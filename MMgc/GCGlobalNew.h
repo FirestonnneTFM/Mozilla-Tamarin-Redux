@@ -34,6 +34,7 @@
 
 #ifdef OVERRIDE_GLOBAL_NEW
 #ifdef __GNUC__
+#ifndef _MAC
 // Custom new and delete operators
 
 #ifdef _DEBUG
@@ -78,6 +79,7 @@ inline __attribute__((always_inline)) void operator delete[]( void *p )
     #endif // _DEBUG
 }
 
+#endif
 #endif // __GNUC__
 #endif // OVERRIDE_GLOBAL_NEW
 

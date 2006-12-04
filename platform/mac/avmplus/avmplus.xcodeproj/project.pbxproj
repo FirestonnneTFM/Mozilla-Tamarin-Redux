@@ -173,7 +173,7 @@
 		1E607F9709733ED1007D0E1E /* MathUtilsUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607F9409733ED1007D0E1E /* MathUtilsUnix.cpp */; };
 		1E607F9809733ED1007D0E1E /* OSDepUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607F9509733ED1007D0E1E /* OSDepUnix.cpp */; };
 		1EC50991097391B400040CAB /* Date.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC50990097391B400040CAB /* Date.cpp */; };
-		7CD864E60AC47805004C73CB /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CD864E50AC47805004C73CB /* AbcData.cpp */; };
+		47B708310B2476480021329D /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B708300B2476480021329D /* AbcData.cpp */; };
 		85125ADF0A5C648300502345 /* AvmPlusScriptableObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 85125ADD0A5C648300502345 /* AvmPlusScriptableObject.cpp */; };
 		85125AE00A5C648300502345 /* AvmPlusScriptableObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 85125ADE0A5C648300502345 /* AvmPlusScriptableObject.h */; };
 		8EE6F43F09AA541600DE11A0 /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 8EE6F42E09AA541600DE11A0 /* config.h */; };
@@ -364,7 +364,7 @@
 		1E607F9409733ED1007D0E1E /* MathUtilsUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MathUtilsUnix.cpp; path = ../../unix/MathUtilsUnix.cpp; sourceTree = SOURCE_ROOT; };
 		1E607F9509733ED1007D0E1E /* OSDepUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = OSDepUnix.cpp; path = ../../unix/OSDepUnix.cpp; sourceTree = SOURCE_ROOT; };
 		1EC50990097391B400040CAB /* Date.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Date.cpp; path = ../../../core/Date.cpp; sourceTree = SOURCE_ROOT; };
-		7CD864E50AC47805004C73CB /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AbcData.cpp; path = ../../../core/AbcData.cpp; sourceTree = SOURCE_ROOT; };
+		47B708300B2476480021329D /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AbcData.cpp; path = ../../../core/AbcData.cpp; sourceTree = SOURCE_ROOT; };
 		85125ADD0A5C648300502345 /* AvmPlusScriptableObject.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AvmPlusScriptableObject.cpp; path = ../../../core/AvmPlusScriptableObject.cpp; sourceTree = SOURCE_ROOT; };
 		85125ADE0A5C648300502345 /* AvmPlusScriptableObject.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmPlusScriptableObject.h; path = ../../../core/AvmPlusScriptableObject.h; sourceTree = SOURCE_ROOT; };
 		8EE6F42E09AA541600DE11A0 /* config.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../../../pcre/config.h; sourceTree = SOURCE_ROOT; };
@@ -435,7 +435,7 @@
 		1E607A9F09733787007D0E1E /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				7CD864E50AC47805004C73CB /* AbcData.cpp */,
+				47B708300B2476480021329D /* AbcData.cpp */,
 				85125ADD0A5C648300502345 /* AvmPlusScriptableObject.cpp */,
 				85125ADE0A5C648300502345 /* AvmPlusScriptableObject.h */,
 				1EC50990097391B400040CAB /* Date.cpp */,
@@ -788,9 +788,12 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "avmplus" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* avmplus */;
 			projectDirPath = "";
+			projectRoot = "";
+			shouldCheckCompatibility = 1;
 			targets = (
 				D2AAC045055464E500DB518D /* avmplus */,
 			);
@@ -897,7 +900,7 @@
 				8EE6F44E09AA541600DE11A0 /* pcre_version.cpp in Sources */,
 				8EE6F44F09AA541600DE11A0 /* pcre_xclass.cpp in Sources */,
 				85125ADF0A5C648300502345 /* AvmPlusScriptableObject.cpp in Sources */,
-				7CD864E60AC47805004C73CB /* AbcData.cpp in Sources */,
+				47B708310B2476480021329D /* AbcData.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -950,6 +953,7 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -962,6 +966,7 @@
 					USE_MMAP,
 					_MAC,
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				OTHER_CFLAGS = (
 					"-finline-functions",
@@ -978,18 +983,10 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
-				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = YES;
-				GCC_WARN_SIGN_COMPARE = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
-				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -997,7 +994,6 @@
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				SYMROOT = "$(PROJECT_DIR)/../../../../platform/mac/flash/Builds";
-				WARNING_CFLAGS = "-Wno-long-long";
 			};
 			name = Debug;
 		};
@@ -1007,19 +1003,11 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
-				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = YES;
-				GCC_WARN_SIGN_COMPARE = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -1027,7 +1015,6 @@
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				SYMROOT = "$(PROJECT_DIR)/../../../../platform/mac/flash/Builds";
-				WARNING_CFLAGS = "-Wno-long-long";
 			};
 			name = Release;
 		};
@@ -1064,7 +1051,7 @@
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
 				ZERO_LINK = NO;
 			};
-			name = Debug Debugger;
+			name = "Debug Debugger";
 		};
 		8E8B52EC09AABCA50057BEE4 /* Release Debugger */ = {
 			isa = XCBuildConfiguration;
@@ -1078,6 +1065,7 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1091,6 +1079,7 @@
 					_MAC,
 					DEBUGGER,
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				OTHER_CFLAGS = (
 					"-finline-functions",
@@ -1099,7 +1088,7 @@
 				PRODUCT_NAME = avmplus;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
 			};
-			name = Release Debugger;
+			name = "Release Debugger";
 		};
 		8E8B52ED09AABCA50057BEE4 /* Debug Debugger */ = {
 			isa = XCBuildConfiguration;
@@ -1107,18 +1096,10 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
-				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = YES;
-				GCC_WARN_SIGN_COMPARE = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
-				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -1126,9 +1107,8 @@
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				SYMROOT = "$(PROJECT_DIR)/../../../../platform/mac/flash/Builds";
-				WARNING_CFLAGS = "-Wno-long-long";
 			};
-			name = Debug Debugger;
+			name = "Debug Debugger";
 		};
 		8E8B52EE09AABCA50057BEE4 /* Release Debugger */ = {
 			isa = XCBuildConfiguration;
@@ -1136,19 +1116,11 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
-				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
-				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = YES;
-				GCC_WARN_SIGN_COMPARE = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -1156,9 +1128,8 @@
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				SYMROOT = "$(PROJECT_DIR)/../../../../platform/mac/flash/Builds";
-				WARNING_CFLAGS = "-Wno-long-long";
 			};
-			name = Release Debugger;
+			name = "Release Debugger";
 		};
 /* End XCBuildConfiguration section */
 
