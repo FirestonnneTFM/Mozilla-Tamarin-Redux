@@ -1,0 +1,16 @@
+- Nix MMgc namespace and go with spaceman
+- Nix GCAllocBase.h
+- MMX mark region, DRC stack scan and finalize/sweep/clears bit scans
+- make freed items marked:
+	- makes false positives to free'd memory not get scanned
+	- optimizes sweep (don't have to mark everything on the freelist)
+	- tricky part is that all marks are cleared at start of mark phase
+- move Intern tables into GC (AVM2 String's, Namespaces, MethodClosures)
+- don't use GCAllocObject so much (just enough to get FixedMalloc up) maybe just for GCHeap
+- coalesce FixedMalloc and its sub collectors into one allocation, ditto for GC and its sub collectors
+
+- move to macro's instead of WB smart pointers, macros skip GetGC and FindBeginning, ie
+ SM_GC_WRITE(this, field, value) -> gc()->writeBarrier(this, &field, value) the end goal 
+ is to remove reliance on GetGC() and allow decoration free large pages.
+ 
+- move ClearMarks/Sweep/Finalize/MarkItem to maximum opt module

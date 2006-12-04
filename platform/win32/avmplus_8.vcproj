@@ -4,7 +4,6 @@
 	Version="8.00"
 	Name="avmplus"
 	ProjectGUID="{437E43D2-ED2D-406B-88DB-B5940F838AE8}"
-	RootNamespace="avmplus"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,7 +19,8 @@
 			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="0"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -46,15 +46,17 @@
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				ForceConformanceInForLoopScope="false"
+				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="avmplus.h"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4189;4740;4189"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -67,7 +69,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/avmplus_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -90,7 +91,8 @@
 			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="0"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -117,15 +119,18 @@
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="true"
-				ForceConformanceInForLoopScope="false"
+				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="avmplus.h"
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
+				DisableSpecificWarnings="4189;4740;4189"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -138,7 +143,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/avmplus.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -157,11 +161,85 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_Debugger|Win32"
+			Name="VTune|Win32"
 			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="0"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="0"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;VTUNE;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmplus.h"
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
+				BrowseInformation="0"
+				WarningLevel="4"
+				WarnAsError="true"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4189;4740;4189"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release Debugger|Win32"
+			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -188,15 +266,18 @@
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="true"
-				ForceConformanceInForLoopScope="false"
+				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="avmplus.h"
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
+				DisableSpecificWarnings="4189;4740;4189"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -209,7 +290,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/avmplus_s.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -228,11 +308,12 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug_Debugger|Win32"
+			Name="Debug Debugger|Win32"
 			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="0"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -258,15 +339,17 @@
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				ForceConformanceInForLoopScope="false"
+				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="avmplus.h"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4189;4740;4189"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -279,7 +362,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/avmplus_sd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -374,7 +456,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|Win32"
+					Name="VTune|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -382,7 +464,15 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Debugger|Win32"
+					Name="Release Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Debugger|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -751,10 +841,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\avmplusProfiler.h"
-				>
-			</File>
-			<File
-				RelativePath=".\AvmPlusScriptableObject.h"
 				>
 			</File>
 			<File

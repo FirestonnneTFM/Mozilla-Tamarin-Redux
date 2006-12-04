@@ -71,8 +71,8 @@ namespace avmshell
 	{
 		delete [] m_buffer;
 		m_buffer = NULL;
-		m_length = 0;
-		m_capacity = 0;
+		m_length = NULL;
+		m_capacity = NULL;
 	}
 	
 	void StringBuilderObject::append(Atom value)

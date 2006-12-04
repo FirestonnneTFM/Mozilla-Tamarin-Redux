@@ -19,6 +19,7 @@
 			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -88,6 +89,7 @@
 			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -108,6 +110,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
+				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories=".;..\core;..\codegen"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -117,6 +120,7 @@
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
+				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
@@ -154,10 +158,83 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_Debugger|Win32"
+			Name="VTune|Win32"
 			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..\core;..\codegen"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_CRT_SECURE_NO_DEPRECATE"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
+				BrowseInformation="0"
+				WarningLevel="4"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/MMgc_vtune.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release Debugger|Win32"
+			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -179,10 +256,7 @@
 				Optimization="2"
 				AdditionalIncludeDirectories="..\core;..\codegen"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;DEBUGGER;AVMPLUS_IA32;_CRT_SECURE_NO_DEPRECATE"
-				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="false"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
 				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
@@ -201,7 +275,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/MMgc_s.lib"
+				OutputFile="$(OutDir)/MMgc.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -220,10 +294,11 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug_Debugger|Win32"
+			Name="Debug Debugger|Win32"
 			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -270,7 +345,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/MMgc_sd.lib"
+				OutputFile="$(OutDir)/MMgc_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -372,10 +447,6 @@
 				>
 			</File>
 			<File
-				RelativePath="GCAllocBase.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GCAllocObject.h"
 				>
 			</File>
@@ -442,6 +513,10 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
+		<File
+			RelativePath=".\VTune\MMgc.vpj"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

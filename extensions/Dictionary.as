@@ -37,8 +37,10 @@ package flash.utils
 
 /**
  * The Dictionary class lets you create a dynamic collection of properties, which uses strict equality
- * (<code>===</code>) for key comparison. When an object is used as a key, the object's
+ * (<code>===</code>) for key comparison on non-primitive object keys. When an object is used as a key, the object's
  * identity is used to look up the object, and not the value returned from calling <code>toString()</code> on it.
+ * Primitive (built-in) objects, like Numbers, in a Dictionary collection behave in the same manner as they do when
+ * they are the property of a regular object.
  * <p>The following statements show the relationship between a Dictionary object and a key object:</p>
  * <pre>
  * var dict = new Dictionary();

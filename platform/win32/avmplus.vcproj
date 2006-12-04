@@ -4,7 +4,6 @@
 	Version="7.10"
 	Name="avmplus"
 	ProjectGUID="{437E43D2-ED2D-406B-88DB-B5940F838AE8}"
-	RootNamespace="avmplus"
 	SccProjectName=""
 	SccAuxPath=""
 	SccLocalPath=""
@@ -17,10 +16,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="Debug"
+			IntermediateDirectory="Debug"
 			ConfigurationType="4"
-			CharacterSet="0">
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
@@ -33,6 +32,7 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="avmplus.h"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="TRUE"
@@ -41,8 +41,7 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/avmplus_d.lib"/>
+				Name="VCLibrarianTool"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -64,13 +63,13 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="Release"
+			IntermediateDirectory="Release"
 			ConfigurationType="4"
-			CharacterSet="0">
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="2"
 				FavorSizeOrSpeed="2"
 				OptimizeForProcessor="2"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre"
@@ -81,6 +80,8 @@
 				BufferSecurityCheck="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="avmplus.h"
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="TRUE"
@@ -89,8 +90,7 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/avmplus.lib"/>
+				Name="VCLibrarianTool"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -111,11 +111,59 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Release_Debugger|Win32"
-			OutputDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
+			Name="VTune|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="0"
+				FavorSizeOrSpeed="2"
+				OptimizeForProcessor="2"
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;VTUNE;NDEBUG;_CONSOLE"
+				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="FALSE"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="avmplus.h"
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
+				BrowseInformation="0"
+				WarningLevel="4"
+				WarnAsError="TRUE"
+				DebugInformationFormat="3"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Release Debugger|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="0">
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
@@ -129,6 +177,8 @@
 				BufferSecurityCheck="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="avmplus.h"
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="TRUE"
@@ -137,8 +187,7 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/avmplus_s.lib"/>
+				Name="VCLibrarianTool"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -159,11 +208,11 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Debug_Debugger|Win32"
-			OutputDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
+			Name="Debug Debugger|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="0">
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
@@ -176,16 +225,15 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="avmplus.h"
+				ProgramDataBaseFileName="$(IntDir)/avmplus.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
-				WarnAsError="TRUE"
 				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/avmplus_sd.lib"/>
+				Name="VCLibrarianTool"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -264,13 +312,19 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|Win32">
+					Name="VTune|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Debugger|Win32">
+					Name="Release Debugger|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Debugger|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
@@ -865,6 +919,9 @@
 		</Filter>
 		<File
 			RelativePath="..\..\core\abcFormat.txt">
+		</File>
+		<File
+			RelativePath=".\VTune\avmplus.vpj">
 		</File>
 		<File
 			RelativePath="..\..\core\ErrorConstants.xml">

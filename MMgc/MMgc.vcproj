@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="0">
 			<Tool
@@ -32,6 +32,7 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="MMgc.h"
+				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="TRUE"
@@ -63,15 +64,15 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="Release"
+			IntermediateDirectory="Release"
 			ConfigurationType="4"
 			CharacterSet="0">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				OptimizeForProcessor="2"
+				Optimization="2"
+				FavorSizeOrSpeed="0"
+				OptimizeForProcessor="0"
 				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32"
 				StringPooling="TRUE"
@@ -80,6 +81,8 @@
 				BufferSecurityCheck="FALSE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="MMgc.h"
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="TRUE"
@@ -109,31 +112,35 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Release_Debugger|Win32"
-			OutputDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="4">
+			Name="VTune|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			CharacterSet="0">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				FavorSizeOrSpeed="2"
+				FavorSizeOrSpeed="1"
 				OptimizeForProcessor="2"
 				AdditionalIncludeDirectories="..\core;..\codegen"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;DEBUGGER;AVMPLUS_IA32"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="FALSE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="MMgc.h"
+				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
-				WarnAsError="TRUE"/>
+				WarnAsError="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
+				DebugInformationFormat="2"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/MMgc_s.lib"/>
+				OutputFile="lib/MMgc_vtune.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -154,9 +161,52 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Debug_Debugger|Win32"
-			OutputDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_7/$(ProjectName)/$(ConfigurationName)"
+			Name="Release Debugger|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\core;..\codegen"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;DEBUGGER;AVMPLUS_IA32"
+				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="FALSE"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="MMgc.h"
+				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
+				BrowseInformation="0"
+				WarningLevel="4"
+				WarnAsError="TRUE"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Debug Debugger|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="0">
 			<Tool
@@ -171,6 +221,7 @@
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="MMgc.h"
+				ProgramDataBaseFileName="$(IntDir)/MMgc.pdb"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="TRUE"
@@ -180,7 +231,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/MMgc_sd.lib"/>
+				OutputFile="$(OutDir)/MMgc_d.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -262,13 +313,19 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|Win32">
+					Name="VTune|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Debugger|Win32">
+					Name="Release Debugger|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Debugger|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
@@ -342,6 +399,9 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
 		</Filter>
+		<File
+			RelativePath=".\VTune\MMgc.vpj">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
