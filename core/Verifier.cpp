@@ -240,12 +240,14 @@ namespace avmplus
 		this->growthGuard = new GrowthGuard(mir ? mir->mirBuffer : NULL);
 		#else
 		// Windows requires the GrowthGuard to be allocated from the stack.
-		GrowthGuard guard( mir ? mir->mirBuffer : NULL);
+		GrowthGuard guard(mir ? mir->mirBuffer : NULL);
 		this->growthGuard = &guard;
 		#endif //AVMPLUS_LINUX
 		#endif //AVMPLUS_MIR
 #endif /* FEATURE_BUFFER_GUARD */
 
+		TRY(core, kCatchAction_Rethrow){
+				
 		#ifdef AVMPLUS_INTERP
 		if (mir)
 		#endif
@@ -2297,6 +2299,25 @@ namespace avmplus
 		growthGuard = NULL;
 		#endif
 		#endif
+
+		} CATCH (Exception *exception) {
+
+			// clean up growthGuard
+#ifdef FEATURE_BUFFER_GUARD
+#ifdef AVMPLUS_MIR
+		    // Make sure the GrowthGuard is unregistered
+			if (growthGuard)
+			{
+					growthGuard->~GrowthGuard();
+//					growthGuard = NULL;
+			}
+#endif
+#endif
+			// re-throw exception
+			core->throwException(exception);
+		}
+		END_CATCH
+		END_TRY
 	}
 
 	void Verifier::checkPropertyMultiname(uint32 &depth, Multiname &multiname)

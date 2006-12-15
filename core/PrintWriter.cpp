@@ -77,7 +77,8 @@ namespace avmplus
 	
 	PrintWriter& PrintWriter::operator<< (percent value)
 	{
-		wchar buffer[256];
+		// Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
+		wchar buffer[312];
 		int len;
 		MathUtils::convertDoubleToString(value.getPercent(), buffer, len);
 		wchar *ptr = buffer;
@@ -176,7 +177,8 @@ namespace avmplus
 
 	PrintWriter& PrintWriter::operator<< (double value)
 	{
-		wchar buffer[256];
+		// Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
+		wchar buffer[312];
 		int len;
 		MathUtils::convertDoubleToString(value, buffer, len);
 		*this << buffer;

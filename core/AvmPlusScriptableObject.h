@@ -68,3 +68,4 @@ namespace avmplus
 }
 
 #endif //__avmplus_AvmPlusScriptableObject__
+

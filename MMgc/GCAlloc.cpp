@@ -330,15 +330,6 @@ start:
 		GCBlock *b = (GCBlock*) ((uintptr) item & ~0xFFF);
 		GCAlloc *a = b->alloc;
 	
-#ifdef _DEBUG		
-		// check that its not already been freed
-		void *free = b->firstFree;
-		while(free) {
-			GCAssert(free != item);
-			free = *((void**) free);
-		}
-#endif
-
 		int index = GetIndex(b, item);
 		if(GetBit(b, index, kHasWeakRef)) {
 			b->gc->ClearWeakRef(GetUserPointer(item));
@@ -666,6 +657,7 @@ start:
 
 		void *oldFree = firstFree;
 		firstFree = item;
+
 #ifdef MEMORY_INFO
 		alloc->m_numAlloc--;
 #endif
@@ -680,6 +672,7 @@ start:
 		if(!alloc->IsRCObject())
 			memset((char*)item, 0, size);
 #endif
+
 		// Add this item to the free list
 		*((void**)item) = oldFree;	
 	}

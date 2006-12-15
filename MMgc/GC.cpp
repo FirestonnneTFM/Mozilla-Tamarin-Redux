@@ -898,7 +898,7 @@ bail:
 			memEnd = (memEnd+0x3fff)&~0x3fff;
 		}
 
-        size_t numPagesNeeded = ((memEnd-memStart)>>14)/GCHeap::kBlockSize + 1;
+		size_t numPagesNeeded = ((memEnd-memStart)>>14)/GCHeap::kBlockSize + 1;
 		if(numPagesNeeded > heap->Size(pageMap)) {
 			dst = (unsigned char*)heap->Alloc(numPagesNeeded);
 		}
@@ -1323,7 +1323,7 @@ bail:
 		while(zctFreelist) {
 			RCObject **next = (RCObject**)*zctFreelist;
 			*zctFreelist = 0;
-            zctFreelist = next;
+			zctFreelist = next;
 		}
 		
 		while(zct+zctIndex < zctNext) {

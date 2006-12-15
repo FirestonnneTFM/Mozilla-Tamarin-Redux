@@ -54,7 +54,7 @@
 		VirtualQuery(_stack, &__mib, sizeof(MEMORY_BASIC_INFORMATION)); \
 	    _size = __mib.RegionSize - ((uintptr) _stack - (uintptr)__mib.BaseAddress);
 
-#else 
+#else
 #define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
 		do { \
 		volatile auto int save1,save2,save3,save4,save5,save6,save7;\
@@ -67,7 +67,22 @@
 		asm("movl %%edi,%0" : "=r" (save7));\
 		asm("movl %%esp,%0" : "=r" (_stack));\
 		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)
-#endif 
+#endif // WIN32
+
+#elif defined MMGC_AMD64
+// 64bit - r8-r15?
+#define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
+		do { \
+		volatile auto int64 save1,save2,save3,save4,save5,save6,save7;\
+		asm("mov %%rax,%0" : "=r" (save1));\
+		asm("mov %%rbx,%0" : "=r" (save2));\
+		asm("mov %%rcx,%0" : "=r" (save3));\
+		asm("mov %%rdx,%0" : "=r" (save4));\
+		asm("mov %%rbp,%0" : "=r" (save5));\
+		asm("mov %%rsi,%0" : "=r" (save6));\
+		asm("mov %%rdi,%0" : "=r" (save7));\
+		asm("mov %%rsp,%0" : "=r" (_stack));\
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)	
 
 #elif defined MMGC_AMD64
 // 64bit - r8-r15?

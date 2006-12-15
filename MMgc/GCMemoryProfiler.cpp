@@ -161,7 +161,7 @@ namespace MMgc
 		}
 #else
 		(void)obj;
-#endif
+#endif // WIN32 || LINUX
 		// cache
 		traceTable[index].memtag = name;
 		return name;
@@ -327,7 +327,7 @@ namespace MMgc
 	 * Its important that the stack trace index is not stored in the first 4 bytes,
 	 * it enables the leak detection to work see ~FixedAlloc.  Underwrite detection isn't
 	 * perfect, an assert will be fired if the stack table index is invalid (greater than
-	 * the table size or to an unused table entry) or it the size gets mangled and the
+	 * the table size or to an unused table entry) or if the size gets mangled and the
 	 * end tag isn't at mem+size.  
 	*/
 	void *DebugDecorate(void *item, size_t size, int skip)

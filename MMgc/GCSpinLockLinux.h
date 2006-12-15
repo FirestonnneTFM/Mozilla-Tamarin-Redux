@@ -47,6 +47,7 @@ namespace MMgc
 	class GCSpinLock
 	{
 	public:
+
 #ifdef USE_X86_SPINLOCK
 
 		GCSpinLock()
@@ -93,22 +94,22 @@ namespace MMgc
 
 		GCSpinLock()
 		{
-			pthread_spin_init( &m1, 0 );
+			pthread_spin_init(&m1,0);
 		}
 	
 		~GCSpinLock()
 		{
-			pthread_spin_destroy( &m1 );
+			pthread_spin_destroy(&m1);
 		}
 
 		inline void Acquire()
 		{
-			pthread_spin_lock( &m1 );
+			pthread_spin_lock(&m1);
 		}
-		
+
 		inline void Release()
 		{
-			pthread_spin_unlock( &m1 );
+			pthread_spin_unlock(&m1);
 		}
 
 	private:

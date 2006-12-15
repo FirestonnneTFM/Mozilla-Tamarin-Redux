@@ -218,7 +218,6 @@ namespace avmplus
 		#else
 		int *jmpBuf;
 		#endif // AVMPLUS_LINUX
-
 	};
 
 	// used to expand GrowableBuffer for generated code
@@ -243,7 +242,7 @@ namespace avmplus
 		#ifdef AVMPLUS_MACH_EXCEPTIONS
 		virtual bool handleException(kern_return_t& returnCode);
 		#endif
-		
+
 	private:
 		// pointer to buffer we are guarding
 		GrowableBuffer* buffer;

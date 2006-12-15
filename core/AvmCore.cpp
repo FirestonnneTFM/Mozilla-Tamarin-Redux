@@ -2771,9 +2771,11 @@ return the result of the comparison ToPrimitive(x) == y.
 			return internInt((int)ui);  
 	} 
 
+
     Stringp AvmCore::internDouble(double d)
     {
-		wchar buffer[256];
+		// Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
+		wchar buffer[312];
 		int len;
 		MathUtils::convertDoubleToString(d, buffer, len);
 		return internAlloc(buffer, len);
@@ -3124,7 +3126,6 @@ return the result of the comparison ToPrimitive(x) == y.
 			mov id3,eax
 		}
 
-
 		if (id3 != 0 || !MathUtils::isNegZero(n))
 		{
 			return id3 | kIntegerType;
@@ -3465,7 +3466,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::doubleToString(double d)
 	{
-		wchar buffer[256];
+		// Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
+		wchar buffer[312];
 		int len;
 		MathUtils::convertDoubleToString(d, buffer, len, MathUtils::DTOSTR_NORMAL,15);
 		return new (GetGC()) String(buffer, len);
