@@ -32,7 +32,7 @@
 
 
 #include "avmshell.h"
-#include "genericzlib.h"
+#include "avmshellzlib.h"
 
 namespace avmshell
 {
