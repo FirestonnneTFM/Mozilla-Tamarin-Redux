@@ -294,6 +294,8 @@ namespace avmplus
 		AvmAssert(needsNormalization() == true);
 		MMGC_MEM_TYPE(this);
 		StringBuf *newData = allocBuf(length());
+		if (newData == NULL)
+			return;
 		wchar *new_buf = newData->m_buf;
 		new_buf[length()] = 0;
 
