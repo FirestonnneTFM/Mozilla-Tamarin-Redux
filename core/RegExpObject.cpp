@@ -426,7 +426,7 @@ namespace avmplus
 		int subjectLength = utf8Subject->length();
 
 		if( startIndex < 0 ||
-			startIndex > subjectLength ||
+			startIndex >= subjectLength ||
 			(results = pcre_exec((pcre*)m_pcreInst,
 								NULL,
 								utf8Subject->c_str(),
