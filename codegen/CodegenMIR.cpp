@@ -8944,7 +8944,14 @@ namespace avmplus
 						Register rLhs = Unknown;
 						InsRegisterPrepA(ip, fpregs, lhs, rLhs);
 						AvmAssert(rLhs == FST0);
+
 						AvmAssert(rhs->reg == Unknown);
+						if (rhs == lhs)
+						{
+							rhs->reg = rLhs;
+							spill(rhs);
+						}
+
 						AvmAssert(rhs->pos != InvalidPos);
 
 						FCOM(stackPos(rhs), framep);
