@@ -45,11 +45,11 @@ bool P4Available();
 bool P4Available();
 #endif
 
+static MMgc::FixedMalloc* fm = NULL;
+
 #ifndef OVERRIDE_GLOBAL_NEW
 // Custom new and delete operators
 // User-defined operator new.
-
-static MMgc::FixedMalloc* fm;
 
 void *operator new(size_t size)
 {
