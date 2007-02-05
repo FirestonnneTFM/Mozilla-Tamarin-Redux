@@ -162,5 +162,4 @@ avmplus_LDFLAGS = \
 	libavmplus.la \
 	MMgc/libmmgc.la \
 	-lpthread \
-	-lz \
-	-ldl
+	-lz

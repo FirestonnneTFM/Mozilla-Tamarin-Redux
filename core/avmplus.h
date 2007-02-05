@@ -78,10 +78,17 @@
 
 #include "avmbuild.h"
 
-#if defined(_MAC) || defined(UNIX)
-//#include <stdlib.h>
+#if defined(_MAC)
 #include <alloca.h>
 #endif
+
+#ifdef UNIX
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#else // HAVE_ALLOCA_H
+#include <stdlib.h>
+#endif // HAVE_ALLOCA_H
+#endif // UNIX
 
 #ifdef WIN32
 #include <malloc.h>

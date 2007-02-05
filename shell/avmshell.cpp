@@ -32,7 +32,7 @@
 
 #include "avmshell.h"
 
-#if defined(DARWIN) || defined(AVMPLUS_LINUX)
+#if defined(DARWIN) || defined(AVMPLUS_UNIX)
 #include <sys/signal.h>
 #include <unistd.h>
 #endif
@@ -41,7 +41,7 @@
 #include <Mmsystem.h>
 #include "dbghelp.h"
 bool P4Available();
-#elif defined AVMPLUS_LINUX
+#elif defined AVMPLUS_UNIX
 bool P4Available();
 #endif
 
@@ -481,7 +481,7 @@ namespace avmshell
 	{
 		TRY(this, kCatchAction_ReportAsError)
 		{
-			#if defined (WIN32) || defined(AVMPLUS_LINUX)
+			#if defined (WIN32) || defined(AVMPLUS_UNIX)
 			if (!P4Available()) {
 				sse2 = false;
 			}
@@ -1144,7 +1144,7 @@ int main(int argc, char *argv[])
 int StackTop;
 #endif
 
-#ifndef AVMPLUS_LINUX
+#ifndef AVMPLUS_UNIX
 #ifdef AVMPLUS_IA32
 // TODO this is a hack until we learn how to determine stack top
 // in IA-32 System V ABI
@@ -1159,7 +1159,7 @@ int main(int argc, char *argv[])
 	asm("mov %0,sp" : "=r" (sp));
 	StackTop = sp;
 	#elif defined AVMPLUS_IA32
-	#ifndef AVMPLUS_LINUX
+	#ifndef AVMPLUS_UNIX
 	asm("movl %%esp,%0\n" : "=r" (StackTop));
 	#endif
 	#endif

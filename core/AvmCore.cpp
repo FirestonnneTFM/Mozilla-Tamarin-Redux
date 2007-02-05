@@ -3150,7 +3150,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		}
 		return allocDouble(n);
-		#elif AVMPLUS_LINUX
+		#elif AVMPLUS_UNIX
 		int id3;
 		asm("movups %1, %%xmm0;"
 			"cvttsd2si %%xmm0, %%ecx;"
@@ -3665,7 +3665,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		id = _mm_cvttsd_si32(_mm_set_sd(d));
 		if (id != (int)0x80000000)
 			return id;
-        #elif AVMPLUS_LINUX
+        #elif AVMPLUS_UNIX
         asm("movups %1, %%xmm0;"
             "cvttsd2si %%xmm0, %%eax;"
             "movl %%eax, %0" : "=r" (id) : "m" (d) : "%eax");

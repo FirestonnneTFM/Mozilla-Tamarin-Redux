@@ -33,7 +33,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <unistd.h>
 
 #include "GCDebug.h"
@@ -44,7 +43,11 @@
 #include <sys/mman.h>
 #endif
 
-#if defined(MEMORY_INFO) && defined(AVMPLUS_LINUX)
+#if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
+#define MAP_ANONYMOUS MAP_ANON
+#endif // !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
+
+#if defined(MEMORY_INFO) && defined(AVMPLUS_UNIX)
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #endif
@@ -286,7 +289,7 @@ namespace MMgc
 #ifdef MEMORY_INFO  
 	void GetInfoFromPC(int pc, char *buff, int buffSize) 
 	{
-#ifdef AVMPLUS_LINUX
+#ifdef AVMPLUS_UNIX
 		Dl_info dlip;
 		dladdr((void *const)pc, &dlip);
 		sprintf(buff, "0x%08x:%s", pc, dlip.dli_sname);

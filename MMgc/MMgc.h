@@ -32,6 +32,9 @@
 #ifndef __MMgc__
 #define __MMgc__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif // HAVE_CONFIG_H
 
 // For size_t
 #include <stddef.h>
@@ -44,10 +47,9 @@
 #include "macbuild.h"
 #endif
 
-#ifdef AVMPLUS_LINUX
+#ifdef AVMPLUS_UNIX
 #include "linuxbuild.h"
 #endif
-
 
 #ifdef MMGC_ARM
 #include "armbuild.h"
@@ -86,7 +88,7 @@
 #ifdef _MAC
 #include "GCSpinLockMac.h"
 #endif
-#ifdef AVMPLUS_LINUX
+#ifdef AVMPLUS_UNIX
 #include "GCSpinLockLinux.h"
 #endif
 #endif

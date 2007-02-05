@@ -148,7 +148,7 @@ namespace MMgc
 		if(traceTable[index].memtag)
 			return traceTable[index].memtag;
 		const char*name="unknown";
-#if defined (WIN32) || defined(AVMPLUS_LINUX)
+#if defined (WIN32) || defined(AVMPLUS_UNIX)
 		try {
 			const std::type_info *ti = &typeid(*(MMgc::GCObject*)obj);
 			if(ti->name())
@@ -161,7 +161,7 @@ namespace MMgc
 		}
 #else
 		(void)obj;
-#endif // WIN32 || LINUX
+#endif // WIN32 || AVMPLUS_UNIX
 		// cache
 		traceTable[index].memtag = name;
 		return name;
