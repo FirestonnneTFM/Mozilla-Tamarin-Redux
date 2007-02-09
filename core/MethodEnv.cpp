@@ -1458,7 +1458,7 @@ namespace avmplus
 
 	Namespace* MethodEnv::internRtns(Atom nsAtom)
 	{
-		if ((nsAtom&7) != kNamespaceType)
+		if (((nsAtom&7) != kNamespaceType) || AvmCore::isNull(nsAtom))
 			toplevel()->throwTypeError(kIllegalNamespaceError);
 		return core()->internNamespace(AvmCore::atomToNamespace(nsAtom));
 	}
