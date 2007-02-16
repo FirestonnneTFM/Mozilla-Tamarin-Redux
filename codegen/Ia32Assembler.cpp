@@ -1007,7 +1007,7 @@ namespace avmplus
 			{ SUB(ESP, alignAmt); }
 	#endif
 
-		LEA(EDX, adjust, ESP);    // callstack node addr
+		LEA(EDX, adjust+alignAmt, ESP);    // callstack node addr
 		PUSH (EDX);	  
 	#ifdef AVMPLUS_CDECL
 		PUSH(ECX);
