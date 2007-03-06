@@ -196,6 +196,12 @@ namespace avmplus
 
 		if (method->flags & AbstractFunction::NEED_ACTIVATION)
 		{
+			// This can happen when the ABC has MethodInfo data but not MethodBody data
+			if (!method->activationTraits)
+			{
+				toplevel()->throwVerifyError(kCorruptABCError);
+			}
+
 			VTable *activation = core->newVTable(method->activationTraits, NULL, vtable->scope, vtable->abcEnv, toplevel());
 			activation->resolveSignatures();
 			setActivationOrMCTable(activation, kActivation);

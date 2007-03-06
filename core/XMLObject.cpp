@@ -690,8 +690,7 @@ namespace avmplus
 
 				this->m_node->addAttribute (e);
 				
-				if (ns)
-					e->_addInScopeNamespace (core, ns);
+				e->_addInScopeNamespace (core, ns);
 
 				nonChildChanges(xmlClass()->kAttrAdded, m.getName()->atom(), sc->atom());
 			}

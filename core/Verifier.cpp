@@ -823,6 +823,10 @@ namespace avmplus
 				checkStack(0,1);
 				AbstractFunction* f = checkMethodInfo(imm30);
 
+				// We don't allow duplicate function definitions.
+				if (f->declaringTraits)
+					verifyFailed(kCorruptABCError);
+
 				f->setParamType(0, NULL);
 				f->makeIntoPrototypeFunction(toplevel);
 				Traits* ftraits = f->declaringTraits;

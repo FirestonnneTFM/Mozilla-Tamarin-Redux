@@ -497,6 +497,11 @@ namespace avmplus
 					#endif
 
 					AbstractFunction* f = resolveMethodInfo(method_info);
+
+					// We don't allow duplicate function definitions.
+					if (f->declaringTraits)
+						toplevel->throwVerifyError(kCorruptABCError);
+
 					f->makeIntoPrototypeFunction(toplevel);
 
 					// create binding
@@ -796,7 +801,7 @@ namespace avmplus
 					++pos; // Kind bytes for each default value
 				}
 
-				if (optional_count > param_count)
+				if (!optional_count || (optional_count > param_count))
 				{
 					// cannot have more optional params than total params
 					toplevel->throwVerifyError(kCorruptABCError);
