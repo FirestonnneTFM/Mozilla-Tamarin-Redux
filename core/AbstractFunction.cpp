@@ -144,7 +144,7 @@ namespace avmplus
 			ftraits->hashTableOffset = ftraits->sizeofInstance; 
 			ftraits->setTotalSize(ftraits->hashTableOffset + sizeof(Hashtable));
 
-			ftraits->initTables();
+			ftraits->initTables(toplevel);
 
 			AvmAssert(core->traits.function_itraits->linked);
 			ftraits->linked = true;

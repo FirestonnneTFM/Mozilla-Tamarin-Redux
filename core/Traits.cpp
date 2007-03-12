@@ -135,7 +135,7 @@ namespace avmplus
 		return b;
 	}
 
-	void Traits::initTables()
+	void Traits::initTables(const Toplevel *toplevel)
 	{
 		// copy down info from base class
 		AvmAssert(!linked);
@@ -155,6 +155,10 @@ namespace avmplus
 
 			void *idata = gc->Alloc(size, GC::kZero | GC::kContainsPointers);
 			
+			// Happens with corrupt SWFs
+			if (!idata)
+				toplevel->throwError(kOutOfMemoryError);
+
 			WB(gc, this, &instanceData, idata);
 		}
 
@@ -280,7 +284,7 @@ namespace avmplus
 				firstMethod = base->methodCount;
 			}
 
-			initTables();
+			initTables(toplevel);
 
 			pool->resolveTraits(this, firstSlot, toplevel);
 

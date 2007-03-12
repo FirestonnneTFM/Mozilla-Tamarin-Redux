@@ -628,12 +628,15 @@ namespace avmplus
 			case TRAIT_Function:
 			{
 				// compute the slot
-				int useSlotId = AvmCore::readU30(pos);
+				uint32 useSlotId = AvmCore::readU30(pos);
                 if( !earlySlotBinding ) useSlotId = 0;
 				if (!useSlotId)
 					useSlotId = slot_id++;
 				else
 					useSlotId--;
+
+				if (useSlotId >= traits->methodCount)
+					toplevel->throwVerifyError(kCorruptABCError);
 
 				// compute the type
 				uint32 method_info = AvmCore::readU30(pos);

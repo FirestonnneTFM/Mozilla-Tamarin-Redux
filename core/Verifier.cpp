@@ -3219,7 +3219,7 @@ namespace avmplus
 					scopeTraits->final = true;
 					scopeTraits->defineSlot(qn.getName(), qn.getNamespace(), 0, BIND_VAR);
 					scopeTraits->slotCount = 1;
-					scopeTraits->initTables();
+					scopeTraits->initTables(toplevel);
 					AbcGen gen(core->GetGC());
 					scopeTraits->setSlotInfo(0, 0, toplevel, t, scopeTraits->sizeofInstance, CPoolKind(0), gen);
 					scopeTraits->setTotalSize(scopeTraits->sizeofInstance + 16);
