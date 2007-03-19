@@ -6095,6 +6095,8 @@ namespace avmplus
 	// preperation for two operands A and B and a result
 	void CodegenMIR::InsRegisterPrepAB(OP* insRes, RegInfo& regsA, OP* insA, Register& reqdA, RegInfo& regsB, OP* insB, Register& reqdB)
 	{
+		AvmAssert( !(reqdA != Unknown && reqdB != Unknown) );
+
 		/**
 		 * Each input may be in 1 of 4 possible states.  IN_REQ, IN_WRONG, IN_ANY, OUT
 		 * 
@@ -6113,17 +6115,6 @@ namespace avmplus
 		AvmAssert(insA != 0);
 		AvmAssert(insB != 0);
 
-		/*
-		 * Handle the special case where insA and insB are the same.
-		 * This happens when things like 2+2 are encountered.
-		 */
-		if (insA == insB && reqdB == Unknown) 
-		{
-			InsRegisterPrepA(insRes, regsA,   insA,   reqdA);
-			reqdB = reqdA;
-			return;
-		}
-
 		if (&regsA != &regsB)
 		{
 			// allocating from different sets of regs is easy
@@ -6134,6 +6125,20 @@ namespace avmplus
 
 		if (insA->lastUse <= insRes) insA->liveAcrossCall = 0;
 		if (insB->lastUse <= insRes) insB->liveAcrossCall = 0;
+
+		/*
+		 * Handle the special case where insA and insB are the same.
+		 * This happens when things like 2+2 are encountered.
+		 */
+		if (insA == insB) 
+		{
+			if (reqdB != Unknown)
+				reqdA = reqdB;
+
+			InsRegisterPrepA(insRes, regsA, insA, reqdA);
+			reqdB = reqdA;
+			return;
+		}
 
 		RegInfo& regs = regsA; // same as regsB
 
