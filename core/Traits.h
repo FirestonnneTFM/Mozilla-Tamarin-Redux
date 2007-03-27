@@ -312,6 +312,7 @@ namespace avmplus
 		/** Interfaces supported by objects described by this traits. */
 		Traitsp* getInterfaces() const { return (Traitsp*)((char*)this+sizeof(Traits)); } 
 
+		Stringp formatClassName();
 #ifdef _DEBUG
 		int interfaceSlop();
 #endif
@@ -339,7 +340,9 @@ namespace avmplus
 			AvmAssert(i < interfaceCapacity);
 			return getInterfaces()[i];
 		}
-
+#ifdef DEBUGGER
+		DRCWB(Stringp) fullName;
+#endif
 	};
 
 	class ImtBuilder

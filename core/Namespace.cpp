@@ -149,5 +149,29 @@ namespace avmplus
 	}
 #endif
 
+	Stringp Namespace::getURI() const
+	{
+		Stringp uri = (Stringp)(((uintptr)m_uri)&~7); 
+#ifdef DEBUGGER
+		if(uri->length() == 0)
+		{
+			NamespaceType type = getType();
+			switch(type)
+			{
+			case NS_Protected:
+				return core()->constantString("protected");
+			case NS_PackageInternal:
+				return core()->constantString("internal");
+			case NS_Private:
+				return core()->constantString("private");
+			case NS_Explicit:
+				return core()->constantString("explicit");
+			case NS_StaticProtected:
+				return core()->constantString("static_protected");
+			}
+		}
+#endif
+		return uri;
+	}
 }
 

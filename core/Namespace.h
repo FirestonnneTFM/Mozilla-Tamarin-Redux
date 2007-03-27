@@ -59,7 +59,7 @@ namespace avmplus
 		~Namespace();
 
 		Atom getPrefix() const { return m_prefix; };
-		Stringp getURI() const { return (Stringp)(((uintptr)m_uri)&~7); };
+		Stringp getURI() const;
 
 		Atom  atom() const { return AtomConstants::kNamespaceType | (Atom)this; }
 

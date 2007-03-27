@@ -876,4 +876,25 @@ namespace avmplus
 			}
 		}
 	}
+	
+	Stringp Traits::formatClassName()
+	{
+#ifndef DEBUGGER
+		String fullName=NULL;
+#endif
+		if(!fullName)
+		{
+			Multiname qname(ns, name);
+			qname.setQName();
+			StringBuffer buffer(core);
+			buffer << &qname;
+			int length = buffer.length();
+			if (length && buffer.c_str()[length-1] == '$') {
+				fullName = core->newString(buffer.c_str(), length-1);
+			} else {
+				fullName = core->newString(buffer.c_str());
+			}
+		}
+		return fullName;
+	}
 }

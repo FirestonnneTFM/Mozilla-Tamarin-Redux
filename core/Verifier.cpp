@@ -3224,6 +3224,10 @@ namespace avmplus
 					scopeTraits->setSlotInfo(0, 0, toplevel, t, scopeTraits->sizeofInstance, CPoolKind(0), gen);
 					scopeTraits->setTotalSize(scopeTraits->sizeofInstance + 16);
 					scopeTraits->linked = true;
+#ifdef DEBUGGER
+					scopeTraits->name = qn.getName();
+					scopeTraits->ns = qn.getNamespace();
+#endif
 				}
 				
 				// handler->scopeTraits = scopeTraits
