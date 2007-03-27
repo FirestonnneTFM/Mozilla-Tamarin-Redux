@@ -1,3 +1,14 @@
 syntax: glob
 CVS/**
 .cvsignore
+*.exe
+*.bat
+*.jar
+*.abc
+pcre/doc/*.1
+jni.h
+jni_md.h
+ErrorConstants.xml
+extensions/Sampler*
+classicprefix_*.pch++
+stale.xml
