@@ -178,6 +178,7 @@ namespace avmplus
 	class Profiler;
 	class RegExpClass;
 	class RegExpObject;
+	class Sampler;
 	class ScopeChain;
 	class ScopeTypeChain;
 	class ScriptBuffer;
@@ -242,6 +243,7 @@ namespace avmplus
 #include "Multiname.h"
 #include "DynamicProfiler.h"
 #include "StaticProfiler.h"
+#include "Sampler.h"
 #include "AvmCore.h"
 #include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"

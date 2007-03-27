@@ -1935,6 +1935,16 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
+		if(core->sampling())
+		{
+			// FIXME: 64 bit integer math needed!
+			//OP* invocationCount = loadIns(MIR_ldop64, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
+			//Ins(MIR_inc64, invocationCount);
+			//storeIns64(invocationCount, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
+			OP* invocationCount = loadIns(MIR_ldop, offsetof(MethodEnv, invocationCount), ldargIns(_env));
+			OP *result = Ins(MIR_add, invocationCount, InsConst(1));
+			storeIns(result, offsetof(MethodEnv, invocationCount), ldargIns(_env));
+		}
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console << "    alloc CallStackNode\n";
@@ -2847,7 +2857,7 @@ namespace avmplus
 				saveState();
 				
 #ifdef DEBUGGER
-				if(core->sampling && targetpc < state->pc)
+				if(core->sampling() && targetpc < state->pc)
 				{
 					emitSampleCheck();
 				}
@@ -2949,7 +2959,7 @@ namespace avmplus
 				AvmAssert(t->linked);
 				int offset = t->getOffsets()[slot];
 				
-				if (pool->isBuiltin && !t->final)
+				if (t->pool->isBuiltin && !t->final)
 				{
 					// t's slots aren't locked in, so we have to adjust for the actual runtime
 					// traits->sizeofInstance.
@@ -4198,7 +4208,7 @@ namespace avmplus
 		#endif /* AVMPLUS_PROFILE */
 
 #ifdef DEBUGGER
-		if(core->sampling && target < state->pc)
+		if(core->sampling() && target < state->pc)
 		{
 			emitSampleCheck();
 		}
@@ -10202,7 +10212,7 @@ namespace avmplus
 			callIns(MIR_cm, COREADDR(AvmCore::sample), 1, InsConst((int32)core));
 			br->target = Ins(MIR_bb);
 		*/
-		callIns(MIR_cm, COREADDR(AvmCore::sampleCheck), 1, InsConst((uintptr)core));
+		callIns(MIR_cm, COREADDR(AvmCore::sampleCheck), 1, InsConst((int32)core));
 	}
 #endif
 

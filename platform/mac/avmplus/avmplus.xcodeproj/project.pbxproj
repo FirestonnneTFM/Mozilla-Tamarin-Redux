@@ -176,6 +176,8 @@
 		47B708310B2476480021329D /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47B708300B2476480021329D /* AbcData.cpp */; };
 		85125ADF0A5C648300502345 /* AvmPlusScriptableObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 85125ADD0A5C648300502345 /* AvmPlusScriptableObject.cpp */; };
 		85125AE00A5C648300502345 /* AvmPlusScriptableObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 85125ADE0A5C648300502345 /* AvmPlusScriptableObject.h */; };
+		857E53B50B4D9C8F00A4FA29 /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 857E53B30B4D9C8F00A4FA29 /* Sampler.cpp */; };
+		857E53B60B4D9C8F00A4FA29 /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 857E53B40B4D9C8F00A4FA29 /* Sampler.h */; };
 		8EE6F43F09AA541600DE11A0 /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 8EE6F42E09AA541600DE11A0 /* config.h */; };
 		8EE6F44009AA541600DE11A0 /* pcre_chartables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8EE6F42F09AA541600DE11A0 /* pcre_chartables.cpp */; };
 		8EE6F44109AA541600DE11A0 /* pcre_compile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8EE6F43009AA541600DE11A0 /* pcre_compile.cpp */; };
@@ -367,6 +369,8 @@
 		47B708300B2476480021329D /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AbcData.cpp; path = ../../../core/AbcData.cpp; sourceTree = SOURCE_ROOT; };
 		85125ADD0A5C648300502345 /* AvmPlusScriptableObject.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AvmPlusScriptableObject.cpp; path = ../../../core/AvmPlusScriptableObject.cpp; sourceTree = SOURCE_ROOT; };
 		85125ADE0A5C648300502345 /* AvmPlusScriptableObject.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmPlusScriptableObject.h; path = ../../../core/AvmPlusScriptableObject.h; sourceTree = SOURCE_ROOT; };
+		857E53B30B4D9C8F00A4FA29 /* Sampler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Sampler.cpp; path = ../../../core/Sampler.cpp; sourceTree = SOURCE_ROOT; };
+		857E53B40B4D9C8F00A4FA29 /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sampler.h; path = ../../../core/Sampler.h; sourceTree = SOURCE_ROOT; };
 		8EE6F42E09AA541600DE11A0 /* config.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../../../pcre/config.h; sourceTree = SOURCE_ROOT; };
 		8EE6F42F09AA541600DE11A0 /* pcre_chartables.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_chartables.cpp; path = ../../../pcre/pcre_chartables.cpp; sourceTree = SOURCE_ROOT; };
 		8EE6F43009AA541600DE11A0 /* pcre_compile.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_compile.cpp; path = ../../../pcre/pcre_compile.cpp; sourceTree = SOURCE_ROOT; };
@@ -438,6 +442,8 @@
 				47B708300B2476480021329D /* AbcData.cpp */,
 				85125ADD0A5C648300502345 /* AvmPlusScriptableObject.cpp */,
 				85125ADE0A5C648300502345 /* AvmPlusScriptableObject.h */,
+				857E53B30B4D9C8F00A4FA29 /* Sampler.cpp */,
+				857E53B40B4D9C8F00A4FA29 /* Sampler.h */,
 				1EC50990097391B400040CAB /* Date.cpp */,
 				1E6078EE097335EF007D0E1E /* AbcEnv.cpp */,
 				1E6078EF097335EF007D0E1E /* AbcEnv.h */,
@@ -759,6 +765,7 @@
 				8EE6F45B09AA545E00DE11A0 /* pcre_internal.h in Headers */,
 				8EE6F45C09AA545E00DE11A0 /* pcre.h in Headers */,
 				85125AE00A5C648300502345 /* AvmPlusScriptableObject.h in Headers */,
+				857E53B60B4D9C8F00A4FA29 /* Sampler.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -899,6 +906,7 @@
 				8EE6F44F09AA541600DE11A0 /* pcre_xclass.cpp in Sources */,
 				85125ADF0A5C648300502345 /* AvmPlusScriptableObject.cpp in Sources */,
 				47B708310B2476480021329D /* AbcData.cpp in Sources */,
+				857E53B50B4D9C8F00A4FA29 /* Sampler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

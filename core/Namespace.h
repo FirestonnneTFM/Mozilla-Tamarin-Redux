@@ -92,6 +92,7 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		uint32 size() const { return sizeof(Namespace) - sizeof(AvmPlusScriptableObject); }
+		Stringp getTypeName() const;
 #endif
 
 //#ifdef AVMPLUS_VERBOSE

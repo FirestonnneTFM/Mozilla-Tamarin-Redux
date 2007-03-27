@@ -96,6 +96,10 @@ namespace avmplus
 	public:
 		Stringp format(AvmCore* core) const;
 #endif
+
+#ifdef DEBUGGER
+		MethodEnv *getCallMethodEnv() { return env; }
+#endif
 	};
 }
 

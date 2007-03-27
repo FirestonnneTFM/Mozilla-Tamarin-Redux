@@ -420,7 +420,7 @@ namespace avmshell
 			debugger = debugCLI;
 
 			// Create the profiler
-			profiler = new Profiler(GetGC());
+			profiler = new (GetGC()) Profiler(this);
 			#endif
 
 			SystemClass::user_argc = argc-1;
@@ -667,7 +667,7 @@ namespace avmshell
 			debugger = debugCLI;
 
 			// Create the profiler
-			profiler = new Profiler(GetGC());
+			profiler = new (GetGC()) Profiler(this);
 
 			if (do_debugger)
 			{

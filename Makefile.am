@@ -83,6 +83,7 @@ libavmplus_la_SOURCES = \
 	core/PrintWriter.cpp \
 	core/RegExpClass.cpp \
 	core/RegExpObject.cpp \
+	core/Sampler.cpp \
 	core/ScopeChain.cpp \
 	core/ScriptBuffer.cpp \
 	core/ScriptObject.cpp \

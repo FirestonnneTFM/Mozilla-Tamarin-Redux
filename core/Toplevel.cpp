@@ -62,9 +62,6 @@ namespace avmplus
 
 	Toplevel::~Toplevel()
 	{
-#ifdef DEBUGGER
-		scriptObjectTable = NULL;
-#endif
 	}
 
 	ClassClosure* Toplevel::resolveBuiltinClass(int class_id)
@@ -215,10 +212,6 @@ namespace avmplus
 
 		ScriptObject *ct = AvmCore::atomToScriptObject(ctor);
 		Atom val = ct->construct(argc, atomv);
-#ifdef DEBUGGER
-		if(core()->allocationTracking)
-			ct->addInstance(val);
-#endif
 		return val;
 	}
 

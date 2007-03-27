@@ -247,10 +247,6 @@ namespace avmplus
 		 */
 		Atom getBinding(Traits* traits, Multiname* multiname) const;
 
-		#ifdef DEBUGGER
-		ScriptObjectTable *scriptObjectTable;		
-		#endif
-
 		/**
 		 * @name ECMA-262 Appendix B.2 extensions
 		 * Extensions to ECMAScript, in ECMA-262 Appendix B.2
@@ -293,6 +289,9 @@ namespace avmplus
 		ErrorClass* getErrorClass(int class_id) const { return (ErrorClass*)getBuiltinClass(class_id); }
 
 		unsigned int readU30(const byte *&p) const;
+
+		// implementation's supporting any of our extensions should override this
+		virtual ClassClosure *getBuiltinExtensionClass(int /*clsid*/) { return NULL; }
 
 	private:
 

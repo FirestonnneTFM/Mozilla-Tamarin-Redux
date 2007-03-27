@@ -35,6 +35,9 @@
 
 namespace avmplus
 {
+#ifdef DEBUGGER
+	class GCHashtableScriptObject;
+#endif
 	/**
 	 * A string in UTF-8 encoding.
 	 *
@@ -348,6 +351,7 @@ namespace avmplus
 		
 #ifdef DEBUGGER
 		uint32 size() const;
+		Stringp getTypeName() const;
 #endif
 
 	private:
