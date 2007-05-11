@@ -12,3 +12,5 @@ ErrorConstants.xml
 extensions/Sampler*
 classicprefix_*.pch++
 stale.xml
+platform/win32/obj_8/**
+MMgc/obj_8/**
