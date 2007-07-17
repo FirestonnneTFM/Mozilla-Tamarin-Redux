@@ -112,6 +112,9 @@ class Configuration:
             'TARGET_CPU': self._target[1]
             }
 
+        if self._host[0] == 'windows':
+            self._acvars['topsrcdir'] = toMSYSPath(self._topsrcdir)
+
 	if self._debug:
 	    self._acvars['ENABLE_DEBUG'] = 1
 
@@ -155,7 +158,7 @@ class Configuration:
 		'MKPROGRAM'    : '$(LD) -OUT:$(1)',
 		'EXPAND_LIBNAME' : '$(1).lib'
 		})
-	    if debug:
+	    if self._debug:
 		self._acvars['CPPFLAGS'] = '-MTD'
 
 	# Hackery! Make assumptions that we want to build with GCC 3.3 on MacPPC
@@ -222,3 +225,9 @@ class Configuration:
 	outf.write(contents)
 	outf.close()
 	print
+
+def toMSYSPath(path):
+    if path[1] != ':':
+        raise ValueError("win32 path without drive letter!")
+
+    return '/%s%s' % (path[0], path[2:].replace('\\', '/'))

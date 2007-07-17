@@ -47,7 +47,6 @@ thisdir = os.path.dirname(os.path.abspath(__file__))
 # Look for additional modules in our build/ directory.
 sys.path.append(thisdir)
 
-import build.configuration
 from build.configuration import *
 import build.getopt
 
@@ -73,12 +72,14 @@ DEBUG_CXXFLAGS = "-g "
 if config.COMPILER_IS_GCC:
     APP_CXXFLAGS = "-fno-exceptions -fno-rtti -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -fmessage-length=0 -finline-functions -finline-limit=65536 "
 else:
-    raise Exception("Not implemented")
+    APP_CXXFLAGS = "-GR- -Wall -WX"
 
-os = config.getHost()[0]
+os = config.getTarget()[0]
 if os == "darwin":
     APP_CPPFLAGS += "-DTARGET_API_MAC_CARBON=1 -DDARWIN=1 -D_MAC -DTARGET_RT_MAC_MACHO=1 -DUSE_MMAP -D_MAC -D__DEBUGGING__ "
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
+elif os == "windows":
+    APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -DAVMPLUS_IA32 -D_CRT_SECURE_NO_DEPRECATE"
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
