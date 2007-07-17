@@ -136,7 +136,8 @@ class Configuration:
 	    'PROGRAM_SUFFIX': '',
 	    'USE_COMPILER_DEPS': 1,
 	    'OS_LIBS'   : 'z',
-	    'EXPAND_LIBNAME' : '-l$(1)'
+	    'EXPAND_LIBNAME' : '-l$(1)',
+            'OUTOPTION' : '-o '
 	    })
 
 	if self._target[0] == 'windows':
@@ -150,13 +151,14 @@ class Configuration:
 		'PROGRAM_SUFFIX': '.exe',
 		'CPPFLAGS'     : '-MT',
 		'CXX'          : 'cl.exe',
-		'CXXFLAGS'     : '',
+		'CXXFLAGS'     : '-TP',
 		'AR'           : 'lib.exe',
 		'LD'           : 'link.exe',
 		'LDFLAGS'      : '',
 		'MKSTATICLIB'  : '$(AR) -OUT:$(1)',
 		'MKPROGRAM'    : '$(LD) -OUT:$(1)',
-		'EXPAND_LIBNAME' : '$(1).lib'
+		'EXPAND_LIBNAME' : '$(1).lib',
+                'OUTOPTION' : '-Fo'
 		})
 	    if self._debug:
 		self._acvars['CPPFLAGS'] = '-MTD'

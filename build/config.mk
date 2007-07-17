@@ -106,7 +106,7 @@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.ii): %.ii: %.cpp
 	$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@ > /dev/null
 
 $$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.ii
-	$(CXX) -o $$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
+	$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $(1).thing.pp: FORCE
 	@echo Building $$@
