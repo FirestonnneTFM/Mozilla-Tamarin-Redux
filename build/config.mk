@@ -149,7 +149,7 @@ define PROGRAM_RULES
 $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
 	$(call MKPROGRAM,$$@) \
 	  $$($(1)_CXXOBJS) \
-	  -L. $$(foreach lib,$$($(1)_STATIC_LIBRARIES),-l$$(lib)) \
+	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
 	  $$($(1)_LDFLAGS)
 
 GARBAGE += $$($(1)_DIR)$$($(1)_NAME)

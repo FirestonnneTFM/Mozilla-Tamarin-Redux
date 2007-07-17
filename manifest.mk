@@ -47,6 +47,9 @@ $(call RECURSE_DIRS,MMgc core pcre codegen)
 ifeq (darwin,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/mac)
 endif
+ifeq (windows,$(TARGET_OS))
+$(call RECURSE_DIRS,platform/win32)
+endif
 
 $(call RECURSE_DIRS,shell)
 

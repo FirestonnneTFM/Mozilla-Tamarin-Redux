@@ -74,12 +74,15 @@ if config.COMPILER_IS_GCC:
 else:
     APP_CXXFLAGS = "-GR- -W4 -WX "
 
+OS_LIBS = ['z']
+
 os = config.getTarget()[0]
 if os == "darwin":
     APP_CPPFLAGS += "-DTARGET_API_MAC_CARBON=1 -DDARWIN=1 -D_MAC -DTARGET_RT_MAC_MACHO=1 -DUSE_MMAP -D_MAC -D__DEBUGGING__ "
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
 elif os == "windows":
     APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -DAVMPLUS_IA32 -D_CRT_SECURE_NO_DEPRECATE -D_CONSOLE "
+    OS_LIBS.append('winmm')
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
@@ -90,6 +93,7 @@ config.subst("OPT_CPPFLAGS", OPT_CPPFLAGS)
 config.subst("OPT_CXXFLAGS", OPT_CXXFLAGS)
 config.subst("DEBUG_CPPFLAGS", DEBUG_CPPFLAGS)
 config.subst("DEBUG_CXXFLAGS", DEBUG_CXXFLAGS)
+config.subst("OS_LIBS", " ".join(OS_LIBS))
 config.generate("Makefile")
 o.finish()
 

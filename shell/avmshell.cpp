@@ -44,6 +44,8 @@
 #endif
 
 #ifdef WIN32
+#pragma warning(disable: 4201)
+
 #include <Mmsystem.h>
 #include "dbghelp.h"
 bool P4Available();

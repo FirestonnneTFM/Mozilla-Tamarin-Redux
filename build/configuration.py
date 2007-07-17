@@ -135,9 +135,9 @@ class Configuration:
 	    'DLL_SUFFIX': 'so',
 	    'PROGRAM_SUFFIX': '',
 	    'USE_COMPILER_DEPS': 1,
-	    'OS_LIBS'   : 'z',
 	    'EXPAND_LIBNAME' : '-l$(1)',
-            'OUTOPTION' : '-o '
+            'OUTOPTION' : '-o ',
+            'LIBPATH': '-L'
 	    })
 
 	if self._target[0] == 'windows':
@@ -149,7 +149,7 @@ class Configuration:
 		'LIB_SUFFIX'   : 'lib',
 		'DLL_SUFFIX'   : 'dll',
 		'PROGRAM_SUFFIX': '.exe',
-		'CPPFLAGS'     : '-MT',
+		'CPPFLAGS'     : '-MD',
 		'CXX'          : 'cl.exe',
 		'CXXFLAGS'     : '-TP',
 		'AR'           : 'lib.exe',
@@ -158,10 +158,11 @@ class Configuration:
 		'MKSTATICLIB'  : '$(AR) -OUT:$(1)',
 		'MKPROGRAM'    : '$(LD) -OUT:$(1)',
 		'EXPAND_LIBNAME' : '$(1).lib',
-                'OUTOPTION' : '-Fo'
+                'OUTOPTION' : '-Fo',
+                'LIBPATH'   : '-LIBPATH:'
 		})
 	    if self._debug:
-		self._acvars['CPPFLAGS'] = '-MTD'
+		self._acvars['CPPFLAGS'] = '-MDd'
 
 	# Hackery! Make assumptions that we want to build with GCC 3.3 on MacPPC
 	# and GCC4 on MacIntel
