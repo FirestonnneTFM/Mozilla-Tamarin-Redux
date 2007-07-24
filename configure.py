@@ -95,5 +95,14 @@ config.subst("DEBUG_CPPFLAGS", DEBUG_CPPFLAGS)
 config.subst("DEBUG_CXXFLAGS", DEBUG_CXXFLAGS)
 config.subst("OS_LIBS", " ".join(OS_LIBS))
 config.generate("Makefile")
+
+# Consume other configure options that are passed down from the
+# toplevel Mozilla configure script but should be ignored.  (If we
+# don't do this, o.finish() complains about unrecognized options.)
+for arg in ['application', 'macos-sdk']:
+    o.getStringArg(arg)
+for arg in ['tests']:
+    o.getBoolArg(arg)
+
 o.finish()
 

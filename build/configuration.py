@@ -87,7 +87,11 @@ class Configuration:
 
         objfile = self._objdir + "/" + sourcefile
         if os.path.exists(objfile):
-            raise Exception("Object file " + objfile + " exists, and shouldn't. You must use an object directory to build Tamarin.")
+            raise Exception("It appears you're trying to build in the source directory.  "
+                            "(Source file " + objfile + " exists here.)  "
+                            "You must use an object directory to build Tamarin.  "
+                            "Create an empty directory, cd into it, and run this configure.py script from there.")
+
 
         if options:
             o = options.getStringArg("optimize")
