@@ -35,5 +35,5 @@
 #
 # ***** END LICENSE BLOCK *****
 
-echo "running $PYTHON $0.py $@"
-exec $PYTHON $0.py $@
+echo "running $PYTHON $0.py --ignore-unknown-flags $@"
+exec $PYTHON $0.py --ignore-unknown-flags $@

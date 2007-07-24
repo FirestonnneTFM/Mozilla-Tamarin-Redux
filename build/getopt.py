@@ -49,7 +49,9 @@ class Options:
 	self._args = {}
 	self.target = None
 	self.host = None
+        self.ignore_unknown_flags = False
 
+        unknown_args = []
 	for arg in argv[1:]:
 	    m = _target.search(arg)
 	    if m:
@@ -64,9 +66,14 @@ class Options:
             if _ignore.search(arg) is not None:
                 continue
 
+            if arg == '--ignore-unknown-flags':
+                self.ignore_unknown_flags = True
+                continue
+
 	    m = _arg.search(arg)
 	    if not m:
-		raise Exception("Unrecognized command line parameter: '" + arg + "'")
+                unknown_args.append(arg)
+                continue
 
 	    (t, n, v) = m.groups()
 
@@ -87,6 +94,11 @@ class Options:
 		    raise Exception("--disable-" + n + " does not take a value.")
 
 		self._args[n] = False
+
+        if unknown_args and not self.ignore_unknown_flags:
+            raise Exception("Unrecognized command line parameters: "
+                            + ', '.join(unknown_args))
+
 
     def getBoolArg(self, name, default=None):
 	if not name in self._args:
@@ -109,6 +121,7 @@ class Options:
 	return val
 
     def finish(self):
-	if len(self._args):
-	    raise Exception("Unrecognized command line parameters: " + \
-			    ",".join(self._args.keys()))
+        if not self.ignore_unknown_flags:
+            if len(self._args):
+                raise Exception("Unrecognized command line parameters: " +
+                                ", ".join(self._args.keys()))
