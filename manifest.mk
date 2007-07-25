@@ -36,7 +36,7 @@
 
 INCLUDES += \
   -I$(topsrcdir) \
-  -I$(topsrcdir)/MMGC \
+  -I$(topsrcdir)/MMgc \
   -I$(topsrcdir)/core \
   -I$(topsrcdir)/codegen \
   -I$(topsrcdir)/pcre \
