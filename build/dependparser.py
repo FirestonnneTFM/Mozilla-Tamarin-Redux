@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- Mode: Python; indent-tabs-mode: nil -*-
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -51,7 +52,7 @@ for line in sys.stdin:
     sys.stdout.write(line)
     m = _lineExp.match(line)
     if m:
-	deps.add(m.group(1))
+        deps.add(m.group(1))
 
 if len(sys.argv) != 2:
     raise Exception("Unexpected command line argument.")

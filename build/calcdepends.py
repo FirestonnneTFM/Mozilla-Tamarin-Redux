@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- Mode: Python; indent-tabs-mode: nil -*-
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -41,23 +42,23 @@ from stat import *
 
 class StatCache:
     def __init__(self):
-	self._dict = {}
+        self._dict = {}
 
     def getStat(self, key):
-	if not key in self._dict:
-	    try:
-		self._dict[key] = os.stat(key)
-	    except OSError:
-		self._dict[key] = None
+        if not key in self._dict:
+            try:
+                self._dict[key] = os.stat(key)
+            except OSError:
+                self._dict[key] = None
 
-	return self._dict[key]
+        return self._dict[key]
 
     def getMTime(self, key):
-	s = self.getStat(key);
-	if s == None:
-	    return 0;
+        s = self.getStat(key);
+        if s == None:
+            return 0;
 
-	return s.st_mtime
+        return s.st_mtime
 
 _statcache = StatCache()
 
@@ -69,12 +70,12 @@ def rebuildNeeded(file, dependencies):
 
     f = _statcache.getMTime(file)
     if f == 0:
-	return True
+        return True
 
     for dep in dependencies:
-	d = _statcache.getMTime(dep)
-	if d == 0 or d > f:
-	    return True
+        d = _statcache.getMTime(dep)
+        if d == 0 or d > f:
+            return True
 
     return False
 
@@ -87,20 +88,20 @@ def rebuildsNeeded(files, outfile):
     ostream = open(outfile, "w")
 
     for (objfile, depfile) in files.items():
-	rebuild = True
+        rebuild = True
 
-	try:
-	    d = open(depfile, "r")
-	    rebuild = \
-		rebuildNeeded(objfile, \
-			      [line.rstrip("\n\r") for line in d.readlines()])
-	    d.close()
+        try:
+            d = open(depfile, "r")
+            rebuild = \
+                rebuildNeeded(objfile, \
+                              [line.rstrip("\n\r") for line in d.readlines()])
+            d.close()
 
-	except IOError:
-	    pass
+        except IOError:
+            pass
 
-	if rebuild:
-	    ostream.write(objfile + ": FORCE\n")
+        if rebuild:
+            ostream.write(objfile + ": FORCE\n")
 
     ostream.close()
 
@@ -116,7 +117,7 @@ if __name__ == "__main__":
     outfile = sys.argv.pop(0)
 
     for objfile in sys.argv:
-	depfile = _argExpr.sub(".deps", objfile)
-	files[objfile] = depfile
+        depfile = _argExpr.sub(".deps", objfile)
+        files[objfile] = depfile
 
     rebuildsNeeded(files, outfile)

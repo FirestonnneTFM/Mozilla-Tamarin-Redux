@@ -1,3 +1,4 @@
+# -*- Mode: Python; indent-tabs-mode: nil -*-
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -46,22 +47,22 @@ _no = re.compile("^(f|false|no|n|0)$", re.I)
 
 class Options:
     def __init__(self, argv = sys.argv):
-	self._args = {}
-	self.target = None
-	self.host = None
+        self._args = {}
+        self.target = None
+        self.host = None
         self.ignore_unknown_flags = False
 
         unknown_args = []
-	for arg in argv[1:]:
-	    m = _target.search(arg)
-	    if m:
-		self.target = m.groups(0)
-		continue
+        for arg in argv[1:]:
+            m = _target.search(arg)
+            if m:
+                self.target = m.groups(0)
+                continue
 
-	    m = _host.search(arg)
-	    if m:
-		self.host = m.groups(0)
-		continue
+            m = _host.search(arg)
+            if m:
+                self.host = m.groups(0)
+                continue
 
             if _ignore.search(arg) is not None:
                 continue
@@ -70,30 +71,30 @@ class Options:
                 self.ignore_unknown_flags = True
                 continue
 
-	    m = _arg.search(arg)
-	    if not m:
+            m = _arg.search(arg)
+            if not m:
                 unknown_args.append(arg)
                 continue
 
-	    (t, n, v) = m.groups()
+            (t, n, v) = m.groups()
 
-	    if type(v) == str:
-		if _yes.search(v):
-		    v = True
-		if _no.search(v):
-		    v = False
+            if type(v) == str:
+                if _yes.search(v):
+                    v = True
+                if _no.search(v):
+                    v = False
 
-	    if t == "enable" or t == "with":
-		if v:
-		    self._args[n] = v
-		else:
-		    self._args[n] = True
+            if t == "enable" or t == "with":
+                if v:
+                    self._args[n] = v
+                else:
+                    self._args[n] = True
 
-	    elif t == "disable" or t == "without":
-		if v:
-		    raise Exception("--disable-" + n + " does not take a value.")
+            elif t == "disable" or t == "without":
+                if v:
+                    raise Exception("--disable-" + n + " does not take a value.")
 
-		self._args[n] = False
+                self._args[n] = False
 
         if unknown_args and not self.ignore_unknown_flags:
             raise Exception("Unrecognized command line parameters: "
@@ -101,24 +102,24 @@ class Options:
 
 
     def getBoolArg(self, name, default=None):
-	if not name in self._args:
-	    return default
+        if not name in self._args:
+            return default
 
-	val = self._args[name]
-	del self._args[name]
+        val = self._args[name]
+        del self._args[name]
 
-	if type(val) == bool:
-	    return val
+        if type(val) == bool:
+            return val
 
-	raise Exception("Unrecognized value for option '" + name + "'.")
+        raise Exception("Unrecognized value for option '" + name + "'.")
 
     def getStringArg(self, name, default=None):
-	if not name in self._args:
-	    return default
+        if not name in self._args:
+            return default
 
-	val = self._args[name]
-	del self._args[name]
-	return val
+        val = self._args[name]
+        del self._args[name]
+        return val
 
     def finish(self):
         if not self.ignore_unknown_flags:

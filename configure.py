@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- Mode: Python; indent-tabs-mode: nil -*-
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -53,7 +54,7 @@ import build.getopt
 o = build.getopt.Options()
 
 config = Configuration(thisdir, options = o,
-		       sourcefile = 'core/avmplus.h')
+                       sourcefile = 'core/avmplus.h')
 
 buildShell = o.getBoolArg("shell", False)
 if (buildShell):

@@ -1,3 +1,4 @@
+# -*- Mode: Python; indent-tabs-mode: nil -*-
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -52,7 +53,7 @@ def _configGuess():
     elif ostest.search('^linux', ostest):
         os = 'linux'
     else:
-	raise Exception('Unrecognized OS: ' + ostest)
+        raise Exception('Unrecognized OS: ' + ostest)
 
     cputest = build.process.run_for_output(['uname', '-m'])
     if re.search(r'^i(\d86|86pc|x86)$', cputest):
@@ -62,7 +63,7 @@ def _configGuess():
     elif re.search('^(ppc|powerpc)$', cputest):
         cpu = 'powerpc'
     else:
-	raise Exception('Unrecognized CPU: ' + cputest)
+        raise Exception('Unrecognized CPU: ' + cputest)
 
     return (os, cpu)
 
@@ -96,22 +97,22 @@ class Configuration:
         if options:
             o = options.getStringArg("optimize")
 
-	    if o != None:
-		self._optimize = o
+            if o != None:
+                self._optimize = o
 
             d = options.getStringArg("debug")
-	    if d != None:
-		self._debug = d
+            if d != None:
+                self._debug = d
 
-	    if options.host:
-		self._host = _configSub(options.host)
+            if options.host:
+                self._host = _configSub(options.host)
 
-	    if options.target:
-		self._target = _configSub(options.target)
+            if options.target:
+                self._target = _configSub(options.target)
 
         self._acvars = {
             'topsrcdir': self._topsrcdir,
-	    'HOST_OS': self._host[0],
+            'HOST_OS': self._host[0],
             'TARGET_OS': self._target[0],
             'TARGET_CPU': self._target[1]
             }
@@ -119,119 +120,119 @@ class Configuration:
         if self._host[0] == 'windows':
             self._acvars['topsrcdir'] = toMSYSPath(self._topsrcdir)
 
-	if self._debug:
-	    self._acvars['ENABLE_DEBUG'] = 1
+        if self._debug:
+            self._acvars['ENABLE_DEBUG'] = 1
 
     def getHost(self):
-	"""Returns an (os, cpu) tuple of the host machine."""
-	return self._host
+        """Returns an (os, cpu) tuple of the host machine."""
+        return self._host
 
     def getTarget(self):
-	"""Returns an (os, cpu) tuple of the target machine."""
-	return self._target
+        """Returns an (os, cpu) tuple of the target machine."""
+        return self._target
 
     def getCompiler(self):
-	self.COMPILER_IS_GCC = True
-	self._acvars.update({
-	    'OBJ_SUFFIX': 'o',
-	    'LIB_PREFIX': 'lib',
-	    'LIB_SUFFIX': 'a',
-	    'DLL_SUFFIX': 'so',
-	    'PROGRAM_SUFFIX': '',
-	    'USE_COMPILER_DEPS': 1,
-	    'EXPAND_LIBNAME' : '-l$(1)',
+        self.COMPILER_IS_GCC = True
+        self._acvars.update({
+            'OBJ_SUFFIX': 'o',
+            'LIB_PREFIX': 'lib',
+            'LIB_SUFFIX': 'a',
+            'DLL_SUFFIX': 'so',
+            'PROGRAM_SUFFIX': '',
+            'USE_COMPILER_DEPS': 1,
+            'EXPAND_LIBNAME' : '-l$(1)',
             'OUTOPTION' : '-o ',
             'LIBPATH': '-L'
-	    })
+            })
 
-	if self._target[0] == 'windows':
-	    self.COMPILER_IS_GCC = False
-	    del self._acvars['USE_COMPILER_DEPS']
-	    self._acvars.update({
-	        'OBJ_SUFFIX'   : 'obj',
-		'LIB_PREFIX'   : '',
-		'LIB_SUFFIX'   : 'lib',
-		'DLL_SUFFIX'   : 'dll',
-		'PROGRAM_SUFFIX': '.exe',
-		'CPPFLAGS'     : '-MD',
-		'CXX'          : 'cl.exe',
-		'CXXFLAGS'     : '-TP',
-		'AR'           : 'lib.exe',
-		'LD'           : 'link.exe',
-		'LDFLAGS'      : '',
-		'MKSTATICLIB'  : '$(AR) -OUT:$(1)',
-		'MKPROGRAM'    : '$(LD) -OUT:$(1)',
-		'EXPAND_LIBNAME' : '$(1).lib',
+        if self._target[0] == 'windows':
+            self.COMPILER_IS_GCC = False
+            del self._acvars['USE_COMPILER_DEPS']
+            self._acvars.update({
+                'OBJ_SUFFIX'   : 'obj',
+                'LIB_PREFIX'   : '',
+                'LIB_SUFFIX'   : 'lib',
+                'DLL_SUFFIX'   : 'dll',
+                'PROGRAM_SUFFIX': '.exe',
+                'CPPFLAGS'     : '-MD',
+                'CXX'          : 'cl.exe',
+                'CXXFLAGS'     : '-TP',
+                'AR'           : 'lib.exe',
+                'LD'           : 'link.exe',
+                'LDFLAGS'      : '',
+                'MKSTATICLIB'  : '$(AR) -OUT:$(1)',
+                'MKPROGRAM'    : '$(LD) -OUT:$(1)',
+                'EXPAND_LIBNAME' : '$(1).lib',
                 'OUTOPTION' : '-Fo',
                 'LIBPATH'   : '-LIBPATH:'
-		})
-	    if self._debug:
-		self._acvars['CPPFLAGS'] = '-MDd'
+                })
+            if self._debug:
+                self._acvars['CPPFLAGS'] = '-MDd'
 
-	# Hackery! Make assumptions that we want to build with GCC 3.3 on MacPPC
-	# and GCC4 on MacIntel
-	elif self._target[0] == 'darwin':
-	    self._acvars.update({
-	        'DLL_SUFFIX'   : 'dylib',
-		'CPPFLAGS'     : '-pipe',
-		'CXXFLAGS'     : '',
-		'LDFLAGS'      : '-lz -framework CoreServices',
-		'AR'           : 'ar',
-		'MKSTATICLIB'  : '$(AR) cr $(1)',
-		'MKPROGRAM'    : '$(CXX) -o $(1)'
-		})
+        # Hackery! Make assumptions that we want to build with GCC 3.3 on MacPPC
+        # and GCC4 on MacIntel
+        elif self._target[0] == 'darwin':
+            self._acvars.update({
+                'DLL_SUFFIX'   : 'dylib',
+                'CPPFLAGS'     : '-pipe',
+                'CXXFLAGS'     : '',
+                'LDFLAGS'      : '-lz -framework CoreServices',
+                'AR'           : 'ar',
+                'MKSTATICLIB'  : '$(AR) cr $(1)',
+                'MKPROGRAM'    : '$(CXX) -o $(1)'
+                })
 
 # -Wno-trigraphs -Wreturn-type -Wnon-virtual-dtor -Wmissing-braces -Wparentheses -Wunused-label  -Wunused-parameter -Wunused-variable -Wunused-value -Wuninitialized
 
-	    if self._target[1] == 'i686':
-		self._acvars['CXX'] = 'g++-4.0'
-	    elif self._target[1] == 'powerpc':
-		self._acvars['CXX'] = 'g++-3.3'
-	    else:
-		raise Exception("Unexpected Darwin processor.")
+            if self._target[1] == 'i686':
+                self._acvars['CXX'] = 'g++-4.0'
+            elif self._target[1] == 'powerpc':
+                self._acvars['CXX'] = 'g++-3.3'
+            else:
+                raise Exception("Unexpected Darwin processor.")
 
-	elif self._target[0] == 'linux':
-	    self._acvars.update({
-		'CPPFLAGS'     : '',
-		'CXX'          : 'g++',
-		'CXXFLAGS'     : '',
-		'LD'           : 'ar',
-		'LDFLAGS'      : '',
-		'MKSTATICLIB'  : '$(AR) cr $(1)',
-		'MKPROGRAM'    : '$(CXX) -o $(1)'
-		})
+        elif self._target[0] == 'linux':
+            self._acvars.update({
+                'CPPFLAGS'     : '',
+                'CXX'          : 'g++',
+                'CXXFLAGS'     : '',
+                'LD'           : 'ar',
+                'LDFLAGS'      : '',
+                'MKSTATICLIB'  : '$(AR) cr $(1)',
+                'MKPROGRAM'    : '$(CXX) -o $(1)'
+                })
 
     def subst(self, name, value):
-	self._acvars[name] = value
+        self._acvars[name] = value
 
     _confvar = re.compile("@([^@]+)@")
 
     def generate(self, makefile):
-	print "Generating " + makefile + "...",
-	outpath = self._objdir + "/" + makefile
+        print "Generating " + makefile + "...",
+        outpath = self._objdir + "/" + makefile
 
-	contents = \
-	    "\n".join([k + "=" + str(v) \
-		       for (k,v) in self._acvars.iteritems()]) + \
-	    "\n\ninclude $(topsrcdir)/build/config.mk\n" \
-	    "include $(topsrcdir)/manifest.mk\n" \
-	    "include $(topsrcdir)/build/rules.mk\n"
+        contents = \
+            "\n".join([k + "=" + str(v) \
+                       for (k,v) in self._acvars.iteritems()]) + \
+            "\n\ninclude $(topsrcdir)/build/config.mk\n" \
+            "include $(topsrcdir)/manifest.mk\n" \
+            "include $(topsrcdir)/build/rules.mk\n"
 
-	try:
-	    outf = open(outpath, "r")
-	    oldcontents = outf.read()
-	    outf.close()
+        try:
+            outf = open(outpath, "r")
+            oldcontents = outf.read()
+            outf.close()
 
-	    if oldcontents == contents:
-		print "not changed"
-		return
-	except IOError:
-	    pass
+            if oldcontents == contents:
+                print "not changed"
+                return
+        except IOError:
+            pass
 
-	outf = open(outpath, "w")
-	outf.write(contents)
-	outf.close()
-	print
+        outf = open(outpath, "w")
+        outf.write(contents)
+        outf.close()
+        print
 
 def toMSYSPath(path):
     if path[1] != ':':

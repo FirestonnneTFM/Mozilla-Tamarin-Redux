@@ -1,3 +1,4 @@
+# -*- Mode: Python; indent-tabs-mode: nil -*-
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -38,13 +39,13 @@ import os
 
 def run_for_output(cmd):
     if type(cmd) == list:
-	# XXX need to escape arguments better... am I in a shell?
-	cmd = " ".join(cmd)
+        # XXX need to escape arguments better... am I in a shell?
+        cmd = " ".join(cmd)
 
     pipe = os.popen(cmd, "r")
     output = pipe.read()
     exitval = pipe.close()
     if (exitval):
-	raise Exception("Command failed: '" + cmd + "'")
+        raise Exception("Command failed: '" + cmd + "'")
 
     return output
