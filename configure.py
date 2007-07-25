@@ -84,6 +84,8 @@ if os == "darwin":
 elif os == "windows":
     APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -DAVMPLUS_IA32 -D_CRT_SECURE_NO_DEPRECATE -D_CONSOLE "
     OS_LIBS.append('winmm')
+elif os == "linux":
+    APP_CPPFLAGS += "-DUNIX -DAVMPLUS_UNIX "
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
