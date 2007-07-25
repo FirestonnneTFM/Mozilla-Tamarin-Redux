@@ -46,11 +46,11 @@ import re
 
 def _configGuess():
     ostest = sys.platform
-    if re.match('^win', ostest):
+    if ostest.startswith('win'):
         os = 'windows'
     elif ostest == 'darwin':
         os = 'darwin'
-    elif ostest.search('^linux', ostest):
+    elif ostest.startswith('linux'):
         os = 'linux'
     else:
         raise Exception('Unrecognized OS: ' + ostest)
