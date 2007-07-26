@@ -77,15 +77,24 @@ else:
 
 OS_LIBS = ['z']
 
-os = config.getTarget()[0]
+os, cpu = config.getTarget()
 if os == "darwin":
     APP_CPPFLAGS += "-DTARGET_API_MAC_CARBON=1 -DDARWIN=1 -D_MAC -DTARGET_RT_MAC_MACHO=1 -DUSE_MMAP -D_MAC -D__DEBUGGING__ "
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
 elif os == "windows":
-    APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -DAVMPLUS_IA32 -D_CRT_SECURE_NO_DEPRECATE -D_CONSOLE "
+    APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -D_CONSOLE "
     OS_LIBS.append('winmm')
 elif os == "linux":
     APP_CPPFLAGS += "-DUNIX -DAVMPLUS_UNIX "
+else:
+    raise Exception("Unsupported OS")
+
+if cpu == "i686":
+    APP_CPPFLAGS += "-DAVMPLUS_IA32 "
+elif cpu == "powerpc":
+    APP_CPPFLAGS += "-DAVMPLUS_PPC "
+else:
+    raise Exception("Unsupported OS")
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
