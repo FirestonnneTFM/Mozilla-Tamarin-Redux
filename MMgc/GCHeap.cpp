@@ -164,7 +164,7 @@ namespace MMgc
 	{
 		GCAssert(size > 0);
 
-		char *baseAddr;
+		char *baseAddr = 0;
 
 		// nested block to keep memset/memory commit out of critical section
 		{

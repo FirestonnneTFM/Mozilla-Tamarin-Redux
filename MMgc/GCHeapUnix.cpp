@@ -143,8 +143,11 @@ namespace MMgc
 		void *endPage   = (void*) (((size_t)endAddress + 0xFFF) & ~0xFFF);
 		size_t sizePaged = (size_t)endPage - (size_t)beginPage;
 
-		int retval = mprotect(beginPage, sizePaged,
-							  executableFlag ? (PROT_READ|PROT_EXEC) : (PROT_READ|PROT_WRITE|PROT_EXEC));
+#ifdef DEBUG
+		int retval =
+#endif
+		  mprotect(beginPage, sizePaged,
+			   executableFlag ? (PROT_READ|PROT_EXEC) : (PROT_READ|PROT_WRITE|PROT_EXEC));
 
 		GCAssert(retval == 0);
 	}
@@ -277,7 +280,10 @@ namespace MMgc
 
 	void GCHeap::ReleaseMemory(char *address, size_t size)
 	{
-		int result = munmap(address, size);
+#ifdef DEBUG
+		int result =
+#endif
+		  munmap(address, size);
 		GCAssert(result == 0);
 	}
 #else

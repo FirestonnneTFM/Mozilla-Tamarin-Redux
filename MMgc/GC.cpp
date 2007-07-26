@@ -1423,7 +1423,10 @@ bail:
 	{
 		if(stackTopKey == 0)
 		{
-			int res = pthread_key_create(&stackTopKey, NULL);
+#ifdef DEBUG		  
+			int res = 
+#endif
+			  pthread_key_create(&stackTopKey, NULL);
 			GCAssert(res == 0);
 		}
 
@@ -2184,8 +2187,10 @@ bail:
 		LARGE_INTEGER value;
 		QueryPerformanceCounter(&value);
 		return value.QuadPart;
+		#elif defined(AVMPLUS_UNIX)
+		// TODO_LINUX
+		return 0;
 		#else
-		#ifndef AVMPLUS_UNIX // TODO_LINUX
 		#ifndef MMGC_ARM
 		UnsignedWide microsecs;
 		::Microseconds(&microsecs);
@@ -2194,7 +2199,6 @@ bail:
 		memcpy(&retval, &microsecs, sizeof(retval));
 		return retval;
 		#endif //MMGC_ARM
-		#endif //AVMPLUS_UNIX
 		#endif
 	}
 
