@@ -161,9 +161,6 @@ namespace avmplus
 
 		virtual bool handleException(kern_return_t& returnCode) = 0;
 		
-		// since we have virtual functions, we probably need a virtual dtor
-		virtual ~GenericGuard() {}
-		
 		static kern_return_t catch_exception_raise(mach_port_t exception_port,
 												   mach_port_t thread,
 												   mach_port_t task,
@@ -187,6 +184,11 @@ namespace avmplus
 		#endif
 		
 		#endif // AVMPLUS_MACH_EXCEPTIONS
+
+		#if defined(AVMPLUS_MACH_EXCEPTIONS) || defined(AVMPLUS_UNIX)
+		// since we have virtual functions, we probably need a virtual dtor
+		virtual ~GenericGuard() {}
+		#endif
 
 		bool registered;		
 	};
