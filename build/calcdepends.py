@@ -117,7 +117,7 @@ if __name__ == "__main__":
     outfile = sys.argv.pop(0)
 
     for objfile in sys.argv:
-        depfile = _argExpr.sub(".deps", objfile)
+        depfile = _argExpr.sub("deps", objfile)
         files[objfile] = depfile
 
     rebuildsNeeded(files, outfile)
