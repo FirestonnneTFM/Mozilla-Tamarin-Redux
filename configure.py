@@ -85,7 +85,7 @@ elif os == "windows":
     APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -D_CONSOLE "
     OS_LIBS.append('winmm')
 elif os == "linux":
-    APP_CPPFLAGS += "-DUNIX -DAVMPLUS_UNIX "
+    APP_CPPFLAGS += "-DUNIX -DAVMPLUS_UNIX -DLINUX "
 else:
     raise Exception("Unsupported OS")
 

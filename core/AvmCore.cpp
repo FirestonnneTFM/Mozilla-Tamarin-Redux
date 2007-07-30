@@ -3403,7 +3403,7 @@ return the result of the comparison ToPrimitive(x) == y.
         asm("movups %1, %%xmm0;"
             "cvttsd2si %%xmm0, %%eax;"
             "movl %%eax, %0" : "=r" (id) : "m" (d) : "%eax");
-        if (id != 0x80000000)
+        if (id != (int)0x80000000)
             return id;
 		#endif
 
