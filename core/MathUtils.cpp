@@ -163,7 +163,7 @@ namespace avmplus
 		int hx = u.parts.msw;
 		int lx = u.parts.lsw;
 
-		return (hx == 0x80000000 && lx == 0x0);
+		return (hx == (int)0x80000000 && lx == (int)0x0);
 	}
 
 #else
