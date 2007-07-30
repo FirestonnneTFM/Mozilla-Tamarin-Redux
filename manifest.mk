@@ -50,6 +50,9 @@ endif
 ifeq (windows,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/win32)
 endif
+ifeq (linux,$(TARGET_OS))
+$(call RECURSE_DIRS,platform/unix)
+endif
 
 $(call RECURSE_DIRS,shell)
 

@@ -71,7 +71,7 @@ DEBUG_CPPFLAGS = "-DDEBUG -D_DEBUG "
 DEBUG_CXXFLAGS = "-g "
 
 if config.COMPILER_IS_GCC:
-    APP_CXXFLAGS = "-fno-exceptions -fno-rtti -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wno-unitialized -Wno-strict-aliasing -fmessage-length=0 -finline-functions -finline-limit=65536 "
+    APP_CXXFLAGS = "-fno-exceptions -fno-rtti -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wno-uninitialized -Wno-strict-aliasing -fmessage-length=0 -finline-functions -finline-limit=65536 "
 else:
     APP_CXXFLAGS = "-GR- -W4 -WX "
 
@@ -86,6 +86,7 @@ elif os == "windows":
     OS_LIBS.append('winmm')
 elif os == "linux":
     APP_CPPFLAGS += "-DUNIX -DAVMPLUS_UNIX -DLINUX "
+    OS_LIBS.append('pthread')
 else:
     raise Exception("Unsupported OS")
 
