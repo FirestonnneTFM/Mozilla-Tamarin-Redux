@@ -55,7 +55,9 @@
 #endif // !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
 
 #if defined(MEMORY_INFO) && defined(AVMPLUS_UNIX)
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <dlfcn.h>
 #endif
 
