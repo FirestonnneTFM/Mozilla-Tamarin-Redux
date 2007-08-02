@@ -52,6 +52,8 @@ COMPILE_CPPFLAGS += $(OPT_CPPFLAGS)
 COMPILE_CXXFLAGS += $(OPT_CXXFLAGS)
 endif
 
+GLOBAL_DEPS := Makefile
+
 all::
 
 # Usage: from within RECURSE_DIRS
@@ -94,23 +96,17 @@ GARBAGE += \
   $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.deps) \
   $(NULL)
 
-ifndef PP_PRECIOUS
-.INTERMEDIATE: $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.ii)
-endif
-
-# XXX Add dependency handling!
-$$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.ii): %.ii: %.cpp	
+$$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.ii): %.ii: %.cpp $$(GLOBAL_DEPS)
 	test -d $$(dir $$@) || mkdir -p $$(dir $$@)
 	$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) \
 	  $$< > $$@
 	$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@ > /dev/null
 
-$$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.ii
+$$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.ii $$(GLOBAL_DEPS)
 	$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $(1).thing.pp: FORCE
-	@echo Building $$@
-	@$(PYTHON) $(topsrcdir)/build/calcdepends.py $$@ $$($(1)_CXXOBJS:$(OBJ_SUFFIX)=.ii)
+	@$(PYTHON) $(topsrcdir)/build/calcdepends.py $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.ii)
 
 include $(1).thing.pp
 
@@ -139,6 +135,7 @@ define PROGRAM_RULES
   $(1)_DEPS = \
     $$($(1)_EXTRA_DEPS) \
     $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$($$(lib)_NAME)) \
+    $$(GLOBAL_DEPS) \
     $(NULL)
   $(1)_LDFLAGS = \
     $$(LDFLAGS) \

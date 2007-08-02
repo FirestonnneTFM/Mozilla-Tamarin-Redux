@@ -37,7 +37,7 @@
 # ***** END LICENSE BLOCK *****
 
 
-import os
+import os, sys, re
 from stat import *
 
 class StatCache:
@@ -79,13 +79,29 @@ def rebuildNeeded(file, dependencies):
 
     return False
 
+_fileFromLine = re.compile('^([^:]+): FORCE')
+
 def rebuildsNeeded(files, outfile):
     """Write a makefile snippet indicating whether object files need to be
     rebuilt.
 
     @param files: a dictionary of { 'objfile', 'depfile' }"""
 
-    ostream = open(outfile, "w")
+    oldrebuilds = {}
+    do_write = False
+
+    if os.path.exists(outfile):
+        istream = open(outfile, "r")
+        for line in istream:
+            m = _fileFromLine.match(line)
+            if m:
+                oldrebuilds[m.group(1)] = None
+        istream.close()
+    else:
+        print >>sys.stderr, "Writing %s: doesn't exist" % outfile
+        do_write = True
+
+    newrebuilds = []
 
     for (objfile, depfile) in files.items():
         rebuild = True
@@ -101,15 +117,25 @@ def rebuildsNeeded(files, outfile):
             pass
 
         if rebuild:
-            ostream.write(objfile + ": FORCE\n")
+            newrebuilds.append(objfile)
 
-    ostream.close()
+            if objfile in oldrebuilds:
+                del oldrebuilds[objfile]
+            else:
+                do_write = True
+
+    if do_write or len(oldrebuilds):
+        print "Building %s" % outfile
+        ostream = open(outfile, "w")
+        for objfile in newrebuilds:
+            ostream.write(objfile + ": FORCE\n")
+        ostream.close()
 
 if __name__ == "__main__":
     import sys
     import re
 
-    _argExpr = re.compile("\\.(ii)$")
+    _argExpr = re.compile("\\.ii$")
 
     files = {}
 
@@ -117,7 +143,7 @@ if __name__ == "__main__":
     outfile = sys.argv.pop(0)
 
     for objfile in sys.argv:
-        depfile = _argExpr.sub("deps", objfile)
+        depfile = _argExpr.sub(".deps", objfile)
         files[objfile] = depfile
 
     rebuildsNeeded(files, outfile)
