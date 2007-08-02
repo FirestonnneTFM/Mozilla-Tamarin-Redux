@@ -68,16 +68,21 @@ APP_CXXFLAGS = ""
 OPT_CXXFLAGS = "-Os "
 OPT_CPPFLAGS = ""
 DEBUG_CPPFLAGS = "-DDEBUG -D_DEBUG "
-DEBUG_CXXFLAGS = "-g "
+DEBUG_CXXFLAGS = ""
 
 if config.COMPILER_IS_GCC:
     APP_CXXFLAGS = "-fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wno-uninitialized -Wno-strict-aliasing -fmessage-length=0 -finline-functions -finline-limit=65536 "
     if config.getDebug():
-        APP_CXXFLAGS = "-frtti "
+        APP_CXXFLAGS += "-frtti "
     else:
         APP_CXXFLAGS += "-fno-rtti "
+    DEBUG_CXXFLAGS += "-g "
 else:
-    APP_CXXFLAGS = "-GR- -W4 -WX "
+    APP_CXXFLAGS = "-W4 -WX "
+    if config.getDebug():
+        APP_CXXFLAGS += "-EHsc "
+    else:
+        APP_CXXFLAGS += "-GR- "
 
 OS_LIBS = ['z']
 
