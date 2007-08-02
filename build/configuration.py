@@ -202,6 +202,9 @@ class Configuration:
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
 
+    def getDebug(self):
+        return self._debug
+
     def subst(self, name, value):
         self._acvars[name] = value
 
