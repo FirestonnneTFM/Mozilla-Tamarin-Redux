@@ -36,108 +36,73 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __MMgc__
-#define __MMgc__
+#ifndef __GCSpinLock__
+#define __GCSpinLock__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif // HAVE_CONFIG_H
-
-// For size_t
-#include <stddef.h>
-
-#ifdef WIN32
-#include "winbuild.h"
-#endif
-
-#ifdef _MAC
-#include "macbuild.h"
-#endif
-
-#ifdef LINUX
-#include "linuxbuild.h"
-#endif
-
-#ifdef SOLARIS
-#include "solarisbuild.h"
-#endif
-
-#ifdef MMGC_ARM
-#include "armbuild.h"
-#endif
-
-#ifdef SCRIPT_DEBUGGER
-#ifndef DEBUGGER
-#define DEBUGGER
-#endif
-#endif
-
-#if defined(_DEBUG) || defined(_MAC)
-// for memset
-#include <string.h>
-#endif
-
-#ifndef _MSC_VER
-#define __forceinline
-#endif
-
-#include "GCDebug.h"
-/*
- * If _GCHeapLock is defined, a spin lock is used for thread safety
- * on all public API's (Alloc, Free, ExpandHeap)
- *
- * Warning:
- * We may use GCHeap for allocation on other threads, hence the
- * spinlock, but the MMgc garbage collector in general is not
- * thread-safe.
- */
-
-#ifdef GCHEAP_LOCK
-#ifdef WIN32
-#include "GCSpinLockWin.h"
-#endif
-#ifdef _MAC
-#include "GCSpinLockMac.h"
-#endif
-#ifdef LINUX
-#include "GCSpinLockLinux.h"
-#endif
-#ifdef SOLARIS
-#include "GCSpinLockSolaris.h"
-#endif
-#endif
+#include <pthread.h>
 
 namespace MMgc
 {
-	class GC;
-	class GCTraceObject;
-	class RCObject;
-	class GCWeakRef;
-	class GCObject;
-	class GCHashtable;
-	class Cleaner;
-	class GCAlloc;
+	/**
+	 * GCSpinLock is a simple spin lock class used by GCHeap to
+	 * ensure mutually exclusive access.  The GCHeap may be accessed
+	 * by multiple threads, so this is necessary to ensure that
+	 * the threads do not step on each other.
+	 */
+	class GCSpinLock
+	{
+	public:
+
+		GCSpinLock()
+		{
+			pthread_spin_init( &m1, 0 );
+		}
+	
+		~GCSpinLock()
+		{
+			pthread_spin_destroy( &m1 );
+		}
+
+		inline void Acquire()
+		{
+			pthread_spin_lock( &m1 );
+		}
+		
+		inline void Release()
+		{
+			pthread_spin_unlock( &m1 );
+		}
+
+	private:
+		pthread_spinlock_t m1;
+	};
+
+	/**
+	 * GCAcquireSpinlock is a convenience class which acquires
+	 * the specified spinlock at construct time, then releases
+	 * the spinlock at desruct time.  The single statement
+	 *
+	 *    GCAcquireSpinlock acquire(spinlock);
+	 *
+	 * ... will acquire the spinlock at the top of the function
+	 * and release it at the end.  This makes for less error-prone
+	 * code than explicit acquire/release.
+	 */
+	class GCAcquireSpinlock
+	{
+	public:
+		GCAcquireSpinlock(GCSpinLock& spinlock) : m_spinlock(spinlock)
+		{
+			m_spinlock.Acquire();
+		}
+		~GCAcquireSpinlock()
+		{
+			m_spinlock.Release();
+		}
+
+	private:
+		GCSpinLock& m_spinlock;
+	};
 }
 
-#include "GCTypes.h"
-#include "GCStack.h"
-#include "GCAllocObject.h"
-#include "GCHeap.h"
-#include "GCAlloc.h"
-#include "GCLargeAlloc.h"
-#include "GCMemoryProfiler.h"
-#include "FixedAlloc.h"
-#include "FixedMalloc.h"
-#include "GCGlobalNew.h"
-#include "GCHashtable.h"
-#include "GC.h"
-#include "GCObject.h"
-#include "GCWeakRef.h"
-#include "WriteBarrier.h"
-
-#if defined(MMGC_DRC) && !defined(WRITE_BARRIERS)
-#error "Need write barriers for DRC"
-#endif
-
-#endif /* __MMgc__ */
-
+#endif /* __GCSpinLock__ */

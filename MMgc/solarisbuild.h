@@ -36,108 +36,60 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __MMgc__
-#define __MMgc__
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif // HAVE_CONFIG_H
-
-// For size_t
-#include <stddef.h>
-
-#ifdef WIN32
-#include "winbuild.h"
-#endif
-
-#ifdef _MAC
-#include "macbuild.h"
-#endif
-
-#ifdef LINUX
-#include "linuxbuild.h"
-#endif
-
-#ifdef SOLARIS
-#include "solarisbuild.h"
-#endif
-
-#ifdef MMGC_ARM
-#include "armbuild.h"
-#endif
-
-#ifdef SCRIPT_DEBUGGER
-#ifndef DEBUGGER
-#define DEBUGGER
+#ifdef DEBUG
+#ifndef _DEBUG
+#define _DEBUG
 #endif
 #endif
 
-#if defined(_DEBUG) || defined(_MAC)
-// for memset
-#include <string.h>
+/**
+ * Critical section on GCHeap allocations.
+ */
+#define GCHEAP_LOCK
+
+/**
+ * IA-32
+ */
+#define MMGC_IA32
+
+/**
+ * Define this to get stack traces.  Helps with memory leaks.
+ */
+#ifdef DEBUG
+#define MEMORY_INFO
 #endif
 
-#ifndef _MSC_VER
-#define __forceinline
-#endif
+/**
+ * This turns on incremental collection as well as all of
+ * the write barriers.
+ */
+#define WRITE_BARRIERS
 
-#include "GCDebug.h"
-/*
- * If _GCHeapLock is defined, a spin lock is used for thread safety
- * on all public API's (Alloc, Free, ExpandHeap)
+/**
+ * Define this if MMgc is being integrated with avmplus.
+ * Activates dynamic profiling support, etc.
+ */
+#define MMGC_AVMPLUS
+
+/**
+ * Use VirtualAlloc to reserve/commit memory
+ */
+#define USE_MMAP
+
+/**
  *
- * Warning:
- * We may use GCHeap for allocation on other threads, hence the
- * spinlock, but the MMgc garbage collector in general is not
- * thread-safe.
+ */
+#define DECOMMIT_MEMORY
+
+/**
+ * Controls whether DRC is in use
  */
 
-#ifdef GCHEAP_LOCK
-#ifdef WIN32
-#include "GCSpinLockWin.h"
-#endif
-#ifdef _MAC
-#include "GCSpinLockMac.h"
-#endif
-#ifdef LINUX
-#include "GCSpinLockLinux.h"
-#endif
-#ifdef SOLARIS
-#include "GCSpinLockSolaris.h"
-#endif
-#endif
+#define MMGC_DRC
 
-namespace MMgc
-{
-	class GC;
-	class GCTraceObject;
-	class RCObject;
-	class GCWeakRef;
-	class GCObject;
-	class GCHashtable;
-	class Cleaner;
-	class GCAlloc;
-}
+/**
+ * This makes JIT code buffers read-only to reduce the probability of
+ * heap overflow attachs
+ */
 
-#include "GCTypes.h"
-#include "GCStack.h"
-#include "GCAllocObject.h"
-#include "GCHeap.h"
-#include "GCAlloc.h"
-#include "GCLargeAlloc.h"
-#include "GCMemoryProfiler.h"
-#include "FixedAlloc.h"
-#include "FixedMalloc.h"
-#include "GCGlobalNew.h"
-#include "GCHashtable.h"
-#include "GC.h"
-#include "GCObject.h"
-#include "GCWeakRef.h"
-#include "WriteBarrier.h"
-
-#if defined(MMGC_DRC) && !defined(WRITE_BARRIERS)
-#error "Need write barriers for DRC"
-#endif
-
-#endif /* __MMgc__ */
-
+#define AVMPLUS_JIT_READONLY
