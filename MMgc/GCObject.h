@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -43,10 +44,23 @@
 //void *operator new(size_t size);
 //void *operator new[] (size_t size);
 
+// Sun Studio doesn't support default parameters for operator new
+#ifdef __SUNPRO_CC
+inline void *operator new(size_t size, MMgc::GC *gc)
+{
+	return gc->Alloc(size, MMgc::GC::kContainsPointers|MMgc::GC::kZero, 4);
+}
+
+inline void *operator new(size_t size, MMgc::GC *gc, int flags)
+{
+	return gc->Alloc(size, flags, 4);
+}
+#else
 inline void *operator new(size_t size, MMgc::GC *gc, int flags=MMgc::GC::kContainsPointers|MMgc::GC::kZero)
 {
 	return gc->Alloc(size, flags, 4);
 }
+#endif
 
 namespace MMgc
 {
