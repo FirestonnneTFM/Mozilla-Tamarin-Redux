@@ -68,7 +68,7 @@ namespace avmplus
 
 		if (traits->init && !this->init)
 		{
-			this->init = new (core->GetGC()) MethodEnv(traits->init, this);
+			this->init = makeMethodEnv(traits->init);
 		}
 
 		// populate method table
@@ -93,7 +93,7 @@ namespace avmplus
 					if (method != NULL)
 					{
 						//this->methods[i] = new (core->GetGC()) MethodEnv(method, this);
-						WB(core->GetGC(), this, &methods[i], new (core->GetGC()) MethodEnv(method, this));
+						WB(core->GetGC(), this, &methods[i], makeMethodEnv(method));
 					}
 					#ifdef AVMPLUS_VERBOSE
 					else if (traits->pool->verbose)
@@ -117,7 +117,7 @@ namespace avmplus
 				AbstractFunction* method = traits->getMethod(i);
 				if (method != NULL)
 				{
-					MethodEnv *env = new (core->GetGC()) MethodEnv(method, this);
+					MethodEnv *env = makeMethodEnv(method);
 					//this->methods[i] = env;
 					WB(core->GetGC(), this, &methods[i], env);
 				}
@@ -158,6 +158,29 @@ namespace avmplus
 				}
 			}
 		}
+	}
+
+	MethodEnv *VTable::makeMethodEnv(AbstractFunction *func)
+	{
+		AvmCore *core = traits->core;
+		MethodEnv *methodEnv = new (core->GetGC()) MethodEnv(func, this);
+		// register this env in the callstatic method table
+		int method_id = func->method_id;
+		if (method_id != -1)
+		{
+			AvmAssert(abcEnv->pool == (PoolObject *) func->pool);
+			if (abcEnv->methods[method_id] == NULL)
+			{
+				abcEnv->setMethod(method_id, methodEnv);
+			}
+			#ifdef AVMPLUS_VERBOSE
+			else if (func->pool->verbose)
+			{
+				core->console << "WARNING: tried to re-register global MethodEnv for " << func << "\n";
+			}
+			#endif
+		}
+		return methodEnv;
 	}
 
 #ifdef DEBUGGER

@@ -212,25 +212,6 @@ namespace avmplus
 			activation->resolveSignatures();
 			setActivationOrMCTable(activation, kActivation);
 		}
-
-		// register this env in the callstatic method table
-		int method_id = method->method_id;
-		if (method_id != -1)
-		{
-			AbcEnv* abcEnv = vtable->abcEnv;
-			AvmAssert(abcEnv->pool == (PoolObject *) method->pool);
-			if (abcEnv->methods[method_id] == NULL)
-			{
-				abcEnv->setMethod(method_id, this);
-			}
-			#ifdef AVMPLUS_VERBOSE
-			else if (method->pool->verbose)
-			{
-				core->console << "WARNING: tried to re-register global MethodEnv for " << method << "\n";
-			}
-			#endif
-		}
-
 	}
 	
 #ifdef DEBUGGER

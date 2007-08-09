@@ -44,6 +44,7 @@ namespace avmplus
 
 	class VTable : public MMgc::GCObject
 	{
+		MethodEnv *makeMethodEnv(AbstractFunction *method);
 		void addInterface(AbstractFunction* virt, int disp_id);
 
 		bool linked;
