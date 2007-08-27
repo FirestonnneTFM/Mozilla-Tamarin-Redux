@@ -61,10 +61,29 @@ namespace avmplus
 #endif
 	}
 
+	size_t wcharStrlen(const wchar* msg)
+	{
+		size_t i = 0;
+		while (*msg++)
+			i++;
+		return i;
+	}
+
 	void AvmDebugMsg(const wchar* msg, bool debugBreak)
 	{
 #ifdef _DEBUG
-        fprintf( stderr, "%s", msg );
+		// Not everyone can do UTF-8, but it's better than nothing.
+		size_t msgsize = wcharStrlen(msg) + 1;
+		size_t bufsize = 3 * msgsize;
+		uint8 *buf = new uint8[bufsize];
+
+		if (buf) {
+			UnicodeUtils::Utf16ToUtf8(msg, msgsize, buf, bufsize);
+			fprintf(stderr, "%s", reinterpret_cast<char *>(buf));
+			delete[] buf;
+		} else {
+			fprintf(stderr, "Warning: Out of memory in AvmDebugMsg.\n");
+		}
 #endif
 	}
 }
