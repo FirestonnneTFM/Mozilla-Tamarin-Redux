@@ -35,52 +35,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
-package es4
 {
-
-    /*
-    
-    Evaluate an ES4 program
-    
-    */
-
-    public var log_mode = release
-    
-    class Evaluator
-    {
-        function Evaluator() {}
-        function eval(src) 
-        {
-            var externs = 
-                        <Slots>
-                            <Slot kind="extern">
-                                <Name>
-                                    <QualifiedIdentifier>
-                                        <Qualifier><Namespace kind="public" name=""/></Qualifier>
-                                        <Identifier name="int"/>
-                                    </QualifiedIdentifier>
-                                </Name>
-                                <Value>"class int"</Value>
-                            </Slot>
-                        </Slots>
-
-            var parser  = new Parser(src)
-            var definer = new Definer()
-            var interpreter = new Interpreter()
-
-            var node    = parser.parseProgram()
-node.Prologue.* += externs.Slot
-            Debug.log_mode::log("parse:"+node.toXMLString())
-            var node    = definer.defineProgram(node)
-            Debug.log_mode::log("define:"+node.toXMLString())
-            Debug.log_mode::log("interp:")
-            var node    = interpreter.interpretProgram(node)
-            return node
-        }
-    }
-    
+    use namespace Parse;
+    use namespace Ast;
+    use namespace Util;
+    load ("esc-env.ast")
+    print ("decoding")
+    var nd = Decode::program (esc_env);
+    var topFixtures = nd.head.fixtures;
+    var str = readFile ("esc-tmp.es");
+    var parser = Parse::initParser(str,topFixtures);
+    print ("parsing");
+    var [ts,nd] = Parse::program();
 }
 
-
+{
+    use namespace Util;
+    dumpABCFile(Gen::cg(nd), "esc-tmp.abc");
+}
