@@ -230,6 +230,25 @@ namespace Gen;
         return named;
     }
     
+    function extractUnNamedFixtures(fixtures)
+    {
+        let named = [];
+        let fix_length = fixtures ? fixtures.length : 0;
+        for(let i = 0; i < fix_length; ++i)
+        {
+            let [name,fixture] = fixtures[i];
+            switch type (name) {
+                case (pn:PropName) {
+                    // do nothing
+                }
+                case (tn:TempName) {
+                    named.push([name,fixture]);
+                }
+            }
+       }
+       return named;
+   }
+
     function cgClass(ctx, c) {
         
         let {asm:asm, emitter:emitter, script:script} = ctx;
@@ -337,7 +356,7 @@ namespace Gen;
         function extractType([name,fixture])
             emitter.fixtureTypeToType(fixture);
         
-        let named_fixtures = extractNamedFixtures(f.params.fixtures);
+        let named_fixtures = extractUnNamedFixtures(f.params.fixtures);
         
         return map(extractType, named_fixtures);
     }
@@ -423,7 +442,7 @@ namespace Gen;
             asm.I_pop();
         }
     }
-    
+
     function cgInits(ctx, inits, baseOnStk){
         let {asm:asm, emitter:emitter} = ctx;
 

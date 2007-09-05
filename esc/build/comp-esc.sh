@@ -21,14 +21,14 @@
 #./esc1-r.sh ../src/bytes.es
 #./esc1-r.sh ../src/asm.es
 #./esc1-r.sh ../src/abc.es
-#./esc1-r.sh ../src/emit.es
+./esc1-r.sh ../src/emit.es
 #./esc1-r.sh ../src/cogen.es
 #./esc1-r.sh ../src/cogen-stmt.es
 #./esc1-r.sh ../src/cogen-expr.es
 #./esc1-r.sh ../src/esc1-t.es
 #./esc1-r.sh ../src/esc2-t.es
 #./esc1-r.sh ../src/esc3-t.es
-./esc1-r.sh ../src/esc-t.es
+#./esc1-r.sh ../src/esc-t.es
 #./esc1-r.sh ../src/main.es
 
 ### STEP2: compile esc3 .ast to .ast.abc
@@ -53,17 +53,17 @@
 #./esc3-r.sh ../src/parse-stmt.es
 #./esc3-r.sh ../src/parse-defn.es
 #./esc3-r.sh ../src/parse-prgm.es
-#./esc3-r.sh ../src/bytes.es
-#./esc3-r.sh ../src/asm.es
-#./esc3-r.sh ../src/abc.es
-#./esc3-r.sh ../src/emit.es
-#./esc3-r.sh ../src/cogen.es
-#./esc3-r.sh ../src/cogen-stmt.es
-#./esc3-r.sh ../src/cogen-expr.es
+#./esc3-r.sh ../src/bytes-tamarin.es
+./esc3-r.sh ../src/asm.es
+./esc3-r.sh ../src/abc.es
+./esc3-r.sh ../src/emit.es
+./esc3-r.sh ../src/cogen.es
+./esc3-r.sh ../src/cogen-stmt.es
+./esc3-r.sh ../src/cogen-expr.es
 #./esc3-r.sh ../src/esc1-t.es
 #./esc3-r.sh ../src/esc2-t.es
 #./esc3-r.sh ../src/esc3-t.es
-./esc3-r.sh ../src/esc-t.es
+#./esc3-r.sh ../src/esc-t.es
 #./esc3-r.sh ../src/main.es
 
 ### STEP 4: compile .ast.abc to .abc using esc3-t
