@@ -608,6 +608,9 @@ namespace avmplus
 
 		// Destroy the mutex
 		pthread_mutex_destroy(&mutex);
+
+		mach_port_deallocate(mach_task_self(), exceptionPort);
+		exceptionPort = MACH_PORT_NULL;
 	}
 
 	void GenericGuard::init()
@@ -729,7 +732,18 @@ namespace avmplus
 			AvmAssertMsg(false, "thread_get_exception_ports failed");
 			return;
 		}
-									   
+
+		// Loop over the ports and find null ports
+		// make sure the thread state flavors of null exception ports
+		// are not zero.  They aren't valid. 
+		for (unsigned int i = 0; i < savedExceptionPorts.count; ++i) {
+			if (savedExceptionPorts.ports[i] == MACH_PORT_NULL) {
+				if (savedExceptionPorts.flavors[i] == 0)
+					savedExceptionPorts.flavors[i] = MACHINE_THREAD_STATE;
+			}
+			AvmAssert(VALID_THREAD_STATE_FLAVOR(savedExceptionPorts.flavors[i]));
+		}
+
 		// Install exception ports
 		r = thread_set_exception_ports(thread,
 									   mask,
