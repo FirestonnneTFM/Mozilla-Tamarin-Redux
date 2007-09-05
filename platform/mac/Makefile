@@ -112,6 +112,7 @@ SHELL_SRCS := ../../shell/avmshell.cpp \
               ../../shell/StringBuilderClass.cpp \
               ../../shell/SystemClass.cpp \
 		../../extensions/DictionaryGlue.cpp
+		../../extensions/SamplerScript.cpp
 
 AVMPLUS_SRCS := \
         ../../core/AbcEnv.cpp \
@@ -170,6 +171,7 @@ AVMPLUS_SRCS := \
         ../../core/PrintWriter.cpp \
         ../../core/RegExpClass.cpp \
         ../../core/RegExpObject.cpp \
+        ../../core/Sampler.cpp \
         ../../core/ScopeChain.cpp \
         ../../core/ScriptBuffer.cpp \
         ../../core/ScriptObject.cpp \

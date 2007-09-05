@@ -133,36 +133,6 @@ namespace avmplus
 		}
 	}
 
-	bool StackTrace::equals(StackTrace::Element *e, int depth)
-	{
-		if(this->depth != depth)
-			return false;
-
-		Element *me = elements;
-		while(depth--)
-		{
-			if(me->info != e->info || me->filename != e->filename || me->linenum != e->linenum)
-				return false;
-			me++;
-			e++;
-		}
-		return true;
-	}
-
-	/*static*/
-	uintptr StackTrace::hashCode(StackTrace::Element *e, int depth)
-	{
-		uintptr hashCode = 0;
-		while(depth--)
-		{
-			hashCode ^= uintptr(e->info)>>3;
-			hashCode ^= uintptr(e->filename)>>3;
-			hashCode ^= (uintptr)e->linenum;
-			e++;
-		}
-		return hashCode;
-	}
-
 	Stringp StackTrace::format(AvmCore* core)
 	{
 		if(!stringRep)
@@ -175,24 +145,29 @@ namespace avmplus
 			const Element *e = elements;
 			for (int i=0; i<displayDepth; i++, e++)
 			{
+				// omit fake functions which are only for profiling purposes
+				if(e->info->isFakeFunction())
+					continue;
 				if(i != 0)
-					s = core->concatStrings(s, core->newString("\n"));
-				s = core->concatStrings(s, core->newString("\tat "));
-				s = core->concatStrings(s, e->info->format(core));
+					s = core->concatStrings(s, core->knewline);
+
+				Stringp filename=NULL;
 				if(e->filename)
 				{
-					StringBuffer out(core);
-					out << '[';
-					dumpFilename(e->filename, out);
-					out << ':'
-						<< (e->linenum)
-						<< ']';
-					s = core->concatStrings(s, core->newString(out.c_str()));
+					StringBuffer sb(core->gc);
+					dumpFilename(e->filename, sb);
+					filename = core->newString(sb.c_str());
+				}
+				s = core->concatStrings(s, e->info->getStackTraceLine(filename));
+				if(e->filename)
+				{
+					s = core->concatStrings(s, core->intToString(e->linenum));
+					s = core->concatStrings(s, core->krightbracket);
 				}
 			}
-            stringRep = s;
+			stringRep = s;
 		}
 		return stringRep;
 	}
 #endif /* DEBUGGER */
-}	
+}

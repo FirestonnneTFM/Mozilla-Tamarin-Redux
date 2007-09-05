@@ -286,15 +286,17 @@ namespace avmplus
 		/** Dummy destructor to avoid warnings */
 		virtual ~AbstractFunction() {}
 	public:
-		virtual Stringp format(const AvmCore* core) const;
+		virtual Stringp format(AvmCore* core) const;
 #endif
 
 #if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 	public:
 		DRCWB(Stringp) name;
+		Stringp getStackTraceLine(Stringp filename);
 #endif
 #ifdef DEBUGGER
 		virtual uint32 size() const;
+		virtual bool isFakeFunction() { return false; }
 #endif
 	};
 
@@ -303,7 +305,9 @@ namespace avmplus
 	class FakeAbstractFunction : public AbstractFunction
 	{
 	public:
+		FakeAbstractFunction(Stringp name) { this->name = name; }
 		void verify(Toplevel *) {}
+		virtual bool isFakeFunction() { return true; }
 	};
 #endif
 }

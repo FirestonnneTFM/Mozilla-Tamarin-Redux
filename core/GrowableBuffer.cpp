@@ -49,6 +49,13 @@
 #endif
 
 #ifdef AVMPLUS_UNIX
+
+#ifdef BSD
+#define GUARD_SIG SIGBUS
+#else
+#define GUARD_SIG SIGSEGV
+#endif
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -184,7 +191,9 @@ namespace avmplus
 #endif
 		void* res = heap->CommitCodeMemory((void*)uncommit, grow);
 		AvmAssert(res != 0);
-		(void)res;
+		if(res == 0)
+		  return uncommit;
+
 		uncommit += grow;
 
 		// commit the first page and make it a guard page
@@ -484,7 +493,9 @@ namespace avmplus
 				f_sysctlnametomib p_sysctlnametomib = *(f_sysctlnametomib*)&tmp;
 				if ( p_sysctlnametomib ) {
 					if (p_sysctlnametomib(name, mib, &len) == -1) {
-						AvmAssertMsg(false, "sysctlbyname_with_pid(0): sysctlnametomib failed");				
+						//If we fail for any reason other than the sysctl does not exist
+						//assert false.
+						AvmAssertMsg( errno==ENOENT , "sysctlbyname_with_pid(0): sysctlnametomib failed");
 						return -1;
 					}
 				} else {
@@ -732,7 +743,7 @@ namespace avmplus
 			AvmAssertMsg(false, "thread_get_exception_ports failed");
 			return;
 		}
-
+		
 		// Loop over the ports and find null ports
 		// make sure the thread state flavors of null exception ports
 		// are not zero.  They aren't valid. 
@@ -743,7 +754,7 @@ namespace avmplus
 			}
 			AvmAssert(VALID_THREAD_STATE_FLAVOR(savedExceptionPorts.flavors[i]));
 		}
-
+		
 		// Install exception ports
 		r = thread_set_exception_ports(thread,
 									   mask,
@@ -775,10 +786,11 @@ namespace avmplus
 		*prev = next;
 		
 		pthread_mutex_unlock(&mutex);
-
-		// Restore thread exception ports
+        
+        // Restore thread exception ports
 		for (unsigned int i=0; i<savedExceptionPorts.count; i++)
 		{
+            AvmAssert(VALID_THREAD_STATE_FLAVOR(savedExceptionPorts.flavors[i]));
 			thread_set_exception_ports(thread,
 									   savedExceptionPorts.masks[i],
 									   savedExceptionPorts.ports[i],
@@ -951,13 +963,7 @@ namespace avmplus
 
         if (!handled)
         {
-#ifdef LINUX
-            sigaction(SIGSEGV, &orig_sa, NULL);
-#elif defined(BSD)
-            sigaction(SIGBUS, &orig_sa, NULL);
-#else 
-#error unknown platform
-#endif
+		sigaction(GUARD_SIG, &orig_sa, NULL);
         }
     }
 
@@ -986,13 +992,8 @@ namespace avmplus
             sa.sa_sigaction = dispatchHandleException;
             sigemptyset(&sa.sa_mask);
             sa.sa_flags = SA_SIGINFO;
-#ifdef LINUX
-            sigaction(SIGSEGV, &sa, &orig_sa);
-#elif defined(BSD)
-            sigaction(SIGBUS, &sa, &orig_sa);
-#else 
-#error unknown platform
-#endif
+
+	    sigaction(GUARD_SIG, &sa, &orig_sa);
         }
         else
         {
@@ -1024,13 +1025,7 @@ namespace avmplus
                 // null out the thread local and remove the signal
                 // handler.
                 pthread_setspecific(guardKey, NULL);
-#ifdef LINUX
-	            sigaction(SIGSEGV, &orig_sa, NULL);
-#elif defined(BSD)
-	            sigaction(SIGBUS, &orig_sa, NULL);
-#else 
-#error unknown platform
-#endif
+                sigaction(GUARD_SIG, &orig_sa, NULL);
             }
         }
         else
@@ -1057,27 +1052,19 @@ namespace avmplus
             }
         }
     }
-#endif // AVMPLUS_UNIX
+#endif // AVMPLUS_UNUX
 
 	// BufferGuard
-	#ifdef AVMPLUS_UNIX
-	BufferGuard::BufferGuard(jmp_buf jmpBuf)
+	BufferGuard::BufferGuard(jmp_buf *jmpBuf)
 	{
-		this->jmpBuf[0] = *jmpBuf;
-	#else
-	BufferGuard::BufferGuard(int *jmpBuf)
-	{
-		this->jmpBuf = jmpBuf;
-	#endif // AVMPLUS_UNIX
+		this->jmpBuf = jmpBuf;	
 		init();
-		if (jmpBuf) 
-			registerHandler();
+		registerHandler();
 	}
 
 	BufferGuard::~BufferGuard()
 	{
-		if (jmpBuf)
-			unregisterHandler();
+		unregisterHandler();
 	}
 
 	// Platform specific code follows
@@ -1090,12 +1077,14 @@ namespace avmplus
 		// Set registers in contextRecord to point to the catch location when
 		// we return.  We will *really* handle the exception there.  All exceptions
 		// caught by this handler must be wrapped by TRY/CATCH blocks. See win32setjmp.cpp
-		contextRecord->Ebp = jmpBuf[0];
-		contextRecord->Ebx = jmpBuf[1];
-		contextRecord->Edi = jmpBuf[2];
-		contextRecord->Esi = jmpBuf[3];
-		contextRecord->Esp = jmpBuf[4];
-		contextRecord->Eip = jmpBuf[5];
+		
+		contextRecord->Ebp = (*jmpBuf)[0];
+		contextRecord->Ebx = (*jmpBuf)[1];
+		contextRecord->Edi = (*jmpBuf)[2];
+		contextRecord->Esi = (*jmpBuf)[3];
+		contextRecord->Esp = (*jmpBuf)[4];
+		contextRecord->Eip = (*jmpBuf)[5];
+		contextRecord->Eax = 1123;
 
 		return ExceptionContinueExecution;
 	}
@@ -1126,25 +1115,25 @@ namespace avmplus
 		
 		// set the registers to point back to the CATCH block     
 		#ifdef AVMPLUS_PPC
-		thread_state.srr0 = jmpBuf[21];
-		thread_state.r1   = jmpBuf[0];
+		thread_state.srr0 = (*jmpBuf)[21];
+		thread_state.r1   = (*jmpBuf)[0];
 		#endif
 
 		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		#if __DARWIN_UNIX03 // Mac 10.5 SDK changed definition
-		thread_state.__ebx = jmpBuf[0];
-		thread_state.__esi = jmpBuf[1];
-		thread_state.__edi = jmpBuf[2];
-		thread_state.__ebp = jmpBuf[3];
-		thread_state.__esp = jmpBuf[4];
-		thread_state.__eip = jmpBuf[5];			
+		thread_state.__ebx = (*jmpBuf)[0];
+		thread_state.__esi = (*jmpBuf)[1];
+		thread_state.__edi = (*jmpBuf)[2];
+		thread_state.__ebp = (*jmpBuf)[3];
+		thread_state.__esp = (*jmpBuf)[4];
+		thread_state.__eip = (*jmpBuf)[5];			
 		#else
-		thread_state.ebx = jmpBuf[0];
-		thread_state.esi = jmpBuf[1];
-		thread_state.edi = jmpBuf[2];
-		thread_state.ebp = jmpBuf[3];
-		thread_state.esp = jmpBuf[4];
-		thread_state.eip = jmpBuf[5];			
+		thread_state.ebx = (*jmpBuf)[0];
+		thread_state.esi = (*jmpBuf)[1];
+		thread_state.edi = (*jmpBuf)[2];
+		thread_state.ebp = (*jmpBuf)[3];
+		thread_state.esp = (*jmpBuf)[4];
+		thread_state.eip = (*jmpBuf)[5];			
 		#endif 
 		#endif
 		
@@ -1173,7 +1162,7 @@ namespace avmplus
     bool BufferGuard::handleException(byte *addr)
     {
 #ifdef _DEBUG
-		printf("BufferGuard::handleException: not implemented yet\n");
+        printf("BufferGuard::handleException: not implemented yet\n");
 #endif
         return false;
     }

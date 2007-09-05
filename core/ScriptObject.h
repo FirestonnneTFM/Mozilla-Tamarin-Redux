@@ -41,9 +41,6 @@
 
 namespace avmplus
 {
-#ifdef DEBUGGER
-	class GCHashtableScriptObject;
-#endif
 	/**
 	 * one actionscript object.  might or might not be a function.
 	 * Base class for all objects visible to script code.
@@ -206,9 +203,7 @@ namespace avmplus
 		
 #ifdef DEBUGGER
 	public:
-		ScriptObject *getSlotIterator();
-		uint32 size() const;
-		Stringp getTypeName() const;
+		uint64 size() const;
 		virtual MethodEnv *getCallMethodEnv() { return NULL; }
 #endif
 	};

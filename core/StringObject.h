@@ -356,8 +356,7 @@ namespace avmplus
 		static wchar wCharToLower (wchar ch);
 		
 #ifdef DEBUGGER
-		uint32 size() const;
-		Stringp getTypeName() const;
+		virtual uint64 size() const;
 #endif
 
 	private:

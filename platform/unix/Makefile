@@ -81,6 +81,7 @@ SHELL_SRCS := ../../shell/TypedArrayClass.cpp \
 	../../shell/avmshell.cpp \
 	../../extensions/DictionaryGlue.cpp \
 	../../extensions/JavaGlue.cpp \
+	../../extensions/SamplerScript.cpp \
 	unixcpuid.cpp
 
 # Use this target to generate a list of source files

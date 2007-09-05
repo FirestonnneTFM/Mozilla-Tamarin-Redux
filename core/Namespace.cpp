@@ -135,25 +135,10 @@ namespace avmplus
 		return getURI();
 	}
 
-#ifdef DEBUGGER
-	Stringp Namespace::getTypeName() const
+	Stringp Namespace::getURI() const
 	{
-		AvmCore *core = this->core();		
-
-		if (core->callStack && core->callStack->env)
-		{
-			Toplevel *toplevel = core->callStack->env->toplevel();
-			ClassClosure *clazz = toplevel->namespaceClass;
-
-			if (clazz)
-			{
-				return clazz->format(core);
-			}
-		}
-
-		return NULL;
+		Stringp uri = (Stringp)(((uintptr)m_uri)&~7);
+		return uri;
 	}
-#endif
-
 }
 

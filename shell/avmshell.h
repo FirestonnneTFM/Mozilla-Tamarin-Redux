@@ -72,6 +72,7 @@ namespace avmplus
 #include "ByteArrayGlue.h"
 #include "TypedArrayClass.h"
 #include "DictionaryGlue.h"
+#include "SamplerScript.h"
 #include "JavaGlue.h"
 
 #ifdef _MSC_VER
@@ -90,11 +91,11 @@ namespace avmshell
 {
 	class ShellCodeContext : public CodeContext
 	{
+		DomainEnv* const _domainEnv;
 	  public:
-		DWB(DomainEnv*) domainEnv;
-#ifdef DEBUGGER
-		virtual Toplevel *toplevel() const { return domainEnv->toplevel(); }
-#endif
+		  ShellCodeContext(DomainEnv *de) : _domainEnv(de) {}
+		  virtual ~ShellCodeContext() {}
+		  virtual DomainEnv *domainEnv() const { return _domainEnv; }
 	};
 	
 	/**

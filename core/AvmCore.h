@@ -548,6 +548,15 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kcallee;
 		DRC(Stringp) kNeedsDxns;
 		DRC(Stringp) kAsterisk;
+#ifdef AVMPLUS_VERBOSE
+		DRC(Stringp) knewline;
+		DRC(Stringp) krightbracket;
+		DRC(Stringp) kleftbracket;
+		DRC(Stringp) kcolon;
+		DRC(Stringp) ktabat;
+		DRC(Stringp) kparens;
+		DRC(Stringp) kanonymousFunc;
+#endif
 		Atom kNaN;
 
 		DRC(Stringp) cachedChars[128];
@@ -1267,8 +1276,12 @@ const int kBufferPadding = 16;
 		Stringp internAlloc(const wchar *s, int len);
 		Stringp internAllocUtf8(const byte *s, int len);
 
-		// doesn't do any heap allocations if the string is interned
-		Stringp internAllocAscii(const char *str);
+#ifdef DEBUGGER
+		/**
+		 * intern without allocating memory, returns NULL if its not already interned
+		 */
+		Stringp findInternedString(const char *s, int len);
+#endif
 
 		bool getIndexFromAtom (Atom a, uint32 *result) const
 		{

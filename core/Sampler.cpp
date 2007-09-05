@@ -37,15 +37,18 @@
 
 #include "avmplus.h"
 
+// Adobe patent application tracking #P721, entitled Application Profiling, inventors: T. Reilly
+
 #ifdef DEBUGGER
 namespace avmplus
 {
 	using namespace MMgc;
 
-	Sampler::Sampler()
+	void Sampler::setCore(AvmCore *core)
 	{
 		// fixed (AvmCore) memory, clear out
 		memset(this, 0, sizeof(Sampler));
+		this->core = core;
 		allocId = 1;
 	}
 
@@ -59,15 +62,12 @@ namespace avmplus
 	{
 		this->sampling = sampling;
 		this->autoStartSampling = autoStart;
-		if(sampling)
+		// setup structures early to catch all memory samples (even though timer doesn't start until 
+		// start sampling is called)
+		if(sampling && !samples)
 		{
-			if (!samples)
-			{
-				samples = new (core->GetGC()) GrowableBuffer(core->GetGC()->GetGCHeap());
-				fakeMethodInfos = new (core->GetGC()) Hashtable(core->GetGC());
-				stackTraces = (StackTrace**)core->GetGC()->Alloc(sizeof(StackTrace*) * 1024, GC::kZero);
-				currentSample = samples->reserve(64 * 4096 * 4096);
-			}
+			samples = new (core->GetGC()) GrowableBuffer(core->GetGC()->GetGCHeap());
+			fakeMethodInfos = new (core->GetGC()) Hashtable(core->GetGC());
 		}
 	}
 
@@ -79,34 +79,33 @@ namespace avmplus
 	}
 
 	void Sampler::sample()
-	{
-		if(!sampling || !samplingNow || !core->callStack)
-			return;
-	
+	{		
+		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		if(!samplingNow || !core->callStack || !sampleSpaceCheck())
+			return;	
 		writeRawSample(RAW_SAMPLE);
 		numSamples++;
 	}
 
-	void Sampler::sampleSpaceCheck()
+	int Sampler::sampleSpaceCheck()
 	{
 		uint32 sampleSize = sizeof(Sample);
 		uint32 callStackDepth = core->callStack ? core->callStack->depth : 0;
 		sampleSize += callStackDepth * sizeof(StackTrace::Element);
 		sampleSize += sizeof(uint64) * 2;
-		if(currentSample + sampleSize > samples->uncommitted()) {
+		while(currentSample + sampleSize > samples->uncommitted()) {
 			samples->grow();
 			if(currentSample + sampleSize > samples->uncommitted()) {
 				// exhausted buffer
-				return;
+				stopSampling();
+				return 0;
 			}
 		}
+		return 1;
 	}
 
 	void Sampler::writeRawSample(SampleType sampleType)
 	{
-		if(!sampling || !samplingNow)
-			return;
-		sampleSpaceCheck();
 		CallStackNode *csn = core->callStack;
 		uint32 depth = csn ? csn->depth : 0;
 		byte *p = currentSample;
@@ -114,10 +113,12 @@ namespace avmplus
 		write(p, sampleType);
 		if(sampleType != DELETED_OBJECT_SAMPLE)
 		{
+			if(depth == 0)
+				AvmDebugMsg(false, "Please add SAMPLE_FRAME's to give this allocation some context.");
 			write(p, depth);
 			while(csn)
 			{
-				write(p, (uintptr)csn->info);
+				write(p, (uint32)csn->info);
 				// FIXME: can filename can be stored in the AbstractInfo?
 				write(p, csn->filename);
 				write(p, csn->linenum);
@@ -132,60 +133,93 @@ namespace avmplus
 		takeSample = 0;
 	}
 
-	void Sampler::readRawSample(byte *&p, Sample &s)
+	void Sampler::readSample(byte *&p, Sample &s)
 	{
+		memset(&s, 0, sizeof(Sample));
 		read(p, s.micros);
-		read(p, s.type);
-		AvmAssertMsg(s.type == RAW_SAMPLE || s.type == NEW_OBJECT_SAMPLE || s.type == DELETED_OBJECT_SAMPLE, "Sample stream corruption.\n");
-		if(s.type != DELETED_OBJECT_SAMPLE)
+		read(p, s.sampleType);
+		AvmAssertMsg(s.sampleType == RAW_SAMPLE || 
+				s.sampleType == NEW_OBJECT_SAMPLE || 
+				s.sampleType == DELETED_OBJECT_SAMPLE, "Sample stream corruption.\n");
+		if(s.sampleType != DELETED_OBJECT_SAMPLE)
 		{
-			read(p, s.depth);
-			s.trace = p;
-			p += s.depth * sizeof(StackTrace::Element);
+			read(p, s.stack.depth);
+			s.stack.trace = p;
+			p += s.stack.depth * sizeof(StackTrace::Element);
 		}
 		// padding to keep 8 byte alignment
 		align(p);
+		if(s.sampleType != Sampler::RAW_SAMPLE)
+		{
+			read(p, s.id);
+			if(s.sampleType == Sampler::NEW_OBJECT_SAMPLE)
+			{
+				read(p, s.weakRef);
+				read(p, s.typeOrVTable);
+			}
+			else 
+			{
+				read(p, s.size);
+			}
+		}
 	}
 
-	uint64 Sampler::recordAllocationSample(AvmPlusScriptableObject *obj, Traits *traits)
+	uint64 Sampler::recordAllocationSample(AvmPlusScriptableObject *obj, Atom  typeOrVTable)
 	{
-		if(!sampling || !samplingNow)
+		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		if(!samplingNow)
 			return 0;
 
-		sampleSpaceCheck();
+		// TODO: investigate not pounding on weak refs
+		GCWeakRef *weakRef = obj->GetWeakRef();
+ 
+		// do space check after obtaining weak ref, it can trigger time and delete sample's
+		if(!sampleSpaceCheck())
+			return 0;
+
+		if(typeOrVTable < 7 && core->codeContext() && core->codeContext()->domainEnv()) {
+			// and in toplevel
+			typeOrVTable |= (uint32)core->codeContext()->domainEnv()->toplevel();
+		}
+
 		writeRawSample(NEW_OBJECT_SAMPLE);
 		write(currentSample, allocId++);
-		// disable sampling across weak ref alloc
-		// TODO: investigate not pounding on weak refs
-		AvmAssert(sampling);
-		sampling = false;
-		GCWeakRef *weakRef = obj->GetWeakRef();
-		AvmAssertMsg(weakRef != NULL, "Null weak reference when recording allocation sample.\n");
 		write(currentSample, weakRef);
-		sampling = true;
-		write(currentSample, traits);
+		write(currentSample, typeOrVTable);
 		AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.\n");
 		numSamples++;
 
 		return allocId-1; // GetWeakRef might cause GC which will traverse samples, ++ early
 	}
 
-	void Sampler::recordDeallocationSample(uint64 id)
+	void Sampler::recordDeallocationSample(uint64 id, uint64 size)
 	{
-		if(!sampling || !samplingNow)
+		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		// recordDeallocationSample doesn't honor the samplingNow flag
+		// this is to avoid dropping deleted object samples when sampling is paused.
+		if(samples == NULL || !sampleSpaceCheck()) {
 			return;
-	
-		sampleSpaceCheck();
+		}
+		AvmAssert(id != 0);
 		writeRawSample(DELETED_OBJECT_SAMPLE);
 		write(currentSample, id);
+		write(currentSample, size);
 		AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.\n");
 		numSamples++;
 	}
 
 	void Sampler::clearSamples()
 	{
-		currentSample = samples->start();
-		numSamples = 0;
+		if (samples != NULL)
+		{
+			currentSample = samples->start();
+			numSamples = 0;
+		}
+		else
+		{
+			currentSample = NULL;
+			numSamples = 0;
+		}
 	}
 
 	void Sampler::startSampling()
@@ -193,143 +227,105 @@ namespace avmplus
 		if(!sampling || samplingNow)
 			return;
 
-		numSamples = 0;
-		samplingNow = true;
-		if(!samples->start()) {
-			currentSample = samples->reserve(64 * 4096 * 4096);
+		if (!samples)
+		{
+			init(sampling, autoStartSampling);
 		}
-		timerHandle = OSDep::startIntWriteTimer(1, &takeSample);
+
+		if (!currentSample)
+		{
+			int megs=256;
+			while(!currentSample && megs >= 16) {
+				currentSample = samples->reserve(megs * 1024 * 1024);
+				megs >>= 1;
+			}
+			if(!currentSample) {
+				sampling = autoStartSampling = false;
+				delete samples;
+				samples = NULL;
+				return;
+			}
+		}
+		
+		samplingNow = true;
+		if(timerHandle == 0)
+			timerHandle = OSDep::startIntWriteTimer(1, &takeSample);
+	}
+
+	void Sampler::pauseSampling()
+	{
+		if(!sampling || !samplingNow)
+			return;
+		samplingNow = false;
 	}
 
 	void Sampler::stopSampling()
 	{
-		if(!sampling || !samplingNow)
+		if(!sampling)
 			return;
-		OSDep::stopTimer(timerHandle);
+
+		if(timerHandle != 0) {
+			OSDep::stopTimer(timerHandle);
+			timerHandle = 0;
+		}
+
+		if(samples) {
+			delete samples;
+			samples = NULL;
+		}
+
 		samplingNow = false;
+		numSamples = 0;
+		currentSample = NULL;
 	}
 
 	void Sampler::initSampling()
 	{
-		if(sampling) {
+		if(sampling) {			
+			// prime fake function table
+			createFakeFunction("[mark]");
+			createFakeFunction("[sweep]");
+			createFakeFunction("[reap]");
+			createFakeFunction("[generate]");
+			createFakeFunction("[verify]");
+			createFakeFunction("[newclass]");
+
 			if(autoStartSampling) {
 				startSampling();
 			}
 		}
 	}
 
-	void Sampler::rehashTraces(int newSize)
+	void Sampler::createFakeFunction(const char *name)
 	{
-		uint32 oldNumTraces = numTraces;
-		numTraces = 0;
-		StackTrace **oldStackTraces = stackTraces;
-		stackTraces = (StackTrace**)core->GetGC()->Calloc(newSize, sizeof(StackTrace*), GC::kZero);
-
-		uint32 bitMask = newSize-1;
-
-		for(uint32 i=0, n=oldNumTraces; i<n; i++)
-		{
-			StackTrace *t = oldStackTraces[i];
-			if(t)
-			{
-				uint32 j = (StackTrace::hashCode(t->elements, t->depth)&0x7FFFFFFF) & bitMask;
-				uint32 n = 7;
-				while (stackTraces[j] != NULL) {
-					j = (j + (n++)) & bitMask; // quadratic probe
-				}
-				stackTraces[j] = t;
-			}
-		}
-		numTraces = oldNumTraces;
-	}
-
-	int Sampler::findTrace(void /*StackTrace::Element*/ *ve, int depth)
-	{
-		StackTrace::Element *e = (StackTrace::Element*)ve;
-		uint32 sizeTraces = core->GetGC()->Size(stackTraces)/sizeof(StackTrace*);
-		uint32 shift = AvmCore::FindOneBit(sizeTraces);
-		uint32 bitMask = (1<<shift)-1;
-		if(numTraces*4 > bitMask*3)
-		{
-			rehashTraces((bitMask+1)*2);
-			sizeTraces = core->GetGC()->Size(stackTraces)/sizeof(StackTrace*);
-			shift = AvmCore::FindOneBit(sizeTraces);
-			bitMask = (1<<shift)-1;
-		}
-
-		uintptr hashCode = StackTrace::hashCode(e, depth);
-		uint32 j = (hashCode&0x7FFFFFFF) & bitMask;
-		uint32 n = 7;
-		while (stackTraces[j] != NULL && !stackTraces[j]->equals(e,depth)) {
-			j = (j + (n++)) & bitMask; // quadratic probe
-		}
-		return j;
-	}
-
-	StackTrace* Sampler::getStackTrace(void /*StackTrace::Element*/ *ve, int depth)
-	{
-		StackTrace::Element *e = (StackTrace::Element*)ve;
-		int i = findTrace(e, depth);
-		StackTrace *t = stackTraces[i];
-		if(t)
-			return t;
-
-		int extra = depth > 0 ? sizeof(StackTrace::Element) * (depth-1) : 0;
-		t = new (core->GetGC(), extra) StackTrace();
-		t->depth = depth;
-		memcpy(t->elements, e, extra + sizeof(StackTrace::Element));
-		stackTraces[i] = t;
-		numTraces++;
-		return t;
-	}
-
-	StackTrace* Sampler::getStackTrace()
-	{
-		if(core->callStack)
-		{
-			StackTrace::Element *elements = (StackTrace::Element*)alloca(core->callStack->depth * sizeof(StackTrace::Element));
-			StackTrace::Element *e = elements;
-			CallStackNode *curr = core->callStack;
-			while (curr) {
-				e->info	= curr->info;
-				e->filename = curr->filename;
-				e->linenum = curr->linenum;
-				e++;
-				curr = curr->next;
-			}
-
-			int i = findTrace(elements, core->callStack->depth);
-			StackTrace *t = stackTraces[i];
-			if(t)
-				return t;
-			StackTrace *st = core->newStackTrace();
-			stackTraces[i] = st;
-			numTraces++;
-			return st;
-		}
-		return NULL;
-	}
-
-	AbstractFunction *Sampler::createFakeFunction(const char *name)
-	{
-		if(!sampling || !core->builtinPool)
-			return NULL;
+		AvmAssert(core->builtinPool != NULL);
+		if(!sampling)
+			return;
 
 		// have to turn sampling off during allocations to avoid recursion
 		AvmAssert(sampling);
-		sampling = false;
-		Stringp s = core->internAllocAscii(name);
-		Atom a = fakeMethodInfos->get(s->atom());
+		Atom nameAtom = core->constant(name);
+		Atom a = fakeMethodInfos->get(nameAtom);
 		AbstractFunction *af = (AbstractFunction*)AvmCore::atomToGCObject(a);
 		if(!af)
 		{
-			af = new (core->GetGC()) FakeAbstractFunction();
-			a = AvmCore::gcObjectToAtom(af);
-			fakeMethodInfos->add(s->atom(), a);
-			af->name = s;
+			af = new (core->GetGC()) FakeAbstractFunction(AvmCore::atomToString(nameAtom));
+			fakeMethodInfos->add(nameAtom, AvmCore::gcObjectToAtom(af));
 			af->pool = core->builtinPool;
 		}
-		sampling = true;
+	}
+
+	AbstractFunction *Sampler::getFakeFunction(const char *name)
+	{
+		// this can't make any allocations, its called from sensitive areas (like from 
+		// the GC marking routines).  For one we'll recurse but also GC state can get messed
+		// up if for instance the allocation triggers a collection
+		Stringp name_str = core->findInternedString(name, strlen(name));
+		if(name_str == NULL)
+			return NULL;
+		Atom a = fakeMethodInfos->get(name_str->atom());
+		AvmAssertMsg(a != undefinedAtom, "name was interned but need to call createFakeFunction with that name");
+		AbstractFunction *af = (AbstractFunction*)AvmCore::atomToGCObject(a);
 		sampleCheck();
 		return af;
 	}
@@ -340,7 +336,7 @@ namespace avmplus
 		this->core = core;
 		if(core)
 		{
-			AbstractFunction *af = core->sampler()->createFakeFunction(name);
+			AbstractFunction *af = core->sampler()->getFakeFunction(name);
 			if(af)
 				initialize(NULL, af, NULL, NULL, 0, NULL, NULL);
 			else {
@@ -366,52 +362,22 @@ namespace avmplus
 		byte *p = getSamples(num);
 		for(uint32 i=0; i < num ; i++)
 		{
-			Sample sample;
-			readRawSample(p, sample);
-			uint64 id;
-			GCWeakRef *weakRef;
-			Traits* type;
-			if(sample.type != RAW_SAMPLE)
-			{
-				read(p, id);
-				AvmAssert(id < allocId);
-				if(id >= allocId) AvmAssert(false);
-				if(sample.type == NEW_OBJECT_SAMPLE) {
-					read(p, weakRef);
-					// keep weak refs to objects still around
-					if(weakRef)
-					{
-						if (weakRef->get() && GC::GetMark(weakRef->get()))
-						{
-							GC::SetMark(weakRef);
-						}
-						else
-						{
-							rewind(p, sizeof(GCWeakRef*));
-							write(p, (uint32)0);
-						}
-					}
-					read(p, type);
-				}
-			}
-			align(p);
-		}
-
-		if(stackTraces)
-		{
-			uint32 n = GC::Size(stackTraces)/sizeof(StackTrace*);
-			n = 1<<AvmCore::FindOneBit(n);
-			bool rehash= false;
-			for (uint32 i=0; i<n; i++)
-			{
-				if(stackTraces[i] && !GC::GetMark(stackTraces[i]))
+			Sample s;
+			readSample(p, s);			
+			if(s.sampleType == NEW_OBJECT_SAMPLE) {
+				// keep all weak refs and type's live, in postsweep we'll erase our weak refs
+				// to objects that were finalized.  we can't nuke them here b/c pushing the
+				// types could cause currently unmarked things to become live
+				if (s.weakRef)
 				{
-					rehash = true;
-					stackTraces[i] = NULL;
+					GC::SetMark(s.weakRef);
+				}
+				if (s.typeOrVTable > 7 && !GC::GetMark((void*)s.typeOrVTable))
+				{
+					GCWorkItem item((void*)s.typeOrVTable, GC::Size((void*)s.typeOrVTable), true);
+					core->gc->PushWorkItem(item);
 				}
 			}
-			if(rehash)
-				rehashTraces(n);
 		}
 	}
 
@@ -419,31 +385,18 @@ namespace avmplus
 	{
 		uint32 num;
 		byte *p = getSamples(num);
-
-		for(uint32 i=0; i < num ; i++)
+		for(uint32 i=0; i < num; i++)
 		{
-			Sample sample;
-			readRawSample(p, sample);
-			uint64 id;
-			GCWeakRef *weakRef;
-			Traits* type;
-			if(sample.type != RAW_SAMPLE)
-			{
-				read(p, id);
-				AvmAssert(id < allocId);
-				if(id >= allocId) AvmAssert(false);
-				if(sample.type == NEW_OBJECT_SAMPLE) {
-					read(p, weakRef);
-					if(weakRef && !weakRef->get())
-					{
-						AvmDebugMsg(false, "Sampler::postsweep: found weak ref with null object.\n");
-						rewind(p, sizeof(GCWeakRef*));
-						write(p, (uint32)0);
-					}
-					read(p, type);
+			Sample s;
+			readSample(p, s);
+			if(s.sampleType == NEW_OBJECT_SAMPLE) {
+				if (s.weakRef && !s.weakRef->get())
+				{				
+					rewind(p, sizeof(GCWeakRef*)*2);
+					write(p, (uint32)0);
+					p += sizeof(GCWeakRef*);
 				}
 			}
-			align(p);
 		}
 	}
 }

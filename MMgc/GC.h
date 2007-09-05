@@ -798,7 +798,9 @@ namespace MMgc
 
 		void ClearWeakRef(const void *obj);
 
-		uintptr	GetStackTop() const;
+		uintptr	GetStackTop() const;		
+		
+		void PushWorkItem(GCWorkItem &item) { PushWorkItem(m_incrementalWork, item); }
 
 	private:
 

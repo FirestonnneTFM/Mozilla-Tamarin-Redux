@@ -1,40 +1,3 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0/LGPL 2.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is [Open Source Virtual Machine.].
- *
- * The Initial Developer of the Original Code is
- * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Adobe AS3 Team
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
- * in which case the provisions of the GPL or the LGPL are applicable instead
- * of those above. If you wish to allow use of your version of this file only
- * under the terms of either the GPL or the LGPL, and not to allow others to
- * use your version of this file under the terms of the MPL, indicate your
- * decision by deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL or the LGPL. If you do not delete
- * the provisions above, a recipient may use your version of this file under
- * the terms of any one of the MPL, the GPL or the LGPL.
- *
- * ***** END LICENSE BLOCK ***** */
-
 const int avmplus_System_exit = 7;
 const int avmplus_System_exec = 8;
 const int avmplus_System_getAvmplusVersion = 9;
@@ -141,14 +104,30 @@ const int abcpackage_UShortArray_as = 9;
 const int flash_utils_Dictionary_Dictionary = 124;
 const int abcclass_flash_utils_Dictionary = 12;
 const int abcpackage_Dictionary_as = 10;
-const int abcclass_flash_utils_Endian = 13;
-const int abcpackage_Endian_as = 11;
-const int avmplus_JObject_create = 130;
-const int avmplus_JObject_createArray = 131;
-const int avmplus_JObject_toArray = 132;
-const int avmplus_JObject_constructorSignature = 133;
-const int avmplus_JObject_methodSignature = 134;
-const int avmplus_JObject_fieldSignature = 135;
-const int avmplus_JObject_toString = 136;
-const int abcclass_avmplus_JObject = 14;
-const int abcpackage_Java_as = 12;
+const int flash_sampler_isGetterSetter = 126;
+const int flash_sampler__getInvocationCount = 127;
+const int flash_sampler_getSampleCount = 131;
+const int flash_sampler_getSamples = 132;
+const int flash_sampler_getMemberNames = 133;
+const int flash_sampler_getSize = 134;
+const int flash_sampler_pauseSampling = 135;
+const int flash_sampler_stopSampling = 136;
+const int flash_sampler_startSampling = 137;
+const int flash_sampler_clearSamples = 138;
+const int abcclass_flash_sampler_StackFrame = 13;
+const int abcclass_flash_sampler_Sample = 14;
+const int flash_sampler_NewObjectSample_object_get = 145;
+const int abcclass_flash_sampler_NewObjectSample = 15;
+const int abcclass_flash_sampler_DeleteObjectSample = 16;
+const int abcpackage_Sampler_as = 11;
+const int abcclass_flash_utils_Endian = 17;
+const int abcpackage_Endian_as = 12;
+const int avmplus_JObject_create = 154;
+const int avmplus_JObject_createArray = 155;
+const int avmplus_JObject_toArray = 156;
+const int avmplus_JObject_constructorSignature = 157;
+const int avmplus_JObject_methodSignature = 158;
+const int avmplus_JObject_fieldSignature = 159;
+const int avmplus_JObject_toString = 160;
+const int abcclass_avmplus_JObject = 18;
+const int abcpackage_Java_as = 13;

@@ -65,7 +65,7 @@ namespace avmplus
 		~Namespace();
 
 		Atom getPrefix() const { return m_prefix; };
-		Stringp getURI() const { return (Stringp)(((uintptr)m_uri)&~7); };
+		Stringp getURI() const;
 
 		Atom  atom() const { return AtomConstants::kNamespaceType | (Atom)this; }
 
@@ -97,8 +97,7 @@ namespace avmplus
 		int nextNameIndex(int index);
 
 #ifdef DEBUGGER
-		uint32 size() const { return sizeof(Namespace) - sizeof(AvmPlusScriptableObject); }
-		Stringp getTypeName() const;
+		uint64 size() const { return sizeof(Namespace) - sizeof(AvmPlusScriptableObject); }
 #endif
 
 //#ifdef AVMPLUS_VERBOSE

@@ -84,8 +84,7 @@ namespace avmshell
 		if (!b)
 			toplevel()->throwTypeError(kNullArgumentError, core->toErrorString("bytes"));
 
-		ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext();
-		codeContext->domainEnv = domainEnv;
+		ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext(domainEnv);
 
 		// parse new bytecode
 		size_t len = b->get_length();
@@ -152,7 +151,7 @@ namespace avmshell
 
 		ShellCodeContext* codeContext = (ShellCodeContext*)core->codeContext();
 		
-		ScriptObject *container = finddef(&multiname, codeContext->domainEnv);
+		ScriptObject *container = finddef(&multiname, codeContext->domainEnv());
 		if (!container) {
 			toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
 		}
@@ -183,7 +182,7 @@ namespace avmshell
 		ShellCodeContext* codeContext = (ShellCodeContext*)core()->codeContext();
 
 		DomainObject* domainObject = (DomainObject*) createInstance(ivtable(), prototype);
-		domainObject->domainEnv = codeContext->domainEnv;
+		domainObject->domainEnv = codeContext->domainEnv();
 		domainObject->domainToplevel = toplevel();
 		
 		return domainObject;
