@@ -1,21 +1,14 @@
 {
     import avmplus.*;
+    import flash.utils.*;
+    use namespace Parse;
+
     var fname = System.argv[0];
     var str = File.read (fname);
-    print ("compiling ", fname);
-}
 
-var topFixtures = [];
-
-{
-    use namespace Parse;
-    print ("parsing");
+    var topFixtures = [];
     var parser = initParser(str,topFixtures);
     var [ts,nd] = program();
-}
 
-{
-    import avmplus.*;
-    import flash.utils.*;
     dumpABCFile(Gen::cg(nd), fname+".abc");
 }

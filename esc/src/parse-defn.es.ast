@@ -3051,23 +3051,6 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'beta'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Release' }
-, { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Parse' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-,  ]
-,  [  ]
-,  ] } }
 ,  ] } ]
 ,  ] }
 ,  ] }

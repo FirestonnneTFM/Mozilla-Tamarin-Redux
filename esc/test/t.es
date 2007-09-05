@@ -1,1 +1,2 @@
-print(1+2)
+var x = 10
+print(x)

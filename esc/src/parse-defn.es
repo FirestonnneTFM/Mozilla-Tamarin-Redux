@@ -179,7 +179,7 @@ use namespace intrinsic;
             enter("Parser::variableBindingList ", ts);
 
             var [ts1,nd1] = variableBinding (ts, beta);
-            var [ts2,nd2] = variableBindingListPrime (ts1, beta);
+            var [ts2,nd2] = variableBindingListPrime (ts1);
 
             var [f1,i1] = nd1;  // FIXME: fold into patterns above when it works in the RI
             var [f2,i2] = nd2;
