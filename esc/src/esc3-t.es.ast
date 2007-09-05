@@ -1,0 +1,429 @@
+public var ast = 
+{ 'ast_class': 'Program'
+, 'packages': []
+, 'head': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'fname' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'bytes' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'nd' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [  ] }
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'BlockStmt'
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'fname' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'System'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'argv'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'ident': { 'ast_class': 'ExpressionIdentifier'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralDecimal'
+, 'decimalValue': '0' } }
+,  ] }
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'IfStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Equal' }
+, 'e1': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'fname'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'e2': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'undefined'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } } }
+,  ] }
+, 'then': { 'ast_class': 'ThrowStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "no file name given" } }
+,  ] } }
+, 'elseOpt': null }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'print'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "reading " } }
+, { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'fname'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'e2': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': ".ast.abc" } } }
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'bytes' } }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ByteArray'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'readFile'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'fname'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'e2': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': ".ast.abc" } } }
+,  ] } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Domain'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'currentDomain'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'loadBytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'print'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "decoding" } }
+, { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'fname'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'nd' } }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Decode'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'ident': 'program' } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+,  ] } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'dumpABCFile'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Gen'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'ident': 'cg' } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'nd'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+,  ] }
+, { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'fname'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  ] } }
+, 'e2': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': ".abc" } } }
+,  ] }
+,  ] } }
+,  ] } }
+,  ] } }

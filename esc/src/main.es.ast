@@ -1,0 +1,822 @@
+public var ast = 
+{ 'ast_class': 'Program'
+, 'packages': []
+, 'head': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'evalFile' } }
+, { 'ast_class': 'MethodFixture'
+, 'func': { 'ast_class': 'Func'
+, 'name': { 'kind': { 'ast_class': 'Ordinary' }
+, 'ident': 'evalFile' }
+, 'isNative': false
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [  ] }
+, 'params': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'src_name' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'src_name' } }
+, { 'ast_class': 'GetParam'
+, 'n': 0 } ]
+,  ] }
+,  ] }
+, 'vars': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'defaults': [ ]
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } } }
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true
+, 'isOverride': false
+, 'isFinal': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'evalString' } }
+, { 'ast_class': 'MethodFixture'
+, 'func': { 'ast_class': 'Func'
+, 'name': { 'kind': { 'ast_class': 'Ordinary' }
+, 'ident': 'evalString' }
+, 'isNative': false
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'b' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'top' } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'parser' } }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Parse'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'initParser' } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'str'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'top'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LetExpr'
+, 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Parse'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'program' } }
+, 'args': [  ] } ]
+,  ] }
+,  ] }
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'ts' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '0'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+, { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'nd' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+,  ] } }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'bytes' } }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Gen'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'cg' } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'nd'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'getBytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [  ] } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'b' } }
+, { 'ast_class': 'NewExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ByteArray'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [  ] } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'b'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'endian'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 're': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "littleEndian" } } }
+,  ] } }
+, { 'ast_class': 'ForStmt'
+, 'vars': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'i' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'len' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [  ] }
+, 'init': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'i' } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralDecimal'
+, 'decimalValue': '0' } } ]
+,  ] }
+, { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'len' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'length'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } } ]
+,  ] }
+,  ] }
+, 'cond': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Less' }
+, 'e1': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'i'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'e2': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'len'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } } }
+,  ] }
+, 'incr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'UnaryExpr'
+, 'op': { 'ast_class': 'PreIncr' }
+, 'e1': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'i'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } } }
+,  ] }
+, 'stmt': { 'ast_class': 'BlockStmt'
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'b'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'writeByte'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'uint'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'ExpressionIdentifier'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'i'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+,  ] }
+,  ] } }
+,  ] } }
+, 'labels': [] }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Domain'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'currentDomain'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'loadBytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'b'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+,  ] } }
+,  ] }
+, 'params': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'str' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'str' } }
+, { 'ast_class': 'GetParam'
+, 'n': 0 } ]
+,  ] }
+,  ] }
+, 'vars': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'top' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'parser' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'ts' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 0 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'nd' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 1 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'bytes' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [  ] }
+, 'defaults': [ ]
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } } }
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true
+, 'isOverride': false
+, 'isFinal': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 's' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [  ] }
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'BlockStmt'
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'WhileStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralBoolean'
+, 'booleanValue': true } }
+,  ] }
+, 'stmt': { 'ast_class': 'BlockStmt'
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'System'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'write'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "es> " } }
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 's' } }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'System'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'readLine'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [  ] } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'evalString'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 's'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+,  ] } }
+,  ] } }
+, 'labels': [] }
+,  ] } }
+,  ] } }

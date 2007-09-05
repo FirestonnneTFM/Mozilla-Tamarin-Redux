@@ -36,4 +36,7 @@ namespace Util
         return a;
     }
 
+    function toUint(x)
+        uint(x);
+
 }
