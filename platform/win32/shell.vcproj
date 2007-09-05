@@ -260,6 +260,9 @@
 				RelativePath="..\..\extensions\DictionaryGlue.cpp">
 			</File>
 			<File
+				RelativePath="..\..\extensions\SamplerScript.cpp">
+			</File>
+			<File
 				RelativePath="..\..\shell\DomainClass.cpp">
 			</File>
 			<File
@@ -305,6 +308,9 @@
 			</File>
 			<File
 				RelativePath="..\..\extensions\DictionaryGlue.h">
+			</File>
+			<File
+				RelativePath="..\..\extensions\SamplerScript.h">
 			</File>
 			<File
 				RelativePath="..\..\shell\DomainClass.h">

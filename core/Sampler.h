@@ -44,16 +44,24 @@ namespace avmplus
 	struct Sample
 	{
 		uint64 micros;
-		uint32 type;
-		uint32 depth;
-		void *trace;
-		ClassClosure *allocType;
+		uint32 sampleType;
+		union {
+			struct {
+				uint32 depth;
+				void *trace; // not filled in for sampleType==DELETED_OBJECT_SAMPLE
+			} stack;
+			uint64 size; // deleted object size record
+			
+		};
+		uint64 id; // filled for DELETED_OBJECT_SAMPLE + NEW_OBJECT_SAMPLE
+		// these are only filled in for sampleType==NEW_OBJECT_SAMPLE
+		Atom  typeOrVTable;
+		MMgc::GCWeakRef *weakRef;
 	};
 
 	class Sampler
 	{
 	public:
-		Sampler();
 		~Sampler();
 
 		enum SampleType 
@@ -69,32 +77,37 @@ namespace avmplus
 		// if true we call startSampling as early as possible during startup
 		bool autoStartSampling;
 
+		// should use opaque Cursor type instead of byte*
 		byte *getSamples(uint32 &num);
+		void readSample(byte *&p, Sample &s);
 		
-		void setCore(AvmCore *core) { this->core = core; }
+		void setCore(AvmCore *core);
 		void init(bool sampling, bool autoStart);
-		StackTrace *getStackTrace();
 		void sampleCheck() { if(takeSample) sample(); }
 
-		uint64 recordAllocationSample(AvmPlusScriptableObject *obj, Traits *t);
-		void recordDeallocationSample(uint64 id);
+		uint64 recordAllocationSample(AvmPlusScriptableObject *obj, Atom typeOrVTable);
+		void recordDeallocationSample(uint64 id, uint64 size);
 
 		void startSampling();
 		void stopSampling();
 		void clearSamples();
+		void pauseSampling();
 
 		
 		// called by VM after initBuiltin's
 		void initSampling();
 
-		AbstractFunction *createFakeFunction(const char *name);
+		void createFakeFunction(const char *name);
+		AbstractFunction *getFakeFunction(const char *name);
 
 		void presweep();
 		void postsweep();
 
-		StackTrace *getStackTrace(void/*StackTrace::Element*/ *e, int depth);
+		uint32 sampleCount() const { return numSamples; }
 
-		void readRawSample(byte *&p, Sample &s);
+	private:	
+
+
 		static void inline align(byte*&b)
 		{
 			if((sintptr)b & 4)
@@ -120,7 +133,6 @@ namespace avmplus
 			p += sizeof(T);
 		}
 		
-	private:	
 		
 		AvmCore *core;
 
@@ -136,24 +148,14 @@ namespace avmplus
 		uintptr timerHandle;
 		Hashtable *fakeMethodInfos; 
 		
-		void rehashTraces(int newSize);
-		int findTrace(void/*StackTrace::Element*/ *e, int depth);
-		StackTrace **stackTraces;
-		uint32 numTraces;
-
-		// for fast Sample init
-		int timeOffset;
-		int stackOffset;
-		
 		void rewind(byte*&b, uint32 amount)
 		{
 			b -= amount;
 		}
 
-		void sampleSpaceCheck();
+		int sampleSpaceCheck();
 		
 		void writeRawSample(SampleType sampleType);
-		ScriptObject *buildSample(Toplevel *tl, uint64 ticks, String *trace);
 	};
 
 #define SAMPLE_FRAME(_strp, _core) avmplus::FakeCallStackNode __fcsn((avmplus::AvmCore*)_core, _strp)

@@ -225,8 +225,13 @@ namespace avmplus
 		{
 			// catches any access violation exceptions and sends control to
 			// the CATCH block below.
-			BufferGuard guard(_ef.jmpbuf);
+			BufferGuard guard(&_ef.jmpbuf);			
 			this->guard = &guard;
+
+			if(toplevel == NULL) {
+				this->guard = NULL;
+				guard.disable();
+			}
 			
 #endif // FEATURE_BUFFER_GUARD
 
@@ -272,12 +277,13 @@ namespace avmplus
 		{
 		 	guard->disable();
 			guard = NULL;
-			if( exception->isValid())
+			if( exception && exception->isValid()) {
 				// Re-throw if exception exists
 				core->throwException(exception);
-			else
+			} else if(toplevel) {
 				// create new exception
 				toplevel->throwVerifyError(kCorruptABCError);
+			} 
 		}
 		END_CATCH
 		END_TRY
@@ -522,10 +528,6 @@ namespace avmplus
 				Stringp s3 = Multiname::format(core,ns,name);
 				Stringp s4 = core->concatStrings(s2,s3);
 				f->name = core->concatStrings(s1, s4);
-				//delete s1 - can't delete, it may be the traits name string;
-				delete s2;
-				//delete s3 - can't delete, it may be the qname name string;
-				delete s4;
 				#endif
 
 				// since this function is ref'ed here, we know the receiver type.
@@ -572,10 +574,11 @@ namespace avmplus
 				}
 				else if (kind == TRAIT_Getter)
 				{
-					// if nothing in base class, look for existing binding on this class,
+					// if nothing already is defined in this class, use base class
 					// in case setter has already been defined.
-					if (baseBinding == BIND_NONE)
-						baseBinding = traits->get(name, ns);
+					Binding ourBinding = traits->get(name, ns);
+					if (ourBinding != BIND_NONE)
+						baseBinding = ourBinding;
 
 					if (baseBinding == BIND_NONE)
 					{
@@ -600,10 +603,11 @@ namespace avmplus
 				}
 				else // TRAIT_Setter
 				{
-					// if nothing in base class, look for existing binding on this class,
+					// if nothing already is defined in this class, use base class
 					// in case getter has already been defined.
-					if (baseBinding == BIND_NONE)
-						baseBinding = traits->get(name, ns);
+					Binding ourBinding = traits->get(name, ns);
+					if (ourBinding != BIND_NONE)
+						baseBinding = ourBinding;
 
 					if (baseBinding == BIND_NONE)
 					{
@@ -742,9 +746,13 @@ namespace avmplus
 				MethodInfo *methodInfo = new (core->GetGC()) MethodInfo();
 				
 				#ifdef AVMPLUS_VERBOSE
-				if (name_index != 0)
+				if (name_index != 0) {
 					methodInfo->name = resolveUtf8(name_index);
-				else
+					if(methodInfo->name->length() == 0) 
+					{
+						methodInfo->name = core->kanonymousFunc;	
+					}
+				} else
 					methodInfo->name = core->concatStrings(core->newString("MethodInfo-"), core->intToString(i));
 				#endif
 				info = methodInfo;
@@ -1055,6 +1063,10 @@ namespace avmplus
 					methodInfo->activationTraits = parseTraits(NULL, NULL, NULL, false, 0);
 					#endif
 					methodInfo->activationTraits->final = true;
+
+					#ifdef DEBUGGER
+					methodInfo->activationTraits->isActivationTraits = true;
+					#endif
 				}
 				else
 				{
@@ -1793,7 +1805,7 @@ namespace avmplus
 #endif
 
 			#ifdef AVMPLUS_VERBOSE
-			iinit->name = core->concatStrings(Multiname::format(core,ns,name), core->newString("$iinit"));
+			iinit->name = Multiname::format(core,ns,name);
 			#endif
 
 			Traits* itraits = parseTraits(baseTraits, ns, name, 0, interfaceDelta, protectedNamespace);

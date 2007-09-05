@@ -24,4 +24,5 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/TypedArrayClass.cpp \
   $(curdir)/../extensions/DictionaryGlue.cpp \
   $(curdir)/../extensions/JavaGlue.cpp \
+  $(curdir)/../extensions/SamplerScript.cpp \
   $(NULL)

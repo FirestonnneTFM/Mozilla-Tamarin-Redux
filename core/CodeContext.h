@@ -46,11 +46,12 @@ namespace avmplus
 
 	// CodeContext is used to track which security context we are in.
 	// When an AS3 method is called, the AS3 method will set core->codeContext to its code context.
-	class CodeContext : public MMgc::GCFinalizedObject
+	class CodeContext : public MMgc::GCObject
 	{
 	public:		
 #ifdef DEBUGGER
-		virtual Toplevel *toplevel() const = 0;
+		virtual DomainEnv *domainEnv() const = 0;
+		virtual ~CodeContext() {}
 #endif
 	};
 

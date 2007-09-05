@@ -388,6 +388,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\extensions\SamplerScript.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\shell\DomainClass.cpp"
 				>
 			</File>
@@ -447,6 +451,10 @@
 			</File>
 			<File
 				RelativePath="..\..\extensions\DictionaryGlue.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\extensions\SamplerScript.h"
 				>
 			</File>
 			<File
@@ -527,6 +535,14 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\UShortArray.as"
+				>
+			</File>
+			<File
+				RelativePath="..\..\extensions\Dictionary.as"
+				>
+			</File>
+			<File
+				RelativePath="..\..\extensions\Sampler.as"
 				>
 			</File>
 		</Filter>

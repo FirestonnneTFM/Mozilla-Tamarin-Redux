@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,52 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 #include "avmplus.h"
 
 namespace avmplus
 {
-	#ifdef DEBUGGER
-	class SlotIterator : public ScriptObject
-	{
-	public:
-		SlotIterator(ScriptObject *obj, VTable *vtable)
-			: obj(obj),
-			ScriptObject(vtable, vtable->toplevel->objectClass->prototype) {}
-
-		int nextNameIndex(int index)
-		{
-			if(index == 0)
-				currTraits = obj->traits();
-
-			while (currTraits != NULL)
-			{
-				while ((index = currTraits->next(index)) != 0)
-				{
-					return index;
-				}
-
-				currTraits = currTraits->base;
-			}
-
-			return 0;
-		}
-
-		Atom nextValue(int index)
-		{
-			Multiname mn(currTraits->nsAt(index), currTraits->keyAt(index), true);
-			QNameObject *qname = new (gc(), toplevel()->qnameClass()->ivtable()->getExtraSize())
-									QNameObject(toplevel()->qnameClass(), mn);
-
-			return qname->atom();
-		}
-
-	private:
-		DRCWB(ScriptObject *) obj;
-		DWB(Traits *) currTraits;
-	};
-	#endif
-
 	ScriptObject::ScriptObject(VTable *vtable,
 							   ScriptObject *delegate,
 	                           int capacity /*=Hashtable::kDefaultCapacity*/)
@@ -88,7 +46,7 @@ namespace avmplus
 #ifdef DEBUGGER 
 			AvmPlusScriptableObject((Atom)vtable), 
 #endif // DEBUGGER
-			vtable(vtable)
+				vtable(vtable)
 	{
 		// initialize slots in this object to initial values from traits.
 		Traits* traits = vtable->traits;
@@ -800,31 +758,7 @@ namespace avmplus
 	}
  
 #ifdef DEBUGGER
-	ScriptObject* ScriptObject::getSlotIterator()
-	{
-		VTable *vt = toplevel()->objectClass->ivtable();
-		return new (gc(), vt->getExtraSize()) SlotIterator(this, vt);
-	}
-
-	Stringp ScriptObject::getTypeName() const
-	{
-        Stringp result;
-        Namespace* ns = traits()->ns;
-        Stringp name = traits()->name;
-
-        if ((ns != NULL) && (name != NULL))
-        {
-            result = Multiname::format(core(), ns, name);
-        }
-        else
-        {
-            result = name;
-        }
-
-		return result;
-	}
-	
-	uint32 ScriptObject::size() const
+	uint64 ScriptObject::size() const
 	{
 		uint32 size = traits()->getTotalSize();
 		if(traits()->needsHashtable)
@@ -835,5 +769,7 @@ namespace avmplus
 		size -= sizeof(AvmPlusScriptableObject);
 		return size;
 	}
+
+	
 #endif
 }

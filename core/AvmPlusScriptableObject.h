@@ -41,7 +41,7 @@
 
 namespace avmplus
 {
-	class AvmPlusScriptableObject : public MMgc::RCFinalizedObject
+	class AvmPlusScriptableObject : public MMgc::RCObject
 	{
 	public:
 		// used by WeakValueHashtable to correctly atom'ize a pointer to one of these
@@ -50,7 +50,8 @@ namespace avmplus
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(Atom atom);
 		~AvmPlusScriptableObject();
-		virtual uint32 size() const = 0;
+		virtual void Finalize();
+		virtual uint64 size() const = 0;
 
 		AvmCore *core() const
 		{

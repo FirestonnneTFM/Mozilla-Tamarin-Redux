@@ -151,6 +151,7 @@ namespace avmplus
 		resources          = NULL;
 		xmlEntities        = NULL;
 		exceptionFrame     = NULL;
+		exceptionAddr      = NULL;
 		builtinPool        = NULL;
 		builtinDomain      = NULL;
 
@@ -214,6 +215,16 @@ namespace avmplus
 		kNaN = doubleToAtom(MathUtils::nan());
 		kNeedsDxns = constantString("NeedsDxns");
 		kAsterisk = constantString("*");
+
+#ifdef AVMPLUS_VERBOSE
+		knewline = newString("\n");
+		krightbracket = newString("]");
+		kleftbracket = newString("[");
+		kcolon = newString(":");
+		ktabat = newString("\tat ");
+		kparens = newString("()");
+		kanonymousFunc = newString("<anonymous>");
+#endif
 
 		for (int i = 0; i < 128; i++)
 		{
@@ -2752,18 +2763,53 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::internDouble(double d)
     {
-		wchar buffer[256];
-		int len;
-		MathUtils::convertDoubleToString(d, buffer, len);
-		return internAlloc(buffer, len);
+	    // Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
+	    wchar buffer[312];
+	    int len;
+	    MathUtils::convertDoubleToString(d, buffer, len);
+	    return internAlloc(buffer, len);
     }
+
+#ifdef DEBUGGER
+	Stringp AvmCore::findInternedString(const char *cs, int len8)
+	{
+		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
+		// use alloca to avoid heap allocations where possible
+		wchar *buffer = (wchar*) alloca((len16+1)*sizeof(wchar));
+
+		if(!buffer) {
+			AvmAssertMsg(false, "alloca failed!");
+			return NULL;
+		}
+		
+		UnicodeUtils::Utf8ToUtf16((const uint8 *)cs, len8, buffer, len16);
+		buffer[len16] = 0;
+		int i = findString(buffer, len16);
+		Stringp other;
+		if ((other=strings[i]) > AVMPLUS_STRING_DELETED)
+		{		
+			return other;
+		}
+		return NULL;
+	}
+#endif
 
 	Stringp AvmCore::internAllocUtf8(const byte *cs, int len8)
 	{
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
-		Stringp s = new (GetGC()) String((const char *)cs, len8, len16);
+		// use alloca to avoid heap allocations where possible
+		wchar *buffer = (wchar*) alloca((len16+1)*sizeof(wchar));
+		
+		Stringp s = NULL;
+		if(!buffer) {
+			s = new (GetGC()) String((const char *)cs, len8, len16);
+			buffer = (wchar*)s->c_str();
+		} else {
+			UnicodeUtils::Utf8ToUtf16((const uint8 *)cs, len8, buffer, len16);
+			buffer[len16] = 0;
+		}
 
-		int i = findString(s->c_str(), len16);
+		int i = findString(buffer, len16);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
 		{
@@ -2774,6 +2820,8 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 
 			stringCount++;
+			if(!s)
+				s = new (GetGC()) String(buffer, len16);
 			strings[i] = s;
 			s->setInterned(this);
 			return s;
@@ -2785,38 +2833,6 @@ return the result of the comparison ToPrimitive(x) == y.
 			return other;
 		}
 	}
-
-	
-	Stringp AvmCore::internAllocAscii(const char *cs)
-	{
-		int len = strlen(cs);
-		wchar buffer[256];
-
-		AvmAssert(len < 256);
-		
-		for(int j=0; j<len; j++)
-		{
-			buffer[j] = cs[j];
-		}
-		buffer[len] = 0;
-
-		int i = findString(buffer, len);
-		Stringp s;
-		if ((s=strings[i]) <= AVMPLUS_STRING_DELETED)
-		{
-			if (s == AVMPLUS_STRING_DELETED)
-			{
-				deletedCount--;
-				AvmAssert(deletedCount >= 0);
-			}
-			s = new (gc) String(buffer, len);
-			stringCount++;
-			strings[i] = s;
-			s->setInterned(this);
-		}
-		return s;
-	}
-
 
 	Stringp AvmCore::internAlloc(const wchar *s, int len)
 	{
@@ -3319,7 +3335,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::doubleToString(double d)
 	{
-		wchar buffer[256];
+		// Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
+		wchar buffer[312];
 		int len;
 		MathUtils::convertDoubleToString(d, buffer, len, MathUtils::DTOSTR_NORMAL,15);
 		return new (GetGC()) String(buffer, len);
@@ -3403,7 +3420,7 @@ return the result of the comparison ToPrimitive(x) == y.
         asm("movups %1, %%xmm0;"
             "cvttsd2si %%xmm0, %%eax;"
             "movl %%eax, %0" : "=r" (id) : "m" (d) : "%eax");
-        if (id != (int)0x80000000)
+        if (id != 0x80000000)
             return id;
 		#endif
 

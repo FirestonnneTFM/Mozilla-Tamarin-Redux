@@ -48,20 +48,10 @@ namespace avmplus
 	AvmPlusScriptableObject::AvmPlusScriptableObject(Atom typeOrVTable)
 	{
 		AvmCore *core = this->core();
-
-		Traits *traits;
-		if(typeOrVTable == kStringType)
-			traits = STRING_TYPE;
-		else if(typeOrVTable == kNamespaceType)
-			traits = NAMESPACE_TYPE;
-		else {
-			VTable *vt = (VTable*)typeOrVTable;
-			traits = vt->traits;
-		}
 			
 		if(core->sampling())
 		{
-			objId = core->sampler()->recordAllocationSample(this, traits);
+			objId = core->sampler()->recordAllocationSample(this, typeOrVTable);
 		}		
 	}
 
@@ -70,7 +60,20 @@ namespace avmplus
 		AvmCore *core = this->core();		
 		if(objId && core) // core should never be null except during tear down^
 		{
-			core->sampler()->recordDeallocationSample(objId);
+			// this should have happened in Finalize
+			AvmAssertMsg(true, "Please add a call do Finalize when explicitly deleting script objects for profiling purposes");
+			core->sampler()->recordDeallocationSample(objId, 0);
+		}
+		objId = 0;
+	}
+
+	void AvmPlusScriptableObject::Finalize()
+	{
+		AvmCore *core = this->core();		
+		if(objId && core) // core should never be null except during tear down^
+		{
+			uint64 s = size();
+			core->sampler()->recordDeallocationSample(objId, s);
 		}
 		objId = 0;
 	}

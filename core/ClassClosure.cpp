@@ -174,9 +174,9 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint32 ClassClosure::size() const
+	uint64 ClassClosure::size() const
 	{
-		uint32 size = ScriptObject::size();
+		uint64 size = ScriptObject::size();
 		size += vtable->size();
 		return size;
 	}

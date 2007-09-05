@@ -135,10 +135,14 @@ namespace avmshell
 		NATIVE_CLASS(abcclass_flash_utils_FloatArray,   FloatArrayClass,    FloatArrayObject)		
 		NATIVE_CLASS(abcclass_flash_utils_DoubleArray,  DoubleArrayClass,   DoubleArrayObject)	
 		NATIVE_CLASS(abcclass_flash_utils_Dictionary,   DictionaryClass,    DictionaryObject)
+		NATIVE_CLASS(abcclass_flash_sampler_Sample,     SampleClass,        SampleObject)
+		NATIVE_CLASS(abcclass_flash_sampler_NewObjectSample, NewObjectSampleClass, NewObjectSampleObject)
+		NATIVE_CLASS(abcclass_flash_sampler_DeleteObjectSample, SampleClass, SampleObject)
 	END_NATIVE_CLASSES()
 
 	BEGIN_NATIVE_SCRIPTS(Shell)
 		NATIVE_SCRIPT(0/*abcscript_avmplus_debugger*/, AvmplusScript)
+		NATIVE_SCRIPT(avmplus::NativeID::abcpackage_Sampler_as, SamplerScript)
 	END_NATIVE_SCRIPTS()
 
 	BEGIN_NATIVE_MAP(AvmplusScript)
@@ -447,8 +451,7 @@ namespace avmshell
 													  domain,
 													  toplevel->domainEnv());
 
-			ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
-			codeContext->domainEnv = domainEnv;
+			ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext(domainEnv);
 				
 			// parse new bytecode
 			handleActionBlock(code, 0, domainEnv, toplevel, NULL, NULL, NULL, codeContext);
@@ -744,8 +747,7 @@ namespace avmshell
 						return(1);
 				}
 
-				ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
-				codeContext->domainEnv = domainEnv;
+				ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext(domainEnv);
 				
 				// parse new bytecode
 				if (isValid)

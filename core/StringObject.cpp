@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,7 +34,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
 
 #include "avmplus.h"
 
@@ -69,7 +68,7 @@ namespace avmplus
 	}
 
 	// create empty string ready to be filled in
-	String::String(int len)
+	String::String(int len) 
 #ifdef DEBUGGER
 		: AvmPlusScriptableObject(kStringType)
 #endif // DEBUGGER
@@ -286,8 +285,8 @@ namespace avmplus
 		AvmAssert(needsNormalization() == true);
 		MMGC_MEM_TYPE(this);
 		StringBuf *newData = allocBuf(length());
-		if (newData == NULL)
-			return;
+ 		if (newData == NULL)
+ 			return;
 		wchar *new_buf = newData->m_buf;
 		new_buf[length()] = 0;
 
@@ -1060,13 +1059,13 @@ namespace avmplus
 	}
 
 	int String::localeCompare(Stringp other, Atom* /*argv*/, int /*argc*/)
-	{
+	{  
 		if ( !other )
-		{
-			GC *gc = GC::GetGC(this);
-			AvmCore *core = (AvmCore *) gc->GetGCContextVariable (MMgc::GC::GCV_AVMCORE);
-			other = core->knull;
-		}
+        {
+            GC *gc = GC::GetGC(this);
+            AvmCore *core = (AvmCore *) gc->GetGCContextVariable (MMgc::GC::GCV_AVMCORE);
+            other = core->knull;
+        }
 
 		return other->Compare(*this);
 	}
@@ -1196,34 +1195,15 @@ namespace avmplus
      }
 
 #ifdef DEBUGGER
-	 uint32 String::size() const
-	 {
-		uint32 bufSize = sizeof(StringBuf) + length() * sizeof(wchar);
-		uint32 size = sizeof(String) - sizeof(AvmPlusScriptableObject) + bufSize / m_buf->RefCount();
-		if(getPrefix())
-		{
-			// - sizeof(String) so we don't recursively count it
-			size += (getPrefix()->size() - sizeof(String));
-		}
-		return size;
-	 }
-
-	Stringp String::getTypeName() const
+	uint64 String::size() const
 	{
-		AvmCore *core = this->core();		
-
-		if (core->callStack && core->callStack->env)
-		{
-			Toplevel *toplevel = core->callStack->env->toplevel();
-			ClassClosure *clazz = toplevel->stringClass;
-
-			if (clazz)
-			{
-				return clazz->format(core);
-			}
-		}
-
-		return NULL;
+		uint64 size = sizeof(String) - sizeof(AvmPlusScriptableObject);
+		uint64 bufSize = sizeof(StringBuf) + length() * sizeof(wchar);
+		if(m_buf->RefCount() != 0)
+			size += bufSize / m_buf->RefCount();
+		else
+			size += bufSize;
+		return size;
 	}
 #endif
 }	

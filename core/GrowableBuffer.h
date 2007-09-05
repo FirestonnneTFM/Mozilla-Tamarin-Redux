@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,7 +34,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
 
 #ifndef __avmplus_GrowableBuffer_H_
 #define __avmplus_GrowableBuffer_H_
@@ -161,6 +160,9 @@ namespace avmplus
 
 		virtual bool handleException(kern_return_t& returnCode) = 0;
 		
+		// since we have virtual functions, we probably need a virtual dtor
+		virtual ~GenericGuard() {}
+		
 		static kern_return_t catch_exception_raise(mach_port_t exception_port,
 												   mach_port_t thread,
 												   mach_port_t task,
@@ -185,11 +187,6 @@ namespace avmplus
 		
 		#endif // AVMPLUS_MACH_EXCEPTIONS
 
-		#if defined(AVMPLUS_MACH_EXCEPTIONS) || defined(AVMPLUS_UNIX)
-		// since we have virtual functions, we probably need a virtual dtor
-		virtual ~GenericGuard() {}
-		#endif
-
 		bool registered;		
 	};
 
@@ -197,11 +194,7 @@ namespace avmplus
 	class BufferGuard : public GenericGuard
 	{
 	public:
-		#ifdef AVMPLUS_UNIX
-		BufferGuard(jmp_buf jmpBuf);
-		#else
-		BufferGuard(int *jmpBuf);
-		#endif // AVMPLUS_UNIX
+		BufferGuard(jmp_buf *jmpBuf);
 		virtual ~BufferGuard();
 
 		#ifdef AVMPLUS_UNIX
@@ -221,12 +214,7 @@ namespace avmplus
 		#endif
 		
 	private:
-		#ifdef AVMPLUS_UNIX
-		jmp_buf jmpBuf;
-		#else
-		int *jmpBuf;
-		#endif // AVMPLUS_UNIX
-
+		jmp_buf *jmpBuf;
 	};
 
 	// used to expand GrowableBuffer for generated code
@@ -251,7 +239,7 @@ namespace avmplus
 		#ifdef AVMPLUS_MACH_EXCEPTIONS
 		virtual bool handleException(kern_return_t& returnCode);
 		#endif
-		
+
 	private:
 		// pointer to buffer we are guarding
 		GrowableBuffer* buffer;

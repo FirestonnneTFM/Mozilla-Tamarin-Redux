@@ -509,7 +509,7 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	uint32 ArrayObject::size() const
+	uint64 ArrayObject::size() const
 	{
 		if(isSimpleDense())
 		{

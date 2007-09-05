@@ -12,6 +12,9 @@
 		47C458260B148CA900FCD007 /* libMMgc64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 47C458000B148C5900FCD007 /* libMMgc64.a */; };
 		6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6803D2C70A5064FD00C797BB /* JavaGlue.cpp */; };
 		6803D2CA0A5064FD00C797BB /* JavaGlue.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6803D2C80A5064FD00C797BB /* JavaGlue.h */; };
+		858088FE0C8F62B80093F49B /* Sampler.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 858088FB0C8F62B80093F49B /* Sampler.as */; };
+		858088FF0C8F62B80093F49B /* SamplerScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 858088FC0C8F62B80093F49B /* SamplerScript.cpp */; };
+		858089000C8F62B80093F49B /* SamplerScript.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 858088FD0C8F62B80093F49B /* SamplerScript.h */; };
 		8E8B529E09AABAA30057BEE4 /* avmshell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E8B527909AABAA20057BEE4 /* avmshell.cpp */; };
 		8E8B529F09AABAA30057BEE4 /* avmshell.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B527A09AABAA20057BEE4 /* avmshell.h */; };
 		8E8B52A009AABAA30057BEE4 /* ByteArray.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B527B09AABAA20057BEE4 /* ByteArray.as */; };
@@ -120,6 +123,8 @@
 				8EDDB9E809AAD1D300FB9EE5 /* Dictionary.as in CopyFiles */,
 				8EDDB9EA09AAD1D300FB9EE5 /* DictionaryGlue.h in CopyFiles */,
 				6803D2CA0A5064FD00C797BB /* JavaGlue.h in CopyFiles */,
+				858088FE0C8F62B80093F49B /* Sampler.as in CopyFiles */,
+				858089000C8F62B80093F49B /* SamplerScript.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
@@ -131,7 +136,10 @@
 		47BA8F1F0B053AB10092107F /* avmplus64.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = avmplus64.xcodeproj; path = ../avmplus/avmplus64.xcodeproj; sourceTree = SOURCE_ROOT; };
 		6803D2C70A5064FD00C797BB /* JavaGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = JavaGlue.cpp; path = ../../../extensions/JavaGlue.cpp; sourceTree = SOURCE_ROOT; };
 		6803D2C80A5064FD00C797BB /* JavaGlue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = JavaGlue.h; path = ../../../extensions/JavaGlue.h; sourceTree = SOURCE_ROOT; };
-		8DD76FB20486AB0100D96B5E /* shell64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell64; sourceTree = BUILT_PRODUCTS_DIR; };
+		858088FB0C8F62B80093F49B /* Sampler.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Sampler.as; path = ../../../extensions/Sampler.as; sourceTree = SOURCE_ROOT; };
+		858088FC0C8F62B80093F49B /* SamplerScript.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerScript.cpp; path = ../../../extensions/SamplerScript.cpp; sourceTree = SOURCE_ROOT; };
+		858088FD0C8F62B80093F49B /* SamplerScript.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SamplerScript.h; path = ../../../extensions/SamplerScript.h; sourceTree = SOURCE_ROOT; };
+		8DD76FB20486AB0100D96B5E /* shell64 */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = shell64; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E8B527909AABAA20057BEE4 /* avmshell.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmshell.cpp; path = ../../../shell/avmshell.cpp; sourceTree = SOURCE_ROOT; };
 		8E8B527A09AABAA20057BEE4 /* avmshell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = avmshell.h; path = ../../../shell/avmshell.h; sourceTree = SOURCE_ROOT; };
 		8E8B527B09AABAA20057BEE4 /* ByteArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ByteArray.as; path = ../../../shell/ByteArray.as; sourceTree = SOURCE_ROOT; };
@@ -292,6 +300,9 @@
 		8EDDB9E409AAD1BF00FB9EE5 /* extensions */ = {
 			isa = PBXGroup;
 			children = (
+				858088FB0C8F62B80093F49B /* Sampler.as */,
+				858088FC0C8F62B80093F49B /* SamplerScript.cpp */,
+				858088FD0C8F62B80093F49B /* SamplerScript.h */,
 				8EDDB9E509AAD1D300FB9EE5 /* Dictionary.as */,
 				8EDDB9E609AAD1D300FB9EE5 /* DictionaryGlue.cpp */,
 				8EDDB9E709AAD1D300FB9EE5 /* DictionaryGlue.h */,
@@ -335,7 +346,6 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "shell64" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* shell */;
 			projectDirPath = "";
@@ -350,7 +360,6 @@
 				},
 			);
 			projectRoot = "";
-			shouldCheckCompatibility = 1;
 			targets = (
 				8DD76FA90486AB0100D96B5E /* shell64 */,
 			);
@@ -392,6 +401,7 @@
 				8E8B52BF09AABAA30057BEE4 /* TypedArrayClass.cpp in Sources */,
 				8EDDB9E909AAD1D300FB9EE5 /* DictionaryGlue.cpp in Sources */,
 				6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */,
+				858088FF0C8F62B80093F49B /* SamplerScript.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

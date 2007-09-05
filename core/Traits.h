@@ -107,6 +107,11 @@ namespace avmplus
 		/** how we implement dictionary or strict style lookups */
 		bool isDictionary:1;
 
+#ifdef DEBUGGER
+		/** how we implement dictionary or strict style lookups */
+		bool isActivationTraits:1;
+#endif
+
 		/**
 		* if this type is a factory, itraits is non-null and points
 		* to the type created by this factory.
@@ -318,6 +323,7 @@ namespace avmplus
 		/** Interfaces supported by objects described by this traits. */
 		Traitsp* getInterfaces() const { return (Traitsp*)((char*)this+sizeof(Traits)); } 
 
+		Stringp formatClassName();
 #ifdef _DEBUG
 		int interfaceSlop();
 #endif
@@ -345,7 +351,9 @@ namespace avmplus
 			AvmAssert(i < interfaceCapacity);
 			return getInterfaces()[i];
 		}
-
+#ifdef DEBUGGER
+		DRCWB(Stringp) fullName;
+#endif
 	};
 
 	class ImtBuilder

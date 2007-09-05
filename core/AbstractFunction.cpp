@@ -75,10 +75,23 @@ namespace avmplus
 	}
 	
 	#ifdef AVMPLUS_VERBOSE
-	Stringp AbstractFunction::format(const AvmCore* core) const
+	Stringp AbstractFunction::format(AvmCore* core) const
 	{
-		return core->concatStrings(name ? (Stringp)name : core->newString("?"),
-			core->newString("()"));
+		return core->concatStrings(name ? (Stringp)name : core->newString("?"), core->kparens);
+	}
+
+	Stringp AbstractFunction::getStackTraceLine(Stringp filename) 
+	{
+		AvmCore *core = this->core();
+		Stringp s = core->ktabat;
+		s = core->concatStrings(s, format(core));
+		if(filename)
+		{
+			s = core->concatStrings(s, core->kleftbracket);
+			s = core->concatStrings(s, filename);
+			s = core->concatStrings(s, core->kcolon);
+		}
+		return s;
 	}
 	#endif //AVMPLUS_VERBOSE
 
