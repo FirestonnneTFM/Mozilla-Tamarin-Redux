@@ -162,10 +162,9 @@
             //bytes[loc] = val & 0xFF;
             //bytes[loc+1] = (val >> 8) & 0xFF;
             //bytes[loc+2] = (val >> 16) & 0xFF;
-            let orig_pos = bytes.position;
-            bytes.position = (loc);
+            bytes.position = loc;
             int24 (val);
-            bytes.position = (orig_pos);
+            bytes.position = bytes.length;
         }
 
         function serialize(s:ABCByteStream) {

@@ -5042,7 +5042,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
-,  [  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'ExpressionIdentifier'
 , 'expr': { 'ast_class': 'ListExpr'
@@ -5068,7 +5070,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
-,  [  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'length'
@@ -5087,7 +5091,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
-,  [  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  ] } }
 , 'e2': { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralDecimal'
@@ -5108,7 +5114,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
-,  [  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  ] } } ]
 ,  ] }
 ,  ] } }
@@ -5171,6 +5179,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
@@ -5186,6 +5197,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -5215,6 +5229,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
 , 'e2': { 'ast_class': 'LexicalRef'
@@ -5231,6 +5248,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -5255,6 +5275,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -5285,12 +5308,13 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
-, 'ident': { 'ast_class': 'QualifiedIdentifier'
-, 'qual': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'Ast'
+, 'ident': 'exprs'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -5306,9 +5330,11 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
-, 'ident': 'exprs' } }
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'push'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
@@ -5322,6 +5348,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -5343,6 +5372,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -5369,6 +5401,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
 ,  ] }
@@ -5383,6 +5418,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -6785,7 +6823,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
-,  [  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'ExpressionIdentifier'
 , 'expr': { 'ast_class': 'ListExpr'
@@ -6811,7 +6851,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
-,  [  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'length'
@@ -6830,7 +6872,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
-,  [  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  ] } }
 , 'e2': { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralDecimal'
@@ -6851,7 +6895,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
-,  [  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  ] } } ]
 ,  ] }
 ,  ] } }
@@ -6914,6 +6960,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
@@ -6929,6 +6978,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -6958,6 +7010,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
 , 'e2': { 'ast_class': 'LexicalRef'
@@ -6974,6 +7029,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -6998,6 +7056,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -7028,6 +7089,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
@@ -7043,6 +7107,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -7066,6 +7133,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
 , 'args': [ { 'ast_class': 'ObjectRef'
@@ -7083,6 +7153,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -7109,6 +7182,9 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
 ,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+,  ]
 ,  [  ]
 ,  ] } }
 ,  ] }
@@ -7123,6 +7199,9 @@ public var ast =
 , 'name': 'Parse' }
 , { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
 ,  ]
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Ast' }
@@ -14957,9 +15036,6 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralBoolean'
-, 'booleanValue': false } }
 ,  ] } }
 ,  ] }
 , 'params': { 'fixtures': [ [ { 'ast_class': 'PropName'

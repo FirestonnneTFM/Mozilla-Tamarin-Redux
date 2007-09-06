@@ -180,6 +180,6 @@ public namespace Char
         print ("Newline=",Newline);
     }
 
-    Char::test ();
+    //Char::test ();
 
 }

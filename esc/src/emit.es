@@ -154,7 +154,6 @@ namespace Emit;
             return constants.Multiname(constants.namespaceset(flattenNamespaceSet(nss)), constants.stringUtf8(ident), is_attr);
         }
         public function qname(qn, is_attr ) {
-print("qn.ns=",qn.ns);
             let {ns:ns, id:id} = qn;
             return constants.QName(namespace(ns), constants.stringUtf8(id), is_attr);
         }
@@ -221,7 +220,7 @@ print("qn.ns=",qn.ns);
                     }
                 }
                 case (x:*) { 
-                    print ("warning: Unimplemented: typeFromTypeExpr " + t + ", using *");
+                    // print ("warning: Unimplemented: typeFromTypeExpr " + t + ", using *");
                 }
             }
             return 0;

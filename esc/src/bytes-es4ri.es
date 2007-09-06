@@ -37,6 +37,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 {
+    use namespace Util;
+
     /* Emitter for various data in ABC-compatible formats, as a byte
      * stream.  The byte stream is represented as an array of unsigned
      * integers below 256 here, the purpose is that we will dump its

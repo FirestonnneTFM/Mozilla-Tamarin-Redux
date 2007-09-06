@@ -110,7 +110,7 @@ public namespace Lex
                     colCoord = 0;
                 }
                 else {
-                    //print ("token ", token);
+                    print ("token ", token);
                     //print ("token ", token, " \t", Token::tokenText(token));
                     colCoord = colCoord + markIndex - lastMarkIndex;
                     coordList.push ([lnCoord,colCoord]);

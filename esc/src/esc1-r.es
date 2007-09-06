@@ -13,7 +13,6 @@
     use namespace Ast;
     use namespace Parse;
     load ("esc-env.ast")
-    print ("decoding: ", esc_env);
     var nd = Decode::program (esc_env);
     var topFixtures = nd.head.fixtures;
 

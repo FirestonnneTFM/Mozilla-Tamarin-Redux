@@ -3540,77 +3540,6 @@ public var ast =
 , 'exprs': [  ] }
 , 'stmts': [ { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'print'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Emit' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Util' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Asm' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  ] } }
-, 'args': [ { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralString'
-, 'strValue': "qn.ns=" } }
-, { 'ast_class': 'ObjectRef'
-, 'base': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'qn'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Emit' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Util' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Asm' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  ] } }
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'ns'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Emit' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Util' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Asm' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  ] } }
-,  ] }
-,  ] } }
-, { 'ast_class': 'ExprStmt'
-, 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'LetExpr'
 , 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
 , 'index': 0 }
@@ -6382,72 +6311,7 @@ public var ast =
 , 'block': { 'ast_class': 'Block'
 , 'head': { 'fixtures': [  ]
 , 'exprs': [  ] }
-, 'stmts': [ { 'ast_class': 'ExprStmt'
-, 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'print'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Emit' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Util' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Asm' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [  ]
-,  ] } }
-, 'args': [ { 'ast_class': 'BinaryExpr'
-, 'op': { 'ast_class': 'Plus' }
-, 'e1': { 'ast_class': 'BinaryExpr'
-, 'op': { 'ast_class': 'Plus' }
-, 'e1': { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralString'
-, 'strValue': "warning: Unimplemented: typeFromTypeExpr " } }
-, 'e2': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 't'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Emit' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Util' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Asm' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-,  ]
-,  [  ]
-,  ] } } }
-, 'e2': { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralString'
-, 'strValue': ", using *" } } }
-,  ] }
-,  ] } }
-,  ] } }
+, 'stmts': [  ] } }
 ,  ] }
 , { 'ast_class': 'ReturnStmt'
 , 'expr': { 'ast_class': 'ListExpr'
@@ -10561,8 +10425,10 @@ public var ast =
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'NewExpr'
 , 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'Class'
+, 'ident': 'Emit'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -10579,6 +10445,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
+, 'ident': 'Class' } }
 , 'args': [ { 'ast_class': 'ThisExpr' }
 , { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
@@ -11536,13 +11403,13 @@ public var ast =
 , 'instanceType': { 'ast_class': 'SpecialType'
 , 'kind': { 'ast_class': 'AnyType' } } } } ]
 , [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Class' } }
 , { 'ast_class': 'ClassFixture'
 , 'cls': { 'ast_class': 'Cls'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Class' }
 , 'baseName': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
@@ -16433,8 +16300,8 @@ public var ast =
 , 'exprs': [  ] }
 , 'stmts': [  ] } }
 , { 'ast_class': 'ClassBlock'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Class' }
 , 'block': { 'ast_class': 'Block'
 , 'head': { 'fixtures': [  ]

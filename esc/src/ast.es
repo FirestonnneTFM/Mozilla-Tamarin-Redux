@@ -1432,5 +1432,5 @@ public namespace Ast
         print (new EmptyStmt);
     }
 
-    test();
+    //test();
 }

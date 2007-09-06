@@ -2551,8 +2551,9 @@ public var ast =
 ,  ] } }
 , { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'ObjectRef'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'bytes'
@@ -2565,7 +2566,7 @@ public var ast =
 ,  [  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'setPosition'
+, 'ident': 'position'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -2574,7 +2575,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'args': [ { 'ast_class': 'LexicalRef'
+, 're': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'loc'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
@@ -2584,8 +2585,7 @@ public var ast =
 , 'name': 'flash.utils' }
 ,  ]
 ,  [  ]
-,  ] } }
-,  ] }
+,  ] } } }
 ,  ] } }
 , { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
@@ -2616,8 +2616,9 @@ public var ast =
 ,  ] } }
 , { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'ObjectRef'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'bytes'
@@ -2630,7 +2631,7 @@ public var ast =
 ,  [  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'setPosition'
+, 'ident': 'position'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -2639,9 +2640,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'args': [ { 'ast_class': 'BinaryExpr'
-, 'op': { 'ast_class': 'Minus' }
-, 'e1': { 'ast_class': 'ObjectRef'
+, 're': { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'bytes'
@@ -2662,11 +2661,7 @@ public var ast =
 , 'name': 'flash.utils' }
 ,  ]
 ,  [  ]
-,  ] } }
-, 'e2': { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralDecimal'
-, 'decimalValue': '1' } } }
-,  ] }
+,  ] } } }
 ,  ] } }
 ,  ] }
 , 'params': { 'fixtures': [ [ { 'ast_class': 'PropName'

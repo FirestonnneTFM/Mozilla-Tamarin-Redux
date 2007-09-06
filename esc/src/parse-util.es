@@ -248,9 +248,10 @@ public namespace Parse;
 
         function addVarInits (inits) 
         {
+            use namespace Ast;
             let varHead = this.varHeads[this.varHeads.length-1];
             for (let n = 0, len = inits.length; n < len; ++n)  // until array conact works
-                varHead.Ast::exprs.push (inits[n]);
+                varHead.exprs.push (inits[n]);
         }
 
         function enterLetBlock () 
@@ -286,6 +287,7 @@ public namespace Parse;
 
         function addLetInits (inits) 
         {
+            use namespace Ast;
             let letHead = this.letHeads[this.letHeads.length-1];
             for (let n = 0, len = inits.length; n < len; ++n)  // until array conact works
                 letHead.exprs.push (inits[n]);
@@ -660,7 +662,7 @@ public namespace Parse;
 
         function desugarAssignmentPattern (p: PATTERN, t: Ast::TYPE_EXPR, e: Ast::EXPR, op: Ast::ASSIGNOP)
             : [Ast::FIXTURES, Ast::EXPR]
-            desugarPattern (p,t,e,null,null,null,op,false);
+            desugarPattern (p,t,e,null,null,null,op);
 
         function desugarBindingPattern (p: PATTERN, t: Ast::TYPE_EXPR, e: Ast::EXPR,
                                         ns: Ast::NAMESPACE?, it: Ast::INIT_TARGET?, ro: boolean?)

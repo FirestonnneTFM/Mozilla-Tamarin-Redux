@@ -164,7 +164,8 @@ use namespace intrinsic;
         {
             enter("Parser::directive ", ts);
 
-            printLn(ts);
+            countLn ();
+            printLn (ts);
 
             switch (hd(ts)) {
             case Token::SemiColon:
@@ -484,6 +485,9 @@ use namespace intrinsic;
             : [TOKENS]
         {
             enter("Parser::pragma ", ts);
+
+            countLn();
+            printLn(ts);
 
             switch (hd (ts)) {
             case Token::Use:

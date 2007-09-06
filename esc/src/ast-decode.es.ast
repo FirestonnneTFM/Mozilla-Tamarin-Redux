@@ -19740,8 +19740,10 @@ public var ast =
 , 'id': 'nd1' } }
 , { 'ast_class': 'CallExpr'
 , 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'assignOp'
+, 'ident': 'Decode'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -19756,6 +19758,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
+, 'ident': 'assignOp' } }
 , 'args': [ { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'

@@ -18104,8 +18104,10 @@ public var ast =
 , 'strValue': ", \'op\': " } } }
 , 'e2': { 'ast_class': 'CallExpr'
 , 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'assignOp'
+, 'ident': 'Encode'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -18120,6 +18122,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
+, 'ident': 'assignOp' } }
 , 'args': [ { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
@@ -18154,7 +18157,9 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'LexicalRef'
+, { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'nesting'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
@@ -18171,7 +18176,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'ObjectRef'
+, 'e2': { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralString'
 , 'strValue': ", \'op\': " } }
@@ -18190,7 +18195,7 @@ public var ast =
 , 'name': 'Encode' }
 ,  ]
 ,  [  ]
-,  ] } }
+,  ] } } }
 ,  ] } }
 , 'e2': { 'ast_class': 'CallExpr'
 , 'expr': { 'ast_class': 'LexicalRef'
@@ -19568,7 +19573,9 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'LexicalRef'
+, { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'nesting'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
@@ -19585,7 +19592,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'ObjectRef'
+, 'e2': { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralString'
 , 'strValue': ", \'op\': " } }
@@ -19604,7 +19611,7 @@ public var ast =
 , 'name': 'Encode' }
 ,  ]
 ,  [  ]
-,  ] } }
+,  ] } } }
 ,  ] } }
 , 'e2': { 'ast_class': 'CallExpr'
 , 'expr': { 'ast_class': 'LexicalRef'
@@ -20032,7 +20039,9 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'LexicalRef'
+, { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'nesting'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
@@ -20049,7 +20058,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'ObjectRef'
+, 'e2': { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralString'
 , 'strValue': ", \'op\': " } }
@@ -20068,7 +20077,7 @@ public var ast =
 , 'name': 'Encode' }
 ,  ]
 ,  [  ]
-,  ] } }
+,  ] } } }
 ,  ] } }
 , 'e2': { 'ast_class': 'CallExpr'
 , 'expr': { 'ast_class': 'LexicalRef'

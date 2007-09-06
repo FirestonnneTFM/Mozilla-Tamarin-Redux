@@ -4,20 +4,6 @@
     var str = File.read (fname);
     print ("compiling ", fname);
 }
-/*
-{
-    import avmplus.*;
-    import flash.utils.*;
-    use namespace Decode;
-    use namespace Ast;
-    print ("decoding");
-    var bytes = ByteArray.readFile ("esc-env.ast.abc");
-    Domain.currentDomain.loadBytes(bytes);   // defines global var 'ast'
-    var nd = program (ast);
-    var topFixtures = nd.head.fixtures;
-}
-*/
-
 var topFixtures = [];
 {
     use namespace Parse;

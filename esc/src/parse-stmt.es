@@ -144,13 +144,19 @@ use namespace intrinsic;
             return [ts1,nd1];
         }
 
+        var logicalLn = 0;
+        function countLn () {
+            ++logicalLn;
+        }
+
         function printLn (ts:TokenStream) {
             enter ("printLn ",ts.n);
             if (coordList.length <= ts.n)
                 print("line eos");
             else {
                 let coord = coordList[ts.n];
-                print ("ln ",coord[0]+1);
+                //print ("ln ",coord[0]+1," ",logicalLn);
+                print ("ln "+(coord[0]+1));
             }
             exit ("printLn");
         }
@@ -542,6 +548,8 @@ use namespace intrinsic;
             : [TOKENS, Ast::EXPR]
         {
             enter("Parser::caseLabel ", ts);
+            countLn ();
+            printLn (ts);
 
             switch (hd (ts)) {
             case Token::Case:
@@ -614,6 +622,8 @@ use namespace intrinsic;
             : [TOKENS,Ast::CATCH]
         {
             enter("Parser::catchClause ", ts);
+            countLn ();
+            printLn (ts);
 
             ts = eat (ts,Token::LeftParen);
             var [ts1,nd1] = parameter (ts);
@@ -690,6 +700,8 @@ use namespace intrinsic;
             : [TOKENS,Ast::CATCHES]
         {
             enter("Parser::typeCases ", ts);
+            countLn ();
+            printLn (ts);
 
             var ts1 = ts;
             var nd1 = [];

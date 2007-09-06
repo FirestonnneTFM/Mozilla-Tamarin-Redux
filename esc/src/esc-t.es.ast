@@ -82,6 +82,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
@@ -91,6 +95,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'ExpressionIdentifier'
@@ -104,6 +112,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } } ]
 ,  ] }
@@ -128,6 +140,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
@@ -137,6 +153,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 , 'args': [ { 'ast_class': 'LexicalRef'
@@ -147,39 +167,14 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 ,  ] } ]
 ,  ] }
-,  ] } }
-, { 'ast_class': 'ExprStmt'
-, 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'print'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
-,  ]
-,  ] } }
-, 'args': [ { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralString'
-, 'strValue': "compiling " } }
-, { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'fname'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
-,  ]
-,  ] } }
-,  ] }
-,  ] } }
 ,  ] } }
 , { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
@@ -198,11 +193,7 @@ public var ast =
 , 'types': [  ] } } } ]
 ,  ] }
 ,  ] } }
-, { 'ast_class': 'BlockStmt'
-, 'block': { 'ast_class': 'Block'
-, 'head': { 'fixtures': [  ]
-, 'exprs': [  ] }
-, 'stmts': [ { 'ast_class': 'ExprStmt'
+, { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'InitExpr'
 , 'target': { 'ast_class': 'VarInit' }
@@ -221,8 +212,9 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Parse' }
 ,  ]
 ,  ] } }
@@ -234,8 +226,9 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Parse' }
 ,  ]
 ,  ] } }
@@ -247,8 +240,9 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Parse' }
 ,  ]
 ,  ] } }
@@ -280,8 +274,9 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
+, { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Parse' }
 ,  ]
 ,  ] } }
@@ -327,12 +322,7 @@ public var ast =
 ,  ] }
 ,  ] } }
 ,  ] } }
-,  ] } }
-, { 'ast_class': 'BlockStmt'
-, 'block': { 'ast_class': 'Block'
-, 'head': { 'fixtures': [  ]
-, 'exprs': [  ] }
-, 'stmts': [ { 'ast_class': 'ExprStmt'
+, { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'CallExpr'
 , 'expr': { 'ast_class': 'LexicalRef'
@@ -343,11 +333,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
 , { 'ast_class': 'PublicNamespace'
 , 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 , 'args': [ { 'ast_class': 'CallExpr'
@@ -361,11 +350,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
 , { 'ast_class': 'PublicNamespace'
 , 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 , 'ident': 'cg' } }
@@ -377,11 +365,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
 , { 'ast_class': 'PublicNamespace'
 , 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 ,  ] }
@@ -395,11 +382,10 @@ public var ast =
 ,  ]
 ,  [ { 'ast_class': 'PublicNamespace'
 , 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
 , { 'ast_class': 'PublicNamespace'
 , 'name': 'flash.utils' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
 ,  ]
 ,  ] } }
 , 'e2': { 'ast_class': 'LiteralExpr'

@@ -637,7 +637,7 @@ public namespace Encode;
                 "{ 'ast_class': 'SetExpr'"
               + indent(nesting)
               + ", 'op': "
-              + assignOp (nd.op,nesting,", 'op': ".length)
+              + Encode::assignOp (nd.op,nesting+", 'op': ".length)
               + indent(nesting)
               + ", 'le': "
               + expr (nd.le,nesting+", 'le': ".length)
@@ -679,7 +679,7 @@ public namespace Encode;
                 "{ 'ast_class': 'BinaryTypeExpr'"
               + indent(nesting)
               + ", 'op': "
-              + binTyOp (nd.op,nesting,", 'op': ".length)
+              + binTyOp (nd.op,nesting+", 'op': ".length)
               + indent(nesting)
               + ", 'e1': "
               + expr (nd.e1,nesting+", 'e1': ".length)
@@ -693,7 +693,7 @@ public namespace Encode;
                 "{ 'ast_class': 'UnaryExpr'"
               + indent(nesting)
               + ", 'op': "
-              + unOp (nd.op,nesting,", 'op': ".length)
+              + unOp (nd.op,nesting+", 'op': ".length)
               + indent(nesting)
               + ", 'e1': "
               + expr (nd.e1,nesting+", 'e1': ".length)
