@@ -87,7 +87,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/PrintWriter.cpp \
   $(curdir)/RegExpClass.cpp \
   $(curdir)/RegExpObject.cpp \
-  $(curdir)/Sampler.cpp
+  $(curdir)/Sampler.cpp \
   $(curdir)/ScopeChain.cpp \
   $(curdir)/ScriptBuffer.cpp \
   $(curdir)/ScriptObject.cpp \
