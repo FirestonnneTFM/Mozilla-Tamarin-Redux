@@ -479,8 +479,6 @@
             asm.I_getlocal(0);
             baseOnStk = true;
         }
-        case (nd: *) {
-        }
         }
         cgInits(ctx, e.inits, baseOnStk);
     	asm.I_pushundefined(); // exprs need to leave something on the stack

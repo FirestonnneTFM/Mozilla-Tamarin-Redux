@@ -269,7 +269,14 @@
     function cgSwitchTypeStmt(ctx, {expr:expr, type:type, cases:cases}) {
         let b = new Block(new Ast::Head([],[]), [new ThrowStmt(expr)]);
 
-        cgTryStmt(ctx, {block:b, catches:cases, finallyBlock:null} );        
+        let newcases = [];
+        for( let i = 0; i < cases.length; i++ )
+            newcases.push(cases[i]);
+
+        // Add a catch all case so we don't end up throwing whatever the switch type expr was
+        newcases.push(new Catch(new Head([ [new PropName({ns:new PublicNamespace(""), id:"x"}), new ValFixture(new SpecialType(new AnyType()), false) ] ], []), new Block(new Head([],[]), [])));
+        
+        cgTryStmt(ctx, {block:b, catches:newcases, finallyBlock:null} );        
     }
     
     function cgWithStmt(ctx, {expr:expr}) {

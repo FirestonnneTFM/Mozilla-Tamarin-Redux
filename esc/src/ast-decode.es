@@ -635,7 +635,7 @@ public namespace Decode;
             var ndx = new TernaryExpr (nd1,nd2,nd3);
             break;
         case 'SetExpr':
-            let nd1 = assignOp (ob.op);
+            let nd1 = Decode::assignOp (ob.op);
             let nd2 = expr (ob.le);
             let nd3 = expr (ob.re);
             var ndx = new SetExpr (nd1,nd2,nd3);

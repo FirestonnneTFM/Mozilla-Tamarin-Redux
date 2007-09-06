@@ -493,10 +493,10 @@ namespace Gen;
     }
 
     function restoreScopes({stk:stk, asm:asm}) {
+        let regs = [];
         while (stk != null) {
             if(stk.has_scope) {
-                asm.I_getlocal(stk.scope_reg);
-                asm.I_pushscope();
+                regs.push(stk.scope_reg);
             }
             if( stk.tag != "function" ) {
                 stk = stk.link;
@@ -504,6 +504,11 @@ namespace Gen;
             else {
                 stk = null;
             }
+        }
+        for( let i = regs.length-1; i >= 0; i-- )
+        {
+            asm.I_getlocal(regs[i]);
+            asm.I_pushscope();
         }
     }
 
