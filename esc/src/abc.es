@@ -77,7 +77,7 @@ namespace Abc;
             Util::assert(bodies.length != 0);
             Util::assert(classes.length == instances.length);
 
-            // print ("emitting magic");
+            // print ("emitting version");
             bytes.uint16(minor_version);
             bytes.uint16(major_version);
             // print ("emitting constants");
