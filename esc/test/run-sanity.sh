@@ -6,6 +6,7 @@ echo compiling $1
 }
 
 rm sanity/log/*
+rm sanity/tests/*.es.abc
 
 run arrayliteral.es
 run cls.es
@@ -27,6 +28,5 @@ run switchType.es
 
 mv sanity/tests/*.es.ast sanity/log
 mv sanity/tests/*.es.log sanity/log
-rm sanity/tests/*.es.abc
 
-diff sanity/regress sanity/log
+diff -s sanity/regress sanity/log

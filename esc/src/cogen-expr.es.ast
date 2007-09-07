@@ -24426,32 +24426,6 @@ public var ast =
 , 'booleanValue': true } } }
 ,  ] } }
 ,  ] } }
-, { 'ast_class': 'Catch'
-, 'param': { 'fixtures': [ [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-, 'id': 'nd' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': false } ]
-,  ]
-, 'exprs': [ { 'ast_class': 'InitExpr'
-, 'target': { 'ast_class': 'VarInit' }
-, 'head': { 'fixtures': [  ]
-, 'exprs': [  ] }
-, 'inits': [ [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-, 'id': 'nd' } }
-, { 'ast_class': 'GetParam'
-, 'n': 0 } ]
-,  ] }
-,  ] }
-, 'block': { 'ast_class': 'Block'
-, 'head': { 'fixtures': [  ]
-, 'exprs': [  ] }
-, 'stmts': [  ] } }
 ,  ] }
 , { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'

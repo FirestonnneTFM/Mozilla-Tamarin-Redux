@@ -6640,8 +6640,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, { 'ast_class': 'NewExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
+, { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'QualifiedIdentifier'
 , 'qual': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
@@ -6660,30 +6659,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'ident': 'SpecialType' } }
-, 'args': [ { 'ast_class': 'NewExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'QualifiedIdentifier'
-, 'qual': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'Ast'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Release' }
-, { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Parse' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-,  ]
-,  [  ]
-,  ] } }
-, 'ident': 'AnyType' } }
-, 'args': [  ] }
-,  ] }
+, 'ident': 'anyType' } }
 ,  ]
 , 'type': { 'ast_class': 'ArrayType'
 , 'types': [  ] } } } ]

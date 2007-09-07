@@ -909,7 +909,7 @@ public namespace Decode;
         switch (ob.ast_class) {
         case 'SpecialType':
             var nd1 = specialTypeKind (ob.kind);
-            var ndx = new SpecialType (nd1);
+            var ndx = nd1;
             break;
         case 'UnionType':
             var nd1 = typeExprs (ob.types);
@@ -990,10 +990,16 @@ public namespace Decode;
 
         switch (ob.ast_class) {
         case 'AnyType':
-            var ndx = new AnyType;
+            var ndx = Ast::anyType;
+            break;
+        case 'NullType':
+            var ndx = Ast::nullType;
+            break;
+        case 'UndefinedType':
+            var ndx = Ast::undefinedType;
             break;
         case 'VoidType':
-            var ndx = new VoidType;
+            var ndx = Ast::voidType
             break;
         default:
             throw "error Decode::specialTypeKind " + ob.ast_class;

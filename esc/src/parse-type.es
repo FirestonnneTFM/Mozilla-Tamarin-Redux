@@ -97,13 +97,13 @@ use namespace intrinsic;
 
             switch (hd (ts)) {
             case Token::Mult:
-                var [ts1,nd1] = [tl (ts), new Ast::SpecialType (new Ast::AnyType)];
+                var [ts1,nd1] = [tl (ts), Ast::anyType];
                 break;
             case Token::Null:
-                var [ts1,nd1] = [tl (ts), new Ast::SpecialType (new Ast::NullType)];
+                var [ts1,nd1] = [tl (ts), Ast::nullType];
                 break;
             case Token::Undefined:
-                var [ts1,nd1] = [tl (ts), new Ast::SpecialType (new Ast::UndefinedType)];
+                var [ts1,nd1] = [tl (ts), Ast::undefinedType];
                 break;
             case Token::Function:
                 var [ts1,nd1] = functionType (ts);

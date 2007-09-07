@@ -338,7 +338,7 @@ use namespace intrinsic;
             var func = new Ast::Func (nd1,false,nd3,params,vars,defaults,resultType);
 
             var name = new Ast::PropName ({ns:ns,id:nd1.ident});
-            var fxtr = new Ast::MethodFixture (func,new Ast::SpecialType (new Ast::AnyType),true,isOverride,isFinal);
+            var fxtr = new Ast::MethodFixture (func,Ast::anyType,true,isOverride,isFinal);
             cx.addVarFixtures ([[name,fxtr]]);
 
             exit("Parser::functionDefinition ", ts3);
@@ -571,7 +571,7 @@ use namespace intrinsic;
             ts1 = eat (ts1,Token::Assign);
             var [ts2,nd2] = assignmentExpression (ts1,allowIn);
 
-            var [tsx,[fxtrs,ndx]] = [ts2,desugarBindingPattern (nd1, new Ast::SpecialType (new Ast::AnyType), nd2, null, Ast::instanceInit,null)];
+            var [tsx,[fxtrs,ndx]] = [ts2,desugarBindingPattern (nd1, Ast::anyType, nd2, null, Ast::instanceInit,null)];
             // assert fxtrs is empty
 
             exit("Parser::setting ", tsx);
@@ -919,7 +919,7 @@ use namespace intrinsic;
                 }
                 break;
             default:
-                var [ts1,nd1] = [ts,new Ast::SpecialType (new Ast::AnyType)];
+                var [ts1,nd1] = [ts,Ast::anyType];
                 break;
             }
 
