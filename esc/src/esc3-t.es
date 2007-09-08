@@ -1,15 +1,37 @@
 import avmplus.*;
 
-// read t.es.ast.abc
+// load ast
 {
     import flash.utils.*;
     var fname = System.argv[0];
     if (fname==undefined) throw "no file name given";
-    print ("reading ", fname+".ast.abc")
-    var bytes = ByteArray.readFile (fname+".ast.abc");
-    Domain.currentDomain.loadBytes(bytes);   // defines global var 'ast'
-    print ("decoding", fname);
-    var nd = Decode::program (ast);
-    dumpABCFile(Gen::cg(nd), fname+".abc");
+    var fname = System.argv[0];
+    var str = File.read (fname+".ast");
 }
-// write t.es.abc
+
+// eval ast
+
+{
+    use namespace Parse;
+print ("parsing: ", str);
+    var top = []
+    var parser = initParser(str,top);
+    var [ts,nd] = program();
+    var bytes = Gen::cg(nd).getBytes();
+    Domain.currentDomain.loadBytes(bytes);
+}
+
+// decode it
+
+{
+    print ("decoding");
+    var nd = Decode::program (ast);  // defined by side effect
+}
+
+// cogen and write it
+
+{
+    print ("generating");
+    var bytes = Gen::cg(nd);
+    dumpABCFile(bytes, fname+".abc");
+}
