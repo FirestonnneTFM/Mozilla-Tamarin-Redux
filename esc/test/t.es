@@ -1,9 +1,1 @@
-var x = 
-{ 'foo': 10
-, 'bar': true
-, 'baz': [ 'hi'
-         , 'bye' 
-         , ]
-, 'biz': { 'a':'b', 'c':'d' }
-
-}
+print (10,'hi',1.23)

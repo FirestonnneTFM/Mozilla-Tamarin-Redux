@@ -13,11 +13,12 @@ import avmplus.*;
 
 {
     use namespace Parse;
+    use namespace Gen;
 print ("parsing: ", str);
     var top = []
     var parser = initParser(str,top);
     var [ts,nd] = program();
-    var bytes = Gen::cg(nd).getBytes();
+    var bytes = cg(nd).getBytes();
     Domain.currentDomain.loadBytes(bytes);
 }
 

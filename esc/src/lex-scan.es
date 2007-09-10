@@ -110,7 +110,7 @@ public namespace Lex
                     colCoord = 0;
                 }
                 else {
-                    print ("token ", token);
+                    //print ("token ", token);
                     //print ("token ", token, " \t", Token::tokenText(token));
                     colCoord = colCoord + markIndex - lastMarkIndex;
                     coordList.push ([lnCoord,colCoord]);
@@ -462,6 +462,7 @@ public namespace Lex
 	    : void
 	{
 	    let c /*: int*/ = next ();
+        while (true) {
 	    switch (c) {
 	    case Char::Asterisk :
             switch (next()) {
@@ -472,27 +473,48 @@ public namespace Lex
                 return;
             case Char::Asterisk:
                 retract (); // leave in case next char is a slash
-                return blockComment ();
+                break;
             case Char::Newline:
                 colCoord = 0;
                 lnCoord++; // count ln and fall through
             default:
-                return blockComment ();
+                break;
             }
+            break;
 	    case Char::EOS :
             retract ();
             return;
         case Char::Newline:
             lnCoord++; // fall through
 	    default :
-            return blockComment ();
+            break;
 	    }
+        c = next ();
+        }
 	}
 
 	function stringLiteral (delimiter, text="")
 	    : int
 	{
 	    let c /*: int*/ = next ();
+        while (c != Char::EOS) {
+            switch (c) {
+            case delimiter:
+                return Token::makeInstance (Token::StringLiteral, String.fromCharCode(delimiter)+text);
+                // encode delimiter in string lexeme by appending to text
+            case Char::BackSlash:
+                c = escapeSequence ();
+                text = text+String.fromCharCode(c);
+                break;
+            default:
+                text = text+String.fromCharCode(c);
+                break;
+            }
+            c = next ();
+        }
+        throw "unterminated string literal: " + text;
+
+        /*
 	    switch (c) {
 	    case delimiter:
             return Token::makeInstance (Token::StringLiteral, String.fromCharCode(delimiter)+text);
@@ -503,6 +525,7 @@ public namespace Lex
 	    default:
             return stringLiteral (delimiter, text+String.fromCharCode (c))
 	    }
+        */
 	}
 
 	/*

@@ -1197,40 +1197,6 @@ public var ast =
 , 'exprs': [  ] }
 , 'stmts': [ { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'print'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-,  ]
-,  [  ]
-,  ] } }
-, 'args': [ { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralString'
-, 'strValue': "token " } }
-, { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'token'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-,  ]
-,  [  ]
-,  ] } }
-,  ] }
-,  ] } }
-, { 'ast_class': 'ExprStmt'
-, 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'SetExpr'
 , 'op': { 'ast_class': 'Assign' }
 , 'le': { 'ast_class': 'LexicalRef'
@@ -7987,7 +7953,17 @@ public var ast =
 , 'args': [  ] } ]
 ,  ] }
 ,  ] } }
-, { 'ast_class': 'SwitchStmt'
+, { 'ast_class': 'WhileStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralBoolean'
+, 'booleanValue': true } }
+,  ] }
+, 'stmt': { 'ast_class': 'BlockStmt'
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'SwitchStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
@@ -8139,24 +8115,8 @@ public var ast =
 ,  ] } }
 , 'args': [  ] }
 ,  ] } }
-, { 'ast_class': 'ReturnStmt'
-, 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'blockComment'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-,  ]
-,  [  ]
-,  ] } }
-, 'args': [  ] }
-,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
 ,  ] }
 , { 'ast_class': 'Case'
 , 'expr': { 'ast_class': 'ListExpr'
@@ -8219,27 +8179,13 @@ public var ast =
 ,  ] }
 , { 'ast_class': 'Case'
 , 'expr': null
-, 'stmts': [ { 'ast_class': 'ReturnStmt'
-, 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'blockComment'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-,  ]
-,  [  ]
-,  ] } }
-, 'args': [  ] }
-,  ] } }
+, 'stmts': [ { 'ast_class': 'BreakStmt'
+, 'ident': null }
 ,  ] }
 ,  ]
 , 'labels': [] }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
 ,  ] }
 , { 'ast_class': 'Case'
 , 'expr': { 'ast_class': 'ListExpr'
@@ -8321,12 +8267,18 @@ public var ast =
 ,  ] }
 , { 'ast_class': 'Case'
 , 'expr': null
-, 'stmts': [ { 'ast_class': 'ReturnStmt'
+, 'stmts': [ { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+,  ]
+, 'labels': [] }
+, { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'blockComment'
+, 'ident': 'c'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -8337,10 +8289,23 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'args': [  ] }
-,  ] } }
-,  ] }
+, 're': { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'next'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
 ,  ]
+,  [ { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [  ] } }
+,  ] } }
+,  ] } }
 , 'labels': [] }
 ,  ] }
 , 'params': { 'fixtures': [  ]
@@ -8366,14 +8331,6 @@ public var ast =
 , 'isNative': false
 , 'block': { 'ast_class': 'Block'
 , 'head': { 'fixtures': [ [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-, 'id': 'c' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': false } ]
-, [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
 , 'id': 'c' } }
@@ -8410,7 +8367,45 @@ public var ast =
 , 'args': [  ] } ]
 ,  ] }
 ,  ] } }
-, { 'ast_class': 'SwitchStmt'
+, { 'ast_class': 'WhileStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'NotEqual' }
+, 'e1': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'c'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'e2': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Char'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'EOS' } } }
+,  ] }
+, 'stmt': { 'ast_class': 'BlockStmt'
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'SwitchStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
@@ -8557,15 +8552,22 @@ public var ast =
 ,  ] }
 , 'stmts': [ { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'InitExpr'
-, 'target': { 'ast_class': 'LetInit' }
-, 'head': { 'fixtures': [  ]
-, 'exprs': [  ] }
-, 'inits': [ [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'c'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Lex' }
-, 'id': 'c' } }
-, { 'ast_class': 'CallExpr'
+,  ]
+,  [  ]
+,  ] } }
+, 're': { 'ast_class': 'CallExpr'
 , 'expr': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'escapeSequence'
@@ -8579,15 +8581,15 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'args': [  ] } ]
-,  ] }
+, 'args': [  ] } }
 ,  ] } }
-, { 'ast_class': 'ReturnStmt'
+, { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'stringLiteral'
+, 'ident': 'text'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -8598,20 +8600,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'args': [ { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'delimiter'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-,  ]
-,  [  ]
-,  ] } }
-, { 'ast_class': 'BinaryExpr'
+, 're': { 'ast_class': 'BinaryExpr'
 , 'op': { 'ast_class': 'Plus' }
 , 'e1': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
@@ -8666,18 +8655,20 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
+,  ] } } }
 ,  ] } }
-,  ] }
-,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
 ,  ] }
 , { 'ast_class': 'Case'
 , 'expr': null
-, 'stmts': [ { 'ast_class': 'ReturnStmt'
+, 'stmts': [ { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'stringLiteral'
+, 'ident': 'text'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -8688,20 +8679,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'args': [ { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'delimiter'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Lex' }
-,  ]
-,  [  ]
-,  ] } }
-, { 'ast_class': 'BinaryExpr'
+, 're': { 'ast_class': 'BinaryExpr'
 , 'op': { 'ast_class': 'Plus' }
 , 'e1': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
@@ -8756,12 +8734,69 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
+,  ] } } }
 ,  ] } }
-,  ] }
-,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
 ,  ] }
 ,  ]
 , 'labels': [] }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'c'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 're': { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'next'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [  ] } }
+,  ] } }
+,  ] } }
+, 'labels': [] }
+, { 'ast_class': 'ThrowStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "unterminated string literal: " } }
+, 'e2': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'text'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } } }
+,  ] } }
 ,  ] }
 , 'params': { 'fixtures': [ [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
