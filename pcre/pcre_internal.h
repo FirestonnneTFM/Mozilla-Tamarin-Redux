@@ -57,6 +57,9 @@ pre-processor statements, or at least there were when I first wrote this. After
 all, it had only been about 10 years then... */
 
 #ifndef __MWERKS__
+/* It turns out that the Mac Debugging.h header also defines the macro DPRINTF, so
+be absolutely sure we get our version. */
+#undef DPRINTF
 #ifdef DEBUG
 #define DPRINTF(p) printf p
 #else

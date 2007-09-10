@@ -2134,8 +2134,6 @@ bail:
 					else
 					{
 						//GCAlloc::SetBit(block, itemNum, GCAlloc::kMark);
-						// clear queued bit
-						*pbits = bits2 & ~(GCAlloc::kQueued << shift);
 						*pbits = bits2 | (GCAlloc::kMark << shift);
 					}
 					#if defined(MEMORY_INFO)

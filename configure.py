@@ -88,7 +88,7 @@ OS_LIBS = ['z']
 
 os, cpu = config.getTarget()
 if os == "darwin":
-    APP_CPPFLAGS += "-DTARGET_API_MAC_CARBON=1 -DDARWIN=1 -D_MAC -DTARGET_RT_MAC_MACHO=1 -DUSE_MMAP -D_MAC -D__DEBUGGING__ "
+    APP_CPPFLAGS += "-DTARGET_API_MAC_CARBON=1 -DDARWIN=1 -D_MAC -DTARGET_RT_MAC_MACHO=1 -DUSE_MMAP -D_MAC "
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
 elif os == "windows":
     APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -D_CONSOLE "
