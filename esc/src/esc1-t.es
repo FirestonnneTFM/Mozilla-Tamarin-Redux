@@ -4,7 +4,9 @@
     var str = File.read (fname);
     print ("compiling ", fname);
 }
+
 var topFixtures = [];
+
 {
     use namespace Parse;
     print ("parsing");

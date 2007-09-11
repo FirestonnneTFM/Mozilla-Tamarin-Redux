@@ -9,13 +9,13 @@ public var ast =
 , 'ns': { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Emit' } } ]
 , [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'ABCEmitter' } }
 , { 'ast_class': 'ClassFixture'
 , 'cls': { 'ast_class': 'Cls'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'ABCEmitter' }
 , 'baseName': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
@@ -10171,13 +10171,13 @@ public var ast =
 , 'instanceType': { 'ast_class': 'SpecialType'
 , 'kind': { 'ast_class': 'AnyType' } } } } ]
 , [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Script' } }
 , { 'ast_class': 'ClassFixture'
 , 'cls': { 'ast_class': 'Cls'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Script' }
 , 'baseName': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
@@ -12887,13 +12887,13 @@ public var ast =
 , 'instanceType': { 'ast_class': 'SpecialType'
 , 'kind': { 'ast_class': 'AnyType' } } } } ]
 , [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Instance' } }
 , { 'ast_class': 'ClassFixture'
 , 'cls': { 'ast_class': 'Cls'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Instance' }
 , 'baseName': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
@@ -13886,13 +13886,13 @@ public var ast =
 , 'instanceType': { 'ast_class': 'SpecialType'
 , 'kind': { 'ast_class': 'AnyType' } } } } ]
 , [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Method' } }
 , { 'ast_class': 'ClassFixture'
 , 'cls': { 'ast_class': 'Cls'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Method' }
 , 'baseName': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
@@ -16284,16 +16284,16 @@ public var ast =
 , 'head': { 'fixtures': [  ]
 , 'exprs': [  ] }
 , 'stmts': [ { 'ast_class': 'ClassBlock'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'ABCEmitter' }
 , 'block': { 'ast_class': 'Block'
 , 'head': { 'fixtures': [  ]
 , 'exprs': [  ] }
 , 'stmts': [  ] } }
 , { 'ast_class': 'ClassBlock'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Script' }
 , 'block': { 'ast_class': 'Block'
 , 'head': { 'fixtures': [  ]
@@ -16308,16 +16308,16 @@ public var ast =
 , 'exprs': [  ] }
 , 'stmts': [  ] } }
 , { 'ast_class': 'ClassBlock'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Instance' }
 , 'block': { 'ast_class': 'Block'
 , 'head': { 'fixtures': [  ]
 , 'exprs': [  ] }
 , 'stmts': [  ] } }
 , { 'ast_class': 'ClassBlock'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Emit' }
 , 'id': 'Method' }
 , 'block': { 'ast_class': 'Block'
 , 'head': { 'fixtures': [  ]

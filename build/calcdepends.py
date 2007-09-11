@@ -62,7 +62,7 @@ class StatCache:
 
 _statcache = StatCache()
 
-def rebuildNeeded(file, dependencies):
+def rebuildNeeded(file, dependencies, verbose):
     """Calculate whether a file needs to be rebuilt by comparing its timestamp
     against a list of dependencies.
 
@@ -70,18 +70,26 @@ def rebuildNeeded(file, dependencies):
 
     f = _statcache.getMTime(file)
     if f == 0:
+        if verbose:
+            print >>sys.stderr, "Target %s doesn't exist" % file
         return True
 
     for dep in dependencies:
         d = _statcache.getMTime(dep)
-        if d == 0 or d > f:
+        if d == 0:
+            if verbose:
+                print >>sys.stderr, "Target %s missing dependency %s" % (file, dep)
+            return True
+        if d > f:
+            if verbose:
+                print >>sys.stderr, "Target %s older than dependency %s" % (file, dep)
             return True
 
     return False
 
 _fileFromLine = re.compile('^([^:]+): FORCE')
 
-def rebuildsNeeded(files, outfile):
+def rebuildsNeeded(files, outfile, verbose):
     """Write a makefile snippet indicating whether object files need to be
     rebuilt.
 
@@ -110,13 +118,16 @@ def rebuildsNeeded(files, outfile):
             d = open(depfile, "r")
             rebuild = \
                 rebuildNeeded(objfile, \
-                              [line.rstrip("\n\r") for line in d.readlines()])
+                              [line.rstrip("\n\r") for line in d.readlines()],
+                              verbose)
             d.close()
 
         except IOError:
             pass
 
         if rebuild:
+            if verbose:
+                print >>sys.stderr, "Scheduling %s for rebuilding" % objfile
             newrebuilds.append(objfile)
 
             if objfile in oldrebuilds:
@@ -138,12 +149,17 @@ if __name__ == "__main__":
     _argExpr = re.compile("\\.ii$")
 
     files = {}
+    verbose = 'CALCDEPENDS_VERBOSE' in os.environ
 
     sys.argv.pop(0)
+    if sys.argv[0] in ('-v', '--verbose'):
+        verbose = True
+        sys.argv.pop(0)
+
     outfile = sys.argv.pop(0)
 
     for objfile in sys.argv:
         depfile = _argExpr.sub(".deps", objfile)
         files[objfile] = depfile
 
-    rebuildsNeeded(files, outfile)
+    rebuildsNeeded(files, outfile, verbose)

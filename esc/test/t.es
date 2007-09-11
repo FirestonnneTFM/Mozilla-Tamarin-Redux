@@ -1,2 +1,1 @@
-var x = 10
-print(x)
+print (10,'hi',1.23)

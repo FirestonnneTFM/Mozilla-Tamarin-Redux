@@ -49,6 +49,11 @@
 
     class ABCByteStream
     {
+        function ABCByteStream ()
+            : bytes = []
+        {
+        }
+
         function get length() {
             return bytes.length;
         }
@@ -176,6 +181,6 @@
             return bytes;
         }
 
-        /*private*/ const bytes = [];
+        /*private*/ const bytes;
     }
 }

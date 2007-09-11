@@ -53,6 +53,14 @@ public var ast =
 , 'kind': { 'ast_class': 'AnyType' } }
 , 'index': 1 }
 , 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'ob' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
 ,  ]
 , 'exprs': [  ] }
 , 'block': { 'ast_class': 'Block'
@@ -324,22 +332,15 @@ public var ast =
 ,  ] } }
 , { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'dumpABCFile'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
-, { 'ast_class': 'PublicNamespace'
-, 'name': 'flash.utils' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Parse' }
-,  ]
-,  ] } }
-, 'args': [ { 'ast_class': 'CallExpr'
+, 'id': 'ob' } }
+, { 'ast_class': 'CallExpr'
 , 'expr': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'QualifiedIdentifier'
 , 'qual': { 'ast_class': 'LexicalRef'
@@ -371,26 +372,7 @@ public var ast =
 , 'name': 'Parse' }
 ,  ]
 ,  ] } }
-,  ] }
-, { 'ast_class': 'BinaryExpr'
-, 'op': { 'ast_class': 'Plus' }
-, 'e1': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'fname'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
-, { 'ast_class': 'PublicNamespace'
-, 'name': 'flash.utils' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Parse' }
-,  ]
-,  ] } }
-, 'e2': { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralString'
-, 'strValue': ".abc" } } }
+,  ] } ]
 ,  ] }
 ,  ] } }
 ,  ] } }

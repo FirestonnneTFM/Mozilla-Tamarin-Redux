@@ -279,7 +279,7 @@ use namespace intrinsic;
                 var [ts2,nd2] = nullableTypeExpression (tl (ts1));
                 break;
             default:
-                var [ts2,nd2] = [ts1,new Ast::SpecialType (new Ast::AnyType)];
+                var [ts2,nd2] = [ts1,Ast::anyType];
                 break;
             }
 

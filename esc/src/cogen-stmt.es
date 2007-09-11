@@ -270,12 +270,20 @@
         let b = new Block(new Ast::Head([],[]), [new ThrowStmt(expr)]);
 
         let newcases = [];
-        for( let i = 0; i < cases.length; i++ )
+        let hasDefault = false;
+        for( let i = 0; i < cases.length; i++ ) {
             newcases.push(cases[i]);
+            let [_,f] = cases[i].param.fixtures[0];
+            if (f.type === Ast::anyType)
+                hasDefault = true;
+        }
 
         // Add a catch all case so we don't end up throwing whatever the switch type expr was
-        newcases.push(new Catch(new Head([ [new PropName({ns:new PublicNamespace(""), id:"x"}), new ValFixture(new SpecialType(new AnyType()), false) ] ], []), new Block(new Head([],[]), [])));
-        
+        if (!hasDefault) {
+            newcases.push(new Catch(new Head([ [new PropName({ns:new PublicNamespace(""), id:"x"})
+                                               ,new ValFixture(Ast::anyType, false) ] ], [])
+                                   ,new Block(new Head([],[]), [])));
+        }
         cgTryStmt(ctx, {block:b, catches:newcases, finallyBlock:null} );        
     }
     

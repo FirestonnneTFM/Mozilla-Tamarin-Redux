@@ -9,6 +9,7 @@
     var topFixtures = [];
     var parser = initParser(str,topFixtures);
     var [ts,nd] = program();
+    var ob = Gen::cg(nd);
 
-    dumpABCFile(Gen::cg(nd), fname+".abc");
+    
 }

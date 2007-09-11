@@ -24923,25 +24923,7 @@ public var ast =
 , 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Decode' }
 , 'id': 'ndx' } }
-, { 'ast_class': 'NewExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'SpecialType'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Release' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Ast' }
-, { 'ast_class': 'IntrinsicNamespace' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Decode' }
-,  ]
-,  [  ]
-,  ] } }
-, 'args': [ { 'ast_class': 'LexicalRef'
+, { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'nd1'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
@@ -24957,8 +24939,7 @@ public var ast =
 , 'name': 'Decode' }
 ,  ]
 ,  [  ]
-,  ] } }
-,  ] } ]
+,  ] } } ]
 ,  ] }
 ,  ] } }
 , { 'ast_class': 'BreakStmt'
@@ -27489,10 +27470,11 @@ public var ast =
 , 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Decode' }
 , 'id': 'ndx' } }
-, { 'ast_class': 'NewExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
+, { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'AnyType'
+, 'ident': 'Ast'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -27507,7 +27489,89 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'args': [  ] } ]
+, 'ident': 'anyType' } } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+, { 'ast_class': 'Case'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NullType" } }
+,  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Decode' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Ast'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Decode' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'nullType' } } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+, { 'ast_class': 'Case'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "UndefinedType" } }
+,  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Decode' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Ast'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Ast' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Decode' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'undefinedType' } } ]
 ,  ] }
 ,  ] } }
 , { 'ast_class': 'BreakStmt'
@@ -27529,10 +27593,11 @@ public var ast =
 , 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Decode' }
 , 'id': 'ndx' } }
-, { 'ast_class': 'NewExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
+, { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'VoidType'
+, 'ident': 'Ast'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -27547,7 +27612,7 @@ public var ast =
 ,  ]
 ,  [  ]
 ,  ] } }
-, 'args': [  ] } ]
+, 'ident': 'voidType' } } ]
 ,  ] }
 ,  ] } }
 , { 'ast_class': 'BreakStmt'
@@ -27674,6 +27739,22 @@ public var ast =
 ,  ] }
 ,  ] }
 , 'vars': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Decode' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Decode' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Decode' }
 , 'id': 'ndx' } }

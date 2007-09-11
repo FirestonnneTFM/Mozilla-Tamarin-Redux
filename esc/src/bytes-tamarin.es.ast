@@ -15,7 +15,29 @@ public var ast =
 , 'id': 'Object' }
 , 'interfaceNames': []
 , 'constructor': { 'ast_class': 'Ctor'
-, 'settings': [ ]
+, 'settings': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'InstanceInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'bytes' } }
+, { 'ast_class': 'NewExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ByteArray'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [  ] } ]
+,  ] }
+, ]
 , 'superArgs': [  ]
 , 'func': { 'ast_class': 'Func'
 , 'name': { 'kind': { 'ast_class': 'Ordinary' }
@@ -24,17 +46,55 @@ public var ast =
 , 'block': { 'ast_class': 'Block'
 , 'head': { 'fixtures': [  ]
 , 'exprs': [  ] }
-, 'stmts': [  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'endian'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 're': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "littleEndian" } } }
+,  ] } }
+,  ] }
 , 'params': { 'fixtures': [  ]
 , 'exprs': [  ] }
 , 'vars': { 'fixtures': [  ]
 , 'exprs': [  ] }
 , 'defaults': [ ]
 , 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } } } }
+, 'kind': { 'ast_class': 'VoidType' } } } }
 , 'classHead': { 'fixtures': [  ]
 , 'exprs': [  ] }
 , 'instanceHead': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'bytes' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true } ]
+, [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 , 'id': 'length' } }
@@ -847,6 +907,36 @@ public var ast =
 , 'decimalValue': '0xFF' } } }
 ,  ] }
 ,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'print'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "int24 " } }
+, { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'val'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+,  ] } }
 ,  ] }
 , 'params': { 'fixtures': [ [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
@@ -1530,7 +1620,7 @@ public var ast =
 ,  [  ]
 ,  ] } }
 , 'args': [ { 'ast_class': 'BinaryExpr'
-, 'op': { 'ast_class': 'BitwiseXor' }
+, 'op': { 'ast_class': 'BitwiseAnd' }
 , 'e1': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'BinaryExpr'
 , 'op': { 'ast_class': 'RightShift' }
@@ -2492,7 +2582,15 @@ public var ast =
 , 'ident': 'setInt24' }
 , 'isNative': false
 , 'block': { 'ast_class': 'Block'
-, 'head': { 'fixtures': [  ]
+, 'head': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'orig_pos' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
 , 'exprs': [  ] }
 , 'stmts': [ { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
@@ -2547,6 +2645,40 @@ public var ast =
 , 'e2': { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralDecimal'
 , 'decimalValue': '16777216' } } } }
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'orig_pos' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'position'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } } ]
 ,  ] }
 ,  ] } }
 , { 'ast_class': 'ExprStmt'
@@ -2978,37 +3110,12 @@ public var ast =
 , 'isReadOnly': true
 , 'isOverride': false
 , 'isFinal': false } ]
-, [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-, 'id': 'bytes' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': true } ]
 ,  ]
 , 'exprs': [ { 'ast_class': 'InitExpr'
 , 'target': { 'ast_class': 'VarInit' }
 , 'head': { 'fixtures': [  ]
 , 'exprs': [  ] }
-, 'inits': [ [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-, 'id': 'bytes' } }
-, { 'ast_class': 'NewExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'ByteArray'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'flash.utils' }
-,  ]
-,  [  ]
-,  ] } }
-, 'args': [  ] } ]
-,  ] }
+, 'inits': [  ] }
 ,  ] }
 , 'classType': { 'ast_class': 'SpecialType'
 , 'kind': { 'ast_class': 'AnyType' } }

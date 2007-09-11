@@ -47,8 +47,16 @@
 
     import flash.utils.*
 
+
     class ABCByteStream
     {
+        /*private*/ const bytes
+        function ABCByteStream ()
+            : bytes = new ByteArray 
+        {
+            bytes.endian = "littleEndian";
+        }
+
         function get length() {
             return bytes.length;
         }
@@ -112,7 +120,7 @@
                 //bytes.push((val & 0x7F) | 0x80,
                 //           (val >> 7) & 0x7F);
                 bytes.writeByte ((val & 0x7F) | 0x80);
-                bytes.writeByte ((val >> 7) | 0x7F);
+                bytes.writeByte ((val >> 7) & 0x7F);
             }
             else if ( val < 0x200000 ) {
                 // 21 bits
@@ -187,6 +195,5 @@
             return bytes;
         }
 
-        /*private*/ const bytes = new ByteArray
     }
 }
