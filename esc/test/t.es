@@ -1,1 +1,3 @@
-print (10,'hi',1.23)
+print(1);
+print(2);
+print(3);

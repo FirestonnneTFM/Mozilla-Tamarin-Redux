@@ -58,6 +58,62 @@ public var ast =
 , 'kind': { 'ast_class': 'AnyType' } }
 , 'isReadOnly': true } ]
 , [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Abc' }
+, 'id': 'methods' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Abc' }
+, 'id': 'metadatas' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Abc' }
+, 'id': 'instances' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Abc' }
+, 'id': 'classes' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Abc' }
+, 'id': 'scripts' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Abc' }
+, 'id': 'bodies' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Abc' }
+, 'id': 'constants' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 , 'id': 'getBytes' } }
@@ -2120,62 +2176,6 @@ public var ast =
 , 'isReadOnly': true
 , 'isOverride': false
 , 'isFinal': false } ]
-, [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, 'id': 'methods' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': true } ]
-, [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, 'id': 'metadatas' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': true } ]
-, [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, 'id': 'instances' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': true } ]
-, [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, 'id': 'classes' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': true } ]
-, [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, 'id': 'scripts' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': true } ]
-, [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, 'id': 'bodies' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': true } ]
-, [ { 'ast_class': 'PropName'
-, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Abc' }
-, 'id': 'constants' } }
-, { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'SpecialType'
-, 'kind': { 'ast_class': 'AnyType' } }
-, 'isReadOnly': false } ]
 ,  ]
 , 'exprs': [ { 'ast_class': 'InitExpr'
 , 'target': { 'ast_class': 'VarInit' }

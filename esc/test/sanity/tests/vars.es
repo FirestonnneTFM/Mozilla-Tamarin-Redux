@@ -1,11 +1,11 @@
 // esc-test
 var s1="hello";
-var s2:String="hello";
+var s2="hello";
 var b1=true;
-var b2:Boolean=false;
-var n1:uint=10000;
-var n2:int=-10000;
-var n3:Number=3.14;
+var b2=false;
+var n1=10000;
+var n2=-10000;
+var n3=3.14;
 print("expecting s1=hello");
 print(s1);
 print("expecting s2=hello");

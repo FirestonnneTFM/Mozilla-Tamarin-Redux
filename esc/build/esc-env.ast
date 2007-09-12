@@ -95,10 +95,10 @@ var esc_env =
                         , [ { 'ast_class': 'PropName'
                             , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
                                               , 'name': '' }
-                                      , 'id': 'Unicode' } }
+                                      , 'id': 'AstEncode' } }
                           , { 'ast_class': 'NamespaceFixture'
                             , 'ns': { 'ast_class': 'AnonymousNamespace'
-                                    , 'name': 'Unicode' } } ]
+                                    , 'name': 'AstEncode' } } ]
                         ,  ]
           , 'exprs': [  ] }
 , 'block': { 'ast_class': 'Block'

@@ -699,7 +699,11 @@ public var ast =
 ,  [  ]
 ,  ] } } }
 ,  ] }
-, 'stmt': { 'ast_class': 'IfStmt'
+, 'stmt': { 'ast_class': 'BlockStmt'
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'IfStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'BinaryExpr'
 , 'op': { 'ast_class': 'StrictEqual' }
@@ -756,6 +760,7 @@ public var ast =
 , 'booleanValue': true } }
 ,  ] } }
 , 'elseOpt': null }
+,  ] } }
 , 'labels': [] }
 , { 'ast_class': 'ReturnStmt'
 , 'expr': { 'ast_class': 'ListExpr'

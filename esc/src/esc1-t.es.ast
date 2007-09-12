@@ -201,7 +201,2261 @@ public var ast =
 , 'id': 'topFixtures' } }
 , { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralArray'
-, 'exprs': [  ]
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Ast" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Ast" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Encode" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Encode" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Debug" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Debug" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Release" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Release" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Decode" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Decode" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Encode" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Encode" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Parse" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Parse" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Lex" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Lex" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Gen" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Gen" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Util" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Util" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Abc" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Abc" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Asm" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Asm" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Emit" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "Emit" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [ { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PropName" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "PublicNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'id'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AstEncode" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "NamespaceFixture" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ns'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralObject'
+, 'fields': [ { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ast_class'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AnonymousNamespace" } } }
+, { 'ast_class': 'LiteralField'
+, 'kind': { 'ast_class': 'Var' }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'name'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  ] }
+, 'expr': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': "AstEncode" } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } } }
+,  ]
+, 'type': { 'ast_class': 'ObjectType'
+, 'fields': [  ] } } }
+,  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } }
+,  ]
 , 'type': { 'ast_class': 'ArrayType'
 , 'types': [  ] } } } ]
 ,  ] }
@@ -515,7 +2769,27 @@ public var ast =
 ,  ] } }
 , 'args': [ { 'ast_class': 'BinaryExpr'
 , 'op': { 'ast_class': 'Plus' }
-, 'e1': { 'ast_class': 'ObjectRef'
+, 'e1': { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'Plus' }
+, 'e1': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'fname'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'avmplus' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Encode' }
+,  ]
+,  ] } }
+, 'e2': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralString'
+, 'strValue': ".ast, " } } }
+, 'e2': { 'ast_class': 'ObjectRef'
 , 'base': { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
 , 'ident': 'tx'
@@ -540,7 +2814,7 @@ public var ast =
 ,  [ { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Encode' }
 ,  ]
-,  ] } }
+,  ] } } }
 , 'e2': { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralString'
 , 'strValue': " chars written" } } }

@@ -907,36 +907,6 @@ public var ast =
 , 'decimalValue': '0xFF' } } }
 ,  ] }
 ,  ] } }
-, { 'ast_class': 'ExprStmt'
-, 'expr': { 'ast_class': 'ListExpr'
-, 'exprs': [ { 'ast_class': 'CallExpr'
-, 'expr': { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'print'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'flash.utils' }
-,  ]
-,  [  ]
-,  ] } }
-, 'args': [ { 'ast_class': 'LiteralExpr'
-, 'literal': { 'ast_class': 'LiteralString'
-, 'strValue': "int24 " } }
-, { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'val'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'flash.utils' }
-,  ]
-,  [  ]
-,  ] } }
-,  ] }
-,  ] } }
 ,  ] }
 , 'params': { 'fixtures': [ [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
@@ -3101,6 +3071,187 @@ public var ast =
 , 'params': { 'fixtures': [  ]
 , 'exprs': [  ] }
 , 'vars': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'defaults': [ ]
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } } }
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': true
+, 'isOverride': false
+, 'isFinal': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'getArrayOfBytes' } }
+, { 'ast_class': 'MethodFixture'
+, 'func': { 'ast_class': 'Func'
+, 'name': { 'kind': { 'ast_class': 'Ordinary' }
+, 'ident': 'getArrayOfBytes' }
+, 'isNative': false
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'a' } }
+, { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralArray'
+, 'exprs': [  ]
+, 'type': { 'ast_class': 'ArrayType'
+, 'types': [  ] } } } ]
+,  ] }
+,  ] } }
+, { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'SetExpr'
+, 'op': { 'ast_class': 'Assign' }
+, 'le': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'position'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 're': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralDecimal'
+, 'decimalValue': '0' } } }
+,  ] } }
+, { 'ast_class': 'WhileStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytesAvailable'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+, 'stmt': { 'ast_class': 'BlockStmt'
+, 'block': { 'ast_class': 'Block'
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'a'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'push'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'BinaryExpr'
+, 'op': { 'ast_class': 'BitwiseAnd' }
+, 'e1': { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'bytes'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'readByte'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [  ] }
+, 'e2': { 'ast_class': 'LiteralExpr'
+, 'literal': { 'ast_class': 'LiteralDecimal'
+, 'decimalValue': '0xff' } } }
+,  ] }
+,  ] } }
+,  ] } }
+, 'labels': [] }
+, { 'ast_class': 'ReturnStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'a'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'PublicNamespace'
+, 'name': 'flash.utils' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] } }
+,  ] }
+, 'params': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'vars': { 'fixtures': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+, 'id': 'a' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
 , 'exprs': [  ] }
 , 'defaults': [ ]
 , 'type': { 'ast_class': 'SpecialType'

@@ -3437,7 +3437,286 @@ public var ast =
 , 'ident': 'Colon' } }
 ,  ] } }
 ,  ] } }
-, { 'ast_class': 'ExprStmt'
+, { 'ast_class': 'SwitchStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'hd'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts2'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+,  ] }
+, 'cases': [ { 'ast_class': 'Case'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Token'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'LeftBrace' } }
+,  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LetExpr'
+, 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'objectLiteral'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts2'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] } ]
+,  ] }
+,  ] }
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts3' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '0'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+, { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'nd3' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+,  ] } }
+,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+, { 'ast_class': 'Case'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Token'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'LeftBracket' } }
+,  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LetExpr'
+, 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'arrayLiteral'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts2'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] } ]
+,  ] }
+,  ] }
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts3' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '0'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+, { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'nd3' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+,  ] } }
+,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+, { 'ast_class': 'Case'
+, 'expr': null
+, 'stmts': [ { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'LetExpr'
 , 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
@@ -3547,6 +3826,11 @@ public var ast =
 ,  ] }
 ,  ] } }
 ,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+,  ]
+, 'labels': [] }
 , { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'CallExpr'
@@ -3799,6 +4083,46 @@ public var ast =
 , 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
 , 'name': 'Parse' }
 , 'id': 'nd2' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 1 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts3' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 0 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'nd3' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 1 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts3' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 0 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'nd3' } }
 , { 'ast_class': 'ValFixture'
 , 'type': { 'ast_class': 'ElementTypeRef'
 , 'base': { 'ast_class': 'SpecialType'
@@ -5907,6 +6231,285 @@ public var ast =
 ,  ] }
 , { 'ast_class': 'Case'
 , 'expr': null
+, 'stmts': [ { 'ast_class': 'SwitchStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'hd'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+,  ] }
+, 'cases': [ { 'ast_class': 'Case'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Token'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'LeftBrace' } }
+,  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LetExpr'
+, 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'objectLiteral'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] } ]
+,  ] }
+,  ] }
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts1' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '0'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+, { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+,  ] } }
+,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+, { 'ast_class': 'Case'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Token'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'LeftBracket' } }
+,  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LetExpr'
+, 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'arrayLiteral'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] } ]
+,  ] }
+,  ] }
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts1' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '0'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+, { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+,  ] } }
+,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+, { 'ast_class': 'Case'
+, 'expr': null
 , 'stmts': [ { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'LetExpr'
@@ -5943,7 +6546,7 @@ public var ast =
 ,  ] } }
 , 'args': [ { 'ast_class': 'LexicalRef'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'ts'
+, 'ident': 'ts1'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]
@@ -6017,6 +6620,11 @@ public var ast =
 ,  ] }
 ,  ] } }
 ,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+,  ]
+, 'labels': [] }
 , { 'ast_class': 'BreakStmt'
 , 'ident': null }
 ,  ] }
@@ -6437,6 +7045,285 @@ public var ast =
 ,  ] }
 , { 'ast_class': 'Case'
 , 'expr': null
+, 'stmts': [ { 'ast_class': 'SwitchStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'hd'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] }
+,  ] }
+, 'cases': [ { 'ast_class': 'Case'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Token'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'LeftBrace' } }
+,  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LetExpr'
+, 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'objectLiteral'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] } ]
+,  ] }
+,  ] }
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts1' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '0'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+, { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+,  ] } }
+,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+, { 'ast_class': 'Case'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'QualifiedIdentifier'
+, 'qual': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'Token'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'ident': 'LeftBracket' } }
+,  ] }
+, 'stmts': [ { 'ast_class': 'ExprStmt'
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'LetExpr'
+, 'head': { 'fixtures': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+,  ]
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'LetInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'TempName'
+, 'index': 0 }
+, { 'ast_class': 'CallExpr'
+, 'expr': { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'arrayLiteral'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+, 'args': [ { 'ast_class': 'LexicalRef'
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': 'ts1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Release' }
+, { 'ast_class': 'IntrinsicNamespace' }
+,  ]
+,  [ { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Lex' }
+,  ]
+,  [  ]
+,  ] } }
+,  ] } ]
+,  ] }
+,  ] }
+, 'expr': { 'ast_class': 'ListExpr'
+, 'exprs': [ { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts1' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '0'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+, { 'ast_class': 'InitExpr'
+, 'target': { 'ast_class': 'VarInit' }
+, 'head': { 'fixtures': [  ]
+, 'exprs': [  ] }
+, 'inits': [ [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ObjectRef'
+, 'base': { 'ast_class': 'GetTemp'
+, 'n': 0 }
+, 'ident': { 'ast_class': 'Identifier'
+, 'ident': '1'
+, 'nss': [  [ { 'ast_class': 'PublicNamespace'
+, 'name': '' }
+,  ]
+,  ] } } ]
+,  ] }
+,  ] } }
+,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+, { 'ast_class': 'Case'
+, 'expr': null
 , 'stmts': [ { 'ast_class': 'ExprStmt'
 , 'expr': { 'ast_class': 'ListExpr'
 , 'exprs': [ { 'ast_class': 'LetExpr'
@@ -6547,6 +7434,11 @@ public var ast =
 ,  ] }
 ,  ] } }
 ,  ] } }
+, { 'ast_class': 'BreakStmt'
+, 'ident': null }
+,  ] }
+,  ]
+, 'labels': [] }
 , { 'ast_class': 'BreakStmt'
 , 'ident': null }
 ,  ] }
@@ -6769,6 +7661,86 @@ public var ast =
 , { 'ast_class': 'ValFixture'
 , 'type': { 'ast_class': 'SpecialType'
 , 'kind': { 'ast_class': 'AnyType' } }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts1' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 0 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 1 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts1' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 0 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 1 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts1' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 0 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 1 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ts1' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 0 }
+, 'isReadOnly': false } ]
+, [ { 'ast_class': 'PropName'
+, 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'
+, 'name': 'Parse' }
+, 'id': 'ndx' } }
+, { 'ast_class': 'ValFixture'
+, 'type': { 'ast_class': 'ElementTypeRef'
+, 'base': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
+, 'index': 1 }
 , 'isReadOnly': false } ]
 , [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'AnonymousNamespace'

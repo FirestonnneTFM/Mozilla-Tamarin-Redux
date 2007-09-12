@@ -529,7 +529,7 @@ public var ast =
 , 'defaults': [ ]
 , 'type': { 'ast_class': 'TypeName'
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'String'
+, 'ident': 'int'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]

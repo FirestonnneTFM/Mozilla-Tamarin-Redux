@@ -4502,7 +4502,7 @@ public var ast =
 ,  [  ]
 ,  ] } }
 , 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'e2'
+, 'ident': 'e1'
 , 'nss': [  [ { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 ,  ]

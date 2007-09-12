@@ -1,7 +1,7 @@
 function prime(n) {
-    var m : int = n;
-    var limit : int = n/2;
-    var i : int = 2;
+    var m /*: int*/ = n;
+    var limit /*: int*/ = n/2;
+    var i /*: int*/ = 2;
     while (i<=limit) {
         if(!(m%i)) {
             return false;

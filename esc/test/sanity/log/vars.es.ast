@@ -14,14 +14,8 @@ public var ast =
 , 'name': '' }
 , 'id': 's2' } }
 , { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'TypeName'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'String'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [  ]
-,  ] } }
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
 , 'isReadOnly': false } ]
 , [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
@@ -36,56 +30,32 @@ public var ast =
 , 'name': '' }
 , 'id': 'b2' } }
 , { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'TypeName'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'Boolean'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [  ]
-,  ] } }
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
 , 'isReadOnly': false } ]
 , [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 , 'id': 'n1' } }
 , { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'TypeName'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'uint'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [  ]
-,  ] } }
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
 , 'isReadOnly': false } ]
 , [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 , 'id': 'n2' } }
 , { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'TypeName'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'int'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [  ]
-,  ] } }
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
 , 'isReadOnly': false } ]
 , [ { 'ast_class': 'PropName'
 , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
 , 'name': '' }
 , 'id': 'n3' } }
 , { 'ast_class': 'ValFixture'
-, 'type': { 'ast_class': 'TypeName'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'Number'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [  ]
-,  ] } }
+, 'type': { 'ast_class': 'SpecialType'
+, 'kind': { 'ast_class': 'AnyType' } }
 , 'isReadOnly': false } ]
 ,  ]
 , 'exprs': [  ] }

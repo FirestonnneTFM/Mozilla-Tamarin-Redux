@@ -325,22 +325,7 @@ public var ast =
 ,  ] } }
 , 'args': [ { 'ast_class': 'LiteralExpr'
 , 'literal': { 'ast_class': 'LiteralString'
-, 'strValue': "parsing: " } }
-, { 'ast_class': 'LexicalRef'
-, 'ident': { 'ast_class': 'Identifier'
-, 'ident': 'str'
-, 'nss': [  [ { 'ast_class': 'PublicNamespace'
-, 'name': '' }
-,  ]
-,  [ { 'ast_class': 'PublicNamespace'
-, 'name': 'avmplus' }
-,  ]
-,  [ { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Parse' }
-, { 'ast_class': 'AnonymousNamespace'
-, 'name': 'Gen' }
-,  ]
-,  ] } }
+, 'strValue': "parsing" } }
 ,  ] }
 ,  ] } }
 , { 'ast_class': 'ExprStmt'
