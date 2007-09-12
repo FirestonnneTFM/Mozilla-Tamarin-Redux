@@ -181,6 +181,10 @@
             return bytes;
         }
 
+        function getArrayOfBytes () {
+            return bytes;
+        }
+
         /*private*/ const bytes;
     }
 }

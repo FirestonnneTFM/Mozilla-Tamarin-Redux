@@ -66,7 +66,7 @@ public namespace Lex
         }
 
         function next ()
-            : String
+            : int
         {
             if (curIndex == src.length)
             {

@@ -23,9 +23,10 @@ namespace Util
     }
 
     function memberOf(x, ys) {
-        for ( var i=0 ; i < ys.length ; i++ )
+        for ( var i=0 ; i < ys.length ; i++ ) {
             if (ys[i] === x)
                 return true;
+        }
         return false;
     }
 

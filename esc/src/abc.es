@@ -68,7 +68,7 @@ namespace Abc;
         const classes = [];
         const scripts = [];
         const bodies = [];
-        var constants;
+        var constants : ABCConstantPool;
 
         public function getBytes(): * /* same type as ABCByteStream.getBytes() */ {
             function emitArray(a, len) {

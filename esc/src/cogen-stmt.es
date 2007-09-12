@@ -94,7 +94,8 @@
         asm.I_label(L0);
     }
 
-    function cgIfStmt(ctx, {expr:test, then:consequent, elseOpt:alternate}) {
+    function cgIfStmt(ctx, s) {
+        var {expr:test, then:consequent, elseOpt:alternate} = s;
         let asm = ctx.asm;
         cgExpr(ctx, test);
         let L0 = asm.I_iffalse(undefined);
@@ -111,7 +112,8 @@
 
     // Probable AST bug: should be no fixtures here, you can't define
     // vars in the WHILE head.
-    function cgWhileStmt(ctx, {stmt: stmt, labels: labels, expr: expr}) {
+    function cgWhileStmt(ctx, s) {
+        var {stmt: stmt, labels: labels, expr: expr} = s;
         let asm    = ctx.asm;
         let Lbreak = asm.newLabel();
         let Lcont  = asm.I_jump(undefined);
@@ -125,7 +127,8 @@
 
     // Probable AST bug: should be no fixtures here, you can't define
     // vars in the DO-WHILE head.
-    function cgDoWhileStmt(ctx, {stmt: stmt, labels: labels, expr: expr}) {
+    function cgDoWhileStmt(ctx, s) {
+        var {stmt: stmt, labels: labels, expr: expr} = s;
         let asm    = ctx.asm;
         let Lbreak = asm.newLabel();
         let Lcont  = asm.newLabel();
@@ -137,7 +140,8 @@
         asm.I_label(Lbreak);
     }
 
-    function cgForStmt(ctx, {vars:vars,init:init,cond:cond,incr:incr,stmt:stmt,labels:labels}) {
+    function cgForStmt(ctx, s) {
+        var {vars:vars,init:init,cond:cond,incr:incr,stmt:stmt,labels:labels} = s;
         // FIXME: fixtures
         // FIXME: code shape?
         let asm = ctx.asm;
@@ -164,7 +168,9 @@
         asm.I_label(Lbreak);
     }
 
-    function cgBreakStmt(ctx, {ident: ident}) {
+    function cgBreakStmt(ctx, s) {
+        var {ident: ident} = s;
+        let stk = ctx.stk;
         function hit (node) {
             return node.tag == "break" && (ident == null || memberOf(ident, stk.labels))
         }
@@ -174,9 +180,11 @@
                                 "Internal error: definer should have checked that all referenced labels are defined");
     }
 
-    function cgContinueStmt(ctx, {ident: ident}) {
+    function cgContinueStmt(ctx, s) {
+        var {ident: ident} = s;
+        let stk = ctx.stk;
         function hit(node) {
-             return node.tag == "continue" && (ident == null || memberOf(ident, stk.labels))
+            return node.tag == "continue" && (ident == null || memberOf(ident, stk.labels))
         }
         unstructuredControlFlow(ctx,
                                 hit,
@@ -213,7 +221,8 @@
         }
     }
 
-    function cgSwitchStmt(ctx, {expr:expr, cases:cases, labels:labels}) {
+    function cgSwitchStmt(ctx, s) {
+        var {expr:expr, cases:cases, labels:labels} = s;
         let asm = ctx.asm;
         cgExpr(ctx, expr);
         let t = asm.getTemp();
@@ -266,7 +275,8 @@
         asm.killTemp(t);
     }
 
-    function cgSwitchTypeStmt(ctx, {expr:expr, type:type, cases:cases}) {
+    function cgSwitchTypeStmt(ctx, s) {
+        var {expr:expr, type:type, cases:cases} = s;
         let b = new Block(new Ast::Head([],[]), [new ThrowStmt(expr)]);
 
         let newcases = [];
@@ -287,7 +297,8 @@
         cgTryStmt(ctx, {block:b, catches:newcases, finallyBlock:null} );        
     }
     
-    function cgWithStmt(ctx, {expr:expr}) {
+    function cgWithStmt(ctx, s) {
+        var {expr:expr} = s;
         let asm = ctx.asm;
         // FIXME: save the scope object in a register and record this fact in the ctx inside
         // the body, so that catch/finally handlers inside the body can restore the scope
@@ -301,7 +312,8 @@
         asm.I_popscope();
     }
     
-    function cgTryStmt(ctx, {block:block, catches:catches, finallyBlock:finallyBlock}) {
+    function cgTryStmt(ctx, s) {
+        var {block:block, catches:catches, finallyBlock:finallyBlock} = s;
         let asm = ctx.asm;
         let code_start = asm.length;
         cgBlock(ctx, block);
@@ -320,7 +332,8 @@
         //FIXME need to do finally
     }
     
-    function cgCatch(ctx, [code_start, code_end, Lend], {param:param, block:block} ) {
+    function cgCatch(ctx, [code_start, code_end, Lend], s ) {
+        var {param:param, block:block} = s;
         let {asm:asm, emitter:emitter, target:target} = ctx;
         
         if( param.fixtures.length != 1 )

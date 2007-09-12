@@ -352,7 +352,8 @@ namespace Gen;
         return method.finalize();
     }
 
-    function extractFormalTypes({emitter:emitter, script:script}, f:Func) {
+    function extractFormalTypes(ctx, f:Func) {
+        var {emitter:emitter, script:script} = ctx;
         function extractType([name,fixture])
             emitter.fixtureTypeToType(fixture);
         
@@ -361,7 +362,8 @@ namespace Gen;
         return map(extractType, named_fixtures);
     }
         
-    function extractDefaultValues({emitter:emitter, script:script}, f:Func) {
+    function extractDefaultValues(ctx, f:Func) {
+        var {emitter:emitter, script:script} = ctx;
         function extractDefaults(expr)
             emitter.defaultExpr(expr);
 
@@ -372,7 +374,8 @@ namespace Gen;
      * Generate code for the function
      * Return the function index
      */
-    function cgFunc({emitter:emitter, script:script}, f:FUNC, initScopeDepth) {
+    function cgFunc(ctx0, f:FUNC, initScopeDepth) {
+        var {emitter:emitter,script:script} = ctx0;
         let formals_type = extractFormalTypes({emitter:emitter, script:script}, f);
         let method = script.newFunction(formals_type,initScopeDepth);
         let asm = method.asm;
@@ -473,7 +476,8 @@ namespace Gen;
     // Handles scopes and finally handlers and returns a label, if appropriate, to
     // branch to.  "tag" is one of "function", "break", "continue"
 
-    function unstructuredControlFlow({stk:stk, asm:asm}, hit, jump, msg) {
+    function unstructuredControlFlow(ctx, hit, jump, msg) {
+        var {stk:stk, asm:asm} = ctx;
         while (stk != null) {
             if (hit(stk)) {
                 if (jump)
@@ -492,7 +496,8 @@ namespace Gen;
         throw msg;
     }
 
-    function restoreScopes({stk:stk, asm:asm}) {
+    function restoreScopes(ctx) {
+        var {stk:stk, asm:asm} = ctx;
         let regs = [];
         while (stk != null) {
             if(stk.has_scope) {

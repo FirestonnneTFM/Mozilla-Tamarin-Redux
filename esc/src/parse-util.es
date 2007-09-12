@@ -492,6 +492,7 @@ public namespace Parse;
 
     class TokenStream {
         var ts: Array;
+        /// var ts: ByteArray
         var n: int;
         function TokenStream (ts,n)
             : ts = ts
@@ -499,6 +500,10 @@ public namespace Parse;
         
         function head () : int{
             return ts[n];
+            //if (ts.position == n) {
+            //    current_char = ts.readUnsignedInt ();
+            //}
+            //return current_char;
         }
         
         function next () : void {

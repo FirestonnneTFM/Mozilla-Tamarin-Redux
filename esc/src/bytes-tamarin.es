@@ -195,5 +195,14 @@
             return bytes;
         }
 
+        function getArrayOfBytes () {
+            var a = [];
+            bytes.position = 0;
+            while (bytes.bytesAvailable) {
+                a.push (bytes.readByte()&0xff);
+            }
+            return a;
+        }
     }
+
 }

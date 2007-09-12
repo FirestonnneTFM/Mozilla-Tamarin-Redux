@@ -125,7 +125,7 @@
             asm.I_label(L0);
         }
         else if (e.op is LogicalOr) {
-            cgExpr(ctx, e.e2);
+            cgExpr(ctx, e.e1);
             asm.I_convert_b();
             asm.I_dup();
             let L0 = asm.I_iftrue(undefined);

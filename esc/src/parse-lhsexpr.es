@@ -166,7 +166,18 @@ use namespace intrinsic;
 
             var [ts2,nd2] = fieldName (ts);
             ts2 = eat (ts2,Token::Colon);
-            var [ts3,nd3] = assignmentExpression (ts2,allowIn);
+
+            switch (hd (ts2)) {
+            case Token::LeftBrace:   // short cut to avoid recursion
+                var [ts3,nd3] = objectLiteral (ts2);
+                break;
+            case Token::LeftBracket:
+                var [ts3,nd3] = arrayLiteral (ts2);
+                break;
+            default:
+                var [ts3,nd3] = assignmentExpression (ts2,allowIn);
+                break;
+            }
 
             exit ("Parser::literalField", ts3);
             return [ts3, new Ast::LiteralField (nd1,nd2,nd3)];
@@ -269,7 +280,17 @@ use namespace intrinsic;
                     var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined)];
                     break;
                 default:
-                    var [ts1,ndx] = assignmentExpression (ts,allowIn);
+                    switch (hd (ts1)) {
+                    case Token::LeftBrace:
+                        var [ts1,ndx] = objectLiteral (ts1);
+                        break;
+                    case Token::LeftBracket:
+                        var [ts1,ndx] = arrayLiteral (ts1);
+                        break;
+                    default:
+                        var [ts1,ndx] = assignmentExpression (ts1,allowIn);
+                        break;
+                    }
                     break;
                 }
                 nd1.push (ndx);
@@ -282,7 +303,17 @@ use namespace intrinsic;
                     case Token::RightBracket:
                         continue;  // we're done
                     default:
-                        var [ts1,ndx] = assignmentExpression (ts1,allowIn);
+                        switch (hd (ts1)) {
+                        case Token::LeftBrace:
+                            var [ts1,ndx] = objectLiteral (ts1);
+                            break;
+                        case Token::LeftBracket:
+                            var [ts1,ndx] = arrayLiteral (ts1);
+                            break;
+                        default:
+                            var [ts1,ndx] = assignmentExpression (ts1,allowIn);
+                            break;
+                        }
                         break;
                     }
                     nd1.push (ndx);
@@ -402,8 +433,6 @@ use namespace intrinsic;
                 return resolveObjectPath (path.slice (1,path.length), base);
             }
         }
-
-
 
         /*
 
