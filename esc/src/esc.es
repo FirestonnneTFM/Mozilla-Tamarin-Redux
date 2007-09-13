@@ -10,8 +10,8 @@
     use namespace Parse;
     use namespace Gen;
     var esc_env_str = File.read ("esc-env.ast");
-    var parser = initParser(esc_env_str,[]);
-    var [ts,nd] = program();
+    var parser = new Parser(esc_env_str,[]);
+    var [ts,nd] = parser.program();
     var bytes = cg(nd).getBytes();
     Domain.currentDomain.loadBytes(bytes);
 }
@@ -28,8 +28,8 @@
 {
     use namespace Parse;
     //print ("parsing");
-    var parser = initParser(str,topFixtures);
-    var [ts,nd] = program();
+    var parser = new Parser(str,topFixtures);
+    var [ts,nd] = parser.program();
 }
 
 {

@@ -16,8 +16,8 @@ import avmplus.*;
     use namespace Gen;
     //print ("parsing ast");
     var top = []
-    var parser = initParser(str,top);
-    var [ts,nd] = program();
+    var parser = new Parser(str,top);
+    var [ts,nd] = parser.program();
     //print ("gening ast");
     var bytes = cg(nd).getBytes();
     //print ("loading ast");

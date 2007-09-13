@@ -44,6 +44,7 @@ use namespace intrinsic;
     use namespace Lex;
 
     {
+    }
         function parenExpression (ts: TOKENS)
             : [TOKENS, Ast::EXPR]
         {
@@ -768,5 +769,4 @@ use namespace intrinsic;
             exit ("Parser::leftHandSideExpression ", ndx);
             return [tsx, ndx];
         }
-    }
 }

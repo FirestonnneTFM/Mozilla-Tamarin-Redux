@@ -16,8 +16,8 @@ import avmplus.*;
     use namespace Gen;
     //print ("parsing");
     var top = [];
-    var parser = initParser(str,top);
-    var [ts,nd] = program();
+    var parser = new Parser(str,top);
+    var [ts,nd] = parser.program();
     var bytes = cg(nd).getBytes();
     Domain.currentDomain.loadBytes(bytes);
 }

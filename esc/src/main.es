@@ -47,9 +47,10 @@
 
     public function evalString(str)
     {
+        use namespace Parse;
         var top = []
-        var parser = Parse::initParser(str,top);
-        var [ts,nd] = Parse::program();
+        var parser = new Parser(str,top);
+        var [ts,nd] = parser.program();
         var bytes = Gen::cg(nd).getBytes();
 
         let b = new ByteArray();
