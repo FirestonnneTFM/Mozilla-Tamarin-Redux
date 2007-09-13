@@ -1,11 +1,10 @@
 function run {
-echo compiling $1
 cd ../build
-#../build/esc1-r.sh ../test/sanity/tests/$1
-cp ../test/sanity/base/$1.ast ../test/sanity/tests
+../build/esc1-t.sh ../test/sanity/tests/$1
 ../build/esc2-t.sh ../test/sanity/tests/$1
-../build/esc3-t.sh ../test/sanity/tests/$1
-../bin/shell -log ../test/sanity/tests/$1.abc
+#../build/esc3-t.sh ../test/sanity/tests/$1
+../build/esc-t.sh ../test/sanity/tests/$1
+../bin/shell ../test/sanity/tests/$1.abc > ../test/sanity/tests/$1.log
 cd ../test
 }
 

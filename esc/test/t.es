@@ -1,3 +1,1 @@
-print(1);
-print(2);
-print(3);
+var [ts,nd] = [10,20]
