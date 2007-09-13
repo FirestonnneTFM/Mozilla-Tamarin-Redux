@@ -1,9 +1,9 @@
 function run {
 cd ../build
-../build/esc1-t.sh ../test/sanity/tests/$1
-../build/esc2-t.sh ../test/sanity/tests/$1
-#../build/esc3-t.sh ../test/sanity/tests/$1
-../build/esc-t.sh ../test/sanity/tests/$1
+../build/esc1.sh ../test/sanity/tests/$1
+../build/esc2.sh ../test/sanity/tests/$1
+../build/esc3.sh ../test/sanity/tests/$1
+../build/esc.sh ../test/sanity/tests/$1
 ../bin/shell ../test/sanity/tests/$1.abc > ../test/sanity/tests/$1.log
 cd ../test
 }
@@ -19,6 +19,7 @@ rm sanity/log/*.es.ast
 rm sanity/log/*.es.asm
 rm sanity/log/*.es.abc
 rm sanity/log/*.es.log
+rm sanity/log/*.es.es
 
 run arrayliteral.es
 run cls.es
@@ -43,5 +44,6 @@ run destruct.es
 cp sanity/tests/*.es.ast sanity/log
 cp sanity/tests/*.es.asm sanity/log
 cp sanity/tests/*.es.log sanity/log
+cp sanity/tests/*.es.es sanity/log
 
 diff -s sanity/base sanity/log

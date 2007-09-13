@@ -1,1 +1,4 @@
-var [ts,nd] = [10,20]
+class A {
+var x;
+function A(x) : x = x { }
+}

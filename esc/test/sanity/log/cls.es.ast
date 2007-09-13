@@ -15,24 +15,7 @@ public var ast =
                                                    , 'id': 'Object' }
                                      , 'interfaceNames': []
                                      , 'constructor': { 'ast_class': 'Ctor'
-                                                      , 'settings': [ { 'ast_class': 'InitExpr'
-                                                                      , 'target': { 'ast_class': 'InstanceInit' }
-                                                                      , 'head': { 'fixtures': [  ]
-                                                                                , 'exprs': [  ] }
-                                                                      , 'inits': [ [ { 'ast_class': 'PropName'
-                                                                                     , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
-                                                                                                       , 'name': '' }
-                                                                                               , 'id': 'x' } }
-                                                                                   , { 'ast_class': 'LexicalRef'
-                                                                                     , 'ident': { 'ast_class': 'Identifier'
-                                                                                                , 'ident': 'x'
-                                                                                                , 'nss': [  [ { 'ast_class': 'PublicNamespace'
-                                                                                                              , 'name': '' }
-                                                                                                            ,  ]
-                                                                                                         ,  [  ]
-                                                                                                         ,  ] } } ]
-                                                                                 ,  ] }
-                                                                    , ]
+                                                      , 'settings': [ ]
                                                       , 'superArgs': [  ]
                                                       , 'func': { 'ast_class': 'Func'
                                                                 , 'name': { 'kind': { 'ast_class': 'Ordinary' }

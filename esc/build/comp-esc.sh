@@ -1,197 +1,34 @@
-### STEP1: compile esc3 .es to .ast using esc1-r
+#./esc.sh ../src/debug.es
+#./esc.sh ../src/util.es
+#./esc.sh ../src/utilamarin.es
+#./esc.sh ../src/lex-char.es
+#./esc.sh ../src/lex-token.es
+#./esc.sh ../src/lex-scan.es
+#./esc.sh ../src/ast.es
+#./esc.sh ../src/ast-decode.es
+#./esc.sh ../src/ast-encode.es
+#./esc.sh ../src/parse-util.es
+#./esc.sh ../src/parse-ident.es
+#./esc.sh ../src/parse-lhsexpr.es
+#./esc.sh ../src/parse-assignexpr.es
+#./esc.sh ../src/parse-ptrn.es
+#./esc.sh ../src/parse-type.es
+#./esc.sh ../src/parse-stmt.es
+#./esc.sh ../src/parse-defn.es
+#./esc.sh ../src/parse-prgm.es
+#./esc.sh ../src/parse.es
+#./esc.sh ../src/bytes-tamarin.es
+#./esc.sh ../src/asm.es
+#./esc.sh ../src/abc.es
+#./esc.sh ../src/abc-encode.es
+#./esc.sh ../src/emit.es
+#./esc.sh ../src/cogen.es
+#./esc.sh ../src/cogen-stmt.es
+#./esc.sh ../src/cogen-expr.es
+#./esc.sh ../src/esc1-t.es
+./esc.sh ../src/esc2-t.es
+./esc.sh ../src/esc3-t.es
+#./esc.sh ../src/esc-t.es
+#./esc.sh ../src/main.es
 
-#./esc1-t.sh ../src/debug.es
-#./esc1-t.sh ../src/util.es
-#./esc1-t.sh ../src/util-ramarin.es
-#./esc1-t.sh ../src/lex-char.es
-#./esc1-t.sh ../src/lex-token.es
-#./esc1-t.sh ../src/lex-scan.es
-#./esc1-t.sh ../src/ast.es
-#./esc1-t.sh ../src/ast-decode.es
-#./esc1-t.sh ../src/ast-encode.es
-#./esc1-t.sh ../src/parse-util.es
-#./esc1-t.sh ../src/parse-ident.es
-#./esc1-t.sh ../src/parse-lhsexpr.es
-#./esc1-t.sh ../src/parse-assignexpr.es
-#./esc1-t.sh ../src/parse-ptrn.es
-#./esc1-t.sh ../src/parse-type.es
-#./esc1-t.sh ../src/parse-stmt.es
-#./esc1-t.sh ../src/parse-defn.es
-#./esc1-t.sh ../src/parse-prgm.es
-#./esc1-t.sh ../src/bytes-tamarin.es
-#./esc1-t.sh ../src/asm.es
-#./esc1-t.sh ../src/abc.es
-#./esc1-t.sh ../src/abc-encode.es
-#./esc1-t.sh ../src/emit.es
-#./esc1-t.sh ../src/cogen.es
-#./esc1-t.sh ../src/cogen-stmt.es
-#./esc1-t.sh ../src/cogen-expr.es
-#./esc1-t.sh ../src/esc1-t.es
-#./esc1-t.sh ../src/esc2-t.es
-#./esc1-t.sh ../src/esc3-t.es
-#./esc1-t.sh ../src/esc-t.es
-#./esc1-t.sh ../src/main.es
-
-### STEP 2: compile .ast to .abc using esc3-r and copy to ../bin
-
-#./esc-t.sh ../src/debug.es
-#./esc-t.sh ../src/util.es
-#./esc-t.sh ../src/util-tamarin.es
-#./esc-t.sh ../src/lex-char.es
-#./esc-t.sh ../src/lex-token.es
-#./esc-t.sh ../src/lex-scan.es
-#./esc-t.sh ../src/ast.es
-#./esc-t.sh ../src/ast-decode.es
-#./esc-t.sh ../src/ast-encode.es
-#./esc-t.sh ../src/parse-util.es
-#./esc-t.sh ../src/parse-ident.es
-#./esc-t.sh ../src/parse-lhsexpr.es
-#./esc-t.sh ../src/parse-assignexpr.es
-#./esc-t.sh ../src/parse-ptrn.es
-#./esc-t.sh ../src/parse-type.es
-#./esc-t.sh ../src/parse-stmt.es
-#./esc-t.sh ../src/parse-defn.es
-#./esc-t.sh ../src/parse-prgm.es
-#./esc-t.sh ../src/bytes-tamarin.es
-#./esc-t.sh ../src/asm.es
-#./esc-t.sh ../src/abc.es
-#./esc-t.sh ../src/abc-encode.es
-#./esc-t.sh ../src/emit.es
-#./esc-t.sh ../src/cogen.es
-#./esc-t.sh ../src/cogen-stmt.es
-#./esc-t.sh ../src/cogen-expr.es
-./esc-t.sh ../src/esc1-t.es
-./esc-t.sh ../src/esc2-t.es
-./esc-t.sh ../src/esc3-t.es
-./esc-t.sh ../src/esc-t.es
-#./esc-t.sh ../src/main.es
-
-cp ../src/debug.es.abc ../bin
-cp ../src/util.es.abc ../bin
-cp ../src/util-tamarin.es.abc ../bin
-cp ../src/lex-char.es.abc ../bin
-cp ../src/lex-token.es.abc ../bin
-cp ../src/lex-scan.es.abc ../bin
-cp ../src/ast.es.abc ../bin
-cp ../src/ast-decode.es.abc ../bin
-cp ../src/ast-encode.es.abc ../bin
-cp ../src/parse-util.es.abc ../bin
-cp ../src/parse-ident.es.abc ../bin
-cp ../src/parse-lhsexpr.es.abc ../bin
-cp ../src/parse-assignexpr.es.abc ../bin
-cp ../src/parse-ptrn.es.abc ../bin
-cp ../src/parse-type.es.abc ../bin
-cp ../src/parse-stmt.es.abc ../bin
-cp ../src/parse-defn.es.abc ../bin
-cp ../src/parse-prgm.es.abc ../bin
-cp ../src/bytes-tamarin.es.abc ../bin
-cp ../src/asm.es.abc ../bin
-cp ../src/abc.es.abc ../bin
-cp ../src/abc-encode.es.abc ../bin
-cp ../src/emit.es.abc ../bin
-cp ../src/cogen.es.abc ../bin
-cp ../src/cogen-stmt.es.abc ../bin
-cp ../src/cogen-expr.es.abc ../bin
-cp ../src/esc1-t.es.abc ../bin
-cp ../src/esc2-t.es.abc ../bin
-cp ../src/esc3-t.es.abc ../bin
-cp ../src/esc-t.es.abc ../bin
-cp ../src/main.es.abc ../bin
-
-### STEP 3: compile .es to .abc using esc1-t.sh and esc3-t.sh
-
-#./esc1-t.sh ../src/debug.es
-#./esc1-t.sh ../src/util.es
-#./esc1-t.sh ../src/util-tamarin.es
-#./esc1-t.sh ../src/lex-char.es
-#./esc1-t.sh ../src/lex-token.es
-#./esc1-t.sh ../src/lex-scan.es
-#./esc1-t.sh ../src/ast.es
-#./esc1-t.sh ../src/ast-decode.es
-#./esc1-t.sh ../src/ast-encode.es
-#./esc1-t.sh ../src/parse-util.es
-#./esc1-t.sh ../src/parse-ident.es
-#./esc1-t.sh ../src/parse-lhsexpr.es
-#./esc1-t.sh ../src/parse-assignexpr.es
-#./esc1-t.sh ../src/parse-ptrn.es
-#./esc1-t.sh ../src/parse-type.es
-#./esc1-t.sh ../src/parse-stmt.es
-#./esc1-t.sh ../src/parse-defn.es
-#./esc1-t.sh ../src/parse-prgm.es
-#./esc1-t.sh ../src/bytes-tamarin.es
-#./esc1-t.sh ../src/asm.es
-#./esc1-t.sh ../src/abc.es
-#./esc1-t.sh ../src/emit.es
-#./esc1-t.sh ../src/cogen.es
-#./esc1-t.sh ../src/cogen-stmt.es
-#./esc1-t.sh ../src/cogen-expr.es
-#./esc1-t.sh ../src/esc1-t.es
-#./esc1-t.sh ../src/esc2-t.es
-#./esc1-t.sh ../src/esc3-t.es
-#./esc1-t.sh ../src/esc-t.es
-#./esc1-t.sh ../src/main.es
-
-### translate .ast to .asm, is good for debugging
-
-#./esc2-t.sh ../src/debug.es
-#./esc2-t.sh ../src/util.es
-#./esc2-t.sh ../src/util-tamarin.es
-#./esc2-t.sh ../src/lex-char.es
-#./esc2-t.sh ../src/lex-token.es
-#./esc2-t.sh ../src/lex-scan.es
-#./esc2-t.sh ../src/ast.es
-#./esc2-t.sh ../src/ast-decode.es
-#./esc2-t.sh ../src/ast-encode.es
-#./esc2-t.sh ../src/parse-util.es
-#./esc2-t.sh ../src/parse-ident.es
-#./esc2-t.sh ../src/parse-lhsexpr.es
-#./esc2-t.sh ../src/parse-assignexpr.es
-#./esc2-t.sh ../src/parse-ptrn.es
-#./esc2-t.sh ../src/parse-type.es
-#./esc2-t.sh ../src/parse-stmt.es
-#./esc2-t.sh ../src/parse-defn.es
-#./esc2-t.sh ../src/parse-prgm.es
-#./esc2-t.sh ../src/bytes-tamarin.es
-#./esc2-t.sh ../src/asm.es
-#./esc2-t.sh ../src/abc.es
-#./esc2-t.sh ../src/emit.es
-#./esc2-t.sh ../src/cogen.es
-#./esc2-t.sh ../src/cogen-stmt.es
-#./esc2-t.sh ../src/cogen-expr.es
-#./esc2-t.sh ../src/esc1-t.es
-#./esc2-t.sh ../src/esc2-t.es
-#./esc2-t.sh ../src/esc3-t.es
-#./esc2-t.sh ../src/esc-t.es
-#./esc2-t.sh ../src/main.es
-
-#./esc3-t.sh ../src/debug.es
-#./esc3-t.sh ../src/util.es
-#./esc3-t.sh ../src/util-tamarin.es
-#./esc3-t.sh ../src/lex-char.es
-#./esc3-t.sh ../src/lex-token.es
-#./esc3-t.sh ../src/lex-scan.es
-#./esc3-t.sh ../src/ast.es
-#./esc3-t.sh ../src/ast-decode.es
-#./esc3-t.sh ../src/ast-encode.es
-#./esc3-t.sh ../src/parse-util.es
-#./esc3-t.sh ../src/parse-ident.es
-#./esc3-t.sh ../src/parse-lhsexpr.es
-#./esc3-t.sh ../src/parse-assignexpr.es
-#./esc3-t.sh ../src/parse-ptrn.es
-#./esc3-t.sh ../src/parse-type.es
-#./esc3-t.sh ../src/parse-stmt.es
-#./esc3-t.sh ../src/parse-defn.es
-#./esc3-t.sh ../src/parse-prgm.es
-#./esc3-t.sh ../src/bytes-tamarin.es
-#./esc3-t.sh ../src/asm.es
-#./esc3-t.sh ../src/abc.es
-#./esc3-t.sh ../src/emit.es
-#./esc3-t.sh ../src/cogen.es
-#./esc3-t.sh ../src/cogen-stmt.es
-#./esc3-t.sh ../src/cogen-expr.es
-#./esc3-t.sh ../src/esc1-t.es
-#./esc3-t.sh ../src/esc2-t.es
-#./esc3-t.sh ../src/esc3-t.es
-#./esc3-t.sh ../src/esc-t.es
-#./esc3-t.sh ../src/main.es
-
+cp ../src/*.es.abc ../bin
