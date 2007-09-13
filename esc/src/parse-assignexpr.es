@@ -352,15 +352,15 @@ use namespace intrinsic;
                     nd2 = new Ast::BinaryExpr (Ast::instanceOfOp,nd1,nd2);
                     break;
                 case Token::Is:
-                    var [ts2, nd2] = typeExpression (tl (ts1), beta);
+                    var [ts2, nd2] = typeExpression (tl (ts1));
                     nd2 = new Ast::BinaryTypeExpr (Ast::isOp,nd1,nd2);
                     break;
                 case Token::To:
-                    var [ts2, nd2] = typeExpression (tl (ts1), beta);
+                    var [ts2, nd2] = typeExpression (tl (ts1));
                     nd2 = new Ast::BinaryTypeExpr (Ast::toOp,nd1,nd2);
                     break;
                 case Token::Cast:
-                    var [ts2, nd2] = typeExpression (tl (ts1), beta);
+                    var [ts2, nd2] = typeExpression (tl (ts1));
                     nd2 = new Ast::BinaryTypeExpr (Ast::castOp,nd1,nd2);
                     break;
                 default:

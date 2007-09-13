@@ -48,11 +48,9 @@ public namespace Encode;
         : string {
         let str = "\n";
 
-        /*
         for ( ; n > 0; n-- ) {
             str = str + " ";
         }
-        */
 
         return str;
     }
@@ -133,8 +131,8 @@ public namespace Encode;
         case (nd:Ast::TempName) {
             var str =
                 "{ 'ast_class': 'TempName'"
-              + indent(nesting) + ", 'index': " + nd.index
-              + " }";
+              + indent(nesting) + ", 'index': '" + nd.index
+              + "' }";
         }
         case (nd: *) {
             var str = "**fixtureName, unhandled ast: " + nd + "]]";
@@ -728,17 +726,17 @@ public namespace Encode;
             var str =
                 "{ 'ast_class': 'GetTemp'"
               + indent(nesting)
-              + ", 'n': "
+              + ", 'n': '"
               + nd.n
-              + " }";
+              + "' }";
         }
         case (nd: GetParam) {
             var str =
                 "{ 'ast_class': 'GetParam'"
               + indent(nesting)
-              + ", 'n': "
+              + ", 'n': '"
               + nd.n
-              + " }";
+              + "' }";
         }
         case (nd: ThisExpr) {
             var str = "{ 'ast_class': 'ThisExpr'" + " }";
@@ -1455,7 +1453,7 @@ public namespace Encode;
     function func (nd : FUNC, nesting: int = 0)
         : string {
         enter ("Encode::func");
-        print ("func ",nd.name.ident);
+        //print ("func ",nd.name.ident);
 
         var str =
             "{ 'ast_class': 'Func'"
@@ -1477,7 +1475,7 @@ public namespace Encode;
 
         enter ("Encode::cls ",nd);
 
-        print ("cls ",nd.name.id);
+        //print ("cls ",nd.name.id);
         var str =
             "{ 'ast_class': 'Cls'"
           + indent(nesting) + ", 'name': " + name (nd.name,nesting+", 'name': ".length)

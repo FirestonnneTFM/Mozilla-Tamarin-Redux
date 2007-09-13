@@ -551,11 +551,11 @@ public namespace Token
 
     function test ()
     {
-        print ("testing lex-token.es");
+        //print ("testing lex-token.es");
         for( var i = firstTokenClass; i >= lastTokenClass; --i )
             print(i,": ",names[-i])
     }
 
-    // Token::test()
+    //Token::test()
 }
 

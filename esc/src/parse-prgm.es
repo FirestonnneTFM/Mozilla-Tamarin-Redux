@@ -323,7 +323,7 @@ use namespace intrinsic;
                 var [ts2,nd2] = classDefinition (ts, attrs.ns, attrs.dynamic);
                 break;
             case Token::Namespace:
-                print ("found namespace");
+                //print ("found namespace");
                 var [ts2,nd2] = namespaceDefinition (ts, omega, attrs.ns);
                 break;
             case Token::Type:

@@ -14,30 +14,30 @@ import avmplus.*;
 {
     use namespace Parse;
     use namespace Gen;
-    print ("parsing ast");
+    //print ("parsing ast");
     var top = []
     var parser = initParser(str,top);
     var [ts,nd] = program();
-    print ("gening ast");
+    //print ("gening ast");
     var bytes = cg(nd).getBytes();
-    print ("loading ast");
+    //print ("loading ast");
     Domain.currentDomain.loadBytes(bytes);
 }
 
 // decode it
 
 {
-    print ("decoding ast");
+    //print ("decoding ast");
     var nd = Decode::program (ast);  // defined by side effect
 }
 
 // cogen and write it
 
 {
-    print ("generating abc");
+    //print ("generating abc");
     var bytes = Gen::cg(nd);
-    print ("encoding asm");
+    //print ("encoding asm");
     var tx = AbcEncode::abcFile (bytes);
     writeFile (tx,fname+".asm");
-    print (fname+".asm, ",tx.length+" chars written");
+    print (fname+".asm, "+tx.length+" chars written");
 }

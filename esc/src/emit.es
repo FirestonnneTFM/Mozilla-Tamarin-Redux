@@ -214,7 +214,7 @@ namespace Emit;
                                 return nameFromIdent("Boolean");
                             }
 		            else {
-                                print ("warning: unknown type name " + t + ", using Object");
+                        //print ("warning: unknown type name " + t + ", using Object");
 				return nameFromIdent("Object");
 			    }
                         }

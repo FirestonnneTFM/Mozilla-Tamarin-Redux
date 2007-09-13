@@ -151,12 +151,13 @@ use namespace intrinsic;
 
         function printLn (ts:TokenStream) {
             enter ("printLn ",ts.n);
-            if (coordList.length <= ts.n)
-                print("line eos");
+            if (coordList.length <= ts.n) {
+                //print("line eos");
+            }
             else {
                 let coord = coordList[ts.n];
                 //print ("ln ",coord[0]+1," ",logicalLn);
-                print ("ln "+(coord[0]+1));
+                //print ("ln "+(coord[0]+1));
             }
             exit ("printLn");
         }

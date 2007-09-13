@@ -947,7 +947,7 @@ use namespace intrinsic;
             default:
                 var [ts1,nd1] = assignmentExpression (ts,beta);
                 ts1 = semicolon (ts1,omega);
-                var nd1 = new Ast::Block (new Ast::Head ([],[]),[new Ast::ReturnStmt (nd1)],null);
+                var nd1 = new Ast::Block (new Ast::Head ([],[]),[new Ast::ReturnStmt (nd1)]);
                 break;
             }
 

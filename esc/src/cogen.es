@@ -150,12 +150,12 @@ namespace Gen;
                     /// switch type(fx.func.name.kind) {
                     /// case (g:Get) {
                     if (fx.func.name.kind is Get) {
-                        print("Getter, target: " + target);
+                        //print("Getter, target: " + target);
                         trait_kind = TRAIT_Getter;
                     }
                     /// case (s:Set) {
                     else if (fx.func.name.kind is Set) {
-                        print("Setter, target: " +target);
+                        //print("Setter, target: " +target);
                         trait_kind = TRAIT_Setter;
                     }
                     /// }
@@ -174,7 +174,7 @@ namespace Gen;
             }
             /// case (fx:TypeFixture) {
             else if (fx is TypeFixture) {
-                print ("warning: ignoring type fixture");
+                //print ("warning: ignoring type fixture");
             }
             /// case (fx:*) { 
             else {

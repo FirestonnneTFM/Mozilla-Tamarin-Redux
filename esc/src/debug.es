@@ -16,7 +16,6 @@ function arrows (c)
     return nesting + " " + str+" ";
 }
 
-
 Debug function enter (s,a="") {
     nesting = nesting + 1;
     print (arrows(">"), s, a);

@@ -186,7 +186,7 @@ namespace Abc;
 
         public function stringUtf8(s/*FIXME ES4: string*/)/*:uint*/ {
             function temp_func(x) { utf8_bytes.uint30(x.length); utf8_bytes.utf8(x) }
-            return findOrAdd( s,
+            return findOrAdd( ""+s,  // FIXME need to make sure its a string
                               utf8_pool,
                               cmp,
                               temp_func )

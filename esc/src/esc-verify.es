@@ -1,6 +1,5 @@
 import avmplus.*;
 
-// load ast
 {
     import flash.utils.*;
     var fname = System.argv[0];
@@ -14,25 +13,28 @@ import avmplus.*;
 {
     use namespace Parse;
     use namespace Gen;
-    //print ("parsing");
-    var top = [];
+    print ("parsing ast");
+    var top = []
     var parser = initParser(str,top);
     var [ts,nd] = program();
+    print ("gening ast");
     var bytes = cg(nd).getBytes();
+    print ("loading ast");
     Domain.currentDomain.loadBytes(bytes);
 }
 
 // decode it
 
 {
-    //print ("decoding");
+    print ("decoding ast");
     var nd = Decode::program (ast);  // defined by side effect
 }
 
-// cogen and write it
-
 {
-    //print ("generating");
-    var bytes = Gen::cg(nd);
-    dumpABCFile(bytes, fname+".abc");
+    use namespace Encode;
+    print ("encoding");
+    var tx = "public var ast = "+program (nd);
+    writeFile (tx,fname+".ast");
+    print (fname+".ast, "+tx.length+" chars written");
 }
+
