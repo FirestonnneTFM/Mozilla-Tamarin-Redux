@@ -1,0 +1,12 @@
+const int axtam_System_getAvmplusVersion = 1;
+const int axtam_System_write = 2;
+const int axtam_System_debugger = 3;
+const int axtam_System_isDebugger = 4;
+const int abcclass_axtam_System = 0;
+const int abcclass_axtam_MSCom = 1;
+const int abcpackage_mscom_as = 0;
+const int axtoplevel_abc_length = 371;
+const int axtoplevel_abc_method_count = 5;
+const int axtoplevel_abc_class_count = 2;
+const int axtoplevel_abc_script_count = 1;
+extern const unsigned char axtoplevel_abc_data[];
