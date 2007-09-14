@@ -102,6 +102,8 @@ public namespace Lex
         function tokenList (lexPrefix)
             //            : [[int],[[int,int]]]
         {
+            import flash.utils.*;
+
             // print ("scanning");
             function pushToken (token)
             {
@@ -114,12 +116,13 @@ public namespace Lex
                     //print ("token ", token, " \t", Token::tokenText(token));
                     colCoord = colCoord + markIndex - lastMarkIndex;
                     coordList.push ([lnCoord,colCoord]);
-                    tokenList.push (token);
+                    tokenList.writeInt (token);
                     lastMarkIndex = markIndex;
                 }
             }
 
-            var tokenList = new Array;
+            //var tokenList = new Array;
+            var tokenList = new ByteArray;
             var coordList = new Array;
 
             let token = lexPrefix ();
@@ -1343,5 +1346,5 @@ public namespace Lex
             print ("scanned!");
         }
     }
-    // Lex::test ();
+    //Lex::test ();
 }

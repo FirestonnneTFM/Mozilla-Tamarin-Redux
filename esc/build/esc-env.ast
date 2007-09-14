@@ -1,4 +1,4 @@
-var esc_env =
+public var esc_env =
 { 'ast_class': 'Program'
 , 'packages': []
 , 'head': { 'fixtures': [ [ { 'ast_class': 'PropName'

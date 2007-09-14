@@ -20,7 +20,7 @@
 
 {
     use namespace Ast;
-    //print ("decoding esc_env");
+    //print ("decoding esc_env ",esc_env.ast_class);
     var nd = Decode::program (esc_env);  // defined by side effect
     var topFixtures = nd.head.fixtures;
 }
@@ -28,13 +28,19 @@
 {
     use namespace Parse;
     //print ("parsing");
+    var t1 = new Date;
     var parser = new Parser(str,topFixtures);
     var [ts,nd] = parser.program();
+    var t2 = new Date;
+    print (fname+" parse "+(t2-t1)+" ms");
 }
 
 {
     //print ("gening");
+    var t1 = new Date;
     var bytes = Gen::cg(nd);
+    var t2 = new Date;
+    print (fname+" cogen "+(t2-t1)+" ms");
     //print ("writing");
     dumpABCFile(bytes, fname+".abc");
 }

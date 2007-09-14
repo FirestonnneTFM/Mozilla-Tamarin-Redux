@@ -19,7 +19,7 @@ rm sanity/log/*.es.ast
 rm sanity/log/*.es.asm
 rm sanity/log/*.es.abc
 rm sanity/log/*.es.log
-rm sanity/log/*.es.es
+rm sanity/log/*.es
 
 run arrayliteral.es
 run cls.es
@@ -44,6 +44,6 @@ run destruct.es
 cp sanity/tests/*.es.ast sanity/log
 cp sanity/tests/*.es.asm sanity/log
 cp sanity/tests/*.es.log sanity/log
-cp sanity/tests/*.es.es sanity/log
+cp sanity/tests/*.es sanity/log
 
 diff -s sanity/base sanity/log

@@ -44,15 +44,15 @@
                , { 'kind': 'QName'
                  , 'ns': '2'
                  , 'utf8': '6' }
+               , { 'kind': 'Multiname'
+                 , 'utf8': '6'
+                 , 'nsset': '1' }
                , { 'kind': 'QName'
                  , 'ns': '2'
                  , 'utf8': '7' }
                , { 'kind': 'QName'
                  , 'ns': '2'
                  , 'utf8': '8' }
-               , { 'kind': 'Multiname'
-                 , 'utf8': '6'
-                 , 'nsset': '1' }
                , { 'kind': 'Multiname'
                  , 'utf8': '9'
                  , 'nsset': '1' }
@@ -123,6 +123,12 @@
                               , pushundefined
                               , pop
                               , getlocal0
+                              , findpropstrict 07
+                              , getproperty 07
+                              , setproperty 06
+                              , pushundefined
+                              , pop
+                              , getlocal0
                               , constructsuper 00
                               , popscope
                               , getlocal0
@@ -166,9 +172,9 @@
                               , pushundefined
                               , pop
                               , getlocal0
-                              , findpropstrict 09
-                              , getproperty 09
-                              , setproperty 08
+                              , findpropstrict 07
+                              , getproperty 07
+                              , setproperty 09
                               , pushundefined
                               , pop
                               , getlocal0
@@ -217,7 +223,7 @@
                               , popscope
                               , getglobalscope
                               , swap
-                              , initproperty 07
+                              , initproperty 08
                               , findpropstrict 0a
                               , getproperty 0a
                               , pushnull
@@ -231,7 +237,7 @@
                               , getproperty 0b
                               , pushint 01
                               , construct 01
-                              , getproperty 09
+                              , getproperty 07
                               , call 01
                               , pop
                               , findpropstrict 0a

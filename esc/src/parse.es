@@ -217,7 +217,7 @@ use namespace intrinsic;
             switch type (fn) {
             case (fn: Ast::PropName) {
                 if (hasName (fxtrs,fn.name.id,fn.name.ns)) {
-                    print("hasName ",ns,"::",id);
+                    //print("hasName ",ns,"::",id);
                     let f2 = getFixture (fxtrs,id,ns);
                     if (f1 is Ast::ValFixture && f2 is Ast::ValFixture) {
                         if (f1.Ast::type==Ast::anyType) return true;
@@ -493,26 +493,46 @@ use namespace intrinsic;
     type TOKENS = TokenStream;  // [int];
 
     class TokenStream {
-        var ts: Array;
-        /// var ts: ByteArray
+        import flash.utils.*;
+        var ts: ByteArray
         var n: int;
-        function TokenStream (ts,n)
+        var current_tok;
+        function TokenStream (ts)
             : ts = ts
-            , n = n { }
+            , n = 0 { 
+            ts.position = n;
+        }
         
-        function head () : int{
-            return ts[n];
-            //if (ts.position == n) {
-            //    current_char = ts.readUnsignedInt ();
-            //}
-            //return current_char;
+        function head () : int {
+            //print("head ts.position ",ts.position," n ",n);
+            if (ts.position == n) {
+                current_tok = ts.readInt ();
+                //print ("current_tok ",current_tok);
+            }
+            Util::assert (ts.position == n+4);
+            return current_tok;
+        }
+        
+        function head2 () : int {
+            //print("head2 ts.position ",ts.position," n ",n);
+            if (ts.position == n) {
+                current_tok = ts.readInt ();
+                //print ("current_tok ",current_tok);
+            }
+            Util::assert (ts.position == n+4);
+            let pos = ts.position;
+            let tk = ts.readInt ();
+            ts.position = pos;
+            return tk;
         }
         
         function next () : void {
-            ++n;
+            n = n + 4;
+            head ();
+            //print ("next n",n);
         }
 
-        public function toString () { return ts.slice(n,ts.length).toString() }
+        public function toString () { return Token::tokenText(this.head()) }
     }
 
     class Parser
@@ -540,6 +560,14 @@ use namespace intrinsic;
             return tk;
         }
 
+        function hd2 (ts:TokenStream) 
+        {
+            //enter ("hd ",ts.head());
+            var tk = Token::tokenKind (ts.head2());
+            //print ("hd ",tk);
+            return tk;
+        }
+
         function eat (ts:TokenStream,tc) {
             //print("eating ",Token::tokenText(tc));
             let tk = hd (ts);
@@ -557,13 +585,17 @@ use namespace intrinsic;
         function swap (ts,t0,t1) {
             let tk = hd (ts);
             if (tk === t0) {
-                return ts.ts[ts.n] = t1;
+                ts.ts.position = ts.n-4;
+                ts.ts.writeInt (t1);
+                return t1;
             }
             throw "expecting "+Token::tokenText(t0)+" found "+Token::tokenText(tk);
         }
 
         function tl (ts:TOKENS) : TOKENS {
-            return new TokenStream (ts.ts,ts.n+1);
+            ts.next ();
+            return ts;
+            //return new TokenStream (ts.ts,ts.n+1);
         }  //ts.slice (1,ts.length);
 
 
@@ -1148,9 +1180,10 @@ use namespace intrinsic;
 
             switch (hd (ts)) {
             case Token::Identifier:
-                switch (hd (tl (ts))) {
+                switch (hd2 (ts)) {
                 case Token::Dot:
-                    var [ts1,nd1] = path (tl (tl (ts)), [Token::tokenText(ts.head())]);
+                    let tx = Token::tokenText(ts.head());
+                    var [ts1,nd1] = path (tl (tl (ts)), [tx]);
                     var [ts2,nd2] = propertyName (ts1);
                     nd2 = new Ast::UnresolvedPath (nd1,nd2);
                     break;
@@ -1181,7 +1214,7 @@ use namespace intrinsic;
 
             switch (hd (ts)) {
             case Token::Identifier:
-                switch (hd (tl (ts))) {
+                switch (hd2 (ts)) {
                 case Token::Dot:
                     nd.push(Token::tokenText(ts.head()));
                     var [ts1,nd1] = path (tl (tl (ts)), nd);
@@ -1309,7 +1342,7 @@ use namespace intrinsic;
         function literalField (ts: TOKENS)
             : [TOKENS, Ast::FIELD_TYPE]
         {
-            enter ("Parser::literalField");
+            enter ("Parser::literalField",ts);
 
             switch (hd (ts)) {
             case Token::Const:
@@ -1352,11 +1385,12 @@ use namespace intrinsic;
         function fieldName (ts: TOKENS)
             : [TOKENS, Ast::IDENT_EXPR]
         {
-            enter ("Parser::fieldName");
+            enter ("Parser::fieldName",ts);
 
             switch (hd (ts)) {
             case Token::StringLiteral:
-                var [ts1,nd1] = [tl (ts), new Ast::Identifier (Token::tokenText (ts.head()),cx.pragmas.openNamespaces)];
+                let nd = new Ast::Identifier (Token::tokenText (ts.head()),cx.pragmas.openNamespaces);
+                var [ts1,nd1] = [tl (ts), nd];
                 break;
             case Token::DecimalLiteral:
             case Token::DecimalIntegerLiteral:
@@ -1365,7 +1399,8 @@ use namespace intrinsic;
                 break;
             default:
                 if (isReserved (hd (ts))) {
-                    var [ts1,nd1] = [tl (ts), new Ast::Identifier (Token::tokenText (ts.head()),cx.pragmas.openNamespaces)];
+                    let nd = new Ast::Identifier (Token::tokenText (ts.head()),cx.pragmas.openNamespaces);
+                    var [ts1,nd1] = [tl (ts), nd];
                                      // NOTE we use openNamespaces here to indicate that the name is 
                                      //      unqualified. the generator should use the expando namespace,
                                      //      which is probably Public "".
@@ -1515,10 +1550,12 @@ use namespace intrinsic;
                 var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralBoolean (false))];
                 break;
             case Token::DecimalLiteral:
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralDecimal (Token::tokenText (ts.head())))];
+                let tx = Token::tokenText (ts.head());
+                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralDecimal (tx))];
                 break;
             case Token::StringLiteral:
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralString (Token::tokenText (ts.head())))];
+                let tx = Token::tokenText (ts.head());
+                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralString (tx))];
                 break;
             case Token::This:
                 var [ts1,nd1] = [tl (ts), new Ast::ThisExpr ()];
@@ -1619,7 +1656,7 @@ use namespace intrinsic;
 
             switch (hd (ts)) {
             case Token::Dot:
-                switch (hd (tl (ts))) {
+                switch (hd2 (ts)) {
                 case Token::LeftParen:
                     throw "filter operator not implemented";
                     break;
@@ -2054,7 +2091,7 @@ use namespace intrinsic;
                     let csx;
                     [tsx,csx] = scan.tokenList (scan.div);
                     coordList = csx;
-                    ts1 = new TokenStream (tsx,0);
+                    ts1 = new TokenStream (tsx);
                 }
 
                 switch (hd (ts1)) {
@@ -3344,7 +3381,7 @@ use namespace intrinsic;
                 var [ts2,nd2] = [ts1,new Ast::BlockStmt (nd1)];
                 break;
             case Token::Switch:
-                switch (hd (tl (ts))) {
+                switch (hd2 (ts)) {
                 case Token::Type:
                     var [ts2,nd2] = switchTypeStatement (ts);
                     break;
@@ -3394,12 +3431,12 @@ use namespace intrinsic;
         }
 
         function printLn (ts:TokenStream) {
-            enter ("printLn ",ts.n);
-            if (coordList.length <= ts.n) {
+            enter ("printLn ",ts.n/4);
+            if (coordList.length <= ts.n/4) {
                 //print("line eos");
             }
             else {
-                let coord = coordList[ts.n];
+                let coord = coordList[ts.n/4];
                 //print ("ln ",coord[0]+1," ",logicalLn);
                 //print ("ln "+(coord[0]+1));
             }
@@ -3409,11 +3446,15 @@ use namespace intrinsic;
         function newline (ts: TOKENS)
             : boolean
         {
-            let offset = ts.n;
+            let offset = ts.n/4;
 
             if (offset == 0)
                 return true;  // first token, so follows newline, but whose asking?
 
+            //print ("ts.ts.position",ts.ts.position);
+            //print ("offset ",offset);
+            //print ("coordList",coordList);
+            //print ("coordList.length",coordList.length);
             let coord = coordList[offset];
             let prevCoord = coordList[offset-1];
             //print("coord=",coord);
@@ -4051,7 +4092,7 @@ use namespace intrinsic;
                 var [tsx,ndx] = [tl (ts), Ast::varTag];
                 break;
             case Token::Let:
-                switch (hd (tl (ts))) {
+                switch (hd2 (ts)) {
                 case Token::Const:
                     var [tsx,ndx] = [tl (tl (ts)), Ast::letConstTag];
                     break;
@@ -4068,7 +4109,7 @@ use namespace intrinsic;
                 break;
             }
 
-            exit("Parser::variableDefinitionKind ", tsx);
+            exit("Parser::variableDefinitionKind ", hd(tsx));
             return [tsx,ndx];
         }
 
@@ -4377,7 +4418,7 @@ use namespace intrinsic;
 
             switch (hd (ts)) {
             case Token::Colon:
-                switch (hd (tl (ts))) {
+                switch (hd2 (ts)) {
                 case Token::Super:
                     var [ts1,nd1] = [tl (tl (ts)),[]]; // no settings
                     var [ts2,nd2] = this.arguments (ts1);
@@ -4430,7 +4471,7 @@ use namespace intrinsic;
         
                 switch (hd (ts)) {
                 case Token::Comma:
-                    switch (hd (tl (ts))) {
+                    switch (hd2 (ts)) {
                     case Token::Super:
                         var [ts2,nd2] = [tl (ts), []];  // eat the comma
                         break;
@@ -5050,9 +5091,10 @@ use namespace intrinsic;
 
             switch (hd (ts)) {
             case Token::Assign:
-                switch (hd (tl (ts))) {
+                switch (hd2 (ts)) {
                 case Token::StringLiteral:
-                    var [ts1,nd1] = [tl (tl (ts)), tokenText (tl (ts).head())];
+                    let tx = tokenText (tl (ts).head());
+                    var [ts1,nd1] = [tl (ts), tx];
                     break;
                 default:
                     var [ts1,nd1] = primaryName (tl (ts));
@@ -5193,10 +5235,14 @@ use namespace intrinsic;
             return [ts1,nd1];
         }
 
-        function isCurrentClassName (ts: TOKENS) 
+        function isCurrentClassName (tk) 
             : boolean {
-            let text = Token::tokenText (ts.head());
-            if (text === currentClassName) 
+            let text = Token::tokenText (tk);
+            //print ("tk",tk);
+            //print ("text",text);
+            //print ("currentClassName",currentClassName);
+
+            if (text == currentClassName) 
             {
                 return true;
             }
@@ -5239,7 +5285,7 @@ use namespace intrinsic;
                 ts1 = semicolon (ts1,omega);
                 break;
             case Token::Function:
-                if (isCurrentClassName (tl (ts))) 
+                if (isCurrentClassName (ts.head2())) 
                 {
                     var [ts1,nd1] = constructorDefinition (ts, omega, cx.pragmas.defaultNamespace);
                 }
@@ -5249,7 +5295,7 @@ use namespace intrinsic;
                                   , cx.pragmas.defaultNamespace
                                   , false, false, false, false, false);
                 }
-                ts1 = semicolon (ts1,omega);
+                //ts1 = semicolon (ts1,omega);
                 break;
             case Token::Class:
                 var isDynamic = false;
@@ -5364,7 +5410,7 @@ use namespace intrinsic;
                 var ts2 = semicolon (ts2,omega);
                 break;
             case Token::Function:
-                if (isCurrentClassName (tl (ts))) 
+                if (isCurrentClassName (ts.head2())) 
                 {
                     var [ts2,nd2] = constructorDefinition (ts, omega, attrs.ns);
                 }
@@ -5374,7 +5420,7 @@ use namespace intrinsic;
                                                            , attrs.ns, attrs.final, attrs.override
                                                            , attrs.prototype, attrs.static, attrs.abstract);
                 }
-                ts2 = semicolon (ts2,omega);
+                //ts2 = semicolon (ts2,omega);
                 break;
             case Token::Class:
                 var [ts2,nd2] = classDefinition (ts, attrs.ns, attrs.dynamic);
@@ -5466,7 +5512,7 @@ use namespace intrinsic;
                 case Token::Intrinsic:
                     var [ts1,nd1] = reservedNamespace (ts);
                     nd.ns = nd1;
-                    var [ts1,nd1] = [tl (ts), nd];
+                    var [ts1,nd1] = [ts1, nd];
                     break;
                 default:
                     var [ts1,nd1] = primaryName (ts);
@@ -5474,14 +5520,17 @@ use namespace intrinsic;
                     var [ts1,nd1] = [ts1,nd];
                     break;
                 }
+                break;
             case globalBlk:
                 switch (hd (ts)) {
                 case Token::True:
                     nd['true'] = true;  // FIXME RI bug
                     var [ts1,nd1] = [tl (ts), nd];
+                    break;
                 case Token::False:
                     nd['false'] = false;
                     var [ts1,nd1] = [tl (ts), nd];
+                    break;
                 case Token::Dynamic:
                     nd.dynamic = true;
                     var [ts1,nd1] = [tl (ts), nd];
@@ -5579,7 +5628,7 @@ use namespace intrinsic;
             case Token::Int:
                 break;
             case Token::Default:
-                switch (hd (tl (ts1))) {
+                switch (hd2 (ts1)) {
                 case Token::Namespace:
                     var [ts1,nd1] = primaryName (tl (tl (ts1)));
                     cx.defaultNamespace (nd1);
@@ -5635,7 +5684,7 @@ use namespace intrinsic;
             nd1 = [nd1];
             while (hd (ts1)===Token::Dot) {
                 nd1.push(Token::tokenText(tl (ts1).head()));
-                ts1 = tl (tl (ts1));
+                ts1 = tl (ts1);
             }
 
             let ns = namespaceFromPath (nd1);
@@ -5682,7 +5731,7 @@ use namespace intrinsic;
 
             let [ts,cs] = scan.tokenList (scan.start);
             coordList = cs;
-            ts = new TokenStream (ts,0);
+            ts = new TokenStream (ts);
 
             cx.enterVarBlock ();
             var publicNamespace = new Ast::ReservedNamespace (new Ast::PublicNamespace (""));

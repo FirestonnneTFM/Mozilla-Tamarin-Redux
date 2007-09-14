@@ -15,7 +15,24 @@ public var ast =
                                                    , 'id': 'Object' }
                                      , 'interfaceNames': []
                                      , 'constructor': { 'ast_class': 'Ctor'
-                                                      , 'settings': [ ]
+                                                      , 'settings': [ { 'ast_class': 'InitExpr'
+                                                                      , 'target': { 'ast_class': 'InstanceInit' }
+                                                                      , 'head': { 'fixtures': [  ]
+                                                                                , 'exprs': [  ] }
+                                                                      , 'inits': [ [ { 'ast_class': 'PropName'
+                                                                                     , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+                                                                                                       , 'name': '' }
+                                                                                               , 'id': 'x' } }
+                                                                                   , { 'ast_class': 'LexicalRef'
+                                                                                     , 'ident': { 'ast_class': 'Identifier'
+                                                                                                , 'ident': 'x'
+                                                                                                , 'nss': [  [ { 'ast_class': 'PublicNamespace'
+                                                                                                              , 'name': '' }
+                                                                                                            ,  ]
+                                                                                                         ,  [  ]
+                                                                                                         ,  ] } } ]
+                                                                                 ,  ] }
+                                                                    , ]
                                                       , 'superArgs': [  ]
                                                       , 'func': { 'ast_class': 'Func'
                                                                 , 'name': { 'kind': { 'ast_class': 'Ordinary' }
@@ -242,7 +259,8 @@ public var ast =
                         , 'block': { 'ast_class': 'Block'
                                    , 'head': { 'fixtures': [  ]
                                              , 'exprs': [  ] }
-                                   , 'stmts': [ { 'ast_class': 'ExprStmt'
+                                   , 'stmts': [ { 'ast_class': 'EmptyStmt' }
+                                              , { 'ast_class': 'ExprStmt'
                                                 , 'expr': { 'ast_class': 'ListExpr'
                                                           , 'exprs': [ { 'ast_class': 'CallExpr'
                                                                        , 'expr': { 'ast_class': 'LexicalRef'
