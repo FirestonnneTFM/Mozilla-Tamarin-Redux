@@ -5,6 +5,8 @@ CVS/**
 *.bat
 *.jar
 *.abc
+*.pyc
+*~
 pcre/doc/*.1
 jni.h
 jni_md.h
@@ -13,4 +15,8 @@ extensions/Sampler*
 classicprefix_*.pch++
 stale.xml
 platform/win32/obj_8/**
+platform/mac/shell/build/**
 MMgc/obj_8/**
+objdir-*/**
+*_DBG.OBJ/**
+*_OPT.OBJ/**
