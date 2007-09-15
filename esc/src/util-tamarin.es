@@ -14,7 +14,7 @@
 
     public function dumpABCFile(abcfile, filename) {
         var bytes = abcfile.getBytes();
-        print (filename+", "+bytes.length+" bytes written");
         bytes.writeFile(filename);
+        return bytes.length;
     }
 }

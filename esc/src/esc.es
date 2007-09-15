@@ -32,15 +32,15 @@
     var parser = new Parser(str,topFixtures);
     var [ts,nd] = parser.program();
     var t2 = new Date;
-    print (fname+" parse "+(t2-t1)+" ms");
+    //print (fname+" parse "+(t2-t1)+" ms");
 }
 
 {
     //print ("gening");
-    var t1 = new Date;
     var bytes = Gen::cg(nd);
-    var t2 = new Date;
-    print (fname+" cogen "+(t2-t1)+" ms");
+    var t3 = new Date;
+    //print (fname+" cogen "+(t3-t2)+" ms");
     //print ("writing");
-    dumpABCFile(bytes, fname+".abc");
+    var len = dumpABCFile(bytes, fname+".abc");
+    print (fname+", "+(t3-t1)+" ms, "+len+" bytes written");
 }
