@@ -95,6 +95,7 @@ namespace avmplus
 	class GenericGuard
 	{
 	public:
+		virtual ~GenericGuard() {}
 		void enable()	{ registerHandler(); }
 		void disable()	{ unregisterHandler(); }
 
@@ -159,9 +160,6 @@ namespace avmplus
 		savedExceptionPorts;
 
 		virtual bool handleException(kern_return_t& returnCode) = 0;
-		
-		// since we have virtual functions, we probably need a virtual dtor
-		virtual ~GenericGuard() {}
 		
 		static kern_return_t catch_exception_raise(mach_port_t exception_port,
 												   mach_port_t thread,
