@@ -123,7 +123,7 @@ namespace avmshell
 
 		Endian GetNativeEndian() const
 		{
-			#ifdef WIN32
+			#if defined(__i386__) || defined(__x86_64__)
 			return kLittleEndian;
 			#else
 			return kBigEndian;
