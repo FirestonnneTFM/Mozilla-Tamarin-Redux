@@ -407,9 +407,9 @@ namespace avmshell
 			file.read(header, 8);
 
 			// Check the magic number
-			if (header[0] != 0x56 &&
-				header[1] != 0x34 &&
-				header[2] != 0x12 &&
+			if (header[0] != 0x56 ||
+				header[1] != 0x34 ||
+				header[2] != 0x12 ||
 				header[3] != 0xFA)
 			{
 				return false;
