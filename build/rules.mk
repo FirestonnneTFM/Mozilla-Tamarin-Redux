@@ -37,7 +37,7 @@
 # For the moment, pretend that nothing but mac exists, and we can always
 # use gcc automatic dependencies.
 
-# A "thing" is any static library, shared library, or program.
+# A "thing" is any static library, DLL, or program.
 # things are made up of CXXSRCS and CSRCS.
 #
 # By default, we use CPPFLAGS/CFLAGS/CXXFLAGS/LDFLAGS.
@@ -55,12 +55,13 @@
 
 THINGS = \
   $(STATIC_LIBRARIES) \
-  $(SHARED_LIBRARIES) \
+  $(DLLS) \
   $(PROGRAMS) \
   $(NULL)
 
 $(foreach thing,$(THINGS),$(eval $(call THING_SRCS,$(thing))))
 $(foreach lib,$(STATIC_LIBRARIES),$(eval $(call STATIC_LIBRARY_RULES,$(lib))))
+$(foreach lib,$(DLLS),$(eval $(call DLL_RULES,$(lib))))
 $(foreach program,$(PROGRAMS),$(eval $(call PROGRAM_RULES,$(program))))
 
 clean::

@@ -48,7 +48,7 @@ namespace MMgc
 	 * by multiple threads, so this is necessary to ensure that
 	 * the threads do not step on each other.
 	 */
-	class GCSpinLock
+	class MMGC_API GCSpinLock
 	{
 	public:
 		GCSpinLock()

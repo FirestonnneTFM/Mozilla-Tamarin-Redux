@@ -47,6 +47,7 @@ COMPILE_CXXFLAGS = $(CXXFLAGS) $(APP_CXXFLAGS)
 ifdef ENABLE_DEBUG
 COMPILE_CPPFLAGS += $(DEBUG_CPPFLAGS)
 COMPILE_CXXFLAGS += $(DEBUG_CXXFLAGS)
+LDFLAGS += $(DEBUG_LDFLAGS)
 else
 COMPILE_CPPFLAGS += $(OPT_CPPFLAGS)
 COMPILE_CXXFLAGS += $(OPT_CXXFLAGS)
@@ -128,17 +129,48 @@ endif
 
 endef
 
-# Usage: $(eval $(call PROGRAM_RULES,$(program_thingnaame)))
-define PROGRAM_RULES
+# Usage: $(eval $(call DLL_RULES,$(dll_thingname)))
+define DLL_RULES
   $(1)_BASENAME ?= $(1)
-  $(1)_NAME ?= $$($(1)_BASENAME)$(BIN_SUFFIX)
+  $(1)_NAME = $(LIB_PREFIX)$$($(1)_BASENAME).$(DLL_SUFFIX)
   $(1)_DEPS = \
     $$($(1)_EXTRA_DEPS) \
-    $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$($$(lib)_NAME)) \
+    $$(foreach lib,$$($(1)_STATIC_LIBRARIES) $$($(1)_DLLS),$$($$(lib)_NAME)) \
     $$(GLOBAL_DEPS) \
     $(NULL)
   $(1)_LDFLAGS = \
     $$(LDFLAGS) \
+    $$($(1)_EXTRA_LDFLAGS) \
+    $$(foreach lib,$$(OS_LIBS),$(call EXPAND_LIBNAME,$$(lib))) \
+    $$(OS_LDFLAGS) \
+    $(NULL)
+
+$$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
+	$(call MKDLL,$$@) $$($(1)_CXXOBJS) \
+	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
+	  $$(foreach lib,$$($(1)_DLLS),$$(call EXPAND_DLLNAME,$$(lib))) \
+	  $$($(1)_LDFLAGS)
+
+GARBAGE += $$($(1)_DIR)$$($(1)_NAME)
+
+ifdef $(1)_BUILD_ALL
+all:: $$($(1)_DIR)$$($(1)_NAME)
+endif
+
+endef
+
+# Usage: $(eval $(call PROGRAM_RULES,$(program_thingnaame)))
+define PROGRAM_RULES
+  $(1)_BASENAME ?= $(1)
+  $(1)_NAME ?= $$($(1)_BASENAME)$(PROGRAM_SUFFIX)
+  $(1)_DEPS = \
+    $$($(1)_EXTRA_DEPS) \
+    $$(foreach lib,$$($(1)_STATIC_LIBRARIES) $$($(1)_DLLS),$$($$(lib)_NAME)) \
+    $$(GLOBAL_DEPS) \
+    $(NULL)
+  $(1)_LDFLAGS = \
+    $$(LDFLAGS) \
+    $$($(1)_EXTRA_LDFLAGS) \
     $$(foreach lib,$$(OS_LIBS),$(call EXPAND_LIBNAME,$$(lib))) \
     $$(OS_LDFLAGS) \
     $(NULL)
@@ -147,6 +179,7 @@ $$($(1)_DIR)$$($(1)_NAME): $$($(1)_CXXOBJS) $$($(1)_DEPS)
 	$(call MKPROGRAM,$$@) \
 	  $$($(1)_CXXOBJS) \
 	  $(LIBPATH). $$(foreach lib,$$($(1)_STATIC_LIBRARIES),$$(call EXPAND_LIBNAME,$$(lib))) \
+	  $$(foreach lib,$$($(1)_DLLS),$$(call EXPAND_DLLNAME,$$(lib))) \
 	  $$($(1)_LDFLAGS)
 
 GARBAGE += $$($(1)_DIR)$$($(1)_NAME)

@@ -61,7 +61,7 @@ if (buildShell):
     config.subst("ENABLE_SHELL", 1)
 
 # Get CPP, CC, etc
-config.getCompiler()
+config.getCompiler(static_crt=o.getBoolArg('static-crt'))
 
 APP_CPPFLAGS = "-DSOFT_ASSERTS "
 APP_CXXFLAGS = ""
@@ -69,26 +69,46 @@ OPT_CXXFLAGS = "-Os "
 OPT_CPPFLAGS = ""
 DEBUG_CPPFLAGS = "-DDEBUG -D_DEBUG "
 DEBUG_CXXFLAGS = ""
+DEBUG_LDFLAGS = ""
+OS_LIBS = []
+MMGC_CPPFLAGS = ""
+AVMSHELL_CPPFLAGS = ""
+AVMSHELL_LDFLAGS = ""
+
+MMGC_DYNAMIC = o.getBoolArg('mmgc-shared', False)
+if MMGC_DYNAMIC:
+    APP_CPPFLAGS += "-DMMGC_DLL "
+    MMGC_CPPFLAGS += "-DMMGC_IMPL "
 
 if config.COMPILER_IS_GCC:
     APP_CXXFLAGS = "-fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wno-uninitialized -Wno-strict-aliasing -fmessage-length=0 -finline-functions -finline-limit=65536 "
     if config.getDebug():
-        APP_CXXFLAGS += "-frtti "
+        APP_CXXFLAGS += "-frtti -fexceptions "
     else:
-        APP_CXXFLAGS += "-fno-rtti "
+        APP_CXXFLAGS += "-fno-rtti -fno-exceptions "
     DEBUG_CXXFLAGS += "-g "
 else:
-    APP_CXXFLAGS = "-W4 -WX "
+    APP_CXXFLAGS = "-W4 -WX -wd4291 "
     if config.getDebug():
         APP_CXXFLAGS += "-EHsc "
     else:
         APP_CXXFLAGS += "-GR- "
+    DEBUG_CXXFLAGS += "-Zi "
+    DEBUG_LDFLAGS += "-DEBUG "
 
-OS_LIBS = ['z']
+zlib_include_dir = o.getStringArg('zlib-include-dir')
+if zlib_include_dir is not None:
+    AVMSHELL_CPPFLAGS += "-I%s " % zlib_include_dir
+
+zlib_lib = o.getStringArg('zlib-lib')
+if zlib_lib is not None:
+    AVMSHELL_LDFLAGS = zlib_lib
+else:
+    OS_LIBS.append('z')
 
 os, cpu = config.getTarget()
 if os == "darwin":
-    APP_CPPFLAGS += "-DTARGET_API_MAC_CARBON=1 -DDARWIN=1 -D_MAC -DTARGET_RT_MAC_MACHO=1 -DUSE_MMAP -D_MAC "
+    APP_CPPFLAGS += "-DTARGET_API_MAC_CARBON=1 -DDARWIN=1 -D_MAC -DTARGET_RT_MAC_MACHO=1 -DUSE_MMAP -D_MAC -D__DEBUGGING__ "
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
 elif os == "windows":
     APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -D_CONSOLE "
@@ -117,7 +137,12 @@ config.subst("OPT_CPPFLAGS", OPT_CPPFLAGS)
 config.subst("OPT_CXXFLAGS", OPT_CXXFLAGS)
 config.subst("DEBUG_CPPFLAGS", DEBUG_CPPFLAGS)
 config.subst("DEBUG_CXXFLAGS", DEBUG_CXXFLAGS)
+config.subst("DEBUG_LDFLAGS", DEBUG_LDFLAGS)
 config.subst("OS_LIBS", " ".join(OS_LIBS))
+config.subst("MMGC_CPPFLAGS", MMGC_CPPFLAGS)
+config.subst("AVMSHELL_CPPFLAGS", AVMSHELL_CPPFLAGS)
+config.subst("AVMSHELL_LDFLAGS", AVMSHELL_LDFLAGS)
+config.subst("MMGC_DYNAMIC", MMGC_DYNAMIC and 1 or '')
 config.generate("Makefile")
 
 o.finish()

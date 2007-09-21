@@ -131,7 +131,7 @@ class Configuration:
         """Returns an (os, cpu) tuple of the target machine."""
         return self._target
 
-    def getCompiler(self):
+    def getCompiler(self, static_crt=False):
         self.COMPILER_IS_GCC = True
         self._acvars.update({
             'OBJ_SUFFIX': 'o',
@@ -141,6 +141,7 @@ class Configuration:
             'PROGRAM_SUFFIX': '',
             'USE_COMPILER_DEPS': 1,
             'EXPAND_LIBNAME' : '-l$(1)',
+            'EXPAND_DLLNAME' : '-l$(1)',
             'OUTOPTION' : '-o ',
             'LIBPATH': '-L'
             })
@@ -148,26 +149,28 @@ class Configuration:
         if self._target[0] == 'windows':
             self.COMPILER_IS_GCC = False
             del self._acvars['USE_COMPILER_DEPS']
+            
             self._acvars.update({
                 'OBJ_SUFFIX'   : 'obj',
                 'LIB_PREFIX'   : '',
                 'LIB_SUFFIX'   : 'lib',
                 'DLL_SUFFIX'   : 'dll',
                 'PROGRAM_SUFFIX': '.exe',
-                'CPPFLAGS'     : '-MD',
+                'CPPFLAGS'     : static_crt and (self._debug and '-MTd' or '-MT') or (self._debug and '-MDd' or '-MD'),
                 'CXX'          : 'cl.exe',
                 'CXXFLAGS'     : '-TP',
+                'DLL_CFLAGS'   : '',
                 'AR'           : 'lib.exe',
                 'LD'           : 'link.exe',
                 'LDFLAGS'      : '',
                 'MKSTATICLIB'  : '$(AR) -OUT:$(1)',
+                'MKDLL'        : '$(LD) -DLL -OUT:$(1)',
                 'MKPROGRAM'    : '$(LD) -OUT:$(1)',
                 'EXPAND_LIBNAME' : '$(1).lib',
+                'EXPAND_DLLNAME' : '$(1).lib',
                 'OUTOPTION' : '-Fo',
                 'LIBPATH'   : '-LIBPATH:'
                 })
-            if self._debug:
-                self._acvars['CPPFLAGS'] = '-MDd'
 
         # Hackery! Make assumptions that we want to build with GCC 3.3 on MacPPC
         # and GCC4 on MacIntel
@@ -176,9 +179,11 @@ class Configuration:
                 'DLL_SUFFIX'   : 'dylib',
                 'CPPFLAGS'     : '-pipe',
                 'CXXFLAGS'     : '',
-                'LDFLAGS'      : '-lz -framework CoreServices',
+                'DLL_CFLAGS'   : '-fPIC',
+                'LDFLAGS'      : '-framework CoreServices',
                 'AR'           : 'ar',
                 'MKSTATICLIB'  : '$(AR) cr $(1)',
+                'MKDLL'        : '$(CXX) -dynamiclib -single_module -o $(1)',
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
 
@@ -196,9 +201,11 @@ class Configuration:
                 'CPPFLAGS'     : '',
                 'CXX'          : 'g++',
                 'CXXFLAGS'     : '',
+                'DLL_CFLAGS'   : '-fPIC',
                 'LD'           : 'ar',
                 'LDFLAGS'      : '',
                 'MKSTATICLIB'  : '$(AR) cr $(1)',
+                'MKDLL'        : '$(CXX) -shared -o $(1)',
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
 

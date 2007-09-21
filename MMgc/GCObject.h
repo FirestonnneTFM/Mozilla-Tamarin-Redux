@@ -77,7 +77,7 @@ namespace MMgc
 	/**
 	 * Baseclass for GC managed objects that aren't finalized
 	 */
-	class GCObject
+	class MMGC_API GCObject
 	{
 	public:
 		static void *operator new(size_t size, GC *gc, size_t extra = 0)
@@ -110,7 +110,7 @@ namespace MMgc
 	/**
 	 *	Baseclass for GC managed objects that are finalized 
 	 */
-	class GCFinalizedObject
+	class MMGC_API GCFinalizedObject
 	//: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
 	// the most base class (GCObject) not having any virtual methods)
 	{
@@ -124,7 +124,7 @@ namespace MMgc
 	/**
 	 *	Baseclass for GC managed objects that are finalized 
 	 */
-	class GCFinalizedObjectOptIn : public GCFinalizedObject
+	class MMGC_API GCFinalizedObjectOptIn : public GCFinalizedObject
 	//: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
 	// the most base class (GCObject) not having any virtual methods)
 	{
@@ -134,7 +134,7 @@ namespace MMgc
 	};
 
 #ifdef MMGC_DRC
-	class RCObject : public GCFinalizedObject
+	class MMGC_API RCObject : public GCFinalizedObject
 	{
 		friend class GC;
 	public:
@@ -320,7 +320,7 @@ namespace MMgc
 #endif
 	};
 
-	class RCFinalizedObject : public RCObject{};
+	class MMGC_API RCFinalizedObject : public RCObject{};
 	
 	template<class T> 
 	class ZeroPtr

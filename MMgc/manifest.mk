@@ -34,8 +34,15 @@
 #
 # ***** END LICENSE BLOCK *****
 
+ifdef MMGC_DYNAMIC
+DLLS += MMgc
+MMgc_EXTRA_CPPFLAGS += $(DLL_CFLAGS)
+else
 STATIC_LIBRARIES += MMgc
+endif
 MMgc_BUILD_ALL = 1
+
+MMgc_EXTRA_CPPFLAGS += $(MMGC_CPPFLAGS)
 
 MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(curdir)/MMgc.cpp \
