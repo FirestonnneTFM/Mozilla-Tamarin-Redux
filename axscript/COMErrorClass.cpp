@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [ActiveScripting implemented with Tamarin].
+ * The Original Code is [axtam].
  *
  * The Initial Developer of the Original Code is Mozilla Corp.
  * Portions created by the Initial Developer are Copyright (C) 2007
@@ -33,62 +33,53 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
 #include "axtam.h"
-#include "SystemClass.h"
-
-#include <stdlib.h>
+#include "COMErrorClass.h"
 
 namespace axtam
 {
-	BEGIN_NATIVE_MAP(SystemClass)
-		NATIVE_METHOD(axtam_System_getAvmplusVersion, SystemClass::getAvmplusVersion)
-		NATIVE_METHOD(axtam_System_write, SystemClass::write)
-		NATIVE_METHOD(axtam_System_debugger, SystemClass::debugger)
-		NATIVE_METHOD(axtam_System_isDebugger, SystemClass::isDebugger)
+	BEGIN_NATIVE_MAP(COMErrorClass)
+		NATIVE_METHOD(axtam_com_Error_getErrorMessage, COMErrorClass::getErrorMessage)
 	END_NATIVE_MAP()
 
-	SystemClass::SystemClass(VTable *cvtable)
+	COMErrorClass::COMErrorClass(VTable* cvtable)
 		: ClassClosure(cvtable)
-    {
-//		AXTam* core = (AXTam*)this->core();
-//		if (core->systemClass == NULL) {
-//			core->systemClass = this;
-//		}
-		
+	{
+		AvmAssert(traits()->sizeofInstance == sizeof(COMErrorClass));
+
+		prototype = createInstance(ivtable(), toplevel()->objectClass->prototype);
+	}
+	
+
+	void COMErrorClass::throwError(HRESULT hr)
+	{
+		Atom args[2] = { nullObjectAtom, core()->intToAtom(hr) };
+		core()->throwAtom(construct(1, args));
+	}
+
+	Stringp COMErrorClass::getErrorMessage(int errorID) const
+	{
+		return this->core()->constantString("Please implement me!");
+	}
+
+	ScriptObject* COMErrorClass::createInstance(VTable *ivtable,
+											 ScriptObject *prototype)
+	{
+		return new (ivtable->gc(), ivtable->getExtraSize()) ScriptObject(ivtable, prototype);
+	}
+
+	/**
+	 * NativeErrorClass
+	 */
+/*****
+	BEGIN_NATIVE_MAP(NativeErrorClass)
+	END_NATIVE_MAP()	
+
+	NativeErrorClass::NativeErrorClass(VTable* cvtable)
+		: ClassClosure(cvtable)
+	{
+		AvmAssert(traits()->sizeofInstance == sizeof(ErrorClass));
 		createVanillaPrototype();
 	}
-
-	SystemClass::~SystemClass()
-	{
-	}
-
-	Stringp SystemClass::getAvmplusVersion()
-	{
-		return core()->newString(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
-	}
-
-	void SystemClass::write(Stringp s)
-	{
-		if (!s)
-			toplevel()->throwArgumentError(kNullArgumentError, "string");
-		core()->console << s;
-	}
-
-	void SystemClass::debugger()
-	{
-		#ifdef DEBUGGER
-		core()->debugger->enterDebugger();
-		#endif
-	}
-
-	bool SystemClass::isDebugger()
-	{
-		#ifdef DEBUGGER
-		return true;
-		#else
-		return false;
-		#endif
-	}
-
+*****/
 }

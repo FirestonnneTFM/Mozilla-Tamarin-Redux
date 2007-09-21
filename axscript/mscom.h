@@ -47,8 +47,14 @@ namespace axtam
 	{
 		friend class MSComClass;
 		MSCom(VTable* vtable, ScriptObject* prototype, IUnknown *pUnk);
+
+		virtual Atom callProperty(Multiname* name, int argc, Atom* argv);
+
 	private:
+		// We'd prefer to  insist on IDispatchEx rather than just IDispatch - but WScript
+		// doesn't implement this :(
 		CComQIPtr<IDispatch, &IID_IDispatch> disp;
+		CComQIPtr<IDispatchEx, &IID_IDispatchEx> dispex;
 	};
 
 	class MSComClass : public ClassClosure

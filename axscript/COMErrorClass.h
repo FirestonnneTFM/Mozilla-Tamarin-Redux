@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is [ActiveScripting implemented with Tamarin].
+ * The Original Code is [axtam].
  *
  * The Initial Developer of the Original Code is Mozilla Corp.
  * Portions created by the Initial Developer are Copyright (C) 2007
@@ -34,61 +34,33 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "axtam.h"
-#include "SystemClass.h"
-
-#include <stdlib.h>
-
-namespace axtam
-{
-	BEGIN_NATIVE_MAP(SystemClass)
-		NATIVE_METHOD(axtam_System_getAvmplusVersion, SystemClass::getAvmplusVersion)
-		NATIVE_METHOD(axtam_System_write, SystemClass::write)
-		NATIVE_METHOD(axtam_System_debugger, SystemClass::debugger)
-		NATIVE_METHOD(axtam_System_isDebugger, SystemClass::isDebugger)
-	END_NATIVE_MAP()
-
-	SystemClass::SystemClass(VTable *cvtable)
-		: ClassClosure(cvtable)
-    {
-//		AXTam* core = (AXTam*)this->core();
-//		if (core->systemClass == NULL) {
-//			core->systemClass = this;
-//		}
-		
-		createVanillaPrototype();
-	}
-
-	SystemClass::~SystemClass()
+namespace axtam {
+	/**
+	 * class COMError
+	 */
+	class COMErrorClass : public ClassClosure
 	{
-	}
+	public:
+		DECLARE_NATIVE_MAP(COMErrorClass)
+		COMErrorClass(VTable* cvtable);
 
-	Stringp SystemClass::getAvmplusVersion()
-	{
-		return core()->newString(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
-	}
+		Atom call(int argc, Atom* argv)
+		{
+			return construct(argc, argv);
+		}
 
-	void SystemClass::write(Stringp s)
-	{
-		if (!s)
-			toplevel()->throwArgumentError(kNullArgumentError, "string");
-		core()->console << s;
-	}
+		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
-	void SystemClass::debugger()
-	{
-		#ifdef DEBUGGER
-		core()->debugger->enterDebugger();
-		#endif
-	}
 
-	bool SystemClass::isDebugger()
-	{
-		#ifdef DEBUGGER
-		return true;
-		#else
-		return false;
-		#endif
-	}
+		/**
+		 * throwError is a convenience function for throwing
+		 * an exception with a formatted error message,
+		 * printf-style
+		 */
+		void throwError(HRESULT hr);
 
-}
+		/** @name static methods */
+		/*@{*/
+		Stringp getErrorMessage(int errorID) const;
+	};
+};

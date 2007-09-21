@@ -75,6 +75,7 @@
 #include <atlcom.h>
 #include <ActivScp.h>
 #include <ObjSafe.h>
+#include <DispEx.h>
 using namespace ATL;
 
 
@@ -113,15 +114,18 @@ DEFINE_GUID(AXT_CATID_ActiveScriptParse, 0xf0b7a1a2, 0x9847, 0x11cf, 0x8f, 0x20,
 namespace axtam
 {
 	class MSComClass;
+	class COMErrorClass;
 
 	// CodeContext is used to track which security context we are in.
 	// When an AS3 method is called, the AS3 method will set core->codeContext to its code context.
 	class CodeContext : public avmplus::CodeContext
 	{
 	  public:
-		DWB(DomainEnv*) domainEnv;
+		CodeContext(DomainEnv* domainEnv) : _domainEnv(domainEnv) { ; }
+		DWB(DomainEnv*) _domainEnv;
 #ifdef DEBUGGER
-		virtual Toplevel *toplevel() const { return domainEnv->toplevel(); }
+		virtual Toplevel *toplevel() const { return _domainEnv->toplevel(); }
+		virtual DomainEnv *domainEnv() const { return _domainEnv; }
 #endif
 	};
 
@@ -131,10 +135,10 @@ namespace axtam
 	public:
 		AXTam(MMgc::GC *gc);
 
-		// XXX - is it appropriate for toplevel and domain to be stored
-		// here (ie, are they really per 'core'?)
+		// XXX - is it appropriate for toplevel to be stored here 
+		// (ie, is it really per 'core'?)
 		Toplevel* toplevel;
-		Domain* domain;
+		CComPtr<IActiveScript> as;
 
 		void interrupt(MethodEnv *env);
 		void stackOverflow(MethodEnv *env);
@@ -142,9 +146,16 @@ namespace axtam
 //		DispatchConsumerClass *dispatchClass;
 
 		// Functions directly related to being embedded in a COM world
-		HRESULT InitNew(void);
+		HRESULT InitNew(IActiveScript *as);
+		HRESULT Close();
 
+		// Dump an exception for the benefit of the person developing/debugging the
+		// engine rather than the author of the actual script code
+		void dumpException(Exception *exc);
 		MSComClass *mscomClass;
+
+		COMErrorClass *comErrorClass() const { return (COMErrorClass*)toplevel->getBuiltinClass(avmplus::NativeID::abcclass_axtam_com_Error); }
+		void throwCOMError(HRESULT hr);
 
 	private:
 		DECLARE_NATIVE_CLASSES()
@@ -161,7 +172,7 @@ namespace axtam
 		Toplevel* initAXTamBuiltins();
 
 		#ifdef DEBUGGER
-		Debugger *debugCLI;
+		//Debugger *debugger;
 		#endif
 	};
 
@@ -186,7 +197,7 @@ namespace axtam
 	{
 	public:
 		typedef Base _BaseClass;
-		CGCRootComObject(MMgc::GC *gc) throw() : _BaseClass(gc)
+		CGCRootComObject(AvmCore *core) throw() : _BaseClass(core)
 		{
 			_pAtlModule->Lock();
 		}

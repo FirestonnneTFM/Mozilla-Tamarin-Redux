@@ -35,77 +35,63 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "axtam.h"
+#include "AdaptActiveScriptSite.h"
 #include "mscom.h"
 
 #include <stdlib.h>
 
 namespace axtam
 {
-	MSCom::MSCom(VTable* vtable, ScriptObject* prototype, IUnknown *pUnk)
+	AdaptActiveScriptSite::AdaptActiveScriptSite(VTable* vtable, ScriptObject* prototype, IActiveScriptSite *pSite)
 		: ScriptObject(vtable, prototype)
 	{
-		disp = pUnk; // must have an IDispatch
-		AvmAssert(disp != 0);
-		dispex = pUnk; // dispex is optional
+		// MarkH is quite confused about this - we are never constructed!!!!!
+		//site = pSite;
 	}
 
-	Atom MSCom::callProperty(avmplus::Multiname *name, int argc, avmplus::Atom *argv)
+	Atom AdaptActiveScriptSite::GetItemInfo(Stringp name, int flag)
 	{
-		// Not sure how to best handle this re 'builtin' names, such as toString()
-		// XXX - need a map of DISPIDs to speed things up, and/or optimizations
-		// using the typelib.
-		DISPID id;
-		AXTam *axcore = (AXTam *)core();
-		OLECHAR *olename = (OLECHAR *)name->getName()->c_str();
-		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
-		if (hr == DISP_E_UNKNOWNNAME) {
-			// not a name this object has - see if its builtin.
-			return ScriptObject::callProperty(name, argc, argv);
-		}
+		AXTam* core = (AXTam *)this->core();
+		CComPtr<IActiveScriptSite> site;
+		HRESULT hr = core->as->GetScriptSite(IID_IActiveScriptSite, (void **)&site);
 		if (FAILED(hr))
-			axcore->throwCOMError(hr);
-		// Now create args for the call.
-		EXCEPINFO ei;
-		AvmAssert(argc==1 && axcore->isString(argv[1])); // sue me :)
-//		ScriptObject *ob = axcore->atomToScriptObject(argv[1]);
-//		CComVariant arg1((OLECHAR *)axcore->atomToString(ob->toString())->c_str());
-		CComVariant arg1((OLECHAR *)axcore->atomToString(argv[1])->c_str());
-		DISPPARAMS params = {&arg1, NULL, 1, 0};
-		CComVariant ret;
-		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_METHOD, &params, &ret, &ei, NULL);
-		if (FAILED(hr))
-			axcore->throwCOMError(hr);
-		return undefinedAtom;
+			core->throwCOMError(hr);
+		CComPtr<IUnknown> unk;
+		hr = site->GetItemInfo((OLECHAR *)name->c_str(), SCRIPTINFO_IUNKNOWN, &unk, NULL);
+		if (FAILED(hr) || !unk)
+			core->throwCOMError(hr);
+		return core->mscomClass->create(unk, undefinedAtom)->atom(); // 2nd param is bogus???
+		//return undefinedAtom;
 	}
 
 
-	BEGIN_NATIVE_MAP(MSComClass)
+	BEGIN_NATIVE_MAP(AdaptActiveScriptSiteClass)
+		NATIVE_METHOD(axtam_com_adaptors_consumer_ScriptSite_GetItemInfo, AdaptActiveScriptSite::GetItemInfo)
+		NATIVE_METHOD(axtam_com_adaptors_consumer_ScriptSite_GetDocVersionString, AdaptActiveScriptSite::GetDocVersionString)
 	END_NATIVE_MAP()
 
-	MSComClass::MSComClass(VTable *cvtable)
+	AdaptActiveScriptSiteClass::AdaptActiveScriptSiteClass(VTable *cvtable)
 		: ClassClosure(cvtable)
     {
-		AXTam* core = (AXTam*)this->core();
-//		if (core->systemClass == NULL) {
-//			core->systemClass = this;
-//		}
+//		AXTam* core = (AXTam*)this->core();
 		// should only be initialized once!
-		AvmAssert(!core->mscomClass);
-		core->mscomClass = this;
+//		AvmAssert(!core->AdaptActiveScriptSiteClass);
+//		core->AdaptActiveScriptSiteClass = this;
 
 		createVanillaPrototype();
 	}
 
-	MSComClass::~MSComClass()
+	AdaptActiveScriptSiteClass::~AdaptActiveScriptSiteClass()
 	{
 	}
 
+    /**
 	// Function called as constructor ... not supported from user code
-	MSCom* MSComClass::create(IUnknown* p, Atom obj)
+	AdaptActiveScriptSite* AdaptActiveScriptSiteClass::create(IUnknown* p, Atom obj)
 	{
 		VTable* ivtable = this->ivtable();
-		MSCom *o = new (core()->GetGC(), ivtable->getExtraSize()) MSCom(ivtable, prototype, p);
+		AdaptActiveScriptSite *o = new (core()->GetGC(), ivtable->getExtraSize()) AdaptActiveScriptSite(ivtable, prototype, p);
 		return o;
 	}
-
+***/
 }

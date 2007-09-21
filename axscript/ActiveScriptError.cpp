@@ -48,6 +48,12 @@ STDMETHODIMP CActiveScriptError::GetExceptionInfo(
 	// zero out members we don't fill (wsh doesn't appear to do this)
 	memset(pexcepinfo, 0, sizeof(*pexcepinfo));
 	Stringp s(core->string(exception->atom));
+	#ifdef DEBUGGER
+
+	if (exception->getStackTrace())
+		s = new (core->GetGC()) String(s, exception->getStackTrace()->format(core));
+
+	#endif
 	pexcepinfo->bstrDescription = ::SysAllocString((const OLECHAR *)s->c_str());
 	return S_OK;
 }
@@ -57,7 +63,19 @@ STDMETHODIMP CActiveScriptError::GetSourcePosition(
             /* [out] */ ULONG *pulLineNumber,
             /* [out] */ LONG *plCharacterPosition)
 {
+#ifdef DEBUGGER
+	if (pdwSourceContext)
+		*pdwSourceContext = dwSourceContextCookie;
+
+	StackTrace *st = exception->getStackTrace();
+	if (pulLineNumber && st)
+		*pulLineNumber = st->elements[0].linenum;
+	if (plCharacterPosition)
+		*plCharacterPosition = 0; // XXX - can we get a column?
+	return S_OK;
+#else
 	return E_NOTIMPL;
+#endif
 }
 
 STDMETHODIMP CActiveScriptError::GetSourceLineText(

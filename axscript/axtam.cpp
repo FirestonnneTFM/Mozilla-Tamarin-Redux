@@ -41,8 +41,13 @@
 #include "resource.h"
 #include "mmsystem.h" // timer related functions
 
+#include "Profiler.h"
+
 #include "MSCom.h"
 #include "SystemClass.h"
+#include "AdaptActiveScriptSite.h"
+#include "COMErrorClass.h"
+
 
 using namespace avmplus::NativeID;
 
@@ -59,8 +64,11 @@ namespace axtam
 	const int kScriptGracePeriod = 5;
 
 	BEGIN_NATIVE_CLASSES(AXTam)
-		NATIVE_CLASS(abcclass_axtam_MSCom,          MSComClass,        ScriptObject)
+		NATIVE_CLASS(abcclass_axtam_com_MSCom,      MSComClass,        ScriptObject)
 		NATIVE_CLASS(abcclass_axtam_System,         SystemClass,       ScriptObject)
+		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_ScriptSite,
+		                                            AdaptActiveScriptSiteClass, ScriptObject)
+		NATIVE_CLASS(abcclass_axtam_com_Error,      COMErrorClass,     ScriptObject)
 	END_NATIVE_CLASSES()
 
 	BEGIN_NATIVE_SCRIPTS(AXTam)
@@ -86,14 +94,14 @@ namespace axtam
 	}
 
 	// Get ready for hosting a new script environment.
-	HRESULT AXTam::InitNew(void) {
+	HRESULT AXTam::InitNew(IActiveScript *as) {
+		this->as = as;
 		initBuiltinPool();
 		initAXPool();
 
 		#ifdef DEBUGGER
 		// Create the debugger
-		debugCLI = new (gc) DebugCLI(this);
-		debugger = debugCLI;
+		//debugger = new (gc) DebugCLI(this);
 
 		// Create the profiler
 		profiler = new (gc) axtam::Profiler(this);
@@ -102,12 +110,14 @@ namespace axtam
 		// init toplevel internally
 		toplevel = initAXTamBuiltins();
 
-		// Create a new Domain for the user code
-		domain = new (gc) Domain(this, builtinDomain);
-		//core->dispatchClass = new (gc) DispatchConsumerClass();
 		return S_OK;
 	}
 
+	HRESULT AXTam::Close() {
+		as = NULL;
+		return S_OK;
+	}
+	
 	void AXTam::initAXPool()
 	{
 		AbstractFunction *nativeMethods[axtoplevel_abc_method_count];
@@ -124,6 +134,9 @@ namespace axtam
 		avmplus::ScriptBuffer code = newScriptBuffer(axtoplevel_abc_length);
 		memcpy(code.getBuffer(), axtoplevel_abc_data, axtoplevel_abc_length);
 		pool = parseActionBlock(code, 0, NULL, builtinDomain, nativeMethods, nativeClasses, nativeScripts);
+		#ifdef AVMPLUS_VERBOSE
+		//pool->verbose = true;
+		#endif
 	}
 
 
@@ -140,8 +153,26 @@ namespace axtam
 						 NULL);
 		return toplevel;
 	}
-	
-	AXTam::AXTam(MMgc::GC *gc) : AvmCore(gc), pool(NULL), mscomClass(NULL)
+
+	void AXTam::dumpException(Exception *exception)
+	{
+		#ifdef DEBUGGER
+		if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+		{
+			ATLTRACE2((wchar_t *)this->string(exception->atom)->c_str());
+			ATLTRACE2("\n");
+		}
+		if (exception->getStackTrace()) {
+			ATLTRACE2((const wchar_t *)exception->getStackTrace()->format(this)->c_str());
+			ATLTRACE2("\n");
+		}
+		#else
+			ATLTRACE2((wchar_t *)this->string(exception->atom)->c_str());
+			ATLTRACE2("\n");
+		#endif
+	}
+
+	AXTam::AXTam(MMgc::GC *gc) : AvmCore(gc), pool(NULL), mscomClass(NULL), toplevel(NULL)
 	{
 //		systemClass = NULL;
 		
@@ -228,6 +259,12 @@ namespace axtam
 		throwException(exception);
 	}
 
+	void AXTam::throwCOMError(HRESULT hr){
+		// hrm - not sure this is working ok...
+		AvmAssert(0);
+		comErrorClass()->throwError(hr);
+		AvmAssert(0); // not reached
+	}
 
 } /* end of namespace AXTam */
 

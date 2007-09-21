@@ -13,7 +13,8 @@
  *
  * The Original Code is [ActiveScripting implemented with Tamarin].
  *
- * The Initial Developer of the Original Code is Mozilla Corp.
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
  * Portions created by the Initial Developer are Copyright (C) 2007
  * the Initial Developer. All Rights Reserved.
  *
@@ -34,61 +35,36 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "axtam.h"
-#include "SystemClass.h"
+#ifndef __axtam_AdaptActiveScriptSite__
+#define __axtam_AdaptActiveScriptSite__
 
-#include <stdlib.h>
 
 namespace axtam
 {
-	BEGIN_NATIVE_MAP(SystemClass)
-		NATIVE_METHOD(axtam_System_getAvmplusVersion, SystemClass::getAvmplusVersion)
-		NATIVE_METHOD(axtam_System_write, SystemClass::write)
-		NATIVE_METHOD(axtam_System_debugger, SystemClass::debugger)
-		NATIVE_METHOD(axtam_System_isDebugger, SystemClass::isDebugger)
-	END_NATIVE_MAP()
-
-	SystemClass::SystemClass(VTable *cvtable)
-		: ClassClosure(cvtable)
-    {
-//		AXTam* core = (AXTam*)this->core();
-//		if (core->systemClass == NULL) {
-//			core->systemClass = this;
-//		}
-		
-		createVanillaPrototype();
-	}
-
-	SystemClass::~SystemClass()
+	class AdaptActiveScriptSite : public ScriptObject
 	{
-	}
+		friend class AdaptActiveScriptSiteClass;
+		AdaptActiveScriptSite(VTable* vtable, ScriptObject* prototype, IActiveScriptSite *);
+	private:
+		Atom GetItemInfo(Stringp name, int flag);
+		Stringp GetDocVersionString() {return NULL;}
 
-	Stringp SystemClass::getAvmplusVersion()
-	{
-		return core()->newString(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
-	}
+		// *sob* - this is still confusing MarkH
+		//CComPtr<IActiveScriptSite> site;
+	};
 
-	void SystemClass::write(Stringp s)
+	class AdaptActiveScriptSiteClass : public ClassClosure
 	{
-		if (!s)
-			toplevel()->throwArgumentError(kNullArgumentError, "string");
-		core()->console << s;
-	}
+	public:
+		AdaptActiveScriptSiteClass(VTable* cvtable);
+		~AdaptActiveScriptSiteClass();
 
-	void SystemClass::debugger()
-	{
-		#ifdef DEBUGGER
-		core()->debugger->enterDebugger();
-		#endif
-	}
+		// Create an instance from native code.
+		//AdaptActiveScriptSite* create(IUnknown *pUnk, Atom obj);
 
-	bool SystemClass::isDebugger()
-	{
-		#ifdef DEBUGGER
-		return true;
-		#else
-		return false;
-		#endif
-	}
+		DECLARE_NATIVE_MAP(AdaptActiveScriptSiteClass)
+	};
 
 }
+
+#endif /* __axtam_AdaptActiveScriptSite__ */

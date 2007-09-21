@@ -35,8 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 // hackery - for now, this file is "built" via:
-// % set T_CENTRAL=../../tamarin-central
-// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath %T_CENTRAL%/utils/asc.jar macromedia.ac.embedding.ScriptCompiler -abcfuture -builtin -import %T_CENTRAL%/core/builtin.abc -out axtoplevel mscom.as
+// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -out axtoplevel mscom.as
 
 package axtam 
 {
@@ -48,8 +47,77 @@ package axtam
 		public native static function debugger():void
 		public native static function isDebugger():Boolean
 	}
+}
+
+package axtam.com {
+	public class constants {
+		public static const E_NOTIMPL = 0x80004001
+	}
+
+	// Its not clear if we should subclass the standard 'Error', but given
+	// it has its own concept of 'Message' and 'ID', it doesn't seem a good fit.
+	// Maybe a new base-class should be introduced.
+	public dynamic class Error
+	{
+		function Error(hresult) {
+			this.hresult = hresult;
+		}
+
+		public native static function getErrorMessage(index:int):String;
+	}
+
 	public class MSCom
 	{
-		// hrm...
+		// this is a native class that manages the 'dynamic' properties
+		// hiding behind a COM IDispatch/IDispatchEx interfaces.
+		// It can only be created by native code.
 	}
+}
+
+package axtam.com.adaptors.consumer {
+	// scripting interfaces we consume in AS (ie, implemented externally)
+	// Each method listed here corresponds to a native method in the engine, 
+	// which inturn delegates to the IActiveScriptSite COM object.
+	public class ScriptSite
+	{
+		public native function GetItemInfo(name:String, flag:int):Object
+		public native function GetDocVersionString(): String
+	}
+}
+
+package axtam.com.adaptors.provider {
+	// scripting interfaces we implement (provide) in AS (ie, called externally)
+	// XXX - these declarations aren't really necessary, as it is never 
+	// used - should they stay?
+	public class ScriptEngine
+	{
+		public function SetScriptSite():void
+		{
+			throw axtam.com.Error(axtam.com.constants.E_NOTIMPL)
+		}
+		public function AddNamedItem(name:String, flags:int):void
+		{
+			throw axtam.com.Error(axtam.com.constants.E_NOTIMPL)
+		}
+	}
+}
+
+package {
+
+	class ScriptEngine extends axtam.com.adaptors.provider.ScriptEngine {
+			override public function AddNamedItem(name:String, flags:int):void
+			{
+				//axtam.System.write('AddNamedItem(' + name + ',' + flags + ')\n')
+				var site = new axtam.com.adaptors.consumer.ScriptSite()
+				var info = site.GetItemInfo(name, 0)
+				//axtam.System.write(info)
+				engine_env[name] = info
+			}
+	}
+
+	public var engine = new ScriptEngine()
+	// This kinda sucks, but will do for now - it holds the 'named items'
+	public var engine_env = new Object; // I want a Dictionary()!
+
+	// and magically methods will be called on 'engine'
 }
