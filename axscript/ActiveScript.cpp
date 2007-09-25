@@ -180,13 +180,17 @@ public:
             /* [in] */ DWORD dwEnabledOptions);
 protected:
 	CComPtr<IActiveScriptSite> m_site;
-	SCRIPTSTATE m_ss;
+	SCRIPTSTATE scriptState;
+	DWORD safetyOptions;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ActiveScript, CActiveScript)
 
 // Constructor
-CActiveScript::CActiveScript() : root(NULL)
+CActiveScript::CActiveScript() : 
+	root(NULL), 
+	safetyOptions(0), 
+	scriptState(SCRIPTSTATE_UNINITIALIZED)
 {
 		// move this to DLL init?
 	if (!fm) {
@@ -231,18 +235,24 @@ STDMETHODIMP CActiveScript::GetScriptSite(
 STDMETHODIMP CActiveScript::SetScriptState( 
             /* [in] */ SCRIPTSTATE ss)
 {
-	m_ss = ss;
+	ATLTRACE2("CActiveScript::SetScriptState(0x%x)\n", ss);
+	scriptState = ss;
 	return S_OK;
 }
 
 STDMETHODIMP CActiveScript::GetScriptState( 
             /* [out] */ SCRIPTSTATE *pssState)
 {
-	ATLTRACENOTIMPL(_T("CActiveScript::GetScriptState"));
+	if (!pssState)
+		return E_POINTER;
+	ATLTRACE2("CActiveScript::GetScriptState (is 0x%x)\n", scriptState);
+	*pssState = scriptState;
+	return S_OK;
 }
 
 STDMETHODIMP CActiveScript::Close(void)
 {
+	ATLTRACE2("CActiveScript::Close()\n");
 	if (!core)
 		return S_OK;
 	return core->Close();
@@ -252,7 +262,7 @@ STDMETHODIMP CActiveScript::AddNamedItem(
             /* [in] */ LPCOLESTR pstrName,
             /* [in] */ DWORD dwFlags)
 {
-	ATLTRACE2("CActiveScript::AddNamedItem(\"%S\", 0x%x)", pstrName, dwFlags);
+	ATLTRACE2("CActiveScript::AddNamedItem(\"%S\", 0x%x)\n", pstrName, dwFlags);
 
 	if (!m_site || !core)
 		return E_FAIL;
@@ -355,7 +365,7 @@ STDMETHODIMP CActiveScript::ParseProcedureText(
 STDMETHODIMP CActiveScript::InitNew(void)
 {
 	if (!core) {
-		ATLTRACE2("Engine failing to initialize - no core!");
+		ATLTRACE2("CActiveScript Engine failing to initialize - no core!");
 		return E_OUTOFMEMORY;
 	}
 	TRY(core, kCatchAction_ReportAsError) {
@@ -402,6 +412,7 @@ STDMETHODIMP CActiveScript::ParseScriptText(
 	// until we get a compiler, assume the text passed to us contains
 	// the name of a file with the .abc!  This will do in the short
 	// term.
+	ATLTRACE2("CActiveScript::ParseScriptText\n");
 	TRY(core, kCatchAction_ReportAsError) {
 		std::fstream file(pstrCode, std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
 		std::ifstream::pos_type size(file.tellg());
@@ -440,7 +451,13 @@ STDMETHODIMP CActiveScript::GetInterfaceSafetyOptions(
             /* [out] */ DWORD *pdwSupportedOptions,
             /* [out] */ DWORD *pdwEnabledOptions)
 {
-	ATLTRACENOTIMPL(_T("CActiveScript::GetInterfaceSafetyOptions"));
+	// XXX - we must look at this in detail!
+	ATLTRACE2("CActiveScript::GetInterfaceSafetyOptions\n");
+	if (!pdwSupportedOptions || !pdwEnabledOptions)
+		return E_POINTER;
+	*pdwSupportedOptions = (DWORD)-1;//INTERFACESAFE_FOR_UNTRUSTED_DATA | INTERFACESAFE_FOR_UNTRUSTED_CALLER;
+	*pdwEnabledOptions = safetyOptions;
+	return S_OK;
 }
 
 STDMETHODIMP CActiveScript::SetInterfaceSafetyOptions( 
@@ -448,5 +465,9 @@ STDMETHODIMP CActiveScript::SetInterfaceSafetyOptions(
             /* [in] */ DWORD dwOptionSetMask,
             /* [in] */ DWORD dwEnabledOptions)
 {
-	ATLTRACENOTIMPL(_T("CActiveScript::SetInterfaceSafetyOptions"));
+	ATLTRACE2("CActiveScript::SetInterfaceSafetyOptions(...,0x%x, 0x%x)\n", dwOptionSetMask, dwEnabledOptions);
+	// XXX - check interfaces
+	safetyOptions &= ~dwOptionSetMask;
+	safetyOptions |= dwEnabledOptions;
+	return S_OK;
 }

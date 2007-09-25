@@ -57,9 +57,11 @@ namespace axtam
 		if (FAILED(hr))
 			core->throwCOMError(hr);
 		CComPtr<IUnknown> unk;
-		hr = site->GetItemInfo((OLECHAR *)name->c_str(), SCRIPTINFO_IUNKNOWN, &unk, NULL);
+		CComPtr<ITypeInfo> tlb;
+		hr = site->GetItemInfo((OLECHAR *)name->c_str(), SCRIPTINFO_IUNKNOWN, &unk, &tlb);
 		if (FAILED(hr) || !unk)
 			core->throwCOMError(hr);
+		// XXX - work out how to return both unk and tlb
 		return core->mscomClass->create(unk, undefinedAtom)->atom(); // 2nd param is bogus???
 		//return undefinedAtom;
 	}
