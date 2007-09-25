@@ -44,7 +44,7 @@ namespace MMgc
 	/**
 	 * A general purpose memory allocator using size classes 
 	 */
-	class FixedMalloc : public GCAllocObject
+	class MMGC_API FixedMalloc : public GCAllocObject
 	{
 		friend class GC;
 	public:

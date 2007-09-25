@@ -38,8 +38,6 @@
 #ifndef __GC__
 #define __GC__
 
-
-
 #if defined MMGC_IA32
 
 #ifdef WIN32
@@ -154,7 +152,7 @@ namespace MMgc
 	 * GCRoot is root in the reachability graph, it contains a pointer a size 
 	 * and will be searched for things.  
 	 */
-	class GCRoot
+	class MMGC_API GCRoot
 	{
 		friend class GC;
 	public:
@@ -197,7 +195,7 @@ namespace MMgc
 	 * GCCallback is an interface that allows the application to get
 	 * callbacks at interesting GC points.
 	 */
-	class GCCallback
+	class MMGC_API GCCallback
 	{
 		friend class GC;
 		friend class ZCT;
@@ -293,7 +291,7 @@ namespace MMgc
 	/**
 	 * The Zero Count Table used by DRC.
 	 */
-	class ZCT
+	class MMGC_API ZCT
 	{
 		friend class GC;
 		// how many items there have to be to trigger a Reap
@@ -377,7 +375,7 @@ namespace MMgc
 	 * to find the optimum value.
 	 *
 	 */
-	class GC : public GCAllocObject
+	class MMGC_API GC : public GCAllocObject
 	{
 		friend class GCRoot;
 		friend class GCCallback;

@@ -79,7 +79,7 @@ namespace MMgc
 	 * the address space returned by VirtualAlloc.  Heap regions are
 	 * allocated contiguously if possible to reduce fragmentation.
 	 */
-	class GCHeap : public GCAllocObject
+	class MMGC_API GCHeap : public GCAllocObject
 	{
 	public:
 		// -- Constants
@@ -265,7 +265,7 @@ namespace MMgc
 		Region *lastRegion;
 		
 		// Block struct used for free lists and memory traversal
-		class HeapBlock : public GCAllocObject
+		class MMGC_API HeapBlock : public GCAllocObject
 		{
 		public:
 			char *baseAddr;   // base address of block's memory

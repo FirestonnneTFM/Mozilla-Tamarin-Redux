@@ -5,6 +5,8 @@ shell_INCLUDES = -I$(srcdir) -I$(topsrcdir)/extensions
 shell_DEFINES = -DAVMPLUS_SHELL
 shell_STATIC_LIBRARIES = MMgc avmplus
 shell_DIR := $(curdir)/
+shell_EXTRA_CPPFLAGS := $(AVMSHELL_CPPFLAGS)
+shell_EXTRA_LDFLAGS := $(AVMSHELL_LDFLAGS)
 
 ifdef ENABLE_SHELL
 shell_BUILD_ALL = 1

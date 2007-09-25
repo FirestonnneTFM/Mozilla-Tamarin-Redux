@@ -158,8 +158,8 @@ namespace MMgc
 		GCCriticalSection& m_cs;
 	};
 
-	void SetMemTag(const char *memtag);
-	void SetMemType(void *memtype);
+	void MMGC_API SetMemTag(const char *memtag);
+	void MMGC_API SetMemType(void *memtype);
 
 	/**
 	 * calculate a stack trace skipping skip frames and return index into
@@ -173,7 +173,7 @@ namespace MMgc
 	/**
 	* Manually set me, for special memory not new/deleted, like the code memory region
 	*/
-	void ChangeSizeForObject(void *object, int size);
+	void MMGC_API ChangeSizeForObject(void *object, int size);
 
 	/**
 	* How much extra size does DebugDecorate need?
