@@ -44,7 +44,7 @@ import re
 import sys
 from sets import Set
 
-_lineExp = re.compile("#(?:line)? \d+ \"([^\"<>]+[^/])\"");
+_lineExp = re.compile("#(?:line)? ?\d+ \"([^\"<>]+[^/])\"");
 
 deps = Set()
 

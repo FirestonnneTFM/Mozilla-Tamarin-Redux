@@ -52,6 +52,8 @@ def _configGuess():
         os = 'darwin'
     elif ostest.startswith('linux'):
         os = 'linux'
+    elif ostest.startswith('sunos'):
+        os = 'sunos'
     else:
         raise Exception('Unrecognized OS: ' + ostest)
 
@@ -62,6 +64,8 @@ def _configGuess():
         cpu = 'x86_64'
     elif re.search('^(ppc|powerpc)$', cputest):
         cpu = 'powerpc'
+    elif re.search('sun', cputest):
+        cpu = 'sparc'
     else:
         raise Exception('Unrecognized CPU: ' + cputest)
 
@@ -134,6 +138,8 @@ class Configuration:
     def getCompiler(self, static_crt=False):
         self.COMPILER_IS_GCC = True
         self._acvars.update({
+            'I_SUFFIX': 'i',
+            'II_SUFFIX': 'ii',
             'OBJ_SUFFIX': 'o',
             'LIB_PREFIX': 'lib',
             'LIB_SUFFIX': 'a',
@@ -206,6 +212,19 @@ class Configuration:
                 'LDFLAGS'      : '',
                 'MKSTATICLIB'  : '$(AR) cr $(1)',
                 'MKDLL'        : '$(CXX) -shared -o $(1)',
+                'MKPROGRAM'    : '$(CXX) -o $(1)'
+                })
+        elif self._target[0] == 'sunos':
+            self.COMPILER_IS_GCC = False
+            self._acvars.update({
+                'I_SUFFIX': 'i',
+                'II_SUFFIX': 'i',
+                'CPPFLAGS'     : '',
+                'CXX'          : 'CC',
+                'CXXFLAGS'     : '',
+                'LD'           : 'ar',
+                'LDFLAGS'      : '',
+                'MKSTATICLIB'  : '$(AR) cr $(1)',
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
 

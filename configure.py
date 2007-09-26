@@ -118,6 +118,15 @@ elif os == "linux":
     OS_LIBS.append('pthread')
     if config.getDebug():
         OS_LIBS.append("dl")
+elif os == "sunos":
+    if not config.COMPILER_IS_GCC:
+        APP_CXXFLAGS = ""
+        OPT_CXXFLAGS = "-xO5 "
+        DEBUG_CXXFLAGS = "-g "
+    APP_CPPFLAGS += "-DUNIX -DAVMPLUS_UNIX -DSOLARIS "
+    OS_LIBS.append('pthread')
+    if config.getDebug():
+        OS_LIBS.append("dl")
 else:
     raise Exception("Unsupported OS")
 
@@ -125,6 +134,8 @@ if cpu == "i686":
     APP_CPPFLAGS += "-DAVMPLUS_IA32 "
 elif cpu == "powerpc":
     APP_CPPFLAGS += "-DAVMPLUS_PPC "
+elif cpu == "sparc":
+    APP_CPPFLAGS += "-DAVMPLUS_SPARC "
 else:
     raise Exception("Unsupported OS")
 

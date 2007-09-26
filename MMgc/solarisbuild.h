@@ -47,10 +47,11 @@
  */
 #define GCHEAP_LOCK
 
-/**
- * IA-32
- */
+#if defined(__sparc) || defined(__sparc__)
+#define MMGC_SPARC
+#elif defined(__i386) || defined(__i386__)
 #define MMGC_IA32
+#endif
 
 /**
  * Define this to get stack traces.  Helps with memory leaks.
@@ -74,8 +75,9 @@
 /**
  * Use VirtualAlloc to reserve/commit memory
  */
+#ifdef MMGC_IA32
 #define USE_MMAP
-
+#endif
 /**
  *
  */

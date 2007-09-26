@@ -146,7 +146,7 @@ if __name__ == "__main__":
     import sys
     import re
 
-    _argExpr = re.compile("\\.ii$")
+    _argExpr = re.compile("\\.ii?$")
 
     files = {}
     verbose = 'CALCDEPENDS_VERBOSE' in os.environ

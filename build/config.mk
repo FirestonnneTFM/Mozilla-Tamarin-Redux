@@ -93,21 +93,21 @@ $(1)_CXXOBJS = $$($(1)_CXXSRCS:%.cpp=%.$(OBJ_SUFFIX))
 
 GARBAGE += \
   $$($(1)_CXXOBJS) \
-  $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.ii) \
+  $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)) \
   $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.deps) \
   $(NULL)
 
-$$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.ii): %.ii: %.cpp $$(GLOBAL_DEPS)
+$$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX)): %.$(II_SUFFIX): %.cpp $$(GLOBAL_DEPS)
 	test -d $$(dir $$@) || mkdir -p $$(dir $$@)
 	$(CXX) -E $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) \
 	  $$< > $$@
 	$(PYTHON) $(topsrcdir)/build/dependparser.py $$*.deps < $$@ > /dev/null
 
-$$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.ii $$(GLOBAL_DEPS)
+$$($(1)_CXXOBJS): %.$(OBJ_SUFFIX): %.$(II_SUFFIX) $$(GLOBAL_DEPS)
 	$(CXX) $(OUTOPTION)$$@ $$($(1)_CPPFLAGS) $$($(1)_CXXFLAGS) $$($(1)_DEFINES) $$($(1)_INCLUDES) -c $$<
 
 $(1).thing.pp: FORCE
-	@$(PYTHON) $(topsrcdir)/build/calcdepends.py $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.ii)
+	@$(PYTHON) $(topsrcdir)/build/calcdepends.py $$@ $$($(1)_CXXOBJS:.$(OBJ_SUFFIX)=.$(II_SUFFIX))
 
 include $(1).thing.pp
 

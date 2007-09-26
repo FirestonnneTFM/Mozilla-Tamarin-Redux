@@ -48,6 +48,10 @@ ifeq (arm,$(TARGET_CPU))
 codegen_cpu_cxxsrc := ArmAssembler.cpp
 endif
 
+ifeq (sparc,$(TARGET_CPU))
+codegen_cpu_cxxsrc := SparcAssembler.cpp
+endif
+
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/CodegenMIR.cpp \
   $(curdir)/$(codegen_cpu_cxxsrc) \
