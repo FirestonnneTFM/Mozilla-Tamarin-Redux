@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -82,6 +83,14 @@
 #include <pthread_np.h>
 #endif // HAVE_PTHREAD_NP_H
 
+#ifdef SOLARIS
+#include <ucontext.h>
+#include <sys/frame.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/stack.h>
+extern "C" greg_t _getsp(void);
+#endif
 
 #if defined(_MSC_VER) && defined(_DEBUG)
 // we turn on exceptions in DEBUG builds
@@ -974,6 +983,8 @@ bail:
 		__asm {
 			mov stackP,esp
 		}
+		#elif defined SOLARIS
+		stackP = (void *) _getsp();
 		#else
 		asm("movl %%esp,%0" : "=r" (stackP));
 		#endif
@@ -981,6 +992,10 @@ bail:
 
 #if defined MMGC_AMD64
 	asm("mov %%rsp,%0" : "=r" (stackP));
+#endif
+
+#if defined MMGC_SPARC
+		stackP = (void *) _getsp();
 #endif
 
 #if defined MMGC_PPC
@@ -1416,7 +1431,67 @@ bail:
 		reaping = false;
 	}
 
-#ifdef AVMPLUS_UNIX
+#ifdef SOLARIS
+
+#ifdef MMGC_SPARC
+#define FLUSHWIN() asm("ta 3"); 
+#else
+#define FLUSHWIN() 
+#endif
+#define MAX_FRAMES 500
+
+	static int validaddr(void * addr) 
+	{
+		static long pagemask = -1;
+		char c;
+		if (pagemask == -1) {
+			pagemask = ~(sysconf(_SC_PAGESIZE) - 1);
+		}
+		addr = (void *)((long)addr & pagemask);
+		if (mincore((char *)addr, 1, &c) == -1 && errno == ENOMEM) {
+			return 0;  /* invalid */
+		} else {
+			return 1;  /* valid */
+		}
+	}  /* end of validaddr */
+
+	pthread_key_t stackTopKey = NULL;
+
+	uint32	GC::GetStackTop() const
+	{
+		if(stackTopKey == NULL)
+			{
+				int res = pthread_key_create(&stackTopKey, NULL);
+				GCAssert(res == 0);
+			}
+
+		void *stackTop = pthread_getspecific(stackTopKey);
+		if(stackTop)
+			return (uint32)stackTop;
+
+		struct frame *sp;
+		int i;
+		int *iptr;
+
+		stack_t st;
+		stack_getbounds(&st);
+		uintptr_t stack_base = (uintptr_t)st.ss_sp + st.ss_size;
+
+		FLUSHWIN();
+
+		sp = (struct frame *)_getfp();
+		stackTop = (void *)sp;
+		for (i = 0; i < MAX_FRAMES && sp && (uintptr_t)sp < stack_base; i++) { 
+			if (!validaddr( sp ) || !validaddr(&sp->fr_savpc) || !sp->fr_savpc ) {
+				break;
+			}
+			stackTop = (void *)sp;
+			sp = ( struct frame * )sp->fr_savfp;
+		}
+		pthread_setspecific(stackTopKey, stackTop);
+		return (uintptr_t)stackTop;
+	}
+#elif defined(AVMPLUS_UNIX) // SOLARIS
 	pthread_key_t stackTopKey = 0;
 
 	uint32 GC::GetStackTop() const
@@ -2185,6 +2260,9 @@ bail:
 		LARGE_INTEGER value;
 		QueryPerformanceCounter(&value);
 		return value.QuadPart;
+		#elif defined SOLARIS
+		uint64 retval = gethrtime();
+		return retval;
 		#elif defined(AVMPLUS_UNIX)
 		// TODO_LINUX
 		return 0;

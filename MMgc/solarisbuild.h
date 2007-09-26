@@ -42,6 +42,8 @@
 #endif
 #endif
 
+#define HAVE_ALLOCA_H
+
 /**
  * Critical section on GCHeap allocations.
  */

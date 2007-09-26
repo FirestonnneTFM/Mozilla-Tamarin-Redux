@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -58,7 +59,12 @@
 		VirtualQuery(_stack, &__mib, sizeof(MEMORY_BASIC_INFORMATION)); \
 	    _size = __mib.RegionSize - ((uintptr) _stack - (uintptr)__mib.BaseAddress);
 
-#else 
+#elif defined SOLARIS
+#define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
+		do { \
+		_stack = (void *) _getsp();\
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)
+#else
 #define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
 		do { \
 		volatile auto int save1,save2,save3,save4,save5,save6,save7;\
@@ -137,6 +143,12 @@
 		asm("mov %0,sp" : "=r" (_stack));\
 		_size = (uintptr)StackTop - (uintptr)_stack;
 
+#elif defined MMGC_SPARC
+#define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
+		do { \
+		asm("ta 3");\
+		_stack = (void *) _getsp();\
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)
 #endif
 
 #ifdef DEBUGGER
