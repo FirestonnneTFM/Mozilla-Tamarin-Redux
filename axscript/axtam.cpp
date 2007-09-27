@@ -48,6 +48,17 @@
 #include "AdaptActiveScriptSite.h"
 #include "COMErrorClass.h"
 
+// files cloned from the shell
+namespace axtam {
+class ByteArrayObject;
+class ByteArray;
+}
+#include "DataIO.h"
+#include "ByteArrayGlue.h"
+#include "DomainClass.h"
+
+#include <fstream> // while we still load .abc files...
+
 
 using namespace avmplus::NativeID;
 
@@ -63,12 +74,18 @@ namespace axtam
 	const int kScriptTimeout = 15;
 	const int kScriptGracePeriod = 5;
 
+	HINSTANCE AXTam::hinstance = 0;
+
 	BEGIN_NATIVE_CLASSES(AXTam)
 		NATIVE_CLASS(abcclass_axtam_com_MSCom,      MSComClass,        ScriptObject)
 		NATIVE_CLASS(abcclass_axtam_System,         SystemClass,       ScriptObject)
 		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_ScriptSite,
 		                                            AdaptActiveScriptSiteClass, ScriptObject)
 		NATIVE_CLASS(abcclass_axtam_com_Error,      COMErrorClass,     ScriptObject)
+		// clones from the shell
+		NATIVE_CLASS(abcclass_avmplus_Domain,          DomainClass,        DomainObject)
+		NATIVE_CLASS(abcclass_flash_utils_ByteArray,    ByteArrayClass,     ByteArrayObject)
+
 	END_NATIVE_CLASSES()
 
 	BEGIN_NATIVE_SCRIPTS(AXTam)
@@ -146,7 +163,61 @@ namespace axtam
 		// DomainEnv based on the builtinDomain.
 		Toplevel* toplevel = initTopLevel();
 
-		// Initialize our builtins in the new Toplevel
+		// load up the compiler (this list comes from esc/build/esc.sh)
+		// This is hacked in under the assumption we will come up with a
+		// better strategy.
+		static const wchar_t *abcs[] = {
+			L"debug.es.abc",           L"ast.es.abc",          L"ast-decode.es.abc",
+			L"util.es.abc",            L"lex-char.es.abc",
+			L"lex-token.es.abc",       L"lex-scan.es.abc",     L"parse.es.abc",
+			L"util-tamarin.es.abc",    L"bytes-tamarin.es.abc",L"util-tamarin.es.abc",
+			L"asm.es.abc",             L"abc.es.abc",          L"emit.es.abc",
+			L"cogen.es.abc",           L"cogen-stmt.es.abc",   L"cogen-expr.es.abc",
+			NULL
+		};
+		// first of these directories with abcs[0] wins...
+		static const wchar_t *candidates[] = {
+			L"..\\..\\..\\esc\\bin\\", // for running directly from the source tree
+			L"",
+			NULL
+		};
+		wchar_t fqname[MAX_PATH+100] = {L'\0'}; // space for candidate path too...
+		rsize_t fqsize = sizeof(fqname)/sizeof(fqname[0]);
+
+		wchar_t *fqtail; // point into fqname where the tail starts.
+		GetModuleFileNameW(axtam::AXTam::hinstance, fqname, fqsize);
+		fqtail = wcsrchr(fqname, L'\\');
+		if (fqtail)
+			fqtail += 1;
+		else // unlikely, but...
+			fqtail = fqname;
+		rsize_t tailsize = fqsize - (fqtail-fqname);
+		const wchar_t **candidate;
+		for (candidate=candidates;*candidate;candidate++) {
+			wcscpy_s(fqtail, tailsize, *candidate);
+			wcscat_s(fqtail, tailsize, abcs[0]);
+			if (0xFFFFFFFF != GetFileAttributesW(fqname)) {
+				// yay - found the path they live in - load-em up.
+				const wchar_t **abc;
+				for (abc=abcs;*abc;abc++) {
+					wcscpy_s(fqtail, tailsize, *candidate);
+					wcscat_s(fqtail, tailsize, *abc);
+					Stringp fname = new (GetGC()) String((wchar *)fqname, wcslen(fqname));
+					// XXX - this will be wrong for non-ascii names!
+					std::fstream file((char *)fname->toUTF8String()->c_str(), std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
+					std::ifstream::pos_type size(file.tellg());
+					ScriptBuffer code = newScriptBuffer(size);
+					file.seekg(0);
+					file.read((char *)code.getBuffer(), size);
+					axtam::CodeContext* codeContext = new (GetGC()) axtam::CodeContext(toplevel->domainEnv());
+					// parse new bytecode
+					handleActionBlock(code, 0, toplevel->domainEnv(), toplevel, NULL, NULL, NULL, codeContext);
+				}
+			}
+			break; // all done
+		}
+
+		// Initialize the parser in our Toplevel
 		handleActionPool(pool,
 						 toplevel->domainEnv(),
 						 toplevel,
@@ -286,8 +357,8 @@ CAXTamarinModule _AtlModule;
 // DLL Entry Point
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
-	hInstance;
-    return _AtlModule.DllMain(dwReason, lpReserved); 
+	axtam::AXTam::hinstance = hInstance;
+	return _AtlModule.DllMain(dwReason, lpReserved); 
 }
 
 #ifdef _MANAGED

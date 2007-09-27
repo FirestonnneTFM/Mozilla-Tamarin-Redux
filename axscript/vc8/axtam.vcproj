@@ -296,7 +296,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ByteArrayGlue.h"
+				>
+			</File>
+			<File
 				RelativePath="..\COMErrorClass.h"
+				>
+			</File>
+			<File
+				RelativePath="..\dataio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\DomainClass.h"
 				>
 			</File>
 			<File
@@ -380,7 +392,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ByteArrayGlue.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\COMErrorClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\DataIO.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\DomainClass.cpp"
 				>
 			</File>
 			<File

@@ -37,10 +37,6 @@
 #include "mscom.h"
 #include "ActiveScriptError.h"
 
-// we use std stream IO for now.
-//#include <iostream>
-#include <fstream>
-
 using namespace axtam;
 
 static MMgc::FixedMalloc* fm = NULL;
@@ -179,6 +175,7 @@ public:
             /* [in] */ DWORD dwOptionSetMask,
             /* [in] */ DWORD dwEnabledOptions);
 protected:
+	HRESULT callEngine(Atom *ret, const char *name, ...);
 	CComPtr<IActiveScriptSite> m_site;
 	SCRIPTSTATE scriptState;
 	DWORD safetyOptions;
@@ -209,6 +206,64 @@ CActiveScript::CActiveScript() :
 	// hrmph - this doesn't look correct...
 	// XXX - surely I must delete this root?
 	root = new MMgc::GCRoot(gc, this, sizeof(*this));
+}
+
+HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
+{
+	AvmAssert(ppret == NULL || *ppret == undefinedAtom); // please init this out param
+	static const int maxAtoms = 64;
+	Atom args[maxAtoms];
+
+	if (!m_site || !core)
+		return E_FAIL;
+
+	ATLTRACE2("Calling engine::%s\n", name);
+	TRY(core, kCatchAction_ReportAsError) {
+
+		// Get the object named 'engine' - XXX - cache this?
+		Multiname multiname(core->publicNamespace, core->constantString("engine"));
+		ScriptEnv *se = (ScriptEnv *)core->toplevel->domainEnv()->getScriptInit(&multiname);
+		Atom a = core->toplevel->getproperty(se->global->atom(), &multiname, core->toplevel->toVTable(se->global->atom()));
+		Multiname multiname_ani(core->publicNamespace, core->constantString(name));
+		Atom ani = core->toplevel->getproperty(a, &multiname_ani, core->toplevel->toVTable(a));
+		// prepare the args
+		va_list s;
+		va_start (s, name); 
+		int argc = 1;
+		args[0] = a;
+		Atom arg = va_arg (s, Atom);
+		while (a != (Atom)-1) {
+			args[argc] = arg;
+			argc++;
+			a = va_arg (s, Atom);
+			AvmAssert(argc<maxAtoms);
+		}
+		// Now call the method.
+		Atom ret = AvmCore::atomToScriptObject(ani)->call(argc-1, args);
+		if (ppret)
+			*ppret = ret;
+	} CATCH(Exception * exception) {
+		// dump the exception for diagnostic purposes
+		core->dumpException(exception);
+		// report the exception to the site.
+		// XXX - later, we will want to move this error handling into
+		// AS, leaving the C++ code to only deal with 'internal' errors
+		// in the engine itself.  For now though, report all errors to 
+		// the site
+		CGCRootComObject<CActiveScriptError> *err;
+		ATLTRY(err = new CGCRootComObject<CActiveScriptError>(core));
+		if (err) {
+			err->exception = exception;
+//			err->dwSourceContextCookie = dwSourceContextCookie;
+			CComQIPtr<IActiveScriptError, &IID_IActiveScriptError> ase(err);
+			m_site->OnScriptError(ase);
+		}
+
+		return E_FAIL;
+	}
+	END_CATCH
+	END_TRY
+	return S_OK;
 }
 
 // Implementation methods.
@@ -264,35 +319,9 @@ STDMETHODIMP CActiveScript::AddNamedItem(
 {
 	ATLTRACE2("CActiveScript::AddNamedItem(\"%S\", 0x%x)\n", pstrName, dwFlags);
 
-	if (!m_site || !core)
-		return E_FAIL;
 	CComPtr<IUnknown> punk;
 
-	TRY(core, kCatchAction_ReportAsError) {
-
-		// Call AddNamedItem on our AS implemented engine
-		// Get the object named 'engine'.
-		Multiname multiname(core->publicNamespace, core->constantString("engine"));
-		ScriptEnv *se = (ScriptEnv *)core->toplevel->domainEnv()->getScriptInit(&multiname);
-		Atom a = core->toplevel->getproperty(se->global->atom(), &multiname, core->toplevel->toVTable(se->global->atom()));
-		// Now call the method.
-		Multiname multiname_ani(core->publicNamespace, core->constantString("AddNamedItem"));
-		Atom ani = core->toplevel->getproperty(a, &multiname_ani, core->toplevel->toVTable(a));
-		Atom atomv[3];
-		atomv[0] = a;
-		atomv[1] = core->internAlloc((const avmplus::wchar *)pstrName, wcslen(pstrName))->atom();
-		atomv[2] = core->internUint32(dwFlags)->atom();
-		AvmCore::atomToScriptObject(ani)->call(2, atomv);
-
-	} CATCH(Exception * exception) {
-		// ack - error setting up our environment.
-		core->dumpException(exception);
-		return E_FAIL;
-
-	}
-	END_CATCH
-	END_TRY
-	return S_OK;
+	return callEngine(NULL, "AddNamedItem", core->toAtom(pstrName), core->toAtom(dwFlags), (Atom)-1);
 }
 
 STDMETHODIMP CActiveScript::AddTypeLib( 
@@ -409,40 +438,15 @@ STDMETHODIMP CActiveScript::ParseScriptText(
             /* [out] */ VARIANT *pvarResult,
             /* [out] */ EXCEPINFO *pexcepinfo)
 {
-	// until we get a compiler, assume the text passed to us contains
-	// the name of a file with the .abc!  This will do in the short
-	// term.
-	ATLTRACE2("CActiveScript::ParseScriptText\n");
-	TRY(core, kCatchAction_ReportAsError) {
-		std::fstream file(pstrCode, std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
-		std::ifstream::pos_type size(file.tellg());
-		ScriptBuffer code = core->newScriptBuffer(size);
-		file.seekg(0);
-		file.read((char *)code.getBuffer(), size);
-
-		axtam::CodeContext* codeContext = new (core->GetGC()) axtam::CodeContext(core->toplevel->domainEnv());
-
-		// parse new bytecode
-		core->handleActionBlock(code, 0, core->toplevel->domainEnv(), core->toplevel, NULL, NULL, NULL, codeContext);
-
-	}
-	CATCH(Exception * exception)
-	{
-		core->dumpException(exception);
-		// Notify script site of error
-		CGCRootComObject<CActiveScriptError> *err;
-		ATLTRY(err = new CGCRootComObject<CActiveScriptError>(core));
-		if (m_site && err) {
-			err->exception = exception; // can we really just copy the pointer here?
-			err->dwSourceContextCookie = dwSourceContextCookie;
-			CComQIPtr<IActiveScriptError, &IID_IActiveScriptError> ase(err);
-			m_site->OnScriptError(ase);
-		}
-
-	}
-	END_CATCH
-	END_TRY
-	return S_OK;
+	return callEngine(NULL, "ParseScriptText",
+	                  core->toAtom(pstrCode),
+	                  core->toAtom(pstrItemName),
+	                  undefinedAtom, // XXX - punkContext,
+	                  core->toAtom(pstrDelimiter),
+	                  core->toAtom(dwSourceContextCookie),
+	                  core->toAtom(ulStartingLineNumber),
+	                  core->toAtom(dwFlags),
+	                  (Atom)-1);
 }
 
 // IObjectSafety

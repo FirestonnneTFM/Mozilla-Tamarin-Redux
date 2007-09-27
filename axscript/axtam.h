@@ -139,9 +139,20 @@ namespace axtam
 		// (ie, is it really per 'core'?)
 		Toplevel* toplevel;
 		CComPtr<IActiveScript> as;
+		static HINSTANCE hinstance;
 
 		void interrupt(MethodEnv *env);
 		void stackOverflow(MethodEnv *env);
+
+		Atom toAtom(LPCOLESTR s) {
+			if (!s)
+				return undefinedAtom;
+			return AvmCore::internAlloc((const avmplus::wchar *)s, wcslen(s))->atom();
+		};
+
+		Atom toAtom(DWORD v) {
+			return internUint32(v)->atom();
+		}
 
 //		DispatchConsumerClass *dispatchClass;
 

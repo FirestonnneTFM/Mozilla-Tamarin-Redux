@@ -35,7 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 // hackery - for now, this file is "built" via:
-// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -out axtoplevel mscom.as
+// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -out axtoplevel mscom.as ../shell/Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
 
 package axtam 
 {
@@ -85,29 +85,51 @@ package axtam.com.adaptors.consumer {
 	}
 }
 
-package axtam.com.adaptors.provider {
-	// scripting interfaces we implement (provide) in AS (ie, called externally)
-	// XXX - these declarations aren't really necessary, as it is never 
-	// used - should they stay?
-	public class ScriptEngine
-	{
-		public function SetScriptSite():void
-		{
-			throw axtam.com.Error(axtam.com.constants.E_NOTIMPL)
-		}
-		public function AddNamedItem(name:String, flags:int):void
-		{
-			throw axtam.com.Error(axtam.com.constants.E_NOTIMPL)
-		}
-	}
-}
+package {
+
+    import avmplus.*; // for our Domain clone - either it should die, or we rename the package in our clone!
+    import flash.utils.*; // for our ByteArray clone - either it should die, or we rename the package in our clone!
+
+
+    public function evalString(str)
+    {
+        import Parse.*;
+        var top = []
+        var parser = new Parse.Parser(str,top);
+        var prog = parser.program();
+        var ts = prog[0]
+        var nd = prog[1]
+        var bytes = Gen::cg(nd).getBytes();
+
+        var b = new ByteArray();
+        b.endian = "littleEndian";
+
+        for (var i = 0, len = bytes.length; i<len; ++i) {
+            b.writeByte(uint(bytes[i]));
+        }
+        axtam.System.write("Loading bytes!\n")
+        return Domain.currentDomain.loadBytes(b);
+    }
+
+   }
 
 package {
 
-	class ScriptEngine extends axtam.com.adaptors.provider.ScriptEngine {
-			override public function AddNamedItem(name:String, flags:int):void
+	class ScriptEngine {
+			public function ParseScriptText(code:String, itemName:String, context:Object, delim:String, sourceCookie:int, lineNumber:int, flags:int) {
+				axtam.System.write('ParseScriptText\n')
+				axtam.System.write(code)
+				// XXX - this is wrong - we should only do the parse and generation
+				// of bytecode here.  We should execute all such blocks at 
+				// SetScriptState(SCRIPTSTATE_RUNNING) time.
+				evalString(code)
+
+			}
+			// This function is called as a 'named item' is added to the environment.
+			// Examples include IE's 'window' object.
+			public function AddNamedItem(name:String, flags:int):void
 			{
-				//axtam.System.write('AddNamedItem(' + name + ',' + flags + ')\n')
+				axtam.System.write('AddNamedItem(' + name + ',' + flags + ')\n')
 				var site = new axtam.com.adaptors.consumer.ScriptSite()
 				var info = site.GetItemInfo(name, 0)
 				//axtam.System.write(info)
