@@ -49,7 +49,7 @@ namespace axtam
 		if (cbuf) {
 			memcpy(cbuf, buffer, count);
 			cbuf[count] = '\0';
-			ATLTRACE2((char *)cbuf);
+			ATLTRACE2("%s", (char *)cbuf);
 			free(cbuf);
 		}
 		return 0;

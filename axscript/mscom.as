@@ -91,7 +91,7 @@ package {
     import flash.utils.*; // for our ByteArray clone - either it should die, or we rename the package in our clone!
 
 
-    public function evalString(str)
+    public function execString(str)
     {
         import Parse.*;
         var top = []
@@ -107,8 +107,7 @@ package {
         for (var i = 0, len = bytes.length; i<len; ++i) {
             b.writeByte(uint(bytes[i]));
         }
-        axtam.System.write("Loading bytes!\n")
-        return Domain.currentDomain.loadBytes(b);
+        Domain.currentDomain.loadBytes(b);
     }
 
    }
@@ -122,7 +121,7 @@ package {
 				// XXX - this is wrong - we should only do the parse and generation
 				// of bytecode here.  We should execute all such blocks at 
 				// SetScriptState(SCRIPTSTATE_RUNNING) time.
-				evalString(code)
+				execString(code)
 
 			}
 			// This function is called as a 'named item' is added to the environment.
