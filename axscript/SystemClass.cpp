@@ -70,9 +70,10 @@ namespace axtam
 
 	void SystemClass::write(Stringp s)
 	{
-		if (!s)
-			toplevel()->throwArgumentError(kNullArgumentError, "string");
-		core()->console << s;
+		if (s)
+			core()->console << s;
+		else
+			core()->console << "<null>";
 	}
 
 	void SystemClass::debugger()
