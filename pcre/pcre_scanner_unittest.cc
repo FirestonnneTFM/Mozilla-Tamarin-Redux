@@ -32,10 +32,23 @@
 // Unittest for scanner, especially GetNextComments and GetComments()
 // functionality.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
+#include <string>
 #include <vector>
+
+#include <pcrecpp.h>
 #include <pcre_stringpiece.h>
 #include <pcre_scanner.h>
+
+#ifdef _WIN32
+#  define snprintf _snprintf
+#endif
+
+#define FLAGS_unittest_stack_size   49152
 
 // Dies with a fatal error if the two values are not equal.
 #define CHECK_EQ(a, b)  do {                                    \
@@ -68,6 +81,7 @@ static void TestScanner() {
   s.Consume(re, &var, &number);
   CHECK_EQ(var, "alpha");
   CHECK_EQ(number, 1);
+  CHECK_EQ(s.LineNumber(), 3);
   s.GetNextComments(&comments);
   CHECK_EQ(comments.size(), 1);
   CHECK_EQ(comments[0].as_string(), " // this sets alpha\n");
@@ -115,8 +129,31 @@ static void TestScanner() {
   comments.resize(0);
 }
 
+static void TestBigComment() {
+  string input;
+  for (int i = 0; i < 1024; ++i) {
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "    # Comment %d\n", i);
+    input += buf;
+  }
+  input += "name = value;\n";
+
+  Scanner s(input.c_str());
+  s.SetSkipExpression("\\s+|#.*\n");
+
+  string name;
+  string value;
+  s.Consume("(\\w+) = (\\w+);", &name, &value);
+  CHECK_EQ(name, "name");
+  CHECK_EQ(value, "value");
+}
+
+// TODO: also test scanner and big-comment in a thread with a
+//       small stack size
+
 int main(int argc, char** argv) {
   TestScanner();
+  TestBigComment();
 
   // Done
   printf("OK\n");

@@ -1,4 +1,6 @@
-// Copyright (c) 2005, Google Inc.
+// -*- coding: utf-8 -*-
+//
+// Copyright (c) 2005 - 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,9 +33,13 @@
 //
 // TODO: Test extractions for PartialMatch/Consume
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
+#include <cassert>
 #include <vector>
-#include "config.h"
 #include "pcrecpp.h"
 
 using pcrecpp::StringPiece;
@@ -259,17 +265,71 @@ static void TestReplace() {
       "aaaaa",
       "bbaaaaa",
       "bbabbabbabbabbabb" },
+    { "b*",
+      "bb",
+      "aa\naa\n",
+      "bbaa\naa\n",
+      "bbabbabb\nbbabbabb\nbb" },
+    { "b*",
+      "bb",
+      "aa\raa\r",
+      "bbaa\raa\r",
+      "bbabbabb\rbbabbabb\rbb" },
+    { "b*",
+      "bb",
+      "aa\r\naa\r\n",
+      "bbaa\r\naa\r\n",
+      "bbabbabb\r\nbbabbabb\r\nbb" },
+#ifdef SUPPORT_UTF8
+    { "b*",
+      "bb",
+      "\xE3\x83\x9B\xE3\x83\xBC\xE3\x83\xA0\xE3\x81\xB8",   // utf8
+      "bb\xE3\x83\x9B\xE3\x83\xBC\xE3\x83\xA0\xE3\x81\xB8",
+      "bb\xE3\x83\x9B""bb""\xE3\x83\xBC""bb""\xE3\x83\xA0""bb""\xE3\x81\xB8""bb" },
+    { "b*",
+      "bb",
+      "\xE3\x83\x9B\r\n\xE3\x83\xBC\r\xE3\x83\xA0\n\xE3\x81\xB8\r\n",   // utf8
+      "bb\xE3\x83\x9B\r\n\xE3\x83\xBC\r\xE3\x83\xA0\n\xE3\x81\xB8\r\n",
+      ("bb\xE3\x83\x9B""bb\r\nbb""\xE3\x83\xBC""bb\rbb""\xE3\x83\xA0"
+       "bb\nbb""\xE3\x81\xB8""bb\r\nbb") },
+#endif
     { "", NULL, NULL, NULL, NULL }
   };
 
+#ifdef SUPPORT_UTF8
+  const bool support_utf8 = true;
+#else
+  const bool support_utf8 = false;
+#endif
+
   for (const ReplaceTest *t = tests; t->original != NULL; ++t) {
+    RE re(t->regexp, RE_Options(PCRE_NEWLINE_CRLF).set_utf8(support_utf8));
+    assert(re.error().empty());
     string one(t->original);
-    CHECK(RE(t->regexp).Replace(t->rewrite, &one));
+    CHECK(re.Replace(t->rewrite, &one));
     CHECK_EQ(one, t->single);
     string all(t->original);
-    CHECK(RE(t->regexp).GlobalReplace(t->rewrite, &all) > 0);
+    CHECK(re.GlobalReplace(t->rewrite, &all) > 0);
     CHECK_EQ(all, t->global);
   }
+
+  // One final test: test \r\n replacement when we're not in CRLF mode
+  {
+    RE re("b*", RE_Options(PCRE_NEWLINE_CR).set_utf8(support_utf8));
+    assert(re.error().empty());
+    string all("aa\r\naa\r\n");
+    CHECK(re.GlobalReplace("bb", &all) > 0);
+    CHECK_EQ(all, string("bbabbabb\rbb\nbbabbabb\rbb\nbb"));
+  }
+  {
+    RE re("b*", RE_Options(PCRE_NEWLINE_LF).set_utf8(support_utf8));
+    assert(re.error().empty());
+    string all("aa\r\naa\r\n");
+    CHECK(re.GlobalReplace("bb", &all) > 0);
+    CHECK_EQ(all, string("bbabbabb\rbb\nbbabbabb\rbb\nbb"));
+  }
+  // TODO: test what happens when no PCRE_NEWLINE_* flag is set.
+  //       Alas, the answer depends on how pcre was compiled.
 }
 
 static void TestExtract() {
@@ -348,21 +408,120 @@ static void TestMatchNumberPeculiarity() {
   CHECK_EQ(a, "");
 }
 
-static void TestRecursion(int size, const char *pattern, int match_limit) {
+static void TestRecursion() {
   printf("Testing recursion\n");
 
-  // Fill up a string repeating the pattern given
-  string domain;
-  domain.resize(size);
-  int patlen = strlen(pattern);
-  for (int i = 0; i < size; ++i) {
-    domain[i] = pattern[i % patlen];
-  }
-  // Just make sure it doesn't crash due to too much recursion.
-  RE_Options options;
-  options.set_match_limit(match_limit);
-  RE re("([a-zA-Z0-9]|-)+(\\.([a-zA-Z0-9]|-)+)*(\\.)?", options);
-  re.FullMatch(domain);
+  // Get one string that passes (sometimes), one that never does.
+  string text_good("abcdefghijk");
+  string text_bad("acdefghijkl");
+
+  // According to pcretest, matching text_good against (\w+)*b
+  // requires match_limit of at least 8192, and match_recursion_limit
+  // of at least 37.
+
+  RE_Options options_ml;
+  options_ml.set_match_limit(8192);
+  RE re("(\\w+)*b", options_ml);
+  CHECK(re.PartialMatch(text_good) == true);
+  CHECK(re.PartialMatch(text_bad) == false);
+  CHECK(re.FullMatch(text_good) == false);
+  CHECK(re.FullMatch(text_bad) == false);
+
+  options_ml.set_match_limit(1024);
+  RE re2("(\\w+)*b", options_ml);
+  CHECK(re2.PartialMatch(text_good) == false);   // because of match_limit
+  CHECK(re2.PartialMatch(text_bad) == false);
+  CHECK(re2.FullMatch(text_good) == false);
+  CHECK(re2.FullMatch(text_bad) == false);
+
+  RE_Options options_mlr;
+  options_mlr.set_match_limit_recursion(50);
+  RE re3("(\\w+)*b", options_mlr);
+  CHECK(re3.PartialMatch(text_good) == true);
+  CHECK(re3.PartialMatch(text_bad) == false);
+  CHECK(re3.FullMatch(text_good) == false);
+  CHECK(re3.FullMatch(text_bad) == false);
+
+  options_mlr.set_match_limit_recursion(10);
+  RE re4("(\\w+)*b", options_mlr);
+  CHECK(re4.PartialMatch(text_good) == false);
+  CHECK(re4.PartialMatch(text_bad) == false);
+  CHECK(re4.FullMatch(text_good) == false);
+  CHECK(re4.FullMatch(text_bad) == false);
+}
+
+// A meta-quoted string, interpreted as a pattern, should always match
+// the original unquoted string.
+static void TestQuoteMeta(string unquoted, RE_Options options = RE_Options()) {
+  string quoted = RE::QuoteMeta(unquoted);
+  RE re(quoted, options);
+  CHECK(re.FullMatch(unquoted));
+}
+
+// A string containing meaningful regexp characters, which is then meta-
+// quoted, should not generally match a string the unquoted string does.
+static void NegativeTestQuoteMeta(string unquoted, string should_not_match,
+                                  RE_Options options = RE_Options()) {
+  string quoted = RE::QuoteMeta(unquoted);
+  RE re(quoted, options);
+  CHECK(!re.FullMatch(should_not_match));
+}
+
+// Tests that quoted meta characters match their original strings,
+// and that a few things that shouldn't match indeed do not.
+static void TestQuotaMetaSimple() {
+  TestQuoteMeta("foo");
+  TestQuoteMeta("foo.bar");
+  TestQuoteMeta("foo\\.bar");
+  TestQuoteMeta("[1-9]");
+  TestQuoteMeta("1.5-2.0?");
+  TestQuoteMeta("\\d");
+  TestQuoteMeta("Who doesn't like ice cream?");
+  TestQuoteMeta("((a|b)c?d*e+[f-h]i)");
+  TestQuoteMeta("((?!)xxx).*yyy");
+  TestQuoteMeta("([");
+}
+
+static void TestQuoteMetaSimpleNegative() {
+  NegativeTestQuoteMeta("foo", "bar");
+  NegativeTestQuoteMeta("...", "bar");
+  NegativeTestQuoteMeta("\\.", ".");
+  NegativeTestQuoteMeta("\\.", "..");
+  NegativeTestQuoteMeta("(a)", "a");
+  NegativeTestQuoteMeta("(a|b)", "a");
+  NegativeTestQuoteMeta("(a|b)", "(a)");
+  NegativeTestQuoteMeta("(a|b)", "a|b");
+  NegativeTestQuoteMeta("[0-9]", "0");
+  NegativeTestQuoteMeta("[0-9]", "0-9");
+  NegativeTestQuoteMeta("[0-9]", "[9]");
+  NegativeTestQuoteMeta("((?!)xxx)", "xxx");
+}
+
+static void TestQuoteMetaLatin1() {
+  TestQuoteMeta("3\xb2 = 9");
+}
+
+static void TestQuoteMetaUtf8() {
+#ifdef SUPPORT_UTF8
+  TestQuoteMeta("Pl\xc3\xa1\x63ido Domingo", pcrecpp::UTF8());
+  TestQuoteMeta("xyz", pcrecpp::UTF8());            // No fancy utf8
+  TestQuoteMeta("\xc2\xb0", pcrecpp::UTF8());       // 2-byte utf8 (degree symbol)
+  TestQuoteMeta("27\xc2\xb0 degrees", pcrecpp::UTF8());  // As a middle character
+  TestQuoteMeta("\xe2\x80\xb3", pcrecpp::UTF8());   // 3-byte utf8 (double prime)
+  TestQuoteMeta("\xf0\x9d\x85\x9f", pcrecpp::UTF8()); // 4-byte utf8 (music note)
+  TestQuoteMeta("27\xc2\xb0"); // Interpreted as Latin-1, but should still work
+  NegativeTestQuoteMeta("27\xc2\xb0",               // 2-byte utf (degree symbol)
+                        "27\\\xc2\\\xb0",
+                        pcrecpp::UTF8());
+#endif
+}
+
+static void TestQuoteMetaAll() {
+  printf("Testing QuoteMeta\n");
+  TestQuotaMetaSimple();
+  TestQuoteMetaSimpleNegative();
+  TestQuoteMetaLatin1();
+  TestQuoteMetaUtf8();
 }
 
 //
@@ -587,6 +746,35 @@ static void TestOptions() {
   Test_all_options();
 }
 
+static void TestConstructors() {
+  printf("Testing constructors\n");
+
+  RE_Options options;
+  options.set_dotall(true);
+  const char *str = "HELLO\n" "cruel\n" "world";
+
+  RE orig("HELLO.*world", options);
+  CHECK(orig.FullMatch(str));
+
+  RE copy1(orig);
+  CHECK(copy1.FullMatch(str));
+
+  RE copy2("not a match");
+  CHECK(!copy2.FullMatch(str));
+  copy2 = copy1;
+  CHECK(copy2.FullMatch(str));
+  copy2 = orig;
+  CHECK(copy2.FullMatch(str));
+
+  // Make sure when we assign to ourselves, nothing bad happens
+  orig = orig;
+  copy1 = copy1;
+  copy2 = copy2;
+  CHECK(orig.FullMatch(str));
+  CHECK(copy1.FullMatch(str));
+  CHECK(copy2.FullMatch(str));
+}
+
 int main(int argc, char** argv) {
   // Treat any flag as --help
   if (argc > 1 && argv[1][0] == '-') {
@@ -621,8 +809,11 @@ int main(int argc, char** argv) {
   /***** FullMatch with no args *****/
 
   CHECK(RE("h.*o").FullMatch("hello"));
-  CHECK(!RE("h.*o").FullMatch("othello"));
-  CHECK(!RE("h.*o").FullMatch("hello!"));
+  CHECK(!RE("h.*o").FullMatch("othello"));     // Must be anchored at front
+  CHECK(!RE("h.*o").FullMatch("hello!"));      // Must be anchored at end
+  CHECK(RE("a*").FullMatch("aaaa"));           // Fullmatch with normal op
+  CHECK(RE("a*?").FullMatch("aaaa"));          // Fullmatch with nongreedy op
+  CHECK(RE("a*?\\z").FullMatch("aaaa"));       // Two unusual ops
 
   /***** FullMatch with args *****/
 
@@ -717,6 +908,13 @@ int main(int argc, char** argv) {
     CHECK(!RE("(\\d+)").FullMatch("4294967296", &v));
   }
 #ifdef HAVE_LONG_LONG
+# if defined(__MINGW__) || defined(__MINGW32__)
+#   define LLD "%I64d"
+#   define LLU "%I64u"
+# else
+#   define LLD "%lld"
+#   define LLU "%llu"
+# endif
   {
     long long v;
     static const long long max_value = 0x7fffffffffffffffLL;
@@ -726,18 +924,18 @@ int main(int argc, char** argv) {
     CHECK(RE("(-?\\d+)").FullMatch("100", &v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v)); CHECK_EQ(v, -100);
 
-    snprintf(buf, sizeof(buf), "%lld", max_value);
+    snprintf(buf, sizeof(buf), LLD, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
-    snprintf(buf, sizeof(buf), "%lld", min_value);
+    snprintf(buf, sizeof(buf), LLD, min_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, min_value);
 
-    snprintf(buf, sizeof(buf), "%lld", max_value);
+    snprintf(buf, sizeof(buf), LLD, max_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
 
-    snprintf(buf, sizeof(buf), "%lld", min_value);
+    snprintf(buf, sizeof(buf), LLD, min_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
@@ -753,7 +951,7 @@ int main(int argc, char** argv) {
     CHECK(RE("(-?\\d+)").FullMatch("100",&v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v2)); CHECK_EQ(v2, -100);
 
-    snprintf(buf, sizeof(buf), "%llu", max_value);
+    snprintf(buf, sizeof(buf), LLU, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
     assert(buf[strlen(buf)-1] != '9');
@@ -905,11 +1103,14 @@ int main(int argc, char** argv) {
   CHECK(RE("h.*o").PartialMatch("hello!"));
   CHECK(RE("((((((((((((((((((((x))))))))))))))))))))").PartialMatch("x"));
 
+  /***** other tests *****/
+
   RadixTests();
   TestReplace();
   TestExtract();
   TestConsume();
   TestFindAndConsume();
+  TestQuoteMetaAll();
   TestMatchNumberPeculiarity();
 
   // Check the pattern() accessor
@@ -1021,19 +1222,16 @@ int main(int argc, char** argv) {
     CHECK(!re.error().empty());
   }
 
-  // Test that recursion is stopped: there will be some errors reported
-  int matchlimit = 5000;
-  int bytes = 15 * 1024;  // enough to crash if there was no match limit
-  TestRecursion(bytes, ".", matchlimit);
-  TestRecursion(bytes, "a", matchlimit);
-  TestRecursion(bytes, "a.", matchlimit);
-  TestRecursion(bytes, "ab.", matchlimit);
-  TestRecursion(bytes, "abc.", matchlimit);
+  // Test that recursion is stopped
+  TestRecursion();
 
   // Test Options
   if (getenv("VERBOSE_TEST") != NULL)
     VERBOSE_TEST  = true;
   TestOptions();
+
+  // Test the constructors
+  TestConstructors();
 
   // Done
   printf("OK\n");

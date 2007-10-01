@@ -1107,6 +1107,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\pcre\pcre_newline.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\pcre\pcre_ord2utf8.cpp"
 				>
 			</File>

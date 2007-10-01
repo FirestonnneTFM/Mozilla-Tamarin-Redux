@@ -157,13 +157,13 @@ AVMPLUS_SRCS := ${AVMPLUS_ROOT}/core/AbcEnv.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_chartables.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_compile.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_config.cpp \
-	${AVMPLUS_ROOT}/pcre/pcre_dfa_exec.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_exec.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_fullinfo.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_get.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_globals.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_info.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_maketables.cpp \
+	${AVMPLUS_ROOT}/pcre/pcre_newline.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_ord2utf8.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_refcount.cpp \
 	${AVMPLUS_ROOT}/pcre/pcre_study.cpp \

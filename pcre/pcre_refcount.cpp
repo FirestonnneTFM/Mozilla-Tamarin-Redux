@@ -8,7 +8,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,9 @@ auxiliary function that can be used to maintain a reference count in a compiled
 pattern data block. This might be helpful in applications where the block is
 shared by different users. */
 
+
+#include "config.h"
+
 #include "pcre_internal.h"
 
 
@@ -65,7 +68,7 @@ Returns:        the (possibly updated) count value (a non-negative number), or
                 a negative error number
 */
 
-PCRE_EXPORT int
+PCRE_EXP_DEFN int
 pcre_refcount(pcre *argument_re, int adjust)
 {
 real_pcre *re = (real_pcre *)argument_re;
