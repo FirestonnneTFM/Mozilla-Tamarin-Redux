@@ -4,7 +4,13 @@
     </head>
 
     <script language="application/javascript;version=4">
-        engine_env.window.alert('Hello world')
+        // we don't have globals working yet...
+        var window = engine_env.window
+        var document = engine_env.window.document
+
+        window.alert('Hello from Tamarin')
+        document.write("Hello from tamarin<br>")
+        document.write("This document is at <code>" + document.location + "<code>")
     </SCRIPT>
 
 </html>
