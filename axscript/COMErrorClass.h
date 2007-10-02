@@ -63,4 +63,23 @@ namespace axtam {
 		/*@{*/
 		Stringp getErrorMessage(int errorID) const;
 	};
+
+	class COMErrorObject : public ScriptObject
+	{
+	public:
+		COMErrorObject(VTable *vtable, ScriptObject *delegate);
+		~COMErrorObject() {
+#ifdef DEBUGGER
+			stackTrace = 0; 
+#endif
+		}
+		Stringp stackTraceToString() const;
+#ifdef DEBUGGER
+		StackTrace *getStackTrace() const { return stackTrace; }
+
+	private:
+		StackTrace *stackTrace;
+#endif /* DEBUGGER */
+	};
+
 };

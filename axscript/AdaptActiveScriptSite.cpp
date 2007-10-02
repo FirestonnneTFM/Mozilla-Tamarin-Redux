@@ -62,8 +62,11 @@ namespace axtam
 		if (FAILED(hr) || !unk)
 			core->throwCOMError(hr);
 		// XXX - work out how to return both unk and tlb
-		return core->mscomClass->create(unk, undefinedAtom)->atom(); // 2nd param is bogus???
-		//return undefinedAtom;
+		CComQIPtr<IDispatch, &IID_IDispatch> disp(unk);
+		AvmAssert(disp!=0); // expect only IDispatch objects back!
+		if (disp)
+			return core->toAtom(disp);
+		return undefinedAtom;
 	}
 
 

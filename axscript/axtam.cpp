@@ -81,7 +81,7 @@ namespace axtam
 		NATIVE_CLASS(abcclass_axtam_System,         SystemClass,       ScriptObject)
 		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_ScriptSite,
 		                                            AdaptActiveScriptSiteClass, ScriptObject)
-		NATIVE_CLASS(abcclass_axtam_com_Error,      COMErrorClass,     ScriptObject)
+		NATIVE_CLASS(abcclass_axtam_com_Error,      COMErrorClass,     COMErrorObject)
 		// clones from the shell
 		NATIVE_CLASS(abcclass_avmplus_Domain,          DomainClass,        DomainObject)
 		NATIVE_CLASS(abcclass_flash_utils_ByteArray,    ByteArrayClass,     ByteArrayObject)
@@ -177,8 +177,10 @@ namespace axtam
 		};
 		// first of these directories with abcs[0] wins...
 		static const wchar_t *candidates[] = {
-			L"..\\..\\..\\esc\\bin\\", // for running directly from the source tree
 			L"",
+#ifdef DEBUG
+			L"..\\..\\..\\esc\\bin\\", // for running directly from the source tree
+#endif
 			NULL
 		};
 		wchar_t fqname[MAX_PATH+100] = {L'\0'}; // space for candidate path too...
@@ -196,6 +198,7 @@ namespace axtam
 		for (candidate=candidates;*candidate;candidate++) {
 			wcscpy_s(fqtail, tailsize, *candidate);
 			wcscat_s(fqtail, tailsize, abcs[0]);
+			ATLTRACE2("Looking for landmark '%S' - %d\n", fqname, GetFileAttributesW(fqname));
 			if (0xFFFFFFFF != GetFileAttributesW(fqname)) {
 				// yay - found the path they live in - load-em up.
 				const wchar_t **abc;
@@ -213,8 +216,8 @@ namespace axtam
 					// parse new bytecode
 					handleActionBlock(code, 0, toplevel->domainEnv(), toplevel, NULL, NULL, NULL, codeContext);
 				}
+				break; // all done
 			}
-			break; // all done
 		}
 
 		// Initialize the parser in our Toplevel
@@ -330,11 +333,88 @@ namespace axtam
 		throwException(exception);
 	}
 
-	void AXTam::throwCOMError(HRESULT hr){
+	void AXTam::throwCOMError(HRESULT hr, EXCEPINFO *pei /* = NULL */){
 		// hrm - not sure this is working ok...
-		AvmAssert(0);
+		//AvmAssert(0);
 		comErrorClass()->throwError(hr);
 		AvmAssert(0); // not reached
+	}
+
+	Atom AXTam::toAtom(VARIANT &var)
+	{
+		switch (var.vt) {
+			case VT_EMPTY:
+			case VT_NULL:
+			case VT_VOID: // theoretically not valid in a variant
+				return undefinedAtom;
+
+			//case VT_I1:
+			//case VT_UI1:
+				// should these be treated as 'char' or 'int'?
+			case VT_I2:
+				return intToAtom(var.iVal);
+			case VT_I4:
+				return intToAtom(var.lVal);
+			case VT_INT:
+				return intToAtom(var.intVal);
+			case VT_UI2:
+				return uintToAtom(var.uiVal);
+			case VT_UI4:
+				return uintToAtom(var.ulVal);
+			case VT_R4:
+				return doubleToAtom(var.fltVal);
+			case VT_R8:
+				return doubleToAtom(var.dblVal);
+			//VT_CY	= 6,
+			//VT_DATE	= 7,
+			case VT_ERROR:
+				return intToAtom(var.scode);
+			case VT_BOOL:
+				return var.boolVal ? trueAtom : falseAtom;
+			case VT_VARIANT:
+				return toAtom(*var.pvarVal);
+			// VT_UNKNOWN	= 13,
+			// VT_DECIMAL	= 14,
+
+			// VT_I8	= 20 // Not valid in a variant
+			// VT_UI8	= 21, // not valid in a variant
+			// VT_HRESULT	= 25, // not valid in a variant
+
+			case VT_BSTR:
+				return toAtom(var.bstrVal);
+
+			case VT_DISPATCH:
+				return toAtom(var.pdispVal);
+		}
+		AvmAssert(0); // a type we are yet to handle!
+		return undefinedAtom;
+	}
+
+	Atom AXTam::toAtom(IDispatch *pDisp)
+	{
+		return mscomClass->create(pDisp)->atom();
+	}
+
+	void AXTam::atomToVARIANT(Atom val, CComVariant *pResult)
+	{
+		switch (val&7) {
+			case kDoubleType:
+				*pResult = number(val);
+				break;
+			case kIntegerType:
+				*pResult = toUInt32(val);
+				break;
+			case kBooleanType:
+				*pResult = boolean(val) ? true : false;
+				break;
+			case kStringType:
+				*pResult = (OLECHAR *)string(val)->c_str();
+				break;
+			default:
+				// coerce to a string.
+				*pResult = (OLECHAR *)coerce_s(val)->c_str();
+				break;
+		}
 	}
 
 } /* end of namespace AXTam */

@@ -59,8 +59,10 @@ package axtam.com {
 	// Maybe a new base-class should be introduced.
 	public dynamic class Error
 	{
+		public var hresult: int
 		function Error(hresult) {
 			this.hresult = hresult;
+			axtam.System.write('Error constructed\n')
 		}
 
 		public native static function getErrorMessage(index:int):String;

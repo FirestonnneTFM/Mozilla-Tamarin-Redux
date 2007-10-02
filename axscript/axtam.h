@@ -126,6 +126,8 @@ namespace axtam
 #ifdef DEBUGGER
 		virtual Toplevel *toplevel() const { return _domainEnv->toplevel(); }
 		virtual DomainEnv *domainEnv() const { return _domainEnv; }
+#else
+		DomainEnv *domainEnv() const { return _domainEnv; }
 #endif
 	};
 
@@ -154,6 +156,13 @@ namespace axtam
 			return internUint32(v)->atom();
 		}
 
+		Atom toAtom(VARIANT &var);
+		Atom toAtom(IDispatch *disp);
+
+		// Convert an atom to the specifically requested variant type.
+		void atomToTypedVARIANT(Atom val, VARTYPE vt, CComVariant *pResult);
+		// Convert an atom to any variant type.
+		void atomToVARIANT(Atom val, CComVariant *pResult);
 //		DispatchConsumerClass *dispatchClass;
 
 		// Functions directly related to being embedded in a COM world
@@ -166,7 +175,7 @@ namespace axtam
 		MSComClass *mscomClass;
 
 		COMErrorClass *comErrorClass() const { return (COMErrorClass*)toplevel->getBuiltinClass(avmplus::NativeID::abcclass_axtam_com_Error); }
-		void throwCOMError(HRESULT hr);
+		void throwCOMError(HRESULT hr, EXCEPINFO *pei = NULL);
 
 	private:
 		DECLARE_NATIVE_CLASSES()

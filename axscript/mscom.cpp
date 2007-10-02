@@ -41,12 +41,12 @@
 
 namespace axtam
 {
-	MSCom::MSCom(VTable* vtable, ScriptObject* prototype, IUnknown *pUnk)
+	MSCom::MSCom(VTable* vtable, ScriptObject* prototype, IDispatch *pDisp)
 		: ScriptObject(vtable, prototype)
 	{
-		disp = pUnk; // must have an IDispatch
+		disp = pDisp; // must have an IDispatch
 		AvmAssert(disp != 0);
-		dispex = pUnk; // dispex is optional
+		dispex = pDisp; // dispex is optional
 	}
 
 	Atom MSCom::callProperty(avmplus::Multiname *name, int argc, avmplus::Atom *argv)
@@ -66,16 +66,46 @@ namespace axtam
 			axcore->throwCOMError(hr);
 		// Now create args for the call.
 		EXCEPINFO ei;
-		AvmAssert(argc==1 && axcore->isString(argv[1])); // sue me :)
-//		ScriptObject *ob = axcore->atomToScriptObject(argv[1]);
-//		CComVariant arg1((OLECHAR *)axcore->atomToString(ob->toString())->c_str());
-		CComVariant arg1((OLECHAR *)axcore->atomToString(argv[1])->c_str());
-		DISPPARAMS params = {&arg1, NULL, 1, 0};
+		CComVariant *pArgs = new CComVariant[argc];
+		//memset(pArgs, 0, sizeof(VARIANT) * argc);
+		// Take care to not early exit without cleaning up variants
+		int i;
+		for (i=0;i<argc;i++) {
+			//VariantInit(pArgs+i);
+			axcore->atomToVARIANT(argv[i+1], pArgs+i);
+		}
+		DISPPARAMS params = {pArgs, NULL, argc, 0};
 		CComVariant ret;
 		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_METHOD, &params, &ret, &ei, NULL);
+		//for (i=0;i<argc;i++)
+		//	VariantClear(pArg+i);
+		delete [] pArgs;
+		if (FAILED(hr))
+			axcore->throwCOMError(hr, &ei);
+		return axcore->toAtom(ret);
+	}
+
+	Atom MSCom::getAtomProperty(Atom name) const {
+		AXTam *axcore = (AXTam *)core();
+		if (!axcore->isString(name))
+			axcore->toplevel->throwTypeError(kCheckTypeFailedError);
+		DISPID id;
+
+		OLECHAR *olename = (OLECHAR *)axcore->atomToString(name)->c_str();
+		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
+		if (hr == DISP_E_UNKNOWNNAME) {
+			// not a name this object has - see if its builtin.
+			return ScriptObject::getAtomProperty(name);
+		}
 		if (FAILED(hr))
 			axcore->throwCOMError(hr);
-		return undefinedAtom;
+		EXCEPINFO ei;
+		DISPPARAMS params = {NULL, NULL, 0, 0};
+		CComVariant ret;
+		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_PROPERTYGET, &params, &ret, &ei, NULL);
+		if (FAILED(hr))
+			axcore->throwCOMError(hr, &ei);
+		return axcore->toAtom(ret);
 	}
 
 
@@ -101,7 +131,7 @@ namespace axtam
 	}
 
 	// Function called as constructor ... not supported from user code
-	MSCom* MSComClass::create(IUnknown* p, Atom obj)
+	MSCom* MSComClass::create(IDispatch* p)
 	{
 		VTable* ivtable = this->ivtable();
 		MSCom *o = new (core()->GetGC(), ivtable->getExtraSize()) MSCom(ivtable, prototype, p);

@@ -46,14 +46,16 @@ namespace axtam
 	class MSCom : public ScriptObject
 	{
 		friend class MSComClass;
-		MSCom(VTable* vtable, ScriptObject* prototype, IUnknown *pUnk);
+		MSCom(VTable* vtable, ScriptObject* prototype, IDispatch *pUnk);
 
 		virtual Atom callProperty(Multiname* name, int argc, Atom* argv);
+		virtual Atom getAtomProperty(Atom name) const;
+
 
 	private:
 		// We'd prefer to  insist on IDispatchEx rather than just IDispatch - but WScript
 		// doesn't implement this :(
-		CComQIPtr<IDispatch, &IID_IDispatch> disp;
+		CComPtr<IDispatch> disp;
 		CComQIPtr<IDispatchEx, &IID_IDispatchEx> dispex;
 	};
 
@@ -64,7 +66,7 @@ namespace axtam
 		~MSComClass();
 
 		// Create an instance from native code.
-		MSCom* create(IUnknown *pUnk, Atom obj);
+		MSCom* create(IDispatch *pDisp);
 
 		DECLARE_NATIVE_MAP(MSComClass)
 	};
