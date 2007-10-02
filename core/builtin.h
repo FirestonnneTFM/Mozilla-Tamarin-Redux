@@ -1,40 +1,3 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0/LGPL 2.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is [Open Source Virtual Machine.].
- *
- * The Initial Developer of the Original Code is
- * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Adobe AS3 Team
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
- * in which case the provisions of the GPL or the LGPL are applicable instead
- * of those above. If you wish to allow use of your version of this file only
- * under the terms of either the GPL or the LGPL, and not to allow others to
- * use your version of this file under the terms of the MPL, indicate your
- * decision by deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL or the LGPL. If you do not delete
- * the provisions above, a recipient may use your version of this file under
- * the terms of any one of the MPL, the GPL or the LGPL.
- *
- * ***** END LICENSE BLOCK ***** */
-
 const int unescape = 0;
 const int escape = 1;
 const int parseFloat = 2;
@@ -153,57 +116,57 @@ const int abcclass_VerifyError = 21;
 const int abcclass_UninitializedError = 22;
 const int abcclass_ArgumentError = 23;
 const int abcpackage_Error_as = 2;
-const int RegExp_source_get = 269;
-const int RegExp_global_get = 270;
-const int RegExp_ignoreCase_get = 271;
-const int RegExp_multiline_get = 272;
-const int RegExp_lastIndex_get = 273;
-const int RegExp_lastIndex_set = 274;
-const int RegExp_dotall_get = 275;
-const int RegExp_extended_get = 276;
-const int RegExp_AS3_exec = 277;
-const int abcclass_RegExp = 24;
-const int abcpackage_RegExp_as = 3;
-const int Date_parse = 323;
-const int Date_UTC = 324;
-const int Date_AS3_valueOf = 325;
-const int Date_private__toString = 326;
-const int Date_private__setTime = 327;
-const int Date_private__get = 328;
-const int Date_AS3_getUTCFullYear = 337;
-const int Date_AS3_getUTCMonth = 338;
-const int Date_AS3_getUTCDate = 339;
-const int Date_AS3_getUTCDay = 340;
-const int Date_AS3_getUTCHours = 341;
-const int Date_AS3_getUTCMinutes = 342;
-const int Date_AS3_getUTCSeconds = 343;
-const int Date_AS3_getUTCMilliseconds = 344;
-const int Date_AS3_getFullYear = 345;
-const int Date_AS3_getMonth = 346;
-const int Date_AS3_getDate = 347;
-const int Date_AS3_getDay = 348;
-const int Date_AS3_getHours = 349;
-const int Date_AS3_getMinutes = 350;
-const int Date_AS3_getSeconds = 351;
-const int Date_AS3_getMilliseconds = 352;
-const int Date_AS3_getTimezoneOffset = 353;
-const int Date_AS3_getTime = 354;
-const int Date_AS3_setFullYear = 355;
-const int Date_AS3_setMonth = 356;
-const int Date_AS3_setDate = 357;
-const int Date_AS3_setHours = 358;
-const int Date_AS3_setMinutes = 359;
-const int Date_AS3_setSeconds = 360;
-const int Date_AS3_setMilliseconds = 361;
-const int Date_AS3_setUTCFullYear = 362;
-const int Date_AS3_setUTCMonth = 363;
-const int Date_AS3_setUTCDate = 364;
-const int Date_AS3_setUTCHours = 365;
-const int Date_AS3_setUTCMinutes = 366;
-const int Date_AS3_setUTCSeconds = 367;
-const int Date_AS3_setUTCMilliseconds = 368;
-const int abcclass_Date = 25;
-const int abcpackage_Date_as = 4;
+const int Date_parse = 307;
+const int Date_UTC = 308;
+const int Date_AS3_valueOf = 309;
+const int Date_private__toString = 310;
+const int Date_private__setTime = 311;
+const int Date_private__get = 312;
+const int Date_AS3_getUTCFullYear = 321;
+const int Date_AS3_getUTCMonth = 322;
+const int Date_AS3_getUTCDate = 323;
+const int Date_AS3_getUTCDay = 324;
+const int Date_AS3_getUTCHours = 325;
+const int Date_AS3_getUTCMinutes = 326;
+const int Date_AS3_getUTCSeconds = 327;
+const int Date_AS3_getUTCMilliseconds = 328;
+const int Date_AS3_getFullYear = 329;
+const int Date_AS3_getMonth = 330;
+const int Date_AS3_getDate = 331;
+const int Date_AS3_getDay = 332;
+const int Date_AS3_getHours = 333;
+const int Date_AS3_getMinutes = 334;
+const int Date_AS3_getSeconds = 335;
+const int Date_AS3_getMilliseconds = 336;
+const int Date_AS3_getTimezoneOffset = 337;
+const int Date_AS3_getTime = 338;
+const int Date_AS3_setFullYear = 339;
+const int Date_AS3_setMonth = 340;
+const int Date_AS3_setDate = 341;
+const int Date_AS3_setHours = 342;
+const int Date_AS3_setMinutes = 343;
+const int Date_AS3_setSeconds = 344;
+const int Date_AS3_setMilliseconds = 345;
+const int Date_AS3_setUTCFullYear = 346;
+const int Date_AS3_setUTCMonth = 347;
+const int Date_AS3_setUTCDate = 348;
+const int Date_AS3_setUTCHours = 349;
+const int Date_AS3_setUTCMinutes = 350;
+const int Date_AS3_setUTCSeconds = 351;
+const int Date_AS3_setUTCMilliseconds = 352;
+const int abcclass_Date = 24;
+const int abcpackage_Date_as = 3;
+const int RegExp_source_get = 392;
+const int RegExp_global_get = 393;
+const int RegExp_ignoreCase_get = 394;
+const int RegExp_multiline_get = 395;
+const int RegExp_lastIndex_get = 396;
+const int RegExp_lastIndex_set = 397;
+const int RegExp_dotall_get = 398;
+const int RegExp_extended_get = 399;
+const int RegExp_AS3_exec = 400;
+const int abcclass_RegExp = 25;
+const int abcpackage_RegExp_as = 4;
 const int isXMLName = 404;
 const int XML_ignoreComments_get = 447;
 const int XML_ignoreComments_set = 448;

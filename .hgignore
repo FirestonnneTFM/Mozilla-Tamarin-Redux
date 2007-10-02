@@ -15,8 +15,17 @@ extensions/Sampler*
 classicprefix_*.pch++
 stale.xml
 platform/win32/obj_8/**
+platform/mac/MMgc/build/**
+platform/mac/avmplus/build/**
 platform/mac/shell/build/**
 MMgc/obj_8/**
 objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**
+.DS_Store
+*.mode2
+*.pbxuser
+test/*.html
+*.ncb
+*.suo
+*.vcproj.*.user

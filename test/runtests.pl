@@ -58,7 +58,7 @@ $allpasses=0;
 $allfails=0;
 @failmsgs=();
 $asc="";
-$globalabc="";
+$builtinabc="";
 
 &parse_args;
 &setup_env;
@@ -117,7 +117,7 @@ sub execute_tests {
         local $lfail=0;
 
         # convert .as name to .abc
-        $js_test_abc = substr($js_test, 0, rindex($js_test,".")) .  ".abc";
+        $js_test_abc = &fix_leaf(substr($js_test, 0, rindex($js_test,".")) .  ".abc");
 
         # create the test command
         $test_command =
@@ -134,8 +134,8 @@ sub execute_tests {
            if (! -e $asc) {
               die("ERROR! cannot build $js_test, ASC environment variable or -asc must be set to asc.jar.\n");
            }   
-           if (! -e $globalabc) {
-              die("ERROR! global.abc does not exist, GLOBALABC environment variable or -globalabc must be set to global.abc.\n");
+           if (! -e $builtinabc) {
+              die("ERROR! builtin.abc does not exist, BUILTINABC environment variable or -builtinabc must be set to builtin.abc.\n");
            }
            &compile_test($js_test);
         }
@@ -195,9 +195,13 @@ sub compile_test {
     } else {
         $cmd = $asc;
     }
-    $cmd = $cmd . " -import " . $globalabc;
-    my $dir=substr($js_test,0,rindex($js_test,'/'));
-    my $file=substr($js_test,rindex($js_test,'/')+1);
+    $cmd = $cmd . " -import " . $builtinabc;
+    if ( $js_test =~ /\/test\/decimal\// ) {
+	# hack to get decimal testcases compiled with -11 switch
+	$cmd = $cmd . " -11 ";
+    }
+    my $dir=&fix_leaf(substr($js_test,0,rindex($js_test,'/')));
+    my $file=&fix_leaf(substr($js_test,rindex($js_test,'/')+1));
     if (! $js_quiet) {
         &js_print( "   compiling " . $file );
     }
@@ -219,7 +223,7 @@ sub compile_test {
         closedir (TESTDIR);
         for (@dirfiles) {
             if ( $_ =~ /\.as$/ ) {
-                $cmd = $cmd . " -in " . $dir . "/" . $_;
+                $cmd = $cmd . " -in " . $dir . "/" . &fix_leaf($_);
             }
         }
     }
@@ -229,7 +233,7 @@ sub compile_test {
     closedir (TESTDIR);
     for (@dirfiles) {
         if ( $_ =~ /Util\.as$/ ) {
-            $cmd = $cmd . " -in " . $dir . "/" . "/" . $_;
+            $cmd = $cmd . " -in " . $dir . "/" . "/" . &fix_leaf($_);
         }
     }    
     $cmd=$cmd . " " . $js_test;
@@ -265,8 +269,8 @@ sub setup_env {
         $asc = &fix_path($ENV{"ASC"});
     }
     
-    if (! -e $globalabc) {
-        $globalabc = &fix_path($ENV{"GLOBALABC"});
+    if (! -e $builtinabc) {
+        $builtinabc = &fix_path($ENV{"BUILTINABC"});
     }
 
     $shell_command = &fix_path($shell_command);
@@ -317,8 +321,8 @@ sub parse_args {
         } elsif ( $ARGV[$i] eq "-asc" ) {
             $asc = &fix_path($ARGV[$i+1]);
             $i++;
-        } elsif ( $ARGV[$i] eq "-globalabc" ) {
-            $globalabc = &fix_path($ARGV[$i+1]);
+        } elsif ( $ARGV[$i] eq "-builtinabc" ) {
+            $builtinabc = &fix_path($ARGV[$i+1]);
             $i++;
         } elsif ( $ARGV[$i] eq '-f' ) {
             $js_output = &fix_path($ARGV[++$i]);
@@ -355,7 +359,7 @@ sub usage {
         "-E <file> Set the avm executable (overwrites AVM env variable)\n" .
         "-f <file> Redirect output to file named <file>\n" .
         "-asc <file> Set the path to asc.jar file\n" .
-        "-globalabc <file> Set the path to global.abc file.\n" .
+        "-builtinabc <file> Set the path to builtin.abc file.\n" .
         "[file|dir ..] Add files or directories to test search path\n"
         );
 }
@@ -475,6 +479,14 @@ sub get_output {
     }
     return $js_output;
 }
+sub fix_leaf {
+    my $leaf = @_[0];
+
+    # assume we are on bash and must escape $ in pathnames (bleah)
+    $leaf =~ s/\$/\\\$/gi;
+
+    return $leaf;
+}
 sub fix_path {
     my $file = @_[0];
     if (-e $file || -d $file) {
@@ -488,5 +500,6 @@ sub fix_path {
             $file=substr($file,1,1) . ":" . substr($file,2);
         }
     }
-    return $file;
+
+    return &fix_leaf($file);
 }
