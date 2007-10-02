@@ -17,7 +17,7 @@ function is to be called. Different callout points can be identified by putting
 a number less than 256 after the letter C. The default value is zero.
 For example, this pattern has two callout points:
 .sp
-  (?C1)\deabc(?C2)def
+  (?C1)abc(?C2)def
 .sp
 If the PCRE_AUTO_CALLOUT option bit is set when \fBpcre_compile()\fP is called,
 PCRE automatically inserts callouts, all with number 255, before each item in
@@ -95,10 +95,12 @@ not useful.
 The \fIsubject\fP and \fIsubject_length\fP fields contain copies of the values
 that were passed to \fBpcre_exec()\fP.
 .P
-The \fIstart_match\fP field contains the offset within the subject at which the
-current match attempt started. If the pattern is not anchored, the callout
-function may be called several times from the same point in the pattern for
-different starting points in the subject.
+The \fIstart_match\fP field normally contains the offset within the subject at
+which the current match attempt started. However, if the escape sequence \eK
+has been encountered, this value is changed to reflect the modified starting
+point. If the pattern is not anchored, the callout function may be called
+several times from the same point in the pattern for different starting points
+in the subject.
 .P
 The \fIcurrent_position\fP field contains the offset within the subject of the
 current match pointer.
@@ -154,8 +156,22 @@ Negative values should normally be chosen from the set of PCRE_ERROR_xxx
 values. In particular, PCRE_ERROR_NOMATCH forces a standard "no match" failure.
 The error number PCRE_ERROR_CALLOUT is reserved for use by callout functions;
 it will never be used by PCRE itself.
-.P
-.in 0
-Last updated: 28 February 2005
-.br
-Copyright (c) 1997-2005 University of Cambridge.
+.
+.
+.SH AUTHOR
+.rs
+.sp
+.nf
+Philip Hazel
+University Computing Service
+Cambridge CB2 3QH, England.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 29 May 2007
+Copyright (c) 1997-2007 University of Cambridge.
+.fi

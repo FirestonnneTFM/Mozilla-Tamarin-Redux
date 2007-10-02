@@ -15,4 +15,5 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/pcre_valid_utf8.cpp \
   $(curdir)/pcre_version.cpp \
   $(curdir)/pcre_xclass.cpp \
+  $(curdir)/pcre_newline.cpp \
   $(NULL)

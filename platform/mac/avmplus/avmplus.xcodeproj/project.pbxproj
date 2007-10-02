@@ -197,6 +197,7 @@
 		8EE6F45C09AA545E00DE11A0 /* pcre.h in Headers */ = {isa = PBXBuildFile; fileRef = 8EE6F45A09AA545E00DE11A0 /* pcre.h */; };
 		942BC4350BB991690088A47F /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 942BC4330BB991690088A47F /* Sampler.cpp */; };
 		942BC4360BB991690088A47F /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 942BC4340BB991690088A47F /* Sampler.h */; };
+		CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -390,6 +391,7 @@
 		8EE6F45A09AA545E00DE11A0 /* pcre.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = pcre.h; path = ../../../pcre/pcre.h; sourceTree = SOURCE_ROOT; };
 		942BC4330BB991690088A47F /* Sampler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Sampler.cpp; path = ../../../core/Sampler.cpp; sourceTree = SOURCE_ROOT; };
 		942BC4340BB991690088A47F /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sampler.h; path = ../../../core/Sampler.h; sourceTree = SOURCE_ROOT; };
+		CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_newline.cpp; path = ../../../pcre/pcre_newline.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libavmplus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libavmplus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -636,6 +638,7 @@
 		1E607AB4097337F4007D0E1E /* pcre */ = {
 			isa = PBXGroup;
 			children = (
+				CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */,
 				8EE6F45909AA545E00DE11A0 /* pcre_internal.h */,
 				8EE6F45A09AA545E00DE11A0 /* pcre.h */,
 				8EE6F42E09AA541600DE11A0 /* config.h */,
@@ -907,6 +910,7 @@
 				85125ADF0A5C648300502345 /* AvmPlusScriptableObject.cpp in Sources */,
 				7CD864E60AC47805004C73CB /* AbcData.cpp in Sources */,
 				942BC4350BB991690088A47F /* Sampler.cpp in Sources */,
+				CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

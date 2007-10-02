@@ -8,7 +8,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2007 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@ see if it was compiled with the opposite endianness. If so, it uses an
 auxiliary local function to flip the appropriate bytes. */
 
 
+#include "config.h"
+
 #include "pcre_internal.h"
 
 
@@ -64,8 +66,8 @@ Arguments:
 Returns:       the flipped value
 */
 
-static long int
-byteflip(long int value, int n)
+static unsigned long int
+byteflip(unsigned long int value, int n)
 {
 if (n == 2) return ((value & 0x00ff) << 8) | ((value & 0xff00) >> 8);
 return ((value & 0x000000ff) << 24) |
@@ -96,7 +98,7 @@ Returns:           the new block if is is indeed a byte-flipped regex
                    NULL if it is not
 */
 
-PCRE_EXPORT real_pcre *
+real_pcre *
 _pcre_try_flipped(const real_pcre *re, real_pcre *internal_re,
   const pcre_study_data *study, pcre_study_data *internal_study)
 {
