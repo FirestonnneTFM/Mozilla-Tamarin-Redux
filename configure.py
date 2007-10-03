@@ -125,6 +125,7 @@ elif os == "linux":
                          'AVMPLUS_UNIX': None,
                          'LINUX': None})
     OS_LIBS.append('pthread')
+    APP_CPPFLAGS += '-DAVMPLUS_CDECL '
     if config.getDebug():
         OS_LIBS.append("dl")
 elif os == "sunos":
