@@ -99,7 +99,7 @@ namespace avmplus
 		// WARNING: this function is NOT THREAD SAFE
 	    /*plugin_export*/ ConstStr255Param MakePascalMsg(const char* theString);
 		
-		#if SOFT_ASSERTS
+		#ifdef SOFT_ASSERTS
 			inline void DebugMsg_(const char* msg) { }
 		#else
 			#ifdef powerc
