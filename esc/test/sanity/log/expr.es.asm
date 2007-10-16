@@ -2,7 +2,7 @@
 { 'abc_class': 'AbcFile'
 , 'minor_version': 16
 , 'major_version': 46
-, 'int_pool': [ 
+, 'int_pool': [ undefined
               , '10'
               , '1'
               , '2'
@@ -11,9 +11,9 @@
               , '0'
               , '6'
               , '5' ]
-, 'uint_pool': [  ]
-, 'double_pool': [  ]
-, 'utf8_pool': [ 
+, 'uint_pool': [ undefined ]
+, 'double_pool': [ undefined ]
+, 'utf8_pool': [ undefined
                , ''
                , 'Object'
                , 'Array'
@@ -21,169 +21,182 @@
                , 'x'
                , 'print'
                , 'int' ]
-, 'namespace_pool': [ 
+, 'namespace_pool': [ undefined
                     , { 'kind': 'PackageNamespace'
-                      , 'utf8': '1' }
-                    , { 'kind': 'AnonymousNamespace'
-                      , 'utf8': '1' } ]
-, 'nsset_pool': [ 
-                , [ '2' ] ]
-, 'name_pool': [ 
+                      , 'utf8': 1 }
+                    , { 'kind': 'Namespace'
+                      , 'utf8': 1 } ]
+, 'nsset_pool': [ undefined
+                , [ 2 ] ]
+, 'name_pool': [ undefined
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '2' }
+                 , 'ns': 1
+                 , 'utf8': 2 }
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '3' }
+                 , 'ns': 1
+                 , 'utf8': 3 }
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '4' }
+                 , 'ns': 1
+                 , 'utf8': 4 }
                , { 'kind': 'QName'
-                 , 'ns': '2'
-                 , 'utf8': '5' }
+                 , 'ns': 2
+                 , 'utf8': 5 }
                , { 'kind': 'Multiname'
-                 , 'utf8': '6'
-                 , 'nsset': '1' }
+                 , 'utf8': 6
+                 , 'nsset': 1 }
                , { 'kind': 'Multiname'
-                 , 'utf8': '7'
-                 , 'nsset': '1' }
+                 , 'utf8': 7
+                 , 'nsset': 1 }
                , { 'kind': 'Multiname'
-                 , 'utf8': '5'
-                 , 'nsset': '1' } ]
-, 'method_infos': [ { 'ret_type': 
+                 , 'utf8': 5
+                 , 'nsset': 1 } ]
+, 'method_infos': [ { 'ret_type': 0
                     , 'param_types': []
-                    , 'name': 
-                    , 'flags': 
-                    , 'optional_count': 
+                    , 'name': 0
+                    , 'flags': 0
+                    , 'optional_count': 0
                     , 'value_kind': [  ]
                     , 'param_names': [  ] }
                   ,  ]
-, 'method_bodys': [ { 'method_info': 
-                    , 'max_stack': 
-                    , 'max_regs': 
-                    , 'scope_depth': 
-                    , 'max_scope': 
-                    , 'code': [ getlocal0
-                              , pushscope
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , pushint 01
-                              , findpropstrict 06
-                              , getproperty 06
-                              , istypelate
-                              , call 01
-                              , pop
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , getlocal0
-                              , getlocal0
-                              , equals
-                              , call 01
-                              , pop
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , pushint 02
-                              , pushint 02
-                              , multiply
-                              , pushint 03
-                              , pushint 03
-                              , divide
-                              , pushint 04
-                              , pushint 05
-                              , modulo
-                              , pushint 06
-                              , pushint 02
-                              , add
-                              , pushint 07
-                              , pushint 08
-                              , subtract
-                              , call 05
-                              , pop
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , pushint 02
-                              , pushint 03
-                              , lessthan
-                              , pushint 03
-                              , pushint 02
-                              , greaterthan
-                              , pushint 02
-                              , pushint 02
-                              , lessequals
-                              , pushint 02
-                              , pushint 02
-                              , greaterequals
-                              , pushint 02
-                              , pushint 02
-                              , equals
-                              , pushint 02
-                              , pushint 02
-                              , strictequals
-                              , pushint 02
-                              , pushint 03
-                              , equals
-                              , not
-                              , pushint 02
-                              , pushint 03
-                              , strictequals
-                              , not
-                              , call 08
-                              , pop
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , pushtrue
-                              , convert_b
-                              , dup
-                              , iffalse 00 00 00
-                              , pop
-                              , pushtrue
-                              , convert_b
-                              , pushfalse
-                              , convert_b
-                              , dup
-                              , iftrue 00 00 00
-                              , pop
-                              , pushtrue
-                              , convert_b
-                              , call 02
-                              , pop
-                              , findproperty 04
-                              , pushint 06
-                              , setproperty 04
-                              , pushundefined
-                              , pop
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , findpropstrict 07
-                              , dup
-                              , getproperty 07
-                              , increment
-                              , dup
-                              , setlocal1
-                              , setproperty 07
-                              , getlocal1
-                              , kill 01
-                              , findpropstrict 07
-                              , dup
-                              , getproperty 07
-                              , decrement
-                              , dup
-                              , setlocal1
-                              , setproperty 07
-                              , getlocal1
-                              , kill 01
-                              , pushfalse
-                              , not
-                              , call 03
-                              , pop
-                              , returnvoid
+, 'metadata_infos': [  ]
+, 'instance_infos': [  ]
+, 'class_infos': [  ]
+, 'script_infos': [ { 'init': 0
+                    , 'traits': [ { 'name': 4
+                                  , 'kind': 0
+                                  , 'attrs': 0
+                                  , 'slot_id': 0
+                                  , 'type_name': 0
+                                  , 'val_index': 0 }
+                                ,  ] }
+                  ,  ]
+, 'method_bodys': [ { 'method_info': 0
+                    , 'max_stack': 11
+                    , 'max_regs': 2
+                    , 'scope_depth': 0
+                    , 'max_scope': 1
+                    , 'code': [ [ 'getlocal0' ]
+                              , [ 'pushscope' ]
+                              , [ 'findpropstrict', 5 ]
+                              , [ 'getproperty', 5 ]
+                              , [ 'pushnull' ]
+                              , [ 'pushint', 1 ]
+                              , [ 'findpropstrict', 6 ]
+                              , [ 'getproperty', 6 ]
+                              , [ 'istypelate' ]
+                              , [ 'call', 1 ]
+                              , [ 'pop' ]
+                              , [ 'findpropstrict', 5 ]
+                              , [ 'getproperty', 5 ]
+                              , [ 'pushnull' ]
+                              , [ 'getlocal0' ]
+                              , [ 'getlocal0' ]
+                              , [ 'equals' ]
+                              , [ 'call', 1 ]
+                              , [ 'pop' ]
+                              , [ 'findpropstrict', 5 ]
+                              , [ 'getproperty', 5 ]
+                              , [ 'pushnull' ]
+                              , [ 'pushint', 2 ]
+                              , [ 'pushint', 2 ]
+                              , [ 'multiply' ]
+                              , [ 'pushint', 3 ]
+                              , [ 'pushint', 3 ]
+                              , [ 'divide' ]
+                              , [ 'pushint', 4 ]
+                              , [ 'pushint', 5 ]
+                              , [ 'modulo' ]
+                              , [ 'pushint', 6 ]
+                              , [ 'pushint', 2 ]
+                              , [ 'add' ]
+                              , [ 'pushint', 7 ]
+                              , [ 'pushint', 8 ]
+                              , [ 'subtract' ]
+                              , [ 'call', 5 ]
+                              , [ 'pop' ]
+                              , [ 'findpropstrict', 5 ]
+                              , [ 'getproperty', 5 ]
+                              , [ 'pushnull' ]
+                              , [ 'pushint', 2 ]
+                              , [ 'pushint', 3 ]
+                              , [ 'lessthan' ]
+                              , [ 'pushint', 3 ]
+                              , [ 'pushint', 2 ]
+                              , [ 'greaterthan' ]
+                              , [ 'pushint', 2 ]
+                              , [ 'pushint', 2 ]
+                              , [ 'lessequals' ]
+                              , [ 'pushint', 2 ]
+                              , [ 'pushint', 2 ]
+                              , [ 'greaterequals' ]
+                              , [ 'pushint', 2 ]
+                              , [ 'pushint', 2 ]
+                              , [ 'equals' ]
+                              , [ 'pushint', 2 ]
+                              , [ 'pushint', 2 ]
+                              , [ 'strictequals' ]
+                              , [ 'pushint', 2 ]
+                              , [ 'pushint', 3 ]
+                              , [ 'equals' ]
+                              , [ 'not' ]
+                              , [ 'pushint', 2 ]
+                              , [ 'pushint', 3 ]
+                              , [ 'strictequals' ]
+                              , [ 'not' ]
+                              , [ 'call', 8 ]
+                              , [ 'pop' ]
+                              , [ 'findpropstrict', 5 ]
+                              , [ 'getproperty', 5 ]
+                              , [ 'pushnull' ]
+                              , [ 'pushtrue' ]
+                              , [ 'convert_b' ]
+                              , [ 'dup' ]
+                              , [ 'iffalse', 3 ]
+                              , [ 'pop' ]
+                              , [ 'pushtrue' ]
+                              , [ 'convert_b' ]
+                              , [ 'pushfalse' ]
+                              , [ 'convert_b' ]
+                              , [ 'dup' ]
+                              , [ 'iftrue', 3 ]
+                              , [ 'pop' ]
+                              , [ 'pushtrue' ]
+                              , [ 'convert_b' ]
+                              , [ 'call', 2 ]
+                              , [ 'pop' ]
+                              , [ 'findproperty', 4 ]
+                              , [ 'pushint', 6 ]
+                              , [ 'setproperty', 4 ]
+                              , [ 'pushundefined' ]
+                              , [ 'pop' ]
+                              , [ 'findpropstrict', 5 ]
+                              , [ 'getproperty', 5 ]
+                              , [ 'pushnull' ]
+                              , [ 'findpropstrict', 7 ]
+                              , [ 'dup' ]
+                              , [ 'getproperty', 7 ]
+                              , [ 'increment' ]
+                              , [ 'dup' ]
+                              , [ 'setlocal1' ]
+                              , [ 'setproperty', 7 ]
+                              , [ 'getlocal1' ]
+                              , [ 'kill', 1 ]
+                              , [ 'findpropstrict', 7 ]
+                              , [ 'dup' ]
+                              , [ 'getproperty', 7 ]
+                              , [ 'decrement' ]
+                              , [ 'dup' ]
+                              , [ 'setlocal1' ]
+                              , [ 'setproperty', 7 ]
+                              , [ 'getlocal1' ]
+                              , [ 'kill', 1 ]
+                              , [ 'pushfalse' ]
+                              , [ 'not' ]
+                              , [ 'call', 3 ]
+                              , [ 'pop' ]
+                              , [ 'returnvoid' ]
                               ,  ]
                     , 'exceptions': [  ]
-                    , 'fixtures': [  ] }
+                    , 'fixtures': [  ]
+                    , 'traits': [  ] }
                   ,  ] }

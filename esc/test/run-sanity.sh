@@ -46,4 +46,6 @@ cp sanity/tests/*.es.asm sanity/log
 cp sanity/tests/*.es.log sanity/log
 cp sanity/tests/*.es sanity/log
 
+dos2unix sanity/log/*.log
+
 diff -s sanity/base sanity/log

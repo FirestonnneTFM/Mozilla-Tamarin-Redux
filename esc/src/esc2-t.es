@@ -36,6 +36,10 @@ import avmplus.*;
 {
     //print ("generating abc");
     var bytes = Gen::cg(nd);
+    
+    var raw_bytes = bytes.getBytes();
+    bytes = Abc::parseAbcFile(new ABCByteStream(raw_bytes));
+
     //print ("encoding asm");
     var tx = AbcEncode::abcFile (bytes);
     writeFile (tx,fname+".asm");

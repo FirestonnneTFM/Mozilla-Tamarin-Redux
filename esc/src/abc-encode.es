@@ -57,404 +57,863 @@ public namespace AbcEncode;
         return str;
     }
 
-    function abcFile (nd : ABCFile, nesting : int = 0)
+    function abcFile (nd : ABCFile, verbose = false, nesting : int = 0 )
         : string {
         enter ("AbcEncode::abcFile ", nesting);
-
-        var str = indent(nesting) + "{ 'abc_class': 'AbcFile'"
-                + indent(nesting) + ", 'minor_version': " + nd.minor_version
-                + indent(nesting) + ", 'major_version': " + nd.major_version
-                + indent(nesting) + ", 'int_pool': [ " + intPool (nd.constants.int_pool,nesting+", 'int_pool': [ ".length) + " ]"
-                + indent(nesting) + ", 'uint_pool': [ " + uintPool (nd.constants.uint_pool,nesting+", 'uint_pool': [ ".length) + " ]"
-                + indent(nesting) + ", 'double_pool': [ " + doublePool (nd.constants.double_pool,nesting+", 'double_pool': [ ".length) + " ]"
-                + indent(nesting) + ", 'utf8_pool': [ " + utf8Pool (nd.constants.utf8_pool,nesting+", 'utf8_pool': [ ".length) + " ]"
-                + indent(nesting) + ", 'namespace_pool': [ " + namespacePool (nd.constants.namespace_pool,nesting+", 'namespace_pool': [ ".length) + " ]"
-                + indent(nesting) + ", 'nsset_pool': [ " + namespacesetPool (nd.constants.namespaceset_pool,nesting+", 'nsset_pool': [ ".length) + " ]"
-                + indent(nesting) + ", 'name_pool': [ " + namePool (nd.constants.multiname_pool,nesting+", 'name_pool': [ ".length) + " ]"
-
-                + indent(nesting) + ", 'method_infos': [ "   + methodInfos (nd.methods,nesting+", 'method_infos': [ ".length) + " ]"
-            /*
-                + indent(nesting) + ", 'metadata_infos': [ " + metadataInfo (nd.metadatas,nesting+", 'metadata_infos': [ ".length) + " ]"
-                + indent(nesting) + ", 'instance_infos': [ " + instanceInfo (nd.instances,nesting+", 'instance_infos': [ ".length) + " ]"
-                + indent(nesting) + ", 'classe_infos': [ "   + classInfo (nd.classes,nesting+", 'class_infos': [ ".length) + " ]"
-                + indent(nesting) + ", 'script_infos': [ "   + scriptInfo (nd.scripts,nesting+", 'script_infos': [ ".length) + " ]"
-            */
-                + indent(nesting) + ", 'method_bodys': [ "   + methodBodys (nd.bodies,nesting+", 'method_bodys': [ ".length) + " ]"
-                + " }";
+        
+        var encoder = new AbcEncoder(nd, verbose);
+        
+        var str = encoder.encode(nesting);
 
         exit ("AbcEncode::abcFile");
         return str;
     }
-
-    function intPool (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::intPool ", nesting);
-
-        var str = "";
-
-        for (var i = 1, len = nd.length; i < len; ++i) 
-        {
-            str = str
-                + indent (nesting-2)
-                + ", "
-                + "'" + nd[i] + "'"; //intConst (nd[i], nesting)
+    
+    class AbcEncoder {
+        var verbose : Boolean;
+        var abc : ABCFile;
+        
+        function AbcEncoder(a:ABCFile, v:Boolean = false): abc=a, verbose=v {
         }
+        
+        function encode(nesting:int = 0) 
+            : string {
+            enter ("AbcEncoder::encode", nesting);
+            var str = indent(nesting) + "{ 'abc_class': 'AbcFile'"
+                    + indent(nesting) + ", 'minor_version': " + abc.minor_version
+                    + indent(nesting) + ", 'major_version': " + abc.major_version
+                    + indent(nesting) + ", 'int_pool': [ " + intPool (abc.constants.int_pool,nesting+", 'int_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'uint_pool': [ " + uintPool (abc.constants.uint_pool,nesting+", 'uint_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'double_pool': [ " + doublePool (abc.constants.double_pool,nesting+", 'double_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'utf8_pool': [ " + utf8Pool (abc.constants.utf8_pool,nesting+", 'utf8_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'namespace_pool': [ " + namespacePool (abc.constants.namespace_pool,nesting+", 'namespace_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'nsset_pool': [ " + namespacesetPool (abc.constants.namespaceset_pool,nesting+", 'nsset_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'name_pool': [ " + namePool (abc.constants.multiname_pool,nesting+", 'name_pool': [ ".length) + " ]"
 
-        exit ("AbcEncode::intPool");
-        return str;
-    }
-
-    function uintPool (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::uintPool ", nesting);
-
-        var str = "";   // hole for sub 0
-
-        for (var i = 1, len = nd.length; i < len; ++i) 
-        {
-            str = str
-                + indent (nesting-2)
-                + ", "
-                + "'" + nd[i] + "'" //intConst (nd[i], nesting)
-        }
-
-        exit ("AbcEncode::uintPool");
-        return str;
-    }
-
-    function doublePool (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::doublePool ", nesting);
-
-        var str = "";
-
-        for (var i = 1, len = nd.length; i < len; ++i) 
-        {
-            str = str
-                + indent (nesting-2)
-                + ", "
-                + "'" + nd[i] + "'" //intConst (nd[i], nesting)
-        }
-
-        exit ("AbcEncode::doublePool");
-        return str;
-    }
-
-    function utf8Pool (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::utf8Pool ", nesting);
-
-        var str = "";
-
-        for (var i = 1, len = nd.length; i < len; ++i) 
-        {
-            str = str
-                + indent (nesting-2)
-                + ", "
-                + "'" + nd[i] + "'" //intConst (nd[i], nesting)
-        }
-
-        exit ("AbcEncode::utf8Pool");
-        return str;
-    }
-
-    function namespacePool (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::namespacePool ", nesting);
-
-        var str = "";
-
-        for (var i = 1, len = nd.length; i < len; ++i) 
-        {
-            str = str
-                + indent (nesting-2)
-                + ", "
-                + namespaceConst (nd[i], nesting)
-        }
-
-        exit ("AbcEncode::namespacePool");
-        return str;
-    }
-
-    function namespaceConst (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::namespaceConst ", nesting);
-        var str = "{ 'kind': " + namespaceKind (nd.kind,nesting+"{ 'kind': ".length)
-                + indent(nesting) + ", 'utf8': '" + nd.name + "'"
-                + " }";
-
-        exit ("AbcEncode::abcFile");
-        return str;
-    }
-
-    function namespaceKind (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::namespaceKind ", nesting);
-        var str = "";
-
-        switch (nd) {
-        case CONSTANT_Namespace:
-            str = "'AnonymousNamespace'";
-            break;
-        case CONSTANT_PackageNamespace:
-            str = "'PackageNamespace'";
-            break;
-        default:
-            str = "Other";
-            break;
-        }
-
-        exit ("AbcEncode::namespaceKind");
-        return str;
-    }
-
-    function namespacesetPool (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::namespacesetPool ", nesting);
-
-        var str = "";
-
-        for (var i = 1, len = nd.length; i < len; ++i) 
-        {
-            str = str
-                + indent (nesting-2)
-                + ", "
-                + "[ " + namespacesetConst (nd[i], nesting+"[ ".length)
-                + " ]"
-        }
-
-        exit ("AbcEncode::namespacesetPool");
-        return str;
-    }
-
-    function namespacesetConst (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::namespacesetConst ", nesting);
-
-        var str = "'" + nd[0] + "'";
-
-        for (var i = 1, len = nd.length; i < len; ++i) 
-        {
-            str = str
-                + indent (nesting-2)
-                + ", "
-                + "'" + nd[i] + "'"
-        }
-
-        exit ("AbcEncode::namespacesetConst");
-        return str;
-    }
-
-    function namePool (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::namePool ", nesting);
-
-        var str = "";
-
-        for (var i = 1, len = nd.length; i < len; ++i)
-        {
-            str = str
-                + indent (nesting-2)
-                + ", "
-                + nameConst (nd[i], nesting)
-        }
-
-        exit ("AbcEncode::namePool");
-        return str;
-    }
-
-    function nameConst (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::nameConst ", nesting);
-
-        var str = "";
-
-        switch (nd.kind) {
-        case CONSTANT_QName:
-            str = "{ 'kind': 'QName'"
-                + indent(nesting)
-                + ", 'ns': '" + nd.ns + "'"
-                + indent(nesting) 
-                + ", 'utf8': '" + nd.name + "'"
-                + " }";
-            break;
-        case CONSTANT_RTQName:
-            str = "{ 'kind': 'RTQName'"
-                + indent(nesting) 
-                + ", 'utf8': '" + nd.name + "'"
-                + " }";
-            break;
-        case CONSTANT_RTQNameL:
-            str = "{ 'kind': 'RTQName'"
-                + " }";
-            break;
-        case CONSTANT_Multiname:
-            str = "{ 'kind': 'Multiname'"
-                + indent(nesting) 
-                + ", 'utf8': '" + nd.name + "'"
-                + indent(nesting) 
-                + ", 'nsset': '" + nd.ns + "'"
-                + " }";
-            break;
-        case CONSTANT_MultinameL:
-            str = "{ 'kind': 'MultinameL'"
-                + indent(nesting) 
-                + ", 'nss': '" + nd.ns + "'"
-                + " }";
-            break;
-        case CONSTANT_QNameA:
-        case CONSTANT_RTQNameA:
-        case CONSTANT_RTQNameLA:
-        case CONSTANT_MultinameA:
-        case CONSTANT_MultinameLA:
-        default:
-            str = "Unsupported Name constant";
-            break;
-        }
-
-        exit ("AbcEncode::nameConst");
-        return str;
-    }
-
-    function methodInfos (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::methodInfos ", nesting);
-
-        var str = "";
-
-        for (var i = 0, len = nd.length; i < len; ++i)
-        {
-            str = str
-                + methodInfo (nd[i], nesting)
-                + indent (nesting-2)
-                + ", "
-        }
-
-        exit ("AbcEncode::methodInfos");
-        return str;
-    }
-
-    function methodInfo (nd, nesting: int = 0)
-        : string {
-        enter ("AbcEncode::methodInfo");
-
-        var str =
-            "{ 'ret_type': "
-          + indent(nesting) + ", 'param_types': [" + "" + "]"
-          + indent(nesting) + ", 'name': "
-          + indent(nesting) + ", 'flags': "
-          + indent(nesting) + ", 'optional_count': "
-          + indent(nesting) + ", 'value_kind': [ " + "" + " ]"
-          + indent(nesting) + ", 'param_names': [ " + "" + " ]"
-          + " }";
-
-        exit ("AbcEncode:methodInfo ",str);
-        return str;
-    }
-
-
-    function methodBodys (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::methodBodys ", nesting);
-
-        var str = "";
-
-        for (var i = 0, len = nd.length; i < len; ++i)
-        {
-            str = str
-                + methodBody (nd[i], nesting)
-                + indent (nesting-2)
-                + ", "
-        }
-
-        exit ("AbcEncode::methodBodys");
-        return str;
-    }
-
-    function methodBody (nd, nesting: int = 0)
-        : string {
-        enter ("AbcEncode::methodBody");
-
-        var str =
-            "{ 'method_info': "
-          + indent(nesting) + ", 'max_stack': "
-          + indent(nesting) + ", 'max_regs': "
-          + indent(nesting) + ", 'scope_depth': "
-          + indent(nesting) + ", 'max_scope': "
-          + indent(nesting) + ", 'code': [ " + code (nd.code, nesting+", 'code': [ ".length) + " ]"
-          + indent(nesting) + ", 'exceptions': [ " + "" + " ]"
-          + indent(nesting) + ", 'fixtures': [ " + "" + " ]"
-          + " }";
-
-        exit ("AbcEncode:methodBody ",str);
-        return str;
-    }
-
-    function code (nd, nesting : int = 0)
-        : string {
-        enter ("AbcEncode::code ", nesting);
-
-        var str = "";
-        var bytes = nd.code.getArrayOfBytes ();
-
-        for (var ip = 0, len = bytes.length; ip < len; ip=ip+width)
-        {
-            var [bs,width] = instruction (ip);
-            str = str
-                + bs
-                + indent (nesting-2)
-                + ", "
-        }
-
-        exit ("AbcEncode::code");
-        return str;
-
-        function instruction (ip)
-            : [int,string] {
-            enter ("AbcEncode::instruction ",ip);
+                    + indent(nesting) + ", 'method_infos': [ "   + methodInfos (abc.methods,nesting+", 'method_infos': [ ".length) + " ]"
+                
+                    + indent(nesting) + ", 'metadata_infos': [ " + metadataInfos (abc.metadatas,nesting+", 'metadata_infos': [ ".length) + " ]"
+                    + indent(nesting) + ", 'instance_infos': [ " + instanceInfos (abc.instances,nesting+", 'instance_infos': [ ".length) + " ]"
+                    + indent(nesting) + ", 'class_infos': [ "   + classInfos (abc.classes,nesting+", 'class_infos': [ ".length) + " ]"
+                    + indent(nesting) + ", 'script_infos': [ "   + scriptInfos (abc.scripts,nesting+", 'script_infos': [ ".length) + " ]"
+                
+                    + indent(nesting) + ", 'method_bodys': [ "   + methodBodys (abc.bodies,nesting+", 'method_bodys': [ ".length) + " ]"
+                    + " }";
+            exit("AbcEncoder::encode");
             
+            return str;
+        }
+        
+    
+        function intPool (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::intPool ", nesting);
+
+            var str = "undefined";
+
+            for (var i = 1, len = nd.length; i < len; ++i) 
+            {
+                str = str
+                    + indent (nesting-2)
+                    + ", "
+                    + "'" + nd[i] + "'"; //intConst (nd[i], nesting)
+            }
+
+            exit ("AbcEncode::intPool");
+            return str;
+        }
+
+        function uintPool (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::uintPool ", nesting);
+
+            var str = "undefined";   // hole for sub 0
+
+            for (var i = 1, len = nd.length; i < len; ++i) 
+            {
+                str = str
+                    + indent (nesting-2)
+                    + ", "
+                    + "'" + nd[i] + "'" //intConst (nd[i], nesting)
+            }
+
+            exit ("AbcEncode::uintPool");
+            return str;
+        }
+
+        function doublePool (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::doublePool ", nesting);
+
+            var str = "undefined";
+
+            for (var i = 1, len = nd.length; i < len; ++i) 
+            {
+                str = str
+                    + indent (nesting-2)
+                    + ", "
+                    + "'" + nd[i] + "'" //intConst (nd[i], nesting)
+            }
+
+            exit ("AbcEncode::doublePool");
+            return str;
+        }
+
+        function utf8Pool (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::utf8Pool ", nesting);
+
+            var str = "undefined";
+
+            for (var i = 1, len = nd.length; i < len; ++i) 
+            {
+                str = str
+                    + indent (nesting-2)
+                    + ", "
+                    + "'" + nd[i] + "'" //+ "// " + i//intConst (nd[i], nesting)
+            }
+
+            exit ("AbcEncode::utf8Pool");
+            return str;
+        }
+
+        function namespacePool (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::namespacePool ", nesting);
+
+            var str = "undefined";
+
+            for (var i = 1, len = nd.length; i < len; ++i) 
+            {
+                str = str
+                    + indent (nesting-2)
+                    + ", "
+                    + namespaceConst (nd[i], nesting)
+            }
+
+            exit ("AbcEncode::namespacePool");
+            return str;
+        }
+
+        function namespaceConst (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::namespaceConst ", nesting);
+            var str = "{ 'kind': " + namespaceKind (nd.kind,nesting+"{ 'kind': ".length)
+                    + indent(nesting) + ", 'utf8': " + nd.name
+                    + " }";
+
+            exit ("AbcEncode::abcFile");
+            return str;
+        }
+
+        function namespaceKind (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::namespaceKind ", nesting);
             var str = "";
-            var n = bytes[ip];
-            var width = opcodes [n][1]
-            switch (width) {
-            case 0:
-                str = "invalid opcode " + opcodes[n][0];
-                width = 1;
+
+            switch (nd) {
+            case CONSTANT_Namespace:
+                str = "'Namespace'";
+                break;
+            case CONSTANT_PackageNamespace:
+                str = "'PackageNamespace'";
+                break;
+            case CONSTANT_PrivateNamespace:
+                str = "'PrivateNamespace'";
+                break;
+            case CONSTANT_PackageInternalNS:
+                str = "'PackageInternalNamespace'";
+                break;
+            case CONSTANT_ProtectedNamespace:
+                str = "'ProtectedNamespace'";
                 break;
             default:
-                str = opcodes[n][0] + operands ();
+                str = "Other";
                 break;
+            }
+
+            exit ("AbcEncode::namespaceKind");
+            return str;
+        }
+
+        function namespacesetPool (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::namespacesetPool ", nesting);
+
+            var str = "undefined";
+
+            for (var i = 1, len = nd.length; i < len; ++i) 
+            {
+                str = str
+                    + indent (nesting-2)
+                    + ", "
+                    + "[ " + namespacesetConst (nd[i], nesting+"[ ".length)
+                    + " ]"
+            }
+
+            exit ("AbcEncode::namespacesetPool");
+            return str;
+        }
+
+        function namespacesetConst (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::namespacesetConst ", nesting);
+
+            var str = nd[0];
+
+            for (var i = 1, len = nd.length; i < len; ++i) 
+            {
+                str = str
+                    + indent (nesting-2)
+                    + ", "
+                    + nd[i]
+            }
+
+            exit ("AbcEncode::namespacesetConst");
+            return str;
+        }
+
+        function namePool (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::namePool ", nesting);
+
+            var str = "undefined";
+
+            for (var i = 1, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + indent (nesting-2)
+                    + ", "
+                    + nameConst (nd[i], nesting)
+            }
+
+            exit ("AbcEncode::namePool");
+            return str;
+        }
+
+        function nameConst (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::nameConst ", nesting);
+
+            var str = "";
+
+            switch (nd.kind) {
+            case CONSTANT_QName:
+                str = "{ 'kind': 'QName'"
+                    + indent(nesting)
+                    + ", 'ns': " + nd.ns
+                    + indent(nesting) 
+                    + ", 'utf8': " + nd.name
+                    + " }";
+                break;
+            case CONSTANT_RTQName:
+                str = "{ 'kind': 'RTQName'"
+                    + indent(nesting) 
+                    + ", 'utf8': " + nd.name
+                    + " }";
+                break;
+            case CONSTANT_RTQNameL:
+                str = "{ 'kind': 'RTQName'"
+                    + " }";
+                break;
+            case CONSTANT_Multiname:
+                str = "{ 'kind': 'Multiname'"
+                    + indent(nesting) 
+                    + ", 'utf8': " + nd.name
+                    + indent(nesting) 
+                    + ", 'nsset': " + nd.ns
+                    + " }";
+                break;
+            case CONSTANT_MultinameL:
+                str = "{ 'kind': 'MultinameL'"
+                    + indent(nesting) 
+                    + ", 'nss': " + nd.ns
+                    + " }";
+                break;
+            case CONSTANT_QNameA:
+            case CONSTANT_RTQNameA:
+            case CONSTANT_RTQNameLA:
+            case CONSTANT_MultinameA:
+            case CONSTANT_MultinameLA:
+            default:
+                str = "Unsupported Name constant";
+                break;
+            }
+
+            exit ("AbcEncode::nameConst");
+            return str;
+        }
+
+        function methodInfos (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::methodInfos ", nesting);
+
+            var str = "";
+
+            for (var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + methodInfo (nd[i], nesting)
+                    + indent (nesting-2)
+                    + ", "
+            }
+
+            exit ("AbcEncode::methodInfos");
+            return str;
+        }
+
+        function methodInfo (nd, nesting: int = 0)
+            : string {
+            enter ("AbcEncode::methodInfo");
+
+            var str =
+                "{ 'ret_type': " + name(nd.return_type, nesting+"{ 'ret_type': ".length)
+              + indent(nesting) + ", 'param_types': [" + names(nd.param_types, nesting+", 'param_types': [".length) + "]"
+              + indent(nesting) + ", 'name': " + name(nd.name, nesting+", 'name': ".length)
+              + indent(nesting) + ", 'flags': " + nd.flags
+              + indent(nesting) + ", 'optional_count': " + (nd.options != null ? nd.options.length : 0)
+              + indent(nesting) + ", 'value_kind': [ " + "" + " ]"
+              + indent(nesting) + ", 'param_names': [ " + "" + " ]"
+              + " }";
+
+            exit ("AbcEncode:methodInfo ",str);
+            return str;
+        }
+
+        function metadataInfos (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::metadataInfos ", nesting);
+
+            var str = "";
+
+            for (var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + metadataInfo (nd[i], nesting)
+                    + indent (nesting-2)
+                    + ", "
+            }
+
+            exit ("AbcEncode::metadataInfos");
+            return str;
+        }
+
+        function metadataInfo (nd, nesting: int = 0)
+            : string {
+            enter ("AbcEncode::metadataInfo");
+
+            var str =
+                "{ 'name': " + utf8(nd.name)
+              + indent(nesting) + ", 'items': [" + metadataItems(nd.items, nesting+", 'items': [".length) + "]"
+              + " }";
+
+            exit ("AbcEncode:metadataInfo ",str);
+            return str;
+        }
+
+        function metadataItems(nd, nesting: int = 0)
+            : string {
+            enter("AbcEncode::metadataItems");
+            var str = "";
+            
+            for(var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + "{ 'key':" + utf8(nd[i].key) + " 'value':"+utf8(nd[i].value) + " }"
+                    + indent(nesting-2)
+                    + ", "
+            }
+            exit("AbcEncode::metadataItems");
+        }
+        
+        function instanceInfos (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::instanceInfos ", nesting);
+
+            var str = "";
+
+            for (var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + instanceInfo (nd[i], nesting)
+                    + indent (nesting-2)
+                    + ", "
+            }
+
+            exit ("AbcEncode::instanceInfos");
+            return str;
+        }
+
+        function instanceInfo (nd, nesting: int = 0)
+            : string {
+            enter ("AbcEncode::instanceInfo");
+
+            var str =
+                "{ 'name': " + name(nd.name, nesting+"{ 'name': ".length)
+              + indent(nesting) + ", 'super_name': " + name(nd.super_name, nesting+", 'super_name': ".length)
+              + indent(nesting) + ", 'flags': " + nd.flags
+              + indent(nesting) + ", 'protected_namespace': " + nd.protectedNS
+              + indent(nesting) + ", 'interface_count': " + nd.interfaces.length
+              + indent(nesting) + ", 'interfaces': [" + names(nd.interfaces, nesting+", 'interfaces': [".length) + "]"
+              + indent(nesting) + ", 'iinit': " + nd.iinit
+              + indent(nesting) + ", 'traits': [ " + traits(nd.traits, nesting+", 'traits': { ".length) + " ]"
+              + " }";
+
+            exit ("AbcEncode:instanceInfo ",str);
+            return str;
+        }
+
+        function classInfos (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::classInfos ", nesting);
+
+            var str = "";
+
+            for (var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + classInfo (nd[i], nesting)
+                    + indent (nesting-2)
+                    + ", "
+            }
+
+            exit ("AbcEncode::classInfos");
+            return str;
+        }
+
+        function classInfo (nd, nesting: int = 0)
+            : string {
+            enter ("AbcEncode::classInfo");
+
+            var str =
+                "{ 'cinit': " + nd.cinit
+              + indent(nesting) + ", 'traits': [ " + traits(nd.traits, nesting+", 'traits': { ".length) + " ]"
+              + " }";
+
+            exit ("AbcEncode:classInfo ",str);
+            return str;
+        }
+
+        function scriptInfos (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::scriptInfos ", nesting);
+
+            var str = "";
+
+            for (var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + scriptInfo (nd[i], nesting)
+                    + indent (nesting-2)
+                    + ", "
+            }
+
+            exit ("AbcEncode::scriptInfos");
+            return str;
+        }
+
+        function scriptInfo (nd, nesting: int = 0)
+            : string {
+            enter ("AbcEncode::scriptInfo");
+
+            var str =
+                "{ 'init': " + nd.init
+              + indent(nesting) + ", 'traits': [ " + traits(nd.traits, nesting+", 'traits': { ".length) + " ]" 
+              + " }";
+
+            exit ("AbcEncode:scriptInfo ",str);
+            return str;
+        }
+        
+        function names(nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::names ", nesting);
+            
+            var str = "";
+            
+            for(var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + name(nd[i], nesting)
+                    + indent(nesting-2)
+                    + ", "
+            }
+            
+            exit ("AbcEncode::names ", nesting);
+            
+            return str;
+        }
+
+        function methodBodys (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::methodBodys ", nesting);
+
+            var str = "";
+
+            for (var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + methodBody (nd[i], nesting)
+                    + indent (nesting-2)
+                    + ", "
+            }
+
+            exit ("AbcEncode::methodBodys");
+            return str;
+        }
+
+        function methodBody (nd, nesting: int = 0)
+            : string {
+            enter ("AbcEncode::methodBody");
+
+            var str =
+                "{ 'method_info': " + nd.method
+              + indent(nesting) + ", 'max_stack': " + nd.max_stack
+              + indent(nesting) + ", 'max_regs': " + nd.local_count
+              + indent(nesting) + ", 'scope_depth': " + nd.init_scope_depth
+              + indent(nesting) + ", 'max_scope': " + nd.max_scope_depth
+              + indent(nesting) + ", 'code': [ " + code (nd.code, nesting+", 'code': [ ".length) + " ]"
+              + indent(nesting) + ", 'exceptions': [ " + "" + " ]"
+              + indent(nesting) + ", 'fixtures': [ " + "" + " ]"
+              + indent(nesting) + ", 'traits': [ " + traits(nd.traits, nesting+", 'traits': { ".length) + " ]"
+              + " }";
+
+            exit ("AbcEncode:methodBody ",str);
+            return str;
+        }
+
+        function traits(nd, nesting : int = 0) 
+            : string {
+            
+            var str = "";
+            for (var i = 0, len = nd.length; i < len; ++i)
+            {
+                str = str
+                    + trait (nd[i], nesting)
+                    + indent (nesting-2)
+                    + ", "
+            }
+            return str;
+        }
+        
+        function trait(nd, nesting : int = 0)
+            : string {
+            
+            var kind = (nd.kind&0x0F);
+            var str = 
+                "{ 'name': " + name(nd.name, nesting+"{ 'name': ".length)
+                + indent(nesting) + ", 'kind': " + slotKind(nd.kind&0x0F)
+                + indent(nesting) + ", 'attrs': " + attrs((nd.kind>>4)&0x0F);
+                
+            switch(kind)
+            {
+                case TRAIT_Slot:
+                case TRAIT_Const:
+                    str =  str + indent(nesting) + ", 'slot_id': " + nd.slot_id
+                        +  indent(nesting) + ", 'type_name': " + name(nd.type_name, nesting+", 'type_name': ".length)
+                        +  indent(nesting) + ", 'val_index': " + nd.vindex;
+                    if( nd.vindex != 0 )
+                        str = str + indent(nesting) + ", 'val_kind': " + nd.vkind;
+                    break;
+                case TRAIT_Method:
+                case TRAIT_Getter:
+                case TRAIT_Setter:
+                    str =  str + indent(nesting) + ", 'disp_id': " + nd.id
+                        +  indent(nesting) + ", 'method': " + nd.val;
+                    break;
+                case TRAIT_Class:
+                    str =  str + indent(nesting) + ", 'slot_id': " + nd.id
+                        +  indent(nesting) + ", 'class': " + nd.val;
+                    break;
+            }
+            
+           str = str + " }";        
+            
+           return str;
+        }
+        
+        function slotKind(kind:uint)
+            : string {
+                
+            return kind;
+        }
+        
+        function attrs(a:uint)
+            :string {
+            return a;
+        }
+        
+        function code (nd, nesting : int = 0)
+            : string {
+            enter ("AbcEncode::code ", nesting);
+
+            var str = "";
+            var bytes = nd;
+            bytes.position = 0;
+
+    //        for (var ip = 0, len = bytes.length; ip < len; ip=ip+width)
+    		while (bytes.bytesAvailable > 0)
+            {
+                var [bs,width] = instruction ();
+                str = str
+                    + bs
+                    + indent (nesting-2)
+                    + ", "
             }
 
             exit ("AbcEncode::code");
-            return [str,width];
+            return str;
 
-            function operands () {
+            function instruction ()
+                : [int,string] {
+                enter ("AbcEncode::instruction ");
+                
                 var str = "";
-
-                // do variable length int operands if all are variable length
-                // FIXME this is all a little too cute for my taste
-
-                if (width < 0) { 
-                    var w = width; 
+                var op = bytes.readByte();
+                var width = opcodes [op][1]
+                switch (width) {
+                case 0:
+                    str = "invalid opcode " + opcodes[op][0];
                     width = 1;
+                    break;
+                case 1:
+                    str = "[ '" + opcodes[op][0] + "' ]";
+                default:
+                    str = "[ '" + opcodes[op][0] + "'" + operands (nesting + 4 + opcodes[op][0].length) + " ]";
+                    break;
                 }
-                for (var i=1; w<0; w=w+2, i=i+1 ) {
-                    let n;
-                    if (bytes[ip+i] < 0x7F) n = 1;
-                    else if (bytes[ip+i] < 0x4000) n = 2;
-                    else if (bytes[ip+i] < 0x20000) n = 3;
-                    else if (bytes[ip+i] < 0x1000000) n = 4;
-                    else n = 5;
-                    width = width + n;
-                    i = i + n;
-                }
+                
+                exit ("AbcEncode::code");
+                return [str,width];
 
-                for (let n=1; n<width; ++n) { // 0 is the opcode
-                    str = str + " " + (bytes[ip+n]<16 ? "0"+ bytes[ip+n].toString (16) : bytes[ip+n].toString (16));
+                function operands (nesting:int = 0) {
+                    var s = "";
+
+    				switch(op)
+    				{
+    					case OP_debugfile:
+    					case OP_pushstring:
+    						s = s + ", " + utf8(bytes.readU32(), nesting+2)// + 
+    						break
+    					case OP_pushnamespace:
+    						s = s + ", " + namespace(bytes.readU32(), nesting+2);
+    						break
+    					case OP_pushint:
+    						s = s + ", " + integer(bytes.readU32(), nesting+2);
+    						break
+    					case OP_pushuint:
+    						s = s + ", " + uinteger(bytes.readU32(), nesting+2);
+    						break;
+    					case OP_pushdouble:
+    						s = s + ", " + number(bytes.readU32(), nesting+2);
+    						break;
+    					case OP_getsuper: 
+    					case OP_setsuper: 
+    					case OP_getproperty: 
+    					case OP_initproperty: 
+    					case OP_setproperty: 
+    					case OP_getlex: 
+    					case OP_findpropstrict: 
+    					case OP_findproperty:
+    					case OP_finddef:
+    					case OP_deleteproperty: 
+    					case OP_istype: 
+    					case OP_coerce: 
+    					case OP_astype: 
+    					case OP_getdescendants:
+    						s = s + ", " + name(bytes.readU32(), nesting+2);
+    						break;
+    					case OP_constructprop:
+    					case OP_callproperty:
+    					case OP_callproplex:
+    					case OP_callsuper:
+    					case OP_callsupervoid:
+    					case OP_callpropvoid:
+    						s = s + ", " + name(bytes.readU32(), nesting+2);
+    						s = s + ", " + bytes.readU32();
+    						break;
+    					case OP_newfunction: {
+    						s = s + ", " + method(bytes.readU32(), nesting+2);
+    						break;
+    					}
+    					case OP_callstatic:
+    						s = s + ", " + method(bytes.readU32(), nesting+2);
+    						s = s + ", " + bytes.readU32();
+    						break;
+    					case OP_newclass: 
+    						s = s + ", " + clas(bytes.readU32(), nesting+2);
+    						break;
+    					case OP_lookupswitch:
+    						var pos = bytes.position-1;
+                            s = s + ", " + bytes.readS24();
+    						//var target = pos + readS24()
+    						var maxindex = bytes.readU32()
+    						//s += "default:" + labels.labelFor(target) // target + "("+(target-pos)+")"
+    						//s += " maxcase:" + maxindex
+                            s = s + ", " + maxindex;
+    						for (var i:int=0; i <= maxindex; i++) {
+    							//target = pos + readS24();
+    							s = s +  ", " + bytes.readS24();
+                                //labels.labelFor(target) // target + "("+(target-pos)+")"
+    						}
+    						break;
+    					case OP_jump:
+    					case OP_iftrue:		case OP_iffalse:
+    					case OP_ifeq:		case OP_ifne:
+    					case OP_ifge:		case OP_ifnge:
+    					case OP_ifgt:		case OP_ifngt:
+    					case OP_ifle:		case OP_ifnle:
+    					case OP_iflt:		case OP_ifnlt:
+    					case OP_ifstricteq:	case OP_ifstrictne:
+    						var offset = bytes.readS24()
+    						//var target = code.position+offset
+    						//s += target + " ("+offset+")"
+    						s = s + ", " + offset;//labels.labelFor(target)
+    						//if (!((code.position) in labels))
+    						//	s += "\n"
+    						break;
+    					case OP_inclocal:
+    					case OP_declocal:
+    					case OP_inclocal_i:
+    					case OP_declocal_i:
+    					case OP_getlocal:
+    					case OP_kill:
+    					case OP_setlocal:
+    					case OP_debugline:
+    					case OP_getglobalslot:
+    					case OP_getslot:
+    					case OP_setglobalslot:
+    					case OP_setslot:
+    					case OP_pushshort:
+    					case OP_newcatch:
+    					case OP_newobject:
+    					case OP_newarray:
+    						s = s + ", " + bytes.readU32();
+    						break;
+    						s = s + ", " + bytes.readU32();
+    						break
+    					case OP_debug:
+    						s = s + ", " + bytes.readByte(); 
+    						s = s + ", " + bytes.readU32();
+    						s = s + ", " + bytes.readByte();
+    						s = s + ", " + bytes.readU32();
+    						break;
+    					case OP_call:
+    					case OP_construct:
+    					case OP_constructsuper:
+    						s = s + ", " + bytes.readU32()
+    						break;
+    					case OP_pushbyte:
+    					case OP_getscopeobject:
+    						s = s + ", " + bytes.readByte()
+    						break;
+    					case OP_hasnext2:
+    						s = s + ", " + bytes.readU32() + ", " + readU32()
+    					default:
+    						break
+    				}
+
+                    return s;
                 }
-                return str;
             }
+        }
+
+        function utf8(index : int , nesting : int = 0) 
+            : string {
+            var str = index;
+            if( verbose ) { 
+                let utf8_pool = abc.constants.utf8_pool;
+                str = "'" + utf8_pool[index] + "'";
+                //str = str.replace(/\n/g,"\\n");
+                //str = str.replace(/\t/g,"\\t"); 
+            }
+            return str;
+        }
+        
+        function namespace(index : int, nesting : int = 0)
+            : string {
+            var str = index;
+            if( verbose ) {
+                let ns = abc.constants.namespace_pool[index];
+                str = "{ 'utf8': " + utf8(ns.name) + ", 'kind': " + namespaceKind(ns.kind) + " }";
+            }
+            return str;
+        }
+        
+        function integer(index: int, nesting : int = 0 )
+            : string {
+            var str = index;
+            if( verbose ) {
+                str = "'" + abc.constants.int_pool[index] + "'";
+            }
+            return str;
+        }
+
+        function uinteger(index: int, nesting : int = 0 )
+            : string {
+            var str = index;
+            if( verbose ) {
+                str = "'" + abc.constants.uint_pool[index] + "'";
+            }
+            return str;
+        }
+
+        function number(index: int, nesting : int = 0 )
+            : string {
+            var str = index;
+            if( verbose ) {
+                str = "'" + abc.constants.double_pool[index] + "'";
+            }
+            return str;
+        }
+        
+        function name(index: int, nesting : int = 0 )
+            : string {
+            var str = index;
+            
+            if( verbose && index > 0) {
+                let name = abc.constants.multiname_pool[index];
+                switch(name.kind) 
+                {
+                    case CONSTANT_QName:
+                        str = "{ 'kind': 'QName'"
+                              + indent(nesting) + ", 'utf8': " + utf8(name.name) 
+                              + indent(nesting) + ", 'ns': " + namespace(name.ns) + " }";
+                        break;
+                    case CONSTANT_RTQName:
+                        str = "{ 'kind': 'RTQName'"
+                              + indent(nesting) +  ", utf8': " + utf8(name.name) + " }";
+                        break;
+                    case CONSTANT_RTQNameL:
+                        str = "{ 'kind': 'RTQNameL' }";
+                        break;
+                    case CONSTANT_Multiname:
+                        str = "{ 'kind': 'Multiname'"
+                              + indent(nesting) + ", 'utf8': " + utf8(name.name) 
+                              + indent(nesting) + ", 'nsset': " + name.ns + " }";
+                        break;
+                    case CONSTANT_MultinameL:
+                        str = "{ 'kind': 'MultinameL'" + ", 'nss': " + name.ns + " }";
+                        break;
+                }
+            }
+            return str;
+        }
+        
+        function method(index: int, nesting : int = 0 )
+            : string {
+            var str = index;
+            if( verbose ) {
+            }
+            return str;
+        }
+
+        function clas(index: int, nesting : int = 0 )
+            : string {
+            var str = index;
+            if( verbose ) {
+            }
+            return str;
         }
     }
 
@@ -718,4 +1177,13 @@ public namespace AbcEncode;
                   , ["verifyop", 0]
                   , ["decode", 0]
                   , ];
+    
+    var slotKinds = [ "TRAIT_Slot"
+                    , "TRAIT_Method"
+                    , "TRAIT_Getter"
+                    , "TRAIT_Setter"
+                    , "TRAIT_Class"
+                    , "TRAIT_Function"
+                    , "TRAIT_Const"
+                    , ];
 }

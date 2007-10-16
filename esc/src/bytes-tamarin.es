@@ -51,10 +51,13 @@
     class ABCByteStream
     {
         /*private*/ const bytes
-        function ABCByteStream ()
-            : bytes = new ByteArray 
+        // If a ByteArray is passed in, then it is used to construct the ABCByteStream, otherwise a new empty ByteArray is used
+        function ABCByteStream (b = null)
+            : bytes = (b!=null? b : new ByteArray )
         {
+// Tamarin was fixed so this is always set correctly now... I think
             bytes.endian = "littleEndian";
+            bytes.position = 0;
         }
 
         function get length() {
@@ -202,6 +205,60 @@
                 a.push (bytes.readByte()&0xff);
             }
             return a;
+        }
+        
+        function readByte() : uint {
+            return bytes.readUnsignedByte();
+        }
+        
+        function readInt() {
+            return bytes.readInt();
+        }
+
+        function readDouble() {
+            return bytes.readDouble();
+        }
+        
+        function readUTFBytes(length:uint) {
+            return bytes.readUTFBytes(length);
+        }
+        
+		function readU32():int {
+			var result:int = bytes.readUnsignedByte();
+			if (!(result & 0x00000080))
+				return result;
+			result = result & 0x0000007f | bytes.readUnsignedByte()<<7;
+			if (!(result & 0x00004000))
+				return result;
+			result = result & 0x00003fff | bytes.readUnsignedByte()<<14;
+			if (!(result & 0x00200000))
+				return result;
+			result = result & 0x001fffff | bytes.readUnsignedByte()<<21;
+			if (!(result & 0x10000000))
+				return result;
+			return   result & 0x0fffffff | bytes.readUnsignedByte()<<28;
+		}
+        
+		function readS24():int
+		{
+			var b:uint = bytes.readUnsignedByte();
+            var b1:uint = bytes.readUnsignedByte();
+            var b2:uint = bytes.readUnsignedByte();
+            
+			b = b | (b1<<8);
+			b = b | (b2<<16);
+			return b
+		}
+
+        function get position() {
+            return bytes.position;
+        }
+        function set position(pos) {
+            bytes.position = pos;
+        }
+        
+        function get bytesAvailable() {
+            return bytes.bytesAvailable;
         }
     }
 

@@ -2,74 +2,81 @@
 { 'abc_class': 'AbcFile'
 , 'minor_version': 16
 , 'major_version': 46
-, 'int_pool': [  ]
-, 'uint_pool': [  ]
-, 'double_pool': [  ]
-, 'utf8_pool': [ 
+, 'int_pool': [ undefined ]
+, 'uint_pool': [ undefined ]
+, 'double_pool': [ undefined ]
+, 'utf8_pool': [ undefined
                , ''
                , 'Object'
                , 'Array'
                , 'RegExp'
                , 'print' ]
-, 'namespace_pool': [ 
+, 'namespace_pool': [ undefined
                     , { 'kind': 'PackageNamespace'
-                      , 'utf8': '1' }
-                    , { 'kind': 'AnonymousNamespace'
-                      , 'utf8': '1' } ]
-, 'nsset_pool': [ 
-                , [ '2' ] ]
-, 'name_pool': [ 
+                      , 'utf8': 1 }
+                    , { 'kind': 'Namespace'
+                      , 'utf8': 1 } ]
+, 'nsset_pool': [ undefined
+                , [ 2 ] ]
+, 'name_pool': [ undefined
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '2' }
+                 , 'ns': 1
+                 , 'utf8': 2 }
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '3' }
+                 , 'ns': 1
+                 , 'utf8': 3 }
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '4' }
+                 , 'ns': 1
+                 , 'utf8': 4 }
                , { 'kind': 'Multiname'
-                 , 'utf8': '5'
-                 , 'nsset': '1' } ]
-, 'method_infos': [ { 'ret_type': 
+                 , 'utf8': 5
+                 , 'nsset': 1 } ]
+, 'method_infos': [ { 'ret_type': 0
                     , 'param_types': []
-                    , 'name': 
-                    , 'flags': 
-                    , 'optional_count': 
+                    , 'name': 0
+                    , 'flags': 0
+                    , 'optional_count': 0
                     , 'value_kind': [  ]
                     , 'param_names': [  ] }
                   ,  ]
-, 'method_bodys': [ { 'method_info': 
-                    , 'max_stack': 
-                    , 'max_regs': 
-                    , 'scope_depth': 
-                    , 'max_scope': 
-                    , 'code': [ getlocal0
-                              , pushscope
-                              , jump 00 00 00
-                              , label
-                              , findpropstrict 04
-                              , getproperty 04
-                              , pushnull
-                              , pushtrue
-                              , call 01
-                              , pop
-                              , jump 00 00 00
-                              , pushtrue
-                              , iftrue ed ff ff
-                              , jump 00 00 00
-                              , label
-                              , findpropstrict 04
-                              , getproperty 04
-                              , pushnull
-                              , pushtrue
-                              , call 01
-                              , pop
-                              , jump 00 00 00
-                              , pushtrue
-                              , iftrue ed ff ff
-                              , returnvoid
+, 'metadata_infos': [  ]
+, 'instance_infos': [  ]
+, 'class_infos': [  ]
+, 'script_infos': [ { 'init': 0
+                    , 'traits': [  ] }
+                  ,  ]
+, 'method_bodys': [ { 'method_info': 0
+                    , 'max_stack': 3
+                    , 'max_regs': 1
+                    , 'scope_depth': 0
+                    , 'max_scope': 1
+                    , 'code': [ [ 'getlocal0' ]
+                              , [ 'pushscope' ]
+                              , [ 'jump', 14 ]
+                              , [ 'label' ]
+                              , [ 'findpropstrict', 4 ]
+                              , [ 'getproperty', 4 ]
+                              , [ 'pushnull' ]
+                              , [ 'pushtrue' ]
+                              , [ 'call', 1 ]
+                              , [ 'pop' ]
+                              , [ 'jump', 5 ]
+                              , [ 'pushtrue' ]
+                              , [ 'iftrue', 16777197 ]
+                              , [ 'jump', 14 ]
+                              , [ 'label' ]
+                              , [ 'findpropstrict', 4 ]
+                              , [ 'getproperty', 4 ]
+                              , [ 'pushnull' ]
+                              , [ 'pushtrue' ]
+                              , [ 'call', 1 ]
+                              , [ 'pop' ]
+                              , [ 'jump', 5 ]
+                              , [ 'pushtrue' ]
+                              , [ 'iftrue', 16777197 ]
+                              , [ 'returnvoid' ]
                               ,  ]
                     , 'exceptions': [  ]
-                    , 'fixtures': [  ] }
+                    , 'fixtures': [  ]
+                    , 'traits': [  ] }
                   ,  ] }
