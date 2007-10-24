@@ -232,10 +232,10 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 		int argc = 1;
 		args[0] = a;
 		Atom arg = va_arg (s, Atom);
-		while (a != (Atom)-1) {
+		while (arg != (Atom)-1) {
 			args[argc] = arg;
 			argc++;
-			a = va_arg (s, Atom);
+			arg = va_arg (s, Atom);
 			AvmAssert(argc<maxAtoms);
 		}
 		// Now call the method.
@@ -393,12 +393,16 @@ STDMETHODIMP CActiveScript::ParseProcedureText(
 // IActiveScriptParse implementation
 STDMETHODIMP CActiveScript::InitNew(void)
 {
+	HRESULT hr;
 	if (!core) {
 		ATLTRACE2("CActiveScript Engine failing to initialize - no core!");
 		return E_OUTOFMEMORY;
 	}
 	TRY(core, kCatchAction_ReportAsError) {
-		return core->InitNew(this);
+		hr = core->InitNew(this);
+		if (FAILED(hr))
+			return hr;
+		return callEngine(NULL, "InitNew", (Atom)-1);
 	}
 	CATCH(Exception * exception) {
 		// ack - error setting up our environment.
