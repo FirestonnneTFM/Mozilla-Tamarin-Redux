@@ -46,6 +46,7 @@ namespace axtam
 		NATIVE_METHOD(axtam_System_write, SystemClass::write)
 		NATIVE_METHOD(axtam_System_debugger, SystemClass::debugger)
 		NATIVE_METHOD(axtam_System_isDebugger, SystemClass::isDebugger)
+		NATIVE_METHOD(axtam_System_nativeDebugBreak, SystemClass::nativeDebugBreak)
 	END_NATIVE_MAP()
 
 	SystemClass::SystemClass(VTable *cvtable)
@@ -92,4 +93,10 @@ namespace axtam
 		#endif
 	}
 
+	void SystemClass::nativeDebugBreak()
+	{
+		#ifdef DEBUG
+			DebugBreak();
+		#endif
+	}
 }

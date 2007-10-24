@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 // This is a clone of the shell's file of the same name, but header and namespaces changed.
+// Now its been changed to handle a NULL 'parent' better
 
 #include "axtam.h"
 class ByteArrayObject;
@@ -47,9 +48,19 @@ class ByteArray;
 
 namespace axtam
 {
+	// hackery...
+	class COMFunction : public AbstractFunction
+	{
+	public:
+		COMFunction(Stringp name) { this->name = name; }
+		void verify(Toplevel *) {}
+		virtual bool isFakeFunction() { return false; }
+	};
+
 	BEGIN_NATIVE_MAP(DomainClass)
 		NATIVE_METHOD(avmplus_Domain_Domain, DomainObject::constructFromDomain)
 		NATIVE_METHOD(avmplus_Domain_loadBytes, DomainObject::loadBytes)
+		NATIVE_METHOD(avmplus_Domain_addNamedScript, DomainObject::addNamedScript)
 		NATIVE_METHOD(avmplus_Domain_currentDomain_get, DomainClass::get_currentDomain)
 		NATIVE_METHOD(avmplus_Domain_getClass, DomainObject::getClass)
 	END_NATIVE_MAP()
@@ -68,22 +79,67 @@ namespace axtam
 		AXTam *core = (AXTam*) this->core();
 
 		Domain* baseDomain;
+		DomainEnv* baseDomainEnv;
 		if (parentDomain) {
-			baseDomain = parentDomain->domainEnv->getDomain();
+			baseDomainEnv = parentDomain->domainEnv;
+			baseDomain = baseDomainEnv->getDomain();
+			
 		} else {
 			baseDomain = core->builtinDomain;
+			baseDomainEnv = NULL;
 		}
 		
-		Domain* domain = new (core->GetGC()) Domain(core, baseDomain);
+		domain = new (core->GetGC()) Domain(core, baseDomain);
 
 		if (parentDomain) {
 			domainToplevel = parentDomain->domainToplevel;
 		} else {
-			AvmAssert(0);
-			//domainToplevel = core->initAXTamBuiltins();
+			domainToplevel = core->toplevel;
 		}
-		
-		domainEnv = new (core->GetGC()) DomainEnv(core, domain, parentDomain->domainEnv);
+
+		domainEnv = new (core->GetGC()) DomainEnv(core, domain, baseDomainEnv);
+
+		// Create a new 'scriptEnv' for the domain, suitable for sticking our own 'global'
+		// objects in.
+		AbcEnv* abcEnv = core->toplevel->object_vtable->abcEnv;
+		Traits *scriptTraits = core->traits.object_itraits;
+		ScopeChain* emptyScope = ScopeChain::create(core->GetGC(), core->traits.object_itraits->scope, NULL, core->newNamespace(core->kEmptyString));
+		VTable* scriptVTable = core->newVTable(scriptTraits, NULL, emptyScope, abcEnv, core->toplevel);
+		scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
+		//scriptVTable->init = scriptEnv;
+		scriptEnv->initGlobal();
+	}
+
+	void DomainObject::addNamedScript(Stringp name, ScriptObject *ob)
+	{
+		AXTam *core = (AXTam*) this->core();
+		scriptEnv->global->setStringProperty(name, ob->atom());
+		domainEnv->namedScripts->add(name, core->publicNamespace, (Binding)(ScriptEnv *)scriptEnv);
+		// now pretend it was a 'global' object with a 'foo' method :)
+		// create a new scriptenv just for this object and its "global" names.
+		if (1) {
+			AbcEnv* abcEnv = core->toplevel->object_vtable->abcEnv;
+			Traits *traits = core->traits.object_itraits;
+			ScopeChain* emptyScope = ScopeChain::create(core->GetGC(), core->traits.object_itraits->scope, NULL, core->newNamespace(core->kEmptyString));
+			VTable* vtable = core->newVTable(traits, NULL, emptyScope, abcEnv, core->toplevel);
+			ScriptEnv *scriptEnv = new (core->GetGC()) ScriptEnv(traits->init, vtable);
+			// and instead of:
+			// scriptEnv->initGlobal();
+			// init things manually such that our object is the global.
+			// Traits* traits = vtable->traits;
+			vtable->resolveSignatures();
+			AvmAssert(traits->getNativeScriptInfo()==NULL); // not a native script
+
+			Toplevel* toplevel = core->toplevel;
+			traits->resolveSignatures(toplevel);
+			scriptEnv->global = ob;
+			// and register all properties...
+			domainEnv->namedScripts->add(core->constantString("foo"), core->publicNamespace, (Binding)(ScriptEnv *)scriptEnv);
+			// and all methods
+			Stringp name = core->constantString("Echo");
+			domain->namedScripts->add(name, core->publicNamespace, (Binding)new (core->GetGC()) COMFunction(name));
+
+		}
 	}
 
 	Atom DomainObject::loadBytes(ByteArrayObject *b)

@@ -10,7 +10,5 @@
 // console, so may be better for diagnostics.
 // (Note: we could register the .es4 extension, making this less ugly)
 
-engine_env.WScript.Echo("Hello from es4/wsh")
-engine_env.WScript.Echo("WSH version is " + engine_env.WScript.Version)
-var ob = engine_env.WScript.CreateObject("WScript.Shell")
-engine_env.WScript.Echo("got " + ob)
+WScript.Echo("Hello from es4/wsh")
+WScript.Echo("WSH version is " + WScript.Version)

@@ -68,6 +68,8 @@ namespace axtam
 		bool isDebugger();
 		/*@}*/
 
+		void nativeDebugBreak();
+
 		DECLARE_NATIVE_MAP(SystemClass)
 	};
 }

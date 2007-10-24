@@ -35,7 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 // hackery - for now, this file is "built" via:
-// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -out axtoplevel mscom.as ../shell/Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
+// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -out axtoplevel mscom.as Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
 
 package axtam 
 {
@@ -46,6 +46,7 @@ package axtam
 		public native static function write(s:String):void
 		public native static function debugger():void
 		public native static function isDebugger():Boolean
+		public native static function nativeDebugBreak():void
 	}
 }
 
@@ -89,11 +90,10 @@ package axtam.com.adaptors.consumer {
 
 package {
 
-    import avmplus.*; // for our Domain clone - either it should die, or we rename the package in our clone!
     import flash.utils.*; // for our ByteArray clone - either it should die, or we rename the package in our clone!
 
 
-    public function execString(str)
+    public function execString(str, domain)
     {
         import Parse.*;
         var top = []
@@ -109,21 +109,30 @@ package {
         for (var i = 0, len = bytes.length; i<len; ++i) {
             b.writeByte(uint(bytes[i]));
         }
-        Domain.currentDomain.loadBytes(b);
+        domain.loadBytes(b);
     }
 
    }
 
 package {
 
+    import avmplus.*; // for our Domain clone - either it should die, or we rename the package in our clone!
+
 	class ScriptEngine {
+			public var domain;
+			public function ScriptEngine() {
+			}
+			public function InitNew() {
+				//domain = Domain.currentDomain
+				domain = new Domain(null)
+			}
 			public function ParseScriptText(code:String, itemName:String, context:Object, delim:String, sourceCookie:int, lineNumber:int, flags:int) {
 				axtam.System.write('ParseScriptText\n')
 				axtam.System.write(code)
 				// XXX - this is wrong - we should only do the parse and generation
 				// of bytecode here.  We should execute all such blocks at 
 				// SetScriptState(SCRIPTSTATE_RUNNING) time.
-				execString(code)
+				execString(code, domain)
 
 			}
 			// This function is called as a 'named item' is added to the environment.
@@ -134,13 +143,10 @@ package {
 				var site = new axtam.com.adaptors.consumer.ScriptSite()
 				var info = site.GetItemInfo(name, 0)
 				//axtam.System.write(info)
-				engine_env[name] = info
+				domain.addNamedScript(name, info)
 			}
 	}
 
 	public var engine = new ScriptEngine()
-	// This kinda sucks, but will do for now - it holds the 'named items'
-	public var engine_env = new Object; // I want a Dictionary()!
-
 	// and magically methods will be called on 'engine'
 }
