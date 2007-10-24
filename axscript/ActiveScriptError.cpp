@@ -50,8 +50,10 @@ STDMETHODIMP CActiveScriptError::GetExceptionInfo(
 	Stringp s(core->string(exception->atom));
 	#ifdef DEBUGGER
 
-	if (exception->getStackTrace())
-		s = new (core->GetGC()) String(s, exception->getStackTrace()->format(core));
+	if (exception->getStackTrace()) {
+		s = core->concatStrings(s, core->constantString("\n"));
+		s = core->concatStrings(s, exception->getStackTrace()->format(core));
+	}
 
 	#endif
 	pexcepinfo->bstrDescription = ::SysAllocString((const OLECHAR *)s->c_str());
