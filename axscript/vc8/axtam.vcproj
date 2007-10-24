@@ -425,6 +425,10 @@
 			Filter="as"
 			>
 			<File
+				RelativePath="..\Domain.as"
+				>
+			</File>
+			<File
 				RelativePath="..\mscom.as"
 				>
 			</File>
