@@ -1007,7 +1007,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				SYMROOT = "$(PROJECT_DIR)/../../../../platform/mac/flash/Builds";
 				WARNING_CFLAGS = "-Wno-long-long";
 			};
 			name = Debug;
@@ -1037,7 +1036,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				SYMROOT = "$(PROJECT_DIR)/../../../../platform/mac/flash/Builds";
 				WARNING_CFLAGS = "-Wno-long-long";
 			};
 			name = Release;
@@ -1134,7 +1132,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				SYMROOT = "$(PROJECT_DIR)/../../../../platform/mac/flash/Builds";
 				WARNING_CFLAGS = "-Wno-long-long";
 			};
 			name = Debug_Debugger;
@@ -1164,7 +1161,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				SYMROOT = "$(PROJECT_DIR)/../../../../platform/mac/flash/Builds";
 				WARNING_CFLAGS = "-Wno-long-long";
 			};
 			name = Release_Debugger;

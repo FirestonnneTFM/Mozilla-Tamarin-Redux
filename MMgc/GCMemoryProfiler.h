@@ -158,8 +158,8 @@ namespace MMgc
 		GCCriticalSection& m_cs;
 	};
 
-	void MMGC_API SetMemTag(const char *memtag);
-	void MMGC_API SetMemType(void *memtype);
+	MMGC_API void SetMemTag(const char *memtag);
+	MMGC_API void SetMemType(void *memtype);
 
 	/**
 	 * calculate a stack trace skipping skip frames and return index into
@@ -173,17 +173,17 @@ namespace MMgc
 	/**
 	* Manually set me, for special memory not new/deleted, like the code memory region
 	*/
-	void MMGC_API ChangeSizeForObject(void *object, int size);
+	MMGC_API void ChangeSizeForObject(void *object, int size);
 
 	/**
 	* How much extra size does DebugDecorate need?
 	*/
-	size_t DebugSize();
+	MMGC_API size_t DebugSize();
 
 	/**
 	* decorate memory with debug information, return pointer to memory to return to caller
 	*/
-	void *DebugDecorate(void *item, size_t size, int skip);
+	MMGC_API void *DebugDecorate(void *item, size_t size, int skip);
 
 	/** 
 	* Given a pointer to user memory do debug checks and return pointer to real memory
@@ -211,7 +211,7 @@ namespace MMgc
 	void GetStackTrace(int *trace, int len, int skip);
 	// print stack trace of index into trace table
 	void PrintStackTraceByIndex(int index);
-	void PrintStackTrace(const void *item);
+	MMGC_API void PrintStackTrace(const void *item);
 	// print stack trace of caller
 	void DumpStackTrace();
 }

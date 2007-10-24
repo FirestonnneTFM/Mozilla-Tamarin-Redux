@@ -335,19 +335,19 @@ namespace avmshell
 	
 	void Shell::initShellPool()
 	{
-		AbstractFunction *nativeMethods[toplevel_abc_method_count];
-		NativeClassInfo *nativeClasses[toplevel_abc_class_count];
-		NativeScriptInfo *nativeScripts[toplevel_abc_script_count];
+		AbstractFunction *nativeMethods[avmplus::NativeID::toplevel_abc_method_count];
+		NativeClassInfo *nativeClasses[avmplus::NativeID::toplevel_abc_class_count];
+		NativeScriptInfo *nativeScripts[avmplus::NativeID::toplevel_abc_script_count];
 
-		memset(nativeMethods, 0, sizeof(AbstractFunction*)*toplevel_abc_method_count);
-		memset(nativeClasses, 0, sizeof(NativeClassInfo*)*toplevel_abc_class_count);
-		memset(nativeScripts, 0, sizeof(NativeScriptInfo*)*toplevel_abc_script_count);
+		memset(nativeMethods, 0, sizeof(AbstractFunction*)*avmplus::NativeID::toplevel_abc_method_count);
+		memset(nativeClasses, 0, sizeof(NativeClassInfo*)*avmplus::NativeID::toplevel_abc_class_count);
+		memset(nativeScripts, 0, sizeof(NativeScriptInfo*)*avmplus::NativeID::toplevel_abc_script_count);
 
 		initNativeTables(classEntries, scriptEntries, 
 			nativeMethods, nativeClasses, nativeScripts);
 
-		avmplus::ScriptBuffer code = newScriptBuffer(toplevel_abc_length);
-		memcpy(code.getBuffer(), toplevel_abc_data, toplevel_abc_length);
+		avmplus::ScriptBuffer code = newScriptBuffer(avmplus::NativeID::toplevel_abc_length);
+		memcpy(code.getBuffer(), toplevel_abc_data, avmplus::NativeID::toplevel_abc_length);
 		shellPool = parseActionBlock(code, 0, NULL, builtinDomain, nativeMethods, nativeClasses, nativeScripts);
 	}
 

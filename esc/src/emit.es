@@ -514,7 +514,7 @@ namespace Emit;
             body.setLocalCount(asm.maxLocal);
             body.setInitScopeDepth(this.initScopeDepth);
             body.setMaxScopeDepth(asm.maxScope);
-            body.setCode(asm);
+            body.setCode(asm.finalize());
             for ( var i=0 ; i < traits.length ; i++ )
                 body.addTrait(traits[i]);
             

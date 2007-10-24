@@ -81,15 +81,29 @@ function getTestCases() {
 	  pattern += strOriginal;
 	  for (i=0; i<numParens; i++) {pattern += closeParen;}
 	  var re = new RegExp(pattern);
+	
+	  if (doBackRefs) {
+		  var res = strOriginal.search(re);
+		  array[item++] = new TestCase(SECTION, "strOriginal.search(re)", -1, res);
 
-	  var res = strOriginal.search(re);
-	  array[item++] = new TestCase(SECTION, "strOriginal.search(re)", -1, res);
+		  res = strOriginal.match(re);
+		  array[item++] = new TestCase(SECTION, "strOriginal.match(re)", null, res);
 
-	  res = strOriginal.match(re);
-	  array[item++] = new TestCase(SECTION, "strOriginal.match(re)", null, res);
+		  res = strOriginal.replace(re, strReplace);
+		  array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "hello", res);
+	  } else {
+	  	  var res = strOriginal.search(re);
+		  array[item++] = new TestCase(SECTION, "strOriginal.search(re)", 0, res);
 
-	  res = strOriginal.replace(re, strReplace);
-	  array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "hello", res);
+		  res = strOriginal.match(re);
+		  //Get the first element to compare
+		  res = res[0];
+		  array[item++] = new TestCase(SECTION, "strOriginal.match(re)", 'hello', res);
+
+		  res = strOriginal.replace(re, strReplace);
+		  array[item++] = new TestCase(SECTION, "strOriginal.replace(re, strReplace)", "goodbye", res);
+	
+	  }
 	}
 
 	return array;

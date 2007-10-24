@@ -43,6 +43,10 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
+#ifdef NEED_MMGC_CONFIG_H
+#include "MMgc-config.h"
+#endif
+
 // For size_t
 #include <stddef.h>
 

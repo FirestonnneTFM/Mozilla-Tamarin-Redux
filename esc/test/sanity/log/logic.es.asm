@@ -2,10 +2,10 @@
 { 'abc_class': 'AbcFile'
 , 'minor_version': 16
 , 'major_version': 46
-, 'int_pool': [  ]
-, 'uint_pool': [  ]
-, 'double_pool': [  ]
-, 'utf8_pool': [ 
+, 'int_pool': [ undefined ]
+, 'uint_pool': [ undefined ]
+, 'double_pool': [ undefined ]
+, 'utf8_pool': [ undefined
                , ''
                , 'Object'
                , 'Array'
@@ -13,195 +13,78 @@
                , 'f'
                , 'print'
                , 'g' ]
-, 'namespace_pool': [ 
+, 'namespace_pool': [ undefined
                     , { 'kind': 'PackageNamespace'
-                      , 'utf8': '1' }
-                    , { 'kind': 'AnonymousNamespace'
-                      , 'utf8': '1' } ]
-, 'nsset_pool': [ 
-                , [ '2' ] ]
-, 'name_pool': [ 
+                      , 'utf8': 1 }
+                    , { 'kind': 'Namespace'
+                      , 'utf8': 1 } ]
+, 'nsset_pool': [ undefined
+                , [ 2 ] ]
+, 'name_pool': [ undefined
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '2' }
+                 , 'ns': 1
+                 , 'utf8': 2 }
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '3' }
+                 , 'ns': 1
+                 , 'utf8': 3 }
                , { 'kind': 'QName'
-                 , 'ns': '1'
-                 , 'utf8': '4' }
+                 , 'ns': 1
+                 , 'utf8': 4 }
                , { 'kind': 'QName'
-                 , 'ns': '2'
-                 , 'utf8': '5' }
+                 , 'ns': 2
+                 , 'utf8': 5 }
                , { 'kind': 'Multiname'
-                 , 'utf8': '6'
-                 , 'nsset': '1' }
+                 , 'utf8': 6
+                 , 'nsset': 1 }
                , { 'kind': 'QName'
-                 , 'ns': '2'
-                 , 'utf8': '7' }
+                 , 'ns': 2
+                 , 'utf8': 7 }
                , { 'kind': 'Multiname'
-                 , 'utf8': '5'
-                 , 'nsset': '1' }
+                 , 'utf8': 5
+                 , 'nsset': 1 }
                , { 'kind': 'Multiname'
-                 , 'utf8': '7'
-                 , 'nsset': '1' } ]
-, 'method_infos': [ { 'ret_type': 
+                 , 'utf8': 7
+                 , 'nsset': 1 } ]
+, 'method_infos': [ { 'ret_type': 0
                     , 'param_types': []
-                    , 'name': 
-                    , 'flags': 
-                    , 'optional_count': 
+                    , 'name': 0
+                    , 'flags': 2
+                    , 'optional_count': 0
                     , 'value_kind': [  ]
                     , 'param_names': [  ] }
-                  , { 'ret_type': 
+                  , { 'ret_type': 0
                     , 'param_types': []
-                    , 'name': 
-                    , 'flags': 
-                    , 'optional_count': 
+                    , 'name': 0
+                    , 'flags': 2
+                    , 'optional_count': 0
                     , 'value_kind': [  ]
                     , 'param_names': [  ] }
-                  , { 'ret_type': 
+                  , { 'ret_type': 0
                     , 'param_types': []
-                    , 'name': 
-                    , 'flags': 
-                    , 'optional_count': 
+                    , 'name': 0
+                    , 'flags': 0
+                    , 'optional_count': 0
                     , 'value_kind': [  ]
                     , 'param_names': [  ] }
                   ,  ]
-, 'method_bodys': [ { 'method_info': 
-                    , 'max_stack': 
-                    , 'max_regs': 
-                    , 'scope_depth': 
-                    , 'max_scope': 
-                    , 'code': [ getlocal0
-                              , pushscope
-                              , newactivation
-                              , dup
-                              , setlocal1
-                              , pushscope
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , pushtrue
-                              , call 01
-                              , pop
-                              , pushtrue
-                              , setlocal2
-                              , getlocal2
-                              , returnvalue
-                              , kill 02
-                              , kill 01
-                              , returnvoid
-                              ,  ]
-                    , 'exceptions': [  ]
-                    , 'fixtures': [  ] }
-                  , { 'method_info': 
-                    , 'max_stack': 
-                    , 'max_regs': 
-                    , 'scope_depth': 
-                    , 'max_scope': 
-                    , 'code': [ getlocal0
-                              , pushscope
-                              , newactivation
-                              , dup
-                              , setlocal1
-                              , pushscope
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , pushfalse
-                              , call 01
-                              , pop
-                              , pushfalse
-                              , setlocal2
-                              , getlocal2
-                              , returnvalue
-                              , kill 02
-                              , kill 01
-                              , returnvoid
-                              ,  ]
-                    , 'exceptions': [  ]
-                    , 'fixtures': [  ] }
-                  , { 'method_info': 
-                    , 'max_stack': 
-                    , 'max_regs': 
-                    , 'scope_depth': 
-                    , 'max_scope': 
-                    , 'code': [ getlocal0
-                              , pushscope
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , findpropstrict 07
-                              , getproperty 07
-                              , pushnull
-                              , call 00
-                              , convert_b
-                              , dup
-                              , iftrue 00 00 00
-                              , pop
-                              , findpropstrict 08
-                              , getproperty 08
-                              , pushnull
-                              , call 00
-                              , convert_b
-                              , call 01
-                              , pop
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , findpropstrict 08
-                              , getproperty 08
-                              , pushnull
-                              , call 00
-                              , convert_b
-                              , dup
-                              , iftrue 00 00 00
-                              , pop
-                              , findpropstrict 07
-                              , getproperty 07
-                              , pushnull
-                              , call 00
-                              , convert_b
-                              , call 01
-                              , pop
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , findpropstrict 07
-                              , getproperty 07
-                              , pushnull
-                              , call 00
-                              , convert_b
-                              , dup
-                              , iffalse 00 00 00
-                              , pop
-                              , findpropstrict 08
-                              , getproperty 08
-                              , pushnull
-                              , call 00
-                              , convert_b
-                              , call 01
-                              , pop
-                              , findpropstrict 05
-                              , getproperty 05
-                              , pushnull
-                              , findpropstrict 08
-                              , getproperty 08
-                              , pushnull
-                              , call 00
-                              , convert_b
-                              , dup
-                              , iffalse 00 00 00
-                              , pop
-                              , findpropstrict 07
-                              , getproperty 07
-                              , pushnull
-                              , call 00
-                              , convert_b
-                              , call 01
-                              , pop
-                              , returnvoid
-                              ,  ]
-                    , 'exceptions': [  ]
-                    , 'fixtures': [  ] }
-                  ,  ] }
+, 'metadata_infos': [  ]
+, 'instance_infos': [  ]
+, 'class_infos': [  ]
+, 'script_infos': [ { 'init': 2
+                    , 'traits': [ { 'name': 4
+                                  , 'kind': 0
+                                  , 'attrs': 0
+                                  , 'slot_id': 0
+                                  , 'type_name': 0
+                                  , 'val_index': 6
+                                  , 'val_kind': 1 }
+                                , { 'name': 0
+                                  , 'kind': 0
+                                  , 'attrs': 0
+                                  , 'slot_id': 3
+                                  , 'type_name': 0
+                                  , 'val_index': 3
+                                  , 'val_kind': 3 }
+                                ,  ] }
+                  ,  ]
+, 'method_bodys': [  ] }

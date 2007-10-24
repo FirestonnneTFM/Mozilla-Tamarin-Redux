@@ -63,7 +63,7 @@ if (buildShell):
 # Get CPP, CC, etc
 config.getCompiler(static_crt=o.getBoolArg('static-crt'))
 
-APP_CPPFLAGS = "-DSOFT_ASSERTS "
+APP_CPPFLAGS = ""
 APP_CXXFLAGS = ""
 OPT_CXXFLAGS = "-Os "
 OPT_CPPFLAGS = ""
@@ -74,10 +74,11 @@ OS_LIBS = []
 MMGC_CPPFLAGS = ""
 AVMSHELL_CPPFLAGS = ""
 AVMSHELL_LDFLAGS = ""
+MMGC_DEFINES = {'SOFT_ASSERTS': None}
 
 MMGC_DYNAMIC = o.getBoolArg('mmgc-shared', False)
 if MMGC_DYNAMIC:
-    APP_CPPFLAGS += "-DMMGC_DLL "
+    MMGC_DEFINES['MMGC_DLL'] = None
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
 
 if config.COMPILER_IS_GCC:
@@ -104,18 +105,27 @@ zlib_lib = o.getStringArg('zlib-lib')
 if zlib_lib is not None:
     AVMSHELL_LDFLAGS = zlib_lib
 else:
-    OS_LIBS.append('z')
+    AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,z)'
 
 os, cpu = config.getTarget()
 if os == "darwin":
-    APP_CPPFLAGS += "-DTARGET_API_MAC_CARBON=1 -DDARWIN=1 -D_MAC -DTARGET_RT_MAC_MACHO=1 -DUSE_MMAP -D_MAC -D__DEBUGGING__ "
+    MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
+                         'DARWIN': 1,
+                         '_MAC': None,
+                         'TARGET_RT_MAC_MACHO': 1,
+                         'USE_MMAP': None})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
 elif os == "windows":
-    APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -D_CONSOLE "
+    MMGC_DEFINES.update({'WIN32': None,
+                         '_CRT_SECURE_NO_DEPRECATE': None})
+    APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
     OS_LIBS.append('winmm')
 elif os == "linux":
-    APP_CPPFLAGS += "-DUNIX -DAVMPLUS_UNIX -DLINUX "
+    MMGC_DEFINES.update({'UNIX': None,
+                         'AVMPLUS_UNIX': None,
+                         'LINUX': None})
     OS_LIBS.append('pthread')
+    APP_CPPFLAGS += '-DAVMPLUS_CDECL '
     if config.getDebug():
         OS_LIBS.append("dl")
 elif os == "sunos":
@@ -123,7 +133,9 @@ elif os == "sunos":
         APP_CXXFLAGS = ""
         OPT_CXXFLAGS = "-xO5 "
         DEBUG_CXXFLAGS = "-g "
-    APP_CPPFLAGS += "-DUNIX -DAVMPLUS_UNIX -DSOLARIS "
+    MMGC_DEFINES.update({'UNIX': None,
+                         'AVMPLUS_UNIX': None,
+                         'SOLARIS': None})
     OS_LIBS.append('pthread')
     if config.getDebug():
         OS_LIBS.append("dl")
@@ -141,6 +153,22 @@ else:
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
+
+# We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
+APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))
+                        for (var, val) in MMGC_DEFINES.iteritems())
+
+definePattern = \
+"""#ifndef %(var)s
+#define %(var)s %(val)s
+#endif
+"""
+
+outpath = "%s/MMgc-config.h" % config.getObjDir()
+contents = ''.join(definePattern % {'var': var,
+                                    'val': val is not None and val or ''}
+                   for (var, val) in MMGC_DEFINES.iteritems())
+writeFileIfChanged(outpath, contents)
 
 config.subst("APP_CPPFLAGS", APP_CPPFLAGS)
 config.subst("APP_CXXFLAGS", APP_CXXFLAGS)

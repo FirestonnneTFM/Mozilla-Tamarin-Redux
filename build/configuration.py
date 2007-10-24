@@ -40,6 +40,25 @@ import sys
 import build.process
 import re
 
+def writeFileIfChanged(path, contents):
+    """Write some contents to a file. Avoids modifying the file timestamp if the file contents already match."""
+    print "Generating " + path + "...",
+    try:
+        outf = open(path, "r")
+        oldcontents = outf.read()
+        outf.close()
+
+        if oldcontents == contents:
+            print "not changed"
+            return
+    except IOError:
+        pass
+
+    outf = open(path, "w")
+    outf.write(contents)
+    outf.close()
+    print
+
 # Figure out TARGET and CPU, a la config.guess
 # Do cross-compilation in the future, which will require HOST_OS and perhaps
 # other settings
@@ -127,6 +146,10 @@ class Configuration:
         if self._debug:
             self._acvars['ENABLE_DEBUG'] = 1
 
+    def getObjDir(self):
+        """Returns the build directory being configured."""
+        return self._objdir
+
     def getHost(self):
         """Returns an (os, cpu) tuple of the host machine."""
         return self._host
@@ -189,7 +212,7 @@ class Configuration:
                 'LDFLAGS'      : '-framework CoreServices',
                 'AR'           : 'ar',
                 'MKSTATICLIB'  : '$(AR) cr $(1)',
-                'MKDLL'        : '$(CXX) -dynamiclib -single_module -o $(1)',
+                'MKDLL'        : '$(CXX) -dynamiclib -single_module -install_name @executable_path/$(1) -o $(1)',
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
 
@@ -237,7 +260,6 @@ class Configuration:
     _confvar = re.compile("@([^@]+)@")
 
     def generate(self, makefile):
-        print "Generating " + makefile + "...",
         outpath = self._objdir + "/" + makefile
 
         contents = \
@@ -247,21 +269,7 @@ class Configuration:
             "include $(topsrcdir)/manifest.mk\n" \
             "include $(topsrcdir)/build/rules.mk\n"
 
-        try:
-            outf = open(outpath, "r")
-            oldcontents = outf.read()
-            outf.close()
-
-            if oldcontents == contents:
-                print "not changed"
-                return
-        except IOError:
-            pass
-
-        outf = open(outpath, "w")
-        outf.write(contents)
-        outf.close()
-        print
+        writeFileIfChanged(outpath, contents)
 
 def toMSYSPath(path):
     if path[1] != ':':
