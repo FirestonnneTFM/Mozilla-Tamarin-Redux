@@ -3,14 +3,17 @@
         <title>Tamarin</title>
     </head>
 
-    <script language="application/javascript;version=4">
-        // we don't have globals working yet...
-        var window = engine_env.window
-        var document = engine_env.window.document
+    <script language="application/javascript;version=2">
+        // We don't have 'global attributes' working yet (ie, 'document'
+        // is a 'public' attribute on 'window', so you should not need to
+        // supply the 'window.' prefix - but currently you do)
+        var document = window.document
 
+        // alert dialog
         window.alert('Hello from Tamarin')
+        // add content to the document
         document.write("Hello from tamarin<br>")
         document.write("This document is at <code>" + document.location + "<code>")
-    </SCRIPT>
+    </script>
 
 </html>

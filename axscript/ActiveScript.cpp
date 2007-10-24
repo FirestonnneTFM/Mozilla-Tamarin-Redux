@@ -214,8 +214,10 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 	static const int maxAtoms = 64;
 	Atom args[maxAtoms];
 
-	if (!m_site || !core)
+	if (!core) {
+		ATLTRACE2("callEngine('%s') - early exit due to null core%s\n", name);
 		return E_FAIL;
+	}
 
 	ATLTRACE2("Calling engine::%s\n", name);
 	TRY(core, kCatchAction_ReportAsError) {
@@ -250,13 +252,18 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 		// AS, leaving the C++ code to only deal with 'internal' errors
 		// in the engine itself.  For now though, report all errors to 
 		// the site
-		CGCRootComObject<CActiveScriptError> *err;
-		ATLTRY(err = new CGCRootComObject<CActiveScriptError>(core));
-		if (err) {
-			err->exception = exception;
-//			err->dwSourceContextCookie = dwSourceContextCookie;
-			CComQIPtr<IActiveScriptError, &IID_IActiveScriptError> ase(err);
-			m_site->OnScriptError(ase);
+		// We may not have a site if we are calling InitNew, or after we
+		// have closed...
+		if (m_site) {
+			CGCRootComObject<CActiveScriptError> *err;
+			ATLTRY(err = new CGCRootComObject<CActiveScriptError>(core));
+			if (err) {
+				err->exception = exception;
+				// XXX - must get passed dwSourceContextCookie, if available
+				//err->dwSourceContextCookie = dwSourceContextCookie;
+				CComQIPtr<IActiveScriptError, &IID_IActiveScriptError> ase(err);
+				m_site->OnScriptError(ase);
+			}
 		}
 
 		return E_FAIL;
