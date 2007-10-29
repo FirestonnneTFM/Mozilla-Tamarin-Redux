@@ -65,18 +65,21 @@ def writeFileIfChanged(path, contents):
 
 def _configGuess():
     ostest = sys.platform
+    cputest = build.process.run_for_output(['uname', '-m'])
+    return _configSub(ostest, cputest)
+
+def _configSub(ostest, cputest):
     if ostest.startswith('win'):
         os = 'windows'
     elif ostest == 'darwin':
         os = 'darwin'
-    elif ostest.startswith('linux'):
+    elif ostest.startswith('linux') or ostest.startswith('pc-linux'):
         os = 'linux'
     elif ostest.startswith('sunos'):
         os = 'sunos'
     else:
         raise Exception('Unrecognized OS: ' + ostest)
 
-    cputest = build.process.run_for_output(['uname', '-m'])
     if re.search(r'^i(\d86|86pc|x86)$', cputest):
         cpu = 'i686'
     elif re.search('^(x86_64|amd64)$', cputest):
@@ -128,10 +131,12 @@ class Configuration:
                 self._debug = d
 
             if options.host:
-                self._host = _configSub(options.host)
+                hostcpu, hostos = options.host.split('-', 1)
+                self._host = _configSub(hostos, hostcpu)
 
             if options.target:
-                self._target = _configSub(options.target)
+                targetcpu, targetos = options.target.split('-', 1)
+                self._target = _configSub(targetos, targetcpu)
 
         self._acvars = {
             'topsrcdir': self._topsrcdir,
@@ -218,7 +223,9 @@ class Configuration:
 
 # -Wno-trigraphs -Wreturn-type -Wnon-virtual-dtor -Wmissing-braces -Wparentheses -Wunused-label  -Wunused-parameter -Wunused-variable -Wunused-value -Wuninitialized
 
-            if self._target[1] == 'i686':
+            if 'CXX' in os.environ:
+                self._acvars['CXX'] = os.environ['CXX']
+            elif self._target[1] == 'i686':
                 self._acvars['CXX'] = 'g++-4.0'
             elif self._target[1] == 'powerpc':
                 self._acvars['CXX'] = 'g++-3.3'
@@ -227,9 +234,9 @@ class Configuration:
 
         elif self._target[0] == 'linux':
             self._acvars.update({
-                'CPPFLAGS'     : '',
-                'CXX'          : 'g++',
-                'CXXFLAGS'     : '',
+                'CPPFLAGS'     : os.environ.get('CPPFLAGS', ''),
+                'CXX'          : os.environ.get('CXX', 'g++'),
+                'CXXFLAGS'     : os.environ.get('CXXFLAGS', ''),
                 'DLL_CFLAGS'   : '-fPIC',
                 'LD'           : 'ar',
                 'LDFLAGS'      : '',

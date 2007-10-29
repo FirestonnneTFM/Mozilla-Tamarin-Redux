@@ -39,7 +39,7 @@ import sys
 import re
 
 _target = re.compile("^--target=(.*)$")
-_host = re.compile("^--host=.*$")
+_host = re.compile("^--host=(.*)$")
 _ignore = re.compile(r"^--(srcdir|cache-file)=")
 _arg = re.compile(r"^--(enable|disable|with|without)-([\w-]+)(?:=(.*)|$)$")
 _yes = re.compile("^(t|true|yes|y|1)$", re.I)
@@ -56,12 +56,12 @@ class Options:
         for arg in argv[1:]:
             m = _target.search(arg)
             if m:
-                self.target = m.groups(0)
+                self.target = m.group(1)
                 continue
 
             m = _host.search(arg)
             if m:
-                self.host = m.groups(0)
+                self.host = m.group(1)
                 continue
 
             if _ignore.search(arg) is not None:
