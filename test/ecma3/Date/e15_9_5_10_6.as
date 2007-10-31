@@ -99,10 +99,20 @@ function getTestCases() {
 	        t += d;
 	        array[item++] = new TestCase( SECTION,
 	                                    "(new Date("+t+")).getDate()",
-	                                    DateFromTime(LocalTime(t)),
-	                                    (new Date(t)).getDate() );
+	                                    true,
+					    checkForMacDST(DateFromTime(LocalTime(t)),
+	                                    (new Date(t)).getDate()) );
 	    }
 	}
+
+	function checkForMacDST(exp, actual) {
+		if (exp == actual || exp == (actual+1)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 
     return ( array );
 }
