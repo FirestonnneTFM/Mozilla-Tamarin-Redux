@@ -46,8 +46,8 @@ startTest();                			// leave this alone
 
 /*===========================================================================*/
 
-include "include.txt"
-include "include1.txt"
+include "Include.txt"
+include "Include1.txt"
 
 include "./MultipleInc/Include2.txt"
 

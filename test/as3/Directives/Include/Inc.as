@@ -47,7 +47,7 @@ startTest();                // leave this alone
 /*===========================================================================*/
 
 // Include.txt used so that it's not considered a testcase by harness
-include "include.txt"
+include "Include.txt"
 
 AddTestCase( "Check if a file can be included using include without the # symbol:", "incFunc", incFunc() );
 
