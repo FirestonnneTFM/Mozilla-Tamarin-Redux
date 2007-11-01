@@ -69,7 +69,7 @@
                                 ,  ] }
                   ,  ]
 , 'method_bodys': [ { 'method_info': 0
-                    , 'max_stack': 4
+                    , 'max_stack': 3
                     , 'max_regs': 2
                     , 'scope_depth': 0
                     , 'max_scope': 1
@@ -91,15 +91,13 @@
                               , [ 'pushundefined' ]
                               , [ 'pop' ]
                               , [ 'findpropstrict', 7 ]
-                              , [ 'getproperty', 7 ]
-                              , [ 'pushnull' ]
                               , [ 'findpropstrict', 8 ]
                               , [ 'getproperty', 8 ]
                               , [ 'getproperty', 5 ]
                               , [ 'findpropstrict', 8 ]
                               , [ 'getproperty', 8 ]
                               , [ 'getproperty', 6 ]
-                              , [ 'call', 2 ]
+                              , [ 'callproperty', 7, 2 ]
                               , [ 'pop' ]
                               , [ 'returnvoid' ]
                               ,  ]

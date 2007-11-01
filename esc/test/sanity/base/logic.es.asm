@@ -83,7 +83,7 @@
                                   , 'attrs': 0
                                   , 'slot_id': 3
                                   , 'type_name': 0
-                                  , 'val_index': 3
+                                  , 'val_index': 2
                                   , 'val_kind': 3 }
                                 ,  ] }
                   ,  ]

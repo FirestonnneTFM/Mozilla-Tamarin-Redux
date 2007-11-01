@@ -41,7 +41,8 @@
 #    include - includes a specific testcase even if the parent has been skipped
 
 # Example:
-# ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-interp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
-
 decimal/.* , .* , skip , skipping decimal tests until asc compiler supports them
 
+
+# fails when running the release vm with the -Dinterp vm arg, bug #401095
+ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-interp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095

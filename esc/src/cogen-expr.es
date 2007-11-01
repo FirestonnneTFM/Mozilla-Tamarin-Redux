@@ -333,15 +333,8 @@
             cgExpr(ctx, or.base);
         }
         case (lr:LexicalRef) {
-            /* FIXME (obscure): not quite right, the function could be
-             * bound by a "with" rib, and if so then that rib should
-             * be the receiver here, not null.  There's no way to do
-             * that on Tamarin without global conventions / parallel
-             * with stacks, I think.
-             */
             asm.I_findpropstrict(cgIdentExpr(ctx, lr.ident));
-            asm.I_getproperty(cgIdentExpr(ctx, lr.ident));
-            asm.I_pushnull();
+            name = lr.ident;
         }
         case (x:*) {
             cgExpr(ctx, e.expr);

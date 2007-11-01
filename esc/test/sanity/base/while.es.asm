@@ -46,34 +46,30 @@
                     , 'traits': [  ] }
                   ,  ]
 , 'method_bodys': [ { 'method_info': 0
-                    , 'max_stack': 3
+                    , 'max_stack': 2
                     , 'max_regs': 1
                     , 'scope_depth': 0
                     , 'max_scope': 1
                     , 'code': [ [ 'getlocal0' ]
                               , [ 'pushscope' ]
-                              , [ 'jump', 14 ]
+                              , [ 'jump', 12 ]
                               , [ 'label' ]
                               , [ 'findpropstrict', 4 ]
-                              , [ 'getproperty', 4 ]
-                              , [ 'pushnull' ]
                               , [ 'pushtrue' ]
-                              , [ 'call', 1 ]
+                              , [ 'callproperty', 4, 1 ]
                               , [ 'pop' ]
                               , [ 'jump', 5 ]
                               , [ 'pushtrue' ]
-                              , [ 'iftrue', 16777197 ]
-                              , [ 'jump', 14 ]
+                              , [ 'iftrue', 16777199 ]
+                              , [ 'jump', 12 ]
                               , [ 'label' ]
                               , [ 'findpropstrict', 4 ]
-                              , [ 'getproperty', 4 ]
-                              , [ 'pushnull' ]
                               , [ 'pushtrue' ]
-                              , [ 'call', 1 ]
+                              , [ 'callproperty', 4, 1 ]
                               , [ 'pop' ]
                               , [ 'jump', 5 ]
                               , [ 'pushtrue' ]
-                              , [ 'iftrue', 16777197 ]
+                              , [ 'iftrue', 16777199 ]
                               , [ 'returnvoid' ]
                               ,  ]
                     , 'exceptions': [  ]
