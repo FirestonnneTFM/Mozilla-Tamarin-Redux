@@ -42,3 +42,7 @@
 
 # Example:
 # ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-interp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
+
+
+# fails when running the release vm with the -Dinterp vm arg, bug #401095
+ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-interp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
