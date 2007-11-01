@@ -47,17 +47,15 @@
                     , 'traits': [  ] }
                   ,  ]
 , 'method_bodys': [ { 'method_info': 0
-                    , 'max_stack': 3
+                    , 'max_stack': 2
                     , 'max_regs': 1
                     , 'scope_depth': 0
                     , 'max_scope': 1
                     , 'code': [ [ 'getlocal0' ]
                               , [ 'pushscope' ]
                               , [ 'findpropstrict', 4 ]
-                              , [ 'getproperty', 4 ]
-                              , [ 'pushnull' ]
                               , [ 'pushstring', 6 ]
-                              , [ 'call', 1 ]
+                              , [ 'callproperty', 4, 1 ]
                               , [ 'pop' ]
                               , [ 'returnvoid' ]
                               ,  ]

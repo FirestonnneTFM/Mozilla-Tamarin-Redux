@@ -91,7 +91,7 @@
                                 ,  ] }
                   ,  ]
 , 'method_bodys': [ { 'method_info': 0
-                    , 'max_stack': 6
+                    , 'max_stack': 5
                     , 'max_regs': 1
                     , 'scope_depth': 0
                     , 'max_scope': 1
@@ -121,13 +121,11 @@
                               , [ 'pushundefined' ]
                               , [ 'pop' ]
                               , [ 'findpropstrict', 9 ]
-                              , [ 'getproperty', 9 ]
-                              , [ 'pushnull' ]
                               , [ 'findpropstrict', 10 ]
                               , [ 'getproperty', 10 ]
                               , [ 'findpropstrict', 11 ]
                               , [ 'getproperty', 11 ]
-                              , [ 'call', 2 ]
+                              , [ 'callproperty', 9, 2 ]
                               , [ 'pop' ]
                               , [ 'returnvoid' ]
                               ,  ]

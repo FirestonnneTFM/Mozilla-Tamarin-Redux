@@ -199,7 +199,7 @@
                     , 'fixtures': [  ]
                     , 'traits': [  ] }
                   , { 'method_info': 2
-                    , 'max_stack': 4
+                    , 'max_stack': 3
                     , 'max_regs': 1
                     , 'scope_depth': 0
                     , 'max_scope': 2
@@ -215,14 +215,12 @@
                               , [ 'swap' ]
                               , [ 'initproperty', 4 ]
                               , [ 'findpropstrict', 11 ]
-                              , [ 'getproperty', 11 ]
-                              , [ 'pushnull' ]
                               , [ 'findpropstrict', 10 ]
                               , [ 'getproperty', 10 ]
                               , [ 'pushint', 3 ]
                               , [ 'construct', 1 ]
                               , [ 'getproperty', 9 ]
-                              , [ 'call', 1 ]
+                              , [ 'callproperty', 11, 1 ]
                               , [ 'pop' ]
                               , [ 'returnvoid' ]
                               ,  ]
