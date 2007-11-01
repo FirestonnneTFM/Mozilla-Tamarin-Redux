@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2005-2006
+ * Portions created by the Initial Developer are Copyright (C) 1993-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,34 +34,27 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-    var VERSION = 9706;
-    startTest();
-    var SECTION = "15.9.2.2";
-    var TOLERANCE = 100;
-    var TITLE = "The Date Constructor Called as a Function";
-
-    writeHeaderToLog(SECTION+" "+TITLE );
-    var testcases = getTestCases();
-
-//  all tests must call a function that returns an array of TestCase objects.
-    test();
 
 
-function getTestCases() {
-    var array = new Array();
-    var item = 0;
+#ifndef __decimalrep__
+#define __decimalrep__
 
-    // Dates around jan 1, 2005
-    array[item++] = new TestCase( SECTION, "Date(2004,11,31,23,59,59)",     true, (new Date()).toString() == Date(2004,11,31,23,59,59));
-    array[item++] = new TestCase( SECTION, "Date(2005,0,1,0,0,0)",          true, (new Date()).toString() == Date(2005,0,1,0,0,0) );
-    array[item++] = new TestCase( SECTION, "Date(2005,0,1,0,0,1)",          true, (new Date()).toString() == Date(2005,0,1,0,0,1) );
-    array[item++] = new TestCase( SECTION, "Date(2004,11,31,16,0,0,0)",     true, (new Date()).toString() == Date(2004,11,31,16,0,0,0));
-/*
-    // Dates around jan 1, 2032
-    array[item++] = new TestCase( SECTION, "Date(2031,11,31,23,59,59)",     true, (new Date()).toString() == Date(2031,11,31,23,59,59));
-    array[item++] = new TestCase( SECTION, "Date(2032,0,1,0,0,0)",          true, (new Date()).toString() == Date(2032,0,1,0,0,0) );
-    array[item++] = new TestCase( SECTION, "Date(2032,0,1,0,0,1)",          true, (new Date()).toString() == Date(2032,0,1,0,0,1) );
-    array[item++] = new TestCase( SECTION, "Date(2031,11,31,16,0,0,0)",     true, (new Date()).toString() == Date(2031,11,31,16,0,0,0));
-*/
-    return ( array );
+namespace avmplus {
+
+class DecimalRep : public MMgc::RCObject {
+
+public:
+	decNumber dn;
+	DecimalRep() {
+		decNumberZero(&dn);
+	}
+	DecimalRep(decNumber *dnptr) {
+		dn = *dnptr;
+	}
+	~DecimalRep() {
+		memset(&dn, 0, sizeof(decNumber));
+	}
+};
+
 }
+#endif /* __decimalrep__ */

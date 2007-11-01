@@ -85,6 +85,7 @@
 #include "avmbuild.h"
 
 #if defined(_MAC)
+//#include <stdlib.h>
 #include <alloca.h>
 #endif
 
@@ -112,6 +113,11 @@
 #include "AvmError.h"
 #include "ErrorConstants.h"
 #include "NativeObjectHelpers.h"
+
+#define DECNUMDIGITS 34
+#include "decNumber.h"
+#include "decContext.h"
+#include "decimal128.h"
 
 using namespace avmplus::AtomConstants;
 using namespace avmplus::ActionBlockConstants;
@@ -145,6 +151,7 @@ namespace avmplus
 	class DateClass;
 	class DateObject;
 	class Debugger;
+	class DecimalRep;
 	class Domain;
 	class DomainEnv;
 	class DynamicProfiler;
@@ -176,6 +183,8 @@ namespace avmplus
 	class NumberClass;
 	class IntClass;
 	class UIntClass;
+    class DoubleClass;
+    class DecimalClass;
 	class OSDep;
 	class ObjectClass;
 	class OutputStream;
@@ -230,6 +239,7 @@ namespace avmplus
 
 #include "MMgc.h"
 
+#include "DecimalRep.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"
 #include "OSDep.h"
@@ -297,6 +307,8 @@ namespace avmplus
 #include "Date.h"
 #include "DateClass.h"
 #include "DateObject.h"
+#include "DoubleClass.h"
+#include "DecimalClass.h"
 #include "Domain.h"
 #include "DomainEnv.h"
 #include "ObjectClass.h"

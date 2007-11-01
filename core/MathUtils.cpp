@@ -163,7 +163,7 @@ namespace avmplus
 		int hx = u.parts.msw;
 		int lx = u.parts.lsw;
 
-		return (hx == (int)0x80000000 && lx == (int)0x0);
+		return (hx == (int)0x80000000 && lx == 0x0);
 	}
 
 #else
@@ -416,6 +416,7 @@ namespace avmplus
 	double MathUtils::convertStringToNumber(const wchar* ptr, int strlen)
 	{
 		double value;
+		// RES - what if string has terminal 'm'?
 
 		if (*ptr == 0) { // toNumber("") should be 0, not NaN
 			value = 0;
@@ -751,6 +752,30 @@ namespace avmplus
 		return true;
 	}
 
+	Stringp MathUtils::convertDecimalToStringRadix(AvmCore *core,
+												  decNumber *value,
+										          int radix)
+	{
+		char buf[50];
+		if (radix < 2 || radix > 36) 
+		{
+			AvmAssert( 0 );
+			return NULL;
+		}
+		int len;
+		// RES decimal code here
+		if (radix != 10) {
+            // for now, just convert to double
+            double dblval = decNumberToDouble(value);
+			return convertDoubleToStringRadix(core, dblval, radix);
+		}
+		else {
+			len = strlen(decNumberToString(value, buf));
+			}
+
+		return new (core->GetGC()) String(buf, len, len); // know there are not UTF8 escapes in buf
+	}
+
 	Stringp MathUtils::convertDoubleToStringRadix(AvmCore *core,
 												  double value,
 										          int radix)
@@ -800,7 +825,200 @@ namespace avmplus
 		int len = srcEnd-src-1;
 		return new (core->GetGC()) String(src+1, len);
 	}
+
+    /* RES These functions are called by MIR generated code.  MIR should get smarter and generate native code
+       for these operations */
+
+    int MathUtils::int_divide(int lhs, int rhs) {
+        return (lhs / rhs);
+    }
+
+    int MathUtils::int_remainder(int lhs, int rhs) {
+        return (lhs % rhs);
+    }
 	
+	/* I know that 10**0 == 1, not 0, but putting 0 in the array doesn't hurt isInt and fixes fromInt */
+	static const int decNumTens[] = {0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
+
+    decNumber* MathUtils::decNumberFromUInt(decNumber *dn, uint32 val) {
+        dn->bits = 0;
+        dn->exponent = 0;
+        dn->digits = 0;
+        int i = 0;
+        while (val >= (uint32)decNumTens[DECDPUN]) {
+            dn->lsu[i++] =  (decNumberUnit)(val % decNumTens[DECDPUN]); // Find and use DivRem or whatever it's called
+            val = val / decNumTens[DECDPUN];
+            dn->digits += DECDPUN;
+        }
+        // we're at most DECDPUN (3) digits left
+        dn->lsu[i] = (decNumberUnit)val;
+        for (int j = DECDPUN; j > 0; j--) {
+            if (val >= (uint32)decNumTens[j-1]) {
+                dn->digits += j;
+                break;
+            }
+        }
+        return dn;
+    }
+
+    decNumber* MathUtils::decNumberFromInt(decNumber *dn, int val) {
+        uint32 uval;
+        bool neg;
+        if (val < 0) {
+            neg = true;
+            uval = -val;
+        } else {
+            neg = false;
+            uval = val;
+        }
+        decNumberFromUInt(dn, uval);
+        if (neg) {
+            dn->bits |= DECNEG;
+        }
+        return dn;
+    }
+
+	decNumber* MathUtils::decNumberFromDouble(decNumber *dn, double val, decContext *ctx) {
+		int intval = real2int(val);
+		if ((double)intval == val) 
+			return decNumberFromInt(dn, intval);
+		wchar wbuf[100];
+		int len;
+		convertDoubleToString(val, wbuf, len, DTOSTR_NORMAL, 15);
+		char buf[100];
+		len = UnicodeUtils::Utf16ToUtf8(wbuf, len, (uint8*)buf, 100);
+		buf[len] = 0;
+		return decNumberFromString(dn, buf, ctx);
+	}
+
+	double MathUtils::decNumberToDouble(decNumber *dn) {
+		char buf[50];
+		wchar wbuf[50];
+		decNumberToString(dn, buf);
+		int len = strlen(buf);
+		UnicodeUtils::Utf8ToUtf16((uint8*)buf, len, wbuf, 50);
+		double ret;
+		convertStringToDouble(wbuf, len, &ret, false);
+		return ret;
+	}
+
+	/* determine whether a decimal value can be represented as a 29 bit integer (leaving 3 bits for atom tag)
+	*/
+
+    bool MathUtils::decNumberIsInt29(decNumber* dn, int &ival) {
+        if (((dn->bits & DECSPECIAL) != 0) || (dn->exponent < 0) || ((dn->digits + dn->exponent) > 9)) {
+            ival = 0;
+            return false;
+        }
+        ival = 0;
+        for (int i = (dn->digits + 2) / 3; i > 0; i--) {
+            ival = ival * decNumTens[DECDPUN] + dn->lsu[i-1];
+        }
+        if (dn->exponent > 0)
+            ival = ival * decNumTens[dn->exponent];
+        if (dn->bits & DECNEG)
+            ival = -ival;
+        if ((-268435456 <= ival) && (ival <= 268435455)) 
+            return true;
+        return false;
+    }
+
+	/* determine whether the decimal value can be represented as an int or a uint.  Return the
+		int or uint value in ival.  
+		*/
+
+    bool MathUtils::decNumberIsInt(decNumber* dn, int &ival, bool &isUint) {
+        if (((dn->bits & DECSPECIAL) != 0) || (dn->exponent < 0) || ((dn->digits + dn->exponent) > 10))
+            return false;
+        int tdig = dn->digits + dn->exponent;
+        if (tdig <= 9) {
+            ival = 0;
+            for (int i = (dn->digits + 2) / 3; i > 0; i--) {
+                ival = ival * decNumTens[DECDPUN] + dn->lsu[i-1];
+            }
+            if (dn->exponent > 0)
+                ival = ival * decNumTens[dn->exponent];
+            if (dn->bits & DECNEG)
+                ival = -ival;
+            isUint = false;
+            return true;
+        }
+        // 10 digits, accumulate in double.
+        double res = 0;
+        for (int i = (dn->digits + 2) / 3; i > 0; i--) {
+            res = res * decNumTens[DECDPUN] + dn->lsu[i-1];
+        }
+        if (dn->exponent > 0)
+            res = res * decNumTens[dn->exponent];
+        if (dn->bits & DECNEG)
+            res = -res;
+        if ((-2147483648.0 <= res) && (res <= 2147483647.0)) {
+            ival = (int)res; 
+            isUint = (res >= 0);
+            return true;
+        } else if ((2147483648.0 <= res) && (res <= 4294967295.0)) {
+            ival = (int)res;
+            isUint = true;
+            return false;
+        }
+        return false;
+    }
+
+	void MathUtils::convertDecimalToString(decNumber *value,
+										  wchar *buffer,
+										  int& len,
+										  int mode,
+										  int precision)
+	{
+		if (decNumberIsInfinite(value)) {
+			if (decNumberIsNegative(value)) {
+				UnicodeUtils::Utf8ToUtf16((uint8*)"-Infinity", 10, buffer, 20);
+				len = 9;
+				return;
+			}
+			else {
+				UnicodeUtils::Utf8ToUtf16((uint8*)"Infinity", 9, buffer, 18);
+				len = 8;
+				return;
+			}
+		}
+		if (decNumberIsNaN(value)) {
+			UnicodeUtils::Utf8ToUtf16((uint8*)"NaN", 4, buffer, 8);
+			len = 3;
+			return;
+		}
+		char buf[50];
+		decNumber pvalue;
+		if (mode ==  DTOSTR_PRECISION) {
+			decContext pctx;
+			decContextDefault(&pctx, DEC_INIT_DECIMAL128);
+			pctx.digits = precision;
+			decNumberPlus(&pvalue, value, &pctx);
+			value = &pvalue;
+		}
+		len = strlen(decNumberToString(value, buf));
+		UnicodeUtils::Utf8ToUtf16((uint8 *)buf, len+1, buffer, 50);
+		return;
+	}
+
+	bool MathUtils::convertStringToDecimal(const wchar *s,
+										  int len,
+										  decNumber *value,
+										  bool strict /*=false*/ )
+	{
+		char buf[100];
+		decContext ctx;
+		decContextDefault(&ctx, DEC_INIT_DECIMAL128);
+
+		UnicodeUtils::Utf16ToUtf8(s, len, (uint8*)buf, 100);
+		// RES ignore strict for now
+		if (strict) {
+			len = len; // keep the compiler quiet
+		}
+		decNumberFromString(value, buf, &ctx);
+		return true;
+	}
+
 	void MathUtils::convertDoubleToString(double value,
 										  wchar *buffer,
 										  int& len,

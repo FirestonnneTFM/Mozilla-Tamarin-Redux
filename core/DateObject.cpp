@@ -83,7 +83,7 @@ namespace avmplus
 			if (j >= 7) {
 				break;
 			}
-			num[j++] = core->number(argv[i]);
+			num[j++] = core->doubleNumber(argv[i]);
 			if (MathUtils::isNaN(num[j-1])) // actually specifying NaN results in a NaN date. Don't pass Nan, however, because we use 
 			{							    //  that value to denote that an optional arg was not supplied.
 				date.setTime(MathUtils::nan());

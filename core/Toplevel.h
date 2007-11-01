@@ -68,6 +68,8 @@ namespace avmplus
 		DRCWB(NumberClass*)    numberClass;
 		DRCWB(IntClass*)       intClass;
 		DRCWB(UIntClass*)      uintClass;
+		DRCWB(DoubleClass*)    doubleClass;
+		DRCWB(DecimalClass*)   decimalClass;
 		DRCWB(ObjectClass*)    objectClass;
 		RegExpClass*         regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
 		DRCWB(StringClass*)    stringClass;
@@ -233,7 +235,26 @@ namespace avmplus
 		/**
 		 * operator +
 		 */
-		Atom add2(Atom lhs, Atom rhs);
+		Atom add2(Atom lhs, Atom rhs, int decimalParam);
+
+		/**
+		 * numeric operators.  Before decimal, only + was special since it could return
+		 * either a number or a string; other operators could rely on the result being
+		 * a double (with some optimizations if operands and result were all ints).  With
+		 * the advent of decimal, these other operations could return either a double or
+		 * a decimal. They are in TopLevel so that they can be called from MIR generated
+		 * code.
+		 */
+
+		Atom sub2(Atom lhs, Atom rhs, int decimalParam);
+		Atom mul2(Atom lhs, Atom rhs, int decimalParam);
+		Atom div2(Atom lhs, Atom rhs, int decimalParam);
+		Atom rem2(Atom lhs, Atom rhs, int decimalParam);
+		Atom negate(Atom lhs, int decimalParam); 
+		Atom incr(Atom lhs, Atom rhs, int decimalParam); // like add2 but doesn't do strings
+
+
+
 
 		/**
 		 * Implements the GetDefaultNamespace API as specified in E4X 12.1.1, pg 59

@@ -115,8 +115,8 @@ OP_pushdouble		"pushdouble"		0x2F	1+2			1	        0		0		0		 1        0
 OP_pushscope		"pushscope"	 		0x30	1			0	        0		0		0		 0        0
 OP_pushnamespace	"pushnamespace" 	0x31	1+2			1	        0		0		0		 1        0
 OP_hasnext2			"hasnext2"			0x32	1			2	        0		0		0		 1        1
-OP_0x33				"OP_0x33" 			0x33	0			-1	        0		0		0		 0        0
-OP_0x34				"OP_0x34" 			0x34	0			-1	        0		0		0		 0        0
+OP_pushdecimal		"pushdecimal"	0x33	1+2			1	        0		0		0		 1        0
+OP_pushdnan			"pushdnan" 			0x34	1			0	        0		0		0		 1        0
 OP_0x35				"OP_0x35" 			0x35	0			-1	        0		0		0		 0        0
 OP_0x36				"OP_0x36"			0x36	0			-1	        0		0		0		 0        0
 OP_0x37				"OP_0x37"			0x37	0			-1	        0		0		0		 0        0
@@ -190,8 +190,8 @@ OP_convert_d		"convert_d" 		0x75	1			0	        0		0		1		 1        1
 OP_convert_b		"convert_b" 		0x76	1			0	        0		0		1		 1        1
 OP_convert_o		"convert_o" 		0x77	1			0	        0		0		1		 1        1
 OP_checkfilter		"checkfilter"		0x78	1			0	        0		0		0		 0        1
-OP_0x79				"OP_0x79"			0x79	0			-1	        0		0		0		 0        0
-OP_0x7A				"OP_0x7A"			0x7A	0			-1	        0		0		0		 0        0
+OP_convert_m		"convert_m"			0x79	1			0	        0		0		1		 1        1
+OP_convert_m_p		"convert_m_p"		0x7A	1+2			1	        0		0		1		 1        1
 OP_0x7B				"OP_0x7B"			0x7B	0			-1	        0		0		0		 0        0
 OP_0x7C				"OP_0x7C"			0x7C	0			-1	        0		0		0		 0        0
 OP_0x7D				"OP_0x7D"			0x7D	0			-1	        0		0		0		 0        0
@@ -216,14 +216,13 @@ OP_astypelate		"astypelate"		0x87	1			0	        0		0		2		 1        1
 
 // deprecated
 OP_coerce_u			"coerce_u"			0x88	1			0	        0		0		1		 1        1
-
 OP_coerce_o			"coerce_o"			0x89	1			0	        0		0		1		 1        1
 OP_0x8A				"OP_0x8A"			0x8A	0			-1	        0		0		0		 0        0
 OP_0x8B				"OP_0x8B"			0x8B	0			-1	        0		0		0		 0        0
 OP_0x8C				"OP_0x8C"			0x8C	0			-1	        0		0		0		 0        0
 OP_0x8D				"OP_0x8D"			0x8D	0			-1	        0		0		0		 0        0
 OP_0x8E				"OP_0x8E"			0x8E	0			-1	        0		0		0		 0        0
-OP_0x8F				"OP_0x8F"			0x8F	0			-1	        0		0		0		 0        0
+OP_negate_p			"negate_p"			0x8F	1+2			1	        0		0		1		 1        1
 OP_negate			"negate" 			0x90	1			0	        0		0		1		 1        1
 OP_increment		"increment" 		0x91	1			0	        0		0		1		 1        1
 OP_inclocal			"inclocal" 			0x92	1+2			1	        1		1		0		 0        1
@@ -236,10 +235,10 @@ OP_0x98				"OP_0x98" 			0x98	0			-1	        0		0		0		 0        0
 OP_0x99				"OP_0x99" 			0x99	0			-1	        0		0		0		 0        0
 OP_concat			"concat" 			0x9A	0			-1	        0		0		0		 0        1 //internal only
 OP_add_d			"add_d" 			0x9B	0			-1	        0		0		0		 0        1 //internal only
-OP_0x9C				"OP_0x9C" 			0x9C	0			-1	        0		0		0		 0        0
-OP_0x9D				"OP_0x9D" 			0x9D	0			-1	        0		0		0		 0        0
-OP_0x9E				"OP_0x9E" 			0x9E	0			-1	        0		0		0		 0        0
-OP_0x9F				"OP_0x9F" 			0x9F	0			-1	        0		0		0		 0        0
+OP_increment_p		"increment_p"	 	0x9C	1+2			1	        0		0		1		 1        1
+OP_inclocal_p		"inclocal_p" 		0x9D	1+2+2		2	        1		1		0		 0        1
+OP_decrement_p		"decrement_p" 		0x9E	1+2			1	        0		0		1		 1        1
+OP_declocal_p		"declocal_p" 		0x9F	1+2+2		2	        1		1		0		 0        1
 OP_add				"add" 				0xA0	1			0	        0		0		2		 1        1
 OP_subtract			"subtract" 			0xA1	1			0	        0		0		2		 1        1
 OP_multiply			"multiply" 			0xA2	1			0	        0		0		2		 1        1
@@ -261,16 +260,16 @@ OP_instanceof		"instanceof" 		0xB1	1			0	        0		0		2		 1        1
 OP_istype			"istype" 			0xB2	1+2			1	        0		0		1		 1        1
 OP_istypelate		"istypelate" 		0xB3	1			0	        0		0		2		 1        1
 OP_in				"in" 				0xB4	1			0	        0		0		2		 1        1
-OP_0xB5				"OP_0xB5" 			0xB5	0			-1	        0		0		0		 0        0
-OP_0xB6				"OP_0xB6" 			0xB6	0			-1	        0		0		0		 0        0
-OP_0xB7				"OP_0xB7" 			0xB7	0			-1	        0		0		0		 0        0
-OP_0xB8				"OP_0xB8" 			0xB8	0			-1	        0		0		0		 0        0
-OP_0xB9				"OP_0xB9" 			0xB9	0			-1	        0		0		0		 0        0
-OP_0xBA				"OP_0xBA" 			0xBA	0			-1	        0		0		0		 0        0
-OP_0xBB				"OP_0xBB" 			0xBB	0			-1	        0		0		0		 0        0
-OP_0xBC				"OP_0xBC" 			0xBC	0			-1	        0		0		0		 0        0
-OP_0xBD				"OP_0xBD" 			0xBD	0			-1	        0		0		0		 0        0
-OP_0xBE				"OP_0xBE" 			0xBE	0			-1	        0		0		0		 0        0
+OP_add_p			"add_p"				0xB5	1+2			1	        0		0		2		 1        1
+OP_subtract_p		"subtract_p" 		0xB6	1+2			1	        0		0		2		 1        1
+OP_multiply_p		"multiply_p"		0xB7	1+2			1	        0		0		2		 1        1
+OP_divide_p			"divide_p"			0xB8	1+2			1	        0		0		2		 1        1
+OP_modulo_p			"modulo_p"			0xB9	1+2			1	        0		0		2		 1        1
+OP_subtract_d			"subtract_d" 			0xBA	0			-1	        0		0		0		 0        1 //internal only
+OP_multiply_d			"multiply_d" 			0xBB	0			-1	        0		0		0		 0        1 //internal only
+OP_divide_d			"divide_d" 			0xBC	0			-1	        0		0		0		 0        1 //internal only
+OP_negate_d			"negate_d" 			0xBD	1			0	        0		0		1		 1        1
+OP_modulo_d			"module_d" 			0xBE	0			-1	        0		0		0		 0        1 //internal only
 OP_0xBF				"OP_0xBF" 			0xBF	0			-1	        0		0		0		 0        0
 OP_increment_i		"increment_i" 		0xC0	1			0	        0		0		1		 1        1
 OP_decrement_i		"decrement_i" 		0xC1	1			0	        0		0		1		 1        1
@@ -280,12 +279,12 @@ OP_negate_i			"negate_i" 			0xC4	1			0	        0		0		1		 1        1
 OP_add_i			"add_i" 			0xC5	1			0	        0		0		2		 1        1
 OP_subtract_i		"subtract_i" 		0xC6	1			0	        0		0		2		 1        1
 OP_multiply_i		"multiply_i" 		0xC7	1			0	        0		0		2		 1        1
-OP_0xC8				"OP_0xC8" 			0xC8	0			-1	        0		0		0		 0        0
-OP_0xC9				"OP_0xC9" 			0xC9	0			-1	        0		0		0		 0        0
-OP_0xCA				"OP_0xCA"			0xCA	0			-1	        0		0		0		 0        0
-OP_0xCB				"OP_0xCB"			0xCB	0			-1	        0		0		0		 0        0
-OP_0xCC				"OP_0xCC"			0xCC	0			-1	        0		0		0		 0        0
-OP_0xCD				"OP_0xCD"			0xCD	0			-1	        0		0		0		 0        0
+OP_divide_i		"divide_i" 		0xC8	1			0	        0		0		2		 1        1
+OP_modulo_i		"modulo_i" 		0xC9	1			0	        0		0		2		 1        1
+OP_increment_d		"increment_d" 		0xCA	1			0	        0		0		1		 1        1
+OP_decrement_d		"decrement_d" 		0xCB	1			0	        0		0		1		 1        1
+OP_inclocal_d		"inclocal_d" 		0xCC	1+2			1	        1		1		0		 0        1
+OP_declocal_d		"declocal_d" 		0xCD	1+2			1	        1		1		0		 0        1
 OP_0xCE				"OP_0xCE"			0xCE	0			-1	        0		0		0		 0        0
 OP_0xCF				"OP_0xCF"			0xCF	0			-1	        0		0		0		 0        0
 OP_getlocal0		"getlocal0"			0xD0	1			0	        1		0		0		 1        0

@@ -64,8 +64,8 @@ namespace avmplus
 	 *  001  object
 	 *  010  string
 	 *  011  namespace
-	 *  100  undefined
-	 *  101  boolean
+	 *  100  undefined or boolean
+	 *  101  decimal
 	 *  110  integer
 	 *  111  double
 	 *
@@ -89,9 +89,9 @@ namespace avmplus
 		const Atom kObjectType	  = 1;	// null=1
 		const Atom kStringType    = 2;	// null=2
 		const Atom kNamespaceType = 3;	// null=3
-		const Atom kSpecialType   = 4;	// undefined=4
-		const Atom kBooleanType   = 5;	// false=5 true=13
-		const Atom kIntegerType   = 6;
+		const Atom kSpecialType   = 4;	// undefined=4, false=12, true=28
+		const Atom kDecimalType   = 5;
+		const Atom kIntegerType   = 6;	// needs low bit 0 for hashtable/array compatibility
 		const Atom kDoubleType    = 7;
 		/*@}*/
 
@@ -102,13 +102,12 @@ namespace avmplus
 		
 		isNull			(unsigned)a < 4
 		isUndefined		a == undefinedAtom
-		isSpecial		(unsigned)a <= 4
-		isNumber		a & 6 == 6
+		isNumber		a & 7 >= 5
 
-							^8	jlt(a<8)	^2		jle(a<=4)
-		true		1110  0110	t			1100	f
-		false		0110  1110	f			0100	t
-		undefined	0100  1100	f			0110	f
+							^24	jlt(a<8)		^8	jle(a<=4)
+		true		11100  00100	t			10100	f
+		false		01100  10100	f			00100	t
+		undefined	00100  11100	f			01100	f
 		*/
 
 		/**
@@ -122,9 +121,9 @@ namespace avmplus
 		const Atom nullObjectAtom = kObjectType|0;
 		const Atom nullStringAtom = kStringType|0;
 		const Atom nullNsAtom     = kNamespaceType|0;
-		const Atom undefinedAtom  = kSpecialType|0; // 0x03
-		const Atom trueAtom       = kBooleanType|0x08; // 0x0D
-		const Atom falseAtom      = kBooleanType|0x00; // 0x05
+		const Atom undefinedAtom  = kSpecialType|0;	   // 0x04
+		const Atom trueAtom       = kSpecialType|0x18; // 0x1C
+		const Atom falseAtom      = kSpecialType|0x08; // 0x0C
 		/*@}*/
 
 		/**

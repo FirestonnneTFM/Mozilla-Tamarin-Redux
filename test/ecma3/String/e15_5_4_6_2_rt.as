@@ -163,8 +163,7 @@ function getTestCases() {
                                   (f = new Object( String.prototype.indexOf ), f(String(GLOBAL))) );
 
     array[item++]= new TestCase(SECTION,"Assigning Object.prototype.toString to f.toString",true, (f.toString=Object.prototype.toString, f.toString())=="[object null]" ||
-                                                                                                  (f.toString=Object.prototype.toString, f.toString())=="[object Function-97]");
-        
+                                                                                                  (f.toString=Object.prototype.toString, f.toString()).indexOf("[object Function")==0);
     array[item++] = new TestCase( SECTION,
                                   "var f = function() {}; f.toString = Object.prototype.toString; f.indexOf = String.prototype.indexOf; f.indexOf('[object Function-0]')",
                                    true,

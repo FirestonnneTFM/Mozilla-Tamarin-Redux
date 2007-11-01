@@ -50,6 +50,7 @@ namespace avmplus
 		/*@{*/
 		enum CPoolKind {
 			CONSTANT_Utf8               = 0x01,
+			CONSTANT_Decimal            = 0x02,	// the number 2 was unused in previous version
 			CONSTANT_Int	            = 0x03,
 			CONSTANT_UInt               = 0x04,
 			CONSTANT_PrivateNs	        = 0x05, // non-shared namespace

@@ -639,7 +639,7 @@ namespace avmplus
 				gen.setslot(slot_id);
 			}
 		}
-		else if (t == NUMBER_TYPE)
+		else if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
 		{
 			Atom value = !index ? core->kNaN : pool->getDefaultValue(toplevel, index, kind, t);
 			if (!(AvmCore::isInteger(value)||AvmCore::isDouble(value)))
@@ -658,6 +658,19 @@ namespace avmplus
 				gen.setslot(slot_id);
 			}
 		}
+		else if (t == DECIMAL_TYPE) {
+			Atom value = !index ? core->dnNaNatom : pool->getDefaultValue(toplevel, index, kind, t);
+			if (!(AvmCore::isNumeric(value))) {
+				Multiname qname(t->ns, t->name);
+				toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
+			}
+			gen.getlocalN(0);
+			if (value == core->dnNaNatom) 
+				gen.pushdnan();
+			else
+				gen.pushconstant(kind, index);
+			gen.setslot(slot_id);
+		}
 		else if (t == BOOLEAN_TYPE)
 		{
 			Atom value = !index ? falseAtom : pool->getDefaultValue(toplevel, index, kind, t);
@@ -667,7 +680,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
 			}
 
-			AvmAssert(urshift(falseAtom,3) == 0);
+			AvmAssert(urshift(falseAtom,4) == 0);
 			if(value != falseAtom)
 			{
 				gen.getlocalN(0);

@@ -58,6 +58,8 @@ namespace avmplus
 		number_itraits		= pool->getBuiltinTraits(core->constantString("Number"));
 		int_itraits			= pool->getBuiltinTraits(core->constantString("int"));
 		uint_itraits		= pool->getBuiltinTraits(core->constantString("uint"));
+		double_itraits		= pool->getBuiltinTraits(core->constantString("double"));
+		decimal_itraits		= pool->getBuiltinTraits(core->constantString("decimal"));
 		string_itraits		= pool->getBuiltinTraits(core->constantString("String"));
 		array_itraits		= pool->getBuiltinTraits(core->constantString("Array"));
 		regexp_itraits		= pool->getBuiltinTraits(core->constantString("RegExp"));
@@ -94,10 +96,14 @@ namespace avmplus
 		uint_itraits->isMachineType		= true;
 		boolean_itraits->isMachineType	= true;
 		number_itraits->isMachineType	= true;
+		double_itraits->isMachineType	= true;
+		decimal_itraits->isMachineType	= false;
 
 		int_itraits->isNumeric			= true;
 		uint_itraits->isNumeric			= true;
 		number_itraits->isNumeric		= true;
+		double_itraits->isNumeric		= true;
+		decimal_itraits->isNumeric		= true;
 
 		// XML and XMLList are dynamic but do not need the
 		// standard dynamic hash table
@@ -116,6 +122,8 @@ namespace avmplus
 		number_itraits->notDerivedObjectOrXML	= true;
 		int_itraits->notDerivedObjectOrXML		= true;
 		uint_itraits->notDerivedObjectOrXML		= true;
+		double_itraits->notDerivedObjectOrXML	= true;
+		decimal_itraits->notDerivedObjectOrXML	= true;
 		object_itraits->notDerivedObjectOrXML	= true;
 		//regexp_itraits->notDerivedObjectOrXML	= true;
 		string_itraits->notDerivedObjectOrXML	= true;
@@ -138,6 +146,8 @@ namespace avmplus
 		uint_ctraits = findCTraits("uint$", pool);
 		boolean_ctraits = findCTraits("Boolean$", pool);
 		string_ctraits = findCTraits("String$", pool);
+		double_ctraits = findCTraits("double$", pool);
+		decimal_ctraits = findCTraits("decimal$", pool);
 	}
 
 	Traits* BuiltinTraits::findCTraits(const char* cname, PoolObject* pool)

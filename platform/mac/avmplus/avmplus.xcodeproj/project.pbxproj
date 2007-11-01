@@ -198,6 +198,19 @@
 		942BC4350BB991690088A47F /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 942BC4330BB991690088A47F /* Sampler.cpp */; };
 		942BC4360BB991690088A47F /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 942BC4340BB991690088A47F /* Sampler.h */; };
 		CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */; };
+		D98B567F0CB2CC8B00B95F8C /* decContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D98B56720CB2CC8B00B95F8C /* decContext.cpp */; };
+		D98B56800CB2CC8B00B95F8C /* decContext.h in Headers */ = {isa = PBXBuildFile; fileRef = D98B56730CB2CC8B00B95F8C /* decContext.h */; };
+		D98B56810CB2CC8B00B95F8C /* decDPD.h in Headers */ = {isa = PBXBuildFile; fileRef = D98B56740CB2CC8B00B95F8C /* decDPD.h */; };
+		D98B56820CB2CC8B00B95F8C /* decimal128.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D98B56750CB2CC8B00B95F8C /* decimal128.cpp */; };
+		D98B56830CB2CC8B00B95F8C /* decimal128.h in Headers */ = {isa = PBXBuildFile; fileRef = D98B56760CB2CC8B00B95F8C /* decimal128.h */; };
+		D98B56840CB2CC8B00B95F8C /* DecimalClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D98B56770CB2CC8B00B95F8C /* DecimalClass.cpp */; };
+		D98B56850CB2CC8B00B95F8C /* DecimalClass.h in Headers */ = {isa = PBXBuildFile; fileRef = D98B56780CB2CC8B00B95F8C /* DecimalClass.h */; };
+		D98B56860CB2CC8B00B95F8C /* DecimalRep.h in Headers */ = {isa = PBXBuildFile; fileRef = D98B56790CB2CC8B00B95F8C /* DecimalRep.h */; };
+		D98B56870CB2CC8B00B95F8C /* decNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D98B567A0CB2CC8B00B95F8C /* decNumber.cpp */; };
+		D98B56880CB2CC8B00B95F8C /* decNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = D98B567B0CB2CC8B00B95F8C /* decNumber.h */; };
+		D98B56890CB2CC8B00B95F8C /* decNumberLocal.h in Headers */ = {isa = PBXBuildFile; fileRef = D98B567C0CB2CC8B00B95F8C /* decNumberLocal.h */; };
+		D98B568A0CB2CC8B00B95F8C /* DoubleClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D98B567D0CB2CC8B00B95F8C /* DoubleClass.cpp */; };
+		D98B568B0CB2CC8B00B95F8C /* DoubleClass.h in Headers */ = {isa = PBXBuildFile; fileRef = D98B567E0CB2CC8B00B95F8C /* DoubleClass.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -393,6 +406,19 @@
 		942BC4340BB991690088A47F /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sampler.h; path = ../../../core/Sampler.h; sourceTree = SOURCE_ROOT; };
 		CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_newline.cpp; path = ../../../pcre/pcre_newline.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libavmplus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libavmplus.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D98B56720CB2CC8B00B95F8C /* decContext.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = decContext.cpp; path = ../../../core/decContext.cpp; sourceTree = SOURCE_ROOT; };
+		D98B56730CB2CC8B00B95F8C /* decContext.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = decContext.h; path = ../../../core/decContext.h; sourceTree = SOURCE_ROOT; };
+		D98B56740CB2CC8B00B95F8C /* decDPD.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = decDPD.h; path = ../../../core/decDPD.h; sourceTree = SOURCE_ROOT; };
+		D98B56750CB2CC8B00B95F8C /* decimal128.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = decimal128.cpp; path = ../../../core/decimal128.cpp; sourceTree = SOURCE_ROOT; };
+		D98B56760CB2CC8B00B95F8C /* decimal128.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = decimal128.h; path = ../../../core/decimal128.h; sourceTree = SOURCE_ROOT; };
+		D98B56770CB2CC8B00B95F8C /* DecimalClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DecimalClass.cpp; path = ../../../core/DecimalClass.cpp; sourceTree = SOURCE_ROOT; };
+		D98B56780CB2CC8B00B95F8C /* DecimalClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DecimalClass.h; path = ../../../core/DecimalClass.h; sourceTree = SOURCE_ROOT; };
+		D98B56790CB2CC8B00B95F8C /* DecimalRep.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DecimalRep.h; path = ../../../core/DecimalRep.h; sourceTree = SOURCE_ROOT; };
+		D98B567A0CB2CC8B00B95F8C /* decNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = decNumber.cpp; path = ../../../core/decNumber.cpp; sourceTree = SOURCE_ROOT; };
+		D98B567B0CB2CC8B00B95F8C /* decNumber.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = decNumber.h; path = ../../../core/decNumber.h; sourceTree = SOURCE_ROOT; };
+		D98B567C0CB2CC8B00B95F8C /* decNumberLocal.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = decNumberLocal.h; path = ../../../core/decNumberLocal.h; sourceTree = SOURCE_ROOT; };
+		D98B567D0CB2CC8B00B95F8C /* DoubleClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DoubleClass.cpp; path = ../../../core/DoubleClass.cpp; sourceTree = SOURCE_ROOT; };
+		D98B567E0CB2CC8B00B95F8C /* DoubleClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DoubleClass.h; path = ../../../core/DoubleClass.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -412,7 +438,8 @@
 				1E607AB4097337F4007D0E1E /* pcre */,
 				1E607AA009733790007D0E1E /* Platform */,
 				1E607A9F09733787007D0E1E /* Core */,
-				1E607A9E0973377F007D0E1E /* CodenGen */,
+				1E607A9E0973377F007D0E1E /* CodeGen */,
+				D98B56710CB2CC4D00B95F8C /* Decimal */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 			);
@@ -427,7 +454,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1E607A9E0973377F007D0E1E /* CodenGen */ = {
+		1E607A9E0973377F007D0E1E /* CodeGen */ = {
 			isa = PBXGroup;
 			children = (
 				1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */,
@@ -435,7 +462,7 @@
 				1E6078E6097335B3007D0E1E /* Ia32Assembler.cpp */,
 				1E6078E7097335B3007D0E1E /* PpcAssembler.cpp */,
 			);
-			name = CodenGen;
+			name = CodeGen;
 			sourceTree = "<group>";
 		};
 		1E607A9F09733787007D0E1E /* Core */ = {
@@ -669,6 +696,26 @@
 			name = Documentation;
 			sourceTree = "<group>";
 		};
+		D98B56710CB2CC4D00B95F8C /* Decimal */ = {
+			isa = PBXGroup;
+			children = (
+				D98B56720CB2CC8B00B95F8C /* decContext.cpp */,
+				D98B56730CB2CC8B00B95F8C /* decContext.h */,
+				D98B56740CB2CC8B00B95F8C /* decDPD.h */,
+				D98B56750CB2CC8B00B95F8C /* decimal128.cpp */,
+				D98B56760CB2CC8B00B95F8C /* decimal128.h */,
+				D98B56770CB2CC8B00B95F8C /* DecimalClass.cpp */,
+				D98B56780CB2CC8B00B95F8C /* DecimalClass.h */,
+				D98B56790CB2CC8B00B95F8C /* DecimalRep.h */,
+				D98B567A0CB2CC8B00B95F8C /* decNumber.cpp */,
+				D98B567B0CB2CC8B00B95F8C /* decNumber.h */,
+				D98B567C0CB2CC8B00B95F8C /* decNumberLocal.h */,
+				D98B567D0CB2CC8B00B95F8C /* DoubleClass.cpp */,
+				D98B567E0CB2CC8B00B95F8C /* DoubleClass.h */,
+			);
+			name = Decimal;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -769,6 +816,14 @@
 				8EE6F45C09AA545E00DE11A0 /* pcre.h in Headers */,
 				85125AE00A5C648300502345 /* AvmPlusScriptableObject.h in Headers */,
 				942BC4360BB991690088A47F /* Sampler.h in Headers */,
+				D98B56800CB2CC8B00B95F8C /* decContext.h in Headers */,
+				D98B56810CB2CC8B00B95F8C /* decDPD.h in Headers */,
+				D98B56830CB2CC8B00B95F8C /* decimal128.h in Headers */,
+				D98B56850CB2CC8B00B95F8C /* DecimalClass.h in Headers */,
+				D98B56860CB2CC8B00B95F8C /* DecimalRep.h in Headers */,
+				D98B56880CB2CC8B00B95F8C /* decNumber.h in Headers */,
+				D98B56890CB2CC8B00B95F8C /* decNumberLocal.h in Headers */,
+				D98B568B0CB2CC8B00B95F8C /* DoubleClass.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -911,6 +966,11 @@
 				7CD864E60AC47805004C73CB /* AbcData.cpp in Sources */,
 				942BC4350BB991690088A47F /* Sampler.cpp in Sources */,
 				CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */,
+				D98B567F0CB2CC8B00B95F8C /* decContext.cpp in Sources */,
+				D98B56820CB2CC8B00B95F8C /* decimal128.cpp in Sources */,
+				D98B56840CB2CC8B00B95F8C /* DecimalClass.cpp in Sources */,
+				D98B56870CB2CC8B00B95F8C /* decNumber.cpp in Sources */,
+				D98B568A0CB2CC8B00B95F8C /* DoubleClass.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

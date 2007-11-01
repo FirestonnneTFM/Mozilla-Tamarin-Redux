@@ -42,3 +42,6 @@
 
 # Example:
 # ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-interp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
+
+decimal/.* , .* , skip , skipping decimal tests until asc compiler supports them
+

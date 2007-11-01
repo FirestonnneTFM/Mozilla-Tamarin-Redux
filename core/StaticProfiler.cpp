@@ -53,6 +53,7 @@ namespace avmplus
 		cpoolIntSize = 0;
 		cpoolUIntSize = 0;
 		cpoolDoubleSize = 0;
+		cpoolDecimalSize = 0;
 		cpoolStrSize = 0;
 		cpoolNsSize = 0;
 		cpoolNsSetSize = 0;
@@ -85,6 +86,9 @@ namespace avmplus
 					<< '\n';
 			console << "cpool double size "
 					<< cpoolDoubleSize
+					<< '\n';
+			console << "cpool decimal size "
+					<< cpoolDecimalSize
 					<< '\n';
 			console << "cpool string size "
 					<< cpoolStrSize

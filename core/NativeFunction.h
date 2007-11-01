@@ -138,7 +138,8 @@ namespace avmplus
 			AvmAssert(declaringTraits->linked);
 			resolveSignature(toplevel);
 			AvmCore* core = this->core();
-			if (returnTraits() == NUMBER_TYPE)
+			// RES this looks backward
+			if (returnTraits() == NUMBER_TYPE || returnTraits() == DOUBLE_TYPE)
 				impl32 = implv32;
 			else
 				implN = implvN;

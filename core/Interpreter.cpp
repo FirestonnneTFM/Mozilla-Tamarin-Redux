@@ -63,7 +63,7 @@ namespace avmplus
 		if (t == UINT_TYPE)
 			return AvmCore::integer_u(a);
 		if (t == BOOLEAN_TYPE)
-			return a>>3;
+			return a>>4;
 		return a & ~7; // possibly null pointer
 	}
 
@@ -72,6 +72,8 @@ namespace avmplus
 		Atom a = interp(env, argc, ap);
 		return AvmCore::number_d(a);
 	}
+
+		
 
     /**
      * Interpret the AVM+ instruction set.
@@ -202,7 +204,10 @@ namespace avmplus
         const List<int,LIST_NonGCObjects>& cpool_int = pool->cpool_int;
         const List<uint32,LIST_NonGCObjects>& cpool_uint = pool->cpool_uint;
         const List<double*, LIST_GCObjects>& cpool_double = pool->cpool_double;
+        const List<DecimalRep*, LIST_RCObjects>& cpool_decimal = pool->cpool_decimal;
 		const List<Namespace*, LIST_RCObjects>& cpool_ns = pool->cpool_ns;
+
+		int decimalParam;
 
 		Atom *sp = scopeBase + max_scope - 1;
 
@@ -260,6 +265,7 @@ namespace avmplus
 				core->dprof.mark(opcode);
 			#endif
 
+			decimalParam = AvmCore::defaultDecimalParam;
             switch (opcode)
             {
             case OP_returnvoid:
@@ -373,6 +379,10 @@ namespace avmplus
 				sp++;
                 sp[0] = kDoubleType|(uintptr)cpool_double[readU30(pc)];
                 continue;
+            case OP_pushdecimal:
+				sp++;
+                sp[0] = kDecimalType|(uintptr)cpool_decimal[readU30(pc)];
+                continue;
             case OP_pushnamespace:
                 sp++;
                 sp[0] = cpool_ns[readU30(pc)]->atom();
@@ -399,6 +409,10 @@ namespace avmplus
 			case OP_pushnan:
 				sp++;
 				sp[0] = core->kNaN;
+				continue;
+			case OP_pushdnan:
+				sp++;
+				sp[0] = core->dnNaNatom;
 				continue;
 
             case OP_pop:
@@ -430,7 +444,7 @@ namespace avmplus
 
             case OP_coerce_d:
             case OP_convert_d:
-                sp[0] = core->numberAtom(sp[0]);
+                sp[0] = core->doubleAtom(sp[0]);
                 continue;
 
             case OP_convert_b:
@@ -438,33 +452,66 @@ namespace avmplus
                 sp[0] = core->booleanAtom(sp[0]);
                 continue;
 
+			case OP_convert_m_p:
+				decimalParam = readU30(pc);
+				// and fall into
+			case OP_convert_m:
+				sp[0] = core->decimalAtom(sp[0], decimalParam);
+				continue;
+
 			// if sp[0] is null or undefined, throw TypeError.  otherwise return same value.
             case OP_convert_o:
                 env->nullcheck(sp[0]);
                 continue;
 
+            case OP_negate_p:
+				decimalParam = readU30(pc);
+				// and fall into
             case OP_negate:
-                sp[0] = core->doubleToAtom(-core->number(sp[0]));
+				switch ((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+					case AvmCore::use_Number:	
+						if (!AvmCore::isDecimal(sp[0])) {
+							sp[0] = core->doubleToAtom(-core->doubleNumber(sp[0]));
+							break;
+						}
+						// else fall into the decimal case
+					case AvmCore::use_decimal:
+						sp[0] = core->decimal_negate(core->decimalNumber(sp[0]), decimalParam);
+						break;
+					case AvmCore::use_double:
+						sp[0] = core->doubleToAtom(-core->doubleNumber(sp[0]));
+						break;
+					case AvmCore::use_uint: // what does it mean to negate a uint?  Treat as int for now
+					case AvmCore::use_int:
+						sp[0] = core->intToAtom(-core->integer(sp[0]));
+						break;
+				}
                 continue;
 
 			case OP_negate_i:
                 sp[0] = core->intToAtom(-core->integer(sp[0]));
                 continue;
 
+            case OP_increment_p:
+				decimalParam = readU30(pc);
+				// and fall into
             case OP_increment:
-				*sp = core->numberAtom(*sp);
-				core->increment_d(sp, 1);
+				*sp = core->numericAtom(*sp);
+				core->increment_d(sp, 1, decimalParam);
                 continue;
 
             case OP_increment_i:
 				core->increment_i(sp, 1);
                 continue;
 
+            case OP_inclocal_p:
+				decimalParam = readU30(pc);
+				// and fall into
 			case OP_inclocal:
 			{
 				Atom* rp = framep+readU30(pc);
-				*rp = core->numberAtom(*rp);
-				core->increment_d(rp, 1);
+				*rp = core->numericAtom(*rp);
+				core->increment_d(rp, 1, decimalParam);
 				continue;
 			}
 
@@ -478,20 +525,26 @@ namespace avmplus
 				core->increment_i(framep+readU30(pc), 1);
 				continue;
 
+            case OP_decrement_p:
+				decimalParam = readU30(pc);
+				// and fall into
             case OP_decrement:
-				*sp = core->numberAtom(*sp);
-				core->increment_d(sp, -1);
+				*sp = core->numericAtom(*sp);
+				core->increment_d(sp, -1, decimalParam);
                 continue;
 
             case OP_decrement_i:
 				core->increment_i(sp, -1);
                 continue;
 
+            case OP_declocal_p:
+				decimalParam = readU30(pc);
+				// and fall into
 			case OP_declocal:
 			{
 				Atom* rp = framep+readU30(pc);
-				*rp = core->numberAtom(*rp);
-				core->increment_d(rp, -1);
+				*rp = core->numericAtom(*rp);
+				core->increment_d(rp, -1, decimalParam);
 				continue;
 			}
 
@@ -521,8 +574,11 @@ namespace avmplus
                 framep[opcode-OP_setlocal0] = *(sp--);
                 continue;
 
+            case OP_add_p:
+				decimalParam = readU30(pc);
+				// and fall into
             case OP_add:
-                sp[-1] = toplevel->add2(sp[-1], sp[0]);
+                sp[-1] = toplevel->add2(sp[-1], sp[0], decimalParam);
                 sp--;
                 continue;
 
@@ -531,8 +587,11 @@ namespace avmplus
                 sp--;
                 continue;
 
+            case OP_subtract_p:
+				decimalParam = readU30(pc);
+				// and fall into
             case OP_subtract:
-                sp[-1] = core->doubleToAtom(core->number(sp[-1]) - core->number(sp[0]));
+                sp[-1] = toplevel->sub2(sp[-1], sp[0], decimalParam);
                 sp--;
                 continue;
 
@@ -541,8 +600,11 @@ namespace avmplus
                 sp--;
                 continue;
 
+            case OP_multiply_p:
+				decimalParam = readU30(pc);
+				// and fall into
             case OP_multiply:
-                sp[-1] = core->doubleToAtom(core->number(sp[-1]) * core->number(sp[0]));
+                sp[-1] = toplevel->mul2(sp[-1], sp[0], decimalParam);
                 sp--;
                 continue;
 
@@ -551,15 +613,21 @@ namespace avmplus
                 sp--;
                 continue;
 
+            case OP_divide_p:
+				decimalParam = readU30(pc);
+				// and fall into
             case OP_divide:
-				sp[-1] = core->doubleToAtom(core->number(sp[-1]) / core->number(sp[0]));
+                sp[-1] = toplevel->div2(sp[-1], sp[0], decimalParam);
                 sp--;
                 continue;
 
-            case OP_modulo:
-				sp[-1] = core->doubleToAtom(MathUtils::mod(core->number(sp[-1]), core->number(sp[0])));
-				sp--;
-				continue;
+           case OP_modulo_p:
+				decimalParam = readU30(pc);
+				// and fall into
+           case OP_modulo:
+                sp[-1] = toplevel->rem2(sp[-1], sp[0], decimalParam);
+                sp--;
+                continue;
 
             case OP_lshift:
 				sp[-1] = core->intToAtom( core->integer(sp[-1]) << (core->toUInt32(sp[0])&0x1F) );

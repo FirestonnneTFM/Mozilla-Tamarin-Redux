@@ -4,7 +4,7 @@ CVS/**
 *.exe
 *.bat
 *.jar
-*.abc
+test/**.abc
 *.pyc
 *~
 pcre/doc/*.1
@@ -14,6 +14,8 @@ ErrorConstants.xml
 extensions/Sampler*
 classicprefix_*.pch++
 stale.xml
+MMgc/obj_7/**
+platform/win32/obj_7/**
 platform/win32/obj_8/**
 platform/mac/MMgc/build/**
 platform/mac/avmplus/build/**
@@ -29,3 +31,8 @@ test/*.html
 *.ncb
 *.suo
 *.vcproj.*.user
+*.o
+*.s
+*.d
+*.a
+

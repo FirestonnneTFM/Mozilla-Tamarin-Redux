@@ -65,6 +65,8 @@ namespace avmplus
 #define NUMBER_TYPE		(core->traits.number_itraits)
 #define INT_TYPE		(core->traits.int_itraits)
 #define UINT_TYPE		(core->traits.uint_itraits)
+#define DOUBLE_TYPE		(core->traits.double_itraits)
+#define DECIMAL_TYPE	(core->traits.decimal_itraits)
 #define BOOLEAN_TYPE	(core->traits.boolean_itraits)
 #define VOID_TYPE		(core->traits.void_itraits)
 #define NULL_TYPE		(core->traits.null_itraits)
@@ -96,6 +98,9 @@ const int kBufferPadding = 16;
 		 * The GC used by this AVM instance
 		 */
 		MMgc::GC * const gc;
+
+		enum NumberUsage { use_Number = 0, use_decimal = 1, use_double = 2, 
+                           use_int = 3, use_uint = 4};
 
 		#ifdef DEBUGGER
 		/**
@@ -292,7 +297,7 @@ const int kBufferPadding = 16;
 									 DomainEnv* domainEnv,
 									 Toplevel*& toplevel,
 									 CodeContext *codeContext);
-		
+	
 		void exportDefs(Traits* traits, ScriptEnv* scriptEnv);
 
 		/**
@@ -381,7 +386,8 @@ const int kBufferPadding = 16;
 
 		static bool isPointer(Atom atom)
 		{
-			return (atom&7) < kSpecialType || (atom&7) == kDoubleType;
+			AvmAssert(kDecimalType == 5 && kDoubleType == 7);
+			return (atom&7) < kSpecialType || (atom&5) == 5; // decimal and double are pointers
 		}
 
 		static bool isTraits(Atom type)
@@ -474,17 +480,35 @@ const int kBufferPadding = 16;
 			return (atom&7) == kIntegerType;
 		}
 
-		/** Helper method; returns true if atom's type is Number */
-		static bool isNumber(Atom atom)
+		/** Helper method; returns true if atom's type is decimal */
+		static bool isDecimal(Atom atom)
 		{
-			// accept kIntegerType(6) or kDoubleType(7)
-			return (atom&6) == kIntegerType;
+			return (atom&7) == kDecimalType;
+		}
+
+		/** Helper method; returns true if atom's type is Number */
+		static bool isNumeric(Atom atom)
+		{
+			// accept kDoubleType(7), kIntegerType(6), or kDecimalType(5)
+			return (atom&7) >= kDecimalType;
+		}
+
+		/** Helper method; returns true if atom's value is 0, atom must be numeric */
+		static bool isZero(Atom atom)
+		{
+			AvmAssert(isNumeric(atom));
+			switch (atom&7) {
+				case kDoubleType: return (atomToDouble(atom) == 0);
+				case kIntegerType: return ((atom & ~7) == 0);
+				case kDecimalType: return (decNumberIsZero((decNumber *)(atom & ~7)));
+			}
+			return false; //unreachable code, but I don't think the compiler can figure that out.
 		}
 
 		/** Helper method; returns true if atom's type is boolean */
 		static bool isBoolean(Atom atom)
 		{
-			return (atom&7) == kBooleanType;
+			return (atom&15) == (kSpecialType | 8);
 		}
 
 		/** Helper method; returns true if atom's type is null */
@@ -508,6 +532,7 @@ const int kBufferPadding = 16;
 		/** Disassembles an opcode and places the text in str. */
 		void formatOpcode(PrintWriter& out, const byte *pc, AbcOpcode opcode, int off, PoolObject* pool);
 		static void formatMultiname(PrintWriter& out, uint32 index, PoolObject* pool);
+		void formatNumberUsage(PrintWriter& out, int param);
 #endif
 
 		/**
@@ -541,6 +566,7 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kxml;
 		DRC(Stringp) kboolean;
 		DRC(Stringp) knumber;
+		//DRC(Stringp) kdecimal;
 		DRC(Stringp) kstring;
 		DRC(Stringp) kuri;
 		DRC(Stringp) kprefix;
@@ -589,7 +615,7 @@ const int kBufferPadding = 16;
 		 * ECMA-262 section 9.6, used in many of the
 		 * native core objects
 		 */
-		uint32 toUInt32(Atom atom) const
+		uint32 toUInt32(Atom atom)
 		{
 			return (uint32)integer(atom);
 		}
@@ -599,13 +625,135 @@ const int kBufferPadding = 16;
 		 * ECMA-262 section 9.4, used in many of the
 		 * native core objects
 		 */
-		double toInteger(Atom atom) const
+		double toInteger(Atom atom)
 		{
 			if ((atom & 7) == kIntegerType) {
 				return (double) (atom>>3);
-			} else {
-				return MathUtils::toInt(number(atom));
+			} else if ((atom & 7) == kDecimalType) {
+				DecimalRep *dval = atomToDecimal(atom);
+				return (double)decimalToInt32(dval);
 			}
+			else {
+				return MathUtils::toInt(doubleNumber(atom));
+			}
+		}
+    
+		/* pre-initialize a few special decimal values to allow more compact atom representation
+			*/
+		enum SpecialDecimalIndex { 
+			sd_NaN = 0, sd_NegInfinity, sd_NegZero,
+			sd_NegOne, sd_0, sd_1, sd_2, sd_3, sd_4, sd_5, sd_6, sd_7, sd_8, sd_9,
+			sd_10, sd_100, 
+			// decimals are not normalized;  .1 and .01 are different, though they are ==
+			sd_point1, sd_point10, sd_point5, sd_point50, sd_point01, 
+			sd_Infinity, sd_Count};
+
+		DRC(DecimalRep*) sd_NaN_rep;
+		DRC(DecimalRep*) sd_NegInfinity_rep; 
+		DRC(DecimalRep*) sd_NegZero_rep; 
+		DRC(DecimalRep*) sd_NegOne_rep; 
+		DRC(DecimalRep*) sd_0_rep; 
+		DRC(DecimalRep*) sd_1_rep; 
+		DRC(DecimalRep*) sd_2_rep; 
+		DRC(DecimalRep*) sd_3_rep; 
+		DRC(DecimalRep*) sd_4_rep; 
+		DRC(DecimalRep*) sd_5_rep; 
+		DRC(DecimalRep*) sd_6_rep; 
+		DRC(DecimalRep*) sd_7_rep; 
+		DRC(DecimalRep*) sd_8_rep; 
+		DRC(DecimalRep*) sd_9_rep; 
+		DRC(DecimalRep*) sd_10_rep; 
+		DRC(DecimalRep*) sd_100_rep; 
+		DRC(DecimalRep*) sd_point1_rep; 
+		DRC(DecimalRep*) sd_point10_rep; 
+		DRC(DecimalRep*) sd_point5_rep; 
+		DRC(DecimalRep*) sd_point50_rep; 
+		DRC(DecimalRep*) sd_point01_rep; 
+		DRC(DecimalRep*) sd_Infinity_rep; 
+
+		DecimalRep* special_decimal[sd_Count];
+
+		bool isSpecialDecimal(decNumber *value, SpecialDecimalIndex &index); // if special, index is set to special value
+		bool isSpecialDecimal(int value, SpecialDecimalIndex &index); // if special, index is set to special value
+
+		/**********   basic decimal arithmetic **********/
+
+		decContext mutableDecContext; // used by operations below, initialized once
+
+		static const int defaultDecimalParam = ((int)DEC_ROUND_HALF_EVEN << 3);
+
+		Atom decimal_add(DecimalRep *lhs, DecimalRep *rhs, int param);
+		Atom decimal_subtract(DecimalRep *lhs, DecimalRep *rhs, int param);
+		Atom decimal_multiply(DecimalRep *lhs, DecimalRep *rhs, int param);
+		Atom decimal_divide(DecimalRep *lhs, DecimalRep *rhs, int param);
+		Atom decimal_remainder(DecimalRep *lhs, DecimalRep *rhs, int param);
+		Atom decimal_negate(DecimalRep *lhs, int param);
+
+		decContext defaultDecContext;
+
+		static decNumber dn2to32m1;
+		static decNumber dn2to32;
+		static decNumber dn2to31;
+		Atom dnNaNatom;
+
+		DecimalRep *toDecimal(Atom atom)
+		{
+			return toDecimal(atom, defaultDecimalParam);
+		}
+    
+		DecimalRep *toDecimal(Atom atom, int decimalParam)
+		{
+			// RES - in here I take precision and rounding into account.  I don't in allocDecimal.
+			// RES - decide which is correct and make both do same thing
+            decContext *ctx = &mutableDecContext;
+            ctx->round = (rounding) ((decimalParam >>3) & 0x7);
+            int p = decimalParam >> 6;
+            ctx->digits = (p == 0)? 34 : p;
+            
+			DecimalRep *ret;
+			if ((atom & 7) == kDecimalType) {
+                ret = atomToDecimal(atom); // takes care of special decimals
+                if (((ret->dn.bits & DECSPECIAL) != 0) || (ret->dn.digits <= ctx->digits))
+                    return ret;
+            }
+            // not special and incoming not is range of ctx, we need to allocate
+			ret = new (GetGC()) DecimalRep(); // initialized to 0
+			if ((atom & 7) == kDecimalType) {
+				DecimalRep *atomval = atomToDecimal(atom);
+				decNumberPlus(&ret->dn, &atomval->dn, ctx);
+				return ret;
+			}
+			if ((atom & 7) == kIntegerType) {
+				decNumber ival;
+				MathUtils::decNumberFromInt(&ival, (atom>>3));
+				decNumberPlus(&ret->dn, &ival, ctx);
+				return ret;
+			} 
+			double val = doubleNumber(atom); // anything not already a decimal will fit in a double
+			char buf[50];
+			wchar wbuf[50];
+			int len;
+			// check a few special values
+			if (val == 0) {
+				if (MathUtils::isNegZero(val))
+					return special_decimal[sd_NegZero];
+				else
+					return special_decimal[sd_0];
+			}
+			if (MathUtils::isNaN(val)) {
+				return special_decimal[sd_NaN];
+			}
+			if (MathUtils::isInfinite(val)) {
+				if (val > 0)
+					return special_decimal[sd_Infinity];
+				else
+					return special_decimal[sd_NegInfinity];
+			}
+			MathUtils::convertDoubleToString(val, wbuf, len);
+			UnicodeUtils::Utf16ToUtf8(wbuf, len, (uint8*)buf, 50);	
+			buf[len] = 0;
+			decNumberFromString(&ret->dn, buf, ctx);
+			return ret;
 		}
 
 		/**
@@ -614,7 +762,7 @@ const int kBufferPadding = 16;
 		 * decoded.  Otherwise, it is coerced to the int type
 		 * and returned.  This is ToInt32() from E3 section 9.5
 		 */
-		int integer(Atom atom) const;
+		int integer(Atom atom);
 
 		// convert atom to integer when we know it is already a legal signed-32 bit int value
 		static int integer_i(Atom a)
@@ -649,16 +797,29 @@ const int kBufferPadding = 16;
 
 	private:
 		static int doubleToInt32(double d);
+		static int decimalToInt32(DecimalRep *dn);
 
 	public:
 		static double number_d(Atom a)
 		{
-			AvmAssert(isNumber(a));
+			AvmAssert(isNumeric(a));
 
 			if ((a&7) == kIntegerType)
 				return a>>3;
+			else if ((a & 7) == kDecimalType) {
+				DecimalRep *drep = atomToDecimal(a);
+                return MathUtils::decNumberToDouble(&drep->dn);
+			}
 			else
 				return atomToDouble(a);
+		}
+
+		DecimalRep* decimal_d(Atom a)
+		{
+			AvmAssert(isNumeric(a));
+			if ((a & 7) == kDecimalType) 
+				return atomToDecimal(a);
+			else return toDecimal(a);
 		}
 
 		/**
@@ -673,6 +834,16 @@ const int kBufferPadding = 16;
 		Atom uintAtom(Atom atom)
 		{
 			return uintToAtom(toUInt32(atom));
+		}
+
+		Atom decimalAtom(Atom atom, int decimalParam)
+		{
+			return decimalToAtom(toDecimal(atom, decimalParam));
+		}
+
+		Atom doubleAtom(Atom atom)
+		{
+			return doubleToAtom(doubleNumber(atom));
 		}
 
 		/**
@@ -859,14 +1030,14 @@ const int kBufferPadding = 16;
 		 * implementation of OP_increg, decreg, increment, decrement which correspond to
 		 * ++ and -- operators in AS.
 		 */
-		void increment_d(Atom *atom, int delta);
+		void increment_d(Atom *atom, int delta, int param);
 
 		/**
 		 * implementation of OP_increg, decreg, increment, decrement which correspond to
 		 * ++ and -- operators in AS.
 		 */
 		void increment_i(Atom *atom, int delta);
-		
+
 		/**
 		 * ES3's internal ToPrimitive() function
 		 */
@@ -876,12 +1047,14 @@ const int kBufferPadding = 16;
 		Atom booleanAtom(Atom atom);
 
 		/** OP_tonumber; ES3 ToNumber */
-		Atom numberAtom(Atom atom);
+		Atom numericAtom(Atom atom);
 		
 		/**
 		 * ES3's internal ToNumber() function for internal use
 		 */
-		double number(Atom atom) const;
+		double doubleNumber(Atom atom);
+
+		DecimalRep *decimalNumber(Atom atom);
 
 #ifdef AVMPLUS_PROFILE
 		/**
@@ -1167,6 +1340,13 @@ const int kBufferPadding = 16;
 			return *obj;
 		}
 
+		static DecimalRep *atomToDecimal(Atom atom)
+		{
+			AvmAssert((atom & 7) == kDecimalType);
+			DecimalRep *val = (DecimalRep*) (atom & ~7);
+			return val;
+		}
+
 		/**
 		 * Convert an Atom of kStringType to a Stringp
 		 * @param atom atom to convert.  Note that the Atom
@@ -1266,6 +1446,7 @@ const int kBufferPadding = 16;
 		Stringp internString(Atom atom);
 		Stringp internInt(int n);
 		Stringp internDouble(double d);
+		Stringp internDecimal(DecimalRep *d);
 		Stringp internUint32(uint32 ui);
 
 		/**
@@ -1334,11 +1515,14 @@ const int kBufferPadding = 16;
 		Stringp uintToString(uint32 i);
 		Stringp intToString(int i);
 		Stringp doubleToString(double d);
+		Stringp decimalToString(DecimalRep *d);
 		Stringp concatStrings(Stringp s1, Stringp s2) const;
 		
 		Atom doubleToAtom(double n);
 		Atom uintToAtom(uint32 n);
 		Atom intToAtom(int n);
+		Atom decimalToAtom(DecimalRep *n);
+		Atom decNumberToAtom(decNumber *n);
 
 		Atom allocDouble(double n)
 		{
@@ -1347,6 +1531,13 @@ const int kBufferPadding = 16;
 			return kDoubleType | (uintptr)ptr;
 		}
 		
+		DecimalRep* allocDecimal(decNumber *n)
+		{
+			MMgc::GC *gc = GetGC();
+			DecimalRep *ptr = new (gc) DecimalRep(n);
+			return ptr;
+		}
+
 		void rehashStrings(int newlen);
 		void rehashNamespaces(int newlen);
 

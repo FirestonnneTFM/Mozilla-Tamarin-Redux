@@ -152,7 +152,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		for (int i=0; i < argc; i++)
 		{
-			double y = core->number(argv[i]);
+			double y = core->doubleNumber(argv[i]);
 			if (y < x)
 				x = y;
 			else if (MathUtils::isNaN(y))
@@ -167,7 +167,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		for (int i=0; i < argc; i++)
 		{
-			double y = core->number(argv[i]);
+			double y = core->doubleNumber(argv[i]);
 			if (y > x)
 				x = y;
 			else if (MathUtils::isNaN(y))

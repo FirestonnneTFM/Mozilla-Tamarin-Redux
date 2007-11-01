@@ -105,7 +105,11 @@ namespace avmplus
 				// ISSUE what about int?
 				return numberClass->prototype;
 
-			case kBooleanType:
+            case kDecimalType:
+                return decimalClass->prototype;
+
+			case kSpecialType:
+				AvmAssert(AvmCore::isBoolean(atom)); // we already know it is not undefined
 				return booleanClass->prototype;
 			}
 		}
@@ -132,8 +136,11 @@ namespace avmplus
 				return namespaceClass->ivtable();
 			case kStringType:
 				return stringClass->ivtable();
-			case kBooleanType:
+			case kSpecialType:
+				AvmAssert(AvmCore::isBoolean(atom)); // we already know it is not undefined
 				return booleanClass->ivtable();
+            case kDecimalType:
+                return decimalClass->ivtable();
 			case kIntegerType:
 			case kDoubleType:
 				// ISSUE what about int?
@@ -163,8 +170,11 @@ namespace avmplus
 				return core()->traits.namespace_itraits;
 			case kStringType:
 				return core()->traits.string_itraits;
-			case kBooleanType:
+			case kSpecialType:
+				AvmAssert(AvmCore::isBoolean(atom)); // we already know it is not undefined
 				return core()->traits.boolean_itraits;
+			case kDecimalType:
+				return core()->traits.decimal_itraits;
 			case kIntegerType:
 			case kDoubleType:
 				// ISSUE what about int?
@@ -259,7 +269,8 @@ namespace avmplus
 				{
 					break;
 				}
-			case kBooleanType:
+			case kSpecialType:		// boolean
+			case kDecimalType:
 			case kIntegerType:
 			case kDoubleType:
 			default: // number
@@ -324,8 +335,10 @@ namespace avmplus
 				}
 			case kIntegerType:
 			case kDoubleType:
+			case kDecimalType:
 			case kStringType:
-			case kBooleanType:
+			case kSpecialType: // boolean
+
 				{
 					s = core->string(p);
 					break;
@@ -653,8 +666,8 @@ namespace avmplus
 			return atom;
 		if (expected == BOOLEAN_TYPE)
 			return core->booleanAtom(atom);
-		if (expected == NUMBER_TYPE)
-			return core->numberAtom(atom);
+		if (expected == NUMBER_TYPE || expected == DOUBLE_TYPE)
+			return core->doubleAtom(atom);
 		if ((expected == STRING_TYPE))
 			return AvmCore::isNullOrUndefined(atom) ? 0|kStringType : core->string(atom)->atom();
 		if (expected == INT_TYPE)
@@ -663,6 +676,8 @@ namespace avmplus
 			return core->uintAtom(atom);
 		if (expected == OBJECT_TYPE)
 			return atom == undefinedAtom ? nullObjectAtom : atom;
+		if (expected == DECIMAL_TYPE)
+			return core->decimalAtom(atom, AvmCore::defaultDecimalParam);
 
 		if (AvmCore::isNullOrUndefined(atom))
 			return expected == VOID_TYPE ? undefinedAtom : nullObjectAtom;
@@ -673,16 +688,21 @@ namespace avmplus
 			actual = STRING_TYPE;
 			break;
 
-		case kBooleanType:
+		case kSpecialType:
+			AvmAssert(AvmCore::isBoolean(atom));	// undefined is taken care of before the switch
 			actual = BOOLEAN_TYPE;
 			break;
 
 		case kDoubleType:
-			actual = NUMBER_TYPE;
+			actual = DOUBLE_TYPE;
 			break;
 
 		case kIntegerType:
 			actual = INT_TYPE;
+			break;
+
+		case kDecimalType:
+			actual = DECIMAL_TYPE;
 			break;
 
 		case kNamespaceType:
@@ -726,23 +746,37 @@ namespace avmplus
 		}
 	}
 	
-    Atom Toplevel::add2(Atom lhs, Atom rhs)
+	Atom Toplevel::add2(Atom lhs, Atom rhs, int decimalParam)
     {
 		AvmCore* core = this->core();
 
 		// do common cases first/quick:
-		if (AvmCore::isNumber(lhs) && AvmCore::isNumber(rhs))
+		if (AvmCore::isNumeric(lhs) && AvmCore::isNumeric(rhs))
 		{
+
 			// C++ porting note. if either side is undefined, null or NaN then result must be NaN.
 			// Java's + operator ensures this for double operands.
 			// cn:  null should convert to 0, so I think the above comment is wrong for null.
-			return core->doubleToAtom(core->number(lhs) + core->number(rhs));
+			switch ((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+				case AvmCore::use_Number:
+					if (!(AvmCore::isDecimal(lhs) || AvmCore::isDecimal(rhs))) {
+						return core->doubleToAtom(core->doubleNumber(lhs) + core->doubleNumber(rhs));
+					}
+					// else fall into decimal case
+				case AvmCore::use_decimal:
+					return  core->decimal_add(core->decimalNumber(lhs), core->decimalNumber(rhs), decimalParam);
+				case AvmCore::use_double:
+					return core->doubleToAtom(core->doubleNumber(lhs) + core->doubleNumber(rhs));
+				case AvmCore::use_int:
+					return core->intToAtom(core->integer(lhs) + core->integer(rhs));
+				case AvmCore::use_uint:
+					return core->uintToAtom(core->toUInt32(lhs) + core->toUInt32(rhs));
+			}
 		}
 		else if (AvmCore::isString(lhs) || AvmCore::isString(rhs) || core->isDate(lhs) || core->isDate(rhs))
 		{
  			return core->concatStrings(core->string(lhs), core->string(rhs))->atom();
 		}
-
 
 		// then look for the more unlikely cases
 		
@@ -783,13 +817,161 @@ namespace avmplus
 		{
 			return core->concatStrings(core->string(lhs_asPrimVal), core->string(rhs_asPrimVal))->atom();
 		}
+		else if (AvmCore::isDecimal(lhs_asPrimVal) || AvmCore::isDecimal(rhs_asPrimVal)) 
+		{
+			return core->decimal_add(core->decimalNumber(lhs_asPrimVal), core->decimalNumber(rhs_asPrimVal), decimalParam);
+		}
 		else
 		{
-			return core->doubleToAtom(core->number(lhs_asPrimVal) + core->number(rhs_asPrimVal));
+			return core->doubleToAtom(core->doubleNumber(lhs_asPrimVal) + core->doubleNumber(rhs_asPrimVal));
 		}
     }
 
-    Atom Toplevel::getproperty(Atom obj, Multiname* multiname, VTable* vtable)
+	Atom Toplevel::sub2(Atom lhs, Atom rhs, int decimalParam) {
+		AvmCore* core = this->core();
+		switch ((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+		case AvmCore::use_Number:
+			if (!(AvmCore::isDecimal(lhs) || AvmCore::isDecimal(rhs))) {
+				return core->doubleToAtom(core->doubleNumber(lhs) - core->doubleNumber(rhs));
+				break;
+			}
+			// otherwise fall into decimal case
+		case AvmCore::use_decimal:
+			return core->decimal_subtract(core->decimalNumber(lhs), core->decimalNumber(rhs), decimalParam);
+		case AvmCore::use_double:
+			return core->doubleToAtom(core->doubleNumber(lhs) - core->doubleNumber(rhs));
+		case AvmCore::use_int:
+			return core->intToAtom(core->integer(lhs) - core->integer(rhs));
+		case AvmCore::use_uint:
+			return core->uintToAtom(core->toUInt32(lhs) - core->toUInt32(rhs));
+		default:
+			AvmAssertMsg(false, "invalid number usage value");
+			return 0; // to keep compiler happy
+		}
+	}
+
+	Atom Toplevel::mul2(Atom lhs, Atom rhs, int decimalParam) {
+		AvmCore* core = this->core();
+		switch ((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+		case AvmCore::use_Number:
+			if (!(AvmCore::isDecimal(lhs) || AvmCore::isDecimal(rhs))) {
+				return core->doubleToAtom(core->doubleNumber(lhs) * core->doubleNumber(rhs));
+				break;
+			}
+			// otherwise fall into decimal case
+		case AvmCore::use_decimal:
+			return core->decimal_multiply(core->decimalNumber(lhs), core->decimalNumber(rhs), decimalParam);
+		case AvmCore::use_double:
+			return core->doubleToAtom(core->doubleNumber(lhs) * core->doubleNumber(rhs));
+		case AvmCore::use_int:
+			return core->intToAtom(core->integer(lhs) * core->integer(rhs));
+		case AvmCore::use_uint:
+			return core->uintToAtom(core->toUInt32(lhs) * core->toUInt32(rhs));
+		default:
+			AvmAssertMsg(false, "invalid number usage value");
+			return 0; // to keep compiler happy
+		}
+	}
+
+	Atom Toplevel::div2(Atom lhs, Atom rhs, int decimalParam) {
+		AvmCore* core = this->core();
+		switch ((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+		case AvmCore::use_Number:
+			if (!(AvmCore::isDecimal(lhs) || AvmCore::isDecimal(rhs))) {
+				return core->doubleToAtom(core->doubleNumber(lhs) / core->doubleNumber(rhs));
+				break;
+			}
+			// otherwise fall into decimal case
+		case AvmCore::use_decimal:
+			return core->decimal_divide(core->decimalNumber(lhs), core->decimalNumber(rhs), decimalParam);
+		case AvmCore::use_double:
+			return core->doubleToAtom(core->doubleNumber(lhs) / core->doubleNumber(rhs));
+		case AvmCore::use_int:
+			return core->intToAtom(core->integer(lhs) / core->integer(rhs));
+		case AvmCore::use_uint:
+			return core->uintToAtom(core->toUInt32(lhs) / core->toUInt32(rhs));
+		default:
+			AvmAssertMsg(false, "invalid number usage value");
+			return 0; // to keep compiler happy
+		}
+	}
+
+	Atom Toplevel::rem2(Atom lhs, Atom rhs, int decimalParam) {
+		AvmCore* core = this->core();
+		switch ((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+		case AvmCore::use_Number:
+			if (!(AvmCore::isDecimal(lhs) || AvmCore::isDecimal(rhs))) {
+				return core->doubleToAtom(MathUtils::mod(core->doubleNumber(lhs), core->doubleNumber(rhs)));
+				break;
+			}
+			// otherwise fall into decimal case
+		case AvmCore::use_decimal:
+			return core->decimal_remainder(core->decimalNumber(lhs), core->decimalNumber(rhs), decimalParam);
+		case AvmCore::use_double:
+			return core->doubleToAtom(MathUtils::mod(core->doubleNumber(lhs), core->doubleNumber(rhs)));
+		case AvmCore::use_int:
+			return core->intToAtom(core->integer(lhs) % core->integer(rhs));
+		case AvmCore::use_uint:
+			return core->uintToAtom(core->toUInt32(lhs) % core->toUInt32(rhs));
+		default:
+			AvmAssertMsg(false, "invalid number usage value");
+			return 0; // to keep compiler happy
+		}
+	}
+
+	Atom Toplevel::incr(Atom lhs, Atom delta, int decimalParam) {
+		// delta is either 1 or -1 as an integer
+        // This is much like add2, but doesn't do string concatenation
+        // var x = "1234";
+        // x++; 
+        // If we used add2, x would end up "12341"
+		AvmCore* core = this->core();
+		switch ((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+		case AvmCore::use_Number:
+			if (!(AvmCore::isDecimal(lhs))) {
+				return core->doubleToAtom(core->doubleNumber(lhs) + core->doubleNumber(delta));
+				break;
+			}
+			// otherwise fall into decimal case
+		case AvmCore::use_decimal:
+			return core->decimal_add(core->decimalNumber(lhs), core->decimalNumber(delta), decimalParam);
+		case AvmCore::use_double:
+			return core->doubleToAtom(core->doubleNumber(lhs) + core->doubleNumber(delta));
+		case AvmCore::use_int:
+			return core->intToAtom(core->integer(lhs) + core->integer(delta));
+		case AvmCore::use_uint:
+			return core->uintToAtom(core->toUInt32(lhs) + core->toUInt32(delta));
+		default:
+			AvmAssertMsg(false, "invalid number usage value");
+			return 0; // to keep compiler happy
+		}
+	}
+
+	Atom Toplevel::negate(Atom lhs, int decimalParam) {
+		AvmCore* core = this->core();
+		switch((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+		case AvmCore::use_Number:
+			if (!AvmCore::isDecimal(lhs)) {
+				return core->doubleToAtom(-(core->doubleNumber(lhs)));
+				break;
+			}
+			// otherwise fall into decimal case
+		case AvmCore::use_decimal:
+			return core->decimal_negate(core->decimalNumber(lhs), decimalParam);
+		case AvmCore::use_double:
+			return core->doubleToAtom(-(core->doubleNumber(lhs)));
+		case AvmCore::use_int:
+			return core->intToAtom(-(core->integer(lhs)));
+		case AvmCore::use_uint:
+			return core->uintToAtom(-(int)(core->toUInt32(lhs))); // RES what does it mean to negate a uint?
+		default:
+			AvmAssertMsg(false, "invalid number usage value");
+			return 0; // to keep compiler happy
+		}
+	}
+
+
+	Atom Toplevel::getproperty(Atom obj, Multiname* multiname, VTable* vtable)
     {
 		Binding b = getBinding(vtable->traits, multiname);
 		AvmCore* core = this->core();

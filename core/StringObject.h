@@ -331,6 +331,18 @@ namespace avmplus
 			return MathUtils::convertStringToNumber(getData() + getOffset(), length());
 		}
 
+		void toDecimal(decNumber *dn, decContext *ctx)
+		{
+			char buf[100];
+			if (needsNormalization()) normalize();
+			int len = UnicodeUtils::Utf16ToUtf8(getData() + getOffset(), length(), (uint8*)buf, 100);
+			buf[len] = 0;
+			char *ptr = buf;
+			while (*ptr == ' ')	// skip blanks to be like double
+				++ptr;
+			decNumberFromString(dn, ptr, ctx);
+		}
+
 		// native functions
 		int indexOf(Stringp s, int i=0);
 		int indexOfDouble(Stringp s, double i=0);

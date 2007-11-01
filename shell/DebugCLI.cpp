@@ -534,8 +534,8 @@ namespace avmshell
 		Atom a = core->newString(to)->atom();
 
 		// using the type of baseline try to convert to into an appropriate Atom
-		if (core->isNumber(baseline))
-			return core->numberAtom(a);
+		if (core->isNumeric(baseline))
+			return core->numericAtom(a);
 		else if (core->isBoolean(baseline))
 			return core->booleanAtom(a);
 		

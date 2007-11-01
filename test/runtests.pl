@@ -59,6 +59,7 @@ $allfails=0;
 @failmsgs=();
 $asc="";
 $builtinabc="";
+$recompile=0;
 
 &parse_args;
 &setup_env;
@@ -116,6 +117,11 @@ sub execute_tests {
         local $lpass=0;
         local $lfail=0;
 
+		if ( $js_test =~ /\/test\/decimal\// ) {
+			# hack to skip decimal testcases for now
+			next;
+		}
+
         # convert .as name to .abc
         $js_test_abc = &fix_leaf(substr($js_test, 0, rindex($js_test,".")) .  ".abc");
 
@@ -130,7 +136,7 @@ sub execute_tests {
             print '.';
         }
 
-        if ( !-e $js_test_abc ) {
+        if ( $recompile || (!-e $js_test_abc) ) {
            if (! -e $asc) {
               die("ERROR! cannot build $js_test, ASC environment variable or -asc must be set to asc.jar.\n");
            }   
@@ -197,8 +203,8 @@ sub compile_test {
     }
     $cmd = $cmd . " -import " . $builtinabc;
     if ( $js_test =~ /\/test\/decimal\// ) {
-	# hack to get decimal testcases compiled with -11 switch
-	$cmd = $cmd . " -11 ";
+		# hack to get decimal testcases compiled with -11 switch
+		$cmd = $cmd . " -11 ";
     }
     my $dir=&fix_leaf(substr($js_test,0,rindex($js_test,'/')));
     my $file=&fix_leaf(substr($js_test,rindex($js_test,'/')+1));
@@ -321,6 +327,9 @@ sub parse_args {
         } elsif ( $ARGV[$i] eq "-asc" ) {
             $asc = &fix_path($ARGV[$i+1]);
             $i++;
+        } elsif ( $ARGV[$i] eq "-recompile" ) {
+            $recompile = 1;
+            $i++;
         } elsif ( $ARGV[$i] eq "-builtinabc" ) {
             $builtinabc = &fix_path($ARGV[$i+1]);
             $i++;
@@ -360,6 +369,7 @@ sub usage {
         "-f <file> Redirect output to file named <file>\n" .
         "-asc <file> Set the path to asc.jar file\n" .
         "-builtinabc <file> Set the path to builtin.abc file.\n" .
+        "-recompile  Recompile all .abc files even if they already exist.\n" .
         "[file|dir ..] Add files or directories to test search path\n"
         );
 }

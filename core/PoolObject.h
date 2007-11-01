@@ -55,6 +55,7 @@ namespace avmplus
 		List<int, LIST_NonGCObjects> cpool_int;
 		List<uint32, LIST_NonGCObjects> cpool_uint;
 		List<double*, LIST_GCObjects> cpool_double;
+		List<DecimalRep*, LIST_RCObjects> cpool_decimal;
 		List<Stringp, LIST_RCObjects> cpool_string;
 		List<Namespace*, LIST_RCObjects> cpool_ns;
 		List<NamespaceSet*, LIST_GCObjects> cpool_ns_set;
@@ -86,6 +87,7 @@ namespace avmplus
 		uint32 constantIntCount;
 		uint32 constantUIntCount;
 		uint32 constantDoubleCount;
+        uint32 constantDecimalCount;
 		uint32 constantStringCount;
 		uint32 constantNsCount;
 		uint32 constantNsSetCount;

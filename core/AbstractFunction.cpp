@@ -218,7 +218,7 @@ namespace avmplus
 				Traits* t = paramTraits(i);
 				AvmAssert(t != VOID_TYPE);
 
-				if (t == NUMBER_TYPE) 
+				if (t == NUMBER_TYPE || t == DOUBLE_TYPE) 
 				{
 					out[i] =  core->doubleToAtom(*(double *)ap);
 					ap += 2;
@@ -232,6 +232,11 @@ namespace avmplus
 				{
 					out[i] = core->uintToAtom((uint32)*(Atom*) ap);
 					ap += sizeof(Atom) / sizeof(uint32);
+				}
+				else if (t == DECIMAL_TYPE)
+				{
+					out[i] = core->decimalToAtom(*(DecimalRep **)ap);
+					ap += sizeof(void *) / sizeof(uint32);;
 				}
 				else if (t == BOOLEAN_TYPE)
 				{
@@ -295,8 +300,10 @@ namespace avmplus
 			}
 			else
 			{
-				if (t == NUMBER_TYPE)
+				if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
 					restOffset += sizeof(double);
+				else if (t == DECIMAL_TYPE)
+					restOffset += sizeof(DecimalRep*);
 				else
 					restOffset += sizeof(Atom);
 				if (t->isInterface)
@@ -308,8 +315,10 @@ namespace avmplus
 			{
 				t = pool->resolveTypeName(pos, toplevel);
 				setParamType(i, t);
-				if (t == NUMBER_TYPE)
+				if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
 					restOffset += sizeof(double);
+				else if (t == DECIMAL_TYPE)
+					restOffset += sizeof(DecimalRep*);
 				else
 					restOffset += sizeof(Atom);
 			}
@@ -347,10 +356,19 @@ namespace avmplus
 							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
 						}
 					}
-					else if (t == NUMBER_TYPE)
+					else if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
 					{
 						value = !index ? core->kNaN : pool->getDefaultValue(toplevel, index, kind, t);
-						if (!(AvmCore::isInteger(value)||AvmCore::isDouble(value)))
+						if (!(AvmCore::isNumeric(value)))
+						{
+							Multiname qname(t->ns, t->name);
+							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
+						}
+					}
+					else if (t == DECIMAL_TYPE) 
+					{
+						value = !index ? core->dnNaNatom : pool->getDefaultValue(toplevel, index, kind, t);
+						if (!(AvmCore::isNumeric(value)))
 						{
 							Multiname qname(t->ns, t->name);
 							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));

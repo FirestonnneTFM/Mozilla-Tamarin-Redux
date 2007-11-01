@@ -129,6 +129,11 @@ namespace avmplus
 										   int& len,
 										   int radix=10,
 										   bool treatAsUnsigned=false);
+
+		static Stringp convertDecimalToStringRadix(AvmCore *core,
+												  decNumber *value,
+										          int radix);
+
 		static Stringp convertDoubleToStringRadix(AvmCore *core,
 												  double value,
 										          int radix);
@@ -143,12 +148,34 @@ namespace avmplus
 										  int &len,
 										  int mode = DTOSTR_NORMAL,
 										  int precision = 15);
+		static void convertDecimalToString(decNumber *value,
+										  wchar *buffer,
+										  int &len,
+										  int mode = DTOSTR_NORMAL,
+										  int precision = 34);
 		static bool convertStringToDouble(const wchar *s,
 										  int len,
 										  double *value,
 										  bool strict=false);
+		static bool convertStringToDecimal(const wchar *s,
+										  int len,
+										  decNumber *value,
+										  bool strict=false);
 		static double convertStringToNumber(const wchar* ptr, int strlen);
+		static decNumber* convertStringToNumber(decNumber *dn, const wchar* ptr, int strlen);
 		static int nextDigit(double *value);
+
+        static int int_divide(int lhs, int rhs);
+        static int int_remainder(int lhs, int rhs);
+
+		static bool decNumberIsInt(decNumber *value, int &ival, bool &isUint);
+		static bool decNumberIsInt29(decNumber *value, int &ival);
+
+		static decNumber* decNumberFromInt(decNumber *dn, int val);
+		static decNumber* decNumberFromUInt(decNumber *dn, uint32 val);
+		static decNumber* decNumberFromDouble(decNumber *dn, double val, decContext *ctx);
+
+		static double decNumberToDouble(decNumber *dn);
 
 	private:
 		static double powerOfTen(int exponent, double value);

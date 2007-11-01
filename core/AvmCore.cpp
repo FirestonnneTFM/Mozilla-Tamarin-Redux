@@ -68,6 +68,8 @@ namespace avmplus
 		NATIVE_CLASS(abcclass_String,				StringClass,	String)
 		NATIVE_CLASS(abcclass_Boolean,			BooleanClass,	bool)
 		NATIVE_CLASS(abcclass_Number,				NumberClass,	double)
+		NATIVE_CLASS(abcclass_double,				DoubleClass,	double)
+		NATIVE_CLASS(abcclass_decimal,				DecimalClass,	DecimalRep*)
 		NATIVE_CLASS(abcclass_int,				IntClass,		int)
 		NATIVE_CLASS(abcclass_uint,				UIntClass,		uint32)
 		NATIVE_CLASS(abcclass_Math,				MathClass,		double)
@@ -166,6 +168,69 @@ namespace avmplus
 		profiler		   = NULL;
 		callStack          = NULL;
         #endif /* DEBUGGER */
+
+		// some useful decimal constants
+
+		// initialize all the special_decimal values
+		{
+			decNumber tmp;
+            decContextDefault(&defaultDecContext, DEC_INIT_DECIMAL128);
+			/* I originally had storage for these decNumbers as part of the global frame of AvmCore.  The
+				problem was that they are not a multiple of 8 in size, so I couldn't use them in Atoms
+				along with a decimal type tag.  Now I'm allocating them to assure 8 byte alignment.  I could
+				go back to not allocating them if I was a little more careful */
+			special_decimal[sd_NaN] = sd_NaN_rep = 
+				allocDecimal(decNumberFromString(&tmp, "NaN", &defaultDecContext));
+			special_decimal[sd_NegInfinity] = sd_NegInfinity_rep =	
+				allocDecimal(decNumberFromString(&tmp, "-Infinity", &defaultDecContext));
+			special_decimal[sd_NegZero] = sd_NegZero_rep =		
+				allocDecimal(decNumberFromString(&tmp, "-0", &defaultDecContext));
+			special_decimal[sd_NegOne] = sd_NegOne_rep =		
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, -1));
+			special_decimal[sd_0] = sd_0_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 0));
+			special_decimal[sd_1] = sd_1_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 1));
+			special_decimal[sd_2] = sd_2_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 2));
+			special_decimal[sd_3] = sd_3_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 3));
+			special_decimal[sd_4] = sd_4_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 4));
+			special_decimal[sd_5] = sd_5_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 5));
+			special_decimal[sd_6] = sd_6_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 6));
+			special_decimal[sd_7] = sd_7_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 7));
+			special_decimal[sd_8] = sd_8_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 8));
+			special_decimal[sd_9] = sd_9_rep =				
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 9));
+			special_decimal[sd_10] = sd_10_rep =			
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 10));
+			special_decimal[sd_100] = sd_100_rep =			
+				allocDecimal(MathUtils::decNumberFromInt(&tmp, 100));
+			special_decimal[sd_point1] = sd_point1_rep =		
+				allocDecimal(decNumberFromString(&tmp, ".1", &defaultDecContext));
+			special_decimal[sd_point10] = sd_point10_rep =		
+				allocDecimal(decNumberFromString(&tmp, ".10", &defaultDecContext));
+			special_decimal[sd_point5] = sd_point5_rep =		
+				allocDecimal(decNumberFromString(&tmp, ".5", &defaultDecContext));
+			special_decimal[sd_point50] = sd_point50_rep =		
+				allocDecimal(decNumberFromString(&tmp, ".50", &defaultDecContext));
+			special_decimal[sd_point01] = sd_point01_rep =		
+				allocDecimal(decNumberFromString(&tmp, ".01", &defaultDecContext));
+			special_decimal[sd_Infinity] = sd_Infinity_rep =	
+				allocDecimal(decNumberFromString(&tmp, "Infinity", &defaultDecContext));
+			decNumberFromString(&dn2to32m1, "4294967295", &defaultDecContext);
+			decNumberFromString(&dn2to32, "4294967296", &defaultDecContext);
+			decNumberFromString(&dn2to31, "2147483648", &defaultDecContext);
+		}
+
+		decContextDefault(&mutableDecContext, DEC_INIT_DECIMAL128); // set the unchanging fields
+
+		dnNaNatom = decimalToAtom(special_decimal[sd_NaN]);
 
 		interrupted        = false;
 
@@ -625,12 +690,15 @@ return the result of the comparison ToPrimitive(x) == y.
             switch (ltype)
             {
 			case 0:
-			case kSpecialType:
 				return trueAtom;
             case kStringType:
 				if (lhs == rhs) return trueAtom;
 				return (*atomToString(lhs) == *atomToString(rhs)) ? trueAtom : falseAtom;
-            case kBooleanType:
+            case kSpecialType:
+                /*
+                  If both are undefined, return true.  If one is undefined and other is boolean,
+                  return false.  The test below will do the right thing.
+                 */
 			case kIntegerType:
 				return lhs == rhs ? trueAtom : falseAtom;
 			case kNamespaceType:
@@ -669,26 +737,87 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kDoubleType:
                 // C++ portability note -- if either arg is NaN, java == returns false, which matches ECMA.
                 return atomToDouble(lhs) == atomToDouble(rhs) ? trueAtom : falseAtom;
+			case kDecimalType: 
+				// two decimal numbers
+				DecimalRep *lnum = atomToDecimal(lhs);
+				DecimalRep *rnum = atomToDecimal(rhs);
+				if (decNumberIsNaN(&lnum->dn) || decNumberIsNaN(&rnum->dn))
+					return falseAtom;
+				// neither is NaN
+				if (decComp(&lnum->dn, &rnum->dn) == 0)
+					return trueAtom;
+				else
+					return falseAtom;
             }
         }
 		else
 		{
 			if (isNullOrUndefined(lhs) && isNullOrUndefined(rhs))
 				return trueAtom;
-            if (ltype == kIntegerType && rtype == kDoubleType)
-				return ((double)(lhs>>3)) == atomToDouble(rhs) ? trueAtom : falseAtom;
-            if (ltype == kDoubleType && rtype == kIntegerType)
-                return atomToDouble(lhs) == ((double)(rhs>>3)) ? trueAtom : falseAtom;
+            if (isNumeric(lhs) && isNumeric(rhs)) { // and we already know they are not the same type
+                int ival;
+                if (ltype == kDecimalType) {
+                    if (rtype == kDoubleType) {
+						DecimalRep *lrep = atomToDecimal(lhs);
+						decNumber *lnum = &lrep->dn;
+                        decNumber rval;
+                        MathUtils::decNumberFromDouble(&rval, atomToDouble(rhs), &defaultDecContext);
+						if (decNumberIsNaN(lnum) || decNumberIsNaN(&rval))
+							return false;
+                        if (decComp(lnum, &rval) == 0) // we promise not to call decComp with NaN
+                            return trueAtom;
+                        else return falseAtom;
+                    }
+                    else { // rtype == kIntegerType
+						DecimalRep *drep = atomToDecimal(lhs);
+                        if (MathUtils::decNumberIsInt29(&drep->dn, ival) && (ival == (rhs>>3)))
+                            return trueAtom;
+                        else return falseAtom;
+                    }
+                }
+                else if (rtype == kDecimalType) {
+                    if (ltype == kDoubleType) {
+						DecimalRep *rrep = atomToDecimal(rhs);
+						decNumber *rnum = &rrep->dn;
+                        decNumber lval;
+                        MathUtils::decNumberFromDouble(&lval, atomToDouble(lhs), &defaultDecContext);
+						if (decNumberIsNaN(rnum) || decNumberIsNaN(&lval))
+							return false;
+                        if (decComp(rnum, &lval) == 0) 
+                            return trueAtom;
+                        else return falseAtom;
+                    }
+                    else { // ltype == kIntegerType
+						DecimalRep *rrep = atomToDecimal(rhs);
+                        if (MathUtils::decNumberIsInt29(&rrep->dn, ival) && (ival == (lhs>>3)))
+                            return trueAtom;
+                        else return falseAtom;
+                    }
+                }
+                else if (ltype == kDoubleType) { // and rtype == kIntegerType
+                    return (atomToDouble(lhs) == ((double)(rhs>>3))) ? trueAtom : falseAtom;
+                }
+                else { // ltype == kIntegerType && rtype == kDoubleType
+                    return  (atomToDouble(rhs) == ((double)(lhs>>3))) ? trueAtom : falseAtom;
+                }
+            }
 
 			// 16. If Type(x) is Number and Type(y) is String,
 			// return the result of the comparison x == ToNumber(y).
-            if (isNumber(lhs) && isString(rhs))
-                return eq(lhs, doubleToAtom(number(rhs)));
+			if (isNumeric(lhs) && isString(rhs)) {
+				if (isDecimal(lhs))
+					return eq(lhs, decimalToAtom(decimalNumber(rhs))); 
+                else
+					return eq(lhs, doubleToAtom(doubleNumber(rhs)));
+			}
 			
 			// 17. If Type(x) is String and Type(y) is Number,
 			// return the result of the comparison ToNumber(x) == y.
-            if (isString(lhs) && isNumber(rhs))
-                return eq(doubleToAtom(number(lhs)), rhs);
+            if (isString(lhs) && isNumeric(rhs))
+				if (isDecimal(rhs))
+					return eq(decimalToAtom(decimalNumber(lhs)), rhs); 
+                else
+	                return eq(doubleToAtom(doubleNumber(lhs)), rhs);
 
 			// E4X 11.5.1, step 4.  Placed slightly lower then in the spec
 			// to handle quicker cases earlier.  No cases above should be comparing
@@ -700,22 +829,22 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 
 			// 18. If Type(x) is Boolean, return the result of the comparison ToNumber(x) == y.
-            if (ltype == kBooleanType)
-                return eq(lhs&~7|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
+            if (isBoolean(lhs))
+                return eq(((lhs>>1)&~7)|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
 			
 			// 19. If Type(y) is Boolean, return the result of the comparison x == ToNumber(y).
-            if (rtype == kBooleanType)
-                return eq(lhs, rhs&~7|kIntegerType);  // equal(lhs, toInteger(rhs))
+            if (isBoolean(rhs))
+                return eq(lhs, ((rhs>>1)&~7|kIntegerType));  // equal(lhs, toInteger(rhs))
 
 			// 20. If Type(x) is either String or Number and Type(y) is Object,
 			// return the result of the comparison x == ToPrimitive(y).
 
-            if ((isString(lhs) || isNumber(lhs)) && rtype == kObjectType)
+            if ((isString(lhs) || isNumeric(lhs)) && rtype == kObjectType)
 				return eq(lhs, atomToScriptObject(rhs)->defaultValue());
 
 			// 21. If Type(x) is Object and Type(y) is either String or Number,
 			// return the result of the comparison ToPrimitive(x) == y.
-            if ((isString(rhs) || isNumber(rhs)) && ltype == kObjectType)
+            if ((isString(rhs) || isNumeric(rhs)) && ltype == kObjectType)
 				return eq(atomToScriptObject(lhs)->defaultValue(), rhs);
         }
 		return falseAtom;
@@ -746,8 +875,21 @@ return the result of the comparison ToPrimitive(x) == y.
         }
 
 		// numeric compare
-        double dx = number(lhs);
-        double dy = number(rhs);
+
+		if (isDecimal(lhs) || isDecimal(rhs)) {
+			DecimalRep *drlhs = decimalNumber(lhs);
+			DecimalRep *drrhs = decimalNumber(rhs);
+			decNumber *dnlhs = &drlhs->dn;
+			decNumber *dnrhs = &drrhs->dn;
+			int comp;
+			if (decNumberIsNaN(dnlhs) || decNumberIsNaN(dnrhs))
+				return undefinedAtom;
+			comp = decComp(dnlhs, dnrhs);
+			return (comp < 0)? trueAtom : falseAtom;
+		}
+
+        double dx = doubleNumber(lhs);
+        double dy = doubleNumber(rhs);
         if (MathUtils::isNaN(dx)) return undefinedAtom;
         if (MathUtils::isNaN(dy)) return undefinedAtom;
         return dx < dy ? trueAtom : falseAtom;
@@ -756,7 +898,7 @@ return the result of the comparison ToPrimitive(x) == y.
     Atom AvmCore::stricteq(Atom lhs, Atom rhs)
     {
 		if (isNull(lhs)) return isNull(rhs) ? trueAtom : falseAtom;
-		if (isNull(rhs)) return isNull(lhs) ? trueAtom : falseAtom;
+		if (isNull(rhs)) return falseAtom; // We already know that lhs is not null
 
         int ltype = lhs & 7;
         int rtype = rhs & 7;
@@ -765,11 +907,13 @@ return the result of the comparison ToPrimitive(x) == y.
             // same type
             switch (ltype)
             {
-            case kSpecialType:
-				return trueAtom; // undefined is the only kSpecialType atom 
             case kStringType:
                 return (lhs==rhs || *string(lhs) == *string(rhs)) ? trueAtom : falseAtom;
-            case kBooleanType:
+            case kSpecialType:
+                /*
+                  If both are undefined, return true.  If one is undefined and other is boolean,
+                  return false.  The test below will do the right thing.
+                 */
             case kIntegerType:
             case kNamespaceType:
 				return lhs == rhs ? trueAtom : falseAtom;
@@ -788,14 +932,48 @@ return the result of the comparison ToPrimitive(x) == y.
             case kDoubleType:
                 // C++ portability note -- if either arg is NaN, java == returns false, which matches ECMA.
                 return atomToDouble(lhs) == atomToDouble(rhs) ? trueAtom : falseAtom;
+            case kDecimalType:
+				// two decimal numbers
+				DecimalRep *lnum = atomToDecimal(lhs);
+				DecimalRep *rnum = atomToDecimal(rhs);
+				if (decNumberIsNaN(&lnum->dn) || decNumberIsNaN(&rnum->dn))
+					return falseAtom;
+				// neither is NaN
+				if (decComp(&lnum->dn, &rnum->dn) == 0)
+					return trueAtom;
+				else
+					return falseAtom;
             }
         }
 		// Sometimes ints can hide in double atoms (neg zero for one)
 		else if ((ltype == kIntegerType) && (rtype == kDoubleType) || 
 			(rtype == kIntegerType) && (ltype == kDoubleType))
 		{
-			return number(lhs) == number(rhs) ? trueAtom : falseAtom;
+			return doubleNumber(lhs) == doubleNumber(rhs) ? trueAtom : falseAtom;
 		}
+		/*
+		else if ((ltype == kIntegerType) && (rtype == kDecimalType))
+		{
+			DecimalRep *rnum = atomToDecimal(rhs);
+			int lval = lhs >> 3;
+			int rval;
+			if (MathUtils::decNumberIsInt29(&rnum->dn, rval) && rval == lval)
+				return trueAtom;
+			else
+				return falseAtom;
+		}
+		else if
+			((rtype == kIntegerType) && (ltype == kDecimalType)) 
+		{
+			DecimalRep *lnum = atomToDecimal(lhs);
+			int rval = rhs >> 3;
+			int lval;
+			if (MathUtils::decNumberIsInt29(&lnum->dn, lval) && rval == lval)
+				return trueAtom;
+			else
+				return falseAtom;
+		}
+		*/
 
         return falseAtom;
     }
@@ -1191,15 +1369,21 @@ return the result of the comparison ToPrimitive(x) == y.
 			switch (atom&7)
 			{
 			case kIntegerType:
-				{
-					int i = atom>>3;
-					return urshift(i|-i,28)&~7 | kBooleanType;
-				}
-			case kBooleanType:
-				return atom;
+            {
+                int i = atom>>3;
+                if (i == 0)
+                    return falseAtom;
+                else
+                    return trueAtom;
+            }
+			case kSpecialType:
+                if (isBoolean(atom))
+                    return atom;
+                else
+                    return falseAtom;// undefined
 			case kObjectType:
 			case kNamespaceType:
-				return isNull(atom) ? falseAtom : trueAtom;
+				return trueAtom;  // We know that atom is not null or undefined
 			case kStringType:
 				if (isNull(atom)) return falseAtom;
 				return (atomToString(atom)->length() > 0) ? trueAtom : falseAtom;
@@ -1223,8 +1407,11 @@ return the result of the comparison ToPrimitive(x) == y.
 			switch (atom&7)
 			{
 			case kIntegerType:
-			case kBooleanType:
 				return (atom & ~7) != 0;
+			case kSpecialType:
+                if (!isBoolean(atom))
+                    return 0;
+				return (atom & ~15) != 0;
 			case kObjectType:
 			case kNamespaceType:
 				return !isNull(atom);
@@ -1257,31 +1444,36 @@ return the result of the comparison ToPrimitive(x) == y.
 		return isObject(atom) ? atomToScriptObject(atom)->defaultValue() : atom;
 	}
 
-    Atom AvmCore::numberAtom(Atom atom)
+    Atom AvmCore::numericAtom(Atom atom)
     {
 		if (!isNull(atom))
 		{
 			double value;
 			switch (atom&7)
 			{
-			case kSpecialType:
-				return kNaN;
+            case kSpecialType:
+                if (atom == undefinedAtom)
+                    return kNaN;
+                // it is a boolean
+                AvmAssert(isBoolean(atom));
+                return ((atom >> 1) & 8) | kIntegerType;
 			case kStringType:
 				value = atomToString(atom)->toNumber();
 				break;
 			default:
 				AvmAssert(false);
-			case kBooleanType:
-				return (atom&~7) | kIntegerType;
 			case kDoubleType:
 			case kIntegerType:
+			case kDecimalType:
 				return atom;
 			case kNamespaceType:
 				// return ToNumber(namespace->uri)
-				value = number(atomToNamespace(atom)->getURI()->atom());
+				value = doubleNumber(atomToNamespace(atom)->getURI()->atom());
 				break;
 			case kObjectType:
-				value = number(atomToScriptObject(atom)->defaultValue());
+				if (atom == undefinedAtom)
+					return kNaN;
+				value = doubleNumber(atomToScriptObject(atom)->defaultValue());
 				break;
 			}
 			return doubleToAtom(value);
@@ -1292,7 +1484,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 	
-    double AvmCore::number(Atom atom) const
+    double AvmCore::doubleNumber(Atom atom)
     {
 		int kind = atom&7;
 
@@ -1300,6 +1492,62 @@ return the result of the comparison ToPrimitive(x) == y.
 			return (double) ((sint32)atom>>3);
 		if (kind == kDoubleType)
 			return atomToDouble(atom);
+		if (kind == kDecimalType) {
+			double ret;
+            DecimalRep *val = atomToDecimal(atom);
+            SpecialDecimalIndex index = sd_NaN;	// init to pacify compiler
+			if (isSpecialDecimal(&val->dn, index)) {
+				switch (index) {
+					case sd_NaN:
+						ret = MathUtils::nan();
+						break;
+					case sd_NegInfinity:
+						ret = -MathUtils::infinity();
+						break;
+					case sd_NegZero:
+						ret = -0;
+						break;
+					case sd_NegOne:
+						ret = -1.0;
+						break;
+					case sd_0:
+					case sd_1:
+					case sd_2:
+					case sd_3:
+					case sd_4:
+					case sd_5:
+					case sd_6:
+					case sd_7:
+					case sd_8:
+					case sd_9:
+					case sd_10:
+						ret = (double)(index - sd_0);
+						break;
+					case sd_100:
+						ret = 100.0;
+						break;
+					case sd_point1:
+					case sd_point10:
+						ret = 0.1; // this is not exact, but the best we can hope for
+						break;
+					case sd_point5:
+					case sd_point50:
+						ret = 0.5;
+						break;
+					case sd_point01:
+						ret = 0.01;
+						break;
+					case sd_Infinity:
+						ret = MathUtils::infinity();
+						break;
+					default:
+						AvmAssert(0); // I should have all the cases covered
+						ret = 0; // to keep the compiler happy
+				}
+				return ret;
+			}
+			return MathUtils::decNumberToDouble(&val->dn);
+        }
 
 		if (!isNull(atom))
 		{
@@ -1308,14 +1556,15 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kStringType:
 				return atomToString(atom)->toNumber();
 			case kSpecialType:
-				return atomToDouble(kNaN);
-			case kBooleanType:
-				return (double) ((sint32)atom>>3);
+                if (!isBoolean(atom))
+                    return atomToDouble(kNaN);
+				else
+                    return (double) ((sint32)atom>>4);
 			case kNamespaceType:
-				return number(atomToNamespace(atom)->getURI()->atom());
+				return doubleNumber(atomToNamespace(atom)->getURI()->atom());
 			default: // number
 			case kObjectType:
-				return number(atomToScriptObject(atom)->defaultValue());
+				return doubleNumber(atomToScriptObject(atom)->defaultValue());
 			}
 		}
 		else
@@ -1325,24 +1574,90 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 
+    DecimalRep* AvmCore::decimalNumber(Atom atom)
+    {
+		int kind = atom&7;
+        int ival;
+		decNumber dn;
+		DecimalRep *result;
+
+		if (kind == kDecimalType) {
+			return atomToDecimal(atom);
+		}
+		if (kind == kIntegerType || kind == kSpecialType) {
+            if (kind == kIntegerType) {
+                ival = atom >> 3;
+            } else {
+                // special is undefined or boolean
+                if (atom == undefinedAtom)
+                    return special_decimal[sd_NaN];
+                // it's a boolean
+                ival = atom >> 4;
+            }
+			SpecialDecimalIndex index;
+			if (isSpecialDecimal(ival, index)) {
+				return special_decimal[index];
+			}
+			else
+				MathUtils::decNumberFromInt(&dn,ival);
+		}
+		else if (kind == kDoubleType) {
+			double dbl = atomToDouble(atom);
+			ival = (int)dbl;
+			if (ival == dbl){
+				SpecialDecimalIndex index;
+				if (isSpecialDecimal(ival, index))
+					return special_decimal[index];
+				// else fall through
+			}
+			else if (dbl == 0.5)
+				return special_decimal[sd_point5];
+			// other special fractions not representable exactly as double
+			MathUtils::decNumberFromDouble(&dn, atomToDouble(atom), &defaultDecContext);
+		} 
+		else if (!isNull(atom))
+		{
+			switch (kind)
+			{
+			case kStringType:
+				atomToString(atom)->toDecimal(&dn, &defaultDecContext);
+				break;
+			case kNamespaceType:
+				return decimalNumber(atomToNamespace(atom)->getURI()->atom());
+			default: // number
+			case kObjectType:
+				return decimalNumber(atomToScriptObject(atom)->defaultValue());
+			}
+		}
+		else
+		{
+			return special_decimal[sd_0];
+		}
+		result = allocDecimal(&dn);
+		return result;
+    }
+
     Stringp AvmCore::intern(Atom atom)
     {
 		if (!isNull(atom))
 		{
 			switch (atom&7)
 			{
-			case kBooleanType:
-				return booleanStrings[atom>>3];
+			case kSpecialType:
+                if (atom == undefinedAtom)
+                    return kundefined;
+                // its a boolean
+				return booleanStrings[atom>>4];
 			case kStringType:
 				return internString(atom);
 			case kNamespaceType:
 				return atomToNamespace(atom)->getURI();
-			case kSpecialType:
-				return kundefined;
 			case kObjectType:
 				return intern(atomToScriptObject(atom)->toString());
 			case kIntegerType:
 				return internInt(atom>>3);
+			case kDecimalType:
+				return internDecimal(atomToDecimal(atom));
 			case kDoubleType:
 			default: // number
 				return internDouble(atomToDouble(atom));
@@ -1392,6 +1707,20 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
+	
+	const char *roundNames[] = {"CEILING", "UP", "HALF_UP", "HALF_EVEN", "HALF_DOWN", "DOWN", "FLOOR"};
+	const char *usageNames[] = {"Number", "decimal", "double", "int", "uint"};
+	void AvmCore::formatNumberUsage(PrintWriter& buffer, int param) {
+		int u = param & 0x7;
+		int r = param >> 3 & 0x7;
+		int precision = param >> 6;
+		if (precision == 0)
+			precision = 34;
+		buffer << " [use: " << usageNames[u] << "rnd: " << roundNames[r];
+		buffer << ", prec: " << precision;
+		buffer << "]";
+	}
+
     void AvmCore::formatOpcode(PrintWriter& buffer, const byte *pc, AbcOpcode opcode, int off, PoolObject* pool)
     {
 		pc++;
@@ -1429,6 +1758,18 @@ return the result of the comparison ToPrimitive(x) == y.
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_double.size())
 					buffer << " " << *pool->cpool_double[index];
+				break;
+			}
+		case OP_pushdecimal:
+			{
+				buffer << opNames[opcode];
+				uint32 index = readU30(pc);
+				char valbuf[50];
+				if (index < pool->cpool_decimal.size()) {
+					DecimalRep *val = pool->cpool_decimal[index]; 
+					decNumberToString(&val->dn, valbuf);
+					buffer << " " << valbuf;
+				}
 				break;
 			}
 		case OP_pushnamespace:
@@ -1536,6 +1877,31 @@ return the result of the comparison ToPrimitive(x) == y.
 				buffer << opNames[opcode] << " " << (double)target;
 				break;
 			}
+
+		case OP_convert_m_p:
+		case OP_negate_p:
+		case OP_increment_p:
+		case OP_decrement_p:
+		case OP_add_p:
+		case OP_subtract_p:
+		case OP_multiply_p:
+		case OP_divide_p:
+		case OP_modulo_p:
+			{
+				buffer << opNames[opcode];
+				int param = readU30(pc);
+				formatNumberUsage(buffer, param);
+				break;
+			}
+		case OP_inclocal_p:
+		case OP_declocal_p:
+			{
+				int param = readU30(pc);
+				int lcl = readU30(pc);
+				buffer << opNames[opcode] << " " << lcl;
+				formatNumberUsage(buffer, param);
+				break;
+			}
 		default:
 			switch (opOperandCount[opcode])
 			{
@@ -1636,26 +2002,57 @@ return the result of the comparison ToPrimitive(x) == y.
 		return NULL;
 	}
 
-	void AvmCore::increment_d(Atom *ap, int delta)
+	void AvmCore::increment_d(Atom *ap, int delta, int decimalParam)
 	{
-		AvmAssert(isNumber(*ap));
-		if (isInteger(*ap))
-			*ap = intToAtom(delta+((sint32)*ap>>3));
-		else
+		AvmAssert(isNumeric(*ap));
+		switch ((AvmCore::NumberUsage)(decimalParam & 0x7)) {
+        case use_Number:
+            if (isInteger(*ap)) {
+                *ap = intToAtom(delta+((sint32)*ap>>3));
+                break;
+            }
+            if (!isDecimal(*ap)) {
+                *ap = doubleToAtom(doubleNumber(*ap)+delta);
+                break;
+            }
+            // fall into decimal case
+        case use_decimal:
+            if (delta == 1)
+				*ap = decimal_add(toDecimal(*ap), special_decimal[sd_1], decimalParam);
+			else  {// delta = -1
+				AvmAssert(delta == -1);
+				*ap = decimal_subtract(toDecimal(*ap), special_decimal[sd_1], decimalParam);
+			}
+            break;
+        case use_double:
 			*ap = doubleToAtom(atomToDouble(*ap)+delta);
+            break;
+        case use_int:
+            *ap = intToAtom(integer(*ap) + delta);
+            break;
+        case use_uint:
+            *ap = uintToAtom(toUInt32(*ap) + delta);
+            break;
+        }
 	}
 
 	void AvmCore::increment_i(Atom *ap, int delta)
 	{
 		switch (*ap & 7)
 		{
-		case kBooleanType:
 		case kIntegerType:
 			*ap = intToAtom(delta+((sint32)*ap>>3));
 			return;
 		case kDoubleType:
 			*ap = intToAtom((int)((sint32)atomToDouble(*ap)+delta));
 			return;
+        case kSpecialType:
+            if (isBoolean(*ap)) {
+                *ap = intToAtom(delta + ((sint32)*ap>>4));
+                return;
+            }
+            //otherwise fall into next case
+		case kDecimalType:
         default:
 			*ap = intToAtom(integer(*ap)+delta);
 			return;
@@ -1682,13 +2079,16 @@ return the result of the comparison ToPrimitive(x) == y.
 			lhs = traits.string_itraits;
 			break;
 
-		case kBooleanType:
-			lhs = traits.boolean_itraits;
+		case kSpecialType:
+            if (atom == undefinedAtom)
+                lhs = traits.void_itraits;
+			else
+				lhs = traits.boolean_itraits;
 			break;
 
 		case kIntegerType:
 			// ISSUE need special support for number value ranges
-			if (itraits == traits.number_itraits)
+			if (itraits == traits.number_itraits || itraits == traits.double_itraits || (itraits == traits.decimal_itraits))
 				return true;
 
 			lhs = traits.int_itraits;
@@ -1698,8 +2098,31 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 			break;
 
+		case kDecimalType:
+			{
+			DecimalRep *arep = atomToDecimal(atom);
+			if (itraits == traits.decimal_itraits)
+				return true;
+			if ((itraits == traits.int_itraits) || (itraits == traits.uint_itraits) || (itraits == traits.double_itraits) ||
+				(itraits == traits.number_itraits)) {
+				bool isInt, isUint;
+				int ival;
+				isInt = MathUtils::decNumberIsInt(&arep->dn, ival, isUint);
+				if (itraits == traits.int_itraits)
+					return isInt;
+				if (itraits == traits.uint_itraits)
+					return isUint;
+				if ((itraits == traits.double_itraits) || (itraits == traits.number_itraits)) {
+					// RES should I return "true" if in value range even if not exactly representable?
+					return (isInt || isUint);
+				}
+				}
+			lhs = traits.decimal_itraits;
+			break;
+			}
 		case kDoubleType:
-			lhs = traits.number_itraits;
+			lhs = traits.double_itraits;
+			// RES at least some double values are reasonable decimal ones
 			// ISSUE there must be a better way...
 			if (itraits == traits.int_itraits)
 			{
@@ -1714,10 +2137,9 @@ return the result of the comparison ToPrimitive(x) == y.
 				unsigned i = (unsigned)d;
 				return d == (double)i;
 			}
+			if (itraits == traits.number_itraits)
+				return true;
 			break;
-
-		case kSpecialType:
-			return itraits == traits.void_itraits;
 
 		case kObjectType: {
 			lhs = atomToScriptObject(atom)->traits();
@@ -1732,6 +2154,96 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		return lhs->containsInterface(itraits)!=0;
     }
+
+	decNumber AvmCore::dn2to32m1, AvmCore::dn2to32, AvmCore::dn2to31;
+	bool AvmCore::isSpecialDecimal(int value, AvmCore::SpecialDecimalIndex &index) {
+		if (value >= -1) {
+			if (value <= 10) {
+				index = (SpecialDecimalIndex)((int)sd_NegOne + (value + 1));
+				return true;
+			}
+			if (value == 100) {
+				index = sd_100;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool AvmCore::isSpecialDecimal(decNumber *value, AvmCore::SpecialDecimalIndex &index) {
+		if (decNumberIsNaN(value)) {
+			index = sd_NaN;
+			return true;
+		}
+		if (decNumberIsInfinite(value)) {
+			if (decNumberIsNegative(value))
+				index = sd_NegInfinity;
+			else
+				index = sd_Infinity;
+			return true;
+		}
+		if (decNumberIsZero(value)) {
+			if (decNumberIsNegative(value))
+				index = sd_NegZero;
+			else
+				index = sd_0;
+			return true;
+		}
+			
+		if ((value->exponent < -2) || ((value->digits + value->exponent) > 3)) {
+            return false;
+        }
+		if (value->exponent >= 0) {
+			int ival = value->lsu[0];	// digits <= 3, so the value fits in a single unit
+			if (decNumberIsNegative(value))
+				ival = -ival;
+			AvmAssert(value->exponent <= 2); // since value->digits >= 1;
+			switch (value->exponent) {
+				case 1: 
+					ival *= 10;
+					break;
+				case 2:
+					ival *= 100;
+			}
+			return AvmCore::isSpecialDecimal(ival, index); // already taken care of 0
+		}
+		else { // less than 1
+			if (decNumberIsNegative(value))
+				return false; // there are no special negative fractions
+			int ival = value->lsu[0];
+			switch (value->exponent) {
+				case -1:
+					if (ival == 1) {
+						index = sd_point1;
+						return true;
+					}
+					if (ival == 5) {
+						index = sd_point5;
+						return true;
+					}
+					return false;
+				case -2:
+					if (ival == 1) {
+						index = sd_point01;
+						return true;
+					}
+					if (ival == 10) {
+						index = sd_point10;
+						return true;
+					}
+					if (ival == 50) {
+						index = sd_point50;
+						return true;
+					}
+					return false;
+			}
+		}
+		AvmAssert(0);	// just make sure I didn't forget a case
+		return false;	// I don't this can be reached
+					
+	}
+
+		
 
 	Stringp AvmCore::coerce_s(Atom atom)
 	{
@@ -1753,11 +2265,13 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kStringType:
 				return atomToString(atom);
 			case kSpecialType:
-				return kundefined;
-			case kBooleanType:
-				return booleanStrings[atom>>3];
+				if (atom == undefinedAtom)
+					return kundefined;
+				return booleanStrings[atom>>4];
 			case kIntegerType:
 				return intToString (int(atom>>3));
+			case kDecimalType:
+				return decimalToString(atomToDecimal(atom));
 			case kDoubleType:
 			default: // number
 				return doubleToString(atomToDouble(atom));
@@ -2327,10 +2841,11 @@ return the result of the comparison ToPrimitive(x) == y.
 				}
 				break;
 			case kSpecialType:
-				return kundefined;
+				if (a == undefinedAtom)
+					return  kundefined;
 			case kIntegerType:
-			case kBooleanType:
 			case kDoubleType:
+			case kDecimalType:
 			default:
 				return string(a);
 			}
@@ -2482,15 +2997,16 @@ return the result of the comparison ToPrimitive(x) == y.
 					return kobject;
 				}
 
-			case kBooleanType:
+			case kSpecialType:
+				if (arg == undefinedAtom)
+					return kundefined;
 				return kboolean;
 
+
+			case kDecimalType:
 			case kIntegerType:
 			case kDoubleType:
 				return knumber;
-
-			case kSpecialType:
-				return kundefined;
 
 			case kStringType:
 				return kstring;
@@ -2561,6 +3077,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		_sampler.postsweep();
 #endif
 	}
+
 
 	bool wcharEquals(const wchar *s1, const wchar *s2)
 	{
@@ -2793,6 +3310,14 @@ return the result of the comparison ToPrimitive(x) == y.
 		return NULL;
 	}
 #endif
+
+    Stringp AvmCore::internDecimal(DecimalRep *d)
+    {
+		wchar buffer[512];	// RES how big need this buffer be?
+		int len;
+		MathUtils::convertDecimalToString(&d->dn, buffer, len);
+		return internAlloc(buffer, len);
+    }
 
 	Stringp AvmCore::internAllocUtf8(const byte *cs, int len8)
 	{
@@ -3089,6 +3614,22 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
+	Atom AvmCore::decNumberToAtom(decNumber *n) {
+		SpecialDecimalIndex index = sd_NaN;	// init to pacify compiler
+		if (isSpecialDecimal(n, index)) {
+			return (Atom)special_decimal[index] | kDecimalType;
+		}
+		return ((Atom)allocDecimal(n) | kDecimalType); 
+	}
+
+	Atom AvmCore::decimalToAtom(DecimalRep *n) {
+		SpecialDecimalIndex index = sd_NaN;	// init to pacify compiler
+		if (isSpecialDecimal(&n->dn, index)) {
+			return (Atom)special_decimal[index] | kDecimalType;
+		}
+		return (Atom)n | kDecimalType;
+	}
+
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 	// ignore warning that inline asm disables global optimization in this function
 	#ifdef _MSC_VER
@@ -3234,10 +3775,12 @@ return the result of the comparison ToPrimitive(x) == y.
 						concatStrings(atomToString((atom&~7)==0 ? kEmptyString->atom() : atom),
 													quotes));
 				}
+			case kDecimalType:
+				return decimalToString(atomToDecimal(atom));
 			case kSpecialType:
-				return kundefined;
-			case kBooleanType:
-				return booleanStrings[atom>>3];
+				if (atom == undefinedAtom)
+					return kundefined;
+				return booleanStrings[atom>>4];
 			case kIntegerType:
 				return intToString((int)(atom>>3));
 			case kDoubleType:
@@ -3259,6 +3802,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC()) String(buffer, len);
 	}
 #endif
+
 
     /**
      * traits with base traits.  These should only be used
@@ -3342,6 +3886,14 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC()) String(buffer, len);
 	}
 
+	Stringp AvmCore::decimalToString(DecimalRep *d)
+	{
+		wchar buffer[512];  // RES how big must this be?
+		int len;
+		MathUtils::convertDecimalToString(&d->dn, buffer, len, MathUtils::DTOSTR_NORMAL,15);
+		return new (GetGC()) String(buffer, len);
+	}
+
 	#ifdef DEBUGGER
 	StackTrace* AvmCore::newStackTrace()
 	{
@@ -3364,6 +3916,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return stackTrace;
 	}
 
+
 	#ifdef _DEBUG
 	void AvmCore::dumpStackTrace()
 	{
@@ -3372,15 +3925,94 @@ return the result of the comparison ToPrimitive(x) == y.
 		AvmDebugMsg(false, buffer.c_str());
 	}
 	#endif
-	#endif /* DEBUGGER */
 
-	int AvmCore::integer(Atom atom) const
+    #endif /* DEBUGGER */
+
+
+	/*******   Basic decimal arithmetic *******/
+
+	
+	Atom AvmCore::decimal_add(DecimalRep *lhs, DecimalRep *rhs, int param) {
+		mutableDecContext.round = (rounding) ((param >>3) & 0x7);
+		int p = param >> 6;
+		mutableDecContext.digits = (p == 0)? 34 : p;
+		decNumber result;
+		return decNumberToAtom(decNumberAdd(&result, &lhs->dn, &rhs->dn, &mutableDecContext));
+	}
+
+	Atom AvmCore::decimal_subtract( DecimalRep *lhs, DecimalRep *rhs, int param){
+		mutableDecContext.round = (rounding) ((param >>3) & 0x7);
+		int p = param >> 6;
+		mutableDecContext.digits = (p == 0)? 34 : p;
+		decNumber result;
+		return decNumberToAtom(decNumberSubtract(&result, &lhs->dn, &rhs->dn, &mutableDecContext));
+	}
+
+	Atom AvmCore::decimal_multiply(DecimalRep *lhs, DecimalRep *rhs, int param){
+		mutableDecContext.round = (rounding) ((param >>3) & 0x7);
+		int p = param >> 6;
+		mutableDecContext.digits = (p == 0)? 34 : p;
+		decNumber result;
+		return decNumberToAtom(decNumberMultiply(&result, &lhs->dn, &rhs->dn, &mutableDecContext));
+	}
+
+	Atom AvmCore::decimal_divide(DecimalRep *lhs, DecimalRep *rhs, int param){
+		mutableDecContext.round = (rounding) ((param >>3) & 0x7);
+		int p = param >> 6;
+		mutableDecContext.digits = (p == 0)? 34 : p;
+		decNumber result;
+		return decNumberToAtom(decNumberDivide(&result, &lhs->dn, &rhs->dn, &mutableDecContext));
+	}
+
+	Atom AvmCore::decimal_remainder(DecimalRep *lhs, DecimalRep *rhs, int param){
+		mutableDecContext.round = (rounding) ((param >>3) & 0x7);
+		int p = param >> 6;
+		mutableDecContext.digits = (p == 0)? 34 : p;
+		decNumber result;
+		/* In what I think is a bug, the decNumber code uses the digits field of the context in
+			a strange way for remainder.  There is a single routine used for both division and
+			remainder.  If the dividend cannot fit in digits, it throws, even though the remainder
+			can clearly fit.  Until that gets fixed, we do the remainder at full precision and
+			round the result to the desired precision
+			*/
+		if (mutableDecContext.digits != 34) {
+			decNumber temp;
+			decNumberRemainder(&temp, &lhs->dn, &rhs->dn, &defaultDecContext);
+			decNumberPlus(&result, &temp, &mutableDecContext);
+		} else {
+			decNumberRemainder(&result, &lhs->dn, &rhs->dn, &mutableDecContext);
+		}
+		return decNumberToAtom(&result);
+	}
+
+	Atom AvmCore::decimal_negate(DecimalRep *lhs, int param){
+		mutableDecContext.round = (rounding) ((param >>3) & 0x7);
+		int p = param >> 6;
+		mutableDecContext.digits = (p == 0)? 34 : p;
+		if (decNumberIsZero(&lhs->dn)) {
+			// decNumberMinus doesn't convert between 0 and -0
+			if (decNumberIsNegative(&lhs->dn))
+				return decimalToAtom(special_decimal[sd_0]);
+			else
+				return decimalToAtom(special_decimal[sd_NegZero]);
+		}
+		decNumber result;
+		return decNumberToAtom(decNumberMinus(&result, &lhs->dn, &mutableDecContext));
+	}
+
+
+	int AvmCore::integer(Atom atom)
 	{
-		if ((atom & 7) == kIntegerType || (atom&7) == kBooleanType) {
+		if ((atom & 7) == kIntegerType) {
 			return atom >> 3;
+		} else if (isBoolean(atom)) {
+            return atom >> 4;
+		} else if ((atom & 7) == kDecimalType) {
+			DecimalRep *drep = decimalNumber(atom);
+			return decimalToInt32(drep);
 		} else {
 			// TODO optimize the code below.
-			double d = number(atom);
+			double d = doubleNumber(atom);
 			return integer_d(d);
 		}
 	}
@@ -3420,7 +4052,7 @@ return the result of the comparison ToPrimitive(x) == y.
         asm("movups %1, %%xmm0;"
             "cvttsd2si %%xmm0, %%eax;"
             "movl %%eax, %0" : "=r" (id) : "m" (d) : "%eax");
-        if (id != (int) 0x80000000)
+        if (id != (int)0x80000000)
             return id;
 		#endif
 
@@ -3473,6 +4105,46 @@ return the result of the comparison ToPrimitive(x) == y.
 		else
 		{
 			return MathUtils::real2int(d < 0.0 ? -ad : ad);
+		}
+	}
+
+
+	int AvmCore::decimalToInt32(DecimalRep *drep) {
+		decNumber *dn = &drep->dn;
+		// model behavior on doubleToInt32.
+		// step 2
+		if (decNumberIsNaN(dn) || decNumberIsInfinite(dn) || decNumberIsZero(dn))
+			return 0;
+		decContext dctx;
+		decContextDefault(&dctx, DEC_INIT_DECIMAL128);
+		dctx.round = DEC_ROUND_DOWN;
+		decNumber dnabs, dnad, dnmod;
+		// step 3 (round toward 0)
+		decNumberToIntegralValue(&dnad, decNumberAbs(&dnabs, dn, &dctx), &dctx);
+		// step 4
+		if (decComp(&dnad, &dn2to32m1) > 0) {
+			decNumberRemainder(&dnmod, &dnad, &dn2to32, &dctx);
+			decNumberCopy(&dnad, &dnmod);
+		}
+		// step 5
+		if (decComp(&dnad, &dn2to31) >= 0) {
+			int intVal;
+			bool isu;
+			decNumber dval;
+			decNumberSubtract(&dval, &dnad, &dn2to31, &dctx);
+			MathUtils::decNumberIsInt(&dval, intVal, isu); // will always be true
+			if (decNumberIsNegative(dn)) {
+				return 0x80000000 - intVal;
+			}
+			else {
+				return 0x80000000 + intVal;
+			}
+		}
+		else {
+			int intVal;
+			bool isu;
+			MathUtils::decNumberIsInt(&dnad, intVal, isu);
+			return decNumberIsNegative(dn)? -intVal : intVal;
 		}
 	}
 
@@ -3622,6 +4294,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if(!isNull(atom)) {
 			switch(atom&7)
 			{	
+				case kDecimalType:
 				case kStringType:
 				case kObjectType:
 				case kNamespaceType:
@@ -3637,6 +4310,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		case kStringType:
 		case kObjectType:
 		case kNamespaceType:
+		case kDecimalType:
 #ifdef MMGC_DRC
 			if(!isNull(atomNew))
 				((MMgc::RCObject*)(atomNew&~7))->IncrementRef();
