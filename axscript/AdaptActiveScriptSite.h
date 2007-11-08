@@ -46,7 +46,7 @@ namespace axtam
 		friend class AdaptActiveScriptSiteClass;
 		AdaptActiveScriptSite(VTable* vtable, ScriptObject* prototype, IActiveScriptSite *);
 	private:
-		Atom GetItemInfo(Stringp name, int flag);
+		ArrayObject *GetItemInfo(Stringp name, unsigned flags);
 		Stringp GetDocVersionString() {return NULL;}
 
 		// *sob* - this is still confusing MarkH

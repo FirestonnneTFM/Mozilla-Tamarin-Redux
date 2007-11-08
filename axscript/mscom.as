@@ -44,46 +44,94 @@ package axtam
 	{
 		public native static function getAvmplusVersion():String
 		public native static function write(s:String):void
+		public native static function trace(a:Array):void
 		public native static function debugger():void
 		public native static function isDebugger():Boolean
 		public native static function nativeDebugBreak():void
 	}
 }
 
-package axtam.com {
-	public class constants {
-		public static const E_NOTIMPL = 0x80004001
+package 
+{
+	// a global 'print' statement...
+	public function print(...s)
+	{
+		axtam.System.trace(s)
 	}
 
+}
+
+package axtam.com {
 	// Its not clear if we should subclass the standard 'Error', but given
 	// it has its own concept of 'Message' and 'ID', it doesn't seem a good fit.
 	// Maybe a new base-class should be introduced.
 	public dynamic class Error
 	{
+		public static const E_NOTIMPL = 0x80004001
+		public static const E_INVALIDARG = 0x80070057
+		public static const E_UNEXPECTED = 0x8000ffff
+		public static const E_FAIL = 0x80004005
+		public static const E_NOINTERFACE = 0x80000004
+
 		public var hresult: int
 		function Error(hresult) {
 			this.hresult = hresult;
-			axtam.System.write('Error constructed\n')
+			print('Error constructed')
 		}
 
-		public native static function getErrorMessage(index:int):String;
-	}
+		prototype.toString = function():String
+		{
+			var e:axtam.com.Error = this
+			return e.message !== "" ? e.name + ": " + e.message : e.name;
+		}
+		_setPropertyIsEnumerable(prototype, "toString", false);
 
-	public class MSCom
-	{
-		// this is a native class that manages the 'dynamic' properties
-		// hiding behind a COM IDispatch/IDispatchEx interfaces.
-		// It can only be created by native code.
+		public native static function getErrorMessage(index:int):String;
+
+		public static function throwError(hresult:int, ... rest)
+		{
+			// todo: rich error support?
+			//throw new axtam.com.Error(hresult);
+		}
+
 	}
+	// constants go directly in the axtam.com package.
+	public const SCRIPTINFO_IUNKNOWN = 0x00000001
+	public const SCRIPTINFO_ITYPEINFO = 0x00000002
+
+	public const SCRIPTITEM_ISVISIBLE = 0x00000002
+	public const SCRIPTITEM_ISSOURCE = 0x00000004
+	public const SCRIPTITEM_GLOBALMEMBERS = 0x00000008
+	public const SCRIPTITEM_ISPERSISTENT = 0x00000040
+	public const SCRIPTITEM_CODEONLY = 0x00000200
+	public const SCRIPTITEM_NOCODE = 0x00000400
+	
 }
 
 package axtam.com.adaptors.consumer {
 	// scripting interfaces we consume in AS (ie, implemented externally)
 	// Each method listed here corresponds to a native method in the engine, 
-	// which inturn delegates to the IActiveScriptSite COM object.
-	public class ScriptSite
+	// which inturn delegates to the real COM object.
+	// Note that some of these classes have no scriptable methods, but they
+	// are used internally
+	public class IUnknown
 	{
-		public native function GetItemInfo(name:String, flag:int):Object
+	}
+
+	// XXX - technically the rest of these 'derive' from IUnknown...
+	public class IDispatch
+	{
+	}
+
+	public class ITypeInfo
+	{
+	}
+
+	public class IActiveScriptSite
+	{
+		// somewhat like GetItemInfo() - but gets both IDispatch and ITypelib,
+		// and wraps them in a ScriptObject which can be used from script.
+		public native function GetItemInfo(name:String, flags:uint):Array
 		public native function GetDocVersionString(): String
 	}
 }
@@ -116,19 +164,18 @@ package {
 
 package {
 
-    import avmplus.*; // for our Domain clone - either it should die, or we rename the package in our clone!
-
 	class ScriptEngine {
 			public var domain;
+			public var state:int;
 			public function ScriptEngine() {
 			}
 			public function InitNew() {
 				//domain = Domain.currentDomain
-				domain = new Domain(null)
+				domain = new axtam.Domain(null)
 			}
 			public function ParseScriptText(code:String, itemName:String, context:Object, delim:String, sourceCookie:int, lineNumber:int, flags:int) {
-				axtam.System.write('ParseScriptText\n')
-				axtam.System.write(code)
+				print('ParseScriptText')
+				print(code)
 				// XXX - this is wrong - we should only do the parse and generation
 				// of bytecode here.  We should execute all such blocks at 
 				// SetScriptState(SCRIPTSTATE_RUNNING) time.
@@ -137,14 +184,42 @@ package {
 			}
 			// This function is called as a 'named item' is added to the environment.
 			// Examples include IE's 'window' object.
-			public function AddNamedItem(name:String, flags:int):void
+			public function AddNamedItem(name:String, flags:uint):void
 			{
-				axtam.System.write('AddNamedItem(' + name + ',' + flags + ')\n')
-				var site = new axtam.com.adaptors.consumer.ScriptSite()
-				var info = site.GetItemInfo(name, 0)
-				//axtam.System.write(info)
-				domain.addNamedScript(name, info)
+				print('AddNamedItem(', name, flags)
+				var site = new axtam.com.adaptors.consumer.IActiveScriptSite()
+				// MS docs say we should avoid grabbing typeinfo unless we
+				// really need it.  At this stage, we need it if the item is
+				// "global", and later will need it if it sources events
+				var gii_flags:uint = axtam.com.SCRIPTINFO_IUNKNOWN
+				if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS)
+					gii_flags |= axtam.com.SCRIPTINFO_ITYPEINFO
+
+				var items = site.GetItemInfo(name, gii_flags)
+				var dispatch = items[0]
+				var typeinfo = items[1]
+				domain.global[name] = dispatch
+				// but we also need to tell the VM exactly what 'scope'
+				// provides this object.
+				domain.addNamedScriptObject(name)
+				// if its global, we enumerate items and make them public - all 
+				// this is done inside exposeGlobalMembers
+				if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS && typeinfo != null) {
+					domain.exposeGlobalMembers(dispatch, typeinfo)
+				}
 			}
+
+			public function GetScriptState(): uint
+			{
+				return state;
+			}
+
+			public function SetScriptState(new_state:uint): void
+			{
+				// don't allow new state transitions once we are closed.
+				axtam.com.Error.throwError(axtam.com.Error.E_INVALIDARG)
+			}
+
 	}
 
 	public var engine = new ScriptEngine()

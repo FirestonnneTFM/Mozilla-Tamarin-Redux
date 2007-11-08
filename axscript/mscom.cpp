@@ -41,21 +41,21 @@
 
 namespace axtam
 {
-	MSCom::MSCom(VTable* vtable, ScriptObject* prototype, IDispatch *pDisp)
-		: ScriptObject(vtable, prototype)
+	MSIDispatchConsumer::MSIDispatchConsumer(VTable* vtable, ScriptObject* prototype, IDispatch *pDisp)
+		: MSIUnknownConsumer(vtable, prototype, pDisp, __uuidof(IDispatch))
 	{
-		disp = pDisp; // must have an IDispatch
-		AvmAssert(disp != 0);
-		dispex = pDisp; // dispex is optional
+		typedAttrs = new (core()->GetGC()) MultinameHashtable();
 	}
 
-	Atom MSCom::callProperty(avmplus::Multiname *name, int argc, avmplus::Atom *argv)
+
+	Atom MSIDispatchConsumer::callProperty(avmplus::Multiname *name, int argc, avmplus::Atom *argv)
 	{
 		// Not sure how to best handle this re 'builtin' names, such as toString()
 		// XXX - need a map of DISPIDs to speed things up, and/or optimizations
 		// using the typelib.
 		DISPID id;
 		AXTam *axcore = (AXTam *)core();
+		IDispatch *disp = (IDispatch *)getDispatch();
 		OLECHAR *olename = (OLECHAR *)name->getName()->c_str();
 		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
 		if (hr == DISP_E_UNKNOWNNAME) {
@@ -85,8 +85,36 @@ namespace axtam
 		return axcore->toAtom(ret);
 	}
 
-	Atom MSCom::getAtomProperty(Atom name) const {
+	// ScriptObject::setMultinameProperty checks if our traits have 'needsHashtable' - 
+	// but we don't.  Its possible 'needsHashtable' is misnamed and means more like 'isDynamic'
+	// so we should revisit this...
+	void MSIDispatchConsumer::setMultinameProperty(Multiname* name, Atom value)
+	{
+		// its possible we should just call setStringProperty(), which calls
+		// setAtomProperty(), and we should add our impl there - but let's see
+		// if we can get away without that for now...
+		DISPID id;
 		AXTam *axcore = (AXTam *)core();
+		OLECHAR *olename = (OLECHAR *)name->getName()->c_str();
+		IDispatch *disp = (IDispatch *)getDispatch();
+		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
+		// ScriptObject::setMultinameProperty just throws an exception, so
+		// no point trying it...
+		if (FAILED(hr))
+			axcore->throwCOMError(hr);
+		// Now create args for the call.
+		EXCEPINFO ei;
+		CComVariant arg;
+		axcore->atomToVARIANT(value, &arg);
+		DISPPARAMS params = {&arg, NULL, 1, 0};
+		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_PROPERTYPUT, &params, NULL, &ei, NULL);
+		if (FAILED(hr))
+			axcore->throwCOMError(hr, &ei);
+	}
+
+	Atom MSIDispatchConsumer::getAtomProperty(Atom name) const {
+		AXTam *axcore = (AXTam *)core();
+		IDispatch *disp = (IDispatch *)getDispatch();
 		if (!axcore->isString(name))
 			axcore->toplevel->throwTypeError(kCheckTypeFailedError);
 		DISPID id;
@@ -94,8 +122,12 @@ namespace axtam
 		OLECHAR *olename = (OLECHAR *)axcore->atomToString(name)->c_str();
 		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
 		if (hr == DISP_E_UNKNOWNNAME) {
-			// not a name this object has - see if its builtin.
+			// not a name this object has - do we need to see if its builtin?
+			// If we call ScriptObject::getAtomProperty() with an unknown name,
+			// it throws an exception, where we just want undefinedAtom.
+			// XXX - but we must call the base for now to resolve 'Object' etc
 			return ScriptObject::getAtomProperty(name);
+			//return undefinedAtom;
 		}
 		if (FAILED(hr))
 			axcore->throwCOMError(hr);
@@ -109,32 +141,54 @@ namespace axtam
 	}
 
 
-	BEGIN_NATIVE_MAP(MSComClass)
+	BEGIN_NATIVE_MAP(MSIUnknownConsumerClass)
 	END_NATIVE_MAP()
 
-	MSComClass::MSComClass(VTable *cvtable)
+	MSIUnknownConsumerClass::MSIUnknownConsumerClass(VTable *cvtable)
 		: ClassClosure(cvtable)
     {
 		AXTam* core = (AXTam*)this->core();
-//		if (core->systemClass == NULL) {
-//			core->systemClass = this;
-//		}
 		// should only be initialized once!
-		AvmAssert(!core->mscomClass);
-		core->mscomClass = this;
+		AvmAssert(!core->unknownClass);
+		core->unknownClass = this;
 
 		createVanillaPrototype();
 	}
 
-	MSComClass::~MSComClass()
+	MSIUnknownConsumerClass::~MSIUnknownConsumerClass()
 	{
 	}
 
 	// Function called as constructor ... not supported from user code
-	MSCom* MSComClass::create(IDispatch* p)
+	MSIUnknownConsumer* MSIUnknownConsumerClass::create(IUnknown* p, const IID &iid)
 	{
 		VTable* ivtable = this->ivtable();
-		MSCom *o = new (core()->GetGC(), ivtable->getExtraSize()) MSCom(ivtable, prototype, p);
+		MSIUnknownConsumer *o = new (core()->GetGC(), ivtable->getExtraSize()) MSIUnknownConsumer(ivtable, prototype, p, iid);
+		return o;
+	}
+
+	BEGIN_NATIVE_MAP(MSIDispatchConsumerClass)
+	END_NATIVE_MAP()
+
+	MSIDispatchConsumerClass::MSIDispatchConsumerClass(VTable *cvtable)
+		: ClassClosure(cvtable)
+    {
+		AXTam* core = (AXTam*)this->core();
+		// should only be initialized once!
+		AvmAssert(!core->dispatchClass);
+		core->dispatchClass= this;
+
+		createVanillaPrototype();
+	}
+
+	MSIDispatchConsumerClass::~MSIDispatchConsumerClass()
+	{
+	}
+
+	MSIDispatchConsumer* MSIDispatchConsumerClass::create(IDispatch* p)
+	{
+		VTable* ivtable = this->ivtable();
+		MSIDispatchConsumer *o = new (core()->GetGC(), ivtable->getExtraSize()) MSIDispatchConsumer(ivtable, prototype, p);
 		return o;
 	}
 

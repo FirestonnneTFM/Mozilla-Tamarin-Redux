@@ -45,11 +45,12 @@ namespace axtam
 	AdaptActiveScriptSite::AdaptActiveScriptSite(VTable* vtable, ScriptObject* prototype, IActiveScriptSite *pSite)
 		: ScriptObject(vtable, prototype)
 	{
-		// MarkH is quite confused about this - we are never constructed!!!!!
+		// MarkH is quite confused about this - we are never constructed - presumably due to the
+		// fact AS code is what creates us.
 		//site = pSite;
 	}
 
-	Atom AdaptActiveScriptSite::GetItemInfo(Stringp name, int flag)
+	ArrayObject *AdaptActiveScriptSite::GetItemInfo(Stringp name, unsigned flags)
 	{
 		AXTam* core = (AXTam *)this->core();
 		CComPtr<IActiveScriptSite> site;
@@ -58,21 +59,26 @@ namespace axtam
 			core->throwCOMError(hr);
 		CComPtr<IUnknown> unk;
 		CComPtr<ITypeInfo> tlb;
-		hr = site->GetItemInfo((OLECHAR *)name->c_str(), SCRIPTINFO_IUNKNOWN, &unk, &tlb);
-		if (FAILED(hr) || !unk)
+		hr = site->GetItemInfo((OLECHAR *)name->c_str(), flags, &unk, &tlb);
+		if (FAILED(hr))
 			core->throwCOMError(hr);
-		// XXX - work out how to return both unk and tlb
-		CComQIPtr<IDispatch, &IID_IDispatch> disp(unk);
-		AvmAssert(disp!=0); // expect only IDispatch objects back!
-		if (disp)
-			return core->toAtom(disp);
-		return undefinedAtom;
+		Atom vals[2] = {nullObjectAtom, nullObjectAtom};
+		if (unk) {
+			CComQIPtr<IDispatch, &IID_IDispatch> disp(unk);
+			AvmAssert(disp!=0); // expect only IDispatch objects back!
+			vals[0] = core->toAtom(disp);
+		}
+		if (tlb)
+			vals[1] = core->toAtom((IUnknown *)tlb, __uuidof(ITypeInfo));
+		ArrayObject *ret = toplevel()->arrayClass->newArray(2);
+		ret->push(vals, 2);
+		return ret;
 	}
 
 
 	BEGIN_NATIVE_MAP(AdaptActiveScriptSiteClass)
-		NATIVE_METHOD(axtam_com_adaptors_consumer_ScriptSite_GetItemInfo, AdaptActiveScriptSite::GetItemInfo)
-		NATIVE_METHOD(axtam_com_adaptors_consumer_ScriptSite_GetDocVersionString, AdaptActiveScriptSite::GetDocVersionString)
+		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_GetItemInfo, AdaptActiveScriptSite::GetItemInfo)
+		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_GetDocVersionString, AdaptActiveScriptSite::GetDocVersionString)
 	END_NATIVE_MAP()
 
 	AdaptActiveScriptSiteClass::AdaptActiveScriptSiteClass(VTable *cvtable)

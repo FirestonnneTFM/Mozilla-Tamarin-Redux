@@ -113,7 +113,8 @@ DEFINE_GUID(AXT_CATID_ActiveScriptParse, 0xf0b7a1a2, 0x9847, 0x11cf, 0x8f, 0x20,
 // TODO: move some of these to a better header.
 namespace axtam
 {
-	class MSComClass;
+	class MSIUnknownConsumerClass;
+	class MSIDispatchConsumerClass;
 	class COMErrorClass;
 
 	// CodeContext is used to track which security context we are in.
@@ -158,6 +159,7 @@ namespace axtam
 
 		Atom toAtom(VARIANT &var);
 		Atom toAtom(IDispatch *disp);
+		Atom toAtom(IUnknown *pUnk, const IID &iid = __uuidof(0));
 
 		// Convert an atom to the specifically requested variant type.
 		void atomToTypedVARIANT(Atom val, VARTYPE vt, CComVariant *pResult);
@@ -172,7 +174,8 @@ namespace axtam
 		// Dump an exception for the benefit of the person developing/debugging the
 		// engine rather than the author of the actual script code
 		void dumpException(Exception *exc);
-		MSComClass *mscomClass;
+		MSIDispatchConsumerClass *dispatchClass;
+		MSIUnknownConsumerClass *unknownClass;
 
 		COMErrorClass *comErrorClass() const { return (COMErrorClass*)toplevel->getBuiltinClass(avmplus::NativeID::abcclass_axtam_com_Error); }
 		void throwCOMError(HRESULT hr, EXCEPINFO *pei = NULL);

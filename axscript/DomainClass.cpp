@@ -44,25 +44,18 @@ class ByteArray;
 #include "DataIO.h"
 #include "ByteArrayGlue.h"
 #include "DomainClass.h"
-
+#include "mscom.h"
 
 namespace axtam
 {
-	// hackery...
-	class COMFunction : public AbstractFunction
-	{
-	public:
-		COMFunction(Stringp name) { this->name = name; }
-		void verify(Toplevel *) {}
-		virtual bool isFakeFunction() { return false; }
-	};
-
 	BEGIN_NATIVE_MAP(DomainClass)
-		NATIVE_METHOD(avmplus_Domain_Domain, DomainObject::constructFromDomain)
-		NATIVE_METHOD(avmplus_Domain_loadBytes, DomainObject::loadBytes)
-		NATIVE_METHOD(avmplus_Domain_addNamedScript, DomainObject::addNamedScript)
-		NATIVE_METHOD(avmplus_Domain_currentDomain_get, DomainClass::get_currentDomain)
-		NATIVE_METHOD(avmplus_Domain_getClass, DomainObject::getClass)
+		NATIVE_METHOD(axtam_Domain_Domain, DomainObject::constructFromDomain)
+		NATIVE_METHOD(axtam_Domain_loadBytes, DomainObject::loadBytes)
+		NATIVE_METHOD(axtam_Domain_addNamedScriptObject, DomainObject::addNamedScriptObject)
+		NATIVE_METHOD(axtam_Domain_exposeGlobalMembers, DomainObject::exposeGlobalMembers)
+		NATIVE_METHOD(axtam_Domain_currentDomain_get, DomainClass::get_currentDomain)
+		NATIVE_METHOD(axtam_Domain_getClass, DomainObject::getClass)
+		NATIVE_METHOD(axtam_Domain_global_get, DomainObject::get_global)
 	END_NATIVE_MAP()
 	
 	DomainObject::DomainObject(VTable *vtable, ScriptObject *delegate)
@@ -110,37 +103,41 @@ namespace axtam
 		scriptEnv->initGlobal();
 	}
 
-	void DomainObject::addNamedScript(Stringp name, ScriptObject *ob)
+	void DomainObject::addNamedScriptObject(Stringp name)
+	{
+		// The script code has already done 'domain.global[name] = ob' -  but we still
+		// need to stick it in namedScripts, which script code can't do.
+		domainEnv->namedScripts->add(name, core()->publicNamespace, (Binding)(ScriptEnv *)scriptEnv);
+	}
+	void DomainObject::exposeGlobalMembers(Atom aObject, Atom aTypeinfo)
 	{
 		AXTam *core = (AXTam*) this->core();
-		scriptEnv->global->setStringProperty(name, ob->atom());
-		domainEnv->namedScripts->add(name, core->publicNamespace, (Binding)(ScriptEnv *)scriptEnv);
-		// now pretend it was a 'global' object with a 'foo' method :)
-		// create a new scriptenv just for this object and its "global" names.
-		if (1) {
-			AbcEnv* abcEnv = core->toplevel->object_vtable->abcEnv;
-			Traits *traits = core->traits.object_itraits;
-			ScopeChain* emptyScope = ScopeChain::create(core->GetGC(), core->traits.object_itraits->scope, NULL, core->newNamespace(core->kEmptyString));
-			VTable* vtable = core->newVTable(traits, NULL, emptyScope, abcEnv, core->toplevel);
-			ScriptEnv *scriptEnv = new (core->GetGC()) ScriptEnv(traits->init, vtable);
-			// and instead of:
-			// scriptEnv->initGlobal();
-			// init things manually such that our object is the global.
-			// Traits* traits = vtable->traits;
-			vtable->resolveSignatures();
-			AvmAssert(traits->getNativeScriptInfo()==NULL); // not a native script
+		if (!core->isObject(aObject) || !core->isObject(aTypeinfo))
+			toplevel()->throwTypeError(kCantUseInstanceofOnNonObjectError);
+		// XXX - Need to typecheck this!
+		MSIDispatchConsumer *ob = (MSIDispatchConsumer *)core->atomToScriptObject(aObject);
+		MSIUnknownConsumer *obti = (MSIUnknownConsumer *)core->atomToScriptObject(aTypeinfo);
+		// ack - keep all the type-unsafe stuff together...
+		AvmAssert(obti->iid == __uuidof(ITypeInfo));
+		//ITypeInfo *ti = (ITypeInfo *)(IUnknown *)obti->ob;
 
-			Toplevel* toplevel = core->toplevel;
-			traits->resolveSignatures(toplevel);
-			scriptEnv->global = ob;
-			// and register all properties...
-			domainEnv->namedScripts->add(core->constantString("foo"), core->publicNamespace, (Binding)(ScriptEnv *)scriptEnv);
-			// and all methods
-			Stringp name = core->constantString("Echo");
-			domain->namedScripts->add(name, core->publicNamespace, (Binding)new (core->GetGC()) COMFunction(name));
 
-		}
+		AbcEnv* abcEnv = core->toplevel->object_vtable->abcEnv;
+		Traits *traits = core->traits.object_itraits;
+		ScopeChain* emptyScope = ScopeChain::create(core->GetGC(), core->traits.object_itraits->scope, NULL, core->newNamespace(core->kEmptyString));
+		VTable* vtable = core->newVTable(traits, NULL, emptyScope, abcEnv, core->toplevel);
+		ScriptEnv *scriptEnv = new (core->GetGC()) ScriptEnv(traits->init, vtable);
+		// and instead of:
+		// scriptEnv->initGlobal();
+		// init things manually such that our object is the global.
+		vtable->resolveSignatures();
+		AvmAssert(traits->getNativeScriptInfo()==NULL); // not a native script
+
+		Toplevel* toplevel = core->toplevel;
+		traits->resolveSignatures(toplevel);
+		scriptEnv->global = ob;
 	}
+
 
 	Atom DomainObject::loadBytes(ByteArrayObject *b)
 	{
@@ -153,7 +150,7 @@ namespace axtam
 		// parse new bytecode
 		size_t len = b->get_length();
 		ScriptBuffer code = core->newScriptBuffer(len);
-		memcpy(code.getBuffer(), &b->GetByteArray()[0], len); 
+		memcpy(code.getBuffer(), &b->GetByteArray()[0], len);
 		Toplevel *toplevel = domainToplevel;
 		return core->handleActionBlock(code, 0,
 								  domainEnv,
@@ -181,6 +178,11 @@ namespace axtam
 		}
 
 		return script->global;
+	}
+
+	Atom DomainObject::get_global()
+	{
+		return scriptEnv->global->atom();
 	}
 	
 	ClassClosure* DomainObject::getClass(Stringp name)

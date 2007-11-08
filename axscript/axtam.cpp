@@ -77,13 +77,14 @@ namespace axtam
 	HINSTANCE AXTam::hinstance = 0;
 
 	BEGIN_NATIVE_CLASSES(AXTam)
-		NATIVE_CLASS(abcclass_axtam_com_MSCom,      MSComClass,        ScriptObject)
 		NATIVE_CLASS(abcclass_axtam_System,         SystemClass,       ScriptObject)
-		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_ScriptSite,
+		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IUnknown,   MSIUnknownConsumerClass,   ScriptObject)
+		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IDispatch,  MSIDispatchConsumerClass,  ScriptObject)
+		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IActiveScriptSite,
 		                                            AdaptActiveScriptSiteClass, ScriptObject)
 		NATIVE_CLASS(abcclass_axtam_com_Error,      COMErrorClass,     COMErrorObject)
 		// clones from the shell
-		NATIVE_CLASS(abcclass_avmplus_Domain,          DomainClass,        DomainObject)
+		NATIVE_CLASS(abcclass_axtam_Domain,         DomainClass,       DomainObject)
 		NATIVE_CLASS(abcclass_flash_utils_ByteArray,    ByteArrayClass,     ByteArrayObject)
 
 	END_NATIVE_CLASSES()
@@ -246,7 +247,7 @@ namespace axtam
 		#endif
 	}
 
-	AXTam::AXTam(MMgc::GC *gc) : AvmCore(gc), pool(NULL), mscomClass(NULL), toplevel(NULL)
+	AXTam::AXTam(MMgc::GC *gc) : AvmCore(gc), pool(NULL), dispatchClass(NULL), unknownClass(NULL), toplevel(NULL)
 	{
 //		systemClass = NULL;
 		
@@ -373,9 +374,10 @@ namespace axtam
 				return var.boolVal ? trueAtom : falseAtom;
 			case VT_VARIANT:
 				return toAtom(*var.pvarVal);
-			// VT_UNKNOWN	= 13,
-			// VT_DECIMAL	= 14,
+			case VT_UNKNOWN :
+				return toAtom(var.punkVal);
 
+			// VT_DECIMAL	= 14,
 			// VT_I8	= 20 // Not valid in a variant
 			// VT_UI8	= 21, // not valid in a variant
 			// VT_HRESULT	= 25, // not valid in a variant
@@ -392,27 +394,34 @@ namespace axtam
 
 	Atom AXTam::toAtom(IDispatch *pDisp)
 	{
-		return mscomClass->create(pDisp)->atom();
+		return dispatchClass->create(pDisp)->atom();
+	}
+
+	Atom AXTam::toAtom(IUnknown *pUnk, const IID &iid /*= __uuidof(0)*/)
+	{
+		return unknownClass->create(pUnk, iid)->atom();
 	}
 
 	void AXTam::atomToVARIANT(Atom val, CComVariant *pResult)
 	{
 		switch (val&7) {
 			case kDoubleType:
-				*pResult = number(val);
+				*pResult = doubleNumber(val);
 				break;
 			case kIntegerType:
 				*pResult = toUInt32(val);
-				break;
-			case kBooleanType:
-				*pResult = boolean(val) ? true : false;
 				break;
 			case kStringType:
 				*pResult = (OLECHAR *)string(val)->c_str();
 				break;
 			default:
-				// coerce to a string.
-				*pResult = (OLECHAR *)coerce_s(val)->c_str();
+				// the more complex type checking.
+				if (isBoolean(val)) {
+					*pResult = boolean(val) ? true : false;
+				} else {
+					// coerce to a string.
+					*pResult = (OLECHAR *)coerce_s(val)->c_str();
+				}
 				break;
 		}
 	}

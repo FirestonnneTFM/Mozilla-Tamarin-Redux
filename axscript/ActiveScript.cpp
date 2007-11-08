@@ -175,7 +175,13 @@ public:
             /* [in] */ DWORD dwOptionSetMask,
             /* [in] */ DWORD dwEnabledOptions);
 protected:
+	// call engine, no exception handling.
+	HRESULT callEngineRaw(Atom *ret, const char *name, ...);
+	// call engine, handling exceptions.
 	HRESULT callEngine(Atom *ret, const char *name, ...);
+	// the worker...
+	HRESULT callEngineRawVA(Atom *ret, const char *name, va_list va);
+
 	CComPtr<IActiveScriptSite> m_site;
 	SCRIPTSTATE scriptState;
 	DWORD safetyOptions;
@@ -208,7 +214,7 @@ CActiveScript::CActiveScript() :
 	root = new MMgc::GCRoot(gc, this, sizeof(*this));
 }
 
-HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
+HRESULT CActiveScript::callEngineRawVA(Atom *ppret, const char *name, va_list va)
 {
 	AvmAssert(ppret == NULL || *ppret == undefinedAtom); // please init this out param
 	static const int maxAtoms = 64;
@@ -218,32 +224,39 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 		ATLTRACE2("callEngine('%s') - early exit due to null core%s\n", name);
 		return E_FAIL;
 	}
-
 	ATLTRACE2("Calling engine::%s\n", name);
-	TRY(core, kCatchAction_ReportAsError) {
 
-		// Get the object named 'engine' - XXX - cache this?
-		Multiname multiname(core->publicNamespace, core->constantString("engine"));
-		ScriptEnv *se = (ScriptEnv *)core->toplevel->domainEnv()->getScriptInit(&multiname);
-		Atom a = core->toplevel->getproperty(se->global->atom(), &multiname, core->toplevel->toVTable(se->global->atom()));
-		Multiname multiname_ani(core->publicNamespace, core->constantString(name));
-		Atom ani = core->toplevel->getproperty(a, &multiname_ani, core->toplevel->toVTable(a));
-		// prepare the args
-		va_list s;
-		va_start (s, name); 
-		int argc = 1;
-		args[0] = a;
-		Atom arg = va_arg (s, Atom);
-		while (arg != (Atom)-1) {
-			args[argc] = arg;
-			argc++;
-			arg = va_arg (s, Atom);
-			AvmAssert(argc<maxAtoms);
-		}
-		// Now call the method.
-		Atom ret = AvmCore::atomToScriptObject(ani)->call(argc-1, args);
-		if (ppret)
-			*ppret = ret;
+	// Get the object named 'engine' - XXX - cache this?
+	Multiname multiname(core->publicNamespace, core->constantString("engine"));
+	ScriptEnv *se = (ScriptEnv *)core->toplevel->domainEnv()->getScriptInit(&multiname);
+	Atom a = core->toplevel->getproperty(se->global->atom(), &multiname, core->toplevel->toVTable(se->global->atom()));
+	Multiname multiname_ani(core->publicNamespace, core->constantString(name));
+	Atom ani = core->toplevel->getproperty(a, &multiname_ani, core->toplevel->toVTable(a));
+	// prepare the args
+	int argc = 1;
+	args[0] = a;
+	Atom arg = va_arg (va, Atom);
+	while (arg != (Atom)-1) {
+		args[argc] = arg;
+		argc++;
+		arg = va_arg (va, Atom);
+		AvmAssert(argc<maxAtoms);
+	}
+	// Now call the method.
+	Atom ret = AvmCore::atomToScriptObject(ani)->call(argc-1, args);
+	if (ppret)
+		*ppret = ret;
+	return S_OK;
+
+}
+
+HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
+{
+	HRESULT hr;
+	va_list va;
+	va_start (va, name); 
+	TRY(core, kCatchAction_ReportAsError) {
+		hr = callEngineRawVA(ppret, name, va);
 	} CATCH(Exception * exception) {
 		// dump the exception for diagnostic purposes
 		core->dumpException(exception);
@@ -266,11 +279,23 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 			}
 		}
 
-		return E_FAIL;
+		hr = E_FAIL;
 	}
 	END_CATCH
 	END_TRY
-	return S_OK;
+	va_end(va);
+	return hr;
+}
+
+HRESULT CActiveScript::callEngineRaw(Atom *ppret, const char *name, ...)
+{
+	HRESULT hr;
+	va_list va;
+	va_start (va, name); 
+	hr = callEngineRawVA(ppret, name, va);
+	// XXX - is this a problem when an exception happens?
+	va_end(va);
+	return hr;
 }
 
 // Implementation methods.
@@ -297,18 +322,31 @@ STDMETHODIMP CActiveScript::GetScriptSite(
 STDMETHODIMP CActiveScript::SetScriptState( 
             /* [in] */ SCRIPTSTATE ss)
 {
-	ATLTRACE2("CActiveScript::SetScriptState(0x%x)\n", ss);
-	scriptState = ss;
-	return S_OK;
+	// ack - WSH 5.6 will die with failure code here!
+	HRESULT hr;
+	TRY(core, kCatchAction_ReportAsError) {
+		hr = callEngineRaw(NULL, "SetScriptState", core->toAtom(ss), (Atom)-1);
+	} CATCH(Exception *exception) {
+		ATLTRACE2("SetScriptState failed!\n");
+		core->dumpException(exception);
+		hr = E_FAIL;
+		exception;
+	}
+	END_CATCH
+	END_TRY
+	return hr;
 }
 
 STDMETHODIMP CActiveScript::GetScriptState( 
             /* [out] */ SCRIPTSTATE *pssState)
 {
+	Atom ret = undefinedAtom;
 	if (!pssState)
 		return E_POINTER;
-	ATLTRACE2("CActiveScript::GetScriptState (is 0x%x)\n", scriptState);
-	*pssState = scriptState;
+	HRESULT hr = callEngine(&ret, "GetScriptState", (Atom)-1);
+	if (FAILED(hr))
+		return hr;
+	*pssState = (SCRIPTSTATE)core->toUInt32(ret);
 	return S_OK;
 }
 

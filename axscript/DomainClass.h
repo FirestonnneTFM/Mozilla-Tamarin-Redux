@@ -50,9 +50,11 @@ namespace axtam
 		void constructFromDomain(DomainObject *base);
 		Atom loadBytes(ByteArrayObject *bytes);
 		ClassClosure* getClass(Stringp name);
-		void addNamedScript(Stringp name, ScriptObject *ob);
+		void addNamedScriptObject(Stringp name);
+		void exposeGlobalMembers(Atom aObject, Atom aTypeinfo);
 
-		
+		Atom get_global();
+
 		DWB(DomainEnv*) domainEnv;
 		DWB(Domain*) domain;
 		DRCWB(Toplevel*) domainToplevel;

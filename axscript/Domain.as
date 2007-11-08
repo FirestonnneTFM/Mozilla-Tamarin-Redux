@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-package avmplus {
+package axtam {
 
 import flash.utils.ByteArray
 
@@ -45,8 +45,11 @@ public class Domain
 	public native function Domain(base:Domain);
 	public native function loadBytes(byteArray:ByteArray);
 	public native function getClass(className:String):Class;
-	public native function addNamedScript(name:String, value:Object):void;
+	public native function addNamedScriptObject(name:String):void;
+	public native function exposeGlobalMembers(dispatch:Object, typeinfo:Object):void;
 	public native static function get currentDomain():Domain;
+
+	public native function get global():Object;
 
 	public function load(filename:String)
 	{

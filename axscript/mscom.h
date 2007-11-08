@@ -41,34 +41,70 @@
 
 namespace axtam
 {
-
-	// a JS object wrapping an IDispatch
-	class MSCom : public ScriptObject
+	// base class for a JS object wrapping an IUnknown for 'consumption'
+	// (ie, the object is implemented externally and 'consumed' by ES.
+	class MSIUnknownConsumer : public ScriptObject
 	{
-		friend class MSComClass;
-		MSCom(VTable* vtable, ScriptObject* prototype, IDispatch *pUnk);
+		friend class MSIUnknownConsumerClass;
+	protected:
+		MSIUnknownConsumer(VTable* vtable, ScriptObject* prototype, IUnknown *pUnk, const IID &_iid)
+			: ScriptObject(vtable, prototype),
+			  ob(pUnk), iid(_iid)
+		{
+			AvmAssert(pUnk!= 0);
+		}
+
+	public:
+		const IID &iid;
+		CComPtr<IUnknown> ob;
+	};
+
+	// A JS object wrapping an IDispatch, exposing it as 'scriptable'
+	class MSIDispatchConsumer : public MSIUnknownConsumer {
+	public:
+		MSIDispatchConsumer(VTable* vtable, ScriptObject* prototype, IDispatch *pDisp);
+
+		IDispatch *getDispatch() const {return (IDispatch *)(IUnknown *)ob;}
+		// Use the typeinfo to pre-populate the maps we use at runtime
+		void populateFromTypeInfo(ITypeInfo *ti);
+
+		// expose all the methods and properties from this object "globally"
+		// into the domain.  This means that while in that domain, the 
+		// properties etc can be referenced without the leading 'foo.'
+		// qualifier.  Assumes populateFromTypeInfo() was called to create
+		// the maps used to enumerate the items to expose.
+		void exposeToDomain(ScriptEnv *env, DomainEnv *domainEnv);
+	private:
 
 		virtual Atom callProperty(Multiname* name, int argc, Atom* argv);
 		virtual Atom getAtomProperty(Atom name) const;
+		virtual void setMultinameProperty(Multiname* name, Atom value);
 
-
-	private:
-		// We'd prefer to  insist on IDispatchEx rather than just IDispatch - but WScript
-		// doesn't implement this :(
-		CComPtr<IDispatch> disp;
-		CComQIPtr<IDispatchEx, &IID_IDispatchEx> dispex;
+		MultinameHashtable *typedAttrs; // hashtable of AttrDesc instances.
 	};
 
-	class MSComClass : public ClassClosure
+	class MSIUnknownConsumerClass : public ClassClosure
 	{
 	public:
-		MSComClass(VTable* cvtable);
-		~MSComClass();
+		MSIUnknownConsumerClass(VTable* cvtable);
+		~MSIUnknownConsumerClass();
 
 		// Create an instance from native code.
-		MSCom* create(IDispatch *pDisp);
+		MSIUnknownConsumer* create(IUnknown *pDisp, const IID &iid = __uuidof(0));
 
-		DECLARE_NATIVE_MAP(MSComClass)
+		DECLARE_NATIVE_MAP(MSIUnknownConsumerClass)
+	};
+
+	class MSIDispatchConsumerClass : public ClassClosure
+	{
+	public:
+		MSIDispatchConsumerClass(VTable* cvtable);
+		~MSIDispatchConsumerClass();
+
+		// Create an instance from native code.
+		MSIDispatchConsumer * create(IDispatch *pDisp);
+
+		DECLARE_NATIVE_MAP(MSIDispatchConsumerClass )
 	};
 
 }
