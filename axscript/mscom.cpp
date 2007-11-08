@@ -44,7 +44,6 @@ namespace axtam
 	MSIDispatchConsumer::MSIDispatchConsumer(VTable* vtable, ScriptObject* prototype, IDispatch *pDisp)
 		: MSIUnknownConsumer(vtable, prototype, pDisp, __uuidof(IDispatch))
 	{
-		typedAttrs = new (core()->GetGC()) MultinameHashtable();
 	}
 
 

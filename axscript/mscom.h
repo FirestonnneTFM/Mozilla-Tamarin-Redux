@@ -53,9 +53,11 @@ namespace axtam
 		{
 			AvmAssert(pUnk!= 0);
 		}
+		~MSIUnknownConsumer() {ob = NULL; memset((void *)&iid, 0, sizeof(IID));}
 
 	public:
-		const IID &iid;
+		// Using a 'const &' isn't possible as we need to zero it!
+		IID iid;
 		CComPtr<IUnknown> ob;
 	};
 
@@ -79,8 +81,6 @@ namespace axtam
 		virtual Atom callProperty(Multiname* name, int argc, Atom* argv);
 		virtual Atom getAtomProperty(Atom name) const;
 		virtual void setMultinameProperty(Multiname* name, Atom value);
-
-		MultinameHashtable *typedAttrs; // hashtable of AttrDesc instances.
 	};
 
 	class MSIUnknownConsumerClass : public ClassClosure
