@@ -257,10 +257,19 @@ namespace Gen;
         let basename = c.baseName != null ? emitter.qname(c.baseName,false) : 0;
         
         let cls = script.newClass(classname, basename);
-/*        
+        
+        
         let c_ctx = new CTX(asm, {tag:"class"}, cls);
-        cgHead(c_ctx, c.classHead);
-*/      
+
+        // static fixtures
+        cgFixtures(c_ctx, c.classHead.fixtures);
+
+        // cinit - init static fixtures
+        let cinit = cls.getCInit();
+        let cinit_ctx = new CTX(cinit.asm, {tag:"cinit"}, cinit);
+        cgHead(cinit_ctx, {fixtures:[], exprs:c.classHead.exprs});
+        
+      
         let inst = cls.getInstance();
         
         // Context for the instance

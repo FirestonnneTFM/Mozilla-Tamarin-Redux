@@ -233,10 +233,10 @@ use namespace intrinsic;
             }
         }
 
-        function addVarFixtures (fxtrs) 
+        function addVarFixtures (fxtrs, isStatic=false) 
         {
             use namespace Ast;
-            let varHead = this.varHeads[this.varHeads.length-1];
+            let varHead = this.varHeads[this.varHeads.length-(isStatic?2:1)];
             for (let n = 0, len = fxtrs.length; n < len; ++n)  // until array conact works
             {
                 let fb = fxtrs[n];
@@ -246,10 +246,10 @@ use namespace intrinsic;
             }
         }
 
-        function addVarInits (inits) 
+        function addVarInits (inits, isStatic=false) 
         {
             use namespace Ast;
-            let varHead = this.varHeads[this.varHeads.length-1];
+            let varHead = this.varHeads[this.varHeads.length-(isStatic?2:1)];
             for (let n = 0, len = inits.length; n < len; ++n)  // until array conact works
                 varHead.exprs.push (inits[n]);
         }
@@ -4107,8 +4107,8 @@ use namespace intrinsic;
             default:
                 switch (tau) {
                 case classBlk:
-                    cx.addVarFixtures (fxtrs);
-                    cx.addVarInits (exprs);  // FIXME these aren't inits, they are a kind of settings
+                    cx.addVarFixtures (fxtrs, isStatic);
+                    cx.addVarInits (exprs, isStatic);  // FIXME these aren't inits, they are a kind of settings
                     var stmts = [];
                     break;
                 default:
@@ -4976,9 +4976,11 @@ use namespace intrinsic;
             var [ts2,nd2] = typeSignature (ts1);
             var [ts3,nd3] = classInheritance (ts2);
             currentClassName = nd1;
-            cx.enterVarBlock ();
+            cx.enterVarBlock(); // Class
+            cx.enterVarBlock (); // Instance
             var [ts4,blck] = classBody (ts3);
-            var ihead = cx.exitVarBlock ();
+            var ihead = cx.exitVarBlock (); // Instance
+            var chead = cx.exitVarBlock (); // Class
             currentClassName = "";
 
             var name = {ns:ns,id:nd1};
@@ -5005,7 +5007,7 @@ use namespace intrinsic;
 
             var baseName = {ns: new Ast::PublicNamespace (""), id: "Object"}
             var interfaceNames = [];
-            var chead = new Ast::Head ([],[]);
+            //var chead = new Ast::Head ([],[]);
             var ctype = Ast::anyType;
             var itype = Ast::anyType;
             var cls = new Ast::Cls (name,baseName,interfaceNames,ctor,chead,ihead,ctype,itype);
