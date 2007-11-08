@@ -2377,7 +2377,7 @@ use namespace intrinsic;
             enter("Parser::bitwiseXorExpression ", ts);
 
             var [ts1, nd1] = bitwiseAndExpression (ts, beta);
-            while (hd (ts1) === Token::BitwiseOr) {
+            while (hd (ts1) === Token::BitwiseXor) {
                 var [ts2, nd2] = bitwiseAndExpression (tl (ts1), beta);
                 var [ts1, nd1] = [ts2, new Ast::BinaryExpr (Ast::bitwiseXorOp, nd1, nd2)];
             }
