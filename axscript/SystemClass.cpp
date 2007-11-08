@@ -44,6 +44,7 @@ namespace axtam
 	BEGIN_NATIVE_MAP(SystemClass)
 		NATIVE_METHOD(axtam_System_getAvmplusVersion, SystemClass::getAvmplusVersion)
 		NATIVE_METHOD(axtam_System_write, SystemClass::write)
+		NATIVE_METHOD(axtam_System_trace, SystemClass::trace)
 		NATIVE_METHOD(axtam_System_debugger, SystemClass::debugger)
 		NATIVE_METHOD(axtam_System_isDebugger, SystemClass::isDebugger)
 		NATIVE_METHOD(axtam_System_nativeDebugBreak, SystemClass::nativeDebugBreak)
@@ -75,6 +76,42 @@ namespace axtam
 			core()->console << s;
 		else
 			core()->console << "<null>";
+	}
+
+	void SystemClass::trace(ArrayObject* a)
+	{
+		if (!a)
+			toplevel()->throwArgumentError(kNullArgumentError, "array");
+		AvmCore* core = this->core();
+		PrintWriter& console = core->console;
+		for (int i=0, n = a->getLength(); i < n; i++)
+		{
+			if (i > 0)
+                console << ' ';
+			Stringp s = core->string(a->getUintProperty(i));
+			for (int j = 0; j < s->length(); j++)
+			{
+				wchar c = (*s)[j];
+				// '\r' gets converted into '\n'
+				// '\n' is left alone
+				// '\r\n' is left alone
+				if (c == '\r')
+				{
+					if (((j+1) < s->length()) && (*s)[j+1] == '\n')
+					{
+						console << '\r';	
+						j++;
+					}
+
+					console << '\n';
+				}
+				else
+				{
+					console << c;
+				}
+			}
+		}
+		console << '\n';
 	}
 
 	void SystemClass::debugger()

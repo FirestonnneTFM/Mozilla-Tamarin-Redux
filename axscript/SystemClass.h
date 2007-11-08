@@ -59,6 +59,7 @@ namespace axtam
 		Stringp getAvmplusVersion();
 
 		void write(Stringp s);
+		void trace(ArrayObject* a);
 
 		/**
 		 * @name Debugging Extensions
