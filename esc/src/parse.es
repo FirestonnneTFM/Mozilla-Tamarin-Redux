@@ -2592,7 +2592,60 @@ use namespace intrinsic;
                 var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,Ast::assignOp);
                 break;
             default:
-                var [ts2,expr] = [ts1,nd1];
+                var op = undefined;
+                switch(hd (ts1)) {
+                case Token::PlusAssign:
+                    op = Ast::plusOp;
+                    break;
+                case Token::MinusAssign:
+                    op = Ast::minusOp;
+                    break;
+                case Token::MultAssign:
+                    op = Ast::timesOp;
+                    break;
+                case Token::DivAssign:
+                    op = Ast::divideOp;
+                    break;
+                case Token::RemainderAssign:
+                    op = Ast::remainderOp;
+                    break;
+                case Token::LogicalAndAssign:
+                    op = Ast::logicalAndOp;
+                    break;
+                case Token::BitwiseAndAssign:
+                    op = Ast::bitwiseAndOp;
+                    break;
+                case Token::LogicalOrAssign:
+                    op = Ast::logicalOrOp;
+                    break;
+                case Token::BitwiseXorAssign:
+                    op = Ast::bitwiseXorOp;
+                    break;
+                case Token::BitwiseOrAssign:
+                    op = Ast::bitwiseOrOp;
+                    break;
+                case Token::LeftShiftAssign:
+                    op = Ast::leftShiftOp;
+                    break;
+                case Token::RightShiftAssign:
+                    op = Ast::rightShiftOp;
+                    break;
+                case Token::UnsignedRightShiftAssign:
+                    op = Ast::rightShiftUnsignedOp;
+                    break;
+                }
+                if( op != undefined )
+                {
+                    var nd_orig = nd1;
+                    var [ts1,nd1] = [tl (ts1), patternFromExpr(nd1)];
+                    var [ts2,nd2] = assignmentExpression(ts1, beta);
+                    nd2 = new Ast::BinaryExpr(op, nd_orig, nd2);
+                    var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,Ast::assignOp);
+                }
+                else
+                {
+                    var [ts2,expr] = [ts1,nd1];
+                }
                 break;
             }
 
@@ -5380,7 +5433,7 @@ use namespace intrinsic;
                             var [ts1,nd1] = annotatableDirective (ts1,tau,omega,attrs);
                             break;
                         default:
-                            throw "directive should never get here";
+                            throw "directive should never get here " + ts1;
                             var nd1 = [new Ast::ExprStmt (nd1)];
                             break;
                         }

@@ -80,7 +80,7 @@ public namespace Token
     const LogicalOrAssign = Token::LogicalOr - 1
     const BitwiseOr = Token::LogicalOrAssign - 1
     const BitwiseOrAssign = Token::BitwiseOr - 1
-    const BitwiseXor = Token::LogicalOrAssign - 1
+    const BitwiseXor = Token::BitwiseOrAssign - 1
     const BitwiseXorAssign = Token::BitwiseXor - 1
     const RightBrace = Token::BitwiseXorAssign - 1
     const BitwiseNot = Token::RightBrace - 1
@@ -252,13 +252,15 @@ public namespace Token
         "at",
         "leftbracket",
         "rightbracket",
-        "bitwisexor",
-        "bitwisexorassign",
+        "logicalxor",
+        "logicalxorassign",
         "leftbrace",
-        "bitwiseor",
         "logicalor",
         "logicalorassign",
+        "bitwiseor",
         "bitwiseorassign",
+        "bitwisexor",
+        "bitwisexorassign",
         "rightbrace",
         "bitwisenot",
         "plus",
