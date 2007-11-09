@@ -111,6 +111,16 @@ namespace axtam
 			axcore->throwCOMError(hr, &ei);
 	}
 
+	// Ditto hasMultinameProperty - needsHashtable is checked.
+	bool MSIDispatchConsumer::hasMultinameProperty(Multiname* name) const
+	{
+		DISPID id;
+		OLECHAR *olename = (OLECHAR *)name->getName()->c_str();
+		IDispatch *disp = (IDispatch *)getDispatch();
+		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
+		return SUCCEEDED(hr);
+	}
+	
 	Atom MSIDispatchConsumer::getAtomProperty(Atom name) const {
 		AXTam *axcore = (AXTam *)core();
 		IDispatch *disp = (IDispatch *)getDispatch();
@@ -125,8 +135,8 @@ namespace axtam
 			// If we call ScriptObject::getAtomProperty() with an unknown name,
 			// it throws an exception, where we just want undefinedAtom.
 			// XXX - but we must call the base for now to resolve 'Object' etc
-			return ScriptObject::getAtomProperty(name);
-			//return undefinedAtom;
+			//return ScriptObject::getAtomProperty(name);
+			return undefinedAtom;
 		}
 		if (FAILED(hr))
 			axcore->throwCOMError(hr);
@@ -147,9 +157,10 @@ namespace axtam
 		: ClassClosure(cvtable)
     {
 		AXTam* core = (AXTam*)this->core();
-		// should only be initialized once!
-		AvmAssert(!core->unknownClass);
-		core->unknownClass = this;
+		// should only be initialized once, but is currently done each time
+		// we init builtins for a new domainenv.
+		if (!core->unknownClass)
+			core->unknownClass = this;
 
 		createVanillaPrototype();
 	}
@@ -173,9 +184,9 @@ namespace axtam
 		: ClassClosure(cvtable)
     {
 		AXTam* core = (AXTam*)this->core();
-		// should only be initialized once!
-		AvmAssert(!core->dispatchClass);
-		core->dispatchClass= this;
+		// should only be initialized once - but see above
+		if (!core->dispatchClass)
+			core->dispatchClass= this;
 
 		createVanillaPrototype();
 	}

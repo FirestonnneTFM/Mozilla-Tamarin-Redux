@@ -42,7 +42,7 @@ import flash.utils.ByteArray
 
 public class Domain
 {
-	public native function Domain(base:Domain);
+	public native function Domain(base:Domain, global:Object);
 	public native function loadBytes(byteArray:ByteArray);
 	public native function getClass(className:String):Class;
 	public native function addNamedScriptObject(name:String):void;

@@ -81,6 +81,7 @@ namespace axtam
 		virtual Atom callProperty(Multiname* name, int argc, Atom* argv);
 		virtual Atom getAtomProperty(Atom name) const;
 		virtual void setMultinameProperty(Multiname* name, Atom value);
+		bool hasMultinameProperty(Multiname* multiname) const;
 	};
 
 	class MSIUnknownConsumerClass : public ClassClosure

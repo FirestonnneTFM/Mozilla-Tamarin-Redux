@@ -67,29 +67,29 @@ namespace axtam
 	{
 	}
 
-	void DomainObject::constructFromDomain(DomainObject *parentDomain)
+	void DomainObject::constructFromDomain(DomainObject *parentDomain, Atom aGlobalObject)
 	{
+		// XXX - this is still an experiment-in-progress.  Attempts at hooking up this
+		// global aren't complete.
 		AXTam *core = (AXTam*) this->core();
 
 		Domain* baseDomain;
-		DomainEnv* baseDomainEnv;
 		if (parentDomain) {
-			baseDomainEnv = parentDomain->domainEnv;
-			baseDomain = baseDomainEnv->getDomain();
-			
+			baseDomain = parentDomain->domainEnv->getDomain();
 		} else {
 			baseDomain = core->builtinDomain;
-			baseDomainEnv = NULL;
 		}
-		
+
+		DomainEnv* baseDomainEnv = NULL;
 		domain = new (core->GetGC()) Domain(core, baseDomain);
 
 		if (parentDomain) {
 			domainToplevel = parentDomain->domainToplevel;
+			baseDomainEnv  = parentDomain->domainEnv;
 		} else {
-			domainToplevel = core->toplevel;
+			domainToplevel = core->initAXTamBuiltins();
+			baseDomainEnv = domainToplevel->domainEnv();
 		}
-
 		domainEnv = new (core->GetGC()) DomainEnv(core, domain, baseDomainEnv);
 
 		// Create a new 'scriptEnv' for the domain, suitable for sticking our own 'global'
@@ -100,7 +100,18 @@ namespace axtam
 		VTable* scriptVTable = core->newVTable(scriptTraits, NULL, emptyScope, abcEnv, core->toplevel);
 		scriptEnv = new (core->GetGC()) ScriptEnv(scriptTraits->init, scriptVTable);
 		//scriptVTable->init = scriptEnv;
-		scriptEnv->initGlobal();
+		if (core->isNull(aGlobalObject)) {
+			scriptEnv->initGlobal();
+		} else if (core->isObject(aGlobalObject)) {
+			// init things manually such that the specified object is the global.
+			scriptVTable->resolveSignatures();
+			AvmAssert(scriptTraits->getNativeScriptInfo()==NULL); // not a native script
+			scriptTraits->resolveSignatures(domainToplevel);
+			scriptEnv->global = core->atomToScriptObject(aGlobalObject);
+		} else {
+			toplevel()->throwTypeError(kCantUseInstanceofOnNonObjectError);
+		}
+
 	}
 
 	void DomainObject::addNamedScriptObject(Stringp name)
@@ -111,6 +122,7 @@ namespace axtam
 	}
 	void DomainObject::exposeGlobalMembers(Atom aObject, Atom aTypeinfo)
 	{
+		/**** XXX - this is dead and should be removeed...
 		AXTam *core = (AXTam*) this->core();
 		if (!core->isObject(aObject) || !core->isObject(aTypeinfo))
 			toplevel()->throwTypeError(kCantUseInstanceofOnNonObjectError);
@@ -136,6 +148,7 @@ namespace axtam
 		Toplevel* toplevel = core->toplevel;
 		traits->resolveSignatures(toplevel);
 		scriptEnv->global = ob;
+		***/
 	}
 
 
@@ -155,7 +168,7 @@ namespace axtam
 		return core->handleActionBlock(code, 0,
 								  domainEnv,
 								  toplevel,
-								  NULL, NULL, NULL, codeContext);
+								  NULL, NULL, NULL, codeContext, scriptEnv->global);
 	}
 
 	ScriptObject* DomainObject::finddef(Multiname* multiname,

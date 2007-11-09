@@ -179,6 +179,7 @@ namespace axtam
 
 		COMErrorClass *comErrorClass() const { return (COMErrorClass*)toplevel->getBuiltinClass(avmplus::NativeID::abcclass_axtam_com_Error); }
 		void throwCOMError(HRESULT hr, EXCEPINFO *pei = NULL);
+		Toplevel* initAXTamBuiltins();
 
 	private:
 		DECLARE_NATIVE_CLASSES()
@@ -192,7 +193,6 @@ namespace axtam
 //		void computeStackBase();
 
 		void initAXPool();
-		Toplevel* initAXTamBuiltins();
 
 		#ifdef DEBUGGER
 		//Debugger *debugger;

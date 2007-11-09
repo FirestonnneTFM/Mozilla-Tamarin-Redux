@@ -165,13 +165,15 @@ package {
 package {
 
 	class ScriptEngine {
-			public var domain;
+			public var globalDomain:axtam.Domain;
+			public var objectDomains; // A hashtable of named objects to their domains.
 			public var state:int;
 			public function ScriptEngine() {
 			}
 			public function InitNew() {
 				//domain = Domain.currentDomain
-				domain = new axtam.Domain(null)
+				globalDomain = new axtam.Domain(null, null)
+				objectDomains = {}
 			}
 			public function ParseScriptText(code:String, itemName:String, context:Object, delim:String, sourceCookie:int, lineNumber:int, flags:int) {
 				print('ParseScriptText')
@@ -179,6 +181,9 @@ package {
 				// XXX - this is wrong - we should only do the parse and generation
 				// of bytecode here.  We should execute all such blocks at 
 				// SetScriptState(SCRIPTSTATE_RUNNING) time.
+				var domain = objectDomains[itemName]
+				if (!domain)
+					domain = globalDomain
 				execString(code, domain)
 
 			}
@@ -198,15 +203,18 @@ package {
 				var items = site.GetItemInfo(name, gii_flags)
 				var dispatch = items[0]
 				var typeinfo = items[1]
-				domain.global[name] = dispatch
+				globalDomain.global[name] = dispatch
 				// but we also need to tell the VM exactly what 'scope'
 				// provides this object.
-				domain.addNamedScriptObject(name)
+				globalDomain.addNamedScriptObject(name)
 				// if its global, we enumerate items and make them public - all 
 				// this is done inside exposeGlobalMembers
-				if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS && typeinfo != null) {
-					domain.exposeGlobalMembers(dispatch, typeinfo)
-				}
+				//if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS && typeinfo != null) {
+				//	domain.exposeGlobalMembers(dispatch, typeinfo)
+				//}
+				// create a new domain for the object with the IDispatch as its global.
+				var obDomain =  new axtam.Domain(globalDomain, dispatch)
+				objectDomains[name] = obDomain
 			}
 
 			public function GetScriptState(): uint

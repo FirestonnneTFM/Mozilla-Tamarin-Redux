@@ -47,7 +47,7 @@ namespace axtam
 		DomainObject(VTable *vtable, ScriptObject *delegate);
 		~DomainObject();
 
-		void constructFromDomain(DomainObject *base);
+		void constructFromDomain(DomainObject *base, Atom aGlobal);
 		Atom loadBytes(ByteArrayObject *bytes);
 		ClassClosure* getClass(Stringp name);
 		void addNamedScriptObject(Stringp name);
