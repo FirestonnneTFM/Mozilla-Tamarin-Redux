@@ -233,10 +233,10 @@ use namespace intrinsic;
             }
         }
 
-        function addVarFixtures (fxtrs) 
+        function addVarFixtures (fxtrs, isStatic=false) 
         {
             use namespace Ast;
-            let varHead = this.varHeads[this.varHeads.length-1];
+            let varHead = this.varHeads[this.varHeads.length-(isStatic?2:1)];
             for (let n = 0, len = fxtrs.length; n < len; ++n)  // until array conact works
             {
                 let fb = fxtrs[n];
@@ -246,10 +246,10 @@ use namespace intrinsic;
             }
         }
 
-        function addVarInits (inits) 
+        function addVarInits (inits, isStatic=false) 
         {
             use namespace Ast;
-            let varHead = this.varHeads[this.varHeads.length-1];
+            let varHead = this.varHeads[this.varHeads.length-(isStatic?2:1)];
             for (let n = 0, len = inits.length; n < len; ++n)  // until array conact works
                 varHead.exprs.push (inits[n]);
         }
@@ -2377,7 +2377,7 @@ use namespace intrinsic;
             enter("Parser::bitwiseXorExpression ", ts);
 
             var [ts1, nd1] = bitwiseAndExpression (ts, beta);
-            while (hd (ts1) === Token::BitwiseOr) {
+            while (hd (ts1) === Token::BitwiseXor) {
                 var [ts2, nd2] = bitwiseAndExpression (tl (ts1), beta);
                 var [ts1, nd1] = [ts2, new Ast::BinaryExpr (Ast::bitwiseXorOp, nd1, nd2)];
             }
@@ -2592,7 +2592,60 @@ use namespace intrinsic;
                 var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,Ast::assignOp);
                 break;
             default:
-                var [ts2,expr] = [ts1,nd1];
+                var op = undefined;
+                switch(hd (ts1)) {
+                case Token::PlusAssign:
+                    op = Ast::plusOp;
+                    break;
+                case Token::MinusAssign:
+                    op = Ast::minusOp;
+                    break;
+                case Token::MultAssign:
+                    op = Ast::timesOp;
+                    break;
+                case Token::DivAssign:
+                    op = Ast::divideOp;
+                    break;
+                case Token::RemainderAssign:
+                    op = Ast::remainderOp;
+                    break;
+                case Token::LogicalAndAssign:
+                    op = Ast::logicalAndOp;
+                    break;
+                case Token::BitwiseAndAssign:
+                    op = Ast::bitwiseAndOp;
+                    break;
+                case Token::LogicalOrAssign:
+                    op = Ast::logicalOrOp;
+                    break;
+                case Token::BitwiseXorAssign:
+                    op = Ast::bitwiseXorOp;
+                    break;
+                case Token::BitwiseOrAssign:
+                    op = Ast::bitwiseOrOp;
+                    break;
+                case Token::LeftShiftAssign:
+                    op = Ast::leftShiftOp;
+                    break;
+                case Token::RightShiftAssign:
+                    op = Ast::rightShiftOp;
+                    break;
+                case Token::UnsignedRightShiftAssign:
+                    op = Ast::rightShiftUnsignedOp;
+                    break;
+                }
+                if( op != undefined )
+                {
+                    var nd_orig = nd1;
+                    var [ts1,nd1] = [tl (ts1), patternFromExpr(nd1)];
+                    var [ts2,nd2] = assignmentExpression(ts1, beta);
+                    nd2 = new Ast::BinaryExpr(op, nd_orig, nd2);
+                    var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,Ast::assignOp);
+                }
+                else
+                {
+                    var [ts2,expr] = [ts1,nd1];
+                }
                 break;
             }
 
@@ -4054,8 +4107,8 @@ use namespace intrinsic;
             default:
                 switch (tau) {
                 case classBlk:
-                    cx.addVarFixtures (fxtrs);
-                    cx.addVarInits (exprs);  // FIXME these aren't inits, they are a kind of settings
+                    cx.addVarFixtures (fxtrs, isStatic);
+                    cx.addVarInits (exprs, isStatic);  // FIXME these aren't inits, they are a kind of settings
                     var stmts = [];
                     break;
                 default:
@@ -4295,7 +4348,14 @@ use namespace intrinsic;
 
             var name = new Ast::PropName ({ns:ns,id:nd1.ident});
             var fxtr = new Ast::MethodFixture (func,Ast::anyType,true,isOverride,isFinal);
-            cx.addVarFixtures ([[name,fxtr]]);
+            switch (tau) {
+            case classBlk:
+                cx.addVarFixtures ([[name,fxtr]], isStatic);
+                break;
+            default:
+                cx.addVarFixtures ([[name,fxtr]]);
+                break;
+            }
 
             exit("Parser::functionDefinition ", ts3);
             return [ts3, []];
@@ -4923,9 +4983,11 @@ use namespace intrinsic;
             var [ts2,nd2] = typeSignature (ts1);
             var [ts3,nd3] = classInheritance (ts2);
             currentClassName = nd1;
-            cx.enterVarBlock ();
+            cx.enterVarBlock(); // Class
+            cx.enterVarBlock (); // Instance
             var [ts4,blck] = classBody (ts3);
-            var ihead = cx.exitVarBlock ();
+            var ihead = cx.exitVarBlock (); // Instance
+            var chead = cx.exitVarBlock (); // Class
             currentClassName = "";
 
             var name = {ns:ns,id:nd1};
@@ -4952,7 +5014,7 @@ use namespace intrinsic;
 
             var baseName = {ns: new Ast::PublicNamespace (""), id: "Object"}
             var interfaceNames = [];
-            var chead = new Ast::Head ([],[]);
+            //var chead = new Ast::Head ([],[]);
             var ctype = Ast::anyType;
             var itype = Ast::anyType;
             var cls = new Ast::Cls (name,baseName,interfaceNames,ctor,chead,ihead,ctype,itype);
@@ -5380,7 +5442,7 @@ use namespace intrinsic;
                             var [ts1,nd1] = annotatableDirective (ts1,tau,omega,attrs);
                             break;
                         default:
-                            throw "directive should never get here";
+                            throw "directive should never get here " + ts1;
                             var nd1 = [new Ast::ExprStmt (nd1)];
                             break;
                         }
