@@ -4348,7 +4348,14 @@ use namespace intrinsic;
 
             var name = new Ast::PropName ({ns:ns,id:nd1.ident});
             var fxtr = new Ast::MethodFixture (func,Ast::anyType,true,isOverride,isFinal);
-            cx.addVarFixtures ([[name,fxtr]]);
+            switch (tau) {
+            case classBlk:
+                cx.addVarFixtures ([[name,fxtr]], isStatic);
+                break;
+            default:
+                cx.addVarFixtures ([[name,fxtr]]);
+                break;
+            }
 
             exit("Parser::functionDefinition ", ts3);
             return [ts3, []];
