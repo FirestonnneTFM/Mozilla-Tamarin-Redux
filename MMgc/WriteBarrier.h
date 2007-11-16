@@ -45,10 +45,10 @@
 #ifdef WRITE_BARRIERS
 
 // inline write barrier
-#define WB(gc, container, addr, value) gc->writeBarrier(container, addr, (const void *)(uintptr)(value))
+#define WB(gc, container, addr, value) gc->writeBarrier(container, addr, (const void *) (value))
 
 // fast manual RC write barrier
-#define WBRC(gc, container, addr, value) gc->writeBarrierRC(container, addr, (const void *)(uintptr)(value))
+#define WBRC(gc, container, addr, value) gc->writeBarrierRC(container, addr, (const void *) (value))
 
 // declare write barrier
 #define DWB(type) MMgc::WriteBarrier<type>

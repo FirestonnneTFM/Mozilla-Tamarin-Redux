@@ -55,11 +55,75 @@ namespace avmplus
 	 * array use the [] operators.  
 	 */
 
-	enum ListElementType { LIST_NonGCObjects, LIST_GCObjects, LIST_RCObjects };
+	enum ListElementType {
+		LIST_NonGCObjects = 0,
+		LIST_GCObjects = 1,
+		LIST_RCObjects = 2
+	};
+
+	template<class T, ListElementType kElementType>
+	class ListBase;
+
+	template<class T>
+	class ListBase<T, LIST_NonGCObjects> : public MMgc::GCObject
+	{
+	protected:
+		T *data;
+		uint32 len;
+		uint32 max;
+		MMgc::GC* gc;
+
+		void wb(uint32 index, T value)
+		{
+			AvmAssert(index < max);
+			AvmAssert(data != NULL);
+			data[index] = value;
+		}
+	};
+
+	template<class T>
+	class ListBase<T, LIST_GCObjects> : public MMgc::GCObject
+	{
+	protected:
+		T *data;
+		uint32 len;
+		uint32 max;
+		MMgc::GC* gc;
+
+		void wb(uint32 index, T value)
+		{
+			AvmAssert(index < max);
+			AvmAssert(data != NULL);
+			WB(gc, data, &data[index], value);
+		}
+	};
+
+	template<class T>
+	class ListBase<T, LIST_RCObjects> : public MMgc::GCObject
+	{
+	protected:
+		T *data;
+		uint32 len;
+		uint32 max;
+		MMgc::GC* gc;
+
+		void wb(uint32 index, T value)
+		{
+			AvmAssert(index < max);
+			AvmAssert(data != NULL);
+			WBRC(gc, data, &data[index], value);
+		}
+	};
 
 	template <class T, ListElementType kElementType>
-	class List : public MMgc::GCObject
+	class List : private ListBase<T, kElementType>
 	{
+		using ListBase<T, kElementType>::data;
+		using ListBase<T, kElementType>::len;
+		using ListBase<T, kElementType>::max;
+		using ListBase<T, kElementType>::gc;
+		using ListBase<T, kElementType>::wb;
+
 	public:
 		enum { kInitialCapacity = 128 };		
 
@@ -235,10 +299,6 @@ namespace avmplus
 		const T *getData() const { return data; }
 
 	private:
-		T *data;
-		uint32 len;
-		uint32 max;
-		MMgc::GC* gc;
 
 		void grow()
 		{
@@ -266,23 +326,6 @@ namespace avmplus
 			{
 				for(int i=nbr-1; i>=0; i--)
 					dst[i+dstStart] = src[i+srcStart];
-			}
-		}
-		void wb(uint32 index, T value)
-		{
-			AvmAssert(index < max);
-			AvmAssert(data != NULL);
-			switch(kElementType)
-			{
-				case LIST_NonGCObjects:
-					data[index] = value;
-					break;
-				case LIST_GCObjects:
-					WB(gc, data, &data[index], value);
-					break;
-				case LIST_RCObjects:
-					WBRC(gc, data, &data[index], value);
-					break;
 			}
 		}
 	};
