@@ -806,6 +806,7 @@ namespace MMgc
 
 		bool Destroying() { return destroying; }
 
+		static GCWeakRef *GetWeakRef(const void *obj);
 		void ClearWeakRef(const void *obj);
 
 		uintptr	GetStackTop() const;		
@@ -834,9 +835,6 @@ namespace MMgc
 		uint32 *m_bitsNext;
 
 		GCHashtable weakRefs;
-		friend class GCObject;
-		friend class GCFinalizedObject;
-		static GCWeakRef *GetWeakRef(const void *obj);
 
 		bool destroying;
 

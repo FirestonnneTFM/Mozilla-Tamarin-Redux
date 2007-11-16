@@ -127,9 +127,9 @@ namespace MMgc
 			if ((b->flags & kMarkFlag) == 0) {
 				void *item = b+1;
 				if (NeedsFinalize(b)) {
-					GCFinalizedObject *obj = (GCFinalizedObject *) item;
-					obj = (GCFinalizedObject *) GetUserPointer(obj);
-					obj->~GCFinalizedObject();
+					GCFinalizable *obj = (GCFinalizable *) item;
+					obj = (GCFinalizable *) GetUserPointer(obj);
+					obj->~GCFinalizable();
 #if defined(_DEBUG) && defined(MMGC_DRC)
 					if((b->flags & kRCObject) != 0) {
 						b->gc->RCObjectZeroCheck((RCObject*)obj);

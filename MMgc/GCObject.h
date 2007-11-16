@@ -65,16 +65,6 @@ inline void *operator new(size_t size, MMgc::GC *gc, int flags=MMgc::GC::kContai
 namespace MMgc
 {
 	/**
-	 *
-	 */
-	class GCCustomSizer
-	{
-	public:
-		virtual ~GCCustomSizer() {} // here since gcc complains otherwise
-		virtual size_t Size() = 0;
-	};
-
-	/**
 	 * Baseclass for GC managed objects that aren't finalized
 	 */
 	class MMGC_API GCObject
@@ -108,15 +98,26 @@ namespace MMgc
 	};
 
 	/**
+	 * Base class for GC-managed objects that are finalized.
+	 * @note This class does not provide operator new/delete: derive from GCFinalizedObject
+	 *       or GCFinalizedObjectOptIn to provide correct handling of "new Class"
+	 */
+	class MMGC_API GCFinalizable
+	{
+	public:
+		virtual ~GCFinalizable() { }
+	};
+
+	/**
 	 *	Baseclass for GC managed objects that are finalized 
 	 */
-	class MMGC_API GCFinalizedObject
+	class MMGC_API GCFinalizedObject : public GCFinalizable
 	//: public GCObject can't do this, get weird compile errors in AVM plus, I think it has to do with
 	// the most base class (GCObject) not having any virtual methods)
 	{
 	public:
-		virtual ~GCFinalizedObject() {}
 		GCWeakRef *GetWeakRef() const;
+
 		static void *operator new(size_t size, GC *gc, size_t extra = 0);
 		static void operator delete (void *gcObject);
 	};

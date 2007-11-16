@@ -428,9 +428,9 @@ start:
 
 					if (marks & kFinalize)
 					{     
-						GCFinalizedObject *obj = (GCFinalizedObject*)GetUserPointer(item);
+						GCFinalizable *obj = (GCFinalizedObject*)GetUserPointer(item);
 						GCAssert(*(int*)obj != 0);
-						obj->~GCFinalizedObject();
+						obj->~GCFinalizable();
 
 						bits[i] &= ~(kFinalize<<(j*4));
 

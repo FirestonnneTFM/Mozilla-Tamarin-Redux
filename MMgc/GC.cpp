@@ -1147,7 +1147,7 @@ bail:
 				cb = cb->nextCB;
 			}
 			if(gc->IsFinalized(obj))
-				((GCFinalizedObject*)obj)->~GCFinalizedObject();
+				((GCFinalizable*)obj)->~GCFinalizable();
 			gc->Free(obj);
 			return;
 		}
@@ -1387,7 +1387,7 @@ bail:
 
 				GCAssert(*(int*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
-				((GCFinalizedObject*)rcobj)->~GCFinalizedObject();
+				((GCFinalizable*)rcobj)->~GCFinalizable();
 #ifdef DEBUGGER
 				numObjects++;
 				objSize += GC::Size(rcobj);
