@@ -179,9 +179,10 @@ namespace axtam
 		// first of these directories with abcs[0] wins...
 		static const wchar_t *candidates[] = {
 			L"",
-#ifdef DEBUG
+			// We don't want to search relative paths in real "release" builds
+			// but its early days, and without this, developers will get confused 
+			// XXX - work out a strategy for embedding esc!
 			L"..\\..\\..\\esc\\bin\\", // for running directly from the source tree
-#endif
 			NULL
 		};
 		wchar_t fqname[MAX_PATH+100] = {L'\0'}; // space for candidate path too...
@@ -254,10 +255,27 @@ namespace axtam
 		gracePeriod = false;
 		inStackOverflow = false;
 
-//		computeStackBase();
+		computeStackBase();
 
 		OutputStream *outputStream = new (gc) OutputStream();
 		setConsoleStream(outputStream);
+	}
+
+	void AXTam::computeStackBase()
+	{
+		const int kStackMargin = 131072;
+		
+		SYSTEM_INFO sysinfo;
+		GetSystemInfo(&sysinfo);
+
+		int dummy;
+		int sp = (int)(&dummy);
+		sp &= ~(sysinfo.dwPageSize-1);
+
+		MEMORY_BASIC_INFORMATION buf;
+		if (VirtualQuery((void*)sp, &buf, sizeof(buf)) == sizeof(buf)) {
+			minstack = (uint32)buf.AllocationBase + kStackMargin;
+		}
 	}
 
 	void AXTam::interrupt(MethodEnv *env)

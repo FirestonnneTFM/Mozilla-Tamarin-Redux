@@ -190,7 +190,7 @@ namespace axtam
 		// what is the pool for?
 		PoolObject* pool;
 
-//		void computeStackBase();
+		void computeStackBase();
 
 		void initAXPool();
 
