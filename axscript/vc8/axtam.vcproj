@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\core;..\..\MMgc;..\..\codegen;..\..\extensions"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;AXTAM_EXPORTS;DEBUG_EARLY_BINDING"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;AVMPLUS_IA32;_CRT_SECURE_NO_DEPRECATE;AXTAM_EXPORTS;DEBUG_EARLY_BINDING"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -129,8 +129,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="3"
+				FavorSizeOrSpeed="2"
 				AdditionalIncludeDirectories="..\..\core;..\..\MMgc;..\..\codegen;..\..\extensions"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;AXTAM_EXPORTS;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;_USRDLL;AXTAM_EXPORTS;USE_REAL2INT;AVMPLUS_IA32"
+				StringPooling="true"
+				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="axtam.h"
@@ -153,7 +157,7 @@
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
+				EnableCOMDATFolding="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -212,7 +216,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\core;..\..\MMgc;..\..\codegen;..\..\extensions"
-				PreprocessorDefinitions="DEBUGGER;WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE;AXTAM_EXPORTS;DEBUG_EARLY_BINDING"
+				PreprocessorDefinitions="DEBUGGER;WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE;USE_REAL2INT;AVMPLUS_IA32;_CRT_SECURE_NO_DEPRECATE;AXTAM_EXPORTS;DEBUG_EARLY_BINDING"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -241,6 +245,93 @@
 				ModuleDefinitionFile="..\axtam.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Register ActiveScript engine"
+				CommandLine="regsvr32.exe /s $(TargetPath)"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release_Debugger|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			UseOfATL="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				Description=""
+				CommandLine=""
+				Outputs=""
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\core;..\..\MMgc;..\..\codegen;..\..\extensions"
+				PreprocessorDefinitions="WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;NDEBUG;_USRDLL;AXTAM_EXPORTS;DEBUGGER;USE_REAL2INT;AVMPLUS_IA32"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="axtam.h"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="winmm.lib ..\..\..\tamarin-central\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus_s.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc_s.lib"
+				LinkIncremental="2"
+				ModuleDefinitionFile="..\axtam.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -380,6 +471,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
