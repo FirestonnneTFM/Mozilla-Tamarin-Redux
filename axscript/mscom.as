@@ -176,8 +176,6 @@ package {
 				objectDomains = {}
 			}
 			public function ParseScriptText(code:String, itemName:String, context:Object, delim:String, sourceCookie:int, lineNumber:int, flags:int) {
-				print('ParseScriptText')
-				print(code)
 				// XXX - this is wrong - we should only do the parse and generation
 				// of bytecode here.  We should execute all such blocks at 
 				// SetScriptState(SCRIPTSTATE_RUNNING) time.
