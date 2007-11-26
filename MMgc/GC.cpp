@@ -1481,7 +1481,7 @@ bail:
 #elif defined(AVMPLUS_UNIX) // SOLARIS
 	pthread_key_t stackTopKey = 0;
 
-	uint32 GC::GetStackTop() const
+	uintptr GC::GetStackTop() const
 	{
 		if(stackTopKey == 0)
 		{
@@ -1494,7 +1494,7 @@ bail:
 
 		void *stackTop = pthread_getspecific(stackTopKey);
 		if(stackTop)
-			return (uint32)stackTop;
+			return (uintptr)stackTop;
 
 		size_t sz;
 		void *s_base;
@@ -1523,7 +1523,7 @@ bail:
 		// stackTop has to be greater than current stack pointer
 		GCAssert(stackTop > &sz);
 		pthread_setspecific(stackTopKey, stackTop);
-		return (uint32)stackTop;
+		return (uintptr)stackTop;
 		
 	}
 #endif // AVMPLUS_UNIX

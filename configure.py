@@ -56,6 +56,10 @@ o = build.getopt.Options()
 config = Configuration(thisdir, options = o,
                        sourcefile = 'core/avmplus.h')
 
+buildTamarin = o.getBoolArg('tamarin', True)
+if buildTamarin:
+    config.subst("ENABLE_TAMARIN", 1)
+
 buildShell = o.getBoolArg("shell", False)
 if (buildShell):
     config.subst("ENABLE_SHELL", 1)
@@ -148,6 +152,8 @@ elif cpu == "powerpc":
     APP_CPPFLAGS += "-DAVMPLUS_PPC "
 elif cpu == "sparc":
     APP_CPPFLAGS += "-DAVMPLUS_SPARC "
+elif cpu == "x86_64":
+    APP_CPPFLAGS += "-DAVMPLUS_AMD64 "
 else:
     raise Exception("Unsupported OS")
 

@@ -42,8 +42,8 @@
 
 #include <unistd.h>
 
-#include "GCDebug.h"
 #include "MMgc.h"
+#include "GCDebug.h"
 #include "GC.h"
 
 #ifdef USE_MMAP
@@ -178,7 +178,7 @@ namespace MMgc
 		res = address;
 		
 		if (res == address)
-			address = (void*)( (int)address + size );
+			address = (void*)( (uintptr)address + size );
 		else
 			address = 0;
 		return address;

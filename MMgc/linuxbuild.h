@@ -49,7 +49,14 @@
 /**
  * IA-32
  */
+#ifdef __i386__
 #define MMGC_IA32
+#elif defined(__x86_64__)
+#define MMGC_AMD64
+#define MMGC_64BIT
+#else
+#error Unknown CPU type
+#endif
 
 /**
  * Define this to get stack traces.  Helps with memory leaks.

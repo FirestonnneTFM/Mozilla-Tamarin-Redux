@@ -42,7 +42,10 @@ INCLUDES += \
   -I$(topsrcdir)/pcre \
   $(NULL)
 
-$(call RECURSE_DIRS,MMgc core pcre codegen)
+$(call RECURSE_DIRS,MMgc)
+
+ifdef ENABLE_TAMARIN
+$(call RECURSE_DIRS,core pcre codegen)
 
 ifeq (darwin,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/mac)
@@ -52,6 +55,7 @@ $(call RECURSE_DIRS,platform/win32)
 endif
 ifeq (linux,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/unix)
+endif
 endif
 
 $(call RECURSE_DIRS,shell)
