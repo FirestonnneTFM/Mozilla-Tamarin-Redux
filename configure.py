@@ -78,7 +78,11 @@ OS_LIBS = []
 MMGC_CPPFLAGS = ""
 AVMSHELL_CPPFLAGS = ""
 AVMSHELL_LDFLAGS = ""
-MMGC_DEFINES = {'SOFT_ASSERTS': None, 'MMGC_INTERIOR_PTRS': None}
+MMGC_DEFINES = {'SOFT_ASSERTS': None}
+
+MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', True)
+if MMGC_INTERIOR_PTRS:
+    MMGC_DEFINES['MMGC_INTERIOR_PTRS'] = None
 
 MMGC_DYNAMIC = o.getBoolArg('mmgc-shared', False)
 if MMGC_DYNAMIC:
