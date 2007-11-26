@@ -302,7 +302,6 @@ namespace MMgc
 		}
 
 #ifdef _DEBUG
-		msgBuf = new char[32];
 #ifdef WIN32
 		m_gcThread = GetCurrentThreadId();
 #endif
@@ -322,14 +321,6 @@ namespace MMgc
 
 	}
 
-#ifdef _DEBUG
-	const char *GC::msg()
-	{
-		sprintf(msgBuf, "[MEM %8dms]", (int)ticksToMillis(GetPerformanceCounter() - t0));
-		return msgBuf;
-	}
-#endif
-	
 	GC::~GC()
 	{
 		// Force all objects to be destroyed
@@ -375,10 +366,6 @@ namespace MMgc
 		pageList = NULL;
 
 		heap->Free(pageMap);
-
-#ifdef _DEBUG
-		delete [] msgBuf;
-#endif
 
 		CheckThread();
 

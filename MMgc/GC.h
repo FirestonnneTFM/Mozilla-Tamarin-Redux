@@ -770,11 +770,6 @@ namespace MMgc
 		
 		uint64 t0;
 
-#ifdef _DEBUG
-		char *msgBuf;
-		const char *msg();
-#endif
-
 		static uint64 ticksToMicros(uint64 ticks) { return (ticks*1000000)/GetPerformanceFrequency(); }
 
 		static uint64 ticksToMillis(uint64 ticks) { return (ticks*1000)/GetPerformanceFrequency(); }

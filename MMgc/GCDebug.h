@@ -82,32 +82,6 @@ namespace MMgc
 		#define GCAssert(x)			do { } while (0) /* no semi */
 	#endif
 
-	/*************************************************************************/
-	/******************************* Debugging *******************************/
-	/*************************************************************************/
-
-	/* This mess serves to define the DebugMsg function on each platform.
-	* DebugMsg is only defined when the Debug flag is turned on; it halts
-	* program execution and drops into the debugger with the given message.
-	* We define it as in inline so that when you fall into the debugger,
-	* you're in the function that issued the call and not in a "DebugMsg"
-	* subroutine.
-	*/
-	#ifdef _MAC		
-		// WARNING: this function is NOT THREAD SAFE
-	    /*plugin_export*/ ConstStr255Param MakePascalMsg(const char* theString);
-		
-		#ifdef SOFT_ASSERTS
-			inline void DebugMsg_(const char* /*msg*/) { }
-		#else
-			#ifdef powerc
-				inline void DebugMsg_(const char* msg) { DebugStr(MakePascalMsg(msg)); }
-			#else
-				inline void DebugMsg_(const char* msg) { SysBreakStr(MakePascalMsg(msg)); }
-			#endif
-		#endif // SOFT_ASSERTS
-	#endif
-
 }
 
 #endif /* __GCDebug__ */
