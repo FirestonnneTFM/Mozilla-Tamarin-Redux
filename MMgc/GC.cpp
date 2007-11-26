@@ -2105,6 +2105,17 @@ bail:
 
 #endif
 
+#ifdef MMGC_INTERIOR_PTRS
+	inline bool IsLargeAllocPage(int bits) {
+		return (bits == GC::kGCLargeAllocPageFirst
+				|| bits == GC::kGCLargeAllocPageRest);
+	}
+#else
+	inline bool IsLargeAllocPage(int bits) {
+		return bits == GC::kGCLargeAllocPageFirst;
+	}
+#endif
+
 	void GC::MarkItem(GCWorkItem &wi, GCStack<GCWorkItem> &work)
 	{
 		size_t size = wi.GetSize();
@@ -2153,26 +2164,32 @@ bail:
 			// normalize and divide by 4K to get index
 			int bits = GetPageMapValue(val); 
 			
-			if (bits == 1)
+			if (bits == kGCAllocPage)
 			{
-				//GCAlloc::ConservativeMark(work, (void*) (val&~7), workitem.ptr);
-				const void* item = (void*) (val&~7);
+				const void *item;
+				GCAlloc::GCBlock *block = (GCAlloc::GCBlock*) (val & ~0xFFF);
 
-				GCAlloc::GCBlock *block = (GCAlloc::GCBlock*) ((uintptr) item & ~0xFFF);
-
+#ifdef MMGC_INTERIOR_PTRS
+				item = (void*) val;
+#else
 				// back up to real beginning
-				item = GetRealPointer((const void*) item);
+				item = GetRealPointer((const void*) (val & ~7));
+#endif
 
 				// guard against bogus pointers to the block header
 				if(item < block->items)
 					continue;
 
-				// make sure this is a pointer to the beginning
-
 				int itemNum = GCAlloc::GetIndex(block, item);
-
+#ifdef MMGC_INTERIOR_PTRS
+				// adjust |item| to the beginning of the allocation
+				item = block->items + itemNum * block->size;
+#else
+				// if |item| doesn't point to the beginning of an allocation,
+				// it's not considered a pointer.
 				if(block->items + itemNum * block->size != item)
 					continue;
+#endif
 
 				// inline IsWhite/SetBit
 				// FIXME: see if using 32 bit values is faster
@@ -2216,39 +2233,57 @@ bail:
 					#endif
 				}
 			}
-			else if (bits == 3)
+			else if (IsLargeAllocPage(bits))
 			{
 				//largeAlloc->ConservativeMark(work, (void*) (val&~7), workitem.ptr);
-				const void* item = (void*) (val&~7);
+				const void* item;
 
-				// back up to real beginning
-				item = GetRealPointer((const void*) item);
-
-				if(((uintptr) item & 0xfff) == sizeof(GCLargeAlloc::LargeBlock))
+#ifdef MMGC_INTERIOR_PTRS
+				if (bits == kGCLargeAllocPageFirst)
 				{
-					GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetBlockHeader(item);
-					if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0) 
+					// guard against bogus pointers to the block header
+					if ((val & 0xffff) < sizeof(GCLargeAlloc::LargeBlock))
+						continue;
+
+					item = (void *) ((val & ~0xfff) |
+									 sizeof(GCLargeAlloc::LargeBlock));
+				}
+				else
+				{
+					item = FindBeginning((void *) val);
+				}
+#else
+				// back up to real beginning
+				item = GetRealPointer((const void*) (val & ~7));
+
+				// If |item| doesn't point to the start of the page, it's not
+				// really a pointer.
+				if(((uintptr) item & 0xfff) != sizeof(GCLargeAlloc::LargeBlock))
+					continue;
+#endif
+
+				GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetBlockHeader(item);
+				if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0) 
+				{
+					size_t usize = b->usableSize;
+					if((b->flags & GCLargeAlloc::kContainsPointers) != 0) 
 					{
-						size_t usize = b->usableSize;
-						if((b->flags & GCLargeAlloc::kContainsPointers) != 0) 
-						{
-							b->flags |= GCLargeAlloc::kQueuedFlag;
-							const void *realItem = item;
-							#ifdef MEMORY_INFO
-							realItem = GetUserPointer(item);
-							usize -= DebugSize();
-							#endif
-							b->gc->PushWorkItem(work, GCWorkItem(realItem, usize, true));
-						} 
-						else
-						{
-							// doesn't need marking go right to black
-							b->flags |= GCLargeAlloc::kMarkFlag;
-						}
-						#if defined(MEMORY_INFO)
-						GC::WriteBackPointer(item, end==(void*)0x130000 ? p-1 : wi.ptr, usize);
+						b->flags |= GCLargeAlloc::kQueuedFlag;
+						const void *realItem = item;
+						#ifdef MEMORY_INFO
+						realItem = GetUserPointer(item);
+						usize -= DebugSize();
 						#endif
+						b->gc->PushWorkItem(work, GCWorkItem(realItem, usize, true));
+					} 
+					else
+					{
+						// doesn't need marking go right to black
+						b->flags |= GCLargeAlloc::kMarkFlag;
 					}
+					#if defined(MEMORY_INFO)
+					GC::WriteBackPointer(item, end==(void*)0x130000 ? p-1 : wi.ptr, usize);
+					#endif
 				}
 			}
 		}
