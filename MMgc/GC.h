@@ -440,11 +440,6 @@ namespace MMgc
 		bool validateDefRef;		
 		bool keepDRCHistory;
 
-		/**
-		 * incremental space divisor
-		 */
-		int ISD;
-
 		size_t collectThreshold;
 
 		bool gcstats;
