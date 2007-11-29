@@ -45,6 +45,13 @@
 // save all registers: they might have pointers in them.  In theory, only
 // need to save callee-saved regs.  In practice, saving three extra pointers
 // is cheap insurance.
+//
+// These macros do not use the "do { ... } while (0)" idiom because they
+// work by introducing local variables (save1, save2, ...) into the block
+// where the macro is called.  If the macro enclosed these variables in a
+// nested block, like a do-while block, they would go out of scope too
+// soon.
+//
 #define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
 		int save1,save2,save3,save4,save5,save6,save7;\
 		__asm mov save1, eax \
@@ -61,12 +68,10 @@
 
 #elif defined SOLARIS
 #define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
-		do { \
 		_stack = (void *) _getsp();\
-		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
 #else
 #define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
-		do { \
 		volatile auto int save1,save2,save3,save4,save5,save6,save7;\
 		asm("movl %%eax,%0" : "=r" (save1));\
 		asm("movl %%ebx,%0" : "=r" (save2));\
@@ -76,13 +81,12 @@
 		asm("movl %%esi,%0" : "=r" (save6));\
 		asm("movl %%edi,%0" : "=r" (save7));\
 		asm("movl %%esp,%0" : "=r" (_stack));\
-		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
 #endif 
 
 #elif defined MMGC_AMD64
 // 64bit - r8-r15?
 #define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
-		do { \
 		volatile auto int64 save1,save2,save3,save4,save5,save6,save7;\
 		asm("mov %%rax,%0" : "=r" (save1));\
 		asm("mov %%rbx,%0" : "=r" (save2));\
@@ -92,7 +96,7 @@
 		asm("mov %%rsi,%0" : "=r" (save6));\
 		asm("mov %%rdi,%0" : "=r" (save7));\
 		asm("mov %%rsp,%0" : "=r" (_stack));\
-		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)	
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
 
 #elif defined MMGC_PPC
 
@@ -145,10 +149,9 @@
 
 #elif defined MMGC_SPARC
 #define MMGC_GET_STACK_EXENTS(_gc, _stack, _size) \
-		do { \
 		asm("ta 3");\
 		_stack = (void *) _getsp();\
-		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
 #endif
 
 #ifdef DEBUGGER
