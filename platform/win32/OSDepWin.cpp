@@ -35,12 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
+#include "avmplus.h"
 #include <windows.h>
 #include <wctype.h>
 #include <time.h>
-
-#include "avmplus.h"
 
 #pragma warning(disable:4201)	// nonstandard extension used : nameless struct/union
 #include <mmsystem.h>			// for timeGetTime (oddly, this include must come AFTER avmplus.h)
@@ -60,7 +58,8 @@ namespace avmplus
 
 	uintptr OSDep::startIntWriteTimer(uint32 millis, int *addr)
 	{
-		return (uintptr) timeSetEvent(millis, millis, (LPTIMECALLBACK)intWriteTimerProc, (DWORD_PTR)addr, 1);
+		return (uintptr) timeSetEvent(millis, millis, (LPTIMECALLBACK)intWriteTimerProc, (DWORD_PTR)addr, 
+			TIME_PERIODIC | TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
 	}
 
 	void OSDep::stopTimer(uintptr handle)

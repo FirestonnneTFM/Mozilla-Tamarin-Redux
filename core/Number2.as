@@ -47,7 +47,8 @@ package
 		public static const MAX_VALUE         :double = 1.7976931348623158e+308
 
 
- 		private static native function _toString(n:double, radix:int):String; // doesn't get used
+		// not used, thus commented out for now to save code size (srj)
+ 		//private static native function _toString(n:double, radix:int):String; // doesn't get used
 
 		AS3 function toString(radix=10):String {
 			return Number(this).AS3::toString(radix);

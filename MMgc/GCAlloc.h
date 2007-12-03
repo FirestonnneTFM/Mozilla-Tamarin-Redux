@@ -295,7 +295,7 @@ namespace MMgc
 		void FreeChunk(GCBlock* b);
 		void AddToFreeList(GCBlock *b)
 		{
-			GCAssert(!IsOnEitherList(b));
+			GCAssert(!IsOnEitherList(b) && !b->needsSweeping);
 			b->prevFree = NULL;
 			b->nextFree = m_firstFree;
 			if (m_firstFree) {

@@ -90,6 +90,9 @@ namespace avmplus
 
 	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), mirBuffers(g, 4), 
 		gcInterface(g)
+#ifdef DEBUGGER
+		,_sampler(g)
+#endif
     {
 		// sanity check for all our types
 		AvmAssert (sizeof(int8) == 1);

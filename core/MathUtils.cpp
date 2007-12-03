@@ -35,9 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <math.h>
-
 #include "avmplus.h"
+#include <math.h>
 #include "BigInteger.h"
 namespace avmplus
 {
@@ -529,6 +528,18 @@ namespace avmplus
 		double original_base = base;
 		int original_exponent = exponent;
 
+		if (MathUtils::isInfinite(base))
+		{
+			if (exponent < 0) // return -0 or 0 depending on sign of base
+				return (base < 0) ? 1.0/base : 0.0;
+
+			// if base is -Infinity, return Infinity or -Infinity depending whether the exponent is even or not.
+			if (base < 0) 
+				return (MathUtils::mod(exponent, 2) != 0) ? base : 0-base;
+
+			return base;
+		}
+
 		if (exponent < 0) {
 			exponent = -exponent;
 			while (exponent) {
@@ -538,7 +549,7 @@ namespace avmplus
 				    // That means we can't invert the exponent when the base ten value exponent is < 307.  
 				    //  We could first check if powerOfTwo(base)*exp > 1074, but that would
 				    //  slow down all powInts calls.  This limits the xtra work to just very small numbers.
-					if (value == 0 && base != 0 && !MathUtils::isInfinite(base)) // double check by calling the real thing
+					if (value == 0 && base != 0) // double check by calling the real thing
 						return MathUtils::powInternal(original_base,(double)original_exponent);
 				}
 				exponent >>= 1;

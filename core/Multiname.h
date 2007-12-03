@@ -243,7 +243,7 @@ namespace avmplus
 		MultiFormat;
 
 		Stringp format(AvmCore* core, MultiFormat form=MULTI_FORMAT_FULL) const;
-		static Stringp format(AvmCore* core, Namespace* ns, Stringp name, bool attr=false);
+		static Stringp format(AvmCore* core, Namespace* ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true);
 //#endif
 	};
 
@@ -352,7 +352,7 @@ namespace avmplus
 //#ifdef AVMPLUS_VERBOSE
 	public:
 		Stringp format(AvmCore* core, Multiname::MultiFormat form=Multiname::MULTI_FORMAT_FULL) const { return name.format(core, form); }
-		static Stringp format(AvmCore* core, Namespace* ns, Stringp name, bool attr=false) { return format(core, ns, name, attr); }
+		static Stringp format(AvmCore* core, Namespace* ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true) { return format(core, ns, name, attr, hideNonPublicNamespaces); }
 //#endif
 	private:
         Multiname name;

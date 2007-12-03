@@ -319,7 +319,9 @@ namespace avmplus
 			// if targetProperty is null or targetProperty.localName = "*"
 			else if (m_targetProperty.isAnyName() ||
 				// Added because of bug 145184 - appendChild with a text node not working right
-				(core->isXML(V) && core->atomToXML(V)->getClass() == E4XNode::kText))
+				// Also handle attribute nodes
+				((core->isXML(V) && core->atomToXML(V)->getClass() == E4XNode::kAttribute)) ||
+				((core->isXML(V) && core->atomToXML(V)->getClass() == E4XNode::kText)))
 			{
 				y = new (core->GetGC()) TextE4XNode (core->atomToXML(r), 0);
 			}
@@ -381,10 +383,25 @@ namespace avmplus
 		}
 
 		// step 2d
-		E4XNode *v = core->atomToXML (V);
-		if ((!core->atomToXMLList(V) && !v) || (v && (v->getClass() & (E4XNode::kText | E4XNode::kCDATA | E4XNode::kAttribute))))
+		if (core->atomToXMLList(V))
 		{
-			// This string is converted into a XML object below in step 2(g)(iii)
+			XMLListObject *src = core->atomToXMLList (V);
+			if ((src->_length() == 1) && src->_getAt(0)->getClass() & (E4XNode::kText | E4XNode::kAttribute))
+			{
+				V = core->string(V)->atom();
+			}	
+		}
+		else if (core->atomToXML (V))
+		{
+			E4XNode *v = core->atomToXML (V);
+			if (v->getClass() & (E4XNode::kText | E4XNode::kAttribute))
+			{
+				// This string is converted into a XML object below in step 2(g)(iii)
+				V = core->string(V)->atom();
+			}
+		}
+		else
+		{
 			V = core->string(V)->atom();
 		}
 

@@ -340,7 +340,11 @@ namespace MMgc
 				if(DecommitMemoryThatMaySpanRegions(block->baseAddr, block->size * kBlockSize))
 				{
 					block->committed = false;
+#ifdef _MAC
+					block->dirty = true;
+#else					
 					block->dirty = false;
+#endif					
 					decommitSize -= block->size;
 #ifdef MEMORY_INFO
 					if(heapVerbose)
@@ -366,6 +370,9 @@ namespace MMgc
 					block->baseAddr = 0;
 
 					block = prev;
+#ifdef _MAC
+					block->dirty = true;
+#endif
 				}
 
 				HeapBlock *next = block + block->size;
@@ -524,7 +531,9 @@ namespace MMgc
 					CheckFreelist();
 
 					zero = block->dirty && zero;
-
+					
+					GCAssert(!block->dirty ? *(uint32*)block->baseAddr == 0 : true);
+					
 					return block;
 				}
 
@@ -697,7 +706,12 @@ namespace MMgc
 #endif
 			numDecommitted -= block->size;
 			block->committed = true;
+#ifdef _MAC
+			// can't set to false, but don't need to set to true
+			GCAssert(block->dirty == true);
+#else
 			block->dirty = false;
+#endif
 		}
 	}
 #endif
@@ -1072,7 +1086,11 @@ namespace MMgc
 		block->next = NULL;
 		block->committed = true;
 #ifdef USE_MMAP
+#ifdef _MAC
+		block->dirty = true;
+#else
 		block->dirty = false; // correct?
+#endif		
 #else
 		block->dirty = true;
 #endif
@@ -1093,7 +1111,11 @@ namespace MMgc
 			block->prev = NULL;
 			block->next = NULL;
 			block->committed = false;
+#ifdef _MAC
+			block->dirty = true;
+#else
 			block->dirty = false;
+#endif			
 #ifdef MEMORY_INFO
 			block->allocTrace = 0;
 			block->freeTrace = 0;

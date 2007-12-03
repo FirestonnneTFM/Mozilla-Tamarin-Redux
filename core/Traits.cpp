@@ -292,6 +292,7 @@ namespace avmplus
 
 			initTables(toplevel);
 
+			const byte* oldpos = getTraitsPos();
 			pool->resolveTraits(this, firstSlot, toplevel);
 
 			// make sure all the methods have resolved types
@@ -460,11 +461,12 @@ namespace avmplus
 						}
 					}
 				}
-				imtBuilder.finish(getIMT(), pool);
+				imtBuilder.finish(getIMT(), pool, toplevel);
 			}
             if (!legal)
             {
-                Multiname qname(ns, name);
+				setTraitsPos(oldpos); // restore traits_pos
+				Multiname qname(ns, name);
                 toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(&qname), core->toErrorString(this));
             }
 			linked = true;
@@ -552,6 +554,8 @@ namespace avmplus
 			// *, Object, and Void are each represented as Atom
 			(!a || a == a->core->traits.object_itraits || a == a->core->traits.void_itraits) &&
 			(!b || b == b->core->traits.object_itraits || b == b->core->traits.void_itraits) ||
+			// Number and double have identical machine representations (IEEE 754)
+			(isNumberOrDouble(a) && isNumberOrDouble(b)) ||
 			// all other non-pointer types have unique representations
 			(a && b && !a->isMachineType && !b->isMachineType);
 	}
@@ -871,7 +875,7 @@ namespace avmplus
 		entries[i] = new (gc) ImtEntry(virt, entries[i], disp_id);
 	}
 
-	void ImtBuilder::finish(Binding imt[], PoolObject* pool)
+	void ImtBuilder::finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel)
 	{
 		for (int i=0; i < Traits::IMT_SIZE; i++)
 		{
@@ -891,8 +895,32 @@ namespace avmplus
 				// build conflict stub
 				CodegenMIR mir(pool);
 				imt[i] = BIND_ITRAMP | (uintptr)mir.emitImtThunk(e);
+				if (mir.overflow)
+					toplevel->throwError(kOutOfMemoryError);
+
 				AvmAssert((imt[i]&7)==BIND_ITRAMP); // addr must be 8-aligned
 			}
 		}
+	}
+	
+	Stringp Traits::formatClassName()
+	{
+#ifndef DEBUGGER
+		Stringp fullName=NULL;
+#endif
+		if(!fullName)
+		{
+			Multiname qname(ns, name);
+			qname.setQName();
+			StringBuffer buffer(core);
+			buffer << &qname;
+			int length = buffer.length();
+			if (length && buffer.c_str()[length-1] == '$') {
+				fullName = core->newString(buffer.c_str(), length-1);
+			} else {
+				fullName = core->newString(buffer.c_str());
+			}
+		}
+		return fullName;
 	}
 }

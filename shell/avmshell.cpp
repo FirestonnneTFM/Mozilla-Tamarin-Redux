@@ -138,6 +138,7 @@ namespace avmshell
 		NATIVE_CLASS(abcclass_flash_sampler_Sample,     SampleClass,        SampleObject)
 		NATIVE_CLASS(abcclass_flash_sampler_NewObjectSample, NewObjectSampleClass, NewObjectSampleObject)
 		NATIVE_CLASS(abcclass_flash_sampler_DeleteObjectSample, SampleClass, SampleObject)
+		NATIVE_CLASS(abcclass_flash_trace_Trace,		TraceClass,			ScriptObject)
 	END_NATIVE_CLASSES()
 
 	BEGIN_NATIVE_SCRIPTS(Shell)
@@ -451,7 +452,8 @@ namespace avmshell
 													  domain,
 													  toplevel->domainEnv());
 
-			ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext(domainEnv);
+			ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
+			codeContext->m_domainEnv = domainEnv;
 				
 			// parse new bytecode
 			handleActionBlock(code, 0, domainEnv, toplevel, NULL, NULL, NULL, codeContext);
@@ -560,7 +562,7 @@ namespace avmshell
 						} else if (!strcmp(arg+2, "noincgc")) {
 							GetGC()->incremental = false;
 						} else if (!strcmp(arg+2, "astrace")) {
-							avmplus::Debugger::astrace = (avmplus::Debugger::TraceLevel) strtol(argv[++i], 0, 10);
+							avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) strtol(argv[++i], 0, 10);
                     	#endif /* DEBUGGER */
 						#ifdef AVMPLUS_INTERP
 						} else if (!strcmp(arg+2, "interp")) {
@@ -747,7 +749,8 @@ namespace avmshell
 						return(1);
 				}
 
-				ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext(domainEnv);
+				ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
+				codeContext->m_domainEnv = domainEnv;
 				
 				// parse new bytecode
 				if (isValid)

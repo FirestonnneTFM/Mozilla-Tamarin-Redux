@@ -43,8 +43,8 @@ using namespace MMgc;
 namespace avmplus
 {
 	// [ed] why does the E4 semantics MethodClosure have a slot table?
-	// [jd] The slot table of a method closure is used to hold the value of the length
-	// property for the method. Dont know how important this is, but there you go.
+	// [jd] The slot table of a method closure is used to hold the value of the length
+	// property for the method. Dont know how important this is, but there you go.
 	// [ed] 9/15/04 we're implementing length as a getter instead of a slot.
 
     MethodClosure::MethodClosure(VTable* ivtable, ScriptObject* prototype, 
@@ -84,6 +84,11 @@ namespace avmplus
 		return env->method->param_count;
 	}
 
+	Atom MethodClosure::get_savedThis()
+	{
+		return savedThis;
+	}
+
 #ifdef AVMPLUS_VERBOSE
     Stringp MethodClosure::format(AvmCore* core) const
     {
@@ -98,6 +103,7 @@ namespace avmplus
 
 	BEGIN_NATIVE_MAP(MethodClosureClass)
 		NATIVE_METHOD2(builtin_as_0_MethodClosure_length_get, &MethodClosure::get_length)
+		NATIVE_METHOD(builtin_as_0_MethodClosure_private_savedThis_get, MethodClosure::get_savedThis)
 	END_NATIVE_MAP()
 
 	MethodClosureClass::MethodClosureClass(VTable* cvtable)

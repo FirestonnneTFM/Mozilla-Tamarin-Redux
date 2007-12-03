@@ -38,6 +38,10 @@
 #ifndef __GCMemoryProfiler__
 #define __GCMemoryProfiler__
 
+#ifndef WIN32
+#include <pthread.h>
+#endif
+
 
 #ifndef MEMORY_INFO
 
@@ -87,7 +91,7 @@ namespace MMgc
 	public:
 		GCThreadLocal()
 		{
-			GCAssert(sizeof(T) == sizeof(LPVOID));
+			GCAssert(sizeof(T) <= sizeof(LPVOID));
 			tlsId = TlsAlloc();
 		}
 		T operator=(T tNew)
@@ -104,25 +108,26 @@ namespace MMgc
 	};
 #else
 
-	// FIXME: implement
 	template<typename T>
 	class GCThreadLocal
 	{
 	public:
 		GCThreadLocal()
-		{			
+		{
+			GCAssert(sizeof(T) <= sizeof(void*));
+			pthread_key_create(&tlsId, NULL);
 		}
 		T operator=(T tNew)
 		{
-			tlsId = tNew;
+			pthread_setspecific(tlsId, (const void*)tNew);
 			return tNew;
 		}
 		operator T() const
 		{
-			return tlsId;
+			return (T)pthread_getspecific(tlsId);
 		}
 	private:
-		T tlsId;
+		pthread_key_t tlsId ;
 	};
 
 	class GCCriticalSection
@@ -213,7 +218,7 @@ namespace MMgc
 	void PrintStackTraceByIndex(int index);
 	MMGC_API void PrintStackTrace(const void *item);
 	// print stack trace of caller
-	void DumpStackTrace();
+	void DumpStackTrace(int skip=1);
 }
 
 #endif //MEMORY_INFO

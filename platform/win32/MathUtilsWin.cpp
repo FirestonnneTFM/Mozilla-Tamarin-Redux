@@ -35,9 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <math.h>
-
 #include "avmplus.h"
+#include <math.h>
 
 #define X86_MATH
 

@@ -76,6 +76,7 @@ namespace avmplus
 			core->sampler()->recordDeallocationSample(objId, s);
 		}
 		objId = 0;
+		RCObject::Finalize();
 	}
 #endif
 }

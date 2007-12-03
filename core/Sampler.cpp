@@ -44,10 +44,15 @@ namespace avmplus
 {
 	using namespace MMgc;
 
+	Sampler::Sampler(GC *gc) : allocId(1), sampling(true),
+			autoStartSampling(false), samplingNow(false), takeSample(0),
+			numSamples(0), samples(gc->GetGCHeap()), currentSample(NULL), timerHandle(0)
+	{
+		fakeMethodInfos = new (gc) Hashtable(gc);
+	}
+
 	void Sampler::setCore(AvmCore *core)
 	{
-		// fixed (AvmCore) memory, clear out
-		memset(this, 0, sizeof(Sampler));
 		this->core = core;
 		allocId = 1;
 	}
@@ -55,26 +60,18 @@ namespace avmplus
 	Sampler::~Sampler()
 	{
 		stopSampling();
-		delete samples;
 	}
 
 	void Sampler::init(bool sampling, bool autoStart)
 	{
 		this->sampling = sampling;
 		this->autoStartSampling = autoStart;
-		// setup structures early to catch all memory samples (even though timer doesn't start until 
-		// start sampling is called)
-		if(sampling && !samples)
-		{
-			samples = new (core->GetGC()) GrowableBuffer(core->GetGC()->GetGCHeap());
-			fakeMethodInfos = new (core->GetGC()) Hashtable(core->GetGC());
-		}
 	}
 
 	byte *Sampler::getSamples(uint32 &num)
 	{
 		num = numSamples;
-		byte *start = samples ? samples->start() : NULL;
+		byte *start = samples.start();
 		return start;
 	}
 
@@ -89,13 +86,16 @@ namespace avmplus
 
 	int Sampler::sampleSpaceCheck()
 	{
+		if(!samples.start())
+			return 0;
+
 		uint32 sampleSize = sizeof(Sample);
 		uint32 callStackDepth = core->callStack ? core->callStack->depth : 0;
 		sampleSize += callStackDepth * sizeof(StackTrace::Element);
 		sampleSize += sizeof(uint64) * 2;
-		while(currentSample + sampleSize > samples->uncommitted()) {
-			samples->grow();
-			if(currentSample + sampleSize > samples->uncommitted()) {
+		while(currentSample + sampleSize > samples.uncommitted()) {
+			samples.grow();
+			if(currentSample + sampleSize > samples.uncommitted()) {
 				// exhausted buffer
 				stopSampling();
 				return 0;
@@ -113,8 +113,8 @@ namespace avmplus
 		write(p, sampleType);
 		if(sampleType != DELETED_OBJECT_SAMPLE)
 		{
-			if(depth == 0)
-				AvmDebugMsg(false, "Please add SAMPLE_FRAME's to give this allocation some context.");
+			//if(depth == 0)
+			//	AvmDebugMsg(false, "Please add SAMPLE_FRAME's to give this allocation some context.");
 			write(p, depth);
 			while(csn)
 			{
@@ -197,7 +197,7 @@ namespace avmplus
 		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
 		// recordDeallocationSample doesn't honor the samplingNow flag
 		// this is to avoid dropping deleted object samples when sampling is paused.
-		if(samples == NULL || !sampleSpaceCheck()) {
+		if(!sampleSpaceCheck()) {
 			return;
 		}
 		AvmAssert(id != 0);
@@ -210,16 +210,8 @@ namespace avmplus
 
 	void Sampler::clearSamples()
 	{
-		if (samples != NULL)
-		{
-			currentSample = samples->start();
-			numSamples = 0;
-		}
-		else
-		{
-			currentSample = NULL;
-			numSamples = 0;
-		}
+		currentSample = samples.start();
+		numSamples = 0;
 	}
 
 	void Sampler::startSampling()
@@ -227,7 +219,6 @@ namespace avmplus
 		if(!sampling || samplingNow)
 			return;
 
-		if (!samples)
 		{
 			init(sampling, autoStartSampling);
 		}
@@ -236,13 +227,12 @@ namespace avmplus
 		{
 			int megs=256;
 			while(!currentSample && megs >= 16) {
-				currentSample = samples->reserve(megs * 1024 * 1024);
+				currentSample = samples.reserve(megs * 1024 * 1024);
 				megs >>= 1;
 			}
 			if(!currentSample) {
 				sampling = autoStartSampling = false;
-				delete samples;
-				samples = NULL;
+				samples.free();
 				return;
 			}
 		}
@@ -269,10 +259,7 @@ namespace avmplus
 			timerHandle = 0;
 		}
 
-		if(samples) {
-			delete samples;
-			samples = NULL;
-		}
+		samples.free();
 
 		samplingNow = false;
 		numSamples = 0;
@@ -281,29 +268,28 @@ namespace avmplus
 
 	void Sampler::initSampling()
 	{
-		if(sampling) {			
-			// prime fake function table
-			createFakeFunction("[mark]");
-			createFakeFunction("[sweep]");
-			createFakeFunction("[reap]");
-			createFakeFunction("[generate]");
-			createFakeFunction("[verify]");
-			createFakeFunction("[newclass]");
+		if(!sampling)
+			return;
+		// prime fake function table
+		createFakeFunction("[mark]");
+		createFakeFunction("[sweep]");
+		createFakeFunction("[reap]");
+		createFakeFunction("[generate]");
+		createFakeFunction("[verify]");
+		createFakeFunction("[newclass]");
 
-			if(autoStartSampling) {
-				startSampling();
-			}
+		if(autoStartSampling) {
+			startSampling();
 		}
+		return;
 	}
 
 	void Sampler::createFakeFunction(const char *name)
 	{
-		AvmAssert(core->builtinPool != NULL);
 		if(!sampling)
 			return;
 
-		// have to turn sampling off during allocations to avoid recursion
-		AvmAssert(sampling);
+		AvmAssert(core->builtinPool != NULL);
 		Atom nameAtom = core->constant(name);
 		Atom a = fakeMethodInfos->get(nameAtom);
 		AbstractFunction *af = (AbstractFunction*)AvmCore::atomToGCObject(a);

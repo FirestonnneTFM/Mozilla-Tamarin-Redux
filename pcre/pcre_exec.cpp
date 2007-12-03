@@ -266,7 +266,7 @@ argument of match(), which never changes. */
 
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw)\
   {\
-  heapframe *newframe = (heapframe* )(pcre_stack_malloc)(sizeof(heapframe));\
+  {heapframe *newframe = (heapframe* )(pcre_stack_malloc)(sizeof(heapframe));\
   frame->Xwhere = rw; \
   newframe->Xeptr = ra;\
   newframe->Xecode = rb;\
@@ -278,17 +278,19 @@ argument of match(), which never changes. */
   newframe->Xrdepth = frame->Xrdepth + 1;\
   newframe->Xprevframe = frame;\
   frame = newframe;\
+  }\
   DPRINTF(("restarting from line %d\n", __LINE__));\
   goto HEAP_RECURSE;\
-  }\
   L_##rw:\
-  DPRINTF(("jumped back to line %d\n", __LINE__));
+  DPRINTF(("jumped back to line %d\n", __LINE__));\
+  }
 
 #define RRETURN(ra)\
   {\
-  heapframe *newframe = frame;\
+  {heapframe *newframe = frame;\
   frame = newframe->Xprevframe;\
   (pcre_stack_free)(newframe);\
+  }\
   if (frame != NULL)\
     {\
     rrc = ra;\

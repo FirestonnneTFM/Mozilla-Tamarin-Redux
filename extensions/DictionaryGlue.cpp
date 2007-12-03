@@ -88,7 +88,7 @@ namespace avmplus
 		AvmAssert(AvmCore::isObject(key));
 		ScriptObject *obj = AvmCore::atomToScriptObject(key);
 		AvmAssert(obj->traits() != core()->traits.qName_itraits);
-		AvmAssert(MMgc::GC::Size(obj) > sizeof(ScriptObject));
+		AvmAssert(MMgc::GC::Size(obj) >= sizeof(ScriptObject));
 		(void)obj;
 
 		// FIXME: this doesn't work, need to convert back to an XMLObject

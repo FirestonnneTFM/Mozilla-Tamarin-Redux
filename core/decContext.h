@@ -37,8 +37,18 @@
   #define DECCAUTHOR   "Mike Cowlishaw"               /* Who to blame */
 
   #if !defined(int32_t) && !defined(_INT8_T)
-    #ifdef __GNUC__
+    #if defined(__GNUC__)
 	#include <stdint.h>           // C99 standard integers
+    #elif defined(_MSC_VER)
+    // use MSVC size-specific defs
+	typedef unsigned __int8 uint8_t;
+	typedef signed __int8 int8_t;
+	typedef unsigned __int16 uint16_t;
+	typedef signed __int16 int16_t;
+	typedef unsigned __int32 uint32_t;
+	typedef signed __int32 int32_t;
+	typedef unsigned __int64 uint64_t;
+	typedef signed __int64 int64_t;
     #else
 	typedef unsigned char uint8_t;
 	typedef char int8_t;

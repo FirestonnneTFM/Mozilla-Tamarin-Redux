@@ -142,49 +142,53 @@ namespace MMgc
 		int numBlocks = kBlockSize/GCHeap::kBlockSize;
 		GCBlock* b = (GCBlock*) m_gc->AllocBlock(numBlocks, GC::kGCAllocPage);
 
-		b->gc = m_gc;
-		b->alloc = this;
-		b->size = m_itemSize;
-		b->needsSweeping = false;
-		if(m_gc->collecting && m_finalized)
-			b->finalizeState = m_gc->finalizedValue;
-		else 
-			b->finalizeState = !m_gc->finalizedValue;
-
-		b->bits = m_bitsInPage ? (uint32*)((char*)b + sizeof(GCBlock)) : bits;
-
-		// Link the block at the end of the list
-		b->prev = m_lastBlock;
-		b->next = 0;
-		
-		if (m_lastBlock) {
-			m_lastBlock->next = b;
-		}
-		if (!m_firstBlock) {
-			m_firstBlock = b;
-		}
-		m_lastBlock = b;
-
-		// Add our new ChunkBlock to the firstFree list (which should be empty)
-		if (m_firstFree)
+		if (b) 
 		{
-			GCAssert(m_firstFree->prevFree == 0);
-			m_firstFree->prevFree = b;
-		}
-		b->nextFree = m_firstFree;
-		b->prevFree = 0;
-		m_firstFree = b;
+			b->gc = m_gc;
+			b->alloc = this;
+			b->size = m_itemSize;
+			b->needsSweeping = false;
+			if(m_gc->collecting && m_finalized)
+				b->finalizeState = m_gc->finalizedValue;
+			else 
+				b->finalizeState = !m_gc->finalizedValue;
 
-		// calculate back from end (better alignment, no dead space at end)
-		b->items = (char*)b+GCHeap::kBlockSize - m_itemsPerBlock * m_itemSize;
-		b->nextItem = b->items;
-		b->numItems = 0;
+			b->bits = m_bitsInPage ? (uint32*)((char*)b + sizeof(GCBlock)) : bits;
+
+			// Link the block at the end of the list
+			b->prev = m_lastBlock;
+			b->next = 0;
+			
+			if (m_lastBlock) {
+				m_lastBlock->next = b;
+			}
+			if (!m_firstBlock) {
+				m_firstBlock = b;
+			}
+			m_lastBlock = b;
+
+			// Add our new ChunkBlock to the firstFree list (which should be empty)
+			if (m_firstFree)
+			{
+				GCAssert(m_firstFree->prevFree == 0);
+				m_firstFree->prevFree = b;
+			}
+			b->nextFree = m_firstFree;
+			b->prevFree = 0;
+			m_firstFree = b;
+
+			// calculate back from end (better alignment, no dead space at end)
+			b->items = (char*)b+GCHeap::kBlockSize - m_itemsPerBlock * m_itemSize;
+			b->nextItem = b->items;
+			b->numItems = 0;
+		}
 
 		return b;
 	}
 
 	void GCAlloc::UnlinkChunk(GCBlock *b)
 	{
+		GCAssert(!b->needsSweeping);
 		m_maxAlloc -= m_itemsPerBlock;
 		m_numBlocks--;
 
@@ -247,6 +251,7 @@ start:
 			}
 		}
 
+		GCAssert(!b->needsSweeping);
 		GCAssert(b == m_firstFree);
 
 		GCAssert(b && !b->IsFull());
@@ -385,6 +390,8 @@ start:
 			// we can unlink block below
 			next = b->next;
 
+			GCAssert(!b->needsSweeping);
+
 			// remove from freelist to avoid mutator destructor allocations
 			// from using this block
 			bool putOnFreeList = false;
@@ -447,6 +454,10 @@ start:
 				}
 			}
 
+			// 3 outcomes:
+			// 1) empty, put on list of empty pages
+			// 2) no freed items, partially empty or full, return to free if partially empty
+			// 3) some freed item add to the to be swept list
 			if(numMarkedItems == 0) {
 				// add to list of block to be returned to the Heap after finalization
 				// we don't do this during finalization b/c we want finalizers to be able

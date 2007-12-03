@@ -91,11 +91,10 @@ namespace avmshell
 {
 	class ShellCodeContext : public CodeContext
 	{
-		DomainEnv* const _domainEnv;
 	  public:
-		  ShellCodeContext(DomainEnv *de) : _domainEnv(de) {}
-		  virtual ~ShellCodeContext() {}
-		  virtual DomainEnv *domainEnv() const { return _domainEnv; }
+		DWB(DomainEnv*) m_domainEnv;
+		virtual ~ShellCodeContext() {}
+		virtual DomainEnv *domainEnv() const { return m_domainEnv; }
 	};
 	
 	/**

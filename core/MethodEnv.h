@@ -53,6 +53,7 @@ namespace avmplus
 
 		/** runtime independent type info for this method */
 		AbstractFunction* const method;
+		Traits * const declTraits;
 
 		/** vtable for the activation scope inside this method */
 		VTable *getActivation();

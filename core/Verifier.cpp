@@ -912,6 +912,15 @@ namespace avmplus
 				checkStack(0,1);
 				AbstractFunction* f = checkMethodInfo(imm30);
 
+				// Duplicate function definitions can happen with well formed ABC data.  We need
+				// to clear out data on AbstractionFunction so it can correctly be re-initialized.
+				// If our old function is ever used incorrectly, we throw an verify error in 
+				// MethodEnv::coerceEnter.
+				if (f->declaringTraits)
+				{
+					f->flags &= ~AbstractFunction::LINKED;
+					f->declaringTraits = NULL;
+				}
 				f->setParamType(0, NULL);
 				f->makeIntoPrototypeFunction(toplevel);
 				Traits* ftraits = f->declaringTraits;
@@ -3380,6 +3389,12 @@ namespace avmplus
 			t2 = temp;
 		}
 
+		// special case Number and double -- they have identical machine representations (IEEE 754)
+		// but findCommonBase will return Object which is incompatible due to machine-type rules.
+		// check for this and return t1 (the target type)
+		if (Traits::isNumberOrDouble(t1) && Traits::isNumberOrDouble(t2))
+			return t1;
+
 		if (!Traits::isMachineCompatible(t1,t2))
 		{
 			// these two types are incompatible machine types that require
@@ -3576,6 +3591,10 @@ namespace avmplus
 					scopeTraits->setSlotInfo(0, 0, toplevel, t, scopeTraits->sizeofInstance, CPoolKind(0), gen);
 					scopeTraits->setTotalSize(scopeTraits->sizeofInstance + 16);
 					scopeTraits->linked = true;
+#ifdef DEBUGGER
+					scopeTraits->name = qn.getName();
+					scopeTraits->ns = qn.getNamespace();
+#endif
 				}
 				
 				// handler->scopeTraits = scopeTraits

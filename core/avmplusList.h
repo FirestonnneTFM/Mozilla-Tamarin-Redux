@@ -116,7 +116,7 @@ namespace avmplus
 	};
 
 	template <class T, ListElementType kElementType>
-	class List : private ListBase<T, kElementType>
+	class List : public ListBase<T, kElementType>
 	{
 		using ListBase<T, kElementType>::data;
 		using ListBase<T, kElementType>::len;
@@ -191,9 +191,17 @@ namespace avmplus
 		}
 		void insert(int index, T value)
 		{
+			if ((uint32)index >= len)
+			{
+				// Someone is trying to insert at the end
+				add(value);
+				return;
+			}
+
 			if (len >= max) {
 				grow();
 			}
+
 			//move items up
 			arraycopy(data, index, data, index + 1, len - index);
 

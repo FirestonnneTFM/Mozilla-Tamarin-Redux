@@ -437,7 +437,6 @@
 		1DEB928708733DD80010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = "$(HOME)/bin";
@@ -459,10 +458,8 @@
 					ENABLE_PROFILER,
 					ENABLE_COMPILER,
 					SOFT_ASSERTS,
-					powerc,
 					"TARGET_RT_MAC_MACHO=1",
 					USE_MMAP,
-					_MAC,
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
@@ -544,7 +541,6 @@
 		8E8B52FF09AABD020057BEE4 /* Release_Debugger */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = "$(HOME)/bin";
@@ -567,10 +563,8 @@
 					ENABLE_PROFILER,
 					ENABLE_COMPILER,
 					SOFT_ASSERTS,
-					powerc,
 					"TARGET_RT_MAC_MACHO=1",
 					USE_MMAP,
-					_MAC,
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;

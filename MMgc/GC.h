@@ -279,7 +279,7 @@ namespace MMgc
 	class GCHiddenPointer
 	{
 	public:
-		GCHiddenPointer(T obj) { set(obj); }
+		GCHiddenPointer(T obj=NULL) { set(obj); }
 		operator T() const { return (T) (low|high<<HIDDENPTRSHIFT);	 }
 		T operator=(T tNew) 
 		{ 
@@ -768,9 +768,25 @@ namespace MMgc
 		
 		uint64 t0;
 
-		static uint64 ticksToMicros(uint64 ticks) { return (ticks*1000000)/GetPerformanceFrequency(); }
+		// a tick is the unit of GetPerformanceCounter()
+		static uint64 ticksToMicros(uint64 ticks) 
+		{ 
+#ifdef WIN32
+			return (ticks*1000000)/GetPerformanceFrequency();
+#else
+			return ticks;
+#endif
+		}
 
-		static uint64 ticksToMillis(uint64 ticks) { return (ticks*1000)/GetPerformanceFrequency(); }
+
+		static uint64 ticksToMillis(uint64 ticks) 
+		{ 
+#ifdef WIN32
+			return (ticks*1000)/GetPerformanceFrequency();
+#else
+			return ticks/1000;
+#endif
+		}
 
 		// marking rate counter
 		uint64 bytesMarked;
@@ -802,8 +818,9 @@ namespace MMgc
 		static GCWeakRef *GetWeakRef(const void *obj);
 		void ClearWeakRef(const void *obj);
 
-		uintptr	GetStackTop() const;		
-		
+		uintptr	GetStackTop() const;
+
+		// for deciding a tree of things should be scanned from presweep
 		void PushWorkItem(GCWorkItem &item) { PushWorkItem(m_incrementalWork, item); }
 
 	private:
@@ -903,14 +920,20 @@ namespace MMgc
 		void* AllocBlockIncremental(int size, bool zero=true);
 		void* AllocBlockNonIncremental(int size, bool zero=true);
 
+#ifdef _DEBUG
+		public:
+#endif
 		void ClearMarks();
+#ifdef _DEBUG
+		private:
+#endif
+
+
 #ifdef _DEBUG
 		public:
 		// sometimes useful for mutator to call this
 		void Trace(const void *stackStart=NULL, size_t stackSize=0);
 		private:
-#else
-		void Trace(const void *stackStart=NULL, size_t stackSize=0);
 #endif
 
 		void Finalize();
