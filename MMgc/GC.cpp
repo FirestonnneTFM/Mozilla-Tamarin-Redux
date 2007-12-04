@@ -1006,7 +1006,7 @@ bail:
 	{
 		GCWorkItem item;
 
-		MMGC_GET_STACK_EXENTS(this, item.ptr, item._size);
+		MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
 
 		// this is where we will clear to when CleanStack is called
 		if(rememberedStackTop == 0 || rememberedStackTop > item.ptr) {
@@ -1311,7 +1311,7 @@ bail:
 
 		// start by pinning live stack objects
 		GCWorkItem item;
-		MMGC_GET_STACK_EXENTS(gc, item.ptr, item._size);
+		MMGC_GET_STACK_EXTENTS(gc, item.ptr, item._size);
 		PinStackObjects(item.ptr, item._size);
 
 		// important to do this before calling prereap
