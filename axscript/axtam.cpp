@@ -112,7 +112,8 @@ namespace axtam
 	}
 
 	// Get ready for hosting a new script environment.
-	HRESULT AXTam::InitNew(IActiveScript *as) {
+	void AXTam::Initialize(IActiveScript *as) {
+		AvmAssert(this->as == NULL); // already initialized??
 		this->as = as;
 		initBuiltinPool();
 		initAXPool();
@@ -127,13 +128,10 @@ namespace axtam
 
 		// init toplevel internally
 		toplevel = initAXTamBuiltins();
-
-		return S_OK;
 	}
 
-	HRESULT AXTam::Close() {
+	void AXTam::Close() {
 		as = NULL;
-		return S_OK;
 	}
 	
 	void AXTam::initAXPool()
@@ -248,7 +246,7 @@ namespace axtam
 		#endif
 	}
 
-	AXTam::AXTam(MMgc::GC *gc) : AvmCore(gc), pool(NULL), dispatchClass(NULL), unknownClass(NULL), toplevel(NULL)
+	AXTam::AXTam(MMgc::GC *gc) : AvmCore(gc), pool(NULL), dispatchClass(NULL), unknownClass(NULL), toplevel(NULL), comErrorClass(NULL)
 	{
 //		systemClass = NULL;
 		
@@ -355,8 +353,12 @@ namespace axtam
 	void AXTam::throwCOMError(HRESULT hr, EXCEPINFO *pei /* = NULL */){
 		// hrm - not sure this is working ok...
 		//AvmAssert(0);
-		comErrorClass()->throwError(hr);
+		comErrorClass->throwError(hr);
 		AvmAssert(0); // not reached
+	}
+
+	bool AXTam::isCOMError(Exception *exc) {
+		return exc->isValid() && istype(exc->atom, comErrorClass->traits()->itraits);
 	}
 
 	Atom AXTam::toAtom(VARIANT &var)

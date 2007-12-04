@@ -168,7 +168,7 @@ namespace axtam
 		return core->handleActionBlock(code, 0,
 								  domainEnv,
 								  toplevel,
-								  NULL, NULL, NULL, codeContext, scriptEnv->global);
+								  NULL, NULL, NULL, codeContext);
 	}
 
 	ScriptObject* DomainObject::finddef(Multiname* multiname,

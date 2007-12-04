@@ -67,7 +67,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/FIXED:NO /SAFESEH:NO"
-				AdditionalDependencies="winmm.lib ..\..\..\tamarin-central\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus_d.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc_d.lib"
+				AdditionalDependencies="winmm.lib ..\..\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus_d.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc_d.lib"
 				ShowProgress="0"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
@@ -153,7 +153,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/FIXED:NO /SAFESEH:NO"
-				AdditionalDependencies="winmm.lib ..\..\..\tamarin-central\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc.lib"
+				AdditionalDependencies="winmm.lib ..\..\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc.lib"
 				LinkIncremental="2"
 				ModuleDefinitionFile="..\axtam.def"
 				GenerateDebugInformation="true"
@@ -241,7 +241,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/FIXED:NO /SAFESEH:NO"
-				AdditionalDependencies="winmm.lib ..\..\..\tamarin-central\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus_sd.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc_sd.lib"
+				AdditionalDependencies="winmm.lib ..\..\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus_sd.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc_sd.lib"
 				ShowProgress="0"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
@@ -329,7 +329,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/FIXED:NO /SAFESEH:NO"
-				AdditionalDependencies="winmm.lib ..\..\..\tamarin-central\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus_s.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc_s.lib"
+				AdditionalDependencies="winmm.lib ..\..\platform\win32\obj_8\avmplus\$(ConfigurationName)\avmplus_s.lib ..\..\..\tamarin-central\MMgc\obj_8\MMgc\$(ConfigurationName)\MMgc_s.lib"
 				LinkIncremental="2"
 				ModuleDefinitionFile="..\axtam.def"
 				GenerateDebugInformation="true"

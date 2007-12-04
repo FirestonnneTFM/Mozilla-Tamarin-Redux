@@ -76,9 +76,45 @@ namespace axtam
 	}
 
 
+	int AdaptActiveScriptSite::OnEnterScript()
+	{
+		AXTam* core = (AXTam *)this->core();
+		CComPtr<IActiveScriptSite> site;
+		HRESULT hr = core->as->GetScriptSite(IID_IActiveScriptSite, (void **)&site);
+		if (FAILED(hr))
+			core->throwCOMError(hr);
+		hr = site->OnEnterScript();
+		return hr;
+	}
+
+	int AdaptActiveScriptSite::OnLeaveScript()
+	{
+		AXTam* core = (AXTam *)this->core();
+		CComPtr<IActiveScriptSite> site;
+		HRESULT hr = core->as->GetScriptSite(IID_IActiveScriptSite, (void **)&site);
+		if (FAILED(hr))
+			core->throwCOMError(hr);
+		hr = site->OnLeaveScript();
+		return hr;
+	}
+
+	int AdaptActiveScriptSite::OnStateChange(unsigned state)
+	{
+		AXTam* core = (AXTam *)this->core();
+		CComPtr<IActiveScriptSite> site;
+		HRESULT hr = core->as->GetScriptSite(IID_IActiveScriptSite, (void **)&site);
+		if (FAILED(hr))
+			core->throwCOMError(hr);
+		hr = site->OnStateChange((SCRIPTSTATE)state);
+		return hr;
+	}
+
 	BEGIN_NATIVE_MAP(AdaptActiveScriptSiteClass)
 		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_GetItemInfo, AdaptActiveScriptSite::GetItemInfo)
 		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_GetDocVersionString, AdaptActiveScriptSite::GetDocVersionString)
+		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_OnEnterScript, AdaptActiveScriptSite::OnEnterScript)
+		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_OnLeaveScript, AdaptActiveScriptSite::OnLeaveScript)
+		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_OnStateChange, AdaptActiveScriptSite::OnStateChange)
 	END_NATIVE_MAP()
 
 	AdaptActiveScriptSiteClass::AdaptActiveScriptSiteClass(VTable *cvtable)

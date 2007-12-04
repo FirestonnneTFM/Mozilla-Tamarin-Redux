@@ -49,6 +49,9 @@ namespace axtam {
 			return construct(argc, argv);
 		}
 
+		// override ctor just so we can get 'hresult' :(
+		Atom construct(int argc, Atom* argv);
+	
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
 
@@ -66,6 +69,7 @@ namespace axtam {
 
 	class COMErrorObject : public ScriptObject
 	{
+		friend class COMErrorClass;
 	public:
 		COMErrorObject(VTable *vtable, ScriptObject *delegate);
 		~COMErrorObject() {
@@ -73,7 +77,10 @@ namespace axtam {
 			stackTrace = 0; 
 #endif
 		}
+		HRESULT getHRESULT() const;
 		Stringp stackTraceToString() const;
+	private:
+		Atom atomhresult; // would prefer to fetch this from script object...
 #ifdef DEBUGGER
 		StackTrace *getStackTrace() const { return stackTrace; }
 

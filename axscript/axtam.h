@@ -167,20 +167,20 @@ namespace axtam
 		void atomToVARIANT(Atom val, CComVariant *pResult);
 //		DispatchConsumerClass *dispatchClass;
 
-		// Functions directly related to being embedded in a COM world
-		HRESULT InitNew(IActiveScript *as);
-		HRESULT Close();
-
+		void Initialize(IActiveScript *as);
+		void Close();
 		// Dump an exception for the benefit of the person developing/debugging the
 		// engine rather than the author of the actual script code
 		void dumpException(Exception *exc);
+		// Some "class" pointers - getBuiltinClass() doesn't work for our "extension" classes...
 		MSIDispatchConsumerClass *dispatchClass;
 		MSIUnknownConsumerClass *unknownClass;
+		COMErrorClass *comErrorClass;
 
-		COMErrorClass *comErrorClass() const { return (COMErrorClass*)toplevel->getBuiltinClass(avmplus::NativeID::abcclass_axtam_com_Error); }
 		void throwCOMError(HRESULT hr, EXCEPINFO *pei = NULL);
-		Toplevel* initAXTamBuiltins();
+		bool isCOMError(Exception *exc);
 
+		Toplevel* initAXTamBuiltins();
 	private:
 		DECLARE_NATIVE_CLASSES()
 		DECLARE_NATIVE_SCRIPTS()
