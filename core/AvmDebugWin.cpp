@@ -72,7 +72,7 @@ namespace avmplus
 
 		char *buffer = (char*)alloca(bufferSize+1);
 		if (buffer) {
-			StringCbVPrintf(buffer, bufferSize, format, argptr);
+			StringCbVPrintf(buffer, bufferSize+1, format, argptr);
 			AvmDebugMsg(buffer, debuggerBreak);
 		}
 #else
