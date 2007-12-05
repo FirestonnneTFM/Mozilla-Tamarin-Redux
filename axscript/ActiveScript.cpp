@@ -36,6 +36,7 @@
 #include "axtam.h"
 #include "mscom.h"
 #include "ActiveScriptError.h"
+#include "COMErrorClass.h"
 
 using namespace axtam;
 
@@ -183,16 +184,20 @@ protected:
 	HRESULT callEngineRawVA(Atom *ret, const char *name, va_list va);
 
 	CComPtr<IActiveScriptSite> m_site;
+	Atom engine; // The ES implemented engine we delegate to
 	SCRIPTSTATE scriptState;
 	DWORD safetyOptions;
+	bool initialized;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ActiveScript, CActiveScript)
 
 // Constructor
 CActiveScript::CActiveScript() : 
-	root(NULL), 
-	safetyOptions(0), 
+	root(NULL),
+	safetyOptions(0),
+	engine(undefinedAtom),
+	initialized(false),
 	scriptState(SCRIPTSTATE_UNINITIALIZED)
 {
 		// move this to DLL init?
@@ -216,25 +221,44 @@ CActiveScript::CActiveScript() :
 
 HRESULT CActiveScript::callEngineRawVA(Atom *ppret, const char *name, va_list va)
 {
-	AvmAssert(ppret == NULL || *ppret == undefinedAtom); // please init this out param
+	AvmAssert(ppret == NULL || *ppret == NULL || *ppret == undefinedAtom); // please init this out param
 	static const int maxAtoms = 64;
 	Atom args[maxAtoms];
 
 	if (!core) {
-		ATLTRACE2("callEngine('%s') - early exit due to null core%s\n", name);
+		AvmDebugMsg(false, "callEngine('%s') - early exit due to null core\r\n", name);
+		return E_OUTOFMEMORY;
+	}
+	if (!initialized) {
+		core->Initialize(this);
+		// fetch and store the 'engine' ES object.
+		// Get the object named 'engine' - XXX - cache this?
+		DomainEnv *domEnv = core->toplevel ? core->toplevel->domainEnv() : NULL;
+		if (!domEnv) {
+			AvmDebugMsg(false, "callEngine('%s') - early exit due to null core/toplevel/domainEnv\r\n", name);
+			return E_FAIL;
+		}
+		Multiname multiname(core->publicNamespace, core->constantString("engine"));
+		ScriptEnv *se = (ScriptEnv *)domEnv->getScriptInit(&multiname);
+		if (!se || !se->global) {
+			AvmDebugMsg(true, "callEngine('%s') - early exit due to no ScriptEnv\r\n", name);
+			return E_FAIL;
+		}
+		AvmAssert(engine==NULL); // already initialized?
+		engine = core->toplevel->getproperty(se->global->atom(), &multiname, core->toplevel->toVTable(se->global->atom()));
+
+		initialized = true;
+	}
+	// fetch the function from the object.
+	Multiname multiname_ani(core->publicNamespace, core->constantString(name));
+	Atom ani = core->toplevel->getproperty(engine, &multiname_ani, core->toplevel->toVTable(engine));
+	if (!core->isObject(ani)) {
+		AvmDebugMsg(true, "callEngine('%s') - no property\r\n");
 		return E_FAIL;
 	}
-	ATLTRACE2("Calling engine::%s\n", name);
-
-	// Get the object named 'engine' - XXX - cache this?
-	Multiname multiname(core->publicNamespace, core->constantString("engine"));
-	ScriptEnv *se = (ScriptEnv *)core->toplevel->domainEnv()->getScriptInit(&multiname);
-	Atom a = core->toplevel->getproperty(se->global->atom(), &multiname, core->toplevel->toVTable(se->global->atom()));
-	Multiname multiname_ani(core->publicNamespace, core->constantString(name));
-	Atom ani = core->toplevel->getproperty(a, &multiname_ani, core->toplevel->toVTable(a));
 	// prepare the args
 	int argc = 1;
-	args[0] = a;
+	args[0] = engine;
 	Atom arg = va_arg (va, Atom);
 	while (arg != (Atom)-1) {
 		args[argc] = arg;
@@ -243,11 +267,11 @@ HRESULT CActiveScript::callEngineRawVA(Atom *ppret, const char *name, va_list va
 		AvmAssert(argc<maxAtoms);
 	}
 	// Now call the method.
+	AvmDebugMsg(false, "Calling engine::%s\r\n", name);
 	Atom ret = AvmCore::atomToScriptObject(ani)->call(argc-1, args);
 	if (ppret)
 		*ppret = ret;
 	return S_OK;
-
 }
 
 HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
@@ -258,28 +282,35 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 	TRY(core, kCatchAction_ReportAsError) {
 		hr = callEngineRawVA(ppret, name, va);
 	} CATCH(Exception * exception) {
-		// dump the exception for diagnostic purposes
-		core->dumpException(exception);
-		// report the exception to the site.
-		// XXX - later, we will want to move this error handling into
-		// AS, leaving the C++ code to only deal with 'internal' errors
-		// in the engine itself.  For now though, report all errors to 
-		// the site
-		// We may not have a site if we are calling InitNew, or after we
-		// have closed...
-		if (m_site) {
-			CGCRootComObject<CActiveScriptError> *err;
-			ATLTRY(err = new CGCRootComObject<CActiveScriptError>(core));
-			if (err) {
-				err->exception = exception;
-				// XXX - must get passed dwSourceContextCookie, if available
-				//err->dwSourceContextCookie = dwSourceContextCookie;
-				CComQIPtr<IActiveScriptError, &IID_IActiveScriptError> ase(err);
-				m_site->OnScriptError(ase);
+		if (core->isCOMError(exception)) {
+			// This is an error explicitly thrown by script code, or
+			// indirectly due to throwCOMError().  It means that the
+			// HRESULT just be returned - its not a "script error".
+			COMErrorObject *eob = (COMErrorObject *)core->atomToScriptObject(exception->atom);
+			hr = eob->getHRESULT();
+		} else {
+			// dump the exception for diagnostic purposes
+			core->dumpException(exception);
+			// report the exception to the site.
+			// XXX - later, we will want to move this error handling into
+			// AS, leaving the C++ code to only deal with 'internal' errors
+			// in the engine itself.  For now though, report all errors to 
+			// the site
+			// We may not have a site if we are calling InitNew, or after we
+			// have closed...
+			if (m_site) {
+				CGCRootComObject<CActiveScriptError> *err;
+				ATLTRY(err = new CGCRootComObject<CActiveScriptError>(core));
+				if (err) {
+					err->exception = exception;
+					// XXX - must get passed dwSourceContextCookie, if available
+					//err->dwSourceContextCookie = dwSourceContextCookie;
+					CComQIPtr<IActiveScriptError, &IID_IActiveScriptError> ase(err);
+					m_site->OnScriptError(ase);
+				}
 			}
+			hr = E_FAIL;
 		}
-
-		hr = E_FAIL;
 	}
 	END_CATCH
 	END_TRY
@@ -304,8 +335,12 @@ STDMETHODIMP CActiveScript::SetScriptSite(
 {
 	if (!pass)
 		return E_POINTER;
-	m_site = pass;
-	return S_OK;
+	// XXX - todo - construct an object and pass it.  The site code currently
+	// has workaround that means this still works.
+	HRESULT hr = callEngine(NULL, "SetScriptSite", undefinedAtom, (Atom)-1);
+	if (SUCCEEDED(hr))
+		m_site = pass;
+	return hr;
 }
 
 STDMETHODIMP CActiveScript::GetScriptSite( 
@@ -313,7 +348,7 @@ STDMETHODIMP CActiveScript::GetScriptSite(
             /* [iid_is][out] */ void **ppvObject)
 {
 	if (!m_site) {
-		ATLTRACE2("GetScriptSite with no site!");
+		AvmDebugMsg(false, "GetScriptSite with no site!\r\n");
 		return E_FAIL;
 	}
 	return m_site.p->QueryInterface(riid, ppvObject);
@@ -322,18 +357,17 @@ STDMETHODIMP CActiveScript::GetScriptSite(
 STDMETHODIMP CActiveScript::SetScriptState( 
             /* [in] */ SCRIPTSTATE ss)
 {
-	// ack - WSH 5.6 will die with failure code here!
 	HRESULT hr;
-	TRY(core, kCatchAction_ReportAsError) {
-		hr = callEngineRaw(NULL, "SetScriptState", core->toAtom(ss), (Atom)-1);
-	} CATCH(Exception *exception) {
-		ATLTRACE2("SetScriptState failed!\n");
-		core->dumpException(exception);
-		hr = E_FAIL;
-		exception;
+	Atom rc = NULL;
+	hr = callEngine(&rc, "SetScriptState", core->toAtom(ss), (Atom)-1);
+	if (SUCCEEDED(hr)) {
+		if (core->isInteger(rc)) {
+			hr = core->toUInt32(rc);
+		} else {
+			AvmDebugMsg(true, "expecting integer result from SetScriptState\r\n");
+			hr = E_UNEXPECTED;
+		}
 	}
-	END_CATCH
-	END_TRY
 	return hr;
 }
 
@@ -352,20 +386,18 @@ STDMETHODIMP CActiveScript::GetScriptState(
 
 STDMETHODIMP CActiveScript::Close(void)
 {
-	ATLTRACE2("CActiveScript::Close()\n");
-	if (!core)
-		return S_OK;
-	return core->Close();
+	if (core) {
+		// ignore failure - everyone gets to close
+		callEngine(NULL, "Close", (Atom)-1);
+		core->Close();
+	}
+	return S_OK;
 }
 
 STDMETHODIMP CActiveScript::AddNamedItem( 
             /* [in] */ LPCOLESTR pstrName,
             /* [in] */ DWORD dwFlags)
 {
-	ATLTRACE2("CActiveScript::AddNamedItem(\"%S\", 0x%x)\n", pstrName, dwFlags);
-
-	CComPtr<IUnknown> punk;
-
 	return callEngine(NULL, "AddNamedItem", core->toAtom(pstrName), core->toAtom(dwFlags), (Atom)-1);
 }
 
@@ -438,26 +470,7 @@ STDMETHODIMP CActiveScript::ParseProcedureText(
 // IActiveScriptParse implementation
 STDMETHODIMP CActiveScript::InitNew(void)
 {
-	HRESULT hr;
-	if (!core) {
-		ATLTRACE2("CActiveScript Engine failing to initialize - no core!");
-		return E_OUTOFMEMORY;
-	}
-	TRY(core, kCatchAction_ReportAsError) {
-		hr = core->InitNew(this);
-		if (FAILED(hr))
-			return hr;
-		return callEngine(NULL, "InitNew", (Atom)-1);
-	}
-	CATCH(Exception * exception) {
-		// ack - error setting up our environment.
-		core->dumpException(exception);
-		return E_FAIL;
-
-	}
-	END_CATCH
-	END_TRY
-
+	return callEngine(NULL, "InitNew", (Atom)-1);
 }
 
 STDMETHODIMP CActiveScript::AddScriptlet( 
@@ -505,7 +518,7 @@ STDMETHODIMP CActiveScript::GetInterfaceSafetyOptions(
             /* [out] */ DWORD *pdwEnabledOptions)
 {
 	// XXX - we must look at this in detail!
-	ATLTRACE2("CActiveScript::GetInterfaceSafetyOptions\n");
+	AvmDebugMsg(false, "CActiveScript::GetInterfaceSafetyOptions\r\n");
 	if (!pdwSupportedOptions || !pdwEnabledOptions)
 		return E_POINTER;
 	*pdwSupportedOptions = (DWORD)-1;//INTERFACESAFE_FOR_UNTRUSTED_DATA | INTERFACESAFE_FOR_UNTRUSTED_CALLER;
@@ -518,7 +531,7 @@ STDMETHODIMP CActiveScript::SetInterfaceSafetyOptions(
             /* [in] */ DWORD dwOptionSetMask,
             /* [in] */ DWORD dwEnabledOptions)
 {
-	ATLTRACE2("CActiveScript::SetInterfaceSafetyOptions(...,0x%x, 0x%x)\n", dwOptionSetMask, dwEnabledOptions);
+	AvmDebugMsg(false, "CActiveScript::SetInterfaceSafetyOptions(...,0x%x, 0x%x)\r\n", dwOptionSetMask, dwEnabledOptions);
 	// XXX - check interfaces
 	safetyOptions &= ~dwOptionSetMask;
 	safetyOptions |= dwEnabledOptions;

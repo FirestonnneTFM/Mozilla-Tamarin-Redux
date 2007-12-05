@@ -48,6 +48,9 @@ namespace axtam
 	private:
 		ArrayObject *GetItemInfo(Stringp name, unsigned flags);
 		Stringp GetDocVersionString() {return NULL;}
+		int OnStateChange(unsigned state);
+		int OnEnterScript(void);
+		int OnLeaveScript(void);
 
 		// *sob* - this is still confusing MarkH
 		//CComPtr<IActiveScriptSite> site;

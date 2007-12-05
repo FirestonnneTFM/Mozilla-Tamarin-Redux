@@ -48,6 +48,10 @@ namespace axtam
 		AvmAssert(traits()->sizeofInstance == sizeof(COMErrorClass));
 
 		prototype = createInstance(ivtable(), toplevel()->objectClass->prototype);
+
+		AXTam* core = (AXTam*)this->core();
+		if (!core->comErrorClass)
+			core->comErrorClass = this;
 	}
 	
 
@@ -55,7 +59,7 @@ namespace axtam
 	{
 		// ack - I don't think this is right :(
 		Atom args[2] = { nullObjectAtom, core()->intToAtom(hr) };
-		core()->throwAtom(prototype->construct(1, args));
+		core()->throwAtom(construct(1, args));
 	}
 
 	Stringp COMErrorClass::getErrorMessage(int errorID) const
@@ -69,9 +73,20 @@ namespace axtam
 		return new (ivtable->gc(), ivtable->getExtraSize()) COMErrorObject(ivtable, prototype);
 	}
 
+	// override ctor just so we can get 'hresult' :(
+	Atom COMErrorClass::construct(int argc, Atom* argv)
+	{
+		Atom ret = ClassClosure::construct(argc, argv);
+		AvmAssert(argc>=1);
+		AvmAssert(core()->istype(ret, traits()->itraits));
+		COMErrorObject *o = (COMErrorObject *)core()->atomToScriptObject(ret);
+		o->atomhresult = argv[1];
+		return ret;
+	}
+
 	COMErrorObject::COMErrorObject(VTable* vtable,
 							 ScriptObject *delegate)
-		: ScriptObject(vtable, delegate)
+		: ScriptObject(vtable, delegate), atomhresult(0)
 	{
 		AvmAssert(traits()->sizeofInstance == sizeof(COMErrorObject));
 
@@ -80,5 +95,14 @@ namespace axtam
 		// Copy the stack trace
 		stackTrace = core->newStackTrace();
 		#endif
+	}
+
+	HRESULT COMErrorObject::getHRESULT() const
+	{
+		// *sob* - why can't I fetch it from the instance?
+		// XXX - fixme
+		// Atom r = getStringProperty(core()->constantString("hresult"));
+		const Atom &r = atomhresult;
+		return (HRESULT)core()->toUInt32(r);
 	}
 }

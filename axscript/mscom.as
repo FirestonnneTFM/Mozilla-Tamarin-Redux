@@ -67,6 +67,9 @@ package axtam.com {
 	// Maybe a new base-class should be introduced.
 	public dynamic class Error
 	{
+		public static const S_OK = 0
+		public static const S_FALSE = 1
+
 		public static const E_NOTIMPL = 0x80004001
 		public static const E_INVALIDARG = 0x80070057
 		public static const E_UNEXPECTED = 0x8000ffff
@@ -76,7 +79,6 @@ package axtam.com {
 		public var hresult: int
 		function Error(hresult) {
 			this.hresult = hresult;
-			print('Error constructed')
 		}
 
 		prototype.toString = function():String
@@ -91,7 +93,7 @@ package axtam.com {
 		public static function throwError(hresult:int, ... rest)
 		{
 			// todo: rich error support?
-			//throw new axtam.com.Error(hresult);
+			throw new axtam.com.Error(hresult);
 		}
 
 	}
@@ -105,7 +107,13 @@ package axtam.com {
 	public const SCRIPTITEM_ISPERSISTENT = 0x00000040
 	public const SCRIPTITEM_CODEONLY = 0x00000200
 	public const SCRIPTITEM_NOCODE = 0x00000400
-	
+
+	public const SCRIPTSTATE_UNINITIALIZED       = 0
+	public const SCRIPTSTATE_INITIALIZED         = 5
+	public const SCRIPTSTATE_STARTED             = 1
+	public const SCRIPTSTATE_CONNECTED           = 2
+	public const SCRIPTSTATE_DISCONNECTED        = 3
+	public const SCRIPTSTATE_CLOSED              = 4
 }
 
 package axtam.com.adaptors.consumer {
@@ -133,6 +141,9 @@ package axtam.com.adaptors.consumer {
 		// and wraps them in a ScriptObject which can be used from script.
 		public native function GetItemInfo(name:String, flags:uint):Array
 		public native function GetDocVersionString(): String
+		public native function OnStateChange(state:uint):int
+		public native function OnEnterScript():int
+		public native function OnLeaveScript():int
 	}
 }
 
@@ -140,8 +151,7 @@ package {
 
     import flash.utils.*; // for our ByteArray clone - either it should die, or we rename the package in our clone!
 
-
-    public function execString(str, domain)
+    public function compileString(str): ByteArray
     {
         import Parse.*;
         var top = []
@@ -157,75 +167,285 @@ package {
         for (var i = 0, len = bytes.length; i<len; ++i) {
             b.writeByte(uint(bytes[i]));
         }
-        domain.loadBytes(b);
+        return b
     }
-
-   }
+}
 
 package {
 
 	class ScriptEngine {
-			public var globalDomain:axtam.Domain;
-			public var objectDomains; // A hashtable of named objects to their domains.
-			public var state:int;
-			public function ScriptEngine() {
-			}
-			public function InitNew() {
-				//domain = Domain.currentDomain
-				globalDomain = new axtam.Domain(null, null)
-				objectDomains = {}
-			}
-			public function ParseScriptText(code:String, itemName:String, context:Object, delim:String, sourceCookie:int, lineNumber:int, flags:int) {
-				// XXX - this is wrong - we should only do the parse and generation
-				// of bytecode here.  We should execute all such blocks at 
-				// SetScriptState(SCRIPTSTATE_RUNNING) time.
-				var domain = objectDomains[itemName]
-				if (!domain)
-					domain = globalDomain
-				execString(code, domain)
+		public var globalDomain:axtam.Domain;
+		public var objectDomains; // A hashtable of named objects to their domains.
+		public var namedItems; // A hashtable AddNamedItem items
+		public var codeBlocks; // code blocks "pushed" but not yet executed.
+		public var state:int;
+		public var site; // MSIUnknownConsumer
 
-			}
-			// This function is called as a 'named item' is added to the environment.
-			// Examples include IE's 'window' object.
-			public function AddNamedItem(name:String, flags:uint):void
-			{
-				print('AddNamedItem(', name, flags)
-				var site = new axtam.com.adaptors.consumer.IActiveScriptSite()
-				// MS docs say we should avoid grabbing typeinfo unless we
-				// really need it.  At this stage, we need it if the item is
-				// "global", and later will need it if it sources events
-				var gii_flags:uint = axtam.com.SCRIPTINFO_IUNKNOWN
-				if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS)
-					gii_flags |= axtam.com.SCRIPTINFO_ITYPEINFO
+		public function ScriptEngine()
+		{
+			stateTransitions = _getStateTransitions()
+			state = axtam.com.SCRIPTSTATE_UNINITIALIZED
+		}
+		public function InitNew()
+		{
+			SetScriptState(axtam.com.SCRIPTSTATE_INITIALIZED)
+		}
+		public function SetScriptSite(undef)
+		{
+			// currently arg is ignored!
+			site = new axtam.com.adaptors.consumer.IActiveScriptSite() // XXX - fix me
+		}
+		public function ParseScriptText(code:String, itemName:String, context:Object, delim:String, sourceCookie:int, lineNumber:int, flags:int)
+		{
+			// Check for 'invalid' states first.
+			if (state==axtam.com.SCRIPTSTATE_UNINITIALIZED || state==axtam.com.SCRIPTSTATE_CLOSED || state==axtam.com.SCRIPTSTATE_DISCONNECTED)
+				axtam.com.Error.throwError(axtam.com.Error.E_FAIL)
 
-				var items = site.GetItemInfo(name, gii_flags)
-				var dispatch = items[0]
-				var typeinfo = items[1]
-				globalDomain.global[name] = dispatch
-				// but we also need to tell the VM exactly what 'scope'
-				// provides this object.
-				globalDomain.addNamedScriptObject(name)
-				// if its global, we enumerate items and make them public - all 
-				// this is done inside exposeGlobalMembers
-				//if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS && typeinfo != null) {
-				//	domain.exposeGlobalMembers(dispatch, typeinfo)
-				//}
-				// create a new domain for the object with the IDispatch as its global.
-				var obDomain =  new axtam.Domain(globalDomain, dispatch)
-				objectDomains[name] = obDomain
+			var bytes = compileString(code)
+
+			var scriptBlock = {'code': code,
+			                   'bytes': bytes,
+			                   'item_name' : itemName,
+			                   'context' : context,
+			                   'delim': delim,
+			                   'source_cookie': sourceCookie,
+			                   'line_number': lineNumber,
+			                   'flags':flags}
+
+			// If we are in the INITIALIZED state, queue it up, otherwise we execute it now.
+			if (state==axtam.com.SCRIPTSTATE_INITIALIZED) {
+				codeBlocks.push(scriptBlock)
+			} else {
+				executeScriptBlock(scriptBlock)
+			}
+		}
+
+		// This function is called as a 'named item' is added to the environment.
+		// Examples include IE's 'window' object.
+		public function AddNamedItem(name:String, flags:uint):void
+		{
+			//print('AddNamedItem(', name, flags)
+			// MS docs say we should avoid grabbing typeinfo unless we
+			// really need it.  At this stage, we need it if the item is
+			// "global", and later will need it if it sources events
+			var gii_flags:uint = axtam.com.SCRIPTINFO_IUNKNOWN
+			if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS)
+				gii_flags |= axtam.com.SCRIPTINFO_ITYPEINFO
+
+			var items = site.GetItemInfo(name, gii_flags)
+			var dispatch = items[0]
+			var typeinfo = items[1]
+			globalDomain.global[name] = dispatch
+			// but we also need to tell the VM exactly what 'scope'
+			// provides this object.
+			globalDomain.addNamedScriptObject(name)
+			// if its global, we enumerate items and make them public - all 
+			// this is done inside exposeGlobalMembers
+			//if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS && typeinfo != null) {
+			//	domain.exposeGlobalMembers(dispatch, typeinfo)
+			//}
+			// create a new domain for the object with the IDispatch as its global.
+			var obDomain =  new axtam.Domain(globalDomain, dispatch)
+			objectDomains[name] = obDomain
+		}
+
+		public function GetScriptState(): uint
+		{
+			return state;
+		}
+
+		public function SetScriptState(new_state:uint): uint
+		{
+			return transitionTo(new_state);
+		}
+		public function Close(): void
+		{
+			SetScriptState(axtam.com.SCRIPTSTATE_CLOSED)
+		}
+
+		// End of COM interfaces...
+		// Start of implementation functions...
+		/* Script State Management */
+		// A state table.  First index is current state, second index is new state.
+		// The intent of our state management is:
+		// * We can always reset back to "initialized" (NOTE: this
+		//   doesn't really work yet)
+		// * Apart from the above, we can not move "backwards" in 
+		//   state - ie, if you are 'connected', you can't move
+		//   back to 'started'
+		// * You can move to 'closed' from any state.  Once closed, you can't 
+		//   transition anywhere - not even back to "initialized" (we drop state
+		//   that prevents a reset)
+		// This means that most entries in the state table are error state.
+		// Also: We special case state==new_state, and CLOSED.
+		// This leaves us with INITIALIZED, STARTED, CONNECTED and DISCONNECTED
+		// XXX: due to compiler bugs, we can't reference our own function in a variable
+		// declaration.  So we define the table in a function, and our ctor sets the variable.
+		var stateTransitions; // = _getStateTransitions()
+
+		function _getStateTransitions() {
+			return { 
+				// *sob* - why are the consts not working?
+				// existing state
+				0 /*axtam.com.SCRIPTSTATE_UNINITIALIZED */ : {
+					// moving to INITIALIZED
+					5 /*axtam.com.SCRIPTSTATE_INITIALIZED */ : function() {
+						setStateInitialized()
+					},
+					// moving to STARTED
+					1 /* axtam.com.SCRIPTSTATE_STARTED */: function() {
+						setStateInitialized()
+						setStateStarted()
+					},
+					// moving to CONNECTED
+					2 /* axtam.com.SCRIPTSTATE_CONNECTED */: function() {
+						setStateInitialized()
+						setStateStarted()
+						setStateConnected()
+					},
+					// moving to DISCONNECTED - nothing to do.
+					3 /* axtam.com.DISCONNECTED */: function() {
+						// uninit -> disconnected - nothing to do!
+					}
+				},
+				// existing state == INITIALIZED
+				5 /*axtam.com.SCRIPTSTATE_INITIALIZED */ : {
+					// moving to STARTED
+					1 /* axtam.com.SCRIPTSTATE_STARTED */: function() {
+						setStateStarted()
+					},
+					// moving to CONNECTED
+					2 /* axtam.com.SCRIPTSTATE_CONNECTED */: function() {
+						setStateStarted()
+						setStateConnected()
+					},
+					3 /* axtam.com.SCRIPTSTATE_DISCONNECTED */: function() {
+						// init -> disconnected - nothing to do!
+					}
+				},
+				// existing state == STARTED
+				1 /* axtam.com.SCRIPTSTATE_STARTED */: {
+					// moving to CONNECTED
+					2 /* axtam.com.SCRIPTSTATE_CONNECTED */: function() {
+						setStateConnected()
+					},
+					// moving to DISCONNECTED - nothing to do.
+					3 /* axtam.com.SCRIPTSTATE_DISCONNECTED */: function() {
+						// started -> disconnected - nothing to do!
+					}
+				},
+				// Existing state == CONNECTED
+				2 /* axtam.com.SCRIPTSTATE_CONNECTED */: {
+					// only state we support from here is disconnected.
+					3 /* axtam.com.SCRIPTSTATE_DISCONNECTED */: function() {
+						setStateDisconnected()
+					}
+				},
+				// Existing state == DISCONNECTED
+				3 /* axtam.com.SCRIPTSTATE_DISCONNECTED */: {
+					// We can't transition to anywhere from here, so this
+					// is empty (but must exist to keep state logic happy)
+				}
+			}
+		}
+
+		function transitionTo(new_state:uint): uint
+		{
+			// states are a little complex - see the MS docs for
+			// the official word.  To make our life easy, we special
+			// case INITIALIZED and CLOSED.
+			// MS documents the following return codes:
+			// S_OK  Success.
+			// E_FAIL  The scripting engine does not support the transition back to the initialized state.
+			//        [We use this to mean it does not support the transition back to the specified state,
+			//         which may or may not be 'initialized']
+			// E_UNEXPECTED  The call was not expected (eg, not initialized)
+			// OLESCRIPT_S_PENDING  The method was queued successfully, but the state has not changed yet. 
+			//                      When the state changes, the site will be called back through the 
+			//                      IActiveScriptSite::OnStateChange method.  [We don't handle this yet]
+			// S_FALSE  The method succeeded, but the script was already in the given state.  
+
+			if (state == axtam.com.SCRIPTSTATE_CLOSED) {
+				axtam.com.Error.throwError(axtam.com.Error.E_FAIL)
 			}
 
-			public function GetScriptState(): uint
-			{
-				return state;
-			}
+			if (state == new_state)
+				return axtam.com.Error.S_FALSE
 
-			public function SetScriptState(new_state:uint): void
-			{
-				// don't allow new state transitions once we are closed.
-				axtam.com.Error.throwError(axtam.com.Error.E_INVALIDARG)
+			// from here we notify the site of the new state.
+			if (new_state == axtam.com.SCRIPTSTATE_INITIALIZED)
+				setStateInitialized()
+			else if (new_state == axtam.com.SCRIPTSTATE_CLOSED) {
+				// setting state closed will clear this.site - so save it
+				var s = site
+				setStateClosed()
+				if (s) {
+					state = new_state
+					s.OnStateChange(new_state)
+				}
+			} else {
+				// use our state table.  No entry means we can't transition
+				// from the current state to the requested state.
+				var transFunc = stateTransitions[state][new_state]
+				if (!transFunc)
+					axtam.com.Error.throwError(axtam.com.Error.E_FAIL)
+				transFunc();
 			}
+			state = new_state
+			if (site)
+				site.OnStateChange(new_state)
+			return axtam.com.Error.S_OK
+		}
 
+		// The "heavy lifters" of the state transition.  transitionToInitialized
+		// is special in that it allows us to transition backwards from all
+		// states except 'closed'.
+		function setStateInitialized(): void
+		{
+			// we could be in any state here (except CLOSED)
+			globalDomain = new axtam.Domain(null, null)
+			objectDomains = {}
+			codeBlocks = new Array()
+		}
+
+		public function setStateStarted(): void
+		{
+			// assert(state == axtam.com.SCRIPTSTATE_INITIALIZED, "must be exactly initialized!")
+			executePendingScriptBlocks()
+		}
+
+		function setStateConnected(): void
+		{
+		}
+
+		function setStateDisconnected(): void
+		{
+		}
+
+		function setStateClosed(): void
+		{
+			globalDomain = null
+			objectDomains = null
+			namedItems = null
+			codeBlocks = null
+			site = null
+		}
+		// End of state management.
+		function executeScriptBlock(scriptBlock)
+		{
+			var domain = objectDomains[scriptBlock.item_name]
+			if (!domain)
+				domain = globalDomain
+			domain.loadBytes(scriptBlock.bytes)
+		}
+		
+		function executePendingScriptBlocks()
+		{
+			while (codeBlocks.length != 0) {
+				var block = codeBlocks.pop()
+				executeScriptBlock(block)
+			}
+		}
 	}
 
 	public var engine = new ScriptEngine()
