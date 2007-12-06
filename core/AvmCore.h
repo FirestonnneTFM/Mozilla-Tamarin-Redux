@@ -843,7 +843,10 @@ const int kBufferPadding = 16;
 
 		Atom doubleAtom(Atom atom)
 		{
-			return doubleToAtom(doubleNumber(atom));
+			// optimize (and prevent some asserts in Flash): if it's already a double,
+			// don't bother converting to double and then allocating a new atom.
+			// just return the one we have.
+			return isDouble(atom) ? atom : doubleToAtom(doubleNumber(atom));
 		}
 
 		/**
@@ -1563,11 +1566,11 @@ const int kBufferPadding = 16;
 		class GCInterface : MMgc::GCCallback
 		{
 		public:
-			GCInterface(MMgc::GC * _gc) : MMgc::GCCallback(_gc) {}
+			GCInterface(MMgc::GC * _gc) : MMgc::GCCallback(_gc), core(NULL) {}
 			void SetCore(AvmCore* _core) { this->core = _core; }
-			void presweep() { core->presweep(); }
-			void postsweep() { core->postsweep(); }
-			void log(const char *str) { core->console << str; }
+			void presweep() { if(core) core->presweep(); }
+			void postsweep() { if(core) core->postsweep(); }
+			void log(const char *str) { if(core) core->console << str; }
 		private:
 			AvmCore *core;
 		};

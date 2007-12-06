@@ -93,7 +93,7 @@ TEST(9, "<alpha>beta</alpha>" + NL() + "<bravo>two</bravo>", x1.toXMLString());
 
 var x1 = new XMLList("<alpha>one</alpha><bravo>two</bravo>");
 x1[0] = new XMLList("beta");
-TEST(10, "beta" + NL() + "<bravo>two</bravo>", x1.toXMLString());
+TEST(10, "<alpha>beta</alpha>" + NL() + "<bravo>two</bravo>", x1.toXMLString());
 
 var x1 = new XMLList("alpha<bravo>two</bravo>");
 x1[0] = new XML("<two>beta</two>");

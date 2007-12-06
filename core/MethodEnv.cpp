@@ -52,6 +52,13 @@ namespace avmplus
 
 		AbstractFunction* method = this->method;
 
+		// Can happen with duplicate function definitions from corrupt ABC data.  F1 is defined
+		// and F2 overrides the F1 slot which is okay as long as F1's MethodEnv is never called again.
+		if (method->declaringTraits != this->declTraits)
+		{
+			toplevel->throwVerifyError(kCorruptABCError);
+		}
+
 		// just do enough to resolve signatures.  Don't do a full verify yet.
 		method->resolveSignature(toplevel);
 
@@ -182,14 +189,14 @@ namespace avmplus
 	}
 
 	MethodEnv::MethodEnv(void *addr, VTable *vtable)
-		: vtable(vtable), method(NULL)
+		: vtable(vtable), method(NULL), declTraits(NULL)
 	{
 		typedef Atom (*AtomMethodProc)(MethodEnv*, int, uint32 *);
 		impl32 = *(AtomMethodProc*) &addr;
 	}
 
 	MethodEnv::MethodEnv(AbstractFunction* method, VTable *vtable)
-		: vtable(vtable), method(method)
+		: vtable(vtable), method(method), declTraits(method->declaringTraits)
 	{
 		// make the first call go to the method impl
 		impl32 = delegateInvoke;
@@ -239,6 +246,7 @@ namespace avmplus
 		if (core->debugger) core->debugger->_debugMethod(this);
 
 		core->sampleCheck();
+		invocationCount++;
 	}
 
 	void MethodEnv::debugExit(CallStackNode* callstack)
@@ -911,6 +919,8 @@ namespace avmplus
 							Atom* scopes) const
     {
 		AvmCore* core = this->core();
+		// adds clarity to what is usually just global$init()
+		SAMPLE_FRAME("[newclass]", core);
 		Toplevel* toplevel = this->toplevel();
 
 		Traits* ctraits = cinit->declaringTraits;
@@ -1041,7 +1051,7 @@ namespace avmplus
 			// obj represents a primitive Number, Boolean, int, or String, and primitives
 			// are sealed and final.  Cannot add dynamic vars to them.
 
-			// throw a ReferenceError exception  Property not found and could not be created.
+			// throw a ReferenceError exception  Property not found and could not be created.
 			Multiname tempname(core()->publicNamespace, core()->internInt(index));
 			toplevel()->throwReferenceError(kWriteSealedError, &tempname, toplevel()->toTraits(obj));
 		}
@@ -1058,7 +1068,7 @@ namespace avmplus
 			// obj represents a primitive Number, Boolean, int, or String, and primitives
 			// are sealed and final.  Cannot add dynamic vars to them.
 
-			// throw a ReferenceError exception  Property not found and could not be created.
+			// throw a ReferenceError exception  Property not found and could not be created.
 			Multiname tempname(core()->publicNamespace, core()->internUint32(index));
 			toplevel()->throwReferenceError(kWriteSealedError, &tempname, toplevel()->toTraits(obj));
 		}

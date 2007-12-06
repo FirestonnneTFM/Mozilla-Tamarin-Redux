@@ -1060,6 +1060,11 @@ namespace avmplus
 	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
 	{
 		mip = mipStart = getMDBuffer(pool);
+		if (!mip)
+		{
+			overflow = true;
+			return NULL;
+		}
 
 #ifdef FEATURE_BUFFER_GUARD
 		GrowthGuard guard(pool->codeBuffer);

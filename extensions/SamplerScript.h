@@ -40,8 +40,27 @@
 
 namespace avmplus
 {
+	class TraceClass : public ClassClosure
+	{
+    public:
+		TraceClass(VTable* cvtable);
+
+		int getLevel(int target);
+		void setLevel(int lvl, int target);
+		void setListener(ScriptObject* f);
+		ScriptObject* getListener();
+		
+		DECLARE_NATIVE_MAP(TraceClass)
+    };
+
 	class SamplerScript : public ScriptObject
 	{
+	protected:
+		// subclasses can override this to check for security violations
+		// and prohibit certain operations. default implementation always
+		// allows but FlashPlayer takes advantage of this.
+		virtual bool trusted() { return true; }
+		
 	public:
 		SamplerScript(VTable *vtable, ScriptObject *delegate);
 		DECLARE_NATIVE_SCRIPT(SamplerScript)

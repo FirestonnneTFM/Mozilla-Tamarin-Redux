@@ -438,7 +438,7 @@ namespace avmplus
 								utf8Subject->c_str(),
 								subjectLength,
 								startIndex,
-								0,
+								PCRE_NO_UTF8_CHECK,
 								ovector,
 								OVECTOR_SIZE)) < 0)
 		{
@@ -572,7 +572,7 @@ namespace avmplus
 		int matchCount;
 		while (lastIndex <= subjectLength &&
 			   (matchCount = pcre_exec((pcre*)m_pcreInst, NULL, src,
-						 subjectLength, lastIndex, 0, ovector, OVECTOR_SIZE)) > 0)
+			   subjectLength, lastIndex, PCRE_NO_UTF8_CHECK, ovector, OVECTOR_SIZE)) > 0)
 		{
 			int captureCount = matchCount-1;
 			
@@ -688,7 +688,7 @@ namespace avmplus
 		int matchCount;
 		while (lastIndex < subjectLength &&
 			   (matchCount = pcre_exec((pcre*)m_pcreInst, NULL, src,
-						 subjectLength, lastIndex, 0, ovector, OVECTOR_SIZE)) > 0)
+						 subjectLength, lastIndex, PCRE_NO_UTF8_CHECK, ovector, OVECTOR_SIZE)) > 0)
 		{
 			int captureCount = matchCount-1;
 			

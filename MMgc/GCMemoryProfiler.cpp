@@ -48,6 +48,9 @@ namespace MMgc
 {
 	GCThreadLocal<const char*> memtag;
 	GCThreadLocal<void*> memtype;
+	GCThreadLocal<void*> lastItem;
+	GCThreadLocal<int> lastTrace;
+
 
 	// Turn this to see GC stack traces.
 	const bool enableTraces = false;
@@ -343,15 +346,12 @@ namespace MMgc
 	{
 		if (!item) return NULL;
 
-		static void *lastItem = 0;
-		static int lastTrace = 0;
-
 #ifndef _MAC
 		if(lastItem)
 		{
 			// this guy might be deleted so swallow access violations
 			try {
-				traceTable[lastTrace].vtable = *(int*)lastItem;
+				traceTable[lastTrace].vtable = *(int*)(void*)lastItem;
 			} catch(...) {}
 			lastItem = 0;
 		}
@@ -525,12 +525,12 @@ namespace MMgc
 		GCDebugMsg(out, false);
 	}
 
-	void DumpStackTrace()
+	void DumpStackTrace(int skip)
 	{
 		if(!enableTraces)
 			return;
 		int trace[kMaxTraceDepth];
-		GetStackTrace(trace, kMaxTraceDepth, 1);
+		GetStackTrace(trace, kMaxTraceDepth, skip);
 		DumpStackTraceHelper(trace);
 	}
  

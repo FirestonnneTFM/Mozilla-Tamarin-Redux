@@ -1,33 +1,40 @@
-/* ***** BEGIN LICENSE BLOCK ***** 
- * Version: MPL 1.1/GPL 2.0/LGPL 2.1 
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * The contents of this file are subject to the Mozilla Public License Version 1.1 (the 
- * "License"); you may not use this file except in compliance with the License. You may obtain 
- * a copy of the License at http://www.mozilla.org/MPL/ 
- * 
- * Software distributed under the License is distributed on an "AS IS" basis, WITHOUT 
- * WARRANTY OF ANY KIND, either express or implied. See the License for the specific 
- * language governing rights and limitations under the License. 
- * 
- * The Original Code is [Open Source Virtual Machine.] 
- * 
- * The Initial Developer of the Original Code is Adobe System Incorporated.  Portions created 
- * by the Initial Developer are Copyright (C)[ 2004-2006 ] Adobe Systems Incorporated. All Rights 
- * Reserved. 
- * 
- * Contributor(s): Adobe AS3 Team
- * 
- * Alternatively, the contents of this file may be used under the terms of either the GNU 
- * General Public License Version 2 or later (the "GPL"), or the GNU Lesser General Public 
- * License Version 2.1 or later (the "LGPL"), in which case the provisions of the GPL or the 
- * LGPL are applicable instead of those above. If you wish to allow use of your version of this 
- * file only under the terms of either the GPL or the LGPL, and not to allow others to use your 
- * version of this file under the terms of the MPL, indicate your decision by deleting provisions 
- * above and replace them with the notice and other provisions required by the GPL or the 
- * LGPL. If you do not delete the provisions above, a recipient may use your version of this file 
- * under the terms of any one of the MPL, the GPL or the LGPL. 
- * 
- ***** END LICENSE BLOCK ***** */
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
 
 // Adobe patent application tracking #P721, entitled Application Profiling, inventors: T. Reilly
 
@@ -43,6 +50,87 @@ using namespace MMgc;
 
 namespace avmplus
 {
+	BEGIN_NATIVE_MAP(TraceClass)
+		NATIVE_METHOD(flash_trace_Trace_setLevel,	 TraceClass::setLevel)
+		NATIVE_METHOD(flash_trace_Trace_getLevel,	 TraceClass::getLevel)
+		NATIVE_METHOD(flash_trace_Trace_setListener, TraceClass::setListener)
+		NATIVE_METHOD(flash_trace_Trace_getListener, TraceClass::getListener)
+	END_NATIVE_MAP()
+
+	TraceClass::TraceClass(VTable *cvtable)
+		: ClassClosure(cvtable)
+    {
+		createVanillaPrototype();
+	}
+
+	int TraceClass::getLevel(int target) 
+	{
+		int lvl = 0 ; /*Debugger::TRACE_OFF;*/
+	#ifdef DEBUGGER
+		AvmCore *core = this->core();
+		if (core->debugger)
+		{
+			if (target > 1)
+				lvl = Debugger::astrace_callback;
+			else
+				lvl = Debugger::astrace_console;				
+		}
+	#endif /* DEBUGGER */
+		(void)target;
+		return lvl;
+	}
+	
+	void TraceClass::setLevel(int lvl, int target)
+	{
+	#ifdef DEBUGGER
+		AvmCore *core = this->core();
+		if (core->debugger)
+		{
+			if (target > 1)
+				Debugger::astrace_callback = (Debugger::TraceLevel) lvl;
+			else
+				Debugger::astrace_console = (Debugger::TraceLevel) lvl;				
+		}
+	#endif /* DEBUGGER */
+		(void)lvl;
+		(void)target;
+	}
+
+	void TraceClass::setListener(ScriptObject* f)
+	{
+	#ifdef DEBUGGER
+		AvmCore *core = this->core();
+		if (core->debugger)
+		{
+			// Listeners MUST be functions or null
+			if ( core->isNullOrUndefined(f->atom()) )
+			{
+				f = 0;
+			}
+			else if (!core->istype(f->atom(), core->traits.function_itraits)) 
+			{
+				toplevel()->argumentErrorClass()->throwError( kInvalidArgumentError, core->toErrorString("Function"));
+				return;
+			}
+			
+			//MethodClosure* mc = f->toplevel()->methodClosureClass->create(f->getCallMethodEnv(), f->atom());
+			Debugger::trace_callback = f;
+		}
+	#endif /* DEBUGGER */
+		(void)f;
+	}
+
+	ScriptObject* TraceClass::getListener()
+	{
+		ScriptObject* f = 0;
+	#ifdef DEBUGGER
+		AvmCore *core = this->core();
+		if (core->debugger)
+			f = Debugger::trace_callback;				
+	#endif /* DEBUGGER */
+		return f;
+	}
+
 	using namespace MMgc;
 
 	BEGIN_NATIVE_MAP(SamplerScript)
@@ -169,6 +257,9 @@ namespace avmplus
 	{	
 		AvmCore *core = this->core();
 		if(!core->sampling() || core->sampler()->sampleCount() == 0)
+			return undefinedAtom;
+		
+		if (!trusted())
 			return undefinedAtom;
 
 		Sampler *s = core->sampler();
@@ -319,6 +410,9 @@ namespace avmplus
 	
 	Atom SamplerScript::getMemberNames(Atom o, bool instanceNames)
 	{
+		if (!trusted())
+			return undefinedAtom;
+
 		AvmCore *core = this->core();
 		if (AvmCore::isObject(o))
 		{
@@ -348,26 +442,37 @@ namespace avmplus
 
 	void SamplerScript::startSampling() 
 	{ 
+		if (!trusted())
+			return;
+
 		core()->sampler()->startSampling(); 
 	}
 	
 	void SamplerScript::stopSampling() 
 	{ 
+		if (!trusted())
+			return;
 		core()->sampler()->stopSampling(); 
 	}
 
 	void SamplerScript::clearSamples() 
 	{
+		if (!trusted())
+			return;
 		core()->sampler()->clearSamples();
 	}		
 
 	void SamplerScript::pauseSampling() 
 	{
+		if (!trusted())
+			return;
 		core()->sampler()->pauseSampling();
 	}		
 
 	double SamplerScript::getInvocationCount(Atom a, QNameObject* qname, uint32 type) 
 	{
+		if (!trusted())
+			return -1;
 		AvmCore *core = this->core();
 		Multiname multiname;
 		if(qname)
@@ -473,8 +578,8 @@ namespace avmplus
 
 		ScriptObject *object = AvmCore::atomToScriptObject(a);
 
-		if(!qname)			
-			toplevel()->throwArgumentError(kInvalidArgumentError, "qname");
+		if(!object || !qname)			
+			toplevel()->argumentErrorClass()->throwError(kInvalidArgumentError);
 
 		Multiname multiname;
 		qname->getMultiname(multiname);

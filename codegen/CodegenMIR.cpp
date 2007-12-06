@@ -96,8 +96,52 @@ return foo;
 return *((sintptr*)&_method);
 #endif
 
+// VOID variant
+#ifdef AVMPLUS_ARM
+#ifdef _MSC_VER
+#define RETURN_VOID_METHOD_PTR(_class, _method) \
+return *((int*)&_method);
+#else
+#define RETURN_VOID_METHOD_PTR(_class, _method) \
+union { \
+    void (_class::*bar)(); \
+    int foo[2]; \
+}; \
+bar = _method; \
+return foo[1];
+#endif
+
+#elif defined AVMPLUS_MAC
+#if !TARGET_RT_MAC_MACHO
+// CodeWarrior makes us jump through some hoops
+// to dereference pointer->method...
+// Convert pointer->method to integer for Carbon.
+#define RETURN_VOID_METHOD_PTR(_class, _method) \
+int foo; \
+asm("lwz %0,0(r5)" : "=r" (foo)); \
+return foo;
+#else
+#define RETURN_VOID_METHOD_PTR(_class, _method) \
+union { \
+    void (_class::*bar)(); \
+    sintptr foo; \
+}; \
+bar = _method; \
+return foo;
+#endif
+
+#else
+#define RETURN_VOID_METHOD_PTR(_class, _method) \
+return *((sintptr*)&_method);
+#endif
+
 namespace avmplus
 {
+		sintptr CodegenMIR::profAddr( void (DynamicProfiler::*f)() )
+		{
+			RETURN_VOID_METHOD_PTR(DynamicProfiler, f);
+		}
+
 		sintptr CodegenMIR::coreAddr( int (AvmCore::*f)() )
 		{
 			RETURN_METHOD_PTR(AvmCore, f);
@@ -1272,6 +1316,7 @@ namespace avmplus
 		state = NULL;
 		framep = SP;
 		interruptable = true;
+		overflow = false;
 
 		#if defined(AVMPLUS_IA32) && defined(_MAC)
 		patch_esp_padding = NULL;
@@ -1519,7 +1564,7 @@ namespace avmplus
 
 		#ifdef DEBUGGER
 		#ifdef AVMPLUS_PROFILE
-		names->add(COREADDR(DynamicProfiler::mark), "DynamicProfiler::mark");
+		names->add(PROFADDR(DynamicProfiler::mark), "DynamicProfiler::mark");
 		#endif
 		names->add(ENVADDR(MethodEnv::debugEnter), "MethodEnv::debugEnter");
 		names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
@@ -1983,7 +2028,7 @@ namespace avmplus
 		#ifdef AVMPLUS_PROFILE
 		if (core->dprof.dprofile)
 		{
-			callIns(MIR_cm, COREADDR(DynamicProfiler::mark), 2,
+			callIns(MIR_cm, PROFADDR(DynamicProfiler::mark), 2,
 				(uintptr)&core->dprof, InsConst(OP_prologue));
 		}
 		#endif
@@ -2760,7 +2805,7 @@ namespace avmplus
 		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
 		if (core->dprof.dprofile)
 		{
-			callIns(MIR_cm, COREADDR(DynamicProfiler::mark), 1,
+			callIns(MIR_cm, PROFADDR(DynamicProfiler::mark), 1,
 				(uintptr)&core->dprof, InsConst(opcode));
 		}
 		#else
@@ -4338,7 +4383,7 @@ namespace avmplus
 		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
 		if (core->dprof.dprofile)
 		{
-			callIns(MIR_cm, COREADDR(DynamicProfiler::mark), 1,
+			callIns(MIR_cm, PROFADDR(DynamicProfiler::mark), 1,
 				(uintptr)&core->dprof, InsConst(opcode));
 		}
 		#endif /* AVMPLUS_PROFILE */
@@ -7496,8 +7541,21 @@ namespace avmplus
 		if (pool->codeBuffer->size() == 0)
 		{
 			// compute amount of space we should reserve.
-			int size = int(estimateMDBufferReservation(pool));
-			pool->codeBuffer->reserve(size);
+			int		expansionFactor = 40; //this constant was initially part of estimateMDBufferReservation()
+			byte	*pMem = NULL;
+			size_t	size = 0;
+			
+			do
+			{
+				size = estimateMDBufferReservation(pool, expansionFactor);
+				pMem = pool->codeBuffer->reserve(size);
+				if(pMem)
+					break; // success!
+				else
+					expansionFactor /= 2; // gradually reduce expansionFactor if we can not reserve so much memory
+			}
+			while(expansionFactor >=5 ); // do not give up until expansionFactor is too small
+
 		}
 #ifdef AVMPLUS_JIT_READONLY
 		else
@@ -7518,7 +7576,7 @@ namespace avmplus
 	/**
 	 * compute an estimate for MD reservation
 	 */
-	/*static*/ size_t CodegenMIR::estimateMDBufferReservation(PoolObject* pool)
+	/*static*/ size_t CodegenMIR::estimateMDBufferReservation(PoolObject* pool, const int expansionFactor)
 	{
 		// compute the size of the buffer based on # methods and expansion.
 
@@ -7531,7 +7589,6 @@ namespace avmplus
 		// What is important is that we place a large enough estimate
 		// in here that we NEVER overflow the buffer.   Overflowing
 		// means we redo the generation which is a massive performance hit.
-		const int expansionFactor = 40;  // abc->md expansion
 
 		int size = 0;
 		for(uint32 i=0, n=pool->methodCount; i < n; i++)
@@ -7614,7 +7671,8 @@ namespace avmplus
 
 		
 #if defined(_MAC) && !TARGET_RT_MAC_MACHO
-		f->impl32 = (int (*)(MethodEnv*, int, va_list)) (mip-2);
+		f->impl32 = *(AtomMethodProc*) &(mip - 2);
+//		f->impl32 = (int (*)(MethodEnv*, int, uint32 *)) (mip-2);
 #else
 		// funny gyration needed to work around GCC pedantic warning
 		typedef Atom (*AtomMethodProc)(MethodEnv*, int, uint32 *);

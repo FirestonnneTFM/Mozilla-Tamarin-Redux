@@ -36,7 +36,8 @@ namespace avmplus
 {
 	
 	BEGIN_NATIVE_MAP(DoubleClass)
-		NATIVE_METHOD(double_private__toString, DoubleClass::doubleToString)
+		// not used, thus commented out for now to save code size (srj)
+		//NATIVE_METHOD(double_private__toString, DoubleClass::doubleToString)
 		//NATIVE_METHOD(double_private__convert, DoubleClass::convert)
 	END_NATIVE_MAP()
 	
@@ -61,52 +62,53 @@ namespace avmplus
 		// TODO ArgumentError if argc > 1
 	}
 
-	Stringp DoubleClass::convert(double n, int precision, int mode)
-	{
-		AvmCore* core = this->core();
-
-		if (mode == MathUtils::DTOSTR_PRECISION)
-		{
-			if (precision < 1 || precision > 21) {
-				toplevel()->throwRangeError(kInvalidPrecisionError, core->toErrorString(precision), core->toErrorString(1), core->toErrorString(21));
-			}
-		}
-		else
-		{
-			if (precision < 0 || precision > 20) {
-				toplevel()->throwRangeError(kInvalidPrecisionError, core->toErrorString(precision), core->toErrorString(0), core->toErrorString(20));
-			}
-		}
-
-		wchar buffer[312];
-		int len;
-		MathUtils::convertDoubleToString(n,
-										 buffer,
-										 len,
-										 mode,
-										 precision);
-
-		return new (core->GetGC()) String(buffer,len);
-	}
-	
-	Stringp DoubleClass::doubleToString(double dVal, int radix)
-	{
-		AvmCore* core = this->core();
-
-		if (radix == 10 || MathUtils::isInfinite(dVal) || MathUtils::isNaN(dVal))
-			return core->doubleToString(dVal);
-
-		if (radix < 2 || radix > 36)
-			toplevel()->throwRangeError(kInvalidRadixError, core->toErrorString(radix));
-
-		// convertDoubleToStringRadix will convert the integer part of dVal
-		// to a string in the specified radix, and it will handle large numbers
-		// beyond the range of int/uint.  It will not handle the fractional
-		// part.  To properly handle that, MathUtils::convertDoubleToString
-		// would have to handle any base.  That's a lot of extra code and complexity for
-		// something the ES3 spec says is implementation dependent
-		// (i.e. we're not required to do it)
-		
-		return MathUtils::convertDoubleToStringRadix(core, dVal, radix);
-	}
+// not used, thus commented out for now to save code size (srj)
+//	Stringp DoubleClass::convert(double n, int precision, int mode)
+//	{
+//		AvmCore* core = this->core();
+//
+//		if (mode == MathUtils::DTOSTR_PRECISION)
+//		{
+//			if (precision < 1 || precision > 21) {
+//				toplevel()->throwRangeError(kInvalidPrecisionError, core->toErrorString(precision), core->toErrorString(1), core->toErrorString(21));
+//			}
+//		}
+//		else
+//		{
+//			if (precision < 0 || precision > 20) {
+//				toplevel()->throwRangeError(kInvalidPrecisionError, core->toErrorString(precision), core->toErrorString(0), core->toErrorString(20));
+//			}
+//		}
+//
+//		wchar buffer[312];
+//		int len;
+//		MathUtils::convertDoubleToString(n,
+//										 buffer,
+//										 len,
+//										 mode,
+//										 precision);
+//
+//		return new (core->GetGC()) String(buffer,len);
+//	}
+//	
+//	Stringp DoubleClass::doubleToString(double dVal, int radix)
+//	{
+//		AvmCore* core = this->core();
+//
+//		if (radix == 10 || MathUtils::isInfinite(dVal) || MathUtils::isNaN(dVal))
+//			return core->doubleToString(dVal);
+//
+//		if (radix < 2 || radix > 36)
+//			toplevel()->throwRangeError(kInvalidRadixError, core->toErrorString(radix));
+//
+//		// convertDoubleToStringRadix will convert the integer part of dVal
+//		// to a string in the specified radix, and it will handle large numbers
+//		// beyond the range of int/uint.  It will not handle the fractional
+//		// part.  To properly handle that, MathUtils::convertDoubleToString
+//		// would have to handle any base.  That's a lot of extra code and complexity for
+//		// something the ES3 spec says is implementation dependent
+//		// (i.e. we're not required to do it)
+//		
+//		return MathUtils::convertDoubleToStringRadix(core, dVal, radix);
+//	}
 }

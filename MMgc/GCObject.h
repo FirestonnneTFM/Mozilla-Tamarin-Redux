@@ -106,6 +106,7 @@ namespace MMgc
 	{
 	public:
 		virtual ~GCFinalizable() { }
+		virtual void Finalize() { this->~GCFinalizable(); }
 	};
 
 	/**
@@ -117,7 +118,7 @@ namespace MMgc
 	{
 	public:
 		GCWeakRef *GetWeakRef() const;
-
+		
 		static void *operator new(size_t size, GC *gc, size_t extra = 0);
 		static void operator delete (void *gcObject);
 	};
@@ -302,6 +303,8 @@ namespace MMgc
 		}
 
 	private:
+		friend class ZCT;
+		
 		// 1 bit for inZCT flag (0x80000000)
 		// 1 bit for sticky flag (0x40000000)
 		// 20 bits for ZCT index

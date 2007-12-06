@@ -62,7 +62,7 @@ package flash.utils
  * delete dict[key]; //removes the key
  * </pre>
  *
- * @playerversion Flash 8.5
+ * @playerversion Flash 9
  * @langversion 3.0
  * @see ../../operators.html#strict_equality === (strict equality)
  * 
@@ -76,7 +76,7 @@ dynamic public class Dictionary
   	 * If the only reference to an object is in the specified Dictionary object, the key is eligible for 
   	 * garbage collection and is removed from the table when the object is collected.
   	 *
-  	 * @playerversion Flash 8.5
+  	 * @playerversion Flash 9
  	 * @langversion 3.0
  	 */
 	public native function Dictionary(weakKeys:Boolean=false);

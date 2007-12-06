@@ -156,20 +156,12 @@ namespace MMgc
 			size = GCHeap::kNativePageSize;  // default of one page
 
 #ifdef AVMPLUS_JIT_READONLY
-		void *res = mmap(address,
-					size,
-					PROT_READ | PROT_WRITE,
-					MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-					-1, 0);
+		int res = mprotect (address, size, PROT_READ | PROT_WRITE);
 #else
-		void *res = mmap(address,
-					size,
-					PROT_READ | PROT_WRITE | PROT_EXEC,
-					MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-					-1, 0);
+		int res = mprotect (address, size, PROT_READ | PROT_WRITE | PROT_EXEC);
 #endif /* AVMPLUS_JIT_READONLY */
 
-		if (res == MAP_FAILED)
+		if (res != 0)
 			address = 0;
 		else
 			address = (void*)( (uintptr)address + size );
@@ -183,14 +175,10 @@ namespace MMgc
 		if (size == 0)
 			size = GCHeap::kNativePageSize;  // default of one page
 
-		char *addr = (char*)mmap(address,
-					 size,
-					 PROT_NONE,
-					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-					 -1, 0);
-		GCAssert(addr == address);
-		(void)addr;
-		return address;
+		int res = mprotect (address, size, PROT_NONE);
+		GCAssert(res == 0);
+		(void) res;
+		return (address);
 	}
 #else
 	int GCHeap::vmPageSize()
@@ -198,27 +186,27 @@ namespace MMgc
 		return 4096;
 	}
 
-	void* GCHeap::ReserveCodeMemory(void* address,
+	void* GCHeap::ReserveCodeMemory(void* ,
 									size_t size)
 	{
 		return aligned_malloc(size, 4096, m_malloc);
 	}
 
 	void GCHeap::ReleaseCodeMemory(void* address,
-								   size_t size)
+								   size_t )
 	{
 		aligned_free(address, m_free);
 	}
 
-	bool GCHeap::SetGuardPage(void *address)
+	bool GCHeap::SetGuardPage(void *)
 	{
 		return false;
 	}
 
 #ifdef AVMPLUS_JIT_READONLY
-	void GCHeap::SetExecuteBit(void *address,
-							   size_t size,
-							   bool executableFlag)
+	void GCHeap::SetExecuteBit(void *,
+							   size_t ,
+							   bool )
 	{
 		// No-op on Mac CFM
 	}
@@ -226,12 +214,12 @@ namespace MMgc
 	
 	
 	void* GCHeap::CommitCodeMemory(void* address,
-								   size_t size)
+								   size_t )
 	{
 		return address;
 	}	
 	void* GCHeap::DecommitCodeMemory(void* address,
-									 size_t size)
+									 size_t )
 	{
 		return address;
 	}	
@@ -260,24 +248,16 @@ namespace MMgc
 
 	bool GCHeap::CommitMemory(char *address, size_t size)
 	{
-		char *addr = (char*)mmap(address,
-					size,
-					PROT_READ | PROT_WRITE,
-			                MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
-					-1, 0);
-		GCAssert(addr == address);
-		return addr == address;
+		int res = mprotect (address, size, PROT_READ | PROT_WRITE);
+		GCAssert(res == 0);
+		return (res == 0);
 	}
 
 	bool GCHeap::DecommitMemory(char *address, size_t size)
 	{
-		char *addr = (char*)mmap(address,
-					 size,
-					 PROT_NONE,
-					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-					 -1, 0);
-		GCAssert(addr == address);
-		return addr == address;
+		int res = mprotect (address, size, PROT_NONE);
+		GCAssert(res == 0);
+		return (res == 0);
 	}
 
 	bool GCHeap::CommitMemoryThatMaySpanRegions(char *address, size_t size)

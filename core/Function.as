@@ -117,5 +117,7 @@ final class MethodClosure extends Function
 		Error.throwError( ReferenceError, 1074 /*kConstWriteError*/, "prototype", "MethodClosure" );
 	}
 
-	public override native function get length():int
+	public override native function get length():int;
+
+	private native function get savedThis():Object;
 }

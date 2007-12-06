@@ -69,6 +69,7 @@
 #else // HAVE_ALLOCA_H
 #include <stdlib.h>
 #endif // HAVE_ALLOCA_H
+#include <sys/time.h>
 #endif // UNIX
 
 #if defined(_MAC) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
@@ -371,56 +372,43 @@ namespace MMgc
 
 		GCAssert(!m_roots);
 		GCAssert(!m_callbacks);
+
+		{
+			GCSpinLock lock(m_rootListLock);
+			// apparently the player can't be made to clean up so keep it from crashing at least
+			while(m_roots) {
+				m_roots->Destroy();
+			}
+		}
+
+		while(m_callbacks) {
+			m_callbacks->Destroy();			
+		}
 	}
 
 	void GC::Collect()
 	{
-		if (nogc || collecting) {
-
-			return;
-		}
-
-		// Don't start a collection if we are in the midst of a ZCT reap.
-		if (zct.reaping)
-		{
-
+		if (nogc || collecting || zct.reaping) {
 			return;
 		}
 
 		ReapZCT();
+		if(!marking)
+			StartIncrementalMark();
+		if(marking)
+			FinishIncrementalMark();
 
-		// if we're in the middle of an incremental mark kill it
-		// FIXME: we should just push it to completion 
-		if(marking) 
-		{
-			marking = false;
-			m_incrementalWork.Keep(0);
-		}
-
-#ifdef DEBUGGER
-		StartGCActivity();
-#endif
-
+#ifdef _DEBUG
 		// Dumping the stack trace at GC time can be very helpful with stack walk bugs
 		// where something was created, stored away in untraced, unmanaged memory and not 
 		// reachable by the conservative stack walk
 		//DumpStackTrace();
-
-		Trace();
-		
-		Sweep();
-
-#ifdef _DEBUG
 		FindUnmarkedPointers();
-#endif
-
 		CheckThread();
-
-#ifdef DEBUGGER
-		StopGCActivity();
 #endif
 	}
 
+#ifdef _DEBUG
 	void GC::Trace(const void *stackStart/*=NULL*/, size_t stackSize/*=0*/)
 	{
 		SAMPLE_FRAME("[mark]", core());
@@ -455,6 +443,7 @@ namespace MMgc
 		
 		SAMPLE_CHECK();
 	}
+#endif
 
 	void *GC::Alloc(size_t size, int flags/*0*/, int skip/*3*/)
 	{
@@ -645,6 +634,11 @@ bail:
 
 	void GC::Sweep(bool force)
 	{	
+		// collecting must be true because it indicates allocations should
+		// start out marked, we can't rely on write barriers below since 
+		// presweep could write a new GC object to a root
+		collecting = true;
+
 		SAMPLE_FRAME("[sweep]", core());
 		sweeps++;
 
@@ -657,10 +651,6 @@ bail:
 		}
 #endif
 		
-		// collecting must be true because it indicates allocations should
-		// start out marked, we can't rely on write barriers below since 
-		// presweep could write a new GC object to a root
-		collecting = true;
 
 		// invoke presweep on all callbacks
 		GCCallback *cb = m_callbacks;
@@ -671,16 +661,21 @@ bail:
 
 		SAMPLE_CHECK();
 
-		Finalize();
-		
-		SAMPLE_CHECK();
-		
 		// if force is true we're being called from ~GC and this isn't necessary
 		if(!force) {
 			// we just executed mutator code which could have fired some WB's
 			Mark(m_incrementalWork);
 		}
 
+		Finalize();
+
+		// if force is true we're being called from ~GC and this isn't necessary
+		if(!force) {
+			// we just executed mutator code which could have fired some WB's
+			Mark(m_incrementalWork);
+		}
+	
+		SAMPLE_CHECK();
 		// ISSUE: this could be done lazily at the expense other GC's potentially expanding
 		// unnecessarily, not sure its worth it as this should be pretty fast
 		GCAlloc::GCBlock *b = smallEmptyPageList;
@@ -699,6 +694,9 @@ bail:
 		GCLargeAlloc::LargeBlock *lb = largeEmptyPageList;		
 		while(lb) {
 			GCLargeAlloc::LargeBlock *next = lb->next;
+#ifdef _DEBUG
+			DebugFreeReverse(lb+1, 0xba, 3);
+#endif
 			// FIXME: this makes for some chatty locking, maybe not a problem?
 			FreeBlock(lb, lb->GetNumBlocks());
 			lb = next;
@@ -1151,11 +1149,15 @@ bail:
 			GCAssert(zct[zctIndex] == NULL);
 			obj->setZCTIndex(zctIndex);
 			zct[zctIndex] = obj;
-		} else {
+		} else if(zctNext - zct <= (RCObject::ZCT_INDEX>>8)) {
 			*zctNext = obj;
 			obj->setZCTIndex(zctNext - zct);
 			zctNext++;
+		} else {
+			// zct is full, do nothing, mark/sweep will have to handle it
+			return;
 		}
+
 		count++;
 
 		if(!reaping) {
@@ -1416,6 +1418,12 @@ bail:
 		}
 #endif
 		reaping = false;
+
+#ifdef _DEBUG
+		if(gc->validateDefRef) {
+			gc->Sweep();
+		}
+#endif
 	}
 
 #ifdef SOLARIS
@@ -1444,7 +1452,7 @@ bail:
 
 	pthread_key_t stackTopKey = NULL;
 
-	uint32	GC::GetStackTop() const
+	uintptr	GC::GetStackTop() const
 	{
 		if(stackTopKey == NULL)
 			{
@@ -2007,7 +2015,7 @@ bail:
 		if(IsPointerToGCPage(ptr)) 
 		{
 			int b = SetMark(ptr);
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(DEBUGGER) // sampler does some marking which triggers this
 			// def ref validation does a Trace which can 
 			// cause things on the work queue to be already marked
 			// in incremental GC
@@ -2286,8 +2294,9 @@ bail:
 		uint64 retval = gethrtime();
 		return retval;
 		#elif defined(AVMPLUS_UNIX)
-		// TODO_LINUX
-		return 0;
+		struct timeval tv;
+		::gettimeofday(&tv, NULL);
+		return (uint64) (tv.tv_sec * 1000000) + (uint64) tv.tv_usec;
 		#else
 		#ifndef MMGC_ARM
 		UnsignedWide microsecs;

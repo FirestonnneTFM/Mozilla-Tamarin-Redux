@@ -149,9 +149,11 @@ namespace avmplus
 	}
 
 	/* static */ 
-	Stringp Multiname::format(AvmCore *core, Namespace* ns, Stringp name, bool attr)
+	Stringp Multiname::format(AvmCore *core, Namespace* ns, Stringp name, bool attr, bool hideNonPublicNamespaces)
 	{
-		if (ns == core->publicNamespace)
+		if (ns == core->publicNamespace ||
+			(hideNonPublicNamespaces && // backwards compatibility
+			ns->getType() != Namespace::NS_Public))
 		{
 			return name;
 		}
@@ -191,7 +193,7 @@ namespace avmplus
 		}
 		else if (namespaceCount() == 1 && isQName()) 
 		{
-			return format(core, getNamespace(), core->concatStrings(attr,name));
+			return format(core, getNamespace(), core->concatStrings(attr,name), false, false);
 		}
 		else
 		{

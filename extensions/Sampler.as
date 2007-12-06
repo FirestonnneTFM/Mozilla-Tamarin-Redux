@@ -37,11 +37,48 @@
 
 package flash.sampler
 {
+    /**
+     * The StackFrame class provides access to the properties of a data block
+     * containing a function.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @keyword StackFrame      
+     */
     public final class StackFrame
     {
+    
+    /**
+     * The function name in the stack frame.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @keyword StackFrame.name, name      
+     */    
    	public const name:String;
+    
+    /**
+     * The file name of the SWF file being debugged.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @keyword StackFrame.file, file      
+     */       
 	public const file:String;
+    
+    /**
+     * The line number for the function in the SWF file being debugged.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @keyword StackFrame.line, line      
+     */      
 	public const line:uint;
+    
+    /**
+     * Converts the StackFrame to a string of its properties.
+     * @return A string containing the <code>name</code> property, and optionally the <code>file</code> 
+     * and <code>line</code> properties (if a SWF file is being debugged) of the StackFrame object.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @keyword StackFrame.toString, toString      
+     */      
 	public function toString():String
 	{
 		return name + "()" + (file ? "[" + file + ":" + line + "]" : "");
@@ -51,26 +88,19 @@ package flash.sampler
 
     /**
      * The Sample class creates objects that hold memory analysis information over distinct durations.
-     * <p><strong>Note:</strong> Only available when using the Flash Player debugger version <em>and</em> when 
-     * you have an mm.cfg file containing the line:</p>
-     * <pre>AS3AllocationTracking=true</pre>
-     * <p>The mm.cfg file is, or can be created, in:</p>
-     * <ul><li>Macintosh: HD/Library/Application Support/Macromedia</li>
-     * <li>Windows: C:\Documents and Settings\<em>username</em></li>
-     * <li>Linux: /home/<em>username</em></li>
-     * </ul>      
-     * @includeExample examples\MemoryTestExample.as -noswf     
-     * @playerversion Flash 9.0.xx.0
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     *
+     * @includeExample examples\SampleTypesExample.as -noswf     
      * @langversion 3.0     
      * @keyword Sample      
-     * @see flash.profiler#getSamples()
+     * @see package.html#getSamples() flash.sampler.getSamples()
      */
     public class Sample
     {
 		/**
 	     * The microseconds that define the duration of the Sample instance.
 	     * 
-	     * @playerversion Flash 9.0.xx.0
+         * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
 	     * @langversion 3.0     
 	     * @keyword Sample, Sample.time, time         
 		 */
@@ -79,87 +109,129 @@ package flash.sampler
 		/**
 		 * Contains information about the methods executed by Flash Player over a specified period of time. The format for the 
 	     * stack trace is similiar to the content shown in the exception dialog box of the Flash Player debugger version.
-	     * @playerversion Flash 9.0.xx.0
+         * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
 	     * @langversion 3.0     
 	     * @keyword Sample, Sample.stack, stack     
-	     * @see flash.profiler flash.profiler package     
 		 */
         public const stack:Array;
     };
 
     /**
-    * Occurs in getSamples() stream when an object is created
+    * The NewObjectSample class represents objects that are created within a <code>getSamples()</code> stream.
+    * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+    * @langversion 3.0     
+    * @keyword NewObjectSample 
+    * @see package.html#getSamples() flash.sampler.getSamples()
+    * @includeExample examples\SampleTypesExample.as -noswf    
     */
     public final class NewObjectSample extends Sample
     {
     	/** 
-    	 * Unique id for this object for matching up with DeleteObjectSample's
+    	 * The unique identification number that matches up with a DeleteObjectSample's identification number.
+         * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+         * @langversion 3.0     
+         * @keyword NewObjectSample, NewObjectSample.id, id  
+         * @see flash.sampler.DeleteObjectSample#id
     	 */
     	public const id:Number;
     	
     	/**
-    	 * the Class object corresponding to the object created
+         * The Class object corresponding to the object created within a <code>getSamples()</code> stream.
+         * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+         * @langversion 3.0     
+         * @keyword NewObjectSample, NewObjectSample.type, type 
     	 */
     	public const type:Class;
     	
     	/**
-    	 * get the object if its still live, if its collected this will return
-    	 * undefined and a DeleteObjectSample will have been issued.
+    	 * The NewObjectSample object if it still exists. If the object has been garbage collected, this property is
+    	 * undefined and a corresponding DeleteObjectSample exists.
+         * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+         * @langversion 3.0     
+         * @keyword NewObjectSample, NewObjectSample.object, object 
+         * @see flash.sampler.DeleteObjectSample         
     	 */
     	public native function get object():*;
    
     };
 	
 	/**
-    * Occurs in getSamples() stream when an object is created
-    */
+    * The DeleteObjectSample class represents objects that are created within a <code>getSamples()</code> stream; each
+    * DeleteObjectSample object corresponds to a NewObjectSample object.
+    * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+    * @langversion 3.0     
+    * @keyword DeleteObjectSample 
+    * @see package.html#getSamples() flash.sampler.getSamples()
+    * @includeExample examples\SampleTypesExample.as -noswf    
+    */    
     public final class DeleteObjectSample extends Sample
     {
     	/** 
-    	 * Unique id for this object for matching up with NewObjectSample's
-    	 */
+         * The unique identification number that matches up with a NewObjectSample's identification number.
+         * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+         * @langversion 3.0     
+         * @keyword DeleteObjectSample, DeleteObjectSample.id, id  
+         * @see flash.sampler.NewObjectSample#id
+         */
     	public const id:Number;
 
-	/**
-         * size of object right before it was deleted
+	    /**
+         * The size of the DeleteObjectSample object before it is deleted.
+         * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+         * @langversion 3.0     
+         * @keyword DeleteObjectSample, DeleteObjectSample.size, size  
+         * @see flash.sampler.NewObjectSample#id
          */
 	public const size:Number;
     };
 
 
     /**
-     * clear's the current set of samples, usually called after calling getSamples and iterating over 
-     * the samples.
+     * Clears the current set of Sample objects. This method is usually called after calling <code>getSamples()</code>
+     * and iterating over the Sample objects.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @keyword clearSamples      
+     * @see package.html#getSamples() getSamples()
      */
 	public native function clearSamples():void;
 
-
+    /**
+     * Begins the process of collecting memory usage Sample objects.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @includeExample examples\StartSamplingExample.as -noswf      
+     * @keyword startSampling      
+     * @see flash.sampler.Sample Sample class
+     */
 	public native function startSampling():void;
 
 	/**
-	 * shutdown sampling and free all its resources, can be started w/ startSampling
+	 * Ends the process of collecting memory usage Sample objects and frees resources dedicated to the sampling process.
+     * You start the sampling process with <code>startSampling()</code>.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @keyword stopSampling      
+     * @see flash.sampler.Sample Sample class
 	 */
 	public native function stopSampling():void;
 
 	/**
-	 * momentarily stop sampling, restart using startSampling
+     * Stops the sampling process momentarily. Restart the sampling process using <code>startSampling()</code>.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     * @langversion 3.0     
+     * @keyword pauseSampling      
+     * @see package.html#startSampling() startSampling()
 	 */
 	public native function pauseSampling():void;
 	
 	/**
-	* Returns the size in memory of a specified object when used with the Flash Player debugger version. If 
+	* Returns the size in memory of a specified object when used with the Flash Player 9.0.xx.0 or later debugger version. If 
     * used with a Flash Player that is not the debugger version, this method returns <code>0</code>.
-    * <p><strong>Note:</strong> You must have an mm.cfg file containing the line:</p>
-    * <pre>AS3AllocationTracking=true</pre>
-    * <p>The mm.cfg file is, or can be created, in:</p>
-    * <ul><li>Macintosh: HD/Library/Application Support/Macromedia</li>
-    * <li>Windows: C:\Documents and Settings\<em>username</em></li>
-    * <li>Linux: /home/<em>username</em></li>
-    * </ul>    
+    * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
     * @param o The object to analyze for memory usage.
     * @return The byte count of memory used by the specified object.
-    * @includeExample examples\MemoryTestExample.as -noswf      
-    * @playerversion Flash 9.0.xx.0
+    * @includeExample examples\DeletedObjectSizeExample.as -noswf      
     * @langversion 3.0     
     * @keyword getSize      
 	*/
@@ -169,20 +241,13 @@ package flash.sampler
      * Returns an object containing all members of a specified object, including private members. You can then 
      * iterate over the returned object to see all values. This method is similar to the flash.utils.describeType() 
      * method but also allows you to see private members and skips the intermediate step of creating an XML object.
-     * <p><strong>Note:</strong> Only available when using the Flash Player debugger version <em>and</em> when 
-     * you have an mm.cfg file containing the line:</p>
-     * <pre>AS3AllocationTracking=true</pre>
-     * <p>The mm.cfg file is, or can be created, in:</p>
-     * <ul><li>Macintosh: HD/Library/Application Support/Macromedia</li>
-     * <li>Windows: C:\Documents and Settings\<em>username</em></li>
-     * <li>Linux: /home/<em>username</em></li>
-     * </ul>     
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>     
+     *
      * @param o The object to analyze.
      * @param instanceNames If object is a Class and instanceNames is true report the instance names as if o was an instance of class instead of the class's member names.
      * @return An Object that you must iterate over with a <code>for each..in</code> loop to retrieve the QNames for
      * each property.
-     * @includeExample examples\MemoryTestExample.as -noswf       
-     * @playerversion Flash 9.0.xx.0
+     * @includeExample examples\GetMemberNamesExample.as -noswf       
      * @langversion 3.0     
      * @keyword getMemberNames
      * @see flash.utils#describeType()
@@ -194,23 +259,94 @@ package flash.sampler
  
     /**
      * Returns an object of memory usage Sample instances from the last sampling session.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
      *
      * @return An iterator of Sample instances.
-     * @playerversion Flash 9.0.xx.0
      * @langversion 3.0     
      * @keyword getSamples     
-     * @see flash.profiler#Sample
+     * @see flash.sampler.Sample
      */
     public native function getSamples():Object;
 
-    /** returns the number of samples piled up */
+    /** 
+     * Returns the number of samples collected. 
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>
+     *
+     * @return An iterator of Sample instances.
+     * @langversion 3.0     
+     * @keyword getSampleCount     
+     * @see flash.sampler.Sample    
+     */
     public native function getSampleCount():Number;
-    
+ 
+   /**
+     * Returns the number of times a method was executed. If the parameter <code>obj</code>
+     * is a Class and the parameter <code>qname</code> is <code>undefined</code> then this method
+     * returns the number of iterations of the constructor function. 
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>     
+     * @param obj A method instance or a class. A class can be used to get the invocation count of 
+     * instance functions when a method instance isn't available. If <code>obj</code> is <code>undefined</code>,
+     * this method returns the count of the package-scoped function named by <code>qname</code>.
+     * @param qname If qname is <code>undefined</code> return the number of iterations of the constructor function.
+     * @return The number of times a method was executed.
+     * @includeExample examples\GetInvocationCountExample.as -noswf       
+     * @langversion 3.0     
+     * @keyword getInvocationCount     
+     */
     public function getInvocationCount(obj:Object, qname:QName):Number { return _getInvocationCount(obj, qname, 0); }
+    
+    /**
+     * Returns the number of times a set function was executed. Use 
+     * <code>isGetterSetter()</code> to verify that you have a get/set function before you use
+     * <code>getSetterInvocationCount()</code>.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>     
+     * @param obj A method instance or a class.
+     * @param qname If qname is <code>undefined</code> return the number of iterations of the constructor function.
+     * @return The number of times a set method was executed.
+     * @langversion 3.0     
+     * @keyword getInvocationCount   
+     * @see package.html#isGetterSetter() isGetterSetter()
+     * @see package.html#getInvocationCount() getInvocationCount()
+     */    
     public function getSetterInvocationCount(obj:Object, qname:QName):Number { return _getInvocationCount(obj, qname, 2); }
+    
+    /**
+     * Returns the number of times a get function was executed. Use 
+     * <code>isGetterSetter()</code> to verify that you have a get/set function before you use
+     * <code>getGetterInvocationCount()</code>.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>     
+     * @param obj A method instance or a class.
+     * @param qname If qname is <code>undefined</code> return the number of iterations of the constructor function.
+     * @return The number of times a get method was executed.
+     * @langversion 3.0     
+     * @keyword getInvocationCount   
+     * @see package.html#isGetterSetter() isGetterSetter()
+     * @see package.html#getInvocationCount() getInvocationCount()
+     */        
     public function getGetterInvocationCount(obj:Object, qname:QName):Number { return _getInvocationCount(obj, qname, 1); }
 
+    /** 
+    * @private
+    */
     native function _getInvocationCount(obj:Object, qname:QName, type:uint):Number;
 
+   /**
+     * Checks to see if a property is defined by a get/set function. If you want to use 
+     * <code>getInvocationCount()</code> on a get/set function for a property,
+     * first call <code>isGetterSetter()</code> to check to see if it is a get/set function,
+     * and then use either <code>getSetterInvocationCount</code>
+     * or <code>getGetterInvocationCount</code> to get the respective counts.
+     * <p><strong>Player Version</strong> : Flash Player 9 debugger version <a target="mm_external" href="http://www.adobe.com/go/fp9_update3">Update 3</a>.</p>     
+     * @param obj A method instance or a class.
+     * @param qname If qname is <code>undefined</code> return the number of iterations of the constructor function.
+     * @return A Boolean value indicating if the property is defined by a get/set function (<code>true</code>)
+     * or not (<code>false</code>).
+     * @includeExample examples\GetInvocationCountExample.as -noswf       
+     * @langversion 3.0     
+     * @keyword getInvocationCount   
+     * @see package.html#getInvocationCount() getInvocationCount()
+     * @see package.html#getSetterInvocationCount() getSetterInvocationCount() 
+     * @see package.html#getGetterInvocationCount() getGetterInvocationCount() 
+     */
     public native function isGetterSetter(obj:Object, qname:QName):Boolean;
 };

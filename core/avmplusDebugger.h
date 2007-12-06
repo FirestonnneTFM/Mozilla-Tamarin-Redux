@@ -195,7 +195,7 @@ namespace avmplus
 		 * initialize the Debugger's internal state.
 		 */
 		Debugger(AvmCore *core);
-		virtual ~Debugger() {}
+		virtual ~Debugger();
 
 		/**
 		 * enterDebugger must be overridden.
@@ -419,8 +419,14 @@ namespace avmplus
 			TRACE_METHODS_AND_LINES_WITH_ARGS = 4	// method entry, arguments and line numbers
 		} TraceLevel;
 
-		static TraceLevel astrace; 
-		static uint64 astraceStartTime;
+		//typedef void (*TraceCallback_i)( Stringp fileName, int linenum, Stringp methodName, Stringp methodArgs );
+		static TraceLevel			astrace_console; 
+		static TraceLevel			astrace_callback;
+		static DRC(ScriptObject*)	trace_callback;
+		static bool					in_trace;
+		static uint64				astraceStartTime;
+
+		void disableAllTracing();  // shuts down all tracing operations
 
 		void traceMethod(AbstractFunction* fnc, bool ignoreArgs=false);
 		void traceLine(int linenum);
@@ -451,10 +457,13 @@ namespace avmplus
 		bool scanCode(AbcFile* file, PoolObject* pool, MethodInfo* m);
 
 		// all abc files
-		List<AbcInfo*, LIST_GCObjects>				abcList;
-		MMgc::GCHashtable			pool2abcIndex;
+		List<AbcInfo*, LIST_GCObjects>	abcList;
+		MMgc::GCHashtable				pool2abcIndex;
 
 	private:
+		void	traceCallback(int line);
+		Stringp traceArgumentsString();
+
 		static int readS24(const byte *pc) { return AvmCore::readS24(pc); }
 		static int readU16(const byte *pc) { return AvmCore::readU16(pc); }
 		static int readU30(const byte *&pc) { return AvmCore::readU30(pc); }

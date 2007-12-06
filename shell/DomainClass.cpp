@@ -84,7 +84,8 @@ namespace avmshell
 		if (!b)
 			toplevel()->throwTypeError(kNullArgumentError, core->toErrorString("bytes"));
 
-		ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext(domainEnv);
+		ShellCodeContext* codeContext = new (core->GetGC()) ShellCodeContext();
+		codeContext->m_domainEnv = domainEnv;
 
 		// parse new bytecode
 		size_t len = b->get_length();

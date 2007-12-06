@@ -62,6 +62,7 @@ namespace avmplus
 	class Sampler
 	{
 	public:
+		Sampler(MMgc::GC *);
 		~Sampler();
 
 		enum SampleType 
@@ -104,7 +105,8 @@ namespace avmplus
 		void postsweep();
 
 		uint32 sampleCount() const { return numSamples; }
-
+		bool activelySampling() { return samplingNow; }
+		
 	private:	
 
 
@@ -141,7 +143,7 @@ namespace avmplus
 		bool samplingNow;
 		int takeSample;
 		uint32 numSamples;
-		GrowableBuffer *samples;
+		GrowableBuffer samples;
 		byte *currentSample;
 		void sample();
 

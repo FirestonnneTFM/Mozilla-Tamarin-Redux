@@ -95,6 +95,7 @@ namespace avmplus
 		Atom construct(int argc, Atom* argv);
 
 		int get_length() const;
+		Atom get_savedThis();
 
 		bool isMethodClosure() { return true; }
 

@@ -608,6 +608,7 @@ namespace avmplus
 		OP* exAtom;
 
 	private:
+		#define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
 		#define COREADDR(f) coreAddr((int (AvmCore::*)())(&f))
 		#define GCADDR(f) gcAddr((int (MMgc::GC::*)())(&f))
 		#define ENVADDR(f) envAddr((int (MethodEnv::*)())(&f))
@@ -618,6 +619,7 @@ namespace avmplus
 		#define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
 		#define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
 
+		static sintptr profAddr( void (DynamicProfiler::*f)() );
 		static sintptr coreAddr( int (AvmCore::*f)() );
 		static sintptr gcAddr( int (MMgc::GC::*f)() );
 		static sintptr envAddr( int (MethodEnv::*f)() );
@@ -913,7 +915,7 @@ namespace avmplus
 
 		bool	ensureMDBufferCapacity(PoolObject* pool, size_t s);  // only if buffer guard is not used
 		byte*	getMDBuffer(PoolObject* pool);	// 
-		size_t	estimateMDBufferReservation(PoolObject* pool);  // 
+		size_t	estimateMDBufferReservation(PoolObject* pool, const int expansionFactor); 
 
 		/**
 		 * Information about the activation record for the method is built up 

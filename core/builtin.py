@@ -49,6 +49,7 @@ if classpath == None:
 javacmd = "java -ea -DAS3 -DAVMPLUS -classpath "+classpath
 asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
 
+print("ASC="+classpath)
 print("building builtin.abc, builtin.cpp, builtin.h")
 
 # add -d to include debug symbols
