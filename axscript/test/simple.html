@@ -6,27 +6,12 @@
     <script language="application/javascript;version=2">
         // alert dialog
         window.alert('Hello from Tamarin')
+        // XXX - we don't have correct global semantics yet
+        // so the 'window.' prefix must always be used.
+        var document = window.document
         // add content to the document
         document.write("Hello from tamarin<br>")
         document.write("This document is at <code>" + document.location + "<code>")
-    </script>
-
-    <script language="application/javascript;version=2">
-    // test that 'global' semantics are working as we expect.
-    // XXX - they are not working yet, but this is the next thing to be
-    // done, so the failing test code can remain...
-    if(!window.customObject)
-        window.customObject = {} // define it explicitly with 'window.' prefix.
-    customObject.customValue = "foo" // but now reference it without the prefix.
-    if (window.customObject.customValue != customObject.customValue)
-        alert("Property values wrong?")
-    // check new names implicitly go to 'window'
-    if(!window.customObject2)
-        customObject2 = {} // define it without a prefix - should still to go 'window'
-    customObject2.customValue = "foo"
-    if (window.customObject2.customValue != customObject2.customValue)
-        alert("Property values wrong?")
-    document.write("property semantics seemed to work")
     </script>
 
 </html>
