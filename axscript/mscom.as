@@ -64,7 +64,7 @@ package
 package axtam.com {
 	// Its not clear if we should subclass the standard 'Error', but given
 	// it has its own concept of 'Message' and 'ID', it doesn't seem a good fit.
-	// Maybe a new base-class should be introduced.
+	// Maybe a new base-class should be introduced?
 	public dynamic class Error
 	{
 		public static const S_OK = 0
@@ -84,19 +84,44 @@ package axtam.com {
 		prototype.toString = function():String
 		{
 			var e:axtam.com.Error = this
-			return e.message !== "" ? e.name + ": " + e.message : e.name;
+			var hv:String = e.hresult > 0 ? e.hresult.toString(16) : (e.hresult+0x100000000).toString(16)
+			return "COM Error 0x" + hv + ": " + ProviderError.getErrorMessage(e.hresult)
 		}
 		_setPropertyIsEnumerable(prototype, "toString", false);
 
-		public native static function getErrorMessage(index:int):String;
+		// *sob* - I can't get this to work without tamarin throwing exceptions.
+		//public native static function getErrorMessage(index:int):String;
 
 		public static function throwError(hresult:int, ... rest)
 		{
 			// todo: rich error support?
-			throw new axtam.com.Error(hresult);
+			throw new axtam.com.ProviderError(hresult);
 		}
 
 	}
+	// This is the actual class that is thrown by script code (see throwError above)
+	// When exceptions of this class are thrown, they are not treated as "unhandled",
+	// but simply indicate that script code wants a COM error returned.
+	public dynamic class ProviderError extends Error {
+		function ProviderError(hresult) {
+			super(hresult)
+		}
+		// *sob* - see above
+		public native static function getErrorMessage(index:int):String;
+	}
+
+	// This is the class that is thrown by *native* code when a COM object you are using
+	// (such as Window) returns a COM error code.  These are never thrown by script code,
+	// and are treated as "unhandled" when the occur - eg, a traceback is printed, debugger
+	// semantics followed, etc.
+	public dynamic class ConsumerError extends Error {
+		function ConsumerError(hresult) {
+			super(hresult)
+		}
+		// *sob* - see above
+		public native static function getErrorMessage(index:int):String;
+	}
+
 	// constants go directly in the axtam.com package.
 	public const SCRIPTINFO_IUNKNOWN = 0x00000001
 	public const SCRIPTINFO_ITYPEINFO = 0x00000002

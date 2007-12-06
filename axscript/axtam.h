@@ -115,7 +115,8 @@ namespace axtam
 {
 	class MSIUnknownConsumerClass;
 	class MSIDispatchConsumerClass;
-	class COMErrorClass;
+	class COMConsumerErrorClass;
+	class COMProviderErrorClass;
 
 	// CodeContext is used to track which security context we are in.
 	// When an AS3 method is called, the AS3 method will set core->codeContext to its code context.
@@ -175,10 +176,16 @@ namespace axtam
 		// Some "class" pointers - getBuiltinClass() doesn't work for our "extension" classes...
 		MSIDispatchConsumerClass *dispatchClass;
 		MSIUnknownConsumerClass *unknownClass;
-		COMErrorClass *comErrorClass;
+		COMConsumerErrorClass *comConsumerErrorClass;
+		COMProviderErrorClass *comProviderErrorClass;
 
-		void throwCOMError(HRESULT hr, EXCEPINFO *pei = NULL);
-		bool isCOMError(Exception *exc);
+		void throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei = NULL);
+
+		// Use this to check if script code has thrown an exception with a HRESULT
+		// that should be returned to the COM method being called.
+		bool isCOMProviderError(Exception *exc);
+		// You almost never need to know if it is a consumer error - treat that as a "normal" exception.
+		bool isCOMConsumerError(Exception *exc);
 
 		Toplevel* initAXTamBuiltins();
 	private:

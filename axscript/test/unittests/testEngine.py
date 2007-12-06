@@ -20,6 +20,7 @@ except ImportError:
 
 from win32com.axscript import axscript
 from win32com.server.util import wrap, Collection
+from win32com.server.exception import COMException
 import winerror
 
 # Other misc stuff.
@@ -41,7 +42,7 @@ class TestScriptObject:
     """This object is added to the ScriptEngine with the name 'test'.  Script
        code can call reference the 'public' properties of this object.
     """
-    _public_methods_ = [ 'call' ]
+    _public_methods_ = [ 'call', 'fail' ]
     _public_attrs_ = ['value', 'collection']
     def __init__(self):
         self.collection = wrap( TestScriptCollection( [1,'Two',3] ))
@@ -51,6 +52,9 @@ class TestScriptObject:
 
     def call(self, *args):
         self.last = args
+
+    def fail(self, hresult=winerror.E_FAIL):
+        raise COMException(hresult=hresult)
 
 class AXTestSite:
     """An IActiveScriptSite implementation used for testing our engine."""
@@ -287,7 +291,13 @@ class TestExceptions(TestCaseInitialized):
         ctx, line, col = self.site.last_error.GetSourcePosition()
         if not skip_known_failures:
             self.failUnlessEqual(line, 2)
-        
+
+    def testCOMException(self):
+        code = "test.fail()"
+        self.parseScriptText(code, expect_exc=True)
+        scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
+        self.failUnless(desc.startswith("COM Error"), desc)
+
 if __name__=='__main__':
     try:
         pythoncom.CoCreateInstance(AXTAM_CLSID, None, pythoncom.CLSCTX_SERVER,

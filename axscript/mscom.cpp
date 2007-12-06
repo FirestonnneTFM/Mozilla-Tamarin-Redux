@@ -62,7 +62,7 @@ namespace axtam
 			return ScriptObject::callProperty(name, argc, argv);
 		}
 		if (FAILED(hr))
-			axcore->throwCOMError(hr);
+			axcore->throwCOMConsumerError(hr);
 		// Now create args for the call.
 		EXCEPINFO ei;
 		CComVariant *pArgs = new CComVariant[argc];
@@ -80,7 +80,7 @@ namespace axtam
 		//	VariantClear(pArg+i);
 		delete [] pArgs;
 		if (FAILED(hr))
-			axcore->throwCOMError(hr, &ei);
+			axcore->throwCOMConsumerError(hr, &ei);
 		return axcore->toAtom(ret);
 	}
 
@@ -100,7 +100,7 @@ namespace axtam
 		// ScriptObject::setMultinameProperty just throws an exception, so
 		// no point trying it...
 		if (FAILED(hr))
-			axcore->throwCOMError(hr);
+			axcore->throwCOMConsumerError(hr);
 		// Now create args for the call.
 		EXCEPINFO ei;
 		CComVariant arg;
@@ -108,7 +108,7 @@ namespace axtam
 		DISPPARAMS params = {&arg, NULL, 1, 0};
 		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_PROPERTYPUT, &params, NULL, &ei, NULL);
 		if (FAILED(hr))
-			axcore->throwCOMError(hr, &ei);
+			axcore->throwCOMConsumerError(hr, &ei);
 	}
 
 	// Ditto hasMultinameProperty - needsHashtable is checked.
@@ -139,13 +139,13 @@ namespace axtam
 			return undefinedAtom;
 		}
 		if (FAILED(hr))
-			axcore->throwCOMError(hr);
+			axcore->throwCOMConsumerError(hr);
 		EXCEPINFO ei;
 		DISPPARAMS params = {NULL, NULL, 0, 0};
 		CComVariant ret;
 		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_PROPERTYGET, &params, &ret, &ei, NULL);
 		if (FAILED(hr))
-			axcore->throwCOMError(hr, &ei);
+			axcore->throwCOMConsumerError(hr, &ei);
 		return axcore->toAtom(ret);
 	}
 

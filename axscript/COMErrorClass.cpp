@@ -38,39 +38,39 @@
 
 namespace axtam
 {
+	/* *sob* - tamarin throws exceptions if I try and define this in the base class
 	BEGIN_NATIVE_MAP(COMErrorClass)
 		NATIVE_METHOD(axtam_com_Error_getErrorMessage, COMErrorClass::getErrorMessage)
 	END_NATIVE_MAP()
+	*/
 
 	COMErrorClass::COMErrorClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(COMErrorClass));
-
-		prototype = createInstance(ivtable(), toplevel()->objectClass->prototype);
-
-		AXTam* core = (AXTam*)this->core();
-		if (!core->comErrorClass)
-			core->comErrorClass = this;
+//		AvmAssert(traits()->sizeofInstance == sizeof(COMErrorClass));
+//		prototype = createInstance(ivtable(), toplevel()->objectClass->prototype);
 	}
 	
 
 	void COMErrorClass::throwError(HRESULT hr)
 	{
-		// ack - I don't think this is right :(
 		Atom args[2] = { nullObjectAtom, core()->intToAtom(hr) };
 		core()->throwAtom(construct(1, args));
 	}
 
 	Stringp COMErrorClass::getErrorMessage(int errorID) const
 	{
-		return this->core()->constantString("Please implement me!");
-	}
-
-	ScriptObject* COMErrorClass::createInstance(VTable *ivtable,
-											 ScriptObject *prototype)
-	{
-		return new (ivtable->gc(), ivtable->getExtraSize()) COMErrorObject(ivtable, prototype);
+		DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER;
+		wchar *buffer;
+		if (::FormatMessageW(flags, 0, errorID, 0, (LPWSTR)&buffer, 0, NULL )<=0)
+			return this->core()->constantString("FormatMessage failed!");
+		// FormatMessage always sticks a trailing \r\n.
+		size_t len = wcslen((wchar_t *)buffer);
+		if (len > 2)
+			buffer[len-2] = '\0';
+		Stringp ret = core()->newString(buffer);
+		LocalFree(buffer);
+		return ret;
 	}
 
 	// override ctor just so we can get 'hresult' :(
@@ -105,4 +105,47 @@ namespace axtam
 		const Atom &r = atomhresult;
 		return (HRESULT)core()->toUInt32(r);
 	}
+	// the subclasses.
+	// COMConsumerErrorClass
+	BEGIN_NATIVE_MAP(COMConsumerErrorClass)
+		NATIVE_METHOD(axtam_com_ConsumerError_getErrorMessage, COMErrorClass::getErrorMessage)
+	END_NATIVE_MAP()
+	COMConsumerErrorClass::COMConsumerErrorClass(VTable* cvtable)
+		: COMErrorClass(cvtable)
+	{
+		AvmAssert(traits()->sizeofInstance == sizeof(COMConsumerErrorClass));
+		prototype = createInstance(ivtable(), toplevel()->objectClass->prototype);
+
+		AXTam* core = (AXTam*)this->core();
+		if (!core->comConsumerErrorClass)
+			core->comConsumerErrorClass = this;
+	}
+
+	ScriptObject* COMConsumerErrorClass::createInstance(VTable *ivtable,
+														ScriptObject *prototype)
+	{
+		return new (ivtable->gc(), ivtable->getExtraSize()) COMConsumerErrorObject(ivtable, prototype);
+	}
+
+	// COMProviderErrorClass
+	BEGIN_NATIVE_MAP(COMProviderErrorClass)
+		NATIVE_METHOD(axtam_com_ProviderError_getErrorMessage, COMErrorClass::getErrorMessage)
+	END_NATIVE_MAP()
+
+	COMProviderErrorClass::COMProviderErrorClass(VTable* cvtable)
+		: COMErrorClass(cvtable)
+	{
+		AvmAssert(traits()->sizeofInstance == sizeof(COMProviderErrorClass));
+		prototype = createInstance(ivtable(), toplevel()->objectClass->prototype);
+		AXTam* core = (AXTam*)this->core();
+		if (!core->comProviderErrorClass)
+			core->comProviderErrorClass = this;
+	}
+
+	ScriptObject* COMProviderErrorClass::createInstance(VTable *ivtable,
+														ScriptObject *prototype)
+	{
+		return new (ivtable->gc(), ivtable->getExtraSize()) COMProviderErrorObject(ivtable, prototype);
+	}
+
 }

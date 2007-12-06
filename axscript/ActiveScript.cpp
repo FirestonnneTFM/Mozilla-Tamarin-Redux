@@ -182,6 +182,7 @@ protected:
 	HRESULT callEngine(Atom *ret, const char *name, ...);
 	// the worker...
 	HRESULT callEngineRawVA(Atom *ret, const char *name, va_list va);
+	HRESULT handleException(Exception *exc, int depth = 0);
 
 	CComPtr<IActiveScriptSite> m_site;
 	Atom engine; // The ES implemented engine we delegate to
@@ -244,7 +245,7 @@ HRESULT CActiveScript::callEngineRawVA(Atom *ppret, const char *name, va_list va
 			AvmDebugMsg(true, "callEngine('%s') - early exit due to no ScriptEnv\r\n", name);
 			return E_FAIL;
 		}
-		AvmAssert(engine==NULL); // already initialized?
+		AvmAssert(engine==undefinedAtom); // already initialized?
 		engine = core->toplevel->getproperty(se->global->atom(), &multiname, core->toplevel->toVTable(se->global->atom()));
 
 		initialized = true;
@@ -282,10 +283,40 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 	TRY(core, kCatchAction_ReportAsError) {
 		hr = callEngineRawVA(ppret, name, va);
 	} CATCH(Exception * exception) {
-		if (core->isCOMError(exception)) {
-			// This is an error explicitly thrown by script code, or
-			// indirectly due to throwCOMError().  It means that the
-			// HRESULT just be returned - its not a "script error".
+		return handleException(exception);
+	}
+	END_CATCH
+	END_TRY
+	va_end(va);
+
+	return hr;
+}
+
+HRESULT CActiveScript::callEngineRaw(Atom *ppret, const char *name, ...)
+{
+	HRESULT hr;
+	va_list va;
+	va_start (va, name); 
+	hr = callEngineRawVA(ppret, name, va);
+	// XXX - is this a problem when an exception happens?
+	va_end(va);
+
+	return hr;
+}
+
+HRESULT CActiveScript::handleException(Exception *exception, int depth /* = 0 */)
+{
+	if (depth > 1) {
+		// give up in disgust
+		AvmDebugMsg(true, "The exception handlers keep throwing exceptions!\r\n");
+		return E_FAIL;
+	}
+	HRESULT hr;
+	TRY(core, kCatchAction_ReportAsError) { // An exception in our exception handler would otherwise be fatal!
+		if (core->isCOMProviderError(exception)) {
+			// This is an error explicitly thrown by script code.  It 
+			// means that the HRESULT just be returned - its not a 
+			// "script error".
 			COMErrorObject *eob = (COMErrorObject *)core->atomToScriptObject(exception->atom);
 			hr = eob->getHRESULT();
 		} else {
@@ -312,20 +343,13 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 			hr = E_FAIL;
 		}
 	}
+	CATCH(Exception * exception) {
+		AvmDebugMsg(false, "Error in exception handler\r\n");
+		hr = handleException(exception, depth+1);
+	}
+
 	END_CATCH
 	END_TRY
-	va_end(va);
-	return hr;
-}
-
-HRESULT CActiveScript::callEngineRaw(Atom *ppret, const char *name, ...)
-{
-	HRESULT hr;
-	va_list va;
-	va_start (va, name); 
-	hr = callEngineRawVA(ppret, name, va);
-	// XXX - is this a problem when an exception happens?
-	va_end(va);
 	return hr;
 }
 

@@ -82,7 +82,9 @@ namespace axtam
 		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IDispatch,  MSIDispatchConsumerClass,  ScriptObject)
 		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IActiveScriptSite,
 		                                            AdaptActiveScriptSiteClass, ScriptObject)
-		NATIVE_CLASS(abcclass_axtam_com_Error,      COMErrorClass,     COMErrorObject)
+		//NATIVE_CLASS(abcclass_axtam_com_Error,      COMErrorClass,     COMErrorObject)
+		NATIVE_CLASS(abcclass_axtam_com_ProviderError,      COMProviderErrorClass,     COMProviderErrorObject)
+		NATIVE_CLASS(abcclass_axtam_com_ConsumerError,      COMConsumerErrorClass,     COMConsumerErrorObject)
 		// clones from the shell
 		NATIVE_CLASS(abcclass_axtam_Domain,         DomainClass,       DomainObject)
 		NATIVE_CLASS(abcclass_flash_utils_ByteArray,    ByteArrayClass,     ByteArrayObject)
@@ -246,7 +248,14 @@ namespace axtam
 		#endif
 	}
 
-	AXTam::AXTam(MMgc::GC *gc) : AvmCore(gc), pool(NULL), dispatchClass(NULL), unknownClass(NULL), toplevel(NULL), comErrorClass(NULL)
+	AXTam::AXTam(MMgc::GC *gc) 
+		: AvmCore(gc), 
+		pool(NULL), 
+		dispatchClass(NULL), 
+		unknownClass(NULL), 
+		toplevel(NULL), 
+		comConsumerErrorClass(NULL),
+		comProviderErrorClass(NULL)
 	{
 //		systemClass = NULL;
 		
@@ -350,15 +359,18 @@ namespace axtam
 		throwException(exception);
 	}
 
-	void AXTam::throwCOMError(HRESULT hr, EXCEPINFO *pei /* = NULL */){
+	void AXTam::throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei /* = NULL */){
 		// hrm - not sure this is working ok...
 		//AvmAssert(0);
-		comErrorClass->throwError(hr);
+		comConsumerErrorClass->throwError(hr);
 		AvmAssert(0); // not reached
 	}
 
-	bool AXTam::isCOMError(Exception *exc) {
-		return exc->isValid() && istype(exc->atom, comErrorClass->traits()->itraits);
+	bool AXTam::isCOMProviderError(Exception *exc) {
+		return exc->isValid() && istype(exc->atom, comProviderErrorClass->traits()->itraits);
+	}
+	bool AXTam::isCOMConsumerError(Exception *exc) {
+		return exc->isValid() && istype(exc->atom, comConsumerErrorClass->traits()->itraits);
 	}
 
 	Atom AXTam::toAtom(VARIANT &var)

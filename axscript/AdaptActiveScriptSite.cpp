@@ -56,12 +56,12 @@ namespace axtam
 		CComPtr<IActiveScriptSite> site;
 		HRESULT hr = core->as->GetScriptSite(IID_IActiveScriptSite, (void **)&site);
 		if (FAILED(hr))
-			core->throwCOMError(hr);
+			core->throwCOMConsumerError(hr);
 		CComPtr<IUnknown> unk;
 		CComPtr<ITypeInfo> tlb;
 		hr = site->GetItemInfo((OLECHAR *)name->c_str(), flags, &unk, &tlb);
 		if (FAILED(hr))
-			core->throwCOMError(hr);
+			core->throwCOMConsumerError(hr);
 		Atom vals[2] = {nullObjectAtom, nullObjectAtom};
 		if (unk) {
 			CComQIPtr<IDispatch, &IID_IDispatch> disp(unk);
@@ -82,7 +82,7 @@ namespace axtam
 		CComPtr<IActiveScriptSite> site;
 		HRESULT hr = core->as->GetScriptSite(IID_IActiveScriptSite, (void **)&site);
 		if (FAILED(hr))
-			core->throwCOMError(hr);
+			core->throwCOMConsumerError(hr);
 		hr = site->OnEnterScript();
 		return hr;
 	}
@@ -93,7 +93,7 @@ namespace axtam
 		CComPtr<IActiveScriptSite> site;
 		HRESULT hr = core->as->GetScriptSite(IID_IActiveScriptSite, (void **)&site);
 		if (FAILED(hr))
-			core->throwCOMError(hr);
+			core->throwCOMConsumerError(hr);
 		hr = site->OnLeaveScript();
 		return hr;
 	}
@@ -104,7 +104,7 @@ namespace axtam
 		CComPtr<IActiveScriptSite> site;
 		HRESULT hr = core->as->GetScriptSite(IID_IActiveScriptSite, (void **)&site);
 		if (FAILED(hr))
-			core->throwCOMError(hr);
+			core->throwCOMConsumerError(hr);
 		hr = site->OnStateChange((SCRIPTSTATE)state);
 		return hr;
 	}
