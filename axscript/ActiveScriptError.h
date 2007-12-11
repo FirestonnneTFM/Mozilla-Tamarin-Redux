@@ -49,7 +49,7 @@ namespace axtam {
 	{
 	public:
 		CActiveScriptError(AvmCore *_core) : 
-		  MMgc::GCRoot(_core->GetGC()), core(_core), dwSourceContextCookie(0) {;}
+		  MMgc::GCRoot(_core->GetGC()), core(_core), dwSourceContextCookie(0), exception(0) {;}
 		virtual ~CActiveScriptError() {;}
 		avmplus::Exception *exception; // is this GCRoot really enough?
 		AvmCore *core;
