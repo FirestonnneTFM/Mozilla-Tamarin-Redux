@@ -113,8 +113,8 @@ DEFINE_GUID(AXT_CATID_ActiveScriptParse, 0xf0b7a1a2, 0x9847, 0x11cf, 0x8f, 0x20,
 // TODO: move some of these to a better header.
 namespace axtam
 {
-	class MSIUnknownConsumerClass;
-	class MSIDispatchConsumerClass;
+	class IUnknownConsumerClass;
+	class IDispatchConsumerClass;
 	class COMConsumerErrorClass;
 	class COMProviderErrorClass;
 
@@ -174,8 +174,8 @@ namespace axtam
 		// engine rather than the author of the actual script code
 		void dumpException(Exception *exc);
 		// Some "class" pointers - getBuiltinClass() doesn't work for our "extension" classes...
-		MSIDispatchConsumerClass *dispatchClass;
-		MSIUnknownConsumerClass *unknownClass;
+		IDispatchConsumerClass *dispatchClass;
+		IUnknownConsumerClass *unknownClass;
 		COMConsumerErrorClass *comConsumerErrorClass;
 		COMProviderErrorClass *comProviderErrorClass;
 

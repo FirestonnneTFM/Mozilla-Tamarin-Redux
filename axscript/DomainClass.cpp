@@ -127,8 +127,8 @@ namespace axtam
 		if (!core->isObject(aObject) || !core->isObject(aTypeinfo))
 			toplevel()->throwTypeError(kCantUseInstanceofOnNonObjectError);
 		// XXX - Need to typecheck this!
-		MSIDispatchConsumer *ob = (MSIDispatchConsumer *)core->atomToScriptObject(aObject);
-		MSIUnknownConsumer *obti = (MSIUnknownConsumer *)core->atomToScriptObject(aTypeinfo);
+		IDispatchConsumer *ob = (IDispatchConsumer *)core->atomToScriptObject(aObject);
+		IUnknownConsumer *obti = (IUnknownConsumer *)core->atomToScriptObject(aTypeinfo);
 		// ack - keep all the type-unsafe stuff together...
 		AvmAssert(obti->iid == __uuidof(ITypeInfo));
 		//ITypeInfo *ti = (ITypeInfo *)(IUnknown *)obti->ob;

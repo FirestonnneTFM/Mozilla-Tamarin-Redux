@@ -152,7 +152,11 @@ package axtam.com.adaptors.consumer {
 	}
 
 	// XXX - technically the rest of these 'derive' from IUnknown...
-	public class IDispatch
+	// An IDispatch object does *not* expose IDispatch methods - instead,
+	// it uses IDispatch to provide normal "object.property" style access.
+	// This is primarily due to a lack of "catch-alls".
+	// It is "dynamic" as it supports 'expandos'
+	public dynamic class IDispatch
 	{
 	}
 
@@ -204,7 +208,7 @@ package {
 		public var namedItems; // A hashtable AddNamedItem items
 		public var codeBlocks; // code blocks "pushed" but not yet executed.
 		public var state:int;
-		public var site; // MSIUnknownConsumer
+		public var site; // IUnknownConsumer
 
 		public function ScriptEngine()
 		{
@@ -293,15 +297,15 @@ package {
 		/* Script State Management */
 		// A state table.  First index is current state, second index is new state.
 		// The intent of our state management is:
-		// * We can always reset back to "initialized" (NOTE: this
-		//   doesn't really work yet)
+		// * We can always reset back to "initialized"
 		// * Apart from the above, we can not move "backwards" in 
 		//   state - ie, if you are 'connected', you can't move
 		//   back to 'started'
 		// * You can move to 'closed' from any state.  Once closed, you can't 
 		//   transition anywhere - not even back to "initialized" (we drop state
 		//   that prevents a reset)
-		// This means that most entries in the state table are error state.
+		// This means that most entries in the state table are error state - which
+		// implement by the policy that missing entries are a transition we don't support.
 		// Also: We special case state==new_state, and CLOSED.
 		// This leaves us with INITIALIZED, STARTED, CONNECTED and DISCONNECTED
 		// XXX: due to compiler bugs, we can't reference our own function in a variable

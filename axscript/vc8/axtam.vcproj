@@ -379,10 +379,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\AdaptActiveScriptSite.h"
-				>
-			</File>
-			<File
 				RelativePath="..\axtam.h"
 				>
 			</File>
@@ -407,7 +403,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\mscom.h"
+				RelativePath="..\IActiveScriptSiteConsumer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\IDispatchConsumer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\IUnknownConsumer.h"
 				>
 			</File>
 			<File
@@ -448,10 +452,6 @@
 			</File>
 			<File
 				RelativePath="..\ActiveScriptError.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\AdaptActiveScriptSite.cpp"
 				>
 			</File>
 			<File
@@ -511,7 +511,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\mscom.cpp"
+				RelativePath="..\IActiveScriptSiteConsumer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IDispatchConsumer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IUnknownConsumer.cpp"
 				>
 			</File>
 			<File

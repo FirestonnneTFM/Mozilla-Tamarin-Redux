@@ -43,9 +43,10 @@
 
 #include "Profiler.h"
 
-#include "MSCom.h"
+#include "IUnknownConsumer.h"
+#include "IDispatchConsumer.h"
 #include "SystemClass.h"
-#include "AdaptActiveScriptSite.h"
+#include "IActiveScriptSiteConsumer.h"
 #include "COMErrorClass.h"
 
 // files cloned from the shell
@@ -77,17 +78,17 @@ namespace axtam
 	HINSTANCE AXTam::hinstance = 0;
 
 	BEGIN_NATIVE_CLASSES(AXTam)
-		NATIVE_CLASS(abcclass_axtam_System,         SystemClass,       ScriptObject)
-		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IUnknown,   MSIUnknownConsumerClass,   ScriptObject)
-		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IDispatch,  MSIDispatchConsumerClass,  ScriptObject)
+		NATIVE_CLASS(abcclass_axtam_System,                           SystemClass,             ScriptObject)
+		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IUnknown,   IUnknownConsumerClass,   IUnknownConsumer)
+		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IDispatch,  IDispatchConsumerClass,  IDispatchConsumer)
 		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IActiveScriptSite,
-		                                            AdaptActiveScriptSiteClass, ScriptObject)
-		//NATIVE_CLASS(abcclass_axtam_com_Error,      COMErrorClass,     COMErrorObject)
-		NATIVE_CLASS(abcclass_axtam_com_ProviderError,      COMProviderErrorClass,     COMProviderErrorObject)
-		NATIVE_CLASS(abcclass_axtam_com_ConsumerError,      COMConsumerErrorClass,     COMConsumerErrorObject)
+		                                                              IActiveScriptSiteConsumerClass, IActiveScriptSiteConsumer)
+		//NATIVE_CLASS(abcclass_axtam_com_Error,                        COMErrorClass,           COMErrorObject)
+		NATIVE_CLASS(abcclass_axtam_com_ProviderError,                COMProviderErrorClass,   COMProviderErrorObject)
+		NATIVE_CLASS(abcclass_axtam_com_ConsumerError,                COMConsumerErrorClass,   COMConsumerErrorObject)
 		// clones from the shell
-		NATIVE_CLASS(abcclass_axtam_Domain,         DomainClass,       DomainObject)
-		NATIVE_CLASS(abcclass_flash_utils_ByteArray,    ByteArrayClass,     ByteArrayObject)
+		NATIVE_CLASS(abcclass_axtam_Domain,                           DomainClass,             DomainObject)
+		NATIVE_CLASS(abcclass_flash_utils_ByteArray,                  ByteArrayClass,          ByteArrayObject)
 
 	END_NATIVE_CLASSES()
 

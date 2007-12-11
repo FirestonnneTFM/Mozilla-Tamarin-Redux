@@ -298,6 +298,13 @@ class TestExceptions(TestCaseInitialized):
         scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
         self.failUnless(desc.startswith("COM Error"), desc)
 
+class TestDispatchConsumer(TestCaseInitialized):
+    def testExpando(self):
+        code = "test.expando = 'new value'"
+        self.parseScriptText(code)
+        # todo: check the new value - but how to do that (we don't have
+        # SCRIPTTEXT_ISEXPRESSION working yet)
+
 if __name__=='__main__':
     try:
         pythoncom.CoCreateInstance(AXTAM_CLSID, None, pythoncom.CLSCTX_SERVER,
