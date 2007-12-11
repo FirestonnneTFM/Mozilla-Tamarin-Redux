@@ -141,7 +141,7 @@ package axtam.com {
 	public const SCRIPTSTATE_CLOSED              = 4
 }
 
-package axtam.com.adaptors.consumer {
+package axtam.com.consumer {
 	// scripting interfaces we consume in AS (ie, implemented externally)
 	// Each method listed here corresponds to a native method in the engine, 
 	// which inturn delegates to the real COM object.
@@ -151,16 +151,17 @@ package axtam.com.adaptors.consumer {
 	{
 	}
 
-	// XXX - technically the rest of these 'derive' from IUnknown...
+	// The rest of these 'derive' from IUnknown...
 	// An IDispatch object does *not* expose IDispatch methods - instead,
 	// it uses IDispatch to provide normal "object.property" style access.
-	// This is primarily due to a lack of "catch-alls".
+	// This is primarily due to a lack of "catch-alls" and effort required in
+	// managing the args used by the native functions.
 	// It is "dynamic" as it supports 'expandos'
-	public dynamic class IDispatch
+	public dynamic class IDispatch extends IUnknown
 	{
 	}
 
-	public class ITypeInfo
+	public class ITypeInfo extends IUnknown
 	{
 	}
 
@@ -174,6 +175,15 @@ package axtam.com.adaptors.consumer {
 		public native function OnEnterScript():int
 		public native function OnLeaveScript():int
 	}
+}
+
+package axtam.com.provider {
+	// scripting interfaces provided by AS (ie, for consumption by external
+	// code).  As such, there are no classes available for use by JS!
+	// A couple of functions are used to *create* such objects, but they
+	// are returned via an axtam.com.consumer.IUnknown (which is wrapping
+	// the object we provide)
+	public native function createDispatchProvider(ob:Object): axtam.com.consumer.IUnknown;
 }
 
 package {
@@ -222,7 +232,7 @@ package {
 		public function SetScriptSite(undef)
 		{
 			// currently arg is ignored!
-			site = new axtam.com.adaptors.consumer.IActiveScriptSite() // XXX - fix me
+			site = new axtam.com.consumer.IActiveScriptSite() // XXX - fix me
 		}
 		public function ParseScriptText(code:String, itemName:String, context:Object, delim:String, sourceCookie:int, lineNumber:int, flags:int)
 		{
@@ -273,9 +283,18 @@ package {
 			//if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS && typeinfo != null) {
 			//	domain.exposeGlobalMembers(dispatch, typeinfo)
 			//}
-			// create a new domain for the object with the IDispatch as its global.
-			var obDomain =  new axtam.Domain(globalDomain, dispatch)
+			// create a new domain for the object with the IDispatch as its global (or not!)
+			var obDomain =  new axtam.Domain(globalDomain, null) // dispatch)
 			objectDomains[name] = obDomain
+		}
+
+		public function GetScriptDispatch(name:String): Object
+		{
+			// XXX - todo - cache these so we don't create new ones each time
+			// (or at least work out if its necessary to do that ;)
+			var domain:axtam.Domain = getDomainForName(name)
+			// return an IDispatch impl around the domain's global.
+			return axtam.com.provider.createDispatchProvider(domain.global)
 		}
 
 		public function GetScriptState(): uint
@@ -460,11 +479,17 @@ package {
 			site = null
 		}
 		// End of state management.
-		function executeScriptBlock(scriptBlock)
+		function getDomainForName(name:String):axtam.Domain
 		{
-			var domain = objectDomains[scriptBlock.item_name]
+			var domain:axtam.Domain = objectDomains[name]
 			if (!domain)
 				domain = globalDomain
+			return domain
+		}
+		
+		function executeScriptBlock(scriptBlock)
+		{
+			var domain:axtam.Domain = getDomainForName(scriptBlock.item_name)
 			domain.loadBytes(scriptBlock.bytes)
 		}
 		

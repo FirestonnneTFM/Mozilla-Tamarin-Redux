@@ -156,7 +156,7 @@ class TestCase(unittest.TestCase):
             if expected_hresult is None:
                 return
             if exc[0] != expected_hresult:
-                self.fail("Expected %s to return 0x%x - got 0x%x instead", func, expected_hresult, exc[0])
+                self.fail("Expected %s to return %d - got %d instead" % (func, expected_hresult, exc[0]))
 
     def _prepareNamedItems(self):
         flags = axscript.SCRIPTITEM_ISVISIBLE | axscript.SCRIPTITEM_GLOBALMEMBERS
@@ -297,6 +297,17 @@ class TestExceptions(TestCaseInitialized):
         self.parseScriptText(code, expect_exc=True)
         scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
         self.failUnless(desc.startswith("COM Error"), desc)
+
+class TestScriptDispatch(TestCaseInitialized):
+    def testDispatchSimple(self):
+        code = "var expando = 'hello'"
+        disp = self.site.engine_script.GetScriptDispatch(None)
+        # name should not exist.
+        if not skip_known_failures:
+            self.assertRaisesCOMError(disp.GetIDsOfNames, 0, 'expando', hresult=winerror.DISP_E_UNKNOWNNAME)
+            # Now execute the script code, which will define the name
+            self.parseScriptText(code)
+            disp.GetIDsOfNames(0, 'expando')
 
 class TestDispatchConsumer(TestCaseInitialized):
     def testExpando(self):

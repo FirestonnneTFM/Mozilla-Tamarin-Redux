@@ -163,9 +163,19 @@ namespace axtam
 		Atom toAtom(IUnknown *pUnk, const IID &iid = __uuidof(0));
 
 		// Convert an atom to the specifically requested variant type.
-		void atomToTypedVARIANT(Atom val, VARTYPE vt, CComVariant *pResult);
+		CComVariant atomToTypedVARIANT(Atom val, VARTYPE vt);
 		// Convert an atom to any variant type.
-		void atomToVARIANT(Atom val, CComVariant *pResult);
+		CComVariant atomToVARIANT(Atom val);
+		void *atomToIUnknown(Atom val, const IID &iid);
+		// Convert an atom - but catch exceptions and translate to a COM
+		// HRESULT.  Suitable for use when no tamarin exception handler is
+		// setup (eg, when returning results to COM objects).  Note that if
+		// these fail, they will generally cause debug output to be written
+		HRESULT atomToTypedVARIANT(Atom val, VARTYPE vt, CComVariant *pResult);
+		// Convert an atom to any variant type.
+		HRESULT atomToVARIANT(Atom val, CComVariant *pResult);
+		HRESULT atomToIUnknown(Atom val, const IID &iid, void **ret);
+
 //		DispatchConsumerClass *dispatchClass;
 
 		void Initialize(IActiveScript *as);
@@ -181,6 +191,9 @@ namespace axtam
 
 		void throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei = NULL);
 
+		// Used by objects which delegate COM interfaces to script code, but
+		// after delegation fail to convert the result to the native COM type.
+		HRESULT handleConversionFailure(const Exception *);
 		// Use this to check if script code has thrown an exception with a HRESULT
 		// that should be returned to the COM method being called.
 		bool isCOMProviderError(Exception *exc);
@@ -188,6 +201,9 @@ namespace axtam
 		bool isCOMConsumerError(Exception *exc);
 
 		Toplevel* initAXTamBuiltins();
+		// native methods.
+		// ack - something is wrong with this - |this| is always NULL :(
+		Atom createDispatchProvider(Atom ob);
 	private:
 		DECLARE_NATIVE_CLASSES()
 		DECLARE_NATIVE_SCRIPTS()

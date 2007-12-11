@@ -186,7 +186,6 @@ protected:
 
 	CComPtr<IActiveScriptSite> m_site;
 	Atom engine; // The ES implemented engine we delegate to
-	SCRIPTSTATE scriptState;
 	DWORD safetyOptions;
 	bool initialized;
 };
@@ -198,8 +197,7 @@ CActiveScript::CActiveScript() :
 	root(NULL),
 	safetyOptions(0),
 	engine(undefinedAtom),
-	initialized(false),
-	scriptState(SCRIPTSTATE_UNINITIALIZED)
+	initialized(false)
 {
 		// move this to DLL init?
 	if (!fm) {
@@ -438,7 +436,14 @@ STDMETHODIMP CActiveScript::GetScriptDispatch(
             /* [in] */ LPCOLESTR pstrItemName,
             /* [out] */ IDispatch **ppdisp)
 {
-	ATLTRACENOTIMPL(_T("CActiveScript::GetScriptDispatch"));
+	HRESULT hr;
+	Atom ret = undefinedAtom;
+	hr = callEngine(&ret, "GetScriptDispatch",
+	                core->toAtom(pstrItemName),
+	                (Atom)-1);
+	if (FAILED(hr))
+		return hr;
+	return core->atomToIUnknown(ret, IID_IDispatch, (void **)ppdisp);
 }
 
 STDMETHODIMP CActiveScript::GetCurrentScriptThreadID( 

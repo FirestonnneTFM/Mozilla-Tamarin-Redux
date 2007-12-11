@@ -45,6 +45,7 @@
 
 #include "IUnknownConsumer.h"
 #include "IDispatchConsumer.h"
+#include "IDispatchProvider.h"
 #include "SystemClass.h"
 #include "IActiveScriptSiteConsumer.h"
 #include "COMErrorClass.h"
@@ -79,9 +80,9 @@ namespace axtam
 
 	BEGIN_NATIVE_CLASSES(AXTam)
 		NATIVE_CLASS(abcclass_axtam_System,                           SystemClass,             ScriptObject)
-		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IUnknown,   IUnknownConsumerClass,   IUnknownConsumer)
-		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IDispatch,  IDispatchConsumerClass,  IDispatchConsumer)
-		NATIVE_CLASS(abcclass_axtam_com_adaptors_consumer_IActiveScriptSite,
+		NATIVE_CLASS(abcclass_axtam_com_consumer_IUnknown,   IUnknownConsumerClass,   IUnknownConsumer)
+		NATIVE_CLASS(abcclass_axtam_com_consumer_IDispatch,  IDispatchConsumerClass,  IDispatchConsumer)
+		NATIVE_CLASS(abcclass_axtam_com_consumer_IActiveScriptSite,
 		                                                              IActiveScriptSiteConsumerClass, IActiveScriptSiteConsumer)
 		//NATIVE_CLASS(abcclass_axtam_com_Error,                        COMErrorClass,           COMErrorObject)
 		NATIVE_CLASS(abcclass_axtam_com_ProviderError,                COMProviderErrorClass,   COMProviderErrorObject)
@@ -97,6 +98,7 @@ namespace axtam
 	END_NATIVE_SCRIPTS()
 
 	BEGIN_NATIVE_MAP(AxtamScript)
+		NATIVE_METHOD_FLAGS(axtam_com_provider_createDispatchProvider, AXTam::createDispatchProvider, 0)
 	END_NATIVE_MAP()
 
 	//ConsoleOutputStream *consoleOutputStream;
@@ -435,29 +437,91 @@ namespace axtam
 		return unknownClass->create(pUnk, iid)->atom();
 	}
 
-	void AXTam::atomToVARIANT(Atom val, CComVariant *pResult)
+	CComVariant AXTam::atomToVARIANT(Atom val)
 	{
 		switch (val&7) {
 			case kDoubleType:
-				*pResult = doubleNumber(val);
-				break;
+				return doubleNumber(val);
 			case kIntegerType:
-				*pResult = toUInt32(val);
-				break;
+				return toUInt32(val);
 			case kStringType:
-				*pResult = (OLECHAR *)string(val)->c_str();
-				break;
+				return (OLECHAR *)string(val)->c_str();
 			default:
 				// the more complex type checking.
 				if (isBoolean(val)) {
-					*pResult = boolean(val) ? true : false;
+					return boolean(val) ? true : false;
 				} else {
 					// coerce to a string.
-					*pResult = (OLECHAR *)coerce_s(val)->c_str();
+					return (OLECHAR *)coerce_s(val)->c_str();
 				}
 				break;
 		}
 	}
+
+	HRESULT AXTam::atomToVARIANT(avmplus::Atom val, ATL::CComVariant *pResult)
+	{
+		if (!pResult)
+			return E_POINTER;
+		HRESULT hr;
+		TRY(this, kCatchAction_ReportAsError) {
+			*pResult = atomToVARIANT(val);
+			hr = S_OK;
+		} CATCH(Exception *exception) {
+			hr = handleConversionFailure(exception);
+		}
+		END_CATCH
+		END_TRY
+		return hr;
+	}
+
+	void *AXTam::atomToIUnknown(Atom val, const IID &iid)
+	{
+		void *ret;
+		HRESULT hr = atomToIUnknown(val, iid, &ret);
+		if (FAILED(hr))
+			throwCOMConsumerError(hr);
+		return ret;
+	}
+
+	HRESULT AXTam::atomToIUnknown(Atom val, const IID &iid, void **ret)
+	{
+		if (!ret)
+			return E_POINTER;
+		if (!istype(val, unknownClass->traits()->itraits)) {
+			AvmDebugMsg(true, "atomToIUnknown doesn't have an unknown consumer");
+			return E_FAIL;
+		}
+		IUnknownConsumer *u = (IUnknownConsumer *)atomToScriptObject(val);
+		return u->get(iid, ret);
+	}
+
+	HRESULT AXTam::handleConversionFailure(const Exception *exc)
+	{
+		// This is an "unexpected" error caused by our implementation
+		// rather than by script code.
+		AvmDebugMsg(true, "Conversion failed");
+		// It makes no sense to try and translate the likely TypeError
+		// into a HRESULT - it doesn't really help the *caller* of this.
+		// We need to provide good diagnosis for the implementor...
+		return E_FAIL;
+	}
+
+	Atom AXTam::createDispatchProvider(Atom ob)
+	{
+		CGCRootComObject<IDispatchProvider> *d = NULL;
+		if (!isObject(ob))
+			toplevel->throwTypeError(kCantUseInstanceofOnNonObjectError);
+		ScriptObject *so = atomToScriptObject(ob);
+		// XXX - todo - ack - this is NULL - obviously something is wrong ;)
+		AXTam *core = (AXTam *)so->core();
+		ATLTRY(d = new CGCRootComObject<IDispatchProvider>(core));
+		if (!d)
+			so->toplevel()->throwError(kOutOfMemoryError);
+		d->ob = so;
+		CComPtr<IDispatch> disp(d);
+		return core->toAtom(disp);
+	}
+
 
 } /* end of namespace AXTam */
 

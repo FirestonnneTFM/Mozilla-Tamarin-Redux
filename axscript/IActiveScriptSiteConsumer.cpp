@@ -109,11 +109,11 @@ namespace axtam
 	}
 
 	BEGIN_NATIVE_MAP(IActiveScriptSiteConsumerClass)
-		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_GetItemInfo, IActiveScriptSiteConsumer::GetItemInfo)
-		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_GetDocVersionString, IActiveScriptSiteConsumer::GetDocVersionString)
-		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_OnEnterScript, IActiveScriptSiteConsumer::OnEnterScript)
-		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_OnLeaveScript, IActiveScriptSiteConsumer::OnLeaveScript)
-		NATIVE_METHOD(axtam_com_adaptors_consumer_IActiveScriptSite_OnStateChange, IActiveScriptSiteConsumer::OnStateChange)
+		NATIVE_METHOD(axtam_com_consumer_IActiveScriptSite_GetItemInfo, IActiveScriptSiteConsumer::GetItemInfo)
+		NATIVE_METHOD(axtam_com_consumer_IActiveScriptSite_GetDocVersionString, IActiveScriptSiteConsumer::GetDocVersionString)
+		NATIVE_METHOD(axtam_com_consumer_IActiveScriptSite_OnEnterScript, IActiveScriptSiteConsumer::OnEnterScript)
+		NATIVE_METHOD(axtam_com_consumer_IActiveScriptSite_OnLeaveScript, IActiveScriptSiteConsumer::OnLeaveScript)
+		NATIVE_METHOD(axtam_com_consumer_IActiveScriptSite_OnStateChange, IActiveScriptSiteConsumer::OnStateChange)
 	END_NATIVE_MAP()
 
 	IActiveScriptSiteConsumerClass::IActiveScriptSiteConsumerClass(VTable *cvtable)

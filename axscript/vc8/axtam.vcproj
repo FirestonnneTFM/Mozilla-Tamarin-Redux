@@ -309,7 +309,7 @@
 				AdditionalIncludeDirectories="..\..\core;..\..\MMgc;..\..\codegen;..\..\extensions"
 				PreprocessorDefinitions="WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;NDEBUG;_USRDLL;AXTAM_EXPORTS;DEBUGGER;USE_REAL2INT;AVMPLUS_IA32"
 				StringPooling="true"
-				ExceptionHandling="0"
+				ExceptionHandling="1"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="false"
@@ -408,6 +408,10 @@
 			</File>
 			<File
 				RelativePath="..\IDispatchConsumer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\IDispatchProvider.h"
 				>
 			</File>
 			<File
@@ -516,6 +520,10 @@
 			</File>
 			<File
 				RelativePath="..\IDispatchConsumer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\IDispatchProvider.cpp"
 				>
 			</File>
 			<File
