@@ -214,7 +214,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
 #ifndef AVMPLUS_SYMBIAN
-	char *mirNames[CodegenMIR::MIR_last];
+	const char *mirNames[CodegenMIR::MIR_last];
 #endif
 #endif /* AVMPLUS_VERBOSE */
 
