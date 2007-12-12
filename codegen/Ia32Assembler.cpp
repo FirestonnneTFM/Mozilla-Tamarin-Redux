@@ -182,7 +182,7 @@ namespace avmplus
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
-			char *opstr="?";
+			const char *opstr="?";
 			switch(op) {
 			case 0x2d: opstr = "sub  "; break;
 			case 0x05: opstr = "add  "; break;
@@ -388,7 +388,7 @@ namespace avmplus
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
-			char *opstr = "?";
+			const char *opstr = "?";
 			switch (op) {
 			case 7: opstr = "sar  "; break;
 			case 5: opstr = "shr  "; break;
@@ -435,7 +435,7 @@ namespace avmplus
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
-			char *opstr="?";
+			const char *opstr="?";
 			switch(op) {
 			case 0x02: opstr = "jb   "; break;
 			case 0x03: opstr = "jnb  "; break;
@@ -503,7 +503,7 @@ namespace avmplus
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
-			char *opstr="?";
+			const char *opstr="?";
 			switch(op) {
 			case 0xddd8: opstr = "fstp "; x87Top++; break;
 			case 0xddc0: opstr = "ffree"; x87Top++; break;
@@ -526,7 +526,7 @@ namespace avmplus
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
-			char *opstr="?";
+			const char *opstr="?";
 			switch(op) {
 			case 0xdc02: opstr = "fcom "; break;
 			case 0xdd03: opstr = "fstpq"; x87Top++; break;
@@ -554,7 +554,7 @@ namespace avmplus
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
-			char *opstr="?";
+			const char *opstr="?";
 			switch(op) {
 			case 0xdde9: opstr = "fucomp"; x87Top++; break;
 			case 0xd9e0: opstr = "fchs "; break;
