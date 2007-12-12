@@ -379,10 +379,15 @@ namespace axtam
 	Atom AXTam::toAtom(VARIANT &var)
 	{
 		switch (var.vt) {
+			// GetDispID() documents that new attributes should be added
+			// with a type of VT_EMPTY.  Therefore, we treat VT_EMPTY as
+			// 'undefined', and NULL as null!
 			case VT_EMPTY:
-			case VT_NULL:
 			case VT_VOID: // theoretically not valid in a variant
 				return undefinedAtom;
+
+			case VT_NULL:
+				return nullObjectAtom;
 
 			//case VT_I1:
 			//case VT_UI1:
@@ -447,6 +452,14 @@ namespace axtam
 			case kStringType:
 				return (OLECHAR *)string(val)->c_str();
 			default:
+				if (AvmCore::isNull(val)) {
+					// Better way to get a VT_NULL variant?
+					CComVariant ret;
+					ret.ChangeType(VT_NULL);
+					return ret;
+				}
+				if (AvmCore::isUndefined(val))
+					return CComVariant(); // VT_EMPTY is default.
 				// the more complex type checking.
 				if (isBoolean(val)) {
 					return boolean(val) ? true : false;
@@ -506,20 +519,20 @@ namespace axtam
 		return E_FAIL;
 	}
 
-	Atom AXTam::createDispatchProvider(Atom ob)
+	ScriptObject *AXTam::createDispatchProvider(Atom ob)
 	{
 		CGCRootComObject<IDispatchProvider> *d = NULL;
 		if (!isObject(ob))
 			toplevel->throwTypeError(kCantUseInstanceofOnNonObjectError);
 		ScriptObject *so = atomToScriptObject(ob);
-		// XXX - todo - ack - this is NULL - obviously something is wrong ;)
+		// XXX - todo - ack - this is some ScriptObject * - obviously something is wrong ;)
 		AXTam *core = (AXTam *)so->core();
 		ATLTRY(d = new CGCRootComObject<IDispatchProvider>(core));
 		if (!d)
 			so->toplevel()->throwError(kOutOfMemoryError);
 		d->ob = so;
 		CComPtr<IDispatch> disp(d);
-		return core->toAtom(disp);
+		return core->atomToScriptObject(core->toAtom(disp));
 	}
 
 

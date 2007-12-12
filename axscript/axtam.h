@@ -202,8 +202,22 @@ namespace axtam
 
 		Toplevel* initAXTamBuiltins();
 		// native methods.
-		// ack - something is wrong with this - |this| is always NULL :(
-		Atom createDispatchProvider(Atom ob);
+		// ack - something is wrong with this - |this| is always a ScriptObject * :(
+		ScriptObject *createDispatchProvider(Atom ob);
+
+		Atom constant(const avmplus::wchar *s)
+		{
+			return constantString(s)->atom();
+		}
+
+		Stringp constantString(const avmplus::wchar *s)
+		{
+			return internString(newString(s));
+		}
+		// ack - we shadow these... - XXX - todo - get the above in the core!
+		Atom constant(const char *s) {return AvmCore::constant(s);}
+		Stringp constantString(const char *s) {return AvmCore::constantString(s);}
+
 	private:
 		DECLARE_NATIVE_CLASSES()
 		DECLARE_NATIVE_SCRIPTS()
@@ -243,7 +257,7 @@ namespace axtam
 	{
 	public:
 		typedef Base _BaseClass;
-		CGCRootComObject(AvmCore *core) throw() : _BaseClass(core)
+		CGCRootComObject(AXTam *core) throw() : _BaseClass(core)
 		{
 			_pAtlModule->Lock();
 		}

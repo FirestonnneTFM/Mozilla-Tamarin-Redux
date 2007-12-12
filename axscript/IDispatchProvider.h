@@ -37,7 +37,14 @@
 #ifndef __axtam_IDispatchProvider__
 #define __axtam_IDispatchProvider__
 
+#include <hash_map>
+
 namespace axtam {
+
+	struct DISPID_ENTRY {
+		Atom name;
+		bool deleted;
+	};
 
 	class ATL_NO_VTABLE IDispatchProvider :
 		public CComObjectRootEx<CComSingleThreadModel>,
@@ -45,11 +52,12 @@ namespace axtam {
 		public MMgc::GCRoot
 	{
 	public:
-		IDispatchProvider(AvmCore *_core) : 
-		  MMgc::GCRoot(_core->GetGC()), ob(0) {;}
+		IDispatchProvider(AXTam *_core) : 
+		  MMgc::GCRoot(_core->GetGC()), core(_core), ob(0), lastDispid(0) {;}
 
 		BEGIN_COM_MAP(IDispatchProvider)
 			COM_INTERFACE_ENTRY(IDispatch)
+			COM_INTERFACE_ENTRY(IDispatchEx)
 		END_COM_MAP()
 
 		// IDispatch
@@ -101,6 +109,12 @@ namespace axtam {
 
 		// The object we are implementing IDispatch for.
 		ScriptObject *ob;
+		AXTam *core;
+	protected:
+		stdext::hash_map<Atom, int> name2dispid;
+		stdext::hash_map<int, DISPID_ENTRY> dispid2info;
+		DISPID allocNewDispid() {return InterlockedIncrement(&lastDispid);}
+		LONG lastDispid;
 	};
 }
 #endif // __axtam_IDispatchProvider__

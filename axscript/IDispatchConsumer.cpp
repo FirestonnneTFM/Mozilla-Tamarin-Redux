@@ -58,7 +58,7 @@ namespace axtam
 		OLECHAR *olename = (OLECHAR *)name->getName()->c_str();
 		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
 		if (hr == DISP_E_UNKNOWNNAME) {
-			// not a name this object has - see if its builtin.
+			// not a name this object has - see if its builtin/expando.
 			return ScriptObject::callProperty(name, argc, argv);
 		}
 		if (FAILED(hr))
@@ -134,12 +134,8 @@ namespace axtam
 		OLECHAR *olename = (OLECHAR *)axcore->atomToString(name)->c_str();
 		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
 		if (hr == DISP_E_UNKNOWNNAME) {
-			// not a name this object has - do we need to see if its builtin?
-			// If we call ScriptObject::getAtomProperty() with an unknown name,
-			// it throws an exception, where we just want undefinedAtom.
-			// XXX - but we must call the base for now to resolve 'Object' etc
-			//return ScriptObject::getAtomProperty(name);
-			return undefinedAtom;
+			// not a name this object has - see if its an expando.
+			return ScriptObject::getAtomProperty(name);
 		}
 		if (FAILED(hr))
 			axcore->throwCOMConsumerError(hr);

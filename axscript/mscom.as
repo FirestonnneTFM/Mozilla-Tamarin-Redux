@@ -212,10 +212,15 @@ package {
 
 package {
 
+	final class NamedItem {
+		public var domain:axtam.Domain
+		public var host_dispatch:axtam.com.consumer.IDispatch
+		public var script_dispatch:axtam.com.consumer.IDispatch
+	}
+
 	class ScriptEngine {
-		public var globalDomain:axtam.Domain;
-		public var objectDomains; // A hashtable of named objects to their domains.
-		public var namedItems; // A hashtable AddNamedItem items
+		// A hashtable of NamedItem() objects, with a null key being the global object.
+		public var namedItems;
 		public var codeBlocks; // code blocks "pushed" but not yet executed.
 		public var state:int;
 		public var site; // IUnknownConsumer
@@ -268,12 +273,13 @@ package {
 			// really need it.  At this stage, we need it if the item is
 			// "global", and later will need it if it sources events
 			var gii_flags:uint = axtam.com.SCRIPTINFO_IUNKNOWN
-			if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS)
-				gii_flags |= axtam.com.SCRIPTINFO_ITYPEINFO
+//			if (flags & axtam.com.SCRIPTITEM_GLOBALMEMBERS)
+//				gii_flags |= axtam.com.SCRIPTINFO_ITYPEINFO
 
 			var items = site.GetItemInfo(name, gii_flags)
 			var dispatch = items[0]
 			var typeinfo = items[1]
+			var globalDomain:axtam.Domain = namedItems[null].domain
 			globalDomain.global[name] = dispatch
 			// but we also need to tell the VM exactly what 'scope'
 			// provides this object.
@@ -285,16 +291,26 @@ package {
 			//}
 			// create a new domain for the object with the IDispatch as its global (or not!)
 			var obDomain =  new axtam.Domain(globalDomain, null) // dispatch)
-			objectDomains[name] = obDomain
+			var item = new NamedItem()
+			item.domain = obDomain
+			item.host_dispatch = dispatch
+			//item.host_typeinfo = typeinfo
+			item.script_dispatch = null
+			namedItems[name] = item
 		}
 
-		public function GetScriptDispatch(name:String): Object
+		public function GetScriptDispatch(name:String): axtam.com.consumer.IDispatch
 		{
 			// XXX - todo - cache these so we don't create new ones each time
 			// (or at least work out if its necessary to do that ;)
-			var domain:axtam.Domain = getDomainForName(name)
 			// return an IDispatch impl around the domain's global.
-			return axtam.com.provider.createDispatchProvider(domain.global)
+			var item:NamedItem = getNamedItem(name)
+			if (!item.script_dispatch) {
+				var domain:axtam.Domain = item.domain
+				// XXX - this is wrong, but for now, treat the host_dispatch as the global.
+				item.script_dispatch = axtam.com.provider.createDispatchProvider(item.host_dispatch)
+			}
+			return item.script_dispatch
 		}
 
 		public function GetScriptState(): uint
@@ -451,8 +467,10 @@ package {
 		function setStateInitialized(): void
 		{
 			// we could be in any state here (except CLOSED)
-			globalDomain = new axtam.Domain(null, null)
-			objectDomains = {}
+			namedItems = {}
+			var global_item:NamedItem = new NamedItem()
+			global_item.domain = new axtam.Domain(null, null)
+			namedItems[null] = global_item
 			codeBlocks = new Array()
 		}
 
@@ -472,24 +490,24 @@ package {
 
 		function setStateClosed(): void
 		{
-			globalDomain = null
-			objectDomains = null
 			namedItems = null
 			codeBlocks = null
 			site = null
 		}
 		// End of state management.
-		function getDomainForName(name:String):axtam.Domain
+		function getNamedItem(name:String):NamedItem
 		{
-			var domain:axtam.Domain = objectDomains[name]
-			if (!domain)
-				domain = globalDomain
-			return domain
+			var ret:NamedItem = namedItems[name]
+			// If the name is not known, return an empty object
+			// so the attributes themselves are undefined.
+			if (ret==undefined)
+				ret = new NamedItem()
+			return ret
 		}
-		
+
 		function executeScriptBlock(scriptBlock)
 		{
-			var domain:axtam.Domain = getDomainForName(scriptBlock.item_name)
+			var domain:axtam.Domain = getNamedItem(scriptBlock.item_name).domain
 			domain.loadBytes(scriptBlock.bytes)
 		}
 		

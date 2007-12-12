@@ -51,14 +51,18 @@ STDMETHODIMP IDispatchProvider::GetTypeInfo(UINT itinfo, LCID lcid, ITypeInfo** 
 STDMETHODIMP IDispatchProvider::GetIDsOfNames(REFIID riid, LPOLESTR* rgszNames, UINT cNames,
                 LCID lcid, DISPID* rgdispid)
 {
-	ATLTRACENOTIMPL(_T("IDispatchProvider::GetIDsOfNames"));
+	if (cNames != 1) {
+		ATLTRACENOTIMPL(_T("IDispatchProvider::GetIDsOfNames (for more than 1 name)"));
+		AvmAssert(0); // not reached.
+	}
+	return GetDispID(rgszNames[0], 0, rgdispid);
 }
 
 STDMETHODIMP IDispatchProvider::Invoke(DISPID dispidMember, REFIID riid,
 				LCID lcid, WORD wFlags, DISPPARAMS* pdispparams, VARIANT* pvarResult,
 				EXCEPINFO* pexcepinfo, UINT* puArgErr)
 {
-	ATLTRACENOTIMPL(_T("IDispatchProvider::Invoke"));
+	return InvokeEx(dispidMember, lcid, wFlags, pdispparams, pvarResult, pexcepinfo, NULL);
 }
 
 STDMETHODIMP IDispatchProvider::GetDispID(
@@ -66,7 +70,32 @@ STDMETHODIMP IDispatchProvider::GetDispID(
 			/* [in] */ DWORD grfdex,
 			/* [out] */ DISPID *pid)
 {
-	ATLTRACENOTIMPL(_T("IDispatchProvider::GetDispID"));
+	Atom name = core->constant((wchar *)bstrName);
+
+	stdext::hash_map<Atom, int>::iterator it = name2dispid.find(name);
+	if(it != name2dispid.end()) {
+		// this name already was assigned
+		*pid = it->second;
+		DISPID_ENTRY entry = dispid2info[*pid];
+		if (entry.deleted)
+			return DISP_E_UNKNOWNNAME;
+	} else {
+		bool exists = ob->hasAtomProperty(name);
+		if (exists || grfdex & fdexNameEnsure) {
+			// must allocate one
+			if (!exists)
+				ob->setAtomProperty(name, undefinedAtom);
+			*pid = allocNewDispid();
+			name2dispid[name] = *pid;
+			DISPID_ENTRY entry;
+			entry.name = name;
+			entry.deleted = false;
+			dispid2info[*pid] = entry;
+		} else {
+			return DISP_E_UNKNOWNNAME;
+		}
+	}
+	return S_OK;
 }
 
 STDMETHODIMP IDispatchProvider::InvokeEx(
@@ -78,7 +107,61 @@ STDMETHODIMP IDispatchProvider::InvokeEx(
 			/* [out] */ EXCEPINFO *pei,
 			/* [unique][in] */ IServiceProvider *pspCaller)
 {
-	ATLTRACENOTIMPL(_T("IDispatchProvider::InvokeEx"));
+	TRY(core, kCatchAction_ReportAsError) {
+		HRESULT hr = S_OK;
+		Atom ret = undefinedAtom;
+		// find the entry for this dispid.
+		stdext::hash_map<int, DISPID_ENTRY>::iterator it = dispid2info.find(id);
+		if(it == dispid2info.end()) {
+			return DISP_E_BADINDEX;
+		}
+		DISPID_ENTRY &entry = it->second;
+		if (entry.deleted) {
+			return DISP_E_BADINDEX;
+		}
+		// do it
+		if (wFlags & DISPATCH_PROPERTYGET) {
+			if (pdp->cArgs != 0 || pdp->cNamedArgs != 0) {
+				return DISP_E_BADPARAMCOUNT;
+			}
+			ret = ob->getAtomProperty(entry.name);
+		} else if (wFlags & DISPATCH_PROPERTYPUT) {
+			if (pdp->cArgs != 1 || pdp->cNamedArgs != 1) {
+				return DISP_E_BADPARAMCOUNT;
+			}
+			ob->setAtomProperty(entry.name, core->toAtom(pdp->rgvarg[0]));
+		} else if (wFlags & DISPATCH_METHOD) {
+			// no named args support.
+			if (pdp->cNamedArgs != 0) {
+				return DISP_E_BADPARAMCOUNT;
+			}
+			Atom *argv = new (core->GetGC()) Atom[pdp->cArgs+1];
+			argv[0] = ob->atom();
+			// fill backwards
+			for (unsigned i=0;i<pdp->cArgs;i++) {
+				argv[i+1] = core->toAtom(pdp->rgvarg[pdp->cArgs-1]);
+			}
+			Multiname mn(core->publicNamespace, core->atomToString(entry.name));
+			ret = ob->callProperty(&mn, pdp->cArgs, argv);
+		} else {
+			AvmDebugMsg(false, "Ignoring invoke flags 0x%x", wFlags);
+			return E_FAIL;
+		}
+		if (pvarRes) {
+			CComVariant res;
+			hr = core->atomToVARIANT(ret, &res);
+			if (SUCCEEDED(hr))
+				hr = res.Detach(pvarRes);
+		}
+		return hr;
+	} CATCH(Exception * exception) {
+		// XXX - consolidate error handling with ActiveScript.cpp
+		AvmDebugMsg(false, "Error in Invoke\r\n");
+		core->dumpException(exception);
+		return E_FAIL;
+	}
+	END_CATCH
+	END_TRY
 }
 
 STDMETHODIMP IDispatchProvider::DeleteMemberByName(
