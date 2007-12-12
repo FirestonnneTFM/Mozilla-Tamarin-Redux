@@ -49,6 +49,12 @@ namespace axtam
 
 	Atom IDispatchConsumer::callProperty(avmplus::Multiname *name, int argc, avmplus::Atom *argv)
 	{
+		// Prevent recursion death due to global being the IDispatchConsumer 
+		// (we ask window for object, it asks  our IDispatch, etc), existing
+		// expandos get preference.
+		if (hasMultinameProperty(name))
+			return ScriptObject::callProperty(name, argc, argv);
+
 		// Not sure how to best handle this re 'builtin' names, such as toString()
 		// XXX - need a map of DISPIDs to speed things up, and/or optimizations
 		// using the typelib.
@@ -113,17 +119,6 @@ namespace axtam
 			axcore->throwCOMConsumerError(hr, &ei);
 	}
 
-	/*** not sure we need this now we are 'dynamic'?
-	bool IDispatchConsumer::hasMultinameProperty(Multiname* name) const
-	{
-		DISPID id;
-		OLECHAR *olename = (OLECHAR *)name->getName()->c_str();
-		IDispatch *disp = (IDispatch *)getDispatch();
-		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
-		return SUCCEEDED(hr);
-	}
-	***/
-	
 	Atom IDispatchConsumer::getAtomProperty(Atom name) const {
 		AXTam *axcore = (AXTam *)core();
 		IDispatch *disp = (IDispatch *)getDispatch();
@@ -131,11 +126,17 @@ namespace axtam
 			axcore->toplevel->throwTypeError(kCheckTypeFailedError);
 		DISPID id;
 
+		// Prevent recursion death due to global being the IDispatchConsumer 
+		// (we ask window for object, it asks  our IDispatch, etc), existing
+		// expandos get preference.
+		if (hasAtomProperty(name))
+			return ScriptObject::getAtomProperty(name);
+
 		OLECHAR *olename = (OLECHAR *)axcore->atomToString(name)->c_str();
 		HRESULT hr = disp->GetIDsOfNames(IID_NULL, &olename, 1, 0, &id);
 		if (hr == DISP_E_UNKNOWNNAME) {
-			// not a name this object has - see if its an expando.
-			return ScriptObject::getAtomProperty(name);
+			// not a name this object has and already checked expandos
+			return undefinedAtom;
 		}
 		if (FAILED(hr))
 			axcore->throwCOMConsumerError(hr);
