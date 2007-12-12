@@ -48,11 +48,11 @@ namespace axtam {
 		public MMgc::GCRoot
 	{
 	public:
-		CActiveScriptError(AvmCore *_core) : 
+		CActiveScriptError(AXTam *_core) : 
 		  MMgc::GCRoot(_core->GetGC()), core(_core), dwSourceContextCookie(0), exception(0) {;}
 		virtual ~CActiveScriptError() {;}
 		avmplus::Exception *exception; // is this GCRoot really enough?
-		AvmCore *core;
+		AXTam *core;
 		DWORD_PTR dwSourceContextCookie;
 	protected:
 

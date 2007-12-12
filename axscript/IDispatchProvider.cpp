@@ -113,13 +113,21 @@ STDMETHODIMP IDispatchProvider::InvokeEx(
 		// find the entry for this dispid.
 		stdext::hash_map<int, DISPID_ENTRY>::iterator it = dispid2info.find(id);
 		if(it == dispid2info.end()) {
+			AvmDebugMsg(false, "IDispatchProvider::InvokeEx - bad dispid %d\n", id);
 			return DISP_E_BADINDEX;
 		}
 		DISPID_ENTRY &entry = it->second;
 		if (entry.deleted) {
+			AvmDebugMsg(false, "IDispatchProvider::InvokeEx - dispid %d has been deleted\n", id);
 			return DISP_E_BADINDEX;
 		}
+		AvmDebugMsg(false, "IDispatchProvider::InvokeEx for '%S', flags=0x%x\n",
+		            core->atomToString(entry.name)->getData(), wFlags);
 		// do it
+		// *sob* - vbscript calls all properties with DISPATCH_METHOD
+		// and DISPATCH_PROPERTYGET - it's syntax can't tell the
+		// difference.  We need to get smarter here - see failing test
+		// testDispatchLikeVBScript in testEngine.py
 		if (wFlags & DISPATCH_PROPERTYGET) {
 			if (pdp->cArgs != 0 || pdp->cNamedArgs != 0) {
 				return DISP_E_BADPARAMCOUNT;
@@ -139,10 +147,11 @@ STDMETHODIMP IDispatchProvider::InvokeEx(
 			argv[0] = ob->atom();
 			// fill backwards
 			for (unsigned i=0;i<pdp->cArgs;i++) {
-				argv[i+1] = core->toAtom(pdp->rgvarg[pdp->cArgs-1]);
+				argv[i+1] = core->toAtom(pdp->rgvarg[pdp->cArgs-i-1]);
 			}
 			Multiname mn(core->publicNamespace, core->atomToString(entry.name));
 			ret = ob->callProperty(&mn, pdp->cArgs, argv);
+			// XXX - explicitly free argv here to help the gc?
 		} else {
 			AvmDebugMsg(false, "Ignoring invoke flags 0x%x", wFlags);
 			return E_FAIL;
@@ -154,11 +163,14 @@ STDMETHODIMP IDispatchProvider::InvokeEx(
 				hr = res.Detach(pvarRes);
 		}
 		return hr;
-	} CATCH(Exception * exception) {
+	} CATCH(Exception *exception) {
 		// XXX - consolidate error handling with ActiveScript.cpp
 		AvmDebugMsg(false, "Error in Invoke\r\n");
+		if (pei) {
+			core->fillEXCEPINFO(exception, pei);
+		}
 		core->dumpException(exception);
-		return E_FAIL;
+		return DISP_E_EXCEPTION;
 	}
 	END_CATCH
 	END_TRY

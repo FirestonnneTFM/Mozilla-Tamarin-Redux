@@ -299,6 +299,10 @@ class TestExceptions(TestCaseInitialized):
         self.failUnless(desc.startswith("COM Error"), desc)
 
 class TestScriptDispatch(TestCaseInitialized):
+    # Test the IDispatch impls handed out by Tamarin.
+    # Note that in general, we avoid the pretty 'Dispatch' wrappers provided
+    # by the pywin32 package, to avoid obscuring tracebacks etc with the
+    # implementation details of those wrappers.
     def testDispatchSimple(self):
         code = "test.expando = 'hello'"
         disp = self.site.engine_script.GetScriptDispatch('test')
@@ -312,11 +316,70 @@ class TestScriptDispatch(TestCaseInitialized):
                           True) # do we want a result?
         self.failUnlessEqual(ret, 'hello')
 
+    def testDispatchCall(self):
+        code = "function f(arg1, arg2, arg3) { return arg1 + arg2 + arg3}; test.expando_func = f;"
+        disp = self.site.engine_script.GetScriptDispatch('test')
+        # name should not exist.
+        self.assertRaisesCOMError(disp.GetIDsOfNames, 0, 'expando',
+                                  hresult=winerror.DISP_E_UNKNOWNNAME)
+        # Now execute the script code, which will define the name
+        self.parseScriptText(code)
+        lcid = 0
+        dispid = disp.GetIDsOfNames(lcid, 'expando_func')
+        ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_METHOD,
+                          True, # do we want a result?
+                          'hello ', 'there ', 'Mark')
+        self.failUnlessEqual(ret, 'hello there Mark')
+
+    def testDispatchSub(self):
+        lcid = 0
+        code = "test.expando = {}\ntest.expando.sub = 'foo'"
+        disp_test = self.site.engine_script.GetScriptDispatch('test')
+        self.parseScriptText(code)
+        # getting the 'expando' object should give us a generic wrapper
+        # around a ScriptObject, which comes back as an IDispatch.
+        id_expando = disp_test.GetIDsOfNames(lcid, 'expando')
+        disp_expando = disp_test.Invoke(id_expando, lcid, pythoncom.DISPATCH_PROPERTYGET, True)
+
+        id_sub = disp_expando.GetIDsOfNames(0, 'sub')
+        val = disp_expando.Invoke(id_expando, lcid, pythoncom.DISPATCH_PROPERTYGET, True)
+        
+        self.failUnlessEqual(val, 'foo')
+
+    def testDispatchLikeVBScript(self):
+        # vbscript calls all properties with DISPATCH_METHOD|DISPATCH_PROPERTYGET
+        # as it's syntax can't tell the difference. So test that.
+        lcid = 0
+        code = """
+            test.expando = {}
+            test.expando.sub = 'foo'
+            function f(arg1, arg2, arg3) { return arg1 + arg2 + arg3}
+            test.expando_func = f
+        """
+        self.parseScriptText(code)
+        disp = self.site.engine_script.GetScriptDispatch('test')
+        flags = pythoncom.DISPATCH_PROPERTYGET | pythoncom.DISPATCH_METHOD
+        # fetch the expando property
+        dispid = disp.GetIDsOfNames(lcid, 'expando')
+        if not skip_known_failures:
+            ret = disp.Invoke(dispid, lcid, flags, True)
+            self.failUnlessEqual(ret, 'hello')
+        # call the expando function
+        dispid = disp.GetIDsOfNames(lcid, 'expando_func')
+        ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_METHOD,
+                          True, # do we want a result?
+                          'hello ', 'there ', 'Mark')
+        self.failUnlessEqual(ret, 'hello there Mark')
+
+# tests specific to IDispachEx
+class TestScriptDispatchEx(TestCaseInitialized):
     def testCreateExpando(self):
+        # Create an expando via the IDispatchEx interface
         disp = self.site.engine_script.GetScriptDispatch('test')
         disp = disp.QueryInterface(pythoncom.IID_IDispatchEx)
         # name should not exist.
-        self.assertRaisesCOMError(disp.GetIDsOfNames, 0, 'expando', hresult=winerror.DISP_E_UNKNOWNNAME)
+        self.assertRaisesCOMError(disp.GetIDsOfNames, 0, 'expando',
+                                  hresult=winerror.DISP_E_UNKNOWNNAME)
         # Now define it
         lcid = 0
         dispid = disp.GetDispID('expando', pythoncom.fdexNameEnsure)
@@ -332,20 +395,6 @@ class TestScriptDispatch(TestCaseInitialized):
         ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_PROPERTYGET,
                           True) # do we want a result?
         self.failUnlessEqual(ret, 'hello')
-
-    def testDispatchCall(self):
-        code = "function f(arg) { return 'hello ' + arg}; test.expando_func = f;"
-        disp = self.site.engine_script.GetScriptDispatch('test')
-        # name should not exist.
-        self.assertRaisesCOMError(disp.GetIDsOfNames, 0, 'expando', hresult=winerror.DISP_E_UNKNOWNNAME)
-        # Now execute the script code, which will define the name
-        self.parseScriptText(code)
-        lcid = 0
-        dispid = disp.GetIDsOfNames(lcid, 'expando_func')
-        ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_METHOD,
-                          True, # do we want a result?
-                          'Mark')
-        self.failUnlessEqual(ret, 'hello Mark')
 
 class TestDispatchConsumer(TestCaseInitialized):
     def testExpando(self):

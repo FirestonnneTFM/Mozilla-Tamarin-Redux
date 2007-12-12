@@ -45,18 +45,8 @@ STDMETHODIMP CActiveScriptError::GetExceptionInfo(
 {
 	if (!pexcepinfo)
 		return E_POINTER;
-	// zero out members we don't fill (wsh doesn't appear to do this)
-	memset(pexcepinfo, 0, sizeof(*pexcepinfo));
-	Stringp s(core->string(exception->atom));
-	#ifdef DEBUGGER
 
-	if (exception->getStackTrace()) {
-		s = core->concatStrings(s, core->constantString("\n"));
-		s = core->concatStrings(s, exception->getStackTrace()->format(core));
-	}
-
-	#endif
-	pexcepinfo->bstrDescription = ::SysAllocString((const OLECHAR *)s->c_str());
+	core->fillEXCEPINFO(exception, pexcepinfo);
 	return S_OK;
 }
 

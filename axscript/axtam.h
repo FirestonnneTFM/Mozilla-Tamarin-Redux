@@ -199,11 +199,16 @@ namespace axtam
 		bool isCOMProviderError(Exception *exc);
 		// You almost never need to know if it is a consumer error - treat that as a "normal" exception.
 		bool isCOMConsumerError(Exception *exc);
+		// fill an EXCEPINFO with a tamarin exception
+		void fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo);
 
 		Toplevel* initAXTamBuiltins();
-		// native methods.
+		// Create IDispatch wrappers around script objects (dispatch providers)
+		// The native method version for script code.
+		CComPtr<IDispatch> createDispatchProvider(Atom ob);
 		// ack - something is wrong with this - |this| is always a ScriptObject * :(
-		ScriptObject *createDispatchProvider(Atom ob);
+		ScriptObject *createDispatchProviderMethod(Atom ob);
+		//
 
 		Atom constant(const avmplus::wchar *s)
 		{

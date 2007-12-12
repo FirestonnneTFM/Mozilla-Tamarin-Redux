@@ -98,7 +98,7 @@ namespace axtam
 	END_NATIVE_SCRIPTS()
 
 	BEGIN_NATIVE_MAP(AxtamScript)
-		NATIVE_METHOD_FLAGS(axtam_com_provider_createDispatchProvider, AXTam::createDispatchProvider, 0)
+		NATIVE_METHOD_FLAGS(axtam_com_provider_createDispatchProvider, AXTam::createDispatchProviderMethod, 0)
 	END_NATIVE_MAP()
 
 	//ConsoleOutputStream *consoleOutputStream;
@@ -362,6 +362,22 @@ namespace axtam
 		throwException(exception);
 	}
 
+	void AXTam::fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo)
+	{
+		// zero out members we don't fill (wsh doesn't appear to do this)
+		memset(pexcepinfo, 0, sizeof(*pexcepinfo));
+		Stringp s(string(exception->atom));
+		#ifdef DEBUGGER
+		if (exception->getStackTrace()) {
+			s = concatStrings(s, constantString("\n"));
+			s = concatStrings(s, exception->getStackTrace()->format(this));
+		}
+		#else
+			s = concatStrings(s, constantString("<stack trace not available>"));
+		#endif
+		pexcepinfo->bstrDescription = ::SysAllocString((const OLECHAR *)s->c_str());
+	}
+
 	void AXTam::throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei /* = NULL */){
 		// hrm - not sure this is working ok...
 		//AvmAssert(0);
@@ -451,6 +467,12 @@ namespace axtam
 				return toUInt32(val);
 			case kStringType:
 				return (OLECHAR *)string(val)->c_str();
+			case kObjectType:
+				// an arbitrary object.
+				// XXX - we should probably check if already an IDispatchConsumer,
+				// and extract the interface accordingly.  Until then, just wrap
+				// whatever it is.
+				return CComVariant(createDispatchProvider(val));
 			default:
 				if (AvmCore::isNull(val)) {
 					// Better way to get a VT_NULL variant?
@@ -519,20 +541,27 @@ namespace axtam
 		return E_FAIL;
 	}
 
-	ScriptObject *AXTam::createDispatchProvider(Atom ob)
+	CComPtr<IDispatch> AXTam::createDispatchProvider(Atom ob)
 	{
 		CGCRootComObject<IDispatchProvider> *d = NULL;
 		if (!isObject(ob))
 			toplevel->throwTypeError(kCantUseInstanceofOnNonObjectError);
 		ScriptObject *so = atomToScriptObject(ob);
-		// XXX - todo - ack - this is some ScriptObject * - obviously something is wrong ;)
-		AXTam *core = (AXTam *)so->core();
-		ATLTRY(d = new CGCRootComObject<IDispatchProvider>(core));
+		ATLTRY(d = new CGCRootComObject<IDispatchProvider>(this));
 		if (!d)
 			so->toplevel()->throwError(kOutOfMemoryError);
 		d->ob = so;
-		CComPtr<IDispatch> disp(d);
-		return core->atomToScriptObject(core->toAtom(disp));
+		return CComPtr<IDispatch>(d);
+	}
+
+	ScriptObject *AXTam::createDispatchProviderMethod(Atom ob)
+	{
+		if (!isObject(ob))
+			toplevel->throwTypeError(kCantUseInstanceofOnNonObjectError);
+		// XXX - todo - ack - this is some ScriptObject * - obviously something is wrong ;)
+		ScriptObject *so = atomToScriptObject(ob);
+		AXTam *core = (AXTam *)so->core();
+		return core->atomToScriptObject(core->toAtom(core->createDispatchProvider(ob)));
 	}
 
 
