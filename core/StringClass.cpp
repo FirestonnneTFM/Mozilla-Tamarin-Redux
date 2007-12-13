@@ -325,8 +325,6 @@ namespace avmplus
         int ilen = in->length();
         int dlen = delim->length();
         int count = 0;
-        int start = 0;
-        int w = 0;
 
 		if (dlen <= 0)
 		{
@@ -339,44 +337,38 @@ namespace avmplus
 			return out;
 		}
 
-		const wchar *delimch = delim->c_str();
-		wchar dlast = delimch[dlen-1];
-		while (delimch[w] != dlast)
-			w++;
-
-        //loop1:
-		unsigned numSeg = 0;
 		const wchar *inchar = in->c_str();
-		for (int i = w; i < ilen; i++)
-        {
-			bool continue_loop1 = false;
-			wchar c = inchar[i];
-            if (c == dlast)
-            {
-                int k = i-1, j;
-				for (j=dlen-2; j >= 0; j--, k--) {
-					if (inchar[k] != delimch[j]) {
-						continue_loop1 = true;
-						break;
-					}
+		const wchar *delimch = delim->c_str();
+
+		wchar probe = delimch[0];	// initial char of search string
+		unsigned numSeg = 0;		// index of next slot in the array
+		int start=0;				// start index in input of next substring to extract
+		int i=0;					// index in input of next character to examine
+		int ilimit=ilen-dlen+1;		// limit for i when comparing to probe
+		for (;;) 
+		{
+again:
+			while (i < ilimit && inchar[i] != probe)
+				i++;
+			if (i >= ilimit)
+				break;
+			for (int j=1; j < dlen ; j++) {
+				if (inchar[i+j] != delimch[j]) {
+					i++;
+					goto again;
 				}
-				if (!continue_loop1) {
-					numSeg++;
+			}
 
-					// if we have found more segments than 
-					// the limit we can stop looking
-					if( numSeg > limit )
-						break;
+			// Got one.  "i" has index of first char of delimiter.
+			numSeg++;
 
-					int sublen=k+1-start;
-					Stringp sub = new (core->GetGC()) String(in, start, sublen);
+			if( numSeg > limit )
+				break;
 
-					out->setUintProperty(count++, sub->atom());
-					
-					start = i+1;
-					i += w;
-				}
-            }
+			Stringp sub = new (core->GetGC()) String(in, start, i-start);
+			out->setUintProperty(count++, sub->atom());
+			
+			i = start = i+dlen;
         }
 
 		// if numSeg is less than limit when we're done, add the rest of
