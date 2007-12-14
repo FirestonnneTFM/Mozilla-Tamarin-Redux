@@ -351,25 +351,32 @@ class TestScriptDispatch(TestCaseInitialized):
         # as it's syntax can't tell the difference. So test that.
         lcid = 0
         code = """
-            test.expando = {}
-            test.expando.sub = 'foo'
+            test.expando = 'hello'
             function f(arg1, arg2, arg3) { return arg1 + arg2 + arg3}
             test.expando_func = f
+            function f2() { return 'hello there'}
+            test.expando_func2 = f2
         """
         self.parseScriptText(code)
         disp = self.site.engine_script.GetScriptDispatch('test')
         flags = pythoncom.DISPATCH_PROPERTYGET | pythoncom.DISPATCH_METHOD
         # fetch the expando property
         dispid = disp.GetIDsOfNames(lcid, 'expando')
-        if not skip_known_failures:
-            ret = disp.Invoke(dispid, lcid, flags, True)
-            self.failUnlessEqual(ret, 'hello')
+        ret = disp.Invoke(dispid, lcid, flags, True)
+        self.failUnlessEqual(ret, 'hello')
         # call the expando function
         dispid = disp.GetIDsOfNames(lcid, 'expando_func')
-        ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_METHOD,
+        ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_PROPERTYGET | pythoncom.DISPATCH_METHOD,
                           True, # do we want a result?
                           'hello ', 'there ', 'Mark')
         self.failUnlessEqual(ret, 'hello there Mark')
+        # and so a workaround in our code isn't forgotten...
+        # call the expando function that takes no params
+        if not skip_known_failures:
+            dispid = disp.GetIDsOfNames(lcid, 'expando_func2')
+            ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_PROPERTYGET | pythoncom.DISPATCH_METHOD,
+                              True) # do we want a result?
+            self.failUnlessEqual(ret, 'hello there')
 
 # tests specific to IDispachEx
 class TestScriptDispatchEx(TestCaseInitialized):
