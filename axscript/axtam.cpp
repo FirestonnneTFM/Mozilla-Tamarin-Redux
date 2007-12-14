@@ -376,11 +376,10 @@ namespace axtam
 			s = concatStrings(s, constantString("<stack trace not available>"));
 		#endif
 		pexcepinfo->bstrDescription = ::SysAllocString((const OLECHAR *)s->c_str());
+		pexcepinfo->scode = E_FAIL; // todo - get a better result value!
 	}
 
 	void AXTam::throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei /* = NULL */){
-		// hrm - not sure this is working ok...
-		//AvmAssert(0);
 		comConsumerErrorClass->throwError(hr);
 		AvmAssert(0); // not reached
 	}
