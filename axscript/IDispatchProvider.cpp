@@ -126,8 +126,11 @@ STDMETHODIMP IDispatchProvider::InvokeEx(
 		// do it
 		// *sob* - vbscript calls all properties with DISPATCH_METHOD
 		// and DISPATCH_PROPERTYGET - it's syntax can't tell the
-		// difference.  We need to get smarter here - see failing test
-		// testDispatchLikeVBScript in testEngine.py
+		// difference.  We need to get smarter here, but this will do
+		// for now (it will fail when trying to call a method without params - 
+		// see failing test testDispatchLikeVBScript)
+		if (wFlags & (DISPATCH_PROPERTYGET | DISPATCH_METHOD) && pdp->cArgs != 0)
+			wFlags = DISPATCH_METHOD;
 		if (wFlags & DISPATCH_PROPERTYGET) {
 			if (pdp->cArgs != 0 || pdp->cNamedArgs != 0) {
 				return DISP_E_BADPARAMCOUNT;
@@ -166,11 +169,13 @@ STDMETHODIMP IDispatchProvider::InvokeEx(
 	} CATCH(Exception *exception) {
 		// XXX - consolidate error handling with ActiveScript.cpp
 		AvmDebugMsg(false, "Error in Invoke\r\n");
+		core->dumpException(exception);
 		if (pei) {
 			core->fillEXCEPINFO(exception, pei);
+			return DISP_E_EXCEPTION;
+		} else {
+			return E_FAIL;
 		}
-		core->dumpException(exception);
-		return DISP_E_EXCEPTION;
 	}
 	END_CATCH
 	END_TRY
