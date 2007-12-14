@@ -55,9 +55,7 @@ forcerebuild = False
 fd,tmpfile = tempfile.mkstemp()
 os.close(fd)
 
-ostype={'CYGWIN_NT-5.2':'win','CYGWIN_NT-5.1':'win','Windows':'win','Darwin':'mac','Linux':'lnx','Solaris':'sol',}[platform.system()]
-
-globs = { 'avm':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':ostype+'-tvm', 'ascargs':'', 'vmargs':''}
+globs = { 'avm':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'', 'ascargs':'', 'vmargs':''}
 if 'AVM' in environ:
 	globs['avm'] = environ['AVM'].strip()
 if 'ASC' in environ:
@@ -192,7 +190,6 @@ if timestamps:
 	# get the start time
 	start_time = datetime.today()
 	js_print("Tamarin tests started: %s" % start_time)
-js_print("current configuration: %s" % globs['config'])
 #
 # run the tests
 #
@@ -272,8 +269,35 @@ vmargs = globs['vmargs']
 avm = globs['avm']
 if not avm: # or not isfile(avm.split()[0]): /* isfile() fails for alias on OSX */
 	exit("ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus" % avm)
-
 js_print("Executing %d tests against vm: %s" % (len(tests), avm));
+
+
+
+
+# ================================================
+# Determine the configruation if it has not been 
+# passed into the script:
+# {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
+# ================================================
+ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','Solaris':'sol',}[platform.system()]
+cputype={'i386':'x86','i686':'x86','Power Macintosh':'ppc'}[platform.machine()]
+
+if globs['config'] == '':
+    vmtype = 'release'
+    f = run_pipe("%s" % avm)
+    try:
+	    for line in f:
+	    	if line.find("[-d]") != -1:
+	    	    vmtype = 'releasedebugger'
+	    	    break
+    except:
+	    nop = True
+	    
+    globs['config'] = cputype+'-'+ostype+'-tvm-'+vmtype+vmargs
+    
+js_print("current configuration: %s" % globs['config'])
+
+
 testnum = len(tests)
 for ast in tests:
 	if ast.startswith("./"):
