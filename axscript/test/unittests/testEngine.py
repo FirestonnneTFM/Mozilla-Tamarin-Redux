@@ -46,12 +46,12 @@ class TestScriptObject:
     _public_attrs_ = ['value', 'collection']
     def __init__(self):
         self.collection = wrap( TestScriptCollection( [1,'Two',3] ))
-        self.last = None
+        self.last_call_args = None
         self.fail_called = 0
         self.value = None
 
     def call(self, *args):
-        self.last = args
+        self.last_call_args = args
 
     def fail(self, hresult=winerror.E_FAIL):
         raise COMException(hresult=hresult)
@@ -409,6 +409,16 @@ class TestDispatchConsumer(TestCaseInitialized):
         self.parseScriptText(code)
         # todo: check the new value - but how to do that (we don't have
         # SCRIPTTEXT_ISEXPRESSION working yet)
+
+    def testCall(self):
+        self.parseScriptText("test.call()")
+        self.failUnlessEqual(self.test_script_ob.last_call_args, ())
+
+        self.parseScriptText("test.call('foo')")
+        self.failUnlessEqual(self.test_script_ob.last_call_args, ('foo',))
+
+        self.parseScriptText("test.call('foo', 'bar')")
+        self.failUnlessEqual(self.test_script_ob.last_call_args, ('foo', 'bar'))
 
 if __name__=='__main__':
     try:
