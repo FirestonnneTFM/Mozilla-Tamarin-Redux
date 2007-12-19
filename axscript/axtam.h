@@ -70,6 +70,10 @@
 
 #include "resource.h"
 
+// Useful #defines before including atl:
+// Send info about QI calls to the debugger.
+// #define _ATL_DEBUG_QI
+
 // ATL, COM, ActiveScripting etc related headers.
 #include <atlbase.h>
 #include <atlcom.h>
@@ -189,6 +193,7 @@ namespace axtam
 		COMConsumerErrorClass *comConsumerErrorClass;
 		COMProviderErrorClass *comProviderErrorClass;
 
+		// Ownership of EXCEPINFO is taken by this function.
 		void throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei = NULL);
 
 		// Used by objects which delegate COM interfaces to script code, but
