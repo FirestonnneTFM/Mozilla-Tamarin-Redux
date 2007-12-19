@@ -420,6 +420,11 @@ class TestDispatchConsumer(TestCaseInitialized):
         self.parseScriptText("test.call('foo', 'bar')")
         self.failUnlessEqual(self.test_script_ob.last_call_args, ('foo', 'bar'))
 
+    def testDefaults(self):
+        # check a 'vanilla' DispatchConsumer can be converted to a string
+        self.parseScriptText("test.value='hello ' + test")
+        self.failUnless(self.test_script_ob.value.startswith('hello '))
+
 if __name__=='__main__':
     try:
         pythoncom.CoCreateInstance(AXTAM_CLSID, None, pythoncom.CLSCTX_SERVER,
