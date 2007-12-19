@@ -77,8 +77,10 @@ STDMETHODIMP IDispatchProvider::GetDispID(
 		// this name already was assigned
 		*pid = it->second;
 		DISPID_ENTRY entry = dispid2info[*pid];
-		if (entry.deleted)
+		if (entry.deleted) {
+			AvmDebugMsg(false, "IDispatchProvider::GetDispID - name '%S' is deleted\n", bstrName);
 			return DISP_E_UNKNOWNNAME;
+		}
 	} else {
 		bool exists = ob->hasAtomProperty(name);
 		if (exists || grfdex & fdexNameEnsure) {
@@ -92,11 +94,14 @@ STDMETHODIMP IDispatchProvider::GetDispID(
 			entry.deleted = false;
 			dispid2info[*pid] = entry;
 		} else {
+			AvmDebugMsg(false, "IDispatchProvider::GetDispID - unknown name '%S'\n", bstrName);
 			return DISP_E_UNKNOWNNAME;
 		}
 	}
+	AvmDebugMsg(false, "IDispatchProvider::GetDispID - name '%S' has dispid=%d\n", bstrName, *pid);
 	return S_OK;
 }
+
 
 STDMETHODIMP IDispatchProvider::InvokeEx(
 			/* [in] */ DISPID id,
@@ -110,54 +115,79 @@ STDMETHODIMP IDispatchProvider::InvokeEx(
 	TRY(core, kCatchAction_ReportAsError) {
 		HRESULT hr = S_OK;
 		Atom ret = undefinedAtom;
-		// find the entry for this dispid.
-		stdext::hash_map<int, DISPID_ENTRY>::iterator it = dispid2info.find(id);
-		if(it == dispid2info.end()) {
-			AvmDebugMsg(false, "IDispatchProvider::InvokeEx - bad dispid %d\n", id);
-			return DISP_E_BADINDEX;
-		}
-		DISPID_ENTRY &entry = it->second;
-		if (entry.deleted) {
-			AvmDebugMsg(false, "IDispatchProvider::InvokeEx - dispid %d has been deleted\n", id);
-			return DISP_E_BADINDEX;
-		}
-		AvmDebugMsg(false, "IDispatchProvider::InvokeEx for '%S', flags=0x%x\n",
-		            core->atomToString(entry.name)->getData(), wFlags);
-		// do it
-		// *sob* - vbscript calls all properties with DISPATCH_METHOD
-		// and DISPATCH_PROPERTYGET - it's syntax can't tell the
-		// difference.  We need to get smarter here, but this will do
-		// for now (it will fail when trying to call a method without params - 
-		// see failing test testDispatchLikeVBScript)
-		if (wFlags & (DISPATCH_PROPERTYGET | DISPATCH_METHOD) && pdp->cArgs != 0)
-			wFlags = DISPATCH_METHOD;
-		if (wFlags & DISPATCH_PROPERTYGET) {
-			if (pdp->cArgs != 0 || pdp->cNamedArgs != 0) {
-				return DISP_E_BADPARAMCOUNT;
+		// handle the special DISPIDs first.
+		if (id==DISPID_VALUE) {
+			if (wFlags & DISPATCH_METHOD) {
+				if (pdp->cNamedArgs != 0) {
+					return DISP_E_NONAMEDARGS;
+				}
+				Atom *argv = new (core->GetGC()) Atom[pdp->cArgs+1];
+				argv[0] = ob->atom();
+				// fill backwards
+				for (unsigned i=0;i<pdp->cArgs;i++) {
+					argv[i+1] = core->toAtom(pdp->rgvarg[pdp->cArgs-i-1]);
+				}
+				ret = ob->call(pdp->cArgs, argv);
+			} else if (wFlags & DISPATCH_PROPERTYGET) {
+				if (pdp->cArgs != 0 || pdp->cNamedArgs != 0) {
+					return DISP_E_BADPARAMCOUNT; // todo: DISP_E_NONAMEDARGS?
+				}
+				ret = ob->defaultValue();
+			} else {
+				AvmDebugMsg(false, "Ignoring invoke flags 0x%x for DISPID_DEFAULT", wFlags);
+				return E_FAIL;
 			}
-			ret = ob->getAtomProperty(entry.name);
-		} else if (wFlags & DISPATCH_PROPERTYPUT) {
-			if (pdp->cArgs != 1 || pdp->cNamedArgs != 1) {
-				return DISP_E_BADPARAMCOUNT;
-			}
-			ob->setAtomProperty(entry.name, core->toAtom(pdp->rgvarg[0]));
-		} else if (wFlags & DISPATCH_METHOD) {
-			// no named args support.
-			if (pdp->cNamedArgs != 0) {
-				return DISP_E_BADPARAMCOUNT;
-			}
-			Atom *argv = new (core->GetGC()) Atom[pdp->cArgs+1];
-			argv[0] = ob->atom();
-			// fill backwards
-			for (unsigned i=0;i<pdp->cArgs;i++) {
-				argv[i+1] = core->toAtom(pdp->rgvarg[pdp->cArgs-i-1]);
-			}
-			Multiname mn(core->publicNamespace, core->atomToString(entry.name));
-			ret = ob->callProperty(&mn, pdp->cArgs, argv);
-			// XXX - explicitly free argv here to help the gc?
 		} else {
-			AvmDebugMsg(false, "Ignoring invoke flags 0x%x", wFlags);
-			return E_FAIL;
+			// Not a special dispid
+			// find the entry for this dispid.
+			stdext::hash_map<int, DISPID_ENTRY>::iterator it = dispid2info.find(id);
+			if(it == dispid2info.end()) {
+				AvmDebugMsg(false, "IDispatchProvider::InvokeEx - bad dispid %d\n", id);
+				return DISP_E_BADINDEX;
+			}
+			DISPID_ENTRY &entry = it->second;
+			if (entry.deleted) {
+				AvmDebugMsg(false, "IDispatchProvider::InvokeEx - dispid %d has been deleted\n", id);
+				return DISP_E_BADINDEX;
+			}
+			AvmDebugMsg(false, "IDispatchProvider::InvokeEx for '%S', flags=0x%x\n",
+						core->atomToString(entry.name)->getData(), wFlags);
+			// do it
+			// *sob* - vbscript calls all properties with DISPATCH_METHOD
+			// and DISPATCH_PROPERTYGET - it's syntax can't tell the
+			// difference.  We need to get smarter here, but this will do
+			// for now (it will fail when trying to call a method without params - 
+			// see failing test testDispatchLikeVBScript)
+			if (wFlags & (DISPATCH_PROPERTYGET | DISPATCH_METHOD) && pdp->cArgs != 0)
+				wFlags = DISPATCH_METHOD;
+			if (wFlags & DISPATCH_PROPERTYGET) {
+				if (pdp->cArgs != 0 || pdp->cNamedArgs != 0) {
+					return DISP_E_BADPARAMCOUNT; // todo: DISP_E_NONAMEDARGS?
+				}
+				ret = ob->getAtomProperty(entry.name);
+			} else if (wFlags & DISPATCH_PROPERTYPUT) {
+				if (pdp->cArgs != 1 || pdp->cNamedArgs != 1) {
+					return DISP_E_BADPARAMCOUNT;  // todo: DISP_E_NONAMEDARGS?
+				}
+				ob->setAtomProperty(entry.name, core->toAtom(pdp->rgvarg[0]));
+			} else if (wFlags & DISPATCH_METHOD) {
+				// no named args support.
+				if (pdp->cNamedArgs != 0) {
+					return DISP_E_NONAMEDARGS;
+				}
+				Atom *argv = new (core->GetGC()) Atom[pdp->cArgs+1];
+				argv[0] = ob->atom();
+				// fill backwards
+				for (unsigned i=0;i<pdp->cArgs;i++) {
+					argv[i+1] = core->toAtom(pdp->rgvarg[pdp->cArgs-i-1]);
+				}
+				Multiname mn(core->publicNamespace, core->atomToString(entry.name));
+				ret = ob->callProperty(&mn, pdp->cArgs, argv);
+				// XXX - explicitly free argv here to help the gc?
+			} else {
+				AvmDebugMsg(false, "Ignoring invoke flags 0x%x", wFlags);
+				return E_FAIL;
+			}
 		}
 		if (pvarRes) {
 			CComVariant res;
