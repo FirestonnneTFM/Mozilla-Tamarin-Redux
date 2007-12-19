@@ -122,7 +122,7 @@ namespace MMgc
 		
 		T set(const T tNew)
 		{
-			if(t != tNew || tNew != 0)
+			if(t != tNew && tNew != 0)
 				GC::WriteBarrier(this, (const void*)tNew);
 			else
 				t = tNew;
