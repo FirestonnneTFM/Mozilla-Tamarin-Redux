@@ -149,6 +149,10 @@ package axtam.com.consumer {
 	// are used internally
 	public class IUnknown
 	{
+		public function toString():String
+		{
+			return "[COM Object]"
+		}
 	}
 
 	// The rest of these 'derive' from IUnknown...
