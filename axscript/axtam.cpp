@@ -380,6 +380,16 @@ namespace axtam
 	}
 
 	void AXTam::throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei /* = NULL */){
+		// TODO: actually *use* this EXCEPINFO
+		if (pei) {
+			AvmDebugMsg(false, "COMError has EXCEPINFO which is ignored: desc is %S", pei->bstrDescription);
+			if (pei->bstrDescription)
+				::SysFreeString(pei->bstrDescription);
+			if (pei->bstrHelpFile)
+				::SysFreeString(pei->bstrHelpFile);
+			if (pei->bstrSource)
+				::SysFreeString(pei->bstrSource);
+		}
 		comConsumerErrorClass->throwError(hr);
 		AvmAssert(0); // not reached
 	}
@@ -449,12 +459,12 @@ namespace axtam
 
 	Atom AXTam::toAtom(IDispatch *pDisp)
 	{
-		return dispatchClass->create(pDisp)->atom();
+		return pDisp ? dispatchClass->create(pDisp)->atom() : nullObjectAtom;
 	}
 
 	Atom AXTam::toAtom(IUnknown *pUnk, const IID &iid /*= __uuidof(0)*/)
 	{
-		return unknownClass->create(pUnk, iid)->atom();
+		return pUnk ? unknownClass->create(pUnk, iid)->atom() : nullObjectAtom;
 	}
 
 	CComVariant AXTam::atomToVARIANT(Atom val)
