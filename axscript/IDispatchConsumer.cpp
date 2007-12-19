@@ -70,29 +70,24 @@ namespace axtam
 		if (FAILED(hr))
 			axcore->throwCOMConsumerError(hr);
 		// Now create args for the call.
-		EXCEPINFO ei;
+		EXCEPINFO ei = {0,0,0,0,0};
 		CComVariant *pArgs = new CComVariant[argc];
-		//memset(pArgs, 0, sizeof(VARIANT) * argc);
-		// Take care to not early exit without cleaning up variants
 		int i;
 		for (i=0;i<argc;i++) {
-			//VariantInit(pArgs+i);
-			axcore->atomToVARIANT(argv[i+1], pArgs+i);
+			// args are in reversed order in DISPPARAMS, and we
+			// don't pass |this|
+			pArgs[argc-i-1] = axcore->atomToVARIANT(argv[i+1]);
 		}
 		DISPPARAMS params = {pArgs, NULL, argc, 0};
 		CComVariant ret;
 		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_METHOD, &params, &ret, &ei, NULL);
-		//for (i=0;i<argc;i++)
-		//	VariantClear(pArg+i);
 		delete [] pArgs;
 		if (FAILED(hr))
+			// EXCEPINFO ownership taken by throwCOMConsumerError
 			axcore->throwCOMConsumerError(hr, &ei);
 		return axcore->toAtom(ret);
 	}
 
-	// ScriptObject::setMultinameProperty checks if our traits have 'needsHashtable' - 
-	// but we don't.  Its possible 'needsHashtable' is misnamed and means more like 'isDynamic'
-	// so we should revisit this...
 	void IDispatchConsumer::setMultinameProperty(Multiname* name, Atom value)
 	{
 		// its possible we should just call setStringProperty(), which calls
@@ -110,9 +105,8 @@ namespace axtam
 		if (FAILED(hr))
 			axcore->throwCOMConsumerError(hr);
 		// Set the value into a DISPPARAMS and set it.
-		EXCEPINFO ei;
-		CComVariant arg;
-		axcore->atomToVARIANT(value, &arg);
+		EXCEPINFO ei = {0,0,0,0,0};
+		CComVariant arg = axcore->atomToVARIANT(value);
 		DISPPARAMS params = {&arg, NULL, 1, 0};
 		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_PROPERTYPUT, &params, NULL, &ei, NULL);
 		if (FAILED(hr))
@@ -140,7 +134,7 @@ namespace axtam
 		}
 		if (FAILED(hr))
 			axcore->throwCOMConsumerError(hr);
-		EXCEPINFO ei;
+		EXCEPINFO ei = {0,0,0,0,0};
 		DISPPARAMS params = {NULL, NULL, 0, 0};
 		CComVariant ret;
 		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_PROPERTYGET, &params, &ret, &ei, NULL);
