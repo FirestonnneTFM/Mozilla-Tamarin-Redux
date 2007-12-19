@@ -207,6 +207,9 @@ namespace axtam
 		// fill an EXCEPINFO with a tamarin exception
 		void fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo);
 
+		// handle an exception by a "top-level" COM entry-point.
+		HRESULT handleException(Exception *exc, EXCEPINFO *pei = NULL, int depth=0);
+
 		Toplevel* initAXTamBuiltins();
 		// Create IDispatch wrappers around script objects (dispatch providers)
 		// The native method version for script code.
@@ -227,6 +230,8 @@ namespace axtam
 		// ack - we shadow these... - XXX - todo - get the above in the core!
 		Atom constant(const char *s) {return AvmCore::constant(s);}
 		Stringp constantString(const char *s) {return AvmCore::constantString(s);}
+
+		CComPtr<IActiveScriptSite> activeScriptSite;
 
 	private:
 		DECLARE_NATIVE_CLASSES()

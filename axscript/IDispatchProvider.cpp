@@ -197,15 +197,7 @@ STDMETHODIMP IDispatchProvider::InvokeEx(
 		}
 		return hr;
 	} CATCH(Exception *exception) {
-		// XXX - consolidate error handling with ActiveScript.cpp
-		AvmDebugMsg(false, "Error in Invoke\r\n");
-		core->dumpException(exception);
-		if (pei) {
-			core->fillEXCEPINFO(exception, pei);
-			return DISP_E_EXCEPTION;
-		} else {
-			return E_FAIL;
-		}
+		return core->handleException(exception, pei);
 	}
 	END_CATCH
 	END_TRY

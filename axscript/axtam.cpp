@@ -49,6 +49,7 @@
 #include "SystemClass.h"
 #include "IActiveScriptSiteConsumer.h"
 #include "COMErrorClass.h"
+#include "ActiveScriptError.h"
 
 // files cloned from the shell
 namespace axtam {
@@ -399,6 +400,60 @@ namespace axtam
 	}
 	bool AXTam::isCOMConsumerError(Exception *exc) {
 		return exc->isValid() && istype(exc->atom, comConsumerErrorClass->traits()->itraits);
+	}
+
+	HRESULT AXTam::handleException(Exception *exception, EXCEPINFO *pei /*=NULL*/, int depth /* = 0 */)
+	{
+		if (depth > 1) {
+			// give up in disgust
+			AvmDebugMsg(true, "The exception handlers keep throwing exceptions!\r\n");
+			return E_FAIL;
+		}
+		HRESULT hr;
+		TRY(this, kCatchAction_ReportAsError) { // An exception in our exception handler would otherwise be fatal!
+			if (isCOMProviderError(exception)) {
+				// This is an error explicitly thrown by script code.  It 
+				// means that the HRESULT just be returned - its not a 
+				// "script error".
+				COMErrorObject *eob = (COMErrorObject *)atomToScriptObject(exception->atom);
+				hr = eob->getHRESULT();
+			} else {
+				// dump the exception for diagnostic purposes
+				dumpException(exception);
+				// report the exception to the site.
+				// XXX - later, we will want to move this error handling into
+				// AS, leaving the C++ code to only deal with 'internal' errors
+				// in the engine itself.  For now though, report all errors to 
+				// the site
+				// We may not have a site if we are calling InitNew, or after we
+				// have closed...
+				if (activeScriptSite != 0) {
+					CGCRootComObject<CActiveScriptError> *err;
+					ATLTRY(err = new CGCRootComObject<CActiveScriptError>(this));
+					if (err) {
+						err->exception = exception;
+						// XXX - must get passed dwSourceContextCookie, if available
+						//err->dwSourceContextCookie = dwSourceContextCookie;
+						CComQIPtr<IActiveScriptError, &IID_IActiveScriptError> ase(err);
+						activeScriptSite->OnScriptError(ase);
+					}
+				}
+				if (pei) {
+					fillEXCEPINFO(exception, pei);
+					hr = DISP_E_EXCEPTION;
+				} else {
+					hr = E_FAIL;
+				}
+			}
+		}
+		CATCH(Exception * exception) {
+			AvmDebugMsg(false, "Error in exception handler\r\n");
+			hr = handleException(exception, pei, depth+1);
+		}
+
+		END_CATCH
+		END_TRY
+		return hr;
 	}
 
 	Atom AXTam::toAtom(VARIANT &var)

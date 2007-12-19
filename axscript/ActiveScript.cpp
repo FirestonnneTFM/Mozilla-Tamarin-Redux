@@ -35,8 +35,6 @@
  * ***** END LICENSE BLOCK ***** */
 #include "axtam.h"
 #include "mscom.h"
-#include "ActiveScriptError.h"
-#include "COMErrorClass.h"
 
 using namespace axtam;
 
@@ -182,9 +180,7 @@ protected:
 	HRESULT callEngine(Atom *ret, const char *name, ...);
 	// the worker...
 	HRESULT callEngineRawVA(Atom *ret, const char *name, va_list va);
-	HRESULT handleException(Exception *exc, int depth = 0);
 
-	CComPtr<IActiveScriptSite> m_site;
 	Atom engine; // The ES implemented engine we delegate to
 	DWORD safetyOptions;
 	bool initialized;
@@ -281,7 +277,7 @@ HRESULT CActiveScript::callEngine(Atom *ppret, const char *name, ...)
 	TRY(core, kCatchAction_ReportAsError) {
 		hr = callEngineRawVA(ppret, name, va);
 	} CATCH(Exception * exception) {
-		return handleException(exception);
+		return core->handleException(exception);
 	}
 	END_CATCH
 	END_TRY
@@ -302,54 +298,6 @@ HRESULT CActiveScript::callEngineRaw(Atom *ppret, const char *name, ...)
 	return hr;
 }
 
-HRESULT CActiveScript::handleException(Exception *exception, int depth /* = 0 */)
-{
-	if (depth > 1) {
-		// give up in disgust
-		AvmDebugMsg(true, "The exception handlers keep throwing exceptions!\r\n");
-		return E_FAIL;
-	}
-	HRESULT hr;
-	TRY(core, kCatchAction_ReportAsError) { // An exception in our exception handler would otherwise be fatal!
-		if (core->isCOMProviderError(exception)) {
-			// This is an error explicitly thrown by script code.  It 
-			// means that the HRESULT just be returned - its not a 
-			// "script error".
-			COMErrorObject *eob = (COMErrorObject *)core->atomToScriptObject(exception->atom);
-			hr = eob->getHRESULT();
-		} else {
-			// dump the exception for diagnostic purposes
-			core->dumpException(exception);
-			// report the exception to the site.
-			// XXX - later, we will want to move this error handling into
-			// AS, leaving the C++ code to only deal with 'internal' errors
-			// in the engine itself.  For now though, report all errors to 
-			// the site
-			// We may not have a site if we are calling InitNew, or after we
-			// have closed...
-			if (m_site) {
-				CGCRootComObject<CActiveScriptError> *err;
-				ATLTRY(err = new CGCRootComObject<CActiveScriptError>(core));
-				if (err) {
-					err->exception = exception;
-					// XXX - must get passed dwSourceContextCookie, if available
-					//err->dwSourceContextCookie = dwSourceContextCookie;
-					CComQIPtr<IActiveScriptError, &IID_IActiveScriptError> ase(err);
-					m_site->OnScriptError(ase);
-				}
-			}
-			hr = E_FAIL;
-		}
-	}
-	CATCH(Exception * exception) {
-		AvmDebugMsg(false, "Error in exception handler\r\n");
-		hr = handleException(exception, depth+1);
-	}
-
-	END_CATCH
-	END_TRY
-	return hr;
-}
 
 // Implementation methods.
 STDMETHODIMP CActiveScript::SetScriptSite( 
@@ -357,11 +305,12 @@ STDMETHODIMP CActiveScript::SetScriptSite(
 {
 	if (!pass)
 		return E_POINTER;
+	AvmAssert(core->activeScriptSite==0); // already have a site??
 	// XXX - todo - construct an object and pass it.  The site code currently
 	// has workaround that means this still works.
 	HRESULT hr = callEngine(NULL, "SetScriptSite", undefinedAtom, (Atom)-1);
 	if (SUCCEEDED(hr))
-		m_site = pass;
+		core->activeScriptSite = pass;
 	return hr;
 }
 
@@ -369,11 +318,11 @@ STDMETHODIMP CActiveScript::GetScriptSite(
             /* [in] */ REFIID riid,
             /* [iid_is][out] */ void **ppvObject)
 {
-	if (!m_site) {
+	if (!core->activeScriptSite) {
 		AvmDebugMsg(false, "GetScriptSite with no site!\r\n");
 		return E_FAIL;
 	}
-	return m_site.p->QueryInterface(riid, ppvObject);
+	return core->activeScriptSite.p->QueryInterface(riid, ppvObject);
 }
 
 STDMETHODIMP CActiveScript::SetScriptState( 
