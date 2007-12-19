@@ -5,7 +5,8 @@ You will currently find one test for Internet Explorer, one for the Windows
 Scripting Host, plus unit tests.
 
 * To test with the Windows Scripting Host (WSH), execute:
-  % cscript.exe /E:application/ecmascript;version=4 wsh_simple.es4
+  % cscript.exe wsh_simple.es4
+  Note you can use either .es4 or .js2 as your file extension.
 
 * To test with Internet Explorer, load 'simple.html' in the browser.  In IE7,
   it will be necessary to enable the engine via the information bar.  Other

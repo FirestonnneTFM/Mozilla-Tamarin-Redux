@@ -20,6 +20,15 @@ HKCR
 		CurVer = s 'tamarin.axscript.1'
 		CLSID = s '{9D593E46-B5EC-44c3-A64C-81C88887263B}'
 	}
+	ForceRemove '.js2' = s 'JS2File'
+	{
+	}
+	ForceRemove 'JS2File' = s ''
+	{
+		ForceRemove ScriptEngine = s 'application/javascript;version=2'
+		{
+		}
+	}
 	ForceRemove 'application/ecmascript;version=4' = s 'Tamarin ECMAScript version 4'
 	{
 		ForceRemove OLEScript = s ''
@@ -27,6 +36,15 @@ HKCR
 		}
 		CurVer = s 'tamarin.axscript.1'
 		CLSID = s '{9D593E46-B5EC-44c3-A64C-81C88887263B}'
+	}
+	ForceRemove '.es4' = s 'ES4File'
+	{
+	}
+	ForceRemove 'ES4File' = s ''
+	{
+		ForceRemove ScriptEngine = s 'application/ecmascript;version=4'
+		{
+		}
 	}
 	NoRemove CLSID
 	{
