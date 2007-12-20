@@ -44,12 +44,12 @@ namespace axtam
 		fwrite(buffer, 1, count, stdout);
 		fflush(stdout);
 
-		// temporary, dodgy implementation using atl's trace tools.
+		// write to OutputDebugString too...
 		char *cbuf = (char *) malloc(count+1);
 		if (cbuf) {
 			memcpy(cbuf, buffer, count);
 			cbuf[count] = '\0';
-			ATLTRACE2("%s", (char *)cbuf);
+			OutputDebugString(cbuf);
 			free(cbuf);
 		}
 		return 0;
