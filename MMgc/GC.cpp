@@ -2245,7 +2245,7 @@ bail:
 				}
 				else
 				{
-					item = FindBeginning((void *) val);
+					item = GetRealPointer(FindBeginning((void *) val));
 				}
 #else
 				// back up to real beginning

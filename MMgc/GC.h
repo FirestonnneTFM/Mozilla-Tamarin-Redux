@@ -164,6 +164,27 @@ namespace avmplus
 namespace MMgc
 {
 	/**
+	 * Conservative collector unit of work
+	 */
+	class GCWorkItem
+	{
+	public:
+		GCWorkItem() : ptr(NULL), _size(0) { }
+		inline GCWorkItem(const void *p, uint32 s, bool isGCItem);
+
+		uint32 GetSize() const { return _size & ~1; }
+		uint32 IsGCItem() const { return _size & 1; }
+
+		// If a WI is a GC item, `ptr` is the UserPointer; it must not
+		// be the RealPointer nor an interior pointer
+		const void *ptr;
+
+		// The low bit of _size stores whether this is a GC item.
+		// Always access this through `GetSize` and `IsGCItem`
+		uint32 _size;
+	};
+
+	/**
 	 * GCRoot is root in the reachability graph, it contains a pointer a size 
 	 * and will be searched for things.  
 	 */
@@ -1073,6 +1094,17 @@ public:
 		int *v;
 		size_t size;
 	};
+
+	inline GCWorkItem::GCWorkItem(const void *p, uint32 s, bool isGCItem)
+		: ptr(p)
+		, _size(s | uint32(isGCItem))
+	{
+#ifdef _DEBUG
+		if (IsGCItem()) {
+			GCAssert(GC::GetGC(p)->FindBeginning(p) == p);
+		}
+#endif
+	}
 }
 
 #endif /* __GC__ */
