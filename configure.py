@@ -75,10 +75,13 @@ DEBUG_CPPFLAGS = "-DDEBUG -D_DEBUG "
 DEBUG_CXXFLAGS = ""
 DEBUG_LDFLAGS = ""
 OS_LIBS = []
+OS_LDFLAGS = ""
 MMGC_CPPFLAGS = ""
 AVMSHELL_CPPFLAGS = ""
 AVMSHELL_LDFLAGS = ""
 MMGC_DEFINES = {'SOFT_ASSERTS': None}
+NSPR_INCLUDES = ""
+NSPR_LDOPTS = ""
 
 MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', True)
 if MMGC_INTERIOR_PTRS:
@@ -88,6 +91,16 @@ MMGC_DYNAMIC = o.getBoolArg('mmgc-shared', False)
 if MMGC_DYNAMIC:
     MMGC_DEFINES['MMGC_DLL'] = None
     MMGC_CPPFLAGS += "-DMMGC_IMPL "
+
+MMGC_THREADSAFE = o.getBoolArg('threadsafe-mmgc', False)
+if MMGC_THREADSAFE:
+    MMGC_DEFINES['MMGC_THREADSAFE'] = None
+    NSPR_INCLUDES = o.getStringArg('nspr-includes')
+    MMGC_CPPFLAGS += NSPR_INCLUDES + " "
+    APP_CPPFLAGS += NSPR_INCLUDES + " "
+
+    NSPR_LDOPTS = o.getStringArg('nspr-ldopts')
+    OS_LDFLAGS += " " + NSPR_LDOPTS
 
 if config.COMPILER_IS_GCC:
     APP_CXXFLAGS = "-fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wno-uninitialized -Wno-strict-aliasing -fmessage-length=0 -finline-functions -finline-limit=65536 "
@@ -188,6 +201,7 @@ config.subst("DEBUG_CPPFLAGS", DEBUG_CPPFLAGS)
 config.subst("DEBUG_CXXFLAGS", DEBUG_CXXFLAGS)
 config.subst("DEBUG_LDFLAGS", DEBUG_LDFLAGS)
 config.subst("OS_LIBS", " ".join(OS_LIBS))
+config.subst("OS_LDFLAGS", OS_LDFLAGS)
 config.subst("MMGC_CPPFLAGS", MMGC_CPPFLAGS)
 config.subst("AVMSHELL_CPPFLAGS", AVMSHELL_CPPFLAGS)
 config.subst("AVMSHELL_LDFLAGS", AVMSHELL_LDFLAGS)

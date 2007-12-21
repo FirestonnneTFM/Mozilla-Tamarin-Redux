@@ -40,7 +40,9 @@ them both to 0; an emulation function will be used. */
 #define HAVE_LIMITS_H 1
 
 /* Define to 1 if the system has the type `long long'. */
+#ifndef HAVE_LONG_LONG
 #define HAVE_LONG_LONG 1
+#endif
 
 /* Define to 1 if you have the `memmove' function. */
 #define HAVE_MEMMOVE 1

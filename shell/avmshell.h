@@ -49,6 +49,12 @@
 
 using namespace avmplus;
 
+// avmplus and NSPR both typedef some basic types: we must disambiguate
+using avmplus::uint64;
+using avmplus::uint32;
+using avmplus::uint16;
+using avmplus::uint8;
+
 namespace avmshell
 {
 	class ByteArrayObject;
