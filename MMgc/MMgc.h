@@ -125,6 +125,7 @@ namespace MMgc
 
 #include "GCTypes.h"
 #include "GCStack.h"
+#include "GCThreads.h"
 #include "GCAllocObject.h"
 #include "GCHeap.h"
 #include "GCAlloc.h"

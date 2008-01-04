@@ -58,10 +58,21 @@ namespace MMgc
 			}
 		}
 	private:
-		// override new so we can be tell the GC we don't contain pointers
+		/**
+		 * When allocating a GCWeakRef, tell the GC we don't contain pointers
+		 * (overriding the default base-class behavior).
+		 *
+		 * In MMGC_THREADSAFE builds, the caller always holds m_lock.
+		 *
+		 * @access Requires(gc->m_lock)
+		 */
 		static void *operator new(size_t size, GC *gc)
 		{
+#ifdef MMGC_THREADSAFE
+			return gc->AllocAlreadyLocked(size, GC::kFinalize, 4);
+#else
 			return gc->Alloc(size, GC::kFinalize, 4);
+#endif
 		}
 		// private, only GC can access
 		GCWeakRef(const void *obj) : m_obj(obj) 

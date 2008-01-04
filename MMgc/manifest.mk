@@ -56,6 +56,7 @@ MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(curdir)/GCMemoryProfiler.cpp \
   $(curdir)/GCObject.cpp \
   $(curdir)/GCTests.cpp \
+  $(curdir)/GCThreads.cpp \
   $(NULL)
 
 ifeq (windows,$(TARGET_OS))

@@ -154,6 +154,17 @@
 		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
 #endif
 
+#ifdef MMGC_THREADSAFE
+#define MMGC_ASSERT_GC_LOCK(gc)  GCAssert((gc)->m_lock.IsHeld() || (gc)->destroying)
+#define MMGC_ASSERT_EXCLUSIVE_GC(gc) \
+    GCAssert(((gc)->m_gcRunning \
+			  && (gc)->m_exclusiveGCThread == GCThread::GetCurrentThread()) \
+			 || (gc)->destroying)
+#else
+#define MMGC_ASSERT_GC_LOCK(gc)      ((void) 0)
+#define MMGC_ASSERT_EXCLUSIVE_GC(gc) ((void) 0)
+#endif
+
 #ifdef DEBUGGER
 namespace avmplus
 {
@@ -219,7 +230,10 @@ namespace MMgc
 	private:
 		FixedMalloc* fm;
 		GC * gc;
+
+		/** @access Requires(gc->m_rootListLock) */
 		GCRoot *next;
+		/** @access Requires(gc->m_rootListLock) */
 		GCRoot *prev;
 		const void *object;
 		size_t size;
@@ -247,11 +261,15 @@ namespace MMgc
 		 * This method is invoked after all marking and before any
 		 * sweeping, useful for bookkeeping based on whether things
 		 * got marked
+		 *
+		 * @access Requires(gc->exclusiveGC)
 		 */
 		virtual void presweep() {}
 
 		/**
 		 * This method is invoked after all sweeping
+		 *
+		 * @access Requires(gc->exclusiveGC)
 		 */
 		virtual void postsweep() {}
 
@@ -267,6 +285,49 @@ namespace MMgc
 		// called after a ZCT reap completes
 		virtual void postreap() {}
 #endif
+
+		/**
+		 * This callback is the first thing a collecting thread does once it
+		 * acquires exclusiveGC status.  When this is called, no other threads
+		 * are running in requests and the calling thread holds gc->m_lock.
+		 *
+		 * Although this makes the most sense in an MMGC_THREADSAFE build, the
+		 * callback is nonetheless called at the same point during collection
+		 * even in non-MMGC_THREADSAFE builds.  This is so programs that build
+		 * in both thread-safe and non-thread-safe configurations will see the
+		 * same behavior in both.  The same idea applies to
+		 * enterExclusiveGCNoLock and leaveExclusiveGC.
+		 *
+		 * @warning
+		 *     Because the system calls this callback while holding the
+		 *     GC-wide lock, implementations must keep it simple and not block
+		 *     or call back into the GC, to avoid deadlock.
+		 *
+		 * @access Requires(gc->exclusiveGC && gc->m_lock)
+		 */
+		virtual void enterExclusiveGC() {}
+
+		/**
+		 * This callback happens after enterExclusiveGC.  The only difference
+		 * is that this is called after the GC has released gc->m_lock.
+		 *
+		 * See notes and warning at GCCallback::enterExclusiveGC().
+		 *
+		 * @access Requires(gc->exclusiveGC && !gc->m_lock)
+		 */
+		virtual void enterExclusiveGCNoLock() {}
+
+		/**
+		 * This callback is the last thing a collecting thread does before it
+		 * relinquishes exclusiveGC status, allowing other threads to run in
+		 * requests.
+		 *
+		 * In an MMGC_THREADSAFE build, this is called while the GC is holding
+		 * the GC-wide lock.  See warning at GCCallback::enterExclusiveGC().
+		 *
+		 * @access Requires(gc->exclusiveGC && gc->m_lock)
+		 */
+		virtual void leaveExclusiveGC() {}
 
 		/**
 		 * This method is called before an RC object is reaped
@@ -443,12 +504,19 @@ namespace MMgc
 		 * will cause a garbage collection.  This makes code run
 		 * abysmally slow, but can be useful for detecting mark
 		 * bugs.
+		 *
+		 * The GC reads this flag only when holding the GC lock.  It is best
+		 * to set it as soon as the GC is created.
+		 *
+		 * @access Requires(m_lock)
 		 */
 		bool greedy;
 
 		/**
 		 * nogc is a debugging flag.  When set, garbage collection
 		 * never happens.
+		 *
+		 * @access Requires(m_lock)
 		 */
 		bool nogc;
 
@@ -464,8 +532,28 @@ namespace MMgc
 		bool validateDefRef;		
 		bool keepDRCHistory;
 
+		/**
+		 * Expand, don't collect, until we reach this threshold. Units are
+		 * pages, not KB, just like GCHeap::GetTotalHeapSize().
+		 *
+		 * In an MMGC_THREADSAFE build, the GC reads this configuration value
+		 * only when holding the GC lock.  Set it during
+		 * initialization, before the GC is visible to multiple threads.
+		 *
+		 * @access Requires(m_lock)
+		 */
 		size_t collectThreshold;
 
+		/**
+		 * If true, log some statistics during each collection.
+		 * The output goes to gclog().
+		 *
+		 * In an MMGC_THREADSAFE build, the GC reads this flag only during
+		 * stop-the-world collection.  Set it during initialization, before
+		 * the GC is visible to multiple threads.
+		 *
+		 * @access Requires(exclusiveGC)
+		 */
 		bool gcstats;
 
 		bool dontAddToZCTDuringCollection;
@@ -475,6 +563,14 @@ namespace MMgc
 		bool incrementalValidationPedantic;
 #endif
 
+		/**
+		 * Configuration flag enabling incremental collection.
+		 *
+		 * In an MMGC_THREADSAFE build, the GC reads this flag only when
+		 * holding the GC lock.  Set it during initialization.
+		 *
+		 * @access Requires(m_lock)
+		 */
 		bool incremental;
 
 		// -- Interface
@@ -482,7 +578,13 @@ namespace MMgc
 		~GC();
 		
 		/**
-		 * Causes an immediate garbage collection
+		 * Causes an immediate garbage collection.
+		 *
+		 * In an MMGC_THREADSAFE build, the caller must not be inside a
+		 * request.  If the caller is inside a request, call
+		 * CollectFromRequest() instead.
+		 *
+		 * @access Requires(!m_lock && !request)
 		 */
 		void Collect();
 
@@ -507,15 +609,26 @@ namespace MMgc
 
 		/**
 		 * Main interface for allocating memory.  Default flags is no
-		 * finalization, contains pointers is set and zero is set
+		 * finalization, contains pointers is set and zero is set.
+		 *
+		 * Do not call this from a finalizer.
+		 *
+		 * @access Requires(request)
 		 */
 		void *Alloc(size_t size, int flags=0, int skip=3);
+
+		/** @access Requires(request && m_lock) */
+		void *AllocAlreadyLocked(size_t size, int flags=0, int skip=3);
 
 		
 		/**
 		 * overflow checking way to call Alloc for a # of n size'd items,
 		 * all instance of Alloc(num*sizeof(thing)) should be replaced with:
 		 * Calloc(num, sizeof(thing))
+		 *
+		 * Do not call this from a finalizer.
+		 *
+		 * @access Requires(request)
 		 */
 		void *Calloc(size_t num, size_t elsize, int flags=0, int skip=3);
 
@@ -523,11 +636,15 @@ namespace MMgc
 		 * One can free a GC allocated pointer, this will throw an assertion
 		 * if called during the Sweep phase (ie via a finalizer) it can only be
 		 * used outside the scope of a collection
+		 *
+		 * @access Requires(request)
 		 */
 		void Free(void *ptr);
 
 		/**
 		 * return the size of a piece of memory, may be bigger than what was asked for
+		 *
+		 * @access Requires(request || exclusiveGC)
 		 */
 		static size_t Size(const void *ptr)
 		{
@@ -541,6 +658,8 @@ namespace MMgc
 		/**
 		 * Tracers should employ GetMark and SetMark to
 		 * set the mark bits during the mark pass.
+		 *
+		 * @access Requires(request || exclusiveGC)
 		 */
 		static int GetMark(const void *item)
 		{
@@ -647,9 +766,13 @@ namespace MMgc
 		}
 
 		/**
-		 * Used by sub-allocators to obtain memory
+		 * Used by sub-allocators to obtain memory.
+		 *
+		 * @access Requires(m_lock)
 		 */
 		void* AllocBlock(int size, int pageType, bool zero=true);
+
+		/** @access Requires((request && m_lock) || exclusiveGC) */
 		void FreeBlock(void *ptr, uint32 size);
 
 		GCHeap *GetGCHeap() const { return heap; }
@@ -677,11 +800,19 @@ namespace MMgc
 		 */
 		bool IncrementalMarking() { return marking; }
 
-		// a magical write barriers that finds the container's address and the GC, just
-		// make sure address is a pointer to a GC page, only used by WB smart pointers
+		/**
+		 * A magical write barrier that finds the container's address and the
+		 * GC, just make sure @a address is a pointer to a GC page. Only used
+		 * by WB smart pointers.
+		 *
+		 * @access Requires(request)
+		 */
 		static void WriteBarrier(const void *address, const void *value);
+
+		/** @access Requires(request) */
 		static void WriteBarrierNoSub(const void *address, const void *value);
 
+		/** @access Requires(request) */
 		void writeBarrier(const void *container, const void *address, const void *value)
 		{
 			GCAssert(IsPointerToGCPage(container));
@@ -693,13 +824,19 @@ namespace MMgc
 			WriteBarrierWrite(address, value);
 		}
 
-		// optimized version with no RC checks or pointer masking
+		/**
+		 * optimized version with no RC checks or pointer masking
+		 *
+		 * @access Requires(request)
+		 */
 		void writeBarrierRC(const void *container, const void *address, const void *value);
 
 		/**
-		Write barrier when the value could be a pointer with anything in the lower 3 bits
-		FIXME: maybe assert that the lower 3 bits are either zero or a pointer type signature,
-		this would require the application to tell us what bit patterns are pointers.
+		 * Write barrier when the value could be a pointer with anything in the lower 3 bits
+		 * FIXME: maybe assert that the lower 3 bits are either zero or a pointer type signature,
+		 * this would require the application to tell us what bit patterns are pointers.
+		 *
+		 * @access Requires(request)
 		 */
 		__forceinline void WriteBarrierNoSubstitute(const void *container, const void *value)
 		{
@@ -707,9 +844,11 @@ namespace MMgc
 		}
 			
 		/**
-		 AVM+ write barrier, valuePtr is known to be pointer and the caller
-		does the write
-		*/
+		 * AVM+ write barrier, valuePtr is known to be pointer and the caller
+		 * does the write.
+		 *
+		 * @access Requires(request)
+		 */
 		__forceinline void WriteBarrierTrap(const void *container, const void *valuePtr)
 		{
 			GCAssert(IsPointerToGCPage(container));
@@ -733,8 +872,10 @@ namespace MMgc
 
 	public:
 
+		/** @access Requires(request || exclusiveGC) */
 		bool ContainsPointers(const void *item);
 
+		/** @access Requires(request) */
 		void *FindBeginning(const void *gcItem)
 		{
 			GCAssert(gcItem != NULL);
@@ -770,11 +911,23 @@ namespace MMgc
 		bool IsRCObject(const void *) { return false; }
 #endif
 
+		/**
+		 * True during Sweep phase.  Application code can use this to
+		 * determine if it's being called (directly or indirectly) from a
+		 * finalizer.
+		 *
+		 * @see IsGCRunning()
+		 * @access Requires(request || exclusiveGC)
+		 */
+		bool Collecting() const
+		{
+			return collecting;
+		}
 
-		bool Collecting() const { return collecting; }
-
+		/** @access Requires(request || exclusiveGC) */
 		bool IsGCMemory (const void *);
 
+		/** @access Requires(request || exclusiveGC) */
 		bool IsQueued(const void *item);
 
 		static uint64 GetPerformanceCounter();
@@ -785,9 +938,12 @@ namespace MMgc
 			return (double(GC::GetPerformanceCounter() - start) * 1000) / GC::GetPerformanceFrequency();
 		}
 
+#ifndef MMGC_THREADSAFE
 		void DisableThreadCheck() { disableThreadCheck = true; }
-		
-		uint64 t0;
+#endif
+
+		/** GC initialization time, in ticks.  Used for logging. */
+		const uint64 t0;
 
 		// a tick is the unit of GetPerformanceCounter()
 		static uint64 ticksToMicros(uint64 ticks) 
@@ -809,22 +965,69 @@ namespace MMgc
 #endif
 		}
 
-		// marking rate counter
+		/**
+		 * Total number of bytes of pointer-containing memory scanned by this
+		 * GC.  Used to measure marking rate, which is
+		 * <code>bytesMarked/ticksToMillis(markTicks)</code>.
+		 *
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
 		uint64 bytesMarked;
+
+		/**
+		 * Total time spent doing incremental marking, in ticks.  See
+		 * bytesMarked.
+		 *
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
 		uint64 markTicks;
 
 		// calls to mark item
 		uint32 lastStartMarkIncrementCount;
 		uint32 markIncrements;
+
+		/**
+		 * Number of calls to MarkItem().
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
 		uint32 marks;
+
+		/**
+		 * Number of calls to Sweep().
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
         uint32 sweeps;
 
+		/**
+		 * Number of calls to MarkItem() during the current (or most recent)
+		 * IncrementalMark().
+		 *
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
 		uint32 numObjects;
+
+		/**
+		 * Number of bytes scanned in MarkItem() during the current (or most
+		 * recent) IncrementalMark().
+		 *
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
 		uint32 objSize;
 
+		/**
+		 * Time of the latest FinishIncrementalMark() call, in ticks.
+		 *
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
 		uint64 sweepStart;
 
-		// if we hit zero in a marking incremental force completion in the next one
+		/**
+		 * True if we emptied the work queue during the most recent
+		 * incremental mark.  This means the next mark will force the GC cycle
+		 * through to completion.
+		 *
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
 		bool hitZeroObjects;
 
 		// called at some apropos moment from the mututor, ideally at a point
@@ -836,7 +1039,10 @@ namespace MMgc
 
 		bool Destroying() { return destroying; }
 
+		/** @access Requires(request) */
 		static GCWeakRef *GetWeakRef(const void *obj);
+
+		/** @access Requires((request && m_lock) || exclusiveGC) */
 		void ClearWeakRef(const void *obj);
 
 		uintptr	GetStackTop() const;
@@ -853,7 +1059,10 @@ namespace MMgc
 		// FIXME: only used for FixedAlloc, GCAlloc sized dynamically
 		const static int kPageUsableSpace = 3936;
 
+		/** @access Requires(request && m_lock) */
 		uint32 *GetBits(int numBytes, int sizeClass);
+
+		/** @access Requires((request && m_lock) || exclusiveGC) */
 		void FreeBits(uint32 *bits, int sizeClass)
 		{
 #ifdef _DEBUG
@@ -862,32 +1071,55 @@ namespace MMgc
 			*(uint32**)bits = m_bitsFreelists[sizeClass];
 			m_bitsFreelists[sizeClass] = bits;
 		}
+
+		/** @access Requires((request && m_lock) || exclusiveGC) */
 		uint32 *m_bitsFreelists[kNumSizeClasses];
+		/** @access Requires((request && m_lock) || exclusiveGC) */
 		uint32 *m_bitsNext;
 
+		/** @access Requires((request && m_lock) || exclusiveGC) */
 		GCHashtable weakRefs;
 
 		bool destroying;
 
-		// we track the heap size so if it expands due to fixed memory allocations
-		// we can trigger a mark/sweep, other wise we can have lots of small GC 
-		// objects allocating tons of fixed memory which results in huge heaps
-		// and possible out of memory situations.
+		/**
+		 * We track the heap size so if it expands due to fixed memory
+		 * allocations we can trigger a mark/sweep. Otherwise we can have lots
+		 * of small GC objects allocating tons of fixed memory, which results
+		 * in huge heaps and possible out of memory situations.
+		 *
+		 * @access Requires(m_lock)
+		 */
 		size_t heapSizeAtLastAlloc;
 
 		bool stackCleaned;
 		const void *rememberedStackTop;
 
+#ifndef MMGC_THREADSAFE
 		// for external which does thread safe multi-thread AS execution
 		bool disableThreadCheck;
+#endif
 
+		/**
+		 * True if incremental marking is on and some objects have been marked.
+		 * This means write barriers are enabled.
+		 *
+		 * @access ReadWrite(request, exclusiveGC)
+		 *
+		 * The GC thread may read and write this flag.  Application threads in
+		 * requests have read-only access.
+		 */
 		bool marking;
 		GCStack<GCWorkItem> m_incrementalWork;
 		void StartIncrementalMark();
 		void FinishIncrementalMark();
+
+		/** @access Requires(request || exclusiveGC) */
 		int IsWhite(const void *item);
 		
+		/** @access ReadWrite(request, exclusiveGC) */
 		uint64 lastMarkTicks;
+		/** @access ReadWrite(request, exclusiveGC) */
 		uint64 lastSweepTicks;
 
 		const static int16 kSizeClasses[kNumSizeClasses];		
@@ -899,14 +1131,44 @@ namespace MMgc
 		// 0 - not in use
 		// 1 - used by GCAlloc
 		// 3 - used by GCLargeAlloc
+
+		/** @access Requires(pageMapLock) */
 		uintptr memStart;
+		/** @access Requires(pageMapLock) */
 		uintptr memEnd;
 
+		/** @access Requires(m_lock) */
 		size_t totalGCPages;
 
+		/**
+		 * The bitmap for what pages are in use.  Any access to either the
+		 * pageMap pointer or the bitmap requires pageMapLock.
+		 *
+		 * (Note: A better synchronization scheme might be to use atomic
+		 * operations to read and write the pageMap pointer, writing it only
+		 * from within m_lock; and then using atomic read and write
+		 * operations--on Intel x86, these are just ordinary reads and
+		 * writes--to access the bitmap, with writes again only from within
+		 * m_lock.  This would require reallocating the pageMap more often,
+		 * but at least write barriers wouldn't have to acquire the spinlock.)
+		 *
+		 * @access Requires(pageMapLock)
+		 */
 		unsigned char *pageMap;
 
+		/**
+		 * This spinlock covers memStart, memEnd, and the contents of pageMap.
+		 */
+		mutable GCSpinLock pageMapLock;
+
 		inline int GetPageMapValue(uintptr addr) const
+		{
+			GCAcquireSpinlock lock(pageMapLock);
+			return GetPageMapValueAlreadyLocked(addr);
+		}
+
+		/** @access Requires(pageMapLock) */
+		inline int GetPageMapValueAlreadyLocked(uintptr addr) const
 		{
 			uintptr index = (addr-memStart) >> 12;
 
@@ -918,7 +1180,20 @@ namespace MMgc
 			//return (pageMap[addr >> 2] & (3<<shiftAmount)) >> shiftAmount;
 			return (pageMap[index >> 2] >> shiftAmount) & 3;
 		}
+
+		/**
+		 * Set the pageMap bits for the given address.  Those bits must be
+		 * zero beforehand.
+		 *
+		 * @access Requires(pageMapLock)
+		 */
 		void SetPageMapValue(uintptr addr, int val);
+
+		/**
+		 * Zero out the pageMap bits for the given address.
+		 *
+		 * @access Requires(pageMapLock)
+		 */
 		void ClearPageMapValue(uintptr addr);
 
 		void MarkGCPages(void *item, uint32 numpages, int val);
@@ -938,12 +1213,37 @@ namespace MMgc
 		GCLargeAlloc *largeAlloc;
 		GCHeap *heap;
 		
+		/** @access Requires(m_lock) */
 		void* AllocBlockIncremental(int size, bool zero=true);
+
+		/** @access Requires(m_lock) */
 		void* AllocBlockNonIncremental(int size, bool zero=true);
+
+	protected:
+		/**
+		 * Collect in a thread-safe, recursion-preventing way, with
+		 * callbacks.
+		 *
+		 * Both parameters are ignored in non-MMGC_THREADSAFE builds.  In an
+		 * MMGC_THREADSAFE build, callerHoldsLock must be true iff the calling
+		 * thread already holds m_lock, and callerHasActiveRequest must be
+		 * true iff the calling thread is already in an active request.
+		 */
+		void CollectWithBookkeeping(bool callerHoldsLock,
+									bool callerHasActiveRequest);
+
+	private:
+		/**
+		 * Just collect.
+		 *
+		 * @access Requires(exclusiveGC)
+		 */
+		void CollectImpl();
 
 #ifdef _DEBUG
 		public:
 #endif
+		/** @access Requires(exclusiveGC) */
 		void ClearMarks();
 #ifdef _DEBUG
 		private:
@@ -953,55 +1253,105 @@ namespace MMgc
 #ifdef _DEBUG
 		public:
 		// sometimes useful for mutator to call this
+		/** @access Requires(exclusiveGC) */
 		void Trace(const void *stackStart=NULL, size_t stackSize=0);
 		private:
 #endif
 
+		/** @access Requires(exclusiveGC) */
 		void Finalize();
+		/** @access Requires(exclusiveGC) */
 		void Sweep(bool force=false);
+		/** @access Requires(exclusiveGC) */
 		void ForceSweep() { Sweep(true); }
+		/** @access Requires(exclusiveGC) */
 		void Mark(GCStack<GCWorkItem> &work);
+		/** @access Requires(exclusiveGC) */
 		void MarkQueueAndStack(GCStack<GCWorkItem> &work);
+		/** @access Requires(exclusiveGC) */
 		void MarkItem(GCStack<GCWorkItem> &work)
 		{
 			GCWorkItem workitem = work.Pop();
 			MarkItem(workitem, work);
 		}
+		/** @access Requires(exclusiveGC) */
 		void MarkItem(GCWorkItem &workitem, GCStack<GCWorkItem> &work);
-		// Write barrier slow path
 
+		/**
+		 * Write barrier slow path. Queues the white object.
+		 *
+		 * @access Requires(request)
+		 */
 		void TrapWrite(const void *black, const void *white);
 
+		/**
+		 * Number of pages allocated from the GCHeap since the start of the
+		 * current GC cycle.
+		 *
+		 * @access Requires((request && m_lock) || exclusiveGC)
+		 */
 		unsigned int allocsSinceCollect;
-		// The collecting flag prevents an unwanted recursive collection.
+
+		/**
+		 * True during the sweep phase of collection.  Several things have to
+		 * behave a little differently during this phase.  For example,
+		 * GC::Free() does nothing during sweep phase; otherwise finalizers
+		 * could be called twice.
+		 *
+		 * Also, Collect() uses this to protect itself from recursive calls
+		 * (from badly behaved finalizers).
+		 *
+		 * @access ReadWrite(request, exclusiveGC)
+		 */
 		bool collecting;
  
+		/** @access Requires((request && m_lock) || exclusiveGC) */ 
 		bool finalizedValue;
 
-		// list of pages to be swept, built up in Finalize
+		/** @access Requires(exclusiveGC) */
 		void AddToSmallEmptyBlockList(GCAlloc::GCBlock *b)
 		{
 			b->next = smallEmptyPageList;
 			smallEmptyPageList = b;
 		}
+
+		/**
+		 * List of pages to be swept, built up in Finalize.
+		 * @access Requires(exclusiveGC)
+		 */
 		GCAlloc::GCBlock *smallEmptyPageList;
 		
-		// list of pages to be swept, built up in Finalize
+		/** @access Requires(exclusiveGC) */
 		void AddToLargeEmptyBlockList(GCLargeAlloc::LargeBlock *lb)
 		{
 			lb->next = largeEmptyPageList;
 			largeEmptyPageList = lb;
 		}
+
+		/**
+		 * List of pages to be swept, built up in Finalize.
+		 * @access Requires(exclusiveGC)
+		 */
 		GCLargeAlloc::LargeBlock *largeEmptyPageList;
 		
 #ifdef GCHEAP_LOCK
 		GCSpinLock m_rootListLock;
 #endif
 
+		/** @access Requires(m_rootListLock) */
 		GCRoot *m_roots;
 		void AddRoot(GCRoot *root);
 		void RemoveRoot(GCRoot *root);
 		
+#ifdef MMGC_THREADSAFE
+		GCSpinLock m_callbackListLock;
+#endif
+
+		/**
+		 * Points to the head of a linked list of callback objects.
+		 *
+		 * @access Requires(m_callbackListLock)
+		 */
 		GCCallback *m_callbacks;
 		void AddCallback(GCCallback *cb);
 		void RemoveCallback(GCCallback *cb);
@@ -1025,7 +1375,9 @@ public:
 private:
 #endif
 
+#ifndef MMGC_THREADSAFE
 		void CheckThread();
+#endif
 
 		void PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item);
 
@@ -1042,17 +1394,37 @@ private:
 		void CheckFreelists();
 
 		int m_gcLastStackTrace;
+
+		/**
+		 * Used by FindUnmarkedPointers.
+		 *
+		 * @access Requires(exclusiveGC)
+		 */
 		void UnmarkedScan(const void *mem, size_t size);
-		// find unmarked pointers in entire heap
+
+		/**
+		 * Find unmarked pointers in the entire heap.
+		 *
+		 * @access Requires(exclusiveGC)
+		 */
 		void FindUnmarkedPointers();
 
 		// methods for incremental verification
 
-		// scan a region of memory for white pointers, used by FindMissingWriteBarriers
+		/**
+		 * Scan a region of memory for white pointers. Used by
+		 * FindMissingWriteBarriers.
+		 *
+		 * @access Requires(exclusiveGC)
+		 */
 		void WhitePointerScan(const void *mem, size_t size);
 
-		// scan all GC memory (skipping roots) If a GC object is black make sure
-		// it has no white pointers, skip it if its grey.
+		/**
+		 * Scan all GC memory (skipping roots). If a GC object is black make sure
+		 * it has no pointers to white objects.
+		 *
+		 * @access Requires(exclusiveGC)
+		 */
 		void FindMissingWriteBarriers();
 #ifdef WIN32
 		// store a handle to the thread that create the GC to ensure thread safety
@@ -1073,7 +1445,187 @@ public:
 #ifdef _DEBUG
 		// Dump a list of objects that have pointers to the given location.
 		void WhosPointingAtMe(void* me, int recurseDepth=0, int currentDepth=0);
+
+		/**
+		 * Used by WhosPointingAtMe.
+		 * @access Requires(pageMapLock)
+		 */
     	void ProbeForMatch(const void *mem, size_t size, uintptr value, int recurseDepth, int currentDepth);
+#endif
+
+#ifdef MMGC_THREADSAFE
+	public:
+		/**
+		 * True if marking or sweeping is happening.  In an MMGC_THREADSAFE
+		 * build, this implies that no threads in requests are running right
+		 * now.
+		 *
+		 * Contrast Collecting().
+		 *
+		 * @access Requires(request || exclusiveGC || m_lock)
+		 */
+		bool IsGCRunning() const { return m_gcRunning; }
+
+	protected:
+		/** @access Requires(m_lock) */
+		void OnEnterRequestAlreadyLocked()
+		{
+			WaitForGCDone();
+			m_requestCount++;
+#ifdef _DEBUG
+			GCThread::GetCurrentThread()->OnEnterRequest();
+#endif
+		}
+
+		/** @access Requires(m_lock) */
+		void OnLeaveRequestAlreadyLocked()
+		{
+			GCAssert(m_requestCount > 0);
+			m_requestCount--;
+			if (m_requestCount == 0)
+				m_condNoRequests.NotifyAll();
+#ifdef _DEBUG
+			GCThread::GetCurrentThread()->OnLeaveRequest();
+#endif
+		}
+
+	public:
+		/**
+		 * Call this when the number of active requests on a thread goes from
+		 * zero to one.
+		 */
+		void OnEnterRequest()
+		{
+			GCAutoLock _lock(m_lock);
+			OnEnterRequestAlreadyLocked();
+		}
+
+		/**
+		 * Call this when the number of active requests on a thread goes from 
+		 * one to zero.
+		 */
+		void OnLeaveRequest()
+		{
+			GCAutoLock _lock(m_lock);
+			OnLeaveRequestAlreadyLocked();
+		}
+
+		/**
+		 * Exactly like Collect(), except that the caller must be inside a
+		 * request.
+		 *
+		 * @access Requires(request && !m_lock)
+		 */
+		void CollectFromRequest()
+		{
+			CollectWithBookkeeping(false, true);
+		}
+
+	protected:
+		/**
+		 * Wait for the current GC operation, if any, to finish.
+		 *
+		 * @access Requires(!request && m_lock)
+		 */
+		void WaitForGCDone()
+		{
+			GCAssert(m_exclusiveGCThread != GCThread::GetCurrentThread());
+			while (m_exclusiveGCThread != NULL)
+				m_condDone.Wait();
+		}
+
+		/**
+		 * This lock protects m_exclusiveGCThread and m_requestCount.
+		 * Policies built on m_lock and m_exclusiveGCThread govern how threads
+		 * access the rest of MMgc (both data and code).
+		 *
+		 * These policies are documented with "\@access" comments, which is a
+		 * kind of shorthand.  Here are a few illustrative examples:
+		 *
+		 * <code>\@access Requires(m_lock)</code> on a member variable or
+		 * method means it must be used only by a thread that holds m_lock.
+		 *
+		 * <code>\@access Requires(exclusiveGC)</code> means the member is to
+		 * be used only by the GC thread, and only when no threads are running
+		 * in requests.  This applies to methods like Trace(), MarkItem(),
+		 * Sweep(), and Finalize().
+		 *
+		 * <code>\@access Requires(request)</code> means the member must be
+		 * used only by a thread that is in a request.  This applies to
+		 * Alloc(), Calloc(), and Free().
+		 *
+		 * <code>\@access Requires(exclusiveGC || request)</code> requires
+		 * that the caller be <em>either</em> in a request <em>or</em> that it
+		 * be the GC thread, with no threads running in requests.  (Of course
+		 * a thread can never be both.)  This is just like
+		 * <code>Requires(request)</code> except that a member marked this way
+		 * is also safe to use from finalizer code.  (Finalizers run with
+		 * <code>exclusiveGC</code>, not in a request.)
+		 *
+		 * <code>\@access ReadWrite(request, exclusiveGC)</code> applies to
+		 * several data members.  This denotes a read-write locking scheme.
+		 * Any thread with <code>request || exclusiveGC</code> can safely
+		 * <em>read</em> these data members, but only a thread with
+		 * <code>exclusiveGC</code> can <em>write</em> to them.
+		 *
+		 * Other policies are occasionally used.  For example, the list of
+		 * GCRoots has its own spinlock, so the head of the list and each of
+		 * the links has <code>@access(m_rootListLock)</code>.
+		 *
+		 * XXX TODO - worry about less-than-one-word fields (just bools, I
+		 * think) that are packed with other fields that have different access
+		 * policies!
+		 *
+		 * Some data structures, like the list of GCRoots, are protected by
+		 * separate spinlocks.  The rule to avoid deadlock is: do not try to
+		 * acquire m_lock if you already hold any spinlock.
+		 */
+		mutable GCLock m_lock;
+
+		/**
+		 * The thread currently doing GC-related work (or waiting to do
+		 * GC-related work); or NULL if there is no such thread.
+		 *
+		 * @access Requires(m_lock)
+		 */
+		GCThread *m_exclusiveGCThread;
+
+		/**
+		 * True if a thread is doing GC-related work, having already ensured
+		 * that no threads are in active requests.
+		 *
+		 * (The complicated thread-safety policy here makes reads lock-free.
+		 * It also supports checking the status even if the currently running
+		 * code isn't in a request at all; Collect() needs that.)
+		 *
+		 * @access ReadWrite(request || exclusiveGC || m_lock, exclusiveGC && m_lock)
+		 */
+		bool m_gcRunning;
+
+		/**
+		 * This is notified whenever m_exclusiveGCThread becomes NULL.
+		 *
+		 * @access Requires(m_lock)
+		 */
+		GCCondition m_condDone;
+
+		/**
+		 * The number of threads currently in active requests.
+		 *
+		 * @access Requires(m_lock)
+		 */
+		int m_requestCount;
+
+		/**
+		 * This is notified whenever m_requestCount becomes zero.
+		 *
+		 * At most one thread is ever waiting on this condition at a time; if
+		 * a thread is waiting on it, that thread is `m_exclusiveGCThread` and
+		 * `m_gcRunning` is false.
+		 *
+		 * @access Requires(m_lock)
+		 */
+		GCCondition m_condNoRequests;
 #endif
 	};
 
