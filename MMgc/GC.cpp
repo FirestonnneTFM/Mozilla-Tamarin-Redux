@@ -453,6 +453,14 @@ namespace MMgc
 			//
 			if (m_exclusiveGCThread != thisThread) {
 				GCRoot *stackRoot;
+				void *stack;
+				size_t stackSize;
+
+				// Call this macro here, not under "if
+				// (callerHasActiveRequest)", because it introduces local
+				// variables that must survive for the whole lifetime of
+				// stackRoot.
+				MMGC_GET_STACK_EXTENTS(this, stack, stackSize);
 
 				// Before waiting, this thread must suspend any active
 				// requests.  This avoids a deadlock where m_exclusiveGCThread
@@ -464,10 +472,6 @@ namespace MMgc
 				// in a suspended request.
 				//
 				if (callerHasActiveRequest) {
-					void *stack;
-					size_t stackSize;
-
-					MMGC_GET_STACK_EXENTS(this, stack, stackSize);
 					stackRoot = new GCRoot(this, stack, stackSize);
 
 					OnLeaveRequestAlreadyLocked();
