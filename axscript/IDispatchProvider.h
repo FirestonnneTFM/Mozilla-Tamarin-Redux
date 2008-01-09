@@ -108,7 +108,7 @@ namespace axtam {
 			/* [out] */ IUnknown **ppunk);
 
 		// The object we are implementing IDispatch for.
-		ScriptObject *ob;
+		DRC(ScriptObject *) ob;
 		AXTam *core;
 	protected:
 		stdext::hash_map<Atom, int> name2dispid;
