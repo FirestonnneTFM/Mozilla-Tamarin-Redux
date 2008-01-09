@@ -47,10 +47,13 @@ public namespace Ast
     // POS
 
     type POS =
-       { file: String
-       , span: int //StreamPos.span
-       , sm: int // StreamPos.sourcemap
-       , post_newline: Boolean }
+       {
+        line : int
+       // file: String
+       //, span: int //StreamPos.span
+       //, sm: int // StreamPos.sourcemap
+       //, post_newline: Boolean 
+       }
 
     // BASIC TYPES
 
@@ -483,16 +486,20 @@ public namespace Ast
 
     class LiteralExpr {
         const literal : LITERAL;
-        function LiteralExpr (literal)
-            : literal = literal {}
+        const pos : POS?
+        function LiteralExpr (literal, pos=null)
+            : literal = literal
+            , pos = pos {}
     }
 
     class CallExpr {
         const expr : EXPR;
         const args : EXPRS;
-        function CallExpr (expr,args)
+        const pos : POS?
+        function CallExpr (expr,args,pos=null)
             : expr = expr
-            , args = args {}
+            , args = args
+            , pos = pos {}
     }
 
     class ApplyTypeExpr {
@@ -531,14 +538,19 @@ public namespace Ast
 
     class LexicalRef {
         const ident : IDENT_EXPR;
-        function LexicalRef (ident)
-            : ident = ident { }
+        const pos : POS?
+        function LexicalRef (ident, pos=null)
+            : ident = ident
+            , pos = pos { }
     }
 
     class SetExpr {
         const op : ASSIGNOP;
         const le : EXPR;
         const re : EXPR;
+        function get pos() : POS? {
+            return le ? le.pos : null;
+        }
         function SetExpr (op,le,re)
             : op=op, le=le, re=re {}
     }
@@ -1421,10 +1433,12 @@ public namespace Ast
         var packages: PACKAGES;
         var block: BLOCK;
         var head: HEAD;
-        function Program (packages, block, head)
+        var file: String?;
+        function Program (packages, block, head, file=null)
             : packages = packages
             , block = block
-            , head = head {}
+            , head = head
+            , file = file {}
     }
 
     function test () {

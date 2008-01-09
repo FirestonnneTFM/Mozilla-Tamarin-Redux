@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -73,6 +73,9 @@
     use namespace Ast;
 
     function cgExpr(ctx, e) {
+        if( e.pos != null ) {
+            cgDebugInfo(ctx, e.pos);
+        }
         switch type (e) {
         case (e:TernaryExpr) { cgTernaryExpr(ctx, e) }
         case (e:BinaryExpr) { cgBinaryExpr(ctx, e) }
@@ -99,6 +102,18 @@
         }
     }
 
+    var lastline = -1;
+    function cgDebugInfo(ctx, p) {
+        //do debugging stuff
+        if( p && emit_debug) {
+            let asm = ctx.asm;
+            if( p.line >= 0  && p.line != lastline) {
+                asm.I_debugline(p.line);
+                lastline = p.line;
+            }
+        }
+    }
+    
     function cgTernaryExpr(ctx, { e1: test, e2: consequent, e3: alternate }) {
         let asm = ctx.asm;
         cgExpr(ctx, test);

@@ -1037,7 +1037,7 @@ use namespace intrinsic;
                     nd1 = new Ast::LexicalRef (new Ast::Identifier (nd1,cx.pragmas.openNamespaces))
                 }
                 case (ns:*) {
-                    nd1 = new Ast::LiteralExpr (new Ast::LiteralNamespace (nd1));
+                    nd1 = new Ast::LiteralExpr (new Ast::LiteralNamespace (nd1), position(ts));
                 }
                 }
                 var [ts2,nd2] = qualifiedNameIdentifier (tl(ts1), nd1);
@@ -1296,7 +1296,7 @@ use namespace intrinsic;
             }
 
             exit("Parser::objectLiteral ", ts2);
-            return [ts2,new Ast::LiteralExpr (new Ast::LiteralObject (nd1,nd2))];
+            return [ts2,new Ast::LiteralExpr (new Ast::LiteralObject (nd1,nd2), position(ts))];
         }
 
         /*
@@ -1440,7 +1440,7 @@ use namespace intrinsic;
             ts1 = eat (ts1,Token::RightBracket);
 
             exit ("Parser::arrayLiteral ", ts1);
-            return [ts1, new Ast::LiteralExpr (new Ast::LiteralArray (nd1,new Ast::ArrayType ([])))];
+            return [ts1, new Ast::LiteralExpr (new Ast::LiteralArray (nd1,new Ast::ArrayType ([])), position(ts))];
         }
 
         /*
@@ -1468,7 +1468,7 @@ use namespace intrinsic;
             {
                 switch (hd (ts)) {
                 case Token::Comma:
-                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined)];
+                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
                     break;
                 default:
                     switch (hd (ts1)) {
@@ -1489,7 +1489,7 @@ use namespace intrinsic;
                     ts1 = eat (ts1,Token::Comma);
                     switch (hd (ts1)) {
                     case Token::Comma:
-                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined)];
+                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
                         break;
                     case Token::RightBracket:
                         continue;  // we're done
@@ -1541,21 +1541,21 @@ use namespace intrinsic;
 
             switch (hd (ts)) {
             case Token::Null:
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralNull ())];
+                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralNull (), position(ts))];
                 break;
             case Token::True:
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralBoolean (true))];
+                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralBoolean (true), position(ts))];
                 break;
             case Token::False:
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralBoolean (false))];
+                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralBoolean (false), position(ts))];
                 break;
             case Token::DecimalLiteral:
                 let tx = Token::tokenText (ts.head());
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralDecimal (tx))];
+                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralDecimal (tx), position(ts))];
                 break;
             case Token::StringLiteral:
                 let tx = Token::tokenText (ts.head());
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralString (tx))];
+                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralString (tx), position(ts))];
                 break;
             case Token::This:
                 var [ts1,nd1] = [tl (ts), new Ast::ThisExpr ()];
@@ -1593,7 +1593,7 @@ use namespace intrinsic;
                     nd1 = new Ast::ObjectRef (base,nd.Ast::ident);  // FIXME: not good for package qualified refs
                 }
                 case (nd:*) {
-                    nd1 = new Ast::LexicalRef (nd1);
+                    nd1 = new Ast::LexicalRef (nd1, position(ts));
                 }
                 }
                 break;
@@ -1808,7 +1808,7 @@ use namespace intrinsic;
 
             var [ts1,nd1] = memberExpression (ts,beta);
             var [ts2,nd2] = this.arguments (ts);
-            var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2));
+            var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2,position(ts1)));
 
             exit ("Parser::callExpressionPrime ", ndx);
             return [tsx, ndx];
@@ -1822,7 +1822,7 @@ use namespace intrinsic;
             switch (hd (ts)) {
             case Token::LeftParen:
                 let [ts1,nd1] = this.arguments (ts);
-                var [tsx,ndx] = callExpressionPrime (ts1, beta, new Ast::CallExpr (nd,nd1));
+                var [tsx,ndx] = callExpressionPrime (ts1, beta, new Ast::CallExpr (nd,nd1,position(ts1)));
                 break;
             case Token::LeftBracket:
             case Token::Dot:
@@ -1860,7 +1860,7 @@ use namespace intrinsic;
                     let [ts2,nd2] = this.arguments (ts1); // refer to parser method
                     if (new_count == 0)
                     {
-                        var [tsx,ndx] = callExpressionPrime (ts2,beta,new Ast::CallExpr (nd1,nd2));
+                        var [tsx,ndx] = callExpressionPrime (ts2,beta,new Ast::CallExpr (nd1,nd2,position(ts1)));
                     }
                     else
                     {
@@ -1886,7 +1886,7 @@ use namespace intrinsic;
                     let [ts2,nd2] = this.arguments (ts1); // refer to parser method
                     if( new_count == 0 )
                     {
-                       var [tsx,ndx] = callExpressionPrime (ts2,beta,new Ast::CallExpr (nd1,nd2));
+                       var [tsx,ndx] = callExpressionPrime (ts2,beta,new Ast::CallExpr (nd1,nd2,position(ts1)));
                     }
                     else
                     {
@@ -1937,7 +1937,7 @@ use namespace intrinsic;
                 switch (hd (ts1)) {
                 case Token::LeftParen:
                     let [ts2,nd2] = this.arguments (ts1); // refer to parser method
-                    var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2));
+                    var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2,position(ts1)));
                     break;
                 default:
                     var [tsx,ndx] = [ts1,nd1];
@@ -1949,7 +1949,7 @@ use namespace intrinsic;
                 switch (hd (ts1)) {
                 case Token::LeftParen:
                     let [ts2,nd2] = this.arguments (ts1); // refer to parser method
-                    var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2));
+                    var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2,position(ts1)));
                     break;
                 default:
                     var [tsx,ndx] = [ts1,nd1];
@@ -2976,7 +2976,7 @@ use namespace intrinsic;
             {
                 switch (hd (ts)) {
                 case Token::Comma:
-                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined)];
+                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
                     break;
                 default:
                     var [ts1,ndx] = pattern (ts,allowIn,gamma);
@@ -2987,7 +2987,7 @@ use namespace intrinsic;
                     ts1 = eat (ts1,Token::Comma);
                     switch (hd (ts1)) {
                     case Token::Comma:
-                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined)];
+                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
                         break;
                     default:
                         var [ts1,ndx] = pattern (ts1,allowIn,gamma);
@@ -3319,7 +3319,7 @@ use namespace intrinsic;
             {
                 switch (hd (ts)) {
                 case Token::Comma:
-                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined)];
+                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
                     break;
                 default:
                     var [ts1,ndx] = nullableTypeExpression (ts);
@@ -3330,7 +3330,7 @@ use namespace intrinsic;
                     ts1 = eat (ts1,Token::Comma);
                     switch (hd (ts1)) {
                     case Token::Comma:
-                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined)];
+                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
                         break;
                     default:
                         var [ts1,ndx] = nullableTypeExpression (ts1);
@@ -3517,6 +3517,16 @@ use namespace intrinsic;
                 return true;
             else 
                 return false;
+        }
+        function position(ts:TOKENS) 
+            //: POS?
+        {
+            let offset = ts.n/4;
+            if( offset < coordList.length ) {
+                return {line:(coordList[offset][0]+1)};
+            }
+            else
+                return null;
         }
 
         function semicolon (ts: TOKENS, omega: OMEGA)
