@@ -112,21 +112,6 @@ namespace MMgc
 	   on different platforms, but we want to use UTF-16 uniformly. */
 	typedef unsigned short wchar;
 
-	/**
-	 * Conservative collector unit of work
-	 */
-    class GCWorkItem
-	{
-	public:
-		GCWorkItem() : ptr(0), _size(0) {}
-		GCWorkItem(const void *p, uint32 s, bool isGCItem) : ptr(p), _size(s | uint32(isGCItem)) {}
-		uint32 GetSize() const { return _size & ~1; }
-		int IsGCItem() const { return _size & 1; }
-		const void *ptr;
-		uint32 _size;
-	};	
-
-    
     typedef void* (*GCMallocFuncPtr)(size_t size);
     typedef void (*GCFreeFuncPtr)(void* mem);
 	

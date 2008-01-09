@@ -55,6 +55,21 @@ namespace MMgc
 
 	GCWeakRef* createWeakRef(int extra=0)
 	{
+		// Bogusly use up some extra stack.
+		//
+		// Certain compilers/platforms require this (at least gcc/MacIntel).
+		// A pointer to the temporary GCObject can be left on the stack, so
+		// far down that CleanStack doesn't dare touch it.  Leaving the
+		// pointer there causes the temporary to be marked, and not collected,
+		// which causes tests to fail with assertions.
+		///
+		// The extra 32 bytes here causes the temporary to end up higher on
+		// the stack (numerically lesser address, on Intel at least) where
+		// CleanStack will clobber it.
+		//
+		char buf[32];
+		sprintf(buf, "%d", extra);  // don't optimize away buf
+
 		return (new (gc, extra) GCObject())->GetWeakRef();
 	}
 

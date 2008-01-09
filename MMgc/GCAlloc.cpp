@@ -127,6 +127,8 @@ namespace MMgc
 
 	GCAlloc::GCBlock* GCAlloc::CreateChunk()
 	{
+		MMGC_ASSERT_GC_LOCK(m_gc);
+
 		// Get space in the bitmap.  Do this before allocating the actual block,
 		// since we might call GC::AllocBlock for more bitmap space and thus
 		// cause some incremental marking.
@@ -229,6 +231,7 @@ namespace MMgc
 
 	void* GCAlloc::Alloc(size_t size, int flags)
 	{
+		MMGC_ASSERT_GC_LOCK(m_gc);
 		(void)size;
 		GCAssertMsg(((size_t)m_itemSize >= size), "allocator itemsize too small");
 start:
@@ -379,6 +382,8 @@ start:
 
 	void GCAlloc::Finalize()
 	{
+		MMGC_ASSERT_EXCLUSIVE_GC(m_gc);
+
 		m_finalized = true;
 		// Go through every item of every block.  Look for items
 		// that are in use but not marked as reachable, and delete

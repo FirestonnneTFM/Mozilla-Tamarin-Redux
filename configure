@@ -35,5 +35,12 @@
 #
 # ***** END LICENSE BLOCK *****
 
-echo "running $PYTHON $0.py --ignore-unknown-flags $@"
-exec $PYTHON $0.py --ignore-unknown-flags $@
+args=''
+while [ $# -ge 1 ]; do
+    args="$args '$1'"
+    shift
+done
+
+echo "running $PYTHON $0.py --ignore-unknown-flags $args"
+
+eval "'$PYTHON' '$0.py' --ignore-unknown-flags $args"

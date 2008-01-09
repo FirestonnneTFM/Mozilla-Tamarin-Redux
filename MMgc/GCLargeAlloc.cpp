@@ -53,6 +53,9 @@ namespace MMgc
 
 	void* GCLargeAlloc::Alloc(size_t size, int flags)
 	{
+#ifdef MMGC_THREADSAFE
+		GCAssert(m_gc->m_lock.IsHeld());
+#endif
 		int blocks = (size+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize;
 		
 		LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, GC::kGCLargeAllocPageFirst, (flags&GC::kZero) != 0);
