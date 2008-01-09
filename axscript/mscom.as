@@ -77,15 +77,27 @@ package axtam.com {
 		public static const E_NOINTERFACE = 0x80000004
 
 		public var hresult: int
-		function Error(hresult) {
+		public var excepinfo: EXCEPINFO
+		function Error(hresult, excepinfo:EXCEPINFO = null) {
 			this.hresult = hresult;
+			this.excepinfo = excepinfo;
 		}
 
 		prototype.toString = function():String
 		{
+			var excepinfo:EXCEPINFO = this.excepinfo;
 			var e:axtam.com.Error = this
-			var hv:String = e.hresult > 0 ? e.hresult.toString(16) : (e.hresult+0x100000000).toString(16)
-			return "COM Error 0x" + hv + ": " + ProviderError.getErrorMessage(e.hresult)
+			var code:uint;
+			var msg:String;
+			if (excepinfo && excepinfo.description) {
+				msg = excepinfo.description + " (source:" + excepinfo.source + ", help:" + excepinfo.helpFile + ", helpContext:" + excepinfo.helpContext + ")";
+				code = excepinfo.code ? excepinfo.code : excepinfo.scode;
+			} else {
+				var code:uint = e.hresult
+				msg = ProviderError.getErrorMessage(code);
+			}
+			var hv:String = code > 0 ? code.toString(16) : (code+0x100000000).toString(16)
+			return "COM Error 0x" + hv + ": " + msg
 		}
 		_setPropertyIsEnumerable(prototype, "toString", false);
 
@@ -103,8 +115,8 @@ package axtam.com {
 	// When exceptions of this class are thrown, they are not treated as "unhandled",
 	// but simply indicate that script code wants a COM error returned.
 	public dynamic class ProviderError extends Error {
-		function ProviderError(hresult) {
-			super(hresult)
+		function ProviderError(hresult, excepinfo:EXCEPINFO = null) {
+			super(hresult, excepinfo)
 		}
 		// *sob* - see above
 		public native static function getErrorMessage(index:int):String;
@@ -115,11 +127,20 @@ package axtam.com {
 	// and are treated as "unhandled" when the occur - eg, a traceback is printed, debugger
 	// semantics followed, etc.
 	public dynamic class ConsumerError extends Error {
-		function ConsumerError(hresult) {
-			super(hresult)
+		function ConsumerError(hresult, excepinfo:EXCEPINFO = null) {
+			super(hresult, excepinfo)
 		}
 		// *sob* - see above
 		public native static function getErrorMessage(index:int):String;
+	}
+
+	public class EXCEPINFO {
+		public native function get code():uint
+		public native function get source():String
+		public native function get description():String
+		public native function get helpFile():String
+		public native function get helpContext():uint
+		public native function get scode():uint
 	}
 
 	// constants go directly in the axtam.com package.

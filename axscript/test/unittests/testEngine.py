@@ -315,6 +315,10 @@ class TestScriptDispatch(TestCaseInitialized):
         ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_PROPERTYGET,
                           True) # do we want a result?
         self.failUnlessEqual(ret, 'hello')
+        # and there should not be a property named 'expando' on the raw
+        # IDispatch - Tamarin should have created it and been handing out
+        # the dispid for it.
+        self.failIf(hasattr(self.test_script_ob, 'expando'))
 
     def testDispatchCall(self):
         code = "function f(arg1, arg2, arg3) { return arg1 + arg2 + arg3}; test.expando_func = f;"
@@ -377,6 +381,52 @@ class TestScriptDispatch(TestCaseInitialized):
             ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_PROPERTYGET | pythoncom.DISPATCH_METHOD,
                               True) # do we want a result?
             self.failUnlessEqual(ret, 'hello there')
+
+    def testDispatchRemembered(self):
+        # Check that a single ScriptObject is used for the same IDispatch
+        # pointer.
+        # This works "by accident" - the top-level names are cached by
+        # the impl.  See the test below, which uses children of the
+        # top-level names, which tests our cache of all seen IDispatch obs.
+        code = "test.expando = 'hello'"
+        disp = self.site.engine_script.GetScriptDispatch('test')
+        # name should not exist.
+        self.assertRaisesCOMError(disp.GetIDsOfNames, 0, 'expando', hresult=winerror.DISP_E_UNKNOWNNAME)
+        # Now execute the script code, which will define the name
+        self.parseScriptText(code)
+        lcid = 0
+        dispid = disp.GetIDsOfNames(lcid, 'expando')
+        ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_PROPERTYGET,
+                          True) # do we want a result?
+        self.failUnlessEqual(ret, 'hello')
+        # and fetch it again - should still get 'hello'
+        disp = self.site.engine_script.GetScriptDispatch('test')
+        dispid = disp.GetIDsOfNames(lcid, 'expando')
+        ret = disp.Invoke(dispid, lcid, pythoncom.DISPATCH_PROPERTYGET,
+                          True) # do we want a result?
+        self.failUnlessEqual(ret, 'hello')
+
+    def testDispatchRememberedSub(self):
+        # Check that a single ScriptObject is used for the same IDispatch
+        # pointer for an object other than a top-level "named item".
+        # set .value to an IDispatch object, and set an expando on that.
+        self.test_script_ob.value = wrap(TestScriptObject())
+        code = "test.value.expando = 'hello'"
+        # Now execute the script code, which will define the name
+        self.parseScriptText(code)
+        # damn - no expressions yet - so execute code that will fail if
+        # our condition is wrong.
+        self.parseScriptText("if (test.value.expando != 'hello') throw('wrong - got ' + test.value.expando);")
+
+    def testDispatchEquality(self):
+        self.test_script_ob.value = wrap(TestScriptObject())
+        code = "test.value.expando = 'hello'"
+        # Now execute the script code, which will define the name
+        self.parseScriptText(code)
+        # damn - no expressions yet - so execute code that will fail if
+        # our condition is wrong.
+        self.parseScriptText("if (test.value != test.value) throw('wrong - equality failed!');")
+        self.parseScriptText("if (!(test.value === test.value)) throw('wrong - identity failed!');")
 
 # tests specific to IDispachEx
 class TestScriptDispatchEx(TestCaseInitialized):

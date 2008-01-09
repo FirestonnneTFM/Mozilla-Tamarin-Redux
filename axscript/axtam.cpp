@@ -50,6 +50,7 @@
 #include "IActiveScriptSiteConsumer.h"
 #include "COMErrorClass.h"
 #include "ActiveScriptError.h"
+#include "ExcepInfo.h"
 
 // files cloned from the shell
 namespace axtam {
@@ -88,6 +89,7 @@ namespace axtam
 		//NATIVE_CLASS(abcclass_axtam_com_Error,                        COMErrorClass,           COMErrorObject)
 		NATIVE_CLASS(abcclass_axtam_com_ProviderError,                COMProviderErrorClass,   COMProviderErrorObject)
 		NATIVE_CLASS(abcclass_axtam_com_ConsumerError,                COMConsumerErrorClass,   COMConsumerErrorObject)
+		NATIVE_CLASS(abcclass_axtam_com_EXCEPINFO,                    EXCEPINFOClass,          EXCEPINFOObject)
 		// clones from the shell
 		NATIVE_CLASS(abcclass_axtam_Domain,                           DomainClass,             DomainObject)
 		NATIVE_CLASS(abcclass_flash_utils_ByteArray,                  ByteArrayClass,          ByteArrayObject)
@@ -137,7 +139,14 @@ namespace axtam
 	}
 
 	void AXTam::Close() {
+		// This should be safe to call multiple times.
 		as = NULL;
+		// Drop all COM references in our dispatchConsumers table.
+		stdext::hash_map<IUnknown *, DRC(IDispatchConsumer *)>::iterator it;
+		for (it=dispatchConsumers.begin(); it != dispatchConsumers.end(); it++) {
+			it->first->Release();
+		}
+		dispatchConsumers.clear();
 	}
 	
 	void AXTam::initAXPool()
@@ -258,6 +267,7 @@ namespace axtam
 		dispatchClass(NULL), 
 		unknownClass(NULL), 
 		toplevel(NULL), 
+		excepinfoClass(NULL),
 		comConsumerErrorClass(NULL),
 		comProviderErrorClass(NULL)
 	{
@@ -381,17 +391,7 @@ namespace axtam
 	}
 
 	void AXTam::throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei /* = NULL */){
-		// TODO: actually *use* this EXCEPINFO
-		if (pei) {
-			AvmDebugMsg(false, "COMError has EXCEPINFO which is ignored: desc is %S", pei->bstrDescription);
-			if (pei->bstrDescription)
-				::SysFreeString(pei->bstrDescription);
-			if (pei->bstrHelpFile)
-				::SysFreeString(pei->bstrHelpFile);
-			if (pei->bstrSource)
-				::SysFreeString(pei->bstrSource);
-		}
-		comConsumerErrorClass->throwError(hr);
+		comConsumerErrorClass->throwError(hr, pei);
 		AvmAssert(0); // not reached
 	}
 
@@ -512,9 +512,50 @@ namespace axtam
 		return undefinedAtom;
 	}
 
+	IDispatchConsumer *AXTam::getExistingConsumer(IUnknown *pUnk)
+	{
+		// See if the IUnknown as passed is in the map.
+		stdext::hash_map<IUnknown *, DRC(IDispatchConsumer *)>::iterator it = dispatchConsumers.find(pUnk);
+		if(it == dispatchConsumers.end()) {
+			// The IUnknown we are passed may not be exactly IUnknown, but
+			// instead a derived interface.  COM identity rules state that
+			// pointers returned from an explicit QI for IUnknown must
+			// be compared, so do that now.
+			CComQIPtr<IUnknown, &IID_IUnknown> realUnk(pUnk);
+			if (realUnk.p == pUnk) {
+				// Same pointer - no point re-checking the map - its not there!
+				return NULL;
+			}
+			it = dispatchConsumers.find(realUnk.p);
+		}
+		if(it == dispatchConsumers.end())
+			return NULL;
+
+		return it->second;
+	}
+
 	Atom AXTam::toAtom(IDispatch *pDisp)
 	{
-		return pDisp ? dispatchClass->create(pDisp)->atom() : nullObjectAtom;
+		if (!pDisp)
+			return nullObjectAtom;
+
+		// If this core has already seen this IDispatch, return the original object
+		// so expandos etc are what we expect.
+		IDispatchConsumer *dc = getExistingConsumer(pDisp);
+		if (dc == NULL) {
+			// haven't seen it before - create a new one and stash away.
+			// We can't get smarter, like only caching IDispatch objects
+			// with expandos, as we still need object identity to work - eg,
+			// 'window.document === window.document' must return True even when
+			// no expandos exist on either object.
+			CComQIPtr<IDispatch, &IID_IDispatch> disp(pDisp);
+			dc = dispatchClass->create(pDisp);
+			// must store a real IUnknown pointer so identity rules are respected
+			CComQIPtr<IUnknown, &IID_IUnknown> realUnk(pDisp);
+			// we store raw pointers, and COM reference is kept via 'Detach'.
+			dispatchConsumers[realUnk.Detach()] = dc;
+		}
+		return dc->atom();
 	}
 
 	Atom AXTam::toAtom(IUnknown *pUnk, const IID &iid /*= __uuidof(0)*/)
@@ -533,9 +574,16 @@ namespace axtam
 				return (OLECHAR *)string(val)->c_str();
 			case kObjectType:
 				// an arbitrary object.
-				// XXX - we should probably check if already an IDispatchConsumer,
-				// and extract the interface accordingly.  Until then, just wrap
-				// whatever it is.
+				// If its already a COM object, just extract the initial object.
+				if (istype(val, dispatchClass->traits()->itraits)) {
+					IDispatchConsumer *dc = (IDispatchConsumer *)atomToScriptObject(val);
+					return CComVariant(dc->getDispatch());
+				}
+				if (istype(val, unknownClass->traits()->itraits)) {
+					IUnknownConsumer *uc = (IUnknownConsumer*)atomToScriptObject(val);
+					return CComVariant(uc->ob);
+				}
+				// some other JS object - create an IDispatch wrapper for it.
 				return CComVariant(createDispatchProvider(val));
 			default:
 				if (AvmCore::isNull(val)) {

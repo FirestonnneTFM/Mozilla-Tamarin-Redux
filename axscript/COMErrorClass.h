@@ -58,10 +58,10 @@ namespace axtam {
 
 		/**
 		 * throwError is a convenience function for throwing
-		 * an exception with a formatted error message,
-		 * printf-style
+		 * an exception with a hresult and optionally an EXCEPINFO.
+		   NOTE: The EXCEPINFO ownership is taken by this function!
 		 */
-		void throwError(HRESULT hr);
+		void throwError(HRESULT hr, EXCEPINFO *pei = NULL);
 
 		/** @name static methods */
 		/*@{*/

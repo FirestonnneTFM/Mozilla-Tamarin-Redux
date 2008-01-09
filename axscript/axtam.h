@@ -82,6 +82,8 @@
 #include <DispEx.h>
 using namespace ATL;
 
+#include <hash_map>
+
 
 // Tamarin headers
 #include "avmplus.h"
@@ -90,6 +92,9 @@ using namespace ATL;
 #include "Exception.h"
 #include "avmplusDebugger.h"
 using namespace avmplus;
+
+// We use a DRC on IDispatchConsumer, so a fwd decl doesn't work.
+#include "IDispatchConsumer.h"
 
 // The NATIVE_CLASS macros etc expect an avmplus::NativeID namespace.
 namespace avmplus
@@ -118,9 +123,9 @@ DEFINE_GUID(AXT_CATID_ActiveScriptParse, 0xf0b7a1a2, 0x9847, 0x11cf, 0x8f, 0x20,
 namespace axtam
 {
 	class IUnknownConsumerClass;
-	class IDispatchConsumerClass;
 	class COMConsumerErrorClass;
 	class COMProviderErrorClass;
+	class EXCEPINFOClass;
 
 	// CodeContext is used to track which security context we are in.
 	// When an AS3 method is called, the AS3 method will set core->codeContext to its code context.
@@ -142,6 +147,7 @@ namespace axtam
 	{
 	public:
 		AXTam(MMgc::GC *gc);
+		~AXTam() {Close();}
 
 		// XXX - is it appropriate for toplevel to be stored here 
 		// (ie, is it really per 'core'?)
@@ -192,6 +198,9 @@ namespace axtam
 		IUnknownConsumerClass *unknownClass;
 		COMConsumerErrorClass *comConsumerErrorClass;
 		COMProviderErrorClass *comProviderErrorClass;
+		// Get an Atom for a previously seen IUnknown object, or undefinedAtom.
+		IDispatchConsumer *getExistingConsumer(IUnknown *pUnk);
+		EXCEPINFOClass *excepinfoClass;
 
 		// Ownership of EXCEPINFO is taken by this function.
 		void throwCOMConsumerError(HRESULT hr, EXCEPINFO *pei = NULL);
@@ -236,6 +245,10 @@ namespace axtam
 	private:
 		DECLARE_NATIVE_CLASSES()
 		DECLARE_NATIVE_SCRIPTS()
+
+		// A hashtable of IDispatchConsumerObjects, keyed by the address of the IUnknown
+		// it wraps.  MarkH failed to beat any of the avm hashtables into compliance.
+		stdext::hash_map<IUnknown *, DRC(IDispatchConsumer *)> dispatchConsumers;
 
 		bool gracePeriod;
 		bool inStackOverflow;

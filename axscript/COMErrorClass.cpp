@@ -35,6 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 #include "axtam.h"
 #include "COMErrorClass.h"
+#include "ExcepInfo.h"
 
 namespace axtam
 {
@@ -52,10 +53,11 @@ namespace axtam
 	}
 	
 
-	void COMErrorClass::throwError(HRESULT hr)
+	void COMErrorClass::throwError(HRESULT hr, EXCEPINFO *pei /* = NULL */)
 	{
-		Atom args[2] = { nullObjectAtom, core()->intToAtom(hr) };
-		core()->throwAtom(construct(1, args));
+		AXTam *core = (AXTam *)this->core();
+		Atom args[] = { nullObjectAtom, core->intToAtom(hr), pei ? core->excepinfoClass->create(pei)->atom() : nullObjectAtom };
+		core->throwAtom(construct(2, args));
 	}
 
 	Stringp COMErrorClass::getErrorMessage(int errorID) const

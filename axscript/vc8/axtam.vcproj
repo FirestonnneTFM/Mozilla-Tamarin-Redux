@@ -403,6 +403,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ExcepInfo.h"
+				>
+			</File>
+			<File
 				RelativePath="..\IActiveScriptSiteConsumer.h"
 				>
 			</File>
@@ -512,6 +516,10 @@
 			</File>
 			<File
 				RelativePath="..\DomainClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\ExcepInfo.cpp"
 				>
 			</File>
 			<File
