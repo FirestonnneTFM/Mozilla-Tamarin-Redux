@@ -340,7 +340,7 @@ namespace Emit;
 
         function Script(e:ABCEmitter) {
             this.e = e;
-            this.init = new Method(e,[], 0, "", true);
+            this.init = new Method(e,[], "", true);
         }
 
         public function newClass(name, basename) {
@@ -349,8 +349,8 @@ namespace Emit;
 
         /* All functions are in some sense global because the
            methodinfo and methodbody are both global. */
-        public function newFunction(formals,initScopeDepth) {
-            return new Method(e, formals, initScopeDepth, null, true);
+        public function newFunction(formals,standardPrologue) {
+            return new Method(e, formals, null, standardPrologue);
         }
 
         public function addException(e) {
@@ -394,8 +394,9 @@ namespace Emit;
         }
 
         public function getCInit() {
-            if(cinit == null )
-                cinit = new Method(s.e, [], 0, "$cinit", true);
+            if(cinit == null ) {
+                cinit = new Method(s.e, [], "$cinit", true);
+            }
             return cinit;
         }
 
@@ -470,12 +471,11 @@ namespace Emit;
     class Method // extends AVM2Assembler
     {
         public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[];
-	var initScopeDepth;
-        function Method(e:ABCEmitter, formals:Array, initScopeDepth, name, standardPrologue) {
-            asm = new AVM2Assembler(e.constants, formals.length, initScopeDepth);
+
+        function Method(e:ABCEmitter, formals:Array, name, standardPrologue) {
+            asm = new AVM2Assembler(e.constants, formals.length);
             //super(e.constants, formals.length);
             this.formals = formals;
-            this.initScopeDepth = initScopeDepth
             this.e = e;
             this.name = name;
 
@@ -512,7 +512,7 @@ namespace Emit;
             var body = new ABCMethodBodyInfo(meth);
             body.setMaxStack(asm.maxStack);
             body.setLocalCount(asm.maxLocal);
-            body.setInitScopeDepth(this.initScopeDepth);
+            body.setInitScopeDepth(0);
             body.setMaxScopeDepth(asm.maxScope);
             body.setCode(asm.finalize());
             for ( var i=0 ; i < traits.length ; i++ )

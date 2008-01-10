@@ -1,3 +1,8 @@
+# Recompile the compiler using the compiler in ../bin, compiling everything.
+# This typically takes a time; in many cases, running "make" is faster (but not always what you want).
+#
+# Please update Makefile if you add or remove files below.
+
 ./esc.sh ../src/debug.es
 ./esc.sh ../src/util.es
 ./esc.sh ../src/util-tamarin.es

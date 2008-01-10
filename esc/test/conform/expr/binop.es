@@ -5,7 +5,7 @@ function divide(a,b) { return a/b }
 function mod(a,b) { return a%b }
 function shl(a,b) { return a<<b }
 function shr(a,b) { return a>>b }
-//function shru(a,b) { return a>>>b }
+function shru(a,b) { return a>>>b }
 function and(a,b) { return a&b }
 function or(a,b) { return a|b }
 function xor(a,b) { return a^b }
@@ -30,7 +30,7 @@ print("DIVIDE " + divide(15,2));
 print("MOD " + mod(8,3));
 print("SHL " + shl(1,3));
 print("SHR " + shr(-1,3));
-//print("SHRU " + shru(-1,3));
+print("SHRU " + shru(-1,3));
 print("AND " + and(10,2));
 print("OR " + or(10,18));
 print("XOR " + xor(15,8));
@@ -53,8 +53,6 @@ var x;
 x = 10;
 print("ASSIGN " + x );
 
-/* None of these are implemented
-
 x = 10; x += 5; print("+= " + x);
 x = 10; x -= 5; print("-= " + x);
 x = 10; x *= 5; print("*= " + x);
@@ -62,11 +60,31 @@ x = 10; x /= 5; print("/= " + x);
 x = 10; x %= 5; print("%= " + x);
 x = 10; x <<= 2; print("<<= " + x);
 x = -1; x >>= 2; print(">>= " + x);
-x = -1; x >>>= 2; print(">>>= " + x);
+x = -1; x >>>= 3; print(">>>= " + x);
 x = 10; x &= 3; print("&= " + x);
 x = 10; x |= 3; print("|= " + x);
 x = 10; x ^= 7; print("^= " + x);
-*/
+
+var obj = {}
+
+obj.x = 10; obj.x += 5; print("Field += " + obj.x);
+obj.x = 10; obj.x -= 5; print("Field -= " + obj.x);
+obj.x = 10; obj.x *= 5; print("Field *= " + obj.x);
+obj.x = 10; obj.x /= 5; print("Field /= " + obj.x);
+obj.x = 10; obj.x %= 5; print("Field %= " + obj.x);
+obj.x = 10; obj.x <<= 2; print("Field <<= " + obj.x);
+obj.x = -1; obj.x >>= 2; print("Field >>= " + obj.x);
+obj.x = -1; obj.x >>>= 3; print("Field >>>= " + obj.x);
+obj.x = 10; obj.x &= 3; print("Field &= " + obj.x);
+obj.x = 10; obj.x |= 3; print("Field |= " + obj.x);
+obj.x = 10; obj.x ^= 7; print("Field ^= " + obj.x);
+
+var i=0;
+var obj = {}
+obj[0] = 42;
+obj[1] = 37;
+obj[i++] += 1;
+print("Side-effect += " + i + " " + obj[0] + " " + obj[1]);
 
 print("COMMA " + ( "WRONG", "RIGHT" ));
 

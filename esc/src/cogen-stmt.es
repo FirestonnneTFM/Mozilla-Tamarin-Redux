@@ -168,6 +168,73 @@
         asm.I_label(Lbreak);
     }
 
+    function cgForInStmt(ctx, s) {
+        var {vars:vars,init:init,obj:obj,stmt:stmt,labels:labels} = s;
+        // FIXME: fixtures
+        // FIXME: code shape?
+        let {asm:asm,emitter:emitter} = ctx;
+        cgHead(ctx, vars);
+
+        if (!(init is ListExpr))
+            throw "cgForInStmt: bogus";
+
+        let name;
+        switch type (init.exprs[0]) {
+        case (lr: LexicalRef) {
+            name = emitter.nameFromIdentExpr(init.exprs[0].ident);
+        }
+        case (ie: InitExpr) {
+            if (ie.inits.length != 1)
+                throw "unimplemented cogen in cgForInStmt: too many names" + ie.inits.length;
+            let [fxname] = ie.inits[0];
+            name = emitter.fixtureNameToName(fxname);
+        }
+        case(x: *) {
+            throw "unimplemented cogen in cgForInStmt for " + init.exprs[0];
+        }
+        }
+
+        let Lbreak = asm.newLabel();
+        let Lcont = asm.newLabel();
+
+        // FIXME: actually wrong to do this.  The effect we're looking for is that the
+        // binding is introduced if it does not exist, ie, DEFVAR.
+        asm.I_findproperty(name);
+        asm.I_pushundefined();
+        asm.I_setproperty(name);
+
+        if (init != null) {
+            cgExpr(ctx, init);
+            asm.I_pop();
+        }
+        let T_obj = asm.getTemp();
+        let T_idx = asm.getTemp();
+        cgExpr(ctx, obj);
+        asm.I_setlocal(T_obj);
+        asm.I_pushbyte(0);
+        asm.I_setlocal(T_idx);
+
+        let Ltop = asm.I_label(undefined);
+
+        asm.I_hasnext2(T_obj, T_idx);
+        asm.I_iffalse(Lbreak);
+        asm.I_getlocal(T_obj);
+        asm.I_getlocal(T_idx);
+        asm.I_nextname();
+
+        asm.I_findpropstrict(name);
+        asm.I_swap();
+        asm.I_setproperty(name);
+
+        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), labels, Lbreak), stmt);
+        asm.I_label(Lcont);
+        asm.I_jump(Ltop);
+
+        asm.I_label(Lbreak);
+        asm.killTemp(T_idx);
+        asm.killTemp(T_obj);
+    }
+
     function cgBreakStmt(ctx, s) {
         var {ident: ident} = s;
         let stk = ctx.stk;
@@ -298,18 +365,17 @@
     }
     
     function cgWithStmt(ctx, s) {
-        var {expr:expr} = s;
+        var {expr:expr, stmt:stmt} = s;
         let asm = ctx.asm;
-        // FIXME: save the scope object in a register and record this fact in the ctx inside
-        // the body, so that catch/finally handlers inside the body can restore the scope
-        // stack properly.
-        //
-        // FIXME: record the fact that "with" is in effect so that unstructured control flow can
-        // pop the scope stack.
+        let scopereg = asm.getTemp();
+
         cgExpr(ctx, expr);
+        asm.I_dup();
+        asm.I_setlocal(scopereg);
         asm.I_pushwith();
-        cgStmt(ctx, body);
+        cgStmt(pushWith(ctx, scopereg), stmt);
         asm.I_popscope();
+        asm.killTemp(scopereg);
     }
     
     function cgTryStmt(ctx, s) {
@@ -349,8 +415,6 @@
         asm.startCatch();
 
         let t = asm.getTemp();
-        asm.I_getlocal(0);
-        asm.I_pushscope();
         restoreScopes(ctx);
         let catch_ctx = pushCatch(ctx,t);
 

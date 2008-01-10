@@ -15,11 +15,9 @@ print( "DELVAR " + (delete x) );
 function f() { print("VOID called") }
 print( "VOID " + (void f()) );
 
-/* Verifier fails
 print( "TYPEOF " + (typeof "foo"));
 print( "TYPEOF " + (typeof null));
 print( "TYPEOF " + (typeof zappa));
-*/
 
 print( "UNOP + " + (+ "") );
 print( "UNOP - " + (- 10) );

@@ -2187,7 +2187,7 @@ use namespace intrinsic;
                     var op = Ast::rightShiftOp;
                     break;
                 case Token::UnsignedRightShift:
-                    var op = Ast::unsignedRightShiftOp;
+                    var op = Ast::rightShiftUnsignedOp;
                     break;
                 default:
                     done = true;
@@ -2584,6 +2584,7 @@ use namespace intrinsic;
         {
             enter("Parser::assignmentExpression ", ts);
 
+            var op = null;
             var [ts1,nd1] = conditionalExpression (ts, beta);
             switch (hd (ts1)) {
             case Token::Assign:
@@ -2591,66 +2592,63 @@ use namespace intrinsic;
                 var [ts2,nd2] = assignmentExpression (ts1,beta);
                 var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,Ast::assignOp);
                 break;
+            case Token::PlusAssign: 
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignPlusOp);
+                break;
+            case Token::MinusAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignMinusOp);
+                break;
+            case Token::MultAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignTimesOp);
+                break;
+            case Token::DivAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignDivideOp);
+                break;
+            case Token::RemainderAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRemainderOp);
+                break;
+            case Token::BitwiseAndAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseAndOp);
+                break;
+            case Token::BitwiseOrAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseOrOp);
+                break;
+            case Token::BitwiseXorAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseXorOp);
+                break;
+            case Token::LeftShiftAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLeftShiftOp);
+                break;
+            case Token::RightShiftAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRightShiftOp);
+                break;
+            case Token::UnsignedRightShiftAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRightShiftUnsignedOp);
+                break;
+            case Token::LogicalAndAssign: 
+                // ES4
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLogicalAndOp);
+                break;
+            case Token::LogicalOrAssign:
+                // ES4
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLogicalOrOp);
+                break;
             default:
-                var op = undefined;
-                switch(hd (ts1)) {
-                case Token::PlusAssign:
-                    op = Ast::plusOp;
-                    break;
-                case Token::MinusAssign:
-                    op = Ast::minusOp;
-                    break;
-                case Token::MultAssign:
-                    op = Ast::timesOp;
-                    break;
-                case Token::DivAssign:
-                    op = Ast::divideOp;
-                    break;
-                case Token::RemainderAssign:
-                    op = Ast::remainderOp;
-                    break;
-                case Token::LogicalAndAssign:
-                    op = Ast::logicalAndOp;
-                    break;
-                case Token::BitwiseAndAssign:
-                    op = Ast::bitwiseAndOp;
-                    break;
-                case Token::LogicalOrAssign:
-                    op = Ast::logicalOrOp;
-                    break;
-                case Token::BitwiseXorAssign:
-                    op = Ast::bitwiseXorOp;
-                    break;
-                case Token::BitwiseOrAssign:
-                    op = Ast::bitwiseOrOp;
-                    break;
-                case Token::LeftShiftAssign:
-                    op = Ast::leftShiftOp;
-                    break;
-                case Token::RightShiftAssign:
-                    op = Ast::rightShiftOp;
-                    break;
-                case Token::UnsignedRightShiftAssign:
-                    op = Ast::rightShiftUnsignedOp;
-                    break;
-                }
-                if( op != undefined )
-                {
-                    var nd_orig = nd1;
-                    var [ts1,nd1] = [tl (ts1), patternFromExpr(nd1)];
-                    var [ts2,nd2] = assignmentExpression(ts1, beta);
-                    nd2 = new Ast::BinaryExpr(op, nd_orig, nd2);
-                    var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,Ast::assignOp);
-                }
-                else
-                {
-                    var [ts2,expr] = [ts1,nd1];
-                }
+                var [ts2,expr] = [ts1,nd1];
                 break;
             }
 
             exit ("Parser::assignmentExpression ", ts1);
             return [ts2,expr];
+
+            function operateAndAssign(ts1, nd1, op) : [TOKENS, Ast::EXPR] {
+                var [ts2,nd2] = [tl (ts1), patternFromExpr (nd1)];
+                if (!(nd2 is SimplePattern))
+                    throw "error operandAndAssign, lhs should be SimplePattern";
+                var [ts3,nd3] = assignmentExpression (ts2,beta);
+                var [fxtrs,expr,head] = desugarAssignmentPattern (nd2,Ast::anyType,nd3,op);
+                return [ts3, expr];
+            }
 
             // expression to pattern converters
 
@@ -3417,6 +3415,10 @@ use namespace intrinsic;
             case Token::For:
                 var [ts2,nd2] = forStatement (ts,omega);
                 break;
+            case Token::Do:
+                var [ts1,nd1] = doStatement (ts,omega);
+                var [ts2,nd2] = [semicolon(ts1,omega),nd1];
+                break;
             case Token::Return:
                 var [ts1,nd1] = returnStatement (ts);
                 var [ts2,nd2] = [semicolon (ts1,omega),nd1];
@@ -3449,6 +3451,9 @@ use namespace intrinsic;
                 break;
             case Token::Try:
                 var [ts2,nd2] = tryStatement (ts);
+                break;
+            case Token::With:
+                var [ts2,nd2] = withStatement (ts, omega);
                 break;
             default:
                 let [ts1,nd1] = expressionStatement (ts);
@@ -3710,6 +3715,28 @@ use namespace intrinsic;
 
         /*
 
+        DoStatement(omega)
+            do Substatement(omega) while expr
+
+        */
+
+        function doStatement (ts: TOKENS, omega) 
+            : [TOKENS, Ast::STMT]
+        {
+            enter("Parser::doStatement ", ts);
+
+            ts = eat (ts,Token::Do);
+            var [ts1,body] = substatement (ts, omega); 
+            ts = eat(ts1,Token::While);
+            var [ts2,test] = parenListExpression (ts);
+            var labels = [];
+ 
+            exit("Parser::doStatement ", ts2);
+            return [ts2, new Ast::DoWhileStmt (test,body,labels)]; // same order of args to constructor as 'while'
+        }
+
+        /*
+
             ForStatement(omega)
                 for  (  ForInitialiser  ;  OptionalExpression  ;  OptionalExpression  )  Substatement(omega)
                 for  (  ForInBinding  in  ListExpression(allowColon, allowIn)  )  Substatement(omega)
@@ -3727,18 +3754,32 @@ use namespace intrinsic;
             ts = eat (ts,Token::For);
             ts = eat (ts,Token::LeftParen);
             var [ts1,nd1] = forInitialiser (ts);
-            ts1 = eat (ts1,Token::SemiColon);
-            var [ts2,nd2] = optionalExpression (ts1);
-            ts2 = eat (ts2,Token::SemiColon);
-            var [ts3,nd3] = optionalExpression (ts2);
-            ts3 = eat (ts3,Token::RightParen);
-            var [ts4,nd4] = substatement (ts3, omega); 
-            var labels = [];
-
-            var head = cx.exitLetBlock ();
- 
-            exit("Parser::forStatement ", ts4);
-            return [ts4, new Ast::ForStmt (head,nd1,nd2,nd3,nd4,labels)];
+            if (hd (ts1) == Token::In) {
+                ts1 = tl (ts1);
+                var [ts2,objexpr] = listExpression (ts1, allowIn);
+                ts2 = eat (ts2,Token::RightParen);
+                var [ts3,body] = substatement (ts2, omega); 
+                var labels = [];
+                
+                var head = cx.exitLetBlock ();
+                
+                exit("Parser::forStatement ", ts3);
+                return [ts3, new Ast::ForInStmt (head,nd1,objexpr,body,labels)];
+            }
+            else {
+                ts1 = eat (ts1,Token::SemiColon);
+                var [ts2,nd2] = optionalExpression (ts1);
+                ts2 = eat (ts2,Token::SemiColon);
+                var [ts3,nd3] = optionalExpression (ts2);
+                ts3 = eat (ts3,Token::RightParen);
+                var [ts4,nd4] = substatement (ts3, omega); 
+                var labels = [];
+                
+                var head = cx.exitLetBlock ();
+                
+                exit("Parser::forStatement ", ts4);
+                return [ts4, new Ast::ForStmt (head,nd1,nd2,nd3,nd4,labels)];
+            }
         }
 
         /*
@@ -3798,7 +3839,7 @@ use namespace intrinsic;
 
             switch (hd (ts)) {
             case Token::SemiColon:
-            case Token::RightBrace:
+            case Token::RightParen:
                 var [ts1,nd1] = [ts,null]
                 break;
             default:
@@ -3985,6 +4026,24 @@ use namespace intrinsic;
 
             exit("Parser::catchClause ", ts2);
             return [ts2,new Ast::Catch (head,nd2)];
+        }
+
+        /*
+
+        WithStatement
+            with ( expr ) stmt
+
+        */
+
+        function withStatement (ts: TOKENS, omega: OMEGA)
+            : [TOKENS,Ast::STMT]
+        {
+            // Only ES3-style with for now
+
+            ts = eat (ts, Token::With);
+            var [ts1, expr] = parenListExpression (ts);
+            var [ts2, body] = substatement (ts1, omega);
+            return [ts2, new Ast::WithStmt (expr, body)];
         }
 
         /*
@@ -4249,6 +4308,12 @@ use namespace intrinsic;
                     case Token::In:
                         if (beta === noIn) {
                             // in a binding form
+                            if (p is IdentifierPattern) {
+                                var tsx = ts2;
+                                var [f,i] = desugarBindingPattern (p,t,nd2,ns,it,ro);
+                            }
+                            else
+                                throw "error identifier pattern required by for-in binding (for now)";
                             break;
                         } // else fall through
                     default:
@@ -4261,12 +4326,21 @@ use namespace intrinsic;
                     case Token::In:
                         if (beta === noIn) {
                             // in a binding form
+                            if (p is IdentifierPattern) {
+                                var tsx = ts1;
+                                // This is actually wrong, because it may overwrite a hoisted var
+                                // that should not be overwritten if the loop body is never entered
+                                var [f,i] = desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro);
+                            }
+                            else
+                                throw "error identifier pattern required by for-in binding (for now)";
                             break;
                         } // else fall through
                     default:
                         switch type (p) {
                         case (p: IdentifierPattern) {
-                            var [tsx,[f,i]] = [ts1,desugarBindingPattern (p,t,null,ns,it,ro)];
+                            // See comment above
+                            var [tsx,[f,i]] = [ts1,desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro)];
                         }
                         case (x : *) {
                             throw "destructuring pattern without initializer";

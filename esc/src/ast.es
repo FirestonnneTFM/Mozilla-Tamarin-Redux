@@ -346,6 +346,19 @@ public namespace Ast
     class AssignLogicalOr {}
 
     const assignOp = new Assign;
+    const assignPlusOp = new AssignPlus;
+    const assignMinusOp = new AssignMinus;
+    const assignTimesOp = new AssignTimes;
+    const assignDivideOp = new AssignDivide;
+    const assignRemainderOp = new AssignRemainder;
+    const assignLeftShiftOp = new AssignLeftShift;
+    const assignRightShiftOp = new AssignRightShift;
+    const assignRightShiftUnsignedOp = new AssignRightShiftUnsigned;
+    const assignBitwiseAndOp = new AssignBitwiseAnd;
+    const assignBitwiseOrOp = new AssignBitwiseOr;
+    const assignBitwiseXorOp = new AssignBitwiseXor;
+    const assignLogicalAndOp = new AssignLogicalAnd;
+    const assignLogicalOrOp = new AssignLogicalOr;
 
     // UNOP
 
@@ -1213,6 +1226,17 @@ public namespace Ast
     }
 
     class ForInStmt {
+        const vars : HEAD;
+        const init : EXPR?;
+        const obj  : EXPR;
+        const stmt : STMT;
+        const labels : [IDENT];
+        function ForInStmt (vars,init,obj,stmt,labels)
+            : vars = vars
+            , init = init
+            , obj = obj
+            , stmt = stmt
+            , labels = labels {}
     }
 
     class ThrowStmt {

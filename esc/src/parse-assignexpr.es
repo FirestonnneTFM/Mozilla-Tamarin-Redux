@@ -269,7 +269,7 @@ use namespace intrinsic;
                     var op = Ast::rightShiftOp;
                     break;
                 case Token::UnsignedRightShift:
-                    var op = Ast::unsignedRightShiftOp;
+                    var op = Ast::rightShiftUnsignedOp;
                     break;
                 default:
                     done = true;
@@ -666,12 +666,54 @@ use namespace intrinsic;
         {
             enter("Parser::assignmentExpression ", ts);
 
+            var op = null;
             var [ts1,nd1] = conditionalExpression (ts, beta);
             switch (hd (ts1)) {
             case Token::Assign:
                 var [ts1,nd1] = [tl (ts1), patternFromExpr (nd1)];
                 var [ts2,nd2] = assignmentExpression (ts1,beta);
                 var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,Ast::assignOp);
+                break;
+            case Token::PlusAssign: 
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignPlusOp);
+                break;
+            case Token::MinusAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignMinusOp);
+                break;
+            case Token::MultAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignTimesOp);
+                break;
+            case Token::DivAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignDivideOp);
+                break;
+            case Token::RemainderAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRemainderOp);
+                break;
+            case Token::BitwiseAndAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseAndOp);
+                break;
+            case Token::BitwiseOrAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseOrOp);
+                break;
+            case Token::BitwiseXorAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseXorOp);
+                break;
+            case Token::LeftShiftAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLeftShiftOp);
+                break;
+            case Token::RightShiftAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRightShiftOp);
+                break;
+            case Token::UnsignedRightShiftAssign:
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRightShiftAssignOp);
+                break;
+            case Token::LogicalAndAssign: 
+                // ES4
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLogicalAndOp);
+                break;
+            case Token::LogicalOrAssign:
+                // ES4
+                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLogicalOrOp);
                 break;
             default:
                 var [ts2,expr] = [ts1,nd1];
@@ -680,6 +722,15 @@ use namespace intrinsic;
 
             exit ("Parser::assignmentExpression ", ts1);
             return [ts2,expr];
+
+            function operateAndAssign(ts1, nd1, op) : [TOKENS, Ast::EXPR] {
+                var [ts1,nd1] = [tl (ts1), patternFromExpr (nd1)];
+                if (!(nd1 is SimplePattern))
+                    throw "error operandAndAssign, lhs should be SimplePattern";
+                var [ts2,nd2] = assignmentExpression (ts1,beta);
+                var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,op);
+                return [ts2, expr];
+            }
 
             // expression to pattern converters
 

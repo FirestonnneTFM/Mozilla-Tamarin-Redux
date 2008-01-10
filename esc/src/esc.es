@@ -12,6 +12,7 @@
     var esc_env_str = File.read ("esc-env.ast");
     var parser = new Parser(esc_env_str,[]);
     var [ts,nd] = parser.program();
+    nd.Ast::file = "esc-env.ast";  // or the AVM flips out if debugging is enabled
     var bytes = cg(nd).getBytes();
     Domain.currentDomain.loadBytes(bytes);
 }

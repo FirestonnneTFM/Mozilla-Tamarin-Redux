@@ -1,10 +1,8 @@
 // FOR LOOPS
 
-/*
 for (;false;)
     print("WRONG");
 print("DONE 0")
-*/
 
 var x;
 for (x=0;x<2;x=x+1)

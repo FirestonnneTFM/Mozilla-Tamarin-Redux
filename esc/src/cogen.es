@@ -36,7 +36,41 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/* Protocols:
+   
+   - the 'this' receiver object is passed as the first argument to any call, 
+     the value may be null
+   - local(0) contains the current 'this' object inside any function body,
+     its value is always an object
+   - inside class instance methods, the 'this' object is on the scope stack 
+     outside the activation object
+   - inside constructors, the 'this' object is on the scope stack in the 
+     constructor body, also outside the activation object
+   - inside other functions, the 'this' object is not on the scope stack
+   - inside script top levels the 'this' object is on the scope stack; it
+     should be the global object.
+   - inside class initializers the 'this' object is on the scope stack; it
+     is presumably the class object (but this remains to be verified).
+*/
+
 var CTX_shared;
+
+/* A context is a structure with the fields
+ *
+ *    emitter  -- the unique emitter
+ *    script   -- the only script we care about in that emitter
+ *    cp       -- the emitter's constant pool
+ *    asm      -- the current function's assembler
+ *    stk      -- the current function's binding stack (labels, ribs)
+ *    target   -- the current trait target
+ *
+ * All of these are invariant and kept in the prototype except for
+ * 'asm', 'stk', and some fields to come.
+ *
+ * FIXME, there are probably at least two targets: one for LET, another
+ * for VAR/CONST/FUNCTION.
+ */
+
 class CTX {
     var asm, stk, target;
     var emitter, script, cp, filename;
@@ -53,8 +87,6 @@ class CTX {
         this.filename = CTX_shared.filename;
     }
 }
-
-
 
 namespace Gen;
 //package cogen
@@ -75,31 +107,13 @@ namespace Gen;
     
     /* Returns an ABCFile structure */
     function cg(tree: PROGRAM) {
-    /// function cg(tree: PROGRAM) {
         var e = new ABCEmitter;
         var s = e.newScript();
         // CTX.prototype = { "emitter": e, "script": s, "cp": e.constants };  // tamarin doesn't like initing prototype here
         CTX_shared = { "emitter": e, "script": s, "cp": e.constants, "filename": tree.file };
-        cgProgram(new CTX(s.init.asm, null, s), tree);
+        cgProgram(new CTX(s.init.asm, {tag: "script", push_this: true}, s), tree);
         return e.finalize();
     }
-
-    /* A context is a structure with the fields
-     *
-     *    emitter  -- the unique emitter
-     *    script   -- the only script we care about in that emitter
-     *    cp       -- the emitter's constant pool
-     *    asm      -- the current function's assembler
-     *    stk      -- the current function's binding stack (labels, ribs)
-     *    target   -- the current trait target
-     *
-     * All of these are invariant and kept in the prototype except for
-     * 'asm', 'stk', and some fields to come.
-     *
-     * FIXME, there are probably at least two targets: one for LET, another
-     * for VAR/CONST/FUNCTION.
-     */
-
 
     function push(ctx, node) {
         node.link = ctx.stk;
@@ -137,63 +151,46 @@ namespace Gen;
             let [fxname, fx] = fixtures[i];
             let name = emitter.fixtureNameToName(fxname);
 
-            /// switch type (fx) {
-            /// case (fx:ValFixture) {
             if (fx is ValFixture) {
                 if( !hasTrait(target.traits, name, TRAIT_Slot) )
                     target.addTrait(new ABCSlotTrait(name, 0, false, 0, emitter.typeFromTypeExpr(fx.type), 0, 0)); 
 					// FIXME when we have more general support for type annos
             }
-            /// case (fx:MethodFixture) {
             else if (fx is MethodFixture) {
-                var initScopeDepth = (ctx.stk!=null && ctx.stk.tag=="instance")?2:0;
-                methidx = cgFunc(ctx, fx.func, initScopeDepth);
-                /// switch type (target) {
-                /// case (m:Method) {
-                if (target is Method) {
+                methidx = cgFunc(ctx, fx.func);
+                if (target is Method || target is Script) {
                     target.addTrait(new ABCSlotTrait(name, 0, false, 0, 0, 0, 0)); 
                     asm.I_findpropstrict(name);
                     asm.I_newfunction(methidx);
                     asm.I_setproperty(name);
                 }
-                /// case (x:*) {
                 else {
                     // target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Method, 0, methidx));
                     trait_kind = TRAIT_Method;
-                    /// switch type(fx.func.name.kind) {
-                    /// case (g:Get) {
                     if (fx.func.name.kind is Get) {
-                        //print("Getter, target: " + target);
                         trait_kind = TRAIT_Getter;
                     }
-                    /// case (s:Set) {
                     else if (fx.func.name.kind is Set) {
-                        //print("Setter, target: " +target);
                         trait_kind = TRAIT_Setter;
                     }
-                    /// }
                     target.addTrait(new ABCOtherTrait(name, 0, trait_kind, 0, methidx));
                 }
-                /// }
             }
-            /// case (fx:ClassFixture) {
             else if (fx is ClassFixture) {
                 clsidx = cgClass(ctx, fx.cls);
                 target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, clsidx));
             }
-            /// case (fx:NamespaceFixture) {
             else if (fx is NamespaceFixture) {
-                target.addTrait(new ABCSlotTrait(name, 0, true, 0, emitter.qname({ns:new PublicNamespace(""), id:"Namespace"},false), emitter.namespace(fx.ns), CONSTANT_Namespace));
+                target.addTrait(new ABCSlotTrait(name, 0, true, 0, 
+                                                 emitter.qname({ns:new PublicNamespace(""), id:"Namespace"},false), 
+                                                 emitter.namespace(fx.ns), CONSTANT_Namespace));
             }
-            /// case (fx:TypeFixture) {
             else if (fx is TypeFixture) {
                 //print ("warning: ignoring type fixture");
             }
-            /// case (fx:*) { 
             else {
                 throw "Internal error: unhandled fixture type" 
             }
-            /// }
         }
     }
 
@@ -279,7 +276,7 @@ namespace Gen;
 
         // cinit - init static fixtures
         let cinit = cls.getCInit();
-        let cinit_ctx = new CTX(cinit.asm, {tag:"cinit"}, cinit);
+        let cinit_ctx = new CTX(cinit.asm, {tag:"function", functype:"cinit"}, cinit);
         cgDebugFile(cinit_ctx);
         cgHead(cinit_ctx, {fixtures:[], exprs:c.classHead.exprs});
         
@@ -315,7 +312,7 @@ namespace Gen;
      */
     function cgCtor(ctx, c, instanceInits) {
         let formals_type = extractFormalTypes(ctx, c.func);
-        let method = new Method(ctx.script.e, formals_type, 2, "$construct", false);
+        let method = new Method(ctx.script.e, formals_type, "$construct", false);
         let asm = method.asm;
 
         let defaults = extractDefaultValues(ctx, c.func);
@@ -325,7 +322,8 @@ namespace Gen;
         }
         
         let t = asm.getTemp();
-        let ctor_ctx = new CTX(asm, {tag:"function", scope_reg:t}, method);
+        // FIXME: record that scopes must be restored here!
+        let ctor_ctx = new CTX(asm, {tag:"function", functype:"iinit", scope_reg:t}, method);
        
         cgDebugFile(ctor_ctx);
         asm.I_getlocal(0);
@@ -398,10 +396,11 @@ namespace Gen;
      * Generate code for the function
      * Return the function index
      */
-    function cgFunc(ctx0, f:FUNC, initScopeDepth) {
+    function cgFunc(ctx0, f:FUNC) {
         var {emitter:emitter,script:script} = ctx0;
+        let fntype = ctx0.stk != null && ctx0.stk.tag == "instance" ? "method" : "vanilla";  // brittle as hell
         let formals_type = extractFormalTypes({emitter:emitter, script:script}, f);
-        let method = script.newFunction(formals_type,initScopeDepth);
+        let method = script.newFunction(formals_type,fntype != "vanilla");
         let asm = method.asm;
 
         let defaults = extractDefaultValues({emitter:emitter, script:script}, f);
@@ -426,24 +425,22 @@ namespace Gen;
          */
         let t = asm.getTemp();
 
-        let ctx = new CTX(asm, {tag: "function", scope_reg:t, has_scope:true}, method);
-        cgDebugFile(ctx);
+        let fnctx = new CTX(asm, {tag: "function", functype:fntype, scope_reg:t, has_scope:true, push_this: (fntype != "vanilla")}, method);
+        cgDebugFile(fnctx);
 
         asm.I_newactivation();
         asm.I_dup();
         asm.I_setlocal(t);
         asm.I_pushscope();
         
-
-        cgHead(ctx, f.params);
-
-        cgHead(ctx, f.vars);
+        cgHead(fnctx, f.params);
+        cgHead(fnctx, f.vars);
         
         /* Generate code for the body.  If there is no return statement in the
          * code then the default behavior of the emitter is to add a returnvoid
          * at the end, so there's nothing to worry about here.
          */
-        cgBlock(ctx, f.block);
+        cgBlock(fnctx, f.block);
         asm.I_kill(t);
         return method.finalize();
     }
@@ -525,22 +522,25 @@ namespace Gen;
 
     function restoreScopes(ctx) {
         var {stk:stk, asm:asm} = ctx;
-        let regs = [];
-        while (stk != null) {
-            if(stk.has_scope) {
-                regs.push(stk.scope_reg);
+        loop(stk);
+
+        function loop(stk) {
+            if (stk == null)
+                return;
+            if (stk.tag != "function")
+                loop(stk.link);
+            if (stk.push_this) {
+                // function, script -- probably others
+                asm.I_getlocal(0);
+                asm.I_pushscope();
             }
-            if( stk.tag != "function" ) {
-                stk = stk.link;
+            if (stk.has_scope) {
+                asm.I_getlocal(stk.scope_reg);
+                if (stk.tag == "with")
+                    asm.I_pushwith();
+                else
+                    asm.I_pushscope();
             }
-            else {
-                stk = null;
-            }
-        }
-        for( let i = regs.length-1; i >= 0; i-- )
-        {
-            asm.I_getlocal(regs[i]);
-            asm.I_pushscope();
         }
     }
 
@@ -555,9 +555,8 @@ namespace Gen;
         // FIXME
     }
 
-    function pushWith(ctx /*more*/) {
-        // FIXME
-    }
+    function pushWith(ctx, scope_reg)
+        push(ctx, { tag:"with", has_scope:true, scope_reg:scope_reg });
 
     function pushLet(ctx /*more*/) {
     }
