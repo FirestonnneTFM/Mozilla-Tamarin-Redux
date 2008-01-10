@@ -560,7 +560,7 @@
             asm.I_construct(2);
         }
 
-        let asm = ctx.asm;
+        let {asm:asm, emitter:emitter} = ctx;
         switch type (e.literal) {
         case (e:LiteralNull) { asm.I_pushnull() }
         case (e:LiteralUndefined) { asm.I_pushundefined() }
@@ -589,7 +589,24 @@
             else
                 asm.I_pushfalse();
         }
-        case (e:LiteralFunction) { asm.I_newfunction(cgFunc(ctx, e.func)) }
+        case (e:LiteralFunction) { 
+            if (e.func.name != null) {
+                // FIXME: correct for ES3 but not for ES4
+                let t = asm.getTemp();
+                asm.I_newobject(0);
+                asm.I_dup();
+                asm.I_setlocal(t);
+                asm.I_pushwith();
+                asm.I_newfunction(cgFunc(ctx, e.func));
+                asm.I_dup();
+                asm.I_getlocal(t);
+                asm.I_swap();
+                asm.I_setproperty(emitter.nameFromIdent(e.func.name.ident));
+                asm.killTemp(t);
+            }
+            else
+                asm.I_newfunction(cgFunc(ctx, e.func));
+        }
         case (e:LiteralArray) { cgArrayInitializer(ctx, e) }
         case (e:LiteralObject) { cgObjectInitializer(ctx, e) }
         case (e:LiteralRegExp) { cgRegExpLiteral(ctx, e) }

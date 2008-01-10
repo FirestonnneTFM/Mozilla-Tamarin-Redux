@@ -49,11 +49,10 @@ print("REGEXP ignorecase " + w.ignorecase);
 
 // Functions
 
-/*var fn = function f(n) { print("NAMED " + n); if (n > 0) f(n-1) }
+var fn = function f(n) { print("NAMED " + n); if (n > 0) f(n-1) }
 fn(2);
 var fn2 = function(n) { print("UNNAMED " + n); if (n > 0) fn2(n-1) }
 fn2(2);
-*/
 
 // Property reference
 

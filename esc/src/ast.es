@@ -822,6 +822,8 @@ public namespace Ast
 
     class LiteralFunction {
         const func : FUNC;
+        function LiteralFunction (func)
+            : func = func {}
     }
 
 	class LiteralRegExp {

@@ -431,7 +431,7 @@
         // catch block body
         cgBlock(catch_ctx, block);
         
-        asm.I_kill(t);
+        asm.killTemp(t);
         
         asm.I_popscope();
         asm.I_jump(Lend);

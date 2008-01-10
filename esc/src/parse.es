@@ -1585,6 +1585,9 @@ use namespace intrinsic;
             case Token::LeftBrace:
                 var [ts1,nd1] = objectLiteral (ts);
                 break;
+            case Token::Function:
+                var [ts1,nd1] = functionExpression (ts);
+                break;
             default:
                 var [ts1,nd1] = primaryName (ts);
                 switch type (nd1) {
@@ -4443,6 +4446,33 @@ use namespace intrinsic;
 
             exit("Parser::functionDefinition ", ts3);
             return [ts3, []];
+        }
+
+        /* ... */
+        function functionExpression (ts:TOKENS)
+            : [TOKENS,Ast::EXPR]
+        {
+            enter("Parser::functionExpression ",ts);
+            
+            ts = eat (ts, Token::Function);
+            if (hd (ts) == Token::Identifier) {
+                var [ts1,name] = functionName (ts);
+            }
+            else {
+                var [ts1,name] = [ts,null];
+            }
+
+            var [ts2,signature] = functionSignature (ts1);
+
+            cx.enterVarBlock ();
+            var [ts3,body] = functionBody (ts2, AllowIn, FullStmt);
+            var vars = cx.exitVarBlock ();
+
+            var { params:params, defaults:defaults, resultType:resultType } = signature;
+            var fnexpr = new Ast::LiteralExpr( new Ast::LiteralFunction(new Ast::Func(name, false, body, params, vars, defaults, resultType )), position(ts3) );
+
+            exit("Parser::functionExpression ",ts3);
+            return [ts3, fnexpr];
         }
 
         /*
