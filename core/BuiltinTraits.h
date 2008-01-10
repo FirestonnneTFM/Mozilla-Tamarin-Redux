@@ -80,6 +80,10 @@ namespace avmplus
 		Traits *regexp_itraits;
 		Traits *string_itraits;
 		Traits *toplevel_itraits;
+		Traits *vectorint_itraits;
+		Traits *vectoruint_itraits;
+		Traits *vectordouble_itraits;
+		Traits *vectorobj_itraits;
 		Traits *void_itraits;
 		Traits *xml_itraits;
 		Traits *xmlList_itraits;

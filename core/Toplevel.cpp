@@ -1673,6 +1673,11 @@ namespace avmplus
 		rangeErrorClass()->throwError(id, arg1);
 	}
 
+	void Toplevel::throwRangeError(int id, Stringp arg1, Stringp arg2) const
+	{
+		rangeErrorClass()->throwError(id, arg1, arg2);
+	}
+
 	void Toplevel::throwRangeError(int id, Stringp arg1, Stringp arg2, Stringp arg3) const
 	{
 		rangeErrorClass()->throwError(id, arg1, arg2, arg3);

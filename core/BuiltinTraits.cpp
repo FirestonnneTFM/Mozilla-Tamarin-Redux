@@ -68,6 +68,10 @@ namespace avmplus
 		qName_itraits		= pool->getBuiltinTraits(core->constantString("QName"));
 		xml_itraits			= pool->getBuiltinTraits(core->constantString("XML"));
 		xmlList_itraits     = pool->getBuiltinTraits(core->constantString("XMLList"));
+		vectorint_itraits	= pool->getBuiltinTraits(core->constantString("Vector$int"));
+		vectoruint_itraits	= pool->getBuiltinTraits(core->constantString("Vector$uint"));
+		vectordouble_itraits= pool->getBuiltinTraits(core->constantString("Vector$double"));
+		vectorobj_itraits	= pool->getBuiltinTraits(core->constantString("Vector$object"));
 
 		null_itraits = core->newTraits(NULL, 0, 0, 0);
 		null_itraits->pool = pool;

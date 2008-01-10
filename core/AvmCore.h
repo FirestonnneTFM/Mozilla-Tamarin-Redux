@@ -71,6 +71,10 @@ namespace avmplus
 #define VOID_TYPE		(core->traits.void_itraits)
 #define NULL_TYPE		(core->traits.null_itraits)
 #define NAMESPACE_TYPE	(core->traits.namespace_itraits)
+#define VECTORINT_TYPE	(core->traits.vectorint_itraits)
+#define VECTORUINT_TYPE	(core->traits.vectoruint_itraits)
+#define VECTORDOUBLE_TYPE		(core->traits.vectordouble_itraits)
+#define VECTOROBJ_TYPE	(core->traits.vectorobj_itraits)
 
 const int kBufferPadding = 16;
 

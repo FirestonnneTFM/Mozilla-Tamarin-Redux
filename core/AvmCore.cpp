@@ -77,6 +77,12 @@ namespace avmplus
 		NATIVE_CLASS(abcclass_RegExp,				RegExpClass,	RegExpObject)
 		NATIVE_CLASS(abcclass_Date,				DateClass,		DateObject)
 
+		// Vector
+		NATIVE_CLASS(abcclass_Vector_int,     IntVectorClass,      IntVectorObject)		
+		NATIVE_CLASS(abcclass_Vector_uint,    UIntVectorClass,     UIntVectorObject)		
+		NATIVE_CLASS(abcclass_Vector_double,  DoubleVectorClass,   DoubleVectorObject)	
+		NATIVE_CLASS(abcclass_Vector_object,  ObjectVectorClass,  ObjectVectorObject)		
+
 		// E4X
 		NATIVE_CLASS(abcclass_XML,				XMLClass,		XMLObject)
 		NATIVE_CLASS(abcclass_XMLList,			XMLListClass,	XMLListObject)

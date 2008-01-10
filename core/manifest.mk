@@ -99,6 +99,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/Toplevel.cpp \
   $(curdir)/Traits.cpp \
   $(curdir)/UnicodeUtils.cpp \
+  $(curdir)/VectorClass.cpp \
   $(curdir)/Verifier.cpp \
   $(curdir)/VTable.cpp \
   $(curdir)/XMLClass.cpp \

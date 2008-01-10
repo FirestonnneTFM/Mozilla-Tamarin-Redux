@@ -167,6 +167,10 @@ namespace avmplus
 	class Hashtable;
 	class HeapMultiname;
 	class Interpreter;
+	class IntVectorObject;
+	class DoubleVectorObject;
+	class UIntVectorObject;
+	class ObjectVectorObject;
 	class Java;
 	class MathClass;
 	class MathUtils;
@@ -303,6 +307,7 @@ namespace avmplus
 #include "NumberClass.h"
 #include "IntClass.h"
 #include "ArrayClass.h"
+#include "VectorClass.h"
 #include "StringClass.h"
 #include "Date.h"
 #include "DateClass.h"

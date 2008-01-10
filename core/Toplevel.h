@@ -119,6 +119,7 @@ namespace avmplus
 
 		void throwRangeError(int id) const;
 		void throwRangeError(int id, Stringp arg1) const;
+		void throwRangeError(int id, Stringp arg1, Stringp arg2) const;
 		void throwRangeError(int id, Stringp arg1, Stringp arg2, Stringp arg3) const;
 
 		void throwReferenceError(int id, Multiname* multiname, const Traits* traits) const;

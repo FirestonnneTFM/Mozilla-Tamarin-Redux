@@ -184,6 +184,26 @@ namespace avmplus
 			RETURN_METHOD_PTR(ArrayObject, f);
 		}
 
+		sintptr CodegenMIR::vectorIntAddr(int (IntVectorObject::*f)())
+		{
+			RETURN_METHOD_PTR(IntVectorObject, f);
+		}
+
+		sintptr CodegenMIR::vectorUIntAddr(int (UIntVectorObject::*f)())
+		{
+			RETURN_METHOD_PTR(UIntVectorObject, f);
+		}
+
+		sintptr CodegenMIR::vectorDoubleAddr(int (DoubleVectorObject::*f)())
+		{
+			RETURN_METHOD_PTR(DoubleVectorObject, f);
+		}
+
+		sintptr CodegenMIR::vectorObjAddr(int (ObjectVectorObject::*f)())
+		{
+			RETURN_METHOD_PTR(ObjectVectorObject, f);
+		}
+
 		sintptr CodegenMIR::efAddr( int (ExceptionFrame::*f)() )
 		{
 			RETURN_METHOD_PTR(ExceptionFrame, f);
@@ -3805,6 +3825,7 @@ namespace avmplus
 
 				if (maybeIntegerIndex && indexType == INT_TYPE)
 				{
+					bool valIsAtom = true;
 					OP* index = localGet(objDisp--);
 					
 					if (multiname->isRtns())
@@ -3816,10 +3837,44 @@ namespace avmplus
 					Traits* objType = state->value(objDisp).traits;
 
 					OP *value;
-					if (objType == ARRAY_TYPE)
+					if (objType == ARRAY_TYPE || objType == VECTOROBJ_TYPE )
 					{
-						value = callIns(MIR_cm, ARRAYADDR(ArrayObject::_getIntProperty), 2,
+						value = callIns(MIR_cm, (objType==ARRAY_TYPE ? 
+												ARRAYADDR(ArrayObject::_getIntProperty) :
+												VECTOROBJADDR(ObjectVectorObject::_getIntProperty)), 2,
 							localGet(sp-1), index);
+					}
+					else if( objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE)
+					{
+						if( result == INT_TYPE || result == UINT_TYPE)
+						{
+							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
+													VECTORINTADDR(IntVectorObject::_getNativeIntProperty) :
+													VECTORUINTADDR(UIntVectorObject::_getNativeIntProperty)), 2,
+							localGet(sp-1), index);
+							valIsAtom = false;
+						}
+						else
+						{
+							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
+													VECTORINTADDR(IntVectorObject::_getIntProperty) :
+													VECTORUINTADDR(UIntVectorObject::_getIntProperty)), 2,
+							localGet(sp-1), index);
+						}
+					}
+					else if( objType == VECTORDOUBLE_TYPE )
+					{
+						if( result == NUMBER_TYPE )
+						{
+							value = callIns(MIR_fcm, VECTORDOUBLEADDR(DoubleVectorObject::_getNativeIntProperty), 2,
+								localGet(sp-1), index);
+							valIsAtom = false;
+						}
+						else
+						{
+							value = callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_getIntProperty), 2,
+								localGet(sp-1), index);
+						}
 					}
 					else
 					{
@@ -3827,10 +3882,12 @@ namespace avmplus
 							ldargIns(_env), loadAtomRep(sp-1), index);
 					}
 
-					localSet(sp-1, atomToNativeRep(result, value));
+					localSet(sp-1, valIsAtom?atomToNativeRep(result, value):value);
 				}
 				else if (maybeIntegerIndex && indexType == UINT_TYPE)
 				{
+					bool valIsAtom = true;
+
 					OP* index = localGet(objDisp--);
 					
 					if (multiname->isRtns())
@@ -3842,10 +3899,44 @@ namespace avmplus
 					Traits* objType = state->value(objDisp).traits;
 
 					OP *value;
-					if (objType == ARRAY_TYPE)
+					if (objType == ARRAY_TYPE || objType ==VECTOROBJ_TYPE)
 					{
-						value = callIns(MIR_cm, ARRAYADDR(ArrayObject::_getUintProperty), 2,
+						value = callIns(MIR_cm, (objType==ARRAY_TYPE ? 
+												ARRAYADDR(ArrayObject::_getUintProperty) :
+												VECTOROBJADDR(ObjectVectorObject::_getUintProperty)), 2,
 							localGet(sp-1), index);
+					}
+					else if( objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
+					{
+						if( result == INT_TYPE || result == UINT_TYPE )
+						{
+							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ?
+													VECTORINTADDR(IntVectorObject::_getNativeUintProperty) :
+													VECTORUINTADDR(UIntVectorObject::_getNativeUintProperty)), 2,
+							localGet(sp-1), index);
+							valIsAtom = false;
+						}
+						else
+						{
+							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ?
+													VECTORINTADDR(IntVectorObject::_getUintProperty) : 
+													VECTORUINTADDR(UIntVectorObject::_getUintProperty)), 2,
+							localGet(sp-1), index);
+						}
+					}
+					else if( objType == VECTORDOUBLE_TYPE )
+					{
+						if( result == NUMBER_TYPE )//|| result == UINT_TYPE)
+						{
+							value = callIns(MIR_fcm, VECTORDOUBLEADDR(DoubleVectorObject::_getNativeUintProperty), 2,
+								localGet(sp-1), index);
+							valIsAtom = false;
+						}
+						else
+						{
+							value = callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_getUintProperty), 2,
+								localGet(sp-1), index);
+						}
 					}
 					else
 					{
@@ -3853,7 +3944,7 @@ namespace avmplus
 							ldargIns(_env), loadAtomRep(sp-1), index);
 					}
 
-					localSet(sp-1, atomToNativeRep(result, value));
+					localSet(sp-1, valIsAtom?atomToNativeRep(result, value):value);
 				}
 				else if (maybeIntegerIndex && indexType != STRING_TYPE)
 				{
@@ -3908,11 +3999,12 @@ namespace avmplus
 				// stack out:
 				// obj = sp[-1]
 				//env->setproperty(obj, multiname, sp[0], toVTable(obj));
-				OP* value = loadAtomRep(sp);
+				//OP* value = loadAtomRep(sp);
 
 				Multiname* multiname = (Multiname*)op1;
 				bool attr = multiname->isAttr();
 				Traits* indexType = state->value(sp-1).traits;
+				Traits* valueType = state->value(sp).traits;
 				int objDisp = sp-1;
 
 				bool maybeIntegerIndex = !attr && multiname->isRtname() && multiname->contains(core->publicNamespace);
@@ -3929,13 +4021,62 @@ namespace avmplus
 					
 					Traits* objType = state->value(objDisp).traits;
 
-					if (objType == ARRAY_TYPE)
+					if (objType == ARRAY_TYPE || objType == VECTOROBJ_TYPE)
 					{
-						callIns(MIR_cm, ARRAYADDR(ArrayObject::_setIntProperty), 3,
+						OP* value = loadAtomRep(sp);
+						callIns(MIR_cm, (objType==ARRAY_TYPE ? 
+										ARRAYADDR(ArrayObject::_setIntProperty) :
+										VECTOROBJADDR(ObjectVectorObject::_setIntProperty)), 3,
 							localGet(objDisp), index, value);
+					}
+					else if(objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
+					{
+						if( valueType == INT_TYPE )
+						{
+							OP* value = localGet(sp);
+							callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
+											VECTORINTADDR(IntVectorObject::_setNativeIntProperty) :
+											VECTORUINTADDR(UIntVectorObject::_setNativeIntProperty)),
+											3,
+											localGet(objDisp), index, value);
+						}
+						else if( valueType == UINT_TYPE )
+						{
+							OP* value = localGet(sp);
+							callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
+											VECTORINTADDR(IntVectorObject::_setNativeIntProperty) :
+											VECTORUINTADDR(UIntVectorObject::_setNativeIntProperty)), 
+											3,
+											localGet(objDisp), index, value);
+						}
+						else
+						{
+							OP* value = loadAtomRep(sp);
+							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
+													VECTORINTADDR(IntVectorObject::_setIntProperty) :
+													VECTORUINTADDR(UIntVectorObject::_setIntProperty)), 
+													3,
+													localGet(objDisp), index, value);
+						}
+					}
+					else if(objType == VECTORDOUBLE_TYPE)
+					{
+						if( valueType == NUMBER_TYPE )
+						{
+							OP* value = localGet(sp);
+							callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setNativeIntProperty), 3,
+								localGet(objDisp), index, value);
+						}
+						else
+						{
+							OP* value = loadAtomRep(sp);
+							value = callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setIntProperty), 3,
+								localGet(objDisp), index, value);
+						}
 					}
 					else
 					{
+						OP* value = loadAtomRep(sp);
 						callIns(MIR_cm, ENVADDR(MethodEnv::setpropertylate_i), 4,
 							ldargIns(_env), loadAtomRep(objDisp), index, value);
 					}
@@ -3952,19 +4093,69 @@ namespace avmplus
 					
 					Traits* objType = state->value(objDisp).traits;
 
-					if (objType == ARRAY_TYPE)
+					if (objType == ARRAY_TYPE || objType == VECTOROBJ_TYPE)
 					{
-						callIns(MIR_cm, ARRAYADDR(ArrayObject::_setUintProperty), 3,
+						OP* value = loadAtomRep(sp);
+						callIns(MIR_cm, (objType==ARRAY_TYPE ? 
+										ARRAYADDR(ArrayObject::_setUintProperty) :
+										VECTOROBJADDR(ObjectVectorObject::_setUintProperty)), 3,
 							localGet(objDisp), index, value);
+					}
+					else if(objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
+					{
+						if( valueType == INT_TYPE )
+						{
+							OP* value = localGet(sp);
+							callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
+											VECTORINTADDR(IntVectorObject::_setNativeUintProperty) :
+											VECTORUINTADDR(UIntVectorObject::_setNativeUintProperty)),
+											3,
+											localGet(objDisp), index, value);
+						}
+						else if( valueType == UINT_TYPE )
+						{
+							OP* value = localGet(sp);
+							callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
+											VECTORINTADDR(IntVectorObject::_setNativeUintProperty) :
+											VECTORUINTADDR(UIntVectorObject::_setNativeUintProperty)), 
+											3,
+											localGet(objDisp), index, value);
+						}
+						else
+						{
+							OP* value = loadAtomRep(sp);
+							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
+													VECTORINTADDR(IntVectorObject::_setUintProperty) :
+													VECTORUINTADDR(UIntVectorObject::_setUintProperty)), 
+													3,
+													localGet(objDisp), index, value);
+						}
+					}
+					else if(objType == VECTORDOUBLE_TYPE)
+					{
+						if( valueType == NUMBER_TYPE )
+						{
+							OP* value = localGet(sp);
+							callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setNativeUintProperty), 3,
+								localGet(objDisp), index, value);
+						}
+						else
+						{
+							OP* value = loadAtomRep(sp);
+							value = callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setUintProperty), 3,
+								localGet(objDisp), index, value);
+						}
 					}
 					else
 					{
+						OP* value = loadAtomRep(sp);
 						callIns(MIR_cm, ENVADDR(MethodEnv::setpropertylate_u), 4,
 							ldargIns(_env), loadAtomRep(objDisp), index, value);
 					}
 				}
 				else if (maybeIntegerIndex)
 				{
+					OP* value = loadAtomRep(sp);
 					OP* _tempname = InsAlloc(sizeof(Multiname));
 
 					// copy the flags
@@ -3995,6 +4186,7 @@ namespace avmplus
 				}
 				else
 				{
+					OP* value = loadAtomRep(sp);
 					OP* multi = initMultiname((Multiname*)op1, objDisp);
 					AvmAssert(state->value(objDisp).notNull);
 

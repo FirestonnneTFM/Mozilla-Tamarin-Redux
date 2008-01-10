@@ -616,6 +616,10 @@ namespace avmplus
 		#define CALLSTACKADDR(f) callStackAddr((int (CallStackNode::*)())(&f))	
 		#define SCRIPTADDR(f) scriptAddr((int (ScriptObject::*)())(&f))
 		#define ARRAYADDR(f) arrayAddr((int (ArrayObject::*)())(&f))
+		#define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
+		#define VECTORUINTADDR(f) vectorUIntAddr((int (UIntVectorObject::*)())(&f))
+		#define VECTORDOUBLEADDR(f) vectorDoubleAddr((int (DoubleVectorObject::*)())(&f))
+		#define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
 		#define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
 		#define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
 
@@ -631,6 +635,10 @@ namespace avmplus
 		static sintptr efAddr( int (ExceptionFrame::*f)() );
 		static sintptr scriptAddr( int (ScriptObject::*f)() );
 		static sintptr arrayAddr( int (ArrayObject::*f)() );
+		static sintptr vectorIntAddr(int (IntVectorObject::*f)() );
+		static sintptr vectorUIntAddr(int (UIntVectorObject::*f)() );
+		static sintptr vectorDoubleAddr(int (DoubleVectorObject::*f)() );
+		static sintptr vectorObjAddr(int (ObjectVectorObject::*f)() );
 
 		friend class Verifier;
 

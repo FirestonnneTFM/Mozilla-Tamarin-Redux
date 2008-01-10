@@ -687,6 +687,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\VectorClass.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Verifier.cpp"
 				>
 				<FileConfiguration
@@ -1079,6 +1083,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\VectorClass.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Verifier.h"
 				>
 			</File>
@@ -1266,6 +1274,10 @@
 			</File>
 			<File
 				RelativePath="..\..\core\String.as"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\Vector.as"
 				>
 			</File>
 			<File

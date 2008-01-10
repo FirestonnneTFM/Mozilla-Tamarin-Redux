@@ -76,7 +76,6 @@ namespace avmplus
 #include "Profiler.h"
 #include "DataIO.h"
 #include "ByteArrayGlue.h"
-#include "TypedArrayClass.h"
 #include "DictionaryGlue.h"
 #include "SamplerScript.h"
 #include "JavaGlue.h"

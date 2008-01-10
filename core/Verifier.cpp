@@ -1142,6 +1142,25 @@ namespace avmplus
 				core->console << "verify setproperty " << obj.traits << " " << &multiname->getName() << " from within " << info << "\n";
 				#endif
 
+				if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
+					obj.traits == VECTORDOUBLE_TYPE )
+				{
+					bool attr = multiname.isAttr();
+					Traits* indexType = state->value(state->sp()-1).traits;
+
+					bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.contains(core->publicNamespace);
+
+					if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
+					{
+						if(obj.traits == VECTORINT_TYPE)
+							emitCoerce(INT_TYPE, state->sp());
+						else if(obj.traits == VECTORUINT_TYPE)
+							emitCoerce(UINT_TYPE, state->sp());
+						else if(obj.traits == VECTORDOUBLE_TYPE)
+							emitCoerce(NUMBER_TYPE, state->sp());
+					}
+				}
+
 				// not a var binding or early bindable accessor
 				if (mir)
 				{
@@ -2858,6 +2877,29 @@ namespace avmplus
 		core->console << "verify getproperty " << obj.traits << " " << multiname->getName() << " from within " << info << "\n";
 		#endif
 
+		if( !propType )
+		{
+			if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
+				obj.traits == VECTORDOUBLE_TYPE )//|| obj.traits == VECTOROBJ_TYPE)
+			{
+				bool attr = multiname.isAttr();
+				Traits* indexType = state->value(state->sp()).traits;
+
+				bool maybeIntegerIndex = !attr && multiname.isRtname() && multiname.contains(core->publicNamespace);
+
+				if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
+				{
+					if(obj.traits == VECTORINT_TYPE)
+						propType = INT_TYPE;
+					else if(obj.traits == VECTORUINT_TYPE)
+						propType = UINT_TYPE;
+					else if(obj.traits == VECTORDOUBLE_TYPE)
+						propType = NUMBER_TYPE;
+					else if(obj.traits == VECTOROBJ_TYPE)
+						propType = OBJECT_TYPE;
+				}
+			}
+		}
 		// default - do getproperty at runtime
 
 		if (mir)
