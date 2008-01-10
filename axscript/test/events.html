@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>Tamarin event-handler tests</title>
+    </head>
+
+    <!-- <body language="application/javascript;version=2" onclick="document.write('body onload event fired')"> -->
+    <body>
+        Hello
+        <p>
+    <input type="button" name="myButton" id="button1" value="Click Me">
+    </body>
+    <script language="application/javascript;version=2">
+    function event_handler(target) {
+        //window.alert('hi - event is ' + window.event.x)
+        window.alert('target is ' + target)
+    }
+    // *sob* - can't make 'window.onload = function' work
+    //window.onload = event_handler
+    //window.event_handler = event_handler
+    // Hook up the button
+    window.document.getElementById("button1").attachEvent("onclick", event_handler);
+    </script>
+</html>
