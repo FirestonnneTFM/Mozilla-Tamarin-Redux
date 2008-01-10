@@ -39,7 +39,7 @@
 var CTX_shared;
 class CTX {
     var asm, stk, target;
-    var emitter, script, cp;
+    var emitter, script, cp, filename;
 
     function CTX (asm, stk, target) {
         this.asm = asm;
@@ -50,6 +50,7 @@ class CTX {
         this.emitter = CTX_shared.emitter;
         this.script = CTX_shared.script;
         this.cp = CTX_shared.cp;
+        this.filename = CTX_shared.filename;
     }
 }
 
@@ -69,13 +70,16 @@ namespace Gen;
     use namespace Emit;
     use namespace Ast;
 
+    // Emit debug info or not
+    var emit_debug = true;
+    
     /* Returns an ABCFile structure */
     function cg(tree: PROGRAM) {
     /// function cg(tree: PROGRAM) {
         var e = new ABCEmitter;
         var s = e.newScript();
         // CTX.prototype = { "emitter": e, "script": s, "cp": e.constants };  // tamarin doesn't like initing prototype here
-        CTX_shared = { "emitter": e, "script": s, "cp": e.constants };
+        CTX_shared = { "emitter": e, "script": s, "cp": e.constants, "filename": tree.file };
         cgProgram(new CTX(s.init.asm, null, s), tree);
         return e.finalize();
     }
@@ -102,7 +106,16 @@ namespace Gen;
         return new CTX(ctx.asm, node, ctx.target);
     }
 
+    function cgDebugFile(ctx) {
+        let {asm:asm, cp:cp} = ctx;
+        if( emit_debug && ctx.filename != null )
+            asm.I_debugfile(cp.stringUtf8(ctx.filename));
+    }
+
     function cgProgram(ctx, prog) {
+        
+        cgDebugFile(ctx);
+        
         if (prog.head.fixtures != null)
             cgFixtures(ctx, prog.head.fixtures);
         cgBlock(ctx, prog.block);
@@ -267,6 +280,7 @@ namespace Gen;
         // cinit - init static fixtures
         let cinit = cls.getCInit();
         let cinit_ctx = new CTX(cinit.asm, {tag:"cinit"}, cinit);
+        cgDebugFile(cinit_ctx);
         cgHead(cinit_ctx, {fixtures:[], exprs:c.classHead.exprs});
         
       
@@ -313,6 +327,7 @@ namespace Gen;
         let t = asm.getTemp();
         let ctor_ctx = new CTX(asm, {tag:"function", scope_reg:t}, method);
        
+        cgDebugFile(ctor_ctx);
         asm.I_getlocal(0);
         asm.I_dup();
         // Should this be instanceInits.inits only?
@@ -410,12 +425,15 @@ namespace Gen;
          * God only knows about the arguments object...
          */
         let t = asm.getTemp();
+
+        let ctx = new CTX(asm, {tag: "function", scope_reg:t, has_scope:true}, method);
+        cgDebugFile(ctx);
+
         asm.I_newactivation();
         asm.I_dup();
         asm.I_setlocal(t);
         asm.I_pushscope();
         
-        let ctx = new CTX(asm, {tag: "function", scope_reg:t, has_scope:true}, method);
 
         cgHead(ctx, f.params);
 

@@ -37,6 +37,7 @@
 
 {
     //print ("gening");
+    nd.Ast::file = fname;
     var bytes = Gen::cg(nd);
     var t3 = new Date;
     //print (fname+" cogen "+(t3-t2)+" ms");
