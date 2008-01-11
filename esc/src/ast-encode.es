@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -1111,7 +1111,7 @@ public namespace Encode;
         case (nd: LetVar) {
             var str = "{ 'ast_class': 'LetVar' }";
         }
-	}
+    }
 
         exit ("Encode:literalField ",str);
         return str;

@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -213,10 +213,10 @@ namespace Emit;
                             else if( name=="boolean" ) {
                                 return nameFromIdent("Boolean");
                             }
-		            else {
+                    else {
                         //print ("warning: unknown type name " + t + ", using Object");
-				return nameFromIdent("Object");
-			    }
+                return nameFromIdent("Object");
+                }
                         }
                     }
                 }
@@ -254,7 +254,7 @@ namespace Emit;
                 return qname(pn.name, false);
             }
             case (tn:TempName) {
-		return qname ({ns:Ast::noNS,id:"$t"+tn.index},false);  // FIXME allocate and access actual temps
+        return qname ({ns:Ast::noNS,id:"$t"+tn.index},false);  // FIXME allocate and access actual temps
             }
             case (x:*) { throw "Internal error: not a valid fixture name" }
             }

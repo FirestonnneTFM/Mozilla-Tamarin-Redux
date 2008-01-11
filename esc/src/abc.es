@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -692,11 +692,11 @@ namespace Abc;
     
     // Construct an ABCFile instance from a bytestream representing an abc block.
     function parseAbcFile(b : ABCByteStream) : ABCFile {
-		b.position = 0;
-		magic = b.readInt();
+        b.position = 0;
+        magic = b.readInt();
         
-		if (magic != (46<<16|16))
-			throw new Error("not an abc file.  magic=" + magic.toString(16));
+        if (magic != (46<<16|16))
+            throw new Error("not an abc file.  magic=" + magic.toString(16));
         
         var abc : ABCFile = new ABCFile();
 

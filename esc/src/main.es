@@ -1,3 +1,4 @@
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -48,7 +49,7 @@
     public function evalString(str)
     {
         use namespace Parse;
-        var top = []
+        var top = [];
         var parser = new Parser(str,top);
         var [ts,nd] = parser.program();
         var bytes = Gen::cg(nd).getBytes();
@@ -57,7 +58,7 @@
         b.endian = "littleEndian";
 
         for (let i = 0, len = bytes.length; i<len; ++i) {
-	    b.writeByte(uint(bytes[i]));
+            b.writeByte(uint(bytes[i]));
         }
 
         Domain.currentDomain.loadBytes(b);
@@ -65,8 +66,8 @@
 
     while( true )
     {
-        System.write("es> ")
-        var s = System.readLine()
+        System.write("es> ");
+        var s = System.readLine();
         evalString(s);
     }
 }
