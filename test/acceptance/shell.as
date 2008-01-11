@@ -40,10 +40,6 @@
  * then load the test script.
  */
 
-import flash.system.*;
-import flash.display.*;
-import flash.util.*;
-
 var	completed =	false;
 var	testcases; // ISSUE:: need to know why we need to comment this out
 var tc = 0;
@@ -59,7 +55,7 @@ var STATUS = "STATUS: ";
 var	GLOBAL = "[object global]";
 var PASSED = " PASSED!"
 var FAILED = " FAILED! expected: ";
-var PACKAGELIST = "{public,$1$private,flash.system,flash.display,flash.util}::";
+var PACKAGELIST = "{public,$1$private}::";
 var TYPEERROR = "TypeError: Error #";
 var REFERENCEERROR = "ReferenceError: Error #";
 var RANGEERROR = "RangeError: Error #";
@@ -222,10 +218,10 @@ function writeFormattedResult( expect, actual, string, passed ) {
         return passed;
 }
 function writeLineToLog( string	) {
-	trace( string );
+	print( string );
 }
 function writeHeaderToLog( string )	{
-	trace( string );
+	print( string );
 }
 // end of print functions
 
@@ -347,7 +343,7 @@ function DaysInYear( y ) {
 	if ( (y	% 400 == 0)	){
 		return 366;
 	} else {
-		trace("ERROR: DaysInYear("	+ y	+ ") case not covered");
+		print("ERROR: DaysInYear("	+ y	+ ") case not covered");
 		return Math.NaN; //"ERROR: DaysInYear("	+ y	+ ") case not covered";
 	}
 }
@@ -548,7 +544,7 @@ function DaylightSavingTA( t ) {
 
 	// Daylight	Savings	Time starts	on the second Sunday	in March at	2:00AM in
 	// PST.	 Other time	zones will need	to override	this function.
-	trace( new Date( UTC(dst_start + LocalTZA())) );
+	print( new Date( UTC(dst_start + LocalTZA())) );
 
 	return UTC(dst_start  +	LocalTZA());
 }function GetSecondSundayInMarch(t )	{
@@ -699,7 +695,7 @@ function ToInteger(	t )	{
 function Enumerate ( o ) {
 	var	p;
 	for	( p	in o ) {
-		trace( p +": " + o[p] );
+		print( p +": " + o[p] );
 	}
 }
 
@@ -723,9 +719,9 @@ function START(summary)
     tf.width = 200;
     tf.height = 400;*/
 
-    trace(summary);
+    print(summary);
     var summaryParts = summary.split(" ");
-    trace("section: " + summaryParts[0] + "!");
+    print("section: " + summaryParts[0] + "!");
     //fileName = summaryParts[0];
 
 }
@@ -901,7 +897,7 @@ function printStatus (msg)
     var l;
 
     for (var i=0; i<lines.length; i++)
-        trace(STATUS + lines[i]);
+        print(STATUS + lines[i]);
 
 }
 function reportCompare (expected, actual, description)

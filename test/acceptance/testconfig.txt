@@ -46,6 +46,7 @@
 
 # skipping decimal tests until asc compiler supports them
 decimal/.* , .* , skip , skipping decimal tests until asc compiler supports them
+es4/vector/.*  , .* , skip , skipping vector tests until asc compiler supports them
 
 
 # fails when running the release vm with the -Dinterp vm arg, bug #401095

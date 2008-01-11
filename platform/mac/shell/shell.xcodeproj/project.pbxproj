@@ -27,17 +27,13 @@
 		8E8B52A909AABAA30057BEE4 /* Domain.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528409AABAA20057BEE4 /* Domain.as */; };
 		8E8B52AA09AABAA30057BEE4 /* DomainClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E8B528509AABAA20057BEE4 /* DomainClass.cpp */; };
 		8E8B52AB09AABAA30057BEE4 /* DomainClass.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528609AABAA20057BEE4 /* DomainClass.h */; };
-		8E8B52AC09AABAA30057BEE4 /* DoubleArray.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528709AABAA20057BEE4 /* DoubleArray.as */; };
 		8E8B52AD09AABAA30057BEE4 /* Endian.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528809AABAA20057BEE4 /* Endian.as */; };
 		8E8B52AE09AABAA30057BEE4 /* FileClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E8B528909AABAA20057BEE4 /* FileClass.cpp */; };
 		8E8B52AF09AABAA30057BEE4 /* FileClass.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528A09AABAA20057BEE4 /* FileClass.h */; };
 		8E8B52B009AABAA30057BEE4 /* FileInputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E8B528B09AABAA20057BEE4 /* FileInputStream.cpp */; };
 		8E8B52B109AABAA30057BEE4 /* FileInputStream.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528C09AABAA20057BEE4 /* FileInputStream.h */; };
-		8E8B52B209AABAA30057BEE4 /* FloatArray.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528D09AABAA20057BEE4 /* FloatArray.as */; };
 		8E8B52B309AABAA30057BEE4 /* genericzlib.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528E09AABAA20057BEE4 /* genericzlib.h */; };
-		8E8B52B409AABAA30057BEE4 /* IntArray.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B528F09AABAA20057BEE4 /* IntArray.as */; };
 		8E8B52B509AABAA30057BEE4 /* Profiler.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529009AABAA30057BEE4 /* Profiler.h */; };
-		8E8B52B609AABAA30057BEE4 /* ShortArray.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529109AABAA30057BEE4 /* ShortArray.as */; };
 		8E8B52B709AABAA30057BEE4 /* StringBuilder.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529209AABAA30057BEE4 /* StringBuilder.as */; };
 		8E8B52B809AABAA30057BEE4 /* StringBuilderClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E8B529309AABAA30057BEE4 /* StringBuilderClass.cpp */; };
 		8E8B52B909AABAA30057BEE4 /* StringBuilderClass.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529409AABAA30057BEE4 /* StringBuilderClass.h */; };
@@ -45,10 +41,6 @@
 		8E8B52BB09AABAA30057BEE4 /* SystemClass.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529609AABAA30057BEE4 /* SystemClass.h */; };
 		8E8B52BC09AABAA30057BEE4 /* toplevel.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529709AABAA30057BEE4 /* toplevel.as */; };
 		8E8B52BE09AABAA30057BEE4 /* toplevel.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529909AABAA30057BEE4 /* toplevel.h */; };
-		8E8B52BF09AABAA30057BEE4 /* TypedArrayClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E8B529A09AABAA30057BEE4 /* TypedArrayClass.cpp */; };
-		8E8B52C009AABAA30057BEE4 /* TypedArrayClass.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529B09AABAA30057BEE4 /* TypedArrayClass.h */; };
-		8E8B52C109AABAA30057BEE4 /* UIntArray.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529C09AABAA30057BEE4 /* UIntArray.as */; };
-		8E8B52C209AABAA30057BEE4 /* UShortArray.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529D09AABAA30057BEE4 /* UShortArray.as */; };
 		8EDDB9DE09AAD17F00FB9EE5 /* libavmplus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E8B52C809AABABE0057BEE4 /* libavmplus.a */; };
 		8EDDB9DF09AAD18200FB9EE5 /* libMMgc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E8B52D309AABB120057BEE4 /* libMMgc.a */; };
 		8EDDB9E809AAD1D300FB9EE5 /* Dictionary.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8EDDB9E509AAD1D300FB9EE5 /* Dictionary.as */; };
@@ -103,23 +95,16 @@
 				8E8B52A809AABAA30057BEE4 /* DebugCLI.h in CopyFiles */,
 				8E8B52A909AABAA30057BEE4 /* Domain.as in CopyFiles */,
 				8E8B52AB09AABAA30057BEE4 /* DomainClass.h in CopyFiles */,
-				8E8B52AC09AABAA30057BEE4 /* DoubleArray.as in CopyFiles */,
 				8E8B52AD09AABAA30057BEE4 /* Endian.as in CopyFiles */,
 				8E8B52AF09AABAA30057BEE4 /* FileClass.h in CopyFiles */,
 				8E8B52B109AABAA30057BEE4 /* FileInputStream.h in CopyFiles */,
-				8E8B52B209AABAA30057BEE4 /* FloatArray.as in CopyFiles */,
 				8E8B52B309AABAA30057BEE4 /* genericzlib.h in CopyFiles */,
-				8E8B52B409AABAA30057BEE4 /* IntArray.as in CopyFiles */,
 				8E8B52B509AABAA30057BEE4 /* Profiler.h in CopyFiles */,
-				8E8B52B609AABAA30057BEE4 /* ShortArray.as in CopyFiles */,
 				8E8B52B709AABAA30057BEE4 /* StringBuilder.as in CopyFiles */,
 				8E8B52B909AABAA30057BEE4 /* StringBuilderClass.h in CopyFiles */,
 				8E8B52BB09AABAA30057BEE4 /* SystemClass.h in CopyFiles */,
 				8E8B52BC09AABAA30057BEE4 /* toplevel.as in CopyFiles */,
 				8E8B52BE09AABAA30057BEE4 /* toplevel.h in CopyFiles */,
-				8E8B52C009AABAA30057BEE4 /* TypedArrayClass.h in CopyFiles */,
-				8E8B52C109AABAA30057BEE4 /* UIntArray.as in CopyFiles */,
-				8E8B52C209AABAA30057BEE4 /* UShortArray.as in CopyFiles */,
 				8EDDB9E809AAD1D300FB9EE5 /* Dictionary.as in CopyFiles */,
 				8EDDB9EA09AAD1D300FB9EE5 /* DictionaryGlue.h in CopyFiles */,
 				6803D2CA0A5064FD00C797BB /* JavaGlue.h in CopyFiles */,
@@ -152,17 +137,13 @@
 		8E8B528409AABAA20057BEE4 /* Domain.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Domain.as; path = ../../../shell/Domain.as; sourceTree = SOURCE_ROOT; };
 		8E8B528509AABAA20057BEE4 /* DomainClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DomainClass.cpp; path = ../../../shell/DomainClass.cpp; sourceTree = SOURCE_ROOT; };
 		8E8B528609AABAA20057BEE4 /* DomainClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DomainClass.h; path = ../../../shell/DomainClass.h; sourceTree = SOURCE_ROOT; };
-		8E8B528709AABAA20057BEE4 /* DoubleArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = DoubleArray.as; path = ../../../shell/DoubleArray.as; sourceTree = SOURCE_ROOT; };
 		8E8B528809AABAA20057BEE4 /* Endian.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Endian.as; path = ../../../shell/Endian.as; sourceTree = SOURCE_ROOT; };
 		8E8B528909AABAA20057BEE4 /* FileClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FileClass.cpp; path = ../../../shell/FileClass.cpp; sourceTree = SOURCE_ROOT; };
 		8E8B528A09AABAA20057BEE4 /* FileClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FileClass.h; path = ../../../shell/FileClass.h; sourceTree = SOURCE_ROOT; };
 		8E8B528B09AABAA20057BEE4 /* FileInputStream.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FileInputStream.cpp; path = ../../../shell/FileInputStream.cpp; sourceTree = SOURCE_ROOT; };
 		8E8B528C09AABAA20057BEE4 /* FileInputStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FileInputStream.h; path = ../../../shell/FileInputStream.h; sourceTree = SOURCE_ROOT; };
-		8E8B528D09AABAA20057BEE4 /* FloatArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = FloatArray.as; path = ../../../shell/FloatArray.as; sourceTree = SOURCE_ROOT; };
 		8E8B528E09AABAA20057BEE4 /* genericzlib.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = genericzlib.h; path = ../../../shell/genericzlib.h; sourceTree = SOURCE_ROOT; };
-		8E8B528F09AABAA20057BEE4 /* IntArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = IntArray.as; path = ../../../shell/IntArray.as; sourceTree = SOURCE_ROOT; };
 		8E8B529009AABAA30057BEE4 /* Profiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Profiler.h; path = ../../../shell/Profiler.h; sourceTree = SOURCE_ROOT; };
-		8E8B529109AABAA30057BEE4 /* ShortArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ShortArray.as; path = ../../../shell/ShortArray.as; sourceTree = SOURCE_ROOT; };
 		8E8B529209AABAA30057BEE4 /* StringBuilder.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = StringBuilder.as; path = ../../../shell/StringBuilder.as; sourceTree = SOURCE_ROOT; };
 		8E8B529309AABAA30057BEE4 /* StringBuilderClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StringBuilderClass.cpp; path = ../../../shell/StringBuilderClass.cpp; sourceTree = SOURCE_ROOT; };
 		8E8B529409AABAA30057BEE4 /* StringBuilderClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StringBuilderClass.h; path = ../../../shell/StringBuilderClass.h; sourceTree = SOURCE_ROOT; };
@@ -170,10 +151,6 @@
 		8E8B529609AABAA30057BEE4 /* SystemClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SystemClass.h; path = ../../../shell/SystemClass.h; sourceTree = SOURCE_ROOT; };
 		8E8B529709AABAA30057BEE4 /* toplevel.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = toplevel.as; path = ../../../shell/toplevel.as; sourceTree = SOURCE_ROOT; };
 		8E8B529909AABAA30057BEE4 /* toplevel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = toplevel.h; path = ../../../shell/toplevel.h; sourceTree = SOURCE_ROOT; };
-		8E8B529A09AABAA30057BEE4 /* TypedArrayClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = TypedArrayClass.cpp; path = ../../../shell/TypedArrayClass.cpp; sourceTree = SOURCE_ROOT; };
-		8E8B529B09AABAA30057BEE4 /* TypedArrayClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TypedArrayClass.h; path = ../../../shell/TypedArrayClass.h; sourceTree = SOURCE_ROOT; };
-		8E8B529C09AABAA30057BEE4 /* UIntArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = UIntArray.as; path = ../../../shell/UIntArray.as; sourceTree = SOURCE_ROOT; };
-		8E8B529D09AABAA30057BEE4 /* UShortArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = UShortArray.as; path = ../../../shell/UShortArray.as; sourceTree = SOURCE_ROOT; };
 		8E8B52C309AABABE0057BEE4 /* avmplus.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = avmplus.xcodeproj; path = ../avmplus/avmplus.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8E8B52CD09AABB120057BEE4 /* MMgc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MMgc.xcodeproj; path = ../MMgc/MMgc.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8EDDB9E509AAD1D300FB9EE5 /* Dictionary.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Dictionary.as; path = ../../../extensions/Dictionary.as; sourceTree = SOURCE_ROOT; };
@@ -269,19 +246,15 @@
 				8E8B528409AABAA20057BEE4 /* Domain.as */,
 				8E8B528509AABAA20057BEE4 /* DomainClass.cpp */,
 				8E8B528609AABAA20057BEE4 /* DomainClass.h */,
-				8E8B528709AABAA20057BEE4 /* DoubleArray.as */,
 				8E8B528809AABAA20057BEE4 /* Endian.as */,
 				8E8B528909AABAA20057BEE4 /* FileClass.cpp */,
 				8E8B528A09AABAA20057BEE4 /* FileClass.h */,
 				8E8B528B09AABAA20057BEE4 /* FileInputStream.cpp */,
 				8E8B528C09AABAA20057BEE4 /* FileInputStream.h */,
-				8E8B528D09AABAA20057BEE4 /* FloatArray.as */,
 				8E8B528E09AABAA20057BEE4 /* genericzlib.h */,
-				8E8B528F09AABAA20057BEE4 /* IntArray.as */,
 				6803D2C70A5064FD00C797BB /* JavaGlue.cpp */,
 				6803D2C80A5064FD00C797BB /* JavaGlue.h */,
 				8E8B529009AABAA30057BEE4 /* Profiler.h */,
-				8E8B529109AABAA30057BEE4 /* ShortArray.as */,
 				8E8B529209AABAA30057BEE4 /* StringBuilder.as */,
 				8E8B529309AABAA30057BEE4 /* StringBuilderClass.cpp */,
 				8E8B529409AABAA30057BEE4 /* StringBuilderClass.h */,
@@ -289,10 +262,6 @@
 				8E8B529609AABAA30057BEE4 /* SystemClass.h */,
 				8E8B529709AABAA30057BEE4 /* toplevel.as */,
 				8E8B529909AABAA30057BEE4 /* toplevel.h */,
-				8E8B529A09AABAA30057BEE4 /* TypedArrayClass.cpp */,
-				8E8B529B09AABAA30057BEE4 /* TypedArrayClass.h */,
-				8E8B529C09AABAA30057BEE4 /* UIntArray.as */,
-				8E8B529D09AABAA30057BEE4 /* UShortArray.as */,
 			);
 			name = shell;
 			sourceTree = "<group>";
@@ -346,6 +315,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "shell" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* shell */;
 			projectDirPath = "";
@@ -359,6 +329,7 @@
 					ProjectRef = 8E8B52CD09AABB120057BEE4 /* MMgc.xcodeproj */;
 				},
 			);
+			projectRoot = ../../..;
 			targets = (
 				8DD76FA90486AB0100D96B5E /* shell */,
 			);
@@ -397,7 +368,6 @@
 				8E8B52B009AABAA30057BEE4 /* FileInputStream.cpp in Sources */,
 				8E8B52B809AABAA30057BEE4 /* StringBuilderClass.cpp in Sources */,
 				8E8B52BA09AABAA30057BEE4 /* SystemClass.cpp in Sources */,
-				8E8B52BF09AABAA30057BEE4 /* TypedArrayClass.cpp in Sources */,
 				8EDDB9E909AAD1D300FB9EE5 /* DictionaryGlue.cpp in Sources */,
 				6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */,
 				858088D80C8F604F0093F49B /* SamplerScript.cpp in Sources */,
