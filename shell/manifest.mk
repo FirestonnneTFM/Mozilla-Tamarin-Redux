@@ -23,7 +23,6 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/FileInputStream.cpp \
   $(curdir)/StringBuilderClass.cpp \
   $(curdir)/SystemClass.cpp \
-  $(curdir)/TypedArrayClass.cpp \
   $(curdir)/../extensions/DictionaryGlue.cpp \
   $(curdir)/../extensions/JavaGlue.cpp \
   $(curdir)/../extensions/SamplerScript.cpp \
