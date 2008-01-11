@@ -152,6 +152,7 @@ AVMPLUS_SRCS := ${AVMPLUS_ROOT}/core/AbcEnv.cpp \
 	${AVMPLUS_ROOT}/core/Toplevel.cpp \
 	${AVMPLUS_ROOT}/core/Traits.cpp \
 	${AVMPLUS_ROOT}/core/UnicodeUtils.cpp \
+	${AVMPLUS_ROOT}/core/VectorClass.cpp \
 	${AVMPLUS_ROOT}/core/Verifier.cpp \
 	${AVMPLUS_ROOT}/core/VTable.cpp \
 	${AVMPLUS_ROOT}/core/XMLClass.cpp \
