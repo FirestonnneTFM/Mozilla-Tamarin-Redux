@@ -82,5 +82,12 @@
     //print (fname+" cogen "+(t3-t2)+" ms");
     //print ("writing");
     var len = dumpABCFile(bytes, fname+".abc");
-    print (fname+", "+(t3-t1)+" ms, "+len+" bytes written");
+    var parse_time = (t3-t1);
+
+    print (fname);
+    print ("  Chars in:  " + str.length);
+    print ("  Bytes out: " + len);
+    print ("  Scanning:  " + Lex::ms_scanning + " ms");
+    print ("  Parsing:   " + (t2 - t1 - Lex::ms_scanning) + " ms");
+    print ("  Cogen:     " + (t3 - t2) + " ms");
 }

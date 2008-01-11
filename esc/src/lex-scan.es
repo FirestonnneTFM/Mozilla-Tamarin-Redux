@@ -43,6 +43,8 @@ public namespace Lex
 {
     use default namespace Lex;
 
+    var ms_scanning = 0;
+
     class Scanner
     {
         var src : String;
@@ -121,6 +123,8 @@ public namespace Lex
                 }
             }
 
+            var then = new Date();
+
             //var tokenList = new Array;
             var tokenList = new ByteArray;
             var coordList = new Array;
@@ -135,6 +139,10 @@ public namespace Lex
                 token = start ();
                 pushToken (token);
             }
+
+            var now = new Date();
+
+            ms_scanning += (now - then);
 
             //print("tokenList = ",tokenList);
             //print("coordList = ",coordList);

@@ -78,4 +78,98 @@ namespace Util
     function toUint(x)
         uint(x);
 
+    class Hashnode {
+        var key = null;
+        var value = null;
+        var hashval = null;
+        var link = null;
+
+        function Hashnode(key, value, hashval) 
+            : key     = key
+            , value   = value
+            , hashval = hashval
+        {
+        }
+    }
+
+    class Hashtable {
+        var size = 10;
+        var population = 0;
+        var must_rehash = false;
+        var tbl;
+        var hashfn;
+        var eqfn;
+        var notfound;
+
+        function Hashtable(hashfn, eqfn, notfound) 
+            : hashfn   = hashfn
+            , eqfn     = eqfn
+            , notfound = notfound
+        {
+            tbl = makeTable(size);
+        }
+
+        // Should be called "get" but ESC is not up to it
+        function read(key) {
+            var h = hashfn(key);
+            var bucket = tbl[h % size];
+            while (bucket != null) {
+                if (bucket.hashval == h && eqfn(bucket.key, key))
+                    return bucket.value;
+                bucket = bucket.link;
+            }
+            return notfound;
+        }
+
+        // Should be called "put" but called "write" to match the one above
+        function write(key, value) {
+            if (must_rehash)
+                rehash();
+
+            var h = hashfn(key);
+            var b = h % size;
+            var bucket = tbl[b];
+            while (bucket != null) {
+                if (bucket.hashval == h && eqfn(bucket.key, key)) {
+                    bucket.value = value;
+                    return;
+                }
+                bucket = bucket.link;
+            }
+            var node = new Hashnode(key, value, h);
+            bucket = tbl[b];
+            node.link = bucket;
+            tbl[b] = node;
+
+            ++population;
+            if (population >= size)
+                must_rehash = true;
+        }
+
+        function rehash() {
+            var newsize = size*2;
+            var newtbl = makeTable(newsize);
+            for ( var i=0 ; i < size ; i++ ) {
+                var bucket = tbl[i];
+                while (bucket != null) {
+                    var node = bucket;
+                    bucket = bucket.link;
+                    var b = node.hashval % newsize;
+                    node.link = newtbl[b];
+                    newtbl[b] = node;
+                }
+            }
+            size = newsize;
+            tbl = newtbl;
+            must_rehash = false;
+        }
+
+        function makeTable(size) {
+            var tbl = new Array(size);
+            for ( var i=0 ; i < size ; i++ )
+                tbl[i] = null;
+            return tbl;
+        }
+    }
+
 }
