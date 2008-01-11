@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		163AFB210D37D87D002BD3F2 /* VectorClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 163AFB200D37D87D002BD3F2 /* VectorClass.cpp */; };
 		1E6078E8097335B3007D0E1E /* CodegenMIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */; };
 		1E6078E9097335B3007D0E1E /* CodegenMIR.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6078E5097335B3007D0E1E /* CodegenMIR.h */; };
 		1E6078EA097335B3007D0E1E /* Ia32Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6078E6097335B3007D0E1E /* Ia32Assembler.cpp */; };
@@ -214,6 +215,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		163AFB200D37D87D002BD3F2 /* VectorClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VectorClass.cpp; path = ../../../core/VectorClass.cpp; sourceTree = SOURCE_ROOT; };
 		1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenMIR.cpp; path = ../../../codegen/CodegenMIR.cpp; sourceTree = SOURCE_ROOT; };
 		1E6078E5097335B3007D0E1E /* CodegenMIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = CodegenMIR.h; path = ../../../codegen/CodegenMIR.h; sourceTree = SOURCE_ROOT; };
 		1E6078E6097335B3007D0E1E /* Ia32Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Ia32Assembler.cpp; path = ../../../codegen/Ia32Assembler.cpp; sourceTree = SOURCE_ROOT; };
@@ -468,6 +470,7 @@
 		1E607A9F09733787007D0E1E /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				163AFB200D37D87D002BD3F2 /* VectorClass.cpp */,
 				942BC4330BB991690088A47F /* Sampler.cpp */,
 				942BC4340BB991690088A47F /* Sampler.h */,
 				7CD864E50AC47805004C73CB /* AbcData.cpp */,
@@ -853,6 +856,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "avmplus" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* avmplus */;
 			projectDirPath = "";
@@ -971,6 +975,7 @@
 				D98B56840CB2CC8B00B95F8C /* DecimalClass.cpp in Sources */,
 				D98B56870CB2CC8B00B95F8C /* decNumber.cpp in Sources */,
 				D98B568A0CB2CC8B00B95F8C /* DoubleClass.cpp in Sources */,
+				163AFB210D37D87D002BD3F2 /* VectorClass.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
