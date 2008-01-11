@@ -48,6 +48,9 @@
  *
  */
 //-------------------------------------------------------------------------------------------------
+
+import flash.system.Capabilities;
+
 var SECTION = "class_006";
 var VERSION = "";
 var TITLE   = "Testing the internal [[Class]] property of objects";
