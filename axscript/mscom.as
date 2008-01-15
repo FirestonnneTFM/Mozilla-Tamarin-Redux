@@ -35,7 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 // hackery - for now, this file is "built" via:
-// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -out axtoplevel mscom.as Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
+// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -import ../esc/bin/ast.es.abc -out axtoplevel mscom.as Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
 
 package axtam 
 {
@@ -215,14 +215,19 @@ package {
 
     import flash.utils.*; // for our ByteArray clone - either it should die, or we rename the package in our clone!
 
-    public function compileString(str): ByteArray
+    public function compileString(str, fname:String = null, startLineNumber:int = 0): ByteArray
     {
         import Parse.*;
+        import Lex.*;
+
         var top = []
         var parser = new Parse.Parser(str,top);
+        parser.scan.lnCoord = startLineNumber;
         var prog = parser.program();
         var ts = prog[0]
         var nd = prog[1]
+        if (fname)
+            nd.Ast::file = fname;
         var bytes = Gen::cg(nd).getBytes();
 
         var b = new ByteArray();
@@ -270,7 +275,9 @@ package {
 			if (state==axtam.com.SCRIPTSTATE_UNINITIALIZED || state==axtam.com.SCRIPTSTATE_CLOSED || state==axtam.com.SCRIPTSTATE_DISCONNECTED)
 				axtam.com.Error.throwError(axtam.com.Error.E_FAIL)
 
-			var bytes = compileString(code)
+			// synthesize a filename
+			var fname:String = "<script " + sourceCookie + ">"
+			var bytes = compileString(code, fname, lineNumber)
 
 			var scriptBlock = {'code': code,
 			                   'bytes': bytes,
