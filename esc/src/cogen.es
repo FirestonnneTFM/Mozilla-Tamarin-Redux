@@ -398,7 +398,7 @@ namespace Gen;
      */
     function cgFunc(ctx0, f:FUNC) {
         var {emitter:emitter,script:script} = ctx0;
-        let fntype = ctx0.stk != null && ctx0.stk.tag == "instance" ? "method" : "vanilla";  // brittle as hell
+        let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "vanilla";  // brittle as hell
         let formals_type = extractFormalTypes({emitter:emitter, script:script}, f);
         let method = script.newFunction(formals_type,fntype != "vanilla");
         let asm = method.asm;
