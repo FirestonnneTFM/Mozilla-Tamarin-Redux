@@ -53,6 +53,7 @@ HKCR
 			ProgID = s 'application/javascript;version=2'
 			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
+			ThreadingModel = s 'Free'
 		}
 	}
 }
