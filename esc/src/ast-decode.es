@@ -1153,6 +1153,15 @@ public namespace Decode;
         case 'LiteralDecimal':
             var ndx = new LiteralDecimal (ob.decimalValue);
             break;
+        case 'LiteralDouble':
+            var ndx = new LiteralDouble (double(ob.intValue));
+            break;
+        case 'LiteralInt':
+            var ndx = new LiteralInt (int(ob.intValue));
+            break;
+        case 'LiteralUInt':
+            var ndx = new LiteralUInt (uint(ob.uintValue));
+            break;
         case 'LiteralBoolean':
             var ndx = new LiteralBoolean (ob.booleanValue);
             break;
