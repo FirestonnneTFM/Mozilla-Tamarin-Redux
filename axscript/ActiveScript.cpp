@@ -41,12 +41,16 @@ using namespace axtam;
 static MMgc::FixedMalloc* fm = NULL;
 
 class ATL_NO_VTABLE CActiveScript :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CActiveScript, &CLSID_ActiveScript>,
 	public IActiveScript, // is this correct?
 	public IActiveScriptParseProcedure2,
 	public IActiveScriptParse,
 	public IObjectSafety
+	// it appears IE also queries us for ICallFactory, so some asynch
+	// operations may be possible.
+	// IActiveScriptProperty - but its not documented.
+
 {
 public:
 	CActiveScript();
@@ -420,7 +424,24 @@ STDMETHODIMP CActiveScript::InterruptScriptThread(
             /* [in] */ const EXCEPINFO *pexcepinfo,
             /* [in] */ DWORD dwFlags)
 {
-	ATLTRACENOTIMPL(_T("CActiveScript::InterruptScriptThread"));
+	if (!core) {
+		AvmDebugMsg(true, "CActiveScript::InterruptScriptThread - but no core!\n");
+		return E_UNEXPECTED;
+	}
+	// hrm - how to abort a specific thread?
+	AvmDebugMsg(false, "CActiveScript::InterruptScriptThread for thread %x, flags=%x\n", stidThread, dwFlags);
+	if (stidThread != SCRIPTTHREADID_ALL) {
+		return E_FAIL;
+	}
+	core->interrupted = true;
+	// XXX - we should try and work out what SCRIPTINTERRUPT_RAISEEXCEPTION
+	// really means - it seems to mean that we should throw an exception 
+	// which can be caught by code. IE doesn't seem to call this function 
+	// though (it doesn't appear to have a way to kill scripts that don't 
+	// respond - unless ICallFactory is necessary?), and WSH passes that 
+	// flag both when the script times out (via /T: param) *and* when script 
+	// code calls WSH.Exit(0)
+	return S_OK;
 }
 
 STDMETHODIMP CActiveScript::Clone( 
