@@ -288,7 +288,163 @@
         }
     }
 
+    // There are many optimization possibilities for 'switch'.
+    // Notably, if the case expressions are all constants (or there
+    // are sequences of cases with constant expressions) then binary
+    // switching or LOOKUPSWITCH can be used.
+    //
+    // LOOKUPSWITCH may be used if the case expressions are constant
+    // int values or single-character strings (we can extract the
+    // character value and switch on that), with a run-time guard on
+    // the type of the dispatch value if there is no compile-time type
+    // information.
+    //
+    // For now, we generate LOOKUPSWITCH for "dense" int switches
+    // above a certain size -- dense meaning at least one third of the
+    // case values in the range of all the defined case values are
+    // actually present in the switch, and the size cutoff being four
+    // labelled cases or more.  The function analyzeSwitch() performs
+    // a simple analysis and determines whether the optimization should
+    // kick in or not.
+    //
+    // FIXME: handle more interesting cases:
+    //  - single-character string values
+    //  - binary search for switches with all constant-value cases
+    //  - mixed sparse-dense switches
+    //  - ...
+
     function cgSwitchStmt(ctx, s) {
+        var fastswitch = analyzeSwitch(ctx, s);
+        if (!fastswitch)
+            cgSwitchStmtSlow(ctx,s);
+        else {
+            let [low,high,has_default] = fastswitch;
+            cgSwitchStmtFast(ctx, s, low, high, has_default);
+        }
+    }
+
+    function analyzeSwitch(ctx, s) {
+        var cases = s.cases;
+        var low = Infinity;
+        var high = -Infinity;
+        var count = 0;
+        var has_default = false;
+        for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
+            let e = cases[i].expr;
+            if (e is ListExpr && e.exprs.length == 1) // parser should clean this case up!
+                e = e.exprs[0];
+            if (e == null)
+                has_default = true;
+            else if (e is LiteralExpr) {
+                let l = e.literal;
+                if (!(l is LiteralInt))
+                    return false;
+                low = Math.min(low, l.intValue);
+                high = Math.max(high, l.intValue);
+                count++;
+            }
+            else
+                return false;
+        }
+        if (count < 4)
+            return false;
+        if (count * 3 < ((high - low) + 1))
+            return false;
+        return [low,high,has_default];
+    }
+
+    function cgSwitchStmtFast(ctx, s, low, high, has_default) {
+        print("FAST SWITCH: " + low + " " + high + " " + has_default);
+
+        var {expr:expr, cases:cases, labels:labels} = s;
+        let asm = ctx.asm;
+        cgExpr(ctx, expr);
+        let t = asm.getTemp();
+        asm.I_setlocal(t);
+        let Ldef = asm.newLabel();
+        let Lcases = new Array(high-low+1);
+        let Lbreak = asm.newLabel();
+        let nctx = pushBreak(ctx, labels, Lbreak);
+        let ldef_emitted = false;
+
+        asm.I_getlocal(t);                    // switch value
+        asm.I_pushint(ctx.cp.int32(low));     // offset
+        asm.I_subtract();                     // bias it
+        asm.I_dup();
+        asm.I_convert_i();                    // convert to int
+        asm.I_dup();
+        asm.I_setlocal(t);                    //   and save
+        asm.I_equals();                       // if computed value and int value are 
+        asm.I_iffalse(Ldef);                  //   not the same then default case
+
+        asm.I_getlocal(t);                    // otherwise dispatch
+        Ldefault = asm.I_lookupswitch(undefined, Lcases);
+
+        // Make a prepass to find all the labels that do not have a
+        // case (except maybe the default case).  If Lcases[i] is not
+        // handled then Lhandled[i] will be false.
+
+        var Lhandled = new Array(Lcases.length);
+        for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
+            let c = cases[i];
+            let e = c.expr;
+            if (e is ListExpr && e.exprs.length == 1) // parser should clean this case up!
+                e = e.exprs[0];
+
+            if (e != null) {
+                assert(e is LiteralExpr && e.literal is LiteralInt);
+                Lhandled[e.literal.intValue - low] = true;
+            }
+        }
+
+        // Now emit code for all the cases.  If there is a default
+        // case then all unhandled labels are emitted there.
+
+        for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
+            let c = cases[i];
+            let e = c.expr;
+            if (e is ListExpr && e.exprs.length == 1) // parser should clean this case up!
+                e = e.exprs[0];
+
+            if (e == null) {
+                asm.I_label(Ldefault);
+                asm.I_label(Ldef);
+                ldef_emitted = true;
+                for ( let j=0, jlimit=Lhandled.length ; j < jlimit ; j++ )
+                    if (!Lhandled[j])
+                        asm.I_label(Lcases[j]);
+            }
+            else {
+                assert(e is LiteralExpr && e.literal is LiteralInt);
+
+                // There might be duplicate case selector values, but only the first one counts.
+                if (Lcases[e.literal.intValue - low] !== false) {
+                    asm.I_label(Lcases[e.literal.intValue - low]);
+                    Lcases[e.literal.intValue - low] = false;
+                }
+            }
+
+            let stmts = c.stmts;
+            for ( let j=0 ; j < stmts.length ; j++ )
+                cgStmt(nctx, stmts[j] );
+        }
+
+        // If there was not a default case then map unhandled case
+        // values to this point.
+
+        if (!has_default) {
+            for ( let j=0, jlimit=Lhandled.length ; j < jlimit ; j++ )
+                if (!Lhandled[j])
+                    asm.I_label(Lcases[j]);
+        }
+
+        asm.I_label(Lbreak);
+        if (!ldef_emitted)
+            asm.I_label(Ldef);
+        asm.killTemp(t);
+    }
+
+    function cgSwitchStmtSlow(ctx,s) {
         var {expr:expr, cases:cases, labels:labels} = s;
         let asm = ctx.asm;
         cgExpr(ctx, expr);
@@ -299,7 +455,6 @@
         let Lfall = null;
         let Lbreak = asm.newLabel();
         let nctx = pushBreak(ctx, labels, Lbreak);
-        var hasBreak = false;
         for ( let i=0 ; i < cases.length ; i++ ) {
             let c = cases[i];
 
@@ -309,18 +464,18 @@
             }
 
             if (Lnext !== null) {
-                asm.I_label(Lnext);          // label next pos
+                asm.I_label(Lnext);                   // label next pos
                 Lnext = null;
             }
 
             if (c.expr != null) {
-                cgExpr(nctx, c.expr);        // check for match
+                cgExpr(nctx, c.expr);                 // check for match
                 asm.I_getlocal(t);
                 asm.I_strictequals();
-                Lnext = asm.I_iffalse(undefined);  // if no match jump to next label
+                Lnext = asm.I_iffalse(undefined);     // if no match jump to next label
             }
 
-            if (Lfall !== null) {         // label fall through pos
+            if (Lfall !== null) {                     // label fall through pos
                 asm.I_label(Lfall);
                 Lfall = null;
             }
@@ -330,7 +485,7 @@
                 cgStmt(nctx, stmts[j] );
             }
 
-            Lfall = asm.I_jump (undefined);         // fall through
+            Lfall = asm.I_jump (undefined);           // fall through
         }
         if (Lnext !== null)
             asm.I_label(Lnext);
