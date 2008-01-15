@@ -3,7 +3,6 @@
         <title>Tamarin event-handler tests</title>
     </head>
 
-    <!-- <body language="application/javascript;version=2" onclick="document.write('body onload event fired')"> -->
     <body>
         Hello
         <p>
@@ -14,7 +13,10 @@
         //window.alert('hi - event is ' + window.event.x)
         window.alert('target is ' + target)
     }
-    // *sob* - can't make 'window.onload = function' work
+    // *sob* - can't make 'window.onload = func_ob' work, even though
+    // http://groups.google.com/group/microsoft.public.scripting.hosting/browse_frm/thread/4e9dcacced837a18/e6646a2ec6db7951?hl=en#e6646a2ec6db7951
+    // says that it should work (ie, simply assigning a function to the event name should work)
+
     //window.onload = event_handler
     //window.event_handler = event_handler
     // Hook up the button
