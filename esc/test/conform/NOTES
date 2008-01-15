@@ -6,10 +6,6 @@ output.
 
 All files should use Unix line endings; use dos2unix.
 
-Remove log files and abc files bur running "clean.sh".
+Remove log files and abc files by running "clean.sh".
 
 DO NOT COMMIT LOG FILES OR ABC FILES!
-
-
-
-

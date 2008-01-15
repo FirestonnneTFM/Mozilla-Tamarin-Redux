@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -42,6 +42,8 @@ public namespace Lex
 
 {
     use default namespace Lex;
+
+    var ms_scanning = 0;
 
     class Scanner
     {
@@ -121,6 +123,8 @@ public namespace Lex
                 }
             }
 
+            var then = new Date();
+
             //var tokenList = new Array;
             var tokenList = new ByteArray;
             var coordList = new Array;
@@ -135,6 +139,10 @@ public namespace Lex
                 token = start ();
                 pushToken (token);
             }
+
+            var now = new Date();
+
+            ms_scanning += (now - then);
 
             //print("tokenList = ",tokenList);
             //print("coordList = ",coordList);

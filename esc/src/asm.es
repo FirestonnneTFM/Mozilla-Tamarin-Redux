@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -114,18 +114,18 @@ namespace Asm;
     public const METHOD_HasParamNames        = 0x80;
 
     
-	const OP_bkpt:int = 0x01
-	const OP_nop:int = 0x02
-	const OP_throw:int = 0x03
-	const OP_getsuper:int = 0x04
-	const OP_setsuper:int = 0x05
-	const OP_dxns:int = 0x06
-	const OP_dxnslate:int = 0x07
-	const OP_kill:int = 0x08
-	const OP_label:int = 0x09
-	const OP_ifnlt:int = 0x0C
-	const OP_ifnle:int = 0x0D
-	const OP_ifngt:int = 0x0E
+    const OP_bkpt:int = 0x01
+    const OP_nop:int = 0x02
+    const OP_throw:int = 0x03
+    const OP_getsuper:int = 0x04
+    const OP_setsuper:int = 0x05
+    const OP_dxns:int = 0x06
+    const OP_dxnslate:int = 0x07
+    const OP_kill:int = 0x08
+    const OP_label:int = 0x09
+    const OP_ifnlt:int = 0x0C
+    const OP_ifnle:int = 0x0D
+    const OP_ifngt:int = 0x0E
 	const OP_ifnge:int = 0x0F
 	const OP_jump:int = 0x10
 	const OP_iftrue:int = 0x11

@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -154,7 +154,7 @@ namespace Gen;
             if (fx is ValFixture) {
                 if( !hasTrait(target.traits, name, TRAIT_Slot) )
                     target.addTrait(new ABCSlotTrait(name, 0, false, 0, emitter.typeFromTypeExpr(fx.type), 0, 0)); 
-					// FIXME when we have more general support for type annos
+                    // FIXME when we have more general support for type annos
             }
             else if (fx is MethodFixture) {
                 methidx = cgFunc(ctx, fx.func);

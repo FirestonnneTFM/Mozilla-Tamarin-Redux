@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -223,32 +223,32 @@
             return bytes.readUTFBytes(length);
         }
         
-		function readU32():int {
-			var result:int = bytes.readUnsignedByte();
-			if (!(result & 0x00000080))
-				return result;
-			result = result & 0x0000007f | bytes.readUnsignedByte()<<7;
-			if (!(result & 0x00004000))
-				return result;
-			result = result & 0x00003fff | bytes.readUnsignedByte()<<14;
-			if (!(result & 0x00200000))
-				return result;
-			result = result & 0x001fffff | bytes.readUnsignedByte()<<21;
-			if (!(result & 0x10000000))
-				return result;
-			return   result & 0x0fffffff | bytes.readUnsignedByte()<<28;
-		}
+        function readU32():int {
+            var result:int = bytes.readUnsignedByte();
+            if (!(result & 0x00000080))
+                return result;
+            result = result & 0x0000007f | bytes.readUnsignedByte()<<7;
+            if (!(result & 0x00004000))
+                return result;
+            result = result & 0x00003fff | bytes.readUnsignedByte()<<14;
+            if (!(result & 0x00200000))
+                return result;
+            result = result & 0x001fffff | bytes.readUnsignedByte()<<21;
+            if (!(result & 0x10000000))
+                return result;
+            return   result & 0x0fffffff | bytes.readUnsignedByte()<<28;
+        }
         
-		function readS24():int
-		{
-			var b:uint = bytes.readUnsignedByte();
+        function readS24():int
+        {
+            var b:uint = bytes.readUnsignedByte();
             var b1:uint = bytes.readUnsignedByte();
             var b2:uint = bytes.readUnsignedByte();
             
-			b = b | (b1<<8);
-			b = b | (b2<<16);
-			return b
-		}
+            b = b | (b1<<8);
+            b = b | (b2<<16);
+            return b
+        }
 
         function get position() {
             return bytes.position;

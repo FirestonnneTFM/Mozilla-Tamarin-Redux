@@ -86,7 +86,7 @@ function uriError( str ){
 function expectExitCode(n)
 {
 
-    trace('--- NOTE: IN THIS TESTCASE, WE EXPECT EXIT CODE ' + n + ' ---');
+    print('--- NOTE: IN THIS TESTCASE, WE EXPECT EXIT CODE ' + n + ' ---');
 
 }
 
@@ -103,33 +103,33 @@ function inSection(x)
  */
 function reportFailure (section, msg)
 {
-    trace(FAILED + inSection(section)+"\n"+msg);
+    print(FAILED + inSection(section)+"\n"+msg);
     /*var lines = msg.split ("\n");
     for (var i=0; i<lines.length; i++)
-        trace (FAILED + lines[i]);
+        print(FAILED + lines[i]);
     */
 }
 
 /*
- * trace a non-failure message.
+ * print a non-failure message.
  */
 function printStatus (msg)
 {
-    trace(PASSED + msg);
+    print(PASSED + msg);
     /*var lines = msg.split ("\n");
     var l;
 
     for (var i=0; i<lines.length; i++)
-        trace (PASSED + lines[i]);
+        print(PASSED + lines[i]);
     */
 }
 
 /*
- * trace a bugnumber message.
+ * print a bugnumber message.
  */
 function printBugNumber (num)
 {
-  trace (BUGNUMBER + num);
+  print(BUGNUMBER + num);
 }
 
 function toPrinted(value)
@@ -161,7 +161,7 @@ function START(summary)
       	// the default ( for now ).
       }
   
-      // trace out bugnumber
+      // print out bugnumber
   
       if ( BUGNUMBER ) {
               writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
@@ -170,7 +170,7 @@ function START(summary)
     testcases = new Array();
     tc = 0;
   
-    trace(summary);
+    print(summary);
   
 }
 
@@ -334,12 +334,12 @@ function writeFormattedResult( expect, actual, string, passed ) {
         return passed;
 }
 function writeLineToLog( string	) {
-	trace( string );
+	print( string );
 }
 function writeHeaderToLog( string )	{
-	trace( string );
+	print( string );
 }
-/* end of trace functions */
+/* end of print functions */
 
 
 /*

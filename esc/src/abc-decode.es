@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -154,40 +154,40 @@ public namespace AbcDecode;
                 cpool.namespaceset(nsset);
             }
             
-    		for (i=1, n=asm.name_pool.length; i < n; i++)
+            for (i=1, n=asm.name_pool.length; i < n; i++)
             {
                 let name = asm.name_pool[i];
                 var kind = name.kind;
-    			switch (kind)
-    			{
-    			case "QName":
-    			case "QNameA":
-    				cpool.QName(name.ns, name.utf8, kind=="QNameA")
-    				break;
-    			
-    			case "RTQName":
-    			case "RTQNameA":
-    				cpool.RTQName(name.utf8, kind=="RTQNameA")
-    				break;
-    			
-    			case "RTQNameL":
-    			case "RTQNameLA":
+                switch (kind)
+                {
+                case "QName":
+                case "QNameA":
+                    cpool.QName(name.ns, name.utf8, kind=="QNameA")
+                    break;
+                
+                case "RTQName":
+                case "RTQNameA":
+                    cpool.RTQName(name.utf8, kind=="RTQNameA")
+                    break;
+                
+                case "RTQNameL":
+                case "RTQNameLA":
                     cpool.RTQNameL(kind=="RTQNameLA");
-    				break;
-    			
-    			case "Multiname":
-    			case "MultinameA":
+                    break;
+                
+                case "Multiname":
+                case "MultinameA":
                     cpool.Multiname(name.nsset, name.utf8, kind=="MultinameA");
-    				break;
+                    break;
 
-    			case "MultinameL":
-    			case "MultinameLA":
-    				cpool.MultinameL(name.nsset, kind=="MultinameLA")
-    				break;
+                case "MultinameL":
+                case "MultinameLA":
+                    cpool.MultinameL(name.nsset, kind=="MultinameLA")
+                    break;
                 
                 default:
                     throw "AbcDecode::abcConstanPool, unknown name type " + kind;
-    			}
+                }
             }
             
             return cpool;
@@ -427,129 +427,129 @@ public namespace AbcDecode;
                 bytes.uint8(op);
                 switch(op)
                 {
-    				case OP_debugfile:
-    				case OP_pushstring:
+                    case OP_debugfile:
+                    case OP_pushstring:
                         bytes.uint30(utf8(ins[1]));
-    					break
-    				case OP_pushnamespace:
+                        break
+                    case OP_pushnamespace:
                         bytes.uint30(namespace(ins[1]));
-    					break
-    				case OP_pushint:
+                        break
+                    case OP_pushint:
                         bytes.uint30(integer(ins[1]));
-    					break
-    				case OP_pushuint:
-    					bytes.uint30(uinteger(ins[1]));
-    					break;
-    				case OP_pushdouble:
+                        break
+                    case OP_pushuint:
+                        bytes.uint30(uinteger(ins[1]));
+                        break;
+                    case OP_pushdouble:
                         bytes.uint30(number(ins[1]));
-    					break;
-    				case OP_getsuper: 
-    				case OP_setsuper: 
-    				case OP_getproperty: 
-    				case OP_initproperty: 
-    				case OP_setproperty: 
-    				case OP_getlex: 
-    				case OP_findpropstrict: 
-    				case OP_findproperty:
-    				case OP_finddef:
-    				case OP_deleteproperty: 
-    				case OP_istype: 
-    				case OP_coerce: 
-    				case OP_astype: 
-    				case OP_getdescendants:
-    					bytes.uint30(name(ins[1]));
-    					break;
-    				case OP_constructprop:
-    				case OP_callproperty:
-    				case OP_callproplex:
-    				case OP_callsuper:
-    				case OP_callsupervoid:
-    				case OP_callpropvoid:
-    					bytes.uint30(name(ins[1]));
-    					bytes.uint30(ins[2]);
-    					break;
-    				case OP_newfunction: {
-    					bytes.uint30(method(ins[1]));
-    					break;
-    				}
-    				case OP_callstatic:
-    					bytes.uint30(method(ins[1]));
-    					bytes.uint30(ins[2]);
-    					break;
-    				case OP_newclass: 
-    					bytes.uint30(clas(ins[1]));
-    					break;
-    				case OP_lookupswitch:
-    					var pos = bytes.position-1;
+                        break;
+                    case OP_getsuper: 
+                    case OP_setsuper: 
+                    case OP_getproperty: 
+                    case OP_initproperty: 
+                    case OP_setproperty: 
+                    case OP_getlex: 
+                    case OP_findpropstrict: 
+                    case OP_findproperty:
+                    case OP_finddef:
+                    case OP_deleteproperty: 
+                    case OP_istype: 
+                    case OP_coerce: 
+                    case OP_astype: 
+                    case OP_getdescendants:
+                        bytes.uint30(name(ins[1]));
+                        break;
+                    case OP_constructprop:
+                    case OP_callproperty:
+                    case OP_callproplex:
+                    case OP_callsuper:
+                    case OP_callsupervoid:
+                    case OP_callpropvoid:
+                        bytes.uint30(name(ins[1]));
+                        bytes.uint30(ins[2]);
+                        break;
+                    case OP_newfunction: {
+                        bytes.uint30(method(ins[1]));
+                        break;
+                    }
+                    case OP_callstatic:
+                        bytes.uint30(method(ins[1]));
+                        bytes.uint30(ins[2]);
+                        break;
+                    case OP_newclass: 
+                        bytes.uint30(clas(ins[1]));
+                        break;
+                    case OP_lookupswitch:
+                        var pos = bytes.position-1;
                         bytes.int24(ins[1]);
-    					//var target = pos + readS24()
-    					var maxindex = ins[2]
-    					//s += "default:" + labels.labelFor(target) // target + "("+(target-pos)+")"
-    					//s += " maxcase:" + maxindex
+                        //var target = pos + readS24()
+                        var maxindex = ins[2]
+                        //s += "default:" + labels.labelFor(target) // target + "("+(target-pos)+")"
+                        //s += " maxcase:" + maxindex
                         bytes.uint30(maxindex);
-    					for (var i:int=3; i-3 <= maxindex; i++) {
-    						//target = pos + readS24();
-    						bytes.int24(ins[i]);
+                        for (var i:int=3; i-3 <= maxindex; i++) {
+                            //target = pos + readS24();
+                            bytes.int24(ins[i]);
                             //labels.labelFor(target) // target + "("+(target-pos)+")"
-    					}
-    					break;
-    				case OP_jump:
-    				case OP_iftrue:		case OP_iffalse:
-    				case OP_ifeq:		case OP_ifne:
-    				case OP_ifge:		case OP_ifnge:
-    				case OP_ifgt:		case OP_ifngt:
-    				case OP_ifle:		case OP_ifnle:
-    				case OP_iflt:		case OP_ifnlt:
-    				case OP_ifstricteq:	case OP_ifstrictne:
-    					bytes.int24(ins[1]);
-    					//var target = code.position+offset
-    					//s += target + " ("+offset+")"
-    					//s = s + ", " + offset;//labels.labelFor(target)
-    					//if (!((code.position) in labels))
-    					//	s += "\n"
-    					break;
-    				case OP_inclocal:
-    				case OP_declocal:
-    				case OP_inclocal_i:
-    				case OP_declocal_i:
-    				case OP_getlocal:
-    				case OP_kill:
-    				case OP_setlocal:
-    				case OP_debugline:
-    				case OP_getglobalslot:
-    				case OP_getslot:
-    				case OP_setglobalslot:
-    				case OP_setslot:
-    				case OP_pushshort:
-    				case OP_newcatch:
-    				case OP_newobject:
-    				case OP_newarray:
-    					bytes.uint30(ins[1]);
-    					break;
-    				case OP_debug:
+                        }
+                        break;
+                    case OP_jump:
+                    case OP_iftrue:     case OP_iffalse:
+                    case OP_ifeq:       case OP_ifne:
+                    case OP_ifge:       case OP_ifnge:
+                    case OP_ifgt:       case OP_ifngt:
+                    case OP_ifle:       case OP_ifnle:
+                    case OP_iflt:       case OP_ifnlt:
+                    case OP_ifstricteq: case OP_ifstrictne:
+                        bytes.int24(ins[1]);
+                        //var target = code.position+offset
+                        //s += target + " ("+offset+")"
+                        //s = s + ", " + offset;//labels.labelFor(target)
+                        //if (!((code.position) in labels))
+                        //  s += "\n"
+                        break;
+                    case OP_inclocal:
+                    case OP_declocal:
+                    case OP_inclocal_i:
+                    case OP_declocal_i:
+                    case OP_getlocal:
+                    case OP_kill:
+                    case OP_setlocal:
+                    case OP_debugline:
+                    case OP_getglobalslot:
+                    case OP_getslot:
+                    case OP_setglobalslot:
+                    case OP_setslot:
+                    case OP_pushshort:
+                    case OP_newcatch:
+                    case OP_newobject:
+                    case OP_newarray:
+                        bytes.uint30(ins[1]);
+                        break;
+                    case OP_debug:
                         bytes.uint8(ins[1]);
                         bytes.uint30(ins[2]);
                         bytes.uint8(ins[3]);
                         bytes.uint30(ins[4]);
-    					break;
-    				case OP_call:
-    				case OP_construct:
-    				case OP_constructsuper:
-    					bytes.uint30(ins[1])
-    					break;
-    				case OP_pushbyte:
-    				case OP_getscopeobject:
-    					bytes.uint8(ins[1])
-    					break;
-    				case OP_hasnext2:
-    					bytes.uint30(ins[1]);
+                        break;
+                    case OP_call:
+                    case OP_construct:
+                    case OP_constructsuper:
+                        bytes.uint30(ins[1])
+                        break;
+                    case OP_pushbyte:
+                    case OP_getscopeobject:
+                        bytes.uint8(ins[1])
+                        break;
+                    case OP_hasnext2:
+                        bytes.uint30(ins[1]);
                         bytes.uint30(ins[2]);
-    				default:
+                    default:
                         for( let j = 1, len = ins.length; j < len; ++j )
                         {
                             bytes.uint8(ins[j]);
                         }
-    					break;
+                        break;
                 }
             }
             return bytes;

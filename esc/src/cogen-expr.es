@@ -1,4 +1,4 @@
-
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil;  -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -501,7 +501,7 @@
         }
         }
         cgInits(ctx, e.inits, baseOnStk);
-    	asm.I_pushundefined(); // exprs need to leave something on the stack
+        asm.I_pushundefined(); // exprs need to leave something on the stack
         // FIXME: should this be the value of the last init?
     }
 

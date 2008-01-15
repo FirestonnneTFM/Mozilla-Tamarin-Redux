@@ -68,8 +68,7 @@ all: ${MMGC_OUTPUT} ${SHELL_OUTPUT} ${AVMPLUS_OUTPUT}
 # Shell Source files
 #****************************************************************************
 
-SHELL_SRCS := ../../shell/TypedArrayClass.cpp \
-	../../shell/SystemClass.cpp \
+SHELL_SRCS := ../../shell/SystemClass.cpp \
 	../../shell/StringBuilderClass.cpp \
 	../../shell/FileInputStream.cpp \
 	../../shell/FileClass.cpp \

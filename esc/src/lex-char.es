@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -141,16 +141,12 @@ public namespace Char
     const Newline = "\n".charCodeAt(0);
     const CarriageReturn = "\r".charCodeAt(0);
 
-    function fromOctal (str)
-	: int
-    {
-	return parseInt (str);
+    function fromOctal (str) : int {
+        return parseInt (str);
     }
 
-    function fromHex (str)
-	: int
-    {
-	return parseInt (str);
+    function fromHex (str) : int {
+        return parseInt (str);
     }
 
     function isIdentifierStart(c) {
@@ -174,7 +170,7 @@ public namespace Char
 
 
     function test () {
-	print ("testing lex-char.es");
+        print ("testing lex-char.es");
         print ("Space=",Space);
         print ("Tab=",Tab);
         print ("Newline=",Newline);

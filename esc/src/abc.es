@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,6 +41,7 @@ namespace Abc;
 {
     use default namespace Abc;
     use namespace Asm;
+    use namespace Util;
     //import util.*;
     //import assembler.*;
     //import bytestream.*;
@@ -143,144 +144,224 @@ namespace Abc;
         
     }
 
-    /* FIXME: we should be using hash tables here, not linear searching. */
     public class ABCConstantPool
     {
         function ABCConstantPool() {
-            // All pools start at 1.
-            int_pool.length = 1;
-            uint_pool.length = 1;
-            double_pool.length = 1;
-            utf8_pool.length = 1;
-            namespace_pool.length = 1;
-            namespaceset_pool.length = 1;
+            function hash_number(n) { 
+                return n ^ 0;                       // Fairly arbitrary
+            }
+
+            function eq_numbers(n1, n2) {
+                return n1 == n2;
+            }
+
+            function hash_string(s) {
+                // See http://www.cse.yorku.ca/~oz/hash.html; this is the djb2 algorithm
+                var h = 5381;
+                for ( var i=0, limit=s.length ; i < limit ; i++ )
+                    h = ((h << 5) +h) + s.charCodeAt(i);
+                return h;
+            }
+
+            function eq_strings(s1, s2) { 
+                return s1 == s2; 
+            }
+
+            function hash_namespace(ns) {
+                return ns.kind ^ ns.name;          // Fairly arbitrary
+            }
+
+            function eq_namespaces(ns1, ns2) {
+                return ns1.kind == ns2.kind && ns1.name == ns2.name;
+            }
+
+            function hash_multiname(m) {
+                return m.kind ^ m.name ^ m.ns;     // Fairly arbitrary
+            }
+
+            function eq_multinames(m1, m2) {
+                return m1.kind == m2.kind && m1.ns == m2.ns && m1.name == m2.name;
+            }
+
+            function hash_namespaceset(nss) {
+                var hash = nss.length;
+                for ( var i=0, limit=nss.length ; i < limit ; i++ )
+                    hash = ((hash << 5) + hash) + nss[i];
+                return hash;
+            }
+
+            function eq_namespacesets(nss1, nss2) {
+                if (nss1.length != nss2.length)
+                    return false;
+                for ( var i=0, limit=nss1.length ; i < limit ; i++ )
+                    if (nss1[i] != nss2[i])
+                        return false;
+                return true;
+            }
+
+            // All pools and counts start at 1.  Counts are
+            // initialized in the property definitions.
+
             multiname_pool.length = 1;
+
+            int_map = new Hashtable(hash_number, eq_numbers, 0);
+            uint_map = new Hashtable(hash_number, eq_numbers, 0);
+            double_map = new Hashtable(hash_number, eq_numbers, 0);
+            utf8_map = new Hashtable(hash_string, eq_strings, 0);
+            namespace_map = new Hashtable(hash_namespace, eq_namespaces, 0);
+            namespaceset_map = new Hashtable(hash_namespaceset, eq_namespacesets, 0);
+            multiname_map = new Hashtable(hash_multiname, eq_multinames, 0);
         }
-
-        /**/ function findOrAdd(x, pool, cmp, emit) {
-            var i;
-            for ( i=1 ; i < pool.length ; i++ )
-                if (cmp(pool[i], x))
-                    return i;
-
-            emit(x);
-            pool.push(x);
-            return i;
-        }
-
-        /*private*/ function cmp(a, b) { return a === b }
 
         public function int32(n:int):uint {
-            function temp_func (x) { int_bytes.int32(x) };
-            return findOrAdd( n, int_pool, cmp, temp_func );
+            var probe = int_map.read(n);
+            if (probe == 0) {
+                probe = int_count++;
+                int_bytes.int32(n);
+            }
+            return probe;
         }
 
         public function uint32(n:uint):uint {
-            function temp_func(x) { uint_bytes.uint32(x) }
-            return findOrAdd( n, uint_pool, cmp, temp_func );
+            var probe = uint_map.read(n);
+            if (probe == 0) {
+                probe = uint_count++;
+                uint_bytes.uint32(n);
+            }
+            return probe;
         }
 
         public function float64(n: Number):uint {
-            function temp_func(x) { double_bytes.float64(x) } 
-            return findOrAdd( n, double_pool, cmp, temp_func);
+            var probe = double_map.read(n);
+            if (probe == 0) {
+                probe = double_count++;
+                double_bytes.float64(n);
+            }
+            return probe;
         }
 
         public function stringUtf8(s/*FIXME ES4: string*/)/*:uint*/ {
-            function temp_func(x) { utf8_bytes.uint30(x.length); utf8_bytes.utf8(x) }
-            return findOrAdd( ""+s,  // FIXME need to make sure its a string
-                              utf8_pool,
-                              cmp,
-                              temp_func )
+            if (!(s is String))
+                s = s+"";
+            var probe = utf8_map.read(s);
+            if (probe == 0) {
+                probe = utf8_count++;
+                utf8_map.write(s, probe);
+                utf8_bytes.uint30(s.length);
+                utf8_bytes.utf8(s);
+            }
+            return probe;
         }
 
-        /*private*/ function cmpname(a, b) {
-            return a.kind == b.kind && a.ns == b.ns && a.name == b.name;
-        }
+        var tmp_namespace = {"kind": 0, "name": 0 };  // avoids allocation when we don't need it
 
         public function namespace(kind/*:uint*/, name/*:uint*/) {
-            function temp_func(x) {
-              namespace_bytes.uint8(x.kind);
-              namespace_bytes.uint30(x.name); }
-            return findOrAdd( { "kind": kind, "name": name },
-                              namespace_pool,
-                              cmpname,
-                              temp_func );
-        }
-
-        /*private*/ function cmparray(a, b) {
-            var i;
-            if (a.length != b.length)
-                return false;
-            for ( i=0 ; i < a.length ; i++ )
-                if (a[i] != b[i])
-                    return false;
-            return true;
+            tmp_namespace.kind = kind;
+            tmp_namespace.name = name;
+            var probe = namespace_map.read(tmp_namespace);
+            if (probe == 0) {
+                probe = namespace_count++;
+                namespace_map.write({"kind": tmp_namespace.kind, "name": tmp_namespace.name}, probe);
+                namespace_bytes.uint8(tmp_namespace.kind);
+                namespace_bytes.uint30(tmp_namespace.name);
+            }
+            return probe;
         }
 
         public function namespaceset(namespaces:Array) {
-            function temp_func (x) {
-              namespaceset_bytes.uint30(x.length);
-              for ( var i=0 ; i < x.length ; i++ )
-                  namespaceset_bytes.uint30(x[i]);
+            var probe = namespaceset_map.read(namespaces);
+            if (probe == 0) {
+                probe = namespaceset_count++;
+                namespaceset_map.write(Util::copyArray(namespaces), probe);
+                namespaceset_bytes.uint30(namespaces.length);
+                for ( var i=0, limit=namespaces.length ; i < limit ; i++ )
+                    namespaceset_bytes.uint30(namespaces[i]);
             }
-            return findOrAdd( Util::copyArray(namespaces),
-                              namespaceset_pool,
-                              cmparray,
-                              temp_func );
+            return probe;
+        }
+
+        /* Look up a multiname entry with kind, name, and namespace
+         * set.  Allocate an entry for it if it does not exist.  If an
+         * entry were allocated, then the negative of the entry index
+         * is returned (and the caller should emit data to the
+         * multiname_bytes stream), otherwise the entry index is
+         * returned.  (If this seems a little contorted, it reduces
+         * allocation of closures in the caller.)
+         */
+
+        // Temporary structure (avoids allocation of structures that already exist).
+        var tmp_multiname = { "kind": 0, "name": 0, "ns": 0 };
+
+        function multinameLookup(kind, name, ns) {
+            tmp_multiname.kind = kind;
+            tmp_multiname.name = name;
+            tmp_multiname.ns = ns;
+            var probe = multiname_map.read(tmp_multiname);
+            if (probe != 0)
+                return probe;
+
+            // Allocate
+            probe = multiname_pool.length;
+            var entry = {"kind":tmp_multiname.kind, "name":tmp_multiname.name, "ns":tmp_multiname.ns}
+            multiname_pool.push(entry);           // need "kind" for later, could optimize here --
+            multiname_map.write(entry, probe);    //   but need to save the whole entry anyway
+            return -probe;
         }
 
         public function QName(ns/*: uint*/, name/*: uint*/, is_attr: Boolean /*FIXME ES4: boolean*/) {
-            function temp_func(x) {
-              multiname_bytes.uint8(x.kind);
-              multiname_bytes.uint30(x.ns);
-              multiname_bytes.uint30(x.name); 
+            var kind = is_attr ? CONSTANT_QNameA : CONSTANT_QName;
+            var idx = multinameLookup( kind, name, ns );
+            if (idx < 0) {
+                multiname_bytes.uint8(kind);
+                multiname_bytes.uint30(ns);
+                multiname_bytes.uint30(name);
+                idx = -idx;
             }
-            return findOrAdd( { "kind": is_attr ? CONSTANT_QNameA : CONSTANT_QName, "ns": ns, "name": name },
-                              multiname_pool,
-                              cmpname,
-                              temp_func );
+            return idx;
         }
 
         public function RTQName(name/*: uint*/, is_attr: Boolean /*FIXME ES4: boolean*/) {
-            function temp_func(x) {
-              multiname_bytes.uint8(x.kind);
-              multiname_bytes.uint30(x.name); 
+            var kind = is_attr ? CONSTANT_RTQNameA : CONSTANT_RTQName;
+            var idx = multinameLookup( kind, name, 0 );
+            if (idx < 0) {
+                multiname_bytes.uint8(kind);
+                multiname_bytes.uint30(name); 
+                idx = -idx;
             }
-            return findOrAdd( { "kind": is_attr ? CONSTANT_RTQNameA : CONSTANT_RTQName, "name": name },
-                              multiname_pool,
-                              cmpname,
-                              temp_func );
+            return idx;
         }
 
         public function RTQNameL(is_attr: Boolean /*FIXME ES4: boolean*/) {
-            function temp_func (x) { multiname_bytes.uint8(x.kind) } 
-            return findOrAdd( { "kind": is_attr ? CONSTANT_RTQNameLA : CONSTANT_RTQNameL },
-                              multiname_pool,
-                              cmpname,
-                              temp_func);
+            var kind = is_attr ? CONSTANT_RTQNameLA : CONSTANT_RTQNameL;
+            var idx = multinameLookup( kind, 0, 0 );
+            if (idx < 0) {
+                multiname_bytes.uint8(kind);
+                idx = -idx;
+            }
+            return idx;
         }
 
         public function Multiname(nsset/*: uint*/, name/*: uint*/, is_attr: Boolean /*FIXME ES4: boolean*/ ) {
-            function temp_func(x) {
-                  multiname_bytes.uint8(x.kind);
-                  multiname_bytes.uint30(x.name);
-                  multiname_bytes.uint30(x.ns); 
-            } 
-            return findOrAdd( { "kind": is_attr ? CONSTANT_MultinameA : CONSTANT_Multiname, "name": name, "ns":nsset },
-                              multiname_pool,
-                              cmpname,
-                              temp_func);
+            var kind = is_attr ? CONSTANT_MultinameA : CONSTANT_Multiname;
+            var idx = multinameLookup(kind, name, nsset );
+            if (idx < 0) {
+                multiname_bytes.uint8(kind);
+                multiname_bytes.uint30(name);
+                multiname_bytes.uint30(nsset); 
+                idx = -idx;
+            }
+            return idx;
         }
 
         public function MultinameL(nsset/*: uint*/, is_attr: Boolean /*FIXME ES4: boolean*/) {
-            function temp_func (x) {
-              multiname_bytes.uint8(x.kind);
-              multiname_bytes.uint30(x.ns); 
+            var kind = is_attr ? CONSTANT_MultinameLA : CONSTANT_MultinameL;
+            var idx = multinameLookup(kind, 0, nsset);
+            if (idx < 0) {
+                multiname_bytes.uint8(kind);
+                multiname_bytes.uint30(nsset);
+                idx = -idx;
             }
-            return findOrAdd( { "kind": is_attr ? CONSTANT_MultinameLA : CONSTANT_MultinameL, "ns":nsset },
-                              multiname_pool,
-                              cmpname,
-                              temp_func );
+            return idx;
         }
 
         public function hasRTNS(index) {
@@ -313,37 +394,49 @@ namespace Abc;
             return result;
         }
 
+        function printPoolStats() {
+            print("  Ints: n=" + int_count + ", bytes=" + int_bytes.length);
+            print("  Uints: n=" + uint_count + ", bytes=" + uint_bytes.length);
+            print("  Doubles: n=" + double_count + ", bytes=" + double_bytes.length);
+            print("  Strings: n=" + utf8_count + ", bytes=" + utf8_bytes.length);
+            print("  Namespaces: n=" + namespace_count + ", bytes=" + namespace_bytes.length);
+            print("  Namespace sets: n=" + namespaceset_count + ", bytes=" + namespaceset_bytes.length);
+            print("  Multinames: n=" + multiname_pool.length + ", bytes=" + multiname_bytes.length);
+        }
+
         public function serialize(bs) {
-            bs.uint30(int_pool.length);
+            bs.uint30(int_count);
             bs.byteStream(int_bytes);
 
-            bs.uint30(uint_pool.length);
+            bs.uint30(uint_count);
             bs.byteStream(uint_bytes);
 
-            bs.uint30(double_pool.length);
+            bs.uint30(double_count);
             bs.byteStream(double_bytes);
 
-            bs.uint30(utf8_pool.length);
+            bs.uint30(utf8_count);
             bs.byteStream(utf8_bytes);
 
-            bs.uint30(namespace_pool.length);
+            bs.uint30(namespace_count);
             bs.byteStream(namespace_bytes);
 
-            bs.uint30(namespaceset_pool.length);
+            bs.uint30(namespaceset_count);
             bs.byteStream(namespaceset_bytes);
 
             bs.uint30(multiname_pool.length);
             bs.byteStream(multiname_bytes);
 
+            //printPoolStats();
+
             return bs;
         }
-        /*private*/ const int_pool = new Array;
-        /*private*/ const uint_pool = new Array;
-        /*private*/ const double_pool = new Array;
-        /*private*/ const utf8_pool = new Array;
-        /*private*/ const namespace_pool = new Array;
-        /*private*/ const namespaceset_pool = new Array;
-        /*private*/ const multiname_pool = new Array;
+        /*private*/ var   int_count = 1;
+        /*private*/ var   uint_count = 1;
+        /*private*/ var   double_count = 1;
+        /*private*/ var   utf8_count = 1;
+        /*private*/ var   namespace_count = 1;
+        /*private*/ var   namespaceset_count = 1;
+        /*private*/ const multiname_pool = new Array; // its length is the count
 
         /*private*/ const int_bytes = new ABCByteStream;
         /*private*/ const uint_bytes = new ABCByteStream;
@@ -352,6 +445,11 @@ namespace Abc;
         /*private*/ const namespace_bytes = new ABCByteStream;
         /*private*/ const namespaceset_bytes = new ABCByteStream;
         /*private*/ const multiname_bytes = new ABCByteStream;
+
+        var utf8_map;
+        var multiname_map;
+        var namespace_map;
+        var namespaceset_map;
     }
 
     public class ABCMethodInfo
@@ -692,11 +790,11 @@ namespace Abc;
     
     // Construct an ABCFile instance from a bytestream representing an abc block.
     function parseAbcFile(b : ABCByteStream) : ABCFile {
-		b.position = 0;
-		magic = b.readInt();
+        b.position = 0;
+        magic = b.readInt();
         
-		if (magic != (46<<16|16))
-			throw new Error("not an abc file.  magic=" + magic.toString(16));
+        if (magic != (46<<16|16))
+            throw new Error("not an abc file.  magic=" + magic.toString(16));
         
         var abc : ABCFile = new ABCFile();
 

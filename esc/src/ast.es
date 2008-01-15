@@ -1,4 +1,4 @@
-/* -*- mode: java; mode: font-lock; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
+/* -*- mode: java; tab-width: 4; insert-tabs-mode: nil; indent-tabs-mode: nil -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -429,11 +429,11 @@ public namespace Ast
        , GetTemp
        , GetParam )
 
-	class TernaryExpr {
+    class TernaryExpr {
         const e1 : EXPR
         const e2 : EXPR
         const e3 : EXPR
-    	function TernaryExpr (e1,e2,e3)
+        function TernaryExpr (e1,e2,e3)
             : e1=e1, e2=e2, e3=e3 {}
     }
 
@@ -441,8 +441,8 @@ public namespace Ast
         const op : BINOP
         const e1 : EXPR
         const e2 : EXPR
-    	function BinaryExpr (op,e1,e2)
-	        : op=op, e1=e1, e2=e2 {}
+        function BinaryExpr (op,e1,e2)
+            : op=op, e1=e1, e2=e2 {}
     }
 
     /*
@@ -457,14 +457,14 @@ public namespace Ast
         const op : BINTYOP
         const e1 : EXPR
         const e2 : TYPE_EXPR
-	    function BinaryTypeExpr (op,e1,e2)
-	        : op=op, e1=e1, e2=e2 {}
-	}
+        function BinaryTypeExpr (op,e1,e2)
+            : op=op, e1=e1, e2=e2 {}
+    }
 
     class UnaryExpr {
         const op : UNOP;
         const e1 : EXPR;
-	    function UnaryExpr (op,e1)
+        function UnaryExpr (op,e1)
             : op=op, e1=e1 {}
     }
 
@@ -598,7 +598,7 @@ public namespace Ast
     const prototypeInit = new PrototypeInit;
     const instanceInit = new InstanceInit;
 
-	class InitExpr {
+    class InitExpr {
         const target : INIT_TARGET;
         const head : HEAD;               // for desugaring temporaries
         const inits  //: INITS;
@@ -826,7 +826,7 @@ public namespace Ast
             : func = func {}
     }
 
-	class LiteralRegExp {
+    class LiteralRegExp {
         const src : String;
     }
 
