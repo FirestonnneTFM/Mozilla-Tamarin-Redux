@@ -38,7 +38,11 @@
 #define __axtam_ActiveScriptError__
 
 namespace axtam {
-	// Class for reporting avm exceptions to the script host.
+	// Class for reporting avm exceptions to the script host.  It is hoped we 
+	// can replace this with a script version, or at least integrate with our 
+	// script impl, so GetSourcePosition() and possibly the script context, 
+	// can be delegated.
+	// XXX - think about this some more.
 	class ATL_NO_VTABLE CActiveScriptError :
 		public CComObjectRootEx<CComSingleThreadModel>,
 		public IActiveScriptError,
