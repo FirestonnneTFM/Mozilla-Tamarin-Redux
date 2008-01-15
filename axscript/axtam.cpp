@@ -51,6 +51,7 @@
 #include "COMErrorClass.h"
 #include "ActiveScriptError.h"
 #include "ExcepInfo.h"
+#include "Debugger.h"
 
 // files cloned from the shell
 namespace axtam {
@@ -128,7 +129,7 @@ namespace axtam
 
 		#ifdef DEBUGGER
 		// Create the debugger
-		//debugger = new (gc) DebugCLI(this);
+		debugger = new (gc) axtam::Debugger(this);
 
 		// Create the profiler
 		profiler = new (gc) axtam::Profiler(this);
