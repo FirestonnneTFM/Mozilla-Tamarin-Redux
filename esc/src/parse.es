@@ -1551,8 +1551,23 @@ use namespace intrinsic;
                 break;
             case Token::DecimalLiteral:
                 let tx = Token::tokenText (ts.head());
+
+                // This is all bogus.  All this should be handled in
+                // the lexer, and the lexer should only return
+                // DecimalLiteral if the literal is supposed to
+                // encoded as an ES4 'decimal'.
+
                 // FIXME.  The AVM2 can't handle decimal literals yet.
-                let n = parseFloat(tx);
+
+                let n = 0;
+                if (tx.charAt(0) == "0") {
+                    if (tx.charAt(1) == "x" || tx.charAt(1) == "X")
+                        n = parseInt(tx);
+                    else
+                        n = parseInt(tx, 8);
+                }
+                else
+                    n = parseFloat(tx);
                 let lit = null;
                 if (Math.floor(n) === n) {
                     if (n >= -0x80000000 && n <= 0x7FFFFFFF)
