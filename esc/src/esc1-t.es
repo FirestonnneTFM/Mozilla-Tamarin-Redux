@@ -36,6 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Gen::emit_debug = false;
 {
     import avmplus.*;
     var fname = System.argv[0];
