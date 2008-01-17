@@ -59,6 +59,7 @@ namespace axtam
 		void exposeToDomain(ScriptEnv *env, DomainEnv *domainEnv);
 	private:
 
+		virtual Atom call(int argc, Atom* argv);
 		virtual Atom callProperty(Multiname* name, int argc, Atom* argv);
 		virtual Atom getAtomProperty(Atom name) const;
 		virtual void setMultinameProperty(Multiname* name, Atom value);
@@ -66,6 +67,27 @@ namespace axtam
 		// rely on the default impl returning False if the name if not
 		// an expando...
 		//bool hasMultinameProperty(Multiname* multiname) const;
+		// The 'integer' methods.  The default impl winds up just
+		// looking in the hashtable, not doing the whole string thing.
+		// Until we have a better handle on how to optimize indexed
+		// access to the DOM, just delegate to our string-based impl.
+		virtual Atom getUintProperty(uint32 i) const
+		{
+			return getAtomProperty(core()->internUint32(i)->atom());
+		}
+		virtual void setUintProperty(uint32 i, Atom value)
+		{
+			setAtomProperty(core()->internUint32(i)->atom(), value);
+		}
+		virtual bool delUintProperty(uint32 i)
+		{
+			return deleteAtomProperty(core()->internUint32(i)->atom());
+		}
+		virtual bool hasUintProperty(uint32 i) const
+		{
+			return hasAtomProperty(core()->internUint32(i)->atom());
+		}
+
 	};
 
 	class IDispatchConsumerClass : public ClassClosure
@@ -80,6 +102,23 @@ namespace axtam
 		DECLARE_NATIVE_MAP(IDispatchConsumerClass )
 	};
 
+	class AXTam;
+	// a helper to manage memory for our VARIANT array, and convert from
+	// an argc array to a DISPPARAMS.
+	class DISPPARAMS_helper : public DISPPARAMS {
+	public:
+		DISPPARAMS_helper() : vars(NULL) {memset(&params, 0, sizeof(params));}
+		DISPPARAMS_helper(AXTam *core, int argc, Atom* argv) : vars(NULL) {memset(&params, 0, sizeof(params));fill(core, argc, argv);}
+		// WARNING: can't rely on dtor being call with exceptions :(
+		~DISPPARAMS_helper() {clear();}
+
+		operator DISPPARAMS *() {return &params;}
+		void fill(AXTam *core, int argc, Atom* argv);
+		void clear() {if (vars) {delete [] vars; vars=NULL;} memset(&params, 0, sizeof(params));}
+		DISPPARAMS params;
+		// unmanaged pointer
+		CComVariant *vars;
+	};
 }
 
 #endif /* __axtam_IDispatchConsumer__ */

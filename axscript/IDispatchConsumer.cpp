@@ -47,6 +47,23 @@ namespace axtam
 		AvmAssert(traits()->sizeofInstance == sizeof(IDispatchConsumer));
 	}
 
+	Atom IDispatchConsumer::call(int argc, Atom* argv)
+	{
+		CComVariant ret;
+		EXCEPINFO ei = {0,0,0,0,0};
+		AXTam *axcore = (AXTam *)core();
+		DISPPARAMS_helper params(axcore, argc, argv);
+		IDispatch *disp = (IDispatch *)getDispatch();
+		HRESULT hr = disp->Invoke(DISPID_VALUE, IID_NULL, 0, DISPATCH_METHOD, params, &ret, &ei, NULL);
+		if (FAILED(hr)) {
+			// EXCEPINFO ownership taken by throwCOMConsumerError
+			ret.Clear();
+			params.clear();
+			axcore->throwCOMConsumerError(hr, &ei);
+		}
+		return axcore->toAtom(ret);
+	}
+
 	Atom IDispatchConsumer::callProperty(avmplus::Multiname *name, int argc, avmplus::Atom *argv)
 	{
 		// Prevent recursion death due to global being the IDispatchConsumer 
@@ -71,20 +88,40 @@ namespace axtam
 			axcore->throwCOMConsumerError(hr);
 		// Now create args for the call.
 		EXCEPINFO ei = {0,0,0,0,0};
-		CComVariant *pArgs = new CComVariant[argc];
-		int i;
-		for (i=0;i<argc;i++) {
-			// args are in reversed order in DISPPARAMS, and we
-			// don't pass |this|
-			pArgs[argc-i-1] = axcore->atomToVARIANT(argv[i+1]);
-		}
-		DISPPARAMS params = {pArgs, NULL, argc, 0};
+		DISPPARAMS_helper params(axcore, argc, argv);
 		CComVariant ret;
-		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_METHOD, &params, &ret, &ei, NULL);
-		delete [] pArgs;
-		if (FAILED(hr))
+		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_METHOD, params, &ret, &ei, NULL);
+		// Consider, eg, 'WSH.Arguments(0)' - we are here attempting to call an
+		// 'Arguments' method - but what we actually *want* is a property-get for
+		// 'Arguments', then a DISPID_DEFAULT call on that.  So do that :)
+		if (hr == DISP_E_MEMBERNOTFOUND) {
+			DISPPARAMS get_params = {NULL, NULL, 0, 0};
+			CComVariant sub;
+			hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_PROPERTYGET, &get_params, &sub, &ei, NULL);
+			if (SUCCEEDED(hr)) {
+				CComPtr<IDispatch> disp_sub;
+				if (sub.vt == VT_DISPATCH)
+					disp_sub = (IDispatch *)sub.pdispVal;
+				else if (sub.vt == VT_UNKNOWN)
+					disp_sub = CComQIPtr<IDispatch, &IID_IDispatch>(sub.punkVal);
+				if (disp_sub==0) {
+					// Its a normal value (eg, string, int - but not "callable")
+					AvmDebugMsg(false, "property get for '%S' returned something not callable (vt=%d)",
+					            olename, sub.vt);
+					ret.Clear();
+					params.clear();
+					axcore->toplevel->throwTypeError(kCallOfNonFunctionError, axcore->toErrorString(name));
+				}
+				// finally have an IDispatch we can retry the call on.
+				hr = disp_sub->Invoke(DISPID_VALUE, IID_NULL, 0, DISPATCH_METHOD, params, &ret, &ei, NULL);
+			}
+		}
+		if (FAILED(hr)) {
+			ret.Clear();
+			params.clear();
 			// EXCEPINFO ownership taken by throwCOMConsumerError
 			axcore->throwCOMConsumerError(hr, &ei);
+		}
 		return axcore->toAtom(ret);
 	}
 
@@ -138,8 +175,10 @@ namespace axtam
 		DISPPARAMS params = {NULL, NULL, 0, 0};
 		CComVariant ret;
 		hr = disp->Invoke(id, IID_NULL, 0, DISPATCH_PROPERTYGET, &params, &ret, &ei, NULL);
-		if (FAILED(hr))
+		if (FAILED(hr)) {
+			ret.Clear();
 			axcore->throwCOMConsumerError(hr, &ei);
+		}
 		return axcore->toAtom(ret);
 	}
 
@@ -167,5 +206,21 @@ namespace axtam
 		VTable* ivtable = this->ivtable();
 		IDispatchConsumer *o = new (core()->GetGC(), ivtable->getExtraSize()) IDispatchConsumer(ivtable, prototype, p);
 		return o;
+	}
+
+	void DISPPARAMS_helper::fill(AXTam *core, int argc, Atom* argv)
+	{
+		// must only be called once.
+		AvmAssert(params.cArgs==0 && params.cNamedArgs==0 && params.rgvarg==NULL && vars==NULL);
+		// XXX - Note: not using mmGC here - it dies at delete time
+		vars = new CComVariant[argc];
+		int i;
+		for (i=0;i<argc;i++) {
+			// args are in reversed order in DISPPARAMS, and we
+			// don't pass |this|
+			vars[argc-i-1] = core->atomToVARIANT(argv[i+1]);
+		}
+		params.rgvarg = vars;
+		params.cArgs = argc;
 	}
 }
