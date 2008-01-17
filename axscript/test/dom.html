@@ -85,6 +85,14 @@ function test(event) {
     if (litem.ownerDocument != document)
         throw "docs aren't the same?"
 
+    // a couple of test for our "collection" semantics.
+    var items = document.getElementsByTagName('*')
+    // The object can be called, or indexed
+    if (items[0] != items(0) || items["0"] != items(0))
+        throw "elements aren't the same"
+    if (items[0].tagName != "HTML")
+        throw "expecting first tag to be HTML - got " + items[0].tagName
+
     write("tests complete")
 }
 
