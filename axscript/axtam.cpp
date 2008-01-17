@@ -457,8 +457,147 @@ namespace axtam
 		return hr;
 	}
 
+	// Nice discussion on types that are important can be found at http://blogs.msdn.com/ericlippert/archive/2004/07/14/183241.aspx
+	// This shows that arrays really don't need much better support than this (indeed, even this goes further than JScript?)
 	Atom AXTam::toAtom(VARIANT &var)
 	{
+		if (V_ISARRAY(&var)) {
+			HRESULT hr;
+			// An array of some kind - decompose it.
+			SAFEARRAY FAR *psa;
+			if (V_ISBYREF(&var))
+				psa = *V_ARRAYREF(&var);
+			else
+				psa=V_ARRAY(&var);
+			VARTYPE eltType;
+
+			if (psa==NULL) // A NULL array
+				return nullObjectAtom;
+
+			if (FAILED(hr = SafeArrayGetVartype(psa, &eltType)))
+				throwCOMConsumerError(hr);
+
+			UINT nDim = SafeArrayGetDim(psa);
+			if (nDim != 1) {
+				AvmDebugMsg(false, "Only handle arrays with a single dimension");
+				return undefinedAtom;
+			}
+			long lb, ub;
+			if (FAILED(hr = SafeArrayGetLBound(psa, 1, &lb)))
+				throwCOMConsumerError(hr);
+			if (FAILED(hr = SafeArrayGetUBound(psa, 1, &ub)))
+				throwCOMConsumerError(hr);
+
+			// XXX - special cases?  VT_UI1 should probably be optimized as it
+			// is used to mean "binary data"
+			ArrayObject *ret = toplevel->arrayClass->newArray(ub-lb+1);
+			for (long i=lb;i<=ub;i++) {
+				Atom sub = undefinedAtom;
+				switch (eltType) {
+					// The following are all variant types valid in an array
+					// Of note, VT_I8 and VT_UI8 are not listed!
+					case VT_VARIANT:
+					{
+						CComVariant elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = toAtom(elt);
+						break;
+					}
+					case VT_I2: {
+						short elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = intToAtom(elt);
+						break;
+					}
+					case VT_I4:
+					case VT_ERROR:
+					case VT_INT:{
+						long elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = intToAtom(elt);
+						break;
+					}
+
+					case VT_I1: {
+						char elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = intToAtom(elt);
+						break;
+					}
+//					case VT_UI1: - not done yet pending special support?
+					case VT_UI2: {
+						unsigned short elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = uintToAtom(elt);
+						break;
+					}
+					case VT_UI4:
+					case VT_UINT: {
+						unsigned long elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = uintToAtom(elt);
+						break;
+					}
+					case VT_R4: {
+						float elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = doubleToAtom(elt);
+						break;
+					}
+					case VT_R8: {
+						double elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = doubleToAtom(elt);
+						break;
+					}
+					case VT_BSTR: {
+						BSTR elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = toAtom(elt);
+						break;
+					}
+					case VT_DISPATCH: {
+						CComPtr<IDispatch> elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = toAtom(elt);
+						break;
+					}
+					case VT_UNKNOWN: {
+						CComPtr<IUnknown> elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = toAtom(elt);
+						break;
+					}
+					case VT_BOOL: {
+						VARIANT_BOOL elt;
+						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
+							throwCOMConsumerError(hr);
+						sub = elt ? trueAtom : falseAtom;
+					}
+					// unsupported types.
+					case VT_CY:
+					case VT_DATE:
+					case VT_DECIMAL:
+					case VT_RECORD:
+					default:
+						AvmDebugMsg(false, "Unsupported array type %x\n", eltType);
+						sub = undefinedAtom;
+				}
+				ret->push(&sub, 1);
+			}
+			return ret->atom();
+		}
 		switch (var.vt) {
 			// GetDispID() documents that new attributes should be added
 			// with a type of VT_EMPTY.  Therefore, we treat VT_EMPTY as
@@ -483,6 +622,8 @@ namespace axtam
 				return uintToAtom(var.uiVal);
 			case VT_UI4:
 				return uintToAtom(var.ulVal);
+			case VT_UINT:
+				return uintToAtom(var.uintVal);
 			case VT_R4:
 				return doubleToAtom(var.fltVal);
 			case VT_R8:
@@ -509,7 +650,7 @@ namespace axtam
 			case VT_DISPATCH:
 				return toAtom(var.pdispVal);
 		}
-		AvmAssert(0); // a type we are yet to handle!
+		AvmDebugMsg(true, "unhandled VARIANT type %d", var.vt);
 		return undefinedAtom;
 	}
 
