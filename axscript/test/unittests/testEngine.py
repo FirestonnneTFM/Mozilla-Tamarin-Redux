@@ -43,9 +43,10 @@ class TestScriptObject:
        code can call reference the 'public' properties of this object.
     """
     _public_methods_ = [ 'call', 'fail' ]
-    _public_attrs_ = ['value', 'collection']
+    _public_attrs_ = ['value', 'collection', 'list']
     def __init__(self):
         self.collection = wrap( TestScriptCollection( [1,'Two',3] ))
+        self.list = ["One", 2, "Three"]
         self.last_call_args = None
         self.fail_called = 0
         self.value = None
@@ -458,6 +459,14 @@ class TestScriptDispatch(TestCaseInitialized):
         # our condition is wrong.
         self.parseScriptText("if (test.value != test.value) throw('wrong - equality failed!');")
         self.parseScriptText("if (!(test.value === test.value)) throw('wrong - identity failed!');")
+
+    def testDispatchList(self):
+        # No eval - so have script code throw exception on failure.
+        for code in ("if (test.list[0] != 'One') throw test.list[0]",
+                     "if (test.list[1] != 2) throw test.list[1]",
+                     "if (test.list[2] != 'Three') throw test.list[1]",
+                     ):
+            self.parseScriptText(code)
 
 # tests specific to IDispachEx
 class TestScriptDispatchEx(TestCaseInitialized):
