@@ -765,6 +765,8 @@ public namespace Ast
 
     class LiteralUInt {
         const uintValue : uint;
+        function LiteralUInt(uintValue) 
+            : uintValue=uintValue {}
     }
 
     class LiteralBoolean {
@@ -1078,8 +1080,8 @@ public namespace Ast
 
     class SpecialType {
         const kind : SPECIAL_TYPE_KIND;
-        function SpecialType(kind) : kind=kind {}}
-    
+        function SpecialType(kind) : kind=kind {}
+    }
 
     type SPECIAL_TYPE_KIND =
         ( AnyType

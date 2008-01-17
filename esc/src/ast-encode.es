@@ -1005,6 +1005,30 @@ public namespace Encode;
               + nd.decimalValue
               + "' }";
         }
+        case (nd: LiteralDouble) {
+            var str =
+                "{ 'ast_class': 'LiteralDouble'"
+              + indent(nesting)
+              + ", 'doubleValue': '"
+              + double.intValue
+              + "' }";
+        }
+        case (nd: LiteralInt) {
+            var str =
+                "{ 'ast_class': 'LiteralInt'"
+              + indent(nesting)
+              + ", 'intValue': '"
+              + nd.intValue
+              + "' }";
+        }
+        case (nd: LiteralUInt) {
+            var str =
+                "{ 'ast_class': 'LiteralUInt'"
+              + indent(nesting)
+              + ", 'uintValue': '"
+              + nd.uintValue
+              + "' }";
+        }
         case (nd: LiteralNamespace) {
             var str =
                 "{ 'ast_class': 'LiteralNamespace'"
