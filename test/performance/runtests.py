@@ -92,7 +92,7 @@ def usage(c):
 	exit(c)
 
 try:
-	opts, args = getopt(argv[1:], "vE:T:a:g:hfc:l", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log"])
+	opts, args = getopt(argv[1:], "vE:T:a:g:hfc:l", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log","avmtt="])
 except:
 	usage(2)
 
@@ -224,9 +224,9 @@ for ast in tests:
 		compile_test(ast)
 		if not isfile(abc):
 			log_print("compile FAILED!, file not found " + abc)
-	f1 = run_pipe("nice --10 %s %s %s" % (avm, vmargs, abc))
+	f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
 	if len(avmtt)>0:
-		f2 = run_pipe("nice --10 %s %s %s" % (avmtt, vmargs, abc))
+		f2 = run_pipe("%s %s %s" % (avmtt, vmargs, abc))
 	try:
 		tc="na"
 		tt="na"
