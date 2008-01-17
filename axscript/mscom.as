@@ -89,14 +89,21 @@ package axtam.com {
 			var e:axtam.com.Error = this
 			var code:uint;
 			var msg:String;
+			code = e.hresult;
+			if (excepinfo) {
+				// our hresult is almost certainly DISP_E_EXCEPTION, so
+				// either of the ones in the excep info are likely to be better
+				if (excepinfo.code)
+					code = excepinfo.code
+				else if (excepinfo.scode)
+					code = excepinfo.scode
+			}
 			if (excepinfo && excepinfo.description) {
 				msg = excepinfo.description + " (source:" + excepinfo.source + ", help:" + excepinfo.helpFile + ", helpContext:" + excepinfo.helpContext + ")";
-				code = excepinfo.code ? excepinfo.code : excepinfo.scode;
 			} else {
-				var code:uint = e.hresult
 				msg = ProviderError.getErrorMessage(code);
 			}
-			var hv:String = code > 0 ? code.toString(16) : (code+0x100000000).toString(16)
+			var hv:String = code >= 0 ? code.toString(16) : (code+0x100000000).toString(16)
 			return "COM Error 0x" + hv + ": " + msg
 		}
 		_setPropertyIsEnumerable(prototype, "toString", false);
@@ -219,7 +226,6 @@ package {
     {
         import Parse.*;
         import Lex.*;
-
         var top = []
         var parser = new Parse.Parser(str,top);
         parser.scan.lnCoord = startLineNumber;
@@ -288,6 +294,10 @@ package {
 			                   'line_number': lineNumber,
 			                   'flags':flags}
 
+			// If flags & SCRIPTTEXT_ISEXPRESSION, we need to do something better.
+			// Note that http://blogs.msdn.com/ericlippert/archive/2005/10/11/479696.aspx
+			// says the engine moves to 'started' once this flag is specified.
+			// assert(flags & SCRIPTTEXT_ISEXPRESSION == 0);
 			// If we are in the INITIALIZED state, queue it up, otherwise we execute it now.
 			if (state==axtam.com.SCRIPTSTATE_INITIALIZED) {
 				codeBlocks.push(scriptBlock)
