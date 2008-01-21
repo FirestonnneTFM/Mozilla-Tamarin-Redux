@@ -43,4 +43,31 @@ while (true) {
     if (x == 0)
         break;
 }
+
+var x=2;
+fnord:
+    while (true) {
+        while (true) {
+            print("LOOP 2");
+            x = x - 1;
+            if (x == 0)
+                break fnord;
+        }
+    }
+
+var x=2;
+feeble:
+    if (x > 1) {
+        print("NESTED");
+        break feeble;
+        print("WRONG");
+    }
+
+// Check to see if the compiler can handle a labelled stmt 
+// even if the stmt can't be broken out of.
+/* Doesn't work, parser needs fixing
+confusing:
+    var x = 10;
+*/
+
 print("DONE");

@@ -545,8 +545,11 @@ namespace Gen;
     }
 
     // The following return extended contexts
-    function pushBreak(ctx, labels, target)
-        push(ctx, { tag:"break", labels:labels, target:target, has_scope:false });
+    function pushBreak(ctx, target)
+        pushLabel(ctx, null, target);
+
+    function pushLabel(ctx, label, target)
+        push(ctx, { tag:"break", label:label, target:target, has_scope:false });
 
     function pushContinue(ctx, labels, target)
         push(ctx, { tag:"continue", labels:labels, target:target, has_scope:false });
