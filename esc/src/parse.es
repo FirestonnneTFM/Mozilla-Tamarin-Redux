@@ -3485,8 +3485,13 @@ use namespace intrinsic;
                 var [ts2,nd2] = withStatement (ts, omega);
                 break;
             default:
-                let [ts1,nd1] = expressionStatement (ts);
-                var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                if (hd (ts) == Token::Identifier && hd2 (ts) == Token::Colon) {
+                    var [ts2,nd2] = labeledStatement (ts);
+                }
+                else {
+                    let [ts1,nd1] = expressionStatement (ts);
+                    var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                }
                 break;
             }
 
@@ -3607,6 +3612,44 @@ use namespace intrinsic;
 
             exit("Parser::semicolon ", ts1);
             return ts1;
+        }
+
+        function labeledStatement (ts: TOKENS)
+            : [TOKENS, Ast::STMT]
+        {
+            enter("Parser::labeledStatement ", ts);
+
+            var [ts1, label] = identifier (ts);
+            var [ts2, stmt] = substatement(eat (ts1, Token::Colon), FullStmt);
+
+            exit("Parser::labeledStatement ", ts2);
+            addLabel(label, stmt);
+            return [ts2, new Ast::LabeledStmt(label, stmt)];
+
+            function addLabel(label, stmt) {
+                use namespace Ast;
+
+                switch type (stmt) {
+                case (x0: LabeledStmt) {
+                    addLabel(label, x0.stmt);
+                }
+                case (x1: ForInStmt) {
+                    x1.labels.push(label);
+                }
+                case (x2: WhileStmt) {
+                    x2.labels.push(label);
+                }
+                case (x3: DoWhileStmt) {
+                    x3.labels.push(label);
+                }
+                case (x4: ForStmt) {
+                    x4.labels.push(label);
+                }
+                case (x:*) {
+                    // Label is not propagated
+                }
+                }
+            }
         }
 
         function expressionStatement (ts: TOKENS)
@@ -3736,10 +3779,9 @@ use namespace intrinsic;
             ts = eat (ts,Token::While);
             var [ts1,nd1] = parenListExpression (ts);
             var [ts2,nd2] = substatement (ts1, omega); 
-            var labels = [];
  
             exit("Parser::whileStatement ", ts2);
-            return [ts2, new Ast::WhileStmt (nd1,nd2,labels)];
+            return [ts2, new Ast::WhileStmt (nd1,nd2)];
         }
 
         /*
@@ -3758,10 +3800,9 @@ use namespace intrinsic;
             var [ts1,body] = substatement (ts, omega); 
             ts = eat(ts1,Token::While);
             var [ts2,test] = parenListExpression (ts);
-            var labels = [];
  
             exit("Parser::doStatement ", ts2);
-            return [ts2, new Ast::DoWhileStmt (test,body,labels)]; // same order of args to constructor as 'while'
+            return [ts2, new Ast::DoWhileStmt (test,body)]; // same order of args to constructor as 'while'
         }
 
         /*
@@ -3788,12 +3829,11 @@ use namespace intrinsic;
                 var [ts2,objexpr] = listExpression (ts1, allowIn);
                 ts2 = eat (ts2,Token::RightParen);
                 var [ts3,body] = substatement (ts2, omega); 
-                var labels = [];
                 
                 var head = cx.exitLetBlock ();
                 
                 exit("Parser::forStatement ", ts3);
-                return [ts3, new Ast::ForInStmt (head,nd1,objexpr,body,labels)];
+                return [ts3, new Ast::ForInStmt (head,nd1,objexpr,body)];
             }
             else {
                 ts1 = eat (ts1,Token::SemiColon);
@@ -3802,12 +3842,11 @@ use namespace intrinsic;
                 var [ts3,nd3] = optionalExpression (ts2);
                 ts3 = eat (ts3,Token::RightParen);
                 var [ts4,nd4] = substatement (ts3, omega); 
-                var labels = [];
                 
                 var head = cx.exitLetBlock ();
                 
                 exit("Parser::forStatement ", ts4);
-                return [ts4, new Ast::ForStmt (head,nd1,nd2,nd3,nd4,labels)];
+                return [ts4, new Ast::ForStmt (head,nd1,nd2,nd3,nd4)];
             }
         }
 
@@ -3924,10 +3963,8 @@ use namespace intrinsic;
             }
             ts2 = eat (ts2,Token::RightBrace);
 
-            var nd3 = []; // FIXME labels
-
             exit("Parser::switchStatement ", ts2);
-            return [ts2, new Ast::SwitchStmt (nd1,nd2,nd3)];
+            return [ts2, new Ast::SwitchStmt (nd1,nd2)];
         }
 
         function caseElementsPrefix (ts: TOKENS)
@@ -5540,13 +5577,19 @@ use namespace intrinsic;
                 var [ts1,nd1] = attribute (ts,tau,defaultAttrs());
                 var [ts1,nd1] = annotatableDirective (ts1,tau,omega,nd1);
                 break;
+            case Token::Identifier:
+                // FIXME: This should be some variant of directive (), in order to catch "var".
+                // But not every directive can be labeled, so just do the simple thing for the
+                // time being.
+                if (hd2 (ts) == Token::Colon) {
+                    var [ts1,nd1] = statement (ts,tau,omega);
+                    nd1 = [nd1];
+                    break;
+                }
+                // Fall through if not label
             default:  // label, attribute, or expr statement
                 var [ts1,nd1] = listExpression (ts,allowIn);
                 switch (hd (ts1)) {
-                case Token::Colon:  // label
-                    //print ("label=",Encode::encodeExpr (nd1));
-                    // FIXME check label
-                    break;
                 case Token::SemiColon:
                     var [ts1,nd1] = [tl (ts1), [new Ast::ExprStmt (nd1)]];
                     break;

@@ -89,8 +89,9 @@
     }
 
     function cgLabeledStmt(ctx, {label: label, stmt: stmt}) {
+        let asm = ctx.asm;
         let L0 = asm.newLabel();
-        cgStmt(pushBreak(ctx, [label], L0), stmt);
+        cgStmt(pushLabel(ctx, label, L0), stmt);
         asm.I_label(L0);
     }
 
@@ -118,7 +119,7 @@
         let Lbreak = asm.newLabel();
         let Lcont  = asm.I_jump(undefined);
         let Ltop   = asm.I_label(undefined);
-        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), labels, Lbreak), stmt);
+        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), Lbreak), stmt);
         asm.I_label(Lcont);
         cgExpr(ctx, expr);
         asm.I_iftrue(Ltop);
@@ -133,7 +134,7 @@
         let Lbreak = asm.newLabel();
         let Lcont  = asm.newLabel();
         let Ltop   = asm.I_label(undefined);
-        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), labels, Lbreak), stmt);
+        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), Lbreak), stmt);
         asm.I_label(Lcont);
         cgExpr(ctx, expr);
         asm.I_iftrue(Ltop);
@@ -157,7 +158,7 @@
             cgExpr(ctx, cond);
             asm.I_iffalse(Lbreak);
         }
-        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), labels, Lbreak), stmt);
+        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), Lbreak), stmt);
         asm.I_label(Lcont);
         if (incr != null)
         {
@@ -226,7 +227,7 @@
         asm.I_swap();
         asm.I_setproperty(name);
 
-        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), labels, Lbreak), stmt);
+        cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), Lbreak), stmt);
         asm.I_label(Lcont);
         asm.I_jump(Ltop);
 
@@ -236,10 +237,9 @@
     }
 
     function cgBreakStmt(ctx, s) {
-        var {ident: ident} = s;
-        let stk = ctx.stk;
+        var ident = s.ident;
         function hit (node) {
-            return node.tag == "break" && (ident == null || memberOf(ident, stk.labels))
+            return node.tag == "break" && (ident == null || ident == node.label)
         }
         unstructuredControlFlow(ctx,
                                 hit,
@@ -249,9 +249,8 @@
 
     function cgContinueStmt(ctx, s) {
         var {ident: ident} = s;
-        let stk = ctx.stk;
         function hit(node) {
-            return node.tag == "continue" && (ident == null || memberOf(ident, stk.labels))
+            return node.tag == "continue" && (ident == null || memberOf(ident, node.labels))
         }
         unstructuredControlFlow(ctx,
                                 hit,
@@ -356,7 +355,7 @@
     function cgSwitchStmtFast(ctx, s, low, high, has_default) {
         print("FAST SWITCH: " + low + " " + high + " " + has_default);
 
-        var {expr:expr, cases:cases, labels:labels} = s;
+        var {expr:expr, cases:cases} = s;
         let asm = ctx.asm;
         cgExpr(ctx, expr);
         let t = asm.getTemp();
@@ -364,7 +363,7 @@
         let Ldef = asm.newLabel();
         let Lcases = new Array(high-low+1);
         let Lbreak = asm.newLabel();
-        let nctx = pushBreak(ctx, labels, Lbreak);
+        let nctx = pushBreak(ctx, Lbreak);
         let ldef_emitted = false;
 
         asm.I_getlocal(t);                    // switch value
@@ -380,7 +379,7 @@
         asm.I_getlocal(t);                    // otherwise dispatch
         Ldefault = asm.I_lookupswitch(undefined, Lcases);
 
-        // Make a prepass to find all the labels that do not have a
+        // Make a prepass to find all the case labels that do not have a
         // case (except maybe the default case).  If Lcases[i] is not
         // handled then Lhandled[i] will be false.
 
@@ -445,7 +444,7 @@
     }
 
     function cgSwitchStmtSlow(ctx,s) {
-        var {expr:expr, cases:cases, labels:labels} = s;
+        var {expr:expr, cases:cases} = s;
         let asm = ctx.asm;
         cgExpr(ctx, expr);
         let t = asm.getTemp();
@@ -454,7 +453,7 @@
         let Lnext = null;
         let Lfall = null;
         let Lbreak = asm.newLabel();
-        let nctx = pushBreak(ctx, labels, Lbreak);
+        let nctx = pushBreak(ctx, Lbreak);
         for ( let i=0 ; i < cases.length ; i++ ) {
             let c = cases[i];
 
