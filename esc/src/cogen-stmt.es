@@ -41,7 +41,6 @@
     //import util.*;
     //import abcfile.*;
     //import assembler.*;
-    use default namespace public;
 
     use default namespace Gen;
     use namespace Util;
@@ -177,7 +176,7 @@
         cgHead(ctx, vars);
 
         if (!(init is ListExpr))
-            throw "cgForInStmt: bogus";
+            Gen::internalError(ctx, "cgForInStmt: unexpected AST");
 
         let name;
         switch type (init.exprs[0]) {
@@ -186,12 +185,12 @@
         }
         case (ie: InitExpr) {
             if (ie.inits.length != 1)
-                throw "unimplemented cogen in cgForInStmt: too many names" + ie.inits.length;
+                Gen::internalError(ctx, "unimplemented cogen in cgForInStmt: too many names" + ie.inits.length);
             let [fxname] = ie.inits[0];
             name = emitter.fixtureNameToName(fxname);
         }
         case(x: *) {
-            throw "unimplemented cogen in cgForInStmt for " + init.exprs[0];
+            Gen::internalError(ctx, "unimplemented cogen in cgForInStmt for " + init.exprs[0]);
         }
         }
 
@@ -244,7 +243,7 @@
         unstructuredControlFlow(ctx,
                                 hit,
                                 true,
-                                "Internal error: definer should have checked that all referenced labels are defined");
+                                (ident == null ? "No 'break' allowed here" : "'break' to undefined label " + ident));
     }
 
     function cgContinueStmt(ctx, s) {
@@ -255,7 +254,7 @@
         unstructuredControlFlow(ctx,
                                 hit,
                                 true,
-                                "Internal error: definer should have checked that all referenced labels are defined");
+                                "'continue' to undefined label " + ident);
     }
 
     function cgThrowStmt(ctx, s) {
@@ -277,7 +276,7 @@
         unstructuredControlFlow(ctx,
                                 hit,
                                 false,
-                                "Internal error: definer should have checked that top-level code does not return");
+                                "No 'return' allowed here.");
         if (s.expr == null)
             asm.I_returnvoid();
         else {
@@ -659,7 +658,7 @@
         let {asm:asm, emitter:emitter, target:target} = ctx;
         
         if( param.fixtures.length != 1 )
-            throw "Internal Error: catch should have 1 fixture";
+            Gen::internalError(ctx, "Catch block should have 1 fixture");
         
         let [propname, fix] = param.fixtures[0];
         
@@ -692,5 +691,4 @@
         asm.I_popscope();
         asm.I_jump(Lend);
     }
-
 }

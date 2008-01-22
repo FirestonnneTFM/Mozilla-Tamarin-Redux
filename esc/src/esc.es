@@ -68,7 +68,7 @@
     use namespace Parse;
     //print ("parsing");
     var t1 = new Date;
-    var parser = new Parser(str,topFixtures);
+    var parser = new Parser(str,topFixtures,fname);
     var [ts,nd] = parser.program();
     var t2 = new Date;
     //print (fname+" parse "+(t2-t1)+" ms");

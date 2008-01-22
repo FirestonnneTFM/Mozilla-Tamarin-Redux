@@ -96,6 +96,7 @@ namespace Gen;
     //import assembler.*;
     //import emitter.*;
     use default namespace Gen;
+
     use namespace Util;
     use namespace Abc;
     use namespace Asm;
@@ -104,7 +105,15 @@ namespace Gen;
 
     // Emit debug info or not
     var emit_debug = true;
-    
+
+    Gen function internalError(ctx, msg) {
+        Util::internalError(ctx.filename, ctx.lineno, msg);
+    }
+
+    Gen function syntaxError(ctx, msg) {
+        Util::syntaxError(ctx.filename, ctx.lineno, msg);
+    }
+
     /* Returns an ABCFile structure */
     function cg(tree: PROGRAM) {
         var e = new ABCEmitter;
@@ -189,7 +198,7 @@ namespace Gen;
                 //print ("warning: ignoring type fixture");
             }
             else {
-                throw "Internal error: unhandled fixture type" 
+                Gen::internalError(ctx, "Unhandled fixture type " + fx);
             }
         }
     }
@@ -216,7 +225,9 @@ namespace Gen;
         case (vd: VariableDefn) {
             // nothing to do, right?
         }
-        case (x:*) { throw "Internal error: unimplemented defn" }
+        case (x:*) { 
+            Gen::internalError(ctx, "Unimplemented defn " +d); 
+        }
         }
     }
 */
@@ -527,12 +538,12 @@ namespace Gen;
                     asm.I_jump(stk.label);
                     stk.returnAddresses[myreturn] = asm.I_label(undefined);
                     */
-                    throw "error: Internal limitation: Can't generate code for break/continue/return past 'finally' block."
+                    Gen::internalError(ctx, "Limitation: Can't generate code for break/continue/return past 'finally' block.");
                 }
             }
             stk = stk.link;
         }
-        throw msg;
+        Gen::syntaxError(ctx, msg);
     }
 
     function restoreScopes(ctx) {
