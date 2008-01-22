@@ -425,7 +425,12 @@ namespace Gen;
          */
         let t = asm.getTemp();
 
-        let fnctx = new CTX(asm, {tag: "function", functype:fntype, scope_reg:t, has_scope:true, push_this: (fntype != "vanilla")}, method);
+        let fnctx = new CTX(asm, {tag: "function", 
+                                  functype:fntype, 
+                                  scope_reg:t, 
+                                  has_scope:true, 
+                                  push_this: (fntype != "vanilla")}, 
+                            method);
         cgDebugFile(fnctx);
 
         asm.I_newactivation();
@@ -441,7 +446,7 @@ namespace Gen;
          * at the end, so there's nothing to worry about here.
          */
         cgBlock(fnctx, f.block);
-        asm.I_kill(t);
+        asm.killTemp(t);
         return method.finalize();
     }
     
@@ -512,8 +517,18 @@ namespace Gen;
                 if(stk.has_scope) {
                     asm.I_popscope();
                 }
-                // FIXME
-                // if there's a FINALLY, visit it here
+                if (stk.tag == "finally") {
+                    /* The verifier can't deal with all these combinations, it appears to
+                       be a limitation of how it does control flow analysis.  So throw
+                       a SyntaxError here until the verifier can be fixed.
+                    let myreturn = stk.nextReturn++;
+                    asm.I_pushint(ctx.cp.int32(myreturn));
+                    asm.I_setlocal(stk.returnreg);
+                    asm.I_jump(stk.label);
+                    stk.returnAddresses[myreturn] = asm.I_label(undefined);
+                    */
+                    throw "error: Internal limitation: Can't generate code for break/continue/return past 'finally' block."
+                }
             }
             stk = stk.link;
         }
@@ -566,9 +581,7 @@ namespace Gen;
 
     function pushCatch(ctx, scope_reg )
         push(ctx, {tag:"catch", has_scope:true, scope_reg:scope_reg});
-        // FIXME anything else?
 
-    function pushFinally(ctx /*more*/) {
-        // FIXME
-    }
+    function pushFinally(ctx, label, returnreg)
+        push(ctx, {tag:"finally", label:label, returnreg:returnreg, returnAddresses:new Array(), nextReturn:0});
 }
