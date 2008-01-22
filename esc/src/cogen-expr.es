@@ -84,7 +84,9 @@
         case (e:TypeExpr) { cgTypeExpr(ctx, e) }
         case (e:ThisExpr) { cgThisExpr(ctx, e) }
         case (e:YieldExpr) { cgYieldExpr(ctx, e) }
-        case (e:SuperExpr) { throw "Internal error: SuperExpr can't appear here" }
+        case (e:SuperExpr) { 
+            Gen::syntaxError(ctx, "SuperExpr can't appear here");
+        }
         case (e:LiteralExpr) { cgLiteralExpr(ctx, e) }
         case (e:CallExpr) { cgCallExpr(ctx, e) }
         case (e:ApplyTypeExpr) { cgApplyTypeExpr(ctx, e) }
@@ -98,7 +100,9 @@
         case (e:SliceExpr) { cgSliceExpr(ctx, e) }
         case (e:GetTemp) { cgGetTempExpr(ctx, e) }
         case (e:GetParam) { cgGetParamExpr(ctx, e) }
-        case (e:*) { throw ("Internal error: Unimplemented expression type " + e) }
+        case (e:*) { 
+            Gen::internalError(ctx, "Unimplemented expression type " + e);
+        }
         }
     }
 
@@ -174,7 +178,9 @@
             case (e:LessOrEqual) { asm.I_lessequals() }
             case (e:Greater) { asm.I_greaterthan() }
             case (e:GreaterOrEqual) { asm.I_greaterequals() }
-            case (e:*) { throw "Internal error: Unimplemented binary operator" }
+            case (e:*) { 
+                Gen::internalError(ctx, "Unimplemented binary operator " + e);
+            }
             }
         }
     }
@@ -203,7 +209,9 @@
             asm.I_coerce();
             asm.I_label(L2);
         }
-        case (op:*) { throw "Internal error: Unimplemented binary type operator" }
+        case (op:*) { 
+            Gen::internalError(ctx, "Unimplemented binary type operator " + op);
+        }
         }
     }
 
@@ -221,7 +229,7 @@
         }
         case (ty:*) {
             /* FIXME */
-            throw ("Unimplemented: type expression type " + ty);
+            Gen::internalError(ctx, "Unimplemented type expression type " + ty);
         }
         }
     }
@@ -239,7 +247,9 @@
                 //name = cgIdentExpr(ctx, or.ident);
                 cgExpr(ctx, or.base);
             }
-            case (x:*) { throw "Internal error: invalid lvalue" }
+            case (x:*) { 
+                Gen::syntaxError(ctx, "Expression is not an lvalue");
+            }
             }
             asm.I_dup();
             asm.I_getproperty(cgIdentExpr(ctx, e.e1.ident));
@@ -316,7 +326,9 @@
             cgExpr(ctx, e.e1);
             asm.I_not();
         }
-        case (op:*) { throw "Internal error: Unimplemented unary operation" }
+        case (op:*) {
+            Gen::internalError(ctx, "Unimplemented unary operation " + op);
+        }
         }
     }
 
@@ -326,7 +338,7 @@
 
     function cgYieldExpr(ctx, e) {
         // FIXME
-        throw "Unimplemented 'yield' expression";
+        Gen::internalError(ctx, "Unimplemented 'yield' expression");
     }
 
     function cgCallExpr(ctx, e) {
@@ -357,7 +369,7 @@
 
     function cgApplyTypeExpr(ctx, e) {
         // FIXME
-        throw "Unimplemented type application expression";
+        Gen::internalError(ctx, "Unimplemented type application expression");
     }
 
     function cgLetExpr(ctx, e) {
@@ -402,7 +414,9 @@
             else
                 asm.I_findpropstrict(cgIdentExpr(ctx, lhs.ident));
         }
-        case (lhs:*) { throw "Internal error: illegal ref type" }
+        case (lhs:*) { 
+            Gen::syntaxError(ctx, "Illegal lvalue");
+        }
         }
 
         if (e.op is AssignLogicalAnd) {
@@ -462,7 +476,9 @@
                 case (op:AssignBitwiseAnd) { asm.I_bitand() }
                 case (op:AssignBitwiseOr) { asm.I_bitor() }
                 case (op:AssignBitwiseXor) { asm.I_bitxor() }
-                case (op:*) { throw "Internal error: ASSIGNOP not supported" }
+                case (op:*) { 
+                    Gen::internalError(ctx, "ASSIGNOP not supported " + op);
+                }
                 }
                 asm.I_dup();
                 asm.I_setlocal(t);
@@ -611,13 +627,15 @@
         case (e:LiteralObject) { cgObjectInitializer(ctx, e) }
         case (e:LiteralRegExp) { cgRegExpLiteral(ctx, e) }
             // case (e:LiteralNamesace) { cgNamespaceLiteral(ctx, e) }
-        case (e:*) { throw "Unimplemented LiteralExpr " + e }
+        case (e:*) { 
+            Gen::internalError(ctx, "Unimplemented LiteralExpr " + e);
+        }
         }
     }
 
     function cgSliceExpr(ctx, e) {
         // FIXME
-        throw "Unimplemented slice expression";
+        Gen::internalError(ctx, "Unimplemented slice expression");
     }
 
     function cgGetTempExpr(ctx, e) {
@@ -653,11 +671,13 @@
                     case( e:* ) {
                         /// cgExpr(ctx, qi.qual);
                         /// return emitter.rtqname(qi);
-                        throw "unsupported form of qualified identifier " + qi.ident;
+                        Gen::internalError(ctx, "Unsupported form of qualified identifier " + qi.ident);
                     }
                 }
             }
-            case (x:*) { throw ("Unimplemented cgIdentExpr " + e) }
+            case (x:*) { 
+                Gen::internalError(ctx, "Unimplemented cgIdentExpr " + e);
+            }
         }
     }
 }
