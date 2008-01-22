@@ -515,7 +515,7 @@ namespace Emit;
             // Standard epilogue for lazy clients.
             asm.I_returnvoid();
 
-            var meth = e.file.addMethod(new ABCMethodInfo(0, formals, 0, asm.flags, defaults,null));
+            var meth = e.file.addMethod(new ABCMethodInfo(name, formals, 0, asm.flags, defaults,null));
             var body = new ABCMethodBodyInfo(meth);
             body.setMaxStack(asm.maxStack);
             body.setLocalCount(asm.maxLocal);
