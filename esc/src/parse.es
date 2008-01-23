@@ -3582,7 +3582,7 @@ use namespace intrinsic;
         {
             let offset = ts.n/4;
             if( offset < coordList.length ) {
-                return {line:(coordList[offset][0]+1)};
+                return {line:(coordList[offset-1][0])};
             }
             else
                 return null;
