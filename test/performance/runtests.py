@@ -52,11 +52,11 @@ fd,tmpfile = tempfile.mkstemp()
 os.close(fd)
 js_output_f=False
 
-globs = { 'avm':'','avmtt':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'', 'ascargs':'', 'vmargs':''}
+globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider', 'ascargs':'', 'vmargs':'', 'vmargs2':''}
 if 'AVM' in environ:
 	globs['avm'] = environ['AVM'].strip()
-if 'AVMTT' in environ:
-	globs['avmtt'] = environ['AVMTT'].strip()
+if 'AVM2' in environ:
+	globs['avm2'] = environ['AVM2'].strip()
 if 'ASC' in environ:
 	globs['asc'] = environ['ASC'].strip()
 if 'GLOBALABC' in environ:
@@ -65,6 +65,8 @@ if 'ASCARGS' in environ:
 	globs['ascargs'] = environ['ASCARGS'].strip()
 if 'VMARGS' in environ:
 	globs['vmargs'] = environ['VMARGS'].strip()
+if 'VMARGS2' in environ:
+	globs['vmargs2'] = environ['VMARGS2'].strip()
 
 def log_print(m):
 	print(m)
@@ -81,18 +83,20 @@ def usage(c):
 	print "usage: %s [options] [tests]" % basename(argv[0])
 	print " -v --verbose       enable additional output"
 	print " -E --avm           avmplus command to use"
-	print " -T --avmtt         avmplus tamarin-tracing command to use"
+	print " -S --avm2          second avmplus command to use"
 	print " -a --asc           compiler to use"
+	print " -c --config        configuration to use with testconfig.txt"
 	print " -g --globalabc     location of global.abc"
 	print " -h --help          display help and exit"
 	print " -f --forcerebuild  force rebuild all test files"
 	print " -l --log           logs results to a file"
 	print "    --ascargs	   args to pass to asc on rebuild of test files"
 	print "    --vmargs	       args to pass to vm"
+	print "    --vmargs2	   args to pass to avm2, if not specified --vmargs will be used"
 	exit(c)
 
 try:
-	opts, args = getopt(argv[1:], "vE:T:a:g:hfc:l", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log","avmtt="])
+	opts, args = getopt(argv[1:], "vE:S:a:g:hfc:l", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log","avm2=","vmargs2=","config="])
 except:
 	usage(2)
 
@@ -105,8 +109,8 @@ for o, v in opts:
 		usage(0)
 	elif o in ("-E", "--avm"):
 		globs['avm'] = v
-	elif o in ("-T", "--avmtt"):
-		globs['avmtt'] = v
+	elif o in ("-S", "--avm2"):
+		globs['avm2'] = v
 	elif o in ("-a", "--asc"):
 		globs['asc'] = v
 	elif o in ("-g", "--globalabc"):
@@ -123,6 +127,8 @@ for o, v in opts:
 		globs['ascargs'] = v
 	elif o in ("--vmargs"):
 		globs['vmargs'] = v
+	elif o in ("--vmargs2"):
+		globs['vmargs2'] = v
 	elif o in ("-l","--log"):
 		now = datetime.today()
 		for i in count(1):
@@ -183,22 +189,26 @@ if isfile('./testconfig.txt'):
 		fields = line.split(',')
 		for f in range(len(fields)):
 			fields[f]=fields[f].strip()
-		if len(fields)>1 and fields[1]=='skip':
+		if len(fields)<3:
+			continue
+		if re.match(fields[1],globs['config'])==None:
+			continue
+		if fields[2]=='skip':
 			skips.append(fields[0])
 vmargs = globs['vmargs']
 avm = globs['avm']
-avmtt = globs['avmtt']
+avm2 = globs['avm2']
 if not avm: # or not isfile(avm.split()[0]): /* isfile() fails for alias on OSX */
 	exit("ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus" % avm)
-log_print("Executing %d tests at %s" % (len(tests),datetime.now()))
-log_print("tc: %s" % avm);
-if len(avmtt)>0:
-	log_print("tt: %s" % avmtt);
+log_print("Executing tests at %s" % (datetime.now()))
+log_print("avm: %s" % avm);
+if len(avm2)>0:
+	log_print("avm2: %s" % avm2);
 
-if len(avmtt)>0:
-	log_print("\n\n%-50s %7s %7s\n" % ("test","tc","tt"));
+if len(avm2)>0:
+	log_print("\n\n%-50s %7s %7s\n" % ("test","avm","avm2"));
 else:
-	log_print("\n\n%-50s %7s\n" % ("test","tc"));
+	log_print("\n\n%-50s %7s\n" % ("test","avm"));
 testnum = len(tests)
 for ast in tests:
 	if ast.startswith("./"):
@@ -225,26 +235,30 @@ for ast in tests:
 		if not isfile(abc):
 			log_print("compile FAILED!, file not found " + abc)
 	f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
-	if len(avmtt)>0:
-		f2 = run_pipe("%s %s %s" % (avmtt, vmargs, abc))
+	if len(avm2)>0:
+		if len(vmargs)>0:
+			f2 = run_pipe("%s %s %s" % (avm2, vmargs2, abc))
+		else:
+			f2 = run_pipe("%s %s %s" % (avm2, vmargs, abc))
 	try:
-		tc="na"
-		tt="na"
+		result1="na"
+		result2="na"
 		for line in f1:
 			if "metric" in line:
-				tclist=line.rsplit()
-				if len(tclist)>2:
-					tc=tclist[2]
-		if len(avmtt)>0:
+				result1list=line.rsplit()
+				if len(result1list)>2:
+					result1=result1list[2]
+		if len(avm2)>0:
 			for line in f2:
 				if "metric" in line:
-					ttlist=line.rsplit()
-					if len(ttlist)>2:
-						tt=ttlist[2]
-		if len(avmtt)>0:
-			log_print("%-50s %7s %7s" % (ast,tc,tt)) 
+					result2list=line.rsplit()
+					if len(result2list)>2:
+						result2=result2list[2]
+		if len(avm2)>0:
+			log_print("%-50s %7s %7s" % (ast,result1,result2)) 
 		else:
-			log_print("%-50s %7s" % (ast,tc)) 
+			log_print("%-50s %7s" % (ast,result1)) 
 	except:
 		log_print("exception")
 		exit(-1)
+
