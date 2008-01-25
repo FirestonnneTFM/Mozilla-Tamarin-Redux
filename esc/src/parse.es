@@ -3840,7 +3840,14 @@ use namespace intrinsic;
 
             cx.enterLetBlock ();
 
+            var is_each = false;
+            
             ts = eat (ts,Token::For);
+            if( hd(ts) == Token::Each )
+            {
+                ts = eat(ts, Token::Each);
+                is_each = true;
+            }
             ts = eat (ts,Token::LeftParen);
             var [ts1,nd1] = forInitialiser (ts);
             if (hd (ts1) == Token::In) {
@@ -3852,7 +3859,7 @@ use namespace intrinsic;
                 var head = cx.exitLetBlock ();
                 
                 exit("Parser::forStatement ", ts3);
-                return [ts3, new Ast::ForInStmt (head,nd1,objexpr,body)];
+                return [ts3, new Ast::ForInStmt (head,nd1,objexpr,body,is_each)];
             }
             else {
                 ts1 = eat (ts1,Token::SemiColon);
