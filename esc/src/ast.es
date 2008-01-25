@@ -1235,11 +1235,13 @@ public namespace Ast
         const obj  : EXPR;
         const stmt : STMT;
         const labels : [IDENT] = [];
-        function ForInStmt (vars,init,obj,stmt)
+        const is_each : boolean;
+        function ForInStmt (vars,init,obj,stmt,is_each=false)
             : vars = vars
             , init = init
             , obj = obj
-            , stmt = stmt {}
+            , stmt = stmt
+            , is_each = is_each {}
     }
 
     class ThrowStmt {
