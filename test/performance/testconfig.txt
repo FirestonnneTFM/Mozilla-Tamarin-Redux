@@ -40,10 +40,12 @@
 # name=regular expression matching testname 
 # operation=skip is only supported operation
 
-(un|)typed/sunspider-regexp-dna.as		,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
-(un|)typed/sunspider-date-format-tofte.as	,skip, contains eval
-(un|)typed/sunspider-date-format-xparb.as	,skip, contains eval
-(un|)typed/sunspider-string-unpack-code.as	,skip, too slow: javascript compressor code runs slowly https://bugzilla.mozilla.org/show_bug.cgi?id=409225
-(un|)typed/sunspider-string-base64.as		,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
-(un|)typed/sunspider-string-tagcloud.as		,skip, contains eval
+jsbench/.*                      ,sunspider,skip, skip jsbench
+sunspider/.*                    ,jsbench  ,skip, skip jsbench
+sunspider/(typed/|)regexp-dna.as	,.*       ,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
+sunspider/(typed/|)date-format-tofte.as	,.*       ,skip, contains eval
+sunspider/(typed/|)date-format-xparb.as	,.*       ,skip, contains eval
+sunspider/(typed/|)string-unpack-code.as,.*       ,skip, too slow: javascript compressor code runs slowly https://bugzilla.mozilla.org/show_bug.cgi?id=409225
+sunspider/(typed/|)string-base64.as	,.*       ,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
+sunspider/(typed/|)string-tagcloud.as	,.*       ,skip, contains eval
 
