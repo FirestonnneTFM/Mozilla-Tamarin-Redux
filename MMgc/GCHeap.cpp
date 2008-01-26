@@ -38,11 +38,11 @@
 
 #include <string.h>
 
-#if defined(DARWIN) || defined(MMGC_ARM)
+#include "MMgc.h"
+
+#if defined(DARWIN) || defined(MMGC_ARM) || defined (MMGC_SPARC)
 #include <stdlib.h>
 #endif
-
-#include "MMgc.h"
 
 namespace MMgc
 {
@@ -83,9 +83,9 @@ namespace MMgc
 		enableMemoryProfiling = false;
 #endif
 
-#if defined(_MAC) || defined(MMGC_ARM)
-		m_malloc = m ? m : malloc;
-		m_free = f ? f : free;		
+#if defined(_MAC) || defined(MMGC_ARM) || defined (MMGC_SPARC)
+		m_malloc = m ? m : (GCMallocFuncPtr)malloc;
+		m_free = f ? f : (GCFreeFuncPtr)free;		
 #else
 		(void)m;
 		(void)f;
