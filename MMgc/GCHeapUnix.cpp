@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -46,9 +47,7 @@
 #include "GCDebug.h"
 #include "GC.h"
 
-#ifdef USE_MMAP
 #include <sys/mman.h>
-#endif
 
 #if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
 #define MAP_ANONYMOUS MAP_ANON
@@ -64,6 +63,12 @@
 // avmplus standalone uses UNIX  
 #ifdef _MAC
 #define MAP_ANONYMOUS MAP_ANON
+#endif
+
+#ifdef SOLARIS
+#include <ucontext.h>
+#include <dlfcn.h>
+extern "C" caddr_t _getfp(void);
 #endif
 
 namespace MMgc
@@ -106,17 +111,29 @@ namespace MMgc
 	void* GCHeap::ReserveCodeMemory(void* address,
 									size_t size)
 	{
+#ifdef SOLARIS
+		return (char*) mmap((char *)address,
+							size,
+							PROT_READ | PROT_WRITE,
+							MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE,
+							-1, 0);
+#else
 		return (char*) mmap(address,
 							size,
 							PROT_NONE,
 							MAP_PRIVATE | MAP_ANONYMOUS,
 							-1, 0);
+#endif
 	}
 
 	void GCHeap::ReleaseCodeMemory(void* address,
 								   size_t size)
 	{
+#ifdef SOLARIS
+		if (munmap((char *)address, size) != 0)
+#else
 		if (munmap(address, size) != 0)
+#endif
 			GCAssert(false);
 	}
 
@@ -124,6 +141,7 @@ namespace MMgc
 	{
 		return false;
 	}
+#endif /* USE_MMAP */
 
 #ifdef AVMPLUS_JIT_READONLY
 	/**
@@ -139,6 +157,19 @@ namespace MMgc
 							   size_t size,
 							   bool executableFlag)
 	{
+#ifdef MMGC_SPARC
+		void *endAddress = (void*) ((char*)address + size);
+		void *beginPage = (void*) ((size_t)address & ~0x1FFF);
+		void *endPage   = (void*) (((size_t)endAddress + 0x1FFF) & ~0x1FFF);
+		size_t sizePaged = (size_t)endPage - (size_t)beginPage;
+#ifdef DEBUG
+		int retval =
+#endif
+		mprotect((char *)beginPage, sizePaged,
+							  executableFlag ? (PROT_READ|PROT_WRITE|PROT_EXEC) : (PROT_READ|PROT_WRITE));
+
+		GCAssert(retval == 0);
+#else
 		// mprotect requires that the addresses be aligned on page boundaries
 		void *endAddress = (void*) ((char*)address + size);
 		void *beginPage = (void*) ((size_t)address & ~0xFFF);
@@ -148,20 +179,42 @@ namespace MMgc
 #ifdef DEBUG
 		int retval =
 #endif
+#ifdef SOLARIS
+		  mprotect((char *)beginPage, sizePaged,
+#else
 		  mprotect(beginPage, sizePaged,
+#endif
 			   executableFlag ? (PROT_READ|PROT_EXEC) : (PROT_READ|PROT_WRITE|PROT_EXEC));
 
 		GCAssert(retval == 0);
+#endif
 	}
 #endif /* AVMPLUS_JIT_READONLY */
 	
+#ifdef USE_MMAP
 	void* GCHeap::CommitCodeMemory(void* address,
 								  size_t size)
 	{
 		void* res;
 		if (size == 0)
 			size = GCHeap::kNativePageSize;  // default of one page
-			
+
+#ifdef SOLARIS
+#ifdef AVMPLUS_JIT_READONLY
+		mmap((char *)address,
+			 size,
+			 PROT_READ | PROT_WRITE,
+			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
+			 -1, 0);
+#else
+		mmap((char *)address,
+			 size,
+			 PROT_READ | PROT_WRITE | PROT_EXEC,
+			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
+			 -1, 0);
+#endif /* AVMPLUS_JIT_READONLY */
+
+#else
 #ifdef AVMPLUS_JIT_READONLY
 		mmap(address,
 			 size,
@@ -175,6 +228,7 @@ namespace MMgc
 			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
 			 -1, 0);
 #endif /* AVMPLUS_JIT_READONLY */
+#endif /* SOLARIS */
 		res = address;
 		
 		if (res == address)
@@ -233,11 +287,22 @@ namespace MMgc
 #ifdef USE_MMAP
 	char* GCHeap::ReserveMemory(char *address, size_t size)
 	{
+#ifdef SOLARIS
+		char *addr = (char*)mmap(address,
+					 size,
+					 PROT_READ | PROT_WRITE,
+					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE,
+					 -1, 0);
+		if (addr == MAP_FAILED) {
+			return NULL;
+		}
+#else
 		char *addr = (char*)mmap(address,
 					 size,
 					 PROT_NONE,
 					 MAP_PRIVATE | MAP_ANONYMOUS,
 					 -1, 0);
+#endif
 		if(address && address != addr) {
 			// behave like windows and fail if we didn't get the right address
 			ReleaseMemory(addr, size);
@@ -261,11 +326,19 @@ namespace MMgc
 	{
 		ReleaseMemory(address, size);
 		// re-reserve it
+#ifdef SOLARIS
+		char *addr = (char*)mmap(address,
+					 size,
+					 PROT_NONE,
+					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE,
+					 -1, 0);
+#else
 		char *addr = (char*)mmap(address,
 					 size,
 					 PROT_NONE,
 					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
 					 -1, 0);
+#endif
 		GCAssert(addr == address);
 		return addr == address;
 	}
@@ -313,6 +386,15 @@ namespace MMgc
 #endif
 	}
 
+#ifdef MMGC_SPARC
+	void GetStackTrace(int *trace, int len, int skip)
+	{
+	  // TODO for sparc.
+		GCAssert(false);
+
+	}
+#endif
+
 #ifdef MMGC_PPC
 	void GetStackTrace(int *trace, int len, int skip) 
 	{
@@ -338,7 +420,11 @@ namespace MMgc
 	void GetStackTrace(int *trace, int len, int skip)
 	{
 		void **ebp;
+#ifdef SOLARIS
+		ebp = (void **)_getfp();
+#else
 		asm("mov %%ebp, %0" : "=r" (ebp));
+#endif
 
 		while(skip-- && *ebp)
 		{

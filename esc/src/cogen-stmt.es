@@ -169,7 +169,7 @@
     }
 
     function cgForInStmt(ctx, s) {
-        var {vars:vars,init:init,obj:obj,stmt:stmt,labels:labels} = s;
+        var {vars:vars,init:init,obj:obj,stmt:stmt,labels:labels,is_each:is_each} = s;
         // FIXME: fixtures
         // FIXME: code shape?
         let {asm:asm,emitter:emitter} = ctx;
@@ -210,6 +210,7 @@
         let T_obj = asm.getTemp();
         let T_idx = asm.getTemp();
         cgExpr(ctx, obj);
+        asm.I_coerce_a(); // satisfy verifier
         asm.I_setlocal(T_obj);
         asm.I_pushbyte(0);
         asm.I_setlocal(T_idx);
@@ -220,7 +221,11 @@
         asm.I_iffalse(Lbreak);
         asm.I_getlocal(T_obj);
         asm.I_getlocal(T_idx);
-        asm.I_nextname();
+        
+        if(is_each)
+            asm.I_nextvalue();
+        else 
+            asm.I_nextname();
 
         asm.I_findpropstrict(name);
         asm.I_swap();
