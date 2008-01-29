@@ -69,6 +69,9 @@
 #include <ucontext.h>
 #include <dlfcn.h>
 extern "C" caddr_t _getfp(void);
+typedef caddr_t maddr_ptr;
+#else
+typedef void *maddr_ptr;
 #endif
 
 namespace MMgc
@@ -111,29 +114,17 @@ namespace MMgc
 	void* GCHeap::ReserveCodeMemory(void* address,
 									size_t size)
 	{
-#ifdef SOLARIS
-		return (char*) mmap((char *)address,
+		return (char*) mmap((maddr_ptr)address,
 							size,
 							PROT_READ | PROT_WRITE,
-							MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE,
-							-1, 0);
-#else
-		return (char*) mmap(address,
-							size,
-							PROT_NONE,
 							MAP_PRIVATE | MAP_ANONYMOUS,
 							-1, 0);
-#endif
 	}
 
 	void GCHeap::ReleaseCodeMemory(void* address,
 								   size_t size)
 	{
-#ifdef SOLARIS
-		if (munmap((char *)address, size) != 0)
-#else
-		if (munmap(address, size) != 0)
-#endif
+		if (munmap((maddr_ptr)address, size) != 0)
 			GCAssert(false);
 	}
 
@@ -157,37 +148,23 @@ namespace MMgc
 							   size_t size,
 							   bool executableFlag)
 	{
-#ifdef MMGC_SPARC
-		void *endAddress = (void*) ((char*)address + size);
-		void *beginPage = (void*) ((size_t)address & ~0x1FFF);
-		void *endPage   = (void*) (((size_t)endAddress + 0x1FFF) & ~0x1FFF);
-		size_t sizePaged = (size_t)endPage - (size_t)beginPage;
-#ifdef DEBUG
-		int retval =
-#endif
-		mprotect((char *)beginPage, sizePaged,
-							  executableFlag ? (PROT_READ|PROT_WRITE|PROT_EXEC) : (PROT_READ|PROT_WRITE));
+		// Should use vmPageSize() or kNativePageSize here.
+		// But this value is hard coded to 4096 if we don't use mmap.
+		int bitmask = sysconf(_SC_PAGESIZE) - 1;
 
-		GCAssert(retval == 0);
-#else
 		// mprotect requires that the addresses be aligned on page boundaries
 		void *endAddress = (void*) ((char*)address + size);
-		void *beginPage = (void*) ((size_t)address & ~0xFFF);
-		void *endPage   = (void*) (((size_t)endAddress + 0xFFF) & ~0xFFF);
+		void *beginPage = (void*) ((size_t)address & ~bitmask);
+		void *endPage   = (void*) (((size_t)endAddress + bitmask) & ~bitmask);
 		size_t sizePaged = (size_t)endPage - (size_t)beginPage;
 
 #ifdef DEBUG
 		int retval =
 #endif
-#ifdef SOLARIS
-		  mprotect((char *)beginPage, sizePaged,
-#else
-		  mprotect(beginPage, sizePaged,
-#endif
+		  mprotect((maddr_ptr)beginPage, sizePaged,
 			   executableFlag ? (PROT_READ|PROT_EXEC) : (PROT_READ|PROT_WRITE|PROT_EXEC));
 
 		GCAssert(retval == 0);
-#endif
 	}
 #endif /* AVMPLUS_JIT_READONLY */
 	
@@ -199,36 +176,19 @@ namespace MMgc
 		if (size == 0)
 			size = GCHeap::kNativePageSize;  // default of one page
 
-#ifdef SOLARIS
 #ifdef AVMPLUS_JIT_READONLY
-		mmap((char *)address,
+		mmap((maddr_ptr)address,
 			 size,
 			 PROT_READ | PROT_WRITE,
 			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
 			 -1, 0);
 #else
-		mmap((char *)address,
+		mmap((maddr_ptr)address,
 			 size,
 			 PROT_READ | PROT_WRITE | PROT_EXEC,
 			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
 			 -1, 0);
 #endif /* AVMPLUS_JIT_READONLY */
-
-#else
-#ifdef AVMPLUS_JIT_READONLY
-		mmap(address,
-			 size,
-			 PROT_READ | PROT_WRITE,
-			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
-			 -1, 0);
-#else
-		mmap(address,
-			 size,
-			 PROT_READ | PROT_WRITE | PROT_EXEC,
-			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
-			 -1, 0);
-#endif /* AVMPLUS_JIT_READONLY */
-#endif /* SOLARIS */
 		res = address;
 		
 		if (res == address)
@@ -287,22 +247,14 @@ namespace MMgc
 #ifdef USE_MMAP
 	char* GCHeap::ReserveMemory(char *address, size_t size)
 	{
-#ifdef SOLARIS
-		char *addr = (char*)mmap(address,
+		char *addr = (char*)mmap((maddr_ptr)address,
 					 size,
 					 PROT_READ | PROT_WRITE,
-					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE,
+					 MAP_PRIVATE | MAP_ANONYMOUS,
 					 -1, 0);
 		if (addr == MAP_FAILED) {
 			return NULL;
 		}
-#else
-		char *addr = (char*)mmap(address,
-					 size,
-					 PROT_NONE,
-					 MAP_PRIVATE | MAP_ANONYMOUS,
-					 -1, 0);
-#endif
 		if(address && address != addr) {
 			// behave like windows and fail if we didn't get the right address
 			ReleaseMemory(addr, size);
@@ -326,19 +278,11 @@ namespace MMgc
 	{
 		ReleaseMemory(address, size);
 		// re-reserve it
-#ifdef SOLARIS
-		char *addr = (char*)mmap(address,
-					 size,
-					 PROT_NONE,
-					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE,
-					 -1, 0);
-#else
-		char *addr = (char*)mmap(address,
+		char *addr = (char*)mmap((maddr_ptr)address,
 					 size,
 					 PROT_NONE,
 					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
 					 -1, 0);
-#endif
 		GCAssert(addr == address);
 		return addr == address;
 	}
@@ -358,7 +302,7 @@ namespace MMgc
 #ifdef DEBUG
 		int result =
 #endif
-		  munmap(address, size);
+		munmap((maddr_ptr)address, size);
 		GCAssert(result == 0);
 	}
 #else
