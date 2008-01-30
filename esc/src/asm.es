@@ -302,16 +302,26 @@ namespace Asm;
         const listify = false;
         const indent = "        ";
 
-        function AVM2Assembler(constants, numberOfFormals) {
+        function AVM2Assembler(constants, numberOfFormals, uses_arguments=false) {
             this.constants = constants;
-            this.nextTemp = numberOfFormals+1; // local 0 is always "this"
+            this.nextTemp = numberOfFormals + 1 + (uses_arguments ? 1 : 0); // local 0 is always "this"
             this.current_scope_depth = 0;
+            this.uses_arguments = uses_arguments;
         }
 
         public function get maxStack() { return max_stack_depth }
         public function get maxLocal() { return nextTemp }
         public function get maxScope() { return max_scope_depth }
-        public function get flags() { return (set_dxns ? METHOD_Setsdxns : 0) | (need_activation ? METHOD_Activation : 0) }
+        public function get flags() { 
+            var f = 0;
+            if (set_dxns)
+                f |= METHOD_Setsdxns;
+            if (need_activation)
+                f |= METHOD_Activation;
+            if (uses_arguments)
+                f |= METHOD_Arguments;
+            return f;
+        }
 
         /*private*/ function listL(n) {
             if (listify)
@@ -825,5 +835,6 @@ namespace Asm;
         /*private*/ var constants;
         /*private*/ var set_dxns = false;
         /*private*/ var need_activation = false;
+        /*private*/ var uses_arguments = false;
     }
 }

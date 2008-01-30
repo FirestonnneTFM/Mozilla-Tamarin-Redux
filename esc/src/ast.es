@@ -907,6 +907,40 @@ public namespace Ast
     class Get {}
     class Set {}
 
+    class FuncAttr {
+        /* Outer function, or null if the function is at the global
+           level (including for class methods). */
+        const parent: FuncAttr;
+
+        /* Nested functions and function expressions, empty for leaf functions */
+        const children;
+
+        function FuncAttr(parent) 
+            : parent = parent
+            , children = []
+        {}
+
+        /* True iff identifier "arguments" lexically referenced in function body.
+           Note that the parameter list is excluded. */
+        var uses_arguments = false;
+        
+        /* True iff identifier expression "eval" is lexically referenced 
+           in the function body as the operator in a call expression. */
+        var uses_eval = false;
+
+        /* True iff ...<id> appears in the parameter list. */
+        var uses_rest = false;
+        
+        /* True iff the body has a "with" statement */
+        var uses_with = false;
+
+        /* True iff the body has a "try" statement with a "catch" clause */
+        var uses_catch = false;
+
+        /* True iff the body has a "try" statement with a "finally" clause */
+        var uses_finally = false;
+    }
+
     class Func {
         const name //: FUNC_NAME;
         const isNative: Boolean;
@@ -915,15 +949,19 @@ public namespace Ast
         const vars: HEAD;
         const defaults: [EXPR];
         const type /*: FUNC_TYPE*/;    // FIXME: should be able to use 'type' here
+        const attr: FuncAttr;
+        const numparams: int;
         function Func (name,isNative,block,
-                       params,vars,defaults,ty)
+                       params,numparams,vars,defaults,ty,attr)
             : name = name
             , isNative = isNative
             , block = block
             , params = params
+            , numparams = numparams
             , vars = vars
             , defaults = defaults
-            , type = ty {}
+            , type = ty
+            , attr = attr {}
     }
 
     // CTOR
@@ -1458,10 +1496,12 @@ public namespace Ast
         var block: BLOCK;
         var head: HEAD;
         var file: String?;
-        function Program (packages, block, head, file=null)
+        var attr: FuncAttr;
+        function Program (packages, block, head, attr, file=null)
             : packages = packages
             , block = block
             , head = head
+            , attr = attr
             , file = file {}
     }
 

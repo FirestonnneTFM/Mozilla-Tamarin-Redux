@@ -61,9 +61,10 @@ public namespace Decode;
         var nd1 = packages (ob.packages);
         var nd2 = block (ob.block);
         var nd3 = head (ob.head);
+        var nd4 = new Ast::FuncAttr(null); // FIXME!  Need to preserve/compute the attrs
 
         exit ("Decode::program ");
-        return new Program (nd1,nd2,nd3);
+        return new Program (nd1,nd2,nd3,nd4);
     }
 
     function packages (obj) 
