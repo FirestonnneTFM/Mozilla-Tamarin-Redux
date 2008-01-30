@@ -65,7 +65,7 @@ namespace axtam
 		DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER;
 		wchar *buffer;
 		if (::FormatMessageW(flags, 0, errorID, 0, (LPWSTR)&buffer, 0, NULL )<=0)
-			return this->core()->constantString("FormatMessage failed!");
+			return core()->kEmptyString;
 		// FormatMessage always sticks a trailing \r\n.
 		size_t len = wcslen((wchar_t *)buffer);
 		if (len > 2)
