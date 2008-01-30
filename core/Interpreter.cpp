@@ -106,7 +106,7 @@ namespace avmplus
 		int local_count = AvmCore::readU30(pos);
 		int init_scope_depth = AvmCore::readU30(pos);
 		int max_scope_depth = AvmCore::readU30(pos);
-		int max_scope = MethodInfo::maxScopeDepth(info, max_scope_depth - init_scope_depth);
+		int volatile max_scope = MethodInfo::maxScopeDepth(info, max_scope_depth - init_scope_depth);
 		AvmCore::readU30(pos); // code_length
 		const byte * volatile code_start = pos;
 		

@@ -714,6 +714,42 @@ namespace MMgc
 		return item;
 	}
 
+	void GC::MaybeGC(bool callerHasActiveRequest)
+	{
+		if (greedy) {
+			CollectWithBookkeeping(false, callerHasActiveRequest);
+		} else if (marking) {
+			IncrementalMark();
+		} else {
+#ifdef MMGC_THREADSAFE
+			GCAutoLock _lock(m_lock);
+#endif
+
+			// Burst logic to prevent collections from happening back to back.
+			uint64 now = GetPerformanceCounter();
+			if (now - lastSweepTicks <= kMarkSweepBurstTicks)
+				return;
+
+			// Definitely start GC if the heap expanded due to FixedMalloc
+			// allocations.  The same heuristic applies to incremental and
+			// non-incremental.
+			bool force = (heapSizeAtLastAlloc > collectThreshold &&
+						  heapSizeAtLastAlloc < heap->GetTotalHeapSize());
+
+			if (incremental) {
+				if (force || (totalGCPages > collectThreshold &&
+							  allocsSinceCollect * kFreeSpaceDivisor >= totalGCPages)) {
+					StartIncrementalMark();
+				}
+			} else {
+				// Collect only if the heap is completely full (a conservative
+				// heuristic).
+				if (force || heap->GetFreeHeapSize() == 0)
+					CollectWithBookkeeping(true, callerHasActiveRequest);
+			}
+		}
+	}
+
 	void *GC::Calloc(size_t num, size_t elsize, int flags, int skip)
 	{
 		uint64 size = (uint64)num * (uint64)elsize;

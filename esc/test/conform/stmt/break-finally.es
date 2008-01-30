@@ -36,38 +36,33 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var x=2;
+// break-past-finally tests
+
+/* These don't work; problem with the verifier 
 while (true) {
-    print("LOOP 1");
-    x = x - 1;
-    if (x == 0)
+    try {
         break;
+    }
+    catch (exn1) {
+    }
+    finally {
+        print("BROKE OUT OF 'TRY'");
+    }
+    print("WRONG 1");
 }
 
-var x=2;
-fnord:
-    while (true) {
-        while (true) {
-            print("LOOP 2");
-            x = x - 1;
-            if (x == 0)
-                break fnord;
-        }
+while (true) {
+    try {
+        throw 0;
     }
-
-var x=2;
-feeble:
-    if (x > 1) {
-        print("NESTED");
-        break feeble;
-        print("WRONG");
+    catch (exn2) {
+        break;
     }
-
-// Check to see if the compiler can handle a labelled stmt 
-// even if the stmt can't be broken out of.
-/* Doesn't work, parser needs fixing
-confusing:
-    var x = 10;
+    finally {
+        print("BROKE OUT OF 'CATCH'");
+    }
+    print("WRONG 2");
+}
 */
 
 print("DONE");

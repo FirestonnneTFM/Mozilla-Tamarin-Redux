@@ -161,6 +161,28 @@ use namespace intrinsic;
 
     type PRAGMA_ENV = [Ast::PRAGMAS];
 
+    Parse function syntaxError(ctx, msg) {
+        // FIXME Need much better source info
+        // ctx can be a Context or a Parser, maybe these have source info we can use.
+        var filename = "";
+        if (ctx is Parser) {
+            print("Is Parser");
+            print(ctx.scan);
+            print(ctx.scan.origin);
+            filename = ctx.scan.origin;
+        }
+        Util::syntaxError(filename, 0, msg);
+    }
+
+    Parse function internalError(ctx, msg) {
+        // FIXME Need much better source info
+        // ctx can be a Context or a Parser, maybe these have source info we can use.
+        var filename = "";
+        if (ctx is Parser)
+            filename = ctx.scan.origin;
+        Util::internalError(filename, 0, msg);
+    }
+
     class Context
     {
         use default namespace public;
@@ -224,7 +246,7 @@ use namespace intrinsic;
                         else if (f2.Ast::type==Ast::anyType) return true;
                         // other positive cases here
                     }
-                    throw "incompatible fixture redef "+fn.id;
+                    Parse::syntaxError(this, "Incompatible fixture redefinition "+fn.id);
                 }
             }
             case (fn: Ast::TempName) {
@@ -346,9 +368,7 @@ use namespace intrinsic;
 
             enter ("getFixture ");
             if (fxtrs.length===0) 
-            {
-                throw "name not found " + ns + "::" + id;
-            }
+                Parse::syntaxError(this, "Name not found " + ns + "::" + id);
 
             let pn = fxtrs[0][0];
             if (pn.name.id==id && pn.name.ns.toString()==ns.toString()) 
@@ -391,7 +411,7 @@ use namespace intrinsic;
                 var stop = 0;
                 break;
             default:
-                throw "error findFixtureWithName: unimplemented target";
+                Parse::internalError(this, "findFixtureWithName: unimplemented target " + it);
             }
 
             //print ("env.length=",env.length);
@@ -403,9 +423,8 @@ use namespace intrinsic;
                 for (var j=nss.length-1; j>=0; --j) {
                     //print ("nss[",j,"]=",nss[j]);
                     if (hasName (fxtrs,id,nss[j])) {
-                        if (ns !== null) {
-                            throw "ambiguous reference to " + id;
-                        }
+                        if (ns !== null)
+                            Parse::syntaxError(this, "Ambiguous reference to " + id);
                         ns = nss[j];
                     }
                 }
@@ -435,7 +454,7 @@ use namespace intrinsic;
                     return fx;
                 }
             }
-            throw "fixture not found: " + id;
+            Parse::syntaxError(this, "Fixture not found: " + id);
         }
 
         function evalIdentExprToNamespace (nd: Ast::IDENT_EXPR)
@@ -457,7 +476,7 @@ use namespace intrinsic;
                     return fxtr.ns;
                 }
                 case (fxtr:*) {
-                    throw "fixture with unknown value " + fxtr;
+                    Parse::internalError(this, "Fixture with unknown value " + fxtr);
                 }
                 }
             }
@@ -466,7 +485,7 @@ use namespace intrinsic;
                 return val;
             }
             case (nd: *) {
-                throw "evalIdentExprToNamespace: case not implemented " + nd;
+                Parse::internalError(this, "evalIdentExprToNamespace: case not implemented " + nd);
             }
             }
             exit ("evalIdentExprToNamespace ", val);
@@ -482,7 +501,7 @@ use namespace intrinsic;
                 var fxtr = findFixtureWithIdentifier (nd.Ast::ident, it);
             }
             case (nd: *) {
-                throw "resolveIdentExpr: case not implemented " + nd;
+                Parse::internalError(this, "resolveIdentExpr: case not implemented " + nd);
             }
             }
             exit ("resolveIdentExpr ", fxtr);
@@ -540,10 +559,10 @@ use namespace intrinsic;
         var scan : Scanner;
         var cx: Context;
 
-        function Parser(src,topFixtures)
+        function Parser(src,topFixtures,filename="")
         {
             this.cx = new Context (topFixtures)
-            this.scan = new Scanner (src,"")
+            this.scan = new Scanner (src,filename)
         }
 
         var defaultNamespace: Ast::NAMESPACE;
@@ -574,7 +593,7 @@ use namespace intrinsic;
             if (tk == tc) {
                 return tl (ts);
             }
-            throw "expecting "+Token::tokenText(tc)+" found "+Token::tokenText(tk);
+            Parse::syntaxError(this, "Expecting " + Token::tokenText(tc) + " found " + Token::tokenText(tk));
         }
 
         /*
@@ -589,7 +608,7 @@ use namespace intrinsic;
                 ts.ts.writeInt (t1);
                 return t1;
             }
-            throw "expecting "+Token::tokenText(t0)+" found "+Token::tokenText(tk);
+            Parse::syntaxError(this, "Expecting "+Token::tokenText(t0)+" found "+Token::tokenText(tk));
         }
 
         function tl (ts:TOKENS) : TOKENS {
@@ -723,7 +742,7 @@ use namespace intrinsic;
                     var ie = e.Ast::ident;
                 }
                 case (e: *) {
-                    throw "invalid init lhs " + e;
+                    Parse::syntaxError(this, "Invalid initializer left-hand-side " + e);
                 }
                 }
                 exit ("identExprFromExpr","");
@@ -748,7 +767,8 @@ use namespace intrinsic;
                     var expr = new Ast::InitExpr (it, new Ast::Head ([],[]), inits);
                 }
                 case (p:SimplePattern) {
-                    if (e === null) throw "simple pattern without initializer";
+                    if (e === null) 
+                        Parse::syntaxError(this, "Simple pattern without initializer");
                     var fxtrs = [];
                     if (it != null) { // we have an init target so must be an init
                         var ie = identExprFromExpr (p.expr);
@@ -874,7 +894,7 @@ use namespace intrinsic;
                 var str = Token::tokenText (ts.head());
                 break;
             default:
-                throw "expecting identifier, found " + Token::tokenText (ts.head());
+                Parse::syntaxError(this, "Expecting identifier, found " + Token::tokenText (ts.head()));
             }
             exit ("Parser::identifier ", str);
             return [tl (ts), str];
@@ -1395,7 +1415,7 @@ use namespace intrinsic;
             case Token::DecimalLiteral:
             case Token::DecimalIntegerLiteral:
             case Token::HexIntegerLiteral:
-                throw "unsupported fieldName " + hd(ts);
+                Parse::internalError(this, "Unsupported fieldName " + hd(ts));
                 break;
             default:
                 if (isReserved (hd (ts))) {
@@ -1687,7 +1707,7 @@ use namespace intrinsic;
             case Token::Dot:
                 switch (hd2 (ts)) {
                 case Token::LeftParen:
-                    throw "filter operator not implemented";
+                    Parse::internalError(this, "Filter operator not implemented");
                     break;
                 default:
                     //                    if (isReservedIdentifier (hd (ts))) {
@@ -1703,10 +1723,10 @@ use namespace intrinsic;
                 var [tsx,ndx] = [ts1, new Ast::ObjectRef (nd,new Ast::ExpressionIdentifier (nd1,cx.pragmas.openNamespaces))];
                 break;
             case Token::DoubleDot:
-                throw "descendents operator not implemented";
+                Parse::internalError(this, "descendents operator not implemented");
                 break;
             default:
-                throw "internal error: propertyOperator";
+                Parse::internalError("propertyOperator");
                 break;
             }
 
@@ -2673,7 +2693,7 @@ use namespace intrinsic;
             function operateAndAssign(ts1, nd1, op) : [TOKENS, Ast::EXPR] {
                 var [ts2,nd2] = [tl (ts1), patternFromExpr (nd1)];
                 if (!(nd2 is SimplePattern))
-                    throw "error operandAndAssign, lhs should be SimplePattern";
+                    Parse::internalError(this, "operandAndAssign, lhs should be SimplePattern");
                 var [ts3,nd3] = assignmentExpression (ts2,beta);
                 var [fxtrs,expr,head] = desugarAssignmentPattern (nd2,Ast::anyType,nd3,op);
                 return [ts3, expr];
@@ -2692,7 +2712,7 @@ use namespace intrinsic;
                         var p = objectPatternFromLiteral (l);
                     }
                     case (l: *) {
-                        throw "invalid lhs expr " + e;
+                        Parse::syntaxError(this, "Invalid lhs expr " + e);
                     }
                     }
                 }
@@ -2703,7 +2723,7 @@ use namespace intrinsic;
                     var p = new SimplePattern (e);
                 }
                 case (e: *) {
-                    throw "error patternFromExpr, unhandled expression kind " + e;
+                    Parse::internalError(this, "patternFromExpr, unhandled expression kind " + e);
                 }
                 }
                 return p;
@@ -2746,7 +2766,7 @@ use namespace intrinsic;
                     var p = fieldListPatternFromLiteral (nd.Ast::fields);
                 }
                 case (nd: *) {
-                    throw "error objectPatternFromLiteral " + nd;
+                    Parse::syntaxError(this, "objectPatternFromLiteral " + nd);
                 }
                 }
                         
@@ -3099,7 +3119,7 @@ use namespace intrinsic;
                     var [ts2,nd2] = [ts1, new IdentifierPattern (nd1.Ast::ident)];
                 }
                 case (nd1:*) {
-                    throw "unsupported fieldPattern " + nd1;
+                    Parse::internalError(this, "unsupported fieldPattern " + nd1);
                 }
                 }
                 break;
@@ -3485,8 +3505,13 @@ use namespace intrinsic;
                 var [ts2,nd2] = withStatement (ts, omega);
                 break;
             default:
-                let [ts1,nd1] = expressionStatement (ts);
-                var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                if (hd (ts) == Token::Identifier && hd2 (ts) == Token::Colon) {
+                    var [ts2,nd2] = labeledStatement (ts);
+                }
+                else {
+                    let [ts1,nd1] = expressionStatement (ts);
+                    var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                }
                 break;
             }
 
@@ -3557,7 +3582,7 @@ use namespace intrinsic;
         {
             let offset = ts.n/4;
             if( offset < coordList.length ) {
-                return {line:(coordList[offset][0]+1)};
+                return {line:(coordList[offset-1][0])};
             }
             else
                 return null;
@@ -3584,9 +3609,8 @@ use namespace intrinsic;
                         var ts1=ts; 
                         //print ("inserting semicolon") 
                     }
-                    else { 
-                        throw "** error: expecting semicolon" 
-                    }
+                    else
+                        Parse::syntaxError(this, "Expecting semicolon");
                     break;
                 }
                 break;
@@ -3602,11 +3626,49 @@ use namespace intrinsic;
                 }
                 break;
             default:
-                throw "unhandled statement mode";
+                Parse::internalError(this, "Unhandled statement mode " + omega);
             }
 
             exit("Parser::semicolon ", ts1);
             return ts1;
+        }
+
+        function labeledStatement (ts: TOKENS)
+            : [TOKENS, Ast::STMT]
+        {
+            enter("Parser::labeledStatement ", ts);
+
+            var [ts1, label] = identifier (ts);
+            var [ts2, stmt] = substatement(eat (ts1, Token::Colon), FullStmt);
+
+            exit("Parser::labeledStatement ", ts2);
+            addLabel(label, stmt);
+            return [ts2, new Ast::LabeledStmt(label, stmt)];
+
+            function addLabel(label, stmt) {
+                use namespace Ast;
+
+                switch type (stmt) {
+                case (x0: LabeledStmt) {
+                    addLabel(label, x0.stmt);
+                }
+                case (x1: ForInStmt) {
+                    x1.labels.push(label);
+                }
+                case (x2: WhileStmt) {
+                    x2.labels.push(label);
+                }
+                case (x3: DoWhileStmt) {
+                    x3.labels.push(label);
+                }
+                case (x4: ForStmt) {
+                    x4.labels.push(label);
+                }
+                case (x:*) {
+                    // Label is not propagated
+                }
+                }
+            }
         }
 
         function expressionStatement (ts: TOKENS)
@@ -3736,10 +3798,9 @@ use namespace intrinsic;
             ts = eat (ts,Token::While);
             var [ts1,nd1] = parenListExpression (ts);
             var [ts2,nd2] = substatement (ts1, omega); 
-            var labels = [];
  
             exit("Parser::whileStatement ", ts2);
-            return [ts2, new Ast::WhileStmt (nd1,nd2,labels)];
+            return [ts2, new Ast::WhileStmt (nd1,nd2)];
         }
 
         /*
@@ -3758,10 +3819,9 @@ use namespace intrinsic;
             var [ts1,body] = substatement (ts, omega); 
             ts = eat(ts1,Token::While);
             var [ts2,test] = parenListExpression (ts);
-            var labels = [];
  
             exit("Parser::doStatement ", ts2);
-            return [ts2, new Ast::DoWhileStmt (test,body,labels)]; // same order of args to constructor as 'while'
+            return [ts2, new Ast::DoWhileStmt (test,body)]; // same order of args to constructor as 'while'
         }
 
         /*
@@ -3780,7 +3840,14 @@ use namespace intrinsic;
 
             cx.enterLetBlock ();
 
+            var is_each = false;
+            
             ts = eat (ts,Token::For);
+            if( hd(ts) == Token::Each )
+            {
+                ts = eat(ts, Token::Each);
+                is_each = true;
+            }
             ts = eat (ts,Token::LeftParen);
             var [ts1,nd1] = forInitialiser (ts);
             if (hd (ts1) == Token::In) {
@@ -3788,12 +3855,11 @@ use namespace intrinsic;
                 var [ts2,objexpr] = listExpression (ts1, allowIn);
                 ts2 = eat (ts2,Token::RightParen);
                 var [ts3,body] = substatement (ts2, omega); 
-                var labels = [];
                 
                 var head = cx.exitLetBlock ();
                 
                 exit("Parser::forStatement ", ts3);
-                return [ts3, new Ast::ForInStmt (head,nd1,objexpr,body,labels)];
+                return [ts3, new Ast::ForInStmt (head,nd1,objexpr,body,is_each)];
             }
             else {
                 ts1 = eat (ts1,Token::SemiColon);
@@ -3802,12 +3868,11 @@ use namespace intrinsic;
                 var [ts3,nd3] = optionalExpression (ts2);
                 ts3 = eat (ts3,Token::RightParen);
                 var [ts4,nd4] = substatement (ts3, omega); 
-                var labels = [];
                 
                 var head = cx.exitLetBlock ();
                 
                 exit("Parser::forStatement ", ts4);
-                return [ts4, new Ast::ForStmt (head,nd1,nd2,nd3,nd4,labels)];
+                return [ts4, new Ast::ForStmt (head,nd1,nd2,nd3,nd4)];
             }
         }
 
@@ -3840,7 +3905,9 @@ use namespace intrinsic;
                 //assert (nd1.length==1);
                 switch type (nd1[0]) {
                 case (nd:Ast::ExprStmt) { nd1 = nd.Ast::expr }
-                case (nd:*) { throw "error forInitialiser " + nd }
+                case (nd:*) { 
+                    Parse::syntaxError(this, "forInitialiser " + nd);
+                }
                 }
                 break;
             default:
@@ -3924,10 +3991,8 @@ use namespace intrinsic;
             }
             ts2 = eat (ts2,Token::RightBrace);
 
-            var nd3 = []; // FIXME labels
-
             exit("Parser::switchStatement ", ts2);
-            return [ts2, new Ast::SwitchStmt (nd1,nd2,nd3)];
+            return [ts2, new Ast::SwitchStmt (nd1,nd2)];
         }
 
         function caseElementsPrefix (ts: TOKENS)
@@ -3978,7 +4043,7 @@ use namespace intrinsic;
                 var [ts1,nd1] = [tl (ts),null];
                 break;
             default:
-                throw "error caseLabel expecting case";
+                Parse::syntaxError(this, "caseLabel expecting case");
             }
 
             ts1 = eat (ts1,Token::Colon);
@@ -4190,7 +4255,7 @@ use namespace intrinsic;
                 var ro = false;
                 break;
             default:
-                throw "error variableDefinition kind " + nd1;
+                Parse::syntaxError(this, "variableDefinition kind " + nd1);
             }
 
             let [ts2,nd2] = variableBindingList (ts1, beta, ns, it, ro);
@@ -4248,7 +4313,7 @@ use namespace intrinsic;
                     var [tsx,ndx] = [tl (tl (ts)), Ast::letConstTag];
                     break;
                 case Token::Function:
-                    throw "internal error: variableDefinitionKind after let";
+                    Parse::syntaxError(this, "variableDefinitionKind after let");
                     break;
                 default:
                     var [tsx,ndx] = [tl (ts), Ast::letVarTag];
@@ -4256,7 +4321,7 @@ use namespace intrinsic;
                 }
                 break;
             default:
-                throw "internal error: variableDefinitionKind";
+                Parse::syntaxError(this, "variableDefinitionKind");
                 break;
             }
 
@@ -4342,7 +4407,7 @@ use namespace intrinsic;
                                 var [f,i] = desugarBindingPattern (p,t,nd2,ns,it,ro);
                             }
                             else
-                                throw "error identifier pattern required by for-in binding (for now)";
+                                Parse::internalError(this, "Identifier pattern required by for-in binding (for now)");
                             break;
                         } // else fall through
                     default:
@@ -4362,7 +4427,7 @@ use namespace intrinsic;
                                 var [f,i] = desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro);
                             }
                             else
-                                throw "error identifier pattern required by for-in binding (for now)";
+                                Parse::internalError(this, "Identifier pattern required by for-in binding (for now)");
                             break;
                         } // else fall through
                     default:
@@ -4372,7 +4437,7 @@ use namespace intrinsic;
                             var [tsx,[f,i]] = [ts1,desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro)];
                         }
                         case (x : *) {
-                            throw "destructuring pattern without initializer";
+                            Parse::syntaxError(this, "destructuring pattern without initializer");
                         }
                         }
                         break;
@@ -4418,7 +4483,7 @@ use namespace intrinsic;
                         var [tsx,ndx] = [ts1,desugarPattern (p,t,null,ns,it)];
                     }
                     case (x : *) {
-                        throw "destructuring pattern without initializer";
+                        Parse::syntaxError(this, "destructuring pattern without initializer");
                     }
                     }
                 break;
@@ -4530,7 +4595,7 @@ use namespace intrinsic;
             var ctor = new Ast::Ctor (settings,superArgs,func);
 
             if (cx.ctor !== null) {
-                throw "constructor already defined";
+                Parse::syntaxError(this, "Constructor already defined");
             }
 
             cx.ctor = ctor;
@@ -4956,7 +5021,7 @@ use namespace intrinsic;
                     // nothing to do
                     break;
                 default:
-                    throw "unexpected token in nonemptyParameters";
+                    Parse::syntaxError(this, "unexpected token in nonemptyParameters");
                 }
                 break;
             }
@@ -4987,7 +5052,7 @@ use namespace intrinsic;
                 break;
             default:
                 if (initRequired) {
-                    throw "expecting default value expression";
+                    Parse::syntaxError(this, "Expecting default value expression");
                 }
                 var [ts2,nd2] = [ts1,[]];
                 break;
@@ -5540,13 +5605,19 @@ use namespace intrinsic;
                 var [ts1,nd1] = attribute (ts,tau,defaultAttrs());
                 var [ts1,nd1] = annotatableDirective (ts1,tau,omega,nd1);
                 break;
+            case Token::Identifier:
+                // FIXME: This should be some variant of directive (), in order to catch "var".
+                // But not every directive can be labeled, so just do the simple thing for the
+                // time being.
+                if (hd2 (ts) == Token::Colon) {
+                    var [ts1,nd1] = statement (ts,tau,omega);
+                    nd1 = [nd1];
+                    break;
+                }
+                // Fall through if not label
             default:  // label, attribute, or expr statement
                 var [ts1,nd1] = listExpression (ts,allowIn);
                 switch (hd (ts1)) {
-                case Token::Colon:  // label
-                    //print ("label=",Encode::encodeExpr (nd1));
-                    // FIXME check label
-                    break;
                 case Token::SemiColon:
                     var [ts1,nd1] = [tl (ts1), [new Ast::ExprStmt (nd1)]];
                     break;
@@ -5582,7 +5653,7 @@ use namespace intrinsic;
                             var [ts1,nd1] = annotatableDirective (ts1,tau,omega,attrs);
                             break;
                         default:
-                            throw "directive should never get here " + ts1;
+                            Parse::internalError(this, "directive should never get here " + ts1);
                             var nd1 = [new Ast::ExprStmt (nd1)];
                             break;
                         }
@@ -5636,7 +5707,8 @@ use namespace intrinsic;
                 break;
             default:  // label, attribute, or expr statement
                 var [ts1,nd1] = attribute (ts,tau,defaultAttrs());
-                if (newline (ts1)) throw "error unexpected newline before "+Token::tokenText (hd (ts));
+                if (newline (ts1)) 
+                    Parse::syntaxError(this, "error unexpected newline before "+Token::tokenText (hd (ts)));
                 var [ts2,nd2] = annotatableDirective (ts1,tau,omega,nd1);
             }
 
@@ -5763,7 +5835,7 @@ use namespace intrinsic;
                 var [ts1,nd1] = [ts,nd];
                 break;
             default:
-                throw "error attribute tau " + tau;
+                Parse::internalError(this, "error attribute tau " + tau);
             }
 
             exit("Parser::attribute ", ts1);
@@ -5837,7 +5909,7 @@ use namespace intrinsic;
                     cx.openNamespace (nd1);
                     break;
                 default:
-                    throw "unexpected token after 'use default'";
+                    Parse::syntaxError(this, "unexpected token after 'use default'");
                 }
                 break;
                 //            case Token::Number
@@ -5855,7 +5927,7 @@ use namespace intrinsic;
             case Token::Unit:
                 break;
             default:
-                throw "unknown token in PragmaItem";
+                Parse::syntaxError(this, "unknown token in PragmaItem");
             }
 
             if (hd (ts1) !== Token::Comma) {
@@ -5962,7 +6034,7 @@ use namespace intrinsic;
             case Token::EOS:
                 break;
             default:
-                throw "extra tokens after end of program: " + ts2;
+                Parse::syntaxError(this, "extra tokens after end of program: " + ts2);
             }
 
             exit ("Parser::program ", ts2);
@@ -6085,7 +6157,8 @@ use namespace intrinsic;
                 print("tx1.length=",tx1.length);
                 print("tx2.length=",tx2.length);
                 for (var i = 0; i < tx1.length; ++i) {
-                    if (tx1[i] != tx2[i]) throw "error at pos "+i+" "+tx1[i]+ " != "+tx2[i]+" prefix: "+tx1.slice(i,tx1.length);
+                    if (tx1[i] != tx2[i]) 
+                        throw "error at pos "+i+" "+tx1[i]+ " != "+tx2[i]+" prefix: "+tx1.slice(i,tx1.length);
                 }
                 print("txt==tx2");
             }

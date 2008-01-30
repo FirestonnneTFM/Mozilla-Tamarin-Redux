@@ -1389,61 +1389,6 @@ const int kBufferPadding = 16;
 		int findNamespace(const Namespace *ns);
 
 	public:
-#ifdef DEBUGGER
-#if defined(MMGC_IA32) || defined(MMGC_IA64)
-		static inline uint32 FindOneBit(uint32 value)
-		{
-#ifndef __GNUC__
-			_asm
-			{
-				bsr eax,[value];
-			}
-#else
-			// DBC - This gets rid of a compiler warning and matchs PPC results where value = 0
-			register int	result = ~0;
-			
-			if (value)
-			{
-				asm (
-					"bsr %1, %0"
-					: "=r" (result)
-					: "m"(value)
-					);
-			}
-			return result;
-#endif
-		}
-
-		#elif defined(MMGC_PPC)
-
-		static inline int FindOneBit(uint32 value)
-		{
-			register int index;
-			#ifdef DARWIN
-			asm ("cntlzw %0,%1" : "=r" (index) : "r" (value));
-			#else
-			register uint32 in = value;
-			asm { cntlzw index, in; }
-			#endif
-			return 31-index;
-		}
-
-		#else // generic platform
-
-		static int FindOneBit(uint32 value)
-		{
-			for (int i=0; i < 32; i++)
-				if (value & (1<<i))
-					return i;
-			// asm versions of this function are undefined if no bits are set
-			AvmAssert(false);
-			return 0;
-		}
-
-		#endif  // MMGC_platform
-#endif
-
-	public:
 		/**
 		 * intern the given string atom which has already been allocated
 		 * @param atom

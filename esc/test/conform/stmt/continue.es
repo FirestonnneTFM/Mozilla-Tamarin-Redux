@@ -43,4 +43,18 @@ while (x > 0) {
     continue;
     print("WRONG");
 }
+
+var x=2;
+outer:
+while(true) {
+    print("LOOP 2 OUTER");
+    while (x > 0) {
+        print("LOOP 2");
+        x = x - 1;
+        continue outer;
+        print("WRONG");
+    }
+    break;
+}
+
 print("DONE");

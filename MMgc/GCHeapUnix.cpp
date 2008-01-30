@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -46,9 +47,7 @@
 #include "GCDebug.h"
 #include "GC.h"
 
-#ifdef USE_MMAP
 #include <sys/mman.h>
-#endif
 
 #if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
 #define MAP_ANONYMOUS MAP_ANON
@@ -64,6 +63,15 @@
 // avmplus standalone uses UNIX  
 #ifdef _MAC
 #define MAP_ANONYMOUS MAP_ANON
+#endif
+
+#ifdef SOLARIS
+#include <ucontext.h>
+#include <dlfcn.h>
+extern "C" caddr_t _getfp(void);
+typedef caddr_t maddr_ptr;
+#else
+typedef void *maddr_ptr;
 #endif
 
 namespace MMgc
@@ -106,9 +114,9 @@ namespace MMgc
 	void* GCHeap::ReserveCodeMemory(void* address,
 									size_t size)
 	{
-		return (char*) mmap(address,
+		return (char*) mmap((maddr_ptr)address,
 							size,
-							PROT_NONE,
+							PROT_READ | PROT_WRITE,
 							MAP_PRIVATE | MAP_ANONYMOUS,
 							-1, 0);
 	}
@@ -116,7 +124,7 @@ namespace MMgc
 	void GCHeap::ReleaseCodeMemory(void* address,
 								   size_t size)
 	{
-		if (munmap(address, size) != 0)
+		if (munmap((maddr_ptr)address, size) != 0)
 			GCAssert(false);
 	}
 
@@ -124,6 +132,7 @@ namespace MMgc
 	{
 		return false;
 	}
+#endif /* USE_MMAP */
 
 #ifdef AVMPLUS_JIT_READONLY
 	/**
@@ -139,37 +148,42 @@ namespace MMgc
 							   size_t size,
 							   bool executableFlag)
 	{
+		// Should use vmPageSize() or kNativePageSize here.
+		// But this value is hard coded to 4096 if we don't use mmap.
+		int bitmask = sysconf(_SC_PAGESIZE) - 1;
+
 		// mprotect requires that the addresses be aligned on page boundaries
 		void *endAddress = (void*) ((char*)address + size);
-		void *beginPage = (void*) ((size_t)address & ~0xFFF);
-		void *endPage   = (void*) (((size_t)endAddress + 0xFFF) & ~0xFFF);
+		void *beginPage = (void*) ((size_t)address & ~bitmask);
+		void *endPage   = (void*) (((size_t)endAddress + bitmask) & ~bitmask);
 		size_t sizePaged = (size_t)endPage - (size_t)beginPage;
 
 #ifdef DEBUG
 		int retval =
 #endif
-		  mprotect(beginPage, sizePaged,
+		  mprotect((maddr_ptr)beginPage, sizePaged,
 			   executableFlag ? (PROT_READ|PROT_EXEC) : (PROT_READ|PROT_WRITE|PROT_EXEC));
 
 		GCAssert(retval == 0);
 	}
 #endif /* AVMPLUS_JIT_READONLY */
 	
+#ifdef USE_MMAP
 	void* GCHeap::CommitCodeMemory(void* address,
 								  size_t size)
 	{
 		void* res;
 		if (size == 0)
 			size = GCHeap::kNativePageSize;  // default of one page
-			
+
 #ifdef AVMPLUS_JIT_READONLY
-		mmap(address,
+		mmap((maddr_ptr)address,
 			 size,
 			 PROT_READ | PROT_WRITE,
 			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
 			 -1, 0);
 #else
-		mmap(address,
+		mmap((maddr_ptr)address,
 			 size,
 			 PROT_READ | PROT_WRITE | PROT_EXEC,
 			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
@@ -233,11 +247,14 @@ namespace MMgc
 #ifdef USE_MMAP
 	char* GCHeap::ReserveMemory(char *address, size_t size)
 	{
-		char *addr = (char*)mmap(address,
+		char *addr = (char*)mmap((maddr_ptr)address,
 					 size,
-					 PROT_NONE,
+					 PROT_READ | PROT_WRITE,
 					 MAP_PRIVATE | MAP_ANONYMOUS,
 					 -1, 0);
+		if (addr == MAP_FAILED) {
+			return NULL;
+		}
 		if(address && address != addr) {
 			// behave like windows and fail if we didn't get the right address
 			ReleaseMemory(addr, size);
@@ -261,7 +278,7 @@ namespace MMgc
 	{
 		ReleaseMemory(address, size);
 		// re-reserve it
-		char *addr = (char*)mmap(address,
+		char *addr = (char*)mmap((maddr_ptr)address,
 					 size,
 					 PROT_NONE,
 					 MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
@@ -285,7 +302,7 @@ namespace MMgc
 #ifdef DEBUG
 		int result =
 #endif
-		  munmap(address, size);
+		munmap((maddr_ptr)address, size);
 		GCAssert(result == 0);
 	}
 #else
@@ -313,6 +330,15 @@ namespace MMgc
 #endif
 	}
 
+#ifdef MMGC_SPARC
+	void GetStackTrace(int *trace, int len, int skip)
+	{
+	  // TODO for sparc.
+		GCAssert(false);
+
+	}
+#endif
+
 #ifdef MMGC_PPC
 	void GetStackTrace(int *trace, int len, int skip) 
 	{
@@ -338,7 +364,11 @@ namespace MMgc
 	void GetStackTrace(int *trace, int len, int skip)
 	{
 		void **ebp;
+#ifdef SOLARIS
+		ebp = (void **)_getfp();
+#else
 		asm("mov %%ebp, %0" : "=r" (ebp));
+#endif
 
 		while(skip-- && *ebp)
 		{

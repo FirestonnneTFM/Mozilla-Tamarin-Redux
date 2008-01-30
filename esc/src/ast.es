@@ -1234,13 +1234,14 @@ public namespace Ast
         const init : EXPR?;
         const obj  : EXPR;
         const stmt : STMT;
-        const labels : [IDENT];
-        function ForInStmt (vars,init,obj,stmt,labels)
+        const labels : [IDENT] = [];
+        const is_each : boolean;
+        function ForInStmt (vars,init,obj,stmt,is_each=false)
             : vars = vars
             , init = init
             , obj = obj
             , stmt = stmt
-            , labels = labels {}
+            , is_each = is_each {}
     }
 
     class ThrowStmt {
@@ -1274,10 +1275,10 @@ public namespace Ast
     }
 
     class LabeledStmt {
-        const ident : IDENT;
+        const label : IDENT;
         const stmt : STMT;
         function LabeledStmt (label,stmt)
-            : ident = ident
+            : label = label
             , stmt = stmt { }
     }
 
@@ -1290,21 +1291,19 @@ public namespace Ast
     class WhileStmt {
         const expr : EXPR;
         const stmt : STMT;
-        const labels : [IDENT];
-        function WhileStmt (expr,stmt,labels)
+        const labels : [IDENT] = [];
+        function WhileStmt (expr,stmt)
             : expr = expr
-            , stmt = stmt
-            , labels = labels {}
+            , stmt = stmt {}
     }
 
     class DoWhileStmt {
         const expr : EXPR;
         const stmt : STMT;
-        const labels : [IDENT];
-        function DoWhileStmt (expr,stmt,labels)
+        const labels : [IDENT] = [];
+        function DoWhileStmt (expr,stmt)
             : expr = expr
-            , stmt = stmt
-            , labels = labels {}
+            , stmt = stmt {}
     }
 
     class ForStmt {
@@ -1313,14 +1312,13 @@ public namespace Ast
         const cond : EXPR?;
         const incr : EXPR?;
         const stmt : STMT;
-        const labels : [IDENT];
-        function ForStmt (vars,init,cond,incr,stmt,labels)
+        const labels : [IDENT] = [];
+        function ForStmt (vars,init,cond,incr,stmt)
             : vars = vars
             , init = init
             , cond = cond
             , incr = incr
-            , stmt = stmt
-            , labels = labels {}
+            , stmt = stmt {}
     }
 
     class IfStmt {
@@ -1336,11 +1334,9 @@ public namespace Ast
     class SwitchStmt {
         const expr : EXPR;
         const cases : CASES;
-        const labels : [IDENT];
-        function SwitchStmt (expr, cases, labels)
+        function SwitchStmt (expr, cases)
             : expr = expr
-            , cases = cases
-            , labels = labels { }
+            , cases = cases { }
     }
 
     type CASE = Case;

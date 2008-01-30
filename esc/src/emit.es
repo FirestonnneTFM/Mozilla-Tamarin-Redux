@@ -110,7 +110,7 @@ namespace Emit;
                     return constants.namespace(CONSTANT_Namespace, constants.stringUtf8("intrinsic"));  // FIXME
                 }
                 case (on:OperatorNamespace) {
-                    throw ("Unimplemented namespace OperatorNamespace");
+                    internalError("", 0, "Unimplemented namespace OperatorNamespace"); // FIXME: source pos
                 }
                 case (pn:PrivateNamespace) {
                     return constants.namespace(CONSTANT_PrivateNamespace, constants.stringUtf8(pn.name));
@@ -133,10 +133,10 @@ namespace Emit;
                     return constants.namespace(CONSTANT_Namespace, constants.stringUtf8(an.name));
                 }
                 case (imp_ns:ImportNamespace) {
-                    throw ("Unimplemented namespace ImportNamespace");
+                    internalError("", 0, "Unimplemented namespace ImportNamespace");  // FIXME: source pos
                 }
                 case (x:*) {
-                    throw ("Unimplemented namespace " + ns);
+                    internalError("", 0, "Unimplemented namespace " + ns); // FIXME: source pos
                 }
             }
         }
@@ -179,12 +179,14 @@ namespace Emit;
                         return qname({ns:new AnonymousNamespace(lr.ident.ident), id:qi.ident}, false)
                     }
                     case( e:* ) {
-                        throw ("Unimplemented: nameFromIdentExpr " + e);
+                        internalError("", 0, "Unimplemented: nameFromIdentExpr " + e); // FIXME: source pos
                     }
                 }
                 return multiname(id,false) 
             }
-            case (x:*) { throw ("Unimplemented: nameFromIdentExpr " + e) }
+            case (x:*) { 
+                internalError("", 0, "Unimplemented: nameFromIdentExpr " + e);  // FIXME: source pos
+            }
             }
         }
         
@@ -241,7 +243,7 @@ namespace Emit;
                     return 0;
                 }
                 case (x:*) { 
-                    throw ("Unimplemented: realTypeName " + t + ", using *")
+                    internalError("", 0, "Unimplemented: realTypeName " + t + ", using *") // FIXME source pos
                 }
             }
             return 0;
@@ -254,83 +256,88 @@ namespace Emit;
                 return qname(pn.name, false);
             }
             case (tn:TempName) {
-        return qname ({ns:Ast::noNS,id:"$t"+tn.index},false);  // FIXME allocate and access actual temps
+                return qname ({ns:Ast::noNS,id:"$t"+tn.index},false);  // FIXME allocate and access actual temps
             }
-            case (x:*) { throw "Internal error: not a valid fixture name" }
+            case (x:*) { 
+                internalError("", 0, "Not a valid fixture name " + x); // FIXME source pos
+            }
             }
         }
         
         public function fixtureTypeToType(fix) {
             switch type (fix) {
-                case (vf:ValFixture) {
-                    return vf.type != null ? typeFromTypeExpr(vf.type) : 0 ;
-                }
-                case (mf:MethodFixture) {
-                    return 0;
-                }
-                case(x:*) { throw "Unimplemented: fixtureTypeToType " + x }
+            case (vf:ValFixture) {
+                return vf.type != null ? typeFromTypeExpr(vf.type) : 0 ;
+            }
+            case (mf:MethodFixture) {
+                return 0;
+            }
+            case(x:*) { 
+                internalError("", 0, "Unimplemented: fixtureTypeToType " + x);  // FIXME source pos
+            }
             }
         }
         
         public function defaultLiteralExpr(lit)
         {
             switch type (lit) {
-                case(ln:LiteralNull) {
-                    return {val:CONSTANT_Null, kind:CONSTANT_Null}
-                }
-                case(lu:LiteralUndefined) {
-                    return {val:0, kind:0}
-                }
-                case(ld:LiteralDouble) {
-                    let val = constants.float64(ld.doubleValue);
-                    return {val:val, kind:CONSTANT_Double};
-                }
-                case(ld:LiteralDecimal) {
-                    let val = constants.float64(ld.decimalValue);
-                    return {val:val, kind:CONSTANT_Double};
-                }
-                case(li:LiteralInt) {
-                    let val = constants.int32(li.intValue);
-                    return {val:val, kind:CONSTANT_Integer};
-                }
-                case(lu:LiteralUInt) {
-                    let val = constants.uint32(lu.uintValue);
-                    return {val:val, kind:CONSTANT_UInteger};
-                }
-                case(lb:LiteralBoolean) {
-                    let val = (lb.booleanValue ? CONSTANT_True : CONSTANT_False);
-                    return {val:val, kind:val};
-                }
-                case(ls:LiteralString) {
-                    let val = constants.stringUtf8(ls.strValue);
-                    return {val:val, kind:CONSTANT_Utf8};
-                }
-                case(ln:LiteralNamespace) {
-                    let val = constants.namespace(ln.namespaceValue);
-                    return  {val:val, kind:CONSTANT_Namespace};
-                }
-                case(x:*) {
-                    throw ("le Default expression must be a constant value" + x)
-                }
+            case(ln:LiteralNull) {
+                return {val:CONSTANT_Null, kind:CONSTANT_Null}
+            }
+            case(lu:LiteralUndefined) {
+                return {val:0, kind:0}
+            }
+            case(ld:LiteralDouble) {
+                let val = constants.float64(ld.doubleValue);
+                return {val:val, kind:CONSTANT_Double};
+            }
+            case(ld:LiteralDecimal) {
+                let val = constants.float64(ld.decimalValue);
+                return {val:val, kind:CONSTANT_Double};
+            }
+            case(li:LiteralInt) {
+                let val = constants.int32(li.intValue);
+                return {val:val, kind:CONSTANT_Integer};
+            }
+            case(lu:LiteralUInt) {
+                let val = constants.uint32(lu.uintValue);
+                return {val:val, kind:CONSTANT_UInteger};
+            }
+            case(lb:LiteralBoolean) {
+                let val = (lb.booleanValue ? CONSTANT_True : CONSTANT_False);
+                return {val:val, kind:val};
+            }
+            case(ls:LiteralString) {
+                let val = constants.stringUtf8(ls.strValue);
+                return {val:val, kind:CONSTANT_Utf8};
+            }
+            case(ln:LiteralNamespace) {
+                let val = constants.namespace(ln.namespaceValue);
+                return  {val:val, kind:CONSTANT_Namespace};
+            }
+            case(x:*) {
+                syntaxError("", 0, "Default expression must be a constant value " + x); // FIXME: source pos
+            }
             }
         }
+
         public function defaultExpr(expr) {
             switch type (expr) {
-                case(le:LiteralExpr) {
-                    return defaultLiteralExpr(le.literal);
-                }
-                case(lr:LexicalRef) {
-                    switch type ( lr.ident ) {
-                        case (i:Identifier) {
-                            if( i.ident == "undefined" ) {
-                                // Handle defualt expr of (... arg = undefined ...)
-                                return defaultLiteralExpr(new LiteralUndefined());
-                            }
-                        }
-                    } 
-                }
+            case(le:LiteralExpr) {
+                return defaultLiteralExpr(le.literal);
             }
-            throw ("Default expression must be a constant value" + expr);
+            case(lr:LexicalRef) {
+                switch type ( lr.ident ) {
+                case (i:Identifier) {
+                    if( i.ident == "undefined" ) {
+                        // Handle defualt expr of (... arg = undefined ...)
+                        return defaultLiteralExpr(new LiteralUndefined());
+                    }
+                }
+                } 
+            }
+            }
+            syntaxError("", 0, "Default expression must be a constant value " + expr); // FIXME: source pos
         }
     }
 
@@ -499,7 +506,7 @@ namespace Emit;
         public function addException(e) {
             return exceptions.push(e)-1;
         }
-        
+
         public function finalize() {
             if (finalized)
                 return;
@@ -508,7 +515,7 @@ namespace Emit;
             // Standard epilogue for lazy clients.
             asm.I_returnvoid();
 
-            var meth = e.file.addMethod(new ABCMethodInfo(0, formals, 0, asm.flags, defaults,null));
+            var meth = e.file.addMethod(new ABCMethodInfo(name, formals, 0, asm.flags, defaults,null));
             var body = new ABCMethodBodyInfo(meth);
             body.setMaxStack(asm.maxStack);
             body.setLocalCount(asm.maxLocal);
