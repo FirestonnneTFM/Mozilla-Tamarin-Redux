@@ -125,9 +125,9 @@ namespace avmplus
 
 		T _getNativeIntProperty(int index) const
 		{
-			if( index < 0 )
+			if( m_length <= uint32(index) )
 				toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
-			return _getNativeUintProperty(index);
+			return m_array[index];
 		}
 
 		void _setNativeUintProperty(uint32 index, T value)
@@ -144,9 +144,16 @@ namespace avmplus
 
 		void _setNativeIntProperty(int index, T value)
 		{
-			if( index < 0 )
-				toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
-			_setNativeUintProperty(index, value);
+			if (m_length <= uint32(index))
+			{
+				if( index < 0 )
+					toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
+				else if(uint32(index) > m_length || m_fixed)
+					toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
+				grow(index+1);
+				m_length = index+1;
+			}
+			m_array[index] = value;
 		}
 
 		Atom _getUintProperty(uint32 index) const
@@ -290,6 +297,10 @@ namespace avmplus
 		{
 			value = core()->integer(atom);						
 		}
+		void atomToValue(Atom atom, sint64& value)
+		{
+			value = core()->integer(int(atom));						
+		}
 		void atomToValue(Atom atom, uint32& value)
 		{
 			value = core()->toUInt32(atom);			
@@ -322,6 +333,10 @@ namespace avmplus
 		Atom valueToAtom(uint32 value) const
 		{
 			return core()->uintToAtom(value);
+		}
+		Atom valueToAtom(sint64 value) const
+		{
+			return core()->intToAtom(int(value));
 		}
 		Atom valueToAtom(float value) const
 		{

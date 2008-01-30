@@ -99,12 +99,8 @@ namespace avmplus
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		static inline uint32 FindOneBit(uint32 value)
 		{
-#ifndef __GNUC__
-			_asm
-			{
-				bsr eax,[value];
-			}
-#else
+
+#ifdef __GNUC__
 			// DBC - This gets rid of a compiler warning and matchs PPC results where value = 0
 			register int	result = ~0;
 			
@@ -117,6 +113,18 @@ namespace avmplus
 					);
 			}
 			return result;
+#elif defined(__SUNPRO_C)||defined(__SUNPRO_CC)
+			for (int i=0; i < 32; i++)
+				if (value & (1<<i))
+					return i;
+			// asm versions of this function are undefined if no bits are set
+			AvmAssert(false);
+			return 0;
+#else
+			_asm
+			{
+				bsr eax,[value];
+			}
 #endif
 		}
 	#elif defined(AVMPLUS_PPC)

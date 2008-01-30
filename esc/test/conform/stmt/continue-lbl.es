@@ -36,7 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* Not implemented
 var x=2;
 foo:
 while (x > 0) {
@@ -45,5 +44,4 @@ while (x > 0) {
     continue foo;
     print("WRONG");
 }
-*/
 print("DONE");

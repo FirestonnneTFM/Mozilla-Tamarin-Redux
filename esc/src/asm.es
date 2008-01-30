@@ -786,25 +786,28 @@ namespace Asm;
             return code;
         }
 
-        /*private*/ function resolveBackpatches() {
+        /*private*/ 
+        function resolveBackpatches() {
             for ( var i=0 ; i < backpatches.length ; i++ ) {
                 var bp = backpatches[i];
                 if (bp.label.address == -1)
-                    throw "Missing definition for label " + bp.label.name;
+                    Util::internalerror("", 0, "Missing definition for label " + bp.label.name); // FIXME: source pos
                 var v = bp.label.address - bp.base;
                 code.setInt24(bp.loc, v);
             }
             backpatches.length = 0;
         }
 
-        /*private*/ function stack(n) {
+        /*private*/ 
+        function stack(n) {
             current_stack_depth = current_stack_depth + n;
             if (current_stack_depth > max_stack_depth) {
                 max_stack_depth = current_stack_depth;
             }
         }
 
-        /*private*/ function scope(n) {
+        /*private*/ 
+        function scope(n) {
             current_scope_depth = current_scope_depth + n;
             if (current_scope_depth > max_scope_depth)
                 max_scope_depth = current_scope_depth;

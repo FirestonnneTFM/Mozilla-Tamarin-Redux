@@ -55,6 +55,14 @@ public namespace Lex
         var colCoord : int;
         var lnCoord : int;
 
+        Lex function syntaxError(msg) {
+            Util::syntaxError(origin, lnCoord, msg);
+        }
+
+        Lex function internalError(msg) {
+            Util::internalError(origin, lnCoord, msg);
+        }
+
         function Scanner (src:String, origin:String)
             : src = src
             , origin = origin
@@ -62,7 +70,7 @@ public namespace Lex
             , markIndex = 0
             , lastMarkIndex = 0
             , colCoord = 0
-            , lnCoord = 0
+            , lnCoord = 1
         {
             // print("scanning: ",src);
         }
@@ -157,7 +165,7 @@ public namespace Lex
             case Char::Slash :
                 return regexpFlags ();
             case Char::EOS :
-                throw "unexpected end of program in regexp literal";
+                Lex::syntaxError("Unexpected end of program in regexp literal");
             default:
                 return regexp ();
             }
@@ -250,14 +258,8 @@ public namespace Lex
                     return decimalInteger ();
                 default:
                     if (Char::isIdentifierStart (c))
-                    {
                         return identifier (String.fromCharCode(c));
-                    }
-                    else
-                    {
-                        print ("prefix=",c);
-                        throw "scanning with invalid prefix ", c;
-                    }
+                    Lex::internalError("Scanning with invalid prefix: " + c);
                 }
             }
             Debug.assert(false);
@@ -523,7 +525,7 @@ public namespace Lex
                 }
                 c = next ();
             }
-            throw "unterminated string literal: " + text;
+            Lex::syntaxError("Unterminated string literal: " + text);
 
             /*
               switch (c) {
@@ -579,7 +581,7 @@ public namespace Lex
             case Char::BackSlash:
                 return c;
             default:
-                throw "lexer error escapeSequence " + c;
+                Lex::syntaxError("Illegal escape character " + c);
             }
         }
 
@@ -612,7 +614,7 @@ public namespace Lex
             case Char::Seven:
                 return octalEscapeShort (n+1);
             default:
-                throw "internal error: expecting octal character";
+                Lex::syntaxError( "Expecting octal character, got " + c);
             }
         }
 
@@ -697,8 +699,7 @@ public namespace Lex
                 m=0x7;
                 break;
             default:
-                print("error");
-                throw "malformed escape, expecting "+n+" more characters";
+                Lex::syntaxError("Malformed escape, expecting " + n + " more characters");
             }
             return octalEscape (n-1, v+m*Math.pow(8,n-1));
         }
@@ -762,8 +763,7 @@ public namespace Lex
                 m=0xF;
                 break;
             default:
-                print("error");
-                throw "malformed escape, expecting "+n+" more characters";
+                Lex::syntaxError("Malformed escape sequence, expecting "+n+" more characters");
             }
             return hexEscape (n-1, v+m*Math.pow(16,n-1));
         }

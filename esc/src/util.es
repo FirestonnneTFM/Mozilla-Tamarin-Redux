@@ -46,6 +46,28 @@ namespace Util
             throw "Assertion failed!";
     }
 
+    // Together these two ensure that all compiler errors are thrown as SyntaxErrors.
+    // This is for the benefit of ActionMonkey, we can clean it up later.
+
+    function syntaxError(file, line, msg) {
+        if (line || file)
+            msg = " " + msg;
+        if (line)
+            msg = line + ":" + msg;
+        if (file)
+            msg = file + ":" + msg;
+        var obj = new SyntaxError(msg);
+        if (line)
+            obj.line = line;
+        if (file)
+            obj.file = file;
+        throw obj;
+    }
+
+    function internalError(file, line, msg) {
+        Util::syntaxError("Internal: " + msg);
+    }
+
     function map(fn, a) {
         var b = [];
         for ( var i=0 ; i < a.length ; i++ )

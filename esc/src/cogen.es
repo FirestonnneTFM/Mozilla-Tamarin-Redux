@@ -96,6 +96,7 @@ namespace Gen;
     //import assembler.*;
     //import emitter.*;
     use default namespace Gen;
+
     use namespace Util;
     use namespace Abc;
     use namespace Asm;
@@ -104,7 +105,15 @@ namespace Gen;
 
     // Emit debug info or not
     var emit_debug = true;
-    
+
+    Gen function internalError(ctx, msg) {
+        Util::internalError(ctx.filename, ctx.lineno, msg);
+    }
+
+    Gen function syntaxError(ctx, msg) {
+        Util::syntaxError(ctx.filename, ctx.lineno, msg);
+    }
+
     /* Returns an ABCFile structure */
     function cg(tree: PROGRAM) {
         var e = new ABCEmitter;
@@ -189,7 +198,7 @@ namespace Gen;
                 //print ("warning: ignoring type fixture");
             }
             else {
-                throw "Internal error: unhandled fixture type" 
+                Gen::internalError(ctx, "Unhandled fixture type " + fx);
             }
         }
     }
@@ -216,7 +225,9 @@ namespace Gen;
         case (vd: VariableDefn) {
             // nothing to do, right?
         }
-        case (x:*) { throw "Internal error: unimplemented defn" }
+        case (x:*) { 
+            Gen::internalError(ctx, "Unimplemented defn " +d); 
+        }
         }
     }
 */
@@ -397,12 +408,15 @@ namespace Gen;
      * Return the function index
      */
     function cgFunc(ctx0, f:FUNC) {
-        var {emitter:emitter,script:script} = ctx0;
+        var {emitter:emitter,script:script, cp:cp} = ctx0;
         let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "vanilla";  // brittle as hell
         let formals_type = extractFormalTypes({emitter:emitter, script:script}, f);
         let method = script.newFunction(formals_type,fntype != "vanilla");
         let asm = method.asm;
 
+        let name = f.name.ident;
+        method.name = cp.stringUtf8(name);
+        
         let defaults = extractDefaultValues({emitter:emitter, script:script}, f);
         if( defaults.length > 0 )
         {
@@ -425,7 +439,12 @@ namespace Gen;
          */
         let t = asm.getTemp();
 
-        let fnctx = new CTX(asm, {tag: "function", functype:fntype, scope_reg:t, has_scope:true, push_this: (fntype != "vanilla")}, method);
+        let fnctx = new CTX(asm, {tag: "function", 
+                                  functype:fntype, 
+                                  scope_reg:t, 
+                                  has_scope:true, 
+                                  push_this: (fntype != "vanilla")}, 
+                            method);
         cgDebugFile(fnctx);
 
         asm.I_newactivation();
@@ -441,7 +460,7 @@ namespace Gen;
          * at the end, so there's nothing to worry about here.
          */
         cgBlock(fnctx, f.block);
-        asm.I_kill(t);
+        asm.killTemp(t);
         return method.finalize();
     }
     
@@ -512,12 +531,22 @@ namespace Gen;
                 if(stk.has_scope) {
                     asm.I_popscope();
                 }
-                // FIXME
-                // if there's a FINALLY, visit it here
+                if (stk.tag == "finally") {
+                    /* The verifier can't deal with all these combinations, it appears to
+                       be a limitation of how it does control flow analysis.  So throw
+                       a SyntaxError here until the verifier can be fixed.
+                    let myreturn = stk.nextReturn++;
+                    asm.I_pushint(ctx.cp.int32(myreturn));
+                    asm.I_setlocal(stk.returnreg);
+                    asm.I_jump(stk.label);
+                    stk.returnAddresses[myreturn] = asm.I_label(undefined);
+                    */
+                    Gen::internalError(ctx, "Limitation: Can't generate code for break/continue/return past 'finally' block.");
+                }
             }
             stk = stk.link;
         }
-        throw msg;
+        Gen::syntaxError(ctx, msg);
     }
 
     function restoreScopes(ctx) {
@@ -545,8 +574,11 @@ namespace Gen;
     }
 
     // The following return extended contexts
-    function pushBreak(ctx, labels, target)
-        push(ctx, { tag:"break", labels:labels, target:target, has_scope:false });
+    function pushBreak(ctx, target)
+        pushLabel(ctx, null, target);
+
+    function pushLabel(ctx, label, target)
+        push(ctx, { tag:"break", label:label, target:target, has_scope:false });
 
     function pushContinue(ctx, labels, target)
         push(ctx, { tag:"continue", labels:labels, target:target, has_scope:false });
@@ -563,9 +595,7 @@ namespace Gen;
 
     function pushCatch(ctx, scope_reg )
         push(ctx, {tag:"catch", has_scope:true, scope_reg:scope_reg});
-        // FIXME anything else?
 
-    function pushFinally(ctx /*more*/) {
-        // FIXME
-    }
+    function pushFinally(ctx, label, returnreg)
+        push(ctx, {tag:"finally", label:label, returnreg:returnreg, returnAddresses:new Array(), nextReturn:0});
 }

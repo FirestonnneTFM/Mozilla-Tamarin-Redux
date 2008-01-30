@@ -36,38 +36,42 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var x=2;
-while (true) {
-    print("LOOP 1");
-    x = x - 1;
-    if (x == 0)
-        break;
+// return-past-finally tests
+
+var washit;
+
+/* These don't work; problem with the verifier
+function f() {
+    try {
+        return "RETURNED";
+    }
+    catch (e) {
+    }
+    finally {
+        washit = "RIGHT";
+    }
+    return "WACKY";
 }
+washit = "WRONG";
+print( f() );
+print( washit );
 
-var x=2;
-fnord:
-    while (true) {
-        while (true) {
-            print("LOOP 2");
-            x = x - 1;
-            if (x == 0)
-                break fnord;
-        }
+function g() {
+    try {
+        throw 0;
     }
-
-var x=2;
-feeble:
-    if (x > 1) {
-        print("NESTED");
-        break feeble;
-        print("WRONG");
+    catch (e) {
+        return "RETURNED";
     }
-
-// Check to see if the compiler can handle a labelled stmt 
-// even if the stmt can't be broken out of.
-/* Doesn't work, parser needs fixing
-confusing:
-    var x = 10;
+    finally {
+        washit = "RIGHT";
+    }
+    return "WACKY";
+}
+washit = "WRONG";
+print( g() );
+print( washit );
 */
 
 print("DONE");
+

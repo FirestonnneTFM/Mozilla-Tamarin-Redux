@@ -38,6 +38,8 @@
 
 import avmplus.*;
 
+Gen::emit_debug = false;
+
 // load ast
 {
     import flash.utils.*;
