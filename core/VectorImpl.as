@@ -148,14 +148,7 @@ private function _shift() {
     _spliceHelper(0, 0, 1, null, 0);
     return v;
 }
-AS3 function unshift(...items): uint {
-    return _unshift(items);
-}
-
-private function _unshift(items:Array) {
-    _spliceHelper(0, items.length, 0, items, 0);
-    return length;
-}
+AS3 native function unshift(...items) : uint;
 
 // Prototype Methods
 prototype.toString = function() {
@@ -249,7 +242,7 @@ prototype.splice = function(start, deleteCount, ...items){
 }
 
 prototype.unshift = function(...items){
-    return castToThisType(this)._unshift(items);
+    return castToThisType(this).AS3::unshift.apply(this, items);
 }
 
 private function clamp(val: Number, len: uint): uint {
