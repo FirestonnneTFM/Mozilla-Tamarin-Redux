@@ -1,0 +1,45 @@
+This directory contains code for an ES4 compiler for tamarin 
+written in ES4. The code is in a formidable stage and so is 
+prone to raising unhandled exceptions. But here are some
+things you might want to do with it anyway.
+
+RUNNING
+
+A set of last known good .abc files is provided in the ./bin 
+directory so you can run the compiler out of the box. There
+isn't much you can do with it that is interesting, but there
+you are.
+
+  cd build
+  ./main.sh      enter simple expressions at the 'es>' prompt
+
+BUILDING
+
+Various hard coded scripts are provided to run ESC on the ES4-RI
+and on Tamarin. Our job is to get the mother script, comp-esc.sh,
+to run to completion without errors. For now it serves as a kind
+of roadmap of what needs to get done.
+
+  cd build
+  ./comp-esc.sh  requires the ES4-RI heap to be installed and 
+                 various hard coded paths to be edited, commands 
+                 that build out of date targets to be uncommented
+
+CONTRIBUTING
+
+If you are so inclined and have a lot of time on your hands, 
+figure out how to get a working version of the ES4-RI on your 
+machine, build a debug version of tamarin, and help us run down 
+the remaining verification and runtime errors that are keeping
+comp-esc.sh from completing successfully.
+
+QUESTIONING
+
+Please do.
+
+    #tamarin on irc.mozilla.org
+    mail:tamarin-devel@mozilla.org
+
+Send personal attacks and complements to
+
+    mail:jodyer@adobe.com
