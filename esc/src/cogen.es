@@ -323,7 +323,7 @@ namespace Gen;
      */
     function cgCtor(ctx, c, instanceInits) {
         let formals_type = extractFormalTypes(ctx, c.func);
-        let method = new Method(ctx.script.e, formals_type, "$construct", false);
+        let method = new Method(ctx.script.e, formals_type, "$construct", false, c.func.attr.uses_arguments);
         let asm = method.asm;
 
         let defaults = extractDefaultValues(ctx, c.func);
@@ -358,6 +358,9 @@ namespace Gen;
         asm.I_setlocal(t);
         asm.I_dup();
         asm.I_pushwith();
+
+        setupArguments(ctor_ctx, c.func);
+
         cgHead(ctor_ctx, c.func.params);
 
         for ( let i=0 ; i < c.settings.length ; i++ ) {
@@ -411,7 +414,7 @@ namespace Gen;
         var {emitter:emitter,script:script, cp:cp} = ctx0;
         let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "vanilla";  // brittle as hell
         let formals_type = extractFormalTypes({emitter:emitter, script:script}, f);
-        let method = script.newFunction(formals_type,fntype != "vanilla");
+        let method = script.newFunction(formals_type, fntype != "vanilla", f.attr.uses_arguments);
         let asm = method.asm;
 
         let name = f.name.ident;
@@ -434,8 +437,6 @@ namespace Gen;
          * FIXME: if a local VAR shadows a formal, there's more
          * elaborate behavior here, and the compiler must perform some
          * analysis and avoid the shadowed formal here.
-         *
-         * God only knows about the arguments object...
          */
         let t = asm.getTemp();
 
@@ -451,10 +452,12 @@ namespace Gen;
         asm.I_dup();
         asm.I_setlocal(t);
         asm.I_pushscope();
-        
+
+        setupArguments(fnctx, f);
+
         cgHead(fnctx, f.params);
         cgHead(fnctx, f.vars);
-        
+
         /* Generate code for the body.  If there is no return statement in the
          * code then the default behavior of the emitter is to add a returnvoid
          * at the end, so there's nothing to worry about here.
@@ -462,6 +465,25 @@ namespace Gen;
         cgBlock(fnctx, f.block);
         asm.killTemp(t);
         return method.finalize();
+    }
+
+    function setupArguments(ctx, f) {
+        if (f.attr.uses_arguments) {
+            // Create a fixture for "arguments", cgFixture ignores it if it's defined already.
+            //
+            // FIXME: what if the existing fixture is typed and won't admit the arguments object?
+            // The rule for ES4 should probably be that if there is a typed "arguments" defined,
+            // then no assignment will be generated here.
+            //
+            // Then initialize it.  It must be done first according to E262-3.
+
+            cgFixtures(ctx, [[new PropName({ns: Ast::noNS, id: "arguments"}), 
+                              new ValFixture(Ast::anyType, false)]]);
+            cgExpr(ctx, new Ast::SetExpr(Ast::assignOp, 
+                                         new Ast::LexicalRef(new Ast::Identifier("arguments",[[Ast::noNS]])), 
+                                         new Ast::GetParam(f.numparams)));
+            ctx.asm.I_pop();
+        }
     }
     
     function cgHead(ctx, head) {

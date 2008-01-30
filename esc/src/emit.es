@@ -347,7 +347,7 @@ namespace Emit;
 
         function Script(e:ABCEmitter) {
             this.e = e;
-            this.init = new Method(e,[], "", true);
+            this.init = new Method(e,[], "", true, false);
         }
 
         public function newClass(name, basename) {
@@ -356,8 +356,8 @@ namespace Emit;
 
         /* All functions are in some sense global because the
            methodinfo and methodbody are both global. */
-        public function newFunction(formals,standardPrologue) {
-            return new Method(e, formals, null, standardPrologue);
+        public function newFunction(formals, standardPrologue, usesArguments) {
+            return new Method(e, formals, null, standardPrologue, usesArguments);
         }
 
         public function addException(e) {
@@ -402,7 +402,7 @@ namespace Emit;
 
         public function getCInit() {
             if(cinit == null ) {
-                cinit = new Method(s.e, [], "$cinit", true);
+                cinit = new Method(s.e, [], "$cinit", true, false);
             }
             return cinit;
         }
@@ -479,8 +479,8 @@ namespace Emit;
     {
         public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[];
 
-        function Method(e:ABCEmitter, formals:Array, name, standardPrologue) {
-            asm = new AVM2Assembler(e.constants, formals.length);
+        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, usesArguments) {
+            asm = new AVM2Assembler(e.constants, formals.length, usesArguments);
             //super(e.constants, formals.length);
             this.formals = formals;
             this.e = e;
