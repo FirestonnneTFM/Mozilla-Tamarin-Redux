@@ -36,11 +36,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Arguments not implemented at all 2007-12-21
-
+var arguments = "WRONG";
 function f(x, y, z) {
-    //print("ARGUMENTS DEFINED " + arguments);
-    //arguments[0] = 12;
+    print("ARGUMENTS DEFINED " + arguments);
+    print("0 " + arguments[0]);
+    print("1 " + arguments[1]);
+    print("2 " + arguments[2]);
+    print("3 " + arguments[3]);
+    print("L " + arguments.length);
+    arguments[0] = 12;
     print("ARGUMENTS SHARING " + x);  // should be 12, not 1
     g();
 }
@@ -52,6 +56,6 @@ function g() {
     print("ARGUMENTS IS VARIABLE " + arguments);
 }
 
-f(1, 2, 3);
+f(1, 2, 3, 4);
 
 print("DONE");
