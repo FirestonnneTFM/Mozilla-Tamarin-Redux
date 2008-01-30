@@ -60,8 +60,11 @@ STDMETHODIMP CActiveScriptError::GetSourcePosition(
 		*pdwSourceContext = dwSourceContextCookie;
 
 	StackTrace *st = exception->getStackTrace();
-	if (pulLineNumber && st)
-		*pulLineNumber = st->elements[0].linenum;
+	if (pulLineNumber && st) {
+		// although not documented as such, linenum is zero based for
+		// axscript engines - its pretty easy to demonstrate with IE.
+		*pulLineNumber = st->elements[0].linenum-1;
+	}
 	if (plCharacterPosition)
 		*plCharacterPosition = 0; // XXX - can we get a column?
 	return S_OK;

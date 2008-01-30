@@ -296,7 +296,14 @@ class TestExceptions(TestCaseInitialized):
         code = "// a comment line\nx = bad_name\n"
         self.parseScriptText(code, expect_exc=True)
         ctx, line, col = self.site.last_error.GetSourcePosition()
-        self.failUnlessEqual(line, 2)
+        # zero-based line numbers, so its reported as 1
+        self.failUnlessEqual(line, 1)
+        # and so it again just to prove we aren't faking.
+        code = "// a comment line\n//\n//\n//\nx = bad_name\n"
+        self.parseScriptText(code, expect_exc=True)
+        ctx, line, col = self.site.last_error.GetSourcePosition()
+        # zero-based line numbers, so its reported as 4
+        self.failUnlessEqual(line, 4)
 
     def testLineNumberAdjusted(self):
         # Tell the script engine the source-code really started on line 10
@@ -304,7 +311,8 @@ class TestExceptions(TestCaseInitialized):
         code = "// a comment line\nx = bad_name\n"
         self.parseScriptText(code, expect_exc=True, startLineNumber=10)
         ctx, line, col = self.site.last_error.GetSourcePosition()
-        self.failUnlessEqual(line, 12)
+        # zero-based line numbers, so its reported as 11
+        self.failUnlessEqual(line, 11)
 
     def testContext(self):
         code = "// a comment line\nx = bad_name\n"
