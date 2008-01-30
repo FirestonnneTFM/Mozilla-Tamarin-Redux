@@ -86,7 +86,7 @@ namespace avmplus
 		uint32 m_capacity;
 		bool m_fixed;
 
-		virtual void grow(uint32 newCapacity) = 0;
+		virtual void grow(uint32 newCapacity, bool exact=false) = 0;
 		virtual VectorBaseObject* newVector(uint32 length = 0) = 0;
 	};
 
@@ -201,6 +201,27 @@ namespace avmplus
 				memset(m_array+newLength, 0, (m_length-newLength)*sizeof(T));
 			}
 			VectorBaseObject::set_length(newLength);
+		}
+
+		uint32 unshift(Atom* argv, int argc)
+		{
+			// shift elements up by argc
+			// inserts args into initial spots
+
+			if( argc > 0 )
+			{
+				if( m_fixed )
+					toplevel()->throwRangeError(kVectorFixedError);
+				grow (m_length + argc);
+				T *arr = m_array;
+				memmove (arr + argc, arr, m_length * sizeof(T));
+				for(int i=0; i<argc; i++) {
+					atomToValue(argv[i], m_array[i]);
+				}
+
+				m_length += argc;
+			}
+			return m_length;
 		}
 
 		void _reverse()
@@ -358,11 +379,12 @@ namespace avmplus
 			return NULL;
 		}
 
-		virtual void grow(uint32 newCapacity)
+		virtual void grow(uint32 newCapacity, bool exact = false)
 		{
 			if (newCapacity > m_capacity)
 			{
-				newCapacity = newCapacity + (newCapacity >>2);
+				if( !exact )
+					newCapacity = newCapacity + (newCapacity >>2);
 				//newCapacity = ((newCapacity+kGrowthIncr)/kGrowthIncr)*kGrowthIncr;
 				T *newArray = new T[newCapacity];
 				if (!newArray)
@@ -461,12 +483,14 @@ namespace avmplus
 		Atom get_type();
 
 		//void _reverse();
+		// insert array of arguments at front of array
+		uint32 unshift(Atom* argv, int argc);
 		void _spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset);
 
 		Atom pop();
 
 	protected:
-		virtual void grow(uint32 newCapacity);
+		virtual void grow(uint32 newCapacity, bool exact=false);
 		virtual VectorBaseObject* newVector(uint32 length = 0);
 
 	private:
@@ -477,7 +501,7 @@ namespace avmplus
 			return NULL;
 		}
 
-		DRCWB(ScriptObject*) t;
+		DRCWB(ClassClosure*) t;
 
 	};
 
@@ -487,6 +511,8 @@ namespace avmplus
 		IntVectorClass(VTable *vtable);
 
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+
+		IntVectorObject* newVector(uint32 length = 0);
 
 		DECLARE_NATIVE_MAP(IntVectorClass)
     };
@@ -498,6 +524,8 @@ namespace avmplus
 
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
+		UIntVectorObject* newVector(uint32 length = 0);
+
 		DECLARE_NATIVE_MAP(UIntVectorClass)
     };
 
@@ -508,6 +536,8 @@ namespace avmplus
 
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
+		DoubleVectorObject* newVector(uint32 length = 0);
+
 		DECLARE_NATIVE_MAP(DoubleVectorClass)
     };
 
@@ -517,6 +547,8 @@ namespace avmplus
 		ObjectVectorClass(VTable * vtable);
 
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+
+		ObjectVectorObject* newVector(ClassClosure* type, uint32 length = 0);
 
 		DECLARE_NATIVE_MAP(ObjectVectorClass)
 	};

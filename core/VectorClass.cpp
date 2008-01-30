@@ -85,7 +85,7 @@ namespace avmplus
 			toplevel()->throwRangeError(kVectorFixedError); 
 		if (newLength > m_capacity)
 		{
-			grow(newLength);
+			grow(newLength, true);
 		}
 		m_length = newLength;
 	}
@@ -225,11 +225,13 @@ namespace avmplus
 		NATIVE_METHOD(Vector_int_private__sort,		ArrayClass::sort)
 		NATIVE_METHOD_FLAGS(Vector_int_private__map,		IntVectorObject::map, 0)
 		NATIVE_METHOD_FLAGS(Vector_int_private__filter,		IntVectorObject::filter, 0)
+		NATIVE_METHOD_FLAGS(Vector_int_AS3_unshift,		IntVectorObject::unshift, 0)
 	END_NATIVE_MAP()
 
 	IntVectorClass::IntVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
     {
+		toplevel()->intVectorClass = this;
         prototype = toplevel()->objectClass->construct();
 	}
 
@@ -239,13 +241,18 @@ namespace avmplus
         return new (core()->GetGC(), ivtable->getExtraSize()) IntVectorObject(ivtable, prototype);
     }
 
-	VectorBaseObject* IntVectorObject::newVector(uint32 length)
+	IntVectorObject* IntVectorClass::newVector(uint32 length)
 	{
-		VTable* ivtable = this->vtable;
+		VTable* ivtable = this->ivtable();
 		IntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			IntVectorObject(ivtable, getDelegate());
+			IntVectorObject(ivtable, prototype);
 		v->set_length(length);
 		return v;
+	}
+
+	VectorBaseObject* IntVectorObject::newVector(uint32 length)
+	{
+		return toplevel()->intVectorClass->newVector(length);
 	}
 
 	//
@@ -267,11 +274,13 @@ namespace avmplus
 		NATIVE_METHOD(Vector_uint_private__sort,		ArrayClass::sort)
 		NATIVE_METHOD_FLAGS(Vector_uint_private__map,		UIntVectorObject::map, 0)
 		NATIVE_METHOD_FLAGS(Vector_uint_private__filter,		UIntVectorObject::filter, 0)
+		NATIVE_METHOD_FLAGS(Vector_uint_AS3_unshift,		UIntVectorObject::unshift, 0)
 	END_NATIVE_MAP()
 
 	UIntVectorClass::UIntVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
     {
+		toplevel()->uintVectorClass = this;
         prototype = toplevel()->objectClass->construct();
 	}
 
@@ -281,13 +290,18 @@ namespace avmplus
         return new (core()->GetGC(), ivtable->getExtraSize()) UIntVectorObject(ivtable, prototype);
     }
 
-	VectorBaseObject* UIntVectorObject::newVector(uint32 length)
+	UIntVectorObject* UIntVectorClass::newVector(uint32 length)
 	{
-		VTable* ivtable = this->vtable;
+		VTable* ivtable = this->ivtable();
 		UIntVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			UIntVectorObject(ivtable, getDelegate());
+			UIntVectorObject(ivtable, prototype);
 		v->set_length(length);
 		return v;
+	}
+
+	VectorBaseObject* UIntVectorObject::newVector(uint32 length)
+	{
+		return toplevel()->uintVectorClass->newVector(length);
 	}
 
 	//
@@ -309,11 +323,13 @@ namespace avmplus
 		NATIVE_METHOD(Vector_double_private__sort,		ArrayClass::sort)
 		NATIVE_METHOD_FLAGS(Vector_double_private__map,		DoubleVectorObject::map, 0)
 		NATIVE_METHOD_FLAGS(Vector_double_private__filter,		DoubleVectorObject::filter, 0)
+		NATIVE_METHOD_FLAGS(Vector_double_AS3_unshift,		DoubleVectorObject::unshift, 0)
 	END_NATIVE_MAP()
 
 	DoubleVectorClass::DoubleVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
-   { 
+	{
+		toplevel()->doubleVectorClass = this;
         prototype = toplevel()->objectClass->construct();
 	}
 
@@ -323,13 +339,18 @@ namespace avmplus
         return new (core()->GetGC(), ivtable->getExtraSize()) DoubleVectorObject(ivtable, prototype);
     }
 
-	VectorBaseObject* DoubleVectorObject::newVector(uint32 length)
+	DoubleVectorObject* DoubleVectorClass::newVector(uint32 length)
 	{
-		VTable* ivtable = this->vtable;
+		VTable* ivtable = this->ivtable();
 		DoubleVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			DoubleVectorObject(ivtable, getDelegate());
+			DoubleVectorObject(ivtable, prototype);
 		v->set_length(length);
 		return v;
+	}
+
+	VectorBaseObject* DoubleVectorObject::newVector(uint32 length)
+	{
+		return toplevel()->doubleVectorClass->newVector(length);
 	}
 
 	//
@@ -353,11 +374,13 @@ namespace avmplus
 		NATIVE_METHOD(Vector_object_private__sort,		ArrayClass::sort)
 		NATIVE_METHOD_FLAGS(Vector_object_private__map,		ObjectVectorObject::map, 0)
 		NATIVE_METHOD_FLAGS(Vector_object_private__filter,		ObjectVectorObject::filter, 0)
+		NATIVE_METHOD_FLAGS(Vector_object_AS3_unshift,		ObjectVectorObject::unshift, 0)
 	END_NATIVE_MAP()
 
 	ObjectVectorClass::ObjectVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
     {
+		toplevel()->objectVectorClass = this;
         prototype = toplevel()->objectClass->construct();
 	}
 
@@ -366,6 +389,16 @@ namespace avmplus
     {
         return new (core()->GetGC(), ivtable->getExtraSize()) ObjectVectorObject(ivtable, prototype);
     }
+
+	ObjectVectorObject* ObjectVectorClass::newVector(ClassClosure* type, uint32 length)
+	{
+		VTable* ivtable = this->ivtable();
+		ObjectVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
+			ObjectVectorObject(ivtable, prototype);
+		v->set_type(type->atom());
+		v->set_length(length);
+		return v;
+	}
 
 	Atom ObjectVectorObject::getUintProperty(uint32 index) const
 	{
@@ -394,7 +427,8 @@ namespace avmplus
 		{
 			if( index > m_length || m_fixed )
 				toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
-			set_length(index+1);
+			grow(index+1);
+			m_length = index+1;
 		}
 		WBATOM( MMgc::GC::GetGC(m_array), m_array, m_array + index, toplevel()->coerce(value, t->traits()->itraits));
 	}			
@@ -402,7 +436,16 @@ namespace avmplus
 	Atom ObjectVectorObject::_getIntProperty(int index) const
 	{
 		if (index >= 0) 
-			return _getUintProperty(index);
+		{
+			if (m_length <= (uint32)index)
+			{
+				toplevel()->throwRangeError(kOutOfRangeError, core()->uintToString(index), core()->uintToString(m_length));
+			}
+			else
+			{
+				return m_array[index];
+			}
+		}
 		else 
 			toplevel()->throwRangeError(kOutOfRangeError, core()->intToString(index), core()->uintToString(m_length));
 		return 0;
@@ -423,7 +466,7 @@ namespace avmplus
 			if( m_fixed )
 				toplevel()->throwRangeError(kVectorFixedError);
 
-			grow(newLength);
+			grow(newLength, true);
 		}
 		else if( newLength < m_length)
 		{
@@ -438,7 +481,7 @@ namespace avmplus
 
 	void ObjectVectorObject::set_type(Atom a)
 	{
-		this->t = AvmCore::atomToScriptObject(a);
+		this->t = (ClassClosure*)AvmCore::atomToScriptObject(a);
 	}
 
 	Atom ObjectVectorObject::get_type()
@@ -446,11 +489,12 @@ namespace avmplus
 		return t->atom();
 	}
 
-	void ObjectVectorObject::grow(uint32 newCapacity)
+	void ObjectVectorObject::grow(uint32 newCapacity, bool exact)
 	{
 		if (newCapacity > m_capacity)
 		{
-			newCapacity = newCapacity + (newCapacity >>2);
+			if(!exact)
+				newCapacity = newCapacity + (newCapacity >>2);
 			//newCapacity = ((newCapacity+kGrowthIncr)/kGrowthIncr)*kGrowthIncr;
 			GC* gc = GC::GetGC(this);
 			Atom* newArray = (Atom*) gc->Calloc(newCapacity, sizeof(Atom), GC::kContainsPointers|GC::kZero);
@@ -472,14 +516,7 @@ namespace avmplus
 
 	VectorBaseObject* ObjectVectorObject::newVector(uint32 length)
 	{
-		VTable* ivtable = this->vtable;
-		ObjectVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			ObjectVectorObject(ivtable, getDelegate());
-
-		v->set_type(t->atom());
-		v->set_length(length);
-
-		return v;
+		return toplevel()->objectVectorClass->newVector(t, length);
 	}
 
 	void ObjectVectorObject::_spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset)
@@ -549,4 +586,28 @@ namespace avmplus
 		}
 		return undefinedAtom;
 	}
+
+	uint32 ObjectVectorObject::unshift(Atom* argv, int argc)
+	{
+		// shift elements up by argc
+		// inserts args into initial spots
+
+		if( argc > 0 )
+		{
+			if( m_fixed )
+				toplevel()->throwRangeError(kVectorFixedError);
+			grow (m_length + argc);
+			Atom *arr = m_array;
+			memmove (arr + argc, arr, m_length * sizeof(Atom));
+			// clear moved element for RC purposes
+			memset (arr, 0, argc * sizeof(Atom));
+			for(int i=0; i<argc; i++) {
+				_setUintProperty(i, argv[i]);
+			}
+
+			m_length += argc;
+		}
+		return m_length;
+	}
+
 }
