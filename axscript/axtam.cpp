@@ -711,7 +711,10 @@ namespace axtam
 			case kDoubleType:
 				return doubleNumber(val);
 			case kIntegerType:
-				return toUInt32(val);
+				// kIntegerType is signed - which is handy, as we should prefer
+				// signed values to unsigned - VBScript, for example, can't handle
+				// unsigned.
+				return integer(val);
 			case kStringType:
 				return (OLECHAR *)string(val)->c_str();
 			case kObjectType:
