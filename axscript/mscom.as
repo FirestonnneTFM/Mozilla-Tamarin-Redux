@@ -228,7 +228,7 @@ package {
         import Lex.*;
         var top = []
         var parser = new Parse.Parser(str,top);
-        parser.scan.lnCoord = startLineNumber;
+        parser.scan.lnCoord += startLineNumber;
         var prog = parser.program();
         var ts = prog[0]
         var nd = prog[1]
