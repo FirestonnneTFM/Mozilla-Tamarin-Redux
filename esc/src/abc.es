@@ -1080,8 +1080,8 @@ namespace Abc;
         var name = b.readU32();
         
         var tag = b.readByte();
-        var kind = tag&0x04;
-        var attrs = (tag>>4) & 0x04;
+        var kind = tag & 0x0F;
+        var attrs = (tag>>4) & 0x0F;
         
         var trait;
         
@@ -1108,6 +1108,10 @@ namespace Abc;
                 let slotid = b.readU32();
                 let classinfo = b.readU32();
                 trait = new ABCOtherTrait(name, attrs, kind, slotid, classinfo);
+                break;
+            case TRAIT_Function: // TODO:
+                b.readU32();
+                b.readU32();
                 break;
         }
         
