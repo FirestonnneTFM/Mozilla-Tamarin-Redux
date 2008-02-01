@@ -40,8 +40,15 @@
 # name=regular expression matching testname 
 # operation=skip is only supported operation
 
-jsbench/.*                      ,sunspider,skip, skip jsbench
-sunspider/.*                    ,jsbench  ,skip, skip jsbench
+jsbench/.*                      ,	sunspider	,	skip	,	skip jsbench
+misc/.*                      	,	sunspider	,	skip	,	skip misc
+
+sunspider/.*                    ,	jsbench		,	skip	,	skip sunspider
+misc/.*                    		,	jsbench		,	skip	,	skip misc
+
+sunspider/.*                    ,	misc		,	skip	, 	skip sunspider
+jsbench/.*                      ,	misc		,	skip	, 	skip jsbench
+
 sunspider/(typed/|)regexp-dna.as	,.*       ,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
 sunspider/(typed/|)date-format-tofte.as	,.*       ,skip, contains eval
 sunspider/(typed/|)date-format-xparb.as	,.*       ,skip, contains eval
