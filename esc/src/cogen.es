@@ -417,7 +417,7 @@ namespace Gen;
         let method = script.newFunction(formals_type, fntype != "vanilla", f.attr.uses_arguments);
         let asm = method.asm;
 
-        let name = f.name.ident;
+        let name = f.name ? f.name.ident : "";
         method.name = cp.stringUtf8(name);
         
         let defaults = extractDefaultValues({emitter:emitter, script:script}, f);
