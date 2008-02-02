@@ -147,20 +147,8 @@ namespace Abc;
     public class ABCConstantPool
     {
         function ABCConstantPool() {
-            function hash_number(n) { 
-                return n ^ 0;                       // Fairly arbitrary
-            }
-
             function eq_numbers(n1, n2) {
                 return n1 == n2;
-            }
-
-            function hash_string(s) {
-                // See http://www.cse.yorku.ca/~oz/hash.html; this is the djb2 algorithm
-                var h = 5381;
-                for ( var i=0, limit=s.length ; i < limit ; i++ )
-                    h = ((h << 5) +h) + s.charCodeAt(i);
-                return h;
             }
 
             function eq_strings(s1, s2) { 
@@ -204,10 +192,10 @@ namespace Abc;
 
             multiname_pool.length = 1;
 
-            int_map = new Hashtable(hash_number, eq_numbers, 0);
-            uint_map = new Hashtable(hash_number, eq_numbers, 0);
-            double_map = new Hashtable(hash_number, eq_numbers, 0);
-            utf8_map = new Hashtable(hash_string, eq_strings, 0);
+            int_map = new Hashtable(Util::hash_number, eq_numbers, 0);
+            uint_map = new Hashtable(Util::hash_number, eq_numbers, 0);
+            double_map = new Hashtable(Util::hash_number, eq_numbers, 0);
+            utf8_map = new Hashtable(Util::hash_string, eq_strings, 0);
             namespace_map = new Hashtable(hash_namespace, eq_namespaces, 0);
             namespaceset_map = new Hashtable(hash_namespaceset, eq_namespacesets, 0);
             multiname_map = new Hashtable(hash_multiname, eq_multinames, 0);
