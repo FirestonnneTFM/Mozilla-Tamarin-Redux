@@ -162,7 +162,7 @@ namespace MMgc
 		int retval =
 #endif
 		  mprotect((maddr_ptr)beginPage, sizePaged,
-			   executableFlag ? (PROT_READ|PROT_EXEC) : (PROT_READ|PROT_WRITE|PROT_EXEC));
+			   executableFlag ? (PROT_READ|PROT_WRITE|PROT_EXEC) : (PROT_READ|PROT_WRITE));
 
 		GCAssert(retval == 0);
 	}
