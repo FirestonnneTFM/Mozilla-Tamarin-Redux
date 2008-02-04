@@ -5454,12 +5454,10 @@ namespace avmplus
 
 		mipStart = mip = (MDInstruction*) (casePtr+case_count);
 
-#ifndef FEATURE_BUFFER_GUARD
 		// make sure we have enough space for our prologue 
 		// technically should be from casePtr but we ask for a bit more room
 		if (!ensureMDBufferCapacity(pool, md_prologue_size + (byte*)mipStart-&code[0] ))
 			return;
-#endif /* FEATURE_BUFFER_GUARD */
 		
 		// clear the registers 
 		gpregs.clear();
@@ -5723,14 +5721,9 @@ namespace avmplus
 
 	void CodegenMIR::generateEpilogue()
 	{
-#ifndef FEATURE_BUFFER_GUARD
-		if (overflow)
-			return;
-
 		// make sure we have committed the memory we are going to use for the epilogue
 		if (!ensureMDBufferCapacity(pool, md_epilogue_size))
 			return;
-#endif /* FEATURE_BUFFER_GUARD */
 
 #ifdef AVMPLUS_VERBOSE
 			if (verbose())
@@ -7706,7 +7699,20 @@ namespace avmplus
 #endif
 	}
 
-#ifndef FEATURE_BUFFER_GUARD
+#ifdef FEATURE_BUFFER_GUARD
+	bool CodegenMIR::ensureMDBufferCapacity(PoolObject* pool, size_t s) 
+	{
+		// with buffer guard enabled we ONLY need to check that we don't run
+		// off the buffer.  We let the exception handler grow the buffer for us  
+		byte* until = (byte*)mip + s;
+		byte* end = pool->codeBuffer->end();
+		if (until >= end)
+		{
+			overflow = true;
+		}
+		return !overflow; 
+	} 
+#else
 	bool CodegenMIR::ensureMDBufferCapacity(PoolObject* pool, size_t s)
 	{
 		byte* until = (byte*)mip + s;
@@ -7716,16 +7722,14 @@ namespace avmplus
 			// committed last page and still want more!
 			if (uncommitted == pool->codeBuffer->end())
 			{
-				//@todo detach the buffer so that we can do another run
+				// dead 
 				overflow = true;
-				return false;
+				break;
 			}
 			uncommitted = pool->codeBuffer->grow();
 		}
-		return true;
+		return !overflow;
 	}
-#else
-	bool CodegenMIR::ensureMDBufferCapacity(PoolObject* /*pool*/, size_t /*s*/) { return true; } 
 #endif /* FEATURE_BUFFER_GUARD */
 
 	byte* CodegenMIR::getMDBuffer(PoolObject* pool)
@@ -7922,14 +7926,10 @@ namespace avmplus
 		// stuff used to track which page in the buffer we are on.
 		const static int maxBytesPerMIRIns = 16*8;  // maximum # of bytes needed by the buffer per MIR instruction (16 machine instructions x 8B)
 
-#ifndef FEATURE_BUFFER_GUARD
 		if (overflow)
 			return;
 
 		uintptr threshold = (uintptr)pool->codeBuffer->uncommitted() - maxBytesPerMIRIns;
-#else
-		(void)maxBytesPerMIRIns;
-#endif /* FEATURE_BUFFER_GUARD */
 
 		#ifdef _DEBUG
 		// used to track the maximum number of bytes generated per MIR instruction
@@ -7959,12 +7959,14 @@ namespace avmplus
 			lastMip = mip;
 			#endif /* _DEBUG */
 
-#ifndef FEATURE_BUFFER_GUARD
-			// now check to see if we are about to overflow our buffer, if so 
-			// bring in the next page and update the threshold
+			// now check to see if we are about to go over a page boundary 
 			if ( (uintptr)mip > threshold)
 			{
+#ifndef FEATURE_BUFFER_GUARD
+				// if no buffer guards then we need to manually grow
 				pool->codeBuffer->grow();
+#endif /* FEATURE_BUFFER_GUARD */
+				ensureMDBufferCapacity(pool, maxBytesPerMIRIns);
 				threshold = (uintptr)pool->codeBuffer->uncommitted() - maxBytesPerMIRIns;
 
 				// check for buffer overrun
@@ -7977,7 +7979,6 @@ namespace avmplus
 					return;
 				}
 			}
-#endif /* FEATURE_BUFFER_GUARD */
 
 			switch(mircode)
 			{
@@ -10010,12 +10011,8 @@ namespace avmplus
 
 					// buffer protection
 					const static int maxBytesPerArg = 16;
-#ifndef FEATURE_BUFFER_GUARD
 					if (!ensureMDBufferCapacity(pool, argc*maxBytesPerArg))
 						return;
-#else
-					(void)maxBytesPerArg;
-#endif /* FEATURE_BUFFER_GUARD */
 
 					// dump all the args to the stack
 					#ifdef _DEBUG
