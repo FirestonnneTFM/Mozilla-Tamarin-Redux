@@ -123,8 +123,9 @@ extern "C"
 
 namespace avmplus
 {
-	GrowableBuffer::GrowableBuffer(MMgc::GCHeap *gcheap)
+	GrowableBuffer::GrowableBuffer(MMgc::GCHeap *gcheap, bool mir)
 		: heap(gcheap)
+		, forMir(mir)
 	{
 		init();
 		AvmAssert( (size_t)MathUtils::nextPowerOfTwo(pageSize()-1) == pageSize() );
@@ -147,7 +148,7 @@ namespace avmplus
 	{
 		// attempt to reserve space 
 		amt = (size_t)pageAfter((byte*)amt);   // align to page
-		first = (byte*)heap->ReserveCodeMemory(0, amt);
+		first = (forMir) ? (byte*)heap->ReserveMirMemory(amt) : (byte*)heap->ReserveCodeMemory(0, amt);
 		last = first + amt;
 		uncommit = first;
 		current = first;
@@ -232,7 +233,10 @@ namespace avmplus
 			MMgc::ChangeSizeForObject(this, -1 * (uncommit-first));
 			heap->DecommitCodeMemory(first, uncommit-first);
 #endif
-			heap->ReleaseCodeMemory(first, size());
+			if (forMir)
+				heap->ReleaseMirMemory(first, size());
+			else
+				heap->ReleaseCodeMemory(first, size());
 			init();
 		}
 	}

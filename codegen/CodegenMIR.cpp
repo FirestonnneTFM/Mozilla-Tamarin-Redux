@@ -1396,11 +1396,11 @@ namespace avmplus
 		patch_stmw = NULL;
 		#endif
 
-		overflow = false;
 		expansionFactor = 1;
 
 		// get a buffer from the global list
 		mirBuffer = core->requestMirBuffer();
+		overflow = (mirBuffer) ? false : true; // if no buffer then we have no room
 
 #ifdef AVMPLUS_PROFILE
 		cseHits = 0;
@@ -1886,6 +1886,7 @@ namespace avmplus
 	bool CodegenMIR::prologue(FrameState* state)
 	{
 		this->state = state;
+		if (overflow) return false;
 
 		#ifdef AVMPLUS_PROFILE
 		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
