@@ -222,12 +222,12 @@ package {
 
     import flash.utils.*; // for our ByteArray clone - either it should die, or we rename the package in our clone!
 
-    public function compileString(str, fname:String = null, startLineNumber:int = 0): ByteArray
+    public function compileString(str, fname:String = "", startLineNumber:int = 0): ByteArray
     {
         import Parse.*;
         import Lex.*;
         var top = []
-        var parser = new Parse.Parser(str,top);
+        var parser = new Parse.Parser(str,top,fname);
         parser.scan.lnCoord += startLineNumber;
         var prog = parser.program();
         var ts = prog[0]
