@@ -4247,13 +4247,8 @@ return the result of the comparison ToPrimitive(x) == y.
 	 * MIR needs a large intermediate buffer for codegen.
 	 * These routines allow reuse of this buffer(s)
 	 */				  
-	// @todo make this static and work with gc
-	//List<GrowableBuffer*> AvmCore::mirBuffers(0);  // mir buffer pool
-	//GCSpinLock AvmCore::mirBufferLock; // lock for pool
-
 	GrowableBuffer* AvmCore::requestMirBuffer()
 	{
-		//GCAcquireSpinlock spinlock(mirBufferLock);
 		GrowableBuffer* buffer = 0;
 		if (mirBuffers.size() > 0)
 			buffer = mirBuffers.removeFirst();
@@ -4269,7 +4264,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	void AvmCore::releaseMirBuffer(GrowableBuffer* buffer)
 	{
-		//GCAcquireSpinlock spinlock(mirBufferLock);
+		buffer->free();	// free the underlying space
 		mirBuffers.add(buffer);
 	}
 
