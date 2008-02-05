@@ -359,7 +359,29 @@ namespace MMgc
 		#ifdef WIN32
 		bool useGuardPages;
 		#endif
+		
+		// mir buffer management, share a common pool across threads
+		GCSpinLock m_mirBufferLock;
+		typedef struct _MirMemInfo
+		{
+			void* addr;
+			size_t size;
+			bool free;
+		} 
+		MirMemInfo;
+
+		static const int MirBufferCount = 8;
+		MirMemInfo m_mirBuffers[MirBufferCount];
+
+		void InitMirMemory();
+		void FlushMirMemory();
+		
 public:
+
+		// support for Mir buffers
+		void* ReserveMirMemory(size_t size);		
+		void  ReleaseMirMemory(void* addr, size_t size);
+
 		// support for jit buffers
 		void* ReserveCodeMemory(void* address, size_t size);
 		void* CommitCodeMemory(void* address, size_t size=0);  // size=0 => 1 page
