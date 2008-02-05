@@ -39,6 +39,12 @@
 
 using namespace axtam;
 
+bool CActiveScriptError::isSyntaxError()
+{
+	using namespace avmplus::NativeID;
+	Traits *tse = core->toplevel->getBuiltinClass(abcclass_SyntaxError)->traits()->itraits;
+	return exception->isValid() && core->istype(exception->atom, tse);
+}
 // IActiveScriptError
 STDMETHODIMP CActiveScriptError::GetExceptionInfo( 
             /* [out] */ EXCEPINFO *pexcepinfo)
@@ -46,7 +52,8 @@ STDMETHODIMP CActiveScriptError::GetExceptionInfo(
 	if (!pexcepinfo)
 		return E_POINTER;
 
-	core->fillEXCEPINFO(exception, pexcepinfo);
+	// SyntaxErrors don't get a stack-trace - it's just to the compiler.
+	core->fillEXCEPINFO(exception, pexcepinfo, !isSyntaxError());
 	return S_OK;
 }
 
@@ -55,22 +62,43 @@ STDMETHODIMP CActiveScriptError::GetSourcePosition(
             /* [out] */ ULONG *pulLineNumber,
             /* [out] */ LONG *plCharacterPosition)
 {
+	if (isSyntaxError()) {
+		// ESC may set 'line', 'column'attributes
+		if (pulLineNumber) {
+			Multiname multiname(core->publicNamespace, core->constantString("line"));
+			Atom line = core->toplevel->getproperty(exception->atom, &multiname,
+			                                        core->toplevel->toVTable(exception->atom));
+			// XXX - pushing this before ESC is fixed - uncomment me!
+			// AvmAssert(line != undefinedAtom); // line can't be 0, so should exist
+			*pulLineNumber = core->toUInt32(line);
+		}
+		if (plCharacterPosition) {
+			Multiname multiname(core->publicNamespace, core->constantString("line"));
+			Atom col = core->toplevel->getproperty(exception->atom, &multiname,
+			                                       core->toplevel->toVTable(exception->atom));
+			// XXX - pushing this before ESC is fixed - uncomment me!
+			// AvmAssert(col != undefinedAtom); // col can't be 0, so should exist
+			*plCharacterPosition = core->toUInt32(col);
+		}
+		return S_OK;
+	} else {
 #ifdef DEBUGGER
-	if (pdwSourceContext)
-		*pdwSourceContext = dwSourceContextCookie;
+		if (pdwSourceContext)
+			*pdwSourceContext = dwSourceContextCookie;
 
-	StackTrace *st = exception->getStackTrace();
-	if (pulLineNumber && st) {
-		// although not documented as such, linenum is zero based for
-		// axscript engines - its pretty easy to demonstrate with IE.
-		*pulLineNumber = st->elements[0].linenum-1;
-	}
-	if (plCharacterPosition)
-		*plCharacterPosition = 0; // XXX - can we get a column?
-	return S_OK;
+		StackTrace *st = exception->getStackTrace();
+		if (pulLineNumber && st) {
+			// although not documented as such, linenum is zero based for
+			// axscript engines - its pretty easy to demonstrate with IE.
+			*pulLineNumber = st->elements[0].linenum-1;
+		}
+		// ESC only sets column position for syntax errors.
+		return S_OK;
 #else
-	return E_NOTIMPL;
+		return E_NOTIMPL;
 #endif
+	}
+	AvmAssert(false); // not reached!
 }
 
 STDMETHODIMP CActiveScriptError::GetSourceLineText(

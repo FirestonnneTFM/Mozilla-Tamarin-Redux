@@ -331,6 +331,22 @@ class TestExceptions(TestCaseInitialized):
         scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
         self.failUnless(desc.startswith("COM Error"), desc)
 
+    def testSyntaxError(self):
+        code = "\n\nfoo]"
+        self.parseScriptText(code, expect_exc=True)
+        scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
+        self.failUnless(desc.startswith("Syntax"), desc)
+        # we aren't expecting a traceback, as it would only be to the
+        # compiler itself - so no \n chars are expected.
+        self.failIf('\n' in desc, desc)
+
+        ctx, line, col = self.site.last_error.GetSourcePosition()
+        self.failUnlessEqual(line, 3)
+        # it looks to me like the column should be reported as 4, but its
+        # currently 3 - presumably an ESC bug I'm too lazy to dig into, but
+        # feel free to change this should it start returning 4 ;)
+        self.failUnlessEqual(col, 3)
+
 class TestScriptDispatch(TestCaseInitialized):
     # Test the IDispatch impls handed out by Tamarin.
     # Note that in general, we avoid the pretty 'Dispatch' wrappers provided

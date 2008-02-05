@@ -374,19 +374,21 @@ namespace axtam
 		throwException(exception);
 	}
 
-	void AXTam::fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo)
+	void AXTam::fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo, bool includeStackTrace /* = true */)
 	{
 		// zero out members we don't fill (wsh doesn't appear to do this)
 		memset(pexcepinfo, 0, sizeof(*pexcepinfo));
 		Stringp s(string(exception->atom));
-		#ifdef DEBUGGER
-		if (exception->getStackTrace()) {
-			s = concatStrings(s, constantString("\n"));
-			s = concatStrings(s, exception->getStackTrace()->format(this));
+		if (includeStackTrace) {
+			#ifdef DEBUGGER
+			if (exception->getStackTrace()) {
+				s = concatStrings(s, constantString("\n"));
+				s = concatStrings(s, exception->getStackTrace()->format(this));
+			}
+			#else
+				s = concatStrings(s, constantString("<stack trace not available>"));
+			#endif
 		}
-		#else
-			s = concatStrings(s, constantString("<stack trace not available>"));
-		#endif
 		pexcepinfo->bstrDescription = ::SysAllocString((const OLECHAR *)s->c_str());
 		pexcepinfo->scode = E_FAIL; // todo - get a better result value!
 	}

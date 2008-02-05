@@ -55,6 +55,7 @@ namespace axtam {
 		CActiveScriptError(AXTam *_core) : 
 		  MMgc::GCRoot(_core->GetGC()), core(_core), dwSourceContextCookie(0), exception(0) {;}
 		virtual ~CActiveScriptError() {;}
+		bool isSyntaxError();
 		avmplus::Exception *exception; // is this GCRoot really enough?
 		AXTam *core;
 		DWORD_PTR dwSourceContextCookie;
