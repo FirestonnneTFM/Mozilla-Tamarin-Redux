@@ -168,6 +168,9 @@ public namespace Char
         return false;
     }
 
+    function isUnicodeIdentifierPart(c) {
+        return false; // FIXME
+    }
 
     function test () {
         print ("testing lex-char.es");

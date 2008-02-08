@@ -30,5 +30,4 @@ $DIR/shell \
     $DIR/cogen-stmt.es.abc \
     $DIR/cogen-expr.es.abc \
     $DIR/esc.es.abc \
-    -- $1
-
+    -- $@

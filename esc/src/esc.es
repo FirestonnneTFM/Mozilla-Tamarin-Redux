@@ -37,57 +37,68 @@
  * ***** END LICENSE BLOCK ***** */
 
 {
-    import avmplus.*;
-    var fname = System.argv[0];
-    var str = File.read (fname);
-    //print ("compiling ", fname);
-}
+    var total_frontend = 0;
+    var total_backend = 0;
 
-{
-    import avmplus.*;
-    use namespace Parse;
-    use namespace Gen;
-    var esc_env_str = File.read ("esc-env.ast");
-    var parser = new Parser(esc_env_str,[]);
-    var [ts,nd] = parser.program();
-    nd.Ast::file = "esc-env.ast";  // or the AVM flips out if debugging is enabled
-    var bytes = cg(nd).getBytes();
-    Domain.currentDomain.loadBytes(bytes);
-}
+    function readFile(fn) {
+        import avmplus.*;
+        return File.read (fn);
+    }
 
-// decode it
+    function boot() {
+        use namespace Parse;
+        use namespace Gen;
 
-{
-    use namespace Ast;
-    //print ("decoding esc_env ",esc_env.ast_class);
-    var nd = Decode::program (esc_env);  // defined by side effect
-    var topFixtures = nd.head.fixtures;
-}
+        var esc_env_str = readFile ("esc-env.ast");
+        var parser = new Parser(esc_env_str,[], "esc-env.ast");
+        var nd = parser.program();
+        var bytes = cg(nd).getBytes();
+        Domain.currentDomain.loadBytes(bytes); // this defines the variable "esc_env".
+    }
 
-{
-    use namespace Parse;
-    //print ("parsing");
-    var t1 = new Date;
-    var parser = new Parser(str,topFixtures,fname);
-    var [ts,nd] = parser.program();
-    var t2 = new Date;
-    //print (fname+" parse "+(t2-t1)+" ms");
-}
+    function getTopFixtures() {
+        use namespace Ast;
 
-{
-    //print ("gening");
-    nd.Ast::file = fname;
-    var bytes = Gen::cg(nd);
-    var t3 = new Date;
-    //print (fname+" cogen "+(t3-t2)+" ms");
-    //print ("writing");
-    var len = dumpABCFile(bytes, fname+".abc");
-    var parse_time = (t3-t1);
+        var nd = Decode::program (esc_env);    // esc_env is defined by side effect in "boot", above
+        return nd.head.fixtures;
+    }
 
-    print (fname);
-    print ("  Chars in:  " + str.length);
-    print ("  Bytes out: " + len);
-    print ("  Scanning:  " + Lex::ms_scanning + " ms");
-    print ("  Parsing:   " + (t2 - t1 - Lex::ms_scanning) + " ms");
-    print ("  Cogen:     " + (t3 - t2) + " ms");
+    function compile(fname) {
+        use namespace Parse;
+
+        // reading takes almost no time, so lump it with scan+parse
+
+        var t1 = new Date;
+        var input = readFile(fname);
+        var parser = new Parser( input, getTopFixtures(), fname );
+        var prog = parser.program();
+
+        // dumping takes almost no time, so lump it with cogen
+
+        var t2 = new Date;
+        var bytes = Gen::cg(prog);
+        var len = dumpABCFile(bytes, fname+".abc");
+
+        var t3 = new Date;
+
+        print (fname);
+        print ("  Scan+parse:  " + (t2 - t1) + " ms");
+        print ("  Cogen:       " + (t3 - t2) + " ms");
+
+        total_frontend += (t2 - t1);
+        total_backend += (t3 - t2);
+    }
+
+    var before = new Date();
+    boot();
+    for ( let i=0, limit=System.argv.length ; i < limit ; i++ )
+        compile(System.argv[i]);
+    var after = new Date();
+
+    if (System.argv.length > 1) {
+        print("");
+        print("Total time: " + (after - before));
+        print("Front end:  " + total_frontend);
+        print("Back end:   " + total_backend);
+    }
 }
