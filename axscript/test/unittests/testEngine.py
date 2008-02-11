@@ -347,6 +347,17 @@ class TestExceptions(TestCaseInitialized):
         # feel free to change this should it start returning 4 ;)
         self.failUnlessEqual(col, 3)
 
+    def testFilename(self):
+        # Make sure the 'filename' of our script block is reported in both
+        # syntax and normal errors.
+        self.parseScriptText("foo=bar", expect_exc=True)
+        scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
+        self.failUnless("<script 0>" in desc, desc)
+        # and do another one with a syntax error - and different name
+        self.parseScriptText("x]", sourceContextCookie=3, expect_exc=True)
+        scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
+        self.failUnless("<script 3>" in desc, desc)
+
 class TestScriptDispatch(TestCaseInitialized):
     # Test the IDispatch impls handed out by Tamarin.
     # Note that in general, we avoid the pretty 'Dispatch' wrappers provided
