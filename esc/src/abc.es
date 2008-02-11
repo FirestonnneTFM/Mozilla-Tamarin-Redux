@@ -942,7 +942,7 @@ namespace Abc;
             optionals = [];
             for(let i = 0; i < optionalcount; ++i )
             {
-                optionals[i] = [b.readU32(), b.readByte()];
+                optionals[i] = { val:b.readU32(), kind:b.readByte() };
             }
         }
         

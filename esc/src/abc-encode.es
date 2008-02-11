@@ -259,8 +259,11 @@ public namespace AbcEncode;
             case CONSTANT_ProtectedNamespace:
                 str = "'ProtectedNamespace'";
                 break;
+            case CONSTANT_StaticProtectedNS:
+                str = "'StaticProtectedNamespace'";
+                break;
             default:
-                str = "Other";
+                str = "'Other'";
                 break;
             }
 
@@ -297,14 +300,14 @@ public namespace AbcEncode;
             : string {
             enter ("AbcEncode::namespacesetConst ", nesting);
 
-            var str = "undefined";
+            var str = "";
             
             for (var i = 0, len = nd.readU32(); i < len; ++i) 
             {
                 str = str
+                    + nd.readU32()
                     + indent (nesting-2)
-                    + ", "
-                    + nd.readU32();
+                    + ", ";
             }
 
             exit ("AbcEncode::namespacesetConst");
@@ -347,15 +350,15 @@ public namespace AbcEncode;
             case CONSTANT_QName:
                 str = "{ 'kind': 'QName'"
                     + indent(nesting)
-                    + ", 'ns': " + nd.readU32();
+                    + ", 'ns': " + nd.readU32()
                     + indent(nesting) 
-                    + ", 'utf8': " + nd.readU32();
+                    + ", 'utf8': " + nd.readU32()
                     + " }";
                 break;
             case CONSTANT_RTQName:
                 str = "{ 'kind': 'RTQName'"
                     + indent(nesting) 
-                    + ", 'utf8': " + nd.readU32();
+                    + ", 'utf8': " + nd.readU32()
                     + " }";
                 break;
             case CONSTANT_RTQNameL:
@@ -365,15 +368,15 @@ public namespace AbcEncode;
             case CONSTANT_Multiname:
                 str = "{ 'kind': 'Multiname'"
                     + indent(nesting) 
-                    + ", 'utf8': " + nd.readU32();
+                    + ", 'utf8': " + nd.readU32()
                     + indent(nesting) 
-                    + ", 'nsset': " + nd.readU32();
+                    + ", 'nsset': " + nd.readU32()
                     + " }";
                 break;
             case CONSTANT_MultinameL:
                 str = "{ 'kind': 'MultinameL'"
                     + indent(nesting) 
-                    + ", 'nss': " + nd.readU32();
+                    + ", 'nss': " + nd.readU32()
                     + " }";
                 break;
             case CONSTANT_QNameA:
@@ -418,12 +421,86 @@ public namespace AbcEncode;
               + indent(nesting) + ", 'name': " + name(nd.name, nesting+", 'name': ".length)
               + indent(nesting) + ", 'flags': " + nd.flags
               + indent(nesting) + ", 'optional_count': " + (nd.options != null ? nd.options.length : 0)
-              + indent(nesting) + ", 'value_kind': [ " + "" + " ]"
+              + indent(nesting) + ", 'optionals': [" + optionals(nd.options, nesting+", 'optionals': [".length) + "]"
               + indent(nesting) + ", 'param_names': [ " + "" + " ]"
               + " }";
 
             exit ("AbcEncode:methodInfo ",str);
             return str;
+        }
+        
+        function optionals(nd, nesting: int = 0)
+            : string {
+            enter("AbcEncode::optionals");
+            
+            var str = "";
+            if( nd )
+            {
+                for( var i:uint = 0, limit:uint = nd.length; i < limit; ++i )
+                {
+                    str = str
+                        + optional(nd[i], nesting)
+                        + indent(nesting-2)
+                        + ", ";
+                }
+            }
+            exit("AbcEncode::optionals ", str);
+            return str;
+        }
+        
+        function optional(nd, nesting: int = 0)
+            : string {
+            enter("AbcEncode::optional");
+            var str = "";
+            
+            var val = "";
+            var kind;
+            
+            switch(nd.kind) {
+                case CONSTANT_Integer:
+                    val = integer(nd.val, nesting);
+                    kind = "'CONSTANT_Integer'";
+                    break;
+                case CONSTANT_UInt:
+                    val = uinteger(nd.val, nesting);
+                    kind = "'CONSTANT_UInt'";
+                    break;
+                case CONSTANT_Utf8:
+                    val = utf8(nd.val, nesting);
+                    kind = "'CONSTANT_Utf8'";
+                    break;
+                case CONSTANT_Namespace:
+                    val = namespace(nd.val, nesting);
+                    kind = "'CONSTANT_Namespace'";
+                    break;
+                case CONSTANT_Double:
+                    val = number(nd.val, nesting);
+                    kind = "'CONSTANT_Double'";
+                    break;
+                case CONSTANT_Null:
+                    val = 0;
+                    kind = "'CONSTANT_Null'";
+                    break;
+                case 0:
+                    val = 0;
+                    kind = 0;
+                    break;
+                case CONSTANT_True:
+                    val = 0;
+                    kind = "'CONSTANT_True'";
+                    break;
+                case CONSTANT_False:
+                    val = 0;
+                    kind = "'CONSTANT_False'";
+                    break;
+            }
+            str = str
+                + "{ 'val': " + val
+                + indent(nesting) + ", 'kind': " + kind + " }";
+            
+            exit("AbcEncode::optional ", str);
+            return str;
+                
         }
 
         function metadataInfos (nd, nesting : int = 0)
