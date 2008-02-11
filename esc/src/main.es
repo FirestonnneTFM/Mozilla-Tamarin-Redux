@@ -51,8 +51,8 @@
         use namespace Parse;
         var top = [];
         var parser = new Parser(str,top);
-        var [ts,nd] = parser.program();
-        var bytes = Gen::cg(nd).getBytes();
+        var prog = parser.program();
+        var bytes = Gen::cg(prog).getBytes();
 
         let b = new ByteArray();
         b.endian = "littleEndian";
