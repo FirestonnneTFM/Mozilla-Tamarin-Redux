@@ -62,37 +62,29 @@ STDMETHODIMP CActiveScriptError::GetSourcePosition(
             /* [out] */ ULONG *pulLineNumber,
             /* [out] */ LONG *plCharacterPosition)
 {
+	if (pdwSourceContext)
+		*pdwSourceContext = dwSourceContextCookie;
+
 	if (isSyntaxError()) {
 		// ESC may set 'line', 'column'attributes
 		if (pulLineNumber) {
 			Multiname multiname(core->publicNamespace, core->constantString("line"));
 			Atom line = core->toplevel->getproperty(exception->atom, &multiname,
 			                                        core->toplevel->toVTable(exception->atom));
-			// XXX - pushing this before ESC is fixed - uncomment me!
-			// AvmAssert(line != undefinedAtom); // line can't be 0, so should exist
-			*pulLineNumber = core->toUInt32(line);
+			AvmAssert(line != undefinedAtom); // line can't be 0, so should exist
+			*pulLineNumber = core->toUInt32(line) - 1; // zero based, as below.
 		}
-		if (plCharacterPosition) {
-			Multiname multiname(core->publicNamespace, core->constantString("line"));
-			Atom col = core->toplevel->getproperty(exception->atom, &multiname,
-			                                       core->toplevel->toVTable(exception->atom));
-			// XXX - pushing this before ESC is fixed - uncomment me!
-			// AvmAssert(col != undefinedAtom); // col can't be 0, so should exist
-			*plCharacterPosition = core->toUInt32(col);
-		}
+		// ESC doesn't do character positions :(
 		return S_OK;
 	} else {
 #ifdef DEBUGGER
-		if (pdwSourceContext)
-			*pdwSourceContext = dwSourceContextCookie;
-
 		StackTrace *st = exception->getStackTrace();
 		if (pulLineNumber && st) {
 			// although not documented as such, linenum is zero based for
 			// axscript engines - its pretty easy to demonstrate with IE.
 			*pulLineNumber = st->elements[0].linenum-1;
 		}
-		// ESC only sets column position for syntax errors.
+		// No column numbers available from runtime exceptions.
 		return S_OK;
 #else
 		return E_NOTIMPL;
