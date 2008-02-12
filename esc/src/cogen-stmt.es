@@ -357,8 +357,6 @@
     }
 
     function cgSwitchStmtFast(ctx, s, low, high, has_default) {
-        print("FAST SWITCH: " + low + " " + high + " " + has_default);
-
         var {expr:expr, cases:cases} = s;
         let asm = ctx.asm;
         let t = asm.getTemp();

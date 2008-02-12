@@ -160,10 +160,10 @@ use namespace intrinsic;
     type PRAGMA_ENV = [Ast::PRAGMAS];
 
     Parse function syntaxError(ctx, msg) {
-        // FIXME Need much better source info
-        // ctx can be a Context or a Parser, maybe these have source info we can use.
         var filename = "";
         var position = 0;
+        if (ctx is Context)
+            ctx = ctx.parser;
         if (ctx is Parser) {
             filename = ctx.scan.filename;
             let p = ctx.position();
@@ -174,16 +174,17 @@ use namespace intrinsic;
     }
 
     Parse function internalError(ctx, msg) {
-        // FIXME Need much better source info
-        // ctx can be a Context or a Parser, maybe these have source info we can use.
         var filename = "";
+        var position = 0;
+        if (ctx is Context)
+            ctx = ctx.parser;
         if (ctx is Parser) {
             filename = ctx.scan.filename;
             let p = ctx.position();
             if (p != null)
                 position = p.line;
         }
-        Util::internalError(filename, 0, msg);
+        Util::internalError(filename, position, msg);
     }
 
     class Context
@@ -196,14 +197,16 @@ use namespace intrinsic;
         var pragmas: PRAGMAS
         var pragmaEnv: PRAGMA_ENV; // push one PRAGMAS for each scope
         var top_function/*: Ast::FuncAttr*/;
+        var parser;
 
-        function Context (topFixtures)
+        function Context (topFixtures, parser)
             : env = [topFixtures]
             , varHeads = []
             , letHeads = [] 
             , ctor = null
             , pragmas = null
             , pragmaEnv = []
+            , parser = parser
         {
             //print ("topFixtures.length=",topFixtures.length);
             //            print ("env[0].length=",env[0].length);
@@ -508,7 +511,7 @@ use namespace intrinsic;
         var filename: String;
 
         function Parser(src,topFixtures,filename="") {
-            this.cx = new Context (topFixtures);
+            this.cx = new Context (topFixtures, this);
             this.scan = new Scanner (src,filename);
             this.filename = filename;
         }
@@ -526,6 +529,9 @@ use namespace intrinsic;
         // T1 is the next token, L1 its line number
         // LP is the line number of the previous token
         //
+        // The line number of a token is the 1-based line number of
+        // the last character of the token.
+        //
         // Invariants:
         //   T0 is NONE only before start() and when the stream is exhausted.
         //   T1 is NONE whenever it's invalid
@@ -537,9 +543,12 @@ use namespace intrinsic;
         // when possible.
         //
         // Current optimizations:
-        //   - avoid function calls
+        //   * avoid function calls
         //     - scan.start() is shallow
         //     - Token::tokenKind and Token::tokenText have been in-lined
+        //   * avoid allocations
+        //     - Communicate with lexer via multiple variables rather than 
+        //       using multiple return values
         //
         // Future optimizations (maybe):
         //   - With static typing to "uint" it may be possible to avoid write 
