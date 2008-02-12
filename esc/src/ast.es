@@ -45,15 +45,14 @@ public namespace Ast
     //    use namespace intrinsic;
 
     // POS
+    //
+    // Source location information.
+    //
+    // This representation is heavyweight for ES4 but may be required
+    // to support "include" as in AS3, since that may introduce new
+    // filenames everywhere.
 
-    type POS =
-       {
-        line : int
-       // file: String
-       //, span: int //StreamPos.span
-       //, sm: int // StreamPos.sourcemap
-       //, post_newline: Boolean 
-       }
+    type POS = { line : int /* , filename: String */ };
 
     // BASIC TYPES
 

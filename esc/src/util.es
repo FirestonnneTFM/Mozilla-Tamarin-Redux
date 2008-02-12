@@ -65,7 +65,7 @@ namespace Util
     }
 
     function internalError(file, line, msg) {
-        Util::syntaxError("Internal: " + msg);
+        Util::syntaxError(file, line, "Internal: " + msg);
     }
 
     function map(fn, a) {
