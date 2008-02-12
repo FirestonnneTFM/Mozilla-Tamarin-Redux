@@ -1266,6 +1266,7 @@ use namespace intrinsic;
 
         function objectLiteral (/*, alpha: ALPHA*/) : Ast::TYPE_EXPR {
             var alpha: ALPHA = allowColon;    // FIXME need to get this from caller
+            var pos = position();             // Record source location of initial left brace
             eat (Token::LeftBrace);
             var fields = fieldList ();
             eat (Token::RightBrace);
@@ -1287,7 +1288,7 @@ use namespace intrinsic;
                 break;
             }
 
-            return new Ast::LiteralExpr (new Ast::LiteralObject (fields,texpr), position());
+            return new Ast::LiteralExpr (new Ast::LiteralObject (fields,texpr), pos);
         }
 
         /*
@@ -1412,12 +1413,13 @@ use namespace intrinsic;
         */
 
         function arrayLiteral () : Ast::EXPR {
+            var pos = position();   // Record source location of initial left bracket
             eat (Token::LeftBracket);
             var elts = elementList ();
             eat (Token::RightBracket);
 
             return new Ast::LiteralExpr (new Ast::LiteralArray (elts, new Ast::ArrayType ([])), 
-                                         position());
+                                         pos);
         }
 
         /*
@@ -1441,8 +1443,9 @@ use namespace intrinsic;
             {
                 switch (hd ()) {
                 case Token::Comma:
+                    let pos = position();
                     next();
-                    elt = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
+                    elt = new Ast::LiteralExpr (new Ast::LiteralUndefined, pos);
                     break;
                 default:
                     switch (hd ()) {
@@ -1510,18 +1513,19 @@ use namespace intrinsic;
         function primaryExpression(beta:BETA) : Ast::EXPR {
             var expr;
 
+            var pos = position();   // Record the source location before consuming the token
             switch (hd ()) {
             case Token::Null:
                 next();
-                expr = new Ast::LiteralExpr (new Ast::LiteralNull (), position());
+                expr = new Ast::LiteralExpr (new Ast::LiteralNull (), pos);
                 break;
             case Token::True:
                 next();
-                expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (true), position());
+                expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (true), pos);
                 break;
             case Token::False:
                 next();
-                expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (false), position());
+                expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (false), pos);
                 break;
             case Token::DecimalLiteral:
                 let tx = lexeme();
@@ -1553,12 +1557,12 @@ use namespace intrinsic;
                     lit = new Ast::LiteralDouble(n);
 
                 next();
-                expr = new Ast::LiteralExpr (lit, position());
+                expr = new Ast::LiteralExpr (lit, pos);
                 break;
             case Token::StringLiteral:
                 let tx = lexeme();
                 next();
-                expr = new Ast::LiteralExpr (new Ast::LiteralString (tx), position());
+                expr = new Ast::LiteralExpr (new Ast::LiteralString (tx), pos);
                 break;
             case Token::This:
                 next();
@@ -1600,7 +1604,7 @@ use namespace intrinsic;
                     expr = new Ast::ObjectRef (base, nd.Ast::ident);  // FIXME: not good for package qualified refs
                 }
                 case (nd:*) {
-                    expr = new Ast::LexicalRef (expr, position());
+                    expr = new Ast::LexicalRef (expr, pos);
                 }
                 }
                 break;
@@ -1791,9 +1795,10 @@ use namespace intrinsic;
         */
 
         function callExpression (beta:BETA) : Ast::EXPR {
+            var pos = position();
             var nd1 = memberExpression (beta);
             var nd2 = this.argumentList ();
-            var expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,position()));
+            var expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,pos));
 
             return expr;
         }
@@ -1803,8 +1808,9 @@ use namespace intrinsic;
 
             switch (hd ()) {
             case Token::LeftParen:
+                let pos = position();
                 let nd1 = this.argumentList ();
-                expr = callExpressionPrime (beta, new Ast::CallExpr (nd,nd1,position()));
+                expr = callExpressionPrime (beta, new Ast::CallExpr (nd,nd1,pos));
                 break;
             case Token::LeftBracket:
             case Token::Dot:
@@ -1837,9 +1843,10 @@ use namespace intrinsic;
                 let nd1 = newExpression (beta, new_count+1);
                 switch (hd ()) {
                 case Token::LeftParen:           // no more new exprs so this paren must start a call expr
+                    let pos = position();
                     let nd2 = this.argumentList (); // refer to parser method
                     if (new_count == 0)
-                        expr = callExpressionPrime (beta,new Ast::CallExpr (nd1,nd2,position()));
+                        expr = callExpressionPrime (beta,new Ast::CallExpr (nd1,nd2,pos));
                     else
                         expr = new Ast::NewExpr (nd1,nd2);
                     break;
@@ -1856,9 +1863,10 @@ use namespace intrinsic;
                 let nd1 = memberExpression (beta);
                 switch (hd ()) {
                 case Token::LeftParen:
+                    let pos = position();
                     let nd2 = this.argumentList (); // refer to parser method
                     if( new_count == 0 )
-                        expr = callExpressionPrime (beta,new Ast::CallExpr (nd1,nd2,position()));
+                        expr = callExpressionPrime (beta,new Ast::CallExpr (nd1,nd2,pos));
                     else
                         expr = new Ast::NewExpr (nd1,nd2);
                     break;
@@ -1898,8 +1906,9 @@ use namespace intrinsic;
                 var nd1 = newExpression (beta,0);
                 switch (hd ()) {
                 case Token::LeftParen:
+                    let pos = position();
                     let nd2 = this.argumentList (); // refer to parser method
-                    expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,position()));
+                    expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,pos));
                     break;
                 default:
                     expr = nd1;
@@ -1910,8 +1919,9 @@ use namespace intrinsic;
                 let nd1 = memberExpression (beta);
                 switch (hd ()) {
                 case Token::LeftParen:
+                    let pos = position();
                     let nd2 = this.argumentList (); // refer to parser method
-                    expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,position()));
+                    expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,pos));
                     break;
                 default:
                     expr = nd1;
@@ -2829,8 +2839,9 @@ use namespace intrinsic;
             if (hd () !== Token::RightBracket) {
                 switch (hd ()) {
                 case Token::Comma:
-                    next();
-                    element = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
+                    let pos = position();
+                    eat(Token::Comma);
+                    element = new Ast::LiteralExpr (new Ast::LiteralUndefined, pos);
                     break;
                 default:
                     element = pattern (allowIn,gamma);
@@ -3117,7 +3128,8 @@ use namespace intrinsic;
             if (hd () !== Token::RightBracket) {
                 switch (hd ()) {
                 case Token::Comma:
-                    next();
+                    let pos = position();
+                    eat(Token::Comma);
                     var ndx = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
                     break;
                 default:
@@ -4077,6 +4089,7 @@ use namespace intrinsic;
 
             cx.enterFunction();
 
+            var pos = position();
             eat (Token::Function);
             if (hd () == Token::Identifier)
                 name = functionName ();
@@ -4099,7 +4112,7 @@ use namespace intrinsic;
                                                                                       defaults, 
                                                                                       resultType,
                                                                                       attr)), 
-                                               position() );
+                                               pos);
 
             return fnexpr;
         }
