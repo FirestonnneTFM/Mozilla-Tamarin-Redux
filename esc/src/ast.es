@@ -751,9 +751,9 @@ public namespace Ast
     }
 
     class LiteralDecimal {
-        const decimalValue : decimal;
-        function LiteralDecimal (decimalValue)
-            : decimalValue = decimalValue { }
+        const decimalValue : String;
+        function LiteralDecimal (str : String)
+            : decimalValue = str { }  // FIXME: convert from string to decimal
     }
 
     class LiteralInt {

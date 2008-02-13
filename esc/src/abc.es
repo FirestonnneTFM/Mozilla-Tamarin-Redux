@@ -205,7 +205,6 @@ namespace Abc;
             var probe = int_map.read(n);
             if (probe == 0) {
                 probe = int_count++;
-                int_map.write(n, probe);
                 int_bytes.int32(n);
             }
             return probe;
@@ -215,7 +214,6 @@ namespace Abc;
             var probe = uint_map.read(n);
             if (probe == 0) {
                 probe = uint_count++;
-                uint_map.write(n, probe);
                 uint_bytes.uint32(n);
             }
             return probe;
@@ -225,7 +223,6 @@ namespace Abc;
             var probe = double_map.read(n);
             if (probe == 0) {
                 probe = double_count++;
-                double_map.write(n, probe);
                 double_bytes.float64(n);
             }
             return probe;
@@ -844,28 +841,28 @@ namespace Abc;
         var pool : ABCConstantPool = new ABCConstantPool;
         
 		// ints
-		n = b.readU30();
+		n = b.readU32();
 		for (i=1; i < n; i++)
-			pool.int32(b.readS32());
+			pool.int32(b.readU32());
         
 		// uints
-		n = b.readU30();
+		n = b.readU32();
 		for (i=1; i < n; i++)
-			pool.uint32(b.readU32());
+			pool.uint32(uint(b.readU32()));
         
 		// doubles
-		n = b.readU30();
+		n = b.readU32();
 		doubles = [NaN];
 		for (i=1; i < n; i++)
 			pool.float64(b.readDouble());
 
         // strings
-		n = b.readU30();
+		n = b.readU32();
 		for (i=1; i < n; i++)
 			pool.stringUtf8(b.readUTFBytes(b.readU32()));
         
 		// namespaces
-		n = b.readU30()
+		n = b.readU32()
 		for (i=1; i < n; i++)
         {
             var nskind = b.readByte();
@@ -874,18 +871,18 @@ namespace Abc;
         }
         
 		// namespace sets
-		n = b.readU30();
+		n = b.readU32();
 		for (i=1; i < n; i++)
 		{
-			var count:int = b.readU30();
+			var count:int = b.readU32();
 			var nsset = [];
 			for (j=0; j < count; j++)
-				nsset[j] = b.readU30();
+				nsset[j] = b.readU32();
             pool.namespaceset(nsset);
 		}
         
 		// multinames
-		n = b.readU30()
+		n = b.readU32()
 		for (i=1; i < n; i++)
         {
             var kind = b.readByte();
@@ -893,12 +890,12 @@ namespace Abc;
 			{
 			case CONSTANT_QName:
 			case CONSTANT_QNameA:
-				pool.QName(b.readU30(), b.readU30(), kind==CONSTANT_QNameA)
+				pool.QName(b.readU32(), b.readU32(), kind==CONSTANT_QNameA)
 				break;
 			
 			case CONSTANT_RTQName:
 			case CONSTANT_RTQNameA:
-				pool.RTQName(b.readU30(), kind==CONSTANT_RTQNameA)
+				pool.RTQName(b.readU32(), kind==CONSTANT_RTQNameA)
 				break;
 			
 			case CONSTANT_RTQNameL:
@@ -909,13 +906,13 @@ namespace Abc;
 			
 			case CONSTANT_Multiname:
 			case CONSTANT_MultinameA:
-				var name = b.readU30()
-                pool.Multiname(b.readU30(), name, kind==CONSTANT_MultinameA);
+				var name = b.readU32()
+                pool.Multiname(b.readU32(), name, kind==CONSTANT_MultinameA);
 				break;
 
 			case CONSTANT_MultinameL:
 			case CONSTANT_MultinameLA:
-				pool.MultinameL(b.readU30(), kind==CONSTANT_MultinameLA)
+				pool.MultinameL(b.readU32(), kind==CONSTANT_MultinameLA)
 				break;
 				
 			}

@@ -1244,134 +1244,59 @@ public namespace Lex
         }
 
         // All number literals start here without having consumed any
-        // input.
-        //
-        // It's a minor weakness of the current token representation
-        // that the value it carries can only be a string.  If not, we
-        // would create number values right here and would avoid
-        // re-converting the strings in the parser when the AST nodes
-        // are created.
+        // input
 
         function numberLiteral() : int {
             switch (src.charCodeAt(curIndex)) {
             case  48 /* Char::0 */: 
-                // Octal / hex / a single 0 / 0.something
+                // Octal or hex or a single digit or 0.something
                 switch (src.charCodeAt(curIndex+1)) {
                 case 120 /* Char::x */:
                 case  88 /* Char::X */:
                     curIndex += 2;
-                    markIndex = curIndex;
                     if (!hexDigits(-1))
                         Lex::syntaxError("Illegal hexadecimal literal: no digits");
-                    return makeIntegerLiteral( parseInt(lexeme(), 16) );
+                    return numberSuffix(); // iffy
 
                 case  46 /* Char::Dot */:
-                    curIndex += 2;
-                    numberFraction(true);
-                    return makeFloatingLiteral( lexeme() );
+                    curIndex++;
+                    decimalFraction (true);
+                    return numberSuffix(); // iffy
                         
                 default:
-                    // Octal or single '0'
-                    if (src.charCodeAt(curIndex) === 109 /* Char::m */)
-                        return makeFloatingLiteral( lexeme() );
-
+                    // Handles single zero too
                     octalLiteral ();
-                    return makeIntegerLiteral( parseInt(lexeme(), 8) );
+                    return numberSuffix(); // iffy
                 }
 
             case  46 /* Char::Dot */:
                 curIndex++;
-                numberFraction(false);
-                return makeFloatingLiteral( lexeme() );
+                decimalFraction(false);
+                return numberSuffix(); // iffy
 
             default:
-                if (numberLiteralPrime() || src.charCodeAt(curIndex) === 109 /* Char::m */)
-                    return makeFloatingLiteral( lexeme() );
-                else
-                    return makeIntegerLiteral( parseInt(lexeme(), 10) );
+                decimalLiteral();
+                return numberSuffix(); // iffy
             }
         }
 
-        function makeIntegerLiteral( n ) {
-            checkNextCharForNumber();
-
-            if (n >= -0x80000000 && n <= 0x7FFFFFFF)
-                return Token::makeInstance( Token::IntLiteral, String(n) );
-            if (n >= 0x80000000 && n <= 0xFFFFFFFF)
-                return Token::makeInstance( Token::UIntLiteral, String(n) );
-            return Token::makeInstance( Token::DoubleLiteral, String(n) );
-        }
-
-        function makeFloatingLiteral( s ) {
-            if (src.charCodeAt(curIndex) === 109 /* Char::m */) {
-                curIndex++;
-
-                checkNextCharForNumber();
-                return Token::makeInstance( Token::DecimalLiteral, s );
-            }
-            else {
-                checkNextCharForNumber();
-                return Token::makeInstance( Token::DoubleLiteral, s );
-            }
-        }
-
-        function checkNextCharForNumber() {
-            let c = src.charCodeAt(curIndex);
-            if (c >= 48 /* Char::Zero */ && c <= 57 /* Char::Nine */ ||
-                Char::isIdentifierStart(c))
-                Lex::syntaxError("Illegal character following numeric literal: " + String.fromCharCode(c));
-        }
-
-        function numberLiteralPrime() {
-            if (!decimalDigits(-1))
-                Lex::syntaxError("Illegal number: no digits");
-            
+        function numberSuffix () : int {
             switch (src.charCodeAt(curIndex)) {
-            case  46 /* Char::Dot */:
-                curIndex++;
-                numberFraction (true);
-                return true;
-
-            case 101 /* Char::e */: 
-            case  69 /* Char::E */:
-                curIndex++;
-                numberExponent ();
-                return true;
-
+            case 105 /* Char::i */:
+                ++curIndex;
+                return Token::makeInstance (Token::ExplicitIntLiteral, lexeme ());
+            case 117 /* Char::u */:
+                ++curIndex;
+                return Token::makeInstance (Token::ExplicitUIntLiteral, lexeme ());
+            case 100 /* Char::d */:
+                ++curIndex;
+                return Token::makeInstance (Token::ExplicitDoubleLiteral, lexeme ());
+            case 109 /* Char::m */:
+                ++curIndex;
+                return Token::makeInstance (Token::ExplicitDecimalLiteral, lexeme ());
             default:
-                return false;
+                return Token::makeInstance (Token::DecimalLiteral, lexeme ());
             }
-        }
-
-        // The '.' has been consumed.
-        //
-        // has_leading_digits should be true if digits have been seen
-        // before the '.'.
-
-        function numberFraction(has_leading_digits) {
-            if (!decimalDigits (-1) && !leading)
-                Lex::syntaxError("Illegal number: must have digits before or after decimal point");
-
-            switch (src.charCodeAt(curIndex)) {
-            case 101 /* Char::e */: 
-            case  69 /* Char::E */:
-                curIndex++;
-                numberExponent ();
-                break;
-            }
-        }
-
-        // The 'e' has been consumed...
-
-        function numberExponent () {
-            switch (src.charCodeAt(curIndex)) {
-            case  43 /* Char::Plus */:
-            case  45 /* Char::Minus */:
-                curIndex++;
-                break;
-            }
-            if (!decimalDigits(-1))
-                Lex::syntaxError("Illegal number: missing digits in exponent");
         }
 
         function octalLiteral () {
@@ -1383,6 +1308,48 @@ public namespace Lex
             case  57 /* Char::Nine */:
                 Lex::syntaxError("Illegal octal literal: non-octal digit");
             }
+        }
+
+        function decimalLiteral () {
+            if (!decimalDigits(-1))
+                Lex::syntaxError("Illegal number: no digits");
+            
+            switch (src.charCodeAt(curIndex)) {
+            case  46 /* Char::Dot */:
+                curIndex++;
+                return decimalFraction (true);
+
+            case 101 /* Char::e */: 
+            case  69 /* Char::E */:
+                curIndex++;
+                return decimalExponent ();
+            }
+        }
+
+        // The '.' has been consumed...
+
+        function decimalFraction(leading) {
+            if (!decimalDigits (-1) && !leading)
+                Lex::syntaxError("Illegal number: must have digits before or after decimal point");
+
+            switch (src.charCodeAt(curIndex)) {
+            case 101 /* Char::e */: 
+            case  69 /* Char::E */:
+                curIndex++;
+                decimalExponent ();
+            }
+        }
+
+        // The 'e' has been consumed...
+
+        function decimalExponent () : int {
+            switch (src.charCodeAt(curIndex)) {
+            case  43 /* Char::Plus */:
+            case  45 /* Char::Minus */:
+                curIndex++;
+            }
+            if (!decimalDigits(-1))
+                Lex::syntaxError("Illegal number: missing digits in exponent");
         }
 
         function octalDigits(k): boolean {
