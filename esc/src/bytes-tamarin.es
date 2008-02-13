@@ -223,20 +223,31 @@
             return bytes.readUTFBytes(length);
         }
         
-        function readU32():int {
-            var result:int = bytes.readUnsignedByte();
-            if (!(result & 0x00000080))
-                return result;
-            result = result & 0x0000007f | bytes.readUnsignedByte()<<7;
-            if (!(result & 0x00004000))
-                return result;
-            result = result & 0x00003fff | bytes.readUnsignedByte()<<14;
-            if (!(result & 0x00200000))
-                return result;
-            result = result & 0x001fffff | bytes.readUnsignedByte()<<21;
-            if (!(result & 0x10000000))
-                return result;
-            return   result & 0x0fffffff | bytes.readUnsignedByte()<<28;
+        function readU30():uint
+            readU32();
+
+        function readS32():int
+            int(readU32());
+
+        // FIXME
+        //
+        // Explicit uint cast here because ESC erases type annotations
+        // at present, and bitops produce 'int'.
+
+        function readU32():uint {
+            var result = bytes.readUnsignedByte();
+            if (result & 0x00000080) {
+                result = result & 0x0000007f | bytes.readUnsignedByte()<<7;
+                if (result & 0x00004000) {
+                    result = result & 0x00003fff | bytes.readUnsignedByte()<<14;
+                    if (result & 0x00200000) {
+                        result = result & 0x001fffff | bytes.readUnsignedByte()<<21;
+                        if (result & 0x10000000)
+                            result = result & 0x0fffffff | bytes.readUnsignedByte()<<28;
+                    }
+                }
+            }
+            return uint(result);
         }
         
         function readS24():int
@@ -247,7 +258,7 @@
             
             b = b | (b1<<8);
             b = b | (b2<<16);
-            return b
+            return b;
         }
 
         function get position() {

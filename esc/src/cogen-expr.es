@@ -580,25 +580,30 @@
         switch type (e.literal) {
         case (e:LiteralNull) { asm.I_pushnull() }
         case (e:LiteralUndefined) { asm.I_pushundefined() }
-        case (e:LiteralInt) { asm.I_pushint(ctx.cp.int32(e.intValue)) }
-        case (e:LiteralUInt) { asm.I_pushuint(ctx.cp.uint32(e.uintValue)) }
-        case (e:LiteralDouble) { asm.I_pushdouble(ctx.cp.float64(e.doubleValue)) }
+        case (e:LiteralInt) { 
+            let val = e.intValue;
+            if (val >= -128 && val < 128)
+                asm.I_pushbyte(val & 0xFF);  // pushbyte sign-extends
+            else
+                asm.I_pushint(ctx.cp.int32(val));
+        }
+        case (e:LiteralUInt) { 
+            asm.I_pushuint(ctx.cp.uint32(e.uintValue));
+        }
+        case (e:LiteralDouble) { 
+            let val = e.doubleValue;
+            if (isNaN(val))
+                asm.I_pushnan();
+            else
+                asm.I_pushdouble(ctx.cp.float64(val));
+        }
         case (e:LiteralDecimal) { 
-            let i : int = int(e.decimalValue);
-            let n : Number = Number(e.decimalValue);
-            if( e.decimalValue == String(i) ) {
-                asm.I_pushint(ctx.cp.int32(i));
-            }
-            else if( e.decimalValue == String(n) ) {
-                asm.I_pushdouble(ctx.cp.float64(Number(n))) 
-            }
-            else {
-                // Work around RI bug - converts all hex strings to 0
-                asm.I_pushstring(ctx.cp.stringUtf8(e.decimalValue));
-                asm.I_convert_d();
-            }
-        } // FIXME - the AVM2 can't handle decimal yet
-        case (e:LiteralString) { asm.I_pushstring(ctx.cp.stringUtf8(e.strValue)) }
+            // FIXME: proper decimal support when the AVM can handle it!
+            asm.I_pushdouble(ctx.cp.float64(parseFloat(e.decimalValue)));
+        }
+        case (e:LiteralString) {
+            asm.I_pushstring(ctx.cp.stringUtf8(e.strValue));
+        }
         case (e:LiteralBoolean) {
             if (e.booleanValue)
                 asm.I_pushtrue();
