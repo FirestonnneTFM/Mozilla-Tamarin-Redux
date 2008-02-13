@@ -35,5 +35,5 @@ test/*.html
 *.s
 *.d
 *.a
-esc/safebin
+esc/safebin*
 esc/src/*.es.abc

@@ -1272,8 +1272,10 @@ public namespace Lex
                         
                 default:
                     // Octal or single '0'
-                    if (src.charCodeAt(curIndex) === 109 /* Char::m */)
+                    if (src.charCodeAt(curIndex+1) === 109 /* Char::m */) {
+                        curIndex++; // Consume the '0'
                         return makeFloatingLiteral( lexeme() );
+                    }
 
                     octalLiteral ();
                     return makeIntegerLiteral( parseInt(lexeme(), 8) );

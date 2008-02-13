@@ -37,6 +37,10 @@ for i in expr/*.es; do
   check $i
 done
 
+for i in es4-expr/*.es; do
+  check $i
+done
+
 for i in misc/*.es; do
   check $i
 done
