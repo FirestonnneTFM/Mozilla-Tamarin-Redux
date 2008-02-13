@@ -193,6 +193,8 @@
         case (op:CastOp) { asm.I_coerce() }
         case (op:IsOp) { asm.I_istypelate() }
         case (op:ToOp) {
+            // FIXME: Neither ES3 nor ES4.
+            //
             // If the type expression object has a property meta::convert then invoke that
             // method and return its result.  Otherwise, behave as cast.
             asm.I_dup();
@@ -343,28 +345,37 @@
 
     function cgCallExpr(ctx, e) {
         let {asm:asm, emitter:emitter} = ctx;
-        let name = null;
+        let nargs = e.args.length;
+
         switch type (e.expr) {
         case (or:ObjectRef) {
-            name = or.ident; // = cgIdentExpr(ctx, or.ident);
             cgExpr(ctx, or.base);
         }
         case (lr:LexicalRef) {
             asm.I_findpropstrict(cgIdentExpr(ctx, lr.ident));
-            name = lr.ident;
         }
         case (x:*) {
             cgExpr(ctx, e.expr);
             asm.I_pushnull();
         }
         }
-        let nargs = e.args.length;
+
         for ( let i=0 ; i < nargs ; i++ )
             cgExpr(ctx, e.args[i]);
-        if (name != null)
-            asm.I_callproperty(cgIdentExpr(ctx, name),nargs);
-        else
+
+        switch type (e.expr) {
+        case (or:ObjectRef) {
+            asm.I_callproperty(cgIdentExpr(ctx, or.ident), nargs);
+        }
+        case (lr:LexicalRef) {
+            // This is not right if the function is bound by "with".  In that
+            // case, I_callproperty would be more right.  That's the outlier, though.
+            asm.I_callproplex(cgIdentExpr(ctx, lr.ident), nargs);
+        }
+        case (x:*) {
             asm.I_call(nargs);
+        }
+        }
     }
 
     function cgApplyTypeExpr(ctx, e) {
@@ -525,27 +536,38 @@
 
         function cgArrayInitializer(ctx, {exprs:exprs}) {
             let asm = ctx.asm;
-            for ( let i=0 ; i < exprs.length ; i++ ) {
-                cgExpr(ctx, exprs[i]);
+            let i = 0;
+
+            // Use newarray to construct the dense prefix
+            for ( ; i < exprs.length ; i++ ) {
+                let e = exprs[i];
+                if (e is Ast::LiteralExpr && e.literal is Ast::LiteralUndefined)
+                    break;
+                cgExpr(ctx, e);
             }
-            asm.I_newarray(exprs.length);
-/*            asm.I_getglobalscope();
-            asm.I_getproperty(ctx.emitter.Array_name);
-            asm.I_construct(0);
-            asm.I_dup();
-            let t = asm.getTemp();
-            asm.I_setlocal(t);
-            for ( let i=0 ; i < exprs.length ; i++ ) {
-                if (exprs[i] !== undefined) {
-                    asm.I_getlocal(t);
-                    asm.I_pushuint(cg.uint32(i));
-                    cgExpr(ctx, exprs[i]);
-                    asm.I_setproperty(genMultinameL());
+            asm.I_newarray(i);
+
+            // Then init the other defined slots one by one
+            if (i < exprs.length) {
+                let last_was_undefined = false;
+                for ( ; i < exprs.length ; i++ ) {
+                    let e = exprs[i];
+                    if (!(e is Ast::LiteralExpr && e.literal is Ast::LiteralUndefined)) {
+                        asm.I_dup();
+                        cgExpr(ctx, e);
+                        asm.I_setproperty(cgIdentExpr(ctx, new Ast::Identifier(String(i), [[Ast::noNS]])));
+                        last_was_undefined = false;
+                    }
+                    else
+                        last_was_undefined = true;
+                }
+                if (last_was_undefined) {
+                    asm.I_dup();
+                    asm.I_pushint(ctx.cp.int32(exprs.length));
+                    asm.I_setproperty(cgIdentExpr(ctx, new Ast::Identifier("length", [[Ast::noNS]])));
                 }
             }
-            asm.I_getlocal(t);
-            asm.killTemp(t);
-*/        }
+        }
 
         function cgObjectInitializer(ctx, {fields:fields}) {
             let {asm:asm, emitter:emitter} = ctx;
@@ -634,7 +656,7 @@
         case (e:LiteralArray) { cgArrayInitializer(ctx, e) }
         case (e:LiteralObject) { cgObjectInitializer(ctx, e) }
         case (e:LiteralRegExp) { cgRegExpLiteral(ctx, e) }
-            // case (e:LiteralNamesace) { cgNamespaceLiteral(ctx, e) }
+            // case (e:LiteralNamespace) { cgNamespaceLiteral(ctx, e) }
         case (e:*) { 
             Gen::internalError(ctx, "Unimplemented LiteralExpr " + e);
         }
