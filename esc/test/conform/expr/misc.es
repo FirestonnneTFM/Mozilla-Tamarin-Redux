@@ -41,20 +41,28 @@
 var global = this;
 
 function f1() {
-    print("THIS GLOBAL " + (this === global));
+    print("THIS GLOBAL 1 " + (this === global));
 }
 f1();
 
 var x = {}
 function f2() {
     function f3() {
-        print("THIS GLOBAL " + (this === global));
+        print("THIS GLOBAL 2 " + (this === global));
     }
-    print("THIS X " + (this === x));
+    print("THIS X 1 " + (this === x));
     f3();
 }
 x.f2 = f2;
 x.f2();
+
+var x = {}
+function f4() {
+    print("THIS X 2 " + (this === x));
+}
+with (x) {
+    f4();
+}
 
 // literals
 print("INT " + 37);
@@ -72,6 +80,10 @@ print("ARRAY " + y);
 print("ARRAY length " + y.length);
 for ( i=0 ; i < 3 ; i++ )
     print("ARRAY ELEMENT " + y[i]);
+var y = [1,,3,,];
+print("ARRAY 2 " + y);
+print("ARRAY 2 length " + y.length);
+print("ARRAY 2 element " + (1 in y));
 var z = { x: 1, y: 2, z: 3 }
 print("OBJECT " + z);
 print("OBJECT x " + z.x);
@@ -115,14 +127,10 @@ function MyType(t) {
     this.t = t;
 }
 
-/* Crashes with TypeError
-
 var z = new MyType;
 print( "NEW fn default " + z.t );
 var zz = new MyType(10);
 print( "NEW fn param " + zz.t );
-
-*/
 
 // conditional
 
