@@ -1152,7 +1152,7 @@ public namespace Decode;
             var ndx = new LiteralString (ob.strValue);
             break;
         case 'LiteralDecimal':
-            var ndx = new LiteralDecimal (ob.decimalValue);
+            var ndx = new LiteralDecimal (new decimal(ob.decimalValue));
             break;
         case 'LiteralDouble':
             var ndx = new LiteralDouble (double(ob.intValue));
