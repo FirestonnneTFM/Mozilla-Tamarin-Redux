@@ -254,11 +254,21 @@ public namespace Token
     const DocComment = Token::BlockComment + 1;             setup(Token::DocComment,"doccomment");
     const Eol = Token::DocComment + 1;                      setup(Token::Eol,"eol");
     const Identifier = Token::Eol + 1;                      setup(Token::Identifier,"identifier");
-    const IntLiteral = Token::Identifier + 1;               setup(Token::IntLiteral,"intliteral");
-    const UIntLiteral = Token::IntLiteral + 1;              setup(Token::UIntLiteral,"uintliteral");
-    const DoubleLiteral = Token::UIntLiteral + 1;           setup(Token::DoubleLiteral,"doubleliteral");
-    const DecimalLiteral = Token::DoubleLiteral + 1;        setup(Token::DecimalLiteral,"decimalliteral");
-    const RegexpLiteral = Token::DecimalLiteral + 1;        setup(Token::RegexpLiteral,"regexpliteral");
+
+    // The interpretation of these 4 literal types can be done during lexing
+
+    const ExplicitDecimalLiteral = Token::Identifier + 1;            setup(Token::ExplicitDecimalLiteral,"explicitdecimalliteral");
+    const ExplicitDoubleLiteral = Token::ExplicitDecimalLiteral + 1; setup(Token::ExplicitDoubleLiteral,"explicitdoubleliteral");
+    const ExplicitIntLiteral = Token::ExplicitDoubleLiteral + 1;     setup(Token::ExplicitIntLiteral,"explicitintliteral");
+    const ExplicitUIntLiteral = Token::ExplicitIntLiteral + 1;       setup(Token::ExplicitUIntLiteral,"explicituintliteral");
+
+    // The interpretation of these 3 literal types is deferred until defn phase
+
+    const DecimalIntegerLiteral = Token::ExplicitUIntLiteral + 1;    setup(Token::DecimalIntegerLiteral,"decimalintegerliteral");
+    const DecimalLiteral = Token::DecimalIntegerLiteral + 1;         setup(Token::DecimalLiteral,"decimalliteral");
+    const HexIntegerLiteral = Token::DecimalLiteral + 1;             setup(Token::HexIntegerLiteral,"hexintegerliteral");
+
+    const RegexpLiteral = Token::HexIntegerLiteral + 1;     setup(Token::RegexpLiteral,"regexpliteral");
     const SlashSlashComment = Token::RegexpLiteral + 1;     setup(Token::SlashSlashComment,"linecomment");
     const StringLiteral = Token::SlashSlashComment + 1;     setup(Token::StringLiteral,"stringliteral");
     const Space = Token::StringLiteral + 1;                 setup(Token::Space,"space");

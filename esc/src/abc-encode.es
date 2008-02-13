@@ -120,7 +120,7 @@ public namespace AbcEncode;
                 str = str
                     + indent (nesting-2)
                     + ", "
-                    + "'" + nd.readS32() + "'"; 
+                    + "'" + nd.readU32() + "'"; 
             }
             
             nd.position = orig;
