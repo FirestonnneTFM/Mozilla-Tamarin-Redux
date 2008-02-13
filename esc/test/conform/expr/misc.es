@@ -77,14 +77,13 @@ print("OBJECT " + z);
 print("OBJECT x " + z.x);
 print("OBJECT y " + z.y);
 print("OBJECT z " + z.z);
-/*
+
 var w = /abc/g;
 print("REGEXP " + w);
 print("REGEXP source " + w.source);
 print("REGEXP global " + w.global);
 print("REGEXP multiline " + w.multiline);
-print("REGEXP ignorecase " + w.ignorecase);
-*/
+print("REGEXP ignoreCase " + w.ignoreCase);
 
 // Functions
 

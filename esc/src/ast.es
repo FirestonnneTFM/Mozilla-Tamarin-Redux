@@ -829,6 +829,8 @@ public namespace Ast
 
     class LiteralRegExp {
         const src : String;
+        function LiteralRegExp(src)
+            : src= src {}
     }
 
     type VAR_DEFN_TAG =

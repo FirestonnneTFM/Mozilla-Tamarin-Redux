@@ -577,6 +577,13 @@ use namespace intrinsic;
             return hd();
         }
 
+        function regexp() {
+            Util::assert( T0 === Token::BREAK && T1 === Token::NONE );
+            T0 = scan.regexp();
+            L0 = scan.lnCoord;
+            return hd();
+        }
+
         function hd ()
             tokenStore[T0].Token::kind;
 
@@ -1514,6 +1521,9 @@ use namespace intrinsic;
         function primaryExpression(beta:BETA) : Ast::EXPR {
             var expr;
 
+            if (hd() == Token::BREAK)
+                regexp();
+
             var pos = position();   // Record the source location before consuming the token
             switch (hd ()) {
             case Token::Null:
@@ -1545,30 +1555,17 @@ use namespace intrinsic;
                 next();
                 break;
             case Token::StringLiteral:
-                let tx = lexeme();
+                expr = new Ast::LiteralExpr (new Ast::LiteralString (lexeme()), pos);
                 next();
-                expr = new Ast::LiteralExpr (new Ast::LiteralString (tx), pos);
+                break;
+            case Token::RegexpLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralRegExp(lexeme()), pos);
+                next();
                 break;
             case Token::This:
-                next();
                 expr = new Ast::ThisExpr ();
+                next();
                 break;
-//            else
-//            if( lookahead(regexpliteral_token) )
-//            {
-//                var result = <LiteralRegExp value={scan.tokenText(match(regexpliteral_token))}/>
-//            }
-//            else
-//            if( lookahead(function_token) )
-//            {
-//                match(function_token);
-//                var first = null
-//                if( lookahead(identifier_token) )
-//                {
-//                    first = parseIdentifier();
-//                }
-//                var result = parseFunctionCommon(first);
-//            }
             case Token::LeftParen:
                 expr = parenListExpression();
                 break;

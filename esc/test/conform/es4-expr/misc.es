@@ -36,6 +36,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+print("STRING \
+MORE HERE \
+AND HERE");
+print("""Triple quoted
+"string"
+ends here""");
+print("""""""""""""""");
 print("DECIMAL " + 0.5m);
 print("DECIMAL " + 0m);
 print("DECIMAL " + 37m);
