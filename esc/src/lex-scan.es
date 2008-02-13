@@ -50,6 +50,7 @@ public namespace Lex
         var curIndex : int;
         var markIndex : int;
         var lnCoord : int;
+        var keyword_or_ident: Boolean;
         const notPartOfIdent = [];
 
         function syntaxError(msg) {
@@ -61,52 +62,84 @@ public namespace Lex
         }
 
         /* public */
-        function Scanner (src:String, filename:String)
-            : src = src + "\n"
+        function Scanner (src:String, filename:String, keyword_or_ident:Boolean = false)
+            : src = src
             , filename = filename
             , curIndex = 0
             , markIndex = 0
             , lnCoord = 1
+            , keyword_or_ident = keyword_or_ident
         {
             // The array notPartOfIdent maps ASCII and Unicode space
             // characters that are not part of an identifier to true.
             // It is used by the scanner to determine whether it has
             // seen a keyword.
 
+            // FIXME: Put this data in a common static, since we may
+            // create a number of lexers to re-scan identifiers
+            // containing escape sequences and it would be nice not to
+            // have to recreate the table every time.
+            //
+            // ESC doesn't have class initializers yet, so fix later.
+
             for ( let i=0 ; i < 128 ; i++ ) {
                 let c = String.fromCharCode(i);
                 if ( c >= "a" && c <= "z" ||
                      c >= "A" && c <= "Z" ||
                      c >= "0" && c <= "9" ||
-                     c == "_" || c == "$")
+                     c == "_" || c == "$" ||
+                     c == "\\")
                     continue;
                 notPartOfIdent[i] = true;
             }
-            notPartOfIdent[0xA0] = true;
-            // FIXME: also all unicode space characters go here!
+            let unicode_spaces = [0x00A0, 0x1680, 0x180E, 0x2000, 0x2001, 0x2002, 0x2003,
+                                  0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A,
+                                  0x202F, 0x205F, 0x3000,
+                                  0x2028, 0x2029];
+            for ( let i=0 ; i < unicode_spaces.length ; i++ )
+                notPartOfIdent[unicode_spaces[i]] = true;
         }
 
         /* public */
         function regexp () {
-            switch (src.charCodeAt(curIndex++)) {
-            case  47 /* Char::Slash */ :
-                return regexpFlags ();
-            case  10 /* Char::Newline */ :
-                if (curIndex == src.length)
-                    Lex::syntaxError("Unexpected end of program in regexp literal");
-            default:
-                return regexp ();
-            }
-        }
+            // Capture the initial '/'
+            markIndex = curIndex - 1;
 
-        function regexpFlags () {
-            if (Char::isIdentifierPart (src.charCodeAt(curIndex))) {
+            // Body
+            // Avoid switches here, the verifier gets confused (verifier bug).
+            while (true) {
+                let c = src.charCodeAt(curIndex++) | 0;
+                if (c == 47 /* Char::Slash */)
+                    break;
+                else if (c == 92 /* Char::Backslash */) {
+                    let d = src.charCodeAt(curIndex++) | 0;
+                    if (d == 10 /* Char::Newline */ ||
+                        d == 13 /* Char::CarriageReturn */ ||
+                        d == 0x2028 /* Char::LS */ ||
+                        d == 0x2029 /* Char::PS */)
+                        Lex::syntaxError("Illegal newline in regexp literal");
+                    else if (d == 0 /* Char::Nul */) {
+                        if (curIndex == src.length)
+                            Lex::syntaxError("Unexpected end of program in regexp literal");
+                    }
+                }
+                else if (c == 10 /* Char::Newline */ ||
+                         c == 13 /* Char::CarriageReturn */ ||
+                         c == 0x2028 /* Char::LS */ ||
+                         c == 0x2029 /* Char::PS */) {
+                    Lex::syntaxError("Illegal newline in regexp literal");
+                }
+                else if (c == 0 /* Char::Nul */) {
+                    if (curIndex == src.length)
+                        Lex::syntaxError("Unexpected end of program in regexp literal");
+                }
+            }
+
+            // Flags
+            while (Char::isUnicodeIdentifierPart(src.charCodeAt(curIndex) | 0))
                 ++curIndex;
-                return regexpFlags ();
-            }
-            else {
-                return Token::makeInstance (Token::RegexpLiteral,lexeme());
-            }
+
+            return Token::makeInstance (Token::RegexpLiteral,lexeme());
         }
 
         /* public */
@@ -124,7 +157,7 @@ public namespace Lex
         }
 
         function lexeme()
-            src.slice (markIndex,curIndex)
+            src.slice (markIndex,curIndex);
 
         /* Get the next token.
 
@@ -133,21 +166,49 @@ public namespace Lex
            lnCoord will be the line number of the
            ending character of the token.  This probably only matters
            for strings, and it would be good in that case to have the
-           starting position too.  */
+           starting position too.
+
+           How end-of-input is detected without checking explicitly:
+           We hop along the string reading the next char c.  Reading a
+           character past the end results in NaN.  c is converted to
+           int, eg c|0.  Now any NaN will be converted to 0.  Ergo we
+           check for end-of-input every time we see 0, which is
+           allowed in the input (string literals, regexp literals,
+           comments) but tends to be very rare in practice.
+
+           Note that subscanners that consume input until something
+           happens (like strings and comments) will need to perform
+           the conversion to int and check for 0 as well.
+
+           (For most practical purposes it's like there's a 0 sitting
+           at the end of the string.  When we get ESC ready for
+           production use we would replace the charCodeAt call by a
+           call on an inlinable primitive method that returns 0 if it
+           reads beyond the end of the string.  Then we do not pay for
+           int-to-double conversion, double returns, and double-to-int
+           conversion like now.)
+        */
 
         /* public */
         function start () : int {
             while (true) {
             bigswitch:
-                switch (src.charCodeAt(curIndex++)) {
+                switch (src.charCodeAt(curIndex++) | 0) {
+                case   0 /* Char::Nul */:
+                    if (curIndex >= src.length) {
+                        curIndex = src.length;
+                        return Token::EOS;
+                    }
+                    Lex::syntaxError("Illegal character in input: NUL");
 
                 case  10 /* Char::Newline */:
-                    if (curIndex === src.length)
-                        return Token::EOS;
                     lnCoord++;
                     continue;
 
                 case  13 /* Char::CarriageReturn */: 
+                    if (src.charCodeAt(curIndex) == 10 /* Char::Newline */)
+                        curIndex++;
+                    lnCoord++;
                     continue;
 
                 case  32 /* Char::Space */: 
@@ -1205,7 +1266,9 @@ public namespace Lex
                 // End generated code
 
                 case  92 /* Char::BackSlash*/:
-                    // FIXME: probably not quite right
+                    // In ES3, the only way backslash can appear in the input in
+                    // this position is as the first character of an identifier,
+                    // represented as a character escape.  So break out.
                     break bigswitch;
 
                 case  48 /* Char::Zero */: 
@@ -1221,22 +1284,42 @@ public namespace Lex
                     markIndex = --curIndex;
                     return numberLiteral ();
 
-                default:
+                default: {
+                    // Check for Unicode line terminators here in
+                    // order to avoid inhibiting the mickey-mouse
+                    // switch optimization in ESC.  (If the
+                    // optimizations were any good they would perform
+                    // this transformation automatically.)
+
+                    let c = src.charCodeAt(curIndex-1);
+                    if (c == 0x2028 /* Char::LS */ || c == 0x2029 /* Char::PS */) {
+                        lnCoord++;
+                        continue;
+                    }
+
                     break bigswitch;
+                }
                 }
 
                 // end of bigswitch.
 
                 // Identifiers are handled here (and only here).
                 //
-                // It is never necessary to check whether the
-                // identifier might be a keyword.  In cases where the
-                // input is "breakX" where X is a non-identifier
-                // character then break will in fact be returned first
-                // because of how the notPartOfIdentifier logic works,
-                // but since the X is not an identifier constituent
-                // there will be an immediate syntax error.  That's
-                // good enough for me.
+                // It is never necessary to check whether an
+                // identifier not containing an escape squeuence is a
+                // keyword.  In cases where the input is "breakX"
+                // where X is a non-identifier character then break
+                // will in fact be returned first because of how the
+                // notPartOfIdentifier logic works, but since the X is
+                // not an identifier constituent there will be an
+                // immediate syntax error.  That's good enough for me.
+
+                // If the scanner is used to re-check whether an identifier
+                // containing a backslash sequence looks like a keyword then
+                // we can stop here.
+
+                if (keyword_or_ident)
+                    return Token::Identifier;
 
                 --curIndex;
                 return identifier();
@@ -1320,7 +1403,7 @@ public namespace Lex
         function checkNextCharForNumber() {
             let c = src.charCodeAt(curIndex);
             if (c >= 48 /* Char::Zero */ && c <= 57 /* Char::Nine */ ||
-                Char::isIdentifierStart(c))
+                Char::isUnicodeIdentifierStart(c))
                 Lex::syntaxError("Illegal character following numeric literal: " + String.fromCharCode(c));
         }
 
@@ -1351,7 +1434,7 @@ public namespace Lex
         // before the '.'.
 
         function numberFraction(has_leading_digits) {
-            if (!decimalDigits (-1) && !leading)
+            if (!decimalDigits (-1) && !has_leading_digits)
                 Lex::syntaxError("Illegal number: must have digits before or after decimal point");
 
             switch (src.charCodeAt(curIndex)) {
@@ -1473,9 +1556,12 @@ public namespace Lex
             let cachedIndex = curIndex;
             let cachedSrc = src;
             while (true) {
-                switch (cachedSrc.charCodeAt(cachedIndex++)) {
-                case 10 /* Char::Newline */:
-                case 13 /* Char::Return */:
+                switch (cachedSrc.charCodeAt(cachedIndex++) | 0) {
+                case      0 /* Char::Nul */:
+                case     10 /* Char::Newline */:
+                case     13 /* Char::Return */:
+                case 0x2028 /* Char::LS */:
+                case 0x2029 /* Char::PS */:
                     cachedIndex--;
                     curIndex = cachedIndex;
                     return;
@@ -1484,62 +1570,117 @@ public namespace Lex
         }
 
         function blockComment () {
-            let newlines = false;
             let cachedIndex = curIndex;
             let cachedSrc = src;
 
             while (true) {
                 let c;
-                while ((c = cachedSrc.charCodeAt(cachedIndex++)) != 42 /* Char::Asterisk */ &&
+                while ((c = cachedSrc.charCodeAt(cachedIndex++) | 0) != 42 /* Char::Asterisk */ &&
+                       c != 0  /* Char::Nul */ &&
                        c != 10 /* Char::Newline */ &&
-                       c != 13 /* Char::Return */)
+                       c != 13 /* Char::CarriageReturn */ &&
+                       c != 0x2028 /* Char::LS */ &&
+                       c != 0x2029 /* Char::PS */)
                     ;
-                if (c == 42 /* Char::Asterisk */ && cachedSrc.charCodeAt(cachedIndex) == 47 /* Char::Slash */) {
-                    cachedIndex++;
-                    curIndex = cachedIndex;
-                    return newlines;
+                if (c == 42 /* Char::Asterisk */) {
+                    if (cachedSrc.charCodeAt(cachedIndex) == 47 /* Char::Slash */) {
+                        cachedIndex++;
+                        curIndex = cachedIndex;
+                        return;
+                    }
+                    continue;
                 }
-                if (c == 13 /* Char::Return */) {
+                if (c == 0) {
+                    if (cachedIndex >= cachedSrc.length) {
+                        curIndex = cachedSrc.length;
+                        Lex::syntaxError("End of input in block comment");
+                    }
+                    continue;
+                }
+                if (c == 13 /* Char::CarriageReturn */) {
                     if (cachedSrc.charCodeAt(cachedIndex) == 10 /* Char::Newline */)
                         cachedIndex++;
                     c = 10;
                 }
-                if (c == 10 /* Char::Newline */) {
-                    if (cachedIndex == cachedSrc.length) {
-                        cachedIndex--;
-                        curIndex = cachedIndex;
-                        Lex::syntaxError("End of input in block comment");
-                    }
-                    lnCoord++;
-                    newlines = true;
-                }
+                Util::assert(c == 10 /* Char::Newline */ || c == 0x2028 /* Char::LS */ || c == 0x2029 /* Char::PS */);
+                lnCoord++;
             }
         }
 
         function identifier () : int {
             let cachedIndex = curIndex;
             let cachedSrc = src;
-            let s = "";
+            
+            // The common case here is that an identifier is a
+            // sequence of simple ASCII characters, followed by a
+            // non-identifier-constituent ASCII character.  Optimize
+            // for this.
 
+            let c;
+            let start = cachedIndex;
+
+            while (((c = cachedSrc.charCodeAt(cachedIndex) | 0) >= 97 /* Char::a */ && c <= 122 /* Char::z */) ||
+                   (c >= 65 /* Char::A */ && c <= 90 /* Char::Z */) ||
+                   (c >= 48 /* Char::0 */ && c <= 57 /* Char::9 */ && cachedIndex > start) ||
+                   c === 95 /* Char::_ */ ||
+                   c === 36 /* Char::$ */)
+                cachedIndex++;
+
+            if (notPartOfIdent[c]) {
+                if (cachedIndex == start)
+                    Lex::syntaxError("Invalid character in input: " + src.charCodeAt(cachedIndex));
+                curIndex = cachedIndex;
+                return Token::makeInstance(Token::Identifier, src.substring(start,cachedIndex));
+            }
+
+            // Slow case.
+            //
+            // If at first we fail then try and try again...
+
+            cachedIndex = curIndex;
+            start = cachedIndex;
+
+            let s = "";
+            let has_backslashes = false;
             while (true) {
-                // Rip through identifier characters that require no work,
-                // do extra work only for backslash sequences.
-                // Cases ordered by most likely characters first.
-                let c;
-                let start = cachedIndex;
-                while (((c = cachedSrc.charCodeAt(cachedIndex)) >= 97 /* Char::a */ && c <= 122 /* Char::z */) ||
-                       (c >= 65 /* Char::A */ && c <= 90 /* Char::Z */) ||
-                       (c >= 48 /* Char::0 */ && c <= 57 /* Char::9 */) ||
-                       c === 95 /* Char::_ */ ||
-                       c === 36 /* Char::$ */ ||
-                       Char::isUnicodeIdentifierPart(c))
+                c = cachedSrc.charCodeAt(cachedIndex) | 0;
+                if (c == 92 /* Char::Backslash */) {
+                    has_backslashes = true;
                     cachedIndex++;
-                s += src.substring(start,cachedIndex);
-                if (c == 92 /* Char::backslash */) {
-                    // FIXME!
-                    Lex::internalError("Backslash support not implemented");
+                    c = cachedSrc.charCodeAt(cachedIndex) | 0;
+                    if (c == 117 /* Char::u */ || c == 85 /* Char::U */) {
+                        curIndex = cachedIndex;
+                        c = escapeSequence();
+                        cachedIndex = curIndex;
+                    }
+                    else
+                        Lex::internalError("Illegal escape sequence.");
                 }
-                break;
+                if (!(cachedIndex == start ? Char::isUnicodeIdentifierStart(c) : Char::isUnicodeIdentifierPart(c)))
+                    break;
+                cachedIndex++;
+                s += String.fromCharCode(c);
+            }
+                
+            if (has_backslashes) {
+                // The ES3 spec requires that identifiers constructed
+                // with escape sequences must be checked after the
+                // fact to see if they are keywords.  Here we create a
+                // new lexer to do that.
+
+                // FIXME (ticket material): It is unclear how this
+                // interacts with / should interact with the more
+                // liberal rules for keywords in ES4.  For example,
+                // "a.if" is legal in ES4.  That being true, does it
+                // make sense to prohibit \u0069f as an identifier?
+                //
+                // The obvious fix might be to interpret \u0069f as
+                // "if" and return Token::If here.
+
+                let subscan = new Scanner(s, filename, true);
+                if (subscan.start() != Token::Identifier)
+                    Lex::syntaxError("Illegal identifier: escape sequence makes it look like a keyword");
+                Util::assert(subscan.start() == Token::EOS);
             }
 
             if (s.length == 0)
@@ -1554,31 +1695,147 @@ public namespace Lex
             let c;
             let s = "";
 
+            if (cachedSrc.charCodeAt(cachedIndex) === delimiter && 
+                cachedSrc.charCodeAt(cachedIndex+1) === delimiter) {
+                curIndex = cachedIndex + 2;
+                return tripleStringLiteral(delimiter);
+            }
+
             while (true) {
                 let start = cachedIndex;
-                while ((c = cachedSrc.charCodeAt(cachedIndex)) !== delimiter && 
+                while ((c = cachedSrc.charCodeAt(cachedIndex) | 0) !== delimiter && 
                        c !== 92 /* Char::Backslash */ && 
+                       c !== 0  /* Char::Nul */ &&
                        c !== 10 /* Char::Newline */ &&
-                       c !== 13 /* Char::Return */)
+                       c !== 13 /* Char::Return */ &&
+                       c !== 0x2028 /* Char::LS */ &&
+                       c !== 0x2029 /* Char::PS */ )
                     cachedIndex++;
                 s += cachedSrc.substring(start, cachedIndex);
 
-                if (c === delimiter) {
+                switch (cachedSrc.charCodeAt(cachedIndex)) {
+                case delimiter:
                     curIndex = cachedIndex + 1;
                     return Token::makeInstance (Token::StringLiteral, s);
-                }
-                else if (c === 92 /* Char::Backslash */) {
-                    curIndex = cachedIndex + 1;
-                    s += String.fromCharCode(escapeSequence());
-                    cachedIndex = curIndex;
-                }
-                else
+
+                case  92 /* Char::Backslash */:
+                    cachedIndex++;
+
+                    switch (cachedSrc.charCodeAt(cachedIndex)) {
+                    case 13 /* Char::CarriageReturn */:
+                        cachedIndex++;
+                        if (cachedSrc.charCodeAt(cachedIndex) === 10 /* Char::Newline */)
+                            cachedIndex++;
+                        lnCoord++;
+                        continue;
+
+                    case 0x2028: /* Char::LS */
+                    case 0x2029: /* Char::PS */
+                    case 10 /* Char::Newline */:
+                        cachedIndex++;
+                        lnCoord++;
+                        continue;
+
+                    default:
+                        curIndex = cachedIndex;
+                        s += String.fromCharCode(escapeSequence());
+                        cachedIndex = curIndex;
+                        continue;
+                    }
+
+                case 0 /* Char::Nul */:
+                    if (cachedIndex < cachedSrc.length) {
+                        s += "\0";
+                        cachedIndex++;
+                        continue;
+                    }
+                    /* FALLTHROUGH */
+
+                default:
                     Lex::syntaxError("Unterminated string literal: " + s);
+                }
+            }
+        }
+
+        // The initial triplequote has been consumed.
+        //
+        // FIXME: A lot of overlap between this function and the
+        // regular string scanner: factor or parameterize?
+
+        function tripleStringLiteral(delimiter) {
+            let cachedSrc = src;
+            let cachedIndex = curIndex;
+            let c;
+            let s = "";
+
+            while (true) {
+                let start = cachedIndex;
+                while ((c = cachedSrc.charCodeAt(cachedIndex) | 0) !== delimiter && 
+                       c !== 92 /* Char::Backslash */ && 
+                       c !== 13 /* Char::Return */ &&
+                       c !== 0  /* Char::Nul */)
+                    cachedIndex++;
+                s += cachedSrc.substring(start, cachedIndex);
+
+                switch (cachedSrc.charCodeAt(cachedIndex)) {
+                case delimiter:
+                    if (cachedSrc.charCodeAt(cachedIndex+1) === delimiter &&
+                        cachedSrc.charCodeAt(cachedIndex+2) === delimiter &&
+                        cachedSrc.charCodeAt(cachedIndex+3) !== delimiter) {
+                        curIndex = cachedIndex + 3;
+                        return Token::makeInstance (Token::StringLiteral, s);
+                    }
+
+                    s += String.fromCharCode(delimiter);
+                    cachedIndex++;
+                    continue;
+
+                case 13 /* Char::CarriageReturn */:
+                    cachedIndex++;
+                    if (cachedSrc.charCodeAt(cachedIndex) === 10 /* Char::Newline */)
+                        cachedIndex++;
+                    s += String.fromCharCode(10);
+                    continue;
+
+                case  92 /* Char::Backslash */:
+                    cachedIndex++;
+
+                    switch (cachedSrc.charCodeAt(cachedIndex)) {
+                    case 13 /* Char::CarriageReturn */:
+                        cachedIndex++;
+                        if (cachedSrc.charCodeAt(cachedIndex) === 10 /* Char::Newline */)
+                            cachedIndex++;
+                        lnCoord++;
+                        continue;
+
+                    case 0x2028: /* Char::LS */
+                    case 0x2029: /* Char::PS */
+                    case 10 /* Char::Newline */:
+                        cachedIndex++;
+                        lnCoord++;
+                        continue;
+
+                    default:
+                        curIndex = cachedIndex;
+                        s += String.fromCharCode(escapeSequence());
+                        cachedIndex = curIndex;
+                        continue;
+                    }
+
+                case 0 /* Char::Nul */:
+                    if (cachedIndex < cachedSrc.length) {
+                        s += "\0";
+                        cachedIndex++;
+                        continue;
+                    }
+                    else
+                        Lex::syntaxError("Unterminated string literal: " + s);
+                }
             }
         }
 
         function escapeSequence () : int {
-            switch (src.charCodeAt(curIndex)) {
+            switch (src.charCodeAt(curIndex) | 0) {
             case  48 /* Char::Zero */:
             case  49 /* Char::One */:
             case  50 /* Char::Two */:
@@ -1626,13 +1883,15 @@ public namespace Lex
             case  92 /* Char::BackSlash */:
                 return src.charCodeAt(curIndex++);
 
+            case   0:
+                Lex::syntaxError("End of input in string");
+
             default:
                 Lex::syntaxError("Illegal escape character " + c);
             }
         }
 
-        function octalOrNulEscape () : uint
-        {
+        function octalOrNulEscape () : uint {
             switch (src.charCodeAt(curIndex)) {
             case  48 /* Char::Zero */:
                 curIndex++;
@@ -1680,44 +1939,4 @@ public namespace Lex
             return parseInt(lexeme(), 16);
         }
     }
-
-    function test()
-    {
-        print ("testing lex-scan.es");
-        let testCases = [ "break case catch continue default delete do else enum extends"
-                          , "false finally for function if in instanceof new null return"
-                          , "super switch this throw true try typeof var void while with"
-                          , "call cast const decimal double dynamic each eval final get has"
-                          , "implements import int interface internal intrinsic is let namespace"
-                          , "native Number override package precision private protected prototype public"
-                          , "rounding standard strict static to type uint undefined use xml yield"
-                          , ". .< .. ... ! != !== % %= & && &&= * *= + +- ++ - -- -="
-                          , "/ /= /> < <= </ << <<= = == === > >= >> >>= >>> >>>="
-                          , "^ ^= | |= || ||= : :: ( ) [ ] { } ~ @ , ; ?"
-                          , "/* hello nobody */ hello // goodbye world"
-                          , "0 0i 00 001u 0123d 045m 0x0 0xCAFEBABE 0x12345678u 1. .0 .2e+3 1.23m"
-                          // , "\\u0050 \\x50gh \\073 \\73 \\073123 \\7398"
-                          , "/abc/ 'hi' \"bye\" null break /def/xyz" ];
-
-        for (var i = 0; i < testCases.length; ++i) {
-            var scan = new Scanner (testCases[i],"test"+i);
-            var [tokens,coords] = scan.tokenList (scan.start);
-            print ("tokens ", tokens);
-            print ("coords ", coords);
-            for (var j=0; j<tokens.length; ++j) {
-                if (tokens[j] == Token::BREAK) {
-                    if (i == testCases.length-1) {   // if last test, then scan for regexps
-                        var [tokens,coords] = scan.tokenList (scan.regexp);
-                    }
-                    else {
-                        [tokens,coords] = scan.tokenList (scan.div);
-                    }
-                    print ("tokens ", tokens);
-                    print ("coords ", coords);
-                }
-            }
-            print ("scanned!");
-        }
-    }
-    //Lex::test ();
 }

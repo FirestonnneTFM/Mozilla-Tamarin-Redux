@@ -141,35 +141,32 @@ public namespace Char
     const Newline = "\n".charCodeAt(0);
     const CarriageReturn = "\r".charCodeAt(0);
 
-    function fromOctal (str) : int {
-        return parseInt (str);
-    }
-
-    function fromHex (str) : int {
-        return parseInt (str);
-    }
-
-    function isIdentifierStart(c) {
-        if (c >= Char::A && c <= Char::Z) return true;
-        else if (c >= Char::a && c <= Char::z) return true;
-        else if (c == Char::UnderScore) return true;
-        else if (c == Char::Dollar) return true;
-        return false;
-    }
-
-    function isDigit (c) {
-        if (c >= Char::Zero && c <= Char::Nine) return true;
-        return false;
-    }
-
-    function isIdentifierPart(c) {
-        if (isIdentifierStart (c)) return true;
-        else if (isDigit (c)) return true;
+    function isUnicodeIdentifierStart(c) {
+        if (c >= Char::A && c <= Char::Z) 
+            return true;
+        if (c >= Char::a && c <= Char::z) 
+            return true;
+        if (c == Char::UnderScore) 
+            return true;
+        if (c == Char::Dollar) 
+            return true;
+        // FIXME: More Unicode here!
         return false;
     }
 
     function isUnicodeIdentifierPart(c) {
-        return false; // FIXME
+        if (c >= Char::A && c <= Char::Z) 
+            return true;
+        if (c >= Char::a && c <= Char::z) 
+            return true;
+        if (c >= Char::Zero && c <= Char::Nine) 
+            return true;
+        if (c == Char::UnderScore) 
+            return true;
+        if (c == Char::Dollar) 
+            return true;
+        // FIXME: More Unicode here!
+        return false;
     }
 
     function test () {

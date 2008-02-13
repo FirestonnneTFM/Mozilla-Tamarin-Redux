@@ -567,13 +567,16 @@
 
         function cgRegExpLiteral({asm:asm, cp:cp}, {src:src}) {
             // src is "/.../flags"
-            // Slow...
+            //
+            // Note, ES4 semantics: recreate RE object every time.
+            // FIXME: re-compiles the RE every time.
             let p = src.lastIndexOf('/');
-            asm.I_getglobalscope();
-            asm.I_getproperty(ctx.emitter.RegExp_name);
+            // FIXME: We don't want findpropstrict because it can be used to spoof RegExp.
+            // But getglobalscope produces an object that does not have "RegExp" bound.
+            asm.I_findpropstrict(ctx.emitter.RegExp_name);
             asm.I_pushstring(cp.stringUtf8(src.substring(1,p)));
             asm.I_pushstring(cp.stringUtf8(src.substring(p+1)));
-            asm.I_construct(2);
+            asm.I_constructprop(ctx.emitter.RegExp_name, 2);
         }
 
         let {asm:asm, emitter:emitter} = ctx;
