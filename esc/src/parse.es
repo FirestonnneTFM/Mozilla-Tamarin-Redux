@@ -1376,10 +1376,11 @@ use namespace intrinsic;
                 name = makeIdentifier (lexeme(), cx.pragmas.openNamespaces);
                 next();
                 break;
+            case Token::IntLiteral:
+            case Token::UIntLiteral:
+            case Token::DoubleLiteral:
             case Token::DecimalLiteral:
-            case Token::DecimalIntegerLiteral:
-            case Token::HexIntegerLiteral:
-                Parse::internalError(this, "Unsupported fieldName " + hd());
+                Parse::internalError(this, "Unsupported numeric field name" + hd());
                 break;
             default:
                 if (isReserved (hd ())) {
@@ -1527,37 +1528,21 @@ use namespace intrinsic;
                 next();
                 expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (false), pos);
                 break;
-            case Token::DecimalLiteral:
-                let tx = lexeme();
-
-                // This is all bogus.  All this should be handled in
-                // the lexer, and the lexer should only return
-                // DecimalLiteral if the literal is supposed to
-                // encoded as an ES4 'decimal'.
-
-                // FIXME.  The AVM2 can't handle decimal literals yet.
-
-                let n = 0;
-                if (tx.charAt(0) == "0") {
-                    if (tx.charAt(1) == "x" || tx.charAt(1) == "X")
-                        n = parseInt(tx);
-                    else
-                        n = parseInt(tx, 8);
-                }
-                else
-                    n = parseFloat(tx);
-                let lit = null;
-                if (Math.floor(n) === n) {
-                    if (n >= -0x80000000 && n <= 0x7FFFFFFF)
-                        lit = new Ast::LiteralInt(int(n));
-                    else if (n >= 0x80000000 && n <= 0xFFFFFFFF)
-                        lit = new Ast::LiteralUInt(uint(n));
-                }
-                if (lit == null)
-                    lit = new Ast::LiteralDouble(n);
-
+            case Token::IntLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralInt(parseInt(lexeme())), pos);
                 next();
-                expr = new Ast::LiteralExpr (lit, pos);
+                break;
+            case Token::UIntLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralUInt(parseInt(lexeme())), pos);
+                next();
+                break;
+            case Token::DoubleLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralDouble(parseFloat(lexeme())), pos);
+                next();
+                break;
+            case Token::DecimalLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralDecimal(new decimal(lexeme())), pos);
+                next();
                 break;
             case Token::StringLiteral:
                 let tx = lexeme();

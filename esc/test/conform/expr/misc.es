@@ -58,7 +58,8 @@ x.f2();
 
 // literals
 print("INT " + 37);
-print("DOUBLE " + 3.14159)
+print("DOUBLE " + 3.14159);
+print("DOUBLE " + 0.5);
 print("HEX " + 0xDEADBEEF);
 print("STRING HELLO");
 print("XESCAPE \x48\x45\x4C\x4C\x4F");
