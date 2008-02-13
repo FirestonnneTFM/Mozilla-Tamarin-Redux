@@ -292,6 +292,7 @@ namespace Emit;
                 return {val:val, kind:CONSTANT_Double};
             }
             case(ld:LiteralDecimal) {
+                // FIXME: when we support decimal...
                 let val = constants.float64(ld.decimalValue);
                 return {val:val, kind:CONSTANT_Double};
             }
@@ -301,7 +302,7 @@ namespace Emit;
             }
             case(lu:LiteralUInt) {
                 let val = constants.uint32(lu.uintValue);
-                return {val:val, kind:CONSTANT_UInteger};
+                return {val:val, kind:CONSTANT_UInt};
             }
             case(lb:LiteralBoolean) {
                 let val = (lb.booleanValue ? CONSTANT_True : CONSTANT_False);
