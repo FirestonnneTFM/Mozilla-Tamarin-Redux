@@ -398,7 +398,7 @@ namespace avmplus
 					toplevel->throwTypeError(kXMLBadQName, core->toErrorString(tagName));
 				}
 
-				prefix = core->internAlloc (tagName, (ptr - tagName));
+				prefix = core->internAlloc (tagName, (int)(ptr - tagName));
 				break;
 			}
 

@@ -86,7 +86,7 @@ namespace avmshell
 		rewind(fp);
 
 		unsigned char *c = new unsigned char[len+1];
-		len = fread(c, 1, len, fp);
+		len = (long)fread(c, 1, len, fp);
 		c[len] = 0;
 		
 		fclose(fp);

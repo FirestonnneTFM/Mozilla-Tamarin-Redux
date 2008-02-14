@@ -490,7 +490,7 @@ namespace MMgc
 	{
 		Region *region = AddrToRegion(item);
 		if(region) {
-			int index = ((char*)item - region->baseAddr) / kBlockSize;
+			size_t index = ((char*)item - region->baseAddr) / kBlockSize;
 			HeapBlock *b = blocks + region->blockId + index;
 			GCAssert(item >= b->baseAddr && item < b->baseAddr + b->size * GCHeap::kBlockSize);
 			return b;
@@ -880,7 +880,7 @@ namespace MMgc
 		if (lastRegion != NULL)
 #endif
 		{
-			commitAvail = (lastRegion->reserveTop - lastRegion->commitTop) / kBlockSize;
+			commitAvail = (int)((lastRegion->reserveTop - lastRegion->commitTop) / kBlockSize);
 			
 			// Can this request be satisfied purely by committing more memory that
 			// is already reserved?

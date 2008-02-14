@@ -56,7 +56,7 @@ namespace MMgc
 		m_maxAlloc      = 0;
 
 #ifdef MEMORY_INFO
-		itemSize += DebugSize();
+		itemSize += (int)DebugSize();
 #endif
 
 		m_itemSize      = itemSize;
@@ -64,7 +64,7 @@ namespace MMgc
 		// The number of items per block is kBlockSize minus
 		// the # of pointers at the base of each page.
 		size_t usableSpace = GCHeap::kBlockSize - kBlockHeadSize;
-		m_itemsPerBlock = usableSpace / m_itemSize;
+		m_itemsPerBlock = (int)(usableSpace / m_itemSize);
 	}
 
 	FixedAlloc::~FixedAlloc()

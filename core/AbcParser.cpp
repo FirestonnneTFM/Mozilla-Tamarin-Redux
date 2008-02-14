@@ -134,7 +134,7 @@ namespace avmplus
 			if (base->sizeofInstance > sizeof(ScriptObject))
 			{
 				// non-Object base class uses a subclass of ScriptObject, so use that size.
-				return base->sizeofInstance;
+				return (int)base->sizeofInstance;
 			}
 			base = base->base;
 		}
@@ -691,7 +691,7 @@ namespace avmplus
 		for (int i=0; i < methodCount; i++)
         {
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 			// MethodInfo
 			int param_count = readU30(pos);
@@ -815,7 +815,7 @@ namespace avmplus
 			pool->methods.set(i, info);
 		}
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.methodsSize += (pos-startpos);
+		core->sprof.methodsSize += (int)(pos-startpos);
 		#endif
     }
 	
@@ -912,7 +912,7 @@ namespace avmplus
 		for (int i=0; i < bodyCount; i++)
         {
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 
 			uint32 method_info = readU30(pos);
@@ -1085,7 +1085,7 @@ namespace avmplus
 		}
 
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.bodiesSize += (pos-startpos);
+		core->sprof.bodiesSize += (int)(pos-startpos);
 		#endif
     }
 
@@ -1115,7 +1115,7 @@ namespace avmplus
 		for(uint32 i = 1; i < int_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 			// S32 value
 			cpool_int.set(i, readS32(pos));
@@ -1130,7 +1130,7 @@ namespace avmplus
 
 		}
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolIntSize = (pos-startpos);
+		core->sprof.cpoolIntSize = (int)(pos-startpos);
 		#endif
 
 		uint32 uint_count = readU30(pos);
@@ -1148,7 +1148,7 @@ namespace avmplus
 		for(uint32 i = 1; i < uint_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 			// U32 value
 			cpool_uint.set(i, (unsigned)readS32(pos));
@@ -1165,7 +1165,7 @@ namespace avmplus
 
 		}
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolUIntSize = (pos-startpos);
+		core->sprof.cpoolUIntSize = (int)(pos-startpos);
 		#endif
 
 		uint32 double_count = readU30(pos);
@@ -1183,7 +1183,7 @@ namespace avmplus
 		for(uint32 i = 1; i < double_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 			// double value
 			union {
@@ -1213,7 +1213,7 @@ namespace avmplus
 		}
 
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolDoubleSize = (pos-startpos);
+		core->sprof.cpoolDoubleSize = (int)(pos-startpos);
 		#endif
 
 		if (version < FIRSTVERSIONWITHDECIMAL) {
@@ -1239,7 +1239,7 @@ namespace avmplus
 			for(uint32 i = 1; i < decimal_count; ++i)
 			{
 #ifdef AVMPLUS_VERBOSE
-				int offset = pos-startpos;
+				int offset = (int)(pos-startpos);
 #endif
 				decimal128 d128;
 				for (int32 j = 15; j >= 0; j--) {
@@ -1269,7 +1269,7 @@ namespace avmplus
 #endif
 			}
 #ifdef AVMPLUS_PROFILE
-            core->sprof.cpoolDecimalSize = (pos - startpos);
+            core->sprof.cpoolDecimalSize = (int)(pos - startpos);
 #endif
 		}
 
@@ -1289,7 +1289,7 @@ namespace avmplus
 		for(uint32 i = 1; i < string_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 
 			// number of characters
@@ -1321,7 +1321,7 @@ namespace avmplus
 
 		}
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolStrSize = (pos-startpos);
+		core->sprof.cpoolStrSize = (int)(pos-startpos);
 		#endif
 
 		uint32 ns_count = readU30(pos);
@@ -1340,7 +1340,7 @@ namespace avmplus
 		for( uint32 i = 1; i < ns_count; ++i )
 		{
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 #ifdef SAFE_PARSE
 			// check to see if we are trying to read past the file end or the beginning.
@@ -1413,7 +1413,7 @@ namespace avmplus
 #endif
 		}
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolNsSize = (pos-startpos);
+		core->sprof.cpoolNsSize = (int)(pos-startpos);
 		#endif
 
 
@@ -1432,7 +1432,7 @@ namespace avmplus
 		for( uint32 i = 1; i < ns_set_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 			uint32 ns_count = readU30(pos);
 			
@@ -1462,7 +1462,7 @@ namespace avmplus
 #endif
 		}
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolNsSetSize = (pos-startpos);
+		core->sprof.cpoolNsSetSize = (int)(pos-startpos);
 		#endif
 
 		uint32 mn_count = readU30(pos);
@@ -1481,7 +1481,7 @@ namespace avmplus
 		for(uint32 i = 1; i < mn_count; ++i )
 		{
 #ifdef AVMPLUS_VERBOSE
-			int offset = pos-startpos;
+			int offset = (int)(pos-startpos);
 #endif
 #ifdef SAFE_PARSE
 			// check to see if we are trying to read past the file end or the beginning.
@@ -1566,7 +1566,7 @@ namespace avmplus
 #endif
 		}
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolMnSize = (pos-startpos);
+		core->sprof.cpoolMnSize = (int)(pos-startpos);
 		#endif
 
     }
@@ -1713,7 +1713,7 @@ namespace avmplus
 			traits->scope = ScopeTypeChain::create(core->GetGC(),NULL,0);
 		}
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.scriptsSize = (pos-startpos);
+		core->sprof.scriptsSize = (int)(pos-startpos);
 		#endif
 
 		return true;
@@ -1937,7 +1937,7 @@ namespace avmplus
         }
 
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.instancesSize = (pos-startpos);
+		core->sprof.instancesSize = (int)(pos-startpos);
 		#endif
 
 		return true;
@@ -2027,7 +2027,7 @@ namespace avmplus
         }
 
 		#ifdef AVMPLUS_PROFILE
-		core->sprof.classesSize = (pos-startpos);
+		core->sprof.classesSize = (int)(pos-startpos);
 		#endif
     }
 

@@ -306,7 +306,7 @@ namespace avmplus
 		// this can't make any allocations, its called from sensitive areas (like from 
 		// the GC marking routines).  For one we'll recurse but also GC state can get messed
 		// up if for instance the allocation triggers a collection
-		Stringp name_str = core->findInternedString(name, strlen(name));
+		Stringp name_str = core->findInternedString(name, (int)strlen(name));
 		if(name_str == NULL)
 			return NULL;
 		Atom a = fakeMethodInfos->get(name_str->atom());
@@ -360,7 +360,7 @@ namespace avmplus
 				}
 				if (s.typeOrVTable > 7 && !GC::GetMark((void*)s.typeOrVTable))
 				{
-					GCWorkItem item((void*)s.typeOrVTable, GC::Size((void*)s.typeOrVTable), true);
+					GCWorkItem item((void*)s.typeOrVTable, (uint32)GC::Size((void*)s.typeOrVTable), true);
 					core->gc->PushWorkItem(item);
 				}
 			}
