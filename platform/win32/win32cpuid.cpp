@@ -48,6 +48,7 @@
 #define CPUID_SSE2_FLAG 0x04000000 //; Is IA SSE2 bit (Bit 26 of EDX) in feature flags set
 static BOOL gP4OsSupport = FALSE;
 
+#ifndef _WIN64
 EXCEPTION_DISPOSITION __cdecl MyExceptionHandlerSSE2(struct _EXCEPTION_RECORD * /*ExceptionRecord*/,
 											     void * /*EstablisherFrame*/,
 											     struct _CONTEXT *ContextRecord,
@@ -60,9 +61,14 @@ EXCEPTION_DISPOSITION __cdecl MyExceptionHandlerSSE2(struct _EXCEPTION_RECORD * 
 	ContextRecord->Eip += 3;
 	return ExceptionContinueExecution;
 }
+#endif
 
 bool P4Available()
 {
+#ifdef _M_AMD64
+	// we support all this stuff
+	return true;
+#else
 	long featureFlags = 0;
 	//arun
 	BOOL procType = 0;
@@ -199,6 +205,6 @@ end_get_cpuid:
 	}
 
 	return bHwSupport && bOsSupport && procType;
-
+#endif
 }
 

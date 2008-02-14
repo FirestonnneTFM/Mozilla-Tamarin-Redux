@@ -85,8 +85,28 @@
 #endif 
 
 #elif defined MMGC_AMD64
+#ifdef _MSC_VER // inline assembler not allowed in x64 MSVC
+struct saveregs {
+	size_t	save1;
+	size_t	save2;
+	size_t	save3;
+	size_t	save4;
+	size_t	save5;
+	size_t	save6;
+	size_t	save7;
+	size_t	save8;
+};
+extern "C" void saveRegs64(void* saves, const void* stack, int* size);
+
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+		saveregs saves;\
+		saves.save1 = 0;\
+		saveRegs64(&saves, &_stack, (int*)&_size);
+
+#else
 // 64bit - r8-r15?
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+		do { \
 		volatile auto int64 save1,save2,save3,save4,save5,save6,save7;\
 		asm("mov %%rax,%0" : "=r" (save1));\
 		asm("mov %%rbx,%0" : "=r" (save2));\
@@ -96,7 +116,8 @@
 		asm("mov %%rsi,%0" : "=r" (save6));\
 		asm("mov %%rdi,%0" : "=r" (save7));\
 		asm("mov %%rsp,%0" : "=r" (_stack));\
-		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)	
+#endif
 
 #elif defined MMGC_PPC
 
@@ -238,7 +259,7 @@ namespace MMgc
 		const void *object;
 		size_t size;
 
-		GCWorkItem GetWorkItem() const { return GCWorkItem(object, size, false); }
+		GCWorkItem GetWorkItem() const { return GCWorkItem(object, (uint32)size, false); }
 	};
 
 	/**
@@ -1186,7 +1207,11 @@ namespace MMgc
 		{
 			uintptr index = (addr-memStart) >> 12;
 
+#ifdef MMGC_AMD64
+			GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
+#else
 			GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
+#endif
 			// shift amount to determine position in the byte (times 2 b/c 2 bits per page)
 			uint32 shiftAmount = (index&0x3) * 2;
 			// 3 ... is mask for 2 bits, shifted to the left by shiftAmount
@@ -1268,7 +1293,7 @@ namespace MMgc
 		public:
 		// sometimes useful for mutator to call this
 		/** @access Requires(exclusiveGC) */
-		void Trace(const void *stackStart=NULL, size_t stackSize=0);
+		void Trace(const void *stackStart=NULL, uint32 stackSize=0);
 		private:
 #endif
 

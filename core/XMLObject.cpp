@@ -335,13 +335,13 @@ namespace avmplus
 					while (!String::isSpace(nameEnd[0]) && (nameEnd[0]))
 						nameEnd++;
 
-					Stringp name = core->internString (new (core->GetGC()) String(nameStart, nameEnd - nameStart));
+					Stringp name = core->internString (new (core->GetGC()) String(nameStart, (int)(nameEnd - nameStart)));
 
 					// Skip over any white space between name and rest of PI
 					while (String::isSpace(nameEnd[0]) && nameEnd[0])
 						nameEnd++;
 
-					String *val = new (gc) String(nameEnd, tag.text->length()-(nameEnd-nameStart));
+					String *val = new (gc) String(nameEnd, tag.text->length()-(int)(nameEnd-nameStart));
 					pNewElement = new (gc) PIE4XNode(0, val); 
 					pNewElement->setQName (core, name, core->publicNamespace);
 					if (!m_node)
@@ -2984,7 +2984,7 @@ namespace avmplus
 			for (uint32 i = 0; i < nsArray->getLength(); i++)
 			{
 				Namespace *ns = AvmCore::atomToNamespace (nsArray->getAt(i));
-				AvmAssert(uintptr(ns));
+				AvmAssert(ns!=NULL);
 #ifdef STRING_DEBUG
 				Stringp s1 = ns->getURI();
 				Stringp s2 = uri;

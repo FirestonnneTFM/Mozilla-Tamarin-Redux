@@ -183,7 +183,7 @@ namespace avmplus
 			{
 				// copy base offsets and adjust for sizeofInstance
 				AvmAssert(sizeofInstance >= base->sizeofInstance);
-				int delta = sizeofInstance - base->sizeofInstance;
+				int delta = (int)(sizeofInstance - base->sizeofInstance);
 
 				for (int i=0; i < firstSlot; i++)
 				{

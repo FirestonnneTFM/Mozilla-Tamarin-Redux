@@ -91,6 +91,8 @@ namespace avmplus
 
 #ifdef FEATURE_BUFFER_GUARD
 
+	class GenericGuard;
+
 	// Generic Guard class
 	class GenericGuard
 	{
@@ -109,12 +111,23 @@ namespace avmplus
 		virtual bool handleException(byte*) = 0;
 		#endif // AVMPLUS_UNIX
 
+#ifdef _WIN64
+		GenericGuard* prevGuard;
+		GenericGuard* nextGuard;
+#endif
+
 	protected:
 		void init();
+#ifdef _WIN64
+		virtual void registerHandler()=0;
+		virtual void unregisterHandler()=0;
+#else
 		void registerHandler();
 		void unregisterHandler();
+#endif
 		
 		#ifdef AVMPLUS_WIN32
+		#ifndef _WIN64
 		typedef struct _ExceptionRegistrationRecord
 		{
 			DWORD prev;
@@ -125,13 +138,17 @@ namespace avmplus
 		ExceptionRegistrationRecord;
 
 		ExceptionRegistrationRecord record;
+		#endif
 
 		// Platform specific code follows
+#ifdef _WIN64
+		static LONG __stdcall guardRoutine(PEXCEPTION_POINTERS pexp);
+#else
 		static int __cdecl guardRoutine(struct _EXCEPTION_RECORD *exceptionRecord,
 										void *establisherFrame,
 										struct _CONTEXT *contextRecord,
 										void *dispatcherContext);
-
+#endif
 		virtual int handleException(struct _EXCEPTION_RECORD *exceptionRecord,
 									void *establisherFrame,
 									struct _CONTEXT *contextRecord,
@@ -199,6 +216,11 @@ namespace avmplus
 		virtual bool handleException(byte*);
 		#endif // AVMPLUS_UNIX
 
+		#ifdef _WIN64
+		virtual void registerHandler();
+		virtual void unregisterHandler();
+		#endif
+
 	protected:
         #ifdef AVMPLUS_WIN32
 		virtual int handleException(struct _EXCEPTION_RECORD *exceptionRecord,
@@ -228,6 +250,10 @@ namespace avmplus
 
 	protected:
 		#ifdef AVMPLUS_WIN32
+		#ifdef _WIN64
+		virtual void registerHandler();
+		virtual void unregisterHandler();
+		#endif
 		virtual int handleException(struct _EXCEPTION_RECORD *exceptionRecord,
 									void *establisherFrame,
 									struct _CONTEXT *contextRecord,

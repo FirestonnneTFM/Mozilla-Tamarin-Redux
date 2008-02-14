@@ -640,7 +640,7 @@ namespace avmshell
 
 		while (len > 0)
 		{
-			int actual = fread(c, 1, len, fp);
+			int actual = (int)fread(c, 1, len, fp);
 			if (actual > 0)
 			{
 				b->fill(c, actual);

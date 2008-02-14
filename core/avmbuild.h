@@ -75,9 +75,18 @@
 #endif
 
 #ifdef AVMPLUS_WIN32
+  #ifdef _WIN64
+	#ifndef AVMPLUS_64BIT
+	  #define AVMPLUS_64BIT
+	#endif
+	#ifndef AVMPLUS_AMD64
+	  #define AVMPLUS_AMD64
+	#endif
+  #else
   #ifndef AVMPLUS_IA32
     #define AVMPLUS_IA32
   #endif
+#endif
 #endif
 
 /// START: CRUFT 
@@ -91,7 +100,7 @@
 
 // FEATURE_BUFFER_GUARD not yet supported on ARM
 #ifdef AVMPLUS_ARM
-  #undef FEATURE_BUFFER_GUARD
+//  #undef FEATURE_BUFFER_GUARD
 #endif
 
 // FEATURE_BUFFER_GUARD not supported on Mac CFM

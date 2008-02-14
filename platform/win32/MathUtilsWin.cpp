@@ -38,7 +38,10 @@
 #include "avmplus.h"
 #include <math.h>
 
+#ifndef _WIN64
 #define X86_MATH
+#endif
+
 
 namespace avmplus
 {
@@ -187,7 +190,7 @@ namespace avmplus
 #endif /* X86_MATH */
 	}
 
-#ifdef X86_MATH
+#if defined(X86_MATH) || defined(_WIN64)
 	/* @(#)s_frexp.c 5.1 93/09/24 */
 	/*
 	 * ====================================================
@@ -279,18 +282,18 @@ namespace avmplus
 		_asm _emit 0xDD; // fstp st(1);
 		_asm _emit 0xD9;
 	}
+#else
+extern "C" {
+	double modInternal(double x, double y);
+}
 #endif /* X86_MATH */
 	
 	double MathUtils::mod(double x, double y)
 	{
-#ifdef X86_MATH
 		if (!y) {
 			return nan();
 		}
 		return modInternal(x, y);
-#else
-		return ::fmod(x, y);
-#endif /* X86_MATH */
 	}
 
 	// Std. library pow()
@@ -364,6 +367,7 @@ namespace avmplus
 #endif /* X86_MATH */
 	}
 
+#ifdef X86_MATH
 	int32 MathUtils::real2int(double value)
 	{
 		uint16 oldcw, newcw;
@@ -378,4 +382,6 @@ namespace avmplus
 		_asm fldcw [oldcw];
 		return intval;
 	}
+#endif
+
 }
