@@ -4032,30 +4032,34 @@ use namespace intrinsic;
 
         */
 
-        function functionDefinition (tau: TAU, omega: OMEGA, kind, ns, isFinal, isOverride, isPrototype, isStatic, isAbstract)
-            : Ast::STMTS
-        {
+        function functionDefinition (tau: TAU, omega: OMEGA, kind, attrs: ATTRS) : Ast::STMTS {
             eat (Token::Function);
 
             cx.enterFunction();
 
-            var nd1 = functionName ();
-            var nd2 = functionSignature ();
+            var name = functionName ();
+            var signature = functionSignature ();
+
+            var body;
 
             cx.enterVarBlock ();
-            var nd3 = functionBody (allowIn, omega);
+            if (attrs.native) {
+                semicolon(fullStmt);
+                body = new Ast::Block(null, []);
+            }
+            else 
+                body = functionBody (allowIn, omega);
             var vars = cx.exitVarBlock ();
-            
             var attr = cx.exitFunction ();
 
-            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,hasRest:hasRest,numparams:numparams} = nd2;
-            var func = new Ast::Func (nd1,false,nd3,params,numparams,vars,defaults,resultType,attr);
+            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,hasRest:hasRest,numparams:numparams} = signature;
+            var func = new Ast::Func (name, attrs.native, body, params, numparams, vars, defaults, resultType, attr);
 
-            var name = new Ast::PropName ({ns:ns,id:nd1.ident});
-            var fxtr = new Ast::MethodFixture (func,Ast::anyType,true,isOverride,isFinal);
+            var name = new Ast::PropName ({ns:attrs.ns, id:name.ident});
+            var fxtr = new Ast::MethodFixture (func, Ast::anyType, true, attrs.override, attrs.final);
             switch (tau) {
             case classBlk:
-                cx.addVarFixtures ([[name,fxtr]], isStatic);
+                cx.addVarFixtures ([[name,fxtr]], attrs.static);
                 break;
             default:
                 cx.addVarFixtures ([[name,fxtr]]);
@@ -4106,24 +4110,31 @@ use namespace intrinsic;
 
         */
 
-        function constructorDefinition (omega, ns) : Ast::STMTS {
+        function constructorDefinition (omega, ns, attrs) : Ast::STMTS {
             eat (Token::Function);
 
             cx.enterFunction();
-            var nd1 = identifier ();
-            var nd2 = constructorSignature ();
+
+            var name = identifier ();
+            var signature = constructorSignature ();
+
+            var body;
 
             cx.enterVarBlock ();
-            var nd3 = functionBody (allowIn, omega);
+            if (attrs.native) {
+                semicolon(fullStmt);
+                body = new Ast::Block(null, []);
+            }
+            else
+                body = functionBody (allowIn, omega);
             var vars = cx.exitVarBlock ();
-
             var attr = cx.exitFunction();
 
-            var {params:params,defaults:defaults,hasRest:hasRest,settings:settings,superArgs:superArgs,numparams:numparams} = nd2;
+            var {params:params,defaults:defaults,hasRest:hasRest,settings:settings,superArgs:superArgs,numparams:numparams} = signature;
 
             // print ("superArgs=",superArgs);
             // print ("settings=",settings);
-            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:nd1},false,nd3,params,numparams,vars,defaults,Ast::voidType,attr);
+            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:name}, attrs.native, body, params, numparams, vars, defaults, Ast::voidType, attr);
             var ctor = new Ast::Ctor (settings,superArgs,func);
 
             if (cx.ctor !== null)
@@ -4931,11 +4942,9 @@ use namespace intrinsic;
 
             case Token::Function:
                 if (isCurrentClassName (lexeme2())) 
-                    nd1 = constructorDefinition (omega, cx.pragmas.defaultNamespace);
+                    nd1 = constructorDefinition (omega, cx.pragmas.defaultNamespace, defaultAttrs());
                 else 
-                    nd1 = functionDefinition (tau, omega, new Ast::Var
-                                              , cx.pragmas.defaultNamespace
-                                              , false, false, false, false, false);
+                    nd1 = functionDefinition (tau, omega, new Ast::Var, defaultAttrs());
                 //ts1 = semicolon (ts1,omega);
                 break;
 
@@ -5058,11 +5067,9 @@ use namespace intrinsic;
 
             case Token::Function:
                 if (isCurrentClassName (lexeme2())) 
-                    nd2 = constructorDefinition (omega, attrs.ns);
+                    nd2 = constructorDefinition (omega, attrs.ns, attrs);
                 else 
-                    nd2 = functionDefinition (tau, omega, new Ast::Var
-                                              , attrs.ns, attrs.final, attrs.override
-                                              , attrs.prototype, attrs.static, attrs.abstract);
+                    nd2 = functionDefinition (tau, omega, new Ast::Var, attrs);
                 //ts2 = semicolon (ts2,omega);
                 break;
 
@@ -5079,7 +5086,7 @@ use namespace intrinsic;
                 break;
 
             default:  // label, attribute, or expr statement
-                let xattrs = attribute (tau,defaultAttrs());
+                let xattrs = attribute (tau,attrs);
                 if (newline ()) 
                     Parse::syntaxError(this, "error unexpected newline before " + lexeme())
                 nd2 = annotatableDirective (tau,omega,xattrs);
