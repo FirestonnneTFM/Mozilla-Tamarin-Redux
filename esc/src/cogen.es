@@ -322,69 +322,71 @@ namespace Gen;
      *  Generate code for a ctor.
      */
     function cgCtor(ctx, c, instanceInits) {
-        let formals_type = extractFormalTypes(ctx, c.func);
-        let method = new Method(ctx.script.e, formals_type, "$construct", false, c.func.attr.uses_arguments);
-        let asm = method.asm;
+        let f = c.func;
+        let formals_type = extractFormalTypes(ctx, f);
+        let method = new Method(ctx.script.e, formals_type, "$construct", false, f.attr.uses_arguments, f.isNative);
 
-        let defaults = extractDefaultValues(ctx, c.func);
+        let defaults = extractDefaultValues(ctx, f);
         if( defaults.length > 0 )
-        {
             method.setDefaults(defaults);
-        }
         
-        let t = asm.getTemp();
-        // FIXME: record that scopes must be restored here!
-        let ctor_ctx = new CTX(asm, {tag:"function", functype:"iinit", scope_reg:t}, method);
+        if (!f.isNative) {
+            let asm = method.asm;
+            let t = asm.getTemp();
+            // FIXME: record that scopes must be restored here!
+            let ctor_ctx = new CTX(asm, {tag:"function", functype:"iinit", scope_reg:t}, method);
        
-        cgDebugFile(ctor_ctx);
-        asm.I_getlocal(0);
-        asm.I_dup();
-        // Should this be instanceInits.inits only?
-        asm.I_pushscope();  // This isn't quite right...
-        for( let i = 0; i < instanceInits.length; i++ ) {
-            cgExpr(ctor_ctx, instanceInits[i]);
-            asm.I_pop();
+            cgDebugFile(ctor_ctx);
+            asm.I_getlocal(0);
+            asm.I_dup();
+            // Should this be instanceInits.inits only?
+            asm.I_pushscope();  // This isn't quite right...
+            for( let i = 0; i < instanceInits.length; i++ ) {
+                cgExpr(ctor_ctx, instanceInits[i]);
+                asm.I_pop();
+            }
+            cgHead(ctor_ctx, instanceInits);
+            asm.I_popscope();
+            //cgHead(ctor_ctx, instanceInits.inits, true);
+
+            // Push 'this' onto scope stack
+            //asm.I_getlocal(0);
+            //asm.I_pushscope();
+            // Create the activation object, and initialize params
+            asm.I_newactivation();
+            asm.I_dup();
+            asm.I_setlocal(t);
+            asm.I_dup();
+            asm.I_pushwith();
+
+            setupArguments(ctor_ctx, f);
+
+            cgHead(ctor_ctx, f.params);
+
+            for ( let i=0 ; i < c.settings.length ; i++ ) {
+                cgExpr(ctor_ctx, c.settings[i]);
+                asm.I_pop();
+            }
+
+            // Eval super args, and call super ctor
+            asm.I_getlocal(0);
+            let nargs = c.superArgs.length;
+            for ( let i=0 ; i < nargs ; i++ )
+                cgExpr(ctx, c.superArgs[i]);
+            asm.I_constructsuper(nargs);
+        
+            asm.I_popscope();
+            asm.I_getlocal(0);
+            asm.I_pushscope();  //'this'
+            asm.I_pushscope();  //'activation'
+        
+            cgHead(ctor_ctx, f.vars);
+
+            cgBlock(ctor_ctx, f.block);
+        
+            asm.I_kill(t);
         }
-        cgHead(ctor_ctx, instanceInits);
-        asm.I_popscope();
-        //cgHead(ctor_ctx, instanceInits.inits, true);
 
-        // Push 'this' onto scope stack
-        //asm.I_getlocal(0);
-        //asm.I_pushscope();
-        // Create the activation object, and initialize params
-        asm.I_newactivation();
-        asm.I_dup();
-        asm.I_setlocal(t);
-        asm.I_dup();
-        asm.I_pushwith();
-
-        setupArguments(ctor_ctx, c.func);
-
-        cgHead(ctor_ctx, c.func.params);
-
-        for ( let i=0 ; i < c.settings.length ; i++ ) {
-            cgExpr(ctor_ctx, c.settings[i]);
-            asm.I_pop();
-        }
-
-        // Eval super args, and call super ctor
-        asm.I_getlocal(0);
-        let nargs = c.superArgs.length;
-        for ( let i=0 ; i < nargs ; i++ )
-            cgExpr(ctx, c.superArgs[i]);
-        asm.I_constructsuper(nargs);
-        
-        asm.I_popscope();
-        asm.I_getlocal(0);
-        asm.I_pushscope();  //'this'
-        asm.I_pushscope();  //'activation'
-        
-        cgHead(ctor_ctx, c.func.vars);
-
-        cgBlock(ctor_ctx, c.func.block);
-        
-        asm.I_kill(t);
         return method.finalize();
     }
 
@@ -413,57 +415,57 @@ namespace Gen;
     function cgFunc(ctx0, f:FUNC) {
         var {emitter:emitter,script:script, cp:cp} = ctx0;
         let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "vanilla";  // brittle as hell
-        let formals_type = extractFormalTypes({emitter:emitter, script:script}, f);
-        let method = script.newFunction(formals_type, fntype != "vanilla", f.attr.uses_arguments);
-        let asm = method.asm;
-
+        let formals_types = extractFormalTypes({emitter:emitter, script:script}, f);
         let name = f.name ? f.name.ident : "";
-        method.name = cp.stringUtf8(name);
-        
+        let method = new Method(emitter, formals_types, cp.stringUtf8(name), fntype != "vanilla", f.attr.uses_arguments, f.isNative);
+
         let defaults = extractDefaultValues({emitter:emitter, script:script}, f);
         if( defaults.length > 0 )
-        {
             method.setDefaults(defaults);
-        }
         
-        /* Create a new rib and populate it with the values of all the
-         * formals.  Add slot traits for all the formals so that the
-         * rib have all the necessary names.  Later code generation
-         * will add properties for all local (hoisted) VAR, CONST, and
-         * FUNCTION bindings, and they will be added to the rib too,
-         * but not initialized here.  (That may have to change, for
-         * FUNCTION bindings at least.)
-         *
-         * FIXME: if a local VAR shadows a formal, there's more
-         * elaborate behavior here, and the compiler must perform some
-         * analysis and avoid the shadowed formal here.
-         */
-        let t = asm.getTemp();
+        if (!f.isNative) {
+            let asm = method.asm;
 
-        let fnctx = new CTX(asm, {tag: "function", 
-                                  functype:fntype, 
-                                  scope_reg:t, 
-                                  has_scope:true, 
-                                  push_this: (fntype != "vanilla")}, 
-                            method);
-        cgDebugFile(fnctx);
+            /* Create a new rib and populate it with the values of all the
+             * formals.  Add slot traits for all the formals so that the
+             * rib have all the necessary names.  Later code generation
+             * will add properties for all local (hoisted) VAR, CONST, and
+             * FUNCTION bindings, and they will be added to the rib too,
+             * but not initialized here.  (That may have to change, for
+             * FUNCTION bindings at least.)
+             *
+             * FIXME: if a local VAR shadows a formal, there's more
+             * elaborate behavior here, and the compiler must perform some
+             * analysis and avoid the shadowed formal here.
+             */
+            let t = asm.getTemp();
 
-        asm.I_newactivation();
-        asm.I_dup();
-        asm.I_setlocal(t);
-        asm.I_pushscope();
+            let fnctx = new CTX(asm, {tag: "function", 
+                                      functype:fntype, 
+                                      scope_reg:t, 
+                                      has_scope:true, 
+                                      push_this: (fntype != "vanilla")}, 
+                                method);
+            cgDebugFile(fnctx);
 
-        setupArguments(fnctx, f);
+            asm.I_newactivation();
+            asm.I_dup();
+            asm.I_setlocal(t);
+            asm.I_pushscope();
 
-        cgHead(fnctx, f.params);
-        cgHead(fnctx, f.vars);
+            setupArguments(fnctx, f);
+            
+            cgHead(fnctx, f.params);
+            cgHead(fnctx, f.vars);
 
-        /* Generate code for the body.  If there is no return statement in the
-         * code then the default behavior of the emitter is to add a returnvoid
-         * at the end, so there's nothing to worry about here.
-         */
-        cgBlock(fnctx, f.block);
-        asm.killTemp(t);
+            /* Generate code for the body.  If there is no return statement in the
+             * code then the default behavior of the emitter is to add a returnvoid
+             * at the end, so there's nothing to worry about here.
+             */
+            cgBlock(fnctx, f.block);
+            asm.killTemp(t);
+        }
+
         return method.finalize();
     }
 
