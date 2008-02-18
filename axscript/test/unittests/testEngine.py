@@ -341,11 +341,8 @@ class TestExceptions(TestCaseInitialized):
         self.failIf('\n' in desc, desc)
 
         ctx, line, col = self.site.last_error.GetSourcePosition()
-        self.failUnlessEqual(line, 3)
-        # it looks to me like the column should be reported as 4, but its
-        # currently 3 - presumably an ESC bug I'm too lazy to dig into, but
-        # feel free to change this should it start returning 4 ;)
-        self.failUnlessEqual(col, 3)
+        self.failUnlessEqual(line, 2) # zero based
+        # no column available :( ...
 
     def testFilename(self):
         # Make sure the 'filename' of our script block is reported in both
