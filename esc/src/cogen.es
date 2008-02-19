@@ -53,41 +53,6 @@
      is presumably the class object (but this remains to be verified).
 */
 
-var CTX_shared;
-
-/* A context is a structure with the fields
- *
- *    emitter  -- the unique emitter
- *    script   -- the only script we care about in that emitter
- *    cp       -- the emitter's constant pool
- *    asm      -- the current function's assembler
- *    stk      -- the current function's binding stack (labels, ribs)
- *    target   -- the current trait target
- *
- * All of these are invariant and kept in the prototype except for
- * 'asm', 'stk', and some fields to come.
- *
- * FIXME, there are probably at least two targets: one for LET, another
- * for VAR/CONST/FUNCTION.
- */
-
-class CTX {
-    var asm, stk, target;
-    var emitter, script, cp, filename;
-
-    function CTX (asm, stk, target) {
-        this.asm = asm;
-        this.stk = stk;
-        this.target = target;
-
-        // tamarin hack
-        this.emitter = CTX_shared.emitter;
-        this.script = CTX_shared.script;
-        this.cp = CTX_shared.cp;
-        this.filename = CTX_shared.filename;
-    }
-}
-
 namespace Gen;
 //package cogen
 {
@@ -102,6 +67,43 @@ namespace Gen;
     use namespace Asm;
     use namespace Emit;
     use namespace Ast;
+
+    /* A context is a structure with the following fields.
+     *
+     * In the object:
+     *
+     *    asm      -- the current function's assembler
+     *    stk      -- the current function's binding stack (labels, ribs)
+     *    target   -- the current trait target
+     *
+     * Invariant fields in CTX.prototype:
+     *
+     *    emitter  -- the unique emitter
+     *    script   -- the only script we care about in that emitter
+     *    cp       -- the emitter's constant pool
+     *    filename -- the source file name (for error messages)
+     *
+     * Default fields in CTX.prototype that may be overridden in the object:
+     *
+     *    scope_reg -- register holding the activation/scope object (default 0 -- no register)
+     *    push_this -- true iff reg0 should be pushed as first scope obj (default false)
+     *    
+     * FIXME, there are probably at least two targets: one for LET, another
+     * for VAR/CONST/FUNCTION.
+     *
+     * Never construct a CTX by hand, always go through the push* functions
+     * near the end of this file.
+     */
+    class CTX 
+    {
+        const asm, stk, target;
+
+        function CTX (asm, stk, target) 
+            : asm = asm
+            , stk = stk
+            , target = target
+        { }
+    }
 
     // Emit debug info or not
     var emit_debug = true;
@@ -118,15 +120,15 @@ namespace Gen;
     function cg(tree: PROGRAM) {
         var e = new ABCEmitter;
         var s = e.newScript();
-        // CTX.prototype = { "emitter": e, "script": s, "cp": e.constants };  // tamarin doesn't like initing prototype here
-        CTX_shared = { "emitter": e, "script": s, "cp": e.constants, "filename": tree.file };
-        cgProgram(new CTX(s.init.asm, {tag: "script", push_this: true}, s), tree);
-        return e.finalize();
-    }
 
-    function push(ctx, node) {
-        node.link = ctx.stk;
-        return new CTX(ctx.asm, node, ctx.target);
+        CTX.prototype.emitter = e;
+        CTX.prototype.script = s;
+        CTX.prototype.cp = e.constants;
+        CTX.prototype.filename = tree.file;
+        CTX.prototype.scope_reg = 0;
+
+        cgProgram(pushProgram(s), tree);
+        return e.finalize();
     }
 
     function cgDebugFile(ctx) {
@@ -136,9 +138,7 @@ namespace Gen;
     }
 
     function cgProgram(ctx, prog) {
-        
         cgDebugFile(ctx);
-        
         if (prog.head.fixtures != null)
             cgFixtures(ctx, prog.head.fixtures);
         cgBlock(ctx, prog.block);
@@ -271,7 +271,6 @@ namespace Gen;
    }
 
     function cgClass(ctx, c) {
-        
         let {asm:asm, emitter:emitter, script:script} = ctx;
         
         let classname = emitter.qname(c.name,false);
@@ -280,14 +279,14 @@ namespace Gen;
         let cls = script.newClass(classname, basename);
         
         
-        let c_ctx = new CTX(asm, {tag:"class"}, cls);
+        let c_ctx = pushClass(ctx, cls);
 
         // static fixtures
         cgFixtures(c_ctx, c.classHead.fixtures);
 
         // cinit - init static fixtures
         let cinit = cls.getCInit();
-        let cinit_ctx = new CTX(cinit.asm, {tag:"function", functype:"cinit"}, cinit);
+        let cinit_ctx = pushCInit(ctx, cinit);
         cgDebugFile(cinit_ctx);
         cgHead(cinit_ctx, {fixtures:[], exprs:c.classHead.exprs});
         
@@ -295,7 +294,7 @@ namespace Gen;
         let inst = cls.getInstance();
         
         // Context for the instance
-        let i_ctx = new CTX(asm, {tag:"instance"}, inst);
+        let i_ctx = pushInstance(ctx, inst);
         
         // do instance slots
         cgFixtures(i_ctx, c.instanceHead.fixtures);  // FIXME instanceHead and instanceInits should be unified
@@ -334,7 +333,7 @@ namespace Gen;
             let asm = method.asm;
             let t = asm.getTemp();
             // FIXME: record that scopes must be restored here!
-            let ctor_ctx = new CTX(asm, {tag:"function", functype:"iinit", scope_reg:t}, method);
+            let ctor_ctx = pushIInit(ctx, t, method);
        
             cgDebugFile(ctor_ctx);
             asm.I_getlocal(0);
@@ -414,10 +413,10 @@ namespace Gen;
      */
     function cgFunc(ctx0, f:FUNC) {
         var {emitter:emitter,script:script, cp:cp} = ctx0;
-        let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "vanilla";  // brittle as hell
+        let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "function";  // brittle as hell
         let formals_types = extractFormalTypes({emitter:emitter, script:script}, f);
         let name = f.name ? f.name.ident : "";
-        let method = new Method(emitter, formals_types, cp.stringUtf8(name), fntype != "vanilla", f.attr.uses_arguments, f.isNative);
+        let method = new Method(emitter, formals_types, cp.stringUtf8(name), fntype != "function", f.attr.uses_arguments, f.isNative);
 
         let defaults = extractDefaultValues({emitter:emitter, script:script}, f);
         if( defaults.length > 0 )
@@ -440,12 +439,7 @@ namespace Gen;
              */
             let t = asm.getTemp();
 
-            let fnctx = new CTX(asm, {tag: "function", 
-                                      functype:fntype, 
-                                      scope_reg:t, 
-                                      has_scope:true, 
-                                      push_this: (fntype != "vanilla")}, 
-                                method);
+            let fnctx = pushFunction(ctx0, fntype, t, (fntype != "function"), method);
             cgDebugFile(fnctx);
 
             asm.I_newactivation();
@@ -548,11 +542,11 @@ namespace Gen;
         while (stk != null) {
             if (hit(stk)) {
                 if (jump)
-                    asm.I_jump(stk.target);
+                    asm.I_jump(stk.branchTarget);
                 return;
             }
             else {
-                if(stk.has_scope) {
+                if(stk.scope_reg) {
                     asm.I_popscope();
                 }
                 if (stk.tag == "finally") {
@@ -583,11 +577,11 @@ namespace Gen;
             if (stk.tag != "function")
                 loop(stk.link);
             if (stk.push_this) {
-                // function, script -- probably others
+                // function, script
                 asm.I_getlocal(0);
                 asm.I_pushscope();
             }
-            if (stk.has_scope) {
+            if (stk.scope_reg) {
                 asm.I_getlocal(stk.scope_reg);
                 if (stk.tag == "with")
                     asm.I_pushwith();
@@ -598,28 +592,71 @@ namespace Gen;
     }
 
     // The following return extended contexts
-    function pushBreak(ctx, target)
-        pushLabel(ctx, null, target);
 
-    function pushLabel(ctx, label, target)
-        push(ctx, { tag:"break", label:label, target:target, has_scope:false });
+    function pushProgram(script)
+        new CTX( script.init.asm, 
+                 { tag: "script", push_this: true, link: null }, 
+                 script );
 
-    function pushContinue(ctx, labels, target)
-        push(ctx, { tag:"continue", labels:labels, target:target, has_scope:false });
+    function pushClass(ctx, cls)
+        new CTX( ctx.asm,
+                 { tag:"class", link: ctx.stk }, 
+                 cls );
 
-    function pushFunction(ctx /*more*/) {
-        // FIXME
-    }
+    function pushCInit(ctx, cinit)
+        new CTX( cinit.asm,
+                 { tag: "function", "type": "cinit", link: ctx.stk }, 
+                 cinit );
+
+    function pushInstance(ctx, inst)
+        new CTX( ctx.asm, 
+                 { tag:"instance", target: inst, link: ctx.stk },
+                 inst );
+
+    function pushIInit(ctx, scope_reg, iinit)
+        new CTX( iinit.asm,
+                 { tag:"function", "type": "iinit", scope_reg: scope_reg, link: ctx.stk },
+                 iinit );
+
+    function pushFunction(ctx, function_type, scope_reg, push_this, func)
+        new CTX( func.asm, 
+                 { tag: "function", 
+                   "type": function_type, 
+                   scope_reg: scope_reg, 
+                   push_this: push_this,
+                   link: ctx.stk },
+                 func );
+
+    function pushBreak(ctx, branchTarget)
+        new CTX( ctx.asm, 
+                 { tag:"break", label: null, branchTarget: branchTarget, link: ctx.stk }, 
+                 ctx.target );
+
+    function pushLabel(ctx, label, branchTarget)
+        new CTX( ctx.asm, 
+                 { tag:"break", label: label, branchTarget: branchTarget, link: ctx.stk }, 
+                 ctx.target );
+
+    function pushContinue(ctx, labels, branchTarget)
+        new CTX(ctx.asm, 
+                { tag:"continue", labels: labels, branchTarget: branchTarget, link: ctx.stk },
+                ctx.target );
 
     function pushWith(ctx, scope_reg)
-        push(ctx, { tag:"with", has_scope:true, scope_reg:scope_reg });
+        new CTX( ctx.asm,
+                 { tag:"with", scope_reg: scope_reg, link: ctx.stk },
+                 ctx.target );
 
     function pushLet(ctx /*more*/) {
     }
 
     function pushCatch(ctx, scope_reg )
-        push(ctx, {tag:"catch", has_scope:true, scope_reg:scope_reg});
+        new CTX( ctx.asm, 
+                 { tag: "catch", scope_reg: scope_reg, link: ctx.stk },
+                 ctx.target );
 
     function pushFinally(ctx, label, returnreg)
-        push(ctx, {tag:"finally", label:label, returnreg:returnreg, returnAddresses:new Array(), nextReturn:0});
+        new CTX( ctx.asm,
+                 { tag: "finally", label: label, returnreg: returnreg, returnAddresses: new Array(), nextReturn: 0, link: ctx.stk },
+                 ctx.target );
 }
