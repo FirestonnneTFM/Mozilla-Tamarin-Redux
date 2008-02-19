@@ -3650,6 +3650,7 @@ use namespace intrinsic;
             var finallyblock = null;
 
             if ( hd () === Token::Finally ) {
+                cx.topFunction().uses_finally = true;
                 next();
                 finallyblocks = block (localBlk);
             }
@@ -3661,6 +3662,7 @@ use namespace intrinsic;
             var catchblocks = [];
 
             while (hd () === Token::Catch) {
+                cx.topFunction().uses_catch = true;
                 next();
                 catchblocks.push (catchClause ());
             }
@@ -3692,6 +3694,7 @@ use namespace intrinsic;
             // Only ES3-style with for now
 
             eat (Token::With);
+            cx.topFunction().uses_with = true;
             var expr = parenListExpression ();
             var body = substatement (omega);
             return new Ast::WithStmt (expr, body);
@@ -4491,6 +4494,7 @@ use namespace intrinsic;
 
             switch (hd ()) {
             case Token::TripleDot:
+                cx.topFunction().uses_rest = true;
                 nd1 = restParameter (n);
                 hasRest = true;
                 numparams = 1;
@@ -5351,6 +5355,56 @@ use namespace intrinsic;
             return pkgs;
         }
 
+        // Synthesize attributes in f.
+
+        function computeAttributes(f: FuncAttr) {
+            let reify_activation = false;
+
+            // If there's eval then variable lookup will be by name;
+            // new names may be added at run-time.
+
+            reify_activation = reify_activation || f.uses_eval;
+
+            // If there's with then variable lookup will be by name;
+            // the set of names in the object is generally unknown.
+            // (It's possible to do better for objects of known
+            // non-dynamic types, but that's unlikely to be a common
+            // case.)
+
+            reify_activation = reify_activation || f.uses_with;
+
+            // If there's a nested function definition or function expression 
+            // then it will close over its reified scope.
+            //
+            // FIXME: If the nested function has no free variables, or its
+            // free variables have constant values, then optimizations are
+            // possible.
+
+            reify_activation = reify_activation || f.children.length > 0;
+
+            // Catch/finally both imply the use of newcatch/pushscope
+            // in a simplistic model.
+            //
+            // FIXME: In actuality, newcatch/pushscope and lookup by
+            // name of the catch var are not necessary unless there is
+            // a method in the catch handler that captures the
+            // environment, so we can do better -- similar to "let"
+            // optimization.
+
+            reify_activation = reify_activation || (f.uses_catch || f.uses_finally); 
+
+            // Even assuming having a nested function does not require
+            // reifying the activation, do reify it if the child
+            // requires its activation to be reified.
+
+            for ( let i=0, limit=f.children.length ; i < limit ; i++ ) {
+                let c = f.children[i];
+                computeAttributes(c);
+                reify_activation = reify_activation || c.reify_activation;
+            }
+            f.reify_activation = reify_activation;
+        }
+
         function program () : Ast::PROGRAM {
             start();
 
@@ -5379,6 +5433,8 @@ use namespace intrinsic;
             default:
                 Parse::syntaxError(this, "extra tokens after end of program.");
             }
+
+            computeAttributes(cx.topFunction());
 
             return new Ast::Program ( nd1,
                                       new Ast::Block (bhead,nd2),
