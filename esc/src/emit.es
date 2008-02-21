@@ -516,6 +516,8 @@ namespace Emit;
                 // Standard epilogue for lazy clients.
                 asm.I_returnvoid();
                 flags = asm.flags;
+            } else {
+                flags = METHOD_Native;
             }
 
             var meth = e.file.addMethod(new ABCMethodInfo(name, formals, 0, flags, defaults, null));
