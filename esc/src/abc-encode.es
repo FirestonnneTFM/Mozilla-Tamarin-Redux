@@ -72,6 +72,7 @@ public namespace AbcEncode;
     class AbcEncoder {
         var verbose : Boolean;
         var abc : ABCFile;
+        var constants: ABCConstantPoolParser;
         
         function AbcEncoder(a:ABCFile, v:Boolean = false): abc=a, verbose=v {
         }
@@ -79,16 +80,17 @@ public namespace AbcEncode;
         function encode(nesting:int = 0) 
             : string {
             enter ("AbcEncoder::encode", nesting);
+            constants = new ABCConstantPoolParser(abc.constants);
             var str = indent(nesting) + "{ 'abc_class': 'AbcFile'"
                     + indent(nesting) + ", 'minor_version': " + abc.minor_version
                     + indent(nesting) + ", 'major_version': " + abc.major_version
-                    + indent(nesting) + ", 'int_pool': [ " + intPool (abc.constants.int_bytes,nesting+", 'int_pool': [ ".length) + " ]"
-                    + indent(nesting) + ", 'uint_pool': [ " + uintPool (abc.constants.uint_bytes,nesting+", 'uint_pool': [ ".length) + " ]"
-                    + indent(nesting) + ", 'double_pool': [ " + doublePool (abc.constants.double_bytes,nesting+", 'double_pool': [ ".length) + " ]"
-                    + indent(nesting) + ", 'utf8_pool': [ " + utf8Pool (abc.constants.utf8_bytes,nesting+", 'utf8_pool': [ ".length) + " ]"
-                    + indent(nesting) + ", 'namespace_pool': [ " + namespacePool (abc.constants.namespace_bytes,nesting+", 'namespace_pool': [ ".length) + " ]"
-                    + indent(nesting) + ", 'nsset_pool': [ " + namespacesetPool (abc.constants.namespaceset_bytes,nesting+", 'nsset_pool': [ ".length) + " ]"
-                    + indent(nesting) + ", 'name_pool': [ " + namePool (abc.constants.multiname_bytes,nesting+", 'name_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'int_pool': [ " + intPool (constants.int_pool,nesting+", 'int_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'uint_pool': [ " + uintPool (constants.uint_pool,nesting+", 'uint_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'double_pool': [ " + doublePool (constants.double_pool,nesting+", 'double_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'utf8_pool': [ " + utf8Pool (constants.utf8_pool,nesting+", 'utf8_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'namespace_pool': [ " + namespacePool (constants.namespace_pool,nesting+", 'namespace_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'nsset_pool': [ " + namespacesetPool (constants.namespaceset_pool,nesting+", 'nsset_pool': [ ".length) + " ]"
+                    + indent(nesting) + ", 'name_pool': [ " + namePool (constants.name_pool,nesting+", 'name_pool': [ ".length) + " ]"
 
                     + indent(nesting) + ", 'method_infos': [ "   + methodInfos (abc.methods,nesting+", 'method_infos': [ ".length) + " ]"
                 
@@ -105,124 +107,85 @@ public namespace AbcEncode;
         }
         
     
-        function intPool (nd, nesting : int = 0)
+        function intPool (pool, nesting : int = 0)
             : string {
             enter ("AbcEncode::intPool ", nesting);
-
             var str = "undefined";
-            
-            var orig = nd.position;
-            var pos = 0;
-            nd.position = (pos);
-            
-            while (nd.bytesAvailable) 
+            for each (var v:int in pool.slice(1))
             {
                 str = str
                     + indent (nesting-2)
                     + ", "
-                    + "'" + nd.readS32() + "'"; 
+                    + "'" + v + "'"; 
             }
-            
-            nd.position = orig;
 
             exit ("AbcEncode::intPool");
             return str;
         }
 
-        function uintPool (nd, nesting : int = 0)
+        function uintPool (pool, nesting : int = 0)
             : string {
             enter ("AbcEncode::uintPool ", nesting);
-
-            var str = "undefined";   // hole for sub 0
-
-            var orig = nd.position;
-            var pos = 0;
-            nd.position = (pos);
-
-            while (nd.bytesAvailable) 
+            var str = "undefined";
+            for each (var v:uint in pool.slice(1))
             {
                 str = str
                     + indent (nesting-2)
                     + ", "
-                    + "'" + nd.readU32() + "'" //intConst (nd[i], nesting)
+                    + "'" + v + "'" //intConst (nd[i], nesting)
             }
-            
-            nd.position = orig;
 
             exit ("AbcEncode::uintPool");
             return str;
         }
 
-        function doublePool (nd, nesting : int = 0)
+        function doublePool (pool, nesting : int = 0)
             : string {
             enter ("AbcEncode::doublePool ", nesting);
-
             var str = "undefined";
-
-            var orig = nd.position;
-            var pos = 0;
-            nd.position = (pos);
-
-            while (nd.bytesAvailable) 
+            for each (var v:double in pool.slice(1))
             {
                 str = str
                     + indent (nesting-2)
                     + ", "
-                    + "'" + nd.readDouble() + "'" //intConst (nd[i], nesting)
+                    + "'" + v + "'" //intConst (nd[i], nesting)
             }
-            
-            nd.position = orig;
 
             exit ("AbcEncode::doublePool");
             return str;
         }
 
-        function utf8Pool (nd, nesting : int = 0)
+        function utf8Pool (pool, nesting : int = 0)
             : string {
             enter ("AbcEncode::utf8Pool ", nesting);
 
             var str = "undefined";
-
-            var orig = nd.position;
-            var pos = 0;
-            nd.position = (pos);
-
-            while (nd.bytesAvailable) 
+            for each (var v:string in pool.slice(1))
             {
-                var len = nd.readU32();
-                var s = nd.readUTFBytes(len);
                 str = str
                     + indent (nesting-2)
                     + ", "
-                    + "'" + s + "'" //+ "// " + i//intConst (nd[i], nesting)
+                    + "'" + v + "'" //+ "// " + i//intConst (nd[i], nesting)
             }
-            
-            nd.position = orig;
 
             exit ("AbcEncode::utf8Pool");
             return str;
         }
 
-        function namespacePool (nd, nesting : int = 0)
+        function namespacePool (pool, nesting : int = 0)
             : string {
             enter ("AbcEncode::namespacePool ", nesting);
 
             var str = "undefined";
-
-            var orig = nd.position;
-            var pos = 0;
-            nd.position = pos;
-
-            while(nd.bytesAvailable)
+            for each (var v in pool.slice(1))
             {
+                // v is an array: kind,nd
                 str = str
                     + indent (nesting-2)
                     + ", "
-                    + namespaceConst ({kind:nd.readByte(), name:nd.readU32()}, nesting)
+                    + namespaceConst (v, nesting)
             }
 
-            nd.position = orig;
-            
             exit ("AbcEncode::namespacePool");
             return str;
         }
@@ -231,7 +194,7 @@ public namespace AbcEncode;
             : string {
             enter ("AbcEncode::namespaceConst ", nesting);
             var str = "{ 'kind': " + namespaceKind (nd.kind,nesting+"{ 'kind': ".length)
-                    + indent(nesting) + ", 'utf8': " + nd.name
+                    + indent(nesting) + ", 'utf8': " + utf8(nd.utf8)
                     + " }";
 
             exit ("AbcEncode::abcFile");
@@ -271,26 +234,20 @@ public namespace AbcEncode;
             return str;
         }
 
-        function namespacesetPool (nd, nesting : int = 0)
+        function namespacesetPool (pool, nesting : int = 0)
             : string {
             enter ("AbcEncode::namespacesetPool ", nesting);
 
             var str = "undefined";
 
-            var orig = nd.position;
-            var pos = 0;
-            nd.position = (pos);
-
-            while(nd.bytesAvailable)
+            for each (var v in pool.slice(1))
             {
                 str = str
                     + indent (nesting-2)
                     + ", "
-                    + "[ " + namespacesetConst (nd, nesting+"[ ".length)
+                    + "[ " + namespacesetConst (v, nesting+"[ ".length)
                     + " ]"
             }
-            
-            nd.position = orig;
 
             exit ("AbcEncode::namespacesetPool");
             return str;
@@ -301,11 +258,10 @@ public namespace AbcEncode;
             enter ("AbcEncode::namespacesetConst ", nesting);
 
             var str = "";
-            
-            for (var i = 0, len = nd.readU32(); i < len; ++i) 
+            for each (var elt in nd)
             {
                 str = str
-                    + nd.readU32()
+                    + elt
                     + indent (nesting-2)
                     + ", ";
             }
@@ -314,25 +270,18 @@ public namespace AbcEncode;
             return str;
         }
 
-        function namePool (nd, nesting : int = 0)
+        function namePool (pool, nesting : int = 0)
             : string {
             enter ("AbcEncode::namePool ", nesting);
 
             var str = "undefined";
-
-            var orig = nd.position;
-            var pos = 0;
-            nd.position = (pos);
-
-            while(nd.bytesAvailable)
+            for each (var v in pool.slice(1))
             {
                 str = str
                     + indent (nesting-2)
                     + ", "
-                    + nameConst (nd, nesting)
+                    + nameConst (v, nesting)
             }
-            
-            nd.position = orig;
 
             exit ("AbcEncode::namePool");
             return str;
@@ -344,21 +293,21 @@ public namespace AbcEncode;
 
             var str = "";
             
-            var kind = nd.readByte();
+            var kind = nd.kind
 
             switch (kind) {
             case CONSTANT_QName:
                 str = "{ 'kind': 'QName'"
                     + indent(nesting)
-                    + ", 'ns': " + nd.readU32()
+                    + ", 'ns': " + namespace(nd.ns)
                     + indent(nesting) 
-                    + ", 'utf8': " + nd.readU32()
+                    + ", 'utf8': " + utf8(nd.utf8)
                     + " }";
                 break;
             case CONSTANT_RTQName:
                 str = "{ 'kind': 'RTQName'"
                     + indent(nesting) 
-                    + ", 'utf8': " + nd.readU32()
+                    + ", 'utf8': " + utf8(nd.utf8)
                     + " }";
                 break;
             case CONSTANT_RTQNameL:
@@ -368,15 +317,15 @@ public namespace AbcEncode;
             case CONSTANT_Multiname:
                 str = "{ 'kind': 'Multiname'"
                     + indent(nesting) 
-                    + ", 'utf8': " + nd.readU32()
+                    + ", 'utf8': " + utf8(nd.utf8)
                     + indent(nesting) 
-                    + ", 'nsset': " + nd.readU32()
+                    + ", 'nsset': " + nd.nsset
                     + " }";
                 break;
             case CONSTANT_MultinameL:
                 str = "{ 'kind': 'MultinameL'"
                     + indent(nesting) 
-                    + ", 'nss': " + nd.readU32()
+                    + ", 'nss': " + nd.nss
                     + " }";
                 break;
             case CONSTANT_QNameA:
@@ -418,7 +367,7 @@ public namespace AbcEncode;
             var str =
                 "{ 'ret_type': " + name(nd.return_type, nesting+"{ 'ret_type': ".length)
               + indent(nesting) + ", 'param_types': [" + names(nd.param_types, nesting+", 'param_types': [".length) + "]"
-              + indent(nesting) + ", 'name': " + name(nd.name, nesting+", 'name': ".length)
+              + indent(nesting) + ", 'name': " + utf8(nd.name, nesting+", 'name': ".length)
               + indent(nesting) + ", 'flags': " + nd.flags
               + indent(nesting) + ", 'optional_count': " + (nd.options != null ? nd.options.length : 0)
               + indent(nesting) + ", 'optionals': [" + optionals(nd.options, nesting+", 'optionals': [".length) + "]"
@@ -946,7 +895,7 @@ public namespace AbcEncode;
             var str = index;
             if( verbose ) { 
                 let utf8_pool = abc.constants.utf8_pool;
-                str = "'" + utf8_pool[index] + "'";
+                str = "'" + constants.getUtf8(index) + "'";
                 //str = str.replace(/\n/g,"\\n");
                 //str = str.replace(/\t/g,"\\t"); 
             }
@@ -957,8 +906,8 @@ public namespace AbcEncode;
             : string {
             var str = index;
             if( verbose ) {
-                let ns = abc.constants.namespace_pool[index];
-                str = "{ 'utf8': " + utf8(ns.name) + ", 'kind': " + namespaceKind(ns.kind) + " }";
+                let val = constants.namespace_pool[index];
+                str = "{ 'utf8': " + utf8(val.utf8) + ", 'kind': " + namespaceKind(val.kind) + " }";
             }
             return str;
         }
@@ -967,7 +916,7 @@ public namespace AbcEncode;
             : string {
             var str = index;
             if( verbose ) {
-                str = "'" + abc.constants.int_pool[index] + "'";
+                str = "'" + constants.getInt(index) + "'";
             }
             return str;
         }
@@ -976,7 +925,7 @@ public namespace AbcEncode;
             : string {
             var str = index;
             if( verbose ) {
-                str = "'" + abc.constants.uint_pool[index] + "'";
+                str = "'" + constants.getUint(index) + "'";
             }
             return str;
         }
@@ -985,7 +934,7 @@ public namespace AbcEncode;
             : string {
             var str = index;
             if( verbose ) {
-                str = "'" + abc.constants.double_pool[index] + "'";
+                str = "'" + constants.getDouble(index) + "'";
             }
             return str;
         }
@@ -995,28 +944,28 @@ public namespace AbcEncode;
             var str = index;
             
             if( verbose && index > 0) {
-                let name = abc.constants.multiname_pool[index];
+                let name = constants.name_pool[index];
                 switch(name.kind) 
                 {
                     case CONSTANT_QName:
                         str = "{ 'kind': 'QName'"
-                              + indent(nesting) + ", 'utf8': " + utf8(name.name) 
+                              + indent(nesting) + ", 'utf8': " + utf8(name.utf8) 
                               + indent(nesting) + ", 'ns': " + namespace(name.ns) + " }";
                         break;
                     case CONSTANT_RTQName:
                         str = "{ 'kind': 'RTQName'"
-                              + indent(nesting) +  ", utf8': " + utf8(name.name) + " }";
+                              + indent(nesting) +  ", utf8': " + utf8(name.utf8) + " }";
                         break;
                     case CONSTANT_RTQNameL:
                         str = "{ 'kind': 'RTQNameL' }";
                         break;
                     case CONSTANT_Multiname:
                         str = "{ 'kind': 'Multiname'"
-                              + indent(nesting) + ", 'utf8': " + utf8(name.name) 
+                              + indent(nesting) + ", 'utf8': " + utf8(name.utf8) 
                               + indent(nesting) + ", 'nsset': " + name.ns + " }";
                         break;
                     case CONSTANT_MultinameL:
-                        str = "{ 'kind': 'MultinameL'" + ", 'nss': " + name.ns + " }";
+                        str = "{ 'kind': 'MultinameL'" + ", 'nss': " + name.nss + " }";
                         break;
                 }
             }
