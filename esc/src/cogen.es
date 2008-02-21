@@ -323,7 +323,7 @@ namespace Gen;
     function cgCtor(ctx, c, instanceInits) {
         let f = c.func;
         let formals_type = extractFormalTypes(ctx, f);
-        let method = new Method(ctx.script.e, formals_type, "$construct", false, f.attr.uses_arguments, f.isNative);
+        let method = new Method(ctx.script.e, formals_type, "$construct", false, f.attr, f.isNative);
 
         let defaults = extractDefaultValues(ctx, f);
         if( defaults.length > 0 )
@@ -416,7 +416,7 @@ namespace Gen;
         let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "function";  // brittle as hell
         let formals_types = extractFormalTypes({emitter:emitter, script:script}, f);
         let name = f.name ? f.name.ident : "";
-        let method = new Method(emitter, formals_types, cp.stringUtf8(name), fntype != "function", f.attr.uses_arguments, f.isNative);
+        let method = new Method(emitter, formals_types, cp.stringUtf8(name), fntype != "function", f.attr, f.isNative);
 
         let defaults = extractDefaultValues({emitter:emitter, script:script}, f);
         if( defaults.length > 0 )

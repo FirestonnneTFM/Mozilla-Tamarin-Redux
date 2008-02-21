@@ -349,7 +349,7 @@ namespace Emit;
 
         function Script(e:ABCEmitter) {
             this.e = e;
-            this.init = new Method(e,[], "", true, false, false);
+            this.init = new Method(e,[], "", true, new Ast::FuncAttr(null), false);
         }
 
         public function newClass(name, basename) {
@@ -398,7 +398,7 @@ namespace Emit;
 
         public function getCInit() {
             if(cinit == null ) {
-                cinit = new Method(s.e, [], "$cinit", true, false, false);
+                cinit = new Method(s.e, [], "$cinit", true, new Ast::FuncAttr(null), false);
             }
             return cinit;
         }
@@ -475,7 +475,7 @@ namespace Emit;
     {
         public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[], isNative=false;
 
-        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, usesArguments, isNative) {
+        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, attr, isNative) {
             //super(e.constants, formals.length);
             this.formals = formals;
             this.e = e;
@@ -483,7 +483,8 @@ namespace Emit;
             this.isNative = isNative;
 
             if (!isNative) {
-                asm = new AVM2Assembler(e.constants, formals.length, usesArguments);
+                attr.rnd = Math.random();
+                asm = new AVM2Assembler(e.constants, formals.length - (attr.uses_rest ? 1 : 0), attr);
                 // Standard prologue -- but is this always right?
                 // ctors don't need this - have a more complicated prologue
                 if(standardPrologue) {
