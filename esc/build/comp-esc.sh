@@ -17,7 +17,9 @@
 ./esc.sh ../src/asm.es
 ./esc.sh ../src/abc.es
 ./esc.sh ../src/abc-encode.es
+./esc.sh ../src/abc-encode-cpp.es
 ./esc.sh ../src/abc-decode.es
+./esc.sh ../src/abc-parse.es
 ./esc.sh ../src/emit.es
 ./esc.sh ../src/cogen.es
 ./esc.sh ../src/cogen-stmt.es
@@ -44,7 +46,9 @@ cp ../src/bytes-tamarin.es.abc ../bin
 cp ../src/asm.es.abc ../bin
 cp ../src/abc.es.abc ../bin
 cp ../src/abc-encode.es.abc ../bin
+cp ../src/abc-encode-cpp.es.abc ../bin
 cp ../src/abc-decode.es.abc ../bin
+cp ../src/abc-parse.es.abc ../bin
 cp ../src/emit.es.abc ../bin
 cp ../src/cogen.es.abc ../bin
 cp ../src/cogen-stmt.es.abc ../bin
