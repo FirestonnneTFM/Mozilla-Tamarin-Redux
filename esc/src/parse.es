@@ -4055,7 +4055,7 @@ use namespace intrinsic;
             var vars = cx.exitVarBlock ();
             var attr = cx.exitFunction ();
 
-            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,hasRest:hasRest,numparams:numparams} = signature;
+            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,numparams:numparams} = signature;
             var func = new Ast::Func (name, attrs.native, body, params, numparams, vars, defaults, resultType, attr);
 
             var name = new Ast::PropName ({ns:attrs.ns, id:name.ident});
@@ -4133,7 +4133,7 @@ use namespace intrinsic;
             var vars = cx.exitVarBlock ();
             var attr = cx.exitFunction();
 
-            var {params:params,defaults:defaults,hasRest:hasRest,settings:settings,superArgs:superArgs,numparams:numparams} = signature;
+            var {params:params,defaults:defaults,settings:settings,superArgs:superArgs,numparams:numparams} = signature;
 
             // print ("superArgs=",superArgs);
             // print ("settings=",settings);
@@ -4160,7 +4160,6 @@ use namespace intrinsic;
           , params : Ast::HEAD
           , paramTypes : [Ast::TYPE_EXPR]
           , defaults : [Ast::EXPR]
-          , hasRest: boolean
           , settings : [Ast::EXPR]
           , superArgs: [Ast::EXPR] }
 
@@ -4170,14 +4169,13 @@ use namespace intrinsic;
           , paramTypes : [Ast::TYPE_EXPR]
           , defaults : [Ast::EXPR]
           , returnType : Ast::TYPE_EXPR
-          , thisType : Ast::TYPE_EXPR?
-          , hasRest : boolean }
+          , thisType : Ast::TYPE_EXPR? }
 
 
         function constructorSignature () : CTOR_SIG {
             var nd1 = typeParameters ();
             eat (Token::LeftParen);
-            var [nd2,hasRest,numparams] = parameters ();
+            var [nd2,numparams] = parameters ();
             eat (Token::RightParen);
             var [settings,superArgs] = constructorInitialiser ();
 
@@ -4189,7 +4187,6 @@ use namespace intrinsic;
                      , paramTypes: t
                      , numparams: numparams
                      , defaults: e
-                     , hasRest: hasRest
                      , settings: settings
                      , superArgs: superArgs };
         }
@@ -4378,7 +4375,7 @@ use namespace intrinsic;
                 Parse::internalError(this, "No support for 'this' annotation in parameter list");
                 break;
             default:
-                var [nd2,hasRest,numparams] = parameters ();
+                var [nd2,numparams] = parameters ();
                 break;
             }
             eat (Token::RightParen);
@@ -4394,8 +4391,7 @@ use namespace intrinsic;
                     , defaults: e
                     , ctorInits: null
                     , resultType: restype
-                    , thisType: null
-                    , hasRest: hasRest };
+                    , thisType: null };
         }
 
         /*
@@ -4463,19 +4459,18 @@ use namespace intrinsic;
 
         */
 
-        function parameters () : [[[Ast::FIXTURES, Ast::EXPRS], [Ast::EXPR], [Ast::TYPE_EXPR]], boolean, int] {
+        function parameters () : [[[Ast::FIXTURES, Ast::EXPRS], [Ast::EXPR], [Ast::TYPE_EXPR]], int] {
             switch (hd ()) {
             case Token::RightParen:
-                var hasRest = false;
                 var nd1 = [[[],[]],[],[]];
                 var numparams = 0;
                 break;
             default:
-                var [nd1,hasRest,numparams] = nonemptyParameters (0,false);
+                var [nd1,numparams] = nonemptyParameters (0,false);
                 break;
             }
 
-            return [nd1,hasRest,numparams];
+            return [nd1,numparams];
         }
 
         /*
@@ -4487,17 +4482,15 @@ use namespace intrinsic;
 
         */
 
-        function nonemptyParameters (n:int, initRequired) : [[[Ast::FIXTURES,Ast::EXPRS], Ast::EXPRS, Ast::TYPE_EXPRS], boolean, int] {
+        function nonemptyParameters (n:int, initRequired) : [[[Ast::FIXTURES,Ast::EXPRS], Ast::EXPRS, Ast::TYPE_EXPRS], int] {
             var nd1;
-            var hasRest = false;
             var numparams = 0;
 
             switch (hd ()) {
             case Token::TripleDot:
                 cx.topFunction().uses_rest = true;
                 nd1 = restParameter (n);
-                hasRest = true;
-                numparams = 1;
+                //numparams = 1;
                 break;
 
             default:
@@ -4507,7 +4500,7 @@ use namespace intrinsic;
                 case Token::Comma:
                     eat (Token::Comma);
                     let [[f1,i1],e1,t1] = nd1;
-                    var [nd2,hasRest,numparams2] = nonemptyParameters (n+1, e1.length!=0);
+                    var [nd2,numparams2] = nonemptyParameters (n+1, e1.length!=0);
                     let [[f2,i2],e2,t2] = nd2;
                     numparams += numparams2;
                     // FIXME when Array.concat works
@@ -4526,7 +4519,22 @@ use namespace intrinsic;
                 break;
             }
 
-            return [nd1,hasRest,numparams];
+            return [nd1,numparams];
+        }
+
+        function restParameter(param_number) : [[Ast::FIXTURES,Ast::EXPRS], Ast::EXPRS, Ast::TYPE_EXPRS] {
+            eat(Token::TripleDot);
+            var [fixtures, inits] =
+                desugarBindingPattern(simplePattern(noIn, noExpr), 
+                                      Ast::anyType, 
+                                      new Ast::GetParam(param_number), 
+                                      Ast::noNS, 
+                                      Ast::letInit, 
+                                      false);
+            fixtures.push([new Ast::TempName(param_number), 
+                           new Ast::ValFixture(Ast::anyType,false)]);
+
+            return [[fixtures, [inits]], [], [Ast::anyType]];
         }
 
         /*

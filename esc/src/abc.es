@@ -455,7 +455,12 @@ namespace Abc;
         function ABCMethodInfo(name/*:uint*/, param_types:Array, return_type/*:uint*/, flags/*:uint*/,
                                options:Array, param_names:Array) {
             this.name = name;
-            this.param_types = param_types;
+            if (flags & METHOD_Needrest) {
+                this.param_types = copyArray(param_types);
+                this.param_types.pop();
+            }
+            else
+                this.param_types = param_types;
             this.return_type = return_type;
             this.flags = flags;
             this.options = options;
