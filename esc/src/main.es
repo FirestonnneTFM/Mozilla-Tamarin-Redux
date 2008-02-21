@@ -66,9 +66,26 @@
 
     while( true )
     {
+        let s = "";
         System.write("es> ");
-        var s = System.readLine();
-        evalString(s);
+        while( true ) {
+            try {
+                s += System.readLine();
+                evalString(s);
+                break; // worked - this command is complete.
+            } catch (x) {
+                // If it is a premature-EOF error, read another line
+                if (x.message.indexOf("found EOS") == -1) {
+                    let msg = x.getStackTrace();
+                    if (!msg) { // probably a non *_Debugger build
+                        msg = x;
+                    }
+                    print(msg);
+                    break;
+                }
+                // else fall through and read another line
+            }
+        }
     }
 }
 
