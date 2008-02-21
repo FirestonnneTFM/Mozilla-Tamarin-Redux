@@ -41,8 +41,8 @@
     //import util.*;
     //import abcfile.*;
     //import assembler.*;
-
     use default namespace Gen;
+
     use namespace Util;
     use namespace Abc;
     use namespace Asm;

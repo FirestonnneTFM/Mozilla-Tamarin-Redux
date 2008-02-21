@@ -63,9 +63,8 @@
     //import abcfile.*;
     //import assembler.*;
     //import emitter.*;
-    use default namespace public;
-
     use default namespace Gen;
+
     use namespace Util;
     use namespace Abc;
     use namespace Asm;

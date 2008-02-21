@@ -2061,6 +2061,14 @@ namespace avmplus
 				break;
 			}
 
+            case OP_getouterscope:
+            {
+				checkStack(0,1);
+				int scope_index = imm30;
+				emitGetOuterScope(scope_index);
+                break;
+            }
+
 			case OP_getglobalscope: 
 			{
 				checkStack(0,1);
@@ -2937,6 +2945,26 @@ namespace avmplus
 				#endif
 				verifyFailed(kGetScopeObjectBoundsError, core->toErrorString(0));
 			}
+		}
+	}
+
+	void Verifier::emitGetOuterScope(int scope_index)
+	{
+		ScopeTypeChain* scope = info->declaringTraits->scope;
+		int captured_depth = scope->size;
+		if (captured_depth > 0)
+		{
+			// enclosing scope
+			if (mir) mir->emitGetscope(state, scope_index, state->sp()+1);
+			state->push(scope->scopes[scope_index].traits, true);
+		}
+		else
+		{
+			#ifdef _DEBUG
+			if (pool->isBuiltin)
+				core->console << "getouterscope >= depth (" << scope_index << " >= " << state->scopeDepth << ")\n";
+			#endif
+			verifyFailed(kGetScopeObjectBoundsError, core->toErrorString(0));
 		}
 	}
 

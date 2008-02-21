@@ -3650,6 +3650,7 @@ use namespace intrinsic;
             var finallyblock = null;
 
             if ( hd () === Token::Finally ) {
+                cx.topFunction().uses_finally = true;
                 next();
                 finallyblocks = block (localBlk);
             }
@@ -3661,6 +3662,7 @@ use namespace intrinsic;
             var catchblocks = [];
 
             while (hd () === Token::Catch) {
+                cx.topFunction().uses_catch = true;
                 next();
                 catchblocks.push (catchClause ());
             }
@@ -3692,6 +3694,7 @@ use namespace intrinsic;
             // Only ES3-style with for now
 
             eat (Token::With);
+            cx.topFunction().uses_with = true;
             var expr = parenListExpression ();
             var body = substatement (omega);
             return new Ast::WithStmt (expr, body);
@@ -4032,30 +4035,34 @@ use namespace intrinsic;
 
         */
 
-        function functionDefinition (tau: TAU, omega: OMEGA, kind, ns, isFinal, isOverride, isPrototype, isStatic, isAbstract)
-            : Ast::STMTS
-        {
+        function functionDefinition (tau: TAU, omega: OMEGA, kind, attrs: ATTRS) : Ast::STMTS {
             eat (Token::Function);
 
             cx.enterFunction();
 
-            var nd1 = functionName ();
-            var nd2 = functionSignature ();
+            var name = functionName ();
+            var signature = functionSignature ();
+
+            var body;
 
             cx.enterVarBlock ();
-            var nd3 = functionBody (allowIn, omega);
+            if (attrs.native) {
+                semicolon(fullStmt);
+                body = new Ast::Block(null, []);
+            }
+            else 
+                body = functionBody (allowIn, omega);
             var vars = cx.exitVarBlock ();
-            
             var attr = cx.exitFunction ();
 
-            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,hasRest:hasRest,numparams:numparams} = nd2;
-            var func = new Ast::Func (nd1,false,nd3,params,numparams,vars,defaults,resultType,attr);
+            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,hasRest:hasRest,numparams:numparams} = signature;
+            var func = new Ast::Func (name, attrs.native, body, params, numparams, vars, defaults, resultType, attr);
 
-            var name = new Ast::PropName ({ns:ns,id:nd1.ident});
-            var fxtr = new Ast::MethodFixture (func,Ast::anyType,true,isOverride,isFinal);
+            var name = new Ast::PropName ({ns:attrs.ns, id:name.ident});
+            var fxtr = new Ast::MethodFixture (func, Ast::anyType, true, attrs.override, attrs.final);
             switch (tau) {
             case classBlk:
-                cx.addVarFixtures ([[name,fxtr]], isStatic);
+                cx.addVarFixtures ([[name,fxtr]], attrs.static);
                 break;
             default:
                 cx.addVarFixtures ([[name,fxtr]]);
@@ -4106,24 +4113,31 @@ use namespace intrinsic;
 
         */
 
-        function constructorDefinition (omega, ns) : Ast::STMTS {
+        function constructorDefinition (omega, ns, attrs) : Ast::STMTS {
             eat (Token::Function);
 
             cx.enterFunction();
-            var nd1 = identifier ();
-            var nd2 = constructorSignature ();
+
+            var name = identifier ();
+            var signature = constructorSignature ();
+
+            var body;
 
             cx.enterVarBlock ();
-            var nd3 = functionBody (allowIn, omega);
+            if (attrs.native) {
+                semicolon(fullStmt);
+                body = new Ast::Block(null, []);
+            }
+            else
+                body = functionBody (allowIn, omega);
             var vars = cx.exitVarBlock ();
-
             var attr = cx.exitFunction();
 
-            var {params:params,defaults:defaults,hasRest:hasRest,settings:settings,superArgs:superArgs,numparams:numparams} = nd2;
+            var {params:params,defaults:defaults,hasRest:hasRest,settings:settings,superArgs:superArgs,numparams:numparams} = signature;
 
             // print ("superArgs=",superArgs);
             // print ("settings=",settings);
-            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:nd1},false,nd3,params,numparams,vars,defaults,Ast::voidType,attr);
+            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:name}, attrs.native, body, params, numparams, vars, defaults, Ast::voidType, attr);
             var ctor = new Ast::Ctor (settings,superArgs,func);
 
             if (cx.ctor !== null)
@@ -4480,6 +4494,7 @@ use namespace intrinsic;
 
             switch (hd ()) {
             case Token::TripleDot:
+                cx.topFunction().uses_rest = true;
                 nd1 = restParameter (n);
                 hasRest = true;
                 numparams = 1;
@@ -4931,11 +4946,9 @@ use namespace intrinsic;
 
             case Token::Function:
                 if (isCurrentClassName (lexeme2())) 
-                    nd1 = constructorDefinition (omega, cx.pragmas.defaultNamespace);
+                    nd1 = constructorDefinition (omega, cx.pragmas.defaultNamespace, defaultAttrs());
                 else 
-                    nd1 = functionDefinition (tau, omega, new Ast::Var
-                                              , cx.pragmas.defaultNamespace
-                                              , false, false, false, false, false);
+                    nd1 = functionDefinition (tau, omega, new Ast::Var, defaultAttrs());
                 //ts1 = semicolon (ts1,omega);
                 break;
 
@@ -5058,11 +5071,9 @@ use namespace intrinsic;
 
             case Token::Function:
                 if (isCurrentClassName (lexeme2())) 
-                    nd2 = constructorDefinition (omega, attrs.ns);
+                    nd2 = constructorDefinition (omega, attrs.ns, attrs);
                 else 
-                    nd2 = functionDefinition (tau, omega, new Ast::Var
-                                              , attrs.ns, attrs.final, attrs.override
-                                              , attrs.prototype, attrs.static, attrs.abstract);
+                    nd2 = functionDefinition (tau, omega, new Ast::Var, attrs);
                 //ts2 = semicolon (ts2,omega);
                 break;
 
@@ -5079,7 +5090,7 @@ use namespace intrinsic;
                 break;
 
             default:  // label, attribute, or expr statement
-                let xattrs = attribute (tau,defaultAttrs());
+                let xattrs = attribute (tau,attrs);
                 if (newline ()) 
                     Parse::syntaxError(this, "error unexpected newline before " + lexeme())
                 nd2 = annotatableDirective (tau,omega,xattrs);
@@ -5344,6 +5355,56 @@ use namespace intrinsic;
             return pkgs;
         }
 
+        // Synthesize attributes in f.
+
+        function computeAttributes(f: FuncAttr) {
+            let reify_activation = false;
+
+            // If there's eval then variable lookup will be by name;
+            // new names may be added at run-time.
+
+            reify_activation = reify_activation || f.uses_eval;
+
+            // If there's with then variable lookup will be by name;
+            // the set of names in the object is generally unknown.
+            // (It's possible to do better for objects of known
+            // non-dynamic types, but that's unlikely to be a common
+            // case.)
+
+            reify_activation = reify_activation || f.uses_with;
+
+            // If there's a nested function definition or function expression 
+            // then it will close over its reified scope.
+            //
+            // FIXME: If the nested function has no free variables, or its
+            // free variables have constant values, then optimizations are
+            // possible.
+
+            reify_activation = reify_activation || f.children.length > 0;
+
+            // Catch/finally both imply the use of newcatch/pushscope
+            // in a simplistic model.
+            //
+            // FIXME: In actuality, newcatch/pushscope and lookup by
+            // name of the catch var are not necessary unless there is
+            // a method in the catch handler that captures the
+            // environment, so we can do better -- similar to "let"
+            // optimization.
+
+            reify_activation = reify_activation || (f.uses_catch || f.uses_finally); 
+
+            // Even assuming having a nested function does not require
+            // reifying the activation, do reify it if the child
+            // requires its activation to be reified.
+
+            for ( let i=0, limit=f.children.length ; i < limit ; i++ ) {
+                let c = f.children[i];
+                computeAttributes(c);
+                reify_activation = reify_activation || c.reify_activation;
+            }
+            f.reify_activation = reify_activation;
+        }
+
         function program () : Ast::PROGRAM {
             start();
 
@@ -5372,6 +5433,8 @@ use namespace intrinsic;
             default:
                 Parse::syntaxError(this, "extra tokens after end of program.");
             }
+
+            computeAttributes(cx.topFunction());
 
             return new Ast::Program ( nd1,
                                       new Ast::Block (bhead,nd2),
