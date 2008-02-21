@@ -384,6 +384,7 @@ namespace Asm;
         public function I_getglobalslot(index) { pushOneU30("getglobalslot", 0x6E, index) }
         public function I_getlex(index) { pushOneU30("getlex", 0x60, index) }
         public function I_getscopeobject(index) { pushOneU30("getscopeobject", 0x65, index) }
+        public function I_getouterscope(index) { pushOneU30("getouterscope", 0x67, index) }
         public function I_newcatch(index) { pushOneU30("newcatch", 0x5A, index) }
         public function I_newfunction(index) { pushOneU30("newfunction", 0x40, index) }
         public function I_pushdouble(index) { pushOneU30("pushdouble", 0x2F, index) }

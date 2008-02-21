@@ -349,17 +349,11 @@ namespace Emit;
 
         function Script(e:ABCEmitter) {
             this.e = e;
-            this.init = new Method(e,[], "", true, false);
+            this.init = new Method(e,[], "", true, false, false);
         }
 
         public function newClass(name, basename) {
             return new Emit::Class(this, name, basename);
-        }
-
-        /* All functions are in some sense global because the
-           methodinfo and methodbody are both global. */
-        public function newFunction(formals, standardPrologue, usesArguments) {
-            return new Method(e, formals, null, standardPrologue, usesArguments);
         }
 
         public function addException(e) {
@@ -404,7 +398,7 @@ namespace Emit;
 
         public function getCInit() {
             if(cinit == null ) {
-                cinit = new Method(s.e, [], "$cinit", true, false);
+                cinit = new Method(s.e, [], "$cinit", true, false, false);
             }
             return cinit;
         }
@@ -479,21 +473,23 @@ namespace Emit;
 
     class Method // extends AVM2Assembler
     {
-        public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[];
+        public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[], isNative=false;
 
-        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, usesArguments) {
-            asm = new AVM2Assembler(e.constants, formals.length, usesArguments);
+        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, usesArguments, isNative) {
             //super(e.constants, formals.length);
             this.formals = formals;
             this.e = e;
             this.name = name;
+            this.isNative = isNative;
 
-            // Standard prologue -- but is this always right?
-            // ctors don't need this - have a more complicated prologue
-            if(standardPrologue)
-            {
-                asm.I_getlocal_0();
-                asm.I_pushscope();
+            if (!isNative) {
+                asm = new AVM2Assembler(e.constants, formals.length, usesArguments);
+                // Standard prologue -- but is this always right?
+                // ctors don't need this - have a more complicated prologue
+                if(standardPrologue) {
+                    asm.I_getlocal_0();
+                    asm.I_pushscope();
+                }
             }
         }
 
@@ -514,23 +510,30 @@ namespace Emit;
                 return;
             finalized = true;
 
-            // Standard epilogue for lazy clients.
-            asm.I_returnvoid();
+            var flags = 0;
 
-            var meth = e.file.addMethod(new ABCMethodInfo(name, formals, 0, asm.flags, defaults,null));
-            var body = new ABCMethodBodyInfo(meth);
-            body.setMaxStack(asm.maxStack);
-            body.setLocalCount(asm.maxLocal);
-            body.setInitScopeDepth(0);
-            body.setMaxScopeDepth(asm.maxScope);
-            body.setCode(asm.finalize());
-            for ( var i=0 ; i < traits.length ; i++ )
-                body.addTrait(traits[i]);
+            if (!isNative) {
+                // Standard epilogue for lazy clients.
+                asm.I_returnvoid();
+                flags = asm.flags;
+            }
+
+            var meth = e.file.addMethod(new ABCMethodInfo(name, formals, 0, flags, defaults, null));
+            if (!isNative) {
+                var body = new ABCMethodBodyInfo(meth);
+                body.setMaxStack(asm.maxStack);
+                body.setLocalCount(asm.maxLocal);
+                body.setInitScopeDepth(0);
+                body.setMaxScopeDepth(asm.maxScope);
+                body.setCode(asm.finalize());
+                for ( var i=0 ; i < traits.length ; i++ )
+                    body.addTrait(traits[i]);
             
-            for ( var i=0 ; i < exceptions.length; i++ )
-                body.addException(exceptions[i]);
+                for ( var i=0 ; i < exceptions.length; i++ )
+                    body.addException(exceptions[i]);
             
-            e.file.addMethodBody(body);
+                e.file.addMethodBody(body);
+            }
 
             return meth;
         }

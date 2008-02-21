@@ -940,6 +940,9 @@ public namespace Ast
 
         /* True iff the body has a "try" statement with a "finally" clause */
         var uses_finally = false;
+
+        /* Synthesized: true iff activation object must be reified for any reason */
+        var reify_activation = false;
     }
 
     class Func {
