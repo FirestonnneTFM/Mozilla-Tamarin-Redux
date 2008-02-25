@@ -29,5 +29,6 @@ $DIR/shell \
     $DIR/cogen.es.abc \
     $DIR/cogen-stmt.es.abc \
     $DIR/cogen-expr.es.abc \
+    $DIR/esc-core.es.abc \
     $DIR/esc.es.abc \
     -- $@

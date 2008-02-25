@@ -787,6 +787,7 @@ public namespace AbcEncode;
     					case OP_getlex: 
     					case OP_findpropstrict: 
     					case OP_findproperty:
+                        case OP_getouterscope:
     					case OP_finddef:
     					case OP_deleteproperty: 
     					case OP_istype: 
@@ -1095,7 +1096,7 @@ public namespace AbcEncode;
                   , ["getglobalscope", 1]
                   , ["getscopeobject", 1-2]
                   , ["getproperty", 1-2]
-                  , ["OP_0x67", 0]
+                  , ["getouterscope", 1-2]
                   , ["initproperty", 1-2]
                   , ["OP_0x69", 0]
                   , ["deleteproperty", 1-2]

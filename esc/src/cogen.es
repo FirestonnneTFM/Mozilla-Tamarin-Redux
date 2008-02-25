@@ -131,6 +131,66 @@ namespace Gen;
         return e.finalize();
     }
 
+    /* Support for "eval".  Compile 'tree' to a special script.
+     *
+     * The script is compiled as a top-level function with the name
+     * given by "name", and the script stores it into ESC::eval_hook,
+     * where the caller will find it (that's awful style, but it works
+     * around a problem with the way name lookup is done in Tamarin,
+     * namely, that a file loading a script can't seem to access names
+     * bound by that script).
+     *
+     * Anyhow the new function will be passed an array of scope
+     * objects, which it must push onto its scope stack (scopedesc
+     * details how many elements, and how to push them).
+     *
+     * Upon entry, the function must bind the var and function
+     * fixtures in 'tree' in the innermost scope object; these
+     * properties are deletable.  Then it must run the program.  (No
+     * other fixture types are allowed.)
+     *
+     * The function can't contain a "return" statement (because it was
+     * parsed as a <Program>) but the statement result value is
+     * captured and is return if the script terminates normally.
+     */
+
+    function cgEval(tree: PROGRAM, name: String, scopedesc: String) {
+
+        function evalInits() {
+            var d = [];
+            for ( let i=0 ; i < scopedesc.length ; i++ )
+                d.push(new Ast::EvalScopeInitExpr(i, scopedesc.charAt(i)));
+            return d;
+        }
+
+        let attr = new Ast::FuncAttr(null);
+        attr.capture_result = true;
+        return cg(new Ast::Program( [], 
+                                    new Ast::Block(new Ast::Head([],[]), 
+                                                   [new Ast::ExprStmt(new Ast::SetExpr(Ast::assignOp,
+                                                                                       new Ast::LexicalRef(new Ast::QualifiedIdentifier(new Ast::LexicalRef(new Ast::Identifier("ESC",[[Ast::noNS]])),
+                                                                                                                                        "eval_hook")),
+                                                                                       new Ast::LexicalRef(new Ast::Identifier(name, [[Ast::noNS]]))))]),
+                                    new Ast::Head([[new Ast::PropName({ns: Ast::noNS, id: name}),
+                                                    new Ast::MethodFixture(new Ast::Func({kind: new Ast::Ordinary, ident: name},
+                                                                                         tree.block,
+                                                                                         new Ast::Head([[new Ast::TempName(100000),
+                                                                                                         new Ast::ValFixture(Ast::anyType,false)]],
+                                                                                                       evalInits()),
+                                                                                         1,
+                                                                                         new Ast::Head([],[]),
+                                                                                         [],
+                                                                                         Ast::anyType,
+                                                                                         attr),
+                                                                           Ast::anyType,
+                                                                           false,
+                                                                           false,
+                                                                           false)]],
+                                                  []),
+                                    tree.attr,
+                                    tree.file));
+    }
+
     function cgDebugFile(ctx) {
         let {asm:asm, cp:cp} = ctx;
         if( emit_debug && ctx.filename != null )
@@ -323,7 +383,7 @@ namespace Gen;
     function cgCtor(ctx, c, instanceInits) {
         let f = c.func;
         let formals_type = extractFormalTypes(ctx, f);
-        let method = new Method(ctx.script.e, formals_type, "$construct", false, f.attr, f.isNative);
+        let method = new Method(ctx.script.e, formals_type, "$construct", false, f.attr);
 
         let defaults = extractDefaultValues(ctx, f);
         if( defaults.length > 0 )
@@ -416,7 +476,7 @@ namespace Gen;
         let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "function";  // brittle as hell
         let formals_types = extractFormalTypes({emitter:emitter, script:script}, f);
         let name = f.name ? f.name.ident : "";
-        let method = new Method(emitter, formals_types, cp.stringUtf8(name), fntype != "function", f.attr, f.isNative);
+        let method = new Method(emitter, formals_types, cp.stringUtf8(name), fntype != "function", f.attr);
 
         let defaults = extractDefaultValues({emitter:emitter, script:script}, f);
         if( defaults.length > 0 )
@@ -437,14 +497,18 @@ namespace Gen;
              * elaborate behavior here, and the compiler must perform some
              * analysis and avoid the shadowed formal here.
              */
-            let t = asm.getTemp();
+            let scope_reg = asm.getTemp();
+            let capture_reg = 0;
 
-            let fnctx = pushFunction(ctx0, fntype, t, (fntype != "function"), method);
+            if (f.attr.capture_result)
+                capture_reg = asm.getTemp();
+
+            let fnctx = pushFunction(ctx0, fntype, scope_reg, capture_reg, (fntype != "function"), method);
             cgDebugFile(fnctx);
 
             asm.I_newactivation();
             asm.I_dup();
-            asm.I_setlocal(t);
+            asm.I_setlocal(scope_reg);
             asm.I_pushscope();
 
             setupArguments(fnctx, f);
@@ -457,7 +521,11 @@ namespace Gen;
              * at the end, so there's nothing to worry about here.
              */
             cgBlock(fnctx, f.block);
-            asm.killTemp(t);
+            asm.killTemp(scope_reg);
+            if (capture_reg) {
+                asm.I_getlocal(capture_reg);
+                asm.I_returnvalue();
+            }
         }
 
         return method.finalize();
@@ -618,11 +686,12 @@ namespace Gen;
                  { tag:"function", "type": "iinit", scope_reg: scope_reg, link: ctx.stk },
                  iinit );
 
-    function pushFunction(ctx, function_type, scope_reg, push_this, func)
+    function pushFunction(ctx, function_type, scope_reg, capture_reg, push_this, func)
         new CTX( func.asm, 
                  { tag: "function", 
                    "type": function_type, 
                    scope_reg: scope_reg, 
+                   capture_reg: capture_reg,
                    push_this: push_this,
                    link: ctx.stk },
                  func );

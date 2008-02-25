@@ -114,7 +114,6 @@ namespace Asm;
     public const METHOD_Setsdxns             = 0x40;
     public const METHOD_HasParamNames        = 0x80;
 
-    
     const OP_bkpt:int = 0x01;
     const OP_nop:int = 0x02;
     const OP_throw:int = 0x03;
@@ -195,7 +194,7 @@ namespace Asm;
     const OP_getglobalscope:int = 0x64;
     const OP_getscopeobject:int = 0x65;
     const OP_getproperty:int = 0x66;
-    const OP_getpropertylate:int = 0x67;
+    const OP_getouterscope:int = 0x67;
     const OP_initproperty:int = 0x68;
     const OP_setpropertylate:int = 0x69;
     const OP_deleteproperty:int = 0x6A;
@@ -298,9 +297,10 @@ namespace Asm;
      *  - Ditto for the scope depth, really.
      */
 
-    class AVM2Assembler
+    var listify = false;
+
+    public class AVM2Assembler
     {
-        const listify = false;
         const indent = "        ";
 
         /*private*/ var code = new ABCByteStream;
@@ -820,7 +820,7 @@ namespace Asm;
             for ( var i=0 ; i < backpatches.length ; i++ ) {
                 var bp = backpatches[i];
                 if (bp.label.address == -1)
-                    Util::internalerror("", 0, "Missing definition for label " + bp.label.name); // FIXME: source pos
+                    Util::internalError("", 0, "Missing definition for label " + bp.label.name); // FIXME: source pos
                 var v = bp.label.address - bp.base;
                 code.setInt24(bp.loc, v);
             }

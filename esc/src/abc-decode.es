@@ -508,6 +508,8 @@ public namespace AbcDecode;
                     case OP_getlex: 
                     case OP_findpropstrict: 
                     case OP_findproperty:
+                    case OP_getglobalscope:
+                    case OP_getouterscope:
                     case OP_finddef:
                     case OP_deleteproperty: 
                     case OP_istype: 
@@ -712,6 +714,7 @@ public namespace AbcDecode;
         const setlocal = OP_setlocal
         const getglobalscope = OP_getglobalscope
         const getscopeobject = OP_getscopeobject
+        const getouterscope = OP_getouterscope
         const getproperty = OP_getproperty
         const initproperty = OP_initproperty
         const deleteproperty = OP_deleteproperty

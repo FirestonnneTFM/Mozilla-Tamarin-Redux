@@ -76,7 +76,24 @@
 
     function cgExprStmt(ctx, s) {
         cgExpr(ctx, s.expr);
-        ctx.asm.I_pop();  // FIXME the last expr stmt of the program must save its value
+        
+        // Capture the result or discard it.
+        //
+        // Statement result capture (E262-3 Ch 12):
+        //  - if capture is desired then there is a local to receive the value
+        //  - exprStmt updates the local with the value instead of popping it
+        //  - catch and finally blocks do not affect the captured value
+
+        let asm=ctx.asm;
+        let stk=ctx.stk;
+        while (stk != null && stk.tag != "function" && stk.tag != "finally" && stk.tag != "catch")
+            stk = stk.link;
+        if (stk != null && stk.tag == "function" && stk.capture_reg) {
+            asm.I_coerce_a();
+            asm.I_setlocal(stk.capture_reg);
+        }
+        else
+            asm.I_pop();
     }
 
     function cgClassBlock(ctx, s) {
