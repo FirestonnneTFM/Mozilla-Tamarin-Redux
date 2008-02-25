@@ -179,7 +179,7 @@ package abcdump
 	const OP_getglobalscope:int = 0x64
 	const OP_getscopeobject:int = 0x65
 	const OP_getproperty:int = 0x66
-	const OP_getpropertylate:int = 0x67
+	const OP_getouterscope:int = 0x67
 	const OP_initproperty:int = 0x68
 	const OP_setpropertylate:int = 0x69
 	const OP_deleteproperty:int = 0x6A
@@ -362,7 +362,7 @@ package abcdump
 	    "getglobalscope",
 	    "getscopeobject",
 	    "getproperty   ",
-	    "OP_0x67       ",
+	    "getouterscope ",
 	    "initproperty  ",
 	    "OP_0x69       ",
 	    "deleteproperty",
