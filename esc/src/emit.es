@@ -349,7 +349,7 @@ namespace Emit;
 
         function Script(e:ABCEmitter) {
             this.e = e;
-            this.init = new Method(e,[], "", true, new Ast::FuncAttr(null), false);
+            this.init = new Method(e,[], "", true, new Ast::FuncAttr(null));
         }
 
         public function newClass(name, basename) {
@@ -398,7 +398,7 @@ namespace Emit;
 
         public function getCInit() {
             if(cinit == null ) {
-                cinit = new Method(s.e, [], "$cinit", true, new Ast::FuncAttr(null), false);
+                cinit = new Method(s.e, [], "$cinit", true, new Ast::FuncAttr(null));
             }
             return cinit;
         }
@@ -473,17 +473,16 @@ namespace Emit;
 
     class Method // extends AVM2Assembler
     {
-        public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[], isNative=false;
+        public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[], attr=null;
 
-        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, attr, isNative) {
+        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, attr) {
             //super(e.constants, formals.length);
             this.formals = formals;
             this.e = e;
             this.name = name;
-            this.isNative = isNative;
+            this.attr = attr;
 
-            if (!isNative) {
-                attr.rnd = Math.random();
+            if (!attr.is_native) {
                 asm = new AVM2Assembler(e.constants, formals.length - (attr.uses_rest ? 1 : 0), attr);
                 // Standard prologue -- but is this always right?
                 // ctors don't need this - have a more complicated prologue
@@ -513,7 +512,7 @@ namespace Emit;
 
             var flags = 0;
 
-            if (!isNative) {
+            if (!attr.is_native) {
                 // Standard epilogue for lazy clients.
                 asm.I_returnvoid();
                 flags = asm.flags;
@@ -522,7 +521,7 @@ namespace Emit;
             }
 
             var meth = e.file.addMethod(new ABCMethodInfo(name, formals, 0, flags, defaults, null));
-            if (!isNative) {
+            if (!attr.is_native) {
                 var body = new ABCMethodBodyInfo(meth);
                 body.setMaxStack(asm.maxStack);
                 body.setLocalCount(asm.maxLocal);

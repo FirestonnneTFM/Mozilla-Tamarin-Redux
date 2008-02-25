@@ -36,54 +36,49 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/* Interactive/non-interactive shell.  If there are command line
+ * arguments, treat them as filenames to load and eval, and then exit
+ * after processing.  Otherwise, read input from the console.
+ */
+
 {
     import avmplus.*;
     import flash.utils.*;
 
-    // shell
-
-    public function evalFile(src_name)
-    {
+    var argv = ESC::commandLineArguments();
+    if (argv.length == 0)
+        repl();
+    else {
+        for ( let i=0 ; i < argv.length ; i++ )
+            ESC::compileAndLoadFile(argv[i]);
     }
+    System.exit(0);
 
-    public function evalString(str)
-    {
-        use namespace Parse;
-        var top = [];
-        var parser = new Parser(str,top);
-        var prog = parser.program();
-        var bytes = Gen::cg(prog).getBytes();
+    // "eval" really belongs in the builtins, but OK here for the moment.
+    public function eval(s)
+        ESC::evaluateInScopeArray(s, "", []);
 
-        let b = new ByteArray();
-        b.endian = "littleEndian";
-
-        for (let i = 0, len = bytes.length; i<len; ++i) {
-            b.writeByte(uint(bytes[i]));
-        }
-
-        Domain.currentDomain.loadBytes(b);
-    }
-
-    while( true )
-    {
-        let s = "";
-        System.write("es> ");
-        while( true ) {
-            try {
-                s += System.readLine();
-                evalString(s);
-                break; // worked - this command is complete.
-            } catch (x) {
-                // If it is a premature-EOF error, read another line
-                if (x.message.indexOf("found EOS") == -1) {
-                    let msg = x.getStackTrace();
-                    if (!msg) { // probably a non *_Debugger build
-                        msg = x;
+    function repl() {
+        while( true )             {
+            let s = "";
+            System.write("es> ");
+            while( true ) {
+                try {
+                    s += System.readLine();
+                    ESC::compileAndLoadString(s, "(repl)");
+                    break; // worked - this command is complete.
+                } catch (x) {
+                    // If it is a premature-EOF error, read another line
+                    if (x.message.indexOf("found EOS") == -1) {
+                        let msg = x.getStackTrace();
+                        if (!msg) { // probably a non *_Debugger build
+                            msg = x;
+                        }
+                        print(msg);
+                        break;
                     }
-                    print(msg);
-                    break;
+                    // else fall through and read another line
                 }
-                // else fall through and read another line
             }
         }
     }

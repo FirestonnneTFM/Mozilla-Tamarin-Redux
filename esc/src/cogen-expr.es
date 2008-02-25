@@ -99,6 +99,7 @@
         case (e:SliceExpr) { cgSliceExpr(ctx, e) }
         case (e:GetTemp) { cgGetTempExpr(ctx, e) }
         case (e:GetParam) { cgGetParamExpr(ctx, e) }
+        case (e:EvalScopeInitExpr) { cgEvalScopeInitExpr(ctx,e) }
         case (e:*) { 
             Gen::internalError(ctx, "Unimplemented expression type " + e);
         }
@@ -302,10 +303,9 @@
                 asm.I_findproperty(cgIdentExpr(ctx, e.e1.ident));
                 asm.I_getproperty(cgIdentExpr(ctx, e.e1.ident));
             }
-            else {
+            else 
                 cgExpr(ctx, e.e1);
-                asm.I_typeof();
-            }
+            asm.I_typeof();
         }
         case (op:PreIncr) { incdec(true, true) }
         case (op:PreDecr) { incdec(true, false) }
@@ -345,6 +345,8 @@
     function cgCallExpr(ctx, e) {
         let {asm:asm, emitter:emitter} = ctx;
         let nargs = e.args.length;
+        let evalTmp = 0;
+        let isEval = false;
 
         switch type (e.expr) {
         case (or:ObjectRef) {
@@ -352,6 +354,12 @@
         }
         case (lr:LexicalRef) {
             asm.I_findpropstrict(cgIdentExpr(ctx, lr.ident));
+            if (lr.ident is Identifier && lr.ident.ident === "eval") {
+                isEval = true;
+                evalTmp = asm.getTemp();   // save the
+                asm.I_dup();               //   object
+                asm.I_setlocal(evalTmp);   //     for later
+            }
         }
         case (x:*) {
             cgExpr(ctx, e.expr);
@@ -361,6 +369,15 @@
 
         for ( let i=0 ; i < nargs ; i++ )
             cgExpr(ctx, e.args[i]);
+
+        var L_skipcall;
+
+        if (isEval) {
+            // Code performs 'eval', cleans the stack, and jumps to L0
+            // if the eval operator kicks in, otherwise falls through
+            // to the regular call code below.
+            L_skipcall = cgEvalPrefix(ctx, evalTmp, nargs);
+        }
 
         switch type (e.expr) {
         case (or:ObjectRef) {
@@ -375,6 +392,151 @@
             asm.I_call(nargs);
         }
         }
+
+        if (isEval) {
+            asm.I_label(L_skipcall);
+            asm.killTemp(evalTmp);
+        }
+    }
+
+    // First check that 'eval' really gets us the global eval binding.
+    //
+    // Assuming it really is the eval operator:
+    //
+    // Since the form of the call is eval(...) we know there are no
+    // late-bound name components on the evaluation stack, just the
+    // receiver object (which is the global object).  Clean up the
+    // stack by consing up an array of all the arguments.
+    //
+    // Call ESC::eval() on the argument array, a descriptor of the
+    // scopes (a string), and an array of scopes, outermost-first.
+    // The descriptor and the scope array have the same length.  A
+    // letter in the descriptor is "s" if the object is a regular
+    // scope object (to be pushed by "pushscope") and "w" if it is is
+    // a "with" object (to be pushed by "pushwith").
+    //
+    // ESC::evalCompiler() returns the result of the evaluation.
+
+    function cgEvalPrefix(ctx, evalTmp, nargs) {
+        var asm = ctx.asm;
+        var nons = [[new Ast::ReservedNamespace(Ast::noNS)]];
+        var id_ESC = new Ast::Identifier("ESC", nons); // Needs to be open namespaces??
+        var id_evaluateInScopeArray = new Ast::QualifiedIdentifier(new Ast::LexicalRef(id_ESC), "evaluateInScopeArray");
+
+        // Check it: Is this *really* the eval operator?
+
+        var L_normalcall = undefined;
+
+        /* FIXME: The following sanity tests only work when getglobalscope returns the object 
+           that actually holds the global variables.  Bugzilla 417342.
+
+        // The container must be === to the global object
+        asm.I_getlocal(evalTmp);
+        asm.I_getglobalscope();
+        asm.I_ifstrictne(L_normalcall);
+
+        // Property must be === to the predefined eval function, stored in the constant ESC::eval
+        asm.I_getlocal(evalTmp);
+        asm.I_getproperty(cgIdentExpr(ctx, lr.ident));
+        asm.I_getglobalscope();
+        asm.i_getproperty(cgIdentExpr(ctx, new Ast::QualifiedIdentifier(id_ESC,
+                                                                        new Ast::Identifier("eval", [[Ast::NoNS]]))));
+        asm.I_ifstrictne(L_normalcall);
+        */
+
+        asm.I_newarray(nargs);             // collapse the arguments
+        asm.I_setlocal(evalTmp);           // save it...
+        asm.I_pop();                       // get rid of the object
+        asm.I_findpropstrict(cgIdentExpr(ctx, id_evaluateInScopeArray));
+        asm.I_getlocal(evalTmp);           // argument array
+
+        // pushScopes() generates code that leaves an array of scope
+        // objects on the stack, followed by the scope descriptor
+        // string.
+
+        let numscopes = pushScopes(ctx);
+
+        asm.I_callproplex(cgIdentExpr(ctx, id_evaluateInScopeArray), 3);
+
+        L_skipcall = asm.I_jump(undefined);
+
+        if (L_normalcall != undefined)
+            asm.I_label(L_normalcall);
+
+        return L_skipcall;
+
+        function pushScopes(ctx) {
+
+            let scopedesc = "";
+
+            function rec(stk, inner) {
+                let level;
+
+                // Do not capture the global scope
+                if (stk.tag == "script")
+                    return 1;
+
+                if (stk.tag == "function") {
+                    level = rec(stk.link, false);
+                    if (inner)
+                        level = 0;
+                }
+                else
+                    level = rec(stk.link, inner);
+
+                // FIXME: There may be two scope objects per ctx rib,
+                // because push_this may be true too.
+                push = false;
+                switch (stk.tag) {
+                case "function":
+                case "catch":
+                    scopedesc = "s" + scopedesc;
+                    push = true;
+                    break;
+                case "with":
+                    scopedesc = "w" + scopedesc;
+                    push = true;
+                    break;
+                case "class":
+                case "instance":
+                case "break":
+                case "continue":
+                case "finally":
+                    break;
+                case "let":
+                default:
+                    Gen::internalError(ctx, "Unknown context tag: " + stk.tag);
+                }
+
+                if (push) {
+                    if (inner)
+                        asm.I_getscopeobject(level);
+                    else
+                        asm.I_getouterscope(level);
+                }
+                return level + 1;
+            }
+
+            rec(ctx.stk, true);
+
+            let numscopes = scopedesc.length;
+
+            ctx.asm.I_newarray(numscopes);
+            ctx.asm.I_pushstring(ctx.cp.stringUtf8(scopedesc));
+
+            return numscopes;
+        }
+    }
+
+    function cgEvalScopeInitExpr(ctx, e) {
+        let asm = ctx.asm;
+        asm.I_getlocal(1);
+        asm.I_getproperty(cgIdentExpr(ctx, new Ast::Identifier(String(e.index), [[Ast::noNS]])));
+        if (e.how == "w")
+            asm.I_pushwith();
+        else
+            asm.I_pushscope();
+        asm.I_pushundefined();
     }
 
     function cgApplyTypeExpr(ctx, e) {

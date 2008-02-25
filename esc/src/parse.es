@@ -237,9 +237,10 @@ use namespace intrinsic;
             return varHead;
         }
 
-        function enterFunction() {
+        function enterFunction(attrs: ATTRS) {
             use namespace Ast; // language bug, needs fixing
             var node = new FuncAttr(top_function);
+            node.is_native = attrs.native;
             top_function.children.push(node);
             top_function = node;
             return node;
@@ -4038,7 +4039,7 @@ use namespace intrinsic;
         function functionDefinition (tau: TAU, omega: OMEGA, kind, attrs: ATTRS) : Ast::STMTS {
             eat (Token::Function);
 
-            cx.enterFunction();
+            cx.enterFunction(attrs);
 
             var name = functionName ();
             var signature = functionSignature ();
@@ -4056,7 +4057,7 @@ use namespace intrinsic;
             var attr = cx.exitFunction ();
 
             var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,numparams:numparams} = signature;
-            var func = new Ast::Func (name, attrs.native, body, params, numparams, vars, defaults, resultType, attr);
+            var func = new Ast::Func (name, body, params, numparams, vars, defaults, resultType, attr);
 
             var name = new Ast::PropName ({ns:attrs.ns, id:name.ident});
             var fxtr = new Ast::MethodFixture (func, Ast::anyType, true, attrs.override, attrs.final);
@@ -4076,7 +4077,7 @@ use namespace intrinsic;
         function functionExpression () : Ast::EXPR {
             var name = null;
 
-            cx.enterFunction();
+            cx.enterFunction(defaultAttrs());
 
             var pos = position();
             eat (Token::Function);
@@ -4093,7 +4094,6 @@ use namespace intrinsic;
 
             var { params:params, numparams:numparams, defaults:defaults, resultType:resultType } = signature;
             var fnexpr = new Ast::LiteralExpr( new Ast::LiteralFunction(new Ast::Func(name, 
-                                                                                      false, 
                                                                                       body, 
                                                                                       params, 
                                                                                       numparams,
@@ -4116,7 +4116,7 @@ use namespace intrinsic;
         function constructorDefinition (omega, ns, attrs) : Ast::STMTS {
             eat (Token::Function);
 
-            cx.enterFunction();
+            cx.enterFunction(attrs);
 
             var name = identifier ();
             var signature = constructorSignature ();
@@ -4137,7 +4137,7 @@ use namespace intrinsic;
 
             // print ("superArgs=",superArgs);
             // print ("settings=",settings);
-            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:name}, attrs.native, body, params, numparams, vars, defaults, Ast::voidType, attr);
+            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:name}, body, params, numparams, vars, defaults, Ast::voidType, attr);
             var ctor = new Ast::Ctor (settings,superArgs,func);
 
             if (cx.ctor !== null)
@@ -4678,8 +4678,7 @@ use namespace intrinsic;
             var ctor = cx.ctor;
             if (ctor===null)
             {
-                cx.enterFunction();
-                let isNative = false;
+                cx.enterFunction(defaultAttrs());
                 let blck = new Ast::Block (new Ast::Head([],[]),[]);
                 let params = new Ast::Head([],[]);
                 let numparams = 0;
@@ -4687,7 +4686,7 @@ use namespace intrinsic;
                 let defaults = [];
                 let ty = Ast::anyType;
                 let attr = cx.exitFunction();
-                let func = new Ast::Func ({kind:new Ast::Ordinary,ident:nd1},isNative,blck,params,numparams,vars,defaults,ty,attr);
+                let func = new Ast::Func ({kind:new Ast::Ordinary,ident:nd1},blck,params,numparams,vars,defaults,ty,attr);
                 var ctor = new Ast::Ctor ([],[],func);
             }
             

@@ -425,6 +425,7 @@ public namespace Ast
        , ListExpr
        , InitExpr
        , SliceExpr
+       , EvalScopeInitExpr
        , GetTemp
        , GetParam )
 
@@ -579,6 +580,15 @@ public namespace Ast
         const exprs : EXPRS;
         function ListExpr (exprs)
             : exprs=exprs {}
+    }
+
+    class EvalScopeInitExpr {
+        const index: int;
+        const how: String;
+        function EvalScopeInitExpr(index, how)
+            : index=index
+            , how=how
+        {}
     }
 
     type INIT_TARGET =
@@ -941,13 +951,19 @@ public namespace Ast
         /* True iff the body has a "try" statement with a "finally" clause */
         var uses_finally = false;
 
+        /* True iff this function is native */
+        var is_native = false;
+
+        /* True iff the function must capture its statement result value and return it if 
+           control falls off the end */
+        var capture_result = false;
+
         /* Synthesized: true iff activation object must be reified for any reason */
         var reify_activation = false;
     }
 
     class Func {
         const name //: FUNC_NAME;
-        const isNative: Boolean;
         const block: BLOCK;
         const params: HEAD;
         const vars: HEAD;
@@ -955,10 +971,8 @@ public namespace Ast
         const type /*: FUNC_TYPE*/;    // FIXME: should be able to use 'type' here
         const attr: FuncAttr;
         const numparams: int;
-        function Func (name,isNative,block,
-                       params,numparams,vars,defaults,ty,attr)
+        function Func (name,block,params,numparams,vars,defaults,ty,attr)
             : name = name
-            , isNative = isNative
             , block = block
             , params = params
             , numparams = numparams
