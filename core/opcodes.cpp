@@ -407,7 +407,7 @@ signed char opOperandCount[] = {
     0,	// "getglobalscope"
     1,	// "getscopeobject"
     1,	// "getproperty"
-    0,	// "getouterscope"
+    1,	// "getouterscope"
     1,	// "initproperty"
     -1,	// "OP_0x69"
     1,	// "deleteproperty"
