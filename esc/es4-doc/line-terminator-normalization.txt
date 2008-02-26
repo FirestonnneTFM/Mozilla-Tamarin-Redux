@@ -1,12 +1,10 @@
-NAME:       "Line terminator normalization"
-CATEGORY:   Lexical conventions (E262-3 ch 7)
-SOURCES:    Reference [1]
-AUTHOR:     Lars
-STATUS:     COMPLETE
-REVIEWS:    (none)
-RI STATUS:  Implemented in lexer.sml
-ESC STATUS: Implemented
-ESC TEST:   ?
+NAME:        "Line terminator normalization"
+CATEGORY:    Lexical conventions (E262-3 ch 7)
+SOURCES:     Reference [1]
+SPEC AUTHOR: Lars
+STATUS:      COMPLETE
+REVIEWS:     (none)
+IMPLEMENTED: RI; Tamarin+ESC
 
 
 DESCRIPTION
