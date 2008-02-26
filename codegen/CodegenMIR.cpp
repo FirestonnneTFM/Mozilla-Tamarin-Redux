@@ -1718,6 +1718,7 @@ namespace avmplus
 		names->add(ENVADDR(MethodEnv::delproperty), "MethodEnv::delproperty");
 		names->add(ENVADDR(MethodEnv::delpropertyHelper), "MethodEnv::delpropertyHelper");
 		names->add(ENVADDR(MethodEnv::in), "MethodEnv::in");
+        names->add(ENVADDR(MethodEnv::getActivation), "MethodEnv::getActivation");
 
 		// exception handling
 		names->add(COREADDR(AvmCore::beginCatch), "AvmCore::beginCatch");
