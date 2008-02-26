@@ -105,7 +105,7 @@ namespace avmplus
 			MIR_use		= 18,				// 
 			MIR_usea	= 19,				// imm32
 			MIR_alloc   = 20,
-			//          = 21,
+			MIR_addp  = 21,     // no cse add for adjusted builtin ScriptObject ptrs
 			MIR_ld      = 22,				// non-optimizable load
 			MIR_jlt     = 23,
 			MIR_jle		= 24,
