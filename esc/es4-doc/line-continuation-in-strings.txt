@@ -1,12 +1,10 @@
-NAME:       "Line continuation in string literals"
-CATEGORY:   Lexical conventions (E262-3 ch 7)
-SOURCES:    References [1], [2]
-AUTHOR:     Lars
-STATUS:     OPEN ISSUES
-REVIEWS:    (none)
-RI STATUS:  Partly implemented (\<PS> and \<LS> not supported)
-ESC STATUS: Implemented
-TEST CASE:  Implemented
+NAME:        "Line continuation in string literals"
+CATEGORY:    Lexical conventions (E262-3 ch 7)
+SOURCES:     References [1], [2]
+SPEC AUTHOR: Lars
+STATUS:      OPEN ISSUES
+REVIEWS:     (none)
+IMPLEMENTED: RI (partial); Tamarin+ESC
 
 
 DESCRIPTION
@@ -17,26 +15,32 @@ removed from strings delimited by either single or triple SINGLEQUOTE
 or DOUBLEQUOTE characters.  (Triple-quoting is defined in [5].)
 
 
+NOTES
+
+It is assumed that line terminator normalization [4] is in effect,
+thus CR does not appear in string literals.
+
+
 OPEN ISSUES
 
-Should this apply in triply quoted strings?  The wiki says no, the RI
-says yes.  I've gone with the RI because the "optimization" described
-in the wiki is probably going to be counterintuitive to most users and
-of effectively no value.  See longer discussion below.
+(1) Should line continuations be handled in triply quoted strings?
+The wiki says no, the RI says yes.  I've gone with the RI because the
+"optimization" described in the wiki [2] is probably going to be
+counterintuitive to most users and of effectively no value.  See
+longer discussion below.
 
-The RI does not handle BACKSLASH LS or BACKSLASH PS, but [1] seems to
-indicate that it's the intent to handle them (it references
-LineTerminator, which includes these characters), so I've gone with
-the wiki.
+(2) The RI does not handle BACKSLASH LS or BACKSLASH PS, but [1] seems
+to indicate that it's the intent to handle them (it references the
+LineTerminator nonterminal, which includes these characters), so I've
+gone with the wiki.
 
 
 DISCUSSION
 
 This feature comes from the bug fix [BACKSLASH.NEWLINE.IN.STRING] in
 [1], applying to strings only (not regular expression literals,
-identifiers, or block comments, which would be other obvious places,
-nor generally as a transformation that would take place before
-tokenization).
+identifiers, or block comments, nor generally as a transformation that
+would take place before tokenization).
 
 Its application to triply quoted strings [3] was discussed in [2],
 where it was proposed that there would be no removal of BACKSLASH
@@ -47,16 +51,18 @@ strings then it was also not wanted.
 
 The RI scanner actually removes BACKSLASH <lineterminator> in triply
 quoted strings.  I believe this is probably the desired behavior,
-which is why it has been described above.
+which is why it has been specified above.
 
-Note that it is probably not necessary to have this feature in regexp
-literals because the new scanning rules for ES4 allows linebreaks with
-the "x" flag.  The absence of support is a little jarring IMO.
+Note that it is probably not necessary to have line continuations in
+regexp literals because the new scanning rules for ES4 allows
+linebreaks with the "x" flag.  The absence of support is however a
+little jarring IMO.
 
 
 DEFINITIONS
 
 LF=U+000A
+CR=U+000D
 BACKSLASH=U+005C
 LS=U+2028
 PS=U+2029
@@ -69,5 +75,5 @@ REFERENCES
 [1] http://wiki.ecmascript.org/doku.php?id=proposals:bug_fixes
 [2] http://wiki.ecmascript.org/doku.php?id=proposals:line_terminator_normalization
 [3] http://wiki.ecmascript.org/doku.php?id=proposals:triple_quotes
-[4] line-terminator-normalization.txt in this directory
-[5] triple-quoted-strings.txt in this directory
+[4] "Line terminator normalization" spec
+[5] "Triply quoted string literals" spec

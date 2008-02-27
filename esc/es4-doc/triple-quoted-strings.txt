@@ -1,12 +1,10 @@
-NAME:       "Triply quoted string literals"
-CATEGORY:   Lexical conventions (E262-3 ch 7)
-SOURCES:    References [1], [4]
-AUTHOR:     Lars
-STATUS:     OPEN ISSUES
-REVIEWS:    (none)
-RI STATUS:  Implemented
-ESC STATUS: Implemented
-TEST CASE:  Implemented
+NAME:        "Triply quoted string literals"
+CATEGORY:    Lexical conventions (E262-3 ch 7)
+SOURCES:     References [1], [4]
+SPEC AUTHOR: Lars
+STATUS:      OPEN ISSUES
+REVIEWS:     (none)
+IMPLEMENTED: RI; Tamarin+ESC
 
 
 DESCRIPTION
@@ -35,7 +33,7 @@ As always, line terminator normalization [2] is in effect.
 
 OPEN ISSUES
 
-There is a note on the wiki [4] around whether \<lineterminator>
+There is a note on the wiki [4] regarding whether \<lineterminator>
 should be handled differently in triple-quoted strings than in
 double-quoted strings.  Brendan's opinion is it should -- it should
 escape the <lineterminator>.  The RI does not implement that behavior,
@@ -53,6 +51,6 @@ DOUBLEQUOTE=U+0022
 REFERENCES
 
 [1] http://wiki.ecmascript.org/doku.php?id=proposals:triple_quotes
-[2] line-terminator-normalization.txt in this directory
-[3] line-continuation-in-strings.txt
+[2] "Line terminator normalization" spec
+[3] "Line continuation in string literals" spec
 [4] http://wiki.ecmascript.org/doku.php?id=proposals:line_terminator_normalization

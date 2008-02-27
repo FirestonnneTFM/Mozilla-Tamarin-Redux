@@ -1539,6 +1539,7 @@ namespace avmplus
 		mirNames[MIR_or]    = "or   ";
 		mirNames[MIR_xor]   = "xor  ";
 		mirNames[MIR_add]   = "add  ";
+		mirNames[MIR_addp]  = "addp ";
 		mirNames[MIR_sub]   = "sub  ";
 		mirNames[MIR_imul]  = "imul ";
 		mirNames[MIR_icmp]  = "icmp ";
@@ -1718,6 +1719,7 @@ namespace avmplus
 		names->add(ENVADDR(MethodEnv::delproperty), "MethodEnv::delproperty");
 		names->add(ENVADDR(MethodEnv::delpropertyHelper), "MethodEnv::delpropertyHelper");
 		names->add(ENVADDR(MethodEnv::in), "MethodEnv::in");
+        names->add(ENVADDR(MethodEnv::getActivation), "MethodEnv::getActivation");
 
 		// exception handling
 		names->add(COREADDR(AvmCore::beginCatch), "AvmCore::beginCatch");
@@ -3055,7 +3057,8 @@ namespace avmplus
 
 				AvmAssert(t->linked);
 				int offset = t->getOffsets()[slot];
-				
+
+				OP *unoffsetPtr = ptr;
 				if (t->pool->isBuiltin && !t->final)
 				{
 					// t's slots aren't locked in, so we have to adjust for the actual runtime
@@ -3064,7 +3067,7 @@ namespace avmplus
 					OP* traits = loadIns(MIR_ldop, offsetof(VTable,traits), vtable);
 					offset -= t->sizeofInstance;
 					OP* sizeofInstance = loadIns(MIR_ldop, offsetof(Traits, sizeofInstance), traits);
-					ptr = binaryIns(MIR_add, sizeofInstance, ptr);
+					ptr = binaryIns(MIR_addp, sizeofInstance, ptr);
 				}
 
 				if (opcode == OP_getslot) 
@@ -3100,14 +3103,14 @@ namespace avmplus
 						}
 						callIns(op, wbAddr, 4, 
 								InsConst((uintptr)core->GetGC()), 
-								ptr, 
+								unoffsetPtr, 
 								leaIns(offset, ptr),
 								value);
 						#else // !DRC
 						// use non-substitute WB
 						callIns(MIR_cm, GCADDR(GC::WriteBarrierTrap), 3, 
 								InsConst((int)core->gc), 
-								ptr,
+								unoffsetPtr,
 								(slotType && slotType != OBJECT_TYPE) ? value :
 								binaryIns(MIR_and, value, InsConst(~7)));
 						#endif
@@ -8719,6 +8722,7 @@ namespace avmplus
 				case MIR_or:
 				case MIR_xor:
 				case MIR_add:
+				case MIR_addp:
 				case MIR_sub:
 			    case MIR_imul:
 				{
@@ -8731,6 +8735,10 @@ namespace avmplus
 						gpregs.expire(rhs, ip);
 						break;
 					}
+
+					// these are the same from a MD perspective
+					if(mircode == MIR_addp)
+						mircode = MIR_add;	
 
 					// rhs could be imm or reg
 
