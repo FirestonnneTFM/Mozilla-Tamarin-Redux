@@ -35,7 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 // hackery - for now, this file is "built" via:
-// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -import ../esc/bin/ast.es.abc -out axtoplevel mscom.as Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
+// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -import ../esc/bin/ast.es.abc -import ../esc/bin/esc-core.es.abc -import ../esc/bin/eval-support.es.abc -out axtoplevel mscom.as Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
 // Note that adding '-d' will include debug info which can be handy if you are tracking problems in this script
 
 package axtam 
@@ -60,6 +60,23 @@ package
 		axtam.System.trace(s)
 	}
 
+	namespace ESC = "ESC"; // implicit namespace from esc-env.ast
+
+	public function eval(s)
+	{
+		use namespace ESC;
+		ESC::evaluateInScopeArray(s, "", []);
+	}
+}
+
+// a clone of the File class from shell/toplevel.as
+package avmplus {
+	public class File
+	{
+		public native static function exists(filename:String):String;
+		public native static function read(filename:String):String;
+		public native static function write(filename:String, data:String):void;
+	}
 }
 
 package axtam.com {
