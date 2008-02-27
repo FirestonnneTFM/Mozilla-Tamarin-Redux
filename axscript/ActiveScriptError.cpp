@@ -64,6 +64,11 @@ STDMETHODIMP CActiveScriptError::GetSourcePosition(
 {
 	if (pdwSourceContext)
 		*pdwSourceContext = dwSourceContextCookie;
+	// WSH doesn't initialize either of these variables
+	if (pulLineNumber)
+		*pulLineNumber = 0;
+	if (plCharacterPosition)
+		*plCharacterPosition = 0;
 
 	if (isSyntaxError()) {
 		// ESC may set 'line', 'column'attributes
