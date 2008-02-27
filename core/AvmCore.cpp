@@ -1745,6 +1745,9 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << s;
 				break;
 			}
+        case OP_pushbyte:
+            buffer << opNames[opcode] << " " << int(int8(*pc));
+            break;
 		case OP_pushint:
 			{
 				buffer << opNames[opcode];
