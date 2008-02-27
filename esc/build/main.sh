@@ -1,1 +1,29 @@
-/work/tamarin/bin/shell ../bin/debug.es.abc ../bin/ast.es.abc ../bin/ast-decode.es.abc ../bin/ast-encode.es.abc ../bin/util.es.abc ../bin/lex-char.es.abc ../bin/lex-token.es.abc ../bin/lex-scan.es.abc ../bin/parse.es.abc ../bin/util-tamarin.es.abc ../bin/bytes-tamarin.es.abc ../bin/util-tamarin.es.abc ../bin/asm.es.abc ../bin/abc.es.abc ../bin/emit.es.abc ../bin/cogen.es.abc ../bin/cogen-stmt.es.abc ../bin/cogen-expr.es.abc ../bin/main.es.abc -- $1
+# Interactive/non-interactive interpreter with eval.
+#
+# If file name arguments are present then they are compiled, 
+# loaded, and executed before the shell exits.  Otherwise 
+# the shell enters a repl.
+
+DIR=../bin
+
+$DIR/shell \
+    $DIR/debug.es.abc \
+    $DIR/util.es.abc \
+    $DIR/bytes-tamarin.es.abc \
+    $DIR/util-tamarin.es.abc \
+    $DIR/lex-char.es.abc \
+    $DIR/lex-token.es.abc \
+    $DIR/lex-scan.es.abc \
+    $DIR/ast.es.abc \
+    $DIR/ast-decode.es.abc \
+    $DIR/parse.es.abc \
+    $DIR/asm.es.abc \
+    $DIR/abc.es.abc \
+    $DIR/emit.es.abc \
+    $DIR/cogen.es.abc \
+    $DIR/cogen-stmt.es.abc \
+    $DIR/cogen-expr.es.abc \
+    $DIR/esc-core.es.abc \
+    $DIR/eval-support.es.abc \
+    $DIR/main.es.abc \
+    -- $@

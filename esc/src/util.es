@@ -65,7 +65,7 @@ namespace Util
     }
 
     function internalError(file, line, msg) {
-        Util::syntaxError("Internal: " + msg);
+        Util::syntaxError(file, line, "Internal: " + msg);
     }
 
     function map(fn, a) {
@@ -99,6 +99,19 @@ namespace Util
 
     function toUint(x)
         uint(x);
+
+    function hash_number(n) { 
+        return uint(n);                       // Fairly arbitrary
+    }
+
+    function hash_string(s) {
+        // See http://www.cse.yorku.ca/~oz/hash.html; this is the djb2 algorithm
+        var h = 5381;
+        for ( var i=0, limit=s.length ; i < limit ; i++ )
+            h = ((h << 5) +h) + s.charCodeAt(i);
+        return uint(h);
+    }
+
 
     class Hashnode {
         var key = null;

@@ -61,8 +61,10 @@ class ByteArray;
 #include "DataIO.h"
 #include "ByteArrayGlue.h"
 #include "DomainClass.h"
+#include "FileClass.h"
 
 #include <fstream> // while we still load .abc files...
+#include <direct.h> // for _chdir() hack below
 
 
 using namespace avmplus::NativeID;
@@ -94,6 +96,7 @@ namespace axtam
 		// clones from the shell
 		NATIVE_CLASS(abcclass_axtam_Domain,                           DomainClass,             DomainObject)
 		NATIVE_CLASS(abcclass_flash_utils_ByteArray,                  ByteArrayClass,          ByteArrayObject)
+		NATIVE_CLASS(abcclass_avmplus_File,                           avmshell::FileClass,     ScriptObject)
 
 	END_NATIVE_CLASSES()
 
@@ -188,6 +191,7 @@ namespace axtam
 			L"util-tamarin.es.abc",    L"bytes-tamarin.es.abc",L"util-tamarin.es.abc",
 			L"asm.es.abc",             L"abc.es.abc",          L"emit.es.abc",
 			L"cogen.es.abc",           L"cogen-stmt.es.abc",   L"cogen-expr.es.abc",
+			L"esc-core.es.abc",        L"eval-support.es.abc",
 			NULL
 		};
 		// first of these directories with abcs[0] wins...
@@ -224,14 +228,25 @@ namespace axtam
 					Stringp fname = new (GetGC()) String((wchar *)fqname, wcslen(fqname));
 					// XXX - this will be wrong for non-ascii names!
 					std::fstream file((char *)fname->toUTF8String()->c_str(), std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
-					std::ifstream::pos_type size(file.tellg());
-					ScriptBuffer code = newScriptBuffer(size);
-					file.seekg(0);
-					file.read((char *)code.getBuffer(), size);
-					axtam::CodeContext* codeContext = new (GetGC()) axtam::CodeContext(toplevel->domainEnv());
-					// parse new bytecode
-					handleActionBlock(code, 0, toplevel->domainEnv(), toplevel, NULL, NULL, NULL, codeContext);
+					if (file.good()) {
+						std::ifstream::pos_type size(file.tellg());
+						ScriptBuffer code = newScriptBuffer(size);
+						file.seekg(0);
+						file.read((char *)code.getBuffer(), size);
+						axtam::CodeContext* codeContext = new (GetGC()) axtam::CodeContext(toplevel->domainEnv());
+						// parse new bytecode
+						handleActionBlock(code, 0, toplevel->domainEnv(), toplevel, NULL, NULL, NULL, codeContext);
+					} else {
+						AvmDebugMsg(true, "Can't find ABC file '%s'", fname->toUTF8String()->c_str());
+					}
 				}
+				// XXX - awful hack so esc can find esc-env.ast.  See bug 419768.
+				wcscpy_s(fqtail, tailsize, *candidate);
+				// For a binary build, the .ast should be next to the .abc files.
+				// For a source-directory, it will be in ..\build relative to the .abcs
+				if (*candidate)
+					wcscat_s(fqtail, tailsize, L"..\\build");
+				_wchdir(fqname);
 				break; // all done
 			}
 		}
@@ -374,19 +389,21 @@ namespace axtam
 		throwException(exception);
 	}
 
-	void AXTam::fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo)
+	void AXTam::fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo, bool includeStackTrace /* = true */)
 	{
 		// zero out members we don't fill (wsh doesn't appear to do this)
 		memset(pexcepinfo, 0, sizeof(*pexcepinfo));
 		Stringp s(string(exception->atom));
-		#ifdef DEBUGGER
-		if (exception->getStackTrace()) {
-			s = concatStrings(s, constantString("\n"));
-			s = concatStrings(s, exception->getStackTrace()->format(this));
+		if (includeStackTrace) {
+			#ifdef DEBUGGER
+			if (exception->getStackTrace()) {
+				s = concatStrings(s, constantString("\n"));
+				s = concatStrings(s, exception->getStackTrace()->format(this));
+			}
+			#else
+				s = concatStrings(s, constantString("<stack trace not available>"));
+			#endif
 		}
-		#else
-			s = concatStrings(s, constantString("<stack trace not available>"));
-		#endif
 		pexcepinfo->bstrDescription = ::SysAllocString((const OLECHAR *)s->c_str());
 		pexcepinfo->scode = E_FAIL; // todo - get a better result value!
 	}

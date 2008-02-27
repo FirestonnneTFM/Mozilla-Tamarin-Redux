@@ -244,8 +244,6 @@ namespace avmplus
 		// we dont have to check the end pointer here.
         for (;;)
         {
-			decimalParam = AvmCore::defaultDecimalParam;
-
 			// restore this every time since we might have called out to
 			// code that changes it
 			core->dxnsAddr = dxnsAddr;
@@ -267,6 +265,7 @@ namespace avmplus
 				core->dprof.mark(opcode);
 			#endif
 
+			decimalParam = AvmCore::defaultDecimalParam;
             switch (opcode)
             {
             case OP_returnvoid:
@@ -1398,6 +1397,14 @@ namespace avmplus
 				sp[0] = scopeBase[scope_index];
 				continue;
 			}
+
+            case OP_getouterscope:
+            {
+                int scope_index = readU30(pc);
+				sp++;
+                sp[0] = scope->getScope(scope_index);
+                continue;
+            }
 
             case OP_getglobalscope:
 			{

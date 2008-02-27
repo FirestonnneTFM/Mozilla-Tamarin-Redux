@@ -39,6 +39,25 @@
 {
     import flash.utils.*;
     
+    // Placeholder until we have decimal support.
+
+    public class decimal {
+        const value;
+
+        // s must be a valid floating point literal optionally prefixed
+        // by + or -, no spaces on either side.
+        public function decimal(s) 
+            : value=s 
+        {
+        }
+
+        public function toString()
+            value;
+
+        public function asDouble()
+            parseFloat(value);
+    }
+
     public function writeFile(s:String, filename:String) {
         var b = new ByteArray();
         b.writeUTFBytes(s);

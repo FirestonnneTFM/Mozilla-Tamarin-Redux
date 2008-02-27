@@ -217,6 +217,8 @@ namespace avmshell
 			printf("          [-Dgcstats]   generate statistics on gc\n");
 			printf("          [-Dnoincgc]   don't use incremental collection\n");
 			printf("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
+			printf("          [-Dlanguage l] localize runtime errors, languages are:\n");
+			printf("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 		#endif
 
 		#ifdef AVMPLUS_INTERP
@@ -561,6 +563,18 @@ namespace avmshell
 							GetGC()->incremental = false;
 						} else if (!strcmp(arg+2, "astrace")) {
 							avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) strtol(argv[++i], 0, 10);
+						} else if (!strcmp(arg+2, "language")) {
+							langID=-1;
+							for (int j=0;j<kLanguages;j++) {
+								if (!strcmp(argv[i+1],languageNames[j].str)) {
+									langID=j;
+									break;
+								}
+							}
+							if (langID==-1) {
+								langID = atoi(argv[i+1]);
+							}
+							i++;
                     	#endif /* DEBUGGER */
 						#ifdef AVMPLUS_INTERP
 						} else if (!strcmp(arg+2, "interp")) {

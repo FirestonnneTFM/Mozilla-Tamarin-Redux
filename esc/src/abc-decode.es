@@ -207,6 +207,8 @@ public namespace AbcDecode;
                 return CONSTANT_PackageInternalNS;
             case 'ProtectedNamespace':
                 return CONSTANT_ProtectedNamespace;
+            case 'StaticProtectedNamespace':
+                return CONSTANT_StaticProtectedNS;
             default:
                 throw "AbcDecode::namespaceKind, unknown namespace kind " + nskind;
             }
@@ -214,10 +216,65 @@ public namespace AbcDecode;
         
         function methodInfo(mi)
             : ABCMethodInfo {
-            
-            return new ABCMethodInfo(name(mi.name), names(mi.param_types), name(mi.ret_type), mi.flags, null/*TODO:optionals*/, mi.paramnames);
+            return new ABCMethodInfo(name(mi.name), names(mi.param_types), name(mi.ret_type), mi.flags, optionals(mi.optionals), mi.paramnames);
         }
 
+        function optionals(ops)
+            : [{val:uint, kind:uint}] {
+            var optionals = [];
+            
+            if(ops.length == 0 )
+                return null;
+            
+            for(var i:uint = 0, limit:uint = ops.length; i < limit; ++i )
+            {
+                optionals.push(optional(ops[i]));
+            }
+            return optionals;
+        }
+        function optional(op)
+            : {val:uint, kind:uint} {
+            switch(op.kind)
+            {
+                case "CONSTANT_Integer":
+                    val = integer(op.val);
+                    kind = CONSTANT_Integer;
+                    break;
+                case "CONSTANT_UInt":
+                    val = uinteger(op.val);
+                    kind = CONSTANT_UInt;
+                    break;
+                case "CONSTANT_Utf8":
+                    val = utf8(op.val);
+                    kind = CONSTANT_Utf8;
+                    break;
+                case "CONSTANT_Namespace":
+                    val = namespace(op.val);
+                    kind = CONSTANT_Namespace;
+                    break;
+                case "CONSTANT_Double":
+                    val = number(op.val);
+                    kind = CONSTANT_Double;
+                    break;
+                case "CONSTANT_Null":
+                    val = 0;
+                    kind = CONSTANT_Null;
+                    break;
+                case "CONSTANT_True":
+                    val = 0;
+                    kind = CONSTANT_True;
+                    break;
+                case "CONSTANT_False":
+                    val = 0;
+                    kind = CONSTANT_False;
+                    break;
+                default:
+                    val = 0;
+                    kind =0;
+                    break;
+            }
+            return{ val:val, kind:kind};
+        }
         function metadataInfo(mi)
             : ABCMethodInfo {
             
@@ -451,6 +508,8 @@ public namespace AbcDecode;
                     case OP_getlex: 
                     case OP_findpropstrict: 
                     case OP_findproperty:
+                    case OP_getglobalscope:
+                    case OP_getouterscope:
                     case OP_finddef:
                     case OP_deleteproperty: 
                     case OP_istype: 
@@ -655,6 +714,7 @@ public namespace AbcDecode;
         const setlocal = OP_setlocal
         const getglobalscope = OP_getglobalscope
         const getscopeobject = OP_getscopeobject
+        const getouterscope = OP_getouterscope
         const getproperty = OP_getproperty
         const initproperty = OP_initproperty
         const deleteproperty = OP_deleteproperty
