@@ -37,57 +37,28 @@
  * ***** END LICENSE BLOCK ***** */
 
 {
-    import avmplus.*;
-    var fname = System.argv[0];
-    var str = File.read (fname);
-    //print ("compiling ", fname);
-}
+    var total_frontend = 0;
+    var total_backend = 0;
 
-{
-    import avmplus.*;
-    use namespace Parse;
-    use namespace Gen;
-    var esc_env_str = File.read ("esc-env.ast");
-    var parser = new Parser(esc_env_str,[]);
-    var [ts,nd] = parser.program();
-    nd.Ast::file = "esc-env.ast";  // or the AVM flips out if debugging is enabled
-    var bytes = cg(nd).getBytes();
-    Domain.currentDomain.loadBytes(bytes);
-}
+    var before = new Date();
 
-// decode it
+    var argv = ESC::commandLineArguments();
+    for ( let i=0, limit=argv.length ; i < limit ; i++ ) {
+        let fname = argv[i];
+        let [parse,cogen] = ESC::compileFile(fname);
+        total_frontend += parse;
+        total_backend += cogen;
+        print (fname);
+        print ("  Scan+parse:  " + parse + " ms");
+        print ("  Cogen:       " + cogen + " ms");
+    }
 
-{
-    use namespace Ast;
-    //print ("decoding esc_env ",esc_env.ast_class);
-    var nd = Decode::program (esc_env);  // defined by side effect
-    var topFixtures = nd.head.fixtures;
-}
+    var after = new Date();
 
-{
-    use namespace Parse;
-    //print ("parsing");
-    var t1 = new Date;
-    var parser = new Parser(str,topFixtures,fname);
-    var [ts,nd] = parser.program();
-    var t2 = new Date;
-    //print (fname+" parse "+(t2-t1)+" ms");
-}
-
-{
-    //print ("gening");
-    nd.Ast::file = fname;
-    var bytes = Gen::cg(nd);
-    var t3 = new Date;
-    //print (fname+" cogen "+(t3-t2)+" ms");
-    //print ("writing");
-    var len = dumpABCFile(bytes, fname+".abc");
-    var parse_time = (t3-t1);
-
-    print (fname);
-    print ("  Chars in:  " + str.length);
-    print ("  Bytes out: " + len);
-    print ("  Scanning:  " + Lex::ms_scanning + " ms");
-    print ("  Parsing:   " + (t2 - t1 - Lex::ms_scanning) + " ms");
-    print ("  Cogen:     " + (t3 - t2) + " ms");
+    if (argv.length > 1) {
+        print("");
+        print("Total time: " + (after - before));
+        print("Front end:  " + ESC::total_frontend);
+        print("Back end:   " + ESC::total_backend);
+    }
 }

@@ -35,7 +35,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // hackery - for now, this file is "built" via:
-// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -import ../esc/bin/ast.es.abc -out axtoplevel mscom.as Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
+// % java -ea -DAS3 -Xmx200m -DAVMPLUS -classpath ../utils/asc.jar macromedia.asc.embedding.ScriptCompiler -abcfuture -builtin -import ../core/builtin.abc -import ../esc/bin/parse.es.abc -import ../esc/bin/cogen.es.abc -import ../esc/bin/ast.es.abc -import ../esc/bin/esc-core.es.abc -import ../esc/bin/eval-support.es.abc -out axtoplevel mscom.as Domain.as ../shell/ByteArray.as && move /y ..\shell\axtoplevel.* .
+// Note that adding '-d' will include debug info which can be handy if you are tracking problems in this script
 
 package axtam 
 {
@@ -59,6 +60,23 @@ package
 		axtam.System.trace(s)
 	}
 
+	namespace ESC = "ESC"; // implicit namespace from esc-env.ast
+
+	public function eval(s)
+	{
+		use namespace ESC;
+		ESC::evaluateInScopeArray(s, "", []);
+	}
+}
+
+// a clone of the File class from shell/toplevel.as
+package avmplus {
+	public class File
+	{
+		public native static function exists(filename:String):String;
+		public native static function read(filename:String):String;
+		public native static function write(filename:String, data:String):void;
+	}
 }
 
 package axtam.com {
@@ -222,19 +240,16 @@ package {
 
     import flash.utils.*; // for our ByteArray clone - either it should die, or we rename the package in our clone!
 
-    public function compileString(str, fname:String = null, startLineNumber:int = 0): ByteArray
+    public function compileString(str, fname:String = "", startLineNumber:int = 0): ByteArray
     {
         import Parse.*;
-        import Lex.*;
+        import Lex.*; // needed to set lnCoord below, for reasons too magic for markh :)
         var top = []
-        var parser = new Parse.Parser(str,top);
+
+        var parser = new Parser(str,top,fname);
         parser.scan.lnCoord += startLineNumber;
         var prog = parser.program();
-        var ts = prog[0]
-        var nd = prog[1]
-        if (fname)
-            nd.Ast::file = fname;
-        var bytes = Gen::cg(nd).getBytes();
+        var bytes = Gen::cg(prog).getBytes();
 
         var b = new ByteArray();
         b.endian = "littleEndian";

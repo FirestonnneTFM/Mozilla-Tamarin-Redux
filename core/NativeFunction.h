@@ -140,9 +140,9 @@ namespace avmplus
 			AvmCore* core = this->core();
 			// RES this looks backward
 			if (returnTraits() == NUMBER_TYPE || returnTraits() == DOUBLE_TYPE)
-				impl32 = implv32;
-			else
 				implN = implvN;
+			else
+				impl32 = implv32;
 		}
 
 		static Atom verifyEnter(MethodEnv* env, int argc, uint32 *ap);

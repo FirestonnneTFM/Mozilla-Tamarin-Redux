@@ -140,7 +140,6 @@ use namespace intrinsic;
         var defaultNamespace: Ast::NAMESPACE;
         function Pragmas (pragmas) 
         {
-            enter ("Pragma ",pragmas);
             if (pragmas==null)
             {
                 this.openNamespaces = [[]];
@@ -155,32 +154,37 @@ use namespace intrinsic;
             if (this.openNamespaces[this.openNamespaces.length-1].length !== 0) { 
                 this.openNamespaces.push ([]);  // otherwise reuse the last one pushed
             }
-            exit ("Pragma");
         }
     }
 
     type PRAGMA_ENV = [Ast::PRAGMAS];
 
     Parse function syntaxError(ctx, msg) {
-        // FIXME Need much better source info
-        // ctx can be a Context or a Parser, maybe these have source info we can use.
         var filename = "";
+        var position = 0;
+        if (ctx is Context)
+            ctx = ctx.parser;
         if (ctx is Parser) {
-            print("Is Parser");
-            print(ctx.scan);
-            print(ctx.scan.origin);
-            filename = ctx.scan.origin;
+            filename = ctx.scan.filename;
+            let p = ctx.position();
+            if (p != null)
+                position = p.line;
         }
-        Util::syntaxError(filename, 0, msg);
+        Util::syntaxError(filename, position, msg);
     }
 
     Parse function internalError(ctx, msg) {
-        // FIXME Need much better source info
-        // ctx can be a Context or a Parser, maybe these have source info we can use.
         var filename = "";
-        if (ctx is Parser)
-            filename = ctx.scan.origin;
-        Util::internalError(filename, 0, msg);
+        var position = 0;
+        if (ctx is Context)
+            ctx = ctx.parser;
+        if (ctx is Parser) {
+            filename = ctx.scan.filename;
+            let p = ctx.position();
+            if (p != null)
+                position = p.line;
+        }
+        Util::internalError(filename, position, msg);
     }
 
     class Context
@@ -193,14 +197,16 @@ use namespace intrinsic;
         var pragmas: PRAGMAS
         var pragmaEnv: PRAGMA_ENV; // push one PRAGMAS for each scope
         var top_function/*: Ast::FuncAttr*/;
+        var parser;
 
-        function Context (topFixtures)
+        function Context (topFixtures, parser)
             : env = [topFixtures]
             , varHeads = []
             , letHeads = [] 
             , ctor = null
             , pragmas = null
             , pragmaEnv = []
+            , parser = parser
         {
             //print ("topFixtures.length=",topFixtures.length);
             //            print ("env[0].length=",env[0].length);
@@ -210,18 +216,15 @@ use namespace intrinsic;
         function enterVarBlock () 
         {
             use namespace Ast;
-            enter ("enterVarBlock");
             let varHead = new Ast::Head ([],[]);
             this.varHeads.push(varHead);
             this.env.push (varHead.fixtures);
             this.pragmas = new Pragmas (this.pragmas);
             this.pragmaEnv.push (this.pragmas);
-            exit ("exitVarBlock");
         }
 
         function exitVarBlock () 
         {
-            enter ("exitVarBlock");
             let varHead = this.varHeads.pop ();
             this.env.pop ();
             this.pragmaEnv.pop ();
@@ -231,13 +234,13 @@ use namespace intrinsic;
             else {
                 this.pragmas = this.pragmaEnv[this.pragmaEnv.length-1];
             }
-            exit ("exitVarBlock");
             return varHead;
         }
 
-        function enterFunction() {
+        function enterFunction(attrs: ATTRS) {
             use namespace Ast; // language bug, needs fixing
             var node = new FuncAttr(top_function);
+            node.is_native = attrs.native;
             top_function.children.push(node);
             top_function = node;
             return node;
@@ -300,23 +303,19 @@ use namespace intrinsic;
         function enterLetBlock () 
         {
             use namespace Ast;
-            enter ("enterLetBlock");
             let letHead = new Ast::Head ([],[]);
             this.letHeads.push(letHead);
             this.env.push (letHead.fixtures);
             this.pragmas = new Pragmas (this.pragmas);
             this.pragmaEnv.push (this.pragmas);
-            exit ("enterLetBlock");
         }
 
         function exitLetBlock () 
         {
-            enter ("exitLetBlock");
             let letHead = this.letHeads.pop ();
             this.env.pop ();
             this.pragmaEnv.pop ();
             this.pragmas = this.pragmaEnv[this.pragmaEnv.length-1];
-            exit ("exitLetBlock");
             return letHead;
         }
 
@@ -337,7 +336,6 @@ use namespace intrinsic;
         }
 
         function openNamespace (nd: Ast::IDENT_EXPR) {
-            enter ("openNamespace");
             let ns = evalIdentExprToNamespace (nd);
             //print("this.pragmas=",this.pragmas);
             let opennss = this.pragmas.openNamespaces;
@@ -345,26 +343,19 @@ use namespace intrinsic;
             //print ("opennss.length=",opennss.length);
             //print ("adding ns ",ns);
             opennss[opennss.length-1].push (ns);
-            exit ("openNamespace");
         }
 
         function defaultNamespace (nd: Ast::IDENT_EXPR) {
-            enter ("defaultNamespace");
             let ns = evalIdentExprToNamespace (nd);
             this.pragmas.defaultNamespace = ns;
-            exit ("defaultNamespace");
         }
 
         function hasName (fxtrs,id,ns) 
         {
             use namespace Ast;
 
-            enter ("hasName ",id);
             if (fxtrs.length==0)
-            {
-                exit ("hasName false");
                 return false;
-            }
 
             let pn = fxtrs[0][0];
             //print ("pn",pn," is PropName",pn is PropName);
@@ -373,12 +364,10 @@ use namespace intrinsic;
             //print ("pn..ns=",pn.name.ns.hash()," ns=",ns.hash());
             if (pn.name.id==id && pn.name.ns.hash()==ns.hash())  // FIXME: need ns compare
             {
-                exit ("hasName true");
                 return true;
             }
             else 
             {
-                exit ("hasName looking");
                 return hasName (fxtrs.slice (1,fxtrs.length),id,ns);
             }
         }
@@ -387,19 +376,16 @@ use namespace intrinsic;
         {
             use namespace Ast;
 
-            enter ("getFixture ");
             if (fxtrs.length===0) 
                 Parse::syntaxError(this, "Name not found " + ns + "::" + id);
 
             let pn = fxtrs[0][0];
             if (pn.name.id==id && pn.name.ns.toString()==ns.toString()) 
             {
-                exit ("getFixture");
                 return fxtrs[0];
             }
             else 
             {
-                exit ("getFixture");
                 return getFixture (fxtrs.slice (1,fxtrs.length),id,ns);
             }
         }
@@ -418,8 +404,6 @@ use namespace intrinsic;
         */
 
         function findFixtureWithNames (id,nss, it: Ast::INIT_TARGET?) {
-            enter ("findFixtureWithNames");
-
             let env = this.env;
 
             switch (it) {
@@ -450,18 +434,15 @@ use namespace intrinsic;
                     }
                 }
                 if (ns!==null) {
-                    exit ("findFixtureWithNames");
                     return getFixture (fxtrs,id,ns);
                 }
             }
 
-            exit ("findFixtureWithNames");
             return null;
         }
 
         function findFixtureWithIdentifier (id: Ast::IDENT, it: Ast::INIT_TARGET?)
         {
-            enter ("findFixtureWithIdentifier ", id);
             //print ("this.pragmas=",this.pragmas);
             let nsss = this.pragmas.openNamespaces;
             //print ("nsss.length=",nsss.length);
@@ -471,7 +452,6 @@ use namespace intrinsic;
                 let fx = findFixtureWithNames (id,nsss[i],it);
                 if (fx !== null) 
                 {
-                    exit ("findFixtureWithIdentifier");
                     return fx;
                 }
             }
@@ -482,8 +462,6 @@ use namespace intrinsic;
             : Ast::NAMESPACE
         {
             use namespace Ast;
-
-            enter ("evalIdentExprToNamespace");
 
             var fxtr = null;
             var val = null;
@@ -509,14 +487,12 @@ use namespace intrinsic;
                 Parse::internalError(this, "evalIdentExprToNamespace: case not implemented " + nd);
             }
             }
-            exit ("evalIdentExprToNamespace ", val);
             return val;
         }
 
         function resolveIdentExpr (nd: Ast::IDENT_EXPR, it: Ast::INIT_TARGET)
             : Ast::FIXTURE_NAME
         {
-            enter ("resolveIdentExpr");
             switch type (nd) {
             case (nd: Ast::Identifier) {
                 var fxtr = findFixtureWithIdentifier (nd.Ast::ident, it);
@@ -525,118 +501,148 @@ use namespace intrinsic;
                 Parse::internalError(this, "resolveIdentExpr: case not implemented " + nd);
             }
             }
-            exit ("resolveIdentExpr ", fxtr);
             return fxtr[0];
         }
     }
 
-    type TOKENS = TokenStream;  // [int];
-
-    class TokenStream {
-        import flash.utils.*;
-        var ts: ByteArray
-        var n: int;
-        var current_tok;
-        function TokenStream (ts)
-            : ts = ts
-            , n = 0 { 
-            ts.position = n;
-        }
-        
-        function head () : int {
-            //print("head ts.position ",ts.position," n ",n);
-            if (ts.position == n) {
-                current_tok = ts.readInt ();
-                //print ("current_tok ",current_tok);
-            }
-            Util::assert (ts.position == n+4);
-            return current_tok;
-        }
-        
-        function head2 () : int {
-            //print("head2 ts.position ",ts.position," n ",n);
-            if (ts.position == n) {
-                current_tok = ts.readInt ();
-                //print ("current_tok ",current_tok);
-            }
-            Util::assert (ts.position == n+4);
-            let pos = ts.position;
-            let tk = ts.readInt ();
-            ts.position = pos;
-            return tk;
-        }
-        
-        function next () : void {
-            n = n + 4;
-            head ();
-            //print ("next n",n);
-        }
-
-        public function toString () { return Token::tokenText(this.head()) }
-    }
-
     class Parser
     {
-        var scan : Scanner;
-        var cx: Context;
+        var scan    : Scanner;
+        var cx      : Context;
+        var filename: String;
 
-        function Parser(src,topFixtures,filename="")
-        {
-            this.cx = new Context (topFixtures)
-            this.scan = new Scanner (src,filename)
+        function Parser(src,topFixtures,filename="") {
+            this.cx = new Context (topFixtures, this);
+            this.scan = new Scanner (src,filename);
+            this.filename = filename;
         }
 
         var defaultNamespace: Ast::NAMESPACE;
         var currentPackageName: string;
         var currentClassName: string;
 
-        var coordList;
+        // Token queue abstractions
+        // BEGIN
 
-        function hd (ts:TokenStream) 
-        {
-            //enter ("hd ",ts.head());
-            var tk = Token::tokenKind (ts.head());
-            //print ("hd ",tk);
-            return tk;
+        // Token queue
+        //
+        // T0 is the current token, L0 its line number
+        // T1 is the next token, L1 its line number
+        // LP is the line number of the previous token
+        //
+        // The line number of a token is the 1-based line number of
+        // the last character of the token.
+        //
+        // Invariants:
+        //   T0 is NONE only before start() and when the stream is exhausted.
+        //   T1 is NONE whenever it's invalid
+        //   L1 is invalid iff T1 is invalid
+        //   LP, L0, and L1 are 0 if there is "no information"
+        //   The scanner never returns Eol
+        //
+        // Every token passes through this interface so we try to save time
+        // when possible.
+        //
+        // Current optimizations:
+        //   * avoid function calls
+        //     - scan.start() is shallow
+        //     - Token::tokenKind and Token::tokenText have been in-lined
+        //   * avoid allocations
+        //     - Communicate with lexer via multiple variables rather than 
+        //       using multiple return values
+        //
+        // Future optimizations (maybe):
+        //   - With static typing to "uint" it may be possible to avoid write 
+        //     barriers on assignments to T0, T1, LP, L0, and L1
+        //   - With tokenStore typed as Vector.<uint> it may be possible to
+        //     avoid range checks and checks for holes
+        //
+        // What we need the compiler to do:
+        //   - Early binding to instance vars and methods is important
+        //   - We would probably benefit from the compiler inlining hd
+        //     everywhere; we can declare it "final" or just make Parser
+        //     itself "final"
+
+        var T0=Token::NONE, T1=Token::NONE, LP=0, L0=0, L1=0;
+        const tokenStore = Token::tokenStore;
+
+        function start() {
+            T0 = scan.start();
+            L0 = scan.lnCoord;
         }
 
-        function hd2 (ts:TokenStream) 
-        {
-            //enter ("hd ",ts.head());
-            var tk = Token::tokenKind (ts.head2());
-            //print ("hd ",tk);
-            return tk;
+        function div() {
+            Util::assert( T0 === Token::BREAK && T1 === Token::NONE );
+            T0 = scan.div();
+            L0 = scan.lnCoord;
+            return hd();
         }
 
-        function eat (ts:TokenStream,tc) {
-            //print("eating ",Token::tokenText(tc));
-            let tk = hd (ts);
-            if (tk == tc) {
-                return tl (ts);
+        function regexp() {
+            Util::assert( T0 === Token::BREAK && T1 === Token::NONE );
+            T0 = scan.regexp();
+            L0 = scan.lnCoord;
+            return hd();
+        }
+
+        function hd ()
+            tokenStore[T0].Token::kind;
+
+        function lexeme ()
+            tokenStore[T0].Token::text;
+
+        function hd2 () {
+            if (T1 === Token::NONE) {
+                T1 = scan.start();
+                L1 = scan.lnCoord;
             }
-            Parse::syntaxError(this, "Expecting " + Token::tokenText(tc) + " found " + Token::tokenText(tk));
+            return tokenStore[T1].Token::kind;
         }
 
-        /*
-          Replace the first token in the stream with another one. Raise an exception
-          if the first token is not of a specified kind.
-        */
+        function lexeme2 () {
+            hd2 ();
+            return tokenStore[T1].Token::text;
+        }
 
-        function swap (ts,t0,t1) {
-            let tk = hd (ts);
-            if (tk === t0) {
-                ts.ts.position = ts.n-4;
-                ts.ts.writeInt (t1);
-                return t1;
+        function next () {
+            LP = L0;
+            T0 = T1;
+            L0 = L1;
+            T1 = Token::NONE;
+            if (T0 === Token::NONE) {
+                T0 = scan.start();
+                L0 = scan.lnCoord;
             }
-            Parse::syntaxError(this, "Expecting "+Token::tokenText(t0)+" found "+Token::tokenText(tk));
         }
 
-        function tl (ts:TOKENS) : TOKENS {
-            ts.next ();
-            return ts;
-            //return new TokenStream (ts.ts,ts.n+1);
-        }  //ts.slice (1,ts.length);
+        function replace (t) {
+            T0 = t;
+        }
+
+        function newline ()
+            LP < L0;
+
+        function position () {
+            if (L0 != 0)
+                return { line: L0 };
+            return null;
+        }
+
+        function tokenText(t)
+            tokenStore[t].Token::text;
+
+        // Token queue abstractions
+        // END
+
+        // If the current token is not tc then throw an error.
+        // Otherwise consume the token.
+
+        function eat (tc) {
+            let tk = hd ();
+            if (tk !== tc)
+                Parse::syntaxError(this, "Expecting " + tokenText(tc) + " found " + tokenText(tk));
+            next ();
+        }
 
         function makeIdentifier(id, nss) : Ast::Identifier {
             var ident = new Ast::Identifier(id, nss);
@@ -655,7 +661,7 @@ use namespace intrinsic;
         (fl,el)        head
         fl             fixture list
         el             expr list
--        il             init list
+        il             init list
         sl             stmt list
         it             init target = VAR, LET (default=LET)
         ie             init expr
@@ -765,7 +771,6 @@ use namespace intrinsic;
 
             function identExprFromExpr (e: Ast::EXPR) 
                 : Ast::IDENT_EXPR {
-                enter ("identExprFromExpr","");
                 switch type (e) {
                 case (e: Ast::LexicalRef) {
                     var ie = e.Ast::ident;
@@ -774,14 +779,12 @@ use namespace intrinsic;
                     Parse::syntaxError(this, "Invalid initializer left-hand-side " + e);
                 }
                 }
-                exit ("identExprFromExpr","");
                 return ie;
             }
 
             function desugarSubPattern (p: PATTERN, t: Ast::TYPE_EXPR, e: Ast::EXPR, n: int) 
                 : [Ast::FIXTURES, Ast::EXPR]
             {
-                enter ("desugarSubPattern","");
                 switch type (p) : PATTERN {
                 case (p:IdentifierPattern) {
                     let nm = new Ast::PropName ({ns:ns,id:p.ident});
@@ -836,11 +839,11 @@ use namespace intrinsic;
                         for (let j=0; j<fx.length; ++j) fxtrs.push(fx[j]);
                         exprs.push(ex);
                     }
-                    let head = new Ast::Head ([[tn,new Ast::ValFixture (Ast::anyType,false)]],[new Ast::InitExpr (Ast::letInit,new Ast::Head([],[]),[[tn,e]])]);
+                    let head = new Ast::Head ([[tn,new Ast::ValFixture (Ast::anyType,false)]],
+                                              [new Ast::InitExpr (Ast::letInit,new Ast::Head([],[]),[[tn,e]])]);
                     var expr = new Ast::LetExpr (head, new Ast::ListExpr (exprs));
                 }
                 }
-                exit ("desugarSubPattern","");
                 return [fxtrs,expr];
             }
         }
@@ -870,14 +873,19 @@ use namespace intrinsic;
 
         */
 
-        public function identifier (ts: TOKENS)
-            : [TOKENS, Ast::IDENT]
-        {
-            enter("Parser::identifier ", ts);
+        // The performance of this is probably OK because Token::Identifier is the first case,
+        // and will be the one hit almost always.  But if the code generator starts getting
+        // smart and generates a binary lookup tree here then it might be better to separate
+        // that test out.  That won't be a problem on tamarin-central, but tamarin-tracing may
+        // discover that the tokens are all const-bound and so do something about it.
+        //
+        // (Another matter is that the code perhaps ought to be auto-generated by the same 
+        // code that generates the keyword lookup code in the lexer.  I'm not sure.)
 
+        public function identifier () : Ast::IDENT {
             var str = "";   // fixme: evaluator isn't happy if this is inside of the switch
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::Identifier:
             case Token::Call:
             case Token::Cast:
@@ -920,13 +928,13 @@ use namespace intrinsic;
             case Token::Use:
             case Token::Xml:
             case Token::Yield:
-                var str = Token::tokenText (ts.head());
+                var str = lexeme ();
+                next ();
                 break;
             default:
-                Parse::syntaxError(this, "Expecting identifier, found " + Token::tokenText (ts.head()));
+                Parse::syntaxError(this, "Expecting identifier, found " + lexeme () );
             }
-            exit ("Parser::identifier ", str);
-            return [tl (ts), str];
+            return str;
         }
 
         function isReserved (tk: int) {
@@ -938,25 +946,25 @@ use namespace intrinsic;
                 return false;
                 break;
             }
+            return true;
         }
 
-        function reservedOrOrdinaryIdentifier (ts: TOKENS)
-            : [TOKENS, Ast::IDENT]
-        {
-            enter ("Parser::reservedOrOrdinaryIdentifer");
+        // Commented out because reservedOrOrdinaryIdentifier() is never called.
+        /*
+        function reservedOrOrdinaryIdentifier () : Ast::IDENT {
+            var name;
 
-            if (isReserved (hd (ts))) 
+            if (isReserved (hd ())) 
             {
-                var [ts1,nd1] = Token::tokenText (hd (ts));
+                name = lexeme();
+                next();
             }
             else 
-            {
-                var [ts1,nd1] = identifier (ts);
-            }
+                name = identifier();
 
-            exit ("Parser::reservedOrOrdinaryIdentifier");
-            return [ts1,nd1];
+            return name;
         }
+        */
 
         /*
             Qualifier
@@ -965,30 +973,27 @@ use namespace intrinsic;
                 Identifier
         */
 
-        function qualifier(ts)
-            : [TOKENS, (Ast::IDENT,Ast::NAMESPACE)]
-        {
-            enter("Parser::qualifier ",ts);
+        function qualifier() : (Ast::IDENT, Ast::NAMESPACE) {
+            var qual;
 
-            switch (hd(ts)) {
+            switch (hd()) {
             case Token::Internal:
             case Token::Intrinsic:
             case Token::Private:
             case Token::Protected:
             case Token::Public:
-                var [ts1,nd1] = reservedNamespace(ts);
+                qual = reservedNamespace();
                 break;
             case Token::Mult:
-                let id = Token::tokenText (ts.head());
-                var [ts1,nd1] = [tl (ts), id];
+                qual = lexeme ();
+                next ();
                 break;
             default:
-                var [ts1,nd1] = identifier (ts);
+                qual = identifier ();
                 break;
             }
 
-            exit("Parser::qualifier ",nd1);
-            return [ts1,nd1];
+            return qual;
         }
 
         /*
@@ -1000,31 +1005,30 @@ use namespace intrinsic;
                 public
         */
 
-        function reservedNamespace (ts: TOKENS)
-            : [TOKENS, Ast::NAMESPACE]
-        {
-            enter("Parser::reservedNamespace ", ts);
+        function reservedNamespace () : Ast::NAMESPACE {
+            var ns = null;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::Internal:
-                var [ts1,nd1] = [tl (ts), new Ast::InternalNamespace (currentPackageName)];
+                ns = new Ast::InternalNamespace (currentPackageName);
                 break;
             case Token::Public:
-                var [ts1,nd1] = [tl (ts), new Ast::PublicNamespace (currentPackageName)];
+                ns = new Ast::PublicNamespace (currentPackageName);
                 break;
             case Token::Intrinsic:
-                var [ts1,nd1] = [tl (ts), new Ast::IntrinsicNamespace];
+                ns = new Ast::IntrinsicNamespace;
                 break;
             case Token::Private:
-                var [ts1,nd1] = [tl (ts), new Ast::PrivateNamespace (currentClassName)];
+                ns = new Ast::PrivateNamespace (currentClassName);
                 break;
             case Token::Protected:
-                var [ts1,nd1] = [tl (ts), new Ast::ProtectedNamespace (currentClassName)];
+                ns = new Ast::ProtectedNamespace (currentClassName);
                 break;
             }
+            if (ns != null)
+                next();
 
-            exit("Parser::reservedNamespace ", ts1);
-            return [ts1,nd1];
+            return ns;
         }
 
         /*
@@ -1037,34 +1041,28 @@ use namespace intrinsic;
               Brackets
         */
 
-        function qualifiedNameIdentifier (ts1: TOKENS, nd1: Ast::EXPR)
-            : [TOKENS, Ast::IDENT_EXPR]
-        {
-            enter("Parser::qualifiedNameIdentifier ", ts1);
+        function qualifiedNameIdentifier (qual: Ast::EXPR) : Ast::IDENT_EXPR {
+            var id = null;
 
-            switch (hd(ts1)) {
-                case Token::Mult:
-                    var [ts2,nd2] = [tl(ts1), "*"];
-                    var [ts3,nd3] = [ts1, new Ast::QualifiedIdentifier (nd1,nd2)];
-                    break;
-                case Token::StringLiteral:
-                case Token::DecimalLiteral:
-                    let str = Token::tokenText (ts1.head());
-                    var [ts2,nd2] = [tl(ts1), str];
-                    var [ts3,nd3] = [ts1, new Ast::QualifiedIdentifier (nd1,nd2)];
-                    break;
-                case Token::LeftBracket:
-                    var [ts2,nd2] = brackets (ts1);
-                    var [ts3,nd3] = [ts1, new Ast::QualifiedExpression (nd1,nd2)];
-                    break;
-                default:
-                    var [ts2,nd2] = identifier (ts1);
-                    var [ts3,nd3] = [ts2, new Ast::QualifiedIdentifier (nd1,nd2)];
-                    break;
+            switch (hd()) {
+            case Token::Mult:
+                id = "*";
+                next();
+                break;
+            case Token::StringLiteral:
+            case Token::DecimalLiteral:
+                id = lexeme ();
+                next();
+                break;
+            case Token::LeftBracket:
+                id = brackets ();
+                break;
+            default:
+                id = identifier ();
+                break;
             }
 
-            exit("Parser::qualifiedNameIdentifier ", nd3);
-            return [ts3,nd3];
+            return new Ast::QualifiedIdentifier (qual,id);
         }
 
         /*
@@ -1073,38 +1071,37 @@ use namespace intrinsic;
               Qualifier  ::  QualifiedNameIdentifier
         */
 
-        function simpleQualifiedName (ts: TOKENS)
-            : [TOKENS, Ast::IDENT_EXPR]
-        {
-            enter ("Parser::simpleQualifiedName ", ts);
+        function simpleQualifiedName () : Ast::IDENT_EXPR {
+            var qual = qualifier ();
+            var name = null;
 
-            var [ts1,nd1] = qualifier (ts);
-            switch (hd (ts1)) {
+            switch (hd ()) {
             case Token::DoubleColon:
-                switch type (nd1) {
+                switch type (qual) {
                 case (id:String) {
-                    nd1 = new Ast::LexicalRef (makeIdentifier (nd1,cx.pragmas.openNamespaces))
+                    qual = new Ast::LexicalRef (makeIdentifier (qual,cx.pragmas.openNamespaces))
                 }
                 case (ns:*) {
-                    nd1 = new Ast::LiteralExpr (new Ast::LiteralNamespace (nd1), position(ts));
+                    qual = new Ast::LiteralExpr (new Ast::LiteralNamespace (qual), position());
                 }
                 }
-                var [ts2,nd2] = qualifiedNameIdentifier (tl(ts1), nd1);
+                next();
+                name = qualifiedNameIdentifier (qual);
                 break;
+
             default:
-                switch type (nd1) {
+                switch type (qual) {
                 case (id:String) {
-                    var [ts2,nd2] = [ts1,makeIdentifier (nd1,cx.pragmas.openNamespaces)];
+                    name = makeIdentifier (qual,cx.pragmas.openNamespaces);
                 }
                 case (ns:*) {
-                    var [ts2,nd2] = [ts1,new Ast::ReservedNamespace (nd1)];
+                    name = new Ast::ReservedNamespace (qual);
                 }
                 }
                 break;
             }
 
-            exit ("Parser::simpleQualifiedName ", ts2);
-            return [ts2,nd2];
+            return name;
         }
 
         /*
@@ -1118,21 +1115,19 @@ use namespace intrinsic;
                 ExpressionQualifiedName
         */
 
-        function nonAttributeQualifiedName (ts: TOKENS)
-            : [TOKENS, Ast::IDENT_EXPR]
-        {
-            enter("Parser::nonAttributeQualifiedName ", ts);
+        function nonAttributeQualifiedName () : Ast::IDENT_EXPR {
+            var name = null;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::LeftParen:
-                var [ts1,nd1] = expressionQualifiedIdentifier (ts);
+                name = expressionQualifiedIdentifier ();
                 break;
             default:
-                var [ts1,nd1] = simpleQualifiedName (ts);
+                name = simpleQualifiedName ();
+                break;
             }
 
-            exit ("Parser::nonAttributeQualifiedName ", ts1);
-            return [ts1,nd1];
+            return name;
         }
 
         /*
@@ -1147,21 +1142,18 @@ use namespace intrinsic;
                 NonAttributeQualifiedName
         */
 
-        function qualifiedName (ts: TOKENS)
-            : [TOKENS, Ast::IDENT_EXPR]
-        {
-            enter("Parser::qualifiedName ", ts);
+        function qualifiedName () : Ast::IDENT_EXPR {
+            var name = null;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::LeftParen:
-                var [ts1,nd1] = expressionQualifiedIdentifier (ts);
+                name = expressionQualifiedIdentifier ();
                 break;
             default:
-                var [ts1,nd1] = simpleQualifiedName (ts);
+                name = simpleQualifiedName ();
             }
 
-            exit ("Parser::qualifiedName ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -1174,12 +1166,10 @@ use namespace intrinsic;
                 A.<B.<C.<t>,D.<u>>>
         */
 
-        function propertyName (ts: TOKENS)
-            : [TOKENS, Ast::IDENT_EXPR]
-        {
-            enter("Parser::propertyName ", ts);
+        function propertyName () : Ast::IDENT_EXPR {
+            var name = null;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
 /*  FIXME: this is a grammar bug
             case Token::LeftParen:
                 var [ts1,nd1] = typeExpression (tl (ts));
@@ -1187,33 +1177,28 @@ use namespace intrinsic;
                 break;
 */
             default:
-                var [ts1,nd1] = nonAttributeQualifiedName (ts);
+                name = nonAttributeQualifiedName ();
             }
 
-            switch (hd (ts1)) {
-            case Token::LeftDotAngle:
-                var [ts2,nd2] = typeExpressionList (tl (ts1));
-                switch (hd (ts2)) {
+            if (hd () === Token::LeftDotAngle) {
+                eat (Token::LeftDotAngle);
+                name = typeExpressionList ();
+                switch (hd ()) {
                 case Token::UnsignedRightShift:
                     // downgrade >>> to >> to eat one >
-                    ts2 = swap (ts2,Token::UnsignedRightShift,Token::RightShift);
+                    replace (Token::RightShift);
                     break;
                 case Token::RightShift:
                     // downgrade >> to > to eat one >
-                    ts2 = swap (ts2,Token::RightShift,Token::GreaterThan);
+                    replace (Token::GreaterThan);
                     break;
                 default:
-                    ts2 = eat (ts2,Token::GreaterThan);
+                    eat (Token::GreaterThan);
                     break;
                 }
-                break;
-            default:
-                var [ts2,nd2] = [ts1,nd1];
-                break;
             }
 
-            exit ("Parser::propertyName ", ts2);
-            return [ts2,nd2];
+            return name;
         }
 
         /*
@@ -1222,32 +1207,21 @@ use namespace intrinsic;
                 PropertyName
         */
 
-        function primaryName (ts: TOKENS)
-            : [TOKENS, Ast::IDENT_EXPR]
-        {
-            enter("Parser::primaryName ", ts);
+        function primaryName () : Ast::IDENT_EXPR {
+            var name = null;
 
-            switch (hd (ts)) {
-            case Token::Identifier:
-                switch (hd2 (ts)) {
-                case Token::Dot:
-                    let tx = Token::tokenText(ts.head());
-                    var [ts1,nd1] = path (tl (tl (ts)), [tx]);
-                    var [ts2,nd2] = propertyName (ts1);
-                    nd2 = new Ast::UnresolvedPath (nd1,nd2);
-                    break;
-                default:
-                    var [ts2,nd2] = propertyName (ts);
-                    break;
-                }
-                break;
-            default:
-                var [ts2,nd2] = propertyName (ts);
-                break;
+            if (hd() === Token::Identifier && hd2() === Token::Dot) {
+                let tx = lexeme ();
+                next();
+                next();
+                var nd1 = path ([tx]);
+                var nd2 = propertyName ();
+                name = new Ast::UnresolvedPath (nd1,nd2);
             }
+            else
+                name = propertyName ();
 
-            exit ("Parser::primaryName ", ts2);
-            return [ts2,nd2];
+            return name;
         }
 
         /*
@@ -1256,56 +1230,35 @@ use namespace intrinsic;
                 Path  .  Identifier
         */
 
-        function path (ts: TOKENS, nd /*: [Ast::IDENT]*/ )  /* FIXME: verifier bug */
-            : [TOKENS, [Ast::IDENT]]
-        {
-            enter("Parser::path ", ts);
+        function path (nd /*: [Ast::IDENT]*/ ) /* FIXME: verifier bug */ : [Ast::IDENT] {
+            var newpath = null;
 
-            switch (hd (ts)) {
-            case Token::Identifier:
-                switch (hd2 (ts)) {
-                case Token::Dot:
-                    nd.push(Token::tokenText(ts.head()));
-                    var [ts1,nd1] = path (tl (tl (ts)), nd);
-                    break;
-                default:
-                    var [ts1,nd1] = [ts,nd];
-                    break;
-                }
-                break;
-            default:
-                var [ts1,nd1] = [ts,nd];
-                break;
+            if (hd() === Token::Identifier && hd2() === Token::Dot) {
+                nd.push( lexeme() );
+                next();
+                next();
+                newpath = path (nd);
             }
+            else
+                newpath = nd;
 
-            exit ("Parser::path ", ts1);
-            return [ts1,nd1];
+            return newpath;
         }
 
-        function parenExpression (ts: TOKENS)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::parenExpression ", ts);
+        function parenExpression () : Ast::EXPR {
+            eat (Token::LeftParen);
+            var expr = assignmentExpression (allowIn);
+            eat (Token::RightParen);
 
-            var ts1 = eat (ts,Token::LeftParen);
-            var [ts2,ndx] = assignmentExpression (ts1, allowIn);
-            var tsx = eat (ts2,Token::RightParen);
-
-            exit ("Parser::parenExpression ", tsx);
-            return [tsx, ndx];
+            return expr;
         }
 
-        function parenListExpression (ts: TOKENS)
-            : [TOKENS, [Ast::EXPR]]
-        {
-            enter("Parser::parenListExpression ", ts);
+        function parenListExpression () : Ast::EXPR {
+            eat (Token::LeftParen);
+            var expr = listExpression (allowIn);
+            eat (Token::RightParen);
 
-            var ts1 = eat (ts,Token::LeftParen);
-            var [ts2,ndx] = listExpression (ts1, allowIn);
-            var tsx = eat (ts2,Token::RightParen);
-
-            exit ("Parser::parenListExpression ", tsx);
-            return [tsx, ndx];
+            return expr;
         }
 
         /*
@@ -1319,33 +1272,31 @@ use namespace intrinsic;
 
         */
 
-        function objectLiteral (ts: TOKENS /*, alpha: ALPHA*/)
-            : [TOKENS, Ast::TYPE_EXPR]
-        {
-            enter("Parser::objectLiteral ", ts);
-
+        function objectLiteral (/*, alpha: ALPHA*/) : Ast::TYPE_EXPR {
             var alpha: ALPHA = allowColon;    // FIXME need to get this from caller
-            ts = eat (ts,Token::LeftBrace);
-            var [ts1,nd1] = fieldList (ts);
-            ts1 = eat (ts1,Token::RightBrace);
+            var pos = position();             // Record source location of initial left brace
+            eat (Token::LeftBrace);
+            var fields = fieldList ();
+            eat (Token::RightBrace);
+
             switch (alpha) {
             case allowColon:
-                switch (hd (ts1)) {
+                switch (hd ()) {
                 case Token::Colon:
-                    var [ts2,nd2] = typeExpression (tl (ts1));
+                    next();
+                    var texpr = typeExpression ();
                     break;
                 default:
-                    var [ts2,nd2] = [ts1,new Ast::ObjectType ([])]; // FIXME I mean {*}
+                    var texpr = new Ast::ObjectType ([]); // FIXME I mean {*}
                     break;
                 }
                 break;
             default:
-                var [ts2,nd2] = [ts1,new Ast::ObjectType ([])]; // FIXME I mean {*}
+                var texpr = new Ast::ObjectType ([]); // FIXME I mean {*}
                 break;
             }
 
-            exit("Parser::objectLiteral ", ts2);
-            return [ts2,new Ast::LiteralExpr (new Ast::LiteralObject (nd1,nd2), position(ts))];
+            return new Ast::LiteralExpr (new Ast::LiteralObject (fields,texpr), pos);
         }
 
         /*
@@ -1357,26 +1308,20 @@ use namespace intrinsic;
 
         */
 
-        function fieldList (ts: TOKENS)
-            //            : [TOKENS, [Ast::FIELD_TYPE]]
-        {
-            enter("Parser::fieldList ", ts);
+        function fieldList () /* : [Ast::FIELD_TYPE] */ {
+            var fields = [];
 
-            var nd1 = [];
-            var ts1 = ts;
-
-            if (hd (ts) !== Token::RightBrace) 
-            {
-                var [ts1,ndx] = literalField (ts);
-                nd1.push (ndx);
-                while (hd (ts1) === Token::Comma) {
-                    var [ts1,ndx] = literalField (tl (ts1));
-                    nd1.push (ndx);
+            if (hd () !== Token::RightBrace) {
+                var field = literalField ();
+                fields.push (field);
+                while (hd () === Token::Comma) {
+                    next();
+                    var field = literalField ();
+                    fields.push (field);
                 }
             }
 
-            exit ("Parser::fieldList ", ts1);
-            return [ts1,nd1];
+            return fields;
         }
 
         /*
@@ -1388,37 +1333,37 @@ use namespace intrinsic;
 
         */
 
-        function literalField (ts: TOKENS)
-            : [TOKENS, Ast::FIELD_TYPE]
-        {
-            enter ("Parser::literalField",ts);
+        function literalField () : Ast::FIELD_TYPE {
+            var tag;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::Const:
-                var [ts1,nd1] = [tl (ts), constTag];
+                next();
+                tag = constTag;
                 break;
             default:
-                var [ts1,nd1] = [ts,Ast::varTag];
+                tag = Ast::varTag;
                 break;
             }
 
-            var [ts2,nd2] = fieldName (ts);
-            ts2 = eat (ts2,Token::Colon);
+            var fn = fieldName ();
+            eat (Token::Colon);
 
-            switch (hd (ts2)) {
+            var expr;
+
+            switch (hd ()) {
             case Token::LeftBrace:   // short cut to avoid recursion
-                var [ts3,nd3] = objectLiteral (ts2);
+                expr = objectLiteral ();
                 break;
             case Token::LeftBracket:
-                var [ts3,nd3] = arrayLiteral (ts2);
+                expr = arrayLiteral ();
                 break;
             default:
-                var [ts3,nd3] = assignmentExpression (ts2,allowIn);
+                expr = assignmentExpression (allowIn);
                 break;
             }
 
-            exit ("Parser::literalField", ts3);
-            return [ts3, new Ast::LiteralField (nd1,nd2,nd3)];
+            return new Ast::LiteralField (tag,fn,expr);
         }
 
         /*
@@ -1431,37 +1376,34 @@ use namespace intrinsic;
 
         */
 
-        function fieldName (ts: TOKENS)
-            : [TOKENS, Ast::IDENT_EXPR]
-        {
-            enter ("Parser::fieldName",ts);
+        function fieldName () : Ast::IDENT_EXPR {
+            var name;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::StringLiteral:
-                let nd = makeIdentifier (Token::tokenText (ts.head()),cx.pragmas.openNamespaces);
-                var [ts1,nd1] = [tl (ts), nd];
+                name = makeIdentifier (lexeme(), cx.pragmas.openNamespaces);
+                next();
                 break;
+            case Token::IntLiteral:
+            case Token::UIntLiteral:
+            case Token::DoubleLiteral:
             case Token::DecimalLiteral:
-            case Token::DecimalIntegerLiteral:
-            case Token::HexIntegerLiteral:
-                Parse::internalError(this, "Unsupported fieldName " + hd(ts));
+                Parse::internalError(this, "Unsupported numeric field name" + hd());
                 break;
             default:
-                if (isReserved (hd (ts))) {
-                    let nd = makeIdentifier (Token::tokenText (ts.head()),cx.pragmas.openNamespaces);
-                    var [ts1,nd1] = [tl (ts), nd];
-                                     // NOTE we use openNamespaces here to indicate that the name is 
-                                     //      unqualified. the generator should use the expando namespace,
-                                     //      which is probably Public "".
+                if (isReserved (hd ())) {
+                    name = makeIdentifier (lexeme(), cx.pragmas.openNamespaces);
+                    next();
+                    // NOTE we use openNamespaces here to indicate that the name is 
+                    //      unqualified. the generator should use the expando namespace,
+                    //      which is probably Public "".
                 }
-                else {
-                    var [ts1,nd1] = nonAttributeQualifiedName (ts);
-                }
+                else
+                    name = nonAttributeQualifiedName ();
                 break;
             }
 
-            exit ("Parser::fieldName");
-            return [ts1,nd1];
+            return name;
         }
 
         /*
@@ -1479,17 +1421,14 @@ use namespace intrinsic;
 
         */
 
-        function arrayLiteral (ts: TOKENS)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::arrayLiteral ", ts);
+        function arrayLiteral () : Ast::EXPR {
+            var pos = position();   // Record source location of initial left bracket
+            eat (Token::LeftBracket);
+            var elts = elementList ();
+            eat (Token::RightBracket);
 
-            ts = eat (ts,Token::LeftBracket);
-            var [ts1,nd1] = elementList (ts);
-            ts1 = eat (ts1,Token::RightBracket);
-
-            exit ("Parser::arrayLiteral ", ts1);
-            return [ts1, new Ast::LiteralExpr (new Ast::LiteralArray (nd1,new Ast::ArrayType ([])), position(ts))];
+            return new Ast::LiteralExpr (new Ast::LiteralArray (elts, new Ast::ArrayType ([])), 
+                                         pos);
         }
 
         /*
@@ -1505,63 +1444,60 @@ use namespace intrinsic;
 
         */
 
-        function elementList (ts: TOKENS)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::elementList ", ts);
+        function elementList () : Ast::EXPR {
+            var elts = [];
+            var elt;
 
-            var nd1 = [];
-            var ts1 = ts;
-
-            if (hd (ts) !== Token::RightBracket) 
+            if (hd () !== Token::RightBracket) 
             {
-                switch (hd (ts)) {
+                switch (hd ()) {
                 case Token::Comma:
-                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
+                    let pos = position();
+                    next();
+                    elt = new Ast::LiteralExpr (new Ast::LiteralUndefined, pos);
                     break;
                 default:
-                    switch (hd (ts1)) {
+                    switch (hd ()) {
                     case Token::LeftBrace:
-                        var [ts1,ndx] = objectLiteral (ts1);
+                        elt = objectLiteral ();
                         break;
                     case Token::LeftBracket:
-                        var [ts1,ndx] = arrayLiteral (ts1);
+                        elt = arrayLiteral ();
                         break;
                     default:
-                        var [ts1,ndx] = assignmentExpression (ts1,allowIn);
+                        elt = assignmentExpression (allowIn);
                         break;
                     }
                     break;
                 }
-                nd1.push (ndx);
-                while (hd (ts1) === Token::Comma) {
-                    ts1 = eat (ts1,Token::Comma);
-                    switch (hd (ts1)) {
+                elts.push (elt);
+                while (hd () === Token::Comma) {
+                    eat (Token::Comma);
+                    switch (hd ()) {
                     case Token::Comma:
-                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
+                        elt = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
                         break;
                     case Token::RightBracket:
                         continue;  // we're done
                     default:
-                        switch (hd (ts1)) {
+                        switch (hd ()) {
                         case Token::LeftBrace:
-                            var [ts1,ndx] = objectLiteral (ts1);
+                            elt = objectLiteral ();
                             break;
                         case Token::LeftBracket:
-                            var [ts1,ndx] = arrayLiteral (ts1);
+                            elt = arrayLiteral ();
                             break;
                         default:
-                            var [ts1,ndx] = assignmentExpression (ts1,allowIn);
+                            elt = assignmentExpression (allowIn);
                             break;
                         }
                         break;
                     }
-                    nd1.push (ndx);
+                    elts.push (elt);
                 }
             }
 
-            exit ("Parser::elementList ", ts1);
-            return [ts1, nd1];
+            return elts;
         }
 
         /*
@@ -1583,126 +1519,96 @@ use namespace intrinsic;
             PrimaryIdentifier
         */
 
-        function primaryExpression(ts:TOKENS,beta:BETA)
-            : [TOKENS,Ast::EXPR]
-        {
-            enter("Parser::primaryExpression ",ts);
+        function primaryExpression(beta:BETA) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            if (hd() == Token::BREAK)
+                regexp();
+
+            var pos = position();   // Record the source location before consuming the token
+            switch (hd ()) {
             case Token::Null:
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralNull (), position(ts))];
+                next();
+                expr = new Ast::LiteralExpr (new Ast::LiteralNull (), pos);
                 break;
             case Token::True:
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralBoolean (true), position(ts))];
+                next();
+                expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (true), pos);
                 break;
             case Token::False:
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralBoolean (false), position(ts))];
+                next();
+                expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (false), pos);
+                break;
+            case Token::IntLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralInt(parseInt(lexeme())), pos);
+                next();
+                break;
+            case Token::UIntLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralUInt(parseInt(lexeme())), pos);
+                next();
+                break;
+            case Token::DoubleLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralDouble(parseFloat(lexeme())), pos);
+                next();
                 break;
             case Token::DecimalLiteral:
-                let tx = Token::tokenText (ts.head());
-
-                // This is all bogus.  All this should be handled in
-                // the lexer, and the lexer should only return
-                // DecimalLiteral if the literal is supposed to
-                // encoded as an ES4 'decimal'.
-
-                // FIXME.  The AVM2 can't handle decimal literals yet.
-
-                let n = 0;
-                if (tx.charAt(0) == "0") {
-                    if (tx.charAt(1) == "x" || tx.charAt(1) == "X")
-                        n = parseInt(tx);
-                    else
-                        n = parseInt(tx, 8);
-                }
-                else
-                    n = parseFloat(tx);
-                let lit = null;
-                if (Math.floor(n) === n) {
-                    if (n >= -0x80000000 && n <= 0x7FFFFFFF)
-                        lit = new Ast::LiteralInt(int(n));
-                    else if (n >= 0x80000000 && n <= 0xFFFFFFFF)
-                        lit = new Ast::LiteralUInt(uint(n));
-                }
-                if (lit == null)
-                    lit = new Ast::LiteralDouble(n);
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (lit, position(ts))];
+                expr = new Ast::LiteralExpr (new Ast::LiteralDecimal(new decimal(lexeme())), pos);
+                next();
                 break;
             case Token::StringLiteral:
-                let tx = Token::tokenText (ts.head());
-                var [ts1,nd1] = [tl (ts), new Ast::LiteralExpr (new Ast::LiteralString (tx), position(ts))];
+                expr = new Ast::LiteralExpr (new Ast::LiteralString (lexeme()), pos);
+                next();
+                break;
+            case Token::RegexpLiteral:
+                expr = new Ast::LiteralExpr (new Ast::LiteralRegExp(lexeme()), pos);
+                next();
                 break;
             case Token::This:
-                var [ts1,nd1] = [tl (ts), new Ast::ThisExpr ()];
+                expr = new Ast::ThisExpr ();
+                next();
                 break;
-//            else
-//            if( lookahead(regexpliteral_token) )
-//            {
-//                var result = <LiteralRegExp value={scan.tokenText(match(regexpliteral_token))}/>
-//            }
-//            else
-//            if( lookahead(function_token) )
-//            {
-//                match(function_token);
-//                var first = null
-//                if( lookahead(identifier_token) )
-//                {
-//                    first = parseIdentifier();
-//                }
-//                var result = parseFunctionCommon(first);
-//            }
             case Token::LeftParen:
-                var [ts1,nd1] = parenListExpression(ts);
+                expr = parenListExpression();
                 break;
             case Token::LeftBracket:
-                var [ts1,nd1] = arrayLiteral (ts);
+                expr = arrayLiteral ();
                 break;
             case Token::LeftBrace:
-                var [ts1,nd1] = objectLiteral (ts);
+                expr = objectLiteral ();
                 break;
             case Token::Function:
-                var [ts1,nd1] = functionExpression (ts);
+                expr = functionExpression ();
                 break;
             default:
-                var [ts1,nd1] = primaryName (ts);
-                switch type (nd1) {
+                expr = primaryName ();
+                switch type (expr) {
                 case (nd: Ast::UnresolvedPath) {
-                    base = resolvePath (nd.Ast::path,null);
-                    nd1 = new Ast::ObjectRef (base,nd.Ast::ident);  // FIXME: not good for package qualified refs
+                    base = resolvePath (nd.Ast::path, null);
+                    expr = new Ast::ObjectRef (base, nd.Ast::ident);  // FIXME: not good for package qualified refs
                 }
                 case (nd:*) {
-                    nd1 = new Ast::LexicalRef (nd1, position(ts));
+                    expr = new Ast::LexicalRef (expr, pos);
                 }
                 }
                 break;
             }
 
-            exit("Parser::primaryExpression ",ts1);
-            return [ts1,nd1];
+            return expr;
         }
 
-        function resolvePath (path/*: [Ast::IDENT]*/, expr: Ast::EXPR)
-        {
-            return resolveObjectPath (path,expr);
-        }
+        function resolvePath (path /*: [Ast::IDENT]*/, expr: Ast::EXPR)
+            resolveObjectPath (path, expr);
 
-        function resolveObjectPath (path /*: [Ast::IDENT]*/, expr: Ast::EXPR)
-            : Ast::EXPR
-        {
-            if (path.length === 0) {
+        function resolveObjectPath (path /*: [Ast::IDENT]*/, expr: Ast::EXPR) : Ast::EXPR {
+            if (path.length === 0)
                 return expr;
-            }
-            else
+
+            var base;
             if (expr === null) 
-            {
-                var base = new Ast::LexicalRef (makeIdentifier (path[0],cx.pragmas.openNamespaces));
-                return resolveObjectPath (path.slice (1,path.length), base);
-            }
+                base = new Ast::LexicalRef (makeIdentifier (path[0],cx.pragmas.openNamespaces));
             else 
-            {
-                var base = new Ast::ObjectRef (expr, makeIdentifier (path[0],cx.pragmas.openNamespaces));
-                return resolveObjectPath (path.slice (1,path.length), base);
-            }
+                base = new Ast::ObjectRef (expr, makeIdentifier (path[0],cx.pragmas.openNamespaces));
+            return resolveObjectPath (path.slice (1, path.length), base);
         }
 
         /*
@@ -1727,29 +1633,29 @@ use namespace intrinsic;
 
         */
 
-        function propertyOperator (ts: TOKENS, nd: Ast::EXPR)
-            : [TOKENS, [Ast::EXPR]]
-        {
-            enter("Parser::propertyOperator ", ts);
+        function propertyOperator (nd: Ast::EXPR) : [Ast::EXPR] {
+            var propref;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::Dot:
-                switch (hd2 (ts)) {
+                switch (hd2 ()) {
                 case Token::LeftParen:
                     Parse::internalError(this, "Filter operator not implemented");
                     break;
                 default:
                     //                    if (isReservedIdentifier (hd (ts))) {
                     //                    }
-                    let [ts1,nd1] = propertyName (tl (ts));
-                    var [tsx,ndx] = [ts1, new Ast::ObjectRef (nd,nd1)];
+                    next();
+                    let propname = propertyName ();
+                    propref = new Ast::ObjectRef (nd,propname);
                     break;
                 }
                 break;
             case Token::LeftBracket:
-                let [ts1,nd1] = listExpression (tl (ts), allowIn);
-                ts1 = eat (ts1,Token::RightBracket);
-                var [tsx,ndx] = [ts1, new Ast::ObjectRef (nd,new Ast::ExpressionIdentifier (nd1,cx.pragmas.openNamespaces))];
+                next();
+                let index = listExpression (allowIn);
+                eat (Token::RightBracket);
+                propref = new Ast::ObjectRef (nd,new Ast::ExpressionIdentifier (index,cx.pragmas.openNamespaces));
                 break;
             case Token::DoubleDot:
                 Parse::internalError(this, "descendents operator not implemented");
@@ -1759,8 +1665,7 @@ use namespace intrinsic;
                 break;
             }
 
-            exit ("Parser::propertyOperator ", tsx);
-            return [tsx, ndx];
+            return propref;
         }
 
         /*
@@ -1775,25 +1680,23 @@ use namespace intrinsic;
 
         */
 
-        function argumentList (ts: TOKENS)
-            : [TOKENS, * /*[Ast::EXPR]*/]
-        {
-            enter("Parser::argumentList ", ts);
+        function argumentList () : * /*[Ast::EXPR]*/ {
+            var args;
 
-            var ts1 = eat (ts,Token::LeftParen);
-            switch (hd (ts1)) {
+            eat (Token::LeftParen);
+            switch (hd ()) {
             case Token::RightParen:
-                var tsx = eat (ts1,Token::RightParen);
-                var ndx = [];
+                eat (Token::RightParen);
+                args = [];
                 break;
             default:
-                let [ts2,nd2] = listExpression (ts1, allowIn);
-                var tsx = eat (ts2,Token::RightParen);
-                var ndx = nd2.Ast::exprs;
+                let nd2 = listExpression (allowIn);
+                eat (Token::RightParen);
+                args = nd2.Ast::exprs;
                 break;
             }
-            exit ("Parser::argumentList ", tsx);
-            return [tsx, ndx];
+
+            return args;
         }
 
         /*
@@ -1820,50 +1723,45 @@ use namespace intrinsic;
 
         */
 
-        function memberExpression (ts: TOKENS, beta:BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::memberExpression ", ts);
+        function memberExpression (beta:BETA) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::New:
-                let [ts1,nd1] = memberExpression (tl (ts), beta);
-                let [ts2,nd2] = this.argumentList (ts1);
-                var [tsx,ndx] = memberExpressionPrime (ts2, beta, new Ast::NewExpr (nd1,nd2));
+                next();
+                let nd1 = memberExpression (beta);
+                let nd2 = this.argumentList ();
+                expr = memberExpressionPrime (beta, new Ast::NewExpr (nd1,nd2));
                 break;
             case Token::Super:
-                let [ts1,nd1] = superExpression (ts);
-                let [ts2,nd2] = propertyOperator (ts1,nd1);
-                var [tsx,ndx] = memberExpressionPrime (ts2, beta, nd2);
+                let nd1 = superExpression ();
+                let nd2 = propertyOperator (nd1);
+                expr = memberExpressionPrime (beta, nd2);
             default:
-                let [ts1,nd1] = primaryExpression (ts,beta);
-                var [tsx,ndx] = memberExpressionPrime (ts1, beta, nd1);
+                let nd1 = primaryExpression (beta);
+                expr = memberExpressionPrime (beta, nd1);
                 break;
             }
 
-            exit ("Parser::memberExpression ", tsx);
-            return [tsx, ndx];
+            return expr;
         }
 
-        function memberExpressionPrime (ts: TOKENS, beta:BETA, nd: Ast::EXPR)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::memberExpressionPrime ", ts);
+        function memberExpressionPrime (beta:BETA, nd: Ast::EXPR) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::LeftBracket:
             case Token::Dot:
             case Token::DoubleDot:
-                let [ts1,nd1] = propertyOperator (ts,nd);
-                var [tsx,ndx] = memberExpressionPrime (ts1, beta, nd1);
+                let nd1 = propertyOperator (nd);
+                expr = memberExpressionPrime (beta, nd1);
                 break;
             default:
-                var [tsx,ndx] = [ts,nd]
+                expr = nd;
                 break;
             }
 
-            exit ("Parser::memberExpressionPrime ", tsx);
-            return [tsx, ndx];
+            return expr;
         }
 
         /*
@@ -1879,42 +1777,36 @@ use namespace intrinsic;
 
         */
 
-        function callExpression (ts: TOKENS, beta:BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::callExpression ", ts);
+        function callExpression (beta:BETA) : Ast::EXPR {
+            var pos = position();
+            var nd1 = memberExpression (beta);
+            var nd2 = this.argumentList ();
+            var expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,pos));
 
-            var [ts1,nd1] = memberExpression (ts,beta);
-            var [ts2,nd2] = this.argumentList (ts);
-            var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2,position(ts1)));
-
-            exit ("Parser::callExpressionPrime ", ndx);
-            return [tsx, ndx];
+            return expr;
         }
 
-        function callExpressionPrime (ts: TOKENS, beta:BETA, nd: Ast::EXPR)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::callExpressionPrime ", ts);
+        function callExpressionPrime (beta:BETA, nd: Ast::EXPR) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::LeftParen:
-                let [ts1,nd1] = this.argumentList (ts);
-                var [tsx,ndx] = callExpressionPrime (ts1, beta, new Ast::CallExpr (nd,nd1,position(ts1)));
+                let pos = position();
+                let nd1 = this.argumentList ();
+                expr = callExpressionPrime (beta, new Ast::CallExpr (nd,nd1,pos));
                 break;
             case Token::LeftBracket:
             case Token::Dot:
             case Token::DoubleDot:
-                let [ts1,nd1] = propertyOperator (ts,nd);
-                var [tsx,ndx] = callExpressionPrime (ts1, beta, nd1);
+                let nd1 = propertyOperator (nd);
+                expr = callExpressionPrime (beta, nd1);
                 break;
             default:
-                var [tsx,ndx] = [ts,nd]
+                expr = nd;
                 break;
             }
 
-            exit ("Parser::callExpressionPrime ", ndx);
-            return [tsx, ndx];
+            return expr;
         }
 
         /*
@@ -1925,68 +1817,53 @@ use namespace intrinsic;
 
         */
 
-        function newExpression (ts: TOKENS, beta:BETA, new_count=0)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::newExpression ", ts);
+        function newExpression (beta:BETA, new_count=0) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::New:
-                let [ts1,nd1] = newExpression (tl (ts), beta, new_count+1);
-                switch (hd (ts1)) {
-                case Token::LeftParen:  // no more new exprs so this paren must start a call expr
-                    let [ts2,nd2] = this.argumentList (ts1); // refer to parser method
+                next();
+                let nd1 = newExpression (beta, new_count+1);
+                switch (hd ()) {
+                case Token::LeftParen:           // no more new exprs so this paren must start a call expr
+                    let pos = position();
+                    let nd2 = this.argumentList (); // refer to parser method
                     if (new_count == 0)
-                    {
-                        var [tsx,ndx] = callExpressionPrime (ts2,beta,new Ast::CallExpr (nd1,nd2,position(ts1)));
-                    }
+                        expr = callExpressionPrime (beta,new Ast::CallExpr (nd1,nd2,pos));
                     else
-                    {
-                        var [tsx,ndx] = [ts2,new Ast::NewExpr (nd1,nd2)];
-                    }
+                        expr = new Ast::NewExpr (nd1,nd2);
                     break;
                 default:
                     if (new_count == 0)
-                    {
-                        var [tsx,ndx] = memberExpressionPrime (ts1,beta,nd1);
-                    }
+                        expr = memberExpressionPrime (beta,nd1);
                     else
-                    {
-                        var [tsx,ndx] = [ts1,new Ast::NewExpr (nd1,[])];
-                    }
+                        expr = new Ast::NewExpr (nd1,[]);
                     break;
                 }
                 break;
+
             default:
-                let [ts1,nd1] = memberExpression (ts,beta);
-                switch (hd (ts1)) {
+                let nd1 = memberExpression (beta);
+                switch (hd ()) {
                 case Token::LeftParen:
-                    let [ts2,nd2] = this.argumentList (ts1); // refer to parser method
+                    let pos = position();
+                    let nd2 = this.argumentList (); // refer to parser method
                     if( new_count == 0 )
-                    {
-                       var [tsx,ndx] = callExpressionPrime (ts2,beta,new Ast::CallExpr (nd1,nd2,position(ts1)));
-                    }
+                        expr = callExpressionPrime (beta,new Ast::CallExpr (nd1,nd2,pos));
                     else
-                    {
-                        var [tsx,ndx] = [ts2,new Ast::NewExpr (nd1,nd2)];
-                    }
+                        expr = new Ast::NewExpr (nd1,nd2);
                     break;
                 default:
                     if( new_count == 0 ) 
-                    {
-                        var [tsx,ndx] = [ts1,nd1];
-                    }
+                        expr = nd1;
                     else 
-                    {
-                        var [tsx,ndx] = [ts1,new Ast::NewExpr (nd1,[])];
-                    }
+                        expr = new Ast::NewExpr (nd1,[]);
                     break;
                 }
                 break;
             }
 
-            exit ("Parser::newExpression ", ndx);
-            return [tsx, ndx];
+            return expr;
         }
 
         /*
@@ -2004,40 +1881,39 @@ use namespace intrinsic;
 
         */
 
-        function leftHandSideExpression (ts: TOKENS, beta:BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::leftHandSideExpression ", ts);
+        function leftHandSideExpression (beta:BETA) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::New:
-                var [ts1,nd1] = newExpression (ts,beta,0);
-                switch (hd (ts1)) {
+                var nd1 = newExpression (beta,0);
+                switch (hd ()) {
                 case Token::LeftParen:
-                    let [ts2,nd2] = this.argumentList (ts1); // refer to parser method
-                    var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2,position(ts1)));
+                    let pos = position();
+                    let nd2 = this.argumentList (); // refer to parser method
+                    expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,pos));
                     break;
                 default:
-                    var [tsx,ndx] = [ts1,nd1];
+                    expr = nd1;
                     break;
                 }
                 break;
             default:
-                let [ts1,nd1] = memberExpression (ts,beta);
-                switch (hd (ts1)) {
+                let nd1 = memberExpression (beta);
+                switch (hd ()) {
                 case Token::LeftParen:
-                    let [ts2,nd2] = this.argumentList (ts1); // refer to parser method
-                    var [tsx,ndx] = callExpressionPrime (ts2, beta, new Ast::CallExpr (nd1,nd2,position(ts1)));
+                    let pos = position();
+                    let nd2 = this.argumentList (); // refer to parser method
+                    expr = callExpressionPrime (beta, new Ast::CallExpr (nd1,nd2,pos));
                     break;
                 default:
-                    var [tsx,ndx] = [ts1,nd1];
+                    expr = nd1;
                     break;
                 }
                 break;
             }
 
-            exit ("Parser::leftHandSideExpression ", ndx);
-            return [tsx, ndx];
+            return expr;
         }
 
         /*
@@ -2049,26 +1925,25 @@ use namespace intrinsic;
 
         */
 
-        function postfixExpression (ts: TOKENS, beta:BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::postfixExpression ", ts);
+        function postfixExpression (beta:BETA) : Ast::EXPR {
+            var expr;
 
-            let [ts1, nd1] = leftHandSideExpression (ts, beta);
-            switch (hd (ts1)) {
+            let nd1 = leftHandSideExpression (beta);
+            switch (hd ()) {
             case Token::PlusPlus:
-                var [tsx,ndx] = [tl (ts1), new Ast::UnaryExpr (Ast::postIncrOp,nd1)];
+                next();
+                expr = new Ast::UnaryExpr (Ast::postIncrOp,nd1);
                 break;
             case Token::MinusMinus:
-                var [tsx,ndx] = [tl (ts1), new Ast::UnaryExpr (Ast::postDecrOp,nd1)];
+                next();
+                expr = new Ast::UnaryExpr (Ast::postDecrOp,nd1);
                 break;
             default:
-                var [tsx,ndx] = [ts1,nd1];
+                expr = nd1;
                 break;
             }
 
-            exit ("Parser::postfixExpression ", tsx);
-            return [tsx, ndx];
+            return expr;
         }
 
         /*
@@ -2088,59 +1963,66 @@ use namespace intrinsic;
 
         */
 
-        function unaryExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::unaryExpression ", ts);
+        function unaryExpression (beta: BETA) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::Delete:
-                let [ts1,nd1] = postfixExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::deleteOp,nd1)];
+                next();
+                let nd1 = postfixExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::deleteOp,nd1);
                 break;
             case Token::Void:
-                let [ts1,nd1] = unaryExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::voidOp,nd1)];
+                next();
+                let nd1 = unaryExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::voidOp,nd1);
                 break;
             case Token::TypeOf:
-                let [ts1,nd1] = unaryExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::typeOfOp,nd1)];
+                next();
+                let nd1 = unaryExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::typeOfOp,nd1);
                 break;
             case Token::PlusPlus:
-                let [ts1,nd1] = postfixExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::preIncrOp,nd1)];
+                next();
+                let nd1 = postfixExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::preIncrOp,nd1);
                 break;
             case Token::MinusMinus:
-                let [ts1,nd1] = postfixExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::preDecrOp,nd1)];
+                next();
+                let nd1 = postfixExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::preDecrOp,nd1);
                 break;
             case Token::Plus:
-                let [ts1,nd1] = unaryExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::unaryPlusOp,nd1)];
+                next();
+                let nd1 = unaryExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::unaryPlusOp,nd1);
                 break;
             case Token::Minus:
-                let [ts1,nd1] = unaryExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::unaryMinusOp,nd1)];
+                next();
+                let nd1 = unaryExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::unaryMinusOp,nd1);
                 break;
             case Token::BitwiseNot:
-                let [ts1,nd1] = unaryExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::bitwiseNotOp,nd1)];
+                next();
+                let nd1 = unaryExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::bitwiseNotOp,nd1);
                 break;
             case Token::Not:
-                let [ts1,nd1] = unaryExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::UnaryExpr (Ast::logicalNotOp,nd1)];
+                next();
+                let nd1 = unaryExpression (beta);
+                expr = new Ast::UnaryExpr (Ast::logicalNotOp,nd1);
                 break;
             case Token::Type:
-                let [ts1,nd1] = nullableTypeExpression (tl (ts),beta);
-                var [tsx,ndx] = [ts1,new Ast::TypeExpr (nd1)];
+                next();
+                let nd1 = nullableTypeExpression (beta);
+                expr = new Ast::TypeExpr (nd1);
                 break;
             default:
-                var [tsx,ndx] = postfixExpression (ts,beta);
+                expr = postfixExpression (beta);
                 break;
             }
 
-            exit ("Parser::unaryExpression ", tsx);
-            return [tsx,ndx];
+            return expr;
         }
 
         /*
@@ -2153,48 +2035,35 @@ use namespace intrinsic;
 
         */
 
-        function multiplicativeExpression (ts: TOKENS, beta:BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::multiplicativeExpression ", ts);
+        function multiplicativeExpression (beta:BETA) : Ast::EXPR {
+            var nd1 = unaryExpression (beta);
 
-            var [ts1,nd1] = unaryExpression (ts, beta);
-
-            /// done:
-            let done = false;
+            done:
             while (true) {
+                if (hd () === Token::BREAK) 
+                    div();
 
-                if (hd (ts1) === Token::BREAK) {
-                    let tsx;
-                    let csx;
-                    [tsx,csx] = scan.tokenList (scan.div);
-                    coordList = csx;
-                    ts1 = new TokenStream (tsx);
-                }
-
-                switch (hd (ts1)) {
+                var op;
+                switch (hd ()) {
                 case Token::Mult:
-                    var op = Ast::timesOp;
+                    op = Ast::timesOp;
                     break;
                 case Token::Div:
-                    var op = Ast::divideOp;
+                    op = Ast::divideOp;
                     break;
                 case Token::Remainder:
-                    var op = Ast::remainderOp;
+                    op = Ast::remainderOp;
                     break;
                 default:
-                    done = true;
-                    break /// done;
+                    break done;
                 }
-                if (done) break;
 
-                let [ts2, nd2] = unaryExpression (tl (ts1), beta);
-                ts1 = ts2;
+                next();
+                let nd2 = unaryExpression (beta);
                 nd1 = new Ast::BinaryExpr (op, nd1, nd2);
             }
 
-            exit ("Parser::multiplicativeExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2206,35 +2075,29 @@ use namespace intrinsic;
 
         */
 
-        function additiveExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::additiveExpression ", ts);
+        function additiveExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = multiplicativeExpression (beta);
 
-            var [ts1, nd1] = multiplicativeExpression (ts, beta);
-
-            /// done:
-            let done = false;
+            done:
             while (true) {
-                switch (hd (ts1)) {
+                var op;
+                switch (hd ()) {
                 case Token::Plus:
-                    var op = Ast::plusOp;
+                    op = Ast::plusOp;
                     break;
                 case Token::Minus:
-                    var op = Ast::minusOp;
+                    op = Ast::minusOp;
                     break;
                 default:
-                    done = true;
-                    break /// done;
+                    break done;
                 }
-                if (done) break;
 
-                let [ts2, nd2] = multiplicativeExpression (tl (ts1), beta);
-                [ts1, nd1] = [ts2, new Ast::BinaryExpr (op, nd1, nd2)];
+                next();
+                let nd2 = multiplicativeExpression (beta);
+                nd1 = new Ast::BinaryExpr (op, nd1, nd2);
             }
 
-            exit ("Parser::additiveExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2247,17 +2110,12 @@ use namespace intrinsic;
 
         */
 
-        function shiftExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::shiftExpression ", ts);
-
-            var [ts1, nd1] = additiveExpression (ts, beta);
+        function shiftExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = additiveExpression (beta);
             
-            let done = false;
-            /// done:
+            done:
             while (true) {
-                switch (hd (ts1)) {
+                switch (hd ()) {
                 case Token::LeftShift:
                     var op = Ast::leftShiftOp;
                     break;
@@ -2268,17 +2126,15 @@ use namespace intrinsic;
                     var op = Ast::rightShiftUnsignedOp;
                     break;
                 default:
-                    done = true;
-                    break /// done;
+                    break done;
                 }
-                if (done) break;
 
-                let [ts2, nd2] = additiveExpression (tl (ts1), beta);
-                var [ts1, nd1] = [ts2, new Ast::BinaryExpr (op, nd1, nd2)];
+                next();
+                let nd2 = additiveExpression (beta);
+                var nd1 = new Ast::BinaryExpr (op, nd1, nd2);
             }
 
-            exit ("Parser::shiftExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2308,67 +2164,67 @@ use namespace intrinsic;
 
         */
 
-        function relationalExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::relationalExpression ", ts);
+        function relationalExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = shiftExpression (beta);
 
-            var [ts1, nd1] = shiftExpression (ts, beta);
-
-            /// done:
-            let done = false;
+            done:
             while (true) {
-                switch (hd (ts1)) {
+                switch (hd ()) {
                 case Token::LessThan:
-                    var [ts2, nd2] = shiftExpression (tl (ts1), beta);
+                    next();
+                    var nd2 = shiftExpression (beta);
                     nd2 = new Ast::BinaryExpr (Ast::lessOp,nd1,nd2);
                     break;
                 case Token::GreaterThan:
-                    var [ts2, nd2] = shiftExpression (tl (ts1), beta);
+                    next();
+                    var nd2 = shiftExpression (beta);
                     nd2 = new Ast::BinaryExpr (Ast::greaterOp,nd1,nd2);
                     break;
                 case Token::LessThanOrEqual:
-                    var [ts2, nd2] = shiftExpression (tl (ts1), beta);
+                    next();
+                    var nd2 = shiftExpression (beta);
                     nd2 = new Ast::BinaryExpr (Ast::lessOrEqualOp,nd1,nd2);
                     break;
                 case Token::GreaterThanOrEqual:
-                    var [ts2, nd2] = shiftExpression (tl (ts1), beta);
+                    next();
+                    var nd2 = shiftExpression (beta);
                     nd2 = new Ast::BinaryExpr (Ast::greaterOrEqualOp,nd1,nd2);
                     break;
                 case Token::In:
-                    if (beta == noIn) {
-                        done = true;
-                        break /// done;
-                    }
-                    var [ts2, nd2] = shiftExpression (tl (ts1), beta);
+                    if (beta == noIn)
+                        break done;
+                    next();
+                    var nd2 = shiftExpression (beta);
                     nd2 = new Ast::BinaryExpr (Ast::inOp,nd1,nd2);
                     break;
                 case Token::InstanceOf:
-                    var [ts2, nd2] = shiftExpression (tl (ts1), beta);
+                    next();
+                    var nd2 = shiftExpression (beta);
                     nd2 = new Ast::BinaryExpr (Ast::instanceOfOp,nd1,nd2);
                     break;
                 case Token::Is:
-                    var [ts2, nd2] = typeExpression (tl (ts1));
+                    next();
+                    var nd2 = typeExpression ();
                     nd2 = new Ast::BinaryTypeExpr (Ast::isOp,nd1,nd2);
                     break;
                 case Token::To:
-                    var [ts2, nd2] = typeExpression (tl (ts1));
+                    next();
+                    var nd2 = typeExpression ();
                     nd2 = new Ast::BinaryTypeExpr (Ast::toOp,nd1,nd2);
                     break;
                 case Token::Cast:
-                    var [ts2, nd2] = typeExpression (tl (ts1));
+                    next();
+                    var nd2 = typeExpression ();
                     nd2 = new Ast::BinaryTypeExpr (Ast::castOp,nd1,nd2);
                     break;
                 default:
-                    done = true;
-                    break /// done;
+                    break done;
                 }
-                if (done) break;
-                var [ts1, nd1] = [ts2,nd2];
+
+                var nd1 = nd2;
             }
 
-            exit ("Parser::equalityExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2382,40 +2238,35 @@ use namespace intrinsic;
 
         */
 
-        function equalityExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::equalityExpression ", ts);
+        function equalityExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = relationalExpression (beta);
 
-            var [ts1, nd1] = relationalExpression (ts, beta);
-            /// done:
-            let done = false;
+            done:
             while (true) {
-                switch (hd (ts1)) {
+                var op;
+                switch (hd ()) {
                 case Token::Equal:
-                    var op = Ast::equalOp;
+                    op = Ast::equalOp;
                     break;
                 case Token::NotEqual:
-                    var op = Ast::notEqualOp;
+                    op = Ast::notEqualOp;
                     break;
                 case Token::StrictEqual:
-                    var op = Ast::strictEqualOp;
+                    op = Ast::strictEqualOp;
                     break;
                 case Token::StrictNotEqual:
-                    var op = Ast::strictNotEqualOp;
+                    op = Ast::strictNotEqualOp;
                     break;
                 default:
-                    done = true;
-                    break /// done;
+                    break done;
                 }
-                if (done) break;
 
-                let [ts2, nd2] = relationalExpression (tl (ts1), beta);
-                var [ts1, nd1] = [ts2, new Ast::BinaryExpr (op, nd1, nd2)];
+                next();
+                let nd2 = relationalExpression (beta);
+                var nd1 = new Ast::BinaryExpr (op, nd1, nd2);
             }
 
-            exit ("Parser::equalityExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2426,19 +2277,16 @@ use namespace intrinsic;
 
         */
 
-        function bitwiseAndExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::bitwiseAndExpression ", ts);
+        function bitwiseAndExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = equalityExpression (beta);
 
-            var [ts1, nd1] = equalityExpression (ts, beta);
-            while (hd (ts1) === Token::BitwiseAnd) {
-                var [ts2, nd2] = equalityExpression (tl (ts1), beta);
-                var [ts1, nd1] = [ts2, new Ast::BinaryExpr (Ast::bitwiseAndOp, nd1, nd2)];
+            while (hd () === Token::BitwiseAnd) {
+                next();
+                var nd2 = equalityExpression (beta);
+                var nd1 = new Ast::BinaryExpr (Ast::bitwiseAndOp, nd1, nd2);
             }
 
-            exit ("Parser::bitwiseAndExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2449,19 +2297,16 @@ use namespace intrinsic;
 
         */
 
-        function bitwiseXorExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::bitwiseXorExpression ", ts);
+        function bitwiseXorExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = bitwiseAndExpression (beta);
 
-            var [ts1, nd1] = bitwiseAndExpression (ts, beta);
-            while (hd (ts1) === Token::BitwiseXor) {
-                var [ts2, nd2] = bitwiseAndExpression (tl (ts1), beta);
-                var [ts1, nd1] = [ts2, new Ast::BinaryExpr (Ast::bitwiseXorOp, nd1, nd2)];
+            while (hd () === Token::BitwiseXor) {
+                next();
+                var nd2 = bitwiseAndExpression (beta);
+                var nd1 = new Ast::BinaryExpr (Ast::bitwiseXorOp, nd1, nd2);
             }
 
-            exit ("Parser::bitwiseXorExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2472,19 +2317,16 @@ use namespace intrinsic;
 
         */
 
-        function bitwiseOrExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::bitwiseOrExpression ", ts);
+        function bitwiseOrExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = bitwiseXorExpression (beta);
 
-            var [ts1, nd1] = bitwiseXorExpression (ts, beta);
-            while (hd (ts1) === Token::BitwiseOr) {
-                var [ts2, nd2] = bitwiseXorExpression (tl (ts1), beta);
-                var [ts1, nd1] = [ts2, new Ast::BinaryExpr (Ast::bitwiseOrOp, nd1, nd2)];
+            while (hd () === Token::BitwiseOr) {
+                next();
+                var nd2 = bitwiseXorExpression (beta);
+                var nd1 = new Ast::BinaryExpr (Ast::bitwiseOrOp, nd1, nd2);
             }
 
-            exit ("Parser::bitwiseOrExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2495,19 +2337,16 @@ use namespace intrinsic;
 
         */
 
-        function logicalAndExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::logicalAndExpression ", ts);
+        function logicalAndExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = bitwiseOrExpression (beta);
 
-            var [ts1, nd1] = bitwiseOrExpression (ts, beta);
-            while (hd (ts1) === Token::LogicalAnd) {
-                var [ts2, nd2] = bitwiseOrExpression (tl (ts1), beta);
-                var [ts1, nd1] = [ts2, new Ast::BinaryExpr (Ast::logicalAndOp, nd1, nd2)];
+            while (hd () === Token::LogicalAnd) {
+                next();
+                var nd2 = bitwiseOrExpression (beta);
+                var nd1 = new Ast::BinaryExpr (Ast::logicalAndOp, nd1, nd2);
             }
 
-            exit ("Parser::logicalAndExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2518,19 +2357,16 @@ use namespace intrinsic;
 
         */
 
-        function logicalXorExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::logicalXorExpression ", ts);
+        function logicalXorExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = logicalAndExpression (beta);
 
-            var [ts1, nd1] = logicalAndExpression (ts, beta);
-            while (hd (ts1) === Token::LogicalXor) {
-                var [ts2, nd2] = logicalAndExpression (tl (ts1), beta);
-                var [ts1, nd1] = [ts2, new Ast::BinaryExpr (Ast::logicalXor, nd1, nd2)];
+            while (hd () === Token::LogicalXor) {
+                next();
+                var nd2 = logicalAndExpression (beta);
+                var nd1 = new Ast::BinaryExpr (Ast::logicalXor, nd1, nd2);
             }
 
-            exit ("Parser::logicalXorExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2541,19 +2377,16 @@ use namespace intrinsic;
 
         */
 
-        function logicalOrExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::logicalOrExpression ", ts);
+        function logicalOrExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = logicalXorExpression (beta);
 
-            var [ts1, nd1] = logicalXorExpression (ts, beta);
-            while (hd (ts1) === Token::LogicalOr) {
-                var [ts2, nd2] = logicalXorExpression (tl (ts1), beta);
-                var [ts1, nd1] = [ts2, new Ast::BinaryExpr (Ast::logicalOrOp, nd1, nd2)];
+            while (hd () === Token::LogicalOr) {
+                next();
+                var nd2 = logicalXorExpression (beta);
+                var nd1 = new Ast::BinaryExpr (Ast::logicalOrOp, nd1, nd2);
             }
 
-            exit ("Parser::logicalOrExpression ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
         /*
@@ -2576,26 +2409,25 @@ use namespace intrinsic;
 
         */
 
-        function nonAssignmentExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::nonAssignmentExpression ", ts);
+        function nonAssignmentExpression (beta: BETA) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::Let:
-                var [ts1,nd1] = letExpression (ts,beta);
+                expr = letExpression (beta);
                 break;
             case Token::Yield:
-                var [ts1,nd1] = yieldExpression (ts,beta);
+                expr = yieldExpression (beta);
                 break;
             default:
-                var [ts1,nd1] = logicalOrExpression (ts,beta);
-                switch (hd (ts1)) {
+                expr = logicalOrExpression (beta);
+                switch (hd ()) {
                 case Token::QuestionMark:
-                    var [ts2,nd2] = nonAssignmentExpression (tl (ts1),beta);
-                    ts2 = eat (ts2,Token::Colon);
-                    var [ts3,nd3] = nonAssignmentExpression (ts2,beta);
-                    var [ts1,nd1] = [ts3, new Ast::TernaryExpr (nd1,nd2,nd3)];
+                    next();
+                    var nd2 = nonAssignmentExpression (beta);
+                    eat (Token::Colon);
+                    var nd3 = nonAssignmentExpression (beta);
+                    expr = new Ast::TernaryExpr (expr,nd2,nd3);
                     break;
                 default:
                     break;
@@ -2603,8 +2435,7 @@ use namespace intrinsic;
                 break;
             }
 
-            exit ("Parser::nonAssignmentExpression ", ts1);
-            return [ts1,nd1];
+            return expr;
         }
 
         /*
@@ -2618,34 +2449,32 @@ use namespace intrinsic;
 
         */
 
-        function conditionalExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::conditionalExpression ", ts);
+        function conditionalExpression (beta: BETA) : Ast::EXPR {
+            var expr;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::Let:
-                var [ts1,nd1] = letExpression (ts,beta);
+                expr = letExpression (beta);
                 break;
             case Token::Yield:
-                var [ts1,nd1] = yieldExpression (ts,beta);
+                expr = yieldExpression (beta);
                 break;
             default:
-                var [ts1,nd1] = logicalOrExpression (ts,beta);
-                switch (hd (ts1)) {
+                expr = logicalOrExpression (beta);
+                switch (hd ()) {
                 case Token::QuestionMark:
-                    var [ts2,nd2] = assignmentExpression (tl (ts1),beta);
-                    ts2 = eat (ts2,Token::Colon);
-                    var [ts3,nd3] = assignmentExpression (ts2,beta);
-                    var [ts1,nd1] = [ts3, new Ast::TernaryExpr (nd1,nd2,nd3)];
+                    next();
+                    var nd2 = assignmentExpression (beta);
+                    eat (Token::Colon);
+                    var nd3 = assignmentExpression (beta);
+                    expr = new Ast::TernaryExpr (expr,nd2,nd3);
                     break;
                 default:
                     break;
                 }
             }
 
-            exit ("Parser::conditionalExpression ", ts1);
-            return [ts1,nd1];
+            return expr
         }
 
         /*
@@ -2657,75 +2486,72 @@ use namespace intrinsic;
 
         */
 
-        function assignmentExpression (ts: TOKENS, beta: BETA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::assignmentExpression ", ts);
-
+        function assignmentExpression (beta: BETA) : Ast::EXPR {
             var op = null;
-            var [ts1,nd1] = conditionalExpression (ts, beta);
-            switch (hd (ts1)) {
+            var nd1 = conditionalExpression (beta);
+            switch (hd ()) {
             case Token::Assign:
-                var [ts1,nd1] = [tl (ts1), patternFromExpr (nd1)];
-                var [ts2,nd2] = assignmentExpression (ts1,beta);
+                next();
+                var nd1 = patternFromExpr (nd1);
+                var nd2 = assignmentExpression (beta);
                 var [fxtrs,expr,head] = desugarAssignmentPattern (nd1,Ast::anyType,nd2,Ast::assignOp);
                 break;
             case Token::PlusAssign: 
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignPlusOp);
+                var expr = operateAndAssign(nd1, Ast::assignPlusOp);
                 break;
             case Token::MinusAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignMinusOp);
+                var expr = operateAndAssign(nd1, Ast::assignMinusOp);
                 break;
             case Token::MultAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignTimesOp);
+                var expr = operateAndAssign(nd1, Ast::assignTimesOp);
                 break;
             case Token::DivAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignDivideOp);
+                var expr = operateAndAssign(nd1, Ast::assignDivideOp);
                 break;
             case Token::RemainderAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRemainderOp);
+                var expr = operateAndAssign(nd1, Ast::assignRemainderOp);
                 break;
             case Token::BitwiseAndAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseAndOp);
+                var expr = operateAndAssign(nd1, Ast::assignBitwiseAndOp);
                 break;
             case Token::BitwiseOrAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseOrOp);
+                var expr = operateAndAssign(nd1, Ast::assignBitwiseOrOp);
                 break;
             case Token::BitwiseXorAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignBitwiseXorOp);
+                var expr = operateAndAssign(nd1, Ast::assignBitwiseXorOp);
                 break;
             case Token::LeftShiftAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLeftShiftOp);
+                var expr = operateAndAssign(nd1, Ast::assignLeftShiftOp);
                 break;
             case Token::RightShiftAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRightShiftOp);
+                var expr = operateAndAssign(nd1, Ast::assignRightShiftOp);
                 break;
             case Token::UnsignedRightShiftAssign:
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignRightShiftUnsignedOp);
+                var expr = operateAndAssign(nd1, Ast::assignRightShiftUnsignedOp);
                 break;
             case Token::LogicalAndAssign: 
                 // ES4
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLogicalAndOp);
+                var expr = operateAndAssign(nd1, Ast::assignLogicalAndOp);
                 break;
             case Token::LogicalOrAssign:
                 // ES4
-                var [ts2,expr] = operateAndAssign(ts1, nd1, Ast::assignLogicalOrOp);
+                var expr = operateAndAssign(nd1, Ast::assignLogicalOrOp);
                 break;
             default:
-                var [ts2,expr] = [ts1,nd1];
+                var expr = nd1;
                 break;
             }
 
-            exit ("Parser::assignmentExpression ", ts1);
-            return [ts2,expr];
+            return expr;
 
-            function operateAndAssign(ts1, nd1, op) : [TOKENS, Ast::EXPR] {
-                var [ts2,nd2] = [tl (ts1), patternFromExpr (nd1)];
+            function operateAndAssign(nd1, op) : Ast::EXPR {
+                next();
+                var nd2 = patternFromExpr (nd1);
                 if (!(nd2 is SimplePattern))
                     Parse::internalError(this, "operandAndAssign, lhs should be SimplePattern");
-                var [ts3,nd3] = assignmentExpression (ts2,beta);
+                var nd3 = assignmentExpression (beta);
                 var [fxtrs,expr,head] = desugarAssignmentPattern (nd2,Ast::anyType,nd3,op);
-                return [ts3, expr];
+                return expr;
             }
 
             // expression to pattern converters
@@ -2758,22 +2584,13 @@ use namespace intrinsic;
                 return p;
             }
 
-            function arrayPatternFromLiteral (nd: Ast::LITERAL)
-                : PATTERN
-            {
-                enter("Parser::arrayPatternFromLiteral ", ts);
-                
+            function arrayPatternFromLiteral (nd: Ast::LITERAL) : PATTERN {
                 var nd1 = elementListPatternFromLiteral (nd.Ast::exprs);
                 
-                exit ("Parser::arrayPatternFromLiteral ", ts1);
                 return new ArrayPattern (nd1);
             }
 
-            function elementListPatternFromLiteral (nd: Ast::EXPRS)
-                : PATTERNS
-            {
-                enter("Parser::elementListPatternFromLiteral ", nd);
-                
+            function elementListPatternFromLiteral (nd: Ast::EXPRS) : PATTERNS {
                 var nd1 = [];
                 
                 for (let i=0; i<nd.length; ++i) {
@@ -2781,15 +2598,10 @@ use namespace intrinsic;
                     nd1.push (ndx);
                 }
                 
-                exit ("Parser::elementListPatternFromLiteral ", nd1);
                 return nd1;
             }
                     
-            function objectPatternFromLiteral (l: Ast::LITERAL)
-                : PATTERN
-            {
-                enter("Parser::objectPatternFromLiteral ", l);
-                
+            function objectPatternFromLiteral (l: Ast::LITERAL) : PATTERN {
                 switch type (l) {
                 case (nd: Ast::LiteralObject) {
                     var p = fieldListPatternFromLiteral (nd.Ast::fields);
@@ -2799,15 +2611,10 @@ use namespace intrinsic;
                 }
                 }
                         
-                exit ("Parser::objectPatternFromLiteral ", p);
                 return new ObjectPattern (p);
             }
                     
-            function fieldListPatternFromLiteral (nd: Ast::LITERAL_FIELDS)
-                : FIELD_PATTERNS
-            {
-                enter("Parser::fieldListPatternFromLiteral ", nd);
-                
+            function fieldListPatternFromLiteral (nd: Ast::LITERAL_FIELDS) : FIELD_PATTERNS {
                 var nd1 = [];
                 
                 for (let i=0; i<nd.length; ++i) {
@@ -2815,19 +2622,13 @@ use namespace intrinsic;
                     nd1.push (ndx);
                 }
                 
-                exit ("Parser::fieldListPatternFromLiteral ", nd1);
                 return nd1;
             }
                     
-            function fieldPatternFromLiteral (nd: Ast::LITERAL_FIELD)
-                : FIELD_PATTERN
-            {
-                enter("Parser::fieldPatternFromLiteral ", ts);
-                
+            function fieldPatternFromLiteral (nd: Ast::LITERAL_FIELD) : FIELD_PATTERN {
                 var nd1 = nd.Ast::ident;
                 var nd2 = patternFromExpr (nd.Ast::expr);
                 
-                exit ("Parser::fieldPatternFromLiteral ", ts2);
                 return new FieldPattern (nd1,nd2);
             }
         }
@@ -2849,39 +2650,28 @@ use namespace intrinsic;
 
         */
 
-        function listExpression (ts: TOKENS, beta: BETA )
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::listExpression ", ts);
+        function listExpression (beta: BETA) : Ast::EXPR {
+            var nd1 = assignmentExpression (beta);
+            var nd2 = listExpressionPrime ();
+            nd2.unshift (nd1);
 
-            function listExpressionPrime (ts: TOKENS )
-                : [TOKENS, Ast::EXPR]
-            {
-                enter("Parser::listExpressionPrime ", ts);
-        
-                switch (hd (ts)) {
+            return new Ast::ListExpr (nd2);
+
+            function listExpressionPrime () : Ast::EXPR {
+                switch (hd ()) {
                 case Token::Comma:
-                    var [ts1,nd1] = assignmentExpression (tl (ts), beta);
-                    var [ts2,nd2] = listExpressionPrime (ts1);
+                    next();
+                    var nd1 = assignmentExpression (beta);
+                    var nd2 = listExpressionPrime ();
                     nd2.unshift (nd1);
                     break;
                 default:
-                    var [ts2,nd2] = [ts,[]];
+                    var nd2 = [];
                     break;
                 }
 
-                exit ("Parser::listExpressionPrime ", ts2);
-                return [ts2,nd2];
+                return nd2;
             }
-
-            var [ts1,nd1] = assignmentExpression (ts, beta);
-            var [ts2,nd2] = listExpressionPrime (ts1);
-            // print("nd2.length=",nd2.length);
-            nd2.unshift (nd1);
-            // print("nd2.length=",nd2.length);
-
-            exit ("Parser::listExpression ", ts2);
-            return [ts2,new Ast::ListExpr (nd2)];
         }
 
 //        /*
@@ -2957,25 +2747,20 @@ use namespace intrinsic;
 
         */
 
-        function pattern (ts: TOKENS, beta: BETA, gamma: GAMMA)
-            : [TOKENS, PATTERN]
-        {
-            enter("Parser::pattern", ts);
-
-            switch (hd (ts)) {
+        function pattern (beta: BETA, gamma: GAMMA) : PATTERN {
+            switch (hd ()) {
             case Token::LeftBrace:
-                var [ts1,nd1] = objectPattern (ts, gamma);
+                var nd1 = objectPattern (gamma);
                 break;
             case Token::LeftBracket:
-                var [ts1,nd1] = arrayPattern (ts, gamma);
+                var nd1 = arrayPattern (gamma);
                 break;
             default:
-                var [ts1,nd1] = simplePattern (ts, beta, gamma);
+                var nd1 = simplePattern (beta, gamma);
                 break;
             }
 
-            exit("Parser::pattern ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -2988,24 +2773,19 @@ use namespace intrinsic;
 
           */
 
-        function simplePattern (ts: TOKENS, beta: BETA, gamma: GAMMA)
-            : [TOKENS, PATTERN]
-        {
-            enter("Parser::simplePattern", ts);
-
+        function simplePattern (beta: BETA, gamma: GAMMA) : PATTERN {
             switch (gamma) {
             case noExpr:
-                let [ts1,nd1] = identifier (ts);
-                var [tsx,ndx] = [ts1, new IdentifierPattern (nd1)];
+                let nd1 = identifier ();
+                var ndx = new IdentifierPattern (nd1);
                 break;
             case allowExpr:
-                let [ts1,nd1] = leftHandSideExpression (ts,beta);
-                var [tsx,ndx] = [ts1, new SimplePattern (nd1)];
+                let nd1 = leftHandSideExpression (beta);
+                var ndx = new SimplePattern (nd1);
                 break;
             }
 
-            exit("Parser::simplePattern", tsx);
-            return [tsx,ndx];
+            return ndx;
         }
 
         /*
@@ -3015,17 +2795,12 @@ use namespace intrinsic;
         
         */
 
-        function arrayPattern (ts: TOKENS, gamma: GAMMA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::arrayPattern ", ts);
+        function arrayPattern (gamma: GAMMA) : Ast::EXPR {
+            eat (Token::LeftBracket);
+            var nd1 = elementListPattern (gamma);
+            eat (Token::RightBracket);
 
-            ts = eat (ts,Token::LeftBracket);
-            var [ts1,nd1] = elementListPattern (ts,gamma);
-            ts1 = eat (ts1,Token::RightBracket);
-
-            exit ("Parser::arrayPattern ", ts1);
-            return [ts1, new ArrayPattern (nd1)];
+            return new ArrayPattern (nd1);
         }
 
         /*
@@ -3041,40 +2816,36 @@ use namespace intrinsic;
 
         */
 
-        function elementListPattern (ts: TOKENS, gamma:GAMMA)
-            : [TOKENS, Ast::EXPRS]
-        {
-            enter("Parser::elementListPattern ", ts);
+        function elementListPattern (gamma:GAMMA) : Ast::EXPRS {
+            var elements = [], element;
 
-            var nd1 = [];
-
-            if (hd (ts) !== Token::RightBracket) 
-            {
-                switch (hd (ts)) {
+            if (hd () !== Token::RightBracket) {
+                switch (hd ()) {
                 case Token::Comma:
-                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
+                    let pos = position();
+                    eat(Token::Comma);
+                    element = new Ast::LiteralExpr (new Ast::LiteralUndefined, pos);
                     break;
                 default:
-                    var [ts1,ndx] = pattern (ts,allowIn,gamma);
+                    element = pattern (allowIn,gamma);
                     break;
                 }
-                nd1.push (ndx);
-                while (hd (ts1) === Token::Comma) {
-                    ts1 = eat (ts1,Token::Comma);
-                    switch (hd (ts1)) {
+                elements.push (element);
+                while (hd () === Token::Comma) {
+                    eat (Token::Comma);
+                    switch (hd ()) {
                     case Token::Comma:
-                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
+                        element = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
                         break;
                     default:
-                        var [ts1,ndx] = pattern (ts1,allowIn,gamma);
+                        element = pattern (allowIn,gamma);
                         break;
                     }
-                    nd1.push (ndx);
+                    elements.push (element);
                 }
             }
 
-            exit ("Parser::elementListPattern ", ts1);
-            return [ts1, nd1];
+            return elements;
         }
 
         /*
@@ -3084,17 +2855,12 @@ use namespace intrinsic;
         
         */
 
-        function objectPattern (ts: TOKENS, gamma: GAMMA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::objectPattern ", ts);
+        function objectPattern (gamma: GAMMA) : Ast::EXPR {
+            eat (Token::LeftBrace);
+            var nd1 = fieldListPattern (gamma);
+            eat (Token::RightBrace);
 
-            ts = eat (ts,Token::LeftBrace);
-            var [ts1,nd1] = fieldListPattern (ts,gamma);
-            ts1 = eat (ts1,Token::RightBrace);
-
-            exit ("Parser::objectPattern ", ts1);
-            return [ts1, new ObjectPattern (nd1)];
+            return new ObjectPattern (nd1); 
         }
 
         /*
@@ -3110,42 +2876,34 @@ use namespace intrinsic;
 
         */
 
-        function fieldListPattern (ts: TOKENS, gamma:GAMMA)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::fieldListPattern ", ts);
-
+        function fieldListPattern (gamma:GAMMA) : Ast::EXPR {
             var nd1 = [];
 
-            if (hd (ts) !== Token::RightBrace) 
+            if (hd () !== Token::RightBrace) 
             {
-                var [ts1,ndx] = fieldPattern (ts,gamma);
+                var ndx = fieldPattern (gamma);
                 nd1.push (ndx);
-                while (hd (ts1) === Token::Comma) {
-                    ts1 = eat (ts1,Token::Comma);
-                    var [ts1,ndx] = fieldPattern (ts1,gamma);
+                while (hd () === Token::Comma) {
+                    eat (Token::Comma);
+                    var ndx = fieldPattern (gamma);
                     nd1.push (ndx);
                 }
             }
 
-            exit ("Parser::fieldListPattern ", ts1);
-            return [ts1, nd1];
+            return nd1;
         }
 
-        function fieldPattern (ts: TOKENS, gamma:GAMMA)
-            : [TOKENS, FIELD_PATTERN]
-        {
-            enter("Parser::fieldPattern ", ts);
-
-            var [ts1,nd1] = fieldName (ts);
-            switch (hd (ts1)) {
+        function fieldPattern (gamma:GAMMA) : FIELD_PATTERN {
+            var nd1 = fieldName ();
+            switch (hd ()) {
             case Token::Colon:
-                var [ts2,nd2] = pattern (tl (ts1),allowIn,gamma);
+                next();
+                var nd2 = pattern (allowIn,gamma);
                 break;
             default:
                 switch type (nd1) {
                 case (nd1: Ast::Identifier) {
-                    var [ts2,nd2] = [ts1, new IdentifierPattern (nd1.Ast::ident)];
+                    var nd2 = new IdentifierPattern (nd1.Ast::ident);
                 }
                 case (nd1:*) {
                     Parse::internalError(this, "unsupported fieldPattern " + nd1);
@@ -3154,8 +2912,7 @@ use namespace intrinsic;
                 break;
             }
 
-            exit ("Parser::fieldPattern ", ts2);
-            return [ts2, new FieldPattern (nd1,nd2)];
+            return new FieldPattern (nd1,nd2);
         }
 
         /*
@@ -3170,23 +2927,19 @@ use namespace intrinsic;
 
         */
 
-        function typedPattern (ts: TOKENS, beta: BETA)
-            : [TOKENS, [PATTERN,Ast::TYPE_EXPR]]
-        {
-            enter("Parser::typedPattern ", ts);
-
-            var [ts1,nd1] = pattern (ts,beta,noExpr);
-            switch (hd (ts1)) {
+        function typedPattern (beta: BETA) : [PATTERN,Ast::TYPE_EXPR] {
+            var nd1 = pattern (beta,noExpr);
+            switch (hd ()) {
             case Token::Colon:
-                var [ts2,nd2] = nullableTypeExpression (tl (ts1));
+                next();
+                var nd2 = nullableTypeExpression ();
                 break;
             default:
-                var [ts2,nd2] = [ts1,Ast::anyType];
+                var nd2 = Ast::anyType;
                 break;
             }
 
-            exit("Parser::typedPattern ", ts2);
-            return [ts2,[nd1,nd2]];
+            return [nd1,nd2];
         }
 
         // TYPE EXPRESSIONS
@@ -3200,26 +2953,23 @@ use namespace intrinsic;
 
         */
 
-        function nullableTypeExpression (ts: TOKENS)
-            : [TOKENS, Ast::TYPE_EXPR]
-        {
-            enter("Parser::nullableTypeExpression ", ts);
-
-            var [ts1,nd1] = typeExpression (ts);
-            switch (hd (ts1)) {
+        function nullableTypeExpression () : Ast::TYPE_EXPR {
+            var nd1 = typeExpression ();
+            switch (hd ()) {
             case Token::QuestionMark:
-                var [ts1,nd1] = [tl (ts1), new Ast::NullableType (nd1,true)];
+                next();
+                var nd1 = new Ast::NullableType (nd1,true);
                 break;
             case Token::Not:
-                var [ts1,nd1] = [tl (ts1), new Ast::NullableType (nd1,false)];
+                next();
+                var nd1 = new Ast::NullableType (nd1,false);
                 break;
             default:
                 // do nothing
                 break;
             }
 
-            exit("Parser::nullableTypeExpression ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -3235,41 +2985,39 @@ use namespace intrinsic;
 
         */
 
-        function typeExpression (ts: TOKENS)
-            : [TOKENS, Ast::TYPE_EXPR]
-        {
-            enter("Parser::typeExpression ", ts);
-
-            switch (hd (ts)) {
+        function typeExpression () : Ast::TYPE_EXPR {
+            switch (hd ()) {
             case Token::Mult:
-                var [ts1,nd1] = [tl (ts), Ast::anyType];
+                next();
+                var nd1 = Ast::anyType;
                 break;
             case Token::Null:
-                var [ts1,nd1] = [tl (ts), Ast::nullType];
+                next();
+                var nd1 = Ast::nullType;
                 break;
             case Token::Undefined:
-                var [ts1,nd1] = [tl (ts), Ast::undefinedType];
+                next();
+                var nd1 = Ast::undefinedType;
                 break;
             case Token::Function:
-                var [ts1,nd1] = functionType (ts);
+                var nd1 = functionType ();
                 break;
             case Token::LeftParen:
-                var [ts1,nd1] = unionType (ts);
+                var nd1 = unionType ();
                 break;
             case Token::LeftBrace:
-                var [ts1,nd1] = objectType (ts);
+                var nd1 = objectType ();
                 break;
             case Token::LeftBracket:
-                var [ts1,nd1] = arrayType (ts);
+                var nd1 = arrayType ();
                 break;
             default:
-                var [ts1,nd1] = primaryName (ts);
+                var nd1 = primaryName ();
                 nd1 = new Ast::TypeName (nd1);
                 break;
             }
 
-            exit("Parser::typeExpression ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -3279,17 +3027,12 @@ use namespace intrinsic;
 
         */
 
-        function unionType (ts: TOKENS)
-            : [TOKENS, Ast::TYPE_EXPR]
-        {
-            enter("Parser::unionType ", ts);
+        function unionType () : Ast::TYPE_EXPR {
+            eat (Token::LeftParen);
+            var nd1 = typeExpressionList ();
+            eat (Token::RightParen);
 
-            ts = eat (ts,Token::LeftParen);
-            var [ts1,nd1] = typeExpressionList (ts);
-            ts1 = eat (ts1,Token::RightParen);
-
-            exit("Parser::unionType ", ts1);
-            return [ts1,new Ast::UnionType (nd1)];
+            return new Ast::UnionType (nd1);
         }
 
         /*
@@ -3299,17 +3042,12 @@ use namespace intrinsic;
 
         */
 
-        function objectType (ts: TOKENS)
-            : [TOKENS, Ast::TYPE_EXPR]
-        {
-            enter("Parser::objectType ", ts);
+        function objectType () : Ast::TYPE_EXPR {
+            eat (Token::LeftBrace);
+            var nd1 = fieldTypeList ();
+            eat (Token::RightBrace);
 
-            ts = eat (ts,Token::LeftBrace);
-            var [ts1,nd1] = fieldTypeList (ts);
-            ts1 = eat (ts1,Token::RightBrace);
-
-            exit("Parser::objectType ", ts1);
-            return [ts1,new Ast::ObjectType (nd1)];
+            return new Ast::ObjectType (nd1);
         }
 
         /*
@@ -3324,38 +3062,26 @@ use namespace intrinsic;
 
         */
 
-        function fieldTypeList (ts: TOKENS)
-            //            : [TOKENS, [Ast::FIELD_TYPE]]
-        {
-            enter("Parser::fieldTypeList ", ts);
-
+        function fieldTypeList () /* : [Ast::FIELD_TYPE] */ {
             var nd1 = [];
 
-            if (hd (ts) !== Token::RightBrace) 
-            {
-                var [ts1,ndx] = fieldType (ts);
+            if (hd () !== Token::RightBrace) {
+                var ndx = fieldType ();
                 nd1.push (ndx);
-                while (hd (ts1) === Token::Comma) {
-                    var [ts1,ndx] = fieldType (tl (ts1));
+                while (hd () === Token::Comma) {
+                    next();
+                    var ndx = fieldType ();
                     nd1.push (ndx);
                 }
             }
 
-            exit ("Parser::fieldTypeList ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
-        function fieldType (ts: TOKENS)
-            : [TOKENS, Ast::FIELD_TYPE]
-        {
-            enter ("Parser::fieldType");
-
-            var [ts1,nd1] = fieldName (ts);
-            ts1 = eat (ts1,Token::Colon);
-            var [ts2,nd2] = nullableTypeExpression (ts1);
-
-            exit ("Parser::fieldType");
-            return [ts2, new Ast::FieldType (nd1,nd2)];
+        function fieldType () : Ast::FIELD_TYPE {
+            var nd1 = fieldName ();
+            eat (Token::Colon);
+            var nd2 = nullableTypeExpression ();
         }
 
         /*
@@ -3371,53 +3097,44 @@ use namespace intrinsic;
 
         */
 
-        function arrayType (ts: TOKENS)
-            : [TOKENS, Ast::TYPE_EXPR]
-        {
-            enter("Parser::arrayType ", ts);
+        function arrayType () : Ast::TYPE_EXPR {
+            eat (Token::LeftBracket);
+            var nd1 = elementTypeList ();
+            eat (Token::RightBracket);
 
-            ts = eat (ts,Token::LeftBracket);
-            var [ts1,nd1] = elementTypeList (ts);
-            ts1 = eat (ts1,Token::RightBracket);
-
-            exit("Parser::arrayType ", ts1);
-            return [ts1,new Ast::ArrayType (nd1)];
+            return new Ast::ArrayType (nd1);
         }
 
-        function elementTypeList (ts: TOKENS)
-            //            : [TOKENS, [Ast::ELEMENT_TYPE]]
-        {
-            enter("Parser::elementTypeList ", ts);
-
+        function elementTypeList () /* : [Ast::ELEMENT_TYPE] */ {
             var nd1 = [];
 
-            if (hd (ts) !== Token::RightBracket) 
-            {
-                switch (hd (ts)) {
+            if (hd () !== Token::RightBracket) {
+                switch (hd ()) {
                 case Token::Comma:
-                    var [ts1,ndx] = [tl (ts),new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
+                    let pos = position();
+                    eat(Token::Comma);
+                    var ndx = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
                     break;
                 default:
-                    var [ts1,ndx] = nullableTypeExpression (ts);
+                    var ndx = nullableTypeExpression ();
                     break;
                 }
                 nd1.push (ndx);
-                while (hd (ts1) === Token::Comma) {
-                    ts1 = eat (ts1,Token::Comma);
-                    switch (hd (ts1)) {
+                while (hd () === Token::Comma) {
+                    eat (Token::Comma);
+                    switch (hd ()) {
                     case Token::Comma:
-                        var [ts1,ndx] = [ts1,new Ast::LiteralExpr (new Ast::LiteralUndefined, position(ts))];
+                        var ndx = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
                         break;
                     default:
-                        var [ts1,ndx] = nullableTypeExpression (ts1);
+                        var ndx = nullableTypeExpression ();
                         break;
                     }
                     nd1.push (ndx);
                 }
             }
 
-            exit ("Parser::elementTypeList ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -3437,21 +3154,17 @@ use namespace intrinsic;
 
         */
 
-        function typeExpressionList (ts: TOKENS)
-            //            : [TOKENS, [Ast::TYPE_EXPR]]
-        {
-            enter("Parser::typeExpressionList ", ts);
-
+        function typeExpressionList () /* : [Ast::TYPE_EXPR] */ {
             var nd1 = [];
-            var [ts1,ndx] = nullableTypeExpression (ts);
+            var ndx = nullableTypeExpression ();
             nd1.push (ndx);
-            while (hd (ts1) === Token::Comma) {
-                var [ts1,ndx] = nullableTypeExpression (tl (ts1));
+            while (hd () === Token::Comma) {
+                next();
+                var ndx = nullableTypeExpression ();
                 nd1.push (ndx);
             }
 
-            exit ("Parser::typeExpressionList ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         // STATEMENTS
@@ -3478,201 +3191,121 @@ use namespace intrinsic;
 
         */
 
-        function statement (ts: TOKENS, tau: TAU, omega: OMEGA)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::statement ", ts);
+        function statement (tau: TAU, omega: OMEGA) : Ast::STMT {
+            var stmt;
 
-            switch (hd(ts)) {
+            switch (hd()) {
             case Token::If:
-                var [ts2,nd2] = ifStatement (ts,omega);
+                stmt = ifStatement (omega);
                 break;
             case Token::While:
-                var [ts2,nd2] = whileStatement (ts,omega);
+                stmt = whileStatement (omega);
                 break;
             case Token::For:
-                var [ts2,nd2] = forStatement (ts,omega);
+                stmt = forStatement (omega);
                 break;
             case Token::Do:
-                var [ts1,nd1] = doStatement (ts,omega);
-                var [ts2,nd2] = [semicolon(ts1,omega),nd1];
+                stmt = doStatement (omega);
+                semicolon(omega);
                 break;
             case Token::Return:
-                var [ts1,nd1] = returnStatement (ts);
-                var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                stmt = returnStatement ();
+                semicolon (omega);
                 break;
             case Token::Break:
-                var [ts1,nd1] = breakStatement (ts);
-                var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                stmt = breakStatement ();
+                semicolon (omega);
                 break;
             case Token::Continue:
-                var [ts1,nd1] = continueStatement (ts);
-                var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                stmt = continueStatement ();
+                semicolon (omega);
                 break;
             case Token::LeftBrace:
-                var [ts1,nd1] = block (ts, tau);
-                var [ts2,nd2] = [ts1,new Ast::BlockStmt (nd1)];
+                stmt = new Ast::BlockStmt ( block (tau) );
                 break;
             case Token::Switch:
-                switch (hd2 (ts)) {
-                case Token::Type:
-                    var [ts2,nd2] = switchTypeStatement (ts);
-                    break;
-                default:
-                    var [ts2,nd2] = switchStatement (ts);
-                    break;
-                }
+                if (hd2 () === Token::Type)
+                    stmt = switchTypeStatement ();
+                else
+                    stmt = switchStatement ();
                 break;
             case Token::Throw:
-                var [ts1,nd1] = throwStatement (ts);
-                var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                stmt = throwStatement ();
+                semicolon (omega);
                 break;
             case Token::Try:
-                var [ts2,nd2] = tryStatement (ts);
+                stmt = tryStatement ();
                 break;
             case Token::With:
-                var [ts2,nd2] = withStatement (ts, omega);
+                stmt = withStatement (omega);
                 break;
             default:
-                if (hd (ts) == Token::Identifier && hd2 (ts) == Token::Colon) {
-                    var [ts2,nd2] = labeledStatement (ts);
-                }
+                if (hd () == Token::Identifier && hd2 () == Token::Colon)
+                    stmt = labeledStatement ();
                 else {
-                    let [ts1,nd1] = expressionStatement (ts);
-                    var [ts2,nd2] = [semicolon (ts1,omega),nd1];
+                    stmt = expressionStatement ();
+                    semicolon (omega);
                 }
                 break;
             }
 
-            exit("Parser::statement ", ts2);
-            return [ts2,nd2];
+            return stmt
         }
 
-        function substatement (ts: TOKENS, omega: OMEGA)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::substatement ", ts);
-
-            switch (hd(ts)) {
+        function substatement (omega: OMEGA) : Ast::STMT {
+            switch (hd()) {
             case Token::SemiColon:
-                var [ts1,nd1] = [tl (ts), new Ast::EmptyStmt];
+                next();
+                var nd1 = new Ast::EmptyStmt;
                 break;
             default:
-                var [ts1,nd1] = statement (ts,localBlk,omega);
+                var nd1 = statement (localBlk,omega);
                 break;
             }
 
-            exit("Parser::substatement ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
-        var logicalLn = 0;
-        function countLn () {
-            ++logicalLn;
-        }
-
-        function printLn (ts:TokenStream) {
-            enter ("printLn ",ts.n/4);
-            if (coordList.length <= ts.n/4) {
-                //print("line eos");
-            }
-            else {
-                let coord = coordList[ts.n/4];
-                //print ("ln ",coord[0]+1," ",logicalLn);
-                //print ("ln "+(coord[0]+1));
-            }
-            exit ("printLn");
-        }
-
-        function newline (ts: TOKENS)
-            : boolean
-        {
-            let offset = ts.n/4;
-
-            if (offset == 0)
-                return true;  // first token, so follows newline, but whose asking?
-
-            //print ("ts.ts.position",ts.ts.position);
-            //print ("offset ",offset);
-            //print ("coordList",coordList);
-            //print ("coordList.length",coordList.length);
-            let coord = coordList[offset];
-            let prevCoord = coordList[offset-1];
-            //print("coord=",coord);
-            //print("prevCoord=",prevCoord);
-
-            if(coord[0] != prevCoord[0]) // do line coords match?
-                return true;
-            else 
-                return false;
-        }
-        function position(ts:TOKENS) 
-            //: POS?
-        {
-            let offset = ts.n/4;
-            if( offset < coordList.length ) {
-                return {line:(coordList[offset-1][0])};
-            }
-            else
-                return null;
-        }
-
-        function semicolon (ts: TOKENS, omega: OMEGA)
-            : [TOKENS]
-        {
-            enter("Parser::semicolon ", ts);
-
+        function semicolon (omega: OMEGA) {
             switch (omega) {
             case fullStmt:
-                switch (hd (ts)) {
+                switch (hd ()) {
                 case Token::SemiColon:
-                    // print ("semicolon found");
-                    var ts1 = tl (ts);
-                    break;
+                    next();
+                    return;
                 case Token::EOS:
                 case Token::RightBrace:
-                    var ts1 = ts;
-                    break;
+                    // Inserting it
+                    return;
                 default:
-                    if (newline (ts)) { 
-                        var ts1=ts; 
-                        //print ("inserting semicolon") 
-                    }
-                    else
+                    if (!newline ())
                         Parse::syntaxError(this, "Expecting semicolon");
-                    break;
+                    // Inserting it
+                    return;
                 }
-                break;
+
             case abbrevStmt:  // Abbrev, ShortIf
-                //print("abbrevStmt");
-                switch (hd (ts)) {
+                switch (hd ()) {
                 case Token::SemiColon:
-                    var ts1 = tl (ts);
-                    break;
+                    next();
+                    return;
                 default:
-                    var ts1 = ts;
-                    break;
+                    // Inserting it
+                    return;
                 }
-                break;
+
             default:
                 Parse::internalError(this, "Unhandled statement mode " + omega);
             }
-
-            exit("Parser::semicolon ", ts1);
-            return ts1;
         }
 
-        function labeledStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::labeledStatement ", ts);
+        function labeledStatement () : Ast::STMT {
+            var label = identifier ();
+            eat(Token::Colon);
+            var stmt = substatement(FullStmt);
 
-            var [ts1, label] = identifier (ts);
-            var [ts2, stmt] = substatement(eat (ts1, Token::Colon), FullStmt);
-
-            exit("Parser::labeledStatement ", ts2);
             addLabel(label, stmt);
-            return [ts2, new Ast::LabeledStmt(label, stmt)];
+            return new Ast::LabeledStmt(label, stmt);
 
             function addLabel(label, stmt) {
                 use namespace Ast;
@@ -3700,116 +3333,69 @@ use namespace intrinsic;
             }
         }
 
-        function expressionStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::expressionStatement ", ts);
+        function expressionStatement () : Ast::STMT
+            new Ast::ExprStmt (listExpression (allowIn));
 
-            var [ts1,nd1] = listExpression (ts,allowIn);
+        function returnStatement () : Ast::STMT {
+            eat (Token::Return);
 
-            exit("Parser::expressionStatement ", ts1);
-            return [ts1, new Ast::ExprStmt (nd1)];
-        }
+            var expr;
 
-        function returnStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::returnStatement ", ts);
-
-            ts = eat (ts, Token::Return);
-
-            switch (hd (ts)) {
+            switch (hd ()) {
+            case Token::EOS:
             case Token::SemiColon:
             case Token::RightBrace:
-                var [ts1,nd1] = [ts,null];
+                expr = null;
                 break;
+
             default:
-                if (newline(ts)) {
-                    var [ts1,nd1] = [ts,null];
-                }
-                else {
-                    var [ts1,nd1] = listExpression (ts,allowIn);
-                }
+                if (newline())
+                    expr = null;
+                else
+                    expr = listExpression (allowIn);
                 break;
             }
 
-            exit("Parser::returnStatement ", ts1);
-            return [ts1, new Ast::ReturnStmt (nd1)];
+            return new Ast::ReturnStmt (expr);
         }
 
-        function breakStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::breakStatement ", ts);
+        function breakStatement () : Ast::STMT
+            new Ast::BreakStmt( breakOrContinueLabel(Token::Break) );
 
-            ts = eat (ts, Token::Break);
-            switch (hd (ts)) {
+        function continueStatement () : Ast::STMT
+            new Ast::ContinueStmt( breakOrContinueLabel(Token::Continue) );
+
+        function breakOrContinueLabel(tok) {
+            eat (tok);
+            switch (hd ()) {
             case Token::SemiColon:
-                var [ts1,nd1] = [tl (ts),null];
-                break;
-            case Token::RightBrace:
-                var [ts1,nd1] = [ts,null];
-                break;
-            default:
-                if (newline(ts)) {
-                    var [ts1,nd1] = [ts,null];
-                }
-                else {
-                    var [ts1,nd1] = identifier (ts);
-                } 
-                break;
-            }
+                next();
+                return null;
 
-            exit("Parser::breakStatement ", ts1);
-            return [ts1, new Ast::BreakStmt (nd1)];
+            case Token::EOS:
+            case Token::RightBrace:
+                return null;
+
+            default:
+                if (newline())
+                    return null;
+
+                return identifier ();
+            }
         }
 
-        function continueStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::continueStatement ", ts);
+        function ifStatement (omega) : Ast::STMT {
+            var test=null, consequent=null, alternate=null;
 
-            ts = eat (ts, Token::Continue);
-            switch (hd (ts)) {
-            case Token::SemiColon:
-                var [ts1,nd1] = [tl (ts),null];
-                break;
-            case Token::RightBrace:
-                var [ts1,nd1] = [ts,null];
-                break;
-            default:
-                if (newline(ts)) {
-                    var [ts1,nd1] = [ts,null];
-                }
-                else {
-                    var [ts1,nd1] = identifier (ts);
-                } 
-                break;
+            eat (Token::If);
+            test = parenListExpression ();
+            consequent = substatement (omega);
+            if ( hd () === Token::Else) {
+                eat (Token::Else);
+                alternate  = substatement (omega);
             }
 
-            exit("Parser::continueStatement ", ts1);
-            return [ts1, new Ast::ContinueStmt (nd1)];
-        }
-
-        function ifStatement (ts: TOKENS, omega)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::ifStatement ", ts);
-
-            ts = eat (ts,Token::If);
-            var [ts1,nd1] = parenListExpression (ts);
-            var [ts2,nd2] = substatement (ts1, omega);
-            switch (hd (ts2)) {
-            case Token::Else:
-                var [ts3,nd3] = substatement (tl (ts2), omega);
-                break;
-            default:
-                var [ts3,nd3] = [ts2,null];
-                break;
-            }
-
-            exit("Parser::ifStatement ", ts3);
-            return [ts3, new Ast::IfStmt (nd1,nd2,nd3)];
+            return new Ast::IfStmt (test, consequent, alternate);
         }
 
         /*
@@ -3819,17 +3405,12 @@ use namespace intrinsic;
 
         */
 
-        function whileStatement (ts: TOKENS, omega)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::whileStatement ", ts);
-
-            ts = eat (ts,Token::While);
-            var [ts1,nd1] = parenListExpression (ts);
-            var [ts2,nd2] = substatement (ts1, omega); 
+        function whileStatement (omega) : Ast::STMT {
+            eat (Token::While);
+            var test = parenListExpression ();
+            var body = substatement (omega); 
  
-            exit("Parser::whileStatement ", ts2);
-            return [ts2, new Ast::WhileStmt (nd1,nd2)];
+            return new Ast::WhileStmt (test, body);
         }
 
         /*
@@ -3839,18 +3420,13 @@ use namespace intrinsic;
 
         */
 
-        function doStatement (ts: TOKENS, omega) 
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::doStatement ", ts);
-
-            ts = eat (ts,Token::Do);
-            var [ts1,body] = substatement (ts, omega); 
-            ts = eat(ts1,Token::While);
-            var [ts2,test] = parenListExpression (ts);
+        function doStatement (omega) : Ast::STMT {
+            eat (Token::Do);
+            var body = substatement (omega); 
+            eat(Token::While);
+            var test = parenListExpression ();
  
-            exit("Parser::doStatement ", ts2);
-            return [ts2, new Ast::DoWhileStmt (test,body)]; // same order of args to constructor as 'while'
+            return new Ast::DoWhileStmt (test,body); // same order of args to constructor as 'while'
         }
 
         /*
@@ -3862,46 +3438,42 @@ use namespace intrinsic;
             
         */
 
-        function forStatement (ts: TOKENS, omega: OMEGA)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::forStatement ", ts);
-
+        function forStatement (omega: OMEGA) : Ast::STMT {
             cx.enterLetBlock ();
 
             var is_each = false;
             
-            ts = eat (ts,Token::For);
-            if( hd(ts) == Token::Each )
+            eat (Token::For);
+            if( hd() == Token::Each )
             {
-                ts = eat(ts, Token::Each);
+                eat(Token::Each);
                 is_each = true;
             }
-            ts = eat (ts,Token::LeftParen);
-            var [ts1,nd1] = forInitialiser (ts);
-            if (hd (ts1) == Token::In) {
-                ts1 = tl (ts1);
-                var [ts2,objexpr] = listExpression (ts1, allowIn);
-                ts2 = eat (ts2,Token::RightParen);
-                var [ts3,body] = substatement (ts2, omega); 
+            eat (Token::LeftParen);
+            var init = forInitialiser ();
+            if (hd () == Token::In) {
+                eat (Token::In);
+                var objexpr = listExpression (allowIn);
+                eat (Token::RightParen);
+                var body = substatement (omega); 
                 
                 var head = cx.exitLetBlock ();
                 
-                exit("Parser::forStatement ", ts3);
-                return [ts3, new Ast::ForInStmt (head,nd1,objexpr,body,is_each)];
+                return new Ast::ForInStmt (head,init,objexpr,body,is_each);
             }
             else {
-                ts1 = eat (ts1,Token::SemiColon);
-                var [ts2,nd2] = optionalExpression (ts1);
-                ts2 = eat (ts2,Token::SemiColon);
-                var [ts3,nd3] = optionalExpression (ts2);
-                ts3 = eat (ts3,Token::RightParen);
-                var [ts4,nd4] = substatement (ts3, omega); 
+                if (is_each)
+                    Parse::syntaxError(this, "'for each' requires 'in' style loop");
+                eat (Token::SemiColon);
+                var test = optionalExpression ();
+                eat (Token::SemiColon);
+                var update = optionalExpression ();
+                eat (Token::RightParen);
+                var body = substatement (omega); 
                 
                 var head = cx.exitLetBlock ();
                 
-                exit("Parser::forStatement ", ts4);
-                return [ts4, new Ast::ForStmt (head,nd1,nd2,nd3,nd4)];
+                return new Ast::ForStmt (head,init,test,update,body);
             }
         }
 
@@ -3918,35 +3490,32 @@ use namespace intrinsic;
 
         */
 
-        function forInitialiser (ts: TOKENS)
-            : [TOKENS, Ast::EXPR?]
-        {
-            enter("Parser::forInitialiser ", ts);
-
-            switch (hd (ts)) {
+        function forInitialiser () : Ast::EXPR? {
+            var init = null;
+            switch (hd ()) {
             case Token::SemiColon:
-                var [ts1,nd1] = [ts,null];
                 break;
+
             case Token::Const:
             case Token::Let:
             case Token::Var:
-                var [ts1,nd1] = variableDefinition (ts,noIn,localBlk,cx.pragmas.defaultNamespace,false,false);
+                init = variableDefinition (noIn,localBlk,cx.pragmas.defaultNamespace,false,false);
                 //assert (nd1.length==1);
-                switch type (nd1[0]) {
-                case (nd:Ast::ExprStmt) { nd1 = nd.Ast::expr }
+                switch type (init[0]) {
+                case (nd:Ast::ExprStmt) { 
+                    init = nd.Ast::expr;
+                }
                 case (nd:*) { 
                     Parse::syntaxError(this, "forInitialiser " + nd);
                 }
                 }
                 break;
             default:
-                var [ts1,nd1] = listExpression (ts,noIn);
+                init = listExpression (noIn);
                 break;
             }
-            //print ("nd1=",nd1);
  
-            exit("Parser::forInitialiser ", ts1);
-            return [ts1,nd1];
+            return init;
         }
 
         /*
@@ -3957,23 +3526,20 @@ use namespace intrinsic;
 
         */
 
-        function optionalExpression (ts: TOKENS)
-            : [TOKENS, Ast::EXPR?]
-        {
-            enter("Parser::optionalExpression ", ts);
+        function optionalExpression () : Ast::EXPR? {
+            var expr = null;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::SemiColon:
             case Token::RightParen:
-                var [ts1,nd1] = [ts,null]
                 break;
+
             default:
-                var [ts1,nd1] = listExpression (ts,noIn);
+                expr = listExpression (noIn);
                 break;
             }
  
-            exit("Parser::optionalExpression ", ts1);
-            return [ts1,nd1];
+            return expr;
         }
 
         /*
@@ -4001,52 +3567,48 @@ use namespace intrinsic;
 
         */
 
-        function switchStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::switchStatement ", ts);
+        function switchStatement () : Ast::STMT {
+            var expr=null, cases=null;
 
-            ts = eat (ts,Token::Switch);
-            var [ts1,nd1] = parenListExpression (ts);
-            ts1 = eat (ts1,Token::LeftBrace);
-            switch (hd (ts1)) {
+            eat (Token::Switch);
+            expr = parenListExpression ();
+
+            eat (Token::LeftBrace);
+            switch (hd ()) {
             case Token::Case:
             case Token::Default:
-                var [ts2,nd2] = caseElementsPrefix (ts1);
+                cases = caseElementsPrefix ();
                 break;
             default:
                 // do nothing
                 break;
             }
-            ts2 = eat (ts2,Token::RightBrace);
+            eat (Token::RightBrace);
 
-            exit("Parser::switchStatement ", ts2);
-            return [ts2, new Ast::SwitchStmt (nd1,nd2)];
+            return new Ast::SwitchStmt (expr, cases);
         }
 
-        function caseElementsPrefix (ts: TOKENS)
-            : [TOKENS, Ast::CASES]
-        {
-            enter("Parser::caseElements ", ts);
+        // FIXME: duplicate defaults could be handled here or in cogen, but
+        // we must be sure to handle it.
 
-            var ts1 = ts;
+        function caseElementsPrefix () : Ast::CASES {
             var nd1 = [];
-            while (hd (ts1) !== Token::RightBrace) {
-                switch (hd (ts1)) {
+            while (hd () !== Token::RightBrace) {
+                switch (hd ()) {
                 case Token::Case:
                 case Token::Default:
-                    var [ts1,ndx] = caseLabel (ts1);
+                    var ndx = caseLabel ();
                     nd1.push (new Ast::Case (ndx,[]));
                     break;
                 default:
-                    var [ts1,ndx] = directive (ts1,localBlk,fullStmt);  // 'abbrev' is handled by RightBrace check in head
-                    for (var i=0; i<ndx.length; ++i) nd1[nd1.length-1].Ast::stmts.push (ndx[i]);
+                    var ndx = directive (localBlk,fullStmt);  // 'abbrev' is handled by RightBrace check in head
+                    for (var i=0; i<ndx.length; ++i) 
+                        nd1[nd1.length-1].Ast::stmts.push (ndx[i]);
                     break;
                 }
             }
 
-            exit("Parser::caseElementsPrefix ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -4057,98 +3619,69 @@ use namespace intrinsic;
 
         */
 
-        function caseLabel (ts: TOKENS)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::caseLabel ", ts);
-            countLn ();
-            printLn (ts);
+        function caseLabel () : Ast::EXPR? {
+            var expr = null;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::Case:
-                var [ts1,nd1] = listExpression (tl (ts),allowIn);
+                next();
+                expr = listExpression (allowIn);
                 break;
             case Token::Default:
-                var [ts1,nd1] = [tl (ts),null];
+                next();
                 break;
             default:
                 Parse::syntaxError(this, "caseLabel expecting case");
             }
+            eat (Token::Colon);
 
-            ts1 = eat (ts1,Token::Colon);
-
-            exit("Parser::caseLabel ", ts1);
-            return [ts1,nd1];
+            return expr;
         }
 
-        function throwStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::throwStatement ", ts);
-
-            ts = eat (ts, Token::Throw);
-            var [ts1,nd1] = listExpression (ts,allowIn);
-
-            exit("Parser::throwStatement ", ts1);
-            return [ts1, new Ast::ThrowStmt (nd1)];
+        function throwStatement () : Ast::STMT {
+            eat (Token::Throw);
+            return new Ast::ThrowStmt( listExpression (allowIn) );
         }
 
-        function tryStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::tryStatement ", ts);
+        function tryStatement () : Ast::STMT {
+            eat (Token::Try);
 
-            ts = eat (ts, Token::Try);
+            var tryblock = block (localBlk);
+            var catchblocks = catches ();
+            var finallyblock = null;
 
-            var [ts1,nd1] = block (ts,localBlk);
-            var [ts2,nd2] = catches (ts1);
-            switch (hd (ts2)) {
-            case Token::Finally:
-                var [ts3,nd3] = block (tl (ts2),localBlk);
-                break;
-            default:
-                var [ts3,nd3] = [ts2,null];
-                break;
+            if ( hd () === Token::Finally ) {
+                cx.topFunction().uses_finally = true;
+                next();
+                finallyblocks = block (localBlk);
             }
 
-            exit("Parser::tryStatement ", ts3);
-            return [ts3, new Ast::TryStmt (nd1,nd2,nd3)];
+            return new Ast::TryStmt (tryblock,catchblocks,finallyblock);
         }
 
-        function catches (ts: TOKENS)
-            : [TOKENS,Ast::CATCHES]
-        {
-            enter("Parser::catches ", ts);
+        function catches () : Ast::CATCHES {
+            var catchblocks = [];
 
-            var ts1 = ts;
-            var nd1 = [];
-            while (hd (ts1)===Token::Catch) {
-                [ts1,ndx] = catchClause (tl (ts1));
-                nd1.push (ndx);
+            while (hd () === Token::Catch) {
+                cx.topFunction().uses_catch = true;
+                next();
+                catchblocks.push (catchClause ());
             }
 
-            exit("Parser::catches ", ts1);
-            return [ts1,nd1];
+            return catchblocks;
         }
 
-        function catchClause (ts: TOKENS)
-            : [TOKENS,Ast::CATCH]
-        {
-            enter("Parser::catchClause ", ts);
-            countLn ();
-            printLn (ts);
+        function catchClause () : Ast::CATCH {
+            eat (Token::LeftParen);
+            var catchvar = parameter ();
+            eat (Token::RightParen);
+            var catchblock = block (localBlk);
 
-            ts = eat (ts,Token::LeftParen);
-            var [ts1,nd1] = parameter (ts);
-            ts1 = eat (ts1,Token::RightParen);
-            var [ts2,nd2] = block (ts1,localBlk);
-
-            var [k,[p,t]] = nd1;
+            var [k,[p,t]] = catchvar;
             var [f,i] = desugarBindingPattern (p, t, new Ast::GetParam (0), Ast::noNS, Ast::varInit, false);
             let head = new Ast::Head (f,[i]);
 
-            exit("Parser::catchClause ", ts2);
-            return [ts2,new Ast::Catch (head,nd2)];
+            return new Ast::Catch (head,catchblock);
         }
 
         /*
@@ -4158,15 +3691,14 @@ use namespace intrinsic;
 
         */
 
-        function withStatement (ts: TOKENS, omega: OMEGA)
-            : [TOKENS,Ast::STMT]
-        {
+        function withStatement (omega: OMEGA) : Ast::STMT {
             // Only ES3-style with for now
 
-            ts = eat (ts, Token::With);
-            var [ts1, expr] = parenListExpression (ts);
-            var [ts2, body] = substatement (ts1, omega);
-            return [ts2, new Ast::WithStmt (expr, body)];
+            eat (Token::With);
+            cx.topFunction().uses_with = true;
+            var expr = parenListExpression ();
+            var body = substatement (omega);
+            return new Ast::WithStmt (expr, body);
         }
 
         /*
@@ -4183,21 +3715,16 @@ use namespace intrinsic;
 
         */
 
-        function switchTypeStatement (ts: TOKENS)
-            : [TOKENS, Ast::STMT]
-        {
-            enter("Parser::switchTypeStatement ", ts);
+        function switchTypeStatement () : Ast::STMT {
+            eat (Token::Switch);
+            eat (Token::Type);
+            var expr  = typedExpression ();
+            var [e,t] = expr;
+            eat (Token::LeftBrace);
+            var typecases = typeCases ();
+            eat (Token::RightBrace);
 
-            ts = eat (ts,Token::Switch);
-            ts = eat (ts,Token::Type);
-            var [ts1,nd1] = typedExpression (ts);
-            var [e,t] = nd1;
-            ts1 = eat (ts1,Token::LeftBrace);
-            var [ts2,nd2] = typeCases (ts1);
-            ts2 = eat (ts2,Token::RightBrace);
-
-            exit("Parser::switchTypeStatement ", ts2);
-            return [ts2, new Ast::SwitchTypeStmt (e,t,nd2)];
+            return new Ast::SwitchTypeStmt (e,t,typecases);
         }
 
         /*
@@ -4208,41 +3735,31 @@ use namespace intrinsic;
 
         */
 
-        function typedExpression (ts: TOKENS)
-            : [TOKENS,[Ast::EXPR,Ast::TYPE_EXPR]]
-        {
-            enter("Parser::typedExpression ", ts);
-
-            var [ts1,nd1] = parenListExpression (ts);
-            switch (hd (ts1)) {
+        function typedExpression () : [Ast::EXPR,Ast::TYPE_EXPR] {
+            var expr = parenListExpression ();
+            var texpr = null;
+            switch (hd ()) {
             case Token::Colon:
-                var [ts2,nd2] = nullableTypeExpression (tl (ts1));
+                next();
+                var texpr = nullableTypeExpression ();
                 break;
             default:
-                var [ts2,nd2] = [ts1,Ast::anyType];
+                var texpr = Ast::anyType;
                 break;
             }
 
-            exit("Parser::typedExpression ", ts2);
-            return [ts2,[nd1,nd2]];
+            return [expr,texpr];
         }
 
-        function typeCases (ts: TOKENS)
-            : [TOKENS,Ast::CATCHES]
-        {
-            enter("Parser::typeCases ", ts);
-            countLn ();
-            printLn (ts);
+        function typeCases () : Ast::CATCHES {
+            var cases = [];
 
-            var ts1 = ts;
-            var nd1 = [];
-            while (hd (ts1)==Token::Case) {
-                [ts1,ndx] = catchClause (tl (ts1));
-                nd1.push (ndx);
+            while (hd () === Token::Case) {
+                next();
+                cases.push (catchClause () );
             }
 
-            exit("Parser::typeCases ", ts1);
-            return [ts1,nd1];
+            return cases;
         }
 
         // DEFINITIONS
@@ -4259,12 +3776,8 @@ use namespace intrinsic;
 
         */
 
-        function variableDefinition (ts: TOKENS, beta: BETA, tau: TAU, ns, isPrototype, isStatic)
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::variableDefinition ", ts);
-
-            let [ts1,nd1] = variableDefinitionKind (ts);
+        function variableDefinition (beta: BETA, tau: TAU, ns, isPrototype, isStatic) : Ast::STMTS {
+            let nd1 = variableDefinitionKind ();
 
             switch (nd1) {
             case Ast::letConstTag:
@@ -4287,7 +3800,7 @@ use namespace intrinsic;
                 Parse::syntaxError(this, "variableDefinition kind " + nd1);
             }
 
-            let [ts2,nd2] = variableBindingList (ts1, beta, ns, it, ro);
+            let nd2 = variableBindingList (beta, ns, it, ro);
             let [fxtrs,exprs] = nd2;
 
             switch (nd1) {
@@ -4310,8 +3823,7 @@ use namespace intrinsic;
                 }
             }
 
-            exit("Parser::variableDefinition ", ts2);
-            return [ts2,stmts];
+            return stmts;
         }
 
         /*
@@ -4324,28 +3836,28 @@ use namespace intrinsic;
 
         */
 
-        function variableDefinitionKind (ts: TOKENS)
-            : [TOKENS, Ast::VAR_DEFN_TAG]
-        {
-            enter("Parser::variableDefinitionKind ", ts);
-
-            switch (hd (ts)) {
+        function variableDefinitionKind () : Ast::VAR_DEFN_TAG {
+            switch (hd ()) {
             case Token::Const:
-                var [tsx,ndx] = [tl (ts), Ast::constTag];
+                next();
+                var ndx = Ast::constTag;
                 break;
             case Token::Var:
-                var [tsx,ndx] = [tl (ts), Ast::varTag];
+                next();
+                var ndx = Ast::varTag;
                 break;
             case Token::Let:
-                switch (hd2 (ts)) {
+                next();
+                switch (hd2 ()) {
                 case Token::Const:
-                    var [tsx,ndx] = [tl (tl (ts)), Ast::letConstTag];
+                    next();
+                    var ndx = Ast::letConstTag;
                     break;
                 case Token::Function:
                     Parse::syntaxError(this, "variableDefinitionKind after let");
                     break;
                 default:
-                    var [tsx,ndx] = [tl (ts), Ast::letVarTag];
+                    var ndx = Ast::letVarTag;
                     break;
                 }
                 break;
@@ -4354,8 +3866,7 @@ use namespace intrinsic;
                 break;
             }
 
-            exit("Parser::variableDefinitionKind ", hd(tsx));
-            return [tsx,ndx];
+            return ndx;
         }
 
         /*
@@ -4373,33 +3884,28 @@ use namespace intrinsic;
 
         */
 
-        function variableBindingList (ts: TOKENS, beta: BETA, ns: Ast::NAMESPACE, 
-                                      it: Ast::INIT_TARGET, ro: boolean )
-            : [TOKENS, [Ast::FIXTURES, Ast::EXPRS]]
-        {
-            enter("Parser::variableBindingList ", ts);
-
-            var [ts1,nd1] = variableBinding (ts, beta);
-            var [ts2,nd2] = variableBindingListPrime (ts1);
+        function variableBindingList (beta: BETA, ns: Ast::NAMESPACE, it: Ast::INIT_TARGET, ro: boolean ) : [Ast::FIXTURES, Ast::EXPRS] {
+            var nd1 = variableBinding (beta);
+            var nd2 = variableBindingListPrime ();
 
             var [f1,i1] = nd1;  // FIXME: fold into patterns above when it works in the RI
             var [f2,i2] = nd2;
 
-            for (let i=0; i<f2.length; ++i) f1.push (f2[i]);  // FIXME: use concat when it works in the RI
-            for (let i=0; i<i2.length; ++i) i1.push (i2[i]);
+            // FIXME: use concat when it works in the RI
+            for (let i=0; i<f2.length; ++i)
+                f1.push (f2[i]);
 
-            exit ("Parser::variableBindingList ", ts2);
-            return [ts2,[f1,i1]];
+            for (let i=0; i<i2.length; ++i)
+                i1.push (i2[i]);
 
-            function variableBindingListPrime (ts: TOKENS)
-                : [TOKENS, [Ast::FIXTURES, Ast::EXPRS]]
-            {
-                enter("Parser::variableBindingListPrime ", ts);
-        
-                switch (hd (ts)) {
+            return [f1,i1];
+
+            function variableBindingListPrime () : [Ast::FIXTURES, Ast::EXPRS] {
+                switch (hd ()) {
                 case Token::Comma:
-                    var [ts1,nd1] = variableBinding (tl (ts), beta);
-                    var [ts2,nd2] = variableBindingListPrime (ts1);
+                    next();
+                    var nd1 = variableBinding (beta);
+                    var nd2 = variableBindingListPrime ();
 
                     var [f1,i1] = nd1;  // FIXME: fold into patterns above when it works in the RI
                     var [f2,i2] = nd2;
@@ -4408,31 +3914,26 @@ use namespace intrinsic;
                     for (let i=0; i<i2.length; ++i) i1.push (i2[i]);
                     break;
                 default:
-                    var [ts2,nd2] = [ts,[[],[]]];
+                    var nd2 = [[],[]];
                     var [f1,i1] = nd2;
                     break;
                 }
 
-                exit ("Parser::variableBindingListPrime ", ts2);
-                return [ts2,[f1,i1]];
+                return [f1,i1];
             }
 
-            function variableBinding (ts: TOKENS, beta: BETA)
-                : [TOKENS, [Ast::FIXTURES, Ast::EXPR]]
-            {
-                enter("Parser::variableBinding ", ts);
-                    
-                let [ts1,nd1] = typedPattern (ts,beta);
+            function variableBinding (beta: BETA) : [Ast::FIXTURES, Ast::EXPR] { // FIXME: this return type looks wrong
+                let nd1 = typedPattern (beta);
                 let [p,t] = nd1;
-                switch (hd (ts1)) {
+                switch (hd ()) {
                 case Token::Assign:
-                    let [ts2,nd2] = assignmentExpression (tl (ts1), beta);
-                    switch (hd (ts2)) {
+                    next();
+                    let nd2 = assignmentExpression (beta);
+                    switch (hd ()) {
                     case Token::In:
                         if (beta === noIn) {
                             // in a binding form
                             if (p is IdentifierPattern) {
-                                var tsx = ts2;
                                 var [f,i] = desugarBindingPattern (p,t,nd2,ns,it,ro);
                             }
                             else
@@ -4440,17 +3941,16 @@ use namespace intrinsic;
                             break;
                         } // else fall through
                     default:
-                        var [tsx,[f,i]] = [ts2,desugarBindingPattern (p,t,nd2,ns,it,ro)];
+                        var [f,i] = desugarBindingPattern (p,t,nd2,ns,it,ro);
                         break;
                     }
                     break;
                 default:
-                    switch (hd (ts1)) {
+                    switch (hd ()) {
                     case Token::In:
                         if (beta === noIn) {
                             // in a binding form
                             if (p is IdentifierPattern) {
-                                var tsx = ts1;
                                 // This is actually wrong, because it may overwrite a hoisted var
                                 // that should not be overwritten if the loop body is never entered
                                 var [f,i] = desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro);
@@ -4463,7 +3963,7 @@ use namespace intrinsic;
                         switch type (p) {
                         case (p: IdentifierPattern) {
                             // See comment above
-                            var [tsx,[f,i]] = [ts1,desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro)];
+                            var [f,i] = desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro);
                         }
                         case (x : *) {
                             Parse::syntaxError(this, "destructuring pattern without initializer");
@@ -4472,8 +3972,8 @@ use namespace intrinsic;
                         break;
                     }
                 }
-                exit("Parser::variableBinding ", tsx);
-                return [tsx,[f,[i]]];
+
+                return [f,[i]];
             }
         }
 
@@ -4536,81 +4036,74 @@ use namespace intrinsic;
 
         */
 
-        function functionDefinition (ts: TOKENS, tau: TAU, omega: OMEGA, kind, ns, isFinal, isOverride, isPrototype, isStatic, isAbstract)
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::functionDefinition ", ts);
+        function functionDefinition (tau: TAU, omega: OMEGA, kind, attrs: ATTRS) : Ast::STMTS {
+            eat (Token::Function);
 
-            cx.enterFunction();
+            cx.enterFunction(attrs);
 
-            ts = eat (ts, Token::Function);
+            var name = functionName ();
+            var signature = functionSignature ();
 
-            var [ts1,nd1] = functionName (ts);
-            var [ts2,nd2] = functionSignature (ts1);
+            var body;
 
             cx.enterVarBlock ();
-            var [ts3,nd3] = functionBody (ts2, allowIn, omega);
+            if (attrs.native) {
+                semicolon(fullStmt);
+                body = new Ast::Block(null, []);
+            }
+            else 
+                body = functionBody (allowIn, omega);
             var vars = cx.exitVarBlock ();
-            
             var attr = cx.exitFunction ();
 
-            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,hasRest:hasRest,numparams:numparams} = nd2;
-            var func = new Ast::Func (nd1,false,nd3,params,numparams,vars,defaults,resultType,attr);
+            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,numparams:numparams} = signature;
+            var func = new Ast::Func (name, body, params, numparams, vars, defaults, resultType, attr);
 
-            var name = new Ast::PropName ({ns:ns,id:nd1.ident});
-            var fxtr = new Ast::MethodFixture (func,Ast::anyType,true,isOverride,isFinal);
+            var name = new Ast::PropName ({ns:attrs.ns, id:name.ident});
+            var fxtr = new Ast::MethodFixture (func, Ast::anyType, true, attrs.override, attrs.final);
             switch (tau) {
             case classBlk:
-                cx.addVarFixtures ([[name,fxtr]], isStatic);
+                cx.addVarFixtures ([[name,fxtr]], attrs.static);
                 break;
             default:
                 cx.addVarFixtures ([[name,fxtr]]);
                 break;
             }
 
-            exit("Parser::functionDefinition ", ts3);
-            return [ts3, []];
+            return [];
         }
 
         /* ... */
-        function functionExpression (ts:TOKENS)
-            : [TOKENS,Ast::EXPR]
-        {
-            enter("Parser::functionExpression ",ts);
-            
-            cx.enterFunction();
+        function functionExpression () : Ast::EXPR {
+            var name = null;
 
-            ts = eat (ts, Token::Function);
-            if (hd (ts) == Token::Identifier) {
-                var [ts1,name] = functionName (ts);
-            }
-            else {
-                var [ts1,name] = [ts,null];
-            }
+            cx.enterFunction(defaultAttrs());
 
-            var [ts2,signature] = functionSignature (ts1);
+            var pos = position();
+            eat (Token::Function);
+            if (hd () == Token::Identifier)
+                name = functionName ();
+
+            var signature = functionSignature ();
 
             cx.enterVarBlock ();
-            var [ts3,body] = functionBody (ts2, AllowIn, FullStmt);
+            var body = functionBody (AllowIn, FullStmt);
             var vars = cx.exitVarBlock ();
 
             var attr = cx.exitFunction();
 
-            var { params:params, defaults:defaults, resultType:resultType, numparams:numparams } = signature;
-            var fnexpr = 
-                new Ast::LiteralExpr( new Ast::LiteralFunction(new Ast::Func(name, 
-                                                                             false, 
-                                                                             body, 
-                                                                             params, 
-                                                                             numparams,
-                                                                             vars, 
-                                                                             defaults, 
-                                                                             resultType,
-                                                                             attr )), 
-                                      position(ts3) );
+            var { params:params, numparams:numparams, defaults:defaults, resultType:resultType } = signature;
+            var fnexpr = new Ast::LiteralExpr( new Ast::LiteralFunction(new Ast::Func(name, 
+                                                                                      body, 
+                                                                                      params, 
+                                                                                      numparams,
+                                                                                      vars, 
+                                                                                      defaults, 
+                                                                                      resultType,
+                                                                                      attr)), 
+                                               pos);
 
-            exit("Parser::functionExpression ",ts3);
-            return [ts3, fnexpr];
+            return fnexpr;
         }
 
         /*
@@ -4620,40 +4113,39 @@ use namespace intrinsic;
 
         */
 
-        function constructorDefinition (ts: TOKENS, omega, ns)
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::constructorDefinition ", ts);
+        function constructorDefinition (omega, ns, attrs) : Ast::STMTS {
+            eat (Token::Function);
 
-            cx.enterFunction();
+            cx.enterFunction(attrs);
 
-            ts = eat (ts, Token::Function);
+            var name = identifier ();
+            var signature = constructorSignature ();
 
-            var [ts1,nd1] = identifier (ts);
-            var [ts2,nd2] = constructorSignature (ts1);
+            var body;
 
             cx.enterVarBlock ();
-            var [ts3,nd3] = functionBody (ts2, allowIn, omega);
+            if (attrs.native) {
+                semicolon(fullStmt);
+                body = new Ast::Block(null, []);
+            }
+            else
+                body = functionBody (allowIn, omega);
             var vars = cx.exitVarBlock ();
-
             var attr = cx.exitFunction();
 
-            var {params:params,defaults:defaults,hasRest:hasRest,settings:settings,superArgs:superArgs,numparams:numparams} = nd2;
+            var {params:params,defaults:defaults,settings:settings,superArgs:superArgs,numparams:numparams} = signature;
 
             // print ("superArgs=",superArgs);
             // print ("settings=",settings);
-            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:nd1},false,nd3,params,numparams,vars,defaults,Ast::voidType,attr);
+            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:name}, body, params, numparams, vars, defaults, Ast::voidType, attr);
             var ctor = new Ast::Ctor (settings,superArgs,func);
 
-            if (cx.ctor !== null) {
+            if (cx.ctor !== null)
                 Parse::syntaxError(this, "Constructor already defined");
-            }
 
             cx.ctor = ctor;
 
-            exit("Parser::constructorDefinition ", ts3);
-
-            return [ts3, []];
+            return [];
         }
 
         /*
@@ -4668,7 +4160,6 @@ use namespace intrinsic;
           , params : Ast::HEAD
           , paramTypes : [Ast::TYPE_EXPR]
           , defaults : [Ast::EXPR]
-          , hasRest: boolean
           , settings : [Ast::EXPR]
           , superArgs: [Ast::EXPR] }
 
@@ -4678,36 +4169,26 @@ use namespace intrinsic;
           , paramTypes : [Ast::TYPE_EXPR]
           , defaults : [Ast::EXPR]
           , returnType : Ast::TYPE_EXPR
-          , thisType : Ast::TYPE_EXPR?
-          , hasRest : boolean }
+          , thisType : Ast::TYPE_EXPR? }
 
 
-        function constructorSignature (ts: TOKENS)
-            : [TOKENS, CTOR_SIG]
-        {
-            enter("Parser::constructorSignature ", ts);
-
-            var [ts1,nd1] = typeParameters (ts);
-            ts1 = eat (ts1, Token::LeftParen);
-            var [ts2,nd2,hasRest,numparams] = parameters (ts1);
-            ts2 = eat (ts2, Token::RightParen);
-            var [ts3,settings,superArgs] = constructorInitialiser (ts2);
+        function constructorSignature () : CTOR_SIG {
+            var nd1 = typeParameters ();
+            eat (Token::LeftParen);
+            var [nd2,numparams] = parameters ();
+            eat (Token::RightParen);
+            var [settings,superArgs] = constructorInitialiser ();
 
             // Translate bindings and init steps into fixtures and inits (HEAD)
             let [[f,i],e,t] = nd2;
 
-            var ndx = { typeParams: []
-                      , params: new Ast::Head (f,i)
-                      , numparams: numparams
-                      , paramTypes: t
-                      , defaults: e
-                      , hasRest: hasRest
-                      , settings: settings
-                      , superArgs: superArgs };
-
-            exit("Parser::constructorSignature ", ts3);
-
-            return [ts3,ndx]
+            return { typeParams: []
+                     , params: new Ast::Head (f,i)
+                     , paramTypes: t
+                     , numparams: numparams
+                     , defaults: e
+                     , settings: settings
+                     , superArgs: superArgs };
         }
 
         /*
@@ -4728,40 +4209,38 @@ use namespace intrinsic;
 
         */
 
-        function constructorInitialiser (ts: TOKENS)
-            : [TOKENS, [Ast::EXPR], [Ast::EXPR]]
-        {
-            enter("Parser::constructorInitialiser ", ts);
-
-            switch (hd (ts)) {
+        function constructorInitialiser () : [[Ast::EXPR], [Ast::EXPR]] {
+            switch (hd ()) {
             case Token::Colon:
-                switch (hd2 (ts)) {
+                switch (hd2 ()) {
                 case Token::Super:
-                    var [ts1,nd1] = [tl (tl (ts)),[]]; // no settings
-                    var [ts2,nd2] = this.argumentList (ts1);
+                    next();
+                    next();
+                    var nd1 = []; // no settings
+                    var nd2 = this.argumentList ();
                     break;
                 default:
-                    var [ts1,nd1] = settingList (tl (ts));
-                    switch (hd (ts1)) {
+                    next();
+                    var nd1 = settingList ();
+                    switch (hd ()) {
                     case Token::Super:
-                        var [ts2,nd2] = this.argumentList (tl (ts1));
+                        next();
+                        var nd2 = this.argumentList ();
                         break;
                     default:
-                        var [ts2,nd2] = [ts1,[]];
+                        var nd2 = [];
                         break;
                     }
                     break;
                 }
                 break;
             default:
-                var ts2 = ts;
                 var nd1 = [];
                 var nd2 = [];
                 break;
             }
 
-            exit("Parser::constructorInitialiser ", ts2);
-            return [ts2,nd1,nd2];
+            return [nd1,nd2];
         }
 
 
@@ -4776,45 +4255,37 @@ use namespace intrinsic;
         
         */
 
-        function settingList (ts: TOKENS)
-            : [TOKENS, [Ast::EXPR]]
-        {
-            enter("Parser::settingList ", ts);
+        function settingList () : [Ast::EXPR] {
+            var nd1 = setting ();
+            var nd2 = settingListPrime ();
 
-            function settingListPrime (ts: TOKENS )
-                : [TOKENS,[Ast::EXPR]]
-            {
-                enter("Parser::settingListPrime ", ts);
-        
-                switch (hd (ts)) {
+            nd2.unshift (nd1);
+
+            return nd2;
+
+            function settingListPrime () : [Ast::EXPR] {
+                switch (hd ()) {
                 case Token::Comma:
-                    switch (hd2 (ts)) {
+                    eat(Token::Comma);
+                    switch (hd2 ()) {
                     case Token::Super:
-                        var [ts2,nd2] = [tl (ts), []];  // eat the comma
+                        // Leave it alone for the caller to consume; super calls are always last.
+                        var nd2 = [];
                         break;
                     default:
-                        var [ts1,nd1] = setting (tl (ts));
-                        var [ts2,nd2] = settingListPrime (ts1);
+                        var nd1 = setting ();
+                        var nd2 = settingListPrime ();
                         nd2.unshift (nd1);
                         break;
                     }
                     break;
                 default:
-                    var [ts2,nd2] = [ts,[]];
+                    var nd2 = [];
                     break;
                 }
 
-                exit ("Parser::settingListPrime ", ts2);
-                return [ts2,nd2];
+                return nd2;
             }
-
-            var [ts1,nd1] = setting (ts);
-            var [ts2,nd2] = settingListPrime (ts1);
-
-            nd2.unshift (nd1);
-
-            exit ("Parser::settingList ", ts2);
-            return [ts2,nd2];
         }
 
         /*
@@ -4835,20 +4306,15 @@ use namespace intrinsic;
 
         */
 
-        function setting (ts: TOKENS)
-            : [TOKENS, Ast::EXPR]
-        {
-            enter("Parser::setting ", ts);
+        function setting () : Ast::EXPR {
+            var nd1 = pattern (allowIn,allowExpr);
+            eat (Token::Assign);
+            var nd2 = assignmentExpression (allowIn);
 
-            var [ts1,nd1] = pattern (ts,allowIn,allowExpr);
-            ts1 = eat (ts1,Token::Assign);
-            var [ts2,nd2] = assignmentExpression (ts1,allowIn);
+            var [fxtrs,ndx] = desugarBindingPattern (nd1, Ast::anyType, nd2, null, Ast::instanceInit,null);
+            // FIXME: assert fxtrs is empty
 
-            var [tsx,[fxtrs,ndx]] = [ts2,desugarBindingPattern (nd1, Ast::anyType, nd2, null, Ast::instanceInit,null)];
-            // assert fxtrs is empty
-
-            exit("Parser::setting ", tsx);
-            return [tsx,ndx];
+            return ndx;
         }
 
         /*
@@ -4861,37 +4327,31 @@ use namespace intrinsic;
 
         */
 
-        function functionName (ts: TOKENS)
-            : [TOKENS, Ast::FUNC_NAME]
-        {
-            enter("Parser::functionName ", ts);
-
-            switch (hd (ts)) {
+        function functionName () : Ast::FUNC_NAME {
+            switch (hd ()) {
             case Token::Get:
-                var [ts1,nd1] = identifier (tl (ts));
-                var tsx = ts1;
+                next();
+                var nd1 = identifier ();
                 var ndx = {kind: new Ast::Get, ident: nd1};
                 break;
             case Token::Set:
-                var [ts1,nd1] = identifier (tl (ts));
-                var tsx = ts1;
+                next();
+                var nd1 = identifier ();
                 var ndx = {kind: new Ast::Set, ident: nd1};
                 break;
             case Token::Plus:
             case Token::Minus:
                 // FIXME add other operators here
-                Parse::internalError(this, "Unimplemented: operator function");
+                // Won't be necessary if we don't support operator overloading
+                Parse::internalError(this, "No support for operators as function names");
                 break;
             default:
-                var [ts1,nd1] = identifier (ts);
-                var tsx = ts1;
+                var nd1 = identifier ();
                 var ndx = {kind: new Ast::Ordinary, ident: nd1};
                 break;
             }
 
-            exit("Parser::functionName ", ts1);
-
-            return [tsx,ndx]
+            return ndx;
         }
 
         /*
@@ -4906,41 +4366,32 @@ use namespace intrinsic;
 
         */
 
-        function functionSignature (ts: TOKENS)
-            : [TOKENS, FUNC_SIG]
-        {
-            enter("Parser::functionSignature ", ts);
-
-            var [ts1,nd1] = typeParameters (ts);
-            ts1 = eat (ts1, Token::LeftParen);
-            switch (hd (ts1)) {
+        function functionSignature () : FUNC_SIG {
+            var nd1 = typeParameters ();
+            eat (Token::LeftParen);
+            switch (hd ()) {
             case Token::This:
-                // FIXME
+                // FIXME implement this
                 Parse::internalError(this, "No support for 'this' annotation in parameter list");
                 break;
             default:
-                var [ts2,nd2,hasRest,numparams] = parameters (ts1);
+                var [nd2,numparams] = parameters ();
                 break;
             }
-            ts2 = eat (ts2, Token::RightParen);
-            var [ts3,nd3] = resultType (ts2);
+            eat (Token::RightParen);
+            var restype = resultType ();
 
             // Translate bindings and init steps into fixtures and inits (HEAD)
             let [[f,i],e,t] = nd2;
 
-            var ndx = { typeParams: []
-                      , params: new Ast::Head (f,i)
-                      , paramTypes: t
-                      , numparams: numparams
-                      , defaults: e
-                      , ctorInits: null
-                      , resultType: nd3
-                      , thisType: null
-                      , hasRest: hasRest };
-
-            exit("Parser::functionSignature ", ts3);
-
-            return [ts3,ndx]
+            return  { typeParams: []
+                    , params: new Ast::Head (f,i)
+                    , paramTypes: t
+                    , numparams: numparams
+                    , defaults: e
+                    , ctorInits: null
+                    , resultType: restype
+                    , thisType: null };
         }
 
         /*
@@ -4951,24 +4402,21 @@ use namespace intrinsic;
 
         */
 
-        function typeParameters (ts: TOKENS)
-            : [TOKENS, [Ast::IDENT]]
-        {
-            enter("Parser::typeParameters ", ts);
+        function typeParameters () : [Ast::IDENT] {
+            var tparams;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::LeftDotAngle:
-                ts = eat (ts, Token::LeftDotAngle);
-                var [ts1,nd1] = typeParameterList (ts);
-                ts1 = eat (ts1, Token::GreaterThan);
+                eat (Token::LeftDotAngle);
+                tparams = typeParameterList ();
+                eat (Token::GreaterThan);
                 break;
             default:
-                var [ts1,nd1] = [ts,[]];
+                tparams = [];
                 break;
             }
 
-            exit("Parser::typeParameters ", ts1);
-            return [ts1,nd1];
+            return tparams;
         }
 
         /*
@@ -4979,33 +4427,28 @@ use namespace intrinsic;
 
         */
 
-        function typeParameterList (ts: TOKENS)
-            : [TOKENS, [Ast::IDENT]]
-        {
-            enter("Parser::typeParameterList ", ts);
+        function typeParameterList () : [Ast::IDENT] {
+            var nd1 = identifier ();
+            var nd2 = typeParameterListPrime ();
 
-            function typeParameterListPrime (ts)
-                : [TOKENS, [Ast::IDENT]] {
+            nd2.unshift (nd1);
 
-                switch (hd (ts)) {
+            return nd2;
+
+            function typeParameterListPrime () : [Ast::IDENT] {
+                switch (hd ()) {
                 case Token::Comma:
-                    ts = eat (ts, Token::Comma);
-                    var [ts1,nd1] = identifier (ts);
-                    var [ts2,nd2] = typeParameterListPrime (ts1);
+                    eat (Token::Comma);
+                    var nd1 = identifier ();
+                    var nd2 = typeParameterListPrime ();
                     break;
                 default:
-                    var [ts2,nd2] = [ts,[]];
+                    var nd2 = [];
                     break;
                 }
             }
 
-            var [ts1,nd1] = identifier (ts);
-            var [ts2,nd2] = typeParameterListPrime (ts1);
-
-            nd2.unshift (nd1);
-
-            exit("Parser::typeParameterList ", ts2);
-            return [ts2,nd2];
+            return nd2;
         }
 
         /*
@@ -5016,26 +4459,18 @@ use namespace intrinsic;
 
         */
 
-        function parameters (ts: TOKENS)
-            : [TOKENS, [[Ast::FIXTURES, Ast::EXPRS], [Ast::EXPR], [Ast::TYPE_EXPR]], boolean, int]
-        {
-            enter("Parser::parameters ", ts);
-
-            switch (hd (ts)) {
+        function parameters () : [[[Ast::FIXTURES, Ast::EXPRS], [Ast::EXPR], [Ast::TYPE_EXPR]], int] {
+            switch (hd ()) {
             case Token::RightParen:
-                let b1 = [];
-                let i1 = [];
-                let e1 = [];
-                let t1 = [];
-                var [ts1,nd1,hasRest,numparams] = [ts,[[[],[]],e1,t1],false,0];
+                var nd1 = [[[],[]],[],[]];
+                var numparams = 0;
                 break;
             default:
-                var [ts1,nd1,hasRest,numparams] = nonemptyParameters (ts,0,false);
+                var [nd1,numparams] = nonemptyParameters (0,false);
                 break;
             }
 
-            exit("Parser::parameters ", ts1);
-            return [ts1,nd1,hasRest,numparams];
+            return [nd1,numparams];
         }
 
         /*
@@ -5047,28 +4482,25 @@ use namespace intrinsic;
 
         */
 
-        function nonemptyParameters (ts: TOKENS, n:int, initRequired)
-            : [TOKENS, [[Ast::FIXTURES,Ast::EXPRS], Ast::EXPRS, Ast::TYPE_EXPRS], boolean]
-        {
-            enter("Parser::nonemptyParameters ", ts);
-
-            var hasRest = false;
+        function nonemptyParameters (n:int, initRequired) : [[[Ast::FIXTURES,Ast::EXPRS], Ast::EXPRS, Ast::TYPE_EXPRS], int] {
+            var nd1;
             var numparams = 0;
 
-            switch (hd (ts)) {
+            switch (hd ()) {
             case Token::TripleDot:
-                var [ts1,nd1] = restParameter (ts,n);
-                hasRest = true;
-                numparams = 1;
+                cx.topFunction().uses_rest = true;
+                nd1 = restParameter (n);
+                //numparams = 1;
                 break;
+
             default:
-                var [ts1,nd1] = parameterInit (ts,n,initRequired);
+                nd1 = parameterInit (n,initRequired);
                 numparams = 1;
-                switch (hd (ts1)) {
+                switch (hd ()) {
                 case Token::Comma:
-                    ts1 = eat (ts1, Token::Comma);
+                    eat (Token::Comma);
                     let [[f1,i1],e1,t1] = nd1;
-                    var [ts2,nd2,hasRest,numparams2] = nonemptyParameters (ts1, n+1, e1.length!=0);
+                    var [nd2,numparams2] = nonemptyParameters (n+1, e1.length!=0);
                     let [[f2,i2],e2,t2] = nd2;
                     numparams += numparams2;
                     // FIXME when Array.concat works
@@ -5076,7 +4508,7 @@ use namespace intrinsic;
                     for (let i=0; i<i2.length; ++i) i1.push(i2[i]);
                     for (let i=0; i<e2.length; ++i) e1.push(e2[i]);
                     for (let i=0; i<t2.length; ++i) t1.push(t2[i]);
-                    var [ts1,nd1,hasRest] = [ts2,[[f1,i1],e1,t1],hasRest];
+                    nd1 = [[f1,i1],e1,t1];
                     break;
                 case Token::RightParen:
                     // nothing to do
@@ -5087,8 +4519,22 @@ use namespace intrinsic;
                 break;
             }
 
-            exit("Parser::nonemptyParameters ", ts1);
-            return [ts1,nd1,hasRest,numparams];
+            return [nd1,numparams];
+        }
+
+        function restParameter(param_number) : [[Ast::FIXTURES,Ast::EXPRS], Ast::EXPRS, Ast::TYPE_EXPRS] {
+            eat(Token::TripleDot);
+            var [fixtures, inits] =
+                desugarBindingPattern(simplePattern(noIn, noExpr), 
+                                      Ast::anyType, 
+                                      new Ast::GetParam(param_number), 
+                                      Ast::noNS, 
+                                      Ast::letInit, 
+                                      false);
+            fixtures.push([new Ast::TempName(param_number), 
+                           new Ast::ValFixture(Ast::anyType,false)]);
+
+            return [[fixtures, [inits]], [], [Ast::anyType]];
         }
 
         /*
@@ -5099,31 +4545,27 @@ use namespace intrinsic;
 
         */
 
-        function parameterInit (ts: TOKENS, n: int, initRequired)
-            : [TOKENS,[[Ast::FIXTURES,Ast::EXPRS], Ast::EXPRS, Ast::TYPE_EXPRS]]
-        {
-            enter("Parser::parameterInit ", ts);
+        function parameterInit (n: int, initRequired) : [[Ast::FIXTURES,Ast::EXPRS], Ast::EXPRS, Ast::TYPE_EXPRS] {
+            var nd1;
 
-            var [ts1,nd1] = parameter (ts);
-            switch (hd (ts1)) {
+            nd1 = parameter ();
+            switch (hd ()) {
             case Token::Assign:
-                ts1 = eat (ts1, Token::Assign);
-                var [ts2,nd2] = nonAssignmentExpression(ts1,allowIn);
-                nd2 = [nd2];
+                eat (Token::Assign);
+                var nd2 = [nonAssignmentExpression(allowIn)];
                 break;
             default:
-                if (initRequired) {
+                if (initRequired)
                     Parse::syntaxError(this, "Expecting default value expression");
-                }
-                var [ts2,nd2] = [ts1,[]];
+                var nd2 = [];
                 break;
             }
 
             var [k,[p,t]] = nd1;
             var [f,i] = desugarBindingPattern (p, t, new Ast::GetParam (n), Ast::noNS, Ast::letInit, false);
             f.push ([new Ast::TempName (n), new Ast::ValFixture (t,false)]); // temp for desugaring
-            exit("Parser::parameterInit ", ts2);
-            return [ts2,[[f,[i]],nd2,[t]]];
+
+            return [[f,[i]],nd2,[t]];
         }
 
         /*
@@ -5134,16 +4576,10 @@ use namespace intrinsic;
 
         */
 
-        function parameter (ts: TOKENS)
-            : [TOKENS, [Ast::VAR_DEFN_TAG, [PATTERN, Ast::TYPE_EXPR]]]
-        {
-            enter("Parser::parameter ", ts);
-
-            var [ts1,nd1] = parameterKind (ts);
-            var [ts2,nd2] = typedPattern (ts1,allowIn);
-
-            exit("Parser::parameter ", ts2);
-            return [ts2,[nd1,nd2]];
+        function parameter () : [Ast::VAR_DEFN_TAG, [PATTERN, Ast::TYPE_EXPR]] {
+            var nd1 = parameterKind ();
+            var nd2 = typedPattern (allowIn);
+            return [nd1,nd2];
         }
 
         /*
@@ -5154,23 +4590,18 @@ use namespace intrinsic;
 
         */
 
-        function parameterKind (ts: TOKENS)
-            : [TOKENS, Ast::VAR_DEFN_TAG]
-        {
-            enter("Parser::parameterKind ", ts);
-
-            switch (hd (ts)) {
+        function parameterKind () : Ast::VAR_DEFN_TAG {
+            switch (hd ()) {
             case Ast::Const:
-                ts = eat (ts, Ast::Const);
-                var [ts1,nd1] = [ts, new Ast::Const];
+                eat (Ast::Const);
+                var nd1 = new Ast::Const;
                 break;
             default:
-                var [ts1,nd1] = [ts, new Ast::Var];
+                var nd1 = new Ast::Var;
                 break;
             }
 
-            exit("Parser::parameterKind ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -5182,31 +4613,26 @@ use namespace intrinsic;
 
         */
 
-        function resultType (ts: TOKENS)
-            : [TOKENS, [Ast::IDENT]]
-        {
-            enter("Parser::resultType ", ts);
-
-            switch (hd (ts)) {
+        function resultType () : [Ast::IDENT] {
+            switch (hd ()) {
             case Token::Colon:
-                ts = eat (ts, Token::Colon);
-                switch (hd (ts)) {
+                eat (Token::Colon);
+                switch (hd ()) {
                 case Token::Void:
-                    ts = eat (ts, Token::Void);
-                    var [ts1,nd1] = [ts,new Ast::SpecialType (new Ast::VoidType)];
+                    eat (Token::Void);
+                    var nd1 = new Ast::SpecialType (new Ast::VoidType);
                     break;
                 default:
-                    var [ts1,nd1] = nullableTypeExpression (ts);
+                    var nd1 = nullableTypeExpression ();
                     break;
                 }
                 break;
             default:
-                var [ts1,nd1] = [ts,Ast::anyType];
+                var nd1 = Ast::anyType;
                 break;
             }
 
-            exit("Parser::resultType ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -5217,41 +4643,32 @@ use namespace intrinsic;
 
         */
 
-        function functionBody (ts: TOKENS, beta: BETA, omega)
-            : [TOKENS, Ast::BLOCK]
-        {
-            enter("Parser::functionBody ", ts);
-
-            switch (hd (ts)) {
+        function functionBody (beta: BETA, omega) : Ast::BLOCK {
+            switch (hd ()) {
             case Token::LeftBrace:
-                var [ts1,nd1] = block (ts,localBlk);
+                var nd1 = block (localBlk);
                 break;
             default:
-                var [ts1,nd1] = assignmentExpression (ts,beta);
-                ts1 = semicolon (ts1,omega);
+                var nd1 = assignmentExpression (beta);
+                semicolon (omega);
                 var nd1 = new Ast::Block (new Ast::Head ([],[]),[new Ast::ReturnStmt (nd1)]);
                 break;
             }
 
-            exit("Parser::functionBody ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
-        function classDefinition (ts: TOKENS, ns: Ast::NAMESPACE, isDynamic)
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::classDefinition ", ts);
+        function classDefinition (ns: Ast::NAMESPACE, isDynamic) : Ast::STMTS {
+            eat (Token::Class);
 
-            ts = eat (ts, Token::Class);
+            var nd1 = identifier ();
 
-            var [ts1,nd1] = identifier (ts);
-            // print ("class ",nd1);
-            var [ts2,nd2] = typeSignature (ts1);
-            var [ts3,nd3] = classInheritance (ts2);
+            var nd2 = typeSignature ();
+            var nd3 = classInheritance ();
             currentClassName = nd1;
             cx.enterVarBlock(); // Class
             cx.enterVarBlock (); // Instance
-            var [ts4,blck] = classBody (ts3);
+            var blck = classBody ();
             var ihead = cx.exitVarBlock (); // Instance
             var chead = cx.exitVarBlock (); // Class
             currentClassName = "";
@@ -5261,8 +4678,7 @@ use namespace intrinsic;
             var ctor = cx.ctor;
             if (ctor===null)
             {
-                cx.enterFunction();
-                let isNative = false;
+                cx.enterFunction(defaultAttrs());
                 let blck = new Ast::Block (new Ast::Head([],[]),[]);
                 let params = new Ast::Head([],[]);
                 let numparams = 0;
@@ -5270,7 +4686,7 @@ use namespace intrinsic;
                 let defaults = [];
                 let ty = Ast::anyType;
                 let attr = cx.exitFunction();
-                let func = new Ast::Func ({kind:new Ast::Ordinary,ident:nd1},isNative,blck,params,numparams,vars,defaults,ty,attr);
+                let func = new Ast::Func ({kind:new Ast::Ordinary,ident:nd1},blck,params,numparams,vars,defaults,ty,attr);
                 var ctor = new Ast::Ctor ([],[],func);
             }
             
@@ -5294,9 +4710,7 @@ use namespace intrinsic;
 
             var ss4 = [new Ast::ClassBlock (name,blck)];
 
-            exit("Parser::classDefinition ", ts4);
-
-            return [ts4, ss4];
+            return ss4;
         }
 
         /*
@@ -5307,70 +4721,43 @@ use namespace intrinsic;
 
         */
 
-        function typeSignature (ts: TOKENS)
-            : [TOKENS, [Ast::IDENT], boolean]
-        {
-            enter("Parser::className ", ts);
+        function typeSignature () : [[Ast::IDENT], boolean] {
+            var nd1 = typeParameters ();
 
-            var [ts1,nd1] = typeParameters (ts);
-
-            switch (hd (ts1)) {
+            switch (hd ()) {
             case Token::Not:
-                var [ts2,nd2] = [tl (ts1), true];
+                next();
+                var nd2 = true;
                 break;
             default:
-                var [ts2,nd2] = [ts1, false];
+                var nd2 = false;
                 break;
             }
 
-            exit("Parser::typeSignature ", ts2);
-
-            return [ts2,nd1,nd2];
+            return [nd1,nd2];
         }
 
-        function classInheritance (ts: TOKENS)
-            : [TOKENS, [Ast::IDENT_EXPR]]
-        {
-            enter("Parser::classInheritance ", ts);
+        function classInheritance () : [Ast::IDENT_EXPR, [Ast::IDENT_EXPR]] {
+            var nd1 = null;
+            var nd2;
 
-            switch (hd (ts)) {
-            case Token::Extends:
-                var [ts1,nd1] = primaryName (tl (ts));
-                switch (hd (ts)) {
-                case Token::Implements:
-                    var [ts2,nd2] = primaryNameList (tl (ts));
-                    break;
-                default:
-                    var [ts2,nd2] = [ts1,[]];
-                    break;
-                }
-                break;
-            case Token::Implements:
-                var [ts1,nd1] = [ts,[]];
-                var [ts2,nd2] = primaryNameList (tl (ts1));
-                break;
-            default:
-                var [ts1,nd1] = [ts,[]];
-                var [ts2,nd2] = [ts1,[]];
-                break;
+            if (hd () === Token::Extends) {
+                eat(Token::Extends);
+                nd1 = primaryName ();
             }
 
-            exit("Parser::classInheritance ", ts2);
+            if (hd () === Token::Implements) {
+                eat(Token::Implements);
+                nd2 = primaryNameList ();
+            }
+            else
+                nd2 = [];
 
-            return [ts2,nd2];
+            return [nd1, nd2];
         }
 
-        function classBody (ts: TOKENS)
-            : [TOKENS, Ast::BLOCK]
-        {
-            enter("Parser::classBody ", ts);
-
-            var [ts1,blck] = block (ts,classBlk);
-
-            exit("Parser::classBody ", ts1);
-
-            return [ts1,blck];
-        }
+        function classBody () : Ast::BLOCK
+            block (classBlk);
 
         /*
 
@@ -5384,62 +4771,51 @@ use namespace intrinsic;
 
         */
 
-        function namespaceDefinition (ts: TOKENS, omega: OMEGA, ns: Ast::NAMESPACE )
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::namespaceDefinition ", ts);
+        function namespaceDefinition (omega: OMEGA, ns: Ast::NAMESPACE ) : Ast::STMTS {
+            eat (Token::Namespace);
+            var nd1 = identifier ();
+            var nd2 = namespaceInitialisation ();
+            semicolon (omega);
 
-            function getAnonymousName (seedStr) {
-                return seedStr;  // FIXME
-            }
-
-            ts = eat (ts,Token::Namespace);
-            var [ts1,nd1] = identifier (ts);
-            var [ts2,nd2] = namespaceInitialisation (ts1);
-            ts2 = semicolon (ts2,omega);
-
+            var nsVal;
             if (nd2 === null) 
-            {
-                var nsVal = new Ast::AnonymousNamespace (getAnonymousName(nd1));
-            }
+                nsVal = new Ast::AnonymousNamespace (getAnonymousName(nd1));
             else 
-            {
-                var nsVal = new Ast::UserNamespace (nd2);
-            }
+                nsVal = new Ast::UserNamespace (nd2);
 
             var name = new Ast::PropName ({ns:ns, id:nd1});
             var fxtr = new Ast::NamespaceFixture (nsVal);
             cx.addVarFixtures ([[name,fxtr]]);
 
-            exit("Parser::namespaceDefinition ", ts2);
-            return [ts2,[]];
+            return [];
+
+            function getAnonymousName (seedStr) {
+                return seedStr;  // FIXME
+            }
+
         }
 
-        function namespaceInitialisation (ts: TOKENS)
-            : [TOKENS, Ast::IDENT]
-        {
-            enter("Parser::namespaceInitialisation ", ts);
-
-            switch (hd (ts)) {
+        function namespaceInitialisation () : Ast::IDENT? {
+            switch (hd ()) {
             case Token::Assign:
-                switch (hd2 (ts)) {
+                eat(Token::Assign);
+                switch (hd ()) {
                 case Token::StringLiteral:
-                    let tx = tokenText (tl (ts).head());
-                    var [ts1,nd1] = [tl (ts), tx];
+                    var nd1 = lexeme();
+                    eat(Token::StringLiteral);
                     break;
                 default:
-                    var [ts1,nd1] = primaryName (tl (ts));
+                    var nd1 = primaryName ();
                     nd1 = cx.resolveNamespaceFromIdentExpr (nd1);  // FIXME not implemented
                     break;
                 }
                 break;
             default:
-                var [ts1,nd1] = [ts,null];
+                var nd1 = null;
                 break;
             }
 
-            exit("Parser::namespaceInitialisation ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
 
@@ -5453,25 +4829,19 @@ use namespace intrinsic;
 
         */
 
-        function typeDefinition (ts: TOKENS, omega: OMEGA, ns: Ast::NAMESPACE)
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::typeDefinition ", ts);
+        function typeDefinition (omega: OMEGA, ns: Ast::NAMESPACE) : Ast::STMTS {
+            eat (Token::Type);
+            var nd1 = identifier ();
 
-            ts = eat (ts,Token::Type);
-            var [ts1,nd1] = identifier (ts);
-            // print ("type ",nd1);
-
-            ts1 = eat (ts1,Token::Assign);
-            var [ts2,nd2] = nullableTypeExpression (ts1);
-            ts2 = semicolon (ts2, omega);
+            eat (Token::Assign);
+            var nd2 = nullableTypeExpression ();
+            semicolon (omega);
 
             var name = new Ast::PropName ({ns:ns, id:nd1});
             var fxtr = new Ast::TypeFixture (nd2);
             cx.addVarFixtures ([[name,fxtr]]);
 
-            exit("Parser::typeDefinition ", ts2);
-            return [ts2,[]];
+            return [];
         }
 
         // DIRECTIVES
@@ -5483,23 +4853,18 @@ use namespace intrinsic;
 
         */
 
-        function directives (ts: TOKENS, tau: TAU)
-            : [TOKENS, Ast::PRAGMAS, Ast::STMTS]
-        {
-            enter("Parser::directives ", ts);
-
-            switch (hd (ts)) {
+        function directives (tau: TAU) : [Ast::PRAGMAS, Ast::STMTS] {
+            switch (hd ()) {
             case Token::RightBrace:
             case Token::EOS:
-                var [ts1,nd1] = [ts,[],[]];
+                var nd1 = [[],[]];
                 break;
             default:
-                var [ts1,nd1] = directivesPrefix (ts,tau);
+                var nd1 = directivesPrefix (tau);
                 break;
             }
 
-            exit("Parser::directives ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
         /*
@@ -5527,61 +4892,35 @@ use namespace intrinsic;
 
         */
 
-        function directivesPrefix (ts: TOKENS, tau: TAU)
-            : [TOKENS, Ast::PRAGMAS, Ast::STMTS]
-        {
-            enter("Parser::directivesPrefix ", ts);
-
-            switch (hd (ts)) {
+        function directivesPrefix (tau: TAU) : [Ast::PRAGMAS, Ast::STMTS] {
+            switch (hd ()) {
             case Token::Use:
             case Token::Import:
-                var [ts1] = pragmas (ts); 
-                var [ts2,nd2] = directivesPrefixPrime (ts1,tau);
+                pragmas (); 
+                var nd2 = directivesPrefixPrime (tau);
                 break;
             default:
-                var [ts2,nd2] = directivesPrefixPrime (ts,tau);
+                var nd2 = directivesPrefixPrime (tau);
                 break;
             }
 
-            exit("Parser::directivesPrefix ", ts2);
-            return [ts2,nd2];
+            return nd2;
         }
 
-        function directivesPrefixPrime (ts: TOKENS, tau: TAU)
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::directivesPrefixPrime ", ts);
-
+        function directivesPrefixPrime (tau: TAU) : Ast::STMTS {
             var nd1 = [];
-            var ts1 = ts;
 
-            while (hd (ts1) !== Token::RightBrace &&
-                   hd (ts1) !== Token::EOS ) 
-            {
-                var [ts1,ndx] = directive (ts1,tau,fullStmt);
-                for (var i=0; i<ndx.length; ++i) nd1.push (ndx[i]);
+            while (hd () !== Token::RightBrace && hd () !== Token::EOS ) {
+                var ndx = directive (tau,fullStmt);
+                for (var i=0; i<ndx.length; ++i) 
+                    nd1.push (ndx[i]);
             }
 
-            exit("Parser::directivesPrefixPrime ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
-        function isCurrentClassName (tk) 
-            : boolean {
-            let text = Token::tokenText (tk);
-            //print ("tk",tk);
-            //print ("text",text);
-            //print ("currentClassName",currentClassName);
-
-            if (text == currentClassName) 
-            {
-                return true;
-            }
-            else 
-            {
-                return false;
-            }
-        }
+        function isCurrentClassName (lexeme) : boolean
+            lexeme === currentClassName;
 
         /*
 
@@ -5593,51 +4932,45 @@ use namespace intrinsic;
 
         */
 
-        function directive (ts: TOKENS, tau: TAU, omega: OMEGA)
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::directive ", ts);
-
-            countLn ();
-            printLn (ts);
-
-            switch (hd(ts)) {
+        function directive (tau: TAU, omega: OMEGA) : Ast::STMTS {
+            var nd1;
+            switch (hd()) {
             case Token::SemiColon:
-                var [ts1,nd1] = [tl (ts), [new Ast::EmptyStmt]];
+                eat(Token::SemiColon);
+                nd1 = [new Ast::EmptyStmt];
                 break;
+
             case Token::Let: // FIXME might be function
             case Token::Var:
             case Token::Const:
-                var [ts1,nd1]
-                    = variableDefinition (ts, allowIn, tau
-                                  , cx.pragmas.defaultNamespace
-                                  , false, false);
-
-                ts1 = semicolon (ts1,omega);
+                nd1 = variableDefinition (allowIn
+                                          , tau
+                                          , cx.pragmas.defaultNamespace
+                                          , false
+                                          , false);
+                semicolon (omega);
                 break;
+
             case Token::Function:
-                if (isCurrentClassName (ts.head2())) 
-                {
-                    var [ts1,nd1] = constructorDefinition (ts, omega, cx.pragmas.defaultNamespace);
-                }
+                if (isCurrentClassName (lexeme2())) 
+                    nd1 = constructorDefinition (omega, cx.pragmas.defaultNamespace, defaultAttrs());
                 else 
-                {
-                    var [ts1,nd1] = functionDefinition (ts, tau, omega, new Ast::Var
-                                  , cx.pragmas.defaultNamespace
-                                  , false, false, false, false, false);
-                }
+                    nd1 = functionDefinition (tau, omega, new Ast::Var, defaultAttrs());
                 //ts1 = semicolon (ts1,omega);
                 break;
+
             case Token::Class:
-                var isDynamic = false;
-                var [ts1,nd1] = classDefinition (ts, cx.pragmas.defaultNamespace, isDynamic);
+                nd1 = classDefinition (cx.pragmas.defaultNamespace, false);
                 break;
+
             case Token::Namespace:
-                var [ts1,nd1] = namespaceDefinition (ts, omega, cx.pragmas.defaultNamespace);
+                nd1 = namespaceDefinition (omega, cx.pragmas.defaultNamespace);
                 break;
+
             case Token::Type:
-                var [ts1,nd1] = typeDefinition (ts, omega, cx.pragmas.defaultNamespace);
+                nd1 = typeDefinition (omega, cx.pragmas.defaultNamespace);
                 break;
+
             case Token::LeftBrace:
             case Token::Break:
             case Token::Continue:
@@ -5652,9 +4985,9 @@ use namespace intrinsic;
             case Token::Try:
             case Token::While:
             case Token::With:
-                var [ts1,nd1] = statement (ts,tau,omega);
-                nd1 = [nd1];
+                nd1 = [statement (tau,omega)];
                 break;
+
             case Token::Dynamic:
             case Token::Final:
             case Token::Native:
@@ -5666,37 +4999,38 @@ use namespace intrinsic;
             case Token::Protected:
             case Token::Internal:
             case Token::Intrinsic:
-                var [ts1,nd1] = attribute (ts,tau,defaultAttrs());
-                var [ts1,nd1] = annotatableDirective (ts1,tau,omega,nd1);
+                let attr = attribute (tau,defaultAttrs());
+                nd1 = annotatableDirective (tau,omega,attr);
                 break;
+
             case Token::Identifier:
                 // FIXME: This should be some variant of directive (), in order to catch "var".
                 // But not every directive can be labeled, so just do the simple thing for the
                 // time being.
-                if (hd2 (ts) == Token::Colon) {
-                    var [ts1,nd1] = statement (ts,tau,omega);
-                    nd1 = [nd1];
+                if (hd2 () == Token::Colon) {
+                    nd1 = [statement (tau,omega)];
                     break;
                 }
                 // Fall through if not label
+
             default:  // label, attribute, or expr statement
-                var [ts1,nd1] = listExpression (ts,allowIn);
-                switch (hd (ts1)) {
+                nd1 = listExpression (allowIn);
+                switch (hd ()) {
                 case Token::SemiColon:
-                    var [ts1,nd1] = [tl (ts1), [new Ast::ExprStmt (nd1)]];
+                    eat(Token::SemiColon);
+                    nd1 = [new Ast::ExprStmt (nd1)];
                     break;
+
                 case Token::RightBrace:
                 case Token::EOS:
-                    var nd1 = [new Ast::ExprStmt (nd1)];
+                    nd1 = [new Ast::ExprStmt (nd1)];
                     break;
+
                 default:
-                    if (newline (ts1)) 
-                    { // stmt
-                        var nd1 = [new Ast::ExprStmt (nd1)];
-                    }
-                    else 
-                    {
-                        switch (hd (ts1)) {
+                    if (newline ()) // stmt
+                        nd1 = [new Ast::ExprStmt (nd1)];
+                    else {
+                        switch (hd ()) {
                         case Token::Dynamic:
                         case Token::Final:
                         case Token::Native:
@@ -5714,70 +5048,62 @@ use namespace intrinsic;
                             let ie = nd1.Ast::exprs[0].Ast::ident;  
                             var attrs = defaultAttrs ();
                             attrs.ns = cx.evalIdentExprToNamespace (ie);
-                            var [ts1,nd1] = annotatableDirective (ts1,tau,omega,attrs);
+                            nd1 = annotatableDirective (tau,omega,attrs);
                             break;
+
                         default:
-                            Parse::internalError(this, "directive should never get here " + ts1);
-                            var nd1 = [new Ast::ExprStmt (nd1)];
+                            Parse::internalError(this, "directive should never get here: " + lexeme());
                             break;
                         }
                     }
                 }
             }
 
-            exit("Parser::directive ", ts1);
-            return [ts1,nd1];
+            return nd1;
         }
 
-        function annotatableDirective (ts: TOKENS, tau: TAU, omega: OMEGA, attrs)
-            : [TOKENS, Ast::STMTS]
-        {
-            enter("Parser::annotatableDirective ", ts);
+        function annotatableDirective (tau: TAU, omega: OMEGA, attrs) : Ast::STMTS {
+            var nd2;
 
-            switch (hd(ts)) {
+            switch (hd()) {
             case Token::Let: // FIXME might be function
             case Token::Var:
             case Token::Const:
-                var [ts2,nd2]
-                    = variableDefinition (ts, allowIn, tau
+                nd2 = variableDefinition (allowIn, tau
                                           , attrs.ns
                                           , attrs.prototype
                                           , attrs.static);
-
-                var ts2 = semicolon (ts2,omega);
+                semicolon (omega);
                 break;
+
             case Token::Function:
-                if (isCurrentClassName (ts.head2())) 
-                {
-                    var [ts2,nd2] = constructorDefinition (ts, omega, attrs.ns);
-                }
+                if (isCurrentClassName (lexeme2())) 
+                    nd2 = constructorDefinition (omega, attrs.ns, attrs);
                 else 
-                {
-                    var [ts2,nd2] = functionDefinition (ts, tau, omega, new Ast::Var
-                                                           , attrs.ns, attrs.final, attrs.override
-                                                           , attrs.prototype, attrs.static, attrs.abstract);
-                }
+                    nd2 = functionDefinition (tau, omega, new Ast::Var, attrs);
                 //ts2 = semicolon (ts2,omega);
                 break;
+
             case Token::Class:
-                var [ts2,nd2] = classDefinition (ts, attrs.ns, attrs.dynamic);
+                nd2 = classDefinition (attrs.ns, attrs.dynamic);
                 break;
+
             case Token::Namespace:
-                //print ("found namespace");
-                var [ts2,nd2] = namespaceDefinition (ts, omega, attrs.ns);
+                nd2 = namespaceDefinition (omega, attrs.ns);
                 break;
+
             case Token::Type:
-                var [ts2,nd2] = typeDefinition (ts, omega, attrs.ns);
+                nd2 = typeDefinition (omega, attrs.ns);
                 break;
+
             default:  // label, attribute, or expr statement
-                var [ts1,nd1] = attribute (ts,tau,defaultAttrs());
-                if (newline (ts1)) 
-                    Parse::syntaxError(this, "error unexpected newline before "+Token::tokenText (hd (ts)));
-                var [ts2,nd2] = annotatableDirective (ts1,tau,omega,nd1);
+                let xattrs = attribute (tau,attrs);
+                if (newline ()) 
+                    Parse::syntaxError(this, "error unexpected newline before " + lexeme())
+                nd2 = annotatableDirective (tau,omega,xattrs);
             }
 
-            exit("Parser::annotatableDirective ", ts2);
-            return [ts2,nd2];
+            return nd2;
         }
 
 //        /*
@@ -5802,8 +5128,7 @@ use namespace intrinsic;
 
         type ATTRS = Object;  // FIXME object type
 
-        function defaultAttrs ()
-            : ATTRS {
+        function defaultAttrs () : ATTRS {
             return { ns: cx.pragmas.defaultNamespace
                    , 'true': false
                    , 'false': false
@@ -5815,194 +5140,160 @@ use namespace intrinsic;
                    , static: false }
         }
 
-        function attribute (ts: TOKENS, tau: TAU, nd: ATTRS)
-            : [TOKENS, *]
-        {
-            enter("Parser::attribute tau="+tau+" ", ts);
-
+        // Modifies "nd" and returns it too.
+        function attribute (tau: TAU, nd: ATTRS) {
             switch (tau) {
             case classBlk:
-                switch (hd (ts)) {
+                switch (hd ()) {
                 case Token::Final:
+                    eat(Token::Final);
                     nd.final = true;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Native:
+                    eat(Token::Native);
                     nd.native = true;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Override:
+                    eat(Token::Override);
                     nd.override = true;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Prototype:
+                    eat(Token::Prototype);
                     nd.prototype = true;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Static:
+                    eat(Token::Static);
                     nd.static = true;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Public:
                 case Token::Private:
                 case Token::Protected:
                 case Token::Internal:
                 case Token::Intrinsic:
-                    var [ts1,nd1] = reservedNamespace (ts);
-                    nd.ns = nd1;
-                    var [ts1,nd1] = [ts1, nd];
+                    nd.ns = reservedNamespace ();
                     break;
                 default:
-                    var [ts1,nd1] = primaryName (ts);
-                    nd.ns = cx.evalIdentExprToNamespace (nd1);
-                    var [ts1,nd1] = [ts1,nd];
+                    nd.ns = cx.evalIdentExprToNamespace (primaryName ());
                     break;
                 }
                 break;
+
             case globalBlk:
-                switch (hd (ts)) {
+                switch (hd ()) {
                 case Token::True:
+                    eat(Token::True);
                     nd['true'] = true;  // FIXME RI bug
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::False:
+                    eat(Token::False);
                     nd['false'] = false;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Dynamic:
+                    eat(Token::Dynamic);
                     nd.dynamic = true;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Final:
+                    eat(Token::Final);
                     nd.final = true;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Native:
+                    eat(Token::Native);
                     nd.native = true;
-                    var [ts1,nd1] = [tl (ts), nd];
                     break;
                 case Token::Public:
                 case Token::Internal:
                 case Token::Intrinsic:
-                    var [ts1,nd1] = reservedNamespace (ts);
-                    nd.ns = nd1;
-                    var [ts1,nd1] = [ts1, nd];
+                    nd.ns = reservedNamespace ();
                     break;
                 default:
-                    var [ts1,nd1] = primaryName (ts);
-                    nd.ns = cx.evalIdentExprToNamespace (nd1);
-                    var [ts1,nd1] = [ts1, nd];
+                    nd.ns = cx.evalIdentExprToNamespace (primaryName ());
                     break;
                 }
                 break;
+
             case localBlk:
-                var [ts1,nd1] = [ts,nd];
                 break;
+
             default:
                 Parse::internalError(this, "error attribute tau " + tau);
             }
 
-            exit("Parser::attribute ", ts1);
-            return [ts1,nd1];
+            return nd;
         }
 
 
         // PRAGMAS
 
-        function pragmas (ts: TOKENS)
-            : [TOKENS]
-        {
-            enter("Parser::pragmas ", ts);
-
-            while (hd (ts)===Token::Use || hd (ts)===Token::Import) {
-                [ts] = pragma (ts);
-                ts = semicolon (ts,fullStmt);
+        // Works by side effect on cx.
+        function pragmas () {
+            while (hd () === Token::Use || hd () === Token::Import) {
+                pragma ();
+                semicolon (fullStmt);
             }
-
-            var ts1 = ts;
-
-            exit("Parser::pragmas ", ts1);
-            return [ts1];
         }
 
-        function pragma (ts: TOKENS)
-            : [TOKENS]
-        {
-            enter("Parser::pragma ", ts);
-
-            countLn();
-            printLn(ts);
-
-            switch (hd (ts)) {
+        function pragma () {
+            switch (hd ()) {
             case Token::Use:
-                var [ts1] = pragmaItems (tl (ts));
+                eat(Token::Use);
+                pragmaItems ();
                 break;
             case Token::Import:
-                var [ts1] = importName (tl (ts));
+                eat(Token::Import);
+                importName ();
                 break;
             }
-
-            exit("Parser::pragma ", ts1);
-            return [ts1];
         }
 
-        function pragmaItems (ts: TOKENS)
-            : [TOKENS]
-        {
-            enter("Parser::pragmaItems ", ts);
-
-            var ts1 = ts;
-
+        function pragmaItems () {
             while (true) {
-            switch (hd (ts1)) {
-            case Token::Decimal:
-                break;
-            case Token::Namespace:
-                var [ts1,nd1] = primaryName (tl (ts1));
-                cx.openNamespace (nd1);
-                break;
-            case Token::Double:
-                break;
-            case Token::Int:
-                break;
-            case Token::Default:
-                switch (hd2 (ts1)) {
+                switch (hd ()) {
+                case Token::Decimal:
+                    break;
                 case Token::Namespace:
-                    var [ts1,nd1] = primaryName (tl (tl (ts1)));
-                    cx.defaultNamespace (nd1);
-                    cx.openNamespace (nd1);
+                    eat(Token::Namespace);
+                    cx.openNamespace (primaryName ());
+                    break;
+                case Token::Double:
+                    break;
+                case Token::Int:
+                    break;
+                case Token::Default:
+                    eat(Token::Default);
+                    switch (hd ()) {
+                    case Token::Namespace:
+                        eat(Token::Namespace);
+                        let name = primaryName ();
+                        cx.defaultNamespace (name);
+                        cx.openNamespace (name);
+                        break;
+                    default:
+                        Parse::syntaxError(this, "unexpected token after 'use default'");
+                    }
+                    break;
+                    //            case Token::Number
+                    //                break;
+                case Token::Precision:
+                    break;
+                case Token::Rounding:
+                    break;
+                case Token::Standard:
+                    break;
+                case Token::Strict:
+                    break;
+                case Token::UInt:
+                    break;
+                case Token::Unit:
                     break;
                 default:
-                    Parse::syntaxError(this, "unexpected token after 'use default'");
+                    Parse::syntaxError(this, "unknown token in PragmaItem");
                 }
-                break;
-                //            case Token::Number
-                //                break;
-            case Token::Precision:
-                break;
-            case Token::Rounding:
-                break;
-            case Token::Standard:
-                break;
-            case Token::Strict:
-                break;
-            case Token::UInt:
-                break;
-            case Token::Unit:
-                break;
-            default:
-                Parse::syntaxError(this, "unknown token in PragmaItem");
-            }
 
-            if (hd (ts1) !== Token::Comma) {
-                break;
-            }
+                if (hd () !== Token::Comma)
+                    break;
 
-            ts1 = eat (ts1,Token::Comma);
+                eat (Token::Comma);
             }
-
-            exit("Parser::pragmaItems ", ts1);
-            return [ts1];
         }
 
         /*
@@ -6013,23 +5304,19 @@ use namespace intrinsic;
 
         */
 
-        function importName (ts: TOKENS)
-            : [TOKENS]
-        {
-            enter("Parser::importName ", ts);
-
-            var [ts1,nd1] = identifier (ts);
-            nd1 = [nd1];
-            while (hd (ts1)===Token::Dot) {
-                nd1.push(Token::tokenText(tl (ts1).head()));
-                ts1 = tl (ts1);
+        function importName () {
+            var nd1 = [identifier ()];
+            while (hd () === Token::Dot) {
+                eat(Token::Dot);
+                // FIXME: This looks anything but safe, it'll accept anything
+                nd1.push(lexeme());
+                next();
             }
 
             let ns = namespaceFromPath (nd1);
             cx.openNamespace (ns);
 
-            exit ("Parser::importName ", ts1);
-            return [ts1];
+            return;
 
             function namespaceFromPath (path) 
             {
@@ -6047,62 +5334,120 @@ use namespace intrinsic;
 
         // BLOCKS and PROGRAMS
 
-        function block (ts:TOKENS, tau: TAU)
-            : [TOKENS, Ast::BLOCK]
+        function block (tau: TAU) : Ast::BLOCK
         {
-            enter("Parser::block ",ts);
-
-            ts = eat (ts, Token::LeftBrace);
+            eat (Token::LeftBrace);
             cx.enterLetBlock ();
-            var [ts1,nd1] = directives (ts, tau);
+            var nd1 = directives (tau);
             let head = cx.exitLetBlock ();
-            ts1 = eat (ts1, Token::RightBrace);
+            eat (Token::RightBrace);
 
-            exit ("Parser::block ", ts1);
-            return [ts1, new Ast::Block (head,nd1)];
+            return new Ast::Block (head,nd1);
         }
 
-        function program ()
-            : [TOKENS, Ast::PROGRAM]
-        {
-            enter("Parser::program ","");
+        function packages () : [PACKAGE] {
+            let pkgs = [];
 
-            let [ts,cs] = scan.tokenList (scan.start);
-            coordList = cs;
-            ts = new TokenStream (ts);
+            // FIXME: "internal".
+            do {
+                let ids = [];
+                eat (Token::Package);
+                ids.push( identifier() );
+                while (hd() == Token::Dot) {
+                    eat(Token::Dot);
+                    ids.push( identifier() );
+                }
+                pkgs.push( new Ast::Package(ids, block(globalBlk)) );
+            } while (hd () == Token::Package);
+            return pkgs;
+        }
+
+        // Synthesize attributes in f.
+
+        function computeAttributes(f: FuncAttr) {
+            let reify_activation = false;
+
+            // If there's eval then variable lookup will be by name;
+            // new names may be added at run-time.
+
+            reify_activation = reify_activation || f.uses_eval;
+
+            // If there's with then variable lookup will be by name;
+            // the set of names in the object is generally unknown.
+            // (It's possible to do better for objects of known
+            // non-dynamic types, but that's unlikely to be a common
+            // case.)
+
+            reify_activation = reify_activation || f.uses_with;
+
+            // If there's a nested function definition or function expression 
+            // then it will close over its reified scope.
+            //
+            // FIXME: If the nested function has no free variables, or its
+            // free variables have constant values, then optimizations are
+            // possible.
+
+            reify_activation = reify_activation || f.children.length > 0;
+
+            // Catch/finally both imply the use of newcatch/pushscope
+            // in a simplistic model.
+            //
+            // FIXME: In actuality, newcatch/pushscope and lookup by
+            // name of the catch var are not necessary unless there is
+            // a method in the catch handler that captures the
+            // environment, so we can do better -- similar to "let"
+            // optimization.
+
+            reify_activation = reify_activation || (f.uses_catch || f.uses_finally); 
+
+            // Even assuming having a nested function does not require
+            // reifying the activation, do reify it if the child
+            // requires its activation to be reified.
+
+            for ( let i=0, limit=f.children.length ; i < limit ; i++ ) {
+                let c = f.children[i];
+                computeAttributes(c);
+                reify_activation = reify_activation || c.reify_activation;
+            }
+            f.reify_activation = reify_activation;
+        }
+
+        function program () : Ast::PROGRAM {
+            start();
 
             cx.enterVarBlock ();
             var publicNamespace = new Ast::ReservedNamespace (new Ast::PublicNamespace (""));
             cx.openNamespace (publicNamespace);
             cx.defaultNamespace (publicNamespace);
 
-            if (hd (ts) == Token::Internal || 
-                hd (ts) == Token::Package)
-            {
-                var [ts1, nd1] = packages (ts);
-            }
+            var nd1;
+            if (hd () == Token::Internal || hd () == Token::Package)
+                nd1 = packages ();
             else
-            {
-                var [ts1, nd1] = [ts, []];
-            }
+                nd1 = [];
 
             currentPackageName = "";
             currentClassName = "";
 
             cx.enterLetBlock ();
-            var [ts2,nd2] = directives (ts1, globalBlk);
+            var nd2 = directives (globalBlk);
             var bhead = cx.exitLetBlock ();
             var vhead = cx.exitVarBlock ();
 
-            switch (hd (ts2)) {
+            switch (hd ()) {
             case Token::EOS:
                 break;
             default:
-                Parse::syntaxError(this, "extra tokens after end of program: " + ts2);
+                Parse::syntaxError(this, "extra tokens after end of program.");
             }
 
-            exit ("Parser::program ", ts2);
-            return [ts2, new Ast::Program (nd1,new Ast::Block (bhead,nd2),vhead,cx.topFunction())];
+            computeAttributes(cx.topFunction());
+
+            return new Ast::Program ( nd1,
+                                      new Ast::Block (bhead,nd2),
+                                      vhead,
+                                      cx.topFunction(),
+                                      filename );
         }
     }
 
@@ -6208,7 +5553,7 @@ use namespace intrinsic;
             var p = programs[n];
             try {
                 var parser = new Parser(p);
-                var [ts1,nd1] = parser.program ();
+                var nd1 = parser.program ();
 
                 //                dumpABCFile(cogen.cg(nd1), "hello-test.es");
 

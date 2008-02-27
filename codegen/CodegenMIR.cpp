@@ -248,7 +248,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
 #ifndef AVMPLUS_SYMBIAN
-	char *mirNames[CodegenMIR::MIR_last];
+	const char *mirNames[CodegenMIR::MIR_last];
 #endif
 #endif /* AVMPLUS_VERBOSE */
 
@@ -1434,11 +1434,11 @@ namespace avmplus
 		patch_stmw = NULL;
 		#endif
 
-		overflow = false;
 		expansionFactor = 1;
 
 		// get a buffer from the global list
 		mirBuffer = core->requestMirBuffer();
+		overflow = (mirBuffer) ? false : true; // if no buffer then we have no room
 
 #ifdef AVMPLUS_PROFILE
 		cseHits = 0;
@@ -1582,6 +1582,7 @@ namespace avmplus
 		mirNames[MIR_or]    = "or   ";
 		mirNames[MIR_xor]   = "xor  ";
 		mirNames[MIR_add]   = "add  ";
+		mirNames[MIR_addp]  = "addp ";
 		mirNames[MIR_sub]   = "sub  ";
 		mirNames[MIR_imul]  = "imul ";
 		mirNames[MIR_icmp]  = "icmp ";
@@ -1934,6 +1935,7 @@ namespace avmplus
 	bool CodegenMIR::prologue(FrameState* state)
 	{
 		this->state = state;
+		if (overflow) return false;
 
 		#ifdef AVMPLUS_PROFILE
 		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
@@ -3151,6 +3153,7 @@ namespace avmplus
 				AvmAssert(t->linked);
 				int offset = t->getOffsets()[slot];
 				
+				OP *unoffsetPtr = ptr;
 				if (t->pool->isBuiltin && !t->final)
 				{
 					// t's slots aren't locked in, so we have to adjust for the actual runtime
@@ -3159,7 +3162,7 @@ namespace avmplus
 					OP* traits = loadIns(MIR_ldop, offsetof(VTable,traits), vtable);
 					offset -= (int)(t->sizeofInstance);
 					OP* sizeofInstance = loadIns(MIR_ldop, offsetof(Traits, sizeofInstance), traits);
-					ptr = binaryIns(MIR_add, sizeofInstance, ptr);
+					ptr = binaryIns(MIR_addp, sizeofInstance, ptr);
 				}
 
 				if (opcode == OP_getslot) 
@@ -3211,14 +3214,14 @@ namespace avmplus
 						}
 						callIns(op, wbAddr, 4, 
 								InsConst((uintptr)core->GetGC()), 
-								ptr, 
+								unoffsetPtr, 
 								leaIns(offset, ptr),
 								value);
 						#else // !DRC
 						// use non-substitute WB
 						callIns(MIR_cm, GCADDR(GC::WriteBarrierTrap), 3, 
 								InsConst((int)core->gc), 
-								ptr,
+								unoffsetPtr,
 								(slotType && slotType != OBJECT_TYPE) ? value :
 								binaryIns(MIR_and, value, InsConst(~7)));
 						#endif
@@ -4068,7 +4071,6 @@ namespace avmplus
 								localGet(sp-1), index);
 						}
 					}
-
 					else
 					{
 						value = callIns(MIR_cm, ENVADDR(MethodEnv::getpropertylate_u), 3,
@@ -5596,12 +5598,10 @@ namespace avmplus
 
 		mipStart = mip = (MDInstruction*) (casePtr+case_count);
 
-#ifndef FEATURE_BUFFER_GUARD
 		// make sure we have enough space for our prologue 
 		// technically should be from casePtr but we ask for a bit more room
 		if (!ensureMDBufferCapacity(pool, md_prologue_size + (byte*)mipStart-&code[0] ))
 			return;
-#endif /* FEATURE_BUFFER_GUARD */
 		
 		// clear the registers 
 		gpregs.clear();
@@ -5885,14 +5885,9 @@ namespace avmplus
 
 	void CodegenMIR::generateEpilogue()
 	{
-#ifndef FEATURE_BUFFER_GUARD
-		if (overflow)
-			return;
-
 		// make sure we have committed the memory we are going to use for the epilogue
 		if (!ensureMDBufferCapacity(pool, md_epilogue_size))
 			return;
-#endif /* FEATURE_BUFFER_GUARD */
 
 #ifdef AVMPLUS_VERBOSE
 			if (verbose())
@@ -8146,7 +8141,20 @@ namespace avmplus
 #endif
 	}
 
-#ifndef FEATURE_BUFFER_GUARD
+#ifdef FEATURE_BUFFER_GUARD
+	bool CodegenMIR::ensureMDBufferCapacity(PoolObject* pool, size_t s) 
+	{
+		// with buffer guard enabled we ONLY need to check that we don't run
+		// off the buffer.  We let the exception handler grow the buffer for us  
+		byte* until = (byte*)mip + s;
+		byte* end = pool->codeBuffer->end();
+		if (until >= end)
+		{
+			overflow = true;
+		}
+		return !overflow; 
+	} 
+#else
 	bool CodegenMIR::ensureMDBufferCapacity(PoolObject* pool, size_t s)
 	{
 		byte* until = (byte*)mip + s;
@@ -8156,16 +8164,14 @@ namespace avmplus
 			// committed last page and still want more!
 			if (uncommitted == pool->codeBuffer->end())
 			{
-				//@todo detach the buffer so that we can do another run
+				// dead 
 				overflow = true;
-				return false;
+				break;
 			}
 			uncommitted = pool->codeBuffer->grow();
 		}
-		return true;
+		return !overflow;
 	}
-#else
-	bool CodegenMIR::ensureMDBufferCapacity(PoolObject* /*pool*/, size_t /*s*/) { return true; } 
 #endif /* FEATURE_BUFFER_GUARD */
 
 	byte* CodegenMIR::getMDBuffer(PoolObject* pool)
@@ -8362,14 +8368,10 @@ namespace avmplus
 		// stuff used to track which page in the buffer we are on.
 		const static int maxBytesPerMIRIns = 16*8;  // maximum # of bytes needed by the buffer per MIR instruction (16 machine instructions x 8B)
 
-#ifndef FEATURE_BUFFER_GUARD
 		if (overflow)
 			return;
 
 		uintptr threshold = (uintptr)pool->codeBuffer->uncommitted() - maxBytesPerMIRIns;
-#else
-		(void)maxBytesPerMIRIns;
-#endif /* FEATURE_BUFFER_GUARD */
 
 		#ifdef _DEBUG
 		// used to track the maximum number of bytes generated per MIR instruction
@@ -8399,12 +8401,14 @@ namespace avmplus
 			lastMip = mip;
 			#endif /* _DEBUG */
 
-#ifndef FEATURE_BUFFER_GUARD
-			// now check to see if we are about to overflow our buffer, if so 
-			// bring in the next page and update the threshold
+			// now check to see if we are about to go over a page boundary 
 			if ( (uintptr)mip > threshold)
 			{
+#ifndef FEATURE_BUFFER_GUARD
+				// if no buffer guards then we need to manually grow
 				pool->codeBuffer->grow();
+#endif /* FEATURE_BUFFER_GUARD */
+				ensureMDBufferCapacity(pool, maxBytesPerMIRIns);
 				threshold = (uintptr)pool->codeBuffer->uncommitted() - maxBytesPerMIRIns;
 
 				// check for buffer overrun
@@ -8417,7 +8421,6 @@ namespace avmplus
 					return;
 				}
 			}
-#endif /* FEATURE_BUFFER_GUARD */
 
 			switch(mircode)
 			{
@@ -9204,6 +9207,7 @@ namespace avmplus
 				case MIR_or:
 				case MIR_xor:
 				case MIR_add:
+				case MIR_addp:
 				case MIR_sub:
 			    case MIR_imul:
 				{
@@ -9216,6 +9220,10 @@ namespace avmplus
 						gpregs.expire(rhs, ip);
 						break;
 					}
+
+					// these are the same from a MD perspective
+					if(mircode == MIR_addp)
+						mircode = MIR_add;	
 
 					// rhs could be imm or reg
 
@@ -10581,12 +10589,8 @@ namespace avmplus
 
 					// buffer protection
 					const static int maxBytesPerArg = 16;
-#ifndef FEATURE_BUFFER_GUARD
 					if (!ensureMDBufferCapacity(pool, argc*maxBytesPerArg))
 						return;
-#else
-					(void)maxBytesPerArg;
-#endif /* FEATURE_BUFFER_GUARD */
 
 					// dump all the args to the stack
 					#ifdef _DEBUG

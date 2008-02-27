@@ -211,7 +211,7 @@ namespace axtam
 		// You almost never need to know if it is a consumer error - treat that as a "normal" exception.
 		bool isCOMConsumerError(Exception *exc);
 		// fill an EXCEPINFO with a tamarin exception
-		void fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo);
+		void fillEXCEPINFO(const Exception *exception, EXCEPINFO *pexcepinfo, bool includeStackTrace = true);
 
 		// handle an exception by a "top-level" COM entry-point.
 		HRESULT handleException(Exception *exc, EXCEPINFO *pei = NULL, int depth=0);

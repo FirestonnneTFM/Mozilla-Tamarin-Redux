@@ -167,7 +167,7 @@ OP_setlocal			"setlocal" 			0x63	1+2			1	        0		1		1		 0        0
 OP_getglobalscope	"getglobalscope"	0x64	1			0	        0		0		0		 1        0
 OP_getscopeobject	"getscopeobject"	0x65	1+1			1	        0		0		0		 1        0
 OP_getproperty		"getproperty" 		0x66	1+2			1	        0		0		-1		 1        1 // stk in: obj [ns] [name]
-OP_0x67				"OP_0x67"			0x67	0			-1	        0		0		0		 0        0
+OP_getouterscope	"getouterscope"		0x67	1+2			1	        0		0		0		 1        0
 OP_initproperty		"initproperty" 		0x68	1+2			1	        0		0		-1		 0        1 // stk in: obj [ns] [name] value
 OP_0x69				"OP_0x69"			0x69	0			-1	        0		0		0		 0        0
 OP_deleteproperty	"deleteproperty"	0x6A	1+2			1	        0		0		-1		 1        1 // stk in: obj [ns] [name]

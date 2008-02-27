@@ -57,7 +57,7 @@ namespace avmplus
 	class GrowableBuffer : public MMgc::GCObject
 	{
 	public:
-		GrowableBuffer(MMgc::GCHeap* heap);
+		GrowableBuffer(MMgc::GCHeap* heap, bool forMir=false);
 		virtual ~GrowableBuffer();
 
 		byte* reserve(size_t amt);
@@ -85,6 +85,7 @@ namespace avmplus
 		byte* last;			// reservation ending address
 		byte* uncommit;		// next uncommitted page in region
 		byte* current;		// current position in buffer
+		bool  forMir;		// set if a mir buffer
 
 		friend class GrowthGuard;
 	};

@@ -41,8 +41,8 @@
     //import util.*;
     //import abcfile.*;
     //import assembler.*;
-
     use default namespace Gen;
+
     use namespace Util;
     use namespace Abc;
     use namespace Asm;
@@ -76,7 +76,24 @@
 
     function cgExprStmt(ctx, s) {
         cgExpr(ctx, s.expr);
-        ctx.asm.I_pop();  // FIXME the last expr stmt of the program must save its value
+        
+        // Capture the result or discard it.
+        //
+        // Statement result capture (E262-3 Ch 12):
+        //  - if capture is desired then there is a local to receive the value
+        //  - exprStmt updates the local with the value instead of popping it
+        //  - catch and finally blocks do not affect the captured value
+
+        let asm=ctx.asm;
+        let stk=ctx.stk;
+        while (stk != null && stk.tag != "function" && stk.tag != "finally" && stk.tag != "catch")
+            stk = stk.link;
+        if (stk != null && stk.tag == "function" && stk.capture_reg) {
+            asm.I_coerce_a();
+            asm.I_setlocal(stk.capture_reg);
+        }
+        else
+            asm.I_pop();
     }
 
     function cgClassBlock(ctx, s) {
@@ -357,20 +374,17 @@
     }
 
     function cgSwitchStmtFast(ctx, s, low, high, has_default) {
-        print("FAST SWITCH: " + low + " " + high + " " + has_default);
-
         var {expr:expr, cases:cases} = s;
         let asm = ctx.asm;
-        cgExpr(ctx, expr);
         let t = asm.getTemp();
-        asm.I_setlocal(t);
+
         let Ldef = asm.newLabel();
         let Lcases = new Array(high-low+1);
         let Lbreak = asm.newLabel();
         let nctx = pushBreak(ctx, Lbreak);
         let ldef_emitted = false;
 
-        asm.I_getlocal(t);                    // switch value
+        cgExpr(ctx, expr);                    // switch value
         asm.I_pushint(ctx.cp.int32(low));     // offset
         asm.I_subtract();                     // bias it
         asm.I_dup();
@@ -378,10 +392,12 @@
         asm.I_dup();
         asm.I_setlocal(t);                    //   and save
         asm.I_equals();                       // if computed value and int value are 
+        asm.I_getlocal(t);                    // otherwise dispatch
+        asm.killTemp(t);
+        asm.I_swap();
         asm.I_iffalse(Ldef);                  //   not the same then default case
 
-        asm.I_getlocal(t);                    // otherwise dispatch
-        Ldefault = asm.I_lookupswitch(undefined, Lcases);
+        let Ldefault = asm.I_lookupswitch(undefined, Lcases);
 
         // Make a prepass to find all the case labels that do not have a
         // case (except maybe the default case).  If Lcases[i] is not
@@ -406,12 +422,16 @@
         for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
             let c = cases[i];
             let e = c.expr;
-            if (e is ListExpr && e.exprs.length == 1) // parser should clean this case up!
+
+            if (e is ListExpr && e.exprs.length == 1) { // parser should clean this case up!
                 e = e.exprs[0];
+                assert( e != null );
+            }
 
             if (e == null) {
-                asm.I_label(Ldefault);
                 asm.I_label(Ldef);
+                asm.I_pop();
+                asm.I_label(Ldefault);
                 ldef_emitted = true;
                 for ( let j=0, jlimit=Lhandled.length ; j < jlimit ; j++ )
                     if (!Lhandled[j])
@@ -441,10 +461,11 @@
                     asm.I_label(Lcases[j]);
         }
 
-        asm.I_label(Lbreak);
-        if (!ldef_emitted)
+        if (!ldef_emitted) {
             asm.I_label(Ldef);
-        asm.killTemp(t);
+            asm.I_pop();
+        }
+        asm.I_label(Lbreak);
     }
 
     function cgSwitchStmtSlow(ctx,s) {

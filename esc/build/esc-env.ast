@@ -11,6 +11,13 @@ public var esc_env =
                         , [ { 'ast_class': 'PropName'
                             , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
                                               , 'name': '' }
+                                      , 'id': 'ESC' } }
+                          , { 'ast_class': 'NamespaceFixture'
+                            , 'ns': { 'ast_class': 'AnonymousNamespace'
+                                    , 'name': 'ESC' } } ]
+                        , [ { 'ast_class': 'PropName'
+                            , 'name': { 'ns': { 'ast_class': 'PublicNamespace'
+                                              , 'name': '' }
                                       , 'id': 'Encode' } }
                           , { 'ast_class': 'NamespaceFixture'
                             , 'ns': { 'ast_class': 'AnonymousNamespace'

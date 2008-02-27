@@ -331,6 +331,30 @@ class TestExceptions(TestCaseInitialized):
         scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
         self.failUnless(desc.startswith("COM Error"), desc)
 
+    def testSyntaxError(self):
+        code = "\n\nfoo]"
+        self.parseScriptText(code, expect_exc=True)
+        scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
+        self.failUnless(desc.startswith("Syntax"), desc)
+        # we aren't expecting a traceback, as it would only be to the
+        # compiler itself - so no \n chars are expected.
+        self.failIf('\n' in desc, desc)
+
+        ctx, line, col = self.site.last_error.GetSourcePosition()
+        self.failUnlessEqual(line, 2) # zero based
+        # no column available :( ...
+
+    def testFilename(self):
+        # Make sure the 'filename' of our script block is reported in both
+        # syntax and normal errors.
+        self.parseScriptText("foo=bar", expect_exc=True)
+        scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
+        self.failUnless("<script 0>" in desc, desc)
+        # and do another one with a syntax error - and different name
+        self.parseScriptText("x]", sourceContextCookie=3, expect_exc=True)
+        scode, hlp, desc, blah, blah, hresult = self.site.last_error.GetExceptionInfo()
+        self.failUnless("<script 3>" in desc, desc)
+
 class TestScriptDispatch(TestCaseInitialized):
     # Test the IDispatch impls handed out by Tamarin.
     # Note that in general, we avoid the pretty 'Dispatch' wrappers provided

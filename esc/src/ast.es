@@ -45,15 +45,14 @@ public namespace Ast
     //    use namespace intrinsic;
 
     // POS
+    //
+    // Source location information.
+    //
+    // This representation is heavyweight for ES4 but may be required
+    // to support "include" as in AS3, since that may introduce new
+    // filenames everywhere.
 
-    type POS =
-       {
-        line : int
-       // file: String
-       //, span: int //StreamPos.span
-       //, sm: int // StreamPos.sourcemap
-       //, post_newline: Boolean 
-       }
+    type POS = { line : int /* , filename: String */ };
 
     // BASIC TYPES
 
@@ -426,6 +425,7 @@ public namespace Ast
        , ListExpr
        , InitExpr
        , SliceExpr
+       , EvalScopeInitExpr
        , GetTemp
        , GetParam )
 
@@ -580,6 +580,15 @@ public namespace Ast
         const exprs : EXPRS;
         function ListExpr (exprs)
             : exprs=exprs {}
+    }
+
+    class EvalScopeInitExpr {
+        const index: int;
+        const how: String;
+        function EvalScopeInitExpr(index, how)
+            : index=index
+            , how=how
+        {}
     }
 
     type INIT_TARGET =
@@ -752,9 +761,9 @@ public namespace Ast
     }
 
     class LiteralDecimal {
-        const decimalValue : String;
-        function LiteralDecimal (str : String)
-            : decimalValue = str { }  // FIXME: convert from string to decimal
+        const decimalValue : decimal;
+        function LiteralDecimal (decimalValue)
+            : decimalValue = decimalValue { }
     }
 
     class LiteralInt {
@@ -830,6 +839,8 @@ public namespace Ast
 
     class LiteralRegExp {
         const src : String;
+        function LiteralRegExp(src)
+            : src= src {}
     }
 
     type VAR_DEFN_TAG =
@@ -939,11 +950,20 @@ public namespace Ast
 
         /* True iff the body has a "try" statement with a "finally" clause */
         var uses_finally = false;
+
+        /* True iff this function is native */
+        var is_native = false;
+
+        /* True iff the function must capture its statement result value and return it if 
+           control falls off the end */
+        var capture_result = false;
+
+        /* Synthesized: true iff activation object must be reified for any reason */
+        var reify_activation = false;
     }
 
     class Func {
         const name //: FUNC_NAME;
-        const isNative: Boolean;
         const block: BLOCK;
         const params: HEAD;
         const vars: HEAD;
@@ -951,10 +971,8 @@ public namespace Ast
         const type /*: FUNC_TYPE*/;    // FIXME: should be able to use 'type' here
         const attr: FuncAttr;
         const numparams: int;
-        function Func (name,isNative,block,
-                       params,numparams,vars,defaults,ty,attr)
+        function Func (name,block,params,numparams,vars,defaults,ty,attr)
             : name = name
-            , isNative = isNative
             , block = block
             , params = params
             , numparams = numparams

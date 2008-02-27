@@ -42,6 +42,7 @@ namespace Asm;
 {
     use default namespace Asm;
     use namespace Util;
+    use namespace Ast;  // ESC bug -- open up fields in FuncAttr
     //use namespace Abc;
     
     //import util.*;
@@ -113,167 +114,166 @@ namespace Asm;
     public const METHOD_Setsdxns             = 0x40;
     public const METHOD_HasParamNames        = 0x80;
 
-    
-    const OP_bkpt:int = 0x01
-    const OP_nop:int = 0x02
-    const OP_throw:int = 0x03
-    const OP_getsuper:int = 0x04
-    const OP_setsuper:int = 0x05
-    const OP_dxns:int = 0x06
-    const OP_dxnslate:int = 0x07
-    const OP_kill:int = 0x08
-    const OP_label:int = 0x09
-    const OP_ifnlt:int = 0x0C
-    const OP_ifnle:int = 0x0D
-    const OP_ifngt:int = 0x0E
-	const OP_ifnge:int = 0x0F
-	const OP_jump:int = 0x10
-	const OP_iftrue:int = 0x11
-	const OP_iffalse:int = 0x12
-	const OP_ifeq:int = 0x13
-	const OP_ifne:int = 0x14
-	const OP_iflt:int = 0x15
-	const OP_ifle:int = 0x16
-	const OP_ifgt:int = 0x17
-	const OP_ifge:int = 0x18
-	const OP_ifstricteq:int = 0x19
-	const OP_ifstrictne:int = 0x1A
-	const OP_lookupswitch:int = 0x1B
-	const OP_pushwith:int = 0x1C
-	const OP_popscope:int = 0x1D
-	const OP_nextname:int = 0x1E
-	const OP_hasnext:int = 0x1F
-	const OP_pushnull:int = 0x20
-	const OP_pushundefined:int = 0x21
-	const OP_pushconstant:int = 0x22
-	const OP_nextvalue:int = 0x23
-	const OP_pushbyte:int = 0x24
-	const OP_pushshort:int = 0x25
-	const OP_pushtrue:int = 0x26
-	const OP_pushfalse:int = 0x27
-	const OP_pushnan:int = 0x28
-	const OP_pop:int = 0x29
-	const OP_dup:int = 0x2A
-	const OP_swap:int = 0x2B
-	const OP_pushstring:int = 0x2C
-	const OP_pushint:int = 0x2D
-	const OP_pushuint:int = 0x2E
-	const OP_pushdouble:int = 0x2F
-	const OP_pushscope:int = 0x30
-	const OP_pushnamespace:int = 0x31
-	const OP_hasnext2:int = 0x32
-	const OP_newfunction:int = 0x40
-	const OP_call:int = 0x41
-	const OP_construct:int = 0x42
-	const OP_callmethod:int = 0x43
-	const OP_callstatic:int = 0x44
-	const OP_callsuper:int = 0x45
-	const OP_callproperty:int = 0x46
-	const OP_returnvoid:int = 0x47
-	const OP_returnvalue:int = 0x48
-	const OP_constructsuper:int = 0x49
-	const OP_constructprop:int = 0x4A
-	const OP_callsuperid:int = 0x4B
-	const OP_callproplex:int = 0x4C
-	const OP_callinterface:int = 0x4D
-	const OP_callsupervoid:int = 0x4E
-	const OP_callpropvoid:int = 0x4F
-	const OP_newobject:int = 0x55
-	const OP_newarray:int = 0x56
-	const OP_newactivation:int = 0x57
-	const OP_newclass:int = 0x58
-	const OP_getdescendants:int = 0x59
-	const OP_newcatch:int = 0x5A
-	const OP_findpropstrict:int = 0x5D
-	const OP_findproperty:int = 0x5E
-	const OP_finddef:int = 0x5F
-	const OP_getlex:int = 0x60
-	const OP_setproperty:int = 0x61
-	const OP_getlocal:int = 0x62
-	const OP_setlocal:int = 0x63
-	const OP_getglobalscope:int = 0x64
-	const OP_getscopeobject:int = 0x65
-	const OP_getproperty:int = 0x66
-	const OP_getpropertylate:int = 0x67
-	const OP_initproperty:int = 0x68
-	const OP_setpropertylate:int = 0x69
-	const OP_deleteproperty:int = 0x6A
-	const OP_deletepropertylate:int = 0x6B
-	const OP_getslot:int = 0x6C
-	const OP_setslot:int = 0x6D
-	const OP_getglobalslot:int = 0x6E
-	const OP_setglobalslot:int = 0x6F
-	const OP_convert_s:int = 0x70
-	const OP_esc_xelem:int = 0x71
-	const OP_esc_xattr:int = 0x72
-	const OP_convert_i:int = 0x73
-	const OP_convert_u:int = 0x74
-	const OP_convert_d:int = 0x75
-	const OP_convert_b:int = 0x76
-	const OP_convert_o:int = 0x77
-    const OP_checkfilter:int = 0x78
-	const OP_coerce:int = 0x80
-	const OP_coerce_b:int = 0x81
-	const OP_coerce_a:int = 0x82
-	const OP_coerce_i:int = 0x83
-	const OP_coerce_d:int = 0x84
-	const OP_coerce_s:int = 0x85
-	const OP_astype:int = 0x86
-	const OP_astypelate:int = 0x87
-	const OP_coerce_u:int = 0x88
-	const OP_coerce_o:int = 0x89
-	const OP_negate:int = 0x90
-	const OP_increment:int = 0x91
-	const OP_inclocal:int = 0x92
-	const OP_decrement:int = 0x93
-	const OP_declocal:int = 0x94
-	const OP_typeof:int = 0x95
-	const OP_not:int = 0x96
-	const OP_bitnot:int = 0x97
-	const OP_concat:int = 0x9A
-	const OP_add_d:int = 0x9B
-	const OP_add:int = 0xA0
-	const OP_subtract:int = 0xA1
-	const OP_multiply:int = 0xA2
-	const OP_divide:int = 0xA3
-	const OP_modulo:int = 0xA4
-	const OP_lshift:int = 0xA5
-	const OP_rshift:int = 0xA6
-	const OP_urshift:int = 0xA7
-	const OP_bitand:int = 0xA8
-	const OP_bitor:int = 0xA9
-	const OP_bitxor:int = 0xAA
-	const OP_equals:int = 0xAB
-	const OP_strictequals:int = 0xAC
-	const OP_lessthan:int = 0xAD
-	const OP_lessequals:int = 0xAE
-	const OP_greaterthan:int = 0xAF
-	const OP_greaterequals:int = 0xB0
-	const OP_instanceof:int = 0xB1
-	const OP_istype:int = 0xB2
-	const OP_istypelate:int = 0xB3
-	const OP_in:int = 0xB4
-	const OP_increment_i:int = 0xC0
-	const OP_decrement_i:int = 0xC1
-	const OP_inclocal_i:int = 0xC2
-	const OP_declocal_i:int = 0xC3
-	const OP_negate_i:int = 0xC4
-	const OP_add_i:int = 0xC5
-	const OP_subtract_i:int = 0xC6
-	const OP_multiply_i:int = 0xC7
-	const OP_getlocal0:int = 0xD0
-	const OP_getlocal1:int = 0xD1
-	const OP_getlocal2:int = 0xD2
-	const OP_getlocal3:int = 0xD3
-	const OP_setlocal0:int = 0xD4
-	const OP_setlocal1:int = 0xD5
-	const OP_setlocal2:int = 0xD6
-	const OP_setlocal3:int = 0xD7
-	const OP_debug:int = 0xEF
-	const OP_debugline:int = 0xF0
-	const OP_debugfile:int = 0xF1
-	const OP_bkptline:int = 0xF2
-    const OP_timestamp:int = 0xF3
+    const OP_bkpt:int = 0x01;
+    const OP_nop:int = 0x02;
+    const OP_throw:int = 0x03;
+    const OP_getsuper:int = 0x04;
+    const OP_setsuper:int = 0x05;
+    const OP_dxns:int = 0x06;
+    const OP_dxnslate:int = 0x07;
+    const OP_kill:int = 0x08;
+    const OP_label:int = 0x09;
+    const OP_ifnlt:int = 0x0C;
+    const OP_ifnle:int = 0x0D;
+    const OP_ifngt:int = 0x0E;
+    const OP_ifnge:int = 0x0F;
+    const OP_jump:int = 0x10;
+    const OP_iftrue:int = 0x11;
+    const OP_iffalse:int = 0x12;
+    const OP_ifeq:int = 0x13;
+    const OP_ifne:int = 0x14;
+    const OP_iflt:int = 0x15;
+    const OP_ifle:int = 0x16;
+    const OP_ifgt:int = 0x17;
+    const OP_ifge:int = 0x18;
+    const OP_ifstricteq:int = 0x19;
+    const OP_ifstrictne:int = 0x1A;
+    const OP_lookupswitch:int = 0x1B;
+    const OP_pushwith:int = 0x1C;
+    const OP_popscope:int = 0x1D;
+    const OP_nextname:int = 0x1E;
+    const OP_hasnext:int = 0x1F;
+    const OP_pushnull:int = 0x20;
+    const OP_pushundefined:int = 0x21;
+    const OP_pushconstant:int = 0x22;
+    const OP_nextvalue:int = 0x23;
+    const OP_pushbyte:int = 0x24;
+    const OP_pushshort:int = 0x25;
+    const OP_pushtrue:int = 0x26;
+    const OP_pushfalse:int = 0x27;
+    const OP_pushnan:int = 0x28;
+    const OP_pop:int = 0x29;
+    const OP_dup:int = 0x2A;
+    const OP_swap:int = 0x2B;
+    const OP_pushstring:int = 0x2C;
+    const OP_pushint:int = 0x2D;
+    const OP_pushuint:int = 0x2E;
+    const OP_pushdouble:int = 0x2F;
+    const OP_pushscope:int = 0x30;
+    const OP_pushnamespace:int = 0x31;
+    const OP_hasnext2:int = 0x32;
+    const OP_newfunction:int = 0x40;
+    const OP_call:int = 0x41;
+    const OP_construct:int = 0x42;
+    const OP_callmethod:int = 0x43;
+    const OP_callstatic:int = 0x44;
+    const OP_callsuper:int = 0x45;
+    const OP_callproperty:int = 0x46;
+    const OP_returnvoid:int = 0x47;
+    const OP_returnvalue:int = 0x48;
+    const OP_constructsuper:int = 0x49;
+    const OP_constructprop:int = 0x4A;
+    const OP_callsuperid:int = 0x4B;
+    const OP_callproplex:int = 0x4C;
+    const OP_callinterface:int = 0x4D;
+    const OP_callsupervoid:int = 0x4E;
+    const OP_callpropvoid:int = 0x4F;
+    const OP_newobject:int = 0x55;
+    const OP_newarray:int = 0x56;
+    const OP_newactivation:int = 0x57;
+    const OP_newclass:int = 0x58;
+    const OP_getdescendants:int = 0x59;
+    const OP_newcatch:int = 0x5A;
+    const OP_findpropstrict:int = 0x5D;
+    const OP_findproperty:int = 0x5E;
+    const OP_finddef:int = 0x5F;
+    const OP_getlex:int = 0x60;
+    const OP_setproperty:int = 0x61;
+    const OP_getlocal:int = 0x62;
+    const OP_setlocal:int = 0x63;
+    const OP_getglobalscope:int = 0x64;
+    const OP_getscopeobject:int = 0x65;
+    const OP_getproperty:int = 0x66;
+    const OP_getouterscope:int = 0x67;
+    const OP_initproperty:int = 0x68;
+    const OP_setpropertylate:int = 0x69;
+    const OP_deleteproperty:int = 0x6A;
+    const OP_deletepropertylate:int = 0x6B;
+    const OP_getslot:int = 0x6C;
+    const OP_setslot:int = 0x6D;
+    const OP_getglobalslot:int = 0x6E;
+    const OP_setglobalslot:int = 0x6F;
+    const OP_convert_s:int = 0x70;
+    const OP_esc_xelem:int = 0x71;
+    const OP_esc_xattr:int = 0x72;
+    const OP_convert_i:int = 0x73;
+    const OP_convert_u:int = 0x74;
+    const OP_convert_d:int = 0x75;
+    const OP_convert_b:int = 0x76;
+    const OP_convert_o:int = 0x77;
+    const OP_checkfilter:int = 0x78;
+    const OP_coerce:int = 0x80;
+    const OP_coerce_b:int = 0x81;
+    const OP_coerce_a:int = 0x82;
+    const OP_coerce_i:int = 0x83;
+    const OP_coerce_d:int = 0x84;
+    const OP_coerce_s:int = 0x85;
+    const OP_astype:int = 0x86;
+    const OP_astypelate:int = 0x87;
+    const OP_coerce_u:int = 0x88;
+    const OP_coerce_o:int = 0x89;
+    const OP_negate:int = 0x90;
+    const OP_increment:int = 0x91;
+    const OP_inclocal:int = 0x92;
+    const OP_decrement:int = 0x93;
+    const OP_declocal:int = 0x94;
+    const OP_typeof:int = 0x95;
+    const OP_not:int = 0x96;
+    const OP_bitnot:int = 0x97;
+    const OP_concat:int = 0x9A;
+    const OP_add_d:int = 0x9B;
+    const OP_add:int = 0xA0;
+    const OP_subtract:int = 0xA1;
+    const OP_multiply:int = 0xA2;
+    const OP_divide:int = 0xA3;
+    const OP_modulo:int = 0xA4;
+    const OP_lshift:int = 0xA5;
+    const OP_rshift:int = 0xA6;
+    const OP_urshift:int = 0xA7;
+    const OP_bitand:int = 0xA8;
+    const OP_bitor:int = 0xA9;
+    const OP_bitxor:int = 0xAA;
+    const OP_equals:int = 0xAB;
+    const OP_strictequals:int = 0xAC;
+    const OP_lessthan:int = 0xAD;
+    const OP_lessequals:int = 0xAE;
+    const OP_greaterthan:int = 0xAF;
+    const OP_greaterequals:int = 0xB0;
+    const OP_instanceof:int = 0xB1;
+    const OP_istype:int = 0xB2;
+    const OP_istypelate:int = 0xB3;
+    const OP_in:int = 0xB4;
+    const OP_increment_i:int = 0xC0;
+    const OP_decrement_i:int = 0xC1;
+    const OP_inclocal_i:int = 0xC2;
+    const OP_declocal_i:int = 0xC3;
+    const OP_negate_i:int = 0xC4;
+    const OP_add_i:int = 0xC5;
+    const OP_subtract_i:int = 0xC6;
+    const OP_multiply_i:int = 0xC7;
+    const OP_getlocal0:int = 0xD0;
+    const OP_getlocal1:int = 0xD1;
+    const OP_getlocal2:int = 0xD2;
+    const OP_getlocal3:int = 0xD3;
+    const OP_setlocal0:int = 0xD4;
+    const OP_setlocal1:int = 0xD5;
+    const OP_setlocal2:int = 0xD6;
+    const OP_setlocal3:int = 0xD7;
+    const OP_debug:int = 0xEF;
+    const OP_debugline:int = 0xF0;
+    const OP_debugfile:int = 0xF1;
+    const OP_bkptline:int = 0xF2;
+    const OP_timestamp:int = 0xF3;
 
     /*********************************************************************************
      * AVM2 assembler for one code block.
@@ -297,16 +297,32 @@ namespace Asm;
      *  - Ditto for the scope depth, really.
      */
 
+    var listify = false;
+
     public class AVM2Assembler
     {
-        const listify = false;
         const indent = "        ";
 
-        function AVM2Assembler(constants, numberOfFormals, uses_arguments=false) {
-            this.constants = constants;
-            this.nextTemp = numberOfFormals + 1 + (uses_arguments ? 1 : 0); // local 0 is always "this"
-            this.current_scope_depth = 0;
-            this.uses_arguments = uses_arguments;
+        /*private*/ var code = new ABCByteStream;
+        /*private*/ var nextLabel = 1000;
+        /*private*/ var backpatches = [];
+        /*private*/ var current_scope_depth = 0;
+        /*private*/ var max_scope_depth = 0;
+        /*private*/ var current_stack_depth = 0;
+        /*private*/ var max_stack_depth = 0;
+        /*private*/ var nextTemp;
+        /*private*/ var freeTemps = [];
+        /*private*/ var constants;
+        /*private*/ var set_dxns = false;
+        /*private*/ var need_activation = false;
+        /*private*/ var attr = null;
+
+        function AVM2Assembler(constants, numberOfFormals, attr)
+            : constants = constants
+            , current_scope_depth = 0
+            , attr = attr
+            , nextTemp = numberOfFormals + 1 + (attr.uses_arguments || attr.uses_rest ? 1 : 0) // local 0 is always "this"
+        {
         }
 
         public function get maxStack() { return max_stack_depth }
@@ -318,8 +334,10 @@ namespace Asm;
                 f |= METHOD_Setsdxns;
             if (need_activation)
                 f |= METHOD_Activation;
-            if (uses_arguments)
+            if (attr.uses_arguments)
                 f |= METHOD_Arguments;
+            if (attr.uses_rest)
+                f |= METHOD_Needrest;
             return f;
         }
 
@@ -384,6 +402,7 @@ namespace Asm;
         public function I_getglobalslot(index) { pushOneU30("getglobalslot", 0x6E, index) }
         public function I_getlex(index) { pushOneU30("getlex", 0x60, index) }
         public function I_getscopeobject(index) { pushOneU30("getscopeobject", 0x65, index) }
+        public function I_getouterscope(index) { pushOneU30("getouterscope", 0x67, index) }
         public function I_newcatch(index) { pushOneU30("newcatch", 0x5A, index) }
         public function I_newfunction(index) { pushOneU30("newfunction", 0x40, index) }
         public function I_pushdouble(index) { pushOneU30("pushdouble", 0x2F, index) }
@@ -801,7 +820,7 @@ namespace Asm;
             for ( var i=0 ; i < backpatches.length ; i++ ) {
                 var bp = backpatches[i];
                 if (bp.label.address == -1)
-                    Util::internalerror("", 0, "Missing definition for label " + bp.label.name); // FIXME: source pos
+                    Util::internalError("", 0, "Missing definition for label " + bp.label.name); // FIXME: source pos
                 var v = bp.label.address - bp.base;
                 code.setInt24(bp.loc, v);
             }
@@ -823,18 +842,5 @@ namespace Asm;
                 max_scope_depth = current_scope_depth;
         }
 
-        /*private*/ var code = new ABCByteStream;
-        /*private*/ var nextLabel = 1000;
-        /*private*/ var backpatches = [];
-        /*private*/ var current_scope_depth = 0;
-        /*private*/ var max_scope_depth = 0;
-        /*private*/ var current_stack_depth = 0;
-        /*private*/ var max_stack_depth = 0;
-        /*private*/ var nextTemp;
-        /*private*/ var freeTemps = [];
-        /*private*/ var constants;
-        /*private*/ var set_dxns = false;
-        /*private*/ var need_activation = false;
-        /*private*/ var uses_arguments = false;
     }
 }
