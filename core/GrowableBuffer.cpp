@@ -1175,7 +1175,11 @@ namespace avmplus
 			if (pGuard->prevGuard)
 				pGuard->prevGuard->nextGuard = pGuard->nextGuard;
 			else
+			{
 				gBufferGuards = pGuard->nextGuard; // might be NULL
+				if (gBufferGuards)
+					gBufferGuards->prevGuard = NULL;
+			}
 		}
 
 		if (gBufferGuards==NULL && gBufferGuardHandler!=NULL)
@@ -1374,7 +1378,11 @@ namespace avmplus
 			if (pGuard->prevGuard)
 				pGuard->prevGuard->nextGuard = pGuard->nextGuard;
 			else
+			{
 				gGrowthGuards = pGuard->nextGuard; // might be NULL
+				if (gGrowthGuards)
+					gGrowthGuards->prevGuard = NULL;
+			}
 		}
 
 		if (gGrowthGuards==NULL && gGrowthGuardHandler!=NULL)
