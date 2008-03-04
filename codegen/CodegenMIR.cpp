@@ -137,6 +137,10 @@ return *((sintptr*)&_method);
 
 namespace avmplus
 {
+	#ifdef VTUNE
+		extern void VTune_RegisterMethod(MethodInfo* info, CodegenMIR *mir, AvmCore* core); 
+	#endif  // VTUNE
+
 		sintptr CodegenMIR::profAddr( void (DynamicProfiler::*f)() )
 		{
 			RETURN_VOID_METHOD_PTR(DynamicProfiler, f);
@@ -1348,6 +1352,12 @@ namespace avmplus
 		#endif
 		this->console = &core->console;
 		#endif		
+
+		#ifdef VTUNE
+		hasDebugInfo = false;
+		vtune = 0;
+		mdOffsets = 0;
+		#endif /* VTUNE */
 	}
 
 	CodegenMIR::CodegenMIR(MethodInfo* i)
@@ -1408,6 +1418,12 @@ namespace avmplus
 		// time stuff
 		verifyStartTime = GC::GetPerformanceCounter();
 #endif /* AVMPLUS_PROFILE */
+
+		#ifdef VTUNE
+		hasDebugInfo = false;
+		vtune = 0;
+		mdOffsets = 0;
+		#endif /* VTUNE */
 	}
 
 	CodegenMIR::CodegenMIR(NativeMethod* m)
@@ -1457,6 +1473,12 @@ namespace avmplus
 
 		// native method generation doesn't require a intermediate mir buffer
 		mirBuffer = 0;
+
+		#ifdef VTUNE
+		hasDebugInfo = false;
+		vtune = 0;
+		mdOffsets = 0;
+		#endif /* VTUNE */
 	}
 
 	CodegenMIR::~CodegenMIR()
@@ -1555,6 +1577,8 @@ namespace avmplus
 		mirNames[MIR_jmp]   = "jmp  ";
 		mirNames[MIR_jmpi]  = "jmpi ";
 		mirNames[MIR_jmpt]  = "jmpt ";
+		mirNames[MIR_file]  = "file ";
+		mirNames[MIR_line]  = "line ";
 		mirNames[MIR_le]    = "le   ";
 		mirNames[MIR_lt]    = "lt   ";
 		mirNames[MIR_eq]    = "eq   ";
@@ -4539,29 +4563,38 @@ namespace avmplus
 			/*
 			 * debugger instructions 
 			 */
-			#ifdef DEBUGGER
 			case OP_debugfile:
 			{
+			#ifdef DEBUGGER
 				// todo refactor api's so we don't have to pass argv/argc
 				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
 											InsConst((uintptr)core));
 				callIns(MIR_cm, DEBUGGERADDR(Debugger::debugFile), 2,
 						debugger,
 						InsConst(op1));
+			#endif // DEBUGGER
+			#ifdef VTUNE
+				Ins(MIR_file, op1);
+			#endif /* VTUNE */
 				break;
 		    }
 
 			case OP_debugline:
 			{
+			#ifdef DEBUGGER
 				// todo refactor api's so we don't have to pass argv/argc
 				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
 											InsConst((uintptr)core));
 				callIns(MIR_cm, DEBUGGERADDR(Debugger::debugLine), 2,
 						debugger,
 						InsConst(op1));
+			#endif // DEBUGGER
+			#ifdef VTUNE
+				Ins(MIR_line, op1);
+				hasDebugInfo = true;
+			#endif /* VTUNE */
 				break;
 			}
-			#endif // DEBUGGER
 
 			default:
 			{
@@ -5303,11 +5336,18 @@ namespace avmplus
 
 			case MIR_imm:
 			case MIR_alloc:
+			case MIR_line:
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " " << (int)op->imm;
 #endif
 				break;
 
+			case MIR_file:
+#ifndef AVMPLUS_SYMBIAN
+				buffer << mirNames[op->code] << " " << (String*)op->imm;
+#endif
+				break;
+				
 			case MIR_arg:
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " ";
@@ -5457,6 +5497,19 @@ namespace avmplus
 		casePtr = (uintptr*)&code[0];
 
 		mipStart = mip = (MDInstruction*) (casePtr+case_count);
+		mipEnd = 0;
+
+		#ifdef VTUNE
+		// squeeze our vtune record in between the case table and the start of code 
+		if (hasDebugInfo)
+		{
+			vtune = (iJIT_Method_NIDS*) (casePtr+case_count);
+			vtune->method_id = iJIT_GetNewMethodID();
+			vtune->stack_id = 0;
+			vtune->method_name = 0;   // @todo moh said this could be empty ?!?
+		}
+		mipStart = mip = (MDInstruction*) (vtune+1);
+		#endif /* VTUNE */
 
 		// make sure we have enough space for our prologue 
 		// technically should be from casePtr but we ask for a bit more room
@@ -5642,6 +5695,23 @@ namespace avmplus
 		#endif // AVMPLUS_ARM
 		
 		#ifdef AVMPLUS_IA32
+
+			#ifdef VTUNE
+				if (vtune && (core->VTuneStatus == iJIT_CALLGRAPH_ON)) 
+				{
+					MDInstruction* VTmip = mip;
+
+					MOV(EAX, (sintptr)vtune);
+					PUSH(EAX);
+					PUSH(0x13);
+			
+					void * funcptr = (void*)&iJIT_NotifyEvent;
+					CALL((int)funcptr-((int)VTmip+13));
+
+					ADD(ESP, 8);
+				}
+			#endif  //VTUNE
+
 		if (core->minstack)
 		{
 			// Check the stack
@@ -5794,7 +5864,8 @@ namespace avmplus
 			LMW ((Register)gpregs.LowerBound, -(32-gpregs.LowerBound)*4, SP);
 		}
 		BLR ();
-
+		mipEnd = mip;
+		
 		// At this point, we generate the code to store
 		// the nonvolatile floating point registers if needed,
 		// and patch the prologue to jump here.
@@ -5862,6 +5933,7 @@ namespace avmplus
 		int nonVolatileCount = countBits(gpregs.nonVolatileMask);
 		SUB_imm8 (SP, FP, 12 + nonVolatileCount * 4);
 		LDMFD (SP, gpregs.nonVolatileMask | FP_mask | SP_mask | PC_mask);
+		mipEnd = mip;
 		
 		// Patch stack overflow check
 		if (core->minstack)
@@ -5962,11 +6034,31 @@ namespace avmplus
 				}
 			}
 
+			#ifdef VTUNE
+				if (vtune && (core->VTuneStatus == iJIT_CALLGRAPH_ON)) 
+				{
+					MDInstruction* VTmip = mip+1;
+
+					PUSH(EAX);
+					MOV(EAX, (sintptr)vtune);
+					PUSH(EAX);
+					PUSH(0x14);
+			
+					void * funcptr = (void*)&iJIT_NotifyEvent;
+					CALL((int)funcptr-((int)VTmip+13));
+	
+					ADD(ESP, 8);
+					POP(EAX);
+				}
+			#endif  //VTUNE
+
+
 			//ADD(ESP, arSize); 
 			//POP  (EBP);
 			ALU(0xc9); // leave:  esp = ebp, pop ebp
 		}
 		RET  ();
+		mipEnd = mip;
 
 		// Patch stack overflow check
 		if (core->minstack)
@@ -6084,9 +6176,6 @@ namespace avmplus
 		info->flags |= AbstractFunction::TURBO;
 		#endif /* AVMPLUS_INTERP */
 			
-		uintptr mipEnd = (uintptr) mip;
-		(void)mipEnd;
-
 		bindMethod(info);
 
 #ifndef AVMPLUS_JIT_READONLY
@@ -6120,7 +6209,7 @@ namespace avmplus
 			double mdrate = mInstructionCount / mddiff; // K instructions per second (diff in ms)
 			double mirrate = (ipEnd-ipStart) / mirdiff; // K OP's per sec
 			double mdperc = mddiff/alldiff*100;
-			uintptr size = mipEnd - (uintptr)mipStart;
+			uintptr size = mipEnd - mipStart;
 
 			// perf
 			core->console << "  " << (int)mirrate << "K mir/s  " 
@@ -7701,6 +7790,12 @@ namespace avmplus
 #ifdef DEBUGGER
 		info->codeSize = int((mip - mipStart) * sizeof(MDInstruction));
 #endif
+
+		#ifdef VTUNE
+		if (vtune && !overflow)
+			VTune_RegisterMethod(info, this, core);
+		mdOffsets = 0;  // clear the address to file:line table
+		#endif /* VTUNE */    
 	}
 
 #ifdef FEATURE_BUFFER_GUARD
@@ -7940,6 +8035,12 @@ namespace avmplus
 		MDInstruction* lastMip = mip;
 		#endif /*_DEBUG */
 
+		#ifdef VTUNE
+		Stringp currentFile = 0;
+		uint32  currentLine = 0; 
+		mdOffsets = new (core->GetGC()) SortedIntMap<LineNumberRecord*>(core->GetGC(), 512);
+		#endif /* VTUNE */
+        
 		// linked list of instructions that need to be spilled prior to a branch.
 		AvmAssert(ip == ipStart);
 		while(ip < ipEnd)
@@ -8026,7 +8127,24 @@ namespace avmplus
 					reserveStackSpace(ip);
 					break;
 				}
+				#ifdef VTUNE
+				case MIR_file:
+				{
+					// current file gets set.
+					currentFile = (Stringp)ip->imm;
+					break;
+				}
+				case MIR_line:
+				{
+					// note the alloc, actual act is delayed; see above					
+					currentLine = (uint32)ip->imm;
 
+					// add the current line/file info to our table tracking such stuff
+					LineNumberRecord* record = new (core->GetGC()) LineNumberRecord(currentFile,currentLine);
+					mdOffsets->put( (sintptr)mip, record );
+					break;
+				}
+				#endif /* VTUNE */
 				case MIR_def:
 				case MIR_fdef:
 				{

@@ -628,7 +628,7 @@ namespace avmplus
 			case OP_debugfile:
 			{
 				//checkStack(0,0)
-				#ifdef DEBUGGER
+				#if defined(DEBUGGER) || defined(VTUNE)
 				Atom filename = checkCpoolOperand(imm30, kStringType);
 				if (mir) mir->emit(state, opcode, (uintptr)AvmCore::atomToString(filename));
 				#endif
@@ -2558,7 +2558,7 @@ namespace avmplus
 				break;
 
 			case OP_debugline:
-				#ifdef DEBUGGER
+				#if defined(DEBUGGER) || defined(VTUNE)
 				// we actually do generate code for these, in debugger mode
 				if (mir) mir->emit(state, opcode, imm30);
 				#endif

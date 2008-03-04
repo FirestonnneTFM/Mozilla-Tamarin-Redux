@@ -99,7 +99,11 @@
 
 #ifdef WIN32
 #include <malloc.h>
-#endif
+#endif 
+
+#ifdef VTUNE
+#include "JITProfiling.h"
+#endif 
 
 #include <stdarg.h>
 
