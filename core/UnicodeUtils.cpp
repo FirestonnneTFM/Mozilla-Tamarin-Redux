@@ -304,10 +304,10 @@ namespace avmplus
 			while (c <= 0x7f)
 			{
 				if (--inLen == 0)
-					return outLen+(1+in-inbase);
+					return outLen+(1+(int)(in-inbase));
 				c = *(++in);
 			}
-			outLen += in-inbase;
+			outLen += (int)(in-inbase);
 
 			switch (c >> 4)
 			{

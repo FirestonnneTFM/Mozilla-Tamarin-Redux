@@ -128,7 +128,7 @@ namespace avmplus
 		, forMir(mir)
 	{
 		init();
-		AvmAssert( (size_t)MathUtils::nextPowerOfTwo(pageSize()-1) == pageSize() );
+		AvmAssert( (size_t)MathUtils::nextPowerOfTwo((int)(pageSize()-1)) == pageSize() );
 	}
 
 	GrowableBuffer::~GrowableBuffer()
@@ -168,7 +168,7 @@ namespace avmplus
 			// get rid of pages
 			byte* after = pageAfter(current);
 #ifdef MEMORY_INFO
-			MMgc::ChangeSizeForObject(this, -1 * (uncommit-after));
+			MMgc::ChangeSizeForObject(this, (int)(-1 * (uncommit-after)));
 #endif
 			heap->DecommitCodeMemory((void*)after, uncommit-after);
 			uncommit = after;
@@ -188,7 +188,7 @@ namespace avmplus
 		AvmAssertMsg(amt % pageSize() == 0, "amt must be multiple of pageSize");
 		size_t grow = ( (uncommit + amt) < last) ? amt : last - uncommit;
 #ifdef MEMORY_INFO
-		MMgc::ChangeSizeForObject(this, grow);
+		MMgc::ChangeSizeForObject(this, (int)grow);
 #endif
 		void* res = heap->CommitCodeMemory((void*)uncommit, grow);
 		AvmAssert(res != 0);
@@ -211,7 +211,7 @@ namespace avmplus
 		if (size > 0)
 		{	
 #ifdef MEMORY_INFO
-			MMgc::ChangeSizeForObject(this, -1 * size);
+			MMgc::ChangeSizeForObject(this, (int)(-1 * size));
 #endif
 			void* res = heap->DecommitCodeMemory((void*)shrinkTo, size);
 			AvmAssert(res != 0);
@@ -230,7 +230,7 @@ namespace avmplus
 		if (first != 0)
 		{
 #ifdef MEMORY_INFO
-			MMgc::ChangeSizeForObject(this, -1 * (uncommit-first));
+			MMgc::ChangeSizeForObject(this, (int)(-1 * (uncommit-first)));
 			heap->DecommitCodeMemory(first, uncommit-first);
 #endif
 			if (forMir)
@@ -249,16 +249,26 @@ namespace avmplus
 
 	#ifdef AVMPLUS_WIN32
 
+	#ifdef _WIN64	
+	static GenericGuard* gGrowthGuards = NULL;
+	static GenericGuard* gBufferGuards = NULL;
+	static PVOID gBufferGuardHandler = 0;
+	static PVOID gGrowthGuardHandler = 0;
+	#endif
+
     #pragma warning(disable: 4733) // make sure you build with linker option /SAFESEH:NO !!!!
 
 	void GenericGuard::init()
 	{
+#ifndef _WIN64
 		record.prev = 0;
 		record.handler = 0;
 		record.instance = 0;
 		record.terminator = 0;
+#endif
 	}
 
+#ifndef _WIN64
 	void GenericGuard::registerHandler()
 	{
 		if (record.instance == 0)
@@ -292,7 +302,66 @@ namespace avmplus
 		}
 		record.instance = 0;
 	}
+#endif
 
+#ifdef _WIN64
+	LONG NTAPI GenericGuard::guardRoutine(PEXCEPTION_POINTERS pexp)
+	{
+		PEXCEPTION_RECORD exceptionRecord = pexp->ExceptionRecord;
+		PCONTEXT contextRecord = pexp->ContextRecord;
+		(void)contextRecord;
+
+		if (exceptionRecord->ExceptionCode==EXCEPTION_GUARD_PAGE ||
+			exceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
+		{
+			// GrowthGuard? Go through the list and see
+			if (gGrowthGuards!=NULL)
+			{
+				GenericGuard* pGuard = gGrowthGuards;
+				while(pGuard)
+				{
+					int ret = pGuard->handleException(exceptionRecord,
+														NULL,
+														contextRecord,
+														NULL);
+					if (ret==EXCEPTION_CONTINUE_EXECUTION)
+						return ret;
+
+					pGuard = pGuard->nextGuard;
+				}
+				// didn't find a handler for this, return if we were
+				// looking for a guard page handler
+				if (exceptionRecord->ExceptionCode==EXCEPTION_GUARD_PAGE)
+					return EXCEPTION_CONTINUE_SEARCH;
+			}
+		}
+		
+		if (exceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
+		{
+			// BufferGuard?
+			if(gBufferGuards!=NULL)
+			{
+				GenericGuard* pGuard = gBufferGuards;
+				while(pGuard)
+				{
+					//GenericGuard* guard = (GenericGuard*)gBufferGuards.get(i);
+					GenericGuard* guard = gBufferGuards;
+					int ret = guard->handleException(exceptionRecord,
+														NULL,
+														contextRecord,
+														NULL);
+					if (ret==EXCEPTION_CONTINUE_EXECUTION)
+						return ret;
+
+					pGuard = pGuard->nextGuard;
+				}
+				// didn't find a handler for this
+				return EXCEPTION_CONTINUE_SEARCH;
+			}
+		}
+		return EXCEPTION_CONTINUE_SEARCH;
+	}
+#else
 	/*static*/int __cdecl GenericGuard::guardRoutine(struct _EXCEPTION_RECORD *exceptionRecord,
 													 void *establisherFrame,
 													 struct _CONTEXT *contextRecord,
@@ -311,6 +380,7 @@ namespace avmplus
 	}
 
     #pragma warning(default: 4733) // make sure you build with linker option /SAFESEH:NO !!!!	
+#endif
 
     #endif /* AVMPLUS_WIN32 */
 	
@@ -1071,6 +1141,60 @@ namespace avmplus
 		unregisterHandler();
 	}
 
+#ifdef _WIN64
+	void BufferGuard::registerHandler()
+	{
+		// If handler hasn't been installed, install it
+		if (gBufferGuardHandler==0)
+		{
+			gBufferGuardHandler = AddVectoredExceptionHandler(1, (PVECTORED_EXCEPTION_HANDLER)&avmplus::GenericGuard::guardRoutine);
+		}
+
+		if (gBufferGuards==NULL)
+		{
+			// first guard
+			this->prevGuard = NULL;
+			this->nextGuard = NULL;
+			gBufferGuards = this;
+		}
+		else
+		{
+			// Make this the first guard in the list
+			this->prevGuard = NULL;
+			this->nextGuard = gBufferGuards;
+			gBufferGuards->prevGuard = this;
+			gBufferGuards = this;
+		}
+	}
+
+	void BufferGuard::unregisterHandler()
+	{
+		// Find us in the list
+		GenericGuard* pGuard = gBufferGuards;
+		while (pGuard!=this && pGuard!=NULL)
+			pGuard = pGuard->nextGuard;
+		if (pGuard)
+		{
+			// this is us
+			if (pGuard->prevGuard)
+				pGuard->prevGuard->nextGuard = pGuard->nextGuard;
+			else
+			{
+				gBufferGuards = pGuard->nextGuard; // might be NULL
+				if (gBufferGuards)
+					gBufferGuards->prevGuard = NULL;
+			}
+		}
+
+		if (gBufferGuards==NULL && gBufferGuardHandler!=NULL)
+		{		
+			// No more buffer guards, remove handler
+			RemoveVectoredExceptionHandler(gBufferGuardHandler);
+			gBufferGuardHandler = 0;
+		}
+	}
+#endif
+
 	// Platform specific code follows
 #ifdef AVMPLUS_WIN32
 	int BufferGuard::handleException(struct _EXCEPTION_RECORD* /*exceptionRecord*/,
@@ -1081,6 +1205,37 @@ namespace avmplus
 		// Set registers in contextRecord to point to the catch location when
 		// we return.  We will *really* handle the exception there.  All exceptions
 		// caught by this handler must be wrapped by TRY/CATCH blocks. See win32setjmp.cpp
+#ifdef _WIN64
+		struct _JUMP_BUFFER *buf = (_JUMP_BUFFER*)jmpBuf;
+		contextRecord->Rdx = buf->Frame;
+		contextRecord->Rbx = buf->Rbx;
+		contextRecord->Rsp = buf->Rsp;
+		contextRecord->Rbp = buf->Rbp;
+		contextRecord->Rsi = buf->Rsi;
+		contextRecord->Rdi = buf->Rdi;
+		contextRecord->R12 = buf->R12;
+		contextRecord->R13 = buf->R13;
+		contextRecord->R14 = buf->R14;
+		contextRecord->R15 = buf->R15;
+
+		contextRecord->Rip = buf->Rip;
+
+		memcpy(&contextRecord->Xmm6, &buf->Xmm6, sizeof(M128A)*10);
+		//contextRecord->Xmm6 = (M128A)buf->Xmm6;
+		//contextRecord->Xmm7 = buf->Xmm7;
+		//contextRecord->Xmm8 = buf->Xmm8;
+		//contextRecord->Xmm9 = buf->Xmm9;
+		//contextRecord->Xmm10 = buf->Xmm10;
+		//contextRecord->Xmm11 = buf->Xmm11;
+		//contextRecord->Xmm12 = buf->Xmm12;
+		//contextRecord->Xmm13 = buf->Xmm13;
+		//contextRecord->Xmm14 = buf->Xmm14;
+		//contextRecord->Xmm15 = buf->Xmm15;
+
+		contextRecord->Rax = 1123;
+
+		return EXCEPTION_CONTINUE_EXECUTION;
+#else
 		
 		contextRecord->Ebp = (*jmpBuf)[0];
 		contextRecord->Ebx = (*jmpBuf)[1];
@@ -1091,6 +1246,8 @@ namespace avmplus
 		contextRecord->Eax = 1123;
 
 		return ExceptionContinueExecution;
+#endif // _WIN64
+
 	}
 #endif // AVMPLUS_WIN32
 
@@ -1188,6 +1345,59 @@ namespace avmplus
 			unregisterHandler();
 	}
 
+#ifdef _WIN64
+	void GrowthGuard::registerHandler()
+	{
+		if (gGrowthGuardHandler==0)
+		{
+			gGrowthGuardHandler = AddVectoredExceptionHandler(1, (PVECTORED_EXCEPTION_HANDLER)&avmplus::GenericGuard::guardRoutine);
+		}
+
+		if (gGrowthGuards==NULL)
+		{
+			// first guard
+			this->prevGuard = NULL;
+			this->nextGuard = NULL;
+			gGrowthGuards = this;
+		}
+		else
+		{
+			// Make this the first guard in the list
+			this->prevGuard = NULL;
+			this->nextGuard = gGrowthGuards;
+			gGrowthGuards->prevGuard = this;
+			gGrowthGuards = this;
+		}
+	}
+
+	void GrowthGuard::unregisterHandler()
+	{
+		// Find us in the list
+		GenericGuard* pGuard = gGrowthGuards;
+		while (pGuard!=this && pGuard!=NULL)
+			pGuard = pGuard->nextGuard;
+		if (pGuard)
+		{
+			// this is us
+			if (pGuard->prevGuard)
+				pGuard->prevGuard->nextGuard = pGuard->nextGuard;
+			else
+			{
+				gGrowthGuards = pGuard->nextGuard; // might be NULL
+				if (gGrowthGuards)
+					gGrowthGuards->prevGuard = NULL;
+			}
+		}
+
+		if (gGrowthGuards==NULL && gGrowthGuardHandler!=NULL)
+		{		
+			// No more Growth guards, remove handler
+			RemoveVectoredExceptionHandler(gGrowthGuardHandler);
+			gGrowthGuardHandler = 0;
+		}
+	}
+#endif
+
 	// Platform specific code follows
 #ifdef AVMPLUS_WIN32
 	int GrowthGuard::handleException(struct _EXCEPTION_RECORD* exceptionRecord,
@@ -1201,19 +1411,31 @@ namespace avmplus
 		{
 			// sequential write access to buffer
 			buffer->grow();
+			#ifdef _WIN64
+			return EXCEPTION_CONTINUE_EXECUTION;
+			#else
 			return ExceptionContinueExecution;
+			#endif
 		}
 		else if (AccessViolationAddress > nextPage && AccessViolationAddress < buffer->end())
 		{
 			// random access into buffer (commit next page after the hit)
 			byte* page = buffer->pageAfter(AccessViolationAddress);
 			buffer->growBy(page - nextPage);
+			#ifdef _WIN64
+			return EXCEPTION_CONTINUE_EXECUTION;
+			#else
 			return ExceptionContinueExecution;
+			#endif
 		}
 		else
 		{
 			// hmm something is pretty bad here
+			#ifdef _WIN64
+			return EXCEPTION_CONTINUE_SEARCH;
+			#else
 			return ExceptionContinueSearch;
+			#endif
 		}
 	}
 

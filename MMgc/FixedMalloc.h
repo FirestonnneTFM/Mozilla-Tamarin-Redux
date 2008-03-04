@@ -119,7 +119,11 @@ namespace MMgc
 		FixedMalloc(GCHeap* heap);
 		~FixedMalloc();
 		static FixedMalloc *instance;
+#ifdef MMGC_AMD64
+		const static int kLargestAlloc = 2016;	
+#else
 		const static int kLargestAlloc = 2032;	
+#endif
 		const static int kNumSizeClasses = 41;
 		const static int kPageUsableSpace = GCHeap::kBlockSize - offsetof(MMgc::FixedAlloc::FixedBlock, items);
 
@@ -141,7 +145,7 @@ namespace MMgc
 		{
 			size += DebugSize();
 			size_t blocksNeeded = ((size+0xfff)&~0xfff) >> 12;
-			void *item = m_heap->Alloc(blocksNeeded, true, false);
+			void *item = m_heap->Alloc((int)blocksNeeded, true, false);
 			if(!item)
 			{
 				GCAssertMsg(item != NULL, "Large allocation of %d blocks failed!");

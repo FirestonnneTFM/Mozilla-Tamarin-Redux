@@ -17,10 +17,12 @@ stale.xml
 MMgc/obj_7/**
 platform/win32/obj_7/**
 platform/win32/obj_8/**
+platform/win32/x64/**
 platform/mac/MMgc/build/**
 platform/mac/avmplus/build/**
 platform/mac/shell/build/**
 MMgc/obj_8/**
+MMgc/x64/**
 objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**
@@ -35,5 +37,9 @@ test/*.html
 *.s
 *.d
 *.a
-esc/safebin*
+esc/safebin
 esc/src/*.es.abc
+*.bak
+*.cod
+*.orig
+*.user

@@ -373,7 +373,7 @@ namespace avmplus
 	void Debugger::processAbc(PoolObject* pool, ScriptBuffer code)
 	{
 		// first off we build an AbcInfo object 
-		AbcFile* abc = new (core->GetGC()) AbcFile(core, code.getSize());
+		AbcFile* abc = new (core->GetGC()) AbcFile(core, (int)code.getSize());
 		
 		// now let's scan the abc resources pulling out what we need
 		scanResources(abc, pool);
@@ -494,7 +494,7 @@ namespace avmplus
 					if (active == NULL)
 						AvmAssert(0 == 1); // means OP_debugline appeared before OP_debugfile which is WRONG!  Fix compiler
 					else
-						active->addLine(core, line, m, pc - abc_start);
+						active->addLine(core, line, m, (int)(pc - abc_start));
  					break;
 				}
 
@@ -723,7 +723,7 @@ namespace avmplus
 		{
 			uintptr index = (uintptr)debugger->pool2abcIndex.get(Atom((PoolObject*)m->pool));
 
-			AbcFile* abc = (AbcFile*)debugger->abcAt(index);
+			AbcFile* abc = (AbcFile*)debugger->abcAt((int)index);
 			source = abc->sourceNamed(trace->filename);
 		}
 		linenum = trace->linenum;

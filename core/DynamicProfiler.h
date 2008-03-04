@@ -48,10 +48,15 @@ namespace avmplus
 	 */
 	class DynamicProfiler
 	{
-		#ifdef WIN32
-		inline static int rdtsc() {
+		#if defined(WIN32)
 			// read the cpu cycle counter.  1 tick = 1 cycle on IA32
+			#ifdef AVMPLUS_64BIT
+		inline static uint64 rdtsc() {
+			return __rdtsc();
+			#else
+		inline static int rdtsc() {
 			_asm rdtsc;
+			#endif
 		}
 		#endif
 
@@ -59,7 +64,7 @@ namespace avmplus
 		int totalCount;
 		AbcOpcode lastOp;
 		uint64 times[256];
-		int lastTime;
+		uint64 lastTime;
 
 		/**
 		 * 1. set markOverhead=0
@@ -103,8 +108,9 @@ namespace avmplus
 
 		void mark(AbcOpcode op)
 		{
-			#ifdef WIN32
-				int now = rdtsc();
+			#if defined(WIN32) 
+			// use compiler instrinsic
+			uint64 now = __rdtsc();
 			#else
 			uint64 now = MMgc::GC::GetPerformanceCounter();
 			#endif

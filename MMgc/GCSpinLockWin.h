@@ -58,19 +58,33 @@ namespace MMgc
 
 		inline void Acquire()
 		{
+#ifdef MMGC_64BIT
+			//!!@ fires off for some reason
+			//GCAssert(sl==0 || sl==1 || sl==0); // Poor mans defense against thread timing issues, per Tom R.
+			while (_InterlockedCompareExchange64(&sl, 1, 0) != 0) {
+#else
 			GCAssert(sl==0 || sl==1 || sl==0); // Poor mans defense against thread timing issues, per Tom R.
 			while (InterlockedCompareExchange(&sl, 1, 0) != 0) {
+#endif
 				Sleep(0);
 			}
 		}
 		
 		inline void Release()
 		{
+#ifdef MMGC_64BIT
+			_InterlockedExchange64(&sl, 0);
+#else
 			InterlockedExchange(&sl, 0);
+#endif
 		}
 
 	private:
+#ifdef MMGC_64BIT
+		volatile LONG64 sl;
+#else
 		long sl;
+#endif
 	};
 
 	/**
