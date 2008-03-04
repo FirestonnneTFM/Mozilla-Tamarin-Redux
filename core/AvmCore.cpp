@@ -156,6 +156,10 @@ namespace avmplus
 
 		#endif // AVMPLUS_MIR
 
+	#ifdef VTUNE
+			VTuneStatus = CheckVTuneStatus();
+	#endif // VTUNE
+
 		interrupts = false;
 
 		gcInterface.SetCore(this);

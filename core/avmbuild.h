@@ -117,7 +117,7 @@
 #define AVMPLUS_VERIFYALL
 #endif
 
-#if defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
+#if defined(VTUNE) || defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
 #define AVMPLUS_VERBOSE
 #define AVMPLUS_PROFILE
 #endif

@@ -55,6 +55,20 @@ namespace avmplus
 	// rounding v up to the given 2^ quantity
 	#define BIT_ROUND_UP(v,q)      ( (((uintptr)v)+(q)-1) & ~((q)-1) )
 
+	#ifdef VTUNE
+	class LineNumberRecord : public MMgc::GCObject
+	{
+		public:
+			LineNumberRecord(Stringp fn, uint32 ln)
+			: filename(fn)
+			, lineno(ln)
+			{ }
+
+		String*	filename;
+		uint32	lineno;
+	};    
+	#endif /* VTUNE */
+
 	/**
 	 * The CodegenMIR class is a dynamic code generator which translates
 	 * AVM+ bytecodes into an architecture neutral intermediate representation
@@ -111,6 +125,8 @@ namespace avmplus
 			MIR_jle		= 24,
 			MIR_jnlt	= 25,
 			MIR_jnle	= 26,
+			MIR_file	= 27,
+			MIR_line	= 28,
 
 			MIR_imm		= 1  | MIR_oper,	// 0,imm32
 			MIR_imul	= 2  | MIR_oper,
@@ -607,6 +623,21 @@ namespace avmplus
 
 		OP* exAtom;
 
+	#ifdef VTUNE
+
+		iJIT_Method_NIDS*					getVtuneInfo()		{ return vtune; }
+		SortedIntMap<LineNumberRecord*>*	getLineNumberMap()	{ return mdOffsets; }
+		uintptr								getMdStart()		{ return (uintptr)mipStart; }
+		uintptr								getMdEnd()			{ return (uintptr)mipEnd; }
+
+	private:
+
+		bool								hasDebugInfo;   // OP_debugline seen during MIR pass
+		iJIT_Method_NIDS*					vtune;			// points to vtune record
+		SortedIntMap<LineNumberRecord*>*	mdOffsets;		// populated during code generation 
+
+	#endif /* VTUNE */
+
 	private:
 		#define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
 		#define COREADDR(f) coreAddr((int (AvmCore::*)())(&f))
@@ -680,6 +711,7 @@ namespace avmplus
 		#ifndef AVMPLUS_ARM
 		MDInstruction* mip;
 		MDInstruction* mipStart;
+		MDInstruction* mipEnd;
 		#endif
 
 		uint32 arg_index;
@@ -1646,8 +1678,14 @@ namespace avmplus
     #endif /* AVMPLUS_ARM */
 	
 	#ifdef AVMPLUS_IA32
+#ifdef VTUNE
+	static const int md_prologue_size		= 64;
+	static const int md_epilogue_size		= 256;
+#else
 	static const int md_prologue_size		= 32;
 	static const int md_epilogue_size		= 128;
+#endif // VTUNE
+
 	static const int md_native_thunk_size	= 256;
 	#endif /* AVMPLUS_PPC */
 	
