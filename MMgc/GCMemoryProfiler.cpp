@@ -49,7 +49,11 @@ namespace MMgc
 	GCThreadLocal<const char*> memtag;
 	GCThreadLocal<void*> memtype;
 	GCThreadLocal<void*> lastItem;
+#ifdef MMGC_64BIT
+	GCThreadLocal<int64> lastTrace;
+#else
 	GCThreadLocal<int> lastTrace;
+#endif
 
 
 	// Turn this to see GC stack traces.
@@ -243,7 +247,7 @@ namespace MMgc
 			}
 		}
 
-		int codeSize = 0;
+		size_t codeSize = 0;
 
 		GCHeap* heap = GCHeap::GetGCHeap();
 		
@@ -251,7 +255,7 @@ namespace MMgc
 		codeSize = heap->GetCodeMemorySize();
 #endif
 		int inUse = heap->GetUsedHeapSize() * GCHeap::kBlockSize;
-		int committed = heap->GetTotalHeapSize() * GCHeap::kBlockSize + codeSize;
+		size_t committed = heap->GetTotalHeapSize() * GCHeap::kBlockSize + codeSize;
 		int free = heap->GetFreeHeapSize() * GCHeap::kBlockSize;
 
 		int memInfo = residentCount*16;
@@ -351,7 +355,7 @@ namespace MMgc
 		{
 			// this guy might be deleted so swallow access violations
 			try {
-				traceTable[lastTrace].vtable = *(int*)(void*)lastItem;
+				traceTable[(int)lastTrace].vtable = *(int*)((void*)lastItem);
 			} catch(...) {}
 			lastItem = 0;
 		}
@@ -378,11 +382,11 @@ namespace MMgc
 		// subtract decoration space
 		size -= DebugSize();
 
-		ChangeSize(traceIndex, size);
+		ChangeSize(traceIndex, (int)size);
 
 		int *mem = (int*)item;
 		// set up the memory
-		*mem++ = size;
+		*mem++ = (int)size;
 		*mem++ = traceIndex;
 		void *ret = mem;
 		mem += (size>>2);
@@ -453,9 +457,9 @@ namespace MMgc
 		// whack the entire thing except the first 8 bytes,
 		// the free list
 		if(poison == 0xca || poison == 0xba)
-			size = GC::Size(ip);
+			size = (uint32)GC::Size(ip);
 		else
-			size = FixedMalloc::GetInstance()->Size(ip);
+			size = (uint32)FixedMalloc::GetInstance()->Size(ip);
 
 		// size is the non-Debug size, so add 4 to get last 4 bytes, don't
 		// touch write back pointer space

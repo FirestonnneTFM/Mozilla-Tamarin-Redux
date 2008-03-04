@@ -79,7 +79,7 @@ namespace avmplus
 		void setLength(uint32 len) { m_length = len; }
 		uint32 capacity()  const 
 		{ 
-			return MMgc::GC::Size(m_atoms)/sizeof(Atom);
+			return (uint32)(MMgc::GC::Size(m_atoms)/sizeof(Atom));
 		}
 
 		void push (Atom a);

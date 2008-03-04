@@ -111,6 +111,13 @@ namespace avmplus
 			MIR_jle		= 24,
 			MIR_jnlt	= 25,
 			MIR_jnle	= 26,
+			MIR_st32	= 27,
+#ifdef AVMPLUS_64BIT
+			MIR_ld32	= 28,
+			MIR_ld32u	= 29,
+#else
+			MIR_ld32	= MIR_ld,
+#endif
 
 			MIR_imm		= 1  | MIR_oper,	// 0,imm32
 			MIR_imul	= 2  | MIR_oper,
@@ -424,7 +431,7 @@ namespace avmplus
 		#endif
 
 		// These are used as register numbers in various parts of the code
-		static const int MAX_REGISTERS = 16;
+		static const int MAX_REGISTERS = 24;
 
 		typedef enum
 		{
@@ -564,7 +571,11 @@ namespace avmplus
 			}
 
 			int spillSize() const {
+				#ifdef AVMPLUS_AMD64
+				return code == MIR_alloc ? ((size<8)?8:(MirOpcode)size) : (MirOpcode)8;
+				#else
 				return code == MIR_alloc ? size : (code & MIR_float) ? 8 : 4;
+				#endif
 			}
 
 			int isDirty() const {
@@ -756,6 +767,10 @@ namespace avmplus
 		static void stackOverflow(MethodEnv *env);
 	    #endif
 		
+		#ifdef AVMPLUS_AMD64
+		int calleeAreaSize() const { return 8*maxArgCount; }
+		#endif
+
 		uint32  maxArgCount;        // most number of arguments used in a call
 
 		#ifdef AVMPLUS_PROFILE
@@ -840,7 +855,7 @@ namespace avmplus
 		OP*		loadAtomRep(uintptr i);
 
 		OP*	  InsAt(int nbr)  { return ipStart+nbr; }
-		int	  InsNbr(OP* ins)	 { AvmAssert(ins >= ipStart); return (ins-ipStart); }
+		int	  InsNbr(OP* ins)	 { AvmAssert(ins >= ipStart); return ((int)(ins-ipStart)); }
 		OP*   InsConst(uintptr value) { return Ins(MIR_imm, value); }
 		OP*   InsAlloc(size_t s) { return Ins(MIR_alloc, (int32)s); }
 		void  InsDealloc(OP* alloc);
@@ -855,7 +870,13 @@ namespace avmplus
 		
 		OP*   loadIns(MirOpcode _code, sintptr _disp, OP* _base)
 		{
-			AvmAssert((_code & ~MIR_float & ~MIR_oper) == MIR_ld);
+#ifdef AVMPLUS_64BIT
+			AvmAssert(((_code & ~MIR_float & ~MIR_oper) == MIR_ld) ||
+						((_code & ~MIR_float & ~MIR_oper) == MIR_ld32) ||
+						((_code & ~MIR_float & ~MIR_oper) == MIR_ld32u));
+#else
+			AvmAssert(((_code & ~MIR_float & ~MIR_oper) == MIR_ld));
+#endif
 			return Ins(_code, _base, (sintptr)_disp);
 		}
 
@@ -870,7 +891,7 @@ namespace avmplus
 		OP*   cmpLe(int lhs, int rhs);
 		OP*	  cmpEq(sintptr funcaddr, int lhs, int rhs);
 
-		void  storeIns(OP* v, uintptr disp, OP* base);
+		void  storeIns(OP* v, uintptr disp, OP* base, bool force32=false);
 
 		OP*   leaIns(sintptr disp, OP* base);
 		OP*   callIns(sintptr addr, uint32 argCount, MirOpcode code);
@@ -946,7 +967,7 @@ namespace avmplus
 
 		static const int InvalidPos = -1;  /* invalid spill position  */
 
-		void reserveStackSpace(OP* ins);
+		void reserveStackSpace(OP* ins, bool bAlign=false);
 
 		#ifdef AVMPLUS_VERBOSE
 		void displayStackTable();
@@ -1426,7 +1447,7 @@ namespace avmplus
 		void PUSH(sintptr imm);
 
 		void MOV (Register dest, sintptr imm32);
-		void MOV (sintptr disp, Register base, sintptr imm);
+		void MOV (sintptr disp, Register base, sintptr imm, bool b32=false);
 		
 		// sse data transfer
 
@@ -1439,8 +1460,12 @@ namespace avmplus
 		void CVTSI2SD(Register dest, Register src)	{ SSE(0xf20f2a, dest, src); }
 		void UCOMISD(Register xmm1, Register xmm2)	{ SSE(0x660f2e, xmm1, xmm2); }
 		void MOVAPD(Register dest, Register src)	{ SSE(0x660f28, dest, src); }
+		void MOVD (Register xmm1, Register src)		{ SSE(0x660F6E, xmm1, src); }
 
 		void XORPD(Register dest, uintptr src);
+#ifdef AVMPLUS_AMD64
+		void XORPD(Register dest, Register src);
+#endif
 
 		void SSE(int op, Register r, sintptr disp, Register base);
 		void ADDSD(Register r, sintptr disp, Register base)		{ SSE(0xf20f58, r, disp, base); }
@@ -1490,14 +1515,15 @@ namespace avmplus
 		void SETLE (Register reg)	{ ALU2(0x0f9E, reg, reg); }
 		void MOVZX_r8 (Register dest, Register src) { ALU2(0x0fb6, dest, src); }
 
-		void ALU(int op, Register r, sintptr disp, Register base);
+		void ALU(int op, Register r, sintptr disp, Register base, bool force32=false);
+
 		void TEST(sintptr disp, Register base, Register r)	{ ALU(0x85, r, disp, base); }
 		void LEA(Register r, sintptr disp, Register base)	{ ALU(0x8d, r, disp, base); }
 		void CALL(sintptr disp, Register base)				{ ALU(0xff, (Register)2, disp, base); }
 		void JMP(sintptr disp, Register base)				{ ALU(0xff, (Register)4, disp, base); }
 		void PUSH(sintptr disp, Register base)				{ ALU(0xff, (Register)6, disp, base); }
-		void MOV (sintptr disp, Register base, Register r)  { ALU(0x89, r, disp, base); }
-		void MOV (Register r, sintptr disp, Register base)  { ALU(0x8b, r, disp, base); }
+		void MOV (sintptr disp, Register base, Register r)  { ALU(0x89, r, disp, base, false); }
+		void MOV (Register r, sintptr disp, Register base)  { ALU(0x8b, r, disp, base, false); }
 
 		void SHIFT(int op, Register reg, int imm8);
 		void SAR(Register reg, int imm8) { SHIFT(7, reg, imm8); } // signed >> imm
@@ -1549,14 +1575,20 @@ namespace avmplus
 		#endif // IA32 or AMD64
 
 		#ifdef AVMPLUS_AMD64
+		void MOV32(Register r, sintptr disp, Register base)		{ ALU(0x8b, r, disp, base, true); }
+		void MOV32(sintptr disp, Register base, Register r)		{ ALU(0x89, r, disp, base, true); }
+		void MOV32(sintptr disp, Register base, sintptr imm)	{ MOV(disp,base,imm,true);}
+
+		void MOVSXD (Register r, sintptr disp, Register base)	{ ALU(0x63, r, disp, base, false); }
+		void MOVSXD (Register dest, Register src)				{ ALU(0x63, dest, src); }
 		void IMM64(int64 imm64) 
 		{
 			*(int64*)mip = imm64;
 			mip += 8;
 		}
-		void REX(Register a,  Register b=EAX, bool set64bit=true);
+		void REX(Register a,  Register b=RAX, bool set64bit=true);
 		
-		bool is32bit(sintptr i)
+		static bool is32bit(sintptr i)
 		{
 			return ((int32)i) == i;
 		}
@@ -1625,7 +1657,21 @@ namespace avmplus
 			#endif
 			
 			#ifdef AVMPLUS_AMD64
-			CALL (addr - (5+(uintptr)mip));
+			int64 offset = addr - (5+(uintptr)mip);
+			if (is32bit(offset))
+				CALL (addr - (5+(uintptr)mip));
+			else
+			{
+				MOV(R11, addr);
+				MOV(-8, RSP, R11);
+				LEA(R11, -8, RSP);
+
+				// CALL code
+				incInstructionCount();
+				*mip++ = 0x4D; //64-bit mode
+				*mip++ = 0xFF;
+				*mip++ = 0x13; // call address in [R11]
+			}
 			#endif
 		}
 

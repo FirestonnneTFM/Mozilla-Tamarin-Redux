@@ -84,7 +84,7 @@ namespace MMgc
 		void* Alloc(size_t size, int flags);
 		static void Free(void *ptr);
 		void Finalize();
-		size_t GetItemSize() { return m_itemSize; }
+		uint32 GetItemSize() { return m_itemSize; }
 		void ClearMarks();
 #ifdef _DEBUG
 		void CheckMarks();
@@ -267,7 +267,7 @@ namespace MMgc
 		GCBlock* m_needsSweeping;
 
 		int    m_itemsPerBlock;
-		size_t    m_itemSize;
+		uint32    m_itemSize;
 		int m_numBitmapBytes;
 		int m_sizeClassIndex;
 
@@ -358,7 +358,7 @@ namespace MMgc
 		
 		static int GetIndex(const GCBlock *block, const void *item)
 		{
-			int index = (((char*) item - block->items) * block->alloc->multiple) >> block->alloc->shift;
+			int index = (int)((((char*) item - block->items) * block->alloc->multiple) >> block->alloc->shift);
 #ifdef _DEBUG
 			GCAssert(((char*) item - block->items) / block->size == (uint32) index);
 #endif

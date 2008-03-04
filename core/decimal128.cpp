@@ -645,7 +645,7 @@ void decDigitsFromDPD(decNumber *dn, const uInt *sour, Int declets) {
   // here, last points to the most significant unit with digits;
   // inspect it to get the final digits count -- this is essentially
   // the same code as decGetDigits in decNumber.c
-  dn->digits=(last-dn->lsu)*DECDPUN+1;  // floor of digits, plus
+  dn->digits=Int(last-dn->lsu)*DECDPUN+1;  // floor of digits, plus
                                         // must be at least 1 digit
   #if DECDPUN>1
   if (*last<10) return;                 // common odd digit or 0

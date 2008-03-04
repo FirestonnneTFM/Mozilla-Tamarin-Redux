@@ -99,7 +99,7 @@ namespace avmplus
 
 		*dst = 0;
 
-        text->unlockBuffer((lastChar ? (lastChar + 1) : dst)-str);
+        text->unlockBuffer((int)((lastChar ? (lastChar + 1) : dst)-str));
 	}
 
 	int XMLParser::getNext(XMLTag& tag)
@@ -143,7 +143,7 @@ namespace avmplus
 			while (*m_ptr && *m_ptr != '<') {
 				m_ptr++;
 			}
-			tag.text = unescape(m_source, start, m_ptr-start, false);
+			tag.text = unescape(m_source, start, (int)(m_ptr-start), false);
 
 			// Condense whitespace if desired
 			if (m_ignoreWhite && m_condenseWhite) {
@@ -165,7 +165,7 @@ namespace avmplus
 				{
 					// We have the end of the XML declaration
 					// !!@ changed to not return <?...?> parts
-					tag.text = new (core->GetGC()) String(start + 2, m_ptr - start - 2);
+					tag.text = new (core->GetGC()) String(start + 2, (int)(m_ptr - start - 2));
 					m_ptr += 2;
 					tag.nodeType = XMLTag::kXMLDeclaration;
 					return XMLParser::kNoError;
@@ -192,7 +192,7 @@ namespace avmplus
 					if (!depth) {
 						// We've reached the end of the DOCTYPE.
 						m_ptr++;
-						tag.text = new (core->GetGC()) String(start, m_ptr-start);
+						tag.text = new (core->GetGC()) String(start, (int)(m_ptr-start));
 						tag.nodeType = XMLTag::kDocTypeDeclaration;
 						return XMLParser::kNoError;
 					}
@@ -211,7 +211,7 @@ namespace avmplus
 			while (*m_ptr) {
 				if (m_ptr[0] == ']' && m_ptr[1] == ']' && m_ptr[2] == '>') {
 					// We have the end of the CDATA section.
-					tag.text = new (core->GetGC()) String(cdata, m_ptr-cdata);
+					tag.text = new (core->GetGC()) String(cdata, (int)(m_ptr-cdata));
 					tag.nodeType = XMLTag::kCDataSection;
 					m_ptr += 3;
 					return XMLParser::kNoError;
@@ -229,7 +229,7 @@ namespace avmplus
 			while (*m_ptr) {
 				if (m_ptr[0] == '?' && m_ptr[1] == '>') {
 					// We have the end of the processing instruction.
-					tag.text = new (core->GetGC()) String(pi, m_ptr - pi);
+					tag.text = new (core->GetGC()) String(pi, (int)(m_ptr - pi));
 					tag.nodeType = XMLTag::kProcessingInstruction;
 					m_ptr += 2;
 					return XMLParser::kNoError;
@@ -251,7 +251,7 @@ namespace avmplus
 			while (*m_ptr) {
 				if (m_ptr[0] == '-' && m_ptr[1] == '-' && m_ptr[2] == '>') 
 				{
-					tag.text = new (core->GetGC()) String(comment, m_ptr-comment);
+					tag.text = new (core->GetGC()) String(comment, (int)(m_ptr-comment));
 					tag.nodeType = XMLTag::kComment;
 					m_ptr += 3;
 					return XMLParser::kNoError;
@@ -283,7 +283,7 @@ namespace avmplus
 			return XMLParser::kMalformedElement;
 		}
 
-		tag.text = unescape(m_source, tagStart, m_ptr-tagStart, true);
+		tag.text = unescape(m_source, tagStart, (int)(m_ptr-tagStart), true);
 
 		tag.nodeType = XMLTag::kElementType;
 
@@ -325,7 +325,7 @@ namespace avmplus
 				return XMLParser::kMalformedElement;
 			}
 
-			Stringp attributeName = unescape(m_source, nameStart, m_ptr-nameStart, true);
+			Stringp attributeName = unescape(m_source, nameStart, (int)(m_ptr-nameStart), true);
 
 			while (String::isSpace(*m_ptr)) {
 				m_ptr++;
@@ -361,7 +361,7 @@ namespace avmplus
 				const wchar *attrEnd = m_ptr;
 				m_ptr++;
 
-				Stringp attributeValue = unescape(m_source, attrStart, attrEnd-attrStart, false);
+				Stringp attributeValue = unescape(m_source, attrStart, (int)(attrEnd-attrStart), false);
 
 				AvmAssert (attributeName->isInterned());
 				tag.attributes.add(attributeName);
@@ -398,7 +398,7 @@ namespace avmplus
 			else
 			{
 				MMgc::GC* gc = MMgc::GC::GetGC(text);
-				int start = startChar - text->c_str();
+				int start = (int)(startChar - text->c_str());
 				AvmAssert (start < text->length());
 				return new (gc) String (text, start, len);
 			}
@@ -422,7 +422,7 @@ namespace avmplus
 				}
 				if (*endPtr) {
 					*endPtr = 0;
-					int len = endPtr-src-1;
+					int len = (int)(endPtr-src-1);
 
 					if (*(src+1) == '#') {
 						// Parse a &#xx; decimal sequence.  Or a &#xDD hex sequence
@@ -461,7 +461,7 @@ namespace avmplus
 		}
 		*dst = 0;
 
-		news->unlockBuffer(dst-buffer);
+		news->unlockBuffer((int)(dst-buffer));
 		return (bIntern) ? core->internString (news) : news;
 	}
 

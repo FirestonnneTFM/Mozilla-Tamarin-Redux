@@ -280,12 +280,12 @@ namespace avmplus
 			
 			AbcOpcode opcode = (AbcOpcode) *pc;
 			if (opOperandCount[opcode] == -1)
-				verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString(pc-code_pos));
+				verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
 
 			if (opcode == OP_label)
 			{
 				// insert a label here
-				getFrameState(pc-code_pos)->targetOfBackwardsBranch = true;
+				getFrameState((int)(pc-code_pos))->targetOfBackwardsBranch = true;
 			}
 
 			bool unreachable = false;
@@ -2607,7 +2607,7 @@ namespace avmplus
 				// first ensure the executing code isn't user code (only VM generated abc can use this op)
 				if(pool->isCodePointer(pc))
 				{
-					verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString(pc-code_pos));
+					verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
 				}
 
 				const byte* new_pc = (const byte*) imm30;
@@ -2621,7 +2621,7 @@ namespace avmplus
 				// now ensure target points to within pool's script buffer
 				if(!pool->isCodePointer(new_pc))
 				{
-					verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString(pc-code_pos));
+					verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
 				}
 
 				// FIXME: what other verification steps should we do here?
@@ -3658,7 +3658,7 @@ namespace avmplus
 					scopeTraits->slotCount = 1;
 					scopeTraits->initTables(toplevel);
 					AbcGen gen(core->GetGC());
-					scopeTraits->setSlotInfo(0, 0, toplevel, t, scopeTraits->sizeofInstance, CPoolKind(0), gen);
+					scopeTraits->setSlotInfo(0, 0, toplevel, t, (int)scopeTraits->sizeofInstance, CPoolKind(0), gen);
 					scopeTraits->setTotalSize(scopeTraits->sizeofInstance + 16);
 					scopeTraits->linked = true;
 #ifdef DEBUGGER
@@ -3742,7 +3742,7 @@ namespace avmplus
 		else
 			core->console << "  ";
 		core->console << state->pc << ':';
-        core->formatOpcode(core->console, pc, (AbcOpcode)*pc, state->pc, pool);
+        core->formatOpcode(core->console, pc, (AbcOpcode)*pc, (int)(state->pc), pool);
 		core->console << '\n';
     }
 

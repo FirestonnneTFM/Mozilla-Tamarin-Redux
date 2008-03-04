@@ -196,7 +196,7 @@ namespace avmshell
 								   const char *input,
 								   int defCmd)
 	{
-		int inputLen = strlen(input);
+		int inputLen = (int)strlen(input);
 		
 		// first check for a comment
 		if (input[0] == '#') {
