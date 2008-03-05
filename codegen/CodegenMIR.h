@@ -111,10 +111,12 @@ namespace avmplus
 			MIR_jle		= 24,
 			MIR_jnlt	= 25,
 			MIR_jnle	= 26,
-			MIR_st32	= 27,
+			MIR_file	= 27,
+			MIR_line	= 28,
+			MIR_st32	= 29,
 #ifdef AVMPLUS_64BIT
-			MIR_ld32	= 28,
-			MIR_ld32u	= 29,
+			MIR_ld32	= 30,
+			MIR_ld32u	= 31,
 #else
 			MIR_ld32	= MIR_ld,
 #endif
@@ -618,6 +620,21 @@ namespace avmplus
 
 		OP* exAtom;
 
+	#ifdef VTUNE
+
+		iJIT_Method_NIDS*					getVtuneInfo()		{ return vtune; }
+		SortedIntMap<LineNumberRecord*>*	getLineNumberMap()	{ return mdOffsets; }
+		uintptr								getMdStart()		{ return (uintptr)mipStart; }
+		uintptr								getMdEnd()			{ return (uintptr)mipEnd; }
+
+	private:
+
+		bool								hasDebugInfo;   // OP_debugline seen during MIR pass
+		iJIT_Method_NIDS*					vtune;			// points to vtune record
+		SortedIntMap<LineNumberRecord*>*	mdOffsets;		// populated during code generation 
+
+	#endif /* VTUNE */
+
 	private:
 		#define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
 		#define COREADDR(f) coreAddr((int (AvmCore::*)())(&f))
@@ -691,6 +708,7 @@ namespace avmplus
 		#ifndef AVMPLUS_ARM
 		MDInstruction* mip;
 		MDInstruction* mipStart;
+		MDInstruction* mipEnd;
 		#endif
 
 		uint32 arg_index;
@@ -1692,8 +1710,14 @@ namespace avmplus
     #endif /* AVMPLUS_ARM */
 	
 	#ifdef AVMPLUS_IA32
+#ifdef VTUNE
+	static const int md_prologue_size		= 64;
+	static const int md_epilogue_size		= 256;
+#else
 	static const int md_prologue_size		= 32;
 	static const int md_epilogue_size		= 128;
+#endif // VTUNE
+
 	static const int md_native_thunk_size	= 256;
 	#endif /* AVMPLUS_PPC */
 	

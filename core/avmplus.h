@@ -105,7 +105,10 @@
 #include <math.h>
 #include <intrin.h>
 #include <emmintrin.h>
+#ifdef VTUNE
+#include "JITProfiling.h"
 #endif
+#endif 
 
 #include <stdarg.h>
 

@@ -100,7 +100,7 @@
 
 // FEATURE_BUFFER_GUARD not yet supported on ARM
 #ifdef AVMPLUS_ARM
-//  #undef FEATURE_BUFFER_GUARD
+  #undef FEATURE_BUFFER_GUARD
 #endif
 
 // FEATURE_BUFFER_GUARD not supported on Mac CFM
@@ -126,7 +126,7 @@
 #define AVMPLUS_VERIFYALL
 #endif
 
-#if defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
+#if defined(VTUNE) || defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
 #define AVMPLUS_VERBOSE
 #define AVMPLUS_PROFILE
 #endif
