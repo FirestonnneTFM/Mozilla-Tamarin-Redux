@@ -88,7 +88,7 @@ namespace avmplus
 			AvmAssert(method->impl32 != NULL);
 			Atom i = method->impl32(this, argc, ap);  // though it doesn't have its tag yet
 			if (returnType == INT_TYPE)
-				return core->intToAtom(i);
+				return core->intToAtom((int)i);
 			else if (returnType == UINT_TYPE)
 				return core->uintToAtom((uint32)i);
 			else if (returnType == DECIMAL_TYPE)
@@ -348,7 +348,7 @@ namespace avmplus
 	{
 		if ((index&7) == kIntegerType)
 		{
-			return getpropertylate_i(obj, index>>3);
+			return getpropertylate_i(obj, (int)(index>>3));
 		}
 
 		if ((index&7) == kDoubleType)
@@ -389,7 +389,7 @@ namespace avmplus
 	{
 		if ((index&7) == kIntegerType)
 		{
-			setpropertylate_i(obj, index>>3, value);
+			setpropertylate_i(obj, (int)(index>>3), value);
 			return;
 		}
 
@@ -434,7 +434,7 @@ namespace avmplus
 	{
 		if ((index&7) == kIntegerType)
 		{
-			setpropertylate_i(obj, index>>3, value);
+			setpropertylate_i(obj, (int)(index>>3), value);
 			return;
 		}
 

@@ -312,7 +312,7 @@ namespace avmplus
 				}
 				else if (t == BOOLEAN_TYPE)
 				{
-					*((int*)p) = src[at++]>>4;
+					*((int*)p) = (int)(src[at++]>>4);
 				}
 				else if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
 				{

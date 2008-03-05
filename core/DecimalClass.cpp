@@ -196,7 +196,7 @@ namespace avmplus
 
 		}
 
-		len = strlen(buffer);
+		len = (int)strlen(buffer);
 		wchar wbuf[50];
 		for (int i = 0; i < len; i++) {
 			wbuf[i] = buffer[i];

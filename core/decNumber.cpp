@@ -498,7 +498,7 @@ decNumber * decNumberFromString(decNumber *dn, const char chars[], decContext *s
 
     // Handle decimal point...
     if (dotchar!=NULL && dotchar<last)  // non-trailing '.' found?
-      exponent-=(last-dotchar);         // adjust exponent
+      exponent-=int(last-dotchar);         // adjust exponent
     // [we can now ignore the .]
 
     // OK, the digits string is good.  Assemble in the decNumber, or in
@@ -520,7 +520,7 @@ decNumber * decNumberFromString(decNumber *dn, const char chars[], decContext *s
     #if DECDPUN>1
     out=0;                         // accumulator
     up=res+D2U(d)-1;               // -> msu
-    cut=d-(up-res)*DECDPUN;        // digits in top unit
+    cut=d-int(up-res)*DECDPUN;        // digits in top unit
     for (c=cfirst;; c++) {         // along the digits
       if (*c=='.') continue;       // ignore '.' [don't decrement cut]
       out=X10(out)+(Int)*c-(Int)'0';
@@ -3617,7 +3617,7 @@ static decNumber * decMultiplyOp(decNumber *res, const decNumber *lhs,
           } // p
         *up=(Unit)item; up++;                // [final needs no division]
         } // lp
-      accunits=up-acc;                       // count of units
+      accunits=int(up-acc);                       // count of units
       }
      else { // here to use units directly, without chunking ['old code']
     #endif
@@ -5077,11 +5077,11 @@ static Int decUnitAddSub(const Unit *a, Int alength,
 
   // OK, all A and B processed; might still have carry or borrow
   // return number of Units in the result, negated if a borrow
-  if (carry==0) return c-clsu;     // no carry, so no more to do
+  if (carry==0) return Int(c-clsu);     // no carry, so no more to do
   if (carry>0) {                   // positive carry
     *c=(Unit)carry;                // place as new unit
     c++;                           // ..
-    return c-clsu;
+    return Int(c-clsu);
     }
   // -ve carry: it's a borrow; complement needed
   add=1;                           // temporary carry...
@@ -5104,7 +5104,7 @@ static Int decUnitAddSub(const Unit *a, Int alength,
     *c=(Unit)(add-carry-1);
     c++;                      // interesting, include it
     }
-  return clsu-c;              // -ve result indicates borrowed
+  return Int(clsu-c);              // -ve result indicates borrowed
   } // decUnitAddSub
 
 /* ------------------------------------------------------------------ */
@@ -5252,7 +5252,7 @@ static Int decShiftToLeast(Unit *uar, Int units, Int shift) {
   if (cut==DECDPUN) {              // unit-boundary case; easy
     up=uar+D2U(shift);
     for (; up<uar+units; target++, up++) *target=*up;
-    return target-uar;
+    return Int(target-uar);
     }
 
   // messier
@@ -5280,7 +5280,7 @@ static Int decShiftToLeast(Unit *uar, Int units, Int shift) {
     count-=cut;
     if (count<=0) break;
     }
-  return target-uar+1;
+  return Int(target-uar+1);
   } // decShiftToLeast
 
 #if DECSUBSET
@@ -6110,7 +6110,7 @@ static decNumber *decPutInt(decNumber *res, Int in) {
     *up=(Unit)(in%(DECDPUNMAX+1));
     in=in/(DECDPUNMAX+1);
     }
-  res->digits=decGetDigits(res->lsu, up-res->lsu);
+  res->digits=decGetDigits(res->lsu, Int(up-res->lsu));
   return res;
   } // decPutInt
 

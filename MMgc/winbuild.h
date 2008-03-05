@@ -44,7 +44,12 @@
 /**
  * IA32 (Intel architecture)
  */
+#if defined (_WIN64)
+	#define MMGC_AMD64
+	#define MMGC_64BIT
+#else
 #define MMGC_IA32
+#endif
 
 /**
  * Define this to get stack traces.  Helps with memory leaks.

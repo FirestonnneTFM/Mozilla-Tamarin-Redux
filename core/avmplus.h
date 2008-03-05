@@ -99,7 +99,16 @@
 
 #ifdef WIN32
 #include <malloc.h>
+#ifdef AVMPLUS_AMD64
+#include <setjmpex.h>
 #endif
+#include <math.h>
+#include <intrin.h>
+#include <emmintrin.h>
+#ifdef VTUNE
+#include "JITProfiling.h"
+#endif
+#endif 
 
 #include <stdarg.h>
 

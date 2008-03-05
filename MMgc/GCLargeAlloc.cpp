@@ -56,7 +56,7 @@ namespace MMgc
 #ifdef MMGC_THREADSAFE
 		GCAssert(m_gc->m_lock.IsHeld());
 #endif
-		int blocks = (size+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize;
+		int blocks = (int)((size+sizeof(LargeBlock)+GCHeap::kBlockSize-1) / GCHeap::kBlockSize);
 		
 		LargeBlock *block = (LargeBlock*) m_gc->AllocBlock(blocks, GC::kGCLargeAllocPageFirst, (flags&GC::kZero) != 0);
 		void *item = NULL;
@@ -80,7 +80,7 @@ namespace MMgc
 			if (flags & GC::kZero)
 			{
 				// AllocBlock should take care of this
-				for(int i=0, n=size/sizeof(int); i<n; i++) {
+				for(int i=0, n=(int)(size/sizeof(int)); i<n; i++) {
 					if(((int*)item)[i] != 0)
 						GCAssert(false);
 				}

@@ -427,12 +427,12 @@ namespace avmplus
 
     void PoolObject::resolveTraits(Traits *traits, int firstSlot, const Toplevel* toplevel)
     {
-		int offset = traits->sizeofInstance;
+		int offset = (int)traits->sizeofInstance;
 		int padoffset = -1;
 		if (traits->base && traits->base->base)
 		{
 			AvmAssert(traits->base->getTotalSize() != 0);
-			offset += traits->base->getTotalSize() - traits->base->sizeofInstance;
+			offset += (uint32)traits->base->getTotalSize() - (uint32)traits->base->sizeofInstance;
 		}
 
 		const byte* pos = traits->getTraitsPos();
@@ -687,7 +687,7 @@ namespace avmplus
 		// if initialization code gen is required, create a new method body and write it to traits->init->body_pos
 		if(gen.size() > 0)
 		{
-			AbcGen newMethodBody(core->GetGC(), 16+gen.size());
+			AbcGen newMethodBody(core->GetGC(), (uint32)(16+gen.size()));
 
 			// insert body preamble
 			MethodInfo *init;
@@ -725,7 +725,7 @@ namespace avmplus
 				init->declaringTraits = traits;
 				init->pool = this;
 				init->param_count = 0;
-				init->restOffset = 4; // sizeof(this)
+				init->restOffset = sizeof(Atom); // sizeof(this)
 				init->initParamTypes(1);
 				init->setParamType(0, traits);	
 				init->setReturnType(VOID_TYPE);
@@ -740,7 +740,7 @@ namespace avmplus
 				gen.returnvoid();
 			}
 
-			newMethodBody.writeInt(gen.size()); // code length
+			newMethodBody.writeInt((int)gen.size()); // code length
 			newMethodBody.writeBytes(gen.getBytes());
 
 			// no exceptions, when we jump to the real code, we'll read the exceptions for that code
@@ -755,7 +755,7 @@ namespace avmplus
 
 		if (traits->base && traits->base->base && traits->base->hashTableOffset != -1)
 		{
-			traits->hashTableOffset = traits->base->hashTableOffset + traits->sizeofInstance - traits->base->sizeofInstance;
+			traits->hashTableOffset = traits->base->hashTableOffset + (uint32)traits->sizeofInstance - (uint32)traits->base->sizeofInstance;
 		}
 		else if (traits->needsHashtable)
 		{

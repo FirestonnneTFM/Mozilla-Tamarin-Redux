@@ -1387,7 +1387,7 @@ namespace avmplus
 			*dst++ = extractCharacter(src);
 		}
 		*dst = 0;
-		out->unlockBuffer(dst-outbuf);
+		out->unlockBuffer((int)(dst-outbuf));
 		
 		return out;
     }

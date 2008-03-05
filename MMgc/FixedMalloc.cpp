@@ -47,6 +47,52 @@ namespace MMgc
 
 	// Size classes for our Malloc.  We start with a 4 byte allocator and then from
 	// 8 to 128, size classes are spaced evenly 8 bytes apart, then from 128 to 1968 they
+#ifdef MMGC_AMD64
+	// The upper entries of the table (>128) are sized to 
+	// match the kSizeClassIndex which uses the number-of-entries
+	// per block to pick an allocator.  For example, if you want to 
+	// allocate a 798 byte object, it gets rounded up to 800 and then
+	// 4032/800 = 5.04 so you look up kSizeClassIndex[5] and get 37 which
+	// returns the allocator size to allocate 800 bytes per alloc.  The 800
+	// was picked to be just larger than the maximum 5-per-block size
+	// that would fit (4032/5=804 down to 800) rounded down to the next 
+	// lowest 8 bytes.  If someone was allocating 801 bytes, it would get rounded
+	// up to 808 and then go into the 4-per-block allocator (4032/808=4.99).
+
+	const int16 FixedMalloc::kSizeClasses[kNumSizeClasses] = {
+		8, 16, 24, 32, 40, 48, 56, 64, 72, 80, //0-9
+		88, 96, 104, 112, 120, 128,	136, 144, 152, 160, //10-19
+		168, 176, 192, 208, 224, 232, 248, 264, 288, 304, //20-29
+		336, 360, 400, 448, 504, 576, 672, 800, 1008, 1344, //30-39
+		2016, //40
+	};
+
+	// This is an index which indicates that allocator i should be used
+	// if kSizeClassIndex[i] items fit into a 4096 byte page.
+	const uint8 FixedMalloc::kSizeClassIndex[32] = {
+		40, 40, 40, 39, 38, 37, 36, 35, 34, 33, //0-9
+		32, 31, 30, 29, 28, 27, 26, 25, 24, 23, //10-19
+		23, 22, 21, 20, 20, 19, 18, 17, 17, 16, //20-29
+		15, 15  //30-31
+	};
+	/*
+	const int16 FixedMalloc::kSizeClasses[kNumSizeClasses] = {
+		4, 8, 16, 24, 32, 40, 48, 56, 64, 72, //0-9
+		80, 88, 96, 104, 112, 120, 128,	144, 160, 168, //10-19
+        183, 192, 201, 211, 224, 235, 251, 267, 288, 310, //20-29
+		336, 366, 403, 448, 504, 576, 672, 806, 1008, 1344, //30-39
+		2032, //40
+	};
+
+	const uint8 FixedMalloc::kSizeClassIndex[32] = {
+		40, 40, 40, 39, 38, 37, 36, 35, 34, 33, //0-10
+		32, 31, 30, 29, 28, 27, 26, 25, 24, 23, //10-19
+		22, 21, 20, 19, 19, 18, 18, 18, 17, 17, //20-29
+		17, 16  //30-31
+	};
+	*/
+
+#else
 	const int16 FixedMalloc::kSizeClasses[kNumSizeClasses] = {
 		4, 8, 16, 24, 32, 40, 48, 56, 64, 72, //0-9
 		80, 88, 96, 104, 112, 120, 128,	144, 160, 176, //10-19
@@ -64,6 +110,7 @@ namespace MMgc
 		17, 16  //30-31
 	};
 
+#endif
 	void FixedMalloc::Init()
 	{
 		GCAssert(instance == NULL);
@@ -115,11 +162,15 @@ namespace MMgc
 	{
 		GCAssertMsg(size > 0, "cannot allocate a 0 sized block\n");
 
-		size_t size8 = (size+7)&~7; // round up to multiple of 8
+		uint32 size8 = (uint32)((size+7)&~7); // round up to multiple of 8
 
 		// Buckets up to 128 are spaced evenly at 8 bytes.
 		if (size <= 128) {
+#ifdef MMGC_AMD64
+			unsigned index = size8 ? ((size8 >> 3) - 1) : 0;
+#else
 			unsigned index = size > 4 ? size8 >> 3 : 0;
+#endif
 			FixedAllocSafe *a = m_allocs[index];
 			// make sure I fit
 			GCAssert(size <= a->GetItemSize());

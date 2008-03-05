@@ -160,7 +160,7 @@ namespace avmplus
 				);
 #endif
 
-			ftraits->hashTableOffset = ftraits->sizeofInstance; 
+			ftraits->hashTableOffset = (int)ftraits->sizeofInstance; 
 			ftraits->setTotalSize(ftraits->hashTableOffset + sizeof(Hashtable));
 
 			ftraits->initTables(toplevel);
