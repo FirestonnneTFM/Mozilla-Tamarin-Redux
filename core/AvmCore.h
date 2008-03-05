@@ -98,6 +98,16 @@ const int kBufferPadding = 16;
 		 */
 		PrintWriter console;
 
+#ifdef VTUNE
+		iJIT_IsProfilingActiveFlags VTuneStatus;
+
+		iJIT_IsProfilingActiveFlags CheckVTuneStatus() 
+		{
+			iJIT_IsProfilingActiveFlags profiler = iJIT_IsProfilingActive();	
+			return profiler;
+		}
+#endif // VTUNE
+
 		/**
 		 * The GC used by this AVM instance
 		 */
@@ -729,7 +739,7 @@ const int kBufferPadding = 16;
 			}
 			if ((atom & 7) == kIntegerType) {
 				decNumber ival;
-				MathUtils::decNumberFromInt(&ival, (atom>>3));
+				MathUtils::decNumberFromInt(&ival, (int)(atom>>3));
 				decNumberPlus(&ret->dn, &ival, ctx);
 				return ret;
 			} 
@@ -766,6 +776,12 @@ const int kBufferPadding = 16;
 		 * decoded.  Otherwise, it is coerced to the int type
 		 * and returned.  This is ToInt32() from E3 section 9.5
 		 */
+#ifdef AVMPLUS_64BIT
+		int64	integer64(Atom atom)			{ return (int64)integer(atom); }
+		static	int64 integer64_i(Atom atom)	{ return (int64)integer_i(atom); }
+		static	int64 integer64_d(double d)		{ return (int64)integer_d(d); }
+		static	int64 integer64_d_sse2(double d){ return (int64)integer_d_sse2(d); }
+#endif
 		int integer(Atom atom);
 
 		// convert atom to integer when we know it is already a legal signed-32 bit int value
@@ -809,7 +825,7 @@ const int kBufferPadding = 16;
 			AvmAssert(isNumeric(a));
 
 			if ((a&7) == kIntegerType)
-				return a>>3;
+				return (int)(a>>3);
 			else if ((a & 7) == kDecimalType) {
 				DecimalRep *drep = atomToDecimal(a);
                 return MathUtils::decNumberToDouble(&drep->dn);

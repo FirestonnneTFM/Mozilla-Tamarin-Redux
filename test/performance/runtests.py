@@ -34,7 +34,7 @@
 #
 # simple script that executes tests on tamarin-central or tamarin-tracing vm
 #
-import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, time
+import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, time, subprocess, socket
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -42,17 +42,20 @@ from glob import glob
 from sys import argv, exit
 from getopt import getopt
 from itertools import count
+from platform import *
+from socket import *
 
 verbose = False
 timestamps = True
 forcerebuild = False
+logresults = False
 
 # needed for pipe
 fd,tmpfile = tempfile.mkstemp()
 os.close(fd)
 js_output_f=False
 
-globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider', 'ascargs':'', 'vmargs':'', 'vmargs2':''}
+globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider', 'ascargs':'', 'vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':''}
 if 'AVM' in environ:
 	globs['avm'] = environ['AVM'].strip()
 if 'AVM2' in environ:
@@ -90,13 +93,16 @@ def usage(c):
 	print " -h --help          display help and exit"
 	print " -f --forcerebuild  force rebuild all test files"
 	print " -l --log           logs results to a file"
+	print " -d --socketlog     logs results to a socket server"
+	print " -r --runtime	   name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
+	print "    --vmversion	   specify vmversion e.g. 502, use this if cannot be calculated from executable"
 	print "    --ascargs	   args to pass to asc on rebuild of test files"
 	print "    --vmargs	       args to pass to vm"
 	print "    --vmargs2	   args to pass to avm2, if not specified --vmargs will be used"
 	exit(c)
 
 try:
-	opts, args = getopt(argv[1:], "vE:S:a:g:hfc:l", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log","avm2=","vmargs2=","config="])
+	opts, args = getopt(argv[1:], "vE:S:a:g:hfc:ldr:", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log","socketlog","avm2=","vmargs2=","config=","runtime=","vmversion="])
 except:
 	usage(2)
 
@@ -137,6 +143,12 @@ for o, v in opts:
 				break
 		print "Writing results to %s" % js_output
 		js_output_f = open(js_output, "w")
+	elif o in ("-d", "--socketlog"):
+		logresults = True
+	elif o in ("-r", "--runtime"):
+		globs['vmname'] = v
+	elif o in ("--vmversion"):
+		globs['vmversion'] = v
 
 def istest(f):
 	return f.endswith(".as")
@@ -155,6 +167,11 @@ def parents(d):
 
 # run a command and return its output
 def run_pipe(cmd):
+	#verbose_print(cmd)
+	#cmds = cmd.split()
+	#proc = subprocess.Popen([cmds[0],cmds[1]], stdout=subprocess.PIPE, shell=False)
+	#proc.wait()
+	#return proc.stdout
 	t = pipes.Template()
 	t.append("%s 2>&1" % cmd, "--")
 	verbose_print(cmd)
@@ -182,6 +199,56 @@ def compile_test(as):
 			verbose_print(line.strip())
 	finally:
 		f.close()
+
+
+# ================================================
+# Determine the version number associated with the 
+# VM, will be cyclone if not from build machine
+# ================================================
+VM_version = ''
+VM_name = globs['vmname']
+
+if globs['vmversion']:
+	VM_version=globs['vmversion']
+else:
+    f = run_pipe("%s" % globs['avm'])
+    try:
+	    for line in f:
+		    version = line.split()
+		    version = version[len(version)-1]
+		    if version.find(":") != -1:		# if this is an actual build we need to remove the hash
+			    version = version.split(":")
+			    version = version[0]
+		    VM_version = version
+		    break
+    except:
+	    nop = True
+
+OS_name = {'CYGWIN_NT-5.1':'WIN','CYGWIN_NT-5.2':'WIN','CYGWIN_NT-6.0-WOW64':'WIN','Windows':'WIN','Darwin':'MAC','Linux':'LNX','Solaris':'SOL',}[system()]
+VM_reporting = '%s %s %s' % (VM_name,OS_name,VM_version)
+# ================================================
+# Prepare the data to be sent through a socket to 
+# be recorded to the database
+# ================================================
+serverHost = '10.60.48.47'
+serverPort = 1188
+# ===========================================
+# If logging is enabled, log results to 
+# performance database
+# ===========================================
+def socketlog(msg):
+	if logresults:
+		s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
+		s.connect((serverHost, serverPort)) # connect to server on the port
+		s.send("%s;exit" % msg)             # send the data
+		data = s.recv(1024)
+		#print('Sent: %s' % msg)
+		#print('Received: %s \n\n' % data)
+		s.shutdown(SHUT_RDWR)
+		s.close()
+
+
+
 
 skips=[]
 if isfile('./testconfig.txt'):
@@ -257,6 +324,7 @@ for ast in tests:
 		if len(avm2)>0:
 			log_print("%-50s %7s %7s" % (ast,result1,result2)) 
 		else:
+			socketlog("addresult::%s::time::%s::%s;" % (ast,result1,VM_reporting))
 			log_print("%-50s %7s" % (ast,result1)) 
 	except:
 		log_print("exception")

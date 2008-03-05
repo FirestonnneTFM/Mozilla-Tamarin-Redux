@@ -279,7 +279,7 @@ js_print("Executing %d tests against vm: %s" % (len(tests), avm));
 # passed into the script:
 # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
 # ================================================
-ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','Solaris':'sol',}[platform.system()]
+ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-5.2-WOW64':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','Solaris':'sol',}[platform.system()]
 cputype={'i386':'x86','i686':'x86','Power Macintosh':'ppc'}[platform.machine()]
 
 if globs['config'] == '':

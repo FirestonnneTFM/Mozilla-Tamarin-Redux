@@ -289,10 +289,12 @@ namespace avmplus
 		virtual Stringp format(AvmCore* core) const;
 #endif
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 	public:
 		DRCWB(Stringp) name;
+	#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		Stringp getStackTraceLine(Stringp filename);
+	#endif
 #endif
 #ifdef DEBUGGER
 		virtual uint32 size() const;

@@ -762,7 +762,7 @@ namespace avmplus
 			fieldatoms = NULL;
 		}
 		if(fields) {
-			int numFields = GC::Size(fields)/sizeof(FieldName);
+			int numFields = (int)GC::Size(fields)/sizeof(FieldName);
 			for(int i=0; i<numFields; i++) {
 				fields[i].name = NULL;
 			}

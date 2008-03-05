@@ -100,7 +100,25 @@ namespace avmplus
 		static inline uint32 FindOneBit(uint32 value)
 		{
 
-#ifdef __GNUC__
+#ifndef __GNUC__
+			#if defined(_MSC_VER) && defined(AVMPLUS_64BIT)
+			unsigned long index;
+			_BitScanReverse(&index, value);
+			return (uint32)index;
+			#elif defined(__SUNPRO_C)||defined(__SUNPRO_CC)
+			for (int i=0; i < 32; i++)
+				if (value & (1<<i))
+					return i;
+			// asm versions of this function are undefined if no bits are set
+			AvmAssert(false);
+			return 0;
+			#else
+  			_asm
+  			{
+  				bsr eax,[value];
+  			}
+			#endif
+#else
 			// DBC - This gets rid of a compiler warning and matchs PPC results where value = 0
 			register int	result = ~0;
 			
@@ -113,14 +131,6 @@ namespace avmplus
 					);
 			}
 			return result;
-#elif defined(__SUNPRO_C)||defined(__SUNPRO_CC)
-			for (int i=0; i < 32; i++)
-				if (value & (1<<i))
-					return i;
-			// asm versions of this function are undefined if no bits are set
-			AvmAssert(false);
-			return 0;
-#else
 			_asm
 			{
 				bsr eax,[value];

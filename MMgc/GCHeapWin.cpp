@@ -262,7 +262,7 @@ namespace MMgc
 		if (addr == NULL)
 			address = 0;
 		else {
-			address = (void*)( (int)address + size );
+			address = (void*)( (sintptr)address + size );
 			committedCodeMemory += size;
 		}
 		return address;
@@ -423,6 +423,11 @@ namespace MMgc
 
 #else
 
+#ifdef _WIN64 
+#define MACHINETYPE IMAGE_FILE_MACHINE_AMD64
+#else
+#define MACHINETYPE IMAGE_FILE_MACHINE_I386
+#endif
 	void GetStackTrace(int *trace, int len, int skip)
 	{
 		HANDLE ht = GetCurrentThread();
@@ -432,7 +437,7 @@ namespace MMgc
 		memset( &c, '\0', sizeof c );
 		c.ContextFlags = CONTEXT_FULL;
 
-#if 0
+#ifdef _WIN64
 		// broken with SP2
 		if ( !GetThreadContext( ht, &c ) )
 			return;
@@ -452,22 +457,37 @@ namespace MMgc
 		STACKFRAME64 frame;
 		memset(&frame, 0, sizeof frame);
 		
+#ifdef _WIN64
+		frame.AddrPC.Offset = c.Rip;
+		frame.AddrPC.Mode = AddrModeFlat;
+		frame.AddrStack.Offset = c.Rsp;
+		frame.AddrStack.Mode = AddrModeFlat;
+		frame.AddrFrame.Offset = c.Rbp;
+		frame.AddrFrame.Mode = AddrModeFlat;
+#else
 		frame.AddrPC.Offset = c.Eip;
 		frame.AddrPC.Mode = AddrModeFlat;
 		frame.AddrFrame.Offset = c.Ebp;
 		frame.AddrFrame.Mode = AddrModeFlat;
-
+#endif
+		
 		int i=0;
 		// save space for 0 pc terminator
 		len--;
 		while(i < len && 
 			g_DbgHelpDll.m_StackWalk64 != NULL &&
 			g_DbgHelpDll.m_SymFunctionTableAccess64 != NULL &&
-			g_DbgHelpDll.m_SymGetModuleBase64 != NULL &&
-			(*g_DbgHelpDll.m_StackWalk64)(IMAGE_FILE_MACHINE_I386, hp, ht, &frame, 
-						NULL, NULL, g_DbgHelpDll.m_SymFunctionTableAccess64, g_DbgHelpDll.m_SymGetModuleBase64, NULL)) {
+			g_DbgHelpDll.m_SymGetModuleBase64 != NULL)
+		{
+			BOOL res = (*g_DbgHelpDll.m_StackWalk64)(MACHINETYPE, hp, ht, &frame, 
+						&c, NULL, g_DbgHelpDll.m_SymFunctionTableAccess64, g_DbgHelpDll.m_SymGetModuleBase64, NULL);
+
+			if (!res) 
+				break;
+
 			if(skip-- > 0)
 				continue;
+
 			// FIXME: not 64 bit safe
 			trace[i++] = (int) frame.AddrPC.Offset;
 		}

@@ -117,7 +117,7 @@ namespace avmplus
 		static double sqrt(double value);
 		static double tan(double value);
 		static double toInt(double value);
-		#ifdef WIN32
+		#if defined(WIN32) && !defined(_WIN64)
 		// This routine will return 0x80000000 if the double value overflows
 		// and integer and is not between -2^31 and 2^31-1. 
 		static int32 real2int(double value);

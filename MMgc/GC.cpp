@@ -581,7 +581,7 @@ namespace MMgc
 	}
 
 #ifdef _DEBUG
-	void GC::Trace(const void *stackStart/*=NULL*/, size_t stackSize/*=0*/)
+	void GC::Trace(const void *stackStart/*=NULL*/, uint32 stackSize/*=0*/)
 	{
 		MMGC_ASSERT_EXCLUSIVE_GC(this);
 
@@ -1026,7 +1026,7 @@ bail:
 			item = AllocBlockNonIncremental(size, zero);
 
 		if(!item) {				
-			int incr = size + totalGCPages / kFreeSpaceDivisor;
+			int incr = (int)(size + totalGCPages / kFreeSpaceDivisor);
 			if(incr > kMaxIncrement) {
 				incr = size < kMaxIncrement ? kMaxIncrement : size;
 			}
@@ -1120,14 +1120,22 @@ bail:
 	void GC::SetPageMapValue(uintptr addr, int val)
 	{
 		uintptr index = (addr-memStart) >> 12;
+#ifdef MMGC_AMD64
+		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
+#else
 		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
+#endif
 		pageMap[index >> 2] |= (val<<((index&0x3)*2));
 	}	
 
 	void GC::ClearPageMapValue(uintptr addr)
 	{
 		uintptr index = (addr-memStart) >> 12;
+#ifdef MMGC_AMD64
+		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
+#else
 		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
+#endif
 		pageMap[index >> 2] &= ~(3<<((index&0x3)*2));
 	}	
 
@@ -1143,11 +1151,11 @@ bail:
 	{
 		USING_PAGE_MAP();
 		uintptr addr = (uintptr)item;
-		uint32 shiftAmount=0;
+		size_t shiftAmount=0;
 		unsigned char *dst = pageMap;
 
 		// save the current live range in case we need to move/copy
-		uint32 numBytesToCopy = (memEnd-memStart)>>14;
+		size_t numBytesToCopy = (memEnd-memStart)>>14;
 
 		if(addr < memStart) {
 			// round down to nearest 16k boundary, makes shift logic work cause it works
@@ -1167,7 +1175,7 @@ bail:
 			memEnd = (memEnd+0x3fff)&~0x3fff;
 		}
 
-        size_t numPagesNeeded = ((memEnd-memStart)>>14)/GCHeap::kBlockSize + 1;
+        uint32 numPagesNeeded = (uint32)(((memEnd-memStart)>>14)/GCHeap::kBlockSize + 1);
 		if(numPagesNeeded > heap->Size(pageMap)) {
 			dst = (unsigned char*)heap->Alloc(numPagesNeeded);
 		}
@@ -1228,7 +1236,12 @@ bail:
 #endif
 
 #if defined MMGC_AMD64
+	#ifdef WIN32
+		int foo;
+		stackP = &foo;
+	#else
 	asm("mov %%rsp,%0" : "=r" (stackP));
+	#endif
 #endif
 
 #if defined MMGC_SPARC
@@ -1398,7 +1411,7 @@ bail:
 		if(zctFreelist) {
 			RCObject **nextFree = (RCObject**)*zctFreelist;
 			*zctFreelist = obj;
-			obj->setZCTIndex(zctFreelist - zct);
+			obj->setZCTIndex((int)(zctFreelist - zct));
 			zctFreelist = nextFree;			
 		} else if(reaping && zctIndex > nextPinnedIndex) {
 			// we're going over the list, insert this guy at the front if possible
@@ -1408,7 +1421,7 @@ bail:
 			zct[zctIndex] = obj;
 		} else if(zctNext - zct <= (RCObject::ZCT_INDEX>>8)) {
 			*zctNext = obj;
-			obj->setZCTIndex(zctNext - zct);
+			obj->setZCTIndex((int)(zctNext - zct));
 			zctNext++;
 		} else {
 			// zct is full, do nothing, mark/sweep will have to handle it
@@ -1493,7 +1506,7 @@ bail:
 
 	void GC::RCObjectZeroCheck(RCObject *item)
 	{
-		int size = Size(item)/sizeof(int);
+		size_t size = Size(item)/sizeof(int);
 		int *p = (int*)item;
 		// skip vtable, first 4 bytes are cleared in Alloc
 		p++;
@@ -1507,7 +1520,7 @@ bail:
 			if(*p == (int32)0xcacacaca)
 				return;
 		}
-		for(int i=1; i<size; i++,p++)
+		for(int i=1; i<(int)size; i++,p++)
 		{
 			if(*p)
 			{
@@ -1559,7 +1572,7 @@ bail:
 
 #ifdef DEBUGGER
 		uint64 start = GC::GetPerformanceCounter();
-		uint32 pagesStart = gc->totalGCPages;
+		uint32 pagesStart = (uint32)gc->totalGCPages;
 		uint32 numObjects=0;
 		uint32 objSize=0;
 #endif
@@ -1642,7 +1655,7 @@ bail:
 				((GCFinalizable*)rcobj)->~GCFinalizable();
 #ifdef DEBUGGER
 				numObjects++;
-				objSize += GC::Size(rcobj);
+				objSize += (uint32)GC::Size(rcobj);
 #endif
 				gc->Free(rcobj);
 
@@ -1728,7 +1741,7 @@ bail:
 
 		void *stackTop = pthread_getspecific(stackTopKey);
 		if(stackTop)
-			return (uint32)stackTop;
+			return (uintptr)stackTop;
 
 		struct frame *sp;
 		int i;
@@ -1750,7 +1763,7 @@ bail:
 			sp = ( struct frame * )sp->fr_savfp;
 		}
 		pthread_setspecific(stackTopKey, stackTop);
-		return (uintptr_t)stackTop;
+		return (uintptr)stackTop;
 	}
 #elif defined(AVMPLUS_UNIX) // SOLARIS
 	pthread_key_t stackTopKey = 0;
@@ -1852,7 +1865,7 @@ bail:
 		GCDebugMsg(false, "---\n");
 		// skip data + endMarker
 		p += 1 + (size>>2);
-		void *container = (void*) *p;
+		void *container = (void*)(*(void**)p);
 		if(container && IsPointerToGCPage(container))
 			DumpBackPointerChain(container);
 		else 
@@ -1866,13 +1879,13 @@ bail:
 	void GC::WriteBackPointer(const void *item, const void *container, size_t itemSize)
 	{
 		GCAssert(container != NULL);
-		int *p = (int*) item;
-		size_t size = *p++;
+		uint32 *p = (uint32*) item;
+		uint32 size = *p++;
 		if(size && size <= itemSize) {
 			// skip traceIndex + data + endMarker
 			p += (2 + (size>>2));
 			GCAssert(sizeof(uintptr) == sizeof(void*));
-			*p = (uintptr) container;
+			*(uintptr*)p = (uintptr) container;
 		}
 	}
 
@@ -2429,7 +2442,7 @@ bail:
 		
 #ifdef DEBUGGER
 		numObjects++;
-		objSize+=size;
+		objSize+=(uint32)size;
 #endif
 
 		while(p < end) 
@@ -2465,7 +2478,14 @@ bail:
 #else
 				// if |item| doesn't point to the beginning of an allocation,
 				// it's not considered a pointer.
-				if(block->items + itemNum * block->size != item)
+				if ((block->items + itemNum * block->size != item)
+#ifdef MMGC_64BIT
+// Doubly-inherited classes have two vtables so are offset 8 more bytes than normal. 
+// Handle that here (shows up with PlayerScriptBufferImpl object in the Flash player)
+					&& ((block->items + itemNum * block->size + sizeof(void *)) != item)
+#endif
+					)
+
 					continue;
 #endif
 
@@ -2480,10 +2500,10 @@ bail:
 					if(block->alloc->ContainsPointers())
 					{
 						const void *realItem = item;
-						size_t itemSize = block->size;
+						uint32 itemSize = block->size;
 						#ifdef MEMORY_INFO
 						realItem = GetUserPointer(realItem);
-						itemSize -= DebugSize();
+						itemSize -= (uint32)DebugSize();
 						#endif
 						if(((uintptr)realItem & ~0xfff) != thisPage)
 						{							
@@ -2543,14 +2563,14 @@ bail:
 				GCLargeAlloc::LargeBlock *b = GCLargeAlloc::GetBlockHeader(item);
 				if((b->flags & (GCLargeAlloc::kQueuedFlag|GCLargeAlloc::kMarkFlag)) == 0) 
 				{
-					size_t usize = b->usableSize;
+					uint32 usize = b->usableSize;
 					if((b->flags & GCLargeAlloc::kContainsPointers) != 0) 
 					{
 						b->flags |= GCLargeAlloc::kQueuedFlag;
 						const void *realItem = item;
 						#ifdef MEMORY_INFO
 						realItem = GetUserPointer(item);
-						usize -= DebugSize();
+						usize -= (uint32)DebugSize();
 						#endif
 						b->gc->PushWorkItem(work, GCWorkItem(realItem, usize, true));
 					} 
@@ -2809,7 +2829,7 @@ bail:
 		// region of the black object as needing to be re-marked)
 		if(ContainsPointers(white)) {
 			SetQueued(white);
-			PushWorkItem(m_incrementalWork, GCWorkItem(white, Size(white), true));
+			PushWorkItem(m_incrementalWork, GCWorkItem(white, (uint32)Size(white), true));
 		} else {
 			SetMark(white);
 		}
@@ -2867,7 +2887,7 @@ bail:
 			else 
 				m_bitsNext += numBytes/sizeof(uint32);
 		} else {
-			if(leftOver > 0) {
+			if(leftOver>=int(sizeof(void*))) {
 				// put waste in freelist
 				for(int i=0, n=kNumSizeClasses; i<n; i++) {
 					GCAlloc *a = noPointersAllocs[i];

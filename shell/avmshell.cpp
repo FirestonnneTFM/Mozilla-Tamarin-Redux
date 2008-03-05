@@ -149,7 +149,11 @@ namespace avmshell
 	#ifdef WIN32
 	void Shell::computeStackBase()
 	{
+#ifdef AVMPLUS_AMD64
+		const int kStackMargin = 262144;
+#else
 		const int kStackMargin = 131072;
+#endif
 		
 		SYSTEM_INFO sysinfo;
 		GetSystemInfo(&sysinfo);

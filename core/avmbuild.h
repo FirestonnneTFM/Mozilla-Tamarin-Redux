@@ -75,9 +75,18 @@
 #endif
 
 #ifdef AVMPLUS_WIN32
+  #ifdef _WIN64
+	#ifndef AVMPLUS_64BIT
+	  #define AVMPLUS_64BIT
+	#endif
+	#ifndef AVMPLUS_AMD64
+	  #define AVMPLUS_AMD64
+	#endif
+  #else
   #ifndef AVMPLUS_IA32
     #define AVMPLUS_IA32
   #endif
+#endif
 #endif
 
 /// START: CRUFT 
@@ -117,7 +126,7 @@
 #define AVMPLUS_VERIFYALL
 #endif
 
-#if defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
+#if defined(VTUNE) || defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
 #define AVMPLUS_VERBOSE
 #define AVMPLUS_PROFILE
 #endif
