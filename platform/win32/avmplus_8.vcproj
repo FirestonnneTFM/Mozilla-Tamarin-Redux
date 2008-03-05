@@ -299,6 +299,148 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="VTune|Win32"
+			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="4"
+			CharacterSet="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\..\..\modules\vtune;..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre"
+				PreprocessorDefinitions="VTUNE;WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="true"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmplus.h"
+				BrowseInformation="0"
+				WarningLevel="4"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/avmplus.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="VTune_Debug|Win32"
+			OutputDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_8/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="4"
+			CharacterSet="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\..\..\modules\vtune;..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre"
+				PreprocessorDefinitions="VTUNE;WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				ForceConformanceInForLoopScope="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="avmplus.h"
+				BrowseInformation="0"
+				WarningLevel="4"
+				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/avmplus_d.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -385,6 +527,22 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug_Debugger|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune_Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -708,10 +866,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Vtune.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\win32setjmp.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						PrecompiledHeaderThrough=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune_Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
