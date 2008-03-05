@@ -131,10 +131,6 @@ namespace avmplus
 					);
 			}
 			return result;
-			_asm
-			{
-				bsr eax,[value];
-			}
 #endif
 		}
 	#elif defined(AVMPLUS_PPC)
