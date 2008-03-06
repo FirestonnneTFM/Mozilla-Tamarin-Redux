@@ -222,6 +222,7 @@ namespace MMgc
 				GCAssert(RefCount() == 1);
 				GC::GetGC(this)->RemoveFromZCT(this);
 			}
+			
 #ifdef _DEBUG
 			if(gc->keepDRCHistory)
 				history.Push(GetStackTraceIndex(2));
@@ -232,6 +233,7 @@ namespace MMgc
 		{ 
 			if(Sticky() || composite == 0)
 				return;
+
 #ifdef _DEBUG
 			GC* gc = GC::GetGC(this);
 			GCAssert(gc->IsRCObject(this));
@@ -276,11 +278,13 @@ namespace MMgc
 			if(gc->keepDRCHistory)
 				history.Push(GetStackTraceIndex(1));
 #endif
+
 			// composite == 1 is the same as (rc == 1 && !notSticky && !notInZCT)
 			if(RefCount() == 0) {
 				GC::GetGC(this)->AddToZCT(this);
 			}
 		}
+		
 #ifdef _DEBUG
 		void DumpHistory();
 #endif

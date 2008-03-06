@@ -1,4 +1,6 @@
 
+#ifndef AVMPLUS_AMD64
+
 #define SSE_FLAG  0x02000000		// SSE flag is bit 25 of Feature Flags
 #define SSE2_FLAG 0x04000000		// SSE2 flag is bit 26 of Feature Flags
 
@@ -51,3 +53,12 @@ bool P4Available()
 	}
 	return false;
 } // IsCpuSSE2Ready()
+
+#else // AVMPLUS_AMD64
+
+bool P4Available()
+{
+	return true;
+}
+
+#endif // AVMPLUS_AMD64

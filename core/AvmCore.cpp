@@ -3781,7 +3781,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // they are regular numeric values.
 
 		// handle integer values w/out allocation
-		#ifdef WIN32
+		#if defined(WIN32) && !defined(_ARM_)
 		#ifdef AVMPLUS_AMD64
 		int id = _mm_cvttsd_si32(_mm_set_sd(n));
 		#else

@@ -330,6 +330,7 @@ namespace MMgc
 
 #ifndef MMGC_ARM // TODO MMGC_ARM
 #ifdef _DEBUG
+		if (!nogc)
 		RunGCTests(this);
 #endif
 #endif
@@ -1012,7 +1013,7 @@ bail:
 			now - lastSweepTicks > kMarkSweepBurstTicks && 
 			heapSizeAtLastAlloc < heap->GetTotalHeapSize()) 
 		{
-			if(incremental)
+			if(incremental && !nogc)
 				StartIncrementalMark();
 			else
 				CollectWithBookkeeping(true, true);
@@ -1020,7 +1021,7 @@ bail:
 
 		void *item;
 
-		if(incremental)
+		if(incremental && !nogc)
 			item = AllocBlockIncremental(size, zero);
 		else
 			item = AllocBlockNonIncremental(size, zero);
@@ -1134,7 +1135,7 @@ bail:
 #ifdef MMGC_AMD64
 		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
 #else
-		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
+		GCAssert((index >> 2) < 64 * GCHeap::kBlockSize);
 #endif
 		pageMap[index >> 2] &= ~(3<<((index&0x3)*2));
 	}	

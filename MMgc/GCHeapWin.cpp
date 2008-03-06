@@ -448,6 +448,7 @@ namespace MMgc
         x: pop eax
         mov c.Eip, eax
         mov c.Ebp, ebp
+        mov c.Esp, esp
       }
 #endif
 
@@ -467,6 +468,8 @@ namespace MMgc
 #else
 		frame.AddrPC.Offset = c.Eip;
 		frame.AddrPC.Mode = AddrModeFlat;
+		frame.AddrStack.Offset = c.Esp;
+		frame.AddrStack.Mode = AddrModeFlat;
 		frame.AddrFrame.Offset = c.Ebp;
 		frame.AddrFrame.Mode = AddrModeFlat;
 #endif

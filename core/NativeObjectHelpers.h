@@ -82,12 +82,12 @@ namespace avmplus
 			uint32 result;
 			if (intValue < 0) 
 			{
-				if (intValue + length < 0) 
+				if (intValue + int(length) < 0) 
 					result = 0;
 				else 
 					result = (uint32)(intValue + length);
 			} 
-			else if (intValue > (int)length) 
+			else if (intValue > int(length)) 
 				result = length;
 			else
 				result = (uint32)intValue;

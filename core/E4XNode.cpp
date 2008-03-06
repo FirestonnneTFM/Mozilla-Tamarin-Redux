@@ -597,7 +597,7 @@ namespace avmplus
 	// E4X 9.1.1.4, pg 15
 	void E4XNode::_deleteByIndex (uint32 i)
 	{
-		if ((i >= 0) && (i < numChildren()))
+		if (i < numChildren())
 		{
 			E4XNode *x = _getAt(i);
 			if (x)
@@ -922,7 +922,7 @@ namespace avmplus
 			}
 
 			xml->setParent (this);
-			if ((i >= 0) && (i < this->numChildren()))
+			if (i < this->numChildren())
 			{ 
 				if (prior)
 				{

@@ -28,6 +28,7 @@ objdir-*/**
 *_OPT.OBJ/**
 .DS_Store
 *.mode2
+*.mode2v3
 *.pbxuser
 test/*.html
 *.ncb

@@ -4897,19 +4897,31 @@ namespace avmplus
 			{
 				OP* lhs = localGet(lhsi);
 				OP* rhs = localGet(rhsi);
+				#ifdef AVMPLUS_AMD64
+				// 32-bit signed and unsigned values fit in our 64-bit registers
+				// so we can simply do a signed compare with mixed int/uint types
+				return binaryIns(MIR_icmp, lhs, rhs);
+				#else
 				if (rhs->code == MIR_imm && rhs->imm >= 0)
 				{
 					return binaryIns(MIR_ucmp, lhs, rhs);
 				}
+				#endif
 			}
 			else if ((lht == INT_TYPE) && (rht == UINT_TYPE))
 			{
 				OP* lhs = localGet(lhsi);
 				OP* rhs = localGet(rhsi);
+				#ifdef AVMPLUS_AMD64
+				// 32-bit signed and unsigned values fit in our 64-bit registers
+				// so we can simply do a signed compare with mixed int/uint types
+				return binaryIns(MIR_icmp, lhs, rhs);
+				#else
 				if (lhs->code == MIR_imm && lhs->imm >= 0)
 				{
 					return binaryIns(MIR_ucmp, lhs, rhs);
 				}
+				#endif
 			}
 
 			OP* lhs = promoteNumberIns(lht, lhsi);

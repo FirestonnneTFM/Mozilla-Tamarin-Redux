@@ -47,14 +47,16 @@
 #if defined (_WIN64)
 	#define MMGC_AMD64
 	#define MMGC_64BIT
+#elif defined(_ARM_)
+	#define MMGC_ARM
 #else
-#define MMGC_IA32
+	#define MMGC_IA32
 #endif
 
 /**
  * Define this to get stack traces.  Helps with memory leaks.
  */
-#ifdef _DEBUG
+#if defined(_DEBUG)
 #define MEMORY_INFO
 #endif
 
@@ -103,6 +105,7 @@
  */
 #ifdef _MSC_VER
 
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#pragma warning(disable:4512) //assignment operator could not be generated
 	#pragma warning(disable:4511) //can't generate copy ctor
 	#pragma warning(disable:4127) //conditional expression is constant
@@ -120,4 +123,4 @@
 	// some that might be useful to turn on someday, but would require too much twiddly code tweaking right now
 //	#pragma warning(error:4296)	// expression is always true (false) (Generally, an unsigned variable was used in a comparison operation with zero.)
 
-#endif
+#endif // _MSC_VER

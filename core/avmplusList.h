@@ -254,19 +254,16 @@ namespace avmplus
 		T removeAt(uint32 i)
 		{
 			T old = (T)0;
-			if (i >= 0)
-			{
-				old = data[i];
-				if(kElementType == LIST_RCObjects)
-					set(i, NULL);
-				arraycopy(data, i+1, data, i, len-i-1);
-				len--;
-				// clear copy at the end so it can be collected if removed
-				// and isn't decremented on next add
-				if(kElementType != LIST_NonGCObjects)
-					data[len] = NULL;
-				AvmAssert(len >= 0);
-			}
+			old = data[i];
+			if(kElementType == LIST_RCObjects)
+				set(i, NULL);
+			arraycopy(data, i+1, data, i, len-i-1);
+			len--;
+			// clear copy at the end so it can be collected if removed
+			// and isn't decremented on next add
+			if(kElementType != LIST_NonGCObjects)
+				data[len] = NULL;
+			AvmAssert(len >= 0);
 			return old;
 		}
 
