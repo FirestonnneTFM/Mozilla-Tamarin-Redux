@@ -230,7 +230,7 @@ const int kBufferPadding = 16;
 		 * will check the stack pointer to make sure it
 		 * doesn't go below this value.
 		 */
-		uint32 minstack;
+		uintptr_t minstack;
 
 		/**
 		 * This method will be invoked when the first exception

@@ -114,7 +114,7 @@ namespace avmplus
 			}
 			
 			//MethodClosure* mc = f->toplevel()->methodClosureClass->create(f->getCallMethodEnv(), f->atom());
-			Debugger::trace_callback = f;
+			core->debugger->trace_callback = f;
 		}
 	#endif /* DEBUGGER */
 		(void)f;
@@ -126,7 +126,7 @@ namespace avmplus
 	#ifdef DEBUGGER
 		AvmCore *core = this->core();
 		if (core->debugger)
-			f = Debugger::trace_callback;				
+			f = core->debugger->trace_callback;				
 	#endif /* DEBUGGER */
 		return f;
 	}

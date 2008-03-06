@@ -92,8 +92,6 @@ namespace avmplus
 
 #ifdef FEATURE_BUFFER_GUARD
 
-	class GenericGuard;
-
 	// Generic Guard class
 	class GenericGuard
 	{

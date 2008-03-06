@@ -85,7 +85,6 @@
 #include "avmbuild.h"
 
 #if defined(_MAC)
-//#include <stdlib.h>
 #include <alloca.h>
 #endif
 
@@ -99,16 +98,20 @@
 
 #ifdef WIN32
 #include <malloc.h>
+#include <math.h>
+#ifdef AVMPLUS_ARM
+typedef unsigned int uintptr_t;
+#else
 #ifdef AVMPLUS_AMD64
 #include <setjmpex.h>
 #endif
-#include <math.h>
 #include <intrin.h>
 #include <emmintrin.h>
 #ifdef VTUNE
 #include "JITProfiling.h"
 #endif
-#endif 
+#endif // AVMPLUS_ARM
+#endif // WIN32
 
 #include <stdarg.h>
 

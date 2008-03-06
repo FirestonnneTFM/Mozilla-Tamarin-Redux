@@ -46,7 +46,6 @@ namespace avmplus
 
 	Debugger::TraceLevel	Debugger::astrace_console = Debugger::TRACE_OFF;
 	Debugger::TraceLevel	Debugger::astrace_callback = Debugger::TRACE_OFF;
-	DRC(ScriptObject*)		Debugger::trace_callback = 0;	
 	bool					Debugger::in_trace = false;
 	uint64					Debugger::astraceStartTime = OSDep::currentTimeMillis();
 

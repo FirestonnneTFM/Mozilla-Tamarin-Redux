@@ -137,6 +137,25 @@ namespace MMgc
 			// classes but how to call the right Free would need to be work out
 			m_allocs[i] = new FixedAllocSafe(kSizeClasses[i], heap);
 		}
+
+#ifdef _DEBUG 
+		// sanity check our tables
+		for (int size8 = 136; size8 < 2016; size8 += 8)
+		{
+			int foo = kPageUsableSpace/(size8);
+			unsigned index = kSizeClassIndex[foo];
+
+			// Given our foo index, this is the maximum sized alloc that may occur
+			// and need to fit into the m_alloc[index] value.
+			unsigned maxsize = (kPageUsableSpace / foo) & ~0x7;
+
+			// assert that I fit
+			GCAssert(maxsize <= (m_allocs[index]->GetItemSize()));
+
+			// assert that I don't fit (makes sure we don't waste space)
+			GCAssert(maxsize > (m_allocs[index-1]->GetItemSize()));
+		}
+#endif
 	}
 
 	FixedMalloc::~FixedMalloc()

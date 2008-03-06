@@ -466,7 +466,7 @@ namespace avmplus
             if (!legal)
             {
 				setTraitsPos(oldpos); // restore traits_pos
-				Multiname qname(ns, name);
+                Multiname qname(ns, name);
                 toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(&qname), core->toErrorString(this));
             }
 			linked = true;

@@ -609,9 +609,9 @@ namespace avmplus
 		{
 			XMLListObject *src = core->atomToXMLList (V);
 			if ((src->_length() == 1) && src->_getAt(0)->getClass() & (E4XNode::kText | E4XNode::kAttribute))
-			{
-				c = core->string(V)->atom();
-			}	
+		{
+			c = core->string(V)->atom();
+		}
 			else
 			{
 				c = src->_deepCopy()->atom();									

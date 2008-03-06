@@ -36,6 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 
+#define MMGC_ARM
+
 #ifdef DEBUG
 #ifndef _DEBUG
 #define _DEBUG

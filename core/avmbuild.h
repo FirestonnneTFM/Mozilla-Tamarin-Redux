@@ -82,6 +82,10 @@
 	#ifndef AVMPLUS_AMD64
 	  #define AVMPLUS_AMD64
 	#endif
+  #elif defined(_ARM_)
+    #ifndef AVMPLUS_ARM
+      #define AVMPLUS_ARM
+    #endif
   #else
   #ifndef AVMPLUS_IA32
     #define AVMPLUS_IA32
@@ -158,6 +162,7 @@
  * which is quite picky.  Disable warnings we don't care about.
  */
 #ifdef _MSC_VER
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#pragma warning(disable:4512) //assignment operator could not be generated
 	#pragma warning(disable:4511) //can't generate copy ctor
 	#pragma warning(disable:4127) //conditional expression is constant

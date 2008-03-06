@@ -198,6 +198,7 @@ allpasses=0
 allfails=0
 allunpass=0
 allexpfails=0
+allexceptions=0
 allskips=0
 failmsgs=[]
 expfailmsgs=[]
@@ -214,8 +215,13 @@ def run_pipe(cmd):
 	t = pipes.Template()
 	t.append("%s 2>&1" % cmd, "--")
 	verbose_print(cmd)
-	return t.open(globs['tmpfile'], "r")
-
+	pipe=False
+	try:
+		pipe=t.open(globs['tmpfile'], "r")
+	except:
+		print "exception occurred in run_pipes"
+		allexceptions+=1
+	return pipe
 def list_match(list,test):
 	for k in list:
 		if re.search(k,test):
@@ -258,7 +264,8 @@ def compile_test(as):
 		for line in f:
 			verbose_print(line.strip())
 	finally:
-		f.close()
+		if f:
+			f.close()
 
 def fail(abc, msg, failmsgs):
 	msg = msg.strip()
@@ -279,7 +286,7 @@ js_print("Executing %d tests against vm: %s" % (len(tests), avm));
 # passed into the script:
 # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
 # ================================================
-ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-5.2-WOW64':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','Solaris':'sol',}[platform.system()]
+ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','Solaris':'sol',}[platform.system()]
 cputype={'i386':'x86','i686':'x86','Power Macintosh':'ppc'}[platform.machine()]
 
 if globs['config'] == '':
@@ -440,6 +447,8 @@ if allexpfails>0:
 	js_print("expected failures    : %d" % allexpfails, "<br>", "")
 if allskips>0:
 	js_print("tests skipped        : %d" % allskips, "<br>", "")
+if allexceptions>0:
+	js_print("test exceptions      : %d" % allexceptions, "<br>", "")
 
 print "Results were written to %s" % js_output
 

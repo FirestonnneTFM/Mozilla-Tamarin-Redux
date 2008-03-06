@@ -300,7 +300,7 @@ namespace avmplus
 			return 0;  // Undefined cast to number/int/uint
 		}
 
-		T *m_array;
+		DWB(T *) m_array;
 
 	protected:
 
