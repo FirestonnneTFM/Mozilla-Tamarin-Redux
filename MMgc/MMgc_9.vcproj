@@ -395,7 +395,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\core;..\codegen"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;DEBUGGER;AVMPLUS_IA32;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;DEBUGGER;AVMPLUS_AMD64;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
@@ -656,6 +656,15 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="ml64.exe /Fo&quot;$(IntDir)\Win64Util.obj&quot; /c /FlWin64Util.cod Win64Util.asm&#x0D;&#x0A;"
+						Outputs="$(OutDir)\Win64Util.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml64.exe /Fo&quot;$(IntDir)\Win64Util.obj&quot; /c /FlWin64Util.cod Win64Util.asm"
 						Outputs="$(OutDir)\Win64Util.obj"
 					/>
 				</FileConfiguration>
