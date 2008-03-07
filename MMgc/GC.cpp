@@ -2479,15 +2479,17 @@ bail:
 #else
 				// if |item| doesn't point to the beginning of an allocation,
 				// it's not considered a pointer.
-				if ((block->items + itemNum * block->size != item)
+				if (block->items + itemNum * block->size != item)
+				{
 #ifdef MMGC_64BIT
 // Doubly-inherited classes have two vtables so are offset 8 more bytes than normal. 
 // Handle that here (shows up with PlayerScriptBufferImpl object in the Flash player)
-					&& ((block->items + itemNum * block->size + sizeof(void *)) != item)
-#endif
-					)
-
-					continue;
+					if ((block->items + itemNum * block->size + sizeof(void *)) == item)
+						item = block->items + itemNum * block->size;
+					else
+#endif // MMGC_64BIT
+						continue;
+				}
 #endif
 
 				// inline IsWhite/SetBit
