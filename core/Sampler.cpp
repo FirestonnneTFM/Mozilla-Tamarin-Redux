@@ -145,7 +145,7 @@ namespace avmplus
 		{
 			read(p, s.stack.depth);
 			s.stack.trace = p;
-			p += s.stack.depth * sizeof(StackTrace::Element);
+			p += s.stack.depth * (sizeof(uint32) + sizeof(Stringp) + sizeof(int));
 		}
 		// padding to keep 8 byte alignment
 		align(p);
@@ -379,7 +379,7 @@ namespace avmplus
 				if (s.weakRef && !s.weakRef->get())
 				{				
 					rewind(p, sizeof(GCWeakRef*)*2);
-					write(p, (uint32)0);
+					write(p, (void *)0);
 					p += sizeof(GCWeakRef*);
 				}
 			}
