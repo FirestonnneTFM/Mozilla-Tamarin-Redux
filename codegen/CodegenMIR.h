@@ -55,6 +55,20 @@ namespace avmplus
 	// rounding v up to the given 2^ quantity
 	#define BIT_ROUND_UP(v,q)      ( (((uintptr)v)+(q)-1) & ~((q)-1) )
 
+	#ifdef VTUNE
+	class LineNumberRecord : public MMgc::GCObject
+	{
+		public:
+			LineNumberRecord(Stringp fn, uint32 ln)
+			: filename(fn)
+			, lineno(ln)
+			{ }
+
+		String*	filename;
+		uint32	lineno;
+	};    
+	#endif /* VTUNE */
+
 	/**
 	 * The CodegenMIR class is a dynamic code generator which translates
 	 * AVM+ bytecodes into an architecture neutral intermediate representation
