@@ -4334,7 +4334,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	GrowableBuffer* AvmCore::requestNewMirBuffer()
 	{
-		return new (GetGC()) GrowableBuffer(GetGC()->GetGCHeap());
+		return new (GetGC()) GrowableBuffer(GetGC()->GetGCHeap(),true);
 	}
 
 	void AvmCore::releaseMirBuffer(GrowableBuffer* buffer)
