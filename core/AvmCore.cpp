@@ -182,6 +182,27 @@ namespace avmplus
 		callStack          = NULL;
         #endif /* DEBUGGER */
 
+		interrupted        = false;
+
+		codeContextAtom    = CONTEXT_NONE;
+		dxnsAddr		   = NULL;
+		
+		strings			= NULL;
+		numStrings		= 0;
+		namespaces		= NULL;
+		numNamespaces	= 0;
+		stringCount		= 0;
+		deletedCount	= 0;
+		nsCount			= 0;
+
+		numStrings = 1024; // power of 2
+		strings = new DRC(Stringp)[numStrings];
+		memset(strings, 0, numStrings*sizeof(Stringp));
+
+		numNamespaces = 1024;  // power of 2
+		namespaces = new DRC(Namespacep)[numNamespaces];
+		memset(namespaces, 0, numNamespaces*sizeof(Namespace*));
+
 		// some useful decimal constants
 
 		// initialize all the special_decimal values
@@ -244,27 +265,6 @@ namespace avmplus
 		decContextDefault(&mutableDecContext, DEC_INIT_DECIMAL128); // set the unchanging fields
 
 		dnNaNatom = decimalToAtom(special_decimal[sd_NaN]);
-
-		interrupted        = false;
-
-		codeContextAtom    = CONTEXT_NONE;
-		dxnsAddr		   = NULL;
-		
-		strings			= NULL;
-		numStrings		= 0;
-		namespaces		= NULL;
-		numNamespaces	= 0;
-		stringCount		= 0;
-		deletedCount	= 0;
-		nsCount			= 0;
-
-		numStrings = 1024; // power of 2
-		strings = new DRC(Stringp)[numStrings];
-		memset(strings, 0, numStrings*sizeof(Stringp));
-
-		numNamespaces = 1024;  // power of 2
-		namespaces = new DRC(Namespacep)[numNamespaces];
-		memset(namespaces, 0, numNamespaces*sizeof(Namespace*));
 
 		console.setCore(this);
 		
@@ -3351,7 +3351,9 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
 		// use alloca to avoid heap allocations where possible
-		wchar *buffer = (wchar*) alloca((len16+1)*sizeof(wchar));
+		wchar *buffer = 0;
+		if (len16 < 1024)
+			buffer = (wchar*) alloca((len16+1)*sizeof(wchar));
 		
 		Stringp s = NULL;
 		if(!buffer) {

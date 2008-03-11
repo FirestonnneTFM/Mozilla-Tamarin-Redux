@@ -1640,6 +1640,9 @@ namespace avmplus
 		mirNames[MIR_fsub]  = "fsub ";
 		mirNames[MIR_fmul]  = "fmul ";
 		mirNames[MIR_fdiv]  = "fdiv ";
+#ifdef AVMPLUS_IA32
+		mirNames[MIR_faddi] = "faddi";
+#endif
 		mirNames[MIR_fneg]  = "fneg ";
 		mirNames[MIR_cmop]  = "cmop ";
 		mirNames[MIR_csop]  = "csop ";
@@ -5356,6 +5359,20 @@ namespace avmplus
 		}
 		if (t == UINT_TYPE)
 		{
+#ifdef AVMPLUS_IA32
+			if (core->sse2)
+			{
+				// Faster to emit this:
+				// sub eax,0x80000000
+				// cvtsi2sd xmm0,eax
+				// addsd xmm0, 2147483648.0
+				OP *op1 = binaryIns(MIR_sub, localGet(i), InsConst(0x80000000));
+				OP *op2 = i2dIns(op1);
+				static const double k_NEGONE = 2147483648.0;
+				return Ins(MIR_faddi, op2, (uintptr) &k_NEGONE);
+			}
+			else
+#endif // AVMPLUS_IA32
 			return u2dIns(localGet(i));
 		}
 		if (t == DECIMAL_TYPE) {
@@ -9335,6 +9352,36 @@ namespace avmplus
 					break;
 				}
 
+#ifdef AVMPLUS_IA32
+				case MIR_faddi:
+				{
+					OP* lhs = ip->oprnd1; // lhs
+
+					if (!ip->lastUse)
+					{
+						fpregs.expire(lhs, ip);
+						break;
+					}
+
+					Register r = Unknown;
+					InsRegisterPrepA(ip, fpregs, lhs, r);
+					AvmAssert(r != Unknown);
+					registerAllocSpecific(fpregs, r);
+
+					if (core->sse2)
+					{
+						ADDSD(r, ip->disp, Unknown); 
+					}
+					else
+					{
+						AvmAssert(0); // unsupported on non-SSE processsors
+					}
+
+					setResultReg(fpregs, ip, r);
+					break;
+				}
+#endif // AVMPLUS_IA32
+
 				case MIR_and:
 				case MIR_or:
 				case MIR_xor:
@@ -10645,7 +10692,7 @@ namespace avmplus
 					#endif
 
 					#ifdef AVMPLUS_ARM
-					// On ARM, MIR_i2d is never generated directly
+					// On ARM, MIR_u2d is never generated directly
 					AvmAssert(false);
 					#endif
 					
@@ -10655,7 +10702,7 @@ namespace avmplus
 					r = registerAllocAny(fpregs, ip);
 
 					#ifdef AVMPLUS_AMD64
-					// Works okay for 32-bit unsigned integers since we using a 64-bit register
+					// Works okay for 32-bit unsigned integers since we're using a 64-bit register
 					CVTSI2SD(r, vReg);
 					#else
 					// We're doing 32-bit moves here
