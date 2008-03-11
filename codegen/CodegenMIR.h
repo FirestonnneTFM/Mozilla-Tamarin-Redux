@@ -176,6 +176,9 @@ namespace avmplus
 			MIR_fsub	= 7  | MIR_float | MIR_oper,	// ptr, ptr
 			MIR_fmul	= 8  | MIR_float | MIR_oper,	// ptr, ptr
 			MIR_fdiv	= 9  | MIR_float | MIR_oper,	// ptr, ptr
+#ifdef AVMPLUS_IA32
+			MIR_faddi	= 10 | MIR_float | MIR_oper,	// ptr, disp
+#endif
 			
 			MIR_fldop   = 22 | MIR_float | MIR_oper,	// ptr, disp (optimizable load)
 
