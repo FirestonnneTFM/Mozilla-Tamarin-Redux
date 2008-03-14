@@ -25,5 +25,6 @@ $DIR/shell \
     $DIR/cogen-expr.es.abc \
     $DIR/esc-core.es.abc \
     $DIR/eval-support.es.abc \
+    $DIR/esc-env.es.abc \
     $DIR/main.es.abc \
     -- $@

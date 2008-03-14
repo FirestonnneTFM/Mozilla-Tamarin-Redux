@@ -14,7 +14,7 @@ TARGETS=$(DIR)/debug.es.abc $(DIR)/util.es.abc $(DIR)/util-tamarin.es.abc $(DIR)
 	$(DIR)/abc-encode.es.abc $(DIR)/abc-encode-cpp.es.abc $(DIR)/abc-decode.es.abc \
 	$(DIR)/emit.es.abc $(DIR)/cogen.es.abc $(DIR)/cogen-stmt.es.abc $(DIR)/cogen-expr.es.abc $(DIR)/esc1-t.es.abc \
 	$(DIR)/esc2-t.es.abc $(DIR)/esc3-t.es.abc $(DIR)/esc-core.es.abc $(DIR)/esc.es.abc $(DIR)/main.es.abc \
-	$(DIR)/eval-support.es.abc
+	$(DIR)/eval-support.es.abc $(DIR)/esc-env.es.abc
 
 default: $(TARGETS)
 	cp $(TARGETS) ../bin

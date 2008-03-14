@@ -48,39 +48,23 @@
 
     function loadBytes(bytes) {
         import avmplus.*;
-        Domain.currentDomain.loadBytes(bytes); // this defines the variable "esc_env".
+        Domain.currentDomain.loadBytes(bytes);
     }
 
     function commandLineArguments() {
         import avmplus.*;
         return System.argv;
     }
-
-    function boot() {
-        use namespace Parse;
-        use namespace Gen;
-
-        if (!booted) {
-            var esc_env_str = ESC::readFile ("esc-env.ast");
-            var parser = new Parser(esc_env_str,[], "esc-env.ast");
-            var nd = parser.program();
-            var bytes = cg(nd).getBytes();
-            ESC::loadBytes(bytes);
-            booted = true;
-        }
-    }
-
+	
     function getTopFixtures() {
         use namespace Ast;
 
-        var nd = Decode::program (esc_env);    // esc_env is defined by side effect in "boot", above
+        var nd = Decode::program (esc_env);    // esc_env is defined in esc-env.es (within ESC namespace)
         return nd.head.fixtures;
     }
 
     function compile(consume, produce, context) {
         use namespace Parse;
-
-        boot();
 
         var t1 = new Date;
 
