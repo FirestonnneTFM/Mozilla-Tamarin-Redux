@@ -48,15 +48,9 @@ namespace avmshell
 	 */
 	class SystemClass : public ClassClosure
 	{
-								
-		//#define PERFORMANCE_GETTIMER
-		#ifdef PERFORMANCE_GETTIMER
 		uint64 initialTime;
-		#else
-		double initialTime;
-		#endif
-
-    public:
+ 
+	public:
 		SystemClass(VTable* cvtable);
 		~SystemClass();
 
