@@ -71,7 +71,7 @@ namespace avmshell
 		#ifdef PERFORMANCE_GETTIMER
 		initialTime = MMgc::GC::getPerformanceCounter();
 		#else
-		initialTime = (double)OSDep::currentTimeMillis();		
+		initialTime = OSDep::currentTimeMillis();		
 		#endif // PERFORMANCE_GETTIMER
 
 	}
