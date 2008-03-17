@@ -120,7 +120,7 @@ def usage(c):
   print '    --ext           set the testfile extension (defaults to .as)'
   print '    --ascargs       args to pass to asc on rebuild of test files'
   print '    --vmargs        args to pass to vm'
-  print '    --timeout       max time to let a test run, in sec (default 60s)
+  print '    --timeout       max time to let a test run, in sec (default 60s)'
   exit(c)
 
 try:
