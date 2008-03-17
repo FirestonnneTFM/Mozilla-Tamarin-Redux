@@ -83,4 +83,12 @@ MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(NULL)
 endif
 
+ifeq (sunos,$(TARGET_OS))
+MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
+  $(curdir)/GCAllocObjectUnix.cpp \
+  $(curdir)/GCDebugUnix.cpp \
+  $(curdir)/GCHeapUnix.cpp \
+  $(NULL)
+endif
+
 $(curdir)/GCDebugMac.$(OBJ_SUFFIX): CXXFLAGS += -Wno-deprecated-declarations

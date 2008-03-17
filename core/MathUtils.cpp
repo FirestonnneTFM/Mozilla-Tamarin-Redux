@@ -73,7 +73,7 @@ namespace avmplus
 
 	double MathUtils::infinity()
 	{
-		#ifdef UNIX
+		#if defined(UNIX) && defined(INFINITY)
 		return INFINITY;
 		#else
 		float result;
@@ -209,7 +209,7 @@ namespace avmplus
 
 	double MathUtils::nan()
 	{
-#ifdef UNIX
+#if defined(UNIX) && defined(NAN)
 		return NAN;
 #else
 #ifdef AVM10_BIG_ENDIAN
