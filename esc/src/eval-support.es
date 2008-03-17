@@ -12,7 +12,6 @@
     ESC function evaluateInScopeArray(args, scopes, scopedesc) {
         use namespace Ast;
 
-        ESC::boot();
         if (args.length > 0) {
             if (args[0] is String) {
                 let id = ESC::eval_counter++;
