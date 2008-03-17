@@ -72,7 +72,7 @@ public namespace Ast
 
     type FIXTURE_NAME =
        ( TempName
-       , PropName )
+       | PropName )
 
     class TempName {
         const index : int;
@@ -107,20 +107,20 @@ public namespace Ast
 
     type NAMESPACE =
        ( IntrinsicNamespace
-       , PrivateNamespace
-       , ProtectedNamespace
-       , PublicNamespace
-       , InternalNamespace
-       , UserNamespace
-       , AnonymousNamespace
-       , ImportNamespace );
+       | PrivateNamespace
+       | ProtectedNamespace
+       | PublicNamespace
+       | InternalNamespace
+       | UserNamespace
+       | AnonymousNamespace
+       | ImportNamespace );
 
     type RESERVED_NAMESPACE =
        ( IntrinsicNamespace
-       , PrivateNamespace
-       , ProtectedNamespace
-       , PublicNamespace
-       , InternalNamespace );
+       | PrivateNamespace
+       | ProtectedNamespace
+       | PublicNamespace
+       | InternalNamespace );
 
     class IntrinsicNamespace {
         function hash () { return "intrinsic"; }
@@ -189,10 +189,10 @@ public namespace Ast
 
     type NUMBER_TYPE =
        ( DecimalType
-       , DoubleType
-       , IntType
-       , UIntType
-       , NumberType )
+       | DoubleType
+       | IntType
+       | UIntType
+       | NumberType )
 
     class DecimalType {}
     class DoubleType {}
@@ -202,12 +202,12 @@ public namespace Ast
 
     type ROUNDING_MODE =
        ( Ceiling
-       , Floor
-       , Up
-       , Down
-       , HalfUp
-       , HalfDown
-       , HalfEven )
+       | Floor
+       | Up
+       | Down
+       | HalfUp
+       | HalfDown
+       | HalfEven )
 
     class Ceiling {}
     class Floor {}
@@ -223,8 +223,8 @@ public namespace Ast
 
     type BINTYOP =
        ( CastOp
-       , IsOp
-       , ToOp )
+       | IsOp
+       | ToOp )
 
     class CastOp {}
     class IsOp {}
@@ -238,28 +238,28 @@ public namespace Ast
 
     type BINOP =
        ( Plus
-       , Minus
-       , Times
-       , Divide
-       , Remainder
-       , LeftShift
-       , RightShift
-       , RightShiftUnsigned
-       , BitwiseAnd
-       , BitwiseOr
-       , BitwiseXor
-       , LogicalAnd
-       , LogicalOr
-       , InstanceOf
-       , In
-       , Equal
-       , NotEqual
-       , StrictEqual
-       , StrictNotEqual
-       , Less
-       , LessOrEqual
-       , Greater
-       , GreaterOrEqual )
+       | Minus
+       | Times
+       | Divide
+       | Remainder
+       | LeftShift
+       | RightShift
+       | RightShiftUnsigned
+       | BitwiseAnd
+       | BitwiseOr
+       | BitwiseXor
+       | LogicalAnd
+       | LogicalOr
+       | InstanceOf
+       | In
+       | Equal
+       | NotEqual
+       | StrictEqual
+       | StrictNotEqual
+       | Less
+       | LessOrEqual
+       | Greater
+       | GreaterOrEqual )
 
     class Plus {}
     class Minus {}
@@ -315,19 +315,19 @@ public namespace Ast
 
     type ASSIGNOP =
        ( Assign
-       , AssignPlus
-       , AssignMinus
-       , AssignTimes
-       , AssignDivide
-       , AssignRemainder
-       , AssignLeftShift
-       , AssignRightShift
-       , AssignRightShiftUnsigned
-       , AssignBitwiseAnd
-       , AssignBitwiseOr
-       , AssignBitwiseXor
-       , AssignLogicalAnd
-       , AssignLogicalOr )
+       | AssignPlus
+       | AssignMinus
+       | AssignTimes
+       | AssignDivide
+       | AssignRemainder
+       | AssignLeftShift
+       | AssignRightShift
+       | AssignRightShiftUnsigned
+       | AssignBitwiseAnd
+       | AssignBitwiseOr
+       | AssignBitwiseXor
+       | AssignLogicalAnd
+       | AssignLogicalOr )
 
     class Assign {}
     class AssignPlus {}
@@ -363,17 +363,17 @@ public namespace Ast
 
     type UNOP =
        ( Delete
-       , Void
-       , Typeof
-       , PreIncr
-       , PreDecr
-       , PostIncr
-       , PostDecr
-       , UnaryPlus
-       , UnaryMinus
-       , BitwiseNot
-       , LogicalNot
-       , Type )
+       | Void
+       | Typeof
+       | PreIncr
+       | PreDecr
+       | PostIncr
+       | PostDecr
+       | UnaryPlus
+       | UnaryMinus
+       | BitwiseNot
+       | LogicalNot
+       | Type )
 
     class Delete {}
     class Void {}
@@ -407,27 +407,27 @@ public namespace Ast
 
     type EXPR =
        ( TernaryExpr
-       , BinaryExpr
-       , BinaryTypeExpr
-       , UnaryExpr
-       , TypeExpr
-       , ThisExpr
-       , YieldExpr
-       , SuperExpr
-       , LiteralExpr
-       , CallExpr
-       , ApplyTypeExpr
-       , LetExpr
-       , NewExpr
-       , ObjectRef
-       , LexicalRef
-       , SetExpr
-       , ListExpr
-       , InitExpr
-       , SliceExpr
-       , EvalScopeInitExpr
-       , GetTemp
-       , GetParam )
+       | BinaryExpr
+       | BinaryTypeExpr
+       | UnaryExpr
+       | TypeExpr
+       | ThisExpr
+       | YieldExpr
+       | SuperExpr
+       | LiteralExpr
+       | CallExpr
+       | ApplyTypeExpr
+       | LetExpr
+       | NewExpr
+       | ObjectRef
+       | LexicalRef
+       | SetExpr
+       | ListExpr
+       | InitExpr
+       | SliceExpr
+       | EvalScopeInitExpr
+       | GetTemp
+       | GetParam )
 
     class TernaryExpr {
         const e1 : EXPR
@@ -593,9 +593,9 @@ public namespace Ast
 
     type INIT_TARGET =
        ( VarInit
-       , LetInit
-       , PrototypeInit
-       , InstanceInit )
+       | LetInit
+       | PrototypeInit
+       | InstanceInit )
 
     class VarInit {}
     class LetInit {}
@@ -639,14 +639,14 @@ public namespace Ast
 
     type IDENT_EXPR =
        ( Identifier
-       , QualifiedExpression
-       , AttributeIdentifier
-       , ExpressionIdentifier
-       , QualifiedIdentifier
-       , TypeIdentifier
-       , UnresolvedPath
-       , WildcardIdentifier
-       , ReservedNamespace )
+       | QualifiedExpression
+       | AttributeIdentifier
+       | ExpressionIdentifier
+       | QualifiedIdentifier
+       | TypeIdentifier
+       | UnresolvedPath
+       | WildcardIdentifier
+       | ReservedNamespace )
 
     class Identifier {
         const ident : IDENT;
@@ -713,22 +713,22 @@ public namespace Ast
     // LITERAL
 
     type LITERAL = (
-        LiteralNull,
-        LiteralUndefined,
-        LiteralContextDecimal,
-        LiteralContextDecimalInteger,
-        LiteralContextHexInteger,
-        LiteralDouble,
-        LiteralDecimal,
-        LiteralInt,
-        LiteralUInt,
-        LiteralBoolean,
-        LiteralString,
-        LiteralArray,
-        LiteralXML,
-        LiteralNamespace,
-        LiteralObject,
-        LiteralFunction,
+        LiteralNull |
+        LiteralUndefined |
+        LiteralContextDecimal |
+        LiteralContextDecimalInteger |
+        LiteralContextHexInteger |
+        LiteralDouble |
+        LiteralDecimal |
+        LiteralInt |
+        LiteralUInt |
+        LiteralBoolean |
+        LiteralString |
+        LiteralArray |
+        LiteralXML |
+        LiteralNamespace |
+        LiteralObject |
+        LiteralFunction |
         LiteralRegExp
     )
 
@@ -845,9 +845,9 @@ public namespace Ast
 
     type VAR_DEFN_TAG =
         ( Const
-        , Var
-        , LetVar
-        , LetConst )
+        | Var
+        | LetVar
+        | LetConst )
 
     class Const {}
     class Var {}
@@ -909,9 +909,9 @@ public namespace Ast
 
     type FUNC_NAME_KIND =
        ( Ordinary
-       , Operator
-       , Get
-       , Set )
+       | Operator
+       | Get
+       | Set )
 
     class Ordinary {}
     class Operator {}
@@ -1012,8 +1012,8 @@ public namespace Ast
 
     type BINDING_IDENT =
        ( TempIdent
-       , ParamIdent
-       , PropIdent )
+       | ParamIdent
+       | PropIdent )
 
     class TempIdent {
         const index : int;
@@ -1035,7 +1035,7 @@ public namespace Ast
 
     type INIT_STEP =
        ( InitStep
-       , AssignStep )
+       | AssignStep )
 
     class InitStep {
         const ident : BINDING_IDENT;
@@ -1056,13 +1056,13 @@ public namespace Ast
     // FIXTURE
 
     type FIXTURE = (
-        NamespaceFixture,
-        ClassFixture,
-        InterfaceFixture,
-        TypeVarFixture,
-        TypeFixture,
-        MethodFixture,
-        ValFixture,
+        NamespaceFixture |
+        ClassFixture |
+        InterfaceFixture |
+        TypeVarFixture |
+        TypeFixture |
+        MethodFixture |
+        ValFixture |
         VirtualValFixture)
         
 
@@ -1120,17 +1120,17 @@ public namespace Ast
 
     type TYPE_EXPRS = [TYPE_EXPR];
     type TYPE_EXPR = (
-        SpecialType,
-        UnionType,
-        ArrayType,
-        TypeName,
-        ElementTypeRef,
-        FieldTypeRef,
-        FunctionType,
-        ObjectType,
-        AppType,
-        NullableType,
-        InstanceType,
+        SpecialType |
+        UnionType |
+        ArrayType |
+        TypeName |
+        ElementTypeRef |
+        FieldTypeRef |
+        FunctionType |
+        ObjectType |
+        AppType |
+        NullableType |
+        InstanceType |
         NominalType
     )
 
@@ -1141,9 +1141,9 @@ public namespace Ast
 
     type SPECIAL_TYPE_KIND =
         ( AnyType
-        , NullType
-        , UndefinedType
-        , VoidType )
+        | NullType
+        | UndefinedType
+        | VoidType )
 
     class AnyType { function toString() "Any" }
     class NullType { function toString() "Null" }
@@ -1249,25 +1249,25 @@ public namespace Ast
 
     type STMT =
        ( EmptyStmt
-       , ExprStmt
-       , ClassBlock
-       , ForInStmt
-       , ThrowStmt
-       , ReturnStmt
-       , BreakStmt
-       , ContinueStmt
-       , BlockStmt
-       , LabeledStmt
-       , LetStmt
-       , WhileStmt
-       , DoWhileStmt
-       , ForStmt
-       , IfStmt
-       , WithStmt
-       , TryStmt
-       , SwitchStmt
-       , SwitchTypeStmt
-       , DXNStmt )
+       | ExprStmt
+       | ClassBlock
+       | ForInStmt
+       | ThrowStmt
+       | ReturnStmt
+       | BreakStmt
+       | ContinueStmt
+       | BlockStmt
+       | LabeledStmt
+       | LetStmt
+       | WhileStmt
+       | DoWhileStmt
+       | ForStmt
+       | IfStmt
+       | WithStmt
+       | TryStmt
+       | SwitchStmt
+       | SwitchTypeStmt
+       | DXNStmt )
 
     class EmptyStmt { }
 
@@ -1466,13 +1466,13 @@ public namespace Ast
 
     type PRAGMA =
         ( UseNamespace
-        , UseDefaultNamespace
-        , UseNumber
-        , UseRounding
-        , UsePrecision
-        , UseStrict
-        , UseStandard
-        , Import )
+        | UseDefaultNamespace
+        | UseNumber
+        | UseRounding
+        | UsePrecision
+        | UseStrict
+        | UseStandard
+        | Import )
 
     class UseNamespace {}
     class UseDefaultNamespace {}
@@ -1505,7 +1505,7 @@ public namespace Ast
 
     type DIRECTIVES =
         { pragmas: [PRAGMA]
-        , stmts: STMTS }
+          , stmts: STMTS }
 
     type PROGRAM = Program
 
