@@ -61,7 +61,7 @@ function getTestCases() {
     array[item++] = new TestCase(   SECTION,
                                     "myfunc = Function(); myfunc.myToString = Object.prototype.toString; myfunc.myToString()",
                                     true,
-                                    myfunc.myToString()=="[object Function-35]" ||
+									myfunc.myToString().indexOf("[object Function-") == 0 ||
                                     myfunc.myToString()=="[object null]"
                                      );
     thisError="no error";
