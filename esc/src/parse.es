@@ -46,9 +46,9 @@ use namespace intrinsic;
     type PATTERNS = [PATTERN];
     type PATTERN =
           ( ObjectPattern
-          , ArrayPattern
-          , SimplePattern
-          , IdentifierPattern );
+          | ArrayPattern
+          | SimplePattern
+          | IdentifierPattern );
 
     type FIELD_PATTERNS = [FIELD_PATTERN];
     type FIELD_PATTERN = FieldPattern;
@@ -88,25 +88,25 @@ use namespace intrinsic;
             : ident = ident { }
     }
 
-    type ALPHA = (NoColon, AllowColon);
+    type ALPHA = (NoColon| AllowColon);
     class NoColon {}
     class AllowColon {}
     const noColon = new NoColon;
     const allowColon = new AllowColon;
 
-    type BETA = (NoIn, AllowIn);
+    type BETA = (NoIn| AllowIn);
     class NoIn {}
     class AllowIn {}
     const noIn = new NoIn;
     const allowIn = new AllowIn;
 
-    type GAMMA = (NoExpr, AllowExpr);
+    type GAMMA = (NoExpr| AllowExpr);
     class NoExpr {}
     class AllowExpr {}
     const noExpr = new NoExpr;
     const allowExpr = new AllowExpr;
 
-    type TAU = (GlobalBlk, ClassBlk, InterfaceBlk, LocalBlk);
+    type TAU = (GlobalBlk| ClassBlk| InterfaceBlk| LocalBlk);
     class GlobalBlk {}
     class ClassBlk {}
     class InterfaceBlk {}
@@ -124,7 +124,7 @@ use namespace intrinsic;
     const Full = Abbrev + 1;
     */
 
-    type OMEGA = (FullStmt, AbbrevStmt);
+    type OMEGA = (FullStmt| AbbrevStmt);
     class FullStmt {}
     class AbbrevStmt {}
     const fullStmt = new FullStmt;
@@ -973,7 +973,7 @@ use namespace intrinsic;
                 Identifier
         */
 
-        function qualifier() : (Ast::IDENT, Ast::NAMESPACE) {
+        function qualifier() : (Ast::IDENT | Ast::NAMESPACE) {
             var qual;
 
             switch (hd()) {
@@ -3023,13 +3023,13 @@ use namespace intrinsic;
         /*
 
         UnionType
-            (  TypeExpressionList  )
+            (  TypeExpressionListBar  )
 
         */
 
         function unionType () : Ast::TYPE_EXPR {
             eat (Token::LeftParen);
-            var nd1 = typeExpressionList ();
+            var nd1 = typeExpressionListBar ();
             eat (Token::RightParen);
 
             return new Ast::UnionType (nd1);
@@ -3159,6 +3159,36 @@ use namespace intrinsic;
             var ndx = nullableTypeExpression ();
             nd1.push (ndx);
             while (hd () === Token::Comma) {
+                next();
+                var ndx = nullableTypeExpression ();
+                nd1.push (ndx);
+            }
+
+            return nd1;
+        }
+
+        /*
+
+        TypeExpressionListBar
+            NullableTypeExpression
+            TypeExpressionListBar |    NullableTypeExpression
+
+        refactored
+
+        TypeExpressionListBar
+            NullableTypeExpression  TypeExpressionListBarPrime
+
+        TypeExpressionListBarPrime
+            empty
+            |  NullableTypeExpression  TypeExpressionListBarPrime
+
+        */
+
+        function typeExpressionListBar () /* : [Ast::TYPE_EXPR] */ {
+            var nd1 = [];
+            var ndx = nullableTypeExpression ();
+            nd1.push (ndx);
+            while (hd () === Token::BitwiseOr) {
                 next();
                 var ndx = nullableTypeExpression ();
                 nd1.push (ndx);
