@@ -43,6 +43,11 @@
 #include <unistd.h>
 #endif
 
+#if defined(SOLARIS)
+#include <ucontext.h>
+extern "C" greg_t _getsp(void);
+#endif
+
 #ifdef WIN32
 #pragma warning(disable: 4201)
 
@@ -186,6 +191,8 @@ namespace avmshell
 		asm("mr %0,r1" : "=r" (sp));
         #elif defined(AVMPLUS_ARM)
 		asm("mov %0,sp" : "=r" (sp));
+		#elif defined SOLARIS
+		sp = _getsp();
 		#else
 		asm("movl %%esp,%0" : "=r" (sp));
 		#endif
@@ -495,7 +502,7 @@ namespace avmshell
 	{
 		TRY(this, kCatchAction_ReportAsError)
 		{
-			#if defined (WIN32) || defined(AVMPLUS_UNIX)
+			#ifdef AVMPLUS_IA32
 			if (!P4Available()) {
 				sse2 = false;
 			}
