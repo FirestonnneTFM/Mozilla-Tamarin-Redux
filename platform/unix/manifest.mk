@@ -37,14 +37,16 @@
 # ***** END LICENSE BLOCK *****
 
 ifeq (sunos,$(TARGET_OS))
+mathutils_cxxsrc = MathUtilsSolaris.cpp
 unixcpuid_cxxsrc = solariscpuid.cpp
 else
+mathutils_cxxsrc = MathUtilsUnix.cpp
 unixcpuid_cxxsrc = unixcpuid.cpp
 endif
 
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/DateUnix.cpp \
-  $(curdir)/MathUtilsUnix.cpp \
+  $(curdir)/$(mathutils_cxxsrc) \
   $(curdir)/$(unixcpuid_cxxsrc) \
   $(curdir)/OSDepUnix.cpp \
   $(NULL)
