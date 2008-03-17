@@ -230,20 +230,6 @@ def run_pipe(cmd):
 	p = Popen(('%s 2>&1' % cmd), shell=True, stdout=PIPE, stderr=STDOUT)
 	p.wait(60) #abort if it takes longer than 20 seconds
 	return p.stdout.readlines()
-	
-	#Old pipes code
-	'''
-  t = pipes.Template()
-  t.append('%s 2>&1' % cmd, '--')
-  verbose_print(cmd)
-  pipe=False
-  try:
-    pipe=t.open(globs['tmpfile'], 'r')
-  except:
-    print 'exception occurred in run_pipes'
-    allexceptions+=1
-  return pipe
-  '''
   
 def list_match(list,test):
   for k in list:
