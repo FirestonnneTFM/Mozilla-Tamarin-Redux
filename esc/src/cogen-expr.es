@@ -135,22 +135,24 @@
         let asm = ctx.asm;
         if (e.op is LogicalAnd) {
             cgExpr(ctx, e.e1);
-            asm.I_convert_b();
+            asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
             asm.I_dup();
+            asm.I_convert_b();
             let L0 = asm.I_iffalse(undefined);
             asm.I_pop();
             cgExpr(ctx, e.e2);
-            asm.I_convert_b();
+            asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
             asm.I_label(L0);
         }
         else if (e.op is LogicalOr) {
             cgExpr(ctx, e.e1);
-            asm.I_convert_b();
+            asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
             asm.I_dup();
+            asm.I_convert_b();
             let L0 = asm.I_iftrue(undefined);
             asm.I_pop();
             cgExpr(ctx, e.e2);
-            asm.I_convert_b();
+            asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
             asm.I_label(L0);
         }
         else {
