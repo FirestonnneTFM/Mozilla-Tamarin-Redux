@@ -1,5 +1,3 @@
-
-#ifndef AVMPLUS_AMD64
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -22,6 +20,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,48 +36,70 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#define SSE_FLAG  0x02000000		// SSE flag is bit 25 of Feature Flags
-#define SSE2_FLAG 0x04000000		// SSE2 flag is bit 26 of Feature Flags
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/elf.h>
+#include <sys/fcntl.h>
+struct cpuid_get_hwcap {
+    char *cgh_archname;
+    uint_t cgh_hwcap;
+};
+#ifndef AV_SPARC_V8PLUS // For OpenSolaris, these were defined
+#define AV_SPARC_V8PLUS		0x0008
+#define AV_SPARC_VIS		0x0020
+#define AV_SPARC_VIS2		0x0040
+#endif
 
-static bool HasCPUIDsupport()
-{
-	unsigned int f1, f2;
-	const unsigned int flag = 0x200000;
-	asm("pushfl\n\t"
-	    "pushfl\n\t"
-	    "popl %0\n\t"
-	    "movl %0,%1\n\t"
-	    "xorl %2,%0\n\t"
-	    "pushl %0\n\t"
-	    "popfl\n\t"
-	    "pushfl\n\t"
-	    "popl %0\n\t"
-	    "popfl\n\t"
-	    : "=&r" (f1), "=&r" (f2)
-	    : "ir" (flag));
-	return ((f1^f2) & flag) != 0;
-}
+#ifndef AV_386_MMX // For OpenSolaris, these were defined
+#define AV_386_MMX			0x0040
+#define AV_386_AMD_MMX		0x0080
+#define AV_386_AMD_3DNow	0x0100
+#define AV_386_AMD_3DNowx	0x0200
+#define AV_386_SSE			0x0800
+#define AV_386_SSE2			0x1000
+#define AV_386_SSE3			0x4000
+#endif
+extern "C" int open(const char *, int, ...);
+extern "C" int ioctl(int, int, ...);
 
 static unsigned int GetFeatureFlags()
 {
-	int dwCPUFeatureFlags = 0x00000000;
-	if (HasCPUIDsupport())
-	{
-		__asm__ (	"pushl %%ebx\n\t"
-					"movl $1, %%eax\n\t"
-					"cpuid\n\t"	
-					"popl %%ebx\n\t"
-				  : "=d" (dwCPUFeatureFlags) : "0" (1) : "eax", "ecx", "cc");
-	}
-	return dwCPUFeatureFlags;
-} // GetFeatureFlags()
+	static bool checked = false;
+	static unsigned int flag = 0;
+	if (checked) return flag;
+		
+	checked = true;
+	static const char dev_cpu_self_cpuid[] = "/dev/cpu/self/cpuid";
+#ifdef AVMPLUS_SPARC
+	static const char isa[] = "sparc";
+#else
+	static const char isa[] = "i386";
+#endif
+	int d = -1;
+	d = open(dev_cpu_self_cpuid, O_RDONLY);
+	if (d == -1)
+	  return 0;
+
+	struct cpuid_get_hwcap __cgh, *cgh = &__cgh;
+
+	cgh->cgh_archname = (char *)isa;
+	if (ioctl(d, (('c' << 24) | ('i' << 16) | ('d' << 8) | 0) /* CPUID_GET_HWCAP */,
+	    cgh) != 0)
+	  return 0;
+
+	flag = cgh->cgh_hwcap;
+	return flag;
+}
 
 bool P4Available()
 {
+#ifdef AVMPLUS_SPARC
+	return false;
+#else
 	static int checked = 0;
 	if ( !checked ) {
 		unsigned int dwFeatures = GetFeatureFlags();
-		if (dwFeatures & SSE2_FLAG) {
+		if (dwFeatures & AV_386_SSE2) {
 			checked = 2;
 			return true;
 		}
@@ -88,13 +109,5 @@ bool P4Available()
 		return true;
 	}
 	return false;
-} // IsCpuSSE2Ready()
-
-#else // AVMPLUS_AMD64
-
-bool P4Available()
-{
-	return true;
+#endif
 }
-
-#endif // AVMPLUS_AMD64
