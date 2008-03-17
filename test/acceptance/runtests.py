@@ -54,6 +54,7 @@ timestamps = True
 forcerebuild = False
 runSource = False # Run the source file (.as, .js) instead of .abc
 sourceExt = '.as' # can be changed to .js, .es ...
+testTimeOut = 60
 
 # needed for pipe
 fd,tmpfile = tempfile.mkstemp()
@@ -119,11 +120,13 @@ def usage(c):
   print '    --ext           set the testfile extension (defaults to .as)'
   print '    --ascargs       args to pass to asc on rebuild of test files'
   print '    --vmargs        args to pass to vm'
+  print '    --timeout       max time to let a test run, in sec (default 60s)
   exit(c)
 
 try:
   opts, args = getopt(argv[1:], 'vE:a:g:x:htfc:', ['verbose','avm=','asc=','globalabc=',
-                'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=','ext='])
+                'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
+                'ext=','timeout='])
 except:
   usage(2)
 
@@ -154,6 +157,8 @@ for o, v in opts:
     globs['vmargs'] = v
   elif o in ('--ext'):
     sourceExt = v
+  elif o in ('--timeout'):
+    testTimeOut=int(o)
   
 # Are we running esc - TODO: add command line flag
 if basename(globs['avm']) == 'main.sh':
@@ -228,7 +233,7 @@ def parents(d):
 # run a command and return its output
 def run_pipe(cmd):
 	p = Popen(('%s 2>&1' % cmd), shell=True, stdout=PIPE, stderr=STDOUT)
-	p.wait(60) #abort if it takes longer than 60 seconds
+	p.wait(testTimeOut) #abort if it takes longer than 60 seconds
 	return p.stdout.readlines()
   
 def list_match(list,test):
@@ -306,8 +311,8 @@ def build_incfiles(as):
 # passed into the script:
 # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
 # ================================================
-ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','Solaris':'sol',}[platform.system()]
-cputype={'i386':'x86','i686':'x86','Power Macintosh':'ppc'}[platform.machine()]
+ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','SunOS':'sol',}[platform.system()]
+cputype={'i386':'x86','i686':'x86','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86'}[platform.machine()]
 
 if globs['config'] == '':
   if not runSource:

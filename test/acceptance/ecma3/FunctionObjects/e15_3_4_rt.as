@@ -53,7 +53,7 @@ function getTestCases() {
     array[item++] = new TestCase(   SECTION,
          "var myfunc = Function.prototype; myfunc.toString = Object.prototype.toString; myfunc.toString()",
          true,
-         (myfunc = Function.prototype, myfunc.toString = Object.prototype.toString, myfunc.toString())=="[object Function-35]" ||
+         (myfunc = Function.prototype, myfunc.toString = Object.prototype.toString, myfunc.toString()).indexOf("[object Function-")==0 ||
          (myfunc = Function.prototype, myfunc.toString = Object.prototype.toString, myfunc.toString())=="[object null]"
          );
 

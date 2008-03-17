@@ -30,7 +30,7 @@ objdir-*/**
 *.mode2
 *.mode2v3
 *.pbxuser
-test/*.html
+test/acceptance/*.html
 *.ncb
 *.suo
 *.vcproj.*.user
