@@ -105,7 +105,7 @@ function TestCase( n, d, e,	a )	{
 	this.description = d;
 	this.expect		 = e;
 	this.actual		 = a;
-	this.passed		 = true;
+	this.passed		 = "";
 	this.reason		 = "";
 	//this.bugnumber	  =	BUGNUMBER;
 
@@ -120,7 +120,6 @@ function TestCase( n, d, e,	a )	{
 
 
 function startTest() {
-
     // print out bugnumber
     /*if ( BUGNUMBER ) {
             writeLineToLog ("BUGNUMBER: " + BUGNUMBER );
@@ -130,6 +129,18 @@ function startTest() {
     tc = 0;
 }
 
+function checkReason(passed) {
+    var reason;
+    if (passed == 'true') {
+	reason = "";
+    } else if (passed == 'false') {
+	reason = "wrong value";
+    } else if (passed == 'type error') {
+	reason = "type error";
+    }
+    return reason;
+}
+
 
 function test(... rest:Array) {
 
@@ -137,10 +148,10 @@ function test(... rest:Array) {
 		// no args sent, use default test
     	for ( tc=0; tc < testcases.length; tc++ ) {
         	testcases[tc].passed = writeTestCaseResult(
-                            	testcases[tc].expect,
-                            	testcases[tc].actual,
-                            	testcases[tc].description +" = "+ testcases[tc].actual );
-        	testcases[tc].reason += ( testcases[tc].passed ) ? "" : "wrong value ";
+                    testcases[tc].expect,
+                    testcases[tc].actual,
+                    testcases[tc].description +" = "+ testcases[tc].actual );
+		    testcases[tc].reason += checkReason(testcases[tc].passed);
     	}
 	} else {
 		// we need to use a specialized call to writeTestCaseResult
@@ -150,7 +161,7 @@ function test(... rest:Array) {
                             		testcases[tc].expect,
                             		testcases[tc].actual,
                             		testcases[tc].description );
-        		testcases[tc].reason += ( testcases[tc].passed ) ? "" : "wrong value ";
+        		testcases[tc].reason += checkReason(testcases[tc].passed);
     	}
 		}
 	}
@@ -162,43 +173,41 @@ function test(... rest:Array) {
 //  Compare expected result to the actual result and figure out whether
 //  the test case passed.
 
-function getTestCaseResult(	expect,	actual ) {
+function getTestCaseResult(expect,actual) {
 	//	because	( NaN == NaN ) always returns false, need to do
 	//	a special compare to see if	we got the right result.
-		if ( actual	!= actual )	{
-			if ( typeof	actual == "object" ) {
-				actual = "NaN object";
-			} else {
-				actual = "NaN number";
-			}
+	if ( actual	!= actual )	{
+		if ( typeof	actual == "object" ) {
+			actual = "NaN object";
+		} else {
+			actual = "NaN number";
 		}
-		if ( expect	!= expect )	{
-			if ( typeof	expect == "object" ) {
-				expect = "NaN object";
-			} else {
-				expect = "NaN number";
-			}
+	}
+	if ( expect	!= expect )	{
+		if ( typeof	expect == "object" ) {
+			expect = "NaN object";
+		} else {
+			expect = "NaN number";
 		}
-
-		var	passed = ( expect == actual	) ?	true : false;
-
-	//	if both	objects	are	numbers
-	// need	to replace w/ IEEE standard	for	rounding
-		if (	!passed
-				&& typeof(actual) == "number"
-				&& typeof(expect) == "number"
-			) {
-				if ( Math.abs(actual-expect) < 0.0000001 ) {
-					passed = true;
-				}
+	}
+	var passed="";
+	if (expect == actual) {
+	    if ( typeof(expect) != typeof(actual) ){
+		passed = "type error";
+	    } else {
+		passed = "true";
+	    }
+	} else { //expect != actual
+	    passed = "false";
+	    // if both objects are numbers
+	    // need	to replace w/ IEEE standard	for	rounding
+	    if (typeof(actual) == "number" && typeof(expect) == "number") {
+		if ( Math.abs(actual-expect) < 0.0000001 ) {
+		    passed = "true";
 		}
-
-	//	verify type	is the same
-		if ( typeof(expect)	!= typeof(actual) )	{
-			passed = false;
-		}
-
-		return passed;
+	    }
+	}
+	return passed;
 }
 
 //  Begin printing functions.  These functions use the shell's
@@ -207,16 +216,33 @@ function getTestCaseResult(	expect,	actual ) {
 //  document.write.
 
 function writeTestCaseResult( expect, actual, string ) {
-		var	passed = getTestCaseResult(	expect,	actual );
-        writeFormattedResult( expect, actual, string, passed );
-		return passed;
+    var passed = getTestCaseResult(expect,actual);
+    var s = string;
+    if (passed == "true") {
+	s += PASSED;
+    } else if (passed == "false") {
+	s += FAILED + expect;
+    } else if (passed == "type error") {
+	s += FAILED + expect + " Type Mismatch - Expected Type: "+ typeof(expect) + ", Result Type: "+ typeof(actual);
+    } else { //should never happen
+	s += FAILED + " UNEXPECTED ERROR - see shell.as:writeTestCaseResult()"
+    }
+
+    //s += ( passed ) ? PASSED : FAILED + expect;
+    writeLineToLog(s);
+    return passed;
 }
+
+//redundant, but leaving in in case its used elsewhere
+/*
 function writeFormattedResult( expect, actual, string, passed ) {
         var s = string ;
         s += ( passed ) ? PASSED : FAILED + expect;
         writeLineToLog( s);
         return passed;
 }
+*/
+
 function writeLineToLog( string	) {
 	print( string );
 }

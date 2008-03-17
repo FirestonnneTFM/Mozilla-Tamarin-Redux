@@ -84,15 +84,6 @@
 #include <pthread_np.h>
 #endif // HAVE_PTHREAD_NP_H
 
-#ifdef SOLARIS
-#include <ucontext.h>
-#include <sys/frame.h>
-#include <errno.h>
-#include <unistd.h>
-#include <sys/stack.h>
-extern "C" greg_t _getsp(void);
-#endif
-
 #if defined(_MSC_VER) && defined(_DEBUG)
 // we turn on exceptions in DEBUG builds
 #pragma warning(disable:4291) // no matching operator delete found; memory will not be freed if initialization throws an exception
@@ -104,6 +95,15 @@ extern "C" greg_t _getsp(void);
 #else
 #define SAMPLE_FRAME(_x, _s) 
 #define SAMPLE_CHECK() 
+#endif
+
+#ifdef SOLARIS
+#include <ucontext.h>
+#include <sys/frame.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/stack.h>
+extern "C" greg_t _getsp(void);
 #endif
 
 namespace MMgc

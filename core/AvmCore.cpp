@@ -3747,6 +3747,8 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		}
 		return allocDouble(n);
+		#elif defined(SOLARIS)
+		return AvmCore::doubleToAtom(n); // This needs to be optimized for solaris.
 		#elif AVMPLUS_UNIX
 		int id3;
 		asm("movups %1, %%xmm0;"
@@ -4108,6 +4110,10 @@ return the result of the comparison ToPrimitive(x) == y.
 		int id = MathUtils::real2int (d);
 		if (id != 0x80000000) 
 			return id;
+#elif AVMPLUS_SPARC
+		int id = MathUtils::real2int (d);
+		if (id != 0x7fffffff && id != 0x80000000)
+			return id;
 #endif
 
 		return doubleToInt32(d);
@@ -4134,6 +4140,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		id = _mm_cvttsd_si32(_mm_set_sd(d));
 		if (id != (int)0x80000000)
 			return id;
+        #elif defined(SOLARIS)
         #elif AVMPLUS_UNIX
         asm("movups %1, %%xmm0;"
             "cvttsd2si %%xmm0, %%eax;"

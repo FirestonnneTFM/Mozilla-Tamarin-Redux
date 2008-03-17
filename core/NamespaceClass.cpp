@@ -56,6 +56,9 @@ namespace avmplus
 	}
 	
 	#define STRING_METHOD(handler) stringMethod((StringHandler)handler)
+#elif defined  __SUNPRO_CC
+	typedef void (Namespace::*StringHandler)();
+	#define STRING_METHOD(x) reinterpret_cast <NativeTableEntry::Handler>((StringHandler)x)
 #else
 	#define STRING_METHOD(x) x
 #endif

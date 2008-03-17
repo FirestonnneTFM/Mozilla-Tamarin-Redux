@@ -192,4 +192,13 @@
 
 // Enable interfacing Java
 #define FEATURE_JNI
+
+#ifdef SOLARIS
+#define HAVE_ALLOCA_H
+#endif
+
+#ifdef AVMPLUS_SPARC
+#define AVM10_BIG_ENDIAN
+#endif
+
 #endif /* __avmbuild__ */
