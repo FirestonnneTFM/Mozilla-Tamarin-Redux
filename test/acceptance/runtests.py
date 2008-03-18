@@ -52,15 +52,17 @@ from killableprocess import Popen
 verbose = False
 timestamps = True
 forcerebuild = False
+runESC = False
 runSource = False # Run the source file (.as, .js) instead of .abc
 sourceExt = '.as' # can be changed to .js, .es ...
-testTimeOut = 300
+testTimeOut = -1 #by default tests will NOT timeout
 
-# needed for pipe
-fd,tmpfile = tempfile.mkstemp()
-os.close(fd)
+globs = { 'avm':'', 'asc':'', 'globalabc':'', 'exclude':[],
+					'config':'', 'ascargs':'', 'vmargs':'', 'escbin':''}
 
-globs = { 'avm':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'', 'ascargs':'', 'vmargs':''}
+# default value for escbin
+globs['escbin'] = '../../esc/bin/'
+
 if 'AVM' in environ:
   globs['avm'] = environ['AVM'].strip()
 if 'ASC' in environ:
@@ -75,6 +77,8 @@ if 'ASCARGS' in environ:
   globs['ascargs'] = environ['ASCARGS'].strip()
 if 'VMARGS' in environ:
   globs['vmargs'] = environ['VMARGS'].strip()
+if 'ESCBIN' in environ:
+	globs['escbin'] = environ['ESCBIN'].strip()
 
 def verbose_print(m, start='', end=''):
   if verbose:
@@ -117,16 +121,18 @@ def usage(c):
   print ' -t --notime        do not generate timestamps (cleaner diffs)'
   print ' -f --forcerebuild  force rebuild all test files'
   print ' -c --config        sets the config string [default OS-tvm]'
+  print '    --esc           run esc instead of avm'
+  print '    --escbin        location of esc/bin directory - defaults to ../../esc/bin'
   print '    --ext           set the testfile extension (defaults to .as)'
   print '    --ascargs       args to pass to asc on rebuild of test files'
   print '    --vmargs        args to pass to vm'
-  print '    --timeout       max time to let a test run, in sec (default 300s)'
+  print '    --timeout       max time to let a test run, in sec (default -1 = never timeout)'
   exit(c)
 
 try:
   opts, args = getopt(argv[1:], 'vE:a:g:x:htfc:', ['verbose','avm=','asc=','globalabc=',
                 'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                'ext=','timeout='])
+                'ext=','timeout=','esc','escbin='])
 except:
   usage(2)
 
@@ -159,11 +165,11 @@ for o, v in opts:
     sourceExt = v
   elif o in ('--timeout'):
     testTimeOut=int(v)
-  
-# Are we running esc - TODO: add command line flag
-if basename(globs['avm']) == 'main.sh':
-  print "found main.sh"  #debug text
-  runSource = True
+  elif o in ('--esc'):
+  	runESC = True
+  elif o in ('--escbin'):
+    globs['escbin'] = v
+      
 
 exclude = globs['exclude']
 
@@ -217,9 +223,11 @@ allunpass=0
 allexpfails=0
 allexceptions=0
 allskips=0
+alltimeouts=0
 failmsgs=[]
 expfailmsgs=[]
 unpassmsgs=[]
+timeoutmsgs=[]
 
 #setup absolute path of base dir to not have parents go beyond that
 absArgPath = abspath(args[0])
@@ -232,6 +240,7 @@ def parents(d):
 
 # run a command and return its output
 def run_pipe(cmd):
+	#print('cmd: %s' % cmd)
 	p = Popen(('%s 2>&1' % cmd), shell=True, stdout=PIPE, stderr=STDOUT)
 	exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
 	if exitCode < 0:	# process timed out
@@ -294,6 +303,22 @@ if not avm: # or not isfile(avm.split()[0]): /* isfile() fails for alias on OSX 
   exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % avm)
 js_print('Executing %d tests against vm: %s' % (len(tests), avm));
 
+# Are we running esc - depends on a valid avm
+if runESC:
+  runSource = True
+  # generate the executable cmd for esc
+  #escAbcs = [f for f in os.listdir(globs['escbin']) if f.endswith('.abc')] #not all abcs are used for esc
+  escAbcs = ['debug','util','bytes-tamarin','util-tamarin','lex-char','lex-token',
+  						'lex-scan','ast','ast-decode','parse','asm','abc','emit','cogen',
+  						'cogen-stmt','cogen-expr','esc-core','eval-support','esc-env','main']
+  if not globs['escbin'].endswith('/'):
+    globs['escbin'] += '/'
+  for f in escAbcs:
+    avm += ' %s%s.es.abc' % (globs['escbin'], f)
+  avm += ' -- '
+  avm += ' %s../test/spidermonkey-prefix.es' % globs['escbin']	#needed to run shell harness
+
+
 def build_incfiles(as):
   files=[]
   (dir, file) = split(as)
@@ -342,6 +367,7 @@ for ast in tests:
   lfail = 0
   lexpfail = 0
   lunpass = 0
+  ltimeout = 0
   dir = ast[0:ast.rfind('/')]
   root,ext = splitext(ast)
   if runSource:
@@ -400,8 +426,8 @@ for ast in tests:
       testName=incfile+" "+testName
   f = run_pipe('%s %s %s' % (avm, vmargs, testName))
   if f == "timedOut":
-  	fail(testName, 'Test Timed Out! Time out is set to %s s' % testTimeOut, [])
-  	lfail = 1
+  	fail(testName, 'Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
+  	ltimeout += 1
   else:
 		try:
 			for line in f:
@@ -443,6 +469,7 @@ for ast in tests:
   allpasses += lpass
   allexpfails += lexpfail
   allunpass += lunpass
+  alltimeouts += ltimeout
   if lfail or lunpass:
     js_print('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
   else:
@@ -451,6 +478,12 @@ for ast in tests:
 #
 # cleanup
 #
+
+if timeoutmsgs:
+	js_print('\nTIMEOUTS:', '', '<br/>')
+	for m in timeoutmsgs:
+		js_print('  %s' % m, '', '<br/>')
+
 if failmsgs:
   js_print('\nFAILURES:', '', '<br/>')
   for m in failmsgs:
@@ -487,6 +520,8 @@ if allskips>0:
   js_print('tests skipped        : %d' % allskips, '<br>', '')
 if allexceptions>0:
   js_print('test exceptions      : %d' % allexceptions, '<br>', '')
+if alltimeouts>0:
+	js_print('test timeouts        : %d' % alltimeouts, '<br>', '')
 
 print 'Results were written to %s' % js_output
 
