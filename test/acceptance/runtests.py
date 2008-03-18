@@ -54,7 +54,7 @@ timestamps = True
 forcerebuild = False
 runSource = False # Run the source file (.as, .js) instead of .abc
 sourceExt = '.as' # can be changed to .js, .es ...
-testTimeOut = 60
+testTimeOut = 300
 
 # needed for pipe
 fd,tmpfile = tempfile.mkstemp()
@@ -120,7 +120,7 @@ def usage(c):
   print '    --ext           set the testfile extension (defaults to .as)'
   print '    --ascargs       args to pass to asc on rebuild of test files'
   print '    --vmargs        args to pass to vm'
-  print '    --timeout       max time to let a test run, in sec (default 60s)'
+  print '    --timeout       max time to let a test run, in sec (default 300s)'
   exit(c)
 
 try:
@@ -158,7 +158,7 @@ for o, v in opts:
   elif o in ('--ext'):
     sourceExt = v
   elif o in ('--timeout'):
-    testTimeOut=int(o)
+    testTimeOut=int(v)
   
 # Are we running esc - TODO: add command line flag
 if basename(globs['avm']) == 'main.sh':
@@ -233,7 +233,9 @@ def parents(d):
 # run a command and return its output
 def run_pipe(cmd):
 	p = Popen(('%s 2>&1' % cmd), shell=True, stdout=PIPE, stderr=STDOUT)
-	p.wait(testTimeOut) #abort if it takes longer than 60 seconds
+	exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
+	if exitCode < 0:	# process timed out
+		return 'timedOut'
 	return p.stdout.readlines()
   
 def list_match(list,test):
@@ -278,7 +280,7 @@ def compile_test(as):
     for line in f:
       verbose_print(line.strip())
   except:
-  	print 'Exception Line 292'
+  	print 'Exception'
 
 
 def fail(abc, msg, failmsgs):
@@ -397,42 +399,46 @@ for ast in tests:
     for incfile in incfiles:
       testName=incfile+" "+testName
   f = run_pipe('%s %s %s' % (avm, vmargs, testName))
-  try:
-    for line in f:
-      verbose_print(line.strip())
-      testcase=''
-      if len(line)>9:
-        testcase=line.strip()
-      if dict_match(settings,testcase,'skip'):
-        js_print('  skipping %s' % line.strip())
-        allskips+=1
-        continue
-      if 'PASSED!' in line:
-        res=dict_match(settings,testcase,'expectedfail')
-        if res:
-          fail(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, unpassmsgs)
-          lunpass += 1
-        else:
-          lpass += 1
-      if 'FAILED!' in line:
-        res=dict_match(settings,testcase,'expectedfail')
-        if res:
-          fail(testName, 'expected failure: ' + line.strip() + ' reason: '+res, expfailmsgs)
-          lexpfail += 1
-        else:
-          lfail += 1
-          fail(testName, line, failmsgs)
-  except:
-    print 'exception running avm'
-    exit(-1)
-  if lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
-    res=dict_match(settings,'*','expectedfail')
-    if res:
-      fail(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,expfailmsgs)
-      lexpfail += 1
-    else:
-      lfail = 1
-      fail(testName, '   FAILED contained no testcase messages', failmsgs)
+  if f == "timedOut":
+  	fail(testName, 'Test Timed Out! Time out is set to %s s' % testTimeOut, [])
+  	lfail = 1
+  else:
+		try:
+			for line in f:
+				verbose_print(line.strip())
+				testcase=''
+				if len(line)>9:
+					testcase=line.strip()
+				if dict_match(settings,testcase,'skip'):
+					js_print('  skipping %s' % line.strip())
+					allskips+=1
+					continue
+				if 'PASSED!' in line:
+					res=dict_match(settings,testcase,'expectedfail')
+					if res:
+						fail(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, unpassmsgs)
+						lunpass += 1
+					else:
+						lpass += 1
+				if 'FAILED!' in line:
+					res=dict_match(settings,testcase,'expectedfail')
+					if res:
+						fail(testName, 'expected failure: ' + line.strip() + ' reason: '+res, expfailmsgs)
+						lexpfail += 1
+					else:
+						lfail += 1
+						fail(testName, line, failmsgs)
+		except:
+			print 'exception running avm'
+			exit(-1)
+		if lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
+			res=dict_match(settings,'*','expectedfail')
+			if res:
+				fail(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,expfailmsgs)
+				lexpfail += 1
+			else:
+				lfail = 1
+				fail(testName, '   FAILED contained no testcase messages', failmsgs)
   allfails += lfail
   allpasses += lpass
   allexpfails += lexpfail
