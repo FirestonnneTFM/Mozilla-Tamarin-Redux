@@ -1649,9 +1649,9 @@ public namespace Lex
                     has_backslashes = true;
                     cachedIndex++;
                     c = cachedSrc.charCodeAt(cachedIndex) | 0;
-                    if (c == 117 /* Char::u */ || c == 85 /* Char::U */) {
-                        curIndex = cachedIndex;
-                        c = escapeSequence();
+                    if (c == 117 /* Char::u */) {
+                        curIndex = cachedIndex+1;
+                        c = hexEscape(4);
                         cachedIndex = curIndex;
                     }
                     else
@@ -1885,10 +1885,19 @@ public namespace Lex
                 return src.charCodeAt(curIndex++);
 
             case   0:
-                Lex::syntaxError("End of input in string");
+                if (curIndex+1 == src.length)
+                    Lex::syntaxError("End of input in escape sequence");
+                curIndex++;
+                return 0;  // NUL
+
+            case     10: /* Char::Linefeed */
+            case     13: /* Char::CarriageReturn */
+            case 0x2028: /* Char::LS */
+            case 0x2029: /* Char::PS */
+                Lex::syntaxError("Illegal line terminator in escape sequence");
 
             default:
-                Lex::syntaxError("Illegal escape character " + c);
+                return src.charCodeAt(curIndex++);
             }
         }
 
