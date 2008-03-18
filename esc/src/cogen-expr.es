@@ -187,31 +187,46 @@
         }
     }
 
+    var id_TypeError = new Ast::Identifier("TypeError",[[Ast::noNS]]);
+
     function cgBinaryTypeExpr(ctx, e) {
         let asm = ctx.asm;
-        cgExpr(ctx, e.e1);
-        cgTypeExprHelper(ctx, e.e2);
         switch type (e.op) {
-        case (op:CastOp) { asm.I_coerce() }
-        case (op:IsOp) { asm.I_istypelate() }
-        case (op:ToOp) {
-            // FIXME: Neither ES3 nor ES4.
+        case (op:CastOp) {
+            // ES4 'cast'.
             //
-            // If the type expression object has a property meta::convert then invoke that
-            // method and return its result.  Otherwise, behave as cast.
+            // OPTIMIZEME.  This would benefit from an "OP_coercelate"
+            // opcode for brevity and less control flow but the code
+            // below should be correct as far as the language and
+            // verifier are concerned.
+            //
+            // OPTIMIZEME.  Early-bind the right hand side if possible
+            // and use simpler code here (probably just a single
+            // OP_coerce instruction if that does not invoke any user
+            // defined converters).
+            cgExpr(ctx, e.e1);
             asm.I_dup();
-            asm.I_getproperty(ctx.emitter.meta_convert_name);
-            asm.I_pushundefined();
-            asm.I_strictequals();
-            var L1 = asm.I_iftrue(undefined);
-            // not undefined
-            asm.I_swap();
-            asm.I_callproperty(ctx.emitter.meta_convert_name, 1);
-            var L2 = asm.I_jump(undefined);
-            asm.I_label(L1);
-            // undefined
-            asm.I_coerce();
-            asm.I_label(L2);
+            cgTypeExprHelper(ctx, e.e2);
+            asm.I_istypelate();
+            let L0 = asm.I_iftrue(undefined);
+            asm.I_pop();
+            // FIXME: should lookup directly in global obj or be unforgeable name.
+            asm.I_findproperty(cgIdentExpr(ctx, id_TypeError));
+            asm.I_pushstring(ctx.cp.stringUtf8("Cast failed."));
+            asm.I_constructprop(cgIdentExpr(ctx, id_TypeError), 1);
+            asm.I_throw();
+            asm.I_label(L0);
+            asm.I_coerce_a();
+        }
+        case (op:IsOp) { 
+            // ES4 'is'.
+            //
+            // OPTIMIZEME.  Early-bind the right hand side if possible
+            // and use simpler code here (probably just a single
+            // OP_istype instruction).
+            cgExpr(ctx, e.e1);
+            cgTypeExprHelper(ctx, e.e2);
+            asm.I_istypelate();
         }
         case (op:*) { 
             Gen::internalError(ctx, "Unimplemented binary type operator " + op);
