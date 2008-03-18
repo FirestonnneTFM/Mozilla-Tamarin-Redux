@@ -56,9 +56,10 @@ runESC = False
 runSource = False # Run the source file (.as, .js) instead of .abc
 sourceExt = '.as' # can be changed to .js, .es ...
 testTimeOut = -1 #by default tests will NOT timeout
+debug = False
 
 globs = { 'avm':'', 'asc':'', 'globalabc':'', 'exclude':[],
-					'config':'', 'ascargs':'', 'vmargs':'', 'escbin':''}
+          'config':'', 'ascargs':'', 'vmargs':'', 'escbin':''}
 
 # default value for escbin
 globs['escbin'] = '../../esc/bin/'
@@ -78,7 +79,7 @@ if 'ASCARGS' in environ:
 if 'VMARGS' in environ:
   globs['vmargs'] = environ['VMARGS'].strip()
 if 'ESCBIN' in environ:
-	globs['escbin'] = environ['ESCBIN'].strip()
+  globs['escbin'] = environ['ESCBIN'].strip()
 
 def verbose_print(m, start='', end=''):
   if verbose:
@@ -130,7 +131,7 @@ def usage(c):
   exit(c)
 
 try:
-  opts, args = getopt(argv[1:], 'vE:a:g:x:htfc:', ['verbose','avm=','asc=','globalabc=',
+  opts, args = getopt(argv[1:], 'vE:a:g:x:htfc:d', ['verbose','avm=','asc=','globalabc=',
                 'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
                 'ext=','timeout=','esc','escbin='])
 except:
@@ -166,9 +167,11 @@ for o, v in opts:
   elif o in ('--timeout'):
     testTimeOut=int(v)
   elif o in ('--esc'):
-  	runESC = True
+    runESC = True
   elif o in ('--escbin'):
     globs['escbin'] = v
+  elif o in ('-d'):
+    debug = True
       
 
 exclude = globs['exclude']
@@ -233,19 +236,20 @@ timeoutmsgs=[]
 absArgPath = abspath(args[0])
 
 def parents(d):
-  while d != absArgPath:
+  while d != absArgPath and d != '':
     yield d
     d = dirname(d)
   yield d
 
 # run a command and return its output
 def run_pipe(cmd):
-	#print('cmd: %s' % cmd)
-	p = Popen(('%s 2>&1' % cmd), shell=True, stdout=PIPE, stderr=STDOUT)
-	exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
-	if exitCode < 0:	# process timed out
-		return 'timedOut'
-	return p.stdout.readlines()
+  if debug:
+    print('cmd: %s' % cmd)
+  p = Popen(('%s 2>&1' % cmd), shell=True, stdout=PIPE, stderr=STDOUT)
+  exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
+  if exitCode < 0:  # process timed out
+    return 'timedOut'
+  return p.stdout.readlines()
   
 def list_match(list,test):
   for k in list:
@@ -289,7 +293,7 @@ def compile_test(as):
     for line in f:
       verbose_print(line.strip())
   except:
-  	print 'Exception'
+    print 'Exception'
 
 
 def fail(abc, msg, failmsgs):
@@ -309,14 +313,14 @@ if runESC:
   # generate the executable cmd for esc
   #escAbcs = [f for f in os.listdir(globs['escbin']) if f.endswith('.abc')] #not all abcs are used for esc
   escAbcs = ['debug','util','bytes-tamarin','util-tamarin','lex-char','lex-token',
-  						'lex-scan','ast','ast-decode','parse','asm','abc','emit','cogen',
-  						'cogen-stmt','cogen-expr','esc-core','eval-support','esc-env','main']
+       'lex-scan','ast','ast-decode','parse','asm','abc','emit','cogen',
+       'cogen-stmt','cogen-expr','esc-core','eval-support','esc-env','main']
   if not globs['escbin'].endswith('/'):
     globs['escbin'] += '/'
   for f in escAbcs:
     avm += ' %s%s.es.abc' % (globs['escbin'], f)
   avm += ' -- '
-  avm += ' %s../test/spidermonkey-prefix.es' % globs['escbin']	#needed to run shell harness
+  avm += ' %s../test/spidermonkey-prefix.es' % globs['escbin']  #needed to run shell harness
 
 
 def build_incfiles(as):
@@ -426,45 +430,45 @@ for ast in tests:
       testName=incfile+" "+testName
   f = run_pipe('%s %s %s' % (avm, vmargs, testName))
   if f == "timedOut":
-  	fail(testName, 'Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
-  	ltimeout += 1
+    fail(testName, 'Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
+    ltimeout += 1
   else:
-		try:
-			for line in f:
-				verbose_print(line.strip())
-				testcase=''
-				if len(line)>9:
-					testcase=line.strip()
-				if dict_match(settings,testcase,'skip'):
-					js_print('  skipping %s' % line.strip())
-					allskips+=1
-					continue
-				if 'PASSED!' in line:
-					res=dict_match(settings,testcase,'expectedfail')
-					if res:
-						fail(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, unpassmsgs)
-						lunpass += 1
-					else:
-						lpass += 1
-				if 'FAILED!' in line:
-					res=dict_match(settings,testcase,'expectedfail')
-					if res:
-						fail(testName, 'expected failure: ' + line.strip() + ' reason: '+res, expfailmsgs)
-						lexpfail += 1
-					else:
-						lfail += 1
-						fail(testName, line, failmsgs)
-		except:
-			print 'exception running avm'
-			exit(-1)
-		if lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
-			res=dict_match(settings,'*','expectedfail')
-			if res:
-				fail(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,expfailmsgs)
-				lexpfail += 1
-			else:
-				lfail = 1
-				fail(testName, '   FAILED contained no testcase messages', failmsgs)
+    try:
+      for line in f:
+        verbose_print(line.strip())
+        testcase=''
+        if len(line)>9:
+          testcase=line.strip()
+        if dict_match(settings,testcase,'skip'):
+          js_print('  skipping %s' % line.strip())
+          allskips+=1
+          continue
+        if 'PASSED!' in line:
+          res=dict_match(settings,testcase,'expectedfail')
+          if res:
+            fail(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, unpassmsgs)
+            lunpass += 1
+          else:
+            lpass += 1
+        if 'FAILED!' in line:
+          res=dict_match(settings,testcase,'expectedfail')
+          if res:
+            fail(testName, 'expected failure: ' + line.strip() + ' reason: '+res, expfailmsgs)
+            lexpfail += 1
+          else:
+            lfail += 1
+            fail(testName, line, failmsgs)
+    except:
+      print 'exception running avm'
+      exit(-1)
+    if lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
+      res=dict_match(settings,'*','expectedfail')
+      if res:
+        fail(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,expfailmsgs)
+        lexpfail += 1
+      else:
+        lfail = 1
+        fail(testName, '   FAILED contained no testcase messages', failmsgs)
   allfails += lfail
   allpasses += lpass
   allexpfails += lexpfail
@@ -480,9 +484,9 @@ for ast in tests:
 #
 
 if timeoutmsgs:
-	js_print('\nTIMEOUTS:', '', '<br/>')
-	for m in timeoutmsgs:
-		js_print('  %s' % m, '', '<br/>')
+  js_print('\nTIMEOUTS:', '', '<br/>')
+  for m in timeoutmsgs:
+    js_print('  %s' % m, '', '<br/>')
 
 if failmsgs:
   js_print('\nFAILURES:', '', '<br/>')
@@ -521,7 +525,7 @@ if allskips>0:
 if allexceptions>0:
   js_print('test exceptions      : %d' % allexceptions, '<br>', '')
 if alltimeouts>0:
-	js_print('test timeouts        : %d' % alltimeouts, '<br>', '')
+  js_print('test timeouts        : %d' % alltimeouts, '<br>', '')
 
 print 'Results were written to %s' % js_output
 
