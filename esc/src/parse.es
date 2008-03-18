@@ -2651,27 +2651,14 @@ use namespace intrinsic;
         */
 
         function listExpression (beta: BETA) : Ast::EXPR {
-            var nd1 = assignmentExpression (beta);
-            var nd2 = listExpressionPrime ();
-            nd2.unshift (nd1);
+            var exprs = [assignmentExpression (beta)];
 
-            return new Ast::ListExpr (nd2);
-
-            function listExpressionPrime () : Ast::EXPR {
-                switch (hd ()) {
-                case Token::Comma:
-                    next();
-                    var nd1 = assignmentExpression (beta);
-                    var nd2 = listExpressionPrime ();
-                    nd2.unshift (nd1);
-                    break;
-                default:
-                    var nd2 = [];
-                    break;
-                }
-
-                return nd2;
+            while (hd() === Token::Comma) {
+                eat(Token::Comma);
+                exprs.push(assignmentExpression(beta));
             }
+
+            return new Ast::ListExpr(exprs);
         }
 
 //        /*
