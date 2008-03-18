@@ -85,7 +85,7 @@ TEST(7, "<alpha attr=\"&lt;att>sixty&lt;/att>\">one</alpha>" + NL() + "<bravo>tw
 
 var x1 = new XMLList("alpha<bravo>two</bravo>");
 x1[0] = "beta";
-TEST(8, "<alpha>beta</alpha>" + NL() + "<bravo>two</bravo>", x1.toXMLString());
+TEST(8, "beta" + NL() + "<bravo>two</bravo>", x1.toXMLString());
 
 var x1 = new XMLList("<alpha>one</alpha><bravo>two</bravo>");
 x1[0] = new XML("beta");
