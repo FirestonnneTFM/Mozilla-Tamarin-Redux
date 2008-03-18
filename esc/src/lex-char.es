@@ -140,6 +140,8 @@ public namespace Char
     const VerticalTab = "\v".charCodeAt(0);
     const Newline = "\n".charCodeAt(0);
     const CarriageReturn = "\r".charCodeAt(0);
+    const Backspace = 8;  // "\b".charCodeAt(0) eventually
+    const Formfeed = 12;  // "\f".charCodeAt(0) eventually
 
     function isUnicodeIdentifierStart(c) {
         if (c >= Char::A && c <= Char::Z) 
