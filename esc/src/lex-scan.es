@@ -98,6 +98,7 @@ public namespace Lex
                                   0x2028, 0x2029];
             for ( let i=0 ; i < unicode_spaces.length ; i++ )
                 notPartOfIdent[unicode_spaces[i]] = true;
+            notPartOfIdent[NaN] = true;
         }
 
         /* public */
