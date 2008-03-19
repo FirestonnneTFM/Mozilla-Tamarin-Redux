@@ -502,10 +502,14 @@ namespace avmshell
 	{
 		TRY(this, kCatchAction_ReportAsError)
 		{
-			#ifdef AVMPLUS_IA32
+			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+			#ifdef AVMPLUS_MAC
+			sse2 = true;
+			#else
 			if (!P4Available()) {
 				sse2 = false;
 			}
+			#endif
 			#endif
 
 			int exitCode = 0;
