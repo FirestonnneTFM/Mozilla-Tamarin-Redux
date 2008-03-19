@@ -39,6 +39,7 @@
 #
 
 import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform
+import time
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -232,24 +233,28 @@ expfailmsgs=[]
 unpassmsgs=[]
 timeoutmsgs=[]
 
-#setup absolute path of base dir to not have parents go beyond that
-absArgPath = abspath(args[0])
-
 def parents(d):
-  while d != absArgPath and d != '':
+  while d != '/' and d != '':
     yield d
     d = dirname(d)
   yield d
 
 # run a command and return its output
 def run_pipe(cmd):
+  output = []
   if debug:
     print('cmd: %s' % cmd)
   p = Popen((cmd), shell=True, stdout=PIPE, stderr=STDOUT)
-  output = p.stdout.readlines()
-  exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
-  if exitCode < 0:  # process timed out
-    return 'timedOut'
+  if testTimeOut > 0:
+    starttime = time.time()
+    while (p.poll() is None):
+      if time.time() - starttime > testTimeOut - 0.01:
+        output = 'timedOut'
+        p.kill()
+        break;
+      output.append(p.stdout.readline())
+  else:
+    output.extend(p.stdout.readlines())
   return output
   
 def list_match(list,test):
