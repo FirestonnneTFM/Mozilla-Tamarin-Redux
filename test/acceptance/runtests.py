@@ -245,11 +245,12 @@ def parents(d):
 def run_pipe(cmd):
   if debug:
     print('cmd: %s' % cmd)
-  p = Popen(('%s 2>&1' % cmd), shell=True, stdout=PIPE, stderr=STDOUT)
+  p = Popen((cmd), shell=True, stdout=PIPE, stderr=STDOUT)
+  output = p.stdout.readlines()
   exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
   if exitCode < 0:  # process timed out
     return 'timedOut'
-  return p.stdout.readlines()
+  return output
   
 def list_match(list,test):
   for k in list:
