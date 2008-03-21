@@ -47,7 +47,7 @@ namespace avmplus
 			OP_pushstring, // CONSTANT_Utf8=1
 			OP_pushdecimal, // CONSTANT_Decimal=2 
 			OP_pushint,  // CONSTANT_Int=3
-			OP_pushint,  // CONSTANT_UInt=4
+			OP_pushuint,  // CONSTANT_UInt=4
 			OP_pushnamespace, // CONSTANT_PrivateNs=5
 			OP_pushdouble, // CONSTANT_Double=6
 			0,
