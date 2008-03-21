@@ -275,6 +275,7 @@ def dict_match(dict,test,value):
         return dict[k][value]
 
 def compile_test(as):
+  outputCalls = [] #store output calls in list to pass back to main loop
   asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
   if not isfile(asc):
     exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as)
@@ -288,7 +289,7 @@ def compile_test(as):
   cmd += ' ' + ascargs
   cmd += ' -import ' + globalabc
   (dir, file) = split(as)
-  verbose_print('   compiling %s' % file)
+  outputCalls.append((verbose_print,('   compiling %s' % file,)))
   for p in parents(dir):
     shell = join(p,'shell'+sourceExt)
     if isfile(shell):
@@ -302,9 +303,10 @@ def compile_test(as):
   try:
     f = run_pipe('%s %s' % (cmd,as))
     for line in f:
-      verbose_print(line.strip())
+      outputCalls.append((verbose_print,(line.strip(),)))
   except:
     print 'Exception'
+  return outputCalls
 
 
 def fail(abc, msg, failmsgs):
@@ -439,7 +441,8 @@ def processTest(ast):
   if forcerebuild and isfile(testName):
     os.unlink(testName)
   if not isfile(testName):
-    compile_test(ast)
+    compileOutput = compile_test(ast)
+    outputCalls.extend(compileOutput)
     if not isfile(testName):
       lfail += 1
       outputCalls.append((fail,(testName, 'FAILED! file not found ' + testName, failmsgs)))
