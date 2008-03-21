@@ -218,6 +218,15 @@ public namespace Lex
                 case   9 /* Char::Tab */: 
                     continue;
 
+                case  11 /* Char::VerticalTab */: 
+                    continue;
+
+                case  12 /* Char::Formfeed */: 
+                    continue;
+
+                case  160 /* Char::NoBreakSpace */: 
+                    continue;
+
                 case  40 /* Char::LeftParen */: 
                     return Token::LeftParen;
 
@@ -1286,16 +1295,42 @@ public namespace Lex
                     return numberLiteral ();
 
                 default: {
-                    // Check for Unicode line terminators here in
-                    // order to avoid inhibiting the mickey-mouse
-                    // switch optimization in ESC.  (If the
-                    // optimizations were any good they would perform
-                    // this transformation automatically.)
+                    // Check for Unicode space characters and line
+                    // terminators here in order to avoid inhibiting
+                    // the mickey-mouse switch optimization in ESC.
+                    // (If the optimizations were any good they would
+                    // perform this transformation automatically.)
 
                     let c = src.charCodeAt(curIndex-1);
-                    if (c == 0x2028 /* Char::LS */ || c == 0x2029 /* Char::PS */) {
-                        lnCoord++;
-                        continue;
+
+                    // Quick check that saves us from the tedious
+                    // testing most of the time, also another hack to
+                    // get around poor switch code generation.
+
+                    if (c >= 0x1680) {
+                        switch (c) {
+                        case 0x1680: /* Various Zs characters */
+                        case 0x180e:
+                        case 0x2000:
+                        case 0x2001:
+                        case 0x2002:
+                        case 0x2003:
+                        case 0x2004:
+                        case 0x2005:
+                        case 0x2006:
+                        case 0x2007:
+                        case 0x2008:
+                        case 0x2009:
+                        case 0x200a:
+                        case 0x202f:
+                        case 0x205f:
+                        case 0x3000:
+                            continue;
+                        case 0x2028: /* Char::LS */
+                        case 0x2029: /* Char::PS */
+                            lnCoord++;
+                            continue;
+                        }
                     }
 
                     break bigswitch;
