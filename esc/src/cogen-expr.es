@@ -256,40 +256,6 @@
     function cgUnaryExpr(ctx, e) {
         var {asm:asm, emitter:emitter} = ctx;
 
-        function incdec(pre, inc) {
-            switch type (e.e1) {
-            case (lr:LexicalRef) {
-                //name = cgIdentExpr(ctx, lr.ident);
-                asm.I_findpropstrict(cgIdentExpr(ctx, lr.ident));
-            }
-            case (or:ObjectRef) {
-                //name = cgIdentExpr(ctx, or.ident);
-                cgExpr(ctx, or.base);
-            }
-            case (x:*) { 
-                Gen::syntaxError(ctx, "Expression is not an lvalue");
-            }
-            }
-            asm.I_dup();
-            asm.I_getproperty(cgIdentExpr(ctx, e.e1.ident));
-            let t = asm.getTemp();
-            if (!pre) {
-                asm.I_dup();
-                asm.I_setlocal(t);
-            }
-            if (inc)
-                asm.I_increment();
-            else
-                asm.I_decrement();
-            if (pre) {
-                asm.I_dup();
-                asm.I_setlocal(t);
-            }
-            asm.I_setproperty(cgIdentExpr(ctx, e.e1.ident));
-            asm.I_getlocal(t);
-            asm.killTemp(t);
-        }
-
         switch type (e.op) {
         case (op:Delete) {
             switch type (e.e1) {
@@ -347,6 +313,46 @@
         case (op:*) {
             Gen::internalError(ctx, "Unimplemented unary operation " + op);
         }
+        }
+
+        function incdec(pre, inc) {
+            switch type (e.e1) {
+            case (lr:LexicalRef) {
+                //name = cgIdentExpr(ctx, lr.ident);
+                asm.I_findpropstrict(cgIdentExpr(ctx, lr.ident));
+            }
+            case (or:ObjectRef) {
+                //name = cgIdentExpr(ctx, or.ident);
+                cgExpr(ctx, or.base);
+            }
+            case (x:*) { 
+                Gen::syntaxError(ctx, "Expression is not an lvalue");
+            }
+            }
+            asm.I_dup();
+            asm.I_getproperty(cgIdentExpr(ctx, e.e1.ident));
+            let t = asm.getTemp();
+            if (pre) {
+                if (inc)
+                    asm.I_increment();
+                else
+                    asm.I_decrement();
+                asm.I_dup();
+                asm.I_setlocal(t);
+            }
+            else {
+                // Postfix ops return value after conversion to number.
+                asm.I_convert_d();
+                asm.I_dup();
+                asm.I_setlocal(t);
+                if (inc)
+                    asm.I_increment();
+                else
+                    asm.I_decrement();
+            }
+            asm.I_setproperty(cgIdentExpr(ctx, e.e1.ident));
+            asm.I_getlocal(t);
+            asm.killTemp(t);
         }
     }
 
