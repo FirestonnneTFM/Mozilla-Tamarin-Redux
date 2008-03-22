@@ -1381,22 +1381,27 @@ use namespace intrinsic;
 
             switch (hd ()) {
             case Token::StringLiteral:
-                name = makeIdentifier (lexeme(), cx.pragmas.openNamespaces);
+                name = new Ast::Identifier(lexeme(), [[Ast::noNS]]);
                 next();
                 break;
             case Token::IntLiteral:
             case Token::UIntLiteral:
+                name = new Ast::Identifier(String(parseInt(lexeme())), [[Ast::noNS]]);
+                next();
+                break;
             case Token::DoubleLiteral:
+                name = new Ast::Identifier(String(parseFloat(lexeme())), [[Ast::noNS]]);
+                next();
+                break;
             case Token::DecimalLiteral:
-                Parse::internalError(this, "Unsupported numeric field name" + hd());
+                name = new Ast::Identifier(String(new decimal(lexeme())), [[Ast::noNS]]);
+                next();
                 break;
             default:
+                // FIXME: support ns::id here
                 if (isReserved (hd ())) {
-                    name = makeIdentifier (lexeme(), cx.pragmas.openNamespaces);
+                    name = new Ast::Identifier(lexeme(), [[Ast::noNS]]);
                     next();
-                    // NOTE we use openNamespaces here to indicate that the name is 
-                    //      unqualified. the generator should use the expando namespace,
-                    //      which is probably Public "".
                 }
                 else
                     name = nonAttributeQualifiedName ();
