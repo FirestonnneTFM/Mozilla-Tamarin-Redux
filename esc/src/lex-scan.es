@@ -1374,7 +1374,7 @@ public namespace Lex
         function numberLiteral() : int {
             switch (src.charCodeAt(curIndex)) {
             case  48 /* Char::0 */: 
-                // Octal / hex / a single 0 / 0.something
+                // Octal / hex / a single 0 / 0.<something> /0e<something>
                 switch (src.charCodeAt(curIndex+1)) {
                 case 120 /* Char::x */:
                 case  88 /* Char::X */:
@@ -1389,6 +1389,12 @@ public namespace Lex
                     numberFraction(true);
                     return makeFloatingLiteral( lexeme() );
                         
+                case 69 /* Char::E */: 
+                case 101 /* Char::e */:
+                    curIndex += 2;
+                    numberExponent();
+                    return makeFloatingLiteral( lexeme() );
+
                 default:
                     // Octal or single '0'
                     if (src.charCodeAt(curIndex+1) === 109 /* Char::m */) {
