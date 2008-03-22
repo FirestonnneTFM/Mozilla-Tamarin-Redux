@@ -386,7 +386,7 @@ if isfile('./testconfig.txt'):
     rootTestConfigLines.append(line)
   
 def processTest(ast):
-  global testnum, allfails, allpasses, allexpfails, allunpass, alltimeouts
+  global testnum, allfails, allpasses, allexpfails, allunpass, alltimeouts, allskips
   outputCalls = [] #queue all output calls so that output is written in a block
   if ast.startswith('./'):
     ast=ast[2:]
