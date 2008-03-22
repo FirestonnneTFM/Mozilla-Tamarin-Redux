@@ -39,7 +39,6 @@
 #
 
 import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform
-import time, threadpool
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -57,7 +56,6 @@ runESC = False
 runSource = False # Run the source file (.as, .js) instead of .abc
 sourceExt = '.as' # can be changed to .js, .es ...
 testTimeOut = -1 #by default tests will NOT timeout
-numThreads = 3 #doesn't seem to help much to increase beyond 3 threads
 debug = False
 
 globs = { 'avm':'', 'asc':'', 'globalabc':'', 'exclude':[],
@@ -130,13 +128,12 @@ def usage(c):
   print '    --ascargs       args to pass to asc on rebuild of test files'
   print '    --vmargs        args to pass to vm'
   print '    --timeout       max time to let a test run, in sec (default -1 = never timeout)'
-  print '    --threads       number of threads to run (default=3), set to 1 to have tests finish sequentially'
   exit(c)
 
 try:
   opts, args = getopt(argv[1:], 'vE:a:g:x:htfc:d', ['verbose','avm=','asc=','globalabc=',
                 'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                'ext=','timeout=','esc','escbin=','threads='])
+                'ext=','timeout=','esc','escbin='])
 except:
   usage(2)
 
@@ -175,8 +172,6 @@ for o, v in opts:
     globs['escbin'] = v
   elif o in ('-d'):
     debug = True
-  elif o in ('--threads'):
-    numThreads=int(v)
       
 
 exclude = globs['exclude']
@@ -237,29 +232,24 @@ expfailmsgs=[]
 unpassmsgs=[]
 timeoutmsgs=[]
 
+#setup absolute path of base dir to not have parents go beyond that
+absArgPath = abspath(args[0])
+
 def parents(d):
-  while d != '/' and d != '':
+  while d != absArgPath and d != '':
     yield d
     d = dirname(d)
   yield d
 
 # run a command and return its output
 def run_pipe(cmd):
-  output = []
   if debug:
     print('cmd: %s' % cmd)
   p = Popen((cmd), shell=True, stdout=PIPE, stderr=STDOUT)
-  if testTimeOut > 0:
-    starttime = time.time()
-    while (p.poll() is None):
-      #print('waiting %s ' % (time.time() - starttime))
-      if time.time() - starttime > testTimeOut - 0.01:
-        p.kill()
-        output = 'timedOut'
-        return output
-      output.append(p.stdout.readline())
-      #time.sleep(0.1)
-  output.extend(p.stdout.readlines())
+  output = p.stdout.readlines()
+  exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
+  if exitCode < 0:  # process timed out
+    return 'timedOut'
   return output
   
 def list_match(list,test):
@@ -275,7 +265,6 @@ def dict_match(dict,test,value):
         return dict[k][value]
 
 def compile_test(as):
-  outputCalls = [] #store output calls in list to pass back to main loop
   asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
   if not isfile(asc):
     exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as)
@@ -289,7 +278,7 @@ def compile_test(as):
   cmd += ' ' + ascargs
   cmd += ' -import ' + globalabc
   (dir, file) = split(as)
-  outputCalls.append((verbose_print,('   compiling %s' % file,)))
+  verbose_print('   compiling %s' % file)
   for p in parents(dir):
     shell = join(p,'shell'+sourceExt)
     if isfile(shell):
@@ -303,10 +292,9 @@ def compile_test(as):
   try:
     f = run_pipe('%s %s' % (cmd,as))
     for line in f:
-      outputCalls.append((verbose_print,(line.strip(),)))
+      verbose_print(line.strip())
   except:
     print 'Exception'
-  return outputCalls
 
 
 def fail(abc, msg, failmsgs):
@@ -375,19 +363,8 @@ if globs['config'] == '':
 js_print('current configuration: %s' % globs['config'])
 
 
-
-
 testnum = len(tests)
-
-#Load main testconfig in our current dir
-rootTestConfigLines = []
-if isfile('./testconfig.txt'):
-  for line in open('./testconfig.txt').read().splitlines():
-    rootTestConfigLines.append(line)
-  
-def processTest(ast):
-  global testnum, allfails, allpasses, allexpfails, allunpass, alltimeouts, allskips
-  outputCalls = [] #queue all output calls so that output is written in a block
+for ast in tests:
   if ast.startswith('./'):
     ast=ast[2:]
   testnum -= 1
@@ -411,7 +388,10 @@ def processTest(ast):
     for i in range(len(lines)):
       if not lines[i].startswith('#'):
         lines[i] = '%s/%s' %(dir,lines[i])
-  for line in (lines + rootTestConfigLines):
+  if isfile('./testconfig.txt'):
+    for line in open('./testconfig.txt').read().splitlines():
+      lines.append(line)
+  for line in lines:
     if line.startswith('#') or len(line)==0:
       continue
     fields = line.split(',')
@@ -432,92 +412,73 @@ def processTest(ast):
         settings[names[1]]={}
       settings[names[1]][fields[2]]=fields[3]
   if includes and not list_match(includes,root):
-    return
-  outputCalls.append((js_print,('%d running %s' % (testnum, ast), '<b>', '</b><br/>')));
+    continue
+  js_print('%d running %s' % (testnum, ast), '<b>', '</b><br/>');
   if names and dict_match(settings,names[1],'skip'):
-    outputCalls.append((js_print,('  skipping',)))
+    js_print('  skipping')
     allskips += 1
-    return
+    continue
   if forcerebuild and isfile(testName):
     os.unlink(testName)
   if not isfile(testName):
-    compileOutput = compile_test(ast)
-    outputCalls.extend(compileOutput)
+    compile_test(ast)
     if not isfile(testName):
       lfail += 1
-      outputCalls.append((fail,(testName, 'FAILED! file not found ' + testName, failmsgs)))
+      fail(testName, 'FAILED! file not found ' + testName, failmsgs)
   if runSource:
     incfiles=build_incfiles(testName)
     for incfile in incfiles:
       testName=incfile+" "+testName
   f = run_pipe('%s %s %s' % (avm, vmargs, testName))
   if f == "timedOut":
-    outputCalls.append((fail,(testName, 'Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)))
+    fail(testName, 'Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
     ltimeout += 1
   else:
     try:
       for line in f:
-        outputCalls.append((verbose_print,(line.strip(),)))
+        verbose_print(line.strip())
         testcase=''
         if len(line)>9:
           testcase=line.strip()
         if dict_match(settings,testcase,'skip'):
-          outputCalls.append((js_print,('  skipping %s' % line.strip(),)))
+          js_print('  skipping %s' % line.strip())
           allskips+=1
-          return
+          continue
         if 'PASSED!' in line:
           res=dict_match(settings,testcase,'expectedfail')
           if res:
-            outputCalls.append((fail,(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, unpassmsgs)))
+            fail(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, unpassmsgs)
             lunpass += 1
           else:
             lpass += 1
-        if 'FAILED!' in line: 
+        if 'FAILED!' in line:
           res=dict_match(settings,testcase,'expectedfail')
           if res:
-            outputCalls.append((fail,(testName, 'expected failure: ' + line.strip() + ' reason: '+res, expfailmsgs)))
+            fail(testName, 'expected failure: ' + line.strip() + ' reason: '+res, expfailmsgs)
             lexpfail += 1
           else:
             lfail += 1
-            outputCalls.append((fail,(testName, line, failmsgs)))
+            fail(testName, line, failmsgs)
     except:
       print 'exception running avm'
       exit(-1)
     if lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
       res=dict_match(settings,'*','expectedfail')
       if res:
-        outputCalls.append((fail,(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,expfailmsgs)))
+        fail(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,expfailmsgs)
         lexpfail += 1
       else:
         lfail = 1
-        outputCalls.append((fail,(testName, '   FAILED contained no testcase messages', failmsgs)))
+        fail(testName, '   FAILED contained no testcase messages', failmsgs)
   allfails += lfail
   allpasses += lpass
   allexpfails += lexpfail
   allunpass += lunpass
   alltimeouts += ltimeout
-  if lfail or lunpass or ltimeout:
-    outputCalls.append((js_print,('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
+  if lfail or lunpass:
+    js_print('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
   else:
-    outputCalls.append((js_print,('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
-  return outputCalls
-  
-
-def printOutput(request, outputCalls):
-  #execute the outputCalls
-  if outputCalls:
-    for call in outputCalls:
-      apply(call[0],call[1])
-
-requests = threadpool.makeRequests(processTest, tests, printOutput)
-main = threadpool.ThreadPool(numThreads)
-# que requests
-[main.putRequest(req) for req in requests]
-
-# ...and wait for the results to arrive in the result queue
-# wait() will return when results for all work requests have arrived
-main.wait()
-
+    js_print('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
 
 #
 # cleanup
