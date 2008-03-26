@@ -402,11 +402,6 @@ public namespace Decode;
             var nd1 = expr (ob.expr);
             var ndx = new ExprStmt (nd1);
             break;
-        case 'ClassBlock':
-            var nd1 = name (ob.name);
-            let nd2 = block (ob.block);
-            var ndx = new ClassBlock (nd1,nd2);
-            break;
         case 'ThrowStmt':
             let nd1 = expr (ob.expr);
             var ndx = new ThrowStmt (nd1);

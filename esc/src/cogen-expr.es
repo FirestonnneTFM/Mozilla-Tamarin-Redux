@@ -38,6 +38,8 @@
 
 /* FIXME: handling 'super'.
  *
+ * These work now:
+ *
  * super.m(...)
  *   calls the super class's "m" with "this" as the receiver:
  *   'callsuper' instruction
@@ -47,6 +49,9 @@
  *   'constructsuper' instruction
  *   only legal in a constructor, the parser annotates the Ctor structure with the args,
  *   don't need to handle this as an expression
+ *
+ *
+ * These have yet to be handled:
  *
  * super.x
  *   picks up the 'x' member from the super class:
@@ -72,7 +77,13 @@
     use namespace Ast;
 
     function cgExpr(ctx, e) {
-        if( e.pos != null ) {
+        // Hack until we get inheritance working: these expression
+        // forms have a 'pos' field.
+        if (e is LiteralExpr ||
+            e is CallExpr || 
+            e is ObjectRef || 
+            e is LexicalRef || 
+            e is SetExpr) {
             cgDebugInfo(ctx, e.pos);
         }
         switch type (e) {
@@ -370,10 +381,18 @@
         let nargs = e.args.length;
         let evalTmp = 0;
         let isEval = false;
+        let isSuperCall = false;
+        let name;
 
         switch type (e.expr) {
         case (or:ObjectRef) {
-            cgExpr(ctx, or.base);
+            if (or.base is SuperExpr) {
+                assert(or.base.ex == null); // If not then super(o) form, don't know what that is yet.  --lars
+                asm.I_getlocal(0);
+                isSuperCall = true;
+            }
+            else
+                cgExpr(ctx, or.base);
         }
         case (lr:LexicalRef) {
             asm.I_findpropstrict(cgIdentExpr(ctx, lr.ident));
@@ -390,6 +409,11 @@
         }
         }
 
+        if (e.expr is ObjectRef) {
+            // Runtime/late parts appear on stack before arguments!
+            name = cgIdentExpr(ctx, e.expr.ident);
+        }
+
         for ( let i=0 ; i < nargs ; i++ )
             cgExpr(ctx, e.args[i]);
 
@@ -404,7 +428,10 @@
 
         switch type (e.expr) {
         case (or:ObjectRef) {
-            asm.I_callproperty(cgIdentExpr(ctx, or.ident), nargs);
+            if (isSuperCall)
+                asm.I_callsuper(name, nargs);
+            else
+                asm.I_callproperty(name, nargs);
         }
         case (lr:LexicalRef) {
             // This is not right if the function is bound by "with".  In that

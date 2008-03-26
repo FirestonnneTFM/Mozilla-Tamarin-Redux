@@ -87,22 +87,14 @@ namespace Abc;
             Util::assert(bodies.length != 0);
             Util::assert(classes.length == instances.length);
 
-            // print ("emitting version");
             bytes.uint16(minor_version);
             bytes.uint16(major_version);
-            // print ("emitting constants");
             constants.serialize(bytes);
-            // print ("emitting methods");
             emitArray(methods,true);
-            // print ("emitting metadatas");
             emitArray(metadatas,true);
-            // print ("emitting instances");
             emitArray(instances,true);
-            // print ("emitting classes");
             emitArray(classes, false);
-            // print ("emitting scripts");
             emitArray(scripts,true);
-            // print ("emitting bodies");
             emitArray(bodies,true);
             return bytes.getBytes();
         }
@@ -545,7 +537,7 @@ namespace Abc;
         public function serialize(bs) {
             var i;
 
-            Util::assert( iinit != undefined );
+            Util::assert( iinit != undefined || (flags & CONSTANT_ClassInterface) != 0);
 
             bs.uint30(name);
             bs.uint30(super_name);
@@ -624,8 +616,6 @@ namespace Abc;
         }
 
         public var name, kind, metadata;
-
-
     }
 
     public class ABCOtherTrait /// extends ABCTrait  // removed for esc

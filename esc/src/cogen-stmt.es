@@ -53,7 +53,6 @@
         switch type (s) {
         case (s:EmptyStmt) { }
         case (s:ExprStmt) { cgExprStmt(ctx, s) }
-        case (s:ClassBlock) { cgClassBlock(ctx, s) }
         case (s:ForInStmt) { cgForInStmt(ctx, s) }
         case (s:ThrowStmt) { cgThrowStmt(ctx, s) }
         case (s:ReturnStmt) { cgReturnStmt(ctx, s) }
@@ -94,10 +93,6 @@
         }
         else
             asm.I_pop();
-    }
-
-    function cgClassBlock(ctx, s) {
-        cgBlock(ctx, s.block);
     }
 
     function cgBlockStmt(ctx, s) {
