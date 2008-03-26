@@ -1,3 +1,5 @@
+var v = "not initialized";
+
 function f() {
     return 37;
 }
@@ -13,5 +15,6 @@ class C {
     }
 }
 
-print("ivar lifted from static " + (new C()).w);
+print("ivar lifted from static: " + (new C()).w);
+print(v);
 print("DONE");

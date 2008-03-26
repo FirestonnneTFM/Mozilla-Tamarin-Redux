@@ -352,8 +352,12 @@ namespace Emit;
             this.init = new Method(e,[], "", true, new Ast::FuncAttr(null));
         }
 
-        public function newClass(name, basename) {
-            return new Emit::Class(this, name, basename);
+        public function newClass(name, basename, interfaces, flags, protectedns=null) {
+            return new Emit::Class(this, name, basename, interfaces, flags, protectedns);
+        }
+
+        public function newInterface(name, interfaces) {
+            return new Emit::Interface(this, name, interfaces);
         }
 
         public function addException(e) {
@@ -375,45 +379,28 @@ namespace Emit;
     
     class Class
     {
-        public var s, name, basename, traits=[], instance=null, cinit;
+        public var s, name, basename, traits=[], instance=null, cinit, interfaces, flags, protectedns;
 
-        function Class(script, name, basename) {
+        function Class(script, name, basename, interfaces, flags, protectedns=null) {
             this.s = script;
             this.name = name;
             this.basename = basename;
+            this.interfaces = interfaces;
+            this.flags = flags;
+            this.protectedns = protectedns;
 
             var asm = script.init;
-            // Create the class
- /*           asm.I_findpropstrict(Object_name);
-            asm.I_getproperty(Object_name);
-            asm.I_dup();
-            asm.I_pushscope();
-            asm.I_newclass(clsidx);
-            asm.I_popscope();
-            asm.I_getglobalscope();
-            asm.I_swap();
-            asm.I_initproperty(Fib_name);
-*/
         }
 
         public function getCInit() {
-            if(cinit == null ) {
+            if(cinit == null )
                 cinit = new Method(s.e, [], "$cinit", true, new Ast::FuncAttr(null));
-            }
             return cinit;
         }
 
-/*
-        public function newIInit(formals, name) {
-            var iinit = new Method(s.e, formals, 2, name, true);
-            iinit.I_getlocal(0);
-            iinit.I_constructsuper(0);
-            return iinit;
-        }
-*/
         public function getInstance() {
             if( this.instance == null )
-                this.instance = new Instance(s, name, basename);
+                this.instance = new Instance(s, name, basename, interfaces, flags, protectedns);
             
             return this.instance;
         }
@@ -434,22 +421,62 @@ namespace Emit;
             
             assert(clsidx == instidx);
 
-            //s.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, clsidx));
             return clsidx;
         }
     }
     
-    
-    class Instance {
-        // FIXME: interfaces
-        
-        public var s, name, basename, traits = [], iinit;
-        
-        function Instance(s:Script, name, basename)  : 
-            s=s, 
-            name=name, 
-            basename=basename {
+    // The documentation has issues here.
+    //
+    // The way ASC generates code:
+    //   - the flags are ClassInterface|ClassSealed 
+    //   - the class init has a body that just executes "returnvoid"
+    //   - there is a method_info entry for the instance initializer 
+    //     but no corresponding method_body
+    //   - logic in cogen is responsible for generating global
+    //     code that performs newclass/initproperty
+
+    class Interface
+    {
+        public var script, name, interfaces, traits=[];
+
+        function Interface(script, name, interfaces) 
+            : script=script
+            , name=name
+            , interfaces=interfaces 
+        {}
+
+        public function finalize() {
+            var clsinfo = new ABCClassInfo();
+
+            var iinit = new Instance(script, name, 0, interfaces, CONSTANT_ClassInterface|CONSTANT_ClassSealed);
+            var cinit = (new Method(script.e, [], name, false, new Ast::FuncAttr(null))).finalize();
+            clsinfo.setCInit(cinit);
+            for(let i = 0; i < traits.length; ++i)
+                clsinfo.addTrait(traits[i]);
+
+            var clsidx = script.e.file.addClass(clsinfo);
             
+            var iinitm = new Method(script.e, [], name, false, new Ast::FuncAttr(null), true);
+            iinit.setIInit(iinitm.finalize());
+            iinit.finalize();
+
+            return clsidx;
+
+        }
+    }
+
+    class Instance 
+    {
+        public var s, name, basename, flags, interfaces, traits = [], iinit, protectedns;
+        
+        function Instance(s:Script, name, basename, interfaces, flags, protectedns=null) 
+            : s=s
+            , name=name
+            , basename=basename 
+            , interfaces=interfaces
+            , flags=flags
+            , protectedns=protectedns
+        {
         }
         
         public function setIInit(method) {
@@ -460,7 +487,13 @@ namespace Emit;
         }
         
         public function finalize() {
-            var instinfo = new ABCInstanceInfo(name, basename, 0, 0, []);
+            if (protectedns != null) {
+                flags |= CONSTANT_ClassProtectedNs;
+                pnsid = s.e.namespace(protectedns);
+            }
+            else
+                pnsid = 0;
+            var instinfo = new ABCInstanceInfo(name, basename, flags, pnsid, interfaces);
             
             instinfo.setIInit(iinit);
             
@@ -473,16 +506,17 @@ namespace Emit;
 
     class Method // extends AVM2Assembler
     {
-        public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[], attr=null;
+        public var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[], attr=null, bodyless;
 
-        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, attr) {
+        function Method(e:ABCEmitter, formals:Array, name, standardPrologue, attr, bodyless=false) {
             //super(e.constants, formals.length);
             this.formals = formals;
             this.e = e;
             this.name = name;
             this.attr = attr;
+            this.bodyless = bodyless;
 
-            if (!attr.is_native) {
+            if (!bodyless && !attr.is_native) {
                 asm = new AVM2Assembler(e.constants, formals.length - (attr.uses_rest ? 1 : 0), attr);
                 // Standard prologue -- but is this always right?
                 // ctors don't need this - have a more complicated prologue
@@ -512,16 +546,16 @@ namespace Emit;
 
             var flags = 0;
 
-            if (!attr.is_native) {
+            if (!bodyless && !attr.is_native) {
                 // Standard epilogue for lazy clients.
                 asm.I_returnvoid();
                 flags = asm.flags;
-            } else {
+            } 
+            else if (attr.is_native)
                 flags = METHOD_Native;
-            }
 
             var meth = e.file.addMethod(new ABCMethodInfo(name, formals, 0, flags, defaults, null));
-            if (!attr.is_native) {
+            if (!bodyless && !attr.is_native) {
                 var body = new ABCMethodBodyInfo(meth);
                 body.setMaxStack(asm.maxStack);
                 body.setLocalCount(asm.maxLocal);

@@ -415,13 +415,6 @@ public namespace Encode;
               + block (nd.block,nesting+", 'block': ".length)
               + " }";
         }
-        case (nd: ClassBlock) {
-            var str =
-                "{ 'ast_class': 'ClassBlock'"
-              + indent(nesting) + ", 'name': " + name (nd.name,nesting+", 'name': ".length)
-              + indent(nesting) + ", 'block': " + block (nd.block,nesting+", 'block': ".length)
-              + " }";
-        }
         case (nd: TryStmt) {
             var str =
                 "{ 'ast_class': 'TryStmt'"

@@ -215,7 +215,6 @@ namespace Gen;
     
     function cgFixtures(ctx, fixtures) {
         let { target:target, asm:asm, emitter:emitter } = ctx;
-        let methidx, trait_kind, clsidx;
         for ( let i=0 ; i < fixtures.length ; i++ ) {
             let [fxname, fx] = fixtures[i];
             let name = emitter.fixtureNameToName(fxname);
@@ -226,7 +225,7 @@ namespace Gen;
                     // FIXME when we have more general support for type annos
             }
             else if (fx is MethodFixture) {
-                methidx = cgFunc(ctx, fx.func);
+                let methidx = cgFunc(ctx, fx.func);
                 if (target is Method || target is Script) {
                     target.addTrait(new ABCSlotTrait(name, 0, false, 0, 0, 0, 0)); 
                     asm.I_findpropstrict(name);
@@ -235,19 +234,28 @@ namespace Gen;
                 }
                 else {
                     // target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Method, 0, methidx));
-                    trait_kind = TRAIT_Method;
+                    let trait_kind = TRAIT_Method;
                     if (fx.func.name.kind is Get) {
                         trait_kind = TRAIT_Getter;
                     }
                     else if (fx.func.name.kind is Set) {
                         trait_kind = TRAIT_Setter;
                     }
-                    target.addTrait(new ABCOtherTrait(name, 0, trait_kind, 0, methidx));
+                    let methattrs = 0;
+                    if (fx.isOverride)
+                        methattrs |= ATTR_Override;
+                    if (fx.isFinal)
+                        methattrs |= ATTR_Final;
+                    target.addTrait(new ABCOtherTrait(name, methattrs, trait_kind, 0, methidx));
                 }
             }
             else if (fx is ClassFixture) {
-                clsidx = cgClass(ctx, fx.cls);
+                let clsidx = cgClass(ctx, fx.cls);
                 target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, clsidx));
+            }
+            else if (fx is InterfaceFixture) {
+                let ifaceidx = cgInterface(ctx, fx.iface);
+                target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, ifaceidx));
             }
             else if (fx is NamespaceFixture) {
                 target.addTrait(new ABCSlotTrait(name, 0, true, 0, 
@@ -271,29 +279,7 @@ namespace Gen;
             cgStmt(ctx, stmts[i]);
     }
 
-/*
-    function cgDefn(ctx, d) {
-        let { asm:asm, emitter:emitter } = ctx;
-        switch type (d) {
-        case (fd:FunctionDefn) {
-            assert( fd.func.name.kind is Ordinary );
-            let name = emitter.nameFromIdent(fd.func.name.ident);
-            //asm.I_findpropstrict(name); // name is fixture, thus always defined
-            //asm.I_newfunction(cgFunc(ctx, fd.func));
-            //asm.I_initproperty(name);
-        }
-        case (vd: VariableDefn) {
-            // nothing to do, right?
-        }
-        case (x:*) { 
-            Gen::internalError(ctx, "Unimplemented defn " +d); 
-        }
-        }
-    }
-*/
-
-    function extractNamedFixtures(fixtures)
-    {
+    function extractNamedFixtures(fixtures) {
         let named = [];
         let fix_length = fixtures ? fixtures.length : 0;
         for(let i = 0; i < fix_length; ++i)
@@ -311,8 +297,7 @@ namespace Gen;
         return named;
     }
     
-    function extractUnNamedFixtures(fixtures)
-    {
+    function extractUnNamedFixtures(fixtures) {
         let named = [];
         let fix_length = fixtures ? fixtures.length : 0;
         for(let i = 0; i < fix_length; ++i)
@@ -334,10 +319,15 @@ namespace Gen;
         let {asm:asm, emitter:emitter, script:script} = ctx;
         
         let classname = emitter.qname(c.name,false);
-        let basename = c.baseName != null ? emitter.qname(c.baseName,false) : 0;
-        
-        let cls = script.newClass(classname, basename);
-        
+        let basename = emitter.qname(c.baseName,false);
+        let interfacenames = Util::map(function (n) { return emitter.qname(n,false) }, c.interfaceNames);
+
+        let flags = 0;
+        if (!(c.isDynamic))
+            flags |= CONSTANT_ClassSealed;
+        if (c.isFinal)
+            flags |= CONSTANT_ClassFinal;
+        let cls = script.newClass(classname, basename, interfacenames, flags, c.protectedns);
         
         let c_ctx = pushClass(ctx, cls);
 
@@ -349,8 +339,8 @@ namespace Gen;
         let cinit_ctx = pushCInit(ctx, cinit);
         cgDebugFile(cinit_ctx);
         cgHead(cinit_ctx, {fixtures:[], exprs:c.classHead.exprs});
-        
-      
+        cgBlock(cinit_ctx, c.classBody);
+
         let inst = cls.getInstance();
         
         // Context for the instance
@@ -362,10 +352,9 @@ namespace Gen;
         inst.setIInit(cgCtor(i_ctx, c.constructor, {fixtures:[],exprs:c.instanceHead.exprs}));
         
         var clsidx = cls.finalize();
-        var Object_name = emitter.qname({ns:new PublicNamespace(""), id:"Object"},false);
 
-        asm.I_findpropstrict(Object_name);
-        asm.I_getproperty(Object_name);
+        asm.I_findpropstrict(basename);
+        asm.I_getproperty(basename);
         asm.I_dup();
         asm.I_pushscope();
         asm.I_newclass(clsidx);
@@ -375,6 +364,24 @@ namespace Gen;
         asm.I_initproperty(classname);
 
         return clsidx;
+    }
+
+    function cgInterface(ctx, c) {
+        let {asm:asm, emitter:emitter, script:script} = ctx;
+        
+        let ifacename = emitter.qname(c.name,false);
+        let interfacenames = Util::map(function (n) { return emitter.qname(n,false) }, c.interfaceNames);
+
+        let iface = script.newInterface(ifacename, interfacenames);
+        
+        let ifaceidx = iface.finalize();
+
+        asm.I_getglobalscope();
+        asm.I_pushnull();
+        asm.I_newclass(ifaceidx);
+        asm.I_initproperty(ifacename);
+
+        return ifaceidx;
     }
     
     /*  
@@ -389,7 +396,7 @@ namespace Gen;
         if( defaults.length > 0 )
             method.setDefaults(defaults);
         
-        if (!f.isNative) {
+        if (!f.attr.is_native) {
             let asm = method.asm;
             let t = asm.getTemp();
             // FIXME: record that scopes must be restored here!
@@ -431,7 +438,7 @@ namespace Gen;
             asm.I_getlocal(0);
             let nargs = c.superArgs.length;
             for ( let i=0 ; i < nargs ; i++ )
-                cgExpr(ctx, c.superArgs[i]);
+                cgExpr(ctor_ctx, c.superArgs[i]);
             asm.I_constructsuper(nargs);
         
             asm.I_popscope();
@@ -482,7 +489,7 @@ namespace Gen;
         if( defaults.length > 0 )
             method.setDefaults(defaults);
         
-        if (!f.isNative) {
+        if (!f.attr.is_native) {
             let asm = method.asm;
 
             /* Create a new rib and populate it with the values of all the
@@ -599,7 +606,7 @@ namespace Gen;
         {
             asm.I_pop();
         }
-  }
+    }
     
 
     // Handles scopes and finally handlers and returns a label, if appropriate, to

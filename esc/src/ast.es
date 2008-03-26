@@ -882,21 +882,41 @@ public namespace Ast
         const name //: NAME;
         const baseName; //: NAME?;
         const interfaceNames; //: [NAME];
+        const protectedns;
         const constructor : CTOR;
         const classHead: HEAD;
         const instanceHead: HEAD;
         const classType; //: ObjectType;
         const instanceType; //: InstanceType;
-        function Cls (name,baseName,interfaceNames,constructor,classHead,instanceHead
-                     ,classType,instanceType)
+        const classBody;
+        const isDynamic;
+        const isFinal;
+        function Cls (name,baseName,interfaceNames,protectedns,constructor,classHead,instanceHead
+                     ,classType,instanceType,classBody,isDynamic,isFinal)
             : name = name
             , baseName = baseName
             , interfaceNames = interfaceNames
+            , protectedns = protectedns
             , constructor = constructor
             , classHead = classHead
             , instanceHead = instanceHead
             , classType = classType
-            , instanceType = instanceType {}
+            , instanceType = instanceType
+            , classBody = classBody
+            , isDynamic = isDynamic
+            , isFinal = isFinal
+        {}
+    }
+
+    class Interface {
+        const name //: NAME;
+        const interfaceNames; //: [NAME];
+        const instanceHead: HEAD;
+        function Interface (name,interfaceNames,instanceHead)
+            : name = name
+            , interfaceNames = interfaceNames
+            , instanceHead = instanceHead
+        {}
     }
 
     // FUNC
@@ -1078,7 +1098,11 @@ public namespace Ast
             : cls = cls {}
     }
 
-    class InterfaceFixture { }
+    class InterfaceFixture {
+        const iface : Interface;
+        function InterfaceFixture (iface)
+            : iface = iface {}
+    }
 
     class TypeVarFixture {}
 
@@ -1250,7 +1274,6 @@ public namespace Ast
     type STMT =
        ( EmptyStmt
        | ExprStmt
-       | ClassBlock
        | ForInStmt
        | ThrowStmt
        | ReturnStmt
@@ -1275,14 +1298,6 @@ public namespace Ast
         const expr : EXPR;
         function ExprStmt (expr)
             : expr = expr {}
-    }
-
-    class ClassBlock {
-        const name //: NAME;
-        const block : BLOCK;
-        function ClassBlock (name,block)
-            : name = name
-            , block = block {}
     }
 
     class ForInStmt {

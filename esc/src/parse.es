@@ -336,12 +336,11 @@ use namespace intrinsic;
         }
 
         function openNamespace (nd: Ast::IDENT_EXPR) {
-            let ns = evalIdentExprToNamespace (nd);
-            //print("this.pragmas=",this.pragmas);
+            pushNamespace( evalIdentExprToNamespace (nd) );
+        }
+
+        function pushNamespace(ns) {
             let opennss = this.pragmas.openNamespaces;
-            //print ("opennss=",opennss);
-            //print ("opennss.length=",opennss.length);
-            //print ("adding ns ",ns);
             opennss[opennss.length-1].push (ns);
         }
 
@@ -1224,6 +1223,20 @@ use namespace intrinsic;
             return name;
         }
 
+        // One or more
+        function primaryNameList() {
+            let names = [];
+            
+            while (true) {
+                names.push(primaryName());
+                if (hd() != Token::Comma)
+                    break;
+                eat(Token::Comma);
+            }
+             
+            return names;
+        }
+
         /*
             Path
                 Identifier
@@ -1624,6 +1637,11 @@ use namespace intrinsic;
 
         */
 
+        // Only supports the simple form, "super"
+        function superExpression() {
+            eat(Token::Super);
+            return new Ast::SuperExpr(null);
+        }
 
         /*
 
@@ -1742,6 +1760,7 @@ use namespace intrinsic;
                 let nd1 = superExpression ();
                 let nd2 = propertyOperator (nd1);
                 expr = memberExpressionPrime (beta, nd2);
+                break;
             default:
                 let nd1 = primaryExpression (beta);
                 expr = memberExpressionPrime (beta, nd1);
@@ -4069,7 +4088,7 @@ use namespace intrinsic;
             var body;
 
             cx.enterVarBlock ();
-            if (attrs.native) {
+            if (attrs.native || tau == interfaceBlk) {
                 semicolon(fullStmt);
                 body = new Ast::Block(null, []);
             }
@@ -4077,6 +4096,9 @@ use namespace intrinsic;
                 body = functionBody (allowIn, omega);
             var vars = cx.exitVarBlock ();
             var attr = cx.exitFunction ();
+
+            if (tau == interfaceBlk)
+                checkLegalAttributes(attrs, {});
 
             var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,numparams:numparams} = signature;
             var func = new Ast::Func (name, body, params, numparams, vars, defaults, resultType, attr);
@@ -4231,38 +4253,28 @@ use namespace intrinsic;
 
         */
 
-        function constructorInitialiser () : [[Ast::EXPR], [Ast::EXPR]] {
-            switch (hd ()) {
-            case Token::Colon:
-                switch (hd2 ()) {
-                case Token::Super:
-                    next();
-                    next();
-                    var nd1 = []; // no settings
-                    var nd2 = this.argumentList ();
-                    break;
-                default:
-                    next();
-                    var nd1 = settingList ();
-                    switch (hd ()) {
-                    case Token::Super:
-                        next();
-                        var nd2 = this.argumentList ();
-                        break;
-                    default:
-                        var nd2 = [];
-                        break;
-                    }
-                    break;
+        function constructorInitialiser () /* : [[Ast::EXPR], [Ast::EXPR]] */ {
+            var settings, superargs;
+
+            if (hd() == Token::Colon) {
+                eat( Token::Colon );
+                if (hd() != Token::Super)
+                    settings = settingList();
+                else
+                    settings = [];
+                if (hd() == Token::Super) {
+                    eat(Token::Super);
+                    superargs = argumentList();
                 }
-                break;
-            default:
-                var nd1 = [];
-                var nd2 = [];
-                break;
+                else
+                    superargs = [];
+            }
+            else {
+                settings = [];
+                superargs = [];
             }
 
-            return [nd1,nd2];
+            return [settings, superargs];
         }
 
 
@@ -4680,59 +4692,118 @@ use namespace intrinsic;
             return nd1;
         }
 
-        function classDefinition (ns: Ast::NAMESPACE, isDynamic) : Ast::STMTS {
+        /* FIXME: syntax description here */
+
+        function classDefinition (ns: Ast::NAMESPACE, attrs) : Ast::STMTS {
             eat (Token::Class);
+            checkLegalAttributes(attrs, {dynamic:true, final:true});
 
-            var nd1 = identifier ();
+            var classid = identifier ();
+            var signature = typeSignature ();       // FIXME: not used yet
+            var superclass = extendsClause();
+            var superinterfaces = implementsClause();
+            var protectedNs = new Ast::ProtectedNamespace (classid);
 
-            var nd2 = typeSignature ();
-            var nd3 = classInheritance ();
-            currentClassName = nd1;
-            cx.enterVarBlock(); // Class
-            cx.enterVarBlock (); // Instance
-            var blck = classBody ();
-            var ihead = cx.exitVarBlock (); // Instance
-            var chead = cx.exitVarBlock (); // Class
+            currentClassName = classid;
+            cx.enterVarBlock();                     // Class
+            cx.enterVarBlock ();                    // Instance
+            cx.pushNamespace(protectedNs);
+
+            cx.ctor = null;                         // updated by constructorDefinition()
+            var body = classBody ();                // Class initialization block
+
+            var ihead = cx.exitVarBlock ();         // Instance
+            var chead = cx.exitVarBlock ();         // Class
             currentClassName = "";
 
-            var name = {ns:ns,id:nd1};
-
             var ctor = cx.ctor;
-            if (ctor===null)
-            {
-                cx.enterFunction(defaultAttrs());
-                let blck = new Ast::Block (new Ast::Head([],[]),[]);
-                let params = new Ast::Head([],[]);
-                let numparams = 0;
-                let vars = new Ast::Head([],[]);
-                let defaults = [];
-                let ty = Ast::anyType;
-                let attr = cx.exitFunction();
-                let func = new Ast::Func ({kind:new Ast::Ordinary,ident:nd1},blck,params,numparams,vars,defaults,ty,attr);
-                var ctor = new Ast::Ctor ([],[],func);
-            }
+            if (ctor === null)
+                ctor = makeDefaultCtor(classid);
             
-            // var [i,j] = o
-            // var $t = o
-            // var i = $t[0]
-            // var j = $t[1]
+            var baseName;
+            if (superclass == null)
+                baseName = {ns: new Ast::PublicNamespace (""), id: "Object"};
+            else 
+                baseName = superTypeToName(superclass);
 
-            // let ($t=o) init
+            var interfaceNames = Util::map(superTypeToName, superinterfaces);
 
-            var baseName = {ns: new Ast::PublicNamespace (""), id: "Object"}
-            var interfaceNames = [];
-            //var chead = new Ast::Head ([],[]);
+            var cname = {ns:ns, id:classid};
             var ctype = Ast::anyType;
             var itype = Ast::anyType;
-            var cls = new Ast::Cls (name,baseName,interfaceNames,ctor,chead,ihead,ctype,itype);
+            var cls = new Ast::Cls (cname,
+                                    baseName,
+                                    interfaceNames,
+                                    protectedNs,
+                                    ctor,
+                                    chead,
+                                    ihead,
+                                    ctype,
+                                    itype,
+                                    body,
+                                    attrs.dynamic,
+                                    attrs.final);
 
-            var fxtrs = [[new Ast::PropName(name),new Ast::ClassFixture (cls)]];
+            var fxtrs = [[new Ast::PropName(cname),new Ast::ClassFixture (cls)]];
             cx.addVarFixtures (fxtrs);
-            cx.ctor = null;
 
-            var ss4 = [new Ast::ClassBlock (name,blck)];
+            return [];
+        }
 
-            return ss4;
+        function interfaceDefinition(ns: Ast::NAMESPACE, attrs) : Ast::STMTS {
+            checkLegalAttributes(attrs, {});
+            eat (Token::Interface);
+            
+            var interfaceid = identifier ();
+            var signature = typeSignature ();       // FIXME: not used yet
+            var superinterfaces = implementsClause();
+
+            currentClassName = "";
+
+            cx.enterVarBlock ();                    // Instance
+            interfaceBody ();
+            var ihead = cx.exitVarBlock ();         // Instance
+
+            var interfaceNames = Util::map(superTypeToName, superinterfaces);
+            
+            var iname = {ns:ns, id:interfaceid};
+            var iface = new Ast::Interface(iname, interfaceNames, ihead);
+
+            var fxtrs = [[new Ast::PropName(iname), new Ast::InterfaceFixture (iface)]];
+            cx.addVarFixtures (fxtrs);
+
+            return [];
+        }
+
+        function makeDefaultCtor(classname) {
+            cx.enterFunction(defaultAttrs());
+            let ctorbody = new Ast::Block (new Ast::Head([],[]),[]);
+            let params = new Ast::Head([],[]);
+            let numparams = 0;
+            let vars = new Ast::Head([],[]);
+            let defaults = [];
+            let ty = Ast::anyType;
+            let attr = cx.exitFunction();
+            let func = new Ast::Func ({kind:new Ast::Ordinary,ident:classname},
+                                      ctorbody,
+                                      params,
+                                      numparams,
+                                      vars,
+                                      defaults,
+                                      ty,
+                                      attr);
+            return new Ast::Ctor ([],[], func);
+        }
+
+        function superTypeToName(s) {
+            switch type (s) {
+            case (x:Identifier) {
+                return {ns: new Ast::PublicNamespace (""), id: x.ident};
+            }
+            case (x:*) {
+                Parse::internalError(this, "Can't handle this base type name " + s);
+            }
+            }
         }
 
         /*
@@ -4759,27 +4830,32 @@ use namespace intrinsic;
             return [nd1,nd2];
         }
 
-        function classInheritance () : [Ast::IDENT_EXPR, [Ast::IDENT_EXPR]] {
-            var nd1 = null;
-            var nd2;
-
+        function extendsClause() {
             if (hd () === Token::Extends) {
                 eat(Token::Extends);
-                nd1 = primaryName ();
-            }
-
-            if (hd () === Token::Implements) {
-                eat(Token::Implements);
-                nd2 = primaryNameList ();
+                return primaryName ();
             }
             else
-                nd2 = [];
+                return null;
+        }
 
-            return [nd1, nd2];
+        function implementsClause() {
+            if (hd () === Token::Implements) {
+                eat(Token::Implements);
+                return primaryNameList ();
+            }
+            else
+                return [];
         }
 
         function classBody () : Ast::BLOCK
             block (classBlk);
+
+        function interfaceBody() {
+            eat(Token::LeftBrace);
+            directives(interfaceBlk);
+            eat(Token::RightBrace);
+        }
 
         /*
 
@@ -4918,6 +4994,8 @@ use namespace intrinsic;
             switch (hd ()) {
             case Token::Use:
             case Token::Import:
+                if (tau == interfaceBlk) // this could be debated
+                    Parse::syntaxError(this, "Pragma not allowed in interfaces");
                 pragmas (); 
                 var nd2 = directivesPrefixPrime (tau);
                 break;
@@ -4958,6 +5036,8 @@ use namespace intrinsic;
             var nd1;
             switch (hd()) {
             case Token::SemiColon:
+                if (tau == interfaceBlk)
+                    Parse::syntaxError(this, "Statement not allowed in interfaces");
                 eat(Token::SemiColon);
                 nd1 = [new Ast::EmptyStmt];
                 break;
@@ -4965,6 +5045,8 @@ use namespace intrinsic;
             case Token::Let: // FIXME might be function
             case Token::Var:
             case Token::Const:
+                if (tau == interfaceBlk)
+                    Parse::syntaxError(this, "Variable bindings not allowed in interfaces");
                 nd1 = variableDefinition (allowIn
                                           , tau
                                           , cx.pragmas.defaultNamespace
@@ -4981,15 +5063,27 @@ use namespace intrinsic;
                 //ts1 = semicolon (ts1,omega);
                 break;
 
+            case Token::Interface:
+                if (tau != globalBlk)
+                    Parse::syntaxError(this, "Interface definition not allowed here");
+                nd1 = interfaceDefinition (cx.pragmas.defaultNamespace, defaultAttrs());
+                break;
+
             case Token::Class:
-                nd1 = classDefinition (cx.pragmas.defaultNamespace, false);
+                if (tau != globalBlk)
+                    Parse::syntaxError(this, "Class definition not allowed here");
+                nd1 = classDefinition (cx.pragmas.defaultNamespace, defaultAttrs());
                 break;
 
             case Token::Namespace:
+                if (tau == interfaceBlk)
+                    Parse::syntaxError(this, "Namespace bindings not allowed in interfaces");
                 nd1 = namespaceDefinition (omega, cx.pragmas.defaultNamespace);
                 break;
 
             case Token::Type:
+                if (tau == interfaceBlk)
+                    Parse::syntaxError(this, "Type bindings not allowed in interfaces");
                 nd1 = typeDefinition (omega, cx.pragmas.defaultNamespace);
                 break;
 
@@ -5007,6 +5101,8 @@ use namespace intrinsic;
             case Token::Try:
             case Token::While:
             case Token::With:
+                if (tau == interfaceBlk)
+                    Parse::syntaxError(this, "Statement not allowed in interfaces");
                 nd1 = [statement (tau,omega)];
                 break;
 
@@ -5030,6 +5126,8 @@ use namespace intrinsic;
                 // But not every directive can be labeled, so just do the simple thing for the
                 // time being.
                 if (hd2 () == Token::Colon) {
+                    if (tau == interfaceBlk)
+                        Parse::syntaxError(this, "Statement not allowed in interfaces");
                     nd1 = [statement (tau,omega)];
                     break;
                 }
@@ -5039,18 +5137,25 @@ use namespace intrinsic;
                 nd1 = listExpression (allowIn);
                 switch (hd ()) {
                 case Token::SemiColon:
+                    if (tau == interfaceBlk)
+                        Parse::syntaxError(this, "Statement not allowed in interfaces");
                     eat(Token::SemiColon);
                     nd1 = [new Ast::ExprStmt (nd1)];
                     break;
 
                 case Token::RightBrace:
                 case Token::EOS:
+                    if (tau == interfaceBlk)
+                        Parse::syntaxError(this, "Statement not allowed in interfaces");
                     nd1 = [new Ast::ExprStmt (nd1)];
                     break;
 
                 default:
-                    if (newline ()) // stmt
+                    if (newline ()) { // stmt
+                        if (tau == interfaceBlk)
+                            Parse::syntaxError(this, "Statement not allowed in interfaces");
                         nd1 = [new Ast::ExprStmt (nd1)];
+                    }
                     else {
                         switch (hd ()) {
                         case Token::Dynamic:
@@ -5064,6 +5169,7 @@ use namespace intrinsic;
                         case Token::Const:
                         case Token::Function:
                         case Token::Class:
+                        case Token::Interface:
                         case Token::Namespace:
                         case Token::Type:
                             // FIXME check ns attr
@@ -5106,8 +5212,12 @@ use namespace intrinsic;
                 //ts2 = semicolon (ts2,omega);
                 break;
 
+            case Token::Interface:
+                nd2 = interfaceDefinition (attrs.ns, attrs);
+                break;
+
             case Token::Class:
-                nd2 = classDefinition (attrs.ns, attrs.dynamic);
+                nd2 = classDefinition (attrs.ns, attrs);
                 break;
 
             case Token::Namespace:
@@ -5160,6 +5270,22 @@ use namespace intrinsic;
                    , override: false
                    , prototype: false
                    , static: false }
+        }
+
+        function checkLegalAttributes(attrs, names) {
+            test("true");
+            test("false");
+            test("dynamic");
+            test("final");
+            test("native");
+            test("override");
+            test("prototype");
+            test("static");
+
+            function test(x) {
+                if (attrs[x] && !names[x])
+                    Parse::syntaxError(this, "Attribute " + x + " not allowed here.");
+            }
         }
 
         // Modifies "nd" and returns it too.
