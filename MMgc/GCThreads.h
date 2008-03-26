@@ -178,7 +178,7 @@ namespace MMgc
     };
 
 	/** A catchall object for per-thread state. */
-	class GCThread {
+	class MMGC_API GCThread {
 	public:
 		static void Init();
 		static void Destroy();
