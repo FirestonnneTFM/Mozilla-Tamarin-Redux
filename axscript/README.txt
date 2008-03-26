@@ -1,9 +1,13 @@
 This is the readme for axtam - Active Scripting implemented using Tamarin.
 --------------------------------------------------------------------------
 
-This is still very early - not much works yet!  See the 'axscript/test'
-directory, where things will generally be more up-to-date than this README 
-is; currently tested are IE and WSH.
+This is a README for the Tamarin source code and is focussed on building
+and testing Tamarin.  Binary installations of Tamarin install 
+README.hta - please see that file for information targetted at *using* 
+Tamarin.
+
+This directory is a functioning ActiveScript engine using Tamarin.  With some 
+limitations, it works with Internet Explorer and the Windows Script Host.
 
 Building
 ---------
@@ -26,3 +30,11 @@ Test it
 --------
 
 See README.txt in the test directory.
+
+Contact Us, Bugs, etc
+----------------------
+
+The mailing list at https://mail.mozilla.org/listinfo/tamarin-devel is 
+currrently used for all Tamarin related traffic, including this AXScript
+engine.  If you wish to report a bug or submit a patch, please use Bugzilla at
+https://bugzilla.mozilla.org/enter_bug.cgi?product=Tamarin&component=ScreamingMonkey
