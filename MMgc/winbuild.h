@@ -109,6 +109,7 @@
 	#pragma warning(disable:4512) //assignment operator could not be generated
 	#pragma warning(disable:4511) //can't generate copy ctor
 	#pragma warning(disable:4127) //conditional expression is constant
+	#pragma warning(disable:4251) // X needs to have dll-interface to be used by clients of class Y
 
 	// enable some that are off even in /W4 mode, but are still handy
 	#pragma warning(default:4265)	// 'class' : class has virtual functions, but destructor is not virtual
