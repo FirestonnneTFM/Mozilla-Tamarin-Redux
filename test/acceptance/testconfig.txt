@@ -49,10 +49,6 @@ decimal/.* , .* , skip , skipping decimal tests until asc compiler supports them
 es4/vector/.*  , .* , skip , skipping vector tests until asc compiler supports them
 
 
-# fails when running the release vm with the -Dinterp vm arg, bug #401095
-ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-Dinterp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
-
-
 # Currently failing on linux, bug #402864
 ecma3/GlobalObject/e15_1_2_2_2:parseInt\("123456789012345678"\)   ,   .*lnx-tvm-.*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 ecma3/GlobalObject/e15_1_2_6:isNaN\(\)                            ,   .*lnx-tvm-.*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
