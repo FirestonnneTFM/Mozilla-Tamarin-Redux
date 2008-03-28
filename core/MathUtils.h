@@ -87,6 +87,7 @@ namespace avmplus
 		static double atan(double value);						
 		static double atan2(double y, double x);
 		static double ceil(double value);								
+		static double copysign(double x, double y);
 		static double cos(double value);		
 		static bool equals(double x, double y);
 		static double exp(double value);

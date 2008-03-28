@@ -73,6 +73,11 @@ namespace avmplus
 		return ::ceil(value);
 	}
 
+	double MathUtils::copysign(double x, double y)
+	{
+		return ::copysign(x, y);
+	}
+
 	double MathUtils::cos(double value)
 	{
 		return ::cos(value);

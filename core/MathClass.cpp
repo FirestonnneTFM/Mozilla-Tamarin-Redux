@@ -155,6 +155,8 @@ namespace avmplus
 			double y = core->doubleNumber(argv[i]);
 			if (y < x)
 				x = y;
+			else if (y == 0 && y == x && MathUtils::copysign(1.0, y) == -1)
+				x = y;
 			else if (MathUtils::isNaN(y))
 				return y;
 		}
@@ -169,6 +171,8 @@ namespace avmplus
 		{
 			double y = core->doubleNumber(argv[i]);
 			if (y > x)
+				x = y;
+			else if (y == 0 && y == x && MathUtils::copysign(1.0, x) == -1)
 				x = y;
 			else if (MathUtils::isNaN(y))
 				return y;
