@@ -114,6 +114,11 @@ namespace avmplus
 #endif /* X86_MATH */
 	}
 
+	double MathUtils::copysign(double x, double y)
+	{
+		return ::_copysign(x, y);
+	}
+
 	double MathUtils::cos(double value)
 	{
 #ifdef X86_MATH
