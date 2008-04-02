@@ -3127,7 +3127,7 @@ bail:
 	}
 #endif  /* DEBUGGER*/
 
-#if defined(_MAC) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
+#if defined(_MAC)
 	uintptr GC::GetStackTop() const
 	{
 		return (uintptr)pthread_get_stackaddr_np(pthread_self());

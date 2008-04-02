@@ -50,6 +50,7 @@ MMgc_CXXSRCS := $(MMgc_CXXSRCS) \
   $(curdir)/FixedMalloc.cpp \
   $(curdir)/GC.cpp \
   $(curdir)/GCAlloc.cpp \
+  $(curdir)/GCGlobalNew.cpp \
   $(curdir)/GCHashtable.cpp \
   $(curdir)/GCHeap.cpp \
   $(curdir)/GCLargeAlloc.cpp \

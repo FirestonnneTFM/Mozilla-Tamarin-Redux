@@ -126,37 +126,11 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
  * anywhere on the machine stack. */
 // TPR - increasing to 20 causes this code to not get optimized out
 
-#ifdef __GNUC__
-
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\
 		_stack = __ppcregs;\
-		void *__stackBase;\
-		asm ("mr r3,r1\n"\
-		     "StackBaseLoop%1%2: mr %0,r3\n"	\
-			"lwz r3,0(%0)\n"\
-		        "rlwinm r3,r3,0,0,30\n"\
-			"cmpi cr0,r3,0\n"\
-		     "bne StackBaseLoop%1%2" : "=b" (__stackBase) : "i" (__FILE__), "i" (__LINE__) : "r3"); \
-		_size = (uintptr) __stackBase - (uintptr) _stack;
-
-#else
-
-#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
-		int __ppcregs[20]; \
-		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\
-		_stack = __ppcregs;\
-		void *__stackBase;\
-		asm ("mr r3,r1\n"\
-			"StackBaseLoop: mr %0,r3\n"\
-			"lwz r3,0(%0)\n"\
-		        "rlwinm r3,r3,0,0,30\n"\
-			"cmpi cr0,r3,0\n"\
-		     "bne StackBaseLoop" : "=b" (__stackBase) : : "r3"); \
-		_size = (uintptr) __stackBase - (uintptr) _stack;
-
-#endif
+		_size = _gc->GetStackTop() - (uintptr) _stack;
 
 #elif defined MMGC_ARM
 
