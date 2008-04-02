@@ -187,13 +187,10 @@
         let {asm:asm,emitter:emitter} = ctx;
         cgHead(ctx, vars);
 
-        if (!(init is ListExpr))
-            Gen::internalError(ctx, "cgForInStmt: unexpected AST");
-
         let name;
-        switch type (init.exprs[0]) {
+        switch type (init) {
         case (lr: LexicalRef) {
-            name = emitter.nameFromIdentExpr(init.exprs[0].ident);
+            name = emitter.nameFromIdentExpr(init.ident);
         }
         case (ie: InitExpr) {
             if (ie.inits.length != 1)
@@ -202,7 +199,7 @@
             name = emitter.fixtureNameToName(fxname);
         }
         case(x: *) {
-            Gen::internalError(ctx, "unimplemented cogen in cgForInStmt for " + init.exprs[0]);
+            Gen::internalError(ctx, "unimplemented cogen in cgForInStmt for " + init);
         }
         }
 
@@ -346,8 +343,6 @@
         let has_default = false;
         for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
             let e = cases[i].expr;
-            if (e is ListExpr && e.exprs.length == 1) // parser should clean this case up!
-                e = e.exprs[0];
             if (e == null)
                 has_default = true;
             else if (e is LiteralExpr) {
@@ -402,8 +397,6 @@
         for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
             let c = cases[i];
             let e = c.expr;
-            if (e is ListExpr && e.exprs.length == 1) // parser should clean this case up!
-                e = e.exprs[0];
 
             if (e != null) {
                 assert(e is LiteralExpr && e.literal is LiteralInt);
@@ -417,11 +410,6 @@
         for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
             let c = cases[i];
             let e = c.expr;
-
-            if (e is ListExpr && e.exprs.length == 1) { // parser should clean this case up!
-                e = e.exprs[0];
-                assert( e != null );
-            }
 
             if (e == null) {
                 asm.I_label(Ldef);

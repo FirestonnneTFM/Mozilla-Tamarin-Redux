@@ -224,6 +224,7 @@ public namespace Ast
     const lessOrEqualOp = 20;
     const greaterOp = 21;
     const greaterOrEqualOp = 22;
+    const commaOp = 23;
 
     // Assignment operators
 
@@ -432,15 +433,6 @@ public namespace Ast
 
         function serialize(s)
             s.sClass(this, "SetExpr", "op", "le", "re");
-    }
-
-    class ListExpr extends Expr implements ISerializable {
-        const exprs : EXPRS;
-        function ListExpr (exprs)
-            : exprs=exprs {}
-
-        function serialize(s)
-            s.sClass(this, "ListExpr", "exprs");
     }
 
     class EvalScopeInitExpr extends Expr implements ISerializable {

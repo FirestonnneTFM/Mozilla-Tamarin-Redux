@@ -843,7 +843,7 @@ use namespace intrinsic;
                     }
                     let head = new Ast::Head ([[tn,new Ast::ValFixture (Ast::anyType,false)]],
                                               [new Ast::InitExpr (Ast::letInit,new Ast::Head([],[]),[[tn,e]])]);
-                    var expr = new Ast::LetExpr (head, new Ast::ListExpr (exprs));
+                    var expr = new Ast::LetExpr (head, exprListToCommaExpr(exprs));
                 }
                 }
                 return [fxtrs,expr];
@@ -1108,7 +1108,7 @@ use namespace intrinsic;
 
         /*
             ExpressionQualifiedName
-                ParenListExpression :: QualifiedName
+                ParenCommaExpression :: QualifiedName
         */
 
         /*
@@ -1261,19 +1261,18 @@ use namespace intrinsic;
             return newpath;
         }
 
-        function parenExpression () : Ast::EXPR {
+        function parenCommaExpression () : Ast::EXPR {
             eat (Token::LeftParen);
-            var expr = assignmentExpression (allowIn);
+            var expr = commaExpression (allowIn);
             eat (Token::RightParen);
 
             return expr;
         }
 
-        function parenListExpression () : Ast::EXPR {
-            eat (Token::LeftParen);
-            var expr = listExpression (allowIn);
-            eat (Token::RightParen);
-
+        function exprListToCommaExpr(es) {
+            var expr = es[0];
+            for ( let i=1 ; i < es.length ; i++ )
+                expr = new Ast::BinaryExpr(Ast::commaOp, expr, es[i]);
             return expr;
         }
 
@@ -1532,7 +1531,7 @@ use namespace intrinsic;
             this
             RegularExpression
             XMLInitialiser
-            ParenListExpression
+            ParenCommaExpression
             ArrayLiteral
             ObjectLiteral
             FunctionExpressionb
@@ -1589,7 +1588,7 @@ use namespace intrinsic;
                 next();
                 break;
             case Token::LeftParen:
-                expr = parenListExpression();
+                expr = parenCommaExpression();
                 break;
             case Token::LeftBracket:
                 expr = arrayLiteral ();
@@ -1653,8 +1652,8 @@ use namespace intrinsic;
             .  PropertyName
             .  AttributeName
             ..  QualifiedName
-            .  ParenListExpression
-            .  ParenListExpression  ::  QualifiedNameIdentifier
+            .  ParenCommatExpression
+            .  ParenCommaExpression  ::  QualifiedNameIdentifier
             Brackets
 
         */
@@ -1679,7 +1678,7 @@ use namespace intrinsic;
                 break;
             case Token::LeftBracket:
                 next();
-                let index = listExpression (allowIn);
+                let index = commaExpression (allowIn);
                 eat (Token::RightBracket);
                 propref = new Ast::ObjectRef (nd,new Ast::ExpressionIdentifier (index,cx.pragmas.openNamespaces));
                 break;
@@ -1706,21 +1705,18 @@ use namespace intrinsic;
 
         */
 
-        function argumentList () : * /*[Ast::EXPR]*/ {
-            var args;
+        function argumentList () {
+            var args = [];
 
-            eat (Token::LeftParen);
-            switch (hd ()) {
-            case Token::RightParen:
-                eat (Token::RightParen);
-                args = [];
-                break;
-            default:
-                let nd2 = listExpression (allowIn);
-                eat (Token::RightParen);
-                args = nd2.Ast::exprs;
-                break;
+            eat(Token::LeftParen);
+            if (hd() != Token::RightParen) {
+                while (true) {
+                    args.push(assignmentExpression(allowIn));
+                    if (!match(Token::Comma))
+                        break;
+                }
             }
+            eat(Token::RightParen);
 
             return args;
         }
@@ -2660,32 +2656,13 @@ use namespace intrinsic;
             }
         }
 
-        /*
+        function commaExpression(beta: BETA): Ast::EXPR {
+            let expr = assignmentExpression(beta);
 
-        ListExpression(b)
-            AssignmentExpression(b)
-            ListExpression(b)  ,  AssignmentExpression(b)
+            while (match(Token::Comma))
+                expr = new Ast::BinaryExpr(Ast::commaOp, expr, assignmentExpression(beta));
 
-        right recursive:
-
-        ListExpression(b)
-            AssignmentExpression(b) ListExpressionPrime(b)
-
-        ListExpressionPrime(b)
-            empty
-            , AssignmentExpression(b) ListExpressionPrime(b)
-
-        */
-
-        function listExpression (beta: BETA) : Ast::EXPR {
-            var exprs = [assignmentExpression (beta)];
-
-            while (hd() === Token::Comma) {
-                eat(Token::Comma);
-                exprs.push(assignmentExpression(beta));
-            }
-
-            return new Ast::ListExpr(exprs);
+            return expr;
         }
 
 //        /*
@@ -3378,7 +3355,7 @@ use namespace intrinsic;
         }
 
         function expressionStatement () : Ast::Stmt
-            new Ast::ExprStmt (listExpression (allowIn));
+            new Ast::ExprStmt (commaExpression (allowIn));
 
         function returnStatement () : Ast::Stmt {
             eat (Token::Return);
@@ -3396,7 +3373,7 @@ use namespace intrinsic;
                 if (newline())
                     expr = null;
                 else
-                    expr = listExpression (allowIn);
+                    expr = commaExpression (allowIn);
                 break;
             }
 
@@ -3432,7 +3409,7 @@ use namespace intrinsic;
             var test=null, consequent=null, alternate=null;
 
             eat (Token::If);
-            test = parenListExpression ();
+            test = parenCommaExpression ();
             consequent = substatement (omega);
             if ( hd () === Token::Else) {
                 eat (Token::Else);
@@ -3445,13 +3422,13 @@ use namespace intrinsic;
         /*
 
         WhileStatement(omega)
-            while ParenListExpression Substatement(omega)
+            while ParenCommaExpression Substatement(omega)
 
         */
 
         function whileStatement (omega) : Ast::Stmt {
             eat (Token::While);
-            var test = parenListExpression ();
+            var test = parenCommaExpression ();
             var body = substatement (omega); 
  
             return new Ast::WhileStmt (test, body);
@@ -3468,7 +3445,7 @@ use namespace intrinsic;
             eat (Token::Do);
             var body = substatement (omega); 
             eat(Token::While);
-            var test = parenListExpression ();
+            var test = parenCommaExpression ();
  
             return new Ast::DoWhileStmt (test,body); // same order of args to constructor as 'while'
         }
@@ -3477,8 +3454,8 @@ use namespace intrinsic;
 
             ForStatement(omega)
                 for  (  ForInitialiser  ;  OptionalExpression  ;  OptionalExpression  )  Substatement(omega)
-                for  (  ForInBinding  in  ListExpression(allowColon, allowIn)  )  Substatement(omega)
-                for  each  ( ForInBinding  in  ListExpression(allowColon, allowIn)  )  Substatement(omega)
+                for  (  ForInBinding  in  CommaExpression(allowColon, allowIn)  )  Substatement(omega)
+                for  each  ( ForInBinding  in  CommaExpression(allowColon, allowIn)  )  Substatement(omega)
             
         */
 
@@ -3497,7 +3474,7 @@ use namespace intrinsic;
             var init = forInitialiser ();
             if (hd () == Token::In) {
                 eat (Token::In);
-                var objexpr = listExpression (allowIn);
+                var objexpr = commaExpression (allowIn);
                 eat (Token::RightParen);
                 var body = substatement (omega); 
                 
@@ -3525,7 +3502,7 @@ use namespace intrinsic;
 
             ForInitialiser
                 empty
-                ListExpression(allowColon, noIn)
+                CommaExpression(allowColon, noIn)
                 VariableDefinition(noIn)
             
             ForInBinding
@@ -3555,7 +3532,7 @@ use namespace intrinsic;
                 }
                 break;
             default:
-                init = listExpression (noIn);
+                init = commaExpression (noIn);
                 break;
             }
  
@@ -3566,7 +3543,7 @@ use namespace intrinsic;
 
         OptionalExpression
             empty
-            ListExpression(allowColon, allowIn)
+            CommaExpression(allowColon, allowIn)
 
         */
 
@@ -3579,7 +3556,7 @@ use namespace intrinsic;
                 break;
 
             default:
-                expr = listExpression (noIn);
+                expr = commaExpression (noIn);
                 break;
             }
  
@@ -3589,7 +3566,7 @@ use namespace intrinsic;
         /*
 
         SwitchStatement
-            switch  ParenListExpression  {  CaseElements  }
+            switch  ParenCommaExpression  {  CaseElements  }
 
         CaseElements
             empty
@@ -3615,7 +3592,7 @@ use namespace intrinsic;
             var expr=null, cases=null;
 
             eat (Token::Switch);
-            expr = parenListExpression ();
+            expr = parenCommaExpression ();
 
             eat (Token::LeftBrace);
             switch (hd ()) {
@@ -3658,7 +3635,7 @@ use namespace intrinsic;
         /*
 
         CaseLabel
-            case  ListExpression(allowColon,allowIn)
+            case  CommaExpression(allowColon,allowIn)
             default  :
 
         */
@@ -3669,7 +3646,7 @@ use namespace intrinsic;
             switch (hd ()) {
             case Token::Case:
                 next();
-                expr = listExpression (allowIn);
+                expr = commaExpression (allowIn);
                 break;
             case Token::Default:
                 next();
@@ -3684,7 +3661,7 @@ use namespace intrinsic;
 
         function throwStatement () : Ast::Stmt {
             eat (Token::Throw);
-            return new Ast::ThrowStmt( listExpression (allowIn) );
+            return new Ast::ThrowStmt( commaExpression (allowIn) );
         }
 
         function tryStatement () : Ast::Stmt {
@@ -3740,7 +3717,7 @@ use namespace intrinsic;
 
             eat (Token::With);
             cx.topFunction().uses_with = true;
-            var expr = parenListExpression ();
+            var expr = parenCommaExpression ();
             var body = substatement (omega);
             return new Ast::WithStmt (expr, body);
         }
@@ -3774,13 +3751,13 @@ use namespace intrinsic;
         /*
 
         TypedExpression
-            ParenListExpression
-            ParenListExpression  :  NullableTypeExpression
+            ParenCommaExpression
+            ParenCommaExpression  :  NullableTypeExpression
 
         */
 
         function typedExpression () : [Ast::EXPR,Ast::TYPE_EXPR] {
-            var expr = parenListExpression ();
+            var expr = parenCommaExpression ();
             var texpr = null;
             switch (hd ()) {
             case Token::Colon:
@@ -3851,7 +3828,7 @@ use namespace intrinsic;
             case Ast::letConstTag:
             case Ast::letVarTag:
                 cx.addLetFixtures (fxtrs);
-                var stmts = [new Ast::ExprStmt (new Ast::ListExpr(exprs))];
+                var stmts = [new Ast::ExprStmt (exprListToCommaExpr(exprs))];
                 break;
             default:
                 switch (tau) {
@@ -3862,7 +3839,7 @@ use namespace intrinsic;
                     break;
                 default:
                     cx.addVarFixtures (fxtrs);
-                    var stmts = [new Ast::ExprStmt (new Ast::ListExpr(exprs))];
+                    var stmts = [new Ast::ExprStmt (exprListToCommaExpr(exprs))];
                     break;
                 }
             }
@@ -5120,7 +5097,7 @@ use namespace intrinsic;
                 // Fall through if not label
 
             default:  // label, attribute, or expr statement
-                nd1 = listExpression (allowIn);
+                nd1 = commaExpression (allowIn);
                 switch (hd ()) {
                 case Token::SemiColon:
                     if (tau == interfaceBlk)
@@ -5158,8 +5135,11 @@ use namespace intrinsic;
                         case Token::Interface:
                         case Token::Namespace:
                         case Token::Type:
-                            // FIXME check ns attr
-                            let ie = nd1.Ast::exprs[0].Ast::ident;  
+                            if (!(nd1 is Ast::LexicalRef))
+                                Parse::syntaxError(this, "Namespace or attribute name required here, not " + nd1);
+                            // FIXME check that the namespace part was not present.
+                            // FIXME there has got to be a cleaner way
+                            let ie = nd1.Ast::ident;  
                             var attrs = defaultAttrs ();
                             attrs.ns = cx.evalIdentExprToNamespace (ie);
                             nd1 = annotatableDirective (tau,omega,attrs);

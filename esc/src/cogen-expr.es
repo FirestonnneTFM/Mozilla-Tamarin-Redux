@@ -102,7 +102,6 @@
         case (e:ObjectRef) { cgObjectRef(ctx, e) }
         case (e:LexicalRef) { cgLexicalRef(ctx, e) }
         case (e:SetExpr) { cgSetExpr(ctx, e) }
-        case (e:ListExpr) { cgListExpr(ctx, e) }
         case (e:InitExpr) { cgInitExpr(ctx, e) }
         case (e:SliceExpr) { cgSliceExpr(ctx, e) }
         case (e:GetTemp) { cgGetTempExpr(ctx, e) }
@@ -150,6 +149,11 @@
             cgExpr(ctx, e.e2);
             asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
             asm.I_label(L0);
+        }
+        else if (e.op == commaOp) {
+            cgExpr(ctx, e.e1);
+            asm.I_pop();
+            cgExpr(ctx, e.e2);
         }
         else {
             cgExpr(ctx, e.e1);
@@ -714,15 +718,6 @@
             }
             asm.I_getlocal(t);
             asm.killTemp(t);
-        }
-    }
-
-    function cgListExpr(ctx, e) {
-        let asm = ctx.asm;
-        for ( let i=0, limit=e.exprs.length ; i < limit ; i++ ) {
-            cgExpr(ctx, e.exprs[i]);
-            if (i < limit-1)
-                asm.I_pop();
         }
     }
 
