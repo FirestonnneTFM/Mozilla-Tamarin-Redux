@@ -109,9 +109,6 @@ namespace Emit;
                 case (int_ns:IntrinsicNamespace) {
                     return constants.namespace(CONSTANT_Namespace, constants.stringUtf8("intrinsic"));  // FIXME
                 }
-                case (on:OperatorNamespace) {
-                    internalError("", 0, "Unimplemented namespace OperatorNamespace"); // FIXME: source pos
-                }
                 case (pn:PrivateNamespace) {
                     return constants.namespace(CONSTANT_PrivateNamespace, constants.stringUtf8(pn.name));
                 }
@@ -176,7 +173,7 @@ namespace Emit;
                     case( lr:LexicalRef ) {
                         // Hack to deal with namespaces for now...
                         // later we will have to implement a namespace lookup to resolve qualified typenames
-                        return qname({ns:new AnonymousNamespace(lr.ident.ident), id:qi.ident}, false)
+                        return qname(new Ast::Name(new AnonymousNamespace(lr.ident.ident), qi.ident), false)
                     }
                     case( e:* ) {
                         internalError("", 0, "Unimplemented: nameFromIdentExpr " + e); // FIXME: source pos
@@ -256,7 +253,7 @@ namespace Emit;
                 return qname(pn.name, false);
             }
             case (tn:TempName) {
-                return qname ({ns:Ast::noNS,id:"$t"+tn.index},false);  // FIXME allocate and access actual temps
+                return qname (new Ast::Name(Ast::noNS, "$t"+tn.index),false);  // FIXME allocate and access actual temps
             }
             case (x:*) { 
                 internalError("", 0, "Not a valid fixture name " + x); // FIXME source pos
@@ -356,8 +353,8 @@ namespace Emit;
             return new Emit::Class(this, name, basename, interfaces, flags, protectedns);
         }
 
-        public function newInterface(name, interfaces) {
-            return new Emit::Interface(this, name, interfaces);
+        public function newInterface(ifacename, methname, interfaces) {
+            return new Emit::Interface(this, ifacename, methname, interfaces);
         }
 
         public function addException(e) {
@@ -437,26 +434,27 @@ namespace Emit;
 
     class Interface
     {
-        public var script, name, interfaces, traits=[];
+        public var script, ifacename, methname, interfaces, traits=[];
 
-        function Interface(script, name, interfaces) 
+        function Interface(script, ifacename, methname, interfaces) 
             : script=script
-            , name=name
+            , ifacename=ifacename
+            , methname=methname
             , interfaces=interfaces 
         {}
 
         public function finalize() {
             var clsinfo = new ABCClassInfo();
 
-            var iinit = new Instance(script, name, 0, interfaces, CONSTANT_ClassInterface|CONSTANT_ClassSealed);
-            var cinit = (new Method(script.e, [], name, false, new Ast::FuncAttr(null))).finalize();
+            var iinit = new Instance(script, ifacename, 0, interfaces, CONSTANT_ClassInterface|CONSTANT_ClassSealed);
+            var cinit = (new Method(script.e, [], methname, false, new Ast::FuncAttr(null))).finalize();
             clsinfo.setCInit(cinit);
             for(let i = 0; i < traits.length; ++i)
                 clsinfo.addTrait(traits[i]);
 
             var clsidx = script.e.file.addClass(clsinfo);
             
-            var iinitm = new Method(script.e, [], name, false, new Ast::FuncAttr(null), true);
+            var iinitm = new Method(script.e, [], methname, false, new Ast::FuncAttr(null), true);
             iinit.setIInit(iinitm.finalize());
             iinit.finalize();
 

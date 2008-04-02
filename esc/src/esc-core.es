@@ -39,8 +39,6 @@
 {
     use default namespace ESC;
 
-    var booted = false;
-
     function readFile(fn) {
         import avmplus.*;
         return File.read (fn);
@@ -56,12 +54,8 @@
         return System.argv;
     }
 	
-    function getTopFixtures() {
-        use namespace Ast;
-
-        var nd = Decode::program (esc_env);    // esc_env is defined in esc-env.es (within ESC namespace)
-        return nd.head.fixtures;
-    }
+    function getTopFixtures()
+        ESC::bootstrap_namespaces;    // in esc-env.es
 
     function compile(consume, produce, context) {
         use namespace Parse;
@@ -81,6 +75,8 @@
         return [t2-t1, t3-t2];
     }
 
+    // Compilation entry points
+
     function compileFile(fname)
         compile( function () { return ESC::readFile(fname) },
                  function (abc) { return dumpABCFile(abc, fname + ".abc") },
@@ -96,4 +92,23 @@
         compile( function () { return input },
                  function (abc) { return ESC::loadBytes(abc.getBytes()) },
                  context );
+
+    // AST encoding and decoding entry points
+
+    function parseFromStringAndEncodeAst(input, context="string input"): String {
+        use namespace Parse;
+
+        var parser = new Parser( input, getTopFixtures(), context );
+        var program = parser.program();
+        return (new Ast::Serializer()).serialize(program);
+    }
+
+    function parseFromFileAndEncodeAst(fname)
+        parseFromStringAndEncodeAst(ESC::readFile(fname), fname);
+
+    function decodeAstFromString(input): Ast::Program
+        (new Ast::Unserializer()).unserializeText(input);
+
+    function decodeAstFromFile(fname)
+        decodeAstFromString(ESC::readFile(fname));
 }

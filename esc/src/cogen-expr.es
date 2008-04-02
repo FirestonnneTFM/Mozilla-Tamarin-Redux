@@ -76,15 +76,12 @@
     use namespace Emit;
     use namespace Ast;
 
+    var lastline = -1;
+
     function cgExpr(ctx, e) {
-        // Hack until we get inheritance working: these expression
-        // forms have a 'pos' field.
-        if (e is LiteralExpr ||
-            e is CallExpr || 
-            e is ObjectRef || 
-            e is LexicalRef || 
-            e is SetExpr) {
-            cgDebugInfo(ctx, e.pos);
+        if (emit_debug && e.pos > 0 && e.pos != lastline) {
+            ctx.asm.I_debugline(e.pos);
+            lastline = e.pos;
         }
         switch type (e) {
         case (e:TernaryExpr) { cgTernaryExpr(ctx, e) }
@@ -95,7 +92,7 @@
         case (e:ThisExpr) { cgThisExpr(ctx, e) }
         case (e:YieldExpr) { cgYieldExpr(ctx, e) }
         case (e:SuperExpr) { 
-            Gen::syntaxError(ctx, "SuperExpr can't appear here");
+            Gen::syntaxError(ctx, "A 'super' expression can't appear here");
         }
         case (e:LiteralExpr) { cgLiteralExpr(ctx, e) }
         case (e:CallExpr) { cgCallExpr(ctx, e) }
@@ -117,18 +114,6 @@
         }
     }
 
-    var lastline = -1;
-    function cgDebugInfo(ctx, p) {
-        //do debugging stuff
-        if( p && emit_debug) {
-            let asm = ctx.asm;
-            if( p.line >= 0  && p.line != lastline) {
-                asm.I_debugline(p.line);
-                lastline = p.line;
-            }
-        }
-    }
-    
     function cgTernaryExpr(ctx, { e1: test, e2: consequent, e3: alternate }) {
         let asm = ctx.asm;
         cgExpr(ctx, test);
@@ -144,7 +129,7 @@
 
     function cgBinaryExpr(ctx, e) {
         let asm = ctx.asm;
-        if (e.op is LogicalAnd) {
+        if (e.op == logicalAndOp) {
             cgExpr(ctx, e.e1);
             asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
             asm.I_dup();
@@ -155,7 +140,7 @@
             asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
             asm.I_label(L0);
         }
-        else if (e.op is LogicalOr) {
+        else if (e.op == logicalOrOp) {
             cgExpr(ctx, e.e1);
             asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
             asm.I_dup();
@@ -169,31 +154,29 @@
         else {
             cgExpr(ctx, e.e1);
             cgExpr(ctx, e.e2);
-            switch type (e.op) {
-            case (e:Plus) { asm.I_add() }
-            case (e:Minus) { asm.I_subtract() }
-            case (e:Times) { asm.I_multiply() }
-            case (e:Divide) { asm.I_divide() }
-            case (e:Remainder) { asm.I_modulo() }
-            case (e:LeftShift) { asm.I_lshift() }
-            case (e:RightShift) { asm.I_rshift() }
-            case (e:RightShiftUnsigned) { asm.I_urshift() }
-            case (e:BitwiseAnd) { asm.I_bitand() }
-            case (e:BitwiseOr) { asm.I_bitor() }
-            case (e:BitwiseXor) { asm.I_bitxor() }
-            case (e:InstanceOf) { asm.I_instanceof() }
-            case (e:In) { asm.I_in() }
-            case (e:Equal) { asm.I_equals() }
-            case (e:NotEqual) { asm.I_equals(); asm.I_not() }
-            case (e:StrictEqual) { asm.I_strictequals() }
-            case (e:StrictNotEqual) { asm.I_strictequals(); asm.I_not() }
-            case (e:Less) { asm.I_lessthan() }
-            case (e:LessOrEqual) { asm.I_lessequals() }
-            case (e:Greater) { asm.I_greaterthan() }
-            case (e:GreaterOrEqual) { asm.I_greaterequals() }
-            case (e:*) { 
-                Gen::internalError(ctx, "Unimplemented binary operator " + e);
-            }
+            switch (e.op) {
+            case plusOp:               asm.I_add(); break;
+            case minusOp:              asm.I_subtract(); break;
+            case timesOp:              asm.I_multiply(); break;
+            case divideOp:             asm.I_divide(); break;
+            case remainderOp:          asm.I_modulo(); break;
+            case leftShiftOp:          asm.I_lshift(); break;
+            case rightShiftOp:         asm.I_rshift(); break;
+            case rightShiftUnsignedOp: asm.I_urshift(); break;
+            case bitwiseAndOp:         asm.I_bitand(); break;
+            case bitwiseOrOp:          asm.I_bitor(); break;
+            case bitwiseXorOp:         asm.I_bitxor(); break;
+            case instanceOfOp:         asm.I_instanceof(); break;
+            case inOp:                 asm.I_in(); break;
+            case equalOp:              asm.I_equals(); break;
+            case notEqualOp:           asm.I_equals(); asm.I_not(); break;
+            case strictEqualOp:        asm.I_strictequals(); break;
+            case strictNotEqualOp:     asm.I_strictequals(); asm.I_not(); break;
+            case lessOp:               asm.I_lessthan(); break;
+            case lessOrEqualOp:        asm.I_lessequals(); break;
+            case greaterOp:            asm.I_greaterthan(); break;
+            case greaterOrEqualOp:     asm.I_greaterequals(); break;
+            default:                   Gen::internalError(ctx, "Unimplemented binary operator " + e);
             }
         }
     }
@@ -202,8 +185,8 @@
 
     function cgBinaryTypeExpr(ctx, e) {
         let asm = ctx.asm;
-        switch type (e.op) {
-        case (op:CastOp) {
+        switch (e.op) {
+        case castOp: {
             // ES4 'cast'.
             //
             // OPTIMIZEME.  This would benefit from an "OP_coercelate"
@@ -228,8 +211,9 @@
             asm.I_throw();
             asm.I_label(L0);
             asm.I_coerce_a();
+            break;
         }
-        case (op:IsOp) { 
+        case isOp: { 
             // ES4 'is'.
             //
             // OPTIMIZEME.  Early-bind the right hand side if possible
@@ -238,10 +222,10 @@
             cgExpr(ctx, e.e1);
             cgTypeExprHelper(ctx, e.e2);
             asm.I_istypelate();
+            break;
         }
-        case (op:*) { 
+        default:
             Gen::internalError(ctx, "Unimplemented binary type operator " + op);
-        }
         }
     }
 
@@ -265,18 +249,16 @@
     }
 
     function cgUnaryExpr(ctx, e) {
-        var {asm:asm, emitter:emitter} = ctx;
+        let {asm:asm, emitter:emitter} = ctx;
 
-        switch type (e.op) {
-        case (op:Delete) {
+        switch (e.op) {
+        case deleteOp: {
             switch type (e.e1) {
             case (lr:LexicalRef) {
-                //let name = cgIdentExpr(ctx, lr.ident);
                 asm.I_findproperty(cgIdentExpr(ctx, lr.ident));
                 asm.I_deleteproperty(cgIdentExpr(ctx, lr.ident));
             }
             case (or:ObjectRef) {
-                //let name = cgIdentExpr(ctx, or.ident);
                 cgExpr(ctx, or.base);
                 asm.I_deleteproperty(cgIdentExpr(ctx, or.ident));
             }
@@ -286,13 +268,16 @@
                 asm.I_pushtrue();
             }
             }
+            break;
         }
-        case (op:Void) {
+
+        case voidOp:
             cgExpr(ctx, e.e1);
             asm.I_pop();
             asm.I_pushundefined();
-        }
-        case (op:Typeof) {
+            break;
+
+        case typeOfOp:
             if (e.e1 is LexicalRef) {
                 asm.I_findproperty(cgIdentExpr(ctx, e.e1.ident));
                 asm.I_getproperty(cgIdentExpr(ctx, e.e1.ident));
@@ -300,30 +285,46 @@
             else 
                 cgExpr(ctx, e.e1);
             asm.I_typeof();
-        }
-        case (op:PreIncr) { incdec(true, true) }
-        case (op:PreDecr) { incdec(true, false) }
-        case (op:PostIncr) { incdec(false, true) }
-        case (op:PostDecr) { incdec(false, false) }
-        case (op:UnaryPlus) {
+            break;
+
+        case preIncrOp: 
+            incdec(true, true); 
+            break;
+
+        case preDecrOp: 
+            incdec(true, false); 
+            break;
+
+        case postIncrOp: 
+            incdec(false, true); 
+            break;
+
+        case postDecrOp: 
+            incdec(false, false); 
+            break;
+
+        case unaryPlusOp:
             cgExpr(ctx, e.e1);
             asm.I_convert_d();
-        }
-        case (op:UnaryMinus) {
+            break;
+
+        case unaryMinusOp:
             cgExpr(ctx, e.e1);
             asm.I_negate();
-        }
-        case (op:BitwiseNot) {
+            break;
+
+        case bitwiseNotOp:
             cgExpr(ctx, e.e1);
             asm.I_bitnot();
-        }
-        case (op:LogicalNot) {
+            break;
+
+        case logicalNotOp:
             cgExpr(ctx, e.e1);
             asm.I_not();
-        }
-        case (op:*) {
+            break;
+
+        default:
             Gen::internalError(ctx, "Unimplemented unary operation " + op);
-        }
         }
 
         function incdec(pre, inc) {
@@ -417,7 +418,7 @@
         for ( let i=0 ; i < nargs ; i++ )
             cgExpr(ctx, e.args[i]);
 
-        var L_skipcall;
+        let L_skipcall;
 
         if (isEval) {
             // Code performs 'eval', cleans the stack, and jumps to L0
@@ -468,14 +469,14 @@
     // ESC::evalCompiler() returns the result of the evaluation.
 
     function cgEvalPrefix(ctx, evalTmp, nargs) {
-        var asm = ctx.asm;
-        var nons = [[new Ast::ReservedNamespace(Ast::noNS)]];
-        var id_ESC = new Ast::Identifier("ESC", nons); // Needs to be open namespaces??
-        var id_evaluateInScopeArray = new Ast::QualifiedIdentifier(new Ast::LexicalRef(id_ESC), "evaluateInScopeArray");
+        let asm = ctx.asm;
+        let nons = [[new Ast::ReservedNamespace(Ast::noNS)]];
+        let id_ESC = new Ast::Identifier("ESC", nons); // Needs to be open namespaces??
+        let id_evaluateInScopeArray = new Ast::QualifiedIdentifier(new Ast::LexicalRef(id_ESC), "evaluateInScopeArray");
 
         // Check it: Is this *really* the eval operator?
 
-        var L_normalcall = undefined;
+        let L_normalcall = undefined;
 
         /* FIXME: The following sanity tests only work when getglobalscope returns the object 
            that actually holds the global variables.  Bugzilla 417342.
@@ -631,7 +632,7 @@
         case (lhs:LexicalRef) {
             //name = cgIdentExpr(ctx, lhs.ident);
             name = lhs.ident;
-            if (e.op is Assign)
+            if (e.op == assignOp)
                 asm.I_findproperty(cgIdentExpr(ctx, lhs.ident));
             else
                 asm.I_findpropstrict(cgIdentExpr(ctx, lhs.ident));
@@ -641,7 +642,7 @@
         }
         }
 
-        if (e.op is AssignLogicalAnd) {
+        if (e.op == assignLogicalAndOp) {
             asm.I_dup();
             asm.I_getproperty(cgIdentExpr(ctx, name));
             let L0 = asm.I_iffalse(undefined);
@@ -650,7 +651,7 @@
             asm.I_label(L0);
             asm.I_setproperty(cgIdentExpr(ctx, name));  // Always store it; the effect is observable
         }
-        else if (e.op is AssignLogicalOr) {
+        else if (e.op == assignLogicalOrOp) {
             asm.I_dup();
             asm.I_getproperty(cgIdentExpr(ctx, name));
             let L0 = asm.I_iftrue(undefined);
@@ -661,7 +662,7 @@
         }
         else {
             let t = asm.getTemp();
-            if (e.op is Assign) {
+            if (e.op == assignOp) {
                 let use_once_name = cgIdentExpr(ctx, name);
                 cgExpr(ctx, e.re);
                 asm.I_dup();
@@ -686,21 +687,19 @@
                     propname = cgIdentExpr(ctx, name);
                 }
                 cgExpr(ctx, e.re);
-                switch type (e.op) {
-                case (op:AssignPlus) { asm.I_add() }
-                case (op:AssignMinus) { asm.I_subtract() }
-                case (op:AssignTimes) { asm.I_multiply() }
-                case (op:AssignDivide) { asm.I_divide() }
-                case (op:AssignRemainder) { asm.I_modulo() }
-                case (op:AssignLeftShift) { asm.I_lshift() }
-                case (op:AssignRightShift) { asm.I_rshift() }
-                case (op:AssignRightShiftUnsigned) { asm.I_urshift() }
-                case (op:AssignBitwiseAnd) { asm.I_bitand() }
-                case (op:AssignBitwiseOr) { asm.I_bitor() }
-                case (op:AssignBitwiseXor) { asm.I_bitxor() }
-                case (op:*) { 
-                    Gen::internalError(ctx, "ASSIGNOP not supported " + op);
-                }
+                switch (e.op) {
+                case assignPlusOp:                asm.I_add(); break;
+                case assignMinusOp:               asm.I_subtract(); break;
+                case assignTimesOp:               asm.I_multiply(); break;
+                case assignDivideOp:              asm.I_divide(); break;
+                case assignRemainderOp:           asm.I_modulo(); break;
+                case assignLeftShiftOp:           asm.I_lshift(); break;
+                case assignRightShiftOp:          asm.I_rshift(); break;
+                case assignRightShiftUnsignedOp:  asm.I_urshift(); break;
+                case assignBitwiseAndOp:          asm.I_bitand(); break;
+                case assignBitwiseOrOp:           asm.I_bitor(); break;
+                case assignBitwiseXorOp:          asm.I_bitxor(); break;
+                default:                          Gen::internalError(ctx, "ASSIGNOP not supported " + op);
                 }
                 asm.I_dup();
                 asm.I_setlocal(t);
@@ -731,12 +730,10 @@
         let asm = ctx.asm;
         let baseOnStk = false;
 //        cgHead(ctx, e.head);
-        switch type (e.target) {
-        case (i:InstanceInit ) {
+        if (e.target == instanceInit) {
             // Load this on the stack
             asm.I_getlocal(0);
             baseOnStk = true;
-        }
         }
         cgInits(ctx, e.inits, baseOnStk);
         asm.I_pushundefined(); // exprs need to leave something on the stack
@@ -881,8 +878,8 @@
 
     function cgGetTempExpr(ctx, e) {
         // FIXME
-        let{asm:asm, emitter:emitter} = ctx;
-        var qn = emitter.qname ({ns:Ast::noNS,id:"$t"+e.n},false);
+        let {asm:asm, emitter:emitter} = ctx;
+        let qn = emitter.qname (new Ast::Name(Ast::noNS, "$t"+e.n), false);
         asm.I_findpropstrict(qn);
         asm.I_getproperty(qn);
     }
@@ -907,7 +904,7 @@
                     case( lr:LexicalRef ) {
                         // Hack to deal with namespaces for now...
                         // later we will have to implement a namespace lookup to resolve qualified typenames
-                        return emitter.qname({ns:new PublicNamespace(lr.ident.ident), id:qi.ident},false)
+                        return emitter.qname(new Ast::Name(new PublicNamespace(lr.ident.ident), qi.ident),false)
                     }
                     case( e:* ) {
                         /// cgExpr(ctx, qi.qual);

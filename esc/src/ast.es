@@ -44,15 +44,9 @@ public namespace Ast
     use default namespace Ast;
     //    use namespace intrinsic;
 
-    // POS
-    //
-    // Source location information.
-    //
-    // This representation is heavyweight for ES4 but may be required
-    // to support "include" as in AS3, since that may introduce new
-    // filenames everywhere.
-
-    type POS = { line : int /* , filename: String */ };
+    // Bug 425467 that this needs to be public
+    public interface ISerializable {
+    }
 
     // BASIC TYPES
 
@@ -61,553 +55,414 @@ public namespace Ast
 
     type HEAD = Head;
 
-    class Head {
-        use default namespace public;  // TRAC should default namespace nest
-        const fixtures: FIXTURES;  
-        const exprs // : EXPRS;
+    class Head implements ISerializable {
+        public const fixtures: FIXTURES;  
+        public const exprs: EXPRS;
         function Head (fixtures,exprs)
-            : fixtures = fixtures
-            , exprs = exprs { }
+            : fixtures=fixtures
+            , exprs=exprs {}
+
+        function serialize(s)
+            s.sClass(this, "Head", "fixtures", "exprs");
     }
 
-    type FIXTURE_NAME =
-       ( TempName
-       | PropName )
+    // FIXME
+    public interface IFixtureName {
+    }
 
-    class TempName {
+    class TempName implements IFixtureName, ISerializable {
         const index : int;
-        function TempName (index)
-            : index = index {}
+        function TempName (index) : index=index {}
+
+        function serialize(s)
+            s.sClass(this, "TempName", "index");
     }
 
-    class PropName {
-        const name /*: NAME*/;
-        function PropName(name) 
-            : name=name { }
+    class PropName implements IFixtureName, ISerializable {
+        const name: Name;
+        function PropName(name) : name=name {}
+
+        function serialize(s)
+            s.sClass(this, "PropName", "name");
     }
 
-    type FIXTURE_BINDING = [FIXTURE_NAME,FIXTURE];
+    type FIXTURE_BINDING = [IFixtureName,Fixture];
     type FIXTURES = [FIXTURE_BINDING];
 
-    type INIT_BINDING = [FIXTURE_NAME,EXPR]
+    type INIT_BINDING = [IFixtureName,Expr]
     type INITS = [INIT_BINDING];
 
-    type NAMES = [NAME];
-    type NAME =
-       { ns: NAMESPACE
-       , id: IDENT }
+    type NAMES = [Name];
 
-    type MULTINAME =
-       { nss: [[NAMESPACE]]
-       , id: IDENT }
+    class Name implements ISerializable {
+        public const ns;
+        public const id;
+        function Name(ns, id) : ns=ns, id=id {}
+     
+        function serialize(s)
+            s.sClass(this, "Name", "ns", "id");
+    }
 
-    // NAMESPACE
+    // Namespace
 
-    type NAMESPACES = [NAMESPACE];
+    public interface INamespace {
+    }
 
-    type NAMESPACE =
-       ( IntrinsicNamespace
-       | PrivateNamespace
-       | ProtectedNamespace
-       | PublicNamespace
-       | InternalNamespace
-       | UserNamespace
-       | AnonymousNamespace
-       | ImportNamespace );
+    type NAMESPACES = [INamespace];
 
-    type RESERVED_NAMESPACE =
-       ( IntrinsicNamespace
-       | PrivateNamespace
-       | ProtectedNamespace
-       | PublicNamespace
-       | InternalNamespace );
-
-    class IntrinsicNamespace {
+    class IntrinsicNamespace implements INamespace, ISerializable {
         function hash () { return "intrinsic"; }
+
+        function serialize(s)
+            s.sClass(this, "IntrinsicNamespace");
     }
 
-    class OperatorNamespace {
-        function hash () { return "operator"; }
-    }
-
-    class PrivateNamespace {
+    class PrivateNamespace implements INamespace, ISerializable {
         const name : IDENT
         function PrivateNamespace (name)
             : name = name { }
         function hash () { return "private " + name; }
+
+        function serialize(s)
+            s.sClass(this, "PrivateNamespace", "name");
     }
 
-    class ProtectedNamespace {
+    class ProtectedNamespace implements INamespace, ISerializable {
         const name : IDENT
         function ProtectedNamespace (name)
             : name = name { }
         function hash () { return "protected " + name; }
+
+        function serialize(s)
+            s.sClass(this, "ProtectedNamespace", "name");
     }
 
-    class PublicNamespace {
+    class PublicNamespace implements INamespace, ISerializable {
         const name : IDENT;
         function PublicNamespace (name)
             : name = name { }
         function hash () { return "public " + name; }
+
+        function serialize(s)
+            s.sClass(this, "PublicNamespace", "name");
     }
 
-    class InternalNamespace {
+    class InternalNamespace implements INamespace, ISerializable {
         const name : IDENT;
         function InternalNamespace (name)
             : name = name { }
         function hash () { return "internal " + name; }
+
+        function serialize(s)
+            s.sClass(this, "InternalNamespace", "name");
     }
 
-    class UserNamespace {
+    class UserNamespace implements INamespace, ISerializable {
         const name : IDENT;
         function UserNamespace (name)
             : name = name { }
         function hash () { return "use " + name; }
+
+        function serialize(s)
+            s.sClass(this, "UserNamespace", "name");
     }
 
-    class AnonymousNamespace {
+    class AnonymousNamespace implements INamespace, ISerializable {
         const name : IDENT;
         function AnonymousNamespace (name)
             : name = name { }
         function hash () { return "anon " + name; }
+
+        function serialize(s)
+            s.sClass(this, "AnonymousNamespace", "name");
     }
 
-    class ImportNamespace {
+    class ImportNamespace implements INamespace, ISerializable {
         const ident : IDENT
         const ns : PublicNamespace
+            function ImportNamespace(ident, ns) : ident=ident, ns=ns {}
+
         function hash () { return "import " + ns.hash; }
+
+        function serialize(s)
+            s.sClass(this, "ImportNamespace", "ident", "ns");
     }
 
-    var noNS = new PublicNamespace ("");   // FIXME find better way to express
-
-    // NUMBERS
-
-    type NUMERIC_MODE =
-       { numberType : NUMBER_TYPE
-       , roundingMode: ROUNDING_MODE
-       , precision: int }
-
-    type NUMBER_TYPE =
-       ( DecimalType
-       | DoubleType
-       | IntType
-       | UIntType
-       | NumberType )
-
-    class DecimalType {}
-    class DoubleType {}
-    class IntType {}
-    class UIntType {}
-    class NumberType {}
-
-    type ROUNDING_MODE =
-       ( Ceiling
-       | Floor
-       | Up
-       | Down
-       | HalfUp
-       | HalfDown
-       | HalfEven )
-
-    class Ceiling {}
-    class Floor {}
-    class Up {}
-    class Down {}
-    class HalfUp {}
-    class HalfDown {}
-    class HalfEven {}
-
-    // OPERATORS
+    const noNS = new PublicNamespace ("");
 
     // Binary type operators
 
-    type BINTYOP =
-       ( CastOp
-       | IsOp
-       | ToOp )
+    type BINTYOP = int;
 
-    class CastOp {}
-    class IsOp {}
-    class ToOp {}
+    const castOp = 0;
+    const isOp = 1;
 
-    const castOp = new CastOp;
-    const isOp = new IsOp;
-    const toOp = new ToOp;
+    // Binary arithmetic and logical operators
 
-    // Binary operators
+    type BINOP = int;
 
-    type BINOP =
-       ( Plus
-       | Minus
-       | Times
-       | Divide
-       | Remainder
-       | LeftShift
-       | RightShift
-       | RightShiftUnsigned
-       | BitwiseAnd
-       | BitwiseOr
-       | BitwiseXor
-       | LogicalAnd
-       | LogicalOr
-       | InstanceOf
-       | In
-       | Equal
-       | NotEqual
-       | StrictEqual
-       | StrictNotEqual
-       | Less
-       | LessOrEqual
-       | Greater
-       | GreaterOrEqual )
+    const plusOp = 0;
+    const minusOp = 1;
+    const timesOp = 2;
+    const divideOp = 3;
+    const remainderOp = 4;
+    const leftShiftOp = 5;
+    const rightShiftOp = 6;
+    const rightShiftUnsignedOp = 7;
+    const bitwiseAndOp = 8;
+    const bitwiseOrOp = 9;
+    const bitwiseXorOp = 10;
+    const logicalAndOp = 11;
+    const logicalOrOp = 12;
+    const instanceOfOp = 13;
+    const inOp = 14;
+    const equalOp = 15;
+    const notEqualOp = 16;
+    const strictEqualOp = 17;
+    const strictNotEqualOp = 18;
+    const lessOp = 19;
+    const lessOrEqualOp = 20;
+    const greaterOp = 21;
+    const greaterOrEqualOp = 22;
 
-    class Plus {}
-    class Minus {}
-    class Times {}
-    class Divide {}
-    class Remainder {}
-    class LeftShift {}
-    class RightShift {}
-    class RightShiftUnsigned {}
-    class BitwiseAnd {}
-    class BitwiseOr {}
-    class BitwiseXor {}
-    class LogicalAnd {}
-    class LogicalOr {}
-    class InstanceOf {}
-    class In {}
-    class Equal {}
-    class NotEqual {}
-    class StrictEqual {}
-    class StrictNotEqual {}
-    class Less {}
-    class LessOrEqual {}
-    class Greater {}
-    class GreaterOrEqual {}
+    // Assignment operators
 
-    var plusOp = new Plus;
-    var minusOp = new Minus;
-    var timesOp = new Times;
-    var divideOp = new Divide;
-    var remainderOp = new Remainder;
-    var leftShiftOp = new LeftShift;
-    var rightShiftOp = new RightShift;
-    var rightShiftUnsignedOp = new RightShiftUnsigned;
-    var bitwiseAndOp = new BitwiseAnd;
-    var bitwiseOrOp = new BitwiseOr;
-    var bitwiseXorOp = new BitwiseXor;
-    var logicalAndOp = new LogicalAnd;
-    var logicalOrOp = new LogicalOr;
-    var instanceOfOp = new InstanceOf;
-    var inOp = new In;
-    var equalOp = new Equal;
-    var notEqualOp = new NotEqual;
-    var strictEqualOp = new StrictEqual;
-    var strictNotEqualOp = new StrictNotEqual;
-    var lessOp = new Less;
-    var lessOrEqualOp = new LessOrEqual;
-    var greaterOp = new Greater;
-    var greaterOrEqualOp = new GreaterOrEqual;
+    type ASSIGNOP = int;
 
-    /*
-        ASSIGNOP
-    */
+    const assignOp = 0;
+    const assignPlusOp = 1;
+    const assignMinusOp = 2;
+    const assignTimesOp = 3;
+    const assignDivideOp = 4;
+    const assignRemainderOp = 5;
+    const assignLeftShiftOp = 6;
+    const assignRightShiftOp = 7;
+    const assignRightShiftUnsignedOp = 8;
+    const assignBitwiseAndOp = 9;
+    const assignBitwiseOrOp = 10;
+    const assignBitwiseXorOp = 11;
+    const assignLogicalAndOp = 12;
+    const assignLogicalOrOp = 13;
 
-    type ASSIGNOP =
-       ( Assign
-       | AssignPlus
-       | AssignMinus
-       | AssignTimes
-       | AssignDivide
-       | AssignRemainder
-       | AssignLeftShift
-       | AssignRightShift
-       | AssignRightShiftUnsigned
-       | AssignBitwiseAnd
-       | AssignBitwiseOr
-       | AssignBitwiseXor
-       | AssignLogicalAnd
-       | AssignLogicalOr )
+    // Unary arithmetic and logical operators
 
-    class Assign {}
-    class AssignPlus {}
-    class AssignMinus {}
-    class AssignTimes {}
-    class AssignDivide {}
-    class AssignRemainder {}
-    class AssignLeftShift {}
-    class AssignRightShift {}
-    class AssignRightShiftUnsigned {}
-    class AssignBitwiseAnd {}
-    class AssignBitwiseOr {}
-    class AssignBitwiseXor {}
-    class AssignLogicalAnd {}
-    class AssignLogicalOr {}
+    type UNOP = int;
 
-    const assignOp = new Assign;
-    const assignPlusOp = new AssignPlus;
-    const assignMinusOp = new AssignMinus;
-    const assignTimesOp = new AssignTimes;
-    const assignDivideOp = new AssignDivide;
-    const assignRemainderOp = new AssignRemainder;
-    const assignLeftShiftOp = new AssignLeftShift;
-    const assignRightShiftOp = new AssignRightShift;
-    const assignRightShiftUnsignedOp = new AssignRightShiftUnsigned;
-    const assignBitwiseAndOp = new AssignBitwiseAnd;
-    const assignBitwiseOrOp = new AssignBitwiseOr;
-    const assignBitwiseXorOp = new AssignBitwiseXor;
-    const assignLogicalAndOp = new AssignLogicalAnd;
-    const assignLogicalOrOp = new AssignLogicalOr;
-
-    // UNOP
-
-    type UNOP =
-       ( Delete
-       | Void
-       | Typeof
-       | PreIncr
-       | PreDecr
-       | PostIncr
-       | PostDecr
-       | UnaryPlus
-       | UnaryMinus
-       | BitwiseNot
-       | LogicalNot
-       | Type )
-
-    class Delete {}
-    class Void {}
-    class Typeof {}
-    class PreIncr {}
-    class PreDecr {}
-    class PostIncr {}
-    class PostDecr {}
-    class UnaryPlus{}
-    class UnaryMinus {}
-    class BitwiseNot {}
-    class LogicalNot {}
-    class Type {}
-
-    var deleteOp = new Delete;
-    var voidOp = new Void;
-    var typeOfOp = new Typeof;
-    var preIncrOp = new PreIncr;
-    var preDecrOp = new PreDecr;
-    var postIncrOp = new PostIncr;
-    var postDecrOp = new PostDecr;
-    var unaryPlusOp = new UnaryPlus;
-    var unaryMinusOp = new UnaryMinus;
-    var bitwiseNotOp = new BitwiseNot;
-    var logicalNotOp = new LogicalNot;
-    var typeOp = new Type;
+    const deleteOp = 0;
+    const voidOp = 1;
+    const typeOfOp = 2;
+    const preIncrOp = 3;
+    const preDecrOp = 4;
+    const postIncrOp = 5;
+    const postDecrOp = 6;
+    const unaryPlusOp = 7;
+    const unaryMinusOp = 8;
+    const bitwiseNotOp = 9;
+    const logicalNotOp = 10;
+    const typeOp = 11;
 
     // EXPR
 
-    type EXPRS = [EXPR];
-
-    type EXPR =
-       ( TernaryExpr
-       | BinaryExpr
-       | BinaryTypeExpr
-       | UnaryExpr
-       | TypeExpr
-       | ThisExpr
-       | YieldExpr
-       | SuperExpr
-       | LiteralExpr
-       | CallExpr
-       | ApplyTypeExpr
-       | LetExpr
-       | NewExpr
-       | ObjectRef
-       | LexicalRef
-       | SetExpr
-       | ListExpr
-       | InitExpr
-       | SliceExpr
-       | EvalScopeInitExpr
-       | GetTemp
-       | GetParam )
-
-    class TernaryExpr {
-        const e1 : EXPR
-        const e2 : EXPR
-        const e3 : EXPR
-        function TernaryExpr (e1,e2,e3)
-            : e1=e1, e2=e2, e3=e3 {}
+    // Bug 425467 that this needs to be public
+    public class Expr {
+        public var pos: int;
+        function Expr(pos=0) : pos=pos {}
     }
 
-    class BinaryExpr {
+    type EXPRS = [Expr];
+
+    class TernaryExpr extends Expr implements ISerializable {
+        const e1 : Expr
+        const e2 : Expr
+        const e3 : Expr
+        function TernaryExpr (e1,e2,e3) : e1=e1, e2=e2, e3=e3 {}
+
+        function serialize(s)
+            s.sClass(this, "TernaryExpr", "e1", "e2", "e3");
+    }
+
+    class BinaryExpr extends Expr implements ISerializable {
         const op : BINOP
-        const e1 : EXPR
-        const e2 : EXPR
-        function BinaryExpr (op,e1,e2)
-            : op=op, e1=e1, e2=e2 {}
+        const e1 : Expr
+        const e2 : Expr
+        function BinaryExpr (op,e1,e2) : op=op, e1=e1, e2=e2 {}
+
+        function serialize(s)
+            s.sClass(this, "BinaryExpr", "op", "e1", "e2");
     }
 
-    /*
-    class BinaryNumberExpr extends BinaryExpr {
-        const mode : NUMERIC_MODE;
-        function BinaryNumberExpr (op,e1,e2,mode)
-            : mode = mode, super (op,e1,e2) {}
-    }
-    */
-
-    class BinaryTypeExpr {
+    class BinaryTypeExpr extends Expr implements ISerializable {
         const op : BINTYOP
-        const e1 : EXPR
+        const e1 : Expr
         const e2 : TYPE_EXPR
-        function BinaryTypeExpr (op,e1,e2)
-            : op=op, e1=e1, e2=e2 {}
+        function BinaryTypeExpr (op,e1,e2) : op=op, e1=e1, e2=e2 {}
+
+        function serialize(s)
+            s.sClass(this, "BinaryTypeExpr", "op", "e1", "e2");
     }
 
-    class UnaryExpr {
+    class UnaryExpr extends Expr implements ISerializable {
         const op : UNOP;
-        const e1 : EXPR;
-        function UnaryExpr (op,e1)
-            : op=op, e1=e1 {}
+        const e1 : Expr;
+        function UnaryExpr (op,e1) : op=op, e1=e1 {}
+
+        function serialize(s)
+            s.sClass(this, "UnaryExpr", "op", "e1");
     }
 
-    /*
-    class UnaryNumberExpr extends UnaryExpr {
-        const mode : NUMERIC_MODE;
-        function UnaryNumberExpr (op,ex,mode)
-            : mode = mode, super (op,ex) {}
-    }
-    */
-
-    class TypeExpr {
+    // FIXME: ex => expr
+    class TypeExpr extends Expr implements ISerializable {
         const ex : TYPE_EXPR;
-        function TypeExpr (ex)
-            : ex=ex {}
+        function TypeExpr (ex) : ex=ex {}
+
+        function serialize(s)
+            s.sClass(this, "TypeExpr", "ex");
     }
 
-    class ThisExpr {
+    class ThisExpr extends Expr implements ISerializable {
+        function serialize(s)
+            s.sClass(this, "ThisExpr");
     }
 
-    class YieldExpr {
-        const ex : EXPR?;
-        function YieldExpr (ex=null)
-            : ex=ex {}
+    // FIXME: ex => expr
+    class YieldExpr extends Expr implements ISerializable {
+        const ex : Expr?;
+        function YieldExpr (ex=null) : ex=ex {}
+
+        function serialize(s)
+            s.sClass(this, "YieldExpr", "ex");
     }
 
-    class SuperExpr {
-        const ex : EXPR?;
-        function SuperExpr (ex=null)
-            : ex=ex {}
+    // FIXME: ex => expr
+    class SuperExpr extends Expr implements ISerializable {
+        const ex : Expr?;
+        function SuperExpr (ex=null) : ex=ex {}
+
+        function serialize(s)
+            s.sClass(this, "SuperExpr", "ex");
     }
 
-    class LiteralExpr {
+    class LiteralExpr extends Expr implements ISerializable {
         const literal : LITERAL;
-        const pos : POS?
-        function LiteralExpr (literal, pos=null)
-            : literal = literal
-            , pos = pos {}
+        function LiteralExpr (literal, pos=0)
+            : literal=literal
+            , super(pos) {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralExpr", "literal", "pos");
     }
 
-    class CallExpr {
-        const expr : EXPR;
+    class CallExpr extends Expr implements ISerializable {
+        const expr : Expr;
         const args : EXPRS;
-        const pos : POS?
-        function CallExpr (expr,args,pos=null)
-            : expr = expr
-            , args = args
-            , pos = pos {}
+        function CallExpr (expr,args,pos=0)
+            : expr=expr
+            , args=args
+            , super(pos) {}
+
+        function serialize(s)
+            s.sClass(this, "CallExpr", "expr", "args", "pos");
     }
 
-    class ApplyTypeExpr {
-        const expr : EXPR;
-        const args : [TYPE_EXPR];
+    class ApplyTypeExpr extends Expr implements ISerializable {
+        const expr : Expr;
+        const args : TYPE_EXPRS;
         function ApplyTypeExpr (expr,args)
-            : expr = expr
-            , args = args {}
+            : expr=expr
+            , args=args {}
+
+        function serialize(s)
+            s.sClass(this, "ApplyTypeExpr", "expr", "args");
     }
 
-    class LetExpr {
+    class LetExpr extends Expr implements ISerializable {
         const head : HEAD;
-        const expr : EXPR;
+        const expr : Expr;
         function LetExpr (head,expr)
             : head = head
             , expr = expr {}
+
+        function serialize(s)
+            s.sClass(this, "LetExpr", "head", "expr");
     }
 
-    class NewExpr {
-        const expr : EXPR;
+    class NewExpr extends Expr implements ISerializable {
+        const expr : Expr;
         const args : EXPRS;
         function NewExpr (expr,args)
             : expr = expr
             , args = args {}
+
+        function serialize(s)
+            s.sClass(this, "NewExpr", "expr", "args");
     }
 
-    class ObjectRef {
-        const base : EXPR;
-        const ident : IDENT_EXPR;
-        const pos : POS?;
-        function ObjectRef (base,ident,pos=null)
+    class ObjectRef extends Expr implements ISerializable {
+        const base : Expr;
+        const ident : IdentExpr;
+        function ObjectRef (base,ident,pos=0)
             : base = base
             , ident = ident
-            , pos = pos { }
+            , super(pos) { }
+
+        function serialize(s)
+            s.sClass(this, "ObjectRef", "base", "ident", "pos");
     }
 
-    class LexicalRef {
-        const ident : IDENT_EXPR;
-        const pos : POS?
-        function LexicalRef (ident, pos=null)
+    class LexicalRef extends Expr implements ISerializable {
+        const ident : IdentExpr;
+        function LexicalRef (ident, pos=0)
             : ident = ident
-            , pos = pos { }
+            , super(pos) { }
+
+        function serialize(s)
+            s.sClass(this, "LexicalRef", "ident", "pos");
     }
 
-    class SetExpr {
+    // FIXME: le? re?
+    class SetExpr extends Expr implements ISerializable {
         const op : ASSIGNOP;
-        const le : EXPR;
-        const re : EXPR;
-        function get pos() : POS? {
-            return le ? le.pos : null;
-        }
-        function SetExpr (op,le,re)
-            : op=op, le=le, re=re {}
+        const le : Expr;
+        const re : Expr;
+        function SetExpr (op,le,re,pos=0)
+            : op=op
+            , le=le
+            , re=re 
+            , super(pos) {}
+
+        function serialize(s)
+            s.sClass(this, "SetExpr", "op", "le", "re");
     }
 
-    /*
-    class SetNumberExpr extends SetExpr {
-        const mode : NUMERIC_MODE;
-        function SetNumberExpr (op,le,re,mode)
-            : mode=mode, super (op,le,re) {}
-    }
-    */
-
-    class ListExpr {
+    class ListExpr extends Expr implements ISerializable {
         const exprs : EXPRS;
         function ListExpr (exprs)
             : exprs=exprs {}
+
+        function serialize(s)
+            s.sClass(this, "ListExpr", "exprs");
     }
 
-    class EvalScopeInitExpr {
+    class EvalScopeInitExpr extends Expr implements ISerializable {
         const index: int;
         const how: String;
         function EvalScopeInitExpr(index, how)
             : index=index
             , how=how
         {}
+
+        function serialize(s)
+            s.sClass(this, "EvalScopeInitExpr", "index", "how");
     }
 
-    type INIT_TARGET =
-       ( VarInit
-       | LetInit
-       | PrototypeInit
-       | InstanceInit )
+    type INIT_TARGET = int;
 
-    class VarInit {}
-    class LetInit {}
-    class PrototypeInit {}
-    class InstanceInit {}
+    const varInit = 0;
+    const letInit = 1;
+    const prototypeInit = 2;
+    const instanceInit = 3;
 
-    const varInit = new VarInit;
-    const letInit = new LetInit;
-    const prototypeInit = new PrototypeInit;
-    const instanceInit = new InstanceInit;
-
-    class InitExpr {
+    class InitExpr extends Expr implements ISerializable {
         const target : INIT_TARGET;
         const head : HEAD;               // for desugaring temporaries
         const inits  //: INITS;
@@ -615,253 +470,320 @@ public namespace Ast
             : target = target
             , head = head
             , inits = inits {}
+
+        function serialize(s)
+            s.sClass(this, "InitExpr", "target", "head", "inits");
     }
 
-    class SliceExpr {
-        const e1 : EXPR;
-        const e2 : EXPR;
-        const e3 : EXPR;
+    class SliceExpr extends Expr implements ISerializable {
+        const e1 : Expr;
+        const e2 : Expr;
+        const e3 : Expr;
+        function SliceExpr(e1, e2, e3)
+            : e1=e1
+            , e2=e2
+            , e3=e3 { }
+
+        function serialize(s)
+            s.sClass(this, "SliceExpr", "e1", "e2", "e3");
     }
 
-    class GetTemp {
+    class GetTemp extends Expr implements ISerializable {
         const n : int;
         function GetTemp (n)
             : n = n {}
+
+        function serialize(s)
+            s.sClass(this, "GetTemp", "n");
     }
 
-    class GetParam {
+    class GetParam extends Expr implements ISerializable {
         const n : int;
         function GetParam (n) 
             : n = n {}
+
+        function serialize(s)
+            s.sClass(this, "GetParam", "n");
     }
 
-    // IDENT_EXPR
+    // IdentExpr
 
-    type IDENT_EXPR =
-       ( Identifier
-       | QualifiedExpression
-       | AttributeIdentifier
-       | ExpressionIdentifier
-       | QualifiedIdentifier
-       | TypeIdentifier
-       | UnresolvedPath
-       | WildcardIdentifier
-       | ReservedNamespace )
+    public interface IIdentExpr {
+    }
 
-    class Identifier {
+    class Identifier extends Expr implements IIdentExpr, ISerializable {
         const ident : IDENT;
         const nss //: NAMESPACES;
         function Identifier (ident,nss)
             : ident = ident
             , nss = nss {}
+
+        function serialize(s)
+            s.sClass(this, "Identifier", "ident", "nss");
     }
 
-    class QualifiedExpression {
-        const qual : EXPR;
-        const expr : EXPR;
+    class QualifiedExpression extends Expr implements IIdentExpr, ISerializable {
+        const qual : Expr;
+        const expr : Expr;
         function QualifiedExpression (qual,expr)
             : qual=qual
             , expr=expr {}
+
+        function serialize(s)
+            s.sClass(this, "QualifiedExpression", "qual", "expr");
     }
 
-    class AttributeIdentifier {
-        const ident : IDENT_EXPR;
+    class AttributeIdentifier extends Expr implements IIdentExpr, ISerializable {
+        const ident : IdentExpr;
         function AttributeIdentifier (ident)
             : ident=ident {}
+
+        function serialize(s)
+            s.sClass(this, "AttributeIdentifier", "ident");
     }
 
-    class ReservedNamespace {
-        const ns: NAMESPACE;
+    class ReservedNamespace extends Expr implements IIdentExpr, ISerializable {
+        const ns: INamespace;
         function ReservedNamespace (ns)
             : ns=ns {}
+
+        function serialize(s)
+            s.sClass(this, "ReservedNamespace", "ns");
     }
 
-    class ExpressionIdentifier {
-        const expr: EXPR;
-        const nss //: [NAMESPACE];
+    class ExpressionIdentifier extends Expr implements IIdentExpr, ISerializable {
+        const expr: Expr;
+        const nss //: [INamespace];
         function ExpressionIdentifier (expr,nss)
             : expr=expr
             , nss = nss { }
+
+        function serialize(s)
+            s.sClass(this, "ExpressionIdentifier", "expr", "nss");
     }
 
-    class QualifiedIdentifier {
-        const qual : EXPR;
+    class QualifiedIdentifier extends Expr implements IIdentExpr, ISerializable {
+        const qual : Expr;
         const ident : IDENT;
         function QualifiedIdentifier (qual,ident)
             : qual=qual
             , ident=ident {}
+
+        function serialize(s)
+            s.sClass(this, "QualifiedIdentifier", "qual", "ident");
     }
 
-    class TypeIdentifier {
-        const ident : IDENT_EXPR;
-        const typeArgs : [TYPE_EXPR];
+    class TypeIdentifier extends Expr implements IIdentExpr, ISerializable {
+        const ident : IdentExpr;
+        const typeArgs : TYPE_EXPRS;
         function TypeIdentifier (ident,typeArgs)
             : ident=ident
             , typeArgs=typeArgs {}
+
+        function serialize(s)
+            s.sClass(this, "TypeIdentifier", "ident", "typeArgs");
     }
 
-    class UnresolvedPath {
-        const path /*: [IDENT] */;
-        const ident : IDENT_EXPR;
+    class UnresolvedPath extends Expr implements IIdentExpr, ISerializable {
+        const path /*: IDENTS */;
+        const ident : IdentExpr;
         function UnresolvedPath (path,ident)
             : path=path
             , ident=ident {}
+
+        function serialize(s)
+            s.sClass(this, "UnresolvedPath", "path", "ident");
     }
 
-    class WildcardIdentifier {}
+    class WildcardIdentifier extends Expr implements IIdentExpr, ISerializable {
+        function serialize(s)
+            s.sClass(this, "WildcardIdentifier");
+    }
 
-    // LITERAL
+    // Literal expressions
 
-    type LITERAL = (
-        LiteralNull |
-        LiteralUndefined |
-        LiteralContextDecimal |
-        LiteralContextDecimalInteger |
-        LiteralContextHexInteger |
-        LiteralDouble |
-        LiteralDecimal |
-        LiteralInt |
-        LiteralUInt |
-        LiteralBoolean |
-        LiteralString |
-        LiteralArray |
-        LiteralXML |
-        LiteralNamespace |
-        LiteralObject |
-        LiteralFunction |
-        LiteralRegExp
-    )
+    public interface ILiteralExpr {
+    }
 
-    class LiteralNull {}
+    class LiteralNull extends Expr implements ILiteralExpr, ISerializable {
+        function serialize(s)
+            s.sClass(this, "LiteralNull");
+    }
 
-    class LiteralUndefined {}
+    class LiteralUndefined extends Expr implements ILiteralExpr, ISerializable {
+        function serialize(s)
+            s.sClass(this, "LiteralUndefined");
+    }
 
-    class LiteralContextDecimal {
+    class LiteralContextDecimal extends Expr implements ILiteralExpr, ISerializable {
         const strValue : String;
         function LiteralContextDecimal (strValue)
             : strValue=strValue {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralNull", "strValue");
     }
 
-    class LiteralContextDecimalInteger {
+    // FIXME: obsolete?
+    class LiteralContextDecimalInteger extends Expr implements ILiteralExpr, ISerializable {
         const strValue : String;
         function LiteralContextDecimalInteger (strValue)
             : strValue=strValue {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralContextDecimalInteger", "strValue");
     }
 
-    class LiteralContextHexInteger {
+    // FIXME: obsolete?
+    class LiteralContextHexInteger extends Expr implements ILiteralExpr, ISerializable {
         const strValue : String;
         function LiteralContextHexInteger (strValue)
             : strValue=strValue {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralContextHexInteger", "strValue");
     }
 
-    class LiteralDouble {
+    class LiteralDouble extends Expr implements ILiteralExpr, ISerializable {
         const doubleValue : Number;
         function LiteralDouble (doubleValue)
             : doubleValue=doubleValue { }
+
+        function serialize(s)
+            s.sClass(this, "LiteralDouble", "doubleValue");
     }
 
-    class LiteralDecimal {
+    class LiteralDecimal extends Expr implements ILiteralExpr, ISerializable {
         const decimalValue : decimal;
         function LiteralDecimal (decimalValue)
             : decimalValue = decimalValue { }
+
+        function serialize(s)
+            s.sClass(this, "LiteralDouble", "decimalValue");
     }
 
-    class LiteralInt {
+    class LiteralInt extends Expr implements ILiteralExpr, ISerializable {
         const intValue : int;
         function LiteralInt(intValue) 
             : intValue=intValue {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralInt", "intValue");
     }
 
-    class LiteralUInt {
+    class LiteralUInt extends Expr implements ILiteralExpr, ISerializable {
         const uintValue : uint;
         function LiteralUInt(uintValue) 
             : uintValue=uintValue {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralUInt", "uintValue");
     }
 
-    class LiteralBoolean {
+    class LiteralBoolean extends Expr implements ILiteralExpr, ISerializable {
         const booleanValue : Boolean;
         function LiteralBoolean(booleanValue) 
             : booleanValue=booleanValue {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralBoolean", "booleanValue");
     }
 
-    class LiteralString {
+    class LiteralString extends Expr implements ILiteralExpr, ISerializable {
         const strValue : String;
         function LiteralString (strValue)
             : strValue = strValue {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralString", "strValue");
     }
 
-    class LiteralArray {
+    class LiteralArray extends Expr implements ILiteralExpr, ISerializable {
         const exprs //: [EXPR];
         const type : TYPE_EXPR;
         function LiteralArray (exprs,ty)
             : exprs = exprs
             , type = ty { }
+
+        function serialize(s)
+            s.sClass(this, "LiteralArray", "exprs", "type");
     }
 
-    class LiteralXML {
-        const exprs : [EXPR];
+    class LiteralXML extends Expr implements ILiteralExpr, ISerializable {
+        const exprs : [Expr];
+        function LiteralXML(exprs) 
+            : exprs = exprs {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralXML", "exprs");
     }
 
-    class LiteralNamespace {
-        const namespaceValue : NAMESPACE;
+    class LiteralNamespace extends Expr implements ILiteralExpr, ISerializable {
+        const namespaceValue : INamespace;
         function LiteralNamespace (namespaceValue)
             : namespaceValue = namespaceValue { }
+
+        function serialize(s)
+            s.sClass(this, "LiteralNamespace", "namespaceValue");
     }
 
-    class LiteralObject {
+    class LiteralObject extends Expr implements ILiteralExpr, ISerializable {
         const fields : LITERAL_FIELDS;
         const type : TYPE_EXPR;
         function LiteralObject (fields, ty)
             : fields = fields
-            , type = ty { }}
+            , type = ty { }
+
+        function serialize(s)
+            s.sClass(this, "LiteralObject", "fields", "type");
+    }
     
     type LITERAL_FIELD = LiteralField;
     type LITERAL_FIELDS = [LiteralField];
 
-    class LiteralField {
+    class LiteralField implements ISerializable {
         const kind: VAR_DEFN_TAG;
-        const ident: IDENT_EXPR;
-        const expr: EXPR;
+        const ident: IdentExpr;
+        const expr: Expr;
         function LiteralField (kind,ident,expr)
             : kind = kind
             , ident = ident
             , expr = expr {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralField", "kind", "ident", "expr");
     }
 
     type FIELD_TYPE = FieldType;
     type FIELD_TYPES = [FIELD_TYPE];
 
-    class LiteralFunction {
+    class LiteralFunction extends Expr implements ILiteralExpr, ISerializable {
         const func : FUNC;
         function LiteralFunction (func)
             : func = func {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralFunction", "func");
     }
 
-    class LiteralRegExp {
+    class LiteralRegExp extends Expr implements ILiteralExpr, ISerializable {
         const src : String;
         function LiteralRegExp(src)
             : src= src {}
+
+        function serialize(s)
+            s.sClass(this, "LiteralRegExp", "src");
     }
 
-    type VAR_DEFN_TAG =
-        ( Const
-        | Var
-        | LetVar
-        | LetConst )
+    type VAR_DEFN_TAG = int;
 
-    class Const {}
-    class Var {}
-    class LetVar {}
-    class LetConst {}
+    const constTag = 0;
+    const varTag = 1;
+    const letVarTag = 2;
+    const letConstTag = 3;
 
-    const constTag = new Const;
-    const varTag = new Var;
-    const letVarTag = new LetVar;
-    const letConstTag = new LetConst;
-
-
-    class VariableDefn {
-        const ns: NAMESPACE;
+    class VariableDefn implements ISerializable {
+        const ns: INamespace;
         const isStatic: Boolean;
         const isPrototype: Boolean;
         const kind: VAR_DEFN_TAG;
@@ -872,16 +794,19 @@ public namespace Ast
             , isPrototype = isPrototype
             , kind = kind
             , bindings = bindings {}
+
+        function serialize(s)
+            s.sClass(this, "VariableDefn", "ns", "isStatic", "isPrototype", "kind", "bindings");
     }
 
     // CLS
 
     type CLS = Cls;
 
-    class Cls {
-        const name //: NAME;
-        const baseName; //: NAME?;
-        const interfaceNames; //: [NAME];
+    class Cls implements ISerializable {
+        const name //: Name;
+        const baseName; //: Name?;
+        const interfaceNames; //: NAMES;
         const protectedns;
         const constructor : CTOR;
         const classHead: HEAD;
@@ -906,50 +831,54 @@ public namespace Ast
             , isDynamic = isDynamic
             , isFinal = isFinal
         {}
+
+        function serialize(s)
+            s.sClass(this, "Cls", 
+                     "name", "baseName", "interfaceNames", "protectedns", "constructor",
+                     "classHead", "instanceHead", "classType", "instanceType", "classBody",
+                     "isDynamic", "isFinal");
     }
 
-    class Interface {
-        const name //: NAME;
-        const interfaceNames; //: [NAME];
+    class Interface implements ISerializable {
+        const name //: Name;
+        const interfaceNames; //: NAMES;
         const instanceHead: HEAD;
         function Interface (name,interfaceNames,instanceHead)
             : name = name
             , interfaceNames = interfaceNames
             , instanceHead = instanceHead
         {}
+
+        function serialize(s)
+            s.sClass(this, "Cls", "name", "interfaceNames", "instanceHead");
     }
 
     // FUNC
 
     type FUNC = Func;
 
-    type FUNC_NAME =
-       { kind : FUNC_NAME_KIND
-       , ident : IDENT }
+    class FuncName implements ISerializable {
+        public const kind: FUNC_NAME_KIND;
+        public const ident: IDENT;
+        function FuncName(kind, ident) : kind=kind, ident=ident {}
 
-    type FUNC_NAME_KIND =
-       ( Ordinary
-       | Operator
-       | Get
-       | Set )
+        function serialize(s)
+            s.sClass(this, "FuncName", "kind", "ident");
+    }
 
-    class Ordinary {}
-    class Operator {}
-    class Get {}
-    class Set {}
+    type FUNC_NAME_KIND = int;
 
-    class FuncAttr {
+    const ordinaryFunction = 0;
+    const getterFunction = 1;
+    const setterFunction = 2;
+
+    class FuncAttr implements ISerializable {
         /* Outer function, or null if the function is at the global
            level (including for class methods). */
         const parent: FuncAttr;
 
         /* Nested functions and function expressions, empty for leaf functions */
         const children;
-
-        function FuncAttr(parent) 
-            : parent = parent
-            , children = []
-        {}
 
         /* True iff identifier "arguments" lexically referenced in function body.
            Note that the parameter list is excluded. */
@@ -980,17 +909,34 @@ public namespace Ast
 
         /* Synthesized: true iff activation object must be reified for any reason */
         var reify_activation = false;
+
+        function FuncAttr(...rest) {
+            if (rest.length == 1) {
+                this.parent = rest[0];
+                this.children = [];
+            }
+            else {
+                // Unserialization.  An ad hoc pass over the AST will (hopefully) take 
+                // care of patching up parent/children.
+                [uses_arguments, uses_eval, uses_rest, uses_with, uses_catch, 
+                 uses_finally, is_native, capture_result, reify_activation] = rest;
+            }
+        }
+
+        function serialize(s)
+            s.sClass(this, "FuncAttr", "uses_arguments", "uses_eval", "uses_rest", "uses_with",
+                     "uses_catch", "uses_finally", "is_native", "capture_result", "reify_activation");
     }
 
-    class Func {
+    class Func implements ISerializable {
         const name //: FUNC_NAME;
         const block: BLOCK;
         const params: HEAD;
-        const vars: HEAD;
-        const defaults: [EXPR];
-        const type /*: FUNC_TYPE*/;    // FIXME: should be able to use 'type' here
-        const attr: FuncAttr;
         const numparams: int;
+        const vars: HEAD;
+        const defaults: EXPRS;
+        const type: ITypeExpr;
+        const attr: FuncAttr;
         function Func (name,block,params,numparams,vars,defaults,ty,attr)
             : name = name
             , block = block
@@ -1000,20 +946,26 @@ public namespace Ast
             , defaults = defaults
             , type = ty
             , attr = attr {}
+
+        function serialize(s)
+            s.sClass(this, "Func", "name", "block", "params", "numparams", "vars", "defaults", "type", "attr");
     }
 
     // CTOR
 
     type CTOR = Ctor;
 
-    class Ctor {
-        const settings : [EXPR];
-        const superArgs : [EXPR];
+    class Ctor implements ISerializable {
+        const settings : EXPRS;
+        const superArgs : EXPRS;
         const func : FUNC;
         function Ctor (settings,superArgs,func)
             : settings = settings
             , superArgs = superArgs
             , func = func {}
+
+        function serialize(s)
+            s.sClass(this, "Ctor", "settings", "superArgs", "func");
     }
 
     // BINDING_INIT
@@ -1022,414 +974,517 @@ public namespace Ast
 
     type BINDING = Binding;
 
-    class Binding {
+    class Binding implements ISerializable {
         const ident : BINDING_IDENT;
         const type : TYPE_EXPR?;
         function Binding (ident,ty)  // FIXME 'type' not allowed as param name in the RI
             : ident = ident
             , type = ty { }
+
+        function serialize(s)
+            s.sClass(this, "Binding", "ident", "type");
     }
 
-    type BINDING_IDENT =
-       ( TempIdent
-       | ParamIdent
-       | PropIdent )
+    public interface IBindingIdent {
+    }
 
-    class TempIdent {
+    class TempIdent implements IBindingIdent, ISerializable {
         const index : int;
         function TempIdent (index)
-            : index = index {}}
-    
+            : index = index {}
 
-    class ParamIdent {
+        function serialize(s)
+            s.sClass(this, "TempIdent", "index");
+    }
+
+    class ParamIdent implements IBindingIdent, ISerializable {
         const index : int;
         function ParamIdent (index)
             : index = index {}
+
+        function serialize(s)
+            s.sClass(this, "ParamIdent", "index");
     }
 
-    class PropIdent {
+    class PropIdent implements IBindingIdent, ISerializable {
         const ident : IDENT;
         function PropIdent (ident)
             : ident = ident { }
+ 
+        function serialize(s)
+            s.sClass(this, "PropIdent", "ident");
     }
 
-    type INIT_STEP =
-       ( InitStep
-       | AssignStep )
+    public interface IInitStep {
+    }
 
-    class InitStep {
+    class InitStep implements IInitStep, ISerializable {
         const ident : BINDING_IDENT;
-        const expr : EXPR;
+        const expr : Expr;
         function InitStep (ident,expr)
             : ident = ident
             , expr = expr { }
+ 
+        function serialize(s)
+            s.sClass(this, "InitStep", "ident", "expr");
     }
 
-    class AssignStep {
-        const le : EXPR;
-        const re : EXPR;
+    class AssignStep implements IInitStep, ISerializable {
+        const le : Expr;
+        const re : Expr;
         function AssignStep (le,re)
             : le = le
             , re = re {}
+
+        function serialize(s)
+            s.sClass(this, "AssignStep", "le", "re");
     }
 
     // FIXTURE
 
-    type FIXTURE = (
-        NamespaceFixture |
-        ClassFixture |
-        InterfaceFixture |
-        TypeVarFixture |
-        TypeFixture |
-        MethodFixture |
-        ValFixture |
-        VirtualValFixture)
-        
-
-    class NamespaceFixture {
-        const ns : NAMESPACE;
-        function NamespaceFixture (ns)
-            : ns = ns {}
+    public interface IFixture {
     }
 
-    class ClassFixture {
+    class NamespaceFixture implements IFixture, ISerializable {
+        const ns : INamespace;
+        function NamespaceFixture (ns)
+            : ns = ns {}
+
+        function serialize(s)
+            s.sClass(this, "NamespaceFixture", "ns");
+    }
+
+    class ClassFixture implements IFixture, ISerializable {
         const cls : CLS;
         function ClassFixture (cls)
             : cls = cls {}
+
+        function serialize(s)
+            s.sClass(this, "ClassFixture", "cls");
     }
 
-    class InterfaceFixture {
+    class InterfaceFixture implements IFixture, ISerializable {
         const iface : Interface;
         function InterfaceFixture (iface)
             : iface = iface {}
+
+        function serialize(s)
+            s.sClass(this, "InterfaceFixture", "iface");
     }
 
-    class TypeVarFixture {}
+    class TypeVarFixture implements IFixture, ISerializable {
+        function serialize(s)
+            s.sClass(this, "TypeVarFixture");
+    }
 
-    class TypeFixture {
+    class TypeFixture implements IFixture, ISerializable {
         const type: TYPE_EXPR;
         function TypeFixture (ty)
             : type = ty {}
+
+        function serialize(s)
+            s.sClass(this, "TypeFixture", "type");
     }
 
-    class MethodFixture {
+    class MethodFixture implements IFixture, ISerializable {
         const func : FUNC;
         const type : TYPE_EXPR;
         const isReadOnly : Boolean;
         const isOverride : Boolean;
         const isFinal : Boolean;
-        function MethodFixture(func, ty, isReadOnly, isOverride, isFinal) :
-            func = func,
-            type = ty,
-            isReadOnly = isReadOnly,
-            isOverride = isOverride,
-            isFinal = isFinal
-        {
-        }
+        function MethodFixture(func, ty, isReadOnly, isOverride, isFinal) 
+            : func = func
+            , type = ty
+            , isReadOnly = isReadOnly
+            , isOverride = isOverride
+            , isFinal = isFinal { }
+
+        function serialize(s)
+            s.sClass(this, "MethodFixture", "func", "type", "isReadOnly", "isOverride", "isFinal");
     }
 
-    class ValFixture {
+    class ValFixture implements IFixture, ISerializable {
         const type : TYPE_EXPR;
         const isReadOnly : Boolean;
-        function ValFixture(ty, isReadOnly) : type=ty, isReadOnly=isReadOnly {}}
-    
+        function ValFixture(ty, isReadOnly) 
+            : type=ty
+            , isReadOnly=isReadOnly {}
 
-    class VirtualValFixture {
+        function serialize(s)
+            s.sClass(this, "ValFixture", "type", "isReadOnly");
+    }
+
+    class VirtualValFixture implements IFixture, ISerializable {
         const type : TYPE_EXPR;
         const getter : FUNC?;
         const setter : FUNC?;
+
+        function VirtualValFixture(ty, getter, setter)
+            : type=ty
+            , getter=getter
+            , setter=setter {}
+
+        function serialize(s)
+            s.sClass(this, "VirtualValFixture", "type", "getter", "setter");
     }
 
     // TYPE_EXPR
 
-    type TYPE_EXPRS = [TYPE_EXPR];
-    type TYPE_EXPR = (
-        SpecialType |
-        UnionType |
-        ArrayType |
-        TypeName |
-        ElementTypeRef |
-        FieldTypeRef |
-        FunctionType |
-        ObjectType |
-        AppType |
-        NullableType |
-        InstanceType |
-        NominalType
-    )
+    public interface ITypeExpr {
+    }
 
-    class SpecialType {
+    type TYPE_EXPRS = [ITypeExpr];
+
+    type SPECIAL_TYPE_KIND = int;
+
+    class SpecialType implements ITypeExpr, ISerializable {
         const kind : SPECIAL_TYPE_KIND;
         function SpecialType(kind) : kind=kind {}
+
+        function serialize(s)
+            s.sConstant("Ast::specialTypes[" + kind + "]");
     }
 
-    type SPECIAL_TYPE_KIND =
-        ( AnyType
-        | NullType
-        | UndefinedType
-        | VoidType )
+    const specialTypes = [new SpecialType(0), 
+                          new SpecialType(1), 
+                          new SpecialType(2), 
+                          new SpecialType(3)];
 
-    class AnyType { function toString() "Any" }
-    class NullType { function toString() "Null" }
-    class UndefinedType { function toString() "Undefined" }
-    class VoidType { function toString() "Void" }
+    const [anyType, nullType, undefinedType, voidType] = specialTypes;
 
-    const anyType = new SpecialType (new AnyType);
-    const nullType = new SpecialType (new NullType);
-    const undefinedType = new SpecialType (new UndefinedType);
-    const voidType = new SpecialType (new VoidType);
+    // These may not be required any more, serialization and
+    // deserialization preserves identity of the special type objects.
 
-    class UnionType {
-        const types : [TYPE_EXPR];
+    function isAnyType(t:ITypeExpr): Boolean
+        t is SpecialType && t.kind == 0;
+
+    function isNullType(t:ITypeExpr): Boolean
+        t is SpecialType && t.kind == 1;
+
+    function isUndefinedType(t:ITypeExpr): Boolean
+        t is SpecialType && t.kind == 2;
+
+    function isVoidType(t:ITypeExpr): Boolean
+        t is SpecialType && t.kind == 3;
+
+    class UnionType implements ITypeExpr, ISerializable {
+        const types : TYPE_EXPRS;
         function UnionType (types)
             : types = types { }
+
+        function serialize(s)
+            s.sClass(this, "UnionType", "types");
     }
 
-    class ArrayType {
+    class ArrayType implements ITypeExpr, ISerializable {
         const types : TYPE_EXPRS;
         function ArrayType (types)
             : types = types { }
+
+        function serialize(s)
+            s.sClass(this, "ArrayType", "types");
     }
 
-    class TypeName {
-        const ident : IDENT_EXPR;
+    class TypeName implements ITypeExpr, ISerializable {
+        const ident : IdentExpr;
         function TypeName (ident)
             : ident = ident {}
+
+        function serialize(s)
+            s.sClass(this, "TypeName", "ident");
     }
 
-    class ElementTypeRef {
+    class ElementTypeRef implements ITypeExpr, ISerializable {
         const base : TYPE_EXPR;
         const index : int;
         function ElementTypeRef (base,index)
             : base = base
             , index = index { }
+
+        function serialize(s)
+            s.sClass(this, "ElementTypeRef", "base", "index");
     }
 
-    class FieldTypeRef {
+    class FieldTypeRef implements ITypeExpr, ISerializable {
         const base : TYPE_EXPR;
-        const ident : IDENT_EXPR;
+        const ident : IdentExpr;
         function FieldTypeRef (base,ident)
             : base = base
             , ident = ident { }
+
+        function serialize(s)
+            s.sClass(this, "FieldTypeRef", "base", "ident");
     }
 
-    class FunctionType {
-        const ftype : FUNC_TYPE;
+    class FunctionType implements ITypeExpr, ISerializable {
+        const ftype /* ??? maybe FUNC_SIG from parse.es, maybe not -- node not in use */;
+        function FunctionType(ftype) : ftype=ftype {}
+
+        function serialize(s) 
+            s.sClass(this, "FunctionType", "ftype");
     }
 
-    type FUNC_TYPE = {
-        typeParams : [IDENT],
-        params: [TYPE_EXPR],
-        result: TYPE_EXPR,
-        thisType: TYPE_EXPR?,
-        hasRest: Boolean,
-        minArgs: int
-    }
-
-    class ObjectType {
+    class ObjectType implements ISerializable {
         const fields : [FIELD_TYPE];
         function ObjectType (fields)
             : fields = fields { }
+
+        function serialize(s)
+            s.sClass(this, "ObjectType", "fields");
     }
 
-    class FieldType {
+    class FieldType implements ISerializable {
         const ident: IDENT;
         const type: TYPE_EXPR;
         function FieldType (ident,ty)
             : ident = ident
             , type = ty {}
+
+        function serializable(s)
+            s.sClass(this, "FieldType", "ident", "type");
     }
 
-    class AppType {
+    class AppType implements ISerializable {
         const base : TYPE_EXPR;
-        const args : [TYPE_EXPR];
+        const args : TYPE_EXPRS;
         function AppType (base,args)
             : base = base
             , args = args { }
+
+        function serializable(s)
+            s.sClass(this, "AppType", "base", "args");
     }
 
-    class NullableType {
+    class NullableType implements ISerializable {
         const type : TYPE_EXPR;
         const isNullable : Boolean;
         function NullableType (ty,isNullable)
             : type = ty
             , isNullable = isNullable { }
+
+        function serialize(s)
+            s.sClass(this, "NullableType", "type", "isNullable");
     }
 
-    class InstanceType {
-        const name : NAME;
-        const typeParams : [IDENT];
+    class InstanceType implements ISerializable {
+        const name : Name;
+        const typeParams : IDENTS;
         const type : TYPE_EXPR;
         const isDynamic : Boolean;
+        function InstanceType(name, typeParams, ty, isDynamic)
+            : name=name
+            , typeParams=typeParams
+            , type=ty
+            , isDynamic=isDynamic
+        { }
+
+        function serialize(s)
+            s.sClass(this, "InstanceType", "name", "typeParams", "type", "isDynamic");
     }
 
-    class NominalType {
-        const name : NAME;
+
+    // Statements
+
+    // Bug 425467 that this needs to be public
+    public interface IStmt {
+        // No common methods, this is just a tag
     }
 
-    // STMTs
+    type STMTS = [Ast::IStmt];
 
-    type STMTS = [STMT];
+    class EmptyStmt implements IStmt, ISerializable {
+        function serialize(s)
+            s.sClass(this, "EmptyStmt");
+    }
 
-    type STMT =
-       ( EmptyStmt
-       | ExprStmt
-       | ForInStmt
-       | ThrowStmt
-       | ReturnStmt
-       | BreakStmt
-       | ContinueStmt
-       | BlockStmt
-       | LabeledStmt
-       | LetStmt
-       | WhileStmt
-       | DoWhileStmt
-       | ForStmt
-       | IfStmt
-       | WithStmt
-       | TryStmt
-       | SwitchStmt
-       | SwitchTypeStmt
-       | DXNStmt )
-
-    class EmptyStmt { }
-
-    class ExprStmt {
-        const expr : EXPR;
+    class ExprStmt implements IStmt, ISerializable {
+        const expr : Expr;
         function ExprStmt (expr)
             : expr = expr {}
+
+        function serialize(s)
+            s.sClass(this, "ExprStmt", "expr");
     }
 
-    class ForInStmt {
+    class ForInStmt implements IStmt, ISerializable {
         const vars : HEAD;
-        const init : EXPR?;
-        const obj  : EXPR;
-        const stmt : STMT;
-        const labels : [IDENT] = [];
+        const init : Expr?;
+        const obj  : Expr;
+        const stmt : IStmt;
         const is_each : boolean;
-        function ForInStmt (vars,init,obj,stmt,is_each=false)
+        const labels : IDENTS;
+        function ForInStmt (vars,init,obj,stmt,is_each=false,labels=null)
             : vars = vars
             , init = init
             , obj = obj
             , stmt = stmt
-            , is_each = is_each {}
+            , is_each = is_each
+            , labels = labels == null ? [] : labels {}
+
+        function serialize(s)
+            s.sClass(this, "ForInStmt", "vars", "init", "obj", "stmt", "is_each", "labels");
     }
 
-    class ThrowStmt {
-        const expr : EXPR;
+    class ThrowStmt implements IStmt, ISerializable {
+        const expr : Expr;
         function ThrowStmt (expr)
             : expr = expr { }
+
+        function serialize(s)
+            s.sClass(this, "ThrowStmt", "expr");
     }
 
-    class ReturnStmt {
-        const expr : EXPR?;
+    class ReturnStmt implements IStmt, ISerializable {
+        const expr : Expr?;
         function ReturnStmt(expr) 
             : expr = expr { }
+
+        function serialize(s)
+            s.sClass(this, "ReturnStmt", "expr");
     }
 
-    class BreakStmt {
+    class BreakStmt implements IStmt, ISerializable {
         const ident : IDENT?;
         function BreakStmt (ident)
             : ident = ident { }
+
+        function serialize(s)
+            s.sClass(this, "BreakStmt", "ident");
     }
 
-    class ContinueStmt {
+    class ContinueStmt implements IStmt, ISerializable {
         const ident : IDENT?;
         function ContinueStmt (ident)
             : ident = ident { }
+
+        function serialize(s)
+            s.sClass(this, "ContinueStmt", "ident");
     }
 
-    class BlockStmt {
+    class BlockStmt implements IStmt, ISerializable {
         const block : BLOCK;
         function BlockStmt (block)
             : block = block {}
+
+        function serialize(s)
+            s.sClass(this, "BlockStmt", "block");
     }
 
-    class LabeledStmt {
+    class LabeledStmt implements IStmt, ISerializable {
         const label : IDENT;
-        const stmt : STMT;
+        const stmt : IStmt;
         function LabeledStmt (label,stmt)
             : label = label
             , stmt = stmt { }
+
+        function serialize(s)
+            s.sClass(this, "LabeledStmt", "label", "stmt");
     }
 
-    class LetStmt {
+    class LetStmt implements IStmt, ISerializable {
         const block : BLOCK;
         function LetStmt (block)
             : block = block {}
+
+        function serialize(s)
+            s.sClass(this, "LetStmt", "block");
     }
 
-    class WhileStmt {
-        const expr : EXPR;
-        const stmt : STMT;
-        const labels : [IDENT] = [];
-        function WhileStmt (expr,stmt)
+    class WhileStmt implements IStmt, ISerializable {
+        const expr : Expr;
+        const stmt : IStmt;
+        const labels : IDENTS;
+        function WhileStmt (expr,stmt,labels=null)
             : expr = expr
-            , stmt = stmt {}
+            , stmt = stmt
+            , labels = labels == null ? [] : labels {}
+
+        function serialize(s)
+            s.sClass(this, "WhileStmt", "expr", "stmt", "labels");
     }
 
-    class DoWhileStmt {
-        const expr : EXPR;
-        const stmt : STMT;
-        const labels : [IDENT] = [];
-        function DoWhileStmt (expr,stmt)
+    class DoWhileStmt implements IStmt, ISerializable {
+        const expr : Expr;
+        const stmt : IStmt;
+        const labels : IDENTS;
+        function DoWhileStmt (expr,stmt,labels=null)
             : expr = expr
-            , stmt = stmt {}
+            , stmt = stmt 
+            , labels = labels == null ? [] : labels {}
+
+        function serialize(s)
+            s.sClass(this, "DoWhileStmt", "expr", "stmt", "labels");
     }
 
-    class ForStmt {
+    class ForStmt implements IStmt, ISerializable {
         const vars : HEAD;
-        const init : EXPR?;
-        const cond : EXPR?;
-        const incr : EXPR?;
-        const stmt : STMT;
-        const labels : [IDENT] = [];
-        function ForStmt (vars,init,cond,incr,stmt)
+        const init : Expr?;
+        const cond : Expr?;
+        const incr : Expr?;
+        const stmt : IStmt;
+        const labels : IDENTS;
+        function ForStmt (vars,init,cond,incr,stmt,labels=null)
             : vars = vars
             , init = init
             , cond = cond
             , incr = incr
-            , stmt = stmt {}
+            , stmt = stmt
+            , labels = labels == null ? [] : labels {}
+
+        function serialize(s)
+            s.sClass(this, "ForStmt", "vars", "init", "cond", "incr", "stmt", "labels");
     }
 
-    class IfStmt {
-        const expr : EXPR;
-        const then : STMT;
-        const elseOpt : STMT?;
+    class IfStmt implements IStmt, ISerializable {
+        const expr : Expr;
+        const then : IStmt;
+        const elseOpt : IStmt?;
         function IfStmt (expr,then,elseOpt)
             : expr = expr
             , then = then
             , elseOpt = elseOpt { }
+
+        function serialize(s)
+            s.sClass(this, "IfStmt", "expr", "cases");
     }
 
-    class SwitchStmt {
-        const expr : EXPR;
+    class SwitchStmt implements IStmt, ISerializable {
+        const expr : Expr;
         const cases : CASES;
         function SwitchStmt (expr, cases)
             : expr = expr
             , cases = cases { }
+
+        function serialize(s)
+            s.sClass(this, "SwitchStmt", "expr", "cases");
     }
 
     type CASE = Case;
     type CASES = [CASE];
 
-    class Case {
-        const expr : EXPR?;  // null for default
+    class Case implements IStmt, ISerializable {
+        const expr : Expr?;  // null for default
         const stmts : STMTS;
         function Case (expr,stmts)
             : expr = expr
             , stmts = stmts { }
+
+        function serialize(s)
+            s.sClass(this, "Case", "expr", "stmts");
     }
 
-    class WithStmt {
-        const expr : EXPR;
-        const stmt : STMT;
+    class WithStmt implements IStmt, ISerializable {
+        const expr : Expr;
+        const stmt : IStmt;
         function WithStmt (expr,stmt)
             : expr = expr
             , stmt = stmt { }
+
+        function serialize(s)
+            s.sClass(this, "WithStmt", "expr", "stmt");
     }
 
-    class TryStmt {
+    class TryStmt implements IStmt, ISerializable {
         const block : BLOCK;
         const catches: CATCHES;
         const finallyBlock: BLOCK?;
@@ -1437,30 +1492,39 @@ public namespace Ast
             : block = block
             , catches = catches
             , finallyBlock = finallyBlock { }
+
+        function serialize(s)
+            s.sClass(this, "TryStmt", "block", "catches", "finallyBlock");
     }
 
-    class SwitchTypeStmt {
-        const expr: EXPR;
+    class SwitchTypeStmt implements IStmt, ISerializable {
+        const expr: Expr;
         const type: TYPE_EXPR;
         const cases: CATCHES;
         function SwitchTypeStmt (expr,ty,cases)
             : expr = expr
             , type = ty
             , cases = cases { }
+
+        function serialize(s)
+            s.sClass(this, "SwitchTypeStmt", "expr", "ty", "cases");
     }
 
     type CATCH = Catch;
     type CATCHES = [CATCH];
 
-    class Catch {
+    class Catch implements ISerializable {
         const param: HEAD;
         const block: BLOCK;
         function Catch (param,block)
             : param = param
             , block = block { }
+
+        function serialize(s)
+            s.sClass(this, "Catch", "param", "block");
     }
 
-    class DXNStmt {
+    class DXNStmt implements IStmt {
     }
 
     /*
@@ -1469,62 +1533,44 @@ public namespace Ast
 
     type BLOCK = Block;
 
-    class Block {
+    class Block implements ISerializable {
         const head: HEAD?;
         const stmts : STMTS;
         function Block (head,stmts)
             : head = head
             , stmts = stmts { }
+
+        function serialize(s) 
+            s.sClass(this, "Block", "head", "stmts");
     }
-
-    type PRAGMAS = [PRAGMA];
-
-    type PRAGMA =
-        ( UseNamespace
-        | UseDefaultNamespace
-        | UseNumber
-        | UseRounding
-        | UsePrecision
-        | UseStrict
-        | UseStandard
-        | Import )
-
-    class UseNamespace {}
-    class UseDefaultNamespace {}
-    class UseNumber {}
-    class UseRounding {}
-    class UsePrecision {}
-    class UseStrict {}
-    class UseStandard {}
-    class Import {}
 
     /*
         PACKAGE
     */
 
-
     type PACKAGE = Package;
     type PACKAGES = [PACKAGE];
 
-    class Package {
-        var name: [IDENT];
+    // FIXME: any reason these properties are var, not const?
+    class Package implements ISerializable {
+        var name: IDENTS;
         var block: BLOCK;
         function Package (name, block)
             : name = name
             , block = block {}
+
+        function serialize(s)
+            s.sClass(this, "Package", "name", "block");
     }
 
     /*
         PROGRAM
     */
 
-    type DIRECTIVES =
-        { pragmas: [PRAGMA]
-          , stmts: STMTS }
-
     type PROGRAM = Program
 
-    class Program {
+    // FIXME: any reason these properties are var, not const?
+    class Program implements ISerializable {
         var packages: PACKAGES;
         var block: BLOCK;
         var head: HEAD;
@@ -1536,12 +1582,171 @@ public namespace Ast
             , head = head
             , attr = attr
             , file = file {}
+
+        function serialize(s)
+            s.sClass(this, "Program", "packages", "block", "head", "attr", "file");
     }
 
-    function test () {
-        print ("testing ast.es");
-        print (new EmptyStmt);
+    class Serializer {
+        public function serialize(obj) {
+            if (obj is ISerializable)
+                return obj.serialize(this);
+
+            if (obj is Array) 
+                return serializeArray(obj, true);
+
+            if (obj is Number || obj is Boolean || obj is int || obj is uint || obj === null || obj === undefined)
+                return String(obj);
+
+            if (obj is String)
+                return "'" + sanitize(obj) + "'";
+
+            throw new Error("Unserializable datum " + obj);
+        }
+
+        function serializeArray(obj, linebreak) {
+            let s = "[";
+            let separator = linebreak ? "\n," : ",";
+            let lastWasOK = true;
+            for ( let i=0, limit=obj.length ; i < limit ; i++ ) {
+                lastWasOK = false;
+                if (i > 0)
+                    s += separator;
+                if (obj.hasOwnProperty(i)) {
+                    lastWasOK = true;
+                    s += serialize(obj[i]);
+                }
+            }
+            if (!lastWasOK)
+                s += separator;
+            s += "]";
+            return s;
+        }
+
+        function sanitize(s) {
+            let r = "";
+            let i = 0;
+            let l = s.length;
+        outer:
+            while (i < l) {
+                let start = i;
+                while (i < l) {
+                    let c = s.charCodeAt(i);
+                    if (c < 32 || 
+                        c == Char::BackSlash || 
+                        c == Char::SingleQuote || 
+                        c == Char::DoubleQuote ||
+                        c == Char::UnicodePS ||
+                        c == Char::UnicodeLS) {
+                        r += s.substring(start, i);
+                        s += uescape(c);
+                        i++;
+                        continue outer;
+                    }
+                    i++;
+                }
+                r += s.substring(start, i);
+            }
+            return r;
+        }
+
+        function uescape(c)
+            "\\u" + (c+0x10000).toString(16).substring(1);
+
+        public function sClass(obj, ...rest) {
+            // The 'ast_layout' is reduced to the class name the day 
+            // Tamarin performs enumeration/itemization in insertion 
+            // order.  If size concerns us (not likely) then we can
+            // compress by maintaining an indexed dictionary of
+            // layout arrays, which is emitted as part of the output.
+
+            let s = "{ 'ast_layout': " + serializeArray(rest, false);
+            for ( let i=1, limit=rest.length ; i < limit ; i++ ) {
+                s += "\n, '" + rest[i] + "': ";
+                s += serialize(obj[rest[i]]);
+            }
+            s += "}";
+            return s;
+        }
+
+        public function sConstant(expr)
+            "{ 'ast_constant': '" + expr + "' }";
     }
 
-    //test();
+    // FIXME I:
+    // The unserializer uses 'eval' for three things:
+    //   - to decode the JSON input (dangerous)
+    //   - to create constructor functions for classes
+    //   - to look up global constant properties
+    //
+    // The latter two could be gotten rid of by using 
+    //
+    //    new Ast::[tag](...desc.map(decode))
+    //
+    // and
+    //
+    //    Ast::[constName]
+    //
+    // respectively (if the serializer cooperates; right now the
+    // constName expression is not a name so that wouldn't work), 
+    // but for that we need bracket syntax and splat to work.
+    //
+    // FIXME II:
+    // The function 'globalEval' should be removed and invocations
+    // of it should be replaced simply by 'global.eval', but that
+    // requires a working notion of 'global' in tamarin.
+
+    class Unserializer {
+        public function unserializeText(s) 
+            decode(globalEval("(" + s + ")"));
+
+        public function unserializeObject(obj) 
+            decode(obj);
+
+        function decode(x) {
+            if (x is Boolean || x is Number || x is int || x is uint || x is String)
+                return x;
+
+            if (x is Array) {
+                for ( let i=0, limit=x.length ; i < limit ; i++ )
+                    if (x.hasOwnProperty(i))
+                        x[i] = decode(x[i]);
+                return x;
+            }
+
+            if (x.hasOwnProperty("ast_layout")) {
+                let desc = x.ast_layout;
+                let tag = desc[0];
+                desc.shift(1);
+                return (getConstructor(tag, desc.length)).apply(null, Util::map(function (n) { return decode(x[n]) }, desc));
+            }
+
+            if (x.hasOwnProperty("ast_constant"))
+                return globalEval(x.ast_constant);
+
+            let s = "{ ";
+            for ( let n in x )
+                if (x.hasOwnProperty(n))
+                    s += "'" + n + "': " + x[n];
+            s += "}";
+            throw new Error("Unknown datum type: object without a tag: " + s);
+        }
+
+        // A map from name to function that constructs instance of name.
+        var constructors = {};
+
+        function getConstructor(name, arity) {
+            if (!constructors.hasOwnProperty(name)) {
+                // FIXME: An array comprehension would be pretty here...
+                let args = [];
+                for ( let i=0 ; i < arity ; i++ )
+                    args.push("_p" + i);
+                constructors[name] = globalEval("(function (" + args + ") { return new Ast::" + name + "(" + args + ") })");
+            }
+            return constructors[name];
+        }
+
+        function globalEval(s)
+            ESC::evaluateInScopeArray([s], [], "");
+    }
 }

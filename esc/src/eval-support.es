@@ -55,6 +55,6 @@
 
     /*
     ESC function eval(...rest)
-        ESC::evalCompiler(rest, "", []);
+        ESC::evalCompiler(rest, [], "");
     */
 }
