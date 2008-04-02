@@ -1402,9 +1402,20 @@ public namespace Lex
                         return makeFloatingLiteral( lexeme() );
                     }
 
-                    octalLiteral ();
-                    return makeIntegerLiteral( parseInt(lexeme(), 8) );
+                    let startIndex = curIndex;
+                    octalDigits(-1);
+                    switch (src.charCodeAt(curIndex) | 0) {
+                    case 56:
+                    case 57:
+                        // Ignore the leading 0 and parse it as decimal.
+                        // Firefox extension; clear error in E262-3.
+                        curIndex = startIndex;
+                        break;
+                    default:
+                        return makeIntegerLiteral( parseInt(lexeme(), 8) );
+                    }
                 }
+                break;
 
             case  46 /* Char::Dot */:
                 curIndex++;
@@ -1412,11 +1423,13 @@ public namespace Lex
                 return makeFloatingLiteral( lexeme() );
 
             default:
-                if (numberLiteralPrime() || src.charCodeAt(curIndex) === 109 /* Char::m */)
-                    return makeFloatingLiteral( lexeme() );
-                else
-                    return makeIntegerLiteral( parseInt(lexeme(), 10) );
+                break;
             }
+
+            if (numberLiteralPrime() || src.charCodeAt(curIndex) === 109 /* Char::m */)
+                return makeFloatingLiteral( lexeme() );
+            else
+                return makeIntegerLiteral( parseInt(lexeme(), 10) );
         }
 
         function makeIntegerLiteral( n ) {
@@ -1499,17 +1512,6 @@ public namespace Lex
             }
             if (!decimalDigits(-1))
                 Lex::syntaxError("Illegal number: missing digits in exponent");
-        }
-
-        function octalLiteral () {
-            if (!octalDigits(-1))
-                Lex::syntaxError("Illegal octal literal: no digits");
-
-            switch (src.charCodeAt(curIndex)) {
-            case  56 /* Char::Eight */:
-            case  57 /* Char::Nine */:
-                Lex::syntaxError("Illegal octal literal: non-octal digit");
-            }
         }
 
         function octalDigits(k): boolean {
