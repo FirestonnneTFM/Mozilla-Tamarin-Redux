@@ -97,6 +97,7 @@
 #endif // UNIX
 
 #ifdef WIN32
+#include <windows.h>
 #include <malloc.h>
 #include <math.h>
 #ifdef AVMPLUS_ARM
@@ -105,7 +106,11 @@ typedef unsigned int uintptr_t;
 #ifdef AVMPLUS_AMD64
 #include <setjmpex.h>
 #endif
+// Newer versions of the Windows SDK set up the intrinsics slightly differently
+// than VC8. Only include intrin.h if the SDK doesn't declare it.
+#ifndef InterlockedBitTestAndSet
 #include <intrin.h>
+#endif
 #include <emmintrin.h>
 #ifdef VTUNE
 #include "JITProfiling.h"
