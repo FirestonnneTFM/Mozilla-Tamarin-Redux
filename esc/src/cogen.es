@@ -94,7 +94,7 @@ namespace Gen;
      * Never construct a CTX by hand, always go through the push* functions
      * near the end of this file.
      */
-    class CTX 
+    dynamic class CTX 
     {
         const asm, stk, target;
 
@@ -118,8 +118,8 @@ namespace Gen;
 
     /* Returns an ABCFile structure */
     function cg(tree: PROGRAM) {
-        var e = new ABCEmitter;
-        var s = e.newScript();
+        let e = new ABCEmitter;
+        let s = e.newScript();
 
         CTX.prototype.emitter = e;
         CTX.prototype.script = s;
@@ -157,7 +157,7 @@ namespace Gen;
     function cgEval(tree: PROGRAM, name: String, scopedesc: String) {
 
         function evalInits() {
-            var d = [];
+            let d = [];
             for ( let i=0 ; i < scopedesc.length ; i++ )
                 d.push(new Ast::EvalScopeInitExpr(i, scopedesc.charAt(i)));
             return d;
@@ -171,8 +171,8 @@ namespace Gen;
                                                                                        new Ast::LexicalRef(new Ast::QualifiedIdentifier(new Ast::LexicalRef(new Ast::Identifier("ESC",[[Ast::noNS]])),
                                                                                                                                         "eval_hook")),
                                                                                        new Ast::LexicalRef(new Ast::Identifier(name, [[Ast::noNS]]))))]),
-                                    new Ast::Head([[new Ast::PropName({ns: Ast::noNS, id: name}),
-                                                    new Ast::MethodFixture(new Ast::Func({kind: new Ast::Ordinary, ident: name},
+                                    new Ast::Head([[new Ast::PropName(new Ast::Name(Ast::noNS, name)),
+                                                    new Ast::MethodFixture(new Ast::Func(new Ast::FuncName(Ast::ordinaryFunction, name),
                                                                                          tree.block,
                                                                                          new Ast::Head([[new Ast::TempName(100000),
                                                                                                          new Ast::ValFixture(Ast::anyType,false)]],
@@ -205,7 +205,7 @@ namespace Gen;
     }
 
     function hasTrait(traits, name, kind) {
-        for(var i = 0, l =traits.length; i < l; i++) {
+        for (let i = 0, l =traits.length; i < l; i++) {
             let t = traits[i];
             if(t.name==name && ((t.kind&15)==kind))
                 return true;
@@ -235,12 +235,10 @@ namespace Gen;
                 else {
                     // target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Method, 0, methidx));
                     let trait_kind = TRAIT_Method;
-                    if (fx.func.name.kind is Get) {
+                    if (fx.func.name.kind == getterFunction) 
                         trait_kind = TRAIT_Getter;
-                    }
-                    else if (fx.func.name.kind is Set) {
+                    else if (fx.func.name.kind == setterFunction)
                         trait_kind = TRAIT_Setter;
-                    }
                     let methattrs = 0;
                     if (fx.isOverride)
                         methattrs |= ATTR_Override;
@@ -259,7 +257,7 @@ namespace Gen;
             }
             else if (fx is NamespaceFixture) {
                 target.addTrait(new ABCSlotTrait(name, 0, true, 0, 
-                                                 emitter.qname({ns:new PublicNamespace(""), id:"Namespace"},false), 
+                                                 emitter.qname(new Ast::Name(Ast::noNS, "Namespace"),false), 
                                                  emitter.namespace(fx.ns), CONSTANT_Namespace));
             }
             else if (fx is TypeFixture) {
@@ -351,7 +349,7 @@ namespace Gen;
         
         inst.setIInit(cgCtor(i_ctx, c.constructor, {fixtures:[],exprs:c.instanceHead.exprs}));
         
-        var clsidx = cls.finalize();
+        let clsidx = cls.finalize();
 
         asm.I_findpropstrict(basename);
         asm.I_getproperty(basename);
@@ -372,7 +370,7 @@ namespace Gen;
         let ifacename = emitter.qname(c.name,false);
         let interfacenames = Util::map(function (n) { return emitter.qname(n,false) }, c.interfaceNames);
 
-        let iface = script.newInterface(ifacename, interfacenames);
+        let iface = script.newInterface(ifacename, ctx.cp.stringUtf8(c.name.id), interfacenames);
         
         let ifaceidx = iface.finalize();
 
@@ -457,7 +455,7 @@ namespace Gen;
     }
 
     function extractFormalTypes(ctx, f:Func) {
-        var {emitter:emitter, script:script} = ctx;
+        let {emitter:emitter, script:script} = ctx;
         function extractType([name,fixture])
             emitter.fixtureTypeToType(fixture);
         
@@ -467,7 +465,7 @@ namespace Gen;
     }
         
     function extractDefaultValues(ctx, f:Func) {
-        var {emitter:emitter, script:script} = ctx;
+        let {emitter:emitter, script:script} = ctx;
         function extractDefaults(expr)
             emitter.defaultExpr(expr);
 
@@ -479,7 +477,7 @@ namespace Gen;
      * Return the function index
      */
     function cgFunc(ctx0, f:FUNC) {
-        var {emitter:emitter,script:script, cp:cp} = ctx0;
+        let {emitter:emitter,script:script, cp:cp} = ctx0;
         let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "function";  // brittle as hell
         let formals_types = extractFormalTypes({emitter:emitter, script:script}, f);
         let name = f.name ? f.name.ident : "";
@@ -548,7 +546,7 @@ namespace Gen;
             //
             // Then initialize it.  It must be done first according to E262-3.
 
-            cgFixtures(ctx, [[new PropName({ns: Ast::noNS, id: "arguments"}), 
+            cgFixtures(ctx, [[new PropName(new Ast::Name(Ast::noNS, "arguments")), 
                               new ValFixture(Ast::anyType, false)]]);
             cgExpr(ctx, new Ast::SetExpr(Ast::assignOp, 
                                          new Ast::LexicalRef(new Ast::Identifier("arguments",[[Ast::noNS]])), 
@@ -613,7 +611,7 @@ namespace Gen;
     // branch to.  "tag" is one of "function", "break", "continue"
 
     function unstructuredControlFlow(ctx, hit, jump, msg) {
-        var {stk:stk, asm:asm} = ctx;
+        let {stk:stk, asm:asm} = ctx;
         while (stk != null) {
             if (hit(stk)) {
                 if (jump)
@@ -643,7 +641,7 @@ namespace Gen;
     }
 
     function restoreScopes(ctx) {
-        var {stk:stk, asm:asm} = ctx;
+        let {stk:stk, asm:asm} = ctx;
         loop(stk);
 
         function loop(stk) {

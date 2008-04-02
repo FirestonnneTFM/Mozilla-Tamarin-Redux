@@ -55,8 +55,8 @@
     System.exit(0);
 
     // "eval" really belongs in the builtins, but OK here for the moment.
-    public function eval(s)
-        ESC::evaluateInScopeArray(s, "", []);
+    public function eval(...args)
+        ESC::evaluateInScopeArray(args, [], "");
 
     function repl() {
         while( true )             {

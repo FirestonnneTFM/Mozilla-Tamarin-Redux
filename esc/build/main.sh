@@ -18,7 +18,6 @@ $ESCBIN/shell \
     $ESCBIN/lex-token.es.abc \
     $ESCBIN/lex-scan.es.abc \
     $ESCBIN/ast.es.abc \
-    $ESCBIN/ast-decode.es.abc \
     $ESCBIN/parse.es.abc \
     $ESCBIN/asm.es.abc \
     $ESCBIN/abc.es.abc \

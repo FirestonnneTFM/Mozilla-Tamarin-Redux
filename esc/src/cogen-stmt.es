@@ -107,7 +107,7 @@
     }
 
     function cgIfStmt(ctx, s) {
-        var {expr:test, then:consequent, elseOpt:alternate} = s;
+        let {expr:test, then:consequent, elseOpt:alternate} = s;
         let asm = ctx.asm;
         cgExpr(ctx, test);
         let L0 = asm.I_iffalse(undefined);
@@ -125,7 +125,7 @@
     // Probable AST bug: should be no fixtures here, you can't define
     // vars in the WHILE head.
     function cgWhileStmt(ctx, s) {
-        var {stmt: stmt, labels: labels, expr: expr} = s;
+        let {stmt: stmt, labels: labels, expr: expr} = s;
         let asm    = ctx.asm;
         let Lbreak = asm.newLabel();
         let Lcont  = asm.I_jump(undefined);
@@ -140,7 +140,7 @@
     // Probable AST bug: should be no fixtures here, you can't define
     // vars in the DO-WHILE head.
     function cgDoWhileStmt(ctx, s) {
-        var {stmt: stmt, labels: labels, expr: expr} = s;
+        let {stmt: stmt, labels: labels, expr: expr} = s;
         let asm    = ctx.asm;
         let Lbreak = asm.newLabel();
         let Lcont  = asm.newLabel();
@@ -153,7 +153,7 @@
     }
 
     function cgForStmt(ctx, s) {
-        var {vars:vars,init:init,cond:cond,incr:incr,stmt:stmt,labels:labels} = s;
+        let {vars:vars,init:init,cond:cond,incr:incr,stmt:stmt,labels:labels} = s;
         // FIXME: fixtures
         // FIXME: code shape?
         let asm = ctx.asm;
@@ -181,7 +181,7 @@
     }
 
     function cgForInStmt(ctx, s) {
-        var {vars:vars,init:init,obj:obj,stmt:stmt,labels:labels,is_each:is_each} = s;
+        let {vars:vars,init:init,obj:obj,stmt:stmt,labels:labels,is_each:is_each} = s;
         // FIXME: fixtures
         // FIXME: code shape?
         let {asm:asm,emitter:emitter} = ctx;
@@ -253,7 +253,7 @@
     }
 
     function cgBreakStmt(ctx, s) {
-        var ident = s.ident;
+        let ident = s.ident;
         function hit (node) {
             return node.tag == "break" && (ident == null || ident == node.label)
         }
@@ -264,7 +264,7 @@
     }
 
     function cgContinueStmt(ctx, s) {
-        var {ident: ident} = s;
+        let {ident: ident} = s;
         function hit(node) {
             return node.tag == "continue" && (ident == null || memberOf(ident, node.labels))
         }
@@ -329,7 +329,7 @@
     //  - ...
 
     function cgSwitchStmt(ctx, s) {
-        var fastswitch = analyzeSwitch(ctx, s);
+        let fastswitch = analyzeSwitch(ctx, s);
         if (!fastswitch)
             cgSwitchStmtSlow(ctx,s);
         else {
@@ -339,11 +339,11 @@
     }
 
     function analyzeSwitch(ctx, s) {
-        var cases = s.cases;
-        var low = Infinity;
-        var high = -Infinity;
-        var count = 0;
-        var has_default = false;
+        let cases = s.cases;
+        let low = Infinity;
+        let high = -Infinity;
+        let count = 0;
+        let has_default = false;
         for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
             let e = cases[i].expr;
             if (e is ListExpr && e.exprs.length == 1) // parser should clean this case up!
@@ -369,7 +369,7 @@
     }
 
     function cgSwitchStmtFast(ctx, s, low, high, has_default) {
-        var {expr:expr, cases:cases} = s;
+        let {expr:expr, cases:cases} = s;
         let asm = ctx.asm;
         let t = asm.getTemp();
 
@@ -398,7 +398,7 @@
         // case (except maybe the default case).  If Lcases[i] is not
         // handled then Lhandled[i] will be false.
 
-        var Lhandled = new Array(Lcases.length);
+        let Lhandled = new Array(Lcases.length);
         for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
             let c = cases[i];
             let e = c.expr;
@@ -464,7 +464,7 @@
     }
 
     function cgSwitchStmtSlow(ctx,s) {
-        var {expr:expr, cases:cases} = s;
+        let {expr:expr, cases:cases} = s;
         let asm = ctx.asm;
         cgExpr(ctx, expr);
         let t = asm.getTemp();
@@ -517,7 +517,7 @@
     }
 
     function cgSwitchTypeStmt(ctx, s) {
-        var {expr:expr, type:type, cases:cases} = s;
+        let {expr:expr, type:type, cases:cases} = s;
         let b = new Block(new Ast::Head([],[]), [new ThrowStmt(expr)]);
 
         let newcases = [];
@@ -525,13 +525,13 @@
         for( let i = 0; i < cases.length; i++ ) {
             newcases.push(cases[i]);
             let [_,f] = cases[i].param.fixtures[0];
-            if (f.type === Ast::anyType)
+            if (Ast::isAnyType(f.type))
                 hasDefault = true;
         }
 
         // Add a catch all case so we don't end up throwing whatever the switch type expr was
         if (!hasDefault) {
-            newcases.push(new Catch(new Head([ [new PropName({ns:new PublicNamespace(""), id:"x"})
+            newcases.push(new Catch(new Head([ [new PropName(new Ast::Name(Ast::noNS, "x"))
                                                ,new ValFixture(Ast::anyType, false) ] ], [])
                                    ,new Block(new Head([],[]), [])));
         }
@@ -539,7 +539,7 @@
     }
     
     function cgWithStmt(ctx, s) {
-        var {expr:expr, stmt:stmt} = s;
+        let {expr:expr, stmt:stmt} = s;
         let asm = ctx.asm;
         let scopereg = asm.getTemp();
 
@@ -647,7 +647,7 @@
         let Lcases = new Array(numvisits);
         asm.I_getlocal(returnreg);
         asm.I_convert_i();
-        var Ldefault = asm.I_lookupswitch(undefined, Lcases);
+        let Ldefault = asm.I_lookupswitch(undefined, Lcases);
         asm.I_label(Ldefault); // Default case is never hit.
         for ( let i=0 ; i < numvisits ; i++ ) {
             asm.I_label(Lcases[i]);
@@ -675,7 +675,7 @@
     }
     
     function cgCatch(ctx, code_start, code_end, Lend, s ) {
-        var {param:param, block:block} = s;
+        let {param:param, block:block} = s;
         let {asm:asm, emitter:emitter, target:target} = ctx;
         
         if( param.fixtures.length != 1 )

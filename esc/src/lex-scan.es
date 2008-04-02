@@ -116,8 +116,8 @@ public namespace Lex
                     let d = src.charCodeAt(curIndex++) | 0;
                     if (d == 10 /* Char::Newline */ ||
                         d == 13 /* Char::CarriageReturn */ ||
-                        d == 0x2028 /* Char::LS */ ||
-                        d == 0x2029 /* Char::PS */)
+                        d == 0x2028 /* Char::UnicodeLS */ ||
+                        d == 0x2029 /* Char::UnicodePS */)
                         Lex::syntaxError("Illegal newline in regexp literal");
                     else if (d == 0 /* Char::Nul */) {
                         if (curIndex == src.length)

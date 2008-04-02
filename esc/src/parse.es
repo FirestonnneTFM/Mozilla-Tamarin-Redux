@@ -166,9 +166,7 @@ use namespace intrinsic;
             ctx = ctx.parser;
         if (ctx is Parser) {
             filename = ctx.scan.filename;
-            let p = ctx.position();
-            if (p != null)
-                position = p.line;
+            position = ctx.position();
         }
         Util::syntaxError(filename, position, msg);
     }
@@ -180,9 +178,7 @@ use namespace intrinsic;
             ctx = ctx.parser;
         if (ctx is Parser) {
             filename = ctx.scan.filename;
-            let p = ctx.position();
-            if (p != null)
-                position = p.line;
+            position = ctx.position();
         }
         Util::internalError(filename, position, msg);
     }
@@ -266,8 +262,10 @@ use namespace intrinsic;
                     //print("hasName ",ns,"::",id);
                     let f2 = getFixture (fxtrs,id,ns);
                     if (f1 is Ast::ValFixture && f2 is Ast::ValFixture) {
-                        if (f1.Ast::type==Ast::anyType) return true;
-                        else if (f2.Ast::type==Ast::anyType) return true;
+                        if (Ast::isAnyType(f1.Ast::type)) 
+                            return true;
+                        if (Ast::isAnyType(f2.Ast::type))
+                            return true;
                         // other positive cases here
                     }
                     Parse::syntaxError(this, "Incompatible fixture redefinition "+fn.id);
@@ -621,11 +619,8 @@ use namespace intrinsic;
         function newline ()
             LP < L0;
 
-        function position () {
-            if (L0 != 0)
-                return { line: L0 };
-            return null;
-        }
+        function position ()
+            L0;
 
         function tokenText(t)
             tokenStore[t].Token::text;
@@ -641,6 +636,14 @@ use namespace intrinsic;
             if (tk !== tc)
                 Parse::syntaxError(this, "Expecting " + tokenText(tc) + " found " + tokenText(tk));
             next ();
+        }
+
+        function match (tc) {
+            let tk = hd ();
+            if (tk !== tc)
+                return false;
+            next ();
+            return true;
         }
 
         function makeIdentifier(id, nss) : Ast::Identifier {
@@ -786,7 +789,7 @@ use namespace intrinsic;
             {
                 switch type (p) : PATTERN {
                 case (p:IdentifierPattern) {
-                    let nm = new Ast::PropName ({ns:ns,id:p.ident});
+                    let nm = new Ast::PropName (new Ast::Name(ns,p.ident));
                     let fx = new Ast::ValFixture (t,ro);
                     var fxtrs = [[nm,fx]];
                     if (e !== null) {
@@ -1684,7 +1687,7 @@ use namespace intrinsic;
                 Parse::internalError(this, "descendents operator not implemented");
                 break;
             default:
-                Parse::internalError("propertyOperator");
+                Parse::internalError("propertyOperator: " + hd());
                 break;
             }
 
@@ -2038,7 +2041,7 @@ use namespace intrinsic;
                 break;
             case Token::Type:
                 next();
-                let nd1 = nullableTypeExpression (beta);
+                let nd1 = nullableTypeExpression ();
                 expr = new Ast::TypeExpr (nd1);
                 break;
             default:
@@ -3232,7 +3235,7 @@ use namespace intrinsic;
 
         */
 
-        function statement (tau: TAU, omega: OMEGA) : Ast::STMT {
+        function statement (tau: TAU, omega: OMEGA) : Ast::Stmt {
             var stmt;
 
             switch (hd()) {
@@ -3293,7 +3296,7 @@ use namespace intrinsic;
             return stmt
         }
 
-        function substatement (omega: OMEGA) : Ast::STMT {
+        function substatement (omega: OMEGA) : Ast::Stmt {
             switch (hd()) {
             case Token::SemiColon:
                 next();
@@ -3340,7 +3343,7 @@ use namespace intrinsic;
             }
         }
 
-        function labeledStatement () : Ast::STMT {
+        function labeledStatement () : Ast::Stmt {
             var label = identifier ();
             eat(Token::Colon);
             var stmt = substatement(FullStmt);
@@ -3374,10 +3377,10 @@ use namespace intrinsic;
             }
         }
 
-        function expressionStatement () : Ast::STMT
+        function expressionStatement () : Ast::Stmt
             new Ast::ExprStmt (listExpression (allowIn));
 
-        function returnStatement () : Ast::STMT {
+        function returnStatement () : Ast::Stmt {
             eat (Token::Return);
 
             var expr;
@@ -3400,10 +3403,10 @@ use namespace intrinsic;
             return new Ast::ReturnStmt (expr);
         }
 
-        function breakStatement () : Ast::STMT
+        function breakStatement () : Ast::Stmt
             new Ast::BreakStmt( breakOrContinueLabel(Token::Break) );
 
-        function continueStatement () : Ast::STMT
+        function continueStatement () : Ast::Stmt
             new Ast::ContinueStmt( breakOrContinueLabel(Token::Continue) );
 
         function breakOrContinueLabel(tok) {
@@ -3425,7 +3428,7 @@ use namespace intrinsic;
             }
         }
 
-        function ifStatement (omega) : Ast::STMT {
+        function ifStatement (omega) : Ast::Stmt {
             var test=null, consequent=null, alternate=null;
 
             eat (Token::If);
@@ -3446,7 +3449,7 @@ use namespace intrinsic;
 
         */
 
-        function whileStatement (omega) : Ast::STMT {
+        function whileStatement (omega) : Ast::Stmt {
             eat (Token::While);
             var test = parenListExpression ();
             var body = substatement (omega); 
@@ -3461,7 +3464,7 @@ use namespace intrinsic;
 
         */
 
-        function doStatement (omega) : Ast::STMT {
+        function doStatement (omega) : Ast::Stmt {
             eat (Token::Do);
             var body = substatement (omega); 
             eat(Token::While);
@@ -3479,7 +3482,7 @@ use namespace intrinsic;
             
         */
 
-        function forStatement (omega: OMEGA) : Ast::STMT {
+        function forStatement (omega: OMEGA) : Ast::Stmt {
             cx.enterLetBlock ();
 
             var is_each = false;
@@ -3608,7 +3611,7 @@ use namespace intrinsic;
 
         */
 
-        function switchStatement () : Ast::STMT {
+        function switchStatement () : Ast::Stmt {
             var expr=null, cases=null;
 
             eat (Token::Switch);
@@ -3679,12 +3682,12 @@ use namespace intrinsic;
             return expr;
         }
 
-        function throwStatement () : Ast::STMT {
+        function throwStatement () : Ast::Stmt {
             eat (Token::Throw);
             return new Ast::ThrowStmt( listExpression (allowIn) );
         }
 
-        function tryStatement () : Ast::STMT {
+        function tryStatement () : Ast::Stmt {
             eat (Token::Try);
 
             var tryblock = block (localBlk);
@@ -3732,7 +3735,7 @@ use namespace intrinsic;
 
         */
 
-        function withStatement (omega: OMEGA) : Ast::STMT {
+        function withStatement (omega: OMEGA) : Ast::Stmt {
             // Only ES3-style with for now
 
             eat (Token::With);
@@ -3756,7 +3759,7 @@ use namespace intrinsic;
 
         */
 
-        function switchTypeStatement () : Ast::STMT {
+        function switchTypeStatement () : Ast::Stmt {
             eat (Token::Switch);
             eat (Token::Type);
             var expr  = typedExpression ();
@@ -4077,7 +4080,7 @@ use namespace intrinsic;
 
         */
 
-        function functionDefinition (tau: TAU, omega: OMEGA, kind, attrs: ATTRS) : Ast::STMTS {
+        function functionDefinition (tau: TAU, omega: OMEGA, attrs: ATTRS) : Ast::STMTS {
             eat (Token::Function);
 
             cx.enterFunction(attrs);
@@ -4103,7 +4106,7 @@ use namespace intrinsic;
             var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,numparams:numparams} = signature;
             var func = new Ast::Func (name, body, params, numparams, vars, defaults, resultType, attr);
 
-            var name = new Ast::PropName ({ns:attrs.ns, id:name.ident});
+            var name = new Ast::PropName (new Ast::Name(attrs.ns, name.ident));
             var fxtr = new Ast::MethodFixture (func, Ast::anyType, true, attrs.override, attrs.final);
             switch (tau) {
             case classBlk:
@@ -4181,7 +4184,14 @@ use namespace intrinsic;
 
             // print ("superArgs=",superArgs);
             // print ("settings=",settings);
-            var func = new Ast::Func ({kind:new Ast::Ordinary,ident:name}, body, params, numparams, vars, defaults, Ast::voidType, attr);
+            var func = new Ast::Func (new Ast::FuncName(Ast::ordinaryFunction, name), 
+                                      body, 
+                                      params, 
+                                      numparams, 
+                                      vars, 
+                                      defaults, 
+                                      Ast::voidType, 
+                                      attr);
             var ctor = new Ast::Ctor (settings,superArgs,func);
 
             if (cx.ctor !== null)
@@ -4212,9 +4222,8 @@ use namespace intrinsic;
           , params : Ast::HEAD
           , paramTypes : [Ast::TYPE_EXPR]
           , defaults : [Ast::EXPR]
-          , returnType : Ast::TYPE_EXPR
+          , resultType : Ast::TYPE_EXPR
           , thisType : Ast::TYPE_EXPR? }
-
 
         function constructorSignature () : CTOR_SIG {
             var nd1 = typeParameters ();
@@ -4277,7 +4286,6 @@ use namespace intrinsic;
             return [settings, superargs];
         }
 
-
         /*
 
         SettingList
@@ -4301,7 +4309,7 @@ use namespace intrinsic;
                 switch (hd ()) {
                 case Token::Comma:
                     eat(Token::Comma);
-                    switch (hd2 ()) {
+                    switch (hd ()) {
                     case Token::Super:
                         // Leave it alone for the caller to consume; super calls are always last.
                         var nd2 = [];
@@ -4355,37 +4363,23 @@ use namespace intrinsic;
 
         FunctionName
             Identifier
-            OverloadedOperator
             get  Identifier
             set  Identifier
 
         */
 
-        function functionName () : Ast::FUNC_NAME {
-            switch (hd ()) {
-            case Token::Get:
-                next();
-                var nd1 = identifier ();
-                var ndx = {kind: new Ast::Get, ident: nd1};
-                break;
-            case Token::Set:
-                next();
-                var nd1 = identifier ();
-                var ndx = {kind: new Ast::Set, ident: nd1};
-                break;
-            case Token::Plus:
-            case Token::Minus:
-                // FIXME add other operators here
-                // Won't be necessary if we don't support operator overloading
-                Parse::internalError(this, "No support for operators as function names");
-                break;
-            default:
-                var nd1 = identifier ();
-                var ndx = {kind: new Ast::Ordinary, ident: nd1};
-                break;
-            }
+        // FIXME: needs to handle plain functions called 'get' and 'set'
+        // FIXME: needs to handle catchalls
 
-            return ndx;
+        function functionName () : Ast::FUNC_NAME {
+            let kind;
+
+            if (match(Token::Get))      kind = Ast::getterFunction;
+            else if (match(Token::Set)) kind = Ast::setterFunction;
+            else                        kind = Ast::ordinaryFunction;
+
+            let ident = identifier();
+            return new Ast::FuncName(kind, ident);
         }
 
         /*
@@ -4403,14 +4397,12 @@ use namespace intrinsic;
         function functionSignature () : FUNC_SIG {
             var nd1 = typeParameters ();
             eat (Token::LeftParen);
-            switch (hd ()) {
-            case Token::This:
+            if (match(Token::This)) {
                 // FIXME implement this
                 Parse::internalError(this, "No support for 'this' annotation in parameter list");
-                break;
-            default:
+            }
+            else {
                 var [nd2,numparams] = parameters ();
-                break;
             }
             eat (Token::RightParen);
             var restype = resultType ();
@@ -4626,12 +4618,12 @@ use namespace intrinsic;
 
         function parameterKind () : Ast::VAR_DEFN_TAG {
             switch (hd ()) {
-            case Ast::Const:
-                eat (Ast::Const);
-                var nd1 = new Ast::Const;
+            case Token::Const:
+                eat (Token::Const);
+                var nd1 = Ast::constTag;
                 break;
             default:
-                var nd1 = new Ast::Var;
+                var nd1 = Ast::varTag;
                 break;
             }
 
@@ -4654,7 +4646,7 @@ use namespace intrinsic;
                 switch (hd ()) {
                 case Token::Void:
                     eat (Token::Void);
-                    var nd1 = new Ast::SpecialType (new Ast::VoidType);
+                    var nd1 = Ast::voidType;
                     break;
                 default:
                     var nd1 = nullableTypeExpression ();
@@ -4701,7 +4693,7 @@ use namespace intrinsic;
             var classid = identifier ();
             var signature = typeSignature ();       // FIXME: not used yet
             var superclass = extendsClause();
-            var superinterfaces = implementsClause();
+            var superinterfaces = interfaceList(Token::Implements);
             var protectedNs = new Ast::ProtectedNamespace (classid);
 
             currentClassName = classid;
@@ -4722,13 +4714,13 @@ use namespace intrinsic;
             
             var baseName;
             if (superclass == null)
-                baseName = {ns: new Ast::PublicNamespace (""), id: "Object"};
+                baseName = new Ast::Name(Ast::noNS, "Object");
             else 
                 baseName = superTypeToName(superclass);
 
             var interfaceNames = Util::map(superTypeToName, superinterfaces);
 
-            var cname = {ns:ns, id:classid};
+            var cname = new Ast::Name(ns, classid);
             var ctype = Ast::anyType;
             var itype = Ast::anyType;
             var cls = new Ast::Cls (cname,
@@ -4756,7 +4748,7 @@ use namespace intrinsic;
             
             var interfaceid = identifier ();
             var signature = typeSignature ();       // FIXME: not used yet
-            var superinterfaces = implementsClause();
+            var superinterfaces = interfaceList(Token::Extends);
 
             currentClassName = "";
 
@@ -4766,7 +4758,7 @@ use namespace intrinsic;
 
             var interfaceNames = Util::map(superTypeToName, superinterfaces);
             
-            var iname = {ns:ns, id:interfaceid};
+            var iname = new Ast::Name(ns, interfaceid);
             var iface = new Ast::Interface(iname, interfaceNames, ihead);
 
             var fxtrs = [[new Ast::PropName(iname), new Ast::InterfaceFixture (iface)]];
@@ -4784,7 +4776,7 @@ use namespace intrinsic;
             let defaults = [];
             let ty = Ast::anyType;
             let attr = cx.exitFunction();
-            let func = new Ast::Func ({kind:new Ast::Ordinary,ident:classname},
+            let func = new Ast::Func (new Ast::FuncName(Ast::ordinaryFunction, classname),
                                       ctorbody,
                                       params,
                                       numparams,
@@ -4798,7 +4790,7 @@ use namespace intrinsic;
         function superTypeToName(s) {
             switch type (s) {
             case (x:Identifier) {
-                return {ns: new Ast::PublicNamespace (""), id: x.ident};
+                return new Ast::Name(Ast::noNS, x.ident);
             }
             case (x:*) {
                 Parse::internalError(this, "Can't handle this base type name " + s);
@@ -4831,21 +4823,15 @@ use namespace intrinsic;
         }
 
         function extendsClause() {
-            if (hd () === Token::Extends) {
-                eat(Token::Extends);
+            if (match(Token::Extends))
                 return primaryName ();
-            }
-            else
-                return null;
+            return null;
         }
 
-        function implementsClause() {
-            if (hd () === Token::Implements) {
-                eat(Token::Implements);
+        function interfaceList(tok) {  // tok is Token::Extends or Token::Implements
+            if (match(tok))
                 return primaryNameList ();
-            }
-            else
-                return [];
+            return [];
         }
 
         function classBody () : Ast::BLOCK
@@ -4881,7 +4867,7 @@ use namespace intrinsic;
             else 
                 nsVal = new Ast::UserNamespace (nd2);
 
-            var name = new Ast::PropName ({ns:ns, id:nd1});
+            var name = new Ast::PropName (new Ast::Name(ns, nd1));
             var fxtr = new Ast::NamespaceFixture (nsVal);
             cx.addVarFixtures ([[name,fxtr]]);
 
@@ -4935,7 +4921,7 @@ use namespace intrinsic;
             var nd2 = nullableTypeExpression ();
             semicolon (omega);
 
-            var name = new Ast::PropName ({ns:ns, id:nd1});
+            var name = new Ast::PropName (new Ast::Name(ns, nd1));
             var fxtr = new Ast::TypeFixture (nd2);
             cx.addVarFixtures ([[name,fxtr]]);
 
@@ -5059,7 +5045,7 @@ use namespace intrinsic;
                 if (isCurrentClassName (lexeme2())) 
                     nd1 = constructorDefinition (omega, cx.pragmas.defaultNamespace, defaultAttrs());
                 else 
-                    nd1 = functionDefinition (tau, omega, new Ast::Var, defaultAttrs());
+                    nd1 = functionDefinition (tau, omega, defaultAttrs());
                 //ts1 = semicolon (ts1,omega);
                 break;
 
@@ -5208,7 +5194,7 @@ use namespace intrinsic;
                 if (isCurrentClassName (lexeme2())) 
                     nd2 = constructorDefinition (omega, attrs.ns, attrs);
                 else 
-                    nd2 = functionDefinition (tau, omega, new Ast::Var, attrs);
+                    nd2 = functionDefinition (tau, omega, attrs);
                 //ts2 = semicolon (ts2,omega);
                 break;
 
@@ -5394,54 +5380,21 @@ use namespace intrinsic;
         }
 
         function pragmaItems () {
-            while (true) {
-                switch (hd ()) {
-                case Token::Decimal:
-                    break;
-                case Token::Namespace:
-                    eat(Token::Namespace);
+            do {
+                if (match(Token::Namespace))
                     cx.openNamespace (primaryName ());
-                    break;
-                case Token::Double:
-                    break;
-                case Token::Int:
-                    break;
-                case Token::Default:
-                    eat(Token::Default);
-                    switch (hd ()) {
-                    case Token::Namespace:
-                        eat(Token::Namespace);
-                        let name = primaryName ();
-                        cx.defaultNamespace (name);
-                        cx.openNamespace (name);
-                        break;
-                    default:
-                        Parse::syntaxError(this, "unexpected token after 'use default'");
-                    }
-                    break;
-                    //            case Token::Number
-                    //                break;
-                case Token::Precision:
-                    break;
-                case Token::Rounding:
-                    break;
-                case Token::Standard:
-                    break;
-                case Token::Strict:
-                    break;
-                case Token::UInt:
-                    break;
-                case Token::Unit:
-                    break;
-                default:
-                    Parse::syntaxError(this, "unknown token in PragmaItem");
+                else if (match(Token::Default)) {
+                    eat(Token::Namespace);
+                    let name = primaryName ();
+                    cx.defaultNamespace (name);
+                    cx.openNamespace (name);
                 }
-
-                if (hd () !== Token::Comma)
-                    break;
-
-                eat (Token::Comma);
-            }
+                else if (match(Token::Strict)) {
+                    // FIXME: turn on strict mode
+                }
+                else
+                    Parse::syntaxError(this, "Unknown token following 'use'");
+            } while (match(Token::Comma));
         }
 
         /*
