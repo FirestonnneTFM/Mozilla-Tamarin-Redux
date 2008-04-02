@@ -41,6 +41,12 @@ using namespace std;
 
 #ifdef OVERRIDE_GLOBAL_NEW
 
+#ifdef __SUNPRO_CC
+#define PRIVATE __hidden
+#else
+#define PRIVATE
+#endif
+
 #ifdef _DEBUG
 int cBlocksAllocated = 0;  // Count of blocks allocated.
 #endif // _DEBUG
@@ -48,7 +54,7 @@ int cBlocksAllocated = 0;  // Count of blocks allocated.
 #ifndef __GNUC__
 
 // User-defined operator new.
-void *operator new(size_t size)
+PRIVATE void *operator new(size_t size)
 {
 	#ifdef _DEBUG
 		cBlocksAllocated++;
@@ -57,7 +63,7 @@ void *operator new(size_t size)
 	return MMgc::FixedMalloc::GetInstance()->Alloc(size);
 }
 
-void *operator new[](size_t size)
+PRIVATE void *operator new[](size_t size)
 {
 	#ifdef _DEBUG
 		cBlocksAllocated++;
@@ -72,7 +78,7 @@ void *operator new[](size_t size)
 // (The fact exceptions aren't on doesn't matter.) - mds, 02/05/04
 void operator delete( void *p) throw()
 #else
-void operator delete( void *p)
+PRIVATE void operator delete( void *p)
 #endif
 {
 	MMgc::FixedMalloc::GetInstance()->Free(p);
@@ -86,7 +92,7 @@ void operator delete( void *p)
 // (The fact exceptions aren't on doesn't matter.) - mds, 02/05/04
 void operator delete[]( void *p) throw()
 #else
-void operator delete[]( void *p )
+PRIVATE void operator delete[]( void *p )
 #endif
 {
 	MMgc::FixedMalloc::GetInstance()->Free(p);

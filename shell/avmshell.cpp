@@ -48,6 +48,12 @@
 extern "C" greg_t _getsp(void);
 #endif
 
+#ifdef __SUNPRO_CC
+#define PRIVATE __hidden
+#else
+#define PRIVATE
+#endif
+
 #ifdef WIN32
 #pragma warning(disable: 4201)
 
@@ -64,7 +70,7 @@ static MMgc::FixedMalloc* fm = NULL;
 // Custom new and delete operators
 // User-defined operator new.
 
-void *operator new(size_t size)
+PRIVATE void *operator new(size_t size)
 {
 	// 10.5 calls new before main
 	if (!fm)
@@ -78,7 +84,7 @@ void *operator new(size_t size)
     return fm->Alloc(size);
 }
 
-void *operator new[](size_t size)
+PRIVATE void *operator new[](size_t size)
 {
 	// 10.5 calls new before main
 	if (!fm)
@@ -98,7 +104,7 @@ void *operator new[](size_t size)
 	// (The fact exceptions aren't on doesn't matter.) - mds, 02/05/04
 	void operator delete( void *p) throw()
 #else
-	void operator delete( void *p)
+PRIVATE	void operator delete( void *p)
 #endif
 	{
 		if (fm)
@@ -110,7 +116,7 @@ void *operator new[](size_t size)
     // (The fact exceptions aren't on doesn't matter.) - mds, 02/05/04
     void operator delete[]( void *p) throw()
 #else
-    void operator delete[]( void *p )
+PRIVATE void operator delete[]( void *p )
 #endif
     {
 		if (fm)
