@@ -71,7 +71,7 @@ def _configGuess():
 def _configSub(ostest, cputest):
     if ostest.startswith('win'):
         os = 'windows'
-    elif ostest == 'darwin':
+    elif ostest.startswith('darwin') or ostest.startswith('apple-darwin'):
         os = 'darwin'
     elif ostest.startswith('linux') or ostest.startswith('pc-linux'):
         os = 'linux'
