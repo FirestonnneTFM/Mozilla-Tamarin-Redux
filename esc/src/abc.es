@@ -223,17 +223,36 @@ namespace Abc;
             return probe;
         }
 
-        public function stringUtf8(s/*FIXME ES4: string*/)/*:uint*/ {
+        public function stringUtf8(s) {
             if (!(s is String))
                 s = s+"";
             var probe = utf8_map.read(s);
             if (probe == 0) {
                 probe = utf8_count++;
                 utf8_map.write(s, probe);
-                utf8_bytes.uint30(s.length);
+                utf8_bytes.uint30(utf8length(s));
                 utf8_bytes.utf8(s);
             }
             return probe;
+        }
+
+        // The virtue of this solution is that it caters to the common
+        // case and does not need to know anything about utf8 apart
+        // from the ASCII range.  The uncommon case can be optimized,
+        // if we care.
+
+        function utf8length(s) {
+            let i;
+            let limit=s.length; 
+
+            for ( i=0 ; i < limit && s.charCodeAt(i) < 128 ; i++ )
+                ;
+            if (i == limit)
+                return limit;
+
+            let bs = new ABCByteStream;
+            bs.utf8(s);
+            return bs.length;
         }
 
         var tmp_namespace = {"kind": 0, "name": 0 };  // avoids allocation when we don't need it
