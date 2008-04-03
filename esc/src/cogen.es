@@ -212,6 +212,15 @@ namespace Gen;
         }
         return false;
     }
+
+    function probeTrait(traits, name) {
+        for (let i=0, limit=traits.length ; i < limit ; i++) {
+            let t = traits[i];
+            if(t.name == name)
+                return [true, t.kind & 15];
+        }
+        return [false, 0];
+    }
     
     function cgFixtures(ctx, fixtures) {
         let { target:target, asm:asm, emitter:emitter } = ctx;
@@ -220,25 +229,37 @@ namespace Gen;
             let name = emitter.fixtureNameToName(fxname);
 
             if (fx is ValFixture) {
-                if( !hasTrait(target.traits, name, TRAIT_Slot) )
+                if (checkTrait(fxname, name, TRAIT_Slot))
                     target.addTrait(new ABCSlotTrait(name, 0, false, 0, emitter.typeFromTypeExpr(fx.type), 0, 0)); 
-                    // FIXME when we have more general support for type annos
+                // FIXME when we have more general support for type annos
             }
             else if (fx is MethodFixture) {
                 let methidx = cgFunc(ctx, fx.func);
                 if (target is Method || target is Script) {
-                    target.addTrait(new ABCSlotTrait(name, 0, false, 0, 0, 0, 0)); 
+                    // Normal function definition
+                    if (checkTrait(fxname, name, TRAIT_Slot))
+                        target.addTrait(new ABCSlotTrait(name, 0, false, 0, 0, 0, 0));
                     asm.I_findpropstrict(name);
                     asm.I_newfunction(methidx);
                     asm.I_setproperty(name);
                 }
                 else {
                     // target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Method, 0, methidx));
-                    let trait_kind = TRAIT_Method;
-                    if (fx.func.name.kind == getterFunction) 
+                    let trait_kind;
+                    if (fx.func.name.kind == getterFunction) {
                         trait_kind = TRAIT_Getter;
-                    else if (fx.func.name.kind == setterFunction)
+                        if (hasTrait(target.traits, name, trait_kind))
+                            dupTrait(fxname, trait_kind, trait_kind);
+                    }
+                    else if (fx.func.name.kind == setterFunction) {
                         trait_kind = TRAIT_Setter;
+                        if (hasTrait(target.traits, name, trait_kind))
+                            dupTrait(fxname, trait_kind, trait_kind);
+                    }
+                    else {
+                        trait_kind = TRAIT_Method;
+                        checkTrait(fxname, name, trait_kind, true);
+                    }
                     let methattrs = 0;
                     if (fx.isOverride)
                         methattrs |= ATTR_Override;
@@ -248,14 +269,17 @@ namespace Gen;
                 }
             }
             else if (fx is ClassFixture) {
+                checkTrait(fxname, name, TRAIT_Slot, true);
                 let clsidx = cgClass(ctx, fx.cls);
                 target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, clsidx));
             }
             else if (fx is InterfaceFixture) {
+                checkTrait(fxname, name, TRAIT_Slot, true);
                 let ifaceidx = cgInterface(ctx, fx.iface);
                 target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, ifaceidx));
             }
             else if (fx is NamespaceFixture) {
+                checkTrait(fxname, name, TRAIT_Slot, true);
                 target.addTrait(new ABCSlotTrait(name, 0, true, 0, 
                                                  emitter.qname(new Ast::Name(Ast::noNS, "Namespace"),false), 
                                                  emitter.namespace(fx.ns), CONSTANT_Namespace));
@@ -266,6 +290,21 @@ namespace Gen;
             else {
                 Gen::internalError(ctx, "Unhandled fixture type " + fx);
             }
+        }
+
+        function checkTrait(fxname, name, kind, unique=false) {
+            let [has_trait, trait_kind] = probeTrait(target.traits, name);
+            if (has_trait && (unique || trait_kind != kind))
+                dupTrait(fxname, kind, trait_kind);
+            return !has_trait;
+        }
+
+        function dupTrait(fxname, newkind, oldkind) {
+            if (newkind != oldkind)
+                Gen::syntaxError(ctx, "Incompatible fixture : name=" + fxname +
+                                 ", newkind=" + newkind + ", oldkind=" + oldkind );
+            else
+                Gen::syntaxError(ctx, "Duplicate fixture : name=" + fxname);
         }
     }
 
