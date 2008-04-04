@@ -1047,6 +1047,8 @@ use namespace intrinsic;
             var id = null;
 
             switch (hd()) {
+            case Token::LeftBracket:
+                return new Ast::QualifiedExpression(qual, brackets());
             case Token::Mult:
                 id = "*";
                 next();
@@ -1056,15 +1058,19 @@ use namespace intrinsic;
                 id = lexeme ();
                 next();
                 break;
-            case Token::LeftBracket:
-                id = brackets ();
-                break;
             default:
                 id = identifier ();
                 break;
             }
 
             return new Ast::QualifiedIdentifier (qual,id);
+        }
+
+        function brackets() {
+            eat(Token::LeftBracket);
+            let expr = commaExpression (allowIn);
+            eat (Token::RightBracket);
+            return expr;
         }
 
         /*
@@ -1677,9 +1683,7 @@ use namespace intrinsic;
                 }
                 break;
             case Token::LeftBracket:
-                next();
-                let index = commaExpression (allowIn);
-                eat (Token::RightBracket);
+                let index = brackets();
                 propref = new Ast::ObjectRef (nd,new Ast::ExpressionIdentifier (index,cx.pragmas.openNamespaces));
                 break;
             case Token::DoubleDot:
