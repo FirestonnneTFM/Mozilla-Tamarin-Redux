@@ -887,30 +887,37 @@
     function cgIdentExpr(ctx, e) {
         let{asm:asm, emitter:emitter} = ctx;
         switch type(e) {
-            case (id:Identifier) {
-                return emitter.multiname(id,false);
+        case (id:Identifier) {
+            return emitter.multiname(id,false);
+        }
+        case (ei:ExpressionIdentifier) {
+            cgExpr(ctx, ei.expr);
+            return emitter.multinameL(ei,false);
+        }
+        case (qi:QualifiedIdentifier) {
+            switch type(qi.qual) {
+            case( lr:LexicalRef ) {
+                // Hack to deal with namespaces for now...
+                // later we will have to implement a namespace lookup to resolve qualified typenames
+                return emitter.qname(new Ast::Name(new PublicNamespace(lr.ident.ident), qi.ident),false);
             }
-            case (ei:ExpressionIdentifier) {
-                cgExpr(ctx, ei.expr);
-                return emitter.multinameL(ei,false);
+            case( e:* ) {
+                /// cgExpr(ctx, qi.qual);
+                /// return emitter.rtqname(qi);
+                Gen::internalError(ctx, "Unsupported form of qualified identifier " + qi);
             }
-            case (qi:QualifiedIdentifier) {
-                switch type(qi.qual) {
-                    case( lr:LexicalRef ) {
-                        // Hack to deal with namespaces for now...
-                        // later we will have to implement a namespace lookup to resolve qualified typenames
-                        return emitter.qname(new Ast::Name(new PublicNamespace(lr.ident.ident), qi.ident),false)
-                    }
-                    case( e:* ) {
-                        /// cgExpr(ctx, qi.qual);
-                        /// return emitter.rtqname(qi);
-                        Gen::internalError(ctx, "Unsupported form of qualified identifier " + qi.ident);
-                    }
-                }
             }
-            case (x:*) { 
-                Gen::internalError(ctx, "Unimplemented cgIdentExpr " + e);
-            }
+        }
+        case (qe:QualifiedExpression) {
+            cgExpr(ctx, qe.qual);
+            ctx.asm.I_coerce(cgIdentExpr(ctx, new Ast::Identifier("Namespace", [[Ast::noNS]])));
+            cgExpr(ctx, qe.expr);
+            ctx.asm.I_coerce_s();
+            return emitter.rtqnameL(false);
+        }
+        case (x:*) { 
+            Gen::internalError(ctx, "Unimplemented cgIdentExpr " + e);
+        }
         }
     }
 }

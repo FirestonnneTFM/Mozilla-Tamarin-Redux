@@ -187,9 +187,11 @@ namespace Emit;
             }
         }
         
-        public function rtqname({ident:ident}, is_attr) {
-            return constants.RTQName(constants.stringUtf8(ident), is_attr);
-        }
+        public function rtqname({ident:ident}, is_attr)
+            constants.RTQName(constants.stringUtf8(ident), is_attr);
+
+        public function rtqnameL(is_attr)
+            constants.RTQNameL(is_attr);
 
         public function typeFromTypeExpr(t) {
             use namespace Ast;
