@@ -47,7 +47,7 @@ from sys import argv, exit
 from getopt import getopt
 from itertools import count
 from subprocess import PIPE,STDOUT
-from killableprocess import Popen
+from util.killableprocess import Popen
 
 verbose = False
 timestamps = True
