@@ -134,7 +134,7 @@ function getTestCases() {
         array[item++] = new TestCase( SECTION, DateString+".getFullYear()",         LocalDate.year,       DateCase.getFullYear() );
         array[item++] = new TestCase( SECTION, DateString+".getMonth()",            LocalDate.month,      DateCase.getMonth() );
 	
-	//Allow for DST variation on different platforms (osx) - https://bugs.adobe.com/jira/browse/ASC-2829
+	//Allow for DST variation on different platforms (osx) - https://bugzilla.mozilla.org/show_bug.cgi?id=401898
 	var date = DateCase.getDate();
 	if (LocalDate.date == (date+1)) date++;
         array[item++] = new TestCase( SECTION, DateString+".getDate()",             LocalDate.date,       date);

@@ -470,8 +470,6 @@ namespace avmplus
 				continue;
 			}
 
-            int decimalParam = AvmCore::defaultDecimalParam;
-
 			switch (opcode)
 			{
 			case OP_iflt:
@@ -604,13 +602,7 @@ namespace avmplus
 			case OP_pushnan:
 				checkStack(0,1);
 				if (mir) mir->emitDoubleConst(state, sp+1, (double*)(core->kNaN & ~7));
-				state->push(DOUBLE_TYPE, true);
-				break;
-
-			case OP_pushdnan:
-				checkStack(0,1);
-				if (mir) mir->emitIntConst(state, sp+1, (uintptr)(core->special_decimal[AvmCore::sd_NaN]));
-				state->push(DECIMAL_TYPE, true);
+				state->push(NUMBER_TYPE, true);
 				break;
 
 			case OP_pushshort:
@@ -711,25 +703,6 @@ namespace avmplus
 				}
 				break;
 			}
-			case OP_pushdecimal: 
-			{
-				checkStack(0,1);
-				uint32 index = imm30;
-				if (index > 0 && index < pool->constantDecimalCount)
-				{
-					if (mir)
-					{
-						DecimalRep* p = pool->cpool_decimal[index];
-						mir->emitIntConst(state, sp+1, (uintptr)p);
-					}
-					state->push(DECIMAL_TYPE, true);
-				}
-				else
-				{
-					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantDecimalCount));
-				}
-				break;
-			}
 			case OP_pushdouble: 
 			{
 				checkStack(0,1);
@@ -741,7 +714,7 @@ namespace avmplus
 						double* p = pool->cpool_double[index];
 						mir->emitDoubleConst(state, sp+1, p);
 					}
-					state->push(DOUBLE_TYPE, true);
+					state->push(NUMBER_TYPE, true);
 				}
 				else
 				{
@@ -825,73 +798,17 @@ namespace avmplus
 				break;
 			}
 
-			case OP_inclocal_p:
-			case OP_declocal_p:
-				decimalParam = imm30;
-				imm30 = imm30b; 
 			case OP_inclocal:
 			case OP_declocal:
 			{
 				//checkStack(0,0);
-
-                Value& operand = checkLocal(imm30);
-				Traits* optraits = operand.traits;
-                int delta = ((opcode == OP_inclocal) || (opcode == OP_inclocal_p))? 1 : -1;
-				if (optraits && optraits->isNumeric) {
-					AvmCore::NumberUsage usage = (AvmCore::NumberUsage) (decimalParam & 0x7);
-					if (mir) {
-						switch (usage) {
-						case AvmCore::use_decimal:
-						case AvmCore::use_Number:
-							if ((usage == AvmCore::use_decimal) || (optraits == DECIMAL_TYPE)) {
-								emitCoerce(DECIMAL_TYPE, imm30);
-								mir->emit(state, OP_inclocal, imm30, delta, DECIMAL_TYPE, decimalParam);
-								break;
-							}
-							// else fall into double case
-						case AvmCore::use_double:
-							emitCoerce(DOUBLE_TYPE, imm30);
-							mir->emit(state, OP_inclocal_d, imm30, delta, DOUBLE_TYPE);
-							break;
-						case AvmCore::use_int:
-						case AvmCore::use_uint:
-						{
-							Traits* optype = (usage == AvmCore::use_int)? INT_TYPE : UINT_TYPE;
-							emitCoerce(optype, imm30);
-							mir->emit(state, OP_inclocal_i, imm30, delta, optype);
-							break;
-						}
-						}
-					}
-					Traits* restraits;
-					switch (usage) {
-					case AvmCore::use_decimal:
-					case AvmCore::use_Number:
-						if ((usage == AvmCore::use_decimal) || (optraits == DECIMAL_TYPE)) {
-							restraits = DECIMAL_TYPE;
-							break;
-						}
-					case AvmCore::use_double:
-						restraits = DOUBLE_TYPE;
-						break;
-					case AvmCore::use_int:
-						restraits = INT_TYPE;
-						break;
-					case AvmCore::use_uint:
-						restraits = UINT_TYPE;
-						break;
-					default:
-						AvmAssert(false);
-					}
-                    // RES do we need to tell someone that local at imm30 has type restraits?
+				checkLocal(imm30);
+				emitCoerce(NUMBER_TYPE, imm30);
+				if (mir)
+				{
+					mir->emit(state, opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE);
 				}
-				else {
-					// don't know the type, call general case function
-					if (mir) {
-						mir->emit(state, opcode, imm30, delta, OBJECT_TYPE, decimalParam);
-					}
-                }
-                break;
+				break;
 			}
 
 			case OP_inclocal_i:
@@ -1319,7 +1236,7 @@ namespace avmplus
 			case OP_coerce_d:
 			{
 				checkStack(1,1);
-				emitCoerce(DOUBLE_TYPE, sp);
+				emitCoerce(NUMBER_TYPE, sp);
 				break;
 			}
 
@@ -1327,15 +1244,6 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(STRING_TYPE, sp);
-				break;
-			}
-
-			case OP_convert_m_p:			// the compiler currently doesn't implement either of these
-				decimalParam = imm30;
-			case OP_convert_m:
-			{
-				checkStack(1,1);
-				emitCoerce(DECIMAL_TYPE, sp);
 				break;
 			}
 
@@ -1570,26 +1478,6 @@ namespace avmplus
 					else if (slotType == core->traits.number_ctraits)
 					{
 						emitCoerce(NUMBER_TYPE, sp);
-						Value v = state->stackTop();
-						state->pop();
-						state->stackTop() = v;
-						if (opcode == OP_callpropvoid)
-							state->pop();
-						break;
-					}
-					else if (slotType == core->traits.double_ctraits)
-					{
-						emitCoerce(DOUBLE_TYPE, sp);
-						Value v = state->stackTop();
-						state->pop();
-						state->stackTop() = v;
-						if (opcode == OP_callpropvoid)
-							state->pop();
-						break;
-					}
-					else if (slotType == core->traits.decimal_ctraits)
-					{
-						emitCoerce(DECIMAL_TYPE, sp);
 						Value v = state->stackTop();
 						state->pop();
 						state->stackTop() = v;
@@ -2171,8 +2059,6 @@ namespace avmplus
 				state->pop_push(1, BOOLEAN_TYPE);
 				break;
 
-			case OP_add_p: 
-                decimalParam = imm30;
 			case OP_add: 
 			{
 				checkStack(2,1);
@@ -2186,7 +2072,7 @@ namespace avmplus
 					{
 						emitToString(OP_convert_s, sp-1);
 						emitToString(OP_convert_s, sp);
-						mir->emit(state, OP_concat, 0, 0, STRING_TYPE, decimalParam);
+						mir->emit(state, OP_concat, 0, 0, STRING_TYPE);
 					}
 					state->pop_push(2, STRING_TYPE, true);
 				}
@@ -2194,282 +2080,47 @@ namespace avmplus
 				{
 					if (mir)
 					{
-						AvmCore::NumberUsage usage = (AvmCore::NumberUsage) (decimalParam & 0x7);
-                        /* this has become more complicated because of decimal and use <numbertype> */
-                        switch (usage) {
-                        case AvmCore::use_decimal:
-                        case AvmCore::use_Number:
-                            if ((usage == AvmCore::use_decimal) || (lhst == DECIMAL_TYPE) || (rhst == DECIMAL_TYPE)) {
-                                emitCoerce(DECIMAL_TYPE, sp-1);
-                                emitCoerce(DECIMAL_TYPE, sp);
-                                mir->emit(state, OP_add, 0, 0, DECIMAL_TYPE, decimalParam); // will call add2
-                                break;
-                            }
-                            // otherwise for now fall into double case
-                            // we know type is numeric.  There are existing optimizations for int in CodegenMIR
-                        case AvmCore::use_double:
-                            emitCoerce(DOUBLE_TYPE, sp-1);
-                            emitCoerce(DOUBLE_TYPE, sp);
-                            mir->emit(state, OP_add_d, 0, 0, DOUBLE_TYPE);
-                            break;
-                        case AvmCore::use_int:  
-                        case AvmCore::use_uint:
-							Traits* optype = (usage == AvmCore::use_int)? INT_TYPE : UINT_TYPE;
-                            emitCoerce(optype, sp-1);
-                            emitCoerce(optype, sp);
-                            mir->emit(state, OP_add_i, 0, 0, optype);
-                            break;
-                        }
+						emitCoerce(NUMBER_TYPE, sp-1);
+						emitCoerce(NUMBER_TYPE, sp);
+						mir->emit(state, OP_add_d, 0, 0, NUMBER_TYPE);
 					}
-					if (lhst == DECIMAL_TYPE || rhst == DECIMAL_TYPE)
-						state->pop_push(2, DECIMAL_TYPE);
-					else
-						state->pop_push(2, DOUBLE_TYPE);
+					state->pop_push(2, NUMBER_TYPE);
 				}
 				else
 				{
-					if (mir) mir->emit(state, OP_add, 0, 0, OBJECT_TYPE, decimalParam);
+					if (mir) mir->emit(state, OP_add, 0, 0, OBJECT_TYPE);
 					// dont know if it will return number or string, but neither will be null.
-					state->pop_push(2, OBJECT_TYPE, true);
+					state->pop_push(2,OBJECT_TYPE, true);
 				}
 				break;
 			}
 
-			case OP_modulo_p:
-			case OP_subtract_p:
-			case OP_divide_p:
-			case OP_multiply_p:
-				decimalParam = imm30;
 			case OP_modulo:
 			case OP_subtract:
 			case OP_divide:
 			case OP_multiply:
-				{
 				checkStack(2,1);
-				Value& rhs = state->peek(1);
-				Value& lhs = state->peek(2);
-				Traits* lhst = lhs.traits;
-				Traits* rhst = rhs.traits;
-                AvmCore::NumberUsage usage = (AvmCore::NumberUsage) (decimalParam & 0x7);
-                if (lhst && lhst->isNumeric && rhst && rhst->isNumeric) {
-					if (mir)
-					{
-					    switch (usage) {
-                        case AvmCore::use_decimal:
-                        case AvmCore::use_Number:
-                            if ((usage == AvmCore::use_decimal) || (lhst == DECIMAL_TYPE) || (rhst == DECIMAL_TYPE)) {
-                                emitCoerce(DECIMAL_TYPE, sp-1);
-                                emitCoerce(DECIMAL_TYPE, sp);
-                                mir->emit(state, opcode, 0, 0, DECIMAL_TYPE, decimalParam); // will call sub2, mul2, etc.
-                                break;
-                            }
-                            // otherwise for now fall into double case
-                            // we know type is numeric.
-                        case AvmCore::use_double:
-						{
-                            AbcOpcode d_op = OP_nop; // initialize to keep compiler happy
-                            switch (opcode) {
-                            case OP_subtract:
-                            case OP_subtract_p:
-                                d_op = OP_subtract_d;
-                                break;
-                            case OP_multiply:
-                            case OP_multiply_p:
-                                d_op = OP_multiply_d;
-                                break;
-                            case OP_divide:
-                            case OP_divide_p:
-                                d_op = OP_divide_d;
-                                break;
-                            case OP_modulo:
-                            case OP_modulo_p:
-                                d_op = OP_modulo_d;
-                                break;
-                            default:
-                                AvmAssert(false);
-                            }
-                            emitCoerce(DOUBLE_TYPE, sp-1);
-                            emitCoerce(DOUBLE_TYPE, sp);
-                            mir->emit(state, d_op, 0, 0, DOUBLE_TYPE);
-                            break;
-						}
-                        case AvmCore::use_int:  
-                        case AvmCore::use_uint: 
-						{
-                            AbcOpcode i_op = OP_nop; // initialize to keep compiler happy
-                            switch (opcode) {
-                            case OP_subtract:
-                            case OP_subtract_p:
-                                i_op = OP_subtract_i;
-                                break;
-                            case OP_multiply:
-                            case OP_multiply_p:
-                                i_op = OP_multiply_i;
-                                break;
-                            case OP_divide:
-                            case OP_divide_p:
-                                i_op = OP_divide_i;
-                                break;
-                            case OP_modulo:
-                            case OP_modulo_p:
-                                i_op = OP_modulo_i;
-                                break;
-                            default:
-                                AvmAssert(false);
-                            }
-							Traits* optype = (usage == AvmCore::use_int)? INT_TYPE : UINT_TYPE;
-                            emitCoerce(optype, sp-1);
-                            emitCoerce(optype, sp);
-                            mir->emit(state, i_op, 0, 0, optype);
-                            break;
-						}
-                        default:
-                            AvmAssert(false);
-                        }
-                    }
-                    if (usage == AvmCore::use_decimal || lhst == DECIMAL_TYPE || rhst == DECIMAL_TYPE)
-                        state->pop_push(2, DECIMAL_TYPE);
-                    else
-                        state->pop_push(2, DOUBLE_TYPE);
-                }
-                else {
-                    if (mir) mir->emit(state, opcode, 0, 0, OBJECT_TYPE, decimalParam);
-                    state->pop_push(2, OBJECT_TYPE, true); 
-                }
-				break;
-				}
-
-			case OP_negate_p: 
-				decimalParam = imm30;
-			case OP_negate: 
+				if (mir)
 				{
-				checkStack(1,1);
-				Value& operand = state->peek(1);
-				Traits* optraits = operand.traits;
-				if (optraits && optraits->isNumeric) {
-					AvmCore::NumberUsage usage = (AvmCore::NumberUsage) (decimalParam & 0x7);
-					if (mir) {
-						switch (usage) {
-						case AvmCore::use_decimal:
-						case AvmCore::use_Number:
-							if ((usage == AvmCore::use_decimal) || (optraits == DECIMAL_TYPE)) {
-								emitCoerce(DECIMAL_TYPE, sp);
-								mir->emit(state, OP_negate, sp, 0, DECIMAL_TYPE, decimalParam);
-								break;
-							}
-							// else fall into double case
-						case AvmCore::use_double:
-							emitCoerce(DOUBLE_TYPE, sp);
-							mir->emit(state, OP_negate_d, sp, 0, DOUBLE_TYPE);
-							break;
-						case AvmCore::use_int:
-						case AvmCore::use_uint:
-						{
-							Traits* optype = (usage == AvmCore::use_int)? INT_TYPE : UINT_TYPE;
-							emitCoerce(optype, sp);
-							mir->emit(state, OP_negate_i, sp, 0, optype);
-							break;
-						}
-						}
-					}
-					Traits* restraits = NULL;
-					switch (usage) {
-					case AvmCore::use_decimal:
-					case AvmCore::use_Number:
-						if ((usage == AvmCore::use_decimal) || (optraits == DECIMAL_TYPE)) {
-							restraits = DECIMAL_TYPE;
-							break;
-						}
-					case AvmCore::use_double:
-						restraits = DOUBLE_TYPE;
-						break;
-					case AvmCore::use_int:
-						restraits = INT_TYPE;
-						break;
-					case AvmCore::use_uint:
-						restraits = UINT_TYPE;
-						break;
-					default:
-						AvmAssert(false);
-					}
-					state->pop_push(1, restraits);
+					emitCoerce(NUMBER_TYPE, sp-1); // convert LHS to number
+					emitCoerce(NUMBER_TYPE, sp); // convert RHS to number
+					mir->emit(state, opcode, 0, 0, NUMBER_TYPE);
 				}
-				else {
-					// don't know the type, call general case function
-					if (mir) {
-						mir->emit(state, OP_negate, sp, 0, OBJECT_TYPE, decimalParam);
-					}
-					state->pop_push(1, OBJECT_TYPE);
-				}
+				state->pop_push(2, NUMBER_TYPE);
 				break;
-				}
-			case OP_increment_p:
-			case OP_decrement_p:
-				decimalParam = imm30;
+
+			case OP_negate:
+				checkStack(1,1);
+				emitCoerce(NUMBER_TYPE, sp);
+				if (mir) mir->emit(state, opcode, sp, 0, NUMBER_TYPE);
+				break;
+
 			case OP_increment:
 			case OP_decrement:
-				{
 				checkStack(1,1);
-				Value& operand = state->peek(1);
-				Traits* optraits = operand.traits;
-                int delta = ((opcode == OP_increment) || (opcode == OP_increment_p))? 1 : -1;
-				if (optraits && optraits->isNumeric) {
-					AvmCore::NumberUsage usage = (AvmCore::NumberUsage) (decimalParam & 0x7);
-					if (mir) {
-						switch (usage) {
-						case AvmCore::use_decimal:
-						case AvmCore::use_Number:
-							if ((usage == AvmCore::use_decimal) || (optraits == DECIMAL_TYPE)) {
-								emitCoerce(DECIMAL_TYPE, sp);
-								mir->emit(state, OP_increment, sp, delta, DECIMAL_TYPE, decimalParam);
-								break;
-							}
-							// else fall into double case
-						case AvmCore::use_double:
-							emitCoerce(DOUBLE_TYPE, sp);
-							mir->emit(state, OP_increment_d, sp, delta, DOUBLE_TYPE);
-							break;
-						case AvmCore::use_int:
-						case AvmCore::use_uint:
-						{
-							Traits* optype = (usage == AvmCore::use_int)? INT_TYPE : UINT_TYPE;
-							emitCoerce(optype, sp);
-							mir->emit(state, OP_increment_i, sp, delta, optype);
-							break;
-						}
-						}
-					}
-					Traits* restraits = NULL;
-					switch (usage) {
-					case AvmCore::use_decimal:
-					case AvmCore::use_Number:
-						if ((usage == AvmCore::use_decimal) || (optraits == DECIMAL_TYPE)) {
-							restraits = DECIMAL_TYPE;
-							break;
-						}
-					case AvmCore::use_double:
-						restraits = DOUBLE_TYPE;
-						break;
-					case AvmCore::use_int:
-						restraits = INT_TYPE;
-						break;
-					case AvmCore::use_uint:
-						restraits = UINT_TYPE;
-						break;
-					default:
-						AvmAssert(false);
-					}
-					state->pop_push(1, restraits);
-				}
-				else {
-					// don't know the type, call general case function
-					if (mir) {
-						mir->emit(state, OP_increment, sp, delta, OBJECT_TYPE, decimalParam);
-					}
-					state->pop_push(1, OBJECT_TYPE);
-				}
+				emitCoerce(NUMBER_TYPE, sp);
+				if (mir) mir->emit(state, opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE);
 				break;
-				}
 
 			case OP_increment_i:
 			case OP_decrement_i:
@@ -2663,7 +2314,7 @@ namespace avmplus
 		#ifdef AVMPLUS_INTERP
 		if (!mir || mir->overflow) 
 		{
-			if (info->returnTraits() == NUMBER_TYPE || info->returnTraits() == DOUBLE_TYPE)
+			if (info->returnTraits() == NUMBER_TYPE)
 				info->implN = Interpreter::interpN;
 			else
 				info->impl32 = Interpreter::interp32;
@@ -2736,12 +2387,12 @@ namespace avmplus
 			if (rhst && rhst->isNumeric && lhst && !lhst->isNumeric)
 			{
 				// convert lhs to Number
-				emitCoerce(DOUBLE_TYPE, state->sp()-1);
+				emitCoerce(NUMBER_TYPE, state->sp()-1);
 			}
 			else if (lhst && lhst->isNumeric && rhst && !rhst->isNumeric)
 			{
 				// promote rhs to Number
-				emitCoerce(DOUBLE_TYPE, state->sp());
+				emitCoerce(NUMBER_TYPE, state->sp());
 			}
 			mir->emit(state, opcode, 0, 0, BOOLEAN_TYPE);
 		}
@@ -3459,12 +3110,6 @@ namespace avmplus
 			t2 = temp;
 		}
 
-		// special case Number and double -- they have identical machine representations (IEEE 754)
-		// but findCommonBase will return Object which is incompatible due to machine-type rules.
-		// check for this and return t1 (the target type)
-		if (Traits::isNumberOrDouble(t1) && Traits::isNumberOrDouble(t2))
-			return t1;
-
 		if (!Traits::isMachineCompatible(t1,t2))
 		{
 			// these two types are incompatible machine types that require
@@ -3556,8 +3201,7 @@ namespace avmplus
 				for (int i=state->stackDepth-argc, n=state->stackDepth; i < n; i++)
 				{
 					Traits* t = state->stackValue(i).traits;
-					// RES decimal code here
-					if (t != NUMBER_TYPE && t != DOUBLE_TYPE && t != INT_TYPE && t != UINT_TYPE)
+					if (t != NUMBER_TYPE && t != INT_TYPE && t != UINT_TYPE)
 						return b;
 				}
 				b = newb;

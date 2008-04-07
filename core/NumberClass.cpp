@@ -61,7 +61,7 @@ namespace avmplus
 		if (argc == 0)
 			return 0|kIntegerType;   // yep this is zero atom
 		else
-			return core()->doubleAtom(argv[1]);
+			return core()->numberAtom(argv[1]);
 		// TODO ArgumentError if argc > 1
 	}
 

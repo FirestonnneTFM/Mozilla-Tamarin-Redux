@@ -1417,7 +1417,7 @@ namespace avmplus
 				break;
 
 			case 'J':
-				a = core->numericAtom( jlongToString(core, val.j)->atom() );  // rather demented conversion route but good enought for now
+				a = core->numberAtom( jlongToString(core, val.j)->atom() );  // rather demented conversion route but good enought for now
 				break;
 
 			case 'F':

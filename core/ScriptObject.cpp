@@ -553,7 +553,7 @@ namespace avmplus
 		{
 			return *((Atom*)p);
 		}
-		else if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
+		else if (t == NUMBER_TYPE)
 		{
 			return core->doubleToAtom(*((double*)p));
 		}
@@ -565,13 +565,9 @@ namespace avmplus
 		{
 			return core->uintToAtom(*((uint32*)p));
 		}
-		else if (t == DECIMAL_TYPE)
-		{
-			return core->decimalToAtom(*((DecimalRep**)p));
-		}
 		else if (t == BOOLEAN_TYPE)
 		{
-			return (*((int*)p)<<4)|kSpecialType | 8;
+			return (*((int*)p)<<3)|kBooleanType;
 		}
 		else if (t == STRING_TYPE)
 		{
@@ -602,14 +598,9 @@ namespace avmplus
 			//*((Atom*)p) = value;
 			WBATOM(core->GetGC(), this, p, value);
 		}
-		else if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
+		else if (t == NUMBER_TYPE)
 		{
 			*((double*)p) = AvmCore::number_d(value);
-		}
-		else if (t == DECIMAL_TYPE)
-		{
-			//*((DecimalRep**)p) = core->decimal_d(value);
-			WBRC(core->GetGC(), this, p, core->decimal_d(value));
 		}
 		else if (t == INT_TYPE)
 		{
@@ -621,7 +612,7 @@ namespace avmplus
 		}
 		else if (t == BOOLEAN_TYPE)
 		{
-			*((int*)p) = urshift(value,4);
+			*((int*)p) = urshift(value,3);
 		}
 		else
 		{

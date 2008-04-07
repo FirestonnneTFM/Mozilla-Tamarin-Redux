@@ -1082,7 +1082,7 @@ namespace avmplus
 
 	bool CodegenMIR::isDouble(int i)
 	{
-		return state->value(i).traits == NUMBER_TYPE || state->value(i).traits == DOUBLE_TYPE;
+		return state->value(i).traits == NUMBER_TYPE;
 	}
 
 	OP* CodegenMIR::loadAtomRep(uintptr i)
@@ -1106,10 +1106,6 @@ namespace avmplus
 					return InsConst(a);
 			}
 
-			if (t == DECIMAL_TYPE) {
-				return binaryIns(MIR_or, native, InsConst(kDecimalType));
-			}
-
 			if (t == UINT_TYPE)
 			{
 				Atom a = core->uintToAtom(uint32(native->imm));
@@ -1128,7 +1124,7 @@ namespace avmplus
 			}
 		}
 
-		if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
+		if (t == NUMBER_TYPE)
 		{
 			sintptr funcaddr = COREADDR(AvmCore::doubleToAtom);
 #ifdef AVMPLUS_IA32
@@ -1147,14 +1143,10 @@ namespace avmplus
 			return callIns(MIR_cmop, COREADDR(AvmCore::uintToAtom), 2,
 				InsConst((uintptr)core), native);
 		}
-		if (t == DECIMAL_TYPE)
-		{
-			return binaryIns(MIR_or, native, InsConst(kDecimalType));
-		}
 		if (t == BOOLEAN_TYPE)
 		{
-			OP* i1 = binaryIns(MIR_lsh, native, InsConst(4));
-			return binaryIns(MIR_or, i1, InsConst(kSpecialType + 8));
+			OP* i1 = binaryIns(MIR_lsh, native, InsConst(3));
+			return binaryIns(MIR_or, i1, InsConst(kBooleanType));
 		}
 
 		// possibly null pointers
@@ -1273,10 +1265,8 @@ namespace avmplus
 						Value& v = state->value(i);
 						Traits* t = v.traits;
 
-                        // RES what to do about decimal here?
-
 						if (t == VOID_TYPE || t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE ||
-							t == NUMBER_TYPE || t == DOUBLE_TYPE || t == STRING_TYPE || t == NAMESPACE_TYPE)
+							t == NUMBER_TYPE || t == STRING_TYPE || t == NAMESPACE_TYPE)
 						{
 							scope = InsConst(0);
 						}
@@ -1674,7 +1664,6 @@ namespace avmplus
 		names->add(COREADDR(AvmCore::intToAtom), "AvmCore::intToAtom");
 		names->add(COREADDR(AvmCore::doubleToAtom), "AvmCore::doubleToAtom");
 		names->add(COREADDR(AvmCore::uintToAtom), "AvmCore::uintToAtom");
-		names->add(COREADDR(AvmCore::decimalToAtom), "AvmCore::decimalToAtom");
 
 		// atom -> type conversions
 		names->add(COREADDR(AVMCORE_integer), "AVMCORE_integer");
@@ -1685,8 +1674,7 @@ namespace avmplus
 #endif
 
 		names->add(FUNCADDR(AvmCore::number_d), "AvmCore::number_d");
-		names->add(COREADDR(AvmCore::doubleNumber), "AvmCore::doubleNumber");
-		names->add(COREADDR(AvmCore::decimalNumber), "AvmCore::decimalNumber");
+		names->add(COREADDR(AvmCore::number), "AvmCore::number");
 		names->add(FUNCADDR(AvmCore::integer_u), "AvmCore::integer_u");
 		names->add(COREADDR(AvmCore::string), "AvmCore::string");
 		names->add(COREADDR(AvmCore::intToString), "AvmCore::intToString");
@@ -1697,8 +1685,6 @@ namespace avmplus
 		names->add(COREADDR(AvmCore::boolean), "AvmCore::boolean");
 
 		// operator helpers
-		names->add(FUNCADDR(MathUtils::int_divide), "MathUtils::int_divide");
-		names->add(FUNCADDR(MathUtils::int_remainder), "MathUtils::int_remainder");
 		names->add(COREADDR(AvmCore::concatStrings), "AvmCore::concatStrings");
 		names->add(TOPLEVELADDR(Toplevel::toVTable), "Toplevel::toVTable");
 		names->add(ENVADDR(MethodEnv::newfunction), "MethodEnv::newfunction");
@@ -1759,12 +1745,6 @@ namespace avmplus
 		names->add(COREADDR(AvmCore::stricteq), "AvmCore::stricteq");
 		names->add(COREADDR(AvmCore::compare), "AvmCore::compare");
 		names->add(TOPLEVELADDR(Toplevel::add2), "Toplevel::add2");
-		names->add(TOPLEVELADDR(Toplevel::sub2), "Toplevel::sub2");
-		names->add(TOPLEVELADDR(Toplevel::mul2), "Toplevel::mul2");
-		names->add(TOPLEVELADDR(Toplevel::div2), "Toplevel::div2");
-		names->add(TOPLEVELADDR(Toplevel::rem2), "Toplevel::rem2");
-		names->add(TOPLEVELADDR(Toplevel::negate), "Toplevel::negate");
-		names->add(TOPLEVELADDR(Toplevel::incr), "Toplevel::incr");
 		names->add(COREADDR(AvmCore::intern), "AvmCore::intern");
 		names->add(ENVADDR(MethodEnv::internRtns), "MethodEnv::internRtns");
 		names->add(TOPLEVELADDR(Toplevel::coerce), "Toplevel::coerce");
@@ -1907,7 +1887,7 @@ namespace avmplus
 		{
 			return atom;
 		}
-		else if (t == NUMBER_TYPE || t == DOUBLE_TYPE )
+		else if (t == NUMBER_TYPE)
 		{
 			if (atom->code == MIR_imm) {
 				Atom a = atom->imm;
@@ -1938,9 +1918,9 @@ namespace avmplus
 		else if (t == BOOLEAN_TYPE)
 		{
 			if (atom->code == MIR_imm)
-				return InsConst(urshift(atom->imm,4));
+				return InsConst(urshift(atom->imm,3));
 			else
-				return binaryIns(MIR_ush, atom, InsConst(4));
+				return binaryIns(MIR_ush, atom, InsConst(3));
 		}
 		else
 		{
@@ -2186,7 +2166,7 @@ namespace avmplus
 			int offset = 0;
 			for (int i=0, n=info->param_count-info->optional_count; i <= n; i++)
 			{
-				if (info->paramTraits(i) == NUMBER_TYPE || info->paramTraits(i) == DOUBLE_TYPE)
+				if (info->paramTraits(i) == NUMBER_TYPE)
 				{
 					offset += 8;
 				}
@@ -2261,7 +2241,7 @@ namespace avmplus
 			#endif
 			Traits* t = info->paramTraits(i);
 			OP* arg; 
-			if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
+			if (t == NUMBER_TYPE)
 			{
 				arg = loadIns(MIR_fldop, offset, apArg);
 				localSet(i, arg);
@@ -2677,7 +2657,7 @@ namespace avmplus
 		{
 			// do nothing, it's fine to coerce null to a pointer type
 		}
-		else if (result == NUMBER_TYPE || result == DOUBLE_TYPE)
+		else if (result == NUMBER_TYPE)
 		{
 			if (in && in->isNumeric || in == BOOLEAN_TYPE)
 			{
@@ -2686,22 +2666,17 @@ namespace avmplus
 			else
 			{
 				// * -> Number
-				localSet(loc, callIns(MIR_fcmop, COREADDR(AvmCore::doubleNumber), 2,
+				localSet(loc, callIns(MIR_fcmop, COREADDR(AvmCore::number), 2,
 					InsConst((uintptr)core), loadAtomRep(loc)));
 			}
 		}
-		else if (result == DECIMAL_TYPE)
-		{
-			localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::decimalNumber), 2,
-				InsConst((uintptr)core), loadAtomRep(loc)));
-		}
 		else if (result == INT_TYPE)
 		{
-			if (in == UINT_TYPE /* || in == BOOLEAN_TYPE */)
+			if (in == UINT_TYPE || in == BOOLEAN_TYPE)
 			{
-				//do nothing  // RES BOOLEAN doesn't have the value in the same bit as (u)int anymore
+				//do nothing
 			}
-			else if (in == NUMBER_TYPE || in == DOUBLE_TYPE)
+			else if (in == NUMBER_TYPE)
 			{
 				OP* ins = value.ins;
 				if (ins != NULL && ins->code == MIR_fadd &&
@@ -2748,7 +2723,7 @@ namespace avmplus
 				}
 			}
 			else
-			{	// RES boolean now comes down here
+			{
 				// * -> int
 				localSet(loc, callIns(MIR_cmop, COREADDR(AVMCORE_integer), 2,
 					InsConst((uintptr)core), loadAtomRep(loc)));
@@ -2756,11 +2731,11 @@ namespace avmplus
 		}
 		else if (result == UINT_TYPE)
 		{
-			if (in == INT_TYPE /* || in == BOOLEAN_TYPE */)
+			if (in == INT_TYPE || in == BOOLEAN_TYPE)
 			{
 				//do nothing
 			}
-			else if (in == NUMBER_TYPE || in == DOUBLE_TYPE)
+			else if (in == NUMBER_TYPE)
 			{
 				OP* ins = value.ins;
 				if (ins != NULL && ins->code == MIR_fadd &&
@@ -2823,7 +2798,7 @@ namespace avmplus
 		}
 		else if (result == BOOLEAN_TYPE)
 		{
-			if (in == NUMBER_TYPE || in == DOUBLE_TYPE)
+			if (in == NUMBER_TYPE)
 			{
 				localSet(loc, Ins(MIR_ne, binaryFcmpIns(
 					localGet(loc), i2dIns(InsConst(0)))));
@@ -2852,7 +2827,7 @@ namespace avmplus
 				localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::uintToString), 2,
 					InsConst((uintptr)core), localGet(loc)));
 			}
-			else if (in == NUMBER_TYPE || in == DOUBLE_TYPE)
+			else if (in == NUMBER_TYPE)
 			{
 				localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::doubleToString), 2,
 					InsConst((uintptr)core), localGet(loc)));
@@ -3040,7 +3015,7 @@ namespace avmplus
 		OP* target = leaIns(offsetof(MethodEnv, impl32), method);
 		OP* apAddr = leaIns(0, ap);
 
-		OP* out = callIndirect((result==NUMBER_TYPE || result==DOUBLE_TYPE)? MIR_fci : MIR_ci, target, 4, 
+		OP* out = callIndirect(result==NUMBER_TYPE ? MIR_fci : MIR_ci, target, 4, 
 			method, InsConst(argc), apAddr, iid);
 
 		InsDealloc(ap);
@@ -3051,7 +3026,7 @@ namespace avmplus
 		}
 	}
 
-	void CodegenMIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result, int decimalParam)
+	void CodegenMIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
 	{
 		this->state = state;
 		emitPrep(opcode);
@@ -3193,7 +3168,7 @@ namespace avmplus
 				if (opcode == OP_getslot) 
 				{
 					// get
-					if (result == NUMBER_TYPE || result == DOUBLE_TYPE)
+					if (result == NUMBER_TYPE)
 						localSet(op2, loadIns(MIR_fld, offset, ptr));
 					else
 					{
@@ -3354,18 +3329,6 @@ namespace avmplus
 			}
 
 			case OP_negate:
-			case OP_negate_p:
-			{
-				OP* in = loadAtomRep(op1);
-				OP* toplevel = loadToplevel(ldargIns(_env));
-				OP* param = InsConst(decimalParam);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::negate), 3,
-					toplevel, in, param);
-				localSet(op1, atomToNativeRep(result, out));
-				break;
-			}
-
-			case OP_negate_d:
 			{
 				OP* in = localGet(op1);
 				OP* out = Ins(MIR_fneg, in);
@@ -3382,30 +3345,11 @@ namespace avmplus
 				localSet(op1, i2);
 				break;
 			}
-            
-        	case OP_increment:
-        	case OP_decrement:
-        	case OP_increment_p:
-        	case OP_decrement_p:
+
+			case OP_increment:
+			case OP_decrement:
 			case OP_inclocal:
 			case OP_declocal:
-			case OP_inclocal_p:
-			case OP_declocal_p:
-            {
-                OP* in = loadAtomRep(op1);
-                OP* delta = InsConst(op2 << 3 | kIntegerType); 
-				OP* toplevel = loadToplevel(ldargIns(_env));
-				OP* param = InsConst(decimalParam);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::incr), 4,
-					toplevel, in, delta, param);
-				localSet(op1, atomToNativeRep(result, out));
-				break;
-            }
-
-			case OP_increment_d:
-			case OP_decrement_d:
-			case OP_inclocal_d:
-			case OP_declocal_d:
 			{
 				OP* in = localGet(op1);
 				OP* inc = i2dIns(InsConst(op2)); // 1 or -1
@@ -3436,7 +3380,7 @@ namespace avmplus
 				break;
 			}
 
-			case OP_modulo_d:
+			case OP_modulo:
 			{
 				OP* lhs = localGet(sp-1);
 				OP* rhs = localGet(sp);
@@ -3446,33 +3390,13 @@ namespace avmplus
 				break;
 			}
 
-			case OP_divide_i:
-			{
-				OP* lhs = localGet(sp-1);
-				OP* rhs = localGet(sp);
-				OP* out = callIns(MIR_csop, FUNCADDR(MathUtils::int_divide), 2,
-					lhs, rhs);
-				localSet(sp-1,	out);
-				break;
-			}
-
-			case OP_modulo_i:
-			{
-				OP* lhs = localGet(sp-1);
-				OP* rhs = localGet(sp);
-				OP* out = callIns(MIR_csop, FUNCADDR(MathUtils::int_remainder), 2,
-					lhs, rhs);
-				localSet(sp-1,	out);
-				break;
-			}
-
 			case OP_add_d:
-			case OP_subtract_d:
+			case OP_subtract:
 			case OP_subtract_i:
 			case OP_add_i:
-			case OP_multiply_d:
+			case OP_multiply:
 			case OP_multiply_i:
-			case OP_divide_d:
+			case OP_divide:
 			case OP_lshift:
 			case OP_rshift:
 			case OP_urshift:
@@ -3488,12 +3412,12 @@ namespace avmplus
 					case OP_urshift:    mircode = MIR_ush;  break;
 					case OP_rshift:     mircode = MIR_rsh;  break;
 					case OP_lshift:     mircode = MIR_lsh;  break;
-					case OP_divide_d:     mircode = MIR_fdiv; break;
-					case OP_multiply_d:   mircode = MIR_fmul; break;
+					case OP_divide:     mircode = MIR_fdiv; break;
+					case OP_multiply:   mircode = MIR_fmul; break;
 					case OP_multiply_i: mircode = MIR_imul; break;
 					case OP_add_i:      mircode = MIR_add;  break;
 					case OP_subtract_i: mircode = MIR_sub;  break;
-					case OP_subtract_d:   mircode = MIR_fsub; break;
+					case OP_subtract:   mircode = MIR_fsub; break;
 					case OP_add_d:      mircode = MIR_fadd; break;
 					default: break;
 				}
@@ -4491,67 +4415,13 @@ namespace avmplus
 			}
 
 
-			case OP_add_p:
 			case OP_add:
 			{
 				OP* lhs = loadAtomRep(sp-1);
 				OP* rhs = loadAtomRep(sp);
 				OP* toplevel = loadToplevel(ldargIns(_env));
-				OP* param = InsConst(decimalParam);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::add2), 4,
-					toplevel, lhs, rhs, param);
-				localSet(sp-1, atomToNativeRep(result, out));
-				break;
-			}
-
-			case OP_subtract:
-			case OP_subtract_p:
-			{
-				OP* lhs = loadAtomRep(sp-1);
-				OP* rhs = loadAtomRep(sp);
-				OP* toplevel = loadToplevel(ldargIns(_env));
-				OP* param = InsConst(decimalParam);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::sub2), 4,
-					toplevel, lhs, rhs, param);
-				localSet(sp-1, atomToNativeRep(result, out));
-				break;
-			}
-
-			case OP_multiply:
-			case OP_multiply_p:
-			{
-				OP* lhs = loadAtomRep(sp-1);
-				OP* rhs = loadAtomRep(sp);
-				OP* toplevel = loadToplevel(ldargIns(_env));
-				OP* param = InsConst(decimalParam);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::mul2), 4,
-					toplevel, lhs, rhs, param);
-				localSet(sp-1, atomToNativeRep(result, out));
-				break;
-			}
-
-			case OP_divide:
-			case OP_divide_p:
-			{
-				OP* lhs = loadAtomRep(sp-1);
-				OP* rhs = loadAtomRep(sp);
-				OP* toplevel = loadToplevel(ldargIns(_env));
-				OP* param = InsConst(decimalParam);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::div2), 4,
-					toplevel, lhs, rhs, param);
-				localSet(sp-1, atomToNativeRep(result, out));
-				break;
-			}
-
-			case OP_modulo:
-			case OP_modulo_p:
-			{
-				OP* lhs = loadAtomRep(sp-1);
-				OP* rhs = loadAtomRep(sp);
-				OP* toplevel = loadToplevel(ldargIns(_env));
-				OP* param = InsConst(decimalParam);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::rem2), 4,
-					toplevel, lhs, rhs, param);
+				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::add2), 3,
+					toplevel, lhs, rhs);
 				localSet(sp-1, atomToNativeRep(result, out));
 				break;
 			}
@@ -4560,7 +4430,7 @@ namespace avmplus
 			{
 				OP* lhs = localGet(sp-1);
 				OP* rhs = localGet(sp);
-				OP* out = callIns(MIR_cmop, COREADDR(AvmCore::concatStrings), 3,  // RES shouldn't this be MIR_cm ?
+				OP* out = callIns(MIR_cmop, COREADDR(AvmCore::concatStrings), 3,
 					InsConst((uintptr)core), lhs, rhs);
 				localSet(sp-1,	out);
 				break;
@@ -4942,8 +4812,8 @@ namespace avmplus
 		if (result)
 			return result;
 
-        AvmAssert(trueAtom == 28);
-		AvmAssert(falseAtom == 12);
+		AvmAssert(trueAtom == 13);
+		AvmAssert(falseAtom == 5);
 		AvmAssert(undefinedAtom == 4);
 		OP* lhs = loadAtomRep(lhsi);
 		OP* rhs = loadAtomRep(rhsi);
@@ -4951,14 +4821,13 @@ namespace avmplus
 			InsConst((uintptr)core), lhs, rhs);
 
 		// caller will use jlt for (a<b) and jge for !(a<b)
-		// compare          ^24    <8 
-		// true       11100  00100   y 
-		// false      01100  10100   n 
-		// undefined  00100  11100   n 
+		// compare          ^8    <8 
+		// true       1101  0101   y 
+		// false      0101  1101   n 
+		// undefined  0100  1100   n 
 
-		OP* c = InsConst(24);
-		OP* c8 = InsConst(8);
-		return binaryIns(MIR_icmp, binaryIns(MIR_xor, atom, c), c8);
+		OP* c = InsConst(8);
+		return binaryIns(MIR_icmp, binaryIns(MIR_xor, atom, c), c);
 	}
 
 	OP* CodegenMIR::cmpLe(int lhsi, int rhsi)
@@ -4973,14 +4842,14 @@ namespace avmplus
 			InsConst((uintptr)core), rhs, lhs);
 
 		// assume caller will use jle for (a<=b) and jgt for !(a<=b)
-		// compare          ^8    <=4
-		// true       11100  10100  n
-		// false      01100  00100  y
-		// undefined  00100  01100  n
+		// compare          ^1    <=4
+		// true       1101  1100  n
+		// false      0101  0100  y
+		// undefined  0100  0101  n
 
-		OP* c8 = InsConst(8);
+		OP* c2 = InsConst(1);
 		OP* c4 = InsConst(4);
-		return binaryIns(MIR_icmp, binaryIns(MIR_xor, atom, c8), c4);
+		return binaryIns(MIR_icmp, binaryIns(MIR_xor, atom, c2), c4);
 	}
 
 	OP* CodegenMIR::cmpEq(sintptr funcaddr, int lhsi, int rhsi)
@@ -5329,7 +5198,6 @@ namespace avmplus
 		else if (t == STRING_TYPE)	offset = offsetof(Toplevel, stringClass);
 		else if (t == BOOLEAN_TYPE)	offset = offsetof(Toplevel, booleanClass);
 		else if (t == NUMBER_TYPE)	offset = offsetof(Toplevel, numberClass);
-		else if (t == DOUBLE_TYPE)	offset = offsetof(Toplevel, doubleClass);
 		else if (t == INT_TYPE)		offset = offsetof(Toplevel, intClass);
 		else if (t == UINT_TYPE)	offset = offsetof(Toplevel, uintClass);
 		else 
@@ -5349,7 +5217,7 @@ namespace avmplus
 
 	OP* CodegenMIR::promoteNumberIns(Traits* t, int i)
 	{
-		if (t == NUMBER_TYPE || t == DOUBLE_TYPE)
+		if (t == NUMBER_TYPE)
 		{
 			return localGet(i);
 		}
@@ -5374,11 +5242,6 @@ namespace avmplus
 			else
 #endif // AVMPLUS_IA32
 			return u2dIns(localGet(i));
-		}
-		if (t == DECIMAL_TYPE) {
-			// some might not think of this as a promotion
-			return callIns(MIR_fcmop, COREADDR(AvmCore::doubleNumber), 2,
-					InsConst((uintptr)core), loadAtomRep(i));
 		}
 		AvmAssert(false);
 		return NULL;

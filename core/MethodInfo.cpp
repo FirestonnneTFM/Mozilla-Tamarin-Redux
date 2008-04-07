@@ -107,7 +107,7 @@ namespace avmplus
 			{
 				#ifdef AVMPLUS_INTERP
 				AvmCore* core = this->core();
-				if (returnTraits() == NUMBER_TYPE || returnTraits() == DOUBLE_TYPE)
+				if (returnTraits() == NUMBER_TYPE)
 					implN = Interpreter::interpN;
 				else
 					impl32 = Interpreter::interp32;
@@ -174,7 +174,7 @@ namespace avmplus
 		for(int i=0; i<local_count; i++)
 		{
 			//localNames[i] = core->kundefined;
-			WBRC(core->GetGC(), localNames, &localNames[i], uintptr(Stringp(core->kundefined)));
+			WBRC(core->GetGC(), localNames, &localNames[i], core->kundefined);
 		}
 	}
 
@@ -207,7 +207,7 @@ namespace avmplus
 			{
 				Traits* t = traitArr[i];
 				void *p = in[i];
-				if (t == NUMBER_TYPE || t == DOUBLE_TYPE) 
+				if (t == NUMBER_TYPE) 
 				{
 					dest[at] = core->doubleToAtom( *((double*)p) );
 				}
@@ -218,10 +218,6 @@ namespace avmplus
 				else if (t == UINT_TYPE)
 				{
 					dest[at] = core->uintToAtom( *((uint32*)p) );
-				}
-				else if (t == DECIMAL_TYPE)
-				{
-					dest[at] = core->decimalToAtom( *((DecimalRep **)p) );
 				}
 				else if (t == BOOLEAN_TYPE)
 				{
@@ -294,7 +290,7 @@ namespace avmplus
 			{
 				Traits* t = traitArr[i];
 				void *p = out[i];
-				if (t == NUMBER_TYPE || t == DOUBLE_TYPE) 
+				if (t == NUMBER_TYPE) 
 				{
 					*((double*)p) = AvmCore::number_d(src[at++]);
 				}
@@ -306,13 +302,9 @@ namespace avmplus
 				{
 					*((uint32*)p) = AvmCore::integer_u(src[at++]);
 				}
-				else if (t == DECIMAL_TYPE)
-				{
-					*((DecimalRep**)p) = core->decimal_d(src[at++]);
-				}
 				else if (t == BOOLEAN_TYPE)
 				{
-					*((int*)p) = (int)(src[at++]>>4);
+					*((int*)p) = (int)(src[at++]>>3);
 				}
 				else if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
 				{

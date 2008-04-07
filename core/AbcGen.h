@@ -52,7 +52,6 @@ namespace avmplus
 		List<byte,LIST_NonGCObjects>& getBytes() { return bytes; }
 		void construct_super() { bytes.add(OP_constructsuper); }
 		void pushnan() { bytes.add(OP_pushnan); }
-		void pushdnan() { bytes.add(OP_pushdnan); }
 		void pushundefined() { bytes.add(OP_pushundefined); }
 		void pushnull() { bytes.add(OP_pushnull); }
 		void pushtrue() { bytes.add(OP_pushtrue); }

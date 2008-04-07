@@ -645,10 +645,9 @@ namespace avmplus
 
 				// We want to throw if this is an Array.NUMERIC sort and any items are not numbers,
 				// and not strings that can be converted into numbers
-				if(isNumericCompare && !core->isNumeric(atoms->getAt(i)))
+				if(isNumericCompare && !core->isNumber(atoms->getAt(i)))
 				{
-					// RES decimal code not needed here
-					double val = core->doubleNumber(atoms->getAt(i));
+					double val = core->number(atoms->getAt(i));
 					if(MathUtils::isNaN(val))
 						// throw exception (not a Number)
 						toplevel->throwTypeError(kCheckTypeFailedError, core->atomToErrorString(atoms->getAt(i)), core->toErrorString(core->traits.number_itraits));
@@ -992,25 +991,8 @@ namespace avmplus
 			return ((int)atmj - (int)atmk);
 		}
 
-		if (core->isDecimal(atmj) || core->isDecimal(atmk)) {
-			DecimalRep *dxrep = core->decimalNumber(atmj);
-			DecimalRep *dyrep = core->decimalNumber(atmk);
-			decNumber *dx = &dxrep->dn;
-			decNumber *dy = &dyrep->dn;
-			bool nanx = decNumberIsNaN(dx);
-			bool nany = decNumberIsNaN(dy);
-			if (!(nanx || nany)) {
-				return decComp(dx, dy);
-			} else if (!nany) {
-				return 1;
-			} else if (!nanx) {
-				return -1;
-			} else {
-				return 0;
-			}
-		}
-		double x = core->doubleNumber(atmj);
-		double y = core->doubleNumber(atmk);
+		double x = core->number(atmj);
+		double y = core->number(atmk);
 		double diff = x - y;
 
 		if (diff == diff) { // same as !isNaN
@@ -1109,8 +1091,8 @@ namespace avmplus
 					}
 				}
 			} else if (opt & kNumeric) {
-				double lhs = core->doubleNumber(x);
-				double rhs = core->doubleNumber(y);
+				double lhs = core->number(x);
+				double rhs = core->number(y);
 				double diff = lhs - rhs;
 
 				if (diff == diff) { // same as !isNaN
@@ -1189,7 +1171,7 @@ namespace avmplus
 				if (args->getLength() >= 2)
 				{
 					Atom arg1 = args->getUintProperty(1);
-					if (core->isNumeric(arg1))
+					if (core->isNumber(arg1))
 					{
 						opt = core->integer (arg1);
 					}
@@ -1200,7 +1182,7 @@ namespace avmplus
 					}
 				}
 			}
-			else if (core->isNumeric(arg0))
+			else if (core->isNumber(arg0))
 			{
 				opt = core->integer (arg0);
 			}

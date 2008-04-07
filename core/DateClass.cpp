@@ -101,7 +101,7 @@ namespace avmplus
 		if (argc == 1) {
 			double dateAsDouble = ( core->isString(argv[1]) ?
 									stringToDateDouble( *(core->string(argv[1])) ) :
-									core->doubleNumber(argv[1]) );
+									core->number(argv[1]) );
 			
 			Date   date(dateAsDouble);
 			return (new (core->GetGC(), ivtable()->getExtraSize()) DateObject(this, date))->atom();
@@ -112,7 +112,7 @@ namespace avmplus
 			if (argc > 7)
 				argc = 7;
 			for (i=0; i<argc; i++) {
-				num[i] = core->doubleNumber(argv[i+1]);
+				num[i] = core->number(argv[i+1]);
 			}
 			Date date(num[0],
 					  num[1],
@@ -153,13 +153,13 @@ namespace avmplus
 						Atom* /*argv*/, int /*argc*/) // rest
 	{
 		AvmCore* core = this->core();
-		Date d(core->doubleNumber(year),
-				  core->doubleNumber(month),
-				  core->doubleNumber(date),
-				  core->doubleNumber(hours),
-				  core->doubleNumber(minutes),
-				  core->doubleNumber(seconds),
-				  core->doubleNumber(ms),
+		Date d(core->number(year),
+				  core->number(month),
+				  core->number(date),
+				  core->number(hours),
+				  core->number(minutes),
+				  core->number(seconds),
+				  core->number(ms),
 				  true);
 		return d.getTime();
 	}

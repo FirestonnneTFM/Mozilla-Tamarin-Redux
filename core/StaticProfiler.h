@@ -60,7 +60,6 @@ namespace avmplus
 		int cpoolIntSize;
 		int cpoolUIntSize;
 		int cpoolDoubleSize;
-		int cpoolDecimalSize;
 		int cpoolStrSize;
 		int cpoolNsSize;
 		int cpoolNsSetSize;
