@@ -798,7 +798,7 @@ namespace avmplus
 		for (int i=first_optional; i <= info->param_count; i++)
 		{
 			Traits* type = info->paramTraits(i);
-			if (type == NUMBER_TYPE || type == DOUBLE_TYPE) {
+			if (type == NUMBER_TYPE) {
 				Atom arg = info->getDefaultValue(i-first_optional);
 				double d = AvmCore::number_d(arg);
 				int *dp = (int*)&d;
@@ -908,7 +908,7 @@ namespace avmplus
 				else if (type == BOOLEAN_TYPE)
 				{
 					// push bool
-					int b = arg>>4;
+					int b = arg>>3;
 					if (GPRIndex < kMaxGPRIndex) {
 						LI ((Register)(R3+GPRIndex), b);
 					} else {
@@ -936,7 +936,7 @@ namespace avmplus
 						STW (R0, kArgumentOffset+GPRIndex*4, SP);
 					}
 				}
-				else if (type == NUMBER_TYPE || type == DOUBLE_TYPE)
+				else if (type == NUMBER_TYPE)
 				{
 					if (FPRIndex < kMaxFPRIndex) {
 						LI32(R11, (int)double_ip);
@@ -975,7 +975,7 @@ namespace avmplus
 			// Generate the code for the non-optional case.
 			// these args will already be converted to native form by the caller
 			
-			if (type == NUMBER_TYPE || type == DOUBLE_TYPE)
+			if (type == NUMBER_TYPE)
 			{
 				// push Atom
 				if (FPRIndex < kMaxFPRIndex) {
@@ -1088,7 +1088,7 @@ namespace avmplus
 		// point of the code, so reuse R30 for SAVE_RETURN.
 		const Register SAVE_RETURN = R30;
 
-		if (type == NUMBER_TYPE || type == DOUBLE_TYPE)
+		if (type == NUMBER_TYPE)
 		{
 			// result is in F1. Store it away on the stack.
 			STFD(F1,12,SP);
@@ -1105,7 +1105,7 @@ namespace avmplus
 		ADDI(R4, SP, nodePos); // CallStackNode
 		thincall(ENVADDR(MethodEnv::debugExit));
 
-		if (type == NUMBER_TYPE || type == DOUBLE_TYPE)
+		if (type == NUMBER_TYPE)
 		{
 			LFD(F1,12,SP);
 		}
@@ -1116,7 +1116,7 @@ namespace avmplus
 		}
 #endif
 
-		if (type != NUMBER_TYPE || type == DOUBLE_TYPE)
+		if (type != NUMBER_TYPE)
 		{
 			// result in R3
 			if (type == BOOLEAN_TYPE)

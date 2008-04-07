@@ -93,8 +93,8 @@ const char *opNames[] = {
     "pushscope",
     "pushnamespace",
     "hasnext2",
-    "pushdecimal",
-    "pushdnan",
+    "OP_0x33",
+    "OP_0x34",
     "OP_0x35",
     "OP_0x36",
     "OP_0x37",
@@ -163,8 +163,8 @@ const char *opNames[] = {
     "convert_b",
     "convert_o",
     "checkfilter",
-    "convert_m",
-    "convert_m_p",
+    "OP_0x79",
+    "OP_0x7A",
     "OP_0x7B",
     "OP_0x7C",
     "OP_0x7D",
@@ -185,7 +185,7 @@ const char *opNames[] = {
     "OP_0x8C",
     "OP_0x8D",
     "OP_0x8E",
-    "negate_p",
+    "OP_0x8F",
     "negate",
     "increment",
     "inclocal",
@@ -198,10 +198,10 @@ const char *opNames[] = {
     "OP_0x99",
     "concat",
     "add_d",
-    "increment_p",
-    "inclocal_p",
-    "decrement_p",
-    "declocal_p",
+    "OP_0x9C",
+    "OP_0x9D",
+    "OP_0x9E",
+    "OP_0x9F",
     "add",
     "subtract",
     "multiply",
@@ -223,16 +223,16 @@ const char *opNames[] = {
     "istype",
     "istypelate",
     "in",
-    "add_p",
-    "subtract_p",
-    "multiply_p",
-    "divide_p",
-    "modulo_p",
-    "subtract_d",
-    "multiply_d",
-    "divide_d",
-    "negate_d",
-    "module_d",
+    "OP_0xB5",
+    "OP_0xB6",
+    "OP_0xB7",
+    "OP_0xB8",
+    "OP_0xB9",
+    "OP_0xBA",
+    "OP_0xBB",
+    "OP_0xBC",
+    "OP_0xBD",
+    "OP_0xBE",
     "OP_0xBF",
     "increment_i",
     "decrement_i",
@@ -242,12 +242,12 @@ const char *opNames[] = {
     "add_i",
     "subtract_i",
     "multiply_i",
-    "divide_i",
-    "modulo_i",
-    "increment_d",
-    "decrement_d",
-    "inclocal_d",
-    "declocal_d",
+    "OP_0xC8",
+    "OP_0xC9",
+    "OP_0xCA",
+    "OP_0xCB",
+    "OP_0xCC",
+    "OP_0xCD",
     "OP_0xCE",
     "OP_0xCF",
     "getlocal0",
@@ -355,8 +355,8 @@ signed char opOperandCount[] = {
     0,	// "pushscope"
     1,	// "pushnamespace"
     2,	// "hasnext2"
-    1,	// "pushdecimal"
-    0,	// "pushdnan"
+    -1,	// "OP_0x33"
+    -1,	// "OP_0x34"
     -1,	// "OP_0x35"
     -1,	// "OP_0x36"
     -1,	// "OP_0x37"
@@ -425,8 +425,8 @@ signed char opOperandCount[] = {
     0,	// "convert_b"
     0,	// "convert_o"
     0,	// "checkfilter"
-    0,	// "convert_m"
-    1,	// "convert_m_p"
+    -1,	// "OP_0x79"
+    -1,	// "OP_0x7A"
     -1,	// "OP_0x7B"
     -1,	// "OP_0x7C"
     -1,	// "OP_0x7D"
@@ -447,7 +447,7 @@ signed char opOperandCount[] = {
     -1,	// "OP_0x8C"
     -1,	// "OP_0x8D"
     -1,	// "OP_0x8E"
-    1,	// "negate_p"
+    -1,	// "OP_0x8F"
     0,	// "negate"
     0,	// "increment"
     1,	// "inclocal"
@@ -460,10 +460,10 @@ signed char opOperandCount[] = {
     -1,	// "OP_0x99"
     -1,	// "concat"
     -1,	// "add_d"
-    1,	// "increment_p"
-    2,	// "inclocal_p"
-    1,	// "decrement_p"
-    2,	// "declocal_p"
+    -1,	// "OP_0x9C"
+    -1,	// "OP_0x9D"
+    -1,	// "OP_0x9E"
+    -1,	// "OP_0x9F"
     0,	// "add"
     0,	// "subtract"
     0,	// "multiply"
@@ -485,16 +485,16 @@ signed char opOperandCount[] = {
     1,	// "istype"
     0,	// "istypelate"
     0,	// "in"
-    1,	// "add_p"
-    1,	// "subtract_p"
-    1,	// "multiply_p"
-    1,	// "divide_p"
-    1,	// "modulo_p"
-    -1,	// "subtract_d"
-    -1,	// "multiply_d"
-    -1,	// "divide_d"
-    0,	// "negate_d"
-    -1,	// "module_d"
+    -1,	// "OP_0xB5"
+    -1,	// "OP_0xB6"
+    -1,	// "OP_0xB7"
+    -1,	// "OP_0xB8"
+    -1,	// "OP_0xB9"
+    -1,	// "OP_0xBA"
+    -1,	// "OP_0xBB"
+    -1,	// "OP_0xBC"
+    -1,	// "OP_0xBD"
+    -1,	// "OP_0xBE"
     -1,	// "OP_0xBF"
     0,	// "increment_i"
     0,	// "decrement_i"
@@ -504,12 +504,12 @@ signed char opOperandCount[] = {
     0,	// "add_i"
     0,	// "subtract_i"
     0,	// "multiply_i"
-    0,	// "divide_i"
-    0,	// "modulo_i"
-    0,	// "increment_d"
-    0,	// "decrement_d"
-    1,	// "inclocal_d"
-    1,	// "declocal_d"
+    -1,	// "OP_0xC8"
+    -1,	// "OP_0xC9"
+    -1,	// "OP_0xCA"
+    -1,	// "OP_0xCB"
+    -1,	// "OP_0xCC"
+    -1,	// "OP_0xCD"
     -1,	// "OP_0xCE"
     -1,	// "OP_0xCF"
     0,	// "getlocal0"
@@ -620,8 +620,8 @@ unsigned char opSizes[] = {
     1,	// "pushscope"
     1+2,	// "pushnamespace"
     1,	// "hasnext2"
-    1+2,	// "pushdecimal"
-    1,	// "pushdnan"
+    0,	// "OP_0x33"
+    0,	// "OP_0x34"
     0,	// "OP_0x35"
     0,	// "OP_0x36"
     0,	// "OP_0x37"
@@ -690,8 +690,8 @@ unsigned char opSizes[] = {
     1,	// "convert_b"
     1,	// "convert_o"
     1,	// "checkfilter"
-    1,	// "convert_m"
-    1+2,	// "convert_m_p"
+    0,	// "OP_0x79"
+    0,	// "OP_0x7A"
     0,	// "OP_0x7B"
     0,	// "OP_0x7C"
     0,	// "OP_0x7D"
@@ -712,7 +712,7 @@ unsigned char opSizes[] = {
     0,	// "OP_0x8C"
     0,	// "OP_0x8D"
     0,	// "OP_0x8E"
-    1+2,	// "negate_p"
+    0,	// "OP_0x8F"
     1,	// "negate"
     1,	// "increment"
     1+2,	// "inclocal"
@@ -725,10 +725,10 @@ unsigned char opSizes[] = {
     0,	// "OP_0x99"
     0,	// "concat"
     0,	// "add_d"
-    1+2,	// "increment_p"
-    1+2+2,	// "inclocal_p"
-    1+2,	// "decrement_p"
-    1+2+2,	// "declocal_p"
+    0,	// "OP_0x9C"
+    0,	// "OP_0x9D"
+    0,	// "OP_0x9E"
+    0,	// "OP_0x9F"
     1,	// "add"
     1,	// "subtract"
     1,	// "multiply"
@@ -750,16 +750,16 @@ unsigned char opSizes[] = {
     1+2,	// "istype"
     1,	// "istypelate"
     1,	// "in"
-    1+2,	// "add_p"
-    1+2,	// "subtract_p"
-    1+2,	// "multiply_p"
-    1+2,	// "divide_p"
-    1+2,	// "modulo_p"
-    0,	// "subtract_d"
-    0,	// "multiply_d"
-    0,	// "divide_d"
-    1,	// "negate_d"
-    0,	// "module_d"
+    0,	// "OP_0xB5"
+    0,	// "OP_0xB6"
+    0,	// "OP_0xB7"
+    0,	// "OP_0xB8"
+    0,	// "OP_0xB9"
+    0,	// "OP_0xBA"
+    0,	// "OP_0xBB"
+    0,	// "OP_0xBC"
+    0,	// "OP_0xBD"
+    0,	// "OP_0xBE"
     0,	// "OP_0xBF"
     1,	// "increment_i"
     1,	// "decrement_i"
@@ -769,12 +769,12 @@ unsigned char opSizes[] = {
     1,	// "add_i"
     1,	// "subtract_i"
     1,	// "multiply_i"
-    1,	// "divide_i"
-    1,	// "modulo_i"
-    1,	// "increment_d"
-    1,	// "decrement_d"
-    1+2,	// "inclocal_d"
-    1+2,	// "declocal_d"
+    0,	// "OP_0xC8"
+    0,	// "OP_0xC9"
+    0,	// "OP_0xCA"
+    0,	// "OP_0xCB"
+    0,	// "OP_0xCC"
+    0,	// "OP_0xCD"
     0,	// "OP_0xCE"
     0,	// "OP_0xCF"
     1,	// "getlocal0"
@@ -949,23 +949,8 @@ unsigned char opStackPop[] = {
     1,
     1,
     0,
-    1,
-    1,
     0,
     0,
-    0,
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    2,
-    1,
-    1,
     0,
     0,
     0,
@@ -974,6 +959,21 @@ unsigned char opStackPop[] = {
     1,
     1,
     1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
     0,
     1,
     0,
@@ -984,54 +984,54 @@ unsigned char opStackPop[] = {
     0,
     0,
     0,
-    1,
-    0,
-    1,
-    0,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    1,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
     0,
     0,
     0,
-    1,
     0,
-    0,
-    1,
-    1,
-    0,
-    0,
-    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
     2,
     2,
     2,
     2,
     2,
     1,
+    2,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     1,
+    1,
+    0,
+    0,
+    1,
+    2,
+    2,
+    2,
+    0,
+    0,
+    0,
+    0,
     0,
     0,
     0,
@@ -1138,6 +1138,134 @@ unsigned char opStackPush[] = {
     0,
     1,
     1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
     1,
     1,
     0,
@@ -1153,74 +1281,8 @@ unsigned char opStackPush[] = {
     0,
     1,
     1,
-    1,
-    1,
-    1,
-    1,
-    1,
     0,
     0,
-    0,
-    1,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
-    0,
-    1,
-    0,
-    1,
-    1,
-    1,
-    1,
-    0,
-    0,
-    1,
-    0,
-    1,
-    0,
-    1,
-    0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    0,
-    1,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
     1,
     1,
     1,
@@ -1229,68 +1291,6 @@ unsigned char opStackPush[] = {
     0,
     0,
     0,
-    0,
-    1,
-    1,
-    1,
-    0,
-    1,
-    0,
-    1,
-    1,
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    1,
-    0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    1,
-    1,
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
     0,
     0,
     0,
@@ -1467,37 +1467,11 @@ unsigned char opCanThrow[] = {
     1,
     1,
     1,
-    1,
-    1,
     0,
     0,
     0,
     0,
     0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    0,
-    0,
-    1,
     0,
     0,
     1,
@@ -1510,12 +1484,28 @@ unsigned char opCanThrow[] = {
     1,
     1,
     1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     1,
     1,
     1,
     1,
     1,
+    0,
+    0,
     1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
     1,
     1,
     1,
@@ -1538,6 +1528,16 @@ unsigned char opCanThrow[] = {
     1,
     1,
     0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     1,
     1,
     1,
@@ -1546,12 +1546,12 @@ unsigned char opCanThrow[] = {
     1,
     1,
     1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     0,
     0,
     0,

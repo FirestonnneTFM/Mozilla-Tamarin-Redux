@@ -130,14 +130,10 @@ namespace avmplus
 			return obj->traits()->findBinding(name, core->publicNamespace) != BIND_NONE ||
 					 obj->hasStringProperty(name);
 		}
-		case kSpecialType:
-			if (thisAtom == undefinedAtom)
-				return false;
-			// else treat as Boolean
 		case kNamespaceType:
 		case kStringType:
+		case kBooleanType:
 		case kDoubleType:
-		case kDecimalType:
 		case kIntegerType:
 			return toplevel()->toTraits(thisAtom)->findBinding(name, core->publicNamespace) != BIND_NONE;
 		default:

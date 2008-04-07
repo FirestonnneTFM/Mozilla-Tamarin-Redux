@@ -45,7 +45,6 @@ namespace avmplus
 		cpool_int(0),
 		cpool_uint(0),
 		cpool_double(core->GetGC(), 0),
-		cpool_decimal(core->GetGC(), 0),
 		cpool_string(core->GetGC(), 0),
 		cpool_ns(core->GetGC(), 0),
 		cpool_ns_set(core->GetGC(), 0),
@@ -207,11 +206,6 @@ namespace avmplus
 			if( index >= constantDoubleCount )
 				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantDoubleCount));
 			return kDoubleType|(uintptr)cpool_double[index];
-
-		case CONSTANT_Decimal:
-			if( index >= constantDecimalCount )
-				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantDecimalCount));
-			return kDecimalType|(uintptr)cpool_decimal[index];
 
 		case CONSTANT_Utf8:
 			if( index >= constantStringCount )
@@ -484,7 +478,7 @@ namespace avmplus
 
 				// default value for this slot.
 				int slotOffset;
-				if ((slotTraits == NUMBER_TYPE || slotTraits == DOUBLE_TYPE)
+				if ((slotTraits == NUMBER_TYPE)
 					#ifdef AVMPLUS_64BIT
 					|| ((slotTraits != INT_TYPE) && (slotTraits != UINT_TYPE) && (slotTraits != BOOLEAN_TYPE))
 					#endif			

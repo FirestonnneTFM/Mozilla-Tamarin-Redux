@@ -45,7 +45,7 @@ namespace avmplus
 		const unsigned char kindToPushOp[] = {
 			0,
 			OP_pushstring, // CONSTANT_Utf8=1
-			OP_pushdecimal, // CONSTANT_Decimal=2 
+			0, 
 			OP_pushint,  // CONSTANT_Int=3
 			OP_pushuint,  // CONSTANT_UInt=4
 			OP_pushnamespace, // CONSTANT_PrivateNs=5
@@ -77,7 +77,7 @@ namespace avmplus
 		const char *constantNames[] = {
 			"const-0",
 			"utf8",//const int CONSTANT_Utf8         = 0x01;
-			"decimal",
+			"const-2",
 			"int",//const int CONSTANT_Int = 0x03;
 			"uint",//const int CONSTANT_UInt = 0x04;
 			"private",//const int CONSTANT_PrivateNS = 0x05;

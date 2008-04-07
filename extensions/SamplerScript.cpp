@@ -381,7 +381,7 @@ namespace avmplus
 			for(uint32 i=0; i < sample.stack.depth; i++, e++)
 			{
 				ScriptObject *f = core->newObject(stackFrameVT, NULL);
-				WBRC(gc(), f, ((char*)f + cc->nameOffset), uintptr(Stringp(e->info->name)));
+				WBRC(gc(), f, ((char*)f + cc->nameOffset), e->info->name);
 				if(e->filename) {
 					WBRC(gc(), f, ((char*)f + cc->fileOffset), e->filename);
 					*(uint32*)((char*)f + cc->lineOffset) = e->linenum;

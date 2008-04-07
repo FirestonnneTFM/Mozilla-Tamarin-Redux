@@ -328,11 +328,11 @@ namespace avmplus
 		}
 		void atomToValue(Atom atom, float& value)
 		{
-			value = (float) core()->doubleNumber(atom);
+			value = (float) core()->number(atom);
 		}
 		void atomToValue(Atom atom, double& value)
 		{
-			value = core()->doubleNumber(atom);
+			value = core()->number(atom);
 		}
 		void atomToValue(Atom atom, ScriptObject*& value)
 		{

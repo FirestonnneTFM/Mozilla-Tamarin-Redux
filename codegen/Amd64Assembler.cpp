@@ -1104,7 +1104,7 @@ namespace avmplus
 				else if (type == BOOLEAN_TYPE)
 				{
 					// push bool
-					int b = (int)arg>>4;
+					int b = (int)arg>>3;
 					if (parameterCount < REGCOUNT)
 					{
 						MOV (intRegUsage[parameterCount], b);
@@ -1363,11 +1363,17 @@ namespace avmplus
 				MOVZX_r8 (RAX, RAX);
 			}
 			else if (type == INT_TYPE)
+
 			{
+
 				// sign extend EAX to RAX
+
 				REX (RAX, RAX, true);
+
  				*mip++ = (MDInstruction)(0x98); // CDQE instruction
+
 			}
+
 			else if (type == VOID_TYPE)
 			{
 				MOV (RAX, undefinedAtom);
@@ -1385,6 +1391,7 @@ namespace avmplus
 		//pool->verbose = false;
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////

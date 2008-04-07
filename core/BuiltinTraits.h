@@ -74,8 +74,6 @@ namespace avmplus
 		Traits *number_itraits;
 		Traits *int_itraits;
 		Traits *uint_itraits;
-		Traits *double_itraits;
-		Traits *decimal_itraits;
 		Traits *object_itraits;
 		Traits *regexp_itraits;
 		Traits *string_itraits;
@@ -95,8 +93,6 @@ namespace avmplus
 		Traits* number_ctraits;
 		Traits* string_ctraits;
 		Traits* boolean_ctraits;
-		Traits* double_ctraits;
-		Traits* decimal_ctraits;
 
 	private:
 		Traits* findCTraits(const char* name, PoolObject* pool);

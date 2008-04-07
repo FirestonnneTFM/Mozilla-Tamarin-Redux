@@ -108,11 +108,6 @@ AVMPLUS_SRCS := ${AVMPLUS_ROOT}/core/AbcEnv.cpp \
 	${AVMPLUS_ROOT}/core/Domain.cpp \
 	${AVMPLUS_ROOT}/core/DomainEnv.cpp \
 	${AVMPLUS_ROOT}/core/DynamicProfiler.cpp \
-	${AVMPLUS_ROOT}/core/decContext.cpp \
-	${AVMPLUS_ROOT}/core/decimal128.cpp \
-	${AVMPLUS_ROOT}/core/DecimalClass.cpp \
-	${AVMPLUS_ROOT}/core/decNumber.cpp \
-	${AVMPLUS_ROOT}/core/DoubleClass.cpp \
 	${AVMPLUS_ROOT}/core/E4XNode.cpp \
 	${AVMPLUS_ROOT}/core/ErrorClass.cpp \
 	${AVMPLUS_ROOT}/core/ErrorConstants.cpp \

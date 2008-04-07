@@ -299,11 +299,6 @@ namespace avmplus
 
 		static bool isMachineCompatible(const Traits* a, const Traits* b);
 
-		inline static bool isNumberOrDouble(const Traits* a)
-		{
-			return a && (a == a->core->traits.number_itraits || a == a->core->traits.double_itraits);
-		}
-
 		void setNativeClassInfo(NativeClassInfo* entry) { this->nativeClassInfo = entry; }
 		void setNativeScriptInfo(NativeScriptInfo* entry) { this->nativeScriptInfo = entry; }
 

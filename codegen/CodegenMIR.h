@@ -218,8 +218,7 @@ namespace avmplus
 		void epilogue(FrameState* state);
 		bool prologue(FrameState* state);
 		void emitCall(FrameState* state, AbcOpcode opcode, sintptr method_id, int argc, Traits* result);
-//		void emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result);
-		void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL, int decimalParam = AvmCore::defaultDecimalParam);
+		void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
 		void emitIf(FrameState* state, AbcOpcode opcode, sintptr target, int lhs, int rhs);
 		void emitSwap(FrameState* state, int i, int j);
 		void emitCopy(FrameState* state, int src, int dest);

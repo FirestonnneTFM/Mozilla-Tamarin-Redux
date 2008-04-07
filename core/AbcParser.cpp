@@ -40,8 +40,6 @@
 
 namespace avmplus
 {
-#define FIRSTVERSIONWITHDECIMAL (46<<16|17)
-
     /**
      * parse a .abc file completely
      * @param code
@@ -71,7 +69,6 @@ namespace avmplus
 		switch (version)
 		{
 		case (46<<16|16):
-		case (46<<16|17):	// version with decimal
 		{
 			AbcParser parser(core, code, toplevel, domain, nativeMethods, nativeClasses, nativeScripts);
 			PoolObject *pObject = parser.parse();
@@ -1215,63 +1212,6 @@ namespace avmplus
 		#ifdef AVMPLUS_PROFILE
 		core->sprof.cpoolDoubleSize = (int)(pos-startpos);
 		#endif
-
-		if (version < FIRSTVERSIONWITHDECIMAL) {
-            pool->constantDecimalCount = 0;
-#ifdef AVMPLUS_PROFILE
-            core->sprof.cpoolDecimalSize = 0;
-#endif
-        }
-        else {
-			// read the decimal constant pool
-			uint32 decimal_count = readU30(pos);
-			if (decimal_count > (uint32)(abcEnd - pos))
-				toplevel->throwVerifyError(kCorruptABCError);
-
-			List<DecimalRep*, LIST_RCObjects>& cpool_decimal = pool->cpool_decimal;
-			cpool_decimal.ensureCapacity(decimal_count);
-			pool->constantDecimalCount = decimal_count;
-
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-			startpos = pos;
-#endif
-
-			for(uint32 i = 1; i < decimal_count; ++i)
-			{
-#ifdef AVMPLUS_VERBOSE
-				int offset = (int)(pos-startpos);
-#endif
-				decimal128 d128;
-				for (int32 j = 15; j >= 0; j--) {
-					d128.bytes[j] = *pos++;
-				}
-				decNumber dn;
-				decimal128ToNumber(&d128, &dn);
-				DecimalRep *val = core->allocDecimal(&dn);
-				cpool_decimal.set(i, val);
-
-#ifdef AVMPLUS_VERBOSE
-				if (pool->verbose)
-				{
-					char buf[100];
-					char buf2[50];
-					wchar wbuf2[50];
-					int len;
-					MathUtils::convertIntegerToString((sintptr)val, wbuf2, len, 16, true);
-					UnicodeUtils::Utf16ToUtf8(wbuf2, len, (uint8 *)buf2, 50);
-					buf2[len] = 0;
-					decNumberToString(&dn, buf);
-					core->console << "    " << offset << ":" << "cpool_decimal["<<i<<"]= ("
-						<< buf2 << ") " << constantNames[CONSTANT_Decimal] << " ";
-					core->console << buf;
-					core->console << "\n";
-				}
-#endif
-			}
-#ifdef AVMPLUS_PROFILE
-            core->sprof.cpoolDecimalSize = (int)(pos - startpos);
-#endif
-		}
 
 		uint32 string_count = readU30(pos);
 		if (string_count > (uint32)(abcEnd - pos))

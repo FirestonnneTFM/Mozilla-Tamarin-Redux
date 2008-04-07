@@ -853,7 +853,7 @@ namespace avmplus
 				else if (type == BOOLEAN_TYPE)
 				{
 					// push bool
-					int b = arg>>4;
+					int b = arg>>3;
 					PUSH (b);
 				}
 				else if (type == INT_TYPE)
@@ -866,7 +866,7 @@ namespace avmplus
 					uint32 v = AvmCore::integer_u(arg);
 					PUSH (v);
 				}
-				else if (type == NUMBER_TYPE || type == DOUBLE_TYPE)
+				else if (type == NUMBER_TYPE)
 				{
 					// push double
 					// TODO make this faster, we probably have memory stalls
@@ -901,7 +901,7 @@ namespace avmplus
 			// Generate the code for the non-optional case.
 			// these args will already be converted to native form by the caller
 			
-			if (type == NUMBER_TYPE || type == DOUBLE_TYPE)
+			if (type == NUMBER_TYPE)
 			{
 				// push double
 				// TODO make this faster, we probably have memory stalls
@@ -992,7 +992,7 @@ namespace avmplus
 		
 		// store the return value on the stack if not a double.
 		int adjust = 0;
-		if (type != NUMBER_TYPE && type != DOUBLE_TYPE)
+		if (type != NUMBER_TYPE)
 		{
 			PUSH(EAX);
 			adjust = 4;
@@ -1026,12 +1026,12 @@ namespace avmplus
 		if (adjust>0) 
 			{ ADD(ESP, adjust); } 
 
-		if (type != NUMBER_TYPE && type != DOUBLE_TYPE)
+		if (type != NUMBER_TYPE)
 			{ POP(EAX);	}
 	}
 #endif /* DEBUGGER */
 
-		if (type != NUMBER_TYPE && type != DOUBLE_TYPE)
+		if (type != NUMBER_TYPE)
 		{
 			// result in EAX
 			

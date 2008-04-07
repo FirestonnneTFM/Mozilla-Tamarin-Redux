@@ -152,7 +152,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		for (int i=0; i < argc; i++)
 		{
-			double y = core->doubleNumber(argv[i]);
+			double y = core->number(argv[i]);
 			if (y < x)
 				x = y;
 			else if (y == 0 && y == x && MathUtils::copysign(1.0, y) == -1)
@@ -169,7 +169,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		for (int i=0; i < argc; i++)
 		{
-			double y = core->doubleNumber(argv[i]);
+			double y = core->number(argv[i]);
 			if (y > x)
 				x = y;
 			else if (y == 0 && y == x && MathUtils::copysign(1.0, x) == -1)

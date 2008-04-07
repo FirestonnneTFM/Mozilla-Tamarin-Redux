@@ -1153,7 +1153,7 @@ namespace avmplus
 	bool XMLListObject::xmlListPropertyIsEnumerable(Atom P) // NOT virtual, NOT an override
 	{
 		AvmCore *core = this->core();
-		double index = core->doubleNumber(P);
+		double index = core->number(P);
 		if ((index >= 0.0) && (index < _length()))
 			return true;
 

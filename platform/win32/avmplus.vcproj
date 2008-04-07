@@ -322,25 +322,10 @@
 				RelativePath=".\DateWin.cpp">
 			</File>
 			<File
-				RelativePath="..\..\core\decContext.cpp">
-			</File>
-			<File
-				RelativePath="..\..\core\decimal128.cpp">
-			</File>
-			<File
-				RelativePath="..\..\core\DecimalClass.cpp">
-			</File>
-			<File
-				RelativePath="..\..\core\decNumber.cpp">
-			</File>
-			<File
 				RelativePath="..\..\core\Domain.cpp">
 			</File>
 			<File
 				RelativePath="..\..\core\DomainEnv.cpp">
-			</File>
-			<File
-				RelativePath="..\..\core\DoubleClass.cpp">
 			</File>
 			<File
 				RelativePath="..\..\core\DynamicProfiler.cpp">
@@ -610,34 +595,10 @@
 				RelativePath="..\..\core\DateObject.h">
 			</File>
 			<File
-				RelativePath="..\..\core\decContext.h">
-			</File>
-			<File
-				RelativePath="..\..\core\decDPD.h">
-			</File>
-			<File
-				RelativePath="..\..\core\decimal128.h">
-			</File>
-			<File
-				RelativePath="..\..\core\DecimalClass.h">
-			</File>
-			<File
-				RelativePath="..\..\core\DecimalRep.h">
-			</File>
-			<File
-				RelativePath="..\..\core\decNumber.h">
-			</File>
-			<File
-				RelativePath="..\..\core\decNumberLocal.h">
-			</File>
-			<File
 				RelativePath="..\..\core\Domain.h">
 			</File>
 			<File
 				RelativePath="..\..\core\DomainEnv.h">
-			</File>
-			<File
-				RelativePath="..\..\core\DoubleClass.h">
 			</File>
 			<File
 				RelativePath="..\..\core\DynamicProfiler.h">
@@ -829,9 +790,6 @@
 				RelativePath="..\..\pcre\pcre_maketables.cpp">
 			</File>
 			<File
-				RelativePath="..\..\pcre\pcre_newline.cpp">
-			</File>
-			<File
 				RelativePath="..\..\pcre\pcre_ord2utf8.cpp">
 			</File>
 			<File
@@ -897,9 +855,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\Number.as">
-			</File>
-			<File
-				RelativePath="..\..\core\Number2.as">
 			</File>
 			<File
 				RelativePath="..\..\core\Object.as">

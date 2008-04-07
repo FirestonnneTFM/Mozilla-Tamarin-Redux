@@ -77,7 +77,7 @@ namespace avmplus
 		// we know we have verified the method, so we can go right into it.
 		Traits* returnType = method->returnTraits();
 		AvmCore* core = this->core();
-		if (returnType == NUMBER_TYPE || returnType == DOUBLE_TYPE)
+		if (returnType == NUMBER_TYPE)
 		{
 			AvmAssert(method->implN != NULL);
 			double d = method->implN(this, argc, ap);
@@ -86,13 +86,11 @@ namespace avmplus
 		else
 		{
 			AvmAssert(method->impl32 != NULL);
-			Atom i = method->impl32(this, argc, ap);  // though it doesn't have its tag yet
+			Atom i = method->impl32(this, argc, ap);
 			if (returnType == INT_TYPE)
 				return core->intToAtom((int)i);
 			else if (returnType == UINT_TYPE)
 				return core->uintToAtom((uint32)i);
-			else if (returnType == DECIMAL_TYPE)
-				return core->decimalToAtom((DecimalRep*)i);
 			else if (returnType == BOOLEAN_TYPE)
 				return i ? trueAtom : falseAtom;
 			else if (!returnType || returnType == OBJECT_TYPE || returnType == VOID_TYPE)
@@ -127,13 +125,13 @@ namespace avmplus
 				Traits* t = f->paramTraits(i);
 				AvmAssert(t != VOID_TYPE);
 
-				if (t == NUMBER_TYPE || t == DOUBLE_TYPE) 
+				if (t == NUMBER_TYPE) 
 				{
 					union {
 						double d;
 						uint32 l[2];
 					};
-					d = core->doubleNumber(in[i]);
+					d = core->number(in[i]);
 					#ifdef AVMPLUS_64BIT
 					AvmAssert(sizeof(Atom) == sizeof(double));
 					*(double *) args = d;
@@ -152,10 +150,6 @@ namespace avmplus
 				{
 					*args++ = core->toUInt32(in[i]);
 				}
-                else if (t == DECIMAL_TYPE)
-                {
-                    *args++ = (Atom)(core->toDecimal(in[i]));
-                }
 				else if (t == BOOLEAN_TYPE)
 				{
 					*args++ = core->boolean(in[i]);
@@ -225,8 +219,8 @@ namespace avmplus
 			activation->resolveSignatures();
 			setActivationOrMCTable(activation, kActivation);
 		}
-    }
-
+	}
+	
 #ifdef DEBUGGER
 	void MethodEnv::debugEnter(int argc, uint32 *ap, 
 							   Traits**frameTraits, int localCount,

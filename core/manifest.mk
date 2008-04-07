@@ -110,11 +110,6 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/Date.cpp \
   $(curdir)/AbcData.cpp \
   $(curdir)/AvmPlusScriptableObject.cpp \
-  $(curdir)/decContext.cpp \
-  $(curdir)/decimal128.cpp \
-  $(curdir)/DecimalClass.cpp \
-  $(curdir)/decNumber.cpp \
-  $(curdir)/DoubleClass.cpp \
   $(NULL)
 
 ifdef ENABLE_DEBUG
