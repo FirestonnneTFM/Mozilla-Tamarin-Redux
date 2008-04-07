@@ -1092,43 +1092,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\decContext.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\decContext.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\decDPD.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\decimal128.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\decimal128.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\DecimalClass.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\DecimalClass.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\DecimalRep.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\decNumber.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\decNumber.h"
 				>
 			</File>
 			<File
@@ -1675,10 +1643,6 @@
 		<Filter
 			Name="pcre"
 			>
-			<File
-				RelativePath="..\..\core\DoubleClass.cpp"
-				>
-			</File>
 			<File
 				RelativePath="..\..\pcre\pcre_chartables.cpp"
 				>
