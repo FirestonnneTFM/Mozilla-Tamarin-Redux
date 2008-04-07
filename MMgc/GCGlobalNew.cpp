@@ -38,8 +38,6 @@
 
 #include "MMgc.h"
 
-using namespace std;
-
 #ifdef OVERRIDE_GLOBAL_NEW
 
 #ifdef __SUNPRO_CC
