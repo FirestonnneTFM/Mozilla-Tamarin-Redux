@@ -1,45 +1,72 @@
-This directory contains code for an ES4 compiler for tamarin 
-written in ES4. The code is in a formidable stage and so is 
-prone to raising unhandled exceptions. But here are some
-things you might want to do with it anyway.
+This directory contains code for an ES4 compiler written in ES4.  The
+compiler generates code for Tamarin (.abc format).
+
+
+STATE OF THE SYSTEM
+
+The code is pretty much in pre-alpha state.  ESC supports all of ES3
+(modulo some known bugs) and quite a bit of proposed ES4, with more
+features being added continually.  It can rebuild itself, has OK
+performance, and generates OK code.
+
+At this time (April 2008) the main focus is on extending ESC to track
+the ES4 spec as that spec is being developed.
+
+
+PRELIMINARIES
+
+You need to compile tamarin-central (a Release_Debugger build is best)
+and install the resulting executable as esc/bin/shell.exe.
+
 
 RUNNING
 
-A set of last known good .abc files is provided in the ./bin 
-directory so you can run the compiler out of the box. There
-isn't much you can do with it that is interesting, but there
-you are.
+A set of last known good .abc files is provided in the ./bin directory
+so you can run the compiler out of the box.  
+
+There is a command-line compiler:
 
   cd build
-  ./main.sh      enter simple expressions at the 'es>' prompt
+  ./esc.sh <filename>.es    // produces <filename>.es.abc
+
+There is a read-eval-print loop:
+
+  cd build
+  ./main.sh
+
+Due to Tamarin artifacts that have yet to be fixed the global object
+has peculiarities that will trip you up.  Global variables created by
+assigning to undefined names are not visible to later expressions
+entered at the repl, for example.
+
+There are various decompilation and debugging tools that need to be
+documented here.
+
+
 
 BUILDING
 
-Various hard coded scripts are provided to run ESC on the ES4-RI
-and on Tamarin. Our job is to get the mother script, comp-esc.sh,
-to run to completion without errors. For now it serves as a kind
-of roadmap of what needs to get done.
+There is a makefile that builds the compiler.
 
   cd build
-  ./comp-esc.sh  requires the ES4-RI heap to be installed and 
-                 various hard coded paths to be edited, commands 
-                 that build out of date targets to be uncommented
+  make
 
-CONTRIBUTING
+(or "make all", "make clean", and so on -- UTSL).
 
-If you are so inclined and have a lot of time on your hands, 
-figure out how to get a working version of the ES4-RI on your 
-machine, build a debug version of tamarin, and help us run down 
-the remaining verification and runtime errors that are keeping
-comp-esc.sh from completing successfully.
+
+BUGS
+
+Known bugs are logged in the Tamarin/ESC component in Bugzilla.
+
 
 QUESTIONING
 
 Please do.
 
     #tamarin on irc.mozilla.org
-    mail:tamarin-devel@mozilla.org
+    tamarin-devel@mozilla.org
 
-Send personal attacks and complements to
+Send personal attacks and compliments to
 
-    mail:jodyer@adobe.com
+    lhansen@adobe.com
+    jodyer@adobe.com
