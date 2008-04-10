@@ -100,9 +100,3 @@
  */
 
 #define AVMPLUS_JIT_READONLY
-
-/**
- * User-defined operator new.
- */
-
-#define OVERRIDE_GLOBAL_NEW
