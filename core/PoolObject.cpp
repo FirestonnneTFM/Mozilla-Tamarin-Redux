@@ -340,6 +340,17 @@ namespace avmplus
 			m.setAttr(kind==CONSTANT_MultinameLA);
 			break;
 		}
+
+		case CONSTANT_TypeName:
+		{
+			index = AvmCore::readU30(pos);
+			Atom a = cpool_mn[index];
+			parseMultiname(atomToPos(a), m);
+			index = AvmCore::readU30(pos);
+			AvmAssert(index==1);
+			m.setTypeParameter(AvmCore::readU30(pos));
+			break;
+		}
 		
 		default:
 			AvmAssert(false);
@@ -370,6 +381,12 @@ namespace avmplus
 	{
 		// only save the type name for now.  verifier will resolve to traits
 		uint32 index = AvmCore::readU30(pc);
+		return resolveTypeName(index, toplevel, allowVoid);
+	}
+
+	Traits* PoolObject::resolveTypeName(uint32 index, const Toplevel* toplevel, bool allowVoid/*=false*/) const
+	{
+		// only save the type name for now.  verifier will resolve to traits
 		if (index == 0)
 		{
 			return NULL;
@@ -385,6 +402,12 @@ namespace avmplus
 		parseMultiname(a, m);
 
 		Traits* t = getTraits(&m, toplevel);
+		if(m.isParameterizedType())
+		{
+			Traits* param_traits = resolveTypeName(m.getTypeParameter(), toplevel);
+
+			t = resolveParameterizedType(toplevel, t, param_traits);
+		}
 		if (!t)
 		{
 			#ifdef AVMPLUS_VERBOSE
@@ -393,13 +416,46 @@ namespace avmplus
 			#endif
 			toplevel->throwVerifyError(kClassNotFoundError, core->toErrorString(&m));
 		}
-
 		if (!allowVoid && t == VOID_TYPE)
 			toplevel->throwVerifyError(kIllegalVoidError);
 
 		return t;
 	}
 
+	Traits* PoolObject::resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* param_traits ) const
+	{
+		Traits* r = NULL;
+		if( base == core->traits.vector_itraits)
+		{
+			// Only vector is parameterizable for now...
+			if(!param_traits) // Vector.<*>
+				r = core->traits.vectorobj_itraits;  
+			else if( param_traits == core->traits.int_itraits)
+				r = core->traits.vectorint_itraits;
+			else if (param_traits == core->traits.uint_itraits)
+				r = core->traits.vectoruint_itraits;
+			else if (param_traits == core->traits.number_itraits)
+				r = core->traits.vectordouble_itraits;
+			else
+			{
+				Stringp fullname = core->internString( core->concatStrings(core->newString("Vector.<"), 
+					core->concatStrings(param_traits->formatClassName(), core->newString(">")))->atom());
+
+				Multiname newname;
+				newname.setName(fullname);
+				newname.setNamespace(base->ns);
+
+				r = getTraits(&newname, toplevel);
+
+				if( !r )
+				{
+					r = core->makeParameterizedITraits(fullname, base->ns, core->traits.vectorobj_itraits);
+					core->traits.vector_itraits->pool->domain->namedTraits->add(fullname, base->ns, (Binding)r);
+				}
+			}
+		}
+		return r;
+	}
 	void PoolObject::allowEarlyBinding(Traits* t, bool& slot) const
 	{
 		// the compiler can early bind to a type's slots when it's defined

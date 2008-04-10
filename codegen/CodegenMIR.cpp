@@ -3693,6 +3693,32 @@ namespace avmplus
 				break;
  			}
 
+			case OP_applytype:
+			{
+				// stack in: method arg1..N
+				// sp[-argc] = applytype(env, sp[-argc], argc, null, arg1..N)
+				int argc = int(op1);
+				int funcDisp = sp - argc;
+				int dest = funcDisp;
+				int arg0 = sp - argc + 1;
+
+				OP* func = loadAtomRep(funcDisp);
+
+				// convert args to Atom[] for the call
+				OP* ap = storeAtomArgs(argc, arg0);
+
+				OP* toplevel = loadToplevel(ldargIns(_env));
+				OP* argv = leaIns(0, ap);
+
+				OP* i3 = callIns(MIR_cm, TOPLEVELADDR(Toplevel::op_applytype), 4,
+					toplevel, func, InsConst(argc), argv);
+
+				InsDealloc(ap);
+
+				localSet(dest, atomToNativeRep(result, i3));
+				break;
+			}
+
 			case OP_newobject:
 			{
  				// result = env->op_newobject(sp, argc)
@@ -3919,7 +3945,7 @@ namespace avmplus
 					Traits* objType = state->value(objDisp).traits;
 
 					OP *value;
-					if (objType == ARRAY_TYPE || objType == VECTOROBJ_TYPE )
+					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)) )
 					{
 						value = callIns(MIR_cm, (objType==ARRAY_TYPE ? 
 												ARRAYADDR(ArrayObject::_getIntProperty) :
@@ -3981,7 +4007,7 @@ namespace avmplus
 					Traits* objType = state->value(objDisp).traits;
 
 					OP *value;
-					if (objType == ARRAY_TYPE || objType ==VECTOROBJ_TYPE)
+					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
 						value = callIns(MIR_cm, (objType==ARRAY_TYPE ? 
 												ARRAYADDR(ArrayObject::_getUintProperty) :
@@ -4103,7 +4129,7 @@ namespace avmplus
 					
 					Traits* objType = state->value(objDisp).traits;
 
-					if (objType == ARRAY_TYPE || objType == VECTOROBJ_TYPE)
+					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
 						OP* value = loadAtomRep(sp);
 						callIns(MIR_cm, (objType==ARRAY_TYPE ? 
@@ -4175,7 +4201,7 @@ namespace avmplus
 					
 					Traits* objType = state->value(objDisp).traits;
 
-					if (objType == ARRAY_TYPE || objType == VECTOROBJ_TYPE)
+					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
 						OP* value = loadAtomRep(sp);
 						callIns(MIR_cm, (objType==ARRAY_TYPE ? 

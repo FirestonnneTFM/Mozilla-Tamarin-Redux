@@ -1585,6 +1585,24 @@ namespace avmplus
 				break;
 			}
 
+			case OP_applytype: 
+				{
+					// in: factory arg1..N
+					// out: type
+					const uint32 argc = imm30;
+					checkStack(argc+1, 1);
+					// * is ok for the type, as Vector classes have no statics
+					// when we implement type parameters fully, we should do something here.
+					Traits* itraits = NULL;
+					if (mir)
+					{
+						mir->emitSetContext(state, NULL);
+						mir->emit(state, opcode, argc, 0, itraits);
+					}
+					state->pop_push(argc+1, itraits, true);
+					break;
+				}
+
 			case OP_callsuper: 
 			case OP_callsupervoid:
 			{
@@ -2925,6 +2943,12 @@ namespace avmplus
 		Traits *t = pool->getTraits(&name, toplevel);
 		if (t == NULL)
 			verifyFailed(kClassNotFoundError, core->toErrorString(&name));
+		else
+			if( name.isParameterizedType() )
+			{
+				Traits* param_traits = checkTypeName(name.getTypeParameter());
+				t = pool->resolveParameterizedType(toplevel, t, param_traits);
+			}
 		return t;
 	}
 

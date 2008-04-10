@@ -80,10 +80,11 @@ namespace avmplus
 		NATIVE_CLASS(abcclass_Date,				DateClass,		DateObject)
 
 		// Vector
-		NATIVE_CLASS(abcclass_Vector_int,     IntVectorClass,      IntVectorObject)		
-		NATIVE_CLASS(abcclass_Vector_uint,    UIntVectorClass,     UIntVectorObject)		
-		NATIVE_CLASS(abcclass_Vector_double,  DoubleVectorClass,   DoubleVectorObject)	
-		NATIVE_CLASS(abcclass_Vector_object,  ObjectVectorClass,  ObjectVectorObject)		
+		NATIVE_CLASS(abcclass___AS3___vec_Vector_int,     IntVectorClass,      IntVectorObject)		
+		NATIVE_CLASS(abcclass___AS3___vec_Vector_uint,    UIntVectorClass,     UIntVectorObject)		
+		NATIVE_CLASS(abcclass___AS3___vec_Vector_double,  DoubleVectorClass,   DoubleVectorObject)	
+		NATIVE_CLASS(abcclass___AS3___vec_Vector,	      VectorClass,		   ObjectVectorObject)		
+		NATIVE_CLASS(abcclass___AS3___vec_Vector_object,  ObjectVectorClass,  ObjectVectorObject)		
 
 		// E4X
 		NATIVE_CLASS(abcclass_XML,				XMLClass,		XMLObject)
@@ -568,6 +569,28 @@ namespace avmplus
 		}
 
 		return handleActionPool(pool, domainEnv, toplevel, codeContext);
+	}
+
+	Traits* AvmCore::makeParameterizedITraits(Stringp name, Namespace* ns, Traits* t)
+	{
+		Traits* newtraits = newTraits(t, 0, 0, t->sizeofInstance);
+		newtraits->name = name;
+		newtraits->ns = ns;
+		newtraits->slotCount = t->slotCount;
+		newtraits->methodCount = t->methodCount;
+		newtraits->needsHashtable = t->needsHashtable;
+		return newtraits;
+	}
+
+	Traits* AvmCore::makeParameterizedCTraits(Stringp name, Namespace* ns, Traits* t)
+	{
+		Traits* newtraits = newTraits(t->base, 0, 0, t->sizeofInstance);
+		newtraits->name = name;
+		newtraits->ns = ns;
+		newtraits->slotCount = t->base->slotCount;
+		newtraits->methodCount = t->base->methodCount;
+		newtraits->needsHashtable = t->needsHashtable;
+		return newtraits;
 	}
 
 /*

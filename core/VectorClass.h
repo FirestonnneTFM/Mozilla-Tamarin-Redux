@@ -541,8 +541,26 @@ namespace avmplus
 		DECLARE_NATIVE_MAP(DoubleVectorClass)
     };
 
+	class VectorClass : public ClassClosure
+	{
+	public:
+		VectorClass(VTable * vtable);
+
+		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
+
+		ObjectVectorObject* newVector(ClassClosure* type, uint32 length = 0);
+
+		virtual Atom applyTypeArgs(int argc, Atom* argv);
+
+		DECLARE_NATIVE_MAP(VectorClass)
+	
+	private:
+		DWB(Hashtable*) instantiated_types;
+	};
+
 	class ObjectVectorClass : public ClassClosure
 	{
+		friend class VectorClass;
 	public:
 		ObjectVectorClass(VTable * vtable);
 
@@ -551,6 +569,9 @@ namespace avmplus
 		ObjectVectorObject* newVector(ClassClosure* type, uint32 length = 0);
 
 		DECLARE_NATIVE_MAP(ObjectVectorClass)
+	
+	private:
+		DRCWB(ClassClosure*) index_type;
 	};
 
 }	

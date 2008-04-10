@@ -82,6 +82,7 @@ namespace avmplus
 		Traits *vectoruint_itraits;
 		Traits *vectordouble_itraits;
 		Traits *vectorobj_itraits;
+		Traits *vector_itraits;
 		Traits *void_itraits;
 		Traits *xml_itraits;
 		Traits *xmlList_itraits;
@@ -93,6 +94,7 @@ namespace avmplus
 		Traits* number_ctraits;
 		Traits* string_ctraits;
 		Traits* boolean_ctraits;
+		Traits* vector_ctraits;
 
 	private:
 		Traits* findCTraits(const char* name, PoolObject* pool);

@@ -70,6 +70,7 @@ namespace avmplus
 	private:
 		static Atom interp(MethodEnv* method, int argc, uint32 *ap);
 		static Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete=false);
+		static Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
 
 		static int readS24(const byte *pc) { return AvmCore::readS24(pc); }
 		static int readU16(const byte *pc) { return AvmCore::readU16(pc); }

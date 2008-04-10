@@ -221,6 +221,20 @@ namespace avmplus
 		return val;
 	}
 
+	/**
+	* OP_applytype.
+	*
+	* arg1 = argv[0]
+	* argN = argv[argc-1]
+	*/
+	Atom Toplevel::op_applytype(Atom factory, int argc, Atom* atomv)
+	{
+		if (!AvmCore::isObject(factory))
+		{
+			throwTypeError(kTypeAppOfNonParamType);
+		}
+		return AvmCore::atomToScriptObject(factory)->applyTypeArgs(argc, atomv);
+	}
 	
 	// E4X 10.5.1, pg 37
 	QNameObject* Toplevel::ToAttributeName(Atom attributeName)

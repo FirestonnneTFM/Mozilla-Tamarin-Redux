@@ -542,6 +542,12 @@ namespace avmplus
 		return undefinedAtom;
 	}
 
+	Atom ScriptObject::applyTypeArgs(int /*argc*/, Atom* /*argv*/)
+	{
+		toplevel()->throwTypeError(kTypeAppOfNonParamType);
+		return undefinedAtom;
+	}
+
 	Atom ScriptObject::getSlotAtom(int slot)
 	{
 		Traits* traits = this->traits();

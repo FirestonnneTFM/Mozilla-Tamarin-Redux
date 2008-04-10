@@ -70,6 +70,7 @@ namespace avmplus
 		vectoruint_itraits	= pool->getBuiltinTraits(core->constantString("Vector$uint"));
 		vectordouble_itraits= pool->getBuiltinTraits(core->constantString("Vector$double"));
 		vectorobj_itraits	= pool->getBuiltinTraits(core->constantString("Vector$object"));
+		vector_itraits		= pool->getBuiltinTraits(core->constantString("Vector"));
 
 		null_itraits = core->newTraits(NULL, 0, 0, 0);
 		null_itraits->pool = pool;
@@ -142,6 +143,7 @@ namespace avmplus
 		uint_ctraits = findCTraits("uint$", pool);
 		boolean_ctraits = findCTraits("Boolean$", pool);
 		string_ctraits = findCTraits("String$", pool);
+		vector_ctraits = findCTraits("Vector$", pool);
 	}
 
 	Traits* BuiltinTraits::findCTraits(const char* cname, PoolObject* pool)

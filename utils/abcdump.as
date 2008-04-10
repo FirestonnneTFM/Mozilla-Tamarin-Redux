@@ -80,6 +80,7 @@ package abcdump
 	const CONSTANT_StaticProtectedNs2	:int = 0x1a
 	const CONSTANT_MultinameL           :int = 0x1B
 	const CONSTANT_MultinameLA          :int = 0x1C
+	const CONSTANT_TypeName             :int = 0x1D
 	
 	const constantKinds:Array = [ "0", "utf8", "2",
 		"int", "uint", "private", "double", "qname", "namespace",
@@ -163,6 +164,7 @@ package abcdump
 	const OP_callinterface:int = 0x4D
 	const OP_callsupervoid:int = 0x4E
 	const OP_callpropvoid:int = 0x4F
+	const OP_applytype:int = 0x50
 	const OP_newobject:int = 0x55
 	const OP_newarray:int = 0x56
 	const OP_newactivation:int = 0x57
@@ -339,7 +341,7 @@ package abcdump
 	    "callinterface ",
 	    "callsupervoid ",
 	    "callpropvoid  ",
-	    "OP_0x50       ",
+	    "applytype     ",
 	    "OP_0x51       ",
 	    "OP_0x52       ",
 	    "OP_0x53       ",
@@ -535,6 +537,27 @@ package abcdump
 			return /*'{' + nsset + '}::' + */name
 		}
 	}
+	
+	class TypeName
+    {
+        var name;
+        var types:Array;
+        function TypeName(name, types)
+        {
+            this.name = name;
+            this.types = types;
+        }
+        
+        public function toString()
+        {
+            var s : String = name.toString();
+            s += ".<"
+            for( var i = 0; i < types.length; ++i )
+                s += types[i] != null ? types[i].toString() : "*" + " ";
+            s += ">"
+            return s;
+        }
+    }
 	
 	dynamic class MetaData
 	{
@@ -754,6 +777,7 @@ package abcdump
 						case OP_call:
 						case OP_construct:
 						case OP_constructsuper:
+                        case OP_applytype:
 							s += "(" + readU32() + ")"
 							break;
 						case OP_pushbyte:
@@ -1092,6 +1116,15 @@ package abcdump
 					names[i] = new Multiname(nssets[readU32()], null)
 					break;
 					
+			    case CONSTANT_TypeName:
+                    var name = names[readU32()];
+                    var count = readU32();
+                    var types = [];
+                    for( var t=0; t < count; ++t )
+                        types.push(names[readU32()]);
+                    names[i] = new TypeName(name, types);
+                    break;
+                    
 				default:
 					throw new Error("invalid kind " + data[data.position-1])
 				}
