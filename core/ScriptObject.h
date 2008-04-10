@@ -180,6 +180,8 @@ namespace avmplus
 		// TODO make this const
 		virtual int nextNameIndex(int index);
 
+		virtual Atom applyTypeArgs(int argc, Atom* argv);
+
 		// HACK; we need this so we can compare MethodClosures that
 		// have the same instance and method.
 		virtual bool isMethodClosure() { return false; }

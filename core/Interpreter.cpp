@@ -1172,6 +1172,16 @@ namespace avmplus
 				}
 				continue;
 
+			case OP_applytype: 
+				{
+					argc = readU30(pc);
+					// stack in: factory, arg1, ... argN
+					// stack out: result
+					tempAtom = toplevel->op_applytype(sp[-argc]/*function*/, argc, sp-argc+1);				
+					*(sp = sp-argc) = tempAtom;
+					continue;
+				}
+
 			case OP_callsuper:
 			case OP_callsupervoid:
 				{
@@ -1265,7 +1275,7 @@ namespace avmplus
 			{
 				Multiname multiname;
 				pool->parseMultiname(multiname, readU30(pc));
-				sp[0] = env->astype(sp[0], pool->getTraits(&multiname, toplevel));
+				sp[0] = env->astype(sp[0], getTraits(&multiname, pool, toplevel, core));
 				break;
 			}
 
@@ -1282,7 +1292,7 @@ namespace avmplus
 				// this is the ES4 implicit coersion
 				Multiname multiname;
 				pool->parseMultiname(multiname, readU30(pc));
-				sp[0] = toplevel->coerce(sp[0], pool->getTraits(&multiname, toplevel));
+				sp[0] = toplevel->coerce(sp[0], getTraits(&multiname, pool, toplevel, core));
                 continue;
 			}
 
@@ -1305,7 +1315,7 @@ namespace avmplus
 				// used when operator "is" RHS is a compile-time type constant
 				Multiname multiname;
 				pool->parseMultiname(multiname, readU30(pc));
-				Traits* itraits = pool->getTraits(&multiname, toplevel);
+				Traits* itraits = getTraits(&multiname, pool, toplevel, core);
 				sp[0] = core->istypeAtom(sp[0], itraits);
                 continue;
 			}
@@ -1525,6 +1535,25 @@ namespace avmplus
 		return sp;
 	}
 
+	Traits* Interpreter::getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core)
+	{
+		Traits* t = pool->getTraits(name, toplevel);
+		if( name->isParameterizedType() )
+		{
+			Multiname param_name;
+			pool->parseMultiname(param_name, name->getTypeParameter());
+
+			Traits* param_traits = getTraits(&param_name, pool, toplevel, core);
+			Stringp fullname = core->internString( core->concatStrings(t->name, 
+				core->concatStrings(core->concatStrings(core->newString(".<"), param_traits->formatClassName()), core->newString(">")))->atom());
+
+			Multiname newname;
+			newname.setName(fullname);
+			newname.setNamespace(t->ns);
+			t = pool->getTraits(&newname, toplevel);
+		}
+		return t;
+	}
 #ifdef AVMPLUS_VERBOSE
 	    /**
      * display contents of current stack frame only.

@@ -369,6 +369,14 @@ const int kBufferPadding = 16;
 							 NativeClassInfo* nativeClasses[],
 							 NativeScriptInfo* nativeScripts[]);
 
+		/**
+		 * Creates a new traits with the given name & ns, copied from the traits* t
+		 * Used for instantiating new parameterized types on the fly.
+		 */
+		Traits* makeParameterizedITraits(Stringp name, Namespace* ns, Traits* t );
+		Traits* makeParameterizedCTraits(Stringp name, Namespace* ns, Traits* t );
+
+
 		/** Implementation of OP_equals */
 		Atom eq(Atom lhs, Atom rhs);
 		

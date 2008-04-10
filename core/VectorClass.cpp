@@ -211,21 +211,21 @@ namespace avmplus
 	//
 
 	BEGIN_NATIVE_MAP(IntVectorClass)
-		NATIVE_METHOD(Vector_int_length_get,        IntVectorObject::get_length)
-		NATIVE_METHOD(Vector_int_length_set,        IntVectorObject::set_length)
-		NATIVE_METHOD(Vector_int_fixed_get,			IntVectorObject::get_fixed)
-		NATIVE_METHOD(Vector_int_fixed_set,			IntVectorObject::set_fixed)
-		NATIVE_METHOD_FLAGS(Vector_int_AS3_pop,		IntVectorObject::pop, 0)
-		NATIVE_METHOD_FLAGS(Vector_int_AS3_push,		IntVectorObject::push, 0)
-		NATIVE_METHOD_FLAGS(Vector_int_private__reverse,		IntVectorObject::_reverse, 0)
-		NATIVE_METHOD_FLAGS(Vector_int_private__spliceHelper,		IntVectorObject::_spliceHelper, 0)
-		NATIVE_METHOD(Vector_int_private__forEach,	ArrayClass::forEach)
-		NATIVE_METHOD(Vector_int_private__every,	ArrayClass::every)
-		NATIVE_METHOD(Vector_int_private__some,		ArrayClass::some)
-		NATIVE_METHOD(Vector_int_private__sort,		ArrayClass::sort)
-		NATIVE_METHOD_FLAGS(Vector_int_private__map,		IntVectorObject::map, 0)
-		NATIVE_METHOD_FLAGS(Vector_int_private__filter,		IntVectorObject::filter, 0)
-		NATIVE_METHOD_FLAGS(Vector_int_AS3_unshift,		IntVectorObject::unshift, 0)
+		NATIVE_METHOD(__AS3___vec_Vector_int_length_get,        IntVectorObject::get_length)
+		NATIVE_METHOD(__AS3___vec_Vector_int_length_set,        IntVectorObject::set_length)
+		NATIVE_METHOD(__AS3___vec_Vector_int_fixed_get,			IntVectorObject::get_fixed)
+		NATIVE_METHOD(__AS3___vec_Vector_int_fixed_set,			IntVectorObject::set_fixed)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_AS3_pop,		IntVectorObject::pop, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_AS3_push,		IntVectorObject::push, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_private__reverse,		IntVectorObject::_reverse, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_private__spliceHelper,		IntVectorObject::_spliceHelper, 0)
+		NATIVE_METHOD(__AS3___vec_Vector_int_private__forEach,	ArrayClass::forEach)
+		NATIVE_METHOD(__AS3___vec_Vector_int_private__every,	ArrayClass::every)
+		NATIVE_METHOD(__AS3___vec_Vector_int_private__some,		ArrayClass::some)
+		NATIVE_METHOD(__AS3___vec_Vector_int_private__sort,		ArrayClass::sort)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_private__map,		IntVectorObject::map, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_private__filter,		IntVectorObject::filter, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_AS3_unshift,		IntVectorObject::unshift, 0)
 	END_NATIVE_MAP()
 
 	IntVectorClass::IntVectorClass(VTable *vtable)
@@ -260,21 +260,21 @@ namespace avmplus
 	//
 
 	BEGIN_NATIVE_MAP(UIntVectorClass)
-		NATIVE_METHOD(Vector_uint_length_get,        UIntVectorObject::get_length)
-		NATIVE_METHOD(Vector_uint_length_set,        UIntVectorObject::set_length)
-		NATIVE_METHOD(Vector_uint_fixed_get,        UIntVectorObject::get_fixed)
-		NATIVE_METHOD(Vector_uint_fixed_set,        UIntVectorObject::set_fixed)
-		NATIVE_METHOD_FLAGS(Vector_uint_AS3_pop,		UIntVectorObject::pop, 0)
-		NATIVE_METHOD_FLAGS(Vector_uint_AS3_push,		UIntVectorObject::push, 0)
-		NATIVE_METHOD_FLAGS(Vector_uint_private__reverse,		UIntVectorObject::_reverse, 0)
-		NATIVE_METHOD_FLAGS(Vector_uint_private__spliceHelper,		UIntVectorObject::_spliceHelper, 0)
-		NATIVE_METHOD(Vector_uint_private__forEach, ArrayClass::forEach)
-		NATIVE_METHOD(Vector_uint_private__every,	ArrayClass::every)
-		NATIVE_METHOD(Vector_uint_private__some,		ArrayClass::some)
-		NATIVE_METHOD(Vector_uint_private__sort,		ArrayClass::sort)
-		NATIVE_METHOD_FLAGS(Vector_uint_private__map,		UIntVectorObject::map, 0)
-		NATIVE_METHOD_FLAGS(Vector_uint_private__filter,		UIntVectorObject::filter, 0)
-		NATIVE_METHOD_FLAGS(Vector_uint_AS3_unshift,		UIntVectorObject::unshift, 0)
+		NATIVE_METHOD(__AS3___vec_Vector_uint_length_get,        UIntVectorObject::get_length)
+		NATIVE_METHOD(__AS3___vec_Vector_uint_length_set,        UIntVectorObject::set_length)
+		NATIVE_METHOD(__AS3___vec_Vector_uint_fixed_get,        UIntVectorObject::get_fixed)
+		NATIVE_METHOD(__AS3___vec_Vector_uint_fixed_set,        UIntVectorObject::set_fixed)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_AS3_pop,		UIntVectorObject::pop, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_AS3_push,		UIntVectorObject::push, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_private__reverse,		UIntVectorObject::_reverse, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_private__spliceHelper,		UIntVectorObject::_spliceHelper, 0)
+		NATIVE_METHOD(__AS3___vec_Vector_uint_private__forEach, ArrayClass::forEach)
+		NATIVE_METHOD(__AS3___vec_Vector_uint_private__every,	ArrayClass::every)
+		NATIVE_METHOD(__AS3___vec_Vector_uint_private__some,		ArrayClass::some)
+		NATIVE_METHOD(__AS3___vec_Vector_uint_private__sort,		ArrayClass::sort)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_private__map,		UIntVectorObject::map, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_private__filter,		UIntVectorObject::filter, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_AS3_unshift,		UIntVectorObject::unshift, 0)
 	END_NATIVE_MAP()
 
 	UIntVectorClass::UIntVectorClass(VTable *vtable)
@@ -309,21 +309,21 @@ namespace avmplus
 	//
 
 	BEGIN_NATIVE_MAP(DoubleVectorClass)
-		NATIVE_METHOD(Vector_double_length_get,        DoubleVectorObject::get_length)
-		NATIVE_METHOD(Vector_double_length_set,        DoubleVectorObject::set_length)
-		NATIVE_METHOD(Vector_double_fixed_get,        DoubleVectorObject::get_fixed)
-		NATIVE_METHOD(Vector_double_fixed_set,        DoubleVectorObject::set_fixed)
-		NATIVE_METHOD_FLAGS(Vector_double_AS3_pop,		DoubleVectorObject::pop, 0)
-		NATIVE_METHOD_FLAGS(Vector_double_AS3_push,		DoubleVectorObject::push, 0)
-		NATIVE_METHOD_FLAGS(Vector_double_private__reverse,		DoubleVectorObject::_reverse, 0)
-		NATIVE_METHOD_FLAGS(Vector_double_private__spliceHelper,		DoubleVectorObject::_spliceHelper, 0)
-		NATIVE_METHOD(Vector_double_private__forEach, ArrayClass::forEach)
-		NATIVE_METHOD(Vector_double_private__every,	ArrayClass::every)
-		NATIVE_METHOD(Vector_double_private__some,		ArrayClass::some)
-		NATIVE_METHOD(Vector_double_private__sort,		ArrayClass::sort)
-		NATIVE_METHOD_FLAGS(Vector_double_private__map,		DoubleVectorObject::map, 0)
-		NATIVE_METHOD_FLAGS(Vector_double_private__filter,		DoubleVectorObject::filter, 0)
-		NATIVE_METHOD_FLAGS(Vector_double_AS3_unshift,		DoubleVectorObject::unshift, 0)
+		NATIVE_METHOD(__AS3___vec_Vector_double_length_get,        DoubleVectorObject::get_length)
+		NATIVE_METHOD(__AS3___vec_Vector_double_length_set,        DoubleVectorObject::set_length)
+		NATIVE_METHOD(__AS3___vec_Vector_double_fixed_get,        DoubleVectorObject::get_fixed)
+		NATIVE_METHOD(__AS3___vec_Vector_double_fixed_set,        DoubleVectorObject::set_fixed)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_AS3_pop,		DoubleVectorObject::pop, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_AS3_push,		DoubleVectorObject::push, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_private__reverse,		DoubleVectorObject::_reverse, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_private__spliceHelper,		DoubleVectorObject::_spliceHelper, 0)
+		NATIVE_METHOD(__AS3___vec_Vector_double_private__forEach, ArrayClass::forEach)
+		NATIVE_METHOD(__AS3___vec_Vector_double_private__every,	ArrayClass::every)
+		NATIVE_METHOD(__AS3___vec_Vector_double_private__some,		ArrayClass::some)
+		NATIVE_METHOD(__AS3___vec_Vector_double_private__sort,		ArrayClass::sort)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_private__map,		DoubleVectorObject::map, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_private__filter,		DoubleVectorObject::filter, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_AS3_unshift,		DoubleVectorObject::unshift, 0)
 	END_NATIVE_MAP()
 
 	DoubleVectorClass::DoubleVectorClass(VTable *vtable)
@@ -354,40 +354,157 @@ namespace avmplus
 	}
 
 	//
+	// VectorClass
+	//
+
+	BEGIN_NATIVE_MAP(VectorClass)
+	END_NATIVE_MAP()
+
+	VectorClass::VectorClass(VTable *vtable)
+	: ClassClosure(vtable)
+	{
+		toplevel()->vectorClass = this;
+		prototype = toplevel()->objectClass->construct();
+		instantiated_types = new (core()->GetGC(), 0)Hashtable(core()->GetGC());
+	}
+
+	Atom VectorClass::applyTypeArgs(int argc, Atom* argv)
+	{
+		//Vector only takes 1 type argument
+		AvmAssert(argc==1);
+		if( argc != 1 )
+		{
+			toplevel()->typeErrorClass()->throwError(kWrongTypeArgCountError, traits()->formatClassName(), core()->toErrorString(1), core()->toErrorString(argc));
+		}
+		Atom type = argv[0];
+		Stringp fullname = NULL;
+		AvmCore* core = this->core();
+		Traits* param_traits = NULL;
+		if( ISNULL(type) )
+			return toplevel()->objectVectorClass->atom();
+		if( (type&7) == kObjectType )
+		{
+			ScriptObject* so = AvmCore::atomToScriptObject(type);
+
+			if (so == toplevel()->intClass)
+				return toplevel()->intVectorClass->atom();
+			else if( so == toplevel()->numberClass )
+				return toplevel()->doubleVectorClass->atom();
+			else if( so == toplevel()->uintClass )
+				return toplevel()->uintVectorClass->atom();
+
+			fullname = so->vtable->ivtable->traits->formatClassName();
+			param_traits = so->vtable->ivtable->traits;
+		}
+		fullname = core->intern(core->concatStrings(core->newString("Vector.<"), core->concatStrings(fullname, core->newString(">")))->atom());
+
+		if( !instantiated_types->contains(fullname->atom()) )
+		{
+			Traits* vecobj_traits = toplevel()->objectVectorClass->vtable->traits;
+			Multiname name;
+			name.setName(fullname);
+			name.setNamespace(this->traits()->ns);
+			Stringp classname = core->internString(core->concatStrings(fullname, core->newString("$")));
+			Multiname class_mname;
+			class_mname.setName(classname);
+			class_mname.setNamespace(this->traits()->ns);
+
+			Traits* itraits = traits()->pool->resolveParameterizedType(toplevel(), ivtable()->traits, param_traits);
+
+			Traits* ctraits = traits()->pool->getTraits(&class_mname, toplevel());
+			if( !ctraits ){
+				ctraits = core->makeParameterizedCTraits(classname, this->traits()->ns, vecobj_traits);
+			}
+
+			itraits->resolveSignatures(toplevel());
+			ctraits->resolveSignatures(toplevel());
+
+			itraits->hashTableOffset = vecobj_traits->itraits->hashTableOffset;
+			itraits->setTotalSize(itraits->hashTableOffset+sizeof(Hashtable));
+			ctraits->hashTableOffset = vecobj_traits->hashTableOffset;
+			ctraits->setTotalSize(ctraits->hashTableOffset+sizeof(Hashtable));
+
+			ctraits->itraits = itraits;
+
+			VTable* objVecVTable = toplevel()->objectVectorClass->vtable;
+			VTable* objVecIVTable = toplevel()->objectVectorClass->ivtable();
+
+			// Create vtables for the new parameterized type
+			VTable* vtab = core->newVTable(ctraits, toplevel()->class_vtable, objVecVTable->scope, objVecVTable->abcEnv, objVecVTable->toplevel); 
+			VTable* ivtab = core->newVTable(itraits, objVecIVTable, objVecIVTable->scope, objVecIVTable->abcEnv, objVecIVTable->toplevel);
+			vtab->ivtable = ivtab;
+			ivtab->init = objVecIVTable->init;
+			vtab->resolveSignatures();
+			ivtab->resolveSignatures();
+
+			ObjectVectorClass* new_type= (ObjectVectorClass*)toplevel()->objectVectorClass->createClassClosure(vtab);
+			new_type->index_type = (ClassClosure*)AvmCore::atomToScriptObject(type);
+
+			// Is this right?  Should each instantiation get its own prototype?
+			new_type->prototype = toplevel()->objectVectorClass->prototype;
+			instantiated_types->put(fullname->atom(), new_type->atom());
+		}
+		return (Atom)instantiated_types->get(fullname->atom());
+	}
+
+	ScriptObject* VectorClass::createInstance(VTable * /*ivtable*/,
+		ScriptObject * /*prototype*/)
+	{
+		// TODO: throw?
+		return NULL;
+	}
+
+	ObjectVectorObject* VectorClass::newVector(ClassClosure* /*type*/, uint32 /*length*/)
+	{
+		ObjectVectorObject* v = NULL;
+		/*
+		VTable* ivtable = this->ivtable();
+		VectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
+			VectorObject(ivtable, prototype);
+		v->set_type(type->atom());
+		v->set_length(length);
+		*/
+		return v;
+	}
+
+	//
 	// ObjectVectorClass
 	//
 
 	BEGIN_NATIVE_MAP(ObjectVectorClass)
-		NATIVE_METHOD_FLAGS(Vector_object_length_get,        ObjectVectorObject::get_length, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_length_set,        ObjectVectorObject::set_length, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_private_type_set,        ObjectVectorObject::set_type, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_private_type_get,        ObjectVectorObject::get_type, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_fixed_set,        ObjectVectorObject::set_fixed, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_fixed_get,        ObjectVectorObject::get_fixed, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_AS3_pop,		ObjectVectorObject::pop, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_AS3_push,		ObjectVectorObject::push, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_private__reverse,		ObjectVectorObject::_reverse, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_private__spliceHelper,		ObjectVectorObject::_spliceHelper, 0)
-		NATIVE_METHOD(Vector_object_private__forEach, ArrayClass::forEach)
-		NATIVE_METHOD(Vector_object_private__every,	ArrayClass::every)
-		NATIVE_METHOD(Vector_object_private__some,		ArrayClass::some)
-		NATIVE_METHOD(Vector_object_private__sort,		ArrayClass::sort)
-		NATIVE_METHOD_FLAGS(Vector_object_private__map,		ObjectVectorObject::map, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_private__filter,		ObjectVectorObject::filter, 0)
-		NATIVE_METHOD_FLAGS(Vector_object_AS3_unshift,		ObjectVectorObject::unshift, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_length_get,        ObjectVectorObject::get_length, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_length_set,        ObjectVectorObject::set_length, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private_type_set,        ObjectVectorObject::set_type, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private_type_get,        ObjectVectorObject::get_type, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_fixed_set,        ObjectVectorObject::set_fixed, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_fixed_get,        ObjectVectorObject::get_fixed, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_AS3_pop,		ObjectVectorObject::pop, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_AS3_push,		ObjectVectorObject::push, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__reverse,		ObjectVectorObject::_reverse, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__spliceHelper,		ObjectVectorObject::_spliceHelper, 0)
+		NATIVE_METHOD(__AS3___vec_Vector_object_private__forEach, ArrayClass::forEach)
+		NATIVE_METHOD(__AS3___vec_Vector_object_private__every,	ArrayClass::every)
+		NATIVE_METHOD(__AS3___vec_Vector_object_private__some,		ArrayClass::some)
+		NATIVE_METHOD(__AS3___vec_Vector_object_private__sort,		ArrayClass::sort)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__map,		ObjectVectorObject::map, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__filter,		ObjectVectorObject::filter, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_AS3_unshift,		ObjectVectorObject::unshift, 0)
 	END_NATIVE_MAP()
 
 	ObjectVectorClass::ObjectVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
     {
-		toplevel()->objectVectorClass = this;
+		if( !toplevel()->objectVectorClass )
+			toplevel()->objectVectorClass = this;
         prototype = toplevel()->objectClass->construct();
 	}
 
 	ScriptObject* ObjectVectorClass::createInstance(VTable *ivtable,
 												   ScriptObject *prototype)
     {
-        return new (core()->GetGC(), ivtable->getExtraSize()) ObjectVectorObject(ivtable, prototype);
+		ObjectVectorObject* v = new (core()->GetGC(), ivtable->getExtraSize()) ObjectVectorObject(ivtable, prototype);
+		v->set_type(index_type->atom());
+        return v;
     }
 
 	ObjectVectorObject* ObjectVectorClass::newVector(ClassClosure* type, uint32 length)
@@ -430,7 +547,7 @@ namespace avmplus
 			grow(index+1);
 			m_length = index+1;
 		}
-		WBATOM( MMgc::GC::GetGC(m_array), m_array, m_array + index, toplevel()->coerce(value, t->traits()->itraits));
+		WBATOM( MMgc::GC::GetGC(m_array), m_array, m_array + index, (t ? toplevel()->coerce(value, t->traits()->itraits) : value));
 	}			
 
 	Atom ObjectVectorObject::_getIntProperty(int index) const
@@ -604,8 +721,8 @@ namespace avmplus
 			for(int i=0; i<argc; i++) {
 				_setUintProperty(i, argv[i]);
 			}
-
-			m_length += argc;
+			// setUintProperty will up the length
+			//m_length += argc;
 		}
 		return m_length;
 	}

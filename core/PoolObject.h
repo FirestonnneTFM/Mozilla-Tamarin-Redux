@@ -131,7 +131,10 @@ namespace avmplus
 		void parseMultiname(const byte *pos, Multiname& m) const;
 		void resolveTraits(Traits *traits, int firstSlot, const Toplevel* toplevel);
 		Traits* resolveTypeName(const byte* &pc, const Toplevel* toplevel, bool allowVoid=false) const;
+		Traits* resolveTypeName(uint32 index, const Toplevel* toplevel, bool allowVoid=false) const;
 		Atom resolveQName(const byte* &p, Multiname &m, const Toplevel* toplevel) const;
+
+		Traits* resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* type_param) const;
 
 
 

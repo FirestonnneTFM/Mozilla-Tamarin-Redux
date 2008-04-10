@@ -35,16 +35,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package
+package __AS3__.vec
 {
-	dynamic final public class Vector$object
+    dynamic final public class Vector
+    {
+    }
+
+	dynamic final class Vector$object
 	{
-        
-        public function Vector$object(t:Class, length:uint=0, fixed:Boolean=false)
+        public function Vector$object(length:uint=0, fixed:Boolean=false)
         {
             this.length = length;
             this.fixed = fixed;
-            this.type = t;
         }
         
         private native function set type(t : Object):void;
@@ -57,7 +59,9 @@ package
         }
         
         private function newThisType(length:uint=0) : Vector$object {
-            return new Vector$object(this.type, length);
+            var v : Vector$object = new Vector.<type>(length);
+            //v.type = this.type;
+            return v;
         }
 
         // Include most of the vector implementation.
@@ -119,7 +123,7 @@ package
 
 	}
     
-	dynamic final public class Vector$int
+	dynamic final class Vector$int
 	{
         
         public function Vector$int(length:uint=0, fixed:Boolean=false)
@@ -197,7 +201,7 @@ package
 	}
     
     
-	dynamic final public class Vector$uint
+	dynamic final class Vector$uint
 	{
         public function Vector$uint(length:uint=0, fixed:Boolean=false)
         {
@@ -274,7 +278,7 @@ package
 
 	}
     
-	dynamic final public class Vector$double
+	dynamic final class Vector$double
 	{
         public function Vector$double(length:uint=0, fixed:Boolean=false)
         {
@@ -348,6 +352,5 @@ package
             }
             return -1;
         }
-
 	}
 }

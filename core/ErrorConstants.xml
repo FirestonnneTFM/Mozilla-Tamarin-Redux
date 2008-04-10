@@ -586,6 +586,8 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 requires object and index to be distinct registers.</error>
   <error id="1125" label="kOutOfRangeError">The index %1 is out of range %2.</error>
   <error id="1126" label="kVectorFixedError">Cannot change the length of a fixed Vector.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Type application attempted on a non-parameterized type.</error>
+  <error id="1128" label="kWrongTypeArgCountError">Incorrect number of type parameters for %1. Expected %2, got %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  
   <error id="1500" hidden="true" label="kFileOpenError">Error occurred opening file %1.</error>

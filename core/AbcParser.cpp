@@ -1490,6 +1490,21 @@ namespace avmplus
 				break;
 			}
 			
+			case CONSTANT_TypeName:
+			{
+				cpool_mn.set(i, pool->posToAtom(pos-1));
+
+				uint32 index = readU30(pos);
+
+				if(!index || index >= pool->constantMnCount)
+					toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantMnCount));
+
+				index = readU30(pos);
+				if(index != 1)
+					toplevel->throwVerifyError(kCorruptABCError);
+				readU30(pos);
+				break;
+			}
 			default:
 				toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(i));
 			}

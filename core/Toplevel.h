@@ -73,6 +73,7 @@ namespace avmplus
 		DRCWB(DoubleVectorClass*)    doubleVectorClass;
 		DRCWB(UIntVectorClass*)   uintVectorClass;
 		DRCWB(ObjectVectorClass*)    objectVectorClass;
+		DRCWB(VectorClass*)    vectorClass;
 		RegExpClass*         regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
 		DRCWB(StringClass*)    stringClass;
 		XMLClass*            xmlClass() { return (XMLClass*)getBuiltinClass(avmplus::NativeID::abcclass_XML); }
@@ -168,6 +169,16 @@ namespace avmplus
 		/** Implementation of OP_constructprop */
 		Atom constructprop(Multiname* name, int argc, Atom* atomv, VTable* vtable);
 		
+		/**
+		* OP_applytype.
+		*
+		* arg1 = atomv[0]
+		* argN = atomv[argc-1]
+		*/
+		Atom op_applytype(Atom obj,
+			int argc,
+			Atom* atomv);
+
 		/**
 		 * Implements the ToAttributeName API as specified in E4X 10.5.1, pg 37
 		 */

@@ -293,7 +293,10 @@ namespace avmplus
 			initTables(toplevel);
 
 			const byte* oldpos = getTraitsPos();
-			pool->resolveTraits(this, firstSlot, toplevel);
+			if( this->getTraitsPos() != 0 )
+				// Traits defined at runtime, i.e. instatiated parameterized types, 
+				// don't come from an abc, and won't have a position
+				pool->resolveTraits(this, firstSlot, toplevel);
 
 			// make sure all the methods have resolved types
 			for (int i=0, n=methodCount; i < n; i++)

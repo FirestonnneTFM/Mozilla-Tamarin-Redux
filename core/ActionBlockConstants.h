@@ -73,7 +73,8 @@ namespace avmplus
             CONSTANT_ExplicitNamespace  = 0x19,
 			CONSTANT_StaticProtectedNs  = 0x1A,
 			CONSTANT_MultinameL         = 0x1B,
-			CONSTANT_MultinameLA        = 0x1C
+			CONSTANT_MultinameLA        = 0x1C,
+			CONSTANT_TypeName	        = 0x1D
 		};
 		/*@}*/
 

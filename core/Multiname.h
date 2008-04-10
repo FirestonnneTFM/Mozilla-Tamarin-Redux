@@ -56,6 +56,7 @@ namespace avmplus
 		const static int RTNAME = 0x08;	// runtime name
 		const static int NSSET  = 0x10;
 		const static int PUBLICNS = 0x20; // temporary flag to support 46.15; public implied
+		const static int TYPEPARAM = 0x40;
 		#ifdef AVMPLUS_MIR
 		friend class CodegenMIR;
 		#endif 
@@ -70,6 +71,7 @@ namespace avmplus
 			Namespace* ns;
 			NamespaceSet* nsset;
 		};
+		uint32 next_index;
 
 	public:
 
@@ -135,6 +137,18 @@ namespace avmplus
 			this->nsset = _nsset;
 		}
 
+		uint32 getTypeParameter() 
+		{
+			AvmAssert(isParameterizedType());
+			return next_index;
+		}
+
+		void setTypeParameter(uint32 index)
+		{
+			flags |= TYPEPARAM; 
+			this->next_index = index;
+		}
+
 		Multiname();
 
 		Multiname(NamespaceSet* nsset);
@@ -152,6 +166,7 @@ namespace avmplus
 			flags = 0;
 			name = NULL;
 			nsset = NULL;
+			next_index = 0;
 		}
 
 		bool contains(Namespace* ns) const;
@@ -194,6 +209,9 @@ namespace avmplus
 		}
 		int isNsset() const {
 			return flags & NSSET;
+		}
+		int isParameterizedType() const {
+			return flags&TYPEPARAM;
 		}
 
 		void setAttr(bool b=true) {
