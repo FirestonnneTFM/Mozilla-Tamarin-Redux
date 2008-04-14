@@ -646,50 +646,41 @@
         }
         }
 
-        if (e.op == assignLogicalAndOp) {
-            asm.I_dup();
-            asm.I_getproperty(cgIdentExpr(ctx, name));
-            let L0 = asm.I_iffalse(undefined);
-            asm.I_pop();
+        let t = asm.getTemp();
+        if (e.op == assignOp) {
+            let use_once_name = cgIdentExpr(ctx, name);
             cgExpr(ctx, e.re);
-            asm.I_label(L0);
-            asm.I_setproperty(cgIdentExpr(ctx, name));  // Always store it; the effect is observable
-        }
-        else if (e.op == assignLogicalOrOp) {
             asm.I_dup();
-            asm.I_getproperty(cgIdentExpr(ctx, name));
-            let L0 = asm.I_iftrue(undefined);
-            asm.I_pop();
-            cgExpr(ctx, e.re);
-            asm.I_label(L0);
-            asm.I_setproperty(cgIdentExpr(ctx, name));  // Always store it; the effect is observable
+            asm.I_setlocal(t);
+            asm.I_setproperty(use_once_name);
         }
         else {
-            let t = asm.getTemp();
-            if (e.op == assignOp) {
-                let use_once_name = cgIdentExpr(ctx, name);
-                cgExpr(ctx, e.re);
+            let propname = null;
+            let subtmp = null;     // stores indexing expression value
+            let subname = null;    // multiname to store under
+            asm.I_dup();           // object expr
+            if (name is ExpressionIdentifier) {
+                subtmp = asm.getTemp();
+                cgExpr(ctx, name.expr);
                 asm.I_dup();
-                asm.I_setlocal(t);
-                asm.I_setproperty(use_once_name);
+                asm.I_setlocal(subtmp);
+                subname = emitter.multinameL(name,false);
+                asm.I_getproperty(subname);
             }
             else {
-                let propname = null;
-                let subtmp = null;     // stores indexing expression value
-                let subname = null;    // multiname to store under
-                asm.I_dup();           // object expr
-                if (name is ExpressionIdentifier) {
-                    subtmp = asm.getTemp();
-                    cgExpr(ctx, name.expr);
-                    asm.I_dup();
-                    asm.I_setlocal(subtmp);
-                    subname = emitter.multinameL(name,false);
-                    asm.I_getproperty(subname);
-                }
-                else {
-                    asm.I_getproperty(cgIdentExpr(ctx, name));
-                    propname = cgIdentExpr(ctx, name);
-                }
+                asm.I_getproperty(cgIdentExpr(ctx, name));
+                propname = cgIdentExpr(ctx, name);
+            }
+            if (e.op == assignLogicalAndOp || e.op == assignLogicalOrOp) {
+                asm.I_dup();
+                asm.I_convert_b();
+                let L0 = (e.op == assignLogicalAndOp) ? asm.I_iffalse(undefined) : asm.I_iftrue(undefined);
+                asm.I_pop();
+                cgExpr(ctx, e.re);
+                asm.I_coerce_a();
+                asm.I_label(L0);
+            }
+            else {
                 cgExpr(ctx, e.re);
                 switch (e.op) {
                 case assignPlusOp:                asm.I_add(); break;
@@ -705,20 +696,20 @@
                 case assignBitwiseXorOp:          asm.I_bitxor(); break;
                 default:                          Gen::internalError(ctx, "ASSIGNOP not supported " + op);
                 }
-                asm.I_dup();
-                asm.I_setlocal(t);
-                if (name is ExpressionIdentifier) {
-                    asm.I_getlocal(subtmp);
-                    asm.I_swap();
-                    asm.I_setproperty(subname);
-                    asm.killTemp(subtmp);
-                }
-                else
-                    asm.I_setproperty(propname);
             }
-            asm.I_getlocal(t);
-            asm.killTemp(t);
+            asm.I_dup();
+            asm.I_setlocal(t);
+            if (name is ExpressionIdentifier) {
+                asm.I_getlocal(subtmp);
+                asm.I_swap();
+                asm.I_setproperty(subname);
+                asm.killTemp(subtmp);
+            }
+            else
+                asm.I_setproperty(propname);
         }
+        asm.I_getlocal(t);
+        asm.killTemp(t);
     }
 
     function cgInitExpr(ctx, e) {
