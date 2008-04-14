@@ -345,12 +345,9 @@
             let e = cases[i].expr;
             if (e == null)
                 has_default = true;
-            else if (e is LiteralExpr) {
-                let l = e.literal;
-                if (!(l is LiteralInt))
-                    return false;
-                low = Math.min(low, l.intValue);
-                high = Math.max(high, l.intValue);
+            else if (e is LiteralInt) {
+                low = Math.min(low, e.intValue);
+                high = Math.max(high, e.intValue);
                 count++;
             }
             else
@@ -399,8 +396,8 @@
             let e = c.expr;
 
             if (e != null) {
-                assert(e is LiteralExpr && e.literal is LiteralInt);
-                Lhandled[e.literal.intValue - low] = true;
+                assert(e is LiteralInt);
+                Lhandled[e.intValue - low] = true;
             }
         }
 
@@ -421,12 +418,12 @@
                         asm.I_label(Lcases[j]);
             }
             else {
-                assert(e is LiteralExpr && e.literal is LiteralInt);
+                assert(e is LiteralInt);
 
                 // There might be duplicate case selector values, but only the first one counts.
-                if (Lcases[e.literal.intValue - low] !== false) {
-                    asm.I_label(Lcases[e.literal.intValue - low]);
-                    Lcases[e.literal.intValue - low] = false;
+                if (Lcases[e.intValue - low] !== false) {
+                    asm.I_label(Lcases[e.intValue - low]);
+                    Lcases[e.intValue - low] = false;
                 }
             }
 

@@ -1090,7 +1090,7 @@ use namespace intrinsic;
                     qual = new Ast::LexicalRef (makeIdentifier (qual,cx.pragmas.openNamespaces))
                 }
                 case (ns:*) {
-                    qual = new Ast::LiteralExpr (new Ast::LiteralNamespace (qual), position());
+                    qual = new Ast::LiteralNamespace (qual, position());
                 }
                 }
                 next();
@@ -1232,20 +1232,6 @@ use namespace intrinsic;
             return name;
         }
 
-        // One or more
-        function primaryNameList() {
-            let names = [];
-            
-            while (true) {
-                names.push(primaryName());
-                if (hd() != Token::Comma)
-                    break;
-                eat(Token::Comma);
-            }
-             
-            return names;
-        }
-
         /*
             Path
                 Identifier
@@ -1294,30 +1280,23 @@ use namespace intrinsic;
         */
 
         function objectLiteral (/*, alpha: ALPHA*/) : Ast::TYPE_EXPR {
-            var alpha: ALPHA = allowColon;    // FIXME need to get this from caller
-            var pos = position();             // Record source location of initial left brace
+            let alpha: ALPHA = allowColon;    // FIXME need to get this from caller
+            let pos = position();             // Record source location of initial left brace
             eat (Token::LeftBrace);
-            var fields = fieldList ();
+            let fields = fieldList ();
             eat (Token::RightBrace);
 
+            let texpr;
             switch (alpha) {
             case allowColon:
-                switch (hd ()) {
-                case Token::Colon:
-                    next();
-                    var texpr = typeExpression ();
-                    break;
-                default:
-                    var texpr = new Ast::ObjectType ([]); // FIXME I mean {*}
-                    break;
-                }
+                texpr = match(Token::Colon) ? typeExpression () : new Ast::ObjectType ([]); // FIXME I mean {*}
                 break;
             default:
-                var texpr = new Ast::ObjectType ([]); // FIXME I mean {*}
+                texpr = new Ast::ObjectType ([]); // FIXME I mean {*}
                 break;
             }
 
-            return new Ast::LiteralExpr (new Ast::LiteralObject (fields,texpr), pos);
+            return new Ast::LiteralObject (fields, texpr, pos);
         }
 
         /*
@@ -1330,17 +1309,14 @@ use namespace intrinsic;
         */
 
         function fieldList () /* : [Ast::FIELD_TYPE] */ {
-            var fields = [];
+            let fields = [];
 
-            if (hd () !== Token::RightBrace) {
-                var field = literalField ();
-                fields.push (field);
-                while (hd () === Token::Comma) {
-                    next();
-                    var field = literalField ();
-                    fields.push (field);
-                }
-            }
+            if (hd () === Token::RightBrace)
+                return fields;
+
+            do { 
+                fields.push (literalField());
+            } while (match(Token::Comma))
 
             return fields;
         }
@@ -1355,23 +1331,12 @@ use namespace intrinsic;
         */
 
         function literalField () : Ast::FIELD_TYPE {
-            var tag;
+            let tag = match(Token::Const) ? constTag : varTag;
+            let fn = fieldName ();
 
-            switch (hd ()) {
-            case Token::Const:
-                next();
-                tag = constTag;
-                break;
-            default:
-                tag = Ast::varTag;
-                break;
-            }
-
-            var fn = fieldName ();
             eat (Token::Colon);
 
-            var expr;
-
+            let expr;
             switch (hd ()) {
             case Token::LeftBrace:   // short cut to avoid recursion
                 expr = objectLiteral ();
@@ -1453,8 +1418,7 @@ use namespace intrinsic;
             var elts = elementList ();
             eat (Token::RightBracket);
 
-            return new Ast::LiteralExpr (new Ast::LiteralArray (elts, new Ast::ArrayType ([])), 
-                                         pos);
+            return new Ast::LiteralArray (elts, new Ast::ArrayType ([]), pos);
         }
 
         /*
@@ -1480,7 +1444,7 @@ use namespace intrinsic;
                 case Token::Comma:
                     let pos = position();
                     next();
-                    elt = new Ast::LiteralExpr (new Ast::LiteralUndefined, pos);
+                    elt = new Ast::LiteralUndefined(pos);
                     break;
                 default:
                     switch (hd ()) {
@@ -1501,7 +1465,7 @@ use namespace intrinsic;
                     eat (Token::Comma);
                     switch (hd ()) {
                     case Token::Comma:
-                        elt = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
+                        elt = new Ast::LiteralUndefined(position());
                         break;
                     case Token::RightBracket:
                         continue;  // we're done
@@ -1555,38 +1519,38 @@ use namespace intrinsic;
             switch (hd ()) {
             case Token::Null:
                 next();
-                expr = new Ast::LiteralExpr (new Ast::LiteralNull (), pos);
+                expr = new Ast::LiteralNull(pos);
                 break;
             case Token::True:
                 next();
-                expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (true), pos);
+                expr = new Ast::LiteralBoolean(true, pos);
                 break;
             case Token::False:
                 next();
-                expr = new Ast::LiteralExpr (new Ast::LiteralBoolean (false), pos);
+                expr = new Ast::LiteralBoolean (false, pos);
                 break;
             case Token::IntLiteral:
-                expr = new Ast::LiteralExpr (new Ast::LiteralInt(parseInt(lexeme())), pos);
+                expr = new Ast::LiteralInt(parseInt(lexeme()), pos);
                 next();
                 break;
             case Token::UIntLiteral:
-                expr = new Ast::LiteralExpr (new Ast::LiteralUInt(parseInt(lexeme())), pos);
+                expr = new Ast::LiteralUInt(parseInt(lexeme()), pos);
                 next();
                 break;
             case Token::DoubleLiteral:
-                expr = new Ast::LiteralExpr (new Ast::LiteralDouble(parseFloat(lexeme())), pos);
+                expr = new Ast::LiteralDouble(parseFloat(lexeme()), pos);
                 next();
                 break;
             case Token::DecimalLiteral:
-                expr = new Ast::LiteralExpr (new Ast::LiteralDecimal(new decimal(lexeme())), pos);
+                expr = new Ast::LiteralDecimal(new decimal(lexeme()), pos);
                 next();
                 break;
             case Token::StringLiteral:
-                expr = new Ast::LiteralExpr (new Ast::LiteralString (lexeme()), pos);
+                expr = new Ast::LiteralString (lexeme(), pos);
                 next();
                 break;
             case Token::RegexpLiteral:
-                expr = new Ast::LiteralExpr (new Ast::LiteralRegExp(lexeme()), pos);
+                expr = new Ast::LiteralRegExp(lexeme(), pos);
                 next();
                 break;
             case Token::This:
@@ -2307,8 +2271,7 @@ use namespace intrinsic;
         function bitwiseAndExpression (beta: BETA) : Ast::EXPR {
             var nd1 = equalityExpression (beta);
 
-            while (hd () === Token::BitwiseAnd) {
-                next();
+            while (match(Token::BitwiseAnd)) {
                 var nd2 = equalityExpression (beta);
                 var nd1 = new Ast::BinaryExpr (Ast::bitwiseAndOp, nd1, nd2);
             }
@@ -2327,8 +2290,7 @@ use namespace intrinsic;
         function bitwiseXorExpression (beta: BETA) : Ast::EXPR {
             var nd1 = bitwiseAndExpression (beta);
 
-            while (hd () === Token::BitwiseXor) {
-                next();
+            while (match(Token::BitwiseXor)) {
                 var nd2 = bitwiseAndExpression (beta);
                 var nd1 = new Ast::BinaryExpr (Ast::bitwiseXorOp, nd1, nd2);
             }
@@ -2347,8 +2309,7 @@ use namespace intrinsic;
         function bitwiseOrExpression (beta: BETA) : Ast::EXPR {
             var nd1 = bitwiseXorExpression (beta);
 
-            while (hd () === Token::BitwiseOr) {
-                next();
+            while (match(Token::BitwiseOr)) {
                 var nd2 = bitwiseXorExpression (beta);
                 var nd1 = new Ast::BinaryExpr (Ast::bitwiseOrOp, nd1, nd2);
             }
@@ -2367,8 +2328,7 @@ use namespace intrinsic;
         function logicalAndExpression (beta: BETA) : Ast::EXPR {
             var nd1 = bitwiseOrExpression (beta);
 
-            while (hd () === Token::LogicalAnd) {
-                next();
+            while (match(Token::LogicalAnd)) {
                 var nd2 = bitwiseOrExpression (beta);
                 var nd1 = new Ast::BinaryExpr (Ast::logicalAndOp, nd1, nd2);
             }
@@ -2387,8 +2347,7 @@ use namespace intrinsic;
         function logicalXorExpression (beta: BETA) : Ast::EXPR {
             var nd1 = logicalAndExpression (beta);
 
-            while (hd () === Token::LogicalXor) {
-                next();
+            while (match(Token::LogicalXor)) {
                 var nd2 = logicalAndExpression (beta);
                 var nd1 = new Ast::BinaryExpr (Ast::logicalXor, nd1, nd2);
             }
@@ -2407,8 +2366,7 @@ use namespace intrinsic;
         function logicalOrExpression (beta: BETA) : Ast::EXPR {
             var nd1 = logicalXorExpression (beta);
 
-            while (hd () === Token::LogicalOr) {
-                next();
+            while (match(Token::LogicalOr)) {
                 var nd2 = logicalXorExpression (beta);
                 var nd1 = new Ast::BinaryExpr (Ast::logicalOrOp, nd1, nd2);
             }
@@ -2585,18 +2543,11 @@ use namespace intrinsic;
 
             function patternFromExpr (e: Ast::EXPR) {
                 switch type (e) {
-                case (e: Ast::LiteralExpr) {
-                    switch type (e.Ast::literal) {
-                    case (l: Ast::LiteralArray) {
-                        var p = arrayPatternFromLiteral (l);
-                    }
-                    case (l: Ast::LiteralObject) {
-                        var p = objectPatternFromLiteral (l);
-                    }
-                    case (l: *) {
-                        Parse::syntaxError(this, "Invalid lhs expr " + e);
-                    }
-                    }
+                case (l: Ast::LiteralArray) {
+                    var p = arrayPatternFromLiteral (l);
+                }
+                case (l: Ast::LiteralObject) {
+                    var p = objectPatternFromLiteral (l);
                 }
                 case (e: Ast::LexicalRef) {
                     var p = new SimplePattern (e);
@@ -2605,7 +2556,7 @@ use namespace intrinsic;
                     var p = new SimplePattern (e);
                 }
                 case (e: *) {
-                    Parse::internalError(this, "patternFromExpr, unhandled expression kind " + e);
+                    Parse::internalError(this, "patternFromExpr, unhandled or invalid expression kind " + e);
                 }
                 }
                 return p;
@@ -2796,7 +2747,7 @@ use namespace intrinsic;
                 case Token::Comma:
                     let pos = position();
                     eat(Token::Comma);
-                    element = new Ast::LiteralExpr (new Ast::LiteralUndefined, pos);
+                    element = new Ast::LiteralUndefined(pos);
                     break;
                 default:
                     element = pattern (allowIn,gamma);
@@ -2807,7 +2758,7 @@ use namespace intrinsic;
                     eat (Token::Comma);
                     switch (hd ()) {
                     case Token::Comma:
-                        element = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
+                        element = new Ast::LiteralUndefined(position());
                         break;
                     default:
                         element = pattern (allowIn,gamma);
@@ -3085,7 +3036,7 @@ use namespace intrinsic;
                 case Token::Comma:
                     let pos = position();
                     eat(Token::Comma);
-                    var ndx = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
+                    var ndx = new Ast::LiteralUndefined(position());
                     break;
                 default:
                     var ndx = nullableTypeExpression ();
@@ -3096,7 +3047,7 @@ use namespace intrinsic;
                     eat (Token::Comma);
                     switch (hd ()) {
                     case Token::Comma:
-                        var ndx = new Ast::LiteralExpr (new Ast::LiteralUndefined, position());
+                        var ndx = new Ast::LiteralUndefined(position());
                         break;
                     default:
                         var ndx = nullableTypeExpression ();
@@ -3955,7 +3906,7 @@ use namespace intrinsic;
                             if (p is IdentifierPattern) {
                                 // This is actually wrong, because it may overwrite a hoisted var
                                 // that should not be overwritten if the loop body is never entered
-                                var [f,i] = desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro);
+                                var [f,i] = desugarBindingPattern (p,t,new Ast::LiteralUndefined(),ns,it,ro);
                             }
                             else
                                 Parse::internalError(this, "Identifier pattern required by for-in binding (for now)");
@@ -3965,7 +3916,7 @@ use namespace intrinsic;
                         switch type (p) {
                         case (p: IdentifierPattern) {
                             // See comment above
-                            var [f,i] = desugarBindingPattern (p,t,new Ast::LiteralExpr(new Ast::LiteralUndefined),ns,it,ro);
+                            var [f,i] = desugarBindingPattern (p,t,new Ast::LiteralUndefined(),ns,it,ro);
                         }
                         case (x : *) {
                             Parse::syntaxError(this, "destructuring pattern without initializer");
@@ -4098,15 +4049,15 @@ use namespace intrinsic;
             var attr = cx.exitFunction();
 
             var { params:params, numparams:numparams, defaults:defaults, resultType:resultType } = signature;
-            var fnexpr = new Ast::LiteralExpr( new Ast::LiteralFunction(new Ast::Func(name, 
-                                                                                      body, 
-                                                                                      params, 
-                                                                                      numparams,
-                                                                                      vars, 
-                                                                                      defaults, 
-                                                                                      resultType,
-                                                                                      attr)), 
-                                               pos);
+            var fnexpr = new Ast::LiteralFunction(new Ast::Func(name, 
+                                                                body, 
+                                                                params, 
+                                                                numparams,
+                                                                vars, 
+                                                                defaults, 
+                                                                resultType,
+                                                                attr),
+                                                  pos);
 
             return fnexpr;
         }
@@ -4765,17 +4716,8 @@ use namespace intrinsic;
         */
 
         function typeSignature () : [[Ast::IDENT], boolean] {
-            var nd1 = typeParameters ();
-
-            switch (hd ()) {
-            case Token::Not:
-                next();
-                var nd2 = true;
-                break;
-            default:
-                var nd2 = false;
-                break;
-            }
+            let nd1 = typeParameters ();
+            let nd2 = match(Token::Not);
 
             return [nd1,nd2];
         }
@@ -4787,9 +4729,14 @@ use namespace intrinsic;
         }
 
         function interfaceList(tok) {  // tok is Token::Extends or Token::Implements
-            if (match(tok))
-                return primaryNameList ();
-            return [];
+            let names = [];
+            if (match(tok)) {
+                do {
+                    names.push(primaryName());
+                }
+                while (match(Token::Comma));
+            }
+            return names;
         }
 
         function classBody () : Ast::BLOCK
@@ -5328,16 +5275,10 @@ use namespace intrinsic;
         }
 
         function pragma () {
-            switch (hd ()) {
-            case Token::Use:
-                eat(Token::Use);
+            if (match(Token::Use)) 
                 pragmaItems ();
-                break;
-            case Token::Import:
-                eat(Token::Import);
+            else if (match(Token::Import)) 
                 importName ();
-                break;
-            }
         }
 
         function pragmaItems () {

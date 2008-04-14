@@ -94,7 +94,7 @@
         case (e:SuperExpr) { 
             Gen::syntaxError(ctx, "A 'super' expression can't appear here");
         }
-        case (e:LiteralExpr) { cgLiteralExpr(ctx, e) }
+        case (e:ILiteralExpr) { cgLiteralExpr(ctx, e) }
         case (e:CallExpr) { cgCallExpr(ctx, e) }
         case (e:ApplyTypeExpr) { cgApplyTypeExpr(ctx, e) }
         case (e:LetExpr) { cgLetExpr(ctx, e) }
@@ -735,7 +735,7 @@
             // Use newarray to construct the dense prefix
             for ( ; i < exprs.length ; i++ ) {
                 let e = exprs[i];
-                if (e is Ast::LiteralExpr && e.literal is Ast::LiteralUndefined)
+                if (e is Ast::LiteralUndefined)
                     break;
                 cgExpr(ctx, e);
             }
@@ -746,7 +746,7 @@
                 let last_was_undefined = false;
                 for ( ; i < exprs.length ; i++ ) {
                     let e = exprs[i];
-                    if (!(e is Ast::LiteralExpr && e.literal is Ast::LiteralUndefined)) {
+                    if (!(e is Ast::LiteralUndefined)) {
                         asm.I_dup();
                         cgExpr(ctx, e);
                         asm.I_setproperty(cgIdentExpr(ctx, new Ast::Identifier(String(i), [[Ast::noNS]])));
@@ -796,7 +796,7 @@
         }
 
         let {asm:asm, emitter:emitter} = ctx;
-        switch type (e.literal) {
+        switch type (e) {
         case (e:LiteralNull) { asm.I_pushnull() }
         case (e:LiteralUndefined) { asm.I_pushundefined() }
         case (e:LiteralInt) { 
