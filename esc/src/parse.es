@@ -2669,67 +2669,44 @@ use namespace intrinsic;
             return expr;
         }
 
-//        /*
-//
-//        LetExpressionb
-//            let  (  LetBindingList  )  AssignmentExpressionb
-//
-//        LetBindingList
-//            empty
-//            NonemptyLetBindingList
-//
-//        NonemptyLetBindingList
-//            VariableBinding
-//            VariableBinding , NonemptyLetBindingList
-//
-//        */
-//
-//        function parseLetExpression(mode)
-//        {
-//            enter("parseLetExpression")
-//
-//            var prologue = <Prologue/>
-//            match(let_token)
-//            match(leftparen_token)
-//            if( lookahead(rightparen_token) )
-//            {
-//                var first = <></>
-//            }
-//            else
-//            {
-//                var first = <></>
-//                first += parseVariableBinding(<Attributes><Let/></Attributes>,var_token,allowIn_mode,prologue)
-//                while( lookahead(comma_token) )
-//                {
-//                    match(comma_token)
-//                    first += parseVariableBinding(<Attributes><Let/></Attributes>,var_token,allowIn_mode,prologue)
-//                }
-//                prologue.* += first
-//            }
-//            match(rightparen_token)
-//            var second = parseAssignmentExpression(mode)
-//            var result = <LetExpression>{prologue}{second}</LetExpression>
-//
-//            exit("parseLetExpression",result)
-//            return result
-//        }
-//
-//        /*
-//
-//        YieldExpressionb
-//            yield  AssignmentExpressionb
-//
-//        */
-//
-///*
-//        function parseYieldExpression(mode)
-//        {
-//            enter("parseYieldExpression")
-//
-//            exit("parseYieldExpression",result)
-//            return result
-//        }
-//*/
+        /*
+
+        LetExpressionb
+           let  (  LetBindingList  )  AssignmentExpressionb
+
+        LetBindingList
+           empty
+           NonemptyLetBindingList
+
+        NonemptyLetBindingList
+           VariableBinding
+           VariableBinding , NonemptyLetBindingList
+
+        */
+
+        function letExpression(beta: BETA) {
+            eat(Token::Let);
+            eat(Token::LeftParen);
+            let [fixtures, inits] = variableBindingList(beta, Ast::noNS, Ast::letInit, false);
+            eat(Token::RightParen);
+            let expr = commaExpression(beta);
+            return new Ast::LetExpr(new Ast::Head(fixtures, inits), expr);
+        }
+
+
+        /*
+
+        YieldExpressionb
+           yield  AssignmentExpressionb
+
+        */
+
+        function yieldExpression(beta: BETA) {
+            cx.topFunction().uses_yield = true;
+            eat(Token::Yield);
+            let expr = assignmentExpression(beta);
+            return new Ast::YieldExpr(expr);
+        }
 
         // PATTERNS
 
