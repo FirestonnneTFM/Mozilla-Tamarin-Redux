@@ -897,6 +897,9 @@ public namespace Ast
         /* True iff the body has a "try" statement with a "finally" clause */
         var uses_finally = false;
 
+        /* True iff the body has a "yield" statement or expression */
+        var uses_yield = false;
+
         /* True iff this function is native */
         var is_native = false;
 
@@ -916,13 +919,14 @@ public namespace Ast
                 // Unserialization.  An ad hoc pass over the AST will (hopefully) take 
                 // care of patching up parent/children.
                 [uses_arguments, uses_eval, uses_rest, uses_with, uses_catch, 
-                 uses_finally, is_native, capture_result, reify_activation] = rest;
+                 uses_finally, uses_yield, is_native, capture_result, reify_activation] = rest;
             }
         }
 
         function serialize(s)
             s.sClass(this, "FuncAttr", "uses_arguments", "uses_eval", "uses_rest", "uses_with",
-                     "uses_catch", "uses_finally", "is_native", "capture_result", "reify_activation");
+                     "uses_catch", "uses_finally", "uses_yield", "is_native", "capture_result", 
+                     "reify_activation");
     }
 
     class Func extends ASTNode implements ISerializable {
