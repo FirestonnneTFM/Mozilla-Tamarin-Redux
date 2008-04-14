@@ -348,16 +348,6 @@ public namespace Ast
             s.sClass(this, "SuperExpr", "ex");
     }
 
-    class LiteralExpr extends Expr implements ISerializable {
-        const literal : LITERAL;
-        function LiteralExpr (literal, pos=0)
-            : literal=literal
-            , super(pos) {}
-
-        function serialize(s)
-            s.sClass(this, "LiteralExpr", "literal", "pos");
-    }
-
     class CallExpr extends Expr implements ISerializable {
         const expr : Expr;
         const args : EXPRS;
@@ -603,48 +593,26 @@ public namespace Ast
     }
 
     class LiteralNull extends Expr implements ILiteralExpr, ISerializable {
+        function LiteralNull(pos=0)
+            : super(pos) { }
+
         function serialize(s)
             s.sClass(this, "LiteralNull");
     }
 
     class LiteralUndefined extends Expr implements ILiteralExpr, ISerializable {
+        function LiteralUndefined(pos=0)
+            : super(pos) { }
+
         function serialize(s)
             s.sClass(this, "LiteralUndefined");
     }
 
-    class LiteralContextDecimal extends Expr implements ILiteralExpr, ISerializable {
-        const strValue : String;
-        function LiteralContextDecimal (strValue)
-            : strValue=strValue {}
-
-        function serialize(s)
-            s.sClass(this, "LiteralNull", "strValue");
-    }
-
-    // FIXME: obsolete?
-    class LiteralContextDecimalInteger extends Expr implements ILiteralExpr, ISerializable {
-        const strValue : String;
-        function LiteralContextDecimalInteger (strValue)
-            : strValue=strValue {}
-
-        function serialize(s)
-            s.sClass(this, "LiteralContextDecimalInteger", "strValue");
-    }
-
-    // FIXME: obsolete?
-    class LiteralContextHexInteger extends Expr implements ILiteralExpr, ISerializable {
-        const strValue : String;
-        function LiteralContextHexInteger (strValue)
-            : strValue=strValue {}
-
-        function serialize(s)
-            s.sClass(this, "LiteralContextHexInteger", "strValue");
-    }
-
     class LiteralDouble extends Expr implements ILiteralExpr, ISerializable {
         const doubleValue : Number;
-        function LiteralDouble (doubleValue)
-            : doubleValue=doubleValue { }
+        function LiteralDouble (doubleValue, pos=0)
+            : doubleValue=doubleValue
+            , super(pos) { }
 
         function serialize(s)
             s.sClass(this, "LiteralDouble", "doubleValue");
@@ -652,8 +620,9 @@ public namespace Ast
 
     class LiteralDecimal extends Expr implements ILiteralExpr, ISerializable {
         const decimalValue : decimal;
-        function LiteralDecimal (decimalValue)
-            : decimalValue = decimalValue { }
+        function LiteralDecimal (decimalValue, pos=0)
+            : decimalValue = decimalValue
+            , super(pos) { }
 
         function serialize(s)
             s.sClass(this, "LiteralDouble", "decimalValue");
@@ -661,8 +630,9 @@ public namespace Ast
 
     class LiteralInt extends Expr implements ILiteralExpr, ISerializable {
         const intValue : int;
-        function LiteralInt(intValue) 
-            : intValue=intValue {}
+        function LiteralInt(intValue, pos=0) 
+            : intValue=intValue
+            , super(pos) {}
 
         function serialize(s)
             s.sClass(this, "LiteralInt", "intValue");
@@ -670,8 +640,9 @@ public namespace Ast
 
     class LiteralUInt extends Expr implements ILiteralExpr, ISerializable {
         const uintValue : uint;
-        function LiteralUInt(uintValue) 
-            : uintValue=uintValue {}
+        function LiteralUInt(uintValue, pos=0) 
+            : uintValue=uintValue
+            , super(pos) {}
 
         function serialize(s)
             s.sClass(this, "LiteralUInt", "uintValue");
@@ -679,8 +650,9 @@ public namespace Ast
 
     class LiteralBoolean extends Expr implements ILiteralExpr, ISerializable {
         const booleanValue : Boolean;
-        function LiteralBoolean(booleanValue) 
-            : booleanValue=booleanValue {}
+        function LiteralBoolean(booleanValue, pos=0) 
+            : booleanValue=booleanValue
+            , super(pos) {}
 
         function serialize(s)
             s.sClass(this, "LiteralBoolean", "booleanValue");
@@ -688,8 +660,9 @@ public namespace Ast
 
     class LiteralString extends Expr implements ILiteralExpr, ISerializable {
         const strValue : String;
-        function LiteralString (strValue)
-            : strValue = strValue {}
+        function LiteralString (strValue, pos=0)
+            : strValue = strValue
+            , super(pos) {}
 
         function serialize(s)
             s.sClass(this, "LiteralString", "strValue");
@@ -698,9 +671,10 @@ public namespace Ast
     class LiteralArray extends Expr implements ILiteralExpr, ISerializable {
         const exprs //: [EXPR];
         const type : TYPE_EXPR;
-        function LiteralArray (exprs,ty)
+        function LiteralArray (exprs, ty, pos=0)
             : exprs = exprs
-            , type = ty { }
+            , type = ty
+            , super(pos) { }
 
         function serialize(s)
             s.sClass(this, "LiteralArray", "exprs", "type");
@@ -708,8 +682,9 @@ public namespace Ast
 
     class LiteralXML extends Expr implements ILiteralExpr, ISerializable {
         const exprs : [Expr];
-        function LiteralXML(exprs) 
-            : exprs = exprs {}
+        function LiteralXML(exprs, pos=0) 
+            : exprs = exprs
+            , super(pos) {}
 
         function serialize(s)
             s.sClass(this, "LiteralXML", "exprs");
@@ -717,8 +692,9 @@ public namespace Ast
 
     class LiteralNamespace extends Expr implements ILiteralExpr, ISerializable {
         const namespaceValue : INamespace;
-        function LiteralNamespace (namespaceValue)
-            : namespaceValue = namespaceValue { }
+        function LiteralNamespace (namespaceValue, pos=0)
+            : namespaceValue = namespaceValue 
+            , super(pos) {}
 
         function serialize(s)
             s.sClass(this, "LiteralNamespace", "namespaceValue");
@@ -727,9 +703,10 @@ public namespace Ast
     class LiteralObject extends Expr implements ILiteralExpr, ISerializable {
         const fields : LITERAL_FIELDS;
         const type : TYPE_EXPR;
-        function LiteralObject (fields, ty)
+        function LiteralObject (fields, ty, pos=0)
             : fields = fields
-            , type = ty { }
+            , type = ty 
+            , super(pos) { }
 
         function serialize(s)
             s.sClass(this, "LiteralObject", "fields", "type");
@@ -756,8 +733,9 @@ public namespace Ast
 
     class LiteralFunction extends Expr implements ILiteralExpr, ISerializable {
         const func : FUNC;
-        function LiteralFunction (func)
-            : func = func {}
+        function LiteralFunction (func, pos=0)
+            : func = func
+            , super(pos) {}
 
         function serialize(s)
             s.sClass(this, "LiteralFunction", "func");
@@ -765,8 +743,9 @@ public namespace Ast
 
     class LiteralRegExp extends Expr implements ILiteralExpr, ISerializable {
         const src : String;
-        function LiteralRegExp(src)
-            : src= src {}
+        function LiteralRegExp(src, pos=0)
+            : src=src
+            , super(pos) {}
 
         function serialize(s)
             s.sClass(this, "LiteralRegExp", "src");

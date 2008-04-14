@@ -324,8 +324,8 @@ namespace Emit;
         public function defaultExpr(expr) {
             // FIXME: This outlaws ~0, -1, and so on.
             switch type (expr) {
-            case(le:LiteralExpr) {
-                return defaultLiteralExpr(le.literal);
+            case(le:ILiteralExpr) {
+                return defaultLiteralExpr(le);
             }
             case(lr:LexicalRef) {
                 switch type ( lr.ident ) {
