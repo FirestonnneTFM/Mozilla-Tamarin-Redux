@@ -50,15 +50,22 @@ namespace avmplus
         enum LangID
         {
             LANG_en    = 0,
-            LANG_de    = 1,
-            LANG_es    = 2,
-            LANG_fr    = 3,
-            LANG_it    = 4,
-            LANG_ja    = 5,
-            LANG_ko    = 6,
-            LANG_zh_CN = 7,
-            LANG_zh_TW = 8,
-            LANG_count = 9
+            LANG_cs    = 1,
+            LANG_de    = 2,
+            LANG_es    = 3,
+            LANG_fr    = 4,
+            LANG_it    = 5,
+            LANG_ja    = 6,
+            LANG_ko    = 7,
+            LANG_nl    = 8,
+            LANG_pl    = 9,
+            LANG_pt    = 10,
+            LANG_ru    = 11,
+            LANG_sv    = 12,
+            LANG_tr    = 13,
+            LANG_zh_CN = 14,
+            LANG_zh_TW = 15,
+            LANG_count = 16
         };
 
 		typedef struct _LangName
