@@ -277,7 +277,9 @@ def processTest(testandnum):
     ltimeout += 1
   else:
     try:
+      outputLines = []
       for line in f:
+        outputLines.append(line)
         outputCalls.append((verbose_print,(line.strip(),)))
         testcase=''
         if len(line)>9:
@@ -311,7 +313,7 @@ def processTest(testandnum):
         lexpfail += 1
       else:
         lfail = 1
-        outputCalls.append((fail,(testName, '   FAILED contained no testcase messages', failmsgs)))
+        outputCalls.append((fail,(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), failmsgs)))
   allfails += lfail
   allpasses += lpass
   allexpfails += lexpfail
@@ -489,7 +491,7 @@ if runESC:
   runSource = True
   # generate the executable cmd for esc
   escAbcs = ['debug','util','bytes-tamarin','util-tamarin','lex-char','lex-token',
-       'lex-scan','ast','ast-decode','parse','asm','abc','emit','cogen',
+       'lex-scan','ast','parse','asm','abc','emit','cogen',
        'cogen-stmt','cogen-expr','esc-core','eval-support','esc-env','main']
   if not globs['escbin'].endswith('/'):
     globs['escbin'] += '/'
