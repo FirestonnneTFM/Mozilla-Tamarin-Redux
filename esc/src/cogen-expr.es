@@ -114,7 +114,7 @@
     }
 
     function cgTernaryExpr(ctx, { e1: test, e2: consequent, e3: alternate }) {
-        let asm = ctx.asm;
+        let {asm} = ctx;
         cgExpr(ctx, test);
         let L0 = asm.I_iffalse(undefined);
         cgExpr(ctx, consequent);
@@ -127,7 +127,7 @@
     }
 
     function cgBinaryExpr(ctx, e) {
-        let asm = ctx.asm;
+        let {asm} = ctx;
         if (e.op == logicalAndOp) {
             cgExpr(ctx, e.e1);
             asm.I_coerce_a();  // wrong, should coerce to LUB of lhs and rhs
@@ -187,9 +187,9 @@
 
     var id_TypeError = new Ast::Identifier("TypeError",[[Ast::noNS]]);
 
-    function cgBinaryTypeExpr(ctx, e) {
-        let asm = ctx.asm;
-        switch (e.op) {
+    function cgBinaryTypeExpr(ctx, {op, e1, e2}) {
+        let {asm, cp} = ctx;
+        switch (op) {
         case castOp: {
             // ES4 'cast'.
             //
@@ -202,15 +202,15 @@
             // and use simpler code here (probably just a single
             // OP_coerce instruction if that does not invoke any user
             // defined converters).
-            cgExpr(ctx, e.e1);
+            cgExpr(ctx, e1);
             asm.I_dup();
-            cgTypeExprHelper(ctx, e.e2);
+            cgTypeExprHelper(ctx, e2);
             asm.I_istypelate();
             let L0 = asm.I_iftrue(undefined);
             asm.I_pop();
             // FIXME: should lookup directly in global obj or be unforgeable name.
             asm.I_findproperty(cgIdentExpr(ctx, id_TypeError));
-            asm.I_pushstring(ctx.cp.stringUtf8("Cast failed."));
+            asm.I_pushstring(cp.stringUtf8("Cast failed."));
             asm.I_constructprop(cgIdentExpr(ctx, id_TypeError), 1);
             asm.I_throw();
             asm.I_label(L0);
@@ -223,8 +223,8 @@
             // OPTIMIZEME.  Early-bind the right hand side if possible
             // and use simpler code here (probably just a single
             // OP_istype instruction).
-            cgExpr(ctx, e.e1);
-            cgTypeExprHelper(ctx, e.e2);
+            cgExpr(ctx, e1);
+            cgTypeExprHelper(ctx, e2);
             asm.I_istypelate();
             break;
         }
@@ -233,12 +233,12 @@
         }
     }
 
-    function cgTypeExpr(ctx, e) {
-        cgTypeExprHelper(ctx, e.ex);
+    function cgTypeExpr(ctx, {ex}) {
+        cgTypeExprHelper(ctx, ex);
     }
 
     function cgTypeExprHelper(ctx, ty) {
-        let {asm:asm, emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
         switch type (ty) {
         case (ty:TypeName) {
             //let name = cgIdentExpr(ctx, ty.ident);
@@ -253,7 +253,7 @@
     }
 
     function cgUnaryExpr(ctx, e) {
-        let {asm:asm, emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
 
         switch (e.op) {
         case deleteOp: {
@@ -372,8 +372,8 @@
         }
     }
 
-    function cgThisExpr(ctx, e) {
-        ctx.asm.I_getlocal(0);
+    function cgThisExpr({asm}, e) {
+        asm.I_getlocal(0);
     }
 
     function cgYieldExpr(ctx, e) {
@@ -382,7 +382,7 @@
     }
 
     function cgCallExpr(ctx, e) {
-        let {asm:asm, emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
         let nargs = e.args.length;
         let evalTmp = 0;
         let isEval = false;
@@ -473,7 +473,7 @@
     // ESC::evalCompiler() returns the result of the evaluation.
 
     function cgEvalPrefix(ctx, evalTmp, nargs) {
-        let asm = ctx.asm;
+        let {asm} = ctx;
         let nons = [[new Ast::ReservedNamespace(Ast::noNS)]];
         let id_ESC = new Ast::Identifier("ESC", nons); // Needs to be open namespaces??
         let id_evaluateInScopeArray = new Ast::QualifiedIdentifier(new Ast::LexicalRef(id_ESC), "evaluateInScopeArray");
@@ -584,7 +584,7 @@
     }
 
     function cgEvalScopeInitExpr(ctx, e) {
-        let asm = ctx.asm;
+        let {asm} = ctx;
         asm.I_getlocal(1);
         asm.I_getproperty(cgIdentExpr(ctx, new Ast::Identifier(String(e.index), [[Ast::noNS]])));
         if (e.how == "w")
@@ -605,26 +605,28 @@
     }
 
     function cgNewExpr(ctx, e) {
+        let {asm} = ctx;
         cgExpr(ctx, e.expr);
         for ( let i=0 ; i < e.args.length ; i++ )
             cgExpr(ctx, e.args[i]);
-        ctx.asm.I_construct(e.args.length);
+        asm.I_construct(e.args.length);
     }
 
     function cgObjectRef(ctx, e) {
+        let {asm} = ctx;
         cgExpr(ctx, e.base);
-        ctx.asm.I_getproperty(cgIdentExpr(ctx, e.ident));
+        asm.I_getproperty(cgIdentExpr(ctx, e.ident));
     }
 
     function cgLexicalRef(ctx, e) {
-        let asm = ctx.asm;
+        let {asm} = ctx;
         //let name = cgIdentExpr(ctx, e.ident);
         asm.I_findpropstrict(cgIdentExpr(ctx, e.ident));
         asm.I_getproperty(cgIdentExpr(ctx, e.ident));
     }
 
     function cgSetExpr(ctx, e) {
-        let {asm:asm, emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
         let name = null;
 
         // The switch leaves an object on the stack and sets "name"
@@ -713,7 +715,7 @@
     }
 
     function cgInitExpr(ctx, e) {
-        let asm = ctx.asm;
+        let {asm} = ctx;
         let baseOnStk = false;
 //        cgHead(ctx, e.head);
         if (e.target == instanceInit) {
@@ -729,7 +731,7 @@
     function cgLiteralExpr(ctx, e) {
 
         function cgArrayInitializer(ctx, {exprs:exprs}) {
-            let asm = ctx.asm;
+            let {asm} = ctx;
             let i = 0;
 
             // Use newarray to construct the dense prefix
@@ -764,7 +766,7 @@
         }
 
         function cgObjectInitializer(ctx, {fields:fields}) {
-            let {asm:asm, emitter:emitter} = ctx;
+            let {asm, emitter} = ctx;
             asm.I_findpropstrict(ctx.emitter.Object_name);
             asm.I_constructprop(ctx.emitter.Object_name, 0);
             let t = asm.getTemp();
@@ -773,6 +775,9 @@
                 //cgLiteralField(fields[i]);
                 let f = fields[i];
                 asm.I_getlocal(t);
+                // FIXME: source information here.
+                if (f.expr == null)
+                    Gen::syntaxError(ctx, "Missing field value in object initializer: " + f.ident);
                 cgExpr(ctx, f.expr);
                 asm.I_setproperty(cgIdentExpr(ctx, f.ident));
             }
@@ -795,7 +800,7 @@
             asm.I_constructprop(ctx.emitter.RegExp_name, 2);
         }
 
-        let {asm:asm, emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
         switch type (e) {
         case (e:LiteralNull) { asm.I_pushnull() }
         case (e:LiteralUndefined) { asm.I_pushundefined() }
@@ -864,19 +869,19 @@
 
     function cgGetTempExpr(ctx, e) {
         // FIXME
-        let {asm:asm, emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
         let qn = emitter.qname (new Ast::Name(Ast::noNS, "$t"+e.n), false);
         asm.I_findpropstrict(qn);
         asm.I_getproperty(qn);
     }
 
     function cgGetParamExpr(ctx, e) {
-        let asm = ctx.asm;
+        let {asm} = ctx;
         asm.I_getlocal(e.n + 1);  //account for 'this'
     }
     
     function cgIdentExpr(ctx, e) {
-        let{asm:asm, emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
         switch type(e) {
         case (id:Identifier) {
             return emitter.multiname(id,false);
@@ -885,7 +890,7 @@
             cgExpr(ctx, ei.expr);
             return emitter.multinameL(ei,false);
         }
-        case (qi:QualifiedIdentifier) {
+        case (qi:QualifiedIdentifier) { 
             switch type(qi.qual) {
             case( lr:LexicalRef ) {
                 // Hack to deal with namespaces for now...
@@ -901,9 +906,9 @@
         }
         case (qe:QualifiedExpression) {
             cgExpr(ctx, qe.qual);
-            ctx.asm.I_coerce(cgIdentExpr(ctx, new Ast::Identifier("Namespace", [[Ast::noNS]])));
+            asm.I_coerce(cgIdentExpr(ctx, new Ast::Identifier("Namespace", [[Ast::noNS]])));
             cgExpr(ctx, qe.expr);
-            ctx.asm.I_coerce_s();
+            asm.I_coerce_s();
             return emitter.rtqnameL(false);
         }
         case (x:*) { 

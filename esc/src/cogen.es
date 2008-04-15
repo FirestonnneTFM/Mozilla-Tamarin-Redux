@@ -192,7 +192,7 @@ namespace Gen;
     }
 
     function cgDebugFile(ctx) {
-        let {asm:asm, cp:cp} = ctx;
+        let {asm, cp} = ctx;
         if( emit_debug && ctx.filename != null )
             asm.I_debugfile(cp.stringUtf8(ctx.filename));
     }
@@ -223,7 +223,7 @@ namespace Gen;
     }
     
     function cgFixtures(ctx, fixtures) {
-        let { target:target, asm:asm, emitter:emitter } = ctx;
+        let {target, asm, emitter} = ctx;
         for ( let i=0 ; i < fixtures.length ; i++ ) {
             let [fxname, fx] = fixtures[i];
             let name = emitter.fixtureNameToName(fxname);
@@ -353,7 +353,7 @@ namespace Gen;
    }
 
     function cgClass(ctx, c) {
-        let {asm:asm, emitter:emitter, script:script} = ctx;
+        let {asm, emitter, script} = ctx;
         
         let classname = emitter.qname(c.name,false);
         let basename = emitter.qname(c.baseName,false);
@@ -404,7 +404,7 @@ namespace Gen;
     }
 
     function cgInterface(ctx, c) {
-        let {asm:asm, emitter:emitter, script:script} = ctx;
+        let {asm, emitter, script} = ctx;
         
         let ifacename = emitter.qname(c.name,false);
         let interfacenames = Util::map(function (n) { return emitter.qname(n,false) }, c.interfaceNames);
@@ -494,7 +494,7 @@ namespace Gen;
     }
 
     function extractFormalTypes(ctx, f:Func) {
-        let {emitter:emitter, script:script} = ctx;
+        let {emitter, script} = ctx;
         function extractType([name,fixture])
             emitter.fixtureTypeToType(fixture);
         
@@ -504,7 +504,7 @@ namespace Gen;
     }
         
     function extractDefaultValues(ctx, f:Func) {
-        let {emitter:emitter, script:script} = ctx;
+        let {emitter, script} = ctx;
         function extractDefaults(expr)
             emitter.defaultExpr(expr);
 
@@ -516,7 +516,7 @@ namespace Gen;
      * Return the function index
      */
     function cgFunc(ctx0, f:FUNC) {
-        let {emitter:emitter,script:script, cp:cp} = ctx0;
+        let {emitter, script, cp} = ctx0;
         let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "function";  // brittle as hell
         let formals_types = extractFormalTypes({emitter:emitter, script:script}, f);
         let name = f.name ? f.name.ident : "";
@@ -595,7 +595,7 @@ namespace Gen;
     }
     
     function cgHead(ctx, head) {
-        let {asm:asm, emitter:emitter, target:target} = ctx;
+        let {asm, emitter, target} = ctx;
         
         function extractName([name,fixture])
             ctx.emitter.fixtureNameToName(name); //FIXME: shouldn't need ctx.
@@ -620,7 +620,7 @@ namespace Gen;
     }
 
     function cgInits(ctx, inits, baseOnStk){
-        let {asm:asm, emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
 
         let t = -1;
         let inits_length = inits?inits.length:0;
@@ -650,7 +650,7 @@ namespace Gen;
     // branch to.  "tag" is one of "function", "break", "continue"
 
     function unstructuredControlFlow(ctx, hit, jump, msg) {
-        let {stk:stk, asm:asm} = ctx;
+        let {stk, asm} = ctx;
         while (stk != null) {
             if (hit(stk)) {
                 if (jump)
@@ -680,7 +680,7 @@ namespace Gen;
     }
 
     function restoreScopes(ctx) {
-        let {stk:stk, asm:asm} = ctx;
+        let {stk, asm} = ctx;
         loop(stk);
 
         function loop(stk) {
@@ -710,66 +710,66 @@ namespace Gen;
                  { tag: "script", push_this: true, link: null }, 
                  script );
 
-    function pushClass(ctx, cls)
-        new CTX( ctx.asm,
-                 { tag:"class", link: ctx.stk }, 
+    function pushClass({asm, stk}, cls)
+        new CTX( asm,
+                 { tag:"class", link: stk }, 
                  cls );
 
-    function pushCInit(ctx, cinit)
-        new CTX( cinit.asm,
-                 { tag: "function", "type": "cinit", link: ctx.stk }, 
+    function pushCInit({asm, stk}, cinit)
+        new CTX( asm,
+                 { tag: "function", "type": "cinit", link: stk }, 
                  cinit );
 
-    function pushInstance(ctx, inst)
-        new CTX( ctx.asm, 
-                 { tag:"instance", target: inst, link: ctx.stk },
+    function pushInstance({asm, stk}, inst)
+        new CTX( asm, 
+                 { tag:"instance", target: inst, link: stk },
                  inst );
 
-    function pushIInit(ctx, scope_reg, iinit)
+    function pushIInit({stk}, scope_reg, iinit)
         new CTX( iinit.asm,
-                 { tag:"function", "type": "iinit", scope_reg: scope_reg, link: ctx.stk },
+                 { tag:"function", "type": "iinit", scope_reg: scope_reg, link: stk },
                  iinit );
 
-    function pushFunction(ctx, function_type, scope_reg, capture_reg, push_this, func)
+    function pushFunction({stk}, function_type, scope_reg, capture_reg, push_this, func)
         new CTX( func.asm, 
                  { tag: "function", 
                    "type": function_type, 
                    scope_reg: scope_reg, 
                    capture_reg: capture_reg,
                    push_this: push_this,
-                   link: ctx.stk },
+                   link: stk },
                  func );
 
-    function pushBreak(ctx, branchTarget)
-        new CTX( ctx.asm, 
-                 { tag:"break", label: null, branchTarget: branchTarget, link: ctx.stk }, 
-                 ctx.target );
+    function pushBreak({asm, stk, target}, branchTarget)
+        new CTX( asm, 
+                 { tag:"break", label: null, branchTarget: branchTarget, link: stk }, 
+                 target );
 
-    function pushLabel(ctx, label, branchTarget)
-        new CTX( ctx.asm, 
-                 { tag:"break", label: label, branchTarget: branchTarget, link: ctx.stk }, 
-                 ctx.target );
+    function pushLabel({asm, stk, target}, label, branchTarget)
+        new CTX( asm, 
+                 { tag:"break", label: label, branchTarget: branchTarget, link: stk }, 
+                 target );
 
-    function pushContinue(ctx, labels, branchTarget)
-        new CTX(ctx.asm, 
-                { tag:"continue", labels: labels, branchTarget: branchTarget, link: ctx.stk },
-                ctx.target );
+    function pushContinue({asm, stk, target}, labels, branchTarget)
+        new CTX( asm, 
+                 { tag:"continue", labels: labels, branchTarget: branchTarget, link: stk },
+                 target );
 
-    function pushWith(ctx, scope_reg)
-        new CTX( ctx.asm,
-                 { tag:"with", scope_reg: scope_reg, link: ctx.stk },
-                 ctx.target );
+    function pushWith({asm, stk, target}, scope_reg)
+        new CTX( asm,
+                 { tag:"with", scope_reg: scope_reg, link: stk },
+                 target );
 
     function pushLet(ctx /*more*/) {
     }
 
-    function pushCatch(ctx, scope_reg )
-        new CTX( ctx.asm, 
-                 { tag: "catch", scope_reg: scope_reg, link: ctx.stk },
-                 ctx.target );
+    function pushCatch({asm, stk, target}, scope_reg )
+        new CTX( asm, 
+                 { tag: "catch", scope_reg: scope_reg, link: stk },
+                 target );
 
-    function pushFinally(ctx, label, returnreg)
-        new CTX( ctx.asm,
-                 { tag: "finally", label: label, returnreg: returnreg, returnAddresses: new Array(), nextReturn: 0, link: ctx.stk },
-                 ctx.target );
+    function pushFinally({asm, stk, target}, label, returnreg)
+        new CTX( asm,
+                 { tag: "finally", label: label, returnreg: returnreg, returnAddresses: new Array(), nextReturn: 0, link: stk },
+                 target );
 }

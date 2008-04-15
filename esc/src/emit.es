@@ -148,11 +148,11 @@ namespace Emit;
             return new_nss;
         }
         public function multiname(mname, is_attr) {
-            let {nss:nss, ident:ident} = mname;
+            let {nss, ident} = mname;
             return constants.Multiname(constants.namespaceset(flattenNamespaceSet(nss)), constants.stringUtf8(ident), is_attr);
         }
         public function qname(qn, is_attr ) {
-            let {ns:ns, id:id} = qn;
+            let {ns, id} = qn;
             return constants.QName(namespace(ns), constants.stringUtf8(id), is_attr);
         }
         public function nameFromIdent(id) {
