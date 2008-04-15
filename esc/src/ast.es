@@ -270,6 +270,10 @@ public namespace Ast
     // EXPR
 
     // Bug 425467 that this needs to be public
+    //
+    // Bug in general that this is called 'Expr' and the interfaces
+    // are 'ISomething', needless confusion.  Should fix the
+    // interfaces.
     public class Expr extends ASTNode {
         public var pos: int;
         function Expr(pos=0) : pos=pos {}
@@ -718,7 +722,7 @@ public namespace Ast
     class LiteralField extends ASTNode implements ISerializable {
         const kind: VAR_DEFN_TAG;
         const ident: IdentExpr;
-        const expr: Expr;
+        const expr: Expr?;
         function LiteralField (kind,ident,expr)
             : kind = kind
             , ident = ident
@@ -1416,16 +1420,16 @@ public namespace Ast
     }
 
     class IfStmt extends ASTNode implements IStmt, ISerializable {
-        const expr : Expr;
-        const then : IStmt;
-        const elseOpt : IStmt?;
-        function IfStmt (expr,then,elseOpt)
-            : expr = expr
-            , then = then
-            , elseOpt = elseOpt { }
+        const test : Expr;
+        const consequent : IStmt;
+        const alternate : IStmt?;
+        function IfStmt (test, consequent, alternate)
+            : test=test
+            , consequent=consequent
+            , alternate=alternate { }
 
         function serialize(s)
-            s.sClass(this, "IfStmt", "expr", "cases");
+            s.sClass(this, "IfStmt", "test", "consequent", "alternate");
     }
 
     class SwitchStmt extends ASTNode implements IStmt, ISerializable {

@@ -1308,8 +1308,8 @@ use namespace intrinsic;
 
         */
 
-        function fieldList () /* : [Ast::FIELD_TYPE] */ {
-            let fields = [];
+        function fieldList () : LITERAL_FIELDS {
+            let fields = [] /* : LITERAL_FIELDS */; // FIXME -- bug
 
             if (hd () === Token::RightBrace)
                 return fields;
@@ -1334,19 +1334,24 @@ use namespace intrinsic;
             let tag = match(Token::Const) ? constTag : varTag;
             let fn = fieldName ();
 
-            eat (Token::Colon);
+            let expr = null;
 
-            let expr;
-            switch (hd ()) {
-            case Token::LeftBrace:   // short cut to avoid recursion
-                expr = objectLiteral ();
-                break;
-            case Token::LeftBracket:
-                expr = arrayLiteral ();
-                break;
-            default:
-                expr = assignmentExpression (allowIn);
-                break;
+            // The colon could be absent if this is a destructuring
+            // shorthand, but we can't expand it here -- that must be
+            // done later, and only in legal contexts.
+
+            if (match(Token::Colon)) {
+                switch (hd ()) {
+                case Token::LeftBrace:   // short cut to avoid recursion
+                    expr = objectLiteral ();
+                    break;
+                case Token::LeftBracket:
+                    expr = arrayLiteral ();
+                    break;
+                default:
+                    expr = assignmentExpression (allowIn);
+                    break;
+                }
             }
 
             return new Ast::LiteralField (tag,fn,expr);
@@ -2606,7 +2611,9 @@ use namespace intrinsic;
             function fieldPatternFromLiteral (nd: Ast::LITERAL_FIELD) : FIELD_PATTERN {
                 var nd1 = nd.Ast::ident;
                 var nd2 = patternFromExpr (nd.Ast::expr);
-                
+                if (nd2 == null)
+                    nd2 = nd1;
+
                 return new FieldPattern (nd1,nd2);
             }
         }
@@ -4012,7 +4019,7 @@ use namespace intrinsic;
             if (tau == interfaceBlk)
                 checkLegalAttributes(attrs, {});
 
-            var {params:params,defaults:defaults,resultType:resultType,thisType:thisType,numparams:numparams} = signature;
+            var {params, defaults, resultType, thisType, numparams} = signature;
             var func = new Ast::Func (name, body, params, numparams, vars, defaults, resultType, attr);
 
             var name = new Ast::PropName (new Ast::Name(attrs.ns, name.ident));
@@ -4048,7 +4055,7 @@ use namespace intrinsic;
 
             var attr = cx.exitFunction();
 
-            var { params:params, numparams:numparams, defaults:defaults, resultType:resultType } = signature;
+            var {params, numparams, defaults, resultType} = signature;
             var fnexpr = new Ast::LiteralFunction(new Ast::Func(name, 
                                                                 body, 
                                                                 params, 
@@ -4089,7 +4096,7 @@ use namespace intrinsic;
             var vars = cx.exitVarBlock ();
             var attr = cx.exitFunction();
 
-            var {params:params,defaults:defaults,settings:settings,superArgs:superArgs,numparams:numparams} = signature;
+            var {params, defaults, settings, superArgs, numparams} = signature;
 
             // print ("superArgs=",superArgs);
             // print ("settings=",settings);

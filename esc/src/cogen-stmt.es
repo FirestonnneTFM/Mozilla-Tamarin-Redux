@@ -74,6 +74,8 @@
     }
 
     function cgExprStmt(ctx, s) {
+        let {asm, stk} = ctx;
+
         cgExpr(ctx, s.expr);
         
         // Capture the result or discard it.
@@ -83,8 +85,6 @@
         //  - exprStmt updates the local with the value instead of popping it
         //  - catch and finally blocks do not affect the captured value
 
-        let asm=ctx.asm;
-        let stk=ctx.stk;
         while (stk != null && stk.tag != "function" && stk.tag != "finally" && stk.tag != "catch")
             stk = stk.link;
         if (stk != null && stk.tag == "function" && stk.capture_reg) {
@@ -95,20 +95,19 @@
             asm.I_pop();
     }
 
-    function cgBlockStmt(ctx, s) {
-        cgBlock(ctx, s.block);
+    function cgBlockStmt(ctx, {block}) {
+        cgBlock(ctx, block);
     }
 
-    function cgLabeledStmt(ctx, {label: label, stmt: stmt}) {
-        let asm = ctx.asm;
+    function cgLabeledStmt(ctx, {label, stmt}) {
+        let {asm} = ctx;
         let L0 = asm.newLabel();
         cgStmt(pushLabel(ctx, label, L0), stmt);
         asm.I_label(L0);
     }
 
-    function cgIfStmt(ctx, s) {
-        let {expr:test, then:consequent, elseOpt:alternate} = s;
-        let asm = ctx.asm;
+    function cgIfStmt(ctx, {test, consequent, alternate}) {
+        let {asm} = ctx;
         cgExpr(ctx, test);
         let L0 = asm.I_iffalse(undefined);
         cgStmt(ctx, consequent);
@@ -124,9 +123,8 @@
 
     // Probable AST bug: should be no fixtures here, you can't define
     // vars in the WHILE head.
-    function cgWhileStmt(ctx, s) {
-        let {stmt: stmt, labels: labels, expr: expr} = s;
-        let asm    = ctx.asm;
+    function cgWhileStmt(ctx, {stmt, labels, expr}) {
+        let {asm}  = ctx;
         let Lbreak = asm.newLabel();
         let Lcont  = asm.I_jump(undefined);
         let Ltop   = asm.I_label(undefined);
@@ -139,9 +137,8 @@
 
     // Probable AST bug: should be no fixtures here, you can't define
     // vars in the DO-WHILE head.
-    function cgDoWhileStmt(ctx, s) {
-        let {stmt: stmt, labels: labels, expr: expr} = s;
-        let asm    = ctx.asm;
+    function cgDoWhileStmt(ctx, {stmt, labels, expr}) {
+        let {asm}  = ctx;
         let Lbreak = asm.newLabel();
         let Lcont  = asm.newLabel();
         let Ltop   = asm.I_label(undefined);
@@ -152,11 +149,10 @@
         asm.I_label(Lbreak);
     }
 
-    function cgForStmt(ctx, s) {
-        let {vars:vars,init:init,cond:cond,incr:incr,stmt:stmt,labels:labels} = s;
+    function cgForStmt(ctx, {vars, init, cond, incr, stmt, labels}) {
         // FIXME: fixtures
         // FIXME: code shape?
-        let asm = ctx.asm;
+        let {asm} = ctx;
         cgHead(ctx, vars);
         let Lbreak = asm.newLabel();
         let Lcont = asm.newLabel();
@@ -180,11 +176,10 @@
         asm.I_label(Lbreak);
     }
 
-    function cgForInStmt(ctx, s) {
-        let {vars:vars,init:init,obj:obj,stmt:stmt,labels:labels,is_each:is_each} = s;
+    function cgForInStmt(ctx, {vars, init, obj, stmt, labels, is_each}) {
         // FIXME: fixtures
         // FIXME: code shape?
-        let {asm:asm,emitter:emitter} = ctx;
+        let {asm, emitter} = ctx;
         cgHead(ctx, vars);
 
         let name;
@@ -249,8 +244,7 @@
         asm.killTemp(T_obj);
     }
 
-    function cgBreakStmt(ctx, s) {
-        let ident = s.ident;
+    function cgBreakStmt(ctx, {ident}) {
         function hit (node) {
             return node.tag == "break" && (ident == null || ident == node.label)
         }
@@ -260,8 +254,7 @@
                                 (ident == null ? "No 'break' allowed here" : "'break' to undefined label " + ident));
     }
 
-    function cgContinueStmt(ctx, s) {
-        let {ident: ident} = s;
+    function cgContinueStmt(ctx, {ident}) {
         function hit(node) {
             return node.tag == "continue" && (ident == null || memberOf(ident, node.labels))
         }
@@ -271,16 +264,17 @@
                                 "'continue' to undefined label " + ident);
     }
 
-    function cgThrowStmt(ctx, s) {
-        cgExpr(ctx, s.expr);
-        ctx.asm.I_throw();
+    function cgThrowStmt(ctx, {expr}) {
+        let {asm} = ctx;
+        cgExpr(ctx, expr);
+        asm.I_throw();
     }
 
-    function cgReturnStmt(ctx, s) {
-        let asm = ctx.asm;
+    function cgReturnStmt(ctx, {expr}) {
+        let {asm} = ctx;
         let t = null;
-        if (s.expr != null) {
-            cgExpr(ctx, s.expr);
+        if (expr != null) {
+            cgExpr(ctx, expr);
             t = asm.getTemp();
             asm.I_setlocal(t);
         }
@@ -291,7 +285,7 @@
                                 hit,
                                 false,
                                 "No 'return' allowed here.");
-        if (s.expr == null)
+        if (expr == null)
             asm.I_returnvoid();
         else {
             asm.I_getlocal(t);
@@ -361,8 +355,8 @@
     }
 
     function cgSwitchStmtFast(ctx, s, low, high, has_default) {
-        let {expr:expr, cases:cases} = s;
-        let asm = ctx.asm;
+        let {expr, cases} = s;
+        let {asm, cp} = ctx;
         let t = asm.getTemp();
 
         let Ldef = asm.newLabel();
@@ -372,7 +366,7 @@
         let ldef_emitted = false;
 
         cgExpr(ctx, expr);                    // switch value
-        asm.I_pushint(ctx.cp.int32(low));     // offset
+        asm.I_pushint(cp.int32(low));         // offset
         asm.I_subtract();                     // bias it
         asm.I_dup();
         asm.I_convert_i();                    // convert to int
@@ -448,9 +442,8 @@
         asm.I_label(Lbreak);
     }
 
-    function cgSwitchStmtSlow(ctx,s) {
-        let {expr:expr, cases:cases} = s;
-        let asm = ctx.asm;
+    function cgSwitchStmtSlow(ctx, {expr,cases}) {
+        let {asm} = ctx;
         cgExpr(ctx, expr);
         let t = asm.getTemp();
         asm.I_setlocal(t);
@@ -501,8 +494,7 @@
         asm.killTemp(t);
     }
 
-    function cgSwitchTypeStmt(ctx, s) {
-        let {expr:expr, type:type, cases:cases} = s;
+    function cgSwitchTypeStmt(ctx, {expr,type,cases}) {
         let b = new Block(new Ast::Head([],[]), [new ThrowStmt(expr)]);
 
         let newcases = [];
@@ -523,9 +515,8 @@
         cgTryStmt(ctx, {block:b, catches:newcases, finallyBlock:null} );        
     }
     
-    function cgWithStmt(ctx, s) {
-        let {expr:expr, stmt:stmt} = s;
-        let asm = ctx.asm;
+    function cgWithStmt(ctx, {expr,stmt}) {
+        let {asm} = ctx;
         let scopereg = asm.getTemp();
 
         cgExpr(ctx, expr);
@@ -569,9 +560,8 @@
     // There is a counter in the ctx, and id's for the switch are generated from it.
     // Its initial value is 0.  lookupswitch can be used.
 
-    function cgTryStmtWithFinally(ctx, s) {
-        let {block:block, catches:catches, finallyBlock:finallyBlock} = s;
-        let {asm:asm, emitter:emitter, target:target} = ctx;
+    function cgTryStmtWithFinally(ctx, {block, catches, finallyBlock}) {
+        let {asm, emitter, target, cp} = ctx;
 
         let returnreg = asm.getTemp();
         let Lfinally = asm.newLabel();
@@ -593,7 +583,7 @@
         // code must not be in the scope of the generated exception
         // handler.
 
-        asm.I_pushint(ctx.cp.int32(myend));
+        asm.I_pushint(cp.int32(myend));
         asm.I_setlocal(returnreg);
         asm.I_jump(Lfinally);                    // control continues at Lend below
 
@@ -612,7 +602,7 @@
 
         restoreScopes(ctx);         // finally block needs correct scopes
 
-        asm.I_pushint(ctx.cp.int32(myreturn));
+        asm.I_pushint(cp.int32(myreturn));
         asm.I_setlocal(returnreg);
         asm.I_jump(Lfinally);                                    // control continues at Lreturn
         rib.returnAddresses[myreturn] = asm.I_label(undefined);  // "Lreturn" is here
@@ -643,9 +633,8 @@
         asm.killTemp(returnreg);
     }
 
-    function cgTryStmtNoFinally(ctx, s) {
-        let {block:block, catches:catches} = s;
-        let asm = ctx.asm;
+    function cgTryStmtNoFinally(ctx, {block, catches}) {
+        let {asm} = ctx;
         let code_start = asm.length;
         cgBlock(ctx, block);
         let code_end = asm.length;
@@ -659,9 +648,8 @@
         asm.I_label(Lend);
     }
     
-    function cgCatch(ctx, code_start, code_end, Lend, s ) {
-        let {param:param, block:block} = s;
-        let {asm:asm, emitter:emitter, target:target} = ctx;
+    function cgCatch(ctx, code_start, code_end, Lend, {param, block} ) {
+        let {asm, emitter, target} = ctx;
         
         if( param.fixtures.length != 1 )
             Gen::internalError(ctx, "Catch block should have 1 fixture");
