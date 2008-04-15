@@ -46,3 +46,4 @@ esc/src/*.es.abc
 *.user
 esc/safebin*
 esc/src/*.es.abc
+obj-dir/**

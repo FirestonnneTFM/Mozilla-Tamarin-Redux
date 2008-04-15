@@ -435,7 +435,9 @@ for ast in tests:
     ltimeout += 1
   else:
     try:
+      outputLines = []
       for line in f:
+        outputLines.append(line)
         verbose_print(line.strip())
         testcase=''
         if len(line)>9:
@@ -469,7 +471,7 @@ for ast in tests:
         lexpfail += 1
       else:
         lfail = 1
-        fail(testName, '   FAILED contained no testcase messages', failmsgs)
+        fail(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), failmsgs)
   allfails += lfail
   allpasses += lpass
   allexpfails += lexpfail
