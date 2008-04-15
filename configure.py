@@ -136,6 +136,7 @@ if os == "darwin":
                          'TARGET_RT_MAC_MACHO': 1,
                          'USE_MMAP': None})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks -mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
+    config.subst("MACOSX_DEPLOYMENT_TARGET",10.4)
 elif os == "windows":
     MMGC_DEFINES.update({'WIN32': None,
                          '_CRT_SECURE_NO_DEPRECATE': None})
