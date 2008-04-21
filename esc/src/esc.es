@@ -58,7 +58,7 @@
     if (argv.length > 1) {
         print("");
         print("Total time: " + (after - before));
-        print("Front end:  " + ESC::total_frontend);
-        print("Back end:   " + ESC::total_backend);
+        print("Front end:  " + total_frontend);
+        print("Back end:   " + total_backend);
     }
 }

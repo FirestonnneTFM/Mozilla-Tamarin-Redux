@@ -696,7 +696,7 @@
                 case assignBitwiseAndOp:          asm.I_bitand(); break;
                 case assignBitwiseOrOp:           asm.I_bitor(); break;
                 case assignBitwiseXorOp:          asm.I_bitxor(); break;
-                default:                          Gen::internalError(ctx, "ASSIGNOP not supported " + op);
+                default:                          Gen::internalError(ctx, "ASSIGNOP not supported " + e.op);
                 }
             }
             asm.I_dup();

@@ -46,6 +46,7 @@ public namespace Ast
 
     // Bug 425467 that this needs to be public
     public interface ISerializable {
+        // FIXME: need a method here!
     }
 
     public class ASTNode {
@@ -853,6 +854,8 @@ public namespace Ast
     const setterFunction = 2;
 
     class FuncAttr extends ASTNode implements ISerializable {
+        use default namespace public;
+
         /* Outer function, or null if the function is at the global
            level (including for class methods). */
         const parent: FuncAttr;
@@ -1274,6 +1277,11 @@ public namespace Ast
         // No common methods, this is just a tag
     }
 
+    public interface ILabelSet {
+        // FIXME
+        // Want to express: has 'labels: Array'
+    }
+
     type STMTS = [Ast::IStmt];
 
     class EmptyStmt extends ASTNode implements IStmt, ISerializable {
@@ -1290,7 +1298,7 @@ public namespace Ast
             s.sClass(this, "ExprStmt", "expr");
     }
 
-    class ForInStmt extends ASTNode implements IStmt, ISerializable {
+    class ForInStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
         const vars : HEAD;
         const init : Expr?;
         const obj  : Expr;
@@ -1374,7 +1382,7 @@ public namespace Ast
             s.sClass(this, "LetStmt", "block");
     }
 
-    class WhileStmt extends ASTNode implements IStmt, ISerializable {
+    class WhileStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
         const expr : Expr;
         const stmt : IStmt;
         const labels : IDENTS;
@@ -1387,7 +1395,7 @@ public namespace Ast
             s.sClass(this, "WhileStmt", "expr", "stmt", "labels");
     }
 
-    class DoWhileStmt extends ASTNode implements IStmt, ISerializable {
+    class DoWhileStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
         const expr : Expr;
         const stmt : IStmt;
         const labels : IDENTS;
@@ -1400,7 +1408,7 @@ public namespace Ast
             s.sClass(this, "DoWhileStmt", "expr", "stmt", "labels");
     }
 
-    class ForStmt extends ASTNode implements IStmt, ISerializable {
+    class ForStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
         const vars : HEAD;
         const init : Expr?;
         const cond : Expr?;
@@ -1570,6 +1578,62 @@ public namespace Ast
         function serialize(s)
             s.sClass(this, "Program", "packages", "block", "head", "attr", "file");
     }
+
+    /* Helper tables */
+
+    const tokenToOperator = [];
+
+    // Binary
+    tokenToOperator[Token::Equal] = Ast::equalOp;
+    tokenToOperator[Token::NotEqual] = Ast::notEqualOp;
+    tokenToOperator[Token::StrictEqual] = Ast::strictEqualOp;
+    tokenToOperator[Token::StrictNotEqual] = Ast::strictNotEqualOp;
+    tokenToOperator[Token::LessThan] = Ast::lessOp;
+    tokenToOperator[Token::GreaterThan] = Ast::greaterOp;
+    tokenToOperator[Token::LessThanOrEqual] = Ast::lessOrEqualOp;
+    tokenToOperator[Token::GreaterThanOrEqual] = Ast::greaterOrEqualOp;
+    tokenToOperator[Token::In] = Ast::inOp;
+    tokenToOperator[Token::InstanceOf] = Ast::instanceOfOp;
+    tokenToOperator[Token::Is] = Ast::isOp;
+    tokenToOperator[Token::Cast] = Ast::castOp;
+    tokenToOperator[Token::LeftShift] = Ast::leftShiftOp;
+    tokenToOperator[Token::RightShift] = Ast::rightShiftOp;
+    tokenToOperator[Token::UnsignedRightShift] = Ast::rightShiftUnsignedOp;
+    tokenToOperator[Token::Plus] = Ast::plusOp;
+    tokenToOperator[Token::Minus] = Ast::minusOp;
+    tokenToOperator[Token::Mult] = Ast::timesOp;
+    tokenToOperator[Token::Div] = Ast::divideOp;
+    tokenToOperator[Token::Remainder] = Ast::remainderOp;
+    tokenToOperator[Token::Delete] = Ast::deleteOp;
+    tokenToOperator[Token::Assign] = Ast::assignOp;
+    tokenToOperator[Token::PlusAssign] = Ast::assignPlusOp;
+    tokenToOperator[Token::MinusAssign] = Ast::assignMinusOp;
+    tokenToOperator[Token::MultAssign] = Ast::assignTimesOp;
+    tokenToOperator[Token::DivAssign] = Ast::assignDivideOp;
+    tokenToOperator[Token::RemainderAssign] = Ast::assignRemainderOp;
+    tokenToOperator[Token::BitwiseAndAssign] = Ast::assignBitwiseAndOp;
+    tokenToOperator[Token::BitwiseOrAssign] = Ast::assignBitwiseOrOp;
+    tokenToOperator[Token::BitwiseXorAssign] = Ast::assignBitwiseXorOp;
+    tokenToOperator[Token::LeftShiftAssign] = Ast::assignLeftShiftOp;
+    tokenToOperator[Token::RightShiftAssign] = Ast::assignRightShiftOp;
+    tokenToOperator[Token::UnsignedRightShiftAssign] = Ast::assignRightShiftUnsignedOp;
+    tokenToOperator[Token::LogicalAndAssign] = Ast::assignLogicalAndOp;
+    tokenToOperator[Token::LogicalOrAssign] = Ast::assignLogicalOrOp;
+
+    // Unary.
+    tokenToOperator[Token::Delete + 1000] = Ast::deleteOp;
+    tokenToOperator[Token::PlusPlus + 1000] = Ast::preIncrOp;
+    tokenToOperator[Token::MinusMinus + 1000] = Ast::preDecrOp;
+    tokenToOperator[Token::Void + 1000] = Ast::voidOp;
+    tokenToOperator[Token::TypeOf + 1000] = Ast::typeOfOp;
+    tokenToOperator[Token::Plus + 1000] = Ast::unaryPlusOp;
+    tokenToOperator[Token::Minus + 1000] = Ast::unaryMinusOp;
+    tokenToOperator[Token::BitwiseNot + 1000] = Ast::bitwiseNotOp;
+    tokenToOperator[Token::Not + 1000] = Ast::logicalNotOp;
+
+    //////////////////////////////////////////////////////////////////////
+    //
+    // Serialization
 
     class Serializer {
         var compact;

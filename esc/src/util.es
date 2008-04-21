@@ -97,6 +97,13 @@ namespace Util
         return a;
     }
 
+    // push elements of a2 onto a1
+    function pushOnto(a1, a2) {
+        for ( let i=0, limit=a2.length ; i < limit ; i++ )
+            a1.push(a2[i]);
+        return a1;
+    }
+
     function toUint(x)
         uint(x);
 
