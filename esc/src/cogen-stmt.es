@@ -36,11 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-//package cogen
 {
-    //import util.*;
-    //import abcfile.*;
-    //import assembler.*;
     use default namespace Gen;
 
     use namespace Util;

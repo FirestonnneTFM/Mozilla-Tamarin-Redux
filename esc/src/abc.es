@@ -37,14 +37,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 namespace Abc;
-//package abcfile
 {
     use default namespace Abc;
     use namespace Asm;
     use namespace Util;
-    //import util.*;
-    //import assembler.*;
-    //import bytestream.*;
 
     /* ABCFile container & helper class.
      *

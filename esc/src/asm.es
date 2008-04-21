@@ -38,17 +38,12 @@
 
 namespace Asm;
 
-//package assembler
 {
     use default namespace Asm;
     use namespace Util;
     use namespace Ast;  // ESC bug -- open up fields in FuncAttr
     //use namespace Abc;
     
-    //import util.*;
-    //import bytestream.*;
-    //import abcfile.*;
-
     /*******************************************************************
      * ABC constants
      */

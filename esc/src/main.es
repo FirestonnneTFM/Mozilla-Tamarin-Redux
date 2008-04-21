@@ -41,9 +41,12 @@
  * after processing.  Otherwise, read input from the console.
  */
 
+/* internal */ namespace AVMPLUS = "avmplus";
+/* internal */ namespace FLASH_UTILS = "flash.utils";
+
 {
-    import avmplus.*;
-    import flash.utils.*;
+    use namespace AVMPLUS;
+    use namespace FLASH_UTILS;
 
     var argv = ESC::commandLineArguments();
     if (argv.length == 0)

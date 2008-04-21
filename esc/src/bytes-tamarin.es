@@ -36,6 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/* internal */ namespace FLASH_UTILS = "flash.utils";
+
 {
     /* Emitter for various data in ABC-compatible formats, as a byte
      * stream.  The byte stream is represented as an array of unsigned
@@ -45,8 +47,7 @@
      * All data are dumped in litte-endian format.
      */
 
-    import flash.utils.*
-
+    use namespace FLASH_UTILS;
 
     class ABCByteStream
     {

@@ -35,17 +35,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-import avmplus.*;
+/* internal */ namespace AVMPLUS = "avmplus";
+/* internal */ namespace FLASH_UTILS = "flash.utils";
 
-use namespace Release;
-use namespace Ast;
-use namespace intrinsic;
 
 {
+    use namespace Release;
+    use namespace Ast;
+    use namespace intrinsic;
     use namespace Abc;
     use namespace Asm;
-    import flash.utils.*;
-
+    use namespace AVMPLUS;
+    use namespace FLASH_UTILS;
 
     class AbcEncoderCpp {
         var verbose : Boolean;
@@ -191,7 +192,12 @@ use namespace intrinsic;
 
 // entry-point...
 {
-    import flash.utils.*;
+    use namespace Release;
+    use namespace Ast;
+    use namespace intrinsic;
+    use namespace AVMPLUS;
+    use namespace FLASH_UTILS;
+
     var fname = System.argv[0];
     var verbose = false;
     if( fname == "verbose" )

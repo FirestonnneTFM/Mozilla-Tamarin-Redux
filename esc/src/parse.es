@@ -3228,7 +3228,8 @@
             else
                 package_list = [];
 
-            currentPackageName = "";
+            // FIXME, right now this breaks everything because of bugs elsewhere...
+            currentPackageName = "" /* + Math.random() + Math.random() + Math.random() */;
             currentClassName = "";
 
             cx.enterLetBlock ();

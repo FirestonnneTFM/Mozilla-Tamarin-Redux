@@ -62,12 +62,7 @@
  *   'callsuper' instruction
  */
 
-//package cogen
 {
-    //import util.*;
-    //import abcfile.*;
-    //import assembler.*;
-    //import emitter.*;
     use default namespace Gen;
 
     use namespace Util;

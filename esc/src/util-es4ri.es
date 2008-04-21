@@ -38,7 +38,6 @@
 
 /* Utilities adapted to the ECMAScript 4 reference implementation */
 
-//package util
 {
     use default namespace Util;
     
