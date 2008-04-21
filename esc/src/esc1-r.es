@@ -36,18 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/*
 {
-    import flash.utils.*;
-    use namespace Decode;
-    var bytes = ByteArray.readFile (fname+"esc-env.ast.abc");
-    Domain.currentDomain.loadBytes(bytes);   // defines global var 'ast'
-    print ("decoding", fname);
-    var nd = program (ast);
-}
-*/
-{
-//    import util.*;
     use namespace Ast;
     use namespace Parse;
     load ("esc-env.ast")

@@ -61,15 +61,11 @@
 */
 
 namespace Emit;
-//package emitter
 {
     use default namespace Emit;
     use namespace Util;
     use namespace Abc;
     use namespace Asm;
-    //import util.*;
-    //import abcfile.*;
-    //import assembler.*;
 
     use namespace Ast;
 
@@ -119,7 +115,7 @@ namespace Emit;
                     return constants.namespace(CONSTANT_Namespace, constants.stringUtf8(pn.name));
                 }
                 case (int_ns:InternalNamespace) {
-                    return constants.namespace(CONSTANT_PackageInternalNS, constants.stringUtf8(pn.name));
+                    return constants.namespace(CONSTANT_PackageInternalNS, constants.stringUtf8(int_ns.name));
                 }
                 case (un:UserNamespace) {
                     /// return constants.namespace(CONSTANT_ExplicitNamespace, constants.stringUtf8(pn.name));

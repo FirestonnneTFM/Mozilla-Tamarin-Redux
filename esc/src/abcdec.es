@@ -36,11 +36,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-import avmplus.*;
+/* internal */ namespace AVMPLUS = "avmplus";
+/* internal */ namespace FLASH_UTILS = "flash.utils";
 
 // load asm
 {
-    import flash.utils.*;
+    use namespace AVMPLUS;
+    use namespace FLASH_UTILS;
+
     var fname = System.argv[0];
     if (fname==undefined) throw "no file name given";
     var fname = System.argv[0];

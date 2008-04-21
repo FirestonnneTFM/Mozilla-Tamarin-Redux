@@ -36,13 +36,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-import avmplus.*;
+/* internal */ namespace AVMPLUS = "avmplus";
+/* internal */ namespace FLASH_UTILS = "flash.utils";
 
 Gen::emit_debug = false;
 
 // load ast
 {
-    import flash.utils.*;
+    use namespace AVMPLUS;
+    use namespace FLASH_UTILS;
+
     var fname = System.argv[0];
     if (fname==undefined) throw "no file name given";
     var fname = System.argv[0];
@@ -52,6 +55,8 @@ Gen::emit_debug = false;
 // eval ast
 
 {
+    use namespace AVMPLUS;
+
     use namespace Parse;
     use namespace Gen;
     //print ("parsing");
@@ -65,6 +70,8 @@ Gen::emit_debug = false;
 // decode it
 
 {
+    use namespace AVMPLUS;
+
     //print ("decoding");
     var nd = Decode::program (ast);  // defined by side effect
 }
@@ -72,6 +79,8 @@ Gen::emit_debug = false;
 // cogen and write it
 
 {
+    use namespace AVMPLUS;
+
     //print ("generating");
     var bytes = Gen::cg(nd);
     dumpABCFile(bytes, fname+".abc");

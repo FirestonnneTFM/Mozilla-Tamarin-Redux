@@ -36,16 +36,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/* internal */ namespace AVMPLUS = "avmplus";
+
 Gen::emit_debug = false;
 {
-    import avmplus.*;
+    use namespace AVMPLUS;
+
     var fname = System.argv[0];
     var str = File.read (fname);
     //print ("compiling ", fname);
 }
 
 {
-    import avmplus.*;
+    use namespace AVMPLUS;
+
     use namespace Parse;
     use namespace Gen;
     var esc_env_str = File.read ("esc-env.ast");

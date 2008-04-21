@@ -36,21 +36,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/* internal */ namespace AVMPLUS = "avmplus";
+
 {
     use default namespace ESC;
 
     function readFile(fn) {
-        import avmplus.*;
+        use namespace AVMPLUS;
         return File.read (fn);
     }
 
     function loadBytes(bytes) {
-        import avmplus.*;
+        use namespace AVMPLUS;
         Domain.currentDomain.loadBytes(bytes);
     }
 
     function commandLineArguments() {
-        import avmplus.*;
+        use namespace AVMPLUS;
         return System.argv;
     }
 	
