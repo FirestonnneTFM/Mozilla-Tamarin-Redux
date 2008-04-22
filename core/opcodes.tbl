@@ -144,10 +144,10 @@ OP_callproplex		"callproplex"		0x4C	1+2+2		2 	        0		0		-1		 1        1 // s
 OP_callinterface	"callinterface"		0x4D	0			-1	        0		0		0		 0        1 // MIR only
 OP_callsupervoid	"callsupervoid" 	0x4E	1+2+2		2 	        0		0		-1		 0        1 // stk in: obj [ns] [name] args...
 OP_callpropvoid		"callpropvoid"		0x4F	1+2+2		2 	        0		0		-1		 0        1 // stk in: base [ns] [name] args...
-OP_applytype		"applytype"				0x50	1+2			1	        0		0		-1		 1        1
+OP_0x50				"OP_0x50"			0x50	0			-1	        0		0		0		 0        0
 OP_0x51				"OP_0x51"			0x51	0			-1	        0		0		0		 0        0
 OP_0x52				"OP_0x52"			0x52	0			-1	        0		0		0		 0        0
-OP_0x53				"OP_0x53"			0x53	0			-1	        0		0		0		 0        0
+OP_applytype		"applytype"				0x53	1+2			1	        0		0		-1		 1        1
 OP_0x54				"OP_0x54"			0x54	0			-1	        0		0		0		 0        0
 OP_newobject		"newobject" 		0x55	1+2			1	        0		0		-1		 1        1
 OP_newarray			"newarray" 			0x56	1+2			1	        0		0		-1		 1        1
