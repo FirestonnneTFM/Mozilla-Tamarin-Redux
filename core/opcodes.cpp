@@ -122,10 +122,10 @@ const char *opNames[] = {
     "callinterface",
     "callsupervoid",
     "callpropvoid",
-    "applytype",
+    "OP_0x50",
     "OP_0x51",
     "OP_0x52",
-    "OP_0x53",
+    "applytype",
     "OP_0x54",
     "newobject",
     "newarray",
@@ -384,10 +384,10 @@ signed char opOperandCount[] = {
     -1,	// "callinterface"
     2,	// "callsupervoid"
     2,	// "callpropvoid"
-    1,	// "applytype"
+    -1,	// "OP_0x50"
     -1,	// "OP_0x51"
     -1,	// "OP_0x52"
-    -1,	// "OP_0x53"
+    1,	// "applytype"
     -1,	// "OP_0x54"
     1,	// "newobject"
     1,	// "newarray"
@@ -649,10 +649,10 @@ unsigned char opSizes[] = {
     0,	// "callinterface"
     1+2+2,	// "callsupervoid"
     1+2+2,	// "callpropvoid"
-    1+2,	// "applytype"
+    0,	// "OP_0x50"
     0,	// "OP_0x51"
     0,	// "OP_0x52"
-    0,	// "OP_0x53"
+    1+2,	// "applytype"
     0,	// "OP_0x54"
     1+2,	// "newobject"
     1+2,	// "newarray"
@@ -908,10 +908,10 @@ unsigned char opStackPop[] = {
     0,
     -1,
     -1,
+    0,
+    0,
+    0,
     -1,
-    0,
-    0,
-    0,
     0,
     -1,
     -1,
@@ -1167,10 +1167,10 @@ unsigned char opStackPush[] = {
     0,
     0,
     0,
+    0,
+    0,
+    0,
     1,
-    0,
-    0,
-    0,
     0,
     1,
     1,
@@ -1426,10 +1426,10 @@ unsigned char opCanThrow[] = {
     1,
     1,
     1,
+    0,
+    0,
+    0,
     1,
-    0,
-    0,
-    0,
     0,
     1,
     1,
