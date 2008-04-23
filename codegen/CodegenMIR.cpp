@@ -5559,7 +5559,7 @@ namespace avmplus
 		if (mipStart > (MDInstruction*)((byte*)casePtr+mirBuffer->pageSize()))
 		{
 			byte* page_ptr = (byte*)casePtr;
-			while (page_ptr < mipStart)
+			while (page_ptr < (byte*)mipStart)
 			{
 				*page_ptr = 0;
 				page_ptr += mirBuffer->pageSize();
