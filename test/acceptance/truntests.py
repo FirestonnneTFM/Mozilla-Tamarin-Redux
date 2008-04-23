@@ -49,12 +49,7 @@ from getopt import getopt
 from itertools import count
 
 import util.threadpool as threadpool
-
-if sys.platform == "cygwin":
-  import util.subProcess as subProcess
-else:
-  from subprocess import PIPE,STDOUT
-  from util.killableprocess import Popen
+import util.subProcess as subProcess
 
 def verbose_print(m, start='', end=''):
   if verbose:
@@ -113,32 +108,22 @@ def parents(d):
   yield d
 
 # run a command and return its output
-# different function is defined for cygwin
-if sys.platform == "cygwin":
-  def run_pipe(cmd):
-    p = subProcess.subProcess(cmd)
-    if testTimeOut > 0:
-      if p.read(testTimeOut): #if process isn't finished in timeout time returns 1
-        try:
-          p.kill()
-        except:
-          pass
-        finally:
-          del(p)
-          return 'timedOut' 
-    else:
-      p.read()
-    output = p.outdata.split('\n')
-    del(p)
-    return output
-else: #NOT cygwin
-  def run_pipe(cmd):
-    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT)
-    output = p.stdout.readlines()
-    exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
-    if exitCode < 0:  # process timed out
-      return 'timedOut'
-    return output
+def run_pipe(cmd):
+  p = subProcess.subProcess(cmd)
+  if testTimeOut > 0:
+    if p.read(testTimeOut): #if process isn't finished in timeout time returns 1
+      try:
+        p.kill()
+      except:
+        pass
+      finally:
+        del(p)
+        return 'timedOut'
+  else:
+    p.read()
+  output = p.outdata.split('\n')
+  del(p)
+  return output
 
 def list_match(list,test):
   for k in list:
