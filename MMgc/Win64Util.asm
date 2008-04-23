@@ -35,6 +35,8 @@ saveRegs64: ; proc saves : qword : stack : qword _size : dword
 	mov [rcx+20h],	r13
 	mov [rcx+28h],	r14
 	mov [rcx+30h],	r15
+	mov [rcx+38h],	rsi
+	mov [rcx+40h],	rdi
 	
 	; params for VirtualQuery
 	mov	 r8d, 48

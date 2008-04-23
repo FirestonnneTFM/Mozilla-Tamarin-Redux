@@ -802,7 +802,7 @@ namespace avmplus
 	    #endif
 		
 		#ifdef AVMPLUS_AMD64
-		int calleeAreaSize() const { return 8*maxArgCount; }
+		int calleeAreaSize() const { return ((maxArgCount>4) ? (8*maxArgCount) : 32); }
 		#endif
 
 		uint32  maxArgCount;        // most number of arguments used in a call
@@ -1508,10 +1508,14 @@ namespace avmplus
 		void DIVSD(Register r, sintptr disp, Register base)		{ SSE(0xf20f5E, r, disp, base); }
 		void MOVSD(Register r, sintptr disp, Register base)		{ SSE(0xf20f10, r, disp, base); }
 		void MOVSD(sintptr disp, Register base, Register r)		{ SSE(0xf20f11, r, disp, base); }
+#ifdef AVMPLUS_AMD64
+		void MOVSD (Register xmm1, Register src)		{ SSE(0xf20f10, xmm1, src); }
+#endif
 		void CVTSI2SD(Register r, sintptr disp, Register base)	{ SSE(0xf20f2a, r, disp, base); }
 
 		void ALU (byte op, Register reg, sintptr imm);
 		void ADD(Register reg, sintptr imm) { ALU(0x05, reg, imm); }
+		void ADD64(Register reg, sintptr imm) { ALU(0x05, reg, imm); }
 		void SUB(Register reg, sintptr imm) { ALU(0x2d, reg, imm); }
 		void AND(Register reg, sintptr imm) { ALU(0x25, reg, imm); }
 		void XOR(Register reg, sintptr imm) { ALU(0x35, reg, imm); }
@@ -1531,8 +1535,10 @@ namespace avmplus
 		void SHR(Register reg, Register /*amt*/)	{ ALU(0xd3, (Register)5, reg); } // unsigned >> ecx
 		void SAR(Register reg, Register /*amt*/)	{ ALU(0xd3, (Register)7, reg); } // signed >> ecx
 		void SHL(Register reg, Register /*amt*/)	{ ALU(0xd3, (Register)4, reg); } // unsigned << ecx
+		#ifndef AVMPLUS_AMD64
 		void XCHG(Register rA, Register rB)		{ ALU(0x87, rA, rB); }
 		void MOV (Register dest, Register src)	{ ALU(0x8b, dest, src); }
+		#endif
 
 		void ALU2(int op, Register lhs_dest, Register rhs);
 		void IMUL(Register lhs, Register rhs) { ALU2(0x0faf, lhs, rhs); }
@@ -1549,15 +1555,49 @@ namespace avmplus
 		void SETLE (Register reg)	{ ALU2(0x0f9E, reg, reg); }
 		void MOVZX_r8 (Register dest, Register src) { ALU2(0x0fb6, dest, src); }
 
-		void ALU(int op, Register r, sintptr disp, Register base, bool force32=false);
+		void ALU(int op, Register r, sintptr disp, Register base);
 
 		void TEST(sintptr disp, Register base, Register r)	{ ALU(0x85, r, disp, base); }
 		void LEA(Register r, sintptr disp, Register base)	{ ALU(0x8d, r, disp, base); }
 		void CALL(sintptr disp, Register base)				{ ALU(0xff, (Register)2, disp, base); }
 		void JMP(sintptr disp, Register base)				{ ALU(0xff, (Register)4, disp, base); }
 		void PUSH(sintptr disp, Register base)				{ ALU(0xff, (Register)6, disp, base); }
-		void MOV (sintptr disp, Register base, Register r)  { ALU(0x89, r, disp, base, false); }
-		void MOV (Register r, sintptr disp, Register base)  { ALU(0x8b, r, disp, base, false); }
+		#ifndef AVMPLUS_AMD64
+		void MOV (sintptr disp, Register base, Register r)  { ALU(0x89, r, disp, base); }
+		void MOV (Register r, sintptr disp, Register base)  { ALU(0x8b, r, disp, base); }
+		#endif
+
+		#ifdef AVMPLUS_AMD64
+		void ALU64 (int op, Register lhs_dest, Register rhs);
+		void ALU64(int op, Register r, sintptr disp, Register base);
+
+		void ADD64(Register lhs, Register rhs)	{ ALU64(0x03, lhs, rhs); }
+
+		void XCHG(Register rA, Register rB)		{ ALU64(0x87, rA, rB); }
+		void MOV (Register dest, Register src)	{ ALU64(0x8b, dest, src); }
+
+		void MOV (sintptr disp, Register base, Register r)  { ALU64(0x89, r, disp, base); }
+		void MOV (Register r, sintptr disp, Register base)  { ALU64(0x8b, r, disp, base); }
+
+		void MOV32(Register r, sintptr disp, Register base)		{ ALU(0x8b, r, disp, base); }
+		void MOV32(sintptr disp, Register base, Register r)		{ ALU(0x89, r, disp, base); }
+		void MOV32(sintptr disp, Register base, sintptr imm)	{ MOV(disp,base,imm,true);}
+
+		void MOVSXD (Register r, sintptr disp, Register base)	{ ALU64(0x63, r, disp, base); }
+		void MOVSXD (Register dest, Register src)				{ ALU64(0x63, dest, src); }
+		void IMM64(int64 imm64) 
+		{
+			*(int64*)mip = imm64;
+			mip += 8;
+		}
+		void REX(Register a,  Register b=RAX, bool set64bit=true);
+		
+		static bool is32bit(sintptr i)
+		{
+			return ((int32)i) == i;
+		}
+			
+		#endif
 
 		void SHIFT(int op, Register reg, int imm8);
 		void SAR(Register reg, int imm8) { SHIFT(7, reg, imm8); } // signed >> imm
@@ -1608,26 +1648,6 @@ namespace avmplus
 		void EMMS()			{ FPU(0x0f77); x87Dirty=false;  }
 		#endif // IA32 or AMD64
 
-		#ifdef AVMPLUS_AMD64
-		void MOV32(Register r, sintptr disp, Register base)		{ ALU(0x8b, r, disp, base, true); }
-		void MOV32(sintptr disp, Register base, Register r)		{ ALU(0x89, r, disp, base, true); }
-		void MOV32(sintptr disp, Register base, sintptr imm)	{ MOV(disp,base,imm,true);}
-
-		void MOVSXD (Register r, sintptr disp, Register base)	{ ALU(0x63, r, disp, base, false); }
-		void MOVSXD (Register dest, Register src)				{ ALU(0x63, dest, src); }
-		void IMM64(int64 imm64) 
-		{
-			*(int64*)mip = imm64;
-			mip += 8;
-		}
-		void REX(Register a,  Register b=RAX, bool set64bit=true);
-		
-		static bool is32bit(sintptr i)
-		{
-			return ((int32)i) == i;
-		}
-			
-		#endif
 		
 		// macros
 
