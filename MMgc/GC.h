@@ -96,6 +96,8 @@ struct saveregs {
 	size_t	save6;
 	size_t	save7;
 	size_t	save8;
+	size_t	save9;
+	size_t	save10;
 };
 extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 

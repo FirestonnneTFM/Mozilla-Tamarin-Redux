@@ -5554,6 +5554,17 @@ namespace avmplus
 		casePtr = (uintptr*)&code[0];
 
 		mipStart = mip = (MDInstruction*) (casePtr+case_count);
+
+		// If this jump is more than 1 page, we need to poke every page
+		if (mipStart > (MDInstruction*)((byte*)casePtr+mirBuffer->pageSize()))
+		{
+			byte* page_ptr = (byte*)casePtr;
+			while (page_ptr < mipStart)
+			{
+				*page_ptr = 0;
+				page_ptr += mirBuffer->pageSize();
+			}
+		}
 		mipEnd = 0;
 
 		#ifdef VTUNE
@@ -9289,9 +9300,11 @@ namespace avmplus
 						break;
 					}
 
+					#ifndef AVMPLUS_AMD64
 					// these are the same from a MD perspective
 					if(mircode == MIR_addp)
 						mircode = MIR_add;	
+					#endif
 
 					// rhs could be imm or reg
 
@@ -9433,6 +9446,12 @@ namespace avmplus
 						{
 							ADD(rD, rhs->imm);
 						}
+						#ifdef AVMPLUS_AMD64
+						else if (mircode == MIR_addp)
+						{
+							ADD64(rD, rhs->imm);
+						}
+						#endif
 						else if (mircode == MIR_sub)
 						{
 							SUB(rD, rhs->imm);
@@ -9458,6 +9477,10 @@ namespace avmplus
 							XOR(rD, rB);
 						else if (mircode == MIR_add)
 							ADD(rD, rB);
+						#ifdef AVMPLUS_AMD64
+						else if (mircode == MIR_addp)
+							ADD64(rD, rB);
+						#endif
 						else if (mircode == MIR_sub)
 							SUB(rD, rB);
 						else if (mircode == MIR_imul)
@@ -10242,11 +10265,19 @@ namespace avmplus
 							if (x87Dirty)
 								EMMS();
 							if (value->pos != InvalidPos) {
+								#ifdef AVMPLUS_AMD64
+								MOVSD(XMM0, stackPos(value), framep);
+								#else
 								FLDQ(stackPos(value), framep);
+								#endif
 							} else {
 								AvmAssert(value->reg != Unknown);
+								#ifdef AVMPLUS_AMD64
+								MOVSD(XMM0, value->reg);
+								#else
 								MOVSD(-8, ESP, value->reg);
 								FLDQ(-8, ESP);
+								#endif
 							}
 						}
 						else

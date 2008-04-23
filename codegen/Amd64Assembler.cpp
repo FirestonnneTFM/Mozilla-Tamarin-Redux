@@ -82,6 +82,14 @@ namespace avmplus
 		"xmm5",
 		"xmm6",
 		"xmm7"
+		"xmm8",
+		"xmm9",
+		"xmm10",
+		"xmm11",
+		"xmm12",
+		"xmm13",
+		"xmm14",
+		"xmm15"
 	};
 
 	const char *CodegenMIR::x87regNames[] = {
@@ -326,7 +334,7 @@ namespace avmplus
 		#endif
 
 		// REX is odd here, because the Register is in ModRM r/m, not reg
-		REX(Unknown, reg);
+		REX(Unknown, reg, false);
 		reg = (Register)(int(reg) & 0x7);
 				
  		if (is8bit((int)imm)) {
@@ -352,6 +360,26 @@ namespace avmplus
 			AvmAssert(0);
 		}
  	}
+
+	void CodegenMIR::ALU64(int op, Register r, Register rhs)
+	{
+		incInstructionCount();
+		#ifdef AVMPLUS_VERBOSE
+		if (verbose())
+		{
+			switch(op) {
+			case 0x03: core->console.format("    %A  add   %R, %R\n", mip, r, rhs); break;
+			case 0x87: core->console.format("    %A  xchg  %R, %R\n", mip, r, rhs); break;
+			case 0x8b: core->console.format("    %A  mov   %R, %R\n", mip, r, rhs); break;
+			}
+		}
+		#endif /* AVMPLUS_VERBOSE */
+
+		REX(r, rhs, true);
+
+		*mip++ = (MDInstruction)op; 
+		MODRM(r, rhs);
+	}
 
 	void CodegenMIR::ALU(int op, Register r, Register rhs)
 	{
@@ -379,12 +407,7 @@ namespace avmplus
 		// SHR/SAR and SAL/SHL need to mask the shift operand to 
 		// 5 bits, to make a 31-bit shift maximum
 		// shift op is always in RCX
-		if (op==0xd3&& ((int)r==5 || (int)r==7 || (int)r==4))
-		{
 			REX(r, rhs, false);
-		}
-		else
-			REX(r, rhs);
 
 		*mip++ = (MDInstruction)op; 
 		MODRM(r, rhs);
@@ -436,6 +459,7 @@ namespace avmplus
 			case 0x660f28: core->console.format("    %A  movapd %F, %F\n", mip, dest, src); break;
 			case 0x660f2e: core->console.format("    %A  ucomisd %F, %F\n", mip, dest, src); break;
 			case 0x660f6e: core->console.format("    %A  movd %F, %F\n", mip, dest, src); break;
+			case 0xf20f10: core->console.format("    %A  movsd %F, %F)\n", mip, dest, src); break;
 			}
 		}
 		#endif /* AVMPLUS_VERBOSE */
@@ -448,6 +472,7 @@ namespace avmplus
 			switch (op) {
 				case 0xf20f2a:
 				case 0x660f6e:
+				case 0xf20f10:
 					REX(dest, src, true);
 					break;
 				default:
@@ -544,6 +569,8 @@ namespace avmplus
 			core->console.format("    %A  imul  %R, %d\n", mip, dst, imm);
 		#endif /* AVMPLUS_VERBOSE */
 
+		REX(dst, dst, false);
+
 		if (is8bit((int)imm))
 		{
 			*mip++ = 0x6b;
@@ -601,14 +628,14 @@ namespace avmplus
 		}
 		#endif /* AVMPLUS_VERBOSE */
 
-		REX(Unknown, r);
+		REX(Unknown, r, false);
 
 		*mip++ = 0xc1;
 		MODRM((Register)op, r);
 		*mip++ = (MDInstruction)imm8;
 	}
 
-	void CodegenMIR::ALU(int op, Register r, sintptr disp, Register base, bool force32)
+	void CodegenMIR::ALU64(int op, Register r, sintptr disp, Register base)
 	{
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
@@ -620,6 +647,7 @@ namespace avmplus
 			case 0x8d: core->console.format("    %A  lea   %R, %d(%R)\n", mip, r, disp, base); break;
 			case 0x89: core->console.format("    %A  mov   %d(%R), %R\n", mip, disp, base, r); break;
 			case 0x8b: core->console.format("    %A  mov   %R, %d(%R)\n", mip, r, disp, base); break;
+			case 0x63: core->console.format("    %A  movsxd   %R, %d(%R)\n", mip, r, disp, base); break;
 			case 0xff: 
 				switch(r) {
 				case 2: core->console.format("    %A  call  %d(%R)\n", mip, disp, base); break;
@@ -630,13 +658,35 @@ namespace avmplus
 		}
 		#endif /* AVMPLUS_VERBOSE */
 
-		if (force32)
+		REX(r, base, true);
+
+		*mip++ = (MDInstruction)op;
+		MODRM(r, disp, base);
+	}
+
+	void CodegenMIR::ALU(int op, Register r, sintptr disp, Register base)
 		{
-			//AvmAssert(r<=15 && base <=15);
-			REX(r, base, false);
+		incInstructionCount();
+		#ifdef AVMPLUS_VERBOSE
+		if (verbose())
+		{
+			switch (op)
+		{
+			case 0x85: core->console.format("    %A  test  %d(%R), %R\n", mip, disp, base, r); break;
+			case 0x8d: core->console.format("    %A  lea   %R, %d(%R)\n", mip, r, disp, base); break;
+			case 0x89: core->console.format("    %A  mov   %d(%R), %R\n", mip, disp, base, r); break;
+			case 0x8b: core->console.format("    %A  mov   %R, %d(%R)\n", mip, r, disp, base); break;
+			case 0xff: 
+				switch(r) {
+				case 2: core->console.format("    %A  call  %d(%R)\n", mip, disp, base); break;
+				case 4: core->console.format("    %A  jmp   %d(%R)\n", mip, disp, base); break;
+				case 6: core->console.format("    %A  push  %d(%R)\n", mip, disp, base); break;
 		}
-		else
-			REX(r, base);
+			}
+		}
+		#endif /* AVMPLUS_VERBOSE */
+
+			REX(r, base, false);
 
 		*mip++ = (MDInstruction)op;
 		MODRM(r, disp, base);
