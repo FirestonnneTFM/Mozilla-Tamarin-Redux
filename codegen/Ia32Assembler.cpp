@@ -403,7 +403,7 @@ namespace avmplus
 		*mip++ = (MDInstruction)(imm8);
 	}
 
-	void CodegenMIR::ALU(int op, Register r, sintptr disp, Register base, bool /*unused*/)
+	void CodegenMIR::ALU(int op, Register r, sintptr disp, Register base)
 	{
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
