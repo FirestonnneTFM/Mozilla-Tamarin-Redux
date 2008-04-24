@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* internal */ namespace AVMPLUS = "avmplus";
+internal namespace AVMPLUS = "avmplus";
 
 Gen::emit_debug = false;
 {
