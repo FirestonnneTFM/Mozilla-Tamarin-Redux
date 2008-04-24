@@ -36,11 +36,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* internal */ namespace AVMPLUS = "avmplus";
-/* internal */ namespace FLASH_UTILS = "flash.utils";
+internal namespace AVMPLUS = "avmplus";
+internal namespace FLASH_UTILS = "flash.utils";
+
+use namespace AVMPLUS;
 
 {
-    use namespace AVMPLUS;
     use namespace FLASH_UTILS;
 
     var fname = System.argv[0];
@@ -52,7 +53,6 @@
 // eval ast
 
 {
-    use namespace AVMPLUS;
     use namespace Parse;
     use namespace Gen;
     print ("parsing ast");
@@ -68,13 +68,11 @@
 // decode it
 
 {
-    use namespace AVMPLUS;
     print ("decoding ast");
     var nd = Decode::program (ast);  // defined by side effect
 }
 
 {
-    use namespace AVMPLUS;
     use namespace Encode;
     print ("encoding");
     var tx = "public var ast = "+program (nd);

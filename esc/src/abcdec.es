@@ -36,8 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/* internal */ namespace AVMPLUS = "avmplus";
-/* internal */ namespace FLASH_UTILS = "flash.utils";
+internal namespace AVMPLUS = "avmplus";
+internal namespace FLASH_UTILS = "flash.utils";
 
 // load asm
 {

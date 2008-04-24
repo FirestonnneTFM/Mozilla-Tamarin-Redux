@@ -1,9 +1,10 @@
-/* internal */ namespace AVMPLUS = "avmplus";
-/* internal */ namespace FLASH_UTILS = "flash.utils";
+internal namespace AVMPLUS = "avmplus";
+internal namespace FLASH_UTILS = "flash.utils";
+
+use namespace AVMPLUS;
 
 // load ast
 {
-    use namespace AVMPLUS;
     use namespace FLASH_UTILS;
 
     var fname = System.argv[0];
@@ -18,8 +19,6 @@
 }
 
 {
-    use namespace AVMPLUS;
-
     bytes = Abc::parseAbcFile(new ABCByteStream(bytes));
 
     //print ("encoding asm");
