@@ -796,7 +796,7 @@ class Cls extends ASTNode implements ISerializable {
     const instanceHead: HEAD;
     const classType; //: ObjectType;
     const instanceType; //: InstanceType;
-    const classBody;
+    const classBody: [Ast::STMT];
     const isDynamic;
     const isFinal;
     function Cls (name,baseName,interfaceNames,protectedns,constructor,classHead,instanceHead
@@ -917,16 +917,16 @@ class FuncAttr extends ASTNode implements ISerializable {
 
 class Func extends ASTNode implements ISerializable {
     const name; //: FUNC_NAME;
-    const block: BLOCK;
+    const body: [Ast::STMT];
     const params: HEAD;
     const numparams: int;
     const vars: HEAD;
     const defaults: EXPRS;
     const type: ITypeExpr;
     const attr: FuncAttr;
-    function Func (name,block,params,numparams,vars,defaults,ty,attr)
+    function Func (name,body,params,numparams,vars,defaults,ty,attr)
         : name = name
-        , block = block
+        , body = body
         , params = params
         , numparams = numparams
         , vars = vars
@@ -935,7 +935,7 @@ class Func extends ASTNode implements ISerializable {
         , attr = attr {}
 
     function serialize(s)
-        s.sClass(this, "Func", "name", "block", "params", "numparams", "vars", "defaults", "type", "attr");
+        s.sClass(this, "Func", "name", "body", "params", "numparams", "vars", "defaults", "type", "attr");
 }
 
 // CTOR
@@ -1542,18 +1542,18 @@ class Block extends ASTNode implements ISerializable {
 type PROGRAM = Program;
 
 class Program extends ASTNode implements ISerializable {
-    const block: BLOCK;
+    const body: [Ast::STMT];
     const head: HEAD;
     const file: String?;
     const attr: FuncAttr;
-    function Program (block, head, attr, file=null)
-        : block = block
+    function Program (body, head, attr, file=null)
+        : body = body
         , head = head
         , attr = attr
         , file = file {}
 
     function serialize(s)
-        s.sClass(this, "Program", "block", "head", "attr", "file");
+        s.sClass(this, "Program", "body", "head", "attr", "file");
 }
 
 /* Helper tables */

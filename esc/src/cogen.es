@@ -158,14 +158,13 @@ function cgEval(tree: PROGRAM, name: String, scopedesc: String) {
 
     let attr = new Ast::FuncAttr(null);
     attr.capture_result = true;
-    return cg(new Ast::Program( new Ast::Block(new Ast::Head([],[]), 
-                                               [new Ast::ExprStmt(new Ast::SetExpr(Ast::assignOp,
-                                                                                   new Ast::LexicalRef(new Ast::QualifiedIdentifier(new Ast::LexicalRef(new Ast::Identifier("ESC",[[Ast::noNS]])),
-                                                                                                                                    "eval_hook")),
-                                                                                   new Ast::LexicalRef(new Ast::Identifier(name, [[Ast::noNS]]))))]),
+    return cg(new Ast::Program( [new Ast::ExprStmt(new Ast::SetExpr(Ast::assignOp,
+                                                                    new Ast::LexicalRef(new Ast::QualifiedIdentifier(new Ast::LexicalRef(new Ast::Identifier("ESC",[[Ast::noNS]])),
+                                                                                                                     "eval_hook")),
+                                                                    new Ast::LexicalRef(new Ast::Identifier(name, [[Ast::noNS]]))))],
                                 new Ast::Head([[new Ast::PropName(new Ast::Name(Ast::noNS, name)),
                                                 new Ast::MethodFixture(new Ast::Func(new Ast::FuncName(Ast::ordinaryFunction, name),
-                                                                                     tree.block,
+                                                                                     tree.body,
                                                                                      new Ast::Head([[new Ast::TempName(100000),
                                                                                                      new Ast::ValFixture(Ast::anyType,false)]],
                                                                                                    evalInits()),
@@ -193,7 +192,7 @@ function cgProgram(ctx, prog) {
     cgDebugFile(ctx);
     if (prog.head.fixtures != null)
         cgFixtures(ctx, prog.head.fixtures);
-    cgBlock(ctx, prog.block);
+    cgStmts(ctx, prog.body);
 }
 
 function hasTrait(traits, name, kind) {
@@ -303,7 +302,10 @@ function cgFixtures(ctx, fixtures) {
 function cgBlock(ctx, b) {
     // FIXME -- more here
     cgHead(ctx, b.head);
-    let stmts = b.stmts;
+    cgStmts(ctx, b.stmts);
+}
+
+function cgStmts(ctx, stmts) {
     for ( let i=0 ; i < stmts.length ; i++ )
         cgStmt(ctx, stmts[i]);
 }
@@ -311,36 +313,34 @@ function cgBlock(ctx, b) {
 function extractNamedFixtures(fixtures) {
     let named = [];
     let fix_length = fixtures ? fixtures.length : 0;
-    for(let i = 0; i < fix_length; ++i)
-        {
-            let [name,fixture] = fixtures[i];
-            switch type (name) {
-            case (pn:PropName) {
-                named.push([name,fixture]);
-            }
-            case (tn:TempName) {
-                // do nothing
-            }
-            }
+    for(let i = 0; i < fix_length; ++i) {
+        let [name,fixture] = fixtures[i];
+        switch type (name) {
+        case (pn:PropName) {
+            named.push([name,fixture]);
         }
+        case (tn:TempName) {
+            // do nothing
+        }
+        }
+    }
     return named;
 }
     
 function extractUnNamedFixtures(fixtures) {
     let named = [];
     let fix_length = fixtures ? fixtures.length : 0;
-    for(let i = 0; i < fix_length; ++i)
-        {
-            let [name,fixture] = fixtures[i];
-            switch type (name) {
-            case (pn:PropName) {
-                // do nothing
-            }
-            case (tn:TempName) {
-                named.push([name,fixture]);
-            }
-            }
+    for(let i = 0; i < fix_length; ++i) {
+        let [name,fixture] = fixtures[i];
+        switch type (name) {
+        case (pn:PropName) {
+            // do nothing
         }
+        case (tn:TempName) {
+            named.push([name,fixture]);
+        }
+        }
+    }
     return named;
 }
 
@@ -391,7 +391,7 @@ function cgClass(ctx, c) {
     let cinit = cls.getCInit();
     let cinit_ctx = pushCInit(ctx, cinit);  // shares asm with ctx
     cgDebugFile(cinit_ctx);
-    cgBlock(cinit_ctx, c.classBody);
+    cgStmts(cinit_ctx, c.classBody);
     asm.I_popscope();
 
     asm.I_getglobalscope();
@@ -479,7 +479,7 @@ function cgCtor(ctx, c, instanceInits) {
         
         cgHead(ctor_ctx, f.vars);
 
-        cgBlock(ctor_ctx, f.block);
+        cgStmts(ctor_ctx, f.body);
         
         asm.I_kill(t);
     }
@@ -558,7 +558,7 @@ function cgFunc(ctx0, f:FUNC) {
          * code then the default behavior of the emitter is to add a returnvoid
          * at the end, so there's nothing to worry about here.
          */
-        cgBlock(fnctx, f.block);
+        cgStmts(fnctx, f.body);
         asm.killTemp(scope_reg);
         if (capture_reg) {
             asm.I_getlocal(capture_reg);

@@ -43,9 +43,9 @@ final class Scanner
     use default namespace private;
 
     public var lnCoord : int;
+    public var filename: String;
 
     var src : String;
-    var filename : String;
     var curIndex : int;
     var markIndex : int;
     var keyword_or_ident: Boolean;

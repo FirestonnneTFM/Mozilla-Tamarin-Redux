@@ -2130,10 +2130,12 @@ final class Parser
 
         if (attrs.native || tau == interfaceBlk) {
             semicolon(fullStmt);
-            body = new Ast::Block(null, []);
+            body = [];
         }
-        else 
+        else {
             body = functionBody (allowIn, omega);
+            semicolon(omega);
+        }
 
         let [vars,attr] = cx.exitFunction();
 
@@ -2190,10 +2192,14 @@ final class Parser
 
         if (attrs.native) {
             semicolon(fullStmt);
-            body = new Ast::Block(null, []);
+            body = [];
         }
-        else
-            body = functionBody (allowIn, omega);  // bogus, expression closure not allowed in constructors
+        else {
+            eat(Token::LeftBrace);
+            body = directivesLocal(fullStmt);
+            eat (Token::RightBrace);
+            semicolon(omega);
+        }
 
         let [vars,attr] = cx.exitFunction();
 
@@ -2443,18 +2449,15 @@ final class Parser
         return Ast::anyType;
     }
 
-    // FIXME: this should just return a directive_list, the head is always empty
-    function functionBody (beta: BETA, omega) : Ast::BLOCK {
+    function functionBody (beta: BETA, omega) : [Ast::STMT] {
         if (match(Token::LeftBrace)) {
             let directive_list = directivesLocal(fullStmt);
             eat (Token::RightBrace);
-
-            return new Ast::Block (new Ast::Head([],[]), directive_list);
+            return directive_list;
         }
 
         let expr = assignmentExpression (allowColon, beta);
-        semicolon (omega);
-        return new Ast::Block (new Ast::Head ([],[]),[new Ast::ReturnStmt (expr)]);
+        return [new Ast::ReturnStmt (expr)];
     }
 
     // Instance variables are initialized by executing initializing
@@ -2487,8 +2490,6 @@ final class Parser
         let [directive_list, ctor] = directivesClass();
         eat (Token::RightBrace);
 
-        let body = new Ast::Block(new Ast::Head([],[]), directive_list);
-
         let ihead = cx.exitClassInstance();
         let chead = cx.exitClassStatic();
         currentClassName = "";
@@ -2516,7 +2517,7 @@ final class Parser
                                 ihead,
                                 ctype,
                                 itype,
-                                body,
+                                directive_list,
                                 attrs.dynamic,
                                 attrs.final);
 
@@ -2546,7 +2547,7 @@ final class Parser
 
     function makeDefaultCtor(classname) {
         cx.enterFunction(makeAttrs());
-        let ctorbody = new Ast::Block (new Ast::Head([],[]),[]);
+        let ctorbody = [];
         let params = new Ast::Head([],[]);
         let numparams = 0;
         let vars = new Ast::Head([],[]);
@@ -3151,8 +3152,7 @@ final class Parser
 
         computeAttributes(cx.topFunction());
 
-        // FIXME: the head is always empty here, because vhead does the job.
-        return new Ast::Program ( new Ast::Block (new Ast::Head([],[]), global_directives),
+        return new Ast::Program ( global_directives,
                                   vhead,
                                   cx.topFunction(),
                                   filename );
