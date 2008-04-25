@@ -213,76 +213,126 @@ function probeTrait(traits, name) {
     return [false, 0];
 }
     
+function cgGetFixtureNameParts(ctx, fxname) : [name, ns] {
+    switch type (fxname) {
+    case (pn:PropName) {
+        return [pn.name.id, pn.name.ns];
+    }
+    case (tn:TempName) {
+        return ["$t"+tn.index, Ast::noNS]
+    }
+    case (x:*) { 
+        Gen::internalError(ctx, "Not a valid fixture name " + x); // FIXME source pos
+    }
+    }
+}
+
 function cgFixtures(ctx, fixtures) {
     let {target, asm, emitter} = ctx;
-    for ( let i=0 ; i < fixtures.length ; i++ ) {
-        let [fxname, fx] = fixtures[i];
-        let name = emitter.fixtureNameToName(fxname);
-
-        if (fx is ValFixture) {
-            if (checkTrait(fxname, name, TRAIT_Slot))
-                target.addTrait(new ABCSlotTrait(name, 0, false, 0, emitter.typeFromTypeExpr(fx.type), 0, 0)); 
-            // FIXME when we have more general support for type annos
-        }
-        else if (fx is MethodFixture) {
-            let methidx = cgFunc(ctx, fx.func);
-            if (target is Method || target is Script) {
-                // Normal function definition
-                if (checkTrait(fxname, name, TRAIT_Slot))
-                    target.addTrait(new ABCSlotTrait(name, 0, false, 0, 0, 0, 0));
-                asm.I_findpropstrict(name);
-                asm.I_newfunction(methidx);
-                asm.I_setproperty(name);
+        
+    let {slots:slots, use_regs:use_regs, scope_reg:scope_reg} = getVariableDefinitionScope(ctx);
+    
+    if( use_regs )
+    {
+        for ( let i=0 ; i < fixtures.length ; i++ ) {
+            let reg = -1;
+            let [fxname, fx] = fixtures[i];
+            let [name, ns] = cgGetFixtureNameParts(ctx, fxname);
+            if( slots.getBinding(name, ns) != null )
+                continue;  // This name already allocated
+            reg = asm.getTemp();
+            let type_index = 0;
+            if( fx is ValFixture ) {
+                type_index = emitter.typeFromTypeExpr(fx.type);
             }
-            else {
-                // target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Method, 0, methidx));
-                let trait_kind;
-                if (fx.func.name.kind == getterFunction) {
-                    trait_kind = TRAIT_Getter;
-                    if (hasTrait(target.traits, name, trait_kind))
-                        dupTrait(fxname, trait_kind, trait_kind);
-                }
-                else if (fx.func.name.kind == setterFunction) {
-                    trait_kind = TRAIT_Setter;
-                    if (hasTrait(target.traits, name, trait_kind))
-                        dupTrait(fxname, trait_kind, trait_kind);
-                }
-                else {
-                    trait_kind = TRAIT_Method;
-                    checkTrait(fxname, name, trait_kind, true);
-                }
-                let methattrs = 0;
-                if (fx.isOverride)
-                    methattrs |= ATTR_Override;
-                if (fx.isFinal)
-                    methattrs |= ATTR_Final;
-                target.addTrait(new ABCOtherTrait(name, methattrs, trait_kind, 0, methidx));
-            }
-        }
-        else if (fx is ClassFixture) {
-            checkTrait(fxname, name, TRAIT_Slot, true);
-            let clsidx = cgClass(ctx, fx.cls);
-            target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, clsidx));
-        }
-        else if (fx is InterfaceFixture) {
-            checkTrait(fxname, name, TRAIT_Slot, true);
-            let ifaceidx = cgInterface(ctx, fx.iface);
-            target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, ifaceidx));
-        }
-        else if (fx is NamespaceFixture) {
-            checkTrait(fxname, name, TRAIT_Slot, true);
-            target.addTrait(new ABCSlotTrait(name, 0, true, 0, 
-                                             emitter.qname(new Ast::Name(Ast::noNS, "Namespace"),false), 
-                                             emitter.namespace(fx.ns), CONSTANT_Namespace));
-        }
-        else if (fx is TypeFixture) {
-            //print ("warning: ignoring type fixture");
-        }
-        else {
-            Gen::internalError(ctx, "Unhandled fixture type " + fx);
+            slots.putBinding(name, ns, new RegBind(reg, type_index));
+            
+            asm.I_pushundefined();
+            // init with the right type 
+            // TODO: optimize so we don't emit this when it's not needed to satisy the verifier
+            if( type_index != 0 )
+                asm.I_coerce(type_index);
+            else
+                asm.I_coerce_a();
+            
+            asm.I_setlocal(reg);
         }
     }
+    else
+    {
+        for ( let i=0 ; i < fixtures.length ; i++ ) {
+            let slot_id = -1;
+            let [fxname, fx] = fixtures[i];
+            let name = emitter.fixtureNameToName(fxname);
 
+            if (fx is ValFixture) {
+                if (checkTrait(fxname, name, TRAIT_Slot))
+                    slot_id = target.addTrait(new ABCSlotTrait(name, 0, false, 0, emitter.typeFromTypeExpr(fx.type), 0, 0));
+                // FIXME when we have more general support for type annos
+            }
+            else if (fx is MethodFixture) {
+                let methidx = cgFunc(ctx, fx.func);
+                if (target is Method || target is Script) {
+                    // Normal function definition
+                    if (checkTrait(fxname, name, TRAIT_Slot))
+                        slot_id = target.addTrait(new ABCSlotTrait(name, 0, false, 0, 0, 0, 0));
+                    asm.I_findpropstrict(name);
+                    asm.I_newfunction(methidx);
+                    asm.I_setproperty(name);
+                }
+                else {
+                    // target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Method, 0, methidx));
+                    let trait_kind;
+                    if (fx.func.name.kind == getterFunction) {
+                        trait_kind = TRAIT_Getter;
+                        if (hasTrait(target.traits, name, trait_kind))
+                            dupTrait(fxname, trait_kind, trait_kind);
+                    }
+                    else if (fx.func.name.kind == setterFunction) {
+                        trait_kind = TRAIT_Setter;
+                        if (hasTrait(target.traits, name, trait_kind))
+                            dupTrait(fxname, trait_kind, trait_kind);
+                    }
+                    else {
+                        trait_kind = TRAIT_Method;
+                        checkTrait(fxname, name, trait_kind, true);
+                    }
+                    let methattrs = 0;
+                    if (fx.isOverride)
+                        methattrs |= ATTR_Override;
+                    if (fx.isFinal)
+                        methattrs |= ATTR_Final;
+                    slot_id = target.addTrait(new ABCOtherTrait(name, methattrs, trait_kind, 0, methidx));
+                }
+            }
+            else if (fx is ClassFixture) {
+                checkTrait(fxname, name, TRAIT_Slot, true);
+                let clsidx = cgClass(ctx, fx.cls);
+                slot_id = target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, clsidx));
+            }
+            else if (fx is InterfaceFixture) {
+                checkTrait(fxname, name, TRAIT_Slot, true);
+                let ifaceidx = cgInterface(ctx, fx.iface);
+                slot_id = target.addTrait(new ABCOtherTrait(name, 0, TRAIT_Class, 0, ifaceidx));
+            }
+            else if (fx is NamespaceFixture) {
+                checkTrait(fxname, name, TRAIT_Slot, true);
+                slot_id = target.addTrait(new ABCSlotTrait(name, 0, true, 0, 
+                                                 emitter.qname(new Ast::Name(Ast::noNS, "Namespace"),false), 
+                                                 emitter.namespace(fx.ns), CONSTANT_Namespace));
+            }
+            else if (fx is TypeFixture) {
+                //print ("warning: ignoring type fixture");
+            }
+            else {
+                Gen::internalError(ctx, "Unhandled fixture type " + fx);
+            }
+            if(slot_id != -1 && slots ){
+                //print("adding slot for ", fxname.name.id, "to", ctx.stk.tag, "slot_id ", slot_id);
+                slots.putBinding(fxname.name.id, fxname.name.ns, new Ast::SlotBind(slot_id, scope_reg));
+            }
+        }
+    }
     function checkTrait(fxname, name, kind, unique=false) {
         let [has_trait, trait_kind] = probeTrait(target.traits, name);
         if (has_trait && (unique || trait_kind != kind))
@@ -509,6 +559,7 @@ function extractDefaultValues(ctx, f:Func) {
  * Generate code for the function
  * Return the function index
  */
+ 
 function cgFunc(ctx0, f:FUNC) {
     let {emitter, script, cp} = ctx0;
     let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "function";  // brittle as hell
@@ -535,23 +586,88 @@ function cgFunc(ctx0, f:FUNC) {
          * elaborate behavior here, and the compiler must perform some
          * analysis and avoid the shadowed formal here.
          */
-        let scope_reg = asm.getTemp();
+            
+        let scope_reg = -1; 
+        if( f.attr.reify_activation )
+            scope_reg = asm.getTemp();
+            
         let capture_reg = 0;
 
         if (f.attr.capture_result)
             capture_reg = asm.getTemp();
 
-        let fnctx = pushFunction(ctx0, fntype, scope_reg, capture_reg, (fntype != "function"), method);
+        let fnctx = pushFunction(ctx0, fntype, scope_reg, capture_reg, (fntype != "function"), f.attr.reify_activation, method);
         cgDebugFile(fnctx);
-
-        asm.I_newactivation();
-        asm.I_dup();
-        asm.I_setlocal(scope_reg);
-        asm.I_pushscope();
-
-        setupArguments(fnctx, f);
             
-        cgHead(fnctx, f.params);
+        if( f.attr.reify_activation )
+        {
+            asm.I_newactivation();
+            asm.I_dup();
+            asm.I_setlocal(scope_reg);
+            asm.I_pushscope();
+        }
+            
+        setupArguments(fnctx, f);
+
+        if( f.attr.reify_activation ) {
+            // If we're using registers, then the regs have already been allocated for the parameters
+            cgHead(fnctx, f.params);
+        }
+        else {
+            let params = f.params.fixtures;
+            let named_params = [];
+            param_count = 0;
+            // Need to generate correct registers for parameters.  This gets tricky with destructuring in parameters
+            // such as {a, b, c} - it comes in as 1 argument, so we must alloc and assign the correct values
+            // for a, b, c.  The temp will already be allocated, so we have to alloc registers for a, b, c
+            // This code depends on the fixtures coming in with the pattern:
+            // PropName, TempName, PropName, TempName...  Regular params - no destructuring 
+            // PropName, PropName, PropName, TempName...  Destructuring - 3 names will be extracted from the temp
+            // This is what the fixtures for {a, b, c} look like.
+            for( let i = 0, limit = params.length; i < limit; ++i ){
+                let [name,fixture] = params[i];
+                if( name is PropName ) {
+                    named_params.push([name, fixture]);
+                }
+                else if ( name is TempName ) {
+                    param_count++;
+                    if( named_params.length == 1 ) {
+                        let [fxname, fx] = named_params[0];
+                        let [name_part, ns_part] = cgGetFixtureNameParts(fnctx, fxname);
+                        let reg = param_count;
+                        let type_index = 0;
+                        if( fx is ValFixture ) {
+                            type_index = emitter.typeFromTypeExpr(fx.type)
+                        }
+                        fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(reg, type_index));
+                    }
+                    else if( named_params.length > 1 ){
+                        // Some sort of destructuring assignment
+                        // need to alloc temps for the named params
+                        for( let q = 0; q < named_params.length; ++q ) {
+                            let [fxname, fx] = named_params[q];
+                            let [name_part, ns_part] = cgGetFixtureNameParts(fnctx, fxname);
+                            let reg = asm.getTemp();
+                            let type_index = 0;
+                            if( fx is ValFixture ) {
+                                type_index = emitter.typeFromTypeExpr(fx.type)
+                            }
+                            fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(reg, type_index));
+                        }
+                        let[name_part, ns_part] = cgGetFixtureNameParts(fnctx, name);
+                        //trace("Adding binding for " + name_part + " at reg " + (param_count));
+                        fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(param_count, 0));
+                    }
+                    named_params = [];
+                }
+            }
+            for ( let i=0 ; i < f.params.exprs.length ; i++ ) {
+                if( !redundantInitialization(fnctx, f.params.exprs[i]) ) {
+                    cgExpr(fnctx, f.params.exprs[i]);
+                    asm.I_pop();
+                }
+            }
+        }
         cgHead(fnctx, f.vars);
 
         /* Generate code for the body.  If there is no return statement in the
@@ -559,14 +675,25 @@ function cgFunc(ctx0, f:FUNC) {
          * at the end, so there's nothing to worry about here.
          */
         cgStmts(fnctx, f.body);
-        asm.killTemp(scope_reg);
+        if( f.attr.reify_activation )
+            asm.killTemp(scope_reg);
         if (capture_reg) {
             asm.I_getlocal(capture_reg);
             asm.I_returnvalue();
         }
     }
-
     return method.finalize();
+}
+
+function redundantInitialization(ctx, e){
+    let ret = false;
+    if(e is InitExpr && e.inits.length==1) {
+        let [name, expr] = e.inits[0];
+        if( name is PropName && expr is GetParam )
+            // This is just setting the param to itself if locals are using registers
+            ret = true;
+    }
+    return ret;
 }
 
 function setupArguments(ctx, f) {
@@ -606,23 +733,95 @@ function cgInits(ctx, inits, baseOnStk) {
     for( let i=0 ; i < limit ; ++i ) {
         let [name, init] = inits[i];
 
-        let name_index = emitter.fixtureNameToName(name);
+        let [n, ns] = cgGetFixtureNameParts(ctx, name);
+                
+        let bind = findBinding(ctx, n, [[ns]]);
 
         if( baseOnStk ) {
             if(i < limit-1)
                 asm.I_dup();
         }
-        else
-            asm.I_findproperty(name_index);
+        else {
+            if( bind is SlotBind ){
+                // Load the scope the slot is in
+                asm.I_getlocal(bind.scope);
+            }
+            else if ( !(bind is RegBind) ) {
+                asm.I_findproperty(emitter.fixtureNameToName(name));
+            }
+        }
             
         cgExpr(ctx, init);
-        asm.I_setproperty(name_index);
-    }
+        if( bind is SlotBind ) {
+            // Load the scope the slot is in
+            if( bind.slot == -1)
+                asm.I_setproperty(emitter.fixtureNameToName(name));
+            else
+                asm.I_setslot(bind.slot);
+        }
+        else if ( bind is RegBind ) {
 
+            if( bind.type_index != 0 )
+                asm.I_coerce(bind.type_index);
+            else
+                asm.I_coerce_a();
+
+            // Set the register
+            asm.I_setlocal(bind.reg);
+        }
+        else {
+            asm.I_setproperty(emitter.fixtureNameToName(name));
+        }
+    }
     if( limit == 0 && baseOnStk )
         asm.I_pop();
 }
     
+function getVariableDefinitionScope(ctx) {
+    var stk = ctx.stk;
+    while( stk != null ) {
+        if( stk.slots != undefined ) {
+            return stk;
+        }
+        stk = stk.link;
+    }
+    return {slots:null, use_regs:false};
+}
+function findBinding(ctx, name, nss) {
+    var {stk:stk, asm:asm} = ctx;
+    
+    var bind = null;
+    while(stk != null) {
+        let slots = stk.slots;
+        if(stk.slots) {
+            for( var i : uint = 0; i < nss.length; ++i ) {
+                let a = nss[i];
+                for( var j : uint = 0; j < a.length; ++j ) {
+                    let b = slots.getBinding(name, a[j]);
+                    if(  b != null ) {
+                        if( bind == null ) {
+                            bind = b;
+                        }
+                        else if( b != bind) {
+                            bind = Ast::nobind; // Ambiguous binding, punt for now, will show up at runtime
+                        }
+                    }
+                }
+                
+            }
+            if(bind != null )
+                return bind;
+        }
+        if( stk.tag =="instance" || (stk.tag == "function" && !stk.push_this)  
+            || stk.tag=="with" || stk.tag=="catch")
+            break;  // Can't go past an instance, or a function without a 'this'
+        stk = stk.link;
+    }
+    if( bind == null )
+        bind = Ast::nobind;
+    
+    return bind;
+}
 
 // Handles scopes and finally handlers and returns a label, if appropriate, to
 // branch to.  "tag" is one of "function", "break", "continue"
@@ -708,14 +907,16 @@ function pushIInit({stk}, scope_reg, iinit)
              { tag:"function", "type": "iinit", scope_reg: scope_reg, link: stk },
              iinit );
 
-function pushFunction({stk}, function_type, scope_reg, capture_reg, push_this, func)
+function pushFunction({stk}, function_type, scope_reg, capture_reg, push_this, reify_act, func)
     new CTX( func.asm, 
              { tag: "function", 
                "type": function_type, 
                scope_reg: scope_reg, 
                capture_reg: capture_reg,
                push_this: push_this,
-               link: stk },
+               use_regs: !reify_act,
+               link: stk,
+               slots: new Util::Names() },
                func );
 
 function pushBreak({asm, stk, target}, branchTarget)

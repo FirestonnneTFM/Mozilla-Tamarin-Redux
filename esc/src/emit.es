@@ -401,7 +401,7 @@ class Class
     }
         
     function addTrait(t) {
-        traits.push(t);
+        return traits.push(t);
     }
 
     function finalize() {
@@ -479,7 +479,7 @@ class Instance
         iinit = method
             }
     function addTrait(t) {
-        traits.push(t);
+        return traits.push(t);
     }
         
     function finalize() {
