@@ -2060,6 +2060,10 @@ final class Parser
         let cases = [];
         while (match(Token::Case))
             cases.push(catchClause());
+            // Switch type currently compiles to a try/catch, so the function
+            // needs to know that a catch is used.
+            cx.topFunction().uses_catch = true;
+            
         return cases;
     }
 

@@ -116,6 +116,9 @@ function hash_string(s) {
     return uint(h);
 }
 
+    function eq_strings(s1, s2) { 
+        return s1 == s2; 
+    }
 
 class Hashnode {
     var key = null;
@@ -210,3 +213,63 @@ class Hashtable {
         return tbl;
     }
 }
+
+    function eq_namespaces(n1, n2) {
+        if( n1 === n2 ) {
+            return true;
+        }
+        //print(n1, n2);
+        return n1.hash() == n2.hash();
+    }
+    
+    class Names
+    {
+        // Hashtable
+        // Name -> [{namespace, val}]]
+        // should it be to another hashtable?
+        // What about get/set to different slots?
+        var table;
+        function Names() : 
+            table = new Hashtable(hash_string, eq_strings, null)
+        {
+        }
+        
+        function getBinding(name, ns) {
+            //print(name);
+            var o = table.read(name);
+            
+            var ret = null;
+            
+            if(o)
+            {
+                for( var i:uint=0, limit=o.length; i<limit; ++i)
+                {
+                    let entry = o[i];
+                    if(eq_namespaces(entry.namespace, ns))
+                    {
+                        ret = entry.val;
+                    }
+                } 
+            }
+            
+            return ret;            
+        }
+        
+        function putBinding(name, ns, value ) {
+            var o = table.read(name);
+            if( o == null )
+            {
+                o = [];
+                table.write(name, o)
+            }
+            var index = 0;
+            for( var i:uint = 0, limit=o.length; i < limit; ++i )
+            {
+                if( eq_namespaces(o[i].namespace, ns) ) {
+                    index = i;
+                    break;
+                }
+            }
+            o[index] = {namespace:ns, val:value};
+        }
+    }

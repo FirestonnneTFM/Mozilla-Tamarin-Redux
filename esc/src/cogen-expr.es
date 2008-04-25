@@ -253,8 +253,13 @@ function cgUnaryExpr(ctx, e) {
     case deleteOp: {
         switch type (e.e1) {
         case (lr:LexicalRef) {
-            asm.I_findproperty(cgIdentExpr(ctx, lr.ident));
-            asm.I_deleteproperty(cgIdentExpr(ctx, lr.ident));
+            let bind = getIdentBinding(ctx, lr.ident);
+            if( bind === Ast::nobind ) {
+	            asm.I_findproperty(cgIdentExpr(ctx, lr.ident));
+	            asm.I_deleteproperty(cgIdentExpr(ctx, lr.ident));
+        	}
+            else
+                asm.I_pushtrue();  // can't delete a fixed property
         }
         case (or:ObjectRef) {
             cgExpr(ctx, or.base);
@@ -277,8 +282,8 @@ function cgUnaryExpr(ctx, e) {
 
     case typeOfOp:
         if (e.e1 is LexicalRef) {
-            asm.I_findproperty(cgIdentExpr(ctx, e.e1.ident));
-            asm.I_getproperty(cgIdentExpr(ctx, e.e1.ident));
+            cgFindProp(ctx, e.e1.ident);
+            cgGetProp(ctx, e.e1.ident);
         }
         else 
             cgExpr(ctx, e.e1);
@@ -326,10 +331,10 @@ function cgUnaryExpr(ctx, e) {
     }
 
     function incdec(pre, inc) {
+        var base_on_stk = true;
         switch type (e.e1) {
         case (lr:LexicalRef) {
-            //name = cgIdentExpr(ctx, lr.ident);
-            asm.I_findpropstrict(cgIdentExpr(ctx, lr.ident));
+            base_on_stk = cgFindPropStrict(ctx, lr.ident);
         }
         case (or:ObjectRef) {
             //name = cgIdentExpr(ctx, or.ident);
@@ -339,8 +344,9 @@ function cgUnaryExpr(ctx, e) {
             Gen::syntaxError(ctx, "Expression is not an lvalue");
         }
         }
-        asm.I_dup();
-        asm.I_getproperty(cgIdentExpr(ctx, e.e1.ident));
+        if( base_on_stk )
+            asm.I_dup();
+        cgGetProp(ctx, e.e1.ident);
         let t = asm.getTemp();
         if (pre) {
             if (inc)
@@ -360,7 +366,7 @@ function cgUnaryExpr(ctx, e) {
             else
                 asm.I_decrement();
         }
-        asm.I_setproperty(cgIdentExpr(ctx, e.e1.ident));
+        cgSetProp(ctx, e.e1.ident);
         asm.I_getlocal(t);
         asm.killTemp(t);
     }
@@ -394,7 +400,14 @@ function cgCallExpr(ctx, e) {
             cgExpr(ctx, or.base);
     }
     case (lr:LexicalRef) {
-        asm.I_findpropstrict(cgIdentExpr(ctx, lr.ident));
+        var bind = getIdentBinding(ctx, lr.ident);
+        if( bind is RegBind ) {
+            asm.I_getlocal(bind.reg);            
+            asm.I_pushnull(); // Should we be using something else for this?
+        }
+        else {
+            cgFindPropStrict(ctx, lr.ident);
+        }
         if (lr.ident is Identifier && lr.ident.ident === "eval") {
             isEval = true;
             evalTmp = asm.getTemp();   // save the
@@ -435,7 +448,12 @@ function cgCallExpr(ctx, e) {
     case (lr:LexicalRef) {
         // This is not right if the function is bound by "with".  In that
         // case, I_callproperty would be more right.  That's the outlier, though.
-        asm.I_callproplex(cgIdentExpr(ctx, lr.ident), nargs);
+        var bind = getIdentBinding(ctx, lr.ident);
+        if( bind is SlotBind || bind == Ast::nobind )
+            asm.I_callproplex(cgIdentExpr(ctx, lr.ident), nargs);
+        else if ( bind is RegBind ) {
+            asm.I_call(nargs);
+        }
     }
     case (x:*) {
         asm.I_call(nargs);
@@ -615,27 +633,31 @@ function cgObjectRef(ctx, e) {
 function cgLexicalRef(ctx, e) {
     let {asm} = ctx;
     //let name = cgIdentExpr(ctx, e.ident);
-    asm.I_findpropstrict(cgIdentExpr(ctx, e.ident));
-    asm.I_getproperty(cgIdentExpr(ctx, e.ident));
+    cgFindPropStrict(ctx, e.ident);
+    cgGetProp(ctx, e.ident);
 }
 
 function cgSetExpr(ctx, e) {
     let {asm, emitter} = ctx;
     let name = null;
 
+    let base_on_stk = true;
+        
     // The switch leaves an object on the stack and sets "name"
     switch type (e.le) {
     case (lhs:ObjectRef) {
         cgExpr(ctx, lhs.base);
         name = lhs.ident;
+        if( name is Identifier )
+            name.binding = Ast::nobind;
     }
     case (lhs:LexicalRef) {
         //name = cgIdentExpr(ctx, lhs.ident);
         name = lhs.ident;
         if (e.op == assignOp)
-            asm.I_findproperty(cgIdentExpr(ctx, lhs.ident));
+            base_on_stk = cgFindProp(ctx, lhs.ident);
         else
-            asm.I_findpropstrict(cgIdentExpr(ctx, lhs.ident));
+            base_on_stk = cgFindPropStrict(ctx, lhs.ident);
     }
     case (lhs:*) { 
         Gen::syntaxError(ctx, "Illegal lvalue");
@@ -644,17 +666,22 @@ function cgSetExpr(ctx, e) {
 
     let t = asm.getTemp();
     if (e.op == assignOp) {
-        let use_once_name = cgIdentExpr(ctx, name);
+        let use_once_name = -1;
+        if( cgIsRuntimeIdent(ctx, name) )
+            use_once_name = cgIdentExpr(ctx, name);
         cgExpr(ctx, e.re);
         asm.I_dup();
         asm.I_setlocal(t);
-        asm.I_setproperty(use_once_name);
+        if( use_once_name != -1)
+            asm.I_setproperty(use_once_name);
+        else
+            cgSetProp(ctx, name);
     }
     else {
-        let propname = null;
         let subtmp = null;     // stores indexing expression value
         let subname = null;    // multiname to store under
-        asm.I_dup();           // object expr
+        if( base_on_stk )
+            asm.I_dup();           // object expr
         if (name is ExpressionIdentifier) {
             subtmp = asm.getTemp();
             cgExpr(ctx, name.expr);
@@ -664,11 +691,11 @@ function cgSetExpr(ctx, e) {
             asm.I_getproperty(subname);
         }
         else {
-            asm.I_getproperty(cgIdentExpr(ctx, name));
-            propname = cgIdentExpr(ctx, name);
+            cgGetProp(ctx, name);
         }
         if (e.op == assignLogicalAndOp || e.op == assignLogicalOrOp) {
-            asm.I_dup();
+            if( base_on_stk )
+            	asm.I_dup();
             asm.I_convert_b();
             let L0 = (e.op == assignLogicalAndOp) ? asm.I_iffalse(undefined) : asm.I_iftrue(undefined);
             asm.I_pop();
@@ -702,7 +729,7 @@ function cgSetExpr(ctx, e) {
             asm.killTemp(subtmp);
         }
         else
-            asm.I_setproperty(propname);
+            cgSetProp(ctx, name);
     }
     asm.I_getlocal(t);
     asm.killTemp(t);
@@ -863,9 +890,9 @@ function cgSliceExpr(ctx, e) {
 function cgGetTempExpr(ctx, e) {
     // FIXME
     let {asm, emitter} = ctx;
-    let qn = emitter.qname (new Ast::Name(Ast::noNS, "$t"+e.n), false);
-    asm.I_findpropstrict(qn);
-    asm.I_getproperty(qn);
+    let i = new Ast::Identifier("$t"+e.n, [[Ast::noNS]]);
+    cgFindPropStrict(ctx, i);
+    cgGetProp(ctx, i);
 }
 
 function cgGetParamExpr(ctx, e) {
@@ -909,3 +936,108 @@ function cgIdentExpr(ctx, e) {
     }
     }
 }
+    
+function getIdentBinding(ctx, id:IDENT_EXPR) {
+    let bind = Ast::nobind;
+    switch type (id) {
+        case (i:Identifier) {
+            if( i.binding === undefined ) {
+                var b = findBinding(ctx, i.ident, i.nss);
+                i.binding = b;
+            }
+            bind = i.binding;
+        }
+        case (e : * ) {
+        }
+    }
+
+    return bind;
+}
+
+// Returns true if the result of the findprop is left on the stack
+function cgFindPropStrict(ctx, id:IDENT_EXPR) {
+    return cgFindProp(ctx, id, true);
+}
+
+// Returns true if the result of the findprop is left on the stack
+function cgFindProp(ctx, id:IDENT_EXPR, is_strict = false) {
+    let asm = ctx.asm;
+    var b = getIdentBinding(ctx, id);
+
+    switch type ( b ) {
+        case ( rb : RegBind ) {
+            // Do nothing, we'll get/set the value later with a register
+            return false;
+        }
+        case ( sb : SlotBind ) {
+            // Load the scope the slot is in
+            asm.I_getlocal(sb.scope);
+        }
+        case ( e : * ) {
+            if( is_strict )
+                asm.I_findpropstrict(cgIdentExpr(ctx, id));
+            else
+                asm.I_findproperty(cgIdentExpr(ctx, id));
+        }
+    }
+    
+    return true;
+}
+
+function cgGetProp(ctx, id:IDENT_EXPR) {
+    let asm = ctx.asm;
+    var b = getIdentBinding(ctx, id);
+
+    switch type ( b ) {
+        case ( rb : RegBind ) {
+            // Load the register
+            asm.I_getlocal(rb.reg);
+        }
+        case ( sb : SlotBind ) {
+            // Load the scope the slot is in
+            if( sb.slot == -1)
+                asm.I_getproperty(cgIdentExpr(ctx, id));
+            else
+                asm.I_getslot(sb.slot);
+        }
+        case ( e : * ) {
+            asm.I_getproperty(cgIdentExpr(ctx, id));
+        }
+    }
+}
+
+function cgSetProp(ctx, id:IDENT_EXPR) {
+    let asm = ctx.asm;
+    var b = getIdentBinding(ctx, id);
+
+    switch type ( b ) {
+        case ( rb : RegBind ) {
+            // Set the register
+            if( rb.type_index != 0 )
+                asm.I_coerce(rb.type_index);
+            else
+                asm.I_coerce_a();
+            asm.I_setlocal(rb.reg);
+        }
+        case ( sb : SlotBind ) {
+            // Load the scope the slot is in
+            if( sb.slot == -1)
+                asm.I_setproperty(cgIdentExpr(ctx, id));
+            else
+                asm.I_setslot(sb.slot);
+        }
+        case ( e : * ) {
+            asm.I_setproperty(cgIdentExpr(ctx, id));
+        }
+    }
+}
+// Whether or not the identifier is a runtime identifier, that would have effects on the stack when emitted.
+function cgIsRuntimeIdent(ctx, id:IDENT_EXPR) {
+    switch type(id) {
+        case (ei:ExpressionIdentifier) {
+            return true;
+        }
+    }
+    
+    return false;
+}    

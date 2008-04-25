@@ -449,6 +449,28 @@ class EvalScopeInitExpr extends Expr implements ISerializable {
         s.sClass(this, "EvalScopeInitExpr", "index", "how");
 }
 
+    public interface IBind {};
+    
+    // Couldn't resolve to any scope/reg
+    class NoBind implements IBind {}
+    const nobind = new NoBind;
+
+    class RegBind implements IBind {
+        public const reg;
+        public const type_index;
+        function RegBind(reg, type_index)
+            : reg = reg
+            , type_index = type_index { }
+    }
+ 
+    class SlotBind implements IBind {
+        public const slot;   // slot id
+        public const scope;  // Register the scope is in.  Could scope ever not be in a register?
+        function SlotBind(slot, scope)
+            : slot = slot
+            , scope = scope { }
+    }
+
 type INIT_TARGET = int;
 
 const varInit = 0;
@@ -508,9 +530,11 @@ public interface IIdentExpr {
 class Identifier extends Expr implements IIdentExpr, ISerializable {
     const ident : IDENT;
     const nss; //: NAMESPACES;
+    var binding;
     function Identifier (ident,nss)
         : ident = ident
-        , nss = nss {}
+        , nss = nss
+        , binding = undefined {}
 
     function serialize(s)
         s.sClass(this, "Identifier", "ident", "nss");
