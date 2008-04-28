@@ -241,6 +241,22 @@ namespace avmplus
         return new (core()->GetGC(), ivtable->getExtraSize()) IntVectorObject(ivtable, prototype);
     }
 
+	Atom IntVectorClass::call(int argc, Atom* argv) 
+	{
+		if (argc != 1)
+		{
+			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
+		}
+		if( core()->istype(argv[1], ivtable()->traits ) )
+			return argv[1];
+
+		IntVectorObject* v = (IntVectorObject*)createInstance(ivtable(), prototype);
+
+		v->initWithObj(argv[1]);
+
+		return v->atom();
+	}
+
 	IntVectorObject* IntVectorClass::newVector(uint32 length)
 	{
 		VTable* ivtable = this->ivtable();
@@ -249,6 +265,7 @@ namespace avmplus
 		v->set_length(length);
 		return v;
 	}
+
 
 	VectorBaseObject* IntVectorObject::newVector(uint32 length)
 	{
@@ -289,6 +306,23 @@ namespace avmplus
     {
         return new (core()->GetGC(), ivtable->getExtraSize()) UIntVectorObject(ivtable, prototype);
     }
+
+	Atom UIntVectorClass::call(int argc, Atom* argv) 
+	{
+		if (argc != 1)
+		{
+			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
+		}
+
+		if( core()->istype(argv[1], ivtable()->traits ) )
+			return argv[1];
+
+		UIntVectorObject* v = (UIntVectorObject*)createInstance(ivtable(), prototype);
+
+		v->initWithObj(argv[1]);
+
+		return v->atom();
+	}
 
 	UIntVectorObject* UIntVectorClass::newVector(uint32 length)
 	{
@@ -338,6 +372,23 @@ namespace avmplus
     {
         return new (core()->GetGC(), ivtable->getExtraSize()) DoubleVectorObject(ivtable, prototype);
     }
+
+	Atom DoubleVectorClass::call(int argc, Atom* argv) 
+	{
+		if (argc != 1)
+		{
+			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
+		}
+
+		if( core()->istype(argv[1], ivtable()->traits ) )
+			return argv[1];
+
+		DoubleVectorObject* v = (DoubleVectorObject*)createInstance(ivtable(), prototype);
+
+		v->initWithObj(argv[1]);
+
+		return v->atom();
+	}
 
 	DoubleVectorObject* DoubleVectorClass::newVector(uint32 length)
 	{
@@ -447,11 +498,29 @@ namespace avmplus
 		return (Atom)instantiated_types->get(fullname->atom());
 	}
 
+
 	ScriptObject* VectorClass::createInstance(VTable * /*ivtable*/,
 		ScriptObject * /*prototype*/)
 	{
 		// TODO: throw?
 		return NULL;
+	}
+
+	Atom ObjectVectorClass::call(int argc, Atom* argv) 
+	{
+		if (argc != 1)
+		{
+			toplevel()->throwArgumentError(kCoerceArgumentCountError, toplevel()->core()->toErrorString(argc));
+		}
+
+		if( core()->istype(argv[1], ivtable()->traits ) )
+			return argv[1];
+
+		ObjectVectorObject* v = (ObjectVectorObject*)createInstance(ivtable(), prototype);
+
+		v->initWithObj(argv[1]);
+
+		return v->atom();
 	}
 
 	ObjectVectorObject* VectorClass::newVector(ClassClosure* /*type*/, uint32 /*length*/)
