@@ -38,7 +38,8 @@
 
 internal namespace AVMPLUS = "avmplus";
 
-use default namespace ESC;
+use default namespace ESC,
+    namespace ESC;
 
 const version = { major: 0, minor: 1, nick: "That depends on what the meaning of 'is' is" };
 

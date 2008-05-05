@@ -37,7 +37,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 namespace AbcDecode;
-use default namespace AbcDecode;
+use default namespace AbcDecode,
+    namespace AbcDecode;
 
 use namespace Release;
 use namespace Ast;
@@ -227,7 +228,7 @@ class AbcDecoder {
             kind = CONSTANT_Utf8;
             break;
         case "CONSTANT_Namespace":
-            val = namespace(op.val);
+            val = this.namespace(op.val);
             kind = CONSTANT_Namespace;
             break;
         case "CONSTANT_Double":
@@ -401,7 +402,7 @@ class AbcDecoder {
         else {
             switch(s.kind) {
             case "QName":
-                var ns = namespace(s.ns);
+                var ns = this.namespace(s.ns);
                 var name = utf8(s.utf8);
                 return abc.constants.QName(ns, name, false);
             case "RTQName":
@@ -444,7 +445,7 @@ class AbcDecoder {
                 bytes.uint30(utf8(ins[1]));
                 break;
             case OP_pushnamespace:
-                bytes.uint30(namespace(ins[1]));
+                bytes.uint30(this.namespace(ins[1]));
                 break;
             case OP_pushint:
                 bytes.uint30(integer(ins[1]));

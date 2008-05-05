@@ -54,5 +54,5 @@ ESC var bootstrap_namespaces =
      "Release", 
      "Token", 
      "Util"].map(function (id) {
-                     return [new Ast::PropName(new Ast::Name(Ast::noNS, id)),
-                             new Ast::NamespaceFixture(new Ast::UnforgeableNamespace(id))]; });
+                     return new Ast::Fixture(new Ast::PropName(new Ast::Name(Ast::publicNS, id)),
+                                             new Ast::NamespaceFixture(new Ast::UnforgeableNamespace(id))); });

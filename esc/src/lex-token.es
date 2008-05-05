@@ -36,7 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-use default namespace Token;
+use default namespace Token,
+    namespace Token;
 
 /* A token has a "kind" (the token type) and a "text" (the lexeme).
  *
@@ -68,7 +69,7 @@ function tokenText ( tid : int ) : String
 // dramatically speed up duplicate testing in makeInstance(), below.
 
 const tokenHash = 
-    new Util::Hashtable(function(x) { return Util::hash_number(x.kind) ^ Util::hash_string(x.text) },
+    new Util::Hashtable(function(x) { return uint(Util::hash_number(x.kind) ^ Util::hash_string(x.text)) },
                         function(a,b) { return a.kind === b.kind && a.text === b.text },
                         false );
     
@@ -84,7 +85,7 @@ const tokenStore = new Array;
 // classification.  Entries are bit vectors (some tokens have
 // multiple attributes).
 
-const CTXRESERVED = 1;       // It is a contextually reserved identifier
+const UNUSED = 1;            // No longer in use
 const RESERVED = 2;          // It is a reserved identifier
 const LITERAL = 4;           // It is a token that yields a literal
 const LEXEME = 8;            // It is a token that has a useful lexeme
@@ -97,9 +98,6 @@ const MULTIPLICATIVEOP = 512;// It is *, /, or %
 const OPASSIGN = 1024;       // += and so on
 
 const tokenAttr = new Array;
-
-function isCtxReserved(token)
-    (tokenAttr[token] & CTXRESERVED) != 0;
 
 function isReserved(token)
     (tokenAttr[token] & RESERVED) != 0;
@@ -137,6 +135,9 @@ function isOpAssign(token)
 
 internal var hash_helper = { kind: 0, text: "" };
 
+function fmt()
+    this.kind + " " + this.text;
+
 function makeInstance(kind:int, text:String) : int {
     hash_helper.kind = kind;
     hash_helper.text = text;
@@ -144,7 +145,7 @@ function makeInstance(kind:int, text:String) : int {
     if (tid === false) {
         tid = tokenStore.length;
         tokenStore.push(new Tok(kind, text));
-        tokenHash.write({kind: kind, text: text}, tid);
+        tokenHash.write({kind: kind, text: text, toString: fmt}, tid);
     }
     return tid;
 }
@@ -173,8 +174,7 @@ const Mult = Token::RightParen + 1;                     setup(Token::Mult,"mult"
 const MultAssign = Token::Mult + 1;                     setup(Token::MultAssign,"multassign", OPASSIGN);
 const Comma = Token::MultAssign  + 1;                   setup(Token::Comma,"comma");
 const Dot = Token::Comma + 1;                           setup(Token::Dot,"dot");
-const DoubleDot = Token::Dot + 1;                       setup(Token::DoubleDot,"doubledot");
-const TripleDot = Token::DoubleDot + 1;                 setup(Token::TripleDot,"tripledot");
+const TripleDot = Token::Dot + 1;                       setup(Token::TripleDot,"tripledot");
 const LeftDotAngle = Token::TripleDot + 1;              setup(Token::LeftDotAngle,"leftdotangle");
 const Div = Token::LeftDotAngle + 1;                    setup(Token::Div,"div", MULTIPLICATIVEOP);
 const DivAssign = Token::Div + 1;                       setup(Token::DivAssign,"divassign", OPASSIGN);
@@ -182,8 +182,7 @@ const Colon = Token::DivAssign + 1;                     setup(Token::Colon,"colo
 const DoubleColon = Token::Colon + 1;                   setup(Token::DoubleColon,"doublecolon");
 const SemiColon = Token::DoubleColon + 1;               setup(Token::SemiColon,"semicolon");
 const QuestionMark = Token::SemiColon + 1;              setup(Token::QuestionMark,"questionmark");
-const At = Token::QuestionMark + 1;                     setup(Token::At,"at");
-const LeftBracket = Token::At + 1;                      setup(Token::LeftBracket,"leftbracket");
+const LeftBracket = Token::QuestionMark + 1;            setup(Token::LeftBracket,"leftbracket");
 const RightBracket = Token::LeftBracket + 1;            setup(Token::RightBracket,"rightbracket");
 const LogicalXor = Token::RightBracket + 1;             setup(Token::LogicalXor,"logicalxor");
 const LogicalXorAssign = Token::LogicalXor + 1;         setup(Token::LogicalXorAssign,"logicalxorassign", OPASSIGN);
@@ -218,85 +217,53 @@ const UnsignedRightShiftAssign = Token::UnsignedRightShift + 1;   setup(Token::U
 
 const Break = Token::UnsignedRightShiftAssign + 1;      setup(Token::Break,"break", RESERVED);
 const Case = Token::Break + 1;                          setup(Token::Case,"case", RESERVED);
-const Catch = Token::Case + 1;                          setup(Token::Catch,"catch", RESERVED);
+const Cast = Token::Case + 1;                           setup(Token::Cast,"cast", RESERVED|RELATIONAL|RELTYPE);
+const Catch = Token::Cast + 1;                          setup(Token::Catch,"catch", RESERVED);
 const Class = Token::Catch + 1;                         setup(Token::Class,"class", RESERVED);
-const Continue = Token::Class + 1;                      setup(Token::Continue,"continue", RESERVED);
+const Const = Token::Class + 1;                         setup(Token::Const,"const", RESERVED);
+const Continue = Token::Const + 1;                      setup(Token::Continue,"continue", RESERVED);
 const Default = Token::Continue + 1;                    setup(Token::Default,"default", RESERVED);
 const Delete = Token::Default + 1;                      setup(Token::Delete,"delete", RESERVED);
 const Do = Token::Delete + 1;                           setup(Token::Do,"do", RESERVED);
-const Else = Token::Do + 1;                             setup(Token::Else,"else", RESERVED);
-const Enum = Token::Else + 1;                           setup(Token::Enum,"enum", RESERVED);
-const Extends = Token::Enum + 1;                        setup(Token::Extends,"extends", RESERVED);
-const False = Token::Extends + 1;                       setup(Token::False,"false", RESERVED|LITERAL);
-const Finally = Token::False + 1;                       setup(Token::Finally,"finally", RESERVED);
+const Dynamic = Token::Do + 1;                          setup(Token::Dynamic,"dynamic", RESERVED);
+const Else = Token::Dynamic + 1;                        setup(Token::Else,"else", RESERVED);
+const False = Token::Else + 1;                          setup(Token::False,"false", RESERVED|LITERAL);
+const Final = Token::False + 1;                         setup(Token::Final,"final", RESERVED);
+const Finally = Token::Final + 1;                       setup(Token::Finally,"finally", RESERVED);
 const For = Token::Finally + 1;                         setup(Token::For,"for", RESERVED);
 const Function = Token::For + 1;                        setup(Token::Function,"function", RESERVED);
 const If = Token::Function + 1;                         setup(Token::If,"if", RESERVED);
 const In = Token::If + 1;                               setup(Token::In,"in", RESERVED|RELATIONAL);
 const InstanceOf = Token::In + 1;                       setup(Token::InstanceOf,"instanceof", RESERVED|RELATIONAL);
-const New = Token::InstanceOf + 1;                      setup(Token::New,"new", RESERVED);
+const Interface = Token::InstanceOf + 1;                setup(Token::Interface,"interface", RESERVED);
+const Is = Token::Interface + 1;                        setup(Token::Is,"is", RESERVED|RELATIONAL|RELTYPE);
+const Let = Token::Is + 1;                              setup(Token::Let,"let", RESERVED);
+const Namespace = Token::Let + 1;                       setup(Token::Namespace,"namespace", RESERVED);
+const Native = Token::Namespace + 1;                    setup(Token::Native,"native", RESERVED);
+const New = Token::Native + 1;                          setup(Token::New,"new", RESERVED);
 const Null = Token::New + 1;                            setup(Token::Null,"null", RESERVED|LITERAL);
-const Return = Token::Null + 1;                         setup(Token::Return,"return", RESERVED);
-const Super = Token::Return + 1;                        setup(Token::Super,"super", RESERVED);
+const Override = Token::Null + 1;                       setup(Token::Override,"override", RESERVED);
+const Return = Token::Override + 1;                     setup(Token::Return,"return", RESERVED);
+const Static = Token::Return + 1;                       setup(Token::Static,"static", RESERVED);
+const Super = Token::Static + 1;                        setup(Token::Super,"super", RESERVED);
 const Switch = Token::Super + 1;                        setup(Token::Switch,"switch", RESERVED);
 const This = Token::Switch + 1;                         setup(Token::This,"this", RESERVED);
 const Throw = Token::This + 1;                          setup(Token::Throw,"throw", RESERVED);
 const True = Token::Throw + 1;                          setup(Token::True,"true", RESERVED|LITERAL);
 const Try = Token::True + 1;                            setup(Token::Try,"try", RESERVED);
-const TypeOf = Token::Try + 1;                          setup(Token::TypeOf,"typeof", RESERVED);
-const Var = Token::TypeOf + 1;                          setup(Token::Var,"var", RESERVED);
+const Type = Token::Try + 1;                            setup(Token::Type,"type", RESERVED);
+const TypeOf = Token::Type + 1;                         setup(Token::TypeOf,"typeof", RESERVED);
+const Use = Token::TypeOf + 1;                          setup(Token::Use,"use", RESERVED);
+const Var = Token::Use + 1;                             setup(Token::Var,"var", RESERVED);
 const Void = Token::Var + 1;                            setup(Token::Void,"void", RESERVED);
 const While = Token::Void + 1;                          setup(Token::While,"while", RESERVED);
 const With = Token::While + 1;                          setup(Token::With,"with", RESERVED);
-
-// contextually reserved identifiers
-
-const Call = Token::With + 1;                           setup(Token::Call,"call", CTXRESERVED);
-const Cast = Token::Call + 1;                           setup(Token::Cast,"cast", CTXRESERVED|RELATIONAL|RELTYPE);
-const Const = Token::Cast + 1;                          setup(Token::Const,"const", CTXRESERVED);
-const Decimal = Token::Const + 1;                       setup(Token::Decimal,"decimal", CTXRESERVED);
-const Double = Token::Decimal + 1;                      setup(Token::Double,"double", CTXRESERVED);
-const Dynamic = Token::Double + 1;                      setup(Token::Dynamic,"dynamic", CTXRESERVED);
-const Each = Token::Dynamic + 1;                        setup(Token::Each,"each", CTXRESERVED);
-const Eval = Token::Each + 1;                           setup(Token::Eval,"eval", CTXRESERVED);
-const Final = Token::Eval + 1;                          setup(Token::Final,"final", CTXRESERVED);
-const Get = Token::Final + 1;                           setup(Token::Get,"get", CTXRESERVED);
-const Has = Token::Get + 1;                             setup(Token::Has,"has", CTXRESERVED);
-const Implements = Token::Has + 1;                      setup(Token::Implements,"implements", CTXRESERVED);
-const Import = Token::Implements + 1;                   setup(Token::Import,"import", CTXRESERVED);
-const Int = Token::Import + 1;                          setup(Token::Int,"int", CTXRESERVED);
-const Interface = Token::Int + 1;                       setup(Token::Interface,"interface", CTXRESERVED);
-const Internal = Token::Interface + 1;                  setup(Token::Internal,"internal", CTXRESERVED);
-const Intrinsic = Token::Internal + 1;                  setup(Token::Intrinsic,"intrinsic", CTXRESERVED);
-const Is = Token::Intrinsic + 1;                        setup(Token::Is,"is", CTXRESERVED|RELATIONAL|RELTYPE);
-const Let = Token::Is + 1;                              setup(Token::Let,"let", CTXRESERVED);
-const Namespace = Token::Let + 1;                       setup(Token::Namespace,"namespace", CTXRESERVED);
-const Native = Token::Namespace + 1;                    setup(Token::Native,"native", CTXRESERVED);
-const Number = Token::Native + 1;                       setup(Token::Number,"Number", CTXRESERVED);
-const Override = Token::Number + 1;                     setup(Token::Override,"override", CTXRESERVED);
-const Package = Token::Override + 1;                    setup(Token::Package,"package", CTXRESERVED);
-const Precision = Token::Package + 1;                   setup(Token::Precision,"precision", CTXRESERVED);
-const Private = Token::Precision + 1;                   setup(Token::Private,"private", CTXRESERVED);
-const Protected = Token::Private + 1;                   setup(Token::Protected,"protected", CTXRESERVED);
-const Prototype = Token::Protected + 1;                 setup(Token::Prototype,"prototype", CTXRESERVED);
-const Public = Token::Prototype + 1;                    setup(Token::Public,"public", CTXRESERVED);
-const Rounding = Token::Public + 1;                     setup(Token::Rounding,"rounding", CTXRESERVED);
-const Standard = Token::Rounding + 1;                   setup(Token::Standard,"standard", CTXRESERVED);
-const Strict = Token::Standard + 1;                     setup(Token::Strict,"strict", CTXRESERVED);
-const To = Token::Strict + 1;                           setup(Token::To,"to", CTXRESERVED|RELATIONAL|RELTYPE);
-const Set = Token::To + 1;                              setup(Token::Set,"set", CTXRESERVED);
-const Static = Token::Set + 1;                          setup(Token::Static,"static", CTXRESERVED);
-const Type = Token::Static + 1;                         setup(Token::Type,"type", CTXRESERVED);
-const UInt = Token::Type + 1;                           setup(Token::UInt,"uint", CTXRESERVED);
-const Undefined = Token::UInt + 1;                      setup(Token::Undefined,"undefined", CTXRESERVED|LITERAL);
-const Unit = Token::Undefined + 1;                      setup(Token::Unit,"unit", CTXRESERVED);
-const Use = Token::Unit + 1;                            setup(Token::Use,"use", CTXRESERVED);
-const Xml = Token::Use + 1;                             setup(Token::Xml,"xml", CTXRESERVED);
-const Yield = Token::Xml + 1;                           setup(Token::Yield,"yield", CTXRESERVED);
+const Yield = Token::With + 1;                          setup(Token::Yield,"yield", RESERVED);
+const __Proto__ = Token::Yield + 1;                     setup(Token::__Proto__,"__proto__", RESERVED);
 
 // sundry
 
-const AttributeIdentifier = Token::Yield + 1;           setup(Token::AttributeIdentifier,"attributeidentifier", LEXEME);
+const AttributeIdentifier = Token::__Proto__ + 1;       setup(Token::AttributeIdentifier,"attributeidentifier", LEXEME);
 const Identifier = Token::AttributeIdentifier + 1;      setup(Token::Identifier,"identifier", LEXEME);
 const IntLiteral = Token::Identifier + 1;               setup(Token::IntLiteral,"intliteral", LEXEME|LITERAL);
 const UIntLiteral = Token::IntLiteral + 1;              setup(Token::UIntLiteral,"uintliteral", LEXEME|LITERAL);
@@ -305,16 +272,21 @@ const DecimalLiteral = Token::DoubleLiteral + 1;        setup(Token::DecimalLite
 const RegexpLiteral = Token::DecimalLiteral + 1;        setup(Token::RegexpLiteral,"regexpliteral", LEXEME|LITERAL);
 const StringLiteral = Token::RegexpLiteral + 1;         setup(Token::StringLiteral,"stringliteral", LEXEME|LITERAL);
 
-const XmlLiteral = Token::StringLiteral + 1;            setup(Token::XmlLiteral,"xmlliteral");
-const XmlPart = Token::XmlLiteral + 1;                  setup(Token::XmlPart,"xmlpart");
-const XmlMarkup = Token::XmlPart + 1;                   setup(Token::XmlMarkup,"xmlmarkup");
-const XmlText = Token::XmlMarkup + 1;                   setup(Token::XmlText,"xmltext");
-const XmlTagEndEnd = Token::XmlText + 1;                setup(Token::XmlTagEndEnd,"xmltagendend");
-const XmlTagStartEnd = Token::XmlTagEndEnd + 1;         setup(Token::XmlTagStartEnd,"xmltagstartend");
-
 // meta
 
-const EOS = Token::XmlTagStartEnd + 1;                  setup(Token::EOS,"EOS");
+const EOS = Token::StringLiteral + 1;                   setup(Token::EOS,"EOS");
 const BREAK = Token::EOS + 1;                           setup(Token::BREAK,"BREAK");
 const NONE = Token::BREAK + 1;                          setup(Token::NONE,"NONE");
 
+// Pre-computed identifier tokens, used throughout the system
+
+const id_each = makeInstance(Token::Identifier, "each");
+const id_eval = makeInstance(Token::Identifier, "eval");
+const id_extends = makeInstance(Token::Identifier, "extends");
+const id_generator = makeInstance(Token::Identifier, "generator");
+const id_get = makeInstance(Token::Identifier, "get");
+const id_implements = makeInstance(Token::Identifier, "implements");
+const id_set = makeInstance(Token::Identifier, "set");
+const id_standard = makeInstance(Token::Identifier, "standard");
+const id_strict = makeInstance(Token::Identifier, "strict");
+const id_undefined = makeInstance(Token::Identifier, "undefined");

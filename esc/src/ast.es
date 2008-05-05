@@ -36,14 +36,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-use default namespace Ast;
+use default namespace Ast,
+    namespace Ast;
 
-// Bug 425467 that this needs to be public
-public interface ISerializable {
-    // FIXME: need a method here!
+interface Serializable {
+    function serialize(s);
 }
 
-public class ASTNode {
+class ASTNode {
     public function toString()
         (new Serializer(true)).serialize(this);
 }
@@ -51,13 +51,10 @@ public class ASTNode {
 // BASIC TYPES
 
 type IDENT = String;   // unicode string
-type IDENTS = [IDENT];
 
-type HEAD = Head;
-
-class Head extends ASTNode implements ISerializable {
-    public const fixtures: FIXTURES;  
-    public const exprs: EXPRS;
+class Head extends ASTNode implements Serializable {
+    const fixtures: [Fixture];
+    const exprs: [Expr];
     function Head (fixtures,exprs)
         : fixtures=fixtures
         , exprs=exprs {}
@@ -66,11 +63,10 @@ class Head extends ASTNode implements ISerializable {
         s.sClass(this, "Head", "fixtures", "exprs");
 }
 
-// FIXME
-public interface IFixtureName {
+interface FixtureName {
 }
 
-class TempName extends ASTNode implements IFixtureName, ISerializable {
+class TempName extends ASTNode implements FixtureName, Serializable {
     const index : int;
     function TempName (index) : index=index {}
 
@@ -78,7 +74,7 @@ class TempName extends ASTNode implements IFixtureName, ISerializable {
         s.sClass(this, "TempName", "index");
 }
 
-class PropName extends ASTNode implements IFixtureName, ISerializable {
+class PropName extends ASTNode implements FixtureName, Serializable {
     const name: Name;
     function PropName(name) : name=name {}
 
@@ -86,29 +82,38 @@ class PropName extends ASTNode implements IFixtureName, ISerializable {
         s.sClass(this, "PropName", "name");
 }
 
-type FIXTURE_BINDING = [IFixtureName,Fixture];
-type FIXTURES = [FIXTURE_BINDING];
+class Fixture extends ASTNode implements Serializable {
+    const name: FixtureName;
+    const data: FixtureData;
+    function Fixture(name, data) : name=name, data=data {}
 
-type INIT_BINDING = [IFixtureName,Expr];
-type INITS = [INIT_BINDING];
+    function serialize(s)
+        s.sClass(this, "Fixture", "name", "data");
+}
 
-type NAMES = [Name];
+class InitBinding extends ASTNode implements Serializable {
+    const name: FixtureName;
+    const expr: Expr;
+    function InitBinding(name, expr) : name=name, expr=expr {}
 
-class Name extends ASTNode implements ISerializable {
-    public const ns;
-    public const id;
+    function serialize(s)
+        s.sClass(this, "InitBinding", "name", "expr");
+}
+
+class Name extends ASTNode implements Serializable {
+    const ns;
+    const id;
     function Name(ns, id) : ns=ns, id=id {}
      
     function serialize(s)
         s.sClass(this, "Name", "ns", "id");
 }
 
-// Namespace
+// Must be qualified everywhere it's used as 'Ast::Namespace' because
+// Tamarin does not (yet) have prioritized name lookup.
 
-public interface INamespace {
+interface Namespace {
 }
-
-type NAMESPACES = [INamespace];
 
 function nsEquals(ns1, ns2) {
     if (ns1 == ns2)
@@ -118,7 +123,6 @@ function nsEquals(ns1, ns2) {
     switch type (ns1) {
     case (x: UnforgeableNamespace) { return ns2 is UnforgeableNamespace; }
     case (x: ForgeableNamespace) { return ns2 is UnforgeableNamespace; }
-    case (x: IntrinsicNamespace) { return ns2 is IntrinsicNamespace; }
     case (x: PrivateNamespace) { return ns2 is PrivateNamespace; }
     case (x: ProtectedNamespace) { return ns2 is ProtectedNamespace; }
     case (x: PublicNamespace) { return ns2 is PublicNamespace; }
@@ -127,15 +131,7 @@ function nsEquals(ns1, ns2) {
     }
 }
 
-class IntrinsicNamespace extends ASTNode implements INamespace, ISerializable {
-    const name = ""; /// Benefits nsEquals
-    function hash () { return "intrinsic"; }
-
-    function serialize(s)
-        s.sClass(this, "IntrinsicNamespace");
-}
-
-class PrivateNamespace extends ASTNode implements INamespace, ISerializable {
+class PrivateNamespace extends ASTNode implements Ast::Namespace, Serializable {
     const name : IDENT;
     function PrivateNamespace (name)
         : name = name { }
@@ -145,7 +141,7 @@ class PrivateNamespace extends ASTNode implements INamespace, ISerializable {
         s.sClass(this, "PrivateNamespace", "name");
 }
 
-class ProtectedNamespace extends ASTNode implements INamespace, ISerializable {
+class ProtectedNamespace extends ASTNode implements Ast::Namespace, Serializable {
     const name : IDENT;
     function ProtectedNamespace (name)
         : name = name { }
@@ -155,7 +151,7 @@ class ProtectedNamespace extends ASTNode implements INamespace, ISerializable {
         s.sClass(this, "ProtectedNamespace", "name");
 }
 
-class PublicNamespace extends ASTNode implements INamespace, ISerializable {
+class PublicNamespace extends ASTNode implements Ast::Namespace, Serializable {
     const name : IDENT;
     function PublicNamespace (name)
         : name = name { }
@@ -165,7 +161,7 @@ class PublicNamespace extends ASTNode implements INamespace, ISerializable {
         s.sClass(this, "PublicNamespace", "name");
 }
 
-class InternalNamespace extends ASTNode implements  INamespace, ISerializable {
+class InternalNamespace extends ASTNode implements Ast::Namespace, Serializable {
     const name : IDENT;
     function InternalNamespace (name)
         : name = name { }
@@ -175,7 +171,7 @@ class InternalNamespace extends ASTNode implements  INamespace, ISerializable {
         s.sClass(this, "InternalNamespace", "name");
 }
 
-class ForgeableNamespace extends ASTNode implements  INamespace, ISerializable {
+class ForgeableNamespace extends ASTNode implements Ast::Namespace, Serializable {
     const name : IDENT;
     function ForgeableNamespace (name)
         : name = name { }
@@ -185,7 +181,7 @@ class ForgeableNamespace extends ASTNode implements  INamespace, ISerializable {
         s.sClass(this, "ForgeableNamespace", "name");
 }
 
-class UnforgeableNamespace extends ASTNode implements  INamespace, ISerializable {
+class UnforgeableNamespace extends ASTNode implements Ast::Namespace, Serializable {
     const name : IDENT;
     function UnforgeableNamespace (name)
         : name = name { }
@@ -195,7 +191,39 @@ class UnforgeableNamespace extends ASTNode implements  INamespace, ISerializable
         s.sClass(this, "UnforgeableNamespace", "name");
 }
 
-const noNS = new PublicNamespace ("");
+internal var nshash = 0;  // Used as an object ID for namespace nodes in the back end
+
+// The correctness of optimizations in the back-end depends on
+// NamespaceSet and NamespaceSetList being functional data structures.
+
+final class NamespaceSet extends ASTNode implements Serializable {
+    const ns;
+    const link: NamespaceSet;
+    const hash = nshash++;
+    function NamespaceSet(ns, link) : ns=ns, link=link {}
+
+    function serialize(s)
+        s.sClass(this, "NamespaceSet", "ns", "link");
+}
+
+final class NamespaceSetList extends ASTNode implements Serializable {
+    const nsset: NamespaceSet;
+    const link : NamespaceSetList;
+    const hash = nshash++;
+    function NamespaceSetList(nsset, link) : nsset=nsset, link=link {}
+
+    function serialize(s)
+        s.sClass(this, "NamespaceSetList", "nsset", "link");
+
+    function pushScope()
+        new NamespaceSetList(null, this);
+
+    function pushNamespace(ns)
+        new NamespaceSetList(new NamespaceSet(ns, nsset), this);
+}
+
+const publicNS = new Ast::PublicNamespace("");
+const publicNSSL = new Ast::NamespaceSetList(new Ast::NamespaceSet(publicNS, null), null);
 
 // Binary type operators
 
@@ -269,22 +297,17 @@ const bitwiseNotOp = 9;
 const logicalNotOp = 10;
 const typeOp = 11;
 
-// EXPR
+// The strictFlag is set on ops that generated in strict mode.
 
-// Bug 425467 that this needs to be public
-//
-// Bug in general that this is called 'Expr' and the interfaces
-// are 'ISomething', needless confusion.  Should fix the
-// interfaces.
+const strictFlag = 64;
+const strictMask = strictFlag-1;
 
-public class Expr extends ASTNode {
-    public var pos: int;
+class Expr extends ASTNode {
+    const pos: int;
     function Expr(pos=0) : pos=pos {}
 }
 
-type EXPRS = [Expr];
-
-class TernaryExpr extends Expr implements ISerializable {
+class TernaryExpr extends Expr implements Serializable {
     const e1 : Expr;
     const e2 : Expr;
     const e3 : Expr;
@@ -294,7 +317,7 @@ class TernaryExpr extends Expr implements ISerializable {
         s.sClass(this, "TernaryExpr", "e1", "e2", "e3");
 }
 
-class BinaryExpr extends Expr implements ISerializable {
+class BinaryExpr extends Expr implements Serializable {
     const op : BINOP;
     const e1 : Expr;
     const e2 : Expr;
@@ -304,17 +327,17 @@ class BinaryExpr extends Expr implements ISerializable {
         s.sClass(this, "BinaryExpr", "op", "e1", "e2");
 }
 
-class BinaryTypeExpr extends Expr implements ISerializable {
+class BinaryTypeExpr extends Expr implements Serializable {
     const op : BINTYOP;
     const e1 : Expr;
-    const e2 : TYPE_EXPR;
+    const e2 : TypeExpr;
     function BinaryTypeExpr (op,e1,e2) : op=op, e1=e1, e2=e2 {}
 
     function serialize(s)
         s.sClass(this, "BinaryTypeExpr", "op", "e1", "e2");
 }
 
-class UnaryExpr extends Expr implements ISerializable {
+class UnaryExpr extends Expr implements Serializable {
     const op : UNOP;
     const e1 : Expr;
     function UnaryExpr (op,e1) : op=op, e1=e1 {}
@@ -324,22 +347,26 @@ class UnaryExpr extends Expr implements ISerializable {
 }
 
 // FIXME: ex => expr
-class TypeExpr extends Expr implements ISerializable {
-    const ex : TYPE_EXPR;
-    function TypeExpr (ex) : ex=ex {}
+
+class TypeOpExpr extends Expr implements Serializable {
+    const ex : TypeExpr;
+    function TypeOpExpr (ex) : ex=ex {}
 
     function serialize(s)
-        s.sClass(this, "TypeExpr", "ex");
+        s.sClass(this, "TypeOpExpr", "ex");
 }
 
-class ThisExpr extends Expr implements ISerializable {
+class ThisExpr extends Expr implements Serializable {
+    const strict: Boolean;
+    function ThisExpr(strict) : strict=strict {}
+
     function serialize(s)
-        s.sClass(this, "ThisExpr");
+        s.sClass(this, "ThisExpr", "strict");
 }
 
 // FIXME: ex => expr
-class YieldExpr extends Expr implements ISerializable {
-    const ex : Expr?;
+class YieldExpr extends Expr implements Serializable {
+    const ex : ? Expr;
     function YieldExpr (ex=null) : ex=ex {}
 
     function serialize(s)
@@ -347,29 +374,31 @@ class YieldExpr extends Expr implements ISerializable {
 }
 
 // FIXME: ex => expr
-class SuperExpr extends Expr implements ISerializable {
-    const ex : Expr?;
+class SuperExpr extends Expr implements Serializable {
+    const ex : ? Expr;
     function SuperExpr (ex=null) : ex=ex {}
 
     function serialize(s)
         s.sClass(this, "SuperExpr", "ex");
 }
 
-class CallExpr extends Expr implements ISerializable {
+class CallExpr extends Expr implements Serializable {
     const expr : Expr;
-    const args : EXPRS;
-    function CallExpr (expr,args,pos=0)
+    const args : [Expr];
+    const strict: Boolean;
+    function CallExpr (expr,args,pos=0,strict=false)
         : expr=expr
         , args=args
+        , strict=strict
         , super(pos) {}
 
     function serialize(s)
-        s.sClass(this, "CallExpr", "expr", "args", "pos");
+        s.sClass(this, "CallExpr", "expr", "args", "pos", "strict");
 }
 
-class ApplyTypeExpr extends Expr implements ISerializable {
+class ApplyTypeExpr extends Expr implements Serializable {
     const expr : Expr;
-    const args : TYPE_EXPRS;
+    const args : [TypeExpr];
     function ApplyTypeExpr (expr,args)
         : expr=expr
         , args=args {}
@@ -378,8 +407,8 @@ class ApplyTypeExpr extends Expr implements ISerializable {
         s.sClass(this, "ApplyTypeExpr", "expr", "args");
 }
 
-class LetExpr extends Expr implements ISerializable {
-    const head : HEAD;
+class LetExpr extends Expr implements Serializable {
+    const head : Head;
     const expr : Expr;
     function LetExpr (head,expr)
         : head = head
@@ -389,9 +418,22 @@ class LetExpr extends Expr implements ISerializable {
         s.sClass(this, "LetExpr", "head", "expr");
 }
 
-class NewExpr extends Expr implements ISerializable {
+class DynamicOverrideExpr extends Expr implements Serializable {
+    const names: [IdentExpr];
+    const exprs: [Expr];
+    const body : Expr;
+    function DynamicOverrideExpr (names, exprs, body)
+        : names=names
+        , exprs=exprs
+        , body=body {}
+
+    function serialize(s)
+        s.sClass(this, "DynamicOverrideExpr", "names", "exprs", "body");
+}
+
+class NewExpr extends Expr implements Serializable {
     const expr : Expr;
-    const args : EXPRS;
+    const args : [Expr];
     function NewExpr (expr,args)
         : expr = expr
         , args = args {}
@@ -400,9 +442,9 @@ class NewExpr extends Expr implements ISerializable {
         s.sClass(this, "NewExpr", "expr", "args");
 }
 
-class ObjectRef extends Expr implements ISerializable {
-    const base : Expr;
-    const ident : IdentExpr;
+class ObjectRef extends Expr implements Serializable {
+    const base  : Expr;
+    const ident : (IdentExpr | ExpressionIdentifier);
     function ObjectRef (base,ident,pos=0)
         : base = base
         , ident = ident
@@ -412,18 +454,23 @@ class ObjectRef extends Expr implements ISerializable {
         s.sClass(this, "ObjectRef", "base", "ident", "pos");
 }
 
-class LexicalRef extends Expr implements ISerializable {
-    const ident : IdentExpr;
-    function LexicalRef (ident, pos=0)
-        : ident = ident
-        , super(pos) { }
+// This is used to encode obj[E] because that whole expression is
+// encoded as an ObjectRef; the "ident" in ObjectRef turns out to be
+// an ExpressionIdentifier.
+//
+// Should be called ObjectRefExpr
+
+class ExpressionIdentifier extends Expr implements Serializable {
+    const expr: Expr;
+    function ExpressionIdentifier (expr)
+        : expr=expr { }
 
     function serialize(s)
-        s.sClass(this, "LexicalRef", "ident", "pos");
+        s.sClass(this, "ExpressionIdentifier", "expr");
 }
 
 // FIXME: le? re?
-class SetExpr extends Expr implements ISerializable {
+class SetExpr extends Expr implements Serializable {
     const op : ASSIGNOP;
     const le : Expr;
     const re : Expr;
@@ -437,7 +484,7 @@ class SetExpr extends Expr implements ISerializable {
         s.sClass(this, "SetExpr", "op", "le", "re");
 }
 
-class EvalScopeInitExpr extends Expr implements ISerializable {
+class EvalScopeInitExpr extends Expr implements Serializable {
     const index: int;
     const how: String;
     function EvalScopeInitExpr(index, how)
@@ -449,27 +496,31 @@ class EvalScopeInitExpr extends Expr implements ISerializable {
         s.sClass(this, "EvalScopeInitExpr", "index", "how");
 }
 
-    public interface IBind {};
+interface Bind {};
     
-    // Couldn't resolve to any scope/reg
-    class NoBind implements IBind {}
-    const nobind = new NoBind;
+// Couldn't resolve to any scope/reg
+class NoBind implements Bind {
+}
 
-    class RegBind implements IBind {
-        public const reg;
-        public const type_index;
-        function RegBind(reg, type_index)
-            : reg = reg
-            , type_index = type_index { }
-    }
+const nobind = new NoBind;
+
+class RegBind implements Bind {
+    const reg;
+    const type_index;
+    function RegBind(reg, type_index)
+        : reg = reg
+        , type_index = type_index { }
+}
  
-    class SlotBind implements IBind {
-        public const slot;   // slot id
-        public const scope;  // Register the scope is in.  Could scope ever not be in a register?
-        function SlotBind(slot, scope)
-            : slot = slot
-            , scope = scope { }
-    }
+class SlotBind implements Bind {
+    const slot;   // slot id
+    const scope;  // Register the scope is in.  Could scope ever not be in a register?
+    function SlotBind(slot, scope)
+        : slot = slot
+        , scope = scope { }
+}
+
+// FIXME: better as an ENUM, but then that needs to be serializable.
 
 type INIT_TARGET = int;
 
@@ -478,10 +529,10 @@ const letInit = 1;
 const prototypeInit = 2;
 const instanceInit = 3;
 
-class InitExpr extends Expr implements ISerializable {
+class InitExpr extends Expr implements Serializable {
     const target : INIT_TARGET;
-    const head : HEAD;               // for desugaring temporaries
-    const inits;  //: INITS;
+    const head : Head;               // for desugaring temporaries
+    const inits : [InitBinding];
     function InitExpr (target, head, inits)
         : target = target
         , head = head
@@ -491,7 +542,7 @@ class InitExpr extends Expr implements ISerializable {
         s.sClass(this, "InitExpr", "target", "head", "inits");
 }
 
-class SliceExpr extends Expr implements ISerializable {
+class SliceExpr extends Expr implements Serializable {
     const e1 : Expr;
     const e2 : Expr;
     const e3 : Expr;
@@ -504,7 +555,7 @@ class SliceExpr extends Expr implements ISerializable {
         s.sClass(this, "SliceExpr", "e1", "e2", "e3");
 }
 
-class GetTemp extends Expr implements ISerializable {
+class GetTemp extends Expr implements Serializable {
     const n : int;
     function GetTemp (n)
         : n = n {}
@@ -513,7 +564,7 @@ class GetTemp extends Expr implements ISerializable {
         s.sClass(this, "GetTemp", "n");
 }
 
-class GetParam extends Expr implements ISerializable {
+class GetParam extends Expr implements Serializable {
     const n : int;
     function GetParam (n) 
         : n = n {}
@@ -522,14 +573,16 @@ class GetParam extends Expr implements ISerializable {
         s.sClass(this, "GetParam", "n");
 }
 
-// IdentExpr
-
-public interface IIdentExpr {
+interface IdentExpr {
 }
 
-class Identifier extends Expr implements IIdentExpr, ISerializable {
+// Values in nss are unresolved expressions until definition time, but
+// the parser also places literal namespace values in the list when it
+// needs to.
+
+class Identifier extends Expr implements IdentExpr, Serializable {
     const ident : IDENT;
-    const nss; //: NAMESPACES;
+    const nss: [(Ast::Namespace | Expr)];
     var binding;
     function Identifier (ident,nss)
         : ident = ident
@@ -540,48 +593,8 @@ class Identifier extends Expr implements IIdentExpr, ISerializable {
         s.sClass(this, "Identifier", "ident", "nss");
 }
 
-class QualifiedExpression extends Expr implements IIdentExpr, ISerializable {
-    const qual : Expr;
-    const expr : Expr;
-    function QualifiedExpression (qual,expr)
-        : qual=qual
-        , expr=expr {}
-
-    function serialize(s)
-        s.sClass(this, "QualifiedExpression", "qual", "expr");
-}
-
-class AttributeIdentifier extends Expr implements IIdentExpr, ISerializable {
-    const ident : IdentExpr;
-    function AttributeIdentifier (ident)
-        : ident=ident {}
-
-    function serialize(s)
-        s.sClass(this, "AttributeIdentifier", "ident");
-}
-
-class ReservedNamespace extends Expr implements IIdentExpr, ISerializable {
-    const ns: INamespace;
-    function ReservedNamespace (ns)
-        : ns=ns {}
-
-    function serialize(s)
-        s.sClass(this, "ReservedNamespace", "ns");
-}
-
-class ExpressionIdentifier extends Expr implements IIdentExpr, ISerializable {
-    const expr: Expr;
-    const nss; //: [INamespace];
-    function ExpressionIdentifier (expr,nss)
-        : expr=expr
-        , nss = nss { }
-
-    function serialize(s)
-        s.sClass(this, "ExpressionIdentifier", "expr", "nss");
-}
-
-class QualifiedIdentifier extends Expr implements IIdentExpr, ISerializable {
-    const qual : Expr;
+class QualifiedIdentifier extends Expr implements IdentExpr, Serializable {
+    const qual  : (Ast::Namespace | Expr);
     const ident : IDENT;
     function QualifiedIdentifier (qual,ident)
         : qual=qual
@@ -591,39 +604,10 @@ class QualifiedIdentifier extends Expr implements IIdentExpr, ISerializable {
         s.sClass(this, "QualifiedIdentifier", "qual", "ident");
 }
 
-class TypeIdentifier extends Expr implements IIdentExpr, ISerializable {
-    const ident : IdentExpr;
-    const typeArgs : TYPE_EXPRS;
-    function TypeIdentifier (ident,typeArgs)
-        : ident=ident
-        , typeArgs=typeArgs {}
-
-    function serialize(s)
-        s.sClass(this, "TypeIdentifier", "ident", "typeArgs");
+interface LiteralExpr {
 }
 
-class UnresolvedPath extends Expr implements IIdentExpr, ISerializable {
-    const path; /*: IDENTS */
-    const ident : IdentExpr;
-    function UnresolvedPath (path,ident)
-        : path=path
-        , ident=ident {}
-
-    function serialize(s)
-        s.sClass(this, "UnresolvedPath", "path", "ident");
-}
-
-class WildcardIdentifier extends Expr implements IIdentExpr, ISerializable {
-    function serialize(s)
-        s.sClass(this, "WildcardIdentifier");
-}
-
-// Literal expressions
-
-public interface ILiteralExpr {
-}
-
-class LiteralNull extends Expr implements ILiteralExpr, ISerializable {
+class LiteralNull extends Expr implements LiteralExpr, Serializable {
     function LiteralNull(pos=0)
         : super(pos) { }
     
@@ -631,7 +615,7 @@ class LiteralNull extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralNull");
 }
 
-class LiteralUndefined extends Expr implements ILiteralExpr, ISerializable {
+class LiteralUndefined extends Expr implements LiteralExpr, Serializable {
     function LiteralUndefined(pos=0)
         : super(pos) { }
 
@@ -639,7 +623,7 @@ class LiteralUndefined extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralUndefined");
 }
 
-class LiteralDouble extends Expr implements ILiteralExpr, ISerializable {
+class LiteralDouble extends Expr implements LiteralExpr, Serializable {
     const doubleValue : Number;
     function LiteralDouble (doubleValue, pos=0)
         : doubleValue=doubleValue
@@ -649,7 +633,7 @@ class LiteralDouble extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralDouble", "doubleValue");
 }
 
-class LiteralDecimal extends Expr implements ILiteralExpr, ISerializable {
+class LiteralDecimal extends Expr implements LiteralExpr, Serializable {
     const decimalValue : decimal;
     function LiteralDecimal (decimalValue, pos=0)
         : decimalValue = decimalValue
@@ -659,7 +643,7 @@ class LiteralDecimal extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralDouble", "decimalValue");
 }
 
-class LiteralInt extends Expr implements ILiteralExpr, ISerializable {
+class LiteralInt extends Expr implements LiteralExpr, Serializable {
     const intValue : int;
     function LiteralInt(intValue, pos=0) 
         : intValue=intValue
@@ -669,7 +653,7 @@ class LiteralInt extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralInt", "intValue");
 }
 
-class LiteralUInt extends Expr implements ILiteralExpr, ISerializable {
+class LiteralUInt extends Expr implements LiteralExpr, Serializable {
     const uintValue : uint;
     function LiteralUInt(uintValue, pos=0) 
         : uintValue=uintValue
@@ -679,7 +663,7 @@ class LiteralUInt extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralUInt", "uintValue");
 }
 
-class LiteralBoolean extends Expr implements ILiteralExpr, ISerializable {
+class LiteralBoolean extends Expr implements LiteralExpr, Serializable {
     const booleanValue : Boolean;
     function LiteralBoolean(booleanValue, pos=0) 
         : booleanValue=booleanValue
@@ -689,7 +673,7 @@ class LiteralBoolean extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralBoolean", "booleanValue");
 }
 
-class LiteralString extends Expr implements ILiteralExpr, ISerializable {
+class LiteralString extends Expr implements LiteralExpr, Serializable {
     const strValue : String;
     function LiteralString (strValue, pos=0)
         : strValue = strValue
@@ -699,30 +683,20 @@ class LiteralString extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralString", "strValue");
 }
 
-class LiteralArray extends Expr implements ILiteralExpr, ISerializable {
-    const exprs; //: [EXPR];
-    const type : TYPE_EXPR;
+class LiteralArray extends Expr implements LiteralExpr, Serializable {
+    const exprs : [Expr];
+    const ty : TypeExpr;
     function LiteralArray (exprs, ty, pos=0)
         : exprs = exprs
-        , type = ty
+        , ty = ty
         , super(pos) { }
 
     function serialize(s)
-        s.sClass(this, "LiteralArray", "exprs", "type");
+        s.sClass(this, "LiteralArray", "exprs", "ty");
 }
 
-class LiteralXML extends Expr implements ILiteralExpr, ISerializable {
-    const exprs : [Expr];
-    function LiteralXML(exprs, pos=0) 
-        : exprs = exprs
-        , super(pos) {}
-
-    function serialize(s)
-        s.sClass(this, "LiteralXML", "exprs");
-}
-
-class LiteralNamespace extends Expr implements ILiteralExpr, ISerializable {
-    const namespaceValue : INamespace;
+class LiteralNamespace extends Expr implements LiteralExpr, Serializable {
+    const namespaceValue : Ast::Namespace;
     function LiteralNamespace (namespaceValue, pos=0)
         : namespaceValue = namespaceValue 
         , super(pos) {}
@@ -731,25 +705,22 @@ class LiteralNamespace extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralNamespace", "namespaceValue");
 }
 
-class LiteralObject extends Expr implements ILiteralExpr, ISerializable {
-    const fields : LITERAL_FIELDS;
-    const type : TYPE_EXPR;
+class LiteralObject extends Expr implements LiteralExpr, Serializable {
+    const fields : [LiteralField];
+    const ty : TypeExpr;
     function LiteralObject (fields, ty, pos=0)
         : fields = fields
-        , type = ty 
+        , ty = ty 
         , super(pos) { }
 
     function serialize(s)
-        s.sClass(this, "LiteralObject", "fields", "type");
+        s.sClass(this, "LiteralObject", "fields", "ty");
 }
     
-type LITERAL_FIELD = LiteralField;
-type LITERAL_FIELDS = [LiteralField];
-
-class LiteralField extends ASTNode implements ISerializable {
-    const kind: VAR_DEFN_TAG;
+class LiteralField extends ASTNode implements Serializable {
+    const kind:  VAR_DEFN_TAG;
     const ident: IdentExpr;
-    const expr: Expr?;
+    const expr:  ? Expr;
     function LiteralField (kind,ident,expr)
         : kind = kind
         , ident = ident
@@ -759,11 +730,8 @@ class LiteralField extends ASTNode implements ISerializable {
         s.sClass(this, "LiteralField", "kind", "ident", "expr");
 }
 
-type FIELD_TYPE = FieldType;
-type FIELD_TYPES = [FIELD_TYPE];
-
-class LiteralFunction extends Expr implements ILiteralExpr, ISerializable {
-    const func : FUNC;
+class LiteralFunction extends Expr implements LiteralExpr, Serializable {
+    const func : Func;
     function LiteralFunction (func, pos=0)
         : func = func
         , super(pos) {}
@@ -772,7 +740,7 @@ class LiteralFunction extends Expr implements ILiteralExpr, ISerializable {
         s.sClass(this, "LiteralFunction", "func");
 }
 
-class LiteralRegExp extends Expr implements ILiteralExpr, ISerializable {
+class LiteralRegExp extends Expr implements LiteralExpr, Serializable {
     const src : String;
     function LiteralRegExp(src, pos=0)
         : src=src
@@ -789,8 +757,9 @@ const varTag = 1;
 const letVarTag = 2;
 const letConstTag = 3;
 
-class VariableDefn extends ASTNode implements ISerializable {
-    const ns: INamespace;
+/*  Not used
+class VariableDefn extends ASTNode implements Serializable {
+    const ns: Namespace;
     const isStatic: Boolean;
     const isPrototype: Boolean;
     const kind: VAR_DEFN_TAG;
@@ -805,22 +774,19 @@ class VariableDefn extends ASTNode implements ISerializable {
     function serialize(s)
         s.sClass(this, "VariableDefn", "ns", "isStatic", "isPrototype", "kind", "bindings");
 }
+*/
 
-// CLS
-
-type CLS = Cls;
-
-class Cls extends ASTNode implements ISerializable {
-    const name //: Name;
-        const baseName; //: Name?;
-    const interfaceNames; //: NAMES;
+class Cls extends ASTNode implements Serializable {
+    const name: Name;
+    const baseName: IdentExpr;
+    const interfaceNames: [IdentExpr];
     const protectedns;
-    const constructor : CTOR;
-    const classHead: HEAD;
-    const instanceHead: HEAD;
-    const classType; //: ObjectType;
-    const instanceType; //: InstanceType;
-    const classBody: [Ast::STMT];
+    const constructor : Ctor;
+    const classHead: Head;
+    const instanceHead: Head;
+    const classType: ObjectType;
+    const instanceType: InstanceType;
+    const classBody: [Stmt];
     const isDynamic;
     const isFinal;
     function Cls (name,baseName,interfaceNames,protectedns,constructor,classHead,instanceHead
@@ -846,10 +812,10 @@ class Cls extends ASTNode implements ISerializable {
                  "isDynamic", "isFinal");
 }
 
-class Interface extends ASTNode implements ISerializable {
-    const name; //: Name;
-    const interfaceNames; //: NAMES;
-    const instanceHead: HEAD;
+class Interface extends ASTNode implements Serializable {
+    const name: Name;
+    const interfaceNames: [IdentExpr];
+    const instanceHead: Head;
     function Interface (name,interfaceNames,instanceHead)
         : name = name
         , interfaceNames = interfaceNames
@@ -860,26 +826,25 @@ class Interface extends ASTNode implements ISerializable {
         s.sClass(this, "Cls", "name", "interfaceNames", "instanceHead");
 }
 
-// FUNC
+// Functions
 
-type FUNC = Func;
-
-class FuncName extends ASTNode implements ISerializable {
-    public const kind: FUNC_NAME_KIND;
-    public const ident: IDENT;
-    function FuncName(kind, ident) : kind=kind, ident=ident {}
-
-    function serialize(s)
-        s.sClass(this, "FuncName", "kind", "ident");
-}
-
+// FIXME: 'TAG' is better here, see above uses.
 type FUNC_NAME_KIND = int;
 
 const ordinaryFunction = 0;
 const getterFunction = 1;
 const setterFunction = 2;
 
-class FuncAttr extends ASTNode implements ISerializable {
+class FuncName extends ASTNode implements Serializable {
+    const kind: FUNC_NAME_KIND;
+    const ident: IDENT;
+    function FuncName(kind, ident) : kind=kind, ident=ident {}
+
+    function serialize(s)
+        s.sClass(this, "FuncName", "kind", "ident");
+}
+
+class FuncAttr extends ASTNode implements Serializable {
     /* Outer function, or null if the function is at the global
        level (including for class methods). */
     const parent: FuncAttr;
@@ -939,37 +904,35 @@ class FuncAttr extends ASTNode implements ISerializable {
                  "reify_activation");
 }
 
-class Func extends ASTNode implements ISerializable {
+class Func extends ASTNode implements Serializable {
     const name; //: FUNC_NAME;
-    const body: [Ast::STMT];
-    const params: HEAD;
+    const body: [Stmt];
+    const params: Head;
     const numparams: int;
-    const vars: HEAD;
-    const defaults: EXPRS;
-    const type: ITypeExpr;
+    const vars: Head;
+    const defaults: [Expr];
+    const ty: TypeExpr;
     const attr: FuncAttr;
-    function Func (name,body,params,numparams,vars,defaults,ty,attr)
+    const strict: Boolean;
+    function Func (name,body,params,numparams,vars,defaults,ty,attr,strict)
         : name = name
         , body = body
         , params = params
         , numparams = numparams
         , vars = vars
         , defaults = defaults
-        , type = ty
-        , attr = attr {}
+        , ty = ty
+        , attr = attr 
+        , strict = strict {}
 
     function serialize(s)
-        s.sClass(this, "Func", "name", "body", "params", "numparams", "vars", "defaults", "type", "attr");
+        s.sClass(this, "Func", "name", "body", "params", "numparams", "vars", "defaults", "ty", "attr", "strict");
 }
 
-// CTOR
-
-type CTOR = Ctor;
-
-class Ctor extends ASTNode implements ISerializable {
-    const settings : EXPRS;
-    const superArgs : EXPRS;
-    const func : FUNC;
+class Ctor extends ASTNode implements Serializable {
+    const settings : [Expr];
+    const superArgs : [Expr];
+    const func : Func;
     function Ctor (settings,superArgs,func)
         : settings = settings
         , superArgs = superArgs
@@ -979,27 +942,10 @@ class Ctor extends ASTNode implements ISerializable {
         s.sClass(this, "Ctor", "settings", "superArgs", "func");
 }
 
-// BINDING_INIT
-
-type BINDING_INITS = [[BINDING],[INIT_STEP]];
-
-type BINDING = Binding;
-
-class Binding extends ASTNode implements ISerializable {
-    const ident : BINDING_IDENT;
-    const type : TYPE_EXPR?;
-    function Binding (ident,ty)  // FIXME 'type' not allowed as param name in the RI
-        : ident = ident
-        , type = ty { }
-
-    function serialize(s)
-        s.sClass(this, "Binding", "ident", "type");
+interface BindingIdent {
 }
 
-public interface IBindingIdent {
-}
-
-class TempIdent extends ASTNode implements IBindingIdent, ISerializable {
+class TempIdent extends ASTNode implements BindingIdent, Serializable {
     const index : int;
     function TempIdent (index)
         : index = index {}
@@ -1008,7 +954,7 @@ class TempIdent extends ASTNode implements IBindingIdent, ISerializable {
         s.sClass(this, "TempIdent", "index");
 }
 
-class ParamIdent extends ASTNode implements IBindingIdent, ISerializable {
+class ParamIdent extends ASTNode implements BindingIdent, Serializable {
     const index : int;
     function ParamIdent (index)
         : index = index {}
@@ -1017,7 +963,7 @@ class ParamIdent extends ASTNode implements IBindingIdent, ISerializable {
         s.sClass(this, "ParamIdent", "index");
 }
 
-class PropIdent extends ASTNode implements IBindingIdent, ISerializable {
+class PropIdent extends ASTNode implements BindingIdent, Serializable {
     const ident : IDENT;
     function PropIdent (ident)
         : ident = ident { }
@@ -1026,38 +972,11 @@ class PropIdent extends ASTNode implements IBindingIdent, ISerializable {
         s.sClass(this, "PropIdent", "ident");
 }
 
-public interface IInitStep {
+interface FixtureData {
 }
 
-class InitStep extends ASTNode implements IInitStep, ISerializable {
-    const ident : BINDING_IDENT;
-    const expr : Expr;
-    function InitStep (ident,expr)
-        : ident = ident
-        , expr = expr { }
- 
-    function serialize(s)
-        s.sClass(this, "InitStep", "ident", "expr");
-}
-
-class AssignStep extends ASTNode implements IInitStep, ISerializable {
-    const le : Expr;
-    const re : Expr;
-    function AssignStep (le,re)
-        : le = le
-        , re = re {}
-
-    function serialize(s)
-        s.sClass(this, "AssignStep", "le", "re");
-}
-
-// FIXTURE
-
-public interface IFixture {
-}
-
-class NamespaceFixture extends ASTNode implements IFixture, ISerializable {
-    const ns : INamespace;
+class NamespaceFixture extends ASTNode implements FixtureData, Serializable {
+    const ns : Ast::Namespace;
     function NamespaceFixture (ns)
         : ns = ns {}
 
@@ -1065,8 +984,8 @@ class NamespaceFixture extends ASTNode implements IFixture, ISerializable {
         s.sClass(this, "NamespaceFixture", "ns");
 }
 
-class ClassFixture extends ASTNode implements IFixture, ISerializable {
-    const cls : CLS;
+class ClassFixture extends ASTNode implements FixtureData, Serializable {
+    const cls : Cls;
     function ClassFixture (cls)
         : cls = cls {}
 
@@ -1074,7 +993,7 @@ class ClassFixture extends ASTNode implements IFixture, ISerializable {
         s.sClass(this, "ClassFixture", "cls");
 }
 
-class InterfaceFixture extends ASTNode implements IFixture, ISerializable {
+class InterfaceFixture extends ASTNode implements FixtureData, Serializable {
     const iface : Interface;
     function InterfaceFixture (iface)
         : iface = iface {}
@@ -1083,72 +1002,68 @@ class InterfaceFixture extends ASTNode implements IFixture, ISerializable {
         s.sClass(this, "InterfaceFixture", "iface");
 }
 
-class TypeVarFixture extends ASTNode implements IFixture, ISerializable {
+class TypeVarFixture extends ASTNode implements FixtureData, Serializable {
     function serialize(s)
         s.sClass(this, "TypeVarFixture");
 }
 
-class TypeFixture extends ASTNode implements IFixture, ISerializable {
-    const type: TYPE_EXPR;
+class TypeFixture extends ASTNode implements FixtureData, Serializable {
+    const ty: TypeExpr;
     function TypeFixture (ty)
-        : type = ty {}
+        : ty = ty {}
 
     function serialize(s)
-        s.sClass(this, "TypeFixture", "type");
+        s.sClass(this, "TypeFixture", "ty");
 }
 
-class MethodFixture extends ASTNode implements IFixture, ISerializable {
-    const func : FUNC;
-    const type : TYPE_EXPR;
+class MethodFixture extends ASTNode implements FixtureData, Serializable {
+    const func : Func;
+    const ty : TypeExpr;
     const isReadOnly : Boolean;
     const isOverride : Boolean;
     const isFinal : Boolean;
     function MethodFixture(func, ty, isReadOnly, isOverride, isFinal) 
         : func = func
-        , type = ty
+        , ty = ty
         , isReadOnly = isReadOnly
         , isOverride = isOverride
         , isFinal = isFinal { }
 
     function serialize(s)
-        s.sClass(this, "MethodFixture", "func", "type", "isReadOnly", "isOverride", "isFinal");
+        s.sClass(this, "MethodFixture", "func", "ty", "isReadOnly", "isOverride", "isFinal");
 }
 
-class ValFixture extends ASTNode implements IFixture, ISerializable {
-    const type : TYPE_EXPR;
+class ValFixture extends ASTNode implements FixtureData, Serializable {
+    const ty : TypeExpr;
     const isReadOnly : Boolean;
     function ValFixture(ty, isReadOnly) 
-        : type=ty
+        : ty=ty
         , isReadOnly=isReadOnly {}
 
     function serialize(s)
-        s.sClass(this, "ValFixture", "type", "isReadOnly");
+        s.sClass(this, "ValFixture", "ty", "isReadOnly");
 }
 
-class VirtualValFixture extends ASTNode implements IFixture, ISerializable {
-    const type : TYPE_EXPR;
-    const getter : FUNC?;
-    const setter : FUNC?;
+class VirtualValFixture extends ASTNode implements FixtureData, Serializable {
+    const ty : TypeExpr;
+    const getter : ? Func;
+    const setter : ? Func;
 
     function VirtualValFixture(ty, getter, setter)
-        : type=ty
+        : ty=ty
         , getter=getter
         , setter=setter {}
 
     function serialize(s)
-        s.sClass(this, "VirtualValFixture", "type", "getter", "setter");
+        s.sClass(this, "VirtualValFixture", "ty", "getter", "setter");
 }
 
-// TYPE_EXPR
-
-public interface ITypeExpr {
+interface TypeExpr {
 }
-
-type TYPE_EXPRS = [ITypeExpr];
 
 type SPECIAL_TYPE_KIND = int;
 
-class SpecialType extends ASTNode implements ITypeExpr, ISerializable {
+class SpecialType extends ASTNode implements TypeExpr, Serializable {
     const kind : SPECIAL_TYPE_KIND;
     function SpecialType(kind) : kind=kind {}
 
@@ -1166,20 +1081,20 @@ const [anyType, nullType, undefinedType, voidType] = specialTypes;
 // These may not be required any more, serialization and
 // deserialization preserves identity of the special type objects.
 
-function isAnyType(t:ITypeExpr): Boolean
+function isAnyType(t:TypeExpr): Boolean
     t is SpecialType && t.kind == 0;
 
-function isNullType(t:ITypeExpr): Boolean
+function isNullType(t:TypeExpr): Boolean
     t is SpecialType && t.kind == 1;
 
-function isUndefinedType(t:ITypeExpr): Boolean
+function isUndefinedType(t:TypeExpr): Boolean
     t is SpecialType && t.kind == 2;
 
-function isVoidType(t:ITypeExpr): Boolean
+function isVoidType(t:TypeExpr): Boolean
     t is SpecialType && t.kind == 3;
 
-class UnionType extends ASTNode implements ITypeExpr, ISerializable {
-    const types : TYPE_EXPRS;
+class UnionType extends ASTNode implements TypeExpr, Serializable {
+    const types : [TypeExpr];
     function UnionType (types)
         : types = types { }
 
@@ -1187,8 +1102,8 @@ class UnionType extends ASTNode implements ITypeExpr, ISerializable {
         s.sClass(this, "UnionType", "types");
 }
 
-class ArrayType extends ASTNode implements ITypeExpr, ISerializable {
-    const types : TYPE_EXPRS;
+class ArrayType extends ASTNode implements TypeExpr, Serializable {
+    const types : [TypeExpr];
     function ArrayType (types)
         : types = types { }
 
@@ -1196,7 +1111,7 @@ class ArrayType extends ASTNode implements ITypeExpr, ISerializable {
         s.sClass(this, "ArrayType", "types");
 }
 
-class TypeName extends ASTNode implements ITypeExpr, ISerializable {
+class TypeName extends ASTNode implements TypeExpr, Serializable {
     const ident : IdentExpr;
     function TypeName (ident)
         : ident = ident {}
@@ -1205,8 +1120,8 @@ class TypeName extends ASTNode implements ITypeExpr, ISerializable {
         s.sClass(this, "TypeName", "ident");
 }
 
-class ElementTypeRef extends ASTNode implements ITypeExpr, ISerializable {
-    const base : TYPE_EXPR;
+class ElementTypeRef extends ASTNode implements TypeExpr, Serializable {
+    const base : TypeExpr;
     const index : int;
     function ElementTypeRef (base,index)
         : base = base
@@ -1216,8 +1131,8 @@ class ElementTypeRef extends ASTNode implements ITypeExpr, ISerializable {
         s.sClass(this, "ElementTypeRef", "base", "index");
 }
 
-class FieldTypeRef extends ASTNode implements ITypeExpr, ISerializable {
-    const base : TYPE_EXPR;
+class FieldTypeRef extends ASTNode implements TypeExpr, Serializable {
+    const base : TypeExpr;
     const ident : IdentExpr;
     function FieldTypeRef (base,ident)
         : base = base
@@ -1227,7 +1142,7 @@ class FieldTypeRef extends ASTNode implements ITypeExpr, ISerializable {
         s.sClass(this, "FieldTypeRef", "base", "ident");
 }
 
-class FunctionType extends ASTNode implements ITypeExpr, ISerializable {
+class FunctionType extends ASTNode implements TypeExpr, Serializable {
     const ftype /* ??? maybe FUNC_SIG from parse.es, maybe not -- node not in use */;
     function FunctionType(ftype) : ftype=ftype {}
 
@@ -1235,8 +1150,8 @@ class FunctionType extends ASTNode implements ITypeExpr, ISerializable {
         s.sClass(this, "FunctionType", "ftype");
 }
 
-class ObjectType extends ASTNode implements ISerializable {
-    const fields : [FIELD_TYPE];
+class ObjectType extends ASTNode implements Serializable {
+    const fields : [FieldType];
     function ObjectType (fields)
         : fields = fields { }
 
@@ -1244,75 +1159,70 @@ class ObjectType extends ASTNode implements ISerializable {
         s.sClass(this, "ObjectType", "fields");
 }
 
-class FieldType extends ASTNode implements ISerializable {
+class FieldType extends ASTNode implements Serializable {
     const ident: IDENT;
-    const type: TYPE_EXPR;
+    const ty: TypeExpr;
     function FieldType (ident,ty)
         : ident = ident
-        , type = ty {}
+        , ty = ty {}
 
-    function serializable(s)
-        s.sClass(this, "FieldType", "ident", "type");
+    function serialize(s)
+        s.sClass(this, "FieldType", "ident", "ty");
 }
 
-class AppType extends ASTNode implements ISerializable {
-    const base : TYPE_EXPR;
-    const args : TYPE_EXPRS;
+class AppType extends ASTNode implements Serializable {
+    const base : TypeExpr;
+    const args : [TypeExpr];
     function AppType (base,args)
         : base = base
         , args = args { }
 
-    function serializable(s)
+    function serialize(s)
         s.sClass(this, "AppType", "base", "args");
 }
 
-class NullableType extends ASTNode implements ISerializable {
-    const type : TYPE_EXPR;
+class NullableType extends ASTNode implements Serializable {
+    const ty : TypeExpr;
     const isNullable : Boolean;
     function NullableType (ty,isNullable)
-        : type = ty
+        : ty = ty
         , isNullable = isNullable { }
 
     function serialize(s)
-        s.sClass(this, "NullableType", "type", "isNullable");
+        s.sClass(this, "NullableType", "ty", "isNullable");
 }
 
-class InstanceType extends ASTNode implements ISerializable {
+class InstanceType extends ASTNode implements Serializable {
     const name : Name;
-    const typeParams : IDENTS;
-    const type : TYPE_EXPR;
+    const typeParams : [IDENT];
+    const ty : TypeExpr;
     const isDynamic : Boolean;
     function InstanceType(name, typeParams, ty, isDynamic)
         : name=name
         , typeParams=typeParams
-        , type=ty
+        , ty=ty
         , isDynamic=isDynamic
     { }
 
     function serialize(s)
-        s.sClass(this, "InstanceType", "name", "typeParams", "type", "isDynamic");
+        s.sClass(this, "InstanceType", "name", "typeParams", "ty", "isDynamic");
 }
 
-// Statements
-
-// Bug 425467 that this needs to be public
-public interface IStmt {
-    // No common methods, this is just a tag
+interface Stmt {
 }
 
-public interface ILabelSet {
-    // FIXME
-    // Want to express: has 'labels: Array'
+interface LabelSet {
+    // Want to express (but can't): has 'labels': Array The best thing
+    // we can do is either specify a push method, or a getter method
+    // for 'labels'.
 }
 
-type STMTS = [Ast::IStmt];
-
-class EmptyStmt extends ASTNode implements IStmt, ISerializable {
+class EmptyStmt extends ASTNode implements Stmt, Serializable {
     function serialize(s)
         s.sClass(this, "EmptyStmt");
 }
 
-class ExprStmt extends ASTNode implements IStmt, ISerializable {
+class ExprStmt extends ASTNode implements Stmt, Serializable {
     const expr : Expr;
     function ExprStmt (expr)
         : expr = expr {}
@@ -1321,26 +1231,26 @@ class ExprStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "ExprStmt", "expr");
 }
 
-class ForInStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
-    const vars : HEAD;
-    const init : Expr?;
+class ForInStmt extends ASTNode implements Stmt, Serializable, LabelSet {
+    const vars : Head;
+    const init : ? Expr;
     const obj  : Expr;
-    const stmt : IStmt;
+    const stmt : Stmt;
     const is_each : boolean;
-    const labels : IDENTS;
+    const labels: [IDENT];
     function ForInStmt (vars,init,obj,stmt,is_each=false,labels=null)
         : vars = vars
         , init = init
         , obj = obj
         , stmt = stmt
         , is_each = is_each
-        , labels = labels == null ? [] : labels {}
+        , labels = labels == null ? ([] : [IDENT]) : labels {}
 
     function serialize(s)
         s.sClass(this, "ForInStmt", "vars", "init", "obj", "stmt", "is_each", "labels");
 }
 
-class ThrowStmt extends ASTNode implements IStmt, ISerializable {
+class ThrowStmt extends ASTNode implements Stmt, Serializable {
     const expr : Expr;
     function ThrowStmt (expr)
         : expr = expr { }
@@ -1349,8 +1259,8 @@ class ThrowStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "ThrowStmt", "expr");
 }
 
-class ReturnStmt extends ASTNode implements IStmt, ISerializable {
-    const expr : Expr?;
+class ReturnStmt extends ASTNode implements Stmt, Serializable {
+    const expr : ? Expr;
     function ReturnStmt(expr) 
         : expr = expr { }
 
@@ -1358,8 +1268,8 @@ class ReturnStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "ReturnStmt", "expr");
 }
 
-class BreakStmt extends ASTNode implements IStmt, ISerializable {
-    const ident : IDENT?;
+class BreakStmt extends ASTNode implements Stmt, Serializable {
+    const ident : ? IDENT;
     function BreakStmt (ident)
         : ident = ident { }
 
@@ -1367,8 +1277,8 @@ class BreakStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "BreakStmt", "ident");
 }
 
-class ContinueStmt extends ASTNode implements IStmt, ISerializable {
-    const ident : IDENT?;
+class ContinueStmt extends ASTNode implements Stmt, Serializable {
+    const ident : ? IDENT;
     function ContinueStmt (ident)
         : ident = ident { }
 
@@ -1376,8 +1286,8 @@ class ContinueStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "ContinueStmt", "ident");
 }
 
-class BlockStmt extends ASTNode implements IStmt, ISerializable {
-    const block : BLOCK;
+class BlockStmt extends ASTNode implements Stmt, Serializable {
+    const block : Block;
     function BlockStmt (block)
         : block = block {}
 
@@ -1385,9 +1295,9 @@ class BlockStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "BlockStmt", "block");
 }
 
-class LabeledStmt extends ASTNode implements IStmt, ISerializable {
+class LabeledStmt extends ASTNode implements Stmt, Serializable {
     const label : IDENT;
-    const stmt : IStmt;
+    const stmt : Stmt;
     function LabeledStmt (label,stmt)
         : label = label
         , stmt = stmt { }
@@ -1396,8 +1306,8 @@ class LabeledStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "LabeledStmt", "label", "stmt");
 }
 
-class LetStmt extends ASTNode implements IStmt, ISerializable {
-    const block : BLOCK;
+class LetStmt extends ASTNode implements Stmt, Serializable {
+    const block : Block;
     function LetStmt (block)
         : block = block {}
 
@@ -1405,10 +1315,10 @@ class LetStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "LetStmt", "block");
 }
 
-class WhileStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
+class WhileStmt extends ASTNode implements Stmt, Serializable, LabelSet {
     const expr : Expr;
-    const stmt : IStmt;
-    const labels : IDENTS;
+    const stmt : Stmt;
+    const labels: [IDENT];
     function WhileStmt (expr,stmt,labels=null)
         : expr = expr
         , stmt = stmt
@@ -1418,42 +1328,42 @@ class WhileStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
         s.sClass(this, "WhileStmt", "expr", "stmt", "labels");
 }
 
-class DoWhileStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
+class DoWhileStmt extends ASTNode implements Stmt, Serializable, LabelSet {
     const expr : Expr;
-    const stmt : IStmt;
-    const labels : IDENTS;
+    const stmt : Stmt;
+    const labels : [IDENT];
     function DoWhileStmt (expr,stmt,labels=null)
         : expr = expr
         , stmt = stmt 
-        , labels = labels == null ? [] : labels {}
+        , labels = labels == null ? ([] : [IDENT]) : labels {}
 
     function serialize(s)
         s.sClass(this, "DoWhileStmt", "expr", "stmt", "labels");
 }
 
-class ForStmt extends ASTNode implements IStmt, ISerializable, ILabelSet {
-    const vars : HEAD;
-    const init : Expr?;
-    const cond : Expr?;
-    const incr : Expr?;
-    const stmt : IStmt;
-    const labels : IDENTS;
+class ForStmt extends ASTNode implements Stmt, Serializable, LabelSet {
+    const vars : Head;
+    const init : ? Expr;
+    const cond : ? Expr;
+    const incr : ? Expr;
+    const stmt : Stmt;
+    const labels : [IDENT];
     function ForStmt (vars,init,cond,incr,stmt,labels=null)
         : vars = vars
         , init = init
         , cond = cond
         , incr = incr
         , stmt = stmt
-        , labels = labels == null ? [] : labels {}
+        , labels = labels == null ? ([] : [IDENT]) : labels {}
 
     function serialize(s)
         s.sClass(this, "ForStmt", "vars", "init", "cond", "incr", "stmt", "labels");
 }
 
-class IfStmt extends ASTNode implements IStmt, ISerializable {
-    const test : Expr;
-    const consequent : IStmt;
-    const alternate : IStmt?;
+class IfStmt extends ASTNode implements Stmt, Serializable {
+    const test       : Expr;
+    const consequent : Stmt;
+    const alternate  : ? Stmt;
     function IfStmt (test, consequent, alternate)
         : test=test
         , consequent=consequent
@@ -1463,9 +1373,9 @@ class IfStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "IfStmt", "test", "consequent", "alternate");
 }
 
-class SwitchStmt extends ASTNode implements IStmt, ISerializable {
+class SwitchStmt extends ASTNode implements Stmt, Serializable {
     const expr : Expr;
-    const cases : CASES;
+    const cases : [Case];
     function SwitchStmt (expr, cases)
         : expr = expr
         , cases = cases { }
@@ -1474,12 +1384,9 @@ class SwitchStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "SwitchStmt", "expr", "cases");
 }
 
-type CASE = Case;
-type CASES = [CASE];
-
-class Case extends ASTNode implements IStmt, ISerializable {
-    const expr : Expr?;  // null for default
-    const stmts : STMTS;
+class Case extends ASTNode implements Stmt, Serializable {
+    const expr : ? Expr;  // null for default
+    const stmts : [Stmt];
     function Case (expr,stmts)
         : expr = expr
         , stmts = stmts { }
@@ -1488,9 +1395,9 @@ class Case extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "Case", "expr", "stmts");
 }
 
-class WithStmt extends ASTNode implements IStmt, ISerializable {
+class WithStmt extends ASTNode implements Stmt, Serializable {
     const expr : Expr;
-    const stmt : IStmt;
+    const stmt : Stmt;
     function WithStmt (expr,stmt)
         : expr = expr
         , stmt = stmt { }
@@ -1499,10 +1406,10 @@ class WithStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "WithStmt", "expr", "stmt");
 }
 
-class TryStmt extends ASTNode implements IStmt, ISerializable {
-    const block : BLOCK;
-    const catches: CATCHES;
-    const finallyBlock: BLOCK?;
+class TryStmt extends ASTNode implements Stmt, Serializable {
+    const block        : Block;
+    const catches      : [Catch];
+    const finallyBlock : ? Block;
     function TryStmt (block,catches,finallyBlock)
         : block = block
         , catches = catches
@@ -1512,25 +1419,22 @@ class TryStmt extends ASTNode implements IStmt, ISerializable {
         s.sClass(this, "TryStmt", "block", "catches", "finallyBlock");
 }
 
-class SwitchTypeStmt extends ASTNode implements IStmt, ISerializable {
+class SwitchTypeStmt extends ASTNode implements Stmt, Serializable {
     const expr: Expr;
-    const type: TYPE_EXPR;
-    const cases: CATCHES;
+    const ty: TypeExpr;
+    const cases: [Catch];
     function SwitchTypeStmt (expr,ty,cases)
         : expr = expr
-        , type = ty
+        , ty = ty
         , cases = cases { }
 
     function serialize(s)
-        s.sClass(this, "SwitchTypeStmt", "expr", "type", "cases");
+        s.sClass(this, "SwitchTypeStmt", "expr", "ty", "cases");
 }
 
-type CATCH = Catch;
-type CATCHES = [CATCH];
-
-class Catch extends ASTNode implements ISerializable {
-    const param: HEAD;
-    const block: BLOCK;
+class Catch extends ASTNode implements Serializable {
+    const param: Head;
+    const block: Block;
     function Catch (param,block)
         : param = param
         , block = block { }
@@ -1539,18 +1443,12 @@ class Catch extends ASTNode implements ISerializable {
         s.sClass(this, "Catch", "param", "block");
 }
 
-class DXNStmt extends ASTNode implements IStmt {
+class DXNStmt extends ASTNode implements Stmt {
 }
 
-/*
- * BLOCK
- */
-
-type BLOCK = Block;
-
-class Block extends ASTNode implements ISerializable {
-    const head: HEAD?;
-    const stmts : STMTS;
+class Block extends ASTNode implements Serializable {
+    const head  : ? Head;
+    const stmts : [Stmt];
     function Block (head,stmts)
         : head = head
         , stmts = stmts { }
@@ -1563,13 +1461,11 @@ class Block extends ASTNode implements ISerializable {
  * PROGRAM
  */
 
-type PROGRAM = Program;
-
-class Program extends ASTNode implements ISerializable {
-    const body: [Ast::STMT];
-    const head: HEAD;
-    const file: String?;
-    const attr: FuncAttr;
+class Program extends ASTNode implements Serializable {
+    const body : [Stmt];
+    const head : Head;
+    const file : ? String;
+    const attr : FuncAttr;
     function Program (body, head, attr, file=null)
         : body = body
         , head = head
@@ -1637,12 +1533,15 @@ tokenToOperator[Token::Not + 1000] = Ast::logicalNotOp;
 // Serialization
 
 class Serializer {
+    use default namespace internal, 
+        namespace internal;
+
     var compact;
 
     public function Serializer(compact=false) : compact=compact {}
 
     public function serialize(obj) {
-        if (obj is ISerializable)
+        if (obj is Serializable)
             return obj.serialize(this);
 
         if (obj is Array) 
@@ -1756,6 +1655,9 @@ class Serializer {
 // requires a working notion of 'global' in tamarin.
 
 class Unserializer {
+    use default namespace internal,
+        namespace internal;
+
     public function unserializeText(s) 
         decode(globalEval("(" + s + ")"));
 
