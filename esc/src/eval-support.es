@@ -8,7 +8,7 @@ ESC var eval_hook;         // will be assigned the newly compiled function
  * "scopes" must contain all scopes except the global one, which
  * is implicit.
  */
-ESC function evaluateInScopeArray(args, scopes, scopedesc) {
+ESC function evaluateInScopeArray(args, scopes, scopedesc, strict) {
     if (args.length > 0) {
         if (args[0] is String) {
             let id = ESC::eval_counter++;
@@ -19,20 +19,10 @@ ESC function evaluateInScopeArray(args, scopes, scopedesc) {
 
             // These checks could be moved into the parser, and might be, by and by.
 
-            if (prog.packages.length != 0)
-                Util::syntaxError(file, 0, "Packages not legal.");
-
             for ( let fs=prog.head.fixtures, limit=fs.length, i=0 ; i < limit ; i++ ) {
                 let f = fs[i];
-                switch type (f[1]) {
-                case (mf: Ast::MethodFixture) {
-                }
-                case (vf: Ast::ValFixture) {
-                }
-                case (x:*) {
-                    Util::syntaxError(file, 0, "Binding form not legal: " + x);
-                }
-                }
+                if (strict || !(f.data is Ast::MethodFixture || f.data is Ast::ValFixture))
+                    Util::syntaxError(file, 0, "Binding form not legal: " + f.data);
             }
 
             //Asm::listify = true;

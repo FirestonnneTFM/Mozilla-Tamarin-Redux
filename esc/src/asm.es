@@ -36,7 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-use default namespace Asm;
+use default namespace Asm,
+    namespace Asm;
 
 /*******************************************************************
  * ABC constants

@@ -37,7 +37,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 namespace AbcEncode;
-use default namespace AbcEncode;
+use default namespace AbcEncode,
+    namespace AbcEncode;
 
 use namespace Release;
 use namespace Ast;
@@ -276,7 +277,7 @@ class AbcEncoder
         case CONSTANT_QName:
             str = "{ 'kind': 'QName'"
                 + indent(nesting)
-                + ", 'ns': " + namespace(nd.ns)
+                + ", 'ns': " + this.namespace(nd.ns)
                 + indent(nesting) 
                 + ", 'utf8': " + utf8(nd.utf8)
                 + " }";
@@ -389,7 +390,7 @@ class AbcEncoder
             kind = "'CONSTANT_Utf8'";
             break;
         case CONSTANT_Namespace:
-            val = namespace(nd.val, nesting);
+            val = this.namespace(nd.val, nesting);
             kind = "'CONSTANT_Namespace'";
             break;
         case CONSTANT_Double:
@@ -708,7 +709,7 @@ class AbcEncoder
                     s = s + ", " + utf8(bytes.readU32(), nesting+2);// + 
                     break;
                 case OP_pushnamespace:
-                    s = s + ", " + namespace(bytes.readU32(), nesting+2);
+                    s = s + ", " + this.namespace(bytes.readU32(), nesting+2);
                     break;
                 case OP_pushint:
                     s = s + ", " + integer(bytes.readU32(), nesting+2);
@@ -882,7 +883,7 @@ class AbcEncoder
             case CONSTANT_QName:
                 str = "{ 'kind': 'QName'"
                     + indent(nesting) + ", 'utf8': " + utf8(name.utf8) 
-                    + indent(nesting) + ", 'ns': " + namespace(name.ns) + " }";
+                    + indent(nesting) + ", 'ns': " + this.namespace(name.ns) + " }";
                 break;
             case CONSTANT_RTQName:
                 str = "{ 'kind': 'RTQName'"

@@ -36,13 +36,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-use default namespace Gen;
+use default namespace Gen,
+    namespace Gen;
 
-use namespace Util;
-use namespace Abc;
-use namespace Asm;
-use namespace Emit;
-use namespace Ast;
+use namespace Abc,
+    namespace Asm,
+    namespace Ast,
+    namespace Emit,
+    namespace Util;
 
 function cgStmt(ctx, s) {
     switch type (s) {
@@ -180,13 +181,13 @@ function cgForInStmt(ctx, {vars, init, obj, stmt, labels, is_each}) {
 
     let name;
     switch type (init) {
-    case (lr: LexicalRef) {
-        name = cgIdentExpr(ctx, init.ident);
+    case (ident: Ast::IdentExpr) {
+        name = cgIdentExpr(ctx, ident);
     }
-    case (ie: InitExpr) {
+    case (ie: Ast::InitExpr) {
         if (ie.inits.length != 1)
             Gen::internalError(ctx, "unimplemented cogen in cgForInStmt: too many names" + ie.inits.length);
-        let [fxname] = ie.inits[0];
+        let {name:fxname} = ie.inits[0];
         name = emitter.fixtureNameToName(fxname);
     }
     case(x: *) {
@@ -490,23 +491,24 @@ function cgSwitchStmtSlow(ctx, {expr,cases}) {
     asm.killTemp(t);
 }
 
-function cgSwitchTypeStmt(ctx, {expr,type,cases}) {
-    let b = new Block(new Ast::Head([],[]), [new ThrowStmt(expr)]);
-
+function cgSwitchTypeStmt(ctx, {expr,cases}) {
+    let b = new Ast::Block(new Ast::Head([],[]), [new Ast::ThrowStmt(expr)]);
     let newcases = [];
     let hasDefault = false;
+
     for( let i = 0; i < cases.length; i++ ) {
         newcases.push(cases[i]);
-        let [_,f] = cases[i].param.fixtures[0];
-        if (Ast::isAnyType(f.type))
+        let {data} = cases[i].param.fixtures[0];
+        if (Ast::isAnyType(data.ty))
             hasDefault = true;
     }
 
     // Add a catch all case so we don't end up throwing whatever the switch type expr was
     if (!hasDefault) {
-        newcases.push(new Catch(new Head([ [new PropName(new Ast::Name(Ast::noNS, "x"))
-                                            ,new ValFixture(Ast::anyType, false) ] ], [])
-                                ,new Block(new Head([],[]), [])));
+        newcases.push(new Ast::Catch(new Ast::Head([ new Ast::Fixture(new Ast::PropName(new Ast::Name(Ast::publicNS, "x")),
+                                                                      new Ast::ValFixture(Ast::anyType, false)) ],
+                                                   []),
+                                     new Ast::Block(new Ast::Head([],[]), [])));
     }
     cgTryStmt(ctx, {block:b, catches:newcases, finallyBlock:null} );        
 }
@@ -650,10 +652,10 @@ function cgCatch(ctx, code_start, code_end, Lend, {param, block} ) {
     if( param.fixtures.length != 1 )
         Gen::internalError(ctx, "Catch block should have 1 fixture");
         
-    let [propname, fix] = param.fixtures[0];
+    let {name:propname, data:fix} = param.fixtures[0];
         
     let param_name = emitter.fixtureNameToName(propname);
-    let param_type = emitter.realTypeName(fix.type);
+    let param_type = emitter.realTypeName(fix.ty);
         
     let catch_idx = target.addException(new ABCException(code_start, code_end, asm.length, param_type, param_name));
 
