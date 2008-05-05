@@ -185,13 +185,12 @@ namespace axtam
 		// This is hacked in under the assumption we will come up with a
 		// better strategy.
 		static const wchar_t *abcs[] = {
-			L"debug.es.abc",           L"ast.es.abc",          L"ast-decode.es.abc",
-			L"util.es.abc",            L"lex-char.es.abc",
-			L"lex-token.es.abc",       L"lex-scan.es.abc",     L"parse.es.abc",
-			L"util-tamarin.es.abc",    L"bytes-tamarin.es.abc",L"util-tamarin.es.abc",
+			L"debug.es.abc",           L"util.es.abc",         L"bytes-tamarin.es.abc",
+			L"util-tamarin.es.abc",    L"lex-char.es.abc",     L"lex-token.es.abc",
+			L"lex-scan.es.abc",        L"ast.es.abc",          L"parse.es.abc",
 			L"asm.es.abc",             L"abc.es.abc",          L"emit.es.abc",
 			L"cogen.es.abc",           L"cogen-stmt.es.abc",   L"cogen-expr.es.abc",
-			L"esc-core.es.abc",        L"eval-support.es.abc",
+			L"esc-core.es.abc",        L"eval-support.es.abc", L"esc-env.es.abc",
 			NULL
 		};
 		// first of these directories with abcs[0] wins...
@@ -413,11 +412,16 @@ namespace axtam
 		AvmAssert(0); // not reached
 	}
 
+	// As our error classes are created when our top-level implementation script is run,
+	// exceptions seen before that (ie, in the ESC bootstrap code or similar) will 
+	// encounter NULL error classes.
 	bool AXTam::isCOMProviderError(Exception *exc) {
-		return exc->isValid() && istype(exc->atom, comProviderErrorClass->traits()->itraits);
+		return exc->isValid() && comProviderErrorClass &&
+		       istype(exc->atom, comProviderErrorClass->traits()->itraits);
 	}
 	bool AXTam::isCOMConsumerError(Exception *exc) {
-		return exc->isValid() && istype(exc->atom, comConsumerErrorClass->traits()->itraits);
+		return exc->isValid() && comConsumerErrorClass &&
+		       istype(exc->atom, comConsumerErrorClass->traits()->itraits);
 	}
 
 	HRESULT AXTam::handleException(Exception *exception, EXCEPINFO *pei /*=NULL*/, int depth /* = 0 */)
@@ -545,7 +549,7 @@ namespace axtam
 						sub = intToAtom(elt);
 						break;
 					}
-//					case VT_UI1: - not done yet pending special support?
+//					case VT_UI1: - XXXX - not done yet pending special support?
 					case VT_UI2: {
 						unsigned short elt;
 						if (FAILED(hr = SafeArrayGetElement(psa, &i, &elt)))
@@ -726,7 +730,7 @@ namespace axtam
 	{
 		switch (val&7) {
 			case kDoubleType:
-				return doubleNumber(val);
+				return atomToDouble(val);
 			case kIntegerType:
 				// kIntegerType is signed - which is handy, as we should prefer
 				// signed values to unsigned - VBScript, for example, can't handle
