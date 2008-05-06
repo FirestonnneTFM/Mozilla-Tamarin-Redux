@@ -492,7 +492,12 @@ namespace avmplus
 			new_type->index_type = (ClassClosure*)AvmCore::atomToScriptObject(type);
 
 			// Is this right?  Should each instantiation get its own prototype?
-			new_type->prototype = toplevel()->objectVectorClass->prototype;
+			//new_type->prototype = toplevel()->objectVectorClass->prototype;
+
+			Atom args[1] = { toplevel()->objectVectorClass->atom() };
+			Atom proto = AvmCore::atomToScriptObject(toplevel()->objectVectorClass->gen_proto_method)->call(0, args);
+			new_type->prototype = AvmCore::atomToScriptObject(proto);
+
 			instantiated_types->put(fullname->atom(), new_type->atom());
 		}
 		return (Atom)instantiated_types->get(fullname->atom());
@@ -502,8 +507,8 @@ namespace avmplus
 	ScriptObject* VectorClass::createInstance(VTable * /*ivtable*/,
 		ScriptObject * /*prototype*/)
 	{
-		// TODO: throw?
-		return NULL;
+		toplevel()->throwTypeError(kConstructOfNonFunctionError);
+		return 0;
 	}
 
 	Atom ObjectVectorClass::call(int argc, Atom* argv) 
@@ -558,6 +563,7 @@ namespace avmplus
 		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__map,		ObjectVectorObject::map, 0)
 		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__filter,		ObjectVectorObject::filter, 0)
 		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_AS3_unshift,		ObjectVectorObject::unshift, 0)
+		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private_genPrototype_set,		ObjectVectorClass::set_gen_proto, 0)
 	END_NATIVE_MAP()
 
 	ObjectVectorClass::ObjectVectorClass(VTable *vtable)
@@ -575,6 +581,11 @@ namespace avmplus
 		v->set_type(index_type->atom());
         return v;
     }
+
+	void ObjectVectorClass::set_gen_proto(Atom func)
+	{
+		gen_proto_method = func;
+	}
 
 	ObjectVectorObject* ObjectVectorClass::newVector(ClassClosure* type, uint32 length)
 	{
