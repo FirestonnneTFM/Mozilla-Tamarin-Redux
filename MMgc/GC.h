@@ -827,12 +827,14 @@ namespace MMgc
 		/** @access Requires(request) */
 		void writeBarrier(const void *container, const void *address, const void *value)
 		{
-			GCAssert(IsPointerToGCPage(container));
+			GCAssert(!container || IsPointerToGCPage(container));
 			GCAssert(((uintptr)address & 3) == 0);
-			GCAssert(address >= container);
-			GCAssert(address < (char*)container + Size(container));
 
-			WriteBarrierNoSubstitute(container, value);
+			if (container) {
+				GCAssert(address >= container);
+				GCAssert(address < (char*)container + Size(container));
+				WriteBarrierNoSubstitute(container, value);
+			}
 			WriteBarrierWrite(address, value);
 		}
 
