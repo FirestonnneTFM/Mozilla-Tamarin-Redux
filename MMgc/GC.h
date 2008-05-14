@@ -893,8 +893,9 @@ namespace MMgc
 		void *FindBeginning(const void *gcItem)
 		{
 			GCAssert(gcItem != NULL);
-			GCAssert(GetPageMapValue((uintptr)gcItem) != 0);
 			void *realItem = NULL;
+			if((uintptr)gcItem < memStart || (uintptr)gcItem >= memEnd)
+				return NULL;
 			int bits = GetPageMapValue((uintptr)gcItem);
 			switch(bits)
 			{
@@ -912,6 +913,8 @@ namespace MMgc
 				}
 				realItem = GCLargeAlloc::FindBeginning(gcItem);
 				break;
+			default:
+				return NULL;
 			}		
 #ifdef MEMORY_INFO
 			realItem = GetUserPointer(realItem);
