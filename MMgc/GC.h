@@ -651,7 +651,7 @@ namespace MMgc
 		 *
 		 * @access Requires(request)
 		 */
-		void Free(void *ptr);
+		void Free(const void *ptr);
 
 		/**
 		 * return the size of a piece of memory, may be bigger than what was asked for
