@@ -368,12 +368,18 @@ function extractUnNamedFixtures(fixtures) {
     return extracted;
 }
 
+function cgTypeExpr(ctx, t) {
+    if (t is Ast::TypeName)
+        return cgIdentExpr(ctx, t.ident);
+    Gen::internalError(this, "Can't deal with type applications in type expressions yet: " + t);
+}
+
 function cgClass(ctx, c) {
     let {asm, emitter, script} = ctx;
         
     let classname = emitter.qname(c.name,false);
-    let basename = cgIdentExpr(ctx, c.baseName);
-    let interfacenames = Util::map(function (n) { return cgIdentExpr(ctx, n) }, c.interfaceNames);
+    let basename = cgTypeExpr(ctx, c.baseName);
+    let interfacenames = Util::map((function (n) cgTypeExpr(ctx, n)), c.interfaceNames);
 
     let flags = 0;
     if (!(c.isDynamic))
@@ -429,7 +435,7 @@ function cgInterface(ctx, c) {
     let {asm, emitter, script} = ctx;
         
     let ifacename = emitter.qname(c.name,false);
-    let interfacenames = Util::map(function (n) { return cgIdentExpr(ctx,n) }, c.interfaceNames);
+    let interfacenames = Util::map((function (n) cgTypeExpr(ctx,n)), c.interfaceNames);
 
     let iface = script.newInterface(ifacename, ctx.cp.stringUtf8(c.name.id), interfacenames);
         
@@ -489,11 +495,42 @@ function cgCtor(ctx, c, instanceInits) {
             asm.I_pop();
         }
 
+        // FIXME: the code below is now wrong.
+        //
+        // The logic for the super invocation needs to be as follows.
+        //
+        // If there is an explicit call to super (a SuperStmt or a
+        // call from the settings) then:
+        //
+        //  - the function will have a local temp (the 'supercall
+        //    flag') whose initial value is false.
+        //
+        //  - A super() call in the settings sets the flag after the
+        //    super constructor returns.
+        //
+        //  - The SuperStmt checks the flag, which must be cleared or an 
+        //    error will be thrown, and sets it after invoking the 
+        //    constructor.  (See also comments in cogen-stmt.es.)
+        //
+        //  - When the constructor returns normally the flag is checked,
+        //    and if it is cleared an error is thrown.
+        //
+        // If there is not an explicit call to super then a call to
+        // the super constructor (with no arguments) is inserted at every
+        // point of normal return from the constructor.
+        //
+        // If there is a call to super() from the settings then
+        // superArgs is non-null.  If there is a SuperStmt in the body
+        // then the function attribute uses_super is true.
+
         // Eval super args, and call super ctor
         asm.I_getlocal(0);
-        let nargs = c.superArgs.length;
-        for ( let i=0 ; i < nargs ; i++ )
-            cgExpr(ctor_ctx, c.superArgs[i]);
+        let nargs = 0;
+        if (c.superArgs != null) {
+            nargs = c.superArgs.length;
+            for ( let i=0 ; i < nargs ; i++ )
+                cgExpr(ctor_ctx, c.superArgs[i]);
+        }
         asm.I_constructsuper(nargs);
         
         asm.I_popscope();

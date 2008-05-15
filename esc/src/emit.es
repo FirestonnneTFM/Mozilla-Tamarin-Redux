@@ -202,6 +202,12 @@ class ABCEmitter
                 // later we will have to implement a namespace lookup to resolve qualified typenames
                 return qname(new Ast::Name(new Ast::UnforgeableNamespace(lr.ident), qi.ident), false);
             }
+            case (lr: Ast::ForgeableNamespace) {
+                return qname(new Ast::Name(lr, qi.ident), false);
+            }
+            case (lr: Ast::UnforgeableNamespace) {
+                return qname(new Ast::Name(lr, qi.ident), false);
+            }
             case( e:* ) {
                 internalError("", 0, "Unimplemented: nameFromIdentExpr " + e);
             }

@@ -85,7 +85,7 @@ Gen::emit_debug = false;
     bytes = Abc::parseAbcFile(new ABCByteStream(raw_bytes));
 
     //print ("encoding asm");
-    var tx = AbcEncode::abcFile (bytes);
+    //    var tx = AbcEncode::abcFile (bytes);
     writeFile (tx,fname+".asm");
     print (fname+".asm, "+tx.length+" chars written");
 }

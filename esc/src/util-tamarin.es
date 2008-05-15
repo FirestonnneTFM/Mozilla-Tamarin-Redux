@@ -36,8 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-internal namespace FLASH_UTILS = "flash.utils";
-use namespace FLASH_UTILS;
+use namespace "flash.utils";
     
 // Placeholder until we have decimal support.
 
