@@ -56,16 +56,19 @@ function cgStmt(ctx, s) {
     case (s:ContinueStmt) { cgContinueStmt(ctx,s) }
     case (s:BlockStmt) { cgBlockStmt(ctx,s) }
     case (s:LabeledStmt) { cgLabeledStmt(ctx,s) }
-    case (s:LetStmt) { cgLetStmt(ctx,s) }
+    case (s:LetBlockStmt) { cgLetBlockStmt(ctx,s) }
     case (s:WhileStmt) { cgWhileStmt(ctx, s) }
     case (s:DoWhileStmt) { cgDoWhileStmt(ctx, s) }
     case (s:ForStmt) { cgForStmt(ctx, s) }
     case (s:IfStmt) { cgIfStmt(ctx, s) }
     case (s:WithStmt) { cgWithStmt(ctx, s) }
     case (s:TryStmt) { cgTryStmt(ctx, s) }
+    case (s:SuperStmt) { cgSuperStmt(ctx, s) }
     case (s:SwitchStmt) { cgSwitchStmt(ctx, s) }
     case (s:SwitchTypeStmt) { cgSwitchTypeStmt(ctx, s) }
-    case (s:DXNStmt) { cgDxnStmt(ctx, s) }
+    case (s:*) { 
+        Gen::internalError(ctx, "Unimplemented statement type " + s);
+    }
     }
 }
 
@@ -100,6 +103,11 @@ function cgLabeledStmt(ctx, {label, stmt}) {
     let L0 = asm.newLabel();
     cgStmt(pushLabel(ctx, label, L0), stmt);
     asm.I_label(L0);
+}
+
+function cgLetBlockStmt(ctx, s) {
+    // FIXME
+    Gen::internalError(ctx, "Unimplemented: LetBlockStmt");
 }
 
 function cgIfStmt(ctx, {test, consequent, alternate}) {
@@ -291,6 +299,16 @@ function cgReturnStmt(ctx, {expr}) {
     }
 }
 
+function cgSuperStmt(ctx, s) {
+    // See comments in cgCtor in cogen.es, about how to do this.
+    //
+    // The logic right here will not be very complicated:
+    //    - check the local supercall flag, fail if set
+    //    - call the super constructor
+    //    - set the local supercall flag
+    Gen::internalError(ctx, "Unimplemented: SuperStmt");
+}
+
 // There are many optimization possibilities for 'switch'.
 // Notably, if the case expressions are all constants (or there
 // are sequences of cases with constant expressions) then binary
@@ -315,6 +333,8 @@ function cgReturnStmt(ctx, {expr}) {
 //  - binary search for switches with all constant-value cases
 //  - mixed sparse-dense switches
 //  - ...
+
+// FIXME: this now carries a head with local bindings.
 
 function cgSwitchStmt(ctx, s) {
     let fastswitch = analyzeSwitch(ctx, s);

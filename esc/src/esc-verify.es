@@ -36,13 +36,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-internal namespace AVMPLUS = "avmplus";
-internal namespace FLASH_UTILS = "flash.utils";
-
-use namespace AVMPLUS;
+use namespace "avmplus";
 
 {
-    use namespace FLASH_UTILS;
+    use namespace "flash.utils";
 
     var fname = System.argv[0];
     if (fname==undefined) throw "no file name given";

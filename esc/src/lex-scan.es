@@ -43,19 +43,19 @@ final class Scanner
 {
     use default namespace private;
 
-    public var lnCoord : int;
-    public var filename: String;
+    public var   lnCoord;
+    public const filename;
 
-    var src : String;
-    var curIndex : int;
-    var markIndex : int;
-    var keyword_or_ident: Boolean;
+    const src;
+    const keyword_or_ident;
+    var curIndex;
+    var markIndex;
 
-    // notPartOfIdent maps ASCII and Unicode space characters that are
-    // not part of an identifier to true.  It is used by the scanner
-    // to determine whether it has seen a keyword.
+    // The table 'notPartOfIdent' maps ASCII and Unicode space
+    // characters that are not part of an identifier to true.  It is
+    // used by the scanner to determine whether it has seen a keyword.
 
-    static const notPartOfIdent = [];
+    static const notPartOfIdent: [Boolean] = [] : [Boolean];  // "new [boolean]" when that works
     static {
         for ( let i=0 ; i < 128 ; i++ ) {
             let c = String.fromCharCode(i);
@@ -72,7 +72,7 @@ final class Scanner
                               0x202F, 0x205F, 0x3000,
                               0x2028, 0x2029];
         for ( let i=0 ; i < unicode_spaces.length ; i++ )
-        notPartOfIdent[unicode_spaces[i]] = true;
+            notPartOfIdent[unicode_spaces[i]] = true;
         notPartOfIdent[NaN] = true;
     }
 
@@ -94,7 +94,7 @@ final class Scanner
     {
     }
 
-    public function regexp () {
+    public function regexp() {
         // Capture the initial '/'
         markIndex = curIndex - 1;
 
@@ -135,13 +135,42 @@ final class Scanner
         return Token::makeInstance (Token::RegexpLiteral,lexeme());
     }
 
-    public function div () : int {
+    public function div() {
         switch (src.charCodeAt(curIndex)) {
         case  61 /* Char::Equal */ : 
             curIndex++;
             return Token::DivAssign;
         default :
             return Token::Div;
+        }
+    }
+
+    public function brocket()
+        Token::GreaterThan;
+
+    public function shiftOrRelational() {
+        switch (src.charCodeAt(curIndex)) {
+        case  61 /* Char::Equal */:
+            curIndex++;
+            return Token::GreaterThanOrEqual;
+        case  62 /* Char::RightAngle */:
+            curIndex++;
+            switch (src.charCodeAt(curIndex)) {
+            case  61 /* Char::Equal */:
+                curIndex++;
+                return Token::RightShiftAssign;
+            case  62 /* Char::RightAngle */:
+                curIndex++;
+                if (src.charCodeAt(curIndex) == 61 /* Char::Equal */) {
+                    curIndex++;
+                    return Token::UnsignedRightShiftAssign;
+                }
+                return Token::UnsignedRightShift;
+            default:
+                return Token::RightShift;
+            }
+        default:
+            return Token::GreaterThan;
         }
     }
 
@@ -178,7 +207,7 @@ final class Scanner
     conversion like now.)
     */
 
-    public function start () : int {
+    public function start() {
         while (true) {
             bigswitch:
             switch (src.charCodeAt(curIndex++) | 0) {
@@ -258,7 +287,7 @@ final class Scanner
 
                 default:
                     markIndex = curIndex-1;
-                    return Token::BREAK;
+                    return Token::BREAK_SLASH;
                 }
 
             case  39 /* Char::SingleQuote */: 
@@ -425,29 +454,7 @@ final class Scanner
                 return Token::Assign;
 
             case  62 /* Char::RightAngle */: 
-                switch (src.charCodeAt(curIndex)) {
-                case  61 /* Char::Equal */:
-                    curIndex++;
-                    return Token::GreaterThanOrEqual;
-                case  62 /* Char::RightAngle */:
-                    curIndex++;
-                    switch (src.charCodeAt(curIndex)) {
-                    case  61 /* Char::Equal */:
-                        curIndex++;
-                        return Token::RightShiftAssign;
-                    case  62 /* Char::RightAngle */:
-                        curIndex++;
-                        if (src.charCodeAt(curIndex) == 61 /* Char::Equal */) {
-                            curIndex++;
-                            return Token::UnsignedRightShiftAssign;
-                        }
-                        return Token::UnsignedRightShift;
-                    default:
-                        return Token::RightShift;
-                    }
-                default:
-                    return Token::GreaterThan;
-                }
+                return Token::BREAK_RBROCKET;
 
                 // Begin generated code
 
@@ -462,7 +469,7 @@ final class Scanner
                     src.charCodeAt(curIndex+7) == 95 /* Char::_ */ &&
                     notPartOfIdent[src.charCodeAt(curIndex+8)]) {
                     curIndex += 8;
-                    return Token::Proto;
+                    return Token::__Proto__;
                 }
                 break bigswitch;
             case 98: /* Char::b */
@@ -706,13 +713,25 @@ final class Scanner
                     break bigswitch;
                 }
             case 108: /* Char::l */
-                if (src.charCodeAt(curIndex+0) == 101 /* Char::e */ &&
-                    src.charCodeAt(curIndex+1) == 116 /* Char::t */ &&
-                    notPartOfIdent[src.charCodeAt(curIndex+2)]) {
-                    curIndex += 2;
-                    return Token::Let;
+                switch(src.charCodeAt(curIndex+0)) {
+                case 101: /* Char::e */
+                    if (src.charCodeAt(curIndex+1) == 116 /* Char::t */ &&
+                        notPartOfIdent[src.charCodeAt(curIndex+2)]) {
+                        curIndex += 2;
+                        return Token::Let;
+                    }
+                    break bigswitch;
+                case 105: /* Char::i */
+                    if (src.charCodeAt(curIndex+1) == 107 /* Char::k */ &&
+                        src.charCodeAt(curIndex+2) == 101 /* Char::e */ &&
+                        notPartOfIdent[src.charCodeAt(curIndex+3)]) {
+                        curIndex += 3;
+                        return Token::Like;
+                    }
+                    break bigswitch;
+                default:
+                    break bigswitch;
                 }
-                break bigswitch;
             case 110: /* Char::n */
                 switch(src.charCodeAt(curIndex+0)) {
                 case 97: /* Char::a */
@@ -1103,7 +1122,7 @@ final class Scanner
             return makeIntegerLiteral( parseInt(lexeme(), 10) );
     }
 
-    function makeIntegerLiteral( n ) {
+    function makeIntegerLiteral(n) {
         checkNextCharForNumber();
 
         if (n >= -0x80000000 && n <= 0x7FFFFFFF)
@@ -1113,10 +1132,9 @@ final class Scanner
         return Token::makeInstance( Token::DoubleLiteral, String(n) );
     }
 
-    function makeFloatingLiteral( s ) {
+    function makeFloatingLiteral(s) {
         if (src.charCodeAt(curIndex) === 109 /* Char::m */) {
             curIndex++;
-
             checkNextCharForNumber();
             return Token::makeInstance( Token::DecimalLiteral, s );
         }
@@ -1174,7 +1192,7 @@ final class Scanner
 
     // The 'e' has been consumed...
 
-    function numberExponent () {
+    function numberExponent() {
         switch (src.charCodeAt(curIndex)) {
         case  43 /* Char::Plus */:
         case  45 /* Char::Minus */:
@@ -1185,7 +1203,7 @@ final class Scanner
             Lex::syntaxError("Illegal number: missing digits in exponent");
     }
 
-    function octalDigits(k): boolean {
+    function octalDigits(k) {
         let startIndex = curIndex;
         loop:
         while (k != 0) {
@@ -1209,7 +1227,7 @@ final class Scanner
         return curIndex > startIndex && k <= 0;
     }
 
-    function decimalDigits(k): boolean {
+    function decimalDigits(k) {
         let startIndex = curIndex;
         loop:
         while (k != 0) {
@@ -1235,7 +1253,7 @@ final class Scanner
         return curIndex > startIndex && k <= 0;
     }
 
-    function hexDigits(k): boolean {
+    function hexDigits(k) {
         let startIndex = curIndex;
         loop:
         while (k != 0) {
@@ -1267,7 +1285,7 @@ final class Scanner
         return curIndex > startIndex && k <= 0;
     }
 
-    function lineComment () {
+    function lineComment() {
         let cachedIndex = curIndex;
         let cachedSrc = src;
         while (true) {
@@ -1284,7 +1302,7 @@ final class Scanner
         }
     }
 
-    function blockComment () {
+    function blockComment() {
         let cachedIndex = curIndex;
         let cachedSrc = src;
 
@@ -1322,7 +1340,7 @@ final class Scanner
         }
     }
 
-    function identifier () : int {
+    function identifier() {
         let cachedIndex = curIndex;
         let cachedSrc = src;
             
@@ -1404,7 +1422,7 @@ final class Scanner
         return Token::makeInstance(Token::Identifier, s);
     }
 
-    function stringLiteral (delimiter) : int {
+    function stringLiteral(delimiter) {
         let cachedSrc = src;
         let cachedIndex = curIndex;
         let c;
@@ -1475,7 +1493,7 @@ final class Scanner
         }
     }
 
-    function escapeSequence () : int {
+    function escapeSequence() {
         switch (src.charCodeAt(curIndex) | 0) {
         case  48 /* Char::Zero */:
         case  49 /* Char::One */:
@@ -1528,7 +1546,7 @@ final class Scanner
             if (curIndex+1 == src.length)
                 Lex::syntaxError("End of input in escape sequence");
             curIndex++;
-            return 0;  // NUL
+            return 0;  /* Char::Nul */
 
         case     10: /* Char::Linefeed */
         case     13: /* Char::CarriageReturn */
@@ -1541,7 +1559,7 @@ final class Scanner
         }
     }
 
-    function octalOrNulEscape () : uint {
+    function octalOrNulEscape() {
         switch (src.charCodeAt(curIndex)) {
         case  48 /* Char::Zero */:
             curIndex++;
@@ -1574,15 +1592,16 @@ final class Scanner
         }
     }
 
-    function octalEscape (n) {
+    function octalEscape(n) {
         markIndex = curIndex;
-        octalDigits(n);                 // ignore result
+        octalDigits(n);                 // Ignore result
         return parseInt(lexeme(), 8);
     }
 
-    // Any leading x or u has been consumed.  n is the number of digits to consume and require.
+    // Any leading x or u has been consumed.  n is the number of
+    // digits to consume and require.
 
-    function hexEscape (n) : uint {
+    function hexEscape(n) {
         markIndex = curIndex;
         if (!hexDigits(n))
             Lex::syntaxError("Wrong number of hexadecimal digits; expected " + n);

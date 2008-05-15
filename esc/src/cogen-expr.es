@@ -397,6 +397,9 @@ function cgCallExpr(ctx, e) {
     let isSuperCall = false;
     let name;
 
+    if (e.spread != null)
+        Gen::internalError(ctx, "Spread expression not implemented.");
+
     switch type (e.expr) {
     case (or: ObjectRef) {
         if (or.base is SuperExpr) {
@@ -686,8 +689,12 @@ function cgDynamicOverrideExpr(ctx, {names, exprs, body}) {
 }
   
 
-function cgNewExpr(ctx, {expr, args}) {
+function cgNewExpr(ctx, {expr, args, spread}) {
     let {asm} = ctx;
+
+    if (spread != null)
+        Gen::internalError(ctx, "Spread expression not implemented");
+
     cgExpr(ctx, expr);
     for ( let i=0 ; i < args.length ; i++ )
         cgExpr(ctx, args[i]);
@@ -749,7 +756,7 @@ function cgSetObjectRefExpr(ctx, {op, le, re}) {
         le.ident.binding = Ast::nobind;
 
     if (opr == assignOp) {
-        let name = cgIdentExpr(ctx, le.ident);   // order matters if it's an ExpressionIdentifier
+        let name = cgIdentExpr(ctx, le.ident);   // order matters if it's a ComputedName
         cgExpr(ctx, re);
         asm.I_dup();
         asm.I_setlocal(t);
@@ -760,7 +767,7 @@ function cgSetObjectRefExpr(ctx, {op, le, re}) {
         let subname = null;    // multiname to store under
         asm.I_dup();           // object expr
 
-        if (le.ident is ExpressionIdentifier) {
+        if (le.ident is ComputedName) {
             subtmp = asm.getTemp();
             cgExpr(ctx, le.ident.expr);
             asm.I_dup();
@@ -775,7 +782,7 @@ function cgSetObjectRefExpr(ctx, {op, le, re}) {
 
         asm.I_dup();
         asm.I_setlocal(t);
-        if (le.ident is ExpressionIdentifier) {
+        if (le.ident is ComputedName) {
             asm.I_getlocal(subtmp);
             asm.I_swap();
             asm.I_setproperty(subname);
@@ -836,9 +843,12 @@ function cgInitExpr(ctx, e) {
 
 function cgLiteralExpr(ctx, e) {
 
-    function cgArrayInitializer(ctx, {exprs:exprs}) {
+    function cgArrayInitializer(ctx, {exprs, spread}) {
         let {asm} = ctx;
         let i = 0;
+
+        if (spread != null)
+            Gen::internalError(ctx, "Spread expression in array initializer not implemented.");
 
         // Use newarray to construct the dense prefix
         for ( ; i < exprs.length ; i++ ) {
@@ -878,14 +888,28 @@ function cgLiteralExpr(ctx, e) {
         let t = asm.getTemp();
         asm.I_setlocal(t);
         for ( let i=0 ; i < fields.length ; i++ ) {
-            //cgLiteralField(fields[i]);
-            let f = fields[i];
-            asm.I_getlocal(t);
-            // FIXME: source information here.
-            if (f.expr == null)
-                Gen::syntaxError(ctx, "Missing field value in object initializer: " + f.ident);
-            cgExpr(ctx, f.expr);
-            asm.I_setproperty(cgIdentExpr(ctx, f.ident));
+            switch type (fields[i]) {
+            case (lf: Ast::LiteralField) {
+                // SYNTACTIC CONDITION.  If the object initializer is
+                // used to produce a value (it's not used for
+                // destructuring) then the ": expr" part is not
+                // optional.
+
+                if (lf.expr == null) 
+                    Gen::syntaxError(ctx, "Missing field value in object initializer: " + lf.ident);
+
+                asm.I_getlocal(t);
+                cgExpr(ctx, lf.expr);
+                asm.I_setproperty(cgIdentExpr(ctx, lf.ident));
+
+            }
+            case (vf: Ast::VirtualField) {
+                Gen::internalError(ctx, "VirtualField support missing.");
+            }
+            case (pf: Ast::ProtoField) {
+                Gen::internalError(ctx, "ProtoField support missing.");
+            }
+            }
         }
         //asm.I_newobject(fields.length);
         asm.I_getlocal(t);
@@ -991,7 +1015,7 @@ function cgIdentExpr(ctx, e) {
     case (id:Identifier) {
         return emitter.multiname(id,false);
     }
-    case (ei:ExpressionIdentifier) {
+    case (ei:ComputedName) {
         cgExpr(ctx, ei.expr);
         return emitter.multinameL(Ast::publicNSSL,false);
     }
@@ -1001,6 +1025,12 @@ function cgIdentExpr(ctx, e) {
             // Hack to deal with namespaces for now...
             // later we will have to implement a namespace lookup to resolve qualified typenames
             return emitter.qname(new Ast::Name(new Ast::UnforgeableNamespace(lr.ident), qi.ident), false);
+        }
+        case (lr: ForgeableNamespace) {
+            return emitter.qname(new Ast::Name(lr, qi.ident), false);
+        }
+        case (lr: UnforgeableNamespace) {
+            return emitter.qname(new Ast::Name(lr, qi.ident), false);
         }
         case( e:* ) {
             /// cgExpr(ctx, qi.qual);

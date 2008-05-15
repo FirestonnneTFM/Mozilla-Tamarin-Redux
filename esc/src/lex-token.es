@@ -39,65 +39,65 @@
 use default namespace Token,
     namespace Token;
 
-/* A token has a "kind" (the token type) and a "text" (the lexeme).
- *
- * For predefined tokens the kind is equal to its index in the
- * token store.
- * 
- * NOTE, the parser in-lines tokenKind and tokenText manually, and
- * knows what a Tok looks like, so don't treat Tok as an abstraction.
- */
+// A token has a "kind" (the token type) and a "text" (the lexeme).
+//
+// For predefined tokens the kind is equal to its index in the
+// token store.
+// 
+// NOTE, the parser in-lines tokenKind and tokenText manually, and
+// knows what a Tok looks like.  Don't treat Tok as an abstraction!
+
 class Tok
 {
-    var kind;
-    var text;
+    const kind: double;
+    const text: String;
 
-    function Tok(kind,text)
-        : kind = kind
-        , text = text
-    {
-    }
+    function Tok(kind,text) : kind=kind, text=text {}
+
+    function toString()
+        kind + " " + text;
 }
 
-function tokenKind (tid: int) : int
+function tokenKind(tid)
     tokenStore[tid].kind;
 
-function tokenText ( tid : int ) : String
+function tokenText(tid)
     tokenStore[tid].text;
 
-// Map from (kind, text) to index in tokenStore.  It is used to
-// dramatically speed up duplicate testing in makeInstance(), below.
+// Map from (kind, text) to index in tokenStore.  It is used to speed
+// up duplicate testing in makeInstance(), below.
 
 const tokenHash = 
-    new Util::Hashtable(function(x) { return uint(Util::hash_number(x.kind) ^ Util::hash_string(x.text)) },
-                        function(a,b) { return a.kind === b.kind && a.text === b.text },
-                        false );
+    new Util::Hashtable( (function(x) (Util::hash_number(x.kind) ^ Util::hash_string(x.text)) >>> 0),
+                         (function(a,b) a.kind === b.kind && a.text === b.text),
+                         false );
     
 // Map from token number to a Tok structure.
-// FIXME: Really "Vector.<Tok>".
 //
 // Metric: Self-compiling parse.es, about 1000 unique tokens are
-// created (beyond the 157 that initially populate the token store).
+// created (beyond the ones that initially populate the token store).
 
-const tokenStore = new Array;
+const tokenStore: [Tok] = [] : [Tok];  // "new [Tok]" when that works
 
 // Attribute table for tokens.  Used by the parser for token
-// classification.  Entries are bit vectors (some tokens have
-// multiple attributes).
+// classification.  Entries are bit vectors (some tokens have multiple
+// attributes).
+//
+// More attributes could be added here as bit fields, for example
+// opcodes for binary and unary operators.
 
-const UNUSED = 1;            // No longer in use
 const RESERVED = 2;          // It is a reserved identifier
 const LITERAL = 4;           // It is a token that yields a literal
 const LEXEME = 8;            // It is a token that has a useful lexeme
 const EQUALITY = 16;         // It is ==, !=, ===, !==
-const RELATIONAL = 32;       // It is <, <=, >, >=, In, InstanceOf, Is, Cast
+const RELATIONAL = 32;       // It is <, <=, >, >=, In, InstanceOf, Is, Cast, Like
 const RELTYPE = 64;          // Relational operator with typeExpr rhs
 const SHIFTOP = 128;         // It is <<, >>, or >>>
 const ADDITIVEOP = 256;      // It is + or -
 const MULTIPLICATIVEOP = 512;// It is *, /, or %
 const OPASSIGN = 1024;       // += and so on
 
-const tokenAttr = new Array;
+const tokenAttr: [double] = [] : [double];  // "new [double]" when that works
 
 function isReserved(token)
     (tokenAttr[token] & RESERVED) != 0;
@@ -129,28 +129,26 @@ function isMultiplicative(token)
 function isOpAssign(token)
     (tokenAttr[token] & OPASSIGN) != 0;
 
-// hash_helper is used to avoid allocation on the fast path inside
-// makeInstance.  It may not make much difference, but there you
-// have it.
+// The variable "hash_helper" is used to avoid allocation on the fast
+// path inside makeInstance().  It may not make a huge difference, but
+// there you have it.
 
-internal var hash_helper = { kind: 0, text: "" };
+internal var hash_helper = {kind: 0, text: ""};
 
-function fmt()
-    this.kind + " " + this.text;
-
-function makeInstance(kind:int, text:String) : int {
+function makeInstance(kind, text) {
     hash_helper.kind = kind;
     hash_helper.text = text;
     var tid = tokenHash.read(hash_helper);
     if (tid === false) {
         tid = tokenStore.length;
-        tokenStore.push(new Tok(kind, text));
-        tokenHash.write({kind: kind, text: text, toString: fmt}, tid);
+        tok = new Tok(kind, text);
+        tokenStore.push(tok);
+        tokenHash.write(tok, tid);
     }
     return tid;
 }
 
-function setup(id, name, attr=0) {
+internal function setup(id, name, attr=0) {
     tokenStore[id] = new Tok(id,name);
     tokenAttr[id] = attr;
 }
@@ -184,8 +182,7 @@ const SemiColon = Token::DoubleColon + 1;               setup(Token::SemiColon,"
 const QuestionMark = Token::SemiColon + 1;              setup(Token::QuestionMark,"questionmark");
 const LeftBracket = Token::QuestionMark + 1;            setup(Token::LeftBracket,"leftbracket");
 const RightBracket = Token::LeftBracket + 1;            setup(Token::RightBracket,"rightbracket");
-const LogicalXor = Token::RightBracket + 1;             setup(Token::LogicalXor,"logicalxor");
-const LogicalXorAssign = Token::LogicalXor + 1;         setup(Token::LogicalXorAssign,"logicalxorassign", OPASSIGN);
+const LogicalXorAssign = Token::RightBracket + 1;       setup(Token::LogicalXorAssign,"logicalxorassign", OPASSIGN);
 const LeftBrace = Token::LogicalXorAssign + 1;          setup(Token::LeftBrace,"leftbrace");
 const LogicalOr = Token::LeftBrace + 1;                 setup(Token::LogicalOr,"logicalor");
 const LogicalOrAssign = Token::LogicalOr + 1;           setup(Token::LogicalOrAssign,"logicalorassign", OPASSIGN);
@@ -238,7 +235,8 @@ const InstanceOf = Token::In + 1;                       setup(Token::InstanceOf,
 const Interface = Token::InstanceOf + 1;                setup(Token::Interface,"interface", RESERVED);
 const Is = Token::Interface + 1;                        setup(Token::Is,"is", RESERVED|RELATIONAL|RELTYPE);
 const Let = Token::Is + 1;                              setup(Token::Let,"let", RESERVED);
-const Namespace = Token::Let + 1;                       setup(Token::Namespace,"namespace", RESERVED);
+const Like = Token::Let + 1;                            setup(Token::Like,"like", RESERVED|RELATIONAL|RELTYPE);
+const Namespace = Token::Like + 1;                      setup(Token::Namespace,"namespace", RESERVED);
 const Native = Token::Namespace + 1;                    setup(Token::Native,"native", RESERVED);
 const New = Token::Native + 1;                          setup(Token::New,"new", RESERVED);
 const Null = Token::New + 1;                            setup(Token::Null,"null", RESERVED|LITERAL);
@@ -263,8 +261,7 @@ const __Proto__ = Token::Yield + 1;                     setup(Token::__Proto__,"
 
 // sundry
 
-const AttributeIdentifier = Token::__Proto__ + 1;       setup(Token::AttributeIdentifier,"attributeidentifier", LEXEME);
-const Identifier = Token::AttributeIdentifier + 1;      setup(Token::Identifier,"identifier", LEXEME);
+const Identifier = Token::__Proto__ + 1;                setup(Token::Identifier,"identifier", LEXEME);
 const IntLiteral = Token::Identifier + 1;               setup(Token::IntLiteral,"intliteral", LEXEME|LITERAL);
 const UIntLiteral = Token::IntLiteral + 1;              setup(Token::UIntLiteral,"uintliteral", LEXEME|LITERAL);
 const DoubleLiteral = Token::UIntLiteral + 1;           setup(Token::DoubleLiteral,"doubleliteral", LEXEME|LITERAL);
@@ -275,10 +272,12 @@ const StringLiteral = Token::RegexpLiteral + 1;         setup(Token::StringLiter
 // meta
 
 const EOS = Token::StringLiteral + 1;                   setup(Token::EOS,"EOS");
-const BREAK = Token::EOS + 1;                           setup(Token::BREAK,"BREAK");
-const NONE = Token::BREAK + 1;                          setup(Token::NONE,"NONE");
+const BREAK_SLASH = Token::EOS + 1;                     setup(Token::BREAK_SLASH,"BREAK_SLASH");
+const BREAK_RBROCKET = Token::BREAK_SLASH + 1;          setup(Token::BREAK_RBROCKET,"BREAK_RBROCKET");
+const NONE = Token::BREAK_RBROCKET + 1;                 setup(Token::NONE,"NONE");
 
-// Pre-computed identifier tokens, used throughout the system
+// Pre-computed identifier tokens, used by the parser for handling
+// contextually reserved words.
 
 const id_each = makeInstance(Token::Identifier, "each");
 const id_eval = makeInstance(Token::Identifier, "eval");
