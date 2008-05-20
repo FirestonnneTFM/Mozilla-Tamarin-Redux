@@ -36,10 +36,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-use default namespace Abc;
+use default namespace Abc,
+    namespace Abc;
 
-use namespace Asm;
-use namespace Util;
+use namespace Asm,
+    namespace Util;
 
 /* ABCFile container & helper class.
  *
@@ -162,7 +163,7 @@ class ABCConstantPool
             var hash = nss.length;
             for ( var i=0, limit=nss.length ; i < limit ; i++ )
                 hash = ((hash << 5) + hash) + nss[i];
-            return hash;
+            return hash >>> 0;
         }
 
         function eq_namespacesets(nss1, nss2) {
@@ -269,7 +270,9 @@ class ABCConstantPool
         var probe = namespaceset_map.read(namespaces);
         if (probe == 0) {
             probe = namespaceset_count++;
-            namespaceset_map.write(Util::copyArray(namespaces), probe);
+            // Not necessary to copy here at the moment, as the array is a fresh
+            // copy created from flattening a NamespaceSetList.
+            namespaceset_map.write(/*Util::copyArray*/(namespaces), probe);
             namespaceset_bytes.uint30(namespaces.length);
             for ( var i=0, limit=namespaces.length ; i < limit ; i++ )
                 namespaceset_bytes.uint30(namespaces[i]);
@@ -484,9 +487,8 @@ class ABCMethodInfo
         var i;
         bs.uint30(param_types.length);
         bs.uint30(return_type);
-        for ( i=0 ; i < param_types.length ; i++ ) {
+        for ( i=0 ; i < param_types.length ; i++ )
             bs.uint30(param_types[i]);
-        }
         bs.uint30(name);
         if (options != null) {
             flags = flags | METHOD_HasOptional;

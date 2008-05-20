@@ -43,11 +43,8 @@
 
 use default namespace internal;
 
-namespace AVMPLUS = "avmplus";
-namespace FLASH_UTILS = "flash.utils";
-
-use namespace AVMPLUS;
-use namespace FLASH_UTILS;
+use namespace "avmplus";
+use namespace "flash.utils";
 
 var argv = ESC::commandLineArguments();
 if (argv.length == 0) {

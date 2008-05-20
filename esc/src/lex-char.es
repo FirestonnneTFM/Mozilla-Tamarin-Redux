@@ -36,7 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-use default namespace Char;
+use default namespace Char,
+    namespace Char;
 
 const EOS = 0;
 const a = "a".charCodeAt(0);

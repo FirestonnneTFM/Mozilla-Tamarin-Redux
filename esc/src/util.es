@@ -36,23 +36,29 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-use default namespace Util;
+use default namespace Util,
+    namespace Util;
 
 function assert(cond) {
     if (!cond)
-        throw "Assertion failed!";
+        throw new Error("Assertion failed!");
 }
 
 // Together these two ensure that all compiler errors are thrown as SyntaxErrors.
 // This is for the benefit of ActionMonkey, we can clean it up later.
 
-function syntaxError(file, line, msg) {
+internal function formatMsg(file, line, msg) {
     if (line || file)
         msg = " " + msg;
     if (line)
         msg = line + ":" + msg;
     if (file)
         msg = file + ":" + msg;
+    return msg;
+}
+
+function syntaxError(file, line, msg) {
+    msg = formatMsg(file, line, msg);
     var obj = new SyntaxError(msg);
     if (line)
         obj.line = line;
@@ -65,6 +71,10 @@ function internalError(file, line, msg) {
     Util::syntaxError(file, line, "Internal: " + msg);
 }
 
+function warning(file, line, msg) {
+    print(formatMsg(file, line, "Warning: " + msg));
+}
+    
 function map(fn, a) {
     var b = [];
     for ( var i=0 ; i < a.length ; i++ )
@@ -116,10 +126,6 @@ function hash_string(s) {
     return uint(h);
 }
 
-    function eq_strings(s1, s2) { 
-        return s1 == s2; 
-    }
-
 class Hashnode {
     var key = null;
     var value = null;
@@ -142,11 +148,13 @@ class Hashtable {
     var hashfn;
     var eqfn;
     var notfound;
+    var debug;
 
-    function Hashtable(hashfn, eqfn, notfound) 
+    function Hashtable(hashfn, eqfn, notfound, debug=false)
         : hashfn   = hashfn
         , eqfn     = eqfn
         , notfound = notfound
+        , debug    = debug
     {
         tbl = makeTable(size);
     }
@@ -154,6 +162,7 @@ class Hashtable {
     // Should be called "get" but ESC is not up to it
     function read(key) {
         var h = hashfn(key);
+        assert( h >= 0 );
         var bucket = tbl[h % size];
         while (bucket != null) {
             if (bucket.hashval == h && eqfn(bucket.key, key))
@@ -169,6 +178,7 @@ class Hashtable {
             rehash();
 
         var h = hashfn(key);
+        assert( h >= 0 );
         var b = h % size;
         var bucket = tbl[b];
         while (bucket != null) {
@@ -189,6 +199,8 @@ class Hashtable {
     }
 
     function rehash() {
+        if (debug)
+            dump("BEFORE");
         var newsize = size*2;
         var newtbl = makeTable(newsize);
         for ( var i=0 ; i < size ; i++ ) {
@@ -203,7 +215,30 @@ class Hashtable {
         }
         size = newsize;
         tbl = newtbl;
+        if (debug)
+            dump("AFTER");
         must_rehash = false;
+    }
+
+    function toString()
+        dumpToString("/*Hashtable*/", false);
+
+    function dump(tag, withval=true) 
+        print(dumpToString(tag, withval));
+
+    function dumpToString(tag, withval=true) {
+        s = tag + " [";
+        for ( let i=0 ; i < size ; i++ ) {
+            s += "[";
+            let b = tbl[i];
+            while (b != null) {
+                s += "{key:" + b.key + ", value:" + b.value + (withval ? ", hashval:" + b.hashval : "") + "} ";
+                b = b.link;
+            }
+            s += "] ";
+        }
+        s += "]";
+        return s;
     }
 
     function makeTable(size) {
@@ -214,62 +249,72 @@ class Hashtable {
     }
 }
 
-    function eq_namespaces(n1, n2) {
-        if( n1 === n2 ) {
-            return true;
-        }
-        //print(n1, n2);
-        return n1.hash() == n2.hash();
-    }
+class ENUM!
+{
+    const s;
+    function ENUM(s) : s=s {}
     
-    class Names
-    {
-        // Hashtable
-        // Name -> [{namespace, val}]]
-        // should it be to another hashtable?
-        // What about get/set to different slots?
-        var table;
-        function Names() : 
-            table = new Hashtable(hash_string, eq_strings, null)
-        {
-        }
-        
-        function getBinding(name, ns) {
-            //print(name);
-            var o = table.read(name);
-            
-            var ret = null;
-            
-            if(o)
-            {
-                for( var i:uint=0, limit=o.length; i<limit; ++i)
-                {
-                    let entry = o[i];
-                    if(eq_namespaces(entry.namespace, ns))
-                    {
-                        ret = entry.val;
-                    }
-                } 
-            }
-            
-            return ret;            
-        }
-        
-        function putBinding(name, ns, value ) {
-            var o = table.read(name);
-            if( o == null )
-            {
-                o = [];
-                table.write(name, o)
-            }
-            var index = 0;
-            for( var i:uint = 0, limit=o.length; i < limit; ++i )
-            {
-                if( eq_namespaces(o[i].namespace, ns) ) {
-                    index = i;
-                    break;
-                }
-            }
-            o[index] = {namespace:ns, val:value};
-        }
+    function toString() {
+        return s;
     }
+}
+
+// FIXME! The one in ast.es is more reliable.
+
+function eq_namespaces(n1, n2) {
+    if( n1 === n2 )
+        return true;
+    return n1.hash() == n2.hash();
+}
+
+// FIXME!  Does not belong in this file, probably.
+    
+internal function printName() 
+    "(" + this.ns + " :: " + this.val + ")";
+
+class Names
+{
+    // Hashtable
+    // Name -> [{namespace, val}]]
+    // should it be to another hashtable?
+    // What about get/set to different slots?
+    const table;
+
+    function Names() {
+        table = new Hashtable(hash_string, (function (a,b) a === b), null);
+    }
+        
+    function toString()
+        table.toString();
+
+    function getBinding(name: Ast::IDENT, ns: Ast::Namespace) {
+        let o = table.read(name);
+        let ret = null;
+            
+        if(o) {
+            for( let i=0, limit=o.length; i<limit; ++i) {
+                let entry = o[i];
+                if(eq_namespaces(entry.namespace, ns))
+                    ret = entry.val;
+            } 
+        }
+        
+        return ret;            
+    }
+        
+    function putBinding(name, ns, value) {
+        let o = table.read(name);
+        if( o == null ) {
+            o = [];
+            table.write(name, o);
+        }
+        let index = 0;
+        for( let i = 0, limit=o.length; i < limit; ++i ) {
+            if( eq_namespaces(o[i].namespace, ns) ) {
+                index = i;
+                break;
+            }
+        }
+        o[index] = {namespace:ns, val:value, toString: printName};
+    }
+}

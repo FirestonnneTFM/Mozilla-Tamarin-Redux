@@ -36,8 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-internal namespace FLASH_UTILS = "flash.utils";
-use namespace FLASH_UTILS;
+use namespace "flash.utils";
 
 /* Emitter for various data in ABC-compatible formats, as a byte
  * stream.  The byte stream is represented as an array of unsigned

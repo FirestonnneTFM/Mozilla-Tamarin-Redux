@@ -53,13 +53,14 @@
      is presumably the class object (but this remains to be verified).
 */
 
-use default namespace Gen;
+use default namespace Gen,
+    namespace Gen;
 
-use namespace Util;
-use namespace Abc;
-use namespace Asm;
-use namespace Emit;
-use namespace Ast;
+use namespace Abc,
+    namespace Asm,
+    namespace Ast,
+    namespace Emit,
+    namespace Util;
 
 /* A context is a structure with the following fields.
  *
@@ -101,6 +102,9 @@ dynamic class CTX
 // Emit debug info or not
 var emit_debug = true;
 
+// Turn on early binding or not
+var early_binding = true;
+
 Gen function internalError(ctx, msg) {
     Util::internalError(ctx.filename, ctx.lineno, msg);
 }
@@ -121,6 +125,8 @@ function cg(tree: PROGRAM) {
     CTX.prototype.scope_reg = 0;
 
     cgProgram(pushProgram(s), tree);
+    //print("iterations=" + (hits + misses) + "; hit ratio=" + hits/(hits + misses));
+    //hits=misses=0;
     return e.finalize();
 }
 
@@ -158,28 +164,36 @@ function cgEval(tree: PROGRAM, name: String, scopedesc: String) {
 
     let attr = new Ast::FuncAttr(null);
     attr.capture_result = true;
-    return cg(new Ast::Program( [new Ast::ExprStmt(new Ast::SetExpr(Ast::assignOp,
-                                                                    new Ast::LexicalRef(new Ast::QualifiedIdentifier(new Ast::LexicalRef(new Ast::Identifier("ESC",[[Ast::noNS]])),
-                                                                                                                     "eval_hook")),
-                                                                    new Ast::LexicalRef(new Ast::Identifier(name, [[Ast::noNS]]))))],
-                                new Ast::Head([[new Ast::PropName(new Ast::Name(Ast::noNS, name)),
-                                                new Ast::MethodFixture(new Ast::Func(new Ast::FuncName(Ast::ordinaryFunction, name),
-                                                                                     tree.body,
-                                                                                     new Ast::Head([[new Ast::TempName(100000),
-                                                                                                     new Ast::ValFixture(Ast::anyType,false)]],
-                                                                                                   evalInits()),
-                                                                                     1,
-                                                                                     new Ast::Head([],[]),
-                                                                                     [],
-                                                                                     Ast::anyType,
-                                                                                     attr),
-                                                                       Ast::anyType,
-                                                                       false,
-                                                                       false,
-                                                                       false)]],
-                                              []),
-                                tree.attr,
-                                tree.file));
+
+    return cg( new Ast::Program
+               ( [ new Ast::ExprStmt
+                   ( new Ast::SetExpr
+                     ( Ast::assignOp,
+                       new Ast::QualifiedIdentifier( new Ast::Identifier("ESC", Ast::publicNSSL), "eval_hook" ),
+                       new Ast::Identifier(name, Ast::publicNSSL))) ],
+                 new Ast::Head
+                 ( [ new Ast::Fixture
+                     ( new Ast::PropName(new Ast::Name(Ast::publicNS, name)),
+                       new Ast::MethodFixture
+                       ( new Ast::Func
+                         ( new Ast::FuncName(Ast::ordinaryFunction, name),
+                           tree.body,
+                           new Ast::Head( [ new Ast::Fixture( new Ast::TempName(100000),
+                                                              new Ast::ValFixture(Ast::anyType,false)) ],
+                                          evalInits() ),
+                           1,
+                           new Ast::Head([],[]),
+                           [],
+                           Ast::anyType,
+                           attr,
+                           true),
+                         Ast::anyType,
+                         false,
+                         false,
+                         false ))],
+                   []),
+                 tree.attr,
+                 tree.file ));
 }
 
 function cgDebugFile(ctx) {
@@ -195,31 +209,13 @@ function cgProgram(ctx, prog) {
     cgStmts(ctx, prog.body);
 }
 
-function hasTrait(traits, name, kind) {
-    for (let i = 0, l =traits.length; i < l; i++) {
-        let t = traits[i];
-        if(t.name==name && ((t.kind&15)==kind))
-            return true;
-    }
-    return false;
-}
-
-function probeTrait(traits, name) {
-    for (let i=0, limit=traits.length ; i < limit ; i++) {
-        let t = traits[i];
-        if(t.name == name)
-            return [true, t.kind & 15];
-    }
-    return [false, 0];
-}
-    
 function cgGetFixtureNameParts(ctx, fxname) : [name, ns] {
     switch type (fxname) {
     case (pn:PropName) {
         return [pn.name.id, pn.name.ns];
     }
     case (tn:TempName) {
-        return ["$t"+tn.index, Ast::noNS]
+        return ["$t"+tn.index, Ast::publicNS]
     }
     case (x:*) { 
         Gen::internalError(ctx, "Not a valid fixture name " + x); // FIXME source pos
@@ -229,22 +225,18 @@ function cgGetFixtureNameParts(ctx, fxname) : [name, ns] {
 
 function cgFixtures(ctx, fixtures) {
     let {target, asm, emitter} = ctx;
-        
-    let {slots:slots, use_regs:use_regs, scope_reg:scope_reg} = getVariableDefinitionScope(ctx);
+    let {slots, use_regs, scope_reg} = getVariableDefinitionScope(ctx);
     
-    if( use_regs )
-    {
+    if( use_regs ) {
         for ( let i=0 ; i < fixtures.length ; i++ ) {
-            let reg = -1;
-            let [fxname, fx] = fixtures[i];
+            let {name:fxname, data:fx} = fixtures[i];
             let [name, ns] = cgGetFixtureNameParts(ctx, fxname);
             if( slots.getBinding(name, ns) != null )
                 continue;  // This name already allocated
-            reg = asm.getTemp();
+            let reg = asm.getTemp();
             let type_index = 0;
-            if( fx is ValFixture ) {
-                type_index = emitter.typeFromTypeExpr(fx.type);
-            }
+            if( fx is ValFixture )
+                type_index = emitter.typeFromTypeExpr(fx.ty);
             slots.putBinding(name, ns, new RegBind(reg, type_index));
             
             asm.I_pushundefined();
@@ -258,16 +250,15 @@ function cgFixtures(ctx, fixtures) {
             asm.I_setlocal(reg);
         }
     }
-    else
-    {
+    else {
         for ( let i=0 ; i < fixtures.length ; i++ ) {
             let slot_id = -1;
-            let [fxname, fx] = fixtures[i];
+            let {name:fxname, data:fx} = fixtures[i];
             let name = emitter.fixtureNameToName(fxname);
 
             if (fx is ValFixture) {
                 if (checkTrait(fxname, name, TRAIT_Slot))
-                    slot_id = target.addTrait(new ABCSlotTrait(name, 0, false, 0, emitter.typeFromTypeExpr(fx.type), 0, 0));
+                    slot_id = target.addTrait(new ABCSlotTrait(name, 0, false, 0, emitter.typeFromTypeExpr(fx.ty), 0, 0));
                 // FIXME when we have more general support for type annos
             }
             else if (fx is MethodFixture) {
@@ -285,12 +276,12 @@ function cgFixtures(ctx, fixtures) {
                     let trait_kind;
                     if (fx.func.name.kind == getterFunction) {
                         trait_kind = TRAIT_Getter;
-                        if (hasTrait(target.traits, name, trait_kind))
+                        if (target.hasTrait(name, trait_kind))
                             dupTrait(fxname, trait_kind, trait_kind);
                     }
                     else if (fx.func.name.kind == setterFunction) {
                         trait_kind = TRAIT_Setter;
-                        if (hasTrait(target.traits, name, trait_kind))
+                        if (target.hasTrait(name, trait_kind))
                             dupTrait(fxname, trait_kind, trait_kind);
                     }
                     else {
@@ -318,7 +309,7 @@ function cgFixtures(ctx, fixtures) {
             else if (fx is NamespaceFixture) {
                 checkTrait(fxname, name, TRAIT_Slot, true);
                 slot_id = target.addTrait(new ABCSlotTrait(name, 0, true, 0, 
-                                                 emitter.qname(new Ast::Name(Ast::noNS, "Namespace"),false), 
+                                                 emitter.qname(new Ast::Name(Ast::publicNS, "Namespace"),false), 
                                                  emitter.namespace(fx.ns), CONSTANT_Namespace));
             }
             else if (fx is TypeFixture) {
@@ -333,8 +324,9 @@ function cgFixtures(ctx, fixtures) {
             }
         }
     }
+
     function checkTrait(fxname, name, kind, unique=false) {
-        let [has_trait, trait_kind] = probeTrait(target.traits, name);
+        let [has_trait, trait_kind] = target.probeTrait(name);
         if (has_trait && (unique || trait_kind != kind))
             dupTrait(fxname, kind, trait_kind);
         return !has_trait;
@@ -361,45 +353,33 @@ function cgStmts(ctx, stmts) {
 }
 
 function extractNamedFixtures(fixtures) {
-    let named = [];
-    let fix_length = fixtures ? fixtures.length : 0;
-    for(let i = 0; i < fix_length; ++i) {
-        let [name,fixture] = fixtures[i];
-        switch type (name) {
-        case (pn:PropName) {
-            named.push([name,fixture]);
-        }
-        case (tn:TempName) {
-            // do nothing
-        }
-        }
-    }
-    return named;
+    let extracted = [];
+    for(let i=0, limit=fixtures.length ; i < limit ; ++i)
+        if (fixtures[i].name is PropName)
+            extracted.push(fixtures[i]);
+    return extracted;
 }
     
 function extractUnNamedFixtures(fixtures) {
-    let named = [];
-    let fix_length = fixtures ? fixtures.length : 0;
-    for(let i = 0; i < fix_length; ++i) {
-        let [name,fixture] = fixtures[i];
-        switch type (name) {
-        case (pn:PropName) {
-            // do nothing
-        }
-        case (tn:TempName) {
-            named.push([name,fixture]);
-        }
-        }
-    }
-    return named;
+    let extracted = [];
+    for(let i=0, limit=fixtures.length; i < limit ; ++i) 
+        if (fixtures[i].name is TempName)
+            extracted.push(fixtures[i]);
+    return extracted;
+}
+
+function cgTypeExpr(ctx, t) {
+    if (t is Ast::TypeName)
+        return cgIdentExpr(ctx, t.ident);
+    Gen::internalError(this, "Can't deal with type applications in type expressions yet: " + t);
 }
 
 function cgClass(ctx, c) {
     let {asm, emitter, script} = ctx;
         
     let classname = emitter.qname(c.name,false);
-    let basename = emitter.qname(c.baseName,false);
-    let interfacenames = Util::map(function (n) { return emitter.qname(n,false) }, c.interfaceNames);
+    let basename = cgTypeExpr(ctx, c.baseName);
+    let interfacenames = Util::map((function (n) cgTypeExpr(ctx, n)), c.interfaceNames);
 
     let flags = 0;
     if (!(c.isDynamic))
@@ -455,7 +435,7 @@ function cgInterface(ctx, c) {
     let {asm, emitter, script} = ctx;
         
     let ifacename = emitter.qname(c.name,false);
-    let interfacenames = Util::map(function (n) { return emitter.qname(n,false) }, c.interfaceNames);
+    let interfacenames = Util::map((function (n) cgTypeExpr(ctx,n)), c.interfaceNames);
 
     let iface = script.newInterface(ifacename, ctx.cp.stringUtf8(c.name.id), interfacenames);
         
@@ -475,7 +455,7 @@ function cgInterface(ctx, c) {
 function cgCtor(ctx, c, instanceInits) {
     let f = c.func;
     let formals_type = extractFormalTypes(ctx, f);
-    let method = new Method(ctx.script.e, formals_type, "$construct", false, f.attr);
+    let method = new Method(ctx.script.e, formals_type, ctx.cp.stringUtf8("$construct"), false, f.attr);
 
     let defaults = extractDefaultValues(ctx, f);
     if( defaults.length > 0 )
@@ -515,11 +495,42 @@ function cgCtor(ctx, c, instanceInits) {
             asm.I_pop();
         }
 
+        // FIXME: the code below is now wrong.
+        //
+        // The logic for the super invocation needs to be as follows.
+        //
+        // If there is an explicit call to super (a SuperStmt or a
+        // call from the settings) then:
+        //
+        //  - the function will have a local temp (the 'supercall
+        //    flag') whose initial value is false.
+        //
+        //  - A super() call in the settings sets the flag after the
+        //    super constructor returns.
+        //
+        //  - The SuperStmt checks the flag, which must be cleared or an 
+        //    error will be thrown, and sets it after invoking the 
+        //    constructor.  (See also comments in cogen-stmt.es.)
+        //
+        //  - When the constructor returns normally the flag is checked,
+        //    and if it is cleared an error is thrown.
+        //
+        // If there is not an explicit call to super then a call to
+        // the super constructor (with no arguments) is inserted at every
+        // point of normal return from the constructor.
+        //
+        // If there is a call to super() from the settings then
+        // superArgs is non-null.  If there is a SuperStmt in the body
+        // then the function attribute uses_super is true.
+
         // Eval super args, and call super ctor
         asm.I_getlocal(0);
-        let nargs = c.superArgs.length;
-        for ( let i=0 ; i < nargs ; i++ )
-            cgExpr(ctor_ctx, c.superArgs[i]);
+        let nargs = 0;
+        if (c.superArgs != null) {
+            nargs = c.superArgs.length;
+            for ( let i=0 ; i < nargs ; i++ )
+                cgExpr(ctor_ctx, c.superArgs[i]);
+        }
         asm.I_constructsuper(nargs);
         
         asm.I_popscope();
@@ -537,31 +548,21 @@ function cgCtor(ctx, c, instanceInits) {
     return method.finalize();
 }
 
-function extractFormalTypes(ctx, f:Func) {
-    let {emitter, script} = ctx;
-    function extractType([name,fixture])
-        emitter.fixtureTypeToType(fixture);
+function extractFormalTypes({emitter}, f:Func)
+    Util::map((function ({data}) emitter.fixtureTypeToType(data)), 
+              extractUnNamedFixtures(f.params.fixtures));
         
-    let named_fixtures = extractUnNamedFixtures(f.params.fixtures);
-        
-    return map(extractType, named_fixtures);
-}
-        
-function extractDefaultValues(ctx, f:Func) {
-    let {emitter, script} = ctx;
-    function extractDefaults(expr)
-        emitter.defaultExpr(expr);
+function extractDefaultValues({emitter}, f:Func)
+    Util::map((function (x) emitter.defaultExpr(x)), f.defaults);
 
-    return map(extractDefaults, f.defaults);
-}
-    
 /* Create a method trait in the ABCFile
  * Generate code for the function
  * Return the function index
  */
  
-function cgFunc(ctx0, f:FUNC) {
+function cgFunc(ctx0, f:Func) {
     let {emitter, script, cp} = ctx0;
+    let use_regs = early_binding && !f.attr.reify_activation;
     let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "function";  // brittle as hell
     let formals_types = extractFormalTypes({emitter:emitter, script:script}, f);
     let name = f.name ? f.name.ident : "";
@@ -588,7 +589,7 @@ function cgFunc(ctx0, f:FUNC) {
          */
             
         let scope_reg = -1; 
-        if( f.attr.reify_activation )
+        if(!use_regs)
             scope_reg = asm.getTemp();
             
         let capture_reg = 0;
@@ -596,10 +597,10 @@ function cgFunc(ctx0, f:FUNC) {
         if (f.attr.capture_result)
             capture_reg = asm.getTemp();
 
-        let fnctx = pushFunction(ctx0, fntype, scope_reg, capture_reg, (fntype != "function"), f.attr.reify_activation, method);
+        let fnctx = pushFunction(ctx0, fntype, scope_reg, capture_reg, (fntype != "function"), use_regs, method);
         cgDebugFile(fnctx);
             
-        if( f.attr.reify_activation )
+        if( !use_regs )
         {
             asm.I_newactivation();
             asm.I_dup();
@@ -609,65 +610,10 @@ function cgFunc(ctx0, f:FUNC) {
             
         setupArguments(fnctx, f);
 
-        if( f.attr.reify_activation ) {
-            // If we're using registers, then the regs have already been allocated for the parameters
+        if( !use_regs )
             cgHead(fnctx, f.params);
-        }
-        else {
-            let params = f.params.fixtures;
-            let named_params = [];
-            param_count = 0;
-            // Need to generate correct registers for parameters.  This gets tricky with destructuring in parameters
-            // such as {a, b, c} - it comes in as 1 argument, so we must alloc and assign the correct values
-            // for a, b, c.  The temp will already be allocated, so we have to alloc registers for a, b, c
-            // This code depends on the fixtures coming in with the pattern:
-            // PropName, TempName, PropName, TempName...  Regular params - no destructuring 
-            // PropName, PropName, PropName, TempName...  Destructuring - 3 names will be extracted from the temp
-            // This is what the fixtures for {a, b, c} look like.
-            for( let i = 0, limit = params.length; i < limit; ++i ){
-                let [name,fixture] = params[i];
-                if( name is PropName ) {
-                    named_params.push([name, fixture]);
-                }
-                else if ( name is TempName ) {
-                    param_count++;
-                    if( named_params.length == 1 ) {
-                        let [fxname, fx] = named_params[0];
-                        let [name_part, ns_part] = cgGetFixtureNameParts(fnctx, fxname);
-                        let reg = param_count;
-                        let type_index = 0;
-                        if( fx is ValFixture ) {
-                            type_index = emitter.typeFromTypeExpr(fx.type)
-                        }
-                        fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(reg, type_index));
-                    }
-                    else if( named_params.length > 1 ){
-                        // Some sort of destructuring assignment
-                        // need to alloc temps for the named params
-                        for( let q = 0; q < named_params.length; ++q ) {
-                            let [fxname, fx] = named_params[q];
-                            let [name_part, ns_part] = cgGetFixtureNameParts(fnctx, fxname);
-                            let reg = asm.getTemp();
-                            let type_index = 0;
-                            if( fx is ValFixture ) {
-                                type_index = emitter.typeFromTypeExpr(fx.type)
-                            }
-                            fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(reg, type_index));
-                        }
-                        let[name_part, ns_part] = cgGetFixtureNameParts(fnctx, name);
-                        //trace("Adding binding for " + name_part + " at reg " + (param_count));
-                        fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(param_count, 0));
-                    }
-                    named_params = [];
-                }
-            }
-            for ( let i=0 ; i < f.params.exprs.length ; i++ ) {
-                if( !redundantInitialization(fnctx, f.params.exprs[i]) ) {
-                    cgExpr(fnctx, f.params.exprs[i]);
-                    asm.I_pop();
-                }
-            }
-        }
+        else 
+            cgOptimizedParams(fnctx, f);
         cgHead(fnctx, f.vars);
 
         /* Generate code for the body.  If there is no return statement in the
@@ -675,7 +621,7 @@ function cgFunc(ctx0, f:FUNC) {
          * at the end, so there's nothing to worry about here.
          */
         cgStmts(fnctx, f.body);
-        if( f.attr.reify_activation )
+        if( !use_regs )
             asm.killTemp(scope_reg);
         if (capture_reg) {
             asm.I_getlocal(capture_reg);
@@ -685,10 +631,68 @@ function cgFunc(ctx0, f:FUNC) {
     return method.finalize();
 }
 
+function cgOptimizedParams(fnctx, f:Func) {
+    let {asm, emitter} = fnctx;
+    let params = f.params.fixtures;
+    let named_params = [];
+    param_count = 0;
+
+    // Need to generate correct registers for parameters.  This gets tricky with destructuring in parameters
+    // such as {a, b, c} - it comes in as 1 argument, so we must alloc and assign the correct values
+    // for a, b, c.  The temp will already be allocated, so we have to alloc registers for a, b, c
+    // This code depends on the fixtures coming in with the pattern:
+    // PropName, TempName, PropName, TempName...  Regular params - no destructuring 
+    // PropName, PropName, PropName, TempName...  Destructuring - 3 names will be extracted from the temp
+    // This is what the fixtures for {a, b, c} look like.
+
+    for( let i = 0, limit = params.length; i < limit; ++i ){
+        let p = params[i];
+        if( p.name is PropName )
+            named_params.push(p);
+        else if ( p.name is TempName ) {
+            param_count++;
+            if( named_params.length == 1 ) {
+                let {name:fxname, data:fx} = named_params[0];
+                let [name_part, ns_part] = cgGetFixtureNameParts(fnctx, fxname);
+                let reg = param_count;
+                let type_index = 0;
+                if( fx is ValFixture )
+                    type_index = emitter.typeFromTypeExpr(fx.ty);
+                fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(reg, type_index));
+            }
+            else if( named_params.length > 1 ){
+                // Some sort of destructuring assignment
+                // need to alloc temps for the named params
+                for( let q = 0; q < named_params.length; ++q ) {
+                    let {name:fxname, data:fx} = named_params[q];
+                    let [name_part, ns_part] = cgGetFixtureNameParts(fnctx, fxname);
+                    let reg = asm.getTemp();
+                    let type_index = 0;
+                    if( fx is ValFixture )
+                        type_index = emitter.typeFromTypeExpr(fx.ty);
+                    fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(reg, type_index));
+                }
+                let [name_part, ns_part] = cgGetFixtureNameParts(fnctx, p.name);
+                //trace("Adding binding for " + name_part + " at reg " + (param_count));
+                fnctx.stk.slots.putBinding(name_part, ns_part, new RegBind(param_count, 0));
+            }
+            named_params = [];
+        }
+        else
+            Gen::internalError(fnctx, "Expected PropName or TempName, got " + p.name);
+    }
+    for ( let i=0 ; i < f.params.exprs.length ; i++ ) {
+        if( !redundantInitialization(fnctx, f.params.exprs[i]) ) {
+            cgExpr(fnctx, f.params.exprs[i]);
+            asm.I_pop();
+        }
+    }
+}
+
 function redundantInitialization(ctx, e){
     let ret = false;
     if(e is InitExpr && e.inits.length==1) {
-        let [name, expr] = e.inits[0];
+        let {name, expr} = e.inits[0];
         if( name is PropName && expr is GetParam )
             // This is just setting the param to itself if locals are using registers
             ret = true;
@@ -706,10 +710,10 @@ function setupArguments(ctx, f) {
         //
         // Then initialize it.  It must be done first according to E262-3.
 
-        cgFixtures(ctx, [[new PropName(new Ast::Name(Ast::noNS, "arguments")), 
-                          new ValFixture(Ast::anyType, false)]]);
+        cgFixtures(ctx, [new Ast::Fixture(new PropName(new Ast::Name(Ast::publicNS, "arguments")), 
+                                          new ValFixture(Ast::anyType, false))]);
         cgExpr(ctx, new Ast::SetExpr(Ast::assignOp, 
-                                     new Ast::LexicalRef(new Ast::Identifier("arguments",[[Ast::noNS]])), 
+                                     new Ast::Identifier("arguments", Ast::publicNSSL), 
                                      new Ast::GetParam(f.numparams)));
         ctx.asm.I_pop();
     }
@@ -728,14 +732,12 @@ function cgHead(ctx, head) {
 
 function cgInits(ctx, inits, baseOnStk) {
     let {asm, emitter} = ctx;
-    let limit = inits ? inits.length : 0;
 
-    for( let i=0 ; i < limit ; ++i ) {
-        let [name, init] = inits[i];
-
+    for( let i=0, limit=inits.length ; i < limit ; ++i ) {
+        let {name, expr} = inits[i];
         let [n, ns] = cgGetFixtureNameParts(ctx, name);
                 
-        let bind = findBinding(ctx, n, [[ns]]);
+        let bind = findBinding(ctx, n, new Ast::NamespaceSetList(new Ast::NamespaceSet(ns, null), null));
 
         if( baseOnStk ) {
             if(i < limit-1)
@@ -751,7 +753,7 @@ function cgInits(ctx, inits, baseOnStk) {
             }
         }
             
-        cgExpr(ctx, init);
+        cgExpr(ctx, expr);
         if( bind is SlotBind ) {
             // Load the scope the slot is in
             if( bind.slot == -1)
@@ -787,40 +789,41 @@ function getVariableDefinitionScope(ctx) {
     }
     return {slots:null, use_regs:false};
 }
-function findBinding(ctx, name, nss) {
-    var {stk:stk, asm:asm} = ctx;
-    
-    var bind = null;
+
+function findBinding({stk, asm}, name: IDENT, nssl: Ast::NamespaceSetList) {
+    if (!early_binding)
+        return Ast::nobind;
+
     while(stk != null) {
         let slots = stk.slots;
+        let bind = null;
         if(stk.slots) {
-            for( var i : uint = 0; i < nss.length; ++i ) {
-                let a = nss[i];
-                for( var j : uint = 0; j < a.length; ++j ) {
-                    let b = slots.getBinding(name, a[j]);
-                    if(  b != null ) {
-                        if( bind == null ) {
-                            bind = b;
-                        }
-                        else if( b != bind) {
+            //print(stk.slots);
+            for ( let tmp_nssl=nssl ; tmp_nssl != null ; tmp_nssl = tmp_nssl.link ) {
+                for ( let nss = tmp_nssl.nsset; nss != null ; nss = nss.link ) {
+                    let ns = slots.getBinding(name, nss.ns);
+                    if (ns != null) {
+                        if( bind == null )
+                            bind = ns;
+                        else if (ns != bind)
                             bind = Ast::nobind; // Ambiguous binding, punt for now, will show up at runtime
-                        }
                     }
                 }
-                
             }
-            if(bind != null )
+            if (bind != null) {
+                //print("Found binding for " + name + " " + nssl + ": " + bind);
                 return bind;
+            }
         }
-        if( stk.tag =="instance" || (stk.tag == "function" && !stk.push_this)  
-            || stk.tag=="with" || stk.tag=="catch")
+        if( stk.tag =="instance" ||
+            (stk.tag == "function" && !stk.push_this) ||
+            stk.tag=="with" || 
+            stk.tag=="catch")
             break;  // Can't go past an instance, or a function without a 'this'
         stk = stk.link;
     }
-    if( bind == null )
-        bind = Ast::nobind;
-    
-    return bind;
+    //print("Found NO binding for " + name + " " + nssl);
+    return Ast::nobind;
 }
 
 // Handles scopes and finally handlers and returns a label, if appropriate, to
@@ -894,7 +897,7 @@ function pushClass({asm, stk}, cls)
 
 function pushCInit({asm, stk}, cinit)
     new CTX( asm,
-             { tag: "function", "type": "cinit", link: stk }, 
+             { tag: "function", ty: "cinit", link: stk }, 
              cinit );
 
 function pushInstance({asm, stk}, inst)
@@ -904,17 +907,17 @@ function pushInstance({asm, stk}, inst)
 
 function pushIInit({stk}, scope_reg, iinit)
     new CTX( iinit.asm,
-             { tag:"function", "type": "iinit", scope_reg: scope_reg, link: stk },
+             { tag:"function", ty: "iinit", scope_reg: scope_reg, link: stk },
              iinit );
 
-function pushFunction({stk}, function_type, scope_reg, capture_reg, push_this, reify_act, func)
+function pushFunction({stk}, function_type, scope_reg, capture_reg, push_this, use_regs, func)
     new CTX( func.asm, 
              { tag: "function", 
-               "type": function_type, 
+               ty: function_type, 
                scope_reg: scope_reg, 
                capture_reg: capture_reg,
                push_this: push_this,
-               use_regs: !reify_act,
+               use_regs: use_regs,
                link: stk,
                slots: new Util::Names() },
                func );
