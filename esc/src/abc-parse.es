@@ -36,8 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-namespace Abc;
-use default namespace Abc;
+use default namespace Abc,
+    namespace Abc;
 
 use namespace Asm;
 

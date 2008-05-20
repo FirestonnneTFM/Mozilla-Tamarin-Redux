@@ -36,24 +36,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-internal namespace AVMPLUS = "avmplus";
-
-use default namespace ESC;
+use default namespace ESC,
+    namespace ESC;
 
 const version = { major: 0, minor: 1, nick: "That depends on what the meaning of 'is' is" };
 
 function readFile(fn) {
-    use namespace AVMPLUS;
+    use namespace "avmplus";
     return File.read (fn);
 }
 
 function loadBytes(bytes) {
-    use namespace AVMPLUS;
+    use namespace "avmplus";
     Domain.currentDomain.loadBytes(bytes);
 }
 
 function commandLineArguments() {
-    use namespace AVMPLUS;
+    use namespace "avmplus";
     return System.argv;
 }
 	

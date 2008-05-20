@@ -35,15 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-internal namespace AVMPLUS = "avmplus";
-internal namespace FLASH_UTILS = "flash.utils";
-
-use namespace Release;
-use namespace Ast;
-use namespace Abc;
-use namespace Asm;
-use namespace AVMPLUS;
-use namespace FLASH_UTILS;
+use namespace Abc,
+    namespace Asm,
+    namespace Ast,
+    namespace Release,
+    namespace "avmplus",
+    namespace "flash.utils";
 
 class AbcEncoderCpp 
 {

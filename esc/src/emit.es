@@ -60,12 +60,13 @@
    Sometimes this OO setup does not seem natural, other times it simplifies...
 */
 
-use default namespace Emit;
+use default namespace Emit,
+    namespace Emit;
 
-use namespace Util;
-use namespace Abc;
-use namespace Asm;
-use namespace Ast; // goes away
+use namespace Abc,
+    namespace Asm,
+    namespace Ast, // goes away
+    namespace Util;
 
 class ABCEmitter
 {
@@ -98,11 +99,19 @@ class ABCEmitter
     var RegExp_name;
     var meta_construct_name;
 
-    function namespace( ns:NAMESPACE ) {
+    /* AVM information.
+     *
+     * The "public public" namespace on the AVM, the one we wish to
+     * map to ES4 "public", is a CONSTANT_PackageNamespace with a name
+     * that is the empty string.
+     *
+     * The compiler inserts two definitions at the top of the file:
+     *
+     *   <magic> namespace internal = <magic>
+     *   internal namespace public = <the real public>
+     */
+    function namespace( ns: Ast::Namespace) {
         switch type ( ns ) {
-        case (int_ns: Ast::IntrinsicNamespace) {
-            return constants.namespace(CONSTANT_Namespace, constants.stringUtf8("intrinsic"));  // FIXME: not what we want
-        }
         case (pn: Ast::PrivateNamespace) {
             return constants.namespace(CONSTANT_PrivateNamespace, constants.stringUtf8(pn.name));
         }
@@ -129,25 +138,44 @@ class ABCEmitter
         }
     }
 
-    function flattenNamespaceSet(nss /*:[[NAMESPACE]]*/) {
+    // The hit ratio of this cache is normally above 95%.  It speeds
+    // up the back end by more than a factor of two.  128 is pretty
+    // random; a smaller number might work just as well.
+    //
+    // The reason it works so well is that the flattening of the
+    // namespace sets together with hashing them and looking them up
+    // to eliminate duplicates in the constant pool is quite
+    // expensive.  Here we filter identical NamespaceSetLists so that
+    // the constant pool doesn't have to work so hard.
+
+    internal var cached_nssl = new Array(128);
+    internal var cached_id = new Array(128);
+
+    function flattenNamespaceSet(nssl: Ast::NamespaceSetList) {
         var new_nss = [];
-        for( let i = 0; i <nss.length; i++ ) {
-            let temp = nss[i];
-            for( let q = 0; q < temp.length; q++) {
-                new_nss.push(namespace(temp[q]));
-            } 
-        } 
+        for ( ; nssl != null ; nssl = nssl.link )
+            for ( let nss = nssl.nsset ; nss != null ; nss = nss.link )
+                new_nss.push(this.namespace(nss.ns));
         return new_nss;
+    }
+
+    function namespaceSetList(nssl) {
+        let h = nssl.hash & 127;
+        if (nssl !== cached_nssl[h]) {
+            cached_nssl[h] = nssl;
+            cached_id[h] = constants.namespaceset(flattenNamespaceSet(nssl));
+        }
+        return cached_id[h];
     }
 
     function multiname(mname, is_attr) {
         let {nss, ident} = mname;
-        return constants.Multiname(constants.namespaceset(flattenNamespaceSet(nss)), constants.stringUtf8(ident), is_attr);
+        return constants.Multiname(namespaceSetList(nss), constants.stringUtf8(ident), is_attr);
     }
 
-    function qname(qn, is_attr ) {
+    function qname(qn, is_attr) {
         let {ns, id} = qn;
-        return constants.QName(namespace(ns), constants.stringUtf8(id), is_attr);
+        return constants.QName(this.namespace(ns), constants.stringUtf8(id), is_attr);
     }
 
     function nameFromIdent(id) {
@@ -155,9 +183,8 @@ class ABCEmitter
                                constants.stringUtf8(id),false);
     }
 
-    function multinameL({nss:nss}, is_attr) {
-        return constants.MultinameL(constants.namespaceset(flattenNamespaceSet(nss)), is_attr);
-    }
+    function multinameL(nss, is_attr)
+        constants.MultinameL(namespaceSetList(nss), is_attr);
 
     // This is a limited version of cgIdentExpr -- several pieces are
     // just copies -- and all uses of this function should probably be replaced
@@ -170,10 +197,16 @@ class ABCEmitter
         }
         case (qi: Ast::QualifiedIdentifier) { 
             switch type(qi.qual) {
-            case( lr: Ast::LexicalRef ) {
+            case( lr: Ast::Identifier ) {
                 // FIXME: Hack to deal with namespaces for now.
                 // later we will have to implement a namespace lookup to resolve qualified typenames
-                return qname(new Ast::Name(new Ast::UnforgeableNamespace(lr.ident.ident), qi.ident), false);
+                return qname(new Ast::Name(new Ast::UnforgeableNamespace(lr.ident), qi.ident), false);
+            }
+            case (lr: Ast::ForgeableNamespace) {
+                return qname(new Ast::Name(lr, qi.ident), false);
+            }
+            case (lr: Ast::UnforgeableNamespace) {
+                return qname(new Ast::Name(lr, qi.ident), false);
             }
             case( e:* ) {
                 internalError("", 0, "Unimplemented: nameFromIdentExpr " + e);
@@ -251,7 +284,7 @@ class ABCEmitter
             return qname(pn.name, false);
         }
         case (tn: Ast::TempName) {
-            return qname (new Ast::Name(Ast::noNS, "$t"+tn.index),false);  // FIXME allocate and access actual temps
+            return qname (new Ast::Name(Ast::publicNS, "$t"+tn.index),false);  // FIXME allocate and access actual temps
         }
         case (x:*) { 
             internalError("", 0, "Not a valid fixture name " + x);
@@ -262,7 +295,7 @@ class ABCEmitter
     function fixtureTypeToType(fix) {
         switch type (fix) {
         case (vf: Ast::ValFixture) {
-            return vf.type != null ? typeFromTypeExpr(vf.type) : 0 ;
+            return vf.ty != null ? typeFromTypeExpr(vf.ty) : 0 ;
         }
         case (mf: Ast::MethodFixture) {
             return 0;
@@ -320,31 +353,64 @@ class ABCEmitter
     function defaultExpr(expr) {
         // FIXME: This outlaws ~0, -1, and so on.  ES4 default expression is a general expr.
         switch type (expr) {
-        case(le: ILiteralExpr) {
+        case(le: LiteralExpr) {
             return defaultLiteralExpr(le);
         }
-        case(lr: Ast::LexicalRef) {
-            switch type ( lr.ident ) {
-            case (i: Ast::Identifier) {
-                if( i.ident == "undefined" ) {
-                    // Handle defualt expr of (... arg = undefined ...)
-                    return defaultLiteralExpr(new Ast::LiteralUndefined());
-                }
+        case(i: Ast::Identifier) {
+            if( i.ident == "undefined" ) {
+                // Handle defualt expr of (... arg = undefined ...)
+                return defaultLiteralExpr(new Ast::LiteralUndefined());
             }
-            } 
         }
         }
         syntaxError("", 0, "Default expression must be a constant value " + expr); // FIXME: source pos
     }
 }
 
-class Script
+// Optimization?  A brute-force hints table that maps both name and
+// (name ^ kind) to true, allowing us to avoid searching the traits
+// table if the hints table does not have an entry for whatever we're
+// looking for, reduces the amount of searching effectively.  But it
+// does not improve running times very much, probably because most
+// traits sets are small.  (In ESC the largest number of traits in a
+// scope is in the assembler, but compiling the assembler with that
+// kind of hints structure slows code generation down.)
+
+class TraitsTable 
 {
-    var e, init, traits=[];
+    var traits = [];
+
+    // Here we probably want: newVar, newConst, ... instead?
+
+    function addTrait(t)
+        traits.push(t);
+
+    function hasTrait(name, kind) {
+        for (let i=0, limit=traits.length ; i < limit ; i++) {
+            let t = traits[i];
+            if(t.name == name && ((t.kind&15)==kind))
+                return true;
+        }
+        return false;
+    }
+
+    function probeTrait(name) {
+        for (let i=0, limit=traits.length ; i < limit ; i++) {
+            let t = traits[i];
+            if(t.name == name)
+                return [true, t.kind & 15];
+        }
+        return [false, 0];
+    }
+}
+
+class Script extends TraitsTable
+{
+    var e, init;
 
     function Script(e:ABCEmitter) {
         this.e = e;
-        this.init = new Method(e,[], "", true, new Ast::FuncAttr(null));
+        this.init = new Method(e,[], 0, true, new Ast::FuncAttr(null));
     }
 
     function newClass(name, basename, interfaces, flags, protectedns=null) {
@@ -358,10 +424,6 @@ class Script
     function addException(e) {
         return init.addException(e);
     }
-    // Here we probably want: newVar, newConst, ... instead?
-    function addTrait(t) {
-        return traits.push(t);
-    }
 
     function finalize() {
         var id = init.finalize();
@@ -372,9 +434,9 @@ class Script
     }
 }
     
-class Class
+class Class extends TraitsTable
 {
-    var s, name, basename, traits=[], instance=null, cinit, interfaces, flags, protectedns;
+    var s, name, basename, instance=null, cinit, interfaces, flags, protectedns;
 
     function Class(script, name, basename, interfaces, flags, protectedns=null) {
         this.s = script;
@@ -389,7 +451,7 @@ class Class
 
     function getCInit() {
         if(cinit == null )
-            cinit = new Method(s.e, [], "$cinit", true, new Ast::FuncAttr(null));
+            cinit = new Method(s.e, [], s.e.constants.stringUtf8("$cinit"), true, new Ast::FuncAttr(null));
         return cinit;
     }
 
@@ -400,10 +462,6 @@ class Class
         return this.instance;
     }
         
-    function addTrait(t) {
-        return traits.push(t);
-    }
-
     function finalize() {
         var instidx = instance.finalize();
             
@@ -430,29 +488,31 @@ class Class
 //   - logic in cogen is responsible for generating global
 //     code that performs newclass/initproperty
 
-class Interface
+class Interface extends TraitsTable
 {
-    var script, ifacename, methname, interfaces, traits=[];
+    var script, ifacename, methname, interfaces;
 
     function Interface(script, ifacename, methname, interfaces) 
         : script=script
         , ifacename=ifacename
         , methname=methname
         , interfaces=interfaces 
-    {}
+    {
+        assert(methname is Number);
+    }
 
     function finalize() {
         var clsinfo = new ABCClassInfo();
 
         var iinit = new Instance(script, ifacename, 0, interfaces, CONSTANT_ClassInterface|CONSTANT_ClassSealed);
-        var cinit = (new Method(script.e, [], methname, false, new Ast::FuncAttr(null))).finalize();
+        var cinit = (new Method(script.e, [], script.e.constants.stringUtf8(methname), false, new Ast::FuncAttr(null))).finalize();
         clsinfo.setCInit(cinit);
         for(let i = 0; i < traits.length; ++i)
             clsinfo.addTrait(traits[i]);
 
         var clsidx = script.e.file.addClass(clsinfo);
             
-        var iinitm = new Method(script.e, [], methname, false, new Ast::FuncAttr(null), true);
+        var iinitm = new Method(script.e, [], script.e.constants.stringUtf8(methname), false, new Ast::FuncAttr(null), true);
         iinit.setIInit(iinitm.finalize());
         iinit.finalize();
 
@@ -461,9 +521,9 @@ class Interface
     }
 }
 
-class Instance 
+class Instance extends TraitsTable
 {
-    var s, name, basename, flags, interfaces, traits = [], iinit, protectedns;
+    var s, name, basename, flags, interfaces, iinit, protectedns;
         
     function Instance(s:Script, name, basename, interfaces, flags, protectedns=null) 
         : s=s
@@ -476,10 +536,7 @@ class Instance
     }
         
     function setIInit(method) {
-        iinit = method
-            }
-    function addTrait(t) {
-        return traits.push(t);
+        iinit = method;
     }
         
     function finalize() {
@@ -500,11 +557,12 @@ class Instance
     }
 }
 
-class Method // extends AVM2Assembler
+class Method extends TraitsTable // extends AVM2Assembler
 {
-    var e, formals, name, asm, traits = [], finalized=false, defaults = null, exceptions=[], attr=null, bodyless;
+    var e, formals, name, asm, finalized=false, defaults = null, exceptions=[], attr=null, bodyless;
 
     function Method(e:ABCEmitter, formals:Array, name, standardPrologue, attr, bodyless=false) {
+        assert( name is Number && name < 1073741824);
         //super(e.constants, formals.length);
         this.formals = formals;
         this.e = e;
@@ -521,10 +579,6 @@ class Method // extends AVM2Assembler
                 asm.I_pushscope();
             }
         }
-    }
-
-    function addTrait(t) {
-        return traits.push(t);
     }
 
     function setDefaults(d) {
