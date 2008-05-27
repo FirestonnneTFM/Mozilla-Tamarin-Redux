@@ -139,7 +139,7 @@ namespace axtam
 		#endif
 
 		// init toplevel internally
-		toplevel = initAXTamBuiltins();
+		toplevel = initAXTamBuiltins(true);
 	}
 
 	void AXTam::Close() {
@@ -174,13 +174,8 @@ namespace axtam
 		#endif
 	}
 
-
-	Toplevel* AXTam::initAXTamBuiltins()
+	void AXTam::initESC(Toplevel *toplevel)
 	{
-		// Initialize a new Toplevel.  This will also create a new
-		// DomainEnv based on the builtinDomain.
-		Toplevel* toplevel = initTopLevel();
-
 		// load up the compiler (this list comes from esc/build/esc.sh)
 		// This is hacked in under the assumption we will come up with a
 		// better strategy.
@@ -247,8 +242,18 @@ namespace axtam
 					wcscat_s(fqtail, tailsize, L"..\\build");
 				_wchdir(fqname);
 				break; // all done
-			}
-		}
+			} // if file exists
+		} // for candidate...
+	}
+
+	Toplevel* AXTam::initAXTamBuiltins(bool load_esc)
+	{
+		// Initialize a new Toplevel.  This will also create a new
+		// DomainEnv based on the builtinDomain.
+		Toplevel* toplevel = initTopLevel();
+
+		if (load_esc)
+			initESC(toplevel);
 
 		// Initialize the parser in our Toplevel
 		handleActionPool(pool,
@@ -902,3 +907,34 @@ STDAPI DllUnregisterServer(void)
 	return hr;
 }
 
+STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine)
+{
+   HRESULT hr = E_FAIL;
+   // MSVC will call "regsvr32 /i:user" if "per-user registration" is set as a 
+   // linker option - so handle that here (its also handle for anyone else to
+   // be able to manually install just for themselves.)
+   static const wchar_t szUserSwitch[] = L"user";
+   if (pszCmdLine != NULL)
+   {
+       if (_wcsnicmp(pszCmdLine, szUserSwitch, _countof(szUserSwitch)) == 0)
+       {
+           AtlSetPerUserRegistration(true);
+		   // But ATL still barfs if you try and register a COM category, so
+		   // just arrange to not do that.
+		   _AtlComModule.m_ppAutoObjMapFirst = _AtlComModule.m_ppAutoObjMapLast;
+       }
+   }
+   if (bInstall)
+   {    
+       hr = DllRegisterServer();
+       if (FAILED(hr))
+       {    
+           DllUnregisterServer();
+       }
+   }
+   else
+   {
+       hr = DllUnregisterServer();
+   }
+   return hr;
+}
