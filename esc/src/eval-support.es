@@ -26,7 +26,7 @@ ESC function evaluateInScopeArray(args, scopes, scopedesc, strict) {
             }
 
             //Asm::listify = true;
-            ESC::loadBytes(Gen::cgEval(prog, name, scopedesc).getBytes());
+            Util::loadBytes(Gen::cgEval(prog, name, scopedesc).getBytes());
             //Asm::listify = false;
 
             return ESC::eval_hook(scopes);

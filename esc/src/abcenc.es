@@ -20,6 +20,6 @@ use namespace "avmplus";
 
     //print ("encoding asm");
     var tx = AbcEncode::abcFile (bytes, verbose);
-    writeFile (tx,fname+".asm");
+    Util::writeStringToFile (tx,fname+".asm");
     print (fname+".asm, "+tx.length+" chars written");
 }

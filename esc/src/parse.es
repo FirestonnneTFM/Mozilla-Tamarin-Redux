@@ -434,11 +434,13 @@ final class Parser
     const cx      : Context;
     const scan    : Scanner;
     const filename: String;
+    const start_line;
 
-    function Parser(src, topFixtures, filename="") 
+    function Parser(src, topFixtures, filename="", start_line=1) 
         : cx = new Context(this, topFixtures)
         , scan = new Lex::Scanner(src, filename)
         , filename = filename
+        , start_line = start_line-1
     { }
 
     var currentClassName: String = "";
@@ -572,7 +574,7 @@ final class Parser
         LP < L0;
 
     function position ()
-        L0;
+        L0 + start_line;
 
     function tokenText(t)
         tokenStore[t].text;
