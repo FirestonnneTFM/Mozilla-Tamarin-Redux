@@ -194,7 +194,13 @@ namespace axtam
 			// We don't want to search relative paths in real "release" builds
 			// but its early days, and without this, developers will get confused 
 			// XXX - work out a strategy for embedding esc!
+#if _MSC_VER < 1500
+			// vs2005 builds into 'vs8/{config_name}
 			L"..\\..\\..\\esc\\bin\\", // for running directly from the source tree
+#else
+			// vs2008 builds into 'vs2008/obj/{config_name}
+			L"..\\..\\..\\..\\esc\\bin\\", // for running directly from the source tree
+#endif
 			NULL
 		};
 		wchar_t fqname[MAX_PATH+100] = {L'\0'}; // space for candidate path too...
