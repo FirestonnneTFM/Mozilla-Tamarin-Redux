@@ -46,7 +46,7 @@ use default namespace internal;
 use namespace "avmplus";
 use namespace "flash.utils";
 
-var argv = ESC::commandLineArguments();
+var argv = Util::commandLineArguments();
 if (argv.length == 0) {
     //let v = ESC::version;
     //print("ESC v" + v.major + "." + v.minor + " (\"" + v.nick + "\")");

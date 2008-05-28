@@ -42,7 +42,7 @@
 
     let before = new Date();
 
-    let argv = ESC::commandLineArguments();
+    let argv = Util::commandLineArguments();
     for ( let i=0, limit=argv.length ; i < limit ; i++ ) {
         let fname = argv[i];
         let [parse,cogen] = ESC::compileFile(fname);

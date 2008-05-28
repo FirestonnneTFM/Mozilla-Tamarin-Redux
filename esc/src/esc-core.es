@@ -39,72 +39,68 @@
 use default namespace ESC,
     namespace ESC;
 
+internal function compile(consume, produce, context, start_line) {
+    let t1 = new Date;
+
+    let input = consume();
+    let parser = new Parse::Parser(input, getTopFixtures(), context, start_line);
+    let prog = parser.program();
+
+    let t2 = new Date;
+
+    let res = produce( Gen::cg(prog) );
+
+    let t3 = new Date;
+
+    return [t2-t1, t3-t2, res];
+}
+
+// Public API below.  The API is ad hoc on purpose, each function
+// serves a different use case and is provided for convenience.
+// Keeping the API small is not (currently) a goal.
+
 const version = { major: 0, minor: 1, nick: "That depends on what the meaning of 'is' is" };
 
-function readFile(fn) {
-    use namespace "avmplus";
-    return File.read (fn);
-}
-
-function loadBytes(bytes) {
-    use namespace "avmplus";
-    Domain.currentDomain.loadBytes(bytes);
-}
-
-function commandLineArguments() {
-    use namespace "avmplus";
-    return System.argv;
-}
-	
 function getTopFixtures()
     ESC::bootstrap_namespaces;    // in esc-env.es
 
-function compile(consume, produce, context) {
-    var t1 = new Date;
+function compileFile(fname, start_line=1)
+    compile( (function () Util::readStringFromFile(fname)),
+             (function (abc) Util::writeBytesToFile(abc.getBytes(), fname + ".abc")),
+             fname,
+             start_line );
 
-    var input = consume();
-    var parser = new Parse::Parser( input, getTopFixtures(), context );
-    var prog = parser.program();
+function compileAndLoadFile(fname, start_line=1)
+    compile( (function () Util::readStringFromFile(fname)),
+             (function (abc) Util::loadBytes(abc.getBytes())),
+             fname,
+             start_line );
 
-    var t2 = new Date;
+function compileAndLoadString(input, context, start_line=1)
+    compile( (function () input),
+             (function (abc) Util::loadBytes(abc.getBytes())),
+             context,
+             start_line );
 
-    produce( Gen::cg(prog) );
-
-    var t3 = new Date;
-
-    return [t2-t1, t3-t2];
+function compileStringToBytes(input, context="(string)", start_line=1) {
+    let [_,_,res] = compile( (function () input),
+                             (function (abc) abc.getBytes()),
+                             context,
+                             start_line );
+    return res;
 }
 
-// Compilation entry points
-
-function compileFile(fname)
-    compile( function () { return ESC::readFile(fname) },
-             function (abc) { return dumpABCFile(abc, fname + ".abc") },
-             fname );
-
-function compileAndLoadFile(fname)
-    compile( function () { return ESC::readFile(fname) },
-             function (abc) { return ESC::loadBytes(abc.getBytes()) },
-             fname );
-
-function compileAndLoadString(input, context)
-    compile( function () { return input },
-             function (abc) { return ESC::loadBytes(abc.getBytes()) },
-             context );
-
-// AST encoding and decoding entry points
-
 function parseFromStringAndEncodeAst(input, context="string input"): String {
-    var parser = new Parse::Parser( input, getTopFixtures(), context );
-    var program = parser.program();
+    let parser = new Parse::Parser(input, getTopFixtures(), context);
+    let program = parser.program();
     return (new Ast::Serializer()).serialize(program);
 }
 
 function parseFromFileAndEncodeAst(fname)
-    parseFromStringAndEncodeAst(ESC::readFile(fname), fname);
+    parseFromStringAndEncodeAst(Util::readStringFromFile(fname), fname);
 
 function decodeAstFromString(input): Ast::Program
     (new Ast::Unserializer()).unserializeText(input);
 
 function decodeAstFromFile(fname)
-    decodeAstFromString(ESC::readFile(fname));
+    decodeAstFromString(Util::readStringFromFile(fname));
