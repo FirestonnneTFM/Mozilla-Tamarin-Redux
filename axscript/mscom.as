@@ -239,16 +239,10 @@ package {
 
 	public function compileString(str, fname:String = "", startLineNumber:int = 0)
 	{
-// Bug 432242 is adding a 'compileStringToBytes' function, but its not checked in
-// yet - so reimplement it ourselves.  Note that line numbers will be broken until
-// that bug is fixed.
-//		use namespace ESC;
-//		var bytes = ESC::compileStringToBytes(str, fname, startLineNumber+1);
-		var bytes;
-		ESC::compile( function () { return str },
-					  function (abc) { bytes = abc.getBytes() },
-					  fname);
-		return bytes;
+		// NOTE: This requires the patch to bug 432242 (and by the time this
+		// comment is stale, we should remove compileString() completely and
+		// inline it!
+		return ESC::compileStringToBytes(str, fname, startLineNumber+1);
 	}
 }
 
