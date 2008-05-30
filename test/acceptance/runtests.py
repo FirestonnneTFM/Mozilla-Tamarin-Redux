@@ -338,14 +338,6 @@ def build_incfiles(as):
 
 
 
-# ================================================
-# Determine the configruation if it has not been 
-# passed into the script:
-# {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
-# ================================================
-ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-5.2-WOW64':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','SunOS':'sol',}[platform.system()]
-cputype={'i386':'x86','i686':'x86','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86'}[platform.machine()]
-
 if globs['config'] == '':
   if not runSource:
     vmtype = 'release'
@@ -358,8 +350,24 @@ if globs['config'] == '':
     except:
       nop = True
       
-    globs['config'] = cputype+'-'+ostype+'-tvm-'+vmtype+vmargs
+  # ================================================
+  # Determine the configruation if it has not been 
+  # passed into the script:
+  # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
+  # ================================================
+  try:
+    ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-5.2-WOW64':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','SunOS':'sol',}[platform.system()]
+  except:
+    print("ERROR: os %s is unknown, expected values are (win,mac,lnx,sol), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.system()))
+    exit(1)
+  try:
+    cputype={'i386':'x86','i686':'x86','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','':'x86'}[platform.machine()]
+  except:
+    print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
+    exit(1)
+  globs['config'] = cputype+'-'+ostype+'-tvm-'+vmtype+vmargs
     
+  
 js_print('current configuration: %s' % globs['config'])
 
 
