@@ -1,3 +1,0 @@
-print (f() || g())
-function f() { print (true); return true }
-function g() { print (false); return false }
