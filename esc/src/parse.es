@@ -1609,6 +1609,8 @@ final class Parser
     //        }
 
     function dynamicOverrideExpression() {
+        if (!ESC::flags.ext_dynamic_override)
+            Parse::syntaxError(this, "'dynamic override' not enabled.");
         eat(Token::Dynamic);
         eat(Token::Override);
         eat(Token::LeftParen);
@@ -2067,7 +2069,12 @@ final class Parser
             return new Ast::LetBlockStmt(new Ast::Head(fixtures, inits), head, directive_list);
         }
 
-        // This is probably an extension
+        // Extension: allow let expressions at the top level.  Trigger
+        // an error if the extension is not enabled.
+
+        if (!ESC::flags.ext_toplevel_letexpr)
+            eat(Token::LeftBrace);
+
         let expr = fullCommaExpression();
         return new Ast::ExprStmt(new Ast::LetExpr(new Ast::Head(fixtures, inits), expr));
     }
@@ -3183,7 +3190,7 @@ final class Parser
                 switch (t) {
                 case Token::Dynamic:
                     // Language extension, this feels hackish.
-                    if (ns == null && attrs == 0 && hd2() == Token::Override)
+                    if (ESC::flags.ext_dynamic_override && ns == null && attrs == 0 && hd2() == Token::Override)
                         return [false, null, 0, null];
                     attrs = checkAttr(attrs, ATTR_DYNAMIC, "dynamic"); 
                     next();

@@ -541,7 +541,7 @@ namespace avmshell
 			bool do_verbose = false;
 #endif
 
-			for (int i=1; i<argc; i++) {
+			for (int i=1; i<argc && endFilenamePos == -1; i++) {
 				char *arg = argv[i];
 				// options available to development builds.
 				if (arg[0] == '-') 
@@ -664,7 +664,8 @@ namespace avmshell
 		            #endif /* DEBUGGER */
 
 					else if(arg[1] == '-' && arg[2] == 0) {
-						endFilenamePos = i;
+						if (endFilenamePos == -1)
+							endFilenamePos = i;
 					}
 					else {
 						usage();
