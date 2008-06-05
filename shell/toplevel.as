@@ -37,6 +37,8 @@
 
 package avmplus 
 {
+    import flash.utils.ByteArray
+
 	public class System
 	{
 		public native static function exit(status:int):void
@@ -57,6 +59,17 @@ package avmplus
 		public native static function exists(filename:String):String;
 		public native static function read(filename:String):String;
 		public native static function write(filename:String, data:String):void;
+
+		public static function fileToByteArray(filename:String, readOnly:Boolean):ByteArray
+		{
+			return ByteArray.readFile(filename)
+		}
+
+		public static function writeByteArray(filename:String, bytes:ByteArray):Boolean
+		{
+			bytes.writeFile(filename)
+			return true
+		}
 	}
 
 	public function debugger()
