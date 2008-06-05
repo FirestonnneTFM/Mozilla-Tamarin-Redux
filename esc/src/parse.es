@@ -604,8 +604,8 @@ final class Parser
         return true;
     }
 
-    function makeIdentifier(id, nss) : Ast::Identifier {
-        let ident = new Ast::Identifier(id, nss);
+    function makeIdentifier(id, nss, pos=0) : Ast::Identifier {
+        let ident = new Ast::Identifier(id, nss, pos);
         if (id === "arguments") 
             cx.topFunction().uses_arguments = true;
         else if (id === "eval")
@@ -828,10 +828,11 @@ final class Parser
     function nameExpression(): Ast::IdentExpr {
         let name;
 
+        let pos = position();
         if (hd() == Token::StringLiteral)
-            name = let (s = new Ast::LiteralString(lexeme(), position())) next(), s;
+            name = let (s = new Ast::LiteralString(lexeme(), pos)) next(), s;
         else if (hd() == Token::Identifier) 
-            name = makeIdentifier(identifier(), cx.getOpenNamespaces());
+            name = makeIdentifier(identifier(), cx.getOpenNamespaces(), pos);
         else
             Parse::syntaxError(this, "String or identifier required, found " + lexeme());
 
@@ -842,7 +843,8 @@ final class Parser
             // namespaces we can't do without.  Right now, it slows down parsing
             // by a factor of 2, but namespace search can be made more clever
             // to fix that.
-            name = new Ast::QualifiedIdentifier(cx.resolveNamespaceExpr(name), propertyIdentifier());
+            pos = position();
+            name = new Ast::QualifiedIdentifier(cx.resolveNamespaceExpr(name), propertyIdentifier(), pos);
         }
 
         return name;
@@ -1233,15 +1235,19 @@ final class Parser
 
     function propertyOperator (obj: Ast::Expr) : [Ast::Expr] {
         switch (hd ()) {
-        case Token::Dot:
+        case Token::Dot: {
             eat(Token::Dot);
+            let pos = position();
             if (Token::isReserved(hd()))
-                return new Ast::ObjectRef (obj, makeIdentifier(propertyIdentifier(), cx.getOpenNamespaces()));
+                return new Ast::ObjectRef (obj, makeIdentifier(propertyIdentifier(), cx.getOpenNamespaces(), pos));
             if (hd() == Token::StringLiteral || hd() == Token::Identifier)
-                return new Ast::ObjectRef (obj, nameExpression());
+                return new Ast::ObjectRef (obj, nameExpression(), pos);
             Parse::syntaxError(this, "Name expression required here.");
-        case Token::LeftBracket:
-            return new Ast::ObjectRef (obj, new Ast::ComputedName(brackets()));
+        }
+        case Token::LeftBracket: {
+            let pos = position();
+            return new Ast::ObjectRef (obj, new Ast::ComputedName(brackets()), pos);
+        }
         case Token::LeftDotAngle: {
             let ts = typeApplication();
             return new Ast::ApplyTypeExpr(obj, ts);

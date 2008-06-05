@@ -656,10 +656,11 @@ class Identifier extends Expr implements IdentExpr, Serializable {
     const ident : IDENT;
     const nss: [...(Ast::Namespace | Expr)];
     var binding;
-    function Identifier (ident,nss)
+    function Identifier (ident,nss,pos=0)
         : ident = ident
         , nss = nss
-        , binding = undefined {}
+        , binding = undefined
+        , super(pos) {}
 
     function serialize(s)
         s.sClass(this, "Identifier", "ident", "nss");
@@ -668,9 +669,10 @@ class Identifier extends Expr implements IdentExpr, Serializable {
 class QualifiedIdentifier extends Expr implements IdentExpr, Serializable {
     const qual  : (Ast::Namespace | Expr);
     const ident : IDENT;
-    function QualifiedIdentifier (qual,ident)
+    function QualifiedIdentifier (qual,ident,pos=0)
         : qual=qual
-        , ident=ident {}
+        , ident=ident
+        , super(pos) {}
 
     function serialize(s)
         s.sClass(this, "QualifiedIdentifier", "qual", "ident");
