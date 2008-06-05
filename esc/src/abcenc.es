@@ -18,7 +18,7 @@ use namespace "avmplus";
 {
     bytes = Abc::parseAbcFile(new ABCByteStream(bytes));
 
-    //print ("encoding asm");
+    print ("encoding asm");
     var tx = AbcEncode::abcFile (bytes, verbose);
     Util::writeStringToFile (tx,fname+".asm");
     print (fname+".asm, "+tx.length+" chars written");

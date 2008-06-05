@@ -102,6 +102,7 @@ function cgExpr(ctx, e) {
     case (e:SliceExpr) { cgSliceExpr(ctx, e) }
     case (e:GetTemp) { cgGetTempExpr(ctx, e) }
     case (e:GetParam) { cgGetParamExpr(ctx, e) }
+    case (e:GetCogenTemp) { cgGetCogenTemp(ctx, e) }
     case (e:EvalScopeInitExpr) { cgEvalScopeInitExpr(ctx,e) }
     case (e:*) { 
         Gen::internalError(ctx, "Unimplemented expression type " + e);
@@ -1004,9 +1005,12 @@ function cgGetTempExpr(ctx, {n}) {
     cgGetProp(ctx, id);
 }
 
-function cgGetParamExpr(ctx, e) {
-    let {asm} = ctx;
-    asm.I_getlocal(e.n + 1);  //account for 'this'
+function cgGetParamExpr({asm}, {n}) {
+    asm.I_getlocal(n + 1);  //account for 'this'
+}
+
+function cgGetCogenTemp({asm}, {n}) {
+    asm.I_getlocal(n);
 }
     
 function cgIdentExpr(ctx, e) {
@@ -1038,6 +1042,12 @@ function cgIdentExpr(ctx, e) {
             Gen::internalError(ctx, "Unsupported form of qualified identifier " + qi);
         }
         }
+    }
+    case (x: PropName) {
+        return emitter.fixtureNameToName(x);
+    }
+    case (x: TempName) {
+        return emitter.fixtureNameToName(x);
     }
     case (x:*) { 
         Gen::internalError(ctx, "Unimplemented cgIdentExpr " + e);
