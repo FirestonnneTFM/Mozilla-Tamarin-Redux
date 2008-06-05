@@ -3615,7 +3615,7 @@ final class Parser
         f.reify_activation = reify_activation;
     }
 
-    function program () : Ast::Program {
+    function program (define_namespaces=true) : Ast::Program {
         start();
 
         // FIXME: The following realization of the internal namespace
@@ -3623,15 +3623,26 @@ final class Parser
         // testing more difficult, and using a hash of the input is
         // slow.  So this will do for the moment.
 
+        // FIXME: Namespaces are not defined for eval, but the
+        // following handling of that problem is probably insufficient
+        // because references to 'public' and 'internal' in the eval
+        // code should reference the ones inherited from the calling
+        // context.
+        //
+        // On the other hand, should global.eval() expose the internal
+        // namespace of the caller??
+
         let internalNamespace = new Ast::InternalNamespace("<#internal " + filename + ">");
 
         cx.enterGlobal ();
-        cx.addFixture(Ast::varInit, 
-                      new Ast::PropName(new Ast::Name(internalNamespace, "internal")),
-                      new Ast::NamespaceFixture(internalNamespace));
-        cx.addFixture(Ast::varInit,
-                      new Ast::PropName(new Ast::Name(internalNamespace, "public")),
-                      new Ast::NamespaceFixture(Ast::publicNS));
+        if (define_namespaces) {
+            cx.addFixture(Ast::varInit, 
+                          new Ast::PropName(new Ast::Name(internalNamespace, "internal")),
+                          new Ast::NamespaceFixture(internalNamespace));
+            cx.addFixture(Ast::varInit,
+                          new Ast::PropName(new Ast::Name(internalNamespace, "public")),
+                          new Ast::NamespaceFixture(Ast::publicNS));
+        }
         cx.pushNamespace(internalNamespace);
         cx.pushNamespace(Ast::publicNS);
 

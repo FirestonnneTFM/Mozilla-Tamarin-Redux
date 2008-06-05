@@ -15,7 +15,7 @@ ESC function evaluateInScopeArray(args, scopes, scopedesc, strict) {
             let file = "(EVAL CODE)";
             let name = "$eval$" + id + "$";
             let parser = new Parse::Parser( args[0], ESC::getTopFixtures(), file );
-            let prog = parser.program();
+            let prog = parser.program(false);
 
             // These checks could be moved into the parser, and might be, by and by.
 

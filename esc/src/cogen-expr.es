@@ -594,8 +594,9 @@ function cgEvalPrefix(ctx, evalTmp, nargs, strict) {
                     asm.I_getscopeobject(level);
                 else
                     asm.I_getouterscope(level);
+                return level + 1;
             }
-            return level + 1;
+            return level;
         }
 
         rec(ctx.stk, true);
