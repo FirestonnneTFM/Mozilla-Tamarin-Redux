@@ -49,7 +49,10 @@ function cgStmt(ctx, s) {
     switch type (s) {
     case (s:EmptyStmt) { }
     case (s:ExprStmt) { cgExprStmt(ctx, s) }
+    case (s:ForStmt) { cgForStmt(ctx, s) }
+    case (s:ForBindingStmt) { cgForBindingStmt(ctx, s) }
     case (s:ForInStmt) { cgForInStmt(ctx, s) }
+    case (s:ForInBindingStmt) { cgForInBindingStmt(ctx, s) }
     case (s:ThrowStmt) { cgThrowStmt(ctx, s) }
     case (s:ReturnStmt) { cgReturnStmt(ctx, s) }
     case (s:BreakStmt) { cgBreakStmt(ctx,s) }
@@ -59,7 +62,6 @@ function cgStmt(ctx, s) {
     case (s:LetBlockStmt) { cgLetBlockStmt(ctx,s) }
     case (s:WhileStmt) { cgWhileStmt(ctx, s) }
     case (s:DoWhileStmt) { cgDoWhileStmt(ctx, s) }
-    case (s:ForStmt) { cgForStmt(ctx, s) }
     case (s:IfStmt) { cgIfStmt(ctx, s) }
     case (s:WithStmt) { cgWithStmt(ctx, s) }
     case (s:TryStmt) { cgTryStmt(ctx, s) }
@@ -155,11 +157,8 @@ function cgDoWhileStmt(ctx, {stmt, labels, expr}) {
     asm.I_label(Lbreak);
 }
 
-function cgForStmt(ctx, {vars, init, cond, incr, stmt, labels}) {
-    // FIXME: fixtures
-    // FIXME: code shape?
+function cgForStmt(ctx, {init, cond, incr, stmt, labels}) {
     let {asm} = ctx;
-    cgHead(ctx, vars);
     let Lbreak = asm.newLabel();
     let Lcont = asm.newLabel();
     if (init != null) {
@@ -181,43 +180,21 @@ function cgForStmt(ctx, {vars, init, cond, incr, stmt, labels}) {
     asm.I_label(Lbreak);
 }
 
-function cgForInStmt(ctx, {vars, init, obj, stmt, labels, is_each}) {
-    // FIXME: fixtures
-    // FIXME: code shape?
-    let {asm, emitter} = ctx;
-    cgHead(ctx, vars);
+function cgForBindingStmt(ctx, s) {
+    cgHead(ctx, s.head);
+    cgForStmt(ctx, s);
+}
 
-    let name;
-    switch type (init) {
-    case (ident: Ast::IdentExpr) {
-        name = cgIdentExpr(ctx, ident);
-    }
-    case (ie: Ast::InitExpr) {
-        if (ie.inits.length != 1)
-            Gen::internalError(ctx, "unimplemented cogen in cgForInStmt: too many names" + ie.inits.length);
-        let {name:fxname} = ie.inits[0];
-        name = emitter.fixtureNameToName(fxname);
-    }
-    case(x: *) {
-        Gen::internalError(ctx, "unimplemented cogen in cgForInStmt for " + init);
-    }
-    }
+function cgForInStmt(ctx, {assignment, tmp, obj, stmt, is_each, labels}) {
+    let {asm, emitter} = ctx;
 
     let Lbreak = asm.newLabel();
     let Lcont = asm.newLabel();
 
-    // FIXME: actually wrong to do this.  The effect we're looking for is that the
-    // binding is introduced if it does not exist, ie, DEFVAR.
-    asm.I_findproperty(name);
-    asm.I_pushundefined();
-    asm.I_setproperty(name);
-
-    if (init != null) {
-        cgExpr(ctx, init);
-        asm.I_pop();
-    }
     let T_obj = asm.getTemp();
     let T_idx = asm.getTemp();
+    let T_val = asm.getTemp();
+    tmp.n = T_val;
     cgExpr(ctx, obj);
     asm.I_coerce_a(); // satisfy verifier
     asm.I_setlocal(T_obj);
@@ -235,18 +212,26 @@ function cgForInStmt(ctx, {vars, init, obj, stmt, labels, is_each}) {
         asm.I_nextvalue();
     else 
         asm.I_nextname();
-
-    asm.I_findpropstrict(name);
-    asm.I_swap();
-    asm.I_setproperty(name);
+    asm.I_setlocal(T_val);
+    cgExpr(ctx, assignment);
+    asm.I_pop();
 
     cgStmt(pushBreak(pushContinue(ctx, labels, Lcont), Lbreak), stmt);
     asm.I_label(Lcont);
     asm.I_jump(Ltop);
 
     asm.I_label(Lbreak);
+    asm.killTemp(T_val);
     asm.killTemp(T_idx);
     asm.killTemp(T_obj);
+}
+
+function cgForInBindingStmt(ctx, s) {
+    let {asm, emitter} = ctx;
+    let {head, init} = s;
+    cgHead(ctx, head);
+    cgExpr(ctx, init);
+    cgForInStmt(ctx, s);
 }
 
 function cgBreakStmt(ctx, {ident}) {

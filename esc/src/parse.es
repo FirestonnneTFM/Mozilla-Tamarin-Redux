@@ -2124,103 +2124,95 @@ final class Parser
     }
 
     function forStatement () : Ast::Stmt {
-        cx.enterBlock ();
+        let init=null;
+        let bindings=null, it=null, ro=false;
 
         eat (Token::For);
         let is_each = matchToken(Token::id_each);
         eat (Token::LeftParen);
-        let init = forInitialiser ();
+
+        switch (hd()) {
+        case Token::SemiColon:
+            break;
+        case Token::Const:
+        case Token::Var:
+        case Token::Let:
+            cx.enterBlock ();
+            [it,ro,bindings] = bindingForInitialiser();
+            break;
+        default:
+            init = dynamic override (alpha=allowColon, beta=noIn) commaExpression();
+        }
+
+        // Always process bindings first to set up the head
+        if (bindings != null)
+            init = collapseBindings(it, ro, bindings);
+
         if (match(Token::In)) {
+            let pattern = null;
+
+            if (bindings != null) {
+                if (bindings.length != 1)
+                    Parse::syntaxError(this, "Only one variable binding allowed in for-in");
+                [pattern] = bindings[0];
+            }
+
             let objexpr = fullCommaExpression ();
             eat (Token::RightParen);
             let body = substatement (); 
-            let head = cx.exitBlock ();
                 
-            return new Ast::ForInStmt (head,init,objexpr,body,is_each);
+            if (bindings == null)
+                pattern = patternFromExpr(init);
+
+            let tmp = new Ast::GetCogenTemp();
+            let [_,assignment] = desugarBindingPattern(pattern, Ast::anyType, tmp, cx.getDefaultNamespace(), null, null);
+
+            if (bindings != null)
+                return new Ast::ForInBindingStmt(cx.exitBlock(), assignment, tmp, init, objexpr, body, is_each);
+            return new Ast::ForInStmt(assignment, tmp, objexpr, body, is_each);
         }
         else {
             if (is_each)
                 Parse::syntaxError(this, "'for each' requires 'in' style loop");
+
             eat (Token::SemiColon);
             let test = hd() == Token::SemiColon ? null : fullCommaExpression();
             eat (Token::SemiColon);
             let update = hd() == Token::RightParen ? null : fullCommaExpression();
             eat (Token::RightParen);
             let body = substatement (); 
-            let head = cx.exitBlock ();
-                
-            return new Ast::ForStmt (head,init,test,update,body);
-        }
-    }
 
-    function forInitialiser () : ? Ast::Expr {
-        switch (hd ()) {
-        case Token::SemiColon:
-            return null;
-
-        case Token::Const:
-        case Token::Let:
-        case Token::Var:
-            return bindingForInitialiser();
-
-        default:
-            return dynamic override (alpha=allowColon, beta=noIn) commaExpression ();
+            if (bindings != null)
+                return new Ast::ForBindingStmt(cx.exitBlock(), init, test, update, body);
+            return new Ast::ForStmt(init,test,update,body);
         }
     }
 
     function bindingForInitialiser() {
         let [it, ro] = dynamic override (tau=localBlk) variableDefinitionKind();
-        let in_allowed = true;
-        let init_expr = null;
+        let bindings = [];
 
-        for (;;) {
+        do {
             let [pattern, annotation] = dynamic override (beta=noIn) typedPattern ();
             let initializer = null;
 
             if (match(Token::Assign))
                 initializer = dynamic override (alpha=allowColon, beta=noIn) assignmentExpression ();
-            else
-                initializer = new Ast::LiteralUndefined();  // Probably wrong, see comment below
 
-            if (hd() != Token::Comma && hd() != Token::SemiColon)
-                break;
+            bindings.push([pattern, annotation, initializer]);
+        } while (match(Token::Comma));
 
-            let [fixtures,init] = desugarBindingPattern (pattern, annotation, initializer, cx.getDefaultNamespace(), it, ro);
+        return [it, ro, bindings];
+    }
 
+    function collapseBindings(it, ro, bindings) {
+        let init = null;
+        for ( let i=0 ; i < bindings.length ; i++ ) {
+            let [pattern, annotation, initializer] = bindings[i];
+            let [fixtures, ie] = desugarBindingPattern(pattern, annotation, initializer, cx.getDefaultNamespace(), it, ro);
             cx.addFixtures(it, fixtures);
-
-            init_expr = init_expr ? new Ast::BinaryExpr(Ast::commaOp, init_expr, init) : init;
-
-            if (hd() == Token::SemiColon)
-                return init_expr;
-
-            in_allowed = false;
-            eat(Token::Comma);
+            init = init ? new Ast::BinaryExpr(Ast::commaOp, init, ie) : ie;
         }
-
-        if (hd() != Token::In)
-            Parse::syntaxError("Expected 'in', found " + lexeme());
-
-        if (!in_allowed)
-            Parse::syntaxError("'in' does not allow multiple binding clauses in the loop head.");
-
-        // FIXME: More elaborate handling of patterns here.
-        // A destructuring pattern is legal in a for-in head
-        // even if it does not have an initializing expression.
-        if (!(pattern is IdentifierPattern))
-            Parse::internalError(this, "Identifier pattern required by for-in binding (for now)");
-
-        if (initializer == null) {
-            // FIXME: This is wrong, because it may overwrite a hoisted var that 
-            // should not be overwritten if the loop body is never entered.
-            initializer = new Ast::LiteralUndefined();
-        }
-
-        let [fixtures,init] = desugarBindingPattern (pattern,annotation,initializer,cx.getDefaultNamespace(),it,ro);
-        if (init == null)
-            Parse::syntaxError(this, "Initializer expression required here");
-            
-        cx.addFixtures(it, fixtures);
         return init;
     }
 

@@ -36,7 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-namespace AbcEncode;
 use default namespace AbcEncode,
     namespace AbcEncode;
 
@@ -819,8 +818,12 @@ class AbcEncoder
                 case OP_getscopeobject:
                     s = s + ", " + bytes.readByte();
                     break;
-                case OP_hasnext2:
-                    s = s + ", " + bytes.readU32() + ", " + readU32();
+                case OP_hasnext2: {
+                    let b1 = bytes.readU32();
+                    let b2 = bytes.readU32();
+                    s = s + ", " + b1 + ", " + b2;
+                    break;
+                }
                 default:
                     break;
                 }

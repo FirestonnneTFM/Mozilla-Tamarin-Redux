@@ -62,6 +62,8 @@ Util function commandLineArguments() {
 }
 	
 Util function writeStringToFile(s:String, filename:String) {
+    use namespace "flash.utils";
+
     var b = new ByteArray();
     b.writeUTFBytes(s);
     b.writeFile(filename);

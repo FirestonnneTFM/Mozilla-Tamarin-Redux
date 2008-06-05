@@ -40,13 +40,13 @@
 
 ESC var bootstrap_namespaces =
     ["Abc",
+     "AbcEncode",
+     "AbcDecode",
      "Asm",
      "Ast",
      "Char",
      "Debug",
-     "Decode",  // should get rid of this
      "Emit",
-     "Encode",  // should get rid of this
      "ESC", 
      "Gen",
      "Lex",
