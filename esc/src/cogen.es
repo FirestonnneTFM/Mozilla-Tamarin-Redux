@@ -167,33 +167,34 @@ function cgEval(tree: PROGRAM, name: String, scopedesc: String) {
     let attr = new Ast::FuncAttr(null);
     attr.capture_result = true;
 
+    tree.head.fixtures.push
+        ( new Ast::Fixture
+          ( new Ast::PropName(new Ast::Name(Ast::publicNS, name)),
+            new Ast::MethodFixture
+            ( new Ast::Func
+              ( new Ast::FuncName(Ast::ordinaryFunction, name),
+                tree.body,
+                new Ast::Head( [ new Ast::Fixture( new Ast::TempName(100000),
+                                                   new Ast::ValFixture(Ast::anyType,false)) ],
+                               evalInits() ),
+                1,
+                new Ast::Head([],[]),
+                [],
+                Ast::anyType,
+                attr,
+                true),
+              Ast::anyType,
+              false,
+              false,
+              false )) );
+
     return cg( new Ast::Program
                ( [ new Ast::ExprStmt
                    ( new Ast::SetExpr
                      ( Ast::assignOp,
                        new Ast::QualifiedIdentifier( new Ast::Identifier("ESC", Ast::publicNSSL), "eval_hook" ),
                        new Ast::Identifier(name, Ast::publicNSSL))) ],
-                 new Ast::Head
-                 ( [ new Ast::Fixture
-                     ( new Ast::PropName(new Ast::Name(Ast::publicNS, name)),
-                       new Ast::MethodFixture
-                       ( new Ast::Func
-                         ( new Ast::FuncName(Ast::ordinaryFunction, name),
-                           tree.body,
-                           new Ast::Head( [ new Ast::Fixture( new Ast::TempName(100000),
-                                                              new Ast::ValFixture(Ast::anyType,false)) ],
-                                          evalInits() ),
-                           1,
-                           new Ast::Head([],[]),
-                           [],
-                           Ast::anyType,
-                           attr,
-                           true),
-                         Ast::anyType,
-                         false,
-                         false,
-                         false ))],
-                   []),
+                 tree.head,
                  tree.attr,
                  tree.file ));
 }
