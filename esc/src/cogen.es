@@ -99,7 +99,7 @@ dynamic class CTX
     { }
 }
 
-// Emit debug info or not
+// Emit debug info or not, re-initialized by cg() below
 var emit_debug = true;
 
 // Turn on early binding or not
@@ -115,6 +115,8 @@ Gen function syntaxError(ctx, msg) {
 
 /* Returns an ABCFile structure */
 function cg(tree: PROGRAM) {
+    emit_debug = ESC::flags.debugging;
+
     let e = new ABCEmitter;
     let s = e.newScript();
 

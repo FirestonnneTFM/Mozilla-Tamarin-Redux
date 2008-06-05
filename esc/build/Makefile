@@ -4,8 +4,12 @@
 #
 # Fall back on the script in comp-es.sh if this makefile gives you trouble.
 # Please update comp-es.sh if you change TARGETS below.
+#
+# ESC uses some of the extensions (currently "dynamic override") so
+# -extensions must be enabled when compiling ESC.
 
 ESC=./esc.sh
+ESCOPT=-debug -extensions
 
 DIR=../src
 
@@ -35,8 +39,8 @@ clean:
 	rm -f $(TARGETS)
 
 recompile: clean
-	$(ESC) $(SRCS)
+	$(ESC) $(ESCOPT) $(SRCS)
 	$(MAKE)
 
 $(TARGETS): %.es.abc: %.es
-	$(ESC) $<
+	$(ESC) $(ESCOPT) $<

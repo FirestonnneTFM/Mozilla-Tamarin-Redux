@@ -59,7 +59,53 @@ internal function compile(consume, produce, context, start_line) {
 // serves a different use case and is provided for convenience.
 // Keeping the API small is not (currently) a goal.
 
+class Flags 
+{
+    var es3_keywords = false;             // recognize only ES3 keywords (not future reserved)
+    var es4_kwd_debugger = false;         // language misfeature
+    var debugging = false;                // true to enable debug code
+    var ext_dynamic_override = false;     // true to enable 'dynamic override' expression
+    var ext_toplevel_letexpr = false;     // true to recognize let expressions at the top level
+}
+
 const version = { major: 0, minor: 1, nick: "That depends on what the meaning of 'is' is" };
+const flags = new Flags;
+
+// Flags are:
+//   -[no-]debug
+//   -g
+//   -[no-]extensions
+//   -[no-]es3
+
+internal var flagvalues = [ ["-es3",      [["es3_keywords",true]]],
+                            ["-no-es3",   [["es3_keywords",false]]],
+                            ["-g",        [["debugging",true]]],
+                            ["-debug",    [["debugging",true]]],
+                            ["-no-debug", [["debugging",false]]],
+                            ["-extensions", [["ext_dynamic_override",true],
+                                             ["ext_toplevel_letexpr",true]]],
+                            ["-no-extensions", [["ext_dynamic_override",false],
+                                                ["ext_toplevel_letexpr",false]]] ];
+
+
+function filterCommandLine(argv) {
+    outer:
+    while (argv.length > 0) {
+        for ( let i=0 ; i < flagvalues.length ; i++ ) {
+            let [name,settings] = flagvalues[i];
+            if (argv[0] == name) {
+                for ( let j=0 ; j < settings.length ; j++ ) {
+                    let [prop,val] = settings[j];
+                    flags[prop] = val;
+                }
+                argv.shift();
+                continue outer;
+            }
+        }
+        break;
+    }
+    return argv;
+}
 
 function getTopFixtures()
     ESC::bootstrap_namespaces;    // in esc-env.es

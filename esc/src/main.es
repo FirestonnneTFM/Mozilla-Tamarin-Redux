@@ -46,17 +46,25 @@ use default namespace internal;
 use namespace "avmplus";
 use namespace "flash.utils";
 
-var argv = Util::commandLineArguments();
-if (argv.length == 0) {
-    //let v = ESC::version;
-    //print("ESC v" + v.major + "." + v.minor + " (\"" + v.nick + "\")");
-    repl();
+{
+    // Users can use -no-debug to turn it off; enabling debugging is
+    // the right choice for the REPL.
+
+    ESC::flags.debugging = true;
+
+    let files = ESC::filterCommandLine(Util::commandLineArguments());
+
+    if (files.length == 0) {
+        //let v = ESC::version;
+        //print("ESC v" + v.major + "." + v.minor + " (\"" + v.nick + "\")");
+        repl();
+    }
+    else {
+        for ( let i=0 ; i < files.length ; i++ )
+            ESC::compileAndLoadFile(files[i]);
+    }
+    System.exit(0);
 }
-else {
-    for ( let i=0 ; i < argv.length ; i++ )
-        ESC::compileAndLoadFile(argv[i]);
-}
-System.exit(0);
 
 // "eval" really belongs in the builtins, but OK here for the moment.
 public function eval(...args)

@@ -42,9 +42,9 @@
 
     let before = new Date();
 
-    let argv = Util::commandLineArguments();
-    for ( let i=0, limit=argv.length ; i < limit ; i++ ) {
-        let fname = argv[i];
+    let files = ESC::filterCommandLine(Util::commandLineArguments());
+    for ( let i=0, limit=files.length ; i < limit ; i++ ) {
+        let fname = files[i];
         let [parse,cogen] = ESC::compileFile(fname);
         total_frontend += parse;
         total_backend += cogen;
@@ -55,7 +55,7 @@
 
     let after = new Date();
 
-    if (argv.length > 1) {
+    if (files.length > 1) {
         print("");
         print("Total time: " + (after - before));
         print("Front end:  " + total_frontend);
