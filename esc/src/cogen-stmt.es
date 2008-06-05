@@ -448,6 +448,7 @@ function cgSwitchStmtSlow(ctx, {expr,cases}) {
     let {asm} = ctx;
     cgExpr(ctx, expr);
     let t = asm.getTemp();
+    asm.I_coerce_a();
     asm.I_setlocal(t);
     let Ldefault = null;
     let Lnext = null;
