@@ -462,13 +462,11 @@ function cgSwitchStmtSlow(ctx, {expr,cases}) {
             assert (Ldefault==null);
             Ldefault = asm.I_label(undefined);    // label default pos
         }
-
-        if (Lnext !== null) {
-            asm.I_label(Lnext);                   // label next pos
-            Lnext = null;
-        }
-
-        if (c.expr != null) {
+        else {
+            if (Lnext !== null) {
+                asm.I_label(Lnext);               // label next pos
+                Lnext = null;
+            }
             cgExpr(nctx, c.expr);                 // check for match
             asm.I_getlocal(t);
             asm.I_strictequals();
@@ -481,11 +479,10 @@ function cgSwitchStmtSlow(ctx, {expr,cases}) {
         }
 
         let stmts = c.stmts;
-        for ( let j=0 ; j < stmts.length ; j++ ) {
+        for ( let j=0 ; j < stmts.length ; j++ )
             cgStmt(nctx, stmts[j] );
-        }
 
-        Lfall = asm.I_jump (undefined);           // fall through
+        Lfall = asm.I_jump(undefined);            // fall through
     }
     if (Lnext !== null)
         asm.I_label(Lnext);
