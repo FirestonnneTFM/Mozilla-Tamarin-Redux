@@ -36,7 +36,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Placeholder until we have decimal support.
+use namespace "flash.utils";
+use namespace "avmplus";
+
+// Placeholder class until we have decimal support
 
 class decimal {
     const value;
@@ -56,37 +59,25 @@ class decimal {
 }
 
 Util function commandLineArguments() {
-    use namespace "avmplus";
-
     return System.argv;
 }
 	
 Util function writeStringToFile(s:String, filename:String) {
-    use namespace "flash.utils";
-
-    var b = new ByteArray();
+    let b = new ByteArray();
     b.writeUTFBytes(s);
-    b.writeFile(filename);
+    File.writeByteArray(filename, b);
 }
     
 Util function readStringFromFile(fn) {
-    use namespace "avmplus";
-
-    /*var b = ByteArray.readFile(filename);
-    return b.readUTFBytes(b.length);
-    */
     return File.read (fn);
 }
 
 Util function writeBytesToFile(bytes, filename) {
-    use namespace "flash.utils";
-    
-    bytes.writeFile(filename);
+    File.writeByteArray(filename, bytes);
     return bytes.length;
 }
 
 Util function loadBytes(bytes) {
-    use namespace "avmplus";
     Domain.currentDomain.loadBytes(bytes);
 }
 
