@@ -94,45 +94,86 @@ final class Scanner
     {
     }
 
-    public function regexp() {
-        // Capture the initial '/'
-        markIndex = curIndex - 1;
+    // Read slash-delimited string plus following flags, return as one string
+    // Initial '/' has been consumed
+    // Must handle unescaped / inside character sets
+    // Must strip \<newline>
+    // Must strip blanks from /x expressions
+    // Character sets are always flat
+    //
+    // The regex engine should evolve to handle \<newline> and blank
+    // stripping as that provides better debuggability.
 
-        // Body
-        // Avoid switches here, the verifier gets confused (verifier bug).
+    public function regexp() {
+        let incharset = false;
+        let s = "/";
+    loop:
         while (true) {
             let c = src.charCodeAt(curIndex++) | 0;
-            if (c == 47 /* Char::Slash */)
-                break;
-            else if (c == 92 /* Char::Backslash */) {
-                let d = src.charCodeAt(curIndex++) | 0;
-                if (d == 10 /* Char::Newline */ ||
-                    d == 13 /* Char::CarriageReturn */ ||
-                    d == 0x2028 /* Char::UnicodeLS */ ||
-                    d == 0x2029 /* Char::UnicodePS */)
-                    Lex::syntaxError("Illegal newline in regexp literal");
-                else if (d == 0 /* Char::Nul */) {
-                    if (curIndex == src.length)
-                        Lex::syntaxError("Unexpected end of program in regexp literal");
-                }
-            }
-            else if (c == 10 /* Char::Newline */ ||
-                     c == 13 /* Char::CarriageReturn */ ||
-                     c == 0x2028 /* Char::LS */ ||
-                     c == 0x2029 /* Char::PS */) {
-                Lex::syntaxError("Illegal newline in regexp literal");
-            }
-            else if (c == 0 /* Char::Nul */) {
+            switch (c) {
+            case 0 /* Char::Nul */:
                 if (curIndex == src.length)
                     Lex::syntaxError("Unexpected end of program in regexp literal");
+                break;
+            case 47 /* Char::Slash */:
+                if (!incharset)
+                    break loop;
+                break;
+            case 91 /* Char::LeftBracket */:
+                incharset = true;
+                break;
+            case 93 /* Char::RightBracket */:
+                incharset = false;
+                break;
+            case 92 /* Char::Backslash */:
+                c = src.charCodeAt(curIndex++) | 0;
+                switch (c) {
+                case 0 /* Char::Nul */:
+                    if (curIndex == src.length)
+                        Lex::syntaxError("Unexpected end of program in regexp literal");
+                    break;
+                case 13 /* Char::CarriageReturn */:
+                    if ((src.charCodeAt(curIndex) | 0) == 10 /* Char::Newline */)
+                        curIndex++;
+                    continue;
+                case 10 /* Char::Newline */:
+                case 0x2028 /* Char::LS */:
+                case 0x2029 /* Char::PS */:
+                    continue;
+                default:
+                    break;
+                }
+                s += "\\";
+                break;
+            case 10 /* Char::Newline */:
+            case 13 /* Char::CarriageReturn */:
+            case 0x2028 /* Char::LS */:
+            case 0x2029 /* Char::PS */:
+                Lex::syntaxError("Illegal newline in regexp literal");
             }
+            s += String.fromCharCode(c);
         }
+        s += "/";
 
         // Flags
-        while (Char::isUnicodeIdentifierPart(src.charCodeAt(curIndex) | 0))
-            ++curIndex;
+        let xflag = false;
+        while (Char::isUnicodeIdentifierPart(c = src.charCodeAt(curIndex) | 0)) {
+            curIndex++;
+            xflag = xflag || c == 120 /* Char::x */;
+            s += String.fromCharCode(c);
+        }
 
-        return Token::makeInstance (Token::RegexpLiteral,lexeme());
+        if (xflag) {
+            let t = "";
+            for ( let i=0, limit=s.length ; i < limit ; i++ ) {
+                let c = s.charCodeAt(i);
+                if (!Char::isUnicodeWhitespace(c))
+                    t += String.fromCharCode(c);
+            }
+            s = t;
+        }
+
+        return Token::makeInstance (Token::RegexpLiteral,s);
     }
 
     public function div() {
