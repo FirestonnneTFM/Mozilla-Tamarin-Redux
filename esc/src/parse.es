@@ -2305,14 +2305,15 @@ final class Parser
     // any local bindings might shadow it.  It is /not/ like
     // LetBlockStatement.  But it might be ES3 compatible.
 
-    function catchClause () : Ast::Catch {
+    function catchClause (require_type=false) : Ast::Catch {
         eat (Token::LeftParen);
-        let catchvar = parameter ();
+        let [pattern,ty] = dynamic override (alpha=allowColon, beta=allowIn) typedPattern();
+        if (require_type && ty == null)
+            Parse::syntaxError(this, "Type annotation required here");
         eat (Token::RightParen);
         let catchblock = statementBlock ();
 
-        let [k,[p,t]] = catchvar;
-        let [f,i] = desugarBindingPattern (p, t, new Ast::GetParam (0), Ast::publicNS, Ast::varInit, false);
+        let [f,i] = desugarBindingPattern (pattern, ty, new Ast::GetParam (0), Ast::publicNS, Ast::varInit, false);
         let head = new Ast::Head (f,[i]);
 
         return new Ast::Catch (head,catchblock);
@@ -2341,13 +2342,19 @@ final class Parser
 
     function typeCases () : [Ast::Catch] {
         let cases = [];
+
+        // SYNTACTIC CONDITION: All clauses for 'switch type' must
+        // have type annotations.
+
         while (match(Token::Case))
-            cases.push(catchClause());
+            cases.push(catchClause(true));
 
         // FIXME.  The Parser Who Knew Too Much.
         //
-        // Switch type currently compiles to a try/catch, so the function
-        // needs to know that a catch is used.
+        // 'switch type' currently compiles to a try/catch, so the
+        // function needs to know that a catch is used.  This will go
+        // away when 'switch type' is reimplemented (bug 432468).
+
         cx.topFunction().uses_catch = true;
             
         return cases;
