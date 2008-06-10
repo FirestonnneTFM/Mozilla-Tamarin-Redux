@@ -495,7 +495,12 @@ function cgSwitchStmtSlow(ctx, {expr,cases}) {
 }
 
 function cgSwitchTypeStmt(ctx, {expr,cases}) {
-    let b = new Ast::Block(new Ast::Head([],[]), [new Ast::ThrowStmt(expr)]);
+    let {asm} = ctx;
+    let t = new Ast::GetCogenTemp();
+    t.n = asm.getTemp();
+    cgExpr(ctx, expr);
+    asm.I_setlocal(t.n);
+    let b = new Ast::Block(new Ast::Head([],[]), [new Ast::ThrowStmt(t)]);
     let newcases = [];
     let hasDefault = false;
 
@@ -513,7 +518,8 @@ function cgSwitchTypeStmt(ctx, {expr,cases}) {
                                                    []),
                                      new Ast::Block(new Ast::Head([],[]), [])));
     }
-    cgTryStmt(ctx, {block:b, catches:newcases, finallyBlock:null} );        
+    cgTryStmt(ctx, {block:b, catches:newcases, finallyBlock:null} );
+    asm.killTemp(t.n);
 }
     
 function cgWithStmt(ctx, {expr,stmt}) {
