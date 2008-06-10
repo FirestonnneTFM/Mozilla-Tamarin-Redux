@@ -231,6 +231,7 @@ function cgForInBindingStmt(ctx, s) {
     let {head, init} = s;
     cgHead(ctx, head);
     cgExpr(ctx, init);
+    asm.I_pop();
     cgForInStmt(ctx, s);
 }
 
