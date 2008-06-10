@@ -123,6 +123,12 @@ namespace avmshell
 
 		SystemClass* systemClass;
 		
+		virtual Toplevel* createToplevel(VTable *vtable);
+
+		virtual size_t getToplevelSize() const;
+
+		PoolObject* shellPool;
+
 	private:
 		DECLARE_NATIVE_CLASSES()
 		DECLARE_NATIVE_SCRIPTS()			
@@ -130,7 +136,6 @@ namespace avmshell
 		ConsoleOutputStream *consoleOutputStream;
 		bool gracePeriod;
 		bool inStackOverflow;
-		PoolObject* shellPool;
 
 		bool executeProjector(int argc, char *argv[], int& exitCode);
 		
@@ -157,6 +162,37 @@ namespace avmshell
 
 
 		DECLARE_NATIVE_SCRIPT(AvmplusScript)
+	};
+
+	class ShellToplevel : public Toplevel
+	{
+	public:
+		ShellToplevel(VTable* vtable, ScriptObject* delegate);
+
+		Shell* core() const {
+			return (Shell*)Toplevel::core();
+		}
+
+		virtual ClassClosure *getBuiltinExtensionClass(int class_id) 
+		{ 
+            return shellClasses[class_id] ? shellClasses[class_id] : resolveShellClass(class_id);
+		}
+
+	private:
+
+		ClassClosure* resolveShellClass(int class_id)
+		{
+			Traits *traits = core()->shellPool->cinits[class_id]->declaringTraits->itraits;
+			Multiname qname(traits->ns, traits->name);
+			ScriptObject *container = vtable->init->finddef(&qname);
+
+			Atom classAtom = getproperty(container->atom(), &qname, container->vtable);
+			ClassClosure *cc = (ClassClosure*)AvmCore::atomToScriptObject(classAtom);
+			WBRC(core()->GetGC(), shellClasses, &shellClasses[class_id], cc);
+			return cc;
+		}
+
+		DWB(ClassClosure**) shellClasses;
 	};
 }
 
