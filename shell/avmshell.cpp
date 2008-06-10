@@ -212,6 +212,12 @@ namespace avmshell
 	}
 	#endif
 	
+	ShellToplevel::ShellToplevel(VTable* vtable, ScriptObject* delegate)
+		: Toplevel(vtable, delegate)
+	{
+		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(NativeID::toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+	}
+
 	void Shell::usage()
 	{
 		printf("avmplus shell " AVMPLUS_VERSION_USER " build " AVMPLUS_BUILD_CODE "\n\n");
@@ -381,6 +387,16 @@ namespace avmshell
 		return toplevel;
 	}
 	
+	Toplevel* Shell::createToplevel(VTable *vtable)
+	{
+		return new (vtable->gc(), vtable->getExtraSize()) ShellToplevel(vtable, NULL);
+	}
+
+	size_t Shell::getToplevelSize() const
+	{
+		return sizeof(ShellToplevel);
+	}
+
 	Shell::Shell(MMgc::GC *gc) : AvmCore(gc)
 	{
 		#ifdef DEBUGGER
