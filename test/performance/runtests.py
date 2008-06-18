@@ -34,7 +34,8 @@
 #
 # simple script that executes tests on tamarin-central or tamarin-tracing vm
 #
-import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, time, subprocess, socket
+import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, time, subprocess, socket, math
+from math import sqrt
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -49,13 +50,14 @@ verbose = False
 timestamps = True
 forcerebuild = False
 logresults = False
+iterations = 1
 
 # needed for pipe
 fd,tmpfile = tempfile.mkstemp()
 os.close(fd)
 js_output_f=False
 
-globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider', 'ascargs':'', 'vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':''}
+globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider', 'ascargs':'', 'vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':''}
 if 'AVM' in environ:
 	globs['avm'] = environ['AVM'].strip()
 if 'AVM2' in environ:
@@ -92,6 +94,7 @@ def usage(c):
 	print " -g --globalabc     location of global.abc"
 	print " -h --help          display help and exit"
 	print " -f --forcerebuild  force rebuild all test files"
+	print " -i --iterations    number of times to repeat test"
 	print " -l --log           logs results to a file"
 	print " -d --socketlog     logs results to a socket server"
 	print " -r --runtime	   name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
@@ -102,7 +105,7 @@ def usage(c):
 	exit(c)
 
 try:
-	opts, args = getopt(argv[1:], "vE:S:a:g:hfc:ldr:", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log","socketlog","avm2=","vmargs2=","config=","runtime=","vmversion="])
+	opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log","socketlog","avm2=","vmargs2=","iterations=","config=","runtime=","vmversion="])
 except:
 	usage(2)
 
@@ -127,6 +130,8 @@ for o, v in opts:
 		timestamps = False
 	elif o in ("-f", "--forcerebuild"):
 		forcerebuild = True
+	elif o in ("-i", "--iterations"):
+		iterations = int(v)
 	elif o in ("-c", "--config"):
 		globs['config'] = v
 	elif o in ("--ascargs"):
@@ -167,15 +172,14 @@ def parents(d):
 
 # run a command and return its output
 def run_pipe(cmd):
+	proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, shell=False)
+	proc.wait()
+	return proc.stdout
+	#t = pipes.Template()
+	#t.append("%s 2>&1" % cmd, "--")
 	#verbose_print(cmd)
-	#cmds = cmd.split()
-	#proc = subprocess.Popen([cmds[0],cmds[1]], stdout=subprocess.PIPE, shell=False)
-	#proc.wait()
-	#return proc.stdout
-	t = pipes.Template()
-	t.append("%s 2>&1" % cmd, "--")
-	verbose_print(cmd)
-	return t.open(globs['tmpfile'], "r")
+	#return t.open(globs['tmpfile'], "r")
+
 
 def compile_test(as):
 	asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
@@ -201,6 +205,43 @@ def compile_test(as):
 		f.close()
 
 
+def mean(population):
+	mean = 0.0
+	for x in population:
+		mean = mean + float(x)
+	return mean / len(population)
+
+def variance(population):
+	n = 0
+	mean = 0.0
+	s = 0.0
+	for x in population:
+		n = n + 1
+		delta = int(x) - mean
+		mean = mean + (delta / n)
+		s = s + delta * (int(x) - mean)
+
+	# if you want to calculate std deviation
+	# of a sample change this to "s / (n-1)"
+	return s / (n-1)
+
+def standard_deviation(population):
+	return sqrt(variance(population))
+
+
+def standard_error(population):
+	return standard_deviation(population) / sqrt(len(population))
+
+tDistribution = [ 999, 999, 12.71, 4.30, 3.18, 2.78, 2.57, 2.45, 2.36, 2.31, 2.26, 2.23, 2.20, 2.18, 2.16, 2.14, 2.13, 2.12, 2.11, 2.10, 2.09, 2.09, 2.08, 2.07, 2.07, 2.06, 2.06, 2.06, 2.05, 2.05, 2.05, 2.04, 2.04, 2.04, 2.03, 2.03, 2.03, 2.03, 2.03, 2.02, 2.02, 2.02, 2.02, 2.02, 2.02, 2.02, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.96]
+tMax = len(tDistribution)
+tLimit = 1.96
+
+def tDist(n):
+    if (n > tMax):
+        return tLimit
+    return tDistribution[n]
+
+
 # ================================================
 # Determine the version number associated with the 
 # VM, will be cyclone if not from build machine
@@ -220,6 +261,7 @@ else:
 			    version = version.split(":")
 			    version = version[0]
 		    VM_version = version
+		    globs['vmversion'] = version
 		    break
     except:
 	    nop = True
@@ -238,9 +280,23 @@ serverPort = 1188
 # ===========================================
 def socketlog(msg):
 	if logresults:
+		if globs['socketlog']=='':
+			file="socketlog-%s.txt" % globs['vmversion']
+			ctr=0
+			while os.path.exists(file):
+				ctr+=1
+				file="socketlog-%s-%s.txt" % (globs['vmversion'],ctr)
+			globs['socketlog']=file
+		alltext=''
+		try:
+			alltext=open(globs['socketlog']).read()
+		except:
+			print("creating new socket log file %s" % globs['socketlog'])
+		alltext+="%s\n" % msg
+		open(globs['socketlog'],'w').write(alltext)
 		s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
 		s.connect((serverHost, serverPort)) # connect to server on the port
-		s.send("%s;exit" % msg)             # send the data
+		s.send("%s;exit\r\n" % msg)         # send the data
 		data = s.recv(1024)
 		#print('Sent: %s' % msg)
 		#print('Received: %s \n\n' % data)
@@ -263,19 +319,23 @@ if isfile('./testconfig.txt'):
 		if fields[2]=='skip':
 			skips.append(fields[0])
 vmargs = globs['vmargs']
+vmargs2 = globs['vmargs2']
 avm = globs['avm']
 avm2 = globs['avm2']
 if not avm: # or not isfile(avm.split()[0]): /* isfile() fails for alias on OSX */
 	exit("ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus" % avm)
 log_print("Executing tests at %s" % (datetime.now()))
-log_print("avm: %s" % avm);
+log_print("avm: %s %s" % (avm,vmargs));
 if len(avm2)>0:
-	log_print("avm2: %s" % avm2);
+	log_print("avm2: %s %s" % (avm2,vmargs2));
 
 if len(avm2)>0:
-	log_print("\n\n%-50s %7s %7s\n" % ("test","avm","avm2"));
+	log_print("\n\n%-50s %7s %7s %7s\n" % ("test","avm","avm2", "%sp"));
 else:
-	log_print("\n\n%-50s %7s\n" % ("test","avm"));
+	if (iterations>2):
+		log_print("\n\n%-50s %7s %12s\n" % ("test","avm","95% conf"))
+	else:
+		log_print("\n\n%-50s %7s\n" % ("test","avm"))
 testnum = len(tests)
 for ast in tests:
 	if ast.startswith("./"):
@@ -301,32 +361,50 @@ for ast in tests:
 		compile_test(ast)
 		if not isfile(abc):
 			log_print("compile FAILED!, file not found " + abc)
-	f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
-	if len(avm2)>0:
-		if len(vmargs)>0:
-			f2 = run_pipe("%s %s %s" % (avm2, vmargs2, abc))
-		else:
-			f2 = run_pipe("%s %s %s" % (avm2, vmargs, abc))
-	try:
-		result1="na"
-		result2="na"
-		for line in f1:
-			if "metric" in line:
-				result1list=line.rsplit()
-				if len(result1list)>2:
-					result1=result1list[2]
+			
+	result1=9999999
+	resultList = []
+	result2=9999999
+	for i in range(iterations):
+		f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
 		if len(avm2)>0:
-			for line in f2:
+			if len(vmargs)>0:
+				f2 = run_pipe("%s %s %s" % (avm2, vmargs2, abc))
+			else:
+				f2 = run_pipe("%s %s %s" % (avm2, vmargs, abc))
+		try:
+			for line in f1:
 				if "metric" in line:
-					result2list=line.rsplit()
-					if len(result2list)>2:
-						result2=result2list[2]
-		if len(avm2)>0:
-			log_print("%-50s %7s %7s" % (ast,result1,result2)) 
+					result1list=line.rsplit()
+					if len(result1list)>2:
+						resultList.append(result1list[2])
+						if result1 > int(result1list[2]):
+							result1=float(result1list[2])
+
+			if len(avm2)>0:
+				for line in f2:
+					if "metric" in line:
+						result2list=line.rsplit()
+						if len(result2list)>2:
+							if result2 > int(result2list[2]):
+								result2=float(result2list[2])
+			spdup = ((result1-result2)/result1)*100.0
+		except:
+			log_print("exception")
+			exit(-1)
+
+	if len(avm2)>0:
+		log_print("%-50s %7s %7s %7.1f" % (ast,result1,result2,spdup)) 
+	else:
+		if result1 < 9999999 :
+			meanRes = mean(resultList)
+			if (iterations > 2):
+				confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
+				config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
+				socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
+				log_print("%-50s %7s %10.1f%%" % (ast,result1,confidence)) 
+			else:
+				log_print("%-50s %7s" % (ast,result1)) 
 		else:
-			socketlog("addresult::%s::time::%s::%s;" % (ast,result1,VM_reporting))
-			log_print("%-50s %7s" % (ast,result1)) 
-	except:
-		log_print("exception")
-		exit(-1)
+				log_print("%-50s crash" % (ast)) 
 

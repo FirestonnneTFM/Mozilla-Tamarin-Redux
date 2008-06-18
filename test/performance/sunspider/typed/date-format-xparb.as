@@ -23,7 +23,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 
 /*
  * Copyright (C) 2004 Baron Schwartz <baron at sequent dot org>
@@ -444,7 +444,7 @@ for (i = 0; i < 4000; ++i) {
 }
 
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 
 print("metric date-format-xparb-typed " + _sunSpiderInterval);
 

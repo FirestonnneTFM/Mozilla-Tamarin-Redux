@@ -106,20 +106,20 @@ function cordicsincos() {
 ///// End CORDIC
 
 function cordic( runs ) {
-  var start = new Date();
+  var start = getTimer();
 
   for ( var i = 0 ; i < runs ; i++ ) {
       cordicsincos();
   }
 
-  var end = new Date();
+  var end = getTimer();
 
-  return end.getTime() - start.getTime();
+  return end - start;
 }
 function runMathCordic() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate:int = getTimer();
 cordic(25000);
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
 print("metric math-cordic "+runMathCordic());

@@ -106,20 +106,20 @@ function cordicsincos():void {
 ///// End CORDIC
 
 function cordic( runs:Number ):Number {
-  var start:Date = new Date();
+  var start:Number = getTimer();
 
   for ( var i:int = 0 ; i < runs ; i++ ) {
       cordicsincos();
   }
 
-  var end:Date = new Date();
+  var end:Number = getTimer();
 
-  return end.getTime() - start.getTime();
+  return end - start;
 }
 function runMathCordic():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 cordic(25000);
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

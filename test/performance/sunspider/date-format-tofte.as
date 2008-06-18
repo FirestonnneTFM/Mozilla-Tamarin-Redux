@@ -315,7 +315,7 @@ Date.prototype.formatDate = function (input,time) {
 }
 
 function runDateFormatTofte() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 
 var date = new Date("1/1/2007 1:11:11");
 
@@ -324,7 +324,7 @@ for (i = 0; i < 500; ++i) {
     var longFormat = date.formatDate("l, F d, Y g:i:s A");
     date.setTime(date.getTime() + 84266956);
 }
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

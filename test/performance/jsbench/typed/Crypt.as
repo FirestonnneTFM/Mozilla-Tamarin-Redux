@@ -27,7 +27,7 @@ datasizes[2] = 50000000;
   var DK:Vector.<int>;
 
   var start=new Date();
-  JGFrun(1);
+  JGFrun(0);
   var elapsed=new Date()-start;
   print("metric jsbench-crypt "+elapsed);
   

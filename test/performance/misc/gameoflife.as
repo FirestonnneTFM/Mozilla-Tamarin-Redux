@@ -39,8 +39,8 @@ package{
 
 	public class DrawGrid {
 
-		private var rows:int =40;
-		private var cols:int= 40;
+		private var rows:int =100;
+		private var cols:int= 100;
 		private var cells:Array = new Array(rows*cols);
 		private var gen =1;
 		public var k:uint=0;
@@ -56,7 +56,7 @@ package{
 		private function Simulation():void{
 			Iterations=0;
 
-			var generations:int=200;
+			var generations:int=500;
 			for (var i=0;i<generations;i++){
 				Iterations++;
 
@@ -66,7 +66,7 @@ package{
 				draw();
 				var end2 = getTimer();
 				var t2 = end2-start2;
-				print("The time taken for generation: "+Iterations+" is:"+t2 +" ms"+"\n");
+//				print("The time taken for generation: "+Iterations+" is:"+t2 +" ms"+"\n");
 			}
 		}
 

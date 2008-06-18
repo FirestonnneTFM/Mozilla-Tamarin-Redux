@@ -23,7 +23,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 
 // The Computer Language Shootout
 // http://shootout.alioth.debian.org/
@@ -52,7 +52,7 @@ for ( var i:int = 3; i <= 5; i++ ) {
 }
 
 
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 
 print("metric controlflow-recursive-typed " + _sunSpiderInterval);
 

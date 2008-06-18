@@ -112,9 +112,9 @@ function addResult(r)
 }
 
 function runStringValidateInput() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 doTest();
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
 print("metric string-validate-input "+runStringValidateInput());

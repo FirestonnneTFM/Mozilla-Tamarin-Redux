@@ -101,7 +101,7 @@ function fastaRandom(n, table) {
 }
 
 function runStringFasta() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 
 var ret;
 
@@ -112,7 +112,7 @@ ret = fastaRandom(5*count*1000, HomoSap);
 
 
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

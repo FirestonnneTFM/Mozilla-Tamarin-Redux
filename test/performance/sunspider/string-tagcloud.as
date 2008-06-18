@@ -262,13 +262,13 @@ function makeTagCloud(tagInfo)
 }
 
 function runStringTagcloud() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 
 var tagcloud = makeTagCloud(tagInfo);
 tagInfo = null;
 
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

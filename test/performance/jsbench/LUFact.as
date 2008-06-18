@@ -21,7 +21,7 @@
 
 	var ipvt;
 	var start=new Date();
-	JGFrun(1);
+	JGFrun(0);
 	var elapsed=new Date()-start;
 	print("metric jsbench-lufact "+elapsed);
 	function abs(d) {

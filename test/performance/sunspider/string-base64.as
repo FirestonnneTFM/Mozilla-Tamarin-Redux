@@ -141,7 +141,7 @@ function base64ToString(data) {
 }
 
 function runStringBase64() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 
 var str = "";
 
@@ -162,7 +162,7 @@ for ( var i = 8192; i <= 16384; i *= 2 ) {
 toBinaryTable = null;
 
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

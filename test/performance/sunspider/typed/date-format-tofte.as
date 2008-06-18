@@ -23,7 +23,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 
 function arrayExists(array:Array, x:String):Boolean {
     for (var i:int = 0; i < array.length; i++) {
@@ -326,7 +326,7 @@ for (var i:int = 0; i < 500; ++i) {
 
 
 
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 
 print("metric date-format-tofte-typed " + _sunSpiderInterval);
 

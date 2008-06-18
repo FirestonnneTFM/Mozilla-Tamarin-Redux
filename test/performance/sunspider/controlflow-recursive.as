@@ -44,13 +44,13 @@ function tak(x,y,z) {
 }
 
 function runControlflowRecursive() {
-  var _sunSpiderStartDate = new Date();
+  var _sunSpiderStartDate = getTimer();
   for ( var i = 3; i <= 5; i++ ) {
     ack(3,i);
     fib(17.0+i);
     tak(3*i+3,2*i+2,i+1);
   }
-  var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 print("metric controlflow-recursive "+runControlflowRecursive());

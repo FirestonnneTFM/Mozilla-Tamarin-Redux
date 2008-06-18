@@ -54,9 +54,9 @@ for(var y=0; y<256; y++) func(y);
 
 
 function runBitops3bitBitsInByte() {
-  var _sunSpiderStartDate = new Date();
+  var _sunSpiderStartDate = getTimer();
   TimeFunc(fast3bitlookup);
-  var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 print("metric 3bit-bits-in-byte "+runBitops3bitBitsInByte());

@@ -406,7 +406,7 @@ function byteArrayToHexStr(b:Array):String {  // convert byte array to hex strin
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
 function runCryptoAES():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 var plainText:String = "ROMEO: But, soft! what light through yonder window breaks?\n\
 It is the east, and Juliet is the sun.\n\
 Arise, fair sun, and kill the envious moon,\n\
@@ -447,7 +447,7 @@ var cipherText:String = AESEncryptCtr(plainText, password, 256);
 var decryptedText:String = AESDecryptCtr(cipherText, password, 256);
 
 
-var _sunSpiderInterval:int = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

@@ -54,11 +54,11 @@ function partial(n:Number):void{
 }
 
 function runMathPartialSums():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 for (var i:int = 1024; i <= 16384; i *= 2) {
     partial(i);
 }
-var _sunSpiderInterval:int = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 
