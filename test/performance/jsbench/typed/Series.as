@@ -11,7 +11,7 @@ var size:int;
   datasizes[2] = 1000000;
 
   var start=new Date();
-  JGFrun(1);
+  JGFrun(0);
   var elapsed=new Date()-start;
   print("metric jsbench-series "+elapsed);
   function JGFsetsize(sizel:int):void {

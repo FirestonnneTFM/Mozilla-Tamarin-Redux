@@ -176,7 +176,7 @@ NBodySystem.prototype.energy = function(){
    return e;
 }
 function runAccessNBody() {
-  var _sunSpiderStartDate = new Date();
+  var _sunSpiderStartDate = getTimer();
   var ret;
 
   for ( var n = 3; n <= 24; n *= 2 ) {
@@ -193,7 +193,7 @@ function runAccessNBody() {
         ret = bodies.energy();
     })();
   }
-  var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 print("metric access-nbody "+runAccessNBody());

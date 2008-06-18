@@ -102,7 +102,7 @@ function fastaRandom(n:Number, table:Object):void {
 }
 
 function runStringFasta():int {
-  var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
   var ret:String;
 
   var count:Number = 7;
@@ -110,7 +110,7 @@ function runStringFasta():int {
   ret = fastaRandom(3*count*1000, IUB);
   ret = fastaRandom(5*count*1000, HomoSap);
 
-  var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 

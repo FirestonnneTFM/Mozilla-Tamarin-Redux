@@ -50,7 +50,7 @@ function bottomUpTree(item,depth){
    }
 }
 function runAccessBinaryTrees() {
-    var _sunSpiderStartDate = new Date();
+    var _sunSpiderStartDate = getTimer();
     var ret;
 
     for ( var n = 4; n <= 7; n += 1 ) {
@@ -72,7 +72,7 @@ function runAccessBinaryTrees() {
        }
     }
     ret = longLivedTree.itemCheck();
-    var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+    var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
     return _sunSpiderInterval;
 }
 print("metric access-binary-trees "+runAccessBinaryTrees());

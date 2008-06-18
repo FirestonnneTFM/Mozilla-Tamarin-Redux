@@ -34,7 +34,7 @@
 	var ytotal=0.0;
 	var lastRandom=RANDOM_SEED;
 	var start=new Date();
-	JGFrun(1);
+	JGFrun(0);
 	var elapsed=new Date()-start;
 	print("metric jsbench-sparsematmult "+elapsed);
 	function _randomInt()

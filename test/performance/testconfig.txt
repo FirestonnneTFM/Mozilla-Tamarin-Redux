@@ -42,13 +42,21 @@
 
 jsbench/.*                      ,	sunspider	,	skip	,	skip jsbench
 misc/.*                      	,	sunspider	,	skip	,	skip misc
+scimark/.*			,	sunspider	,	skip	,	skip scimark
 
 sunspider/.*                    ,	jsbench		,	skip	,	skip sunspider
-misc/.*                    		,	jsbench		,	skip	,	skip misc
+misc/.*                   	,	jsbench		,	skip	,	skip misc
+scimark/.*			,	jsbench		,	skip	,	skip scimark
 
 sunspider/.*                    ,	misc		,	skip	, 	skip sunspider
 jsbench/.*                      ,	misc		,	skip	, 	skip jsbench
 
+sunspider/.*                    ,	scimark		,	skip	, 	skip sunspider
+jsbench/.*                      ,	scimark		,	skip	, 	skip jsbench
+misc/.*                    	,	scimark		,	skip	, 	skip jsbench
+
+jsbench/Search.as               ,       .*              ,       skip    ,       skip test runs too long and times out buildbot
+.*util.*                        ,       .*              ,       skip    ,       ship internal files
 sunspider/(typed/|)regexp-dna.as	,.*       ,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
 sunspider/(typed/|)date-format-tofte.as	,.*       ,skip, contains eval
 sunspider/(typed/|)date-format-xparb.as	,.*       ,skip, contains eval

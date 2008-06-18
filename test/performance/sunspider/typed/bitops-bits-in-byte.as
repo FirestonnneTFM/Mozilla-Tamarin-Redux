@@ -44,9 +44,9 @@ for(var y=0; y<256; y++) func(y);
 }
 
 function runBitopsBitsInByte():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 TimeFunc(bitsinbyte);
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

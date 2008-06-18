@@ -61,10 +61,10 @@ function fannkuch(n:int):int {
    }
 }
 function runAccessFannkuch():int {
-  var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
   var n:int = 8;
   var ret:int = fannkuch(n);
-  var _sunSpiderInterval:int = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 print("metric run-access-fannkuch-typed "+runAccessFannkuch());

@@ -347,7 +347,7 @@ function Init(CubeSize:Number):void {
   Loop();
 }
 function run3dCube():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 
 for ( var i:int = 20; i <= 160; i *= 2 ) {
   Init(i);
@@ -363,7 +363,7 @@ LoopTime = null;
 DisplArea = null;
 
 
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

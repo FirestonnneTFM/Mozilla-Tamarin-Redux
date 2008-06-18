@@ -73,11 +73,11 @@ function spectralnorm(n:Number):Number {
 }
 
 function runMathSpectralNorm():int {
-  var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
   for (var i:int = 6; i <= 48; i *= 2) {
     spectralnorm(i);
   }
-  var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 

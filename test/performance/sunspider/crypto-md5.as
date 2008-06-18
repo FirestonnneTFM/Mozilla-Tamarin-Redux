@@ -280,7 +280,7 @@ function binl2b64(binarray)
 }
 
 function runCryptoMD5() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 
 var plainText = "Rebellious subjects, enemies to peace,\n\
 Profaners of this neighbour-stained steel,--\n\
@@ -313,7 +313,7 @@ for (var i = 0; i <4; i++) {
 var md5Output = hex_md5(plainText);
 
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

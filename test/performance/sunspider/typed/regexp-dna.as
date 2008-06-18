@@ -23,7 +23,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 
 // The Computer Language Shootout
 // http://shootout.alioth.debian.org/
@@ -1739,7 +1739,7 @@ for(k in subs)
  // search string, replacement string, flags
 
 
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 
 print("metric regexp-dna-typed " + _sunSpiderInterval);
 

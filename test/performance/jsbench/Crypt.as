@@ -27,7 +27,7 @@
 	var DK;
 
 	var start=new Date();
-	JGFrun(1);
+	JGFrun(0);
 	var elapsed=new Date()-start;
 	print("metric jsbench-crypt "+elapsed);
 	

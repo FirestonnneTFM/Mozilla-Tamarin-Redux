@@ -41,7 +41,7 @@ function morph(a, f) {
 
     
 function run3dmorph() {
-    var _sunSpiderStartDate = new Date();
+    var _sunSpiderStartDate = getTimer();
     var a = Array()
     for (var i=0; i < nx*nz*3; ++i) 
        a[i] = 0
@@ -54,7 +54,7 @@ function run3dmorph() {
     for (var i = 0; i < nx; i++)
         testOutput += a[3*(i*nx+i)+1];
     a = null;
-    var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+    var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
     return _sunSpiderInterval;
 }
 print("metric 3dmorph "+run3dmorph());

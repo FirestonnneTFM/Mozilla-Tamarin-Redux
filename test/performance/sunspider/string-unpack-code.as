@@ -36,7 +36,7 @@
 ***/
 
 function runStringUnpackCode() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 
 for (var i = 0; i < 2; i++) {
 
@@ -94,7 +94,7 @@ var decompressedPrototype = function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(
 
 }
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

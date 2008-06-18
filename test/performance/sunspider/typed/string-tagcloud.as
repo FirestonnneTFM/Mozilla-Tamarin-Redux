@@ -35,7 +35,7 @@
 // generates html markup for a "tagcloud" view.
 
 function runStringTagCloud():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 
 if (!Object.prototype.toJSONString) {
 
@@ -267,7 +267,7 @@ var tagcloud = makeTagCloud(tagInfo);
 tagInfo = null;
 
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

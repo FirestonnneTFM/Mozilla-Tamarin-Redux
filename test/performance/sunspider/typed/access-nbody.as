@@ -153,7 +153,7 @@ NBodySystem.prototype.energy = function():Number{
 }
 
 function runAccessNbody():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 
 var ret:Number;
 
@@ -173,7 +173,7 @@ for ( var n:int = 3; n <= 24; n *= 2 ) {
 }
 
 
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

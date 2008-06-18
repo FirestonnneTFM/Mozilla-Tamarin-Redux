@@ -72,11 +72,11 @@ function spectralnorm(n) {
   return Math.sqrt(vBv/vv);
 }
 function runMathSpectralNorm() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 for (var i = 6; i <= 48; i *= 2) {
     spectralnorm(i);
 }
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
 print("metric math-spectral-norm "+runMathSpectralNorm());

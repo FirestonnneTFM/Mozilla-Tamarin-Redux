@@ -55,9 +55,9 @@ function sieve():void {
 }
 
 function runBitopsNsieveBits():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 sieve();
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

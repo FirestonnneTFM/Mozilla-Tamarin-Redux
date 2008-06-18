@@ -53,11 +53,11 @@ function partial(n){
 }
 
 function runPartialSums() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 for (var i = 1024; i <= 16384; i *= 2) {
     partial(i);
 }
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
 print("metric run-partial-sums "+runPartialSums());

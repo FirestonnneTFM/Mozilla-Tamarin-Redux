@@ -43,9 +43,9 @@ for(var y=0; y<256; y++) func(y);
 }
 
 function runBitOpsBitsInByte() {
-  var _sunSpiderStartDate = new Date();
+  var _sunSpiderStartDate = getTimer();
   TimeFunc(bitsinbyte);
-  var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 print("metric bitops-bit-in-byte "+runBitOpsBitsInByte());

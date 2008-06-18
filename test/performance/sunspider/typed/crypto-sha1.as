@@ -227,7 +227,7 @@ function binb2b64(binarray:Array):String
 }
 
 function runCryptoSHA1():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 var plainText:String = "Two households, both alike in dignity,\n\
 In fair Verona, where we lay our scene,\n\
 From ancient grudge break to new mutiny,\n\
@@ -250,7 +250,7 @@ for (var i:int = 0; i <4; i++) {
 var sha1Output:String = hex_sha1(plainText);
 
 
-var _sunSpiderInterval:int = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

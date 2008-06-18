@@ -112,9 +112,9 @@ function addResult(r:String):void
 }
 
 function runStringValidateInput():int {
-  var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
   doTest();
-  var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 

@@ -40,7 +40,7 @@ function morph(a:Array, f:Number):void {
 }
 
 function run3dMorph():int {    
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 
 var a:Array = Array()
 for (var i:int=0; i < nx*nz*3; ++i) 
@@ -54,7 +54,7 @@ var testOutput:Number = 0;
 for (var i:int = 0; i < nx; i++)
     testOutput += a[3*(i*nx+i)+1];
 a = null;
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

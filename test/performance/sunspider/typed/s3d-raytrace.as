@@ -314,7 +314,7 @@ Camera.prototype.render = function(scene:Object, pixels:Array, width:Number, hei
 
 function raytraceScene():Array
 {
-    var startDate:Number = new Date().getTime();
+    var startDate:Number = getTimer();
     var numTriangles:Number = 2 * 6;
     var triangles:Array = new Array();//numTriangles);
     var tfl:Array = createVector(-10,  10, -10);
@@ -441,9 +441,9 @@ for (var y = 0; y < size; y++) {\n\
 }
 
 function run3dRaytrace():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 var testOutput:String = arrayToCanvasCommands(raytraceScene());
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

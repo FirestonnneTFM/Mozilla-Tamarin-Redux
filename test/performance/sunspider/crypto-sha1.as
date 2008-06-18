@@ -227,7 +227,7 @@ function binb2b64(binarray)
 }
 
 function runCryptoSHA1() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 var plainText = "Two households, both alike in dignity,\n\
 In fair Verona, where we lay our scene,\n\
 From ancient grudge break to new mutiny,\n\
@@ -250,7 +250,7 @@ for (var i = 0; i <4; i++) {
 var sha1Output = hex_sha1(plainText);
 
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 print("metric crypto-sha1 "+runCryptoSHA1());

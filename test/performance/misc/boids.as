@@ -36,8 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 package {
-	import flash.system.System;
-	import flash.utils.getTimer;
   
 	var b:boids=new boids(100);
 	b.width=5000;

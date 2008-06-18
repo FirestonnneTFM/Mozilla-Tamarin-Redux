@@ -311,7 +311,7 @@ Camera.prototype.render = function(scene, pixels, width, height) {
 
 function raytraceScene()
 {
-    var startDate = new Date().getTime();
+    var startDate = getTimer();
     var numTriangles = 2 * 6;
     var triangles = new Array();//numTriangles);
     var tfl = createVector(-10,  10, -10);
@@ -438,9 +438,9 @@ for (var y = 0; y < size; y++) {\n\
 }
 
 function run3draytrace() {
-  var _sunSpiderStartDate = new Date();
+  var _sunSpiderStartDate = getTimer();
   testOutput = arrayToCanvasCommands(raytraceScene());
-  var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 print("metric 3d-raytrace "+run3draytrace());

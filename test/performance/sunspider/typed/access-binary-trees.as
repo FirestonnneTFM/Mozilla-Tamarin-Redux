@@ -52,7 +52,7 @@ function bottomUpTree(item,depth):Object{
 }
 
 function runAccessBinaryTrees():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 var ret:Object;
 
 for ( var n:int = 4; n <= 7; n += 1 ) {
@@ -77,7 +77,7 @@ for ( var n:int = 4; n <= 7; n += 1 ) {
 }
 
 
-var _sunSpiderInterval:int = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 

@@ -386,7 +386,7 @@ String.leftPad = function (val, size, ch) {
     return result;
 }
 function runDateFormatXparb() {
-var _sunSpiderStartDate = new Date();
+var _sunSpiderStartDate = getTimer();
 
 Date.daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
 Date.monthNames =
@@ -446,7 +446,7 @@ for (i = 0; i < 4000; ++i) {
 }
 
 
-var _sunSpiderInterval = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }

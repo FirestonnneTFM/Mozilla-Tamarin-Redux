@@ -49,11 +49,11 @@
  */
 
 function runBitopsBitwiseAnd():int {
-var _sunSpiderStartDate:Date = new Date();
+var _sunSpiderStartDate:int = getTimer();
 var bitwiseAndValue:int = 4294967296;
 for (var i:Number = 0; i < 600000; i++)
     bitwiseAndValue = bitwiseAndValue & i;
-var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 print("metric bitops-bitwise-and-typed " + runBitopsBitwiseAnd());
