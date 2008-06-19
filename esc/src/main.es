@@ -77,7 +77,9 @@ function repl() {
         while( true ) {
             try {
                 s += System.readLine();
-                ESC::compileAndLoadString(s, "(repl)");
+                let [_,_,res] = ESC::compileAndLoadString(s, "(repl)");
+                if (res !== undefined)
+                    print(res);
                 break; // worked - this command is complete.
             } catch (x) {
                 // If it is a premature-EOF error, read another line

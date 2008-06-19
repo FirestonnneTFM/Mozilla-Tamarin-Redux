@@ -86,9 +86,9 @@ function cgExprStmt(ctx, s) {
     //  - exprStmt updates the local with the value instead of popping it
     //  - catch and finally blocks do not affect the captured value
 
-    while (stk != null && stk.tag != "function" && stk.tag != "finally" && stk.tag != "catch")
+    while (stk != null && stk.tag != "function" && stk.tag != "script" && stk.tag != "finally" && stk.tag != "catch")
         stk = stk.link;
-    if (stk != null && stk.tag == "function" && stk.capture_reg) {
+    if (stk != null /*&& stk.tag == "function"*/ && stk.capture_reg) {
         asm.I_coerce_a();
         asm.I_setlocal(stk.capture_reg);
     }
