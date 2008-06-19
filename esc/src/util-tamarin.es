@@ -78,6 +78,6 @@ Util function writeBytesToFile(bytes, filename) {
 }
 
 Util function loadBytes(bytes) {
-    Domain.currentDomain.loadBytes(bytes);
+    return Domain.currentDomain.loadBytes(bytes);
 }
 

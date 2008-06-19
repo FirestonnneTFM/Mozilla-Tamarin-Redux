@@ -126,7 +126,11 @@ function cg(tree: PROGRAM) {
     CTX.prototype.filename = tree.file;
     CTX.prototype.scope_reg = 0;
 
-    cgProgram(pushProgram(s), tree);
+    let asm = s.init.asm;
+    let capture_reg = asm.getTemp();
+    cgProgram(pushProgram(s, capture_reg), tree);
+    asm.I_getlocal(capture_reg);
+    asm.I_returnvalue();
     //print("iterations=" + (hits + misses) + "; hit ratio=" + hits/(hits + misses));
     //hits=misses=0;
     return e.finalize();
@@ -888,9 +892,9 @@ function restoreScopes(ctx) {
 
 // The following return extended contexts
 
-function pushProgram(script)
+function pushProgram(script, capture_reg)
     new CTX( script.init.asm, 
-             { tag: "script", push_this: true, link: null }, 
+             { tag: "script", push_this: true, capture_reg: capture_reg, link: null }, 
              script );
 
 function pushClass({asm, stk}, cls)
