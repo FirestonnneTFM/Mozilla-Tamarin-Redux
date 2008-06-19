@@ -118,11 +118,14 @@ function hash_number(n) {
     return uint(n);                       // Fairly arbitrary
 }
 
-function hash_string(s) {
+// The type annotation and the explicit namespace has somewhat
+// dramatic effects on performance.
+
+function hash_string(s: String) {
     // See http://www.cse.yorku.ca/~oz/hash.html; this is the djb2 algorithm
     var h = 5381;
     for ( var i=0, limit=s.length ; i < limit ; i++ )
-        h = ((h << 5) + h) + s.charCodeAt(i);
+        h = ((h << 5) + h) + s."http://adobe.com/AS3/2006/builtin"::charCodeAt(i);
     return uint(h);
 }
 
