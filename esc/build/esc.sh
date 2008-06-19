@@ -18,6 +18,10 @@
 #   -[no-]debug
 #      Emit (do not emit) debug information
 #
+#   -Xprofile
+#      Profile the compiler: dump a statistical profile to the file 
+#      esc.profile following compilation.
+#
 # Defaults are -no-es3 -no-extensions -no-debug.
 #
 # esc.sh must be run from $DIR, or you must change the value of
@@ -45,5 +49,6 @@ $DIR/shell \
     $DIR/esc-core.es.abc \
     $DIR/eval-support.es.abc \
     $DIR/esc-env.es.abc \
+    $DIR/sampler.es.abc \
     $DIR/esc.es.abc \
     -- $@
