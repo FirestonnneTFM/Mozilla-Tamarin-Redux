@@ -99,7 +99,6 @@ function cgExpr(ctx, e) {
     case (e:IdentExpr) { cgIdentExprNode(ctx, e) }
     case (e:SetExpr) { cgSetExpr(ctx, e) }
     case (e:InitExpr) { cgInitExpr(ctx, e) }
-    case (e:SliceExpr) { cgSliceExpr(ctx, e) }
     case (e:GetTemp) { cgGetTempExpr(ctx, e) }
     case (e:GetParam) { cgGetParamExpr(ctx, e) }
     case (e:GetCogenTemp) { cgGetCogenTemp(ctx, e) }
@@ -992,11 +991,6 @@ function cgLiteralExpr(ctx, e) {
         Gen::internalError(ctx, "Unimplemented LiteralExpr " + e);
     }
     }
-}
-
-function cgSliceExpr(ctx, e) {
-    // FIXME
-    Gen::internalError(ctx, "Unimplemented slice expression");
 }
 
 function cgGetTempExpr(ctx, {n}) {
