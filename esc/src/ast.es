@@ -50,11 +50,12 @@ class ASTNode {
 
 // BASIC TYPES
 
-type IDENT = String;   // unicode string
+type IDENT = Token::Tok; // hm, how does this serialize??
 
 class Head extends ASTNode implements Serializable {
     const fixtures: [...Fixture];
     const exprs: [...Expr];
+    const cache = null;  // used by the definer, for the moment
     function Head (fixtures,exprs)
         : fixtures=fixtures
         , exprs=exprs {}
@@ -232,7 +233,7 @@ final class NamespaceSetList extends ASTNode implements Serializable {
         new NamespaceSetList(new NamespaceSet(ns, nsset), this.link);
 }
 
-const publicNS = new Ast::PublicNamespace("");
+const publicNS = new Ast::PublicNamespace(Token::sym_EMPTY);
 const publicNSSL = new Ast::NamespaceSetList(new Ast::NamespaceSet(publicNS, null), null);
 
 // Binary type operators
@@ -737,7 +738,7 @@ class LiteralBoolean extends Expr implements LiteralExpr, Serializable {
 }
 
 class LiteralString extends Expr implements LiteralExpr, Serializable {
-    const strValue : String;
+    const strValue : Token::Tok;
     function LiteralString (strValue, pos=0)
         : strValue = strValue
         , super(pos) {}
@@ -844,7 +845,7 @@ class LiteralFunction extends Expr implements LiteralExpr, Serializable {
 }
 
 class LiteralRegExp extends Expr implements LiteralExpr, Serializable {
-    const src : String;
+    const src : Token::Tok;
     function LiteralRegExp(src, pos=0)
         : src=src
         , super(pos) {}
@@ -1029,7 +1030,9 @@ class Func extends ASTNode implements Serializable {
     const ty: TypeExpr;
     const attr: FuncAttr;
     const strict: Boolean;
-    function Func (name,body,params,numparams,vars,defaults,ty,attr,strict)
+    const pos;
+    const filename;
+    function Func (name,body,params,numparams,vars,defaults,ty,attr,strict,pos=0,filename=null)
         : name = name
         , body = body
         , params = params
@@ -1038,10 +1041,12 @@ class Func extends ASTNode implements Serializable {
         , defaults = defaults
         , ty = ty
         , attr = attr 
-        , strict = strict {}
+        , strict = strict
+        , pos = pos
+        , filename = filename {}
 
     function serialize(s)
-        s.sClass(this, "Func", "name", "body", "params", "numparams", "vars", "defaults", "ty", "attr", "strict");
+        s.sClass(this, "Func", "name", "body", "params", "numparams", "vars", "defaults", "ty", "attr", "strict", "pos", "filename");
 }
 
 class Ctor extends ASTNode implements Serializable {
@@ -1126,7 +1131,7 @@ class ClassFixture extends ASTNode implements FixtureData, Serializable {
 }
 
 class InterfaceFixtureFwd extends FixtureFwd implements Serializable {
-    function InterfaceFixtureFwd (params) : super(params) {}
+    function InterfaceFixtureFwd (params) : super(params, false) {}
 
     function serialize(s)
         s.sClass(this, "InterfaceFixtureFwd", "params");
@@ -1774,7 +1779,8 @@ class Serializer {
         if (obj is String)
             return "'" + sanitize(obj) + "'";
 
-        throw new Error("Unserializable datum " + obj);
+        //throw new Error("Unserializable datum " + obj);
+        return "[[" + obj + "]]";
     }
 
     function serializeArray(obj, linebreak) {

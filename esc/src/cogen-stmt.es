@@ -242,7 +242,7 @@ function cgBreakStmt(ctx, {ident}) {
     unstructuredControlFlow(ctx,
                             hit,
                             true,
-                            (ident == null ? "No 'break' allowed here" : "'break' to undefined label " + ident));
+                            (ident == null ? "No 'break' allowed here" : "'break' to undefined label " + ident.text));
 }
 
 function cgContinueStmt(ctx, {ident}) {
@@ -252,7 +252,7 @@ function cgContinueStmt(ctx, {ident}) {
     unstructuredControlFlow(ctx,
                             hit,
                             true,
-                            "'continue' to undefined label " + ident);
+                            (ident == null ? "No 'continue' allowed here" : "'continue' to undefined label " + ident.text));
 }
 
 function cgThrowStmt(ctx, {expr}) {
@@ -425,7 +425,7 @@ function cgSwitchStmtFast(ctx, s, low, high, has_default) {
         }
 
         let stmts = c.stmts;
-        for ( let j=0 ; j < stmts.length ; j++ )
+        for ( let j=0, jlimit=stmts.length ; j < jlimit ; j++ )
             cgStmt(nctx, stmts[j] );
     }
 
@@ -456,7 +456,7 @@ function cgSwitchStmtSlow(ctx, {expr,cases}) {
     let Lfall = null;
     let Lbreak = asm.newLabel();
     let nctx = pushBreak(ctx, Lbreak);
-    for ( let i=0 ; i < cases.length ; i++ ) {
+    for ( let i=0, limit=cases.length ; i < limit ; i++ ) {
         let c = cases[i];
 
         if (c.expr == null) {
@@ -480,7 +480,7 @@ function cgSwitchStmtSlow(ctx, {expr,cases}) {
         }
 
         let stmts = c.stmts;
-        for ( let j=0 ; j < stmts.length ; j++ )
+        for ( let j=0, jlimit=stmts.length ; j < jlimit ; j++ )
             cgStmt(nctx, stmts[j] );
 
         Lfall = asm.I_jump(undefined);            // fall through
@@ -505,7 +505,7 @@ function cgSwitchTypeStmt(ctx, {expr,cases}) {
     let newcases = [];
     let hasDefault = false;
 
-    for( let i = 0; i < cases.length; i++ ) {
+    for( let i = 0, limit=cases.length ; i < limit ; i++ ) {
         newcases.push(cases[i]);
         let {data} = cases[i].param.fixtures[0];
         if (Ast::isAnyType(data.ty))
@@ -514,7 +514,7 @@ function cgSwitchTypeStmt(ctx, {expr,cases}) {
 
     // Add a catch all case so we don't end up throwing whatever the switch type expr was
     if (!hasDefault) {
-        newcases.push(new Ast::Catch(new Ast::Head([ new Ast::Fixture(new Ast::PropName(new Ast::Name(Ast::publicNS, "x")),
+        newcases.push(new Ast::Catch(new Ast::Head([ new Ast::Fixture(new Ast::PropName(new Ast::Name(Ast::publicNS, Token::sym_x)),
                                                                       new Ast::ValFixture(Ast::anyType, false)) ],
                                                    []),
                                      new Ast::Block(new Ast::Head([],[]), [])));
@@ -650,7 +650,7 @@ function cgTryStmtNoFinally(ctx, {block, catches}) {
     let Lend = asm.newLabel();
     asm.I_jump(Lend);
 
-    for( let i = 0; i < catches.length; ++i )
+    for( let i = 0, limit=catches.length ; i < limit ; ++i )
         cgCatch(ctx, code_start, code_end, Lend, catches[i]);
         
     asm.I_label(Lend);

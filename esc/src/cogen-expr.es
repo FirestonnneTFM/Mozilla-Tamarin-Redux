@@ -181,7 +181,7 @@ function cgBinaryExpr(ctx, e) {
     }
 }
 
-internal var id_TypeError = new Ast::Identifier("TypeError", Ast::publicNSSL);
+internal var id_TypeError = new Ast::Identifier(Token::sym_TypeError, Ast::publicNSSL);
 
 function cgBinaryTypeExpr(ctx, {op, e1, e2}) {
     let {asm, cp} = ctx;
@@ -419,7 +419,7 @@ function cgCallExpr(ctx, e) {
         else {
             cgFindPropStrict(ctx, lr);
         }
-        if (lr is Identifier && lr.ident === "eval") {
+        if (lr is Identifier && lr.ident == Token::sym_eval) {
             isEval = true;
             evalTmp = asm.getTemp();   // save the
             asm.I_dup();               //   object
@@ -497,8 +497,8 @@ function cgCallExpr(ctx, e) {
 
 function cgEvalPrefix(ctx, evalTmp, nargs, strict) {
     let {asm} = ctx;
-    let id_ESC = new Ast::Identifier("ESC", Ast::publicNSSL);
-    let id_evaluateInScopeArray = new Ast::QualifiedIdentifier(id_ESC, "evaluateInScopeArray");
+    let id_ESC = new Ast::Identifier(Token::sym_ESC, Ast::publicNSSL);
+    let id_evaluateInScopeArray = new Ast::QualifiedIdentifier(id_ESC, Token::sym_evaluateInScopeArray);
 
     // Check it: Is this *really* the eval operator?
 
@@ -697,7 +697,7 @@ function cgNewExpr(ctx, {expr, args, spread}) {
         Gen::internalError(ctx, "Spread expression not implemented");
 
     cgExpr(ctx, expr);
-    for ( let i=0 ; i < args.length ; i++ )
+    for ( let i=0, limit=args.length ; i < limit ; i++ )
         cgExpr(ctx, args[i]);
     asm.I_construct(args.length);
 }
@@ -847,12 +847,13 @@ function cgLiteralExpr(ctx, e) {
     function cgArrayInitializer(ctx, {exprs, spread}) {
         let {asm} = ctx;
         let i = 0;
+        let limit = exprs.length
 
         if (spread != null)
             Gen::internalError(ctx, "Spread expression in array initializer not implemented.");
 
         // Use newarray to construct the dense prefix
-        for ( ; i < exprs.length ; i++ ) {
+        for ( ; i < limit ; i++ ) {
             let e = exprs[i];
             if (e is Ast::LiteralUndefined)
                 break;
@@ -861,14 +862,14 @@ function cgLiteralExpr(ctx, e) {
         asm.I_newarray(i);
 
         // Then init the other defined slots one by one
-        if (i < exprs.length) {
+        if (i < limit) {
             let last_was_undefined = false;
-            for ( ; i < exprs.length ; i++ ) {
+            for ( ; i < limit ; i++ ) {
                 let e = exprs[i];
                 if (!(e is Ast::LiteralUndefined)) {
                     asm.I_dup();
                     cgExpr(ctx, e);
-                    asm.I_setproperty(cgIdentExpr(ctx, new Ast::Identifier(String(i), Ast::publicNSSL)));
+                    asm.I_setproperty(cgIdentExpr(ctx, new Ast::Identifier(Token::intern(i), Ast::publicNSSL)));
                     last_was_undefined = false;
                 }
                 else
@@ -876,8 +877,8 @@ function cgLiteralExpr(ctx, e) {
             }
             if (last_was_undefined) {
                 asm.I_dup();
-                asm.I_pushint(ctx.cp.int32(exprs.length));
-                asm.I_setproperty(cgIdentExpr(ctx, new Ast::Identifier("length", Ast::publicNSSL)));
+                asm.I_pushint(ctx.cp.int32(limit));
+                asm.I_setproperty(cgIdentExpr(ctx, new Ast::Identifier(Token::sym_length, Ast::publicNSSL)));
             }
         }
     }
@@ -888,7 +889,7 @@ function cgLiteralExpr(ctx, e) {
         asm.I_constructprop(ctx.emitter.Object_name, 0);
         let t = asm.getTemp();
         asm.I_setlocal(t);
-        for ( let i=0 ; i < fields.length ; i++ ) {
+        for ( let i=0, limit=fields.length ; i < limit ; i++ ) {
             switch type (fields[i]) {
             case (lf: Ast::LiteralField) {
                 // SYNTACTIC CONDITION.  If the object initializer is
@@ -917,7 +918,9 @@ function cgLiteralExpr(ctx, e) {
         asm.killTemp(t);
     }
 
-    function cgRegExpLiteral({asm:asm, cp:cp}, {src:src}) {
+    function cgRegExpLiteral(ctx, re) {
+        let {asm, cp} = ctx;
+        let src = re.src.text;
         // src is "/.../flags"
         //
         // Note, ES4 semantics: recreate RE object every time.
@@ -957,7 +960,7 @@ function cgLiteralExpr(ctx, e) {
         asm.I_pushdouble(ctx.cp.float64(parseFloat(e.decimalValue)));
     }
     case (e:LiteralString) {
-        asm.I_pushstring(ctx.cp.stringUtf8(e.strValue));
+        asm.I_pushstring(ctx.cp.symbolUtf8(e.strValue));
     }
     case (e:LiteralBoolean) {
         if (e.booleanValue)
@@ -995,7 +998,7 @@ function cgLiteralExpr(ctx, e) {
 
 function cgGetTempExpr(ctx, {n}) {
     let {asm, emitter} = ctx;
-    let id = new Ast::Identifier("$t" + n, Ast::publicNSSL);
+    let id = new Ast::Identifier(Token::intern("$t" + n), Ast::publicNSSL);
     cgFindPropStrict(ctx, id);
     cgGetProp(ctx, id);
 }

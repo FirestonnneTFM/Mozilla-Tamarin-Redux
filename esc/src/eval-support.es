@@ -13,7 +13,7 @@ ESC function evaluateInScopeArray(args, scopes, scopedesc, strict) {
         if (args[0] is String) {
             let id = ESC::eval_counter++;
             let file = "(EVAL CODE)";
-            let name = "$eval$" + id + "$";
+            let name = Token::intern("$eval$" + id + "$");
             let parser = new Parse::Parser( args[0], ESC::getTopFixtures(), file );
             let prog = parser.program(false);
 

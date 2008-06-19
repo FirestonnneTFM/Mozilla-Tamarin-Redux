@@ -48,10 +48,21 @@ function startProfile() {
 internal function printProf()
     this.name + "\n   {self:" + this.self + ", children: " + this.children + ", new:" + this.new + "}";
 
+internal function printCallers() {
+    let s = "{";
+    for each ( let v in this )
+        s += v + ", ";
+    s += "}";
+    return s;
+}
+
+internal function printCaller()
+    this.name + "= " + this.count;
+
 internal function frame2name(s) {
     let name = s + " ";
     if (!profile_data.hasOwnProperty(name))
-        profile_data[name] = {name: name, self:0, children: 0, new:0, toString: printProf};
+        profile_data[name] = {name: name, callers: { toString: printCallers }, self:0, children: 0, new:0, toString: printProf};
     return name;
 }
 
@@ -68,6 +79,12 @@ function snapshotProfile() {
             }
             case (s: *) { 
                 profile_data[name].self += 1;
+                if (sample.stack.length > 1) {
+                    let n2 = frame2name(sample.stack[1]);
+                    if (!profile_data[name].callers.hasOwnProperty(n2))
+                        profile_data[name].callers[n2] = { name: n2, count: 0, toString: printCaller };
+                    profile_data[name].callers[n2].count += 1;
+                }
                 for ( let i=1 ; i < sample.stack.length ; i++ ) {
                     let parent_name = frame2name(sample.stack[i]);
                     profile_data[parent_name].children += 1;
@@ -122,8 +139,13 @@ function dumpProfile(filename) {
 
         for ( let i=0 ; i < tmp.length && val(tmp[i]) > 0 ; i++ )
             total += tmp[i].self;  // [sic]
-        for ( let i=0 ; i < tmp.length && (v = val(tmp[i])) > 0 ; i++ )
+        for ( let i=0 ; i < tmp.length && (v = val(tmp[i])) > 0 ; i++ ) {
             s += "" + right(tmp[i].self, 8) + " " + right(tmp[i].self+tmp[i].children, 8) + right((100*v/total).toFixed(1), 6) + "% " + tmp[i].name + "\n";
+            /* Print the known callers of the method in arbitrary order
+            if (tmp[i].name == "Array/get length() ")
+                s += "      " + tmp[i].callers.toString().split(",").join("\n      ") + "\n";
+            */
+        }
     }
 
     function right(x, n) {
@@ -135,4 +157,3 @@ function dumpProfile(filename) {
 function stopProfile() {
     "flash.sampler"::stopSampling();
 }
-

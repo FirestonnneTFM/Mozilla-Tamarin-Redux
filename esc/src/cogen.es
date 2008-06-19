@@ -159,7 +159,7 @@ function cg(tree: PROGRAM) {
  * captured and is return if the script terminates normally.
  */
 
-function cgEval(tree: PROGRAM, name: String, scopedesc: String) {
+function cgEval(tree: PROGRAM, name: Token::Tok, scopedesc: String) {
 
     function evalInits() {
         let d = [];
@@ -196,7 +196,7 @@ function cgEval(tree: PROGRAM, name: String, scopedesc: String) {
                ( [ new Ast::ExprStmt
                    ( new Ast::SetExpr
                      ( Ast::assignOp,
-                       new Ast::QualifiedIdentifier( new Ast::Identifier("ESC", Ast::publicNSSL), "eval_hook" ),
+                       new Ast::QualifiedIdentifier( new Ast::Identifier(Token::sym_ESC, Ast::publicNSSL), Token::sym_eval_hook ),
                        new Ast::Identifier(name, Ast::publicNSSL))) ],
                  tree.head,
                  tree.attr,
@@ -216,13 +216,13 @@ function cgProgram(ctx, prog) {
     cgStmts(ctx, prog.body);
 }
 
-function cgGetFixtureNameParts(ctx, fxname) : [name, ns] {
+function cgGetFixtureNameParts(ctx, fxname) {
     switch type (fxname) {
     case (pn:PropName) {
         return [pn.name.id, pn.name.ns];
     }
     case (tn:TempName) {
-        return ["$t"+tn.index, Ast::publicNS]
+        return [Token::intern("$t"+tn.index), Ast::publicNS]
     }
     case (x:*) { 
         Gen::internalError(ctx, "Not a valid fixture name " + x); // FIXME source pos
@@ -235,7 +235,7 @@ function cgFixtures(ctx, fixtures) {
     let {slots, use_regs, scope_reg} = getVariableDefinitionScope(ctx);
     
     if( use_regs ) {
-        for ( let i=0 ; i < fixtures.length ; i++ ) {
+        for ( let i=0, limit=fixtures.length ; i < limit ; i++ ) {
             let {name:fxname, data:fx} = fixtures[i];
             let [name, ns] = cgGetFixtureNameParts(ctx, fxname);
             if( slots.getBinding(name, ns) != null )
@@ -258,7 +258,7 @@ function cgFixtures(ctx, fixtures) {
         }
     }
     else {
-        for ( let i=0 ; i < fixtures.length ; i++ ) {
+        for ( let i=0, limit=fixtures.length ; i < limit ; i++ ) {
             let slot_id = -1;
             let {name:fxname, data:fx} = fixtures[i];
             let name = emitter.fixtureNameToName(fxname);
@@ -316,7 +316,7 @@ function cgFixtures(ctx, fixtures) {
             else if (fx is NamespaceFixture) {
                 checkTrait(fxname, name, TRAIT_Slot, true);
                 slot_id = target.addTrait(new ABCSlotTrait(name, 0, true, 0, 
-                                                 emitter.qname(new Ast::Name(Ast::publicNS, "Namespace"),false), 
+                                                 emitter.qname(new Ast::Name(Ast::publicNS, Token::sym_Namespace),false), 
                                                  emitter.namespace(fx.ns), CONSTANT_Namespace));
             }
             else if (fx is TypeFixture) {
@@ -355,7 +355,7 @@ function cgBlock(ctx, b) {
 }
 
 function cgStmts(ctx, stmts) {
-    for ( let i=0 ; i < stmts.length ; i++ )
+    for ( let i=0, limit=stmts.length ; i < limit ; i++ )
         cgStmt(ctx, stmts[i]);
 }
 
@@ -444,7 +444,7 @@ function cgInterface(ctx, c) {
     let ifacename = emitter.qname(c.name,false);
     let interfacenames = Util::map((function (n) cgTypeExpr(ctx,n)), c.interfaceNames);
 
-    let iface = script.newInterface(ifacename, ctx.cp.stringUtf8(c.name.id), interfacenames);
+    let iface = script.newInterface(ifacename, ctx.cp.symbolUtf8(c.name.id), interfacenames);
         
     let ifaceidx = iface.finalize();
 
@@ -497,7 +497,7 @@ function cgCtor(ctx, c, instanceInits) {
 
         cgHead(ctor_ctx, f.params);
 
-        for ( let i=0 ; i < c.settings.length ; i++ ) {
+        for ( let i=0, limit=c.settings.length ; i < limit ; i++ ) {
             cgExpr(ctor_ctx, c.settings[i]);
             asm.I_pop();
         }
@@ -572,8 +572,14 @@ function cgFunc(ctx0, f:Func) {
     let use_regs = early_binding && !f.attr.reify_activation;
     let fntype = ctx0.stk != null && (ctx0.stk.tag == "instance" || ctx0.stk.tag == "class")? "method" : "function";  // brittle as hell
     let formals_types = extractFormalTypes({emitter:emitter, script:script}, f);
-    let name = f.name ? f.name.ident : "";
-    let method = new Method(emitter, formals_types, cp.stringUtf8(name), fntype != "function", f.attr);
+    let name = null;
+    if (f.name == null) {
+        if (f.pos != 0 || f.filename != null)
+            name = Token::intern("<anonymous " + (f.filename ? f.filename : "(unknown)") + ":" + f.pos + ">");
+    }
+    else
+        name = f.name.ident;
+    let method = new Method(emitter, formals_types, cp.symbolUtf8(name), fntype != "function", f.attr);
 
     let defaults = extractDefaultValues({emitter:emitter, script:script}, f);
     if( defaults.length > 0 )
@@ -717,10 +723,10 @@ function setupArguments(ctx, f) {
         //
         // Then initialize it.  It must be done first according to E262-3.
 
-        cgFixtures(ctx, [new Ast::Fixture(new PropName(new Ast::Name(Ast::publicNS, "arguments")), 
+        cgFixtures(ctx, [new Ast::Fixture(new PropName(new Ast::Name(Ast::publicNS, Token::sym_arguments)), 
                                           new ValFixture(Ast::anyType, false))]);
         cgExpr(ctx, new Ast::SetExpr(Ast::assignOp, 
-                                     new Ast::Identifier("arguments", Ast::publicNSSL), 
+                                     new Ast::Identifier(Token::sym_arguments, Ast::publicNSSL), 
                                      new Ast::GetParam(f.numparams)));
         ctx.asm.I_pop();
     }
@@ -731,7 +737,7 @@ function cgHead(ctx, head) {
         
     let named_fixtures = extractNamedFixtures(head.fixtures);
     cgFixtures(ctx, named_fixtures);
-    for ( let i=0 ; i < head.exprs.length ; i++ ) {
+    for ( let i=0, limit=head.exprs.length ; i < limit ; i++ ) {
         cgExpr(ctx, head.exprs[i]);
         asm.I_pop();
     }
