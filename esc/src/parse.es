@@ -51,13 +51,13 @@ class FieldPattern extends Pattern {
 }
 
 class ObjectPattern extends Pattern {
-    const ptrns : [FieldPattern];
+    const ptrns : [...FieldPattern];
     function ObjectPattern (ptrns)
         : ptrns = ptrns { }
 }
 
 class ArrayPattern extends Pattern {
-    const ptrns : [Pattern];
+    const ptrns : [...Pattern];
     const spread: ? Pattern;
     function ArrayPattern (ptrns, spread)
         : ptrns = ptrns 
@@ -105,7 +105,7 @@ type NamespaceExpr = (Ast::IdentExpr | Ast::LiteralString);
 function extractInfo(ctx) {
     let filename = "";
     let position = 0;
-    if (ctx is Context)
+    if (ctx is Definer)
         ctx = ctx.parser;
     if (ctx is Parser) {
         filename = ctx.scan.filename;
@@ -129,321 +129,21 @@ function warning(ctx, msg) {
     Util::warning(filename, position, msg);
 }
 
-final class Rib 
-{
-    static const SYSTEM = -1;
-    static const GLOBAL = 0;
-    static const CLASS_STATIC = 1;
-    static const CLASS_INSTANCE = 2;
-    static const FUNCTION = 3;
-    static const BLOCK = 4;
-
-    var defaultNamespace: (Ast::Expr | Ast::Namespace);
-    var strict:           Boolean;
-    var open_namespaces:  Ast::NamespaceSetList;
-    const head:           Ast::Head;
-    const link:           Rib;
-    const tag;
-
-    // Now we can use the trick where if the top namespace has no
-    // entries then we reuse it, since it is a completely functional
-    // data structure.
-
-    function Rib(tag, link) 
-        : tag = tag
-        , link = link
-        , defaultNamespace = Ast::publicNS
-        , head = new Ast::Head([], [])
-        , strict = link ? link.strict : false
-    {
-        if (link == null)
-            open_namespaces = new Ast::NamespaceSetList(null, null);
-        else if (link.open_namespaces.nsset == null)
-            open_namespaces = link.open_namespaces;
-        else
-            open_namespaces = link.open_namespaces.pushScope();
-    }
-
-    function openNamespace(ns) {
-        let nss;
-        for ( nss = open_namespaces.nsset ; nss != null && !Ast::nsEquals(nss.ns, ns) ; nss = nss.link )
-            ;
-        if (nss == null)
-            open_namespaces = open_namespaces.pushNamespace(ns);
-    }
-
-    static function makeSystemRib(topFixtures) {
-        let r = new Rib(Rib.SYSTEM, null);
-        Util::pushOnto(r.head.fixtures, topFixtures);
-        return r;
-    }
-}
-
-// This is a singleton class and it should probably just be inlined
-// into Parser, the indirection / abstraction doesn't buy us anything
-// but a tiny amount of information hiding.
-
-final class Context
-{
-    const parser;
-
-    private var env: Rib;
-    private var top_function: Ast::FuncAttr;
-
-    function Context (parser, topFixtures)
-        : parser = parser
-        , env = Rib.makeSystemRib(topFixtures)
-        , top_function = new Ast::FuncAttr(null)
-    {
-    }
-
-    function enterGlobal(): void
-        enterRib(Rib.GLOBAL);
-
-    function exitGlobal() 
-        exitRib();
-
-    function enterClassStatic(): void 
-        enterRib(Rib.CLASS_STATIC);
-
-    function exitClassStatic() 
-        exitRib();
-
-    function enterClassInstance(): void 
-        enterRib(Rib.CLASS_INSTANCE);
-
-    function exitClassInstance() 
-        exitRib();
-
-    function enterFunction(attrs): void {
-        let node = new Ast::FuncAttr(top_function);
-        node.is_native = attrs.native;
-        top_function.children.push(node);
-        top_function = node;
-        enterRib(Rib.FUNCTION);
-    }
-
-    function exitFunction() {
-        let vars = exitRib();
-        let attr = top_function;
-        top_function = top_function.parent;
-
-        return [vars, attr];
-    }
-
-    function topFunction() {
-        return top_function;
-    }
-
-    function enterBlock(): void 
-        enterRib(Rib.BLOCK);
-
-    function exitBlock() 
-        exitRib();
-
-    private function enterRib(tag): void
-        env = new Rib(tag, env);
-
-    private function exitRib(): Ast::Head {
-        let head = env.head;
-        env = env.link;
-        return head;
-    }
-
-    function addFixtures(initType, fixtures, isStatic=false): void
-        Util::pushOnto(findHead(initType, isStatic).fixtures, fixtures);
-
-    function addInits(initType, inits, isStatic=false): void
-        Util::pushOnto(findHead(initType, isStatic).exprs, inits);
-
-    function addFixture(initType, name, fixture, isStatic=false): void
-        findHead(initType, isStatic).fixtures.push(new Ast::Fixture(name,fixture));
-
-    private function findHead(initType, isStatic) {
-        if (initType == Ast::letInit)
-            return env.head;
-        for ( let e=env ; e != null ; e = e.link )
-            if (e.tag != Rib.BLOCK && (!isStatic || e.tag == Rib.CLASS_STATIC))
-                return e.head;
-        Parse::internalError(this, "Fell off the end in Context::findHead(): " + initType + "," + isStatic);
-    }
-
-    function getOpenNamespaces()
-        env.open_namespaces;
-
-    function getDefaultNamespace()
-        env.defaultNamespace;
-
-    function setDefaultNamespace (ident: NamespaceExpr) {
-        env.defaultNamespace = resolveNamespaceExpr(ident);
-    }
-
-    function openNamespace (ident: NamespaceExpr): void
-        env.openNamespace( resolveNamespaceExpr(ident) );
-
-    function pushNamespace(ns): void
-        env.openNamespace(ns);
-
-    function getStrict()
-        env.strict;
-
-    function setStrict(mode): void
-        env.strict = mode;
-
-    function hasName (fxtrs, id, ns) {
-        for ( let i=0, limit=fxtrs.length ; i < limit ; i++ ) {
-            let pn = fxtrs[i].name;
-            if (pn.name.id == id && Ast::nsEquals(pn.name.ns, ns))
-                return true;
-        }
-        return false;
-    }
-
-    function getFixture (fxtrs,id,ns) {
-        for ( let i=0, limit=fxtrs.length ; i < limit ; i++ ) {
-            let pn = fxtrs[i].name;
-            if (pn.name.id == id && Ast::nsEquals(pn.name.ns, ns))
-                return fxtrs[i];
-        }
-        Parse::internalError(this, "Name not found " + ns + "::" + id );
-    }
-
-    // Compile-time name resolution.
-    //
-    // FIXME.  This algorithm is probably not correct yet, and it is
-    // certainly incomplete (does not handle qualified names).
-
-    // SYNTACTIC CONDITION.  Name resolved at compile time must be
-    // unambiguously resolvable to a fixture binding.
-    //
-    // SYNTACTIC CONDITION.  Looking up a value that ought to be a
-    // namespace must in fact resolve to a namespace binding.
-
-    // FIXME -- implement.
-    //
-    // SYNTACTIC CONDITION.  A "with" scope found during resolution
-    // should result in an error being thrown.  It's easier to throw
-    // the error here than during parsing since we may find the
-    // binding nested inside a "with" scope, in which case the "with"
-    // is not really a problem.  (But it's possible that /any/ "with"
-    // should disqualify /all/ compile-time resolutions inside its
-    // body, regardless of shadowing.)
-    //
-    // SYNTACTIC CONDITION.  What about the non-strict eval operator?
-    // It can introduce shadowing bindings too.
-
-    function findFixtureWithNames (id, nss, it: ? Ast::INIT_TARGET) {
-        let env = this.env;
-
-        if (it == Ast::instanceInit) {
-            while (env != null && env.tag != Rib.CLASS_INSTANCE)
-                env = env.link;
-            return findFixtureWithNamesInFixtures(env.head.fixtures, id, nss);
-        }
-
-        while (env != null) {
-            let result = findFixtureWithNamesInFixtures(env.head.fixtures, id, nss);
-            if (result != null)
-                return result;
-            env = env.link;
-        }
-        
-        return null;
-    }
-
-    function findFixtureWithNamesInFixtures(fxtrs, id, nss: Ast::NamespaceSet) {
-        let ns = null;
-        while (nss != null) {
-            if (hasName (fxtrs, id, nss.ns)) {
-                if (ns !== null)
-                    Parse::syntaxError(this, "Ambiguous reference to '" + id + "': defined in " + ns + " and " + nss.ns);
-                ns = nss.ns;
-            }
-            nss = nss.link;
-        }
-
-        if (ns != null)
-            return getFixture (fxtrs, id, ns);
-
-        return null;
-    }
-
-    function findFixtureWithIdentifier (id: Ast::IDENT, it: ? Ast::INIT_TARGET) {
-        for ( let nssl = getOpenNamespaces() ; nssl != null ; nssl = nssl.link ) {
-            let fx = findFixtureWithNames(id, nssl.nsset, it);
-            if (fx != null) 
-                return fx;
-        }
-        return null;
-    }
-
-    /* resolveNamespaceExpr is responsible for something like 20% of
-     * the front-end time (9 May 2008).  It's not possible to cache
-     * results here without some sort of reservation mechanism, since
-     * a "found" result can turn into a "not found" result later
-     * (ambiguous definition).  So don't optimize this now.
-     *
-     * Compiling parse.es, about 1e6 iterations of the inner loop of
-     * hasName() is executed, all doing a string comparison.  The
-     * strings probably compare === so it may not be a big problem,
-     * but interned symbols might help.  For those that are ===, a
-     * call is made to Ast::nsEquals(), which performs another string
-     * comparison but never reaches the case where the hashes have to
-     * be compared.
-     *
-     * calls to hasName: 32151
-     * loops in hasName: 916000
-     * of which calls to nsEquals: 5783
-     */
-    function resolveNamespaceExpr(ident: NamespaceExpr) : Ast::Namespace {
-        switch type (ident) {
-        case (id: Ast::Identifier) {
-            let fxtr = findFixtureWithIdentifier (id.ident, null);
-            if (fxtr && fxtr.data is Ast::NamespaceFixture)
-                return fxtr.data.ns;
-            if (fxtr == null)
-                Parse::syntaxError(this, "Fixture not found: " + ident);
-            Parse::internalError(this, "Fixture with unknown value " + fxtr.data);
-        }
-        case (qi: Ast::QualifiedIdentifier) {
-            Parse::internalError(this, "resolveNamespaceExpr: no qualified identifier references");
-        }
-        case (id: Ast::LiteralString) {
-            return new Ast::ForgeableNamespace(id.strValue);
-        }
-        case (objref: Ast::ObjectRef) {
-            Parse::internalError(this, "resolveNamespaceExpr: no object references");
-        }
-        }
-    }
-
-    function resolveIdentExpr (ident: Ast::IdentExpr, it: Ast::INIT_TARGET) : Ast::FixtureName {
-        if (ident is Ast::Identifier) {
-            let fx = findFixtureWithIdentifier(ident.ident, it);
-            if (fx == null)
-                Parse::syntaxError(this, "Unable to resolve identifier " + ident);
-            return fx.name;
-        }
-
-        Parse::internalError(this, "resolveIdentExpr: case not implemented " + ident);
-    }
-}
-
 final class Parser
 {
-    const cx      : Context;
+    const cx      : Definer;
     const scan    : Scanner;
     const filename: String;
     const start_line;
 
     function Parser(src, topFixtures, filename="", start_line=1) 
-        : cx = new Context(this, topFixtures)
+        : cx = new Definer(this, topFixtures)
         , scan = new Lex::Scanner(src, filename)
         , filename = filename
         , start_line = start_line-1
     { }
 
-    var currentClassName: String = "";
+    var currentClassName: Token::Tok = Token::sym_EMPTY;
     var alpha           : ALPHA = allowColon;
     var beta            : BETA = allowIn;
     var gamma           : GAMMA = allowExpr;
@@ -532,7 +232,7 @@ final class Parser
         tokenStore[T0].kind;
 
     function lexeme ()
-        tokenStore[T0].text;
+        tokenStore[T0];
 
     function hd2 () {
         if (T1 === Token::NONE) {
@@ -544,7 +244,7 @@ final class Parser
 
     function lexeme2 () {
         hd2 ();
-        return tokenStore[T1].text;
+        return tokenStore[T1];
     }
 
     function matchToken (t) {
@@ -604,11 +304,12 @@ final class Parser
         return true;
     }
 
-    function makeIdentifier(id, nss, pos=0) : Ast::Identifier {
+    function makeIdentifier(id : Token::Tok, nss, pos=0) : Ast::Identifier {
+        Util::assert( id is Token::Tok );
         let ident = new Ast::Identifier(id, nss, pos);
-        if (id === "arguments") 
+        if (id === Token::sym_arguments) 
             cx.topFunction().uses_arguments = true;
-        else if (id === "eval")
+        else if (id === Token::sym_eval)
             cx.topFunction().uses_eval = true;
         return ident;
     }
@@ -769,7 +470,7 @@ final class Parser
                 if (p is ArrayPattern && p.spread != null)
                     Parse::internalError(this, "Unimplemented spread in ArrayPattern");
                 let ptrns = p.ptrns;
-                for (let i=0; i < ptrns.length; ++i) {
+                for (let i=0, limit=ptrns.length ; i < limit ; ++i) {
                     let sub = ptrns[i];
                     let typ, exp, ptn;
                     /// switch type (sub) {
@@ -782,7 +483,7 @@ final class Parser
                     /// case (pat: *) {
                     else {
                         typ = new Ast::ElementTypeRef (t,i);
-                        exp = new Ast::ObjectRef (new Ast::GetTemp (n), makeIdentifier (String(i), Ast::publicNSSL));
+                        exp = new Ast::ObjectRef (new Ast::GetTemp (n), makeIdentifier( Token::intern(i), Ast::publicNSSL ));
                         // FIXME what is the ns of a temp and how do we refer it
                         ptn = sub;
                     }
@@ -806,13 +507,13 @@ final class Parser
     function identifier () : Ast::IDENT {
         if (hd() == Token::Identifier)
             return let (str = lexeme()) next(), str;
-        Parse::syntaxError(this, "Expecting identifier, found " + lexeme());
+        Parse::syntaxError(this, "Expecting identifier, found " + lexeme().text);
     }
 
     function propertyIdentifier(): Ast::IDENT {
         if (hd() == Token::Identifier || Token::isReserved(hd()))
             return let (str = lexeme()) next(), str;
-        Parse::syntaxError(this, "Expecting identifier or reserved word, found " + lexeme());
+        Parse::syntaxError(this, "Expecting identifier or reserved word, found " + lexeme().text);
     }
   
     // Returns IdentExpr or LiteralString, consumer should cope.
@@ -834,7 +535,7 @@ final class Parser
         else if (hd() == Token::Identifier) 
             name = makeIdentifier(identifier(), cx.getOpenNamespaces(), pos);
         else
-            Parse::syntaxError(this, "String or identifier required, found " + lexeme());
+            Parse::syntaxError(this, "String or identifier required, found " + lexeme().text);
 
         // Excludes slice expression shorthands.  Messy!
         while (hd() == Token::DoubleColon && hd2() != Token::RightBracket) {
@@ -860,7 +561,7 @@ final class Parser
 
     function exprListToCommaExpr(es) {
         let expr = es[0];
-        for ( let i=1 ; i < es.length ; i++ )
+        for ( let i=1, limit=es.length ; i < limit ; i++ )
             expr = new Ast::BinaryExpr(Ast::commaOp, expr, es[i]);
         return expr;
     }
@@ -944,12 +645,12 @@ final class Parser
         let fn = fieldName();
 
         if (fn is Ast::Identifier) {
-            if (fn.ident == "get") {
+            if (fn.ident == Token::sym_get) {
                 let getter = getterOrSetterFieldMaybe(tag, Ast::getterFunction);
                 if (getter)
                     return getter;
             }
-            else if (fn.ident == "set") {
+            else if (fn.ident == Token::sym_set) {
                 let setter = getterOrSetterFieldMaybe(tag, Ast::setterFunction);
                 if (setter)
                     return setter;
@@ -990,13 +691,13 @@ final class Parser
 
         case Token::IntLiteral:
         case Token::UIntLiteral:
-            return let (name = new Ast::Identifier(String(parseInt(lexeme())), Ast::publicNSSL)) next(), name;
+            return let (name = new Ast::Identifier(Token::intern(parseInt(lexeme().text)), Ast::publicNSSL)) next(), name;
 
         case Token::DoubleLiteral:
-            return let (name = new Ast::Identifier(String(parseFloat(lexeme())), Ast::publicNSSL)) next(), name;
+            return let (name = new Ast::Identifier(Token::intern(parseFloat(lexeme().text)), Ast::publicNSSL)) next(), name;
 
         case Token::DecimalLiteral:
-            return let (name = new Ast::Identifier(String(new decimal(lexeme())), Ast::publicNSSL)) next(), name;
+            return let (name = new Ast::Identifier(Token::intern(new decimal(lexeme().text)), Ast::publicNSSL)) next(), name;
 
         default:
             if (Token::isReserved(hd ()))
@@ -1061,7 +762,7 @@ final class Parser
             return new Ast::ComprehendIf(cond, subclause);
         }
         default:
-            Parse::syntaxError(this, "Expected 'for', 'let', 'if', or ']'; found " + lexeme());
+            Parse::syntaxError(this, "Expected 'for', 'let', 'if', or ']'; found " + lexeme().text);
         }
     }
 
@@ -1122,16 +823,16 @@ final class Parser
             return let (expr = new Ast::LiteralBoolean(hd() == Token::True, pos)) next(), expr;
 
         case Token::IntLiteral:
-            return let (expr = new Ast::LiteralInt(parseInt(lexeme()), pos)) next(), expr;
+            return let (expr = new Ast::LiteralInt(parseInt(lexeme().text), pos)) next(), expr;
 
         case Token::UIntLiteral:
-            return let (expr = new Ast::LiteralUInt(parseInt(lexeme()), pos)) next(), expr;
+            return let (expr = new Ast::LiteralUInt(parseInt(lexeme().text), pos)) next(), expr;
 
         case Token::DoubleLiteral:
-            return let (expr = new Ast::LiteralDouble(parseFloat(lexeme()), pos)) next(), expr;
+            return let (expr = new Ast::LiteralDouble(parseFloat(lexeme().text), pos)) next(), expr;
 
         case Token::DecimalLiteral:
-            return let (expr = new Ast::LiteralDecimal(new decimal(lexeme()), pos)) next(), expr;
+            return let (expr = new Ast::LiteralDecimal(new decimal(lexeme().text), pos)) next(), expr;
 
         case Token::StringLiteral:
             if (hd2() == Token::DoubleColon)
@@ -1167,7 +868,7 @@ final class Parser
                 return arrayInitializer();
             if (hd2() == Token::LeftBrace)
                 return objectInitializer();
-            Parse::internalError(this, "Unexpected keyword here: " + lexeme());
+            Parse::internalError(this, "Unexpected keyword here: " + lexeme().text);
 
         case Token::Let:
             return letExpression();
@@ -1195,7 +896,10 @@ final class Parser
         return new Ast::SuperExpr(expr);
     }
 
-    const intrinsic_ns = new Ast::ForgeableNamespace("http://adobe.com/AS3/2006/builtin");
+    // FIXME: presumably this belongs somewhere more central, but
+    // right now it's only used for slice.
+
+    const intrinsic_ns = new Ast::ForgeableNamespace(Token::intern("http://adobe.com/AS3/2006/builtin"));
 
     function slice(obj, pos, e1, e2, e3) {
         let args = [];
@@ -1210,7 +914,7 @@ final class Parser
         if (e3)
             args.push(e3);
         return new Ast::CallExpr( new Ast::ObjectRef( obj, 
-                                                      new Ast::QualifiedIdentifier( intrinsic_ns, "slice" ),
+                                                      new Ast::QualifiedIdentifier(intrinsic_ns, Token::sym_slice),
                                                       pos ),
                                   args,
                                   null,
@@ -1860,9 +1564,9 @@ final class Parser
     }
 
     function typeName(): Ast::TypeExpr {
-        let name = new Ast::TypeName(nameExpression() );
+        let name = new Ast::TypeName(nameExpression());
         if (hd() != Token::LeftDotAngle)
-            return name;
+            return cx.resolveTypeNameExpr(name);
         let ts = typeApplication();
         return new Ast::AppType(name, ts);
     }
@@ -2024,7 +1728,7 @@ final class Parser
                 return;
             default:
                 if (!newline ())
-                    Parse::syntaxError(this, "Expecting semicolon or newline, found " + lexeme());
+                    Parse::syntaxError(this, "Expecting semicolon or newline, found " + lexeme().text);
                 // Inserting it
                 return;
             }
@@ -2235,7 +1939,7 @@ final class Parser
 
     function collapseBindings(it, ro, bindings) {
         let init = null;
-        for ( let i=0 ; i < bindings.length ; i++ ) {
+        for ( let i=0, limit=bindings.length ; i < limit ; i++ ) {
             let [pattern, annotation, initializer] = bindings[i];
             let [fixtures, ie] = desugarBindingPattern(pattern, annotation, initializer, cx.getDefaultNamespace(), it, ro);
             cx.addFixtures(it, fixtures);
@@ -2405,7 +2109,7 @@ final class Parser
 
     function variableDefinitionKind () {
         if (tau == statementBlk && (hd() == Token::Const || hd() == Token::Let))
-            Parse::syntaxError(this, "'" + lexeme() + "' not allowed here");
+            Parse::syntaxError(this, "'" + lexeme().text + "' not allowed here");
 
         if (match(Token::Const)) {
             if (match(Token::Function))
@@ -2419,7 +2123,7 @@ final class Parser
         if (match(Token::Let))
             return [Ast::letInit, false];
 
-        Parse::syntaxError(this, "Illegal binding keyword " + lexeme());
+        Parse::syntaxError(this, "Illegal binding keyword " + lexeme().text);
     }
 
     function variableBindingList (ns: Ast::Namespace, it: Ast::INIT_TARGET, ro: boolean ) : [[Ast::Fixture], [Ast::Expr]] {
@@ -2521,7 +2225,9 @@ final class Parser
                                  defaults, 
                                  resultType,
                                  attr,
-                                 strict);
+                                 strict,
+                                 pos,
+                                 filename);
         if (strict)
             checkStrictFunction(func);
 
@@ -2666,13 +2372,13 @@ final class Parser
         if (allow_getter_setter) {
             if (matchToken(Token::id_get)) {
                 if (hd() == Token::LeftParen)
-                    ident = "get";
+                    ident = Token::sym_get;
                 else
                     kind = Ast::getterFunction;
             }
             else if (matchToken(Token::id_set)) {
                 if (hd() == Token::LeftParen)
-                    ident = "set";
+                    ident = Token::sym_set;
                 else
                     kind = Ast::setterFunction;
             }
@@ -2753,13 +2459,8 @@ final class Parser
     }
 
     function checkStrictFunction(fn) {
-        /*
-        let ht = new Util::Hashtable(Util::hash_string, (function (x,y) x==y), undefined);
+        // FIXME -- implement
         
-        for ( let ps = fn.params.fixtures, limit=ps.length, i=0 ; i < ps.length ; i++ )
-            if (ht.read(ps[i][0] ???  -- no common API here
-        */
-        // FIXME
         // no duplicate parameter names
         // no bound var (including fn) at the body top-level that is also a param name
         // no duplicate var/fn
@@ -2833,7 +2534,7 @@ final class Parser
         if (match(Token::Assign))
             initexpr = dynamic override (alpha=allowColon, beta=allowIn) nonAssignmentExpression();
         else if (initRequired)
-            Parse::syntaxError(this, "Expected mandatory initializer expression, found " + lexeme());
+            Parse::syntaxError(this, "Expected mandatory initializer expression, found " + lexeme().text);
 
         let [f,i,t] = parameterToFixturesAndInitAndType(param, params.numparams);
 
@@ -2928,11 +2629,11 @@ final class Parser
             cx.pushNamespace(protectedNs);
             cx.pushNamespace(privateNs);
             cx.addFixture(Ast::varInit,
-                          new Ast::PropName(new Ast::Name(privateNs, "private")),
+                          new Ast::PropName(new Ast::Name(privateNs, Token::sym_private)),
                           new Ast::NamespaceFixture(privateNs),
                           true);
             cx.addFixture(Ast::varInit,
-                          new Ast::PropName(new Ast::Name(privateNs, "protected")),
+                          new Ast::PropName(new Ast::Name(privateNs, Token::sym_protected)),
                           new Ast::NamespaceFixture(protectedNs),
                           true);
 
@@ -2942,13 +2643,13 @@ final class Parser
 
             let ihead = cx.exitClassInstance();
             let chead = cx.exitClassStatic();
-            currentClassName = "";
+            currentClassName = Token::sym_EMPTY;
 
             if (ctor == null)
                 ctor = makeDefaultCtor(classid);
             
             if (superclass == null)
-                superclass = new Ast::TypeName( new Ast::Identifier("Object", Ast::publicNSSL) );
+                superclass = new Ast::TypeName( new Ast::Identifier(Token::sym_Object, Ast::publicNSSL) );
 
             let ctype = Ast::anyType;                                 // FIXME: proper class type
             let itype = Ast::anyType;                                 // FIXME: proper instance type
@@ -2994,7 +2695,7 @@ final class Parser
             Parse::syntaxError(this, "Interfaces may not carry nullability annotations");
 
         if (superinterfaces.length != 0 || hd() == Token::LeftBrace) {
-            currentClassName = "";
+            currentClassName = Token::sym_EMPTY;
 
             cx.enterClassInstance();
             eat(Token::LeftBrace);
@@ -3250,7 +2951,7 @@ final class Parser
             }
 
             if (ns != null) 
-                Parse::syntaxError(this, "Expected attribute keyword or definition keyword, found " + lexeme());
+                Parse::syntaxError(this, "Expected attribute keyword or definition keyword, found " + lexeme().text);
             let expr = fullCommaExpression(); 
             if (expr is Ast::IdentExpr || expr is Ast::LiteralString) 
                 ns = expr;
@@ -3587,7 +3288,7 @@ final class Parser
                 cx.setStrict(false);
             }
             else
-                Parse::syntaxError(this, "Unknown token following 'use': " + lexeme());
+                Parse::syntaxError(this, "Unknown token following 'use': " + lexeme().text);
         } while (match(Token::Comma));
         semicolon (fullStmt);
     }
@@ -3661,15 +3362,15 @@ final class Parser
         // On the other hand, should global.eval() expose the internal
         // namespace of the caller??
 
-        let internalNamespace = new Ast::InternalNamespace("<#internal " + filename + ">");
+        let internalNamespace = new Ast::InternalNamespace(Token::intern("<#internal " + filename + ">"));
 
         cx.enterGlobal ();
         if (define_namespaces) {
             cx.addFixture(Ast::varInit, 
-                          new Ast::PropName(new Ast::Name(internalNamespace, "internal")),
+                          new Ast::PropName(new Ast::Name(internalNamespace, Token::sym_internal)),
                           new Ast::NamespaceFixture(internalNamespace));
             cx.addFixture(Ast::varInit,
-                          new Ast::PropName(new Ast::Name(internalNamespace, "public")),
+                          new Ast::PropName(new Ast::Name(internalNamespace, Token::sym_public)),
                           new Ast::NamespaceFixture(Ast::publicNS));
         }
         cx.pushNamespace(internalNamespace);

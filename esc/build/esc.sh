@@ -39,6 +39,7 @@ $DIR/shell \
     $DIR/lex-token.es.abc \
     $DIR/lex-scan.es.abc \
     $DIR/ast.es.abc \
+    $DIR/define.es.abc \
     $DIR/parse.es.abc \
     $DIR/asm.es.abc \
     $DIR/abc.es.abc \
