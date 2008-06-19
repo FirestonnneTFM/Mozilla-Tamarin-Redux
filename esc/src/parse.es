@@ -1195,20 +1195,42 @@ final class Parser
         return new Ast::SuperExpr(expr);
     }
 
-    function brackets() {
+    const intrinsic_ns = new Ast::ForgeableNamespace("http://adobe.com/AS3/2006/builtin");
+
+    function slice(obj, pos, e1, e2, e3) {
+        let args = [];
+        if (e1)
+            args.push(e1);
+        else
+            args.push(new Ast::LiteralInt(0));
+        if (e2)
+            args.push(e2);
+        else if (e3)
+            args.push(new Ast::LiteralUndefined);
+        if (e3)
+            args.push(e3);
+        return new Ast::CallExpr( new Ast::ObjectRef( obj, 
+                                                      new Ast::QualifiedIdentifier( intrinsic_ns, "slice" ),
+                                                      pos ),
+                                  args,
+                                  null,
+                                  cx.getStrict() );
+    }
+
+    function brackets(obj: Ast::Expr, pos) {
         eat(Token::LeftBracket);
 
         if (match(Token::DoubleColon)) {
             let expr3 = optionalBracketExpr();
             eat (Token::RightBracket);
-            return new Ast::SliceExpr( null, null, expr3 );
+            return slice( obj, pos, null, null, expr3 );
         }
 
         let expr1 = optionalBracketExpr();
 
         if (match(Token::DoubleColon)) {
             eat(Token::RightBracket);
-            return new Ast::SliceExpr( expr1, null, null );
+            return slice( obj, pos, expr1, null, null );
         }
 
         if (match(Token::Colon)) {
@@ -1217,14 +1239,14 @@ final class Parser
             if (match(Token::Colon))
                 expr3 = optionalBracketExpr();
             eat(Token::RightBracket);
-            return new Ast::SliceExpr( expr1, expr2, expr3 );
+            return slice( obj, pos, expr1, expr2, expr3 );
         }
 
         if (expr1 == null)
             Parse::syntaxError(this, "Expression required inside the brackets.");
 
         eat (Token::RightBracket);
-        return expr1;
+        return new Ast::ObjectRef (obj, new Ast::ComputedName(expr1), pos);
     }
 
     function optionalBracketExpr() {
@@ -1246,7 +1268,7 @@ final class Parser
         }
         case Token::LeftBracket: {
             let pos = position();
-            return new Ast::ObjectRef (obj, new Ast::ComputedName(brackets()), pos);
+            return brackets(obj, pos);
         }
         case Token::LeftDotAngle: {
             let ts = typeApplication();

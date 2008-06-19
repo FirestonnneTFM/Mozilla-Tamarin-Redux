@@ -481,8 +481,10 @@ class ObjectRef extends Expr implements Serializable {
 }
 
 // This is used to encode obj[E] because that whole expression is
-// encoded as an ObjectRef; the "ident" in ObjectRef turns out to be a
-// ComputedName.
+// encoded as an ObjectRef; the "ident" in ObjectRef (the 'E' above)
+// turns out to be a ComputedName.  Note that E cannot be a slice
+// expression; the pattern obj[E1:E2:E3] is translated into a call
+// expression.
 
 class ComputedName extends Expr implements Serializable {
     const expr: Expr;
@@ -604,19 +606,6 @@ class InitExpr extends Expr implements Serializable {
 
     function serialize(s)
         s.sClass(this, "InitExpr", "target", "head", "inits");
-}
-
-class SliceExpr extends Expr implements Serializable {
-    const e1 : ? Expr;
-    const e2 : ? Expr;
-    const e3 : ? Expr;
-    function SliceExpr(e1, e2, e3)
-        : e1=e1
-        , e2=e2
-        , e3=e3 { }
-
-    function serialize(s)
-        s.sClass(this, "SliceExpr", "e1", "e2", "e3");
 }
 
 class GetTemp extends Expr implements Serializable {
