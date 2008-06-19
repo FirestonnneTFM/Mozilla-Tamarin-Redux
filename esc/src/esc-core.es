@@ -66,6 +66,7 @@ class Flags
     var debugging = false;                // true to enable debug code
     var ext_dynamic_override = false;     // true to enable 'dynamic override' expression
     var ext_toplevel_letexpr = false;     // true to recognize let expressions at the top level
+    var profile_compiler = false;         // true to profile the ESC run (used in esc.es)
 }
 
 const version = { major: 0, minor: 1, nick: "That depends on what the meaning of 'is' is" };
@@ -85,7 +86,8 @@ internal var flagvalues = [ ["-es3",      [["es3_keywords",true]]],
                             ["-extensions", [["ext_dynamic_override",true],
                                              ["ext_toplevel_letexpr",true]]],
                             ["-no-extensions", [["ext_dynamic_override",false],
-                                                ["ext_toplevel_letexpr",false]]] ];
+                                                ["ext_toplevel_letexpr",false]]],
+                            ["-Xprofile", [["profile_compiler",true]]] ];
 
 
 function filterCommandLine(argv) {
