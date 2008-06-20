@@ -165,7 +165,8 @@ namespace MMgc
 			address = 0;
 		else
 			address = (void*)( (uintptr)address + size );
-			
+	
+		committedCodeMemory += size;
 		return address;		
 	}
 
@@ -178,6 +179,7 @@ namespace MMgc
 		int res = mprotect (address, size, PROT_NONE);
 		GCAssert(res == 0);
 		(void) res;
+		committedCodeMemory -= size;
 		return (address);
 	}
 #else
@@ -216,11 +218,13 @@ namespace MMgc
 	void* GCHeap::CommitCodeMemory(void* address,
 								   size_t )
 	{
+		committedCodeMemory += size;
 		return address;
 	}	
 	void* GCHeap::DecommitCodeMemory(void* address,
 									 size_t )
 	{
+		committedCodeMemory -= size;
 		return address;
 	}	
 #endif /* USE_MMAP */	

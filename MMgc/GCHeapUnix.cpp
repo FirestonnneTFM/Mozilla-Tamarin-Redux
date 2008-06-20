@@ -207,6 +207,8 @@ namespace MMgc
 			address = (void*)( (uintptr)address + size );
 		else
 			address = 0;
+			
+		committedCodeMemory += size;
 		return address;
 	}
 
@@ -219,6 +221,7 @@ namespace MMgc
 		// release and re-reserve it
 		ReleaseCodeMemory(address, size);
 		address = ReserveCodeMemory(address, size);
+		committedCodeMemory -= size;
 		return address;
 	}
 #else
@@ -247,11 +250,13 @@ namespace MMgc
 	void* GCHeap::CommitCodeMemory(void* address,
 								   size_t size)
 	{
+		committedCodeMemory += size;
 		return address;
 	}	
 	void* GCHeap::DecommitCodeMemory(void* address,
 									 size_t size)
 	{
+		committedCodeMemory -= size;
 		return address;
 	}	
 #endif /* USE_MMAP */	
