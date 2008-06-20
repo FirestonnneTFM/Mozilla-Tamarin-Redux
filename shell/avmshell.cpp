@@ -1072,8 +1072,8 @@ namespace avmshell
 		if (show_mem)
 		{
 			MMgc::GCHeap* heap = GetGC()->GetGCHeap();
-			int codeSize = heap->GetCodeMemorySize();
-			console << codeSize << " bytes used by the compiler\n";
+			size_t codeSize = heap->GetCodeMemorySize();
+			console << (int)codeSize << " bytes used by the compiler\n";
 		}
 
 #ifdef AVMPLUS_WITH_JNI
