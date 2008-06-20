@@ -255,6 +255,7 @@ namespace avmshell
 		    printf("          [-Dforcemir]  use MIR always, never interp\n");
         #endif /* AVMPLUS_INTERP */
 
+		printf("          [-Dmem]       show compiler memory usage \n");
 		printf("          [-Dnodce]     disable DCE optimization \n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
 
@@ -523,6 +524,8 @@ namespace avmshell
 		
 	int Shell::main(int argc, char *argv[])
 	{
+		bool show_mem = false;
+
 		TRY(this, kCatchAction_ReportAsError)
 		{
 			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
@@ -630,6 +633,9 @@ namespace avmshell
 							
 						} else if (!strcmp(arg+2, "nocse")) {
 							cseopt = false;
+
+						} else if (!strcmp(arg+2, "mem")) {
+							show_mem = true;
 
                         #ifdef AVMPLUS_VERBOSE
 						} else if (!strcmp(arg+2, "bbgraph")) {
@@ -1063,6 +1069,13 @@ namespace avmshell
 		#ifdef AVMPLUS_PROFILE
 			dump();
 		#endif
+		if (show_mem)
+		{
+			MMgc::GCHeap* heap = GetGC()->GetGCHeap();
+			int codeSize = heap->GetCodeMemorySize();
+			console << codeSize << " bytes used by the compiler\n";
+		}
+
 #ifdef AVMPLUS_WITH_JNI
 		if (Java::startup_options) delete Java::startup_options;
 #endif /* AVMPLUS_WITH_JNI */
