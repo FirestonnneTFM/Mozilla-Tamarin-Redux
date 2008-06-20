@@ -56,5 +56,5 @@ try {
 AddTestCase(
 		"unshift single element vector with single item",
 		"RangeError: Error #1126",
-		errormsg);
+		parseError(errormsg,"RangeError: Error #1126".length));
 test();

@@ -39,7 +39,7 @@ try {
 AddTestCase(
 		"map mapper is undefined",
 		"ArgumentError: Error #1063",
-		errormsg);
+		parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var v1=new Vector.<int>();
 v1.push(1);
@@ -52,7 +52,7 @@ try {
 AddTestCase(
 		"map mapper is not a function",
 		"TypeError: Error #1034",
-		errormsg);
+		parseError(errormsg,"TypeError: Error #1034".length));
 
 var v1=new Vector.<int>();
 AddTestCase(

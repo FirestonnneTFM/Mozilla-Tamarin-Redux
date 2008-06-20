@@ -65,7 +65,7 @@ try {
 AddTestCase(
                 "pop fixed vector should throw exception",
                 "RangeError: Error #1126",
-                errormsg);
+                parseError(errormsg,"RangeError: Error #1126".length));
 AddTestCase(
                 "pop fixed vector should not change vector",
                 "0,0,0,0,0,0,0,0,0,0",
