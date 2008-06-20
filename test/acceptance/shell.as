@@ -244,10 +244,10 @@ function writeFormattedResult( expect, actual, string, passed ) {
 */
 
 function writeLineToLog( string	) {
-	print( string );
+	_print( string );
 }
 function writeHeaderToLog( string )	{
-	print( string );
+	_print( string );
 }
 // end of print functions
 
@@ -369,7 +369,7 @@ function DaysInYear( y ) {
 	if ( (y	% 400 == 0)	){
 		return 366;
 	} else {
-		print("ERROR: DaysInYear("	+ y	+ ") case not covered");
+		_print("ERROR: DaysInYear("	+ y	+ ") case not covered");
 		return Math.NaN; //"ERROR: DaysInYear("	+ y	+ ") case not covered";
 	}
 }
@@ -570,7 +570,7 @@ function DaylightSavingTA( t ) {
 
 	// Daylight	Savings	Time starts	on the second Sunday	in March at	2:00AM in
 	// PST.	 Other time	zones will need	to override	this function.
-	print( new Date( UTC(dst_start + LocalTZA())) );
+	_print( new Date( UTC(dst_start + LocalTZA())) );
 
 	return UTC(dst_start  +	LocalTZA());
 }function GetSecondSundayInMarch(t )	{
@@ -721,7 +721,7 @@ function ToInteger(	t )	{
 function Enumerate ( o ) {
 	var	p;
 	for	( p	in o ) {
-		print( p +": " + o[p] );
+		_print( p +": " + o[p] );
 	}
 }
 
@@ -745,9 +745,9 @@ function START(summary)
     tf.width = 200;
     tf.height = 400;*/
 
-    print(summary);
+    _print(summary);
     var summaryParts = summary.split(" ");
-    print("section: " + summaryParts[0] + "!");
+    _print("section: " + summaryParts[0] + "!");
     //fileName = summaryParts[0];
 
 }
@@ -923,7 +923,7 @@ function printStatus (msg)
     var l;
 
     for (var i=0; i<lines.length; i++)
-        print(STATUS + lines[i]);
+        _print(STATUS + lines[i]);
 
 }
 function reportCompare (expected, actual, description)
@@ -955,4 +955,16 @@ function reportCompare (expected, actual, description)
             	reportFailure (output);
         }
     stopTest();
+}
+// encapsulate output in shell
+function _print(s) {
+  print(s);
+//  trace(s);
+}
+// workaround for Debugger vm where error contains more details
+function parseError(error,len) {
+  if (error.length>len) {
+    error=error.substring(0,len);
+  }
+  return error;
 }

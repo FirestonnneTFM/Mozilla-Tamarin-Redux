@@ -37,7 +37,7 @@ try {
 }
 AddTestCase(	"filter checker is undefined",
 		"ArgumentError: Error #1063",
-		errormsg);
+    parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var v1:Vector.<int>=new Vector.<int>(10);
 for (var i=0;i<10;i++) v1[i]=i;
@@ -49,7 +49,7 @@ try {
 }
 AddTestCase(	"filter checker is not a function",
 		"TypeError: Error #1034",
-		errormsg);
+              parseError(errormsg,"TypeError: Error #1034".length));
 
 var v1:Vector.<int>=new Vector.<int>();
 var result=v1.filter(EvenChecker);

@@ -31,7 +31,7 @@ try {
 }
 AddTestCase( 	"forEach eacher is undefined",
 		"ArgumentError: Error #1063",
-		errormsg);
+    parseError(errormsg,"ArgumentError: Error #1063".length));
 
 var v1=new Vector.<int>();
 for (var i=0;i<3;i++) v1[i]=i;
@@ -41,9 +41,9 @@ try {
 } catch (e) {
   errormsg=e.toString();
 }
-AddTestCase( 	"forEach eacher is not a function",
-		"TypeError: Error #1034",
-		errormsg);
+AddTestCase("forEach eacher is not a function",
+         		"TypeError: Error #1034",
+            parseError(errormsg,"TypeError: Error #1034".length));
 
 var v1=new Vector.<String>();
 for (var i=0;i<3;i++) v1[i]="s"+i;

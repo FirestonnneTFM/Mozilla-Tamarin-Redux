@@ -67,7 +67,7 @@ try {
 AddTestCase(
 		"shift on fixed vector throws exception",
 		"RangeError: Error #1126",
-		errormsg);
+		parseError(errormsg,"RangeError: Error #1126".length));
 test();AddTestCase(
 		"shift on fixed vector does shift",
 		"10,11,12,13,14,15,16,17,18,19",

@@ -29,7 +29,7 @@ try {
 AddTestCase(
 		"assign vector variable to mismatched builtin type, throws runtime error",
 		"TypeError: Error #1034",
-		err1);
+		parseError(err1,"TypeError: Error #1034".length));
 
 class A { }
 class B extends A { }
@@ -45,7 +45,7 @@ try {
 AddTestCase(
 		"assign vector variable to mismatched types, throws runtime error",
 		"TypeError: Error #1034",
-		err3);
+		parseError(err3,"TypeError: Error #1034".length));
 
 
 AddTestCase(
@@ -62,7 +62,7 @@ try {
 AddTestCase(
 		"push wrong type into Vector, throws runtime error",
 		"TypeError: Error #1034",
-		err4);
+		parseError(err4,"TypeError: Error #1034".length));
 
 var v4:Vector.<A>=new Vector.<A>();
 
@@ -86,7 +86,7 @@ try {
 AddTestCase(
 		"unshift wrong type into Vector, throws runtime error",
 		"TypeError: Error #1034",
-		err5);
+		parseError(err5,"TypeError: Error #1034".length));
 
 var v6:Vector.<A>=new Vector.<A>();
 v6.push(new A(),new A());
@@ -108,7 +108,7 @@ try {
 AddTestCase(
 		"vector concat throws runtime error",
 		"TypeError: Error #1034",
-		err7);
+		parseError(err7,"TypeError: Error #1034".length));
 
 var v8:Vector.<A>=new Vector.<A>();
 var err8="no error";
@@ -120,6 +120,6 @@ try {
 AddTestCase(
 		"vector assignment on incorrect type throws runtime error",
 		"TypeError: Error #1034",
-		err8);
+		parseError(err8,"TypeError: Error #1034".length));
 
 test();

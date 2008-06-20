@@ -35,7 +35,7 @@ try {
 AddTestCase(
 		"some no checker",
 		"ArgumentError: Error #1063",
-		errormsg);
+		parseError(errormsg,"ArgumentError: Error #1063".length));
 
 
 var checker2="a string";
@@ -50,7 +50,7 @@ try {
 AddTestCase(
 		"some checker not a function",
 		"TypeError: Error #1034",
-		errormsg);
+		parseError(errormsg,"TypeError: Error #1034".length));
 
 var msg="";
 var v1=new Vector.<int>();

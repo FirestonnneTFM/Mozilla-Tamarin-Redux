@@ -26,14 +26,6 @@ AddTestCase(	"concat uint vector, new vector concat worked",
 		"0,1,2,3,4,5",
 		v3.toString());
 
-/*
-var v1=new Vector.<int>();
-var v2=v1.concat(1,2,3);
-AddTestCase(    "concat single elements as parameters",
-                "1,2,3",
-                v2.toString());
-*/
-
 var v1=new Vector.<String>();
 v1[0]="zero"; v1[1]="one"; v1[2]="two";
 var v2=new Vector.<int>();
@@ -46,17 +38,8 @@ try {
 }
 AddTestCase(    "concat two differently typed vectors",
                 "TypeError: Error #1034",
-                errormsg);
+                parseError(errormsg,"TypeError: Error #1034".length));
 
-/*
-var v1=new Vector.<int>();
-v1[0]=0; v1[1]=1; v1[2]=2;
-var v2=new Vector.<int>();
-v2[0]=3; v2[1]=4; v2[2]=5;
-var v3=Vector.<int>.concat(v1,v2);
-AddTestCase(    "static Vector.<int>.concat two simple vectors",
-                "0,1,2,3,4,5",
-                v3.toString());
-*/
+
 test();
 
