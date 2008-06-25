@@ -266,7 +266,7 @@ else:
     except:
 	    nop = True
 
-OS_name = {'CYGWIN_NT-5.1':'WIN','CYGWIN_NT-5.2':'WIN','CYGWIN_NT-6.0-WOW64':'WIN','Windows':'WIN','Darwin':'MAC','Linux':'LNX','SunOS':'SOL',}[system()]
+OS_name = {'CYGWIN_NT-5.1':'WIN','CYGWIN_NT-5.2':'WIN','CYGWIN_NT-6.0-WOW64':'WIN','Windows':'WIN','Darwin':'MAC','Linux':'LNX','Solaris':'SOL','SunOS':'SOL',}[system()]
 VM_reporting = '%s %s %s' % (VM_name,OS_name,VM_version)
 # ================================================
 # Prepare the data to be sent through a socket to 
@@ -388,7 +388,10 @@ for ast in tests:
 						if len(result2list)>2:
 							if result2 > int(result2list[2]):
 								result2=float(result2list[2])
-			spdup = ((result1-result2)/result1)*100.0
+			if result1==0:
+				spdup = 9999
+			else:
+				spdup = ((result1-result2)/result2)*100.0
 		except:
 			log_print("exception")
 			exit(-1)
@@ -399,7 +402,10 @@ for ast in tests:
 		if result1 < 9999999 :
 			meanRes = mean(resultList)
 			if (iterations > 2):
-				confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
+				if meanRes==0:
+					confidence = 0
+				else:
+					confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
 				config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
 				socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
 				log_print("%-50s %7s %10.1f%%" % (ast,result1,confidence)) 
