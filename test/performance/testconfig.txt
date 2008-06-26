@@ -57,10 +57,10 @@ misc/.*                    	,	scimark		,	skip	, 	skip jsbench
 
 jsbench/Search.as               ,       .*              ,       skip    ,       skip test runs too long and times out buildbot
 .*util.*                        ,       .*              ,       skip    ,       ship internal files
-sunspider/(typed/|)regexp-dna.as	,.*       ,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
-sunspider/(typed/|)date-format-tofte.as	,.*       ,skip, contains eval
-sunspider/(typed/|)date-format-xparb.as	,.*       ,skip, contains eval
-sunspider/(typed/|)string-unpack-code.as,.*       ,skip, too slow: javascript compressor code runs slowly https://bugzilla.mozilla.org/show_bug.cgi?id=409225
-sunspider/(typed/|)string-base64.as	,.*       ,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
-sunspider/(typed/|)string-tagcloud.as	,.*       ,skip, contains eval
+sunspider/(as3/|)regexp-dna.as	,.*       ,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
+sunspider/(as3/|)date-format-tofte.as	,.*       ,skip, contains eval
+sunspider/(as3/|)date-format-xparb.as	,.*       ,skip, contains eval
+sunspider/(as3/|)string-unpack-code.as,.*       ,skip, too slow: javascript compressor code runs slowly https://bugzilla.mozilla.org/show_bug.cgi?id=409225
+sunspider/(as3/|)string-base64.as	,.*       ,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
+sunspider/(as3/|)string-tagcloud.as	,.*       ,skip, contains eval
 
