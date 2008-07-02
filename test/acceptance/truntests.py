@@ -476,7 +476,7 @@ if runESC:
   runSource = True
   # generate the executable cmd for esc
   escAbcs = ['debug','util','bytes-tamarin','util-tamarin','lex-char','lex-token',
-       'lex-scan','ast','parse','asm','abc','emit','cogen',
+       'lex-scan','ast','define','parse','asm','abc','emit','cogen',
        'cogen-stmt','cogen-expr','esc-core','eval-support','esc-env','main']
   if not globs['escbin'].endswith('/'):
     globs['escbin'] += '/'
