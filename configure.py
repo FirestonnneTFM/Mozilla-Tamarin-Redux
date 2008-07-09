@@ -103,7 +103,7 @@ if MMGC_THREADSAFE:
     OS_LDFLAGS += " " + NSPR_LDOPTS
 
 if config.COMPILER_IS_GCC:
-    APP_CXXFLAGS = "-fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wno-uninitialized -Wno-strict-aliasing -fmessage-length=0 -finline-functions -finline-limit=65536 "
+    APP_CXXFLAGS = "-fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wno-uninitialized -Wno-strict-aliasing -fmessage-length=0 -finline-functions -Wno-parentheses -finline-limit=65536 "
     if config.getDebug():
         APP_CXXFLAGS += "-frtti -fexceptions "
     else:
