@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: t; -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -80,17 +81,21 @@ namespace avmshell
 		union {
 			uint32 u;
 			float f;
-		};
-		u = ReadU32();
-		return f;
+		} ptr;
+		ptr.u = ReadU32();
+		return ptr.f;
 	}
 
 	double DataInput::ReadDouble()
 	{
-		double value;
-		Read(&value, 8);
-		ConvertU64((uint64&)value);
-		return value;
+		union {
+			uint64 u;
+			double d;
+		} ptr;
+
+		Read(&ptr.d, 8);
+		ConvertU64(ptr.u);
+		return ptr.d;
 	}
 
 	String* DataInput::ReadUTFBytes(uint32 length)
@@ -188,13 +193,23 @@ namespace avmshell
 	
 	void DataOutput::WriteFloat(float value)
 	{
-		WriteU32(*((uint32*)&value));
+		union {
+			uint32 u;
+			float v;
+		} ptr;
+		ptr.v = value;
+		WriteU32(ptr.u);
 	}
 
 	void DataOutput::WriteDouble(double value)
 	{
-		ConvertU64((uint64&)value);
-		Write(&value, 8);
+		union {
+			uint64 u;
+			double v;
+		} ptr;
+		ptr.v = value;
+		ConvertU64(ptr.u);
+		Write(&ptr.u, 8);
 	}
 
 	void DataOutput::WriteUTF(String *str)

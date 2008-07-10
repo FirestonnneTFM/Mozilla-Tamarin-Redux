@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4; -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -185,8 +186,12 @@ namespace avmplus
 	MethodEnv::MethodEnv(void *addr, VTable *vtable)
 		: vtable(vtable), method(NULL), declTraits(NULL)
 	{
-		typedef Atom (*AtomMethodProc)(MethodEnv*, int, uint32 *);
-		impl32 = *(AtomMethodProc*) &addr;
+		union {
+			Atom (*fp)(MethodEnv*, int, uint32*);
+			void *p;
+		} funcptr;
+		funcptr.p = addr;
+		impl32 = funcptr.fp;
 	}
 
 	MethodEnv::MethodEnv(AbstractFunction* method, VTable *vtable)
