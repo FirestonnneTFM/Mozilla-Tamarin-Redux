@@ -8338,10 +8338,12 @@ namespace avmplus
 		f->impl32 = *(AtomMethodProc*) &(mip - 2);
 //		f->impl32 = (int (*)(MethodEnv*, int, uint32 *)) (mip-2);
 #else
-		// funny gyration needed to work around GCC pedantic warning
-		typedef Atom (*AtomMethodProc)(MethodEnv*, int, uint32 *);
-
-		f->impl32 = *(AtomMethodProc*) &mipStart;
+                union {
+                  Atom (*fp)(MethodEnv*, int, uint32*);
+                  void *p;
+                } funcptr;
+                funcptr.p = mipStart;
+		f->impl32 = funcptr.fp;
 #endif
 		// lock in the next available location in the buffer (16B aligned)
 		PoolObject* pool = f->pool;
