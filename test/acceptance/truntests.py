@@ -39,7 +39,7 @@
 #
 
 import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform
-import time, signal
+import time, signal, shutil
 from os.path import *
 from os import getcwd,environ,walk
 from datetime import datetime
@@ -47,6 +47,7 @@ from glob import glob
 from sys import argv, exit
 from getopt import getopt
 from itertools import count
+
 
 import util.threadpool as threadpool
 import util.subProcess as subProcess
@@ -77,6 +78,7 @@ def usage(c):
   print ' -c --config        sets the config string [default OS-tvm]'
   print '    --atsswf        generate ats swfs of tests run'
   print '      --pg          location of playerglobal.abc - required to generate swfs'
+  print '      --swfout      output directory for swfs (defaults to ./ATS_SWF)'
   print '    --esc           run esc instead of avm'
   print '    --escbin        location of esc/bin directory - defaults to ../../esc/bin'
   print '    --ext           set the testfile extension (defaults to .as)'
@@ -163,6 +165,22 @@ def compile_test(as):
   deps.sort()
   for util in deps + glob(join(dir,'*Util'+sourceExt)):
     cmd += ' -in %s' % string.replace(util, '$', '\$')
+  
+  if globs['atsswf']:  # output ats swfs
+    # create a temporary include file that has ATS vars
+    swfName = splitext(file)[0]
+    atsTempStr = 'var fileName="%s_";' % swfName
+    atsTempStr += 'var testCaseCount = 0;this[fileName] = new Array();this[fileName+"Str"] = new Array();this[fileName+"Ans"] = new Array();'
+    atsFile = open('util/temp_ATS_include.as','w')
+    atsFile.write(atsTempStr)
+    atsFile.close()
+    atsCmd = cmd + ' -in temp_ATS_include.as -swf 200,200 -import '+globs['playerglobal']+' -in util/shell_ats.as' 
+    atsRun = run_pipe('%s %s' % (atsCmd, as))
+    if not os.path.exists(globs['swfout']+'/'+dir+'/'):
+      os.makedirs(globs['swfout']+'/'+dir+'/')
+    if os.path.exists(dir+'/'+swfName+'.swf'):
+      shutil.move(dir+'/'+swfName+'.swf', globs['swfout']+'/'+dir+'/'+swfName+'_.swf')
+    #end ATS
   try:
     f = run_pipe('%s %s' % (cmd,as))
     for line in f:
@@ -334,8 +352,11 @@ debug = False
 globs = { 'avm':'', 'asc':'', 'globalabc':'', 'exclude':[],
           'config':'', 'ascargs':'', 'vmargs':'', 'escbin':''}
 
-# default value for escbin
+# default values
 globs['escbin'] = '../../esc/bin/'
+globs['swfout'] = 'ATS_SWF'
+globs['playerglobal'] = 'playerglobal.abc'
+globs['atsswf'] = False
 
 if 'AVM' in environ:
   globs['avm'] = environ['AVM'].strip()
@@ -375,7 +396,7 @@ if os.path.exists(pf):
 try:
   opts, args = getopt(argv[1:], 'vE:a:g:x:htfc:d', ['verbose','avm=','asc=','globalabc=',
                 'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                'ext=','timeout=','esc','escbin=','threads='])
+                'ext=','timeout=','esc','escbin=','threads=','atsswf','pg=','swfout='])
 except:
   usage(2)  
   
@@ -416,6 +437,13 @@ for o, v in opts:
     debug = True
   elif o in ('--threads'):
     numThreads=int(v)
+  elif o in ('--atsswf'):
+    globs['atsswf'] = True
+    forcerebuild = True #if making swfs, force recompile of all files
+  elif o in ('--pg'):
+    globs['playerglobal'] = v
+  elif o in ('--swfout'):
+    globs['swfout'] = v
       
 exclude = globs['exclude']
 
