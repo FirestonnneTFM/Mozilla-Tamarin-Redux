@@ -43,6 +43,8 @@
 # Example:
 # ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-Dinterp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
 
+util/shell_ats, .*, skip, shell file for ats media creation
+
 # Currently failing on linux, bug #402864
 ecma3/GlobalObject/e15_1_2_2_2:parseInt\("123456789012345678"\)   ,   .*lnx-tvm-.*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 ecma3/GlobalObject/e15_1_2_6:isNaN\(\)                            ,   .*lnx-tvm-.*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
