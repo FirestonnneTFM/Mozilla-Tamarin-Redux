@@ -174,7 +174,7 @@ def compile_test(as):
     atsFile = open('util/temp_ATS_include.as','w')
     atsFile.write(atsTempStr)
     atsFile.close()
-    atsCmd = cmd + ' -in temp_ATS_include.as -swf 200,200 -import '+globs['playerglobal']+' -in util/shell_ats.as' 
+    atsCmd = cmd + ' -in util/temp_ATS_include.as -swf 200,200 -import '+globs['playerglobal']+' -in util/shell_ats.as' 
     atsRun = run_pipe('%s %s' % (atsCmd, as))
     if not os.path.exists(globs['swfout']+'/'+dir+'/'):
       os.makedirs(globs['swfout']+'/'+dir+'/')
