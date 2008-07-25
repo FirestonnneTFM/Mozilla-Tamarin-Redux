@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -133,6 +134,13 @@ return foo;
 #else
 #define RETURN_VOID_METHOD_PTR(_class, _method) \
 return *((sintptr*)&_method);
+#endif
+
+#ifdef AVMPLUS_SPARC
+extern  "C"
+{
+	void sync_instruction_memory(caddr_t v, u_int len);
+}
 #endif
 
 #ifdef AVMPLUS_64BIT
@@ -1373,6 +1381,11 @@ namespace avmplus
 		#if defined(AVMPLUS_IA32) && defined(_MAC)
 		patch_esp_padding = NULL;
 		#endif
+
+		#ifdef AVMPLUS_SPARC
+		beginCatch_start = NULL;
+		beginCatch_end = NULL;
+		#endif
 		
 		#ifdef AVMPLUS_ARM
 		#ifdef AVMPLUS_VERBOSE
@@ -1425,6 +1438,12 @@ namespace avmplus
 		patch_stmfd = NULL;
 		gpregs.nonVolatileMask  = 0;
 		fpregs.nonVolatileMask  = 0;
+		#endif
+
+		#ifdef AVMPLUS_SPARC
+		patch_frame_size = NULL;
+		beginCatch_start = NULL;
+		beginCatch_end = NULL;
 		#endif
 
 		#ifdef AVMPLUS_PPC
@@ -1487,6 +1506,12 @@ namespace avmplus
 		patch_stmfd = NULL;
 		gpregs.nonVolatileMask  = 0;
 		fpregs.nonVolatileMask  = 0;
+		#endif
+
+		#ifdef AVMPLUS_SPARC
+		patch_frame_size = NULL;
+		beginCatch_start = NULL;
+		beginCatch_end = NULL;
 		#endif
 
 		#ifdef AVMPLUS_PPC
@@ -1715,7 +1740,7 @@ namespace avmplus
 		names->add(FUNCADDR(CodegenMIR::i2d), "CodegenMIR::i2d");
 		names->add(FUNCADDR(CodegenMIR::u2d), "CodegenMIR::u2d");								
 #endif /* AVMPLUS_ARM */
-#ifdef AVMPLUS_PPC
+#if defined AVMPLUS_PPC || defined AVMPLUS_SPARC
 		names->add(FUNCADDR(CodegenMIR::stackOverflow), "CodegenMIR::stackOverflow");
 #endif /* AVMPLUS_PPC */
 		names->add(FUNCADDR(MathUtils::mod), "MathUtils::mod");
@@ -1787,7 +1812,7 @@ namespace avmplus
 		return v == undefinedAtom ? nullObjectAtom : v;
 	}
 
-#ifdef AVMPLUS_PPC
+#if defined AVMPLUS_PPC || defined AVMPLUS_SPARC
 	// This helper function exists only on PowerPC in order to
 	// minimize the code size of generated stack overflow checks.
 	// It is static and takes only one parameter, env.
@@ -1949,7 +1974,11 @@ namespace avmplus
 		abcStart = state->verifier->code_pos;
 		abcEnd   = abcStart + state->verifier->code_length;
 
-        #ifdef AVMPLUS_PPC
+		#ifdef AVMPLUS_SPARC
+		// we count maxArgCount in doubles.
+		// 3 covers O0-O5. This is really a waste of stack.
+		maxArgCount = 3;
+		#elif defined AVMPLUS_PPC
 		// On PowerPC, maxArgCount should initially be 4,
 		// because any varargs routine will immediately
 		// store r3...r10 into the PPC callee area.
@@ -2043,6 +2072,14 @@ namespace avmplus
 					 defineArgInsPos(12);
 		#endif	/* _WIN64 */
         #endif /* AVMPLUS_AMD64 */
+
+		#ifdef AVMPLUS_SPARC
+		calleeVars = NULL;
+		methodArgs = defineArgInsReg(I0);
+					 defineArgInsReg(I1);
+					 defineArgInsReg(I2);
+		#endif /* AVMPLUS_SPARC */
+
         #ifdef AVMPLUS_PPC
 		calleeVars = NULL;
 		methodArgs = defineArgInsReg(R3);
@@ -2365,6 +2402,10 @@ namespace avmplus
 			OP* ee = callIns(MIR_cs, SETJMP, 2,
 				jmpbuf, InsConst(0));
 
+#ifdef AVMPLUS_SPARC
+			beginCatch_start = ee;
+#endif
+
 			// if (setjmp() == 0) goto start
 			OP* cond = binaryIns(MIR_ucmp, ee, InsConst(0));
 			OP* exBranch = Ins(MIR_jeq, cond);
@@ -2379,6 +2420,10 @@ namespace avmplus
 			OP* pc = loadIns(MIR_ld, 0, _save_eip);
 			OP* handler = callIns(MIR_cm, COREADDR(AvmCore::beginCatch), 5,
 				InsConst((uintptr)core), leaIns(0,_ef), InsConst((uintptr)info), pc, ee);
+
+#ifdef AVMPLUS_SPARC
+			beginCatch_end = handler;
+#endif
 
 			// jump to catch handler
 			Ins(MIR_jmpi, handler, (int32)offsetof(ExceptionHandler, target));
@@ -4914,6 +4959,21 @@ namespace avmplus
 	{
 		this->state = state;
 
+#ifdef AVMPLUS_SPARC
+		if(beginCatch_start && beginCatch_end) {
+			beginCatch_end->lastUse = ip;
+			for (OP* temp_ip = beginCatch_start; temp_ip <= beginCatch_end; temp_ip++) {
+				switch(temp_ip->code) {
+				case MIR_cs:
+				case MIR_cm:
+				case MIR_ld:
+				case MIR_lea:
+					temp_ip->lastUse = ip;
+				}
+			}
+		}
+#endif
+
 		#ifdef AVMPLUS_PROFILE
 		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
 		#endif /* AVMPLUS_PROFILE */
@@ -5588,6 +5648,32 @@ namespace avmplus
 		gpregs.clear();
 		fpregs.clear();
 
+		#ifdef AVMPLUS_SPARC
+		// add scratch registers to our free list for the allocator
+		// I6 is the frame pointer, I don't know what I7 for.
+		// L0 is avoided for temp use.
+		gpregs.calleeSaved = rmask(L1) | rmask(L2) | rmask(L3)
+						   | rmask(L4) | rmask(L5) | rmask(L6) | rmask(L7)
+						   | rmask(I0) | rmask(I1) | rmask(I2) | rmask(I3)
+						   | rmask(I4) | rmask(I5);
+
+		fpregs.calleeSaved = 0;
+
+		// avoid O6, since it's the stack pointer.
+		// Also I don't know what O7 for.
+		gpregs.free = gpregs.calleeSaved
+						   | rmask(O0)  | rmask(O1) | rmask(O2) | rmask(O3)
+						   | rmask(O4)  | rmask(O5);
+
+		// Also we only handle double here use only even float register.
+		fpregs.free = fpregs.calleeSaved
+						   | rmask(F0) | rmask(F2)  | rmask(F4)  | rmask(F6)
+						   | rmask(F8) | rmask(F10) | rmask(F12) | rmask(F14)
+						   | rmask(F16)| rmask(F18) | rmask(F20) | rmask(F22)
+						   | rmask(F24)| rmask(F26) | rmask(F28);
+
+        #endif /* AVMPLUS_SPARC */
+
 		#ifdef AVMPLUS_PPC
 		// add scratch registers to our free list for the allocator
 		gpregs.calleeSaved = rmask(R13) | rmask(R14) | rmask(R15) | rmask(R16)
@@ -5709,6 +5795,26 @@ namespace avmplus
 		gpregs.checkCount();
 		fpregs.checkCount();
 		#endif /* _DEBUG */
+
+		#ifdef AVMPLUS_SPARC
+		patch_frame_size = mip;
+		NOP(); /* This nop is for stack size beyong 4096. */
+		NOP();
+		SAVEI(SP, 0, SP);
+
+		if (core->minstack)
+		{
+			SET32((int)&core->minstack, L0);
+			LDSWI(L0, 0, L1);
+			stackCheck.patchStackSize = mip;
+			NOP();
+			SUBCC(SP, L1, G0);
+			BL(1, 0);
+			mdPatchPrevious(&stackCheck.overflowLabel);
+			NOP();
+			mdLabel(&stackCheck.resumeLabel, mip);
+		}
+ 		#endif /* AVMPLUS_SPARC */
 
 		#ifdef AVMPLUS_PPC
 		MFLR (R0);
@@ -5899,6 +6005,49 @@ namespace avmplus
 		
 		if (patch_end.nextPatch)
 			mdLabel(&patch_end, mip);
+
+		#ifdef AVMPLUS_SPARC
+		int stackSize = activation.highwatermark;
+		int frameSize = stackSize+calleeAreaSize()+kLinkageAreaSize;
+		frameSize = BIT_ROUND_UP(frameSize, 8);
+		if (frameSize <= 4096)
+			*(patch_frame_size + 2) |= (-frameSize & 0x1FFF);
+		else {
+			MDInstruction* mipTemp = mip;
+			mip = patch_frame_size;
+			SETHI(-frameSize, G1);
+			ORI(G1, -frameSize & 0x3FF, G1);
+			*mip |= G1;
+			*mip &= 0xFFFFDFFF;
+			mip = mipTemp;
+		}
+
+		ORI(O0, 0, I0);
+		JMPLI(I7, 8, G0); //ret
+		RESTORE(G0, G0, G0); //restore
+
+		if (core->minstack)
+		{
+			// Patch the stack oveflow check's frame size
+			uint32 *savedMip = mip;
+			mip = stackCheck.patchStackSize;
+			ADDI32(L1, activation.highwatermark, L1);
+			mip = savedMip;
+
+#ifdef AVMPLUS_VERBOSE
+			if (verbose())
+				core->console << "stackOverflow:\n";
+#endif
+			mdLabel(&stackCheck.overflowLabel, mip);
+
+			OR(I0, G0, O0);
+			thincall(FUNCADDR(CodegenMIR::stackOverflow));
+			BA(1, 0);
+			mdPatchPrevious(&stackCheck.resumeLabel);
+			NOP();
+		}
+
+		#endif // AVMPLUS_SPARC
 
 		#ifdef AVMPLUS_PPC
 		int stackSize = activation.highwatermark;
@@ -7118,6 +7267,12 @@ namespace avmplus
 		{
 			// All we need to do is swap A and B
 			registerAllocSpecific(regs, rA);
+			#ifdef AVMPLUS_SPARC
+			moveR2R(insA, rA, L0);
+			moveR2R(insA, rB, rA);
+			moveR2R(insA, L0, rB);
+            #endif /* AVMPLUS_SPARC */
+
 			#ifdef AVMPLUS_PPC
 			moveR2R(insA, rA, R0);
 			moveR2R(insA, rB, rA);
@@ -7273,6 +7428,13 @@ namespace avmplus
 	// instruction type specific machine regiser to register move 
 	void CodegenMIR::moveR2R(OP* ins, Register src, Register dst)
 	{
+		#ifdef AVMPLUS_SPARC
+		if (ins->isDouble())
+			FMOVD(src, dst);
+		else
+			OR(src, G0, dst);
+		#endif /* AVMPLUS_SPARC */
+
 		#ifdef AVMPLUS_PPC
 		if (ins->isDouble())
 			FMR(dst, src);
@@ -7337,6 +7499,13 @@ namespace avmplus
 	void CodegenMIR::copyToStack(OP* ins, Register r)
 	{
 		int disp = stackPos(ins);
+		#ifdef AVMPLUS_SPARC
+		if (ins->isDouble())
+			STDF32(r, disp, SP);    // r => d(SP)
+		else
+			STW32(r, disp, SP);    // r => d(SP)
+        #endif /* AVMPLUS_SPARC */
+
 		#ifdef AVMPLUS_PPC
 		if (ins->isDouble())
 			STFD32( r, disp, SP );    // r => d(SP)
@@ -7392,6 +7561,11 @@ namespace avmplus
 		{
 			uint32 v = uint32(ins->imm);
 			Register r =  ins->reg;
+			#ifdef AVMPLUS_SPARC
+			// todo add faster case for v=0? okay but make sure not to set cc's
+			SET32(v, r);
+			#endif
+
 			#ifdef AVMPLUS_PPC
 			// todo add faster case for v=0? okay but make sure not to set cc's
 			LI32(r, v);
@@ -7418,6 +7592,14 @@ namespace avmplus
 			// Must have already spilled it or located it on the stack
 			AvmAssert(ins->pos != InvalidPos);
 			int disp = stackPos(ins);
+
+			// now generate the MD code for the stack move
+			#ifdef AVMPLUS_SPARC
+			if ( ins->isDouble() )
+				LDDF32(SP, disp, ins->reg);   // argN(SP) => r
+			else
+				LDSW32(SP, disp, ins->reg);   // argN(SP) => r
+			#endif
 
 			// now generate the MD code for the stack move
 			#ifdef AVMPLUS_PPC
@@ -7562,6 +7744,75 @@ namespace avmplus
 		if ((livefp = ~fpregs.calleeSaved & ~fpregs.free) != 0)
 			livefp = spillCallerRegisters(postCall, fpregs, livefp);
 
+		#ifdef AVMPLUS_SPARC
+		int GPRIndex = O0;
+		int FPRIndex = F2;
+		int offset = kLinkageAreaSize;
+		for(int i=1; i<=argc; i++)
+		{
+			OP*		argVal	 = call->args[i];
+			bool	isDouble = argVal->isDouble();
+			RegInfo *argRegs;
+
+			Register r;
+			if (isDouble) 
+			{
+				r = (FPRIndex > F28) ? F0 : registerAllocSpecific(fpregs, (Register)FPRIndex);
+				FPRIndex += 2;
+				GPRIndex += 2;
+				offset += 8;
+				argRegs = &fpregs;
+				livefp &= ~rmask(r);
+			} 
+			else 
+			{
+				// Note: R11 is used as the temp for a stack-based argument,
+				// since R0 is needed for large-displacement stack offsets
+				r = registerAllocSpecific(gpregs, (GPRIndex > O5) ? L1 : (Register)GPRIndex);
+				GPRIndex++;
+				offset += 4;
+				argRegs = &gpregs;
+				livegp &= ~rmask(r);
+			}
+			
+			if (argVal->reg == Unknown)
+			{
+				argVal->reg = r;
+				rematerialize(argVal);
+				argVal->reg = Unknown;
+			}
+			else
+			{
+				// wrong spot
+				moveR2R(argVal, argVal->reg, r);
+			}
+
+			if (isDouble) {
+				STDF32(r, offset-8, SP);
+
+				// We might be calling a varargs function.
+				// So, make sure the GPR's are also loaded with
+				// the value, or the stack contains it.
+				if (GPRIndex-2 <= O5) {
+					LDSW32(SP, offset-8, (Register)(GPRIndex-2));
+				}
+				if (GPRIndex-1 <= O5) {
+					LDSW32(SP, offset-4, (Register)(GPRIndex-1));
+				}
+			} else {
+				// For non-FP values, store on the stack only
+				// if we've exhausted GPR's.
+				if (r == L1) {
+					STW32(r, offset-4, SP);
+				}
+			}
+
+			if (r != F0) {
+				argRegs->addFree(r);				
+			}
+		}
+		int at = 0;
+		#endif // AVMPLUS_SPARC
 		#ifdef AVMPLUS_PPC
 
 		int GPRIndex = R3;
@@ -7985,6 +8236,10 @@ namespace avmplus
 	// converts an instructions 'pos' field to a stack pointer relative displacement
 	int CodegenMIR::stackPos(OP* ins)
 	{
+		#ifdef AVMPLUS_SPARC
+		return ins->pos + kLinkageAreaSize + calleeAreaSize();
+		#endif
+
 		#ifdef AVMPLUS_PPC
 		return ins->pos + kLinkageAreaSize + calleeAreaSize();
 		#endif
@@ -8145,8 +8400,12 @@ namespace avmplus
 		* brilliance from mastermind garyg's noggin.
 		*/
 #ifdef FEATURE_BUFFER_GUARD
+		GrowthGuard* growthGuard;
+		TRY(core, kCatchAction_Rethrow)
+		{
 		// put a guard against buffer growth
 		GrowthGuard guard(pool->codeBuffer);
+		growthGuard = &guard;
 #endif /* FEATURE_BUFFER_GUARD */
 
 		generatePrologue();
@@ -8165,6 +8424,20 @@ namespace avmplus
 			VTune_RegisterMethod(info, this, core);
 		mdOffsets = 0;  // clear the address to file:line table
 		#endif /* VTUNE */    
+
+#ifdef FEATURE_BUFFER_GUARD // no buffer guard in Carbon builds
+		}
+		CATCH(Exception *exception)
+		{
+			if (growthGuard)
+			{
+				growthGuard->~GrowthGuard();
+			}
+			core->throwException(exception);
+		}
+		END_CATCH
+		END_TRY
+#endif // FEATURE_BUFFER_GUARD
 	}
 
 #ifdef FEATURE_BUFFER_GUARD
@@ -8364,6 +8637,10 @@ namespace avmplus
 		// cache designs.
 		MakeDataExecutable(mipStart, (int)mip - (int)mipStart);
 		#endif /* AVMPLUS_PPC */
+
+		#ifdef AVMPLUS_SPARC
+		sync_instruction_memory((char *)mipStart, (int)mip - (int)mipStart);
+		#endif /* AVMPLUS_PPC */
 		
 		// make the code executable
 		MMgc::GCHeap* heap = core->GetGC()->GetGCHeap();
@@ -8380,6 +8657,9 @@ namespace avmplus
 #ifdef AVMPLUS_PPC
 	#define MD_PATCH_LOCATION_SET(w,o) AvmAssertMsg(BIT_VALUE_FITS(o,26), "Branch offset exceeds 26 bits; illegal for PPC"); *w = BIT_INSERT(*w,25,0,o)
 	#define MD_PATCH_LOCATION_GET(w) BIT_EXTRACT(*w,25,0)
+#elif defined AVMPLUS_SPARC
+	#define MD_PATCH_LOCATION_SET(w,o) *w &= 0xFFC00000; *w |= o&0x3FFFFF;
+	#define MD_PATCH_LOCATION_GET(w) *w & 0x3FFFFF;
 #elif defined AVMPLUS_ARM
 	#define MD_PATCH_LOCATION_SET(w,o) AvmAssertMsg(BIT_VALUE_FITS(o,28), "Branch offset exceeds 28 bits; illegal for PPC"); *w = BIT_INSERT(*w,27,0,o)
 	#define MD_PATCH_LOCATION_GET(w) BIT_EXTRACT(*w,27,0)	
@@ -8647,6 +8927,10 @@ namespace avmplus
 
 						// pos field of alloca contains stack pos
 						disp += stackPos(base);
+						#ifdef AVMPLUS_SPARC
+						ADDI32(framep, disp, r);
+						#endif
+
 						#ifdef AVMPLUS_PPC
 						ADDI32(r, framep, disp);
 						#endif
@@ -8674,6 +8958,10 @@ namespace avmplus
 						InsRegisterPrepA(ip, gpregs, base, rBase);
 						AvmAssert(rBase != Unknown);
 						Register r = InsPrepResult(gpregs, ip, rmask(rBase));
+
+						#ifdef AVMPLUS_SPARC
+						ADDI32(rBase, disp, r);
+						#endif
 
 						#ifdef AVMPLUS_PPC
 						ADDI32(r, rBase, disp);
@@ -8751,6 +9039,14 @@ namespace avmplus
 						InsRegisterPrepA(ip, gpregs, addr, rSrc);
 						r = InsPrepResult(regs, ip, rmask(rSrc));
 					}
+
+					#ifdef AVMPLUS_SPARC
+					if (ip->isDouble()) {
+						LDDF32(rSrc, disp, r);
+					} else {
+						LDSW32(rSrc, disp, r);
+					}
+					#endif
 
 					#ifdef AVMPLUS_PPC
 					if (ip->isDouble()) {
@@ -8834,6 +9130,10 @@ namespace avmplus
 
 					Register r = InsPrepResult(gpregs, ip);
 
+					#ifdef AVMPLUS_SPARC
+					ADDI32(framep, stackPos(def), r);
+					#endif
+
 					#ifdef AVMPLUS_PPC
 					ADDI32(r, framep, stackPos(def));
 					#endif
@@ -8873,6 +9173,34 @@ namespace avmplus
 
 					RegInfo& regsValue = value->isDouble() ? fpregs : gpregs;
 
+					#ifdef AVMPLUS_SPARC
+
+					if (!addr)
+					{
+						// disp = absolute immediate address
+						InsRegisterPrepA(ip, regsValue, value, rValue);
+					}
+					else if (addr->code == MIR_alloc)
+					{
+						InsRegisterPrepA(ip, regsValue, value, rValue);
+						rDst = SP;
+						disp += stackPos(addr);
+					}
+					else
+					{
+						InsRegisterPrepAB(ip, regsValue, value, rValue, gpregs, addr, rDst);
+					}
+					
+					if (value->isDouble())
+					{
+						STDF32(rValue, disp, rDst);
+					}
+					else
+					{
+						STW32(rValue, disp, rDst);
+					}
+					
+					#endif // AVMPLUS_SPARC
 					#ifdef AVMPLUS_PPC
 
 					if (!addr)
@@ -9021,6 +9349,48 @@ namespace avmplus
 
 					// rhs could be imm or reg
 
+					#ifdef AVMPLUS_SPARC
+
+					if (canImmFold(ip, rhs))
+					{
+						Register rLhs = Unknown;
+						InsRegisterPrepA(ip, gpregs, lhs, rLhs);
+						AvmAssert(rLhs != Unknown);
+						Register r = InsPrepResult(gpregs, ip);
+
+						int shift = rhs->imm&0x1F;
+						if (shift)
+						{
+							if (mircode == MIR_lsh)
+								SLLI(rLhs, rhs->imm&0x1F, r);
+							else if (mircode == MIR_rsh)
+								SRAI(rLhs, rhs->imm&0x1F, r);
+							else // MIR_ush
+								SRLI(rLhs, rhs->imm&0x1F, r);
+						}
+						else
+						{
+							ORI(rLhs, 0, r);
+						}
+					}
+					else
+					{
+						Register rLhs = Unknown;
+						Register rRhs = Unknown;
+						InsRegisterPrepAB(ip, gpregs, lhs, rLhs, gpregs, rhs, rRhs);
+						Register r = registerAllocAny(gpregs, ip);
+						setResultReg(gpregs, ip, r);
+
+						ANDI(rRhs, 0x1F, rRhs);
+						if (mircode==MIR_lsh)
+							SLL(rLhs, rRhs, r);
+						else if (mircode==MIR_rsh)
+							SRA(rLhs, rRhs, r);
+						else // MIR_ush
+							SRL(rLhs, rRhs, r);
+					}
+					
+					#endif // AVMPLUS_SPARC
 					#ifdef AVMPLUS_PPC
 
 					if (canImmFold(ip, rhs))
@@ -9155,6 +9525,15 @@ namespace avmplus
 						break;
 					}
 
+					#ifdef AVMPLUS_SPARC
+					Register rLhs = Unknown;
+					InsRegisterPrepA(ip, fpregs, lhs, rLhs);
+					Register r = registerAllocAny(fpregs, ip);
+
+					FNEGD(rLhs, r);
+
+					#endif
+
 					#ifdef AVMPLUS_PPC
 
 					Register rLhs = Unknown;
@@ -9193,6 +9572,10 @@ namespace avmplus
 #else
 						#if defined(AVMPLUS_WIN32)
 						static __declspec(align(16)) uint32 negateMask[] = {0,0x80000000,0,0};
+						#elif defined __SUNPRO_CC
+						static uint32 temp[] = {0,0,0,0, 0,0,0};
+						static uint32 *negateMask = (uint32 *)BIT_ROUND_UP(temp, 16);
+						negateMask[1] = 0x80000000;
 						#else
 						static uint32 __attribute__ ((aligned (16))) negateMask[] = {0,0x80000000,0,0};
 						#endif
@@ -9221,6 +9604,14 @@ namespace avmplus
 						gpregs.expire(lhs, ip);
 						break;
 					}
+					#ifdef AVMPLUS_SPARC
+					Register rLhs = Unknown;
+					InsRegisterPrepA(ip, gpregs, lhs, rLhs);
+					Register r = registerAllocAny(gpregs, ip);
+
+					SUB(G0, rLhs, r);
+
+					#endif
 
 					#ifdef AVMPLUS_PPC
 					
@@ -9290,7 +9681,7 @@ namespace avmplus
 				case MIR_add:
 				case MIR_addp:
 				case MIR_sub:
-			    case MIR_imul:
+				case MIR_imul:
 				{
 					OP* lhs = ip->oprnd1; // lhs				
 					OP* rhs = ip->oprnd2; // rhs
@@ -9309,6 +9700,55 @@ namespace avmplus
 					#endif
 
 					// rhs could be imm or reg
+
+					#ifdef AVMPLUS_SPARC
+
+					Register rD = Unknown;
+					if (canImmFold(ip, rhs))
+					{
+						Register rLhs = Unknown;
+						InsRegisterPrepA(ip, gpregs, lhs, rLhs);
+						rD = registerAllocAny(gpregs, ip);
+
+						AvmAssert(rLhs != Unknown);
+
+						if (mircode == MIR_and)
+							ANDI(rLhs, rhs->imm, rD);
+						else if (mircode == MIR_or)
+							ORI(rLhs, rhs->imm, rD);
+						else if (mircode == MIR_xor)
+							XORI(rLhs, rhs->imm, rD);
+						else if (mircode == MIR_add)
+							ADDI(rLhs, rhs->imm, rD);
+						else if (mircode == MIR_sub)
+							SUBI(rLhs, rhs->imm, rD);
+						else if (mircode == MIR_imul)
+							MULXI(rLhs, rhs->imm, rD);
+					}
+					else
+					{
+						Register rLhs = Unknown;
+						Register rRhs = Unknown;
+						InsRegisterPrepAB(ip, gpregs, lhs, rLhs, gpregs, rhs, rRhs);
+						rD = registerAllocAny(gpregs, ip);
+
+						AvmAssert(rLhs != Unknown);
+						AvmAssert(rRhs != Unknown);
+						if (mircode == MIR_and)
+							AND(rLhs, rRhs, rD);
+						else if (mircode == MIR_or)
+							OR (rLhs, rRhs, rD);
+						else if (mircode == MIR_xor)
+							XOR(rLhs, rRhs, rD);
+						else if (mircode == MIR_add)
+							ADD(rLhs, rRhs, rD);
+						else if (mircode == MIR_sub)
+							SUB(rLhs, rRhs, rD);
+						else if (mircode == MIR_imul)
+							MULX(rLhs, rRhs, rD);
+					}
+
+					#endif
 
 					#ifdef AVMPLUS_PPC
 
@@ -9510,6 +9950,72 @@ namespace avmplus
 					// WARNING: MIR_ne is not the same as !MIR_eq. if unordered, MIR_ne = false 
 
 					// rhs could be imm or reg
+					#ifdef AVMPLUS_SPARC
+					
+					Register r = registerAllocAny(gpregs, ip);
+
+					if (cond->code != MIR_fcmp) {
+						switch (mircode) {
+						case MIR_ne:
+							ORI(G0, 0, r);
+							BNE(1, 2);
+							ORI(G0, 0x1, r);
+							break;
+						case MIR_eq:
+							ORI(G0, 0, r);
+							BE(1, 2);
+							ORI(G0, 0x1, r);
+							break;
+						case MIR_lt:
+							ORI(G0, 0, r);
+							if( cond->code == MIR_ucmp)
+								BLU(1, 2);
+							else
+								BL(1, 2);
+							ORI(G0, 0x1, r);
+							break;
+						case MIR_le:
+							ORI(G0, 0, r);
+							if( cond->code == MIR_ucmp)
+								BLEU(1, 2);
+							else
+								BLE(1, 2);
+							ORI(G0, 0x1, r);
+							break;
+						default:
+							AvmAssert(false);
+							break;
+						}
+					} else {
+						switch (mircode) {
+						case MIR_ne:
+							ORI(G0, 0x1, r);
+							FBUE(1, 2);
+							ORI(G0, 0, r);
+							break;
+						case MIR_eq:
+							ORI(G0, 0, r);
+							FBE(1, 2);
+							ORI(G0, 0x1, r);
+							break;
+						case MIR_lt:
+							ORI(G0, 0, r);
+							FBL(1, 2);
+							ORI(G0, 0x1, r);
+							break;
+						case MIR_le:
+							ORI(G0, 0, r);
+							FBLE(1, 2);
+							ORI(G0, 0x1, r);
+							break;
+						default:
+							AvmAssert(false);
+							break;
+						}
+					} 
+					setResultReg(gpregs,ip,r);
+
+					#endif // AVMPLUS_SPARC
 
 					#ifdef AVMPLUS_IA32
 					registerAllocSpecific(gpregs, EAX);
@@ -9711,6 +10217,37 @@ namespace avmplus
 					}
 
 					// rhs could be imm or reg
+					#ifdef AVMPLUS_SPARC
+
+					Register rLhs= Unknown;
+					Register rRhs = Unknown;
+
+					InsRegisterPrepAB(ip, fpregs, lhs, rLhs, fpregs, rhs, rRhs);
+					Register r = registerAllocAny(fpregs, ip);
+
+					AvmAssert(rLhs != Unknown);
+					AvmAssert(rRhs != Unknown);
+					switch (mircode) {
+					case MIR_fadd:
+						FADDD(rLhs, rRhs, r);
+						break;
+					case MIR_fsub:
+						FSUBD(rLhs, rRhs, r);
+						break;
+					case MIR_fmul:
+						FMULD(rLhs, rRhs, r);
+						break;
+					case MIR_fdiv:
+						FDIVD(rLhs, rRhs, r);
+						break;
+					default:
+						break;
+					}
+					setResultReg(fpregs,ip,r);
+
+					#endif //AVMPLUS_SPARC
+
+					// rhs could be imm or reg
                     #ifdef AVMPLUS_PPC
 
 					Register rLhs= Unknown;
@@ -9882,6 +10419,28 @@ namespace avmplus
 						break;
 					}
 
+					#ifdef AVMPLUS_SPARC
+
+					if (canImmFold(ip, rhs))
+					{
+						// 13-bit immediate values can use SUBCCI
+						// instead of SUBCC
+						Register rLhs = Unknown;
+						InsRegisterPrepA(ip, gpregs, lhs, rLhs);
+						AvmAssert(rLhs != Unknown);
+						SUBCCI(rLhs, rhs->imm, G0);
+					}
+					else
+					{
+						Register rLhs = Unknown;
+						Register rRhs = Unknown;
+						InsRegisterPrepAB(ip, gpregs, lhs, rLhs, gpregs, rhs, rRhs);
+						AvmAssert(rRhs != Unknown);
+						AvmAssert(rLhs != Unknown);
+						SUBCC(rLhs, rRhs, G0);
+					}
+
+					#endif // AVMPLUS_SPARC
 					#ifdef AVMPLUS_PPC
 
 					if (canImmFold(ip, rhs))
@@ -9967,6 +10526,15 @@ namespace avmplus
 						break;
 					}
 
+					#ifdef AVMPLUS_SPARC
+
+					Register rLhs = Unknown;
+					Register rRhs = Unknown;
+					InsRegisterPrepAB(ip, fpregs, lhs, rLhs, fpregs, rhs, rRhs);
+					FCMPD(rLhs, rRhs);
+
+					#endif //AVMPLUS_SPARC
+
 					#ifdef AVMPLUS_PPC
 
 					Register rLhs = Unknown;
@@ -10037,6 +10605,72 @@ namespace avmplus
 					// this is the instruction of the compare.
 					MirOpcode cc = ip->oprnd1->code;
 					AvmAssert(cc == MIR_icmp || cc == MIR_ucmp || cc == MIR_fcmp);
+
+					#ifdef AVMPLUS_SPARC
+					
+					if (cc != MIR_fcmp) {
+						switch (mircode) {
+						case MIR_jne:
+							BNE(0, 0);
+							break;
+						case MIR_jeq:
+							BE(0, 0);
+							break;
+						case MIR_jlt:
+							if( cc == MIR_ucmp)
+								BLU(0, 0);
+							else
+								BL(0, 0);
+							break;
+						case MIR_jle:
+							if( cc == MIR_ucmp)
+								BLEU(0, 0);
+							else
+								BLE(0, 0);
+							break;
+						case MIR_jnlt:
+							if( cc == MIR_ucmp)
+								BGEU(0, 0);
+							else
+								BGE(0, 0);
+							break;
+						case MIR_jnle:
+							if( cc == MIR_ucmp)
+								BGU(0, 0);
+							else
+								BG(0, 0);
+							break;
+						default:
+							AvmAssert(false);
+							break;
+						}
+					} else {
+						switch (mircode) {
+						case MIR_jne:
+							FBNE(0, 0);
+							break;
+						case MIR_jeq:
+							FBE(0, 0);
+							break;
+						case MIR_jlt:
+							FBL(0, 0);
+							break;
+						case MIR_jle:
+							FBLE(0, 0);
+							break;
+						case MIR_jnlt:
+							FBUGE(0, 0);
+							break;
+						case MIR_jnle:
+							FBUG(0, 0);
+							break;
+						default:
+							AvmAssert(false);
+							break;
+						}
+					} 
+
+					#endif // AVMPLUS_SPARC
 
 					#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 
@@ -10232,6 +10866,10 @@ namespace avmplus
 
 					mdPatchPreviousOp(target);
 
+					#ifdef AVMPLUS_SPARC
+					NOP();
+					#endif
+
 					gpregs.expireAll(ip);
 					fpregs.expireAll(ip);
 					break;
@@ -10339,8 +10977,28 @@ namespace avmplus
 					InsRegisterPrepA(ip, *regs, value, rRet);
 					#endif
 
+					#ifdef AVMPLUS_SPARC
+					// force oprnd1 into R3/F1 
+					Register rRet;
+					RegInfo *regs;
+					if (value->isDouble()) {
+						rRet = F0;
+						regs = &fpregs;
+					} else {
+						rRet = O0;
+						regs = &gpregs;
+					}
+					InsRegisterPrepA(ip, *regs, value, rRet);
+					#endif // AVMPLUS_SPARC
+
 					if (ip+1 < ipEnd)
 					{
+						#ifdef AVMPLUS_SPARC
+						BA(0, 0);
+						mdPatchPrevious(&patch_end);
+						NOP();
+						#endif
+
 						#ifdef AVMPLUS_PPC
 						B (0); // jump to epilogue
 						mdPatchPrevious(&patch_end);
@@ -10366,6 +11024,12 @@ namespace avmplus
 
 					if (!(target == ip+1 || target==ip+2 && ip[1].code==MIR_bb))
 					{
+						#ifdef AVMPLUS_SPARC
+						BA(0, 0);
+						mdPatchPreviousOp(target);
+						NOP();
+						#endif
+
 						#ifdef AVMPLUS_PPC
 						B (0);
 						mdPatchPreviousOp(target);
@@ -10404,6 +11068,13 @@ namespace avmplus
 					Register r = Unknown;
 					InsRegisterPrepA(ip, gpregs, ip->base, r);
 					AvmAssert(r != Unknown);
+
+					#ifdef AVMPLUS_SPARC
+					// Maybe not correct.
+					LDSW32(r, disp, L0);
+					JMPL(G0, L0, G0);
+					NOP();
+					#endif
 
 					#ifdef AVMPLUS_PPC
 					LI32 (R0, disp);
@@ -10449,6 +11120,13 @@ namespace avmplus
 					InsRegisterPrepA(ip, gpregs, ip->base, rTbl);
 					AvmAssert(rTbl != Unknown);
 
+					#ifdef AVMPLUS_SPARC
+					// Maybe not correct.
+					LDSW32(rTbl, ip->disp, L0);
+					JMPL(G0, L0, G0);
+					NOP();
+					#endif
+
 					// jump table is absolute addr, not in MIR code
 					#ifdef AVMPLUS_PPC						
 					LI32 (R0, ip->disp);
@@ -10487,6 +11165,20 @@ namespace avmplus
 					}
 
 					Register r = Unknown;
+
+					#ifdef AVMPLUS_SPARC
+
+					Register vReg = Unknown;
+					InsRegisterPrepA(ip, gpregs, v, vReg);
+					r = registerAllocAny(fpregs, ip);
+
+					int disp = -8;
+					STWI(vReg, disp, SP);
+					LDDF32(SP, disp, r);
+					FITOD(r, r);
+					setResultReg(fpregs,ip,r);
+
+					#endif
 
 					#ifdef AVMPLUS_PPC
 					Register vReg = Unknown;
@@ -10595,6 +11287,29 @@ namespace avmplus
 					}
 
 					Register r = Unknown;
+
+					#ifdef AVMPLUS_SPARC
+
+					Register vReg = Unknown;
+					Register rTemp = F30;
+					InsRegisterPrepA(ip, gpregs, v, vReg);
+					r = registerAllocAny(fpregs, ip);
+					int disp = -8;
+
+					SETHI(0x43300000, G1);
+					STWI(G1, disp, SP);
+					STWI(vReg, disp+4, SP);
+					LDDF32(SP, disp, rTemp);
+
+					STWI(G0, disp+4, SP);
+					LDDF32(SP, disp, r);
+
+					FSUBD(rTemp, r, r);
+					FABSS(r, r);
+
+					setResultReg(fpregs,ip,r);
+
+					#endif
 
 					#ifdef AVMPLUS_PPC
 					Register vReg = Unknown;
@@ -10718,6 +11433,12 @@ namespace avmplus
 					Register r = R3;
 					Register rHint = R6;
 					#endif
+
+					#ifdef AVMPLUS_SPARC
+					Register r = O0;
+					Register rHint = O3;
+					#endif
+
 					sintptr disp = 0;
 					OP* base = NULL;
 					if ((mircode & ~MIR_float) == MIR_ci)
@@ -10763,6 +11484,21 @@ namespace avmplus
 
 					// now update the allocator by expiring actives 
 					ip = postCall;
+
+					#ifdef AVMPLUS_SPARC
+					if ((mircode & ~MIR_float) != MIR_ci)
+					{
+						// direct call
+						thincall(call->addr);
+					}
+					else
+					{
+						// Maybe not correct.
+						LDSW32(r, disp, L0);
+						JMPL(G0, L0, 15);
+						NOP();
+					}
+					#endif
 
 					#ifdef AVMPLUS_PPC
 
@@ -10924,6 +11660,11 @@ namespace avmplus
 
 						if (!(mircode & MIR_float))
 						{
+
+							#ifdef AVMPLUS_SPARC
+							setResultReg(gpregs, call, registerAllocSpecific(gpregs, O0));
+							#endif
+
 							// 32bit result
 							#ifdef AVMPLUS_PPC
 							setResultReg(gpregs, call, registerAllocSpecific(gpregs, R3));
@@ -10945,6 +11686,10 @@ namespace avmplus
 						}
 						else 
 						{
+							#ifdef AVMPLUS_SPARC
+							setResultReg(fpregs, call, registerAllocSpecific(fpregs, F0));
+							#endif
+
 							// floating point result
 							#ifdef AVMPLUS_PPC
 							setResultReg(fpregs, call, registerAllocSpecific(fpregs, F1));
@@ -11062,6 +11807,10 @@ namespace avmplus
 		// any regs?
         if (active_size > 0)
             core->console << "                                 active: ";
+
+        #ifdef AVMPLUS_SPARC
+        const char **regnames = (&regs != &fpregs) ? gpregNames : fpregNames;
+        #endif
 
         #if defined(AVMPLUS_PPC)
         const char **regnames = (&regs != &fpregs) ? gpregNames : fpregNames;
@@ -11238,6 +11987,18 @@ namespace avmplus
 
 	void CodegenMIR::mdApplyPatch(uint32* where, sintptr labelvalue)
 	{
+		#ifdef AVMPLUS_SPARC
+		MDInstruction* savedMip = mip;
+		mip = (MDInstruction* )where;
+
+		// displacement relative to our patch address
+		int disp = (byte*)labelvalue - (byte*)mip;
+
+		mip[0] &= 0xFFC00000;
+		mip[0] |= (disp>>2)&0x3FFFFF;
+		mip = savedMip;
+		#endif
+
         #ifdef AVMPLUS_PPC
 		MDInstruction* savedMip = mip;
 		mip = (MDInstruction* )where;
