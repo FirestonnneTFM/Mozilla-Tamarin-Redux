@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -274,6 +275,127 @@ namespace avmplus
 		#endif
 	
 	public:
+
+		#ifdef AVMPLUS_SPARC
+
+		#ifdef AVMPLUS_VERBOSE
+		static const char *gpregNames[];
+		static const char *fpregNames[];
+		#endif
+
+		typedef unsigned Register;
+		static const int MAX_REGISTERS = 32;
+		enum
+		{
+			R0  = 0,
+			R1  = 1,
+			R2  = 2,
+			R3  = 3,
+			R4  = 4,
+			R5  = 5,
+			R6  = 6,
+			R7  = 7,
+			R8  = 8,
+			R9  = 9,
+			R10 = 10,						
+			R11 = 11,						
+			R12 = 12,						
+			R13 = 13,						
+			R14 = 14,						
+			R15 = 15,						
+			R16 = 16,						
+			R17 = 17,						
+			R18 = 18,						
+			R19 = 19,						
+			R20 = 20,						
+			R21 = 21,						
+			R22 = 22,						
+			R23 = 23,						
+			R24 = 24,						
+			R25 = 25,						
+			R26 = 26,						
+			R27 = 27,						
+			R28 = 28,						
+			R29 = 29,						
+			R30 = 30,
+			R31 = 31,			
+
+			SP  = 14,
+			FP  = 30,
+
+			G0  = 0,
+			G1  = 1,
+			G2  = 2,
+			G3  = 3,
+			G4  = 4,
+			G5  = 5,
+			G6  = 6,
+			G7  = 7,
+
+			O0  = 8,
+			O1  = 9,
+			O2  = 10,
+			O3  = 11,
+			O4  = 12,
+			O5  = 13,
+			O6  = 14,
+			O7  = 15,
+
+			L0  = 16,
+			L1  = 17,
+			L2  = 18,
+			L3  = 19,
+			L4  = 20,
+			L5  = 21,
+			L6  = 22,
+			L7  = 23,
+
+			I0  = 24,
+			I1  = 25,
+			I2  = 26,
+			I3  = 27,
+			I4  = 28,
+			I5  = 29,
+			I6  = 30,
+			I7  = 31,
+
+			F0  = 0,
+			F1  = 1,
+			F2  = 2,
+			F3  = 3,
+			F4  = 4,
+			F5  = 5,
+			F6  = 6,
+			F7  = 7,
+			F8  = 8,
+			F9  = 9,
+			F10 = 10,						
+			F11 = 11,						
+			F12 = 12,						
+			F13 = 13,						
+			F14 = 14,						
+			F15 = 15,						
+			F16 = 16,						
+			F17 = 17,						
+			F18 = 18,						
+			F19 = 19,						
+			F20 = 20,						
+			F21 = 21,						
+			F22 = 22,						
+			F23 = 23,						
+			F24 = 24,						
+			F25 = 25,						
+			F26 = 26,						
+			F27 = 27,						
+			F28 = 28,						
+			F29 = 29,						
+			F30 = 30,
+			F31 = 31,
+			Unknown = 0x7F
+
+		};
+		#endif //AVMPLUS_SPARC
+
 		//
 		// Register allocation stuff follows
 		// Encoded in 7b quantity
@@ -431,7 +553,7 @@ namespace avmplus
 			FST6 = 6,
 			FST7 = 7,
 
-			Unknown = -1
+			Unknown = 0x7F
 		} 
 		Register;
 		#endif
@@ -509,7 +631,7 @@ namespace avmplus
 			FST6 = 6,
 			FST7 = 7,
 
-			Unknown = -1
+			Unknown = 0x7F
 		} 
 		Register;
 		#endif // AVMPLUS_AMD64
@@ -698,6 +820,11 @@ namespace avmplus
 		uintptr*  casePtr;
 		int		 case_count;
 
+		#ifdef AVMPLUS_SPARC
+		typedef uint32 MDInstruction;
+		#define PREV_MD_INS(m) (m-1)
+		#endif
+
 		#ifdef AVMPLUS_PPC
 		typedef uint32 MDInstruction;
 		#define PREV_MD_INS(m) (m-1)
@@ -785,6 +912,21 @@ namespace avmplus
 
 		int countBits(uint32);
         #endif
+
+		#ifdef AVMPLUS_SPARC
+		OP *beginCatch_start;
+		OP *beginCatch_end;
+		uint32 *patch_frame_size;
+		/**
+		 * Compute the size of the PPC callee area.  Must be done
+		 * after the generation of MIR opcodes.
+		 */
+		int calleeAreaSize() const { return 8*maxArgCount; }
+
+		// This helper exists on SPARC only to minimize the code size
+		// of the generated code for stack overflow checks
+		static void stackOverflow(MethodEnv *env);
+		#endif
 		
 		#ifdef AVMPLUS_PPC
 		uint32 *patch_stmw;
@@ -1011,6 +1153,10 @@ namespace avmplus
 	    static const int kLinkageAreaSize = 24;
     	#endif
 
+    	#ifdef AVMPLUS_SPARC
+	    static const int kLinkageAreaSize = 68;
+    	#endif
+
 		// converts an instructions 'pos' field to a stack pointer relative displacement
 		int stackPos(OP* ins);
 
@@ -1222,6 +1368,188 @@ namespace avmplus
 
 		// Returns true if immediate folding can be used
 		bool canImmFold(OP *ins, OP *imm) const;
+
+		#ifdef AVMPLUS_SPARC
+
+		void CALL(int offset);
+		void Format_2_1(Register rd, int op2, int imm22);
+		void Format_2_2(int a, int cond, int op2, int disp22);
+		void Format_2_3(int a, int cond, int op2, int cc1, int cc0, int p, int disp19);
+		void Format_2_4(int a, int rcond, int op2, int d16hi, int p, Register rs1, int d16lo);
+		void Format_3(int op1, Register rd, int op3, int bits19);
+		void Format_3_1(int op1, Register rd, int op3, Register rs1, int bit8, Register rs2);
+		void Format_3_1I(int op1, Register rd, int op3, Register rs1, int simm13);
+		void Format_3_2(int op1, Register rd, int op3, Register rs1, int rcond, Register rs2);
+		void Format_3_2I(int op1, Register rd, int op3, Register rs1, int rcond, int simm10);
+		void Format_3_3(int op1, Register rd, int op3, Register rs1, int cmask, int mmask);
+		void Format_3_4(int op1, Register rd, int op3, int bits19);
+		void Format_3_5(int op1, Register rd, int op3, Register rs1, int x, Register rs2);
+		void Format_3_6(int op1, Register rd, int op3, Register rs1, int shcnt32);
+		void Format_3_7(int op1, Register rd, int op3, Register rs1, int shcnt64);
+		void Format_3_8(int op1, Register rd, int op3, Register rs1, int bits9, Register rs2);
+		void Format_3_9(int op1, int cc1, int cc0, int op3, Register rs1, int bits9, Register rs2);
+		void Format_4_1(Register rd, int op3, Register rs1, int cc1, int cc0, Register rs2);
+		void Format_4_1I(Register rd, int op3, Register rs1, int cc1, int cc0, int simm11);
+		void Format_4_2(Register rd, int op3, int cc2, int cond, int cc1, int cc0, Register rs2);
+		void Format_4_2I(Register rd, int op3, int cc2, int cond, int cc1, int cc0, int simm11);
+		void Format_4_3(Register rd, int op3, Register rs1, int cc1, int cc0, int swap_trap);
+		void Format_4_4(Register rd, int op3, Register rs1, int rcond, int opf_low, Register rs2);
+		void Format_4_5(Register rd, int op3, int cond, int opf_cc, int opf_low, Register rs2);
+
+		void ADD(Register rs1, Register rs2, Register rd);
+		void ADDI(Register rs1, int simm13, Register rd);
+		void AND(Register rs1, Register rs2, Register rd);
+		void ANDI(Register rs1, int simm13, Register rd);
+		void BA(int a, int dsp22);
+		void BE(int a, int dsp22);
+		void BG(int a, int dsp22);
+		void BGU(int a, int dsp22);
+		void BGE(int a, int dsp22);
+		void BGEU(int a, int dsp22);
+		void BL(int a, int dsp22);
+		void BLU(int a, int dsp22);
+		void BLE(int a, int dsp22);
+		void BLEU(int a, int dsp22);
+		void BNE(int a, int dsp22);
+		void FABSS(Register rs2, Register rd);
+		void FADDD(Register rs1, Register rs2, Register rd);
+		void FBE(int a, int dsp22);
+		void FBNE(int a, int dsp22);
+		void FBUE(int a, int dsp22);
+		void FBG(int a, int dsp22);
+		void FBUG(int a, int dsp22);
+		void FBGE(int a, int dsp22);
+		void FBUGE(int a, int dsp22);
+		void FBL(int a, int dsp22);
+		void FBLE(int a, int dsp22);
+		void FCMPD(Register rs1, Register rs2);
+		void FSUBD(Register rs1, Register rs2, Register rd);
+		void FMULD(Register rs1, Register rs2, Register rd);
+		void FDIVD(Register rs1, Register rs2, Register rd);
+		void FMOVD(Register rs2, Register rd);
+		void FNEGD(Register rs2, Register rd);
+		void FITOD(Register rs2, Register rd);
+		void JMPL(Register rs1, Register rs2, Register rd);
+		void JMPLI(Register rs1, int simm13, Register rd);
+		void LDF(Register rs1, Register rs2, Register rd);
+		void LDFI(Register rs1, int simm13, Register rd);
+		void LDSW(Register rs1, Register rs2, Register rd);
+		void LDSWI(Register rs1, int simm13, Register rd);
+		void MULX(Register rs1, Register rs2, Register rd);
+		void MULXI(Register rs1, int simm13, Register rd);
+		void NOP();
+		void OR(Register rs1, Register rs2, Register rd);
+		void ORI(Register rs1, int simm13, Register rd);
+		void RD(Register rs1, Register rd);
+		void RESTORE(Register rs1, Register rs2, Register rd);
+		void SAVEI(Register rs1, int simm13, Register rd);
+		// Acturally it is sethi(%hi(value), rd). I don't if it is good to do so.
+		void SETHI(int imm22, Register rd);
+		void SLL(Register rs1, Register rs2, Register rd);
+		void SLLI(Register rs1, int shcnt32, Register rd);
+		void SRA(Register rs1, Register rs2, Register rd);
+		void SRAI(Register rs1, int shcnt32, Register rd);
+		void SRL(Register rs1, Register rs2, Register rd);
+		void SRLI(Register rs1, int shcnt32, Register rd);
+		void STF(Register rd, Register rs1, Register rs2);
+		void STFI(Register rd, int simm13, Register rs1);
+		void STW(Register rd, Register rs2, Register rs1);
+		void STWI(Register rd, int simm13, Register rs1);
+		void SUBCC(Register rs1, Register rs2, Register rd);
+		void SUBCCI(Register rs1, int simm13, Register rd);
+		void SUB(Register rs1, Register rs2, Register rd);
+		void SUBI(Register rs1, int simm13, Register rd);
+		void XOR(Register rs1, Register rs2, Register rd);
+		void XORI(Register rs1, int simm13, Register rd);
+
+		// Returns true if imm below 13-bit unsigned immediate)
+		inline bool isIMM13(int imm) const
+		{
+			return imm <= 4095 && imm >= -4096;
+		}
+
+
+		void SET32(int imm32, Register rd)
+		{
+			if(isIMM13(imm32)) {
+				ORI(G0, imm32, rd);
+			}
+			else {
+				SETHI(imm32, rd);
+				ORI(rd, imm32 & 0x3FF, rd);
+			}
+		}
+
+		void STDF32(Register rd, int imm32, Register rs1)
+		{
+			if(isIMM13(imm32+4)) {
+				STFI(rd, imm32, rs1);
+				STFI(rd+1, imm32+4, rs1);
+			}
+			else {
+				SET32(imm32, L0);
+				STF(rd, L0, rs1);
+				SET32(imm32+4, L0);
+				STW(rd+1, L0, rs1);
+			}
+		}
+
+		void LDDF32(Register rs1, int imm32, Register rd)
+		{
+			if(isIMM13(imm32+4)) {
+				LDFI(rs1, imm32, rd);
+				LDFI(rs1, imm32+4, rd+1);
+			}
+			else {
+				SET32(imm32, L0);
+				LDF(rs1, L0, rd);
+				SET32(imm32+4, L0);
+				LDF(rs1, L0, rd+1);
+			}
+		}
+
+		void STW32(Register rd, int imm32, Register rs1)
+		{
+			if(isIMM13(imm32)) {
+				STWI(rd, imm32, rs1);
+			}
+			else {
+				SET32(imm32, L0);
+				STW(rd, L0, rs1);
+			}
+		}
+
+		void LDSW32(Register rs1, int imm32, Register rd)
+		{
+			if(isIMM13(imm32)) {
+				LDSWI(rs1, imm32, rd);
+			}
+			else {
+				SET32(imm32, L0);
+				LDSW(rs1, L0, rd);
+			}
+		}
+
+		void ADDI32(Register rs1, int imm32, Register rd)
+		{
+			if(isIMM13(imm32)) {
+				ADDI(rs1, imm32, rd);
+			}
+			else {
+				SET32(imm32, L0);
+				ADD(rs1, L0, rd);
+			}
+		}
+
+		void patchRelativeBranch(uint32 *patch_ip, uint32 *target_ip)
+			{
+				int offset = target_ip-patch_ip;
+				*patch_ip &= 0xFFC00000;
+				*patch_ip |= (offset & 0x3FFFFF);
+			}
+
+		#endif // AVMPLUS_SPARC
+
 
 		#ifdef AVMPLUS_PPC
 		//
@@ -1673,6 +2001,12 @@ namespace avmplus
 		/** call a method using a relative offset */
 		void thincall(sintptr addr) 
 		{
+			#ifdef AVMPLUS_SPARC
+			int disp = addr - (int)mip;
+			CALL(disp);
+			NOP();
+			#endif
+
 			#ifdef AVMPLUS_PPC
 			int disp = addr - (int)mip;
 			if (IsBranchDisplacement(disp)) {
@@ -1733,6 +2067,13 @@ namespace avmplus
 	};
 
 	// machine dependent buffer sizing information try to use 4B aligned values
+	#ifdef AVMPLUS_SPARC
+	// TODO for sparc.
+	static const int md_prologue_size		= 96;
+	static const int md_epilogue_size		= 280;
+	static const int md_native_thunk_size	= 1024;
+	#endif
+
 	#ifdef AVMPLUS_PPC
 	static const int md_prologue_size		= 96;
 	static const int md_epilogue_size		= 280;
