@@ -8400,7 +8400,7 @@ namespace avmplus
 		* brilliance from mastermind garyg's noggin.
 		*/
 #ifdef FEATURE_BUFFER_GUARD
-		GrowthGuard* growthGuard;
+		GrowthGuard* growthGuard = 0;
 		TRY(core, kCatchAction_Rethrow)
 		{
 		// put a guard against buffer growth
