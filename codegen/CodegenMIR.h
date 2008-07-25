@@ -553,7 +553,11 @@ namespace avmplus
 			FST6 = 6,
 			FST7 = 7,
 
-			Unknown = 0x7F
+			#ifdef SOLARIS
+			Unknown = 0x7f
+			#else
+			Unknown = -1
+			#endif
 		} 
 		Register;
 		#endif
@@ -631,7 +635,11 @@ namespace avmplus
 			FST6 = 6,
 			FST7 = 7,
 
-			Unknown = 0x7F
+			#ifdef SOLARIS
+			Unknown = 0x7f
+			#else
+			Unknown = -1
+			#endif
 		} 
 		Register;
 		#endif // AVMPLUS_AMD64
