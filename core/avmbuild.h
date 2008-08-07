@@ -131,7 +131,6 @@
 
 #if defined(VTUNE) || defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
 #define AVMPLUS_VERBOSE
-#define AVMPLUS_PROFILE
 #endif
 
 // #undef verify, a Mac thing

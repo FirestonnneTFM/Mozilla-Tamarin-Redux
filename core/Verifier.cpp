@@ -66,11 +66,6 @@ namespace avmplus
 		this->verbose = pool->verbose || (info->flags & AbstractFunction::VERBOSE_VERIFY);
 		#endif
 
-		#ifdef AVMPLUS_PROFILE
-		if (core->dprof.dprofile)
-			core->dprof.mark(OP_verifyop);
-		#endif
-
 		const byte* pos = info->body_pos;
 		max_stack = AvmCore::readU30(pos);
 		local_count = AvmCore::readU30(pos);
@@ -225,11 +220,6 @@ namespace avmplus
 		if( !initialState->init(state) ) 
 			verifyFailed(kCorruptABCError);
 
-		#ifdef AVMPLUS_PROFILE
-		if (core->dprof.dprofile)
-			core->dprof.mark(OP_verifypass);
-		#endif
-
 		int actualCount = 0;
 		bool blockEnd = false;    // extended basic block ending
 
@@ -265,10 +255,6 @@ namespace avmplus
 		for (const byte* pc = code_pos, *code_end=code_pos+code_length; pc < code_end; pc += size)
 		{
 			SAMPLE_CHECK();
-			#ifdef AVMPLUS_PROFILE
-			if (core->dprof.dprofile)
-				core->dprof.mark(OP_verifyop);
-			#endif
 
 			if (mir && mir->overflow)
 			{
@@ -445,11 +431,6 @@ namespace avmplus
 			size = int(nextpc-pc);
 			if (pc+size > code_end)
 				verifyFailed(kLastInstExceedsCodeSizeError);
-
-            #ifdef AVMPLUS_PROFILE
-			if (core->sprof.sprofile)
-				core->sprof.tally(opcode, size);
-			#endif
 
 			#ifdef AVMPLUS_VERBOSE
 			if (verbose) 

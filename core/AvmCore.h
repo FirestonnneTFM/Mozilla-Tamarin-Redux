@@ -148,11 +148,6 @@ const int kBufferPadding = 16;
 
 		#endif /* MIR */
 
-#ifdef AVMPLUS_PROFILE
-		StaticProfiler sprof;
-		DynamicProfiler dprof;
-#endif
-
 		/**
 		 * Redirects the standard output of the VM to the specified
 		 * output stream.  Output from print() statements and
@@ -906,13 +901,6 @@ const int kBufferPadding = 16;
 		 * ES3's internal ToNumber() function for internal use
 		 */
 		double number(Atom atom) const;
-
-#ifdef AVMPLUS_PROFILE
-		/**
-		 * dump profiler stats 
-		 */
-		void dump();
-#endif
 		
 		/**
 		 * produce an atom from a string.  used only for string constants.
