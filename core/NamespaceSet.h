@@ -51,9 +51,6 @@ namespace avmplus
 		#ifdef AVMPLUS_MIR
 		friend class CodegenMIR;
 		#endif 
-		#ifdef AVMPLUS_INTERP
-		friend class Interpreter;
-		#endif
 
 	public:
 		int size;

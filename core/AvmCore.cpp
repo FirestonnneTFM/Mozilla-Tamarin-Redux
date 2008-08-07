@@ -127,9 +127,7 @@ namespace avmplus
 		verbose = false;
 		#endif
 
-		#ifdef AVMPLUS_INTERP
  		turbo = true;
-		#endif
 
 		#ifdef AVMPLUS_VERIFYALL
 		verifyall = false;
@@ -137,10 +135,8 @@ namespace avmplus
 
 		#ifdef AVMPLUS_MIR
 
-			#ifdef AVMPLUS_INTERP
 			// forcemir flag forces use of MIR instead of interpreter
 			forcemir = false;
-			#endif
 	
 			cseopt = true;
 			dceopt = true;

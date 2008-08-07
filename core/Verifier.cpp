@@ -246,9 +246,7 @@ namespace avmplus
 
 		TRY(core, kCatchAction_Rethrow){
 
-		#ifdef AVMPLUS_INTERP
 		if (mir)
-		#endif
 		{
 			#ifdef AVMPLUS_MIR
 			if( !mir->prologue(state) ) 
@@ -2329,16 +2327,14 @@ namespace avmplus
 			verifyFailed(kInvalidBranchTargetError);
 		}
 
-		#ifdef AVMPLUS_INTERP
 		if (!mir || mir->overflow) 
 		{
 			if (info->returnTraits() == NUMBER_TYPE)
-				info->implN = Interpreter::interpN;
+				info->implN = avmplus::interpN;
 			else
-				info->impl32 = Interpreter::interp32;
+				info->impl32 = avmplus::interp32;
 		}
 		else
-		#endif //AVMPLUS_INTERP
 		{
 			mir->epilogue(state);
 		}

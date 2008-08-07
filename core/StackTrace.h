@@ -159,9 +159,7 @@ namespace avmplus
 		sintptr volatile * eip; 	// ptr to where the current pc is stored
 
 		void**		scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
-		#ifdef AVMPLUS_INTERP
 		int*		scopeDepth; // Only used by the interpreter! With MIR, look for NULL entires in the scopeBase array.
-		#endif
 	protected:
 		// allow more flexibility to subclasses
 		CallStackNode(){}

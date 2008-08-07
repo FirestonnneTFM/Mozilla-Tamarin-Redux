@@ -48,10 +48,30 @@
 #endif
 #endif
 
-#ifdef AVMPLUS_INTERP
 namespace avmplus
 {	
-	Atom Interpreter::interp32(MethodEnv* env, int argc, uint32 *ap)
+	inline int readS24(const byte *pc) {
+		return AvmCore::readS24(pc);
+	}
+	inline int readU30(const byte *&pc) {
+		return AvmCore::readU30(pc);
+	}
+
+	Atom interp(MethodEnv* method, int argc, uint32 *ap);
+	Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete=false);
+	Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
+
+#ifdef AVMPLUS_VERBOSE
+	
+	/**
+	 * display contents of current stack frame only.
+	 */
+	static void showState(MethodInfo* info, AbcOpcode opcode, int off,
+				   Atom* framep, int sp, int scopep, int scopeBase, int stackBase,
+				   const byte *code_start);
+#endif
+
+	Atom interp32(MethodEnv* env, int argc, uint32 *ap)
 	{
 		Atom a = interp(env, argc, ap);
 		Traits* t = env->method->returnTraits();
@@ -67,7 +87,7 @@ namespace avmplus
 		return a & ~7; // possibly null pointer
 	}
 
-	double Interpreter::interpN(MethodEnv* env, int argc, uint32 * ap)
+	double interpN(MethodEnv* env, int argc, uint32 * ap)
 	{
 		Atom a = interp(env, argc, ap);
 		return AvmCore::number_d(a);
@@ -77,7 +97,7 @@ namespace avmplus
      * Interpret the AVM+ instruction set.
      * @return
      */
-    Atom Interpreter::interp(MethodEnv *env, int argc, uint32 *ap)
+    Atom interp(MethodEnv *env, int argc, uint32 *ap)
     {
 
 		MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
@@ -1490,7 +1510,7 @@ namespace avmplus
 		//
     }
 
-	Atom* Interpreter::initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete/*=false*/)
+	Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete/*=false*/)
 	{
 		if (name.isRtname())
 		{
@@ -1535,7 +1555,7 @@ namespace avmplus
 		return sp;
 	}
 
-	Traits* Interpreter::getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core)
+	Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core)
 	{
 		Traits* t = pool->getTraits(name, toplevel);
 		if( name->isParameterizedType() )
@@ -1558,7 +1578,7 @@ namespace avmplus
 	    /**
      * display contents of current stack frame only.
      */
-	void Interpreter::showState(MethodInfo* info, AbcOpcode opcode, int off,
+	void showState(MethodInfo* info, AbcOpcode opcode, int off,
 							Atom* framep, int sp, int scopep, int scopeBase, int stackBase,
 							const byte *code_start)
     {
@@ -1601,4 +1621,3 @@ namespace avmplus
     }
 #endif
 }
-#endif /* AVMPLUS_INTERP */

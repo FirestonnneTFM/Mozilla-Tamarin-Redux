@@ -177,7 +177,6 @@ namespace avmplus
 	class GrowableBuffer;
 	class Hashtable;
 	class HeapMultiname;
-	class Interpreter;
 	class IntVectorObject;
 	class DoubleVectorObject;
 	class UIntVectorObject;
