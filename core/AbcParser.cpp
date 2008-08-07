@@ -1654,13 +1654,13 @@ namespace avmplus
 			script->name = core->concatStrings(traits->format(core), core->newString("$init"));
 			#endif
 
-            #if defined(AVMPLUS_INTERP) && defined(AVMPLUS_MIR)
+            #if defined(AVMPLUS_MIR)
 			if (!core->forcemir)
 			{
 				// suggest that we don't jit the $init methods
 				script->flags |= AbstractFunction::SUGGEST_INTERP;
 			}
-			#endif /* AVMPLUS_INTERP */
+			#endif
 
 			pool->scripts.set(i, script);
 
@@ -1970,13 +1970,13 @@ namespace avmplus
 			ctraits->final = true;
 			ctraits->needsHashtable = true;
 
-            #if defined(AVMPLUS_INTERP) && defined(AVMPLUS_MIR)
+            #if defined(AVMPLUS_MIR)
 			if (!core->forcemir)
 			{
 				// suggest that we don't jit the class initializer
 				cinit->flags |= AbstractFunction::SUGGEST_INTERP;
 			}
-			#endif /* AVMPLUS_INTERP */
+			#endif
 
 			pool->cinits.set(i, cinit);
         }

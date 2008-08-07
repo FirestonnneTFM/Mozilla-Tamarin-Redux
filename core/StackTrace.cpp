@@ -61,9 +61,7 @@ namespace avmplus
 		linenum         = 0;
 
 		// scopechain stuff
-		#ifdef AVMPLUS_INTERP
 		this->scopeDepth = NULL;
-		#endif
 
 		// link into callstack
 		next            = core->callStack;

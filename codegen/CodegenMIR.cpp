@@ -6531,10 +6531,8 @@ namespace avmplus
 			}
 		}
 
-		#ifdef AVMPLUS_INTERP
 		// mark method as been JIT'd
 		info->flags |= AbstractFunction::TURBO;
-		#endif /* AVMPLUS_INTERP */
 			
 		uintptr mipEnd = (uintptr) mip;
 		(void)mipEnd;

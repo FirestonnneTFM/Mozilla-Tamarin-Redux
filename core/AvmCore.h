@@ -177,7 +177,6 @@ const int kBufferPadding = 16;
 		bool verbose;
 		#endif /* AVMPLUS_VERBOSE */
 
-		#ifdef AVMPLUS_INTERP
 		/**
 		 * The turbo switch determines how bytecode is executed.
 		 * When turbo is true, bytecode is translated to native code.
@@ -190,11 +189,9 @@ const int kBufferPadding = 16;
 		 * builds on supported platforms.
 		 */
 		bool turbo;
-		#endif /* AVMPLUS_INTERP */
 
 		#ifdef AVMPLUS_MIR
 
-		#ifdef AVMPLUS_INTERP
 		/**
 		 * To speed up initialization, we don't use MIR on
 		 * $init methods; we use interp instead.  For testing
@@ -204,7 +201,6 @@ const int kBufferPadding = 16;
 		 * instead of interp.
 		 */
 		bool forcemir;
-		#endif
 
 		bool cseopt;
 		bool dceopt;
