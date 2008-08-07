@@ -57,10 +57,6 @@ namespace avmplus
 
 		int version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
 
-		#ifdef AVMPLUS_PROFILE
-		DynamicProfiler::StackMark mark(OP_decode, &core->dprof);
-		#endif
-
 		#ifdef AVMPLUS_VERBOSE
 		if (core->verbose)
 			core->console << "major=" << (version&0xFFFF) << " minor=" << (version>>16) << "\n";
@@ -681,7 +677,7 @@ namespace avmplus
 		pool->methods.ensureCapacity(size);
 		pool->methodCount = methodCount;
 
-#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		const byte* startpos = pos;
 #endif
 
@@ -811,9 +807,6 @@ namespace avmplus
 			// save method info pointer.  we will verify code later.
 			pool->methods.set(i, info);
 		}
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.methodsSize += (int)(pos-startpos);
-		#endif
     }
 	
 
@@ -887,10 +880,6 @@ namespace avmplus
 #endif  // AVMPLUS_VERBOSE
 			}
 		}
-
-#ifdef AVMPLUS_VERBOSE
-//StaticProfiler::methodsSize += (pos-startpos);
-#endif
     }
 
     void AbcParser::parseMethodBodies()
@@ -902,7 +891,7 @@ namespace avmplus
 			core->console << "bodies_count=" << bodyCount << "\n";
 #endif
 
-#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		const byte* startpos = pos;
 #endif
 
@@ -1080,10 +1069,6 @@ namespace avmplus
 				toplevel->throwVerifyError(kIllegalNativeMethodBodyError, core->toErrorString(info));
 			}
 		}
-
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.bodiesSize += (int)(pos-startpos);
-		#endif
     }
 
     void AbcParser::parseCpool()
@@ -1105,7 +1090,7 @@ namespace avmplus
 		pool->verbose = core->verbose;
 #endif
 
-#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		const byte* startpos = pos;
 #endif
 
@@ -1126,9 +1111,6 @@ namespace avmplus
 #endif
 
 		}
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolIntSize = (int)(pos-startpos);
-		#endif
 
 		uint32 uint_count = readU30(pos);
 		if (uint_count > (uint32)(abcEnd - pos))
@@ -1138,7 +1120,7 @@ namespace avmplus
 		cpool_uint.ensureCapacity(uint_count);
 		pool->constantUIntCount = uint_count;
 
-#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		startpos = pos;
 #endif
 
@@ -1161,9 +1143,6 @@ namespace avmplus
 #endif
 
 		}
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolUIntSize = (int)(pos-startpos);
-		#endif
 
 		uint32 double_count = readU30(pos);
 		if (double_count > (uint32)(abcEnd - pos))
@@ -1208,10 +1187,6 @@ namespace avmplus
 #endif
 
 		}
-
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolDoubleSize = (int)(pos-startpos);
-		#endif
 
 		uint32 string_count = readU30(pos);
 		if (string_count > (uint32)(abcEnd - pos))
@@ -1260,9 +1235,6 @@ namespace avmplus
 #endif
 
 		}
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolStrSize = (int)(pos-startpos);
-		#endif
 
 		uint32 ns_count = readU30(pos);
 		if (ns_count > (uint32)(abcEnd - pos))
@@ -1352,10 +1324,6 @@ namespace avmplus
 			}
 #endif
 		}
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolNsSize = (int)(pos-startpos);
-		#endif
-
 
 		uint32 ns_set_count = readU30(pos);
 		if (ns_set_count > (uint32)(abcEnd - pos))
@@ -1401,9 +1369,6 @@ namespace avmplus
 			}
 #endif
 		}
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolNsSetSize = (int)(pos-startpos);
-		#endif
 
 		uint32 mn_count = readU30(pos);
 		if (mn_count > (uint32)(abcEnd - pos))
@@ -1520,10 +1485,6 @@ namespace avmplus
 			}
 #endif
 		}
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.cpoolMnSize = (int)(pos-startpos);
-		#endif
-
     }
 
 	void AbcParser::addNamedTraits(Namespace* ns, Stringp name, Traits* itraits)
@@ -1582,7 +1543,7 @@ namespace avmplus
 		}
 #endif
 
-#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		const byte* startpos = pos;
 #endif
 
@@ -1667,9 +1628,6 @@ namespace avmplus
 			// initial scope chain is []
 			traits->scope = ScopeTypeChain::create(core->GetGC(),NULL,0);
 		}
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.scriptsSize = (int)(pos-startpos);
-		#endif
 
 		return true;
 	}
@@ -1699,7 +1657,7 @@ namespace avmplus
 			core->console << "class_count=" << classCount <<"\n";
 #endif
 
-#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		const byte* startpos = pos;
 #endif
 
@@ -1891,10 +1849,6 @@ namespace avmplus
 			}
         }
 
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.instancesSize = (int)(pos-startpos);
-		#endif
-
 		return true;
     }
 
@@ -1905,7 +1859,7 @@ namespace avmplus
 			return;
 		}
 
-#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		const byte* startpos = pos;
 #endif
 
@@ -1980,10 +1934,6 @@ namespace avmplus
 
 			pool->cinits.set(i, cinit);
         }
-
-		#ifdef AVMPLUS_PROFILE
-		core->sprof.classesSize = (int)(pos-startpos);
-		#endif
     }
 
 	unsigned int AbcParser::readU30(const byte *&p) const

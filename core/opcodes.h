@@ -199,16 +199,5 @@ OP_debug = 0xEF,
 OP_debugline = 0xF0,
 OP_debugfile = 0xF1,
 OP_bkptline = 0xF2,
-OP_timestamp = 0xF3,
-OP_verifypass = 0xF5,
-OP_alloc = 0xF6,
-OP_mark = 0xF7,
-OP_wb = 0xF8,
-OP_prologue = 0xF9,
-OP_sendenter = 0xFA,
-OP_doubletoatom = 0xFB,
-OP_sweep = 0xFC,
-OP_codegenop = 0xFD,
-OP_verifyop = 0xFE,
-OP_decode = 0xFF
+OP_timestamp = 0xF3
 };

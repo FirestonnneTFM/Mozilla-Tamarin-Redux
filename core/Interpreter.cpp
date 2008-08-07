@@ -275,11 +275,6 @@ namespace avmplus
             }
 			#endif
 
-			#ifdef AVMPLUS_PROFILE
-			if (core->dprof.dprofile)
-				core->dprof.mark(opcode);
-			#endif
-
             switch (opcode)
             {
             case OP_returnvoid:

@@ -442,17 +442,9 @@ namespace avmplus
 		TRY(this, kCatchAction_Rethrow)
 		{
 			result = main->coerceEnter(0, argv);
-			#ifdef AVMPLUS_PROFILE
-			if (dprof.dprofile)
-				dprof.mark((AbcOpcode)0);
-			#endif
 		}
 		CATCH(Exception *exception)
 		{
-			#ifdef AVMPLUS_PROFILE
-			if (dprof.dprofile)
-				dprof.mark((AbcOpcode)0);
-			#endif
 			// Re-throw exception
 			throwException(exception);
 		}
@@ -1816,15 +1808,6 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 
-#ifdef AVMPLUS_PROFILE
-	void AvmCore::dump()
-	{
-		sprof.dump(console);
-		dprof.dump(console);
-	}
-#endif
-
-
 	void AvmCore::setConsoleStream(OutputStream *stream)
 	{
 		console.setOutputStream(stream);
@@ -3156,11 +3139,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	#endif
 	Atom AvmCore::doubleToAtom_sse2(double n)
 	{
-		#ifdef AVMPLUS_PROFILE
-		if (dprof.dprofile)
-			DynamicProfiler::StackMark mark(OP_doubletoatom, &dprof);
-		#endif
-
 		// handle integer values w/out allocation
 		// this logic rounds in the wrong direction for E3, but
 		// we never use a rounded value, only cleanly converted values.
@@ -3254,11 +3232,6 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Atom AvmCore::doubleToAtom(double n)
 	{
-		#ifdef AVMPLUS_PROFILE
-		if (dprof.dprofile)
-			DynamicProfiler::StackMark mark(OP_doubletoatom, &dprof);
-		#endif
-
 		// There is no need for special logic for NaN or +/-Inf since we don't
         // ever test for those values in coreplayer.  As far as we're concerned
         // they are regular numeric values.

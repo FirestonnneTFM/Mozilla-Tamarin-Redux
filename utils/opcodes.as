@@ -167,7 +167,7 @@ out += " * Use the script '" + SCRIPT_NAME + "' to generate this file.\n";
 out += " */\n";
 out += "\n";
 
-out += "#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)\n";
+out += "#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)\n";
 out += "const char *opNames[] = {\n";
 var first=true;
 for (var i=0; i<opcodes.length; i++) {
@@ -183,7 +183,7 @@ out += "};\n";
 out += "#endif\n";
 out += "\n";
 out += "\n\n";
-out += "signed char opOperandCount[] = {\n";
+out += "const signed char opOperandCount[] = {\n";
 for (var i=0; i<opcodes.length; i++) {
 	out += '    ' + opcodes[i].op_count + ",\t// " + opcodes[i].name + "\n";
 }
@@ -194,13 +194,13 @@ out += "#if 0 && defined(AVMPLUS_MIR) && defined(_DEBUG)\n";
 out += "\n\n";
 out += "// C++ note.  the max opSize[] value is 5 (3 bits).  We could pack these tighter.\n";
 out += "// no. of bytes in the opcode stream.  0 means unsupported opcode.\n";
-out += "unsigned char opSizes[] = {\n";
+out += "const unsigned char opSizes[] = {\n";
 for (var i=0; i<opcodes.length; i++) {
 	out += '    ' + opcodes[i].ins_width + ",\t// " + opcodes[i].name + "\n";
 }
 out += "\n";
 out += "};\n";
-out += "unsigned char opStackPop[] = {\n";
+out += "const unsigned char opStackPop[] = {\n";
 first = true;
 for (var i=0; i<opcodes.length; i++) {
 	if (!first) {
@@ -213,7 +213,7 @@ for (var i=0; i<opcodes.length; i++) {
 out += "\n";
 out += "};\n";
 out += "\n"; 
-out += "unsigned char opStackPush[] = {\n";
+out += "const unsigned char opStackPush[] = {\n";
 first = true;
 for (var i=0; i<opcodes.length; i++) {
 	if (!first) {
@@ -227,7 +227,7 @@ out += "\n";
 out += "};\n";
 out += "#endif /* AVMPLUS_MIR && _DEBUG */\n";
 
-out += "unsigned char opCanThrow[] = {\n";
+out += "const unsigned char opCanThrow[] = {\n";
 first = true;
 for (var i=0; i<opcodes.length; i++) {
 	if (!first) {
