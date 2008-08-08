@@ -225,10 +225,6 @@ namespace avmshell
 		#ifdef DEBUGGER
 			printf("          [-d]          enter debugger on start\n");
 		#endif
-		#ifdef AVMPLUS_PROFILE
-			printf("          [-Ddprofile]  dynamic instruction stats\n");
-			printf("          [-Dsprofile]  show static instruction stats\n");
-		#endif /* AVMPLUS_PROFILE */
 		#ifdef _DEBUG
 			printf("          [-Dgreedy]    collect before every allocation\n");
 		#endif /* _DEBUG */
@@ -241,9 +237,7 @@ namespace avmshell
 			printf("                        en,de,es,fr,it,ja,ko,zh-CN,zh-TW\n");
 		#endif
 
-		#ifdef AVMPLUS_INTERP
-			printf("          [-Dinterp]    do not generate machine code, interpret instead\n");
-		#endif /* AVMPLUS_INTERP */
+		printf("          [-Dinterp]    do not generate machine code, interpret instead\n");
 
 		#ifdef AVMPLUS_VERBOSE
 			printf("          [-Dverbose]   trace every instruction (verbose!)\n");
@@ -251,10 +245,7 @@ namespace avmshell
 		#endif
 
     #ifdef AVMPLUS_MIR
-		#ifdef AVMPLUS_INTERP
-		    printf("          [-Dforcemir]  use MIR always, never interp\n");
-        #endif /* AVMPLUS_INTERP */
-
+		printf("          [-Dforcemir]  use MIR always, never interp\n");
 		printf("          [-Dmem]       show compiler memory usage \n");
 		printf("          [-Dnodce]     disable DCE optimization \n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
@@ -513,10 +504,6 @@ namespace avmshell
 		}
 		END_CATCH
 		END_TRY
-				
-		#ifdef AVMPLUS_PROFILE
-			dump();
-		#endif
 
 		exitCode = 0;
 		return true;
@@ -584,13 +571,6 @@ namespace avmshell
 							GetGC()->greedy = true;
 		                #endif /* _DEBUG */
 
-						#ifdef AVMPLUS_PROFILE
-						} else if (!strcmp(arg+2, "dprofile")) {
-							dprof.dprofile = true;
-						} else if (!strcmp(arg+2, "sprofile")) {
-							sprof.sprofile = true;
-						#endif /* AVMPLUS_PROFILE */
-
 	                    #ifdef DEBUGGER
 						} else if (!strcmp(arg+2, "gcstats")) {
 							GetGC()->gcstats = true;
@@ -613,20 +593,16 @@ namespace avmshell
 							}
 							i++;
                     	#endif /* DEBUGGER */
-						#ifdef AVMPLUS_INTERP
 						} else if (!strcmp(arg+2, "interp")) {
 							turbo = false;
-		                #endif /* AVMPLUS_INTERP */
 						#ifdef AVMPLUS_VERBOSE
 						} else if (!strcmp(arg+2, "verbose")) {
 							do_verbose = true;
 						#endif
 
 	                #ifdef AVMPLUS_MIR
-						#ifdef AVMPLUS_INTERP
 						} else if (!strcmp(arg+2, "forcemir")) {
 							forcemir = true;
-                        #endif /* AVMPLUS_INTERP */
 
 						} else if (!strcmp(arg+2, "nodce")) {
 							dceopt = false;
@@ -1066,9 +1042,6 @@ namespace avmshell
 		END_CATCH
 		END_TRY
 				
-		#ifdef AVMPLUS_PROFILE
-			dump();
-		#endif
 		if (show_mem)
 		{
 			MMgc::GCHeap* heap = GetGC()->GetGCHeap();

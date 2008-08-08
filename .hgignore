@@ -50,3 +50,6 @@ obj-dir/**
 axscript/vc2008/obj/**
 axscript/vc2008/*.ncb
 axscript/vc2008/axtam.vcproj.*.user
+rd/**
+dd/**
+rel/**

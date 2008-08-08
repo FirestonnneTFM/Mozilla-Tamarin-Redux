@@ -165,7 +165,6 @@ namespace avmplus
 	class Debugger;
 	class Domain;
 	class DomainEnv;
-	class DynamicProfiler;
 	class E4XNode;
 	class ErrorClass;
 	class ErrorObject;
@@ -177,7 +176,6 @@ namespace avmplus
 	class GrowableBuffer;
 	class Hashtable;
 	class HeapMultiname;
-	class Interpreter;
 	class IntVectorObject;
 	class DoubleVectorObject;
 	class UIntVectorObject;
@@ -213,7 +211,6 @@ namespace avmplus
 	class ScriptEnv;
 	class ScriptObject;
 	class StackTrace;
-	class StaticProfiler;
 	class StringBuffer;
 	class StringClass;
 	class String;
@@ -270,8 +267,6 @@ namespace avmplus
 #include "BuiltinTraits.h"
 #include "NamespaceSet.h"
 #include "Multiname.h"
-#include "DynamicProfiler.h"
-#include "StaticProfiler.h"
 #include "Sampler.h"
 #include "AvmCore.h"
 #include "AtomWriteBarrier.h"
