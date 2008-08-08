@@ -50,6 +50,9 @@
 
 namespace avmplus
 {	
+#define IS_BOTH_INTEGER(a,b) \
+	((a & 7) == (b & 7) && (a & 7) == kIntegerType)
+
 	inline int readS24(const byte *pc) {
 		return AvmCore::readS24(pc);
 	}
@@ -315,14 +318,20 @@ namespace avmplus
 			}
 
             INSTR(nop) {
+				// FIXME: In the direct threaded translation these should probably
+				// not be in the instruction stream at all.
                 NEXT();
 			}
 
             INSTR(label) {
+				// FIXME: In the direct threaded translation these should probably
+				// not be in the instruction stream at all.
                 NEXT();
 			}
 
 			INSTR(timestamp) {
+				// FIXME: In the direct threaded translation these should probably
+				// not be in the instruction stream at all.
                 NEXT();
 			}
 
@@ -342,8 +351,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(debugline)
-			{
+			INSTR(debugline) {
 				save_expc();
 			    #ifdef DEBUGGER
 				int line = readU30(pc);
@@ -358,8 +366,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(bkptline)
-			{
+			INSTR(bkptline) {
 				save_expc();
 			    #ifdef DEBUGGER
 				int line = readU30(pc);
@@ -380,8 +387,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(debugfile)
-			{
+			INSTR(debugfile) {
 				save_expc();
 				#ifdef DEBUGGER
 				int index = readU30(pc);
@@ -396,10 +402,10 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(jump)
-			{
+			INSTR(jump) {
 				int j = readS24(pc);
-				core->branchCheck(env, interruptable, j);
+				if (j < 0)
+				    core->branchCheck(env, interruptable, j);
 				pc += 3+j;
 				restore_dxns();
                 NEXT();
@@ -424,12 +430,22 @@ namespace avmplus
 			}
 
             INSTR(pushint) {
+				// FIXME
+				// Here we want the translator to direct threaded code
+				// to specialize the operation into a plain 'pushword' that
+				// simply pushes the following word (it could be tagged
+				// already) or a 'pushdouble'
 				sp++;
                 sp[0] = core->intToAtom(cpool_int[readU30(pc)]);
                 NEXT();
 			}
 
             INSTR(pushuint) {
+				// FIXME
+				// Here we want the translator to direct threaded code
+				// to specialize the operation into a plain 'pushword' that
+				// simply pushes the following word (it could be tagged
+				// already) or a 'pushdouble'
 				sp++;
                 sp[0] = core->uintToAtom(cpool_uint[readU30(pc)]);
                 NEXT();
@@ -511,7 +527,8 @@ namespace avmplus
 
             INSTR(convert_s) {
 				save_expc();
-                sp[0] = core->string(sp[0])->atom();
+				if ((sp[0] & 7) != kStringType)
+				    sp[0] = core->string(sp[0])->atom();
 				restore_dxns();
                 NEXT();
 			}
@@ -532,7 +549,8 @@ namespace avmplus
 
 	#define coerce_d_impl() \
 				save_expc();\
-                sp[0] = core->numberAtom(sp[0]);\
+				if ((sp[0] & 7) != kDoubleType) \
+				    sp[0] = core->numberAtom(sp[0]);	\
 				restore_dxns();
 
             INSTR(coerce_d) {
@@ -546,7 +564,8 @@ namespace avmplus
 			}
 
 	#define coerce_b_impl() \
-                sp[0] = core->booleanAtom(sp[0]);
+				if ((sp[0] & 7) != kBooleanType) \
+				    sp[0] = core->booleanAtom(sp[0]);
 
             INSTR(convert_b) {
 				coerce_b_impl();
@@ -558,10 +577,10 @@ namespace avmplus
                 NEXT();
 			}
 
-			// if sp[0] is null or undefined, throw TypeError.  otherwise return same value.
             INSTR(convert_o) {
 				save_expc();
-                env->nullcheck(sp[0]);
+				if (AvmCore::isNullOrUndefined(sp[0]))
+				    env->nullcheck(sp[0]);
                 NEXT();
 			}
 
@@ -814,8 +833,7 @@ namespace avmplus
                 NEXT();
 			}
 				
-			INSTR(lookupswitch)
-			{
+			INSTR(lookupswitch) {
 				const byte* base = pc-1;
 				// safe to assume int since verifier checks for int
 				uint32 index = AvmCore::integer_u(*(sp--));
@@ -827,10 +845,14 @@ namespace avmplus
 
             INSTR(iftrue) {
 				save_expc();
-				if (core->booleanAtom(*(sp--)) & booleanNotMask)
+				Atom bval = *(sp--);
+				if ((bval & 7) != kBooleanType)
+					bval = core->booleanAtom(bval);
+				if (bval & booleanNotMask)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
                     pc += 3+j;
 				}
 				else
@@ -840,10 +862,14 @@ namespace avmplus
 
             INSTR(iffalse) {
 				save_expc();
-				if (!(core->booleanAtom(*(sp--)) & booleanNotMask))
+				Atom bval = *(sp--);
+				if ((bval & 7) != kBooleanType)
+					bval = core->booleanAtom(bval);
+				if (!(bval & booleanNotMask))
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
                     pc += 3+j;
 				}
 				else
@@ -851,70 +877,62 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(ifeq) {
-				save_expc();
-				sp -= 2;
-				if (core->eq(sp[1], sp[2]) == trueAtom)
-				{
-					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+#define IFEQ(intcmp, comparator, truish) \
+	do { \
+		save_expc(); \
+		Atom lhs = sp[-1], rhs=sp[0]; \
+		bool result; \
+		if (IS_BOTH_INTEGER(lhs, rhs)) \
+			result = lhs intcmp rhs; \
+		else \
+			result = core->comparator(lhs, rhs) == truish; \
+		sp -= 2; \
+		if (result) \
+		{ \
+			int j = readS24(pc); \
+			if (j < 0) \
+				core->branchCheck(env, interruptable, j); \
+			pc += j; \
+		} \
+		pc += 3; \
+		restore_dxns(); \
+	} while(0)
+	
+		   INSTR(ifeq) {
+				IFEQ(==, eq, trueAtom);
                 NEXT();
 			}
-
+					
 			INSTR(ifne) {
-				save_expc();
-				sp -= 2;
-                if (core->eq(sp[1], sp[2]) == falseAtom)
-				{
-					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFEQ(!=, eq, falseAtom);
                 NEXT();
 			}
 
-			INSTR(ifstricteq) {
-				save_expc();
-				sp -= 2;
-                if (core->stricteq(sp[1], sp[2]) == trueAtom)
-				{
-					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
-				}
-				pc += 3;
-				restore_dxns();
-                continue;
+		   INSTR(ifstricteq) {
+				IFEQ(==, stricteq, trueAtom);
+				NEXT();
 			}
 
-            INSTR(ifstrictne) {
-				save_expc();
-				sp -= 2;
-                if (core->stricteq(sp[1], sp[2]) == falseAtom)
-				{
-					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
-				}
-				pc += 3;
-				restore_dxns();
-                NEXT();
+			INSTR(ifstrictne) {
+				IFEQ(!=, stricteq, falseAtom);
+				NEXT();
 			}
 
 			INSTR(iflt) {
 				save_expc();
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[1], sp[2]) == trueAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs < rhs;
+				else
+					result = core->compare(lhs, rhs) == trueAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
 				restore_dxns();
@@ -923,12 +941,19 @@ namespace avmplus
 
 			INSTR(ifnlt) {
 				save_expc();
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[1], sp[2]) != trueAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs >= rhs;
+				else
+					result = core->compare(lhs, rhs) != trueAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
 				restore_dxns();
@@ -937,12 +962,19 @@ namespace avmplus
 
 			INSTR(ifle) {
 				save_expc();
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[2], sp[1]) == falseAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs <= rhs;
+				else
+					result = core->compare(rhs, lhs) == falseAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
 				restore_dxns();
@@ -951,12 +983,19 @@ namespace avmplus
 
 			INSTR(ifnle) {
 				save_expc();
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[2], sp[1]) != falseAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs > rhs;
+				else
+					result = core->compare(rhs, lhs) != falseAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
 				restore_dxns();
@@ -965,12 +1004,19 @@ namespace avmplus
 
 			INSTR(ifgt) {
 				save_expc();
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[2], sp[1]) == trueAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs > rhs;
+				else
+					result = core->compare(rhs, lhs) == trueAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
 				restore_dxns();
@@ -979,12 +1025,19 @@ namespace avmplus
 
 			INSTR(ifngt) {
 				save_expc();
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[2], sp[1]) != trueAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs <= rhs;
+				else
+					result = core->compare(rhs, lhs) != trueAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
 				restore_dxns();
@@ -993,12 +1046,19 @@ namespace avmplus
 			
 			INSTR(ifge) {
 				save_expc();
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[1], sp[2]) == falseAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs >= rhs;
+				else
+					result = core->compare(lhs, rhs) == falseAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
 				restore_dxns();
@@ -1007,12 +1067,19 @@ namespace avmplus
 
 			INSTR(ifnge) {
 				save_expc();
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[1], sp[2]) != falseAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs < rhs;
+				else
+					result = core->compare(lhs, rhs) != falseAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
 				restore_dxns();
@@ -1020,37 +1087,57 @@ namespace avmplus
 			}
 
             INSTR(lessthan) {
-				save_expc();
-                sp--;
-				sp[0] = core->compare(sp[0],sp[1]) == trueAtom ? trueAtom : falseAtom;
-				restore_dxns();
+				Atom lhs=sp[-1], rhs=sp[0];
+				sp--;
+				if (IS_BOTH_INTEGER(lhs,rhs))
+					sp[0] = lhs < rhs ? trueAtom : falseAtom;
+				else {
+					save_expc();
+					sp[0] = core->compare(lhs,rhs) == trueAtom ? trueAtom : falseAtom;
+					restore_dxns();
+				}
                 NEXT();
 			}
 
             INSTR(lessequals) {
-				save_expc();
+				Atom lhs=sp[-1], rhs=sp[0];
 				sp--;
-				sp[0] = core->compare(sp[1],sp[0]) == falseAtom ? trueAtom : falseAtom;
-				restore_dxns();
+				if (IS_BOTH_INTEGER(lhs,rhs))
+					sp[0] = lhs <= rhs ? trueAtom : falseAtom;
+				else {
+					save_expc();
+					sp[0] = core->compare(rhs,lhs) == falseAtom ? trueAtom : falseAtom;
+					restore_dxns();
+				}
                 NEXT();
 			}
 
             INSTR(greaterthan) {
-				save_expc();
+				Atom lhs=sp[-1], rhs=sp[0];
 				sp--;
-				sp[0] = core->compare(sp[1],sp[0]) == trueAtom ? trueAtom : falseAtom;
-				restore_dxns();
+				if (IS_BOTH_INTEGER(lhs,rhs))
+					sp[0] = lhs > rhs ? trueAtom : falseAtom;
+				else {
+				    save_expc();
+					sp[0] = core->compare(rhs,lhs) == trueAtom ? trueAtom : falseAtom;
+					restore_dxns();
+				}
                 NEXT();
 			}
-
+					
             INSTR(greaterequals) {
-				save_expc();
+				Atom lhs=sp[-1], rhs=sp[0];
 				sp--;
-				sp[0] = core->compare(sp[0],sp[1]) == falseAtom ? trueAtom : falseAtom;
-				restore_dxns();
+				if (IS_BOTH_INTEGER(lhs,rhs))
+					sp[0] = lhs >= rhs ? trueAtom : falseAtom;
+				else {
+				    save_expc();
+					sp[0] = core->compare(lhs,rhs) == falseAtom ? trueAtom : falseAtom;
+					restore_dxns();
+				}
                 NEXT();
 			}
-
+					
             INSTR(newobject) {
 				save_expc();
                 argc = readU30(pc);
@@ -1069,8 +1156,7 @@ namespace avmplus
                 NEXT();
 			}
 
-			INSTR(getlex)
-			{
+			INSTR(getlex) {
 				save_expc();
 				// findpropstrict + getproperty
 				// stack in:  -
@@ -1087,8 +1173,7 @@ namespace avmplus
 			}	
 
 			// get a property using a multiname ref
-            INSTR(getproperty)
-			{
+            INSTR(getproperty) {
 				save_expc();
 				Multiname multiname;
 				pool->parseMultiname(multiname, readU30(pc));
@@ -1111,8 +1196,7 @@ namespace avmplus
 			}
 
 			// set a property using a multiname ref
-			INSTR(setproperty) 
-			{
+			INSTR(setproperty) {
 				save_expc();
 				Multiname multiname; 
 				pool->parseMultiname(multiname, readU30(pc));
@@ -1138,8 +1222,7 @@ namespace avmplus
                 NEXT();
 			}
 
-			INSTR(initproperty) 
-			{
+			INSTR(initproperty) {
 				save_expc();
 				Multiname multiname; 
 				pool->parseMultiname(multiname, readU30(pc));
@@ -1159,8 +1242,7 @@ namespace avmplus
                 NEXT();
 			}
 
-			INSTR(getdescendants)
-			{
+			INSTR(getdescendants) {
 				save_expc();
 				Multiname name;
 				pool->parseMultiname(name, readU30(pc));
@@ -1177,8 +1259,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(checkfilter)
-			{
+			INSTR(checkfilter) {
 				save_expc();
 				env->checkfilter(sp[0]);
 				restore_dxns();
@@ -1188,8 +1269,7 @@ namespace avmplus
 			// search the scope chain for a given property and return the object
 			// that contains it.  the next instruction will usually be getpropname
 			// or setpropname.
-            INSTR(findpropstrict)
-			{
+            INSTR(findpropstrict) {
 				// stack in:  [ns [name]]
 				// stack out: obj
 				save_expc();
@@ -1202,8 +1282,7 @@ namespace avmplus
 				NEXT();
 			}
 
-            INSTR(findproperty)
-			{
+            INSTR(findproperty) {
 				// stack in:  [ns [name]]
 				// stack out: obj
 				save_expc();
@@ -1216,8 +1295,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(finddef)
-			{
+			INSTR(finddef) {
 				// stack in: 
 				// stack out: obj
 				save_expc();
@@ -1255,8 +1333,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(hasnext2)
-			{
+			INSTR(hasnext2) {
 				save_expc();
 				int objectReg = readU30(pc);
 				int indexReg  = readU30(pc);
@@ -1270,8 +1347,7 @@ namespace avmplus
 			}
 
 			// delete property using multiname
-			INSTR(deleteproperty)
-			{
+			INSTR(deleteproperty) {
 				save_expc();
 				Multiname multiname;
 				pool->parseMultiname(multiname, readU30(pc));
@@ -1294,8 +1370,7 @@ namespace avmplus
 				NEXT();
 			}
 
-            INSTR(setslot)
-			{
+            INSTR(setslot) {
 				save_expc();
 				sp -= 2;
 				env->nullcheck(sp[1]);
@@ -1315,8 +1390,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(setglobalslot)
-			{
+			INSTR(setglobalslot) {
 				save_expc();
 				// find the global activation scope (object at depth 0 on scope chain)
 				ScriptObject *global;
@@ -1337,8 +1411,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(getglobalslot)
-			{
+			INSTR(getglobalslot) {
 				save_expc();
 				// find the global activation scope (object at depth 0 on scope chain)
 				ScriptObject *global;
@@ -1357,8 +1430,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(call) 
-			{
+			INSTR(call) {
 				save_expc();
                 argc = readU30(pc);
                 // stack in: function, receiver, arg1, ... argN
@@ -1369,8 +1441,7 @@ namespace avmplus
                 NEXT();
 			}
 
-			INSTR(construct) 
-			{
+			INSTR(construct) {
 				save_expc();
                 argc = readU30(pc);
                 // stack in: function, arg1, ..., argN
@@ -1381,8 +1452,7 @@ namespace avmplus
                 NEXT();
 			}
 
-            INSTR(newfunction)
-			{
+            INSTR(newfunction) {
 				save_expc();
 				sp++;
 				AbstractFunction *body = pool->getMethodInfo(readU30(pc));
@@ -1391,8 +1461,7 @@ namespace avmplus
                 NEXT();
             }
 
-            INSTR(newclass)
-			{
+            INSTR(newclass) {
 				save_expc();
 				int class_index = readU30(pc);
 				AbstractFunction *cinit = pool->cinits[class_index];
@@ -1402,8 +1471,7 @@ namespace avmplus
 				NEXT();
 			}
 				
-            INSTR(callstatic)
-			{
+            INSTR(callstatic) {
 				save_expc();
 				// stack in: receiver, arg1..N
 				// stack out: result
@@ -1418,8 +1486,7 @@ namespace avmplus
 				NEXT();
 			}
 
-            INSTR(callmethod)
-			{
+            INSTR(callmethod) {
 				save_expc();
 				// stack in: receiver, arg1..N
 				// stack out: result
@@ -1442,7 +1509,8 @@ namespace avmplus
 				NEXT();
 			}
 
-	#define callprop_impl(atomv0) {\
+	#define callprop_impl(atomv0) \
+            {\
 				save_expc();\
 				/* ( obj [ns [name]] arg1..N -- result ) */ \
 				Multiname multiname;\
@@ -1473,8 +1541,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(constructprop)
-			{
+			INSTR(constructprop) {
 				save_expc();
 				// stack in: obj [ns [name]] arg1..N
 				// stack out: result
@@ -1498,8 +1565,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(applytype)
-			{
+			INSTR(applytype) {
 				save_expc();
 				argc = readU30(pc);
 				// stack in: factory, arg1, ... argN
@@ -1510,7 +1576,8 @@ namespace avmplus
 				NEXT();
 			}
 
-	#define callsuper_impl() {\
+	#define callsuper_impl() \
+			{\
 				save_expc(); \
 				/* ( obj [ns [name]] arg1..N -- ) */ \
 				Multiname name; \
@@ -1544,8 +1611,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(getsuper)
-			{
+			INSTR(getsuper) {
 				save_expc();
 				Multiname name;
 				pool->parseMultiname(name, readU30(pc));
@@ -1566,8 +1632,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(setsuper)
-			{
+			INSTR(setsuper) {
 				save_expc();
 				int index = readU30(pc);
 				Multiname name;
@@ -1592,8 +1657,7 @@ namespace avmplus
 
 			// obj arg1 arg2
 		    //           sp
-			INSTR(constructsuper)
-			{
+			INSTR(constructsuper) {
 				save_expc();
 				// stack in:  obj arg1..N
 				// stack out: 
@@ -1611,8 +1675,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(astype)
-			{
+			INSTR(astype) {
 				save_expc();
 				Multiname multiname;
 				pool->parseMultiname(multiname, readU30(pc));
@@ -1622,8 +1685,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(astypelate)
-			{
+			INSTR(astypelate) {
 				save_expc();
 				sp--;
 				sp[0] = env->astype(sp[0], env->toClassITraits(sp[1]));
@@ -1631,8 +1693,7 @@ namespace avmplus
                 NEXT();
 			}
 
-            INSTR(coerce)
-			{
+            INSTR(coerce) {
 				save_expc();
                 // expects a CONSTANT_Multiname cpool index
 				// this is the ES4 implicit coersion
@@ -1656,8 +1717,7 @@ namespace avmplus
 				NEXT();
 			}
 
-			INSTR(istype)
-			{
+			INSTR(istype) {
 				save_expc();
                 // expects a CONSTANT_Multiname cpool index
 				// used when operator "is" RHS is a compile-time type constant
@@ -1669,8 +1729,7 @@ namespace avmplus
                 NEXT();
 			}
 
-			INSTR(istypelate)
-			{
+			INSTR(istypelate) {
 				save_expc();
 				sp--;
 				sp[0] = core->istypeAtom(sp[0], env->toClassITraits(sp[1]));
@@ -1686,24 +1745,21 @@ namespace avmplus
                 NEXT();
 			}
 
-            INSTR(getscopeobject)
-			{
+            INSTR(getscopeobject) {
 				int scope_index = *pc++;
 				sp++;
 				sp[0] = scopeBase[scope_index];
 				NEXT();
 			}
 
-            INSTR(getouterscope)
-            {
+            INSTR(getouterscope) {
                 int scope_index = readU30(pc);
 				sp++;
                 sp[0] = scope->getScope(scope_index);
                 NEXT();
             }
 
-            INSTR(getglobalscope)
-			{
+            INSTR(getglobalscope) {
 				sp++;
 				if (outer_depth > 0)
 				{
@@ -1716,8 +1772,7 @@ namespace avmplus
 				NEXT();
 			}
 
-            INSTR(pushscope)
-			{
+            INSTR(pushscope) {
 				save_expc();
 				sp--;
 				Atom s = sp[1];
@@ -1726,8 +1781,7 @@ namespace avmplus
 				NEXT();
 			}
 			
-            INSTR(pushwith)
-			{
+            INSTR(pushwith) {
 				save_expc();
 				sp--;
 				Atom s = sp[1];
@@ -1740,8 +1794,7 @@ namespace avmplus
 				NEXT();
 			}
 
-            INSTR(newactivation)
-			{
+            INSTR(newactivation) {
 				save_expc();
 				sp++;
 				sp[0] = core->newActivation(env->getActivation(), NULL)->atom();
@@ -1749,8 +1802,7 @@ namespace avmplus
 				NEXT();
 			}
 
-            INSTR(newcatch)
-			{
+            INSTR(newcatch) {
 				save_expc();
 				int catch_index = readU30(pc);
 				Traits *t = info->exceptions->exceptions[catch_index].scopeTraits;
