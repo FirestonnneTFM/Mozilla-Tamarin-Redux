@@ -148,11 +148,6 @@ const int kBufferPadding = 16;
 
 		#endif /* MIR */
 
-#ifdef AVMPLUS_PROFILE
-		StaticProfiler sprof;
-		DynamicProfiler dprof;
-#endif
-
 		/**
 		 * Redirects the standard output of the VM to the specified
 		 * output stream.  Output from print() statements and
@@ -177,7 +172,6 @@ const int kBufferPadding = 16;
 		bool verbose;
 		#endif /* AVMPLUS_VERBOSE */
 
-		#ifdef AVMPLUS_INTERP
 		/**
 		 * The turbo switch determines how bytecode is executed.
 		 * When turbo is true, bytecode is translated to native code.
@@ -190,11 +184,9 @@ const int kBufferPadding = 16;
 		 * builds on supported platforms.
 		 */
 		bool turbo;
-		#endif /* AVMPLUS_INTERP */
 
 		#ifdef AVMPLUS_MIR
 
-		#ifdef AVMPLUS_INTERP
 		/**
 		 * To speed up initialization, we don't use MIR on
 		 * $init methods; we use interp instead.  For testing
@@ -204,7 +196,6 @@ const int kBufferPadding = 16;
 		 * instead of interp.
 		 */
 		bool forcemir;
-		#endif
 
 		bool cseopt;
 		bool dceopt;
@@ -910,13 +901,6 @@ const int kBufferPadding = 16;
 		 * ES3's internal ToNumber() function for internal use
 		 */
 		double number(Atom atom) const;
-
-#ifdef AVMPLUS_PROFILE
-		/**
-		 * dump profiler stats 
-		 */
-		void dump();
-#endif
 		
 		/**
 		 * produce an atom from a string.  used only for string constants.

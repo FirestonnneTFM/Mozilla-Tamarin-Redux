@@ -119,7 +119,6 @@
 #endif
 
 #define AVMPLUS_MIR
-#define AVMPLUS_INTERP
 
 // if a function meets the E4 criteria for being unchecked, then make
 // all its parameters optional and add a rest arg.  asc should do this
@@ -132,7 +131,6 @@
 
 #if defined(VTUNE) || defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
 #define AVMPLUS_VERBOSE
-#define AVMPLUS_PROFILE
 #endif
 
 // #undef verify, a Mac thing
