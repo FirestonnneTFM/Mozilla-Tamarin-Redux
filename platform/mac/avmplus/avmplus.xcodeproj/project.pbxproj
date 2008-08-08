@@ -70,8 +70,6 @@
 		1E6079CA097335EF007D0E1E /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60792A097335EF007D0E1E /* Domain.h */; };
 		1E6079CB097335EF007D0E1E /* DomainEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60792B097335EF007D0E1E /* DomainEnv.cpp */; };
 		1E6079CC097335EF007D0E1E /* DomainEnv.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60792C097335EF007D0E1E /* DomainEnv.h */; };
-		1E6079CD097335EF007D0E1E /* DynamicProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60792D097335EF007D0E1E /* DynamicProfiler.cpp */; };
-		1E6079CE097335EF007D0E1E /* DynamicProfiler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60792E097335EF007D0E1E /* DynamicProfiler.h */; };
 		1E6079CF097335EF007D0E1E /* E4XNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60792F097335EF007D0E1E /* E4XNode.cpp */; };
 		1E6079D0097335EF007D0E1E /* E4XNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607930097335EF007D0E1E /* E4XNode.h */; };
 		1E6079D1097335EF007D0E1E /* ErrorClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607931097335EF007D0E1E /* ErrorClass.cpp */; };
@@ -138,8 +136,6 @@
 		1E607A0E097335EF007D0E1E /* SortedIntMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60796E097335EF007D0E1E /* SortedIntMap.h */; };
 		1E607A0F097335EF007D0E1E /* StackTrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60796F097335EF007D0E1E /* StackTrace.cpp */; };
 		1E607A10097335EF007D0E1E /* StackTrace.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607970097335EF007D0E1E /* StackTrace.h */; };
-		1E607A11097335EF007D0E1E /* StaticProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607971097335EF007D0E1E /* StaticProfiler.cpp */; };
-		1E607A12097335EF007D0E1E /* StaticProfiler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607972097335EF007D0E1E /* StaticProfiler.h */; };
 		1E607A13097335EF007D0E1E /* StringBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607973097335EF007D0E1E /* StringBuffer.cpp */; };
 		1E607A14097335EF007D0E1E /* StringBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607974097335EF007D0E1E /* StringBuffer.h */; };
 		1E607A15097335EF007D0E1E /* StringClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607975097335EF007D0E1E /* StringClass.cpp */; };
@@ -266,8 +262,6 @@
 		1E60792A097335EF007D0E1E /* Domain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Domain.h; path = ../../../core/Domain.h; sourceTree = SOURCE_ROOT; };
 		1E60792B097335EF007D0E1E /* DomainEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DomainEnv.cpp; path = ../../../core/DomainEnv.cpp; sourceTree = SOURCE_ROOT; };
 		1E60792C097335EF007D0E1E /* DomainEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DomainEnv.h; path = ../../../core/DomainEnv.h; sourceTree = SOURCE_ROOT; };
-		1E60792D097335EF007D0E1E /* DynamicProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DynamicProfiler.cpp; path = ../../../core/DynamicProfiler.cpp; sourceTree = SOURCE_ROOT; };
-		1E60792E097335EF007D0E1E /* DynamicProfiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DynamicProfiler.h; path = ../../../core/DynamicProfiler.h; sourceTree = SOURCE_ROOT; };
 		1E60792F097335EF007D0E1E /* E4XNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = E4XNode.cpp; path = ../../../core/E4XNode.cpp; sourceTree = SOURCE_ROOT; };
 		1E607930097335EF007D0E1E /* E4XNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = E4XNode.h; path = ../../../core/E4XNode.h; sourceTree = SOURCE_ROOT; };
 		1E607931097335EF007D0E1E /* ErrorClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ErrorClass.cpp; path = ../../../core/ErrorClass.cpp; sourceTree = SOURCE_ROOT; };
@@ -334,8 +328,6 @@
 		1E60796E097335EF007D0E1E /* SortedIntMap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SortedIntMap.h; path = ../../../core/SortedIntMap.h; sourceTree = SOURCE_ROOT; };
 		1E60796F097335EF007D0E1E /* StackTrace.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StackTrace.cpp; path = ../../../core/StackTrace.cpp; sourceTree = SOURCE_ROOT; };
 		1E607970097335EF007D0E1E /* StackTrace.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StackTrace.h; path = ../../../core/StackTrace.h; sourceTree = SOURCE_ROOT; };
-		1E607971097335EF007D0E1E /* StaticProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StaticProfiler.cpp; path = ../../../core/StaticProfiler.cpp; sourceTree = SOURCE_ROOT; };
-		1E607972097335EF007D0E1E /* StaticProfiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StaticProfiler.h; path = ../../../core/StaticProfiler.h; sourceTree = SOURCE_ROOT; };
 		1E607973097335EF007D0E1E /* StringBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StringBuffer.cpp; path = ../../../core/StringBuffer.cpp; sourceTree = SOURCE_ROOT; };
 		1E607974097335EF007D0E1E /* StringBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StringBuffer.h; path = ../../../core/StringBuffer.h; sourceTree = SOURCE_ROOT; };
 		1E607975097335EF007D0E1E /* StringClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StringClass.cpp; path = ../../../core/StringClass.cpp; sourceTree = SOURCE_ROOT; };
@@ -512,8 +504,6 @@
 				1E60792A097335EF007D0E1E /* Domain.h */,
 				1E60792B097335EF007D0E1E /* DomainEnv.cpp */,
 				1E60792C097335EF007D0E1E /* DomainEnv.h */,
-				1E60792D097335EF007D0E1E /* DynamicProfiler.cpp */,
-				1E60792E097335EF007D0E1E /* DynamicProfiler.h */,
 				1E60792F097335EF007D0E1E /* E4XNode.cpp */,
 				1E607930097335EF007D0E1E /* E4XNode.h */,
 				1E607931097335EF007D0E1E /* ErrorClass.cpp */,
@@ -580,8 +570,6 @@
 				1E60796E097335EF007D0E1E /* SortedIntMap.h */,
 				1E60796F097335EF007D0E1E /* StackTrace.cpp */,
 				1E607970097335EF007D0E1E /* StackTrace.h */,
-				1E607971097335EF007D0E1E /* StaticProfiler.cpp */,
-				1E607972097335EF007D0E1E /* StaticProfiler.h */,
 				1E607973097335EF007D0E1E /* StringBuffer.cpp */,
 				1E607974097335EF007D0E1E /* StringBuffer.h */,
 				1E607975097335EF007D0E1E /* StringClass.cpp */,
@@ -719,7 +707,6 @@
 				1E6079C8097335EF007D0E1E /* DateObject.h in Headers */,
 				1E6079CA097335EF007D0E1E /* Domain.h in Headers */,
 				1E6079CC097335EF007D0E1E /* DomainEnv.h in Headers */,
-				1E6079CE097335EF007D0E1E /* DynamicProfiler.h in Headers */,
 				1E6079D0097335EF007D0E1E /* E4XNode.h in Headers */,
 				1E6079D2097335EF007D0E1E /* ErrorClass.h in Headers */,
 				1E6079D4097335EF007D0E1E /* ErrorConstants.h in Headers */,
@@ -755,7 +742,6 @@
 				1E607A0D097335EF007D0E1E /* ScriptObject.h in Headers */,
 				1E607A0E097335EF007D0E1E /* SortedIntMap.h in Headers */,
 				1E607A10097335EF007D0E1E /* StackTrace.h in Headers */,
-				1E607A12097335EF007D0E1E /* StaticProfiler.h in Headers */,
 				1E607A14097335EF007D0E1E /* StringBuffer.h in Headers */,
 				1E607A16097335EF007D0E1E /* StringClass.h in Headers */,
 				1E607A18097335EF007D0E1E /* StringObject.h in Headers */,
@@ -805,6 +791,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "avmplus" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* avmplus */;
 			projectDirPath = "";
@@ -845,7 +832,6 @@
 				1E6079C7097335EF007D0E1E /* DateObject.cpp in Sources */,
 				1E6079C9097335EF007D0E1E /* Domain.cpp in Sources */,
 				1E6079CB097335EF007D0E1E /* DomainEnv.cpp in Sources */,
-				1E6079CD097335EF007D0E1E /* DynamicProfiler.cpp in Sources */,
 				1E6079CF097335EF007D0E1E /* E4XNode.cpp in Sources */,
 				1E6079D1097335EF007D0E1E /* ErrorClass.cpp in Sources */,
 				1E6079D3097335EF007D0E1E /* ErrorConstants.cpp in Sources */,
@@ -877,7 +863,6 @@
 				1E607A0A097335EF007D0E1E /* ScriptBuffer.cpp in Sources */,
 				1E607A0C097335EF007D0E1E /* ScriptObject.cpp in Sources */,
 				1E607A0F097335EF007D0E1E /* StackTrace.cpp in Sources */,
-				1E607A11097335EF007D0E1E /* StaticProfiler.cpp in Sources */,
 				1E607A13097335EF007D0E1E /* StringBuffer.cpp in Sources */,
 				1E607A15097335EF007D0E1E /* StringClass.cpp in Sources */,
 				1E607A17097335EF007D0E1E /* StringObject.cpp in Sources */,
