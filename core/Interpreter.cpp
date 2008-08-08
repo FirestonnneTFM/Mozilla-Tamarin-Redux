@@ -51,6 +51,10 @@
 #ifdef AVMPLUS_INTERP
 namespace avmplus
 {	
+
+#define IS_BOTH_INTEGER(a,b) \
+	((a & 7) == (b & 7) && (a & 7) == kIntegerType)
+
 	Atom Interpreter::interp32(MethodEnv* env, int argc, uint32 *ap)
 	{
 		Atom a = interp(env, argc, ap);
@@ -282,6 +286,8 @@ namespace avmplus
             case OP_nop:
             case OP_label:
 			case OP_timestamp:
+				// FIXME: In the direct threaded translation these should probably
+				// not be in the instruction stream at all.
                 continue;
 
 			case OP_bkpt:
@@ -344,7 +350,8 @@ namespace avmplus
 			case OP_jump:
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
+					if (j < 0)
+					  core->branchCheck(env, interruptable, j);
                     pc += 3+j;
 				}
                 continue;
@@ -362,10 +369,20 @@ namespace avmplus
                 sp[0] = cpool_string[readU30(pc)]->atom();
                 continue;
             case OP_pushint:
+				// FIXME
+				// Here we want the translator to direct threaded code
+				// to specialize the operation into a plain 'pushword' that
+				// simply pushes the following word (it could be tagged
+				// already) or a 'pushdouble'
 				sp++;
                 sp[0] = core->intToAtom(cpool_int[readU30(pc)]);
                 continue;
             case OP_pushuint:
+				// FIXME
+				// Here we want the translator to direct threaded code
+				// to specialize the operation into a plain 'pushword' that
+				// simply pushes the following word (it could be tagged
+				// already) or a 'pushdouble'
 				sp++;
                 sp[0] = core->uintToAtom(cpool_uint[readU30(pc)]);
                 continue;
@@ -417,7 +434,8 @@ namespace avmplus
                 continue;
 
             case OP_convert_s:
-                sp[0] = core->string(sp[0])->atom();
+				if ((sp[0] & 7) != kStringType)
+					sp[0] = core->string(sp[0])->atom();
                 continue;
 
 			case OP_esc_xelem: // ToXMLString will call EscapeElementValue
@@ -430,17 +448,20 @@ namespace avmplus
 
             case OP_coerce_d:
             case OP_convert_d:
-                sp[0] = core->numberAtom(sp[0]);
+				if ((sp[0] & 7) != kDoubleType)
+					sp[0] = core->numberAtom(sp[0]);
                 continue;
 
             case OP_convert_b:
             case OP_coerce_b:
-                sp[0] = core->booleanAtom(sp[0]);
+				if ((sp[0] & 7) != kBooleanType)
+					sp[0] = core->booleanAtom(sp[0]);
                 continue;
 
 			// if sp[0] is null or undefined, throw TypeError.  otherwise return same value.
             case OP_convert_o:
-                env->nullcheck(sp[0]);
+				if (AvmCore::isNullOrUndefined(sp[0]))
+					env->nullcheck(sp[0]);
                 continue;
 
             case OP_negate:
@@ -614,179 +635,278 @@ namespace avmplus
 			}
 
             case OP_iftrue:
-				if (core->booleanAtom(*(sp--)) & booleanNotMask)
+			{
+				Atom bval = *(sp--);
+				if ((bval & 7) != kBooleanType)
+					bval = core->booleanAtom(bval);
+				if (bval & booleanNotMask)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
                     pc += 3+j;
 				}
 				else
                     pc += 3;
                 continue;
+			}
 
             case OP_iffalse:
-				if (!(core->booleanAtom(*(sp--)) & booleanNotMask))
+			{
+				Atom bval = *(sp--);
+				if ((bval & 7) != kBooleanType)
+					bval = core->booleanAtom(bval);
+				if (!(bval & booleanNotMask))
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
                     pc += 3+j;
 				}
 				else
                     pc += 3;
 				continue;
+			}
 
+#define IFEQ(comparator, truish) \
+	do { \
+		Atom lhs = sp[-1], rhs=sp[0]; \
+		bool result; \
+		if (IS_BOTH_INTEGER(lhs, rhs)) \
+			result = lhs == rhs; \
+		else \
+			result = core->comparator(lhs, rhs) == truish; \
+		sp -= 2; \
+		if (result) \
+		{ \
+			int j = readS24(pc); \
+			if (j < 0) \
+				core->branchCheck(env, interruptable, j); \
+			pc += j; \
+		} \
+		pc += 3; \
+	} while(0)
+	
 			case OP_ifeq:
-				sp -= 2;
-				if (core->eq(sp[1], sp[2]) == trueAtom)
-				{
-					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
-				}
-				pc += 3;
+				IFEQ(eq, trueAtom);
                 continue;
-
+					
 			case OP_ifne:
-				sp -= 2;
-                if (core->eq(sp[1], sp[2]) == falseAtom)
-				{
-					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
-				}
-				pc += 3;
-                continue;
+				IFEQ(eq, falseAtom);
+				continue;
 
 			case OP_ifstricteq:
-				sp -= 2;
-                if (core->stricteq(sp[1], sp[2]) == trueAtom)
-				{
-					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
-				}
-				pc += 3;
+				IFEQ(stricteq, trueAtom);
                 continue;
 
             case OP_ifstrictne:
-				sp -= 2;
-                if (core->stricteq(sp[1], sp[2]) == falseAtom)
-				{
-					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
-				}
-				pc += 3;
+				IFEQ(stricteq, falseAtom);
                 continue;
 
 			case OP_iflt:
+			{
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[1], sp[2]) == trueAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs < rhs;
+				else
+					result = core->compare(lhs, rhs) == trueAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
                 continue;
-
+			}
+					
 			case OP_ifnlt:
+			{
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[1], sp[2]) != trueAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs >= rhs;
+				else
+					result = core->compare(lhs, rhs) != trueAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
                 continue;
-
+			}
+					
 			case OP_ifle:
+			{
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[2], sp[1]) == falseAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs <= rhs;
+				else
+					result = core->compare(rhs, lhs) == falseAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
                 continue;
+			}
 
 			case OP_ifnle:
+			{
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[2], sp[1]) != falseAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs > rhs;
+				else
+					result = core->compare(rhs, lhs) != falseAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
                 continue;
+			}
 
 			case OP_ifgt:
+			{
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[2], sp[1]) == trueAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs > rhs;
+				else
+					result = core->compare(rhs, lhs) == trueAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
                 continue;
+			}
 
 			case OP_ifngt:
+			{
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[2], sp[1]) != trueAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs <= rhs;
+				else
+					result = core->compare(rhs, lhs) != trueAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
                 continue;
-			
+			}
+					
 			case OP_ifge:
+			{
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[1], sp[2]) == falseAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs >= rhs;
+				else
+					result = core->compare(lhs, rhs) == falseAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
                 continue;
+			}
 
 			case OP_ifnge:
+			{
+				Atom lhs = sp[-1], rhs=sp[0];
 				sp -= 2;
-                if (core->compare(sp[1], sp[2]) != falseAtom)
+				bool result;
+				if (IS_BOTH_INTEGER(lhs, rhs))
+					result = lhs < rhs;
+				else
+					result = core->compare(lhs, rhs) != falseAtom;
+				if (result)
 				{
 					int j = readS24(pc);
-					core->branchCheck(env, interruptable, j);
-                    pc += j;
+					if (j < 0)
+						core->branchCheck(env, interruptable, j);
+					pc += j;
 				}
 				pc += 3;
                 continue;
+			}
 
             case OP_lessthan:
-                sp--;
-				sp[0] = core->compare(sp[0],sp[1]) == trueAtom ? trueAtom : falseAtom;
+			{
+				Atom lhs=sp[-1], rhs=sp[0];
+				sp--;
+				if (IS_BOTH_INTEGER(lhs,rhs))
+					sp[0] = lhs < rhs ? trueAtom : falseAtom;
+				else
+					sp[0] = core->compare(lhs,rhs) == trueAtom ? trueAtom : falseAtom;
                 continue;
+			}
 
             case OP_lessequals:
+			{
+				Atom lhs=sp[-1], rhs=sp[0];
 				sp--;
-				sp[0] = core->compare(sp[1],sp[0]) == falseAtom ? trueAtom : falseAtom;
+				if (IS_BOTH_INTEGER(lhs,rhs))
+					sp[0] = lhs <= rhs ? trueAtom : falseAtom;
+				else
+					sp[0] = core->compare(rhs,lhs) == falseAtom ? trueAtom : falseAtom;
                 continue;
+			}
 
-            case OP_greaterthan:
+			case OP_greaterthan:
+			{
+				Atom lhs=sp[-1], rhs=sp[0];
 				sp--;
-				sp[0] = core->compare(sp[1],sp[0]) == trueAtom ? trueAtom : falseAtom;
-                continue;
-
+				if (IS_BOTH_INTEGER(lhs,rhs))
+					sp[0] = lhs > rhs ? trueAtom : falseAtom;
+				else
+					sp[0] = core->compare(rhs,lhs) == falseAtom ? trueAtom : falseAtom;
+				continue;
+			}
+					
             case OP_greaterequals:
+			{
+				Atom lhs=sp[-1], rhs=sp[0];
 				sp--;
-				sp[0] = core->compare(sp[0],sp[1]) == falseAtom ? trueAtom : falseAtom;
+				if (IS_BOTH_INTEGER(lhs,rhs))
+					sp[0] = lhs >= rhs ? trueAtom : falseAtom;
+				else
+					sp[0] = core->compare(lhs,rhs) == falseAtom ? trueAtom : falseAtom;
                 continue;
-
+			}
+					
             case OP_newobject:
                 argc = readU30(pc);
                 tempAtom = env->op_newobject(sp, argc)->atom();
