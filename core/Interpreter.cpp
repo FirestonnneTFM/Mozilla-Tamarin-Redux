@@ -287,7 +287,6 @@ namespace avmplus
 				core->codeContextAtom = savedCodeContext;\
 				tempAtom = toplevel->coerce(val, info->returnTraits());\
 				restore_caller_dxns();\
-				return tempAtom;\
 			}
 		
 

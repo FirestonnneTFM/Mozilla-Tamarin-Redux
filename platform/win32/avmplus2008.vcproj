@@ -5,9 +5,6 @@
 	Name="avmplus"
 	ProjectGUID="{437E43D2-ED2D-406B-88DB-B5940F838AE8}"
 	RootNamespace="avmplus"
-	SccProjectName="Perforce Project"
-	SccLocalPath="..\.."
-	SccProvider="MSSCCI:Perforce SCM"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -1120,14 +1117,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\DynamicProfiler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\DynamicProfiler.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\E4XNode.cpp"
 				>
 			</File>
@@ -1409,14 +1398,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\StackTrace.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\StaticProfiler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\StaticProfiler.h"
 				>
 			</File>
 			<File
