@@ -38,6 +38,7 @@
 
 
 #include "avmplus.h"
+#include "CodegenMIR.h"
 #include "../core/FrameState.h"
 
 #ifdef DARWIN
