@@ -1,3 +1,4 @@
+
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -34,39 +35,38 @@
 #
 # ***** END LICENSE BLOCK *****
 
-INCLUDES += \
-  -I$(topsrcdir) \
-  -I$(topsrcdir)/MMgc \
-  -I$(topsrcdir)/core \
-  -I$(topsrcdir)/codegen \
-  -I$(topsrcdir)/nanojit \
-  -I$(topsrcdir)/pcre \
+nanojit_cpu_cxxsrc = $(error Unrecognized target CPU.)
+
+ifeq (i686,$(TARGET_CPU))
+nanojit_cpu_cxxsrc := Nativei386.cpp
+endif
+
+#ifeq (powerpc,$(TARGET_CPU))
+#nanojit_cpu_cxxsrc := PpcAssembler.cpp
+#endif
+
+ifeq (arm,$(TARGET_CPU))
+nanojit_cpu_cxxsrc := NativeThumb.cpp
+endif
+
+ifeq (thumb,$(TARGET_CPU))
+nanojit_cpu_cxxsrc := NativeThumb.cpp
+endif
+
+#ifeq (sparc,$(TARGET_CPU))
+#nanojit_cpu_cxxsrc := SparcAssembler.cpp
+#endif
+
+avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
+  $(curdir)/Assembler.cpp \
+  $(curdir)/Fragmento.cpp \
+  $(curdir)/LIR.cpp \
+  $(curdir)/RegAlloc.cpp \
+  $(curdir)/$(nanojit_cpu_cxxsrc) \
   $(NULL)
 
-$(call RECURSE_DIRS,MMgc)
-
-ifdef ENABLE_TAMARIN
-$(call RECURSE_DIRS,core pcre codegen nanojit)
-
-ifeq (darwin,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/mac)
+ifeq ($(COMPILER),VS)
+# Disable the 'cast truncates constant value' warning, incurred by
+# macros encoding instruction operands in machine code fields.
+$(curdir)/Assembler.obj $(curdir)/Nativei386.obj: avmplus_CXXFLAGS += -wd4310
 endif
-ifeq (windows,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/win32)
-endif
-ifeq (linux,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/unix)
-endif
-ifeq (sunos,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/unix)
-endif
-endif
-
-$(call RECURSE_DIRS,shell)
-
-echo:
-	@echo avmplus_CXXFLAGS = $(avmplus_CXXFLAGS)
-	@echo avmplus_CXXSRCS = $(avmplus_CXXSRCS)
-	@echo avmplus_CXXOBJS = $(avmplus_CXXOBJS)
-	@echo avmplus_OBJS = $(avmplus_OBJS)
-	@echo avmplus_NAME = $(avmplus_NAME)

@@ -76,6 +76,73 @@ namespace avmplus
 
 const int kBufferPadding = 16;
 
+	struct Config
+	{
+		#ifdef AVMPLUS_VERBOSE
+		/**
+		 * The verbose flag may be set to display each bytecode
+		 * instruction as it is executed, along with a snapshot of
+		 * the state of the stack and scope chain.
+		 * Caution!  This shoots out a ton of output!
+		 */
+		bool verbose;
+		bool verbose_addrs;
+		#endif /* AVMPLUS_VERBOSE */
+
+		/**
+		 * The turbo switch determines how bytecode is executed.
+		 * When turbo is true, bytecode is translated to native code.
+		 * When turbo is false, the gallop() interpreter loop is used.
+		 * turbo defaults to true except on platforms where it is
+		 * not supported, and except when debugging is in progress.
+		 * 
+		 * Turbo is a debugger-only option.  release builds always
+		 * have it turned on.  This means we can only build release
+		 * builds on supported platforms.
+		 */
+		bool turbo;
+
+		#ifdef AVMPLUS_MIR
+
+		/**
+		 * To speed up initialization, we don't use MIR on
+		 * $init methods; we use interp instead.  For testing
+		 * purposes, one may want to force the MIR to be used
+		 * for all code including $init methods.  The
+		 * forcemir switch forces all code to run through MIR
+		 * instead of interp.
+		 */
+		bool forcemir;
+
+		bool cseopt;
+		bool dceopt;
+
+		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+		bool sse2;
+		#endif
+
+		/**
+		 * If this switch is set, executing code will check the
+		 * "interrupted" flag to see whether an interrupt needs
+		 * to be handled.
+		 */
+		bool interrupts;
+
+		/**
+		 * Genearate a graph for the basic blocks.  Can be used by
+		 * 'dot' utility to generate a jpg.
+		 */
+		#ifdef AVMPLUS_VERBOSE
+		bool bbgraph;
+		#endif //AVMPLUS_VERBOSE
+
+		#endif // AVMPLUS_MIR
+
+#ifdef AVMPLUS_VERIFYALL
+		bool verifyall;
+#endif
+	};
+
 	/**
 	 * The main class of the AVM+ virtual machine.  This is the
 	 * main entry point to the VM for running ActionScript code.
@@ -162,54 +229,7 @@ const int kBufferPadding = 16;
 		virtual void presweep();
 		virtual void postsweep();
 		
-		#ifdef AVMPLUS_VERBOSE
-		/**
-		 * The verbose flag may be set to display each bytecode
-		 * instruction as it is executed, along with a snapshot of
-		 * the state of the stack and scope chain.
-		 * Caution!  This shoots out a ton of output!
-		 */
-		bool verbose;
-		#endif /* AVMPLUS_VERBOSE */
-
-		/**
-		 * The turbo switch determines how bytecode is executed.
-		 * When turbo is true, bytecode is translated to native code.
-		 * When turbo is false, the gallop() interpreter loop is used.
-		 * turbo defaults to true except on platforms where it is
-		 * not supported, and except when debugging is in progress.
-		 * 
-		 * Turbo is a debugger-only option.  release builds always
-		 * have it turned on.  This means we can only build release
-		 * builds on supported platforms.
-		 */
-		bool turbo;
-
-		#ifdef AVMPLUS_MIR
-
-		/**
-		 * To speed up initialization, we don't use MIR on
-		 * $init methods; we use interp instead.  For testing
-		 * purposes, one may want to force the MIR to be used
-		 * for all code including $init methods.  The
-		 * forcemir switch forces all code to run through MIR
-		 * instead of interp.
-		 */
-		bool forcemir;
-
-		bool cseopt;
-		bool dceopt;
-
-		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-		bool sse2;
-		#endif
-
-		/**
-		 * If this switch is set, executing code will check the
-		 * "interrupted" flag to see whether an interrupt needs
-		 * to be handled.
-		 */
-		bool interrupts;
+		Config config;
 
 		/**
 		 * If this is set to a nonzero value, executing code
@@ -224,20 +244,6 @@ const int kBufferPadding = 16;
 		 * minstack.
 		 */
 		virtual void setStackBase() {}
-		
-		/**
-		 * Genearate a graph for the basic blocks.  Can be used by
-		 * 'dot' utility to generate a jpg.
-		 */
-		#ifdef AVMPLUS_VERBOSE
-		bool bbgraph;
-		#endif //AVMPLUS_VERBOSE
-
-		#endif // AVMPLUS_MIR
-
-#ifdef AVMPLUS_VERIFYALL
-		bool verifyall;
-#endif
 
 		/** Internal table of strings for boolean type ("true", "false") */
 		DRC(Stringp) booleanStrings[2];

@@ -199,4 +199,15 @@
 #define AVM10_BIG_ENDIAN
 #endif
 
+// FASTCALL 
+#ifdef AVMPLUS_IA32
+	#if _MSC_VER
+		#define FASTCALL __fastcall
+	#elif __GNUC__
+		#define FASTCALL __attribute__((fastcall))
+	#else
+		#define FASTCALL
+	#endif
+#endif
+
 #endif /* __avmbuild__ */

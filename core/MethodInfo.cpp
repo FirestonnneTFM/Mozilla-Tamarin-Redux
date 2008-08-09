@@ -63,7 +63,7 @@ namespace avmplus
 
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		if (f->pool->core->verifyall && f->pool)
+		if (f->pool->core->config.verifyall && f->pool)
 			f->pool->processVerifyQueue(env->toplevel());
 		#endif
 
@@ -91,7 +91,7 @@ namespace avmplus
 		Verifier verifier(this, toplevel);
 
 		AvmCore* core = this->core();
-		if (core->turbo && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
+		if (core->config.turbo && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
 			CodegenMIR mir(this);
 			verifier.verify(&mir);	// pass 2 - data flow

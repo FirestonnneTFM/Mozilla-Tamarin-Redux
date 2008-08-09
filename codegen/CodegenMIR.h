@@ -70,6 +70,10 @@ namespace avmplus
 	};    
 	#endif /* VTUNE */
 
+	inline unsigned int rmask(int r) {
+		return 1 << r;
+	}
+		
 	/**
 	 * The CodegenMIR class is a dynamic code generator which translates
 	 * AVM+ bytecodes into an architecture neutral intermediate representation
@@ -643,8 +647,6 @@ namespace avmplus
 		} 
 		Register;
 		#endif // AVMPLUS_AMD64
-		
-		#define rmask(r) (1 << (r))
 
 		/**
 		 * MIR instruction

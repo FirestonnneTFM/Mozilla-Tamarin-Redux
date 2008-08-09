@@ -124,29 +124,30 @@ namespace avmplus
 			
 		// set default mode flags
 		#ifdef AVMPLUS_VERBOSE
-		verbose = false;
+		config.verbose = false;
+		config.verbose_addrs = false;
 		#endif
 
- 		turbo = true;
+ 		config.turbo = true;
 
 		#ifdef AVMPLUS_VERIFYALL
-		verifyall = false;
+		config.verifyall = false;
 		#endif
 
 		#ifdef AVMPLUS_MIR
 
 			// forcemir flag forces use of MIR instead of interpreter
-			forcemir = false;
+			config.forcemir = false;
 	
-			cseopt = true;
-			dceopt = true;
+			config.cseopt = true;
+			config.dceopt = true;
 
 		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-    		sse2 = true;
+    		config.sse2 = true;
 			#endif
 
 			#ifdef AVMPLUS_VERBOSE
-			bbgraph = false;
+			config.bbgraph = false;
 			#endif
 
 		#endif // AVMPLUS_MIR
@@ -155,7 +156,7 @@ namespace avmplus
 			VTuneStatus = CheckVTuneStatus();
 	#endif // VTUNE
 
-		interrupts = false;
+		config.interrupts = false;
 
 		gcInterface.SetCore(this);
 		resources          = NULL;
@@ -1647,7 +1648,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				if (istype(atom, handler->traits)) 
 				{
 					#ifdef AVMPLUS_VERBOSE
-					if (verbose)
+					if (config.verbose)
 					{
 						console << "enter " << info << " catch " << handler->traits << '\n';
 					}

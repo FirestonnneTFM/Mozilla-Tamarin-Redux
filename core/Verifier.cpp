@@ -843,7 +843,7 @@ namespace avmplus
 				}
 
 				#ifdef AVMPLUS_VERIFYALL
-				if (core->verifyall)
+				if (core->config.verifyall)
 					pool->enq(f);
 				#endif
 
@@ -937,7 +937,7 @@ namespace avmplus
 				itraits->resolveSignatures(toplevel);
 
 				#ifdef AVMPLUS_VERIFYALL
-				if (core->verifyall)
+				if (core->config.verifyall)
 				{
 					pool->enq(ctraits);
 					pool->enq(itraits);
@@ -1284,7 +1284,7 @@ namespace avmplus
 				}
 
 				#ifdef AVMPLUS_VERIFYALL
-				if (core->verifyall)
+				if (core->config.verifyall)
 					pool->enq(m);
 				#endif
 
