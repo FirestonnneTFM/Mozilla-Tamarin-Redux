@@ -183,6 +183,10 @@ namespace avmplus
 		{
 			return data[index];
 		}
+		T last() const
+		{
+			return data[len-1];
+		}
 		void set(uint32 index, T value)
 		{
 			wb(index, value);

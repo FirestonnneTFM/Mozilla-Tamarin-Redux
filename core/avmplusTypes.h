@@ -43,7 +43,11 @@
 #include <stdint.h>
 #endif
 
-//#define _BigEndian
+#ifdef _MSC_VER
+#include "../utils/msc_types.h"
+#else
+#include <inttypes.h>
+#endif
 
 namespace avmplus
 {

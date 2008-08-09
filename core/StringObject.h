@@ -467,6 +467,33 @@ public:
 	{ 
 		return s2.Compare(s1) >= 0; 
 	}
+
+	// if you absolutely MUST have a null-terminated string, use this
+	// class to produce one. keep in mind that the underlying string
+	// probably is NOT null-terminated, so we must allocate temporary space
+	// to copy the string into, so only use this when you have no alternative
+	// (e.g., to pass to a system or library call). also keep in mind that
+	// the pointer is only valid for as long as the class itself.
+	//
+	// And yes, this name is deliberately long and awkward; if that's a problem,
+	// it probably means you are over-using it.
+	//
+	class StringNullTerminatedUTF8
+	{
+	private:
+		// no DRC here because these are generally stack-allocated and we
+		// want copy operations to be cheap. if you need one of these as
+		// a member var then change to DRC...
+		Stringp m_str;
+		//DRC(Stringp) m_str;
+		// @todo -- consider putting a small buf here to use for small strings to avoid alloc call
+		char* m_bufptr;
+		MMgc::GC *gc;
+	public:
+		StringNullTerminatedUTF8(MMgc::GC *gc, Stringp src);
+		~StringNullTerminatedUTF8();
+		const char* c_str() const { return m_bufptr; }
+	};
 }
 
 #endif /* __avmplus_String__ */
