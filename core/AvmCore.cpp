@@ -37,6 +37,9 @@
 
 
 #include "avmplus.h"
+#ifdef AVMPLUS_MIR
+#include "CodegenMIR.h"
+#endif
 
 #if defined(_MSC_VER) && defined(AVMPLUS_AMD64)
 #include <emmintrin.h>

@@ -37,6 +37,7 @@
 
 
 #include "avmplus.h"
+#include "CodegenMIR.h"
 
 //hack
 #if !defined(AVMPLUS_SYMBIAN) && !defined(UNDER_CE)
