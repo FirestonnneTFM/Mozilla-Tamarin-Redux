@@ -73,7 +73,7 @@ namespace avmplus
 				AvmDebugMsg(msg, true);
 		}
 
-		#define AvmAssertMsg(x,y)				do { _AvmAssertMsg((x), (y)); } while (0) /* no semi */
+		#define AvmAssertMsg(x,y)				do { avmplus::_AvmAssertMsg((x), (y)); } while (0) /* no semi */
 
 		#define AvmAssert(x)					_AvmAssert((x), __LINE__,__FILE__)
 		#define _AvmAssert(x, line_, file_)		__AvmAssert((x), line_, file_)

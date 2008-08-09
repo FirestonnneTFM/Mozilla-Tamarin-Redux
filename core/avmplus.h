@@ -172,7 +172,6 @@ namespace avmplus
 	class ExceptionFrame;
 	class ExceptionHandler;
 	class ExceptionHandlerTable;
-	class FrameState;
 	class GrowableBuffer;
 	class Hashtable;
 	class HeapMultiname;
@@ -294,7 +293,6 @@ namespace avmplus
 
 #include "AtomArray.h"
 #include "Verifier.h"
-#include "FrameState.h"
 #include "NativeFunction.h"
 #include "ClassClosure.h"
 #include "ClassClass.h"

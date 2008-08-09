@@ -73,6 +73,8 @@ namespace avmplus
 	inline unsigned int rmask(int r) {
 		return 1 << r;
 	}
+
+	class FrameState;
 		
 	/**
 	 * The CodegenMIR class is a dynamic code generator which translates

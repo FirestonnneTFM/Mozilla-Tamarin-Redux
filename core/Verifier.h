@@ -57,6 +57,8 @@ namespace avmplus
 	 * incompatible frame states cause verify errors.
 	 */
 
+	class FrameState;
+
 	class Verifier
 	{
 	public:

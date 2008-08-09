@@ -38,6 +38,7 @@
 
 
 #include "avmplus.h"
+#include "../core/FrameState.h"
 
 #ifdef DARWIN
 #include <Carbon/Carbon.h>
@@ -4964,7 +4965,7 @@ namespace avmplus
 			{
 				ExceptionHandler* h = &info->exceptions->exceptions[i];
 				AvmAssertMsg(state->verifier->getFrameState(h->target)->label.bb != NULL, "Exception target address MUST have been resolved");
-				mirPatchPtr( &h->targetIns, h->target );
+				mirPatchPtr( (OP**)&h->target, h->target );
 			}
 		}
 
