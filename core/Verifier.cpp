@@ -37,6 +37,7 @@
 
 
 #include "avmplus.h"
+#include "FrameState.h"
 
 namespace avmplus
 {

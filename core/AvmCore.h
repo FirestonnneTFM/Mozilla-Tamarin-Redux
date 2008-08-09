@@ -1282,7 +1282,6 @@ const int kBufferPadding = 16;
 						  int interfaceCount,
 						  size_t sizeofInstance);
 		
-		FrameState* newFrameState(int frameSize, int scopeBase, int stackBase);
         Namespace* newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespace* newNamespace(Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespace* newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public);

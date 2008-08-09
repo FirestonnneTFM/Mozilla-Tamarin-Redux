@@ -48,7 +48,7 @@
 namespace MMgc
 {
 	GCThreadLocal<const char*> memtag;
-	GCThreadLocal<void*> memtype;
+	GCThreadLocal<const void*> memtype;
 	GCThreadLocal<void*> lastItem;
 #ifdef MMGC_64BIT
 	GCThreadLocal<int64> lastTrace;
@@ -407,7 +407,7 @@ namespace MMgc
 				if(memtag)
 					traceTable[traceIndex].memtag = memtag;
 				else
-					traceTable[traceIndex].vtable =  *(int*)(void*)memtype;
+					traceTable[traceIndex].vtable =  *(int*)(const void*)memtype;
 				memtag = NULL;
 				memtype = NULL;
 			} else {
@@ -566,7 +566,7 @@ namespace MMgc
 		if(memtag == NULL)
 			memtag = s;
 	}
-	void SetMemType(void *s)
+	void SetMemType(const void *s)
 	{
 		if(memtype == NULL)
 			memtype = s;

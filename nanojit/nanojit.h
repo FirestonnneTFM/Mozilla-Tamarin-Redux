@@ -82,10 +82,8 @@ namespace nanojit
 			#define DebugBreak() AvmAssert(0)
 		#endif
 
-		#define _NanoAssertMsg(a,m)		do { if ((a)==0) { AvmDebugLog(("%s", m)); DebugBreak(); } } while (0)
-		#define NanoAssertMsg(x,y)				do { _NanoAssertMsg((x), (y)); } while (0) /* no semi */
-		#define _NanoAssertMsgf(a,m)		do { if ((a)==0) { AvmDebugLog(m); DebugBreak(); } } while (0)
-		#define NanoAssertMsgf(x,y)				do { _NanoAssertMsgf((x), y); } while (0) /* no semi */
+		#define NanoAssertMsg(x,y)			AvmAssertMsg(x,y)
+		#define NanoAssertMsgf(x,y)				do { if (!(a)) AvmDebugMsg(true, y); } while (0) /* no semi */
 		#define NanoAssert(x)					_NanoAssert((x), __LINE__,__FILE__)
 		#define _NanoAssert(x, line_, file_)	__NanoAssert((x), line_, file_)
 		#define __NanoAssert(x, line_, file_)	do { NanoAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")"); } while (0) /* no semi */
