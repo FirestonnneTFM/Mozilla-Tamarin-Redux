@@ -44,7 +44,7 @@
 #endif
 
 #ifdef _MSC_VER
-#include "../utils/msc_types.h"
+#include "../utils/msc_inttypes.h"
 #else
 #include <inttypes.h>
 #endif
