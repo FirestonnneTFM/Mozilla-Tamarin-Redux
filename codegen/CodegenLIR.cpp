@@ -45,72 +45,123 @@
 namespace avmplus 
 {
 	CodegenLIR::CodegenLIR(MethodInfo* info)
-		: overflow(true)
-	{}
+		: overflow(true) {
+        (void) info;
+    }
 
 	void CodegenLIR::emitMD()
 	{}
 
-	void CodegenLIR::formatOperand(PrintWriter& buffer, OP* oprnd)
-	{}
+	void CodegenLIR::formatOperand(PrintWriter& buffer, OP* oprnd) {
+        (void) buffer;
+        (void) oprnd;
+    }
 
-	void CodegenLIR::epilogue(FrameState* state)
-	{}
+	void CodegenLIR::epilogue(FrameState* state) {
+        this->state = state;
+    }
 
 	bool CodegenLIR::prologue(FrameState* state) {
+        this->state = state;
 		return true;
 	}
 
-	void CodegenLIR::emitCall(FrameState* state, AbcOpcode opcode, sintptr method_id, int argc, Traits* result)
-	{}
+	void CodegenLIR::emitCall(FrameState* state, AbcOpcode opcode, sintptr method_id, int argc, Traits* result) {
+        this->state = state;
+        (void) opcode;
+        (void) method_id;
+        (void) argc;
+        (void) result;
+    }
 
-	void CodegenLIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
-	{}
+	void CodegenLIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result) {
+        this->state = state;
+        (void) opcode;
+        (void) op1;
+        (void) op2;
+        (void) result;
+    }
 
-	void CodegenLIR::emitIf(FrameState* state, AbcOpcode opcode, sintptr target, int lhs, int rhs)
-	{}
+	void CodegenLIR::emitIf(FrameState* state, AbcOpcode opcode, sintptr target, int lhs, int rhs) {
+        this->state = state;
+        (void) opcode;
+        (void) target;
+        (void) lhs;
+        (void) rhs;
+    }
 
-	void CodegenLIR::emitSwap(FrameState* state, int i, int j)
-	{}
+    void CodegenLIR::emitSwap(FrameState* state, int i, int j) {
+        this->state = state;
+        (void) i;
+        (void) j;
+    }
 
-	void CodegenLIR::emitCopy(FrameState* state, int src, int dest)
-	{}
+	void CodegenLIR::emitCopy(FrameState* state, int src, int dest) {
+        this->state = state;
+        (void) src;
+        (void) dest;
+    }
 
-	void CodegenLIR::emitGetscope(FrameState* state, int scope, int dest)
-	{}
+	void CodegenLIR::emitGetscope(FrameState* state, int scope, int dest) {
+        this->state = state;
+        (void) scope;
+        (void) dest;
+    }
 
-	void CodegenLIR::emitKill(FrameState* state, int i)
-	{}
+	void CodegenLIR::emitKill(FrameState* state, int i) {
+        this->state = state;
+        (void) i;
+    }
 
-	void CodegenLIR::emitBlockStart(FrameState* state)
-	{}
+	void CodegenLIR::emitBlockStart(FrameState* state) {
+        this->state = state;
+    }
 
-	void CodegenLIR::emitBlockEnd(FrameState* state)
-	{}
+	void CodegenLIR::emitBlockEnd(FrameState* state) {
+        this->state = state;
+    }
 
-	void CodegenLIR::emitIntConst(FrameState* state, int index, uintptr c)
-	{}
+	void CodegenLIR::emitIntConst(FrameState* state, int index, uintptr c) {
+        this->state = state;
+        (void) index;
+        (void) c;
+    }
 
-	void CodegenLIR::emitDoubleConst(FrameState* state, int index, double* pd)
-	{}
+	void CodegenLIR::emitDoubleConst(FrameState* state, int index, double* pd) {
+        this->state = state;
+        (void) index;
+        (void) pd;
+    }
 
-	void CodegenLIR::emitCoerce(FrameState* state, int index, Traits* type)
-	{}
+	void CodegenLIR::emitCoerce(FrameState* state, int index, Traits* type) {
+        this->state = state;
+        (void) index;
+        (void) type;
+    }
 
-	void CodegenLIR::emitCheckNull(FrameState* state, int index)
-	{}
+	void CodegenLIR::emitCheckNull(FrameState* state, int index) {
+        this->state = state;
+        (void) index;
+    }
 
-	void CodegenLIR::emitSetContext(FrameState* state, AbstractFunction* f)
-	{}
+	void CodegenLIR::emitSetContext(FrameState* state, AbstractFunction* f) {
+        this->state = state;
+        (void) f;
+    }
 
-	void CodegenLIR::emitSetDxns(FrameState* state)
-	{}
+	void CodegenLIR::emitSetDxns(FrameState* state) {
+        this->state = state;
+    }
 
-	void CodegenLIR::merge(const Value& current, Value& target)
-	{}
+	void CodegenLIR::merge(const Value& current, Value& target) {
+        (void) current;
+        (void) target;
+    }
 
-	void CodegenLIR::localSet(uintptr i, OP* o)
-	{}
+	void CodegenLIR::localSet(uintptr i, OP* o) {
+        (void) i;
+        (void) o;
+    }
 
 	bool isDef(LIns *i) {
 		return i && i->isop(LIR_def);
@@ -124,6 +175,8 @@ namespace avmplus
 
 	LIns* CodegenLIR::useIns(LIns* def, int i)
 	{
+        (void) def;
+        (void) i;
 		return 0;
 	}
 }

@@ -1045,6 +1045,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\codegen\CodegenLIR.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\codegen\CodegenLIR.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\codegen\CodegenMIR.cpp"
 				>
 			</File>
