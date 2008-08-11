@@ -244,6 +244,30 @@ namespace avmplus
 
 namespace avmplus
 {
+//#ifdef AVMTHUNK_VERSION
+// Native-Method helpers (only used when AVMTHUNK_VERSION defined, but must be declared before we know...)
+
+	typedef avmplus::AbcEnv* AvmInstance;
+	typedef avmplus::ScriptObject* AvmObject;
+	typedef avmplus::String* AvmString;
+	typedef avmplus::Namespace* AvmNamespace;
+	typedef avmplus::Atom AvmBox;
+	typedef avmplus::MethodEnv* AvmMethodEnv;
+
+	#define AvmThunkRetType_AvmObject		(error ??? illegal)
+	typedef AvmBox AvmThunkRetType_bool;
+	typedef AvmBox AvmThunkRetType_int32_t;
+	typedef AvmBox AvmThunkRetType_uint32_t;
+	typedef AvmBox AvmThunkRetType_AvmNamespace;
+	typedef AvmBox AvmThunkRetType_AvmBox;
+	typedef AvmBox AvmThunkRetType_AvmString;
+	typedef AvmBox AvmThunkRetType_void;
+	typedef double AvmThunkRetType_double;
+
+	typedef AvmThunkRetType_AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+
+//#endif
+
 	namespace NativeID
 	{
         #include "builtin.h"

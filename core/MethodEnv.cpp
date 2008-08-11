@@ -540,6 +540,7 @@ namespace avmplus
 
 		name.setName(core->intern(index));
 	}		
+#endif
 
 	ScriptObject* MethodEnv::newcatch(Traits* traits)
 	{
@@ -559,6 +560,7 @@ namespace avmplus
 		}
 	}
 
+#ifdef AVMPLUS_MIR
 	ArrayObject* MethodEnv::createArgumentsHelper(int argc, uint32 *ap)
 	{
 		// create arguments using argv[1..argc].

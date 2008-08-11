@@ -38,6 +38,8 @@
 
 #include "avmplus.h"
 
+#ifdef AVMPLUS_MIR
+
 namespace avmplus
 {
 	using namespace MMgc;
@@ -928,6 +930,7 @@ namespace avmplus
 		#undef _PAGESIZE_ 
 	}
 	
+#ifndef AVMTHUNK_VERSION
 	/**
 	 * emitNativeThunk generates code for a native method
 	 * thunk.  A native method thunk converts VM types like
@@ -1440,6 +1443,7 @@ namespace avmplus
 		
 		//pool->verbose = false;
 	}
+#endif
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -1533,3 +1537,4 @@ namespace avmplus
 #endif /* AVMPLUS_AMD64 */
 
 }
+#endif

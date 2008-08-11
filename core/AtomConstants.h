@@ -138,7 +138,9 @@ namespace avmplus
 		const Binding BIND_METHOD    = 1;       // int disp_id local method number
 		const Binding BIND_VAR       = 2;       // int local slot number (r/w var)
 		const Binding BIND_CONST     = 3;       // int local slot number (r/o const)
+#ifdef AVMPLUS_MIR
 		const Binding BIND_ITRAMP    = 4;       // interface trampoline in imt table
+#endif
 		const Binding BIND_GET       = 5;		// get-only property   101
 		const Binding BIND_SET		 = 6;       // set-only property   110
 		const Binding BIND_GETSET    = 7;       // readwrite property  111

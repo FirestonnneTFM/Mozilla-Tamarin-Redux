@@ -123,6 +123,7 @@ extern "C"
 
 namespace avmplus
 {
+#if defined(AVMPLUS_MIR) || defined(DEBUGGER)
 	GrowableBuffer::GrowableBuffer(MMgc::GCHeap *gcheap, bool mir)
 		: heap(gcheap)
 		, forMir(mir)
@@ -240,6 +241,7 @@ namespace avmplus
 			init();
 		}
 	}
+#endif
 
 #ifdef FEATURE_BUFFER_GUARD
 
@@ -953,6 +955,7 @@ namespace avmplus
 								 ports);
 	}
 	
+#ifdef AVMPLUS_MIR
 	bool GrowthGuard::handleException(kern_return_t& returnCode)
 	{
     #ifdef AVMPLUS_ROSETTA
@@ -1019,6 +1022,7 @@ namespace avmplus
 		return false;
 	}	
 #endif // AVMPLUS_MACH_EXCEPTIONS
+#endif
 
 #ifdef AVMPLUS_UNIX
     static pthread_key_t guardKey = 0;
@@ -1329,6 +1333,7 @@ namespace avmplus
     }
 #endif // AVMPLUS_UNIX
 
+#ifdef AVMPLUS_MIR
 	// GrowthGuard
 	GrowthGuard::GrowthGuard(GrowableBuffer* buffer)
 	{
@@ -1397,8 +1402,10 @@ namespace avmplus
 		}
 	}
 #endif
+#endif
 
 	// Platform specific code follows
+#ifdef AVMPLUS_MIR
 #ifdef AVMPLUS_WIN32
 	int GrowthGuard::handleException(struct _EXCEPTION_RECORD* exceptionRecord,
 									 void* /*establisherFrame*/,
@@ -1440,7 +1447,9 @@ namespace avmplus
 	}
 
 #endif /* AVMPLUS_WIN32 */
+#endif
 
+#ifdef AVMPLUS_MIR
 #ifdef AVMPLUS_UNIX
     bool GrowthGuard::handleException(byte* addr)
     {
@@ -1465,6 +1474,7 @@ namespace avmplus
         return result;
     }
 #endif /* AVMPLUS_UNIX */
+#endif
 
 #endif /* FEATURE_BUFFER_GUARD */
 }

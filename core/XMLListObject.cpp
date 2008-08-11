@@ -1334,11 +1334,13 @@ namespace avmplus
 	}
 
 
-	Atom XMLListObject::getNamespace (Atom *argv, int argc) // prefix is optional
+	Atom XMLListObject::getNamespace (Atom prefix, int argc) // prefix is optional
 	{
+		AvmAssert(argc == 0 || argc == 1);
+		
 		if (_length() == 1)
 		{
-			return _getAt(0)->getNamespace(argv, argc);
+			return _getAt(0)->getNamespace(prefix, argc);
 		}
 		else
 		{

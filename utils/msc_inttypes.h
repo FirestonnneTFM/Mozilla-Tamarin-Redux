@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,7 +16,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2007
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,59 +36,33 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#ifndef __avmplus_msc_inttypes__
+#define __avmplus_msc_inttypes__
 
+typedef unsigned char    uint8_t;
+typedef unsigned short   uint16_t;
+typedef signed char      int8_t;
+typedef short            int16_t;
+typedef unsigned int     uint32_t; 
+typedef signed int       int32_t;
+typedef __int64          int64_t;
+typedef unsigned __int64 uint64_t;
+typedef long long          int64_t;
+typedef unsigned long long         uint64_t;
 
-#include "avmplus.h"
-
-namespace avmplus
-{
-#ifdef AVMTHUNK_VERSION
-	NativeMethod::NativeMethod(const NativeTableEntry& _nte)
-		: AbstractFunction(), nte(_nte)
-	{
-		this->flags |= nte.flags;
-		this->impl32 = verifyEnter;
-	}
+// math friendly pointer (64 bits in LP 64 systems)
+#if defined (_MSC_VER) && (_MSC_VER >= 1300)
+#define AVMPLUS_TYPE_IS_POINTER_SIZED __w64
 #else
-	NativeMethod::NativeMethod(int flags, Handler handler, int cookie)
-		: AbstractFunction()
-	{
-		m_handler = handler;
-		m_cookie  = cookie;
-		this->flags |= flags;
-		this->impl32 = verifyEnter;
-	}
+#define AVMPLUS_TYPE_IS_POINTER_SIZED
+#endif	
+
+#ifdef AVMPLUS_64BIT
+typedef AVMPLUS_TYPE_IS_POINTER_SIZED uint64_t uintptr_t;
+typedef AVMPLUS_TYPE_IS_POINTER_SIZED int64_t intptr_t;
+#else
+typedef AVMPLUS_TYPE_IS_POINTER_SIZED uint32_t uintptr_t;
+typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32_t intptr_t;
 #endif
 
-	Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
-	{
-		NativeMethod* f = (NativeMethod*) env->method;
-
-		f->verify(env->vtable->toplevel);
-
-		#ifdef AVMPLUS_VERIFYALL
-		f->flags |= VERIFIED;
-		if (f->pool->core->verifyall && f->pool)
-			f->pool->processVerifyQueue(env->toplevel());
-		#endif
-
-		env->impl32 = f->impl32;
-		return f->impl32(env, argc, ap);
-	}
-
-	void NativeMethod::verify(Toplevel *toplevel)
-	{
-		AvmAssert(declaringTraits->linked);
-		resolveSignature(toplevel);
-
-#ifdef AVMTHUNK_VERSION
-		*(AvmThunkNativeThunker*)&this->impl32 = this->nte.thunker;
-#else
-		// generate the native method thunk
-		CodegenMIR cgen(this);
-		cgen.emitNativeThunk(this);
-		if (cgen.overflow)
-			toplevel->throwError(kOutOfMemoryError);
-#endif
-	}
-}
+#endif	

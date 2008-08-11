@@ -156,8 +156,19 @@ namespace avmplus
 						slotCount*sizeof(int) + // slot offsets
 						methodCount*sizeof(AbstractFunction*);
 
+#ifdef AVMPLUS_MIR
 			if(hasInterfaces)
 				size += IMT_SIZE * sizeof(Binding);
+#else
+			if (!size)
+			{
+				// with no IMT we can end up with a valid size zero.
+				// MMGC can't allocate a zero-size block.
+				// We won't ever access it, just leave it null.
+				AvmAssert(instanceData == 0);
+				return;
+			}
+#endif
 
 			void *idata = gc->Alloc(size, GC::kZero | GC::kContainsPointers);
 
@@ -326,7 +337,9 @@ namespace avmplus
 
 			if (hasInterfaces && legal && !this->isInterface)
 			{
+#ifdef AVMPLUS_MIR
 				ImtBuilder imtBuilder(core->GetGC());
+#endif
 
 				// make sure every interface method is implemented
 				for (int i=0, n=interfaceCapacity; i < n; i++)
@@ -378,7 +391,9 @@ namespace avmplus
 									over = getMethod(disp_id);
 									if (over != virt)
 										legal &= checkOverride(virt, over);
+#ifdef AVMPLUS_MIR
 									imtBuilder.addEntry(virt, disp_id);
+#endif
 								}
 							}
 							else if (AvmCore::isAccessorBinding(iBinding))
@@ -432,7 +447,9 @@ namespace avmplus
 											over = getMethod(disp_id);
 											if (over != virt)
 												legal &= checkOverride(virt,over);
+#ifdef AVMPLUS_MIR
 											imtBuilder.addEntry(virt, disp_id);
+#endif
 										}
 									}
 
@@ -456,7 +473,9 @@ namespace avmplus
 											over = getMethod(disp_id);
 											if (over != virt)
 												legal &= checkOverride(virt,over);
+#ifdef AVMPLUS_MIR
 											imtBuilder.addEntry(virt, disp_id);
+#endif
 										}
 									}
 								}
@@ -464,7 +483,9 @@ namespace avmplus
 						}
 					}
 				}
+#ifdef AVMPLUS_MIR
 				imtBuilder.finish(getIMT(), pool, toplevel);
+#endif
 			}
             if (!legal)
             {
@@ -847,6 +868,7 @@ namespace avmplus
 	}
 #endif
 
+#ifdef AVMPLUS_MIR
 	ImtBuilder::ImtBuilder(MMgc::GC *gc)
 	{
 		this->gc = gc;
@@ -890,6 +912,7 @@ namespace avmplus
 			}
 		}
 	}
+#endif
 	
 	Stringp Traits::formatClassName()
 	{

@@ -39,6 +39,8 @@
 
 #include "avmplus.h"
 
+#ifdef AVMPLUS_MIR
+
 #ifdef DARWIN
 #include <Carbon/Carbon.h>
 #endif
@@ -12105,3 +12107,5 @@ namespace avmplus
 #endif
 
 }
+
+#endif

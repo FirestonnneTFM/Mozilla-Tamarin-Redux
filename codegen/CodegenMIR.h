@@ -246,7 +246,9 @@ namespace avmplus
 		/**
 		 * Generates code for a native method thunk.
 		 */
+#ifndef AVMTHUNK_VERSION
 		void emitNativeThunk(NativeMethod* info);
+#endif
 		void* emitImtThunk(ImtBuilder::ImtEntry *e);
 
 	private:

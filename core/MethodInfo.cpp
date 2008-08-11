@@ -122,7 +122,7 @@ namespace avmplus
 		}
 		#else
 		Verifier verifier(this, toplevel);
-		verifier.verify(NULL);
+		verifier.verify();
 		#endif
 
         #ifdef DEBUGGER
