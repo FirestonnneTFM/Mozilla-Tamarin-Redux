@@ -69,9 +69,7 @@ namespace avmplus
 
 			~BitSet()
 			{
-				if (capacity > kDefaultCapacity)
-					delete [] bits.ptr;
-				capacity = 0;
+                reset();
 			}
 
 			void set(int bitNbr)
@@ -86,6 +84,10 @@ namespace avmplus
 				else
 					bits.ar[index] |= (1<<bit);
 			}
+
+            void set(MMgc::GC *, int bitNbr) {
+                set(bitNbr);
+            }
 
 			void clear(int bitNbr)
 			{
@@ -114,6 +116,12 @@ namespace avmplus
 				}
 				return value;
 			}
+
+            void reset() {
+				if (capacity > kDefaultCapacity)
+					delete [] bits.ptr;
+				capacity = 0;
+            }
 
 		private:
 

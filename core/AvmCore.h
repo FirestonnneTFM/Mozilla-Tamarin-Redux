@@ -141,6 +141,13 @@ const int kBufferPadding = 16;
 #ifdef AVMPLUS_VERIFYALL
 		bool verifyall;
 #endif
+
+#ifdef FEATURE_NANOJIT
+        bool show_stats;
+        bool tree_opt;
+        bool verbose_live;
+        bool verbose_exits;
+#endif
 	};
 
 	/**
@@ -230,6 +237,14 @@ const int kBufferPadding = 16;
 		virtual void postsweep();
 		
 		Config config;
+        
+        #ifdef FEATURE_NANOJIT // accessors
+        bool quiet_opt() { return false; } 
+        bool use_sse2() { return config.sse2; }
+        bool verbose() { return config.verbose; }
+        bool verbose_exits() { return config.verbose_exits; }
+        bool verbose_live() { return config.verbose_live; }
+        #endif
 
 		/**
 		 * If this is set to a nonzero value, executing code

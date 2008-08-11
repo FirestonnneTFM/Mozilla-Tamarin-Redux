@@ -396,7 +396,7 @@ namespace nanojit
 					LIns* ins = regs->getActive(r);
 					// @todo we should be able to check across RegAlloc's somehow (to include savedGP...)
 					Reservation *v = getresv(ins);
-					NanoAssert(v);
+					NanoAssert(v != 0);
 					int32_t idx = v - _resvTable;
 					NanoAssert(idx >= 0 && idx < NJ_MAX_STACK_ENTRY);
 					resv[idx]=ins;
@@ -579,7 +579,7 @@ namespace nanojit
     void Assembler::patch(GuardRecord *lr)
     {
         Fragment *frag = lr->target;
-		NanoAssert(frag->fragEntry);
+		NanoAssert(frag->fragEntry != 0);
 		NIns* was = asm_adjustBranch((NIns*)lr->jmp, frag->fragEntry);
 		if (!lr->origTarget) lr->origTarget = was;
 		verbose_only(verbose_outputf("patching jump at %p to target %p (was %p)\n",
@@ -612,7 +612,7 @@ namespace nanojit
 				verbose_outputf("        %p:",_nIns);
 			)			
 			at = exit->target->fragEntry;
-			NanoAssert(at);
+			NanoAssert(at != 0);
 			_branchStateMap->remove(exit);
 		}
 		return at;
@@ -797,7 +797,7 @@ namespace nanojit
 			//fprintf(stderr, "endAssembly frag %X entry %X\n", (int)frag, (int)frag->fragEntry);
 		}
 		
-		AvmAssertMsg(error() || _fpuStkDepth == 0, ("_fpuStkDepth %d\n",_fpuStkDepth));
+		NanoAssertMsgf(error() || _fpuStkDepth == 0, ("_fpuStkDepth %d\n",_fpuStkDepth));
 
 		internalReset();  // clear the reservation tables and regalloc
 		NanoAssert(_branchStateMap->isEmpty());
@@ -1749,7 +1749,7 @@ namespace nanojit
 	{
 		uint32_t argc = 0;
 		uint32_t argt = _argtypes;
-		for (int i = 0; i < 5; ++i)
+		for (int i = 0; i < MAXARGS; ++i)
 		{
 			argt >>= 2;
 			argc += (argt & mask) != 0;
@@ -1761,7 +1761,7 @@ namespace nanojit
     {
 		uint32_t argt = _argtypes;
 		uint32_t argc = 0;
-		for (int32_t i = 0; i < 5; i++) {
+		for (int32_t i = 0; i < MAXARGS; i++) {
 			argt >>= 2;
 			ArgSize a = ArgSize(argt&3);
 #ifdef NJ_SOFTFLOAT

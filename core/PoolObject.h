@@ -41,6 +41,10 @@
 
 namespace avmplus
 {
+#ifdef FEATURE_NANOJIT
+    class PageMgr;
+#endif
+
 	/**
 	 * The PoolObject class is a container for the pool of resources
 	 * decoded from an ABC file: the constant pool, the methods
@@ -106,6 +110,10 @@ namespace avmplus
 		GrowableBuffer *codeBuffer;
 		sintptr stackOverflowHandler; // address of stack overflow handler
 		#endif /*AVMPLUS_MIR */
+
+        #ifdef FEATURE_NANOJIT
+        PageMgr *codePages;
+        #endif
 
 		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos);
 		~PoolObject();

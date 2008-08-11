@@ -37,6 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "nanojit.h"
+#undef MEMORY_INFO
 
 namespace nanojit
 {	
@@ -428,7 +429,7 @@ namespace nanojit
 	{
 		int c = hist->count(ip);
 		if (_assm->_verbose)
-			_assm->outputf("++ %s %d", core()->interp.labels->format(ip), c);
+			_assm->outputf("++ %s %d", labels->format(ip), c);
 	}
 
 	void Fragmento::countIL(uint32_t il, uint32_t abc)
@@ -437,11 +438,6 @@ namespace nanojit
 		_stats.abcsize += abc;
 	}
 	
-#ifdef AVMPLUS_VERBOSE
-	void Fragmento::drawTrees(char *fileName) {
-		drawTraceTrees(this, this->_frags, this->_core, fileName);
-	}
-#endif
 #endif // NJ_VERBOSE
 
 	//

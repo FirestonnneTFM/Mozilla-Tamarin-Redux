@@ -44,11 +44,14 @@ namespace nanojit
 	class LIns;
 	class LirBuffer;
 	class LirWriter;
+    class Fragmento;
+    enum LOpcode;
 }
 
 namespace avmplus
 {
 	using namespace nanojit;
+    using namespace MMgc;
 
 	class MethodInfo;
 	typedef LIns OP;
@@ -58,20 +61,66 @@ namespace avmplus
 		LIns **nextPatchIns;
 	};
 
+    class PageMgr {
+    public:
+        Fragmento *frago;
+        PageMgr();
+    };
+
+    enum MirOpcode {
+        MIR_cm, MIR_cmop,
+        MIR_cs, MIR_csop,
+        MIR_fcm, MIR_fcmop,
+        MIR_fcs, MIR_fcsop,
+    };
+
 	class CodegenLIR {
 	public:
 		bool overflow;
-		OP *exAtom;
+		LIns *exAtom;
 		const byte *abcStart;
 		const byte *abcEnd;
 
 	private:
+        GC *gc;
+        AvmCore *core;
+        MethodInfo *info;
+        Fragmento *frago;
 		LirBuffer *lirbuf;
 		LirWriter *lirout;
 		FrameState *state;
+        LIns *locals;
+        LIns *localTraits;
+        LIns *env_param, *argc_param, *ap_param;
+        LIns *_save_eip, *_ef;
+        LIns *dxns, *dxnsAddrSave;
+        LIns *_callStackNode;
+        LIns *undefConst;
+        bool interruptable;
+        CodegenLabel interrupt_label;
 
-		LIns *localGet(int index);
-		LIns *useIns(LIns *i, int index);
+        LIns *InsAlloc(int32_t);
+        LIns *loadIns(LOpcode op, int32_t disp, LIns *base);
+        LIns *Ins(LOpcode op, LIns *lhs, LIns *rhs);
+        LIns *Ins(LOpcode op, LIns *a);
+        LIns *Ins(LOpcode op);
+        LIns *storeIns(LIns *val, int32_t disp, LIns *base);
+        LIns *InsConst(int32_t c);
+        LIns *defIns(LIns *i);
+        LIns *atomToNativeRep(int loc, LIns *i);
+        LIns *atomToNativeRep(Traits *, LIns *i);
+        LIns *callIns(MirOpcode, uintptr_t funcid, int argc, ...);
+        LIns *i2dIns(OP* v);
+        LIns *leaIns(int32_t d, LIns *base);
+        LIns *binaryIns(LOpcode, LIns *a, LIns *b);
+        LIns *localGet(int i);
+        LIns *localGetq(int i);
+    	void patchPtr(OP** targetp, uintptr_t pc);
+    	void patchPtr(OP** targetp, CodegenLabel& l);
+        void patch(LIns *j, CodegenLabel& l);
+        bool isDouble(int i);
+        bool isPointer(int i);
+        void saveState();
 
 	public:
 		CodegenLIR(MethodInfo* info);

@@ -66,6 +66,7 @@ namespace nanojit
 		LIR_param	= 10,
 		LIR_st		= 11,
 		LIR_ld		= 12,
+        LIR_alloc   = 13, // alloca some stack space
         LIR_sti     = 14,
 		LIR_call	= 18,
 			
@@ -78,6 +79,7 @@ namespace nanojit
 		LIR_jt		= 22, // jump true
 		LIR_jf		= 23, // jump false
 		LIR_label	= 24, // a jump target
+        LIR_ji      = 25, // jump indirect
 		
 		// operators
 		LIR_feq		= 26,
@@ -384,8 +386,8 @@ namespace nanojit
 		virtual LInsp insGuard(LOpcode v, LIns *c, SideExit *x) {
 			return out->insGuard(v, c, x);
 		}
-		virtual LInsp insBranch(LOpcode v, LInsp toLabel, LInsp condition=0) {
-			return out->insBranch(v, toLabel, condition);
+		virtual LInsp insBranch(LOpcode v, LInsp condition, LInsp toLabel) {
+			return out->insBranch(v, condition, toLabel);
 		}
 		virtual LInsp insParam(int32_t i) {
 			return out->insParam(i);
@@ -409,6 +411,9 @@ namespace nanojit
 		virtual LInsp insCall(uint32_t fid, LInsp args[]) {
 			return out->insCall(fid, args);
 		}
+        virtual LInsp insAlloc(int32_t size) {
+            return out->insAlloc(size);
+        }
 
 		// convenience
 	    LIns*		insLoadi(LIns *base, int disp);
@@ -442,8 +447,8 @@ namespace nanojit
 		char buf[1000], *end;
         void formatAddr(const void *p, char *buf);
     public:
-		AvmCore *core;
-        LabelMap(AvmCore *, LabelMap* parent);
+        avmplus::AvmCore *core;
+        LabelMap(avmplus::AvmCore *, LabelMap* parent);
         void add(const void *p, size_t size, size_t align, const char *name);
 		void add(const void *p, size_t size, size_t align, avmplus::String*);
 		const char *dup(const char *);
@@ -525,8 +530,8 @@ namespace nanojit
 			return i;
 		}
 
-		LIns* insBranch(LOpcode v, LInsp toLabel, LInsp condition=0) {
-			return add(out->insBranch(v, toLabel, condition));
+		LIns* insBranch(LOpcode v, LInsp condition, LInsp toLabel) {
+			return add(out->insBranch(v, condition, toLabel));
 		}
 
 		LIns* ins0(LOpcode v) {
@@ -562,6 +567,9 @@ namespace nanojit
 		LIns* insStorei(LInsp v, LInsp b, int32_t d) {
 			return add(out->insStorei(v, b, d));
 		}
+        LIns* insAlloc(int32_t size) {
+            return add(out->insAlloc(size));
+        }
     };
 
 #endif
@@ -683,7 +691,8 @@ namespace nanojit
 			LInsp	insImmq(uint64_t imm);
 		    LInsp	insCall(uint32_t fid, LInsp args[]);
 			LInsp	insGuard(LOpcode op, LInsp cond, SideExit *x);
-			LInsp	insBranch(LOpcode v, LInsp toLabel, LInsp condition=0);
+			LInsp	insBranch(LOpcode v, LInsp condition, LInsp toLabel);
+            LInsp   insAlloc(int32_t size);
 
 			// buffer mgmt
 			LInsp	skip(size_t);

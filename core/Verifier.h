@@ -165,4 +165,21 @@ namespace avmplus
     };
 }
 
+namespace nanojit {
+    class Fragment;
+    struct GuardRecord {
+        int calldepth;
+        Fragment *from, *target;
+        void *jmp, *origTarget;
+        GuardRecord *next, *outgoing;
+    };
+    #define GuardRecordSize(r) sizeof(GuardRecord)
+
+    struct SideExit {
+        int sid;
+        Fragment *target;
+    };
+    #define SideExitSize(x) sizeof(SideExit)
+}
+
 #endif /* __avmplus_Verifier__ */

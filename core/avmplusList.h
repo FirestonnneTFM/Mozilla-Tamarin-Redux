@@ -307,6 +307,13 @@ namespace avmplus
 
 		const T *getData() const { return data; }
 
+        void become(List<T, kElementType> &list) {
+            clear();
+            for (int i=0, n=list.len; i < n; i++)
+                add(list[i]);
+            list.clear();
+        }
+
 	private:
 
 		void grow()
