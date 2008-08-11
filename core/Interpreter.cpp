@@ -58,8 +58,10 @@ namespace avmplus
 #define FITS_IN_INTEGER(v)   ((((int32)v << 3) >> 3) == v)
 #define MAKE_INTEGER(v)      (((v) << 3) | kIntegerType)
 #define INTEGER_VALUE(v)     ((int32)(v) >> 3)
+#define DOUBLE_VALUE(v)		 (*(double*)((v) ^ kDoubleType))
 #define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0) // less control flow but more registers -- which is better?
 //#define IS_BOTH_INTEGER(a,b) ((IS_INTEGER(a) && IS_INTEGER(b))
+#define IS_BOTH_DOUBLE(a,b)  ((((a & kDoubleType) | (b ^ kDoubleType)) & 7) == 0)
 	
 	inline int readS24(const byte *pc) {
 		return AvmCore::readS24(pc);
@@ -559,11 +561,11 @@ namespace avmplus
 			}
 
 #define coerce_d_impl() \
-				if (!IS_DOUBLE(sp[0])) { \
-					save_expc(); \
-				    sp[0] = core->numberAtom(sp[0]);	\
-					restore_dxns(); \
-				}
+	if (!IS_DOUBLE(sp[0])) { \
+		save_expc(); \
+		sp[0] = core->numberAtom(sp[0]); \
+		restore_dxns(); \
+	}
 
             INSTR(coerce_d) {
 				coerce_d_impl();
@@ -575,9 +577,14 @@ namespace avmplus
                 NEXT();
 			}
 
-	#define coerce_b_impl() \
-				if (!IS_BOOLEAN(sp[0])) \
-				    sp[0] = core->booleanAtom(sp[0]);
+#define coerce_b_impl() \
+	Atom lhs = sp[0]; \
+	if (IS_BOOLEAN(lhs)) \
+		; \
+	else if (IS_INTEGER(lhs)) \
+		sp[0] = lhs == kIntegerType ? falseAtom : trueAtom; \
+	else \
+		sp[0] = core->booleanAtom(lhs);
 
             INSTR(convert_b) {
 				coerce_b_impl();
@@ -630,11 +637,19 @@ namespace avmplus
 			}
 
             INSTR(not) {
-                *sp = core->booleanAtom(*sp) ^ booleanNotMask;
+				Atom bval = sp[0];
+				if (IS_BOOLEAN(bval))
+					;
+				else if (IS_INTEGER(bval))
+					bval = bval == kIntegerType ? falseAtom : trueAtom;
+				else
+					bval = core->booleanAtom(bval);
+                sp[0] = bval ^ booleanNotMask;
                 NEXT();
 			}
 
 			INSTR(bitnot) {
+				// OPTIMIZEME
 				save_expc();
 				*sp = core->intToAtom(~core->integer(*sp));
 				restore_dxns();
@@ -666,8 +681,9 @@ namespace avmplus
                 NEXT();
 			}	
 
-// Add lhs and rhs if they are both fixnums and computation does not overflow.
-// On success, store the result in dest, and NEXT.
+// Add lhs and rhs if they are both fixnums and computation does not overflow,
+// or if they are both flonums.  On success, store the result in dest, and NEXT.
+
 #define FAST_ADD_MAYBE(lhs,rhs,dest) \
 	if (IS_BOTH_INTEGER(lhs, rhs)) { \
 		uint32 lop = (uint32)lhs ^ kIntegerType, rop = (uint32)rhs ^ kIntegerType; \
@@ -676,8 +692,29 @@ namespace avmplus
 			dest = result | kIntegerType; \
 			NEXT(); \
 		} \
+	} \
+	else if (IS_BOTH_DOUBLE(lhs, rhs)) { \
+		dest = core->doubleToAtom(DOUBLE_VALUE(lhs) + DOUBLE_VALUE(rhs)); \
+		NEXT(); \
 	}
 
+// Add 1 to lhs if it is a fixnum and computation does not overflow, or
+// if lhs is a flonum.  On success, store the result in dest, and NEXT.
+					
+#define FAST_INC_MAYBE(lhs,dest) \
+	if (IS_INTEGER(lhs)) { \
+		uint32 lop = (uint32)lhs ^ kIntegerType; \
+		uint32 result = lop + (1 << 3); \
+		if ((int32)lop < 0 || (int32)(result ^ lop) >= 0) { \
+			dest = result | kIntegerType; \
+			NEXT(); \
+		} \
+	} \
+    else if (IS_DOUBLE(lhs)) { \
+		dest = core->doubleToAtom(DOUBLE_VALUE(lhs) + 1.0); \
+		NEXT(); \
+	}
+					
 // Subtract rhs from lhs if they are both fixnums and computation does not overflow.
 // On success, store the result in dest, and NEXT.
 #define FAST_SUB_MAYBE(lhs,rhs,dest) \
@@ -688,12 +725,31 @@ namespace avmplus
 			dest = result | kIntegerType; \
 			NEXT(); \
 		} \
+	} \
+	else if (IS_BOTH_DOUBLE(lhs, rhs)) { \
+		dest = core->doubleToAtom(DOUBLE_VALUE(lhs) + DOUBLE_VALUE(rhs)); \
+		NEXT(); \
+	}
+
+// Subtract 1 from lhs if lhs is a fixnum and computation does not overflow.
+// On success, store the result in dest, and NEXT.
+#define FAST_DEC_MAYBE(lhs,dest) \
+	if (IS_INTEGER(lhs)) { \
+		uint32 lop = (uint32)lhs ^ kIntegerType; \
+		uint32 result = lop - (1 << 3); \
+		if ((int32)lop >= 0 || (int32)(result ^ lop) >= 0) { \
+			dest = result | kIntegerType; \
+			NEXT(); \
+		} \
+	} \
+    else if (IS_DOUBLE(lhs)) { \
+		dest = core->doubleToAtom(DOUBLE_VALUE(lhs) - 1.0); \
+		NEXT(); \
 	}
 
             INSTR(increment) {
 				Atom lhs = *sp;
-				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_ADD_MAYBE can handle doubles
-				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
+				FAST_INC_MAYBE(lhs,sp[0]);
 				save_expc();
 				*sp = core->numberAtom(lhs);
 				core->increment_d(sp, 1);
@@ -703,8 +759,7 @@ namespace avmplus
 
             INSTR(increment_i) {
 				Atom lhs = *sp;
-				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_ADD_MAYBE can handle doubles
-				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
+				FAST_INC_MAYBE(lhs,sp[0]);
 				save_expc();
 				core->increment_i(sp, 1);
 				restore_dxns();
@@ -714,8 +769,7 @@ namespace avmplus
 			INSTR(inclocal) {
 				Atom* rp = framep+readU30(pc);
 				Atom lhs = *rp;
-				Atom rhs = (1<<3)|kIntegerType;  // No good if FAST_ADD_MAYBE can handle doubles
-				FAST_ADD_MAYBE(lhs,rhs,*rp);
+				FAST_INC_MAYBE(lhs,*rp);
 				save_expc();
 				*rp = core->numberAtom(*rp);
 				core->increment_d(rp, 1);
@@ -726,8 +780,7 @@ namespace avmplus
             INSTR(inclocal_i) {
 				Atom* rp = framep+readU30(pc);
 				Atom lhs = *rp;
-				Atom rhs = (1<<3)|kIntegerType;  // No good if FAST_ADD_MAYBE can handle doubles
-				FAST_ADD_MAYBE(lhs,rhs,*rp);
+				FAST_INC_MAYBE(lhs,*rp);
 				save_expc();
 				core->increment_i(rp, 1);
 				restore_dxns();
@@ -736,8 +789,7 @@ namespace avmplus
 
             INSTR(decrement) {
 				Atom lhs = *sp;
-				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_SUB_MAYBE can handle doubles
-				FAST_SUB_MAYBE(lhs,rhs,sp[0]);
+				FAST_DEC_MAYBE(lhs,sp[0]);
 				save_expc();
 				*sp = core->numberAtom(*sp);
 				core->increment_d(sp, -1);
@@ -747,8 +799,7 @@ namespace avmplus
 
             INSTR(decrement_i) {
 				Atom lhs = *sp;
-				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_SUB_MAYBE can handle doubles
-				FAST_SUB_MAYBE(lhs,rhs,sp[0]);
+				FAST_DEC_MAYBE(lhs,sp[0]);
 				save_expc();
 				core->increment_i(sp, -1);
 				restore_dxns();
@@ -758,8 +809,7 @@ namespace avmplus
 			INSTR(declocal) {
 				Atom* rp = framep+readU30(pc);
 				Atom lhs = *rp;
-				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_SUB_MAYBE can handle doubles
-				FAST_SUB_MAYBE(lhs,rhs,*rp);
+				FAST_DEC_MAYBE(lhs,*rp);
 				save_expc();
 				*rp = core->numberAtom(*rp);
 				core->increment_d(rp, -1);
@@ -770,8 +820,7 @@ namespace avmplus
 			INSTR(declocal_i) {
 				Atom* rp = framep+readU30(pc);
 				Atom lhs = *rp;
-				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_SUB_MAYBE can handle doubles
-				FAST_SUB_MAYBE(lhs,rhs,*rp);
+				FAST_DEC_MAYBE(lhs,*rp);
 				save_expc();
 				core->increment_i(rp, -1);
 				restore_dxns();
@@ -819,16 +868,21 @@ namespace avmplus
 			}
 
             INSTR(multiply) {
-				// OPTIMIZEME?
+				// OPTIMIZEME? for small integer
+				Atom lhs = sp[-1], rhs = sp[0];
+				sp--;
+				if (IS_BOTH_DOUBLE(lhs, rhs)) {
+					sp[0] = core->doubleToAtom(DOUBLE_VALUE(lhs) * DOUBLE_VALUE(rhs));
+					NEXT();
+				}
 				save_expc();
-                sp[-1] = core->doubleToAtom(core->number(sp[-1]) * core->number(sp[0]));
-                sp--;
+                sp[0] = core->doubleToAtom(core->number(lhs) * core->number(rhs));
 				restore_dxns();
                 NEXT();
 			}
 
 			INSTR(multiply_i) {
-				// OPTIMIZEME?
+				// OPTIMIZEME? for small integer
 				save_expc();
                 sp[-1] = core->intToAtom(core->integer(sp[-1]) * core->integer(sp[0]));
                 sp--;
@@ -837,17 +891,34 @@ namespace avmplus
 			}
 
             INSTR(divide) {
+				Atom lhs = sp[-1], rhs = sp[0];
+				sp--;
+				if (IS_BOTH_DOUBLE(lhs, rhs)) {
+					sp[0] = core->doubleToAtom(DOUBLE_VALUE(lhs) / DOUBLE_VALUE(rhs));
+					NEXT();
+				}
 				save_expc();
-				sp[-1] = core->doubleToAtom(core->number(sp[-1]) / core->number(sp[0]));
-                sp--;
+				sp[0] = core->doubleToAtom(core->number(lhs) / core->number(rhs));
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(modulo) {
-				save_expc();
-				sp[-1] = core->doubleToAtom(MathUtils::mod(core->number(sp[-1]), core->number(sp[0])));
+				Atom lhs = sp[-1], rhs = sp[0];
 				sp--;
+				if (IS_BOTH_INTEGER(lhs, rhs) && rhs != kIntegerType) {
+					int result = (lhs >> 3) % (rhs >> 3);  // can this overflow somehow? 
+					if (FITS_IN_INTEGER(result)) {
+						sp[0] = MAKE_INTEGER(result);
+						NEXT();
+					}
+				}
+				else if (IS_BOTH_DOUBLE(lhs, rhs)) {
+					sp[0] = core->doubleToAtom(MathUtils::mod(DOUBLE_VALUE(lhs), DOUBLE_VALUE(rhs)));
+					NEXT();
+				}
+				save_expc();
+				sp[0] = core->doubleToAtom(MathUtils::mod(core->number(lhs), core->number(rhs)));
 				restore_dxns();
 				NEXT();
 			}
@@ -969,7 +1040,11 @@ namespace avmplus
 
             INSTR(iftrue) {
 				Atom bval = *(sp--);
-				if (!IS_BOOLEAN(bval))
+				if (IS_BOOLEAN(bval))
+					;
+				else if (IS_INTEGER(bval))
+					bval = bval == kIntegerType ? falseAtom : trueAtom;
+				else
 					bval = core->booleanAtom(bval);  // does not throw or change the XML namespace
 				if (bval & booleanNotMask)
 				{
@@ -987,7 +1062,11 @@ namespace avmplus
 
             INSTR(iffalse) {
 				Atom bval = *(sp--);
-				if (!IS_BOOLEAN(bval))
+				if (IS_BOOLEAN(bval))
+					;
+				else if (IS_INTEGER(bval))
+					bval = bval == kIntegerType ? falseAtom : trueAtom;
+				else
 					bval = core->booleanAtom(bval);  // does not throw or change the XML namespace
 				if (!(bval & booleanNotMask))
 				{
@@ -1010,6 +1089,8 @@ namespace avmplus
 		bool result; \
 		if (IS_BOTH_INTEGER(lhs, rhs)) \
 			result = lhs intcmp rhs; \
+		else if (IS_BOTH_DOUBLE(lhs, rhs)) \
+			result = DOUBLE_VALUE(lhs) intcmp DOUBLE_VALUE(rhs); \
 		else \
 			result = core->comparator(lhs, rhs) == truish; \
 		sp -= 2; \
@@ -1044,223 +1125,97 @@ namespace avmplus
 				NEXT();
 			}
 
+#define IFCMP(numeric_cmp, generic_cmp) \
+		save_expc(); \
+		Atom lhs = sp[-1], rhs=sp[0]; \
+		sp -= 2; \
+		bool result; \
+		if (IS_BOTH_INTEGER(lhs, rhs)) \
+			result = lhs numeric_cmp rhs; \
+		else if (IS_BOTH_DOUBLE(lhs, rhs)) \
+			result = DOUBLE_VALUE(lhs) numeric_cmp DOUBLE_VALUE(rhs); \
+		else \
+			result = generic_cmp; \
+		if (result) \
+		{ \
+			int j = readS24(pc); \
+			if (j < 0) \
+				core->branchCheck(env, interruptable, j); \
+			pc += j; \
+		} \
+		pc += 3; \
+		restore_dxns();
+
 			INSTR(iflt) {
-				save_expc();
-				Atom lhs = sp[-1], rhs=sp[0];
-				sp -= 2;
-				bool result;
-				if (IS_BOTH_INTEGER(lhs, rhs))
-					result = lhs < rhs;
-				else
-					result = core->compare(lhs, rhs) == trueAtom;
-				if (result)
-				{
-					int j = readS24(pc);
-					if (j < 0)
-						core->branchCheck(env, interruptable, j);
-					pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFCMP(<, core->compare(lhs,rhs) == trueAtom);
                 NEXT();
 			}
 
 			INSTR(ifnlt) {
-				save_expc();
-				Atom lhs = sp[-1], rhs=sp[0];
-				sp -= 2;
-				bool result;
-				if (IS_BOTH_INTEGER(lhs, rhs))
-					result = lhs >= rhs;
-				else
-					result = core->compare(lhs, rhs) != trueAtom;
-				if (result)
-				{
-					int j = readS24(pc);
-					if (j < 0)
-						core->branchCheck(env, interruptable, j);
-					pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFCMP(>=, core->compare(lhs, rhs) != trueAtom);
                 NEXT();
 			}
 
 			INSTR(ifle) {
-				save_expc();
-				Atom lhs = sp[-1], rhs=sp[0];
-				sp -= 2;
-				bool result;
-				if (IS_BOTH_INTEGER(lhs, rhs))
-					result = lhs <= rhs;
-				else
-					result = core->compare(rhs, lhs) == falseAtom;
-				if (result)
-				{
-					int j = readS24(pc);
-					if (j < 0)
-						core->branchCheck(env, interruptable, j);
-					pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFCMP(<=, core->compare(rhs, lhs) == falseAtom);
                 NEXT();
 			}
 
 			INSTR(ifnle) {
-				save_expc();
-				Atom lhs = sp[-1], rhs=sp[0];
-				sp -= 2;
-				bool result;
-				if (IS_BOTH_INTEGER(lhs, rhs))
-					result = lhs > rhs;
-				else
-					result = core->compare(rhs, lhs) != falseAtom;
-				if (result)
-				{
-					int j = readS24(pc);
-					if (j < 0)
-						core->branchCheck(env, interruptable, j);
-					pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFCMP(>, core->compare(rhs, lhs) != falseAtom);
                 NEXT();
 			}
 
 			INSTR(ifgt) {
-				save_expc();
-				Atom lhs = sp[-1], rhs=sp[0];
-				sp -= 2;
-				bool result;
-				if (IS_BOTH_INTEGER(lhs, rhs))
-					result = lhs > rhs;
-				else
-					result = core->compare(rhs, lhs) == trueAtom;
-				if (result)
-				{
-					int j = readS24(pc);
-					if (j < 0)
-						core->branchCheck(env, interruptable, j);
-					pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFCMP(>, core->compare(rhs, lhs) == trueAtom);
                 NEXT();
 			}
 
 			INSTR(ifngt) {
-				save_expc();
-				Atom lhs = sp[-1], rhs=sp[0];
-				sp -= 2;
-				bool result;
-				if (IS_BOTH_INTEGER(lhs, rhs))
-					result = lhs <= rhs;
-				else
-					result = core->compare(rhs, lhs) != trueAtom;
-				if (result)
-				{
-					int j = readS24(pc);
-					if (j < 0)
-						core->branchCheck(env, interruptable, j);
-					pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFCMP(<=, core->compare(rhs, lhs) != trueAtom);
                 NEXT();
 			}
 			
 			INSTR(ifge) {
-				save_expc();
-				Atom lhs = sp[-1], rhs=sp[0];
-				sp -= 2;
-				bool result;
-				if (IS_BOTH_INTEGER(lhs, rhs))
-					result = lhs >= rhs;
-				else
-					result = core->compare(lhs, rhs) == falseAtom;
-				if (result)
-				{
-					int j = readS24(pc);
-					if (j < 0)
-						core->branchCheck(env, interruptable, j);
-					pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFCMP(>=, core->compare(lhs, rhs) == falseAtom);
                 NEXT();
 			}
 
 			INSTR(ifnge) {
-				save_expc();
-				Atom lhs = sp[-1], rhs=sp[0];
-				sp -= 2;
-				bool result;
-				if (IS_BOTH_INTEGER(lhs, rhs))
-					result = lhs < rhs;
-				else
-					result = core->compare(lhs, rhs) != falseAtom;
-				if (result)
-				{
-					int j = readS24(pc);
-					if (j < 0)
-						core->branchCheck(env, interruptable, j);
-					pc += j;
-				}
-				pc += 3;
-				restore_dxns();
+				IFCMP(<, core->compare(lhs, rhs) != falseAtom);
                 NEXT();
 			}
 
+#define CMP(numeric_cmp, generic_cmp) \
+	Atom lhs=sp[-1], rhs=sp[0]; \
+	sp--; \
+	if (IS_BOTH_INTEGER(lhs,rhs)) \
+		sp[0] = lhs numeric_cmp rhs ? trueAtom : falseAtom; \
+	else if (IS_BOTH_DOUBLE(lhs, rhs)) \
+		sp[0] = DOUBLE_VALUE(lhs) numeric_cmp DOUBLE_VALUE(rhs) ? trueAtom : falseAtom; \
+	else { \
+		save_expc(); \
+		sp[0] = generic_cmp ? trueAtom : falseAtom; \
+		restore_dxns(); \
+	}
+					
             INSTR(lessthan) {
-				Atom lhs=sp[-1], rhs=sp[0];
-				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs))
-					sp[0] = lhs < rhs ? trueAtom : falseAtom;
-				else {
-					save_expc();
-					sp[0] = core->compare(lhs,rhs) == trueAtom ? trueAtom : falseAtom;
-					restore_dxns();
-				}
+				CMP(<, core->compare(lhs, rhs) == trueAtom);
                 NEXT();
 			}
 
             INSTR(lessequals) {
-				Atom lhs=sp[-1], rhs=sp[0];
-				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs))
-					sp[0] = lhs <= rhs ? trueAtom : falseAtom;
-				else {
-					save_expc();
-					sp[0] = core->compare(rhs,lhs) == falseAtom ? trueAtom : falseAtom;
-					restore_dxns();
-				}
+				CMP(<=, core->compare(rhs,lhs) == falseAtom);
                 NEXT();
 			}
 
             INSTR(greaterthan) {
-				Atom lhs=sp[-1], rhs=sp[0];
-				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs))
-					sp[0] = lhs > rhs ? trueAtom : falseAtom;
-				else {
-				    save_expc();
-					sp[0] = core->compare(rhs,lhs) == trueAtom ? trueAtom : falseAtom;
-					restore_dxns();
-				}
+				CMP(>, core->compare(rhs, lhs) == trueAtom);
                 NEXT();
 			}
 					
             INSTR(greaterequals) {
-				Atom lhs=sp[-1], rhs=sp[0];
-				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs))
-					sp[0] = lhs >= rhs ? trueAtom : falseAtom;
-				else {
-				    save_expc();
-					sp[0] = core->compare(lhs,rhs) == falseAtom ? trueAtom : falseAtom;
-					restore_dxns();
-				}
+				CMP(>=, core->compare(lhs, rhs) == falseAtom);
                 NEXT();
 			}
 					
@@ -1899,14 +1854,7 @@ namespace avmplus
 
             INSTR(getglobalscope) {
 				sp++;
-				if (outer_depth > 0)
-				{
-					sp[0] = scope->getScope(0);
-				}
-				else
-				{
-					sp[0] = scopeBase[0];
-				}
+				sp[0] = (outer_depth > 0) ? scope->getScope(0) : scopeBase[0];
 				NEXT();
 			}
 
