@@ -678,9 +678,21 @@ namespace avmplus
 		} \
 	}
 
+// Subtract rhs from lhs if they are both fixnums and computation does not overflow.
+// On success, store the result in dest, and NEXT.
+#define FAST_SUB_MAYBE(lhs,rhs,dest) \
+	if (IS_BOTH_INTEGER(lhs, rhs)) { \
+		uint32 lop = (uint32)lhs ^ kIntegerType, rop = (uint32)rhs ^ kIntegerType; \
+		uint32 result = lop - rop; \
+		if ((int32)(lop ^ rop) >= 0 || (int32)(result ^ lop) >= 0) { \
+			dest = result | kIntegerType; \
+			NEXT(); \
+		} \
+	}
+
             INSTR(increment) {
 				Atom lhs = *sp;
-				Atom rhs = (1<<3) | kIntegerType;
+				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_ADD_MAYBE can handle doubles
 				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
 				save_expc();
 				*sp = core->numberAtom(lhs);
@@ -691,7 +703,7 @@ namespace avmplus
 
             INSTR(increment_i) {
 				Atom lhs = *sp;
-				Atom rhs = (1<<3) | kIntegerType;
+				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_ADD_MAYBE can handle doubles
 				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
 				save_expc();
 				core->increment_i(sp, 1);
@@ -702,7 +714,7 @@ namespace avmplus
 			INSTR(inclocal) {
 				Atom* rp = framep+readU30(pc);
 				Atom lhs = *rp;
-				Atom rhs = (1<<3)|kIntegerType;
+				Atom rhs = (1<<3)|kIntegerType;  // No good if FAST_ADD_MAYBE can handle doubles
 				FAST_ADD_MAYBE(lhs,rhs,*rp);
 				save_expc();
 				*rp = core->numberAtom(*rp);
@@ -714,7 +726,7 @@ namespace avmplus
             INSTR(inclocal_i) {
 				Atom* rp = framep+readU30(pc);
 				Atom lhs = *rp;
-				Atom rhs = (1<<3)|kIntegerType;
+				Atom rhs = (1<<3)|kIntegerType;  // No good if FAST_ADD_MAYBE can handle doubles
 				FAST_ADD_MAYBE(lhs,rhs,*rp);
 				save_expc();
 				core->increment_i(rp, 1);
@@ -723,7 +735,9 @@ namespace avmplus
 			}
 
             INSTR(decrement) {
-				// OPTIMIZEME
+				Atom lhs = *sp;
+				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_SUB_MAYBE can handle doubles
+				FAST_SUB_MAYBE(lhs,rhs,sp[0]);
 				save_expc();
 				*sp = core->numberAtom(*sp);
 				core->increment_d(sp, -1);
@@ -732,7 +746,9 @@ namespace avmplus
 			}
 
             INSTR(decrement_i) {
-				// OPTIMIZEME
+				Atom lhs = *sp;
+				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_SUB_MAYBE can handle doubles
+				FAST_SUB_MAYBE(lhs,rhs,sp[0]);
 				save_expc();
 				core->increment_i(sp, -1);
 				restore_dxns();
@@ -740,9 +756,11 @@ namespace avmplus
 			}
 
 			INSTR(declocal) {
-				// OPTIMIZEME
-				save_expc();
 				Atom* rp = framep+readU30(pc);
+				Atom lhs = *rp;
+				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_SUB_MAYBE can handle doubles
+				FAST_SUB_MAYBE(lhs,rhs,*rp);
+				save_expc();
 				*rp = core->numberAtom(*rp);
 				core->increment_d(rp, -1);
 				restore_dxns();
@@ -750,9 +768,12 @@ namespace avmplus
 			}
 
 			INSTR(declocal_i) {
-				// OPTIMIZEME
+				Atom* rp = framep+readU30(pc);
+				Atom lhs = *rp;
+				Atom rhs = (1<<3) | kIntegerType;  // No good if FAST_SUB_MAYBE can handle doubles
+				FAST_SUB_MAYBE(lhs,rhs,*rp);
 				save_expc();
-				core->increment_i(framep+readU30(pc), -1);
+				core->increment_i(rp, -1);
 				restore_dxns();
                 NEXT();
 			}
@@ -778,25 +799,27 @@ namespace avmplus
 			}
 
             INSTR(subtract) {
-				// OPTIMIZEME
+				Atom lhs = sp[-1], rhs=sp[0];
+				sp--;
+				FAST_SUB_MAYBE(lhs,rhs,sp[0]);
 				save_expc();
-                sp[-1] = core->doubleToAtom(core->number(sp[-1]) - core->number(sp[0]));
-                sp--;
+                sp[0] = core->doubleToAtom(core->number(lhs) - core->number(rhs));
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(subtract_i) {
-				// OPTIMIZEME
+				Atom lhs = sp[-1], rhs=sp[0];
+				sp--;
+				FAST_SUB_MAYBE(lhs,rhs,sp[0]);
 				save_expc();
-				sp[-1] = core->intToAtom(core->integer(sp[-1]) - core->integer(sp[0]));
-                sp--;
+				sp[0] = core->intToAtom(core->integer(lhs) - core->integer(lhs));
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(multiply) {
-				// OPTIMIZEME
+				// OPTIMIZEME?
 				save_expc();
                 sp[-1] = core->doubleToAtom(core->number(sp[-1]) * core->number(sp[0]));
                 sp--;
@@ -805,7 +828,7 @@ namespace avmplus
 			}
 
 			INSTR(multiply_i) {
-				// OPTIMIZEME
+				// OPTIMIZEME?
 				save_expc();
                 sp[-1] = core->intToAtom(core->integer(sp[-1]) * core->integer(sp[0]));
                 sp--;
