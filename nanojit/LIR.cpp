@@ -368,6 +368,18 @@ namespace nanojit
 		return l;
 	}
 
+    LInsp LirBufWriter::insAlloc(int32_t size)
+    {
+        NanoAssert(isU16(size));
+		ensureRoom(1);
+		LInsp l = _buf->next();
+		l->initOpcode(LIR_alloc);
+		l->i.imm16 = uint16_t(size);
+		_buf->commit(1);
+		_buf->_stats.lir++;
+		return l;
+    }
+
     LInsp LirBufWriter::insParam(int32_t arg)
     {
 		ensureRoom(1);
@@ -941,9 +953,9 @@ namespace nanojit
 #ifdef NJ_SOFTFLOAT
 		if (op == LIR_fcall)
 			op = LIR_callh;
-		LInsp args2[5*2]; // arm could require 2 args per double
+		LInsp args2[MAXARGS*2]; // arm could require 2 args per double
 		int32_t j = 0;
-		for (int32_t i = 0; i < 5; i++) {
+		for (int32_t i = 0; i < MAXARGS; i++) {
 			argt >>= 2;
 			ArgSize a = ArgSize(argt&3);
 			if (a == ARGSIZE_F) {
@@ -958,7 +970,7 @@ namespace nanojit
         NanoAssert(j == argc);
 #endif
 
-		NanoAssert(argc < 8);
+		NanoAssert(argc < MAXARGS);
 		uint32_t words = argwords(argc);
 		ensureRoom(words+argc+1);  // ins size + possible tramps
 		for (uint32_t i=0; i < argc; i++)
@@ -1077,7 +1089,7 @@ namespace nanojit
 			m_list(gc, kInitialCap), m_used(0), m_gc(gc)
 	{
 #ifdef MEMORY_INFO
-		m_list.set_meminfo_name("LInsHashSet.list");
+//		m_list.set_meminfo_name("LInsHashSet.list");
 #endif
 		m_list.set(kInitialCap-1, 0);
 	}
@@ -1158,7 +1170,7 @@ namespace nanojit
 		const uint32_t newcap = m_list.size() << 1;
 		InsList newlist(m_gc, newcap);
 #ifdef MEMORY_INFO
-		newlist.set_meminfo_name("LInsHashSet.list");
+//		newlist.set_meminfo_name("LInsHashSet.list");
 #endif
 		newlist.set(newcap-1, 0);
 		for (uint32_t i=0, n=m_list.size(); i < n; i++)
@@ -1797,7 +1809,7 @@ namespace nanojit
 		RegAllocMap regMap(gc);
 		NInsList loopJumps(gc);
 #ifdef MEMORY_INFO
-		loopJumps.set_meminfo_name("LIR loopjumps");
+//		loopJumps.set_meminfo_name("LIR loopjumps");
 #endif
 		assm->beginAssembly(&regMap);
 

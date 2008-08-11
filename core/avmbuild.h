@@ -119,6 +119,7 @@
 #endif
 
 #define AVMPLUS_MIR
+#define FEATURE_NANOJIT
 
 // if a function meets the E4 criteria for being unchecked, then make
 // all its parameters optional and add a rest arg.  asc should do this

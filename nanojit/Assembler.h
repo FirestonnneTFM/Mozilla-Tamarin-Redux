@@ -99,12 +99,10 @@ namespace nanojit
 	{
 		intptr_t	_address;
 		uint16_t	_argtypes;		// 6 2-bit fields indicating arg type, by ARGSIZE above (including ret type): a1 a2 a3 a4 a5 ret
-		uint8_t		_cse:1;			// true if no side effects
-		uint8_t		_fold:1;		// true if no side effects
-		uint8_t		_abi:2;
+		uint8_t		_cse;			// true if no side effects
+		uint8_t		_fold;		// true if no side effects
 		verbose_only ( const char* _name; )
 		
-		enum ABI { ABI_FASTCALL, ABI_THISCALL, ABI_CDECL };
 		uint32_t FASTCALL _count_args(uint32_t mask) const;
         uint32_t get_sizes(ArgSize*) const;
 

@@ -76,6 +76,8 @@ namespace nanojit
 	typedef avmplus::List<LIns*,avmplus::LIST_NonGCObjects>	InsList;
 	typedef avmplus::List<char*, avmplus::LIST_GCObjects> StringList;
 
+    const int MAXARGS = 8;
+
 	#if defined(_DEBUG)
 		
 		#ifndef WIN32
@@ -83,7 +85,7 @@ namespace nanojit
 		#endif
 
 		#define NanoAssertMsg(x,y)			AvmAssertMsg(x,y)
-		#define NanoAssertMsgf(x,y)				do { if (!(a)) AvmDebugMsg(true, y); } while (0) /* no semi */
+        #define NanoAssertMsgf(a,y)				NanoAssert(a)
 		#define NanoAssert(x)					_NanoAssert((x), __LINE__,__FILE__)
 		#define _NanoAssert(x, line_, file_)	__NanoAssert((x), line_, file_)
 		#define __NanoAssert(x, line_, file_)	do { NanoAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")"); } while (0) /* no semi */
