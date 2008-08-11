@@ -1,4 +1,5 @@
 use namespace "avmplus";
+use namespace AbcEncode;
 
 // load ast
 {
