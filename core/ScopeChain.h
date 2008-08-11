@@ -38,6 +38,8 @@
 
 namespace avmplus
 {
+	class CodegenMIR;
+	class CodegenLIR;
 
 	/**
 	 * type descriptor for a captured scope chain
@@ -88,6 +90,7 @@ namespace avmplus
 		DRCWB(Namespace*) const defaultXmlNamespace;
 	private:
 		friend class CodegenMIR;
+		friend class CodegenLIR;
 		Atom scopes[1]; // actual length == size
 
 	public:

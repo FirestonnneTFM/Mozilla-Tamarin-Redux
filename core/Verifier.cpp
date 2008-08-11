@@ -37,7 +37,7 @@
 
 
 #include "avmplus.h"
-#include "../codegen/CodegenMIR.h"
+#include "../codegen/CodegenLIR.h"
 #include "FrameState.h"
 
 namespace avmplus
@@ -141,7 +141,7 @@ namespace avmplus
 	 * @param pool
 	 * @param info
 	 */
-    void Verifier::verify(CodegenMIR *mir)
+    void Verifier::verify(CodegenLIR *mir)
 	{		
 		SAMPLE_FRAME("[verify]", core);
 
@@ -231,8 +231,8 @@ namespace avmplus
 #ifdef FEATURE_BUFFER_GUARD
 		#ifdef AVMPLUS_MIR
 		// allow the mir buffer to grow dynamically
-		GrowthGuard guard(mir ? mir->mirBuffer : NULL);
-		this->growthGuard = &guard;
+		//GrowthGuard guard(mir ? mir->mirBuffer : NULL);
+		//this->growthGuard = &guard;
 		#endif //AVMPLUS_MIR
 #endif /* FEATURE_BUFFER_GUARD */
 
@@ -3408,7 +3408,7 @@ namespace avmplus
 		}
 #ifdef AVMPLUS_MIR
 		if (mir && v.ins)
-			mir->formatOperand(core->console, v.ins, mir->ipStart);
+			mir->formatOperand(core->console, v.ins);
 #endif
 	}
 

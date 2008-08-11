@@ -41,6 +41,9 @@
 
 namespace avmplus
 {
+	class CodegenMIR;
+	class CodegenLIR;
+
 	/**
 	 * Multiname is a reference to an identifier in 0 or more namespaces.  It consists
 	 * of the simple name and a list of namespaces.

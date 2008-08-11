@@ -760,9 +760,9 @@ namespace avmplus
 
 		#ifdef AVMPLUS_VERBOSE
 		void buildFlowGraph();
-		static void formatOpcode(PrintWriter& buffer, OP *ipStart, OP* op, PoolObject* pool, MMgc::GCHashtable* names);
-	    static void formatInsOperand(PrintWriter& buffer, OP* oprnd, OP* ipStart);
-	    static void formatOperand(PrintWriter& buffer, OP* oprnd, OP* ipStart);
+		void formatOpcode(PrintWriter& buffer, OP* op, PoolObject* pool, MMgc::GCHashtable* names);
+	    void formatInsOperand(PrintWriter& buffer, OP* oprnd);
+	    void formatOperand(PrintWriter& buffer, OP* oprnd);
 		static MMgc::GCHashtable* initMethodNames(AvmCore* core);
 		#endif //AVMPLUS_VERBOSE
 
@@ -2082,6 +2082,9 @@ namespace avmplus
 	static const int md_epilogue_size		= 128;
 	static const int md_native_thunk_size	= 256;
 	#endif /* AVMPLUS_PPC */
-	
+
+	typedef CodegenMIR::MirLabel CodegenLabel;
+	typedef CodegenMIR::OP OP;
+	typedef CodegenMIR Cogen;
 }
 #endif /* __avmplus_CodegenMIR__ */

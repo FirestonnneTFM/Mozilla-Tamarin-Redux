@@ -272,7 +272,6 @@ namespace avmplus
 	#endif /* _MSC_VER */
 
 
-	typedef CodegenMIR::OP OP;
 
 	/**
 	 * 3 instruction formats 
@@ -310,7 +309,7 @@ namespace avmplus
 			if (verbose())
 			{
 				core->console << "       @"<< InsNbr(ip)<<"\t";
-				formatOpcode(core->console, ipStart, ip, pool, core->codegenMethodNames);
+				formatOpcode(core->console, ip, pool, core->codegenMethodNames);
 				core->console <<"\n";
 			}
 #endif /* AVMPLUS_VERBOSE */
@@ -353,7 +352,7 @@ namespace avmplus
 			if (verbose())
 			{
 				core->console << "       @"<<InsNbr(ip)<<"\t";
-				formatOpcode(core->console, ipStart, ip, pool, core->codegenMethodNames);
+				formatOpcode(core->console, ip, pool, core->codegenMethodNames);
 				core->console << "\n";
 			}
 #endif /* AVMPLUS_VERBOSE */
@@ -393,7 +392,7 @@ namespace avmplus
 			if (verbose())
 			{
 				core->console << "       @"<<InsNbr(ip)<<"\t";
-				formatOpcode(core->console, ipStart, ip, pool, core->codegenMethodNames);
+				formatOpcode(core->console, ip, pool, core->codegenMethodNames);
 				core->console  << "\n";
 			}
 #endif /* AVMPLUS_VERBOSE */
@@ -512,7 +511,7 @@ namespace avmplus
 			if (verbose())
 			{
 				core->console << "       @"<<InsNbr(ip)<<"\t";
-				formatOpcode(core->console, ipStart, ip, pool, core->codegenMethodNames);
+				formatOpcode(core->console, ip, pool, core->codegenMethodNames);
 				core->console << "\n";
 			}
 #endif /* AVMPLUS_VERBOSE */
@@ -788,7 +787,7 @@ namespace avmplus
 		if (verbose())
 		{
 			core->console << "       @"<<InsNbr(ip)<<"\t";
-			formatOpcode(core->console, ipStart, ip, pool, core->codegenMethodNames);
+			formatOpcode(core->console, ip, pool, core->codegenMethodNames);
 			core->console << "\n";
 		}
 #endif /* AVMPLUS_VERBOSE */
@@ -1061,7 +1060,7 @@ namespace avmplus
 
 		#ifdef VERBOSE_LOCALS
 		core->console << "  lset " << (double)i << "  ";
-		formatOpcode(core->console, ipStart, o, pool, core->codegenMethodNames);
+		formatOpcode(core->console, o, pool, core->codegenMethodNames);
 		core->console <<"\n";
 		#endif
 	}
@@ -5255,7 +5254,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
 
-	void CodegenMIR::formatInsOperand(PrintWriter& buffer, OP* opr, OP* ipStart)
+	void CodegenMIR::formatInsOperand(PrintWriter& buffer, OP* opr)
 	{
 		if (opr)
 			buffer.format("@%d", opr-ipStart);
@@ -5263,7 +5262,7 @@ namespace avmplus
 			buffer << "0";
 	}
 
-	void CodegenMIR::formatOperand(PrintWriter& buffer, OP* opr, OP* ipStart)
+	void CodegenMIR::formatOperand(PrintWriter& buffer, OP* opr)
 	{
 		if (!opr)
 		{
@@ -5271,11 +5270,11 @@ namespace avmplus
 		}
 		else 
 		{
-			formatInsOperand(buffer, opr, ipStart);
+			formatInsOperand(buffer, opr);
 		}
 	}
 
-    void CodegenMIR::formatOpcode(PrintWriter& buffer, OP* ipStart, OP* op, PoolObject* /*pool*/, GCHashtable* names)
+    void CodegenMIR::formatOpcode(PrintWriter& buffer, OP* op, PoolObject* /*pool*/, GCHashtable* names)
     {
 
 		switch (op->code)
@@ -5308,7 +5307,7 @@ namespace avmplus
 				// now dump the params
 				for(uint32 i=1; i<=argc; i++)
 				{
-					formatInsOperand(buffer, op->args[i], ipStart);
+					formatInsOperand(buffer, op->args[i]);
 					if (i+1 <= argc)
 						buffer << ", ";
 				}
@@ -5322,14 +5321,14 @@ namespace avmplus
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " ";
 #endif
-				formatInsOperand(buffer, op->target, ipStart);
+				formatInsOperand(buffer, op->target);
 				uint32 argc = op->argc;
 				buffer << " (";
 
 				// now dump the params
 				for(uint32 i=1; i<=argc; i++)
 				{
-					formatInsOperand(buffer, op->args[i], ipStart);
+					formatInsOperand(buffer, op->args[i]);
 					if (i+1 <= argc)
 						buffer << ", ";
 				}
@@ -5352,7 +5351,7 @@ namespace avmplus
 				buffer << mirNames[op->code] << " ";
 #endif
 				buffer << int(op->disp) << "(";
-				formatInsOperand(buffer, op->oprnd1, ipStart);
+				formatInsOperand(buffer, op->oprnd1);
 				buffer << ")";
 				break;
 			}
@@ -5364,10 +5363,10 @@ namespace avmplus
 				buffer << mirNames[op->code] << " ";
 #endif
 				buffer << int(op->disp) << "(";
-				formatInsOperand(buffer, op->oprnd1, ipStart);
+				formatInsOperand(buffer, op->oprnd1);
 				buffer << ")";
 				buffer << " <- ";
-				formatInsOperand(buffer, op->value, ipStart);
+				formatInsOperand(buffer, op->value);
 				break;
 			}
 
@@ -5407,10 +5406,10 @@ namespace avmplus
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " ";
 #endif
-				formatInsOperand(buffer, op->oprnd1, ipStart);
+				formatInsOperand(buffer, op->oprnd1);
 				if (op->join) {
 					buffer << " joined to " ;
-					formatInsOperand(buffer, op->join, ipStart);
+					formatInsOperand(buffer, op->join);
 				}
 				break;
 
@@ -5419,7 +5418,7 @@ namespace avmplus
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " ";
 #endif
-				formatInsOperand(buffer, op->oprnd1, ipStart);
+				formatInsOperand(buffer, op->oprnd1);
 				buffer << " [" << int(op->disp) << "]";
 				break;
 
@@ -5427,10 +5426,10 @@ namespace avmplus
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " (";
 #endif
-				formatInsOperand(buffer, op->base, ipStart);
+				formatInsOperand(buffer, op->base);
 				buffer << ") [";
 				for (int i=1; i <= op->size; i++) {
-					formatInsOperand(buffer, op->args[i], ipStart);
+					formatInsOperand(buffer, op->args[i]);
 					if (i+1 <= op->size)
 						buffer << ", ";
 				}
@@ -5442,7 +5441,7 @@ namespace avmplus
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " -> " << int(op->disp) << "(";
 #endif
-				formatInsOperand(buffer, op->base, ipStart);
+				formatInsOperand(buffer, op->base);
 				buffer << ")";
 				break;
 
@@ -5450,7 +5449,7 @@ namespace avmplus
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " -> ";
 #endif
-				formatInsOperand(buffer, op->target, ipStart);
+				formatInsOperand(buffer, op->target);
 				break;
 
 			case MIR_jeq:
@@ -5462,9 +5461,9 @@ namespace avmplus
 #ifndef AVMPLUS_SYMBIAN
 				buffer << mirNames[op->code] << " ";
 #endif
-				formatInsOperand(buffer, op->oprnd1, ipStart);
+				formatInsOperand(buffer, op->oprnd1);
 				buffer << " -> ";
-				formatInsOperand(buffer, op->target, ipStart);
+				formatInsOperand(buffer, op->target);
 				break;
 
 			case MIR_bb:
@@ -5484,7 +5483,7 @@ namespace avmplus
 				else
 				{
 					OP* opr = op->oprnd1;
-					formatInsOperand(buffer, opr, ipStart);
+					formatInsOperand(buffer, opr);
 
 					opr = op->oprnd2;
 					if (opr == 0) 
@@ -5494,7 +5493,7 @@ namespace avmplus
 					else 
 					{
 						buffer << " ";
-						formatInsOperand(buffer, opr, ipStart);
+						formatInsOperand(buffer, opr);
 					}
 					// no other instruction should use operand3
 					//opr = op->value;
@@ -8509,7 +8508,7 @@ namespace avmplus
 			if (verbose() && mircode != MIR_bb)
 			{
 				core->console << "\n@" << InsNbr(ip) << " ";
-				formatOpcode(core->console, ipStart, ip, pool, core->codegenMethodNames);
+				formatOpcode(core->console, ip, pool, core->codegenMethodNames);
 				core->console << "\n";
 			}
 			#endif // AVMPLUS_VERBOSE
@@ -8570,7 +8569,7 @@ namespace avmplus
 					if (verbose())
 					{
 						core->console << "\n@" << InsNbr(ip) << " ";
-						formatOpcode(core->console, ipStart, ip, pool, core->codegenMethodNames);
+						formatOpcode(core->console, ip, pool, core->codegenMethodNames);
 						core->console << "\n";
 					}
 					#endif // AVMPLUS_VERBOSE
