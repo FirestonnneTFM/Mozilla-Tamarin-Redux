@@ -38,6 +38,8 @@
 
 #include "avmplus.h"
 
+#ifdef AVMPLUS_MIR
+
 //hack
 #if !defined(AVMPLUS_SYMBIAN) && !defined(UNDER_CE)
 #include <sys/mman.h>
@@ -626,6 +628,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_MIR
 
+#ifndef AVMTHUNK_VERSION
 	void CodegenMIR::emitNativeThunk(NativeMethod *info)
 	{
 		SET_CONDITION_CODE(AL);
@@ -1023,6 +1026,7 @@ namespace avmplus
 		//if (hack)
 			//verboseFlag = false;
 	}
+#endif
 
 	void ArmAssembler::flushDataCache(void *start, int len)
 	{
@@ -1174,3 +1178,4 @@ namespace avmplus
 	
 #endif /* AVMPLUS_ARM */
 }
+#endif

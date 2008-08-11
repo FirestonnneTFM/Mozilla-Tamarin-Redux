@@ -340,7 +340,7 @@ namespace avmplus
 		Stringp charAtDouble(double i=0); 
 		double charCodeAt(int i); // returns NaN for out-of-bounds
 		double charCodeAtDouble(double i); // returns NaN for out-of-bounds
-		int localeCompare(Stringp other, Atom *argv, int argc);
+		int localeCompare(Stringp other);
 
 		Stringp substring(int i_start, int i_end);
 		Stringp substringDouble(double d_start, double d_end);

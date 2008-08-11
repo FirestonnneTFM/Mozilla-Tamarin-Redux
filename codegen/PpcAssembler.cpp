@@ -38,6 +38,8 @@
 
 #include "avmplus.h"
 
+#ifdef AVMPLUS_MIR
+
 #ifdef DARWIN
 #include <Carbon/Carbon.h>
 #endif
@@ -732,6 +734,7 @@ namespace avmplus
 	}
 #endif
 	
+#ifndef AVMTHUNK_VERSION
 	void CodegenMIR::emitNativeThunk(NativeMethod *info)
 	{
 		/**
@@ -1169,6 +1172,7 @@ namespace avmplus
 		MakeDataExecutable(mipStart, (int)mip-(int)mipStart);
 #endif /* AVMPLUS_JIT_READONLY */
 	}
+#endif
 
 #if defined(_MAC) && !TARGET_RT_MAC_MACHO
 	static uint32 get_rtoc()
@@ -1302,3 +1306,4 @@ namespace avmplus
 
 #endif // AVMPLUS_PPC
 }
+#endif

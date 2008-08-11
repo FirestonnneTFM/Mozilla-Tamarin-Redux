@@ -76,9 +76,26 @@ namespace avmplus
 		#if defined(UNIX) && defined(INFINITY)
 		return INFINITY;
 		#else
-		float result;
-		*((uint32*)&result) = 0x7F800000;
-		return result;
+		union {
+			float f;
+			uint32_t i;
+		} u;
+		u.i = 0x7F800000;
+		return u.f;
+		#endif
+	}
+
+	double MathUtils::neg_infinity()
+	{
+		#if defined(UNIX) && defined(INFINITY)
+		return 0.0 - INFINITY;
+		#else
+		union {
+			float f;
+			uint32_t i;
+		} u;
+		u.i = 0xFF800000;
+		return u.f;
 		#endif
 	}
 
@@ -1226,7 +1243,7 @@ namespace avmplus
 				memcpy(buff,ptr,16);
 				buff[8] = 0;
 				if (String::Compare(buff,"Infinity",8) == 0) { 
-					*value = (negate ? 0.0 - MathUtils::infinity() : MathUtils::infinity());
+					*value = (negate ? MathUtils::neg_infinity() : MathUtils::infinity());
 					return true;
 				}
 			}

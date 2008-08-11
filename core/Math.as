@@ -75,8 +75,9 @@ public final class Math
 	public native static function atan2	(x:Number, y:Number):Number
 	public native static function pow	(x:Number, y:Number):Number
 	
-	public native static function max    (x:Number = void 0, y:Number = void 0, ... rest):Number
-	public native static function min    (x:Number = void 0, y:Number = void 0, ... rest):Number
+	private static const NegInfinity:Number = -1/0;
+	public native static function max    (x:Number = NegInfinity, y:Number = NegInfinity, ... rest):Number
+	public native static function min    (x:Number = Infinity, y:Number = Infinity, ... rest):Number
 
 	public native static function random ():Number 
 }

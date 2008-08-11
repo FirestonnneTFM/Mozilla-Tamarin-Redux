@@ -42,6 +42,111 @@
 namespace avmplus
 {
 
+#ifdef AVMTHUNK_VERSION
+
+	#define kAvmThunkNull		nullObjectAtom
+	#define kAvmThunkUndefined	undefinedAtom
+
+	#define kAvmThunkInfinity		(MathUtils::infinity())
+	#define kAvmThunkNegInfinity	(MathUtils::neg_infinity())
+	#define kAvmThunkNaN			(MathUtils::nan())
+	
+	#define AvmToRetType_AvmObject(r)		(error ??? illegal)
+	#define AvmToRetType_bool(r)			AvmBox(r)
+	#define AvmToRetType_int32_t(r)			AvmBox(r)
+	#define AvmToRetType_uint32_t(r)		AvmBox(r)
+	#define AvmToRetType_AvmNamespace(r)	AvmBox(r)
+	#define AvmToRetType_AvmBox(r)			AvmBox(r)
+	#define AvmToRetType_AvmString(r)		AvmBox(r)
+	#define AvmToRetType_void(r)			(kAvmThunkUndefined)
+	#define AvmToRetType_double(r)			(r)
+
+	typedef avmplus::ScriptObject AvmObjectT;
+	typedef avmplus::String AvmStringT;
+	typedef avmplus::Namespace AvmNamespaceT;
+
+    #define AVMTHUNK_DECLARE_MEMBER_FUNCTION(typename, ret, receiver, args) \
+		typedef ret (receiver##T::*typename) args ;
+		
+    #define AVMTHUNK_CALL_MEMBER_FUNCTION(obj, func, args) \
+		( (*(obj).*(func)) args )
+	
+	#define AvmThunkUnbox_AvmObject(r)		((ScriptObject*)(r))
+	#define AvmThunkUnbox_bool(r)			((r) != 0)
+	#define AvmThunkUnbox_int32_t(r)		int32_t(r)
+	#define AvmThunkUnbox_uint32_t(r)		uint32_t(r)
+	#define AvmThunkUnbox_AvmNamespace(r)	((Namespace*)(r))
+	#define AvmThunkUnbox_AvmBox(r)			(r)
+	#define AvmThunkUnbox_AvmString(r)		((String*)(r))
+	#define AvmThunkUnbox_void(r)			(error ??? illegal)
+	#define AvmThunkUnbox_double(r)			AvmThunkUnbox_double_impl(&(r))
+
+	inline double AvmThunkUnbox_double_impl(const AvmBox* b)
+	{
+	#if defined(AVMPLUS_64BIT)
+		AvmAssert(sizeof(AvmBox) == sizeof(double));
+		return *(const double*)b;
+	#elif defined(AVMPLUS_IA32)
+		// unaligned access is fine on x86-32
+		AvmAssert(sizeof(AvmBox)*2 == sizeof(double));
+		return *(const double*)b;
+	#else
+		AvmAssert(sizeof(AvmBox)*2 == sizeof(double));
+		union {
+			double d;
+			AvmBox b[2];
+		} u;
+		u.b[0] = b[0];
+		u.b[1] = b[1];
+		return u.d;
+	#endif
+	}
+
+	// trick, since values are compile-time known we usually don't need to call intToAtom, can statically transform them
+	// good for ints and ints currently
+	#define AvmThunkCanBeSmallIntAtom(v)	(!((v) & 0xF0000000))
+	#define AvmThunkSmallIntAtom(v)			((((Atom)(v))<<3) | kIntegerType)
+		
+	// note, this isn't complete -- only the ones currently needed are defined.
+	// expand as necessary. macros to take advantage of the fact that most
+	// args are compile-time constants.
+	#define AvmThunkCoerce_int32_t_double(v)	double(v)
+	#define AvmThunkCoerce_int32_t_uint32_t(v)	uint32_t(v)
+	#define AvmThunkCoerce_int32_t_AvmBox(v)	(AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
+
+	#define AvmThunkCoerce_uint32_t_double(v)	double(v)
+	#define AvmThunkCoerce_uint32_t_int32_t(v)	int32_t(v)
+	#define AvmThunkCoerce_uint32_t_AvmBox(v)	(AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
+
+#ifdef _DEBUG
+	inline double AvmThunkCoerce_AvmBox_double(AvmBox v) { AvmAssert((v) == kAvmThunkUndefined); (void)v; return kAvmThunkNaN; }
+	inline AvmString AvmThunkCoerce_AvmBox_AvmString(AvmBox v) { AvmAssert((v) == kAvmThunkUndefined || (v) == kAvmThunkNull); (void)v; return NULL; }
+	inline AvmObject AvmThunkCoerce_AvmBox_AvmObject(AvmBox v) { AvmAssert((v) == kAvmThunkUndefined || (v) == kAvmThunkNull); (void)v; return NULL; }
+#else
+	#define AvmThunkCoerce_AvmBox_double(v)		(kAvmThunkNaN)
+	#define AvmThunkCoerce_AvmBox_AvmString(v)	(NULL)
+	#define AvmThunkCoerce_AvmBox_AvmObject(v)	(NULL)
+#endif
+
+	#define AvmThunkCoerce_AvmString_AvmBox(v)	((v) ? (v)->atom() : nullStringAtom)
+
+	#define AvmThunkConstant_AvmString(v)		(env->method->pool->cpool_string[v])
+	
+	typedef void (ScriptObject::*AvmThunkNativeHandler)();
+
+	#define AVMTHUNK_GET_HANDLER(env)	(static_cast<NativeMethod*>((env)->method)->nte.handler)
+	#define AVMTHUNK_GET_COOKIE(env)	(static_cast<NativeMethod*>((env)->method)->nte.cookie)
+
+#ifdef DEBUGGER
+	#define AVMTHUNK_DEBUG_ENTER(env)	CallStackNode csn(0); (env)->debugEnter(argc, (uint32_t*)argv, 0, 0, &csn, 0, 0); 
+	#define AVMTHUNK_DEBUG_EXIT(env)	(env)->debugExit(&csn);
+#else
+	#define AVMTHUNK_DEBUG_ENTER(env)	
+	#define AVMTHUNK_DEBUG_EXIT(env)	
+#endif
+
+#endif
+
 	/**
 	 * The NativeMethod class is a wrapper to bind a native C++ function
 	 * to a class method surfaced into the ActionScript world.
@@ -61,22 +166,16 @@ namespace avmplus
 	 * Class           ClassClosure*
 	 * MovieClip       MovieClipObject*   (similar for any other class)
 	 */
+	struct NativeTableEntry;
 	class NativeMethod : public AbstractFunction
 	{
 	public:
+#ifdef AVMTHUNK_VERSION
+		NativeMethod(const NativeTableEntry& nte);
+#else
 		typedef void (ScriptObject::*Handler)();
-		typedef Atom (ScriptObject::*GetHandler)();
-		typedef void (ScriptObject::*SetHandler)(Atom);
-
-		/**
-		 * invoke handler as handler(...) with native typed args
-		 */
-		NativeMethod(int flags, Handler handler);
-
-		/**
-		 * invoke handler as handler(int cookie, ...) with native typed args
-		 */
 		NativeMethod(int flags, Handler handler, int cookie);
+#endif
 		
 		// we have virtual functions, so we probably need a virtual dtor
 		virtual ~NativeMethod() {}
@@ -85,78 +184,17 @@ namespace avmplus
 
 		virtual void verify(Toplevel* toplevel);
 
-		int m_cookie;
+#ifdef AVMTHUNK_VERSION
+		const NativeTableEntry& nte;
+#else
 		union {
 			Handler m_handler;
 			uintptr m_handler_addr;
 		};
-		
-	};
-
-	/**
-	 * NativeMethodV is similar to NativeMethod but does not coerce
-	 * arguments automatically to appropriate C++ types.
-	 * Instead, the C++ code always receives arguments in the
-	 * form: Atom method(Atom *argv, int argc);
-	 *
-	 * NativeMethodV is deprecated and will eventually be removed.
-	 */
-	class NativeMethodV : public AbstractFunction
-	{
-	public:
-		typedef int (ScriptObject::*Handler32)(Atom *argv, int argc);
-		typedef int (ScriptObject::*CookieHandler32)(int cookie, Atom *argv, int argc);		
-		typedef double (ScriptObject::*HandlerN)(Atom *argv, int argc);
-		typedef double (ScriptObject::*CookieHandlerN)(int cookie, Atom *argv, int argc);		
-
-		/**
-		 * invoke handler as handler(...) with native typed args
-		 */
-		NativeMethodV(Handler32 handler, int flgs)
-			: AbstractFunction()
-		{
-			m_handler = handler;
-			this->flags |= (flgs | NEED_REST);
-			this->impl32 = verifyEnter;
-		}
-
-		/**
-		 * invoke handler as handler(int cookie, ...) with native typed args
-		 */
-		NativeMethodV(Handler32 handler, int cookie, int flgs)
-			: AbstractFunction()
-		{
-			m_handler = handler;
-			m_cookie  = cookie;
-			m_haveCookie = true;
-			this->impl32 = verifyEnter;
-			this->flags = flgs;
-		}
-
-		void verify(Toplevel* toplevel)
-		{
-			AvmAssert(declaringTraits->linked);
-			resolveSignature(toplevel);
-			AvmCore* core = this->core();
-			if (returnTraits() == NUMBER_TYPE)
-				implN = implvN;
-			else
-				impl32 = implv32;
-		}
-
-		static Atom verifyEnter(MethodEnv* env, int argc, uint32 *ap);
-
-		static Atom implv32(MethodEnv* env, 
-				   int argc, uint32 *ap);
-		static double implvN(MethodEnv* env,
-				   int argc, uint32 *ap);
-		
-	private:
-		bool m_haveCookie;
 		int m_cookie;
-		Handler32 m_handler;
+#endif
+		
 	};
-
 
 	/**
 	 * NativeTableEntry is an internal structure used for native
@@ -165,51 +203,71 @@ namespace avmplus
 	 */
 	struct NativeTableEntry
 	{
-		typedef void (ScriptObject::*Handler)();
-		int method_id;
 		enum {
-			kNativePrefix,
 			kNativeMethod,
-			kNativeMethod1,
-			kNativeMethodRest,
-			kNativeMethodV,
-			kNativeMethodV1
-		} type;
+			kNativeMethod1
+		};
+
+#ifdef AVMTHUNK_VERSION
+		AvmThunkNativeThunker thunker;
+		AvmThunkNativeHandler handler;
+#else
+		typedef void (ScriptObject::*Handler)();
 		Handler handler;
-		int cookie;
-		int flags;
+#endif
+		int32_t method_id;
+		int32_t cookie;
+		int32_t flags;
 	};
 
 	/**
 	 * Macros for declaring native methods
 	 */
-#define BEGIN_NATIVE_MAP(_Class) NativeTableEntry _Class::natives[] = {
+	#define BEGIN_NATIVE_MAP(_Class) \
+		NativeTableEntry _Class::natives[] = {
+			
+	#define DECLARE_NATIVE_MAP(_Class) \
+		static ClassClosure* createClassClosure(VTable* cvtable) \
+		{ return new (cvtable->gc(), cvtable->getExtraSize()) _Class(cvtable); } \
+		static NativeTableEntry natives[];
+
+	#define DECLARE_NATIVE_SCRIPT(_Script) \
+		static ScriptObject* createGlobalObject(VTable* vtable, ScriptObject* delegate) \
+		{ return new (vtable->gc(), vtable->getExtraSize()) _Script(vtable, delegate); } \
+		static NativeTableEntry natives[];
+
+#ifdef AVMTHUNK_VERSION
+	
+	#define NATIVE_METHOD(method_id, handler) \
+		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunk, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, 0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
 		
-#define DECLARE_NATIVE_MAP(_Class) static ClassClosure* createClassClosure(VTable* cvtable) \
-{ return new (cvtable->gc(), cvtable->getExtraSize()) _Class(cvtable); } \
-static NativeTableEntry natives[];
+	#define NATIVE_METHOD_FLAGS(method_id, handler, fl) \
+		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunk, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, 0, fl | AbstractFunction::NATIVE_COOKIE },
 
-#define DECLARE_NATIVE_SCRIPT(_Script) static ScriptObject* createGlobalObject(VTable* vtable, ScriptObject* delegate) \
-{ return new (vtable->gc(), vtable->getExtraSize()) _Script(vtable, delegate); } \
-static NativeTableEntry natives[];
-
-#define NATIVE_METHOD(method_id, handler) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethod, (NativeTableEntry::Handler)&handler, 0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
-#define NATIVE_METHOD_FLAGS(method_id, handler, fl) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethod, (NativeTableEntry::Handler)&handler, 0, fl },
-
-#define NATIVE_METHOD2(method_id, handler) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethod, (NativeTableEntry::Handler)(handler), 0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
-#define NATIVE_METHOD2_FLAGS(method_id, handler,fl) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethod, (NativeTableEntry::Handler)(handler), 0, fl },
-
-#define NATIVE_METHOD1(method_id, handler, cookie) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethod1, (NativeTableEntry::Handler)&handler, cookie, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
-#define NATIVE_METHOD1_FLAGS(method_id, handler, cookie, fl) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethod1, (NativeTableEntry::Handler)&handler, cookie, fl },
-
-#define NATIVE_METHODV(method_id, handler) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethodV, (NativeTableEntry::Handler)&handler, 0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
-#define NATIVE_METHODV_FLAGS(method_id, handler, fl) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethodV, (NativeTableEntry::Handler)&handler, 0, fl },
+	#define NATIVE_METHOD1(method_id, handler, cookie) \
+		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunkc, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, cookie, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS | AbstractFunction::NATIVE_COOKIE },
 		
-#define NATIVE_METHODV1(method_id, handler, cookie) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethodV1, (NativeTableEntry::Handler)&handler, cookie, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
-#define NATIVE_METHODV1_FLAGS(method_id, handler, cookie, fl) { avmplus::NativeID::method_id, NativeTableEntry::kNativeMethodV1, (NativeTableEntry::Handler)&handler, cookie, fl },
+	#define NATIVE_METHOD1_FLAGS(method_id, handler, cookie, fl) \
+		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunkc, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
 
+	#define END_NATIVE_MAP() \
+		{ NULL, NULL, -1, 0 } };
+#else
+	#define NATIVE_METHOD(method_id, handler) \
+		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, 0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
+		
+	#define NATIVE_METHOD_FLAGS(method_id, handler, fl) \
+		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, 0, fl },
 
-#define END_NATIVE_MAP() { -1, NativeTableEntry::kNativeMethod, NULL, 0 } };
+	#define NATIVE_METHOD1(method_id, handler, cookie) \
+		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, cookie, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS | AbstractFunction::NATIVE_COOKIE },
+		
+	#define NATIVE_METHOD1_FLAGS(method_id, handler, cookie, fl) \
+		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
+
+	#define END_NATIVE_MAP() \
+		{ NULL, -1, 0 } };
+#endif
 
     /**
 	 * NativeScriptInfo is an internal structure used for
