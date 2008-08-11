@@ -58,13 +58,14 @@ namespace avmplus
 	 */
 
 	class FrameState;
+	class CodegenLIR;
 
 	class Verifier
 	{
 	public:
 
 		#ifdef AVMPLUS_MIR
-		CodegenMIR *mir;
+		CodegenLIR *mir;
 		#endif // AVMPLUS_MIR
 
 		AvmCore *core;
@@ -101,7 +102,7 @@ namespace avmplus
 		 * an exception will be thrown, of type VerifyError.
 		 * @param info the method to verify
 		 */
-		void verify(CodegenMIR *mir);
+		void verify(CodegenLIR *mir);
 		FrameState* getFrameState(sintptr targetpc);
 
 	private:

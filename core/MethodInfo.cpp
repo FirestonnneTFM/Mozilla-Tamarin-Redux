@@ -38,7 +38,7 @@
 
 #include "avmplus.h"
 #ifdef AVMPLUS_MIR
-#include "../codegen/CodegenMIR.h"
+#include "../codegen/CodegenLIR.h"
 #endif
 
 namespace avmplus
@@ -96,7 +96,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		if (core->config.turbo && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
-			CodegenMIR mir(this);
+			CodegenLIR mir(this);
 			verifier.verify(&mir);	// pass 2 - data flow
 			if (!mir.overflow)
 				mir.emitMD(); // pass 3 - generate code
