@@ -49,10 +49,18 @@
 #endif
 
 namespace avmplus
-{	
-#define IS_BOTH_INTEGER(a,b) \
-	((a & 7) == (b & 7) && (a & 7) == kIntegerType)
+{
 
+#define IS_INTEGER(v)        (((v) & 7) == kIntegerType)
+#define IS_DOUBLE(v)         (((v) & 7) == kDoubleType)
+#define IS_BOOLEAN(v)        (((v) & 7) == kBooleanType)
+#define IS_STRING(v)		 (((v) & 7) == kStringType)
+#define FITS_IN_INTEGER(v)   ((((int32)v << 3) >> 3) == v)
+#define MAKE_INTEGER(v)      (((v) << 3) | kIntegerType)
+#define INTEGER_VALUE(v)     ((int32)(v) >> 3)
+#define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0) // less control flow but more registers -- which is better?
+//#define IS_BOTH_INTEGER(a,b) ((IS_INTEGER(a) && IS_INTEGER(b))
+	
 	inline int readS24(const byte *pc) {
 		return AvmCore::readS24(pc);
 	}
@@ -217,8 +225,6 @@ namespace avmplus
 		// make sure scope chain depth is right before entering.
 		volatile int initialScopeDepth = scopeDepth;
 
-		Atom tempAtom;
-
 		PoolObject *pool = info->pool;
 		const List<Stringp, LIST_RCObjects>& cpool_string = pool->cpool_string;
         const List<int,LIST_NonGCObjects>& cpool_int = pool->cpool_int;
@@ -285,15 +291,16 @@ namespace avmplus
             switch (*pc++)
             {
 
-	#define return_impl(val) {\
+	#define return_impl(val) \
+            {\
 				save_expc();\
 				core->codeContextAtom = savedCodeContext;\
 				tempAtom = toplevel->coerce(val, info->returnTraits());\
 				restore_caller_dxns();\
 			}
-		
 
 			INSTR(returnvoid) {
+				Atom tempAtom;
 				#ifdef DEBUGGER
 				env->debugExit(&callStackNode);
 				#endif				
@@ -306,6 +313,7 @@ namespace avmplus
 			}
 
             INSTR(returnvalue) {
+				Atom tempAtom;
 				#ifdef DEBUGGER
 				env->debugExit(&callStackNode);
 				#endif				
@@ -404,10 +412,12 @@ namespace avmplus
 
 			INSTR(jump) {
 				int j = readS24(pc);
-				if (j < 0)
+				if (j < 0) {
+					save_expc();
 				    core->branchCheck(env, interruptable, j);
+					restore_dxns();
+				}
 				pc += 3+j;
-				restore_dxns();
                 NEXT();
 			}
 
@@ -519,17 +529,18 @@ namespace avmplus
 			}
 
             INSTR(swap) {
-                tempAtom = sp[0];
+                Atom tempAtom = sp[0];
                 sp[0] = sp[-1];
                 sp[-1] = tempAtom;
                 NEXT();
 			}
 
             INSTR(convert_s) {
-				save_expc();
-				if ((sp[0] & 7) != kStringType)
+				if ((sp[0] & 7) != kStringType) {
+					save_expc();
 				    sp[0] = core->string(sp[0])->atom();
-				restore_dxns();
+					restore_dxns();
+				}
                 NEXT();
 			}
 
@@ -547,11 +558,12 @@ namespace avmplus
 				NEXT();
 			}
 
-	#define coerce_d_impl() \
-				save_expc();\
-				if ((sp[0] & 7) != kDoubleType) \
+#define coerce_d_impl() \
+				if (!IS_DOUBLE(sp[0])) { \
+					save_expc(); \
 				    sp[0] = core->numberAtom(sp[0]);	\
-				restore_dxns();
+					restore_dxns(); \
+				}
 
             INSTR(coerce_d) {
 				coerce_d_impl();
@@ -564,7 +576,7 @@ namespace avmplus
 			}
 
 	#define coerce_b_impl() \
-				if ((sp[0] & 7) != kBooleanType) \
+				if (!IS_BOOLEAN(sp[0])) \
 				    sp[0] = core->booleanAtom(sp[0]);
 
             INSTR(convert_b) {
@@ -578,15 +590,24 @@ namespace avmplus
 			}
 
             INSTR(convert_o) {
-				save_expc();
-				if (AvmCore::isNullOrUndefined(sp[0]))
+				if (AvmCore::isNullOrUndefined(sp[0])) {
+					save_expc();
 				    env->nullcheck(sp[0]);
+				}
                 NEXT();
 			}
 
             INSTR(negate) {
+				Atom val = sp[0];
+				if (IS_INTEGER(val) && val != MAKE_INTEGER(0)) {
+					int32 v = -(val >> 3);
+					if (FITS_IN_INTEGER(v)) {
+						sp[0] = MAKE_INTEGER(v);
+						NEXT();
+					}
+				}
 				save_expc();
-                sp[0] = core->doubleToAtom(-core->number(sp[0]));
+				sp[0] = core->doubleToAtom(-core->number(val));
 				restore_dxns();
                 NEXT();
 			}
@@ -598,72 +619,9 @@ namespace avmplus
                 NEXT();
 			}
 
-            INSTR(increment) {
-				save_expc();
-				*sp = core->numberAtom(*sp);
-				core->increment_d(sp, 1);
-				restore_dxns();
-                NEXT();
-			}
-
-            INSTR(increment_i) {
-				save_expc();
-				core->increment_i(sp, 1);
-				restore_dxns();
-                NEXT();
-			}
-
-			INSTR(inclocal)
-			{
-				save_expc();
-				Atom* rp = framep+readU30(pc);
-				*rp = core->numberAtom(*rp);
-				core->increment_d(rp, 1);
-				restore_dxns();
-				NEXT();
-			}
-
 			INSTR(kill) {
 				framep[readU30(pc)] = undefinedAtom;
 				NEXT();
-			}
-
-            INSTR(inclocal_i) {
-				save_expc();
-				core->increment_i(framep+readU30(pc), 1);
-				restore_dxns();
-				NEXT();
-			}
-
-            INSTR(decrement) {
-				save_expc();
-				*sp = core->numberAtom(*sp);
-				core->increment_d(sp, -1);
-				restore_dxns();
-                NEXT();
-			}
-
-            INSTR(decrement_i) {
-				save_expc();
-				core->increment_i(sp, -1);
-				restore_dxns();
-                NEXT();
-			}
-
-			INSTR(declocal) {
-				save_expc();
-				Atom* rp = framep+readU30(pc);
-				*rp = core->numberAtom(*rp);
-				core->increment_d(rp, -1);
-				restore_dxns();
-				NEXT();
-			}
-
-			INSTR(declocal_i) {
-				save_expc();
-				core->increment_i(framep+readU30(pc), -1);
-				restore_dxns();
-                NEXT();
 			}
 
             INSTR(typeof) {
@@ -708,23 +666,119 @@ namespace avmplus
                 NEXT();
 			}	
 
-            INSTR(add) {
+// Add lhs and rhs if they are both fixnums and computation does not overflow.
+// On success, store the result in dest, and NEXT.
+#define FAST_ADD_MAYBE(lhs,rhs,dest) \
+	if (IS_BOTH_INTEGER(lhs, rhs)) { \
+		uint32 lop = (uint32)lhs ^ kIntegerType, rop = (uint32)rhs ^ kIntegerType; \
+		uint32 result = lop + rop; \
+		if ((int32)(lop ^ rop) < 0 || (int32)(result ^ lop) >= 0) { \
+			dest = result | kIntegerType; \
+			NEXT(); \
+		} \
+	}
+
+            INSTR(increment) {
+				Atom lhs = *sp;
+				Atom rhs = (1<<3) | kIntegerType;
+				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
 				save_expc();
-                sp[-1] = toplevel->add2(sp[-1], sp[0]);
-                sp--;
+				*sp = core->numberAtom(lhs);
+				core->increment_d(sp, 1);
+				restore_dxns();
+                NEXT();
+			}
+
+            INSTR(increment_i) {
+				Atom lhs = *sp;
+				Atom rhs = (1<<3) | kIntegerType;
+				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
+				save_expc();
+				core->increment_i(sp, 1);
+				restore_dxns();
+                NEXT();
+			}
+
+			INSTR(inclocal) {
+				Atom* rp = framep+readU30(pc);
+				Atom lhs = *rp;
+				Atom rhs = (1<<3)|kIntegerType;
+				FAST_ADD_MAYBE(lhs,rhs,*rp);
+				save_expc();
+				*rp = core->numberAtom(*rp);
+				core->increment_d(rp, 1);
+				restore_dxns();
+				NEXT();
+			}
+
+            INSTR(inclocal_i) {
+				Atom* rp = framep+readU30(pc);
+				Atom lhs = *rp;
+				Atom rhs = (1<<3)|kIntegerType;
+				FAST_ADD_MAYBE(lhs,rhs,*rp);
+				save_expc();
+				core->increment_i(rp, 1);
+				restore_dxns();
+				NEXT();
+			}
+
+            INSTR(decrement) {
+				// OPTIMIZEME
+				save_expc();
+				*sp = core->numberAtom(*sp);
+				core->increment_d(sp, -1);
+				restore_dxns();
+                NEXT();
+			}
+
+            INSTR(decrement_i) {
+				// OPTIMIZEME
+				save_expc();
+				core->increment_i(sp, -1);
+				restore_dxns();
+                NEXT();
+			}
+
+			INSTR(declocal) {
+				// OPTIMIZEME
+				save_expc();
+				Atom* rp = framep+readU30(pc);
+				*rp = core->numberAtom(*rp);
+				core->increment_d(rp, -1);
+				restore_dxns();
+				NEXT();
+			}
+
+			INSTR(declocal_i) {
+				// OPTIMIZEME
+				save_expc();
+				core->increment_i(framep+readU30(pc), -1);
+				restore_dxns();
+                NEXT();
+			}
+
+            INSTR(add) {
+				Atom lhs = sp[-1], rhs=sp[0];
+				sp--;
+				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
+				save_expc();
+                sp[0] = toplevel->add2(lhs, rhs);
 				restore_dxns();
                 NEXT();
 			}
 
 			INSTR(add_i) {
+				Atom lhs = sp[-1], rhs=sp[0];
+				sp--;
+				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
 				save_expc();
-				sp[-1] = core->intToAtom(core->integer(sp[-1]) + core->integer(sp[0]));
-                sp--;
+				sp[0] = core->intToAtom(core->integer(lhs) + core->integer(rhs));
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(subtract) {
+				// OPTIMIZEME
 				save_expc();
                 sp[-1] = core->doubleToAtom(core->number(sp[-1]) - core->number(sp[0]));
                 sp--;
@@ -733,6 +787,7 @@ namespace avmplus
 			}
 
             INSTR(subtract_i) {
+				// OPTIMIZEME
 				save_expc();
 				sp[-1] = core->intToAtom(core->integer(sp[-1]) - core->integer(sp[0]));
                 sp--;
@@ -741,6 +796,7 @@ namespace avmplus
 			}
 
             INSTR(multiply) {
+				// OPTIMIZEME
 				save_expc();
                 sp[-1] = core->doubleToAtom(core->number(sp[-1]) * core->number(sp[0]));
                 sp--;
@@ -749,6 +805,7 @@ namespace avmplus
 			}
 
 			INSTR(multiply_i) {
+				// OPTIMIZEME
 				save_expc();
                 sp[-1] = core->intToAtom(core->integer(sp[-1]) * core->integer(sp[0]));
                 sp--;
@@ -773,53 +830,96 @@ namespace avmplus
 			}
 
             INSTR(lshift) {
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
+				sp--;
+				if (IS_BOTH_INTEGER(lhs,rhs)) {
+					int32 result = INTEGER_VALUE(lhs) << (INTEGER_VALUE(rhs) & 0x1F);
+					if (FITS_IN_INTEGER(result)) {
+						sp[0] = MAKE_INTEGER(result);
+						NEXT();
+					}
+				}
 				save_expc();
-				sp[-1] = core->intToAtom( core->integer(sp[-1]) << (core->toUInt32(sp[0])&0x1F) );
-                sp--;
+				sp[0] = core->intToAtom( core->integer(lhs) << (core->toUInt32(rhs)&0x1F) );
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(rshift) {
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
+				sp--;
+				if (IS_BOTH_INTEGER(lhs,rhs)) {
+					sp[0] = MAKE_INTEGER(INTEGER_VALUE(lhs) >> (INTEGER_VALUE(rhs) & 0x1F));
+					NEXT();
+				}
 				save_expc();
-				sp[-1] = core->intToAtom( core->integer(sp[-1]) >> (core->toUInt32(sp[0])&0x1F) );
-                sp--;
+				sp[0] = core->intToAtom( core->integer(lhs) >> (core->toUInt32(rhs)&0x1F) );
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(urshift) {
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
+				sp--;
+				if (IS_BOTH_INTEGER(lhs,rhs)) {
+					uint32 result = ((uint32)INTEGER_VALUE(lhs) >> (INTEGER_VALUE(rhs) & 0x1F));
+					if ((result & 0xF0000000U) == 0) {
+						sp[0] = MAKE_INTEGER(result);
+						NEXT();
+					}
+				}
 				save_expc();
-                sp[-1] = core->uintToAtom( core->toUInt32(sp[-1]) >> (core->toUInt32(sp[0])&0x1F) );
-                sp--;
+                sp[0] = core->uintToAtom( core->toUInt32(lhs) >> (core->toUInt32(rhs)&0x1F) );
                 NEXT();
 			}
 
             INSTR(bitand) {
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
+				sp--;
+				if (IS_BOTH_INTEGER(lhs,rhs)) {
+					sp[0] = lhs & rhs;
+					NEXT();
+				}
 				save_expc();
-				sp[-1] = core->intToAtom(core->integer(sp[-1]) & core->integer(sp[0]));
-                sp--;
+				sp[0] = core->intToAtom(core->integer(lhs) & core->integer(rhs));
 				restore_dxns();
 				NEXT();
 			}
 
             INSTR(bitor) {
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
+				sp--;
+				if (IS_BOTH_INTEGER(lhs,rhs)) {
+					sp[0] = lhs | rhs;
+					NEXT();
+				}
 				save_expc();
-                sp[-1] = core->intToAtom(core->integer(sp[-1]) | core->integer(sp[0]));
-                sp--;
+                sp[0] = core->intToAtom(core->integer(lhs) | core->integer(rhs));
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(bitxor) {
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
+				sp--;
+				if (IS_BOTH_INTEGER(lhs,rhs)) {
+					sp[0] = (lhs ^ rhs) | kIntegerType;
+					NEXT();
+				}
 				save_expc();
-				sp[-1] = core->intToAtom(core->integer(sp[-1]) ^ core->integer(sp[0]));
-                sp--;
+				sp[0] = core->intToAtom(core->integer(lhs) ^ core->integer(rhs));
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(equals) {
+				// OPTIMIZEME?
 				save_expc();
 				sp[-1] = core->eq(sp[-1], sp[0]);
                 sp--;
@@ -828,6 +928,7 @@ namespace avmplus
 			}
 
             INSTR(strictequals) {
+				// OPTIMIZEME?
                 sp[-1] = core->stricteq(sp[-1], sp[0]);
                 sp--;
                 NEXT();
@@ -844,15 +945,16 @@ namespace avmplus
 			}
 
             INSTR(iftrue) {
-				save_expc();
 				Atom bval = *(sp--);
-				if ((bval & 7) != kBooleanType)
-					bval = core->booleanAtom(bval);
+				if (!IS_BOOLEAN(bval))
+					bval = core->booleanAtom(bval);  // does not throw or change the XML namespace
 				if (bval & booleanNotMask)
 				{
 					int j = readS24(pc);
-					if (j < 0)
+					if (j < 0) {
+						save_expc();
 						core->branchCheck(env, interruptable, j);
+					}
                     pc += 3+j;
 				}
 				else
@@ -861,15 +963,16 @@ namespace avmplus
 			}
 
             INSTR(iffalse) {
-				save_expc();
 				Atom bval = *(sp--);
-				if ((bval & 7) != kBooleanType)
-					bval = core->booleanAtom(bval);
+				if (!IS_BOOLEAN(bval))
+					bval = core->booleanAtom(bval);  // does not throw or change the XML namespace
 				if (!(bval & booleanNotMask))
 				{
 					int j = readS24(pc);
-					if (j < 0)
+					if (j < 0) {
+						save_expc();
 						core->branchCheck(env, interruptable, j);
+					}
                     pc += 3+j;
 				}
 				else
@@ -908,7 +1011,7 @@ namespace avmplus
                 NEXT();
 			}
 
-		   INSTR(ifstricteq) {
+		    INSTR(ifstricteq) {
 				IFEQ(==, stricteq, trueAtom);
 				NEXT();
 			}
@@ -1140,8 +1243,8 @@ namespace avmplus
 					
             INSTR(newobject) {
 				save_expc();
-                argc = readU30(pc);
-                tempAtom = env->op_newobject(sp, argc)->atom();
+                int32 argc = readU30(pc);
+                Atom tempAtom = env->op_newobject(sp, argc)->atom();
                 *(sp -= 2*argc-1) = tempAtom;
 				restore_dxns();
                 NEXT();
@@ -1149,8 +1252,8 @@ namespace avmplus
 
             INSTR(newarray) {
 				save_expc();
-                argc = readU30(pc);
-                tempAtom = toplevel->arrayClass->newarray(sp-argc+1, argc)->atom();
+                int32 argc = readU30(pc);
+                Atom tempAtom = toplevel->arrayClass->newarray(sp-argc+1, argc)->atom();
                 *(sp -= argc-1) = tempAtom;
 				restore_dxns();
                 NEXT();
@@ -1308,27 +1411,33 @@ namespace avmplus
 
 			INSTR(nextname) {
 				save_expc();
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
 				sp--;
 				// verifier checks for int
-				sp[0] = env->nextname(sp[0], AvmCore::integer_i(sp[1]));
+				sp[0] = env->nextname(lhs, AvmCore::integer_i(rhs));
 				restore_dxns();
 				NEXT();
 			}
 
 			INSTR(nextvalue) {
 				save_expc();
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
 				sp--;
 				// verifier checks for int
-				sp[0] = env->nextvalue(sp[0], AvmCore::integer_i(sp[1]));
+				sp[0] = env->nextvalue(lhs, AvmCore::integer_i(rhs));
 				restore_dxns();
 				NEXT();
 			}
 				
 			INSTR(hasnext) {
 				save_expc();
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
 				sp--;
 				// verifier checks for int
-				sp[0] = core->intToAtom(env->hasnext(sp[0], AvmCore::integer_i(sp[1])));
+				sp[0] = core->intToAtom(env->hasnext(lhs, AvmCore::integer_i(rhs)));
 				restore_dxns();
 				NEXT();
 			}
@@ -1372,12 +1481,13 @@ namespace avmplus
 
             INSTR(setslot) {
 				save_expc();
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
 				sp -= 2;
-				env->nullcheck(sp[1]);
+				env->nullcheck(lhs);
 				int slot_id = readU30(pc)-1;
-				ScriptObject* o = AvmCore::atomToScriptObject(sp[1]);
-				o->setSlotAtom(slot_id,
-					toplevel->coerce(sp[2], o->traits()->getSlotTraits(slot_id)));
+				ScriptObject* o = AvmCore::atomToScriptObject(lhs);
+				o->setSlotAtom(slot_id, toplevel->coerce(rhs, o->traits()->getSlotTraits(slot_id)));
 				restore_dxns();
 				NEXT();
 			}
@@ -1404,9 +1514,9 @@ namespace avmplus
 				}
 
 				int slot_id = readU30(pc)-1;
+				Atom op = sp[0];
 				sp--;
-				global->setSlotAtom(slot_id, 
-					toplevel->coerce(sp[1], global->traits()->getSlotTraits(slot_id)));
+				global->setSlotAtom(slot_id, toplevel->coerce(op, global->traits()->getSlotTraits(slot_id)));
 				restore_dxns();
 				NEXT();
 			}
@@ -1432,10 +1542,10 @@ namespace avmplus
 
 			INSTR(call) {
 				save_expc();
-                argc = readU30(pc);
+                int32 argc = readU30(pc);
                 // stack in: function, receiver, arg1, ... argN
                 // stack out: result
-                tempAtom = toplevel->op_call(sp[-argc-1]/*function*/, argc, sp-argc);
+                Atom tempAtom = toplevel->op_call(sp[-argc-1]/*function*/, argc, sp-argc);
                 *(sp = sp-argc-1) = tempAtom;
 				restore_dxns();
                 NEXT();
@@ -1443,10 +1553,10 @@ namespace avmplus
 
 			INSTR(construct) {
 				save_expc();
-                argc = readU30(pc);
+                int32 argc = readU30(pc);
                 // stack in: function, arg1, ..., argN
                 // stack out: new instance
-                tempAtom = toplevel->op_construct(sp[-argc]/*function*/, argc, sp-argc);				
+                Atom tempAtom = toplevel->op_construct(sp[-argc]/*function*/, argc, sp-argc);				
                 *(sp = sp-argc) = tempAtom;
 				restore_dxns();
                 NEXT();
@@ -1476,11 +1586,11 @@ namespace avmplus
 				// stack in: receiver, arg1..N
 				// stack out: result
 				int method_id = readU30(pc);
-				argc = readU30(pc);
+				int32 argc = readU30(pc);
 				env->nullcheck(sp[-argc]);
 				// ISSUE if arg types were checked in verifier, this coerces again.
 				MethodEnv* f = env->vtable->abcEnv->methods[method_id];
-				tempAtom = f->coerceEnter(argc, sp-argc);
+				Atom tempAtom = f->coerceEnter(argc, sp-argc);
 				*(sp -= argc) = tempAtom;
 				restore_dxns();
 				NEXT();
@@ -1491,7 +1601,7 @@ namespace avmplus
 				// stack in: receiver, arg1..N
 				// stack out: result
 				uint32 disp_id = readU30(pc)-1;
-				argc = readU30(pc);
+				int32 argc = readU30(pc);
 				// null check included in env->callmethod
 				//tempAtom = env->callmethod(disp_id, argc, sp-argc);
 				Atom* atomv = sp-argc;
@@ -1502,7 +1612,7 @@ namespace avmplus
 				AvmAssert(disp_id < vtable->traits->methodCount);
 				MethodEnv *f = vtable->methods[disp_id];
 				// ISSUE if arg types were checked in verifier, this coerces again.
-				tempAtom = f->coerceEnter(argc, atomv);
+				Atom tempAtom = f->coerceEnter(argc, atomv);
 
 				*(sp -= argc) = tempAtom;
 				restore_dxns();
@@ -1515,7 +1625,7 @@ namespace avmplus
 				/* ( obj [ns [name]] arg1..N -- result ) */ \
 				Multiname multiname;\
 				pool->parseMultiname(multiname, readU30(pc));\
-				argc = readU30(pc);\
+				int32 argc = readU30(pc);\
 				Atom base;\
 				Atom *atomv = sp - argc;\
 				sp = multiname.isRuntime() ? initMultiname(env, multiname, atomv) : atomv;\
@@ -1547,11 +1657,11 @@ namespace avmplus
 				// stack out: result
 				Multiname name;
 				pool->parseMultiname(name, readU30(pc));
-				argc = readU30(pc);
+				int32 argc = readU30(pc);
 				if (!name.isRuntime())
 				{
 					// np check in toVTable
-					tempAtom = toplevel->constructprop(&name, argc, sp-argc, toplevel->toVTable(sp[-argc]));
+					Atom tempAtom = toplevel->constructprop(&name, argc, sp-argc, toplevel->toVTable(sp[-argc]));
 					*(sp -= argc) = tempAtom;
 				}
 				else
@@ -1567,10 +1677,10 @@ namespace avmplus
 
 			INSTR(applytype) {
 				save_expc();
-				argc = readU30(pc);
+				int32 argc = readU30(pc);
 				// stack in: factory, arg1, ... argN
 				// stack out: result
-				tempAtom = toplevel->op_applytype(sp[-argc]/*function*/, argc, sp-argc+1);				
+				Atom tempAtom = toplevel->op_applytype(sp[-argc]/*function*/, argc, sp-argc+1);				
 				*(sp = sp-argc) = tempAtom;
 				restore_dxns();
 				NEXT();
@@ -1582,11 +1692,11 @@ namespace avmplus
 				/* ( obj [ns [name]] arg1..N -- ) */ \
 				Multiname name; \
 				pool->parseMultiname(name, readU30(pc)); \
-				argc = readU30(pc); \
+				int32 argc = readU30(pc); \
 				if (!name.isRuntime()) \
 				{ \
 					env->nullcheck(sp[-argc]); \
-					tempAtom = env->callsuper(&name, argc, sp-argc); \
+					Atom tempAtom = env->callsuper(&name, argc, sp-argc); \
 					*(sp -= argc) = tempAtom; \
 				} \
 				else \
@@ -1661,7 +1771,7 @@ namespace avmplus
 				save_expc();
 				// stack in:  obj arg1..N
 				// stack out: 
-				argc = readU30(pc);
+				int32 argc = readU30(pc);
 				env->nullcheck(sp[-argc]);
 				env->vtable->base->init->coerceEnter(argc, sp-argc);
 				sp -= argc+1;
@@ -1687,8 +1797,10 @@ namespace avmplus
 
 			INSTR(astypelate) {
 				save_expc();
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
 				sp--;
-				sp[0] = env->astype(sp[0], env->toClassITraits(sp[1]));
+				sp[0] = env->astype(lhs, env->toClassITraits(rhs));
 				restore_dxns();
                 NEXT();
 			}
@@ -1711,9 +1823,12 @@ namespace avmplus
 			}
 
 			INSTR(coerce_s) {
-				save_expc();
-				sp[0] = AvmCore::isNullOrUndefined(sp[0]) ? nullStringAtom : core->string(sp[0])->atom();
-				restore_dxns();
+				Atom val = sp[0];
+				if (!IS_STRING(val)) {
+					save_expc();
+					sp[0] = AvmCore::isNullOrUndefined(val) ? nullStringAtom : core->string(val)->atom();
+					restore_dxns();
+				}
 				NEXT();
 			}
 
@@ -1731,17 +1846,17 @@ namespace avmplus
 
 			INSTR(istypelate) {
 				save_expc();
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
 				sp--;
-				sp[0] = core->istypeAtom(sp[0], env->toClassITraits(sp[1]));
+				sp[0] = core->istypeAtom(lhs, env->toClassITraits(rhs));
 				restore_dxns();
                 NEXT();
 			}
 
             INSTR(pushbyte) {
-				save_expc();
 				sp++;
-                sp[0] = ((sint8)*pc++)<<3|kIntegerType;
-				restore_dxns();
+                sp[0] = MAKE_INTEGER((sint8)*pc++);
                 NEXT();
 			}
 
@@ -1773,23 +1888,25 @@ namespace avmplus
 			}
 
             INSTR(pushscope) {
-				save_expc();
+				Atom s = sp[0];
 				sp--;
-				Atom s = sp[1];
-				env->nullcheck(s);
+				if (AvmCore::isNullOrUndefined(s)) {
+					save_expc();
+					env->nullcheck(s);
+				}
 				scopeBase[scopeDepth++] = s;
 				NEXT();
 			}
 			
             INSTR(pushwith) {
-				save_expc();
+				Atom s = sp[0];
 				sp--;
-				Atom s = sp[1];
-				env->nullcheck(s);
-				if (!withBase)
-				{
-					withBase = scopeBase+scopeDepth;
+				if (AvmCore::isNullOrUndefined(s)) {
+					save_expc();
+					env->nullcheck(s);
 				}
+				if (!withBase)
+					withBase = scopeBase+scopeDepth;
 				scopeBase[scopeDepth++] = s;
 				NEXT();
 			}
@@ -1815,39 +1932,47 @@ namespace avmplus
             INSTR(popscope) {
 				scopeDepth--;
 				if (withBase >= scopeBase+scopeDepth)
-				{
 					withBase = NULL;
+				NEXT();
+			}
+
+			INSTR(coerce_i) {
+				Atom val = sp[0];
+				if (!IS_INTEGER(val)) {
+					save_expc();
+					sp[0] = core->intAtom(val);
+					restore_dxns();
 				}
 				NEXT();
 			}
 
-	#define coerce_i_impl() \
-				save_expc();\
-                sp[0] = core->intAtom(sp[0]);\
-				restore_dxns();
-
-			INSTR(coerce_i) {
-				coerce_i_impl();
-				NEXT();
-			}
-
             INSTR(convert_i) {
-				coerce_i_impl();
+				Atom val = sp[0];
+				if (!IS_INTEGER(val)) {
+					save_expc();
+					sp[0] = core->intAtom(val);
+					restore_dxns();
+				}
                 NEXT();
 			}
 
-	#define coerce_u_impl() \
-				save_expc();\
-                sp[0] = core->uintAtom(sp[0]);\
-				restore_dxns();
-
 			INSTR(coerce_u) {
-				coerce_u_impl();
+				Atom val = sp[0];
+				if (!IS_INTEGER(val) || val < 0) {
+					save_expc();
+					sp[0] = core->uintAtom(val);
+					restore_dxns();
+				}
                 NEXT();
 			}
 
 			INSTR(convert_u) {
-				coerce_u_impl();
+				Atom val = sp[0];
+				if (!IS_INTEGER(val) || val < 0) {
+					save_expc();
+					sp[0] = core->uintAtom(val);
+					restore_dxns();
+				}
                 NEXT();
 			}
 
@@ -1860,16 +1985,20 @@ namespace avmplus
 				
             INSTR(instanceof) {
 				save_expc();
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
 				sp--;
-				sp[0] = toplevel->instanceof(sp[0], sp[1]);
+				sp[0] = toplevel->instanceof(lhs, rhs);
 				restore_dxns();
 				NEXT();
 			}
 
             INSTR(in) {
 				save_expc();
+				Atom lhs = sp[-1];
+				Atom rhs = sp[0];
 				sp--;
-				sp[0] = env->in(sp[0], sp[1]);
+				sp[0] = env->in(lhs, rhs);
 				restore_dxns();
 				NEXT();
 			}
