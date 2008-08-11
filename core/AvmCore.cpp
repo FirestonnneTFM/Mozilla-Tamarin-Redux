@@ -1210,35 +1210,29 @@ return the result of the comparison ToPrimitive(x) == y.
 	
     Atom AvmCore::booleanAtom(Atom atom)
     {
-		if (!AvmCore::isNullOrUndefined(atom))
-		{
-			switch (atom&7)
-			{
-			case kIntegerType:
-				{
-                Atom i = atom>>3;
-					return urshift(i|-i,28)&~7 | kBooleanType;
-				}
-			case kBooleanType:
-				return atom;
-			case kObjectType:
-			case kNamespaceType:
-				return isNull(atom) ? falseAtom : trueAtom;
-			case kStringType:
-				if (isNull(atom)) return falseAtom;
-				return (atomToString(atom)->length() > 0) ? trueAtom : falseAtom;
-			default:
-				{
-					double d = atomToDouble(atom);
-					return !MathUtils::isNaN(d) && d != 0.0 ? trueAtom : falseAtom;
-				}
-			}
+		int tag = atom & 7;
+		
+		if (tag == kIntegerType)
+			return atom == kIntegerType ? falseAtom : trueAtom;
+
+		if (tag == kDoubleType) {
+			double d = atomToDouble(atom);
+			return !MathUtils::isNaN(d) && d != 0.0 ? trueAtom : falseAtom;
 		}
-		else
-		{
+
+		if (AvmCore::isNullOrUndefined(atom))
 			return falseAtom;
-		}
-    }
+
+		if (tag == kStringType)
+			return atomToString(atom)->length() == 0 ? falseAtom : trueAtom;
+		
+		if (tag == kObjectType || tag == kNamespaceType)
+			return trueAtom;
+		
+		AvmAssert(tag == kBooleanType);
+
+		return atom;
+	}
 
 	int AvmCore::boolean(Atom atom)
     {
@@ -1334,7 +1328,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case kSpecialType:
 				return atomToDouble(kNaN);
 			case kBooleanType:
-				return (double) ((sint32)atom>>3);
+				return atom == trueAtom ? 1.0 : 0.0;
 			case kNamespaceType:
 				return number(atomToNamespace(atom)->getURI()->atom());
 			default: // number
@@ -1345,7 +1339,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		else
 		{
 			// ES3 9.3, toNumber(null) == 0
-			return 0;
+			return 0.0;
 		}
     }
 
