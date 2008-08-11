@@ -1253,43 +1253,18 @@ AvmThunkRetType_AvmBox builtin_a2a_oaaa_thunkc(AvmMethodEnv env, uint32_t argc, 
     return AvmToRetType_AvmBox(ret);    
 }
 
-	#if defined(AVMPLUS_ARM) && !defined(_MSC_VER)
-		#define AVMPLUS_RETURN_METHOD_PTR(_class, _method, _desttype, _destname) \
-			union { \
-				void (_class::*bar)(); \
-				_desttype foo[2]; \
-			} u; \
-			u.bar = _method; \
-			const _desttype _destname = u.foo[1];
-	#else
-		#define AVMPLUS_RETURN_METHOD_PTR(_class, _method, _desttype, _destname) \
-			union { \
-				void (_class::*bar)(); \
-				_desttype foo; \
-			} u; \
-			u.bar = _method; \
-			const _desttype _destname = u.foo;
-	#endif
-
-    #define AVMTHUNK_DECLARE_MEMBER_FUNCTION2(ret, args) \
-		typedef ret (*MemberFunction) args ; \
-		AVMPLUS_RETURN_METHOD_PTR(ScriptObject, AVMTHUNK_GET_HANDLER(env), MemberFunction, f)
-
-    #define AVMTHUNK_CALL_MEMBER_FUNCTION2(args) \
-		( (*f) args )
-	
-
 // Object_private__toString
 AvmThunkRetType_AvmString builtin_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
     const uint32_t argoff0 = 0;    
     const uint32_t argoff1 = argoff0 + (sizeof(AvmObject) / sizeof(AvmBox));    
     (void)argc;    
-    AVMTHUNK_DECLARE_MEMBER_FUNCTION2(AvmString, (AvmObject, AvmBox))    
+    AVMTHUNK_DECLARE_MEMBER_FUNCTION(MemberFunction, AvmString, AvmObject, (AvmBox))    
     AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_MEMBER_FUNCTION2(    
+    const AvmString ret = AVMTHUNK_CALL_MEMBER_FUNCTION(    
+        AvmThunkUnbox_AvmObject(argv[argoff0]),         
+        MemberFunction(AVMTHUNK_GET_HANDLER(env)),        
         (        
-			AvmThunkUnbox_AvmObject(argv[argoff0]),         
             AvmThunkUnbox_AvmBox(argv[argoff1])            
         )        
     );    

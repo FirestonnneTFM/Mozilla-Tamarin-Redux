@@ -81,7 +81,12 @@ namespace avmplus
 		resolveSignature(toplevel);
 
 #ifdef AVMTHUNK_VERSION
-		*(AvmThunkNativeThunker*)&this->impl32 = this->nte.thunker;
+		union {
+			Atom (*impl32)(MethodEnv*, int, uint32 *);
+			AvmThunkNativeThunker thunker;
+		} u;
+		u.thunker = this->nte.thunker;
+		this->impl32 = u.impl32;
 #else
 		// generate the native method thunk
 		CodegenMIR cgen(this);

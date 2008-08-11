@@ -197,7 +197,12 @@ namespace avmplus
 
 	int MathUtils::isInfinite(double x)
 	{
-		uint64 v = *((uint64 *)&x);
+		union {
+			double d;
+			uint64_t i;
+		} u;
+		u.d = x;
+		const uint64_t v = u.i;
 		if ((v & 0x7fffffffffffffffLL) != 0x7FF0000000000000LL)
 			return 0;
 		if (v & 0x8000000000000000LL)
@@ -206,20 +211,14 @@ namespace avmplus
 			return 1;
 	}
 
-	#if 0
-	bool MathUtils::isNaN(double x)
-	{
-		return x != x;
-		uint64 v = *((uint64 *)&x);
-		return ((v & 0x7ff0000000000000LL) == 0x7ff0000000000000LL &&  // is a special value
-			    (v & 0x000fffffffffffffLL) != 0x0000000000000000LL);   // not inf
-	}
-	#endif
-
 	bool MathUtils::isNegZero(double x)
 	{
-		uint64 v = *((uint64 *)&x);
-		return (v == 0x8000000000000000LL);
+		union {
+			double d;
+			uint64_t i;
+		} u;
+		u.d = x;
+		return (u.i == 0x8000000000000000LL);
 	}
 
 #endif // UNIX
@@ -229,13 +228,19 @@ namespace avmplus
 #if defined(UNIX) && defined(NAN)
 		return NAN;
 #else
+		union {
+			double d;
+			struct {
 #ifdef AVM10_BIG_ENDIAN
-		uint32 nan[2]={0x7fffffff, 0xffffffff};
+				uint32 msw, lsw;
 #else
-		uint32 nan[2]= {0xffffffff, 0x7fffffff}; 
+				uint32 lsw, msw;
 #endif
-		double g = *(double*)nan;
-		return g;
+			} parts;
+		} nan;
+		nan.parts.msw = 0x7fffffff;
+		nan.parts.lsw = 0xffffffff;
+		return nan.d;
 #endif
 	}
 
