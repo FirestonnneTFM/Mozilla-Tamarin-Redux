@@ -85,6 +85,7 @@ namespace avmplus
         GC *gc;
         AvmCore *core;
         MethodInfo *info;
+        PoolObject *pool;
         Fragmento *frago;
 		LirBuffer *lirbuf;
 		LirWriter *lirout;
@@ -98,6 +99,7 @@ namespace avmplus
         LIns *undefConst;
         bool interruptable;
         CodegenLabel interrupt_label;
+        sintptr lastPcSave;
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(LOpcode op, int32_t disp, LIns *base);
@@ -109,18 +111,30 @@ namespace avmplus
         LIns *defIns(LIns *i);
         LIns *atomToNativeRep(int loc, LIns *i);
         LIns *atomToNativeRep(Traits *, LIns *i);
+        LIns *loadAtomRep(int i);
         LIns *callIns(MirOpcode, uintptr_t funcid, int argc, ...);
         LIns *i2dIns(OP* v);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *binaryIns(LOpcode, LIns *a, LIns *b);
         LIns *localGet(int i);
         LIns *localGetq(int i);
+        LIns *branchIns(LOpcode op, LIns *cond, LIns *target);
+        LIns *retIns(LIns *val);
+        LIns *loadToplevel(LIns* env);
+        LIns *initMultiname(Multiname* multiname, int& csp, bool isDelete =false);
+        LIns *storeAtomArgs(int count, int index);
+        LIns *storeAtomArgs(LIns *obj, int count, int index);
     	void patchPtr(OP** targetp, uintptr_t pc);
     	void patchPtr(OP** targetp, CodegenLabel& l);
+        void patch(LIns *j, uintptr_t pc);
         void patch(LIns *j, CodegenLabel& l);
         bool isDouble(int i);
         bool isPointer(int i);
         void saveState();
+        void label(CodegenLabel &label, LIns *bb);
+        void emitPrep();
+        void emitSampleCheck();
+        void InsDealloc(LIns *a);
 
 	public:
 		CodegenLIR(MethodInfo* info);
