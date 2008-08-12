@@ -152,6 +152,7 @@ namespace avmplus
         if (!pool->codePages) {
             pool->codePages = new (gc) PageMgr();
             pool->codePages->frago = new (gc) Fragmento(core, 24/*16mb*/);
+            pool->codePages->frago->labels = new (gc) LabelMap(core, 0);
         }
         frago = pool->codePages->frago;
     }
@@ -172,6 +173,7 @@ namespace avmplus
         this->state = state;
         lirbuf = new (gc) LirBuffer(frago, helpers::functions);
         lirout = new (gc) LirBufWriter(lirbuf);
+        lirbuf->names = new (gc) LirNameMap(gc, helpers::functions, frago->labels);
         lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
 		
 		abcStart = state->verifier->code_pos;
@@ -470,11 +472,9 @@ namespace avmplus
 			patch(br, interrupt_label);
 		}
 
-		// this is not fatal but its good to know if our prologue estimation code is off.
-		InsAlloc(0);
+        Ins(LIR_label);
 
 		return true;
-
 	}
 
 	void CodegenLIR::emitCall(FrameState* state, AbcOpcode opcode, sintptr method_id, int argc, Traits* result) {
