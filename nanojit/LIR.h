@@ -68,6 +68,7 @@ namespace nanojit
 		LIR_ld		= 12,
         LIR_alloc   = 13, // alloca some stack space
         LIR_sti     = 14,
+        LIR_ret     = 15,
 		LIR_call	= 18,
 			
 		// guards
@@ -129,6 +130,7 @@ namespace nanojit
 		 */
 		LIR_stq		= LIR_st | LIR64,
 		LIR_stqi	= LIR_sti | LIR64,
+        LIR_fret    = LIR_ret | LIR64,
 		LIR_quad    = LIR_int | LIR64,
 		LIR_ldq		= LIR_ld    | LIR64,
 
@@ -326,7 +328,9 @@ namespace nanojit
 		bool isconstval(int32_t val) const;
 		bool isconstq() const;
         bool isTramp() const {return isop(LIR_neartramp) || isop(LIR_tramp); }
-		bool isBranch() const { return isop(LIR_jt) || isop(LIR_jf) || isop(LIR_j); }
+		bool isBranch() const {
+            return isop(LIR_jt) || isop(LIR_jf) || isop(LIR_j) || isop(LIR_ret) || isop(LIR_fret);
+        }
 		
 		void setimm16(int32_t i);
 		void setimm24(int32_t i);
@@ -337,6 +341,7 @@ namespace nanojit
 		void setOprnd3(LIns*);
         void setDisp(int8_t d);
 		void target(LIns* t);
+        LIns **targetAddr();
 		LIns* getTarget();
 
         SideExit *exit();

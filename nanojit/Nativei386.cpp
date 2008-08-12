@@ -379,8 +379,10 @@ namespace nanojit
 #elif defined NANOJIT_AMD64
 			prefer &= rmask(RAX);
 #endif
-		else if (op == LIR_param)
-			prefer &= rmask(Register(i->imm8()));
+        else if (op == LIR_param) {
+            if (i->imm8() < sizeof(argRegs)/sizeof(argRegs[0]))
+    			prefer &= rmask(Register(i->imm8()));
+        }
         else if (op == LIR_callh || op == LIR_rsh && i->oprnd1()->opcode()==LIR_callh)
 #if defined NANOJIT_IA32
             prefer &= rmask(EDX);

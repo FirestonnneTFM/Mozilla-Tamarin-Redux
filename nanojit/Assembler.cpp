@@ -987,10 +987,17 @@ namespace nanojit
 				}
 				case LIR_param:
 				{
-					Register w = Register(ins->imm8());
-                    NanoAssert(w != UnknownReg);
-					// incoming arg in register
-					prepResultReg(ins, rmask(w));
+                    int a = ins->imm8();
+                    // fixme - this is __fastcall specific!
+                    if (a < sizeof(argRegs)/sizeof(argRegs[0])) {
+					    Register w = Register(a);
+                        NanoAssert(w != UnknownReg);
+					    // incoming arg in register
+					    prepResultReg(ins, rmask(w));
+                    } else {
+                        // incoming arg is on stack
+                        NanoAssert(false);
+                    }
 					break;
 				}
 				case LIR_qlo:

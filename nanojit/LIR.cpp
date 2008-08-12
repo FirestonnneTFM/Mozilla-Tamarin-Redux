@@ -47,13 +47,13 @@ namespace nanojit
 
 	const uint8_t operandCount[] = {
 	/* 0 */		2, 2, /*trace*/0, /*nearskip*/0, /*skip*/0, /*neartramp*/0, /*tramp*/0, 0, /*def*/2, 1,
-	/* 10 */	/*param*/0, 2, 2, /*alloc*/0, 2, 2, 2, 2, /*call*/0, /*loop*/0,
+	/* 10 */	/*param*/0, 2, 2, /*alloc*/0, 2, /*ret*/1, 2, 2, /*call*/0, /*loop*/0,
 	/* 20 */	/*x*/0, 0, 1, 1, /*label*/0, 2, 2, 2, 2, 2,
 	/* 30 */	2, 2, /*short*/0, /*int*/0, 2, 2, /*neg*/1, 2, 2, 2,
 	/* 40 */	/*callh*/1, 2, 2, 2, /*not*/1, 2, 2, 2, /*xt*/1, /*xf*/1,
 	/* 50 */	/*qlo*/1, /*qhi*/1, 2, /*ov*/1, /*cs*/1, 2, 2, 2, 2, 2,
 	/* 60 */	2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	/* 70 */	2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	/* 70 */	2, 2, 2, 2, 2, 2, 2, 2, 2, /*fret*/1,
 	/* 80 */	2, 2, /*fcall*/0, 2, 2, 2, 2, 2, 2, 2,
 	/* 90 */	2, 2, 2, 2, 2, 2, 2, /*quad*/0, 2, 2,
 	/* 100 */	/*fneg*/1, 2, 2, 2, 2, 2, /*i2f*/1, /*u2f*/1, 2, 2,
@@ -66,14 +66,14 @@ namespace nanojit
 
 	const char* lirNames[] = {
 	/* 0-9 */	"0","1","trace","nearskip","skip","neartramp","tramp","var","def","use",
-	/* 10-19 */	"param","st","ld","alloc","sti","15","16","17","call","loop",
+	/* 10-19 */	"param","st","ld","alloc","sti","ret","16","17","call","loop",
 	/* 20-29 */ "x","j","jt","jf","L","25","feq","flt","fgt","fle",
 	/* 30-39 */ "fge","cmov","short","int","ldc","","neg","add","sub","mul",
 	/* 40-49 */ "callh","and","or","xor","not","lsh","rsh","ush","xt","xf",
 	/* 50-59 */ "qlo","qhi","ldcb","ov","cs","eq","lt","gt","le","ge",
 	/* 60-63 */ "ult","ugt","ule","uge",
 	/* 64-69 */ "LIR64","65","66","67","68","69",
-	/* 70-79 */ "70","71","72","73","74","stq","ldq","77","stqi","79",
+	/* 70-79 */ "70","71","72","73","74","stq","ldq","77","stqi","fret",
 	/* 80-89 */ "80","81","fcall","83","84","85","86","87","88","89",
 	/* 90-99 */ "90","91","92","93","94","95","96","quad","98","99",
 	/* 100-109 */ "fneg","fadd","fsub","fmul","fdiv","qjoin","i2f","u2f","108","109",
@@ -385,7 +385,8 @@ namespace nanojit
 		ensureRoom(1);
 		LInsp l = _buf->next();
 		l->initOpcode(LIR_param);
-		l->c.imm8a = Assembler::argRegs[arg];
+        NanoAssert(isU8(arg));
+		l->c.imm8a = arg;
 
 		_buf->commit(1);
 		_buf->_stats.lir++;
@@ -616,12 +617,16 @@ namespace nanojit
         sti.disp = d;
     }
 
-	void LIns::target(LInsp label)
-	{
-		NanoAssert( isBranch() && label->isop(LIR_label) );
+    LIns **LIns::targetAddr() {
+		NanoAssert(isBranch());
 		LInsp i = (LInsp) this-1 - u.oprnd_2;
 		NanoAssert( i->isTramp() );
-		*((LInsp*)(i-1)) = label;
+		return (LIns**)(i-1);
+    }
+
+    void LIns::target(LInsp label) {
+        NanoAssert(label && label->isop(LIR_label));
+        *(targetAddr()) = label;
 	}
 
 	LInsp LIns::getTarget()
@@ -970,7 +975,7 @@ namespace nanojit
         NanoAssert(j == argc);
 #endif
 
-		NanoAssert(argc < MAXARGS);
+		NanoAssert(argc <= MAXARGS);
 		uint32_t words = argwords(argc);
 		ensureRoom(words+argc+1);  // ins size + possible tramps
 		for (uint32_t i=0; i < argc; i++)
@@ -1576,7 +1581,7 @@ namespace nanojit
 			}
 
 			case LIR_param:
-                sprintf(s, "%s %s", lirNames[op], gpn(i->imm8()));
+                sprintf(s, "%s %d", lirNames[op], i->imm8());
 				break;
 
 			case LIR_var:
@@ -1601,6 +1606,8 @@ namespace nanojit
 				break;
 
 			case LIR_j:
+			case LIR_ret:
+			case LIR_fret:
                 sprintf(s, "%s %s", lirNames[op], formatRef(i->oprnd1()));
 				break;
 				
