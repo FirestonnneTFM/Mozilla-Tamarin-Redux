@@ -47,7 +47,7 @@ namespace nanojit
 
 	const uint8_t operandCount[] = {
 	/* 0 */		2, 2, /*trace*/0, /*nearskip*/0, /*skip*/0, /*neartramp*/0, /*tramp*/0, 0, /*def*/2, 1,
-	/* 10 */	/*param*/0, 2, 2, 2, 2, 2, 2, 2, /*call*/0, /*loop*/0,
+	/* 10 */	/*param*/0, 2, 2, /*alloc*/0, 2, 2, 2, 2, /*call*/0, /*loop*/0,
 	/* 20 */	/*x*/0, 0, 1, 1, /*label*/0, 2, 2, 2, 2, 2,
 	/* 30 */	2, 2, /*short*/0, /*int*/0, 2, 2, /*neg*/1, 2, 2, 2,
 	/* 40 */	/*callh*/1, 2, 2, 2, /*not*/1, 2, 2, 2, /*xt*/1, /*xf*/1,
@@ -66,7 +66,7 @@ namespace nanojit
 
 	const char* lirNames[] = {
 	/* 0-9 */	"0","1","trace","nearskip","skip","neartramp","tramp","var","def","use",
-	/* 10-19 */	"param","st","ld","13","sti","15","16","17","call","loop",
+	/* 10-19 */	"param","st","ld","alloc","sti","15","16","17","call","loop",
 	/* 20-29 */ "x","j","jt","jf","L","25","feq","flt","fgt","fle",
 	/* 30-39 */ "fge","cmov","short","int","ldc","","neg","add","sub","mul",
 	/* 40-49 */ "callh","and","or","xor","not","lsh","rsh","ush","xt","xf",
@@ -1545,6 +1545,11 @@ namespace nanojit
                 sprintf(s, "%s", formatRef(i));
 				break;
 			}
+
+            case LIR_alloc: {
+                sprintf(s, "%s %d", lirNames[op], i->imm16());
+                break;
+            }
 
 			case LIR_quad:
 			{

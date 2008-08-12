@@ -535,6 +535,9 @@ namespace nanojit
 		}
 
 		LIns* ins0(LOpcode v) {
+            if (v == LIR_label) {
+                flush();
+            }
 			LInsp i = add(out->ins0(v));
 			if (i)
 			{
