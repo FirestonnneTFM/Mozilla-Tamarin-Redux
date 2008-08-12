@@ -95,12 +95,19 @@ namespace nanojit
         _ARGSIZE_MASK_ANY = 3
     };
 
+    enum CallingConvention {
+        ABI_FASTCALL,
+        ABI_CDECL,
+        ABI_THISCALL
+    };
+
 	struct CallInfo
 	{
 		intptr_t	_address;
 		uint16_t	_argtypes;		// 6 2-bit fields indicating arg type, by ARGSIZE above (including ret type): a1 a2 a3 a4 a5 ret
-		uint8_t		_cse;			// true if no side effects
-		uint8_t		_fold;		// true if no side effects
+        uint8_t		_cse:1;			// true if no side effects
+        uint8_t		_fold:1;		// true if no side effects
+        uint8_t     _abi:3;
 		verbose_only ( const char* _name; )
 		
 		uint32_t FASTCALL _count_args(uint32_t mask) const;
@@ -111,11 +118,12 @@ namespace nanojit
 		// fargs = args - iargs
 	};
 
+    /*
 	#define FUNCTIONID(name) CI_avmplus_##name
 
 	#define INTERP_FOPCODE_LIST_BEGIN											enum FunctionID {
 	#define INTERP_FOPCODE_LIST_ENTRY_PRIM(nm)									
-	#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(nm,argtypes,cse,fold,ret,args)	FUNCTIONID(nm),
+	#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(nm,argtypes,cse,fold,abi,ret,args)	FUNCTIONID(nm),
 	#define INTERP_FOPCODE_LIST_ENTRY_SUPER(nm,off)								
 	#define INTERP_FOPCODE_LIST_ENTRY_EXTERN(nm,off)							
 	#define INTERP_FOPCODE_LIST_ENTRY_LITC(nm,i)								
@@ -127,7 +135,11 @@ namespace nanojit
 	#undef INTERP_FOPCODE_LIST_ENTRY_SUPER
 	#undef INTERP_FOPCODE_LIST_ENTRY_EXTERN
 	#undef INTERP_FOPCODE_LIST_ENTRY_LITC
-	#undef INTERP_FOPCODE_LIST_END
+	#undef INTERP_FOPCODE_LIST_END 
+    */
+    enum FunctionID {
+        CI_Max
+    };
 
 	#ifdef AVMPLUS_WIN32
 		#define AVMPLUS_ALIGN16(type) __declspec(align(16)) type

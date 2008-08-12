@@ -62,6 +62,7 @@ namespace avmplus
 		const static int TYPEPARAM = 0x40;
 		#ifdef AVMPLUS_MIR
 		friend class CodegenMIR;
+		friend class CodegenLIR;
 		#endif 
 		friend class HeapMultiname;
 		int flags;
