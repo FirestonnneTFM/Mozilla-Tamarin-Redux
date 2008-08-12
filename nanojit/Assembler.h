@@ -104,7 +104,7 @@ namespace nanojit
 	struct CallInfo
 	{
 		intptr_t	_address;
-		uint16_t	_argtypes;		// 6 2-bit fields indicating arg type, by ARGSIZE above (including ret type): a1 a2 a3 a4 a5 ret
+        uint32_t	_argtypes:18;	// 9 2-bit fields indicating arg type, by ARGSIZE above (including ret type): a1 a2 a3 a4 a5 ret
         uint8_t		_cse:1;			// true if no side effects
         uint8_t		_fold:1;		// true if no side effects
         uint8_t     _abi:3;
@@ -123,7 +123,7 @@ namespace nanojit
 
 	#define INTERP_FOPCODE_LIST_BEGIN											enum FunctionID {
 	#define INTERP_FOPCODE_LIST_ENTRY_PRIM(nm)									
-	#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(nm,argtypes,cse,fold,abi,ret,args)	FUNCTIONID(nm),
+	#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(addr,argtypes,cse,fold,abi,ret,args,nm)	FUNCTIONID(nm),
 	#define INTERP_FOPCODE_LIST_ENTRY_SUPER(nm,off)								
 	#define INTERP_FOPCODE_LIST_ENTRY_EXTERN(nm,off)							
 	#define INTERP_FOPCODE_LIST_ENTRY_LITC(nm,i)								

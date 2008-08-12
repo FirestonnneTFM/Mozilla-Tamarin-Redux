@@ -250,7 +250,8 @@ namespace avmplus
 	#ifdef AVMPLUS_MIR
 
 #define INTERP_FOPCODE_LIST_BEGIN static const CallInfo k_functions[] = {
-#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args) { f, sig, cse, fold, abi, #f }
+#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
+    { f, sig, cse, fold, abi, #name },
 #define INTERP_FOPCODE_LIST_END };
 
     #include "../core/vm_fops.h"
@@ -327,6 +328,7 @@ namespace avmplus
 	{
         LOpcode op;
         switch(code) {
+            case MIR_ret: op = a1->isQuad() ? LIR_fret : LIR_ret; break;
             case MIR_neg: op = LIR_neg; break;
             case MIR_fneg: op = LIR_fneg; break;
             default:
@@ -408,21 +410,37 @@ namespace avmplus
 	}
 
 	// address calc instruction
-	OP* CodegenLIR::leaIns(int32_t disp, OP* base)
-	{
-		AvmAssert((disp % 4) == 0);
-        AvmAssert(base->isop(LIR_alloc));
+	OP* CodegenLIR::leaIns(int32_t disp, OP* base) {
         return lirout->ins2(LIR_add, base, lirout->insImm(disp));
 	}
 
-	// call 
-	OP* CodegenLIR::callIns(MirOpcode code, uintptr_t addr, int argCount, ...)
-	{
+    uint32_t find_fid(uintptr_t addr) {
+        uint32_t n = sizeof(k_functions)/sizeof(k_functions[0]);
+        for (uint32_t i=0; i < n; i++) {
+            if (addr == (uintptr_t) k_functions[i]._address)
+                return i;
+        }
         AvmAssert(false);
-        (void) code;
-        (void) addr;
-        (void) argCount;
         return 0;
+    }
+
+	// call 
+	OP* CodegenLIR::callIns(MirOpcode code, uintptr_t addr, int argc, ...)
+	{
+        (void) code;
+        uint32_t fid = find_fid(addr);
+        AvmAssert(argc <= MAXARGS);
+        AvmAssert(argc == (int) k_functions[fid].count_args());
+        AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
+
+        LInsp args[MAXARGS];
+        va_list ap;
+        va_start(ap, argc);
+        for (int i=0; i < argc; i++)
+            args[argc-i-1] = va_arg(ap, LIns*);
+        va_end(ap);
+
+        return lirout->insCall(fid, args);
 	}
 
 	OP* CodegenLIR::callIndirect(MirOpcode code, OP* target, int argCount, ...)
@@ -610,15 +628,6 @@ namespace avmplus
 #endif
 	}
 
-	// position label at OP->target (will trigger patching)
-	void CodegenLIR::mirPatch(OP* i, sintptr targetpc)
-	{
-        AvmAssert(false);
-		//mirPatchPtr(&i->target, targetpc);
-		if (targetpc < state->pc)
-			extendLastUse(i, targetpc);
-	}
-
 	void CodegenLIR::extendLastUse(OP* ins, OP* use, OP* target)
 	{
         AvmAssert(false);
@@ -640,12 +649,11 @@ namespace avmplus
 	void CodegenLIR::InsDealloc(OP* alloc)
 	{
 		AvmAssert(alloc->isop(LIR_alloc));
-        AvmAssert(false);
-        (void) alloc;
+		//alloc->lastUse = ip-1;
 	}
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: core(i->core()), pool(i->pool), info(i)
+		: gc (i->core()->gc), core(i->core()), pool(i->pool), info(i)
 	{
 		state = NULL;
  		interruptable = true;
@@ -696,6 +704,13 @@ namespace avmplus
 		vtune = 0;
 		mdOffsets = 0;
 		#endif /* VTUNE */
+
+        // set up the generator LIR pipeline
+        if (!pool->codePages) {
+            pool->codePages = new (gc) PageMgr();
+            pool->codePages->frago = new (gc) Fragmento(core, 24/*16mb*/);
+            pool->codePages->frago->labels = new (gc) LabelMap(core, 0);
+        }
 	}
 
 	CodegenLIR::~CodegenLIR()
@@ -877,6 +892,14 @@ namespace avmplus
 	bool CodegenLIR::prologue(FrameState* state)
 	{
 		this->state = state;
+
+        Fragmento *frago = pool->codePages->frago;
+        lirbuf = new (gc) LirBuffer(frago, k_functions);
+        lirout = new (gc) LirBufWriter(lirbuf);
+        lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
+        lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
+        lirout = new (gc) ExprFilter(lirout);
+
 		if (overflow) return false;
 
 		abcStart = state->verifier->code_pos;
@@ -900,7 +923,16 @@ namespace avmplus
         env_param = lirout->insParam(0);
         argc_param = lirout->insParam(1);
         ap_param = lirout->insParam(2);
+        localVars = InsAlloc(state->verifier->frameSize * 8);
 
+        verbose_only( if (lirbuf->names) {
+            lirbuf->names->addName(env_param, "env");
+            lirbuf->names->addName(argc_param, "argc");
+            lirbuf->names->addName(ap_param, "ap");
+            lirbuf->names->addName(localVars, "vars");
+        })
+
+        #ifdef DEBUGGER
 		// pointers to traits so that the debugger can decode the locals
 		// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
 		localTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
@@ -935,10 +967,6 @@ namespace avmplus
 			OP *result = Ins(MIR_add, invocationCount, InsConst(1));
 			storeIns(result, offsetof(MethodEnv, invocationCount), env_param);
 		}
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    alloc CallStackNode\n";
-		#endif
 
 		// Allocate space for the call stack
 		_callStackNode = InsAlloc(sizeof(CallStackNode));
@@ -946,11 +974,6 @@ namespace avmplus
 		
 		if (info->setsDxns())
 		{
-			#ifdef AVMPLUS_VERBOSE
-			if (verbose())
-				core->console << "    init dxns\n";
-			#endif
-
 			// dxns = env->vtable->scope->defaultXmlNamespace
 			OP* declVTable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env_param);
 			OP* scope = loadIns(MIR_ldop, offsetof(VTable, scope), declVTable);
@@ -979,11 +1002,6 @@ namespace avmplus
 		OP* apArg = ap_param;
 		if (info->flags & AbstractFunction::HAS_OPTIONAL)
 		{
-			#ifdef AVMPLUS_VERBOSE
-			if (verbose())
-				core->console << "    required and optional args\n";
-			#endif
-
 			// compute offset of first optional arg
 			int offset = 0;
 			for (int i=0, n=info->param_count-info->optional_count; i <= n; i++)
@@ -1009,11 +1027,6 @@ namespace avmplus
 				// first set the local[p+1] = defaultvalue
 				int param = i + info->param_count - info->optional_count; // 0..N
 				int loc = param+1;
-
-				#ifdef AVMPLUS_VERBOSE
-				if (verbose())
-					core->console << "    init optional param " << loc << "\n";
-				#endif
 
 				OP* defaultVal = InsConst(info->getDefaultValue(i));
 				defaultVal = defIns(atomToNativeRep(loc, defaultVal));
@@ -1054,10 +1067,6 @@ namespace avmplus
 		int offset = 0;
 		for (int i=0, n=info->param_count-info->optional_count; i <= n; i++)
 		{
-			#ifdef AVMPLUS_VERBOSE
-			if (verbose())
-				core->console << "    param " << i << "\n";
-			#endif
 			Traits* t = info->paramTraits(i);
 			OP* arg; 
 			if (t == NUMBER_TYPE)
@@ -1144,11 +1153,6 @@ namespace avmplus
 			localSet(i, undefConst);
 		}
 
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    debug_enter\n";
-		#endif
-
 		callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
 			env_param, argc_param, ap_param, // for sendEnter
 			leaIns(0, localTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
@@ -1161,11 +1165,6 @@ namespace avmplus
 
 		if (info->isFlagSet(AbstractFunction::HAS_EXCEPTIONS))
 		{
-			#ifdef AVMPLUS_VERBOSE
-			if (verbose())
-				core->console << "    exception setup\n";
-			#endif
-
 			// _ef.beginTry(core);
 			callIns(MIR_cm, EFADDR(ExceptionFrame::beginTry), 2,
 				leaIns(0,_ef), InsConst((uintptr)core));
@@ -1229,8 +1228,8 @@ namespace avmplus
 			patchLater(br, interrupt_label);
 		}
 
-		// this is not fatal but its good to know if our prologue estimation code is off.
-		InsAlloc(0);
+        // mark end of prolog
+        Ins(MIR_bb);
 
 		return true;
 	}
@@ -1316,12 +1315,10 @@ namespace avmplus
 		if (verbose())
 			core->console << "        	set dxns addr\n";
 		#endif
-		if (info->isFlagSet(AbstractFunction::SETS_DXNS))
-		{
+		if (info->isFlagSet(AbstractFunction::SETS_DXNS)) {
 			dxnsAddr = leaIns(0,dxns);
 		}
-		else
-		{
+		else {
 			// dxnsAddr = &env->vtable->scope->defaultXmlNamespace
 			OP* env = env_param;
 			OP* declVTable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env);
@@ -1329,7 +1326,7 @@ namespace avmplus
 			dxnsAddr = leaIns(offsetof(ScopeChain, defaultXmlNamespace), scope);
 		}
 
-		storeIns(dxnsAddr, (uintptr)&core->dxnsAddr, 0);
+		storeIns(dxnsAddr, 0, InsConst((uintptr)&core->dxnsAddr));
 	}
 
 	void CodegenLIR::merge(const Value& current, Value& target)
@@ -1818,8 +1815,7 @@ namespace avmplus
 
 				// relative branch
 				OP* p = Ins(MIR_jmp); // will be patched
-
-				mirPatch(p, targetpc);
+				patchLater(p, targetpc);
 				break;
 			}
 
@@ -3355,7 +3351,8 @@ namespace avmplus
 				hasDebugInfo = true;
 			#endif /* VTUNE */
 				break;
-			}
+            }
+            #endif // DEBUGGER
 
 			default:
 			{
@@ -3841,9 +3838,16 @@ namespace avmplus
 	void CodegenLIR::mirLabel(CodegenLabel& l, OP* bb)
 	{
         AvmAssert(bb->isop(LIR_label));
-        AvmAssert(false);
-        (void) l;
-        (void) bb;
+        AvmAssert(l.bb == 0);
+        l.bb = bb;
+		LIns** np = l.nextPatchIns;
+		l.nextPatchIns = NULL;
+		while(np)
+		{
+			LIns** targetp = np;
+			np = (LIns**)*targetp;
+			*targetp = bb;
+		}
 	}
 
 	/* patch the location 'where' with the value of the label */
@@ -3878,15 +3882,21 @@ namespace avmplus
     LIns *CodegenLIR::Ins(MirOpcode code) {
         switch (code) {
             case MIR_bb: return lirout->ins0(LIR_label);
+            case MIR_jmp: return lirout->insBranch(LIR_j, 0, 0);
         }
         AvmAssert(false);
         return 0;
     }
 
     void CodegenLIR::patchLater(LIns *br, CodegenLabel &l) {
-        AvmAssert(false);
-        (void) br;
-        (void) l;
+        if (l.bb != 0) {
+            br->target(l.bb);
+        } else {
+            // queue for later
+            LIns **targetp = br->targetAddr();
+   			*targetp = (LIns*)l.nextPatchIns;
+			l.nextPatchIns = targetp;
+        }
     }
 
     LIns* CodegenLIR::InsConst(int32_t c) {
@@ -3901,6 +3911,7 @@ namespace avmplus
         LOpcode op;
         switch (code) {
             case MIR_ld: op = LIR_ld; break;
+            case MIR_ldop: op = LIR_ldc; break;
             default:
                 AvmAssert(false);
                 return 0;
@@ -3908,8 +3919,14 @@ namespace avmplus
         return lirout->insLoad(op, base, disp);
     }
 
+    void CodegenLIR::markDead(LIns*) 
+    {}
+
+    PageMgr::PageMgr() : frago(0)
+    {}
+
     void CodegenLIR::emitMD() {
-        AvmAssert(0);
+        overflow = true;
     }
 }
 

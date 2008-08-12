@@ -56,9 +56,12 @@ namespace avmplus
 	class MethodInfo;
 	typedef LIns OP;
 
-	struct CodegenLabel {
+	class CodegenLabel {
+    public:
 		LIns *bb;
 		LIns **nextPatchIns;
+        CodegenLabel() : bb(0), nextPatchIns(0)
+        {}
 	};
 
     class PageMgr {
@@ -168,7 +171,6 @@ namespace avmplus
         AvmCore *core;
         MethodInfo *info;
         PoolObject *pool;
-        Fragmento *frago;
 		LirBuffer *lirbuf;
 		LirWriter *lirout;
 		FrameState *state;
@@ -228,14 +230,13 @@ namespace avmplus
         bool usedInState(OP*);
         bool verbose();
         void extendDefLifetime(OP*);
-        void mirPatch(OP*, sintptr);
         void extendLastUse(LIns *i, sintptr pc);
         void extendLastUse(LIns *ins, LIns *use, LIns *target);
         void patchLater(LIns *br, CodegenLabel &);
         void patchLater(LIns *br, intptr_t pc);
         bool isCodeContextChanged() const;
         void mirLabel(CodegenLabel &l, LIns *target);
-        void markDead(LIns *) {}
+        void markDead(LIns *);
 
 	public:
 		CodegenLIR(MethodInfo* info);
