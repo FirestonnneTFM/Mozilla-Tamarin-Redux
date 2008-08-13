@@ -120,7 +120,6 @@ namespace nanojit
 		// fargs = args - iargs
 	};
 
-    /*
 	#define FUNCTIONID(name) CI_avmplus_##name
 
 	#define INTERP_FOPCODE_LIST_BEGIN											enum FunctionID {
@@ -138,10 +137,6 @@ namespace nanojit
 	#undef INTERP_FOPCODE_LIST_ENTRY_EXTERN
 	#undef INTERP_FOPCODE_LIST_ENTRY_LITC
 	#undef INTERP_FOPCODE_LIST_END 
-    */
-    enum FunctionID {
-        CI_Max
-    };
 
 	#ifdef AVMPLUS_WIN32
 		#define AVMPLUS_ALIGN16(type) __declspec(align(16)) type
@@ -223,7 +218,6 @@ namespace nanojit
 			void		unpatch(GuardRecord *lr);
 			AssmError   error()	{ return _err; }
 			void		setError(AssmError e) { _err = e; }
-			void		setCallTable(const CallInfo *functions);
 			void		pageReset();
 			Page*		handoverPages(bool exitPages=false);
 
@@ -248,13 +242,11 @@ namespace nanojit
 			NIns*		genPrologue(RegisterMask);
 			NIns*		genEpilogue(RegisterMask);
 
-			bool		ignoreInstruction(LInsp ins);
-
 			GuardRecord* placeGuardRecord(LInsp guard);
 			void		initGuardRecord(LInsp guard, GuardRecord*);
 
 			uint32_t	arReserve(LIns* l);
-			uint32_t	arFree(uint32_t idx);
+			void    	arFree(uint32_t idx);
 			void		arReset();
 
 			Register	registerAlloc(RegisterMask allow);
@@ -287,8 +279,6 @@ namespace nanojit
             DWB(Fragment*)		_thisfrag;
 			RegAllocMap*		_branchStateMap;
 			GuardRecord*		_latestGuard;
-		
-			const CallInfo	*_functions;
 			
 			NIns*		_nIns;			// current native instruction
 			NIns*		_nExitIns;		// current instruction in exit fragment page

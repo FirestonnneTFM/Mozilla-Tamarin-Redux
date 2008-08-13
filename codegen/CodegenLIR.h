@@ -180,6 +180,7 @@ namespace avmplus
         AvmCore *core;
         MethodInfo *info;
         PoolObject *pool;
+        Fragment *frag;
 		LirBuffer *lirbuf;
 		LirWriter *lirout;
 		FrameState *state;
