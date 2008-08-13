@@ -121,6 +121,11 @@
 #define AVMPLUS_MIR
 #define AVMPLUS_INTERP
 
+#if defined(AVMPLUS_MAC) && defined(AVMPLUS_64BIT)
+	// MIR not yet supported on 64-bit Mac
+	#undef AVMPLUS_MIR
+#endif
+
 // if a function meets the E4 criteria for being unchecked, then make
 // all its parameters optional and add a rest arg.  asc should do this
 // at compile time so we don't have to do it in avmplus.
