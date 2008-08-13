@@ -319,11 +319,15 @@ namespace avmplus
 	// format 2
 	OP* CodegenLIR::Ins(MirOpcode code, OP* a1, uintptr v2)
 	{
-        AvmAssert(false);
-        (void)code;
-        (void)a1;
-        (void)v2;
-        return 0;
+        switch(code) {
+            case MIR_faddi: {
+                uint64_t *dp = (uint64_t*)v2;
+                return lirout->ins2(LIR_fadd, a1, lirout->insImmq(*dp));
+            }
+            default:
+                AvmAssert(false);
+                return 0;
+        }
     }
 
     // unary
@@ -334,6 +338,8 @@ namespace avmplus
             case MIR_ret: op = a1->isQuad() ? LIR_fret : LIR_ret; break;
             case MIR_neg: op = LIR_neg; break;
             case MIR_fneg: op = LIR_fneg; break;
+            case MIR_i2d: op = LIR_i2f; break;
+            case MIR_u2d: op = LIR_u2f; break;
             default:
                 AvmAssert(false);
                 return 0;
@@ -904,6 +910,110 @@ namespace avmplus
 #endif
 	}
 
+    class TypeChecker: public LirWriter
+    {
+    public:
+        TypeChecker(LirWriter *out) : LirWriter(out)
+        {}
+        LIns *ins0(LOpcode op) {
+            switch (op) {
+                case LIR_tramp: AvmAssert(false); break;
+                case LIR_neartramp: AvmAssert(false); break;
+                case LIR_skip: AvmAssert(false); break;
+                case LIR_nearskip: AvmAssert(false); break;
+                case LIR_label: break;
+                default:AvmAssert(false);
+            }
+            return out->ins0(op);
+        }
+
+        LIns *ins1(LOpcode op, LIns *a) {
+            switch (op) {
+                case LIR_fneg: AvmAssert(a->isQuad()); break;
+                case LIR_fret: AvmAssert(a->isQuad()); break;
+                case LIR_not:  AvmAssert(!a->isQuad()); break;
+                case LIR_neg:  AvmAssert(!a->isQuad()); break;
+                case LIR_i2f:  AvmAssert(!a->isQuad()); break;
+                case LIR_u2f:  AvmAssert(!a->isQuad()); break;
+                case LIR_ret:  AvmAssert(!a->isQuad()); break;
+                case LIR_qlo:  AvmAssert(a->isQuad()); break;
+                case LIR_qhi:  AvmAssert(a->isQuad()); break;
+                default:AvmAssert(false);
+            }
+            return out->ins1(op, a);
+        }
+
+        LIns *ins2(LOpcode op, LIns *a, LIns *b) {
+            switch (op) {
+                case LIR_fadd: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_fsub: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_fmul: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_fdiv: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_feq: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_flt: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_fle: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_fgt: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_fge: AvmAssert(a->isQuad() && b->isQuad()); break;
+                case LIR_qjoin: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_add: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_sub: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_mul: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_and: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_or: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_xor: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_lsh: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_rsh: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_ush: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_eq: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_lt: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_gt: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_le: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_ge: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_ult: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_ule: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_ugt: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_uge: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                default:AvmAssert(false);
+            }
+            return out->ins2(op, a, b);
+        }
+
+        LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
+            switch (op) {
+                case LIR_ld: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
+                case LIR_ldc: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
+                case LIR_ldq: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
+                default: AvmAssert(false);
+            }
+            return out->insLoad(op, base, disp);
+        }
+
+        LIns *insStore(LIns *value, LIns *base, LIns *disp) {
+            AvmAssert(!base->isQuad() && !disp->isQuad());
+            return out->insStore(value, base, disp);
+        }
+
+        LIns *insStorei(LIns *value, LIns *base, int32_t d) {
+            AvmAssert(!base->isQuad());
+            return out->insStorei(value, base, d);
+        }
+
+        LIns *insBranch(LOpcode op, LIns *cond, LIns *label) {
+            switch (op) {
+                case LIR_jt: AvmAssert(cond->isCond() && (!label || label->isop(LIR_label))); break;
+                case LIR_jf: AvmAssert(cond->isCond() && (!label || label->isop(LIR_label))); break;
+                case LIR_j: AvmAssert(!cond && (!label || label->isop(LIR_label))); break;
+                default: AvmAssert(false);
+            }
+            return out->insBranch(op, cond, label);
+        }
+
+        LIns *insGuard(LOpcode v, LIns *cond, SideExit *x) {
+            AvmAssert(false);
+            return out->insGuard(v, cond, x);
+        }
+    };
+
 	// f(env, argc, instance, argv)
 	bool CodegenLIR::prologue(FrameState* state)
 	{
@@ -915,6 +1025,7 @@ namespace avmplus
         lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
         lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
         lirout = new (gc) ExprFilter(lirout);
+        lirout = new (gc) TypeChecker(lirout);
 
 		if (overflow) return false;
 
@@ -945,7 +1056,7 @@ namespace avmplus
             lirbuf->names->addName(env_param, "env");
             lirbuf->names->addName(argc_param, "argc");
             lirbuf->names->addName(ap_param, "ap");
-            lirbuf->names->addName(localVars, "vars");
+            lirbuf->names->addName(localVars, "localVars");
         })
 
         #ifdef DEBUGGER
@@ -953,6 +1064,10 @@ namespace avmplus
 		// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
 		localTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
 		localPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
+        verbose_only( if (lirbuf->names) {
+            lirbuf->names->addName(localTraits, "localTraits");
+            lirbuf->names->addName(localPtrs, "localPtrs");
+        })
 		#endif //DEBUGGER
 
 		// whether this sequence is interruptable or not.
@@ -965,11 +1080,18 @@ namespace avmplus
 			// offsets of local vars, rel to current ESP
 			_save_eip = InsAlloc(sizeof(byte*));
 			_ef       = InsAlloc(sizeof(ExceptionFrame));
+            verbose_only( if (lirbuf->names) {
+                lirbuf->names->addName(_save_eip, "_save_eip");
+                lirbuf->names->addName(_ef, "_ef");
+            })
 		}
 
 		if (info->setsDxns())
 		{
 			dxns = InsAlloc(sizeof(Namespace*));
+            verbose_only( if (lirbuf->names) {
+                lirbuf->names->addName(dxns, "dxns");
+            })
 		}
 
 		#ifdef DEBUGGER
@@ -986,6 +1108,9 @@ namespace avmplus
 
 		// Allocate space for the call stack
 		_callStackNode = InsAlloc(sizeof(CallStackNode));
+        verbose_only( if (lirbuf->names) {
+            lirbuf->names->addName(_callStackNode, "_callStackNode");
+        })
 		#endif
 		
 		if (info->setsDxns())
@@ -1113,11 +1238,6 @@ namespace avmplus
 		// capture remaining args
 		if (info->flags & AbstractFunction::NEED_REST)
 		{
-			#ifdef AVMPLUS_VERBOSE
-			if (verbose())
-				core->console << "    create rest\n";
-			#endif
-
 			//framep[info->param_count+1] = createRest(env, argv, argc);
 			OP* argcArg = argc_param;
 			OP* apArg = ap_param;
@@ -1131,11 +1251,6 @@ namespace avmplus
 		}
 		else if (info->flags & AbstractFunction::NEED_ARGUMENTS)
 		{
-			#ifdef AVMPLUS_VERBOSE
-			if (verbose())
-				core->console << "    create arguments\n";
-			#endif
-
 			//framep[info->param_count+1] = createArguments(env, argv, argc);
 			OP* argcArg = argc_param;
 			OP* apArg = ap_param;
@@ -1298,7 +1413,7 @@ namespace avmplus
 				#endif
 
 				// core->codeContext = env;
-				storeIns(env_param, (uintptr)&core->codeContextAtom, 0);
+				storeIns(env_param, 0, InsConst((uintptr)&core->codeContextAtom));
 			}
 
 			if (!f || f->usesDefaultXmlNamespace())
@@ -1409,7 +1524,8 @@ namespace avmplus
 	void CodegenLIR::emitDoubleConst(FrameState* state, int index, double* pd)
 	{
 		this->state = state;
-		localSet(index, loadIns(MIR_fldop, (uintptr)pd, NULL));
+        uint64_t *pquad = (uint64_t*) pd;
+		localSet(index, lirout->insImmq(*pquad));
 	}
 
 	void CodegenLIR::emitCoerce(FrameState* state, int loc, Traits* result)
@@ -2069,82 +2185,74 @@ namespace avmplus
 			case OP_not:
 			{
 				AvmAssert(state->value(op1).traits == BOOLEAN_TYPE);
-
 				OP* value = localGet(op1);
 				OP* i3 = binaryIns(MIR_xor, value, InsConst(1));
 				localSet(op1, i3);
 				break;
 			}
 
-			case OP_negate:
-			{
-				OP* in = localGet(op1);
-				OP* out = Ins(MIR_fneg, in);
-				localSet(op1, out);
+            case OP_negate: {
+				localSet(op1, Ins(MIR_fneg, localGetq(op1)));
 				break;
 			}
 
-			case OP_negate_i:
-			{
+            case OP_negate_i: {
 				//framep[op1] = -framep[op1]
 				AvmAssert(state->value(op1).traits == INT_TYPE);
-				OP* value = localGet(op1);
-				OP* i2 = Ins(MIR_neg, value);  // -number  
-				localSet(op1, i2);
+				localSet(op1, Ins(MIR_neg, localGet(op1)));
 				break;
 			}
 
 			case OP_increment:
 			case OP_decrement:
 			case OP_inclocal:
-			case OP_declocal:
-			{
-				OP* in = localGet(op1);
-				OP* inc = i2dIns(InsConst(op2)); // 1 or -1
-				OP* out = binaryIns(MIR_fadd, in, inc);
-				localSet(op1, out);
+            case OP_declocal: {
+				localSet(op1, binaryIns(MIR_fadd, localGetq(op1), i2dIns(InsConst(op2))));
 				break;
 			}
 
 			case OP_inclocal_i:
 			case OP_declocal_i:
 			case OP_increment_i:
-			case OP_decrement_i:
-			{
+            case OP_decrement_i: {
 				AvmAssert(state->value(op1).traits == INT_TYPE);
-				OP* in = localGet(op1);
-				OP* out = binaryIns(MIR_add, in, InsConst(op2));
-				localSet(op1, out);
+				localSet(op1, binaryIns(MIR_add, localGet(op1), InsConst(op2)));
 				break;
 			}
 
-			case OP_bitnot:
-			{
+            case OP_bitnot: {
 				// *sp = core->intToAtom(~integer(*sp));
 				AvmAssert(state->value(op1).traits == INT_TYPE);
-				OP* value = localGet(op1);
-				OP* out = binaryIns(MIR_xor, value, InsConst(uintptr(~0)));
-				localSet(op1, out);
+				localSet(op1, lirout->ins1(LIR_not, localGet(op1)));
 				break;
 			}
 
-			case OP_modulo:
-			{
-				OP* lhs = localGet(sp-1);
-				OP* rhs = localGet(sp);
+            case OP_modulo: {
 				OP* out = callIns(MIR_fcsop, FUNCADDR(MathUtils::mod), 2,
-					lhs, rhs);
+					localGetq(sp-1), localGetq(sp));
 				localSet(sp-1,	out);
 				break;
 			}
 
-			case OP_add_d:
-			case OP_subtract:
+            case OP_divide:
+            case OP_multiply:
+            case OP_subtract:
+            case OP_add_d: {
+				MirOpcode mircode=MIR_last;
+				switch (opcode) {
+					case OP_divide:     mircode = MIR_fdiv; break;
+					case OP_multiply:   mircode = MIR_fmul; break;
+					case OP_subtract:   mircode = MIR_fsub; break;
+					case OP_add_d:      mircode = MIR_fadd; break;
+					default: break;
+				}
+                localSet(sp-1, binaryIns(MIR_fadd, localGetq(sp-1), localGetq(sp)));
+                break;
+            }
+
 			case OP_subtract_i:
 			case OP_add_i:
-			case OP_multiply:
 			case OP_multiply_i:
-			case OP_divide:
 			case OP_lshift:
 			case OP_rshift:
 			case OP_urshift:
@@ -2160,13 +2268,9 @@ namespace avmplus
 					case OP_urshift:    mircode = MIR_ush;  break;
 					case OP_rshift:     mircode = MIR_rsh;  break;
 					case OP_lshift:     mircode = MIR_lsh;  break;
-					case OP_divide:     mircode = MIR_fdiv; break;
-					case OP_multiply:   mircode = MIR_fmul; break;
 					case OP_multiply_i: mircode = MIR_imul; break;
 					case OP_add_i:      mircode = MIR_add;  break;
 					case OP_subtract_i: mircode = MIR_sub;  break;
-					case OP_subtract:   mircode = MIR_fsub; break;
-					case OP_add_d:      mircode = MIR_fadd; break;
 					default: break;
 				}
 				OP* lhs = localGet(sp-1);
@@ -2255,6 +2359,8 @@ namespace avmplus
 
 			case OP_hasnext2: 
 			{
+                // fixme - if obj is already Atom, or index is already int,
+                // easier to directly reference space in localVars.
 				OP* obj = InsAlloc(sizeof(Atom));
 				OP* index = InsAlloc(sizeof(int));
 				storeIns(loadAtomRep(op1), 0, obj);
@@ -2478,11 +2584,7 @@ namespace avmplus
 				OP* ap = storeAtomArgs(2*argc, arg0);
 
 				OP* i3 = callIns(MIR_cm, ENVADDR(MethodEnv::op_newobject), 3,
-#ifdef AVMPLUS_64BIT
-					env_param, leaIns(8*(2*argc-1), ap), InsConst(argc));
-#else
-					env_param, leaIns(4*(2*argc-1), ap), InsConst(argc));
-#endif
+					env_param, leaIns(sizeof(Atom)*(2*argc-1), ap), InsConst(argc));
 				InsDealloc(ap);
 
 				localSet(dest, ptrToNativeRep(result, i3));
@@ -2581,16 +2683,9 @@ namespace avmplus
 				break;
 			}
 
-			case OP_checkfilter:
-			{
-				// stack in: obj 
-				// stack out: obj
-				OP* envArg = env_param;
-				OP* value = loadAtomRep(op1);
-
+            case OP_checkfilter: {
 				callIns(MIR_cm, ENVADDR(MethodEnv::checkfilter), 2,
-					envArg, value);
-
+					env_param, loadAtomRep(op1));
 				break;
 			}
 
@@ -2919,7 +3014,7 @@ namespace avmplus
 					{
 						if( valueType == NUMBER_TYPE )
 						{
-							OP* value = localGet(sp);
+							OP* value = localGetq(sp);
 							callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setNativeIntProperty), 3,
 								localGet(objDisp), index, value);
 						}
@@ -2991,7 +3086,7 @@ namespace avmplus
 					{
 						if( valueType == NUMBER_TYPE )
 						{
-							OP* value = localGet(sp);
+							OP* value = localGetq(sp);
 							callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setNativeUintProperty), 3,
 								localGet(objDisp), index, value);
 						}
@@ -3663,14 +3758,12 @@ namespace avmplus
 		InsDealloc(_callStackNode);
 		#endif
 
-		if (npe_label.nextPatchIns)
-		{
+        if (npe_label.preds) {
 			mirLabel(npe_label, Ins(MIR_bb));
 			callIns(MIR_cm, ENVADDR(MethodEnv::npe), 1, env_param);
 		}
 
-		if (interrupt_label.nextPatchIns)
-		{
+        if (interrupt_label.preds) {
 			mirLabel(interrupt_label, Ins(MIR_bb));
 			callIns(MIR_cm, ENVADDR(MethodEnv::interrupt), 1, env_param);
 		}
@@ -3810,7 +3903,7 @@ namespace avmplus
 	{
 		if (t == NUMBER_TYPE)
 		{
-			return localGet(i);
+			return localGetq(i);
 		}
 		if (t == INT_TYPE || t == BOOLEAN_TYPE)
 		{
@@ -3840,12 +3933,17 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
 
-	void CodegenLIR::formatOperand(PrintWriter& buffer, OP* opr)
+	void CodegenLIR::formatOperand(PrintWriter& buffer, LIns* opr)
 	{
-		if (opr)
+        if (opr) {
+            if (opr->isStore() && opr->oprnd2() == localVars) {
+                opr = opr->oprnd1(); // show the value stored
+            }
 			buffer.format("@%s", lirbuf->names->formatRef(opr));
-		else
+        }
+        else {
 			buffer << "0";
+        }
 	}
 
 #endif /* AVMPLUS_VERBOSE */
@@ -3901,10 +3999,11 @@ namespace avmplus
 	}
 
     void CodegenLIR::patchLater(LIns *br, CodegenLabel &l) {
+        l.preds++;
         if (l.bb != 0) {
             br->target(l.bb);
         } else {
-            patches.add(Patch(br,l));
+            patches.add(Patch(br, l));
         }
     }
 
@@ -3921,6 +4020,8 @@ namespace avmplus
         switch (code) {
             case MIR_ld: op = LIR_ld; break;
             case MIR_ldop: op = LIR_ldc; break;
+            case MIR_fld: op = LIR_ldq; break;
+            case MIR_fldop: op = LIR_ldq; break; // fixme: need cse version
             default:
                 AvmAssert(false);
                 return 0;

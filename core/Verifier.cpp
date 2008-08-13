@@ -306,8 +306,10 @@ namespace avmplus
 
 				if (!blockState->targetOfBackwardsBranch)
 				{
-					blockStates->remove((uintptr)pc);
-					core->GetGC()->Free(blockState);
+                    // fixme: CodegenLIR wants to do all patching in epilog() so we cannot
+                    // free the block early.
+					//blockStates->remove((uintptr)pc);
+					//core->GetGC()->Free(blockState);
 				}
 			}
 			else

@@ -242,6 +242,7 @@ namespace nanojit
 
 	LInsp LirBufWriter::ensureReferenceable(LInsp i, int32_t addedDistance)
 	{
+        NanoAssert(i != 0);
 		LInsp next = _buf->next();
 		LInsp from = next + 2*addedDistance;
 		if (can8bReach(from,i))
@@ -318,8 +319,7 @@ namespace nanojit
 
 		LInsp l = _buf->next();
 		l->initOpcode(op);
-		if (r1)
-			l->setOprnd1(r1);
+		l->setOprnd1(r1);
 
 		_buf->commit(1);
 		_buf->_stats.lir++;
@@ -334,10 +334,8 @@ namespace nanojit
 
 		LInsp l = _buf->next();
 		l->initOpcode(op);
-		if (r1)
-			l->setOprnd1(r1);
-		if (r2)
-			l->setOprnd2(r2);
+		l->setOprnd1(r1);
+		l->setOprnd2(r2);
 
 		_buf->commit(1);
 		_buf->_stats.lir++;
@@ -517,6 +515,10 @@ namespace nanojit
 	bool FASTCALL isCond(LOpcode c) {
 		return (c == LIR_ov) || (c == LIR_cs) || isCmp(c);
 	}
+
+    bool FASTCALL isRet(LOpcode c) {
+        return (c & ~LIR64) == LIR_ret;
+    }
     
 	bool LIns::isCmp() const {
 		return nanojit::isCmp(u.code);
