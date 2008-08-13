@@ -189,7 +189,7 @@ namespace avmplus
 		stringCount		= 0;
 		deletedCount	= 0;
 		nsCount			= 0;
-
+		
 		numStrings = 1024; // power of 2
 		strings = new DRC(Stringp)[numStrings];
 		memset(strings, 0, numStrings*sizeof(Stringp));
@@ -247,6 +247,9 @@ namespace avmplus
 
 		booleanStrings[0] = kfalse;
         booleanStrings[1] = ktrue;
+
+		for (int i=0 ; i < 256 ; i++ )
+			index_strings[i] = NULL;
 
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
@@ -2727,10 +2730,27 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::internInt(int value)
     {
+		// This simple cache of interned strings representing integers greatly benefits
+		// array-heavy code in the interpreter, at least for the time being (2008-08-13).
+		// But it would be better not to intern integers at all.
+
+		int index = value & 255;
+		if (value >= 0 && index_strings[index] != NULL && index_strings[index]->value == value)
+			return index_strings[index]->string;
+		
 		wchar buffer[65];
 		int len;
 		MathUtils::convertIntegerToString(value, buffer, len);
-		return internAlloc(buffer, len);
+		Stringp s = internAlloc(buffer, len);
+
+		if (value >= 0) {
+			if (index_strings[index] == NULL)
+				index_strings[index] = new (GetGC()) IndexString;
+			index_strings[index]->value = value;
+			index_strings[index]->string = s;
+		}
+
+		return s;
 
 		// This optimized routine below works fine and is faster than calling
 		// convertIntegerToString but with our support of integer keys in our
