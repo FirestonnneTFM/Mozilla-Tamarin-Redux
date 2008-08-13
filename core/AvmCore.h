@@ -1324,6 +1324,15 @@ const int kBufferPadding = 16;
 		DRC(Stringp) * strings;
 		// hash set containing namespaces
 		DRC(Namespacep) * namespaces;
+		
+		// cache of interned names of nonnegative integers (numeric value % 256)
+		class IndexString : public MMgc::GCObject {
+		public:
+			int value;
+			DRCWB(Stringp) string;
+		};
+		
+		IndexString* index_strings[256];
 
 		// avoid multiple inheritance issues
 		class GCInterface : MMgc::GCCallback
