@@ -999,8 +999,8 @@ namespace nanojit
 
     using namespace avmplus;
 
-	StackFilter::StackFilter(LirFilter *in, GC *gc, Fragment *frag, LInsp sp) 
-		: LirFilter(in), gc(gc), frag(frag), sp(sp), top(0)
+	StackFilter::StackFilter(LirFilter *in, GC *gc, LirBuffer *lirbuf, LInsp sp) 
+		: LirFilter(in), gc(gc), lirbuf(lirbuf), sp(sp), top(0)
 	{}
 
 	LInsp StackFilter::read() 
@@ -1400,27 +1400,27 @@ namespace nanojit
 		}
 	};
 
-    void live(GC *gc, Assembler *assm, Fragment *frag)
+    void live(GC *gc, LirBuffer *lirbuf)
 	{
 		// traverse backwards to find live exprs and a few other stats.
 
-		LInsp sp = frag->lirbuf->sp;
-		LInsp rp = frag->lirbuf->rp;
+		LInsp sp = lirbuf->sp;
+		LInsp rp = lirbuf->rp;
 		LiveTable live(gc);
 		uint32_t exits = 0;
-		LirBuffer *lirbuf = frag->lirbuf;
         LirReader br(lirbuf);
-		StackFilter sf(&br, gc, frag, sp);
-		StackFilter r(&sf, gc, frag, rp);
+		StackFilter sf(&br, gc, lirbuf, sp);
+		StackFilter r(&sf, gc, lirbuf, rp);
         int total = 0;
-        live.add(frag->lirbuf->state, r.pos());
+        if (lirbuf->state)
+            live.add(lirbuf->state, r.pos());
 		for (LInsp i = r.read(); i != 0; i = r.read())
 		{
             total++;
 
             // first handle side-effect instructions
 			if (i->isStore() || i->isGuard() ||
-				i->isCall() && !assm->callInfoFor(i->fid())->_cse)
+				i->isCall() && !lirbuf->_functions[i->fid()]._cse)
 			{
 				live.add(i,0);
                 if (i->isGuard())
@@ -1454,12 +1454,12 @@ namespace nanojit
 			}
 		}
  
-		assm->outputf("live instruction count %ld, total %ld, max pressure %d",
+		printf("live instruction count %ld, total %ld, max pressure %d\n",
 			live.retired.size(), total, live.maxlive);
-        assm->outputf("side exits %ld", exits);
+        printf("side exits %ld\n", exits);
 
 		// print live exprs, going forwards
-		LirNameMap *names = frag->lirbuf->names;
+		LirNameMap *names = lirbuf->names;
 		for (int j=live.retired.size()-1; j >= 0; j--) 
         {
             RetiredEntry *e = live.retired[j];
@@ -1841,7 +1841,7 @@ namespace nanojit
 		verbose_only( assm->_outputCache = &asmOutput; )
 
 		verbose_only(if (assm->_verbose && core->config.verbose_live)
-			live(gc, assm, triggerFrag);)
+			live(gc, triggerFrag->lirbuf);)
 
 		bool treeCompile = core->config.tree_opt && (triggerFrag->kind == BranchTrace);
 		RegAllocMap regMap(gc);
