@@ -40,7 +40,6 @@
 #include "avmplus.h"
 #include "CodegenLIR.h"
 #include "../core/FrameState.h"
-#include "../nanojit/nanojit.h"
 
 #ifdef DARWIN
 #include <Carbon/Carbon.h>
@@ -317,7 +316,7 @@ namespace avmplus
 	}
 
 	// format 2
-	OP* CodegenLIR::Ins(MirOpcode code, OP* a1, uintptr v2)
+	OP* CodegenLIR::Ins(MirOpcode code, OP* a1, uintptr_t v2)
 	{
         switch(code) {
             case MIR_faddi: {
@@ -434,25 +433,25 @@ namespace avmplus
     }
 
 	// call 
-	OP* CodegenLIR::callIns(MirOpcode code, uintptr_t addr, int argc, ...)
+	OP* CodegenLIR::callIns(MirOpcode code, uintptr_t addr, uint32_t argc, ...)
 	{
         (void) code;
         uint32_t fid = find_fid(addr);
         AvmAssert(argc <= MAXARGS);
-        AvmAssert(argc == (int) k_functions[fid].count_args());
+        AvmAssert(argc == k_functions[fid].count_args());
         AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
 
         LInsp args[MAXARGS];
         va_list ap;
         va_start(ap, argc);
-        for (int i=0; i < argc; i++)
+        for (uint32_t i=0; i < argc; i++)
             args[argc-i-1] = va_arg(ap, LIns*);
         va_end(ap);
 
         return lirout->insCall(fid, args);
 	}
 
-	OP* CodegenLIR::callIndirect(MirOpcode code, OP* target, int argc, ...)
+	OP* CodegenLIR::callIndirect(MirOpcode code, OP* target, uint32_t argc, ...)
 	{
         uint32_t fid = find_fid(
             code == MIR_fci ? 
@@ -460,13 +459,13 @@ namespace avmplus
                 (argc == 3 ? CALL_INDIRECT : CALL_IMT)
             );
         AvmAssert(argc+1 <= MAXARGS);
-        AvmAssert(argc+1 == (int) k_functions[fid].count_args());
+        AvmAssert(argc+1 == k_functions[fid].count_args());
         AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
 
         LInsp args[MAXARGS];
         va_list ap;
         va_start(ap, argc);
-        for (int i=0; i < argc; i++)
+        for (uint32_t i=0; i < argc; i++)
             args[argc-i-1] = va_arg(ap, LIns*);
         va_end(ap);
         args[argc] = target; // addr is final arg in arglist
@@ -4003,7 +4002,7 @@ namespace avmplus
     }
 
 	/* patch the location 'where' with the value of the label */
-	void CodegenLIR::patchLater(OP* br, sintptr pc)	{
+	void CodegenLIR::patchLater(OP* br, intptr_t pc)	{
         patchLater(br, state->verifier->getFrameState(pc)->label);
 	}
 

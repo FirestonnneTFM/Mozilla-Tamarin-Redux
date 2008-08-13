@@ -1047,7 +1047,7 @@ namespace nanojit
 				}
 				case LIR_param:
 				{
-                    int a = ins->imm8();
+                    uint32_t a = ins->imm8();
                     // fixme - this is __fastcall specific!
                     if (a < sizeof(argRegs)/sizeof(argRegs[0])) {
 					    Register w = Register(a);
@@ -1846,8 +1846,7 @@ namespace nanojit
 	{
 		uint32_t argc = 0;
 		uint32_t argt = _argtypes;
-		for (int i = 0; i < MAXARGS; ++i)
-		{
+		for (uint32_t i = 0; i < MAXARGS; ++i) {
 			argt >>= 2;
 			argc += (argt & mask) != 0;
 		}
@@ -1858,7 +1857,7 @@ namespace nanojit
     {
 		uint32_t argt = _argtypes;
 		uint32_t argc = 0;
-		for (int32_t i = 0; i < MAXARGS; i++) {
+		for (uint32_t i = 0; i < MAXARGS; i++) {
 			argt >>= 2;
 			ArgSize a = ArgSize(argt&3);
 #ifdef NJ_SOFTFLOAT

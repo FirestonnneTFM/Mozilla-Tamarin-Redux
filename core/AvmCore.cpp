@@ -127,7 +127,7 @@ namespace avmplus
 			
 		// set default mode flags
 		#ifdef AVMPLUS_VERBOSE
-		config.verbose = true;
+		config.verbose = false;
 		config.verbose_addrs = false;
 		#endif
 

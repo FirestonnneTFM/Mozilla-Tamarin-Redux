@@ -1454,9 +1454,9 @@ namespace nanojit
 			}
 		}
  
-		printf("live instruction count %ld, total %ld, max pressure %d\n",
+		printf("live instruction count %d, total %u, max pressure %d\n",
 			live.retired.size(), total, live.maxlive);
-        printf("side exits %ld\n", exits);
+        printf("side exits %u\n", exits);
 
 		// print live exprs, going forwards
 		LirNameMap *names = lirbuf->names;
@@ -1584,7 +1584,6 @@ namespace nanojit
 			}
 			case LIR_fcalli:
 			case LIR_calli: {
-                const CallInfo &c = _functions[i->fid()];
                 int32_t argc = i->argc();
 				sprintf(s, "[%s] ( ", formatRef(i->arg(argc-1)));
                 s += strlen(s);

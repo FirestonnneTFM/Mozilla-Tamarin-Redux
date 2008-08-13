@@ -39,14 +39,15 @@
 #ifndef __avmplus_CodegenLIR__
 #define __avmplus_CodegenLIR__
 
-namespace nanojit
+/*namespace nanojit
 {
 	class LIns;
 	class LirBuffer;
 	class LirWriter;
     class Fragmento;
     enum LOpcode;
-}
+}*/
+#include "../nanojit/nanojit.h"
 
 namespace avmplus
 {
@@ -210,8 +211,8 @@ namespace avmplus
         LIns *atomToNativeRep(Traits *, LIns *i);
         LIns *ptrToNativeRep(Traits*, LIns*);
         LIns *loadAtomRep(int i);
-        LIns *callIns(MirOpcode, uintptr_t addr, int argc, ...);
-        LIns *callIndirect(MirOpcode, LIns* addr, int argc, ...);
+        LIns *callIns(MirOpcode, uintptr_t addr, uint32_t argc, ...);
+        LIns *callIndirect(MirOpcode, LIns* addr, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *binaryIns(MirOpcode, LIns *a, LIns *b);
         LIns *binaryIns(LOpcode, LIns *a, LIns *b);
