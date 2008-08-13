@@ -723,8 +723,8 @@ namespace nanojit
 
 		// set up backwards pipeline: assembler -> StackFilter -> LirReader
 		LirReader bufreader(frag->lastIns);
-		StackFilter storefilter1(&bufreader, gc, frag, frag->lirbuf->sp);
-		StackFilter storefilter2(&storefilter1, gc, frag, frag->lirbuf->rp);
+		StackFilter storefilter1(&bufreader, gc, frag->lirbuf, frag->lirbuf->sp);
+		StackFilter storefilter2(&storefilter1, gc, frag->lirbuf, frag->lirbuf->rp);
 		DeadCodeFilter deadfilter(&storefilter2, this);
 		LirFilter* rdr = &deadfilter;
 		verbose_only(

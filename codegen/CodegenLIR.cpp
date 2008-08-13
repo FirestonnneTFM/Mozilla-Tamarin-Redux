@@ -910,10 +910,10 @@ namespace avmplus
 #endif
 	}
 
-    class TypeChecker: public LirWriter
+    class ValidateWriter: public LirWriter
     {
     public:
-        TypeChecker(LirWriter *out) : LirWriter(out)
+        ValidateWriter(LirWriter *out) : LirWriter(out)
         {}
         LIns *ins0(LOpcode op) {
             switch (op) {
@@ -922,6 +922,7 @@ namespace avmplus
                 case LIR_skip: AvmAssert(false); break;
                 case LIR_nearskip: AvmAssert(false); break;
                 case LIR_label: break;
+                case LIR_trace: break;
                 default:AvmAssert(false);
             }
             return out->ins0(op);
@@ -1025,7 +1026,9 @@ namespace avmplus
         lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
         lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
         lirout = new (gc) ExprFilter(lirout);
-        lirout = new (gc) TypeChecker(lirout);
+        lirout = new (gc) ValidateWriter(lirout);
+
+        lirout->ins0(LIR_trace); // required, but poorly named
 
 		if (overflow) return false;
 
@@ -4035,8 +4038,32 @@ namespace avmplus
     PageMgr::PageMgr() : frago(0)
     {}
 
+    class ValidateReader: public LirFilter {
+    public:
+        ValidateReader(LirFilter *in) : LirFilter(in)
+        {}
+
+        LIns* read() {
+            LIns *i = in->read();
+            if (i) {
+                switch (i->opcode()) {
+                case LIR_jt: AvmAssert(*i->targetAddr() != 0); break;
+                case LIR_jf: AvmAssert(*i->targetAddr() != 0); break;
+                case LIR_j: AvmAssert(*i->targetAddr() != 0); break;
+                }
+            }
+            return i;
+        }
+    };
+
     void CodegenLIR::emitMD() {
         overflow = true;
+
+        LirReader reader(lirbuf);
+        for (LIns *i = reader.read(); i != 0; i = reader.read()) 
+        {}
+
+        live(gc, lirbuf);
     }
 }
 

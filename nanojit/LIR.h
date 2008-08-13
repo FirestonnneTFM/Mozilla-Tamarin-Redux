@@ -757,18 +757,18 @@ namespace nanojit
 
     void compile(Assembler *assm, Fragment *frag);
     verbose_only( void printTracker(const char* s, avmplus::RegionTracker& trk, Assembler* assm); )
-	verbose_only(void live(GC *gc, Assembler *assm, Fragment *frag);)
+	verbose_only(void live(GC *gc, LirBuffer *lirbuf);)
 
 	class StackFilter: public LirFilter
 	{
 		GC *gc;
-		Fragment *frag;
+		LirBuffer *lirbuf;
 		LInsp sp;
 		avmplus::BitSet stk;
         int top;
 		int getTop(LInsp guard);
 	public:
-		StackFilter(LirFilter *in, GC *gc, Fragment *frag, LInsp sp); 
+		StackFilter(LirFilter *in, GC *gc, LirBuffer *lirbuf, LInsp sp); 
 		virtual ~StackFilter() {}
 		LInsp read();
 	};
