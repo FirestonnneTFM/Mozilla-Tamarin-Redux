@@ -59,8 +59,8 @@ namespace avmplus
 	class CodegenLabel {
     public:
 		LIns *bb;
-		LIns **nextPatchIns;
-        CodegenLabel() : bb(0), nextPatchIns(0)
+		int preds;
+        CodegenLabel() : bb(0), preds(0)
         {}
 	};
 

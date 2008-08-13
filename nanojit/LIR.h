@@ -362,6 +362,7 @@ namespace nanojit
 	bool FASTCALL isCse(LOpcode v);
 	bool FASTCALL isCmp(LOpcode v);
 	bool FASTCALL isCond(LOpcode v);
+    bool FASTCALL isRet(LOpcode v);
 	LIns* FASTCALL callArgN(LInsp i, uint32_t n);
 	extern const uint8_t operandCount[];
 
@@ -561,7 +562,7 @@ namespace nanojit
 		}
 
 		LIns* ins1(LOpcode v, LInsp a) {
-			return add(out->ins1(v, a));
+            return isRet(v) ? add_flush(out->ins1(v, a)) : add(out->ins1(v, a));
 		}
 		LIns* ins2(LOpcode v, LInsp a, LInsp b) {
 			return v == LIR_2 ? out->ins2(v,a,b) : add(out->ins2(v, a, b));
