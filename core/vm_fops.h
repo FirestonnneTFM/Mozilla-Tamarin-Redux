@@ -171,6 +171,8 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(COREADDR(AvmCore::compare), I_III, compare)
     CSEMETHOD(ENVADDR(MethodEnv::createRestHelper), I_III, createRestHelper)
     CSEMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), I_III, createArgumentsHelper)
+    METHOD(COREADDR(AvmCore::initMultinameLate), I_III, initMultinameLate)
+    METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), I_III, initMultinameLateForDelete)
 
 INTERP_FOPCODE_LIST_END
 

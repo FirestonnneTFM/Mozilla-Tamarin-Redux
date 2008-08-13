@@ -476,18 +476,18 @@ namespace avmplus
 
 	OP* CodegenLIR::localGet(int i)				
 	{
-        return lirout->insLoadi(localVars, i*8);
+        return lirout->insLoadi(vars, i*8);
 	}
 
 	OP* CodegenLIR::localGetq(int i)				
 	{
-        return lirout->insLoad(LIR_ldq, localVars, i*8);
+        return lirout->insLoad(LIR_ldq, vars, i*8);
 	}
 
 	void  CodegenLIR::localSet(uintptr i, OP* o)	
 	{
         Value &v = state->value(i);
-        v.ins = lirout->insStorei(o, localVars, i*8);
+        v.ins = lirout->insStorei(o, vars, i*8);
         v.stored = true;
 	}
 
@@ -922,7 +922,7 @@ namespace avmplus
                 case LIR_skip: AvmAssert(false); break;
                 case LIR_nearskip: AvmAssert(false); break;
                 case LIR_label: break;
-                case LIR_trace: break;
+                case LIR_start: break;
                 default:AvmAssert(false);
             }
             return out->ins0(op);
@@ -1028,7 +1028,7 @@ namespace avmplus
         lirout = new (gc) ExprFilter(lirout);
         lirout = new (gc) ValidateWriter(lirout);
 
-        lirout->ins0(LIR_trace); // required, but poorly named
+        lirout->ins0(LIR_start);
 
 		if (overflow) return false;
 
@@ -1053,23 +1053,23 @@ namespace avmplus
         env_param = lirout->insParam(0);
         argc_param = lirout->insParam(1);
         ap_param = lirout->insParam(2);
-        localVars = InsAlloc(state->verifier->frameSize * 8);
+        vars = InsAlloc(state->verifier->frameSize * 8);
 
         verbose_only( if (lirbuf->names) {
             lirbuf->names->addName(env_param, "env");
             lirbuf->names->addName(argc_param, "argc");
             lirbuf->names->addName(ap_param, "ap");
-            lirbuf->names->addName(localVars, "localVars");
+            lirbuf->names->addName(vars, "vars");
         })
 
         #ifdef DEBUGGER
 		// pointers to traits so that the debugger can decode the locals
 		// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
-		localTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
-		localPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
+		varTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
+		varPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
         verbose_only( if (lirbuf->names) {
-            lirbuf->names->addName(localTraits, "localTraits");
-            lirbuf->names->addName(localPtrs, "localPtrs");
+            lirbuf->names->addName(varTraits, "varTraits");
+            lirbuf->names->addName(varPtrs, "varPtrs");
         })
 		#endif //DEBUGGER
 
@@ -1110,9 +1110,9 @@ namespace avmplus
 		}
 
 		// Allocate space for the call stack
-		_callStackNode = InsAlloc(sizeof(CallStackNode));
+		csn = InsAlloc(sizeof(CallStackNode));
         verbose_only( if (lirbuf->names) {
-            lirbuf->names->addName(_callStackNode, "_callStackNode");
+            lirbuf->names->addName(csn, "csn");
         })
 		#endif
 		
@@ -1289,9 +1289,9 @@ namespace avmplus
 
 		callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
 			env_param, argc_param, ap_param, // for sendEnter
-			leaIns(0, localTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
-			leaIns(0, _callStackNode), 
-			leaIns(0, localPtrs),
+			leaIns(0, varTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
+			leaIns(0, csn), 
+			leaIns(0, varPtrs),
 			info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
 			);
 
@@ -1712,8 +1712,10 @@ namespace avmplus
 			}
 			else if (in == INT_TYPE || in == UINT_TYPE || (in && !in->notDerivedObjectOrXML))
 			{
-				localSet(loc, Ins(MIR_ne, binaryIns(MIR_icmp, 
-					localGet(loc), InsConst(0))));
+                // int to bool: b = !!i
+				localSet(loc, binaryIns(LIR_eq, 
+                    binaryIns(LIR_eq, localGet(loc), InsConst(0)),
+                    InsConst(0)));
 			}
 			else
 			{
@@ -2136,7 +2138,7 @@ namespace avmplus
 
 				#ifdef DEBUGGER
 				callIns(MIR_cm, ENVADDR(MethodEnv::debugExit), 2,
-					env_param, leaIns(0, _callStackNode));
+					env_param, leaIns(0, csn));
 				// now we toast the cse and restore contents in order to 
 				// ensure that any variable modifications made by the debugger
 				// will be pulled in.
@@ -2363,7 +2365,7 @@ namespace avmplus
 			case OP_hasnext2: 
 			{
                 // fixme - if obj is already Atom, or index is already int,
-                // easier to directly reference space in localVars.
+                // easier to directly reference space in vars.
 				OP* obj = InsAlloc(sizeof(Atom));
 				OP* index = InsAlloc(sizeof(int));
 				storeIns(loadAtomRep(op1), 0, obj);
@@ -3711,7 +3713,7 @@ namespace avmplus
 		{
 			OP* lhs = localGet(lhsi);
 			OP* rhs = localGet(rhsi);
-			return binaryIns(MIR_ucmp, lhs, rhs);
+			return binaryIns(LIR_eq, lhs, rhs);
 		}
 		else
 		{
@@ -3721,7 +3723,7 @@ namespace avmplus
 				3, InsConst((uintptr)core), lhs, rhs);
 
 			// assume caller will use MIR_jeq or MIR_jne
-			return binaryIns(MIR_icmp, out, InsConst(trueAtom));
+			return binaryIns(LIR_eq, out, InsConst(trueAtom));
 		}
 	}
 
@@ -3756,9 +3758,9 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		InsDealloc(localPtrs);
-		InsDealloc(localTraits);
-		InsDealloc(_callStackNode);
+		InsDealloc(varPtrs);
+		InsDealloc(varTraits);
+		InsDealloc(csn);
 		#endif
 
         if (npe_label.preds) {
@@ -3939,7 +3941,7 @@ namespace avmplus
 	void CodegenLIR::formatOperand(PrintWriter& buffer, LIns* opr)
 	{
         if (opr) {
-            if (opr->isStore() && opr->oprnd2() == localVars) {
+            if (opr->isStore() && opr->oprnd2() == vars) {
                 opr = opr->oprnd1(); // show the value stored
             }
 			buffer.format("@%s", lirbuf->names->formatRef(opr));

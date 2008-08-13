@@ -51,7 +51,7 @@ namespace nanojit
 		LIR64	= 0x40,			// result is double or quad
 		
 		// special operations (must be 0..N)
-		LIR_trace =		2,	
+		LIR_start =		2,	
 		LIR_nearskip =  3, // must be LIR_skip-1 and lsb=1
 		LIR_skip =		4,
         LIR_neartramp = 5, // must be LIR_tramp-1 and lsb=1
@@ -512,10 +512,9 @@ namespace nanojit
 	{
 		avmplus::List<LInsp, avmplus::LIST_NonGCObjects> code;
 		LirNameMap *names;
-		int32_t lblCount;
     public:
 		VerboseWriter(GC *gc, LirWriter *out, LirNameMap* names) 
-			: LirWriter(out), code(gc), names(names), lblCount(0)
+			: LirWriter(out), code(gc), names(names)
 		{}
 
 		LInsp add(LInsp i) {
@@ -547,18 +546,10 @@ namespace nanojit
 		}
 
 		LIns* ins0(LOpcode v) {
-            if (v == LIR_label) {
+            if (v == LIR_label || v == LIR_start) {
                 flush();
             }
-			LInsp i = add(out->ins0(v));
-			if (i)
-			{
-				if (v == LIR_label)
-					i->setimm24(++lblCount);
-				else if (v != LIR_var)
-					flush();
-			}
-			return i;
+			return add(out->ins0(v));
 		}
 
 		LIns* ins1(LOpcode v, LInsp a) {

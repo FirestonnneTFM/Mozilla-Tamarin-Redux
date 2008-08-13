@@ -65,9 +65,9 @@ namespace nanojit
 	#ifdef NJ_VERBOSE
 
 	const char* lirNames[] = {
-	/* 0-9 */	"0","1","trace","nearskip","skip","neartramp","tramp","var","def","use",
+	/* 0-9 */	"0","1","start","nearskip","skip","neartramp","tramp","var","def","use",
 	/* 10-19 */	"param","st","ld","alloc","sti","ret","16","calli","call","loop",
-	/* 20-29 */ "x","j","jt","jf","L","25","feq","flt","fgt","fle",
+	/* 20-29 */ "x","j","jt","jf","label","25","feq","flt","fgt","fle",
 	/* 30-39 */ "fge","cmov","short","int","ldc","","neg","add","sub","mul",
 	/* 40-49 */ "callh","and","or","xor","not","lsh","rsh","ush","xt","xf",
 	/* 50-59 */ "qlo","qhi","ldcb","ov","cs","eq","lt","gt","le","ge",
@@ -497,7 +497,7 @@ namespace nanojit
 					i -= 3;
 					break;
 
-				case LIR_trace:
+				case LIR_start:
 					_i = 0;  // start of trace
 					return cur;
 			}
@@ -1419,7 +1419,7 @@ namespace nanojit
             total++;
 
             // first handle side-effect instructions
-			if (i->isStore() || i->isGuard() ||
+			if (i->isStore() || i->isGuard() || i->isBranch() || i->isop(LIR_label) ||
 				i->isCall() && !lirbuf->_functions[i->fid()]._cse)
 			{
 				live.add(i,0);
@@ -1518,9 +1518,6 @@ namespace nanojit
 		else if (ref->isconst()) {
 			formatImm(ref->constval(), buf);
 		}
-		else if (ref->isop(LIR_label)) {
-			sprintf(buf, "L%d", ref->imm24());
-		}
 		else {
 			if (ref->isCall()) {
 				copyName(ref, _functions[ref->fid()]._name, funccounts.add(ref->fid()));
@@ -1537,7 +1534,7 @@ namespace nanojit
 	{
 		char sbuf[200];
 		char *s = sbuf;
-		if (!i->isStore() && !i->isGuard() && !i->isop(LIR_trace) && 
+		if (!i->isStore() && !i->isGuard() && !i->isop(LIR_start) && 
 			!i->isop(LIR_label) && !i->isop(LIR_var) && !i->isop(LIR_def) && 
 			!i->isBranch()
 		   ) 
@@ -1569,7 +1566,7 @@ namespace nanojit
 			}
 
 			case LIR_loop:
-			case LIR_trace:
+			case LIR_start:
 				sprintf(s, "%s", lirNames[op]);
 				break;
 
@@ -1618,7 +1615,7 @@ namespace nanojit
 				break;
 
 			case LIR_label:
-                sprintf(s, "  %s%d:", lirNames[op], i->imm24());
+                sprintf(s, "%s:", formatRef(i));
 				break;
 
 			case LIR_jt:
