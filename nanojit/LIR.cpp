@@ -47,14 +47,14 @@ namespace nanojit
 
 	const uint8_t operandCount[] = {
 	/* 0 */		2, 2, /*trace*/0, /*nearskip*/0, /*skip*/0, /*neartramp*/0, /*tramp*/0, 0, /*def*/2, 1,
-	/* 10 */	/*param*/0, 2, 2, /*alloc*/0, 2, /*ret*/1, 2, 2, /*call*/0, /*loop*/0,
+	/* 10 */	/*param*/0, 2, 2, /*alloc*/0, 2, /*ret*/1, 2, /*calli*/0, /*call*/0, /*loop*/0,
 	/* 20 */	/*x*/0, 0, 1, 1, /*label*/0, 2, 2, 2, 2, 2,
 	/* 30 */	2, 2, /*short*/0, /*int*/0, 2, 2, /*neg*/1, 2, 2, 2,
 	/* 40 */	/*callh*/1, 2, 2, 2, /*not*/1, 2, 2, 2, /*xt*/1, /*xf*/1,
 	/* 50 */	/*qlo*/1, /*qhi*/1, 2, /*ov*/1, /*cs*/1, 2, 2, 2, 2, 2,
 	/* 60 */	2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
 	/* 70 */	2, 2, 2, 2, 2, 2, 2, 2, 2, /*fret*/1,
-	/* 80 */	2, 2, /*fcall*/0, 2, 2, 2, 2, 2, 2, 2,
+	/* 80 */	2, /*fcalli*/0, /*fcall*/0, 2, 2, 2, 2, 2, 2, 2,
 	/* 90 */	2, 2, 2, 2, 2, 2, 2, /*quad*/0, 2, 2,
 	/* 100 */	/*fneg*/1, 2, 2, 2, 2, 2, /*i2f*/1, /*u2f*/1, 2, 2,
 	/* 110 */	2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -66,7 +66,7 @@ namespace nanojit
 
 	const char* lirNames[] = {
 	/* 0-9 */	"0","1","trace","nearskip","skip","neartramp","tramp","var","def","use",
-	/* 10-19 */	"param","st","ld","alloc","sti","ret","16","17","call","loop",
+	/* 10-19 */	"param","st","ld","alloc","sti","ret","16","calli","call","loop",
 	/* 20-29 */ "x","j","jt","jf","L","25","feq","flt","fgt","fle",
 	/* 30-39 */ "fge","cmov","short","int","ldc","","neg","add","sub","mul",
 	/* 40-49 */ "callh","and","or","xor","not","lsh","rsh","ush","xt","xf",
@@ -74,7 +74,7 @@ namespace nanojit
 	/* 60-63 */ "ult","ugt","ule","uge",
 	/* 64-69 */ "LIR64","65","66","67","68","69",
 	/* 70-79 */ "70","71","72","73","74","stq","ldq","77","stqi","fret",
-	/* 80-89 */ "80","81","fcall","83","84","85","86","87","88","89",
+	/* 80-89 */ "80","fcalli","fcall","83","84","85","86","87","88","89",
 	/* 90-99 */ "90","91","92","93","94","95","96","quad","98","99",
 	/* 100-109 */ "fneg","fadd","fsub","fmul","fdiv","qjoin","i2f","u2f","108","109",
 	/* 110-119 */ "110","111","112","113","114","115","116","117","118","119",
@@ -235,7 +235,7 @@ namespace nanojit
     LIns* LIns::deref(int32_t off) const
     {
 		LInsp i = (LInsp) this-1 - off;
-        while (i->isTramp())
+        while (i && i->isTramp())
             i = i->ref();
 		return i;
     }
@@ -528,7 +528,8 @@ namespace nanojit
     
 	bool LIns::isCall() const
 	{
-		return (u.code&~LIR64) == LIR_call;
+        int c = u.code & ~LIR64;
+		return c == LIR_call || c == LIR_calli;
 	}
 
 	bool LIns::isGuard() const
@@ -947,12 +948,14 @@ namespace nanojit
     LIns* LirBufWriter::insCall(uint32_t fid, LInsp args[])
 	{
 		static const LOpcode k_callmap[] = { LIR_call, LIR_fcall, LIR_call, LIR_callh };
+		static const LOpcode k_callimap[] = { LIR_calli, LIR_fcalli, LIR_calli, LIR_skip };
 
 		const CallInfo& ci = _functions[fid];
 		uint32_t argt = ci._argtypes;
-		LOpcode op = k_callmap[argt & 3];
+        LOpcode op = (ci._address < 256 ? k_callimap : k_callmap)[argt & 3];
+        NanoAssert(op != LIR_skip); // LIR_skip here is just an error condition
 
-        ArgSize sizes[10];
+        ArgSize sizes[2*MAXARGS];
         uint32_t argc = ci.get_sizes(sizes);
 
 #ifdef NJ_SOFTFLOAT
@@ -1570,8 +1573,24 @@ namespace nanojit
 
 			case LIR_fcall:
 			case LIR_call: {
-				sprintf(s, "%s ( ", _functions[i->fid()]._name);
+                const CallInfo &c = _functions[i->fid()];
+				sprintf(s, "%s ( ", c._name);
 				for (int32_t j=i->argc()-1; j >= 0; j--) {
+					s += strlen(s);
+					sprintf(s, "%s ",formatRef(i->arg(j)));
+				}
+				s += strlen(s);
+				sprintf(s, ")");
+				break;
+			}
+			case LIR_fcalli:
+			case LIR_calli: {
+                const CallInfo &c = _functions[i->fid()];
+                int32_t argc = i->argc();
+				sprintf(s, "[%s] ( ", formatRef(i->arg(argc-1)));
+                s += strlen(s);
+                argc--;
+				for (int32_t j=argc-1; j >= 0; j--) {
 					s += strlen(s);
 					sprintf(s, "%s ",formatRef(i->arg(j)));
 				}
@@ -1602,12 +1621,17 @@ namespace nanojit
 
 			case LIR_jt:
 			case LIR_jf:
-                sprintf(s, "%s %s, %s", lirNames[op], formatRef(i->oprnd1()), formatRef(i->oprnd2()));
+                sprintf(s, "%s %s -> %s", lirNames[op], formatRef(i->oprnd1()), 
+                    i->oprnd2() ? formatRef(i->oprnd2()) : "unpatched");
 				break;
 
 			case LIR_j:
+                sprintf(s, "%s -> %s", lirNames[op], 
+                    i->oprnd2() ? formatRef(i->oprnd2()) : "unpatched");
+				break;
+
 			case LIR_ret:
-			case LIR_fret:
+            case LIR_fret:
                 sprintf(s, "%s %s", lirNames[op], formatRef(i->oprnd1()));
 				break;
 				

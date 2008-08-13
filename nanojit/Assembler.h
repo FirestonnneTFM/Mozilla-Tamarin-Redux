@@ -103,7 +103,7 @@ namespace nanojit
 
 	struct CallInfo
 	{
-		intptr_t	_address;
+		uintptr_t	_address;
         uint32_t	_argtypes:18;	// 9 2-bit fields indicating arg type, by ARGSIZE above (including ret type): a1 a2 a3 a4 a5 ret
         uint8_t		_cse:1;			// true if no side effects
         uint8_t		_fold:1;		// true if no side effects
@@ -113,7 +113,9 @@ namespace nanojit
 		uint32_t FASTCALL _count_args(uint32_t mask) const;
         uint32_t get_sizes(ArgSize*) const;
 
-		inline uint32_t FASTCALL count_args() const { return _count_args(_ARGSIZE_MASK_ANY); }
+		inline uint32_t FASTCALL count_args() const {
+            return _count_args(_ARGSIZE_MASK_ANY) + (_address < 256);
+        }
 		inline uint32_t FASTCALL count_iargs() const { return _count_args(_ARGSIZE_MASK_INT); }
 		// fargs = args - iargs
 	};
