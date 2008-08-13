@@ -178,6 +178,16 @@ namespace avmplus
 		#define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
 		#define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
 
+	#ifndef AVMPLUS_MAC
+		#define FUNCADDR(addr) (uintptr)addr
+	#else
+		#if TARGET_RT_MAC_MACHO
+			#define FUNCADDR(addr) (uintptr)addr
+		#else
+			#define FUNCADDR(addr) (*((uintptr*)addr))	
+		#endif
+	#endif
+
 		sintptr coreAddr( int (AvmCore::*f)() )
 		{
 			RETURN_METHOD_PTR(AvmCore, f);
@@ -249,6 +259,10 @@ namespace avmplus
 
 	#ifdef AVMPLUS_MIR
 
+    enum IndirectFunctionId {
+        CALL_INDIRECT, FCALL_INDIRECT, CALL_IMT, FCALL_IMT
+    };
+
 #define INTERP_FOPCODE_LIST_BEGIN static const CallInfo k_functions[] = {
 #define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
     { f, sig, cse, fold, abi, #name },
@@ -274,17 +288,6 @@ namespace avmplus
 	static const int prologue_size = 32768; //3840;
 	#endif
 	static const int epilogue_size = 208;
-
-	#ifndef AVMPLUS_MAC
-		#define FUNCADDR(addr) (uintptr)addr
-	#else
-		#if TARGET_RT_MAC_MACHO
-			#define FUNCADDR(addr) (uintptr)addr
-		#else
-			#define FUNCADDR(addr) (*((uintptr*)addr))	
-		#endif
-	#endif
-
 
 	#if defined(_MSC_VER) && !defined(AVMPLUS_ARM)
 	#define SETJMP ((uintptr)_setjmp3)
@@ -443,13 +446,26 @@ namespace avmplus
         return lirout->insCall(fid, args);
 	}
 
-	OP* CodegenLIR::callIndirect(MirOpcode code, OP* target, int argCount, ...)
+	OP* CodegenLIR::callIndirect(MirOpcode code, OP* target, int argc, ...)
 	{
-        AvmAssert(false);
-        (void) code;
-        (void) target;
-        (void) argCount;
-        return 0;
+        uint32_t fid = find_fid(
+            code == MIR_fci ? 
+                (argc == 3 ? FCALL_INDIRECT : FCALL_IMT) :
+                (argc == 3 ? CALL_INDIRECT : CALL_IMT)
+            );
+        AvmAssert(argc+1 <= MAXARGS);
+        AvmAssert(argc+1 == (int) k_functions[fid].count_args());
+        AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
+
+        LInsp args[MAXARGS];
+        va_list ap;
+        va_start(ap, argc);
+        for (int i=0; i < argc; i++)
+            args[argc-i-1] = va_arg(ap, LIns*);
+        va_end(ap);
+        args[argc] = target; // addr is final arg in arglist
+
+        return lirout->insCall(fid, args);
 	}
 
 	OP* CodegenLIR::localGet(int i)				
@@ -653,7 +669,7 @@ namespace avmplus
 	}
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: gc (i->core()->gc), core(i->core()), pool(i->pool), info(i)
+		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc)
 	{
 		state = NULL;
  		interruptable = true;
@@ -1550,7 +1566,7 @@ namespace avmplus
 						// Note: make sure we call the version that returns a
 						// 32-bit result here
 						localSet(loc, callIns(MIR_csop, FUNCADDR(AvmCore::integer_d_sse2), 1,
-											localGet(loc)));
+											localGetq(loc)));
 					}
 					else
 	#endif
@@ -1602,7 +1618,7 @@ namespace avmplus
 			else if (in == NUMBER_TYPE)
 			{
 				localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::doubleToString), 2,
-					InsConst((uintptr)core), localGet(loc)));
+					InsConst((uintptr)core), localGetq(loc)));
 			}
 			else if (in == BOOLEAN_TYPE)
 			{
@@ -1779,7 +1795,8 @@ namespace avmplus
 		OP* target = leaIns(offsetof(MethodEnv, impl32), method);
 		OP* apAddr = leaIns(0, ap);
 
-		OP* out = callIndirect(result==NUMBER_TYPE ? MIR_fci : MIR_ci, target, 4, 
+		OP* out = callIndirect(result==NUMBER_TYPE ? MIR_fci : MIR_ci, target, 
+            iid ? 4 : 3, 
 			method, InsConst(argc), apAddr, iid);
 
 		InsDealloc(ap);
@@ -3664,8 +3681,6 @@ namespace avmplus
 			return;
 #endif /* FEATURE_BUFFER_GUARD */
 
-		// We do this patching at the end since the verifier needs the unaltered 
-		// exception target just in case we hit a backedge and regen
 		if (info->exceptions)
 		{
             AvmAssert(false);
@@ -3676,6 +3691,12 @@ namespace avmplus
 				//mirPatchPtr( (OP**)&h->target, h->target );
 			}
 		}
+
+        for (int i=0, n=patches.size(); i < n; i++) {
+            Patch p = patches[i];
+            AvmAssert(p.label->bb != 0);
+            p.br->target(p.label->bb);
+        }
 	}
 
 	OP* CodegenLIR::initMultiname(Multiname* multiname, int& csp, bool isDelete /*=false*/)
@@ -3834,26 +3855,12 @@ namespace avmplus
 		return pool->domain->base != NULL;
 	}
 
-	/* set position of label (will trigger patching) */
-	void CodegenLIR::mirLabel(CodegenLabel& l, OP* bb)
-	{
+	/* set position of label */
+	void CodegenLIR::mirLabel(CodegenLabel& l, OP* bb) {
         AvmAssert(bb->isop(LIR_label));
         AvmAssert(l.bb == 0);
         l.bb = bb;
-		LIns** np = l.nextPatchIns;
-		l.nextPatchIns = NULL;
-		while(np)
-		{
-			LIns** targetp = np;
-			np = (LIns**)*targetp;
-			*targetp = bb;
-		}
-	}
-
-	/* patch the location 'where' with the value of the label */
-	void CodegenLIR::patchLater(OP* br, sintptr pc)	{
-        patchLater(br, state->verifier->getFrameState(pc)->label);
-	}
+    }
 
 #ifdef DEBUGGER
 	void CodegenLIR::emitSampleCheck()
@@ -3888,14 +3895,16 @@ namespace avmplus
         return 0;
     }
 
+	/* patch the location 'where' with the value of the label */
+	void CodegenLIR::patchLater(OP* br, sintptr pc)	{
+        patchLater(br, state->verifier->getFrameState(pc)->label);
+	}
+
     void CodegenLIR::patchLater(LIns *br, CodegenLabel &l) {
         if (l.bb != 0) {
             br->target(l.bb);
         } else {
-            // queue for later
-            LIns **targetp = br->targetAddr();
-   			*targetp = (LIns*)l.nextPatchIns;
-			l.nextPatchIns = targetp;
+            patches.add(Patch(br,l));
         }
     }
 

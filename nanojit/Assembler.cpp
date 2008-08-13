@@ -1782,6 +1782,10 @@ namespace nanojit
                 sizes[argc++] = a;
             }
 		}
+        if (_address < 256) {
+            // add one more arg for indirect call address
+            argc++;
+        }
         return argc;
     }
 #endif

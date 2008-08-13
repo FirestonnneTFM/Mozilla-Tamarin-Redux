@@ -159,6 +159,15 @@ namespace avmplus
 		MIR_last	= 23 | MIR_float | MIR_oper // highest ordinal value possible
 	};
 
+    class Patch {
+    public:
+        LIns *br;
+        CodegenLabel *label;
+        Patch() : br(0), label(0) {}
+        Patch(int) : br(0), label(0) {}
+        Patch(LIns *br, CodegenLabel &l) : br(br), label(&l) {}
+    };
+
 	class CodegenLIR {
 	public:
 		bool overflow;
@@ -183,6 +192,7 @@ namespace avmplus
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
         sintptr lastPcSave;
+        List<Patch, LIST_NonGCObjects> patches;
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(MirOpcode op, int32_t disp, LIns *base);

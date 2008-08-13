@@ -69,7 +69,8 @@ namespace nanojit
         LIR_alloc   = 13, // alloca some stack space
         LIR_sti     = 14,
         LIR_ret     = 15,
-		LIR_call	= 18,
+        LIR_calli   = 17, // indirect call
+		LIR_call	= 18, // direct call
 			
 		// guards
 		LIR_loop    = 19, // loop fragment
@@ -135,6 +136,7 @@ namespace nanojit
 		LIR_ldq		= LIR_ld    | LIR64,
 
         LIR_fcall   = LIR_call  | LIR64,
+        LIR_fcalli  = LIR_calli | LIR64,
 		LIR_fneg	= LIR_neg  | LIR64,
 		LIR_fadd	= LIR_add  | LIR64,
 		LIR_fsub	= LIR_sub  | LIR64,
@@ -516,9 +518,16 @@ namespace nanojit
 		{}
 
 		LInsp add(LInsp i) {
-			code.add(i);
+			if (i) 
+                code.add(i);
 			return i;
 		}
+
+        LInsp add_flush(LInsp i) {
+            if ((i = add(i)) != 0) 
+                flush();
+            return i;
+        }
 
 		void flush()
 		{
@@ -529,14 +538,11 @@ namespace nanojit
 		}
 
 		LIns* insGuard(LOpcode op, LInsp cond, SideExit *x) {
-			LInsp i = add(out->insGuard(op,cond,x));
-			if (i)
-				flush();
-			return i;
+			return add_flush(out->insGuard(op,cond,x));
 		}
 
 		LIns* insBranch(LOpcode v, LInsp condition, LInsp toLabel) {
-			return add(out->insBranch(v, condition, toLabel));
+			return add_flush(out->insBranch(v, condition, toLabel));
 		}
 
 		LIns* ins0(LOpcode v) {
