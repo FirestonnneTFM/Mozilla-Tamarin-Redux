@@ -53,15 +53,24 @@ namespace nanojit
 
 	class DeadCodeFilter: public LirFilter
 	{
-		Assembler *assm;
+		const CallInfo *functions;
+
+	    bool ignoreInstruction(LInsp ins)
+	    {
+            LOpcode op = ins->opcode();
+            if (ins->isStore() || op == LIR_def || op == LIR_loop || op == LIR_label)
+                return false;
+	        return ins->resv() == 0;
+	    }
+
 	public:
-		DeadCodeFilter(LirFilter *in, Assembler *a) : LirFilter(in), assm(a) {}
+		DeadCodeFilter(LirFilter *in, const CallInfo *f) : LirFilter(in), functions(f) {}
 		LInsp read() {
 			for (;;) {
 				LInsp i = in->read();
 				if (!i || i->isGuard() || i->isBranch()
-					|| i->isCall() && !assm->_functions[i->fid()]._cse
-					|| !assm->ignoreInstruction(i))
+					|| i->isCall() && !functions[i->fid()]._cse
+					|| !ignoreInstruction(i))
 					return i;
 			}
 		}
@@ -86,20 +95,26 @@ namespace nanojit
 			block.clear();
 		}
 
+        void flush_add(LInsp i) {
+            flush();
+            block.add(i);
+        }
+
 		LInsp read() {
 			LInsp i = in->read();
 			if (!i) {
 				flush();
 				return i;
 			}
-			if (i->isGuard()) {
-				flush();
-				block.add(i);
+            if (i->isGuard() || i->isBranch()) {
+				flush_add(i);
 				if (i->oprnd1())
 					block.add(i->oprnd1());
-			}
+            } else if (isRet(i->opcode())) {
+                flush_add(i);
+            }
 			else {
-				block.add(i);
+				flush_add(i);//block.add(i);
 			}
 			return i;
 		}
@@ -210,7 +225,7 @@ namespace nanojit
 		if (!item) 
 			setError(ResvFull); 
 
-        if (i->isconst() || i->isconstq())
+        if (i->isconst() || i->isconstq() || i->isop(LIR_alloc))
             r->cost = 0;
         else if (i == _thisfrag->lirbuf->sp || i == _thisfrag->lirbuf->rp)
             r->cost = 2;
@@ -314,7 +329,7 @@ namespace nanojit
 	const CallInfo* Assembler::callInfoFor(uint32_t fid)
 	{	
 		NanoAssert(fid < CI_Max);
-		return &_functions[fid];
+		return &_thisfrag->lirbuf->_functions[fid];
 	}
 
 	#ifdef _DEBUG
@@ -343,10 +358,29 @@ namespace nanojit
 			if ( !ins )
 				continue;
 			Reservation *r = getresv(ins);
+            NanoAssert(r != 0);
 			int32_t idx = r - _resvTable;
 			resv[idx]=ins;
 			NanoAssertMsg(idx, "MUST have a resource for the instruction for it to have a stack location assigned to it");
-			NanoAssertMsg( r->arIndex==0 || r->arIndex==i || (ins->isQuad()&&r->arIndex==i-(stack_direction(1))), "Stack record index mismatch");
+            if (r->arIndex) {
+                if (ins->isop(LIR_alloc)) {
+                    int j=i+1;
+                    for (int n = i + (ins->imm16()>>2); j < n; j++) {
+                        NanoAssert(_activation.entry[j]==ins);
+                    }
+		        	NanoAssert(r->arIndex == (uint32_t)j-1);
+                    i = j-1;
+                }
+                else if (ins->isQuad()) {
+                    NanoAssert((i&1)==0);
+		        	NanoAssert(r->arIndex == i);
+                    NanoAssert(_activation.entry[i+stack_direction(1)]==ins);
+                    i += 1; // skip high word
+                }
+                else {
+        			NanoAssertMsg(r->arIndex == i, "Stack record index mismatch");
+                }
+            }
 			NanoAssertMsg( r->reg==UnknownReg || regs->isConsistent(r->reg,ins), "Register record mismatch");
 		}
 	
@@ -445,7 +479,12 @@ namespace nanojit
 			
 	Register Assembler::findRegFor(LIns* i, RegisterMask allow)
 	{
-		Reservation* resv = getresv(i);
+        if (i->isop(LIR_alloc)) {
+            // never allocate a reg for this w/out stack space too
+            findMemFor(i);
+        }
+
+        Reservation* resv = getresv(i);
 		Register r;
 
         if (resv && (r=resv->reg) != UnknownReg && (rmask(r) & allow)) {
@@ -453,7 +492,7 @@ namespace nanojit
         }
 
 		RegisterMask prefer = hint(i, allow);
-		if (!resv) 	
+        if (!resv)
 			resv = reserveAlloc(i);
 
         if ((r=resv->reg) == UnknownReg)
@@ -476,8 +515,7 @@ namespace nanojit
             if (rmask(r) & GpRegs) {
     			MR(r, s);
             } 
-			else
-			{
+            else {
 				asm_nongp_copy(r, s);
 			}
 			return s;
@@ -514,7 +552,8 @@ namespace nanojit
 			asm_spilli(i, resv, pop);
 			_allocator.retire(rr);	// free any register associated with entry
 		}
-		arFree(index);			// free any stack stack space associated with entry
+		if (index)
+            arFree(index);			// free any stack stack space associated with entry
 		reserveFree(i);		// clear fields of entry and add it to free list
 	}
 
@@ -674,14 +713,6 @@ namespace nanojit
         return jmpTarget;
     }
 	
-	bool Assembler::ignoreInstruction(LInsp ins)
-	{
-        LOpcode op = ins->opcode();
-        if (ins->isStore() || op == LIR_def || op == LIR_loop || op == LIR_label)
-            return false;
-	    return getresv(ins) == 0;
-	}
-
 	void Assembler::beginAssembly(RegAllocMap* branchStateMap)
 	{
 		_activation.lowwatermark = 1;
@@ -725,7 +756,7 @@ namespace nanojit
 		LirReader bufreader(frag->lastIns);
 		StackFilter storefilter1(&bufreader, gc, frag->lirbuf, frag->lirbuf->sp);
 		StackFilter storefilter2(&storefilter1, gc, frag->lirbuf, frag->lirbuf->rp);
-		DeadCodeFilter deadfilter(&storefilter2, this);
+		DeadCodeFilter deadfilter(&storefilter2, frag->lirbuf->_functions);
 		LirFilter* rdr = &deadfilter;
 		verbose_only(
 			VerboseBlockReader vbr(rdr, this, frag->lirbuf->names);
@@ -876,6 +907,35 @@ namespace nanojit
 				default:
 					NanoAssertMsg(false, "unsupported LIR instruction");
 					break;
+
+                case LIR_ret:  {
+                    LIns *val = ins->oprnd1();
+                    findSpecificRegFor(val, retRegs[0]);
+                    if (_nIns != _epilogue)
+                        JMP(_epilogue);
+                    break;
+                }
+
+                case LIR_fret: {
+                    LIns *val = ins->oprnd1();
+                    findSpecificRegFor(val, FST0);
+                    JMP(_epilogue);
+                    break;
+                }
+
+                // allocate some stack space.  the value of this instruction
+                // is the address of the stack space.
+                case LIR_alloc: {
+                    printf("lir_alloc %s size %d\n", _thisfrag->lirbuf->names->formatRef(ins), ins->imm16());
+                    Reservation *resv = getresv(ins);
+                    int d = disp(resv);
+                    NanoAssert(d != 0);
+                    Register r = resv->reg;
+                    freeRsrcOf(ins, 0);
+                    if (r != UnknownReg)
+                        LEA(resv->reg, d, FP);
+                    break;
+                }
 
 				case LIR_j:
 				{
@@ -1066,8 +1126,14 @@ namespace nanojit
 					LIns* base = ins->oprnd1();
 					LIns* disp = ins->oprnd2();
 					Register rr = prepResultReg(ins, GpRegs);
-					Register ra = findRegFor(base, GpRegs);
+					Register ra;
 					int d = disp->constval();
+                    if (base->isop(LIR_alloc)) {
+                        ra = FP;
+                        d += findMemFor(base);
+                    } else {
+                        ra = findRegFor(base, GpRegs);
+                    }
 					if (op == LIR_ldcb)
 						LD8Z(rr, d, ra);
 					else
@@ -1504,12 +1570,15 @@ namespace nanojit
 		}
     }
 
-	uint32_t Assembler::arFree(uint32_t idx)
+	void Assembler::arFree(uint32_t idx)
 	{
-		if (idx > 0 && _activation.entry[idx] == _activation.entry[idx+stack_direction(1)])
-			_activation.entry[idx+stack_direction(1)] = 0;  // clear 2 slots for doubles 
-		_activation.entry[idx] = 0;
-		return 0;
+        AR &ar = _activation;
+        LIns *i = ar.entry[idx];
+        NanoAssert(i != 0);
+        do {
+            ar.entry[idx] = 0;
+            idx--;
+        } while (ar.entry[idx] == i);
 	}
 
 #ifdef NJ_VERBOSE
@@ -1559,49 +1628,75 @@ namespace nanojit
 #endif
 	}
 #endif
+
+    bool canfit(int32_t size, int32_t loc, AR &ar) {
+        for (int i=0; i < size; i++) {
+            if (ar.entry[loc+stack_direction(i)])
+                return false;
+        }
+        return true;
+    }
 	
 	uint32_t Assembler::arReserve(LIns* l)
 	{
 		NanoAssert(!l->isTramp());
 
 		//verbose_only(printActivationState());
-		const bool quad = l->isQuad();
-		const int32_t n = _activation.tos;
-		int32_t start = _activation.lowwatermark;
+        int32_t size = l->isop(LIR_alloc) ? ((l->imm16()+3)>>2) : l->isQuad() ? 2 : sizeof(intptr_t)>>2;
+        AR &ar = _activation;
+		const int32_t tos = ar.tos;
+		int32_t start = ar.lowwatermark;
 		int32_t i = 0;
 		NanoAssert(start>0);
-		if (n >= NJ_MAX_STACK_ENTRY-2)
+		if (tos+size >= NJ_MAX_STACK_ENTRY)
 		{	
 			setError(StackFull);
 			return start;
 		}
-		else if (quad)
-		{
-			if ( (start&1)==1 ) start++;  // even 
-			for(i=start; i <= n; i+=2)
-			{
-				if ( (_activation.entry[i+stack_direction(1)] == 0) && (i==n || (_activation.entry[i] == 0)) )
+
+        if (size == 1) {
+            // easy most common case -- find a hole, or make the frame bigger
+            for (i=start; i < NJ_MAX_STACK_ENTRY; i++) {
+                if (ar.entry[i] == 0) {
+                    // found a hole
+                    ar.entry[i] = l;
+                    return i;
+                }
+            }
+            ar.tos++;
+            ar.highwatermark++;
+            return i;
+        }
+        else if (size == 2) {
+			if ( (start&1)==1 ) start++;  // even 8 boundary
+			for (i=start; i < NJ_MAX_STACK_ENTRY; i+=2) {
+				if ( (ar.entry[i+stack_direction(1)] == 0) && (i==tos || (ar.entry[i] == 0)) )
 					break;   //  for fp we need 2 adjacent aligned slots
 			}
+            NanoAssert(_activation.entry[i] == 0);
+            NanoAssert(_activation.entry[i+stack_direction(1)] == 0);
+            ar.entry[i] = l;
+            ar.entry[i+stack_direction(1)] = l;
 		}
-		else
-		{
-			for(i=start; i < n; i++)
-			{
-				if (_activation.entry[i] == 0)
-					break;   // not being used
-			}
+        else {
+            printf("use %s size %d\n", _thisfrag->lirbuf->names->formatRef(l), size*4);
+            // alloc larger block on 8byte boundary.
+            if (start < size) start = size;
+            if ((start&1)==1) start++;
+            for (i=start; i < NJ_MAX_STACK_ENTRY; i+=2) {
+                if (canfit(size, i, ar))
+                    break;
+            }
+		    // place the entry in the table and mark the instruction with it
+            for (int32_t j=0; j < size; j++) {
+                NanoAssert(_activation.entry[i+stack_direction(j)] == 0);
+                _activation.entry[i+stack_direction(j)] = l;
+            }
 		}
-
-		int32_t inc = ((i-n+1) < 0) ? 0 : (i-n+1);
-		if (quad && stack_direction(1)>0) inc++;
-		_activation.tos += inc;
-		_activation.highwatermark += inc;
-
-		// place the entry in the table and mark the instruction with it
-		_activation.entry[i] = l;
-		if (quad) _activation.entry[i+stack_direction(1)] = l;
-		return i;
+        if (i >= (int32_t)ar.tos) {
+            ar.tos = ar.highwatermark = i+1;
+        }
+        return i;
 	}
 
 	void Assembler::restoreCallerSaved()
@@ -1700,11 +1795,6 @@ namespace nanojit
 		return rec;
 	}
 
-	void Assembler::setCallTable(const CallInfo* functions)
-	{
-		_functions = functions;
-	}
-
 	#ifdef NJ_VERBOSE
 		char Assembler::outline[8192];
 
@@ -1719,7 +1809,7 @@ namespace nanojit
 
 		void Assembler::output(const char* s)
 		{
-			if (_outputCache)
+			if (0&&_outputCache)
 			{
 				char* str = (char*)_gc->Alloc(strlen(s)+1);
 				strcpy(str, s);

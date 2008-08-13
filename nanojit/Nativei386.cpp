@@ -229,22 +229,32 @@ namespace nanojit
 		const uint32_t iargs = call->count_iargs();
 		int32_t fstack = call->count_args() - iargs;
 
-        int32_t extra = 0;
-		int32_t istack = iargs-2;  // first 2 4B args are in registers
-		if (istack <= 0)
-		{
-			istack = 0;
-		}
+        uint32_t max_regs;
+        switch (call->_abi) {
+            default: AvmAssert(false);
+            case ABI_CDECL: max_regs = 0; break;  // args on stack
+            case ABI_THISCALL: max_regs = 1; break; // this in ecx, others on stack
+            case ABI_FASTCALL: max_regs = 2; break; // arg 0, 1 in ecx, edx
+        }
+        if (max_regs > iargs)
+            max_regs = iargs;
 
-		const int32_t size = 4*istack + 8*fstack; // actual stack space used
-        if (size) {
+        int32_t istack = iargs-max_regs;  // first 2 4B args are in registers
+        int32_t extra = 0;
+		const int32_t pushsize = 4*istack + 8*fstack; // actual stack space used
+
+        if (pushsize) {
 		    // stack re-alignment 
 		    // only pop our adjustment amount since callee pops args in FASTCALL mode
-		    extra = alignUp(size, NJ_ALIGN_STACK) - (size); 
+		    extra = alignUp(pushsize, NJ_ALIGN_STACK) - pushsize; 
 		    if (extra > 0)
-			{
 				ADDi(SP, extra);
-			}
+        }
+
+        if (call->_abi == ABI_CDECL) {
+            // caller pops args with cdecl abi
+            if (pushsize > 0)
+                ADDi(SP, pushsize);
         }
 
 		CALL(call);
@@ -253,9 +263,8 @@ namespace nanojit
 		NanoAssert(_allocator.isFree(FST0));
 		// note: this code requires that ref arguments (ARGSIZE_Q)
         // be one of the first two arguments
-		// pre-assign registers to the first 2 4B args
-		const int max_regs = (iargs < 2) ? iargs : 2;
-		int n = 0;
+		// pre-assign registers to the first N 4B args based on the calling convention
+		uint32_t n = 0;
 
         ArgSize sizes[10];
         uint32_t argc = call->get_sizes(sizes);
@@ -271,9 +280,7 @@ namespace nanojit
 		}
 
 		if (extra > 0)
-		{
 			SUBi(SP, extra);
-		}
 	}
 
 #elif defined NANOJIT_AMD64
@@ -461,15 +468,17 @@ namespace nanojit
 	
 	void Assembler::asm_restore(LInsp i, Reservation *resv, Register r)
 	{
-        if (i->isconst())
-        {
+        if (i->isop(LIR_alloc)) {
+            printf("remat %s size %d\n", _thisfrag->lirbuf->names->formatRef(i), i->imm16());
+            LEA(r, disp(resv), FP);
+        }
+        else if (i->isconst()) {
             if (!resv->arIndex) {
                 reserveFree(i);
             }
             LDi(r, i->constval());
         }
-        else
-        {
+        else {
             int d = findMemFor(i);
 			asm_load(d,r);
 			verbose_only(if (_verbose) {

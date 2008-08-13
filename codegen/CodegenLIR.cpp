@@ -670,6 +670,7 @@ namespace avmplus
 
 	void CodegenLIR::InsDealloc(OP* alloc)
 	{
+        (void) alloc;
 		AvmAssert(alloc->isop(LIR_alloc));
 		//alloc->lastUse = ip-1;
 	}
@@ -1019,9 +1020,12 @@ namespace avmplus
 	bool CodegenLIR::prologue(FrameState* state)
 	{
 		this->state = state;
+		abcStart = state->verifier->code_pos;
+		abcEnd   = abcStart + state->verifier->code_length;
 
         Fragmento *frago = pool->codePages->frago;
-        lirbuf = new (gc) LirBuffer(frago, k_functions);
+        frag = new (gc) Fragment(abcStart);
+        lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
         lirout = new (gc) LirBufWriter(lirbuf);
         lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
         lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
@@ -1032,8 +1036,6 @@ namespace avmplus
 
 		if (overflow) return false;
 
-		abcStart = state->verifier->code_pos;
-		abcEnd   = abcStart + state->verifier->code_length;
 
 #ifndef FEATURE_BUFFER_GUARD 
 		// if we aren't growing the buffer dynamically then commit a whole bunch of it
@@ -3795,6 +3797,8 @@ namespace avmplus
             AvmAssert(p.label->bb != 0);
             p.br->target(p.label->bb);
         }
+
+        frag->lastIns = lirbuf->next()-1;
 	}
 
 	OP* CodegenLIR::initMultiname(Multiname* multiname, int& csp, bool isDelete /*=false*/)
@@ -4058,14 +4062,22 @@ namespace avmplus
         }
     };
 
-    void CodegenLIR::emitMD() {
-        overflow = true;
-
+    void CodegenLIR::emitMD() 
+    {
         LirReader reader(lirbuf);
         for (LIns *i = reader.read(); i != 0; i = reader.read()) 
         {}
 
         live(gc, lirbuf);
+
+        Assembler *assm = pool->codePages->frago->assm();
+        RegAllocMap regMap(gc);
+        NInsList loopJumps(gc);
+        assm->beginAssembly(&regMap);
+        assm->assemble(frag, loopJumps);
+        assm->endAssembly(frag, loopJumps);
+
+        overflow = true;
     }
 }
 
