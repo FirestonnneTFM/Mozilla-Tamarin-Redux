@@ -183,11 +183,11 @@ namespace avmplus
 		LirBuffer *lirbuf;
 		LirWriter *lirout;
 		FrameState *state;
-        LIns *localVars, *localTraits, *localPtrs;
+        LIns *vars, *varTraits, *varPtrs;
         LIns *env_param, *argc_param, *ap_param;
         LIns *_save_eip, *_ef;
         LIns *dxns, *dxnsAddrSave;
-        LIns *_callStackNode;
+        LIns *csn;
         LIns *undefConst;
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
