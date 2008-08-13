@@ -76,7 +76,7 @@ namespace nanojit
 	typedef avmplus::List<LIns*,avmplus::LIST_NonGCObjects>	InsList;
 	typedef avmplus::List<char*, avmplus::LIST_GCObjects> StringList;
 
-    const int MAXARGS = 8;
+    const uint32_t MAXARGS = 8;
 
 	#if defined(_DEBUG)
 		
