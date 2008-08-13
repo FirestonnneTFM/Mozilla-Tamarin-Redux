@@ -795,6 +795,7 @@
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* avmplus */;
 			projectDirPath = "";
+			projectRoot = ../../..;
 			targets = (
 				D2AAC045055464E500DB518D /* avmplus */,
 			);
