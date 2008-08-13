@@ -254,7 +254,7 @@ namespace avmplus
 	typedef avmplus::Atom AvmBox;
 	typedef avmplus::MethodEnv* AvmMethodEnv;
 
-	#define AvmThunkRetType_AvmObject		(error ??? illegal)
+	#define AvmThunkRetType_AvmObject		(error ??? illegal) /* all Objects are return as AvmBox */
 	typedef AvmBox AvmThunkRetType_bool;
 	typedef AvmBox AvmThunkRetType_int32_t;
 	typedef AvmBox AvmThunkRetType_uint32_t;
@@ -263,6 +263,8 @@ namespace avmplus
 	typedef AvmBox AvmThunkRetType_AvmString;
 	typedef AvmBox AvmThunkRetType_void;
 	typedef double AvmThunkRetType_double;
+
+	#define AVMTHUNK_CALLTYPE	 /* could be used to declare custom call type (eg __fastcall) */
 
 	typedef AvmThunkRetType_AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 

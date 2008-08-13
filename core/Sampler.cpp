@@ -118,7 +118,7 @@ namespace avmplus
 			write(p, depth);
 			while(csn)
 			{
-				write(p, (uint32)csn->info);
+				write(p, (uintptr_t)csn->info);
 				// FIXME: can filename can be stored in the AbstractInfo?
 				write(p, csn->filename);
 				write(p, csn->linenum);
@@ -179,7 +179,7 @@ namespace avmplus
 
 		if(typeOrVTable < 7 && core->codeContext() && core->codeContext()->domainEnv()) {
 			// and in toplevel
-			typeOrVTable |= (uint32)core->codeContext()->domainEnv()->toplevel();
+			typeOrVTable |= (uintptr_t)core->codeContext()->domainEnv()->toplevel();
 		}
 
 		writeRawSample(NEW_OBJECT_SAMPLE);
