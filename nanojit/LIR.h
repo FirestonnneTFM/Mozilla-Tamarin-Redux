@@ -571,7 +571,7 @@ namespace nanojit
 			return add(out->insStore(v, b, d));
 		}
 		LIns* insStorei(LInsp v, LInsp b, int32_t d) {
-			return add(out->insStorei(v, b, d));
+			return add_flush(out->insStorei(v, b, d));
 		}
         LIns* insAlloc(int32_t size) {
             return add(out->insAlloc(size));

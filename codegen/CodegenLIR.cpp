@@ -593,10 +593,6 @@ namespace avmplus
 
 	OP* CodegenLIR::storeAtomArgs(int count, int index)
 	{
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "        	store boxed args\n";
-		#endif
 		OP* ap = InsAlloc(sizeof(Atom)*count);
 		for (int i=0; i < count; i++)
 		{
@@ -683,11 +679,6 @@ namespace avmplus
 		#ifdef AVMPLUS_MAC_CARBON
 		setjmpInit();
 		#endif
-
-		#ifdef AVMPLUS_ARM
-		// Hack for debugging
-		//pool->verbose = true;
-		#endif
 		
 		#ifdef AVMPLUS_ARM
 		#ifdef AVMPLUS_VERBOSE
@@ -699,26 +690,6 @@ namespace avmplus
 		abcStart = NULL;
 		abcEnd   = NULL;
 
-		#ifdef AVMPLUS_ARM
-		patch_frame_size = NULL;
-		patch_stmfd = NULL;
-		gpregs.nonVolatileMask  = 0;
-		fpregs.nonVolatileMask  = 0;
-		#endif
-
-		#ifdef AVMPLUS_SPARC
-		patch_frame_size = NULL;
-		beginCatch_start = NULL;
-		beginCatch_end = NULL;
-		#endif
-
-		#ifdef AVMPLUS_PPC
-		gpregs.LowerBound = Unknown;
-		fpregs.LowerBound = Unknown;
-		patch_stwu = NULL;
-		patch_stmw = NULL;
-		#endif
-
 		overflow = false;
 
 		#ifdef VTUNE
@@ -729,9 +700,12 @@ namespace avmplus
 
         // set up the generator LIR pipeline
         if (!pool->codePages) {
-            pool->codePages = new (gc) PageMgr();
-            pool->codePages->frago = new (gc) Fragmento(core, 24/*16mb*/);
-            pool->codePages->frago->labels = new (gc) LabelMap(core, 0);
+			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
+            mgr->frago = new (gc) Fragmento(core, 24/*16mb*/);
+			verbose_only(
+				LabelMap *labels = mgr->frago->labels = new (gc) LabelMap(core, 0);
+				labels->add(core, sizeof(AvmCore), 0, "core");
+			)
         }
 	}
 
@@ -1446,10 +1420,6 @@ namespace avmplus
 
 		OP* dxnsAddr;
 
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "        	set dxns addr\n";
-		#endif
 		if (info->isFlagSet(AbstractFunction::SETS_DXNS)) {
 			dxnsAddr = leaIns(0,dxns);
 		}

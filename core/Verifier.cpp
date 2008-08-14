@@ -143,6 +143,8 @@ namespace avmplus
 	 */
     void Verifier::verify(CodegenLIR *mir)
 	{		
+		verbose = (mir != 0);
+
 		SAMPLE_FRAME("[verify]", core);
 
 		#ifdef AVMPLUS_VERBOSE
