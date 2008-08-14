@@ -143,14 +143,13 @@ namespace nanojit
 
     void Assembler::arReset()
 	{
+		_argsUsed = 0;
 		_activation.highwatermark = 0;
 		_activation.lowwatermark = 0;
 		_activation.tos = 0;
 
 		for(uint32_t i=0; i<NJ_MAX_STACK_ENTRY; i++)
 			_activation.entry[i] = 0;
-		for(uint32_t i=0; i<NJ_MAX_PARAMETERS; i++)
-			_activation.parameter[i] = 0;
 	}
 
  	void Assembler::registerResetAll()
@@ -1050,9 +1049,10 @@ namespace nanojit
                     uint32_t a = ins->imm8();
                     // fixme - this is __fastcall specific!
                     if (a < sizeof(argRegs)/sizeof(argRegs[0])) {
-					    Register w = Register(a);
+					    Register w = argRegs[a];
                         NanoAssert(w != UnknownReg);
 					    // incoming arg in register
+						argsUsed |= rmask(w);
 					    prepResultReg(ins, rmask(w));
                     } else {
                         // incoming arg is on stack

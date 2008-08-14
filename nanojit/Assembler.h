@@ -83,7 +83,6 @@ namespace nanojit
 		uint32_t		tos;							/* current top of stack entry */
 		uint32_t		highwatermark;					/* max tos hit */
 		uint32_t		lowwatermark;					/* we pre-allocate entries from 0 upto this index-1; so dynamic entries are added above this index */
-		LIns*			parameter[ NJ_MAX_PARAMETERS ]; /* incoming parameters */
 	};
 
     enum ArgSize {
@@ -295,6 +294,7 @@ namespace nanojit
 			Reservation _resvTable[ NJ_MAX_STACK_ENTRY ]; // table where we house stack and register information
 			uint32_t	_resvFree;
 			bool		_inExit,vpad2[3];
+			RegisterMap _argsUsed;
 
 			void		asm_cmp(LIns *cond);
 #ifndef NJ_SOFTFLOAT
