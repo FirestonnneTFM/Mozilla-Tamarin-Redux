@@ -1675,7 +1675,9 @@ namespace nanojit
             ar.entry[i+stack_direction(1)] = l;
 		}
         else {
-            printf("arReserve %s size %d\n", _thisfrag->lirbuf->names->formatRef(l), size<<2);
+            verbose_only(if (_verbose) {
+                printf("arReserve %s size %d\n", _thisfrag->lirbuf->names->formatRef(l), size<<2);
+            })
             // alloc larger block on 8byte boundary.
             if (start < size) start = size;
             if ((start&1)==1) start++;

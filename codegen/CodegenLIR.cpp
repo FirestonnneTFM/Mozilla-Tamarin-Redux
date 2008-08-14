@@ -263,9 +263,15 @@ namespace avmplus
     };
 
 #define INTERP_FOPCODE_LIST_BEGIN static const CallInfo k_functions[] = {
-#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
-    { f, sig, cse, fold, abi, #name },
 #define INTERP_FOPCODE_LIST_END };
+
+#ifdef NJ_VERBOSE
+    #define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
+        { f, sig, cse, fold, abi, #name },
+#else
+    #define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
+        { f, sig, cse, fold, abi },
+#endif
 
     #include "../core/vm_fops.h"
 
@@ -887,6 +893,7 @@ namespace avmplus
 #endif
 	}
 
+#ifdef _DEBUG
     class ValidateWriter: public LirWriter
     {
     public:
@@ -1015,6 +1022,7 @@ namespace avmplus
             return out->insCall(fid, args);
         }
     };
+#endif //  _DEBUG
 
 	// f(env, argc, instance, argv)
 	bool CodegenLIR::prologue(FrameState* state)
@@ -1028,10 +1036,14 @@ namespace avmplus
         lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
-        lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
-        lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
+        verbose_only(
+            lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
+            lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
+        )
         lirout = new (gc) ExprFilter(lirout);
-        lirout = new (gc) ValidateWriter(lirout);
+        debug_only(
+            lirout = new (gc) ValidateWriter(lirout);
+        )
 
         lirout->ins0(LIR_start);
 
@@ -4067,11 +4079,12 @@ namespace avmplus
         for (LIns *i = validator.read(); i != 0; i = validator.read()) 
         {}
 
-        live(gc, lirbuf);
+        verbose_only(if (verbose()) {
+            live(gc, lirbuf);
+        })
 
         Fragmento *frago = pool->codePages->frago;
         Assembler *assm = frago->assm();
-        assm->_verbose = true;
         RegAllocMap regMap(gc);
         NInsList loopJumps(gc);
         assm->beginAssembly(&regMap);
@@ -4092,9 +4105,11 @@ namespace nanojit
         return 0;
     }
 
+    #ifdef NJ_VERBOSE
     void LirNameMap::formatGuard(LIns*, char*) {
         AvmAssert(false);
     }
+    #endif
 
     void Assembler::asm_bailout(LIns*, Register) {
         AvmAssert(false);
