@@ -142,8 +142,9 @@ namespace avmplus
 	 * @param info
 	 */
     void Verifier::verify(CodegenLIR *mir)
-	{		
-		verbose = (mir != 0);
+	{
+		//debugging hack
+        //verbose = (mir != 0);
 
 		SAMPLE_FRAME("[verify]", core);
 

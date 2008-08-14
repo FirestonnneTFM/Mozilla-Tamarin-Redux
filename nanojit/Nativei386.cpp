@@ -483,7 +483,9 @@ namespace nanojit
 	void Assembler::asm_restore(LInsp i, Reservation *resv, Register r)
 	{
         if (i->isop(LIR_alloc)) {
-            printf("remat %s size %d\n", _thisfrag->lirbuf->names->formatRef(i), i->size());
+            verbose_only(if (_verbose) {
+                printf("remat %s size %d\n", _thisfrag->lirbuf->names->formatRef(i), i->size());
+            })
             LEA(r, disp(resv), FP);
         }
         else if (i->isconst()) {
