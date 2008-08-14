@@ -110,11 +110,12 @@ namespace nanojit
 				flush_add(i);
 				if (i->oprnd1())
 					block.add(i->oprnd1());
-            } else if (isRet(i->opcode())) {
+            }
+            else if (isRet(i->opcode()) || i->isStore()) {
                 flush_add(i);
             }
 			else {
-				flush_add(i);//block.add(i);
+				block.add(i);
 			}
 			return i;
 		}
@@ -143,7 +144,6 @@ namespace nanojit
 
     void Assembler::arReset()
 	{
-		_argsUsed = 0;
 		_activation.highwatermark = 0;
 		_activation.lowwatermark = 0;
 		_activation.tos = 0;
@@ -209,8 +209,10 @@ namespace nanojit
 	{
 		_resvTable[0].arIndex = 0;
 		int i;
-		for(i=1; i<NJ_MAX_STACK_ENTRY; i++)
+        for(i=1; i<NJ_MAX_STACK_ENTRY; i++) {
 			_resvTable[i].arIndex = i-1;
+            _resvTable[i].used = 0;
+        }
 		_resvFree= i-1;
 	}
 
@@ -221,6 +223,7 @@ namespace nanojit
 		_resvFree = r->arIndex;
 		r->reg = UnknownReg;
 		r->arIndex = 0;
+        r->used = 1;
 		if (!item) 
 			setError(ResvFull); 
 
@@ -240,6 +243,7 @@ namespace nanojit
         Reservation *rs = getresv(i);
         NanoAssert(rs == &_resvTable[i->resv()]);
 		rs->arIndex = _resvFree;
+        rs->used = 0;
 		_resvFree = i->resv();
         i->setresv(0);
 	}
@@ -342,30 +346,25 @@ namespace nanojit
             !_allocator.active[FST0] && _fpuStkDepth == 0);
 #endif
 		
-		// for tracking resv usage
-		LIns* resv[NJ_MAX_STACK_ENTRY];
-		for(int i=0; i<NJ_MAX_STACK_ENTRY; i++)
-			resv[i]=0;
-			
+        AR &ar = _activation;
 		// check AR entries
-		NanoAssert(_activation.highwatermark < NJ_MAX_STACK_ENTRY);
+		NanoAssert(ar.highwatermark < NJ_MAX_STACK_ENTRY);
 		LIns* ins = 0;
 		RegAlloc* regs = &_allocator;
-		for(uint32_t i=_activation.lowwatermark; i<_activation.tos; i++)
+		for(uint32_t i = ar.lowwatermark; i < ar.tos; i++)
 		{
-			ins = _activation.entry[i];
+			ins = ar.entry[i];
 			if ( !ins )
 				continue;
 			Reservation *r = getresv(ins);
             NanoAssert(r != 0);
 			int32_t idx = r - _resvTable;
-			resv[idx]=ins;
 			NanoAssertMsg(idx, "MUST have a resource for the instruction for it to have a stack location assigned to it");
             if (r->arIndex) {
                 if (ins->isop(LIR_alloc)) {
                     int j=i+1;
-                    for (int n = i + (ins->imm16()>>2); j < n; j++) {
-                        NanoAssert(_activation.entry[j]==ins);
+                    for (int n = i + (ins->size()>>2); j < n; j++) {
+                        NanoAssert(ar.entry[j]==ins);
                     }
 		        	NanoAssert(r->arIndex == (uint32_t)j-1);
                     i = j-1;
@@ -373,7 +372,7 @@ namespace nanojit
                 else if (ins->isQuad()) {
                     NanoAssert((i&1)==0);
 		        	NanoAssert(r->arIndex == i);
-                    NanoAssert(_activation.entry[i+stack_direction(1)]==ins);
+                    NanoAssert(ar.entry[i+stack_direction(1)]==ins);
                     i += 1; // skip high word
                 }
                 else {
@@ -383,34 +382,25 @@ namespace nanojit
 			NanoAssertMsg( r->reg==UnknownReg || regs->isConsistent(r->reg,ins), "Register record mismatch");
 		}
 	
-		registerConsistencyCheck(resv);
+		registerConsistencyCheck();
 				
 		// check resv table
 		int32_t inuseCount = 0;
 		int32_t notInuseCount = 0;
-		for(uint32_t i=1; i<NJ_MAX_STACK_ENTRY; i++)
-		{
-			if (resv[i]==0)
-			{
-				notInuseCount++;
-			}
-			else
-			{
-				inuseCount++;
-			}
-		}
+        for(uint32_t i=1; i < sizeof(_resvTable)/sizeof(_resvTable[0]); i++) {
+            _resvTable[i].used ? inuseCount++ : notInuseCount++;
+        }
 
 		int32_t freeCount = 0;
 		uint32_t free = _resvFree;
-		while(free)
-		{
+        while(free) {
 			free = _resvTable[free].arIndex;
 			freeCount++;
 		}
 		NanoAssert( ( freeCount==notInuseCount && inuseCount+notInuseCount==(NJ_MAX_STACK_ENTRY-1) ) );
 	}
 
-	void Assembler::registerConsistencyCheck(LIns** resv)
+	void Assembler::registerConsistencyCheck()
 	{	
 		// check registers
 		RegAlloc *regs = &_allocator;
@@ -432,9 +422,7 @@ namespace nanojit
 					NanoAssert(v != 0);
 					int32_t idx = v - _resvTable;
 					NanoAssert(idx >= 0 && idx < NJ_MAX_STACK_ENTRY);
-					resv[idx]=ins;
 					NanoAssertMsg(idx, "MUST have a resource for the instruction for it to have a register assigned to it");
-					NanoAssertMsg( v->arIndex==0 || ins==_activation.entry[v->arIndex], "Stack record index mismatch");
 					NanoAssertMsg( regs->getActive(v->reg)==ins, "Register record mismatch");
 				}			
 			}
@@ -823,7 +811,6 @@ namespace nanojit
 			// let the fragment manage the pages if we're using trees and there are branches
 			Page* manage = (_frago->core()->config.tree_opt) ? handoverPages() : 0;
 			frag->setCode(code, manage); // root of tree should manage all pages
-			NanoAssert(!_frago->core()->config.tree_opt || frag == frag->anchor || frag->kind == MergeTrace);			
 			//fprintf(stderr, "endAssembly frag %X entry %X\n", (int)frag, (int)frag->fragEntry);
 		}
 		
@@ -910,8 +897,10 @@ namespace nanojit
                 case LIR_ret:  {
                     LIns *val = ins->oprnd1();
                     findSpecificRegFor(val, retRegs[0]);
-                    if (_nIns != _epilogue)
+                    if (_nIns != _epilogue) {
                         JMP(_epilogue);
+                        MR(SP,FP);
+                    }
                     break;
                 }
 
@@ -925,14 +914,15 @@ namespace nanojit
                 // allocate some stack space.  the value of this instruction
                 // is the address of the stack space.
                 case LIR_alloc: {
-                    printf("lir_alloc %s size %d\n", _thisfrag->lirbuf->names->formatRef(ins), ins->imm16());
                     Reservation *resv = getresv(ins);
-                    int d = disp(resv);
-                    NanoAssert(d != 0);
+                    NanoAssert(resv->arIndex != 0);
                     Register r = resv->reg;
+                    if (r != UnknownReg) {
+    			        _allocator.retire(r);
+                        resv->reg = UnknownReg;
+                        asm_restore(ins, resv, r);
+                    }
                     freeRsrcOf(ins, 0);
-                    if (r != UnknownReg)
-                        LEA(resv->reg, d, FP);
                     break;
                 }
 
@@ -1047,16 +1037,18 @@ namespace nanojit
 				case LIR_param:
 				{
                     uint32_t a = ins->imm8();
-                    // fixme - this is __fastcall specific!
-                    if (a < sizeof(argRegs)/sizeof(argRegs[0])) {
+                    AbiKind abi = _thisfrag->lirbuf->abi;
+                    uint32_t abi_regcount = abi == ABI_FASTCALL ? 2 : abi == ABI_THISCALL ? 1 : 0;
+                    if (a < abi_regcount) {
 					    Register w = argRegs[a];
                         NanoAssert(w != UnknownReg);
 					    // incoming arg in register
-						argsUsed |= rmask(w);
 					    prepResultReg(ins, rmask(w));
                     } else {
-                        // incoming arg is on stack
-                        NanoAssert(false);
+                        // incoming arg is on stack, and EAX points nearby (see genPrologue)
+                        Register r = prepResultReg(ins, GpRegs & ~rmask(EAX));
+                        int d = (a - abi_regcount) * sizeof(intptr_t) + 8;
+                        LD(r, d, EAX); 
                     }
 					break;
 				}
@@ -1429,13 +1421,16 @@ namespace nanojit
 
 #ifndef NJ_SOFTFLOAT
 				case LIR_fcall:
+				case LIR_fcalli:
 #endif
 				case LIR_call:
+				case LIR_calli:
 				{
                     Register rr = UnknownReg;
 #ifndef NJ_SOFTFLOAT
-                    if (op == LIR_fcall)
+                    if ((op&LIR64))
                     {
+                        // fcall or fcalli
 						Reservation* rR = getresv(ins);
 						rr = asm_prep_fcall(rR, ins);
                     }
@@ -1566,6 +1561,7 @@ namespace nanojit
 		}
         else
 		{
+            NanoAssert(sz == ARGSIZE_F);
 			asm_farg(p);
 		}
     }
@@ -1642,7 +1638,7 @@ namespace nanojit
 		NanoAssert(!l->isTramp());
 
 		//verbose_only(printActivationState());
-        int32_t size = l->isop(LIR_alloc) ? ((l->imm16()+3)>>2) : l->isQuad() ? 2 : sizeof(intptr_t)>>2;
+        int32_t size = l->isop(LIR_alloc) ? (l->size()>>2) : l->isQuad() ? 2 : sizeof(intptr_t)>>2;
         AR &ar = _activation;
 		const int32_t tos = ar.tos;
 		int32_t start = ar.lowwatermark;
@@ -1679,7 +1675,7 @@ namespace nanojit
             ar.entry[i+stack_direction(1)] = l;
 		}
         else {
-            printf("use %s size %d\n", _thisfrag->lirbuf->names->formatRef(l), size*4);
+            printf("arReserve %s size %d\n", _thisfrag->lirbuf->names->formatRef(l), size<<2);
             // alloc larger block on 8byte boundary.
             if (start < size) start = size;
             if ((start&1)==1) start++;
@@ -1871,7 +1867,7 @@ namespace nanojit
                 sizes[argc++] = a;
             }
 		}
-        if (_address < 256) {
+        if (isIndirect()) {
             // add one more arg for indirect call address
             argc++;
         }

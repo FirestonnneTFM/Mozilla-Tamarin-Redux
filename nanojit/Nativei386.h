@@ -127,7 +127,7 @@ namespace nanojit
 	#define DECLARE_PLATFORM_REGALLOC()
 
 	#define DECLARE_PLATFORM_ASSEMBLER()	\
-        const static Register argRegs[3], retRegs[2]; \
+        const static Register argRegs[2], retRegs[2]; \
 		bool x87Dirty;						\
         bool sse2;							\
 		bool has_cmov; \
@@ -659,6 +659,7 @@ namespace nanojit
 #define FLDr(r)		do { FPU(0xd9c0,r);				asm_output1("fld %s",fpn(r)); fpu_push(); } while(0)
 #define EMMS()		do { FPUc(0x0f77);				asm_output("emms"); } while (0)
 
+// standard direct call
 #define CALL(c)	do { \
   underrunProtect(5);					\
   int offset = (c->_address) - ((int)_nIns); \
@@ -667,6 +668,15 @@ namespace nanojit
   verbose_only(asm_output1("call %s",(c->_name));) \
   debug_only(if ((c->_argtypes&3)==ARGSIZE_F) fpu_push();)\
 } while (0)
+
+// indirect call thru register
+#define CALLr(c,r)	do { \
+  underrunProtect(2);\
+  ALU(0xff, 2, (r));\
+  verbose_only(asm_output1("call %s",gpn(r));) \
+  debug_only(if ((c->_argtypes&3)==ARGSIZE_F) fpu_push();)\
+} while (0)
+
 
 }
 #endif // __nanojit_Nativei386__
