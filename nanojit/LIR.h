@@ -162,7 +162,45 @@ namespace nanojit
 
     struct SideExit;
     struct Page;
-    struct CallInfo;
+
+    enum AbiKind {
+        ABI_FASTCALL,
+        ABI_THISCALL,
+        ABI_CDECL
+    };
+
+    enum ArgSize {
+	    ARGSIZE_NONE = 0,
+	    ARGSIZE_F = 1,
+	    ARGSIZE_LO = 2,
+	    ARGSIZE_Q = 3,
+	    _ARGSIZE_MASK_INT = 2, 
+        _ARGSIZE_MASK_ANY = 3
+    };
+
+    struct CallInfo
+	{
+		uintptr_t	_address;
+        uint32_t	_argtypes:18;	// 9 2-bit fields indicating arg type, by ARGSIZE above (including ret type): a1 a2 a3 a4 a5 ret
+        uint8_t		_cse:1;			// true if no side effects
+        uint8_t		_fold:1;		// true if no side effects
+        AbiKind     _abi:3;
+		verbose_only ( const char* _name; )
+		
+		uint32_t FASTCALL _count_args(uint32_t mask) const;
+        uint32_t get_sizes(ArgSize*) const;
+
+        inline bool isIndirect() const {
+            return _address < 256;
+        }
+		inline uint32_t FASTCALL count_args() const {
+            return _count_args(_ARGSIZE_MASK_ANY) + isIndirect();
+        }
+		inline uint32_t FASTCALL count_iargs() const {
+            return _count_args(_ARGSIZE_MASK_INT);
+        }
+		// fargs = args - iargs
+	};
 
 	// Low-level Instruction 4B
 	// had to lay it our as a union with duplicate code fields since msvc couldn't figure out how to compact it otherwise.
@@ -256,6 +294,10 @@ namespace nanojit
 		inline uint8_t	resv()	 const  { return g.resv; }
         void*	payload() const;
         inline Page*	page()			{ return (Page*) alignTo(this,NJ_PAGE_SIZE); }
+        inline int32_t  size() const {
+            NanoAssert(isop(LIR_alloc));
+            return i.imm16<<2;
+        }
 
 		// index args in r-l order.  arg(0) is rightmost arg
 		inline LIns* arg(uint32_t i) {
@@ -664,6 +706,7 @@ namespace nanojit
 			_stats;
 
 			const CallInfo* _functions;
+            AbiKind abi;
             LInsp state,param1,sp,rp;
 			
 		private:

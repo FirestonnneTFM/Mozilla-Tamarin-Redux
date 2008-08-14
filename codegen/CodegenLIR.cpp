@@ -518,6 +518,18 @@ namespace avmplus
 	{
 		Value& v = state->value(i);
 		Traits* t = v.traits;
+
+        // handle Number first in case we need to do a quad load
+		if (t == NUMBER_TYPE)
+		{
+			sintptr funcaddr = COREADDR(AvmCore::doubleToAtom);
+#ifdef AVMPLUS_IA32
+			if (core->config.sse2)
+				funcaddr = COREADDR(AvmCore::doubleToAtom_sse2);
+#endif
+			return callIns(MIR_cmop, funcaddr, 2, InsConst((uintptr)core), localGetq(i));
+		}
+
 		OP* native = localGet(i);
 
 		if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
@@ -553,15 +565,6 @@ namespace avmplus
 			}
 		}
 
-		if (t == NUMBER_TYPE)
-		{
-			sintptr funcaddr = COREADDR(AvmCore::doubleToAtom);
-#ifdef AVMPLUS_IA32
-			if (core->config.sse2)
-				funcaddr = COREADDR(AvmCore::doubleToAtom_sse2);
-#endif
-			return callIns(MIR_cmop, funcaddr, 2, InsConst((uintptr)core), native);
-		}
 		if (t == INT_TYPE)
 		{
 			return callIns(MIR_cmop, COREADDR(AvmCore::intToAtom), 2,
@@ -987,6 +990,30 @@ namespace avmplus
             AvmAssert(false);
             return out->insGuard(v, cond, x);
         }
+
+        LIns *insAlloc(int32_t size) {
+            AvmAssert(size >= 4 && isU16((size+3)>>2));
+            return out->insAlloc(size);
+        }
+
+        LIns *insCall(uint32_t fid, LInsp args[]) {
+            const CallInfo &call = k_functions[fid];
+            ArgSize sizes[2*MAXARGS];
+            uint32_t argc = call.get_sizes(sizes);
+            if (call.isIndirect()) {
+                argc--;
+                AvmAssert(!args[argc]->isQuad());
+            }
+            for (uint32_t i=0; i < argc; i++) {
+                switch (sizes[i]) {
+                    default: AvmAssert(false);
+                    case ARGSIZE_LO: NanoAssert(!args[i]->isQuad()); break;
+                    case ARGSIZE_Q: NanoAssert(args[i]->isQuad()); break;
+                    case ARGSIZE_F: NanoAssert(args[i]->isQuad()); break;
+                }
+            }
+            return out->insCall(fid, args);
+        }
     };
 
 	// f(env, argc, instance, argv)
@@ -999,6 +1026,7 @@ namespace avmplus
         Fragmento *frago = pool->codePages->frago;
         frag = new (gc) Fragment(abcStart);
         lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
+        lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
         lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
         lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
@@ -1596,7 +1624,7 @@ namespace avmplus
 					if (core->config.sse2)
 						funcaddr = FUNCADDR(AVMCORE_integer_d_sse2);
 	#endif
-					localSet(loc, callIns(MIR_csop, funcaddr, 1, localGet(loc)));
+					localSet(loc, callIns(MIR_csop, funcaddr, 1, localGetq(loc)));
 				}
 			}
 			else
@@ -1884,7 +1912,7 @@ namespace avmplus
         AvmAssert(isU16(disp));
 		ap->setimm16(disp);
 
-		OP* target = leaIns(offsetof(MethodEnv, impl32), method);
+		OP* target = loadIns(MIR_ld, offsetof(MethodEnv, impl32), method);
 		OP* apAddr = leaIns(0, ap);
 
 		OP* out = callIndirect(result==NUMBER_TYPE ? MIR_fci : MIR_ci, target, 
@@ -3990,7 +4018,8 @@ namespace avmplus
     }
 
     LIns* CodegenLIR::InsAlloc(int32_t size) {
-        return lirout->insAlloc(size);
+        //fixme - why InsAlloc(0)?
+        return lirout->insAlloc(size >= 4 ? size : 4);
     }
 
     LIns* CodegenLIR::loadIns(MirOpcode code, int32_t disp, LIns *base) {
@@ -4034,17 +4063,23 @@ namespace avmplus
     void CodegenLIR::emitMD() 
     {
         LirReader reader(lirbuf);
-        for (LIns *i = reader.read(); i != 0; i = reader.read()) 
+        ValidateReader validator(&reader);
+        for (LIns *i = validator.read(); i != 0; i = validator.read()) 
         {}
 
         live(gc, lirbuf);
 
-        Assembler *assm = pool->codePages->frago->assm();
+        Fragmento *frago = pool->codePages->frago;
+        Assembler *assm = frago->assm();
+        assm->_verbose = true;
         RegAllocMap regMap(gc);
         NInsList loopJumps(gc);
         assm->beginAssembly(&regMap);
         assm->assemble(frag, loopJumps);
         assm->endAssembly(frag, loopJumps);
+
+        frag->releaseLirBuffer();
+        frag->releaseCode(frago);
 
         overflow = true;
     }

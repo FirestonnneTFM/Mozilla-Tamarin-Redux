@@ -74,7 +74,8 @@ namespace nanojit
 	{
 		uint32_t arIndex:16;	/* index into stack frame.  displ is -4*arIndex */
 		Register reg:8;			/* register UnkownReg implies not in register */
-        int cost:8;
+        int cost:7;
+        int used:1;
 	};
 
 	struct AR
@@ -83,40 +84,6 @@ namespace nanojit
 		uint32_t		tos;							/* current top of stack entry */
 		uint32_t		highwatermark;					/* max tos hit */
 		uint32_t		lowwatermark;					/* we pre-allocate entries from 0 upto this index-1; so dynamic entries are added above this index */
-	};
-
-    enum ArgSize {
-	    ARGSIZE_NONE = 0,
-	    ARGSIZE_F = 1,
-	    ARGSIZE_LO = 2,
-	    ARGSIZE_Q = 3,
-	    _ARGSIZE_MASK_INT = 2, 
-        _ARGSIZE_MASK_ANY = 3
-    };
-
-    enum CallingConvention {
-        ABI_FASTCALL,
-        ABI_CDECL,
-        ABI_THISCALL
-    };
-
-	struct CallInfo
-	{
-		uintptr_t	_address;
-        uint32_t	_argtypes:18;	// 9 2-bit fields indicating arg type, by ARGSIZE above (including ret type): a1 a2 a3 a4 a5 ret
-        uint8_t		_cse:1;			// true if no side effects
-        uint8_t		_fold:1;		// true if no side effects
-        uint8_t     _abi:3;
-		verbose_only ( const char* _name; )
-		
-		uint32_t FASTCALL _count_args(uint32_t mask) const;
-        uint32_t get_sizes(ArgSize*) const;
-
-		inline uint32_t FASTCALL count_args() const {
-            return _count_args(_ARGSIZE_MASK_ANY) + (_address < 256);
-        }
-		inline uint32_t FASTCALL count_iargs() const { return _count_args(_ARGSIZE_MASK_INT); }
-		// fargs = args - iargs
 	};
 
 	#define FUNCTIONID(name) CI_avmplus_##name
@@ -225,7 +192,7 @@ namespace nanojit
 			
 			// support calling out from a fragment ; used to debug the jit
 			debug_only( void		resourceConsistencyCheck(); )
-			debug_only( void		registerConsistencyCheck(LIns** resv); )
+			debug_only( void		registerConsistencyCheck(); )
 			
 			Stats		_stats;		
 
@@ -293,8 +260,7 @@ namespace nanojit
 			NInsMap		_patches;
 			Reservation _resvTable[ NJ_MAX_STACK_ENTRY ]; // table where we house stack and register information
 			uint32_t	_resvFree;
-			bool		_inExit,vpad2[3];
-			RegisterMap _argsUsed;
+			bool		_inExit, vpad2[3];
 
 			void		asm_cmp(LIns *cond);
 #ifndef NJ_SOFTFLOAT

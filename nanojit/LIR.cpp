@@ -95,9 +95,8 @@ namespace nanojit
 	
 	// LCompressedBuffer
 	LirBuffer::LirBuffer(Fragmento* frago, const CallInfo* functions)
-		: _frago(frago), _functions(functions)
+		: _frago(frago), _functions(functions), _start(0), abi(ABI_FASTCALL)
 	{
-		_start = 0;
 		clear();
 		_start = pageAlloc();
 		if (_start)
@@ -368,6 +367,7 @@ namespace nanojit
 
     LInsp LirBufWriter::insAlloc(int32_t size)
     {
+        size = (size+3)>>2; // # of required 32bit words
         NanoAssert(isU16(size));
 		ensureRoom(1);
 		LInsp l = _buf->next();
@@ -477,6 +477,8 @@ namespace nanojit
 
 				case LIR_call:
 				case LIR_fcall:
+                case LIR_calli:
+                case LIR_fcalli:
 					i -= argwords(i->argc())+1;
 					break;
 
@@ -954,7 +956,7 @@ namespace nanojit
 
 		const CallInfo& ci = _functions[fid];
 		uint32_t argt = ci._argtypes;
-        LOpcode op = (ci._address < 256 ? k_callimap : k_callmap)[argt & 3];
+        LOpcode op = (ci.isIndirect() ? k_callimap : k_callmap)[argt & 3];
         NanoAssert(op != LIR_skip); // LIR_skip here is just an error condition
 
         ArgSize sizes[2*MAXARGS];
@@ -1472,7 +1474,7 @@ namespace nanojit
 				NanoAssert(s < livebuf+sizeof(livebuf));
             }
 			printf("%-60s %s\n", livebuf, names->formatIns(e->i));
-			if (e->i->isGuard())
+			if (e->i->isGuard() || e->i->isBranch())
 				printf("\n");
 		}
 	}
@@ -1554,7 +1556,7 @@ namespace nanojit
 			}
 
             case LIR_alloc: {
-                sprintf(s, "%s %d", lirNames[op], i->imm16());
+                sprintf(s, "%s %d", lirNames[op], i->size());
                 break;
             }
 
@@ -1888,6 +1890,7 @@ namespace nanojit
 		verbose_only(if (assm->_verbose) 
 			assm->outputf("compiling trunk %s",
 				frago->labels->format(root));)
+		NanoAssert(!frago->core()->config.tree_opt || root == root->anchor || root->kind == MergeTrace);			
 		assm->endAssembly(root, loopJumps);
 			
 		// reverse output so that assembly is displayed low-to-high

@@ -66,7 +66,7 @@ namespace nanojit
 	#endif
 
 #if defined NANOJIT_IA32
-    const Register Assembler::argRegs[] = { ECX, EDX, EAX };
+    const Register Assembler::argRegs[] = { ECX, EDX };
     const Register Assembler::retRegs[] = { EAX, EDX };
 #elif defined NANOJIT_AMD64
 #if defined WIN64
@@ -130,7 +130,7 @@ namespace nanojit
 		// functions like MMgc::GetStackTrace.  The 'return address'
 		// of this 'frame' will be the last-saved register, but that's
 		// fine, because the next-older frame will be legit.
-		PUSHr(FP);
+		PUSHr(EAX);
 
 		for(Register i=FirstReg; i <= LastReg; i = nextreg(i))
 			if (needSaving&rmask(i))
@@ -149,11 +149,8 @@ namespace nanojit
 #elif defined NANOJIT_AMD64
 		ANDQi(SP, -NJ_ALIGN_STACK);
 #endif
-		fixme - need calling convention for generated code.  argsUsed
-		tells us where to put the incoming args, but only need loads for
-		the stack args that arent already in registers
-			
-		MR(FP,SP);
+		
+		MR(EAX,SP); // save original SP into EAX so we can access stack params
 		PUSHr(FP); // Save caller's FP.
 
 		return patchEntry;
@@ -187,7 +184,6 @@ namespace nanojit
 		}
 		// first restore ESP from EBP, undoing SUBi(SP,amt) from genPrologue
         MR(SP,FP);
-
 
         #ifdef NJ_VERBOSE
         if (_frago->core()->config.show_stats) {
@@ -231,7 +227,7 @@ namespace nanojit
         const CallInfo* call = callInfoFor(fid);
 		// must be signed, not unsigned
 		const uint32_t iargs = call->count_iargs();
-		int32_t fstack = call->count_args() - iargs;
+		int32_t fargs = call->count_args() - iargs - call->isIndirect();
 
         uint32_t max_regs;
         switch (call->_abi) {
@@ -245,23 +241,32 @@ namespace nanojit
 
         int32_t istack = iargs-max_regs;  // first 2 4B args are in registers
         int32_t extra = 0;
-		const int32_t pushsize = 4*istack + 8*fstack; // actual stack space used
+		const int32_t pushsize = 4*istack + 8*fargs; // actual stack space used
 
         if (pushsize) {
 		    // stack re-alignment 
 		    // only pop our adjustment amount since callee pops args in FASTCALL mode
-		    extra = alignUp(pushsize, NJ_ALIGN_STACK) - pushsize; 
-		    if (extra > 0)
+		    extra = alignUp(pushsize, NJ_ALIGN_STACK) - pushsize;
+            if (call->_abi == ABI_CDECL) {
+                ADDi(SP, extra+pushsize);
+            } else if (extra > 0) {
 				ADDi(SP, extra);
+            }
         }
 
-        if (call->_abi == ABI_CDECL) {
-            // caller pops args with cdecl abi
-            if (pushsize > 0)
-                ADDi(SP, pushsize);
+        bool indirect = false;
+        if (ins->isop(LIR_call) || ins->isop(LIR_fcall)) {
+    		CALL(call);
         }
-
-		CALL(call);
+        else {
+            // indirect call.  x86 Calling conventions don't use EAX as an
+            // argument, and do use EAX as a return value.  We need a register
+            // for the address to call, so we use EAX since it will always be
+            // available
+            NanoAssert(ins->isop(LIR_calli) || ins->isop(LIR_fcalli));
+            CALLr(call, EAX);
+            indirect = true;
+        }
 
 		// make sure fpu stack is empty before call (restoreCallerSaved)
 		NanoAssert(_allocator.isFree(FST0));
@@ -270,16 +275,21 @@ namespace nanojit
 		// pre-assign registers to the first N 4B args based on the calling convention
 		uint32_t n = 0;
 
-        ArgSize sizes[10];
+        ArgSize sizes[2*MAXARGS];
         uint32_t argc = call->get_sizes(sizes);
+        if (indirect) {
+            argc--;
+            asm_arg(ARGSIZE_LO, ins->arg(argc), EAX);
+        }
 
 		for(uint32_t i=0; i < argc; i++)
 		{
 			uint32_t j = argc-i-1;
             ArgSize sz = sizes[j];
             Register r = UnknownReg;
-            if (n < max_regs && sz != ARGSIZE_F) 
-			    r = argRegs[n++]; // tell asm_arg what reg to use
+            if (n < max_regs && sz != ARGSIZE_F) { 
+		        r = argRegs[n++]; // tell asm_arg what reg to use
+            }
             asm_arg(sz, ins->arg(j), r);
 		}
 
@@ -473,7 +483,7 @@ namespace nanojit
 	void Assembler::asm_restore(LInsp i, Reservation *resv, Register r)
 	{
         if (i->isop(LIR_alloc)) {
-            printf("remat %s size %d\n", _thisfrag->lirbuf->names->formatRef(i), i->imm16());
+            printf("remat %s size %d\n", _thisfrag->lirbuf->names->formatRef(i), i->size());
             LEA(r, disp(resv), FP);
         }
         else if (i->isconst()) {
@@ -898,7 +908,7 @@ namespace nanojit
 
 	void Assembler::asm_farg(LInsp p)
 	{
-#if defined NANOJIT_IA32
+        NanoAssert(p->isQuad());
 		Register r = findRegFor(p, FpRegs);
 		if (rmask(r) & XmmRegs) {
 			SSE_STQ(0, SP, r); 
@@ -907,7 +917,6 @@ namespace nanojit
 		}
 		PUSHr(ECX); // 2*pushr is smaller than sub
 		PUSHr(ECX);
-#endif
 	}
 
 	void Assembler::asm_fop(LInsp ins)
