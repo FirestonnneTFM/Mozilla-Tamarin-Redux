@@ -51,11 +51,6 @@ INTERP_FOPCODE_LIST_BEGIN
     FUNCTION(CALL_IMT, I_I4, callimt)
     FUNCTION(FCALL_IMT, D_I4, fcallimt)
 
-    METHOD(ENVADDR(MethodEnv::debugEnter), I_I8, debugEnter)
-    METHOD(ENVADDR(MethodEnv::debugExit), I_II, debugExit)
-    METHOD(DEBUGGERADDR(Debugger::debugFile), I_II, debugFile)
-    METHOD(DEBUGGERADDR(Debugger::debugLine), I_II, debugLine)
-
     METHOD(ENVADDR(MethodEnv::getActivation), I_I, getActivation)
     METHOD(COREADDR(AvmCore::newActivation), I_III, newActivation)
     METHOD(ENVADDR(MethodEnv::newcatch), I_II, newCatch)
@@ -86,7 +81,6 @@ INTERP_FOPCODE_LIST_BEGIN
     CSEMETHOD(COREADDR(AvmCore::number), D_II, number)
     CSEFUNCTION(FUNCADDR(CodegenLIR::coerce_o), I_I, coerce_o)
     METHOD(ENVADDR(MethodEnv::hasnext2), I_III, hasnext2)
-    METHOD(COREADDR(AvmCore::sampleCheck), I_I, sampleCheck)
     METHOD(ENVADDR(MethodEnv::nullcheck), I_II, nullcheck)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toVTable), I_II, toVTable)
     METHOD(TOPLEVELADDR(Toplevel::setproperty), I_I5, setproperty)
@@ -173,6 +167,14 @@ INTERP_FOPCODE_LIST_BEGIN
     CSEMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), I_III, createArgumentsHelper)
     METHOD(COREADDR(AvmCore::initMultinameLate), I_III, initMultinameLate)
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), I_III, initMultinameLateForDelete)
+
+#ifdef DEBUGGER
+    METHOD(ENVADDR(MethodEnv::debugEnter), I_I8, debugEnter)
+    METHOD(ENVADDR(MethodEnv::debugExit), I_II, debugExit)
+    METHOD(DEBUGGERADDR(Debugger::debugFile), I_II, debugFile)
+    METHOD(DEBUGGERADDR(Debugger::debugLine), I_II, debugLine)
+    METHOD(COREADDR(AvmCore::sampleCheck), I_I, sampleCheck)
+#endif
 
 INTERP_FOPCODE_LIST_END
 
