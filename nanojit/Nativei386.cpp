@@ -66,7 +66,7 @@ namespace nanojit
 	#endif
 
 #if defined NANOJIT_IA32
-    const Register Assembler::argRegs[] = { ECX, EDX };
+    const Register Assembler::argRegs[] = { ECX, EDX, EAX };
     const Register Assembler::retRegs[] = { EAX, EDX };
 #elif defined NANOJIT_AMD64
 #if defined WIN64
@@ -149,6 +149,10 @@ namespace nanojit
 #elif defined NANOJIT_AMD64
 		ANDQi(SP, -NJ_ALIGN_STACK);
 #endif
+		fixme - need calling convention for generated code.  argsUsed
+		tells us where to put the incoming args, but only need loads for
+		the stack args that arent already in registers
+			
 		MR(FP,SP);
 		PUSHr(FP); // Save caller's FP.
 
