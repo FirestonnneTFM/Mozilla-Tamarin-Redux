@@ -161,8 +161,8 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE toplevel_v2a_od_thunkc(AvmMethodEn
   const uint32_t flash_utils_ByteArray_writeFloat = 68;
   #define flash_utils_ByteArray_writeFloat_thunk  toplevel_v2a_od_thunk
   #define flash_utils_ByteArray_writeFloat_thunkc toplevel_v2a_od_thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE toplevel_b2a_oao_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE toplevel_b2a_oao_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE toplevel_b2a_oao_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE toplevel_b2a_oao_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t flash_sampler_isGetterSetter = 95;
   #define flash_sampler_isGetterSetter_thunk  toplevel_b2a_oao_thunk
   #define flash_sampler_isGetterSetter_thunkc toplevel_b2a_oao_thunkc
@@ -262,8 +262,8 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE toplevel_v2a_o_thunkc(AvmMethodEnv
   const uint32_t avmplus_System_debugger = 12;
   #define avmplus_System_debugger_thunk  toplevel_v2a_o_thunk
   #define avmplus_System_debugger_thunkc toplevel_v2a_o_thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE toplevel_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE toplevel_b2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE toplevel_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE toplevel_b2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t avmplus_System_isDebugger = 13;
   #define avmplus_System_isDebugger_thunk  toplevel_b2a_o_thunk
   #define avmplus_System_isDebugger_thunkc toplevel_b2a_o_thunkc

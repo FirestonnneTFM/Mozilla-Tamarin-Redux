@@ -253,9 +253,10 @@ namespace avmplus
 	typedef avmplus::Namespace* AvmNamespace;
 	typedef avmplus::Atom AvmBox;
 	typedef avmplus::MethodEnv* AvmMethodEnv;
+	typedef uint32_t AvmBoolArg;
 
 	#define AvmThunkRetType_AvmObject		(error ??? illegal) /* all Objects are return as AvmBox */
-	typedef AvmBox AvmThunkRetType_bool;
+	typedef AvmBox AvmThunkRetType_AvmBoolArg;
 	typedef AvmBox AvmThunkRetType_int32_t;
 	typedef AvmBox AvmThunkRetType_uint32_t;
 	typedef AvmBox AvmThunkRetType_AvmNamespace;
