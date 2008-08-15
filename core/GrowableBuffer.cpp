@@ -894,6 +894,8 @@ namespace avmplus
 													  exception_data_t code,
 													  mach_msg_type_number_t code_count)
 	{
+		bool isAccessViolation = false;
+		
 		// Find the GenericGuard associated with thread
 		int retCode = pthread_mutex_lock(&mutex);
 		(void)retCode;
@@ -924,7 +926,7 @@ namespace avmplus
 
 		// If an access violation occurred, let the GenericGuard a shot
 		// at handling the exception.
-		bool isAccessViolation = (exception == EXC_BAD_ACCESS && code[0] == KERN_PROTECTION_FAILURE);
+		isAccessViolation = (exception == EXC_BAD_ACCESS && code[0] == KERN_PROTECTION_FAILURE);
 
 		#ifdef AVMPLUS_ROSETTA
 		// Under Rosetta on 10.4.6 i386, exception and code[0] come through in
