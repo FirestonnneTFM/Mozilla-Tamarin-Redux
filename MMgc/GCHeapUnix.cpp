@@ -129,7 +129,7 @@ namespace MMgc
 			GCAssert(false);
 	}
 
-	bool GCHeap::SetGuardPage(void *address)
+	bool GCHeap::SetGuardPage(void */*address*/)
 	{
 		return false;
 	}
@@ -159,7 +159,7 @@ namespace MMgc
 	 */
 	void GCHeap::SetExecuteBit(void *address,
 							   size_t size,
-							   bool executableFlag)
+							   bool /*executableFlag*/)
 	{
 		// Should use vmPageSize() or kNativePageSize here.
 		// But this value is hard coded to 4096 if we don't use mmap.
@@ -336,7 +336,7 @@ namespace MMgc
 
 
 #ifdef MEMORY_INFO  
-	void GetInfoFromPC(int pc, char *buff, int buffSize) 
+	void GetInfoFromPC(int pc, char *buff, int /*buffSize*/) 
 	{
 #ifdef AVMPLUS_UNIX
 		Dl_info dlip;
