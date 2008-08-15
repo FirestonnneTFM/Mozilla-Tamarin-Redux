@@ -1058,7 +1058,7 @@ namespace avmplus
 		return lastIndexOf (substr, iStartPos);
 	}
 
-	int String::localeCompare(Stringp other, Atom* /*argv*/, int /*argc*/)
+	int String::localeCompare(Stringp other)
 	{  
 		if ( !other )
         {

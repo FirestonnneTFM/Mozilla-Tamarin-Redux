@@ -51,12 +51,13 @@
 // eval ast
 
 {
+    use namespace "avmplus";
     use namespace Parse;
     use namespace Gen;
     //print ("parsing");
     var top = [];
     var parser = new Parser(str,top);
-    var [ts,nd] = parser.program();
+    var nd = parser.program();
     var bytes = cg(nd).getBytes();
     Util::loadBytes(bytes);
 }
@@ -71,7 +72,6 @@
 // cogen and write it
 
 {
-    
-    var len = Util::writeBytesAToFile(abc, fname+".abc");
+    var len = Util::writeBytesToFile(abc.getBytes(), fname+".abc");
     print (fname+", "/*+(t3-t1)+" ms, "*/+len+" bytes written");
 }

@@ -118,6 +118,7 @@ namespace avmplus
 		*/
 		Traits* itraits;
 
+#ifdef AVMPLUS_MIR
 		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
 		// since we use the AbstractFunction pointer as the interface method id
 		// smaller = dense table, few large conflict stubs
@@ -127,6 +128,7 @@ namespace avmplus
 		static const int IMT_SIZE = 3;  // good for testing all code paths
 #else
 		static const int IMT_SIZE = 7;  // good for performance
+#endif
 #endif
 
 		const byte* getTraitsPos() const {
@@ -197,10 +199,12 @@ namespace avmplus
 		// BIND_METHOD+disp_id = no conflict, dispatches to concrete method
 		// BIND_ITRAMP+addr    = conflict, dispatch to conflict resolution stub
 		// IMT table (if we have one, comes after the interfaces)
+#ifdef AVMPLUS_MIR
 		Binding *getIMT() const {
 			AvmAssert(hasInterfaces);
 			return (Binding*) (getMethods() + methodCount);
 		}
+#endif
 
 		AbstractFunction **getMethods() const { return instanceData ? (AbstractFunction**) (getOffsets() + slotCount) : NULL; }
 		Traits **getSlotTypes() const { return (Traits**) instanceData; }
@@ -356,6 +360,7 @@ namespace avmplus
 #endif
 	};
 
+#ifdef AVMPLUS_MIR
 	class ImtBuilder
 	{
 	public:
@@ -377,6 +382,7 @@ namespace avmplus
 		MMgc::GC *gc;
 		ImtEntry *entries[Traits::IMT_SIZE];
 	};
+#endif
 }
 
 #endif /* __avmplus_Traits__ */

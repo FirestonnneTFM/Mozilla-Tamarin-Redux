@@ -336,16 +336,16 @@ final class Parser
 
     Bindings
 
-    var x = y      [x], init VAR () [x=y]
-    var [x] = y    [x], init VAR ([t0],[init t0=y]) [x=t0[0]]
+    var x = y      [x], set x=y
+    var [x] = y    [x], let ([t0],[t0=y]) set x=t0[0]
 
-    let (x=y) ...  let ([x], init x=y) ...
-    let x=y             [x], init x=y]
+    let (x=y) ...  let ([x], [x=y]) ...
+    let x=y        let ([x]) set x=y
 
     Assignments
 
     x = y          [],  set x=y
-    [x] = y        [],  let ([t0],[init t0=y]) [set x=t0[0]]
+    [x] = y        [],  let ([t0],[t0=y]) set x=t0[0]
 
     Blocks
 
@@ -375,7 +375,9 @@ final class Parser
     var x = v            let (t0=v) init () [x=t0]
     var [x] = v          let (t0=v) init () [x=t0[0]]
     var [x,[y,z]] = v    let (t0=v) init () [x=t0[0]]
-    , let (t1=t0[1]) init () [y=t1[0], z=t1[1]]
+                                  , let (t1=t0[1]) init () [y=t1[0]
+                                                 , z=t1[1]]
+
     var [x,[y,[z]]] = v  let (t0=v) init () [x=t0[0]]
     , let (t1=t0[1]) init () [y=t1[0]
     , let (t2=t1[0]) init () [z=t2[0]]
@@ -2097,14 +2099,14 @@ final class Parser
 
     function variableDefinition (attrs) : ? Ast::Expr {
         let [it, ro] = variableDefinitionKind ();
-        let [fxtrs,exprs] = variableBindingList (attrs.ns, it, ro);
+        let [fxtrs, exprs] = variableBindingList (attrs.ns, it, ro);
 
         cx.addFixtures (it, fxtrs, attrs.static);
         if (tau == classBlk && !attrs.static) {
             cx.addInits(it, exprs);
             return null;
         }
-        return exprListToCommaExpr(exprs);
+        return exprListToCommaExpr (exprs);
     }
 
     function variableDefinitionKind () {

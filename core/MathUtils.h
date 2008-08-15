@@ -94,6 +94,7 @@ namespace avmplus
 		static double floor(double value);
 		static uint64  frexp(double x, int *eptr);
 		static double infinity();
+		static double neg_infinity();
 		static int isInfinite(double value);
 		#ifdef UNIX
 		static bool isNaN(double value);

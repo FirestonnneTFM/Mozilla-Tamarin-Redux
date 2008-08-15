@@ -125,11 +125,14 @@ PRIVATE void operator delete[]( void *p )
     }
 #endif // OVERRIDE_GLOBAL_NEW
 
+namespace avmplus {
+	namespace NativeID {
+		#include "toplevel.cpp"
+	}
+}
 
 namespace avmshell
 {
-	#include "toplevel.cpp"
-
 	const int kScriptTimeout = 15;
 	const int kScriptGracePeriod = 5;
 
@@ -149,7 +152,11 @@ namespace avmshell
 
 	BEGIN_NATIVE_SCRIPTS(Shell)
 		NATIVE_SCRIPT(0/*abcscript_avmplus_debugger*/, AvmplusScript)
+#ifdef AVMTHUNK_VERSION
+		NATIVE_SCRIPT(avmplus::NativeID::abcscript_startSampling, SamplerScript)
+#else
 		NATIVE_SCRIPT(avmplus::NativeID::abcpackage_Sampler_as, SamplerScript)
+#endif
 	END_NATIVE_SCRIPTS()
 
 	BEGIN_NATIVE_MAP(AvmplusScript)
@@ -215,7 +222,7 @@ namespace avmshell
 	ShellToplevel::ShellToplevel(VTable* vtable, ScriptObject* delegate)
 		: Toplevel(vtable, delegate)
 	{
-		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(NativeID::toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 	}
 
 	void Shell::usage()
@@ -369,7 +376,7 @@ namespace avmshell
 			nativeMethods, nativeClasses, nativeScripts);
 
 		avmplus::ScriptBuffer code = newScriptBuffer(avmplus::NativeID::toplevel_abc_length);
-		memcpy(code.getBuffer(), toplevel_abc_data, avmplus::NativeID::toplevel_abc_length);
+		memcpy(code.getBuffer(), avmplus::NativeID::toplevel_abc_data, avmplus::NativeID::toplevel_abc_length);
 		shellPool = parseActionBlock(code, 0, NULL, builtinDomain, nativeMethods, nativeClasses, nativeScripts);
 	}
 
@@ -528,6 +535,7 @@ namespace avmshell
 
 		TRY(this, kCatchAction_ReportAsError)
 		{
+#ifdef AVMPLUS_MIR
 			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 			#ifdef AVMPLUS_MAC
 			sse2 = true;
@@ -537,6 +545,7 @@ namespace avmshell
 			}
 			#endif
 			#endif
+#endif
 
 			int exitCode = 0;
 			if (executeProjector(argc, argv, exitCode))
@@ -571,7 +580,9 @@ namespace avmshell
 
 						#ifdef AVMPLUS_IA32
 						} else if (!strcmp(arg+2, "nosse")) {
+#ifdef AVMPLUS_MIR
 							sse2 = false;
+#endif
 						#endif
 
 	                    #ifdef AVMPLUS_VERIFYALL

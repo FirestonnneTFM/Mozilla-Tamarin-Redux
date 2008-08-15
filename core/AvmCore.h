@@ -213,6 +213,8 @@ const int kBufferPadding = 16;
 		bool sse2;
 		#endif
 
+		#endif // AVMPLUS_MIR
+		
 		/**
 		 * If this switch is set, executing code will check the
 		 * "interrupted" flag to see whether an interrupt needs
@@ -234,6 +236,8 @@ const int kBufferPadding = 16;
 		 */
 		virtual void setStackBase() {}
 		
+		#ifdef AVMPLUS_MIR
+
 		/**
 		 * Genearate a graph for the basic blocks.  Can be used by
 		 * 'dot' utility to generate a jpg.
