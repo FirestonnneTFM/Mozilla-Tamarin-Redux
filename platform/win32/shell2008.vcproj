@@ -506,7 +506,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/SAFESEH:NO"
 				AdditionalDependencies="winmm.lib"
-				OutputFile="$(OutDir)/avmplus_s.exe"
+				OutputFile="$(OutDir)/avmplus_s_64.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"

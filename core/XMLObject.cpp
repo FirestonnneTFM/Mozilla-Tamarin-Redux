@@ -1959,8 +1959,10 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.23, page 80
-	Atom XMLObject::getNamespace (Atom *argv, int argc) // prefix is optional
+	Atom XMLObject::getNamespace (Atom p_prefix, int argc) // prefix is optional
 	{
+		AvmAssert(argc == 0 || argc == 1);
+
 		AvmCore *core = this->core();
 
 		// step 2
@@ -1988,7 +1990,7 @@ namespace avmplus
 		}
 		else
 		{
-			Atom prefix = core->internString (core->string (argv[0]))->atom();
+			Atom prefix = core->internString (core->string (p_prefix))->atom();
 
 			for (uint32 i = 0; i < inScopeNS->getLength(); i++)
 			{

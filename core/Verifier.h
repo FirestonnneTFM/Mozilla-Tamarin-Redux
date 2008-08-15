@@ -99,7 +99,11 @@ namespace avmplus
 		 * an exception will be thrown, of type VerifyError.
 		 * @param info the method to verify
 		 */
+#ifdef AVMPLUS_MIR
 		void verify(CodegenMIR *mir);
+#else
+		void verify();
+#endif
 		FrameState* getFrameState(sintptr targetpc);
 
 	private:
@@ -138,7 +142,9 @@ namespace avmplus
 
 		void emitCoerce(Traits* target, int i);
 		void emitToString(AbcOpcode opcode, int index);
+		#ifdef AVMPLUS_MIR
 		void emitCheckNull(int index);
+		#endif
 		void emitCompare(AbcOpcode opcode);
 		void emitFindProperty(AbcOpcode opcode, Multiname& multiname);
 		void emitGetProperty(Multiname &multiname, int n);

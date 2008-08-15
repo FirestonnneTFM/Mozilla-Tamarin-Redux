@@ -134,6 +134,13 @@ namespace avmplus
 			initialize(env, info, framep, frameTraits, argc, ap, eip);
 		}
 
+#ifdef AVMTHUNK_VERSION
+		// dummy ctor we can use to construct an uninitalized version -- useful for the thunks, which
+		// will construct one and immediately call intialize (via debugEnter) so there's no need to
+		// redundantly fill in fields.
+		inline explicit CallStackNode(int) { }
+#endif
+
 		// WARNING!!!! this method is called by CodegenMIR if you change the signature then change the call there.
 		void initialize(MethodEnv *			env,
 						AbstractFunction *	info,

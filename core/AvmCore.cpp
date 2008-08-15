@@ -97,7 +97,10 @@ namespace avmplus
 		NATIVE_SCRIPT(0, Toplevel)
 	END_NATIVE_SCRIPTS()
 
-	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), mirBuffers(g, 4), 
+	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), 
+#ifdef AVMPLUS_MIR
+		mirBuffers(g, 4), 
+#endif
 		gcInterface(g)
 #ifdef DEBUGGER
 		,_sampler(g)
@@ -282,9 +285,11 @@ namespace avmplus
 		delete [] namespaces;
 		namespaces = NULL;
 
+#ifdef AVMPLUS_MIR
 		// free all the mir buffers
 		while(mirBuffers.size() > 0)
 			mirBuffers.removeFirst()->free();
+#endif
 	}
 
 	void AvmCore::initBuiltinPool()
@@ -1838,25 +1843,11 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		while (nativeMap->method_id != -1)
 		{
-			AbstractFunction *f = NULL;
-
-			switch (nativeMap->type)
-			{
-			case NativeTableEntry::kNativeMethod:
-				f = new (GetGC()) NativeMethod(nativeMap->flags, (NativeMethod::Handler)nativeMap->handler);
-				break;
-			case NativeTableEntry::kNativeMethod1:
-				f = new (GetGC()) NativeMethod(nativeMap->flags, (NativeMethod::Handler)nativeMap->handler, nativeMap->cookie);
-				break;
-			case NativeTableEntry::kNativeMethodV:
-				f = new (GetGC()) NativeMethodV((NativeMethodV::Handler32)nativeMap->handler, nativeMap->flags);
-				break;			
-			case NativeTableEntry::kNativeMethodV1:
-				f = new (GetGC()) NativeMethodV((NativeMethodV::Handler32)nativeMap->handler, nativeMap->cookie, nativeMap->flags);
-				break;
-			default:
-				AvmAssert(false);
-			}
+#ifdef AVMTHUNK_VERSION
+			AbstractFunction* f = new (GetGC()) NativeMethod(*nativeMap);
+#else
+			AbstractFunction* f = new (GetGC()) NativeMethod(nativeMap->flags, (NativeMethod::Handler)nativeMap->handler, nativeMap->cookie);
+#endif
             				
 			// if we overwrite a native method mapping, something is hosed
 			AvmAssert(nativeMethods[nativeMap->method_id]==NULL);
@@ -3680,6 +3671,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
+#ifdef AVMPLUS_MIR
 	/**
 	 * MIR needs a large intermediate buffer for codegen.
 	 * These routines allow reuse of this buffer(s)
@@ -3704,6 +3696,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		 buffer->free();  // free the underlying space
 		mirBuffers.add(buffer);
 	}
+#endif
 
 #ifdef MMGC_DRC
 	/*static*/ 

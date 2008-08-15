@@ -123,6 +123,7 @@ extern "C"
 
 namespace avmplus
 {
+#if defined(AVMPLUS_MIR) || defined(DEBUGGER)
 	GrowableBuffer::GrowableBuffer(MMgc::GCHeap *gcheap, bool mir)
 		: heap(gcheap)
 		, forMir(mir)
@@ -240,6 +241,7 @@ namespace avmplus
 			init();
 		}
 	}
+#endif
 
 #ifdef FEATURE_BUFFER_GUARD
 
@@ -892,6 +894,8 @@ namespace avmplus
 													  exception_data_t code,
 													  mach_msg_type_number_t code_count)
 	{
+		bool isAccessViolation = false;
+		
 		// Find the GenericGuard associated with thread
 		int retCode = pthread_mutex_lock(&mutex);
 		(void)retCode;
@@ -922,7 +926,7 @@ namespace avmplus
 
 		// If an access violation occurred, let the GenericGuard a shot
 		// at handling the exception.
-		bool isAccessViolation = (exception == EXC_BAD_ACCESS && code[0] == KERN_PROTECTION_FAILURE);
+		isAccessViolation = (exception == EXC_BAD_ACCESS && code[0] == KERN_PROTECTION_FAILURE);
 
 		#ifdef AVMPLUS_ROSETTA
 		// Under Rosetta on 10.4.6 i386, exception and code[0] come through in
@@ -953,6 +957,7 @@ namespace avmplus
 								 ports);
 	}
 	
+#ifdef AVMPLUS_MIR
 	bool GrowthGuard::handleException(kern_return_t& returnCode)
 	{
     #ifdef AVMPLUS_ROSETTA
@@ -1019,12 +1024,13 @@ namespace avmplus
 		return false;
 	}	
 #endif // AVMPLUS_MACH_EXCEPTIONS
+#endif
 
 #ifdef AVMPLUS_UNIX
     static pthread_key_t guardKey = 0;
     static struct sigaction orig_sa;
 
-    static void dispatchHandleException(int sig, siginfo_t *info, void *context)
+    static void dispatchHandleException(int /*sig*/, siginfo_t *info, void * /*context*/)
     {
         GenericGuard *genericGuard = (GenericGuard*) pthread_getspecific(guardKey);
         bool handled = false;
@@ -1320,7 +1326,7 @@ namespace avmplus
 #endif /* AVMPLUS_MACH_EXCEPTIONS */
 
 #ifdef AVMPLUS_UNIX
-    bool BufferGuard::handleException(byte *addr)
+    bool BufferGuard::handleException(byte * /*addr*/)
     {
 #ifdef _DEBUG
         printf("BufferGuard::handleException: not implemented yet\n");
@@ -1329,6 +1335,7 @@ namespace avmplus
     }
 #endif // AVMPLUS_UNIX
 
+#ifdef AVMPLUS_MIR
 	// GrowthGuard
 	GrowthGuard::GrowthGuard(GrowableBuffer* buffer)
 	{
@@ -1397,8 +1404,10 @@ namespace avmplus
 		}
 	}
 #endif
+#endif
 
 	// Platform specific code follows
+#ifdef AVMPLUS_MIR
 #ifdef AVMPLUS_WIN32
 	int GrowthGuard::handleException(struct _EXCEPTION_RECORD* exceptionRecord,
 									 void* /*establisherFrame*/,
@@ -1440,7 +1449,9 @@ namespace avmplus
 	}
 
 #endif /* AVMPLUS_WIN32 */
+#endif
 
+#ifdef AVMPLUS_MIR
 #ifdef AVMPLUS_UNIX
     bool GrowthGuard::handleException(byte* addr)
     {
@@ -1465,6 +1476,7 @@ namespace avmplus
         return result;
     }
 #endif /* AVMPLUS_UNIX */
+#endif
 
 #endif /* FEATURE_BUFFER_GUARD */
 }

@@ -70,7 +70,7 @@ namespace avmplus
 		NATIVE_METHOD(XMLList_AS3_inScopeNamespaces, XMLListObject::inScopeNamespaces)
 		NATIVE_METHOD(XMLList_AS3_insertChildAfter, XMLListObject::insertChildAfter)
 		NATIVE_METHOD(XMLList_AS3_insertChildBefore, XMLListObject::insertChildBefore)
-		NATIVE_METHODV(XMLList_AS3_namespace, XMLListObject::getNamespace)
+		NATIVE_METHOD(XMLList_private__namespace, XMLListObject::getNamespace)
 		NATIVE_METHOD(XMLList_AS3_localName, XMLListObject::localName)
 		NATIVE_METHOD(XMLList_AS3_namespaceDeclarations, XMLListObject::namespaceDeclarations)
 		NATIVE_METHOD(XMLList_AS3_nodeKind, XMLListObject::nodeKind)

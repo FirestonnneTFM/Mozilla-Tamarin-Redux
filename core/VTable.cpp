@@ -131,6 +131,7 @@ namespace avmplus
 			}
 		}
 
+#ifdef AVMPLUS_MIR
 		if(traits->hasInterfaces)
 		{
 			for (int i=0; i < Traits::IMT_SIZE; i++)
@@ -158,6 +159,7 @@ namespace avmplus
 				}
 			}
 		}
+#endif
 	}
 
 	MethodEnv *VTable::makeMethodEnv(AbstractFunction *func)

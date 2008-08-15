@@ -39,11 +39,11 @@
 #define __avmplus_types__
 
 
-#ifdef _MAC
-#include <stdint.h>
+#ifdef _MSC_VER
+#include "../utils/msc_inttypes.h"
+#else
+#include <inttypes.h>
 #endif
-
-//#define _BigEndian
 
 namespace avmplus
 {
