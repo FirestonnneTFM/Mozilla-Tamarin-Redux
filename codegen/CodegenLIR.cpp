@@ -4120,6 +4120,7 @@ namespace avmplus
     void CodegenLIR::patchLater(LIns *br, CodegenLabel &l) {
         l.preds++;
         if (l.bb != 0) {
+            hasLoop = true;
             br->target(l.bb);
         } else {
             patches.add(Patch(br, l));
@@ -4155,6 +4156,10 @@ namespace avmplus
     PageMgr::PageMgr() : frago(0)
     {}
 
+    PageMgr::~PageMgr() {
+        frago->clearFrags();
+    }
+
 #ifdef _DEBUG
     class ValidateReader: public LirFilter {
     public:
@@ -4188,11 +4193,6 @@ namespace avmplus
             live(gc, lirbuf);
         })
 
-        if (hasLoop) {
-            overflow = true;
-            return;
-        }
-
         Fragmento *frago = pool->codePages->frago;
         Assembler *assm = frago->assm();
 
@@ -4214,7 +4214,7 @@ namespace avmplus
 
         frag->releaseLirBuffer();
 
-        if (0 && !assm->error()) {
+        if (!hasLoop && !assm->error()) {
             // save pointer to generated code
             union {
                 Atom (*fp)(MethodEnv*, int, uint32_t*);
@@ -4223,6 +4223,7 @@ namespace avmplus
             u.vp = frag->code();
             info->impl32 = u.fp;
         } else {
+            // assm puked, or we did something untested, so interpret.
             frag->releaseCode(frago);
             overflow = true;
             // need to remove this frag from Fragmento, free everything.
