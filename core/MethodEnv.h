@@ -158,7 +158,7 @@ namespace avmplus
 		int hasnext(Atom objAtom, int index) const;
 
 		/** Implementation of OP_hasnext2 */		
-		int hasnext2(Atom& objAtom, int& index) const;
+		int hasnextproto(Atom& objAtom, int& index) const;
 		
 		/**
 		 * operator in from ES3

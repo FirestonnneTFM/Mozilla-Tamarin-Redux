@@ -484,7 +484,7 @@ namespace nanojit
 	{
         if (i->isop(LIR_alloc)) {
             verbose_only(if (_verbose) {
-                outputf("remat %s size %d\n", _thisfrag->lirbuf->names->formatRef(i), i->size());
+                outputf("        remat %s size %d", _thisfrag->lirbuf->names->formatRef(i), i->size());
             })
             LEA(r, disp(resv), FP);
         }

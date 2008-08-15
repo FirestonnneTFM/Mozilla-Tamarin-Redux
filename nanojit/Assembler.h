@@ -146,6 +146,27 @@ namespace nanojit
 	typedef avmplus::SortedMap<LIns*,NIns*,avmplus::LIST_NonGCObjects> InsMap;
 	typedef avmplus::SortedMap<NIns*,LIns*,avmplus::LIST_NonGCObjects> NInsMap;
 
+    class LabelState MMGC_SUBCLASS_DECL
+    {
+    public:
+        RegAlloc regs;
+        NIns *addr;
+        LabelState(NIns *a, RegAlloc &r) : regs(r), addr(a)
+        {}
+    };
+
+    class LabelStateMap
+    {
+        GC *gc;
+        avmplus::SortedMap<LIns*, LabelState*, avmplus::LIST_GCObjects> labels;
+    public:
+        LabelStateMap(GC *gc) : gc(gc), labels(gc)
+        {}
+
+        void clear() { labels.clear(); }
+        void add(LIns *label, NIns *addr, RegAlloc &regs);
+        LabelState *get(LIns *);
+    };
     /**
  	 * Information about the activation record for the method is built up 
  	 * as we generate machine code.  As part of the prologue, we issue
@@ -256,7 +277,7 @@ namespace nanojit
 			AR			_activation;
 			RegAlloc	_allocator;
 
-			InsMap		_labels; 
+			LabelStateMap	_labels; 
 			NInsMap		_patches;
 			Reservation _resvTable[ NJ_MAX_STACK_ENTRY ]; // table where we house stack and register information
 			uint32_t	_resvFree;
@@ -290,7 +311,7 @@ namespace nanojit
 			void		asm_bailout(LInsp guard, Register state);
 			void		asm_call(LInsp);
             void        asm_arg(ArgSize, LInsp, Register);					
-			NIns*		asm_branch(bool branchOnTrue, LInsp cond, NIns* targ);
+			NIns*		asm_branch(bool branchOnFalse, LInsp cond, NIns* targ);
 
 			// platform specific implementation (see NativeXXX.cpp file)
 			void		nInit(uint32_t flags);

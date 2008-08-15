@@ -780,7 +780,7 @@ namespace avmplus
 		}
 	}
 
-	int MethodEnv::hasnext2(Atom& objAtom, int& index) const
+	int MethodEnv::hasnextproto(Atom& objAtom, int& index) const
 	{
 		if (index < 0)
 			return 0;
