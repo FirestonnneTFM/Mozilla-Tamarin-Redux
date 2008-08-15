@@ -1842,7 +1842,7 @@ namespace nanojit
 
 		void Assembler::output(const char* s)
 		{
-			if (_outputCache)
+			if (0&&_outputCache)
 			{
 				char* str = (char*)_gc->Alloc(strlen(s)+1);
 				strcpy(str, s);

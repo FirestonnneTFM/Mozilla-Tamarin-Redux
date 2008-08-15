@@ -65,10 +65,11 @@ namespace avmplus
         {}
 	};
 
-    class PageMgr {
+    class PageMgr : public GCFinalizedObject {
     public:
-        Fragmento *frago;
+        DWB(Fragmento*) frago;
         PageMgr();
+        virtual ~PageMgr();
     };
 
 	enum MirOpcode 

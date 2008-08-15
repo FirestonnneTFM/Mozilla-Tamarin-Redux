@@ -157,6 +157,8 @@ namespace avmplus
 				delete [] data;
 			// list can be a stack object so this can help the gc
 			data = NULL;
+            len = 0;
+            max = 0;
 		}
 		uint32 add(T value)
 		{

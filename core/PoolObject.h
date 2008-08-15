@@ -112,7 +112,7 @@ namespace avmplus
 		#endif /*AVMPLUS_MIR */
 
         #ifdef FEATURE_NANOJIT
-        PageMgr *codePages;
+        DWB(PageMgr*) codePages;
         #endif
 
 		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos);
