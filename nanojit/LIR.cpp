@@ -1462,11 +1462,16 @@ namespace nanojit
 
 		// print live exprs, going forwards
 		LirNameMap *names = lirbuf->names;
+        bool newblock = true;
 		for (int j=live.retired.size()-1; j >= 0; j--) 
         {
             RetiredEntry *e = live.retired[j];
             char livebuf[1000], *s=livebuf;
             *s = 0;
+            if (!newblock && e->i->isop(LIR_label)) {
+                printf("\n");
+            }
+            newblock = false;
             for (int k=0,n=e->live.size(); k < n; k++) {
 				strcpy(s, names->formatRef(e->live[k]));
 				s += strlen(s);
@@ -1474,8 +1479,10 @@ namespace nanojit
 				NanoAssert(s < livebuf+sizeof(livebuf));
             }
 			printf("%-60s %s\n", livebuf, names->formatIns(e->i));
-			if (e->i->isGuard() || e->i->isBranch())
+            if (e->i->isGuard() || e->i->isBranch()) {
 				printf("\n");
+                newblock = true;
+            }
 		}
 	}
 

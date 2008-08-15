@@ -90,7 +90,7 @@ namespace nanojit
 			Page*		pageAlloc();
 			void		pageFree(Page* page);
 			
-            Fragment*   getLoop(const void* ip);
+            Fragment*   getAnchor(const void* ip);
 			void        clearFrags();	// clear all fragments from the cache
             Fragment*   getMerge(GuardRecord *lr, const void* ip);
             Fragment*   createBranch(GuardRecord *lr, const void* ip);

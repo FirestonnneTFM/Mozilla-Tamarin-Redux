@@ -479,13 +479,17 @@ namespace avmplus
         return lirout->insCall(fid, args);
 	}
 
-	OP* CodegenLIR::localGet(int i)				
-	{
+    LIns *CodegenLIR::localCopy(int i) {
+        return lirout->insLoad(
+            state->value(i).traits == NUMBER_TYPE ? LIR_ldq : LIR_ld,
+            vars, i<<3);
+    }
+
+	OP* CodegenLIR::localGet(int i) {
         return lirout->insLoadi(vars, i*8);
 	}
 
-	OP* CodegenLIR::localGetq(int i)				
-	{
+	OP* CodegenLIR::localGetq(int i) {
         return lirout->insLoad(LIR_ldq, vars, i*8);
 	}
 
@@ -712,6 +716,7 @@ namespace avmplus
 			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
             mgr->frago = new (gc) Fragmento(core, 24/*16mb*/);
 			verbose_only(
+                mgr->frago->assm()->_verbose = verbose();
 				LabelMap *labels = mgr->frago->labels = new (gc) LabelMap(core, 0);
 				labels->add(core, sizeof(AvmCore), 0, "core");
 			)
@@ -1032,13 +1037,15 @@ namespace avmplus
 		abcEnd   = abcStart + state->verifier->code_length;
 
         Fragmento *frago = pool->codePages->frago;
-        frag = new (gc) Fragment(abcStart);
+        frag = frago->getAnchor(abcStart);
+        gc->Free(frag->mergeCounts);
         lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
         verbose_only(
             lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
-            lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
+            if (verbose())
+                lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
         )
         lirout = new (gc) ExprFilter(lirout);
         debug_only(
@@ -1383,11 +1390,9 @@ namespace avmplus
 		return true;
 	}
 
-	void CodegenLIR::emitCopy(FrameState* state, int src, int dest)
-	{
+	void CodegenLIR::emitCopy(FrameState* state, int src, int dest) {
 		this->state = state;
-		// local[dest] = local[src]
-		localSet(dest, localGet(src));
+		localSet(dest, localCopy(src));
 	}
 
 	void CodegenLIR::emitGetscope(FrameState* state, int scope_index, int dest)
@@ -1400,13 +1405,11 @@ namespace avmplus
 		localSet(dest, atomToNativeRep(t, scopeobj));
 	}
 
-	void CodegenLIR::emitSwap(FrameState* state, int i, int j)
-	{
+	void CodegenLIR::emitSwap(FrameState* state, int i, int j) {
 		this->state = state;
-		OP* a = localGet(i);
-		OP* b = localGet(j);
-		localSet(i, b);
-		localSet(j, a);
+		OP* t = localCopy(i);
+		localSet(i, localCopy(j));
+		localSet(j, t);
 	}
 
 	void CodegenLIR::emitKill(FrameState* state, int i)
@@ -4085,16 +4088,39 @@ namespace avmplus
 
         Fragmento *frago = pool->codePages->frago;
         Assembler *assm = frago->assm();
+
+		verbose_only( StringList asmOutput(gc); )
+		verbose_only( assm->_outputCache = &asmOutput; )
+
         RegAllocMap regMap(gc);
         NInsList loopJumps(gc);
         assm->beginAssembly(&regMap);
         assm->assemble(frag, loopJumps);
         assm->endAssembly(frag, loopJumps);
 
-        frag->releaseLirBuffer();
-        frag->releaseCode(frago);
+		verbose_only(
+            assm->_outputCache = 0;
+            for (int i=asmOutput.size()-1; i>=0; --i) {
+                assm->outputf("%s",asmOutput.get(i)); 
+            }
+        );
 
-        overflow = true;
+        frag->releaseLirBuffer();
+
+        if (!assm->error()) {
+            // save pointer to generated code
+            union {
+                Atom (*fp)(MethodEnv*, int, uint32_t*);
+                void *vp;
+            } u;
+            u.vp = frag->code();
+            info->impl32 = u.fp;
+        } else {
+            AvmAssert(false);//untested
+            frag->releaseCode(frago);
+            overflow = true;
+            // need to remove this frag from Fragmento, free everything.
+        }
     }
 }
 

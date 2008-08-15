@@ -484,7 +484,7 @@ namespace nanojit
 	{
         if (i->isop(LIR_alloc)) {
             verbose_only(if (_verbose) {
-                printf("remat %s size %d\n", _thisfrag->lirbuf->names->formatRef(i), i->size());
+                outputf("remat %s size %d\n", _thisfrag->lirbuf->names->formatRef(i), i->size());
             })
             LEA(r, disp(resv), FP);
         }
@@ -885,18 +885,15 @@ namespace nanojit
 	{
 		// arg goes on stack
 		Reservation* rA = getresv(p);
-		if (rA == 0)
+		if (rA == 0 && p->isconst())
 		{
-			if (p->isconst())
-			{
-				// small const we push directly
-				PUSHi(p->constval());
-			}
-			else
-			{
-				Register ra = findRegFor(p, GpRegs);
-				PUSHr(ra);
-			}
+			// small const we push directly
+			PUSHi(p->constval());
+		}
+		else if (rA == 0 || p->isop(LIR_alloc))
+		{
+			Register ra = findRegFor(p, GpRegs);
+			PUSHr(ra);
 		}
 		else if (rA->reg == UnknownReg)
 		{

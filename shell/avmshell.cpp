@@ -241,6 +241,7 @@ namespace avmshell
 
 		#ifdef AVMPLUS_VERBOSE
 			printf("          [-Dverbose]   trace every instruction (verbose!)\n");
+			printf("          [-Dverbose_init] trace the builtins too\n");
 			printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
 		#endif
 
@@ -598,6 +599,9 @@ namespace avmshell
 						#ifdef AVMPLUS_VERBOSE
 						} else if (!strcmp(arg+2, "verbose")) {
 							do_verbose = true;
+						} else if (!strcmp(arg+2, "verbose_init")) {
+                            do_verbose = this->config.verbose = true;
+                        
 						#endif
 
 	                #ifdef AVMPLUS_MIR

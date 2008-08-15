@@ -94,6 +94,7 @@ namespace avmplus
 		Verifier verifier(this, toplevel);
 
 		AvmCore* core = this->core();
+        
 		if (core->config.turbo && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
 			CodegenLIR mir(this);
