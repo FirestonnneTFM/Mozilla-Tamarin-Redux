@@ -1518,7 +1518,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		case OP_newclass: 
 			{
-				AbstractFunction* c = pool->cinits[readU30(pc)];
+                uint32_t id = readU30(pc);
+				AbstractFunction* c = pool->cinits[id];
 				buffer << opNames[opcode] << " " << c;
 				break;
 			}

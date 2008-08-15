@@ -142,6 +142,7 @@ namespace nanojit
         , _gc(frago->core()->gc)
         , _labels(_gc)
         , _patches(_gc)
+        , hasLoop(0)
 	{
         AvmCore *core = frago->core();
 		nInit(core);
@@ -1302,6 +1303,7 @@ namespace nanojit
                     if (!label) {
                         //AvmAssert(false);
                         // jump to unknown label is a back edge
+                        hasLoop = true;
                         JMP(0);
                         _labels.add(target, 0, _allocator);
     					_patches.put(_nIns, target);
@@ -1310,6 +1312,7 @@ namespace nanojit
                         //AvmAssert(false);
                         // back jump to label already targeted by some other jump
                         // so we merge with that register state
+                        hasLoop = true;
                         JMP(0);
                         releaseRegisters();
                         mergeRegisterState(label->regs);
@@ -1334,9 +1337,9 @@ namespace nanojit
                         mergeRegisterState(label->regs);
                     }
                     else {
-                        //AvmAssert(false);
                         // conditional back-edge to unknown label.
                         // cannot merge register state with anything yet.
+                        hasLoop = true;
     					NIns* branch = asm_branch(op == LIR_jf, cond, 0);
 						_patches.put(branch,to);
                     }
@@ -1350,8 +1353,8 @@ namespace nanojit
     					_labels.add(ins, _nIns, _allocator);
                     }
                     else {
-                        //AvmAssert(false);
                         // we're at the top of a loop, merge with register state from successor jumps
+                        hasLoop = true;
                         NanoAssert(label->addr == 0);
                         mergeRegisterState(label->regs);
                         label->addr = _nIns;

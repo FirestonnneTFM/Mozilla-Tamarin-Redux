@@ -216,6 +216,7 @@ namespace nanojit
 			debug_only( void		registerConsistencyCheck(); )
 			
 			Stats		_stats;		
+            int hasLoop;
 
 			const CallInfo* callInfoFor(uint32_t fid);
 			const CallInfo* callInfoFor(LInsp call)
