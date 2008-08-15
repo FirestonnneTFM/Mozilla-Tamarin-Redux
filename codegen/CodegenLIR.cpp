@@ -685,7 +685,7 @@ namespace avmplus
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
 		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc),
-          interruptable(true), hasLoop(false)
+          interruptable(true)
 	{
 		state = NULL;
 
@@ -4099,7 +4099,6 @@ namespace avmplus
 #endif
 
     LIns *CodegenLIR::branchIns(LOpcode op, LIns *cond, LIns *target) {
-        hasLoop |= (target != 0);
         return lirout->insBranch(op, cond, target);
     }
 
@@ -4120,7 +4119,6 @@ namespace avmplus
     void CodegenLIR::patchLater(LIns *br, CodegenLabel &l) {
         l.preds++;
         if (l.bb != 0) {
-            hasLoop = true;
             br->target(l.bb);
         } else {
             patches.add(Patch(br, l));
@@ -4214,7 +4212,7 @@ namespace avmplus
 
         frag->releaseLirBuffer();
 
-        if (!hasLoop && !assm->error()) {
+        if (!assm->hasLoop && !assm->error()) {
             // save pointer to generated code
             union {
                 Atom (*fp)(MethodEnv*, int, uint32_t*);
