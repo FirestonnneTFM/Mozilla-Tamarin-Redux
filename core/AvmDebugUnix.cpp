@@ -44,20 +44,24 @@
 
 namespace avmplus
 {
-	void AvmDebugMsg(bool debuggerBreak, const char *format, ...)
+	void AvmDebugMsg(bool /*debuggerBreak*/, const char *format, ...)
 	{
 #ifdef _DEBUG
 		va_list args;
 		va_start(args, format);
 		vfprintf(stderr, format, args);
 		va_end(args);
+#else
+		(void)format;
 #endif
 	}
 	
-	void AvmDebugMsg(const char* msg, bool debugBreak)
+	void AvmDebugMsg(const char* msg, bool /*debugBreak*/)
 	{
 #ifdef _DEBUG
         fprintf( stderr, "%s", msg );
+#else
+		(void)msg;
 #endif
 	}
 
@@ -69,7 +73,7 @@ namespace avmplus
 		return i;
 	}
 
-	void AvmDebugMsg(const wchar* msg, bool debugBreak)
+	void AvmDebugMsg(const wchar* msg, bool /*debugBreak*/)
 	{
 #ifdef _DEBUG
 		// Not everyone can do UTF-8, but it's better than nothing.
@@ -84,6 +88,8 @@ namespace avmplus
 		} else {
 			fprintf(stderr, "Warning: Out of memory in AvmDebugMsg.\n");
 		}
+#else
+		(void)msg;
 #endif
 	}
 }
