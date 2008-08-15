@@ -218,6 +218,7 @@ namespace avmplus
         LIns *binaryIns(LOpcode, LIns *a, LIns *b);
         LIns *localGet(int i);
         LIns *localGetq(int i);
+        LIns *localCopy(int i); // sniff's type
         LIns *branchIns(LOpcode op, LIns *cond, LIns *target=0);
         LIns *retIns(LIns *val);
         LIns *loadToplevel(LIns* env);

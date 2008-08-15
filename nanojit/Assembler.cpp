@@ -899,8 +899,8 @@ namespace nanojit
                     findSpecificRegFor(val, retRegs[0]);
                     if (_nIns != _epilogue) {
                         JMP(_epilogue);
-                        MR(SP,FP);
                     }
+                    MR(SP,FP);
                     break;
                 }
 
@@ -930,9 +930,10 @@ namespace nanojit
 				{
 					LInsp target = ins->oprnd1();
 					NIns* addr = _labels.get(target);
-					if (!addr)
+                    JMP(addr);
+                    if (!addr) {
 						_patches.put(_nIns,target);
-					JMP(addr);
+                    }
 					break;
 				}					
 				case LIR_jt:
@@ -940,23 +941,18 @@ namespace nanojit
 				{
 					bool needsPatching = false;
 					LInsp to = ins->oprnd2();
-					NIns* addr = _labels.get(to);
-					if (!addr)
-					{
-						needsPatching = true;
-						addr = (NIns*)0x7fffffff; // @todo fix this up
-					}
 					LIns* cond = ins->oprnd1();
-					bool bPos = (op == LIR_xt) ? true : false;
-					NIns* branch = asm_branch(bPos, cond, addr);
-					if (needsPatching)
+					NIns* addr = _labels.get(to);
+					NIns* branch = asm_branch(op == LIR_xt, cond, addr);
+                    if (!addr) {
 						_patches.put(branch,to);
+                    }
 					break;
 
 				}					
 				case LIR_label:
 				{
-					verbose_only( verbose_outputf("        L%d:", ins->imm24()); )
+					verbose_only( verbose_outputf("        L%d:", _thisfrag->lirbuf->names->formatRef(ins)); )
 					_labels.put(ins, _nIns);
 					break;
 				}
@@ -1676,7 +1672,7 @@ namespace nanojit
 		}
         else {
             verbose_only(if (_verbose) {
-                printf("arReserve %s size %d\n", _thisfrag->lirbuf->names->formatRef(l), size<<2);
+                outputf("arReserve %s size %d\n", _thisfrag->lirbuf->names->formatRef(l), size<<2);
             })
             // alloc larger block on 8byte boundary.
             if (start < size) start = size;
@@ -1807,7 +1803,7 @@ namespace nanojit
 
 		void Assembler::output(const char* s)
 		{
-			if (0&&_outputCache)
+			if (_outputCache)
 			{
 				char* str = (char*)_gc->Alloc(strlen(s)+1);
 				strcpy(str, s);

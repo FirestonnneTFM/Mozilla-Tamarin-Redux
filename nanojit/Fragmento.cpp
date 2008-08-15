@@ -188,7 +188,7 @@ namespace nanojit
 		return _core;
 	}
 
-    Fragment* Fragmento::getLoop(const void* ip)
+    Fragment* Fragmento::getAnchor(const void* ip)
 	{
 		Fragment* f = _frags->get(ip);
 		if (!f) {
