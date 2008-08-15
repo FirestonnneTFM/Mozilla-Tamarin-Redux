@@ -216,6 +216,7 @@ namespace avmplus
 	class String;
 	class Toplevel;
 	class Traits;
+	class Translator;
 	class UnicodeUtils;
 	class Value;
 	class Verifier; 
@@ -293,6 +294,7 @@ namespace avmplus
 #endif
 
 #include "AtomArray.h"
+#include "Translator.h"
 #include "Verifier.h"
 #include "FrameState.h"
 #include "NativeFunction.h"
