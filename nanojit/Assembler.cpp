@@ -1347,7 +1347,6 @@ namespace nanojit
 				}					
 				case LIR_label:
 				{
-					verbose_only( verbose_outputf("        L%d:", _thisfrag->lirbuf->names->formatRef(ins)); )
                     LabelState *label = _labels.get(ins);
                     if (!label) {
     					_labels.add(ins, _nIns, _allocator);
@@ -1845,7 +1844,7 @@ namespace nanojit
 
 		void Assembler::output(const char* s)
 		{
-			if (0&&_outputCache)
+			if (_outputCache)
 			{
 				char* str = (char*)_gc->Alloc(strlen(s)+1);
 				strcpy(str, s);
