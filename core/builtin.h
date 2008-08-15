@@ -215,8 +215,8 @@ extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ss_optakAvmThunkUnd
   const uint32_t String_AS3_localeCompare = 129;
   #define String_AS3_localeCompare_thunk  builtin_i2a_ss_optakAvmThunkUndefined_thunk
   #define String_AS3_localeCompare_thunkc builtin_i2a_ss_optakAvmThunkUndefined_thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t XML_AS3_hasOwnProperty = 722;
   #define XML_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_thunk
   #define XML_AS3_hasOwnProperty_thunkc builtin_b2a_oa_optakAvmThunkUndefined_thunkc
@@ -292,8 +292,8 @@ extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_osa_thunkc(AvmMetho
   const uint32_t String_private__search = 117;
   #define String_private__search_thunk  builtin_i2a_osa_thunk
   #define String_private__search_thunkc builtin_i2a_osa_thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_od_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_od_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t isNaN = 5;
   #define isNaN_thunk  builtin_b2a_od_optakAvmThunkUndefined_thunk
   #define isNaN_thunkc builtin_b2a_od_optakAvmThunkUndefined_thunkc
@@ -732,16 +732,16 @@ extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConst
   const uint32_t parseFloat = 2;
   #define parseFloat_thunk  builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunk
   #define parseFloat_thunkc builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t XMLList_AS3_contains = 812;
   #define XMLList_AS3_contains_thunk  builtin_b2a_oa_thunk
   #define XMLList_AS3_contains_thunkc builtin_b2a_oa_thunkc
   const uint32_t XML_AS3_contains = 732;
   #define XML_AS3_contains_thunk  builtin_b2a_oa_thunk
   #define XML_AS3_contains_thunkc builtin_b2a_oa_thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oas_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oas_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t Object_private__hasOwnProperty = 11;
   #define Object_private__hasOwnProperty_thunk  builtin_b2a_oas_thunk
   #define Object_private__hasOwnProperty_thunkc builtin_b2a_oas_thunkc
@@ -866,13 +866,13 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunkc(AvmMetho
   const uint32_t Array_private__map = 182;
   #define Array_private__map_thunk  builtin_a2a_oaoa_thunk
   #define Array_private__map_thunkc builtin_a2a_oaoa_thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t Object_private__isPrototypeOf = 14;
   #define Object_private__isPrototypeOf_thunk  builtin_b2a_oaa_thunk
   #define Object_private__isPrototypeOf_thunkc builtin_b2a_oaa_thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t XML_prettyPrinting_get = 714;
   #define XML_prettyPrinting_get_thunk  builtin_b2a_o_thunk
   #define XML_prettyPrinting_get_thunkc builtin_b2a_o_thunkc
@@ -998,8 +998,8 @@ extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_sd_opti0_thunkc(AvmM
   const uint32_t String_AS3_charCodeAt = 127;
   #define String_AS3_charCodeAt_thunk  builtin_d2d_sd_opti0_thunk
   #define String_AS3_charCodeAt_thunkc builtin_d2d_sd_opti0_thunkc
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_bool AVMTHUNK_CALLTYPE builtin_b2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t Array_private__every = 179;
   #define Array_private__every_thunk  builtin_b2a_oaoa_thunk
   #define Array_private__every_thunkc builtin_b2a_oaoa_thunkc

@@ -35,10 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <math.h>
-
 #include "avmplus.h"
 #include "BigInteger.h"
+
+#include <math.h>
+
 namespace avmplus
 {
 	const double kLog2_10 = 0.30102999566398119521373889472449;

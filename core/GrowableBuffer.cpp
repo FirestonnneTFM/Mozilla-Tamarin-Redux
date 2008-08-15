@@ -1030,7 +1030,7 @@ namespace avmplus
     static pthread_key_t guardKey = 0;
     static struct sigaction orig_sa;
 
-    static void dispatchHandleException(int sig, siginfo_t *info, void *context)
+    static void dispatchHandleException(int /*sig*/, siginfo_t *info, void * /*context*/)
     {
         GenericGuard *genericGuard = (GenericGuard*) pthread_getspecific(guardKey);
         bool handled = false;
@@ -1326,7 +1326,7 @@ namespace avmplus
 #endif /* AVMPLUS_MACH_EXCEPTIONS */
 
 #ifdef AVMPLUS_UNIX
-    bool BufferGuard::handleException(byte *addr)
+    bool BufferGuard::handleException(byte * /*addr*/)
     {
 #ifdef _DEBUG
         printf("BufferGuard::handleException: not implemented yet\n");
