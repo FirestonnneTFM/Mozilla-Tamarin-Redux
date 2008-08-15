@@ -684,10 +684,10 @@ namespace avmplus
 	}
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc)
+		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc),
+          interruptable(true), hasLoop(false)
 	{
 		state = NULL;
- 		interruptable = true;
 
 		#ifdef AVMPLUS_MAC_CARBON
 		setjmpInit();
@@ -901,8 +901,9 @@ namespace avmplus
 #ifdef _DEBUG
     class ValidateWriter: public LirWriter
     {
+        bool reachable;
     public:
-        ValidateWriter(LirWriter *out) : LirWriter(out)
+        ValidateWriter(LirWriter *out) : LirWriter(out), reachable(false)
         {}
         LIns *ins0(LOpcode op) {
             switch (op) {
@@ -910,14 +911,30 @@ namespace avmplus
                 case LIR_neartramp: AvmAssert(false); break;
                 case LIR_skip: AvmAssert(false); break;
                 case LIR_nearskip: AvmAssert(false); break;
-                case LIR_label: break;
-                case LIR_start: break;
+                case LIR_label: reachable = true; break;
+                case LIR_start: reachable = true; break;
                 default:AvmAssert(false);
             }
             return out->ins0(op);
         }
 
+        LIns *insParam(int32_t i) {
+            AvmAssert(reachable);
+            return out->insParam(i);
+        }
+
+        LIns *insImm(int32_t i) {
+            AvmAssert(reachable);
+            return out->insImm(i);
+        }
+
+        LIns *insImmq(uint64_t i) {
+            AvmAssert(reachable);
+            return out->insImmq(i);
+        }
+
         LIns *ins1(LOpcode op, LIns *a) {
+            AvmAssert(reachable);
             switch (op) {
                 case LIR_fneg: AvmAssert(a->isQuad()); break;
                 case LIR_fret: AvmAssert(a->isQuad()); break;
@@ -934,6 +951,7 @@ namespace avmplus
         }
 
         LIns *ins2(LOpcode op, LIns *a, LIns *b) {
+            AvmAssert(reachable);
             switch (op) {
                 case LIR_fadd: AvmAssert(a->isQuad() && b->isQuad()); break;
                 case LIR_fsub: AvmAssert(a->isQuad() && b->isQuad()); break;
@@ -969,6 +987,7 @@ namespace avmplus
         }
 
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
+            AvmAssert(reachable);
             switch (op) {
                 case LIR_ld: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
                 case LIR_ldc: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
@@ -979,20 +998,26 @@ namespace avmplus
         }
 
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
+            AvmAssert(reachable);
             AvmAssert(!base->isQuad() && !disp->isQuad());
             return out->insStore(value, base, disp);
         }
 
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
+            AvmAssert(reachable);
             AvmAssert(!base->isQuad());
             return out->insStorei(value, base, d);
         }
 
         LIns *insBranch(LOpcode op, LIns *cond, LIns *label) {
+            AvmAssert(reachable);
             switch (op) {
                 case LIR_jt: AvmAssert(cond->isCond() && (!label || label->isop(LIR_label))); break;
                 case LIR_jf: AvmAssert(cond->isCond() && (!label || label->isop(LIR_label))); break;
-                case LIR_j: AvmAssert(!cond && (!label || label->isop(LIR_label))); break;
+                case LIR_j:
+                    AvmAssert(!cond && (!label || label->isop(LIR_label)));
+                    reachable = false;
+                    break;
                 default: AvmAssert(false);
             }
             return out->insBranch(op, cond, label);
@@ -1004,11 +1029,13 @@ namespace avmplus
         }
 
         LIns *insAlloc(int32_t size) {
+            AvmAssert(reachable);
             AvmAssert(size >= 4 && isU16((size+3)>>2));
             return out->insAlloc(size);
         }
 
         LIns *insCall(uint32_t fid, LInsp args[]) {
+            AvmAssert(reachable);
             const CallInfo &call = k_functions[fid];
             ArgSize sizes[2*MAXARGS];
             uint32_t argc = call.get_sizes(sizes);
@@ -1029,6 +1056,67 @@ namespace avmplus
     };
 #endif //  _DEBUG
 
+    class CopyPropagation: public LirWriter
+    {
+        SortedMap<int, LIns*, LIST_NonGCObjects> tracker;
+        LIns *vars;
+    public:
+        CopyPropagation(GC *gc, LirWriter *out) : LirWriter(out), tracker(gc)
+        {}
+
+        void init(LIns *vars) {
+            this->vars = vars;
+        }
+
+        void store(int d, LIns *val) {
+            tracker.put(d, val);
+        }
+
+        void reset() {
+            tracker.clear();
+        }
+
+        LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
+            /*if (base == vars) {
+                int d = disp->constval();
+                LIns *val = tracker.get(d);
+                if (val) {
+                    return val;
+                }
+            }*/
+            return out->insLoad(op, base, disp);
+        }
+
+        LIns *insStore(LIns *value, LIns *base, LIns *disp) {
+            if (base == vars)
+                store(disp->constval(), value);
+            return out->insStore(value, base, disp);
+        }
+
+        LIns *insStorei(LIns *value, LIns *base, int32_t d) {
+            if (base == vars)
+                store(d, value);
+            return out->insStorei(value, base, d);
+        }
+
+        LIns *ins0(LOpcode op) {
+            if (op == LIR_label)
+                reset();
+            return out->ins0(op);
+        }
+
+        LIns *ins1(LOpcode op, LIns* a) {
+            if (isRet(op))
+                reset();
+            return out->ins1(op, a);
+        }
+
+        // TODO
+        // * reset when vars passed as arg to a function that could modify vars (debugenter/exit)
+        // * handle load/store size mismatches -- loading high word of quad, etc
+        // * suppress stores until saveState() points.
+    };
+
 	// f(env, argc, instance, argv)
 	bool CodegenLIR::prologue(FrameState* state)
 	{
@@ -1042,20 +1130,26 @@ namespace avmplus
         lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
+        debug_only(
+            // catch problems before they hit the buffer
+            lirout = new (gc) ValidateWriter(lirout);
+        )
         verbose_only(
             lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
             if (verbose())
                 lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
         )
         lirout = new (gc) ExprFilter(lirout);
+        CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout);
+        lirout = copier;
         debug_only(
+            // catch problems before they hit the pipeline
             lirout = new (gc) ValidateWriter(lirout);
         )
 
         lirout->ins0(LIR_start);
 
 		if (overflow) return false;
-
 
 #ifndef FEATURE_BUFFER_GUARD 
 		// if we aren't growing the buffer dynamically then commit a whole bunch of it
@@ -1076,6 +1170,9 @@ namespace avmplus
         argc_param = lirout->insParam(1);
         ap_param = lirout->insParam(2);
         vars = InsAlloc(state->verifier->frameSize * 8);
+
+        if (copier)
+            copier->init(vars);
 
         verbose_only( if (lirbuf->names) {
             lirbuf->names->addName(env_param, "env");
@@ -2384,7 +2481,7 @@ namespace avmplus
 				OP* index = InsAlloc(sizeof(int));
 				storeIns(loadAtomRep(op1), 0, obj);
 				storeIns(localGet(op2), 0, index);
-				OP* i1 = callIns(MIR_cm, ENVADDR(MethodEnv::hasnext2), 3,
+				OP* i1 = callIns(MIR_cm, ENVADDR(MethodEnv::hasnextproto), 3,
 									 env_param, leaIns(0, obj), leaIns(0, index));
 				localSet(op1, loadIns(MIR_ldop, 0, obj));
 				localSet(op2, loadIns(MIR_ldop, 0, index));
@@ -4002,6 +4099,7 @@ namespace avmplus
 #endif
 
     LIns *CodegenLIR::branchIns(LOpcode op, LIns *cond, LIns *target) {
+        hasLoop |= (target != 0);
         return lirout->insBranch(op, cond, target);
     }
 
@@ -4057,6 +4155,7 @@ namespace avmplus
     PageMgr::PageMgr() : frago(0)
     {}
 
+#ifdef _DEBUG
     class ValidateReader: public LirFilter {
     public:
         ValidateReader(LirFilter *in) : LirFilter(in)
@@ -4074,17 +4173,25 @@ namespace avmplus
             return i;
         }
     };
+#endif
 
     void CodegenLIR::emitMD() 
     {
-        LirReader reader(lirbuf);
-        ValidateReader validator(&reader);
-        for (LIns *i = validator.read(); i != 0; i = validator.read()) 
-        {}
+        debug_only(
+            LirReader reader(lirbuf);
+            ValidateReader validator(&reader);
+            while (validator.read())
+            {}
+        )
 
         verbose_only(if (verbose()) {
             live(gc, lirbuf);
         })
+
+        if (hasLoop) {
+            overflow = true;
+            return;
+        }
 
         Fragmento *frago = pool->codePages->frago;
         Assembler *assm = frago->assm();
@@ -4107,7 +4214,7 @@ namespace avmplus
 
         frag->releaseLirBuffer();
 
-        if (!assm->error()) {
+        if (0 && !assm->error()) {
             // save pointer to generated code
             union {
                 Atom (*fp)(MethodEnv*, int, uint32_t*);
@@ -4116,7 +4223,6 @@ namespace avmplus
             u.vp = frag->code();
             info->impl32 = u.fp;
         } else {
-            AvmAssert(false);//untested
             frag->releaseCode(frago);
             overflow = true;
             // need to remove this frag from Fragmento, free everything.

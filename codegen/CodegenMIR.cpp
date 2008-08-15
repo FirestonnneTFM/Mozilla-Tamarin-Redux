@@ -1744,7 +1744,7 @@ namespace avmplus
 		names->add(ENVADDR(MethodEnv::nextname), "MethodEnv::nextname");
 		names->add(ENVADDR(MethodEnv::nextvalue), "MethodEnv::nextvalue");
 		names->add(ENVADDR(MethodEnv::hasnext), "MethodEnv::hasnext");
-		names->add(ENVADDR(MethodEnv::hasnext2), "MethodEnv::hasnext2");
+		names->add(ENVADDR(MethodEnv::hasnextproto), "MethodEnv::hasnextproto");
 		names->add(ENVADDR(MethodEnv::getdescendants), "MethodEnv::getdescendants");
 		names->add(ENVADDR(MethodEnv::getdescendantslate), "MethodEnv::getdescendantslate");
 		names->add(TOPLEVELADDR(Toplevel::setproperty), "Toplevel::setproperty");
@@ -3497,7 +3497,7 @@ namespace avmplus
 				OP* index = InsAlloc(sizeof(int));
 				storeIns(loadAtomRep(op1), 0, obj);
 				storeIns(localGet(op2), 0, index);
-				OP* i1 = callIns(MIR_cm, ENVADDR(MethodEnv::hasnext2), 3,
+				OP* i1 = callIns(MIR_cm, ENVADDR(MethodEnv::hasnextproto), 3,
 									 ldargIns(_env), leaIns(0, obj), leaIns(0, index));
 				localSet(op1, loadIns(MIR_ldop, 0, obj));
 				localSet(op2, loadIns(MIR_ldop, 0, index));

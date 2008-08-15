@@ -1426,7 +1426,7 @@ namespace avmplus
 				int indexReg  = readU30(pc);
 				Atom objAtom = framep[objectReg];
 				int index = core->integer(framep[indexReg]);
-				*(++sp) = env->hasnext2(objAtom, index) ? trueAtom : falseAtom;
+				*(++sp) = env->hasnextproto(objAtom, index) ? trueAtom : falseAtom;
 				framep[objectReg] = objAtom;
 				framep[indexReg] = core->intToAtom(index);
 				restore_dxns();

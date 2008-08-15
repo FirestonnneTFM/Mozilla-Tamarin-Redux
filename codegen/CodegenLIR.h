@@ -191,7 +191,7 @@ namespace avmplus
         LIns *dxns, *dxnsAddrSave;
         LIns *csn;
         LIns *undefConst;
-        bool interruptable;
+        bool interruptable, hasLoop;
         CodegenLabel interrupt_label, npe_label;
         sintptr lastPcSave;
         List<Patch, LIST_NonGCObjects> patches;

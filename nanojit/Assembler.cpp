@@ -87,17 +87,24 @@ namespace nanojit
 			: LirFilter(in), assm(a), names(n), block(a->_gc) {}
 
 		void flush() {
-			assm->outputf("        %p:", assm->_nIns);
-			assm->output("");
-			for (int j=0,n=block.size(); j < n; j++)
-				assm->outputf("    %s", names->formatIns(block[j]));
-			assm->output("");
-			block.clear();
+            if (!block.isEmpty()) {
+			    assm->outputf("        %p:", assm->_nIns);
+			    assm->output("");
+			    for (int j=0,n=block.size(); j < n; j++)
+				    assm->outputf("    %s", names->formatIns(block[j]));
+			    assm->output("");
+			    block.clear();
+            }
 		}
 
         void flush_add(LInsp i) {
             flush();
             block.add(i);
+        }
+
+        void add_flush(LInsp i) {
+            block.add(i);
+            flush();
         }
 
 		LInsp read() {
@@ -111,8 +118,11 @@ namespace nanojit
 				if (i->oprnd1())
 					block.add(i->oprnd1());
             }
-            else if (isRet(i->opcode()) || i->isStore()) {
+            else if (isRet(i->opcode())/* || i->isStore()*/) {
                 flush_add(i);
+            }
+            else if (i->isop(LIR_label)) {
+                add_flush(i);
             }
 			else {
 				block.add(i);
@@ -130,8 +140,8 @@ namespace nanojit
     Assembler::Assembler(Fragmento* frago)
         : _frago(frago)
         , _gc(frago->core()->gc)
-        , _labels(frago->core()->gc)
-        , _patches(frago->core()->gc)
+        , _labels(_gc)
+        , _patches(_gc)
 	{
         AvmCore *core = frago->core();
 		nInit(core);
@@ -370,9 +380,7 @@ namespace nanojit
                     i = j-1;
                 }
                 else if (ins->isQuad()) {
-                    NanoAssert((i&1)==0);
-		        	NanoAssert(r->arIndex == i);
-                    NanoAssert(ar.entry[i+stack_direction(1)]==ins);
+                    NanoAssert(ar.entry[i - stack_direction(1)]==ins);
                     i += 1; // skip high word
                 }
                 else {
@@ -727,6 +735,7 @@ namespace nanojit
 			
         _epilogue = genEpilogue(SavedRegs);
 		_branchStateMap = branchStateMap;
+        _labels.clear();
 		
 		verbose_only( verbose_outputf("        %p:",_nIns) );
 		verbose_only( verbose_output("        epilogue:") );
@@ -766,13 +775,12 @@ namespace nanojit
 		{
 			NIns* where = _patches.lastKey();
 			LInsp targ = _patches.removeLast();
-			NIns* ntarg = _labels.get(targ);
-			if (ntarg)
-			{
+            LabelState *label = _labels.get(targ);
+			NIns* ntarg = label->addr;
+            if (ntarg) {
 				nPatchBranch(where,ntarg);
 			}
-			else
-			{
+            else {
 				_err = UnknownBranch;
 				break;
 			}
@@ -926,36 +934,6 @@ namespace nanojit
                     break;
                 }
 
-				case LIR_j:
-				{
-					LInsp target = ins->oprnd1();
-					NIns* addr = _labels.get(target);
-                    JMP(addr);
-                    if (!addr) {
-						_patches.put(_nIns,target);
-                    }
-					break;
-				}					
-				case LIR_jt:
-				case LIR_jf:
-				{
-					bool needsPatching = false;
-					LInsp to = ins->oprnd2();
-					LIns* cond = ins->oprnd1();
-					NIns* addr = _labels.get(to);
-					NIns* branch = asm_branch(op == LIR_xt, cond, addr);
-                    if (!addr) {
-						_patches.put(branch,to);
-                    }
-					break;
-
-				}					
-				case LIR_label:
-				{
-					verbose_only( verbose_outputf("        L%d:", _thisfrag->lirbuf->names->formatRef(ins)); )
-					_labels.put(ins, _nIns);
-					break;
-				}
 				case LIR_var:
 				{
 					Reservation* r = getresv(ins);
@@ -1316,14 +1294,78 @@ namespace nanojit
 					}
                     break;
 				}
-				case LIR_xt:
+
+				case LIR_j:
+				{
+					LInsp target = ins->oprnd1();
+                    LabelState *label = _labels.get(target);
+                    if (!label) {
+                        //AvmAssert(false);
+                        // jump to unknown label is a back edge
+                        JMP(0);
+                        _labels.add(target, 0, _allocator);
+    					_patches.put(_nIns, target);
+                    }
+                    else if (!label->addr) {
+                        //AvmAssert(false);
+                        // back jump to label already targeted by some other jump
+                        // so we merge with that register state
+                        JMP(0);
+                        releaseRegisters();
+                        mergeRegisterState(label->regs);
+                    } else {
+                        // forward jump to known label - pick up register state from there.
+                        releaseRegisters();
+                        mergeRegisterState(label->regs);
+                        JMP(label->addr);
+                    }
+					break;
+				}
+
+				case LIR_jt:
+				case LIR_jf:
+				{
+					LInsp to = ins->oprnd2();
+					LIns* cond = ins->oprnd1();
+                    LabelState *label = _labels.get(to);
+                    if (label) {
+                        // forward jump to known label.  need to merge with label's register state.
+    					NIns* branch = asm_branch(op == LIR_jf, cond, label->addr);
+                        mergeRegisterState(label->regs);
+                    }
+                    else {
+                        //AvmAssert(false);
+                        // conditional back-edge to unknown label.
+                        // cannot merge register state with anything yet.
+    					NIns* branch = asm_branch(op == LIR_jf, cond, 0);
+						_patches.put(branch,to);
+                    }
+					break;
+				}					
+				case LIR_label:
+				{
+					verbose_only( verbose_outputf("        L%d:", _thisfrag->lirbuf->names->formatRef(ins)); )
+                    LabelState *label = _labels.get(ins);
+                    if (!label) {
+    					_labels.add(ins, _nIns, _allocator);
+                    }
+                    else {
+                        //AvmAssert(false);
+                        // we're at the top of a loop, merge with register state from successor jumps
+                        NanoAssert(label->addr == 0);
+                        mergeRegisterState(label->regs);
+                        label->addr = _nIns;
+                    }
+					break;
+				}
+
+                case LIR_xt:
 				case LIR_xf:
 				{
 					// we only support cmp with guard right now, also assume it is 'close' and only emit the branch
-                    NIns* exit = asm_exit(ins);
+                    NIns* exit = asm_exit(ins); // does mergeRegisterState()
 					LIns* cond = ins->oprnd1();
-					bool bNeg = (op == LIR_xf) ? true : false;
-					asm_branch(bNeg, cond, exit);
+					asm_branch(op == LIR_xf, cond, exit);
 					break;
 				}
 				case LIR_x:
@@ -1451,7 +1493,7 @@ namespace nanojit
 		}
 	}
 
-	NIns* Assembler::asm_branch(bool branchOnTrue, LInsp cond, NIns* targ)
+	NIns* Assembler::asm_branch(bool branchOnFalse, LInsp cond, NIns* targ)
 	{
 		NIns* at = 0;
 		LOpcode condop = cond->opcode();
@@ -1459,7 +1501,7 @@ namespace nanojit
 #ifndef NJ_SOFTFLOAT
 		if (condop >= LIR_feq && condop <= LIR_fge)
 		{
-			if (branchOnTrue)
+			if (branchOnFalse)
 				JP(targ);
 			else
 				JNP(targ);
@@ -1469,7 +1511,7 @@ namespace nanojit
 		}
 #endif
 		// produce the branch
-		if (branchOnTrue)
+		if (branchOnFalse)
 		{
 			if (condop == LIR_eq)
 				JNE(targ);
@@ -1671,9 +1713,6 @@ namespace nanojit
             ar.entry[i+stack_direction(1)] = l;
 		}
         else {
-            verbose_only(if (_verbose) {
-                outputf("arReserve %s size %d\n", _thisfrag->lirbuf->names->formatRef(l), size<<2);
-            })
             // alloc larger block on 8byte boundary.
             if (start < size) start = size;
             if ((start&1)==1) start++;
@@ -1872,4 +1911,13 @@ namespace nanojit
         return argc;
     }
 #endif
+
+    void LabelStateMap::add(LIns *label, NIns *addr, RegAlloc &regs) {
+        LabelState *st = new (gc) LabelState(addr, regs);
+        labels.put(label, st);
+    }
+
+    LabelState* LabelStateMap::get(LIns *label) {
+        return labels.get(label);
+    }
 }
