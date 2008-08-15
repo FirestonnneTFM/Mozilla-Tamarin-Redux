@@ -72,8 +72,8 @@ namespace nanojit
 
 	Fragmento::~Fragmento()
 	{
-		debug_only( clearFrags() );
-        _frags->clear();		
+//		debug_only( clearFrags() );
+//        _frags->clear();		
 		while( _allocList.size() > 0 )
 		{
 			//fprintf(stderr,"dealloc %x\n", (intptr_t)_allocList.get(_allocList.size()-1));
@@ -82,7 +82,7 @@ namespace nanojit
 #endif
 			_gcHeap->Free( _allocList.removeLast() );	
 		}
-		NanoAssert(_stats.freePages == _stats.pages );
+//		NanoAssert(_stats.freePages == _stats.pages );
 	}
 
 	void Fragmento::trackFree(int32_t delta)
