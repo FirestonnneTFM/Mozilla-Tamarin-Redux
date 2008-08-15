@@ -1077,13 +1077,13 @@ namespace avmplus
         }
 
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
-            /*if (base == vars) {
+            if (base == vars) {
                 int d = disp->constval();
                 LIns *val = tracker.get(d);
                 if (val) {
                     return val;
                 }
-            }*/
+            }
             return out->insLoad(op, base, disp);
         }
 
@@ -4220,11 +4220,17 @@ namespace avmplus
             } u;
             u.vp = frag->code();
             info->impl32 = u.fp;
+            verbose_only(if (verbose()) {
+                printf("keeping compiled code\n");
+            })
         } else {
             // assm puked, or we did something untested, so interpret.
+            // fixme: need to remove this frag from Fragmento and free everything.
             frag->releaseCode(frago);
             overflow = true;
-            // need to remove this frag from Fragmento, free everything.
+            verbose_only(if (verbose()) {
+                printf("reverting to interpreter\n");
+            })
         }
     }
 }
