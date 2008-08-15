@@ -199,4 +199,8 @@
 #define AVM10_BIG_ENDIAN
 #endif
 
+// Enable translation from ABC byte code to a wider word code that can
+// also be used by a direct threaded interpreter
+//#define AVMPLUS_WORD_CODE
+
 #endif /* __avmbuild__ */
