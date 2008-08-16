@@ -140,7 +140,278 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 		const uint32* pos = info->word_code.body_pos;
 		if (pos == NULL) {
+#  ifdef AVMPLUS_DIRECT_THREADED
+#    define XXX &&L_illegal_op
+			static void* opcode_labels[] = 
+			{   /* 0x00 */ XXX, 
+			    /* 0x01 */ &&L_bkpt,
+			    /* 0x02 */ XXX, /* OP_nop */
+				/* 0x03 */ &&L_throw,
+				/* 0x04 */ &&L_getsuper,
+				/* 0x05 */ &&L_setsuper,
+				/* 0x06 */ &&L_dxns,
+				/* 0x07 */ &&L_dxnslate,
+				/* 0x08 */ &&L_kill,
+				/* 0x09 */ XXX, /* OP_label */
+				/* 0x0A */ XXX,
+				/* 0x0B */ XXX,
+				/* 0x0C */ &&L_ifnlt,
+				/* 0x0D */ &&L_ifnle,
+				/* 0x0E */ &&L_ifngt,
+				/* 0x0F */ &&L_ifnge,
+				/* 0x10 */ &&L_jump,
+				/* 0x11 */ &&L_iftrue,
+				/* 0x12 */ &&L_iffalse,
+				/* 0x13 */ &&L_ifeq,
+				/* 0x14 */ &&L_ifne,
+				/* 0x15 */ &&L_iflt,
+				/* 0x16 */ &&L_ifle,
+				/* 0x17 */ &&L_ifgt,
+				/* 0x18 */ &&L_ifge,
+				/* 0x19 */ &&L_ifstricteq,
+				/* 0x1A */ &&L_ifstrictne,
+				/* 0x1B */ &&L_lookupswitch,
+				/* 0x1C */ &&L_pushwith,
+				/* 0x1D */ &&L_popscope,
+				/* 0x1E */ &&L_nextname,
+				/* 0x1F */ &&L_hasnext,
+				/* 0x20 */ &&L_pushnull,
+				/* 0x21 */ &&L_pushundefined,
+				/* 0x22 */ XXX,
+				/* 0x23 */ &&L_nextvalue,
+				/* 0x24 */ XXX, /* OP_pushbyte */
+				/* 0x25 */ XXX, /* OP_pushshort */
+				/* 0x26 */ &&L_pushtrue,
+				/* 0x27 */ &&L_pushfalse,
+				/* 0x28 */ &&L_pushnan,
+				/* 0x29 */ &&L_pop,
+				/* 0x2A */ &&L_dup,
+				/* 0x2B */ &&L_swap,
+				/* 0x2C */ &&L_pushstring,
+				/* 0x2D */ XXX, /* OP_pushint */
+				/* 0x2E */ XXX, /* OP_pushuint */
+				/* 0x2F */ &&L_pushdouble,
+				/* 0x30 */ &&L_pushscope,
+				/* 0x31 */ &&L_pushnamespace,
+				/* 0x32 */ &&L_hasnext2,
+				/* 0x33 */ XXX,
+				/* 0x34 */ XXX,
+				/* 0x35 */ XXX,
+				/* 0x36 */ XXX,
+				/* 0x37 */ XXX,
+				/* 0x38 */ XXX,
+				/* 0x39 */ XXX,
+				/* 0x3A */ XXX,
+				/* 0x3B */ XXX,
+				/* 0x3C */ XXX,
+				/* 0x3D */ XXX,
+				/* 0x3E */ XXX,
+				/* 0x3F */ XXX,
+				/* 0x40 */ &&L_newfunction,
+				/* 0x41 */ &&L_call,
+				/* 0x42 */ &&L_construct,
+				/* 0x43 */ &&L_callmethod,
+				/* 0x44 */ &&L_callstatic,
+				/* 0x45 */ &&L_callsuper,
+				/* 0x46 */ &&L_callproperty,
+				/* 0x47 */ &&L_returnvoid,
+				/* 0x48 */ &&L_returnvalue,
+				/* 0x49 */ &&L_constructsuper,
+				/* 0x4A */ &&L_constructprop,
+				/* 0x4B */ XXX, /* OP_callsuperid */
+				/* 0x4C */ &&L_callproplex,
+				/* 0x4D */ XXX, /* OP_callinterface */
+				/* 0x4E */ &&L_callsupervoid,
+				/* 0x4F */ &&L_callpropvoid,
+				/* 0x50 */ XXX,
+				/* 0x51 */ XXX,
+				/* 0x52 */ XXX,
+				/* 0x53 */ &&L_applytype,
+				/* 0x54 */ XXX,
+				/* 0x55 */ &&L_newobject,
+				/* 0x56 */ &&L_newarray,
+				/* 0x57 */ &&L_newactivation,
+				/* 0x58 */ &&L_newclass,
+				/* 0x59 */ &&L_getdescendants,
+				/* 0x5A */ &&L_newcatch,
+				/* 0x5B */ XXX,
+				/* 0x5C */ XXX,
+				/* 0x5D */ &&L_findpropstrict,
+				/* 0x5E */ &&L_findproperty,
+				/* 0x5F */ &&L_finddef,
+				/* 0x60 */ &&L_getlex,
+				/* 0x61 */ &&L_setproperty,
+				/* 0x62 */ &&L_getlocal,
+				/* 0x63 */ &&L_setlocal,
+				/* 0x64 */ &&L_getglobalscope,
+				/* 0x65 */ &&L_getscopeobject,
+				/* 0x66 */ &&L_getproperty,
+				/* 0x67 */ &&L_getouterscope,
+				/* 0x68 */ &&L_initproperty,
+				/* 0x69 */ XXX,
+				/* 0x6A */ &&L_deleteproperty,
+				/* 0x6B */ XXX,
+				/* 0x6C */ &&L_getslot,
+				/* 0x6D */ &&L_setslot,
+				/* 0x6E */ &&L_getglobalslot,
+				/* 0x6F */ &&L_setglobalslot,
+				/* 0x70 */ &&L_convert_s,
+				/* 0x71 */ &&L_esc_xelem,
+				/* 0x72 */ &&L_esc_xattr,
+				/* 0x73 */ &&L_convert_i,
+				/* 0x74 */ &&L_convert_u,
+				/* 0x75 */ &&L_convert_d,
+				/* 0x76 */ &&L_convert_b,
+				/* 0x77 */ &&L_convert_o,
+				/* 0x78 */ &&L_checkfilter,
+				/* 0x79 */ XXX,
+				/* 0x7A */ XXX,
+				/* 0x7B */ XXX,
+				/* 0x7C */ XXX,
+				/* 0x7D */ XXX,
+				/* 0x7E */ XXX,
+				/* 0x7F */ XXX,
+				/* 0x80 */ &&L_coerce,
+				/* 0x81 */ &&L_coerce_b,
+				/* 0x82 */ &&L_coerce_a,
+				/* 0x83 */ &&L_coerce_i,
+				/* 0x84 */ &&L_coerce_d,
+				/* 0x85 */ &&L_coerce_s,
+				/* 0x86 */ &&L_astype,
+				/* 0x87 */ &&L_astypelate,
+				/* 0x88 */ &&L_coerce_u,
+				/* 0x89 */ &&L_coerce_o,
+				/* 0x8A */ XXX,
+				/* 0x8B */ XXX,
+				/* 0x8C */ XXX,
+				/* 0x8D */ XXX,
+				/* 0x8E */ XXX,
+				/* 0x8F */ XXX,
+				/* 0x90 */ &&L_negate,
+				/* 0x91 */ &&L_increment,
+				/* 0x92 */ &&L_inclocal,
+				/* 0x93 */ &&L_decrement,
+				/* 0x94 */ &&L_declocal,
+				/* 0x95 */ &&L_typeof,
+				/* 0x96 */ &&L_not,
+				/* 0x97 */ &&L_bitnot,
+				/* 0x98 */ XXX,
+				/* 0x99 */ XXX,
+				/* 0x9A */ XXX, /* OP_concat */
+				/* 0x9B */ XXX, /* OP_add_d */
+				/* 0x9C */ XXX,
+				/* 0x9D */ XXX,
+				/* 0x9E */ XXX,
+				/* 0x9F */ XXX,
+				/* 0xA0 */ &&L_add,
+				/* 0xA1 */ &&L_subtract,
+				/* 0xA2 */ &&L_multiply,
+				/* 0xA3 */ &&L_divide,
+				/* 0xA4 */ &&L_modulo,
+				/* 0xA5 */ &&L_lshift,
+				/* 0xA6 */ &&L_rshift,
+				/* 0xA7 */ &&L_urshift,
+				/* 0xA8 */ &&L_bitand,
+				/* 0xA9 */ &&L_bitor,
+				/* 0xAA */ &&L_bitxor,
+				/* 0xAB */ &&L_equals,
+				/* 0xAC */ &&L_strictequals,
+				/* 0xAD */ &&L_lessthan,
+				/* 0xAE */ &&L_lessequals,
+				/* 0xAF */ &&L_greaterthan,
+				/* 0xB0 */ &&L_greaterequals,
+				/* 0xB1 */ &&L_instanceof,
+				/* 0xB2 */ &&L_istype,
+				/* 0xB3 */ &&L_istypelate,
+				/* 0xB4 */ &&L_in,
+				/* 0xB5 */ XXX,
+				/* 0xB6 */ XXX,
+				/* 0xB7 */ XXX,
+				/* 0xB8 */ XXX,
+				/* 0xB9 */ XXX,
+				/* 0xBA */ XXX,
+				/* 0xBB */ XXX,
+				/* 0xBC */ XXX,
+				/* 0xBD */ XXX,
+				/* 0xBE */ XXX,
+				/* 0xBF */ XXX,
+				/* 0xC0 */ &&L_increment_i,
+				/* 0xC1 */ &&L_decrement_i,
+				/* 0xC2 */ &&L_inclocal_i,
+				/* 0xC3 */ &&L_declocal_i,
+				/* 0xC4 */ &&L_negate_i,
+				/* 0xC5 */ &&L_add_i,
+				/* 0xC6 */ &&L_subtract_i,
+				/* 0xC7 */ &&L_multiply_i,
+				/* 0xC8 */ XXX,
+				/* 0xC9 */ XXX,
+				/* 0xCA */ XXX,
+				/* 0xCB */ XXX,
+				/* 0xCC */ XXX,
+				/* 0xCD */ XXX,
+				/* 0xCE */ XXX,
+				/* 0xCF */ XXX,
+				/* 0xD0 */ &&L_getlocal0,
+				/* 0xD1 */ &&L_getlocal1,
+				/* 0xD2 */ &&L_getlocal2,
+				/* 0xD3 */ &&L_getlocal3,
+				/* 0xD4 */ &&L_setlocal0,
+				/* 0xD5 */ &&L_setlocal1,
+				/* 0xD6 */ &&L_setlocal2,
+				/* 0xD7 */ &&L_setlocal3,
+				/* 0xD8 */ XXX,
+				/* 0xD9 */ XXX,
+				/* 0xDA */ XXX,
+				/* 0xDB */ XXX,
+				/* 0xDC */ XXX,
+				/* 0xDD */ XXX,
+				/* 0xDE */ XXX,
+				/* 0xDF */ XXX,
+				/* 0xE0 */ XXX,
+				/* 0xE1 */ XXX,
+				/* 0xE2 */ XXX,
+				/* 0xE3 */ XXX,
+				/* 0xE4 */ XXX,
+				/* 0xE5 */ XXX,
+				/* 0xE6 */ XXX,
+				/* 0xE7 */ XXX,
+				/* 0xE8 */ XXX,
+				/* 0xE9 */ XXX,
+				/* 0xEA */ XXX,
+				/* 0xEB */ XXX,
+				/* 0xEC */ XXX,
+				/* 0xED */ XXX,
+				/* 0xEE */ XXX, /* OP_abs_jump */
+				/* 0xEF */ XXX, /* OP_debug */
+				/* 0xF0 */ &&L_debugline,
+				/* 0xF1 */ &&L_debugfile,
+				/* 0xF2 */ &&L_bkptline,
+				/* 0xF3 */ XXX,  /* OP_timestamp */
+				/* 0xF4 */ XXX,
+				/* 0xF5 */ XXX,
+				/* 0xF6 */ XXX,
+				/* 0xF7 */ XXX,
+				/* 0xF8 */ XXX,
+				/* 0xF9 */ XXX,
+				/* 0xFA */ XXX,
+				/* 0xFB */ XXX,
+				/* 0xFC */ XXX,
+				/* 0xFD */ XXX,
+				/* 0xFE */ XXX,
+				/* 0xFF */ XXX,  /* OP_ext */
+				/* 0xFF 0x00 */ XXX,
+				/* 0xFF 0x01 */ &&L_ext_pushbits,
+				/* 0xFF 0x02 */ &&L_ext_push_doublebits
+			};
+			AvmAssert(opcode_labels[0x18] == &&L_ifge);
+			AvmAssert(opcode_labels[0x97] == &&L_bitnot);
+			AvmAssert(opcode_labels[0xF0] == &&L_debugline);
+			AvmAssert(opcode_labels[257] == &&L_ext_pushbits);
+			Translator *t = new Translator(opcode_labels);
+#  else  // !AVMPLUS_DIRECT_THREADED
 			Translator *t = new Translator();
+#  endif // AVMPLUS_DIRECT_THREADED
+			
 			t->translate(env);
 			delete t;
 			pos = info->word_code.body_pos;
@@ -151,7 +422,7 @@ namespace avmplus
 		int local_count = info->word_code.local_count;
 		int init_scope_depth = info->word_code.init_scope_depth;
 		int max_scope_depth = info->word_code.max_scope_depth;
-#else
+#else // !AVMPLUS_WORD_CODE
 		const byte* pos = info->body_pos;
 		int max_stack = AvmCore::readU30(pos);
 		int local_count = AvmCore::readU30(pos);
@@ -159,7 +430,7 @@ namespace avmplus
 		int max_scope_depth = AvmCore::readU30(pos);
 		AvmCore::readU30(pos); // code_length
 		const byte * volatile code_start = pos;
-#endif
+#endif // AVMPLUS_WORD_CODE
 		int volatile max_scope = MethodInfo::maxScopeDepth(info, max_scope_depth - init_scope_depth);
 
 		// these should have been checked in AbcParser
@@ -168,11 +439,11 @@ namespace avmplus
 		Atom* scopeBase = framep + local_count;
 		Atom* withBase = NULL;
 
-		#ifdef DEBUGGER
+#ifdef DEBUGGER
 		env->invocationCount++;
 		CallStackNode callStackNode(env, info, framep, 0, argc, ap, 0 /* later changed to 'pc' */);
 		// don't allow entry into the debugger until we have setup the frame
-		#endif
+#endif
 
 		CodeContextAtom savedCodeContext = core->codeContextAtom;
 		if (info->pool->domain->base != NULL) {
@@ -295,15 +566,6 @@ namespace avmplus
 		// when we're leaving this call frame
 		#define restore_caller_dxns() if(info->setsDxns()) core->dxnsAddr = dxnsAddrSave
 
-		#if defined AVMPLUS_VERBOSE && !defined AVMPLUS_WORD_CODE  // fixme later
-			#define INSTR(op) case OP_##op: \
-					if (pool->verbose) {\
-						showState(info, code_start, pc,  framep, sp, scopeDepth, scopeBase, max_scope); \
-					}
-		#else
-			#define INSTR(op) case OP_##op:
-		#endif
-
 		// NEXT dispatches the next instruction.
 		//
 		// U30ARG picks up a variable-length unsigned integer argument from the instruction
@@ -317,20 +579,34 @@ namespace avmplus
 		//
 		// SAVE_EXPC and variants saves the address of the current opcode in the local 'expc'.
 		// Used in the case of exceptions.
-		
+
 #ifdef AVMPLUS_WORD_CODE
 
 #  ifdef AVMPLUS_DIRECT_THREADED
+#    define INSTR(op)       L_##op:
+#    define NEXT            goto *(*pc++)
+#    define FIRST			NEXT
 #  else
+#    define INSTR(op)       case OP_##op:
 #    define NEXT            continue
-#    define U30ARG          (*pc++)
-#    define U8ARG           (*pc++)
-#    define S24ARG          (int32)(*pc++)
-#    define SAVE_EXPC       expc = pc-1-code_start
-#    define SAVE_EXPC_S24   expc = pc-2-code_start
 #  endif
+		
+#  define U30ARG          (*pc++)
+#  define U8ARG           (*pc++)
+#  define S24ARG          (int32)(*pc++)
+#  define SAVE_EXPC       expc = pc-1-code_start
+#  define SAVE_EXPC_S24   expc = pc-2-code_start
 
-#else
+#else // !AVMPLUS_WORD_CODE
+
+#  if defined AVMPLUS_VERBOSE
+#    define INSTR(op) case OP_##op: \
+                        if (pool->verbose) {\
+							showState(info, code_start, pc,  framep, sp, scopeDepth, scopeBase, max_scope); \
+						}
+#  else
+#    define INSTR(op) case OP_##op:
+#  endif
 
 #  define NEXT            continue
 #  define U30ARG          (readU30(pc))
@@ -339,7 +615,7 @@ namespace avmplus
 #  define SAVE_EXPC	      expc = pc-1-code_start
 #  define SAVE_EXPC_S24   expc = pc-4-code_start
 
-#endif
+#endif // AVMPLUS_WORD_CODE
 		
 	MainLoop:
 #ifdef AVMPLUS_WORD_CODE
@@ -353,20 +629,24 @@ namespace avmplus
 		// the verifier ensures we don't fall off the end of a method.  so
 		// we dont have to check the end pointer here.
 #ifdef AVMPLUS_DIRECT_THREADED
-			
-#  error "Direct threaded code not yet implemented"
 
+		FIRST;
+
+		L_illegal_op:
+			AvmAssert(!"Illegal operation!");
+			return falseAtom;
+			
 #else	// AVMPLUS_DIRECT_THREADED
 			
         for (;;)
         {
-#ifdef AVMPLUS_WORD_CODE
+#  ifdef AVMPLUS_WORD_CODE
 			// See comments around INSTR(ext) below.
 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
 			switch ((*pc++) & 255)
-#else
+#  else
             switch (*pc++)
-#endif // AVMPLUS_WORD_CODE
+#  endif // AVMPLUS_WORD_CODE
             {
 
 #endif // AVMPLUS_DIRECT_THREADED
@@ -2093,15 +2373,15 @@ namespace avmplus
 					SAVE_EXPC;
 					env->interrupt();
 				}
-#ifdef AVMPLUS_64BIT
+#  ifdef AVMPLUS_64BIT
 				uint32 base = AvmCore::readU30(pc);
 				byte *target = (byte *) ((uintptr(AvmCore::readU30(pc)) << 32));
 				target = (byte*)((uintptr)target | base);
 				code_start = pc = (const byte*) target;
-#else // !AVMPLUS_64BIT
+#  else // !AVMPLUS_64BIT
 				const byte *target = (const byte *) U30ARG;
 				code_start = pc = target;
-#endif // AVMPLUS_64BIT
+#  endif // AVMPLUS_64BIT
 				NEXT;
             }
 #endif // !AVMPLUS_WORD_CODE
@@ -2141,14 +2421,14 @@ namespace avmplus
 			} // INSTR(ext)
 #  endif
 #endif
-			}
+#ifndef AVMPLUS_DIRECT_THREADED
+			} // switch
 			// illegal instruction or accidental break
 			AvmAssert(false);
-#ifndef AVMPLUS_DIRECT_THREADED
 		} // for
 #endif
 
-		}
+		}  // TRY
 
 		CATCH (Exception *exception)
 		{
