@@ -34,15 +34,24 @@
 #define D_I   (nanojit::ARGSIZE_F | nanojit::ARGSIZE_LO<<2)
 #define D_DD  (nanojit::ARGSIZE_F | nanojit::ARGSIZE_F<<4 | nanojit::ARGSIZE_F<<2)
 
+#if _MSC_VER
+	#define ABI_FUNCTION ABI_CDECL
+	#define ABI_METHOD   ABI_THISCALL
+#else
+	// gcc, probably
+	#define ABI_FUNCTION ABI_CDECL
+	#define ABI_METHOD   ABI_CDECL
+#endif
+
 #define FUNCTION(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,0,0,ABI_CDECL,/*ret*/,/*args*/,name)
+    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,0,0,ABI_FUNCTION,/*ret*/,/*args*/,name)
 #define CSEFUNCTION(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,1,0,ABI_CDECL,/*ret*/,/*args*/,name)
+    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,1,0,ABI_FUNCTION,/*ret*/,/*args*/,name)
 
 #define METHOD(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,0,0,ABI_THISCALL,/*ret*/,/*args*/,name)
+    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,0,0,ABI_METHOD,/*ret*/,/*args*/,name)
 #define CSEMETHOD(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,1,0,ABI_THISCALL,/*ret*/,/*args*/,name)
+    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,1,0,ABI_METHOD,/*ret*/,/*args*/,name)
 
 INTERP_FOPCODE_LIST_BEGIN
 
@@ -198,3 +207,5 @@ INTERP_FOPCODE_LIST_END
 #undef CSEFUNCTION
 #undef METHOD
 #undef CSEMETHOD
+#undef ABI_METHOD
+#undef ABI_FUNCTION

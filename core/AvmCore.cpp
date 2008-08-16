@@ -930,7 +930,12 @@ return the result of the comparison ToPrimitive(x) == y.
 					for (callStackNode = callStack; callStackNode; callStackNode = callStackNode->next)
 					{
 						MethodInfo* info = (MethodInfo*) callStackNode->info;
-						if (info->exceptions != NULL && callStackNode->eip && *callStackNode->eip)
+#ifdef AVMPLUS_WORD_CODE
+						ExceptionHandlerTable* exceptions = info->word_code.exceptions;
+#else
+						ExceptionHandlerTable* exceptions = info->exceptions;
+#endif
+						if (exceptions != NULL && callStackNode->eip && *callStackNode->eip)
 						{
 							// Check if this particular frame of the callstack
 							// is going to catch the exception.
@@ -1635,9 +1640,23 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		//[ed] we only call this from methods with catch blocks, when exceptions != NULL
 		AvmAssert(info->exceptions != NULL);
+#ifdef AVMPLUS_WORD_CODE
+		// This is hacky and will go away.  If we're not running in the pure interpreter
+		// then methods are JITted on first entry, bypassing translation altogether.  In
+		// this case, info->word_code.exceptions will be NULL, causing the AVM to crash.
+		// So the right thing to do in this case is to fall back on info->exceptions.
+		
+		//AvmAssert(info->word_code.exceptions != NULL);
+		ExceptionHandlerTable* exceptions = info->word_code.exceptions;
 
-		int exception_count = info->exceptions->exception_count;
-		ExceptionHandler* handler = info->exceptions->exceptions;
+		if (exceptions == NULL)
+			exceptions = info->exceptions;
+#else
+		ExceptionHandlerTable* exceptions = info->exceptions;
+#endif
+		
+		int exception_count = exceptions->exception_count;
+		ExceptionHandler* handler = exceptions->exceptions;
 		Atom atom = exception->atom;
 		
 		while (--exception_count >= 0) 
