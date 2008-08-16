@@ -201,6 +201,7 @@
 
 // Enable translation from ABC byte code to a wider word code that can
 // also be used by a direct threaded interpreter
-//#define AVMPLUS_WORD_CODE
+#define AVMPLUS_WORD_CODE
+#define AVMPLUS_DIRECT_THREADED
 
 #endif /* __avmbuild__ */

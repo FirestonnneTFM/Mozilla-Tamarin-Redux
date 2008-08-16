@@ -43,7 +43,11 @@ namespace avmplus
 	class Translator 
 	{
 	public:
+#  ifdef AVMPLUS_DIRECT_THREADED
+		Translator(void** opcode_labels);
+#  else
 		Translator();
+#  endif
 		~Translator();
 		
 		// Update MethodEnv in place by adding a translation to it.
@@ -114,6 +118,9 @@ namespace avmplus
 		exception_info* exception_fixes; // in address order
 		buffer_info* buffers;			 // newest buffer first
 		uint32 buffer_offset;			 // offset of first word of current buffer
+#ifdef AVMPLUS_DIRECT_THREADED
+		void** opcode_labels;
+#endif
 		
 		void cleanup();
 		void refill(uint32 *&dest, uint32 *&dest_limit);
