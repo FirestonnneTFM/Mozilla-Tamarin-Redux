@@ -92,13 +92,13 @@ namespace avmplus
 			label_info* next;
 		};
 	
-		class exception_info
+		class catch_info
 		{
 		public:
 			const byte* pc;			// address in ABC code to trigger use of this structure
 			void *fixup_loc;		// points to a location to update
 			bool is_target;			// The 'target' field is a sintptr, not an int (sigh).
-			exception_info* next;
+			catch_info* next;
 		};
 		
 		class buffer_info
@@ -111,7 +111,7 @@ namespace avmplus
 		
 		backpatch_info* backpatches;	 // in address order
 		label_info* labels;				 // in reverse offset order
-		exception_info* exception_fixes; // in address order
+		catch_info* exception_fixes; // in address order
 		buffer_info* buffers;			 // newest buffer first
 		uint32 buffer_offset;			 // offset of first word of current buffer
 		
