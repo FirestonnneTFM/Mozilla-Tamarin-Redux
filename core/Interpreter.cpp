@@ -298,7 +298,7 @@ namespace avmplus
 		#if defined AVMPLUS_VERBOSE && !defined AVMPLUS_WORD_CODE  // fixme later
 			#define INSTR(op) case OP_##op: \
 					if (pool->verbose) {\
-						showState(info, code_start, pc,  framep, sp, scopeDepth, scopeBase, max_scope); \
+						showState(info, code_start, pc-1, framep, sp, scopeDepth, scopeBase, max_scope); \
 					}
 		#else
 			#define INSTR(op) case OP_##op:
