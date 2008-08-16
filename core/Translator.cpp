@@ -77,7 +77,7 @@ namespace avmplus
 	{
 		DELETE_LIST(backpatch_info, backpatches);
 		DELETE_LIST(label_info, labels);
-		DELETE_LIST(exception_info, exception_fixes);
+		DELETE_LIST(catch_info, exception_fixes);
 		DELETE_LIST(buffer_info, buffers);
 	}
 	
@@ -126,7 +126,7 @@ namespace avmplus
 				b->next = q;
 				qq->next = b;
 			}
-			*dest++ = ~0;
+			*dest++ = (uint32)~0;
 		}
 	}
 	
@@ -137,7 +137,7 @@ namespace avmplus
 		if (info->exceptions == NULL)
 			return;
 		
-		DELETE_LIST(exception_info, exception_fixes);
+		DELETE_LIST(catch_info, exception_fixes);
 		
 		ExceptionHandlerTable* old_table = info->exceptions;
 		int exception_count = old_table->exception_count;
@@ -154,42 +154,42 @@ namespace avmplus
 			new_table->exceptions[i].traits = old_table->exceptions[i].traits;
 			new_table->exceptions[i].scopeTraits = old_table->exceptions[i].scopeTraits;
 			
-			exception_info* p[3];
+			catch_info* p[3];
 			
-			p[0] = new exception_info;
+			p[0] = new catch_info;
 			p[0]->pc = code_start + info->exceptions->exceptions[i].from;
 			p[0]->is_target = false;
 			p[0]->fixup_loc = (void*)&(new_table->exceptions[i].from);
 			
-			p[1] = new exception_info;
+			p[1] = new catch_info;
 			p[1]->pc = code_start + info->exceptions->exceptions[i].to;
 			p[1]->is_target = false;
 			p[1]->fixup_loc = (void*)&(new_table->exceptions[i].to);
 			
-			p[2] = new exception_info;
+			p[2] = new catch_info;
 			p[2]->pc = code_start + info->exceptions->exceptions[i].target;
 			p[2]->is_target = true;
 			p[2]->fixup_loc = (void*)&(new_table->exceptions[i].target);
 			
 			if (p[0]->pc > p[1]->pc) {
-				exception_info* tmp = p[0];
+				catch_info* tmp = p[0];
 				p[0] = p[1];
 				p[1] = tmp;
 			}
 			if (p[1]->pc > p[2]->pc) {
-				exception_info* tmp = p[1];
+				catch_info* tmp = p[1];
 				p[1] = p[2];
 				p[2] = tmp;
 			}
 			if (p[0]->pc > p[1]->pc) {
-				exception_info* tmp = p[0];
+				catch_info* tmp = p[0];
 				p[0] = p[1];
 				p[1] = tmp;
 			}
 			
 			int j=0;
-			exception_info* e = exception_fixes;
-			exception_info* ee = NULL;
+			catch_info* e = exception_fixes;
+			catch_info* ee = NULL;
 			while (j < 3 && e != NULL) {
 				if (e->pc > p[j]->pc) {
 					if (ee == NULL) 
@@ -250,8 +250,8 @@ namespace avmplus
 		
 #ifdef _DEBUG
 		if (exception_fixes != NULL) {
-			exception_info* ee = exception_fixes;
-			exception_info* e = ee->next;
+			catch_info* ee = exception_fixes;
+			catch_info* e = ee->next;
 			AvmAssert(ee->pc <= e->pc);
 			ee = e;
 			e = e->next;
@@ -273,7 +273,7 @@ namespace avmplus
 		
 #ifdef _DEBUG
 		uint32 prev_opcodes[4];
-		for ( uint i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0]) ; i++ )
+		for ( uint32 i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0]) ; i++ )
 			prev_opcodes[i] = ~0U;
 #endif // _DEBUG
 		while (pc < limit)
@@ -285,7 +285,7 @@ namespace avmplus
 					*(sintptr*)(exception_fixes->fixup_loc) = (sintptr)(buffer_offset + (dest - buffers->data));
 				else
 					*(int*)(exception_fixes->fixup_loc) = (int)(buffer_offset + (dest - buffers->data));
-				exception_info* tmp = exception_fixes;
+				catch_info* tmp = exception_fixes;
 				exception_fixes = exception_fixes->next;
 				delete tmp;
 			}
@@ -634,7 +634,7 @@ namespace avmplus
 				}
 			}
 #ifdef _DEBUG
-			for ( uint i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0])-1 ; i++ )
+			for ( uint32 i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0])-1 ; i++ )
 				prev_opcodes[i+1] = prev_opcodes[i];
 			prev_opcodes[0] = opcode;
 #endif

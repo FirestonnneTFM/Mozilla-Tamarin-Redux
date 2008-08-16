@@ -1449,6 +1449,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\Translator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\Translator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\UnicodeUtils.cpp"
 				>
 			</File>
