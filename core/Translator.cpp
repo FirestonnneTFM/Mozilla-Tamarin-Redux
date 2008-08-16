@@ -273,7 +273,7 @@ namespace avmplus
 		
 #ifdef _DEBUG
 		uint32 prev_opcodes[4];
-		for ( uint i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0]) ; i++ )
+		for ( uint32 i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0]) ; i++ )
 			prev_opcodes[i] = ~0U;
 #endif // _DEBUG
 		while (pc < limit)
@@ -634,7 +634,7 @@ namespace avmplus
 				}
 			}
 #ifdef _DEBUG
-			for ( uint i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0])-1 ; i++ )
+			for ( uint32 i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0])-1 ; i++ )
 				prev_opcodes[i+1] = prev_opcodes[i];
 			prev_opcodes[0] = opcode;
 #endif
