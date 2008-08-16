@@ -917,6 +917,7 @@ namespace nanojit
                     LIns *val = ins->oprnd1();
                     findSpecificRegFor(val, FST0);
                     JMP(_epilogue);
+                    fpu_pop();
                     break;
                 }
 
