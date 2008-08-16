@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		076659050E4D244F0092FCA7 /* Translator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 076659040E4D244F0092FCA7 /* Translator.cpp */; };
 		1A91570F0B012A3F00744986 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A91570E0B012A3F00744986 /* libz.dylib */; };
 		6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6803D2C70A5064FD00C797BB /* JavaGlue.cpp */; };
 		6803D2CA0A5064FD00C797BB /* JavaGlue.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6803D2C80A5064FD00C797BB /* JavaGlue.h */; };
@@ -116,6 +117,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		076659040E4D244F0092FCA7 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Translator.cpp; sourceTree = "<group>"; };
+		07F636620E4F788800EB2E55 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Translator.h; sourceTree = "<group>"; };
 		1A91570E0B012A3F00744986 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		4E62BE2C0D6244D300A24F2D /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AbcData.cpp; sourceTree = "<group>"; };
 		4E62BE2D0D6244D300A24F2D /* AbcEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AbcEnv.cpp; sourceTree = "<group>"; };
@@ -676,6 +679,8 @@
 				4E62BEE20D6244D300A24F2D /* Traits.cpp */,
 				4E62BEE30D6244D300A24F2D /* Traits.h */,
 				4E62BEE40D6244D300A24F2D /* TraitsIterator.h */,
+				07F636620E4F788800EB2E55 /* Translator.h */,
+				076659040E4D244F0092FCA7 /* Translator.cpp */,
 				4E62BEE50D6244D300A24F2D /* UnicodeUtils.cpp */,
 				4E62BEE60D6244D300A24F2D /* UnicodeUtils.h */,
 				4E62BEE70D6244D300A24F2D /* Vector.as */,
@@ -964,6 +969,7 @@
 				8EDDB9E909AAD1D300FB9EE5 /* DictionaryGlue.cpp in Sources */,
 				6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */,
 				858088D80C8F604F0093F49B /* SamplerScript.cpp in Sources */,
+				076659050E4D244F0092FCA7 /* Translator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

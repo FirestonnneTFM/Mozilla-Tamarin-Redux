@@ -166,6 +166,7 @@ namespace nanojit
     enum AbiKind {
         ABI_FASTCALL,
         ABI_THISCALL,
+		ABI_STDCALL,
         ABI_CDECL
     };
 

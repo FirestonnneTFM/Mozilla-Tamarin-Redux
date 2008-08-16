@@ -232,7 +232,8 @@ namespace nanojit
         uint32_t max_regs;
         switch (call->_abi) {
             default: AvmAssert(false);
-            case ABI_CDECL: max_regs = 0; break;  // args on stack
+            case ABI_CDECL:
+            case ABI_STDCALL: max_regs = 0; break;  // args on stack
             case ABI_THISCALL: max_regs = 1; break; // this in ecx, others on stack
             case ABI_FASTCALL: max_regs = 2; break; // arg 0, 1 in ecx, edx
         }
@@ -248,6 +249,7 @@ namespace nanojit
 		    // only pop our adjustment amount since callee pops args in FASTCALL mode
 		    extra = alignUp(pushsize, NJ_ALIGN_STACK) - pushsize;
             if (call->_abi == ABI_CDECL) {
+				// with CDECL only, caller pops args
                 ADDi(SP, extra+pushsize);
             } else if (extra > 0) {
 				ADDi(SP, extra);

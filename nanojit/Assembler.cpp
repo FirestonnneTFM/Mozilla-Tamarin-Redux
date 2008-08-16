@@ -1021,6 +1021,7 @@ namespace nanojit
 					    prepResultReg(ins, rmask(w));
                     } else {
                         // incoming arg is on stack, and EAX points nearby (see genPrologue)
+						evict(EAX);
                         Register r = prepResultReg(ins, GpRegs & ~rmask(EAX));
                         int d = (a - abi_regcount) * sizeof(intptr_t) + 8;
                         LD(r, d, EAX); 
