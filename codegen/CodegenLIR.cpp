@@ -854,7 +854,7 @@ namespace avmplus
 			if (atom->isconst()) {
 				Atom a = atom->constval();
 				if (AvmCore::isDouble(a)) {
-					return loadIns(MIR_fldop, a&~7, 0);
+					return loadIns(MIR_fldop, 0, InsConst(a&~7));
 				} else {
 					AvmAssert(AvmCore::isInteger(a));
 					return i2dIns(InsConst(a>>3));
@@ -2193,7 +2193,7 @@ namespace avmplus
 
 					if (core->GetGC()->incremental &&
 						(!slotType || !slotType->isMachineType || slotType == OBJECT_TYPE) &&
-						value->isconst())
+						!value->isconst())
 					{
 						#ifdef MMGC_DRC
 						MirOpcode op = MIR_cm;
