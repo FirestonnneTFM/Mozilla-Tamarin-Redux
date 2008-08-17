@@ -1498,7 +1498,12 @@ namespace nanojit
 
 	void LirNameMap::copyName(LInsp i, const char *s, int suffix) {
 		char s2[200];
-		sprintf(s2,"%s%d", s,suffix);
+		if (isdigit(s[strlen(s)-1])) {
+			// if s ends with a digit, add '_' to clarify the suffix
+			sprintf(s2,"%s_%d", s, suffix);
+		} else {
+			sprintf(s2,"%s%d", s, suffix);
+		}
 		addName(i, labels->core->newString(s2));
 	}
 
@@ -1570,7 +1575,7 @@ namespace nanojit
 			case LIR_quad:
 			{
 				int32_t *p = (int32_t*) (i-2);
-				sprintf(s, "#%X:%X", p[1], p[0]);
+				sprintf(s, "#%X:%X /* %.f */", p[1], p[0], i->constvalf());
 				break;
 			}
 
