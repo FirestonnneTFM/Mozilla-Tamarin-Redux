@@ -374,7 +374,7 @@ namespace nanojit
 		bool isconstq() const;
         bool isTramp() const {return isop(LIR_neartramp) || isop(LIR_tramp); }
 		bool isBranch() const {
-            return isop(LIR_jt) || isop(LIR_jf) || isop(LIR_j) || isop(LIR_ret) || isop(LIR_fret);
+            return isop(LIR_jt) || isop(LIR_jf) || isop(LIR_j);
         }
 		
 		void setimm16(int32_t i);
@@ -801,7 +801,7 @@ namespace nanojit
 		LInsp sp;
 		avmplus::BitSet stk;
         int top;
-		int getTop(LInsp guard);
+		int getTop(LInsp br);
 	public:
 		StackFilter(LirFilter *in, GC *gc, LirBuffer *lirbuf, LInsp sp); 
 		virtual ~StackFilter() {}

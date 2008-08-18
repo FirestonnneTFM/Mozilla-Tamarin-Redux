@@ -51,7 +51,7 @@ namespace nanojit
 	class RegAlloc MMGC_SUBCLASS_DECL
 	{
 		public:
-			RegAlloc() {}
+            RegAlloc() : free(0), used(0) {}
 			void	clear();
 			bool	isFree(Register r); 
 			void	addFree(Register r);
@@ -60,6 +60,9 @@ namespace nanojit
 			void	removeActive(Register r);
 			LIns*	getActive(Register r); 
 			void	retire(Register r);
+            bool    isValid() {
+                return (free|used) != 0;
+            }
 
 			debug_only( uint32_t	countFree(); )
 			debug_only( uint32_t	countActive(); )

@@ -1170,7 +1170,7 @@ namespace avmplus
         argc_param = lirout->insParam(1);
         ap_param = lirout->insParam(2);
         vars = InsAlloc(state->verifier->frameSize * 8);
-
+        lirbuf->sp = vars;
         if (copier)
             copier->init(vars);
 
@@ -1315,7 +1315,9 @@ namespace avmplus
 				arg = defIns(arg);
 				localSet(loc, defaultVal);
 
-				br->target(Ins(MIR_bb));
+                LIns *label = Ins(MIR_bb);
+				br->target(label);
+                label->setimm24((loc+1) * 8);
 			}
 		}
 		else
@@ -1427,7 +1429,8 @@ namespace avmplus
 			saveState();
 
 			// force the locals to be clean for the setjmp call
-			Ins(MIR_bb);
+			LIns *label = Ins(MIR_bb);
+            label->setimm24(state->verifier->frameSize * 8);
 			
 			// Exception* _ee = setjmp(_ef.jmpBuf);
 			// ISSUE this needs to be a cdecl call
@@ -1462,7 +1465,8 @@ namespace avmplus
 			Ins(MIR_jmpi, handler, (int32)offsetof(ExceptionHandler, target));
 
 			// target of conditional
-			exBranch->target(Ins(MIR_bb));
+            label->setimm24(state->verifier->frameSize * 8);
+			exBranch->target(label);
 		}
 
 		// If interrupts are enabled, generate an interrupt check.
@@ -1482,7 +1486,8 @@ namespace avmplus
 		}
 
         // mark end of prolog
-        Ins(MIR_bb);
+        LIns *label = Ins(MIR_bb);
+        label->setimm24(state->verifier->scopeBase * 8);
 
 		return true;
 	}
@@ -1588,6 +1593,7 @@ namespace avmplus
 		// our new extended BB now starts here, this means that any branch targets
 		// should hit the next instruction our bb start instruction
 		OP* bb = Ins(MIR_bb); // mark start of block
+        bb->setimm24((state->sp()+1) * 8);
 
 		// get a label for our block start and tie it to this location
 		mirLabel(state->verifier->getFrameState(state->pc)->label, bb);
@@ -2063,7 +2069,7 @@ namespace avmplus
 #endif
 
 				// relative branch
-				OP* p = Ins(MIR_jmp); // will be patched
+				OP* p = branchIns(LIR_j, 0); // will be patched
 				patchLater(p, targetpc);
 				break;
 			}
@@ -3875,14 +3881,22 @@ namespace avmplus
 		#endif
 
         if (npe_label.preds) {
-			mirLabel(npe_label, Ins(MIR_bb));
+            LIns *label = Ins(MIR_bb);
+            label->setimm24(state->verifier->frameSize * 8);
+			mirLabel(npe_label, label);
 			callIns(MIR_cm, ENVADDR(MethodEnv::npe), 1, env_param);
 		}
 
         if (interrupt_label.preds) {
-			mirLabel(interrupt_label, Ins(MIR_bb));
+            LIns *label = Ins(MIR_bb);
+            label->setimm24(state->verifier->frameSize * 8);
+			mirLabel(interrupt_label, label);
 			callIns(MIR_cm, ENVADDR(MethodEnv::interrupt), 1, env_param);
 		}
+
+        // one last label, to make sure it's the first thing we see in reverse
+        LIns *end = lirout->ins0(LIR_label);
+        end->setimm24(state->verifier->frameSize * 8);
 
 		// bail if no room in the buffer.  
 #ifndef FEATURE_BUFFER_GUARD
@@ -4105,7 +4119,7 @@ namespace avmplus
     LIns *CodegenLIR::Ins(MirOpcode code) {
         switch (code) {
             case MIR_bb: return lirout->ins0(LIR_label);
-            case MIR_jmp: return lirout->insBranch(LIR_j, 0, 0);
+            //case MIR_jmp: return lirout->insBranch(LIR_j, InsConst(0), 0);
         }
         AvmAssert(false);
         return 0;
@@ -4168,9 +4182,10 @@ namespace avmplus
             LIns *i = in->read();
             if (i) {
                 switch (i->opcode()) {
-                case LIR_jt: AvmAssert(*i->targetAddr() != 0); break;
-                case LIR_jf: AvmAssert(*i->targetAddr() != 0); break;
-                case LIR_j: AvmAssert(*i->targetAddr() != 0); break;
+                case LIR_jt:
+                case LIR_jf:
+                case LIR_j: 
+                    AvmAssert(*i->targetAddr() != 0 && i->oprnd2()->isop(LIR_label)); break;
                 }
             }
             return i;
@@ -4212,7 +4227,7 @@ namespace avmplus
 
         frag->releaseLirBuffer();
 
-        if (!assm->hasLoop && !assm->error()) {
+        if (!assm->hasLoop && !info->hasExceptions() && !assm->error()) {
             // save pointer to generated code
             union {
                 Atom (*fp)(MethodEnv*, int, uint32_t*);
@@ -4237,9 +4252,17 @@ namespace avmplus
 
 namespace nanojit
 {
-    int StackFilter::getTop(LIns*) {
-        AvmAssert(false);
-        return 0;
+    int StackFilter::getTop(LIns* i) {
+        if (i->isBranch()) {
+            return i->oprnd2()->imm24();
+        }
+        else if (i->isop(LIR_label)) {
+            return i->imm24();
+        }
+        else {
+            AvmAssert(false);
+            return 0x7fffffff; // highest top possible = most conservative
+        }
     }
 
     #ifdef NJ_VERBOSE
