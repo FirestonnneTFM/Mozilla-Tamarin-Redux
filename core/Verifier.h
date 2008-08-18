@@ -150,6 +150,7 @@ namespace avmplus
 		void emitGetSlot(int slot);
 		void emitSetSlot(int slot);
 		void emitSwap();
+        void emitNip();
 
 		Binding findMathFunction(Traits* math, Multiname* name, Binding b, int argc);
 

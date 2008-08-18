@@ -4248,10 +4248,12 @@ namespace avmplus
         _nvprof("hasExceptions", info->hasExceptions());
         _nvprof("hasLoop", assm->hasLoop);
 
-        if ((!assm->hasLoop /*&& normalcount <= 3*/ || assm->hasLoop && loopcount <= 128) 
-            && !info->hasExceptions() && !assm->error()) {
+        bool keep = (!assm->hasLoop && normalcount <= 0 || assm->hasLoop && loopcount <= 0) 
+            && !info->hasExceptions() && !assm->error();
+
+        _nvprof("keep",keep);
+        if (keep) {
             // save pointer to generated code
-            _nvprof("keep",1);
             union {
                 Atom (*fp)(MethodEnv*, int, uint32_t*);
                 void *vp;
@@ -4266,7 +4268,6 @@ namespace avmplus
                 }
             })
         } else {
-            _nvprof("reject",1);
             // assm puked, or we did something untested, so interpret.
             // fixme: need to remove this frag from Fragmento and free everything.
             frag->releaseCode(frago);
