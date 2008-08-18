@@ -1339,8 +1339,8 @@ namespace nanojit
                     LabelState *label = _labels.get(to);
                     if (label && label->addr) {
                         // forward jump to known label.  need to merge with label's register state.
-    					asm_branch(op == LIR_jf, cond, label->addr);
                         mergeRegisterState(label->regs);
+    					asm_branch(op == LIR_jf, cond, label->addr);
                     }
                     else {
                         // back edge.
