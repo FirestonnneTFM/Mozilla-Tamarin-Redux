@@ -355,7 +355,6 @@ namespace nanojit
 
 	LInsp LirBufWriter::insBranch(LOpcode op, LInsp condition, LInsp toLabel)
 	{
-		LInsp l = 0;
 		if (!toLabel)
 			toLabel = insFar(LIR_tramp,0); //empty tramp
         if (!condition) {
