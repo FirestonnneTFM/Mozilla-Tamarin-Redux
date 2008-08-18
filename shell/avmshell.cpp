@@ -727,7 +727,9 @@ namespace avmshell
 				strcpy(logname,filename);
 				strcpy(logname+(dot-filename),".log");
 				printf("%s\n",filename); // but first print name to default stdout
-				freopen(logname, "w", stdout);
+				FILE *f = freopen(logname, "w", stdout);
+				if (!f)
+				  printf("freopen %s failed.\n",filename);
 				delete [] logname;
 			}
 
