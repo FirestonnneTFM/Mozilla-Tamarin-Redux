@@ -239,7 +239,7 @@ namespace nanojit
 
 			Register	registerAlloc(RegisterMask allow);
 			void		registerResetAll();
-			void		restoreCallerSaved();
+			void		evictRegs(RegisterMask regs);
 			void		mergeRegisterState(RegAlloc& saved);
 	        LInsp       findVictim(RegAlloc& regs, RegisterMask allow, RegisterMask prefer);
 		

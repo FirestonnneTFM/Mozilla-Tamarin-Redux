@@ -392,7 +392,7 @@ const int kBufferPadding = 16;
 
 
 		/** Implementation of OP_equals */
-		Atom eq(Atom lhs, Atom rhs);
+		Atom equals(Atom lhs, Atom rhs);
 		
 		/**
 		 * this is the abstract relational comparison algorithm according to ECMA 262 11.8.5

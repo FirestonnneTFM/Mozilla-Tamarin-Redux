@@ -40,6 +40,7 @@
 #include "avmplus.h"
 #include "CodegenLIR.h"
 #include "../core/FrameState.h"
+#include "../vprof/vprof.h"
 
 #ifdef DARWIN
 #include <Carbon/Carbon.h>
@@ -1020,7 +1021,12 @@ namespace avmplus
                     break;
                 default: AvmAssert(false);
             }
-            return out->insBranch(op, cond, label);
+            LIns *br = out->insBranch(op, cond, label);
+            AvmAssert(br->oprnd2() == label);
+            if (!label) {
+                AvmAssert(*br->targetAddr() == 0);
+            }
+            return br;
         }
 
         LIns *insGuard(LOpcode v, LIns *cond, SideExit *x) {
@@ -1293,6 +1299,7 @@ namespace avmplus
 
 				OP* defaultVal = InsConst(info->getDefaultValue(i));
 				defaultVal = defIns(atomToNativeRep(loc, defaultVal));
+                localSet(loc, defaultVal);
 				
 				// then generate: if (argc > p) local[p+1] = arg[p+1]
 				OP* cmp = binaryIns(LIR_le, argcarg, InsConst((int32)param));
@@ -1313,7 +1320,7 @@ namespace avmplus
 #endif
 				}
 				arg = defIns(arg);
-				localSet(loc, defaultVal);
+				localSet(loc, arg);
 
                 LIns *label = Ins(MIR_bb);
 				br->target(label);
@@ -2099,11 +2106,11 @@ namespace avmplus
 
 				for (int i=0; i < count; i++)
 				{
-					sintptr off = state->pc + AvmCore::readS24(pc+3*i);
+					sintptr target = state->pc + AvmCore::readS24(pc+3*i);
                     LIns *br = branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)));
-                    patchLater(br, state->pc + off);
-					//if (off < state->pc)
-					//	extendLastUse(jmpt, off);
+                    patchLater(br, target);
+					//if (target < state->pc)
+					//	extendLastUse(jmpt, target);
 				}
 				break;
 			}
@@ -2368,7 +2375,7 @@ namespace avmplus
 					case OP_add_d:      mircode = MIR_fadd; break;
 					default: break;
 				}
-                localSet(sp-1, binaryIns(MIR_fadd, localGetq(sp-1), localGetq(sp)));
+                localSet(sp-1, binaryIns(mircode, localGetq(sp-1), localGetq(sp)));
                 break;
             }
 
@@ -3430,7 +3437,7 @@ namespace avmplus
 			case OP_equals:
 			{
 				AvmAssert(result == BOOLEAN_TYPE);
-				localSet(sp-1, cmpEq(COREADDR(AvmCore::eq), sp-1, sp));
+				localSet(sp-1, cmpEq(COREADDR(AvmCore::equals), sp-1, sp));
 				break;
 			}
 
@@ -3664,11 +3671,11 @@ namespace avmplus
 			break;
 		case OP_ifeq:
 			br = LIR_jt;
-			cond = cmpEq(COREADDR(AvmCore::eq), a, b);
+			cond = cmpEq(COREADDR(AvmCore::equals), a, b);
 			break;
 		case OP_ifne:
 			br = LIR_jf;
-			cond = cmpEq(COREADDR(AvmCore::eq), a, b);
+			cond = cmpEq(COREADDR(AvmCore::equals), a, b);
 			break;
 		case OP_ifstricteq:
 			br = LIR_jt;
@@ -4185,13 +4192,21 @@ namespace avmplus
                 case LIR_jt:
                 case LIR_jf:
                 case LIR_j: 
-                    AvmAssert(*i->targetAddr() != 0 && i->oprnd2()->isop(LIR_label)); break;
+                    LIns *t = *i->targetAddr();
+                    AvmAssert(t != 0);
+                    LIns *l = i->oprnd2();
+                    LIns *k = i->oprnd2();
+                    AvmAssert(k==t && k->isop(LIR_label));
+                    break;
                 }
             }
             return i;
         }
     };
 #endif
+
+    static int loopcount=0;
+    static int normalcount=0;
 
     void CodegenLIR::emitMD() 
     {
@@ -4214,6 +4229,7 @@ namespace avmplus
 
         RegAllocMap regMap(gc);
         NInsList loopJumps(gc);
+        assm->hasLoop = false;
         assm->beginAssembly(&regMap);
         assm->assemble(frag, loopJumps);
         assm->endAssembly(frag, loopJumps);
@@ -4227,8 +4243,15 @@ namespace avmplus
 
         frag->releaseLirBuffer();
 
-        if (!assm->hasLoop && !info->hasExceptions() && !assm->error()) {
+        assm->hasLoop ? loopcount++ : normalcount++;
+        _nvprof("assm->error", assm->error());
+        _nvprof("hasExceptions", info->hasExceptions());
+        _nvprof("hasLoop", assm->hasLoop);
+
+        if ((!assm->hasLoop /*&& normalcount <= 3*/ || assm->hasLoop && loopcount <= 128) 
+            && !info->hasExceptions() && !assm->error()) {
             // save pointer to generated code
+            _nvprof("keep",1);
             union {
                 Atom (*fp)(MethodEnv*, int, uint32_t*);
                 void *vp;
@@ -4236,9 +4259,14 @@ namespace avmplus
             u.vp = frag->code();
             info->impl32 = u.fp;
             verbose_only(if (verbose()) {
-                printf("keeping compiled code\n");
+                if (assm->hasLoop) {
+                    printf("keeping loopy code %d\n", loopcount);
+                } else {
+                    printf("keeping plain code %d\n", normalcount);
+                }
             })
         } else {
+            _nvprof("reject",1);
             // assm puked, or we did something untested, so interpret.
             // fixme: need to remove this frag from Fragmento and free everything.
             frag->releaseCode(frago);

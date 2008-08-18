@@ -87,11 +87,14 @@ namespace nanojit
 		Assembler *assm;
 		LirNameMap *names;
 		avmplus::List<LInsp, avmplus::LIST_NonGCObjects> block;
+        bool flushnext;
 	public:
 		VerboseBlockReader(LirFilter *in, Assembler *a, LirNameMap *n) 
-			: LirFilter(in), assm(a), names(n), block(a->_gc) {}
+			: LirFilter(in), assm(a), names(n), block(a->_gc), flushnext(false)
+        {}
 
 		void flush() {
+            flushnext = false;
             if (!block.isEmpty()) {
 			    assm->outputf("        %p:", assm->_nIns);
 			    assm->output("");
@@ -105,11 +108,6 @@ namespace nanojit
         void flush_add(LInsp i) {
             flush();
             block.add(i);
-        }
-
-        void add_flush(LInsp i) {
-            block.add(i);
-            flush();
         }
 
 		LInsp read() {
@@ -126,11 +124,12 @@ namespace nanojit
             else if (isRet(i->opcode())/* || i->isStore()*/) {
                 flush_add(i);
             }
-            else if (i->isop(LIR_label)) {
-                add_flush(i);
-            }
 			else {
+                if (flushnext)
+                    flush();
 				block.add(i);
+                if (i->isop(LIR_label))
+                    flushnext = true;
 			}
 			return i;
 		}
@@ -1307,6 +1306,10 @@ namespace nanojit
 				{
 					LInsp target = ins->oprnd1();
                     LabelState *label = _labels.get(target);
+                    // the jump is always taken so whatever register state we
+                    // have from downstream code, is irrelevant to code before
+                    // this jump.  so clear it out.  we will pick up register
+                    // state from the jump target, if we have seen that label.
                     releaseRegisters();
                     if (label && label->addr) {
                         // forward jump - pick up register state from target.
@@ -1316,17 +1319,12 @@ namespace nanojit
                     else {
                         // backwards jump
                         hasLoop = true;
-                        JMP(0);
-                        NIns *branch = _nIns;
-                        if (!label) {
-                            // we're the first, possibly only pred of that label. save our [empty] reg state.
-                            _labels.add(target, 0, _allocator);
-                        }
-                        else {
-                            // some other jump already goes there, merge with that state.
+                        if (label) {
                             mergeRegisterState(label->regs);
                         }
-    					_patches.put(branch, target);
+                        JMP(0);
+    					_patches.put(_nIns, target);
+                        verbose_outputf("Loop jump");
                     }
 					break;
 				}
@@ -1347,16 +1345,18 @@ namespace nanojit
                         hasLoop = true;
                         NIns *branch;
                         if (!label) {
-                            // we're first, possibly only to target that label. clear regstate.
+                            // evict all registers, most conservative approach.
+                            evictRegs(~_allocator.free);
                             _labels.add(to, 0, _allocator);
-    					    branch = asm_branch(op == LIR_jf, cond, 0);
-                        }
+                            branch = asm_branch(op == LIR_jf, cond, 0);
+                        } 
                         else {
-                            // backedge to known label not processed yet. merge.
-    					    branch = asm_branch(op == LIR_jf, cond, 0);
+                            // evict all registers, most conservative approach.
                             mergeRegisterState(label->regs);
+                            branch = asm_branch(op == LIR_jf, cond, 0);
                         }
-					    _patches.put(branch,to);
+			            _patches.put(branch,to);
+                        verbose_outputf("Loop jump");
                     }
 					break;
 				}					
@@ -1370,12 +1370,11 @@ namespace nanojit
                     else {
                         // we're at the top of a loop
                         hasLoop = true;
-                        NanoAssert(label->addr == 0);
-                        if (label->regs.isValid()) {
-                            // merge with register state from successor jumps
-                            mergeRegisterState(label->regs);
-                        }
+                        NanoAssert(label->addr == 0 && label->regs.isValid());
+                        //evictRegs(~_allocator.free);
+                        mergeRegisterState(label->regs);
                         label->addr = _nIns;
+                        verbose_outputf("Loop label");
                     }
 					break;
 				}
@@ -1502,7 +1501,7 @@ namespace nanojit
 
 					// do this after we've handled the call result, so we dont
 					// force the call result to be spilled unnecessarily.
-					restoreCallerSaved();
+					evictRegs(~SavedRegs);
 
 					asm_call(ins);
 				}
@@ -1753,14 +1752,13 @@ namespace nanojit
         return i;
 	}
 
-	void Assembler::restoreCallerSaved()
+	void Assembler::evictRegs(RegisterMask regs)
 	{
 		// generate code to restore callee saved registers 
 		// @todo speed this up
-		RegisterMask scratch = ~SavedRegs;
 		for (Register r = FirstReg; r <= LastReg; r = nextreg(r))
 		{
-			if ((rmask(r) & scratch) && _allocator.getActive(r))
+			if ((rmask(r) & regs) && _allocator.getActive(r))
             {
 				evict(r);
             }
