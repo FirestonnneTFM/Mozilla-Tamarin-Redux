@@ -154,7 +154,9 @@ namespace avmshell
 			toplevel->throwError(kFileWriteError, filename);
 		}
 		UTF8String* dataUTF8 = data->toUTF8String();
-		fwrite(dataUTF8->c_str(), dataUTF8->length(), 1, fp);
+		if (fwrite(dataUTF8->c_str(), dataUTF8->length(), 1, fp) != 1) {
+			toplevel->throwError(kFileWriteError, filename);
+		}
 		fclose(fp);
 	}
 }

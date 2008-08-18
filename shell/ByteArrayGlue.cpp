@@ -693,7 +693,9 @@ namespace avmshell
 			toplevel->throwError(kFileWriteError, filename);
 		}
 
-		fwrite(&(this->GetByteArray())[0], this->get_length(), 1, fp);
+		if (fwrite(&(this->GetByteArray())[0], this->get_length(), 1, fp) != 1) {
+			toplevel->throwError(kFileWriteError, filename);
+		}
 		fclose(fp);
 	}
 
