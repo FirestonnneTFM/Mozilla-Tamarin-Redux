@@ -177,7 +177,20 @@ const int kBufferPadding = 16;
 		bool verbose;
 		#endif /* AVMPLUS_VERBOSE */
 
-		#ifdef AVMPLUS_INTERP
+        #ifdef AVMPLUS_INTERP
+		    inline void SetMIREnabled(bool isEnabled)
+			{
+				turbo = isEnabled;
+			}
+
+		    inline bool IsMIREnabled() const
+			{
+				return turbo;
+			}
+		#endif	
+
+	protected:
+
 		/**
 		 * The turbo switch determines how bytecode is executed.
 		 * When turbo is true, bytecode is translated to native code.
@@ -189,8 +202,11 @@ const int kBufferPadding = 16;
 		 * have it turned on.  This means we can only build release
 		 * builds on supported platforms.
 		 */
-		bool turbo;
-		#endif /* AVMPLUS_INTERP */
+
+        #ifdef AVMPLUS_INTERP
+		    bool turbo;
+		#endif	
+	public:
 
 		#ifdef AVMPLUS_MIR
 
@@ -335,7 +351,8 @@ const int kBufferPadding = 16;
 									 Domain* domain,
 									 AbstractFunction *nativeMethods[],
 									 NativeClassInfo *nativeClasses[],
-									 NativeScriptInfo *nativeScripts[]);
+									 NativeScriptInfo *nativeScripts[],
+									 List<Stringp, LIST_RCObjects>* include_versions = NULL);
 		
 		/**
 		 * Execute the ABC block starting at offset start in code.
@@ -574,6 +591,8 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kcallee;
 		DRC(Stringp) kNeedsDxns;
 		DRC(Stringp) kAsterisk;
+		DRC(Stringp) kVersion;
+		DRC(Stringp) kVector;
 #ifdef AVMPLUS_VERBOSE
 		DRC(Stringp) knewline;
 		DRC(Stringp) krightbracket;
@@ -932,10 +951,7 @@ const int kBufferPadding = 16;
 			return constantString(s)->atom();
 		}
 
-		Stringp constantString(const char *s)
-		{
-			return internString(newString(s));
-		}
+		Stringp constantString(const char *s);
 
 		/**
 		 * The interrupt method is called from executing code

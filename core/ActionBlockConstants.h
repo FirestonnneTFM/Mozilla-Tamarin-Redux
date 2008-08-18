@@ -109,16 +109,16 @@ namespace avmplus
 		 * each opcode.  It is used by the VM to advance through
 		 * bytecode streams.  -1 means invalid opcode.
 		 */
-		extern signed char opOperandCount[];
+		extern const signed char opOperandCount[];
 
 		/**
 		 * The opCanThrow array specifies whether an opcode can throw
 		 * exceptions or not.
 		 */
-		extern unsigned char opCanThrow[];
+		extern const unsigned char opCanThrow[];
 
 #if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-		extern const char *opNames[];
+		extern const char * const opNames[];
 #endif
 
 		extern const unsigned char kindToPushOp[];
@@ -126,8 +126,8 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 		/** @name debugger string names */
 		/*@{*/
-		extern const char *constantNames[];
-		extern const char *traitNames[];
+		extern const char * const constantNames[];
+		extern const char * const traitNames[];
 		/*@}*/
 #endif
 

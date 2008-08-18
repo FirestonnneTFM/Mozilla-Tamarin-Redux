@@ -447,7 +447,7 @@ namespace avmplus
 			fullname = so->vtable->ivtable->traits->formatClassName();
 			param_traits = so->vtable->ivtable->traits;
 		}
-		fullname = core->intern(core->concatStrings(core->newString("Vector.<"), core->concatStrings(fullname, core->newString(">")))->atom());
+		fullname = core->intern(core->concatStrings(core->kVector, core->concatStrings(fullname, core->newString(">")))->atom());
 
 		if( !instantiated_types->contains(fullname->atom()) )
 		{
