@@ -946,6 +946,7 @@ namespace avmplus
                 case LIR_ret:  AvmAssert(!a->isQuad()); break;
                 case LIR_qlo:  AvmAssert(a->isQuad()); break;
                 case LIR_qhi:  AvmAssert(a->isQuad()); break;
+                case LIR_live: break;
                 default:AvmAssert(false);
             }
             return out->ins1(op, a);
@@ -3901,6 +3902,11 @@ namespace avmplus
 			callIns(MIR_cm, ENVADDR(MethodEnv::interrupt), 1, env_param);
 		}
 
+        // extend live range of critical stuff
+        // fixme -- this should be automatic based on live analysis
+        lirout->ins1(LIR_live, env_param);
+        lirout->ins1(LIR_live, vars);
+
         // one last label, to make sure it's the first thing we see in reverse
         LIns *end = lirout->ins0(LIR_label);
         end->setimm24(state->verifier->frameSize * 8);
@@ -4248,7 +4254,7 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop /*&& normalcount <= 6*/ || assm->hasLoop /*&& loopcount <= 0*/) 
+        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop /*&& loopcount <= 7*/) 
             && !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);

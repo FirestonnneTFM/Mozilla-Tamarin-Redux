@@ -661,10 +661,19 @@ namespace nanojit
             return;
 		}
 
-		Reservation* rA = getresv(value);
-		int pop = !rA || rA->reg==UnknownReg;
- 		Register rv = findRegFor(value, sse2 ? XmmRegs : FpRegs);
 		Register rb = findRegFor(base, GpRegs);
+
+        // if value already in a reg, use that, otherwise
+        // try to get it into XMM regs before FPU regs.
+		Reservation* rA = getresv(value);
+ 		Register rv;
+        int pop = !rA || rA->reg == UnknownReg;
+        if (pop) {
+            rv = findRegFor(value, sse2 ? XmmRegs : FpRegs);
+        } 
+        else {
+            rv = rA->reg;
+        }
 
 		if (rmask(rv) & XmmRegs) {
             SSE_STQ(dr, rb, rv);

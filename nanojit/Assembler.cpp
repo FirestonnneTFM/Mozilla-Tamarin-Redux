@@ -62,6 +62,7 @@ namespace nanojit
                 op == LIR_def ||
                 op == LIR_loop ||
                 op == LIR_label ||
+                op == LIR_live ||
                 isRet(op)) {
                 return false;
             }
@@ -907,21 +908,25 @@ namespace nanojit
 					NanoAssertMsg(false, "unsupported LIR instruction");
 					break;
 
+                case LIR_live: {
+                    findRegFor(ins->oprnd1(), GpRegs);
+                    break;
+                }
+
+                case LIR_fret:
                 case LIR_ret:  {
                     LIns *val = ins->oprnd1();
-                    findSpecificRegFor(val, retRegs[0]);
+                    if (op == LIR_ret) {
+                        findSpecificRegFor(val, retRegs[0]);
+                    }
+                    else {
+                        findSpecificRegFor(val, FST0);
+                        fpu_pop();
+                    }
                     if (_nIns != _epilogue) {
                         JMP(_epilogue);
                     }
                     MR(SP,FP);
-                    break;
-                }
-
-                case LIR_fret: {
-                    LIns *val = ins->oprnd1();
-                    findSpecificRegFor(val, FST0);
-                    JMP(_epilogue);
-                    fpu_pop();
                     break;
                 }
 

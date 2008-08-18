@@ -69,6 +69,7 @@ namespace nanojit
         LIR_alloc   = 13, // alloca some stack space
         LIR_sti     = 14,
         LIR_ret     = 15,
+        LIR_live    = 16, // extend live range of reference
         LIR_calli   = 17, // indirect call
 		LIR_call	= 18, // direct call
 			
