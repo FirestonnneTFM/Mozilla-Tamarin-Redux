@@ -295,7 +295,7 @@ namespace avmplus
 		// when we're leaving this call frame
 		#define restore_caller_dxns() if(info->setsDxns()) core->dxnsAddr = dxnsAddrSave
 
-		#if defined AVMPLUS_VERBOSE && !defined AVMPLUS_WORD_CODE  // fixme later
+		#if 0 && defined AVMPLUS_VERBOSE && !defined AVMPLUS_WORD_CODE  // fixme later
 			#define INSTR(op) case OP_##op: \
 					if (pool->verbose) {\
 						showState(info, code_start, pc-1, framep, sp, scopeDepth, scopeBase, max_scope); \

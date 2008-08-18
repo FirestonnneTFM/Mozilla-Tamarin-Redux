@@ -4244,14 +4244,14 @@ namespace avmplus
         frag->releaseLirBuffer();
 
         assm->hasLoop ? loopcount++ : normalcount++;
-        _nvprof("assm->error", assm->error());
-        _nvprof("hasExceptions", info->hasExceptions());
-        _nvprof("hasLoop", assm->hasLoop);
+        //_nvprof("assm->error", assm->error());
+        //_nvprof("hasExceptions", info->hasExceptions());
+        //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop && normalcount <= 0 || assm->hasLoop && loopcount <= 0) 
+        bool keep = (!assm->hasLoop /*&& normalcount <= 6*/ || assm->hasLoop /*&& loopcount <= 0*/) 
             && !info->hasExceptions() && !assm->error();
 
-        _nvprof("keep",keep);
+        //_nvprof("keep",keep);
         if (keep) {
             // save pointer to generated code
             union {
