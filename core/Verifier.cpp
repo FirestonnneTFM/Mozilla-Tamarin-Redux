@@ -1444,9 +1444,7 @@ namespace avmplus
 					if (slotType == core->traits.int_ctraits)
 					{
 						emitCoerce(INT_TYPE, sp);
-						Value v = state->stackTop();
-						state->pop();
-						state->stackTop() = v;
+                        emitNip();
 						if (opcode == OP_callpropvoid)
 							state->pop();
 						break;
@@ -1454,9 +1452,7 @@ namespace avmplus
 					else if (slotType == core->traits.uint_ctraits)
 					{
 						emitCoerce(UINT_TYPE, sp);
-						Value v = state->stackTop();
-						state->pop();
-						state->stackTop() = v;
+                        emitNip();
 						if (opcode == OP_callpropvoid)
 							state->pop();
 						break;
@@ -1464,9 +1460,7 @@ namespace avmplus
 					else if (slotType == core->traits.number_ctraits)
 					{
 						emitCoerce(NUMBER_TYPE, sp);
-						Value v = state->stackTop();
-						state->pop();
-						state->stackTop() = v;
+                        emitNip();
 						if (opcode == OP_callpropvoid)
 							state->pop();
 						break;
@@ -1474,9 +1468,7 @@ namespace avmplus
 					else if (slotType == core->traits.boolean_ctraits)
 					{
 						emitCoerce(BOOLEAN_TYPE, sp);
-						Value v = state->stackTop();
-						state->pop();
-						state->stackTop() = v;
+                        emitNip();
 						if (opcode == OP_callpropvoid)
 							state->pop();
 						break;
@@ -1484,9 +1476,7 @@ namespace avmplus
 					else if (slotType == core->traits.string_ctraits)
 					{
 						emitToString(OP_convert_s, sp);
-						Value v = state->stackTop();
-						state->pop();
-						state->stackTop() = v;
+                        emitNip();
 						if (opcode == OP_callpropvoid)
 							state->pop();
 						break;
@@ -1497,9 +1487,7 @@ namespace avmplus
 					{
 						AvmAssert(slotType->itraits != NULL);
 						emitCoerce(slotType->itraits, state->sp());
-						Value v = state->stackTop();
-						state->pop();
-						state->stackTop() = v;
+                        emitNip();
 						if (opcode == OP_callpropvoid)
 							state->pop();
 						break;
@@ -2651,15 +2639,27 @@ namespace avmplus
 		state->pop(2);
 	}
 
+    // ( x1 x2 -- x2 x1 )
 	void Verifier::emitSwap()
 	{
-		if (mir) mir->emitSwap(state, state->sp(), state->sp()-1);
+		if (mir) 
+            mir->emitSwap(state, state->sp(), state->sp()-1);
 		Value v1 = state->peek(1);
 		Value v2 = state->peek(2);
 		state->pop(2);
 		state->push(v1);
 		state->push(v2);
 	}
+
+    // ( x1 x2 -- x2 )
+    void Verifier::emitNip()
+    {
+        if (mir) 
+            mir->emitCopy(state, state->sp(), state->sp()-1);
+        Value v = state->stackTop();
+        state->pop(2);
+        state->push(v);
+    }
 
 	FrameState *Verifier::getFrameState(sintptr targetpc)
 	{
