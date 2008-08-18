@@ -1105,7 +1105,7 @@ namespace avmplus
             INSTR(equals) {
 				// OPTIMIZEME?
 				SAVE_EXPC;
-				sp[-1] = core->eq(sp[-1], sp[0]);
+				sp[-1] = core->equals(sp[-1], sp[0]);
                 sp--;
 				restore_dxns();
                 NEXT;
@@ -1202,12 +1202,12 @@ namespace avmplus
 	} while(0)
 	
 		   INSTR(ifeq) {
-				IFEQ(==, eq, trueAtom);
+				IFEQ(==, equals, trueAtom);
                 NEXT;
 			}
 					
 			INSTR(ifne) {
-				IFEQ(!=, eq, falseAtom);
+				IFEQ(!=, equals, falseAtom);
                 NEXT;
 			}
 

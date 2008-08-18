@@ -625,7 +625,11 @@ namespace nanojit
     LIns **LIns::targetAddr() {
 		NanoAssert(isBranch());
 		LInsp i = (LInsp) this-1 - u.oprnd_2;
-		NanoAssert( i->isTramp() );
+        NanoAssert(i->isTramp());
+        LInsp ref;
+        while ((ref=i->ref()) != 0 && ref->isTramp())
+            i = ref;
+		NanoAssert(i->isop(LIR_tramp));
 		return (LIns**)(i-1);
     }
 
@@ -1420,7 +1424,8 @@ namespace nanojit
             total++;
 
             // first handle side-effect instructions
-			if (i->isStore() || i->isGuard() || i->isBranch() || i->isop(LIR_label) ||
+			if (i->isStore() || i->isGuard() || i->isBranch() ||
+                i->isop(LIR_label) || isRet(i->opcode()) ||
 				i->isCall() && !lirbuf->_functions[i->fid()]._cse)
 			{
 				live.add(i,0);

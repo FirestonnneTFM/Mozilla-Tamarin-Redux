@@ -1772,7 +1772,7 @@ namespace avmplus
 		names->add(ENVADDR(MethodEnv::initproperty), "MethodEnv::initproperty");
 		names->add(ENVADDR(MethodEnv::setpropertylate_i), "MethodEnv::setpropertylate_i");
 		names->add(ENVADDR(MethodEnv::setpropertylate_u), "MethodEnv::setpropertylate_u");
-		names->add(COREADDR(AvmCore::eq), "AvmCore::eq");
+		names->add(COREADDR(AvmCore::equals), "AvmCore::equals");
 		names->add(COREADDR(AvmCore::stricteq), "AvmCore::stricteq");
 		names->add(COREADDR(AvmCore::compare), "AvmCore::compare");
 		names->add(TOPLEVELADDR(Toplevel::add2), "Toplevel::add2");
@@ -4472,7 +4472,7 @@ namespace avmplus
 			case OP_equals:
 			{
 				AvmAssert(result == BOOLEAN_TYPE);
-				localSet(sp-1, Ins(MIR_eq, cmpEq(COREADDR(AvmCore::eq), sp-1, sp)));
+				localSet(sp-1, Ins(MIR_eq, cmpEq(COREADDR(AvmCore::equals), sp-1, sp)));
 				break;
 			}
 
@@ -4706,11 +4706,11 @@ namespace avmplus
 			break;
 		case OP_ifeq:
 			br = MIR_jeq;
-			cond = cmpEq(COREADDR(AvmCore::eq), a, b);
+			cond = cmpEq(COREADDR(AvmCore::equals), a, b);
 			break;
 		case OP_ifne:
 			br = MIR_jne;
-			cond = cmpEq(COREADDR(AvmCore::eq), a, b);
+			cond = cmpEq(COREADDR(AvmCore::equals), a, b);
 			break;
 		case OP_ifstricteq:
 			br = MIR_jeq;
