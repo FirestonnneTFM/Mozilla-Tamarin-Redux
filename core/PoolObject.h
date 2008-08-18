@@ -97,6 +97,14 @@ namespace avmplus
 		/** # of elements in scripts array */
 		uint32 scriptCount;
 
+		/** flags to control certain bugfix behavior */
+		uint32 bugFlags;
+
+		// Numbers here correspond to Bugzilla bug numbers (i.e. bugzilla bug 444630 is kbug444630
+		enum {
+			kbug444630 = 0x00000001
+		};
+
 		// true if this pool is baked into the player.  used to control
 		// whether callees will set their context.
 		bool isBuiltin;
@@ -175,6 +183,12 @@ namespace avmplus
 			return abcStart + urshift(a,3);
 		}
 
+		// Index of the metadata info that means skip the associated definition
+		List<uint32, LIST_NonGCObjects> stripMetadataIndexes;
+		void addStripMetadata(uint32 index)
+		{
+			stripMetadataIndexes.add(index);
+		}
 
 #ifdef AVMPLUS_VERIFYALL
 		List<AbstractFunction*, LIST_GCObjects> verifyQueue;

@@ -41,7 +41,7 @@
  */
 
 #if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-const char *opNames[] = {
+const char * const opNames[] = {
     "OP_0x00",
     "bkpt",
     "nop",
@@ -303,7 +303,7 @@ const char *opNames[] = {
 
 
 
-signed char opOperandCount[] = {
+const signed char opOperandCount[] = {
     -1,	// "OP_0x00"
     0,	// "bkpt"
     0,	// "nop"
@@ -568,7 +568,7 @@ signed char opOperandCount[] = {
 
 // C++ note.  the max opSize[] value is 5 (3 bits).  We could pack these tighter.
 // no. of bytes in the opcode stream.  0 means unsupported opcode.
-unsigned char opSizes[] = {
+const unsigned char opSizes[] = {
     0,	// "OP_0x00"
     1,	// "bkpt"
     1,	// "nop"
@@ -827,7 +827,7 @@ unsigned char opSizes[] = {
     0,	// "decode"
 
 };
-unsigned char opStackPop[] = {
+const unsigned char opStackPop[] = {
     0,
     0,
     0,
@@ -1086,7 +1086,7 @@ unsigned char opStackPop[] = {
     0
 };
 
-unsigned char opStackPush[] = {
+const unsigned char opStackPush[] = {
     0,
     0,
     0,
@@ -1345,7 +1345,7 @@ unsigned char opStackPush[] = {
     0
 };
 #endif /* AVMPLUS_MIR && _DEBUG */
-unsigned char opCanThrow[] = {
+const unsigned char opCanThrow[] = {
     0,
     0,
     0,

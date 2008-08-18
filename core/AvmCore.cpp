@@ -131,7 +131,7 @@ namespace avmplus
 		#endif
 
 		#ifdef AVMPLUS_INTERP
- 		turbo = true;
+ 		    SetMIREnabled(true);
 		#endif
 
 		#ifdef AVMPLUS_VERIFYALL
@@ -232,6 +232,8 @@ namespace avmplus
 		kNaN = doubleToAtom(MathUtils::nan());
 		kNeedsDxns = constantString("NeedsDxns");
 		kAsterisk = constantString("*");
+		kVersion = constantString("Version");
+		kVector = constantString("Vector.<");
 
 #ifdef AVMPLUS_VERBOSE
 		knewline = newString("\n");
@@ -517,7 +519,8 @@ namespace avmplus
 										  Domain* domain,
 										  AbstractFunction *nativeMethods[],
 										  NativeClassInfo *nativeClasses[],
-										  NativeScriptInfo *nativeScripts[])
+										  NativeScriptInfo *nativeScripts[],
+										  List<Stringp, LIST_RCObjects>* include_versions)
 	{
 		// parse constants and attributes.
 		PoolObject* pool = AbcParser::decodeAbc(this,
@@ -526,7 +529,8 @@ namespace avmplus
 												domain,
 												nativeMethods,
 												nativeClasses,
-												nativeScripts);
+												nativeScripts,
+												include_versions);
 
         #ifdef DEBUGGER
 		if (debugger) {
@@ -1233,7 +1237,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 			case kIntegerType:
 				{
-                Atom i = atom>>3;
+					Atom i = atom>>3;
 					return urshift(i|-i,28)&~7 | kBooleanType;
 				}
 			case kBooleanType:
@@ -2706,6 +2710,11 @@ return the result of the comparison ToPrimitive(x) == y.
         return i;
 	}
 
+	Stringp AvmCore::constantString(const char *s)
+	{
+		return internString(newString(s));
+	}
+
     /**
      * intern the given string atom which has already been allocated
      * @param atom
@@ -3159,7 +3168,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		// handle integer values w/out allocation
 		// this logic rounds in the wrong direction for E3, but
 		// we never use a rounded value, only cleanly converted values.
-		#ifdef WIN32 
+		#if defined(WIN32) || defined(__ICC) 
 		#ifdef AVMPLUS_AMD64
 		int id = _mm_cvttsd_si32(_mm_set_sd(n));
 		if (((id<<3)>>3) == n) {

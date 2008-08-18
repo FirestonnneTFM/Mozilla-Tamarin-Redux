@@ -91,7 +91,7 @@ namespace avmplus
 		Verifier verifier(this, toplevel);
 
 		AvmCore* core = this->core();
-		if (core->turbo && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
+		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
 			CodegenMIR mir(this);
 			verifier.verify(&mir);	// pass 2 - data flow
@@ -174,7 +174,7 @@ namespace avmplus
 		for(int i=0; i<local_count; i++)
 		{
 			//localNames[i] = core->kundefined;
-			WBRC(core->GetGC(), localNames, &localNames[i], core->kundefined);
+			WBRC(core->GetGC(), localNames, &localNames[i], uintptr(Stringp(core->kundefined)));
 		}
 	}
 

@@ -50,7 +50,8 @@ namespace avmplus
 		Domain* domain,
 		AbstractFunction *nativeMethods[],
 		NativeClassInfo *nativeClasses[],
-		NativeScriptInfo *nativeScripts[])
+		NativeScriptInfo *nativeScripts[],
+		List<Stringp, LIST_RCObjects>* keepVersions)
     {
 		if (code.getSize() < 4)
 			toplevel->throwVerifyError(kCorruptABCError);
@@ -70,7 +71,7 @@ namespace avmplus
 		{
 		case (46<<16|16):
 		{
-			AbcParser parser(core, code, toplevel, domain, nativeMethods, nativeClasses, nativeScripts);
+			AbcParser parser(core, code, toplevel, domain, nativeMethods, nativeClasses, nativeScripts, keepVersions);
 			PoolObject *pObject = parser.parse();
  			if ( !pObject )
  				toplevel->throwVerifyError( kCorruptABCError );
@@ -88,7 +89,8 @@ namespace avmplus
 		Domain* domain,
 		AbstractFunction *nativeMethods[],
 		NativeClassInfo *nativeClasses[],
-		NativeScriptInfo *nativeScripts[]) 
+		NativeScriptInfo *nativeScripts[],
+		List<Stringp, LIST_RCObjects>* keepVersions)
 		: toplevel(toplevel),
 		  domain(domain),
 		  instances(core->GetGC(), 0)
@@ -101,6 +103,7 @@ namespace avmplus
 		this->nativeMethods = nativeMethods;
 		this->nativeClasses = nativeClasses;
 		this->nativeScripts = nativeScripts;
+		this->keepVersions = keepVersions;
 
 		abcStart = &code[0];
 		abcEnd = &code[(int)code.getSize()];
@@ -347,7 +350,7 @@ namespace avmplus
 		
 		pool->allowEarlyBinding(base, earlySlotBinding);
 
-        for (unsigned int i=0; i < nameCount; i++)
+		for (unsigned int i=0; i < nameCount; i++)
         {
 			Multiname qn;
 			resolveQName(pos, qn);
@@ -363,7 +366,90 @@ namespace avmplus
 #endif //SAFE_PARSE
             int tag = *pos++;
             TraitKind kind = (TraitKind) (tag & 0x0f);
+
+			int skip = 0;
+			int id = 0;
+			int info = 0;
+			int value_index = 0;
+			CPoolKind value_kind;
+#ifdef AVMPLUS_VERBOSE
+			Multiname typeName;
+#endif
+			int flags = 0;
+
+			// Read in the trait entry.
+			// Skip any traits that have version metadata that indicates they should be removed.
+			switch (kind)
+			{
+			case TRAIT_Slot:
+			case TRAIT_Const:
+			case TRAIT_Class:
+				id = readU30(pos); // slot id
+				if( kind == TRAIT_Slot || kind == TRAIT_Const )
+				{
+#ifdef AVMPLUS_VERBOSE
+					parseTypeName(pos, typeName);
+#else
+					readU30(pos);
+#endif
+					value_index = readU30(pos); // value
+					if( value_index )
+					{
+#ifdef SAFE_PARSE
+						// check to see if we are trying to read past the file end or the beginning.
+						if (pos < abcStart || pos >= abcEnd )
+							toplevel->throwVerifyError(kCorruptABCError);
+#endif //SAFE_PARSE
+						value_kind = (CPoolKind)*(pos++);
+					}
+
+				}
+				else
+				{
+					info = readU30(pos);
+				}
+				break;
+			case TRAIT_Getter:
+			case TRAIT_Setter:
+			case TRAIT_Method:
+				id = readU30(pos);  // disp id
+				info = readU30(pos);  // method
+				break;
+			default:
+				// unsupported traits type
+				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
+			}
+			const byte* meta_pos = pos;
+			if( tag & ATTR_metadata )
+			{
+				int metadataCount = readU30(pos);
+				for( int metadata = 0; metadata < metadataCount; ++metadata)
+				{
+					int index = readU30(pos);
+					Stringp name = metaNames[index];
+					if (pool->stripMetadataIndexes.indexOf(index) != -1)
+						skip = 1;  // Stripping this definition, 
+					else if (name == core->kNeedsDxns )
+						flags |= AbstractFunction::NEEDS_DXNS;
+#ifdef AVMPLUS_VERBOSE
+					else if (name == kVerboseVerify )
+						flags |= AbstractFunction::VERBOSE_VERIFY;
+#endif
+				}
+			}
+			if( skip ) 
+			{ 
+#ifdef AVMPLUS_VERBOSE
+				if (pool->verbose)
+				{
+					core->console << "skipping definition" << " name=" << Multiname::format(core,ns,name)
+						<< "\n";
+				}
+#endif
+				continue;
+			}
 			
+			// Didn't skip the trait, so do set up for the definition now.
 			AbstractFunction *f = NULL;
 			switch (kind)
             {
@@ -371,7 +457,7 @@ namespace avmplus
             case TRAIT_Const:
             case TRAIT_Class:
 			{
-                uint32 slot_id = readU30(pos);
+                uint32 slot_id = id;
 				if (!earlySlotBinding) slot_id = 0;
 				if (!slot_id)
 				{
@@ -398,29 +484,13 @@ namespace avmplus
 				// a slot cannot override anything else.
 				if (traits->get(name, ns) != BIND_NONE)
 					toplevel->throwVerifyError(kCorruptABCError);
-				
+
 				if (script)
 					addNamedScript(ns, name, script);
 
 				if( kind == TRAIT_Slot || kind == TRAIT_Const)
 				{
 					#ifdef AVMPLUS_VERBOSE
-					// type name
-					Multiname typeName;
-					parseTypeName(pos, typeName);
-
-					// default value index
-					int value_index = readU30(pos);
-					CPoolKind value_kind;
-					if( value_index )
-					{
-#ifdef SAFE_PARSE
-						// check to see if we are trying to read past the file end or the beginning.
-						if (pos < abcStart || pos >= abcEnd )
-							toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
-						value_kind = (CPoolKind)*(pos++);
-					}
 					if (pool->verbose)
 					{
 						core->console << "            " << traitNames[kind]
@@ -429,13 +499,6 @@ namespace avmplus
 							<< " value_index=" << value_index
 							<< " type=" << &typeName
 							<< "\n";
-					}
-					#else
-					readU30(pos); // type
-					int value_index = readU30(pos); // default value
-					if( value_index )
-					{
-						pos++; // byte for the value kind
 					}
 					#endif
 
@@ -449,7 +512,7 @@ namespace avmplus
 				{
 					AvmAssert(kind == TRAIT_Class);
 					// get the class type
-					int class_info = readU30(pos);
+					int class_info = info;
 					if (class_info >= classCount)
 						toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_info), core->toErrorString(classCount));
 
@@ -480,14 +543,14 @@ namespace avmplus
 
 						if ( tag & ATTR_metadata )
 						{
-							itraits->setMetadataPos(pos);
+							itraits->setMetadataPos(meta_pos);
 						}
 					}
 					else
 					{
 						if ( tag & ATTR_metadata )
 						{
-							ctraits->setMetadataPos(pos);
+							ctraits->setMetadataPos(meta_pos);
 						}
 					}
 
@@ -502,9 +565,9 @@ namespace avmplus
 			case TRAIT_Setter:
             case TRAIT_Method:
 			{
-				int earlyDispId = readU30( pos );
+				int earlyDispId = id;
                 (void)earlyDispId;
-				uint32 method_info = readU30(pos);
+				uint32 method_info = info;
 
 				#ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
@@ -535,6 +598,8 @@ namespace avmplus
 				{
 					toplevel->throwVerifyError(kCorruptABCError);
 				}
+
+				f->flags |= flags;
 
 				if (tag & ATTR_final)
 					f->flags |= AbstractFunction::FINAL;
@@ -639,23 +704,18 @@ namespace avmplus
 				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
             }
 
+#ifdef AVMPLUS_VERBOSE
             if ( tag & ATTR_metadata )
             {
-                int metadataCount = readU30(pos);
+                int metadataCount = readU30(meta_pos);
 				for( int metadata = 0; metadata < metadataCount; ++metadata)
 				{
-					int index = readU30(pos);
-					Stringp name = metaNames[index];
-					if (name == core->kNeedsDxns && f != NULL)
-						f->flags |= AbstractFunction::NEEDS_DXNS;
-#ifdef AVMPLUS_VERBOSE
-					if (name == kVerboseVerify && f != NULL)
-						f->flags |= AbstractFunction::VERBOSE_VERIFY;
+					int index = readU30(meta_pos);
 					if (pool->verbose)
 						core->console << "            [" << metaNames[index] << "]\n";
-#endif
 				}
             }
+#endif
         }
 
 		traits->slotCount = slotCount;
@@ -852,39 +912,45 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 				if (pool->verbose) 
 					core->console << "    " << name;
+#endif
 				int values_count = readU30(pos);
 				if (values_count > 0)
 				{
+#ifdef AVMPLUS_VERBOSE
 					if (pool->verbose) 
 						core->console << "(";
+#endif
 					for(int q = 0; q < values_count; ++q)
 					{
 						int a = readU30(pos);
 						int b = readU30(pos);
+						if(keepVersions
+							&& name == core->kVersion 
+							&& a==0 
+							&& keepVersions->indexOf(resolveUtf8(b))==-1)
+						{
+							// Found the metadata to strip
+							pool->addStripMetadata(i);
+						}
+#ifdef AVMPLUS_VERBOSE
 						if (pool->verbose) 
 						{
 							core->console << a << "," << b;
 							if (q+1 < values_count)
 								core->console << " ";
 						}
+#endif
 					}
+#ifdef AVMPLUS_VERBOSE
 					if (pool->verbose)
 						core->console << ")";
+#endif
 				}
+#ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
 					core->console << "\n";
+#endif
 				
-#else	// AVMPLUS_VERBOSE
-				
-				// MetadataInfo
-				int values_count = readU30(pos);
-				for(int q = 0; q < values_count; ++q)
-				{
-					readU30(pos);
-					readU30(pos);
-				}
-
-#endif  // AVMPLUS_VERBOSE
 			}
 		}
 
@@ -1186,12 +1252,12 @@ namespace avmplus
 			union {
 				double value;
 				sint64 bits;
-				#ifdef AVMPLUS_ARM
+				#ifdef AVMPLUS_ARM_OLDABI
 				uint32 words[2];
 				#endif
 			} u;
 			u.bits = readS64(pos);
-			#ifdef AVMPLUS_ARM
+			#ifdef AVMPLUS_ARM_OLDABI
 			uint32 t = u.words[0];
 			u.words[0] = u.words[1];
 			u.words[1] = t;
