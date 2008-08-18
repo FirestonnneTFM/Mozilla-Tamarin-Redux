@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -53,7 +54,7 @@ namespace avmplus
 	 * This object is not optimized for a fixed sized bit vector
 	 * it instead allows for dynamically growing the bit vector.
 	 */ 
-	class BitSet: public MMgc::GCFinalizedObject
+	class BitSet
 	{
 		public:
 
@@ -63,31 +64,31 @@ namespace avmplus
 			BitSet()
 			{
 				capacity = kDefaultCapacity;
-				for(int i=0; i<capacity; i++)
-					bits.ar[i] = 0;
-			}
-
-			~BitSet()
-			{
                 reset();
 			}
 
-			void set(int bitNbr)
+            void reset()
+            {
+                if (capacity > kDefaultCapacity)
+    				for(int i=0; i<capacity; i++)
+	    				bits.ptr[i] = 0;
+                else
+    				for(int i=0; i<capacity; i++)
+	    				bits.ar[i] = 0;
+            }
+
+            void set(MMgc::GC *gc, int bitNbr)
 			{
 				int index = bitNbr / kUnit;
 				int bit = bitNbr % kUnit;
 				if (index >= capacity)
-					grow(index+1);
+					grow(gc, index+1);
 
 				if (capacity > kDefaultCapacity)
 					bits.ptr[index] |= (1<<bit);
 				else
 					bits.ar[index] |= (1<<bit);
 			}
-
-            void set(MMgc::GC *, int bitNbr) {
-                set(bitNbr);
-            }
 
 			void clear(int bitNbr)
 			{
@@ -117,40 +118,32 @@ namespace avmplus
 				return value;
 			}
 
-            void reset() {
-				if (capacity > kDefaultCapacity)
-					delete [] bits.ptr;
-				capacity = 0;
-            }
-
 		private:
 
 			// Grow the array until at least newCapacity big
-			void grow(int newCapacity)
+			void grow(MMgc::GC *gc, int newCapacity)
 			{
 				// create vector that is 2x bigger than requested 
 				newCapacity *= 2;
 				//MEMTAG("BitVector::Grow - long[]");
-				long* newBits = new long[newCapacity];
+				long* newBits = (long*)gc->Alloc(newCapacity * sizeof(long), MMgc::GC::kZero);
 
 				// copy the old one 
-				for(int i=0; i<capacity; i++)
-				{
-					if (capacity > kDefaultCapacity)
+                if (capacity > kDefaultCapacity)
+				    for(int i=0; i<capacity; i++)
 						newBits[i] = bits.ptr[i];
-					else
+				else
+				    for(int i=0; i<capacity; i++)
 						newBits[i] = bits.ar[i];
-				}
-
-				// clear out the rest
-				for(int i=capacity; i<newCapacity; i++)
-					newBits[i] = 0;
 
 				// in with the new out with the old
 				if (capacity > kDefaultCapacity)
-					delete [] bits.ptr;
+					gc->Free(bits.ptr);
 
-				bits.ptr = newBits;
+                if (gc->IsPointerToGCPage(this))
+    				WB(gc, this, &bits.ptr, newBits);
+                else
+                    bits.ptr = newBits;
 				capacity = newCapacity;
 			}
 
@@ -160,7 +153,7 @@ namespace avmplus
 			int capacity;
 			union
 			{
-				long   ar[kDefaultCapacity];
+				long ar[kDefaultCapacity];
 				long*  ptr;
 			}
 			bits;

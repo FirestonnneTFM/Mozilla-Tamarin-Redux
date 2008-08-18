@@ -1198,6 +1198,11 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
+    /**
+     * ensure all def's are live to this point (current).
+     * this is used to ensure variables are visible to the
+     * debugger even after the end of their normal live range
+     */
 	void CodegenMIR::extendDefLifetime(OP* current)
 	{
 		for (int i=0, n=state->verifier->local_count; i < n; i++)
@@ -1314,10 +1319,18 @@ namespace avmplus
 	void CodegenMIR::mirPatch(OP* i, sintptr targetpc)
 	{
 		mirPatchPtr(&i->target, targetpc);
-		if (targetpc < state->pc)
+        if (targetpc < state->pc) {
+            // this is a backwards jump, extend live vars to the jump
+            // so they are live through the whole loop body
 			extendLastUse(i, targetpc);
+        }
 	}
 
+    /**
+     * extend the live range of a single variable that is used in 
+     * a loop, but defined before the loop, to make sure it's live
+     * through the whole loop.
+     */
 	void CodegenMIR::extendLastUse(OP* ins, OP* use, OP* target)
 	{
 		if (!ins)
@@ -1325,10 +1338,18 @@ namespace avmplus
 		if ((ins->code & ~MIR_float) == MIR_def)
 			while (ins->join)
 				ins = ins->join;
-		if (ins < target && target < ins->lastUse)
+        if (ins < target && target < ins->lastUse) {
+            // ins is defined before the loop header (target)
+            // and used inside the loop, so extend it to the
+            // loop jump point (use)
 			ins->lastUse = use;
+        }
 	}
 
+    /**
+     * extend the live range of variables that are used in a loop
+     * to make sure the range extends to the bottom of the loop
+     */
 	void CodegenMIR::extendLastUse(OP* use, sintptr targetpc)
 	{
 		// if target of the branch is in the middle of any

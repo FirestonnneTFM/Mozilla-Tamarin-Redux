@@ -329,7 +329,7 @@ namespace nanojit
 	{
 		ensureRoom(3);
 		LInsp r1 = ensureReferenceable(o1,2);
-		LInsp r2 = ensureReferenceable(o2,1);
+        LInsp r2 = o2==o1 ? r1 : ensureReferenceable(o2,1);
 
 		LInsp l = _buf->next();
 		l->initOpcode(op);
@@ -358,11 +358,11 @@ namespace nanojit
 		LInsp l = 0;
 		if (!toLabel)
 			toLabel = insFar(LIR_tramp,0); //empty tramp
-		if (condition)
-			l = ins2(op,condition,toLabel);
-		else
-			l = ins1(op,toLabel);
-		return l;
+        if (!condition) {
+            // unconditional, just point to something
+            condition = toLabel;
+        }
+	    return ins2(op,condition,toLabel);
 	}
 
     LInsp LirBufWriter::insAlloc(int32_t size)
@@ -636,9 +636,8 @@ namespace nanojit
 
 	LInsp LIns::getTarget()
 	{
-		LInsp i = (LInsp) this-1 - u.oprnd_2;
-		NanoAssert( i->isTramp() );
-		return *((LInsp*)(i-1));
+        NanoAssert(isBranch());
+        return oprnd2();
 	}
 
 	LInsp	LIns::oprnd1() const	
@@ -1042,7 +1041,7 @@ namespace nanojit
 					}
 				}
 			}
-			else if (i->isGuard())
+			else if (i->isGuard()||i->isBranch()||i->isop(LIR_label))
 			{
 				stk.reset();
 				top = getTop(i) >> 2;
@@ -1479,7 +1478,7 @@ namespace nanojit
 				NanoAssert(s < livebuf+sizeof(livebuf));
             }
 			printf("%-60s %s\n", livebuf, names->formatIns(e->i));
-            if (e->i->isGuard() || e->i->isBranch()) {
+            if (e->i->isGuard() || e->i->isBranch() || isRet(e->i->opcode())) {
 				printf("\n");
                 newblock = true;
             }

@@ -58,8 +58,13 @@ namespace nanojit
 	    bool ignoreInstruction(LInsp ins)
 	    {
             LOpcode op = ins->opcode();
-            if (ins->isStore() || op == LIR_def || op == LIR_loop || op == LIR_label)
+            if (ins->isStore() ||
+                op == LIR_def ||
+                op == LIR_loop ||
+                op == LIR_label ||
+                isRet(op)) {
                 return false;
+            }
 	        return ins->resv() == 0;
 	    }
 
@@ -1302,27 +1307,26 @@ namespace nanojit
 				{
 					LInsp target = ins->oprnd1();
                     LabelState *label = _labels.get(target);
-                    if (!label) {
-                        //AvmAssert(false);
-                        // jump to unknown label is a back edge
-                        hasLoop = true;
-                        JMP(0);
-                        _labels.add(target, 0, _allocator);
-    					_patches.put(_nIns, target);
-                    }
-                    else if (!label->addr) {
-                        //AvmAssert(false);
-                        // back jump to label already targeted by some other jump
-                        // so we merge with that register state
-                        hasLoop = true;
-                        JMP(0);
-                        releaseRegisters();
-                        mergeRegisterState(label->regs);
-                    } else {
-                        // forward jump to known label - pick up register state from there.
-                        releaseRegisters();
+                    releaseRegisters();
+                    if (label && label->addr) {
+                        // forward jump - pick up register state from target.
                         mergeRegisterState(label->regs);
                         JMP(label->addr);
+                    }
+                    else {
+                        // backwards jump
+                        hasLoop = true;
+                        JMP(0);
+                        NIns *branch = _nIns;
+                        if (!label) {
+                            // we're the first, possibly only pred of that label. save our [empty] reg state.
+                            _labels.add(target, 0, _allocator);
+                        }
+                        else {
+                            // some other jump already goes there, merge with that state.
+                            mergeRegisterState(label->regs);
+                        }
+    					_patches.put(branch, target);
                     }
 					break;
 				}
@@ -1330,20 +1334,29 @@ namespace nanojit
 				case LIR_jt:
 				case LIR_jf:
 				{
-					LInsp to = ins->oprnd2();
+					LInsp to = ins->getTarget();
 					LIns* cond = ins->oprnd1();
                     LabelState *label = _labels.get(to);
-                    if (label) {
+                    if (label && label->addr) {
                         // forward jump to known label.  need to merge with label's register state.
     					asm_branch(op == LIR_jf, cond, label->addr);
                         mergeRegisterState(label->regs);
                     }
                     else {
-                        // conditional back-edge to unknown label.
-                        // cannot merge register state with anything yet.
+                        // back edge.
                         hasLoop = true;
-    					NIns* branch = asm_branch(op == LIR_jf, cond, 0);
-						_patches.put(branch,to);
+                        NIns *branch;
+                        if (!label) {
+                            // we're first, possibly only to target that label. clear regstate.
+                            _labels.add(to, 0, _allocator);
+    					    branch = asm_branch(op == LIR_jf, cond, 0);
+                        }
+                        else {
+                            // backedge to known label not processed yet. merge.
+    					    branch = asm_branch(op == LIR_jf, cond, 0);
+                            mergeRegisterState(label->regs);
+                        }
+					    _patches.put(branch,to);
                     }
 					break;
 				}					
@@ -1351,13 +1364,17 @@ namespace nanojit
 				{
                     LabelState *label = _labels.get(ins);
                     if (!label) {
+                        // label seen first, normal target of forward jump, save addr & allocator
     					_labels.add(ins, _nIns, _allocator);
                     }
                     else {
-                        // we're at the top of a loop, merge with register state from successor jumps
+                        // we're at the top of a loop
                         hasLoop = true;
                         NanoAssert(label->addr == 0);
-                        mergeRegisterState(label->regs);
+                        if (label->regs.isValid()) {
+                            // merge with register state from successor jumps
+                            mergeRegisterState(label->regs);
+                        }
                         label->addr = _nIns;
                     }
 					break;
