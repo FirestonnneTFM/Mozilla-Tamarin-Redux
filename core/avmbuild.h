@@ -213,6 +213,9 @@
 
 // Enable translation from ABC byte code to a wider word code that can
 // also be used by a direct threaded interpreter
-//#define AVMPLUS_WORD_CODE
+#ifdef AVMPLUS_MAC
+#  define AVMPLUS_WORD_CODE         // works cross-platform (probably not 64-bit)
+#  define AVMPLUS_DIRECT_THREADED   // gcc only for the time being
+#endif
 
 #endif /* __avmbuild__ */
