@@ -241,7 +241,6 @@ namespace avmplus
         void emitPrep(AbcOpcode);
         void emitSampleCheck();
         void InsDealloc(LIns *a);
-        bool usedInState(OP*);
         bool verbose();
         void extendDefLifetime(OP*);
         void extendLastUse(LIns *i, sintptr pc);

@@ -913,20 +913,26 @@ namespace nanojit
                     break;
                 }
 
-                case LIR_fret:
                 case LIR_ret:  {
                     LIns *val = ins->oprnd1();
-                    if (op == LIR_ret) {
-                        findSpecificRegFor(val, retRegs[0]);
-                    }
-                    else {
-                        findSpecificRegFor(val, FST0);
-                        fpu_pop();
-                    }
+                    findSpecificRegFor(val, retRegs[0]);
                     if (_nIns != _epilogue) {
                         JMP(_epilogue);
                     }
                     MR(SP,FP);
+                    break;
+                }
+
+                case LIR_fret: {
+                    LIns *val = ins->oprnd1();
+                    findSpecificRegFor(val, FST0);
+                    fpu_pop();
+                    if (_nIns != _epilogue) {
+                        JMP(_epilogue);
+                    }
+                    MR(SP,FP);
+                    if (sse2)
+                        evict(FST0);
                     break;
                 }
 
