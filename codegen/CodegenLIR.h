@@ -47,6 +47,7 @@
     class Fragmento;
     enum LOpcode;
 }*/
+
 #include "../nanojit/nanojit.h"
 
 namespace avmplus

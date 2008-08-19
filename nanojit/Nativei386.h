@@ -499,7 +499,7 @@ namespace nanojit
     *(--_nIns) = 0x10;\
     *(--_nIns) = 0x0f;\
     *(--_nIns) = 0xf2;\
-    asm_output3("movsd %s,%p // =%f",gpn(r),daddr,*daddr); \
+    asm_output3("movsd %s,%p // =%f",gpn(r),(void*)daddr,*daddr); \
     } while(0)
 
 #define STSD(d,b,r)do {     \
@@ -563,7 +563,7 @@ namespace nanojit
     *(--_nIns) = 0x58;\
     *(--_nIns) = 0x0f;\
     *(--_nIns) = 0xf2;\
-    asm_output3("addsd %s,%p // =%f",gpn(r),daddr,*daddr); \
+    asm_output3("addsd %s,%p // =%f",gpn(r),(void*)daddr,*daddr); \
     } while(0)
 
 #define SSE_SUBSD(rd,rs) do{ \
@@ -595,7 +595,7 @@ namespace nanojit
     *(--_nIns) = 0x57;\
     *(--_nIns) = 0x0f;\
     *(--_nIns) = 0x66;\
-    asm_output2("xorpd %s,[0x%p]",gpn(r),(maskaddr));\
+    asm_output2("xorpd %s,[0x%p]",gpn(r),(void*)(maskaddr));\
     } while(0)
 
 #define SSE_XORPDr(rd,rs) do{ \
