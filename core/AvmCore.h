@@ -134,7 +134,7 @@ const int kBufferPadding = 16;
 
 		#ifdef AVMPLUS_MIR
 		// MIR intermediate buffer pool
-		List<GrowableBuffer*, LIST_GCObjects> mirBuffers; // mir buffer pool
+		List<GrowableBuffer*> mirBuffers; // mir buffer pool
 		GrowableBuffer* requestNewMirBuffer();	 // create a new buffer
 		GrowableBuffer* requestMirBuffer();	     // get next buffer in list or a create a new one
 		void releaseMirBuffer(GrowableBuffer* buffer);
@@ -352,7 +352,7 @@ const int kBufferPadding = 16;
 									 AbstractFunction *nativeMethods[],
 									 NativeClassInfo *nativeClasses[],
 									 NativeScriptInfo *nativeScripts[],
-									 List<Stringp, LIST_RCObjects>* include_versions = NULL);
+									 List<Stringp>* include_versions = NULL);
 		
 		/**
 		 * Execute the ABC block starting at offset start in code.

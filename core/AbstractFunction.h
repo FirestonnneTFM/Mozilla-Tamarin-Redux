@@ -150,27 +150,18 @@ namespace avmplus
 		DWB(Traits*) activationTraits;
 		DWB(PoolObject*) pool;
 		
-		AvmCore* core() const
-		{
-			return pool->core;
-		}
+		inline AvmCore* core() const;
 
 		uintptr iid() const
 		{
 			return ((uintptr)this)>>3;
 		}
 
-		bool usesCallerContext() const
-		{
-			return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));
-		}
+		inline bool usesCallerContext() const;
 
 		// Builtin + non-native functions always need the dxns code emitted 
 		// Builtin + native functions have flags to specify if they need the dxns code
-		bool usesDefaultXmlNamespace() const
-		{
-			return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
-		}
+		inline bool usesDefaultXmlNamespace() const;
 
 		/** number of declared parameters including optionals */
 		int param_count;
@@ -314,6 +305,28 @@ namespace avmplus
 		virtual bool isFakeFunction() { return true; }
 	};
 #endif
+}
+
+#include "PoolObject.h"
+
+namespace avmplus
+{
+	inline AvmCore* AbstractFunction::core() const
+	{
+		return pool->core;
+	}
+
+	inline bool AbstractFunction::usesCallerContext() const
+	{
+		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));
+	}
+
+	// Builtin + non-native functions always need the dxns code emitted 
+	// Builtin + native functions have flags to specify if they need the dxns code
+	inline bool AbstractFunction::usesDefaultXmlNamespace() const
+	{
+		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
+	}
 }
 
 #endif /* __avmplus_AbstractFunction__ */

@@ -5,6 +5,9 @@
 	Name="avmplus"
 	ProjectGUID="{437E43D2-ED2D-406B-88DB-B5940F838AE8}"
 	RootNamespace="avmplus"
+	SccProjectName="Perforce Project"
+	SccLocalPath="..\.."
+	SccProvider="MSSCCI:Perforce SCM"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>

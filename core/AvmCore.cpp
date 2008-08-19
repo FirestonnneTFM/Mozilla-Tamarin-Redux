@@ -521,7 +521,7 @@ namespace avmplus
 										  AbstractFunction *nativeMethods[],
 										  NativeClassInfo *nativeClasses[],
 										  NativeScriptInfo *nativeScripts[],
-										  List<Stringp, LIST_RCObjects>* include_versions)
+										  List<Stringp>* include_versions)
 	{
 		// parse constants and attributes.
 		PoolObject* pool = AbcParser::decodeAbc(this,

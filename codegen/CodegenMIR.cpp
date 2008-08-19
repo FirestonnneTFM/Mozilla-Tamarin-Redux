@@ -667,7 +667,7 @@ namespace avmplus
 		if (ins->lastUse || usedInState(ins))
 			return;
 
-		List<OP*,LIST_NonGCObjects> search(4);
+		List<OP*> search(4);
 		search.add(ins);
 
 		OP* currIns = ins;  // start the search from the given instruction

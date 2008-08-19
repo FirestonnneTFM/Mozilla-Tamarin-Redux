@@ -223,13 +223,13 @@ namespace MMgc
 	
 	
 	void* GCHeap::CommitCodeMemory(void* address,
-								   size_t )
+								   size_t size)
 	{
 		committedCodeMemory += size;
 		return address;
 	}	
 	void* GCHeap::DecommitCodeMemory(void* address,
-									 size_t )
+									 size_t size)
 	{
 		committedCodeMemory -= size;
 		return address;

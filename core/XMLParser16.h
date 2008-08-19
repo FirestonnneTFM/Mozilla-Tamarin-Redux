@@ -80,7 +80,7 @@ namespace avmplus
 		Stringp text;
 		enum TagType nodeType;
 		bool empty;
-		List<Stringp, LIST_RCObjects> attributes;
+		List<Stringp> attributes;
 
 		/**
 		 * nextAttribute is used to iterate over the

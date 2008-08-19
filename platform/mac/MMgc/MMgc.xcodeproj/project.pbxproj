@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01A22A250E26F8F4001049AE /* TypeTraits.h in Headers */ = {isa = PBXBuildFile; fileRef = 01A22A240E26F8F4001049AE /* TypeTraits.h */; };
 		1E60773C09733377007D0E1E /* FixedAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60771109733377007D0E1E /* FixedAlloc.cpp */; };
 		1E60773D09733377007D0E1E /* FixedAlloc.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60771209733377007D0E1E /* FixedAlloc.h */; };
 		1E60773E09733377007D0E1E /* FixedMalloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60771309733377007D0E1E /* FixedMalloc.cpp */; };
@@ -42,6 +43,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		01A22A240E26F8F4001049AE /* TypeTraits.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TypeTraits.h; path = ../../../MMgc/TypeTraits.h; sourceTree = SOURCE_ROOT; };
 		1E60771109733377007D0E1E /* FixedAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FixedAlloc.cpp; path = ../../../MMgc/FixedAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		1E60771209733377007D0E1E /* FixedAlloc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FixedAlloc.h; path = ../../../MMgc/FixedAlloc.h; sourceTree = SOURCE_ROOT; };
 		1E60771309733377007D0E1E /* FixedMalloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FixedMalloc.cpp; path = ../../../MMgc/FixedMalloc.cpp; sourceTree = SOURCE_ROOT; };
@@ -132,6 +134,7 @@
 				1E60773709733377007D0E1E /* GCWeakRef.h */,
 				1E60773909733377007D0E1E /* macbuild.h */,
 				1E60773A09733377007D0E1E /* MMgc.h */,
+				01A22A240E26F8F4001049AE /* TypeTraits.h */,
 				1E60773B09733377007D0E1E /* WriteBarrier.h */,
 			);
 			name = Source;
@@ -178,6 +181,7 @@
 				1E60776409733377007D0E1E /* macbuild.h in Headers */,
 				1E60776509733377007D0E1E /* MMgc.h in Headers */,
 				1E60776609733377007D0E1E /* WriteBarrier.h in Headers */,
+				01A22A250E26F8F4001049AE /* TypeTraits.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

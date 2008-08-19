@@ -51,27 +51,27 @@
   %s = char*   
   
   <error id="1000" label="kOutOfMemoryError">
-    Nicht genügend Speicher vorhanden.
+    La mémoire du système est saturée.
     <description><![CDATA[
 		Flash Player needs more memory to compile your code than your system has available. 
 		Close some of the applications or processes running on your system.
 	]]></description></error>
  
-  <error id="1001" label="kNotImplementedError">Die Methode %1 wird nicht implementiert.</error>
+  <error id="1001" label="kNotImplementedError">La méthode %1 n'est pas mise en oeuvre.</error>
   <error id="1002" label="kInvalidPrecisionError">
-    Das Genauigkeitsargument muss zwischen %2 und %3 liegen; %1 ist ungültig.
+    L'argument precision doit être compris entre %2 et %3. %1 n'est pas valide.
     <description><![CDATA[
 		You specified a value that is not within the expected range of the <code>precision</code> argument. Number.toPrecision has a range of 1 to 21. Number.toFixed and Number.toExponential have a range of 0 to 20.		
 	]]></description></error>
  
   <error id="1003" label="kInvalidRadixError">
-    Das Grundzahlargument muss zwischen 2 und 36 liegen; %1 erhalten.
+    L'argument radix doit être compris entre 2 et 36. %1 détecté.
     <description><![CDATA[
 		You passed a value less than 2 or greater than 36 for the <code>radix</code> argument of a method or property. 
 		Pass a value between 2 and 36 as a <code>radix</code> argument.
 	]]></description>  </error>
   <error id="1004" label="kInvokeOnIncompatibleObjectError">
-    Methode %1 wurde für ein nicht kompatibles Objekt aufgerufen.
+    La méthode %1 a été invoquée pour un objet non compatible.
     <description><![CDATA[
 		You tried to call a method that is not available to the specified object. This error occurs when 
 		you have copied a prototype function from one object to another, and then invoked it, but the 
@@ -81,14 +81,14 @@
   
   <!-- ISSUE jsshell reports "invalid array length" -->
 <error id="1005" label="kArrayIndexNotIntegerError">
-    Array-Index ist keine positive Ganzzahl (%1).
+    L'index du tableau n'est pas un entier positif (%1).
     <description><![CDATA[
 		You tried to access a member of an array using an index value that is not a positive integer. Pass only positive integers as index values for arrays.
 	]]></description></error>
  
   
 <error id="1006" label="kCallOfNonFunctionError">
-    %1 ist keine Funktion.
+    %1 n'est pas une fonction.
     <description><![CDATA[
 		This error occurs when you attempt to call a function that does not exist. 
 		Make sure you are calling the correct function, and that the API has 
@@ -101,10 +101,10 @@
 var big:Sprite = new Sprite();
 var error:int = big.length(); </code></pre>
 	]]></description></error>
-  <error id="1007" label="kConstructOfNonFunctionError">Versuchte Instanziierung für einen Nicht-Konstruktor.</error>
-  <error id="1008" label="kAmbiguousBindingError">%1 ist nicht eindeutig; es wurden mehrere übereinstimmende Bindungen gefunden.</error>
+  <error id="1007" label="kConstructOfNonFunctionError">Tentative d'instanciation sur un élément non constructeur.</error>
+  <error id="1008" label="kAmbiguousBindingError">%1 est ambigu. Plusieurs liaisons correspondantes détectées.</error>
   <error id="1009" label="kConvertNullToObjectError">
-    Der Zugriff auf eine Eigenschaft oder eine Methode eines null-Objektverweises ist nicht möglich.
+    Il est impossible d'accéder à la propriété ou à la méthode d'une référence d'objet nul.
     <description><![CDATA[
 	An object that evaluates to <code>null</code> can have no properties. This error can occur in some unexpected 
 	(though valid) situations. For example, consider the following code, which creates a Sprite
@@ -119,7 +119,7 @@ var q:String = sprite1.stage.quality;</code></pre>
 	]]></description></error>
  
   <error id="1010" label="kConvertUndefinedToObjectError">
-    Ein Begriff ist nicht definiert und hat keine Eigenschaften.
+    Un terme n'est pas défini et n'a pas de propriété.
     <description><![CDATA[
 		This error can occur if you try to access a property of an object that does not exist. For example:
 		<pre><code>var obj:Object = new Object();
@@ -135,134 +135,134 @@ trace(obj.b.prop);</code></pre>
 	
 	]]></description></error>
   <error id="1011" label="kIllegalOpcodeError">
-    Methode %1 enthielt einen unzulässigen Opcode %2 bei Offset %3.
+    La méthode %1 contenait un opcode %2 non valide au décalage %3.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1012" label="kLastInstExceedsCodeSizeError">
-    Die letzte Anweisung hat die Codegröße überschritten.
+    La dernière instruction dépassait la taille du code.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1013" label="kFindVarWithNoScopeError">
-    OP_findproperty kann nicht aufgerufen werden, wenn scopeDepth 0 ist.
+    Impossible d'appeler OP_findproperty si scopeDepth correspond à 0.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
-   <error id="1014" label="kClassNotFoundError">Klasse %1 wurde nicht gefunden.</error>
+   <error id="1014" label="kClassNotFoundError">La classe %1 est introuvable.</error>
    <error id="1015" label="kIllegalSetDxns">
-    Methode %1 kann nicht den Standard-XML-Namespace festlegen.
+    La méthode %1 ne peut pas définir l'espace de nom xml par défaut
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
-   <error id="1016" label="kDescendentsError">Nachfolger-Operator (..) wird für Typ %1 nicht unterstützt.</error>
+   <error id="1016" label="kDescendentsError">L'opérateur Descendants (..) n'est pas pris en charge sur le type %1.</error>
    <error id="1017" label="kScopeStackOverflowError">
-    Gültigkeitsbereich-Stapelüberlauf.
+    Il s'est produit un débordement de la pile de domaine.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1018" label="kScopeStackUnderflowError">
-    Gültigkeitsbereich-Stapelunterlauf.
+    Il s'est produit un débordement négatif de la pile de domaine.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1019" label="kGetScopeObjectBoundsError">
-    Getscopeobject %1 liegt außerhalb des gültigen Bereichs.
+    Getscopeobject %1 sort des limites.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
    <error id="1020" label="kCannotFallOffMethodError">
-    Code kann nicht außerhalb eines Methodenendes vorkommen.
+    Le code ne doit pas dépasser la fin d'une méthode.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1021" label="kInvalidBranchTargetError">
-    Mindestens ein Verzweigungsziel war nicht auf einer gültigen Anweisung in der Methode.
+    Au moins une cible branche ne figurait pas dans une instruction valide de la méthode.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1022" label="kIllegalVoidError">
-    Typ 'void' kann nur als Rückgabetyp für eine Funktion verwendet werden.
+    Void est réservé aux types de renvoi de fonction.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1023" label="kStackOverflowError">
-    Stapelüberlauf.
+    Il s'est produit un débordement de pile.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1024" label="kStackUnderflowError">
-    Stapelunterlauf.
+    Il s'est produit un débordement négatif de pile.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1025" label="kInvalidRegisterError">
-    Zugriff auf ein ungültiges Register %1.
+    Il s'est produit un accès à un registre %1 non valide.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1026" label="kSlotExceedsCountError">
-    Position %1 ist höher als slotCount=%2 von %3.
+    L'emplacement %1 dépasse slotCount=%2 sur %3.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1027" label="kMethodInfoExceedsCountError">
-    Method_info %1 ist höher als method_count=%2.
+    Method_info %1 dépasse method_count=%2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1028" label="kDispIdExceedsCountError">
-    Disp_id %1 ist größer als max_disp_id=%2 von %3.
+    Disp_id %1 dépasse max_disp_id=%2 sur %3.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1029" label="kDispIdUndefinedError">
-    Disp_id %1 ist nicht definiert in %2.
+    Disp_id %1 n'est pas défini sur %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1030" label="kStackDepthUnbalancedError">
-    Stapeltiefe ist nicht ausgeglichen. %1 != %2.
+    La profondeur de la pile n'est pas équilibrée. %1 != %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1031" label="kScopeDepthUnbalancedError">
-    Gültigkeitsbereichstiefe ist nicht ausgeglichen. %1 != %2.
+    La profondeur du domaine n'est pas équilibrée. %1 != %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1032" label="kCpoolIndexRangeError">
-    Cpool-Index %1 liegt außerhalb des gültigen Bereichs %2.
+    L'index Cpool %1 est en dehors des limites %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
-   <error id="1033" label="kCpoolEntryWrongTypeError">Cpool-Eintrag %1 hat den falschen Typ.<description><![CDATA[
+   <error id="1033" label="kCpoolEntryWrongTypeError">Le type de l'entrée Cpool  %1 est incorrect.<description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
-   <error id="1034" label="kCheckTypeFailedError">Typumwandlung fehlgeschlagen: %1 kann nicht in %2 umgewandelt werden.</error>
+   <error id="1034" label="kCheckTypeFailedError">Echec de la contrainte de type : conversion de %1 en %2 impossible.</error>
  
    <error id="1035" label="kIllegalSuperCallError">
-    Unzulässiger super-Ausdruck in Methode %1 gefunden.
+    Super expression illégale détectée dans la méthode %1.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
@@ -270,14 +270,14 @@ trace(obj.b.prop);</code></pre>
    <!-- <error id="1036" label="kUncaughtExceptionWarning">The VM exited due to an uncaught exception.</error> -->  
    
    <error id="1037" label="kCannotAssignToMethodError">
-    Zuweisung zu einer Methode %1 für %2 nicht möglich.
+    Affectation impossible à une méthode %1 sur %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   
 <error id="1038" label="kRedefinedError">
-    %1 ist bereits definiert.
+    %1 est déjà défini.
     <description><![CDATA[
 		You cannot declare a variable or function with the same identifier name more than once 
 		within the same scope. 
@@ -287,90 +287,90 @@ trace(obj.b.prop);</code></pre>
 	]]></description></error>
  
   <error id="1039" label="kCannotVerifyUntilReferencedError">
-    Die Methode kann nicht überprüft werden, bevor sie referenziert wird.
+    Impossible de vérifier la méthode tant qu'elle n'est pas référencée.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1040" label="kCantUseInstanceofOnNonObjectError">
-    Auf der rechten Seite von instanceof muss eine Klasse oder Funktion stehen.
+    L'expression à droite de instanceof doit être une classe ou une fonction.
     <description><![CDATA[
 		The expression on the right side of the <code>instanceof</code> operator must be a class or function.
 	]]></description></error>
   <error id="1041" label="kIsTypeMustBeClassError">
-    Auf der rechten Seite des Operators muss eine Klasse stehen.
+    L'expression à droite de l'opérateur doit être une classe.
     <description><![CDATA[
 		The expression on the right side of the <code>is</code> operator must be a class.
 	]]></description></error>
    <error id="1042" label="kInvalidMagicError">
-    Keine ABC-Datei. major_version=%1 minor_version=%2.
+    Il ne s'agit pas d'un fichier ABC.  major_version=%1 minor_version=%2.
     <description><![CDATA[
 You are attempting to use an  invalid file with the player: the tool that generates the SWF may be out of date or the SWF itself may be corrupt.
 	]]></description></error>
    <error id="1043" label="kInvalidCodeLengthError">
-    Ungültige code_length=%1.
+    code_length non valide=%1.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1044" label="kInvalidMethodInfoFlagsError">
-    MethodInfo-%1 nicht unterstützte Flags=%2.
+    Indicateurs MethodInfo-%1 non pris en charge=%2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
  
  <error id="1045" label="kUnsupportedTraitsKindError">
-    Nicht unterstützter Traittyp=%1.
+    Type de trait non pris en charge=%1.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1046" label="kMethodInfoOrderError">
-    MethodInfo-%1 vor der Definition referenziert.
+    MethodInfo-%1 référencé avant la définition.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1047" label="kMissingEntryPointError">
-    Es wurde kein Zugangspunkt gefunden.
+    Aucun point d'entrée n'a été détecté.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
    <!--<error id="1048" label="kNativeMethodNotFoundError">Native method not found: %a.</error>-->  
    
    <error id="1049" label="kPrototypeTypeError">
-    Prototypobjekte müssen Vanilla-Objekte sein.
+    Les objets prototype doivent être des objets vanille.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1050" label="kConvertToPrimitiveError">
-    %1 kann nicht in Grundtyp umgewandelt werden.
+    Impossible de convertir %1 en primitive.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1051" label="kIllegalEarlyBindingError">
-    Unzulässig früher Bindungszugriff auf %1.
+    Accès anticipé illégal de liaison à %1.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1052" label="kInvalidURIError">
-    Ungültige URI an %1-Funktion übergeben.
+    URI non valide transmis à la fonction %1.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1053" label="kIllegalOverrideError">
-    Unzulässiges Außerkraftsetzen von %1 in %2.
+    Remplacement illégal de %1 dans %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1054" label="kIllegalExceptionHandlerError">
-    Unzulässige Bereich- oder Zieloffsets in Ausnahmeprozedur.
+    Plage ou décalages cibles illégaux dans le gestionnaire d'exceptions.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
@@ -378,38 +378,38 @@ You are attempting to use an  invalid file with the player: the tool that genera
   <error id="1055" label="kHasNoPropertiesTypeError">%S has no properties</error>
   -->
   <error id="1056" label="kWriteSealedError">
-    Eigenschaft %1 in %2 kann nicht erstellt werden.
+    Impossible de créer la propriété %1 sur %2.
     <description><![CDATA[
 	You are trying to assign a value to a nonexistent property on an instance of a non-dynamic 
 	class. This is only possible for instances of dynamic classes]]></description></error>
   
  <error id="1057" label="kIllegalSlotError">
-    %1 kann nur Methoden enthalten.
+    %1 ne peut contenir que des méthodes.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1058" label="kIllegalOperandTypeError">
-    Unzulässiger Operandtyp: %1 muss %2 sein.
+    Type d'opérande illégal : %1 doit correspondre à %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1059" label="kClassInfoOrderError">
-    ClassInfo-%1 vor der Definition referenziert.
+    ClassInfo-%1 est référencé avant la définition.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1060" label="kClassInfoExceedsCountError">
-    ClassInfo %1 ist größer als class_count=%2.
+    ClassInfo %1 dépasse class_count=%2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   
 <error id="1061" label="kNumberOutOfRangeError">
-    Der Wert %1 kann nicht in %2 umgewandelt werden, ohne dass Genauigkeit verloren geht.
+    La valeur %1 ne peut pas être convertie en %2 sans perte de précision.
     <description><![CDATA[
 	
 		This error appears if you attempt to assign a decimal number to a property that has data type 
@@ -433,9 +433,9 @@ var m1:uint = uint(m0&lt;&lt;24);</code></pre>
 	
 	]]></description></error>
    <!--<error id="1062" label="kPackageCircularityError">Package %a imported while being defined</error>-->
-  <error id="1063" label="kWrongArgumentCountError">Nicht übereinstimmende Argumentzählung für %1. %2 erwartet, %3 erhalten.</error>
+  <error id="1063" label="kWrongArgumentCountError">Non-correspondance du nombre d'arguments sur %1. %2 prévu(s), %3 détecté(s).</error>
   <error id="1064" label="kCannotCallMethodAsConstructor">
-    Methode %1 kann nicht als Konstruktor aufgerufen werden.
+    Impossible d'appeler la méthode %1 en tant que constructeur.
     <description><![CDATA[
 	Extracted methods are permanently bound to the object they are extracted from. 
 	Therefore, they can not later be called as a constructor. For example, the following 
@@ -452,7 +452,7 @@ var m1:uint = uint(m0&lt;&lt;24);</code></pre>
 	
 	]]></description></error>
   <error id="1065" label="kUndefinedVarError">
-    Variable %1 ist nicht definiert.
+    La variable %1 n'est pas définie.
     <description><![CDATA[
 	You are using an undefined lexical reference. For example, in the following statements, the 
 	statement <code>trace(x)</code> generates an error because <code>x</code> is undefined. However, the 
@@ -463,27 +463,27 @@ var m1:uint = uint(m0&lt;&lt;24);</code></pre>
 	trace(y) // No error, y is defined.</code></pre>
 	]]></description></error>
   <error id="1066" label="kFunctionConstructorError">
-    Die Form function('function body') wird nicht unterstützt.
+    La fonction('corps de fonction') form n'est pas prise en charge.
     <description><![CDATA[
 	Unlike JavaScript, Flash does not compile code on-the-fly using <code>eval()</code> and 
 	<code>function()</code>.  Thus, calling these as a constructor in ActionScript 3.0 generates this error.
 	]]></description></error>
   
 <error id="1067" label="kIllegalNativeMethodBodyError">
-    Der Hauptteil der nativen Methode %1 ist unzulässig.
+    La méthode native %1 contient un corps de méthode illégal.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   
 <error id="1068" label="kCannotMergeTypesError">
-    %1 und %2 können nicht angeglichen werden.
+    Impossible de réconcilier %1 et %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1069" label="kReadSealedError">
-    Eigenschaft %1 für %2 nicht gefunden und es ist kein Standardwert vorhanden.
+    La propriété %1 est introuvable sur %2 et il n'existe pas de valeur par défaut.
     <description><![CDATA[
 	You are referencing an undefined property on a non-dynamic class instance. For example, the following generates this error when it references property 
 	<code>x</code>, which is not defined and cannot be created dynamically: 	
@@ -491,7 +491,7 @@ var m1:uint = uint(m0&lt;&lt;24);</code></pre>
 	trace(new A().x) // no property x defined on A, and A is not dynamic</code></pre>
 	]]></description></error>
   <error id="1070" label="kCallNotFoundError">
-    Methode %1 nicht in %2 gefunden
+    La méthode %1 est introuvable sur %2
     <description><![CDATA[
 	You are using a <code>super</code> statement to call a function, but the function doesn't exist in the super class. 
 	For example, the following code generates the error:	<pre><code>class A() {}
@@ -499,63 +499,63 @@ class B extends A {
   function f() { trace(super.f()); } // error 1070, there is no f on A
 }</code></pre>
 	]]></description></error>
-  <error id="1071" label="kAlreadyBoundError">Funktion %1 wurde bereits an %2 gebunden.</error>
+  <error id="1071" label="kAlreadyBoundError">La fonction %1 a déjà été liée à %2.</error>
   
 <error id="1072" label="kZeroDispIdError">
-    Disp_id 0 ist unzulässig.
+    Disp_id 0 est illégal.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1073" label="kDuplicateDispIdError">
-    Die nicht außer Kraft zu setzende Methode %1 wurde wegen doppelter disp_id %2 ersetzt.
+    La méthode de non-remplacement %1 a été supplantée en raison du doublon disp_id %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
   
-<error id="1074" label="kConstWriteError">Unzulässiger Schreibvorgang in schreibgeschützte Eigenschaft %1 in %2.</error>
+<error id="1074" label="kConstWriteError">Ecriture illégale dans une propriété en lecture seule %1 sur %2.</error>
   <error id="1075" label="kMathNotFunctionError">
-    Math ist keine Funktion.
+    Math n'est pas une fonction.
     <description><![CDATA[
 	You are trying to call <code>math()</code> as a function, but the Math class is a class with static methods.
 	]]></description></error>
   <error id="1076" label="kMathNotConstructorError">
-    Math ist kein Konstruktor.
+    Math n'est pas un constructeur.
     <description><![CDATA[
 	You can not instantiate the Math class. 
  	]]></description></error>
  
-  <error id="1077" label="kWriteOnlyError">Unzulässiger Lesevorgang für Eigenschaft mit Lesezugriff %1 in %2.</error>
+  <error id="1077" label="kWriteOnlyError">Lecture illégale d'une propriété en écriture seule %1 sur %2.</error>
    <error id="1078" label="kIllegalOpMultinameError">
-    Unzulässige Opcode/Multiname-Kombination: %1&lt;%2&gt;.
+    Combinaison opcode/multiname illégale : %1&lt;%2&gt;.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1079" label="kIllegalNativeMethodError">
-    Native Methoden sind in geladenem Code nicht zulässig.
+    Les méthodes natives ne sont pas autorisées dans le code chargé.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1080" label="kIllegalNamespaceError">
-    Unzulässiger Wert für Namespace.
+    La valeur de l'espace de nom est illégale.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
  
-  <error id="1081" label="kReadSealedErrorNs">Eigenschaft %1 in %2 nicht gefunden und es ist kein Standardwert vorhanden.</error>
+  <error id="1081" label="kReadSealedErrorNs">La propriété %1 est introuvable sur %2 et il n'existe pas de valeur par défaut.</error>
  <!--<error id="1081" label="kIllegalMultinameCallError">Illegal call to %1</error>-->  
  
  <error id="1082" label="kNoDefaultNamespaceError">
-    Es wurde kein Standard-Namespace festgelegt.
+    Aucun espace de nom par défaut n'a été défini.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1083" label="kXMLPrefixNotBound">
-    Das Präfix "%1" für Element "%2" ist nicht gebunden.
+    Le préfixe "%1" associé à l'élément "%2" n'est pas lié.
     <description><![CDATA[
 	An attribute name or element name has a prefix but no matching namespace was 
 	found. This statement generates an error because there is no <code>foo</code> 
@@ -563,14 +563,14 @@ class B extends A {
 		]]></description></error>
  
   <error id="1084" label="kXMLBadQName">
-    Element oder Attribut ("%1") stimmt nicht mit QName-Produktion überein: QName::=(NCName':')?NCName.
+    L'élément ou l'attribut ("%1") ne correspond pas à la production QName : QName::=(NCName':')?NCName.
     <description><![CDATA[
 	You have <code>foo: </code> or <code>:foo</code> as an element or attribute name, but there is nothing 
 	on the other side of the colon.	
 	]]></description></error>
-  <error id="1085" label="kXMLUnterminatedElementTag">Der Elementtyp "%1" muss durch das entsprechende Schluss-Tag "&lt;/%2&gt;" abgeschlossen werden.</error>
+  <error id="1085" label="kXMLUnterminatedElementTag">Le type d'élément "%1" doit se terminer par la balise de fin correspondante "&lt;/%2&gt;".</error>
   <error id="1086" label="kXMLOnlyWorksWithOneItemLists">
-    Die %1-Methode kann nur für Listen mit einem Element verwendet werden.
+    La méthode %1 ne fonctionne qu'avec les listes composées d'un seul élément.
     <description><![CDATA[
 	The XMLList class propagates the XML-specific functions to one child if it has only one 
 	item in its list. If more than one item is in the list, the routines fail with this 
@@ -582,9 +582,9 @@ class B extends A {
 	<code>setChildren</code>,  <code>setLocalName</code>,  <code>setName</code>,  and <code>setNamespace.
  
 	]]></description></error>
-  <error id="1087" label="kXMLAssignmentToIndexedXMLNotAllowed">Die Zuweisung zu indizierter XML ist nicht zulässig.</error>
+  <error id="1087" label="kXMLAssignmentToIndexedXMLNotAllowed">L'affectation à un élément XML indexé n'est pas autorisée.</error>
   <error id="1088" label="kXMLMarkupMustBeWellFormed">
-    Das Markup im Dokument nach dem Stammelement muss logisch aufgebaut sein.
+    Le marquage du document après l'élément root doit être composé correctement.
     <description><![CDATA[
 	These are possible causes of this error:
 	<ul>
@@ -593,24 +593,24 @@ class B extends A {
 	</ul>	
 	]]></description></error>
  
-  <error id="1089" label="kXMLAssigmentOneItemLists">Die Zuweisung zu Listen mit mehreren Elementen wird nicht unterstützt.</error>
+  <error id="1089" label="kXMLAssigmentOneItemLists">L'affectation à des listes composées de plus d'un élément n'est pas prise en charge.</error>
   <error id="1090" label="kXMLMalformedElement">
-    XML-Parserfehler: Element ist fehlerhaft.
+    Echec de l'analyse XML : le format de l'élément est incorrect.
     <description><![CDATA[
 	An element name is malformed. This example of an element name is malformed because a 
 	trailing right angle bracket <code>></code> is missing:
  
 	<pre>&lt;a/&gt;&lt;b&gt;&lt;/b</pre>	]]></description></error>
  
-  <error id="1091" label="kXMLUnterminatedCData">XML-Parserfehler: Nicht abgeschlossener CDATA-Abschnitt.</error>
-  <error id="1092" label="kXMLUnterminatedXMLDecl">XML-Parserfehler: Nicht abgeschlossene XML-Deklaration.</error>
-  <error id="1093" label="kXMLUnterminatedDocTypeDecl">XML-Parserfehler: Nicht abgeschlossene DOCTYPE-Deklaration.</error>
-  <error id="1094" label="kXMLUnterminatedComment">XML-Parserfehler: Nicht abgeschlossener Kommentar.</error>
-  <error id="1095" label="kXMLUnterminatedAttribute">XML-Parserfehler: Nicht abgeschlossenes Attribut.</error>
-  <error id="1096" label="kXMLUnterminatedElement">XML-Parserfehler: Nicht abgeschlossenes Element.</error>
-  <error id="1097" label="kXMLUnterminatedProcessingInstruction">XML-Parserfehler: Nicht abgeschlossene Verarbeitungsanweisung.</error>
+  <error id="1091" label="kXMLUnterminatedCData">Echec de l'analyse XML : Section CDATA non terminée.</error>
+  <error id="1092" label="kXMLUnterminatedXMLDecl">Echec de l'analyse XML : Déclaration XML non terminée.</error>
+  <error id="1093" label="kXMLUnterminatedDocTypeDecl">Echec de l'analyse XML : Déclaration DOCTYPE non terminée.</error>
+  <error id="1094" label="kXMLUnterminatedComment">Echec de l'analyse XML : Commentaire non terminé.</error>
+  <error id="1095" label="kXMLUnterminatedAttribute">Echec de l'analyse XML : Attribut non terminé.</error>
+  <error id="1096" label="kXMLUnterminatedElement">Echec de l'analyse XML : Elément non terminé.</error>
+  <error id="1097" label="kXMLUnterminatedProcessingInstruction">Echec de l'analyse XML : Instruction de traitement non terminée.</error>
   <error id="1098" label="kXMLNamespaceWithPrefixAndNoURI">
-    Unzulässiges Präfix %1 für Nicht-Namespace.
+    Préfixe %1 illégal sans espace de nom.
     <description><![CDATA[
 	The namespace constructor throws this error if you try to pass in an empty URI with a 
 	non-empty prefix as in this example:
@@ -620,7 +620,7 @@ class B extends A {
  
   <!--<error id="1099" label="kNullArgumentError">Argument %s cannot be null.</error>-->
   <error id="1100" label="kRegExpFlagsArgumentError">
-    Es können keine Flags angegeben werden, wenn ein RegExp aus einem anderen konstruiert wird.
+    Impossible de fournir des indicateurs lors de la construction d'un RegExp à partir d'un autre.
     <description><![CDATA[
 	Creating a new regular expression from an existing one also copies its flags. To create a regular expression with 
 	different flags, use the <code>new</code> operator and set the flags as desired. For example, this statement 
@@ -630,120 +630,123 @@ class B extends A {
 	<pre><code>var re2:RegExp = new RegExp(re, ...)</code></pre> 	]]></description></error>
   
    <error id="1101" label="kNoScopeError">
-    Methode %1 mit unbekannten Gültigkeitsbereich kann nicht überprüft werden.
+    Impossible de vérifier la méthode %1 si le domaine est inconnu.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1102" label="kIllegalDefaultValue">
-    Unzulässiger Standardwert für Typ %1.
+    Valeur par défaut illégale pour le type %1.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
    <error id="1103" label="kCannotExtendFinalClass">
-    Klasse %1 kann die letzte Basisklasse nicht erweitern.
+    La classe %1 ne peut pas étendre la classe de base finale.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
-   <error id="1104" label="kXMLDuplicateAttribute">Attribut "%1" wurde bereits für Element "%2" spezifiziert.</error>
+   <error id="1104" label="kXMLDuplicateAttribute">L'attribut "%1" a déjà été spécifié pour l'élément "%2".</error>
   <!--<error id="1105" label="kStringIndexOutOfBoundsError">The string index %d is out of bounds; must be in range %d to %d.</error>-->
   <!--<error id="1106" label="kInvalidRangeError">The range specified is invalid.</error>-->
   <error id="1107" label="kCorruptABCError">
-    Die ABC-Daten sind beschädigt, versuchtes Lesen außerhalb des gültigen Bereichs.
+    Les données ABC sont corrompues, tentative de lecture en dehors des limites.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1108" label="kInvalidBaseClassError">
-    Der Opcode OP_newclass wurde mit der falschen Basisklasse verwendet.
+    L'élément opcode OP_newclass a été utilisé avec une classe de base incorrecte.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1109" label="kDanglingFunctionError">
-    Versuchter direkter Aufruf der nicht gebundenen Funktion %1 von Methode %2.
+    Tentative d'appel direct d'une fonction non liée %1 à partir de la méthode %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1110" label="kCannotExtendError">
-    %1 kann nicht %2 erweitern.
+    %1 ne peut pas étendre %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1111" label="kCannotImplementError">
-    %1 kann nicht %2 implementieren.
+    %1 ne peut pas mettre en oeuvre %2.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
-   <error id="1112" label="kCoerceArgumentCountError">Nicht übereinstimmende Argumentzählung für Klassenumwandlung.  1 erwartet, %1 erhalten.</error>
+   <error id="1112" label="kCoerceArgumentCountError">Non-concordance du nombre d'arguments pour contrainte de classe.  1 prévu, %1 détecté(s).</error>
    <error id="1113" label="kInvalidNewActivationError">
-    OP_newactivation wurde ohne Flag NEED_ACTIVATION in Methode verwendet.
+    OP_newactivation utilisé dans la méthode sans indicateur NEED_ACTIVATION.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
   <error id="1114" label="kNoGlobalScopeError">
-    OP_getglobalslot oder OP_setglobalslot ohne globalen Gültigkeitsbereich verwendet.
+    OP_getglobalslot ou OP_setglobalslot utilisé sans domaine global.
     <description><![CDATA[
 		See the <a href="#note">note</a> at the bottom of this table.&#42;
 	]]></description></error>
  
-  <error id="1115" label="kNotConstructorError">%1 ist kein Konstruktor.</error>
-  <error id="1116" label="kApplyError">zweites Argument für Function.prototype.apply muss ein Array sein.</error>
-  <error id="1117" label="kXMLInvalidName">Ungültiger XML-Name: %1.</error>
-  <error id="1118" label="kXMLIllegalCyclicalLoop">Unzulässige zyklische Schleife zwischen Knoten.</error>
-  <error id="1119" label="kDeleteTypeError">Delete-Operator mit Operand vom Typ %1 wird nicht unterstützt.</error>
-  <error id="1120" label="kDeleteSealedError">Eigenschaft %1 in %2 kann nicht gelöscht werden.</error>
-  <error id="1121" label="kDuplicateMethodBodyError">Methode %1 verfügt über doppelten Hauptteil.</error>
-   <error id="1122" label="kIllegalInterfaceMethodBodyError">Der Hauptteil der Schnittstellenmethode %1 ist unzulässig.</error>
-  <error id="1123" label="kFilterError">Filter-Operator wird für Typ %1 nicht unterstützt.</error>  
-  <error id="1124" label="kInvalidHasNextError">Für OP_hasnext2 müssen object und index verschiedene Register sein.</error>
-  <error id="1125" label="kOutOfRangeError">Der Index %1 liegt außerhalb des gültigen Bereichs %2.</error>
-  <error id="1126" label="kVectorFixedError">Die Länge eines festen Vektors kann nicht geändert werden.</error>
+  <error id="1115" label="kNotConstructorError">%1 n'est pas un constructeur.</error>
+  <error id="1116" label="kApplyError">Le deuxième argument transmis à Function.prototype.apply doit être un tableau.</error>
+  <error id="1117" label="kXMLInvalidName">Nom XML non valide : %1.</error>
+  <error id="1118" label="kXMLIllegalCyclicalLoop">Boucle cyclique illégale entre noeuds.</error>
+  <error id="1119" label="kDeleteTypeError">L'opérateur delete n'est pas pris en charge avec une opérande de type %1.</error>
+  <error id="1120" label="kDeleteSealedError">Impossible de supprimer la propriété %1 sur %2.</error>
+  <error id="1121" label="kDuplicateMethodBodyError">La méthode %1 contient un corps de méthode dupliqué.</error>
+   <error id="1122" label="kIllegalInterfaceMethodBodyError">La méthode d'interface %1 contient un corps de méthode illégal.</error>
+  <error id="1123" label="kFilterError">L'opérateur Filter n'est pas pris en charge sur le type %1.</error>  
+  <error id="1124" label="kInvalidHasNextError">OP_hasnext2 requiert que l'objet et l'index soient des registres distincts.</error>
+  <error id="1125" label="kOutOfRangeError">L'index %1 est en dehors des limites %2.</error>
+  <error id="1126" label="kVectorFixedError">Impossible de modifier la longueur d'un vecteur fixe.</error>
+
+<error id="1127" label="kTypeAppOfNonParamType">Application de type tentée sur un type sans paramètre.</error>
+  <error id="1128" label="kWrongTypeArgCountError">Nombre incorrect de paramètres type pour %1. %2 prévu(s), %3 détecté(s).</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  
-  <error id="1500" hidden="true" label="kFileOpenError">Fehler beim Öffnen von Datei %1.</error>
+  <error id="1500" hidden="true" label="kFileOpenError">Une erreur s’est produite lors de l’ouverture du fichier %1.</error>
   <error id="1501" hidden="true" label="kFileWriteError">
-    Fehler beim Schreiben in Datei %1.
+    Une erreur s’est produite lors de l’écriture dans le fichier %1.
     <description><![CDATA[
 		The file you are writing to cannot be opened. Possibly the filename contains an error, the file is read-only, or 
 		you do not have access privileges.
 	  	]]></description>
 		</error>
   <error id="1502" label="kScriptTimeoutError">
-    Ein Skript wurde länger als die Standard-Timeout-Zeit von 15 Sekunden ausgeführt.
+    La durée d'exécution d'un script excède le délai par défaut (15 secondes).
     <description><![CDATA[
 		A script executed after the timeout period. (The default timeout period is 15 seconds.) After this error occurs, the 
 		script can continue to execute for 15 seconds more, after which the script terminates and throws run-time error number 1503 (A script failed to exit after 30 seconds and was terminated.)  
 	]]></description>
  </error>
   <error id="1503" label="kScriptTerminatedError">
-    Ein Skript konnte nach 30 Sekunden nicht abgeschlossen werden und wurde beendet.
+    Un script ne s'est pas terminé après 30 secondes et a été arrêté.
     <description><![CDATA[
 	  The script was still executing after 30 seconds. Flash Player first throws run-time error number 1502 (A script has executed for longer than the default timeout period of 15 seconds.) if the script executed more than 15 
 	  seconds, which is the default timeout period. This error occurs 15 seconds after Error 1502 occurs.  
 	]]></description></error>
 	 <error id="1504" hidden="true" label="kEndOfFileError">
-    Dateiende.
+    Fin du fichier.
     <description><![CDATA[
 	  Flash Player unexpectedly encountered the end of the file. Possibly the file was not saved correctly or Flash Player expected more data 
 	  in the file.
 	]]></description>  
   </error>
-  <error id="1505" hidden="true" label="kStringIndexOutOfBoundsError">Der String-Index %1 liegt außerhalb des zulässigen Bereichs; muss im Bereich %2 bis %3 liegen.</error>
+  <error id="1505" hidden="true" label="kStringIndexOutOfBoundsError">L'index de chaîne %1 sort des limites. Il doit être compris entre %2 et %3.</error>
   <error id="1506" hidden="true" label="kInvalidRangeError">
-    Der angegebene Bereich ist ungültig.
+    La plage indiquée n'est pas valide.
     <description><![CDATA[
 	The method's <code>start</code> parameter is greater than its <code>end</code> parameter.
 	]]></description></error>
-  <error id="1507" label="kNullArgumentError">Argument %1 kann nicht null sein.</error>
+  <error id="1507" label="kNullArgumentError">L’argument %1 ne doit pas être null.</error>
   <error id="1508" label="kInvalidArgumentError">
-    Der angegebene Wert für Argument %1 ist ungültig.
+    La valeur indiquée pour l’argument %1 n’est pas valide.
     <description><![CDATA[
 	You are possibly trying to pass the wrong data type. For example, the code
 	<pre><code>public function doSomething(const:int):void {
@@ -752,10 +755,10 @@ class B extends A {
 	generates an error at runtime because <code>doSomething</code> is cast as an int data type.	]]></description></error>
  
   <error id="1509" hidden="true" label="kShellCompressedDataError">
-    Fehler beim Dekomprimieren der Daten.
+    Une erreur s'est produite lors de la décompression des données.
     <description><![CDATA[
 	The de-compressor reached the end of the stream, but more data was expected. The compressed data 
 	stream is probably corrupted.
 	]]></description></error>
-  <error id="1510" label="kArrayFilterNonNullObjectError">Wenn das callback-Argument eine Methode einer Klasse ist, muss das optionale this-Argument null sein.</error>
+  <error id="1510" label="kArrayFilterNonNullObjectError">Lorsque l’argument du rappel correspond à une méthode de classe, l’argument facultatif 'this' doit être null.</error>
 </errors>
