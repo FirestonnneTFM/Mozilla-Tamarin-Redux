@@ -3925,7 +3925,7 @@ namespace avmplus
             AvmAssert(false);
 			for (int i=0, n=info->exceptions->exception_count; i < n; i++)
 			{
-				ExceptionHandler* h = &info->exceptions->exceptions[i];
+				ExceptionHandler* h = &info->exceptions->exceptions[i]; (void)h;
 				AvmAssertMsg(state->verifier->getFrameState(h->target)->label.bb != NULL, "Exception target address MUST have been resolved");
 				//mirPatchPtr( (OP**)&h->target, h->target );
 			}
