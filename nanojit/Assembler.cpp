@@ -46,6 +46,10 @@
 #include <asm/unistd.h>
 #endif
 
+#ifdef PERFM
+#include "../vprof/vprof.h"
+#endif /* PERFM */
+
 namespace nanojit
 {
 	#ifdef FEATURE_NANOJIT
@@ -281,6 +285,7 @@ namespace nanojit
 			page->next = list;
 			list = page;
 			nMarkExecute(page);
+			_stats.pages++;
 		}
 		else
 		{
@@ -298,6 +303,7 @@ namespace nanojit
 		
 		_nIns = 0;
 		_nExitIns = 0;
+		_stats.pages = 0;
 
 		nativePageReset();
 	}
@@ -312,6 +318,15 @@ namespace nanojit
 		}
 	}
 
+	int_t Assembler::codeBytes()
+	{
+		// computes the # bytes used for code. Should be
+		// called after endAssembly prior to handoverPages()
+		return ((_stats.pages-2) * sizeof(Page)) +
+			((int_t)pageBottom(_nIns) - (int_t)_nIns) +
+			((int_t)pageBottom(_nExitIns) - (int_t)_nExitIns);
+	}
+	
 	Page* Assembler::handoverPages(bool exitPages)
 	{
 		Page*& list = (exitPages) ? _nativeExitPages : _nativePages;
@@ -321,7 +336,7 @@ namespace nanojit
 		ins = 0;
 		return start;
 	}
-	
+
 	#ifdef _DEBUG
 	bool Assembler::onPage(NIns* where, bool exitPages)
 	{
@@ -728,6 +743,10 @@ namespace nanojit
 
 		setError(None);
 
+#ifdef PERFM
+		NanoAssert(_stats.pages == 0); // warning the codeBytes() will be incorrect if we hit this
+#endif /* PERFM */
+
 		// native code gen buffer setup
 		nativePageSetup();
 		
@@ -821,7 +840,9 @@ namespace nanojit
 
             frag->fragEntry = patchEntry;
 			NIns* code = _nIns;
-			
+#ifdef PERFM
+			_nvprof("code", codeBytes());  // requires that all pages are released between begin/endAssembly()otherwise we double count
+#endif
 			// let the fragment manage the pages if we're using trees and there are branches
 			Page* manage = (_frago->core()->config.tree_opt) ? handoverPages() : 0;
 			frag->setCode(code, manage); // root of tree should manage all pages

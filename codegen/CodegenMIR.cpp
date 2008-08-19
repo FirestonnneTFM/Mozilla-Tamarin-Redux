@@ -145,6 +145,10 @@ extern  "C"
 }
 #endif
 
+#ifdef PERFM
+#include "../vprof/vprof.h"
+#endif /* PERFM */
+
 #ifdef AVMPLUS_64BIT
 #define AVMCORE_integer			AvmCore::integer64
 #define AVMCORE_integer_i		AvmCore::integer64_i
@@ -8216,6 +8220,10 @@ namespace avmplus
 		}
 		#endif
 
+#ifdef PERFM
+		uint64_t start = rtstamp();
+#endif /* PERFM */
+
 		/* 
 		* Use access exceptions to manage our buffer growth.  We
 		* reserve a large region of memory and write to it freely
@@ -8264,6 +8272,14 @@ namespace avmplus
 		END_CATCH
 		END_TRY
 #endif // FEATURE_BUFFER_GUARD
+#ifdef PERFM
+		uint64_t stop = rtstamp();
+		const int mhz = 100;
+		_nvprof("compile", (stop-start)/(100*mhz));
+		_nvprof("mir bytes", (int_t)ipEnd - (int_t)code);
+		_nvprof("mir", int_t((ip - ipStart)));
+		_nvprof("code", int_t((mip - mipStart) * sizeof(MDInstruction)));
+#endif /* PERFM */
 	}
 
 #ifdef FEATURE_BUFFER_GUARD

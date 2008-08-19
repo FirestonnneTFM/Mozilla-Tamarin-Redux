@@ -53,7 +53,7 @@
 
 #ifdef AVMPLUS_MAC
   // Are we PowerPC or i386 (Macintel) or x86_64 (64-bit)?
-  #if __i386__
+  #ifdef __i386__
     #ifndef AVMPLUS_IA32
       #define AVMPLUS_IA32
     #endif
@@ -191,6 +191,9 @@
 
 // Enable interfacing Java
 #define FEATURE_JNI
+
+// performance metrics for NJ 
+//#define PERFM
 
 #ifdef SOLARIS
 #define HAVE_ALLOCA_H

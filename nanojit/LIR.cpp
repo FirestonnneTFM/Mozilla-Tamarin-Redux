@@ -40,6 +40,10 @@
 #include "nanojit.h"
 #include <stdio.h>
 
+#ifdef PERFM
+#include "../vprof/vprof.h"
+#endif /* PERFM */
+
 namespace nanojit
 {
     using namespace avmplus;
@@ -151,15 +155,16 @@ namespace nanojit
 	}
 	#endif 
 
-#ifdef NJ_VERBOSE
-	int LirBuffer::insCount() {
+	int_t LirBuffer::insCount() 
+	{
+		// doesn't include embedded constants nor LIR_skip payload
 		return _stats.lir;
 	}
-	int LirBuffer::byteCount() {
-		return (_stats.pages-1) * (sizeof(Page)-sizeof(PageHeader)) +
-			(_unused - &_unused->page()->lir[0]) * sizeof(LIns);
+	int_t LirBuffer::byteCount() 
+	{
+		return ((_stats.pages-1) * sizeof(Page)) +
+			((int_t)_unused - (int_t)pageTop(_unused));
 	}
-#endif
 
 	Page* LirBuffer::pageAlloc()
 	{
@@ -400,6 +405,7 @@ namespace nanojit
 		*((LInsp*)(l-1)) = target;
 		l->initOpcode(op);
 		_buf->commit(2);
+		_buf->_stats.lir++;
 		return l;
 	}
 	
@@ -413,6 +419,7 @@ namespace nanojit
             l->initOpcode(LOpcode(op-1)); // nearskip or neartramp
             l->t.imm24 = target-l;
             _buf->commit(1);
+			_buf->_stats.lir++;
         }
         else
 		{

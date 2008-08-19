@@ -117,7 +117,8 @@ namespace nanojit
 		counter_define(spills;)
 		counter_define(native;)
         counter_define(exitnative;)
-
+		
+		int_t pages;
 		DECLARE_PLATFORM_STATS()
 #ifdef __GNUC__
 		// inexplicably, gnuc gives padding/alignment warnings without this. pacify it.
@@ -206,6 +207,7 @@ namespace nanojit
 			AssmError   error()	{ return _err; }
 			void		setError(AssmError e) { _err = e; }
 			void		pageReset();
+			int_t		codeBytes();
 			Page*		handoverPages(bool exitPages=false);
 
 			debug_only ( void		pageValidate(); )

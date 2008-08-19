@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		076659050E4D244F0092FCA7 /* Translator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 076659040E4D244F0092FCA7 /* Translator.cpp */; };
 		1A91570F0B012A3F00744986 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A91570E0B012A3F00744986 /* libz.dylib */; };
+		4E9A32270E5A423000376C46 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4E9A32260E5A423000376C46 /* vprof.cpp */; };
 		6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6803D2C70A5064FD00C797BB /* JavaGlue.cpp */; };
 		6803D2CA0A5064FD00C797BB /* JavaGlue.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6803D2C80A5064FD00C797BB /* JavaGlue.h */; };
 		858088D70C8F604F0093F49B /* Sampler.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 858088D40C8F604F0093F49B /* Sampler.as */; };
@@ -120,6 +121,24 @@
 		076659040E4D244F0092FCA7 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Translator.cpp; sourceTree = "<group>"; };
 		07F636620E4F788800EB2E55 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Translator.h; sourceTree = "<group>"; };
 		1A91570E0B012A3F00744986 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
+		4E0F4EEA0E5A353500DA786F /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cpp; path = ../../../nanojit/Assembler.cpp; sourceTree = SOURCE_ROOT; };
+		4E0F4EEB0E5A353500DA786F /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Assembler.h; path = ../../../nanojit/Assembler.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EEC0E5A353500DA786F /* Fragmento.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Fragmento.cpp; path = ../../../nanojit/Fragmento.cpp; sourceTree = SOURCE_ROOT; };
+		4E0F4EED0E5A353500DA786F /* Fragmento.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Fragmento.h; path = ../../../nanojit/Fragmento.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EEE0E5A353500DA786F /* LIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = LIR.cpp; path = ../../../nanojit/LIR.cpp; sourceTree = SOURCE_ROOT; };
+		4E0F4EEF0E5A353500DA786F /* LIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = LIR.h; path = ../../../nanojit/LIR.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EF00E5A353500DA786F /* nanojit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = nanojit.h; path = ../../../nanojit/nanojit.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EF10E5A353500DA786F /* Native.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Native.h; path = ../../../nanojit/Native.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EF20E5A353500DA786F /* NativeAMD64.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NativeAMD64.h; path = ../../../nanojit/NativeAMD64.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EF30E5A353500DA786F /* NativeARM.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NativeARM.h; path = ../../../nanojit/NativeARM.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EF40E5A353500DA786F /* Nativei386.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Nativei386.cpp; path = ../../../nanojit/Nativei386.cpp; sourceTree = SOURCE_ROOT; };
+		4E0F4EF50E5A353500DA786F /* Nativei386.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Nativei386.h; path = ../../../nanojit/Nativei386.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EF60E5A353500DA786F /* NativeThumb.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = NativeThumb.cpp; path = ../../../nanojit/NativeThumb.cpp; sourceTree = SOURCE_ROOT; };
+		4E0F4EF70E5A353500DA786F /* NativeThumb.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NativeThumb.h; path = ../../../nanojit/NativeThumb.h; sourceTree = SOURCE_ROOT; };
+		4E0F4EF80E5A353500DA786F /* RegAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = RegAlloc.cpp; path = ../../../nanojit/RegAlloc.cpp; sourceTree = SOURCE_ROOT; };
+		4E0F4EF90E5A353500DA786F /* RegAlloc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = RegAlloc.h; path = ../../../nanojit/RegAlloc.h; sourceTree = SOURCE_ROOT; };
+		4E0F4F500E5A379600DA786F /* CodegenLIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CodegenLIR.cpp; sourceTree = "<group>"; };
+		4E0F4F510E5A379600DA786F /* CodegenLIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CodegenLIR.h; sourceTree = "<group>"; };
 		4E62BE2C0D6244D300A24F2D /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AbcData.cpp; sourceTree = "<group>"; };
 		4E62BE2D0D6244D300A24F2D /* AbcEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AbcEnv.cpp; sourceTree = "<group>"; };
 		4E62BE2E0D6244D300A24F2D /* AbcEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AbcEnv.h; sourceTree = "<group>"; };
@@ -395,12 +414,13 @@
 		4E62BF3F0D62451F00A24F2D /* solarisbuild.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = solarisbuild.h; sourceTree = "<group>"; };
 		4E62BF400D62451F00A24F2D /* winbuild.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = winbuild.h; sourceTree = "<group>"; };
 		4E62BF410D62451F00A24F2D /* WriteBarrier.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = WriteBarrier.h; sourceTree = "<group>"; };
+		4E9A32260E5A423000376C46 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
 		6803D2C70A5064FD00C797BB /* JavaGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = JavaGlue.cpp; path = ../../../extensions/JavaGlue.cpp; sourceTree = SOURCE_ROOT; };
 		6803D2C80A5064FD00C797BB /* JavaGlue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = JavaGlue.h; path = ../../../extensions/JavaGlue.h; sourceTree = SOURCE_ROOT; };
 		858088D40C8F604F0093F49B /* Sampler.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Sampler.as; path = ../../../extensions/Sampler.as; sourceTree = SOURCE_ROOT; };
 		858088D50C8F604F0093F49B /* SamplerScript.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerScript.cpp; path = ../../../extensions/SamplerScript.cpp; sourceTree = SOURCE_ROOT; };
 		858088D60C8F604F0093F49B /* SamplerScript.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SamplerScript.h; path = ../../../extensions/SamplerScript.h; sourceTree = SOURCE_ROOT; };
-		8DD76FB20486AB0100D96B5E /* shell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* shell */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E8B527909AABAA20057BEE4 /* avmshell.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmshell.cpp; path = ../../../shell/avmshell.cpp; sourceTree = SOURCE_ROOT; };
 		8E8B527A09AABAA20057BEE4 /* avmshell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = avmshell.h; path = ../../../shell/avmshell.h; sourceTree = SOURCE_ROOT; };
 		8E8B527B09AABAA20057BEE4 /* ByteArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ByteArray.as; path = ../../../shell/ByteArray.as; sourceTree = SOURCE_ROOT; };
@@ -466,6 +486,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4E9A32250E5A420E00376C46 /* vprof */,
 				4E62BE2A0D62449900A24F2D /* no_compile_for_debugging_only */,
 				8EDDB9E409AAD1BF00FB9EE5 /* extensions */,
 				8EDDB9E209AAD1A100FB9EE5 /* shell */,
@@ -481,9 +502,33 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		4E0F4EE90E5A351000DA786F /* nanojit */ = {
+			isa = PBXGroup;
+			children = (
+				4E0F4EEA0E5A353500DA786F /* Assembler.cpp */,
+				4E0F4EEB0E5A353500DA786F /* Assembler.h */,
+				4E0F4EEC0E5A353500DA786F /* Fragmento.cpp */,
+				4E0F4EED0E5A353500DA786F /* Fragmento.h */,
+				4E0F4EEE0E5A353500DA786F /* LIR.cpp */,
+				4E0F4EEF0E5A353500DA786F /* LIR.h */,
+				4E0F4EF00E5A353500DA786F /* nanojit.h */,
+				4E0F4EF10E5A353500DA786F /* Native.h */,
+				4E0F4EF20E5A353500DA786F /* NativeAMD64.h */,
+				4E0F4EF30E5A353500DA786F /* NativeARM.h */,
+				4E0F4EF40E5A353500DA786F /* Nativei386.cpp */,
+				4E0F4EF50E5A353500DA786F /* Nativei386.h */,
+				4E0F4EF60E5A353500DA786F /* NativeThumb.cpp */,
+				4E0F4EF70E5A353500DA786F /* NativeThumb.h */,
+				4E0F4EF80E5A353500DA786F /* RegAlloc.cpp */,
+				4E0F4EF90E5A353500DA786F /* RegAlloc.h */,
+			);
+			name = nanojit;
+			sourceTree = "<group>";
+		};
 		4E62BE2A0D62449900A24F2D /* no_compile_for_debugging_only */ = {
 			isa = PBXGroup;
 			children = (
+				4E0F4EE90E5A351000DA786F /* nanojit */,
 				4E62BF030D62451F00A24F2D /* MMgc */,
 				4E62BEFA0D62450800A24F2D /* codegen */,
 				4E62BE2B0D6244D300A24F2D /* core */,
@@ -710,6 +755,8 @@
 		4E62BEFA0D62450800A24F2D /* codegen */ = {
 			isa = PBXGroup;
 			children = (
+				4E0F4F500E5A379600DA786F /* CodegenLIR.cpp */,
+				4E0F4F510E5A379600DA786F /* CodegenLIR.h */,
 				4E62BEFB0D62450800A24F2D /* Amd64Assembler.cpp */,
 				4E62BEFC0D62450800A24F2D /* ArmAssembler.cpp */,
 				4E62BEFD0D62450800A24F2D /* ArmAssembler.h */,
@@ -798,6 +845,14 @@
 				4E62BF3E0D62451F00A24F2D /* run_alloc.vcproj */,
 			);
 			path = run_alloc;
+			sourceTree = "<group>";
+		};
+		4E9A32250E5A420E00376C46 /* vprof */ = {
+			isa = PBXGroup;
+			children = (
+				4E9A32260E5A423000376C46 /* vprof.cpp */,
+			);
+			name = vprof;
 			sourceTree = "<group>";
 		};
 		8E8B52C409AABABE0057BEE4 /* Products */ = {
@@ -913,7 +968,6 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "shell" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* shell */;
 			projectDirPath = "";
@@ -970,6 +1024,7 @@
 				6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */,
 				858088D80C8F604F0093F49B /* SamplerScript.cpp in Sources */,
 				076659050E4D244F0092FCA7 /* Translator.cpp in Sources */,
+				4E9A32270E5A423000376C46 /* vprof.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1040,7 +1095,7 @@
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
@@ -1052,6 +1107,7 @@
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Debug;
 		};
@@ -1078,7 +1134,7 @@
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -1091,6 +1147,7 @@
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Release;
 		};
@@ -1146,7 +1203,7 @@
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
@@ -1158,6 +1215,7 @@
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Debug_Debugger;
 		};
@@ -1185,7 +1243,7 @@
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -1198,6 +1256,7 @@
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Release_Debugger;
 		};

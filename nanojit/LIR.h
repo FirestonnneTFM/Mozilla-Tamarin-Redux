@@ -691,13 +691,13 @@ namespace nanojit
 			virtual ~LirBuffer();
 			void        clear();
 			LInsp		next();
-			LInsp		commit(uint32_t count);
-			bool		addPage();
 			bool		outOmem() { return _noMem != 0; }
-			debug_only (void		validate() const;)
+			
+			debug_only (void validate() const;)
 			verbose_only(DWB(LirNameMap*) names;)
-			verbose_only(int insCount();)
-			verbose_only(int byteCount();)
+			
+			int_t insCount();
+			int_t byteCount();
 
 			// stats
 			struct 
@@ -711,12 +711,16 @@ namespace nanojit
             AbiKind abi;
             LInsp state,param1,sp,rp;
 			
-		private:
+		protected:
+			friend class LirBufWriter;
+
+			LInsp		commit(uint32_t count);
+			bool		addPage();
 			Page*		pageAlloc();
 
-			Page*				_start;		// first page
-			LInsp				_unused;	// next unused instruction slot
-			int					_noMem;		// set if ran out of memory when writing to buffer
+			Page*		_start;		// first page
+			LInsp		_unused;	// next unused instruction slot
+			int			_noMem;		// set if ran out of memory when writing to buffer
 	};	
 
 	class LirBufWriter : public LirWriter

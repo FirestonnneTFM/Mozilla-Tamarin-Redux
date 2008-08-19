@@ -40,7 +40,6 @@
 #include "avmplus.h"
 #include "CodegenLIR.h"
 #include "../core/FrameState.h"
-#include "../vprof/vprof.h"
 
 #ifdef DARWIN
 #include <Carbon/Carbon.h>
@@ -145,6 +144,10 @@ extern  "C"
 	void sync_instruction_memory(caddr_t v, u_int len);
 }
 #endif
+
+#ifdef PERFM
+#include "../vprof/vprof.h"
+#endif /* PERFM */
 
 #ifdef AVMPLUS_64BIT
 #define AVMCORE_integer			AvmCore::integer64
@@ -4212,6 +4215,9 @@ namespace avmplus
 
     void CodegenLIR::emitMD() 
     {
+#ifdef PERFM
+		uint64_t start = rtstamp();
+#endif /* PERFM */
         debug_only(
             LirReader reader(lirbuf);
             ValidateReader validator(&reader);
@@ -4235,7 +4241,10 @@ namespace avmplus
         assm->beginAssembly(&regMap);
         assm->assemble(frag, loopJumps);
         assm->endAssembly(frag, loopJumps);
-
+#ifdef PERFM
+		uint64_t stop = rtstamp();
+#endif /* PERFM */
+		
 		verbose_only(
             assm->_outputCache = 0;
             for (int i=asmOutput.size()-1; i>=0; --i) {
@@ -4243,6 +4252,13 @@ namespace avmplus
             }
         );
 
+#ifdef PERFM
+		const int mhz = 100;
+		_nvprof("compile", (stop-start)/(100*mhz));
+		_nvprof("lir bytes", lirbuf->byteCount());
+		_nvprof("lir", lirbuf->insCount());		
+#endif /* PERFM */
+		
         frag->releaseLirBuffer();
 
         assm->hasLoop ? loopcount++ : normalcount++;
