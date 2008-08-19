@@ -53,7 +53,7 @@ namespace avmplus
 			AbstractFunction *nativeMethods[],
 			NativeClassInfo *nativeClasses[],
 			NativeScriptInfo *nativeScripts[],
-			List<Stringp, LIST_RCObjects>* keepVersions = NULL);
+			List<Stringp>* keepVersions = NULL);
 
 		~AbcParser();
 
@@ -68,7 +68,7 @@ namespace avmplus
 			AbstractFunction *nativeMethods[],
 			NativeClassInfo *nativeClasses[],
 			NativeScriptInfo *nativeScripts[],
-			List<Stringp, LIST_RCObjects>* keepVersions = NULL);
+			List<Stringp>* keepVersions = NULL);
 
 	protected:
 		PoolObject* parse();
@@ -196,12 +196,12 @@ namespace avmplus
 		NativeClassInfo **nativeClasses;
 		NativeScriptInfo **nativeScripts;
 		int				classCount;
-		List<Traits*, LIST_GCObjects>		instances;
+		List<Traits*>		instances;
 		byte* abcStart;
 		byte* abcEnd; // one past the end, actually
 		Stringp* metaNames;
 		Stringp kNeedsDxns;
-		List<Stringp, LIST_RCObjects>* keepVersions;
+		List<Stringp>* keepVersions;
 #ifdef AVMPLUS_VERBOSE
 		Stringp kVerboseVerify;
 #endif

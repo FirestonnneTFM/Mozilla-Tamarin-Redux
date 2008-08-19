@@ -1159,7 +1159,7 @@ namespace avmplus
 		{
 		public:
 			AR(MMgc::GC *gc) : temps(gc) {}
-			List<OP*,LIST_NonGCObjects>		temps;				/* list of active temps */
+			List<OP*>		temps;				/* list of active temps */
 			int				size;				/* current # of bytes consumed by the temps */
 			int				highwatermark;		/* max size of temps */
 			MDInstruction*	adjustmentIns;		/* AR sizing instruction to patch */

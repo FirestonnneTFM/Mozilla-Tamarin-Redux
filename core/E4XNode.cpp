@@ -747,7 +747,7 @@ namespace avmplus
 			for (uint32 n2 = 0; n2 < numNamespaces(); n2++)
 			{
 				Namespace *namespace2 = core->atomToNamespace (ns2->getAt (n2));
-				if (namespace1->equalTo (namespace2))
+				if (namespace1->EqualTo (namespace2))
 					break;
 			}
 

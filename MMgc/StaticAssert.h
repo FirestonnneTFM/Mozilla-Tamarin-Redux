@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,55 +35,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_AbcGen__
-#define __avmplus_AbcGen__
+#ifndef __StaticAssert__
+#define __StaticAssert__
 
-
-namespace avmplus
+namespace MMgc
 {
-	class AbcGen 
-	{
-	public:
-		/**
-		 * construct an abc code gen buffer with the given initial capacity
-		 */
-		AbcGen(MMgc::GC *gc, int initCapacity=128) : bytes(gc, initCapacity) {}
-
-		List<byte>& getBytes() { return bytes; }
-		void construct_super() { bytes.add(OP_constructsuper); }
-		void pushnan() { bytes.add(OP_pushnan); }
-		void pushundefined() { bytes.add(OP_pushundefined); }
-		void pushnull() { bytes.add(OP_pushnull); }
-		void pushtrue() { bytes.add(OP_pushtrue); }
-		void pushconstant(CPoolKind kind, int index) 
-		{ 
-			// AbcParser should already ensure kind is legal value.
-			AvmAssert(kind >=0 && kind <= CONSTANT_StaticProtectedNs && kindToPushOp[kind] != 0);
-			int op = kindToPushOp[kind];
-			bytes.add((byte)op);
-			if(opOperandCount[op] > 0)
-				writeInt(index); 
-		}
-		void getlocalN(int N) { bytes.add((byte)(OP_getlocal0+N)); }
-		void setslot(int slot) { bytes.add(OP_setslot); writeInt(slot+1); }
-		void abs_jump(const byte *pc, int code_length) 
-		{ 
-			bytes.add(OP_abs_jump); 
-#ifdef AVMPLUS_64BIT
-			writeInt((int)(uintptr)pc);
-			writeInt((int)(((uintptr)pc) >> 32));
-#else			
-			writeInt((int)pc); 
-#endif			
-			writeInt(code_length); 
-		}
-		void returnvoid() { bytes.add(OP_returnvoid); }
-		void writeBytes(List<byte>& b) { bytes.add(b); }
-		void writeInt(unsigned int n);
-		size_t size() { return bytes.size(); }
-	private:
-		List<byte> bytes;
-	};
+	template <int> struct static_assert {};
+	template <bool> struct STATIC_ASSERTION_FAILED;
+	template <> struct STATIC_ASSERTION_FAILED<true> {};
 }
 
-#endif // __avmplus_MethodEnv__
+#define _MMGC_JOIN(x,y) _MMGC_DO_JOIN(x,y)
+#define _MMGC_DO_JOIN(x,y) _MMGC_DO_JOIN2(x,y)
+#define _MMGC_DO_JOIN2(x,y) x##y
+
+#define MMGC_STATIC_ASSERT(condition) \
+	typedef ::MMgc::static_assert<sizeof (::MMgc::STATIC_ASSERTION_FAILED<(bool)(condition)>)> \
+		_MMGC_JOIN(MMgc_static_assert_line_, __LINE__)
+
+#endif /* __StaticAssert__ */

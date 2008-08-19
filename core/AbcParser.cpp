@@ -51,7 +51,7 @@ namespace avmplus
 		AbstractFunction *nativeMethods[],
 		NativeClassInfo *nativeClasses[],
 		NativeScriptInfo *nativeScripts[],
-		List<Stringp, LIST_RCObjects>* keepVersions)
+		List<Stringp>* keepVersions)
     {
 		if (code.getSize() < 4)
 			toplevel->throwVerifyError(kCorruptABCError);
@@ -90,7 +90,7 @@ namespace avmplus
 		AbstractFunction *nativeMethods[],
 		NativeClassInfo *nativeClasses[],
 		NativeScriptInfo *nativeScripts[],
-		List<Stringp, LIST_RCObjects>* keepVersions)
+		List<Stringp>* keepVersions)
 		: toplevel(toplevel),
 		  domain(domain),
 		  instances(core->GetGC(), 0)
@@ -1168,7 +1168,7 @@ namespace avmplus
 		if (int_count > (uint32)(abcEnd - pos)) 
 			toplevel->throwVerifyError(kCorruptABCError);
 
-		List<int,LIST_NonGCObjects>& cpool_int = pool->cpool_int;
+		List<int>& cpool_int = pool->cpool_int;
 		cpool_int.ensureCapacity(int_count);
 		pool->constantIntCount = int_count;
 
@@ -1205,7 +1205,7 @@ namespace avmplus
 		if (uint_count > (uint32)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
 
-		List<uint32,LIST_NonGCObjects>& cpool_uint = pool->cpool_uint;
+		List<uint32>& cpool_uint = pool->cpool_uint;
 		cpool_uint.ensureCapacity(uint_count);
 		pool->constantUIntCount = uint_count;
 
@@ -1288,7 +1288,7 @@ namespace avmplus
 		if (string_count > (uint32)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
 
-		List<Stringp, LIST_RCObjects> &cpool_string = pool->cpool_string;
+		List<Stringp> &cpool_string = pool->cpool_string;
 		MMGC_MEM_TYPE(pool);
 		cpool_string.ensureCapacity(string_count);
 		pool->constantStringCount = string_count;
@@ -1339,7 +1339,7 @@ namespace avmplus
 		if (ns_count > (uint32)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
 
-		List<Namespace*, LIST_RCObjects> &cpool_ns = pool->cpool_ns;
+		List<Namespace*> &cpool_ns = pool->cpool_ns;
 
 		MMGC_MEM_TYPE(pool);
 		cpool_ns.ensureCapacity(ns_count);
@@ -1432,7 +1432,7 @@ namespace avmplus
 		if (ns_set_count > (uint32)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
 
-		List<NamespaceSet*, LIST_GCObjects>& cpool_ns_set = pool->cpool_ns_set;
+		List<NamespaceSet*>& cpool_ns_set = pool->cpool_ns_set;
 		cpool_ns_set.ensureCapacity(ns_set_count);
 		pool->constantNsSetCount = ns_set_count;
 
@@ -1481,7 +1481,7 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 
 		// TODO: why Atom?  its actually a list of positions
-		List<Atom,LIST_NonGCObjects>& cpool_mn = pool->cpool_mn;
+		List<Atom>& cpool_mn = pool->cpool_mn;
 		MMGC_MEM_TYPE(pool);
 		cpool_mn.ensureCapacity(mn_count);
 		pool->constantMnCount = mn_count;

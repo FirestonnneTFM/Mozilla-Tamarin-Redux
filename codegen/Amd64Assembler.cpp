@@ -1600,7 +1600,6 @@ namespace avmplus
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
 	{
-		//AvmAssert(0); // needs to be ported to 64-bit
 		mip = mipStart = getMDBuffer(pool);
 
 #ifdef FEATURE_BUFFER_GUARD

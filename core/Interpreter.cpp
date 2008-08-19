@@ -197,11 +197,11 @@ namespace avmplus
 		Atom tempAtom;
 
 		PoolObject *pool = info->pool;
-		const List<Stringp, LIST_RCObjects>& cpool_string = pool->cpool_string;
-        const List<int,LIST_NonGCObjects>& cpool_int = pool->cpool_int;
-        const List<uint32,LIST_NonGCObjects>& cpool_uint = pool->cpool_uint;
+		const List<Stringp>& cpool_string = pool->cpool_string;
+        const List<int>& cpool_int = pool->cpool_int;
+        const List<uint32>& cpool_uint = pool->cpool_uint;
         const List<double*, LIST_GCObjects>& cpool_double = pool->cpool_double;
-		const List<Namespace*, LIST_RCObjects>& cpool_ns = pool->cpool_ns;
+		const List<Namespace*>& cpool_ns = pool->cpool_ns;
 
 		Atom *sp = scopeBase + max_scope - 1;
 
