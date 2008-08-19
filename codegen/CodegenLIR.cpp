@@ -266,6 +266,16 @@ namespace avmplus
         CALL_INDIRECT, FCALL_INDIRECT, CALL_IMT, FCALL_IMT
     };
 
+	#if defined(_MSC_VER) && !defined(AVMPLUS_ARM)
+	#define SETJMP ((uintptr)_setjmp3)
+	#else
+		#ifdef AVMPLUS_MAC_CARBON
+			#define SETJMP setjmpAddress
+		#else
+			#define SETJMP ((uintptr)setjmp)
+		#endif
+	#endif /* _MSC_VER */
+
 #define INTERP_FOPCODE_LIST_BEGIN static const CallInfo k_functions[] = {
 #define INTERP_FOPCODE_LIST_END };
 
@@ -297,16 +307,6 @@ namespace avmplus
 	static const int prologue_size = 32768; //3840;
 	#endif
 	static const int epilogue_size = 208;
-
-	#if defined(_MSC_VER) && !defined(AVMPLUS_ARM)
-	#define SETJMP ((uintptr)_setjmp3)
-	#else
-		#ifdef AVMPLUS_MAC_CARBON
-			#define SETJMP setjmpAddress
-		#else
-			#define SETJMP ((uintptr)setjmp)
-		#endif
-	#endif /* _MSC_VER */
 
 	/**
 	 * 3 instruction formats 
@@ -389,22 +389,6 @@ namespace avmplus
     OP* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b) {
         return lirout->ins2(op, a, b);
     }
-
-	/**
-	 * Check to see if the given instruction is used in our state
-	 */
-	bool CodegenLIR::usedInState(OP* ins)
-	{
-		for (int i=0, n=state->verifier->frameSize; i < n; i++)
-		{
-			Value& v = state->value(i);
-			if (ins == v.ins)
-				return true;
-		}
-		return false;
-	}
-
-
 
 	/**
  	 * ---------------------------------
@@ -905,9 +889,8 @@ namespace avmplus
 #ifdef _DEBUG
     class ValidateWriter: public LirWriter
     {
-        bool reachable;
     public:
-        ValidateWriter(LirWriter *out) : LirWriter(out), reachable(false)
+        ValidateWriter(LirWriter *out) : LirWriter(out)
         {}
         LIns *ins0(LOpcode op) {
             switch (op) {
@@ -915,30 +898,26 @@ namespace avmplus
                 case LIR_neartramp: AvmAssert(false); break;
                 case LIR_skip: AvmAssert(false); break;
                 case LIR_nearskip: AvmAssert(false); break;
-                case LIR_label: reachable = true; break;
-                case LIR_start: reachable = true; break;
+                case LIR_label: break;
+                case LIR_start: break;
                 default:AvmAssert(false);
             }
             return out->ins0(op);
         }
 
         LIns *insParam(int32_t i) {
-            AvmAssert(reachable);
             return out->insParam(i);
         }
 
         LIns *insImm(int32_t i) {
-            AvmAssert(reachable);
             return out->insImm(i);
         }
 
         LIns *insImmq(uint64_t i) {
-            AvmAssert(reachable);
             return out->insImmq(i);
         }
 
         LIns *ins1(LOpcode op, LIns *a) {
-            AvmAssert(reachable);
             switch (op) {
                 case LIR_fneg: AvmAssert(a->isQuad()); break;
                 case LIR_fret: AvmAssert(a->isQuad()); break;
@@ -956,7 +935,6 @@ namespace avmplus
         }
 
         LIns *ins2(LOpcode op, LIns *a, LIns *b) {
-            AvmAssert(reachable);
             switch (op) {
                 case LIR_fadd: AvmAssert(a->isQuad() && b->isQuad()); break;
                 case LIR_fsub: AvmAssert(a->isQuad() && b->isQuad()); break;
@@ -992,7 +970,6 @@ namespace avmplus
         }
 
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
-            AvmAssert(reachable);
             switch (op) {
                 case LIR_ld: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
                 case LIR_ldc: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
@@ -1003,34 +980,24 @@ namespace avmplus
         }
 
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
-            AvmAssert(reachable);
             AvmAssert(!base->isQuad() && !disp->isQuad());
             return out->insStore(value, base, disp);
         }
 
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
-            AvmAssert(reachable);
             AvmAssert(!base->isQuad());
             return out->insStorei(value, base, d);
         }
 
-        LIns *insBranch(LOpcode op, LIns *cond, LIns *label) {
-            AvmAssert(reachable);
+        LIns *insBranch(LOpcode op, LIns *cond, LIns *to) {
             switch (op) {
-                case LIR_jt: AvmAssert(cond->isCond() && (!label || label->isop(LIR_label))); break;
-                case LIR_jf: AvmAssert(cond->isCond() && (!label || label->isop(LIR_label))); break;
-                case LIR_j:
-                    AvmAssert(!cond && (!label || label->isop(LIR_label)));
-                    reachable = false;
-                    break;
+                case LIR_jt: AvmAssert(cond->isCond() && (!to || to->isop(LIR_label))); break;
+                case LIR_jf: AvmAssert(cond->isCond() && (!to || to->isop(LIR_label))); break;
+                case LIR_j:  AvmAssert(!cond && (!to || to->isop(LIR_label))); break;
+                case LIR_ji: AvmAssert(!cond && to && !to->isop(LIR_label)); break;
                 default: AvmAssert(false);
             }
-            LIns *br = out->insBranch(op, cond, label);
-            AvmAssert(br->oprnd2() == label);
-            if (!label) {
-                AvmAssert(*br->targetAddr() == 0);
-            }
-            return br;
+            return out->insBranch(op, cond, to);
         }
 
         LIns *insGuard(LOpcode v, LIns *cond, SideExit *x) {
@@ -1039,13 +1006,11 @@ namespace avmplus
         }
 
         LIns *insAlloc(int32_t size) {
-            AvmAssert(reachable);
             AvmAssert(size >= 4 && isU16((size+3)>>2));
             return out->insAlloc(size);
         }
 
         LIns *insCall(uint32_t fid, LInsp args[]) {
-            AvmAssert(reachable);
             const CallInfo &call = k_functions[fid];
             ArgSize sizes[2*MAXARGS];
             uint32_t argc = call.get_sizes(sizes);
@@ -1454,8 +1419,8 @@ namespace avmplus
 #endif
 
 			// if (setjmp() == 0) goto start
-			OP* cond = binaryIns(MIR_ucmp, ee, InsConst(0));
-			OP* exBranch = Ins(MIR_jeq, cond);
+			OP* cond = binaryIns(LIR_eq, ee, InsConst(0));
+			OP* exBranch = branchIns(LIR_jt, cond);
 
 			// exception case
 			exAtom = loadIns(MIR_ld, offsetof(Exception, atom), ee);
@@ -1473,7 +1438,8 @@ namespace avmplus
 #endif
 
 			// jump to catch handler
-			Ins(MIR_jmpi, handler, (int32)offsetof(ExceptionHandler, target));
+            handler = loadIns(MIR_ld, offsetof(ExceptionHandler, target), handler);
+			branchIns(LIR_ji, 0, handler);
 
 			// target of conditional
             label->setimm24(state->verifier->frameSize * 8);
@@ -1497,8 +1463,8 @@ namespace avmplus
 		}
 
         // mark end of prolog
-        LIns *label = Ins(MIR_bb);
-        label->setimm24(state->verifier->scopeBase * 8);
+        //LIns *label = Ins(MIR_bb);
+        //label->setimm24(state->verifier->scopeBase * 8);
 
 		return true;
 	}
@@ -1712,38 +1678,34 @@ namespace avmplus
 			}
 			else if (in == NUMBER_TYPE)
 			{
-				OP* ins = value.ins;
+				OP* ins = localGetq(loc);
 				if (ins != NULL && ins->isop(LIR_fadd) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
 					// old: int(fadd(Number(int),Number(int)))
 					// new: iadd(int,int)
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fsub) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fmul) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_imul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && (ins->isop(LIR_i2f) || ins->isop(LIR_u2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, ins->oprnd1());
-					markDead(orig);
+					markDead(ins);
 				}
 				else
 				{
@@ -1771,38 +1733,34 @@ namespace avmplus
 			}
 			else if (in == NUMBER_TYPE)
 			{
-				OP* ins = value.ins;
+				OP* ins = localGetq(loc);
 				if (ins != NULL && ins->isop(LIR_fadd) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
 					// old: uint(fadd(Number(uint),Number(uint)))
 					// new: iadd(int,int)
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fsub) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fmul) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_imul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ((ins->isop(LIR_i2f)) || (ins->isop(LIR_u2f))))
 				{
-					OP* orig = value.ins;
 					localSet(loc, ins->oprnd1());
-					markDead(orig);
+					markDead(ins);
 				}
 				else
 				{
@@ -1834,9 +1792,7 @@ namespace avmplus
 		{
 			if (in == NUMBER_TYPE)
 			{
-                // fixme -- is this correct for double to boolean conversion?
-				localSet(loc, Ins(MIR_ne, binaryIns(LIR_feq,
-					localGet(loc), i2dIns(InsConst(0)))));
+                localSet(loc, callIns(MIR_csop, FUNCADDR(MathUtils::doubleToBool), 1, localGetq(loc)));
 			}
 			else if (in == INT_TYPE || in == UINT_TYPE || (in && !in->notDerivedObjectOrXML))
 			{
@@ -3693,6 +3649,19 @@ namespace avmplus
 			AvmAssert(false);
 			return;
 		}
+
+        if (cond->isconst()) {
+            if (br == LIR_jt && cond->constval() || br == LIR_jf && !cond->constval()) {
+                // taken
+                br = LIR_j;
+                cond = 0;
+            }
+            else {
+                // not taken = no-op
+                return;
+            }
+        }
+
 		saveState();
         patchLater(branchIns(br, cond), target);
 	} // emitIf()
@@ -3922,7 +3891,6 @@ namespace avmplus
 
 		if (info->exceptions)
 		{
-            AvmAssert(false);
 			for (int i=0, n=info->exceptions->exception_count; i < n; i++)
 			{
 				ExceptionHandler* h = &info->exceptions->exceptions[i]; (void)h;
@@ -4129,6 +4097,26 @@ namespace avmplus
 #endif
 
     LIns *CodegenLIR::branchIns(LOpcode op, LIns *cond, LIns *target) {
+        if (cond) {
+            if (!cond->isCmp()) {
+                // branching on a non-condition expression, so test (v==0)
+                // and invert the sense of the branch.
+                cond = lirout->ins_eq0(cond);
+                op = LOpcode(op ^ 1);
+            }
+            if (cond->isconst()) {
+                if (op == LIR_jt && cond->constval() || op == LIR_jf && !cond->constval()) {
+                    // taken
+                    op = LIR_j;
+                    cond = 0;
+                }
+                else {
+                    // not taken - no code to emit.
+                    // fixme - but what to return? caller wants to patch something.
+                    AvmAssert(false);
+                }
+            }
+        }
         return lirout->insBranch(op, cond, target);
     }
 
@@ -4266,7 +4254,7 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop /*&& loopcount <= 7*/) 
+        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop /*&& loopcount <= 0*/) 
             && !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);
