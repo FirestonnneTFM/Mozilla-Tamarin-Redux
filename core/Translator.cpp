@@ -48,12 +48,19 @@ namespace avmplus
 		uint32 data[1];  // more follows
 	};
 
+#ifdef AVMPLUS_DIRECT_THREADED
+	Translator::Translator(void** opcode_labels)
+#else
 	Translator::Translator()
+#endif
 		: backpatches(NULL)
 		, labels(NULL)
 		, exception_fixes(NULL)
 		, buffers(NULL)
 		, buffer_offset(0)
+#ifdef AVMPLUS_DIRECT_THREADED
+		, opcode_labels(opcode_labels)
+#endif
 	{
 	}
 
@@ -265,10 +272,14 @@ namespace avmplus
 		if (dest+n > dest_limit) \
 			refill(dest, dest_limit);
 
-#ifdef _DEBUG
-#  define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // debugging...
+#ifdef AVMPLUS_DIRECT_THREADED
+#  define NEW_OPCODE(opcode)  ((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode])); AvmAssert(((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8)+256] : opcode_labels[opcode])) != 0)
 #else
-#  define NEW_OPCODE(opcode)  opcode
+#  ifdef _DEBUG
+#    define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // debugging...
+#  else
+#    define NEW_OPCODE(opcode)  opcode
+#  endif
 #endif
 		
 #ifdef _DEBUG

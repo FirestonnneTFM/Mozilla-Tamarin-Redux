@@ -366,8 +366,8 @@ namespace avmplus
 							state->push(NULL);
 
 							#ifdef AVMPLUS_MIR
-							if (mir)
-								mir->localSet(stackBase, mir->exAtom);
+							//if (mir)
+							//	mir->localSet(stackBase, mir->exAtom);
 							#endif
 
 							checkTarget(target);
@@ -3345,9 +3345,9 @@ namespace avmplus
     {
 		// stack
 		core->console << "                        stack:";
-		for (int i=0, n=state->stackDepth; i < n; i++) {
+		for (int i=stackBase, n=state->sp(); i <= n; i++) {
 			core->console << " ";
-			printValue(state->stackValue(i));
+			printValue(state->value(i));
 		}
 		core->console << '\n';
 
@@ -3373,9 +3373,12 @@ namespace avmplus
 			}
 			core->console << "] ";
 		}
-		for (int i=0, n=state->scopeDepth; i < n; i++) 
+		for (int i=scopeBase, n=stackBase; i < n; i++) 
 		{
-            printValue(state->scopeValue(i));
+            if (i-scopeBase < state->scopeDepth)
+                printValue(state->value(i));
+            else
+                core->console << "~";
 			core->console << " ";
         }
 		core->console << '\n';

@@ -934,20 +934,26 @@ namespace nanojit
                     break;
                 }
 
-                case LIR_fret:
                 case LIR_ret:  {
                     LIns *val = ins->oprnd1();
-                    if (op == LIR_ret) {
-                        findSpecificRegFor(val, retRegs[0]);
-                    }
-                    else {
-                        findSpecificRegFor(val, FST0);
-                        fpu_pop();
-                    }
+                    findSpecificRegFor(val, retRegs[0]);
                     if (_nIns != _epilogue) {
                         JMP(_epilogue);
                     }
                     MR(SP,FP);
+                    break;
+                }
+
+                case LIR_fret: {
+                    LIns *val = ins->oprnd1();
+                    findSpecificRegFor(val, FST0);
+                    fpu_pop();
+                    if (_nIns != _epilogue) {
+                        JMP(_epilogue);
+                    }
+                    MR(SP,FP);
+                    if (sse2)
+                        evict(FST0);
                     break;
                 }
 
@@ -1330,8 +1336,8 @@ namespace nanojit
 
 				case LIR_j:
 				{
-					LInsp target = ins->oprnd1();
-                    LabelState *label = _labels.get(target);
+					LInsp to = ins->oprnd2();
+                    LabelState *label = _labels.get(to);
                     // the jump is always taken so whatever register state we
                     // have from downstream code, is irrelevant to code before
                     // this jump.  so clear it out.  we will pick up register
@@ -1345,12 +1351,20 @@ namespace nanojit
                     else {
                         // backwards jump
                         hasLoop = true;
-                        if (label) {
+                        if (!label) {
+                            // save empty register state at loop header
+                            _labels.add(to, 0, _allocator);
+                        }
+                        else {
                             mergeRegisterState(label->regs);
                         }
                         JMP(0);
-    					_patches.put(_nIns, target);
-                        verbose_outputf("Loop jump");
+    					_patches.put(_nIns, to);
+                        verbose_only(
+                            verbose_outputf("        Loop %s -> %s", 
+                                lirNames[ins->opcode()], 
+                                _thisfrag->lirbuf->names->formatRef(to));
+                        )
                     }
 					break;
 				}
@@ -1369,20 +1383,22 @@ namespace nanojit
                     else {
                         // back edge.
                         hasLoop = true;
-                        NIns *branch;
                         if (!label) {
                             // evict all registers, most conservative approach.
                             evictRegs(~_allocator.free);
                             _labels.add(to, 0, _allocator);
-                            branch = asm_branch(op == LIR_jf, cond, 0);
                         } 
                         else {
                             // evict all registers, most conservative approach.
                             mergeRegisterState(label->regs);
-                            branch = asm_branch(op == LIR_jf, cond, 0);
                         }
+                        NIns *branch = asm_branch(op == LIR_jf, cond, 0);
 			            _patches.put(branch,to);
-                        verbose_outputf("Loop jump");
+                        verbose_only(
+                            verbose_outputf("Loop %s -> %s", 
+                                lirNames[ins->opcode()], 
+                                _thisfrag->lirbuf->names->formatRef(to));
+                        )
                     }
 					break;
 				}					
@@ -1400,7 +1416,9 @@ namespace nanojit
                         //evictRegs(~_allocator.free);
                         mergeRegisterState(label->regs);
                         label->addr = _nIns;
-                        verbose_outputf("Loop label");
+                        verbose_only(
+                            verbose_outputf("Loop label %s", _thisfrag->lirbuf->names->formatRef(ins));
+                        )
                     }
 					break;
 				}
