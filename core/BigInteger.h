@@ -208,7 +208,7 @@ namespace avmplus
 			//  Data members
 			// --------------------------------------------------------
 			static const int kMaxBigIntegerBufferSize=128;
-			uint32 wordBuffer[kMaxBigIntegerBufferSize];
+			uint32 wordBuffer[kMaxBigIntegerBufferSize+2];
 			int32  numWords;
 
 		private:

@@ -51,6 +51,7 @@ namespace avmplus
 	{
 		AvmCore* core = pool->core;
 
+		Traits* math_itraits = pool->getBuiltinTraits(core->constantString("Math"));
 		class_itraits		= pool->getBuiltinTraits(core->constantString("Class"));
 		namespace_itraits	= pool->getBuiltinTraits(core->constantString("Namespace"));
 		function_itraits	= pool->getBuiltinTraits(core->constantString("Function"));
@@ -129,6 +130,31 @@ namespace avmplus
 		xml_itraits->notDerivedObjectOrXML		= true;
 		xmlList_itraits->notDerivedObjectOrXML	= true;
 		qName_itraits->notDerivedObjectOrXML	= true;
+
+		// types that don't use the default construct method.
+		array_itraits->hasCustomConstruct  		= true;
+		boolean_itraits->hasCustomConstruct		= true;
+		class_itraits->hasCustomConstruct		= true;
+		date_itraits->hasCustomConstruct		= true;
+		function_itraits->hasCustomConstruct	= true;
+		namespace_itraits->hasCustomConstruct	= true;
+		null_itraits->hasCustomConstruct		= true;
+		number_itraits->hasCustomConstruct		= true;
+		int_itraits->hasCustomConstruct			= true;
+		uint_itraits->hasCustomConstruct		= true;
+		object_itraits->hasCustomConstruct		= true;
+		regexp_itraits->hasCustomConstruct		= true;
+		string_itraits->hasCustomConstruct		= true;
+		void_itraits->hasCustomConstruct		= true;
+		xml_itraits->hasCustomConstruct			= true;
+		xmlList_itraits->hasCustomConstruct		= true;
+		qName_itraits->hasCustomConstruct		= true;
+		math_itraits->hasCustomConstruct		= true;
+
+		vectordouble_itraits->name = core->constantString("Vector.<Number>");
+		vectorint_itraits->name = core->constantString("Vector.<int>");
+		vectoruint_itraits->name = core->constantString("Vector.<uint>");
+		vectorobj_itraits->name = core->constantString("Vector.<*>");
 
 		Traits* methodClosure_itraits;
 		methodClosure_itraits = pool->getBuiltinTraits(core->constantString("MethodClosure"));

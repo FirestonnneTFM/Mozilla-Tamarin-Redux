@@ -52,6 +52,11 @@ using namespace MMgc;
 
 namespace avmplus
 {	
+	Hashtable::Hashtable(MMgc::GC *gc, int capacity)
+	{
+		initialize(gc, capacity);
+	}
+
 	void Hashtable::initialize(GC *gc, int capacity)
 	{
 		capacity = MathUtils::nextPowerOfTwo(capacity);

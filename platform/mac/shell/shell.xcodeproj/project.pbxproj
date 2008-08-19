@@ -171,8 +171,6 @@
 		4E62BE5F0D6244D300A24F2D /* BooleanClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BooleanClass.h; sourceTree = "<group>"; };
 		4E62BE600D6244D300A24F2D /* builtin.abc */ = {isa = PBXFileReference; lastKnownFileType = file; path = builtin.abc; sourceTree = "<group>"; };
 		4E62BE610D6244D300A24F2D /* builtin.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = builtin.as; sourceTree = "<group>"; };
-		4E62BE620D6244D300A24F2D /* builtin.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = builtin.cpp; sourceTree = "<group>"; };
-		4E62BE630D6244D300A24F2D /* builtin.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = builtin.h; sourceTree = "<group>"; };
 		4E62BE640D6244D300A24F2D /* builtin.py */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.script.python; path = builtin.py; sourceTree = "<group>"; };
 		4E62BE650D6244D300A24F2D /* BuiltinTraits.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BuiltinTraits.cpp; sourceTree = "<group>"; };
 		4E62BE660D6244D300A24F2D /* BuiltinTraits.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BuiltinTraits.h; sourceTree = "<group>"; };
@@ -189,23 +187,10 @@
 		4E62BE710D6244D300A24F2D /* DateClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DateClass.h; sourceTree = "<group>"; };
 		4E62BE720D6244D300A24F2D /* DateObject.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DateObject.cpp; sourceTree = "<group>"; };
 		4E62BE730D6244D300A24F2D /* DateObject.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DateObject.h; sourceTree = "<group>"; };
-		4E62BE740D6244D300A24F2D /* decContext.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = decContext.cpp; sourceTree = "<group>"; };
-		4E62BE750D6244D300A24F2D /* decContext.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decContext.h; sourceTree = "<group>"; };
-		4E62BE760D6244D300A24F2D /* decDPD.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decDPD.h; sourceTree = "<group>"; };
-		4E62BE770D6244D300A24F2D /* decimal128.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = decimal128.cpp; sourceTree = "<group>"; };
-		4E62BE780D6244D300A24F2D /* decimal128.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decimal128.h; sourceTree = "<group>"; };
-		4E62BE790D6244D300A24F2D /* DecimalClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DecimalClass.cpp; sourceTree = "<group>"; };
-		4E62BE7A0D6244D300A24F2D /* DecimalClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DecimalClass.h; sourceTree = "<group>"; };
-		4E62BE7B0D6244D300A24F2D /* DecimalRep.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DecimalRep.h; sourceTree = "<group>"; };
-		4E62BE7C0D6244D300A24F2D /* decNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = decNumber.cpp; sourceTree = "<group>"; };
-		4E62BE7D0D6244D300A24F2D /* decNumber.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decNumber.h; sourceTree = "<group>"; };
-		4E62BE7E0D6244D300A24F2D /* decNumberLocal.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decNumberLocal.h; sourceTree = "<group>"; };
 		4E62BE7F0D6244D300A24F2D /* Domain.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Domain.cpp; sourceTree = "<group>"; };
 		4E62BE800D6244D300A24F2D /* Domain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Domain.h; sourceTree = "<group>"; };
 		4E62BE810D6244D300A24F2D /* DomainEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DomainEnv.cpp; sourceTree = "<group>"; };
 		4E62BE820D6244D300A24F2D /* DomainEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DomainEnv.h; sourceTree = "<group>"; };
-		4E62BE830D6244D300A24F2D /* DoubleClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DoubleClass.cpp; sourceTree = "<group>"; };
-		4E62BE840D6244D300A24F2D /* DoubleClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DoubleClass.h; sourceTree = "<group>"; };
 		4E62BE850D6244D300A24F2D /* DynamicProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DynamicProfiler.cpp; sourceTree = "<group>"; };
 		4E62BE860D6244D300A24F2D /* DynamicProfiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DynamicProfiler.h; sourceTree = "<group>"; };
 		4E62BE870D6244D300A24F2D /* E4XNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = E4XNode.cpp; sourceTree = "<group>"; };
@@ -257,7 +242,6 @@
 		4E62BEB50D6244D300A24F2D /* NativeFunction.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NativeFunction.h; sourceTree = "<group>"; };
 		4E62BEB60D6244D300A24F2D /* NativeObjectHelpers.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NativeObjectHelpers.h; sourceTree = "<group>"; };
 		4E62BEB70D6244D300A24F2D /* Number.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Number.as; sourceTree = "<group>"; };
-		4E62BEB80D6244D300A24F2D /* Number2.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Number2.as; sourceTree = "<group>"; };
 		4E62BEB90D6244D300A24F2D /* NumberClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = NumberClass.cpp; sourceTree = "<group>"; };
 		4E62BEBA0D6244D300A24F2D /* NumberClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NumberClass.h; sourceTree = "<group>"; };
 		4E62BEBB0D6244D300A24F2D /* Object.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Object.as; sourceTree = "<group>"; };
@@ -545,8 +529,6 @@
 				4E62BE5F0D6244D300A24F2D /* BooleanClass.h */,
 				4E62BE600D6244D300A24F2D /* builtin.abc */,
 				4E62BE610D6244D300A24F2D /* builtin.as */,
-				4E62BE620D6244D300A24F2D /* builtin.cpp */,
-				4E62BE630D6244D300A24F2D /* builtin.h */,
 				4E62BE640D6244D300A24F2D /* builtin.py */,
 				4E62BE650D6244D300A24F2D /* BuiltinTraits.cpp */,
 				4E62BE660D6244D300A24F2D /* BuiltinTraits.h */,
@@ -563,23 +545,10 @@
 				4E62BE710D6244D300A24F2D /* DateClass.h */,
 				4E62BE720D6244D300A24F2D /* DateObject.cpp */,
 				4E62BE730D6244D300A24F2D /* DateObject.h */,
-				4E62BE740D6244D300A24F2D /* decContext.cpp */,
-				4E62BE750D6244D300A24F2D /* decContext.h */,
-				4E62BE760D6244D300A24F2D /* decDPD.h */,
-				4E62BE770D6244D300A24F2D /* decimal128.cpp */,
-				4E62BE780D6244D300A24F2D /* decimal128.h */,
-				4E62BE790D6244D300A24F2D /* DecimalClass.cpp */,
-				4E62BE7A0D6244D300A24F2D /* DecimalClass.h */,
-				4E62BE7B0D6244D300A24F2D /* DecimalRep.h */,
-				4E62BE7C0D6244D300A24F2D /* decNumber.cpp */,
-				4E62BE7D0D6244D300A24F2D /* decNumber.h */,
-				4E62BE7E0D6244D300A24F2D /* decNumberLocal.h */,
 				4E62BE7F0D6244D300A24F2D /* Domain.cpp */,
 				4E62BE800D6244D300A24F2D /* Domain.h */,
 				4E62BE810D6244D300A24F2D /* DomainEnv.cpp */,
 				4E62BE820D6244D300A24F2D /* DomainEnv.h */,
-				4E62BE830D6244D300A24F2D /* DoubleClass.cpp */,
-				4E62BE840D6244D300A24F2D /* DoubleClass.h */,
 				4E62BE850D6244D300A24F2D /* DynamicProfiler.cpp */,
 				4E62BE860D6244D300A24F2D /* DynamicProfiler.h */,
 				4E62BE870D6244D300A24F2D /* E4XNode.cpp */,
@@ -631,7 +600,6 @@
 				4E62BEB50D6244D300A24F2D /* NativeFunction.h */,
 				4E62BEB60D6244D300A24F2D /* NativeObjectHelpers.h */,
 				4E62BEB70D6244D300A24F2D /* Number.as */,
-				4E62BEB80D6244D300A24F2D /* Number2.as */,
 				4E62BEB90D6244D300A24F2D /* NumberClass.cpp */,
 				4E62BEBA0D6244D300A24F2D /* NumberClass.h */,
 				4E62BEBB0D6244D300A24F2D /* Object.as */,

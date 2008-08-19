@@ -281,10 +281,12 @@ namespace avmplus
 		DWB(Traits**) m_types; // actual length will be 1+param_count
 		DWB(Atom*) m_values; // default values for any optional params. size = optional_count
 
-#ifdef AVMPLUS_VERBOSE
+#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 
 		/** Dummy destructor to avoid warnings */
 		virtual ~AbstractFunction() {}
+#endif 
+#ifdef AVMPLUS_VERBOSE
 	public:
 		virtual Stringp format(AvmCore* core) const;
 #endif

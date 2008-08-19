@@ -797,7 +797,9 @@ namespace MMgc
 #ifdef _DEBUG
 		// trash it. fb == free block
 		memset(block->baseAddr, 0xfb, block->size * kBlockSize);
+#ifdef MEMORY_INFO
 		block->freeTrace = GetStackTraceIndex(2);
+#endif
 #endif
 
 		// Try to coalesce this block with its predecessor
@@ -1220,7 +1222,7 @@ namespace MMgc
 		for(int i=0;i<MirBufferCount;i++)
 		{
 			MirMemInfo* b = &m_mirBuffers[i];
-			GCAssertMsg(b->free, "Oh, should be freed");
+			GCAssertMsg(b->free, "WARNING: ReleaseMirMemory was not called on this block\n");
 			if (b->size)
 				ReleaseCodeMemory(b->addr, b->size);
 		}
@@ -1241,7 +1243,9 @@ namespace MMgc
 	{
 		MirMemInfo* buf = 0;
 		{
+#ifdef GCHEAP_LOCK
 			GCAcquireSpinlock lock(m_mirBufferLock);
+#endif
 			for(int i=0;i<MirBufferCount;i++)
 			{
 				MirMemInfo* b = &m_mirBuffers[i];
@@ -1261,7 +1265,8 @@ namespace MMgc
 			}
 
 			// lock in our selection
-			if (buf) buf->free = false; 
+			if (buf) 
+				buf->free = false; 
 		}
 		// WATCH OUT; lock on buffers relased
 
@@ -1282,7 +1287,9 @@ namespace MMgc
 			
 		// failure
 		buf->size = 0;
+#ifdef GCHEAP_LOCK
 		GCAcquireSpinlock lock(m_mirBufferLock);  // technically needed
+#endif
 		buf->free = true;
 		return 0;	
 	}	
@@ -1297,7 +1304,9 @@ namespace MMgc
 				break;
 		}
 		GCAssertMsg(b && !b->free, "Ohh very bad we have a memory leak");
+#ifdef GCHEAP_LOCK
 		GCAcquireSpinlock lock(m_mirBufferLock);  // technically needed 
+#endif
 		if (b) b->free = true;
 	}
 }

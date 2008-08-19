@@ -1056,6 +1056,7 @@ namespace avmplus
 				core->console << "verify setproperty " << obj.traits << " " << &multiname->getName() << " from within " << info << "\n";
 				#endif
 
+				bool needsSetContext = true;
 				if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
 					obj.traits == VECTORDOUBLE_TYPE )
 				{
@@ -1066,6 +1067,7 @@ namespace avmplus
 
 					if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
 					{
+						needsSetContext = false;
 						if(obj.traits == VECTORINT_TYPE)
 							emitCoerce(INT_TYPE, state->sp());
 						else if(obj.traits == VECTORUINT_TYPE)
@@ -1079,7 +1081,8 @@ namespace avmplus
 				#ifdef AVMPLUS_MIR
 				if (mir)
 				{
-					mir->emitSetContext(state, NULL);
+					if (needsSetContext)
+						mir->emitSetContext(state, NULL);
 					mir->emit(state, opcode, (uintptr)&multiname);
 				}
 				#endif
@@ -1589,7 +1592,16 @@ namespace avmplus
 					if (mir)
 					{
 						mir->emitSetContext(state, NULL);
-						mir->emit(state, OP_construct, argc, 0, itraits);
+						if( itraits && !itraits->hasCustomConstruct && itraits->init->argcOk(argc))
+						{
+							emitCheckNull(sp-(n-1));
+							emitCoerceArgs(itraits->init, argc, true);
+							mir->emitCall(state, OP_construct, 0, argc, itraits);
+						}
+						else
+						{
+							mir->emit(state, OP_construct, argc, 0, itraits);
+						}
 					}
 					#endif
 					state->pop_push(argc+1, itraits, true);
@@ -2631,10 +2643,11 @@ namespace avmplus
 		core->console << "verify getproperty " << obj.traits << " " << multiname->getName() << " from within " << info << "\n";
 		#endif
 
+		bool needsSetContext = true;
 		if( !propType )
 		{
 			if( obj.traits == VECTORINT_TYPE  || obj.traits == VECTORUINT_TYPE ||
-				obj.traits == VECTORDOUBLE_TYPE )//|| obj.traits == VECTOROBJ_TYPE)
+				obj.traits == VECTORDOUBLE_TYPE )
 			{
 				bool attr = multiname.isAttr();
 				Traits* indexType = state->value(state->sp()).traits;
@@ -2643,14 +2656,13 @@ namespace avmplus
 
 				if( maybeIntegerIndex && (indexType == UINT_TYPE || indexType == INT_TYPE) )
 				{
+					needsSetContext = false;
 					if(obj.traits == VECTORINT_TYPE)
 						propType = INT_TYPE;
 					else if(obj.traits == VECTORUINT_TYPE)
 						propType = UINT_TYPE;
 					else if(obj.traits == VECTORDOUBLE_TYPE)
 						propType = NUMBER_TYPE;
-					else if(obj.traits == VECTOROBJ_TYPE)
-						propType = OBJECT_TYPE;
 				}
 			}
 		}
@@ -2658,7 +2670,8 @@ namespace avmplus
 		#ifdef AVMPLUS_MIR
 		if (mir)
 		{
-			mir->emitSetContext(state, NULL);
+			if (needsSetContext)
+				mir->emitSetContext(state, NULL);
 			mir->emit(state, OP_getproperty, (uintptr)&multiname, 0, propType);
 		}
 		#endif
@@ -2892,7 +2905,7 @@ namespace avmplus
 		}
 	}
 
-	void Verifier::emitCoerceArgs(AbstractFunction* m, int argc)
+	void Verifier::emitCoerceArgs(AbstractFunction* m, int argc, bool isctor)
 	{
 		if (!m->argcOk(argc))
 		{
@@ -2916,8 +2929,10 @@ namespace avmplus
 		}
 
 		// coerce receiver type
-		if (mir)
+		if (mir && !isctor)  // don't coerce if this is for a ctor, since the ctor will be on the stack instead of the new object
 			emitCoerce(m->paramTraits(0), state->sp()-(n-1));
+		#else
+		(void)isctor;
 		#endif
 	}
 
@@ -3038,7 +3053,7 @@ namespace avmplus
 		else
 			if( name.isParameterizedType() )
 			{
-				Traits* param_traits = checkTypeName(name.getTypeParameter());
+				Traits* param_traits = name.getTypeParameter() ? checkTypeName(name.getTypeParameter()) : NULL ;
 				t = pool->resolveParameterizedType(toplevel, t, param_traits);
 			}
 		return t;

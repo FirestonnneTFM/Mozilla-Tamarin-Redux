@@ -32,8 +32,7 @@ objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**
 .DS_Store
-*.mode2
-*.mode2v3
+*.mode2*
 *.pbxuser
 test/acceptance/*.html
 *.ncb
@@ -57,3 +56,7 @@ axscript/vc2008/*.ncb
 axscript/vc2008/axtam.vcproj.*.user
 core/*.out
 shell/*.out
+*.pp
+*.ii
+*.deps
+

@@ -41,8 +41,12 @@
 
 #ifdef MEMORY_INFO
 
-#ifndef __MWERKS__
+#if !defined(__MWERKS__)
+#if !defined(__ICC)
+#if !defined(UNDER_CE)
 #include <typeinfo>
+#endif
+#endif
 #endif
 
 namespace MMgc
@@ -78,7 +82,7 @@ namespace MMgc
 
 	struct StackTrace
 	{
-		int ips[kMaxTraceDepth];
+		sintptr ips[kMaxTraceDepth];
 		int size;
 		int totalSize;
 		int sweepSize;
@@ -92,16 +96,16 @@ namespace MMgc
 
 	static StackTrace traceTable[kNumTraces];
 
-	unsigned int hashTrace(int *trace)
+	sintptr hashTrace(sintptr *trace)
 	{
-		unsigned int hash = *trace++;
+		sintptr hash = *trace++;
 		while(*trace++ != 0) {
 			hash ^= *trace;
 		}
 		return hash;
 	}
 
-	bool tracesEqual(int *trace1, int *trace2)
+	bool tracesEqual(sintptr *trace1, sintptr *trace2)
 	{
 		while(*trace1) {
 			if(*trace1 != *trace2)
@@ -112,7 +116,7 @@ namespace MMgc
 		return *trace1 == *trace2;
 	}
 
-	unsigned int LookupTrace(int *trace)
+	unsigned int LookupTrace(sintptr *trace)
 	{
 #ifdef GCHEAP_LOCK
 		GCEnterCriticalSection lock(m_traceTableLock);
@@ -123,7 +127,7 @@ namespace MMgc
 		
 		static int numTraces = 0;
 		int modmask = kNumTraces - 1;
-		unsigned int hash = hashTrace(trace);
+		sintptr hash = hashTrace(trace);
 		unsigned int index = hash & modmask;
 		unsigned int n = 17; // small number means cluster at start
 		int c = 1;
@@ -163,7 +167,8 @@ namespace MMgc
 			return traceTable[index].memtag;
 		const char*name="unknown";
 
-#if (defined(WIN32) && !defined(UNDER_CE)) || defined(AVMPLUS_UNIX)
+// Disabled for 64-bit Windows.  Debugger doesn't allow exception to go uncaught so always breaks
+#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || ( defined(AVMPLIS_UNIX) && !defined(__ICC) )
 		try {
 			const std::type_info *ti = &typeid(*(MMgc::GCObject*)obj);
 			if(ti->name())
@@ -504,14 +509,14 @@ namespace MMgc
 	{
 		if(!enableTraces)
 			return 0;
-		int trace[kMaxTraceDepth]; // an array of pcs
+		sintptr trace[kMaxTraceDepth]; // an array of pcs
 		GetStackTrace(trace, kMaxTraceDepth, skip);
 
 		// get index into trace table
 		return LookupTrace(trace);
 	}
 
-	void DumpStackTraceHelper(int *trace)
+	void DumpStackTraceHelper(sintptr *trace)
 	{
 		if(!enableTraces)
 			return;
@@ -535,7 +540,7 @@ namespace MMgc
 	{
 		if(!enableTraces)
 			return;
-		int trace[kMaxTraceDepth];
+		sintptr trace[kMaxTraceDepth];
 		GetStackTrace(trace, kMaxTraceDepth, skip);
 		DumpStackTraceHelper(trace);
 	}

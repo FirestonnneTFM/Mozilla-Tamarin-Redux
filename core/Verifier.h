@@ -127,7 +127,7 @@ namespace avmplus
 		bool canAssign(Traits* lhs, Traits* rhs) const;
 		Traits* checkSlot(Traits* traits, int slot_id);
 		Traits* findCommonBase(Traits* t1, Traits* t2);
-		void emitCoerceArgs(AbstractFunction* m, int argc);
+		void emitCoerceArgs(AbstractFunction* m, int argc, bool isctor=false);
 		void printValue(Value& v);
 		Traits* readBinding(Traits* traits, Binding b);
 		void checkEarlySlotBinding(Traits* traits);

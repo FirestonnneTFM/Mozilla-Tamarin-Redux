@@ -65,7 +65,7 @@ namespace avmplus
 		int search(Stringp in, Atom regexpAtom);
 		ArrayObject* split(Stringp in, Atom delimAtom, uint32 limit);
 
-		//cn: defined via rest args to allow length = 1 and support calling with no args... ES3 spec says length = 1
+		// defined via rest args to allow length = 1 and support calling with no args... ES3 spec says length = 1
 		Stringp fromCharCode(Atom *argv, int argc);
 
 		DECLARE_NATIVE_MAP(StringClass)

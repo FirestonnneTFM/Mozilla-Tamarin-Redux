@@ -207,11 +207,9 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "MMgc" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* MMgc */;
 			projectDirPath = "";
-			projectRoot = "";
 			targets = (
 				D2AAC045055464E500DB518D /* MMgc */,
 			);
@@ -270,9 +268,11 @@
 					SOFT_ASSERTS,
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
+				WARNING_CFLAGS = "-Wstrict-aliasing";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -293,7 +293,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = MMgc_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -305,16 +305,14 @@
 					USE_MMAP,
 					_MAC,
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_STRICT_ALIASING = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
-				OTHER_CFLAGS = (
-					"-finline-functions",
-					"-finline-limit=256",
-				);
 				PRODUCT_NAME = MMgc;
 				SEPARATE_STRIP = NO;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
+				WARNING_CFLAGS = "-Wstrict-aliasing";
 			};
 			name = Release;
 		};
@@ -413,9 +411,11 @@
 					SCRIPT_DEBUGGER,
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
+				WARNING_CFLAGS = "-Wstrict-aliasing";
 				ZERO_LINK = NO;
 			};
 			name = Debug_Debugger;
@@ -436,7 +436,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = MMgc_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -449,16 +449,14 @@
 					_MAC,
 					SCRIPT_DEBUGGER,
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_STRICT_ALIASING = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
-				OTHER_CFLAGS = (
-					"-finline-functions",
-					"-finline-limit=256",
-				);
 				PRODUCT_NAME = MMgc;
 				SEPARATE_STRIP = NO;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
+				WARNING_CFLAGS = "-Wstrict-aliasing";
 			};
 			name = Release_Debugger;
 		};

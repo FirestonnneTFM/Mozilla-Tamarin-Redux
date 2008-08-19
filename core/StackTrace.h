@@ -63,6 +63,9 @@ namespace avmplus
 			AbstractFunction *info;
 			Stringp filename;			// in the form "C:\path\to\package\root;package/package;filename"
 		    int linenum;
+#ifdef AVMPLUS_64BIT
+			int pad;
+#endif
 		};
 		bool equals(StackTrace::Element *e, int depth);
 		static uintptr hashCode(StackTrace::Element *e, int depth);

@@ -173,6 +173,8 @@ namespace avmplus
 	#define AvmThunkCoerce_uint32_t_int32_t(v)	int32_t(v)
 	#define AvmThunkCoerce_uint32_t_AvmBox(v)	(AvmThunkCanBeSmallIntAtom(v) ? AvmThunkSmallIntAtom(v) : env->core()->intAtom(v))
 
+	#define AvmThunkCoerce_AvmBoolArg_AvmBox(v)	((v) ? trueAtom : falseAtom)
+
 #ifdef _DEBUG
 	inline double AvmThunkCoerce_AvmBox_double(AvmBox v) { AvmAssert((v) == kAvmThunkUndefined); (void)v; return kAvmThunkNaN; }
 	inline AvmString AvmThunkCoerce_AvmBox_AvmString(AvmBox v) { AvmAssert((v) == kAvmThunkUndefined || (v) == kAvmThunkNull); (void)v; return NULL; }

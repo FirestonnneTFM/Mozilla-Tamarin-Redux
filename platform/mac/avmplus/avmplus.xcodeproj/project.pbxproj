@@ -416,7 +416,7 @@
 				1E607AB4097337F4007D0E1E /* pcre */,
 				1E607AA009733790007D0E1E /* Platform */,
 				1E607A9F09733787007D0E1E /* Core */,
-				1E607A9E0973377F007D0E1E /* CodenGen */,
+				1E607A9E0973377F007D0E1E /* CodeGen */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 			);
@@ -431,7 +431,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1E607A9E0973377F007D0E1E /* CodenGen */ = {
+		1E607A9E0973377F007D0E1E /* CodeGen */ = {
 			isa = PBXGroup;
 			children = (
 				1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */,
@@ -439,7 +439,7 @@
 				1E6078E6097335B3007D0E1E /* Ia32Assembler.cpp */,
 				1E6078E7097335B3007D0E1E /* PpcAssembler.cpp */,
 			);
-			name = CodenGen;
+			name = CodeGen;
 			sourceTree = "<group>";
 		};
 		1E607A9F09733787007D0E1E /* Core */ = {
@@ -805,11 +805,9 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "avmplus" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* avmplus */;
 			projectDirPath = "";
-			projectRoot = "";
 			targets = (
 				D2AAC045055464E500DB518D /* avmplus */,
 			);
@@ -954,6 +952,7 @@
 					USE_MMAP,
 					_MAC,
 				);
+				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
@@ -977,7 +976,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = avmplus_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -989,12 +988,9 @@
 					USE_MMAP,
 					_MAC,
 				);
+				GCC_STRICT_ALIASING = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
-				OTHER_CFLAGS = (
-					"-finline-functions",
-					"-finline-limit=65536",
-				);
 				PRODUCT_NAME = avmplus;
 				SEPARATE_STRIP = NO;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
@@ -1027,7 +1023,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				WARNING_CFLAGS = "-Wno-long-long";
+				WARNING_CFLAGS = (
+					"-Wno-long-long",
+					"-Wstrict-aliasing",
+				);
 			};
 			name = Debug;
 		};
@@ -1059,7 +1058,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				WARNING_CFLAGS = "-Wno-long-long";
+				WARNING_CFLAGS = (
+					"-Wno-long-long",
+					"-Wstrict-aliasing",
+				);
 			};
 			name = Release;
 		};
@@ -1092,6 +1094,7 @@
 					_MAC,
 					DEBUGGER,
 				);
+				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
@@ -1115,7 +1118,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = avmplus_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1128,12 +1131,9 @@
 					_MAC,
 					DEBUGGER,
 				);
+				GCC_STRICT_ALIASING = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
-				OTHER_CFLAGS = (
-					"-finline-functions",
-					"-finline-limit=100000",
-				);
 				PRODUCT_NAME = avmplus;
 				SEPARATE_STRIP = NO;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
@@ -1166,7 +1166,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				WARNING_CFLAGS = "-Wno-long-long";
+				WARNING_CFLAGS = (
+					"-Wno-long-long",
+					"-Wstrict-aliasing",
+				);
 			};
 			name = Debug_Debugger;
 		};
@@ -1198,7 +1201,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				WARNING_CFLAGS = "-Wno-long-long";
+				WARNING_CFLAGS = (
+					"-Wno-long-long",
+					"-Wstrict-aliasing",
+				);
 			};
 			name = Release_Debugger;
 		};

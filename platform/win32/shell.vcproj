@@ -281,9 +281,6 @@
 				RelativePath="..\..\shell\SystemClass.cpp">
 			</File>
 			<File
-				RelativePath="..\..\shell\TypedArrayClass.cpp">
-			</File>
-			<File
 				RelativePath="..\..\platform\win32\win32cpuid.cpp">
 			</File>
 		</Filter>
@@ -332,9 +329,6 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\toplevel.h">
-			</File>
-			<File
-				RelativePath="..\..\shell\TypedArrayClass.h">
 			</File>
 		</Filter>
 		<Filter

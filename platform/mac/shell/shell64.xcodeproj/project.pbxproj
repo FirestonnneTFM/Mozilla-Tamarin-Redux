@@ -181,8 +181,6 @@
 		4EF1E52A0D62459F000392CC /* BooleanClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BooleanClass.h; sourceTree = "<group>"; };
 		4EF1E52B0D62459F000392CC /* builtin.abc */ = {isa = PBXFileReference; lastKnownFileType = file; path = builtin.abc; sourceTree = "<group>"; };
 		4EF1E52C0D62459F000392CC /* builtin.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = builtin.as; sourceTree = "<group>"; };
-		4EF1E52D0D62459F000392CC /* builtin.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = builtin.cpp; sourceTree = "<group>"; };
-		4EF1E52E0D62459F000392CC /* builtin.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = builtin.h; sourceTree = "<group>"; };
 		4EF1E52F0D62459F000392CC /* builtin.py */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.script.python; path = builtin.py; sourceTree = "<group>"; };
 		4EF1E5300D62459F000392CC /* BuiltinTraits.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BuiltinTraits.cpp; sourceTree = "<group>"; };
 		4EF1E5310D62459F000392CC /* BuiltinTraits.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BuiltinTraits.h; sourceTree = "<group>"; };
@@ -577,8 +575,6 @@
 				4EF1E52A0D62459F000392CC /* BooleanClass.h */,
 				4EF1E52B0D62459F000392CC /* builtin.abc */,
 				4EF1E52C0D62459F000392CC /* builtin.as */,
-				4EF1E52D0D62459F000392CC /* builtin.cpp */,
-				4EF1E52E0D62459F000392CC /* builtin.h */,
 				4EF1E52F0D62459F000392CC /* builtin.py */,
 				4EF1E5300D62459F000392CC /* BuiltinTraits.cpp */,
 				4EF1E5310D62459F000392CC /* BuiltinTraits.h */,

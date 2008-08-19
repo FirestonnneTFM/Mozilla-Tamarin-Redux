@@ -63,6 +63,8 @@ namespace avmplus
 		 */
 		virtual Atom construct(int argc, Atom* argv);
 
+		ScriptObject* newInstance();
+
 		/**
 		 * called as function, as in C().  For user classes, this is the
 		 * the explicit coersion function.  For user functions, we

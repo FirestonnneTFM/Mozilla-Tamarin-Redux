@@ -65,6 +65,7 @@ namespace avmplus
 		union {
 			Atom (*impl32)(MethodEnv*, int, uint32 *);
 			double (*implN)(MethodEnv*, int, uint32 *);
+			void *implV;
 		};
 
 		MethodEnv(void* addr, VTable *vtable);

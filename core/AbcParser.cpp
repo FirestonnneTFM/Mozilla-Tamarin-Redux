@@ -485,6 +485,11 @@ namespace avmplus
 				if (traits->get(name, ns) != BIND_NONE)
 					toplevel->throwVerifyError(kCorruptABCError);
 
+// In theory we should reject duplicate slots here; 
+// in practice we don't, as it causes problems with some existing content
+//				if (traits->findBinding(name, ns) != BIND_NONE)
+//					toplevel->throwVerifyError(kIllegalOverrideError, toplevel->core()->toErrorString(&qn), toplevel->core()->toErrorString(traits));
+
 				if (script)
 					addNamedScript(ns, name, script);
 
