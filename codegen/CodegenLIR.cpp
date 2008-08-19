@@ -388,22 +388,6 @@ namespace avmplus
     }
 
 	/**
-	 * Check to see if the given instruction is used in our state
-	 */
-	bool CodegenLIR::usedInState(OP* ins)
-	{
-		for (int i=0, n=state->verifier->frameSize; i < n; i++)
-		{
-			Value& v = state->value(i);
-			if (ins == v.ins)
-				return true;
-		}
-		return false;
-	}
-
-
-
-	/**
  	 * ---------------------------------
 	 * Instruction convenience functions 
 	 * ---------------------------------
@@ -1691,38 +1675,34 @@ namespace avmplus
 			}
 			else if (in == NUMBER_TYPE)
 			{
-				OP* ins = value.ins;
+				OP* ins = localGetq(loc);
 				if (ins != NULL && ins->isop(LIR_fadd) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
 					// old: int(fadd(Number(int),Number(int)))
 					// new: iadd(int,int)
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fsub) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fmul) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_imul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && (ins->isop(LIR_i2f) || ins->isop(LIR_u2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, ins->oprnd1());
-					markDead(orig);
+					markDead(ins);
 				}
 				else
 				{
@@ -1750,38 +1730,34 @@ namespace avmplus
 			}
 			else if (in == NUMBER_TYPE)
 			{
-				OP* ins = value.ins;
+				OP* ins = localGetq(loc);
 				if (ins != NULL && ins->isop(LIR_fadd) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
 					// old: uint(fadd(Number(uint),Number(uint)))
 					// new: iadd(int,int)
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fsub) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fmul) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					OP* orig = value.ins;
 					localSet(loc, binaryIns(MIR_imul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(orig);
+					markDead(ins);
 				}
 				else if (ins != NULL && ((ins->isop(LIR_i2f)) || (ins->isop(LIR_u2f))))
 				{
-					OP* orig = value.ins;
 					localSet(loc, ins->oprnd1());
-					markDead(orig);
+					markDead(ins);
 				}
 				else
 				{

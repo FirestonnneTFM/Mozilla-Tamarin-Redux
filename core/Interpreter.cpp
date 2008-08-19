@@ -599,7 +599,7 @@ namespace avmplus
 
 #else // !AVMPLUS_WORD_CODE
 
-#  if defined AVMPLUS_VERBOSE
+#  if 0 && defined AVMPLUS_VERBOSE
 #    define INSTR(op) case OP_##op: \
                         if (pool->verbose) {\
 							showState(info, code_start, pc-1,  framep, sp, scopeDepth, scopeBase, max_scope); \
