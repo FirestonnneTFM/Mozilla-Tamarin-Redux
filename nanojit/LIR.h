@@ -438,8 +438,8 @@ namespace nanojit
 		virtual LInsp insGuard(LOpcode v, LIns *c, SideExit *x) {
 			return out->insGuard(v, c, x);
 		}
-		virtual LInsp insBranch(LOpcode v, LInsp condition, LInsp toLabel) {
-			return out->insBranch(v, condition, toLabel);
+		virtual LInsp insBranch(LOpcode v, LInsp condition, LInsp to) {
+			return out->insBranch(v, condition, to);
 		}
 		virtual LInsp insParam(int32_t i) {
 			return out->insParam(i);
@@ -585,8 +585,8 @@ namespace nanojit
 			return add_flush(out->insGuard(op,cond,x));
 		}
 
-		LIns* insBranch(LOpcode v, LInsp condition, LInsp toLabel) {
-			return add_flush(out->insBranch(v, condition, toLabel));
+		LIns* insBranch(LOpcode v, LInsp condition, LInsp to) {
+			return add_flush(out->insBranch(v, condition, to));
 		}
 
 		LIns* ins0(LOpcode v) {
@@ -742,7 +742,7 @@ namespace nanojit
 			LInsp	insImmq(uint64_t imm);
 		    LInsp	insCall(uint32_t fid, LInsp args[]);
 			LInsp	insGuard(LOpcode op, LInsp cond, SideExit *x);
-			LInsp	insBranch(LOpcode v, LInsp condition, LInsp toLabel);
+			LInsp	insBranch(LOpcode v, LInsp condition, LInsp to);
             LInsp   insAlloc(int32_t size);
 
 			// buffer mgmt
