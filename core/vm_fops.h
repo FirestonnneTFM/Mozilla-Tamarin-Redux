@@ -66,7 +66,6 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(ENVADDR(MethodEnv::newfunction), I_I4, newfunction)
     METHOD(TOPLEVELADDR(Toplevel::op_call), I_I4, op_call)
     METHOD(TOPLEVELADDR(Toplevel::callproperty), I_I6, callproperty)
-    METHOD(EFADDR(ExceptionFrame::endTry), I_I, endTry)
     CSEMETHOD(TOPLEVELADDR(Toplevel::coerce), I_III, coerce)
     METHOD(ENVADDR(MethodEnv::npe), I_I, npe)
     METHOD(ENVADDR(MethodEnv::interrupt), I_I, interrupt)
@@ -169,7 +168,7 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(ENVADDR(MethodEnv::getsuper), I_III, getsuper)
     METHOD(COREADDR(AvmCore::throwAtom), I_II, throwAtom)
     CSEFUNCTION(FUNCADDR(MathUtils::mod), D_DD, mod)
-    METHOD(COREADDR(AvmCore::_typeof), I_II, _typeof)
+    CSEMETHOD(COREADDR(AvmCore::_typeof), I_II, _typeof)
     FUNCTION(FUNCADDR(AvmCore::atomWriteBarrier), I_I4, atomWriteBarrier)
     METHOD(GCADDR(GC::writeBarrierRC), I_I4, writeBarrierRC)
     CSEMETHOD(COREADDR(AvmCore::uintToAtom), I_II, uintToAtom)
@@ -179,6 +178,12 @@ INTERP_FOPCODE_LIST_BEGIN
     CSEMETHOD(ENVADDR(MethodEnv::createArgumentsHelper), I_III, createArgumentsHelper)
     METHOD(COREADDR(AvmCore::initMultinameLate), I_III, initMultinameLate)
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), I_III, initMultinameLateForDelete)
+    CSEFUNCTION(FUNCADDR(MathUtils::doubleToBool), I_D, doubleToBool)
+
+    METHOD(EFADDR(ExceptionFrame::endTry), I_I, endTry)
+    METHOD(EFADDR(ExceptionFrame::beginTry), I_II, beginTry)
+    FUNCTION(SETJMP, I_II, setjmp)
+    METHOD(COREADDR(AvmCore::beginCatch), I_I5, beginCatch)
 
 #ifdef DEBUGGER
     METHOD(ENVADDR(MethodEnv::debugEnter), I_I8, debugEnter)

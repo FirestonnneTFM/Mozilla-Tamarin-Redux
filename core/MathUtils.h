@@ -151,6 +151,10 @@ namespace avmplus
 		static double convertStringToNumber(const wchar* ptr, int strlen);
 		static int nextDigit(double *value);
 
+        static int doubleToBool(double d) {
+            // ecma3/Boolean/e15_6_1.abc
+            return d == d && d != 0;
+        }
 	private:
 		static double powerOfTen(int exponent, double value);
 		static wchar *handleSign(const wchar *s, bool& negative);
