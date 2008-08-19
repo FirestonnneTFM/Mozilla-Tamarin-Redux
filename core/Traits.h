@@ -107,6 +107,12 @@ namespace avmplus
 		/** how we implement dictionary or strict style lookups */
 		bool isDictionary:1;
 
+		/** does this type use the default ClassClosure::construct method or not. 
+			If the traits are for a type that implements its own construct method, 
+			this must be set to true.  If it is false, the JIT will early bind to 
+			the AS defined constructor. */
+		bool hasCustomConstruct:1;
+
 #ifdef DEBUGGER
 		/** how we implement dictionary or strict style lookups */
 		bool isActivationTraits:1;

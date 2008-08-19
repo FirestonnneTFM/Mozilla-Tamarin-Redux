@@ -94,27 +94,39 @@ namespace avmplus
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
 			CodegenMIR mir(this);
-			verifier.verify(&mir);	// pass 2 - data flow
-			if (!mir.overflow)
-				mir.emitMD(); // pass 3 - generate code
-
-			// the MD buffer can overflow so we need to re-iterate
-			// over the whole thing, since we aren't yet robust enough
-			// to just rebuild the MD code.
-
-			// mark it as interpreted and try to limp along
-			if (mir.overflow)
+			TRY(core, kCatchAction_Rethrow)
 			{
-				#ifdef AVMPLUS_INTERP
-				AvmCore* core = this->core();
-				if (returnTraits() == NUMBER_TYPE)
-					implN = Interpreter::interpN;
-				else
-					impl32 = Interpreter::interp32;
-				#else
-				toplevel()->throwError(kOutOfMemoryError);
-				#endif //AVMPLUS_INTERP
+				verifier.verify(&mir);	// pass 2 - data flow
+				if (!mir.overflow)
+					mir.emitMD(); // pass 3 - generate code
+
+				// the MD buffer can overflow so we need to re-iterate
+				// over the whole thing, since we aren't yet robust enough
+				// to just rebuild the MD code.
+
+				// mark it as interpreted and try to limp along
+				if (mir.overflow)
+				{
+					#ifdef AVMPLUS_INTERP
+					AvmCore* core = this->core();
+					if (returnTraits() == NUMBER_TYPE)
+						implN = Interpreter::interpN;
+					else
+						impl32 = Interpreter::interp32;
+					#else
+					toplevel()->throwError(kOutOfMemoryError);
+					#endif //AVMPLUS_INTERP
+				}
 			}
+			CATCH (Exception *exception) 
+			{
+				mir.clearMIRBuffers();
+
+				// re-throw exception
+				core->throwException(exception);
+			}
+			END_CATCH
+			END_TRY
 		}
 		else
 		{

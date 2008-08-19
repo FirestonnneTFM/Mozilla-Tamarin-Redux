@@ -90,7 +90,22 @@ namespace avmplus
 #else
 		// generate the native method thunk
 		CodegenMIR cgen(this);
-		cgen.emitNativeThunk(this);
+		AvmCore *c = core();
+		
+		TRY(c, kCatchAction_Rethrow)
+		{
+			cgen.emitNativeThunk(this);
+		} 
+		CATCH (Exception *exception) 
+		{
+			cgen.clearMIRBuffers();
+
+			// re-throw exception
+			c->throwException(exception);
+		}
+		END_CATCH
+		END_TRY
+
 		if (cgen.overflow)
 			toplevel->throwError(kOutOfMemoryError);
 #endif

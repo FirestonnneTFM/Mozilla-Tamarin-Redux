@@ -97,9 +97,11 @@ namespace avmplus
 		/** set to true if the no more memory. */
 		bool overflow;
 
-		static const int MIR_float = 0x20;		// result is double
-		static const int MIR_oper  = 0x40;		// eligible for cse
-		enum MirOpcode 
+		static const int MIR_float = 0x40;		// result is double
+		static const int MIR_oper  = 0x80;		// eligible for cse
+
+		typedef unsigned int MirOpcode;
+		enum
 		{
 			MIR_bb      = 2,
 			MIR_jmpt	= 3,				// offset, size
@@ -120,7 +122,7 @@ namespace avmplus
 			MIR_use		= 18,				// 
 			MIR_usea	= 19,				// imm32
 			MIR_alloc   = 20,
-			MIR_addp  = 21,     // no cse add for adjusted builtin ScriptObject ptrs
+			MIR_addp	= 21,     // no cse add for adjusted builtin ScriptObject ptrs (NOT 64-bit related)
 			MIR_ld      = 22,				// non-optimizable load
 			MIR_jlt     = 23,
 			MIR_jle		= 24,
@@ -134,6 +136,10 @@ namespace avmplus
 			MIR_ld32u	= 31,
 #else
 			MIR_ld32	= MIR_ld,
+#endif
+
+#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+			MIR_d2i		= 36,				// cvttsd2si for SSE2
 #endif
 
 			MIR_imm		= 1  | MIR_oper,	// 0,imm32
@@ -157,6 +163,14 @@ namespace avmplus
 
 			MIR_ldop    = 22 | MIR_oper,    // ptr, disp (optimizable)
 
+#ifdef AVMPLUS_64BIT
+			MIR_orp     = 23 | MIR_oper,	// ptr sized OR operation
+			MIR_andp    = 24 | MIR_oper,	// ptr sized AND operation
+#else
+			MIR_orp     = MIR_or,			// ptr sized OR operation (same on 32-bit systems)
+			MIR_andp    = MIR_and,			// ptr sized AND operation (same on 32-bit systems)
+#endif
+
 			// After this point are all instructions that return a double-sized
 			// result.
 			MIR_fcm		= 4  | MIR_float,	// count, imm32 - call method, float return
@@ -177,9 +191,6 @@ namespace avmplus
 			MIR_fsub	= 7  | MIR_float | MIR_oper,	// ptr, ptr
 			MIR_fmul	= 8  | MIR_float | MIR_oper,	// ptr, ptr
 			MIR_fdiv	= 9  | MIR_float | MIR_oper,	// ptr, ptr
-#ifdef AVMPLUS_IA32
-			MIR_faddi	= 10 | MIR_float | MIR_oper,	// ptr, disp
-#endif
 			
 			MIR_fldop   = 22 | MIR_float | MIR_oper,	// ptr, disp (optimizable load)
 
@@ -210,6 +221,9 @@ namespace avmplus
 
 		~CodegenMIR();
 
+		/* Frees our MIR buffers when needed. */
+		void clearMIRBuffers();
+
 		/**
 		 * Generates code for the method info.  The bytecode is translated
 		 * into native machine code and the TURBO flag is set
@@ -230,6 +244,7 @@ namespace avmplus
 		void emitIntConst(FrameState* state, int index, uintptr c);
 		void emitDoubleConst(FrameState* state, int index, double* pd);
 		void emitCoerce(FrameState* state, int index, Traits* type);
+		void emitDoubleToInteger(int index);
 		void emitCheckNull(FrameState* state, int index);
 		void emitSetContext(FrameState* state, AbstractFunction* f);
 		void emitSetDxns(FrameState* state);
@@ -625,6 +640,14 @@ namespace avmplus
 			XMM5 = 5,
 			XMM6 = 6,
 			XMM7 = 7,
+			XMM8 = 8,
+			XMM9 = 9,
+			XMM10 = 10,
+			XMM11 = 11,
+			XMM12 = 12,
+			XMM13 = 13,
+			XMM14 = 14,
+			XMM15 = 15,
 
 			// !!@ remove all float support?  SSE2 is always available
 			// X87 regs
@@ -798,6 +821,7 @@ namespace avmplus
 		#define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
 		#define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
 		#define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
+		#define CLASSCLOSUREADDR(f)   classClosureAddr((int (ClassClosure::*)())(&f))
 
 		static sintptr profAddr( void (DynamicProfiler::*f)() );
 		static sintptr coreAddr( int (AvmCore::*f)() );
@@ -811,6 +835,7 @@ namespace avmplus
 		static sintptr efAddr( int (ExceptionFrame::*f)() );
 		static sintptr scriptAddr( int (ScriptObject::*f)() );
 		static sintptr arrayAddr( int (ArrayObject::*f)() );
+		static sintptr classClosureAddr( int (ClassClosure::*f)() );
 		static sintptr vectorIntAddr(int (IntVectorObject::*f)() );
 		static sintptr vectorUIntAddr(int (UIntVectorObject::*f)() );
 		static sintptr vectorDoubleAddr(int (DoubleVectorObject::*f)() );
@@ -850,19 +875,20 @@ namespace avmplus
 		// for intel and our purposes previous instruction is 4 bytes prior to m; used for patching 32bit target addresses
 		#endif
 
-		// 64bit - need to verify
 		#ifdef AVMPLUS_AMD64
 		typedef byte MDInstruction;
 		#define PREV_MD_INS(m) (m-4)
+		#define PREV_MD_INS_64(m) (m-8)
 		// for intel and our purposes previous instruction is 4 bytes prior to m; used for patching 32bit target addresses
 		#endif
 		
+        #if !defined(AVMPLUS_ARM)
 		// machine specific instruction buffer
-		#ifndef AVMPLUS_ARM
 		MDInstruction* mip;
 		MDInstruction* mipStart;
-		MDInstruction* mipEnd;
 		#endif
+	
+		MDInstruction* mipEnd;
 
 		uint32 arg_index;
 
@@ -888,7 +914,7 @@ namespace avmplus
 		class StackCheck
 		{
 		public:
-			uint32 *patchStackSize;
+			uintptr *patchStackSize;
 			MdLabel  resumeLabel;
 			MdLabel  overflowLabel;
 
@@ -971,10 +997,8 @@ namespace avmplus
 		uint64  verifyStartTime;	// note the time we started verification
 		uint64  mdStartTime;		// note the time we started MD generation
 
-		#ifndef AVMPLUS_ARM
 		int		mInstructionCount;  // number of machine instructions
 		#define incInstructionCount() mInstructionCount++
-		#endif
 
 		#ifdef _DEBUG
 		// buffer tuning information
@@ -984,6 +1008,7 @@ namespace avmplus
 
 		#else
 
+		#undef incInstructionCount
 		#define incInstructionCount()
 		
 		#endif /* AVMPLUS_PROFILE */
@@ -1054,17 +1079,7 @@ namespace avmplus
 		OP*	  defineArgInsReg(Register r);
 		OP*   binaryIns(MirOpcode code, OP* a1, OP* a2);
 		
-		OP*   loadIns(MirOpcode _code, sintptr _disp, OP* _base)
-		{
-#ifdef AVMPLUS_64BIT
-			AvmAssert(((_code & ~MIR_float & ~MIR_oper) == MIR_ld) ||
-						((_code & ~MIR_float & ~MIR_oper) == MIR_ld32) ||
-						((_code & ~MIR_float & ~MIR_oper) == MIR_ld32u));
-#else
-			AvmAssert(((_code & ~MIR_float & ~MIR_oper) == MIR_ld));
-#endif
-			return Ins(_code, _base, (sintptr)_disp);
-		}
+		OP*   loadIns(MirOpcode _code, sintptr _disp, OP* _base);
 
 		OP*   cmpOptimization (int lhs, int rhs);
 
@@ -1077,6 +1092,7 @@ namespace avmplus
 		OP*   cmpLe(int lhs, int rhs);
 		OP*	  cmpEq(sintptr funcaddr, int lhs, int rhs);
 
+		void  storeIns(MirOpcode _code, OP* v, uintptr disp, OP* base);
 		void  storeIns(OP* v, uintptr disp, OP* base, bool force32=false);
 
 		OP*   leaIns(sintptr disp, OP* base);
@@ -1250,6 +1266,9 @@ namespace avmplus
 
 			void retire(Register r)
 			{
+				#ifdef _MSC_VER
+				__assume(r>0);
+				#endif //#ifdef _MSC_VER
 				AvmAssert(r != Unknown);
 				AvmAssert(active[r] != NULL);
 				active[r] = NULL;
@@ -1257,7 +1276,7 @@ namespace avmplus
 			}
 			/**
 			 * add the register provided in v->reg to the active list
-			 * IMPORTANT: this is a necesary call when allocating a register
+			 * IMPORTANT: this is a necessary call when allocating a register
 			 */
 			void addActive(OP* v)
 			{
@@ -1285,6 +1304,9 @@ namespace avmplus
 			*/
 			void removeActive(Register r)
 			{
+				#ifdef _MSC_VER
+				__assume(r>0);
+				#endif //#ifdef _MSC_VER
 				//registerReleaseCount++;
 				AvmAssert(r != Unknown);
 				AvmAssert(active[r] != NULL);
@@ -1774,8 +1796,6 @@ namespace avmplus
 		//
 		// End PowerPC code generation
 		//
-		// 64bit - enabled this for 64-bit to get compiling.  There
-		// are certain differences between 32 and 64-bit bytecode
         #elif defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)		
 		//   ---------------------------------------------------
 		// 
@@ -1829,6 +1849,7 @@ namespace avmplus
 		void SUBSD(Register dest, Register src)		{ SSE(0xf20f5c, dest, src); }
 		void MULSD(Register dest, Register src)		{ SSE(0xf20f59, dest, src); }
 		void DIVSD(Register dest, Register src)		{ SSE(0xf20f5e, dest, src); }
+		void CVTTSD2SI(Register dest, Register src)	{ SSE(0xf20f2c, dest, src); }
 		void CVTSI2SD(Register dest, Register src)	{ SSE(0xf20f2a, dest, src); }
 		void UCOMISD(Register xmm1, Register xmm2)	{ SSE(0x660f2e, xmm1, xmm2); }
 		void MOVAPD(Register dest, Register src)	{ SSE(0x660f28, dest, src); }
@@ -1853,7 +1874,17 @@ namespace avmplus
 
 		void ALU (byte op, Register reg, sintptr imm);
 		void ADD(Register reg, sintptr imm) { ALU(0x05, reg, imm); }
-		void ADD64(Register reg, sintptr imm) { ALU(0x05, reg, imm); }
+#ifdef AVMPLUS_AMD64
+		void ADD64(Register reg, sintptr imm) { ALU64(0x05, reg, imm); }
+		void ALU64 (byte op, Register reg, sintptr imm);
+		void SUB64(Register reg, sintptr imm) { ALU64(0x2d, reg, imm); }
+		void SUB64(Register lhs, Register rhs)	{ ALU64(0x2b, lhs, rhs); }
+		void OR64 (Register reg, sintptr imm) { ALU64(0x0d, reg, imm); }
+		void OR64 (Register lhs, Register rhs)	{ ALU64(0x0b, lhs, rhs); }
+		void AND64(Register reg, sintptr imm) { ALU64(0x25, reg, imm); }
+		void AND64(Register lhs, Register rhs)	{ ALU64(0x23, lhs, rhs); }
+		void CMP64(Register lhs, Register rhs)	{ ALU64(0x3b, lhs, rhs); }
+#endif
 		void SUB(Register reg, sintptr imm) { ALU(0x2d, reg, imm); }
 		void AND(Register reg, sintptr imm) { ALU(0x25, reg, imm); }
 		void XOR(Register reg, sintptr imm) { ALU(0x35, reg, imm); }
@@ -1896,9 +1927,18 @@ namespace avmplus
 		void ALU(int op, Register r, sintptr disp, Register base);
 
 		void TEST(sintptr disp, Register base, Register r)	{ ALU(0x85, r, disp, base); }
+
+#ifdef AVMPLUS_AMD64
+		void LEA(Register r, sintptr disp, Register base)	{ ALU64(0x8d, r, disp, base); }
+#else
 		void LEA(Register r, sintptr disp, Register base)	{ ALU(0x8d, r, disp, base); }
+#endif
 		void CALL(sintptr disp, Register base)				{ ALU(0xff, (Register)2, disp, base); }
+#ifdef AVMPLUS_AMD64
+		void JMP(sintptr disp, Register base)				{ ALU64(0xff, (Register)4, disp, base); }
+#else
 		void JMP(sintptr disp, Register base)				{ ALU(0xff, (Register)4, disp, base); }
+#endif
 		void PUSH(sintptr disp, Register base)				{ ALU(0xff, (Register)6, disp, base); }
 		#ifndef AVMPLUS_AMD64
 		void MOV (sintptr disp, Register base, Register r)  { ALU(0x89, r, disp, base); }
@@ -1910,6 +1950,8 @@ namespace avmplus
 		void ALU64(int op, Register r, sintptr disp, Register base);
 
 		void ADD64(Register lhs, Register rhs)	{ ALU64(0x03, lhs, rhs); }
+
+		void CVTSI2SD64(Register dest, Register src); 
 
 		void XCHG(Register rA, Register rB)		{ ALU64(0x87, rA, rB); }
 		void MOV (Register dest, Register src)	{ ALU64(0x8b, dest, src); }
@@ -1935,7 +1977,7 @@ namespace avmplus
 			return ((int32)i) == i;
 		}
 			
-		#endif
+		#endif // AVMPLUS_AMD64
 
 		void SHIFT(int op, Register reg, int imm8);
 		void SAR(Register reg, int imm8) { SHIFT(7, reg, imm8); } // signed >> imm
@@ -2109,10 +2151,9 @@ namespace avmplus
 	#endif /* AVMPLUS_PPC */
 	
 	#ifdef AVMPLUS_AMD64
-	//  64bit - may need adjustment
-	static const int md_prologue_size		= 32;
-	static const int md_epilogue_size		= 128;
-	static const int md_native_thunk_size	= 256;
+	static const int md_prologue_size		= 128;
+	static const int md_epilogue_size		= 256;
+	static const int md_native_thunk_size	= 512;
 	#endif /* AVMPLUS_PPC */
 	
 }

@@ -38,7 +38,9 @@
 #include "avmplus.h"
 
 #ifdef DARWIN
-#include <Carbon/Carbon.h>
+    #if defined(AVMPLUS_MAC_CARBON)
+		#include <Carbon/Carbon.h>
+	#endif
 #endif
 
 #ifdef AVMPLUS_ROSETTA
@@ -790,7 +792,10 @@ namespace avmplus
 		// Add self to exception thread's list
 		int retCode = pthread_mutex_lock(&mutex);
 		(void)retCode;
+
+        #if !defined(AVMPLUS_PTHREAD_NO_ASSERT)
 		AvmAssert(!retCode);
+		#endif
 
 		thread = mach_thread_self();
 		
@@ -798,8 +803,10 @@ namespace avmplus
 		guardList = this;
 		
 		retCode = pthread_mutex_unlock(&mutex);
-		AvmAssert(!retCode);
 
+        #if !defined(AVMPLUS_PTHREAD_NO_ASSERT)
+		AvmAssert(!retCode);
+		#endif
 
 		exception_mask_t mask = EXC_MASK_BAD_ACCESS;
 		

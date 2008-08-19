@@ -490,15 +490,11 @@ namespace avmplus
 
 			ObjectVectorClass* new_type= (ObjectVectorClass*)toplevel()->objectVectorClass->createClassClosure(vtab);
 			new_type->index_type = (ClassClosure*)AvmCore::atomToScriptObject(type);
+			new_type->setDelegate(toplevel()->classClass->prototype);
 
 			// Is this right?  Should each instantiation get its own prototype?
-			//new_type->prototype = toplevel()->objectVectorClass->prototype;
-
-			Atom args[1] = { toplevel()->objectVectorClass->atom() };
-			Atom proto = AvmCore::atomToScriptObject(toplevel()->objectVectorClass->gen_proto_method)->call(0, args);
-			new_type->prototype = AvmCore::atomToScriptObject(proto);
-
-			instantiated_types->put(fullname->atom(), new_type->atom());
+			new_type->prototype = toplevel()->objectVectorClass->prototype;
+			instantiated_types->add(fullname->atom(), new_type->atom());
 		}
 		return (Atom)instantiated_types->get(fullname->atom());
 	}
@@ -528,17 +524,12 @@ namespace avmplus
 		return v->atom();
 	}
 
-	ObjectVectorObject* VectorClass::newVector(ClassClosure* /*type*/, uint32 /*length*/)
+	ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32 length)
 	{
-		ObjectVectorObject* v = NULL;
-		/*
-		VTable* ivtable = this->ivtable();
-		VectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
-			VectorObject(ivtable, prototype);
-		v->set_type(type->atom());
-		v->set_length(length);
-		*/
-		return v;
+		Atom args[1] = {type->atom()};
+
+		ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(applyTypeArgs(1, args));
+		return vecclass->newVector(length);
 	}
 
 	//
@@ -563,7 +554,6 @@ namespace avmplus
 		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__map,		ObjectVectorObject::map, 0)
 		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__filter,		ObjectVectorObject::filter, 0)
 		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_AS3_unshift,		ObjectVectorObject::unshift, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private_genPrototype_set,		ObjectVectorClass::set_gen_proto, 0)
 	END_NATIVE_MAP()
 
 	ObjectVectorClass::ObjectVectorClass(VTable *vtable)
@@ -582,17 +572,12 @@ namespace avmplus
         return v;
     }
 
-	void ObjectVectorClass::set_gen_proto(Atom func)
-	{
-		gen_proto_method = func;
-	}
-
-	ObjectVectorObject* ObjectVectorClass::newVector(ClassClosure* type, uint32 length)
+	ObjectVectorObject* ObjectVectorClass::newVector(uint32 length)
 	{
 		VTable* ivtable = this->ivtable();
 		ObjectVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
 			ObjectVectorObject(ivtable, prototype);
-		v->set_type(type->atom());
+		v->set_type(this->index_type->atom());
 		v->set_length(length);
 		return v;
 	}
@@ -713,7 +698,7 @@ namespace avmplus
 
 	VectorBaseObject* ObjectVectorObject::newVector(uint32 length)
 	{
-		return toplevel()->objectVectorClass->newVector(t, length);
+		return toplevel()->vectorClass->newVector(t, length);
 	}
 
 	void ObjectVectorObject::_spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset)

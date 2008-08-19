@@ -815,8 +815,15 @@ namespace avmplus
 			ht = obj->getTable();
 		}
 		
-		// memset native space to zero except baseclasses
-		memset((char*)obj+sizeof(AvmPlusScriptableObject), 0, sizeofInstance-sizeof(AvmPlusScriptableObject));
+		// clear native space to zero except baseclasses
+		int *myptr = (int *)((char*)obj+sizeof(AvmPlusScriptableObject));
+		size_t mysize = sizeofInstance-sizeof(AvmPlusScriptableObject);
+		AvmAssert((mysize & 0x3) == 0); // we assume all sizes are multiples of 4
+		while (mysize >= 4)
+		{
+			*myptr++ = 0;
+			mysize -= 4;
+		}
 
 		// NOTE: this code can't use type macros or core b/c it can run
 		// after AvmCore has been destructed
@@ -904,11 +911,23 @@ namespace avmplus
 			{
 				// build conflict stub
 				CodegenMIR mir(pool);
-				imt[i] = BIND_ITRAMP | (uintptr)mir.emitImtThunk(e);
-				if (mir.overflow)
-					toplevel->throwError(kOutOfMemoryError);
+				TRY(pool->core, kCatchAction_Rethrow)
+				{
+					imt[i] = BIND_ITRAMP | (uintptr)mir.emitImtThunk(e);
+					if (mir.overflow)
+						toplevel->throwError(kOutOfMemoryError);
+	
+					AvmAssert((imt[i]&7)==BIND_ITRAMP); // addr must be 8-aligned
+				}
+				CATCH (Exception *exception) 
+				{
+					mir.clearMIRBuffers();
 
-				AvmAssert((imt[i]&7)==BIND_ITRAMP); // addr must be 8-aligned
+					// re-throw exception
+					pool->core->throwException(exception);
+				}
+				END_CATCH
+				END_TRY
 			}
 		}
 	}

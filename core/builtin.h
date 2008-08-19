@@ -2,9 +2,9 @@
 #define AVMTHUNK_VERSION 1
 const uint32_t builtin_abc_class_count = 34;
 const uint32_t builtin_abc_script_count = 6;
-const uint32_t builtin_abc_method_count = 852;
-const uint32_t builtin_abc_length = 39739;
-extern const uint8_t builtin_abc_data[39739];
+const uint32_t builtin_abc_method_count = 846;
+const uint32_t builtin_abc_length = 38886;
+extern const uint8_t builtin_abc_data[38886];
 
 const uint32_t abcclass_Math = 16;
 
@@ -86,57 +86,77 @@ const uint32_t abcclass_builtin_as_0_MethodClosure = 15;
 const uint32_t abcclass___AS3___vec_Vector_uint = 13;
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XML_prettyIndent_get = 716;
+  const uint32_t XML_prettyIndent_get = 710;
   #define XML_prettyIndent_get_thunk  builtin_i2a_o_thunk
   #define XML_prettyIndent_get_thunkc builtin_i2a_o_thunkc
-  const uint32_t XMLList_AS3_length = 818;
+  const uint32_t XMLList_AS3_length = 812;
   #define XMLList_AS3_length_thunk  builtin_i2a_o_thunk
   #define XMLList_AS3_length_thunkc builtin_i2a_o_thunkc
-  const uint32_t builtin_as_0_MethodClosure_length_get = 454;
+  const uint32_t builtin_as_0_MethodClosure_length_get = 448;
   #define builtin_as_0_MethodClosure_length_get_thunk  builtin_i2a_o_thunk
   #define builtin_as_0_MethodClosure_length_get_thunkc builtin_i2a_o_thunkc
-  const uint32_t XMLList_AS3_childIndex = 827;
+  const uint32_t XMLList_AS3_childIndex = 821;
   #define XMLList_AS3_childIndex_thunk  builtin_i2a_o_thunk
   #define XMLList_AS3_childIndex_thunkc builtin_i2a_o_thunkc
   const uint32_t Function_length_get = 39;
   #define Function_length_get_thunk  builtin_i2a_o_thunk
   #define Function_length_get_thunkc builtin_i2a_o_thunkc
-  const uint32_t RegExp_lastIndex_get = 657;
+  const uint32_t RegExp_lastIndex_get = 651;
   #define RegExp_lastIndex_get_thunk  builtin_i2a_o_thunk
   #define RegExp_lastIndex_get_thunkc builtin_i2a_o_thunkc
-  const uint32_t XML_AS3_childIndex = 729;
+  const uint32_t XML_AS3_childIndex = 723;
   #define XML_AS3_childIndex_thunk  builtin_i2a_o_thunk
   #define XML_AS3_childIndex_thunkc builtin_i2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_int_AS3_pop = 323;
+  const uint32_t __AS3___vec_Vector_int_AS3_pop = 319;
   #define __AS3___vec_Vector_int_AS3_pop_thunk  builtin_i2a_o_thunk
   #define __AS3___vec_Vector_int_AS3_pop_thunkc builtin_i2a_o_thunkc
+extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+  const uint32_t XML_AS3_descendants = 728;
+  #define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunk
+  #define XML_AS3_descendants_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunkc
+  const uint32_t XMLList_AS3_processingInstructions = 816;
+  #define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunk
+  #define XMLList_AS3_processingInstructions_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunkc
+  const uint32_t XMLList_AS3_descendants = 808;
+  #define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunk
+  #define XMLList_AS3_descendants_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunkc
+  const uint32_t XMLList_AS3_elements = 809;
+  #define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunk
+  #define XMLList_AS3_elements_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunkc
+  const uint32_t XML_AS3_elements = 729;
+  #define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunk
+  #define XML_AS3_elements_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunkc
+  const uint32_t XML_AS3_processingInstructions = 744;
+  #define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunk
+  #define XML_AS3_processingInstructions_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XML_AS3_attribute = 726;
+  const uint32_t XML_AS3_attribute = 720;
   #define XML_AS3_attribute_thunk  builtin_a2a_oa_thunk
   #define XML_AS3_attribute_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XMLList_AS3_setChildren = 839;
+  const uint32_t XMLList_AS3_setChildren = 833;
   #define XMLList_AS3_setChildren_thunk  builtin_a2a_oa_thunk
   #define XMLList_AS3_setChildren_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XML_AS3_setChildren = 754;
+  const uint32_t XML_AS3_setChildren = 748;
   #define XML_AS3_setChildren_thunk  builtin_a2a_oa_thunk
   #define XML_AS3_setChildren_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XMLList_AS3_appendChild = 826;
+  const uint32_t XMLList_AS3_appendChild = 820;
   #define XMLList_AS3_appendChild_thunk  builtin_a2a_oa_thunk
   #define XMLList_AS3_appendChild_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XML_AS3_prependChild = 751;
+  const uint32_t XML_AS3_prependChild = 745;
   #define XML_AS3_prependChild_thunk  builtin_a2a_oa_thunk
   #define XML_AS3_prependChild_thunkc builtin_a2a_oa_thunkc
   const uint32_t Array_private__shift = 172;
   #define Array_private__shift_thunk  builtin_a2a_oa_thunk
   #define Array_private__shift_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XMLList_AS3_removeNamespace = 837;
+  const uint32_t XMLList_AS3_removeNamespace = 831;
   #define XMLList_AS3_removeNamespace_thunk  builtin_a2a_oa_thunk
   #define XMLList_AS3_removeNamespace_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XML_AS3_child = 728;
+  const uint32_t XML_AS3_child = 722;
   #define XML_AS3_child_thunk  builtin_a2a_oa_thunk
   #define XML_AS3_child_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XML_AS3_removeNamespace = 752;
+  const uint32_t XML_AS3_removeNamespace = 746;
   #define XML_AS3_removeNamespace_thunk  builtin_a2a_oa_thunk
   #define XML_AS3_removeNamespace_thunkc builtin_a2a_oa_thunkc
   const uint32_t Array_private__pop = 169;
@@ -145,69 +165,69 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_thunkc(AvmMethodE
   const uint32_t Function_prototype_set = 38;
   #define Function_prototype_set_thunk  builtin_a2a_oa_thunk
   #define Function_prototype_set_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XML_AS3_appendChild = 725;
+  const uint32_t XML_AS3_appendChild = 719;
   #define XML_AS3_appendChild_thunk  builtin_a2a_oa_thunk
   #define XML_AS3_appendChild_thunkc builtin_a2a_oa_thunkc
   const uint32_t Array_private__reverse = 170;
   #define Array_private__reverse_thunk  builtin_a2a_oa_thunk
   #define Array_private__reverse_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XMLList_AS3_child = 809;
+  const uint32_t XMLList_AS3_child = 803;
   #define XMLList_AS3_child_thunk  builtin_a2a_oa_thunk
   #define XMLList_AS3_child_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XMLList_AS3_addNamespace = 825;
+  const uint32_t XMLList_AS3_addNamespace = 819;
   #define XMLList_AS3_addNamespace_thunk  builtin_a2a_oa_thunk
   #define XMLList_AS3_addNamespace_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XMLList_AS3_attribute = 807;
+  const uint32_t XMLList_AS3_attribute = 801;
   #define XMLList_AS3_attribute_thunk  builtin_a2a_oa_thunk
   #define XMLList_AS3_attribute_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XMLList_AS3_prependChild = 836;
+  const uint32_t XMLList_AS3_prependChild = 830;
   #define XMLList_AS3_prependChild_thunk  builtin_a2a_oa_thunk
   #define XMLList_AS3_prependChild_thunkc builtin_a2a_oa_thunkc
-  const uint32_t XML_AS3_addNamespace = 724;
+  const uint32_t XML_AS3_addNamespace = 718;
   #define XML_AS3_addNamespace_thunk  builtin_a2a_oa_thunk
   #define XML_AS3_addNamespace_thunkc builtin_a2a_oa_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Date_private__setMilliseconds = 592;
+  const uint32_t Date_private__setMilliseconds = 586;
   #define Date_private__setMilliseconds_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setMilliseconds_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setMinutes = 590;
+  const uint32_t Date_private__setMinutes = 584;
   #define Date_private__setMinutes_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setMinutes_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setUTCMinutes = 597;
+  const uint32_t Date_private__setUTCMinutes = 591;
   #define Date_private__setUTCMinutes_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setUTCMinutes_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setHours = 589;
+  const uint32_t Date_private__setHours = 583;
   #define Date_private__setHours_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setHours_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setUTCDate = 595;
+  const uint32_t Date_private__setUTCDate = 589;
   #define Date_private__setUTCDate_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setUTCDate_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setMonth = 587;
+  const uint32_t Date_private__setMonth = 581;
   #define Date_private__setMonth_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setMonth_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setFullYear = 586;
+  const uint32_t Date_private__setFullYear = 580;
   #define Date_private__setFullYear_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setFullYear_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setUTCFullYear = 593;
+  const uint32_t Date_private__setUTCFullYear = 587;
   #define Date_private__setUTCFullYear_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setUTCFullYear_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setDate = 588;
+  const uint32_t Date_private__setDate = 582;
   #define Date_private__setDate_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setDate_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setUTCMilliseconds = 599;
+  const uint32_t Date_private__setUTCMilliseconds = 593;
   #define Date_private__setUTCMilliseconds_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setUTCMilliseconds_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setSeconds = 591;
+  const uint32_t Date_private__setSeconds = 585;
   #define Date_private__setSeconds_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setSeconds_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setUTCMonth = 594;
+  const uint32_t Date_private__setUTCMonth = 588;
   #define Date_private__setUTCMonth_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setUTCMonth_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setUTCSeconds = 598;
+  const uint32_t Date_private__setUTCSeconds = 592;
   #define Date_private__setUTCSeconds_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setUTCSeconds_thunkc builtin_d2d_o_rest_thunkc
-  const uint32_t Date_private__setUTCHours = 596;
+  const uint32_t Date_private__setUTCHours = 590;
   #define Date_private__setUTCHours_thunk  builtin_d2d_o_rest_thunk
   #define Date_private__setUTCHours_thunkc builtin_d2d_o_rest_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ss_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -217,19 +237,19 @@ extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ss_optakAvmThunkUnd
   #define String_AS3_localeCompare_thunkc builtin_i2a_ss_optakAvmThunkUndefined_thunkc
 extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XML_AS3_hasOwnProperty = 722;
+  const uint32_t XML_AS3_hasOwnProperty = 716;
   #define XML_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_thunk
   #define XML_AS3_hasOwnProperty_thunkc builtin_b2a_oa_optakAvmThunkUndefined_thunkc
-  const uint32_t XMLList_AS3_hasOwnProperty = 805;
+  const uint32_t XMLList_AS3_hasOwnProperty = 799;
   #define XMLList_AS3_hasOwnProperty_thunk  builtin_b2a_oa_optakAvmThunkUndefined_thunk
   #define XMLList_AS3_hasOwnProperty_thunkc builtin_b2a_oa_optakAvmThunkUndefined_thunkc
-  const uint32_t XMLList_AS3_propertyIsEnumerable = 806;
+  const uint32_t XMLList_AS3_propertyIsEnumerable = 800;
   #define XMLList_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optakAvmThunkUndefined_thunk
   #define XMLList_AS3_propertyIsEnumerable_thunkc builtin_b2a_oa_optakAvmThunkUndefined_thunkc
-  const uint32_t XML_AS3_propertyIsEnumerable = 723;
+  const uint32_t XML_AS3_propertyIsEnumerable = 717;
   #define XML_AS3_propertyIsEnumerable_thunk  builtin_b2a_oa_optakAvmThunkUndefined_thunk
   #define XML_AS3_propertyIsEnumerable_thunkc builtin_b2a_oa_optakAvmThunkUndefined_thunkc
-  const uint32_t isXMLName = 665;
+  const uint32_t isXMLName = 659;
   #define isXMLName_thunk  builtin_b2a_oa_optakAvmThunkUndefined_thunk
   #define isXMLName_thunkc builtin_b2a_oa_optakAvmThunkUndefined_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_n_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -239,28 +259,28 @@ extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_n_thunkc(AvmMetho
   #define Namespace_uri_get_thunkc builtin_s2a_n_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ob_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ob_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t __AS3___vec_Vector_object_fixed_set = 240;
+  const uint32_t __AS3___vec_Vector_object_fixed_set = 238;
   #define __AS3___vec_Vector_object_fixed_set_thunk  builtin_a2a_ob_thunk
   #define __AS3___vec_Vector_object_fixed_set_thunkc builtin_a2a_ob_thunkc
-  const uint32_t __AS3___vec_Vector_int_fixed_set = 300;
+  const uint32_t __AS3___vec_Vector_int_fixed_set = 297;
   #define __AS3___vec_Vector_int_fixed_set_thunk  builtin_a2a_ob_thunk
   #define __AS3___vec_Vector_int_fixed_set_thunkc builtin_a2a_ob_thunkc
-  const uint32_t __AS3___vec_Vector_uint_fixed_set = 360;
+  const uint32_t __AS3___vec_Vector_uint_fixed_set = 356;
   #define __AS3___vec_Vector_uint_fixed_set_thunk  builtin_a2a_ob_thunk
   #define __AS3___vec_Vector_uint_fixed_set_thunkc builtin_a2a_ob_thunkc
-  const uint32_t XML_prettyPrinting_set = 715;
+  const uint32_t XML_prettyPrinting_set = 709;
   #define XML_prettyPrinting_set_thunk  builtin_a2a_ob_thunk
   #define XML_prettyPrinting_set_thunkc builtin_a2a_ob_thunkc
-  const uint32_t __AS3___vec_Vector_double_fixed_set = 420;
+  const uint32_t __AS3___vec_Vector_double_fixed_set = 415;
   #define __AS3___vec_Vector_double_fixed_set_thunk  builtin_a2a_ob_thunk
   #define __AS3___vec_Vector_double_fixed_set_thunkc builtin_a2a_ob_thunkc
-  const uint32_t XML_ignoreProcessingInstructions_set = 711;
+  const uint32_t XML_ignoreProcessingInstructions_set = 705;
   #define XML_ignoreProcessingInstructions_set_thunk  builtin_a2a_ob_thunk
   #define XML_ignoreProcessingInstructions_set_thunkc builtin_a2a_ob_thunkc
-  const uint32_t XML_ignoreWhitespace_set = 713;
+  const uint32_t XML_ignoreWhitespace_set = 707;
   #define XML_ignoreWhitespace_set_thunk  builtin_a2a_ob_thunk
   #define XML_ignoreWhitespace_set_thunkc builtin_a2a_ob_thunkc
-  const uint32_t XML_ignoreComments_set = 709;
+  const uint32_t XML_ignoreComments_set = 703;
   #define XML_ignoreComments_set_thunk  builtin_a2a_ob_thunk
   #define XML_ignoreComments_set_thunkc builtin_a2a_ob_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -270,21 +290,21 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_optakAvmThunkUnd
   #define Function_AS3_apply_thunkc builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Date_UTC = 555;
+  const uint32_t Date_UTC = 549;
   #define Date_UTC_thunk  builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk
   #define Date_UTC_thunkc builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunkc
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_ouuuai_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t __AS3___vec_Vector_int_private__spliceHelper = 314;
+  const uint32_t __AS3___vec_Vector_int_private__spliceHelper = 311;
   #define __AS3___vec_Vector_int_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
   #define __AS3___vec_Vector_int_private__spliceHelper_thunkc builtin_v2a_ouuuai_thunkc
-  const uint32_t __AS3___vec_Vector_object_private__spliceHelper = 254;
+  const uint32_t __AS3___vec_Vector_object_private__spliceHelper = 252;
   #define __AS3___vec_Vector_object_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
   #define __AS3___vec_Vector_object_private__spliceHelper_thunkc builtin_v2a_ouuuai_thunkc
-  const uint32_t __AS3___vec_Vector_uint_private__spliceHelper = 374;
+  const uint32_t __AS3___vec_Vector_uint_private__spliceHelper = 370;
   #define __AS3___vec_Vector_uint_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
   #define __AS3___vec_Vector_uint_private__spliceHelper_thunkc builtin_v2a_ouuuai_thunkc
-  const uint32_t __AS3___vec_Vector_double_private__spliceHelper = 434;
+  const uint32_t __AS3___vec_Vector_double_private__spliceHelper = 429;
   #define __AS3___vec_Vector_double_private__spliceHelper_thunk  builtin_v2a_ouuuai_thunk
   #define __AS3___vec_Vector_double_private__spliceHelper_thunkc builtin_v2a_ouuuai_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_osa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -307,28 +327,25 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_n_thunkc(AvmMethodEn
   #define Namespace_prefix_get_thunkc builtin_a2a_n_thunkc
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t __AS3___vec_Vector_object_private_genPrototype_set = 233;
-  #define __AS3___vec_Vector_object_private_genPrototype_set_thunk  builtin_v2a_oa_thunk
-  #define __AS3___vec_Vector_object_private_genPrototype_set_thunkc builtin_v2a_oa_thunkc
-  const uint32_t XML_AS3_setLocalName = 755;
+  const uint32_t XML_AS3_setLocalName = 749;
   #define XML_AS3_setLocalName_thunk  builtin_v2a_oa_thunk
   #define XML_AS3_setLocalName_thunkc builtin_v2a_oa_thunkc
-  const uint32_t XML_AS3_setNamespace = 757;
+  const uint32_t XML_AS3_setNamespace = 751;
   #define XML_AS3_setNamespace_thunk  builtin_v2a_oa_thunk
   #define XML_AS3_setNamespace_thunkc builtin_v2a_oa_thunkc
-  const uint32_t XMLList_AS3_setLocalName = 840;
+  const uint32_t XMLList_AS3_setLocalName = 834;
   #define XMLList_AS3_setLocalName_thunk  builtin_v2a_oa_thunk
   #define XMLList_AS3_setLocalName_thunkc builtin_v2a_oa_thunkc
-  const uint32_t XMLList_AS3_setNamespace = 842;
+  const uint32_t XMLList_AS3_setNamespace = 836;
   #define XMLList_AS3_setNamespace_thunk  builtin_v2a_oa_thunk
   #define XMLList_AS3_setNamespace_thunkc builtin_v2a_oa_thunkc
-  const uint32_t XMLList_AS3_setName = 841;
+  const uint32_t XMLList_AS3_setName = 835;
   #define XMLList_AS3_setName_thunk  builtin_v2a_oa_thunk
   #define XMLList_AS3_setName_thunkc builtin_v2a_oa_thunkc
-  const uint32_t __AS3___vec_Vector_object_private_type_set = 235;
+  const uint32_t __AS3___vec_Vector_object_private_type_set = 233;
   #define __AS3___vec_Vector_object_private_type_set_thunk  builtin_v2a_oa_thunk
   #define __AS3___vec_Vector_object_private_type_set_thunkc builtin_v2a_oa_thunkc
-  const uint32_t XML_AS3_setName = 756;
+  const uint32_t XML_AS3_setName = 750;
   #define XML_AS3_setName_thunk  builtin_v2a_oa_thunk
   #define XML_AS3_setName_thunkc builtin_v2a_oa_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -341,16 +358,16 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oaoa_thunkc(AvmMethodE
   const uint32_t Array_private__forEach = 181;
   #define Array_private__forEach_thunk  builtin_v2a_oaoa_thunk
   #define Array_private__forEach_thunkc builtin_v2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_int_private__forEach = 294;
+  const uint32_t __AS3___vec_Vector_int_private__forEach = 291;
   #define __AS3___vec_Vector_int_private__forEach_thunk  builtin_v2a_oaoa_thunk
   #define __AS3___vec_Vector_int_private__forEach_thunkc builtin_v2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_double_private__forEach = 414;
+  const uint32_t __AS3___vec_Vector_double_private__forEach = 409;
   #define __AS3___vec_Vector_double_private__forEach_thunk  builtin_v2a_oaoa_thunk
   #define __AS3___vec_Vector_double_private__forEach_thunkc builtin_v2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_object_private__forEach = 230;
+  const uint32_t __AS3___vec_Vector_object_private__forEach = 229;
   #define __AS3___vec_Vector_object_private__forEach_thunk  builtin_v2a_oaoa_thunk
   #define __AS3___vec_Vector_object_private__forEach_thunkc builtin_v2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_uint_private__forEach = 354;
+  const uint32_t __AS3___vec_Vector_uint_private__forEach = 350;
   #define __AS3___vec_Vector_uint_private__forEach_thunk  builtin_v2a_oaoa_thunk
   #define __AS3___vec_Vector_uint_private__forEach_thunkc builtin_v2a_oaoa_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -365,16 +382,16 @@ extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odii_thunkc(AvmMe
   #define Number_private__convert_thunkc builtin_s2a_odii_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Math_pow = 475;
+  const uint32_t Math_pow = 469;
   #define Math_pow_thunk  builtin_d2d_odd_thunk
   #define Math_pow_thunkc builtin_d2d_odd_thunkc
-  const uint32_t Math_private__min = 459;
+  const uint32_t Math_private__min = 453;
   #define Math_private__min_thunk  builtin_d2d_odd_thunk
   #define Math_private__min_thunkc builtin_d2d_odd_thunkc
-  const uint32_t Math_atan2 = 474;
+  const uint32_t Math_atan2 = 468;
   #define Math_atan2_thunk  builtin_d2d_odd_thunk
   #define Math_atan2_thunkc builtin_d2d_odd_thunkc
-  const uint32_t Math_private__max = 460;
+  const uint32_t Math_private__max = 454;
   #define Math_private__max_thunk  builtin_d2d_odd_thunk
   #define Math_private__max_thunkc builtin_d2d_odd_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -384,10 +401,10 @@ extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti2147483647_
   #define String_private__lastIndexOf_thunkc builtin_i2a_ssi_opti2147483647_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Error_getErrorMessage = 483;
+  const uint32_t Error_getErrorMessage = 477;
   #define Error_getErrorMessage_thunk  builtin_s2a_oi_thunk
   #define Error_getErrorMessage_thunkc builtin_s2a_oi_thunkc
-  const uint32_t Date_private__toString = 557;
+  const uint32_t Date_private__toString = 551;
   #define Date_private__toString_thunk  builtin_s2a_oi_thunk
   #define Date_private__toString_thunkc builtin_s2a_oi_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -449,94 +466,94 @@ extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_os_optsAvmThunkCo
   #define escape_thunkc builtin_s2a_os_optsAvmThunkConstant_AvmString_3_____undefined_____thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XML_AS3_name = 743;
+  const uint32_t XML_AS3_name = 737;
   #define XML_AS3_name_thunk  builtin_a2a_o_thunk
   #define XML_AS3_name_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_inScopeNamespaces = 828;
+  const uint32_t XMLList_AS3_inScopeNamespaces = 822;
   #define XMLList_AS3_inScopeNamespaces_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_inScopeNamespaces_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_localName = 742;
+  const uint32_t XML_AS3_localName = 736;
   #define XML_AS3_localName_thunk  builtin_a2a_o_thunk
   #define XML_AS3_localName_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_namespaceDeclarations = 746;
+  const uint32_t XML_AS3_namespaceDeclarations = 740;
   #define XML_AS3_namespaceDeclarations_thunk  builtin_a2a_o_thunk
   #define XML_AS3_namespaceDeclarations_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_namespaceDeclarations = 835;
+  const uint32_t XMLList_AS3_namespaceDeclarations = 829;
   #define XMLList_AS3_namespaceDeclarations_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_namespaceDeclarations_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_comments = 811;
+  const uint32_t XMLList_AS3_comments = 805;
   #define XMLList_AS3_comments_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_comments_thunkc builtin_a2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_object_private_type_get = 236;
+  const uint32_t __AS3___vec_Vector_object_private_type_get = 234;
   #define __AS3___vec_Vector_object_private_type_get_thunk  builtin_a2a_o_thunk
   #define __AS3___vec_Vector_object_private_type_get_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_notification = 760;
+  const uint32_t XML_AS3_notification = 754;
   #define XML_AS3_notification_thunk  builtin_a2a_o_thunk
   #define XML_AS3_notification_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_parent = 749;
+  const uint32_t XML_AS3_parent = 743;
   #define XML_AS3_parent_thunk  builtin_a2a_o_thunk
   #define XML_AS3_parent_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_parent = 821;
+  const uint32_t XMLList_AS3_parent = 815;
   #define XMLList_AS3_parent_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_parent_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_localName = 834;
+  const uint32_t XMLList_AS3_localName = 828;
   #define XMLList_AS3_localName_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_localName_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_attributes = 808;
+  const uint32_t XMLList_AS3_attributes = 802;
   #define XMLList_AS3_attributes_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_attributes_thunkc builtin_a2a_o_thunkc
   const uint32_t Class_prototype_get = 29;
   #define Class_prototype_get_thunk  builtin_a2a_o_thunk
   #define Class_prototype_get_thunkc builtin_a2a_o_thunkc
-  const uint32_t builtin_as_0_MethodClosure_private_savedThis_get = 455;
+  const uint32_t builtin_as_0_MethodClosure_private_savedThis_get = 449;
   #define builtin_as_0_MethodClosure_private_savedThis_get_thunk  builtin_a2a_o_thunk
   #define builtin_as_0_MethodClosure_private_savedThis_get_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_children = 810;
+  const uint32_t XMLList_AS3_children = 804;
   #define XMLList_AS3_children_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_children_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_children = 730;
+  const uint32_t XML_AS3_children = 724;
   #define XML_AS3_children_thunk  builtin_a2a_o_thunk
   #define XML_AS3_children_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_text = 758;
+  const uint32_t XML_AS3_text = 752;
   #define XML_AS3_text_thunk  builtin_a2a_o_thunk
   #define XML_AS3_text_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_normalize = 820;
+  const uint32_t XMLList_AS3_normalize = 814;
   #define XMLList_AS3_normalize_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_normalize_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_comments = 731;
+  const uint32_t XML_AS3_comments = 725;
   #define XML_AS3_comments_thunk  builtin_a2a_o_thunk
   #define XML_AS3_comments_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_text = 823;
+  const uint32_t XMLList_AS3_text = 817;
   #define XMLList_AS3_text_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_text_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_name = 819;
+  const uint32_t XMLList_AS3_name = 813;
   #define XMLList_AS3_name_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_name_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_copy = 733;
+  const uint32_t XML_AS3_copy = 727;
   #define XML_AS3_copy_thunk  builtin_a2a_o_thunk
   #define XML_AS3_copy_thunkc builtin_a2a_o_thunkc
-  const uint32_t QName_uri_get = 847;
+  const uint32_t QName_uri_get = 841;
   #define QName_uri_get_thunk  builtin_a2a_o_thunk
   #define QName_uri_get_thunkc builtin_a2a_o_thunkc
   const uint32_t Array_AS3_pop = 188;
   #define Array_AS3_pop_thunk  builtin_a2a_o_thunk
   #define Array_AS3_pop_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_inScopeNamespaces = 738;
+  const uint32_t XML_AS3_inScopeNamespaces = 732;
   #define XML_AS3_inScopeNamespaces_thunk  builtin_a2a_o_thunk
   #define XML_AS3_inScopeNamespaces_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_attributes = 727;
+  const uint32_t XML_AS3_attributes = 721;
   #define XML_AS3_attributes_thunk  builtin_a2a_o_thunk
   #define XML_AS3_attributes_thunkc builtin_a2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_object_AS3_pop = 263;
+  const uint32_t __AS3___vec_Vector_object_AS3_pop = 260;
   #define __AS3___vec_Vector_object_AS3_pop_thunk  builtin_a2a_o_thunk
   #define __AS3___vec_Vector_object_AS3_pop_thunkc builtin_a2a_o_thunkc
   const uint32_t Function_prototype_get = 37;
   #define Function_prototype_get_thunk  builtin_a2a_o_thunk
   #define Function_prototype_get_thunkc builtin_a2a_o_thunkc
-  const uint32_t XML_AS3_normalize = 748;
+  const uint32_t XML_AS3_normalize = 742;
   #define XML_AS3_normalize_thunk  builtin_a2a_o_thunk
   #define XML_AS3_normalize_thunkc builtin_a2a_o_thunkc
-  const uint32_t XMLList_AS3_copy = 813;
+  const uint32_t XMLList_AS3_copy = 807;
   #define XMLList_AS3_copy_thunk  builtin_a2a_o_thunk
   #define XMLList_AS3_copy_thunkc builtin_a2a_o_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -561,10 +578,10 @@ extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_osi_optsAvmThunkCons
   #define parseInt_thunkc builtin_d2d_osi_optsAvmThunkConstant_AvmString_5_____NaN_____opti0_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oai_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XMLList_private__namespace = 832;
+  const uint32_t XMLList_private__namespace = 826;
   #define XMLList_private__namespace_thunk  builtin_a2a_oai_thunk
   #define XMLList_private__namespace_thunkc builtin_a2a_oai_thunkc
-  const uint32_t XML_private__namespace = 744;
+  const uint32_t XML_private__namespace = 738;
   #define XML_private__namespace_thunk  builtin_a2a_oai_thunk
   #define XML_private__namespace_thunkc builtin_a2a_oai_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -594,137 +611,137 @@ extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_si_opti0_thunkc(AvmM
   #define String_private__charCodeAt_thunkc builtin_d2d_si_opti0_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t RegExp_lastIndex_set = 658;
+  const uint32_t RegExp_lastIndex_set = 652;
   #define RegExp_lastIndex_set_thunk  builtin_a2a_oi_thunk
   #define RegExp_lastIndex_set_thunkc builtin_a2a_oi_thunkc
-  const uint32_t XML_prettyIndent_set = 717;
+  const uint32_t XML_prettyIndent_set = 711;
   #define XML_prettyIndent_set_thunk  builtin_a2a_oi_thunk
   #define XML_prettyIndent_set_thunkc builtin_a2a_oi_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Date_AS3_getMonth = 577;
+  const uint32_t Date_AS3_getMonth = 571;
   #define Date_AS3_getMonth_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getMonth_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getUTCMonth = 569;
+  const uint32_t Date_AS3_getUTCMonth = 563;
   #define Date_AS3_getUTCMonth_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getUTCMonth_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getDay = 579;
+  const uint32_t Date_AS3_getDay = 573;
   #define Date_AS3_getDay_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getDay_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getUTCSeconds = 574;
+  const uint32_t Date_AS3_getUTCSeconds = 568;
   #define Date_AS3_getUTCSeconds_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getUTCSeconds_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getMilliseconds = 583;
+  const uint32_t Date_AS3_getMilliseconds = 577;
   #define Date_AS3_getMilliseconds_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getMilliseconds_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_valueOf = 556;
+  const uint32_t Date_AS3_valueOf = 550;
   #define Date_AS3_valueOf_thunk  builtin_d2d_o_thunk
   #define Date_AS3_valueOf_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getUTCMilliseconds = 575;
+  const uint32_t Date_AS3_getUTCMilliseconds = 569;
   #define Date_AS3_getUTCMilliseconds_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getUTCMilliseconds_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getFullYear = 576;
+  const uint32_t Date_AS3_getFullYear = 570;
   #define Date_AS3_getFullYear_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getFullYear_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getDate = 578;
+  const uint32_t Date_AS3_getDate = 572;
   #define Date_AS3_getDate_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getDate_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getSeconds = 582;
+  const uint32_t Date_AS3_getSeconds = 576;
   #define Date_AS3_getSeconds_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getSeconds_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getTimezoneOffset = 584;
+  const uint32_t Date_AS3_getTimezoneOffset = 578;
   #define Date_AS3_getTimezoneOffset_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getTimezoneOffset_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getUTCFullYear = 568;
+  const uint32_t Date_AS3_getUTCFullYear = 562;
   #define Date_AS3_getUTCFullYear_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getUTCFullYear_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getHours = 580;
+  const uint32_t Date_AS3_getHours = 574;
   #define Date_AS3_getHours_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getHours_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getUTCDay = 571;
+  const uint32_t Date_AS3_getUTCDay = 565;
   #define Date_AS3_getUTCDay_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getUTCDay_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getUTCMinutes = 573;
+  const uint32_t Date_AS3_getUTCMinutes = 567;
   #define Date_AS3_getUTCMinutes_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getUTCMinutes_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getMinutes = 581;
+  const uint32_t Date_AS3_getMinutes = 575;
   #define Date_AS3_getMinutes_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getMinutes_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getTime = 585;
+  const uint32_t Date_AS3_getTime = 579;
   #define Date_AS3_getTime_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getTime_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getUTCDate = 570;
+  const uint32_t Date_AS3_getUTCDate = 564;
   #define Date_AS3_getUTCDate_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getUTCDate_thunkc builtin_d2d_o_thunkc
-  const uint32_t Date_AS3_getUTCHours = 572;
+  const uint32_t Date_AS3_getUTCHours = 566;
   #define Date_AS3_getUTCHours_thunk  builtin_d2d_o_thunk
   #define Date_AS3_getUTCHours_thunkc builtin_d2d_o_thunkc
-  const uint32_t Math_random = 478;
+  const uint32_t Math_random = 472;
   #define Math_random_thunk  builtin_d2d_o_thunk
   #define Math_random_thunkc builtin_d2d_o_thunkc
-  const uint32_t __AS3___vec_Vector_double_AS3_pop = 443;
+  const uint32_t __AS3___vec_Vector_double_AS3_pop = 437;
   #define __AS3___vec_Vector_double_AS3_pop_thunk  builtin_d2d_o_thunk
   #define __AS3___vec_Vector_double_AS3_pop_thunkc builtin_d2d_o_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t RegExp_AS3_exec = 661;
+  const uint32_t RegExp_AS3_exec = 655;
   #define RegExp_AS3_exec_thunk  builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk
   #define RegExp_AS3_exec_thunkc builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XMLList_AS3_replace = 838;
+  const uint32_t XMLList_AS3_replace = 832;
   #define XMLList_AS3_replace_thunk  builtin_a2a_oaa_thunk
   #define XMLList_AS3_replace_thunkc builtin_a2a_oaa_thunkc
-  const uint32_t XMLList_AS3_insertChildAfter = 829;
+  const uint32_t XMLList_AS3_insertChildAfter = 823;
   #define XMLList_AS3_insertChildAfter_thunk  builtin_a2a_oaa_thunk
   #define XMLList_AS3_insertChildAfter_thunkc builtin_a2a_oaa_thunkc
-  const uint32_t XMLList_AS3_insertChildBefore = 830;
+  const uint32_t XMLList_AS3_insertChildBefore = 824;
   #define XMLList_AS3_insertChildBefore_thunk  builtin_a2a_oaa_thunk
   #define XMLList_AS3_insertChildBefore_thunkc builtin_a2a_oaa_thunkc
-  const uint32_t XML_AS3_insertChildAfter = 739;
+  const uint32_t XML_AS3_insertChildAfter = 733;
   #define XML_AS3_insertChildAfter_thunk  builtin_a2a_oaa_thunk
   #define XML_AS3_insertChildAfter_thunkc builtin_a2a_oaa_thunkc
-  const uint32_t XML_AS3_replace = 753;
+  const uint32_t XML_AS3_replace = 747;
   #define XML_AS3_replace_thunk  builtin_a2a_oaa_thunk
   #define XML_AS3_replace_thunkc builtin_a2a_oaa_thunkc
-  const uint32_t XML_AS3_insertChildBefore = 740;
+  const uint32_t XML_AS3_insertChildBefore = 734;
   #define XML_AS3_insertChildBefore_thunk  builtin_a2a_oaa_thunk
   #define XML_AS3_insertChildBefore_thunkc builtin_a2a_oaa_thunkc
 extern AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t __AS3___vec_Vector_object_AS3_unshift = 256;
+  const uint32_t __AS3___vec_Vector_object_AS3_unshift = 254;
   #define __AS3___vec_Vector_object_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
   #define __AS3___vec_Vector_object_AS3_unshift_thunkc builtin_u2a_o_rest_thunkc
-  const uint32_t __AS3___vec_Vector_double_AS3_push = 429;
+  const uint32_t __AS3___vec_Vector_double_AS3_push = 424;
   #define __AS3___vec_Vector_double_AS3_push_thunk  builtin_u2a_o_rest_thunk
   #define __AS3___vec_Vector_double_AS3_push_thunkc builtin_u2a_o_rest_thunkc
-  const uint32_t __AS3___vec_Vector_double_AS3_unshift = 436;
+  const uint32_t __AS3___vec_Vector_double_AS3_unshift = 431;
   #define __AS3___vec_Vector_double_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
   #define __AS3___vec_Vector_double_AS3_unshift_thunkc builtin_u2a_o_rest_thunkc
-  const uint32_t __AS3___vec_Vector_object_AS3_push = 249;
+  const uint32_t __AS3___vec_Vector_object_AS3_push = 247;
   #define __AS3___vec_Vector_object_AS3_push_thunk  builtin_u2a_o_rest_thunk
   #define __AS3___vec_Vector_object_AS3_push_thunkc builtin_u2a_o_rest_thunkc
-  const uint32_t __AS3___vec_Vector_int_AS3_push = 309;
+  const uint32_t __AS3___vec_Vector_int_AS3_push = 306;
   #define __AS3___vec_Vector_int_AS3_push_thunk  builtin_u2a_o_rest_thunk
   #define __AS3___vec_Vector_int_AS3_push_thunkc builtin_u2a_o_rest_thunkc
   const uint32_t Array_AS3_push = 189;
   #define Array_AS3_push_thunk  builtin_u2a_o_rest_thunk
   #define Array_AS3_push_thunkc builtin_u2a_o_rest_thunkc
-  const uint32_t __AS3___vec_Vector_uint_AS3_push = 369;
+  const uint32_t __AS3___vec_Vector_uint_AS3_push = 365;
   #define __AS3___vec_Vector_uint_AS3_push_thunk  builtin_u2a_o_rest_thunk
   #define __AS3___vec_Vector_uint_AS3_push_thunkc builtin_u2a_o_rest_thunkc
-  const uint32_t __AS3___vec_Vector_uint_AS3_unshift = 376;
+  const uint32_t __AS3___vec_Vector_uint_AS3_unshift = 372;
   #define __AS3___vec_Vector_uint_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
   #define __AS3___vec_Vector_uint_AS3_unshift_thunkc builtin_u2a_o_rest_thunkc
   const uint32_t Array_AS3_unshift = 194;
   #define Array_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
   #define Array_AS3_unshift_thunkc builtin_u2a_o_rest_thunkc
-  const uint32_t __AS3___vec_Vector_int_AS3_unshift = 316;
+  const uint32_t __AS3___vec_Vector_int_AS3_unshift = 313;
   #define __AS3___vec_Vector_int_AS3_unshift_thunk  builtin_u2a_o_rest_thunk
   #define __AS3___vec_Vector_int_AS3_unshift_thunkc builtin_u2a_o_rest_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Math_max = 476;
+  const uint32_t Math_max = 470;
   #define Math_max_thunk  builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunk
   #define Math_max_thunkc builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -734,10 +751,10 @@ extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConst
   #define parseFloat_thunkc builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunkc
 extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XMLList_AS3_contains = 812;
+  const uint32_t XMLList_AS3_contains = 806;
   #define XMLList_AS3_contains_thunk  builtin_b2a_oa_thunk
   #define XMLList_AS3_contains_thunkc builtin_b2a_oa_thunkc
-  const uint32_t XML_AS3_contains = 732;
+  const uint32_t XML_AS3_contains = 726;
   #define XML_AS3_contains_thunk  builtin_b2a_oa_thunk
   #define XML_AS3_contains_thunkc builtin_b2a_oa_thunkc
 extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -750,16 +767,16 @@ extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oas_thunkc(AvmMe
   #define Object_private__propertyIsEnumerable_thunkc builtin_b2a_oas_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ou_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ou_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t __AS3___vec_Vector_double_length_set = 419;
+  const uint32_t __AS3___vec_Vector_double_length_set = 414;
   #define __AS3___vec_Vector_double_length_set_thunk  builtin_a2a_ou_thunk
   #define __AS3___vec_Vector_double_length_set_thunkc builtin_a2a_ou_thunkc
-  const uint32_t __AS3___vec_Vector_int_length_set = 299;
+  const uint32_t __AS3___vec_Vector_int_length_set = 296;
   #define __AS3___vec_Vector_int_length_set_thunk  builtin_a2a_ou_thunk
   #define __AS3___vec_Vector_int_length_set_thunkc builtin_a2a_ou_thunkc
-  const uint32_t __AS3___vec_Vector_object_length_set = 239;
+  const uint32_t __AS3___vec_Vector_object_length_set = 237;
   #define __AS3___vec_Vector_object_length_set_thunk  builtin_a2a_ou_thunk
   #define __AS3___vec_Vector_object_length_set_thunkc builtin_a2a_ou_thunkc
-  const uint32_t __AS3___vec_Vector_uint_length_set = 359;
+  const uint32_t __AS3___vec_Vector_uint_length_set = 355;
   #define __AS3___vec_Vector_uint_length_set_thunk  builtin_a2a_ou_thunk
   #define __AS3___vec_Vector_uint_length_set_thunkc builtin_a2a_ou_thunkc
   const uint32_t Array_length_set = 185;
@@ -767,97 +784,77 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ou_thunkc(AvmMethodE
   #define Array_length_set_thunkc builtin_a2a_ou_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Date_private__get = 559;
+  const uint32_t Date_private__get = 553;
   #define Date_private__get_thunk  builtin_d2d_oi_thunk
   #define Date_private__get_thunkc builtin_d2d_oi_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Math_min = 477;
+  const uint32_t Math_min = 471;
   #define Math_min_thunk  builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk
   #define Math_min_thunkc builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XML_AS3_toString = 721;
+  const uint32_t XML_AS3_toString = 715;
   #define XML_AS3_toString_thunk  builtin_s2a_o_thunk
   #define XML_AS3_toString_thunkc builtin_s2a_o_thunkc
-  const uint32_t XMLList_AS3_toString = 803;
+  const uint32_t XMLList_AS3_toString = 797;
   #define XMLList_AS3_toString_thunk  builtin_s2a_o_thunk
   #define XMLList_AS3_toString_thunkc builtin_s2a_o_thunkc
-  const uint32_t Error_getStackTrace = 487;
+  const uint32_t Error_getStackTrace = 481;
   #define Error_getStackTrace_thunk  builtin_s2a_o_thunk
   #define Error_getStackTrace_thunkc builtin_s2a_o_thunkc
-  const uint32_t QName_localName_get = 846;
+  const uint32_t QName_localName_get = 840;
   #define QName_localName_get_thunk  builtin_s2a_o_thunk
   #define QName_localName_get_thunkc builtin_s2a_o_thunkc
-  const uint32_t XMLList_AS3_toXMLString = 824;
+  const uint32_t XMLList_AS3_toXMLString = 818;
   #define XMLList_AS3_toXMLString_thunk  builtin_s2a_o_thunk
   #define XMLList_AS3_toXMLString_thunkc builtin_s2a_o_thunkc
-  const uint32_t XML_AS3_toXMLString = 759;
+  const uint32_t XML_AS3_toXMLString = 753;
   #define XML_AS3_toXMLString_thunk  builtin_s2a_o_thunk
   #define XML_AS3_toXMLString_thunkc builtin_s2a_o_thunkc
-  const uint32_t RegExp_source_get = 653;
+  const uint32_t RegExp_source_get = 647;
   #define RegExp_source_get_thunk  builtin_s2a_o_thunk
   #define RegExp_source_get_thunkc builtin_s2a_o_thunkc
-  const uint32_t XML_AS3_nodeKind = 747;
+  const uint32_t XML_AS3_nodeKind = 741;
   #define XML_AS3_nodeKind_thunk  builtin_s2a_o_thunk
   #define XML_AS3_nodeKind_thunkc builtin_s2a_o_thunkc
-  const uint32_t XMLList_AS3_nodeKind = 831;
+  const uint32_t XMLList_AS3_nodeKind = 825;
   #define XMLList_AS3_nodeKind_thunk  builtin_s2a_o_thunk
   #define XMLList_AS3_nodeKind_thunkc builtin_s2a_o_thunkc
 extern AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t __AS3___vec_Vector_double_length_get = 418;
+  const uint32_t __AS3___vec_Vector_double_length_get = 413;
   #define __AS3___vec_Vector_double_length_get_thunk  builtin_u2a_o_thunk
   #define __AS3___vec_Vector_double_length_get_thunkc builtin_u2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_uint_length_get = 358;
+  const uint32_t __AS3___vec_Vector_uint_length_get = 354;
   #define __AS3___vec_Vector_uint_length_get_thunk  builtin_u2a_o_thunk
   #define __AS3___vec_Vector_uint_length_get_thunkc builtin_u2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_uint_AS3_pop = 383;
+  const uint32_t __AS3___vec_Vector_uint_AS3_pop = 378;
   #define __AS3___vec_Vector_uint_AS3_pop_thunk  builtin_u2a_o_thunk
   #define __AS3___vec_Vector_uint_AS3_pop_thunkc builtin_u2a_o_thunkc
   const uint32_t Array_length_get = 184;
   #define Array_length_get_thunk  builtin_u2a_o_thunk
   #define Array_length_get_thunkc builtin_u2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_int_length_get = 298;
+  const uint32_t __AS3___vec_Vector_int_length_get = 295;
   #define __AS3___vec_Vector_int_length_get_thunk  builtin_u2a_o_thunk
   #define __AS3___vec_Vector_int_length_get_thunkc builtin_u2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_object_length_get = 238;
+  const uint32_t __AS3___vec_Vector_object_length_get = 236;
   #define __AS3___vec_Vector_object_length_get_thunk  builtin_u2a_o_thunk
   #define __AS3___vec_Vector_object_length_get_thunkc builtin_u2a_o_thunkc
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t __AS3___vec_Vector_object_private__reverse = 250;
+  const uint32_t __AS3___vec_Vector_object_private__reverse = 248;
   #define __AS3___vec_Vector_object_private__reverse_thunk  builtin_v2a_o_thunk
   #define __AS3___vec_Vector_object_private__reverse_thunkc builtin_v2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_int_private__reverse = 310;
+  const uint32_t __AS3___vec_Vector_int_private__reverse = 307;
   #define __AS3___vec_Vector_int_private__reverse_thunk  builtin_v2a_o_thunk
   #define __AS3___vec_Vector_int_private__reverse_thunkc builtin_v2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_uint_private__reverse = 370;
+  const uint32_t __AS3___vec_Vector_uint_private__reverse = 366;
   #define __AS3___vec_Vector_uint_private__reverse_thunk  builtin_v2a_o_thunk
   #define __AS3___vec_Vector_uint_private__reverse_thunkc builtin_v2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_double_private__reverse = 430;
+  const uint32_t __AS3___vec_Vector_double_private__reverse = 425;
   #define __AS3___vec_Vector_double_private__reverse_thunk  builtin_v2a_o_thunk
   #define __AS3___vec_Vector_double_private__reverse_thunkc builtin_v2a_o_thunkc
-extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XML_AS3_descendants = 734;
-  #define XML_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunk
-  #define XML_AS3_descendants_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunkc
-  const uint32_t XMLList_AS3_processingInstructions = 822;
-  #define XMLList_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunk
-  #define XMLList_AS3_processingInstructions_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunkc
-  const uint32_t XMLList_AS3_descendants = 814;
-  #define XMLList_AS3_descendants_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunk
-  #define XMLList_AS3_descendants_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunkc
-  const uint32_t XMLList_AS3_elements = 815;
-  #define XMLList_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunk
-  #define XMLList_AS3_elements_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunkc
-  const uint32_t XML_AS3_elements = 735;
-  #define XML_AS3_elements_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunk
-  #define XML_AS3_elements_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunkc
-  const uint32_t XML_AS3_processingInstructions = 750;
-  #define XML_AS3_processingInstructions_thunk  builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunk
-  #define XML_AS3_processingInstructions_thunkc builtin_a2a_oa_optsAvmThunkConstant_AvmString_359___________thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t Array_private__filter = 180;
@@ -873,55 +870,55 @@ extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunkc(AvmMe
   #define Object_private__isPrototypeOf_thunkc builtin_b2a_oaa_thunkc
 extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XML_prettyPrinting_get = 714;
+  const uint32_t XML_prettyPrinting_get = 708;
   #define XML_prettyPrinting_get_thunk  builtin_b2a_o_thunk
   #define XML_prettyPrinting_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t RegExp_multiline_get = 656;
+  const uint32_t RegExp_multiline_get = 650;
   #define RegExp_multiline_get_thunk  builtin_b2a_o_thunk
   #define RegExp_multiline_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t XML_AS3_hasComplexContent = 736;
+  const uint32_t XML_AS3_hasComplexContent = 730;
   #define XML_AS3_hasComplexContent_thunk  builtin_b2a_o_thunk
   #define XML_AS3_hasComplexContent_thunkc builtin_b2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_object_fixed_get = 241;
+  const uint32_t __AS3___vec_Vector_object_fixed_get = 239;
   #define __AS3___vec_Vector_object_fixed_get_thunk  builtin_b2a_o_thunk
   #define __AS3___vec_Vector_object_fixed_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t XML_ignoreProcessingInstructions_get = 710;
+  const uint32_t XML_ignoreProcessingInstructions_get = 704;
   #define XML_ignoreProcessingInstructions_get_thunk  builtin_b2a_o_thunk
   #define XML_ignoreProcessingInstructions_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_double_fixed_get = 421;
+  const uint32_t __AS3___vec_Vector_double_fixed_get = 416;
   #define __AS3___vec_Vector_double_fixed_get_thunk  builtin_b2a_o_thunk
   #define __AS3___vec_Vector_double_fixed_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t RegExp_dotall_get = 659;
+  const uint32_t RegExp_dotall_get = 653;
   #define RegExp_dotall_get_thunk  builtin_b2a_o_thunk
   #define RegExp_dotall_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t XMLList_AS3_hasComplexContent = 816;
+  const uint32_t XMLList_AS3_hasComplexContent = 810;
   #define XMLList_AS3_hasComplexContent_thunk  builtin_b2a_o_thunk
   #define XMLList_AS3_hasComplexContent_thunkc builtin_b2a_o_thunkc
-  const uint32_t RegExp_ignoreCase_get = 655;
+  const uint32_t RegExp_ignoreCase_get = 649;
   #define RegExp_ignoreCase_get_thunk  builtin_b2a_o_thunk
   #define RegExp_ignoreCase_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t XML_ignoreComments_get = 708;
+  const uint32_t XML_ignoreComments_get = 702;
   #define XML_ignoreComments_get_thunk  builtin_b2a_o_thunk
   #define XML_ignoreComments_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t XMLList_AS3_hasSimpleContent = 817;
+  const uint32_t XMLList_AS3_hasSimpleContent = 811;
   #define XMLList_AS3_hasSimpleContent_thunk  builtin_b2a_o_thunk
   #define XMLList_AS3_hasSimpleContent_thunkc builtin_b2a_o_thunkc
-  const uint32_t XML_AS3_hasSimpleContent = 737;
+  const uint32_t XML_AS3_hasSimpleContent = 731;
   #define XML_AS3_hasSimpleContent_thunk  builtin_b2a_o_thunk
   #define XML_AS3_hasSimpleContent_thunkc builtin_b2a_o_thunkc
-  const uint32_t RegExp_extended_get = 660;
+  const uint32_t RegExp_extended_get = 654;
   #define RegExp_extended_get_thunk  builtin_b2a_o_thunk
   #define RegExp_extended_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_int_fixed_get = 301;
+  const uint32_t __AS3___vec_Vector_int_fixed_get = 298;
   #define __AS3___vec_Vector_int_fixed_get_thunk  builtin_b2a_o_thunk
   #define __AS3___vec_Vector_int_fixed_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t __AS3___vec_Vector_uint_fixed_get = 361;
+  const uint32_t __AS3___vec_Vector_uint_fixed_get = 357;
   #define __AS3___vec_Vector_uint_fixed_get_thunk  builtin_b2a_o_thunk
   #define __AS3___vec_Vector_uint_fixed_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t RegExp_global_get = 654;
+  const uint32_t RegExp_global_get = 648;
   #define RegExp_global_get_thunk  builtin_b2a_o_thunk
   #define RegExp_global_get_thunkc builtin_b2a_o_thunkc
-  const uint32_t XML_ignoreWhitespace_get = 712;
+  const uint32_t XML_ignoreWhitespace_get = 706;
   #define XML_ignoreWhitespace_get_thunk  builtin_b2a_o_thunk
   #define XML_ignoreWhitespace_get_thunkc builtin_b2a_o_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -944,19 +941,19 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oao_thunkc(AvmMethod
   const uint32_t Array_private__sort = 175;
   #define Array_private__sort_thunk  builtin_a2a_oao_thunk
   #define Array_private__sort_thunkc builtin_a2a_oao_thunkc
-  const uint32_t __AS3___vec_Vector_double_private__sort = 416;
+  const uint32_t __AS3___vec_Vector_double_private__sort = 411;
   #define __AS3___vec_Vector_double_private__sort_thunk  builtin_a2a_oao_thunk
   #define __AS3___vec_Vector_double_private__sort_thunkc builtin_a2a_oao_thunkc
   const uint32_t Array_private__splice = 174;
   #define Array_private__splice_thunk  builtin_a2a_oao_thunk
   #define Array_private__splice_thunkc builtin_a2a_oao_thunkc
-  const uint32_t __AS3___vec_Vector_int_private__sort = 296;
+  const uint32_t __AS3___vec_Vector_int_private__sort = 293;
   #define __AS3___vec_Vector_int_private__sort_thunk  builtin_a2a_oao_thunk
   #define __AS3___vec_Vector_int_private__sort_thunkc builtin_a2a_oao_thunkc
-  const uint32_t __AS3___vec_Vector_uint_private__sort = 356;
+  const uint32_t __AS3___vec_Vector_uint_private__sort = 352;
   #define __AS3___vec_Vector_uint_private__sort_thunk  builtin_a2a_oao_thunk
   #define __AS3___vec_Vector_uint_private__sort_thunkc builtin_a2a_oao_thunkc
-  const uint32_t __AS3___vec_Vector_object_private__sort = 232;
+  const uint32_t __AS3___vec_Vector_object_private__sort = 231;
   #define __AS3___vec_Vector_object_private__sort_thunk  builtin_a2a_oao_thunk
   #define __AS3___vec_Vector_object_private__sort_thunkc builtin_a2a_oao_thunkc
   const uint32_t Array_private__concat = 171;
@@ -964,28 +961,28 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oao_thunkc(AvmMethod
   #define Array_private__concat_thunkc builtin_a2a_oao_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ooa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t __AS3___vec_Vector_uint_private__map = 378;
+  const uint32_t __AS3___vec_Vector_uint_private__map = 374;
   #define __AS3___vec_Vector_uint_private__map_thunk  builtin_a2a_ooa_thunk
   #define __AS3___vec_Vector_uint_private__map_thunkc builtin_a2a_ooa_thunkc
-  const uint32_t __AS3___vec_Vector_int_private__map = 318;
+  const uint32_t __AS3___vec_Vector_int_private__map = 315;
   #define __AS3___vec_Vector_int_private__map_thunk  builtin_a2a_ooa_thunk
   #define __AS3___vec_Vector_int_private__map_thunkc builtin_a2a_ooa_thunkc
-  const uint32_t __AS3___vec_Vector_double_private__map = 438;
+  const uint32_t __AS3___vec_Vector_double_private__map = 433;
   #define __AS3___vec_Vector_double_private__map_thunk  builtin_a2a_ooa_thunk
   #define __AS3___vec_Vector_double_private__map_thunkc builtin_a2a_ooa_thunkc
-  const uint32_t __AS3___vec_Vector_object_private__filter = 257;
+  const uint32_t __AS3___vec_Vector_object_private__filter = 255;
   #define __AS3___vec_Vector_object_private__filter_thunk  builtin_a2a_ooa_thunk
   #define __AS3___vec_Vector_object_private__filter_thunkc builtin_a2a_ooa_thunkc
-  const uint32_t __AS3___vec_Vector_uint_private__filter = 377;
+  const uint32_t __AS3___vec_Vector_uint_private__filter = 373;
   #define __AS3___vec_Vector_uint_private__filter_thunk  builtin_a2a_ooa_thunk
   #define __AS3___vec_Vector_uint_private__filter_thunkc builtin_a2a_ooa_thunkc
-  const uint32_t __AS3___vec_Vector_object_private__map = 258;
+  const uint32_t __AS3___vec_Vector_object_private__map = 256;
   #define __AS3___vec_Vector_object_private__map_thunk  builtin_a2a_ooa_thunk
   #define __AS3___vec_Vector_object_private__map_thunkc builtin_a2a_ooa_thunkc
-  const uint32_t __AS3___vec_Vector_int_private__filter = 317;
+  const uint32_t __AS3___vec_Vector_int_private__filter = 314;
   #define __AS3___vec_Vector_int_private__filter_thunk  builtin_a2a_ooa_thunk
   #define __AS3___vec_Vector_int_private__filter_thunkc builtin_a2a_ooa_thunkc
-  const uint32_t __AS3___vec_Vector_double_private__filter = 437;
+  const uint32_t __AS3___vec_Vector_double_private__filter = 432;
   #define __AS3___vec_Vector_double_private__filter_thunk  builtin_a2a_ooa_thunk
   #define __AS3___vec_Vector_double_private__filter_thunkc builtin_a2a_ooa_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -1003,36 +1000,36 @@ extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaoa_thunkc(AvmM
   const uint32_t Array_private__every = 179;
   #define Array_private__every_thunk  builtin_b2a_oaoa_thunk
   #define Array_private__every_thunkc builtin_b2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_int_private__every = 293;
+  const uint32_t __AS3___vec_Vector_int_private__every = 290;
   #define __AS3___vec_Vector_int_private__every_thunk  builtin_b2a_oaoa_thunk
   #define __AS3___vec_Vector_int_private__every_thunkc builtin_b2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_object_private__some = 231;
+  const uint32_t __AS3___vec_Vector_object_private__some = 230;
   #define __AS3___vec_Vector_object_private__some_thunk  builtin_b2a_oaoa_thunk
   #define __AS3___vec_Vector_object_private__some_thunkc builtin_b2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_double_private__some = 415;
+  const uint32_t __AS3___vec_Vector_double_private__some = 410;
   #define __AS3___vec_Vector_double_private__some_thunk  builtin_b2a_oaoa_thunk
   #define __AS3___vec_Vector_double_private__some_thunkc builtin_b2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_int_private__some = 295;
+  const uint32_t __AS3___vec_Vector_int_private__some = 292;
   #define __AS3___vec_Vector_int_private__some_thunk  builtin_b2a_oaoa_thunk
   #define __AS3___vec_Vector_int_private__some_thunkc builtin_b2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_uint_private__every = 353;
+  const uint32_t __AS3___vec_Vector_uint_private__every = 349;
   #define __AS3___vec_Vector_uint_private__every_thunk  builtin_b2a_oaoa_thunk
   #define __AS3___vec_Vector_uint_private__every_thunkc builtin_b2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_uint_private__some = 355;
+  const uint32_t __AS3___vec_Vector_uint_private__some = 351;
   #define __AS3___vec_Vector_uint_private__some_thunk  builtin_b2a_oaoa_thunk
   #define __AS3___vec_Vector_uint_private__some_thunkc builtin_b2a_oaoa_thunkc
   const uint32_t Array_private__some = 183;
   #define Array_private__some_thunk  builtin_b2a_oaoa_thunk
   #define Array_private__some_thunkc builtin_b2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_double_private__every = 413;
+  const uint32_t __AS3___vec_Vector_double_private__every = 408;
   #define __AS3___vec_Vector_double_private__every_thunk  builtin_b2a_oaoa_thunk
   #define __AS3___vec_Vector_double_private__every_thunkc builtin_b2a_oaoa_thunkc
-  const uint32_t __AS3___vec_Vector_object_private__every = 229;
+  const uint32_t __AS3___vec_Vector_object_private__every = 228;
   #define __AS3___vec_Vector_object_private__every_thunk  builtin_b2a_oaoa_thunk
   #define __AS3___vec_Vector_object_private__every_thunkc builtin_b2a_oaoa_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oo_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t XML_AS3_setNotification = 761;
+  const uint32_t XML_AS3_setNotification = 755;
   #define XML_AS3_setNotification_thunk  builtin_a2a_oo_thunk
   #define XML_AS3_setNotification_thunkc builtin_a2a_oo_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -1042,7 +1039,7 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optakAvmThunkUnde
   #define Function_AS3_call_thunkc builtin_a2a_oa_optakAvmThunkUndefined_rest_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Date_parse = 554;
+  const uint32_t Date_parse = 548;
   #define Date_parse_thunk  builtin_d2d_oa_thunk
   #define Date_parse_thunkc builtin_d2d_oa_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_osaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -1060,45 +1057,45 @@ extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_s_thunkc(AvmMetho
   #define String_AS3_toUpperCase_thunkc builtin_s2a_s_thunkc
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_od_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t Math_abs = 461;
+  const uint32_t Math_abs = 455;
   #define Math_abs_thunk  builtin_d2d_od_thunk
   #define Math_abs_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_round = 470;
+  const uint32_t Math_round = 464;
   #define Math_round_thunk  builtin_d2d_od_thunk
   #define Math_round_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_exp = 467;
+  const uint32_t Math_exp = 461;
   #define Math_exp_thunk  builtin_d2d_od_thunk
   #define Math_exp_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_log = 469;
+  const uint32_t Math_log = 463;
   #define Math_log_thunk  builtin_d2d_od_thunk
   #define Math_log_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_acos = 462;
+  const uint32_t Math_acos = 456;
   #define Math_acos_thunk  builtin_d2d_od_thunk
   #define Math_acos_thunkc builtin_d2d_od_thunkc
-  const uint32_t Date_private__setTime = 558;
+  const uint32_t Date_private__setTime = 552;
   #define Date_private__setTime_thunk  builtin_d2d_od_thunk
   #define Date_private__setTime_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_floor = 468;
+  const uint32_t Math_floor = 462;
   #define Math_floor_thunk  builtin_d2d_od_thunk
   #define Math_floor_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_tan = 473;
+  const uint32_t Math_tan = 467;
   #define Math_tan_thunk  builtin_d2d_od_thunk
   #define Math_tan_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_sqrt = 472;
+  const uint32_t Math_sqrt = 466;
   #define Math_sqrt_thunk  builtin_d2d_od_thunk
   #define Math_sqrt_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_cos = 466;
+  const uint32_t Math_cos = 460;
   #define Math_cos_thunk  builtin_d2d_od_thunk
   #define Math_cos_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_asin = 463;
+  const uint32_t Math_asin = 457;
   #define Math_asin_thunk  builtin_d2d_od_thunk
   #define Math_asin_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_ceil = 465;
+  const uint32_t Math_ceil = 459;
   #define Math_ceil_thunk  builtin_d2d_od_thunk
   #define Math_ceil_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_sin = 471;
+  const uint32_t Math_sin = 465;
   #define Math_sin_thunk  builtin_d2d_od_thunk
   #define Math_sin_thunkc builtin_d2d_od_thunkc
-  const uint32_t Math_atan = 464;
+  const uint32_t Math_atan = 458;
   #define Math_atan_thunk  builtin_d2d_od_thunk
   #define Math_atan_thunkc builtin_d2d_od_thunkc

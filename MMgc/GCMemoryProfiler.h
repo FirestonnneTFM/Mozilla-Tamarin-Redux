@@ -43,6 +43,57 @@
 #include <pthread.h>
 #endif
 
+/**
+* GCThreadLocal turned out to be useful class not only for the memory profiler so it is defined in Release and Debug (It is not controlled by MEMORY_INFO)
+**/
+namespace MMgc
+{
+#ifdef WIN32
+	template<typename T>
+	class GCThreadLocal
+	{
+	public:
+		GCThreadLocal()
+		{
+			GCAssert(sizeof(T) <= sizeof(LPVOID));
+			tlsId = TlsAlloc();
+		}
+		T operator=(T tNew)
+		{
+			TlsSetValue(tlsId, (LPVOID) tNew);
+			return tNew;
+		}
+		operator T() const
+		{
+			return (T) TlsGetValue(tlsId);
+		}
+	private:
+		DWORD tlsId;
+	};
+#else
+	template<typename T>
+	class GCThreadLocal
+	{
+	public:
+		GCThreadLocal()
+		{
+			GCAssert(sizeof(T) <= sizeof(void*));
+			pthread_key_create(&tlsId, NULL);
+		}
+		T operator=(T tNew)
+		{
+			pthread_setspecific(tlsId, (const void*)tNew);
+			return tNew;
+		}
+		operator T() const
+		{
+			return (T)pthread_getspecific(tlsId);
+		}
+	private:
+		pthread_key_t tlsId ;
+	};
+#endif
+}
 
 #ifndef MEMORY_INFO
 
@@ -76,7 +127,7 @@ namespace MMgc
 		{
 			EnterCriticalSection(&cs);
 		}
-		
+
 		inline void Release()
 		{
 			LeaveCriticalSection(&cs);
@@ -86,51 +137,7 @@ namespace MMgc
 		CRITICAL_SECTION cs;
 	};
 	
-	template<typename T>
-	class GCThreadLocal
-	{
-	public:
-		GCThreadLocal()
-		{
-			GCAssert(sizeof(T) <= sizeof(LPVOID));
-			tlsId = TlsAlloc();
-		}
-		T operator=(T tNew)
-		{
-			TlsSetValue(tlsId, (LPVOID) tNew);
-			return tNew;
-		}
-		operator T() const
-		{
-			return (T) TlsGetValue(tlsId);
-		}
-	private:
-		DWORD tlsId;
-	};
 #else
-
-	template<typename T>
-	class GCThreadLocal
-	{
-	public:
-		GCThreadLocal()
-		{
-			GCAssert(sizeof(T) <= sizeof(void*));
-			pthread_key_create(&tlsId, NULL);
-		}
-		T operator=(T tNew)
-		{
-			pthread_setspecific(tlsId, (const void*)tNew);
-			return tNew;
-		}
-		operator T() const
-		{
-			return (T)pthread_getspecific(tlsId);
-		}
-	private:
-		pthread_key_t tlsId ;
-	};
-
 	class GCCriticalSection
 	{
 	public:
@@ -213,8 +220,8 @@ namespace MMgc
 
 	const char* GetTypeName(int index, void *obj);
 
-	void GetInfoFromPC(int pc, char *buff, int buffSize);
-	void GetStackTrace(int *trace, int len, int skip);
+	void GetInfoFromPC(sintptr pc, char *buff, int buffSize);
+	void GetStackTrace(sintptr *trace, int len, int skip);
 	// print stack trace of index into trace table
 	void PrintStackTraceByIndex(int index);
 	MMGC_API void PrintStackTrace(const void *item);

@@ -829,7 +829,7 @@ namespace avmplus
 			Stringp s = core->string (c);
 			if (s->length())
 			{
-				xi->_replace (core, toplevel, i, c);
+				xi->_replace (core, toplevel, i, c, prior);
 			}
 		}
 		else
@@ -838,8 +838,13 @@ namespace avmplus
 
 			if (notifyNeeded(getNode()))
 			{
-				XMLObject* xml = new (core->GetGC()) XMLObject(xmlClass(), m_node->_getAt(i));
-				childChanges( (prior) ? xmlClass()->kNodeChanged : xmlClass()->kNodeAdded, xml->atom(), prior);
+				// The above _replace call may be used to insert new nodes at the end.  However, if a null is inserted
+				// the effect is as though nothing was inserted.  Test for this case.
+				if (m_node->_length() > (avmplus::uint32)i)
+				{
+					XMLObject* xml = new (core->GetGC()) XMLObject(xmlClass(), m_node->_getAt(i));
+					childChanges( (prior) ? xmlClass()->kNodeChanged : xmlClass()->kNodeAdded, xml->atom(), prior);
+				}
 			}
 		}
 		return;

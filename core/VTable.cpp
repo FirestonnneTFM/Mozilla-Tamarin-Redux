@@ -193,7 +193,7 @@ namespace avmplus
 		if(ivtable != NULL)
 			size += ivtable->size();
 
-		size += traits->numTriplets * 3;
+		size += traits->numQuads * sizeof(MultinameHashtable::Quad);
 
 		size += traits->methodCount*sizeof(AbstractFunction*);
 

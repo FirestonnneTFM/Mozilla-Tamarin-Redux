@@ -168,7 +168,7 @@ namespace avmshell
 		
 		void enterDebugger();
 		void setCurrentSource(Stringp file);
-		bool filterException(Exception *exception);
+		bool filterException(Exception *exception, bool willBeCaught);
 		bool hitWatchpoint() { return false; }
 
 		/**

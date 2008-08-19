@@ -216,7 +216,7 @@ namespace avmplus
 		 * ignored the exception, in which case Flash might dump
 		 * it to the console and/or display a message box.
 		 */
-		virtual bool filterException(Exception *exception) = 0;
+		virtual bool filterException(Exception *exception, bool willBeCaught) = 0;
 		
 		/**
 		 * Called at the end of the method's prologue 

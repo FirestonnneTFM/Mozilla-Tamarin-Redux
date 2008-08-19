@@ -137,29 +137,18 @@ namespace MMgc
 
 #ifdef AVMPLUS_JIT_READONLY
 	/**
-	 * SetExecuteBit changes the page access protections on a block of pages,
+	 * SetPageProtection changes the page access protections on a block of pages,
 	 * to make JIT-ted code executable or not.
 	 *
 	 * If executableFlag is true, the memory is made executable and read-only.
 	 *
 	 * If executableFlag is false, the memory is made non-executable and
 	 * read-write.
-	 *
-	 * [rickr] bug #182323  The codegen can bail in the middle of generating 
-	 * code for any number of reasons.  When this occurs we need to ensure 
-	 * that any code that was previously on the page still executes, so we 
-	 * leave the page as PAGE_EXECUTE_READWRITE rather than PAGE_READWRITE.  
-	 * Ideally we'd use PAGE_READWRITE and then on failure revert it back to 
-	 * read/execute but this is a little tricker and doesn't add too much 
-	 * protection since only a single page is 'exposed' with this technique.
-	 *
-	 * [leon.sha] from above discription, if you want to change the excuatable
-	 * status of one pice of memory, you changed the whole page's status. So
-	 * just ignore the executableFlag.
 	 */
-	void GCHeap::SetExecuteBit(void *address,
+	void GCHeap::SetPageProtection(void *address,
 							   size_t size,
-							   bool /*executableFlag*/)
+							   bool executableFlag,
+							   bool writeableFlag)
 	{
 		// Should use vmPageSize() or kNativePageSize here.
 		// But this value is hard coded to 4096 if we don't use mmap.
@@ -171,10 +160,17 @@ namespace MMgc
 		void *endPage   = (void*) (((size_t)endAddress + bitmask) & ~bitmask);
 		size_t sizePaged = (size_t)endPage - (size_t)beginPage;
 
+		int flags = PROT_READ;
+		if (executableFlag) {
+			flags |= PROT_EXEC;
+		}
+		if (writeableFlag) {
+			flags |= PROT_WRITE;
+		}
 #ifdef DEBUG
 		int retval =
 #endif
-		  mprotect((maddr_ptr)beginPage, sizePaged, (PROT_READ|PROT_WRITE|PROT_EXEC));
+		  mprotect((maddr_ptr)beginPage, sizePaged,flags);
 
 		GCAssert(retval == 0);
 	}
@@ -341,14 +337,14 @@ namespace MMgc
 #ifdef AVMPLUS_UNIX
 		Dl_info dlip;
 		dladdr((void *const)pc, &dlip);
-		sprintf(buff, "0x%08x:%s", pc, dlip.dli_sname);
+		sprintf(buff, "0x%p:%s", (void *)pc, dlip.dli_sname);
 #else
 		sprintf(buff, "0x%x", pc);
 #endif
 	}
 
 #ifdef MMGC_SPARC
-	void GetStackTrace(int *trace, int len, int skip)
+	void GetStackTrace(sintptr *trace, int len, int skip)
 	{
 	  // TODO for sparc.
 		GCAssert(false);
@@ -357,11 +353,11 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_PPC
-	void GetStackTrace(int *trace, int len, int skip) 
+	void GetStackTrace(sintptr *trace, int len, int skip) 
 	{
 	  register int stackp;
-	  int pc;
-	  asm("mr %0,r1" : "=r" (stackp));
+	  sintptr pc;
+	  asm("mr %0,%%r1" : "=r" (stackp));
 	  while(skip--) {
 	    stackp = *(int*)stackp;
 	  }
@@ -369,7 +365,7 @@ namespace MMgc
 	  // save space for 0 terminator
 	  len--;
 	  while(i<len && stackp) {
-	    pc = *((int*)stackp+2);
+	    pc = *((sintptr*)stackp+2);
 	    trace[i++]=pc;
 	    stackp = *(int*)stackp;
 	  }
@@ -378,7 +374,7 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_IA32
-	void GetStackTrace(int *trace, int len, int skip)
+	void GetStackTrace(sintptr *trace, int len, int skip)
 	{
 		void **ebp;
 #ifdef SOLARIS
@@ -400,7 +396,7 @@ namespace MMgc
 		while (i < len && *ebp)
 		{
 			/* store the current frame pointer */
-			trace[i++] = *((int*) ebp + 1);
+			trace[i++] = *((sintptr*) ebp + 1);
 			/* get the next frame pointer */
 			ebp = (void**)(*ebp);
 		}
@@ -410,7 +406,7 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_ARM
-	void GetStackTrace(int *trace, int len, int skip) {}
+	void GetStackTrace(sintptr *trace, int len, int skip) {}
 #endif
 
 #endif

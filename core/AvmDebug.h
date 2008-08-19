@@ -45,19 +45,26 @@
 #include <windows.h>
 #endif
 
+#if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
+    extern "C"
+    {
+        void AVMPlusCustomAssertionHandler(const char *message);
+    }
+#endif
+
 #ifdef _MAC
-#if !TARGET_RT_MAC_MACHO
-typedef const unsigned char* ConstStr255Param;
-extern "C"
-{
-#ifdef powerc
-	extern pascal void DebugStr(ConstStr255Param aStr);
-#else
-	// extern pascal void DebugStr(ConstStr255Param aStr) = 0xABFF;
-	extern pascal void SysBreakStr(ConstStr255Param aStr) = {0x303C, 0xFE15, 0xA9C9};
-#endif
-}
-#endif
+    #if !defined(AVMPLUS_MAC_NO_CARBON)
+        typedef const unsigned char* ConstStr255Param;
+
+        extern "C"
+		{
+            #ifdef powerc
+			    extern pascal void DebugStr(ConstStr255Param aStr);
+	        #else
+//			    extern pascal void SysBreakStr(ConstStr255Param aStr) = {0x303C, 0xFE15, 0xA9C9};
+			#endif
+		}
+    #endif
 #endif
 
 namespace avmplus
@@ -67,10 +74,16 @@ namespace avmplus
 	void AvmDebugMsg(const wchar* msg, bool debuggerBreak);
 
 	#ifdef _DEBUG
-		inline void _AvmAssertMsg(int32 assertion, const char* msg)
+		inline void _AvmAssertMsg(int32 assertion, const char* message)
 		{
 			if (assertion == 0)
-				AvmDebugMsg(msg, true);
+            {
+                #if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
+                    AVMPlusCustomAssertionHandler(message);
+                #else
+				    AvmDebugMsg(message, true);
+                #endif
+            }
 		}
 
 		#define AvmAssertMsg(x,y)				do { _AvmAssertMsg((x), (y)); } while (0) /* no semi */

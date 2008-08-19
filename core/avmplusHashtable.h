@@ -138,7 +138,7 @@ namespace avmplus
 		static inline int FindOneBit(uint32 value)
 		{
 			register int index;
-			#ifdef DARWIN
+			#ifdef __GNUC__
 			asm ("cntlzw %0,%1" : "=r" (index) : "r" (value));
 			#else
 			register uint32 in = value;
@@ -178,10 +178,7 @@ namespace avmplus
 		 * @param heap
 		 * @param capacity  # of logical slots
 		 */
-		Hashtable(MMgc::GC *gc, int capacity = kDefaultCapacity)
-		{
-			initialize(gc, capacity);
-		}
+		Hashtable(MMgc::GC *gc, int capacity = kDefaultCapacity);
 	
 		void destroy(); 
 
@@ -203,7 +200,6 @@ namespace avmplus
 		 * @name operations on name/value pairs
 		 */
 		/*@{*/
-		void put(Atom name, Atom value);
 		Atom get(Atom name) const;
 		Atom remove(Atom name);
 
@@ -271,6 +267,7 @@ namespace avmplus
 		void setHasDeletedItems(bool val) { flags = (short)((flags & ~kHasDeletedItems) | (val ? kHasDeletedItems : 0)); }
 
 	protected:
+		void put(Atom name, Atom value);
 		int rehash(Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen);
 	};
 

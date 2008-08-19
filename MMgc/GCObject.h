@@ -224,7 +224,7 @@ namespace MMgc
 				GC::GetGC(this)->RemoveFromZCT(this);
 			}
 			
-#ifdef _DEBUG
+#ifdef MEMORY_INFO
 			if(gc->keepDRCHistory)
 				history.Push(GetStackTraceIndex(2));
 #endif
@@ -247,7 +247,9 @@ namespace MMgc
 				return;
 
 			if(RefCount() == 0) {
+#ifdef MEMORY_INFO
 				DumpHistory();
+#endif
 				GCAssert(false);
 			}
 #endif
@@ -268,7 +270,7 @@ namespace MMgc
 			
 			composite--; 
 
-#ifdef _DEBUG
+#ifdef MEMORY_INFO
 			// the delete flag works around the fact that DecrementRef
 			// may be called after ~RCObject since all dtors are called
 			// in one pass.  For example a FunctionScriptObject may be
@@ -286,7 +288,7 @@ namespace MMgc
 			}
 		}
 		
-#ifdef _DEBUG
+#ifdef MEMORY_INFO
 		void DumpHistory();
 #endif
 

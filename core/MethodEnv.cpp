@@ -186,12 +186,7 @@ namespace avmplus
 	MethodEnv::MethodEnv(void *addr, VTable *vtable)
 		: vtable(vtable), method(NULL), declTraits(NULL)
 	{
-		union {
-			Atom (*fp)(MethodEnv*, int, uint32*);
-			void *p;
-		} funcptr;
-		funcptr.p = addr;
-		impl32 = funcptr.fp;
+		implV = addr;
 	}
 
 	MethodEnv::MethodEnv(AbstractFunction* method, VTable *vtable)

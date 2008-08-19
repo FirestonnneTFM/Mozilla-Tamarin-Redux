@@ -66,7 +66,7 @@ namespace MMgc
 		// [ggrossman 09.24.04]
 		// Changed this to _DEBUG only because we don't link to
 		// CRT in Release builds, so vsprintf is unavailable!!
-#ifdef _DEBUG
+#if defined (_DEBUG) && !defined(UNDER_CE)
 		va_list argptr;
 		va_start(argptr, format);
 		int bufferSize = _vscprintf(format, argptr)+1;
@@ -84,7 +84,12 @@ namespace MMgc
 	
 	void GCDebugMsg(const char* msg, bool debugBreak)
 	{
-		OutputDebugString(msg);
+#ifndef UNDER_CE
+		// !!@ only unicode
+		OutputDebugStringA(msg);
+#else
+		DebugBreak();
+#endif
 		if(logToStdErr) {
  			fprintf( stderr, "%s\n", msg );
 		}

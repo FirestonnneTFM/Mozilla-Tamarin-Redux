@@ -199,17 +199,8 @@ prototype.pop = function() {
     return castToThisType(this).AS3::pop();
 }
 
-private function _push(items:Array) : uint{
-    var l : uint = length;
-    length = l + items.length;
-    for ( var i:uint=0, limit:uint=items.length ; i < limit ; i++, l++ )
-        this[l] = items[i];
-
-    return length;
-}
-
 prototype.push = function (...items) {
-    return castToThisType(this)._push(items);
+    return castToThisType(this).AS3::push.apply(castToThisType(this), items);
 }
 
 prototype.reverse = function() {

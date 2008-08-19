@@ -41,8 +41,10 @@
 #ifdef AVMPLUS_MIR
 
 //hack
-#if !defined(AVMPLUS_SYMBIAN) && !defined(UNDER_CE)
-#include <sys/mman.h>
+#ifdef AVMPLUS_ARM
+	#if !defined(AVMPLUS_SYMBIAN) && !defined(UNDER_CE)
+		#include <sys/mman.h>
+	#endif
 #endif
 
 #include <stdio.h>
@@ -636,7 +638,10 @@ namespace avmplus
 		// Hack to see what instructions we're generating
 		//bool hack = true;
 		//verboseFlag = true;
-		//core->console << " native thunk for " << info << "\n";
+#ifdef AVMPLUS_VERBOSE
+		if (verbose())
+			core->console << " native thunk for " << info << "\n";
+#endif
 
 		const Register TEMP  = R7;
 		const Register AP    = R6;
@@ -705,7 +710,7 @@ namespace avmplus
 			Traits* type = info->paramTraits(i);
 			Atom arg = info->getDefaultValue(i-first_optional);
 			
-			if (type == OBJECT_TYPE || type == VOID_TYPE)
+			if (type == OBJECT_TYPE || type == VOID_TYPE || !type)
 			{
 				IMM32(arg);
 			}
@@ -715,10 +720,14 @@ namespace avmplus
 			}
 			else if (type == NUMBER_TYPE)
 			{
-				double d = core->number_d(arg);
-				int *dp = (int*)&d;
-				IMM32(dp[0]);
-				IMM32(dp[1]);
+				union {
+					double d;
+                    uint32 i[2];
+				};
+
+				d = core->number_d(arg);
+				IMM32(i[0]);
+				IMM32(i[1]);
 			}
 			else if (type == INT_TYPE)
 			{
@@ -787,7 +796,7 @@ namespace avmplus
 		
 		if (info->flags & AbstractFunction::NATIVE_COOKIE)
 		{
-			MOV_imm8 (R1, info->m_cookie);
+			MOV_imm32 (R1, info->m_cookie);
 			GPRIndex++;
 		}
 
@@ -827,9 +836,9 @@ namespace avmplus
 
 					// Do second word of double
 					if ((GPRIndex+1) < kMaxGPRIndex) {
-						LDR ((Register)(R0+GPRIndex+1), offset+4, PC);
+						LDR ((Register)(R0+GPRIndex+1), offset, PC);
 					} else {
-						LDR (TEMP, offset+4, PC);
+						LDR (TEMP, offset, PC);
 						STR (TEMP, (GPRIndex+1-kMaxGPRIndex)*4, SP);
 					}
 					
@@ -1030,6 +1039,8 @@ namespace avmplus
 
 	void ArmAssembler::flushDataCache(void *start, int len)
 	{
+		(void) start;
+		(void) len;
 		#ifdef AVMPLUS_SYMBIAN
 
 		// Adjust start and len to page boundaries

@@ -38,7 +38,7 @@
 #include "avmplus.h"
 #include <math.h>
 
-#ifndef _WIN64
+#ifdef AVMPLUS_IA32
 #define X86_MATH
 #endif
 
@@ -112,11 +112,6 @@ namespace avmplus
 #else
 		return ::ceil(value);
 #endif /* X86_MATH */
-	}
-
-	double MathUtils::copysign(double x, double y)
-	{
-		return ::_copysign(x, y);
 	}
 
 	double MathUtils::cos(double value)
@@ -195,7 +190,6 @@ namespace avmplus
 #endif /* X86_MATH */
 	}
 
-#if defined(X86_MATH) || defined(_WIN64)
 	/* @(#)s_frexp.c 5.1 93/09/24 */
 	/*
 	 * ====================================================
@@ -254,12 +248,6 @@ namespace avmplus
 		*eptr -= 53; // 52 mantissa bits + the hidden bit
 		return (uint64)((fracMantissa) * (double)(1LL << 53));
 	}
-#else
-	double MathUtils::frexp(double x, int *eptr)
-	{
-		return ::frexp(x, eptr);
-	}
-#endif /* X86_MATH */
 	
 	double MathUtils::log(double value)
 	{
@@ -287,6 +275,8 @@ namespace avmplus
 		_asm _emit 0xDD; // fstp st(1);
 		_asm _emit 0xD9;
 	}
+#elif defined(UNDER_CE)
+	double modInternal(double x, double y) { return ::fmod(x, y); };
 #else
 extern "C" {
 	double modInternal(double x, double y);

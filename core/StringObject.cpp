@@ -278,7 +278,6 @@ namespace avmplus
 		return (*p == c);
 	}
 
-
 	// flatten a composite string
 	void String::normalize()
 	{
@@ -971,6 +970,13 @@ namespace avmplus
 		return charCodeAt (iPos);
     }
 
+	const wchar* String::c_str() 
+	{
+		// For offset too since our string needs to be null terminated
+		if (needsNormalization()) normalize();
+		return getData(); 
+	}
+
 	wchar String::operator[] (int index)
 	{
 		AvmAssert(index >=0 && index < length());
@@ -995,6 +1001,18 @@ namespace avmplus
 			return s->getData()[s->getOffset() + index];
 #endif
 		}
+	}
+
+	wchar* String::lockBuffer() 
+	{
+		// For offset too since our string needs to be null terminated
+		if (needsNormalization()) normalize();
+		return (wchar*) getData(); 
+	}
+
+	/*static*/ bool String::isSpace(wchar ch)
+	{
+		return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r');
 	}
 
 	bool String::isWhitespace()
@@ -1025,23 +1043,25 @@ namespace avmplus
 		if (iStartPos > iRight) {
 			iStartPos = iRight;
 		}
+
+		if (sublen == 0)
+			return iStartPos;
+
 		const wchar *substrstr = substr->c_str();
 		const wchar *selfstr = this->c_str() + iStartPos;
 		for ( ; iStartPos >= 0 ; iStartPos-- )
 		{
-			int j;
-			for (j = 0; j < sublen; j++)
+			for (int j = 0; j < sublen; j++)
 			{
 				if (substrstr[j] != selfstr[j])
 				{
 					break;
 				}
+
+				if (j == (sublen - 1))
+					return iStartPos;
 			}
 
-			if (j == sublen)
-			{
-				return iStartPos;
-			}
 			selfstr--;
 		}
 

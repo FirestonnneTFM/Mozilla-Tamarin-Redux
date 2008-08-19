@@ -89,33 +89,34 @@
 #endif
 
 #ifdef UNIX
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#else // HAVE_ALLOCA_H
-#include <stdlib.h>
-#endif // HAVE_ALLOCA_H
+	#include <stdint.h>
+	#ifdef HAVE_ALLOCA_H
+		#include <alloca.h>
+	#else // HAVE_ALLOCA_H
+		#include <stdlib.h>
+	#endif // HAVE_ALLOCA_H
 #endif // UNIX
 
 #ifdef WIN32
-#include <windows.h>
-#include <malloc.h>
-#include <math.h>
-#ifdef AVMPLUS_ARM
-typedef unsigned int uintptr_t;
-#else
-#ifdef AVMPLUS_AMD64
-#include <setjmpex.h>
-#endif
-// Newer versions of the Windows SDK set up the intrinsics slightly differently
-// than VC8. Only include intrin.h if the SDK doesn't declare it.
-#ifndef InterlockedBitTestAndSet
-#include <intrin.h>
-#endif
-#include <emmintrin.h>
-#ifdef VTUNE
-#include "JITProfiling.h"
-#endif
-#endif // AVMPLUS_ARM
+	#include <windows.h>
+	#include <malloc.h>
+	#include <math.h>
+	#ifdef AVMPLUS_ARM
+		typedef unsigned int uintptr_t;
+	#else
+		#ifdef AVMPLUS_AMD64
+			#include <setjmpex.h>
+		#endif
+		// Newer versions of the Windows SDK set up the intrinsics slightly differently
+		// than VC8. Only include intrin.h if the SDK doesn't declare it.
+		#ifndef InterlockedBitTestAndSet
+			#include <intrin.h>
+		#endif
+		#include <emmintrin.h>
+		#ifdef VTUNE
+			#include "JITProfiling.h"
+		#endif
+	#endif // AVMPLUS_ARM
 #endif // WIN32
 
 #include <stdarg.h>

@@ -38,6 +38,7 @@
 #ifndef __avmplus_MultinameHashtable__
 #define __avmplus_MultinameHashtable__
 
+#define MH_CACHE1
 
 namespace avmplus
 {
@@ -46,21 +47,32 @@ namespace avmplus
 	 */
 	class MultinameHashtable : public MMgc::GCObject
 	{
-		class Triple 
+#ifdef DEBUGGER // for VTable::size	
+	public:
+#endif
+		class Quad // 33% better!
 		{
 		public:
 			Stringp name;
 			Namespace* ns;
 			Binding value;
+			// non-0 if the given name exists elsewhere w/ a different NS
+			// (also the alignment gives a speed boost)
+			unsigned multiNS;
 		};
+	private:
+
+		/** property hashtable */
+		DWB(Quad*) quads;
 
 		/**
 		 * Finds the hash bucket corresponding to the key <name,ns>
 		 * in the hash table starting at t, containing tLen
-		 * triples.
+		 * quads.
 		 */
-		static int find(Stringp name, Namespace* ns, Triple *t, unsigned tLen);
-	    void rehash(Triple *oldAtoms, int oldlen, Triple *newAtoms, int newlen);
+		static int find(Stringp name, Namespace* ns, Quad *t, unsigned tLen);
+	    void rehash(Quad *oldAtoms, int oldlen, Quad *newAtoms, int newlen);
+
 		/**
 		 * Called to grow the Hashtable, particularly by add.
 		 *
@@ -73,10 +85,6 @@ namespace avmplus
 		 * 
 		 */
 		void grow();
-
-		/** property hashtable */
-		DWB(Triple*) triples;
-
 	public:
 		/**
 		 * since identifiers are always interned strings, they can't be 0,
@@ -90,8 +98,8 @@ namespace avmplus
 		/** no. of properties */
 		int size;
 
-		/** size of hashtable (number of triples - actual capacity is *3) */
-		int numTriplets;
+		/** size of hashtable (number of quads - actual capacity is *3) */
+		int numQuads;
 
 		/**
 		 * initialize with a known capacity.  i.e. we can fit minSize
@@ -106,7 +114,7 @@ namespace avmplus
 		bool isFull() const;
 
 		/**
-		 * @name operations on name/ns/binding triples
+		 * @name operations on name/ns/binding quads
 		 */
 		/*@{*/
 		void    put(Stringp name, Namespace* ns, Binding value);
@@ -132,6 +140,10 @@ namespace avmplus
 		Binding valueAt(int index);
 	protected:
 		void Init(int capacity);
+
+#ifdef MH_CACHE1
+		mutable Quad cache1;
+#endif
 	};
 }
 
