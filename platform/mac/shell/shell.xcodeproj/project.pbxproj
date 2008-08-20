@@ -420,7 +420,7 @@
 		858088D40C8F604F0093F49B /* Sampler.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Sampler.as; path = ../../../extensions/Sampler.as; sourceTree = SOURCE_ROOT; };
 		858088D50C8F604F0093F49B /* SamplerScript.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerScript.cpp; path = ../../../extensions/SamplerScript.cpp; sourceTree = SOURCE_ROOT; };
 		858088D60C8F604F0093F49B /* SamplerScript.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SamplerScript.h; path = ../../../extensions/SamplerScript.h; sourceTree = SOURCE_ROOT; };
-		8DD76FB20486AB0100D96B5E /* shell */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* shell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E8B527909AABAA20057BEE4 /* avmshell.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmshell.cpp; path = ../../../shell/avmshell.cpp; sourceTree = SOURCE_ROOT; };
 		8E8B527A09AABAA20057BEE4 /* avmshell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = avmshell.h; path = ../../../shell/avmshell.h; sourceTree = SOURCE_ROOT; };
 		8E8B527B09AABAA20057BEE4 /* ByteArray.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = ByteArray.as; path = ../../../shell/ByteArray.as; sourceTree = SOURCE_ROOT; };
