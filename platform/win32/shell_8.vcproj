@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="shell"
 	ProjectGUID="{437E43D2-ED2D-406B-88DB-B5940F838AE9}"
 	RootNamespace="shell"
@@ -124,7 +124,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				FavorSizeOrSpeed="2"
+				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\codegen;..\..\..\..\modules\zlib\src;..\..\core;."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;USE_REAL2INT;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -210,7 +210,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				FavorSizeOrSpeed="2"
+				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\codegen;..\..\..\..\modules\zlib\src;..\..\core;."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -417,9 +417,7 @@
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
 				OptimizeReferences="2"
-				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -438,6 +436,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -502,9 +503,7 @@
 				AdditionalLibraryDirectories="..\..\..\..\modules\vtune\ia32\libcmt\"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
-				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -523,6 +522,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
