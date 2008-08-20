@@ -1612,13 +1612,15 @@ namespace avmplus
                 NEXT;
 			}
 
+#define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
+
 			INSTR(getlex) {
 				SAVE_EXPC;
 				// findpropstrict + getproperty
 				// stack in:  -
 				// stack out: value
 				Multiname name;
-				pool->parseMultiname(name, U30ARG);
+				GET_MULTINAME(name, U30ARG);
 
 				// only non-runtime names are allowed.  but this still includes
 				// wildcard and attribute names.
@@ -1632,7 +1634,7 @@ namespace avmplus
             INSTR(getproperty) {
 				SAVE_EXPC;
 				Multiname multiname;
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				if (!multiname.isRuntime())
 				{
 					sp[0] = toplevel->getproperty(sp[0], &multiname, toplevel->toVTable(sp[0]));
@@ -1655,7 +1657,7 @@ namespace avmplus
 			INSTR(setproperty) {
 				SAVE_EXPC;
 				Multiname multiname; 
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				Atom value = *(sp--);
 				if (!multiname.isRuntime())
 				{
@@ -1681,7 +1683,7 @@ namespace avmplus
 			INSTR(initproperty) {
 				SAVE_EXPC;
 				Multiname multiname; 
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				Atom value = *(sp--);
 				if (!multiname.isRuntime())
 				{
@@ -1701,7 +1703,7 @@ namespace avmplus
 			INSTR(getdescendants) {
 				SAVE_EXPC;
 				Multiname name;
-				pool->parseMultiname(name, U30ARG);
+				GET_MULTINAME(name, U30ARG);
 				if (!name.isRuntime())
 				{
 					sp[0] = env->getdescendants(sp[0], &name);
@@ -1730,7 +1732,7 @@ namespace avmplus
 				// stack out: obj
 				SAVE_EXPC;
 				Multiname multiname;
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				if (multiname.isRuntime())
 					sp = initMultiname(env, multiname, sp);
 				*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, &multiname, true, withBase);
@@ -1743,7 +1745,7 @@ namespace avmplus
 				// stack out: obj
 				SAVE_EXPC;
 				Multiname multiname;
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				if (multiname.isRuntime())
 					sp = initMultiname(env, multiname, sp);
 				*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, &multiname, false, withBase);
@@ -1756,7 +1758,7 @@ namespace avmplus
 				// stack out: obj
 				SAVE_EXPC;
 				Multiname multiname;
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				*(++sp) = env->finddef(&multiname)->atom();
 				restore_dxns();
 				NEXT;
@@ -1812,7 +1814,7 @@ namespace avmplus
 			INSTR(deleteproperty) {
 				SAVE_EXPC;
 				Multiname multiname;
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				if (!multiname.isRuntime())
 				{
 					sp[0] = env->delproperty(sp[0], &multiname);
@@ -1969,7 +1971,7 @@ namespace avmplus
 				SAVE_EXPC;\
 				/* ( obj [ns [name]] arg1..N -- result ) */ \
 				Multiname multiname;\
-				pool->parseMultiname(multiname, U30ARG);\
+				GET_MULTINAME(multiname, U30ARG);\
 				int32 argc = U30ARG;\
 				Atom base;\
 				Atom *atomv = sp - argc;\
@@ -2001,7 +2003,7 @@ namespace avmplus
 				// stack in: obj [ns [name]] arg1..N
 				// stack out: result
 				Multiname name;
-				pool->parseMultiname(name, U30ARG);
+				GET_MULTINAME(name, U30ARG);
 				int32 argc = U30ARG;
 				if (!name.isRuntime())
 				{
@@ -2036,7 +2038,7 @@ namespace avmplus
 				SAVE_EXPC; \
 				/* ( obj [ns [name]] arg1..N -- ) */ \
 				Multiname name; \
-				pool->parseMultiname(name, U30ARG); \
+				GET_MULTINAME(name, U30ARG); \
 				int32 argc = U30ARG; \
 				if (!name.isRuntime()) \
 				{ \
@@ -2069,7 +2071,7 @@ namespace avmplus
 			INSTR(getsuper) {
 				SAVE_EXPC;
 				Multiname name;
-				pool->parseMultiname(name, U30ARG);
+				GET_MULTINAME(name, U30ARG);
 				if (!name.isRuntime())
 				{
 					Atom objAtom = *sp;
@@ -2091,7 +2093,7 @@ namespace avmplus
 				SAVE_EXPC;
 				int index = U30ARG;
 				Multiname name;
-				pool->parseMultiname(name, index);
+				GET_MULTINAME(name, index);
 				Atom valueAtom = *(sp--);
 				if (!name.isRuntime())
 				{
@@ -2135,7 +2137,7 @@ namespace avmplus
 			INSTR(astype) {
 				SAVE_EXPC;
 				Multiname multiname;
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				sp[0] = env->astype(sp[0], getTraits(&multiname, pool, toplevel, core));
 				// this used to be after the switch
 				restore_dxns();
@@ -2157,7 +2159,7 @@ namespace avmplus
                 // expects a CONSTANT_Multiname cpool index
 				// this is the ES4 implicit coersion
 				Multiname multiname;
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				sp[0] = toplevel->coerce(sp[0], getTraits(&multiname, pool, toplevel, core));
 				restore_dxns();
                 NEXT;
@@ -2184,7 +2186,7 @@ namespace avmplus
                 // expects a CONSTANT_Multiname cpool index
 				// used when operator "is" RHS is a compile-time type constant
 				Multiname multiname;
-				pool->parseMultiname(multiname, U30ARG);
+				GET_MULTINAME(multiname, U30ARG);
 				Traits* itraits = getTraits(&multiname, pool, toplevel, core);
 				sp[0] = core->istypeAtom(sp[0], itraits);
 				restore_dxns();
@@ -2502,7 +2504,7 @@ namespace avmplus
 		if( name->isParameterizedType() )
 		{
 			Multiname param_name;
-			pool->parseMultiname(param_name, name->getTypeParameter());
+			GET_MULTINAME(param_name, name->getTypeParameter());
 
 			Traits* param_traits = getTraits(&param_name, pool, toplevel, core);
 			Stringp fullname = core->internString( core->concatStrings(t->name, 
