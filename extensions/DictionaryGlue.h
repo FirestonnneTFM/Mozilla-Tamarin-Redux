@@ -59,7 +59,7 @@ namespace avmplus
 		virtual Atom nextName(int index);
 		virtual int nextNameIndex(int index);
 
-	private:
+		bool isUsingWeakKeys() const { return weakKeys; }	private:
 		DWB(Hashtable*) table;
 		bool weakKeys;
 

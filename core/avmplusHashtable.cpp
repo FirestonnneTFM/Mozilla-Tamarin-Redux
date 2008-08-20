@@ -52,7 +52,7 @@ using namespace MMgc;
 
 namespace avmplus
 {	
-	void Hashtable::initialize(GC *gc, int capacity)
+	Hashtable::Hashtable(MMgc::GC *gc, int capacity)	{		initialize(gc, capacity);	}	void Hashtable::initialize(GC *gc, int capacity)
 	{
 		capacity = MathUtils::nextPowerOfTwo(capacity);
 		setNumAtoms(capacity*2);

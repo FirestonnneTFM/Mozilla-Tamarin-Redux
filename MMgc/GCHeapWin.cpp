@@ -44,10 +44,11 @@
 #ifdef MEMORY_INFO
 #include <malloc.h>
 #include <strsafe.h>
-#include <DbgHelp.h>
+#ifndef UNDER_CE#include <DbgHelp.h>
+#endif
 #endif
 
-#ifdef MEMORY_INFO
+#if defined(MEMORY_INFO) && !defined(UNDER_CE)
 
 namespace MMgc
 {
@@ -271,8 +272,7 @@ namespace MMgc
 
 #ifdef AVMPLUS_JIT_READONLY
 	/**
-	 * SetExecuteBit changes the page access protections on a block of pages,
-	 * to make JIT-ted code executable or not.
+	 * SetPageProtection changes the page access protections on a block of pages,	 * to make JIT-ted code executable or not.
 	 *
 	 * If executableFlag is true, the memory is made executable and read-only.
 	 *
@@ -287,15 +287,12 @@ namespace MMgc
 	 * read/execute but this is a little tricker and doesn't add too much 
 	 * protection since only a single page is 'exposed' with this technique.
 	 */
-	void GCHeap::SetExecuteBit(void *address,
-							   size_t size,
-							   bool executableFlag)
-	{
+	void GCHeap::SetPageProtection(void *address,							   size_t size,
+							   bool executableFlag,							   bool writeableFlag)	{
 		DWORD oldProtectFlags = 0;
-		BOOL retval = VirtualProtect(address,
+		DWORD newProtectFlags = 0;		if ( executableFlag && writeableFlag ) {			newProtectFlags = PAGE_EXECUTE_READWRITE;		} else if ( executableFlag ) {			newProtectFlags = PAGE_EXECUTE_READ;		} else if ( writeableFlag ) {			newProtectFlags = PAGE_READWRITE;		} else {			newProtectFlags = PAGE_READONLY;		}		BOOL retval = VirtualProtect(address,
 									 size,
-									 executableFlag ? PAGE_EXECUTE_READ : PAGE_EXECUTE_READWRITE,
-									 &oldProtectFlags);
+									 newProtectFlags,									 &oldProtectFlags);
 
 		(void)retval;
 		GCAssert(retval);
@@ -415,23 +412,19 @@ namespace MMgc
 	}	
 	#endif
 
-#ifdef MEMORY_INFO
-#ifndef MEMORY_INFO
+#if defined(MEMORY_INFO) && defined (UNDER_CE)	void GetStackTrace(int *trace, int len, int skip)	{		(void) trace;		(void) len;		(void) skip;		// NOT SUPPORTEDD		return;	}
 
-	// empty when MEMORY_INFO not defined
-	void GetInfoFromPC(int pc, char *buff, int buffSize) { }
-	void GetStackTrace(int *trace, int len, int skip) {}
+	void GetInfoFromPC(sintptr pc, char *buff, int buffSize)	{		(void) pc;		(void) buff;		(void) buffSize;	}
 
-#else
+#endif
 
-#ifdef _WIN64 
+#if defined(MEMORY_INFO) && !defined(UNDER_CE)	static bool inited = false;		static const int MaxNameLength = 256;#ifdef _WIN64 
 #define MACHINETYPE IMAGE_FILE_MACHINE_AMD64
 #else
 #define MACHINETYPE IMAGE_FILE_MACHINE_I386
 #endif
-	void GetStackTrace(int *trace, int len, int skip)
-	{
-		HANDLE ht = GetCurrentThread();
+	void GetStackTrace(sintptr *trace, int len, int skip)	{
+		if(!inited) {			if(!g_DbgHelpDll.m_SymInitialize ||				!(*g_DbgHelpDll.m_SymInitialize)(GetCurrentProcess(), NULL, true)) {				LPVOID lpMsgBuf;				if(FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,								NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language								(LPTSTR) &lpMsgBuf, 0, NULL )) 				{					GCDebugMsg("See lpMsgBuf", true);					LocalFree(lpMsgBuf);				}						}			inited = true;		}		HANDLE ht = GetCurrentThread();
 		HANDLE hp = GetCurrentProcess();
 
 		CONTEXT c;		
@@ -439,10 +432,7 @@ namespace MMgc
 		c.ContextFlags = CONTEXT_FULL;
 
 #ifdef _WIN64
-		// broken with SP2
-		if ( !GetThreadContext( ht, &c ) )
-			return;
-#else		
+		 RtlCaptureContext( &c );#else		
       __asm
       {
         call x
@@ -492,16 +482,11 @@ namespace MMgc
 			if(skip-- > 0)
 				continue;
 
-			// FIXME: not 64 bit safe
-			trace[i++] = (int) frame.AddrPC.Offset;
-		}
+			// Sometimes fires off in 64-bit 			// GCAssert(!frame.AddrPC.Offset || frame.AddrPC.Offset > 0x1000);			trace[i++] = (sintptr) frame.AddrPC.Offset;		}
 		trace[i] = 0;
 	}
 
-	static bool inited = false;	
-	static const int MaxNameLength = 256;
-	void GetInfoFromPC(int pc, char *buff, int buffSize)
-	{
+	void GetInfoFromPC(sintptr pc, char *buff, int buffSize)	{
 		if(!inited) {
 			if(!g_DbgHelpDll.m_SymInitialize ||
 				!(*g_DbgHelpDll.m_SymInitialize)(GetCurrentProcess(), NULL, true)) {
@@ -570,7 +555,6 @@ namespace MMgc
 nosym:	
 		StringCchPrintfA(buff, buffSize, "0x%x", pc);
 	}
-#endif
 #endif // MEMORY_INFO
 
 }

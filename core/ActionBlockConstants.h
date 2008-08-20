@@ -117,8 +117,8 @@ namespace avmplus
 		 */
 		extern const unsigned char opCanThrow[];
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-		extern const char *opNames[];
+#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+		extern const char * const opNames[];
 #endif
 
 		extern const unsigned char kindToPushOp[];
@@ -126,8 +126,8 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 		/** @name debugger string names */
 		/*@{*/
-		extern const char *constantNames[];
-		extern const char *traitNames[];
+		extern const char * const constantNames[];
+		extern const char * const traitNames[];
 		/*@}*/
 #endif
 

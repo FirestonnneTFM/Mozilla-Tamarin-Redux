@@ -123,26 +123,22 @@ namespace MMgc
 
 #ifdef AVMPLUS_JIT_READONLY
 	/**
-	 * SetExecuteBit changes the page access protections on a block of pages,
-	 * to make JIT-ted code executable or not.
+	 * SetPageProtection changes the page access protections on a block of pages,	 * to make JIT-ted code executable or not.
 	 *
 	 * If executableFlag is true, the memory is made executable and read-only.
 	 *
 	 * If executableFlag is false, the memory is made non-executable and
 	 * read-write.
 	 */
-	void GCHeap::SetExecuteBit(void *address,
-							   size_t size,
-							   bool executableFlag)
-	{
+	void GCHeap::SetPageProtection(void *address,							   size_t size,
+							   bool executableFlag,							   bool writeableFlag)	{
 		// mprotect requires that the addresses be aligned on page boundaries
 		void *endAddress = (void*) ((char*)address + size);
 		void *beginPage = (void*) ((size_t)address & ~0xFFF);
 		void *endPage   = (void*) (((size_t)endAddress + 0xFFF) & ~0xFFF);
 		size_t sizePaged = (size_t)endPage - (size_t)beginPage;
 
-		int retval = mprotect(beginPage, sizePaged,
-							  executableFlag ? (PROT_READ|PROT_EXEC) : (PROT_READ|PROT_WRITE|PROT_EXEC));
+		int flags = PROT_READ;		if (executableFlag) {			flags |= PROT_EXEC;		}		if (writeableFlag) {			flags |= PROT_WRITE;		}		int retval = mprotect(beginPage, sizePaged, flags);
 
 		GCAssert(retval == 0);
 		(void)retval;
@@ -216,14 +212,12 @@ namespace MMgc
 	
 	
 	void* GCHeap::CommitCodeMemory(void* address,
-								   size_t )
-	{
+								   size_t size)	{
 		committedCodeMemory += size;
 		return address;
 	}	
 	void* GCHeap::DecommitCodeMemory(void* address,
-									 size_t )
-	{
+									 size_t size)	{
 		committedCodeMemory -= size;
 		return address;
 	}	
@@ -299,16 +293,13 @@ namespace MMgc
 
 #ifdef MMGC_PPC
 	// no idea how to do this with codewarrior
-	void GetInfoFromPC(int pc, char *buff, int /*buffSize*/) 
-	{
+	void GetInfoFromPC(sintptr pc, char *buff, int /*buffSize*/) 	{
 		sprintf(buff, "0x%x", pc);	
 	}
 
-	void GetStackTrace(int *trace, int len, int skip) 
-	{
+	void GetStackTrace(sintptr *trace, int len, int skip) 	{
 	  register int stackp;
-	  int pc;
-	  asm("mr %0,r1" : "=r" (stackp));
+	  sintptr pc;	  asm("mr %0,r1" : "=r" (stackp));
 	  while(skip--) {
 	    stackp = *(int*)stackp;
 	  }
@@ -316,8 +307,7 @@ namespace MMgc
 	  // save space for 0 terminator
 	  len--;
 	  while(i<len && stackp) {
-	    pc = *((int*)stackp+2);
-	    trace[i++]=pc;
+	    pc = *((sintptr*)stackp+2);	    trace[i++]=pc;
 	    stackp = *(int*)stackp;
 	  }
 	  trace[i] = 0;
@@ -326,15 +316,12 @@ namespace MMgc
 
 #if (defined(MMGC_IA32) || defined(MMGC_AMD64))
 
-	void GetInfoFromPC(int pc, char *buff, int buffSize) 
-	{
+	void GetInfoFromPC(sintptr pc, char *buff, int buffSize) 	{
 		Dl_info dlip;
 		dladdr((void * const)pc, &dlip);
-		snprintf(buff, buffSize, "0x%08x:%s", pc, dlip.dli_sname);
-	}
+		snprintf(buff, buffSize, "0x%08x:%s", (uint32)pc, dlip.dli_sname);	}
 	
-	void GetStackTrace(int* trace, int len, int skip) 
-	{
+	void GetStackTrace(sintptr* trace, int len, int skip) 	{
 		void **ebp;
 		#ifdef MMGC_IA32
 		asm("mov %%ebp, %0" : "=r" (ebp));
@@ -350,8 +337,7 @@ namespace MMgc
 		int i=0;
 		while(i<len && *ebp)
 		{
-			trace[i++] = *((int*)ebp+1);
-			ebp = (void**)(*ebp);			
+			trace[i++] = *((sintptr*)ebp+1);			ebp = (void**)(*ebp);			
 		}
 		trace[i] = 0;
 	}

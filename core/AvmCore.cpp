@@ -38,7 +38,7 @@
 
 #include "avmplus.h"
 
-#if defined(_MSC_VER) && defined(AVMPLUS_AMD64)
+#if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 #include <emmintrin.h>
 #endif
 
@@ -97,7 +97,10 @@ namespace avmplus
 		NATIVE_SCRIPT(0, Toplevel)
 	END_NATIVE_SCRIPTS()
 
-	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), mirBuffers(g, 4), 
+	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), 
+#ifdef AVMPLUS_MIR
+		mirBuffers(g, 4), 
+#endif
 		gcInterface(g)
 #ifdef DEBUGGER
 		,_sampler(g)
@@ -127,7 +130,7 @@ namespace avmplus
 		verbose = false;
 		#endif
 
- 		turbo = true;
+	    SetMIREnabled(true);
 
 		#ifdef AVMPLUS_VERIFYALL
 		verifyall = false;
@@ -175,6 +178,7 @@ namespace avmplus
 		debugger           = NULL;
 		profiler		   = NULL;
 		callStack          = NULL;
+		passAllExceptionsToDebugger = false;
         #endif /* DEBUGGER */
 
 		interrupted        = false;
@@ -189,7 +193,7 @@ namespace avmplus
 		stringCount		= 0;
 		deletedCount	= 0;
 		nsCount			= 0;
-		
+
 		numStrings = 1024; // power of 2
 		strings = new DRC(Stringp)[numStrings];
 		memset(strings, 0, numStrings*sizeof(Stringp));
@@ -225,6 +229,8 @@ namespace avmplus
 		kNaN = doubleToAtom(MathUtils::nan());
 		kNeedsDxns = constantString("NeedsDxns");
 		kAsterisk = constantString("*");
+		kVersion = constantString("Version");
+		kVector = constantString("Vector.<");
 
 #ifdef AVMPLUS_VERBOSE
 		knewline = newString("\n");
@@ -281,9 +287,11 @@ namespace avmplus
 		delete [] namespaces;
 		namespaces = NULL;
 
+#ifdef AVMPLUS_MIR
 		// free all the mir buffers
 		while(mirBuffers.size() > 0)
 			mirBuffers.removeFirst()->free();
+#endif
 	}
 
 	void AvmCore::initBuiltinPool()
@@ -503,7 +511,8 @@ namespace avmplus
 										  Domain* domain,
 										  AbstractFunction *nativeMethods[],
 										  NativeClassInfo *nativeClasses[],
-										  NativeScriptInfo *nativeScripts[])
+										  NativeScriptInfo *nativeScripts[],
+										  List<Stringp>* include_versions)
 	{
 		// parse constants and attributes.
 		PoolObject* pool = AbcParser::decodeAbc(this,
@@ -512,7 +521,8 @@ namespace avmplus
 												domain,
 												nativeMethods,
 												nativeClasses,
-												nativeScripts);
+												nativeScripts,
+												include_versions);
 
         #ifdef DEBUGGER
 		if (debugger) {
@@ -662,7 +672,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				return lhs == rhs ? trueAtom : falseAtom;
 			case kNamespaceType:
 				// E4X 11.5.1, pg 53
-				return atomToNamespace(lhs)->equalTo(atomToNamespace(rhs))? trueAtom : falseAtom;
+				return atomToNamespace(lhs)->EqualTo(atomToNamespace(rhs))? trueAtom : falseAtom;
 			case kObjectType:
 			{
 				// E4X 11.5.1, pg 53
@@ -843,11 +853,13 @@ return the result of the comparison ToPrimitive(x) == y.
 			// stuck in an infinite loop).
 			exception->flags |= Exception::SEEN_BY_DEBUGGER;
 
-			if (!willExceptionBeCaught(exception))
+			bool willBeCaught = willExceptionBeCaught(exception);
+
+			if (passAllExceptionsToDebugger || !willBeCaught)
 			{
 				// filterException() returns 'true' if it somehow let the user know
 				// about the exception, 'false' if it ignored the exception.
-				if (debugger->filterException(exception))
+				if (debugger->filterException(exception, willBeCaught))
 					exception->flags |= Exception::SEEN_BY_DEBUGGER;
 				else
 					exception->flags &= ~Exception::SEEN_BY_DEBUGGER;
@@ -1218,29 +1230,35 @@ return the result of the comparison ToPrimitive(x) == y.
 	
     Atom AvmCore::booleanAtom(Atom atom)
     {
-		int tag = atom & 7;
-		
-		if (tag == kIntegerType)
-			return atom == kIntegerType ? falseAtom : trueAtom;
-
-		if (tag == kDoubleType) {
-			double d = atomToDouble(atom);
-			return !MathUtils::isNaN(d) && d != 0.0 ? trueAtom : falseAtom;
+		if (!AvmCore::isNullOrUndefined(atom))
+		{
+			switch (atom&7)
+			{
+			case kIntegerType:
+				{
+					Atom i = atom>>3;
+					return urshift(i|-i,28)&~7 | kBooleanType;
+				}
+			case kBooleanType:
+				return atom;
+			case kObjectType:
+			case kNamespaceType:
+				return isNull(atom) ? falseAtom : trueAtom;
+			case kStringType:
+				if (isNull(atom)) return falseAtom;
+				return (atomToString(atom)->length() > 0) ? trueAtom : falseAtom;
+			default:
+				{
+					double d = atomToDouble(atom);
+					return !MathUtils::isNaN(d) && d != 0.0 ? trueAtom : falseAtom;
+				}
+			}
 		}
-
-		if (AvmCore::isNullOrUndefined(atom))
+		else
+		{
 			return falseAtom;
-
-		if (tag == kStringType)
-			return atomToString(atom)->length() == 0 ? falseAtom : trueAtom;
-		
-		if (tag == kObjectType || tag == kNamespaceType)
-			return trueAtom;
-		
-		AvmAssert(tag == kBooleanType);
-
-		return atom;
-	}
+		}
+    }
 
 	int AvmCore::boolean(Atom atom)
     {
@@ -1640,7 +1658,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		// then methods are JITted on first entry, bypassing translation altogether.  In
 		// this case, info->word_code.exceptions will be NULL, causing the AVM to crash.
 		// So the right thing to do in this case is to fall back on info->exceptions.
-		
+
 		//AvmAssert(info->word_code.exceptions != NULL);
 		ExceptionHandlerTable* exceptions = info->word_code.exceptions;
 
@@ -1833,25 +1851,11 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		while (nativeMap->method_id != -1)
 		{
-			AbstractFunction *f = NULL;
-
-			switch (nativeMap->type)
-			{
-			case NativeTableEntry::kNativeMethod:
-				f = new (GetGC()) NativeMethod(nativeMap->flags, (NativeMethod::Handler)nativeMap->handler);
-				break;
-			case NativeTableEntry::kNativeMethod1:
-				f = new (GetGC()) NativeMethod(nativeMap->flags, (NativeMethod::Handler)nativeMap->handler, nativeMap->cookie);
-				break;
-			case NativeTableEntry::kNativeMethodV:
-				f = new (GetGC()) NativeMethodV((NativeMethodV::Handler32)nativeMap->handler, nativeMap->flags);
-				break;			
-			case NativeTableEntry::kNativeMethodV1:
-				f = new (GetGC()) NativeMethodV((NativeMethodV::Handler32)nativeMap->handler, nativeMap->cookie, nativeMap->flags);
-				break;
-			default:
-				AvmAssert(false);
-			}
+#ifdef AVMTHUNK_VERSION
+			AbstractFunction* f = new (GetGC()) NativeMethod(*nativeMap);
+#else
+			AbstractFunction* f = new (GetGC()) NativeMethod(nativeMap->flags, (NativeMethod::Handler)nativeMap->handler, nativeMap->cookie);
+#endif
             				
 			// if we overwrite a native method mapping, something is hosed
 			AvmAssert(nativeMethods[nativeMap->method_id]==NULL);
@@ -2710,6 +2714,11 @@ return the result of the comparison ToPrimitive(x) == y.
         return i;
 	}
 
+	Stringp AvmCore::constantString(const char *s)
+	{
+		return internString(newString(s));
+	}
+
     /**
      * intern the given string atom which has already been allocated
      * @param atom
@@ -3175,25 +3184,21 @@ return the result of the comparison ToPrimitive(x) == y.
 		// handle integer values w/out allocation
 		// this logic rounds in the wrong direction for E3, but
 		// we never use a rounded value, only cleanly converted values.
-		#ifdef WIN32 
+		#if defined(WIN32) || defined(__ICC) 
 		#ifdef AVMPLUS_AMD64
-		int id = _mm_cvttsd_si32(_mm_set_sd(n));
-		if (((id<<3)>>3) == n) {
+		int32_t id = _mm_cvttsd_si32(_mm_set_sd(n));
+		if (id == n) {
 			// make sure its not -0
 			if (id == 0 && MathUtils::isNegZero(n)) {
 				return allocDouble(n);
 			} else {
-#ifdef AVMPLUS_64BIT
-				return (id<<3) | kIntegerType;
-#else
-				return uint32((id<<3) | kIntegerType);
-#endif
+				return (intptr_t(id)<<3) | kIntegerType;
 			}
 		}
 		return allocDouble(n);
 		#else
 		int id3;
-		_asm {
+		__asm {
 			movsd xmm0,n
 			cvttsd2si ecx,xmm0
 			shl ecx,3		// id<<3
@@ -3206,14 +3211,13 @@ return the result of the comparison ToPrimitive(x) == y.
 			mov id3,eax
 		}
 
-
 		if (id3 != 0 || !MathUtils::isNegZero(n))
 		{
 			return id3 | kIntegerType;
 		}
 		else
 		{
-			_asm d2a_alloc:
+			__asm d2a_alloc:
 			return allocDouble(n);
 		}
 		#endif
@@ -3239,7 +3243,19 @@ return the result of the comparison ToPrimitive(x) == y.
 		return allocDouble(n);
 		#elif defined(SOLARIS)
 		return AvmCore::doubleToAtom(n); // This needs to be optimized for solaris.
-		#elif AVMPLUS_UNIX
+		#elif defined(AVMPLUS_UNIX)
+		#ifdef __amd64__
+		int32_t id = _mm_cvttsd_si32(_mm_set_sd(n));
+		if (id == n) {
+			// make sure its not -0
+			if (id == 0 && MathUtils::isNegZero(n)) {
+				return allocDouble(n);
+			} else {
+				return (intptr_t(id)<<3) | kIntegerType;
+			}
+		}
+		return allocDouble(n);
+		#else // __amd64__
 		int id3;
 		asm("movups %1, %%xmm0;"
 			"cvttsd2si %%xmm0, %%ecx;"
@@ -3259,10 +3275,12 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		asm("d2a_alloc:");
 		return allocDouble(n);
-		#endif
+		#endif // __amd64__
+		#endif // defined(AVMPLUS_UNIX)
 	}
 #endif
 
+#ifndef AVMPLUS_AMD64
 	Atom AvmCore::doubleToAtom(double n)
 	{
 		// There is no need for special logic for NaN or +/-Inf since we don't
@@ -3308,6 +3326,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			return allocDouble(n);
 		}
 	}
+#endif // not AVMPLUS_AMD64
 
 #ifdef AVMPLUS_VERBOSE
     /**
@@ -3481,20 +3500,17 @@ return the result of the comparison ToPrimitive(x) == y.
 	int AvmCore::integer(Atom atom) const
 	{
 		if ((atom & 7) == kIntegerType || (atom&7) == kBooleanType) {
-#ifdef AVMPLUS_64BIT
-			return (int)(atom >> 3);
-#else
-			return (int)(sint32(atom) >> 3);
-#endif
+			return (int32_t)(atom >> 3);
 		} else {
 			// TODO optimize the code below.
 			double d = number(atom);
-			return (int)integer_d(d);
+			return (int32_t)integer_d(d);
 		}
 	}
 
 	// static
 
+#ifndef AVMPLUS_AMD64
 	int AvmCore::integer_d(double d)
 	{
 		// Try a simple case first to see if we have a in-range float value
@@ -3512,6 +3528,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		return doubleToInt32(d);
 	}
+#endif // not AVMPLUS_AMD64
 
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 	int AvmCore::integer_d_sse2(double d)
@@ -3547,6 +3564,8 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif // AVMPLUS_IA32 or AVMPLUS_AMD64
 
+
+#if !defined(AVMPLUS_IA32) && !defined(AVMPLUS_AMD64)
 	int AvmCore::doubleToInt32(double d)
 	{
 		// From the ES3 spec, 9.5
@@ -3594,7 +3613,174 @@ return the result of the comparison ToPrimitive(x) == y.
 			return MathUtils::real2int(d < 0.0 ? -ad : ad);
 		}
 	}
+#else
+		// From the ES3 spec, 9.5
+		//  2.	If Result(1) is NaN, +0, -0, +Inf, or -Inf, return +0.
+		//  3.	Compute sign(Result(1)) * floor(abs(Result(1))).
+		//  4.	Compute Result(3) modulo 2^32; that is, a finite integer value k of Number 
+		//  type with positive sign and less than 2^32 in magnitude such the mathematical 
+		//  difference of Result(3) and k is mathematically an integer multiple of 2^32.
+		//	5.	If Result(4) is greater than or equal to 2^31, return Result(4)- 2^32, 
+		//  otherwise return Result(4).
+#if defined(AVMPLUS_AMD64)
+	#define DBLTOINT32_INT64 1
+#else
+	#define DBLTOINT32_INT64 0
+#endif
+    
+    typedef union {  
+	    double d;
+		uint64 i;
+#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)		
+		struct { 
+			uint32 il, ih;
+		} i32;
+#else
+#error("this routine does not work in PowerPC processors");
+		struct { 
+			uint32 ih, il;
+		} i32;
+#endif
+    } double_int;
+    
+    #if DBLTOINT32_INT64
+	int AvmCore::doubleToInt32(double d)
+	{
+    	double_int du, duh, two32;
+    	uint64 sign_d;
+    	int64 MASK;
+    	uint32 DI_H, u_tmp, expon, shift_amount;
+    
+		//  Algorithm Outline 
+		//  Step 1.  If d is NaN, +/-Inf or |d|>=2^84 or |d|<1, then return 0
+		//  All of this is implemented based on an exponent comparison.
+		//  Step 2.  If |d|<2^31, then return (int)d
+		//  The cast to integer (conversion in RZ mode) returns the correct result.
+		//  Step 3. If |d|>=2^32, d:=fmod(d, 2^32) is taken  -- but without a call
+		//  Step 4. If |d|>=2^31, then the fractional bits are cleared before
+		//  applying the correction by 2^32:  d - sign(d)*2^32
+		//  Step 5.  Return (int)d
+	    
+		du.d = d;
+		DI_H = du.i32.ih;
+	    
+		u_tmp = (DI_H & 0x7ff00000) - 0x3ff00000;
+		if(u_tmp >= (0x45300000-0x3ff00000)) {
+			// d is Nan, +/-Inf or +/-0, or |d|>=2^(32+52) or |d|<1, in which case result=0
+			return 0;
+		}
+	    
+		if(u_tmp < 0x01f00000) {
+			// |d|<2^31
+			return int32(d);
+		}
 
+		if(u_tmp > 0x01f00000) {
+			// |d|>=2^32
+			expon = u_tmp >> 20;
+			shift_amount = expon - 21;
+			duh.i = du.i;
+			MASK = 0x8000000000000000ll;
+			MASK = MASK >> shift_amount;
+			duh.i &= (uint64)MASK;
+			du.d -= duh.d;
+		}
+	    
+		DI_H = du.i32.ih;
+	    
+		// eliminate fractional bits
+		u_tmp = (DI_H & 0x7ff00000);
+		if(u_tmp >= 0x41e00000) {
+			// |d|>=2^31
+			expon = u_tmp >> 20;
+			shift_amount = expon - (0x3ff - 11);
+			MASK = 0x8000000000000000ll;
+			MASK = MASK >> shift_amount;
+			du.i &= (uint64)MASK;
+			sign_d = du.i & 0x8000000000000000ull;
+			two32.i = 0x41f0000000000000ull ^ sign_d;
+			du.d -= two32.d;
+		}
+	    
+		return int32(du.d);
+    }
+    #else // DBLTOINT32_INT64
+	int AvmCore::doubleToInt32(double d)
+    {
+		double_int du, duh, two32;
+		uint32 DI_H, u_tmp, expon, shift_amount;
+		int32 mask32;
+    
+		//  Algorithm Outline 
+		//  Step 1.  If d is NaN, +/-Inf or |d|>=2^84 or |d|<1, then return 0
+		//  All of this is implemented based on an exponent comparison.
+		//  Step 2.  If |d|<2^31, then return (int)d
+		//  The cast to integer (conversion in RZ mode) returns the correct result.
+		//  Step 3. If |d|>=2^32, d:=fmod(d, 2^32) is taken  -- but without a call
+		//  Step 4. If |d|>=2^31, then the fractional bits are cleared before
+		//  applying the correction by 2^32:  d - sign(d)*2^32
+		//  Step 5.  Return (int)d
+	   
+	   du.d = d;
+	   DI_H = du.i32.ih;
+	   
+	   u_tmp = (DI_H & 0x7ff00000) - 0x3ff00000;
+	   if(u_tmp >= (0x45300000-0x3ff00000)) {
+		   // d is Nan, +/-Inf or +/-0, or |d|>=2^(32+52) or |d|<1, in which case result=0
+		   return 0;
+	   }
+	   
+	   if(u_tmp < 0x01f00000) {
+		   // |d|<2^31
+		   return int32(d);
+	   }
+	   
+	   if(u_tmp > 0x01f00000) {
+		   // |d|>=2^32
+		   expon = u_tmp >> 20;
+		   shift_amount = expon - 21;
+		   duh.i = du.i;
+		   mask32 = 0x80000000;
+		   if(shift_amount<32) {
+			   mask32 >>= shift_amount;
+			   duh.i32.ih = du.i32.ih & mask32;
+			   duh.i32.il = 0;
+		   }
+		   else {
+			   mask32 >>= (shift_amount-32);
+			   duh.i32.ih = du.i32.ih;
+			   duh.i32.il = du.i32.il & mask32;
+		   }
+		   du.d -= duh.d;
+	   }
+
+		DI_H = du.i32.ih;
+
+		// eliminate fractional bits
+		u_tmp = (DI_H & 0x7ff00000);
+		if(u_tmp >= 0x41e00000) {
+			// |d|>=2^31
+			expon = u_tmp >> 20;
+			shift_amount = expon - (0x3ff - 11);
+			mask32 = 0x80000000;
+			if(shift_amount<32) {
+				mask32 >>= shift_amount;
+				du.i32.ih &= mask32;
+				du.i32.il = 0;
+			}
+			else {
+				mask32 >>= (shift_amount-32);
+				du.i32.il &= mask32;
+			}
+			two32.i32.ih = 0x41f00000 ^ (du.i32.ih & 0x80000000);
+			two32.i32.il = 0;
+			du.d -= two32.d;
+		}
+
+		return int32(du.d);
+	}
+   #endif // DBLTOINT32_INT64
+#endif // !(defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))		
 
 	// This routine is a very specific parser to generate a positive integer from a string.
 	// The following are supported:
@@ -3682,6 +3868,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
+#ifdef AVMPLUS_MIR
 	/**
 	 * MIR needs a large intermediate buffer for codegen.
 	 * These routines allow reuse of this buffer(s)
@@ -3706,6 +3893,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		 buffer->free();  // free the underlying space
 		mirBuffers.add(buffer);
 	}
+#endif
 
 #ifdef MMGC_DRC
 	/*static*/ 

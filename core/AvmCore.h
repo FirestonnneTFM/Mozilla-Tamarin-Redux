@@ -134,7 +134,7 @@ const int kBufferPadding = 16;
 
 		#ifdef AVMPLUS_MIR
 		// MIR intermediate buffer pool
-		List<GrowableBuffer*, LIST_GCObjects> mirBuffers; // mir buffer pool
+		List<GrowableBuffer*> mirBuffers; // mir buffer pool
 		GrowableBuffer* requestNewMirBuffer();	 // create a new buffer
 		GrowableBuffer* requestMirBuffer();	     // get next buffer in list or a create a new one
 		void releaseMirBuffer(GrowableBuffer* buffer);
@@ -172,6 +172,18 @@ const int kBufferPadding = 16;
 		bool verbose;
 		#endif /* AVMPLUS_VERBOSE */
 
+	    inline void SetMIREnabled(bool isEnabled)
+		{
+			turbo = isEnabled;
+		}
+
+	    inline bool IsMIREnabled() const
+		{
+			return turbo;
+		}
+
+	protected:
+
 		/**
 		 * The turbo switch determines how bytecode is executed.
 		 * When turbo is true, bytecode is translated to native code.
@@ -184,6 +196,8 @@ const int kBufferPadding = 16;
 		 * builds on supported platforms.
 		 */
 		bool turbo;
+
+	public:
 
 		#ifdef AVMPLUS_MIR
 
@@ -204,6 +218,8 @@ const int kBufferPadding = 16;
 		bool sse2;
 		#endif
 
+		#endif // AVMPLUS_MIR
+		
 		/**
 		 * If this switch is set, executing code will check the
 		 * "interrupted" flag to see whether an interrupt needs
@@ -225,6 +241,8 @@ const int kBufferPadding = 16;
 		 */
 		virtual void setStackBase() {}
 		
+		#ifdef AVMPLUS_MIR
+
 		/**
 		 * Genearate a graph for the basic blocks.  Can be used by
 		 * 'dot' utility to generate a jpg.
@@ -322,7 +340,8 @@ const int kBufferPadding = 16;
 									 Domain* domain,
 									 AbstractFunction *nativeMethods[],
 									 NativeClassInfo *nativeClasses[],
-									 NativeScriptInfo *nativeScripts[]);
+									 NativeScriptInfo *nativeScripts[],
+									 List<Stringp>* include_versions = NULL);
 		
 		/**
 		 * Execute the ABC block starting at offset start in code.
@@ -561,6 +580,8 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kcallee;
 		DRC(Stringp) kNeedsDxns;
 		DRC(Stringp) kAsterisk;
+		DRC(Stringp) kVersion;
+		DRC(Stringp) kVector;
 #ifdef AVMPLUS_VERBOSE
 		DRC(Stringp) knewline;
 		DRC(Stringp) krightbracket;
@@ -630,7 +651,7 @@ const int kBufferPadding = 16;
 #ifdef AVMPLUS_64BIT
 		int64	integer64(Atom atom)			{ return (int64)integer(atom); }
 		static	int64 integer64_i(Atom atom)	{ return (int64)integer_i(atom); }
-		static	int64 integer64_d(double d)		{ return (int64)integer_d(d); }
+		static	int64 integer64_d(double d)		{ return (int64)integer_d_sse2(d); }
 		static	int64 integer64_d_sse2(double d){ return (int64)integer_d_sse2(d); }
 #endif
 		int integer(Atom atom) const;
@@ -659,7 +680,13 @@ const int kBufferPadding = 16;
 			}
 		}
 
+#ifdef AVMPLUS_AMD64
+		#define integer_d integer_d_sse2
+		#define doubleToAtom doubleToAtom_sse2
+#else
 		static int integer_d(double d);
+		Atom doubleToAtom(double n);
+#endif
 
 #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		static int integer_d_sse2(double d);
@@ -744,11 +771,11 @@ const int kBufferPadding = 16;
 		/** Helper function; reads a signed 24-bit integer from pc */
 		static int readS24(const byte *pc)
 		{
-			#ifdef WIN32
+			#ifdef AVMPLUS_UNALIGNED_ACCESS
 				// unaligned short access still faster than 2 byte accesses
-				return ((unsigned short*)pc)[0] | ((signed char*)pc)[2]<<16;
+				return ((uint16_t*)pc)[0] | ((int8_t*)pc)[2]<<16;
 			#else
-				return pc[0] | pc[1]<<8 | ((signed char*)pc)[2]<<16;
+				return pc[0] | pc[1]<<8 | ((int8_t*)pc)[2]<<16;
 			#endif
 		}
 
@@ -848,11 +875,11 @@ const int kBufferPadding = 16;
 		}
 
 		/** Helper function; reads an unsigned 16-bit integer from pc */
-		static int readU16(const byte *pc)
+		static int32_t readU16(const byte *pc)
 		{
-			#ifdef WIN32
+			#ifdef AVMPLUS_UNALIGNED_ACCESS
 				// unaligned short access still faster than 2 byte accesses
-				return *((unsigned short*)pc);
+				return *((uint16_t*)pc);
 			#else
 				return pc[0] | pc[1]<<8;
 			#endif
@@ -901,7 +928,7 @@ const int kBufferPadding = 16;
 		 * ES3's internal ToNumber() function for internal use
 		 */
 		double number(Atom atom) const;
-		
+
 		/**
 		 * produce an atom from a string.  used only for string constants.
 		 * @param s
@@ -912,10 +939,7 @@ const int kBufferPadding = 16;
 			return constantString(s)->atom();
 		}
 
-		Stringp constantString(const char *s)
-		{
-			return internString(newString(s));
-		}
+		Stringp constantString(const char *s);
 
 		/**
 		 * The interrupt method is called from executing code
@@ -1015,6 +1039,8 @@ const int kBufferPadding = 16;
 		Sampler *sampler() { return &_sampler; }
 		void sampleCheck() { _sampler.sampleCheck(); }
 		bool sampling() { return _sampler.sampling; }
+
+		bool passAllExceptionsToDebugger;
 
 		#ifdef _DEBUG
 		void dumpStackTrace();
@@ -1293,15 +1319,18 @@ const int kBufferPadding = 16;
 		Stringp doubleToString(double d);
 		Stringp concatStrings(Stringp s1, Stringp s2) const;
 		
-		Atom doubleToAtom(double n);
 		Atom uintToAtom(uint32 n);
 		Atom intToAtom(int n);
 
 		Atom allocDouble(double n)
 		{
-			double *ptr = (double*)GetGC()->Alloc(sizeof(double), 0);
-			*ptr = n;
-			return kDoubleType | (uintptr)ptr;
+			union { 
+				double *d;
+				void *v;
+			};
+			v = GetGC()->Alloc(sizeof(double), 0);
+			*d = n;
+			return kDoubleType | (uintptr)v;
 		}
 		
 		void rehashStrings(int newlen);
@@ -1324,7 +1353,7 @@ const int kBufferPadding = 16;
 		DRC(Stringp) * strings;
 		// hash set containing namespaces
 		DRC(Namespacep) * namespaces;
-		
+
 		// cache of interned names of nonnegative integers (numeric value % 256)
 		class IndexString : public MMgc::GCObject {
 		public:

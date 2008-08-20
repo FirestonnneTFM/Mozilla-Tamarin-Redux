@@ -630,8 +630,7 @@ namespace avmshell
 		#endif
 	}
 
-	bool DebugCLI::filterException(Exception *exception)
-	{
+	bool DebugCLI::filterException(Exception *exception, bool /*willBeCaught*/)	{
 		// Filter exceptions when -d switch specified
 		if (activeFlag) {
 			core->console << "Exception has been thrown:\n"

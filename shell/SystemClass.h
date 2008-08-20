@@ -56,7 +56,8 @@ namespace avmshell
 
 		// set by shell
 		static int user_argc;
-		static char **user_argv;
+#ifdef UNDER_CE		static TCHAR **user_argv;#else		static char **user_argv;
+#endif
 
 		/**
 		 * Implementation of System.exit

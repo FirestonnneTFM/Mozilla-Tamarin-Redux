@@ -40,35 +40,8 @@
 
 namespace avmplus
 {
-	/**
-	 * interp32/N() is the main loop of the AVM+ interpreter.
-	 *
-	 * The native code compiler CodegenMIR is used by default
-	 * for executing AVM+ bytecode, since it is faster by
-	 * nature, but the AVM+ interpreter is used in some cases:
-	 *
-	 * - It is used to execute AVM+ code when the turbo flag is
-	 *   set to false (-Dinterp in command-line shell)
-	 * - It is also used when a debug session is in progress.
-	 * - It is used when the target platform does not support
-	 *   the native code compiler.
-	 *
-	 * @param methodEnv   The method to execute.
-	 * @param argc number of args
-	 * @param ap arg list
-	 * @return The return value of the method that was executed.
-	 * @throws Exception if the method throws an exception.
-	 */
-	Atom interp32(MethodEnv* method, int argc, uint32 *ap);
-	double interpN(MethodEnv* method, int argc, uint32 *ap);
-}
-
+	/**	 * interp32/N() is the main loop of the AVM+ interpreter.	 *	 * The native code compiler CodegenMIR is used by default	 * for executing AVM+ bytecode, since it is faster by	 * nature, but the AVM+ interpreter is used in some cases:	 *	 * - It is used to execute AVM+ code when the turbo flag is	 *   set to false (-Dinterp in command-line shell)	 * - It is also used when a debug session is in progress.	 * - It is used when the target platform does not support	 *   the native code compiler.	 *	 * @param methodEnv   The method to execute.	 * @param argc number of args	 * @param ap arg list	 * @return The return value of the method that was executed.	 * @throws Exception if the method throws an exception.	 */	Atom interp32(MethodEnv* method, int argc, uint32 *ap);	double interpN(MethodEnv* method, int argc, uint32 *ap);}
 #ifdef AVMPLUS_WORD_CODE
-
-#  define OP_ext 0xFF   // FIXME! define elsewhere
-#  define OP_ext_pushbits           ((1<<8) | OP_ext)
-#  define OP_ext_push_doublebits    ((2<<8) | OP_ext)
-
+#  define OP_ext 0xFF   // FIXME! define elsewhere#  define OP_ext_pushbits           ((1<<8) | OP_ext)#  define OP_ext_push_doublebits    ((2<<8) | OP_ext)
 #endif // AVMPLUS_WORD_CODE
-
 #endif // __avmplus_Interpreter__

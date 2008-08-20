@@ -83,8 +83,7 @@ namespace avmplus
 	private:		
 		VTable* const sampleIteratorVTable;
 		VTable* const slotIteratorVTable;
-		ClassClosure *getType(Atom typeOrVTable, MMgc::GCWeakRef *weakRef);
-#else
+		ClassClosure *getType(uintptr typeOrVTable, MMgc::GCWeakRef *weakRef);#else
 		// stubs for release
 		double getSize(Atom ) { return 0; }
 		Atom getMemberNames(Atom, bool) { return undefinedAtom; }

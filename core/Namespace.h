@@ -80,7 +80,7 @@ namespace avmplus
 
 		bool hasPrefix () const;
 
-		bool equalTo(const Namespace* other) const;
+		bool EqualTo(const Namespace* other) const;
 
 		bool isPrivate() const 
 		{

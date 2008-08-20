@@ -102,8 +102,7 @@ namespace avmplus
 #endif
 
 	BEGIN_NATIVE_MAP(MethodClosureClass)
-		NATIVE_METHOD2(builtin_as_0_MethodClosure_length_get, &MethodClosure::get_length)
-		NATIVE_METHOD(builtin_as_0_MethodClosure_private_savedThis_get, MethodClosure::get_savedThis)
+		NATIVE_METHOD(builtin_as_0_MethodClosure_length_get, MethodClosure::get_length)		NATIVE_METHOD(builtin_as_0_MethodClosure_private_savedThis_get, MethodClosure::get_savedThis)
 	END_NATIVE_MAP()
 
 	MethodClosureClass::MethodClosureClass(VTable* cvtable)

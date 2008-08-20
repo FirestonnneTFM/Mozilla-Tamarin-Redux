@@ -89,34 +89,10 @@
 #endif
 
 #ifdef UNIX
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#else // HAVE_ALLOCA_H
-#include <stdlib.h>
-#endif // HAVE_ALLOCA_H
-#endif // UNIX
+	#include <stdint.h>	#ifdef HAVE_ALLOCA_H		#include <alloca.h>	#else // HAVE_ALLOCA_H		#include <stdlib.h>	#endif // HAVE_ALLOCA_H#endif // UNIX
 
 #ifdef WIN32
-#include <windows.h>
-#include <malloc.h>
-#include <math.h>
-#ifdef AVMPLUS_ARM
-typedef unsigned int uintptr_t;
-#else
-#ifdef AVMPLUS_AMD64
-#include <setjmpex.h>
-#endif
-// Newer versions of the Windows SDK set up the intrinsics slightly differently
-// than VC8. Only include intrin.h if the SDK doesn't declare it.
-#ifndef InterlockedBitTestAndSet
-#include <intrin.h>
-#endif
-#include <emmintrin.h>
-#ifdef VTUNE
-#include "JITProfiling.h"
-#endif
-#endif // AVMPLUS_ARM
-#endif // WIN32
+	#include <windows.h>	#include <malloc.h>	#include <math.h>	#ifdef AVMPLUS_ARM		typedef unsigned int uintptr_t;	#else		#ifdef AVMPLUS_AMD64			#include <setjmpex.h>		#endif		// Newer versions of the Windows SDK set up the intrinsics slightly differently		// than VC8. Only include intrin.h if the SDK doesn't declare it.		#ifndef InterlockedBitTestAndSet			#include <intrin.h>		#endif		#include <emmintrin.h>		#ifdef VTUNE			#include "JITProfiling.h"		#endif	#endif // AVMPLUS_ARM#endif // WIN32
 
 #include <stdarg.h>
 
@@ -216,8 +192,7 @@ namespace avmplus
 	class String;
 	class Toplevel;
 	class Traits;
-	class Translator;
-	class UnicodeUtils;
+	class Translator;	class UnicodeUtils;
 	class Value;
 	class Verifier; 
 	class VTable; 
@@ -242,7 +217,7 @@ namespace avmplus
 
 namespace avmplus
 {
-	namespace NativeID
+//#ifdef AVMTHUNK_VERSION// Native-Method helpers (only used when AVMTHUNK_VERSION defined, but must be declared before we know...)	typedef avmplus::AbcEnv* AvmInstance;	typedef avmplus::ScriptObject* AvmObject;	typedef avmplus::String* AvmString;	typedef avmplus::Namespace* AvmNamespace;	typedef avmplus::Atom AvmBox;	typedef avmplus::MethodEnv* AvmMethodEnv;	typedef uint32_t AvmBoolArg;	#define AvmThunkRetType_AvmObject		(error ??? illegal) /* all Objects are return as AvmBox */	typedef AvmBox AvmThunkRetType_AvmBoolArg;	typedef AvmBox AvmThunkRetType_int32_t;	typedef AvmBox AvmThunkRetType_uint32_t;	typedef AvmBox AvmThunkRetType_AvmNamespace;	typedef AvmBox AvmThunkRetType_AvmBox;	typedef AvmBox AvmThunkRetType_AvmString;	typedef AvmBox AvmThunkRetType_void;	typedef double AvmThunkRetType_double;	#define AVMTHUNK_CALLTYPE	 /* could be used to declare custom call type (eg __fastcall) */	typedef AvmThunkRetType_AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);//#endif	namespace NativeID
 	{
         #include "builtin.h"
 	}
@@ -273,9 +248,8 @@ namespace avmplus
 #include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"
 #include "CodeContext.h"
-#include "PoolObject.h"
+#include "AbstractFunction.h"#include "PoolObject.h"
 #include "AbcEnv.h"
-#include "AbstractFunction.h"
 #include "Traits.h"
 #include "TraitsIterator.h"
 #include "VTable.h"
@@ -294,8 +268,7 @@ namespace avmplus
 #endif
 
 #include "AtomArray.h"
-#include "Translator.h"
-#include "Verifier.h"
+#include "Translator.h"#include "Verifier.h"
 #include "FrameState.h"
 #include "NativeFunction.h"
 #include "ClassClosure.h"

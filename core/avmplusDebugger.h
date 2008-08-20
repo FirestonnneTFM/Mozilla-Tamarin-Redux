@@ -216,8 +216,7 @@ namespace avmplus
 		 * ignored the exception, in which case Flash might dump
 		 * it to the console and/or display a message box.
 		 */
-		virtual bool filterException(Exception *exception) = 0;
-		
+		virtual bool filterException(Exception *exception, bool willBeCaught) = 0;		
 		/**
 		 * Called at the end of the method's prologue 
 		 * to notify the debugger that a new method is about to be executed.
@@ -457,8 +456,7 @@ namespace avmplus
 		bool scanCode(AbcFile* file, PoolObject* pool, MethodInfo* m);
 
 		// all abc files
-		List<AbcInfo*, LIST_GCObjects>	abcList;
-		MMgc::GCHashtable				pool2abcIndex;
+		List<AbcInfo*>	abcList;		MMgc::GCHashtable				pool2abcIndex;
 
 	private:
 		void	traceCallback(int line);
@@ -476,7 +474,7 @@ namespace avmplus
 	 * ----------------------------------------------------------
 	 */
 
-	class AbcFile : public AbcInfo
+	class SourceFile : public SourceInfo	{	public:		SourceFile(MMgc::GC* gc, Stringp name);		/**		 * name of source file 		 */		Stringp name() const;		/**		 * Number of functions defined in this file.  		 */		int functionCount() const;		/**		 * Access to each function 		 */		MethodInfo* functionAt(int index) const;		/**		 * A line - offset pair should be recorded 		 */		void addLine(AvmCore* core, int linenum, MethodInfo* function, int offset);		bool setBreakpoint(int linenum);		bool clearBreakpoint(int linenum);		bool hasBreakpoint(int linenum);	protected:		Stringp							named;		List<MethodInfo*>				functions;		DWB(BitSet*)					sourceLines;	// lines that have source code on them		DWB(BitSet*)					breakpoints;	};	class AbcFile : public AbcInfo
 	{
 	public:
 		/**
@@ -514,44 +512,7 @@ namespace avmplus
 	protected:
 		AvmCore*			core;
 		DWB(Hashtable*)		sourcemap;	// maps filename to that file's index in "sources"
-		List<SourceFile*,LIST_GCObjects>	source;		// all source files used in this abc file
-		int					byteCount;	// # bytes of bytecode 
-	};
-
-	class SourceFile : public SourceInfo
-	{
-	public:
-		SourceFile(MMgc::GC* gc, Stringp name);
-
-		/**
-		 * name of source file 
-		 */
-		Stringp name() const;
-
-		/**
-		 * Number of functions defined in this file.  
-		 */
-		int functionCount() const;
-
-		/**
-		 * Access to each function 
-		 */
-		MethodInfo* functionAt(int index) const;
-
-		/**
-		 * A line - offset pair should be recorded 
-		 */
-		void addLine(AvmCore* core, int linenum, MethodInfo* function, int offset);
-
-		bool setBreakpoint(int linenum);
-		bool clearBreakpoint(int linenum);
-		bool hasBreakpoint(int linenum);
-
-	protected:
-		Stringp							named;
-		List<MethodInfo*, LIST_GCObjects>				functions;
-		DWB(BitSet*)					sourceLines;	// lines that have source code on them
-		DWB(BitSet*)					breakpoints;
+		List<SourceFile*>	source;		// all source files used in this abc file		int					byteCount;	// # bytes of bytecode 
 	};
 
 	class DebugStackFrame : public MMgc::GCObject, public DebugFrame
