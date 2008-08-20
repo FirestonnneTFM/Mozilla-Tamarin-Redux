@@ -14,8 +14,8 @@
 # The Original Code is [Open Source Virtual Machine].
 #
 # The Initial Developer of the Original Code is
-# Adobe System Incorporated.
-# Portions created by the Initial Developer are Copyright (C) 2005-2006
+# Intel Corporation.
+# Portions created by the Initial Developer are Copyright (C) 2008
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
@@ -34,38 +34,6 @@
 #
 # ***** END LICENSE BLOCK *****
 
-INCLUDES += \
-  -I$(topsrcdir) \
-  -I$(topsrcdir)/MMgc \
-  -I$(topsrcdir)/core \
-  -I$(topsrcdir)/codegen \
-  -I$(topsrcdir)/pcre \
+avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
+  $(curdir)/vprof.cpp \
   $(NULL)
-
-$(call RECURSE_DIRS,MMgc)
-
-ifdef ENABLE_TAMARIN
-$(call RECURSE_DIRS,core pcre codegen vprof)
-
-ifeq (darwin,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/mac)
-endif
-ifeq (windows,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/win32)
-endif
-ifeq (linux,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/unix)
-endif
-ifeq (sunos,$(TARGET_OS))
-$(call RECURSE_DIRS,platform/unix)
-endif
-endif
-
-$(call RECURSE_DIRS,shell)
-
-echo:
-	@echo avmplus_CXXFLAGS = $(avmplus_CXXFLAGS)
-	@echo avmplus_CXXSRCS = $(avmplus_CXXSRCS)
-	@echo avmplus_CXXOBJS = $(avmplus_CXXOBJS)
-	@echo avmplus_OBJS = $(avmplus_OBJS)
-	@echo avmplus_NAME = $(avmplus_NAME)
