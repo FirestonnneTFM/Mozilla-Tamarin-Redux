@@ -38,8 +38,8 @@
 
 #include "avmshell.h"
 
-#if defined(DARWIN) || defined(AVMPLUS_UNIX)
-//#include <sys/signal.h>
+#if defined(DARWIN) || (defined(AVMPLUS_UNIX) && !defined(SOLARIS))
+#include <sys/signal.h>
 #include <unistd.h>
 #endif
 
