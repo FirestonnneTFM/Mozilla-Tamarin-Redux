@@ -273,7 +273,9 @@ namespace avmplus
 			refill(dest, dest_limit);
 
 #ifdef AVMPLUS_DIRECT_THREADED
-#  define NEW_OPCODE(opcode)  ((uintptr_t)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode])); AvmAssert(((uintptr_t)(opcode >= 255 ? opcode_labels[(opcode>>8)+256] : opcode_labels[opcode])) != 0)
+#  define NEW_OPCODE(opcode) \
+	((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode])); \
+	AvmAssert(((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8)+256] : opcode_labels[opcode])) != 0)
 #else
 #  ifdef _DEBUG
 #    define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // debugging...
