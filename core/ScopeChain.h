@@ -130,9 +130,8 @@ namespace avmplus
 		    return 0;
 		}
 
-		Namespace** getDefaultNamespaceAddr() const { 
-			return (Namespace**)&defaultXmlNamespace;
-		}
+		//		// Shut up these false positives:		//		// In member function ‘avmplus::Namespace** avmplus::ScopeChain::getDefaultNamespaceAddr() const’:		// warning: dereferencing type-punned pointer might break strict-aliasing rules 		//		#ifdef __GNUC__		#pragma GCC system_header		#endif // __GNUC__		Namespace** getDefaultNamespaceAddr() const { 
+			return (Namespace **)(&defaultXmlNamespace);		}
 		
 		static ScopeChain* create(MMgc::GC* gc, ScopeTypeChain *scopeTraits, ScopeChain* outer, Namespace *dxns)
 		{

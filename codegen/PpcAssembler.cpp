@@ -38,7 +38,7 @@
 
 #include "avmplus.h"
 
-#ifdef DARWIN
+#ifdef AVMPLUS_MIR#ifdef DARWIN
 #include <Carbon/Carbon.h>
 #endif
 
@@ -724,15 +724,11 @@ namespace avmplus
 #endif /* MAX */
 
 #if !TARGET_RT_MAC_MACHO
-	int nativeHandlerAddr(NativeMethod::Handler handler)
-	{
-		int result;
-		asm("lwz %0,0(r5)" : "=r" (result));
-		return result;
+	intptr_t nativeHandlerAddr(NativeMethod::Handler handler)	{
+		intptr_t result;		asm("lwz %0,0(%%r5)" : "=r" (result));		return result;
 	}
-#endif
-	
-	void CodegenMIR::emitNativeThunk(NativeMethod *info)
+#endif // !TARGET_RT_MAC_MACHO	
+#ifndef AVMTHUNK_VERSION	void CodegenMIR::emitNativeThunk(NativeMethod *info)
 	{
 		/**
 		 * PowerPC stack frame layout
@@ -800,11 +796,7 @@ namespace avmplus
 			Traits* type = info->paramTraits(i);
 			if (type == NUMBER_TYPE) {
 				Atom arg = info->getDefaultValue(i-first_optional);
-				double d = AvmCore::number_d(arg);
-				int *dp = (int*)&d;
-				*mip++ = dp[0];
-				*mip++ = dp[1];
-			}
+				union {					double d;					int32_t i[2];				};				d = AvmCore::number_d(arg);				*mip++ = i[0];				*mip++ = i[1];			}
 		}
 
 		mipStart = mip;
@@ -1071,14 +1063,10 @@ namespace avmplus
 		// all args have been pushed, now call function using thiscall calling conventions
 		Traits* type = info->returnTraits();
 
-#if !TARGET_RT_MAC_MACHO
-		int handler_addr = nativeHandlerAddr(info->m_handler);
-#else
 		union {
-			int handler_addr;
-			NativeMethod::Handler handler;
+			intptr_t handler_addr;			NativeMethod::Handler handler;
 		};
-		handler = info->m_handler;
+#if !TARGET_RT_MAC_MACHO		handler_addr = nativeHandlerAddr(info->m_handler);#else		handler = info->m_handler;
 #endif
 
 		thincall(handler_addr);
@@ -1169,13 +1157,11 @@ namespace avmplus
 		MakeDataExecutable(mipStart, (int)mip-(int)mipStart);
 #endif /* AVMPLUS_JIT_READONLY */
 	}
-
-#if defined(_MAC) && !TARGET_RT_MAC_MACHO
-	static uint32 get_rtoc()
-	{
-		asm { mr r3, r2; }
-	}
 #endif
+
+#if !TARGET_RT_MAC_MACHO	static uintptr_t get_rtoc()	{
+		uintptr_t result;		asm ("mr %0, %%r2" : "=r" (result));		return result;	}
+#endif // !TARGET_RT_MAC_MACHO
 
 	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
 	{
@@ -1302,3 +1288,4 @@ namespace avmplus
 
 #endif // AVMPLUS_PPC
 }
+#endif

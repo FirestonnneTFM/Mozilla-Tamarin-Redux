@@ -131,7 +131,7 @@ namespace avmplus
 			}
 		}
 
-		if(traits->hasInterfaces)
+#ifdef AVMPLUS_MIR		if(traits->hasInterfaces)
 		{
 			for (int i=0; i < Traits::IMT_SIZE; i++)
 			{
@@ -158,7 +158,7 @@ namespace avmplus
 				}
 			}
 		}
-	}
+#endif	}
 
 	MethodEnv *VTable::makeMethodEnv(AbstractFunction *func)
 	{
@@ -191,7 +191,7 @@ namespace avmplus
 		if(ivtable != NULL)
 			size += ivtable->size();
 
-		size += traits->numTriplets * 3;
+		size += traits->numQuads * sizeof(MultinameHashtable::Quad);
 
 		size += traits->methodCount*sizeof(AbstractFunction*);
 

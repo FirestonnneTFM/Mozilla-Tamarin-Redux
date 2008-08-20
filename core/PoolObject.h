@@ -52,28 +52,20 @@ namespace avmplus
 		AvmCore *core;
 
 		/** constants */
-		List<int, LIST_NonGCObjects> cpool_int;
-		List<uint32, LIST_NonGCObjects> cpool_uint;
-		List<double*, LIST_GCObjects> cpool_double;
-		List<Stringp, LIST_RCObjects> cpool_string;
-		List<Namespace*, LIST_RCObjects> cpool_ns;
-		List<NamespaceSet*, LIST_GCObjects> cpool_ns_set;
+		List<int> cpool_int;		List<uint32> cpool_uint;		List<double*, LIST_GCObjects> cpool_double;	// explicitly specify LIST_GCObject b/c these are GC-allocated ptrs		List<Stringp> cpool_string;		List<Namespace*> cpool_ns;		List<NamespaceSet*> cpool_ns_set;
 
-		// LIST_NonGCObjects b/c these aren't really atoms, they are offsets
-		List<Atom,LIST_NonGCObjects> cpool_mn;
+		// explicitly specify LIST_NonGCObjects b/c these aren't really atoms, they are offsets		List<Atom,LIST_NonGCObjects> cpool_mn;
 
 		/** all methods */
-		List<AbstractFunction*, LIST_GCObjects> methods;
+		List<AbstractFunction*> methods;
 
-		/** metadata */
-		List<const byte*,LIST_NonGCObjects> metadata_infos;
+		/** metadata -- ptrs into ABC, not gc-allocated */		List<const byte*> metadata_infos;
 
 		/** domain */
 		DWB(Domain*) domain;
 		
 		/** constructors for class objects, for op_newclass */
-		List<AbstractFunction*, LIST_GCObjects> cinits;  // TODO just use methods array, dont need new cinits array
-		List<AbstractFunction*, LIST_GCObjects> scripts;
+		List<AbstractFunction*> cinits;  // TODO just use methods array, dont need new cinits array		List<AbstractFunction*> scripts;
 
 		/** # of elements in methods array */
 		uint32 methodCount;
@@ -97,7 +89,7 @@ namespace avmplus
 		/** # of elements in scripts array */
 		uint32 scriptCount;
 
-		// true if this pool is baked into the player.  used to control
+		/** flags to control certain bugfix behavior */		uint32 bugFlags;		// Numbers here correspond to Bugzilla bug numbers (i.e. bugzilla bug 444630 is kbug444630		enum {			kbug444630 = 0x00000001		};		// true if this pool is baked into the player.  used to control
 		// whether callees will set their context.
 		bool isBuiltin;
 
@@ -175,10 +167,10 @@ namespace avmplus
 			return abcStart + urshift(a,3);
 		}
 
+		// Index of the metadata info that means skip the associated definition		List<uint32> stripMetadataIndexes;		void addStripMetadata(uint32 index)		{			stripMetadataIndexes.add(index);		}
 
 #ifdef AVMPLUS_VERIFYALL
-		List<AbstractFunction*, LIST_GCObjects> verifyQueue;
-		void enq(AbstractFunction* f);
+		List<AbstractFunction*> verifyQueue;		void enq(AbstractFunction* f);
 		void enq(Traits* t);
 		void processVerifyQueue(Toplevel* toplevel);
 #endif

@@ -155,6 +155,7 @@ namespace MMgc
 	{
 		// prime ZCT with some pinners
 		RCObject *stackPinners[3];
+		memset(stackPinners, 0, sizeof(stackPinners));
 
 		GCWeakRef *wr = createProblem(stackPinners);
 

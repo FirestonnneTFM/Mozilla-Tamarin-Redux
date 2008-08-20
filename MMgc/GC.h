@@ -107,18 +107,16 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 		saveRegs64(&saves, &_stack, (int*)&_size);
 
 #else
-// 64bit - r8-r15?
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		do { \
-		volatile auto int64 save1,save2,save3,save4,save5,save6,save7;\
-		asm("mov %%rax,%0" : "=r" (save1));\
+		volatile auto int64 save1,save2,save3,save4,save5,save6,save7,save8,save9,save10,save11,save12,save13;\		asm("mov %%rax,%0" : "=r" (save1));\
 		asm("mov %%rbx,%0" : "=r" (save2));\
 		asm("mov %%rcx,%0" : "=r" (save3));\
 		asm("mov %%rdx,%0" : "=r" (save4));\
 		asm("mov %%rbp,%0" : "=r" (save5));\
 		asm("mov %%rsi,%0" : "=r" (save6));\
 		asm("mov %%rdi,%0" : "=r" (save7));\
-		asm("mov %%rsp,%0" : "=r" (_stack));\
+		asm("mov %%r8,%0" : "=r" (save8));\		asm("mov %%r9,%0" : "=r" (save9));\		asm("mov %%r12,%0" : "=r" (save10));\		asm("mov %%r13,%0" : "=r" (save11));\		asm("mov %%r14,%0" : "=r" (save12));\		asm("mov %%r15,%0" : "=r" (save13));\		asm("mov %%rsp,%0" : "=r" (_stack));\
 		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)	
 #endif
 
@@ -129,21 +127,21 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
  * anywhere on the machine stack. */
 // TPR - increasing to 20 causes this code to not get optimized out
 
-#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+#ifdef __GNUC__#ifdef _MAC#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \		int __ppcregs[20]; \		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\		_stack = __ppcregs;\		void *__stackBase;\		asm ("mr r3,r1\n"\			"1: mr %0,r3\n"\			"lwz r3,0(%0)\n"\		        "rlwinm r3,r3,0,0,30\n"\			"cmpi cr0,r3,0\n"\			"bne 1b" : "=b" (__stackBase) : : "r3");\		_size = (uintptr) __stackBase - (uintptr) _stack;#else // _MAC#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \		int __ppcregs[20]; \		asm("stmw %%r13,0(%0)" : : "b" (__ppcregs));\		_stack = __ppcregs;\		void *__stackBase;\		asm ("mr %%r3,%%r1\n"\		     "StackBaseLoop%1%2: mr %0,%%r3\n"	\			"lwz %%r3,0(%0)\n"\		        "rlwinm %%r3,%%r3,0,0,30\n"\			"cmpi cr0,%%r3,0\n"\		     "bne StackBaseLoop%1%2" : "=b" (__stackBase) : "i" (__FILE__), "i" (__LINE__) : "r3"); \		_size = (uintptr) __stackBase - (uintptr) _stack;#endif // _MAC#else // __GNUC__#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\
 		_stack = __ppcregs;\
-		_size = _gc->GetStackTop() - (uintptr) _stack;
+		void *__stackBase;\		asm ("mr r3,r1\n"\			"StackBaseLoop: mr %0,r3\n"\			"lwz r3,0(%0)\n"\		        "rlwinm r3,r3,0,0,30\n"\			"cmpi cr0,r3,0\n"\		     "bne StackBaseLoop" : "=b" (__stackBase) : : "r3"); \		_size = (uintptr) __stackBase - (uintptr) _stack;#endif // __GNUC__
 
 #elif defined MMGC_ARM
 
-// Store nonvolatile registers r4-r10
+#ifdef UNDER_CE#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \		int GC_tmp_1; void* tmp_ptr = &GC_tmp_1;\		MEMORY_BASIC_INFORMATION __mib;\		VirtualQuery(tmp_ptr, &__mib, sizeof(MEMORY_BASIC_INFORMATION)); \	    _size = __mib.RegionSize - ((int)tmp_ptr - (int)__mib.BaseAddress); \		_stack = tmp_ptr;#else#ifdef __ARMCC__#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \		_stack =  (void*)__current_sp(); \		_size = (unsigned int*)_gc->GetStackTop() - (unsigned int*)_stack;#else// Store nonvolatile registers r4-r10
 // Find stack pointer
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int regs[7];\
 		asm("stmia %0,{r4-r10}" : : "r" (regs));\
 		asm("mov %0,sp" : "=r" (_stack));\
-		_size = (uintptr)StackTop - (uintptr)_stack;
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;#endif //__ARMCC__#endif
 
 #elif defined MMGC_SPARC
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
@@ -200,7 +198,7 @@ namespace MMgc
 	class MMGC_API GCRoot
 	{
 		friend class GC;
-	public:
+		GCRoot();		void init(GC*gc, const void *object, size_t size);	public:
 		/** subclassing constructor */
 		GCRoot(GC *gc);
 		/** general constructor */
@@ -226,7 +224,6 @@ namespace MMgc
 		void Destroy();
 	
 	private:
-		FixedMalloc* fm;
 		GC * gc;
 
 		/** @access Requires(gc->m_rootListLock) */
@@ -348,25 +345,20 @@ namespace MMgc
 	};
 
 	#ifdef MMGC_64BIT
-	#define HIDDENPTRSHIFT 32
-	#define HIDDENPTRMASK 0xFFFFFFFF
-	#else
-	#define HIDDENPTRSHIFT 16
-	#define HIDDENPTRMASK 0x0000FFFF
-	#endif
+	#define HIDDENPTRMASK (uintptr(0x1L)<<63)	#else
+	#define HIDDENPTRMASK (uintptr(0x1L)<<31)	#endif
 
 	template <class T>
 	class GCHiddenPointer
 	{
 	public:
 		GCHiddenPointer(T obj=NULL) { set(obj); }
-		operator T() const { return (T) (low|high<<HIDDENPTRSHIFT);	 }
-		T operator=(T tNew) 
+		operator T() const { return (T) (val^HIDDENPTRMASK);	 }		T operator=(T tNew) 
 		{ 
 			set(tNew); 
 			return (T)this; 
 		}
-		T operator->() const { return (T) (low|high<<HIDDENPTRSHIFT); }
+		T operator->() const { return (T) (val^HIDDENPTRMASK); }
 
 	private:
 		// private to prevent its use and someone adding it, GCC creates
@@ -376,12 +368,8 @@ namespace MMgc
 		void set(T obj) 
 		{
 			uintptr p = (uintptr)obj;
-			high = p >> HIDDENPTRSHIFT;
-			low = p & HIDDENPTRMASK;
-		}
-		uintptr high;
-		uintptr low;
-	};
+			val = p ^ HIDDENPTRMASK;		}
+		uintptr val;	};
 
 	/**
 	 * The Zero Count Table used by DRC.
@@ -556,8 +544,7 @@ namespace MMgc
 
 		bool dontAddToZCTDuringCollection;
 
-#ifdef _DEBUG
-		bool incrementalValidation;
+		bool incrementalValidation;#ifdef _DEBUG
 		bool incrementalValidationPedantic;
 #endif
 
@@ -673,15 +660,7 @@ namespace MMgc
 		 *
 		 * @access Requires(request || exclusiveGC)
 		 */
-		static int GetMark(const void *item)
-		{
-			item = GetRealPointer(item);
-			if (GCLargeAlloc::IsLargeBlock(item)) {
-				return GCLargeAlloc::GetMark(item);
-			} else {
-				return GCAlloc::GetMark(item);
-			}
-		}
+		static int GetMark(const void *item);
 
 		static int SetMark(const void *item)
 		{
@@ -805,7 +784,7 @@ namespace MMgc
 		/**
 		 * Do as much marking as possible in time milliseconds
 		 */
-		void IncrementalMark(uint32 time=10);
+		void IncrementalMark();
 
 		/**
 		 * Are we currently marking
@@ -893,7 +872,7 @@ namespace MMgc
 		void *FindBeginning(const void *gcItem)
 		{
 			GCAssert(gcItem != NULL);
-			void *realItem = NULL;
+			GCAssert(GetPageMapValue((uintptr)gcItem) != 0);			void *realItem = NULL;
 			if((uintptr)gcItem < memStart || (uintptr)gcItem >= memEnd)
 				return NULL;
 			int bits = GetPageMapValue((uintptr)gcItem);
@@ -1109,8 +1088,9 @@ namespace MMgc
 		 */
 		size_t heapSizeAtLastAlloc;
 
-		bool stackCleaned;
+		// we track the top and bottom of the stack for cleaning purposes.		// the top tells us how far up the stack as been dirtied.		// the bottom is also tracked so we can ensure we're on the same		// stack that the GC responsible for cleaning.  necessary if multiple		// threads use the GC.  only thread that creates the GC will have its stack		// tracked and cleaned.		bool stackCleaned;
 		const void *rememberedStackTop;
+		const void *rememberedStackBottom;
 
 #ifndef MMGC_THREADSAFE
 		// for external which does thread safe multi-thread AS execution
@@ -1176,31 +1156,17 @@ namespace MMgc
 		/**
 		 * This spinlock covers memStart, memEnd, and the contents of pageMap.
 		 */
-		mutable GCSpinLock pageMapLock;
+#ifdef MMGC_THREADSAFE		mutable GCSpinLock pageMapLock;
+#endif
 
 		inline int GetPageMapValue(uintptr addr) const
 		{
-			GCAcquireSpinlock lock(pageMapLock);
-			return GetPageMapValueAlreadyLocked(addr);
+#ifdef MMGC_THREADSAFE			GCAcquireSpinlock lock(pageMapLock);
+#endif			return GetPageMapValueAlreadyLocked(addr);
 		}
 
 		/** @access Requires(pageMapLock) */
-		inline int GetPageMapValueAlreadyLocked(uintptr addr) const
-		{
-			uintptr index = (addr-memStart) >> 12;
-
-#ifdef MMGC_AMD64
-			GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
-#else
-			GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
-#endif
-			// shift amount to determine position in the byte (times 2 b/c 2 bits per page)
-			uint32 shiftAmount = (index&0x3) * 2;
-			// 3 ... is mask for 2 bits, shifted to the left by shiftAmount
-			// finally shift back by shift amount to get the value 0, 1 or 3
-			//return (pageMap[addr >> 2] & (3<<shiftAmount)) >> shiftAmount;
-			return (pageMap[index >> 2] >> shiftAmount) & 3;
-		}
+		int GetPageMapValueAlreadyLocked(uintptr addr) const;
 
 		/**
 		 * Set the pageMap bits for the given address.  Those bits must be
@@ -1410,9 +1376,7 @@ private:
 		void AllocActivity(int blocks);
 #endif
 
-#ifdef _DEBUG
-		void CheckFreelist(GCAlloc *gca);
-		void CheckFreelists();
+		void CheckFreelists();#ifdef _DEBUG
 
 		int m_gcLastStackTrace;
 
@@ -1455,7 +1419,7 @@ private:
 
 public:
 #ifdef MEMORY_INFO
-		void DumpBackPointerChain(void *o);
+		typedef void (*pDumpBackCallbackProc)(void* pContext, void *obj, const char *type );		void DumpBackPointerChain(void *o, pDumpBackCallbackProc p = NULL, void *context = NULL);
 
 		// debugging routine that records who marked who, can be used to
 		// answer the question, how did I get marked?  also could be used to

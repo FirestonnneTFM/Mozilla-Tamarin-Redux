@@ -111,7 +111,8 @@ namespace avmshell
 	public:
 		Shell(MMgc::GC *gc);
 		void usage();
-		int main(int argc, char *argv[]);
+#ifdef UNDER_CE		int main(int argc, TCHAR *argv[]);#else		int main(int argc, char *argv[]);
+#endif
 
 		void interrupt(MethodEnv *env);
 		void stackOverflow(MethodEnv *env);

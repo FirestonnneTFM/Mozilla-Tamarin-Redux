@@ -240,8 +240,6 @@ SHELL DomainClass.obj
 SHELL DomainObject.obj
 SHELL StringBuilderClass.obj
 SHELL StringBuilderObject.obj
-SHELL TypedArrayClass.obj
-SHELL TypedArrayObject.obj
 SHELL ByteArrayGlue.obj
 SHELL DataIO.obj
 SHELL FileClass.obj

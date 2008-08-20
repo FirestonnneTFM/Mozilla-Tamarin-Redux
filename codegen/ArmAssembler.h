@@ -161,7 +161,6 @@ namespace avmplus
 		MDInstruction *mipStart;
 
 		int		mInstructionCount;  // number of machine instructions
-		#define incInstructionCount() mInstructionCount++		
 
 		/* Current condition code */
 		ConditionCode conditionCode;

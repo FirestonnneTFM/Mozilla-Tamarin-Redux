@@ -38,20 +38,25 @@
 #ifndef __avmbuild__
 #define __avmbuild__
 
+#ifdef UNIX
+  #ifndef AVMPLUS_UNIX
+    #define AVMPLUS_UNIX
+  #endif
+#endif // UNIX
 
 #ifdef _MAC
   #ifndef AVMPLUS_MAC
     #define AVMPLUS_MAC
   #endif
-#endif
+#endif // _MAC
 
 #ifdef WIN32
   #ifndef AVMPLUS_WIN32
     #define AVMPLUS_WIN32
   #endif
-#endif
+#endif // WIN32
 
-#ifdef AVMPLUS_MAC
+#if defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX)
   // Are we PowerPC or i386 (Macintel) or x86_64 (64-bit)?
   #if __i386__
     #ifndef AVMPLUS_IA32
@@ -67,9 +72,16 @@
     #ifndef AVMPLUS_64BIT
 	  #define AVMPLUS_64BIT
     #endif
-  #elif (__ppc__)
+  #elif (__ppc__) || (__powerpc__)
     #ifndef AVMPLUS_PPC
       #define AVMPLUS_PPC
+    #endif	
+    #ifdef __powerpc64__
+      #define AVMPLUS_64BIT
+    #endif
+  #elif (__arm__)
+    #ifndef AVMPLUS_ARM
+      #define AVMPLUS_ARM
     #endif	
   #endif
 #endif
@@ -118,7 +130,15 @@
   #endif
 #endif
 
-#define AVMPLUS_MIR
+// don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
+#ifndef AVMPLUS_DISABLE_MIR
+	#define AVMPLUS_MIR
+#endif
+
+#if defined(AVMPLUS_MAC) && defined(AVMPLUS_64BIT)
+	// MIR not yet supported on 64-bit Mac
+	#undef AVMPLUS_MIR
+#endif
 
 // if a function meets the E4 criteria for being unchecked, then make
 // all its parameters optional and add a rest arg.  asc should do this
@@ -137,9 +157,13 @@
 #undef verify
 
 #ifdef AVMPLUS_MAC
-#if !TARGET_RT_MAC_MACHO
-#define AVMPLUS_MAC_CARBON
-#endif
+	#ifdef AVMPLUS_64BIT
+		// 64-bit Mac builds can't use Carbon
+		#define AVMPLUS_MAC_NO_CARBON
+	#endif
+    #if !defined(TARGET_RT_MAC_MACHO) && !defined(AVMPLUS_MAC_NO_CARBON)
+		#define AVMPLUS_MAC_CARBON
+	#endif
 #endif
 
 #ifdef AVMPLUS_MAC
@@ -153,6 +177,14 @@
     // Support for running the PowerPC version under Rosetta
     #define AVMPLUS_ROSETTA
   #endif
+#endif
+
+#ifndef AVMPLUS_UNALIGNED_ACCESS
+    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+        #define AVMPLUS_UNALIGNED_ACCESS
+    #else
+        // leave undefined, assume unaligned access is a bad thing
+    #endif
 #endif
 
 /**
@@ -180,6 +212,17 @@
 	// some that might be useful to turn on someday, but would require too much twiddly code tweaking right now
 //	#pragma warning(error:4296)	// expression is always true (false) (Generally, an unsigned variable was used in a comparison operation with zero.)
 
+	#ifndef DEBUG
+	#include <memory.h>
+	#include <string.h>
+	#pragma intrinsic(memcmp)
+	#pragma intrinsic(memcpy)
+	#pragma intrinsic(memset)
+	#pragma intrinsic(strlen)
+	#pragma intrinsic(strcpy)
+	#pragma intrinsic(strcat)
+	#endif // DEBUG
+
 #endif
 
 // extra safety checks during parsing
@@ -191,12 +234,26 @@
 // Enable interfacing Java
 #define FEATURE_JNI
 
+#define PCRE_STATIC
+
 #ifdef SOLARIS
 #define HAVE_ALLOCA_H
 #endif
 
-#ifdef AVMPLUS_SPARC
-#define AVM10_BIG_ENDIAN
+#if !defined(AVMPLUS_LITTLE_ENDIAN) && !defined(AVMPLUS_BIG_ENDIAN)
+	#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64) || defined(AVMPLUS_ARM)
+		// assume ARM is always little-endian for now
+		#define AVMPLUS_LITTLE_ENDIAN
+ 	#elif defined(AVMPLUS_PPC) || defined(AVMPLUS_SPARC)
+ 		#define AVMPLUS_BIG_ENDIAN
+ 	#else
+ 		#error "must define AVMPLUS_LITTLE_ENDIAN or AVMPLUS_BIG_ENDIAN"
+ 	#endif
+#endif
+
+#ifdef AVMPLUS_BIG_ENDIAN
+	// define in case any old code relies on this
+	#define AVM10_BIG_ENDIAN
 #endif
 
 // Enable translation from ABC byte code to a wider word code that can

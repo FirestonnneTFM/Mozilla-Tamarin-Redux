@@ -51,21 +51,13 @@
 // For size_t
 #include <stddef.h>
 
-#ifdef WIN32
-#include "winbuild.h"
-#endif
+#if defined(MMGC_CUSTOM_BUILD)    #include "MMgcCustomBuild.h"#else	#ifdef WIN32		#ifdef ARM			#include "armbuild.h"		#else			#include "winbuild.h"		#endif	#endif
 
-#ifdef _MAC
-#include "macbuild.h"
-#endif
+	#ifdef _MAC		#include "macbuild.h"	#endif
 
-#ifdef LINUX
-#include "linuxbuild.h"
-#endif
+	#ifdef LINUX	#include "linuxbuild.h"	#endif
 
-#ifdef SOLARIS
-#include "solarisbuild.h"
-#endif
+	#ifdef SOLARIS	#include "solarisbuild.h"	#endif#endif
 
 #ifdef MMGC_ARM
 #include "armbuild.h"
@@ -84,7 +76,7 @@
 
 #ifndef _MSC_VER
 #define __forceinline
-#endif
+#else#ifndef DEBUG#include <memory.h>#include <string.h>#pragma intrinsic(memcmp)#pragma intrinsic(memcpy)#pragma intrinsic(memset)#pragma intrinsic(strlen)#pragma intrinsic(strcpy)#pragma intrinsic(strcat)#endif // DEBUG#endif
 
 #include "GCDebug.h"
 /*
