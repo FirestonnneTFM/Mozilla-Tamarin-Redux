@@ -76,6 +76,46 @@ namespace avmplus
 	}
 #endif
 
+// Direct threading in the interpreter.
+//
+// If you have gcc, direct threading should work out of the box and
+// should provide a nice speedup with many platforms and compiler versions.
+//
+// If you are using Microsoft Visual C/C++ then you may turn on direct 
+// threading, and you must select one of the two threading implementations
+// below.  MSVC_X86_ASM_THREADING should "just work" but is likely
+// to be slower than switch dispatch, unless you're using a compiler
+// version with little or no optimization.  MSVC_X86_REWRITE_THREADING
+// usually improves the performance over switch dispatch, but requires
+// a fair amount of manual work if core/Interpreter.cpp has been modified
+// since core/FastInterpreter.asm was generated.  The specific work
+// needed to regenerate core/FastInterpreter.cpp is described in a comment
+// at the head of utils/x86rewrite.as, which you will need to run.
+
+#ifdef AVMPLUS_DIRECT_THREADED
+#  ifndef AVMPLUS_WORD_CODE
+#    error "Need word code enabled for this"
+#  endif
+#  if defined __GNUC__
+#    define GNUC_THREADING
+#    define DIRECT_DISPATCH
+#  elif defined AVMPLUS_WIN32
+	 // Pick one of the two following options
+//#    define MSVC_X86_ASM_THREADING
+#    define MSVC_X86_REWRITE_THREADING
+#    ifdef MSVC_X86_ASM_THREADING
+#      define DIRECT_DISPATCH
+#    endif
+#    ifdef MSVC_X86_REWRITE_THREADING
+#      define SWITCH_DISPATCH
+#    endif
+#  else
+#    error "Threaded code not supported for this platform/compiler"
+#  endif
+#else
+#  define SWITCH_DISPATCH
+#endif // compiler/platform vipers' nest
+
 	Atom interp(MethodEnv* method, int argc, uint32 *ap);
 	Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete=false);
 	Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
@@ -112,6 +152,11 @@ namespace avmplus
 		return AvmCore::number_d(a);
 	}
 
+#pragma warning(disable:4102)    // unreferenced label
+#ifdef MSVC_X86_ASM_THREADING
+#  pragma warning(disable:4740)  // "inline assembler suppresses global optimization"
+#endif
+
     /**
      * Interpret the AVM+ instruction set.
      * @return
@@ -141,272 +186,293 @@ namespace avmplus
 		const uint32* pos = info->word_code.body_pos;
 		if (pos == NULL) {
 #  ifdef AVMPLUS_DIRECT_THREADED
-#    define XXX &&L_illegal_op
-			static void* opcode_labels[] = 
-			{   /* 0x00 */ XXX, 
-			    /* 0x01 */ &&L_bkpt,
-			    /* 0x02 */ XXX, /* OP_nop */
-				/* 0x03 */ &&L_throw,
-				/* 0x04 */ &&L_getsuper,
-				/* 0x05 */ &&L_setsuper,
-				/* 0x06 */ &&L_dxns,
-				/* 0x07 */ &&L_dxnslate,
-				/* 0x08 */ &&L_kill,
-				/* 0x09 */ XXX, /* OP_label */
-				/* 0x0A */ XXX,
-				/* 0x0B */ XXX,
-				/* 0x0C */ &&L_ifnlt,
-				/* 0x0D */ &&L_ifnle,
-				/* 0x0E */ &&L_ifngt,
-				/* 0x0F */ &&L_ifnge,
-				/* 0x10 */ &&L_jump,
-				/* 0x11 */ &&L_iftrue,
-				/* 0x12 */ &&L_iffalse,
-				/* 0x13 */ &&L_ifeq,
-				/* 0x14 */ &&L_ifne,
-				/* 0x15 */ &&L_iflt,
-				/* 0x16 */ &&L_ifle,
-				/* 0x17 */ &&L_ifgt,
-				/* 0x18 */ &&L_ifge,
-				/* 0x19 */ &&L_ifstricteq,
-				/* 0x1A */ &&L_ifstrictne,
-				/* 0x1B */ &&L_lookupswitch,
-				/* 0x1C */ &&L_pushwith,
-				/* 0x1D */ &&L_popscope,
-				/* 0x1E */ &&L_nextname,
-				/* 0x1F */ &&L_hasnext,
-				/* 0x20 */ &&L_pushnull,
-				/* 0x21 */ &&L_pushundefined,
-				/* 0x22 */ XXX,
-				/* 0x23 */ &&L_nextvalue,
-				/* 0x24 */ XXX, /* OP_pushbyte */
-				/* 0x25 */ XXX, /* OP_pushshort */
-				/* 0x26 */ &&L_pushtrue,
-				/* 0x27 */ &&L_pushfalse,
-				/* 0x28 */ &&L_pushnan,
-				/* 0x29 */ &&L_pop,
-				/* 0x2A */ &&L_dup,
-				/* 0x2B */ &&L_swap,
-				/* 0x2C */ &&L_pushstring,
-				/* 0x2D */ XXX, /* OP_pushint */
-				/* 0x2E */ XXX, /* OP_pushuint */
-				/* 0x2F */ &&L_pushdouble,
-				/* 0x30 */ &&L_pushscope,
-				/* 0x31 */ &&L_pushnamespace,
-				/* 0x32 */ &&L_hasnext2,
-				/* 0x33 */ XXX,
-				/* 0x34 */ XXX,
-				/* 0x35 */ XXX,
-				/* 0x36 */ XXX,
-				/* 0x37 */ XXX,
-				/* 0x38 */ XXX,
-				/* 0x39 */ XXX,
-				/* 0x3A */ XXX,
-				/* 0x3B */ XXX,
-				/* 0x3C */ XXX,
-				/* 0x3D */ XXX,
-				/* 0x3E */ XXX,
-				/* 0x3F */ XXX,
-				/* 0x40 */ &&L_newfunction,
-				/* 0x41 */ &&L_call,
-				/* 0x42 */ &&L_construct,
-				/* 0x43 */ &&L_callmethod,
-				/* 0x44 */ &&L_callstatic,
-				/* 0x45 */ &&L_callsuper,
-				/* 0x46 */ &&L_callproperty,
-				/* 0x47 */ &&L_returnvoid,
-				/* 0x48 */ &&L_returnvalue,
-				/* 0x49 */ &&L_constructsuper,
-				/* 0x4A */ &&L_constructprop,
-				/* 0x4B */ XXX, /* OP_callsuperid */
-				/* 0x4C */ &&L_callproplex,
-				/* 0x4D */ XXX, /* OP_callinterface */
-				/* 0x4E */ &&L_callsupervoid,
-				/* 0x4F */ &&L_callpropvoid,
-				/* 0x50 */ XXX,
-				/* 0x51 */ XXX,
-				/* 0x52 */ XXX,
-				/* 0x53 */ &&L_applytype,
-				/* 0x54 */ XXX,
-				/* 0x55 */ &&L_newobject,
-				/* 0x56 */ &&L_newarray,
-				/* 0x57 */ &&L_newactivation,
-				/* 0x58 */ &&L_newclass,
-				/* 0x59 */ &&L_getdescendants,
-				/* 0x5A */ &&L_newcatch,
-				/* 0x5B */ XXX,
-				/* 0x5C */ XXX,
-				/* 0x5D */ &&L_findpropstrict,
-				/* 0x5E */ &&L_findproperty,
-				/* 0x5F */ &&L_finddef,
-				/* 0x60 */ &&L_getlex,
-				/* 0x61 */ &&L_setproperty,
-				/* 0x62 */ &&L_getlocal,
-				/* 0x63 */ &&L_setlocal,
-				/* 0x64 */ &&L_getglobalscope,
-				/* 0x65 */ &&L_getscopeobject,
-				/* 0x66 */ &&L_getproperty,
-				/* 0x67 */ &&L_getouterscope,
-				/* 0x68 */ &&L_initproperty,
-				/* 0x69 */ XXX,
-				/* 0x6A */ &&L_deleteproperty,
-				/* 0x6B */ XXX,
-				/* 0x6C */ &&L_getslot,
-				/* 0x6D */ &&L_setslot,
-				/* 0x6E */ &&L_getglobalslot,
-				/* 0x6F */ &&L_setglobalslot,
-				/* 0x70 */ &&L_convert_s,
-				/* 0x71 */ &&L_esc_xelem,
-				/* 0x72 */ &&L_esc_xattr,
-				/* 0x73 */ &&L_convert_i,
-				/* 0x74 */ &&L_convert_u,
-				/* 0x75 */ &&L_convert_d,
-				/* 0x76 */ &&L_convert_b,
-				/* 0x77 */ &&L_convert_o,
-				/* 0x78 */ &&L_checkfilter,
-				/* 0x79 */ XXX,
-				/* 0x7A */ XXX,
-				/* 0x7B */ XXX,
-				/* 0x7C */ XXX,
-				/* 0x7D */ XXX,
-				/* 0x7E */ XXX,
-				/* 0x7F */ XXX,
-				/* 0x80 */ &&L_coerce,
-				/* 0x81 */ &&L_coerce_b,
-				/* 0x82 */ &&L_coerce_a,
-				/* 0x83 */ &&L_coerce_i,
-				/* 0x84 */ &&L_coerce_d,
-				/* 0x85 */ &&L_coerce_s,
-				/* 0x86 */ &&L_astype,
-				/* 0x87 */ &&L_astypelate,
-				/* 0x88 */ &&L_coerce_u,
-				/* 0x89 */ &&L_coerce_o,
-				/* 0x8A */ XXX,
-				/* 0x8B */ XXX,
-				/* 0x8C */ XXX,
-				/* 0x8D */ XXX,
-				/* 0x8E */ XXX,
-				/* 0x8F */ XXX,
-				/* 0x90 */ &&L_negate,
-				/* 0x91 */ &&L_increment,
-				/* 0x92 */ &&L_inclocal,
-				/* 0x93 */ &&L_decrement,
-				/* 0x94 */ &&L_declocal,
-				/* 0x95 */ &&L_typeof,
-				/* 0x96 */ &&L_not,
-				/* 0x97 */ &&L_bitnot,
-				/* 0x98 */ XXX,
-				/* 0x99 */ XXX,
-				/* 0x9A */ XXX, /* OP_concat */
-				/* 0x9B */ XXX, /* OP_add_d */
-				/* 0x9C */ XXX,
-				/* 0x9D */ XXX,
-				/* 0x9E */ XXX,
-				/* 0x9F */ XXX,
-				/* 0xA0 */ &&L_add,
-				/* 0xA1 */ &&L_subtract,
-				/* 0xA2 */ &&L_multiply,
-				/* 0xA3 */ &&L_divide,
-				/* 0xA4 */ &&L_modulo,
-				/* 0xA5 */ &&L_lshift,
-				/* 0xA6 */ &&L_rshift,
-				/* 0xA7 */ &&L_urshift,
-				/* 0xA8 */ &&L_bitand,
-				/* 0xA9 */ &&L_bitor,
-				/* 0xAA */ &&L_bitxor,
-				/* 0xAB */ &&L_equals,
-				/* 0xAC */ &&L_strictequals,
-				/* 0xAD */ &&L_lessthan,
-				/* 0xAE */ &&L_lessequals,
-				/* 0xAF */ &&L_greaterthan,
-				/* 0xB0 */ &&L_greaterequals,
-				/* 0xB1 */ &&L_instanceof,
-				/* 0xB2 */ &&L_istype,
-				/* 0xB3 */ &&L_istypelate,
-				/* 0xB4 */ &&L_in,
-				/* 0xB5 */ XXX,
-				/* 0xB6 */ XXX,
-				/* 0xB7 */ XXX,
-				/* 0xB8 */ XXX,
-				/* 0xB9 */ XXX,
-				/* 0xBA */ XXX,
-				/* 0xBB */ XXX,
-				/* 0xBC */ XXX,
-				/* 0xBD */ XXX,
-				/* 0xBE */ XXX,
-				/* 0xBF */ XXX,
-				/* 0xC0 */ &&L_increment_i,
-				/* 0xC1 */ &&L_decrement_i,
-				/* 0xC2 */ &&L_inclocal_i,
-				/* 0xC3 */ &&L_declocal_i,
-				/* 0xC4 */ &&L_negate_i,
-				/* 0xC5 */ &&L_add_i,
-				/* 0xC6 */ &&L_subtract_i,
-				/* 0xC7 */ &&L_multiply_i,
-				/* 0xC8 */ XXX,
-				/* 0xC9 */ XXX,
-				/* 0xCA */ XXX,
-				/* 0xCB */ XXX,
-				/* 0xCC */ XXX,
-				/* 0xCD */ XXX,
-				/* 0xCE */ XXX,
-				/* 0xCF */ XXX,
-				/* 0xD0 */ &&L_getlocal0,
-				/* 0xD1 */ &&L_getlocal1,
-				/* 0xD2 */ &&L_getlocal2,
-				/* 0xD3 */ &&L_getlocal3,
-				/* 0xD4 */ &&L_setlocal0,
-				/* 0xD5 */ &&L_setlocal1,
-				/* 0xD6 */ &&L_setlocal2,
-				/* 0xD7 */ &&L_setlocal3,
-				/* 0xD8 */ XXX,
-				/* 0xD9 */ XXX,
-				/* 0xDA */ XXX,
-				/* 0xDB */ XXX,
-				/* 0xDC */ XXX,
-				/* 0xDD */ XXX,
-				/* 0xDE */ XXX,
-				/* 0xDF */ XXX,
-				/* 0xE0 */ XXX,
-				/* 0xE1 */ XXX,
-				/* 0xE2 */ XXX,
-				/* 0xE3 */ XXX,
-				/* 0xE4 */ XXX,
-				/* 0xE5 */ XXX,
-				/* 0xE6 */ XXX,
-				/* 0xE7 */ XXX,
-				/* 0xE8 */ XXX,
-				/* 0xE9 */ XXX,
-				/* 0xEA */ XXX,
-				/* 0xEB */ XXX,
-				/* 0xEC */ XXX,
-				/* 0xED */ XXX,
-				/* 0xEE */ XXX, /* OP_abs_jump */
-				/* 0xEF */ XXX, /* OP_debug */
-				/* 0xF0 */ &&L_debugline,
-				/* 0xF1 */ &&L_debugfile,
-				/* 0xF2 */ &&L_bkptline,
-				/* 0xF3 */ XXX,  /* OP_timestamp */
-				/* 0xF4 */ XXX,
-				/* 0xF5 */ XXX,
-				/* 0xF6 */ XXX,
-				/* 0xF7 */ XXX,
-				/* 0xF8 */ XXX,
-				/* 0xF9 */ XXX,
-				/* 0xFA */ XXX,
-				/* 0xFB */ XXX,
-				/* 0xFC */ XXX,
-				/* 0xFD */ XXX,
-				/* 0xFE */ XXX,
-				/* 0xFF */ XXX,  /* OP_ext */
-				/* 0xFF 0x00 */ XXX,
-				/* 0xFF 0x01 */ &&L_ext_pushbits,
-				/* 0xFF 0x02 */ &&L_ext_push_doublebits
+#    if defined GNUC_THREADING
+#      define III(idx, lbl) &&lbl,
+#      define XXX(idx) &&L_illegal_op,
+			static void* opcode_labels[] = {
+#    elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
+	    static void* opcode_labels[300];  // FIXME: need better way of computing the size of that table
+        if (opcode_labels[0] == 0) {
+#      define XXX(idx) III(idx, L_illegal_op)
+#      ifdef MSVC_X86_ASM_THREADING
+#        define III(idx, lbl) __asm { \
+	           __asm mov eax, offset opcode_labels \
+	  	       __asm mov ebx, offset lbl \
+		       __asm mov [eax+4*idx], ebx \
+		     }
+#       else
+		  extern bool LLLLABEL(int);
+#         define III(a,b) extern void LLLLABEL ## _ ## a ## _ ## b(); LLLLABEL ## _ ## a ## _ ## b();
+#       endif
+#    endif // threading discipline
+			 XXX(0x00)
+			 III(0x01, L_bkpt)
+			 XXX(0x02) /* OP_nop */
+			 III(0x03, L_throw)
+			 III(0x04, L_getsuper)
+			 III(0x05, L_setsuper)
+			 III(0x06, L_dxns)
+			 III(0x07, L_dxnslate)
+			 III(0x08, L_kill)
+			 XXX(0x09) /* OP_label */
+			 XXX(0x0A)
+			 XXX(0x0B)
+			 III(0x0C, L_ifnlt)
+			 III(0x0D, L_ifnle)
+			 III(0x0E, L_ifngt)
+			 III(0x0F, L_ifnge)
+			 III(0x10, L_jump)
+			 III(0x11, L_iftrue)
+			 III(0x12, L_iffalse)
+			 III(0x13, L_ifeq)
+			 III(0x14, L_ifne)
+			 III(0x15, L_iflt)
+			 III(0x16, L_ifle)
+			 III(0x17, L_ifgt)
+			 III(0x18, L_ifge)
+			 III(0x19, L_ifstricteq)
+			 III(0x1A, L_ifstrictne)
+			 III(0x1B, L_lookupswitch)
+			 III(0x1C, L_pushwith)
+			 III(0x1D, L_popscope)
+			 III(0x1E, L_nextname)
+			 III(0x1F, L_hasnext)
+			 III(0x20, L_pushnull)
+			 III(0x21, L_pushundefined)
+			 XXX(0x22)
+			 III(0x23, L_nextvalue)
+			 XXX(0x24) /* OP_pushbyte */
+			 XXX(0x25) /* OP_pushshort */
+			 III(0x26, L_pushtrue)
+			 III(0x27, L_pushfalse)
+			 III(0x28, L_pushnan)
+			 III(0x29, L_pop)
+			 III(0x2A, L_dup)
+			 III(0x2B, L_swap)
+			 III(0x2C, L_pushstring)
+			 XXX(0x2D) /* OP_pushint */
+			 XXX(0x2E) /* OP_pushuint */
+			 III(0x2F, L_pushdouble)
+			 III(0x30, L_pushscope)
+			 III(0x31, L_pushnamespace)
+			 III(0x32, L_hasnext2)
+			 XXX(0x33)
+			 XXX(0x34)
+			 XXX(0x35)
+			 XXX(0x36)
+			 XXX(0x37)
+			 XXX(0x38)
+			 XXX(0x39)
+			 XXX(0x3A)
+			 XXX(0x3B)
+			 XXX(0x3C)
+			 XXX(0x3D)
+			 XXX(0x3E)
+			 XXX(0x3F)
+			 III(0x40, L_newfunction)
+			 III(0x41, L_call)
+			 III(0x42, L_construct)
+			 III(0x43, L_callmethod)
+			 III(0x44, L_callstatic)
+			 III(0x45, L_callsuper)
+			 III(0x46, L_callproperty)
+			 III(0x47, L_returnvoid)
+			 III(0x48, L_returnvalue)
+			 III(0x49, L_constructsuper)
+			 III(0x4A, L_constructprop)
+			 XXX(0x4B) /* OP_callsuperid */
+			 III(0x4C, L_callproplex)
+			 XXX(0x4D) /* OP_callinterface */
+			 III(0x4E, L_callsupervoid)
+			 III(0x4F, L_callpropvoid)
+			 XXX(0x50)
+			 XXX(0x51)
+			 XXX(0x52)
+			 III(0x53, L_applytype)
+			 XXX(0x54)
+			 III(0x55, L_newobject)
+			 III(0x56, L_newarray)
+			 III(0x57, L_newactivation)
+			 III(0x58, L_newclass)
+			 III(0x59, L_getdescendants)
+			 III(0x5A, L_newcatch)
+			 XXX(0x5B)
+			 XXX(0x5C)
+			 III(0x5D, L_findpropstrict)
+			 III(0x5E, L_findproperty)
+			 III(0x5F, L_finddef)
+			 III(0x60, L_getlex)
+			 III(0x61, L_setproperty)
+			 III(0x62, L_getlocal)
+			 III(0x63, L_setlocal)
+			 III(0x64, L_getglobalscope)
+			 III(0x65, L_getscopeobject)
+			 III(0x66, L_getproperty)
+			 III(0x67, L_getouterscope)
+			 III(0x68, L_initproperty)
+			 XXX(0x69)
+			 III(0x6A, L_deleteproperty)
+			 XXX(0x6B)
+			 III(0x6C, L_getslot)
+			 III(0x6D, L_setslot)
+			 III(0x6E, L_getglobalslot)
+			 III(0x6F, L_setglobalslot)
+			 III(0x70, L_convert_s)
+			 III(0x71, L_esc_xelem)
+			 III(0x72, L_esc_xattr)
+			 III(0x73, L_convert_i)
+			 III(0x74, L_convert_u)
+			 III(0x75, L_convert_d)
+			 III(0x76, L_convert_b)
+			 III(0x77, L_convert_o)
+			 III(0x78, L_checkfilter)
+			 XXX(0x79)
+			 XXX(0x7A)
+			 XXX(0x7B)
+			 XXX(0x7C)
+			 XXX(0x7D)
+			 XXX(0x7E)
+			 XXX(0x7F)
+			 III(0x80, L_coerce)
+			 III(0x81, L_coerce_b)
+			 III(0x82, L_coerce_a)
+			 III(0x83, L_coerce_i)
+			 III(0x84, L_coerce_d)
+			 III(0x85, L_coerce_s)
+			 III(0x86, L_astype)
+			 III(0x87, L_astypelate)
+			 III(0x88, L_coerce_u)
+			 III(0x89, L_coerce_o)
+			 XXX(0x8A)
+			 XXX(0x8B)
+			 XXX(0x8C)
+			 XXX(0x8D)
+			 XXX(0x8E)
+			 XXX(0x8F)
+			 III(0x90, L_negate)
+			 III(0x91, L_increment)
+			 III(0x92, L_inclocal)
+			 III(0x93, L_decrement)
+			 III(0x94, L_declocal)
+			 III(0x95, L_typeof)
+			 III(0x96, L_not)
+			 III(0x97, L_bitnot)
+			 XXX(0x98)
+			 XXX(0x99)
+			 XXX(0x9A) /* OP_concat */
+			 XXX(0x9B) /* OP_add_d */
+			 XXX(0x9C)
+			 XXX(0x9D)
+			 XXX(0x9E)
+			 XXX(0x9F)
+			 III(0xA0, L_add)
+			 III(0xA1, L_subtract)
+			 III(0xA2, L_multiply)
+			 III(0xA3, L_divide)
+			 III(0xA4, L_modulo)
+			 III(0xA5, L_lshift)
+			 III(0xA6, L_rshift)
+			 III(0xA7, L_urshift)
+			 III(0xA8, L_bitand)
+			 III(0xA9, L_bitor)
+			 III(0xAA, L_bitxor)
+			 III(0xAB, L_equals)
+			 III(0xAC, L_strictequals)
+			 III(0xAD, L_lessthan)
+			 III(0xAE, L_lessequals)
+			 III(0xAF, L_greaterthan)
+			 III(0xB0, L_greaterequals)
+			 III(0xB1, L_instanceof)
+			 III(0xB2, L_istype)
+			 III(0xB3, L_istypelate)
+			 III(0xB4, L_in)
+			 XXX(0xB5)
+			 XXX(0xB6)
+			 XXX(0xB7)
+			 XXX(0xB8)
+			 XXX(0xB9)
+			 XXX(0xBA)
+			 XXX(0xBB)
+			 XXX(0xBC)
+			 XXX(0xBD)
+			 XXX(0xBE)
+			 XXX(0xBF)
+			 III(0xC0, L_increment_i)
+			 III(0xC1, L_decrement_i)
+			 III(0xC2, L_inclocal_i)
+			 III(0xC3, L_declocal_i)
+			 III(0xC4, L_negate_i)
+			 III(0xC5, L_add_i)
+			 III(0xC6, L_subtract_i)
+			 III(0xC7, L_multiply_i)
+			 XXX(0xC8)
+			 XXX(0xC9)
+			 XXX(0xCA)
+			 XXX(0xCB)
+			 XXX(0xCC)
+			 XXX(0xCD)
+			 XXX(0xCE)
+			 XXX(0xCF)
+			 III(0xD0, L_getlocal0)
+			 III(0xD1, L_getlocal1)
+			 III(0xD2, L_getlocal2)
+			 III(0xD3, L_getlocal3)
+			 III(0xD4, L_setlocal0)
+			 III(0xD5, L_setlocal1)
+			 III(0xD6, L_setlocal2)
+			 III(0xD7, L_setlocal3)
+			 XXX(0xD8)
+			 XXX(0xD9)
+			 XXX(0xDA)
+			 XXX(0xDB)
+			 XXX(0xDC)
+			 XXX(0xDD)
+			 XXX(0xDE)
+			 XXX(0xDF)
+			 XXX(0xE0)
+			 XXX(0xE1)
+			 XXX(0xE2)
+			 XXX(0xE3)
+			 XXX(0xE4)
+			 XXX(0xE5)
+			 XXX(0xE6)
+			 XXX(0xE7)
+			 XXX(0xE8)
+			 XXX(0xE9)
+			 XXX(0xEA)
+			 XXX(0xEB)
+			 XXX(0xEC)
+			 XXX(0xED)
+			 XXX(0xEE) /* OP_abs_jump */
+			 XXX(0xEF) /* OP_debug */
+			 III(0xF0, L_debugline)
+			 III(0xF1, L_debugfile)
+			 III(0xF2, L_bkptline)
+			 XXX(0xF3)  /* OP_timestamp */
+			 XXX(0xF4)
+			 XXX(0xF5)
+			 XXX(0xF6)
+			 XXX(0xF7)
+			 XXX(0xF8)
+			 XXX(0xF9)
+			 XXX(0xFA)
+			 XXX(0xFB)
+			 XXX(0xFC)
+			 XXX(0xFD)
+			 XXX(0xFE)
+			 XXX(0xFF)  /* OP_ext */
+			 XXX(0x100)
+			 III(0x101, L_ext_pushbits)
+			 III(0x102, L_ext_push_doublebits)
+#    if defined GNUC_THREADING
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
 			AvmAssert(opcode_labels[0x97] == &&L_bitnot);
 			AvmAssert(opcode_labels[0xF0] == &&L_debugline);
 			AvmAssert(opcode_labels[257] == &&L_ext_pushbits);
+#    elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
+			} // conditional run-time initialization of jump table
+#    endif // threading discipline
 			Translator *t = new Translator(opcode_labels);
 #  else  // !AVMPLUS_DIRECT_THREADED
 			Translator *t = new Translator();
@@ -416,7 +482,7 @@ namespace avmplus
 			delete t;
 			pos = info->word_code.body_pos;
 			AvmAssert(pos != NULL);
-		}
+		} // pos == 0
 		const uint32* volatile code_start = pos;
 		int max_stack = info->word_code.max_stack;
 		int local_count = info->word_code.local_count;
@@ -582,11 +648,24 @@ namespace avmplus
 
 #ifdef AVMPLUS_WORD_CODE
 
-#  ifdef AVMPLUS_DIRECT_THREADED
-#    define INSTR(op)       L_##op:
-#    define NEXT            goto *(*pc++)
-#    define FIRST			NEXT
-#  else
+#  if defined AVMPLUS_DIRECT_THREADED
+#    if defined GNUC_THREADING
+#      define INSTR(op)       L_##op:
+#      define NEXT            goto *(*pc++)
+#    elif defined MSVC_X86_REWRITE_THREADING
+#      define INSTR(op)       case OP_##op: L_ ## op: 
+#      define NEXT            continue
+#    elif defined MSVC_X86_ASM_THREADING
+#      define INSTR(op)       L_ ## op: 
+#      define NEXT __asm { \
+				__asm mov ebx, pc \
+				__asm mov eax, [ebx] \
+				__asm add ebx, 4 \
+				__asm mov pc, ebx \
+				__asm jmp eax \
+		   }
+#    endif // threading discipline
+#  else // AVMPLUS_DIRECT_THREADED
 #    define INSTR(op)       case OP_##op:
 #    define NEXT            continue
 #  endif
@@ -628,28 +707,26 @@ namespace avmplus
 
 		// the verifier ensures we don't fall off the end of a method.  so
 		// we dont have to check the end pointer here.
-#ifdef AVMPLUS_DIRECT_THREADED
+#if defined DIRECT_DISPATCH
 
-		FIRST;
+		NEXT;
 
-		L_illegal_op:
-			AvmAssert(!"Illegal operation!");
-			return falseAtom;
-			
-#else	// AVMPLUS_DIRECT_THREADED
+#endif // DIRECT_DISPATCH
+
+#if defined SWITCH_DISPATCH
 			
         for (;;)
         {
-#  ifdef AVMPLUS_WORD_CODE
+#  if defined AVMPLUS_WORD_CODE && !defined AVMPLUS_DIRECT_THREADED
 			// See comments around INSTR(ext) below.
 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
 			switch ((*pc++) & 255)
 #  else
             switch (*pc++)
-#  endif // AVMPLUS_WORD_CODE
+#  endif // AVMPLUS_WORD_CODE && !AVMPLUS_DIRECT_THREADING
             {
 
-#endif // AVMPLUS_DIRECT_THREADED
+#endif // SWITCH_DISPATCH
 
 	#define return_impl(val) \
             {\
@@ -710,6 +787,9 @@ namespace avmplus
 #endif
 					
 			INSTR(coerce_a) { // no-op since interpreter only uses atoms
+#ifdef MSVC_X86_REWRITE_THREADING
+				SAVE_EXPC;    // need to do _something_ or the label disappears completely
+#endif
                 NEXT;
 			}
 
@@ -2387,22 +2467,40 @@ namespace avmplus
 				NEXT;
             }
 #endif // !AVMPLUS_WORD_CODE
-					
+
+#if defined(AVMPLUS_WORD_CODE) && !defined(AVMPLUS_DIRECT_THREADED)
+			// Fleshes out the dispatch table so that it's 0..255, allows
+			// some compilers to generate better code for the switch at the
+			// top, which switches on the low 8 bits.  (0 is an illegal
+			// opcode; 255 is OP_ext, for which there's a case below.)
+			case 0: {
+				AvmAssert(false);
+			}
+#endif
+
 #ifdef AVMPLUS_WORD_CODE
 #  ifndef AVMPLUS_DIRECT_THREADED
+			INSTR(ext) {
 			// When using token threading, opcodes for introduced (rewritten) instructions are 
 			// represented with the low byte being OP_ext (0xFF) and the second byte being one
 			// of the OP_ext_ opcodes.  The main dispatch loop must mask off the higher bits
 			// during initial dispatch; this incurs a slight cost but (a) the normal case is
 			// that direct threading will be used and (b) the effect of the optimizations enabled
 			// by the extended opcodes should make up for it.
-			INSTR(ext) {
 #    ifdef _DEBUG
 			switch (pc[-1] & 65535) {
 #    else
 			switch (pc[-1]) {
 #    endif
+#  endif // !AVMPLUS_DIRECT_THREADED
+#  ifdef MSVC_X86_REWRITE_THREADING
+			default:
+				// Keep L_illegal_op and L_ext_push_doublebits alive...
+				if ((int)pc > 0x100000)
+					goto L_ext_push_doublebits;
+				break;
 #  endif
+
 			INSTR(ext_pushbits) {
 				*++sp = *pc++;
 				NEXT;
@@ -2418,16 +2516,20 @@ namespace avmplus
 				*++sp = core->doubleToAtom(u.d);
 				NEXT;
 			}
+
 #  ifndef AVMPLUS_DIRECT_THREADED
 			} // switch
 			} // INSTR(ext)
 #  endif
+
 #endif
-#ifndef AVMPLUS_DIRECT_THREADED
+#if defined SWITCH_DISPATCH
 			} // switch
 			// illegal instruction or accidental break
-			AvmAssert(false);
+			goto L_illegal_op;
 		} // for
+#else
+			goto L_illegal_op;
 #endif
 
 		}  // TRY
@@ -2448,6 +2550,11 @@ namespace avmplus
 		END_CATCH
 		END_TRY 
 
+		// Target of various error cases
+
+		L_illegal_op:
+			AvmAssert(!"Illegal operation!");
+			goto MainLoop;
 		//
 		// we never get here. verifier doesn't allow code to fall off end.
 		//
