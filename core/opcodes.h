@@ -199,5 +199,4 @@ OP_debug = 0xEF,
 OP_debugline = 0xF0,
 OP_debugfile = 0xF1,
 OP_bkptline = 0xF2,
-OP_timestamp = 0xF3
-};
+OP_timestamp = 0xF3};

@@ -268,7 +268,7 @@ namespace avmplus
 		}
 #endif
 		
-		uint32 *dest, *dest_limit;
+		uint32 *dest = 0, *dest_limit = 0;
 		refill(dest, dest_limit);
 		
 #define CHECK(n) \

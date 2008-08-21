@@ -73,22 +73,7 @@ namespace avmplus
 		
 		const byte *body_pos;
 
-#ifdef AVMPLUS_WORD_CODE
-		struct 
-		{
-			const uint32 *body_pos; // NULL iff not yet translated
-			DWB(GCObject*) code_anchor;  // The object that contains the code pointed to by body_pos
-			int max_stack;
-			int local_count;
-			int init_scope_depth;
-			int max_scope_depth;
-			// We write this once, in Translator, with an explicit WB.  so no DWB.
-			// The contents are the same as the 'exceptions' structure below, except the 'from', 'to', and 'target' fields.
-			ExceptionHandlerTable* exceptions;
-		} word_code;
-#endif
-
-		// we write this once, in Verifier, with an explicit WB.  so no DWB.
+#ifdef AVMPLUS_WORD_CODE		struct 		{			const uint32 *body_pos; // NULL iff not yet translated			DWB(GCObject*) code_anchor;  // The object that contains the code pointed to by body_pos			int max_stack;			int local_count;			int init_scope_depth;			int max_scope_depth;			// We write this once, in Translator, with an explicit WB.  so no DWB.			// The contents are the same as the 'exceptions' structure below, except the 'from', 'to', and 'target' fields.			ExceptionHandlerTable* exceptions;		} word_code;#endif		// we write this once, in Verifier, with an explicit WB.  so no DWB.
 		ExceptionHandlerTable* exceptions;
 
 		MethodInfo();

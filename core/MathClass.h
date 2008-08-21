@@ -84,10 +84,8 @@ namespace avmplus
 		double min2(double x, double y);
 		double max2(double x, double y);
 
-		// cn:  max/min declared as NATIVE_METHODV so we can implement ES3 spec'd length property of 2
-		//      and still allow any number of arguments.
-		double max(Atom* argv, int argc);
-		double min(Atom* argv, int argc);
+		// cn:  max/min declared with rest args so we can implement ES3 spec'd length property of 2		//      and still allow any number of arguments.
+		double max(double x, double y, const Atom* argv, uint32_t argc);		double min(double x, double y, const Atom* argv, uint32_t argc);
 
 		DECLARE_NATIVE_MAP(MathClass)
 

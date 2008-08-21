@@ -49,7 +49,7 @@ namespace avmplus
 		cpool_ns(core->GetGC(), 0),
 		cpool_ns_set(core->GetGC(), 0),
 		cpool_mn(0),
-		methods(core->GetGC(), 0),
+		bugFlags(0),		methods(core->GetGC(), 0),
 		metadata_infos(0),
 		cinits(core->GetGC(), 0),
 		scripts(core->GetGC(), 0),
@@ -509,6 +509,7 @@ namespace avmplus
             int tag = (TraitKind)pos[0];
 			TraitKind kind = (TraitKind) (tag & 0x0f); //Get rid of the flags
 			pos += 1;
+			int skip = 0;			int id = 0;			int info = 0;			int value_index = 0;			CPoolKind value_kind = (CPoolKind)0;			// Check for version metadata			switch (kind)			{			case TRAIT_Slot:			case TRAIT_Const:			case TRAIT_Class:				id = AvmCore::readU30(pos); // slot id				info = AvmCore::readU30(pos); // type or class info				if( kind == TRAIT_Slot || kind == TRAIT_Const )				{					value_index = AvmCore::readU30(pos); // value					if( value_index )						value_kind = (CPoolKind)*(pos++);				}				break;			case TRAIT_Getter:			case TRAIT_Setter:			case TRAIT_Method:				id = AvmCore::readU30(pos);  // disp id				info = AvmCore::readU30(pos);  // method				break;			default:				// unsupported traits type				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));			}			const byte* meta_pos = pos;			if( tag & ATTR_metadata )			{				int metadataCount = AvmCore::readU30(pos);				for( int metadata = 0; metadata < metadataCount; ++metadata)				{					int index = AvmCore::readU30(pos);					if (stripMetadataIndexes.indexOf(index)!=-1 )						skip = 1;  // Stripping this definition, 				}			}			if( skip ) 			{ 				continue;			}
 
 			switch (kind)
 			{
@@ -516,24 +517,14 @@ namespace avmplus
 			case TRAIT_Const:
 			{
 				// compute the slot
-				uint32 useSlotId = AvmCore::readU30(pos);
-                if(!earlySlotBinding ) useSlotId = 0;
+				uint32 useSlotId = id;                if(!earlySlotBinding ) useSlotId = 0;
 				if (!useSlotId)
 					useSlotId = slot_id++;
 				else
 					useSlotId--;
 
 				// compute the type
-				Traits* slotTraits = resolveTypeName(pos, toplevel);
-
-				// default value
-				int value_index = AvmCore::readU30(pos);
-
-				CPoolKind value_kind = (CPoolKind)0;
-				if (value_index)
-				{
-					value_kind = (CPoolKind)*(pos++);
-				}
+				Traits* slotTraits = resolveTypeName(info, toplevel);
 
 				// default value for this slot.
 				int slotOffset;
@@ -570,24 +561,21 @@ namespace avmplus
 				traits->setSlotInfo(value_index, useSlotId, toplevel, slotTraits, slotOffset, value_kind, gen);
 				if( tag & ATTR_metadata )
 				{
-					traits->setSlotMetadataPos(useSlotId, pos);
-				}
+					traits->setSlotMetadataPos(useSlotId, meta_pos);				}
 				break;
 			}
 
 			case TRAIT_Class: 
 			{
 				// compute the slot
-				uint32 useSlotId = AvmCore::readU30(pos);
-                if( !earlySlotBinding ) useSlotId = 0;
+				uint32 useSlotId = id;                if( !earlySlotBinding ) useSlotId = 0;
 				if (!useSlotId)
 					useSlotId = slot_id++;
 				else
 					useSlotId--;
 
 				// get the class type
-				uint32 class_info = AvmCore::readU30(pos);
-				if (class_info >= classCount)
+				uint32 class_info = info;				if (class_info >= classCount)
 					toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_info), core->toErrorString(classCount));
 
 				AbstractFunction* cinit = cinits[class_info];
@@ -624,10 +612,9 @@ namespace avmplus
 
 			case TRAIT_Method:
 			{
-				int earlyDispId = AvmCore::readU30( pos );
-                (void)earlyDispId;
+				int earlyDispId = id;                (void)earlyDispId;
 
-				uint32 method_info = AvmCore::readU30(pos);
+				uint32 method_info = info;
 
 				// method_info range already checked in AbcParser
 				AvmAssert(method_info < methodCount);
@@ -648,19 +635,16 @@ namespace avmplus
 				traits->setMethod(disp_id, f);
 				if( tag & ATTR_metadata )
 				{
-					traits->setMethodMetadataPos(disp_id, pos);
-				}
+					traits->setMethodMetadataPos(disp_id, meta_pos);				}
 				break;
 			}
 
 			case TRAIT_Getter:
 			case TRAIT_Setter:
 			{
-				int earlyDispId = AvmCore::readU30(pos);
-                (void)earlyDispId;
+				int earlyDispId = id;                (void)earlyDispId;
 
-				uint32 method_info = AvmCore::readU30(pos);
-				
+				uint32 method_info = info;				
 				// method_info already checked in AbcParser
 				AvmAssert(method_info < methodCount);
 				AbstractFunction* f = getMethodInfo(method_info);
@@ -684,8 +668,7 @@ namespace avmplus
 				traits->setMethod(disp_id, f);
 				if( tag & ATTR_metadata )
 				{
-					traits->setMethodMetadataPos(disp_id, pos);
-				}
+					traits->setMethodMetadataPos(disp_id, meta_pos);				}
 
 				break;
 			}
@@ -695,15 +678,6 @@ namespace avmplus
 				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
 			}
 
-			// skip metadata
-            if( tag & ATTR_metadata )
-            {
-				int metaCount = AvmCore::readU30(pos);
-				for( int metadata = 0; metadata < metaCount; ++metadata )
-				{
-					AvmCore::readU30(pos);
-				}
-            }
 		}
 
 		int *offsets = traits->getOffsets();

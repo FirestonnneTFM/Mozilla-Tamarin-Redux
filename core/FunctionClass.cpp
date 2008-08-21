@@ -41,14 +41,7 @@
 namespace avmplus
 {
 	BEGIN_NATIVE_MAP(FunctionClass)
-		NATIVE_METHOD2(Function_prototype_get, 
-						(NativeMethod::GetHandler)&ClassClosure::get_prototype)
-		NATIVE_METHOD2(Function_prototype_set, 
-						(NativeMethod::SetHandler)&ClassClosure::set_prototype)
-		NATIVE_METHOD2(Function_AS3_call, &ScriptObject::function_call)
-		NATIVE_METHOD2(Function_AS3_apply, &ScriptObject::function_apply)
-		NATIVE_METHOD2(Function_length_get, &ClassClosure::get_length)
-	END_NATIVE_MAP()
+		NATIVE_METHOD(Function_prototype_get, ClassClosure::get_prototype)		NATIVE_METHOD(Function_prototype_set, ClassClosure::set_prototype)		NATIVE_METHOD(Function_AS3_call, ScriptObject::function_call)		NATIVE_METHOD(Function_AS3_apply, ScriptObject::function_apply)		NATIVE_METHOD(Function_length_get, ClassClosure::get_length)	END_NATIVE_MAP()
 
 	FunctionClass::FunctionClass(VTable* cvtable)
 		: ClassClosure(cvtable)

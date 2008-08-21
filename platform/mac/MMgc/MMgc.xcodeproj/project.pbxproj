@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E60773C09733377007D0E1E /* FixedAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60771109733377007D0E1E /* FixedAlloc.cpp */; };
+		01A22A250E26F8F4001049AE /* TypeTraits.h in Headers */ = {isa = PBXBuildFile; fileRef = 01A22A240E26F8F4001049AE /* TypeTraits.h */; };		1E60773C09733377007D0E1E /* FixedAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60771109733377007D0E1E /* FixedAlloc.cpp */; };
 		1E60773D09733377007D0E1E /* FixedAlloc.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60771209733377007D0E1E /* FixedAlloc.h */; };
 		1E60773E09733377007D0E1E /* FixedMalloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60771309733377007D0E1E /* FixedMalloc.cpp */; };
 		1E60773F09733377007D0E1E /* FixedMalloc.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60771409733377007D0E1E /* FixedMalloc.h */; };
@@ -42,7 +42,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1E60771109733377007D0E1E /* FixedAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FixedAlloc.cpp; path = ../../../MMgc/FixedAlloc.cpp; sourceTree = SOURCE_ROOT; };
+		01A22A240E26F8F4001049AE /* TypeTraits.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TypeTraits.h; path = ../../../MMgc/TypeTraits.h; sourceTree = SOURCE_ROOT; };		1E60771109733377007D0E1E /* FixedAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FixedAlloc.cpp; path = ../../../MMgc/FixedAlloc.cpp; sourceTree = SOURCE_ROOT; };
 		1E60771209733377007D0E1E /* FixedAlloc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FixedAlloc.h; path = ../../../MMgc/FixedAlloc.h; sourceTree = SOURCE_ROOT; };
 		1E60771309733377007D0E1E /* FixedMalloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FixedMalloc.cpp; path = ../../../MMgc/FixedMalloc.cpp; sourceTree = SOURCE_ROOT; };
 		1E60771409733377007D0E1E /* FixedMalloc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FixedMalloc.h; path = ../../../MMgc/FixedMalloc.h; sourceTree = SOURCE_ROOT; };
@@ -132,7 +132,7 @@
 				1E60773709733377007D0E1E /* GCWeakRef.h */,
 				1E60773909733377007D0E1E /* macbuild.h */,
 				1E60773A09733377007D0E1E /* MMgc.h */,
-				1E60773B09733377007D0E1E /* WriteBarrier.h */,
+				01A22A240E26F8F4001049AE /* TypeTraits.h */,				1E60773B09733377007D0E1E /* WriteBarrier.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -178,7 +178,7 @@
 				1E60776409733377007D0E1E /* macbuild.h in Headers */,
 				1E60776509733377007D0E1E /* MMgc.h in Headers */,
 				1E60776609733377007D0E1E /* WriteBarrier.h in Headers */,
-			);
+				01A22A250E26F8F4001049AE /* TypeTraits.h in Headers */,			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
@@ -267,10 +267,10 @@
 					ENABLE_COMPILER,
 					SOFT_ASSERTS,
 				);
-				INSTALL_PATH = /usr/local/lib;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;				GCC_STRICT_ALIASING = YES;				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
-				ZERO_LINK = NO;
+				WARNING_CFLAGS = "-Wstrict-aliasing";				ZERO_LINK = NO;
 			};
 			name = Debug;
 		};
@@ -290,8 +290,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_OPTIMIZATION_LEVEL = 3;				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = MMgc_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					_MAC,
@@ -302,16 +301,12 @@
 					USE_MMAP,
 					_MAC,
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;				GCC_STRICT_ALIASING = YES;				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
-				OTHER_CFLAGS = (
-					"-finline-functions",
-					"-finline-limit=256",
-				);
 				PRODUCT_NAME = MMgc;
 				SEPARATE_STRIP = NO;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
-			};
+				WARNING_CFLAGS = "-Wstrict-aliasing";			};
 			name = Release;
 		};
 		1DEB91F008733DB70010E9CD /* Debug */ = {
@@ -408,10 +403,10 @@
 					SOFT_ASSERTS,
 					SCRIPT_DEBUGGER,
 				);
-				INSTALL_PATH = /usr/local/lib;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;				GCC_STRICT_ALIASING = YES;				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
-				ZERO_LINK = NO;
+				WARNING_CFLAGS = "-Wstrict-aliasing";				ZERO_LINK = NO;
 			};
 			name = Debug_Debugger;
 		};
@@ -431,8 +426,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_OPTIMIZATION_LEVEL = 3;				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = MMgc_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					SOFT_ASSERTS,
@@ -444,16 +438,12 @@
 					_MAC,
 					SCRIPT_DEBUGGER,
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;				GCC_STRICT_ALIASING = YES;				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
-				OTHER_CFLAGS = (
-					"-finline-functions",
-					"-finline-limit=256",
-				);
 				PRODUCT_NAME = MMgc;
 				SEPARATE_STRIP = NO;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
-			};
+				WARNING_CFLAGS = "-Wstrict-aliasing";			};
 			name = Release_Debugger;
 		};
 		8E8B52F909AABCC40057BEE4 /* Debug_Debugger */ = {

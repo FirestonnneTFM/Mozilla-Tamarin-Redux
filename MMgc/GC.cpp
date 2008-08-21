@@ -47,13 +47,11 @@
 #include <stdio.h>
 #endif
 
-#ifdef _DEBUG
+#ifdef MEMORY_INFO#if !defined(__MWERKS__)#if !defined(__ICC)#if !defined(UNDER_CE)#include <typeinfo>#endif#endif#endif#endif#ifdef _DEBUG
 #include "GCTests.h"
 #endif
 
-#ifdef DARWIN
-#include <Carbon/Carbon.h>
-#endif
+#if defined(DARWIN) && defined(AVMPLUS_MAC_CARBON)	#include <Carbon/Carbon.h>#endif
 
 // get alloca for CleanStack
 #ifdef WIN32
@@ -65,12 +63,7 @@
 #endif
 
 #ifdef UNIX
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#else // HAVE_ALLOCA_H
-#include <stdlib.h>
-#endif // HAVE_ALLOCA_H
-#include <sys/time.h>
+	#ifdef HAVE_ALLOCA_H		#include <alloca.h>	#else // HAVE_ALLOCA_H		#include <stdlib.h>	#endif // HAVE_ALLOCA_H#endif#if defined(UNIX) || defined(MMGC_MAC_NO_CARBON)#include <sys/time.h>
 #endif // UNIX
 
 #if defined(_MAC) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
@@ -107,7 +100,7 @@
 extern "C" greg_t _getsp(void);
 #endif
 
-namespace MMgc
+// Werner mode is a back pointer chain facility for Relase mode//#define WERNER_MODE#ifdef WERNER_MODE	#include <typeinfo>	#include <stdio.h>	void *shouldGo;	char statusBuffer[1024];#endifnamespace MMgc
 {
 
 #ifdef MMGC_DRC
@@ -220,12 +213,7 @@ namespace MMgc
 #else
 		  incremental(false),
 #endif
-
-#ifdef _DEBUG
-		  // this doens't hurt performance too much so alway leave it on in DEBUG builds
-		  // before sweeping we check for missing write barriers
-		  incrementalValidation(false),
-
+		  incrementalValidation(false),#ifdef _DEBUG
 		  // check for missing write barriers at every Alloc
 		  incrementalValidationPedantic(false),
 #endif
@@ -290,7 +278,7 @@ namespace MMgc
 		GCAssert (sizeof(uintptr) == 4);	
 		#endif		
 	
-#ifdef MMGC_DRC
+		{			GCWorkItem item;			MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);			rememberedStackBottom =  (const void *)((const char *)item.ptr + item._size);		}#ifdef MMGC_DRC
 		zct.gc = this;
 #endif
 		// Create all the allocators up front (not lazy)
@@ -321,7 +309,7 @@ namespace MMgc
 		}
 
 #ifdef _DEBUG
-#ifdef WIN32
+		// this doens't hurt performance too much so alway leave it on in DEBUG builds		// before sweeping we check for missing write barriers		incrementalValidation = true;#ifdef WIN32
 		m_gcThread = GetCurrentThreadId();
 #endif
 #endif
@@ -618,7 +606,7 @@ namespace MMgc
 		}
 		
 		SAMPLE_CHECK();
-	}
+		ClearMarks();	}
 #endif
 
 	void *GC::Alloc(size_t size, int flags/*0*/, int skip/*3*/)
@@ -698,18 +686,16 @@ namespace MMgc
 		}
 
 #ifdef MEMORY_INFO
-		item = DebugDecorate(item,  GC::Size(GetUserPointer(item)) + DebugSize(), skip);
-#endif
+		if(item)			item = DebugDecorate(item,  GC::Size(GetUserPointer(item)) + DebugSize(), skip);#endif
 
 #ifdef _DEBUG
-		// in debug mode memory is poisoned so we have to clear it here
+        bool shouldZero = (flags & kZero) || incrementalValidationPedantic;        		// in debug mode memory is poisoned so we have to clear it here
 		// in release builds memory is zero'd to start and on free/sweep
 		// in pedantic mode uninitialized data can trip the write barrier 
 		// detector, only do it for pedantic because otherwise we want the
 		// mutator to get the poisoned data so it crashes if it relies on 
 		// uninitialized values
-		if(item && (flags&kZero || incrementalValidationPedantic)) {
-			memset(item, 0, Size(item));
+		if((item) && (shouldZero)) {			memset(item, 0, Size(item));
 		}
 #endif
 
@@ -826,7 +812,7 @@ bail:
 			ClearWeakRef(item);
 	}
 
-	void GC::ClearMarks()
+	/*static*/ int GC::GetMark(const void *item)	{		item = GetRealPointer(item);		if (GCLargeAlloc::IsLargeBlock(item)) {			return GCLargeAlloc::GetMark(item);		} else {			return GCAlloc::GetMark(item);		}	}	void GC::ClearMarks()
 	{
 		MMGC_ASSERT_EXCLUSIVE_GC(this);
 
@@ -931,8 +917,7 @@ bail:
 		GCLargeAlloc::LargeBlock *lb = largeEmptyPageList;		
 		while(lb) {
 			GCLargeAlloc::LargeBlock *next = lb->next;
-#ifdef _DEBUG
-			DebugFreeReverse(lb+1, 0xba, 3);
+#ifdef MEMORY_INFO			DebugFreeReverse(lb+1, 0xba, 3);
 #endif
 			// FIXME: this makes for some chatty locking, maybe not a problem?
 			FreeBlock(lb, lb->GetNumBlocks());
@@ -986,8 +971,7 @@ bail:
 			double millis = duration(sweepStart);
 			gclog("[GC] sweep(%d) reclaimed %d whole pages (%d kb) in %4Lf millis (%4Lf s)\n", 
 				sweeps, sweepResults, sweepResults*GCHeap::kBlockSize>>10, millis,
-				duration(t0)/1000);\
-		}
+				duration(t0)/1000);		}
 #ifdef DEBUGGER
 		StopGCActivity();
 #endif
@@ -1060,17 +1044,13 @@ bail:
 	{
 		MMGC_ASSERT_GC_LOCK(this);
 
-		if(!nogc && !collecting) {
-			uint64 now = GetPerformanceCounter();
+		if(!collecting || incrementalValidation) {			uint64 now = GetPerformanceCounter();
 			if (marking) {		
 				if(now - lastMarkTicks > kIncrementalMarkDelayTicks) {
 					IncrementalMark();
 				}
-			} else if (totalGCPages > collectThreshold &&
-				allocsSinceCollect * kFreeSpaceDivisor >= totalGCPages) {
-				// burst detection
-				if(now - lastSweepTicks > kMarkSweepBurstTicks)
-					StartIncrementalMark();
+			} else if (incrementalValidation ||				(totalGCPages > collectThreshold &&				allocsSinceCollect * kFreeSpaceDivisor >= totalGCPages &&				// burst detection
+				(now - lastSweepTicks > kMarkSweepBurstTicks))) {					StartIncrementalMark();
 			}
 		}
 
@@ -1119,7 +1099,7 @@ bail:
 		UnmarkGCPages(ptr, size);
 	}
 
-	void GC::SetPageMapValue(uintptr addr, int val)
+	int GC::GetPageMapValueAlreadyLocked(uintptr addr) const	{		uintptr index = (addr-memStart) >> 12;#ifdef MMGC_AMD64		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));#else		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);#endif		// shift amount to determine position in the byte (times 2 b/c 2 bits per page)		uint32 shiftAmount = (index&0x3) * 2;		// 3 ... is mask for 2 bits, shifted to the left by shiftAmount		// finally shift back by shift amount to get the value 0, 1 or 3		//return (pageMap[addr >> 2] & (3<<shiftAmount)) >> shiftAmount;		return (pageMap[index >> 2] >> shiftAmount) & 3;	}	void GC::SetPageMapValue(uintptr addr, int val)
 	{
 		uintptr index = (addr-memStart) >> 12;
 #ifdef MMGC_AMD64
@@ -1214,8 +1194,7 @@ bail:
 
 	void GC::CleanStack(bool force)
 	{
-#if defined(_MSC_VER) && defined(_DEBUG)
-		// debug builds poison the stack already
+#if defined(_MSC_VER) && (defined(_DEBUG) || defined(_ARM_))		// debug builds poison the stack already
 		(void)force;
 		return;
 #else
@@ -1225,7 +1204,7 @@ bail:
 		stackCleaned = true;
 		
 		register void *stackP;
-#if defined MMGC_IA32
+#if defined MMGC_IA32
 		#ifdef WIN32
 		__asm {
 			mov stackP,esp
@@ -1252,17 +1231,13 @@ bail:
 
 #if defined MMGC_PPC
 		// save off sp
-		asm("mr %0,r1" : "=r" (stackP));
-#endif	
-		if((char*) stackP > (char*)rememberedStackTop) {
-			size_t amount = (char*) stackP - (char*)rememberedStackTop;
+	#ifdef _MAC			asm("mr %0,r1" : "=r" (stackP));	#else // _MAC			asm("mr %0,%%r1" : "=r" (stackP));	#endif // _MAC#endif // MMGC_PPC		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)rememberedStackBottom > (char*)stackP)) {			size_t amount = (char*) stackP - (char*)rememberedStackTop;
 			void *stack = alloca(amount);
 			if(stack) {
 				memset(stack, 0, amount);
 			}
 		}
-#endif
-	}
+#endif // __MSC_VER && _DEBUG	}
 	
 	#if defined(MMGC_PPC) && defined(__GNUC__)
 	__attribute__((noinline)) 
@@ -1274,28 +1249,19 @@ bail:
 		MMGC_GET_STACK_EXTENTS(this, item.ptr, item._size);
 
 		// this is where we will clear to when CleanStack is called
-		if(rememberedStackTop == 0 || rememberedStackTop > item.ptr) {
-			rememberedStackTop = item.ptr;
-		}
+        if(rememberedStackBottom == (const void *)((const char *)item.ptr + item._size)) {			if(rememberedStackTop == 0 || rememberedStackTop > item.ptr) {				rememberedStackTop = item.ptr;			}		}
 
 		PushWorkItem(work, item);
 		Mark(work);
 	}
 
-	GCRoot::GCRoot(GC * _gc) : gc(_gc)
-	{
-		// I think this makes some non-guaranteed assumptions about object layout,
-		// like with multiple inheritance this might not be the beginning
-		object = this;
-		size = FixedMalloc::GetInstance()->Size(this);
-		gc->AddRoot(this);
+	void GCRoot::init(GC* _gc, const void *_object, size_t _size)	{
+#ifndef _DEBUG		// only do the memset on GCRoot subclasses		if(_object == this) {			size_t s = FixedMalloc::GetInstance()->Size(this);			// being a GCRoot its important we are clean			memset(this, 0, s);		}#endif		gc = _gc;		object = _object;		size = _size;		gc->AddRoot(this);
 	}
 
-	GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size)
-		: gc(_gc), object(_object), size(_size)
+	GCRoot::GCRoot(GC * _gc)	{		init(_gc, this, FixedMalloc::GetInstance()->Size(this));	}	GCRoot::GCRoot(GC * _gc, const void * _object, size_t _size)
 	{
-		gc->AddRoot(this);
-	}
+		init(_gc, _object, _size);	}
 
 	GCRoot::~GCRoot()
 	{
@@ -1504,7 +1470,7 @@ bail:
 		}
 	}
 			
-#ifdef _DEBUG
+#if 0	// this is a release ready tool for hunting down freelist corruption	void GC::CheckFreelists()	{		GCAlloc **allocs = containsPointersAllocs;		for (int l=0; l < GC::kNumSizeClasses; l++) {			GCAlloc *a = allocs[l];			GCAlloc::GCBlock *_b = a->m_firstBlock;				while(_b) {				void *fitem = _b->firstFree;				void *prev = 0;				while(fitem) {					if((uintptr(fitem) & 7) != 0) {						_asm int 3;						break;					}					if((uintptr(fitem) & ~0xfff) != uintptr(_b))						_asm int 3;					prev = fitem;					fitem = *(void**)fitem;				}						_b = _b->next;			}		}	}#endif#ifdef _DEBUG
 
 	void GC::RCObjectZeroCheck(RCObject *item)
 	{
@@ -1526,8 +1492,8 @@ bail:
 		{
 			if(*p)
 			{
-				PrintStackTrace(item);
-				GCAssertMsg(false, "RCObject didn't clean up itself.");
+#ifdef MEMORY_INFO				PrintStackTrace(item);
+#endif				GCAssertMsg(false, "RCObject didn't clean up itself.");
 			}
 		}	
 	}
@@ -1635,10 +1601,10 @@ bail:
 #ifdef _DEBUG
 				if(gc->validateDefRef) {
 					if(gc->GetMark(rcobj)) {	
-						rcobj->DumpHistory();
+#ifdef MEMORY_INFO						rcobj->DumpHistory();
 						GCDebugMsg(false, "Back pointer chain:");
 						gc->DumpBackPointerChain(rcobj);
-						GCAssertMsg(false, "Zero count object reachable, ref counts not correct!");
+#endif						GCAssertMsg(false, "Zero count object reachable, ref counts not correct!");
 					}
 				}
 #endif
@@ -1853,8 +1819,7 @@ bail:
 	}
 
 #ifdef MEMORY_INFO
-	void GC::DumpBackPointerChain(void *o)
-	{
+	void GC::DumpBackPointerChain(void *o, pDumpBackCallbackProc proc, void *context)	{
 		int *p = (int*)GetRealPointer ( o ) ;
 		int size = *p++;
 		int traceIndex = *p++;
@@ -1862,15 +1827,13 @@ bail:
 			// bail, object was deleted
 		//	return;
 		//}
-		GCDebugMsg(false, "Object: %s:0x%x\n", GetTypeName(traceIndex, o), p);
-		PrintStackTraceByIndex(traceIndex);
+		const char *typeName = GetTypeName(traceIndex, o);// Disabled for 64-bit Windows.  Debugger doesn't allow exception to go uncaught so always breaks#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || ( defined(AVMPLIS_UNIX) && !defined(__ICC) )		if (strncmp(typeName, "unknown ", 7))		{			try {				const std::type_info *ti = &typeid(*(MMgc::GCObject*)p);				if (ti->name() && (int(ti->name()) > 0x10000))					typeName = ti->name();				// sometimes name will get set to bogus memory with no exceptions catch that				char c = *typeName;				(void)c;	// silence compiler warning			} catch(...) {				typeName = "unknown";			}		}#endif		// strip "class "		if (!strncmp(typeName, "class ", 6))			typeName += 6;		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, p);		if (proc)			proc(context, o, typeName);		PrintStackTraceByIndex(traceIndex);
 		GCDebugMsg(false, "---\n");
 		// skip data + endMarker
 		p += 1 + (size>>2);
 		void *container = (void*)(*(void**)p);
 		if(container && IsPointerToGCPage(container))
-			DumpBackPointerChain(container);
-		else 
+			DumpBackPointerChain(container, proc, context);		else 
 		{
 			GCDebugMsg(false, "GCRoot object: 0x%x\n", container);
 			if((uintptr)container >= memStart && (uintptr)container < memEnd)
@@ -1958,32 +1921,6 @@ bail:
 #endif
 
 #ifdef _DEBUG
-
-	void GC::CheckFreelist(GCAlloc *gca)
-	{	
-		GCAlloc::GCBlock *b = gca->m_firstFree;
-		while(b)
-		{
-			void *freelist = b->firstFree;
-			while(freelist)
-			{			
-				// b->firstFree should be either 0 end of free list or a pointer into b, otherwise, someone
-				// wrote to freed memory and hosed our freelist
-				GCAssert(freelist == 0 || ((uintptr) freelist >= (uintptr) b->items && (uintptr) freelist < (uintptr) b + GCHeap::kBlockSize));
-				freelist = *((void**)freelist);
-			}
-			b = b->nextFree;
-		}
-	}
-
-	void GC::CheckFreelists()
-	{
-		for(int i=0; i < kNumSizeClasses; i++)
-		{
-			CheckFreelist(containsPointersAllocs[i]);
-			CheckFreelist(noPointersAllocs[i]);
-		}
-	}
 
 	void GC::UnmarkedScan(const void *mem, size_t size)
 	{
@@ -2144,7 +2081,8 @@ bail:
 				if (buffer) GCDebugMsg(false, buffer);
 				GCDebugMsg(false, "Location: 0x%08x  Object: 0x%08x (size %d)\n", where, real, taggedSize);
 				if (buffer) GCDebugMsg(false, buffer);
-				PrintStackTraceByIndex(traceIndex);
+#ifdef MEMORY_INFO				PrintStackTraceByIndex(traceIndex);
+#endif
 
 				if (recurseDepth > 0)
 					WhosPointingAtMe(real, recurseDepth-1, currentDepth+1);
@@ -2286,8 +2224,7 @@ bail:
 			GCRoot *r = m_roots;
 			while(r) {
 				GCWorkItem item = r->GetWorkItem();
-				MarkItem(item, m_incrementalWork);
-				r = r->next;
+				if(item.ptr)					MarkItem(item, m_incrementalWork);				r = r->next;
 			}
 		}
 		markTicks += GetPerformanceCounter() - start;
@@ -2409,12 +2346,12 @@ bail:
 	}
 #endif
 
-	void GC::MarkItem(GCWorkItem &wi, GCStack<GCWorkItem> &work)
+#ifdef WERNER_MODE#define RECURSIVE_MARK	class MarkList	{	public:		static MarkList *current;		static int offset;		MarkList(GCWorkItem &item) : prev(current), wi(item), off(offset)		{			current = this;		}		~MarkList() { current = prev; }		MarkList *prev;		GCWorkItem &wi;		int off;	};	MarkList *MarkList::current = NULL;	int MarkList::offset = -1;#endif	void GC::MarkItem(GCWorkItem &wi, GCStack<GCWorkItem> &work)
 	{
 		size_t size = wi.GetSize();
 		uintptr *p = (uintptr*) wi.ptr;
 
-		bytesMarked += size;
+#ifdef WERNER_MODE		MarkList me(wi);				if(p == shouldGo) {			MarkList *wl = MarkList::current;			while(wl) {				const char *name = "";// To enable RTTI, you must change all your projects to use RTTI first.  #if 0				static bool tryit = true;				if (tryit)				{					try {						const std::type_info *ti = &typeid(*(MMgc::GCFinalizedObject*)wl->wi.ptr);						if (ti->name() && (int(ti->name()) > 0x10000))							name = ti->name();					} catch(...) {						name = "unknown";					}				}#endif				if(wl->prev)					sprintf(statusBuffer, "0x%x+%d -> 0x%x size=%d (%s)\n",  (unsigned int)wl->prev->wi.ptr, wl->off, (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);				else					sprintf(statusBuffer, "0x%x : %d (%s)\n", (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);				wl = wl->prev;				OutputDebugString(statusBuffer);			}			sprintf(statusBuffer, "\n");			OutputDebugString(statusBuffer);			//shouldGo = NULL;		}#endif		bytesMarked += size;
 		marks++;
 
 		uintptr *end = p + (size / sizeof(void*));
@@ -2449,7 +2386,7 @@ bail:
 
 		while(p < end) 
 		{
-			uintptr val = *p++;  
+#ifdef WERNER_MODE			MarkList::offset = (int)p - (int)wi.ptr;#endif			uintptr val = *p++;  
 
 			if(val < _memStart || val >= _memEnd)
 				continue;
@@ -2600,11 +2537,9 @@ bail:
 		#elif defined SOLARIS
 		uint64 retval = gethrtime();
 		return retval;
-		#elif defined(AVMPLUS_UNIX)
-		struct timeval tv;
+        #elif defined(AVMPLUS_UNIX) || (defined(DARWIN) && defined(MMGC_MAC_NO_CARBON))		struct timeval tv;
 		::gettimeofday(&tv, NULL);
-		return (uint64) (tv.tv_sec * 1000000) + (uint64) tv.tv_usec;
-		#else
+        uint64 seconds = (uint64)(tv.tv_sec * 1000000);        uint64 microseconds = (uint64)tv.tv_usec;        uint64 result = seconds + microseconds;        		return result;		#else
 		#ifndef MMGC_ARM
 		UnsignedWide microsecs;
 		::Microseconds(&microsecs);
@@ -2629,9 +2564,9 @@ bail:
 		#endif
 	}
 
-	void GC::IncrementalMark(uint32 time)
-	{
+	void GC::IncrementalMark()	{
 		MMGC_ASSERT_EXCLUSIVE_GC(this);
+		uint32 time = incrementalValidation ? 1 : 5;#ifdef _DEBUG		time = 1;#endif
 
 		SAMPLE_FRAME("[mark]", core());
 		if(m_incrementalWork.Count() == 0 || hitZeroObjects) {
@@ -2714,8 +2649,7 @@ bail:
 				// need to do this while holding the root lock so we don't end 
 				// up trying to scan a deleted item later, another reason to keep
 				// the root set small
-				MarkItem(item, m_incrementalWork);
-				r = r->next;
+				if(item.ptr) {					MarkItem(item, m_incrementalWork);				}				r = r->next;
 			}
 		}
 		MarkQueueAndStack(m_incrementalWork);
@@ -2960,10 +2894,10 @@ bail:
 
 	void GC::PushWorkItem(GCStack<GCWorkItem> &stack, GCWorkItem item)
 	{
-		if(item.ptr) {
+#ifdef RECURSIVE_MARK		MarkItem(item, stack);#else		if(item.ptr) {
 			stack.Push(item);
 		}
-	}
+#endif	}
 
 	GCWeakRef* GC::GetWeakRef(const void *item) 
 	{
@@ -3022,11 +2956,11 @@ bail:
 			   *(((int32*)(val&~7))+1) != (int32)0xcacacaca && // Free'd
 			   *(((int32*)(val&~7))+1) != (int32)0xbabababa) // Swept
 			{
-				GCDebugMsg(false, "Object 0x%x allocated here:\n", mem);
+#ifdef MEMORY_INFO				GCDebugMsg(false, "Object 0x%x allocated here:\n", mem);
 				PrintStackTrace(mem);
 				GCDebugMsg(false, "Didn't mark pointer at 0x%x, object 0x%x allocated here:\n", p, val);
 				PrintStackTrace((const void*)(val&~7));
-				GCAssert(false);
+#endif				GCAssert(false);
 			}
 			p++;
 		}
@@ -3128,12 +3062,12 @@ bail:
 	}
 #endif  /* DEBUGGER*/
 
-#if defined(_MAC)
-	uintptr GC::GetStackTop() const
+#if defined(_MAC) && (defined(MMGC_IA32) || defined(MMGC_AMD64)) || defined(MMGC_MAC_NO_CARBON)	uintptr GC::GetStackTop() const
 	{
 		return (uintptr)pthread_get_stackaddr_np(pthread_self());
 	}
 #endif
 
+#if defined(LINUX) && defined(MMGC_ARM) && !defined(AVMPLUS_UNIX)	uintptr GC::GetStackTop() const	{		void* sp;		pthread_attr_t attr;		pthread_getattr_np(pthread_self(), &attr);		pthread_attr_getstackaddr(&attr, &sp);		return (uintptr)sp;	}#endif
 
 }

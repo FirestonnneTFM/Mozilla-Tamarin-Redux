@@ -40,65 +40,31 @@
 
 namespace avmplus
 {
-#ifdef __MWERKS__
-	typedef void (String::*StringHandler)();
-	
-	NativeTableEntry::Handler stringMethod(StringHandler stringHandler)
-	{
-		union 
-		{
-			StringHandler foo;
-			NativeTableEntry::Handler bar;
-		};
-		foo = stringHandler;
-		return bar;
-	}
-	
-	#define STRING_METHOD(handler) stringMethod((StringHandler)handler)
-#elif defined  __SUNPRO_CC
-	typedef void (String::*StringHandler)();
-	#define STRING_METHOD(x) reinterpret_cast <NativeTableEntry::Handler>((StringHandler)x)
-#else
-	#define STRING_METHOD(x) x
-#endif
-	
 	BEGIN_NATIVE_MAP(StringClass)
 		// instance methods
-		NATIVE_METHOD2_FLAGS(String_length_get, STRING_METHOD(&String::length), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_localeCompare, STRING_METHOD(&String::localeCompare), AbstractFunction::NEED_REST)
+		NATIVE_METHOD_FLAGS(String_length_get, String::length, 0)		NATIVE_METHOD_FLAGS(String_AS3_localeCompare, String::localeCompare, 0)
 
-		NATIVE_METHOD2_FLAGS(String_private__indexOf, STRING_METHOD(&String::indexOf), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_indexOf, STRING_METHOD(&String::indexOfDouble), 0)
+		NATIVE_METHOD_FLAGS(String_private__indexOf, String::indexOf, 0)		NATIVE_METHOD_FLAGS(String_AS3_indexOf, String::indexOfDouble, 0)
 
-		NATIVE_METHOD2_FLAGS(String_private__lastIndexOf, STRING_METHOD(&String::lastIndexOf), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_lastIndexOf, STRING_METHOD(&String::lastIndexOfDouble), 0)
+		NATIVE_METHOD_FLAGS(String_private__lastIndexOf, String::lastIndexOf, 0)		NATIVE_METHOD_FLAGS(String_AS3_lastIndexOf, String::lastIndexOfDouble, 0)
 
-		NATIVE_METHOD2_FLAGS(String_private__charAt, STRING_METHOD(&String::charAt), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_charAt, STRING_METHOD(&String::charAtDouble), 0)
+		NATIVE_METHOD_FLAGS(String_private__charAt, String::charAt, 0)		NATIVE_METHOD_FLAGS(String_AS3_charAt, String::charAtDouble, 0)
 
-		NATIVE_METHOD2_FLAGS(String_private__charCodeAt, STRING_METHOD(&String::charCodeAt), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_charCodeAt, STRING_METHOD(&String::charCodeAtDouble), 0)
+		NATIVE_METHOD_FLAGS(String_private__charCodeAt, String::charCodeAt, 0)		NATIVE_METHOD_FLAGS(String_AS3_charCodeAt, String::charCodeAtDouble, 0)
 
-		NATIVE_METHOD2_FLAGS(String_private__substring, STRING_METHOD(&String::substring), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_substring, STRING_METHOD(&String::substringDouble), 0)
+		NATIVE_METHOD_FLAGS(String_private__substring, String::substring, 0)		NATIVE_METHOD_FLAGS(String_AS3_substring, String::substringDouble, 0)
 
-		NATIVE_METHOD2_FLAGS(String_private__slice, STRING_METHOD(&String::slice), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_slice, STRING_METHOD(&String::sliceDouble), 0)
+		NATIVE_METHOD_FLAGS(String_private__slice, String::slice, 0)		NATIVE_METHOD_FLAGS(String_AS3_slice, String::sliceDouble, 0)
 
-		NATIVE_METHOD2_FLAGS(String_private__substr, STRING_METHOD(&String::substr), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_substr, STRING_METHOD(&String::substrDouble), 0)
+		NATIVE_METHOD_FLAGS(String_private__substr, String::substr, 0)		NATIVE_METHOD_FLAGS(String_AS3_substr, String::substrDouble, 0)
 
-		NATIVE_METHOD2_FLAGS(String_AS3_toLowerCase, STRING_METHOD(&String::toLowerCase), 0)
-		NATIVE_METHOD2_FLAGS(String_AS3_toUpperCase, STRING_METHOD(&String::toUpperCase), 0)
+		NATIVE_METHOD_FLAGS(String_AS3_toLowerCase, String::toLowerCase, 0)		NATIVE_METHOD_FLAGS(String_AS3_toUpperCase, String::toUpperCase, 0)
 
 		// static method (language feature - by design)
-		NATIVE_METHODV(String_AS3_fromCharCode, StringClass::fromCharCode)
+		NATIVE_METHOD(String_AS3_fromCharCode, StringClass::fromCharCode)
 
 		// static methods (require AvmCore *)
-		NATIVE_METHOD2(String_private__match, &StringClass::match)
-		NATIVE_METHOD2(String_private__replace, &StringClass::replace)
-		NATIVE_METHOD2(String_private__search, &StringClass::search)
-		NATIVE_METHOD2(String_private__split, &StringClass::split)
+		NATIVE_METHOD(String_private__match, StringClass::match)		NATIVE_METHOD(String_private__replace, StringClass::replace)		NATIVE_METHOD(String_private__search, StringClass::search)		NATIVE_METHOD(String_private__split, StringClass::split)
 
 	END_NATIVE_MAP()
 		

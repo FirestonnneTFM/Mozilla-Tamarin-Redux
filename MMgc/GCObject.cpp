@@ -71,8 +71,7 @@ namespace MMgc
 		GC::GetGC(gcObject)->Free(gcObject);
 	}		
 
-#if defined(MMGC_DRC) && defined(_DEBUG)
-	void RCObject::DumpHistory()
+#if defined(MMGC_DRC) && defined(MEMORY_INFO)	void RCObject::DumpHistory()
 	{			
 		GCDebugMsg(false, "Ref count modification history for object 0x%x:\n", this);
 		int *traces = history.GetData();

@@ -36,8 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#define MMGC_ARM
+#if !defined(MMGC_ARM)	#define MMGC_ARM#endif
 
 #ifdef DEBUG
 #ifndef _DEBUG
@@ -48,20 +47,19 @@
 /**
  * Critical section on GCHeap allocations.
  */
-//#define GCHEAP_LOCK
+#define GCHEAP_LOCK
 
 /**
  * Define this to get stack traces.  Helps with memory leaks.
  */
 #ifdef DEBUG
-#define MEMORY_INFO
-#endif
+//#define MEMORY_INFO#endif
 
 /**
  * This turns on incremental collection as well as all of
  * the write barriers.
  */
-//#define WRITE_BARRIERS
+#define WRITE_BARRIERS
 
 /**
  * Define this if MMgc is being integrated with avmplus.
@@ -69,18 +67,12 @@
  */
 #define MMGC_AVMPLUS
 
-/**
- *
- */
 #define DECOMMIT_MEMORY
 
-/**
- * USE_MMAP not used for ARM skunkworks
- */
-//#define USE_MMAP
+#if !defined(USE_MMAP) && !defined(MMGC_NO_MMAP)    #define USE_MMAP#endif
 
 /**
  * Controls whether DRC is in use
  */
 
-//#define MMGC_DRC
+#define MMGC_DRC#if !defined(AVMPLUS_NO_JIT_READONLY)	#define AVMPLUS_JIT_READONLY#endif

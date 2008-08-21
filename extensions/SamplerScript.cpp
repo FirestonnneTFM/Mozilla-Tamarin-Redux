@@ -181,8 +181,7 @@ namespace avmplus
 			Sample s;
 			sampler->readSample(cursor, s);
 			count--;
-			return script->makeSample(s)->atom();
-		}
+			ScriptObject *sam = script->makeSample(s);			if(!sam) {				count = 0;							return undefinedAtom;		}			return sam->atom();		}
 
 		
 		Atom nextName(int)
@@ -275,8 +274,7 @@ namespace avmplus
 		return (double)num;
 	}
 
-	ClassClosure *SamplerScript::getType(Atom typeOrVTable, GCWeakRef *weakRef)
-	{
+	ClassClosure *SamplerScript::getType(uintptr typeOrVTable, GCWeakRef *weakRef)	{
 		Toplevel *tl = toplevel();
 		AvmCore *core = this->core();
 
@@ -286,11 +284,9 @@ namespace avmplus
 				tl = (Toplevel*)(typeOrVTable&~7);
 			}
 
-			if((typeOrVTable&7) == kStringType)
-				return tl->stringClass;
+			if(((Atom) typeOrVTable&7) == kStringType)				return tl->stringClass;
 
-			if((typeOrVTable&7) == kNamespaceType)
-				return tl->namespaceClass;
+			if(((Atom) typeOrVTable&7) == kNamespaceType)				return tl->namespaceClass;
 		}
 		
 		VTable *vtable = (VTable*)typeOrVTable;
@@ -337,10 +333,9 @@ namespace avmplus
 			}
 		}
 
-		AvmAssert(!obj || 
+		// If this fires off, Tommy Reilly says: "It basically means we exhausting all efforts to		// associate an object with some "type" and failed.  You can ignore it.		AvmAssert(!obj || 
 			  typeOrVTable < 7 || 
-			  obj->traits()->name->Equals("global") ||
-			  (core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
+			  (obj->traits()->name && obj->traits()->name->Equals("global")) ||			  (core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
 			  (obj->traits()->isActivationTraits && type == tl->objectClass) ||
 			  core->istype(obj->atom(), type->traits()->itraits));
 		AvmAssert(core->istype(type->atom(), CLASS_TYPE));	
@@ -373,7 +368,7 @@ namespace avmplus
 			return sam;
 		}
 		
-		if(sample.stack.depth > 0)
+		uint32 num;		if(sample.stack.depth > 0)
 		{
 			VTable *stackFrameVT = toplevel()->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame)->vtable->ivtable;		
 			ArrayObject *stack = toplevel()->arrayClass->newArray(sample.stack.depth);
@@ -381,8 +376,7 @@ namespace avmplus
 			for(uint32 i=0; i < sample.stack.depth; i++, e++)
 			{
 				ScriptObject *f = core->newObject(stackFrameVT, NULL);
-				WBRC(gc(), f, ((char*)f + cc->nameOffset), e->info->name);
-				if(e->filename) {
+								// at every allocation the sample buffer could overflow and the samples could be deleted				// the StackTrace::Element pointer is a raw pointer into that buffer so we need to check				// that its still around before dereferencing e				if(core->sampler()->getSamples(num) == NULL)					return NULL;						WBRC(gc(), f, ((char*)f + cc->nameOffset), uintptr(Stringp(e->info->name)));				if(e->filename) {
 					WBRC(gc(), f, ((char*)f + cc->fileOffset), e->filename);
 					*(uint32*)((char*)f + cc->lineOffset) = e->linenum;
 				}
@@ -506,8 +500,7 @@ namespace avmplus
 			if(core->istype(a, CLASS_TYPE) && !qname) {
 				// return constructor count
 				ClassClosure *cc = (ClassClosure*)object;
-				return (double)cc->vtable->init->invocationCount;
-			}
+				if (cc->vtable->init) // Vector related crash here, Tommy says: I didn't think a type could ever not have a constructor but I guess there's no reason it has to.					return (double)cc->vtable->init->invocationCount;			}
 		}
 
 		if(!object || !qname)			
