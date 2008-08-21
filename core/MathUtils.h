@@ -93,7 +93,8 @@ namespace avmplus
 		static double floor(double value);
 		static uint64  frexp(double x, int *eptr);
 		static double infinity();
-		static double neg_infinity();		static int isInfinite(double value);
+		static double neg_infinity();
+		static int isInfinite(double value);
 		static bool isNaN(double value);
 		static bool isNegZero(double x);
 		static bool isHexNumber(const wchar *ptr);
@@ -113,7 +114,8 @@ namespace avmplus
 		static double sqrt(double value);
 		static double tan(double value);
 		static double toInt(double value);
-		#if defined(WIN32) && defined(AVMPLUS_IA32)		// This routine will return 0x80000000 if the double value overflows
+		#if defined(WIN32) && defined(AVMPLUS_IA32)
+		// This routine will return 0x80000000 if the double value overflows
 		// and integer and is not between -2^31 and 2^31-1. 
 		static int32 real2int(double value);
 		#else
@@ -124,7 +126,8 @@ namespace avmplus
 										   int& len,
 										   int radix=10,
 										   bool treatAsUnsigned=false);
-		static Stringp convertDoubleToStringRadix(AvmCore *core,
+
+		static Stringp convertDoubleToStringRadix(AvmCore *core,
 												  double value,
 										          int radix);
 		enum {

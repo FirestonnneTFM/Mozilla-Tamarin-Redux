@@ -39,7 +39,11 @@
 #define __avmplus_types__
 
 
-#ifdef _MSC_VER#include "../utils/msc_inttypes.h"#else#include <inttypes.h>#endif
+#ifdef _MSC_VER
+#include "../utils/msc_inttypes.h"
+#else
+#include <inttypes.h>
+#endif
 
 namespace avmplus
 {

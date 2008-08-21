@@ -208,7 +208,8 @@ namespace avmplus
 			//  Data members
 			// --------------------------------------------------------
 			static const int kMaxBigIntegerBufferSize=128;
-			uint32 wordBuffer[kMaxBigIntegerBufferSize+2];			int32  numWords;
+			uint32 wordBuffer[kMaxBigIntegerBufferSize+2];
+			int32  numWords;
 
 		private:
 			//  sign;  Simplifications are made assuming all numbers are positive

@@ -65,7 +65,8 @@ namespace avmplus
 		union {
 			Atom (*impl32)(MethodEnv*, int, uint32 *);
 			double (*implN)(MethodEnv*, int, uint32 *);
-			void *implV;		};
+			void *implV;
+		};
 
 		MethodEnv(void* addr, VTable *vtable);
 		MethodEnv(AbstractFunction* method, VTable *vtable);
@@ -135,7 +136,8 @@ namespace avmplus
 		ArrayObject* createRestHelper(int argc, uint32 *ap);
 #endif
 
-		ScriptObject* newcatch(Traits *traits);		/**
+		ScriptObject* newcatch(Traits *traits);
+		/**
 		 * used for defining and resolving imported definitions.
 		 */
 		ScriptObject* finddef(Multiname* name) const;

@@ -105,8 +105,10 @@ namespace avmplus
 		/** The target location to branch to when the exception occurs. */
 		union {
 			sintptr target;
-#ifdef AVMPLUS_MIR			CodegenMIR::OP* targetIns;
-#endif		};
+#ifdef AVMPLUS_MIR
+			CodegenMIR::OP* targetIns;
+#endif
+		};
 
 		/** The type of exceptions handled by this exception handler. */
 		Traits* traits;
@@ -197,7 +199,16 @@ namespace avmplus
 		// order to avoid problems with sign-extension.)
 		CatchAction catchAction:4;
 #endif /* DEBUGGER */
-#if defined(AVMPLUS_AMD64) && !defined(_WIN64)		friend class CodegenMIR;		enum {			MAX_LONG_JMP_COUNT = 65536		};		static void *lptr[MAX_LONG_JMP_COUNT];		static int   lptrcounter;#endif //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)	};
+
+#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+		friend class CodegenMIR;
+		enum {
+			MAX_LONG_JMP_COUNT = 65536
+		};
+		static void *lptr[MAX_LONG_JMP_COUNT];
+		static int   lptrcounter;
+#endif //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+	};
 
 	/**
 	 * TRY, CATCH, and friends are macros for setting up exception try/catch

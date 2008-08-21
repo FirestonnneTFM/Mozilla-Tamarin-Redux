@@ -52,7 +52,8 @@ namespace avmplus
 			Domain* domain,
 			AbstractFunction *nativeMethods[],
 			NativeClassInfo *nativeClasses[],
-			NativeScriptInfo *nativeScripts[],			List<Stringp>* keepVersions = NULL);
+			NativeScriptInfo *nativeScripts[],
+			List<Stringp>* keepVersions = NULL);
 
 		~AbcParser();
 
@@ -66,7 +67,8 @@ namespace avmplus
 			Domain* domain,
 			AbstractFunction *nativeMethods[],
 			NativeClassInfo *nativeClasses[],
-			NativeScriptInfo *nativeScripts[],			List<Stringp>* keepVersions = NULL);
+			NativeScriptInfo *nativeScripts[],
+			List<Stringp>* keepVersions = NULL);
 
 	protected:
 		PoolObject* parse();
@@ -194,11 +196,13 @@ namespace avmplus
 		NativeClassInfo **nativeClasses;
 		NativeScriptInfo **nativeScripts;
 		int				classCount;
-		List<Traits*>		instances;		byte* abcStart;
+		List<Traits*>		instances;
+		byte* abcStart;
 		byte* abcEnd; // one past the end, actually
 		Stringp* metaNames;
 		Stringp kNeedsDxns;
-		List<Stringp>* keepVersions;#ifdef AVMPLUS_VERBOSE
+		List<Stringp>* keepVersions;
+#ifdef AVMPLUS_VERBOSE
 		Stringp kVerboseVerify;
 #endif
 #ifdef FEATURE_BUFFER_GUARD // no Carbon

@@ -58,8 +58,10 @@ namespace avmplus
 		DWB(VTable*) base;
 		DWB(VTable*) ivtable;
 
-#ifdef AVMPLUS_MIR		MethodEnv* imt[Traits::IMT_SIZE];
-#endif		MethodEnv* methods[1]; // virtual method table
+#ifdef AVMPLUS_MIR
+		MethodEnv* imt[Traits::IMT_SIZE];
+#endif
+		MethodEnv* methods[1]; // virtual method table
 
 		VTable(Traits* traits, VTable* base, ScopeChain* scope, AbcEnv* abcEnv, Toplevel* toplevel);
 		void resolveSignatures();

@@ -55,7 +55,8 @@ namespace avmplus
 		};
 		uint64 id; // filled for DELETED_OBJECT_SAMPLE + NEW_OBJECT_SAMPLE
 		// these are only filled in for sampleType==NEW_OBJECT_SAMPLE
-		uintptr typeOrVTable;		MMgc::GCWeakRef *weakRef;
+		uintptr typeOrVTable;
+		MMgc::GCWeakRef *weakRef;
 	};
 
 	class Sampler
@@ -85,7 +86,8 @@ namespace avmplus
 		void init(bool sampling, bool autoStart);
 		void sampleCheck() { if(takeSample) sample(); }
 
-		uint64 recordAllocationSample(AvmPlusScriptableObject *obj, uintptr typeOrVTable);		void recordDeallocationSample(uint64 id, uint64 size);
+		uint64 recordAllocationSample(AvmPlusScriptableObject *obj, uintptr typeOrVTable);
+		void recordDeallocationSample(uint64 id, uint64 size);
 
 		void startSampling();
 		void stopSampling();

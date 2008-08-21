@@ -117,10 +117,15 @@ namespace avmplus
 			write(p, depth);
 			while(csn)
 			{
-				write(p, (uintptr_t)csn->info);				// FIXME: can filename can be stored in the AbstractInfo?
+				write(p, (uintptr_t)csn->info);
+				// FIXME: can filename can be stored in the AbstractInfo?
 				write(p, csn->filename);
 				write(p, csn->linenum);
-#ifdef AVMPLUS_64BIT				AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int) + sizeof(int));				write(p, (int) 0); // structure padding#endif				csn = csn->next;
+#ifdef AVMPLUS_64BIT
+				AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int) + sizeof(int));
+				write(p, (int) 0); // structure padding
+#endif
+				csn = csn->next;
 				depth--;
 			}
 			AvmAssert(depth == 0);
@@ -143,7 +148,14 @@ namespace avmplus
 		{
 			read(p, s.stack.depth);
 			s.stack.trace = p;
-#ifndef AVMPLUS_64BIT			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int));#else			// Extra int because of the structure padding			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int) + sizeof(int));#endif			p += s.stack.depth * sizeof(StackTrace::Element);		}
+#ifndef AVMPLUS_64BIT
+			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int));
+#else
+			// Extra int because of the structure padding
+			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int) + sizeof(int));
+#endif
+			p += s.stack.depth * sizeof(StackTrace::Element);
+		}
 		// padding to keep 8 byte alignment
 		align(p);
 		if(s.sampleType != Sampler::RAW_SAMPLE)
@@ -161,7 +173,8 @@ namespace avmplus
 		}
 	}
 
-	uint64 Sampler::recordAllocationSample(AvmPlusScriptableObject *obj, uintptr typeOrVTable)	{
+	uint64 Sampler::recordAllocationSample(AvmPlusScriptableObject *obj, uintptr typeOrVTable)
+	{
 		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
 		if(!samplingNow)
 			return 0;
@@ -175,7 +188,9 @@ namespace avmplus
 
 		if(typeOrVTable < 7 && core->codeContext() && core->codeContext()->domainEnv()) {
 			// and in toplevel
-			// FIXME 64bit			typeOrVTable |= (uint32)(uintptr_t)core->codeContext()->domainEnv()->toplevel();		}
+			// FIXME 64bit
+			typeOrVTable |= (uint32)(uintptr_t)core->codeContext()->domainEnv()->toplevel();
+		}
 
 		writeRawSample(NEW_OBJECT_SAMPLE);
 		write(currentSample, allocId++);

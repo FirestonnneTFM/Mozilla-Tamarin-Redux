@@ -107,7 +107,12 @@ namespace avmplus
 		/** how we implement dictionary or strict style lookups */
 		bool isDictionary:1;
 
-		/** does this type use the default ClassClosure::construct method or not. 			If the traits are for a type that implements its own construct method, 			this must be set to true.  If it is false, the JIT will early bind to 			the AS defined constructor. */		bool hasCustomConstruct:1;#ifdef DEBUGGER
+		/** does this type use the default ClassClosure::construct method or not. 
+			If the traits are for a type that implements its own construct method, 
+			this must be set to true.  If it is false, the JIT will early bind to 
+			the AS defined constructor. */
+		bool hasCustomConstruct:1;
+#ifdef DEBUGGER
 		/** how we implement dictionary or strict style lookups */
 		bool isActivationTraits:1;
 #endif
@@ -118,7 +123,8 @@ namespace avmplus
 		*/
 		Traits* itraits;
 
-#ifdef AVMPLUS_MIR		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
+#ifdef AVMPLUS_MIR
+		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
 		// since we use the AbstractFunction pointer as the interface method id
 		// smaller = dense table, few large conflict stubs
 		// larger  = sparse table, many small conflict stubs 
@@ -198,7 +204,8 @@ namespace avmplus
 		// BIND_METHOD+disp_id = no conflict, dispatches to concrete method
 		// BIND_ITRAMP+addr    = conflict, dispatch to conflict resolution stub
 		// IMT table (if we have one, comes after the interfaces)
-#ifdef AVMPLUS_MIR		Binding *getIMT() const {
+#ifdef AVMPLUS_MIR
+		Binding *getIMT() const {
 			AvmAssert(hasInterfaces);
 			return (Binding*) (getMethods() + methodCount);
 		}
@@ -358,7 +365,8 @@ namespace avmplus
 #endif
 	};
 
-#ifdef AVMPLUS_MIR	class ImtBuilder
+#ifdef AVMPLUS_MIR
+	class ImtBuilder
 	{
 	public:
 		class ImtEntry: public MMgc::GCObject
@@ -379,6 +387,7 @@ namespace avmplus
 		MMgc::GC *gc;
 		ImtEntry *entries[Traits::IMT_SIZE];
 	};
-#endif}
+#endif
+}
 
 #endif /* __avmplus_Traits__ */

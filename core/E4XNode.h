@@ -226,7 +226,8 @@ namespace avmplus
 		void _deleteByIndex (uint32 entry);
 		E4XNode *_deepCopy (AvmCore *core, Toplevel *toplevel) const;
 		virtual void _insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value);
-		virtual E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);		virtual void _addInScopeNamespace (AvmCore *core, Namespace *ns);
+		virtual E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);
+		virtual void _addInScopeNamespace (AvmCore *core, Namespace *ns);
 		virtual void _append (E4XNode* /*childNode*/) { AvmAssert(0); };
 
 		Namespace *FindNamespace (AvmCore *core, Toplevel *toplevel, const wchar *tagName, const wchar **localName, bool bAttribute);

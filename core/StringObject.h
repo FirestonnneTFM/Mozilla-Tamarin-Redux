@@ -148,8 +148,10 @@ namespace avmplus
 		 * Operator overload; returns a pointer to the
 		 * null-terminated string.
 		 */
-		inline operator const wchar* () 		{
-			return c_str(); 		}
+		inline operator const wchar* () 
+		{
+			return c_str(); 
+		}
 		
 		/**
 		 * Returns a pointer to the null-terminated string.
@@ -168,7 +170,8 @@ namespace avmplus
 		 * can be used to mutate a string that is known to not
 		 * have any other references.  Use with caution.
 		 */
-		wchar* lockBuffer();		
+		wchar* lockBuffer();
+		
 		/**
 		 * Unlocks the buffer previously returned by lockBuffer.
 		 * Must call after using lockBuffer to mutate the buffer.

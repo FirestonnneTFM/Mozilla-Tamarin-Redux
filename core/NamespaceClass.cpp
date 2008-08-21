@@ -41,7 +41,9 @@
 namespace avmplus
 {
 	BEGIN_NATIVE_MAP(NamespaceClass)
-		NATIVE_METHOD(Namespace_prefix_get, Namespace::getPrefix)		NATIVE_METHOD(Namespace_uri_get, Namespace::getURI)	END_NATIVE_MAP()
+		NATIVE_METHOD(Namespace_prefix_get, Namespace::getPrefix)
+		NATIVE_METHOD(Namespace_uri_get, Namespace::getURI)
+	END_NATIVE_MAP()
 
 	NamespaceClass::NamespaceClass(VTable* cvtable)
 		: ClassClosure(cvtable)

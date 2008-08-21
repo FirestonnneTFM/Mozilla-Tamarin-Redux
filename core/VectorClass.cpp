@@ -493,7 +493,9 @@ namespace avmplus
 			new_type->setDelegate(toplevel()->classClass->prototype);
 
 			// Is this right?  Should each instantiation get its own prototype?
-			new_type->prototype = toplevel()->objectVectorClass->prototype;			instantiated_types->add(fullname->atom(), new_type->atom());		}
+			new_type->prototype = toplevel()->objectVectorClass->prototype;
+			instantiated_types->add(fullname->atom(), new_type->atom());
+		}
 		return (Atom)instantiated_types->get(fullname->atom());
 	}
 
@@ -522,8 +524,12 @@ namespace avmplus
 		return v->atom();
 	}
 
-	ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32 length)	{
-		Atom args[1] = {type->atom()};		ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(applyTypeArgs(1, args));		return vecclass->newVector(length);	}
+	ObjectVectorObject* VectorClass::newVector(ClassClosure* type, uint32 length)
+	{
+		Atom args[1] = {type->atom()};
+		ObjectVectorClass* vecclass = (ObjectVectorClass*)AvmCore::atomToScriptObject(applyTypeArgs(1, args));
+		return vecclass->newVector(length);
+	}
 
 	//
 	// ObjectVectorClass
@@ -565,11 +571,13 @@ namespace avmplus
         return v;
     }
 
-	ObjectVectorObject* ObjectVectorClass::newVector(uint32 length)	{
+	ObjectVectorObject* ObjectVectorClass::newVector(uint32 length)
+	{
 		VTable* ivtable = this->ivtable();
 		ObjectVectorObject *v = new (core()->GetGC(), ivtable->getExtraSize()) 
 			ObjectVectorObject(ivtable, prototype);
-		v->set_type(this->index_type->atom());		v->set_length(length);
+		v->set_type(this->index_type->atom());
+		v->set_length(length);
 		return v;
 	}
 
@@ -689,7 +697,8 @@ namespace avmplus
 
 	VectorBaseObject* ObjectVectorObject::newVector(uint32 length)
 	{
-		return toplevel()->vectorClass->newVector(t, length);	}
+		return toplevel()->vectorClass->newVector(t, length);
+	}
 
 	void ObjectVectorObject::_spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset)
 	{
