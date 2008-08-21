@@ -152,10 +152,12 @@ namespace avmplus
 		return AvmCore::number_d(a);
 	}
 
-#pragma warning(disable:4102)    // unreferenced label
-#ifdef MSVC_X86_ASM_THREADING
-#  pragma warning(disable:4740)  // "inline assembler suppresses global optimization"
-#endif
+#ifdef _MSC_VER
+#  pragma warning(disable:4102)    // unreferenced label
+#  ifdef MSVC_X86_ASM_THREADING
+#    pragma warning(disable:4740)  // "inline assembler suppresses global optimization"
+#  endif
+#endif // _MSC_VER
 
     /**
      * Interpret the AVM+ instruction set.
@@ -1692,8 +1694,18 @@ namespace avmplus
                 NEXT;
 			}
 
-#define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
+// We can do better than this if, in the optimized case, 'name' is a "const Multiname&" or "const Multiname*" that
+// points into the table.  The const-ness is crucial, we do not want anyone, anywhere, to modify the pointed-to
+// structure.  Code that does modify it (like initMultiname) would make an explicit copy and work on that.  (Edwin
+// even suggest that it would be better to keep the Multiname constant and variable parts separate, and that
+// that's what they did in TT.)  But that change spreads "const" throughout the system; need to check with a 
+// Higher Authority before doing that.
 
+#ifdef AVMPLUS_WORD_CODE
+#  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; name = pool->word_code.cpool_mn->multinames[tmp]; } while(0)
+#else
+#  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
+#endif
 			INSTR(getlex) {
 				SAVE_EXPC;
 				// findpropstrict + getproperty
@@ -1701,7 +1713,6 @@ namespace avmplus
 				// stack out: value
 				Multiname name;
 				GET_MULTINAME(name, U30ARG);
-
 				// only non-runtime names are allowed.  but this still includes
 				// wildcard and attribute names.
 				Atom obj = env->findproperty(scope, scopeBase, scopeDepth, &name, true, withBase);
