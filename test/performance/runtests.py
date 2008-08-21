@@ -58,7 +58,7 @@ os.close(fd)
 js_output_f=False
 
 globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider', 'ascargs':'', 
-          'vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':'', 'perfm':False}
+          'vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':'', 'perfm':False, 'avmname':'avm', 'avm2name':'avm2'}
 if 'AVM' in environ:
   globs['avm'] = environ['AVM'].strip()
 if 'AVM2' in environ:
@@ -90,6 +90,8 @@ def usage(c):
   print " -v --verbose       enable additional output"
   print " -E --avm           avmplus command to use"
   print " -S --avm2          second avmplus command to use"
+  print "    --avmname       nickname for avm to use as column header"
+  print "    --avm2name      nickname for avm2 to use as column header"
   print " -a --asc           compiler to use"
   print " -c --config        configuration to use with testconfig.txt"
   print " -g --globalabc     location of global.abc"
@@ -108,7 +110,7 @@ def usage(c):
 
 try:
   opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log",
-                      "socketlog","avm2=","vmargs2=","iterations=","config=","runtime=","vmversion=","perfm"])
+                      "socketlog","avm2=","vmargs2=","iterations=","config=","runtime=","vmversion=","perfm", "avmname=","avm2name="])
 except:
   usage(2)
 
@@ -159,6 +161,10 @@ for o, v in opts:
     globs['vmversion'] = v
   elif o in ("--perfm"):
     globs['perfm'] = True
+  elif o in ("--avmname"):
+    globs['avmname'] = v
+  elif o in ("--avm2name"):
+    globs['avm2name'] = v
 
 def istest(f):
   return f.endswith(".as")
@@ -319,6 +325,8 @@ def parsePerfm(line,dic):
     dic['compile'] = int(line.split(' ')[-2])
   elif 'ir bytes' in line:
     dic['irbytes'] = int(line.split(' ')[-2])
+  elif 'IR/tick' in line:
+    dic['tick'] = int(line.split(' ')[-2])
   elif ('lir ' in line) or ('mir ' in line):
     dic['ir'] = int(line.split(' ')[-2])
     dic['count'] = int(line.split(' ')[-1])
@@ -349,16 +357,16 @@ if len(avm2)>0:
   if len(vmargs2)>0:
     log_print("avm2: %s %s" % (avm2,vmargs2));
   else:
-    log_print("avm2: %s %s" % (avm2,vmargs));
+    log_print("avm2: %s" % (avm2,));
   
 
 if len(avm2)>0:
-  log_print("\n\n%-50s %7s %7s %7s\n" % ("test","avm","avm2", "%sp"));
+  log_print("\n\n%-50s %7s %7s %7s\n" % ("test",globs['avmname'],globs['avm2name'], "%sp"));
 else:
   if (iterations>2):
-    log_print("\n\n%-50s %7s %12s\n" % ("test","avm","95% conf"))
+    log_print("\n\n%-50s %7s %12s\n" % ("test",globs['avmname'],"95% conf"))
   else:
-    log_print("\n\n%-50s %7s\n" % ("test","avm"))
+    log_print("\n\n%-50s %7s\n" % ("test",globs['avmname']))
 testnum = len(tests)
 for ast in tests:
   if ast.startswith("./"):
@@ -431,11 +439,12 @@ for ast in tests:
     log_print("%-50s %7s %7s %7.1f" % (ast,result1,result2,spdup))
     if globs['perfm']:
       try:
-        log_print('     %-45s %7s %7s %7.1f' % ('verify & IR gen', perfm1['verify'], perfm2['verify'], ((perfm1['verify']-perfm2['verify'])/float(perfm2['verify']))*100.0))
-        log_print('     %-45s %7s %7s %7.1f' % ('code', perfm1['code'], perfm2['code'], ((perfm1['code']-perfm2['code'])/float(perfm2['code']))*100.0))
-        log_print('     %-45s %7s %7s %7.1f' % ('compile', perfm1['compile'], perfm2['compile'], ((perfm1['compile']-perfm2['compile'])/float(perfm2['compile']))*100.0))
+        log_print('     %-45s %7s %7s %7.1f' % ('verify & IR gen (time)', perfm1['verify'], perfm2['verify'], ((perfm1['verify']-perfm2['verify'])/float(perfm2['verify']))*100.0))
+        log_print('     %-45s %7s %7s %7.1f' % ('compile (time)', perfm1['compile'], perfm2['compile'], ((perfm1['compile']-perfm2['compile'])/float(perfm2['compile']))*100.0))
+        log_print('     %-45s %7s %7s %7.1f' % ('code size (bytes)', perfm1['code'], perfm2['code'], ((perfm1['code']-perfm2['code'])/float(perfm2['code']))*100.0))
         log_print('     %-45s %7s %7s %7.1f' % ('mir/lir bytes', perfm1['irbytes'], perfm2['irbytes'], ((perfm1['irbytes']-perfm2['irbytes'])/float(perfm2['irbytes']))*100.0))
-        log_print('     %-45s %7s %7s %7.1f' % ('mir/lir inst', perfm1['ir'], perfm2['ir'], ((perfm1['ir']-perfm2['ir'])/float(perfm2['ir']))*100.0))
+        log_print('     %-45s %7s %7s %7.1f' % ('mir/lir (# of inst)', perfm1['ir'], perfm2['ir'], ((perfm1['ir']-perfm2['ir'])/float(perfm2['ir']))*100.0))
+        log_print('     %-45s %7s %7s %7.1f' % ('IR/tick', perfm1['tick'], perfm2['tick'], ((perfm1['tick']-perfm2['tick'])/float(perfm2['tick']))*100.0))
         log_print('     %-45s %7s %7s' % ('count', perfm1['count'], perfm2['count'])) 
       except:
         pass
