@@ -38,6 +38,10 @@
 
 #include "avmplus.h"
 
+#ifdef PERFM
+  #include "../vprof/vprof.h"
+#endif /* PERFM */
+
 namespace avmplus
 {
 	using namespace MMgc;
@@ -93,10 +97,19 @@ namespace avmplus
 		AvmCore* core = this->core();
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
+		#ifdef PERFM
+			uint64_t start = rtstamp();
+		#endif /* PERFM */
 			CodegenMIR mir(this);
 			TRY(core, kCatchAction_Rethrow)
 			{
 				verifier.verify(&mir);	// pass 2 - data flow
+		#ifdef PERFM
+				uint64_t stop = rtstamp();
+				const int mhz = 100;
+				_nvprof("verify & IR gen", (stop-start)/(100*mhz));
+		#endif /* PERFM */
+        
 				if (!mir.overflow)
 					mir.emitMD(); // pass 3 - generate code
 

@@ -157,6 +157,10 @@ extern  "C"
 }
 #endif
 
+#ifdef PERFM
+#include "../vprof/vprof.h"
+#endif /* PERFM */
+
 #ifdef AVMPLUS_64BIT
 #define AVMCORE_integer			AvmCore::integer64
 #define AVMCORE_integer_i		AvmCore::integer64_i
@@ -8349,6 +8353,10 @@ namespace avmplus
 		}
 		#endif
 
+#ifdef PERFM
+		uint64_t start = rtstamp();
+#endif /* PERFM */
+
 		/* 
 		* Use access exceptions to manage our buffer growth.  We
 		* reserve a large region of memory and write to it freely
@@ -8397,6 +8405,22 @@ namespace avmplus
 		END_CATCH
 		END_TRY
 #endif // FEATURE_BUFFER_GUARD
+#ifdef PERFM
+		#define bytesBetween(x,y)   ( (size_t)(x) - (size_t)(y) )
+
+		AvmAssert((int)casePtr);
+		uint64_t stop = rtstamp();
+		const int mhz = 100;
+		double time = (stop-start)/(100*mhz);
+		_nvprof("compile", time);
+		_nvprof("mir bytes", bytesBetween(ip,ipStart));
+		_nvprof("mir", ip-ipStart);
+		_nvprof("code", bytesBetween(mip,casePtr));
+		_nvprof("IR/tick", (ip-ipStart)/time);
+//		_nvprof("code buffer", bytesBetween(pool->codeBuffer->getPos(),pool->codeBuffer->start()));
+
+		#undef bytesBetween
+#endif /* PERFM */
 	}
 
 #ifdef FEATURE_BUFFER_GUARD
