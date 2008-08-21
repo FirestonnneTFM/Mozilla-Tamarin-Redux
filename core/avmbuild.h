@@ -58,7 +58,7 @@
 
 #if defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX)
   // Are we PowerPC or i386 (Macintel) or x86_64 (64-bit)?
-  #if __i386__
+  #ifdef __i386__
     #ifndef AVMPLUS_IA32
       #define AVMPLUS_IA32
     #endif
@@ -235,6 +235,9 @@
 #define FEATURE_JNI
 
 #define PCRE_STATIC
+
+// performance metrics for NJ 
+//#define PERFM
 
 #ifdef SOLARIS
 #define HAVE_ALLOCA_H
