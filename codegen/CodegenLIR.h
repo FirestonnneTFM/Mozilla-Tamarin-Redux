@@ -197,6 +197,7 @@ namespace avmplus
         CodegenLabel interrupt_label, npe_label;
         sintptr lastPcSave;
         List<Patch, LIST_NonGCObjects> patches;
+		SortedIntMap<uintptr_t> callAddrMap;
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(MirOpcode op, int32_t disp, LIns *base);
