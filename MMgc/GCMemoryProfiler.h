@@ -43,7 +43,10 @@
 #include <pthread.h>
 #endif
 
-/*** GCThreadLocal turned out to be useful class not only for the memory profiler so it is defined in Release and Debug (It is not controlled by MEMORY_INFO)**/namespace MMgc
+/**
+* GCThreadLocal turned out to be useful class not only for the memory profiler so it is defined in Release and Debug (It is not controlled by MEMORY_INFO)
+**/
+namespace MMgc
 {
 #ifdef WIN32
 	template<typename T>
@@ -89,9 +92,46 @@
 	private:
 		pthread_key_t tlsId ;
 	};
-#endif}#ifndef MEMORY_INFO#define MMGC_MEM_TAG(_x)#define MMGC_MEM_TYPE(_x)#define GetRealPointer(_x) _x#define GetUserPointer(_x) _x#define DebugSize() 0#else#define MMGC_MEM_TAG(_x) MMgc::SetMemTag(_x)#define MMGC_MEM_TYPE(_x) MMgc::SetMemType(_x)namespace MMgc{#ifdef WIN32	/**	 * GCCriticalSection is a simple Critical Section class used by GCMemoryProfiler to	 * ensure mutually exclusive access.  GCSpinLock doesn't suffice since its not	 * re-entrant and we need that	 */	class GCCriticalSection	{	public:		GCCriticalSection()		{			InitializeCriticalSection(&cs);		}		inline void Acquire()		{			EnterCriticalSection(&cs);		}		inline void Release()		{			LeaveCriticalSection(&cs);		}	private:		CRITICAL_SECTION cs;	};
+#endif
+}
+#ifndef MEMORY_INFO
+#define MMGC_MEM_TAG(_x)
+#define MMGC_MEM_TYPE(_x)
+#define GetRealPointer(_x) _x
+#define GetUserPointer(_x) _x
+#define DebugSize() 0
+#else
+#define MMGC_MEM_TAG(_x) MMgc::SetMemTag(_x)
+#define MMGC_MEM_TYPE(_x) MMgc::SetMemType(_x)
+namespace MMgc
+{
+#ifdef WIN32
+	/**
+	 * GCCriticalSection is a simple Critical Section class used by GCMemoryProfiler to
+	 * ensure mutually exclusive access.  GCSpinLock doesn't suffice since its not
+	 * re-entrant and we need that
+	 */
+	class GCCriticalSection
+	{
+	public:
+		GCCriticalSection()
+		{
+			InitializeCriticalSection(&cs);
+		}
+		inline void Acquire()
+		{
+			EnterCriticalSection(&cs);
+		}
+		inline void Release()
+		{
+			LeaveCriticalSection(&cs);
+		}
+	private:
+		CRITICAL_SECTION cs;
+	};
 	
-#else	class GCCriticalSection
+#else
+	class GCCriticalSection
 	{
 	public:
 		GCCriticalSection()
@@ -173,7 +213,9 @@
 
 	const char* GetTypeName(int index, void *obj);
 
-	void GetInfoFromPC(sintptr pc, char *buff, int buffSize);	void GetStackTrace(sintptr *trace, int len, int skip);	// print stack trace of index into trace table
+	void GetInfoFromPC(sintptr pc, char *buff, int buffSize);
+	void GetStackTrace(sintptr *trace, int len, int skip);
+	// print stack trace of index into trace table
 	void PrintStackTraceByIndex(int index);
 	MMGC_API void PrintStackTrace(const void *item);
 	// print stack trace of caller

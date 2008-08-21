@@ -41,9 +41,13 @@
 
 #ifdef MEMORY_INFO
 
-#if !defined(__MWERKS__)#if !defined(__ICC)#if !defined(UNDER_CE)#include <typeinfo>
+#if !defined(__MWERKS__)
+#if !defined(__ICC)
+#if !defined(UNDER_CE)
+#include <typeinfo>
 #endif
-#endif#endif
+#endif
+#endif
 
 namespace MMgc
 {
@@ -78,7 +82,8 @@ namespace MMgc
 
 	struct StackTrace
 	{
-		sintptr ips[kMaxTraceDepth];		int size;
+		sintptr ips[kMaxTraceDepth];
+		int size;
 		int totalSize;
 		int sweepSize;
         int vtable;
@@ -91,14 +96,17 @@ namespace MMgc
 
 	static StackTrace traceTable[kNumTraces];
 
-	sintptr hashTrace(sintptr *trace)	{
-		sintptr hash = *trace++;		while(*trace++ != 0) {
+	sintptr hashTrace(sintptr *trace)
+	{
+		sintptr hash = *trace++;
+		while(*trace++ != 0) {
 			hash ^= *trace;
 		}
 		return hash;
 	}
 
-	bool tracesEqual(sintptr *trace1, sintptr *trace2)	{
+	bool tracesEqual(sintptr *trace1, sintptr *trace2)
+	{
 		while(*trace1) {
 			if(*trace1 != *trace2)
 				return false;
@@ -108,7 +116,8 @@ namespace MMgc
 		return *trace1 == *trace2;
 	}
 
-	unsigned int LookupTrace(sintptr *trace)	{
+	unsigned int LookupTrace(sintptr *trace)
+	{
 #ifdef GCHEAP_LOCK
 		GCEnterCriticalSection lock(m_traceTableLock);
 #endif
@@ -118,7 +127,8 @@ namespace MMgc
 		
 		static int numTraces = 0;
 		int modmask = kNumTraces - 1;
-		sintptr hash = hashTrace(trace);		unsigned int index = hash & modmask;
+		sintptr hash = hashTrace(trace);
+		unsigned int index = hash & modmask;
 		unsigned int n = 17; // small number means cluster at start
 		int c = 1;
 		while(traceTable[index].ips[0] && !tracesEqual(traceTable[index].ips, trace)) {
@@ -157,7 +167,9 @@ namespace MMgc
 			return traceTable[index].memtag;
 		const char*name="unknown";
 
-// Disabled for 64-bit Windows.  Debugger doesn't allow exception to go uncaught so always breaks#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || ( defined(AVMPLIS_UNIX) && !defined(__ICC) )		try {
+// Disabled for 64-bit Windows.  Debugger doesn't allow exception to go uncaught so always breaks
+#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || ( defined(AVMPLIS_UNIX) && !defined(__ICC) )
+		try {
 			const std::type_info *ti = &typeid(*(MMgc::GCObject*)obj);
 			if(ti->name())
 				name = ti->name();
@@ -497,13 +509,15 @@ namespace MMgc
 	{
 		if(!enableTraces)
 			return 0;
-		sintptr trace[kMaxTraceDepth]; // an array of pcs		GetStackTrace(trace, kMaxTraceDepth, skip);
+		sintptr trace[kMaxTraceDepth]; // an array of pcs
+		GetStackTrace(trace, kMaxTraceDepth, skip);
 
 		// get index into trace table
 		return LookupTrace(trace);
 	}
 
-	void DumpStackTraceHelper(sintptr *trace)	{
+	void DumpStackTraceHelper(sintptr *trace)
+	{
 		if(!enableTraces)
 			return;
 
@@ -526,7 +540,8 @@ namespace MMgc
 	{
 		if(!enableTraces)
 			return;
-		sintptr trace[kMaxTraceDepth];		GetStackTrace(trace, kMaxTraceDepth, skip);
+		sintptr trace[kMaxTraceDepth];
+		GetStackTrace(trace, kMaxTraceDepth, skip);
 		DumpStackTraceHelper(trace);
 	}
  

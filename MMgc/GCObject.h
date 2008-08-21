@@ -224,7 +224,8 @@ namespace MMgc
 				GC::GetGC(this)->RemoveFromZCT(this);
 			}
 			
-#ifdef MEMORY_INFO			if(gc->keepDRCHistory)
+#ifdef MEMORY_INFO
+			if(gc->keepDRCHistory)
 				history.Push(GetStackTraceIndex(2));
 #endif
 		}
@@ -246,8 +247,10 @@ namespace MMgc
 				return;
 
 			if(RefCount() == 0) {
-#ifdef MEMORY_INFO				DumpHistory();
-#endif				GCAssert(false);
+#ifdef MEMORY_INFO
+				DumpHistory();
+#endif
+				GCAssert(false);
 			}
 #endif
 
@@ -267,7 +270,8 @@ namespace MMgc
 			
 			composite--; 
 
-#ifdef MEMORY_INFO			// the delete flag works around the fact that DecrementRef
+#ifdef MEMORY_INFO
+			// the delete flag works around the fact that DecrementRef
 			// may be called after ~RCObject since all dtors are called
 			// in one pass.  For example a FunctionScriptObject may be
 			// the sole reference to a ScopeChain and dec its ref in 
@@ -284,7 +288,8 @@ namespace MMgc
 			}
 		}
 		
-#ifdef MEMORY_INFO		void DumpHistory();
+#ifdef MEMORY_INFO
+		void DumpHistory();
 #endif
 
 		void setZCTIndex(int index) 

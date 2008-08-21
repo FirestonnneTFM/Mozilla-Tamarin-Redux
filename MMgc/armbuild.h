@@ -36,7 +36,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#if !defined(MMGC_ARM)	#define MMGC_ARM#endif
+#if !defined(MMGC_ARM)
+	#define MMGC_ARM
+#endif
 
 #ifdef DEBUG
 #ifndef _DEBUG
@@ -53,7 +55,8 @@
  * Define this to get stack traces.  Helps with memory leaks.
  */
 #ifdef DEBUG
-//#define MEMORY_INFO#endif
+//#define MEMORY_INFO
+#endif
 
 /**
  * This turns on incremental collection as well as all of
@@ -69,10 +72,15 @@
 
 #define DECOMMIT_MEMORY
 
-#if !defined(USE_MMAP) && !defined(MMGC_NO_MMAP)    #define USE_MMAP#endif
+#if !defined(USE_MMAP) && !defined(MMGC_NO_MMAP)
+    #define USE_MMAP
+#endif
 
 /**
  * Controls whether DRC is in use
  */
 
-#define MMGC_DRC#if !defined(AVMPLUS_NO_JIT_READONLY)	#define AVMPLUS_JIT_READONLY#endif
+#define MMGC_DRC
+#if !defined(AVMPLUS_NO_JIT_READONLY)
+	#define AVMPLUS_JIT_READONLY
+#endif

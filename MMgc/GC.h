@@ -109,14 +109,21 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 #else
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		do { \
-		volatile auto int64 save1,save2,save3,save4,save5,save6,save7,save8,save9,save10,save11,save12,save13;\		asm("mov %%rax,%0" : "=r" (save1));\
+		volatile auto int64 save1,save2,save3,save4,save5,save6,save7,save8,save9,save10,save11,save12,save13;\
+		asm("mov %%rax,%0" : "=r" (save1));\
 		asm("mov %%rbx,%0" : "=r" (save2));\
 		asm("mov %%rcx,%0" : "=r" (save3));\
 		asm("mov %%rdx,%0" : "=r" (save4));\
 		asm("mov %%rbp,%0" : "=r" (save5));\
 		asm("mov %%rsi,%0" : "=r" (save6));\
 		asm("mov %%rdi,%0" : "=r" (save7));\
-		asm("mov %%r8,%0" : "=r" (save8));\		asm("mov %%r9,%0" : "=r" (save9));\		asm("mov %%r12,%0" : "=r" (save10));\		asm("mov %%r13,%0" : "=r" (save11));\		asm("mov %%r14,%0" : "=r" (save12));\		asm("mov %%r15,%0" : "=r" (save13));\		asm("mov %%rsp,%0" : "=r" (_stack));\
+		asm("mov %%r8,%0" : "=r" (save8));\
+		asm("mov %%r9,%0" : "=r" (save9));\
+		asm("mov %%r12,%0" : "=r" (save10));\
+		asm("mov %%r13,%0" : "=r" (save11));\
+		asm("mov %%r14,%0" : "=r" (save12));\
+		asm("mov %%r15,%0" : "=r" (save13));\
+		asm("mov %%rsp,%0" : "=r" (_stack));\
 		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;	} while (0)	
 #endif
 
@@ -127,21 +134,73 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
  * anywhere on the machine stack. */
 // TPR - increasing to 20 causes this code to not get optimized out
 
-#ifdef __GNUC__#ifdef _MAC#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \		int __ppcregs[20]; \		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\		_stack = __ppcregs;\		void *__stackBase;\		asm ("mr r3,r1\n"\			"1: mr %0,r3\n"\			"lwz r3,0(%0)\n"\		        "rlwinm r3,r3,0,0,30\n"\			"cmpi cr0,r3,0\n"\			"bne 1b" : "=b" (__stackBase) : : "r3");\		_size = (uintptr) __stackBase - (uintptr) _stack;#else // _MAC#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \		int __ppcregs[20]; \		asm("stmw %%r13,0(%0)" : : "b" (__ppcregs));\		_stack = __ppcregs;\		void *__stackBase;\		asm ("mr %%r3,%%r1\n"\		     "StackBaseLoop%1%2: mr %0,%%r3\n"	\			"lwz %%r3,0(%0)\n"\		        "rlwinm %%r3,%%r3,0,0,30\n"\			"cmpi cr0,%%r3,0\n"\		     "bne StackBaseLoop%1%2" : "=b" (__stackBase) : "i" (__FILE__), "i" (__LINE__) : "r3"); \		_size = (uintptr) __stackBase - (uintptr) _stack;#endif // _MAC#else // __GNUC__#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+#ifdef __GNUC__
+#ifdef _MAC
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\
 		_stack = __ppcregs;\
-		void *__stackBase;\		asm ("mr r3,r1\n"\			"StackBaseLoop: mr %0,r3\n"\			"lwz r3,0(%0)\n"\		        "rlwinm r3,r3,0,0,30\n"\			"cmpi cr0,r3,0\n"\		     "bne StackBaseLoop" : "=b" (__stackBase) : : "r3"); \		_size = (uintptr) __stackBase - (uintptr) _stack;#endif // __GNUC__
+		void *__stackBase;\
+		asm ("mr r3,r1\n"\
+			"1: mr %0,r3\n"\
+			"lwz r3,0(%0)\n"\
+		        "rlwinm r3,r3,0,0,30\n"\
+			"cmpi cr0,r3,0\n"\
+			"bne 1b" : "=b" (__stackBase) : : "r3");\
+		_size = (uintptr) __stackBase - (uintptr) _stack;
+#else // _MAC
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+		int __ppcregs[20]; \
+		asm("stmw %%r13,0(%0)" : : "b" (__ppcregs));\
+		_stack = __ppcregs;\
+		void *__stackBase;\
+		asm ("mr %%r3,%%r1\n"\
+		     "StackBaseLoop%1%2: mr %0,%%r3\n"	\
+			"lwz %%r3,0(%0)\n"\
+		        "rlwinm %%r3,%%r3,0,0,30\n"\
+			"cmpi cr0,%%r3,0\n"\
+		     "bne StackBaseLoop%1%2" : "=b" (__stackBase) : "i" (__FILE__), "i" (__LINE__) : "r3"); \
+		_size = (uintptr) __stackBase - (uintptr) _stack;
+#endif // _MAC
+#else // __GNUC__
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+		int __ppcregs[20]; \
+		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\
+		_stack = __ppcregs;\
+		void *__stackBase;\
+		asm ("mr r3,r1\n"\
+			"StackBaseLoop: mr %0,r3\n"\
+			"lwz r3,0(%0)\n"\
+		        "rlwinm r3,r3,0,0,30\n"\
+			"cmpi cr0,r3,0\n"\
+		     "bne StackBaseLoop" : "=b" (__stackBase) : : "r3"); \
+		_size = (uintptr) __stackBase - (uintptr) _stack;
+#endif // __GNUC__
 
 #elif defined MMGC_ARM
 
-#ifdef UNDER_CE#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \		int GC_tmp_1; void* tmp_ptr = &GC_tmp_1;\		MEMORY_BASIC_INFORMATION __mib;\		VirtualQuery(tmp_ptr, &__mib, sizeof(MEMORY_BASIC_INFORMATION)); \	    _size = __mib.RegionSize - ((int)tmp_ptr - (int)__mib.BaseAddress); \		_stack = tmp_ptr;#else#ifdef __ARMCC__#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \		_stack =  (void*)__current_sp(); \		_size = (unsigned int*)_gc->GetStackTop() - (unsigned int*)_stack;#else// Store nonvolatile registers r4-r10
+#ifdef UNDER_CE
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+		int GC_tmp_1; void* tmp_ptr = &GC_tmp_1;\
+		MEMORY_BASIC_INFORMATION __mib;\
+		VirtualQuery(tmp_ptr, &__mib, sizeof(MEMORY_BASIC_INFORMATION)); \
+	    _size = __mib.RegionSize - ((int)tmp_ptr - (int)__mib.BaseAddress); \
+		_stack = tmp_ptr;
+#else
+#ifdef __ARMCC__
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+		_stack =  (void*)__current_sp(); \
+		_size = (unsigned int*)_gc->GetStackTop() - (unsigned int*)_stack;
+#else
+// Store nonvolatile registers r4-r10
 // Find stack pointer
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int regs[7];\
 		asm("stmia %0,{r4-r10}" : : "r" (regs));\
 		asm("mov %0,sp" : "=r" (_stack));\
-		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;#endif //__ARMCC__#endif
+		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
+#endif //__ARMCC__
+#endif
 
 #elif defined MMGC_SPARC
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
@@ -198,7 +257,9 @@ namespace MMgc
 	class MMGC_API GCRoot
 	{
 		friend class GC;
-		GCRoot();		void init(GC*gc, const void *object, size_t size);	public:
+		GCRoot();
+		void init(GC*gc, const void *object, size_t size);
+	public:
 		/** subclassing constructor */
 		GCRoot(GC *gc);
 		/** general constructor */
@@ -345,15 +406,18 @@ namespace MMgc
 	};
 
 	#ifdef MMGC_64BIT
-	#define HIDDENPTRMASK (uintptr(0x1L)<<63)	#else
-	#define HIDDENPTRMASK (uintptr(0x1L)<<31)	#endif
+	#define HIDDENPTRMASK (uintptr(0x1L)<<63)
+	#else
+	#define HIDDENPTRMASK (uintptr(0x1L)<<31)
+	#endif
 
 	template <class T>
 	class GCHiddenPointer
 	{
 	public:
 		GCHiddenPointer(T obj=NULL) { set(obj); }
-		operator T() const { return (T) (val^HIDDENPTRMASK);	 }		T operator=(T tNew) 
+		operator T() const { return (T) (val^HIDDENPTRMASK);	 }
+		T operator=(T tNew) 
 		{ 
 			set(tNew); 
 			return (T)this; 
@@ -368,8 +432,10 @@ namespace MMgc
 		void set(T obj) 
 		{
 			uintptr p = (uintptr)obj;
-			val = p ^ HIDDENPTRMASK;		}
-		uintptr val;	};
+			val = p ^ HIDDENPTRMASK;
+		}
+		uintptr val;
+	};
 
 	/**
 	 * The Zero Count Table used by DRC.
@@ -544,7 +610,8 @@ namespace MMgc
 
 		bool dontAddToZCTDuringCollection;
 
-		bool incrementalValidation;#ifdef _DEBUG
+		bool incrementalValidation;
+#ifdef _DEBUG
 		bool incrementalValidationPedantic;
 #endif
 
@@ -872,7 +939,8 @@ namespace MMgc
 		void *FindBeginning(const void *gcItem)
 		{
 			GCAssert(gcItem != NULL);
-			GCAssert(GetPageMapValue((uintptr)gcItem) != 0);			void *realItem = NULL;
+			GCAssert(GetPageMapValue((uintptr)gcItem) != 0);
+			void *realItem = NULL;
 			if((uintptr)gcItem < memStart || (uintptr)gcItem >= memEnd)
 				return NULL;
 			int bits = GetPageMapValue((uintptr)gcItem);
@@ -1088,7 +1156,13 @@ namespace MMgc
 		 */
 		size_t heapSizeAtLastAlloc;
 
-		// we track the top and bottom of the stack for cleaning purposes.		// the top tells us how far up the stack as been dirtied.		// the bottom is also tracked so we can ensure we're on the same		// stack that the GC responsible for cleaning.  necessary if multiple		// threads use the GC.  only thread that creates the GC will have its stack		// tracked and cleaned.		bool stackCleaned;
+		// we track the top and bottom of the stack for cleaning purposes.
+		// the top tells us how far up the stack as been dirtied.
+		// the bottom is also tracked so we can ensure we're on the same
+		// stack that the GC responsible for cleaning.  necessary if multiple
+		// threads use the GC.  only thread that creates the GC will have its stack
+		// tracked and cleaned.
+		bool stackCleaned;
 		const void *rememberedStackTop;
 		const void *rememberedStackBottom;
 
@@ -1156,13 +1230,16 @@ namespace MMgc
 		/**
 		 * This spinlock covers memStart, memEnd, and the contents of pageMap.
 		 */
-#ifdef MMGC_THREADSAFE		mutable GCSpinLock pageMapLock;
+#ifdef MMGC_THREADSAFE
+		mutable GCSpinLock pageMapLock;
 #endif
 
 		inline int GetPageMapValue(uintptr addr) const
 		{
-#ifdef MMGC_THREADSAFE			GCAcquireSpinlock lock(pageMapLock);
-#endif			return GetPageMapValueAlreadyLocked(addr);
+#ifdef MMGC_THREADSAFE
+			GCAcquireSpinlock lock(pageMapLock);
+#endif
+			return GetPageMapValueAlreadyLocked(addr);
 		}
 
 		/** @access Requires(pageMapLock) */
@@ -1376,7 +1453,8 @@ private:
 		void AllocActivity(int blocks);
 #endif
 
-		void CheckFreelists();#ifdef _DEBUG
+		void CheckFreelists();
+#ifdef _DEBUG
 
 		int m_gcLastStackTrace;
 
@@ -1419,7 +1497,8 @@ private:
 
 public:
 #ifdef MEMORY_INFO
-		typedef void (*pDumpBackCallbackProc)(void* pContext, void *obj, const char *type );		void DumpBackPointerChain(void *o, pDumpBackCallbackProc p = NULL, void *context = NULL);
+		typedef void (*pDumpBackCallbackProc)(void* pContext, void *obj, const char *type );
+		void DumpBackPointerChain(void *o, pDumpBackCallbackProc p = NULL, void *context = NULL);
 
 		// debugging routine that records who marked who, can be used to
 		// answer the question, how did I get marked?  also could be used to
