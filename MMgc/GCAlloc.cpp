@@ -110,10 +110,10 @@ namespace MMgc
 					if(data != (int32)0xbabababa && data != (int32)0xcacacaca)
 					{
 						GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:");
-						PrintStackTrace((int*)item+2);
-						GCDebugMsg(false, "Deletion trace:");
-						PrintStackTrace((int*)item+3);
-						GCDebugMsg(true, "Deleted item write violation!");
+#ifdef MEMORY_INFO						PrintStackTrace((int*)item+2);
+#endif						GCDebugMsg(false, "Deletion trace:");
+#ifdef MEMORY_INFO						PrintStackTrace((int*)item+3);
+#endif						GCDebugMsg(true, "Deleted item write violation!");
 					}
 				}
 				// next free item
@@ -336,7 +336,7 @@ start:
 				SetBit(b, index, kMark);
 		}
 
-		return item;
+		GCAssert((uintptr(item) & ~0xfff) == (uintptr) b);		GCAssert((uintptr(item) & 7) == 0);		return item;
 	}
 
 	/* static */
@@ -444,7 +444,7 @@ start:
 						GCFinalizable *obj = (GCFinalizedObject*)GetUserPointer(item);
 						GCAssert(*(int*)obj != 0);
 						obj->~GCFinalizable();
-						bits[i] &= ~(kFinalize<<(j*4));
+						bits[i] &= ~(kFinalize<<(j*4));
 
 #if defined(_DEBUG) && defined(MMGC_DRC)
 						if(b->alloc->IsRCObject()) {
@@ -675,7 +675,8 @@ start:
 
 	void GCAlloc::GCBlock::FreeItem(const void *item, int index)
 	{
-		GCAssert(alloc->m_numAlloc != 0);
+#ifdef MEMORY_INFO		GCAssert(alloc->m_numAlloc != 0);
+#endif
 
 #ifdef _DEBUG		
 		// check that its not already been freed

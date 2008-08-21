@@ -41,26 +41,17 @@
 
 namespace avmplus
 {
-	NativeMethod::NativeMethod(int flags, Handler handler)
-		: AbstractFunction()
-	{
-		m_handler = handler;
-		this->flags |= flags;
-		this->impl32 = verifyEnter;
+#ifdef AVMTHUNK_VERSION	NativeMethod::NativeMethod(const NativeTableEntry& _nte)		: AbstractFunction(), nte(_nte)	{
+		this->flags |= nte.flags;		this->impl32 = verifyEnter;
 	}
-
-	/**
-		* invoke handler as handler(int cookie, ...) with native typed args
-		*/
-	NativeMethod::NativeMethod(int flags, Handler handler, int cookie)
+#else	NativeMethod::NativeMethod(int flags, Handler handler, int cookie)
 		: AbstractFunction()
 	{
 		m_handler = handler;
 		m_cookie  = cookie;
-		this->flags |= (flags | NATIVE_COOKIE);
-		this->impl32 = verifyEnter;
+		this->flags |= flags;		this->impl32 = verifyEnter;
 	}
-
+#endif
 
 	Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
 	{
@@ -83,97 +74,15 @@ namespace avmplus
 		AvmAssert(declaringTraits->linked);
 		resolveSignature(toplevel);
 
-		// generate the native method thunk
+#ifdef AVMTHUNK_VERSION		union {			Atom (*impl32)(MethodEnv*, int, uint32 *);			AvmThunkNativeThunker thunker;		} u;		u.thunker = this->nte.thunker;		this->impl32 = u.impl32;#else		// generate the native method thunk
 		CodegenMIR cgen(this);
-		cgen.emitNativeThunk(this);
-		if (cgen.overflow)
-			toplevel->throwError(kOutOfMemoryError);
-	}
-
-	Atom NativeMethodV::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
-	{
-		NativeMethodV* f = (NativeMethodV*) env->method;
-
-		f->verify(env->vtable->toplevel);
-
-		#ifdef AVMPLUS_VERIFYALL
-		f->flags |= VERIFIED;
-		if (f->pool->core->verifyall && f->pool)
-			f->pool->processVerifyQueue(env->toplevel());
-		#endif
-
-		env->impl32 = f->impl32;
-		return f->impl32(env, argc, ap);
-	}
-
-	Atom NativeMethodV::implv32(MethodEnv* env, 
-				int argc, uint32 *ap)
-	{
-		// get the instance pointer before we unbox everything
-		ScriptObject* instance = *(ScriptObject **)(ap);
-
-#ifdef NATIVE_GLOBAL_FUNCTION_HACK
-		// HACK for native toplevel functions
-		instance = (ScriptObject*)(~7 & (int)instance);
-#endif
-
-		// convert the args in place
-		Atom* atomv = (Atom*) ap;
-
-		NativeMethodV* nmv = (NativeMethodV*) (AbstractFunction*) env->method;
-
-		nmv->boxArgs(argc, ap, atomv);
-
-		// skip the instance atom
-		atomv++;
-
-#ifdef DEBUGGER
-		if (env->core()->debugger != 0)
-			env->core()->debugger->traceMethod(nmv, true);  // tracing for native methods
-#endif	/* DEBUGGER */
-
-		if (nmv->m_haveCookie) {
-			CookieHandler32 cookieHandler = (CookieHandler32)nmv->m_handler;
-			return (instance->*cookieHandler)(nmv->m_cookie, atomv, argc);
-		} else {
-			Handler32 handler = (Handler32) nmv->m_handler;
-			return (instance->*handler)(atomv, argc);
-		}
-	}
-
-	double NativeMethodV::implvN(MethodEnv* env,
-				int argc, uint32 * ap)
-	{
-		// get the instance pointer before we unbox everything
-		ScriptObject* instance = *(ScriptObject **)(ap);
-
-#ifdef NATIVE_GLOBAL_FUNCTION_HACK
-		// HACK for native toplevel functions
-		instance = (ScriptObject*)(~7 & (int)instance);
-#endif
-
-		// convert the args in place
-		Atom* atomv = (Atom*) ap;
+		AvmCore *c = core();
 		
-		NativeMethodV* nmv = (NativeMethodV*) (AbstractFunction*) env->method;
+		TRY(c, kCatchAction_Rethrow)		{			cgen.emitNativeThunk(this);		} 		CATCH (Exception *exception) 		{			cgen.clearMIRBuffers();
 
-		nmv->boxArgs(argc, ap, atomv);
+			// re-throw exception			c->throwException(exception);		}
+		END_CATCH		END_TRY
 
-		// skip the instance atom
-		atomv++;
-
-#ifdef DEBUGGER
-		if (env->core()->debugger != 0)
-			env->core()->debugger->traceMethod(nmv, true);  // tracing for native methods
-#endif	/* DEBUGGER */
-
-		if (nmv->m_haveCookie) {
-			CookieHandlerN cookieHandler = (CookieHandlerN)nmv->m_handler;
-			return (instance->*cookieHandler)(nmv->m_cookie, atomv, argc);
-		} else {
-			HandlerN handler = (HandlerN) nmv->m_handler;
-			return (instance->*handler)(atomv, argc);
-		}
+		if (cgen.overflow)			toplevel->throwError(kOutOfMemoryError);#endif
 	}
-
 }

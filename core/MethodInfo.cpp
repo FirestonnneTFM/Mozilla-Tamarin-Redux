@@ -38,6 +38,10 @@
 
 #include "avmplus.h"
 
+#ifdef PERFM
+  #include "../vprof/vprof.h"
+#endif /* PERFM */
+
 namespace avmplus
 {
 	using namespace MMgc;
@@ -91,26 +95,47 @@ namespace avmplus
 		Verifier verifier(this, toplevel);
 
 		AvmCore* core = this->core();
-		if (core->turbo && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
+		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
+		#ifdef PERFM
+			uint64_t start = rtstamp();
+		#endif /* PERFM */
 			CodegenMIR mir(this);
-			verifier.verify(&mir);	// pass 2 - data flow
-			if (!mir.overflow)
-				mir.emitMD(); // pass 3 - generate code
-
-			// the MD buffer can overflow so we need to re-iterate
-			// over the whole thing, since we aren't yet robust enough
-			// to just rebuild the MD code.
-
-			// mark it as interpreted and try to limp along
-			if (mir.overflow)
+			TRY(core, kCatchAction_Rethrow)
 			{
-				AvmCore* core = this->core();
-				if (returnTraits() == NUMBER_TYPE)
-					this->implN = &avmplus::interpN;
-				else
-					this->impl32 = &avmplus::interp32;
+				verifier.verify(&mir);	// pass 2 - data flow
+		#ifdef PERFM
+				uint64_t stop = rtstamp();
+				const int mhz = 100;
+				_nvprof("verify & IR gen", (stop-start)/(100*mhz));
+		#endif /* PERFM */
+        
+				if (!mir.overflow)
+					mir.emitMD(); // pass 3 - generate code
+
+				// the MD buffer can overflow so we need to re-iterate
+				// over the whole thing, since we aren't yet robust enough
+				// to just rebuild the MD code.
+
+				// mark it as interpreted and try to limp along
+				if (mir.overflow)
+				{
+					AvmCore* core = this->core();
+					if (returnTraits() == NUMBER_TYPE)
+						implN = avmplus::interpN;
+					else
+						impl32 = avmplus::interp32;
+				}
 			}
+			CATCH (Exception *exception) 
+			{
+				mir.clearMIRBuffers();
+
+				// re-throw exception
+				core->throwException(exception);
+			}
+			END_CATCH
+			END_TRY
 		}
 		else
 		{
@@ -118,7 +143,7 @@ namespace avmplus
 		}
 		#else
 		Verifier verifier(this, toplevel);
-		verifier.verify(NULL);
+		verifier.verify();
 		#endif
 
         #ifdef DEBUGGER
@@ -170,7 +195,7 @@ namespace avmplus
 		for(int i=0; i<local_count; i++)
 		{
 			//localNames[i] = core->kundefined;
-			WBRC(core->GetGC(), localNames, &localNames[i], core->kundefined);
+			WBRC(core->GetGC(), localNames, &localNames[i], uintptr(Stringp(core->kundefined)));
 		}
 	}
 

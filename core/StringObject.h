@@ -148,22 +148,13 @@ namespace avmplus
 		 * Operator overload; returns a pointer to the
 		 * null-terminated string.
 		 */
-		operator const wchar* () 
-		{
-			// For offset too since our string needs to be null terminated
-			if (needsNormalization()) normalize();
-			return getData(); 
-		}
+		inline operator const wchar* () 		{
+			return c_str(); 		}
 		
 		/**
 		 * Returns a pointer to the null-terminated string.
 		 */
-		const wchar* c_str() 
-		{
-			// For offset too since our string needs to be null terminated
-			if (needsNormalization()) normalize();
-			return getData(); 
-		}
+		const wchar* c_str();
 
 		/**
 		 * Returns the index'th character of the string.
@@ -177,13 +168,7 @@ namespace avmplus
 		 * can be used to mutate a string that is known to not
 		 * have any other references.  Use with caution.
 		 */
-		wchar* lockBuffer() 
-		{
-			// For offset too since our string needs to be null terminated
-			if (needsNormalization()) normalize();
-			return (wchar*) getData(); 
-		}
-		
+		wchar* lockBuffer();		
 		/**
 		 * Unlocks the buffer previously returned by lockBuffer.
 		 * Must call after using lockBuffer to mutate the buffer.
@@ -311,10 +296,7 @@ namespace avmplus
 			generateIntegerEquivalent (core);
 		}
 
-		static bool isSpace(wchar ch)
-		{
-			return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r');
-		}
+		static bool isSpace(wchar ch);
 
 		bool isWhitespace();
 
@@ -340,7 +322,7 @@ namespace avmplus
 		Stringp charAtDouble(double i=0); 
 		double charCodeAt(int i); // returns NaN for out-of-bounds
 		double charCodeAtDouble(double i); // returns NaN for out-of-bounds
-		int localeCompare(Stringp other, Atom *argv, int argc);
+		int localeCompare(Stringp other);
 
 		Stringp substring(int i_start, int i_end);
 		Stringp substringDouble(double d_start, double d_end);

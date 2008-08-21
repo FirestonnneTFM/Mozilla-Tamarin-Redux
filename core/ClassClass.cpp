@@ -41,9 +41,7 @@
 namespace avmplus
 {
 	BEGIN_NATIVE_MAP(ClassClass)
-		NATIVE_METHOD2(Class_prototype_get, 
-					(NativeMethod::GetHandler)&ClassClosure::get_prototype)
-	END_NATIVE_MAP()
+		NATIVE_METHOD(Class_prototype_get, ClassClosure::get_prototype)	END_NATIVE_MAP()
 
 	ClassClass::ClassClass(VTable* cvtable)
 		: ClassClosure(cvtable)

@@ -44,8 +44,8 @@ namespace avmshell
 {
 	
 //#include "platformutils.h"
-#define PLAYERASSERT AvmAssert
-#include "zlib.h"
+#ifndef PLAYERASSERT#define PLAYERASSERT AvmAssert
+#endif#include "zlib.h"
 
 
 inline bool PlatformZlibInflate(

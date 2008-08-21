@@ -35,17 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <math.h>
+#include "avmplus.h"#include "BigInteger.h"#include <math.h>
 
-#include "avmplus.h"
-#include "BigInteger.h"
-namespace avmplus
+#if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))    #include <emmintrin.h>#endifnamespace avmplus
 {
 	const double kLog2_10 = 0.30102999566398119521373889472449;
 
 	// optimize pow(10,x) for commonly sized numbers;
-	static double kPowersOfTen[23] = { 1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10,
-									   1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20,
+	static const double kPowersOfTen[23] = { 1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10,									   1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20,
 									   1e21, 1e22 };
 
 	static inline double quickPowTen(int exp)
@@ -57,7 +54,6 @@ namespace avmplus
 		}
 	}
 
-	
 	bool MathUtils::equals(double x, double y)
 	{
 		// Infiniti-ness must match up
@@ -73,13 +69,9 @@ namespace avmplus
 
 	double MathUtils::infinity()
 	{
-		#if defined(UNIX) && defined(INFINITY)
-		return INFINITY;
+		#ifdef __GNUC__		return INFINITY;
 		#else
-		float result;
-		*((uint32*)&result) = 0x7F800000;
-		return result;
-		#endif
+		union { float f; uint32 d; }; d = 0x7F800000;		return f;		#endif	}	double MathUtils::neg_infinity()	{		#ifdef __GNUC__		return 0.0 - INFINITY;		#else		union { float f; uint32 d; }; d = 0xFF800000;		return f;		#endif
 	}
 
 #ifdef UNIX
@@ -100,8 +92,7 @@ namespace avmplus
 		union {
 			double value;
 			struct {
-#ifdef AVM10_BIG_ENDIAN
-				uint32 msw, lsw;
+#ifdef AVMPLUS_BIG_ENDIAN				uint32 msw, lsw;
 #else
 				uint32 lsw, msw;
 #endif
@@ -128,8 +119,7 @@ namespace avmplus
 		union {
 			double value;
 			struct {
-#ifdef AVM10_BIG_ENDIAN
-				uint32 msw, lsw;
+#ifdef AVMPLUS_BIG_ENDIAN				uint32 msw, lsw;
 #else
 				uint32 lsw, msw;
 #endif
@@ -151,8 +141,7 @@ namespace avmplus
 		union {
 			double value;
 			struct {
-#ifdef AVM10_BIG_ENDIAN
-				uint32 msw, lsw;
+#ifdef AVMPLUS_BIG_ENDIAN				uint32 msw, lsw;
 #else
 				uint32 lsw, msw;
 #endif
@@ -180,8 +169,7 @@ namespace avmplus
 
 	int MathUtils::isInfinite(double x)
 	{
-		uint64 v = *((uint64 *)&x);
-		if ((v & 0x7fffffffffffffffLL) != 0x7FF0000000000000LL)
+		union { double d; uint64 v; }; d = x;		if ((v & 0x7fffffffffffffffLL) != 0x7FF0000000000000LL)
 			return 0;
 		if (v & 0x8000000000000000LL)
 			return -1;
@@ -189,37 +177,21 @@ namespace avmplus
 			return 1;
 	}
 
-	#if 0
-	bool MathUtils::isNaN(double x)
-	{
-		return x != x;
-		uint64 v = *((uint64 *)&x);
-		return ((v & 0x7ff0000000000000LL) == 0x7ff0000000000000LL &&  // is a special value
-			    (v & 0x000fffffffffffffLL) != 0x0000000000000000LL);   // not inf
-	}
-	#endif
+	bool MathUtils::isNaN(double value)	{
+		union {			  double dvalue;			  uint64 lvalue;		};		dvalue = value;		return ( ( int64(lvalue) & ~0x8000000000000000ULL ) > 0x7ff0000000000000ULL ); 		//return x != x;	}
 
 	bool MathUtils::isNegZero(double x)
 	{
-		uint64 v = *((uint64 *)&x);
-		return (v == 0x8000000000000000LL);
+		union { double d; uint64 v; }; d = x;		return (v == 0x8000000000000000LL);
 	}
 
 #endif // UNIX
 
 	double MathUtils::nan()
 	{
-#if defined(UNIX) && defined(NAN)
-		return NAN;
+#ifdef __GNUC__		return NAN;
 #else
-#ifdef AVM10_BIG_ENDIAN
-		uint32 nan[2]={0x7fffffff, 0xffffffff};
-#else
-		uint32 nan[2]= {0xffffffff, 0x7fffffff}; 
-#endif
-		double g = *(double*)nan;
-		return g;
-#endif
+		union { float f; uint32 d; }; d = 0x7FFFFFFF;		return f;#endif
 	}
 
 	int MathUtils::nextPowerOfTwo(int n)
@@ -436,20 +408,16 @@ namespace avmplus
 	// ECMA-262 section 9.4
 	double MathUtils::toInt(double value)
 	{
-#ifdef WIN32
-		#ifdef AVMPLUS_AMD64
-		int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
-		#else
-		int intValue;
+#if defined(WIN32) && defined(AVMPLUS_AMD64)		int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
+#elif defined(WIN32) && defined(AVMPLUS_IA32)		int intValue;
 		_asm fld [value];
 		_asm fistp [intValue];
-		#endif
 #elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 		int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
 #else
 		int intValue = real2int(value);
 #endif
-		if ((value == (double)(intValue)) && ((uint32)intValue != 0x80000000))
+		if ((value == (double)(intValue)) && ((uint32)intValue != 0x80000000))
 			return value;
 
 		if (MathUtils::isNaN(value)) {
@@ -658,29 +626,21 @@ namespace avmplus
 		return powInternal(x, y);
 	}
 
-	// convertDoubleToString: Converts a double-precision floating-point number
-	// to its ASCII representation
-	//
-
 	int MathUtils::nextDigit(double *value)
 	{
 		int digit;
-		#ifdef WIN32
-		#ifdef AVMPLUS_AMD64
-		digit = _mm_cvttsd_si32(_mm_set_sd(*value));
-		#else
-		// WARNING! nextDigit assumes that rounding mode is
+		#if defined(WIN32) && defined(AVMPLUS_AMD64)		digit = _mm_cvttsd_si32(_mm_set_sd(*value));
+		#elif defined(WIN32) && defined(AVMPLUS_IA32)		// WARNING! nextDigit assumes that rounding mode is
 		// set to truncate.
 		_asm mov eax,[value];
 		_asm fld qword ptr [eax];
 		_asm fistp [digit];
-		#endif
 		#elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 		digit = _mm_cvttsd_si32(_mm_set_sd(*value));
 		#else
 		digit = (int) *value;
 		#endif
-		*value -= digit;
+		*value -= digit;
 		*value *= 10;
 		return digit;
 	}
@@ -847,14 +807,10 @@ namespace avmplus
 		// is much, much faster then our double version.  (Skips a ton of _ftol
 		// which are slow).
 		if (mode == DTOSTR_NORMAL) {
-#ifdef WIN32
-			#ifdef AVMPLUS_AMD64
-			int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
-			#else
-			int intValue;
+#if defined(WIN32) && defined(AVMPLUS_AMD64)			int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
+#elif defined(WIN32) && defined(AVMPLUS_IA32)			int intValue;
 			_asm fld [value];
 			_asm fistp [intValue];
-			#endif
 #elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 			int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
 #else
@@ -1226,8 +1182,7 @@ namespace avmplus
 				memcpy(buff,ptr,16);
 				buff[8] = 0;
 				if (String::Compare(buff,"Infinity",8) == 0) { 
-					*value = (negate ? 0.0 - MathUtils::infinity() : MathUtils::infinity());
-					return true;
+					*value = (negate ? MathUtils::neg_infinity() : MathUtils::infinity());					return true;
 				}
 			}
 			return false;

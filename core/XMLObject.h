@@ -188,8 +188,7 @@ namespace avmplus
 
 		Atom localName ();
 		Atom name ();
-		Atom getNamespace (Atom *argv, int argc); // prefix is optional (was previously called namespace)
-		ArrayObject *namespaceDeclarations ();
+		Atom getNamespace (Atom prefix, int argc); // prefix is optional (was previously called namespace)		ArrayObject *namespaceDeclarations ();
 		String *nodeKind () const;
 		XMLObject *normalize ();
 		Atom parent ();

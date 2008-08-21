@@ -92,8 +92,8 @@ namespace avmshell
 			toplevel()->throwArgumentError(kNullArgumentError, "command");
 		}
 		UTF8String *commandUTF8 = command->toUTF8String();
-		return system(commandUTF8->c_str());
-	}
+		#ifdef UNDER_CE		AvmAssert(0);		(void) commandUTF8;		return 0;		#else		return system(commandUTF8->c_str());
+		#endif	}
 	
 	Stringp SystemClass::getAvmplusVersion()
 	{
@@ -172,7 +172,8 @@ namespace avmshell
     }
 
 	int SystemClass::user_argc;
-	char **SystemClass::user_argv;
+#ifdef UNDER_CE	TCHAR **SystemClass::user_argv;#else	char **SystemClass::user_argv;
+#endif
 
 	ArrayObject * SystemClass::getArgv()
 	{

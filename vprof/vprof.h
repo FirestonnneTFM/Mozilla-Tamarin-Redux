@@ -96,15 +96,10 @@ typedef __int64            int64_t;
 typedef unsigned __int64   uint64_t;
 typedef long long          int64_t;
 typedef unsigned long long uint64_t;
+#define vprof_align8(t) __declspec(align(8)) t
 #else
 #include <inttypes.h>
-#endif
-
-// portable align macro
-#if defined(_MSC_VER)
-	#define vprof_align8(t) __declspec(align(8)) t
-#elif defined(__GNUC__)
-	#define vprof_align8(t) t __attribute__ ((aligned (8)))
+#define vprof_align8(t) t __attribute__ ((aligned (8)))
 #endif
 
 #ifdef __cplusplus
@@ -115,6 +110,8 @@ int profileValue (void** id, char* file, int line, int64_t value, ...);
 int _profileEntryValue (void* id, int64_t value);
 int histValue(void** id, char* file, int line, int64_t value, int nbins, ...);
 int _histEntryValue (void* id, int64_t value);
+uint64_t rtstamp();
+uint64_t tstamp();
 
 #ifdef __cplusplus
 }

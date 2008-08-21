@@ -39,15 +39,16 @@
 
 namespace avmshell
 {
-	FileInputStream::FileInputStream(const char *filename)
-	{
-		file = fopen(filename, "rb");
+#ifdef UNDER_CE	FileInputStream::FileInputStream(const wchar *filename)#else	FileInputStream::FileInputStream(const char *filename)
+#endif	{
+#ifdef UNDER_CE		file = _wfopen(filename, _T("rb"));#else		file = fopen(filename, "rb");
+#endif
 
 		if (file != NULL) {
 			fseek(file, 0L, SEEK_END);
 			len = ftell(file);
-			rewind(file);
-		}
+			#ifdef UNDER_CE			fseek (file, 0L, SEEK_SET);			#else			rewind(file);
+			#endif		}
 	}
 
 	bool FileInputStream::valid() const

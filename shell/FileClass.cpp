@@ -83,7 +83,8 @@ namespace avmshell
 		}
 		fseek(fp, 0L, SEEK_END);
 		long len = ftell(fp);
-		rewind(fp);
+		#ifdef UNDER_CE		fseek (fp, 0L, SEEK_SET);		#else		rewind(fp);
+		#endif
 
 		unsigned char *c = new unsigned char[len+1];
 		len = (long)fread(c, 1, len, fp);
@@ -154,7 +155,6 @@ namespace avmshell
 			toplevel->throwError(kFileWriteError, filename);
 		}
 		UTF8String* dataUTF8 = data->toUTF8String();
-		fwrite(dataUTF8->c_str(), dataUTF8->length(), 1, fp);
-		fclose(fp);
+		if (fwrite(dataUTF8->c_str(), dataUTF8->length(), 1, fp) != 1) {			toplevel->throwError(kFileWriteError, filename);		}		fclose(fp);
 	}
 }

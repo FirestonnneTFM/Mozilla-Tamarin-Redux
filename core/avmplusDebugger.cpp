@@ -137,7 +137,7 @@ namespace avmplus
 		}
 
 		// tracing information
-		traceLine(line);
+		if (!exited)			traceLine(line);
 
 		// check if we should stop due to breakpoint or step
 		bool stop = false;

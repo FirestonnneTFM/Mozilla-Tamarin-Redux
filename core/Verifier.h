@@ -99,8 +99,8 @@ namespace avmplus
 		 * an exception will be thrown, of type VerifyError.
 		 * @param info the method to verify
 		 */
-		void verify(CodegenMIR *mir);
-		FrameState* getFrameState(sintptr targetpc);
+#ifdef AVMPLUS_MIR		void verify(CodegenMIR *mir);
+#else		void verify();#endif		FrameState* getFrameState(sintptr targetpc);
 
 	private:
 		Toplevel* toplevel;
@@ -123,8 +123,7 @@ namespace avmplus
 		bool canAssign(Traits* lhs, Traits* rhs) const;
 		Traits* checkSlot(Traits* traits, int slot_id);
 		Traits* findCommonBase(Traits* t1, Traits* t2);
-		void emitCoerceArgs(AbstractFunction* m, int argc);
-		void printValue(Value& v);
+		void emitCoerceArgs(AbstractFunction* m, int argc, bool isctor=false);		void printValue(Value& v);
 		Traits* readBinding(Traits* traits, Binding b);
 		void checkEarlySlotBinding(Traits* traits);
 		void checkEarlyMethodBinding(Traits* traits);
@@ -138,8 +137,8 @@ namespace avmplus
 
 		void emitCoerce(Traits* target, int i);
 		void emitToString(AbcOpcode opcode, int index);
-		void emitCheckNull(int index);
-		void emitCompare(AbcOpcode opcode);
+		#ifdef AVMPLUS_MIR		void emitCheckNull(int index);
+		#endif		void emitCompare(AbcOpcode opcode);
 		void emitFindProperty(AbcOpcode opcode, Multiname& multiname);
 		void emitGetProperty(Multiname &multiname, int n);
 		void emitGetGlobalScope();

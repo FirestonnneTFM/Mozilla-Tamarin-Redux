@@ -87,7 +87,7 @@ namespace avmplus
 		return vtable->ivtable;
 	}
 
-	// this = argv[0] (ignored)
+	// Called from construct or generated code to alloc a new instance	ScriptObject* ClassClosure::newInstance() {		VTable* ivtable = this->ivtable();		AvmAssert(ivtable != NULL);		if (prototype == NULL) // ES3 spec, 13.2.2 (we've already ensured prototype is either an Object or null)			prototype = AvmCore::atomToScriptObject(toplevel()->objectClass->get_prototype());		ScriptObject *obj = createInstance(ivtable, prototype);		return obj;	}	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]
 	Atom ClassClosure::construct(int argc, Atom* argv)
@@ -95,10 +95,8 @@ namespace avmplus
 		VTable* ivtable = this->ivtable();
 		AvmAssert(ivtable != NULL);
 		AvmAssert(argv != NULL); // need at least one arg spot passed in
-		if (prototype == NULL) // ES3 spec, 13.2.2 (we've already ensured prototype is either an Object or null)
-			prototype = AvmCore::atomToScriptObject(toplevel()->objectClass->get_prototype());
 
-		ScriptObject *obj = createInstance(ivtable, prototype);
+		ScriptObject* obj = newInstance();
 
 		if (vtable->call != NULL)
 		{
