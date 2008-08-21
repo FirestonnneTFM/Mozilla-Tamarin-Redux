@@ -274,7 +274,9 @@ namespace avmplus
 
 		/** Dummy destructor to avoid warnings */
 		virtual ~AbstractFunction() {}
-#endif #ifdef AVMPLUS_VERBOSE	public:
+#endif 
+#ifdef AVMPLUS_VERBOSE
+	public:
 		virtual Stringp format(AvmCore* core) const;
 #endif
 
@@ -303,4 +305,22 @@ namespace avmplus
 #endif
 }
 
-#include "PoolObject.h"namespace avmplus{	inline AvmCore* AbstractFunction::core() const	{		return pool->core;	}	inline bool AbstractFunction::usesCallerContext() const	{		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));	}	// Builtin + non-native functions always need the dxns code emitted 	// Builtin + native functions have flags to specify if they need the dxns code	inline bool AbstractFunction::usesDefaultXmlNamespace() const	{		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));	}}#endif /* __avmplus_AbstractFunction__ */
+#include "PoolObject.h"
+namespace avmplus
+{
+	inline AvmCore* AbstractFunction::core() const
+	{
+		return pool->core;
+	}
+	inline bool AbstractFunction::usesCallerContext() const
+	{
+		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));
+	}
+	// Builtin + non-native functions always need the dxns code emitted 
+	// Builtin + native functions have flags to specify if they need the dxns code
+	inline bool AbstractFunction::usesDefaultXmlNamespace() const
+	{
+		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
+	}
+}
+#endif /* __avmplus_AbstractFunction__ */

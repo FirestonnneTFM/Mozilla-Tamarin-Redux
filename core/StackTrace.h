@@ -63,7 +63,10 @@ namespace avmplus
 			AbstractFunction *info;
 			Stringp filename;			// in the form "C:\path\to\package\root;package/package;filename"
 		    int linenum;
-#ifdef AVMPLUS_64BIT			int pad;#endif		};
+#ifdef AVMPLUS_64BIT
+			int pad;
+#endif
+		};
 		bool equals(StackTrace::Element *e, int depth);
 		static uintptr hashCode(StackTrace::Element *e, int depth);
 
@@ -134,7 +137,13 @@ namespace avmplus
 			initialize(env, info, framep, frameTraits, argc, ap, eip);
 		}
 
-#ifdef AVMTHUNK_VERSION		// dummy ctor we can use to construct an uninitalized version -- useful for the thunks, which		// will construct one and immediately call intialize (via debugEnter) so there's no need to		// redundantly fill in fields.		inline explicit CallStackNode(int) { }#endif		// WARNING!!!! this method is called by CodegenMIR if you change the signature then change the call there.
+#ifdef AVMTHUNK_VERSION
+		// dummy ctor we can use to construct an uninitalized version -- useful for the thunks, which
+		// will construct one and immediately call intialize (via debugEnter) so there's no need to
+		// redundantly fill in fields.
+		inline explicit CallStackNode(int) { }
+#endif
+		// WARNING!!!! this method is called by CodegenMIR if you change the signature then change the call there.
 		void initialize(MethodEnv *			env,
 						AbstractFunction *	info,
 						Atom*				framep,

@@ -81,7 +81,8 @@ namespace avmplus
 		return (AvmCore::isName(m_prefix) && AvmCore::atomToString(m_prefix)->length()>0);
 	}
 
-	bool Namespace::EqualTo(const Namespace* other) const	{
+	bool Namespace::EqualTo(const Namespace* other) const
+	{
 		if (isPrivate() || other->isPrivate())
 		{
 			// one of these namespaces is private, so compare using object identity

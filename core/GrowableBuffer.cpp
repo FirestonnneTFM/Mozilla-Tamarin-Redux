@@ -38,7 +38,10 @@
 #include "avmplus.h"
 
 #ifdef DARWIN
-    #if defined(AVMPLUS_MAC_CARBON)		#include <Carbon/Carbon.h>	#endif#endif
+    #if defined(AVMPLUS_MAC_CARBON)
+		#include <Carbon/Carbon.h>
+	#endif
+#endif
 
 #ifdef AVMPLUS_ROSETTA
 // Include sysctlbyname and getpid
@@ -122,7 +125,8 @@ extern "C"
 
 namespace avmplus
 {
-#if defined(AVMPLUS_MIR) || defined(DEBUGGER)	GrowableBuffer::GrowableBuffer(MMgc::GCHeap *gcheap, bool mir)
+#if defined(AVMPLUS_MIR) || defined(DEBUGGER)
+	GrowableBuffer::GrowableBuffer(MMgc::GCHeap *gcheap, bool mir)
 		: heap(gcheap)
 		, forMir(mir)
 	{
@@ -788,7 +792,9 @@ namespace avmplus
 		// Add self to exception thread's list
 		int retCode = pthread_mutex_lock(&mutex);
 		(void)retCode;
-        #if !defined(AVMPLUS_PTHREAD_NO_ASSERT)		AvmAssert(!retCode);
+
+        #if !defined(AVMPLUS_PTHREAD_NO_ASSERT)
+		AvmAssert(!retCode);
 		#endif
 
 		thread = mach_thread_self();
@@ -797,7 +803,9 @@ namespace avmplus
 		guardList = this;
 		
 		retCode = pthread_mutex_unlock(&mutex);
-        #if !defined(AVMPLUS_PTHREAD_NO_ASSERT)		AvmAssert(!retCode);
+
+        #if !defined(AVMPLUS_PTHREAD_NO_ASSERT)
+		AvmAssert(!retCode);
 		#endif
 
 		exception_mask_t mask = EXC_MASK_BAD_ACCESS;
@@ -893,7 +901,9 @@ namespace avmplus
 													  exception_data_t code,
 													  mach_msg_type_number_t code_count)
 	{
-		bool isAccessViolation = false;				// Find the GenericGuard associated with thread
+		bool isAccessViolation = false;
+		
+		// Find the GenericGuard associated with thread
 		int retCode = pthread_mutex_lock(&mutex);
 		(void)retCode;
 		AvmAssert(!retCode);
@@ -954,7 +964,8 @@ namespace avmplus
 								 ports);
 	}
 	
-#ifdef AVMPLUS_MIR	bool GrowthGuard::handleException(kern_return_t& returnCode)
+#ifdef AVMPLUS_MIR
+	bool GrowthGuard::handleException(kern_return_t& returnCode)
 	{
     #ifdef AVMPLUS_ROSETTA
 		// Under Rosetta, thread_get_state does not appear to work.
@@ -1026,7 +1037,8 @@ namespace avmplus
     static pthread_key_t guardKey = 0;
     static struct sigaction orig_sa;
 
-    static void dispatchHandleException(int /*sig*/, siginfo_t *info, void * /*context*/)    {
+    static void dispatchHandleException(int /*sig*/, siginfo_t *info, void * /*context*/)
+    {
         GenericGuard *genericGuard = (GenericGuard*) pthread_getspecific(guardKey);
         bool handled = false;
 
@@ -1321,7 +1333,8 @@ namespace avmplus
 #endif /* AVMPLUS_MACH_EXCEPTIONS */
 
 #ifdef AVMPLUS_UNIX
-    bool BufferGuard::handleException(byte * /*addr*/)    {
+    bool BufferGuard::handleException(byte * /*addr*/)
+    {
 #ifdef _DEBUG
         printf("BufferGuard::handleException: not implemented yet\n");
 #endif
@@ -1329,7 +1342,8 @@ namespace avmplus
     }
 #endif // AVMPLUS_UNIX
 
-#ifdef AVMPLUS_MIR	// GrowthGuard
+#ifdef AVMPLUS_MIR
+	// GrowthGuard
 	GrowthGuard::GrowthGuard(GrowableBuffer* buffer)
 	{
 		this->registered = false;
@@ -1400,7 +1414,8 @@ namespace avmplus
 #endif
 
 	// Platform specific code follows
-#ifdef AVMPLUS_MIR#ifdef AVMPLUS_WIN32
+#ifdef AVMPLUS_MIR
+#ifdef AVMPLUS_WIN32
 	int GrowthGuard::handleException(struct _EXCEPTION_RECORD* exceptionRecord,
 									 void* /*establisherFrame*/,
 									 struct _CONTEXT* /*contextRecord*/,
@@ -1443,7 +1458,8 @@ namespace avmplus
 #endif /* AVMPLUS_WIN32 */
 #endif
 
-#ifdef AVMPLUS_MIR#ifdef AVMPLUS_UNIX
+#ifdef AVMPLUS_MIR
+#ifdef AVMPLUS_UNIX
     bool GrowthGuard::handleException(byte* addr)
     {
         GrowableBuffer* g = buffer;

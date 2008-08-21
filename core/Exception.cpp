@@ -38,7 +38,13 @@
 
 #include "avmplus.h"
 
-#if defined(AVMPLUS_AMD64) && defined(_WIN64)	extern "C"	{		_int64 __cdecl longjmp64(jmp_buf jmpbuf, _int64 arg);	}#endifnamespace avmplus
+#if defined(AVMPLUS_AMD64) && defined(_WIN64)
+	extern "C"
+	{
+		_int64 __cdecl longjmp64(jmp_buf jmpbuf, _int64 arg);
+	}
+#endif
+namespace avmplus
 {
 	//
 	// Exception
@@ -85,7 +91,13 @@
 	//
 	// ExceptionFrame
 	//
-#if defined(AVMPLUS_AMD64) && !defined(_WIN64)	// FIXME: This is a temporary approach.	void *ExceptionFrame::lptr[MAX_LONG_JMP_COUNT] = {0};	int   ExceptionFrame::lptrcounter = 1;#endif //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)	void ExceptionFrame::beginTry(AvmCore* core)
+
+#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+	// FIXME: This is a temporary approach.
+	void *ExceptionFrame::lptr[MAX_LONG_JMP_COUNT] = {0};
+	int   ExceptionFrame::lptrcounter = 1;
+#endif //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+	void ExceptionFrame::beginTry(AvmCore* core)
 	{
 		this->core = core;
 
@@ -127,7 +139,16 @@
 	void ExceptionFrame::throwException(Exception *exception)
 	{
 		core->exceptionAddr = exception;
-#if defined(AVMPLUS_AMD64) && defined(_WIN64)		longjmp64(jmpbuf, (uintptr)exception); #elif defined(AVMPLUS_AMD64)		AvmAssert(lptrcounter<MAX_LONG_JMP_COUNT);		lptr[lptrcounter++] = exception;		longjmp(jmpbuf, (lptrcounter-1)*sizeof(void *)); #else		longjmp(jmpbuf, (int)(uintptr)exception); #endif	}
+#if defined(AVMPLUS_AMD64) && defined(_WIN64)
+		longjmp64(jmpbuf, (uintptr)exception); 
+#elif defined(AVMPLUS_AMD64)
+		AvmAssert(lptrcounter<MAX_LONG_JMP_COUNT);
+		lptr[lptrcounter++] = exception;
+		longjmp(jmpbuf, (lptrcounter-1)*sizeof(void *)); 
+#else
+		longjmp(jmpbuf, (int)(uintptr)exception); 
+#endif
+	}
 
 	void ExceptionFrame::beginCatch()
 	{

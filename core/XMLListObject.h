@@ -184,7 +184,8 @@ namespace avmplus
 		ArrayObject *inScopeNamespaces ();
 		Atom insertChildAfter (Atom child1, Atom child2);
 		Atom insertChildBefore (Atom child1, Atom child2);
-		Atom getNamespace (Atom prefix, int argc); // prefix is optional		Atom localName ();
+		Atom getNamespace (Atom prefix, int argc); // prefix is optional
+		Atom localName ();
 		ArrayObject *namespaceDeclarations ();
 		String *nodeKind ();
 		XMLObject *prependChild (Atom value);

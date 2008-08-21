@@ -35,14 +35,21 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"#include "BigInteger.h"#include <math.h>
+#include "avmplus.h"
+#include "BigInteger.h"
+#include <math.h>
 
-#if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))    #include <emmintrin.h>#endifnamespace avmplus
+
+#if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
+    #include <emmintrin.h>
+#endif
+namespace avmplus
 {
 	const double kLog2_10 = 0.30102999566398119521373889472449;
 
 	// optimize pow(10,x) for commonly sized numbers;
-	static const double kPowersOfTen[23] = { 1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10,									   1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20,
+	static const double kPowersOfTen[23] = { 1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10,
+									   1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20,
 									   1e21, 1e22 };
 
 	static inline double quickPowTen(int exp)
@@ -69,9 +76,21 @@
 
 	double MathUtils::infinity()
 	{
-		#ifdef __GNUC__		return INFINITY;
+		#ifdef __GNUC__
+		return INFINITY;
 		#else
-		union { float f; uint32 d; }; d = 0x7F800000;		return f;		#endif	}	double MathUtils::neg_infinity()	{		#ifdef __GNUC__		return 0.0 - INFINITY;		#else		union { float f; uint32 d; }; d = 0xFF800000;		return f;		#endif
+		union { float f; uint32 d; }; d = 0x7F800000;
+		return f;
+		#endif
+	}
+	double MathUtils::neg_infinity()
+	{
+		#ifdef __GNUC__
+		return 0.0 - INFINITY;
+		#else
+		union { float f; uint32 d; }; d = 0xFF800000;
+		return f;
+		#endif
 	}
 
 #ifdef UNIX
@@ -92,7 +111,8 @@
 		union {
 			double value;
 			struct {
-#ifdef AVMPLUS_BIG_ENDIAN				uint32 msw, lsw;
+#ifdef AVMPLUS_BIG_ENDIAN
+				uint32 msw, lsw;
 #else
 				uint32 lsw, msw;
 #endif
@@ -119,7 +139,8 @@
 		union {
 			double value;
 			struct {
-#ifdef AVMPLUS_BIG_ENDIAN				uint32 msw, lsw;
+#ifdef AVMPLUS_BIG_ENDIAN
+				uint32 msw, lsw;
 #else
 				uint32 lsw, msw;
 #endif
@@ -141,7 +162,8 @@
 		union {
 			double value;
 			struct {
-#ifdef AVMPLUS_BIG_ENDIAN				uint32 msw, lsw;
+#ifdef AVMPLUS_BIG_ENDIAN
+				uint32 msw, lsw;
 #else
 				uint32 lsw, msw;
 #endif
@@ -169,7 +191,8 @@
 
 	int MathUtils::isInfinite(double x)
 	{
-		union { double d; uint64 v; }; d = x;		if ((v & 0x7fffffffffffffffLL) != 0x7FF0000000000000LL)
+		union { double d; uint64 v; }; d = x;
+		if ((v & 0x7fffffffffffffffLL) != 0x7FF0000000000000LL)
 			return 0;
 		if (v & 0x8000000000000000LL)
 			return -1;
@@ -177,21 +200,33 @@
 			return 1;
 	}
 
-	bool MathUtils::isNaN(double value)	{
-		union {			  double dvalue;			  uint64 lvalue;		};		dvalue = value;		return ( ( int64(lvalue) & ~0x8000000000000000ULL ) > 0x7ff0000000000000ULL ); 		//return x != x;	}
+	bool MathUtils::isNaN(double value)
+	{
+		union {
+			  double dvalue;
+			  uint64 lvalue;
+		};
+		dvalue = value;
+		return ( ( int64(lvalue) & ~0x8000000000000000ULL ) > 0x7ff0000000000000ULL ); 
+		//return x != x;
+	}
 
 	bool MathUtils::isNegZero(double x)
 	{
-		union { double d; uint64 v; }; d = x;		return (v == 0x8000000000000000LL);
+		union { double d; uint64 v; }; d = x;
+		return (v == 0x8000000000000000LL);
 	}
 
 #endif // UNIX
 
 	double MathUtils::nan()
 	{
-#ifdef __GNUC__		return NAN;
+#ifdef __GNUC__
+		return NAN;
 #else
-		union { float f; uint32 d; }; d = 0x7FFFFFFF;		return f;#endif
+		union { float f; uint32 d; }; d = 0x7FFFFFFF;
+		return f;
+#endif
 	}
 
 	int MathUtils::nextPowerOfTwo(int n)
@@ -408,8 +443,10 @@
 	// ECMA-262 section 9.4
 	double MathUtils::toInt(double value)
 	{
-#if defined(WIN32) && defined(AVMPLUS_AMD64)		int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
-#elif defined(WIN32) && defined(AVMPLUS_IA32)		int intValue;
+#if defined(WIN32) && defined(AVMPLUS_AMD64)
+		int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
+#elif defined(WIN32) && defined(AVMPLUS_IA32)
+		int intValue;
 		_asm fld [value];
 		_asm fistp [intValue];
 #elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
@@ -417,7 +454,8 @@
 #else
 		int intValue = real2int(value);
 #endif
-		if ((value == (double)(intValue)) && ((uint32)intValue != 0x80000000))
+
+		if ((value == (double)(intValue)) && ((uint32)intValue != 0x80000000))
 			return value;
 
 		if (MathUtils::isNaN(value)) {
@@ -629,8 +667,11 @@
 	int MathUtils::nextDigit(double *value)
 	{
 		int digit;
-		#if defined(WIN32) && defined(AVMPLUS_AMD64)		digit = _mm_cvttsd_si32(_mm_set_sd(*value));
-		#elif defined(WIN32) && defined(AVMPLUS_IA32)		// WARNING! nextDigit assumes that rounding mode is
+
+		#if defined(WIN32) && defined(AVMPLUS_AMD64)
+		digit = _mm_cvttsd_si32(_mm_set_sd(*value));
+		#elif defined(WIN32) && defined(AVMPLUS_IA32)
+		// WARNING! nextDigit assumes that rounding mode is
 		// set to truncate.
 		_asm mov eax,[value];
 		_asm fld qword ptr [eax];
@@ -640,7 +681,8 @@
 		#else
 		digit = (int) *value;
 		#endif
-		*value -= digit;
+
+		*value -= digit;
 		*value *= 10;
 		return digit;
 	}
@@ -807,8 +849,10 @@
 		// is much, much faster then our double version.  (Skips a ton of _ftol
 		// which are slow).
 		if (mode == DTOSTR_NORMAL) {
-#if defined(WIN32) && defined(AVMPLUS_AMD64)			int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
-#elif defined(WIN32) && defined(AVMPLUS_IA32)			int intValue;
+#if defined(WIN32) && defined(AVMPLUS_AMD64)
+			int intValue = _mm_cvttsd_si32(_mm_set_sd(value));
+#elif defined(WIN32) && defined(AVMPLUS_IA32)
+			int intValue;
 			_asm fld [value];
 			_asm fistp [intValue];
 #elif defined(_MAC) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
@@ -1182,7 +1226,8 @@
 				memcpy(buff,ptr,16);
 				buff[8] = 0;
 				if (String::Compare(buff,"Infinity",8) == 0) { 
-					*value = (negate ? MathUtils::neg_infinity() : MathUtils::infinity());					return true;
+					*value = (negate ? MathUtils::neg_infinity() : MathUtils::infinity());
+					return true;
 				}
 			}
 			return false;
