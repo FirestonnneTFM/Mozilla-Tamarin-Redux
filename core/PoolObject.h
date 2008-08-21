@@ -41,6 +41,32 @@
 
 namespace avmplus
 {
+#ifdef AVMPLUS_WORD_CODE
+	
+	// This needs to be a root because there are GCObjects referenced from the multinames
+	// that are not protected by write barriers (namely, the NamespaceSet objects).
+	// Other objects in the multinames are RC; the PrecomputedMultinames constructor
+	// explicitly increments their reference counts, and the destructor decrements
+	// them.  There are no barriers here, because we want to be able to reach in
+	// and reference a Multiname structure directly.
+	
+	class PrecomputedMultinames : public MMgc::GCRoot
+	{
+	public:
+        void *operator new(size_t size, size_t extra=0)
+        {
+			return MMgc::FixedMalloc::GetInstance()->Alloc(size+extra);
+        }
+
+		PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool);		
+		~PrecomputedMultinames();
+		void Initialize(PoolObject* pool);		// Eagerly parses all multinames
+		uint32 nNames;							// Number of elements
+		Multiname multinames[1];				// Allocated size is MAX(1,nName)
+	};
+	
+#endif  // AVMPLUS_WORD_CODE
+	
 	/**
 	 * The PoolObject class is a container for the pool of resources
 	 * decoded from an ABC file: the constant pool, the methods
@@ -101,6 +127,13 @@ namespace avmplus
 		// whether callees will set their context.
 		bool isBuiltin;
 
+#ifdef AVMPLUS_WORD_CODE
+		struct 
+		{
+			PrecomputedMultinames* cpool_mn;	// a GCRoot
+		} word_code;
+#endif
+		
 		#ifdef AVMPLUS_MIR
 		/** buffer containing generated machine code for all methods */
 		GrowableBuffer *codeBuffer;
