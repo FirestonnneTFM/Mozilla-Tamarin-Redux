@@ -40,7 +40,10 @@
 #define __GCSpinLock__
 
 #ifdef __GNUC__
-    #if !defined(MMGC_MAC_NO_CORE_SERVICES)		#include <CoreServices/CoreServices.h>    #endif#else // __GNUC__
+    #if !defined(MMGC_MAC_NO_CORE_SERVICES)
+		#include <CoreServices/CoreServices.h>
+    #endif
+#else // __GNUC__
 #include <Multiprocessing.h>
 #endif // __GNUC__
 

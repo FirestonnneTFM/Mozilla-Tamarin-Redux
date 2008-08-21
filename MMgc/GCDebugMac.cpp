@@ -39,16 +39,22 @@
 
 #include "MMgc.h"
 
-#if !defined(__MWERKS__) && !defined(MMGC_MAC_NO_CORE_SERVICES)    #include <CoreServices/CoreServices.h>#endif
+#if !defined(__MWERKS__) && !defined(MMGC_MAC_NO_CORE_SERVICES)
+    #include <CoreServices/CoreServices.h>
+#endif
 
 #ifndef __MACH__
 	#include <windows.h>
 #endif
-#include <stdio.h>
+
+#include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
-#if defined(MMGC_CUSTOM_DEBUG_MESSAGE_HANDLER)	void MMGCCustomDebugMessageHandler(const char *message);#endifnamespace MMgc
+#if defined(MMGC_CUSTOM_DEBUG_MESSAGE_HANDLER)
+	void MMGCCustomDebugMessageHandler(const char *message);
+#endif
+namespace MMgc
 {
 	void GCDebugMsg(bool debuggerBreak, const char* format, ...)
 	{
@@ -63,5 +69,21 @@
 
 	void GCDebugMsg(const char* p, bool debugBreak)
 	{
-        #if defined(MMGC_CUSTOM_DEBUG_MESSAGE_HANDLER)			MMGCCustomDebugMessageHandler(p);        #else		    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);			if(debugBreak)			{				Str255 buf;				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);				DebugStr(buf);			}			else			{				::CFShow(cfStr);			}			::CFRelease (cfStr);		#endif	}
+        #if defined(MMGC_CUSTOM_DEBUG_MESSAGE_HANDLER)
+			MMGCCustomDebugMessageHandler(p);
+        #else
+		    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);
+			if(debugBreak)
+			{
+				Str255 buf;
+				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
+				DebugStr(buf);
+			}
+			else
+			{
+				::CFShow(cfStr);
+			}
+			::CFRelease (cfStr);
+		#endif
+	}
 }

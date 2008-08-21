@@ -129,22 +129,27 @@ namespace MMgc
 			GCAssert(false);
 	}
 
-	bool GCHeap::SetGuardPage(void */*address*/)	{
+	bool GCHeap::SetGuardPage(void */*address*/)
+	{
 		return false;
 	}
 #endif /* USE_MMAP */
 
 #ifdef AVMPLUS_JIT_READONLY
 	/**
-	 * SetPageProtection changes the page access protections on a block of pages,	 * to make JIT-ted code executable or not.
+	 * SetPageProtection changes the page access protections on a block of pages,
+	 * to make JIT-ted code executable or not.
 	 *
 	 * If executableFlag is true, the memory is made executable and read-only.
 	 *
 	 * If executableFlag is false, the memory is made non-executable and
 	 * read-write.
 	 */
-	void GCHeap::SetPageProtection(void *address,							   size_t size,
-							   bool executableFlag,							   bool writeableFlag)	{
+	void GCHeap::SetPageProtection(void *address,
+							   size_t size,
+							   bool executableFlag,
+							   bool writeableFlag)
+	{
 		// Should use vmPageSize() or kNativePageSize here.
 		// But this value is hard coded to 4096 if we don't use mmap.
 		int bitmask = sysconf(_SC_PAGESIZE) - 1;
@@ -155,7 +160,14 @@ namespace MMgc
 		void *endPage   = (void*) (((size_t)endAddress + bitmask) & ~bitmask);
 		size_t sizePaged = (size_t)endPage - (size_t)beginPage;
 
-		int flags = PROT_READ;		if (executableFlag) {			flags |= PROT_EXEC;		}		if (writeableFlag) {			flags |= PROT_WRITE;		}#ifdef DEBUG
+		int flags = PROT_READ;
+		if (executableFlag) {
+			flags |= PROT_EXEC;
+		}
+		if (writeableFlag) {
+			flags |= PROT_WRITE;
+		}
+#ifdef DEBUG
 		int retval =
 #endif
 		  mprotect((maddr_ptr)beginPage, sizePaged,flags);
@@ -320,17 +332,20 @@ namespace MMgc
 
 
 #ifdef MEMORY_INFO  
-	void GetInfoFromPC(int pc, char *buff, int /*buffSize*/) 	{
+	void GetInfoFromPC(int pc, char *buff, int /*buffSize*/) 
+	{
 #ifdef AVMPLUS_UNIX
 		Dl_info dlip;
 		dladdr((void *const)pc, &dlip);
-		sprintf(buff, "0x%p:%s", (void *)pc, dlip.dli_sname);#else
+		sprintf(buff, "0x%p:%s", (void *)pc, dlip.dli_sname);
+#else
 		sprintf(buff, "0x%x", pc);
 #endif
 	}
 
 #ifdef MMGC_SPARC
-	void GetStackTrace(sintptr *trace, int len, int skip)	{
+	void GetStackTrace(sintptr *trace, int len, int skip)
+	{
 	  // TODO for sparc.
 		GCAssert(false);
 
@@ -338,16 +353,20 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_PPC
-	void GetStackTrace(sintptr *trace, int len, int skip) 	{
+	void GetStackTrace(sintptr *trace, int len, int skip) 
+	{
 	  register int stackp;
-	  sintptr pc;	  asm("mr %0,%%r1" : "=r" (stackp));	  while(skip--) {
+	  sintptr pc;
+	  asm("mr %0,%%r1" : "=r" (stackp));
+	  while(skip--) {
 	    stackp = *(int*)stackp;
 	  }
 	  int i=0;
 	  // save space for 0 terminator
 	  len--;
 	  while(i<len && stackp) {
-	    pc = *((sintptr*)stackp+2);	    trace[i++]=pc;
+	    pc = *((sintptr*)stackp+2);
+	    trace[i++]=pc;
 	    stackp = *(int*)stackp;
 	  }
 	  trace[i] = 0;
@@ -355,7 +374,8 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_IA32
-	void GetStackTrace(sintptr *trace, int len, int skip)	{
+	void GetStackTrace(sintptr *trace, int len, int skip)
+	{
 		void **ebp;
 #ifdef SOLARIS
 		ebp = (void **)_getfp();
@@ -376,7 +396,8 @@ namespace MMgc
 		while (i < len && *ebp)
 		{
 			/* store the current frame pointer */
-			trace[i++] = *((sintptr*) ebp + 1);			/* get the next frame pointer */
+			trace[i++] = *((sintptr*) ebp + 1);
+			/* get the next frame pointer */
 			ebp = (void**)(*ebp);
 		}
 
@@ -385,7 +406,8 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_ARM
-	void GetStackTrace(sintptr *trace, int len, int skip) {}#endif
+	void GetStackTrace(sintptr *trace, int len, int skip) {}
+#endif
 
 #endif
 }
