@@ -318,14 +318,42 @@ namespace nanojit
 		}
 	}
 
+	#define bytesFromTop(x)		( (size_t)(x) - (size_t)pageTop(x) )
+	#define bytesToBottom(x)	( (size_t)pageBottom(x) - (size_t)(x) )
+	#define bytesBetween(x,y)	( (size_t)(x) - (size_t)(y) )
+	
 	int_t Assembler::codeBytes()
 	{
-		// computes the # bytes used for code. Should be
-		// called after endAssembly prior to handoverPages()
-		return ((_stats.pages-2) * sizeof(Page)) +
-			((int_t)pageBottom(_nIns) - (int_t)_nIns) +
-			((int_t)pageBottom(_nExitIns) - (int_t)_nExitIns);
+		// start and end on same page?
+		size_t exit = 0;
+		if (samepage(_nExitIns,_stats.codeExitStart-1))
+		{
+			exit = bytesBetween(_stats.codeExitStart, _nExitIns);
+		}
+		else if (_nExitIns != _stats.codeExitStart)
+		{
+			exit = bytesFromTop(_stats.codeExitStart);
+			exit += bytesToBottom(_nExitIns);
+		}
+
+		size_t main = 0;
+		NanoAssert(_nIns != _stats.codeStart);
+		if (samepage(_nIns,_stats.codeStart-1))
+		{
+			main = bytesBetween(_stats.codeStart, _nIns);
+		}
+		else
+		{
+			main = bytesFromTop(_stats.codeStart);
+			main += bytesToBottom(_nIns);
+		}
+
+		return _stats.pages * sizeof(Page) + main + exit;		
 	}
+
+	#undef bytesFromTop
+	#undef bytesToBottom
+	#undef byteBetween
 	
 	Page* Assembler::handoverPages(bool exitPages)
 	{
@@ -743,10 +771,6 @@ namespace nanojit
 
 		setError(None);
 
-#ifdef PERFM
-		NanoAssert(_stats.pages == 0); // warning the codeBytes() will be incorrect if we hit this
-#endif /* PERFM */
-
 		// native code gen buffer setup
 		nativePageSetup();
 		
@@ -758,6 +782,12 @@ namespace nanojit
 		// make sure we got memory at least one page
 		if (error()) return;
 			
+#ifdef PERFM
+		_stats.pages = 0;
+		_stats.codeStart = _nIns;
+		_stats.codeExitStart = _nExitIns;		
+#endif /* PERFM */
+
         _epilogue = genEpilogue(SavedRegs);
 		_branchStateMap = branchStateMap;
         _labels.clear();

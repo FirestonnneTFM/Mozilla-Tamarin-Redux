@@ -119,6 +119,9 @@ namespace nanojit
         counter_define(exitnative;)
 		
 		int_t pages;
+		NIns* codeStart;
+		NIns* codeExitStart;
+
 		DECLARE_PLATFORM_STATS()
 #ifdef __GNUC__
 		// inexplicably, gnuc gives padding/alignment warnings without this. pacify it.

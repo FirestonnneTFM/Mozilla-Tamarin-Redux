@@ -4242,9 +4242,11 @@ namespace avmplus
 
 #ifdef PERFM
 		const int mhz = 100;
-		_nvprof("compile", (stop-start)/(100*mhz));
+		double time = (stop-start)/(100*mhz);
+		_nvprof("compile", time);
 		_nvprof("lir bytes", lirbuf->byteCount());
 		_nvprof("lir", lirbuf->insCount());		
+		_nvprof("IR/tick", lirbuf->insCount()/time);		
 #endif /* PERFM */
 		
         frag->releaseLirBuffer();
