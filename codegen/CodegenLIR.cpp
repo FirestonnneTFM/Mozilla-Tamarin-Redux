@@ -293,7 +293,6 @@ namespace avmplus
 #undef INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM
 #undef INTERP_FOPCODE_LIST_END
 
-
 	#ifdef AVMPLUS_SYMBIAN
 	static const int mir_buffer_reserve_size =	1*1024*1024;	// 2MB
 	#else
@@ -416,21 +415,17 @@ namespace avmplus
         return lirout->ins2(LIR_add, base, lirout->insImm(disp));
 	}
 
-    uint32_t find_fid(uintptr_t addr) {
-        uint32_t n = sizeof(k_functions)/sizeof(k_functions[0]);
-        for (uint32_t i=0; i < n; i++) {
-            if (addr == (uintptr_t) k_functions[i]._address)
-                return i;
-        }
-        AvmAssert(false);
-        return 0;
+    uint32_t find_fid(uintptr_t addr, SortedIntMap<uintptr_t>& map) {
+		int_t idx = map.get(addr);
+		AvmAssert(idx);
+		return idx-1;
     }
 
 	// call 
 	OP* CodegenLIR::callIns(MirOpcode code, uintptr_t addr, uint32_t argc, ...)
 	{
         (void) code;
-        uint32_t fid = find_fid(addr);
+        uint32_t fid = find_fid(addr,callAddrMap);
         AvmAssert(argc <= MAXARGS);
         AvmAssert(argc == k_functions[fid].count_args());
         AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
@@ -451,7 +446,7 @@ namespace avmplus
             code == MIR_fci ? 
                 (argc == 3 ? FCALL_INDIRECT : FCALL_IMT) :
                 (argc == 3 ? CALL_INDIRECT : CALL_IMT)
-            );
+            , callAddrMap);
         AvmAssert(argc+1 <= MAXARGS);
         AvmAssert(argc+1 == k_functions[fid].count_args());
         AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
@@ -520,12 +515,12 @@ namespace avmplus
         // handle Number first in case we need to do a quad load
 		if (t == NUMBER_TYPE)
 		{
-			sintptr funcaddr = COREADDR(AvmCore::doubleToAtom);
+			sintptr funcAddr = COREADDR(AvmCore::doubleToAtom);
 #ifdef AVMPLUS_IA32
 			if (core->config.sse2)
-				funcaddr = COREADDR(AvmCore::doubleToAtom_sse2);
+				funcAddr = COREADDR(AvmCore::doubleToAtom_sse2);
 #endif
-			return callIns(MIR_cmop, funcaddr, 2, InsConst((uintptr)core), localGetq(i));
+			return callIns(MIR_cmop, funcAddr, 2, InsConst((uintptr)core), localGetq(i));
 		}
 
 		OP* native = localGet(i);
@@ -672,8 +667,8 @@ namespace avmplus
 	}
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc),
-          interruptable(true)
+		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc), 
+			callAddrMap(gc,144,true,0), interruptable(true)
 	{
 		state = NULL;
 
@@ -693,6 +688,18 @@ namespace avmplus
 
 		overflow = false;
 
+#define INTERP_FOPCODE_LIST_BEGIN 
+#define INTERP_FOPCODE_LIST_END
+		int_t pos = 1;
+    #define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
+		callAddrMap.put(f, pos++);
+
+    #include "../core/vm_fops.h"
+
+#undef INTERP_FOPCODE_LIST_BEGIN
+#undef INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM
+#undef INTERP_FOPCODE_LIST_END
+	
 		#ifdef VTUNE
 		hasDebugInfo = false;
 		vtune = 0;
