@@ -38,7 +38,7 @@
 
 #include "avmshell.h"
 
-#if defined(DARWIN) || defined(AVMPLUS_UNIX)
+#if defined(DARWIN) || (defined(AVMPLUS_UNIX) && !defined(SOLARIS))
 #include <sys/signal.h>
 #include <unistd.h>
 #endif
@@ -59,8 +59,10 @@ extern "C" greg_t _getsp(void);
 #pragma warning(disable: 4201)
 
 #include <Mmsystem.h>
+#ifndef UNDER_CE
 #include "dbghelp.h"
 bool P4Available();
+#endif
 #elif defined AVMPLUS_UNIX
 bool P4Available();
 #endif
@@ -125,11 +127,14 @@ PRIVATE void operator delete[]( void *p )
     }
 #endif // OVERRIDE_GLOBAL_NEW
 
+namespace avmplus {
+	namespace NativeID {
+		#include "toplevel.cpp"
+	}
+}
 
 namespace avmshell
 {
-	#include "toplevel.cpp"
-
 	const int kScriptTimeout = 15;
 	const int kScriptGracePeriod = 5;
 
@@ -149,7 +154,11 @@ namespace avmshell
 
 	BEGIN_NATIVE_SCRIPTS(Shell)
 		NATIVE_SCRIPT(0/*abcscript_avmplus_debugger*/, AvmplusScript)
+#ifdef AVMTHUNK_VERSION
+		NATIVE_SCRIPT(avmplus::NativeID::abcscript_startSampling, SamplerScript)
+#else
 		NATIVE_SCRIPT(avmplus::NativeID::abcpackage_Sampler_as, SamplerScript)
+#endif
 	END_NATIVE_SCRIPTS()
 
 	BEGIN_NATIVE_MAP(AvmplusScript)
@@ -163,6 +172,8 @@ namespace avmshell
 	{
 #ifdef AVMPLUS_AMD64
 		const int kStackMargin = 262144;
+#elif defined(UNDER_CE)
+		const int kStackMargin = 32768;
 #else
 		const int kStackMargin = 131072;
 #endif
@@ -215,7 +226,7 @@ namespace avmshell
 	ShellToplevel::ShellToplevel(VTable* vtable, ScriptObject* delegate)
 		: Toplevel(vtable, delegate)
 	{
-		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(NativeID::toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 	}
 
 	void Shell::usage()
@@ -238,7 +249,6 @@ namespace avmshell
 		#endif
 
 		printf("          [-Dinterp]    do not generate machine code, interpret instead\n");
-
 		#ifdef AVMPLUS_VERBOSE
 			printf("          [-Dverbose]   trace every instruction (verbose!)\n");
 			printf("          [-Dverbose_init] trace the builtins too\n");
@@ -273,6 +283,12 @@ namespace avmshell
 		exit(1);
 	}
 
+#ifdef UNDER_CE
+#define strcmp(_str, _conststr)		_tcscmp(_str, _T(_conststr)) 
+#define strrchr(_str, _constchr)	_tcsrchr(_str, _T(_constchr))
+#define strlen(_str)				_tcslen(_str)
+#define strcpy(_str, _conststr)		_tcscpy(_str, _conststr)
+#endif
 	void Shell::stackOverflow(MethodEnv *env)
 	{
 		if (inStackOverflow)
@@ -361,7 +377,7 @@ namespace avmshell
 			nativeMethods, nativeClasses, nativeScripts);
 
 		avmplus::ScriptBuffer code = newScriptBuffer(avmplus::NativeID::toplevel_abc_length);
-		memcpy(code.getBuffer(), toplevel_abc_data, avmplus::NativeID::toplevel_abc_length);
+		memcpy(code.getBuffer(), avmplus::NativeID::toplevel_abc_data, avmplus::NativeID::toplevel_abc_length);
 		shellPool = parseActionBlock(code, 0, NULL, builtinDomain, nativeMethods, nativeClasses, nativeScripts);
 	}
 
@@ -407,17 +423,24 @@ namespace avmshell
 		computeStackBase();
 	}
 
+#ifndef UNDER_CE
 	bool Shell::executeProjector(int argc, char *argv[], int& exitCode)
 	{
 		TRY(this, kCatchAction_ReportAsError)
 		{
 			uint8 header[8];
 
-			char executablePath[256];
-
 			#ifdef WIN32
+#ifdef UNDER_CE
+			// !!@windowsmobile untested
+			TCHAR executablePath[256];
+			strncpy(executablePath, argv[0], sizeof(executablePath));
+#else
+			char executablePath[256];
 			GetModuleFileName(NULL, executablePath, sizeof(executablePath));
+#endif
 			#else
+			char executablePath[256];
 			strncpy(executablePath, argv[0], sizeof(executablePath));
 			#endif
 		   
@@ -505,17 +528,22 @@ namespace avmshell
 		}
 		END_CATCH
 		END_TRY
-
+				
 		exitCode = 0;
 		return true;
 	}
-		
+#endif
+#ifdef UNDER_CE
+	int Shell::main(int argc, TCHAR *argv[])
+#else
 	int Shell::main(int argc, char *argv[])
+#endif
 	{
 		bool show_mem = false;
 
 		TRY(this, kCatchAction_ReportAsError)
 		{
+#ifdef AVMPLUS_MIR
 			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 			#ifdef AVMPLUS_MAC
 			config.sse2 = true;
@@ -525,12 +553,15 @@ namespace avmshell
 			}
 			#endif
 			#endif
+#endif
 
+#ifndef UNDER_CE
 			int exitCode = 0;
 			if (executeProjector(argc, argv, exitCode))
 			{
 				return exitCode;
 			}
+#endif
 						
 			if (argc < 2) {
 				usage();
@@ -538,7 +569,11 @@ namespace avmshell
 
 			int filenamesPos = -1;
 			int endFilenamePos = -1;
+#ifdef UNDER_CE
+			TCHAR *filename = NULL;
+#else
 			char *filename = NULL;
+#endif
 			bool do_log = false;
 #ifdef DEBUGGER
 			bool do_debugger = false;
@@ -549,7 +584,11 @@ namespace avmshell
 #endif
 
 			for (int i=1; i<argc && endFilenamePos == -1; i++) {
+#ifdef UNDER_CE
+				TCHAR *arg = argv[i];
+#else
 				char *arg = argv[i];
+#endif
 				// options available to development builds.
 				if (arg[0] == '-') 
 				{
@@ -559,7 +598,9 @@ namespace avmshell
 
 						#ifdef AVMPLUS_IA32
 						} else if (!strcmp(arg+2, "nosse")) {
+#ifdef AVMPLUS_MIR
 							config.sse2 = false;
+#endif
 						#endif
 
 	                    #ifdef AVMPLUS_VERIFYALL
@@ -636,7 +677,11 @@ namespace avmshell
 					else if (!strcmp(arg, "-error")) {
 						show_error = true;
 						#ifdef WIN32
+						#ifdef UNDER_CE
+						AvmAssert(0);
+						#else
 						SetErrorMode(0);  // set to default
+						#endif
 						#endif // WIN32
 					}
 #ifdef AVMPLUS_WITH_JNI
@@ -685,6 +730,7 @@ namespace avmshell
 				usage();
 			}
 
+#ifndef UNDER_CE
 			if( do_log )
 			{
 				// open logfile based on last filename
@@ -694,12 +740,18 @@ namespace avmshell
 
 				char* logname = new char[dot-filename+5];  // free upon exit
 				strcpy(logname,filename);
+#ifdef UNDER_CE
+				_tcscpy(logname+(dot-filename),_T(".log"));
+#else
 				strcpy(logname+(dot-filename),".log");
+#endif
 				printf("%s\n",filename); // but first print name to default stdout
-				freopen(logname, "w", stdout);
+				FILE *f = freopen(logname, "w", stdout);
+				if (!f)
+				  printf("freopen %s failed.\n",filename);
 				delete [] logname;
 			}
-
+#endif
 			initBuiltinPool();
 			initShellPool();
 
@@ -1080,7 +1132,11 @@ namespace avmshell
 	#endif //AVMPLUS_INTERACTIVE
 }
 
+#ifdef UNDER_CE
+int _main(int argc, TCHAR *argv[])
+#else
 int _main(int argc, char *argv[])
+#endif
 {
 	if (!fm)
 	{
@@ -1111,7 +1167,7 @@ int _main(int argc, char *argv[])
  	return exitCode;
 }
 
-#ifdef AVMPLUS_WIN32
+#if defined(AVMPLUS_WIN32) && !defined(AVMPLUS_ARM)
 unsigned long CrashFilter(LPEXCEPTION_POINTERS pException, int exceptionCode)
 {
 	unsigned long result;
@@ -1195,12 +1251,21 @@ int main(int argc, char *argv[])
 int StackTop;
 #endif
 
+#ifdef UNDER_CE
+int wmain(int argc, wchar *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
 	#ifdef AVMPLUS_ARM
+	#ifdef UNDER_CE
+	int sp;
+	StackTop = (int) &sp;
+	#else
 	int sp;
 	asm("mov %0,sp" : "=r" (sp));
 	StackTop = sp;
+	#endif
 	#endif
 
 #ifdef AVMPLUS_MACH_EXCEPTIONS

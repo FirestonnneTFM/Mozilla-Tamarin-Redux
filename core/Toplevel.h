@@ -182,7 +182,7 @@ namespace avmplus
 		/**
 		 * Implements the ToAttributeName API as specified in E4X 10.5.1, pg 37
 		 */
-		QNameObject* ToAttributeName (Atom arg);
+		QNameObject* ToAttributeName (const Atom arg);
 		QNameObject* ToAttributeName (const Stringp arg)
 		{
 			return ToAttributeName(arg->atom());

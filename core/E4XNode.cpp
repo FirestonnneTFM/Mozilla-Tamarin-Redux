@@ -747,7 +747,7 @@ namespace avmplus
 			for (uint32 n2 = 0; n2 < numNamespaces(); n2++)
 			{
 				Namespace *namespace2 = core->atomToNamespace (ns2->getAt (n2));
-				if (namespace1->equalTo (namespace2))
+				if (namespace1->EqualTo (namespace2))
 					break;
 			}
 
@@ -876,12 +876,12 @@ namespace avmplus
 
 	// E4X 9.1.1.12, page 19
 	// Autoconverts V into an XML object 
-	E4XNode* E4XNode::_replace (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32 /*i*/, Atom /*V*/)
+	E4XNode* E4XNode::_replace (AvmCore* /*core*/, Toplevel* /*toplevel*/, uint32 /*i*/, Atom /*V*/, Atom /*pastValue*/)
 	{
 		return 0;
 	}
 
-	E4XNode* ElementE4XNode::_replace (AvmCore *core, Toplevel *toplevel, uint32 i, Atom V)
+	E4XNode* ElementE4XNode::_replace (AvmCore *core, Toplevel *toplevel, uint32 i, Atom V, Atom pastValue)
 	{
 		//step 1
 		//if (getClass() & (kText | kCDATA | kComment | kProcessingInstruction | kAttribute))
@@ -952,6 +952,8 @@ namespace avmplus
 			if (XMLObject::notifyNeeded(newXML))
 			{
 				Atom detail = prior ? prior->getValue()->atom() : 0;
+				if (!detail)
+					detail = pastValue;
 				XMLObject* target = new (core->GetGC()) XMLObject(toplevel->xmlClass(), newXML);
 				target->nonChildChanges(toplevel->xmlClass()->kTextSet, newXML->getValue()->atom(), detail);
 			}

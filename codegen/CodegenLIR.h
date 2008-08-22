@@ -39,15 +39,6 @@
 #ifndef __avmplus_CodegenLIR__
 #define __avmplus_CodegenLIR__
 
-/*namespace nanojit
-{
-	class LIns;
-	class LirBuffer;
-	class LirWriter;
-    class Fragmento;
-    enum LOpcode;
-}*/
-
 #include "../nanojit/nanojit.h"
 
 namespace avmplus
@@ -230,12 +221,12 @@ namespace avmplus
         LIns *storeAtomArgs(LIns *obj, int count, int index);
         LIns *promoteNumberIns(Traits *t, int i);
         LIns *loadVTable(int i);
-    	LIns* cmpEq(sintptr funcaddr, int lhsi, int rhsi);
-    	LIns* cmpLt(int lhsi, int rhsi);
-    	LIns* cmpLe(int lhsi, int rhsi);
-        LIns* cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
-	    LIns* i2dIns(LIns* v);
-	    LIns* u2dIns(LIns* v);
+    	LIns *cmpEq(sintptr funcaddr, int lhsi, int rhsi);
+    	LIns *cmpLt(int lhsi, int rhsi);
+    	LIns *cmpLe(int lhsi, int rhsi);
+        LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
+	    LIns *i2dIns(LIns* v);
+	    LIns *u2dIns(LIns* v);
         bool isDouble(int i);
         bool isPointer(int i);
         void saveState();
@@ -256,6 +247,7 @@ namespace avmplus
 	public:
 		CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
+		void clearMIRBuffers();
 		void emitMD();
 	    void formatOperand(PrintWriter& buffer, OP* oprnd);
 		void epilogue(FrameState* state);

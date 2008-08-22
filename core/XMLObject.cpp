@@ -829,7 +829,7 @@ namespace avmplus
 			Stringp s = core->string (c);
 			if (s->length())
 			{
-				xi->_replace (core, toplevel, i, c);
+				xi->_replace (core, toplevel, i, c, prior);
 			}
 		}
 		else
@@ -838,8 +838,13 @@ namespace avmplus
 
 			if (notifyNeeded(getNode()))
 			{
-				XMLObject* xml = new (core->GetGC()) XMLObject(xmlClass(), m_node->_getAt(i));
-				childChanges( (prior) ? xmlClass()->kNodeChanged : xmlClass()->kNodeAdded, xml->atom(), prior);
+				// The above _replace call may be used to insert new nodes at the end.  However, if a null is inserted
+				// the effect is as though nothing was inserted.  Test for this case.
+				if (m_node->_length() > (avmplus::uint32)i)
+				{
+					XMLObject* xml = new (core->GetGC()) XMLObject(xmlClass(), m_node->_getAt(i));
+					childChanges( (prior) ? xmlClass()->kNodeChanged : xmlClass()->kNodeAdded, xml->atom(), prior);
+				}
 			}
 		}
 		return;
@@ -1573,17 +1578,20 @@ namespace avmplus
 	{
 		AvmCore *core = this->core();
 
-		if (core->isXML(child))
+		if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
 		{
-			child = core->atomToXMLObject (child)->atom();
-		}
-		else if (core->isXMLList (child))
-		{
-			child = core->atomToXMLList (child)->atom();
-		}
-		else // all other types go through XML constructor as a string
-		{
-			child = xmlClass()->ToXML (core->string(child)->atom());
+			if (core->isXML(child))
+			{
+				child = core->atomToXMLObject (child)->atom();
+			}
+			else if (core->isXMLList (child))
+			{
+				child = core->atomToXMLList (child)->atom();
+			}
+			else // all other types go through XML constructor as a string
+			{
+				child = xmlClass()->ToXML (core->string(child)->atom());
+			}
 		}
 
 		Atom children = getStringProperty(core->kAsterisk);
@@ -1828,17 +1836,20 @@ namespace avmplus
 		if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
 			return undefinedAtom;
 
-		if (core->isXML(child2))
+		if(!(PoolObject::kbug444630 & traits()->pool->bugFlags)) 
 		{
-			child2 = core->atomToXMLObject (child2)->atom();
-		}
-		else if (core->isXMLList (child2))
-		{
-			child2 = core->atomToXMLList (child2)->atom();
-		}
-		else // all other types go through XML constructor as a string
-		{
-			child2 = xmlClass()->ToXML (core->string(child2)->atom());
+			if (core->isXML(child2))
+			{
+				child2 = core->atomToXMLObject (child2)->atom();
+			}
+			else if (core->isXMLList (child2))
+			{
+				child2 = core->atomToXMLList (child2)->atom();
+			}
+			else // all other types go through XML constructor as a string
+			{
+				child2 = xmlClass()->ToXML (core->string(child2)->atom());
+			}
 		}
 
 		if (AvmCore::isNull(child1))
@@ -1885,17 +1896,20 @@ namespace avmplus
 		if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
 			return undefinedAtom;
 
-		if (core->isXML(child2))
+		if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
 		{
-			child2 = core->atomToXMLObject (child2)->atom();
-		}
-		else if (core->isXMLList (child2))
-		{
-			child2 = core->atomToXMLList (child2)->atom();
-		}
-		else // all other types go through XML constructor as a string
-		{
-			child2 = xmlClass()->ToXML (core->string(child2)->atom());
+			if (core->isXML(child2))
+			{
+				child2 = core->atomToXMLObject (child2)->atom();
+			}
+			else if (core->isXMLList (child2))
+			{
+				child2 = core->atomToXMLList (child2)->atom();
+			}
+			else // all other types go through XML constructor as a string
+			{
+				child2 = xmlClass()->ToXML (core->string(child2)->atom());
+			}
 		}
 
 		if (AvmCore::isNull(child1))
@@ -1959,8 +1973,9 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.23, page 80
-	Atom XMLObject::getNamespace (Atom *argv, int argc) // prefix is optional
+	Atom XMLObject::getNamespace (Atom p_prefix, int argc) // prefix is optional
 	{
+		AvmAssert(argc == 0 || argc == 1);
 		AvmCore *core = this->core();
 
 		// step 2
@@ -1988,7 +2003,7 @@ namespace avmplus
 		}
 		else
 		{
-			Atom prefix = core->internString (core->string (argv[0]))->atom();
+			Atom prefix = core->internString (core->string (p_prefix))->atom();
 
 			for (uint32 i = 0; i < inScopeNS->getLength(); i++)
 			{
@@ -2202,17 +2217,20 @@ namespace avmplus
 		AvmCore *core = this->core();
 		Toplevel *toplevel = this->toplevel();
 
-		if (core->isXML(value))
+		if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
 		{
-			value = core->atomToXMLObject (value)->atom();
-		}
-		else if (core->isXMLList (value))
-		{
-			value = core->atomToXMLList (value)->atom();
-		}
-		else // all other types go through XML constructor as a string
-		{
-			value = xmlClass()->ToXML (core->string(value)->atom());
+			if (core->isXML(value))
+			{
+				value = core->atomToXMLObject (value)->atom();
+			}
+			else if (core->isXMLList (value))
+			{
+				value = core->atomToXMLList (value)->atom();
+			}
+			else // all other types go through XML constructor as a string
+			{
+				value = xmlClass()->ToXML (core->string(value)->atom());
+			}
 		}
 
 		m_node->_insert (core, toplevel, 0, value);
@@ -2306,7 +2324,10 @@ namespace avmplus
 		}
 		else
 		{
-			c = xmlClass()->ToXML (core->string(value)->atom());
+			if(!(PoolObject::kbug444630 & traits()->pool->bugFlags))
+				c = xmlClass()->ToXML (core->string(value)->atom());
+			else
+				c = core->string(value)->atom();
 		}
 
 		uint32 index;

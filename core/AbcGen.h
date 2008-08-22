@@ -49,7 +49,7 @@ namespace avmplus
 		 */
 		AbcGen(MMgc::GC *gc, int initCapacity=128) : bytes(gc, initCapacity) {}
 
-		List<byte,LIST_NonGCObjects>& getBytes() { return bytes; }
+		List<byte>& getBytes() { return bytes; }
 		void construct_super() { bytes.add(OP_constructsuper); }
 		void pushnan() { bytes.add(OP_pushnan); }
 		void pushundefined() { bytes.add(OP_pushundefined); }
@@ -78,11 +78,11 @@ namespace avmplus
 			writeInt(code_length); 
 		}
 		void returnvoid() { bytes.add(OP_returnvoid); }
-		void writeBytes(List<byte,LIST_NonGCObjects>& b) { bytes.add(b); }
+		void writeBytes(List<byte>& b) { bytes.add(b); }
 		void writeInt(unsigned int n);
 		size_t size() { return bytes.size(); }
 	private:
-		List<byte, LIST_NonGCObjects> bytes;
+		List<byte> bytes;
 	};
 }
 

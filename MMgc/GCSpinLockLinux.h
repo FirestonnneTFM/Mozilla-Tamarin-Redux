@@ -41,8 +41,6 @@
 
 #include <pthread.h>
 
-#define USE_X86_SPINLOCK
-
 namespace MMgc
 {
 	/**
@@ -54,7 +52,7 @@ namespace MMgc
 	class GCSpinLock
 	{
 	public:
-#ifdef USE_X86_SPINLOCK
+#if defined(MMGC_IA32) || defined(MMGC_AMD64)
 
 		GCSpinLock()
  		{
@@ -96,7 +94,28 @@ namespace MMgc
 
 		volatile int lock;
 
-#else // USE_X86_SPINLOCK
+#elif defined (USE_PTHREAD_MUTEX) //defined(MMGC_IA32) || defined(MMGC_AMD64)
+		GCSpinLock()
+		{
+			pthread_mutex_init( &m1, 0 );
+		}
+	
+		~GCSpinLock()
+		{
+			pthread_mutex_destroy( &m1 );
+		}
+		inline void Acquire()
+		{
+			pthread_mutex_lock( &m1 );
+		}
+		
+		inline void Release()
+		{
+			pthread_mutex_unlock( &m1 );
+		}
+	private:
+		pthread_mutex_t m1;
+#else //defined(MMGC_IA32) || defined(MMGC_AMD64)
 
 		GCSpinLock()
 		{
@@ -121,7 +140,7 @@ namespace MMgc
 	private:
 		pthread_spinlock_t m1;
 
-#endif // USE_X86_SPINLOCK
+#endif //defined(MMGC_IA32) || defined(MMGC_AMD64)
 	};
 
 	/**

@@ -55,6 +55,10 @@
 #elif defined(__x86_64__)
 #define MMGC_AMD64
 #define MMGC_64BIT
+#elif defined(__powerpc__)
+#define MMGC_PPC
+#elif defined(__arm__)
+#define MMGC_ARM
 #else
 #error Unknown CPU type
 #endif

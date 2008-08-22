@@ -210,6 +210,8 @@
 		942BC4350BB991690088A47F /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 942BC4330BB991690088A47F /* Sampler.cpp */; };
 		942BC4360BB991690088A47F /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 942BC4340BB991690088A47F /* Sampler.h */; };
 		CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */; };
+		D962305C0E5CA2D200DA3F47 /* Translator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D962305A0E5CA2D200DA3F47 /* Translator.cpp */; };
+		D962305D0E5CA2D200DA3F47 /* Translator.h in Headers */ = {isa = PBXBuildFile; fileRef = D962305B0E5CA2D200DA3F47 /* Translator.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -417,6 +419,8 @@
 		942BC4340BB991690088A47F /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sampler.h; path = ../../../core/Sampler.h; sourceTree = SOURCE_ROOT; };
 		CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_newline.cpp; path = ../../../pcre/pcre_newline.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libavmplus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libavmplus.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D962305A0E5CA2D200DA3F47 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Translator.cpp; path = ../../../core/Translator.cpp; sourceTree = SOURCE_ROOT; };
+		D962305B0E5CA2D200DA3F47 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Translator.h; path = ../../../core/Translator.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -437,7 +441,7 @@
 				1E607AB4097337F4007D0E1E /* pcre */,
 				1E607AA009733790007D0E1E /* Platform */,
 				1E607A9F09733787007D0E1E /* Core */,
-				1E607A9E0973377F007D0E1E /* CodenGen */,
+				1E607A9E0973377F007D0E1E /* CodeGen */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 			);
@@ -452,7 +456,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1E607A9E0973377F007D0E1E /* CodenGen */ = {
+		1E607A9E0973377F007D0E1E /* CodeGen */ = {
 			isa = PBXGroup;
 			children = (
 				4E0F4F320E5A374200DA786F /* CodegenLIR.cpp */,
@@ -462,12 +466,14 @@
 				1E6078E6097335B3007D0E1E /* Ia32Assembler.cpp */,
 				1E6078E7097335B3007D0E1E /* PpcAssembler.cpp */,
 			);
-			name = CodenGen;
+			name = CodeGen;
 			sourceTree = "<group>";
 		};
 		1E607A9F09733787007D0E1E /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				D962305A0E5CA2D200DA3F47 /* Translator.cpp */,
+				D962305B0E5CA2D200DA3F47 /* Translator.h */,
 				47D44EB40D37D56B008368EC /* VectorClass.cpp */,
 				47D44EB50D37D56B008368EC /* VectorClass.h */,
 				942BC4330BB991690088A47F /* Sampler.cpp */,
@@ -820,6 +826,7 @@
 				4E0F4EDD0E5A34F900DA786F /* Nativei386.h in Headers */,
 				4E0F4EDF0E5A34F900DA786F /* RegAlloc.h in Headers */,
 				4E0F4F350E5A374200DA786F /* CodegenLIR.h in Headers */,
+				D962305D0E5CA2D200DA3F47 /* Translator.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -967,6 +974,7 @@
 				4E0F4EDE0E5A34F900DA786F /* RegAlloc.cpp in Sources */,
 				4E0F4F340E5A374200DA786F /* CodegenLIR.cpp in Sources */,
 				4E9A321B0E5A417C00376C46 /* CodegenMIR.cpp in Sources */,
+				D962305C0E5CA2D200DA3F47 /* Translator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1000,6 +1008,7 @@
 					USE_MMAP,
 					_MAC,
 				);
+				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
@@ -1019,7 +1028,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = avmplus_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1031,12 +1040,9 @@
 					USE_MMAP,
 					_MAC,
 				);
+				GCC_STRICT_ALIASING = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
-				OTHER_CFLAGS = (
-					"-finline-functions",
-					"-finline-limit=65536",
-				);
 				PRODUCT_NAME = avmplus;
 				SEPARATE_STRIP = NO;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
@@ -1050,6 +1056,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
@@ -1073,6 +1080,7 @@
 				WARNING_CFLAGS = (
 					"-Wno-long-long",
 					"-Wno-variadic-macros",
+					"-Wstrict-aliasing",
 				);
 			};
 			name = Debug;
@@ -1086,6 +1094,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
@@ -1110,6 +1119,7 @@
 				WARNING_CFLAGS = (
 					"-Wno-long-long",
 					"-Wno-variadic-macros",
+					"-Wstrict-aliasing",
 				);
 			};
 			name = Release;
@@ -1142,6 +1152,7 @@
 					_MAC,
 					DEBUGGER,
 				);
+				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
@@ -1161,7 +1172,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = avmplus_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1174,12 +1185,9 @@
 					_MAC,
 					DEBUGGER,
 				);
+				GCC_STRICT_ALIASING = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
-				OTHER_CFLAGS = (
-					"-finline-functions",
-					"-finline-limit=100000",
-				);
 				PRODUCT_NAME = avmplus;
 				SEPARATE_STRIP = NO;
 				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
@@ -1193,6 +1201,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
@@ -1216,6 +1225,7 @@
 				WARNING_CFLAGS = (
 					"-Wno-long-long",
 					"-Wno-variadic-macros",
+					"-Wstrict-aliasing",
 				);
 			};
 			name = Debug_Debugger;
@@ -1228,6 +1238,7 @@
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
@@ -1252,6 +1263,7 @@
 				WARNING_CFLAGS = (
 					"-Wno-long-long",
 					"-Wno-variadic-macros",
+					"-Wstrict-aliasing",
 				);
 			};
 			name = Release_Debugger;

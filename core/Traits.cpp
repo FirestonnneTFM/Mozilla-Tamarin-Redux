@@ -157,8 +157,19 @@ namespace avmplus
 						slotCount*sizeof(int) + // slot offsets
 						methodCount*sizeof(AbstractFunction*);
 
+#ifdef AVMPLUS_MIR
 			if(hasInterfaces)
 				size += IMT_SIZE * sizeof(Binding);
+#else
+			if (!size)
+			{
+				// with no IMT we can end up with a valid size zero.
+				// MMGC can't allocate a zero-size block.
+				// We won't ever access it, just leave it null.
+				AvmAssert(instanceData == 0);
+				return;
+			}
+#endif
 
 			void *idata = gc->Alloc(size, GC::kZero | GC::kContainsPointers);
 
@@ -327,7 +338,9 @@ namespace avmplus
 
 			if (hasInterfaces && legal && !this->isInterface)
 			{
+#ifdef AVMPLUS_MIR
 				ImtBuilder imtBuilder(core->GetGC());
+#endif
 
 				// make sure every interface method is implemented
 				for (int i=0, n=interfaceCapacity; i < n; i++)
@@ -379,7 +392,9 @@ namespace avmplus
 									over = getMethod(disp_id);
 									if (over != virt)
 										legal &= checkOverride(virt, over);
+#ifdef AVMPLUS_MIR
 									imtBuilder.addEntry(virt, disp_id);
+#endif
 								}
 							}
 							else if (AvmCore::isAccessorBinding(iBinding))
@@ -433,7 +448,9 @@ namespace avmplus
 											over = getMethod(disp_id);
 											if (over != virt)
 												legal &= checkOverride(virt,over);
+#ifdef AVMPLUS_MIR
 											imtBuilder.addEntry(virt, disp_id);
+#endif
 										}
 									}
 
@@ -457,7 +474,9 @@ namespace avmplus
 											over = getMethod(disp_id);
 											if (over != virt)
 												legal &= checkOverride(virt,over);
+#ifdef AVMPLUS_MIR
 											imtBuilder.addEntry(virt, disp_id);
+#endif
 										}
 									}
 								}
@@ -465,7 +484,9 @@ namespace avmplus
 						}
 					}
 				}
+#ifdef AVMPLUS_MIR
 				imtBuilder.finish(getIMT(), pool, toplevel);
+#endif
 			}
             if (!legal)
             {
@@ -795,8 +816,15 @@ namespace avmplus
 			ht = obj->getTable();
 		}
 		
-		// memset native space to zero except baseclasses
-		memset((char*)obj+sizeof(AvmPlusScriptableObject), 0, sizeofInstance-sizeof(AvmPlusScriptableObject));
+		// clear native space to zero except baseclasses
+		int *myptr = (int *)((char*)obj+sizeof(AvmPlusScriptableObject));
+		size_t mysize = sizeofInstance-sizeof(AvmPlusScriptableObject);
+		AvmAssert((mysize & 0x3) == 0); // we assume all sizes are multiples of 4
+		while (mysize >= 4)
+		{
+			*myptr++ = 0;
+			mysize -= 4;
+		}
 
 		// NOTE: this code can't use type macros or core b/c it can run
 		// after AvmCore has been destructed
@@ -848,6 +876,7 @@ namespace avmplus
 	}
 #endif
 
+#ifdef AVMPLUS_MIR
 	ImtBuilder::ImtBuilder(MMgc::GC *gc)
 	{
 		this->gc = gc;
@@ -883,14 +912,27 @@ namespace avmplus
 			{
 				// build conflict stub
 				CodegenMIR mir(pool);
-				imt[i] = BIND_ITRAMP | (uintptr)mir.emitImtThunk(e);
-				if (mir.overflow)
-					toplevel->throwError(kOutOfMemoryError);
+				TRY(pool->core, kCatchAction_Rethrow)
+				{
+					imt[i] = BIND_ITRAMP | (uintptr)mir.emitImtThunk(e);
+					if (mir.overflow)
+						toplevel->throwError(kOutOfMemoryError);
+	
+					AvmAssert((imt[i]&7)==BIND_ITRAMP); // addr must be 8-aligned
+				}
+				CATCH (Exception *exception) 
+				{
+					mir.clearMIRBuffers();
 
-				AvmAssert((imt[i]&7)==BIND_ITRAMP); // addr must be 8-aligned
+					// re-throw exception
+					pool->core->throwException(exception);
+				}
+				END_CATCH
+				END_TRY
 			}
 		}
 	}
+#endif
 	
 	Stringp Traits::formatClassName()
 	{

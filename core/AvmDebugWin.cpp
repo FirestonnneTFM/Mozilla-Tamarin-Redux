@@ -44,7 +44,9 @@
 
 #ifdef _DEBUG
 #include <malloc.h>
+#ifndef UNDER_CE
 #include <DbgHelp.h>
+#endif
 #include <strsafe.h>
 #endif
 
@@ -62,6 +64,7 @@ namespace avmplus
 
 	void AvmDebugMsg(bool debuggerBreak, const char *format, ...)
 	{
+#ifndef UNDER_CE
 		// [ggrossman 09.24.04]
 		// Changed this to _DEBUG only because we don't link to
 		// CRT in Release builds, so vsprintf is unavailable!!
@@ -79,11 +82,21 @@ namespace avmplus
 		(void)format;
 		(void)debuggerBreak;
 #endif
+#else
+		// !!@ WINDOWSMOBILE better than nothing?
+		AvmDebugMsg(format, debuggerBreak);
+#endif
 	}
 	
 	void AvmDebugMsg(const char* msg, bool debugBreak)
 	{
-		OutputDebugString(msg);
+#ifndef UNDER_CE
+		OutputDebugStringA(msg);
+#else
+		// !!@ only unicode is supported
+		//OutputDebugStringW(unicode msg);
+		printf(msg);
+#endif
 		if(logToStdErr) {
  			fprintf( stderr, "%s", msg );
 		}

@@ -89,7 +89,11 @@ namespace MMgc
 		const static int kBlockSize = 4096;
 
 		/** Default size of address space reserved per region */
+#ifdef UNDER_CE
+		const static int kDefaultReserve = 512;
+#else
 		const static int kDefaultReserve = 4096;
+#endif
 		
 		/** Sizes up to this many blocks each have their own free list. */
 		const static int kUniqueThreshold = 16;
@@ -390,7 +394,9 @@ public:
 		void ReleaseCodeMemory(void* address, size_t size);
 		bool SetGuardPage(void *address);
 #ifdef AVMPLUS_JIT_READONLY
-		void SetExecuteBit(void *address, size_t size, bool executeFlag);
+		// SECURITY: setting executeFlag and writeableFlag at the same time is DANGEROUS! 
+		//           Make sure that you know what you are doing!
+		void SetPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
 #endif /* AVMPLUS_JIT_READONLY */
 		size_t GetCodeMemorySize() const { return committedCodeMemory; }
 #endif

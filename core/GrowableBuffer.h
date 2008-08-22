@@ -54,6 +54,7 @@
 
 namespace avmplus
 {
+#if defined(AVMPLUS_MIR) || defined(DEBUGGER)
 	class GrowableBuffer : public MMgc::GCObject
 	{
 	public:
@@ -89,6 +90,7 @@ namespace avmplus
 
 		friend class GrowthGuard;
 	};
+#endif
 
 #ifdef FEATURE_BUFFER_GUARD
 
@@ -236,6 +238,7 @@ namespace avmplus
 		jmp_buf *jmpBuf;
 	};
 
+#ifdef AVMPLUS_MIR
 	// used to expand GrowableBuffer for generated code
 	class GrowthGuard : public GenericGuard
 	{
@@ -267,6 +270,7 @@ namespace avmplus
 		// pointer to buffer we are guarding
 		GrowableBuffer* buffer;
 	};
+#endif
 #endif /* FEATURE_BUFFER_GUARD */
 }
 #endif /*___avmplus_GrowableBuffer_H_*/

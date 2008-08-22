@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="avmplus"
 	ProjectGUID="{437E43D2-ED2D-406B-88DB-B5940F838AE8}"
 	RootNamespace="avmplus"
@@ -13,6 +13,9 @@
 		/>
 	</Platforms>
 	<ToolFiles>
+		<DefaultToolFile
+			FileName="masm.rules"
+		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -27,6 +30,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="MASM"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -99,6 +105,9 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
+				Name="MASM"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -110,7 +119,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				FavorSizeOrSpeed="2"
+				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -122,6 +131,7 @@
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="avmplus.h"
+				AssemblerOutput="0"
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="true"
@@ -171,6 +181,9 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
+				Name="MASM"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -182,7 +195,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				FavorSizeOrSpeed="2"
+				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\codegen;..\..\pcre"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -241,6 +254,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="MASM"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -313,6 +329,9 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
+				Name="MASM"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -383,6 +402,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="MASM"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -636,10 +658,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\DynamicProfiler.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\E4XNode.cpp"
 				>
 			</File>
@@ -654,6 +672,58 @@
 			<File
 				RelativePath="..\..\core\Exception.cpp"
 				>
+			</File>
+			<File
+				RelativePath="..\..\core\FastInterpreter.asm"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="MASM"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="MASM"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="MASM"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Debugger|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="MASM"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="MASM"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune_Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="MASM"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\core\FrameState.cpp"
@@ -687,6 +757,13 @@
 			<File
 				RelativePath="..\..\core\Interpreter.cpp"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\core\MathClass.cpp"
@@ -797,10 +874,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\StaticProfiler.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\StringBuffer.cpp"
 				>
 			</File>
@@ -818,6 +891,10 @@
 			</File>
 			<File
 				RelativePath="..\..\core\Traits.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\Translator.cpp"
 				>
 			</File>
 			<File

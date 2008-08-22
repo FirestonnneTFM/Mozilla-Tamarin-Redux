@@ -123,10 +123,12 @@ namespace avmshell
 
 		Endian GetNativeEndian() const
 		{
-			#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+			#if defined(AVMPLUS_LITTLE_ENDIAN)
 			return kLittleEndian;
-			#else
+			#elif defined(AVMPLUS_BIG_ENDIAN)
 			return kBigEndian;
+			#else
+			#error
 			#endif
 		}
 			

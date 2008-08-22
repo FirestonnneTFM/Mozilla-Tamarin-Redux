@@ -62,13 +62,9 @@ namespace avmplus
 	Atom interp32(MethodEnv* method, int argc, uint32 *ap);
 	double interpN(MethodEnv* method, int argc, uint32 *ap);
 }
-
 #ifdef AVMPLUS_WORD_CODE
-
 #  define OP_ext 0xFF   // FIXME! define elsewhere
 #  define OP_ext_pushbits           ((1<<8) | OP_ext)
 #  define OP_ext_push_doublebits    ((2<<8) | OP_ext)
-
 #endif // AVMPLUS_WORD_CODE
-
 #endif // __avmplus_Interpreter__

@@ -186,12 +186,7 @@ namespace avmplus
 	MethodEnv::MethodEnv(void *addr, VTable *vtable)
 		: vtable(vtable), method(NULL), declTraits(NULL)
 	{
-		union {
-			Atom (*fp)(MethodEnv*, int, uint32*);
-			void *p;
-		} funcptr;
-		funcptr.p = addr;
-		impl32 = funcptr.fp;
+		implV = addr;
 	}
 
 	MethodEnv::MethodEnv(AbstractFunction* method, VTable *vtable)
@@ -540,6 +535,7 @@ namespace avmplus
 
 		name.setName(core->intern(index));
 	}		
+#endif
 
 	ScriptObject* MethodEnv::newcatch(Traits* traits)
 	{
@@ -559,6 +555,7 @@ namespace avmplus
 		}
 	}
 
+#ifdef AVMPLUS_MIR
 	ArrayObject* MethodEnv::createArgumentsHelper(int argc, uint32 *ap)
 	{
 		// create arguments using argv[1..argc].

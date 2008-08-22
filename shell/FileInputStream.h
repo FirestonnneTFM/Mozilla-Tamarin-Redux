@@ -61,7 +61,11 @@ namespace avmshell
 	class FileInputStream : public InputStream
 	{
 	public:
+#ifdef UNDER_CE
+		FileInputStream(const wchar *filename);
+#else
 		FileInputStream(const char *filename);
+#endif
 		bool valid() const;
 		~FileInputStream();
 		int available();

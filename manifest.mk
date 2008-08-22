@@ -47,7 +47,6 @@ $(call RECURSE_DIRS,MMgc)
 
 ifdef ENABLE_TAMARIN
 $(call RECURSE_DIRS,core pcre codegen nanojit vprof)
-
 ifeq (darwin,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/mac)
 endif

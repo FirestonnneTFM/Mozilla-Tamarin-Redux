@@ -39,10 +39,6 @@
 #define __avmplus_types__
 
 
-#ifdef _MAC
-#include <stdint.h>
-#endif
-
 #ifdef _MSC_VER
 #include "../utils/msc_inttypes.h"
 #else
