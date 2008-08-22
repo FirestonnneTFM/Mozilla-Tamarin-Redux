@@ -188,7 +188,6 @@ namespace avmplus
         CodegenLabel interrupt_label, npe_label;
         sintptr lastPcSave;
         List<Patch, LIST_NonGCObjects> patches;
-		SortedMap<uintptr_t, uint32_t, LIST_NonGCObjects> callAddrMap;
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(MirOpcode op, int32_t disp, LIns *base);
@@ -205,8 +204,8 @@ namespace avmplus
         LIns *atomToNativeRep(Traits *, LIns *i);
         LIns *ptrToNativeRep(Traits*, LIns*);
         LIns *loadAtomRep(int i);
-        LIns *callIns(MirOpcode, uintptr_t addr, uint32_t argc, ...);
-        LIns *callIndirect(MirOpcode, LIns* addr, uint32_t argc, ...);
+        LIns *callIns(uint32_t fid, uint32_t argc, ...);
+        LIns *callIndirect(uint32_t fid, LIns* addr, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *binaryIns(MirOpcode, LIns *a, LIns *b);
         LIns *binaryIns(LOpcode, LIns *a, LIns *b);
@@ -221,7 +220,7 @@ namespace avmplus
         LIns *storeAtomArgs(LIns *obj, int count, int index);
         LIns *promoteNumberIns(Traits *t, int i);
         LIns *loadVTable(int i);
-    	LIns *cmpEq(sintptr funcaddr, int lhsi, int rhsi);
+    	LIns *cmpEq(uint32_t fid, int lhsi, int rhsi);
     	LIns *cmpLt(int lhsi, int rhsi);
     	LIns *cmpLe(int lhsi, int rhsi);
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);

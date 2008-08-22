@@ -420,19 +420,11 @@ namespace avmplus
         return lirout->ins2(LIR_add, base, lirout->insImm(disp));
 	}
 
-    uint32_t CodegenLIR::find_fid(uintptr_t addr) {
-		AvmAssert(callAddrMap.containsKey(addr));
-		return callAddrMap.get(addr);
-    }
-
-	// call 
-	OP* CodegenLIR::callIns(MirOpcode code, uintptr_t addr, uint32_t argc, ...)
+    // call 
+	OP* CodegenLIR::callIns(uint32_t fid, uint32_t argc, ...)
 	{
-        (void) code;
-        uint32_t fid = find_fid(addr);
         AvmAssert(argc <= MAXARGS);
         AvmAssert(argc == k_functions[fid].count_args());
-        AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
 
         LInsp args[MAXARGS];
         va_list ap;
@@ -444,16 +436,10 @@ namespace avmplus
         return lirout->insCall(fid, args);
 	}
 
-	OP* CodegenLIR::callIndirect(MirOpcode code, OP* target, uint32_t argc, ...)
+	OP* CodegenLIR::callIndirect(uint32_t fid, OP* target, uint32_t argc, ...)
 	{
-        uint32_t fid = find_fid(
-            code == MIR_fci ? 
-                (argc == 3 ? FCALL_INDIRECT : FCALL_IMT) :
-                (argc == 3 ? CALL_INDIRECT : CALL_IMT)
-                );
         AvmAssert(argc+1 <= MAXARGS);
         AvmAssert(argc+1 == k_functions[fid].count_args());
-        AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
 
         LInsp args[MAXARGS];
         va_list ap;
@@ -519,12 +505,12 @@ namespace avmplus
         // handle Number first in case we need to do a quad load
 		if (t == NUMBER_TYPE)
 		{
-			sintptr funcAddr = COREADDR(AvmCore::doubleToAtom);
+			uint32_t fid = FUNCTIONID(doubleToAtom);
 #ifdef AVMPLUS_IA32
 			if (core->config.sse2)
-				funcAddr = COREADDR(AvmCore::doubleToAtom_sse2);
+				fid = FUNCTIONID(doubleToAtom_sse2);
 #endif
-			return callIns(MIR_cmop, funcAddr, 2, InsConst((uintptr)core), localGetq(i));
+			return callIns(fid, 2, InsConst((uintptr)core), localGetq(i));
 		}
 
 		OP* native = localGet(i);
@@ -564,12 +550,12 @@ namespace avmplus
 
 		if (t == INT_TYPE)
 		{
-			return callIns(MIR_cmop, COREADDR(AvmCore::intToAtom), 2,
+			return callIns(FUNCTIONID(intToAtom), 2,
 				InsConst((uintptr)core), native);
 		}
 		if (t == UINT_TYPE)
 		{
-			return callIns(MIR_cmop, COREADDR(AvmCore::uintToAtom), 2,
+			return callIns(FUNCTIONID(uintToAtom), 2,
 				InsConst((uintptr)core), native);
 		}
 		if (t == BOOLEAN_TYPE)
@@ -672,7 +658,7 @@ namespace avmplus
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
 		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc), 
-			callAddrMap(gc,CI_Max), interruptable(true)
+			interruptable(true)
 	{
 		state = NULL;
 
@@ -691,17 +677,6 @@ namespace avmplus
 		abcEnd   = NULL;
 
 		overflow = false;
-
-#define INTERP_FOPCODE_LIST_BEGIN 
-#define INTERP_FOPCODE_LIST_END
-    #define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
-		callAddrMap.put(f, FUNCTIONID(name));
-
-    #include "../core/vm_fops.h"
-
-#undef INTERP_FOPCODE_LIST_BEGIN
-#undef INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM
-#undef INTERP_FOPCODE_LIST_END
 	
 		#ifdef VTUNE
 		hasDebugInfo = false;
@@ -1360,7 +1335,7 @@ namespace avmplus
 			OP* apArg = ap_param;
 
 			// use csop so if rest value never used, we don't bother creating array
-			OP* rest = callIns(MIR_cmop, ENVADDR(MethodEnv::createRestHelper), 3, 
+			OP* rest = callIns(FUNCTIONID(createRestHelper), 3, 
 				env_param, argcArg, apArg);
 
 			localSet(firstLocal, rest);
@@ -1373,7 +1348,7 @@ namespace avmplus
 			OP* apArg = ap_param;
 
 			// use csop so if arguments never used, we don't create it
-			OP* arguments = callIns(MIR_cmop, ENVADDR(MethodEnv::createArgumentsHelper), 3, 
+			OP* arguments = callIns(FUNCTIONID(createArgumentsHelper), 3, 
 				env_param, argcArg, apArg);
 
 			localSet(firstLocal, arguments);
@@ -1401,7 +1376,7 @@ namespace avmplus
 			localSet(i, undefConst);
 		}
 
-		callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
+		callIns(FUNCTIONID(debugEnter), 8,
 			env_param, argc_param, ap_param, // for sendEnter
 			leaIns(0, varTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
 			leaIns(0, csn), 
@@ -1414,7 +1389,7 @@ namespace avmplus
 		if (info->isFlagSet(AbstractFunction::HAS_EXCEPTIONS))
 		{
 			// _ef.beginTry(core);
-			callIns(MIR_cm, EFADDR(ExceptionFrame::beginTry), 2,
+			callIns(FUNCTIONID(beginTry), 2,
 				leaIns(0,_ef), InsConst((uintptr)core));
 
 			// spill prior to jmp so that our stack is cleared of 
@@ -1447,7 +1422,7 @@ namespace avmplus
 			// _ef.beginCatch()
 			// ISSUE why do we have to redefine ef? it is NULL when exception happens
 			OP* pc = loadIns(MIR_ld, 0, _save_eip);
-			OP* handler = callIns(MIR_cm, COREADDR(AvmCore::beginCatch), 5,
+			OP* handler = callIns(FUNCTIONID(beginCatch), 5,
 				InsConst((uintptr)core), leaIns(0,_ef), InsConst((uintptr)info), pc, ee);
 
 #ifdef AVMPLUS_SPARC
@@ -1661,7 +1636,7 @@ namespace avmplus
 			{
 				// value already boxed but we need to coerce undefined->null
 				if (!value.notNull)
-					localSet(loc, callIns(MIR_csop, FUNCADDR(CodegenLIR::coerce_o), 1,
+					localSet(loc, callIns(FUNCTIONID(coerce_o), 1,
 										localGet(loc)));
 			}
 			else
@@ -1683,7 +1658,7 @@ namespace avmplus
 			else
 			{
 				// * -> Number
-				localSet(loc, callIns(MIR_fcmop, COREADDR(AvmCore::number), 2,
+				localSet(loc, callIns(FUNCTIONID(number), 2,
 					InsConst((uintptr)core), loadAtomRep(loc)));
 			}
 		}
@@ -1726,19 +1701,19 @@ namespace avmplus
 				}
 				else
 				{
-					sintptr funcaddr = FUNCADDR(AVMCORE_integer_d);
+					uint32_t funcaddr = FUNCTIONID(integer_d);
 					// narrowing conversion number->int
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 					if (core->config.sse2)
-						funcaddr = FUNCADDR(AVMCORE_integer_d_sse2);
+						funcaddr = FUNCTIONID(integer_d_sse2);
 	#endif
-					localSet(loc, callIns(MIR_csop, funcaddr, 1, localGetq(loc)));
+					localSet(loc, callIns(funcaddr, 1, localGetq(loc)));
 				}
 			}
 			else
 			{
 				// * -> int
-				localSet(loc, callIns(MIR_cmop, COREADDR(AVMCORE_integer), 2,
+				localSet(loc, callIns(FUNCTIONID(integer), 2,
 					InsConst((uintptr)core), loadAtomRep(loc)));
 			}
 		}
@@ -1787,13 +1762,13 @@ namespace avmplus
 					{
 						// Note: make sure we call the version that returns a
 						// 32-bit result here
-						localSet(loc, callIns(MIR_csop, FUNCADDR(AvmCore::integer_d_sse2), 1,
+						localSet(loc, callIns(FUNCTIONID(integer_d_sse2), 1,
 											localGetq(loc)));
 					}
 					else
 	#endif
 					{
-						localSet(loc, callIns(MIR_csop, FUNCADDR(AVMCORE_integer_d), 1,
+						localSet(loc, callIns(FUNCTIONID(integer_d), 1,
 											localGet(loc)));
 					}
 				}
@@ -1801,7 +1776,7 @@ namespace avmplus
 			else
 			{
 				// * -> uint
-				localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::toUInt32), 2,
+				localSet(loc, callIns(FUNCTIONID(toUInt32), 2,
 					InsConst((uintptr)core), loadAtomRep(loc)));
 			}
 		}
@@ -1809,7 +1784,7 @@ namespace avmplus
 		{
 			if (in == NUMBER_TYPE)
 			{
-                localSet(loc, callIns(MIR_csop, FUNCADDR(MathUtils::doubleToBool), 1, localGetq(loc)));
+                localSet(loc, callIns(FUNCTIONID(doubleToBool), 1, localGetq(loc)));
 			}
 			else if (in == INT_TYPE || in == UINT_TYPE || (in && !in->notDerivedObjectOrXML))
 			{
@@ -1821,7 +1796,7 @@ namespace avmplus
 			else
 			{
 				// * -> Boolean
-				localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::boolean), 2,
+				localSet(loc, callIns(FUNCTIONID(boolean), 2,
 					InsConst((uintptr)core), loadAtomRep(loc)));
 			}
 		}
@@ -1829,17 +1804,17 @@ namespace avmplus
 		{
 			if (in == INT_TYPE)
 			{
-				localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::intToString), 2,
+				localSet(loc, callIns(FUNCTIONID(intToString), 2,
 					InsConst((uintptr)core), localGet(loc)));
 			}
 			else if (in == UINT_TYPE)
 			{
-				localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::uintToString), 2,
+				localSet(loc, callIns(FUNCTIONID(uintToString), 2,
 					InsConst((uintptr)core), localGet(loc)));
 			}
 			else if (in == NUMBER_TYPE)
 			{
-				localSet(loc, callIns(MIR_cmop, COREADDR(AvmCore::doubleToString), 2,
+				localSet(loc, callIns(FUNCTIONID(doubleToString), 2,
 					InsConst((uintptr)core), localGetq(loc)));
 			}
 			else if (in == BOOLEAN_TYPE)
@@ -1855,12 +1830,12 @@ namespace avmplus
 			else if (value.notNull)
 			{
 				// not eligible for CSE, and we know it's not null/undefined
-				localSet(loc, callIns(MIR_cm, COREADDR(AvmCore::string), 2,
+				localSet(loc, callIns(FUNCTIONID(string), 2,
 					InsConst((uintptr)core), loadAtomRep(loc)));
 			}
 			else
 			{
-				localSet(loc, callIns(MIR_cm, COREADDR(AvmCore::coerce_s), 2,
+				localSet(loc, callIns(FUNCTIONID(coerce_s), 2,
 					InsConst((uintptr)core), loadAtomRep(loc)));
 			}
 		}
@@ -1869,7 +1844,7 @@ namespace avmplus
 		{
 			OP* toplevel = loadToplevel(env_param);
 			// coerceobj is void, but we mustn't optimize it out; verifier only calls it when required
-			callIns(MIR_cm, TOPLEVELADDR(Toplevel::coerceobj), 3,
+			callIns(FUNCTIONID(coerceobj), 3,
 				toplevel, localGet(loc), InsConst((uintptr)result));
 			// the input pointer has now been checked but it's still the same value.
 			// verifier remembers this fact by updating the verify time type.
@@ -1877,7 +1852,7 @@ namespace avmplus
 		else if (!result->isMachineType && result != NAMESPACE_TYPE)
 		{
 			// result is a ScriptObject based type.
-			localSet(loc, callIns(MIR_cm, ENVADDR(MethodEnv::coerceAtom2SO), 3,
+			localSet(loc, callIns(FUNCTIONID(coerceAtom2SO), 3,
 				env_param, loadAtomRep(loc), InsConst((uintptr)result)));
 		}
 		else
@@ -1885,7 +1860,7 @@ namespace avmplus
 			OP* value = loadAtomRep(loc);
 			OP* toplevel = loadToplevel(env_param);
 			// sp[0] = toplevel->coerce(sp[0], traits)
-			OP* out = callIns(MIR_cmop, TOPLEVELADDR(Toplevel::coerce), 3,
+			OP* out = callIns(FUNCTIONID(coerce), 3,
 				toplevel,
 				value,
 				InsConst((uintptr)result));
@@ -1907,7 +1882,7 @@ namespace avmplus
 		{
 			// checking atom for null or undefined (AvmCore::isNullOrUndefined())
 			OP* value = localGet(index);
-			callIns(MIR_cm, ENVADDR(MethodEnv::nullcheck), 2, env_param, value);
+			callIns(FUNCTIONID(nullcheck), 2, env_param, value);
 		}
 		else if (!t->isMachineType)
 		{
@@ -2003,7 +1978,7 @@ namespace avmplus
 			OP* vtable = loadVTable(objDisp);
 			OP* ivtable = loadIns(MIR_ldop, offsetof(VTable, ivtable), vtable);
 			method = loadIns(MIR_ldop, offsetof(VTable, init), ivtable);
-			OP* inst = callIns(MIR_cm, CLASSCLOSUREADDR(ClassClosure::newInstance),1, localGet(objDisp));
+			OP* inst = callIns(FUNCTIONID(newInstance),1, localGet(objDisp));
 			localSet(dest, inst);
 			break;
 		}
@@ -2028,8 +2003,10 @@ namespace avmplus
 		OP* target = loadIns(MIR_ld, offsetof(MethodEnv, impl32), method);
 		OP* apAddr = leaIns(0, ap);
 
-		OP* out = callIndirect(result==NUMBER_TYPE ? MIR_fci : MIR_ci, target, 
-            iid ? 4 : 3, 
+        uint32_t fid = result==NUMBER_TYPE ? 
+            (iid ? FUNCTIONID(fcallimt) : FUNCTIONID(fcalli)) :
+            (iid ? FUNCTIONID(callimt) : FUNCTIONID(calli));
+		OP* out = callIndirect(fid, target, iid ? 4 : 3, 
 			method, InsConst(argc), apAddr, iid);
 
 		InsDealloc(ap);
@@ -2197,22 +2174,20 @@ namespace avmplus
 						!value->isconst())
 					{
 						#ifdef MMGC_DRC
-						MirOpcode op = MIR_cm;
-						sintptr wbAddr = GCADDR(GC::writeBarrierRC);
+						uint32_t wbAddr = FUNCTIONID(writeBarrierRC);
 						if(slotType == NULL || slotType == OBJECT_TYPE) {
 							// use fast atom wb
 							// TODO: inline pointer check
-							op = MIR_cs;
-							wbAddr = FUNCADDR(AvmCore::atomWriteBarrier);
+							wbAddr = FUNCTIONID(atomWriteBarrier);
 						}
-						callIns(op, wbAddr, 4, 
+						callIns(wbAddr, 4, 
 								InsConst((uintptr)core->GetGC()), 
 								unoffsetPtr, 
 								leaIns(offset, ptr),
 								value);
 						#else // !DRC
 						// use non-substitute WB
-						callIns(MIR_cm, GCADDR(GC::WriteBarrierTrap), 3, 
+						callIns(FUNCTIONID(WriteBarrierTrap), 3, 
 								InsConst((int)core->gc), 
 								unoffsetPtr,
 								(slotType && slotType != OBJECT_TYPE) ? value :
@@ -2249,7 +2224,7 @@ namespace avmplus
 				}
 
 				#ifdef DEBUGGER
-				callIns(MIR_cm, ENVADDR(MethodEnv::debugExit), 2,
+				callIns(FUNCTIONID(debugExit), 2,
 					env_param, leaIns(0, csn));
 				// now we toast the cse and restore contents in order to 
 				// ensure that any variable modifications made by the debugger
@@ -2261,7 +2236,7 @@ namespace avmplus
 				{
 					// _ef.endTry();
 					OP* ef = leaIns(0, _ef);
-					callIns(MIR_cm, EFADDR(ExceptionFrame::endTry), 1,
+					callIns(FUNCTIONID(endTry), 1,
 						ef);
 				}
 
@@ -2279,7 +2254,7 @@ namespace avmplus
 					{
 						// implicitly coerce undefined to the return type
 						OP* toplevel = loadToplevel(env_param);
-						retvalue = callIns(MIR_cmop, TOPLEVELADDR(Toplevel::coerce), 3,
+						retvalue = callIns(FUNCTIONID(coerce), 3,
 							toplevel, retvalue, InsConst((uintptr)t));
 						retvalue = atomToNativeRep(t, retvalue);
 					}
@@ -2292,7 +2267,7 @@ namespace avmplus
 			{
 				//sp[0] = typeof(sp[0]);
 				OP* value = loadAtomRep(op1);
-				OP* i3 = callIns(MIR_cmop, COREADDR(AvmCore::_typeof), 2,
+				OP* i3 = callIns(FUNCTIONID(typeof), 2,
 					InsConst((uintptr)core), value);
 				AvmAssert(result == STRING_TYPE);
 				localSet(op1, i3);
@@ -2403,7 +2378,7 @@ namespace avmplus
 				OP* value = loadAtomRep(op1);
 				saveState();
 				//throwAtom(*sp--);
-				callIns(MIR_cm, COREADDR(AvmCore::throwAtom), 2,
+				callIns(FUNCTIONID(throwAtom), 2,
 					InsConst((uintptr)core), value);
 				break;
 			}
@@ -2419,7 +2394,7 @@ namespace avmplus
 
 				OP* obj = loadAtomRep(objDisp);
 
-				OP* i3 = callIns(MIR_cm, ENVADDR(MethodEnv::getsuper), 3,
+				OP* i3 = callIns(FUNCTIONID(getsuper), 3,
 					env_param, obj, leaIns(0,multi));
 
 				InsDealloc(multi);
@@ -2441,7 +2416,7 @@ namespace avmplus
 				OP* obj = loadAtomRep(objDisp);
 				OP* value = loadAtomRep(sp);
 
-				callIns(MIR_cm, ENVADDR(MethodEnv::setsuper), 4,
+				callIns(FUNCTIONID(setsuper), 4,
 					env_param, obj, leaIns(0, multi), value);
 
 				InsDealloc(multi);
@@ -2455,7 +2430,7 @@ namespace avmplus
 				OP* obj = loadAtomRep(sp-1);
 				AvmAssert(state->value(sp).traits == INT_TYPE);
 				OP* index = localGet(sp);
-				OP* i1 = callIns(MIR_cm, (opcode == OP_nextname) ? ENVADDR(MethodEnv::nextname) : ENVADDR(MethodEnv::nextvalue), 3,
+				OP* i1 = callIns((opcode == OP_nextname) ? FUNCTIONID(nextname) : FUNCTIONID(nextvalue), 3,
 					env_param, obj, index);
 				localSet(sp-1, atomToNativeRep(result, i1));
 				break;
@@ -2467,7 +2442,7 @@ namespace avmplus
 				OP* obj = loadAtomRep(sp-1);
 				AvmAssert(state->value(sp).traits == INT_TYPE);
 				OP* index = localGet(sp);
-				OP* i1 = callIns(MIR_cm, ENVADDR(MethodEnv::hasnext), 3,
+				OP* i1 = callIns(FUNCTIONID(hasnext), 3,
 					env_param, obj, index);
 				AvmAssert(result == INT_TYPE);
 				localSet(sp-1, i1);
@@ -2482,7 +2457,7 @@ namespace avmplus
 				OP* index = InsAlloc(sizeof(int));
 				storeIns(loadAtomRep(op1), 0, obj);
 				storeIns(localGet(op2), 0, index);
-				OP* i1 = callIns(MIR_cm, ENVADDR(MethodEnv::hasnextproto), 3,
+				OP* i1 = callIns(FUNCTIONID(hasnextproto), 3,
 									 env_param, leaIns(0, obj), leaIns(0, index));
 				localSet(op1, loadIns(MIR_ldop, 0, obj));
 				localSet(op2, loadIns(MIR_ldop, 0, index));
@@ -2507,7 +2482,7 @@ namespace avmplus
 				OP* outer = loadIns(MIR_ldop, offsetof(VTable, scope), vtable);
 				OP* argv = leaIns(0, ap);
 
-				OP* i3 = callIns(MIR_cm, ENVADDR(MethodEnv::newfunction), 4,
+				OP* i3 = callIns(FUNCTIONID(newfunction), 4,
 					envArg, InsConst((uintptr)func), outer, argv);
 
 				InsDealloc(ap);
@@ -2532,7 +2507,7 @@ namespace avmplus
 				OP* toplevel = loadToplevel(env_param);
 				OP* argv = leaIns(0, ap);
 
-				OP* i3 = callIns(MIR_cm, TOPLEVELADDR(Toplevel::op_call), 4, 
+				OP* i3 = callIns(FUNCTIONID(op_call), 4, 
 					toplevel, func, InsConst(argc), argv);
 
 				InsDealloc(ap);
@@ -2568,7 +2543,7 @@ namespace avmplus
 				OP* toplevel = loadToplevel(env_param);
 				OP* atomv = leaIns(0, ap);
 
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::callproperty), 6,
+				OP* out = callIns(FUNCTIONID(callproperty), 6,
 					toplevel, base, leaIns(0, multi), InsConst(argc), atomv, vtable);
 
 				InsDealloc(ap);
@@ -2600,7 +2575,7 @@ namespace avmplus
 
 				OP* toplevel = loadToplevel(env_param);
 				OP* atomv = leaIns(0, ap);
-				OP* i3 = callIns(MIR_cm, TOPLEVELADDR(Toplevel::constructprop), 5,
+				OP* i3 = callIns(FUNCTIONID(constructprop), 5,
 					toplevel, leaIns(0, multi), InsConst(argc), atomv, vtable);
 
 				InsDealloc(ap);
@@ -2629,7 +2604,7 @@ namespace avmplus
 				OP* ap = storeAtomArgs(obj, argc, argv);
 
 				OP* atomv = leaIns(0, ap);
-				OP* i3 = callIns(MIR_cm, ENVADDR(MethodEnv::callsuper), 4,
+				OP* i3 = callIns(FUNCTIONID(callsuper), 4,
 					env_param, leaIns(0, multi), InsConst(argc), atomv);
 
 				InsDealloc(ap);
@@ -2655,7 +2630,7 @@ namespace avmplus
 				OP* toplevel = loadToplevel(env_param);
 				OP* argv = leaIns(0, ap);
 
-				OP* i3 = callIns(MIR_cm, TOPLEVELADDR(Toplevel::op_construct), 4,
+				OP* i3 = callIns(FUNCTIONID(op_construct), 4,
 					toplevel, func, InsConst(argc), argv);
 
 				InsDealloc(ap);
@@ -2681,7 +2656,7 @@ namespace avmplus
 				OP* toplevel = loadToplevel(env_param);
 				OP* argv = leaIns(0, ap);
 
-				OP* i3 = callIns(MIR_cm, TOPLEVELADDR(Toplevel::op_applytype), 4,
+				OP* i3 = callIns(FUNCTIONID(op_applytype), 4,
 					toplevel, func, InsConst(argc), argv);
 
 				InsDealloc(ap);
@@ -2700,7 +2675,7 @@ namespace avmplus
 				// convert args to Atom for the call[]
 				OP* ap = storeAtomArgs(2*argc, arg0);
 
-				OP* i3 = callIns(MIR_cm, ENVADDR(MethodEnv::op_newobject), 3,
+				OP* i3 = callIns(FUNCTIONID(op_newobject), 3,
 					env_param, leaIns(sizeof(Atom)*(2*argc-1), ap), InsConst(argc));
 				InsDealloc(ap);
 
@@ -2714,8 +2689,8 @@ namespace avmplus
  				int dest = sp+1;
 
 				OP* envArg = env_param;
-				OP* activationVTable = callIns(MIR_cm, ENVADDR(MethodEnv::getActivation), 1, envArg);
-				OP* activation = callIns(MIR_cm, COREADDR(AvmCore::newActivation), 3, 
+				OP* activationVTable = callIns(FUNCTIONID(getActivation), 1, envArg);
+				OP* activation = callIns(FUNCTIONID(newActivation), 3, 
 										 InsConst((uintptr)core), activationVTable, InsConst(0));
 
 				localSet(dest, ptrToNativeRep(result, activation));
@@ -2727,7 +2702,7 @@ namespace avmplus
  				// result = core->newObject(env->activation, NULL);
  				int dest = sp+1;
 
-				OP* activation = callIns(MIR_cm, ENVADDR(MethodEnv::newcatch), 2, 
+				OP* activation = callIns(FUNCTIONID(newcatch), 2, 
 										 env_param, InsConst((uintptr)result));
 
 				localSet(dest, ptrToNativeRep(result, activation));
@@ -2744,7 +2719,7 @@ namespace avmplus
 				OP* ap = storeAtomArgs(argc, arg0);
 				OP* toplevel = loadToplevel(env_param);
 				OP* arrayClass = loadIns(MIR_ldop, offsetof(Toplevel,arrayClass), toplevel);
-				OP* i3 = callIns(MIR_cm, SCRIPTADDR(ArrayClass::newarray), 3,
+				OP* i3 = callIns(FUNCTIONID(newarray), 3,
 					arrayClass, leaIns(0,ap), InsConst(argc));
 				InsDealloc(ap);
 
@@ -2769,7 +2744,7 @@ namespace avmplus
 				OP* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 				OP* argv = leaIns(0, ap);
 
-				OP* i3 = callIns(MIR_cm, ENVADDR(MethodEnv::newclass), 5, 
+				OP* i3 = callIns(FUNCTIONID(newclass), 5, 
 					envArg, InsConst((sintptr)cinit), base, outer, argv);
 				InsDealloc(ap);
 
@@ -2792,7 +2767,7 @@ namespace avmplus
 				OP* obj = loadAtomRep(objDisp);
 				AvmAssert(state->value(objDisp).notNull);
 
-				out = callIns(MIR_cm, ENVADDR(MethodEnv::getdescendants), 3,
+				out = callIns(FUNCTIONID(getdescendants), 3,
 					envArg, obj, leaIns(0, multi));
 
 				InsDealloc(multi);
@@ -2801,7 +2776,7 @@ namespace avmplus
 			}
 
             case OP_checkfilter: {
-				callIns(MIR_cm, ENVADDR(MethodEnv::checkfilter), 2,
+				callIns(FUNCTIONID(checkfilter), 2,
 					env_param, loadAtomRep(op1));
 				break;
 			}
@@ -2836,7 +2811,7 @@ namespace avmplus
 	
 				// 		return env->findproperty(outer, argv, extraScopes, name, strict);
 
-				OP* i3 = callIns(MIR_cm, ENVADDR(MethodEnv::findproperty), 7, 
+				OP* i3 = callIns(FUNCTIONID(findproperty), 7, 
 					envArg, outer, leaIns(0,ap), InsConst(extraScopes), leaIns(0, multi), 
 					InsConst((int32)(opcode == OP_findpropstrict)),
 					withBase);
@@ -2861,14 +2836,14 @@ namespace avmplus
 				AvmAssert(multiname->isBinding());
 				if (multiname->isNsset())
 				{
-					out = callIns(MIR_cmop, ENVADDR(MethodEnv::finddefNsset), 3,
+					out = callIns(FUNCTIONID(finddefNsset), 3,
 						env_param,
 						InsConst((uintptr)multiname->getNsset()),
 						name);
 				}
 				else
 				{
-					out = callIns(MIR_cmop, ENVADDR(MethodEnv::finddefNs), 3,
+					out = callIns(FUNCTIONID(finddefNs), 3,
 						env_param,
 						InsConst((uintptr)multiname->getNamespace()),
 						name);
@@ -2907,26 +2882,26 @@ namespace avmplus
 					OP *value;
 					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)) )
 					{
-						value = callIns(MIR_cm, (objType==ARRAY_TYPE ? 
-												ARRAYADDR(ArrayObject::_getIntProperty) :
-												VECTOROBJADDR(ObjectVectorObject::_getIntProperty)), 2,
+						value = callIns((objType==ARRAY_TYPE ? 
+										FUNCTIONID(ArrayObject_getIntProperty) :
+										FUNCTIONID(ObjectVectorObject_getIntProperty)), 2,
 							localGet(sp-1), index);
 					}
 					else if( objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE)
 					{
 						if( result == INT_TYPE || result == UINT_TYPE)
 						{
-							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
-													VECTORINTADDR(IntVectorObject::_getNativeIntProperty) :
-													VECTORUINTADDR(UIntVectorObject::_getNativeIntProperty)), 2,
+							value = callIns((objType==VECTORINT_TYPE ? 
+													FUNCTIONID(IntVectorObject_getNativeIntProperty) :
+													FUNCTIONID(UIntVectorObject_getNativeIntProperty)), 2,
 							localGet(sp-1), index);
 							valIsAtom = false;
 						}
 						else
 						{
-							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
-													VECTORINTADDR(IntVectorObject::_getIntProperty) :
-													VECTORUINTADDR(UIntVectorObject::_getIntProperty)), 2,
+							value = callIns((objType==VECTORINT_TYPE ? 
+													FUNCTIONID(IntVectorObject_getIntProperty) :
+													FUNCTIONID(UIntVectorObject_getIntProperty)), 2,
 							localGet(sp-1), index);
 						}
 					}
@@ -2934,19 +2909,19 @@ namespace avmplus
 					{
 						if( result == NUMBER_TYPE )
 						{
-							value = callIns(MIR_fcm, VECTORDOUBLEADDR(DoubleVectorObject::_getNativeIntProperty), 2,
+							value = callIns(FUNCTIONID(DoubleVectorObject_getNativeIntProperty), 2,
 								localGet(sp-1), index);
 							valIsAtom = false;
 						}
 						else
 						{
-							value = callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_getIntProperty), 2,
+							value = callIns(FUNCTIONID(DoubleVectorObject_getIntProperty), 2,
 								localGet(sp-1), index);
 						}
 					}
 					else
 					{
-						value = callIns(MIR_cm, ENVADDR(MethodEnv::getpropertylate_i), 3,
+						value = callIns(FUNCTIONID(getpropertylate_i), 3,
 							env_param, loadAtomRep(sp-1), index);
 					}
 
@@ -2969,26 +2944,26 @@ namespace avmplus
 					OP *value;
 					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
-						value = callIns(MIR_cm, (objType==ARRAY_TYPE ? 
-												ARRAYADDR(ArrayObject::_getUintProperty) :
-												VECTOROBJADDR(ObjectVectorObject::_getUintProperty)), 2,
+						value = callIns((objType==ARRAY_TYPE ? 
+												FUNCTIONID(ArrayObject_getUintProperty) :
+												FUNCTIONID(ObjectVectorObject_getUintProperty)), 2,
 							localGet(sp-1), index);
 					}
 					else if( objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
 					{
 						if( result == INT_TYPE || result == UINT_TYPE )
 						{
-							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ?
-													VECTORINTADDR(IntVectorObject::_getNativeUintProperty) :
-													VECTORUINTADDR(UIntVectorObject::_getNativeUintProperty)), 2,
+							value = callIns((objType==VECTORINT_TYPE ?
+													FUNCTIONID(IntVectorObject_getNativeUintProperty) :
+													FUNCTIONID(UIntVectorObject_getNativeUintProperty)), 2,
 							localGet(sp-1), index);
 							valIsAtom = false;
 						}
 						else
 						{
-							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ?
-													VECTORINTADDR(IntVectorObject::_getUintProperty) : 
-													VECTORUINTADDR(UIntVectorObject::_getUintProperty)), 2,
+							value = callIns((objType==VECTORINT_TYPE ?
+													FUNCTIONID(IntVectorObject_getUintProperty) : 
+													FUNCTIONID(UIntVectorObject_getUintProperty)), 2,
 							localGet(sp-1), index);
 						}
 					}
@@ -2996,19 +2971,19 @@ namespace avmplus
 					{
 						if( result == NUMBER_TYPE )//|| result == UINT_TYPE)
 						{
-							value = callIns(MIR_fcm, VECTORDOUBLEADDR(DoubleVectorObject::_getNativeUintProperty), 2,
+							value = callIns(FUNCTIONID(DoubleVectorObject_getNativeUintProperty), 2,
 								localGet(sp-1), index);
 							valIsAtom = false;
 						}
 						else
 						{
-							value = callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_getUintProperty), 2,
+							value = callIns(FUNCTIONID(DoubleVectorObject_getUintProperty), 2,
 								localGet(sp-1), index);
 						}
 					}
 					else
 					{
-						value = callIns(MIR_cm, ENVADDR(MethodEnv::getpropertylate_u), 3,
+						value = callIns(FUNCTIONID(getpropertylate_u), 3,
 							env_param, loadAtomRep(sp-1), index);
 					}
 
@@ -3033,7 +3008,7 @@ namespace avmplus
 
 					OP *multi = leaIns(0, _tempname);
 
-					OP* value = callIns(MIR_cm, ENVADDR(MethodEnv::getpropertyHelper), 5,
+					OP* value = callIns(FUNCTIONID(getpropertyHelper), 5,
 									    env_param, obj, multi, loadVTable(objDisp), index);
 
 					InsDealloc(_tempname);
@@ -3050,7 +3025,7 @@ namespace avmplus
 					OP* toplevel = loadToplevel(env_param);
 
 					//return toplevel->getproperty(obj, name, toplevel->toVTable(obj));
-					OP* value = callIns(MIR_cm, TOPLEVELADDR(Toplevel::getproperty), 4,
+					OP* value = callIns(FUNCTIONID(getproperty), 4,
 										toplevel, obj, leaIns(0, multi), vtable);
 
 					InsDealloc(multi);
@@ -3092,9 +3067,9 @@ namespace avmplus
 					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
 						OP* value = loadAtomRep(sp);
-						callIns(MIR_cm, (objType==ARRAY_TYPE ? 
-										ARRAYADDR(ArrayObject::_setIntProperty) :
-										VECTOROBJADDR(ObjectVectorObject::_setIntProperty)), 3,
+						callIns((objType==ARRAY_TYPE ? 
+										FUNCTIONID(ArrayObject_setIntProperty) :
+										FUNCTIONID(ObjectVectorObject_setIntProperty)), 3,
 							localGet(objDisp), index, value);
 					}
 					else if(objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
@@ -3102,27 +3077,27 @@ namespace avmplus
 						if( valueType == INT_TYPE )
 						{
 							OP* value = localGet(sp);
-							callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
-											VECTORINTADDR(IntVectorObject::_setNativeIntProperty) :
-											VECTORUINTADDR(UIntVectorObject::_setNativeIntProperty)),
+							callIns((objType==VECTORINT_TYPE ? 
+											FUNCTIONID(IntVectorObject_setNativeIntProperty) :
+											FUNCTIONID(UIntVectorObject_setNativeIntProperty)),
 											3,
 											localGet(objDisp), index, value);
 						}
 						else if( valueType == UINT_TYPE )
 						{
 							OP* value = localGet(sp);
-							callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
-											VECTORINTADDR(IntVectorObject::_setNativeIntProperty) :
-											VECTORUINTADDR(UIntVectorObject::_setNativeIntProperty)), 
+							callIns((objType==VECTORINT_TYPE ? 
+											FUNCTIONID(IntVectorObject_setNativeIntProperty) :
+											FUNCTIONID(UIntVectorObject_setNativeIntProperty)), 
 											3,
 											localGet(objDisp), index, value);
 						}
 						else
 						{
 							OP* value = loadAtomRep(sp);
-							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
-													VECTORINTADDR(IntVectorObject::_setIntProperty) :
-													VECTORUINTADDR(UIntVectorObject::_setIntProperty)), 
+							value = callIns((objType==VECTORINT_TYPE ? 
+													FUNCTIONID(IntVectorObject_setIntProperty) :
+													FUNCTIONID(UIntVectorObject_setIntProperty)), 
 													3,
 													localGet(objDisp), index, value);
 						}
@@ -3132,20 +3107,20 @@ namespace avmplus
 						if( valueType == NUMBER_TYPE )
 						{
 							OP* value = localGetq(sp);
-							callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setNativeIntProperty), 3,
+							callIns(FUNCTIONID(DoubleVectorObject_setNativeIntProperty), 3,
 								localGet(objDisp), index, value);
 						}
 						else
 						{
 							OP* value = loadAtomRep(sp);
-							value = callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setIntProperty), 3,
+							value = callIns(FUNCTIONID(DoubleVectorObject_setIntProperty), 3,
 								localGet(objDisp), index, value);
 						}
 					}
 					else
 					{
 						OP* value = loadAtomRep(sp);
-						callIns(MIR_cm, ENVADDR(MethodEnv::setpropertylate_i), 4,
+						callIns(FUNCTIONID(setpropertylate_i), 4,
 							env_param, loadAtomRep(objDisp), index, value);
 					}
 				}
@@ -3164,9 +3139,9 @@ namespace avmplus
 					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
 						OP* value = loadAtomRep(sp);
-						callIns(MIR_cm, (objType==ARRAY_TYPE ? 
-										ARRAYADDR(ArrayObject::_setUintProperty) :
-										VECTOROBJADDR(ObjectVectorObject::_setUintProperty)), 3,
+						callIns((objType==ARRAY_TYPE ? 
+										FUNCTIONID(ArrayObject_setUintProperty) :
+										FUNCTIONID(ObjectVectorObject_setUintProperty)), 3,
 							localGet(objDisp), index, value);
 					}
 					else if(objType == VECTORINT_TYPE || objType == VECTORUINT_TYPE )
@@ -3174,27 +3149,27 @@ namespace avmplus
 						if( valueType == INT_TYPE )
 						{
 							OP* value = localGet(sp);
-							callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
-											VECTORINTADDR(IntVectorObject::_setNativeUintProperty) :
-											VECTORUINTADDR(UIntVectorObject::_setNativeUintProperty)),
+							callIns((objType==VECTORINT_TYPE ? 
+											FUNCTIONID(IntVectorObject_setNativeUintProperty) :
+											FUNCTIONID(UIntVectorObject_setNativeUintProperty)),
 											3,
 											localGet(objDisp), index, value);
 						}
 						else if( valueType == UINT_TYPE )
 						{
 							OP* value = localGet(sp);
-							callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
-											VECTORINTADDR(IntVectorObject::_setNativeUintProperty) :
-											VECTORUINTADDR(UIntVectorObject::_setNativeUintProperty)), 
+							callIns((objType==VECTORINT_TYPE ? 
+											FUNCTIONID(IntVectorObject_setNativeUintProperty) :
+											FUNCTIONID(UIntVectorObject_setNativeUintProperty)), 
 											3,
 											localGet(objDisp), index, value);
 						}
 						else
 						{
 							OP* value = loadAtomRep(sp);
-							value = callIns(MIR_cm, (objType==VECTORINT_TYPE ? 
-													VECTORINTADDR(IntVectorObject::_setUintProperty) :
-													VECTORUINTADDR(UIntVectorObject::_setUintProperty)), 
+							value = callIns((objType==VECTORINT_TYPE ? 
+													FUNCTIONID(IntVectorObject_setUintProperty) :
+													FUNCTIONID(UIntVectorObject_setUintProperty)), 
 													3,
 													localGet(objDisp), index, value);
 						}
@@ -3204,20 +3179,20 @@ namespace avmplus
 						if( valueType == NUMBER_TYPE )
 						{
 							OP* value = localGetq(sp);
-							callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setNativeUintProperty), 3,
+							callIns(FUNCTIONID(DoubleVectorObject_setNativeUintProperty), 3,
 								localGet(objDisp), index, value);
 						}
 						else
 						{
 							OP* value = loadAtomRep(sp);
-							value = callIns(MIR_cm, VECTORDOUBLEADDR(DoubleVectorObject::_setUintProperty), 3,
+							value = callIns(FUNCTIONID(DoubleVectorObject_setUintProperty), 3,
 								localGet(objDisp), index, value);
 						}
 					}
 					else
 					{
 						OP* value = loadAtomRep(sp);
-						callIns(MIR_cm, ENVADDR(MethodEnv::setpropertylate_u), 4,
+						callIns(FUNCTIONID(setpropertylate_u), 4,
 							env_param, loadAtomRep(objDisp), index, value);
 					}
 				}
@@ -3243,9 +3218,9 @@ namespace avmplus
 
 					OP *multi = leaIns(0, _tempname);
 
-					sintptr func = opcode==OP_setproperty ? ENVADDR(MethodEnv::setpropertyHelper) :
-														ENVADDR(MethodEnv::initpropertyHelper);
-					callIns(MIR_cm, func, 6,
+					uint32_t func = opcode==OP_setproperty ? FUNCTIONID(setpropertyHelper) :
+														FUNCTIONID(initpropertyHelper);
+					callIns(func, 6,
 							envarg, obj, multi, value, vtable, index);
 
 					InsDealloc(_tempname);
@@ -3265,12 +3240,12 @@ namespace avmplus
 					if (OP_setproperty)
 					{
 						OP* toplevel = loadToplevel(envarg);
-						callIns(MIR_cm, TOPLEVELADDR(Toplevel::setproperty), 5,
+						callIns(FUNCTIONID(setproperty), 5,
 										toplevel, obj, leaIns(0, multi), value, vtable);
 					}
 					else
 					{
-						callIns(MIR_cm, ENVADDR(MethodEnv::initproperty), 5,
+						callIns(FUNCTIONID(initproperty), 5,
 							envarg, obj, leaIns(0, multi), value, vtable);
 					}
 
@@ -3291,7 +3266,7 @@ namespace avmplus
 
 					OP* obj = loadAtomRep(objDisp);
 					
-					OP* i3 = callIns(MIR_cm, ENVADDR(MethodEnv::delproperty), 3,
+					OP* i3 = callIns(FUNCTIONID(delproperty), 3,
 						env_param, obj, leaIns(0, multi));
 
 					InsDealloc(multi);
@@ -3316,7 +3291,7 @@ namespace avmplus
 					{
 						// intern the runtime namespace and copy to the temp multiname
 						OP* nsAtom = loadAtomRep(objDisp--);
-						OP* internNs = callIns(MIR_cm, ENVADDR(MethodEnv::internRtns), 2,
+						OP* internNs = callIns(FUNCTIONID(internRtns), 2,
 							env_param, nsAtom);
 
 						storeIns(internNs, offsetof(Multiname,ns), _tempname);
@@ -3327,7 +3302,7 @@ namespace avmplus
 
 					OP *multi = leaIns(0, _tempname);
 
-					OP* value = callIns(MIR_cm, ENVADDR(MethodEnv::delpropertyHelper), 4,
+					OP* value = callIns(FUNCTIONID(delpropertyHelper), 4,
 									    env_param, obj, multi, index);
 
 					InsDealloc(_tempname);
@@ -3339,7 +3314,7 @@ namespace avmplus
 
 			case OP_convert_s:
 			{
-				localSet(op1, callIns(MIR_cm, COREADDR(AvmCore::string), 2,
+				localSet(op1, callIns(FUNCTIONID(string), 2,
 					InsConst((uintptr)core), loadAtomRep(op1)));
 				break;
 			}
@@ -3348,7 +3323,7 @@ namespace avmplus
 			{
 				//sp[0] = core->ToXMLString(sp[0]);
 				OP* value = loadAtomRep(op1);
-				OP* i3 = callIns(MIR_cmop, COREADDR(AvmCore::ToXMLString), 2,
+				OP* i3 = callIns(FUNCTIONID(ToXMLString), 2,
 					InsConst((uintptr)core), value);
 				AvmAssert(result == STRING_TYPE);
 				localSet(op1, i3);
@@ -3359,7 +3334,7 @@ namespace avmplus
 			{
 				//sp[0] = core->EscapeAttributeValue(sp[0]);
 				OP* value = loadAtomRep(op1);
-				OP* i3 = callIns(MIR_cmop, COREADDR(AvmCore::EscapeAttributeValue), 2,
+				OP* i3 = callIns(FUNCTIONID(EscapeAttributeValue), 2,
 					InsConst((uintptr)core), value);
 				AvmAssert(result == STRING_TYPE);
 				localSet(op1, i3);
@@ -3370,7 +3345,7 @@ namespace avmplus
 			{
 				// sp[0] = core->astype(sp[0], traits)
 				OP* obj = loadAtomRep(op2);
-				OP* i1 = callIns(MIR_cmop, ENVADDR(MethodEnv::astype), 3,
+				OP* i1 = callIns(FUNCTIONID(astype), 3,
 					env_param,
 					obj,
 					InsConst(op1)); // traits
@@ -3387,12 +3362,12 @@ namespace avmplus
 				OP* type = loadAtomRep(sp);
 
 				OP* envarg = env_param;
-				OP* itraits = callIns(MIR_cmop, ENVADDR(MethodEnv::toClassITraits), 2,
+				OP* itraits = callIns(FUNCTIONID(toClassITraits), 2,
 					envarg, type);
 
 				OP* obj = loadAtomRep(sp-1);
 
-				OP* i3 = callIns(MIR_cmop, ENVADDR(MethodEnv::astype), 3,
+				OP* i3 = callIns(FUNCTIONID(astype), 3,
 					envarg, obj, itraits);
 
 				i3 = atomToNativeRep(result, i3);
@@ -3406,7 +3381,7 @@ namespace avmplus
 				OP* lhs = loadAtomRep(sp-1);
 				OP* rhs = loadAtomRep(sp);
 				OP* toplevel = loadToplevel(env_param);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::add2), 3,
+				OP* out = callIns(FUNCTIONID(add2), 3,
 					toplevel, lhs, rhs);
 				localSet(sp-1, atomToNativeRep(result, out));
 				break;
@@ -3416,7 +3391,7 @@ namespace avmplus
 			{
 				OP* lhs = localGet(sp-1);
 				OP* rhs = localGet(sp);
-				OP* out = callIns(MIR_cmop, COREADDR(AvmCore::concatStrings), 3,
+				OP* out = callIns(FUNCTIONID(concatStrings), 3,
 					InsConst((uintptr)core), lhs, rhs);
 				localSet(sp-1,	out);
 				break;
@@ -3425,14 +3400,14 @@ namespace avmplus
 			case OP_strictequals:
 			{
 				AvmAssert(result == BOOLEAN_TYPE);
-				localSet(sp-1, cmpEq(COREADDR(AvmCore::stricteq), sp-1, sp));
+				localSet(sp-1, cmpEq(FUNCTIONID(stricteq), sp-1, sp));
 				break;
 			}
 
 			case OP_equals:
 			{
 				AvmAssert(result == BOOLEAN_TYPE);
-				localSet(sp-1, cmpEq(COREADDR(AvmCore::equals), sp-1, sp));
+				localSet(sp-1, cmpEq(FUNCTIONID(equals), sp-1, sp));
 				break;
 			}
 
@@ -3469,7 +3444,7 @@ namespace avmplus
 				OP* lhs = loadAtomRep(sp-1);
 				OP* rhs = loadAtomRep(sp);
 				OP* toplevel = loadToplevel(env_param);
-				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::instanceof), 3,
+				OP* out = callIns(FUNCTIONID(instanceof), 3,
 					toplevel, lhs, rhs);
 				out = atomToNativeRep(result, out);
 				localSet(sp-1,	out);
@@ -3480,7 +3455,7 @@ namespace avmplus
 			{
 				OP* lhs = loadAtomRep(sp-1);
 				OP* rhs = loadAtomRep(sp);
-				OP* out = callIns(MIR_cm, ENVADDR(MethodEnv::in), 3,
+				OP* out = callIns(FUNCTIONID(in), 3,
 					env_param, lhs, rhs);
 				out = atomToNativeRep(result, out);
 				localSet(sp-1, out);
@@ -3494,7 +3469,7 @@ namespace avmplus
 				//sp[0] = istype(sp[0], itraits);
 				OP* obj = loadAtomRep(op2);
 				OP* itraits = InsConst(op1);
-				OP* out = callIns(MIR_cm, COREADDR(AvmCore::istypeAtom), 3,
+				OP* out = callIns(FUNCTIONID(istypeAtom), 3,
 					InsConst((uintptr)core), obj, itraits);
 				out = atomToNativeRep(result, out);
 				localSet(op2, out);
@@ -3507,12 +3482,12 @@ namespace avmplus
 				//sp--;
 				OP* type = loadAtomRep(sp);
 
-				OP* traits = callIns(MIR_cmop, ENVADDR(MethodEnv::toClassITraits), 2,
+				OP* traits = callIns(FUNCTIONID(toClassITraits), 2,
 					env_param, type);
 
 				OP* obj = loadAtomRep(sp-1);
 
-				OP* i3 = callIns(MIR_cm, COREADDR(AvmCore::istypeAtom), 3,
+				OP* i3 = callIns(FUNCTIONID(istypeAtom), 3,
 					InsConst((uintptr)core), obj, traits);
 
 				i3 = atomToNativeRep(result, i3);
@@ -3523,8 +3498,7 @@ namespace avmplus
 			case OP_dxns:
 			{
 				OP* uri = InsConst(op1); // uri
-				OP* ns = callIns(MIR_cm, 
-					COREADDR(AvmCore::newPublicNamespace), 
+				OP* ns = callIns(FUNCTIONID(newPublicNamespace), 
 					2, 
 					InsConst((uintptr)core), 
 					uri);
@@ -3535,10 +3509,9 @@ namespace avmplus
 			case OP_dxnslate:
 			{
 				OP* atom = loadAtomRep(op1);				
-				OP* uri = callIns(MIR_cm, COREADDR(AvmCore::intern), 2,
+				OP* uri = callIns(FUNCTIONID(intern), 2,
 					InsConst((uintptr)core), atom);
-				OP* ns = callIns(MIR_cm, 
-					COREADDR(AvmCore::newPublicNamespace), 
+				OP* ns = callIns(FUNCTIONID(newPublicNamespace), 
 					2, 
 					InsConst((uintptr)core), 
 					uri);
@@ -3555,7 +3528,7 @@ namespace avmplus
 				// todo refactor api's so we don't have to pass argv/argc
 				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
 											InsConst((uintptr)core));
-				callIns(MIR_cm, DEBUGGERADDR(Debugger::debugFile), 2,
+				callIns(FUNCTIONID(debugFile), 2,
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
@@ -3571,7 +3544,7 @@ namespace avmplus
 				// todo refactor api's so we don't have to pass argv/argc
 				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
 											InsConst((uintptr)core));
-				callIns(MIR_cm, DEBUGGERADDR(Debugger::debugLine), 2,
+				callIns(FUNCTIONID(debugLine), 2,
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
@@ -3659,19 +3632,19 @@ namespace avmplus
 			break;
 		case OP_ifeq:
 			br = LIR_jt;
-			cond = cmpEq(COREADDR(AvmCore::equals), a, b);
+			cond = cmpEq(FUNCTIONID(equals), a, b);
 			break;
 		case OP_ifne:
 			br = LIR_jf;
-			cond = cmpEq(COREADDR(AvmCore::equals), a, b);
+			cond = cmpEq(FUNCTIONID(equals), a, b);
 			break;
 		case OP_ifstricteq:
 			br = LIR_jt;
-			cond = cmpEq(COREADDR(AvmCore::stricteq), a, b);
+			cond = cmpEq(FUNCTIONID(stricteq), a, b);
 			break;
 		case OP_ifstrictne:
 			br = LIR_jf;
-			cond = cmpEq(COREADDR(AvmCore::stricteq), a, b);
+			cond = cmpEq(FUNCTIONID(stricteq), a, b);
 			break;
 		default:
 			AvmAssert(false);
@@ -3785,7 +3758,7 @@ namespace avmplus
 		AvmAssert(undefinedAtom == 4);
 		OP* lhs = loadAtomRep(lhsi);
 		OP* rhs = loadAtomRep(rhsi);
-		OP* atom = callIns(MIR_cm, COREADDR(AvmCore::compare), 3,
+		OP* atom = callIns(FUNCTIONID(compare), 3,
 			InsConst((uintptr)core), lhs, rhs);
 
 		// caller will use jt for (a<b) and jf for !(a<b)
@@ -3806,7 +3779,7 @@ namespace avmplus
 
 		OP* lhs = loadAtomRep(lhsi);
 		OP* rhs = loadAtomRep(rhsi);
-		OP* atom = callIns(MIR_cm, COREADDR(AvmCore::compare), 3,
+		OP* atom = callIns(FUNCTIONID(compare), 3,
 			InsConst((uintptr)core), rhs, lhs);
 
 		// assume caller will use jt for (a<=b) and jf for !(a<=b)
@@ -3820,7 +3793,7 @@ namespace avmplus
 		return binaryIns(LIR_le, binaryIns(MIR_xor, atom, c2), c4);
 	}
 
-	LIns* CodegenLIR::cmpEq(sintptr funcaddr, int lhsi, int rhsi)
+	LIns* CodegenLIR::cmpEq(uint32_t fid, int lhsi, int rhsi)
 	{
 		LIns *result = cmpOptimization (lhsi, rhsi, LIR_eq, LIR_eq, LIR_feq);
 		if (result) {
@@ -3845,8 +3818,7 @@ namespace avmplus
 		{
 			LIns* lhs = loadAtomRep(lhsi);
 			LIns* rhs = loadAtomRep(rhsi);
-			LIns* out = callIns(MIR_cm, funcaddr, 
-				3, InsConst((uintptr)core), lhs, rhs);
+			LIns* out = callIns(fid, 3, InsConst((uintptr)core), lhs, rhs);
 
 			// assume caller will use MIR_jeq or MIR_jne
 			result = binaryIns(LIR_eq, out, InsConst(trueAtom));
@@ -3894,14 +3866,14 @@ namespace avmplus
             LIns *label = Ins(MIR_bb);
             label->setimm24(state->verifier->frameSize * 8);
 			mirLabel(npe_label, label);
-			callIns(MIR_cm, ENVADDR(MethodEnv::npe), 1, env_param);
+			callIns(FUNCTIONID(npe), 1, env_param);
 		}
 
         if (interrupt_label.preds) {
             LIns *label = Ins(MIR_bb);
             label->setimm24(state->verifier->frameSize * 8);
 			mirLabel(interrupt_label, label);
-			callIns(MIR_cm, ENVADDR(MethodEnv::interrupt), 1, env_param);
+			callIns(FUNCTIONID(interrupt), 1, env_param);
 		}
 
         // extend live range of critical stuff
@@ -3967,7 +3939,7 @@ namespace avmplus
 		{
 			// intern the runtime namespace and copy to the temp multiname
 			OP* nsAtom = loadAtomRep(csp--);
-			OP* internNs = callIns(MIR_cm, ENVADDR(MethodEnv::internRtns), 2,
+			OP* internNs = callIns(FUNCTIONID(internRtns), 2,
 				env_param, nsAtom);
 
 			storeIns(internNs, offsetof(Multiname,ns), _tempname);
@@ -3986,14 +3958,14 @@ namespace avmplus
 		{
 			if (isDelete)
 			{
-				callIns(MIR_cm, ENVADDR(MethodEnv::initMultinameLateForDelete), 3,
+				callIns(FUNCTIONID(initMultinameLateForDelete), 3,
 						env_param,
 						leaIns(0, _tempname),
 						nameAtom);
 			}
 			else
 			{
-				callIns(MIR_cm, COREADDR(AvmCore::initMultinameLate), 3,
+				callIns(FUNCTIONID(initMultinameLate), 3,
 						InsConst((uintptr)core),
 						leaIns(0, _tempname),
 						nameAtom);
@@ -4034,8 +4006,7 @@ namespace avmplus
 		{
 			// *, Object or Void
 			OP* obj = loadAtomRep(i);
-			return callIns(MIR_cmop, TOPLEVELADDR(Toplevel::toVTable), 2,
-					toplevel, obj);
+			return callIns(FUNCTIONID(toVTable), 2, toplevel, obj);
 		}
 
 		// now offset != -1 and we are returning a primitive vtable
@@ -4112,10 +4083,10 @@ namespace avmplus
 		/* @todo  inlined sample check doesn't work, help! 
 			OP* takeSample = loadIns(MIR_ld, (int)&core->takeSample, NULL);
 			OP* br = Ins(MIR_jeq, binaryIns(MIR_ucmp, takeSample, InsConst(0)));
-			callIns(MIR_cm, COREADDR(AvmCore::sample), 1, InsConst((int32)core));
+			callIns(FUNCTIONID(sample), 1, InsConst((int32)core));
 			br->target = Ins(MIR_bb);
 		*/
-		callIns(MIR_cm, COREADDR(AvmCore::sampleCheck), 1, InsConst((uintptr)core));
+		callIns(FUNCTIONID(sampleCheck), 1, InsConst((uintptr)core));
 	}
 #endif
 
