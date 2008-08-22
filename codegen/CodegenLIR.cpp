@@ -840,7 +840,7 @@ namespace avmplus
 					return i2dIns(InsConst(a>>3));
 				}
 			} else {
-				return callIns(MIR_fcsop, FUNCADDR(AvmCore::number_d), 1, atom);
+				return callIns(FUNCTIONID(number_d), 1, atom);
 			}
 		}
 		else if (t == INT_TYPE)
@@ -848,14 +848,14 @@ namespace avmplus
 			if (atom->isconst())
 				return InsConst(AVMCORE_integer_i(atom->constval()));
 			else
-				return callIns(MIR_csop, FUNCADDR(AVMCORE_integer_i), 1, atom);
+				return callIns(FUNCTIONID(integer_i), 1, atom);
 		}
 		else if (t == UINT_TYPE)
 		{
 			if (atom->isconst())
 				return InsConst(AvmCore::integer_u(atom->constval()));
 			else
-				return callIns(MIR_csop, FUNCADDR(AvmCore::integer_u), 1, atom);
+				return callIns(FUNCTIONID(integer_u), 1, atom);
 		}
 		else if (t == BOOLEAN_TYPE)
 		{
@@ -1403,7 +1403,7 @@ namespace avmplus
 			// Exception* _ee = setjmp(_ef.jmpBuf);
 			// ISSUE this needs to be a cdecl call
 			OP* jmpbuf = leaIns(offsetof(ExceptionFrame, jmpbuf), _ef);
-			OP* ee = callIns(MIR_cs, SETJMP, 2,
+			OP* ee = callIns(FUNCTIONID(fsetjmp), 2,
 				jmpbuf, InsConst(0));
 
 #ifdef AVMPLUS_SPARC
@@ -1450,7 +1450,7 @@ namespace avmplus
 			#else
 			OP* interrupted = loadIns(MIR_ld, (uintptr)&core->interrupted, NULL);
 			#endif
-			OP* br = Ins(MIR_jne, binaryIns(MIR_ucmp, interrupted, InsConst(0)));
+			OP* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
 			patchLater(br, interrupt_label);
 		}
 
@@ -2320,7 +2320,7 @@ namespace avmplus
 			}
 
             case OP_modulo: {
-				OP* out = callIns(MIR_fcsop, FUNCADDR(MathUtils::mod), 2,
+				OP* out = callIns(FUNCTIONID(mod), 2,
 					localGetq(sp-1), localGetq(sp));
 				localSet(sp-1,	out);
 				break;
@@ -2330,13 +2330,13 @@ namespace avmplus
             case OP_multiply:
             case OP_subtract:
             case OP_add_d: {
-				MirOpcode mircode=MIR_last;
+				MirOpcode mircode;
 				switch (opcode) {
+					default:
 					case OP_divide:     mircode = MIR_fdiv; break;
 					case OP_multiply:   mircode = MIR_fmul; break;
 					case OP_subtract:   mircode = MIR_fsub; break;
 					case OP_add_d:      mircode = MIR_fadd; break;
-					default: break;
 				}
                 localSet(sp-1, binaryIns(mircode, localGetq(sp-1), localGetq(sp)));
                 break;
@@ -2352,8 +2352,9 @@ namespace avmplus
 			case OP_bitor:
 			case OP_bitxor:
 			{
-				MirOpcode mircode=MIR_last;
+				MirOpcode mircode;
 				switch (opcode) {
+                    default:
 					case OP_bitxor:     mircode = MIR_xor;  break;
 					case OP_bitor:      mircode = MIR_or;   break;
 					case OP_bitand:     mircode = MIR_and;  break;
@@ -2363,7 +2364,6 @@ namespace avmplus
 					case OP_multiply_i: mircode = MIR_imul; break;
 					case OP_add_i:      mircode = MIR_add;  break;
 					case OP_subtract_i: mircode = MIR_sub;  break;
-					default: break;
 				}
 				OP* lhs = localGet(sp-1);
 				OP* rhs = localGet(sp);
@@ -3670,7 +3670,7 @@ namespace avmplus
 	OP* CodegenLIR::i2dIns(OP* v)
 	{
 		#ifdef AVMPLUS_ARM
-		return callIns(MIR_fcsop, FUNCADDR(CodegenLIR::i2d), 1, v);
+		return callIns(FUNCTIONID(i2d), 1, v);
 		#else
 		return Ins(MIR_i2d, v);
 		#endif
@@ -3679,7 +3679,7 @@ namespace avmplus
 	OP* CodegenLIR::u2dIns(OP* v)
 	{
 		#ifdef AVMPLUS_ARM
-		return callIns(MIR_fcsop, FUNCADDR(CodegenLIR::u2d), 1, v);
+		return callIns(FUNCTIONID(u2d), 1, v);
 		#else
 		return Ins(MIR_u2d, v);
 		#endif
@@ -4257,7 +4257,7 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop && normalcount <= 0 || assm->hasLoop && loopcount <= 0) 
+        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop /*&& loopcount <= 0*/) 
             && !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);

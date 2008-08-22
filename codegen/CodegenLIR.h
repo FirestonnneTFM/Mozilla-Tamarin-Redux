@@ -68,12 +68,12 @@ namespace avmplus
 	{
 		MIR_bb      = 2,
 		MIR_jmpt	= 3,				// offset, size
-		MIR_cm		= 4,				// count, imm32  - call method
-		MIR_cs		= 5,				// count, imm32  - call static
-		MIR_ci		= 6,				// count, ptr	 - call indirect
-		MIR_icmp 	= 7,				// ptr, imm32
-		MIR_ucmp	= 8,				// ptr, imm32
-		MIR_fcmp	= 9,				// ptr, imm32
+		//MIR_cm		= 4,				// count, imm32  - call method
+		//MIR_cs		= 5,				// count, imm32  - call static
+		//MIR_ci		= 6,				// count, ptr	 - call indirect
+		//MIR_icmp 	= 7,				// ptr, imm32
+		//MIR_ucmp	= 8,				// ptr, imm32
+		//MIR_fcmp	= 9,				// ptr, imm32
 		MIR_jeq		= 10,				// ptr, imm32
 		MIR_jne		= 11,				// ptr, imm32
 		MIR_ret		= 12,				// ptr
@@ -106,8 +106,8 @@ namespace avmplus
 		MIR_imm		= 1  | MIR_oper,	// 0,imm32
 		MIR_imul	= 2  | MIR_oper,
 		MIR_neg		= 3  | MIR_oper,	// ptr, ptr
-		MIR_cmop    = 4  | MIR_oper,    // MIR_cm|oper, call method w/out side effects
-		MIR_csop    = 5  | MIR_oper,    // MIR_cs|oper, call static method w/out side effects
+		//MIR_cmop    = 4  | MIR_oper,    // MIR_cm|oper, call method w/out side effects
+		//MIR_csop    = 5  | MIR_oper,    // MIR_cs|oper, call static method w/out side effects
 		MIR_lsh		= 6  | MIR_oper,	// <<
 		MIR_rsh		= 7  | MIR_oper,	// >>
 		MIR_ush		= 8  | MIR_oper,	// >>>
@@ -116,19 +116,19 @@ namespace avmplus
 		MIR_xor		= 11 | MIR_oper,
 		MIR_add		= 12 | MIR_oper,
 		MIR_sub		= 13 | MIR_oper,	// ptr, ptr
-		MIR_eq		= 14 | MIR_oper,
-		MIR_le		= 15 | MIR_oper,
-		MIR_lt		= 16 | MIR_oper,
-		MIR_ne		= 17 | MIR_oper,
+		//MIR_eq		= 14 | MIR_oper,
+		//MIR_le		= 15 | MIR_oper,
+		//MIR_lt		= 16 | MIR_oper,
+		//MIR_ne		= 17 | MIR_oper,
 		MIR_lea		= 18 | MIR_oper,	// ptr, disp
 
 		MIR_ldop    = 22 | MIR_oper,    // ptr, disp (optimizable)
 
 		// After this point are all instructions that return a double-sized
 		// result.
-		MIR_fcm		= 4  | MIR_float,	// count, imm32 - call method, float return
-		MIR_fcs		= 5  | MIR_float,	// count, imm32 - call static, float return
-		MIR_fci		= 6	 | MIR_float,	// count, addr - call indirect, float return
+		//MIR_fcm		= 4  | MIR_float,	// count, imm32 - call method, float return
+		//MIR_fcs		= 5  | MIR_float,	// count, imm32 - call static, float return
+		//MIR_fci		= 6	 | MIR_float,	// count, addr - call indirect, float return
 
 		MIR_fdef    = 17 | MIR_float,   // defines value of variable as floating point
 		MIR_fuse    = 18 | MIR_float,   // 
@@ -138,8 +138,8 @@ namespace avmplus
 		MIR_i2d		= 1  | MIR_float | MIR_oper,	// ptr
 		MIR_fneg	= 2  | MIR_float | MIR_oper,	// ptr
 		MIR_u2d		= 3  | MIR_float | MIR_oper,
-		MIR_fcmop   = 4  | MIR_float | MIR_oper,
-		MIR_fcsop   = 5  | MIR_float | MIR_oper,
+		//MIR_fcmop   = 4  | MIR_float | MIR_oper,
+		//MIR_fcsop   = 5  | MIR_float | MIR_oper,
 		MIR_fadd	= 6  | MIR_float | MIR_oper,	// ptr, ptr
 		MIR_fsub	= 7  | MIR_float | MIR_oper,	// ptr, ptr
 		MIR_fmul	= 8  | MIR_float | MIR_oper,	// ptr, ptr
@@ -150,7 +150,7 @@ namespace avmplus
 		
 		MIR_fldop   = 22 | MIR_float | MIR_oper,	// ptr, disp (optimizable load)
 
-		MIR_last	= 23 | MIR_float | MIR_oper // highest ordinal value possible
+		//MIR_last	= 23 | MIR_float | MIR_oper // highest ordinal value possible
 	};
 
     class Patch {
