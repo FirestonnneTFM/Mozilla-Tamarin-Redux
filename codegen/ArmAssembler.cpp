@@ -38,8 +38,13 @@
 
 #include "avmplus.h"
 
-#ifdef AVMPLUS_MIR//hack
-#ifdef AVMPLUS_ARM	#if !defined(AVMPLUS_SYMBIAN) && !defined(UNDER_CE)		#include <sys/mman.h>	#endif#endif
+#ifdef AVMPLUS_MIR
+//hack
+#ifdef AVMPLUS_ARM
+	#if !defined(AVMPLUS_SYMBIAN) && !defined(UNDER_CE)
+		#include <sys/mman.h>
+	#endif
+#endif
 
 #include <stdio.h>
 
@@ -624,14 +629,18 @@ namespace avmplus
 
 #ifdef AVMPLUS_MIR
 
-#ifndef AVMTHUNK_VERSION	void CodegenMIR::emitNativeThunk(NativeMethod *info)
+#ifndef AVMTHUNK_VERSION
+	void CodegenMIR::emitNativeThunk(NativeMethod *info)
 	{
 		SET_CONDITION_CODE(AL);
 		
 		// Hack to see what instructions we're generating
 		//bool hack = true;
 		//verboseFlag = true;
-#ifdef AVMPLUS_VERBOSE		if (verbose())			core->console << " native thunk for " << info << "\n";#endif
+#ifdef AVMPLUS_VERBOSE
+		if (verbose())
+			core->console << " native thunk for " << info << "\n";
+#endif
 
 		const Register TEMP  = R7;
 		const Register AP    = R6;
@@ -700,7 +709,8 @@ namespace avmplus
 			Traits* type = info->paramTraits(i);
 			Atom arg = info->getDefaultValue(i-first_optional);
 			
-			if (type == OBJECT_TYPE || type == VOID_TYPE || !type)			{
+			if (type == OBJECT_TYPE || type == VOID_TYPE || !type)
+			{
 				IMM32(arg);
 			}
 			else if (type == BOOLEAN_TYPE)
@@ -709,7 +719,14 @@ namespace avmplus
 			}
 			else if (type == NUMBER_TYPE)
 			{
-				union {					double d;                    uint32 i[2];				};				d = core->number_d(arg);				IMM32(i[0]);				IMM32(i[1]);			}
+				union {
+					double d;
+                    uint32 i[2];
+				};
+				d = core->number_d(arg);
+				IMM32(i[0]);
+				IMM32(i[1]);
+			}
 			else if (type == INT_TYPE)
 			{
 				int i = core->integer_i(arg);
@@ -777,7 +794,8 @@ namespace avmplus
 		
 		if (info->flags & AbstractFunction::NATIVE_COOKIE)
 		{
-			MOV_imm32 (R1, info->m_cookie);			GPRIndex++;
+			MOV_imm32 (R1, info->m_cookie);
+			GPRIndex++;
 		}
 
 		// push args left to right
@@ -816,8 +834,10 @@ namespace avmplus
 
 					// Do second word of double
 					if ((GPRIndex+1) < kMaxGPRIndex) {
-						LDR ((Register)(R0+GPRIndex+1), offset, PC);					} else {
-						LDR (TEMP, offset, PC);						STR (TEMP, (GPRIndex+1-kMaxGPRIndex)*4, SP);
+						LDR ((Register)(R0+GPRIndex+1), offset, PC);
+					} else {
+						LDR (TEMP, offset, PC);
+						STR (TEMP, (GPRIndex+1-kMaxGPRIndex)*4, SP);
 					}
 					
 					const_ip += 2;
@@ -1017,7 +1037,9 @@ namespace avmplus
 
 	void ArmAssembler::flushDataCache(void *start, int len)
 	{
-		(void) start;		(void) len;		#ifdef AVMPLUS_SYMBIAN
+		(void) start;
+		(void) len;
+		#ifdef AVMPLUS_SYMBIAN
 
 		// Adjust start and len to page boundaries
 		start = (void*) ((int)start & ~0xFFF);
@@ -1165,4 +1187,4 @@ namespace avmplus
 	
 #endif /* AVMPLUS_ARM */
 }
-#endif
+#endif
