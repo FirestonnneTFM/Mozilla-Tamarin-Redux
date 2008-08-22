@@ -179,6 +179,7 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(COREADDR(AvmCore::initMultinameLate), I_III, initMultinameLate)
     METHOD(ENVADDR(MethodEnv::initMultinameLateForDelete), I_III, initMultinameLateForDelete)
     CSEFUNCTION(FUNCADDR(MathUtils::doubleToBool), I_D, doubleToBool)
+    METHOD(CLASSCLOSUREADDR(ClassClosure::newInstance), I_I, newInstance)
 
     METHOD(EFADDR(ExceptionFrame::endTry), I_I, endTry)
     METHOD(EFADDR(ExceptionFrame::beginTry), I_II, beginTry)

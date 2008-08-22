@@ -188,7 +188,7 @@ namespace avmplus
         CodegenLabel interrupt_label, npe_label;
         sintptr lastPcSave;
         List<Patch, LIST_NonGCObjects> patches;
-		SortedIntMap<uintptr_t> callAddrMap;
+		SortedMap<uintptr_t, uint32_t, LIST_NonGCObjects> callAddrMap;
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(MirOpcode op, int32_t disp, LIns *base);
@@ -243,6 +243,7 @@ namespace avmplus
         bool isCodeContextChanged() const;
         void mirLabel(CodegenLabel &l, LIns *target);
         void markDead(LIns *);
+        uint32_t find_fid(uintptr_t addr);
 
 	public:
 		CodegenLIR(MethodInfo* info);

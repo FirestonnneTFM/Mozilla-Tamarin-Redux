@@ -180,6 +180,7 @@ namespace avmplus
 		#define VECTOROBJADDR(f) vectorObjAddr((int (ObjectVectorObject::*)())(&f))
 		#define EFADDR(f)   efAddr((int (ExceptionFrame::*)())(&f))
 		#define DEBUGGERADDR(f)   debuggerAddr((int (Debugger::*)())(&f))
+		#define CLASSCLOSUREADDR(f)   classClosureAddr((int (ClassClosure::*)())(&f))
 
 	#ifndef AVMPLUS_MAC
 		#define FUNCADDR(addr) (uintptr)addr
@@ -255,6 +256,10 @@ namespace avmplus
 		sintptr efAddr( int (ExceptionFrame::*f)() )
 		{
 			RETURN_METHOD_PTR(ExceptionFrame, f);
+		}
+		sintptr classClosureAddr(int (ClassClosure::*f)())
+		{
+			RETURN_METHOD_PTR(ClassClosure, f);
 		}
 
 	using namespace MMgc;
@@ -415,17 +420,16 @@ namespace avmplus
         return lirout->ins2(LIR_add, base, lirout->insImm(disp));
 	}
 
-    uint32_t find_fid(uintptr_t addr, SortedIntMap<uintptr_t>& map) {
-		int_t idx = map.get(addr);
-		AvmAssert(idx);
-		return idx-1;
+    uint32_t CodegenLIR::find_fid(uintptr_t addr) {
+		AvmAssert(callAddrMap.containsKey(addr));
+		return callAddrMap.get(addr);
     }
 
 	// call 
 	OP* CodegenLIR::callIns(MirOpcode code, uintptr_t addr, uint32_t argc, ...)
 	{
         (void) code;
-        uint32_t fid = find_fid(addr,callAddrMap);
+        uint32_t fid = find_fid(addr);
         AvmAssert(argc <= MAXARGS);
         AvmAssert(argc == k_functions[fid].count_args());
         AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
@@ -446,7 +450,7 @@ namespace avmplus
             code == MIR_fci ? 
                 (argc == 3 ? FCALL_INDIRECT : FCALL_IMT) :
                 (argc == 3 ? CALL_INDIRECT : CALL_IMT)
-            , callAddrMap);
+                );
         AvmAssert(argc+1 <= MAXARGS);
         AvmAssert(argc+1 == k_functions[fid].count_args());
         AvmAssert(((code&MIR_oper) != 0) == (k_functions[fid]._cse != 0));
@@ -668,7 +672,7 @@ namespace avmplus
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
 		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc), 
-			callAddrMap(gc,144,true,0), interruptable(true)
+			callAddrMap(gc,CI_Max), interruptable(true)
 	{
 		state = NULL;
 
@@ -690,9 +694,8 @@ namespace avmplus
 
 #define INTERP_FOPCODE_LIST_BEGIN 
 #define INTERP_FOPCODE_LIST_END
-		int_t pos = 1;
     #define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
-		callAddrMap.put(f, pos++);
+		callAddrMap.put(f, FUNCTIONID(name));
 
     #include "../core/vm_fops.h"
 
@@ -724,7 +727,7 @@ namespace avmplus
 		//	core->console << "mir_arg " << arg_count << " of " << InsNbr(ip) << "\n";
 		//arg_count = 0;
 
-		clearMIRBuffers();
+		//clearMIRBuffers();
 	}
 
 	void CodegenLIR::clearMIRBuffers()
@@ -1991,6 +1994,17 @@ namespace avmplus
 			OP* vtable = loadVTable(objDisp);
 			method = loadIns(MIR_ldop, offsetof(VTable, imt)+sizeof(uintptr)*index, vtable);
 			iid = InsConst(method_id);
+			break;
+		}
+		case OP_construct:
+		{
+			// stack in: ctor arg1..N
+			// stack out: newinstance
+			OP* vtable = loadVTable(objDisp);
+			OP* ivtable = loadIns(MIR_ldop, offsetof(VTable, ivtable), vtable);
+			method = loadIns(MIR_ldop, offsetof(VTable, init), ivtable);
+			OP* inst = callIns(MIR_cm, CLASSCLOSUREADDR(ClassClosure::newInstance),1, localGet(objDisp));
+			localSet(dest, inst);
 			break;
 		}
 		default:
@@ -4272,7 +4286,7 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop /*&& loopcount <= 0*/) 
+        bool keep = (!assm->hasLoop && normalcount <= 0 || assm->hasLoop && loopcount <= 0) 
             && !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);

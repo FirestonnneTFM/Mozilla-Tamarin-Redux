@@ -118,7 +118,7 @@ namespace nanojit
 		counter_define(native;)
         counter_define(exitnative;)
 		
-		int_t pages;
+		int32_t pages;
 		NIns* codeStart;
 		NIns* codeExitStart;
 
@@ -210,7 +210,7 @@ namespace nanojit
 			AssmError   error()	{ return _err; }
 			void		setError(AssmError e) { _err = e; }
 			void		pageReset();
-			int_t		codeBytes();
+			int32_t		codeBytes();
 			Page*		handoverPages(bool exitPages=false);
 
 			debug_only ( void		pageValidate(); )

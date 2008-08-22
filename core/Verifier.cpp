@@ -374,7 +374,7 @@ namespace avmplus
 							// atom received as *, will coerce to correct type in catch handler.
 							state->push(NULL);
 
-							MIR_ONLY( /*if (mir) mir->localSet(stackBase, mir->exAtom);*/ )
+							//MIR_ONLY( if (mir) mir->localSet(stackBase, mir->exAtom); )
 
 							checkTarget(target);
  							state->pop();
