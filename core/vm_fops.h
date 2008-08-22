@@ -183,7 +183,7 @@ INTERP_FOPCODE_LIST_BEGIN
 
     METHOD(EFADDR(ExceptionFrame::endTry), I_I, endTry)
     METHOD(EFADDR(ExceptionFrame::beginTry), I_II, beginTry)
-    FUNCTION(SETJMP, I_II, setjmp)
+    FUNCTION(SETJMP, I_II, fsetjmp)
     METHOD(COREADDR(AvmCore::beginCatch), I_I5, beginCatch)
 
 #ifdef DEBUGGER
