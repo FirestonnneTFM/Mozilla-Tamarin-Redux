@@ -44,15 +44,40 @@ namespace avmplus
 	{
 	public:
 #  ifdef AVMPLUS_DIRECT_THREADED
-		Translator(void** opcode_labels);
+		Translator(MethodInfo* info, void** opcode_labels);
 #  else
-		Translator();
+		Translator(MethodInfo* info);
 #  endif
 		~Translator();
 		
-		// Update MethodEnv in place by adding a translation to it.
-		void translate(MethodEnv* method);
+		// In all cases below, pc points to the opcode.
 		
+		void computeExceptionFixups();
+
+		// Call before every instruction to handle exception range translation and
+		// fix up branches to this address
+		void fixExceptionsAndLabels(const byte *pc);
+		
+		// Paste up the translated code and install it in info
+		void epilogue();
+		
+		// Handle specific instructions or instruction classes
+		void emitOp0(const byte *pc, int opcode);
+		void emitOp1(const byte *pc, int opcode);
+		void emitOp2(const byte *pc, int opcode);
+		void emitDebug(const byte *pc);
+		void emitRelativeJump(const byte *pc, int opcode);
+		void emitLookupswitch(const byte *pc);
+		void emitLabel(const byte *pc);
+		void emitPushbyte(const byte *pc);
+		void emitPushshort(const byte *pc);
+		void emitPushint(const byte *pc);
+		void emitPushuint(const byte *pc);
+		void emitGetscopeobject(const byte *pc);
+
+		// In this case, new_pc is the pc being jumped to
+		void emitAbsJump(const byte *new_pc);
+
 	private:
 		// 'backpatches' represent target addresses of jumps in the original code, along
 		// with locations in the translated code that must be patched when the target
@@ -113,6 +138,7 @@ namespace avmplus
 			buffer_info* next;
 		};
 		
+		MethodInfo* info;
 		backpatch_info* backpatches;	 // in address order
 		label_info* labels;				 // in reverse offset order
 		catch_info* exception_fixes; // in address order
@@ -121,11 +147,16 @@ namespace avmplus
 #ifdef AVMPLUS_DIRECT_THREADED
 		void** opcode_labels;
 #endif
+		PoolObject *pool;
+		const byte* code_start;
 		
+		bool exceptions_consumed;
+		uint32 *dest;
+		uint32 *dest_limit;
+
 		void cleanup();
-		void refill(uint32 *&dest, uint32 *&dest_limit);
-		void emitRelativeOffset(uint32 base_offset, uint32 *&dest, const byte *pc, const byte *code_start, int32 offset);
-		void computeExceptionFixups(MethodInfo* info, const byte* code_start);
+		void refill();
+		void emitRelativeOffset(uint32 base_offset, const byte *pc, int32 offset);
 	};
 #endif // AVMPUS_WORD_CODE
 }

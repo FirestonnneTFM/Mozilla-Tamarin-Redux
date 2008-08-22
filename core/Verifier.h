@@ -64,7 +64,10 @@ namespace avmplus
 		#ifdef AVMPLUS_MIR
 		CodegenMIR *mir;
 		#endif // AVMPLUS_MIR
-
+		#ifdef AVMPLUS_WORD_CODE
+		Translator *translator;
+		#endif
+		
 		AvmCore *core;
 		SortedIntMap<FrameState*>* blockStates;
 		FrameState *state;
