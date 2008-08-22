@@ -62,7 +62,7 @@ INTERP_FOPCODE_LIST_BEGIN
 
     METHOD(ENVADDR(MethodEnv::getActivation), I_I, getActivation)
     METHOD(COREADDR(AvmCore::newActivation), I_III, newActivation)
-    METHOD(ENVADDR(MethodEnv::newcatch), I_II, newCatch)
+    METHOD(ENVADDR(MethodEnv::newcatch), I_II, newcatch)
     METHOD(ENVADDR(MethodEnv::newfunction), I_I4, newfunction)
     METHOD(TOPLEVELADDR(Toplevel::op_call), I_I4, op_call)
     METHOD(TOPLEVELADDR(Toplevel::callproperty), I_I6, callproperty)
@@ -168,7 +168,7 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(ENVADDR(MethodEnv::getsuper), I_III, getsuper)
     METHOD(COREADDR(AvmCore::throwAtom), I_II, throwAtom)
     CSEFUNCTION(FUNCADDR(MathUtils::mod), D_DD, mod)
-    CSEMETHOD(COREADDR(AvmCore::_typeof), I_II, _typeof)
+    CSEMETHOD(COREADDR(AvmCore::_typeof), I_II, typeof)
     FUNCTION(FUNCADDR(AvmCore::atomWriteBarrier), I_I4, atomWriteBarrier)
     METHOD(GCADDR(GC::writeBarrierRC), I_I4, writeBarrierRC)
     CSEMETHOD(COREADDR(AvmCore::uintToAtom), I_II, uintToAtom)
