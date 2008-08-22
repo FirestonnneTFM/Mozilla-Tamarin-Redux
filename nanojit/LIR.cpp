@@ -155,15 +155,15 @@ namespace nanojit
 	}
 	#endif 
 
-	int_t LirBuffer::insCount() 
+	int32_t LirBuffer::insCount() 
 	{
 		// doesn't include embedded constants nor LIR_skip payload
 		return _stats.lir;
 	}
-	int_t LirBuffer::byteCount() 
+	int32_t LirBuffer::byteCount() 
 	{
 		return ((_stats.pages-1) * sizeof(Page)) +
-			((int_t)_unused - (int_t)pageTop(_unused));
+			((int32_t)_unused - (int32_t)pageTop(_unused));
 	}
 
 	Page* LirBuffer::pageAlloc()

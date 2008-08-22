@@ -696,8 +696,8 @@ namespace nanojit
 			debug_only (void validate() const;)
 			verbose_only(DWB(LirNameMap*) names;)
 			
-			int_t insCount();
-			int_t byteCount();
+			int32_t insCount();
+			int32_t byteCount();
 
 			// stats
 			struct 

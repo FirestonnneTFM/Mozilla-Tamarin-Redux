@@ -322,7 +322,7 @@ namespace nanojit
 	#define bytesToBottom(x)	( (size_t)pageBottom(x) - (size_t)(x) )
 	#define bytesBetween(x,y)	( (size_t)(x) - (size_t)(y) )
 	
-	int_t Assembler::codeBytes()
+	int32_t Assembler::codeBytes()
 	{
 		// start and end on same page?
 		size_t exit = 0;
