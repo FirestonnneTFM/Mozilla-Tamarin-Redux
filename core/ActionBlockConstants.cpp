@@ -70,11 +70,12 @@ namespace avmplus
 			OP_pushnamespace, //CONSTANT_ProtectedNamespace=24
 			OP_pushnamespace, //CONSTANT_ExplicitNamespace=25
 			OP_pushnamespace, //CONSTANT_StaticProtectedNs=26
+			0,
 		};
 			
 
 #ifdef AVMPLUS_VERBOSE
-		const char *constantNames[] = {
+		const char * const constantNames[] = {
 			"const-0",
 			"utf8",//const int CONSTANT_Utf8         = 0x01;
 			"const-2",
@@ -103,10 +104,11 @@ namespace avmplus
 			"explicit",//const int CONSTANT_ExplicitNamespace = 0x19
 			"staticprotected",//const int CONSTANT_StaticProtectedNs = 0x1A,
 			"multinamelate", //const int CONSTANT_MultinameL		= 0x1B,	// o.[], ns, rt name
-			"@multinamelate" //CONSTANT_MultinameLA		= 0x1C, // o.@[], ns, rt attr-name
+			"@multinamelate", //CONSTANT_MultinameLA		= 0x1C, // o.@[], ns, rt attr-name
+			"typename", //CONSTANT_TypeName = 0x1D
 		};
 
-		const char *traitNames[] = {
+		const char * const traitNames[] = {
 			"slot",//const int TRAIT_Slot			    = 0x00;
 			"method",//const int TRAIT_Method			= 0x01;
 			"getter",//const int TRAIT_Getter			= 0x02;

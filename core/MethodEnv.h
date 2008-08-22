@@ -65,6 +65,7 @@ namespace avmplus
 		union {
 			Atom (*impl32)(MethodEnv*, int, uint32 *);
 			double (*implN)(MethodEnv*, int, uint32 *);
+			void *implV;
 		};
 
 		MethodEnv(void* addr, VTable *vtable);
@@ -131,11 +132,11 @@ namespace avmplus
 		Atom delpropertyHelper(Atom obj, Multiname *multi, Atom index);
 
 		void initMultinameLateForDelete(Multiname& name, Atom index);
-		ScriptObject* newcatch(Traits *traits);
 		ArrayObject* createArgumentsHelper(int argc, uint32 *ap);
 		ArrayObject* createRestHelper(int argc, uint32 *ap);
 #endif
 
+		ScriptObject* newcatch(Traits *traits);
 		/**
 		 * used for defining and resolving imported definitions.
 		 */

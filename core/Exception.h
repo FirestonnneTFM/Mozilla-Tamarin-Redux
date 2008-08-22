@@ -194,6 +194,15 @@ namespace avmplus
 		// order to avoid problems with sign-extension.)
 		CatchAction catchAction:4;
 #endif /* DEBUGGER */
+
+#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+		friend class CodegenMIR;
+		enum {
+			MAX_LONG_JMP_COUNT = 65536
+		};
+		static void *lptr[MAX_LONG_JMP_COUNT];
+		static int   lptrcounter;
+#endif //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
 	};
 
 	/**

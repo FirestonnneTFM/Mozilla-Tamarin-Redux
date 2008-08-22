@@ -40,8 +40,8 @@
  * Use the script 'opcodes.as' to generate this file.
  */
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-const char *opNames[] = {
+#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+const char * const opNames[] = {
     "OP_0x00",
     "bkpt",
     "nop",
@@ -287,17 +287,17 @@ const char *opNames[] = {
     "bkptline",
     "timestamp",
     "OP_0xF4",
-    "OP_0xF5",
-    "OP_0xF6",
-    "OP_0xF7",
-    "OP_0xF8",
-    "OP_0xF9",
-    "OP_0xFA",
-    "OP_0xFB",
-    "OP_0xFC",
-    "OP_0xFD",
-    "OP_0xFE",
-    "OP_0xFF"
+    "verifypass",
+    "alloc",
+    "mark",
+    "wb",
+    "prologue",
+    "sendenter",
+    "doubletoatom",
+    "sweep",
+    "codegenop",
+    "verifyop",
+    "decode"
 };
 #endif
 
@@ -549,17 +549,17 @@ const signed char opOperandCount[] = {
     1,	// "bkptline"
     0,	// "timestamp"
     -1,	// "OP_0xF4"
-    -1,	// "OP_0xF5"
-    -1,	// "OP_0xF6"
-    -1,	// "OP_0xF7"
-    -1,	// "OP_0xF8"
-    -1,	// "OP_0xF9"
-    -1,	// "OP_0xFA"
-    -1,	// "OP_0xFB"
-    -1,	// "OP_0xFC"
-    -1,	// "OP_0xFD"
-    -1,	// "OP_0xFE"
-    -1,	// "OP_0xFF"
+    -1,	// "verifypass"
+    -1,	// "alloc"
+    -1,	// "mark"
+    -1,	// "wb"
+    -1,	// "prologue"
+    -1,	// "sendenter"
+    -1,	// "doubletoatom"
+    -1,	// "sweep"
+    -1,	// "codegenop"
+    -1,	// "verifyop"
+    -1,	// "decode"
 
 };
 
@@ -814,17 +814,17 @@ const unsigned char opSizes[] = {
     1+3,	// "bkptline"
     1,	// "timestamp"
     0,	// "OP_0xF4"
-    0,	// "OP_0xF5"
-    0,	// "OP_0xF6"
-    0,	// "OP_0xF7"
-    0,	// "OP_0xF8"
-    0,	// "OP_0xF9"
-    0,	// "OP_0xFA"
-    0,	// "OP_0xFB"
-    0,	// "OP_0xFC"
-    0,	// "OP_0xFD"
-    0,	// "OP_0xFE"
-    0,	// "OP_0xFF"
+    0,	// "verifypass"
+    0,	// "alloc"
+    0,	// "mark"
+    0,	// "wb"
+    0,	// "prologue"
+    0,	// "sendenter"
+    0,	// "doubletoatom"
+    0,	// "sweep"
+    0,	// "codegenop"
+    0,	// "verifyop"
+    0,	// "decode"
 
 };
 const unsigned char opStackPop[] = {

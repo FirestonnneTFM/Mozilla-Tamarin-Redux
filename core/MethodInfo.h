@@ -87,7 +87,6 @@ namespace avmplus
 			ExceptionHandlerTable* exceptions;
 		} word_code;
 #endif
-
 		// we write this once, in Verifier, with an explicit WB.  so no DWB.
 		ExceptionHandlerTable* exceptions;
 

@@ -45,6 +45,32 @@ namespace avmplus
     class PageMgr;
 #endif
 
+#ifdef AVMPLUS_WORD_CODE
+	
+	// This needs to be a root because there are GCObjects referenced from the multinames
+	// that are not protected by write barriers (namely, the NamespaceSet objects).
+	// Other objects in the multinames are RC; the PrecomputedMultinames constructor
+	// explicitly increments their reference counts, and the destructor decrements
+	// them.  There are no barriers here, because we want to be able to reach in
+	// and reference a Multiname structure directly.
+	
+	class PrecomputedMultinames : public MMgc::GCRoot
+	{
+	public:
+        void *operator new(size_t size, size_t extra=0)
+        {
+			return MMgc::FixedMalloc::GetInstance()->Alloc(size+extra);
+        }
+
+		PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool);		
+		~PrecomputedMultinames();
+		void Initialize(PoolObject* pool);		// Eagerly parses all multinames
+		uint32 nNames;							// Number of elements
+		Multiname multinames[1];				// Allocated size is MAX(1,nName)
+	};
+	
+#endif  // AVMPLUS_WORD_CODE
+	
 	/**
 	 * The PoolObject class is a container for the pool of resources
 	 * decoded from an ABC file: the constant pool, the methods
@@ -56,28 +82,28 @@ namespace avmplus
 		AvmCore *core;
 
 		/** constants */
-		List<int, LIST_NonGCObjects> cpool_int;
-		List<uint32, LIST_NonGCObjects> cpool_uint;
-		List<double*, LIST_GCObjects> cpool_double;
-		List<Stringp, LIST_RCObjects> cpool_string;
-		List<Namespace*, LIST_RCObjects> cpool_ns;
-		List<NamespaceSet*, LIST_GCObjects> cpool_ns_set;
+		List<int> cpool_int;
+		List<uint32> cpool_uint;
+		List<double*, LIST_GCObjects> cpool_double;	// explicitly specify LIST_GCObject b/c these are GC-allocated ptrs
+		List<Stringp> cpool_string;
+		List<Namespace*> cpool_ns;
+		List<NamespaceSet*> cpool_ns_set;
 
-		// LIST_NonGCObjects b/c these aren't really atoms, they are offsets
+		// explicitly specify LIST_NonGCObjects b/c these aren't really atoms, they are offsets
 		List<Atom,LIST_NonGCObjects> cpool_mn;
 
 		/** all methods */
-		List<AbstractFunction*, LIST_GCObjects> methods;
+		List<AbstractFunction*> methods;
 
-		/** metadata */
-		List<const byte*,LIST_NonGCObjects> metadata_infos;
+		/** metadata -- ptrs into ABC, not gc-allocated */
+		List<const byte*> metadata_infos;
 
 		/** domain */
 		DWB(Domain*) domain;
 		
 		/** constructors for class objects, for op_newclass */
-		List<AbstractFunction*, LIST_GCObjects> cinits;  // TODO just use methods array, dont need new cinits array
-		List<AbstractFunction*, LIST_GCObjects> scripts;
+		List<AbstractFunction*> cinits;  // TODO just use methods array, dont need new cinits array
+		List<AbstractFunction*> scripts;
 
 		/** # of elements in methods array */
 		uint32 methodCount;
@@ -101,10 +127,23 @@ namespace avmplus
 		/** # of elements in scripts array */
 		uint32 scriptCount;
 
+		/** flags to control certain bugfix behavior */
+		uint32 bugFlags;
+		// Numbers here correspond to Bugzilla bug numbers (i.e. bugzilla bug 444630 is kbug444630
+		enum {
+			kbug444630 = 0x00000001
+		};
 		// true if this pool is baked into the player.  used to control
 		// whether callees will set their context.
 		bool isBuiltin;
 
+#ifdef AVMPLUS_WORD_CODE
+		struct 
+		{
+			PrecomputedMultinames* cpool_mn;	// a GCRoot
+		} word_code;
+#endif
+		
 		#ifdef AVMPLUS_MIR
 		/** buffer containing generated machine code for all methods */
 		GrowableBuffer *codeBuffer;
@@ -183,9 +222,15 @@ namespace avmplus
 			return abcStart + urshift(a,3);
 		}
 
+		// Index of the metadata info that means skip the associated definition
+		List<uint32> stripMetadataIndexes;
+		void addStripMetadata(uint32 index)
+		{
+			stripMetadataIndexes.add(index);
+		}
 
 #ifdef AVMPLUS_VERIFYALL
-		List<AbstractFunction*, LIST_GCObjects> verifyQueue;
+		List<AbstractFunction*> verifyQueue;
 		void enq(AbstractFunction* f);
 		void enq(Traits* t);
 		void processVerifyQueue(Toplevel* toplevel);

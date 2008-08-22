@@ -249,6 +249,9 @@ namespace avmplus
 		const List<int,LIST_NonGCObjects>& cpool_int = pool->cpool_int;
 		const List<uint32,LIST_NonGCObjects>& cpool_uint = pool->cpool_uint;
 
+		if (pool->word_code.cpool_mn == NULL)
+			pool->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (pool->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), pool);
+		
 		// FIXME: If info->exceptions is not NULL then copy into info->word_code.exceptions, 
 		// but 'from', 'to', and 'target' fields must be updated.
 		
@@ -265,7 +268,7 @@ namespace avmplus
 		}
 #endif
 		
-		uint32 *dest, *dest_limit;
+		uint32 *dest = 0, *dest_limit = 0;
 		refill(dest, dest_limit);
 		
 #define CHECK(n) \
@@ -273,7 +276,9 @@ namespace avmplus
 			refill(dest, dest_limit);
 
 #ifdef AVMPLUS_DIRECT_THREADED
-#  define NEW_OPCODE(opcode)  ((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode])); AvmAssert(((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8)+256] : opcode_labels[opcode])) != 0)
+#  define NEW_OPCODE(opcode) \
+	((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode])); \
+	AvmAssert(((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8)+256] : opcode_labels[opcode])) != 0)
 #else
 #  ifdef _DEBUG
 #    define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // debugging...

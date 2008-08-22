@@ -136,7 +136,6 @@ SHELL_SRCS := ../../../../../zlib/zutil.cpp \
 	../../../../../zlib/crc32.cpp \
 	../../../../../zlib/compress.cpp \
 	../../../../../zlib/adler32.cpp \
-	../../shell/TypedArrayClass.cpp \
 	../../shell/SystemClass.cpp \
 	../../shell/StringBuilderClass.cpp \
 	../../shell/FileInputStream.cpp \
@@ -173,7 +172,6 @@ AVMPLUS_SRCS := ../../core/AbcEnv.cpp \
 	../../core/avmplusProfiler.cpp \
 	../../core/BigInteger.cpp \
 	../../core/BooleanClass.cpp \
-	../../core/builtin.cpp \
 	../../codegen/ArmAssembler.cpp \
 	../../codegen/CodegenMIR.cpp \
 	../../core/BuiltinTraits.cpp \

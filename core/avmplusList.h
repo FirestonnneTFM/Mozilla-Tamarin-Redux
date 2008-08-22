@@ -38,6 +38,7 @@
 #ifndef __avmplus_List__
 #define __avmplus_List__
 
+#include "TypeTraits.h"
 
 namespace avmplus
 {
@@ -61,6 +62,42 @@ namespace avmplus
 		LIST_RCObjects = 2
 	};
 
+	template <bool isGCObject, bool isGCFinalizedObject, bool isRCObject>
+	struct _ListElementType
+	{
+	};
+	/*
+		Only valid combinations of the above variables are listed below.
+	*/
+	template <>
+	struct _ListElementType<true, false, false>
+	{
+		static const ListElementType kElementType = LIST_GCObjects;
+	};
+	template <>
+	struct _ListElementType<false, true, false>
+	{
+		static const ListElementType kElementType = LIST_GCObjects;
+	};
+	template <>
+	struct _ListElementType<false, true, true>
+	{
+		static const ListElementType kElementType = LIST_RCObjects;
+	};
+	template <>
+	struct _ListElementType<false, false, false>
+	{
+		static const ListElementType kElementType = LIST_NonGCObjects;
+	};
+	template <class T>
+	struct _ListElementTypeHelper
+	{
+		typedef typename MMgc::remove_pointer<T>::type base_type;
+		typedef MMgc::is_base_of<MMgc::GCObject, base_type> _isGCObject;
+		typedef MMgc::is_base_of<MMgc::GCFinalizedObject, base_type> _isGCFinalizedObject;
+		typedef MMgc::is_base_of<MMgc::RCObject, base_type> _isRCObject;
+		static const ListElementType kElementType = _ListElementType<_isGCObject::value, _isGCFinalizedObject::value, _isRCObject::value>::kElementType;
+	};
 	template<class T, ListElementType kElementType>
 	class ListBase;
 
@@ -115,7 +152,7 @@ namespace avmplus
 		}
 	};
 
-	template <class T, ListElementType kElementType>
+	template <class T, ListElementType kElementType = _ListElementTypeHelper<T>::kElementType>
 	class List : public ListBase<T, kElementType>
 	{
 		using ListBase<T, kElementType>::data;

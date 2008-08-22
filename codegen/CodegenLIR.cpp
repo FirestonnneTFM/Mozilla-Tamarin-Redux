@@ -724,11 +724,18 @@ namespace avmplus
 		//	core->console << "mir_arg " << arg_count << " of " << InsNbr(ip) << "\n";
 		//arg_count = 0;
 
+		clearMIRBuffers();
+	}
+
+	void CodegenLIR::clearMIRBuffers()
+	{
 		// free scratch buffers explicitly.  None of these have any pointers
 		// in them, and none of them will have escaped into other objects.
 		// freeing them now reduces GC pressure at startup time.
 
 		// return the buffer back to the global list
+		if (frag) 
+			frag->releaseLirBuffer();
 	}
 	
 	#ifdef AVMPLUS_MAC_CARBON
@@ -3401,17 +3408,17 @@ namespace avmplus
 				break;
 			}
 
-			case OP_equals:
-			{
-				AvmAssert(result == BOOLEAN_TYPE);
-				localSet(sp-1, cmpEq(COREADDR(AvmCore::equals), sp-1, sp));
-				break;
-			}
-
 			case OP_strictequals:
 			{
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp-1, cmpEq(COREADDR(AvmCore::stricteq), sp-1, sp));
+				break;
+			}
+
+			case OP_equals:
+			{
+				AvmAssert(result == BOOLEAN_TYPE);
+				localSet(sp-1, cmpEq(COREADDR(AvmCore::equals), sp-1, sp));
 				break;
 			}
 
@@ -3799,11 +3806,12 @@ namespace avmplus
 		return binaryIns(LIR_le, binaryIns(MIR_xor, atom, c2), c4);
 	}
 
-	OP* CodegenLIR::cmpEq(sintptr funcaddr, int lhsi, int rhsi)
+	LIns* CodegenLIR::cmpEq(sintptr funcaddr, int lhsi, int rhsi)
 	{
-		OP *result = cmpOptimization (lhsi, rhsi, LIR_eq, LIR_eq, LIR_feq);
-		if (result)
+		LIns *result = cmpOptimization (lhsi, rhsi, LIR_eq, LIR_eq, LIR_feq);
+		if (result) {
 			return result;
+		}
 
 		Traits* lht = state->value(lhsi).traits;
 		Traits* rht = state->value(rhsi).traits;
@@ -3815,20 +3823,21 @@ namespace avmplus
 			((rht == NULL_TYPE) && (lht && !lht->notDerivedObjectOrXML)) ||
 			((rht && !rht->notDerivedObjectOrXML) && (lht && !lht->notDerivedObjectOrXML)))
 		{
-			OP* lhs = localGet(lhsi);
-			OP* rhs = localGet(rhsi);
-			return binaryIns(LIR_eq, lhs, rhs);
+			LIns* lhs = localGet(lhsi);
+			LIns* rhs = localGet(rhsi);
+			result = binaryIns(LIR_eq, lhs, rhs);
 		}
 		else
 		{
-			OP* lhs = loadAtomRep(lhsi);
-			OP* rhs = loadAtomRep(rhsi);
-			OP* out = callIns(MIR_cm, funcaddr, 
+			LIns* lhs = loadAtomRep(lhsi);
+			LIns* rhs = loadAtomRep(rhsi);
+			LIns* out = callIns(MIR_cm, funcaddr, 
 				3, InsConst((uintptr)core), lhs, rhs);
 
 			// assume caller will use MIR_jeq or MIR_jne
-			return binaryIns(LIR_eq, out, InsConst(trueAtom));
+			result = binaryIns(LIR_eq, out, InsConst(trueAtom));
 		}
+		return result;
 	}
 
 	void CodegenLIR::epilogue(FrameState *state)

@@ -126,7 +126,12 @@ namespace MMgc
 		const static int kLargestAlloc = 2032;	
 #endif
 		const static int kNumSizeClasses = 41;
+#ifdef BROKEN_OFFSETOF
+		// FIXME: quick hack for compiler issue.
+		const static int kPageUsableSpace = GCHeap::kBlockSize - sizeof(MMgc::FixedAlloc::FixedBlock);
+#else
 		const static int kPageUsableSpace = GCHeap::kBlockSize - offsetof(MMgc::FixedAlloc::FixedBlock, items);
+#endif
 
 		const static int16 kSizeClasses[kNumSizeClasses];
 		const static uint8 kSizeClassIndex[32];

@@ -591,15 +591,12 @@ namespace avmplus
 
 		Atom call(int argc, Atom* argv);
 
-		ObjectVectorObject* newVector(ClassClosure* type, uint32 length = 0);
-
-		void set_gen_proto(Atom func);
+		ObjectVectorObject* newVector(uint32 length = 0);
 
 		DECLARE_NATIVE_MAP(ObjectVectorClass)
 	
 	private:
 		DRCWB(ClassClosure*) index_type;
-		ATOM_WB gen_proto_method;
 	};
 
 }	
