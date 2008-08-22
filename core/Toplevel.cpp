@@ -1006,7 +1006,7 @@ namespace avmplus
 	 */
 	Binding Toplevel::getBinding(Traits* traits, Multiname* ref) const
 	{
-		Atom b = BIND_NONE;
+		Binding b = BIND_NONE;
 		if (traits && ref->isBinding())
 		{
 			if (!ref->isNsset())
