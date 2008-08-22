@@ -40,60 +40,57 @@
 
 
 #ifdef _MSC_VER
-#include "../utils/msc_inttypes.h"
+	// MSVC doesn't support inttypes.h or most C99 types directly
+	#include <crtdefs.h>	// defines intrptr_t and uintptr_t, but not the rest of C99 int types
+	typedef __int8				int8_t;
+	typedef __int16				int16_t;
+	typedef __int32				int32_t;
+	typedef __int64				int64_t;
+	typedef unsigned __int8		uint8_t;
+	typedef unsigned __int16	uint16_t;
+	typedef unsigned __int32	uint32_t; 
+	typedef unsigned __int64	uint64_t;
+	// intptr is same as int64, can't overload it separately
+	//#define AVMPLUS_INTPTR_OVERLOADS
 #else
-#include <inttypes.h>
+	#include <inttypes.h>
+	// intptr is (generally) defined as long, not int, so can (and must) overload it
+	// (true of gcc 4.x, might not be elsewhere)
+	#define AVMPLUS_INTPTR_OVERLOADS
 #endif
 
 namespace avmplus
 {
-	typedef unsigned char    byte;
-	typedef unsigned char    uint8;
-	typedef unsigned short   uint16;
-	typedef char             sint8;
-	typedef char             int8;
-	typedef short            sint16;
-	typedef short            int16;
-	typedef unsigned int     uint32; 
-	typedef signed int       sint32;
-	typedef signed int       int32;
-	#ifdef _MSC_VER
-	typedef __int64          int64;
-	typedef __int64          sint64;
-	typedef unsigned __int64 uint64;
-	#elif defined(_MAC)
-	typedef int64_t          int64;
-	typedef int64_t          sint64;
-	typedef uint64_t         uint64;
-	#else
-	typedef long long          int64;
-	typedef long long          sint64;
-	typedef unsigned long long         uint64;
-	#endif
+	// legacy types
+	typedef int8_t		sint8;
+	typedef int8_t		int8;
+	typedef uint8_t		byte;
+	typedef uint8_t		uint8;
+
+	typedef int16_t		sint16;
+	typedef int16_t		int16;
+	typedef uint16_t	uint16;
+
+	typedef int32_t		sint32;
+	typedef int32_t		int32;
+	typedef uint32_t	uint32; 
+
+	typedef int64_t		int64;
+	typedef int64_t		sint64;
+	typedef uint64_t	uint64;
+
+	typedef intptr_t	sintptr;
+	typedef uintptr_t	uintptr;
 
 	/* wchar is our version of wchar_t, since wchar_t is different sizes
 	   on different platforms, but we want to use UTF-16 uniformly. */
-	typedef unsigned short wchar;
+	typedef uint16_t wchar;
 	
     #ifndef NULL
     #define NULL 0
     #endif
 
-	// math friendly pointer (64 bits in LP 64 systems)
-	#if defined (_MSC_VER) && (_MSC_VER >= 1300)
-	    #define AVMPLUS_TYPE_IS_POINTER_SIZED __w64
-	#else
-	    #define AVMPLUS_TYPE_IS_POINTER_SIZED
-	#endif	
-	
-	#ifdef AVMPLUS_64BIT
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED uint64 uintptr;
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int64 sintptr;
-	#else
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED uint32 uintptr;
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32 sintptr;
-	#endif
-	
+	// @todo -- these should really be unique pointer types, not intptr
 	typedef sintptr          Atom;
 	typedef sintptr			 Binding;
 	typedef sintptr          CodeContextAtom;

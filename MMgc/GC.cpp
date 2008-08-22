@@ -42,6 +42,7 @@
 #include <string.h>
 
 #include "MMgc.h"
+#include "StaticAssert.h"
 
 #if defined(_DEBUG) || defined(DEBUGGER)
 #include <stdio.h>
@@ -291,22 +292,22 @@ namespace MMgc
 #endif
 	{
 		// sanity check for all our types
-		GCAssert (sizeof(int8) == 1);
-		GCAssert (sizeof(uint8) == 1);		
-		GCAssert (sizeof(int16) == 2);
-		GCAssert (sizeof(uint16) == 2);
-		GCAssert (sizeof(int32) == 4);
-		GCAssert (sizeof(uint32) == 4);
-		GCAssert (sizeof(int64) == 8);
-		GCAssert (sizeof(uint64) == 8);
-		GCAssert (sizeof(sintptr) == sizeof(void *));
-		GCAssert (sizeof(uintptr) == sizeof(void *));
+		MMGC_STATIC_ASSERT(sizeof(int8) == 1);
+		MMGC_STATIC_ASSERT(sizeof(uint8) == 1);		
+		MMGC_STATIC_ASSERT(sizeof(int16) == 2);
+		MMGC_STATIC_ASSERT(sizeof(uint16) == 2);
+		MMGC_STATIC_ASSERT(sizeof(int32) == 4);
+		MMGC_STATIC_ASSERT(sizeof(uint32) == 4);
+		MMGC_STATIC_ASSERT(sizeof(int64) == 8);
+		MMGC_STATIC_ASSERT(sizeof(uint64) == 8);
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == sizeof(void *));
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
 		#ifdef MMGC_64BIT
-		GCAssert (sizeof(sintptr) == 8);
-		GCAssert (sizeof(uintptr) == 8);	
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == 8);
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == 8);	
 		#else	
-		GCAssert (sizeof(sintptr) == 4);
-		GCAssert (sizeof(uintptr) == 4);	
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == 4);
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == 4);	
 		#endif		
 	
 		{

@@ -52,13 +52,7 @@ namespace avmplus
 	class MethodInfo : public AbstractFunction
 	{
 	public:
-
 #ifdef DEBUGGER
-	public:
-		int		firstSourceLine;// source line number where function starts
-		int		lastSourceLine;	// source line number where function ends
-		int     offsetInAbc;	// offset in abc file
-
 		AbcFile* getFile() { return file; }
 		void setFile(AbcFile* file) { this->file = file; }
 
@@ -71,11 +65,6 @@ namespace avmplus
 		void unboxLocals(Atom* src, int srcPos, Traits** traitArr, void* dest, int destPos, int length);
 #endif // DEBUGGER
 		
-		const byte *body_pos;
-
-		// we write this once, in Verifier, with an explicit WB.  so no DWB.
-		ExceptionHandlerTable* exceptions;
-
 		MethodInfo();
 
 		static Atom verifyEnter(MethodEnv* env, int argc, uint32 *ap);
@@ -89,15 +78,26 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		virtual uint32 size() const;
-		// abc size pre-jit, native size post jit
-		uint32 codeSize;
-		int local_count;
-		int max_scopes;
-	protected:
-		DWB(AbcFile*) file;			// the abc file from which this method came
-		DWB(Stringp*) localNames;		// array of names for args and locals in framep order
 		void initLocalNames();
 #endif // DEBUGGER
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		const uint8_t*			body_pos;
+		ExceptionHandlerTable*	exceptions;	// we write this once, in Verifier, with an explicit WB.  so no DWB.
+#ifdef DEBUGGER
+	protected:
+		DWB(AbcFile*)			file;			// the abc file from which this method came
+		DWB(Stringp*)			localNames;		// array of names for args and locals in framep order
+	public:
+		int32_t					firstSourceLine;	// source line number where function starts
+		int32_t					lastSourceLine;		// source line number where function ends
+		int32_t					offsetInAbc;		// offset in abc file
+		uint32_t				codeSize;			// abc size pre-jit, native size post jit
+		int32_t					local_count;
+		int32_t					max_scopes;
+#endif
+	// ------------------------ DATA SECTION END
 	};
 }
 

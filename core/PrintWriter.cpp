@@ -141,7 +141,7 @@ namespace avmplus
 		return *this;
 	}
 	
-	PrintWriter& PrintWriter::operator<< (int value)
+	PrintWriter& PrintWriter::operator<< (int32_t value)
 	{
 		wchar buffer[256];
 		int len;
@@ -151,7 +151,7 @@ namespace avmplus
 		return *this;
 	}
 
-	PrintWriter& PrintWriter::operator<< (uint64 value)
+	PrintWriter& PrintWriter::operator<< (uint64_t value)
 	{
 		wchar buffer[256];
 		int len;
@@ -161,7 +161,7 @@ namespace avmplus
 		return *this;
 	}
 
-	PrintWriter& PrintWriter::operator<< (int64 value)
+	PrintWriter& PrintWriter::operator<< (int64_t value)
 	{
 		wchar buffer[256];
 		int len;
@@ -171,7 +171,29 @@ namespace avmplus
 		return *this;
 	}
 
-	PrintWriter& PrintWriter::operator<< (uint32 value)
+#ifdef AVMPLUS_INTPTR_OVERLOADS
+	PrintWriter& PrintWriter::operator<< (uintptr_t value)
+	{
+		wchar buffer[256];
+		int len;
+		if (MathUtils::convertIntegerToString((sintptr) value, buffer, len)) {
+			*this << buffer;
+		}
+		return *this;
+	}
+
+	PrintWriter& PrintWriter::operator<< (intptr_t value)
+	{
+		wchar buffer[256];
+		int len;
+		if (MathUtils::convertIntegerToString((sintptr) value, buffer, len)) {
+			*this << buffer;
+		}
+		return *this;
+	}
+#endif
+
+	PrintWriter& PrintWriter::operator<< (uint32_t value)
 	{
 		wchar buffer[256];
 		int len;
