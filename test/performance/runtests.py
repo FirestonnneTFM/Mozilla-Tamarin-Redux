@@ -316,21 +316,29 @@ def socketlog(msg):
 
 
 def parsePerfm(line,dic):
-  line = line.strip()
-  if 'verify & IR gen' in line:
-    dic['verify'] = int(line.split(' ')[-2])
-  elif 'code ' in line:
-    dic['code'] = int(line.split(' ')[-2])
-  elif 'compile ' in line:
-    dic['compile'] = int(line.split(' ')[-2])
-  elif 'ir bytes' in line:
-    dic['irbytes'] = int(line.split(' ')[-2])
-  elif 'IR/tick' in line:
-    dic['tick'] = int(line.split(' ')[-2])
-  elif ('lir ' in line) or ('mir ' in line):
-    dic['ir'] = int(line.split(' ')[-2])
-    dic['count'] = int(line.split(' ')[-1])
-  return dic
+  try:
+    result = line.strip().split(' ')[-2]
+    if 'verify & IR gen' in line:
+      dic['verify'].append(int(result))
+    elif 'code ' in line:
+      dic['code'].append(int(result))
+    elif 'compile ' in line:
+      dic['compile'].append(int(result))
+    elif 'ir bytes' in line:
+      dic['irbytes'].append(int(result))
+    elif 'IR/tick' in line:
+      dic['tick'].append(int(result))
+    elif ('lir ' in line) or ('mir ' in line): #note trailing space
+      dic['ir'].append(int(result))
+      dic['count'].append(int(line.strip().split(' ')[-1]))
+  except:
+    pass
+
+# setup dictionary for vprof (perfm) results
+if globs['perfm']:
+  perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'tick':[], 'ir':[], 'count':[] }
+  perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'tick':[], 'ir':[], 'count':[] }
+  
 
 
 skips=[]
@@ -358,10 +366,15 @@ if len(avm2)>0:
     log_print("avm2: %s %s" % (avm2,vmargs2));
   else:
     log_print("avm2: %s" % (avm2,));
-  
+log_print('iterations: %s' % iterations)
 
 if len(avm2)>0:
-  log_print("\n\n%-50s %7s %7s %7s\n" % ("test",globs['avmname'],globs['avm2name'], "%sp"));
+  if iterations == 1:
+    log_print("\n%-50s %7s %7s %7s\n" % ("test",globs['avmname'],globs['avm2name'], "%sp"))
+  else:
+    log_print("\n%-50s %20s   %20s" % ("test",globs['avmname'],globs['avm2name']))
+    log_print('%-50s  %5s :%5s  %5s    %5s :%5s  %5s %7s' % ('', 'min','max','avg','min','max','avg','%diff'))
+    log_print('                                                   --------------------   --------------------   -----')
 else:
   if (iterations>2):
     log_print("\n\n%-50s %7s %12s\n" % ("test",globs['avmname'],"95% conf"))
@@ -395,6 +408,7 @@ for ast in tests:
       
   result1=9999999
   resultList = []
+  resultList2 = []
   result2=9999999
   
   perfm1 = {}
@@ -407,47 +421,68 @@ for ast in tests:
         f2 = run_pipe("%s %s %s" % (avm2, vmargs2, abc))
       else:
         f2 = run_pipe("%s %s %s" % (avm2, vmargs, abc))
-    try:
-      for line in f1:
+    #try:
+    for line in f1:
+      if "metric" in line:
+        result1list=line.rsplit()
+        if len(result1list)>2:
+          resultList.append(int(result1list[2]))
+          if result1 > int(result1list[2]):
+            result1=float(result1list[2])
+      elif globs['perfm']:
+        parsePerfm(line, perfm1Dict)
+          
+    if len(avm2)>0:
+      for line in f2:
         if "metric" in line:
-          result1list=line.rsplit()
-          if len(result1list)>2:
-            resultList.append(result1list[2])
-            if result1 > int(result1list[2]):
-              result1=float(result1list[2])
+          result2list=line.rsplit()
+          if len(result2list)>2:
+            resultList2.append(int(result1list[2]))
+            if result2 > int(result2list[2]):
+              result2=float(result2list[2])
         elif globs['perfm']:
-          perfm1 = parsePerfm(line, perfm1)
-            
-      if len(avm2)>0:
-        for line in f2:
-          if "metric" in line:
-            result2list=line.rsplit()
-            if len(result2list)>2:
-              if result2 > int(result2list[2]):
-                result2=float(result2list[2])
-          elif globs['perfm']:
-            perfm2 = parsePerfm(line, perfm2)
-      if result1==0:
-        spdup = 9999
-      else:
-        spdup = ((result1-result2)/result2)*100.0
-    except:
-      log_print("exception")
-      exit(-1)
+          parsePerfm(line, perfm2Dict)
+    if result1==0:
+      spdup = 9999
+    else:
+      spdup = ((result1-result2)/result2)*100.0
+    #except:
+    #  log_print("exception: %s" % sys.exc_info()[0])
+    #  exit(-1)
 
   if len(avm2)>0:
-    log_print("%-50s %7s %7s %7.1f" % (ast,result1,result2,spdup))
-    if globs['perfm']:
+    if iterations == 1:
+      log_print('%-50s %7s %7s %7.1f' % (ast,result1,result2,spdup))
+    else:
       try:
-        log_print('     %-45s %7s %7s %7.1f' % ('verify & IR gen (time)', perfm1['verify'], perfm2['verify'], ((perfm1['verify']-perfm2['verify'])/float(perfm2['verify']))*100.0))
-        log_print('     %-45s %7s %7s %7.1f' % ('compile (time)', perfm1['compile'], perfm2['compile'], ((perfm1['compile']-perfm2['compile'])/float(perfm2['compile']))*100.0))
-        log_print('     %-45s %7s %7s %7.1f' % ('code size (bytes)', perfm1['code'], perfm2['code'], ((perfm1['code']-perfm2['code'])/float(perfm2['code']))*100.0))
-        log_print('     %-45s %7s %7s %7.1f' % ('mir/lir bytes', perfm1['irbytes'], perfm2['irbytes'], ((perfm1['irbytes']-perfm2['irbytes'])/float(perfm2['irbytes']))*100.0))
-        log_print('     %-45s %7s %7s %7.1f' % ('mir/lir (# of inst)', perfm1['ir'], perfm2['ir'], ((perfm1['ir']-perfm2['ir'])/float(perfm2['ir']))*100.0))
-        log_print('     %-45s %7s %7s %7.1f' % ('IR/tick', perfm1['tick'], perfm2['tick'], ((perfm1['tick']-perfm2['tick'])/float(perfm2['tick']))*100.0))
-        log_print('     %-45s %7s %7s' % ('count', perfm1['count'], perfm2['count'])) 
+        log_print('%-50s [%5s :%5s] %5.1f   [%5s :%5s] %5.1f %7.1f' % (ast, min(resultList), max(resultList), sum(resultList)/len(resultList), min(resultList2), max(resultList2), sum(resultList2)/len(resultList2),spdup))
       except:
-        pass
+        log_print('%-50s [%5s :%5s] %5.1f   [%5s :%5s] %5.1f %7.1f' % (ast, '', '', result1, '', '', result2, spdup))
+    
+    if globs['perfm']:
+      def calcPerfm(desc, key):
+        # calculate min, max, average and %diff of averages
+        try:
+          if iterations == 1:
+            return '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
+                                ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0))
+          else:
+            avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
+            avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
+            return '     %-45s [%5s :%5s] %5s   [%5s :%5s] %5s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
+                                                                 min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
+                                                                 ((avg1-avg2)/float(avg2))*100.0)
+        except:
+          return ''
+          
+      log_print(calcPerfm('verify & IR gen (time)','verify'))
+      log_print(calcPerfm('compile (time)','compile'))
+      log_print(calcPerfm('code size (bytes)','code'))
+      log_print(calcPerfm('mir/lir bytes', 'irbytes'))
+      log_print(calcPerfm('mir/lir (# of inst)', 'ir'))
+      log_print(calcPerfm('IR/tick', 'tick'))
+      log_print(calcPerfm('count', 'count'))
+      log_print('------------------------------------------------------------------------------------------------------')
   else:
     if result1 < 9999999 :
       meanRes = mean(resultList)
