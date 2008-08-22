@@ -123,9 +123,13 @@ namespace avmshell
 
 		Endian GetNativeEndian() const
 		{
-			#if defined(AVMPLUS_LITTLE_ENDIAN)			return kLittleEndian;
-			#elif defined(AVMPLUS_BIG_ENDIAN)			return kBigEndian;			#else
-			#error			#endif
+			#if defined(AVMPLUS_LITTLE_ENDIAN)
+			return kLittleEndian;
+			#elif defined(AVMPLUS_BIG_ENDIAN)
+			return kBigEndian;
+			#else
+			#error
+			#endif
 		}
 			
 	private:

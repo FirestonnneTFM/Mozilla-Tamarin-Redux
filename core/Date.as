@@ -95,9 +95,35 @@ package
 		AS3 native function getTimezoneOffset():Number	
 		AS3 native function getTime():Number			
 
-		private native function _setFullYear(...rest):Number		private native function _setMonth(...rest):Number		private native function _setDate(...rest):Number		private native function _setHours(...rest):Number		private native function _setMinutes(...rest):Number		private native function _setSeconds(...rest):Number		private native function _setMilliseconds(...rest):Number
+		private native function _setFullYear(...rest):Number
+		private native function _setMonth(...rest):Number
+		private native function _setDate(...rest):Number
+		private native function _setHours(...rest):Number
+		private native function _setMinutes(...rest):Number
+		private native function _setSeconds(...rest):Number
+		private native function _setMilliseconds(...rest):Number
 
-		private native function _setUTCFullYear(...rest0):Number		private native function _setUTCMonth(...rest):Number		private native function _setUTCDate(...rest):Number		private native function _setUTCHours(...rest):Number		private native function _setUTCMinutes(...rest):Number		private native function _setUTCSeconds(...rest):Number		private native function _setUTCMilliseconds(...rest):Number		AS3 function setFullYear(year=void 0, month=void 0, date=void 0):Number { return _setFullYear.apply(this, arguments); }		AS3 function setMonth(month=void 0, date=void 0):Number { return _setMonth.apply(this, arguments); }		AS3 function setDate(date=void 0):Number { return _setDate.apply(this, arguments); }		AS3 function setHours(hour=void 0, min=void 0, sec=void 0, ms=void 0):Number { return _setHours.apply(this, arguments); }		AS3 function setMinutes(min=void 0, sec=void 0, ms=void 0):Number { return _setMinutes.apply(this, arguments); }		AS3 function setSeconds(sec=void 0, ms=void 0):Number { return _setSeconds.apply(this, arguments); }		AS3 function setMilliseconds(ms=void 0):Number { return _setMilliseconds.apply(this, arguments); }		AS3 function setUTCFullYear(year=void 0, month=void 0, date=void 0):Number { return _setUTCFullYear.apply(this, arguments); }		AS3 function setUTCMonth(month=void 0, date=void 0):Number { return _setUTCMonth.apply(this, arguments); }		AS3 function setUTCDate(date=void 0):Number { return _setUTCDate.apply(this, arguments); }		AS3 function setUTCHours(hour=void 0, min=void 0, sec=void 0, ms=void 0):Number { return _setUTCHours.apply(this, arguments); }		AS3 function setUTCMinutes(min=void 0, sec=void 0, ms=void 0):Number { return _setUTCMinutes.apply(this, arguments); }		AS3 function setUTCSeconds(sec=void 0, ms=void 0):Number { return _setUTCSeconds.apply(this, arguments); }		AS3 function setUTCMilliseconds(ms=void 0):Number { return _setUTCMilliseconds.apply(this, arguments); }
+		private native function _setUTCFullYear(...rest0):Number
+		private native function _setUTCMonth(...rest):Number
+		private native function _setUTCDate(...rest):Number
+		private native function _setUTCHours(...rest):Number
+		private native function _setUTCMinutes(...rest):Number
+		private native function _setUTCSeconds(...rest):Number
+		private native function _setUTCMilliseconds(...rest):Number
+		AS3 function setFullYear(year=void 0, month=void 0, date=void 0):Number { return _setFullYear.apply(this, arguments); }
+		AS3 function setMonth(month=void 0, date=void 0):Number { return _setMonth.apply(this, arguments); }
+		AS3 function setDate(date=void 0):Number { return _setDate.apply(this, arguments); }
+		AS3 function setHours(hour=void 0, min=void 0, sec=void 0, ms=void 0):Number { return _setHours.apply(this, arguments); }
+		AS3 function setMinutes(min=void 0, sec=void 0, ms=void 0):Number { return _setMinutes.apply(this, arguments); }
+		AS3 function setSeconds(sec=void 0, ms=void 0):Number { return _setSeconds.apply(this, arguments); }
+		AS3 function setMilliseconds(ms=void 0):Number { return _setMilliseconds.apply(this, arguments); }
+		AS3 function setUTCFullYear(year=void 0, month=void 0, date=void 0):Number { return _setUTCFullYear.apply(this, arguments); }
+		AS3 function setUTCMonth(month=void 0, date=void 0):Number { return _setUTCMonth.apply(this, arguments); }
+		AS3 function setUTCDate(date=void 0):Number { return _setUTCDate.apply(this, arguments); }
+		AS3 function setUTCHours(hour=void 0, min=void 0, sec=void 0, ms=void 0):Number { return _setUTCHours.apply(this, arguments); }
+		AS3 function setUTCMinutes(min=void 0, sec=void 0, ms=void 0):Number { return _setUTCMinutes.apply(this, arguments); }
+		AS3 function setUTCSeconds(sec=void 0, ms=void 0):Number { return _setUTCSeconds.apply(this, arguments); }
+		AS3 function setUTCMilliseconds(ms=void 0):Number { return _setUTCMilliseconds.apply(this, arguments); }
 
 		prototype.toString = function():String
 		{

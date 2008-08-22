@@ -39,7 +39,8 @@
 
 #include "avmplus.h"
 
-#ifdef AVMPLUS_MIRnamespace avmplus
+#ifdef AVMPLUS_MIR
+namespace avmplus
 {
 	using namespace MMgc;
 
@@ -261,7 +262,9 @@
 			case 0x0f9C: core->console.format("    %A  setl  %R\n", mip, r); break;
 			case 0x0f9E: core->console.format("    %A  setle %R\n", mip, r); break;
 			case 0x0fb6: core->console.format("    %A  movzx_r8 %R, %R\n", mip, r, rhs);
-			case 0x0fbe: core->console.format("    %A  movsx_r8 %R, %R\n", mip, r, rhs);			case 0x0fbf: core->console.format("    %A  movsx_r16 %R, %R\n", mip, r, rhs);			}
+			case 0x0fbe: core->console.format("    %A  movsx_r8 %R, %R\n", mip, r, rhs);
+			case 0x0fbf: core->console.format("    %A  movsx_r16 %R, %R\n", mip, r, rhs);
+			}
 		}
 		#endif /* AVMPLUS_VERBOSE */
 
@@ -283,7 +286,8 @@
 			case 0xf20f59: core->console.format("    %A  mulsd %F, %F\n", mip, dest, src); break;
 			case 0xf20f5e: core->console.format("    %A  divsd %F, %F\n", mip, dest, src); break;
 			case 0xf20f2a: core->console.format("    %A  cvtsi2sd %F, %R\n", mip, dest, src); break;
-			case 0xf20f2c: core->console.format("    %A  cvttsd2si %F, %R\n", mip, dest, src); break;			case 0x660f28: core->console.format("    %A  movapd %F, %F\n", mip, dest, src); break;
+			case 0xf20f2c: core->console.format("    %A  cvttsd2si %F, %R\n", mip, dest, src); break;
+			case 0x660f28: core->console.format("    %A  movapd %F, %F\n", mip, dest, src); break;
 			case 0x660f2e: core->console.format("    %A  ucomisd %F, %F\n", mip, dest, src); break;
 			}
 		}
@@ -307,7 +311,9 @@
 			case 0xf20f5c: core->console.format("    %A  subsd %F, %d(%R)\n", mip, r, disp, base); break;
 			case 0xf20f59: core->console.format("    %A  mulsd %F, %d(%R)\n", mip, r, disp, base); break;
 			case 0xf20f5e: core->console.format("    %A  divsd %F, %d(%R)\n", mip, r, disp, base); break;
-			case 0xf30f10: core->console.format("    %A  movss %F, %d(%R)\n", mip, r, disp, base); break;			case 0xf30f11: core->console.format("    %A  movss %d(%R), %F\n", mip, disp, base, r); break;			case 0xf20f10: core->console.format("    %A  movsd %F, %d(%R)\n", mip, r, disp, base); break;
+			case 0xf30f10: core->console.format("    %A  movss %F, %d(%R)\n", mip, r, disp, base); break;
+			case 0xf30f11: core->console.format("    %A  movss %d(%R), %F\n", mip, disp, base, r); break;
+			case 0xf20f10: core->console.format("    %A  movsd %F, %d(%R)\n", mip, r, disp, base); break;
 			case 0xf20f11: core->console.format("    %A  movsd %d(%R), %F\n", mip, disp, base, r); break;
 			case 0xf20f2a: core->console.format("    %A  cvtsi2sd %F, %d(%R)\n", mip, r, disp, base); break;
 			}
@@ -414,9 +420,15 @@
 			{
 			case 0x85: core->console.format("    %A  test  %d(%R), %R\n", mip, disp, base, r); break;
 			case 0x8d: core->console.format("    %A  lea   %R, %d(%R)\n", mip, r, disp, base); break;
-			case 0x88: core->console.format("    %A  mov_8   %d(%R), %R\n", mip, disp, base, r); break;			case 0x6689: core->console.format("    %A  mov_16   %d(%R), %R\n", mip, disp, base, r); break;			case 0x89: core->console.format("    %A  mov   %d(%R), %R\n", mip, disp, base, r); break;
+			case 0x88: core->console.format("    %A  mov_8   %d(%R), %R\n", mip, disp, base, r); break;
+			case 0x6689: core->console.format("    %A  mov_16   %d(%R), %R\n", mip, disp, base, r); break;
+			case 0x89: core->console.format("    %A  mov   %d(%R), %R\n", mip, disp, base, r); break;
 			case 0x8b: core->console.format("    %A  mov   %R, %d(%R)\n", mip, r, disp, base); break;
-			case 0x0fbe: core->console.format("    %A  movsx_8   %R, %d(%R)\n", mip, r, disp, base); break;			case 0x0fbf: core->console.format("    %A  movsx_16   %R, %d(%R)\n", mip, r, disp, base); break;			case 0x0fb6: core->console.format("    %A  movzx_8   %R, %d(%R)\n", mip, r, disp, base); break;			case 0x0fb7: core->console.format("    %A  movzx_16   %R, %d(%R)\n", mip, r, disp, base); break;			case 0xff: 
+			case 0x0fbe: core->console.format("    %A  movsx_8   %R, %d(%R)\n", mip, r, disp, base); break;
+			case 0x0fbf: core->console.format("    %A  movsx_16   %R, %d(%R)\n", mip, r, disp, base); break;
+			case 0x0fb6: core->console.format("    %A  movzx_8   %R, %d(%R)\n", mip, r, disp, base); break;
+			case 0x0fb7: core->console.format("    %A  movzx_16   %R, %d(%R)\n", mip, r, disp, base); break;
+			case 0xff: 
 				switch(r) {
 				case 2: core->console.format("    %A  call  %d(%R)\n", mip, disp, base); break;
 				case 4: core->console.format("    %A  jmp   %d(%R)\n", mip, disp, base); break;
@@ -426,7 +438,10 @@
 		}
 		#endif /* AVMPLUS_VERBOSE */
 
-		if(op >= 0x100)			*mip++ = (MDInstruction)(op >> 8);		*mip++ = (MDInstruction)(op) & 0xff;		MODRM(r, disp, base);
+		if(op >= 0x100)
+			*mip++ = (MDInstruction)(op >> 8);
+		*mip++ = (MDInstruction)(op) & 0xff;
+		MODRM(r, disp, base);
 	}
 
 	void CodegenMIR::JCC(byte op, sintptr offset)
@@ -530,8 +545,10 @@
 			switch(op) {
 			case 0xdc02: opstr = "fcom "; break;
 			case 0xdd03: opstr = "fstpq"; x87Top++; break;
-			case 0xd902: opstr = "fstd "; break;			case 0xdd02: opstr = "fstq "; break;
-			case 0xd900: opstr = "fldd "; x87Top++; break;			case 0xdd00: opstr = "fldq "; x87Top++; break;
+			case 0xd902: opstr = "fstd "; break;
+			case 0xdd02: opstr = "fstq "; break;
+			case 0xd900: opstr = "fldd "; x87Top++; break;
+			case 0xdd00: opstr = "fldq "; x87Top++; break;
 			case 0xdf05: opstr = "fildq"; x87Top--; break;
 			case 0xdc00: opstr = "faddq"; break;
 			case 0xdc04: opstr = "fsubq"; break;
@@ -639,14 +656,18 @@
 
 			SUB(ECX,EAX);			//      ; move stack down by eax
 			MOV(EAX,ESP);			//      ; save current tos and do a...
-			ADD(EAX, growthAmt );   //      ; // not 100% sure if needed, but keep eax at the previous sp					TEST(0, ECX, EAX);		//      ; ...probe in case a page was crossed
-			JMP(0x7FFFFFFF);		//		; jmp back into mainline code
+			ADD(EAX, growthAmt );   //      ; // not 100% sure if needed, but keep eax at the previous sp
+		
+			TEST(0, ECX, EAX);		//      ; ...probe in case a page was crossed
+
+			JMP(0x7FFFFFFF);		//		; jmp back into mainline code
 			mdPatchPrevious(returnTo);
 
 		#undef _PAGESIZE_ 
 	}
 	
-#ifndef AVMTHUNK_VERSION	/**
+#ifndef AVMTHUNK_VERSION
+	/**
 	 * emitNativeThunk generates code for a native method
 	 * thunk.  A native method thunk converts VM types like
 	 * Atoms to native data types, pushes them on the stack
@@ -874,7 +895,12 @@
 					// but performance is better if they are.
 					union {
 						double d;
-						uint32 i[2];					};					d = AvmCore::number_d(arg);					PUSH (i[1]); //msb					PUSH (i[0]); //lsb				}
+						uint32 i[2];
+					};
+					d = AvmCore::number_d(arg);
+					PUSH (i[1]); //msb
+					PUSH (i[0]); //lsb
+				}
 				else
 				{
 					// push pointer type
@@ -1148,4 +1174,4 @@
 #endif /* AVMPLUS_IA32 */
 
 }
-#endif
+#endif
