@@ -41,21 +41,21 @@
 namespace avmplus
 {
 
-#define DECLARE_NATIVE_SCRIPTS() static NativeScriptInfo scriptEntries[];
+#define DECLARE_NATIVE_SCRIPTS() static const NativeScriptInfo scriptEntries[];
 
-#define BEGIN_NATIVE_SCRIPTS(_Class) NativeScriptInfo _Class::scriptEntries[] = {
+#define BEGIN_NATIVE_SCRIPTS(_Class) /*static*/ const  NativeScriptInfo _Class::scriptEntries[] = {
 
-#define NATIVE_SCRIPT(script_id, _Script) { script_id, (NativeScriptInfo::Handler)_Script::createGlobalObject, _Script::natives, sizeof(_Script) },
+#define NATIVE_SCRIPT(script_id, _Script) { (NativeScriptInfo::Handler)_Script::createGlobalObject, _Script::natives, script_id, sizeof(_Script) },
 
-#define END_NATIVE_SCRIPTS() { -1, NULL, NULL, 0 } };
+#define END_NATIVE_SCRIPTS() { NULL, NULL, -1, 0 } };
 
-#define DECLARE_NATIVE_CLASSES() static NativeClassInfo classEntries[];
+#define DECLARE_NATIVE_CLASSES() static const NativeClassInfo classEntries[];
 
-#define BEGIN_NATIVE_CLASSES(_Class) NativeClassInfo _Class::classEntries[] = {
+#define BEGIN_NATIVE_CLASSES(_Class) /*static*/ const NativeClassInfo _Class::classEntries[] = {
 
-#define NATIVE_CLASS(class_id, _Class, _Instance) { avmplus::NativeID::class_id, (NativeClassInfo::Handler)_Class::createClassClosure, _Class::natives, sizeof(_Class), sizeof(_Instance) },
+#define NATIVE_CLASS(class_id, _Class, _Instance) { (NativeClassInfo::Handler)_Class::createClassClosure, _Class::natives, avmplus::NativeID::class_id, sizeof(_Class), sizeof(_Instance) },
 
-#define END_NATIVE_CLASSES() { -1, NULL, NULL, 0, 0 } };
+#define END_NATIVE_CLASSES() { NULL, NULL, -1, 0, 0 } };
 
 #define OBJECT_TYPE		(core->traits.object_itraits)
 #define CLASS_TYPE		(core->traits.class_itraits)
@@ -350,8 +350,8 @@ const int kBufferPadding = 16;
 									 Toplevel* toplevel,
 									 Domain* domain,
 									 AbstractFunction *nativeMethods[],
-									 NativeClassInfo *nativeClasses[],
-									 NativeScriptInfo *nativeScripts[],
+									 NativeClassInfop nativeClasses[],
+									 NativeScriptInfop nativeScripts[],
 									 List<Stringp>* include_versions = NULL);
 		
 		/**
@@ -375,8 +375,8 @@ const int kBufferPadding = 16;
 									DomainEnv* domainEnv,
 									Toplevel* &toplevel,
 									AbstractFunction *nativeMethods[],
-									NativeClassInfo *nativeClasses[],
-									NativeScriptInfo *nativeScripts[],
+									NativeClassInfop nativeClasses[],
+									NativeScriptInfop nativeScripts[],
 									CodeContext *codeContext);
 
 				
@@ -384,11 +384,11 @@ const int kBufferPadding = 16;
 		 * Initializes the native table with the specified
 		 * class/script entries.
 		 */
-		void initNativeTables(NativeClassInfo *classEntries,
-							 NativeScriptInfo *scriptEntries,
-							 AbstractFunction *nativeMethods[],
-							 NativeClassInfo* nativeClasses[],
-							 NativeScriptInfo* nativeScripts[]);
+		void initNativeTables(NativeClassInfop classEntries,
+							 NativeScriptInfop scriptEntries,
+							 AbstractFunction* nativeMethods[],
+							 NativeClassInfop nativeClasses[],
+							 NativeScriptInfop nativeScripts[]);
 
 		/**
 		 * Creates a new traits with the given name & ns, copied from the traits* t
@@ -1188,7 +1188,7 @@ const int kBufferPadding = 16;
 		DECLARE_NATIVE_CLASSES()
 		DECLARE_NATIVE_SCRIPTS()
 
-		void registerNatives(NativeTableEntry *nativeMap, AbstractFunction *nativeMethods[]);
+		void registerNatives(NativeTableEntryp nativeMap, AbstractFunction *nativeMethods[]);
 
 		//
 		// this used to be Heap
@@ -1318,7 +1318,7 @@ const int kBufferPadding = 16;
 		Traits* newTraits(Traits *base,
 						  int nameCount,
 						  int interfaceCount,
-						  size_t sizeofInstance);
+						  uint32 sizeofInstance);
 		
 		FrameState* newFrameState(int frameSize, int scopeBase, int stackBase);
         Namespace* newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);

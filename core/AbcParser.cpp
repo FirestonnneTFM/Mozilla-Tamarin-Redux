@@ -49,8 +49,8 @@ namespace avmplus
 		Toplevel* toplevel,
 		Domain* domain,
 		AbstractFunction *nativeMethods[],
-		NativeClassInfo *nativeClasses[],
-		NativeScriptInfo *nativeScripts[],
+		NativeClassInfop nativeClasses[],
+		NativeScriptInfop nativeScripts[],
 		List<Stringp>* keepVersions)
     {
 		if (code.getSize() < 4)
@@ -88,8 +88,8 @@ namespace avmplus
 		Toplevel* toplevel,
 		Domain* domain,
 		AbstractFunction *nativeMethods[],
-		NativeClassInfo *nativeClasses[],
-		NativeScriptInfo *nativeScripts[],
+		NativeClassInfop nativeClasses[],
+		NativeScriptInfop nativeScripts[],
 		List<Stringp>* keepVersions)
 		: toplevel(toplevel),
 		  domain(domain),
@@ -122,7 +122,7 @@ namespace avmplus
 									   Traits* base) const
 	{
 		// If this is a native class, return the stated instance size
-		NativeClassInfo* nativeEntry;
+		NativeClassInfop nativeEntry;
 		if (nativeClasses && (nativeEntry = nativeClasses[class_id]) != 0)
 		{
 			return nativeEntry->sizeofInstance;
@@ -1705,7 +1705,7 @@ namespace avmplus
 			traits->final = true;
 			
 			// global object, make it dynamic
-			NativeScriptInfo* nativeEntry;
+			NativeScriptInfop nativeEntry;
 			if (nativeScripts && (nativeEntry=nativeScripts[i]) != 0)
 			{
 				traits->sizeofInstance = nativeEntry->sizeofInstance;
@@ -2015,7 +2015,7 @@ namespace avmplus
 			Traits* ctraits = parseTraits(CLASS_TYPE, 
 				ns, core->internString(core->concatStrings(name, core->newString("$"))), 0, 0, itraits->protectedNamespace);
 
-			NativeClassInfo *nativeEntry;
+			NativeClassInfop nativeEntry;
 			if (nativeClasses && (nativeEntry=nativeClasses[i]) != 0)
 			{
 				ctraits->sizeofInstance = nativeEntry->sizeofClass;

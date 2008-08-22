@@ -57,73 +57,6 @@ namespace avmplus
 	{
 		friend class VTable;
 	public:
-		AvmCore* const core;
-
-		/**
-		 * Pointer to the base traits; that is, the traits
-		 * of the base class.
-		 */
-		DWB(Traits*) base;
- 
-		/** The name of the class described by this traits object. */
-		DRCWB(Namespace*) ns;
-		DRCWB(Stringp) name;
-
-		/**
-		  * If true, the class needs a hash table.  Typically true for dynamic
-		  * classes, but will be false for XML since they store dynamic props
-		  * differently
-		  */
-		bool needsHashtable:1;
-		
-		/** set once signature types have been resolved */
-		bool linked:1;
-
-		/** set when the class cannot be extended */
-		bool final:1;
-
-		/** true for types whose values are not pointers */
-		bool isMachineType:1;
-
-		/** true for types that are interfaces */
-		bool isInterface:1;
-
-		/** used for Verify::findCommonBase */
-		bool commonBase:1;
-
-		/** used in verify/mir, true for int, uint, Number */
-		bool isNumeric:1;
-
-		/** used to tell us whether we need to allocate space for the IMT */
-		bool hasInterfaces:1;
-
-		/** true if this is NOT a derived object class. */
-		/** Also true if this is an XML or XMLList object. */
-		bool notDerivedObjectOrXML:1;
-
-		/** for this == OBJECT_TYPE where we can't use OBJECT_TYPE */
-		bool isObjectType:1;
-
-		/** how we implement dictionary or strict style lookups */
-		bool isDictionary:1;
-
-		/** does this type use the default ClassClosure::construct method or not. 
-			If the traits are for a type that implements its own construct method, 
-			this must be set to true.  If it is false, the JIT will early bind to 
-			the AS defined constructor. */
-		bool hasCustomConstruct:1;
-
-#ifdef DEBUGGER
-		/** how we implement dictionary or strict style lookups */
-		bool isActivationTraits:1;
-#endif
-
-		/**
-		* if this type is a factory, itraits is non-null and points
-		* to the type created by this factory.
-		*/
-		Traits* itraits;
-
 #ifdef AVMPLUS_MIR
 		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
 		// since we use the AbstractFunction pointer as the interface method id
@@ -147,12 +80,12 @@ namespace avmplus
 			traits_pos = pos;
 		}
 
-		size_t getTotalSize() const { 
+		uint32_t getTotalSize() const { 
 			AvmAssert(linked);
 			return totalSize;
 		}
 
-		void setTotalSize(size_t _size) { 
+		void setTotalSize(uint32_t _size) { 
 			totalSize = _size;
 		}
 
@@ -164,10 +97,8 @@ namespace avmplus
 			return metadata_pos;
 		}
 
-		void setSlotMetadataPos(uint32 i, const byte* pos)								
-		{ AvmAssert(i < slotCount);   setIndexedMetadataPos(i, pos); }
-		void setMethodMetadataPos(uint32 i, const byte* pos)							
-		{ AvmAssert(i < methodCount); setIndexedMetadataPos(i+slotCount, pos); }
+		void setSlotMetadataPos(uint32 i, const byte* pos) { AvmAssert(i < slotCount);   setIndexedMetadataPos(i, pos); }
+		void setMethodMetadataPos(uint32 i, const byte* pos) { AvmAssert(i < methodCount); setIndexedMetadataPos(i+slotCount, pos); }
 		const byte* getSlotMetadataPos(uint32 i, PoolObject*& residingPool) const;
 		const byte* getMethodMetadataPos(uint32 i, PoolObject*& residingPool) const;
 
@@ -175,28 +106,10 @@ namespace avmplus
 			return !t || !t->isMachineType || t->isObjectType;
 		}
 
-		// not a call/init union b/c smart pointers and union's don't mix
-		DWB(AbstractFunction*) init;		
-
 	private:
 
 		void initMetadataTable();
 		void setIndexedMetadataPos(uint32 i, const byte* pos);
-
-		// in resolveTraits we read traits_pos for the last time and at the end set totalSize
-		union {
-			const byte* traits_pos;
-			/** total size of instance including native size and slots size */
-			size_t totalSize;
-		};
-
-
-		/** chunk of memory allocated after traits resolution holding slotTypes, offsets and methods */
-		void *instanceData;
-
-		const byte* metadata_pos;
-
-		const byte** slot_metadata_pos;
 
 	public:
 
@@ -216,38 +129,6 @@ namespace avmplus
 		Traits **getSlotTypes() const { return (Traits**) instanceData; }
 		int *getOffsets() const { return instanceData ? (int*) ((Traits **) instanceData + slotCount) : NULL; }
 
-		/** # of methods in the methods array */
-		uint32 methodCount;
-		
-		/** # of slots in the slots array */
-		uint32 slotCount;         
-		
-		/** # of traits (interfaces and base classes) in the interfaces array */
-		uint32 interfaceCount;
-
-		/** size of interfaces array */
-		uint32 interfaceCapacity;
-
-		/** offset of hash table for dynamic objects, -1 if invalid */
-		int hashTableOffset;
-
-		/**
-		 * sizeof implementation class,
-		 * e.g. ScriptObject, etc.  Not counting extra room for slots
-		 */
-		size_t sizeofInstance;
-
-		/**
-		 * The constant pool owning this definition. NULL for internal types.
-		 */
-		DWB(PoolObject*) pool;
-
-		/** scope chain types */
-		DWB(ScopeTypeChain*) scope;
-
-		/** protected namespace, if any */
-		DRCWB(Namespace*) protectedNamespace;
-		
 		/**
 		 * Constructor for traits.  base != NULL means inheritance.
 		 */
@@ -256,7 +137,7 @@ namespace avmplus
 			   int nameCount,
 			   int interfaceCount,
 			   int interfaceCapacity,
-			   size_t sizeofInstance);
+			   uint32_t sizeofInstance);
 		
 		virtual ~Traits();
 
@@ -309,11 +190,11 @@ namespace avmplus
 
 		static bool isMachineCompatible(const Traits* a, const Traits* b);
 
-		void setNativeClassInfo(NativeClassInfo* entry) { this->nativeClassInfo = entry; }
-		void setNativeScriptInfo(NativeScriptInfo* entry) { this->nativeScriptInfo = entry; }
+		void setNativeClassInfo(NativeClassInfop entry) { this->nativeClassInfo = entry; }
+		void setNativeScriptInfo(NativeScriptInfop entry) { this->nativeScriptInfo = entry; }
 
-		NativeClassInfo* getNativeClassInfo() const { return nativeClassInfo; }
-		NativeScriptInfo* getNativeScriptInfo() const { return nativeScriptInfo; }
+		NativeClassInfop getNativeClassInfo() const { return nativeClassInfo; }
+		NativeScriptInfop getNativeScriptInfo() const { return nativeScriptInfo; }
 
 		AbstractFunction* getMethod(uint32 i) const
 		{
@@ -343,11 +224,6 @@ namespace avmplus
 #endif
 
 	private:
-		union {
-			NativeClassInfo* nativeClassInfo;
-			NativeScriptInfo* nativeScriptInfo;
-		};
-
 		Traitsp* findInterface(Traits* t) const;
 
 
@@ -361,9 +237,58 @@ namespace avmplus
 			AvmAssert(i < interfaceCapacity);
 			return getInterfaces()[i];
 		}
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		AvmCore* const			core;
+		DWB(Traits*)			base;		// Pointer to the base traits; that is, the traits of the base class
+		Traits*					itraits;	// if this type is a factory, itraits is non-null and points to the type created by this factory.
+		DRCWB(Namespace*)		ns;			// The namespace of the class described by this traits object
+		DRCWB(Stringp)			name;		// The name of the class described by this traits object
 #ifdef DEBUGGER
-		DRCWB(Stringp) fullName;
+		DRCWB(Stringp)			fullName;
 #endif
+		DWB(PoolObject*)		pool;		// The constant pool owning this definition. NULL for internal types
+		DWB(ScopeTypeChain*)	scope;		// scope chain types
+		DRCWB(Namespace*)		protectedNamespace;	// protected namespace, if any
+		DWB(AbstractFunction*)	init;		// not a call/init union b/c smart pointers and union's don't mix
+	private:
+		union {
+			const byte*			traits_pos;		// in resolveTraits we read traits_pos for the last time and at the end set totalSize
+			uint32_t			totalSize;		// total size of instance including native size and slots size 
+		};
+		union {
+			NativeClassInfop	nativeClassInfo;
+			NativeScriptInfop	nativeScriptInfo;
+		};
+		void*					instanceData;		// chunk of memory allocated after traits resolution holding slotTypes, offsets and methods */
+		const byte*				metadata_pos;
+		const byte**			slot_metadata_pos;
+	public:
+		uint32_t				methodCount;		// # of methods in the methods array 
+		uint32_t				slotCount;			// # of slots in the slots array 
+		uint32_t				interfaceCount;		// # of traits (interfaces and base classes) in the interfaces array 
+		uint32_t				interfaceCapacity;	// size of interfaces array 
+		int32_t					hashTableOffset;	// offset of hash table for dynamic objects, -1 if invalid 
+		uint32_t				sizeofInstance;		// sizeof implementation class, e.g. ScriptObject, etc.  Not counting extra room for slots
+		// flag bits below
+		uint32_t				needsHashtable:1;			// If true, the class needs a hash table. Typically true for dynamic classes, but will be false for XML
+		uint32_t				linked:1;					// set once signature types have been resolved */
+		uint32_t				final:1;					// set when the class cannot be extended */
+		uint32_t				isMachineType:1;			// true for types whose values are not pointers */
+		uint32_t				isInterface:1;				// true for types that are interfaces */
+		uint32_t				commonBase:1;				// used for Verify::findCommonBase */
+		uint32_t				isNumeric:1;				// used in verify/mir, true for int, uint, Number */
+		uint32_t				hasInterfaces:1;			// used to tell us whether we need to allocate space for the IMT */
+		uint32_t				notDerivedObjectOrXML:1;	// true if this is NOT a derived object class. Also true if this is an XML or XMLList object. */
+		uint32_t				isObjectType:1;				// for this == OBJECT_TYPE where we can't use OBJECT_TYPE
+		uint32_t				isDictionary:1;				// how we implement dictionary or strict style lookups
+		uint32_t				hasCustomConstruct:1;		// does this type use the default ClassClosure::construct method or not?
+										// If the traits are for a type that implements its own construct method, this must be set to true.  
+										// If it is false, the JIT will early bind to the AS defined constructor. 
+		uint32_t				isActivationTraits:1;		// how we implement dictionary or strict style lookups -- only for DEBUGGER builds, unused otherwise
+		uint32_t				padding:19;
+	// ------------------------ DATA SECTION END
 	};
 
 #ifdef AVMPLUS_MIR

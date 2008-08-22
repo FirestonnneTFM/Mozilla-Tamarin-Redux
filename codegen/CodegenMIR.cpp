@@ -2587,7 +2587,7 @@ namespace avmplus
 	void CodegenMIR::emitGetscope(FrameState* state, int scope_index, int dest)
 	{
 		this->state = state;
-		Traits* t = info->declaringTraits->scope->scopes[scope_index].traits;
+		Traits* t = info->declaringTraits->scope->getScopeTraitsAt(scope_index);
 		OP* declVTable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), ldargIns(_env));
 		OP* scope = loadIns(MIR_ldop, offsetof(VTable, scope), declVTable);
 		OP* scopeobj = loadIns(MIR_ldop, offsetof(ScopeChain, scopes) + scope_index*sizeof(Atom), scope);
@@ -3303,7 +3303,7 @@ namespace avmplus
 					}
 					else
 					{
-						t = scopeTypes->scopes[0].traits;
+						t = scopeTypes->getScopeTraitsAt(0);
 						OP* declVTable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), ldargIns(_env));
 						OP* scope = loadIns(MIR_ldop, offsetof(VTable, scope), declVTable);
 						OP* scopeobj = loadIns(MIR_ld, offsetof(ScopeChain, scopes) + 0*sizeof(Atom), scope);
@@ -3324,7 +3324,7 @@ namespace avmplus
 					OP* vtable = loadIns(MIR_ldop, offsetof(ScriptObject,vtable), ptr);
 					OP* traits = loadIns(MIR_ldop, offsetof(VTable,traits), vtable);
 					offset -= (int)(t->sizeofInstance);
-					OP* sizeofInstance = loadIns(MIR_ldop, offsetof(Traits, sizeofInstance), traits);
+					OP* sizeofInstance = loadIns(MIR_ld32u, offsetof(Traits, sizeofInstance), traits);
 					ptr = binaryIns(MIR_addp, sizeofInstance, ptr);
 				}
 
@@ -5908,7 +5908,7 @@ namespace avmplus
 		{
 			SET32((int)&core->minstack, L0);
 			LDSWI(L0, 0, L1);
-			stackCheck.patchStackSize = mip;
+			stackCheck.patchStackSize = (uintptr_t*)mip;
 			NOP();
 			SUBCC(SP, L1, G0);
 			BL(1, 0);
@@ -5926,7 +5926,7 @@ namespace avmplus
 		{
 			LI32(R11, (int)&core->minstack);
 			LWZ(R12, 0, R11);
-			stackCheck.patchStackSize = mip;
+			stackCheck.patchStackSize = (uintptr_t*)mip;
 			NOP();
 			NOP();
 			CMPL(CR7, SP, R12);
@@ -6013,7 +6013,7 @@ namespace avmplus
 		{
 			// Check the stack
 			CMP(ESP, 0x7FFFFFFF);
-			stackCheck.patchStackSize = (uint32*)PREV_MD_INS(mip);
+			stackCheck.patchStackSize = (uintptr*)PREV_MD_INS(mip);
 			JB(0x7FFFFFFF);
 			mdPatchPrevious(&stackCheck.overflowLabel);
 			mdLabel(&stackCheck.resumeLabel, mip);
@@ -6230,7 +6230,7 @@ namespace avmplus
 		{
 			// Patch the stack oveflow check's frame size
 			uint32 *savedMip = mip;
-			mip = stackCheck.patchStackSize;
+			mip = (uint32*)stackCheck.patchStackSize;
 			ADDI32(R12, R12, activation.highwatermark);
 			mip = savedMip;
 

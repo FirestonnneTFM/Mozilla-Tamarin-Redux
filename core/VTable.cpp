@@ -41,16 +41,18 @@
 namespace avmplus
 {
 	
-	VTable::VTable(Traits* traits, VTable* base, ScopeChain* scope, AbcEnv* abcEnv, Toplevel* toplevel)
+	VTable::VTable(Traits* _traits, VTable* _base, ScopeChain* _scope, AbcEnv* _abcEnv, Toplevel* _toplevel) :
+		abcEnv(_abcEnv),
+		toplevel(_toplevel),
+		call(NULL),
+		init(NULL),
+		scope(_scope),
+		base(_base),
+		ivtable(NULL),
+		traits(_traits),
+		linked(false)
 	{
 		AvmAssert(traits != NULL);
-		this->traits = traits;
-		this->base = base;
-		this->scope = scope;
-		this->abcEnv = abcEnv;
-		this->toplevel = toplevel;
-		this->linked = false;
-		this->init = NULL;
 	}
 
 	void VTable::resolveSignatures()

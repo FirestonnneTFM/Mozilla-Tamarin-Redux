@@ -50,7 +50,7 @@ namespace avmplus
 				   int nameCount,
 				   int interfaceCount,
 				   int interfaceCapacity,
-				   size_t sizeofInstance)
+				   uint32_t sizeofInstance)
 		: core(core),
 		MultinameHashtable(0)
     {
@@ -887,7 +887,7 @@ namespace avmplus
 		int i = virt->iid() % Traits::IMT_SIZE;
 #ifdef AVMPLUS_VERBOSE
 		if (entries[i] && virt->pool->verbose)
-			virt->core()->console << "conflict " << virt->iid() << " " << i << "\n";
+			virt->core()->console << "conflict " << (uint64_t)virt->iid() << " " << i << "\n";
 #endif
 		entries[i] = new (gc) ImtEntry(virt, entries[i], disp_id);
 	}
