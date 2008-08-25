@@ -139,6 +139,7 @@ namespace nanojit
 			GCHeap*		_gcHeap;
 
 			const uint32_t _max_pages;
+			const uint32_t _pagesGrowth;
 	};
 
 	enum TraceKind {
