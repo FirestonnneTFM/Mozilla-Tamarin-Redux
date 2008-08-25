@@ -393,58 +393,63 @@ namespace avmplus
 		*dest++ = NEW_OPCODE(opcode);
 	}
 
+#ifdef _DEBUG
+#  define CHECK_OP1(opcode, tag) \
+	switch (opcode) { \
+		case OP_applytype: \
+		case OP_astype: \
+		case OP_bkptline: \
+		case OP_call: \
+		case OP_coerce: \
+		case OP_construct: \
+		case OP_constructsuper: \
+		case OP_debugline: \
+		case OP_debugfile: \
+		case OP_declocal: \
+		case OP_declocal_i: \
+		case OP_deleteproperty: \
+		case OP_dxns: \
+		case OP_finddef: \
+		case OP_findproperty: \
+		case OP_findpropstrict: \
+		case OP_getdescendants: \
+		case OP_getglobalslot: \
+		case OP_getlex: \
+		case OP_getlocal: \
+		case OP_getouterscope: \
+		case OP_getproperty: \
+		case OP_getslot: \
+		case OP_getsuper: \
+		case OP_inclocal: \
+		case OP_inclocal_i: \
+		case OP_initproperty: \
+		case OP_istype: \
+		case OP_kill: \
+		case OP_newarray: \
+		case OP_newcatch: \
+		case OP_newclass: \
+		case OP_newfunction: \
+		case OP_newobject: \
+		case OP_pushdouble: \
+		case OP_pushnamespace: \
+		case OP_pushstring: \
+		case OP_setglobalslot: \
+ 		case OP_setlocal: \
+		case OP_setproperty: \
+		case OP_setslot: \
+		case OP_setsuper: \
+			break; \
+		default: \
+			AvmAssert(!"Unknown " tag); \
+	}
+#else
+#  define CHECK_OP1(opcode)
+#endif
+	
 	// These take one U30 argument
 	void Translator::emitOp1(const byte *pc, int opcode)
 	{
-#ifdef _DEBUG
-		switch (opcode) {
-			case OP_applytype:
-			case OP_astype:
-			case OP_bkptline:
-			case OP_call:
-			case OP_coerce:
-			case OP_construct:
-			case OP_constructsuper:
-			case OP_debugline:
-			case OP_debugfile:
-			case OP_declocal:
-			case OP_declocal_i:
-			case OP_deleteproperty:
-			case OP_dxns:
-			case OP_finddef:
-			case OP_findproperty:
-			case OP_findpropstrict:
-			case OP_getdescendants:
-			case OP_getglobalslot:
-			case OP_getlex:
-			case OP_getlocal:
-			case OP_getouterscope:
-			case OP_getproperty:
-			case OP_getslot:
-			case OP_getsuper:
-			case OP_inclocal:
-			case OP_inclocal_i:
-			case OP_initproperty:
-			case OP_istype:
-			case OP_kill:
-			case OP_newarray:
-			case OP_newcatch:
-			case OP_newclass:
-			case OP_newfunction:
-			case OP_newobject:
-			case OP_pushdouble:
-			case OP_pushnamespace:
-			case OP_pushstring:
-			case OP_setglobalslot:
-			case OP_setlocal:
-			case OP_setproperty:
-			case OP_setslot:
-			case OP_setsuper:
-				break;
-			default:
-				AvmAssert(!"Unknown OP1");
-		}
-#endif
+		CHECK_OP1(opcode, "OP1")
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
@@ -454,38 +459,36 @@ namespace avmplus
 	// These take one U30 argument, and the argument is explicitly passed here (result of optimization)
 	void Translator::emitOp1(int opcode, uint32 operand)
 	{
-#ifdef _DEBUG
-		switch (opcode) {
-			case OP_getslot:
-			case OP_getproperty:
-				break;
-			default:
-				AvmAssert(!"Unknown OP1/imm");
-		}
-#endif
+		CHECK_OP1(opcode, "OP1/imm")
 		CHECK(2);
 		*dest++ = NEW_OPCODE(opcode);
 		*dest++ = operand;
 	}
 	
-	// These take two U30 arguments
-	void Translator::emitOp2(const byte *pc, int opcode) {
 #ifdef _DEBUG
-		switch (opcode) {
-			case OP_hasnext2:
-			case OP_callstatic:
-			case OP_callmethod:
-			case OP_callproperty:
-			case OP_callproplex:
-			case OP_callpropvoid:
-			case OP_constructprop:
-			case OP_callsuper:
-			case OP_callsupervoid:
-				break;
-			default:
-				AvmAssert(!"Unknown OP2");
+#  define CHECK_OP2(opcode, tag) \
+	switch (opcode) { \
+		case OP_hasnext2: \
+		case OP_callstatic: \
+		case OP_callmethod: \
+		case OP_callproperty: \
+		case OP_callproplex: \
+		case OP_callpropvoid: \
+		case OP_constructprop: \
+		case OP_callsuper: \
+		case OP_callsupervoid: \
+			break; \
+		default: \
+			AvmAssert(!"Unknown " tag); \
 		}
+#else
+#  define CHECK_OP2(opcode, tag)	
 #endif // _DEBUG
+
+	// These take two U30 arguments
+	void Translator::emitOp2(const byte *pc, int opcode)
+	{
+		CHECK_OP2(opcode, "OP2")
 		CHECK(3);
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
@@ -493,6 +496,15 @@ namespace avmplus
 		*dest++ = AvmCore::readU30(pc);
 	}
 	
+	void Translator::emitOp2(int opcode, uint32 op1, uint32 op2)
+	{
+		CHECK_OP2(opcode, "OP2/imm");
+		CHECK(3);
+		*dest++ = NEW_OPCODE(opcode);
+		*dest++ = op1;
+		*dest++ = op2;
+	}
+
 	
 	// These take one S24 argument that is PC-relative.  If the offset is negative
 	// then the target must be a LABEL instruction, and we can just look it up.

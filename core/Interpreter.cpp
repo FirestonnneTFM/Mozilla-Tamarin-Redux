@@ -878,20 +878,17 @@ namespace avmplus
 			}
 
             INSTR(pushnull) {
-				sp++;
-                sp[0] = nullObjectAtom;
+                *(++sp) = nullObjectAtom;
                 NEXT;
 			}
 
             INSTR(pushundefined) {
-				sp++;
-                sp[0] = undefinedAtom;
+                *(++sp) = undefinedAtom;
                 NEXT;
 			}
 
             INSTR(pushstring) {
-				sp++;
-                sp[0] = cpool_string[U30ARG]->atom();
+                *(++sp) = cpool_string[U30ARG]->atom();
                 NEXT;
 			}
 
@@ -902,8 +899,7 @@ namespace avmplus
 				// to specialize the operation into a plain 'pushword' that
 				// simply pushes the following word (it could be tagged
 				// already) or a 'pushdouble'
-				sp++;
-                sp[0] = core->intToAtom(cpool_int[U30ARG]);
+                *(++sp) = core->intToAtom(cpool_int[U30ARG]);
                 NEXT;
 			}
 #endif
@@ -915,27 +911,23 @@ namespace avmplus
 				// to specialize the operation into a plain 'pushword' that
 				// simply pushes the following word (it could be tagged
 				// already) or a 'pushdouble'
-				sp++;
-                sp[0] = core->uintToAtom(cpool_uint[U30ARG]);
+                *(++sp) = core->uintToAtom(cpool_uint[U30ARG]);
                 NEXT;
 			}
 #endif
 					
             INSTR(pushdouble) {
-				sp++;
-                sp[0] = kDoubleType|(uintptr)cpool_double[U30ARG];
+                *(++sp) = kDoubleType|(uintptr)cpool_double[U30ARG];
                 NEXT;
 			}
 
             INSTR(pushnamespace) {
-                sp++;
-                sp[0] = cpool_ns[U30ARG]->atom();
+                *(++sp) = cpool_ns[U30ARG]->atom();
                 NEXT;
 			}
 
             INSTR(getlocal) {
-                sp++;
-				sp[0] = framep[U30ARG];
+				*(++sp) = framep[U30ARG];
 				NEXT;
 			}
 
@@ -960,20 +952,17 @@ namespace avmplus
 			}
 
             INSTR(pushtrue) {
-                sp++;
-				sp[0] = trueAtom;
+				*(++sp) = trueAtom;
                 NEXT;
 			}
 
             INSTR(pushfalse) {
-				sp++;
-                sp[0] = falseAtom;
+                *(++sp) = falseAtom;
                 NEXT;
 			}
 
 			INSTR(pushnan) {
-				sp++;
-				sp[0] = core->kNaN;
+				*(++sp) = core->kNaN;
 				NEXT;
 			}
 
@@ -1712,6 +1701,7 @@ namespace avmplus
 #else
 #  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
 #endif
+
 			INSTR(getlex) {
 				SAVE_EXPC;
 				// findpropstrict + getproperty
@@ -1947,6 +1937,8 @@ namespace avmplus
 			INSTR(getslot) {
 				SAVE_EXPC;
 				env->nullcheck(sp[0]);
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				sp[0] = AvmCore::atomToScriptObject(sp[0])->getSlotAtom(U30ARG-1);
 				restore_dxns();
 				NEXT;
@@ -1961,6 +1953,8 @@ namespace avmplus
 				else
 					global = AvmCore::atomToScriptObject(scope->getScope(0));
 
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				int slot_id = U30ARG-1;
 				Atom op = sp[0];
 				sp--;
@@ -1978,6 +1972,8 @@ namespace avmplus
 				else
 					global = AvmCore::atomToScriptObject(scope->getScope(0));
 
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				sp++;
 				sp[0] = global->getSlotAtom(U30ARG-1);
 				restore_dxns();

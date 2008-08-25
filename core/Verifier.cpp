@@ -907,7 +907,7 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 				XLAT_ONLY( translator->emitOp1(pc, opcode) );  // optimize later
 #else
-				emitFindProperty(OP_findpropstrict, multiname);
+				emitFindProperty(OP_findpropstrict, multiname, imm30);
 				emitGetProperty(multiname, 1, imm30);
 #endif
 				break;
@@ -923,8 +923,7 @@ namespace avmplus
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(0, 1, &multiname);
-				emitFindProperty(opcode, multiname);
-				XLAT_ONLY( translator->emitOp1(pc, opcode) );
+				emitFindProperty(opcode, multiname, imm30);
 				break;
 			}
 
@@ -1590,7 +1589,7 @@ namespace avmplus
 						goto callprop_end;
 					}
 				}
-				#endif // AVMPLUS_MIR
+				#endif // AVMPLUS_MIR || AVMPLUS_WORD_CODE
 
 				#ifdef DEBUG_EARLY_BINDING
 				core->console << "verify callproperty " << t << " " << multiname->getName() << " from within " << info << "\n";
@@ -2606,10 +2605,9 @@ namespace avmplus
 		state->pop_push(2, BOOLEAN_TYPE);
 	}
 
-	void Verifier::emitFindProperty(AbcOpcode opcode, Multiname& multiname)
+	void Verifier::emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32 imm30)
 	{
 		ScopeTypeChain* scope = info->declaringTraits->scope;
-		bool early = false;
 		if (multiname.isBinding())
 		{
 			int index = scopeBase + state->scopeDepth - 1;
@@ -2628,16 +2626,13 @@ namespace avmplus
 				{
 					MIR_ONLY( if (mir) mir->emitCopy(state, index, state->sp()+1); )
 					state->push(v);
-					early = true;
-					break;
+					XLAT_ONLY( translator->emitOp1(OP_getscopeobject, index-scopeBase) );
+					return;
 				}
-				else if (v.isWith)
-				{
-					// with scope could have dynamic property
-					break;
-				}
+				if (v.isWith)
+					break;  // with scope could have dynamic property
 			}
-			if (!early && index < base)
+			if (index < base)
 			{
 				// look at captured scope types
 				for (index = scope->size-1; index > 0; index--)
@@ -2648,16 +2643,13 @@ namespace avmplus
 					{
 						MIR_ONLY( if (mir) mir->emitGetscope(state, index, state->sp()+1); )
 						state->push(t, true);
-						early = true;
-						break;
+						XLAT_ONLY( translator->emitOp1(OP_getouterscope, index) );
+						return;
 					}
-					else if (scope->scopes[index].isWith)
-					{
-						// with scope could have dynamic property
-						break;
-					}
+					if (scope->scopes[index].isWith)
+						break;  // with scope could have dynamic property
 				}
-				if (!early && index <= 0)
+				if (index <= 0)
 				{
 					// look at import table for a suitable script
 					AbstractFunction* script = (AbstractFunction*)pool->getNamedScript(&multiname);
@@ -2671,38 +2663,30 @@ namespace avmplus
 								// ISSUE what if there is an ambiguity at runtime? is VT too early to bind?
 								// its defined here, use getscopeobject 0
 								if (scope->size > 0)
-								{
 									mir->emitGetscope(state, 0, state->sp()+1);
-								}
 								else
-								{
 									mir->emitCopy(state, scopeBase, state->sp()+1);
-								}
 							}
-							else
-							{
-								// found a single matching traits
+							else // found a single matching traits
 								mir->emit(state, OP_finddef, (uintptr)&multiname, state->sp()+1, script->declaringTraits);
-							}
 						}
 						#else
 						(void)opcode;
 						#endif
 						state->push(script->declaringTraits, true);
-						early = true;
+						// OPTIMIZEME: could do better here?
+						XLAT_ONLY( translator->emitOp1(opcode, imm30) );
 						return;
 					}
 				}
 			}
 		}
 
-		if (!early)
-		{
-			uint32 n=1;
-			checkPropertyMultiname(n, multiname);
-			MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE); )
-			state->pop_push(n-1, OBJECT_TYPE, true);
-		}
+		uint32 n=1;
+		checkPropertyMultiname(n, multiname);
+		MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE); )
+		state->pop_push(n-1, OBJECT_TYPE, true);
+		XLAT_ONLY( translator->emitOp1(opcode, imm30) );
 	}
 
 	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32 imm30)
