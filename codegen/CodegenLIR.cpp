@@ -2014,7 +2014,7 @@ namespace avmplus
 
 		InsDealloc(ap);
 
-		if (opcode != OP_constructsuper)
+		if (opcode != OP_constructsuper && opcode != OP_construct)
 		{
 			localSet(dest, out);
 		}
@@ -2173,8 +2173,7 @@ namespace avmplus
 					Traits* slotType = t->getSlotTraits(slot);
 
 					if (core->GetGC()->incremental &&
-						(!slotType || !slotType->isMachineType || slotType == OBJECT_TYPE) &&
-						!value->isconst())
+						(!slotType || !slotType->isMachineType || slotType == OBJECT_TYPE))
 					{
 						#ifdef MMGC_DRC
 						uint32_t wbAddr = FUNCTIONID(writeBarrierRC);
@@ -4260,7 +4259,7 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop && normalcount <= 0 || assm->hasLoop /*&& loopcount <= 0*/) 
+        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop && loopcount <= 0) 
             && !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);
