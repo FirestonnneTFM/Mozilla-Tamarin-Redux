@@ -690,8 +690,10 @@ namespace avmplus
             mgr->frago = new (gc) Fragmento(core, 24/*16mb*/);
 			verbose_only(
                 mgr->frago->assm()->_verbose = verbose();
-				LabelMap *labels = mgr->frago->labels = new (gc) LabelMap(core, 0);
-				labels->add(core, sizeof(AvmCore), 0, "core");
+                if (verbose()) {
+				    LabelMap *labels = mgr->frago->labels = new (gc) LabelMap(core, 0);
+				    labels->add(core, sizeof(AvmCore), 0, "core");
+                }
 			)
         }
 	}
@@ -1102,9 +1104,10 @@ namespace avmplus
             lirout = new (gc) ValidateWriter(lirout);
         )
         verbose_only(
-            lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
-            if (verbose())
+            if (verbose()) {
+                lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
                 lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
+            }
         )
         lirout = new (gc) ExprFilter(lirout);
         CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout);
@@ -4257,7 +4260,7 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop /*&& loopcount <= 0*/) 
+        bool keep = (!assm->hasLoop && normalcount <= 0 || assm->hasLoop /*&& loopcount <= 0*/) 
             && !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);
