@@ -408,7 +408,7 @@ namespace avmplus
     }
 
     void CodegenLIR::storeIns(LIns *value, int32_t disp, LIns* base) {
-        lirout->insStorei(value, base, disp);
+        lirout->store(value, base, disp);
 	}
 
 	OP* CodegenLIR::defIns(OP* value) {
@@ -469,7 +469,7 @@ namespace avmplus
 	void  CodegenLIR::localSet(uintptr i, OP* o)	
 	{
         Value &v = state->value(i);
-        v.ins = lirout->insStorei(o, vars, i*8);
+        v.ins = lirout->store(o, vars, i*8);
         v.stored = true;
 	}
 
@@ -974,12 +974,12 @@ namespace avmplus
         }
 
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
-            AvmAssert(!base->isQuad() && !disp->isQuad());
+            AvmAssert(base && value && !base->isQuad() && !disp->isQuad());
             return out->insStore(value, base, disp);
         }
 
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
-            AvmAssert(!base->isQuad());
+            AvmAssert(base && value && !base->isQuad());
             return out->insStorei(value, base, d);
         }
 
@@ -1449,9 +1449,9 @@ namespace avmplus
 				storeIns(InsConst(state->pc), 0, _save_eip);
 
 			#ifdef AVMPLUS_64BIT
-			OP* interrupted = loadIns(MIR_ld32, (uintptr)&core->interrupted, NULL);
+			OP* interrupted = loadIns(MIR_ld32, 0, InsConst((uintptr)&core->interrupted));
 			#else
-			OP* interrupted = loadIns(MIR_ld, (uintptr)&core->interrupted, NULL);
+			OP* interrupted = loadIns(MIR_ld, 0, InsConst((uintptr)&core->interrupted));
 			#endif
 			OP* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
 			patchLater(br, interrupt_label);
@@ -1578,9 +1578,9 @@ namespace avmplus
 				storeIns(InsConst(state->pc), 0, _save_eip);
 
 			#ifdef AVMPLUS_AMD64
-			OP* interrupted = loadIns(MIR_ld, (uintptr)&core->interrupted, NULL);
+			OP* interrupted = loadIns(MIR_ld, 0, InsConst((uintptr)&core->interrupted));
 			#else
-			OP* interrupted = loadIns(MIR_ld, (uintptr)&core->interrupted, NULL);
+			OP* interrupted = loadIns(MIR_ld, 0, InsConst((uintptr)&core->interrupted));
 			#endif
 			OP* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
 			patchLater(br, interrupt_label);
@@ -2222,7 +2222,7 @@ namespace avmplus
 
 				// restore AvmCore::dxnsAddr if we set it to a stack addr in our frame
 				if(info->setsDxns()) {
-					storeIns(dxnsAddrSave, (uintptr)&core->dxnsAddr, 0);
+					storeIns(dxnsAddrSave, 0, InsConst((uintptr)&core->dxnsAddr));
 				}
 
 				#ifdef DEBUGGER
