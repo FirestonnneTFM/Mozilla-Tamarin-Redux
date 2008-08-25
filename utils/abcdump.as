@@ -164,7 +164,8 @@ package abcdump
 	const OP_callinterface:int = 0x4D
 	const OP_callsupervoid:int = 0x4E
 	const OP_callpropvoid:int = 0x4F
-	const OP_applytype:int = 0x53	const OP_newobject:int = 0x55
+	const OP_applytype:int = 0x53
+	const OP_newobject:int = 0x55
 	const OP_newarray:int = 0x56
 	const OP_newactivation:int = 0x57
 	const OP_newclass:int = 0x58

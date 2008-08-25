@@ -143,7 +143,13 @@ public final dynamic class XML extends Object
 	AS3 function length ():int { return 1; }
 	AS3 native function localName ():Object; // null or String;
 	AS3 native function name ():Object; // null or String;
-	private native function _namespace (prefix:*, argc:int):*; 	AS3 function namespace (prefix = null):* // prefix is optional	{		// can't use .apply() here, XML getproperty hacking confuses name lookup		return arguments.length ? _namespace(prefix, 1) : _namespace(null, 0);	}	AS3 native function namespaceDeclarations ():Array;
+	private native function _namespace (prefix:*, argc:int):*; 
+	AS3 function namespace (prefix = null):* // prefix is optional
+	{
+		// can't use .apply() here, XML getproperty hacking confuses name lookup
+		return arguments.length ? _namespace(prefix, 1) : _namespace(null, 0);
+	}
+	AS3 native function namespaceDeclarations ():Array;
 	AS3 native function nodeKind ():String;
 	AS3 native function normalize ():XML;
 	AS3 native function parent ():*; // undefined or String
@@ -435,7 +441,13 @@ public final dynamic class XMLList extends Object
 	AS3 native function insertChildAfter (child1, child2):*; // undefined or this
 	AS3 native function insertChildBefore (child1, child2):*; // undefined or this
 	AS3 native function nodeKind ():String;
-	private native function _namespace (prefix:*, argc:int):*; 	AS3 function namespace (prefix = null):* // prefix is optional	{		// can't use .apply() here, XML getproperty hacking confuses name lookup		return arguments.length ? _namespace(prefix, 1) : _namespace(null, 0);	}	AS3 native function localName ():Object; // null or String
+	private native function _namespace (prefix:*, argc:int):*; 
+	AS3 function namespace (prefix = null):* // prefix is optional
+	{
+		// can't use .apply() here, XML getproperty hacking confuses name lookup
+		return arguments.length ? _namespace(prefix, 1) : _namespace(null, 0);
+	}
+	AS3 native function localName ():Object; // null or String
 	AS3 native function namespaceDeclarations ():Array;
 	AS3 native function prependChild (value):XML;
 	AS3 native function removeNamespace (ns):XML;

@@ -630,7 +630,10 @@ namespace avmshell
 		}
 		fseek(fp, 0L, SEEK_END);
 		long len = ftell(fp);
-		#ifdef UNDER_CE		fseek (fp, 0L, SEEK_SET);		#else		rewind(fp);
+		#ifdef UNDER_CE
+		fseek (fp, 0L, SEEK_SET);
+		#else
+		rewind(fp);
 		#endif	
 
 		unsigned char *c = new unsigned char[len+1];
@@ -694,7 +697,10 @@ namespace avmshell
 			toplevel->throwError(kFileWriteError, filename);
 		}
 
-		if (fwrite(&(this->GetByteArray())[0], this->get_length(), 1, fp) != 1) {			toplevel->throwError(kFileWriteError, filename);		}		fclose(fp);
+		if (fwrite(&(this->GetByteArray())[0], this->get_length(), 1, fp) != 1) {
+			toplevel->throwError(kFileWriteError, filename);
+		}
+		fclose(fp);
 	}
 
 }	

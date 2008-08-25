@@ -103,10 +103,12 @@ if MMGC_THREADSAFE:
     OS_LDFLAGS += " " + NSPR_LDOPTS
 
 if config.COMPILER_IS_GCC:
-    APP_CXXFLAGS = "-fstrict-aliasing -fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -finline-functions -finline-limit=65536 "    if config.getDebug():
+    APP_CXXFLAGS = "-fstrict-aliasing -fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -finline-functions -finline-limit=65536 "
+    if config.getDebug():
         APP_CXXFLAGS += "-frtti -fexceptions "
     else:
-        APP_CXXFLAGS += "-fno-rtti -fno-exceptions -Wuninitialized  "    DEBUG_CXXFLAGS += "-g "
+        APP_CXXFLAGS += "-fno-rtti -fno-exceptions -Wuninitialized  "
+    DEBUG_CXXFLAGS += "-g "
 else:
     APP_CXXFLAGS = "-W4 -WX -wd4291 "
     if config.getDebug():
@@ -133,7 +135,18 @@ if os == "darwin":
                          '_MAC': None,
                          'TARGET_RT_MAC_MACHO': 1,
                          'USE_MMAP': None})
-    APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "    if o.getBoolArg("leopard"):		# use --enable-leopard to build for 10.5 or later; this is mainly useful for enabling		# us to build with gcc4.2 (which requires the 10.5 sdk), since it has a slightly different		# set of error & warning sensitivities. Note that we don't override CC/CXX here, the calling script		# is expected to do that if desired (thus we can support 10.5sdk with either 4.0 or 4.2)        APP_CXXFLAGS += "-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk "        config.subst("MACOSX_DEPLOYMENT_TARGET",10.5)    else:        APP_CXXFLAGS += "-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "        config.subst("MACOSX_DEPLOYMENT_TARGET",10.4)elif os == "windows":
+    APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
+    if o.getBoolArg("leopard"):
+		# use --enable-leopard to build for 10.5 or later; this is mainly useful for enabling
+		# us to build with gcc4.2 (which requires the 10.5 sdk), since it has a slightly different
+		# set of error & warning sensitivities. Note that we don't override CC/CXX here, the calling script
+		# is expected to do that if desired (thus we can support 10.5sdk with either 4.0 or 4.2)
+        APP_CXXFLAGS += "-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk "
+        config.subst("MACOSX_DEPLOYMENT_TARGET",10.5)
+    else:
+        APP_CXXFLAGS += "-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
+        config.subst("MACOSX_DEPLOYMENT_TARGET",10.4)
+elif os == "windows":
     MMGC_DEFINES.update({'WIN32': None,
                          '_CRT_SECURE_NO_DEPRECATE': None})
     APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "

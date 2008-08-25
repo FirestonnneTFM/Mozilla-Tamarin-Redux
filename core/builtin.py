@@ -41,9 +41,16 @@ import os
 import shutil
 import sys
 
-def mv(oldfile, newfile):	shutil.copyfile(oldfile,newfile)	os.remove(oldfile)def rm(file):	os.remove(file)classpath = os.environ.get('ASC')
+def mv(oldfile, newfile):
+	shutil.copyfile(oldfile,newfile)
+	os.remove(oldfile)
+def rm(file):
+	os.remove(file)
+classpath = os.environ.get('ASC')
 if classpath == None:
-	classpath = "../utils/asc.jar"	#print "ERROR: ASC environment variable must point to asc.jar"	#exit(1)
+	classpath = "../utils/asc.jar"
+	#print "ERROR: ASC environment variable must point to asc.jar"
+	#exit(1)
 
 javacmd = "java -ea -DAS3 -DAVMPLUS -classpath "+classpath
 asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
@@ -52,6 +59,10 @@ thunkgen = javacmd+" adobe.abc.AbcThunkGen "
 print("ASC="+classpath)
 print("Building builtins...")
 
-# compile builtins os.system(asc+" -builtin -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as")
+# compile builtins 
+os.system(asc+" -builtin -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as")
 
-print("Generating native thunks...")os.system(thunkgen+" builtin.abc > builtin.out")mv("builtin.cpp2", "builtin.cpp")mv("builtin.h2", "builtin.h")
+print("Generating native thunks...")
+os.system(thunkgen+" builtin.abc > builtin.out")
+mv("builtin.cpp2", "builtin.cpp")
+mv("builtin.h2", "builtin.h")
