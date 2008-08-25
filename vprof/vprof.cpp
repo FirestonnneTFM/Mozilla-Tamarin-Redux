@@ -362,7 +362,6 @@ int histValue(void** id, char* file, int line, int64_t value, int nbins, ...)
     return 0;
 }
 
-#ifdef PERFM
 uint64_t tstamp()
 {
 	uint64_t t = (uint64_t) clock();
@@ -392,7 +391,8 @@ uint64_t rtstamp()
 			: "%eax", "%ecx", "%edx"
 		);
 		return temp;
+	#else 
+		return 0;
 	#endif
 }
-#endif
 
