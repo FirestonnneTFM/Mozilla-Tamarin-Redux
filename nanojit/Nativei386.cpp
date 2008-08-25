@@ -744,8 +744,10 @@ namespace nanojit
 			NanoAssert((rmask(rr) & FpRegs) != 0);
 
 			const double d = ins->constvalf();
+            const uint64_t q = ins->constvalq();
 			if (rmask(rr) & XmmRegs) {
-				if (d == 0.0) {
+				if (q == 0) {
+                    // test (int64)0 since -0.0 == 0.0
 					SSE_XORPDr(rr, rr);
 				} else if (d == 1.0) {
 					// 1.0 is extremely frequent and worth special-casing!
@@ -757,7 +759,8 @@ namespace nanojit
 					SSE_LDQ(rr, d, FP);
 				}
 			} else {
-				if (d == 0.0) {
+				if (q == 0.0) {
+                    // test (int64)0 since -0.0 == 0.0
 					FLDZ();
 				} else if (d == 1.0) {
 					FLD1();

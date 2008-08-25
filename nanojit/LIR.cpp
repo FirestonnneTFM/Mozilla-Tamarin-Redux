@@ -919,6 +919,12 @@ namespace nanojit
 		return insLoad(op, base, insImm(disp));
 	}
 
+    LIns* LirWriter::store(LInsp value, LInsp base, int32_t d)
+    {
+		return isS8(d) ? insStorei(value, base, d)
+			: insStore(value, base, insImm(d));
+    }
+
 	LIns* LirWriter::ins_eq0(LIns* oprnd1)
 	{
 		return ins2i(LIR_eq, oprnd1, 0);
