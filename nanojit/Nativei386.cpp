@@ -226,8 +226,12 @@ namespace nanojit
         uint32_t fid = ins->fid();
         const CallInfo* call = callInfoFor(fid);
 		// must be signed, not unsigned
-		const uint32_t iargs = call->count_iargs();
+		uint32_t iargs = call->count_iargs();
 		int32_t fargs = call->count_args() - iargs - call->isIndirect();
+
+        bool imt = call->isInterface();
+        if (imt)
+            iargs --;
 
         uint32_t max_regs;
         switch (call->_abi) {
@@ -282,6 +286,13 @@ namespace nanojit
         if (indirect) {
             argc--;
             asm_arg(ARGSIZE_LO, ins->arg(argc), EAX);
+        }
+
+        if (imt) {
+            // interface thunk calling convention: put iid in EDX
+            NanoAssert(call->_abi == ABI_CDECL);
+            argc--;
+            asm_arg(ARGSIZE_LO, ins->arg(argc), EDX);
         }
 
 		for(uint32_t i=0; i < argc; i++)

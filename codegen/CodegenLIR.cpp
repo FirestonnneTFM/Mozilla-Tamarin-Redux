@@ -2007,17 +2007,20 @@ namespace avmplus
 		OP* target = loadIns(MIR_ld, offsetof(MethodEnv, impl32), method);
 		OP* apAddr = leaIns(0, ap);
 
-        uint32_t fid = result==NUMBER_TYPE ? 
-            (iid ? FUNCTIONID(fcallimt) : FUNCTIONID(fcalli)) :
-            (iid ? FUNCTIONID(callimt) : FUNCTIONID(calli));
-		OP* out = callIndirect(fid, target, iid ? 4 : 3, 
-			method, InsConst(argc), apAddr, iid);
+        LIns *out;
+        if (!iid) {
+            uint32_t fid = result==NUMBER_TYPE ? FUNCTIONID(fcalli) : FUNCTIONID(calli);
+		    out = callIndirect(fid, target, 3, method, InsConst(argc), apAddr);
+        } else {
+            uint32_t fid = result==NUMBER_TYPE ? FUNCTIONID(fcallimt) : FUNCTIONID(callimt);
+		    out = callIndirect(fid, target, 4, iid, method, InsConst(argc), apAddr);
+        }
 
 		InsDealloc(ap);
 
 		if (opcode != OP_constructsuper && opcode != OP_construct)
 		{
-			localSet(dest, out);
+			localSet(dest, out); 
 		}
 	}
 
