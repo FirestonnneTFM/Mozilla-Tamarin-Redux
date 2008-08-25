@@ -200,7 +200,8 @@ prototype.pop = function() {
 }
 
 prototype.push = function (...items) {
-    return castToThisType(this).AS3::push.apply(castToThisType(this), items);}
+    return castToThisType(this).AS3::push.apply(castToThisType(this), items);
+}
 
 prototype.reverse = function() {
     return castToThisType(this).AS3::reverse();

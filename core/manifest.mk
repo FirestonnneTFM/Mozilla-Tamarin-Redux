@@ -96,7 +96,8 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/StringObject.cpp \
   $(curdir)/Toplevel.cpp \
   $(curdir)/Traits.cpp \
-  $(curdir)/Translator.cpp \  $(curdir)/UnicodeUtils.cpp \
+  $(curdir)/Translator.cpp \
+  $(curdir)/UnicodeUtils.cpp \
   $(curdir)/VectorClass.cpp \
   $(curdir)/Verifier.cpp \
   $(curdir)/VTable.cpp \
