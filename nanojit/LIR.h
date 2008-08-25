@@ -556,7 +556,7 @@ namespace nanojit
 	class VerboseWriter : public LirWriter
 	{
 		avmplus::List<LInsp, avmplus::LIST_NonGCObjects> code;
-		LirNameMap *names;
+		DWB(LirNameMap*) names;
     public:
 		VerboseWriter(GC *gc, LirWriter *out, LirNameMap* names) 
 			: LirWriter(out), code(gc), names(names)
