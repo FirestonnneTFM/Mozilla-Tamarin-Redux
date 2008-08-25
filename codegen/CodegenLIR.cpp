@@ -2162,7 +2162,8 @@ namespace avmplus
 				else
 				{
 					// set
-					OP* value = localGet(sp);					
+                    // use localCopy() to sniff the type and use ldq if it's Number
+					OP* value = localCopy(sp);					
 
 					#ifndef MMGC_DRC
 					storeIns(value, offset, ptr);
@@ -4259,7 +4260,7 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop && loopcount <= 0) 
+        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop /*&& loopcount <= 0*/) 
             && !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);
