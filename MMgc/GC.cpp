@@ -3213,6 +3213,15 @@ bail:
 		uintptr m = memStart;
 		while(m < memEnd)
 		{
+			// divide by 4K to get index
+			int bits = GetPageMapValue(m);
+            GCAssert(bits == 0 || bits == 1 || bits == 3);
+            if (bits == 0) {
+                // owned by GCHeap
+                m += GCHeap::kBlockSize;
+                continue;
+            }
+
 #ifdef WIN32
 			// first skip uncommitted memory
 			MEMORY_BASIC_INFORMATION mib;
@@ -3222,44 +3231,31 @@ bail:
 				continue;
 			}
 #endif
-			// divide by 4K to get index
-			int bits = GetPageMapValue(m);
-			switch(bits)
-			{
-			case 0:
-				m += GCHeap::kBlockSize;
-				break;
-			case 3:
-				{
-					GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
-					const void *item = GetUserPointer((const void*)(lb+1));
-					if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
-						WhitePointerScan(item, lb->usableSize - DebugSize());
-					}
-					m += lb->GetNumBlocks() * GCHeap::kBlockSize;
-				}
-				break;
-			case 1:
-				{
-					// go through all marked objects in this page
-					GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
-                    for (int i=0; i< b->alloc->m_itemsPerBlock; i++) {
-                        // find all marked objects and search them
-                        if(!GCAlloc::GetBit(b, i, GCAlloc::kMark))
-                            continue;
+            if (bits == 1) {
+                // owned by GCAlloc
+				// go through all marked objects in this page
+				GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
+                for (int i=0; i< b->alloc->m_itemsPerBlock; i++) {
+                    // find all marked objects and search them
+                    if(!GCAlloc::GetBit(b, i, GCAlloc::kMark))
+                        continue;
 
-						if(b->alloc->ContainsPointers()) {
-	                        void* item = (char*)b->items + b->alloc->m_itemSize*i;
-							WhitePointerScan(GetUserPointer(item), b->alloc->m_itemSize - DebugSize());
-						}
+					if(b->alloc->ContainsPointers()) {
+                        void* item = (char*)b->items + b->alloc->m_itemSize*i;
+						WhitePointerScan(GetUserPointer(item), b->alloc->m_itemSize - DebugSize());
 					}
-					m += GCHeap::kBlockSize;
 				}
-				break;
-			default:
-				GCAssert(false);
-				break;
-			}
+				m += GCHeap::kBlockSize;
+            }
+            else {
+                // owned by GCLargeAlloc
+				GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
+				const void *item = GetUserPointer((const void*)(lb+1));
+				if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
+					WhitePointerScan(item, lb->usableSize - DebugSize());
+				}
+				m += lb->GetNumBlocks() * GCHeap::kBlockSize;
+            }
 		}
 	}
 #endif
