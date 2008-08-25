@@ -451,6 +451,23 @@ namespace avmplus
 		*dest++ = AvmCore::readU30(pc);
 	}
 	
+	// These take one U30 argument, and the argument is explicitly passed here (result of optimization)
+	void Translator::emitOp1(int opcode, uint32 operand)
+	{
+#ifdef _DEBUG
+		switch (opcode) {
+			case OP_getslot:
+			case OP_getproperty:
+				break;
+			default:
+				AvmAssert(!"Unknown OP1/imm");
+		}
+#endif
+		CHECK(2);
+		*dest++ = NEW_OPCODE(opcode);
+		*dest++ = operand;
+	}
+	
 	// These take two U30 arguments
 	void Translator::emitOp2(const byte *pc, int opcode) {
 #ifdef _DEBUG
