@@ -904,9 +904,12 @@ namespace avmplus
 				checkStackMulti(0, 1, &multiname);
 				if (multiname.isRuntime())
 					verifyFailed(kIllegalOpMultinameError, core->toErrorString(opcode), core->toErrorString(&multiname));
+#ifdef AVMPLUS_WORD_CODE
+				XLAT_ONLY( translator->emitOp1(pc, opcode) );  // optimize later
+#else
 				emitFindProperty(OP_findpropstrict, multiname);
-				emitGetProperty(multiname, 1);
-				XLAT_ONLY( translator->emitOp1(pc, opcode) );
+				emitGetProperty(multiname, 1, imm30);
+#endif
 				break;
 			}
 
@@ -1129,8 +1132,7 @@ namespace avmplus
 				checkStackMulti(1, 1, &multiname);
 				uint32 n=1;
 				checkPropertyMultiname(n, multiname);
-				emitGetProperty(multiname, n);
-				XLAT_ONLY( translator->emitOp1(pc, opcode) );
+				emitGetProperty(multiname, n, imm30);
 				break;
 			}
 
@@ -2703,7 +2705,7 @@ namespace avmplus
 		}
 	}
 
-	void Verifier::emitGetProperty(Multiname &multiname, int n)
+	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32 imm30)
 	{
 		Value& obj = state->peek(n); // object
 
@@ -2716,10 +2718,27 @@ namespace avmplus
 		{
 			// early bind to slot
 			MIR_ONLY( if (mir) mir->emit(state, OP_getslot, AvmCore::bindingToSlotId(b), state->sp(), propType); )
+#ifdef AVMPLUS_WORD_CODE
+			{
+				// Copied from CodegenMIR, does not belong here.  Experiment.
+				Traits* t = state->value(state->sp()).traits;
+				int slot = int(AvmCore::bindingToSlotId(b));
+				
+				AvmAssert(t->linked);
+				//int offset = t->getOffsets()[slot];
+				
+				if (!(t->pool->isBuiltin && !t->final))
+					translator->emitOp1(OP_getslot, slot+1 /* not offset -- this is bytecode */);
+				else
+					translator->emitOp1(OP_getproperty, imm30);
+			}
+#endif
 			state->pop_push(n, propType);
 			return;
 		}
 
+		XLAT_ONLY( translator->emitOp1(OP_getproperty, imm30) );
+		
 		// Do early binding to accessors.
 		if (AvmCore::hasGetterBinding(b))
 		{

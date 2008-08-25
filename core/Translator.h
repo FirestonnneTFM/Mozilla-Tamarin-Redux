@@ -64,6 +64,7 @@ namespace avmplus
 		// Handle specific instructions or instruction classes
 		void emitOp0(const byte *pc, int opcode);
 		void emitOp1(const byte *pc, int opcode);
+		void emitOp1(int opcode, uint32 operand);
 		void emitOp2(const byte *pc, int opcode);
 		void emitDebug(const byte *pc);
 		void emitRelativeJump(const byte *pc, int opcode);
