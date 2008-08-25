@@ -39,6 +39,8 @@
 #include "nanojit.h"
 #undef MEMORY_INFO
 
+#include "../vprof/vprof.h"
+
 namespace nanojit
 {	
 	#ifdef FEATURE_NANOJIT
@@ -57,11 +59,13 @@ namespace nanojit
 	 */
 	Fragmento::Fragmento(AvmCore* core, uint32_t cacheSizeLog2) 
 		: _allocList(core->GetGC()),
-			_max_pages(1 << (calcSaneCacheSize(cacheSizeLog2) - NJ_LOG2_PAGE_SIZE))
+			_max_pages(1 << (calcSaneCacheSize(cacheSizeLog2) - NJ_LOG2_PAGE_SIZE)),
+			_pagesGrowth(16)
 	{
 #ifdef MEMORY_INFO
 		_allocList.set_meminfo_name("Fragmento._allocList");
 #endif
+		NanoAssert(_max_pages > _pagesGrowth); // shrink growth if needed 
 		_core = core;
 		GC *gc = core->GetGC();
 		_frags = new (gc) FragmentMap(gc, 128);
@@ -97,7 +101,7 @@ namespace nanojit
 	{
         NanoAssert(sizeof(Page) == NJ_PAGE_SIZE);
 		if (!_pageList)
-			pagesGrow(_max_pages);	// try to get more mem
+			pagesGrow(_pagesGrowth);	// try to get more mem
 		Page *page = _pageList;
 		if (page)
 		{
@@ -127,6 +131,7 @@ namespace nanojit
 		Page* memory = 0;
 		if (_stats.pages < _max_pages)
 		{
+			//int64_t start = rtstamp();
 			// @todo nastiness that needs a fix'n
 			_gcHeap = _core->GetGC()->GetGCHeap();
 			NanoAssert(int32_t(NJ_PAGE_SIZE)<=_gcHeap->kNativePageSize);
@@ -140,7 +145,9 @@ namespace nanojit
 #endif
 			NanoAssert((int*)memory == pageTop(memory));
 			//fprintf(stderr,"head alloc of %d at %x of %d pages using nj page size of %d\n", gcpages, (intptr_t)memory, (intptr_t)_gcHeap->kNativePageSize, NJ_PAGE_SIZE);
-
+			//_nvprof("mem alloc time", rtstamp()-start);
+			//start = rtstamp();
+	
             _allocList.add(memory);
 
 			Page* page = memory;
@@ -156,6 +163,7 @@ namespace nanojit
 				page = next; 
 			}
 			page->next = 0;
+			//_nvprof("mem page list time", rtstamp()-start);
 			NanoAssert(pageCount()==_stats.freePages);
 			//fprintf(stderr,"Fragmento::pageGrow adding page %x ; %d\n", (intptr_t)page, count);
 		}
