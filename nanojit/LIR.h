@@ -192,6 +192,9 @@ namespace nanojit
 		uint32_t FASTCALL _count_args(uint32_t mask) const;
         uint32_t get_sizes(ArgSize*) const;
 
+        inline bool isInterface() const {
+            return _address == 2 || _address == 3; /* hack! */
+        }
         inline bool isIndirect() const {
             return _address < 256;
         }
