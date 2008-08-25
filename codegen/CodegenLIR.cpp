@@ -1772,7 +1772,7 @@ namespace avmplus
 	#endif
 					{
 						localSet(loc, callIns(FUNCTIONID(integer_d), 1,
-											localGet(loc)));
+											localGetq(loc)));
 					}
 				}
 			}
@@ -1995,7 +1995,8 @@ namespace avmplus
 		int disp = 0;
 		for (int i=0; i <= argc; i++)
 		{
-			OP* v = localGet(index++);
+            // use localCopy so we sniff the arg type and use appropriate load instruction
+			OP* v = localCopy(index++);
 			storeIns(v, disp, ap);
             disp += v->isQuad() ? 8 : 4;
 		}
@@ -2247,7 +2248,8 @@ namespace avmplus
 				if (opcode == OP_returnvalue)
 				{
 					// already coerced to required native type
-					retvalue = localGet(op1);
+                    // use localCopy to sniff type and use appropriate load instruction
+					retvalue = localCopy(op1);
 				}
 				else
 				{
