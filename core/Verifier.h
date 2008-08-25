@@ -149,7 +149,7 @@ namespace avmplus
 		void emitCheckNull(int index);
 		#endif
 		void emitCompare(AbcOpcode opcode);
-		void emitFindProperty(AbcOpcode opcode, Multiname& multiname);
+		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32 imm30);
 		void emitGetProperty(Multiname &multiname, int n, uint32 imm30);
 		void emitGetGlobalScope();
 		void emitGetOuterScope(int scope_idx);
