@@ -777,7 +777,7 @@ namespace nanojit
 		else if (oprnd1->isconstq() && oprnd2->isconstq())
 		{
 			double c1 = oprnd1->constvalf();
-			double c2 = oprnd1->constvalf();
+			double c2 = oprnd2->constvalf();
 			if (v == LIR_feq)
 				return insImm(c1 == c2);
 			if (v == LIR_flt)
