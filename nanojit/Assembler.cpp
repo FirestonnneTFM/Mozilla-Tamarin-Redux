@@ -688,7 +688,7 @@ namespace nanojit
 		else
 		{
 			RegAlloc* captured = _branchStateMap->get(exit);
-			mergeRegisterState(*captured);
+			intersectRegisterState(*captured);
 			verbose_only(
 				verbose_outputf("        merging trunk with %s",
 					_frago->labels->format(exit->target));
@@ -712,7 +712,7 @@ namespace nanojit
 
         // this point is unreachable.  so free all the registers.
 		// if an instruction has a stack entry we will leave it alone,
-		// otherwise we free it entirely.  mergeRegisterState will restore.
+		// otherwise we free it entirely.  intersectRegisterState will restore.
 		releaseRegisters();
 		
 		swapptrs();
@@ -729,7 +729,7 @@ namespace nanojit
 		Register state = findSpecificRegFor(stateins, Register(stateins->imm8()));
 		asm_bailout(guard, state);
 
-		mergeRegisterState(capture);
+		intersectRegisterState(capture);
 
 		// this can be useful for breaking whenever an exit is taken
 		//INT3();
@@ -960,7 +960,7 @@ namespace nanojit
 					break;
 
                 case LIR_live: {
-                    findRegFor(ins->oprnd1(), GpRegs);
+                    findMemFor(ins->oprnd1());
                     break;
                 }
 
@@ -1375,7 +1375,7 @@ namespace nanojit
                     releaseRegisters();
                     if (label && label->addr) {
                         // forward jump - pick up register state from target.
-                        mergeRegisterState(label->regs);
+                        unionRegisterState(label->regs);
                         JMP(label->addr);
                     }
                     else {
@@ -1386,7 +1386,7 @@ namespace nanojit
                             _labels.add(to, 0, _allocator);
                         }
                         else {
-                            mergeRegisterState(label->regs);
+                            intersectRegisterState(label->regs);
                         }
                         JMP(0);
     					_patches.put(_nIns, to);
@@ -1407,7 +1407,7 @@ namespace nanojit
                     LabelState *label = _labels.get(to);
                     if (label && label->addr) {
                         // forward jump to known label.  need to merge with label's register state.
-                        mergeRegisterState(label->regs);
+                        unionRegisterState(label->regs);
     					asm_branch(op == LIR_jf, cond, label->addr);
                     }
                     else {
@@ -1420,7 +1420,7 @@ namespace nanojit
                         } 
                         else {
                             // evict all registers, most conservative approach.
-                            mergeRegisterState(label->regs);
+                            intersectRegisterState(label->regs);
                         }
                         NIns *branch = asm_branch(op == LIR_jf, cond, 0);
 			            _patches.put(branch,to);
@@ -1444,7 +1444,7 @@ namespace nanojit
                         hasLoop = true;
                         NanoAssert(label->addr == 0 && label->regs.isValid());
                         //evictRegs(~_allocator.free);
-                        mergeRegisterState(label->regs);
+                        intersectRegisterState(label->regs);
                         label->addr = _nIns;
                         verbose_only(
                             verbose_outputf("Loop label %s", _thisfrag->lirbuf->names->formatRef(ins));
@@ -1457,7 +1457,7 @@ namespace nanojit
 				case LIR_xf:
 				{
 					// we only support cmp with guard right now, also assume it is 'close' and only emit the branch
-                    NIns* exit = asm_exit(ins); // does mergeRegisterState()
+                    NIns* exit = asm_exit(ins); // does intersectRegisterState()
 					LIns* cond = ins->oprnd1();
 					asm_branch(op == LIR_xf, cond, exit);
 					break;
@@ -1841,8 +1841,12 @@ namespace nanojit
 	
 	/**
 	 * Merge the current state of the registers with a previously stored version
+     * current == saved    skip
+     * current & saved     evict current, keep saved
+     * current & !saved    evict current  (unionRegisterState would keep)
+     * !current & saved    keep saved
 	 */
-	void Assembler::mergeRegisterState(RegAlloc& saved)
+	void Assembler::intersectRegisterState(RegAlloc& saved)
 	{
 		// evictions and pops first
 		RegisterMask skip = 0;
@@ -1852,8 +1856,7 @@ namespace nanojit
 			LIns * savedins = saved.getActive(r);
 			if (curins == savedins)
 			{
-				verbose_only( if (curins) 
-					verbose_outputf("        skip %s", regNames[r]); )
+				verbose_only( if (curins) verbose_outputf("        skip %s", regNames[r]); )
 				skip |= rmask(r);
 			}
 			else 
@@ -1867,7 +1870,46 @@ namespace nanojit
 				#endif
 			}
 		}
+        assignSaved(saved, skip);
+	}
 
+	/**
+	 * Merge the current state of the registers with a previously stored version.
+     * 
+     * current == saved    skip
+     * current & saved     evict current, keep saved
+     * current & !saved    keep current (intersectRegisterState would evict)
+     * !current & saved    keep saved
+	 */
+	void Assembler::unionRegisterState(RegAlloc& saved)
+	{
+		// evictions and pops first
+		RegisterMask skip = 0;
+		for (Register r=FirstReg; r <= LastReg; r = nextreg(r))
+		{
+			LIns * curins = _allocator.getActive(r);
+			LIns * savedins = saved.getActive(r);
+			if (curins == savedins)
+			{
+				verbose_only( if (curins) outputf("        skip %s", regNames[r]); )
+				skip |= rmask(r);
+			}
+			else 
+			{
+				if (curins && savedins)
+					evict(r);
+				
+    			#ifdef NANOJIT_IA32
+				if (savedins && (rmask(r) & x87Regs))
+					FSTP(r);
+				#endif
+			}
+		}
+        assignSaved(saved, skip);
+    }
+
+    void Assembler::assignSaved(RegAlloc &saved, RegisterMask skip)
+    {
 		// now reassign mainline registers
 		for (Register r=FirstReg; r <= LastReg; r = nextreg(r))
 		{

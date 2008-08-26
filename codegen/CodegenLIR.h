@@ -66,31 +66,31 @@ namespace avmplus
 
 	enum MirOpcode 
 	{
-		MIR_bb      = 2,
-		MIR_jmpt	= 3,				// offset, size
+		//MIR_bb      = 2,
+		//MIR_jmpt	= 3,				// offset, size
 		//MIR_cm		= 4,				// count, imm32  - call method
 		//MIR_cs		= 5,				// count, imm32  - call static
 		//MIR_ci		= 6,				// count, ptr	 - call indirect
 		//MIR_icmp 	= 7,				// ptr, imm32
 		//MIR_ucmp	= 8,				// ptr, imm32
 		//MIR_fcmp	= 9,				// ptr, imm32
-		MIR_jeq		= 10,				// ptr, imm32
-		MIR_jne		= 11,				// ptr, imm32
-		MIR_ret		= 12,				// ptr
-		MIR_jmp		= 13,				// ptr
-		MIR_jmpi	= 14,				// ptr, disp
-		MIR_st		= 15,				// ptr, disp, ptr
-		MIR_arg     = 16,				// pos | reg - defines methods incoming arguments
-		MIR_def		= 17,				// 
-		MIR_use		= 18,				// 
-		MIR_usea	= 19,				// imm32
-		MIR_alloc   = 20,
+		//MIR_jeq		= 10,				// ptr, imm32
+		//MIR_jne		= 11,				// ptr, imm32
+		//MIR_ret		= 12,				// ptr
+		//MIR_jmp		= 13,				// ptr
+		//MIR_jmpi	= 14,				// ptr, disp
+		//MIR_st		= 15,				// ptr, disp, ptr
+		//MIR_arg     = 16,				// pos | reg - defines methods incoming arguments
+		//MIR_def		= 17,				// 
+		//MIR_use		= 18,				// 
+		//MIR_usea	= 19,				// imm32
+		//MIR_alloc   = 20,
 		MIR_addp  = 21,     // no cse add for adjusted builtin ScriptObject ptrs
 		MIR_ld      = 22,				// non-optimizable load
-		MIR_jlt     = 23,
-		MIR_jle		= 24,
-		MIR_jnlt	= 25,
-		MIR_jnle	= 26,
+		//MIR_jlt     = 23,
+		//MIR_jle		= 24,
+		//MIR_jnlt	= 25,
+		//MIR_jnle	= 26,
 		MIR_file	= 27,
 		MIR_line	= 28,
 		MIR_st32	= 29,
@@ -103,24 +103,24 @@ namespace avmplus
     	MIR_float = 0x20,		// result is double
 	    MIR_oper  = 0x40,		// eligible for cse
 
-		MIR_imm		= 1  | MIR_oper,	// 0,imm32
-		MIR_imul	= 2  | MIR_oper,
-		MIR_neg		= 3  | MIR_oper,	// ptr, ptr
+		//MIR_imm		= 1  | MIR_oper,	// 0,imm32
+		//MIR_imul	= 2  | MIR_oper,
+		//MIR_neg		= 3  | MIR_oper,	// ptr, ptr
 		//MIR_cmop    = 4  | MIR_oper,    // MIR_cm|oper, call method w/out side effects
 		//MIR_csop    = 5  | MIR_oper,    // MIR_cs|oper, call static method w/out side effects
-		MIR_lsh		= 6  | MIR_oper,	// <<
-		MIR_rsh		= 7  | MIR_oper,	// >>
-		MIR_ush		= 8  | MIR_oper,	// >>>
-		MIR_and		= 9  | MIR_oper,
-		MIR_or		= 10 | MIR_oper,
-		MIR_xor		= 11 | MIR_oper,
-		MIR_add		= 12 | MIR_oper,
-		MIR_sub		= 13 | MIR_oper,	// ptr, ptr
+		//MIR_lsh		= 6  | MIR_oper,	// <<
+		//MIR_rsh		= 7  | MIR_oper,	// >>
+		//MIR_ush		= 8  | MIR_oper,	// >>>
+		//MIR_and		= 9  | MIR_oper,
+		//MIR_or		= 10 | MIR_oper,
+		//MIR_xor		= 11 | MIR_oper,
+		//MIR_add		= 12 | MIR_oper,
+		//MIR_sub		= 13 | MIR_oper,	// ptr, ptr
 		//MIR_eq		= 14 | MIR_oper,
 		//MIR_le		= 15 | MIR_oper,
 		//MIR_lt		= 16 | MIR_oper,
 		//MIR_ne		= 17 | MIR_oper,
-		MIR_lea		= 18 | MIR_oper,	// ptr, disp
+		//MIR_lea		= 18 | MIR_oper,	// ptr, disp
 
 		MIR_ldop    = 22 | MIR_oper,    // ptr, disp (optimizable)
 
@@ -130,20 +130,20 @@ namespace avmplus
 		//MIR_fcs		= 5  | MIR_float,	// count, imm32 - call static, float return
 		//MIR_fci		= 6	 | MIR_float,	// count, addr - call indirect, float return
 
-		MIR_fdef    = 17 | MIR_float,   // defines value of variable as floating point
-		MIR_fuse    = 18 | MIR_float,   // 
+		//MIR_fdef    = 17 | MIR_float,   // defines value of variable as floating point
+		//MIR_fuse    = 18 | MIR_float,   // 
 
 		MIR_fld		= 22 | MIR_float,	// float load
 
-		MIR_i2d		= 1  | MIR_float | MIR_oper,	// ptr
-		MIR_fneg	= 2  | MIR_float | MIR_oper,	// ptr
-		MIR_u2d		= 3  | MIR_float | MIR_oper,
+		//MIR_i2d		= 1  | MIR_float | MIR_oper,	// ptr
+		//MIR_fneg	= 2  | MIR_float | MIR_oper,	// ptr
+		//MIR_u2d		= 3  | MIR_float | MIR_oper,
 		//MIR_fcmop   = 4  | MIR_float | MIR_oper,
 		//MIR_fcsop   = 5  | MIR_float | MIR_oper,
-		MIR_fadd	= 6  | MIR_float | MIR_oper,	// ptr, ptr
-		MIR_fsub	= 7  | MIR_float | MIR_oper,	// ptr, ptr
-		MIR_fmul	= 8  | MIR_float | MIR_oper,	// ptr, ptr
-		MIR_fdiv	= 9  | MIR_float | MIR_oper,	// ptr, ptr
+		//MIR_fadd	= 6  | MIR_float | MIR_oper,	// ptr, ptr
+		//MIR_fsub	= 7  | MIR_float | MIR_oper,	// ptr, ptr
+		//MIR_fmul	= 8  | MIR_float | MIR_oper,	// ptr, ptr
+		//MIR_fdiv	= 9  | MIR_float | MIR_oper,	// ptr, ptr
 #ifdef AVMPLUS_IA32
 		MIR_faddi	= 10 | MIR_float | MIR_oper,	// ptr, disp
 #endif
@@ -191,11 +191,10 @@ namespace avmplus
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(MirOpcode op, int32_t disp, LIns *base);
-        LIns *Ins(MirOpcode);
-        LIns *Ins(MirOpcode, uintptr_t);
+        LIns *Ins(LOpcode);
         LIns *Ins(MirOpcode, LIns*, uintptr_t);
         LIns *Ins(MirOpcode, LIns *a, LIns *b);
-        LIns *Ins(MirOpcode, LIns *a);
+        LIns *Ins(LOpcode, LIns *a);
         void storeIns(LIns *val, int32_t disp, LIns *base);
         void storeIns(LIns *val, int32_t disp, LIns *base, bool force32);
         LIns *InsConst(int32_t c);

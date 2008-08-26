@@ -245,7 +245,9 @@ namespace nanojit
 			Register	registerAlloc(RegisterMask allow);
 			void		registerResetAll();
 			void		evictRegs(RegisterMask regs);
-			void		mergeRegisterState(RegAlloc& saved);
+			void		intersectRegisterState(RegAlloc& saved);
+			void		unionRegisterState(RegAlloc& saved);
+            void        assignSaved(RegAlloc &saved, RegisterMask skip);
 	        LInsp       findVictim(RegAlloc& regs, RegisterMask allow, RegisterMask prefer);
 		
 			int			findMemFor(LIns* i);

@@ -50,7 +50,7 @@
 #define count_ld() _nvprof("x86-ld",1) count_instr()
 #define count_ldq() _nvprof("x86-ldq",1) count_instr()
 #define count_call() _nvprof("x86-call",1) count_instr()
-#define count_calli() _nvprof("x86-calli",1) count_instr()
+#define count_calli() _nvprof("x86-ld",1);  _nvprof("x86-calli",1) count_instr()
 #define count_prolog() _nvprof("x86-prolog",1) count_instr()
 #define count_alu() _nvprof("x86-alu",1) count_instr()
 #define count_fpu() _nvprof("x86-fpu",1) count_instr()
