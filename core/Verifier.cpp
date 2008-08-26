@@ -2619,15 +2619,6 @@ namespace avmplus
 	
 	bool Verifier::emitCallpropertySlotXLAT(AbcOpcode opcode, Traits* t, Binding b, uint32 argc) 
 	{
-#if 1
-		(void)opcode;
-		(void)t;
-		(void)b;
-		(void)argc;
-		return false;
-#else
-		// Not yet sound, though not yet quite clear why.  Probably the stack movement.
-		
 		if (!AvmCore::isSlotBinding(b) || argc != 1)
 			return false;
 		
@@ -2665,9 +2656,16 @@ namespace avmplus
 
 	fast_path:
 		if (opcode == OP_callpropvoid)
-			translator->emitOp0(OP_pop);
+		{
+			translator->emitOp0(OP_pop);  // result
+			translator->emitOp0(OP_pop);  // function
+		}
+		else
+		{
+			translator->emitOp0(OP_swap); // function on top
+			translator->emitOp0(OP_pop);  //   and discard it
+		}
 		return true;
-#endif // 1
 	}
 #endif // AVMPLUS_WORD_CODE
 
