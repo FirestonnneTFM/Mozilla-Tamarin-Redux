@@ -443,7 +443,7 @@ namespace avmplus
 			AvmAssert(!"Unknown " tag); \
 	}
 #else
-#  define CHECK_OP1(opcode)
+#  define CHECK_OP1(opcode, tag)
 #endif
 	
 	// These take one U30 argument
@@ -459,7 +459,14 @@ namespace avmplus
 	// These take one U30 argument, and the argument is explicitly passed here (result of optimization)
 	void Translator::emitOp1(int opcode, uint32 operand)
 	{
-		CHECK_OP1(opcode, "OP1/imm")
+#ifdef _DEBUG
+		switch (opcode) {
+			case OP_getscopeobject:
+				break;
+			default:
+				CHECK_OP1(opcode, "OP1/imm")
+		}
+#endif // _DEBUG
 		CHECK(2);
 		*dest++ = NEW_OPCODE(opcode);
 		*dest++ = operand;
