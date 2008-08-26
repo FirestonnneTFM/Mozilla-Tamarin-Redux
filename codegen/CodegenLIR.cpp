@@ -320,15 +320,6 @@ namespace avmplus
 	 *  format 3  : oprnd1 = ptr  oprnd2 / oprnd3 are optional ptr (only MIR_st should use oprnd3)
 	 */
 
-	// format 1
-	OP* CodegenLIR::Ins(MirOpcode code, uintptr_t v)
-	{
-        AvmAssert(false);
-        (void) code;
-        (void) v;
-        return 0;
-	}
-
 	// format 2
 	OP* CodegenLIR::Ins(MirOpcode code, OP* a1, uintptr_t v2)
 	{
@@ -344,41 +335,16 @@ namespace avmplus
     }
 
     // unary
-	OP* CodegenLIR::Ins(MirOpcode code, OP* a1)
-	{
-        LOpcode op;
-        switch(code) {
-            case MIR_ret: op = a1->isQuad() ? LIR_fret : LIR_ret; break;
-            case MIR_neg: op = LIR_neg; break;
-            case MIR_fneg: op = LIR_fneg; break;
-            case MIR_i2d: op = LIR_i2f; break;
-            case MIR_u2d: op = LIR_u2f; break;
-            default:
-                AvmAssert(false);
-                return 0;
-        }
-        return lirout->ins1(op, a1);
-	}
+    LIns *CodegenLIR::Ins(LOpcode op, LIns* a) {
+        return lirout->ins1(op, a);
+    }
 
     // binary
 	OP* CodegenLIR::Ins(MirOpcode code, OP* a1, OP* a2)
 	{
         LOpcode op;
         switch(code) {
-            case MIR_add: op = LIR_add; break;
             case MIR_addp: op = LIR_add; break; // fixme - need non-cse ptr add
-            case MIR_sub: op = LIR_sub; break;
-            case MIR_imul: op = LIR_mul; break;
-            case MIR_or: op = LIR_or; break;
-            case MIR_and: op = LIR_and; break;
-            case MIR_xor: op = LIR_xor; break;
-            case MIR_lsh: op = LIR_lsh; break;
-            case MIR_rsh: op = LIR_rsh; break;
-            case MIR_ush: op = LIR_ush; break;
-            case MIR_fadd: op = LIR_fadd; break;
-            case MIR_fsub: op = LIR_fsub; break;
-            case MIR_fmul: op = LIR_fmul; break;
-            case MIR_fdiv: op = LIR_fdiv; break;
             default:
                 AvmAssert(false);
                 return 0;
@@ -482,7 +448,7 @@ namespace avmplus
 	{
 		if (t->isMachineType)
 		{
-			return binaryIns(MIR_or, ptr, InsConst(kObjectType));
+			return binaryIns(LIR_or, ptr, InsConst(kObjectType));
 		}
 		return ptr;
 	}
@@ -560,21 +526,21 @@ namespace avmplus
 		}
 		if (t == BOOLEAN_TYPE)
 		{
-			OP* i1 = binaryIns(MIR_lsh, native, InsConst(3));
-			return binaryIns(MIR_or, i1, InsConst(kBooleanType));
+			OP* i1 = binaryIns(LIR_lsh, native, InsConst(3));
+			return binaryIns(LIR_or, i1, InsConst(kBooleanType));
 		}
 
 		// possibly null pointers
 		if (t == STRING_TYPE)
 		{
-			return binaryIns(MIR_or, native, InsConst(kStringType));
+			return binaryIns(LIR_or, native, InsConst(kStringType));
 		}
 		if (t == NAMESPACE_TYPE)
 		{
-			return binaryIns(MIR_or, native, InsConst(kNamespaceType));
+			return binaryIns(LIR_or, native, InsConst(kNamespaceType));
 		}
 
-		return binaryIns(MIR_or, native, InsConst(kObjectType));
+		return binaryIns(LIR_or, native, InsConst(kObjectType));
 	}
 
 	OP* CodegenLIR::storeAtomArgs(int count, int index)
@@ -864,7 +830,7 @@ namespace avmplus
 			if (atom->isconst())
 				return InsConst(urshift(atom->constval(),3));
 			else
-				return binaryIns(MIR_ush, atom, InsConst(3));
+				return binaryIns(LIR_ush, atom, InsConst(3));
 		}
 		else
 		{
@@ -872,7 +838,7 @@ namespace avmplus
 			if (atom->isconst())
 				return InsConst(atom->constval() & ~7);
 			else
-				return binaryIns(MIR_and, atom, InsConst(uintptr(~7)));
+				return binaryIns(LIR_and, atom, InsConst(uintptr(~7)));
 		}
 		
 #ifdef __GNUC__
@@ -1194,7 +1160,7 @@ namespace avmplus
 			//Ins(MIR_inc64, invocationCount);
 			//storeIns64(invocationCount, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
 			OP* invocationCount = loadIns(MIR_ldop, offsetof(MethodEnv, invocationCount), env_param);
-			OP *result = Ins(MIR_add, invocationCount, InsConst(1));
+			OP *result = binaryIns(LIR_add, invocationCount, InsConst(1));
 			storeIns(result, offsetof(MethodEnv, invocationCount), env_param);
 		}
 
@@ -1286,7 +1252,7 @@ namespace avmplus
 				arg = defIns(arg);
 				localSet(loc, arg);
 
-                LIns *label = Ins(MIR_bb);
+                LIns *label = Ins(LIR_label);
 				br->target(label);
                 label->setimm24((loc+1) * 8);
 			}
@@ -1400,7 +1366,7 @@ namespace avmplus
 			saveState();
 
 			// force the locals to be clean for the setjmp call
-			LIns *label = Ins(MIR_bb);
+			LIns *label = Ins(LIR_label);
             label->setimm24(state->verifier->frameSize * 8);
 			
 			// Exception* _ee = setjmp(_ef.jmpBuf);
@@ -1458,7 +1424,7 @@ namespace avmplus
 		}
 
         // mark end of prolog
-        //LIns *label = Ins(MIR_bb);
+        //LIns *label = Ins(LIR_label);
         //label->setimm24(state->verifier->scopeBase * 8);
 
 		return true;
@@ -1564,7 +1530,7 @@ namespace avmplus
 	{
 		// our new extended BB now starts here, this means that any branch targets
 		// should hit the next instruction our bb start instruction
-		OP* bb = Ins(MIR_bb); // mark start of block
+		OP* bb = Ins(LIR_label); // mark start of block
         bb->setimm24((state->sp()+1) * 8);
 
 		// get a label for our block start and tie it to this location
@@ -1680,21 +1646,21 @@ namespace avmplus
 				{
 					// old: int(fadd(Number(int),Number(int)))
 					// new: iadd(int,int)
-					localSet(loc, binaryIns(MIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
+					localSet(loc, binaryIns(LIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
 					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fsub) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					localSet(loc, binaryIns(MIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
+					localSet(loc, binaryIns(LIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
 					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fmul) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					localSet(loc, binaryIns(MIR_imul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
+					localSet(loc, binaryIns(LIR_mul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
 					markDead(ins);
 				}
 				else if (ins != NULL && (ins->isop(LIR_i2f) || ins->isop(LIR_u2f)))
@@ -1735,21 +1701,21 @@ namespace avmplus
 				{
 					// old: uint(fadd(Number(uint),Number(uint)))
 					// new: iadd(int,int)
-					localSet(loc, binaryIns(MIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
+					localSet(loc, binaryIns(LIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
 					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fsub) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					localSet(loc, binaryIns(MIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
+					localSet(loc, binaryIns(LIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
 					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fmul) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
-					localSet(loc, binaryIns(MIR_imul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
+					localSet(loc, binaryIns(LIR_mul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
 					markDead(ins);
 				}
 				else if (ins != NULL && ((ins->isop(LIR_i2f)) || (ins->isop(LIR_u2f))))
@@ -1824,9 +1790,9 @@ namespace avmplus
 			{
 				// load "true" or "false"
 #ifdef AVMPLUS_64BIT
-				OP *index = binaryIns(MIR_lsh, localGet(loc), InsConst(3));
+				OP *index = binaryIns(LIR_lsh, localGet(loc), InsConst(3));
 #else
-				OP *index = binaryIns(MIR_lsh, localGet(loc), InsConst(2));
+				OP *index = binaryIns(LIR_lsh, localGet(loc), InsConst(2));
 #endif
 				localSet(loc, loadIns(MIR_ldop, (uintptr)&core->booleanStrings, index));
 			}
@@ -2267,7 +2233,7 @@ namespace avmplus
 						retvalue = atomToNativeRep(t, retvalue);
 					}
 				}
-				Ins(MIR_ret, retvalue);
+                Ins((retvalue->isQuad() ? LIR_fret : LIR_ret), retvalue);
 				break;
 			}
 
@@ -2286,20 +2252,20 @@ namespace avmplus
 			{
 				AvmAssert(state->value(op1).traits == BOOLEAN_TYPE);
 				OP* value = localGet(op1);
-				OP* i3 = binaryIns(MIR_xor, value, InsConst(1));
+				OP* i3 = binaryIns(LIR_xor, value, InsConst(1));
 				localSet(op1, i3);
 				break;
 			}
 
             case OP_negate: {
-				localSet(op1, Ins(MIR_fneg, localGetq(op1)));
+				localSet(op1, Ins(LIR_fneg, localGetq(op1)));
 				break;
 			}
 
             case OP_negate_i: {
 				//framep[op1] = -framep[op1]
 				AvmAssert(state->value(op1).traits == INT_TYPE);
-				localSet(op1, Ins(MIR_neg, localGet(op1)));
+				localSet(op1, Ins(LIR_neg, localGet(op1)));
 				break;
 			}
 
@@ -2307,7 +2273,7 @@ namespace avmplus
 			case OP_decrement:
 			case OP_inclocal:
             case OP_declocal: {
-				localSet(op1, binaryIns(MIR_fadd, localGetq(op1), i2dIns(InsConst(op2))));
+				localSet(op1, binaryIns(LIR_fadd, localGetq(op1), i2dIns(InsConst(op2))));
 				break;
 			}
 
@@ -2316,7 +2282,7 @@ namespace avmplus
 			case OP_increment_i:
             case OP_decrement_i: {
 				AvmAssert(state->value(op1).traits == INT_TYPE);
-				localSet(op1, binaryIns(MIR_add, localGet(op1), InsConst(op2)));
+				localSet(op1, binaryIns(LIR_add, localGet(op1), InsConst(op2)));
 				break;
 			}
 
@@ -2338,13 +2304,13 @@ namespace avmplus
             case OP_multiply:
             case OP_subtract:
             case OP_add_d: {
-				MirOpcode mircode;
+				LOpcode mircode;
 				switch (opcode) {
 					default:
-					case OP_divide:     mircode = MIR_fdiv; break;
-					case OP_multiply:   mircode = MIR_fmul; break;
-					case OP_subtract:   mircode = MIR_fsub; break;
-					case OP_add_d:      mircode = MIR_fadd; break;
+					case OP_divide:     mircode = LIR_fdiv; break;
+					case OP_multiply:   mircode = LIR_fmul; break;
+					case OP_subtract:   mircode = LIR_fsub; break;
+					case OP_add_d:      mircode = LIR_fadd; break;
 				}
                 localSet(sp-1, binaryIns(mircode, localGetq(sp-1), localGetq(sp)));
                 break;
@@ -2360,18 +2326,18 @@ namespace avmplus
 			case OP_bitor:
 			case OP_bitxor:
 			{
-				MirOpcode mircode;
+				LOpcode mircode;
 				switch (opcode) {
                     default:
-					case OP_bitxor:     mircode = MIR_xor;  break;
-					case OP_bitor:      mircode = MIR_or;   break;
-					case OP_bitand:     mircode = MIR_and;  break;
-					case OP_urshift:    mircode = MIR_ush;  break;
-					case OP_rshift:     mircode = MIR_rsh;  break;
-					case OP_lshift:     mircode = MIR_lsh;  break;
-					case OP_multiply_i: mircode = MIR_imul; break;
-					case OP_add_i:      mircode = MIR_add;  break;
-					case OP_subtract_i: mircode = MIR_sub;  break;
+					case OP_bitxor:     mircode = LIR_xor;  break;
+					case OP_bitor:      mircode = LIR_or;   break;
+					case OP_bitand:     mircode = LIR_and;  break;
+					case OP_urshift:    mircode = LIR_ush;  break;
+					case OP_rshift:     mircode = LIR_rsh;  break;
+					case OP_lshift:     mircode = LIR_lsh;  break;
+					case OP_multiply_i: mircode = LIR_mul; break;
+					case OP_add_i:      mircode = LIR_add;  break;
+					case OP_subtract_i: mircode = LIR_sub;  break;
 				}
 				OP* lhs = localGet(sp-1);
 				OP* rhs = localGet(sp);
@@ -3680,7 +3646,7 @@ namespace avmplus
 		#ifdef AVMPLUS_ARM
 		return callIns(FUNCTIONID(i2d), 1, v);
 		#else
-		return Ins(MIR_i2d, v);
+		return Ins(LIR_i2f, v);
 		#endif
 	}
 
@@ -3689,7 +3655,7 @@ namespace avmplus
 		#ifdef AVMPLUS_ARM
 		return callIns(FUNCTIONID(u2d), 1, v);
 		#else
-		return Ins(MIR_u2d, v);
+		return Ins(LIR_u2f, v);
 		#endif
 	}
 	
@@ -3776,7 +3742,7 @@ namespace avmplus
 		// undefined  0100  1100   n 
 
 		OP* c = InsConst(8);
-		return binaryIns(LIR_lt, binaryIns(MIR_xor, atom, c), c);
+		return binaryIns(LIR_lt, binaryIns(LIR_xor, atom, c), c);
 	}
 
 	OP* CodegenLIR::cmpLe(int lhsi, int rhsi)
@@ -3798,7 +3764,7 @@ namespace avmplus
 
 		OP* c2 = InsConst(1);
 		OP* c4 = InsConst(4);
-		return binaryIns(LIR_le, binaryIns(MIR_xor, atom, c2), c4);
+		return binaryIns(LIR_le, binaryIns(LIR_xor, atom, c2), c4);
 	}
 
 	LIns* CodegenLIR::cmpEq(uint32_t fid, int lhsi, int rhsi)
@@ -3827,8 +3793,6 @@ namespace avmplus
 			LIns* lhs = loadAtomRep(lhsi);
 			LIns* rhs = loadAtomRep(rhsi);
 			LIns* out = callIns(fid, 3, InsConst((uintptr)core), lhs, rhs);
-
-			// assume caller will use MIR_jeq or MIR_jne
 			result = binaryIns(LIR_eq, out, InsConst(trueAtom));
 		}
 		return result;
@@ -3871,14 +3835,14 @@ namespace avmplus
 		#endif
 
         if (npe_label.preds) {
-            LIns *label = Ins(MIR_bb);
+            LIns *label = Ins(LIR_label);
             label->setimm24(state->verifier->frameSize * 8);
 			mirLabel(npe_label, label);
 			callIns(FUNCTIONID(npe), 1, env_param);
 		}
 
         if (interrupt_label.preds) {
-            LIns *label = Ins(MIR_bb);
+            LIns *label = Ins(LIR_label);
             label->setimm24(state->verifier->frameSize * 8);
 			mirLabel(interrupt_label, label);
 			callIns(FUNCTIONID(interrupt), 1, env_param);
@@ -4043,7 +4007,7 @@ namespace avmplus
 				// sub eax,0x80000000
 				// cvtsi2sd xmm0,eax
 				// addsd xmm0, 2147483648.0
-				OP *op1 = binaryIns(MIR_sub, localGet(i), InsConst(0x80000000));
+				OP *op1 = binaryIns(LIR_sub, localGet(i), InsConst(0x80000000));
 				OP *op2 = i2dIns(op1);
 				static const double k_NEGONE = 2147483648.0;
 				return Ins(MIR_faddi, op2, (uintptr) &k_NEGONE);
@@ -4092,7 +4056,7 @@ namespace avmplus
 			OP* takeSample = loadIns(MIR_ld, (int)&core->takeSample, NULL);
 			OP* br = Ins(MIR_jeq, binaryIns(MIR_ucmp, takeSample, InsConst(0)));
 			callIns(FUNCTIONID(sample), 1, InsConst((int32)core));
-			br->target = Ins(MIR_bb);
+			br->target = Ins(LIR_label);
 		*/
 		callIns(FUNCTIONID(sampleCheck), 1, InsConst((uintptr)core));
 	}
@@ -4129,13 +4093,8 @@ namespace avmplus
         return lirout->insBranch(op, cond, target);
     }
 
-    LIns *CodegenLIR::Ins(MirOpcode code) {
-        switch (code) {
-            case MIR_bb: return lirout->ins0(LIR_label);
-            //case MIR_jmp: return lirout->insBranch(LIR_j, InsConst(0), 0);
-        }
-        AvmAssert(false);
-        return 0;
+    LIns *CodegenLIR::Ins(LOpcode code) {
+        return lirout->ins0(code);
     }
 
 	/* patch the location 'where' with the value of the label */
@@ -4251,7 +4210,7 @@ namespace avmplus
 
 #ifdef PERFM
 		const int mhz = 100;
-		double time = (stop-start)/(100*mhz);
+		double time = (stop-start)/(100.0*mhz);
 		_nvprof("compile", time);
 		_nvprof("lir bytes", lirbuf->byteCount());
 		_nvprof("lir", lirbuf->insCount());		

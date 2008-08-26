@@ -8434,7 +8434,7 @@ namespace avmplus
 		AvmAssert((int)casePtr);
 		uint64_t stop = rtstamp();
 		const int mhz = 100;
-		double time = (stop-start)/(100*mhz);
+		double time = (stop-start)/(100.0*mhz);
 		_nvprof("compile", time);
 		_nvprof("mir bytes", bytesBetween(ip,ipStart));
 		_nvprof("mir", ip-ipStart);

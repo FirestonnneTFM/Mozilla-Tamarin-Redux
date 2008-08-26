@@ -601,7 +601,7 @@ namespace nanojit
 
 // move and zero-extend gpreg to xmm reg
 #define SSE_MOVD(d,s) do{ \
-	count_alu();\
+	count_fpu();\
 	if (_is_xmm_reg_(s)) { \
 		NanoAssert(_is_gp_reg_(d)); \
 		SSE(0x660f7e, (s)&7, (d)&7); \
@@ -671,7 +671,7 @@ namespace nanojit
     } while(0)
 
 #define SSE_XORPD(r, maskaddr) do {\
-	count_ldq();\
+	count_fpuld();\
     underrunProtect(8); \
     IMM32(maskaddr);\
     *(--_nIns) = uint8_t(((r)&7)<<3|5); \
