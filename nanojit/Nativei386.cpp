@@ -93,6 +93,7 @@ namespace nanojit
 
 	NIns* Assembler::genPrologue(RegisterMask needSaving)
 	{
+		count_prolog();
 		/**
 		 * Prologue
 		 */

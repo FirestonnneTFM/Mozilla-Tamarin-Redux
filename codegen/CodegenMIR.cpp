@@ -5635,6 +5635,7 @@ namespace avmplus
 
 	void CodegenMIR::generatePrologue()
 	{
+		count_prolog();
 		// empty the activation record, ready for code gen
 		activation.size = 0;
 		activation.temps.clear();
