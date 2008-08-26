@@ -64,7 +64,10 @@ namespace avmplus
 		#ifdef AVMPLUS_MIR
 		CodegenMIR *mir;
 		#endif // AVMPLUS_MIR
-
+		#ifdef AVMPLUS_WORD_CODE
+		Translator *translator;
+		#endif
+		
 		AvmCore *core;
 		SortedIntMap<FrameState*>* blockStates;
 		FrameState *state;
@@ -147,7 +150,7 @@ namespace avmplus
 		#endif
 		void emitCompare(AbcOpcode opcode);
 		void emitFindProperty(AbcOpcode opcode, Multiname& multiname);
-		void emitGetProperty(Multiname &multiname, int n);
+		void emitGetProperty(Multiname &multiname, int n, uint32 imm30);
 		void emitGetGlobalScope();
 		void emitGetOuterScope(int scope_idx);
 		void emitGetSlot(int slot);
