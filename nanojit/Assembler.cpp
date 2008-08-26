@@ -1891,7 +1891,7 @@ namespace nanojit
 			LIns * savedins = saved.getActive(r);
 			if (curins == savedins)
 			{
-				verbose_only( if (curins) outputf("        skip %s", regNames[r]); )
+				verbose_only( if (curins) verbose_outputf("        skip %s", regNames[r]); )
 				skip |= rmask(r);
 			}
 			else 
