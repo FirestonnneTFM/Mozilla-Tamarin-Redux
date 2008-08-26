@@ -61,7 +61,11 @@ namespace avmplus
 	 */
 	Atom interp32(MethodEnv* method, int argc, uint32 *ap);
 	double interpN(MethodEnv* method, int argc, uint32 *ap);
+#ifdef AVMPLUS_DIRECT_THREADED
+	void** interpGetOpcodeLabels();
+#endif
 }
+
 #ifdef AVMPLUS_WORD_CODE
 #  define OP_ext 0xFF   // FIXME! define elsewhere
 #  define OP_ext_pushbits           ((1<<8) | OP_ext)
