@@ -39,6 +39,52 @@
 #ifndef __avmplus_CodegenMIR__
 #define __avmplus_CodegenMIR__
 
+#ifdef PERFM
+#include "../vprof/vprof.h" 
+#define count_instr() _nvprof("x86",1)
+#define count_ret() _nvprof("x86-ret",1) count_instr()
+#define count_push() _nvprof("x86-push",1) count_instr()
+#define count_pop() _nvprof("x86-pop",1) count_instr()
+#define count_st() _nvprof("x86-st",1) count_instr()
+#define count_stq() _nvprof("x86-stq",1) count_instr()
+#define count_ld() _nvprof("x86-ld",1) count_instr()
+#define count_ldq() _nvprof("x86-ldq",1) count_instr()
+#define count_call() _nvprof("x86-call",1) count_instr()
+#define count_calli() _nvprof("x86-calli",1) count_instr()
+#define count_prolog() _nvprof("x86-prolog",1) count_instr()
+#define count_alu() _nvprof("x86-alu",1) count_instr()
+#define count_fpu() _nvprof("x86-fpu",1) count_instr()
+#define count_jmp() _nvprof("x86-jmp",1) count_instr()
+#define count_jcc() _nvprof("x86-jcc",1) count_instr()
+#define count_thunk() _nvprof("x86-thunk",1) count_instr()
+#define count_imt() _nvprof("x86-imt",1) count_instr()
+#define count_fpuld() _nvprof("x86-ldq",1); _nvprof("x86-fpu",1); count_instr()
+#define count_aluld() _nvprof("x86-ld",1); _nvprof("x86-alu",1); count_instr()
+#define count_pushld() _nvprof("x86-ld",1); _nvprof("x86-push",1); count_instr()
+#define count_jmpld() _nvprof("x86-ld",1); _nvprof("x86-jmp",1); count_instr()
+#else
+#define count_instr() 
+#define count_ret() 
+#define count_push() 
+#define count_pop()
+#define count_st() 
+#define count_stq()
+#define count_ld() 
+#define count_ldq() 
+#define count_call()
+#define count_calli() 
+#define count_prolog()
+#define count_alu()
+#define count_fpu()
+#define count_jmp()
+#define count_jcc()
+#define count_thunk()
+#define count_imt() 
+#define count_fpuld()
+#define count_aluld() 
+#define count_pushld() 
+#define count_jmpld()
+#endif
 
 namespace avmplus
 {
@@ -1815,16 +1861,16 @@ namespace avmplus
 		void MODRM(Register reg, Register operand);
 
 		void ALU(int op);
-		void RET()				{ ALU(0xc3); }
-		void NOP()				{ ALU(0x90); }
+		void RET()				{ count_ret(); ALU(0xc3); }
+		void NOP()				{ count_alu(); ALU(0x90); }
 		#ifdef AVMPLUS_64BIT
 		void PUSH(Register r);
 		void POP(Register r);
 		#else
-		void PUSH(Register r)	{ ALU(0x50|r); }
-		void POP(Register r)	{ ALU(0x58|r); }
+		void PUSH(Register r)	{ count_push(); ALU(0x50|r); }
+		void POP(Register r)	{ count_pop(); ALU(0x58|r); }
 		#endif
-		void LAHF()				{ ALU(0x9F); }
+		void LAHF()				{ count_alu(); ALU(0x9F); }
 
 		void PUSH(sintptr imm);
 
@@ -1835,15 +1881,15 @@ namespace avmplus
 
 		// sse math
 		void SSE(int op, Register dest, Register src);
-		void ADDSD(Register dest, Register src)		{ SSE(0xf20f58, dest, src); }
-		void SUBSD(Register dest, Register src)		{ SSE(0xf20f5c, dest, src); }
-		void MULSD(Register dest, Register src)		{ SSE(0xf20f59, dest, src); }
-		void DIVSD(Register dest, Register src)		{ SSE(0xf20f5e, dest, src); }
-		void CVTTSD2SI(Register dest, Register src)	{ SSE(0xf20f2c, dest, src); }
-		void CVTSI2SD(Register dest, Register src)	{ SSE(0xf20f2a, dest, src); }
-		void UCOMISD(Register xmm1, Register xmm2)	{ SSE(0x660f2e, xmm1, xmm2); }
-		void MOVAPD(Register dest, Register src)	{ SSE(0x660f28, dest, src); }
-		void MOVD (Register xmm1, Register src)		{ SSE(0x660F6E, xmm1, src); }
+		void ADDSD(Register dest, Register src)		{ count_fpu(); SSE(0xf20f58, dest, src); }
+		void SUBSD(Register dest, Register src)		{ count_fpu(); SSE(0xf20f5c, dest, src); }
+		void MULSD(Register dest, Register src)		{ count_fpu(); SSE(0xf20f59, dest, src); }
+		void DIVSD(Register dest, Register src)		{ count_fpu(); SSE(0xf20f5e, dest, src); }
+		void CVTTSD2SI(Register dest, Register src)	{ count_fpu(); SSE(0xf20f2c, dest, src); }
+		void CVTSI2SD(Register dest, Register src)	{ count_fpu(); SSE(0xf20f2a, dest, src); }
+		void UCOMISD(Register xmm1, Register xmm2)	{ count_fpu(); SSE(0x660f2e, xmm1, xmm2); }
+		void MOVAPD(Register dest, Register src)	{ count_fpu(); SSE(0x660f28, dest, src); }
+		void MOVD (Register xmm1, Register src)		{ count_fpu(); SSE(0x660F6E, xmm1, src); }
 
 		void XORPD(Register dest, uintptr src);
 #ifdef AVMPLUS_AMD64
@@ -1851,88 +1897,88 @@ namespace avmplus
 #endif
 
 		void SSE(int op, Register r, sintptr disp, Register base);
-		void ADDSD(Register r, sintptr disp, Register base)		{ SSE(0xf20f58, r, disp, base); }
-		void SUBSD(Register r, sintptr disp, Register base)		{ SSE(0xf20f5C, r, disp, base); }
-		void MULSD(Register r, sintptr disp, Register base)		{ SSE(0xf20f59, r, disp, base); }
-		void DIVSD(Register r, sintptr disp, Register base)		{ SSE(0xf20f5E, r, disp, base); }
-		void MOVSD(Register r, sintptr disp, Register base)		{ SSE(0xf20f10, r, disp, base); }
-		void MOVSD(sintptr disp, Register base, Register r)		{ SSE(0xf20f11, r, disp, base); }
+		void ADDSD(Register r, sintptr disp, Register base)		{ count_fpuld(); SSE(0xf20f58, r, disp, base); }
+		void SUBSD(Register r, sintptr disp, Register base)		{ count_fpuld(); SSE(0xf20f5C, r, disp, base); }
+		void MULSD(Register r, sintptr disp, Register base)		{ count_fpuld(); SSE(0xf20f59, r, disp, base); }
+		void DIVSD(Register r, sintptr disp, Register base)		{ count_fpuld(); SSE(0xf20f5E, r, disp, base); }
+		void MOVSD(Register r, sintptr disp, Register base)		{ count_ldq(); SSE(0xf20f10, r, disp, base); }
+		void MOVSD(sintptr disp, Register base, Register r)		{ count_stq(); SSE(0xf20f11, r, disp, base); }
 #ifdef AVMPLUS_AMD64
-		void MOVSD (Register xmm1, Register src)		{ SSE(0xf20f10, xmm1, src); }
+		void MOVSD (Register xmm1, Register src)		{ count_fpu(); SSE(0xf20f10, xmm1, src); }
 #endif
-		void CVTSI2SD(Register r, sintptr disp, Register base)	{ SSE(0xf20f2a, r, disp, base); }
+		void CVTSI2SD(Register r, sintptr disp, Register base)	{ count_fpuld(); SSE(0xf20f2a, r, disp, base); }
 
 		void ALU (byte op, Register reg, sintptr imm);
-		void ADD(Register reg, sintptr imm) { ALU(0x05, reg, imm); }
+		void ADD(Register reg, sintptr imm) { count_alu(); ALU(0x05, reg, imm); }
 #ifdef AVMPLUS_AMD64
-		void ADD64(Register reg, sintptr imm) { ALU64(0x05, reg, imm); }
+		void ADD64(Register reg, sintptr imm) { count_alu(); ALU64(0x05, reg, imm); }
 		void ALU64 (byte op, Register reg, sintptr imm);
-		void SUB64(Register reg, sintptr imm) { ALU64(0x2d, reg, imm); }
-		void SUB64(Register lhs, Register rhs)	{ ALU64(0x2b, lhs, rhs); }
-		void OR64 (Register reg, sintptr imm) { ALU64(0x0d, reg, imm); }
-		void OR64 (Register lhs, Register rhs)	{ ALU64(0x0b, lhs, rhs); }
-		void AND64(Register reg, sintptr imm) { ALU64(0x25, reg, imm); }
-		void AND64(Register lhs, Register rhs)	{ ALU64(0x23, lhs, rhs); }
-		void CMP64(Register lhs, Register rhs)	{ ALU64(0x3b, lhs, rhs); }
+		void SUB64(Register reg, sintptr imm) { count_alu(); ALU64(0x2d, reg, imm); }
+		void SUB64(Register lhs, Register rhs)	{ count_alu(); ALU64(0x2b, lhs, rhs); }
+		void OR64 (Register reg, sintptr imm) { count_alu(); ALU64(0x0d, reg, imm); }
+		void OR64 (Register lhs, Register rhs)	{ count_alu(); ALU64(0x0b, lhs, rhs); }
+		void AND64(Register reg, sintptr imm) { count_alu(); ALU64(0x25, reg, imm); }
+		void AND64(Register lhs, Register rhs)	{ count_alu(); ALU64(0x23, lhs, rhs); }
+		void CMP64(Register lhs, Register rhs)	{ count_alu(); ALU64(0x3b, lhs, rhs); }
 #endif
-		void SUB(Register reg, sintptr imm) { ALU(0x2d, reg, imm); }
-		void AND(Register reg, sintptr imm) { ALU(0x25, reg, imm); }
-		void XOR(Register reg, sintptr imm) { ALU(0x35, reg, imm); }
-		void OR (Register reg, sintptr imm) { ALU(0x0d, reg, imm); }
-		void CMP(Register reg, sintptr imm) { ALU(0x3d, reg, imm); }
+		void SUB(Register reg, sintptr imm) { count_alu(); ALU(0x2d, reg, imm); }
+		void AND(Register reg, sintptr imm) { count_alu(); ALU(0x25, reg, imm); }
+		void XOR(Register reg, sintptr imm) { count_alu(); ALU(0x35, reg, imm); }
+		void OR (Register reg, sintptr imm) { count_alu(); ALU(0x0d, reg, imm); }
+		void CMP(Register reg, sintptr imm) { count_alu(); ALU(0x3d, reg, imm); }
 		void IMUL(Register dst, sintptr imm);
 
 		void ALU (int op, Register lhs_dest, Register rhs);
-		void OR (Register lhs, Register rhs)	{ ALU(0x0b, lhs, rhs); }
-		void AND(Register lhs, Register rhs)	{ ALU(0x23, lhs, rhs); }
-		void XOR(Register lhs, Register rhs)	{ ALU(0x33, lhs, rhs); }
-		void ADD(Register lhs, Register rhs)	{ ALU(0x03, lhs, rhs); }
-		void CMP(Register lhs, Register rhs)	{ ALU(0x3b, lhs, rhs); }
-		void SUB(Register lhs, Register rhs)	{ ALU(0x2b, lhs, rhs); }
-		void TEST(Register lhs, Register rhs)	{ ALU(0x85, lhs, rhs); }
-		void NEG(Register reg)					{ ALU(0xf7, (Register)3, reg); }
-		void SHR(Register reg, Register /*amt*/)	{ ALU(0xd3, (Register)5, reg); } // unsigned >> ecx
-		void SAR(Register reg, Register /*amt*/)	{ ALU(0xd3, (Register)7, reg); } // signed >> ecx
-		void SHL(Register reg, Register /*amt*/)	{ ALU(0xd3, (Register)4, reg); } // unsigned << ecx
+		void OR (Register lhs, Register rhs)	{ count_alu(); ALU(0x0b, lhs, rhs); }
+		void AND(Register lhs, Register rhs)	{ count_alu(); ALU(0x23, lhs, rhs); }
+		void XOR(Register lhs, Register rhs)	{ count_alu(); ALU(0x33, lhs, rhs); }
+		void ADD(Register lhs, Register rhs)	{ count_alu(); ALU(0x03, lhs, rhs); }
+		void CMP(Register lhs, Register rhs)	{ count_alu(); ALU(0x3b, lhs, rhs); }
+		void SUB(Register lhs, Register rhs)	{ count_alu(); ALU(0x2b, lhs, rhs); }
+		void TEST(Register lhs, Register rhs)	{ count_alu(); ALU(0x85, lhs, rhs); }
+		void NEG(Register reg)					{ count_alu(); ALU(0xf7, (Register)3, reg); }
+		void SHR(Register reg, Register /*amt*/)	{ count_alu(); ALU(0xd3, (Register)5, reg); } // unsigned >> ecx
+		void SAR(Register reg, Register /*amt*/)	{ count_alu(); ALU(0xd3, (Register)7, reg); } // signed >> ecx
+		void SHL(Register reg, Register /*amt*/)	{ count_alu(); ALU(0xd3, (Register)4, reg); } // unsigned << ecx
 		#ifndef AVMPLUS_AMD64
-		void XCHG(Register rA, Register rB)		{ ALU(0x87, rA, rB); }
-		void MOV (Register dest, Register src)	{ ALU(0x8b, dest, src); }
+		void XCHG(Register rA, Register rB)		{ count_alu(); ALU(0x87, rA, rB); }
+		void MOV (Register dest, Register src)	{ count_alu(); ALU(0x8b, dest, src); }
 		#endif
 
 		void ALU2(int op, Register lhs_dest, Register rhs);
-		void IMUL(Register lhs, Register rhs) { ALU2(0x0faf, lhs, rhs); }
+		void IMUL(Register lhs, Register rhs) { count_alu(); ALU2(0x0faf, lhs, rhs); }
 
-		void SETB  (Register reg)	{ ALU2(0x0f92, reg, reg); }
-		void SETNB (Register reg)	{ ALU2(0x0f93, reg, reg); }
-		void SETE  (Register reg)	{ ALU2(0x0f94, reg, reg); }
-		void SETNE (Register reg)	{ ALU2(0x0f95, reg, reg); }
-		void SETBE (Register reg)	{ ALU2(0x0f96, reg, reg); }
-		void SETNBE(Register reg)	{ ALU2(0x0f97, reg, reg); }
-		void SETNP (Register reg)	{ ALU2(0x0f9b, reg, reg); }
-		void SETP  (Register reg)	{ ALU2(0x0f9a, reg, reg); }
-		void SETL  (Register reg)	{ ALU2(0x0f9C, reg, reg); }
-		void SETLE (Register reg)	{ ALU2(0x0f9E, reg, reg); }
-		void MOVZX_r8 (Register dest, Register src) { ALU2(0x0fb6, dest, src); }
+		void SETB  (Register reg)	{ count_alu(); ALU2(0x0f92, reg, reg); }
+		void SETNB (Register reg)	{ count_alu(); ALU2(0x0f93, reg, reg); }
+		void SETE  (Register reg)	{ count_alu(); ALU2(0x0f94, reg, reg); }
+		void SETNE (Register reg)	{ count_alu(); ALU2(0x0f95, reg, reg); }
+		void SETBE (Register reg)	{ count_alu(); ALU2(0x0f96, reg, reg); }
+		void SETNBE(Register reg)	{ count_alu(); ALU2(0x0f97, reg, reg); }
+		void SETNP (Register reg)	{ count_alu(); ALU2(0x0f9b, reg, reg); }
+		void SETP  (Register reg)	{ count_alu(); ALU2(0x0f9a, reg, reg); }
+		void SETL  (Register reg)	{ count_alu(); ALU2(0x0f9C, reg, reg); }
+		void SETLE (Register reg)	{ count_alu(); ALU2(0x0f9E, reg, reg); }
+		void MOVZX_r8 (Register dest, Register src) { count_alu(); ALU2(0x0fb6, dest, src); }
 
 		void ALU(int op, Register r, sintptr disp, Register base);
 
-		void TEST(sintptr disp, Register base, Register r)	{ ALU(0x85, r, disp, base); }
+		void TEST(sintptr disp, Register base, Register r)	{ count_aluld(); ALU(0x85, r, disp, base); }
 
 #ifdef AVMPLUS_AMD64
-		void LEA(Register r, sintptr disp, Register base)	{ ALU64(0x8d, r, disp, base); }
+		void LEA(Register r, sintptr disp, Register base)	{ count_alu(); ALU64(0x8d, r, disp, base); }
 #else
-		void LEA(Register r, sintptr disp, Register base)	{ ALU(0x8d, r, disp, base); }
+		void LEA(Register r, sintptr disp, Register base)	{ count_alu(); ALU(0x8d, r, disp, base); }
 #endif
-		void CALL(sintptr disp, Register base)				{ ALU(0xff, (Register)2, disp, base); }
+		void CALL(sintptr disp, Register base)				{ count_calli(); ALU(0xff, (Register)2, disp, base); }
 #ifdef AVMPLUS_AMD64
-		void JMP(sintptr disp, Register base)				{ ALU64(0xff, (Register)4, disp, base); }
+		void JMP(sintptr disp, Register base)				{ count_jmpld(); ALU64(0xff, (Register)4, disp, base); }
 #else
-		void JMP(sintptr disp, Register base)				{ ALU(0xff, (Register)4, disp, base); }
+		void JMP(sintptr disp, Register base)				{ count_jmpld(); ALU(0xff, (Register)4, disp, base); }
 #endif
-		void PUSH(sintptr disp, Register base)				{ ALU(0xff, (Register)6, disp, base); }
+		void PUSH(sintptr disp, Register base)				{ count_pushld(); ALU(0xff, (Register)6, disp, base); }
 		#ifndef AVMPLUS_AMD64
-		void MOV (sintptr disp, Register base, Register r)  { ALU(0x89, r, disp, base); }
-		void MOV (Register r, sintptr disp, Register base)  { ALU(0x8b, r, disp, base); }
+		void MOV (sintptr disp, Register base, Register r)  { count_st(); ALU(0x89, r, disp, base); }
+		void MOV (Register r, sintptr disp, Register base)  { count_ld(); ALU(0x8b, r, disp, base); }
 		#endif
 
 		#ifdef AVMPLUS_AMD64
@@ -1970,52 +2016,52 @@ namespace avmplus
 		#endif // AVMPLUS_AMD64
 
 		void SHIFT(int op, Register reg, int imm8);
-		void SAR(Register reg, int imm8) { SHIFT(7, reg, imm8); } // signed >> imm
-		void SHR(Register reg, int imm8) { SHIFT(5, reg, imm8); } // unsigned >> imm
-		void SHL(Register reg, int imm8) { SHIFT(4, reg, imm8); } // unsigned << imm
+		void SAR(Register reg, int imm8) { count_alu(); SHIFT(7, reg, imm8); } // signed >> imm
+		void SHR(Register reg, int imm8) { count_alu(); SHIFT(5, reg, imm8); } // unsigned >> imm
+		void SHL(Register reg, int imm8) { count_alu(); SHIFT(4, reg, imm8); } // unsigned << imm
 		void TEST_AH(uint8 imm8);
 
 		void JCC (byte op, sintptr offset);
-		void JB  (sintptr offset) { JCC(0x02, offset); }	
-		void JNB (sintptr offset) { JCC(0x03, offset); }
-		void JE  (sintptr offset) { JCC(0x04, offset); }
-		void JNE (sintptr offset) { JCC(0x05, offset); }
-		void JBE (sintptr offset) { JCC(0x06, offset); }	
-		void JNBE(sintptr offset) { JCC(0x07, offset); }
-		void JP  (sintptr offset) { JCC(0x0A, offset); }
-		void JNP (sintptr offset) { JCC(0x0B, offset); }
-		void JL  (sintptr offset) { JCC(0x0C, offset); }
-		void JNL (sintptr offset) { JCC(0x0D, offset); }
-		void JLE (sintptr offset) { JCC(0x0E, offset); }
-		void JNLE(sintptr offset) { JCC(0x0F, offset); }
+		void JB  (sintptr offset) { count_jcc(); JCC(0x02, offset); }	
+		void JNB (sintptr offset) { count_jcc(); JCC(0x03, offset); }
+		void JE  (sintptr offset) { count_jcc(); JCC(0x04, offset); }
+		void JNE (sintptr offset) { count_jcc(); JCC(0x05, offset); }
+		void JBE (sintptr offset) { count_jcc(); JCC(0x06, offset); }	
+		void JNBE(sintptr offset) { count_jcc(); JCC(0x07, offset); }
+		void JP  (sintptr offset) { count_jcc(); JCC(0x0A, offset); }
+		void JNP (sintptr offset) { count_jcc(); JCC(0x0B, offset); }
+		void JL  (sintptr offset) { count_jcc(); JCC(0x0C, offset); }
+		void JNL (sintptr offset) { count_jcc(); JCC(0x0D, offset); }
+		void JLE (sintptr offset) { count_jcc(); JCC(0x0E, offset); }
+		void JNLE(sintptr offset) { count_jcc(); JCC(0x0F, offset); }
 		void JMP (sintptr offset);
 		void CALL(sintptr offset);
 
 		void FPU(int op, sintptr disp, Register base);
-		void FSTQ(sintptr disp, Register base)  { FPU(0xdd02, disp, base); }
-		void FSTPQ(sintptr disp, Register base) { FPU(0xdd03, disp, base); }
-		void FCOM(sintptr disp, Register base)	{ FPU(0xdc02, disp, base); } 
-		void FLDQ(sintptr disp, Register base)  { x87Dirty=true; FPU(0xdd00, disp, base); }
-		void FILDQ(sintptr disp, Register base)	{ x87Dirty=true; FPU(0xdf05, disp, base); }
-		void FILD(sintptr disp, Register base)  { x87Dirty=true; FPU(0xdb00, disp, base); }
-		void FADDQ(sintptr disp, Register base) { FPU(0xdc00, disp, base); }
-		void FSUBQ(sintptr disp, Register base) { FPU(0xdc04, disp, base); }
-		void FMULQ(sintptr disp, Register base) { FPU(0xdc01, disp, base); }
-		void FDIVQ(sintptr disp, Register base) { FPU(0xdc06, disp, base); }
+		void FSTQ(sintptr disp, Register base)  { count_stq(); FPU(0xdd02, disp, base); }
+		void FSTPQ(sintptr disp, Register base) { count_stq(); FPU(0xdd03, disp, base); }
+		void FCOM(sintptr disp, Register base)	{ count_fpuld(); FPU(0xdc02, disp, base); } 
+		void FLDQ(sintptr disp, Register base)  { count_ldq(); x87Dirty=true; FPU(0xdd00, disp, base); }
+		void FILDQ(sintptr disp, Register base)	{ count_fpuld(); x87Dirty=true; FPU(0xdf05, disp, base); }
+		void FILD(sintptr disp, Register base)  { count_fpuld(); x87Dirty=true; FPU(0xdb00, disp, base); }
+		void FADDQ(sintptr disp, Register base) { count_fpuld(); FPU(0xdc00, disp, base); }
+		void FSUBQ(sintptr disp, Register base) { count_fpuld(); FPU(0xdc04, disp, base); }
+		void FMULQ(sintptr disp, Register base) { count_fpuld(); FPU(0xdc01, disp, base); }
+		void FDIVQ(sintptr disp, Register base) { count_fpuld(); FPU(0xdc06, disp, base); }
 
 		void FPU(int op, Register r);
-		void FFREE(Register r)	{ FPU(0xddc0, r); }
-		void FSTP(Register r)	{ FPU(0xddd8, r); }
-		void FADDQ(Register r)	{ FPU(0xd8c0, r); }
-		void FSUBQ(Register r)	{ FPU(0xd8e0, r); }
-		void FMULQ(Register r)	{ FPU(0xd8c8, r); }
-		void FDIVQ(Register r)	{ FPU(0xd8f0, r); }
+		void FFREE(Register r)	{ count_fpu(); FPU(0xddc0, r); }
+		void FSTP(Register r)	{ count_fpu(); FPU(0xddd8, r); }
+		void FADDQ(Register r)	{ count_fpu(); FPU(0xd8c0, r); }
+		void FSUBQ(Register r)	{ count_fpu(); FPU(0xd8e0, r); }
+		void FMULQ(Register r)	{ count_fpu(); FPU(0xd8c8, r); }
+		void FDIVQ(Register r)	{ count_fpu(); FPU(0xd8f0, r); }
 
 		void FPU(int op);
-		void FUCOMP()		{ FPU(0xdde9); }
-		void FCHS()			{ FPU(0xd9e0); }
-		void FNSTSW_AX()	{ FPU(0xdfe0); }
-		void EMMS()			{ FPU(0x0f77); x87Dirty=false;  }
+		void FUCOMP()		{ count_fpu(); FPU(0xdde9); }
+		void FCHS()			{ count_fpu(); FPU(0xd9e0); }
+		void FNSTSW_AX()	{ count_fpu(); FPU(0xdfe0); }
+		void EMMS()			{ count_fpu(); FPU(0x0f77); x87Dirty=false;  }
 		#endif // IA32 or AMD64
 
 		
