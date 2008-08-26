@@ -41,6 +41,7 @@
 
 #include <stddef.h>
 #include "avmplus.h"
+#include "../vprof/vprof.h"
 
 #ifdef AVMPLUS_IA32
 #define NANOJIT_IA32
