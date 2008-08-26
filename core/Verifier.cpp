@@ -1043,16 +1043,17 @@ namespace avmplus
 				Binding b = toplevel->getBinding(obj.traits, &multiname);
 				bool needsSetContext = true;
 				MIR_ONLY( Traits* propTraits = ) readBinding(obj.traits, b);
-				#ifdef AVMPLUS_MIR
-				if (AvmCore::isSlotBinding(b) && mir &&
+				#if defined AVMPLUS_MIR || defined AVMPLUS_WORD_CODE
+				if (AvmCore::isSlotBinding(b) && /*mir &&*/
 					// it's a var, or a const being set from the init function
 					(!AvmCore::isConstBinding(b) || 
 						obj.traits->init == info && opcode == OP_initproperty))
 				{
 					emitCoerce(propTraits, state->sp());
-					mir->emit(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex, propTraits);
+					MIR_ONLY( if (mir) mir->emit(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex, propTraits); );
+					XLAT_ONLY( if (translator) translator->emitOp1( OP_setslot, AvmCore::bindingToSlotId(b)+1 ) );
 					state->pop(n);
-					goto setproperty_end;
+					break;
 				}
 				// else: setting const from illegal context, fall through
 				#endif
@@ -1469,7 +1470,6 @@ namespace avmplus
 				uint32 n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
 
-				/// need to get control over some of this logic...
 				emitCallproperty(opcode, sp, multiname, imm30, imm30b);
 				break;
 			}
