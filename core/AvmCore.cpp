@@ -140,6 +140,13 @@ namespace avmplus
 		config.verifyall = false;
 		#endif
 
+		#ifdef FEATURE_NANOJIT
+			config.show_stats = false;
+			config.tree_opt = false;
+			config.verbose_live = false;;
+			config.verbose_exits = false;
+		#endif
+
 		#ifdef AVMPLUS_MIR
 
 			// forcemir flag forces use of MIR instead of interpreter
