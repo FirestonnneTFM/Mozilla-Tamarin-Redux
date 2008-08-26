@@ -77,6 +77,14 @@ namespace nanojit
 	const Register Assembler::retRegs[] = { RAX, RDX };
 #endif
 
+    const static uint8_t max_abi_regs[] = {
+        2, /* ABI_FASTCALL */
+        1, /* ABI_THISCALL */
+        0, /* ABI_STDCALL */
+        0  /* ABI_CDECL */
+    };
+
+
 	void Assembler::nInit(AvmCore* core)
 	{
 #if defined NANOJIT_IA32
@@ -234,14 +242,7 @@ namespace nanojit
         if (imt)
             iargs --;
 
-        uint32_t max_regs;
-        switch (call->_abi) {
-            default: AvmAssert(false);
-            case ABI_CDECL:
-            case ABI_STDCALL: max_regs = 0; break;  // args on stack
-            case ABI_THISCALL: max_regs = 1; break; // this in ecx, others on stack
-            case ABI_FASTCALL: max_regs = 2; break; // arg 0, 1 in ecx, edx
-        }
+        uint32_t max_regs = max_abi_regs[call->_abi];
         if (max_regs > iargs)
             max_regs = iargs;
 
@@ -415,7 +416,8 @@ namespace nanojit
 			prefer &= rmask(RAX);
 #endif
         else if (op == LIR_param) {
-            if (i->imm8() < sizeof(argRegs)/sizeof(argRegs[0]))
+            uint32_t max_regs = max_abi_regs[_thisfrag->lirbuf->abi];
+            if (i->imm8() < max_regs)
     			prefer &= rmask(Register(i->imm8()));
         }
         else if (op == LIR_callh || op == LIR_rsh && i->oprnd1()->opcode()==LIR_callh)

@@ -95,7 +95,7 @@ namespace nanojit
         // Preserve a 16-byte stack alignment, to support the use of
         // SSE instructions like MOVDQA (if not by Tamarin itself,
         // then by the C functions it calls).
-	const int NJ_ALIGN_STACK = 16;
+	const int NJ_ALIGN_STACK = 8;
 	
 	typedef uint8_t NIns;
 

@@ -539,7 +539,17 @@ namespace nanojit
         if (!resv)
 			resv = reserveAlloc(i);
 
-        if ((r=resv->reg) == UnknownReg)
+        r = resv->reg;
+        if (r != UnknownReg && 
+            ((rmask(r)&XmmRegs) && !(allow&XmmRegs) ||
+                 (rmask(r)&x87Regs) && !(allow&x87Regs)))
+        {
+            // x87 <-> xmm copy required
+            evict(r);
+            r = UnknownReg;
+        }
+
+        if (r == UnknownReg)
 		{
             if (resv->cost == 2 && (allow&SavedRegs))
                 prefer = allow&SavedRegs;
@@ -547,7 +557,7 @@ namespace nanojit
 			_allocator.addActive(r, i);
 			return r;
 		}
-		else 
+		else
 		{
 			// r not allowed
 			resv->reg = UnknownReg;
@@ -982,8 +992,8 @@ namespace nanojit
                         JMP(_epilogue);
                     }
                     MR(SP,FP);
-                    if (sse2)
-                        evict(FST0);
+                    //if (sse2)
+                    //    evict(FST0);
                     break;
                 }
 
