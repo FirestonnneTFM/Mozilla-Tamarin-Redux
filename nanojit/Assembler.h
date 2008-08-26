@@ -73,9 +73,8 @@ namespace nanojit
     struct Reservation
 	{
 		uint32_t arIndex:16;	/* index into stack frame.  displ is -4*arIndex */
-		Register reg:8;			/* register UnkownReg implies not in register */
-        int cost:7;
-        int used:1;
+		Register reg:15;			/* register UnkownReg implies not in register */
+        uint32_t used:1;
 	};
 
 	struct AR
@@ -245,10 +244,11 @@ namespace nanojit
 			Register	registerAlloc(RegisterMask allow);
 			void		registerResetAll();
 			void		evictRegs(RegisterMask regs);
+            void        evictScratchRegs();
 			void		intersectRegisterState(RegAlloc& saved);
 			void		unionRegisterState(RegAlloc& saved);
             void        assignSaved(RegAlloc &saved, RegisterMask skip);
-	        LInsp       findVictim(RegAlloc& regs, RegisterMask allow, RegisterMask prefer);
+	        LInsp       findVictim(RegAlloc& regs, RegisterMask allow);
 		
 			int			findMemFor(LIns* i);
 			Register	findRegFor(LIns* i, RegisterMask allow);
@@ -262,6 +262,7 @@ namespace nanojit
 			NIns*		pageAlloc(bool exitPage=false);
 			void		pagesFree(Page*& list);
 			void		internalReset();
+            bool        canRemat(LIns*);
 
 			Reservation* reserveAlloc(LInsp i);
 			void		reserveFree(LInsp i);
