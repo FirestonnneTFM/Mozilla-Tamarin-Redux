@@ -162,7 +162,7 @@ namespace nanojit
 #define alignUp(x,s)		((((uintptr_t)(x))+(((uintptr_t)s)-1))&~(((uintptr_t)s)-1))
 
 #define pageTop(x)			( (int*)alignTo(x,NJ_PAGE_SIZE) )
-#define pageBottom(x)		( (int*)(alignTo(x,NJ_PAGE_SIZE)+NJ_PAGE_SIZE)-1 )
+#define pageBottom(x)		( (int*)((alignTo(x,NJ_PAGE_SIZE)+NJ_PAGE_SIZE)-1) )
 #define samepage(x,y)		(pageTop(x) == pageTop(y))
 
 #include "Native.h"

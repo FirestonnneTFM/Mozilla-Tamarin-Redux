@@ -326,29 +326,31 @@ namespace nanojit
 	{
 		// start and end on same page?
 		size_t exit = 0;
-		if (samepage(_nExitIns,_stats.codeExitStart-1))
-		{
+		int_t pages = _stats.pages;
+		if (_nExitIns-1 == _stats.codeExitStart)
+			;
+		else if (samepage(_nExitIns,_stats.codeExitStart))
 			exit = bytesBetween(_stats.codeExitStart, _nExitIns);
-		}
-		else if (_nExitIns != _stats.codeExitStart)
+		else
 		{
-			exit = bytesFromTop(_stats.codeExitStart);
-			exit += bytesToBottom(_nExitIns);
+			pages--;
+			exit = ((intptr_t)_stats.codeExitStart & (NJ_PAGE_SIZE-1)) ? bytesFromTop(_stats.codeExitStart)+1 : 0;
+			exit += bytesToBottom(_nExitIns)+1;
 		}
 
 		size_t main = 0;
-		NanoAssert(_nIns != _stats.codeStart);
-		if (samepage(_nIns,_stats.codeStart-1))
-		{
+		if (_nIns-1 == _stats.codeStart)
+			;
+		else if (samepage(_nIns,_stats.codeStart))
 			main = bytesBetween(_stats.codeStart, _nIns);
-		}
 		else
 		{
-			main = bytesFromTop(_stats.codeStart);
-			main += bytesToBottom(_nIns);
+			pages--;
+			main = ((intptr_t)_stats.codeStart & (NJ_PAGE_SIZE-1)) ? bytesFromTop(_stats.codeStart)+1 : 0;
+			main += bytesToBottom(_nIns)+1;
 		}
-
-		return _stats.pages * sizeof(Page) + main + exit;		
+		//fprintf(stderr,"size %d, exit is %d, main is %d, page count %d, sizeof %d\n", (int)((pages) * NJ_PAGE_SIZE + main + exit),(int)exit, (int)main, (int)_stats.pages, (int)sizeof(Page));
+		return (pages) * NJ_PAGE_SIZE + main + exit;		
 	}
 
 	#undef bytesFromTop
@@ -784,14 +786,15 @@ namespace nanojit
 			
 #ifdef PERFM
 		_stats.pages = 0;
-		_stats.codeStart = _nIns;
-		_stats.codeExitStart = _nExitIns;		
+		_stats.codeStart = _nIns-1;
+		_stats.codeExitStart = _nExitIns-1;		
+		//fprintf(stderr,"pageReset %d start %x exit start %x\n", _stats.pages, (int)_stats.codeStart, (int)_stats.codeExitStart);
 #endif /* PERFM */
 
         _epilogue = genEpilogue(SavedRegs);
 		_branchStateMap = branchStateMap;
         _labels.clear();
-		
+
 		verbose_only( verbose_outputf("        %p:",_nIns) );
 		verbose_only( verbose_output("        epilogue:") );
 	}
@@ -874,7 +877,7 @@ namespace nanojit
 			_nvprof("code", codeBytes());  // requires that all pages are released between begin/endAssembly()otherwise we double count
 #endif
 			// let the fragment manage the pages if we're using trees and there are branches
-			Page* manage = (_frago->core()->config.tree_opt) ? handoverPages() : 0;
+			Page* manage = (_frago->core()->config.tree_opt) ? handoverPages() : 0;			
 			frag->setCode(code, manage); // root of tree should manage all pages
 			//fprintf(stderr, "endAssembly frag %X entry %X\n", (int)frag, (int)frag->fragEntry);
 		}
