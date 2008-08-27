@@ -409,27 +409,34 @@ namespace nanojit
 	{
 		uint32_t op = i->opcode();
 		int prefer = allow;
-		if (op == LIR_call)
+        if (op == LIR_call) {
 #if defined NANOJIT_IA32
 			prefer &= rmask(EAX);
 #elif defined NANOJIT_AMD64
 			prefer &= rmask(RAX);
 #endif
+        }
+        else if (op == LIR_fcall || op == LIR_fcalli) {
+            prefer &= rmask(FST0);
+        }
         else if (op == LIR_param) {
             uint32_t max_regs = max_abi_regs[_thisfrag->lirbuf->abi];
             if (i->imm8() < max_regs)
     			prefer &= rmask(Register(i->imm8()));
         }
-        else if (op == LIR_callh || op == LIR_rsh && i->oprnd1()->opcode()==LIR_callh)
+        else if (op == LIR_callh || op == LIR_rsh && i->oprnd1()->opcode()==LIR_callh) {
 #if defined NANOJIT_IA32
             prefer &= rmask(EDX);
 #elif defined NANOJIT_AMD64
             prefer &= rmask(RDX);
 #endif
-		else if (i->isCmp())
+        }
+        else if (i->isCmp()) {
 			prefer &= AllowableFlagRegs;
-        else if (i->isconst())
+        }
+        else if (i->isconst()) {
             prefer &= ScratchRegs;
+        }
 		return (_allocator.free & prefer) ? prefer : allow;
 	}
 
@@ -523,7 +530,13 @@ namespace nanojit
     {
         if (value->isconst())
         {
-			Register rb = findRegFor(base, GpRegs);
+			Register rb;
+            if (base->isop(LIR_alloc)) {
+                rb = FP;
+                dr += findMemFor(base);
+            } else {
+                rb = findRegFor(base, GpRegs);
+            }
             int c = value->constval();
 			STi(rb, dr, c);
         }
@@ -531,9 +544,16 @@ namespace nanojit
         {
 		    // make sure what is in a register
 		    Reservation *rA, *rB;
-		    findRegFor2(GpRegs, value, rA, base, rB);
-		    Register ra = rA->reg;
-		    Register rb = rB->reg;
+            Register ra, rb;
+            if (base->isop(LIR_alloc)) {
+                rb = FP;
+                dr += findMemFor(base);
+                ra = findRegFor(value, GpRegs);
+            } else {
+    		    findRegFor2(GpRegs, value, rA, base, rB);
+		        ra = rA->reg;
+		        rb = rB->reg;
+            }
 		    ST(rb, dr, ra);
         }
     }
@@ -600,7 +620,13 @@ namespace nanojit
 		if (rr != UnknownReg && rmask(rr) & XmmRegs)
 		{
 			freeRsrcOf(ins, false);
-			Register rb = findRegFor(base, GpRegs);
+			Register rb;
+            if (base->isop(LIR_alloc)) {
+                rb = FP;
+                db += findMemFor(base);
+            } else {
+                rb = findRegFor(base, GpRegs);
+            }
 			SSE_LDQ(rr, db, rb);
 		}
 #if defined NANOJIT_AMD64
@@ -618,7 +644,13 @@ namespace nanojit
 		else
 		{
 			int dr = disp(resv);
-			Register rb = findRegFor(base, GpRegs);
+			Register rb;
+            if (base->isop(LIR_alloc)) {
+                rb = FP;
+                db += findMemFor(base);
+            } else {
+                rb = findRegFor(base, GpRegs);
+            }
 			resv->reg = UnknownReg;
 
 			// don't use an fpu reg to simply load & store the value.
@@ -643,7 +675,13 @@ namespace nanojit
 		{
 			// if a constant 64-bit value just store it now rather than
 			// generating a pointless store/load/store sequence
-			Register rb = findRegFor(base, GpRegs);
+			Register rb;
+            if (base->isop(LIR_alloc)) {
+                rb = FP;
+                dr += findMemFor(base);
+            } else {
+                rb = findRegFor(base, GpRegs);
+            }
 			const int32_t* p = (const int32_t*) (value-2);
 			STi(rb, dr+4, p[1]);
 			STi(rb, dr, p[0]);
@@ -664,18 +702,36 @@ namespace nanojit
 
 			if (sse2) {
                 Register rv = findRegFor(value, XmmRegs);
-                Register rb = findRegFor(base, GpRegs);
+                Register rb;
+                if (base->isop(LIR_alloc)) {
+                    rb = FP;
+                    dr += findMemFor(base);
+                } else {
+                    rb = findRegFor(base, GpRegs);
+                }
                 SSE_STQ(dr, rb, rv);
 				return;
             }
 
 			int da = findMemFor(value);
-		    Register rb = findRegFor(base, GpRegs);
+		    Register rb;
+            if (base->isop(LIR_alloc)) {
+                rb = FP;
+                dr += findMemFor(base);
+            } else {
+                rb = findRegFor(base, GpRegs);
+            }
 		    asm_mmq(rb, dr, FP, da);
             return;
 		}
 
-		Register rb = findRegFor(base, GpRegs);
+		Register rb;
+        if (base->isop(LIR_alloc)) {
+            rb = FP;
+            dr += findMemFor(base);
+        } else {
+            rb = findRegFor(base, GpRegs);
+        }
 
         // if value already in a reg, use that, otherwise
         // try to get it into XMM regs before FPU regs.
@@ -683,7 +739,7 @@ namespace nanojit
  		Register rv;
         int pop = !rA || rA->reg == UnknownReg;
         if (pop) {
-            rv = findRegFor(value, sse2 ? XmmRegs : FpRegs);
+            rv = findRegFor(value, /*sse2 ? XmmRegs :*/ FpRegs);
         } 
         else {
             rv = rA->reg;
@@ -942,8 +998,9 @@ namespace nanojit
 		} else {
 			FSTPQ(0, SP);
 		}
-		PUSHr(ECX); // 2*pushr is smaller than sub
-		PUSHr(ECX);
+        SUBi(ESP,8);
+		//PUSHr(ECX); // 2*pushr is smaller than sub
+		//PUSHr(ECX);
 	}
 
 	void Assembler::asm_fop(LInsp ins)
@@ -1163,6 +1220,75 @@ namespace nanojit
 		}
 	}
 
+    NIns * Assembler::asm_jmpcc(bool branchOnFalse, LIns *cond, NIns *targ)
+    {
+        LOpcode c = cond->opcode();
+        if (sse2 && c != LIR_feq) {
+            LIns *lhs = cond->oprnd1();
+            LIns *rhs = cond->oprnd2();
+            if (c == LIR_flt) {
+                LIns *t = lhs; lhs = rhs; rhs = t;
+                c = LIR_fgt;
+            }
+            else if (c == LIR_fle) {
+                LIns *t = lhs; lhs = rhs; rhs = t;
+                c = LIR_fge;
+            }
+
+            if (c == LIR_fgt) {
+                if (branchOnFalse) { JNA(targ); } else { JA(targ); }
+            }
+            else { // if (c == LIR_fge)
+                if (branchOnFalse) { JNAE(targ); } else { JAE(targ); }
+            }
+            NIns *at = _nIns;
+            Reservation *rA, *rB;
+            findRegFor2(XmmRegs, lhs, rA, rhs, rB);
+            SSE_UCOMISD(rA->reg, rB->reg);
+            return at;
+        }
+
+    	if (branchOnFalse)
+			JP(targ);
+		else
+			JNP(targ);
+		NIns *at = _nIns;
+		asm_fcmp(cond);
+        return at;
+    }
+
+    void Assembler::asm_setcc(Register r, LIns *cond)
+    {
+        LOpcode c = cond->opcode();
+        if (sse2 && c != LIR_feq) {
+    		MOVZX8(r,r);
+            LIns *lhs = cond->oprnd1();
+            LIns *rhs = cond->oprnd2();
+            if (c == LIR_flt) {
+                LIns *t = lhs; lhs = rhs; rhs = t;
+                SETA(r);
+            }
+            else if (c == LIR_fle) {
+                LIns *t = lhs; lhs = rhs; rhs = t;
+                SETAE(r);
+            }
+            else if (c == LIR_fgt) {
+                SETA(r);
+            }
+            else { // if (c == LIR_fge)
+                SETAE(r);
+            }
+            Reservation *rA, *rB;
+            findRegFor2(XmmRegs, lhs, rA, rhs, rB);
+            SSE_UCOMISD(rA->reg, rB->reg);
+            return;
+        }
+		// SETcc only sets low 8 bits, so extend 
+		MOVZX8(r,r);
+		SETNP(r);
+        asm_fcmp(cond);
+    }
+
 	void Assembler::asm_fcmp(LIns *cond)
 	{
 		LOpcode condop = cond->opcode();
@@ -1179,10 +1305,12 @@ namespace nanojit
 		    mask = 0x05;
         else if (condop == LIR_fge) {
             // swap, use le
+            condop = LIR_fle;
             LIns* t = lhs; lhs = rhs; rhs = t;
             mask = 0x41;
         } else { // if (condop == LIR_fgt)
             // swap, use lt
+            condop = LIR_flt;
             LIns* t = lhs; lhs = rhs; rhs = t;
 		    mask = 0x05;
         }
@@ -1200,7 +1328,8 @@ namespace nanojit
                 // nan check
                 Register r = findRegFor(lhs, XmmRegs);
                 SSE_UCOMISD(r, r);
-            } else {
+            } 
+            else {
 #if defined NANOJIT_IA32
                 evict(EAX);
                 TEST_AH(mask);
@@ -1277,5 +1406,18 @@ namespace nanojit
 		if (!_nIns)		 _nIns	   = pageAlloc();
 		if (!_nExitIns)  _nExitIns = pageAlloc(true);
 	}
+
+	// enough room for n bytes
+    void Assembler::underrunProtect(int n)
+    {
+        NIns *eip = this->_nIns;
+        Page *p = (Page*)pageTop(eip-1);
+        NIns *top = (NIns*) &p->code[0];
+        if (eip - n < top) {
+			_nIns = pageAlloc(_inExit);
+            JMP(eip);
+		}
+	}
+
 	#endif /* FEATURE_NANOJIT */
 }

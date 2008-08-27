@@ -48,7 +48,6 @@ namespace nanojit
     struct PageHeader
     {
         struct Page *next;
-        verbose_only (int seq;) // sequence # of page
     };
     struct Page: public PageHeader
     {
@@ -221,18 +220,5 @@ namespace nanojit
 			int32_t			_hits;
 			Page*			_pages;		// native code pages 
 	};
-	
-#ifdef NJ_VERBOSE
-	inline int nbr(LInsp x) 
-	{
-        Page *p = x->page();
-        return (p->seq * NJ_PAGE_SIZE + (intptr_t(x)-intptr_t(p))) / sizeof(LIns);
-	}
-#else
-    inline int nbr(LInsp x)
-    {
-        return int(x) & (NJ_PAGE_SIZE-1);
-    }
-#endif
 }
 #endif // __nanojit_Fragmento__

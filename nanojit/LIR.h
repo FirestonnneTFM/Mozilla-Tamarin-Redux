@@ -303,6 +303,10 @@ namespace nanojit
             NanoAssert(isop(LIR_alloc));
             return i.imm16<<2;
         }
+        inline void setSize(int32_t bytes) {
+            NanoAssert(isop(LIR_alloc) && (bytes&3)==0 && isU16(bytes>>2));
+            i.imm16 = bytes>>2;
+        }
 
 		// index args in r-l order.  arg(0) is rightmost arg
 		inline LIns* arg(uint32_t i) {
@@ -410,6 +414,7 @@ namespace nanojit
 	bool FASTCALL isCmp(LOpcode v);
 	bool FASTCALL isCond(LOpcode v);
     bool FASTCALL isRet(LOpcode v);
+    bool FASTCALL isFloat(LOpcode v);
 	LIns* FASTCALL callArgN(LInsp i, uint32_t n);
 	extern const uint8_t operandCount[];
 
@@ -479,6 +484,7 @@ namespace nanojit
         LIns*       ins2i(LOpcode op, LIns *oprnd1, int32_t);
 		LIns*		qjoin(LInsp lo, LInsp hi);
 		LIns*		insImmPtr(const void *ptr);
+        LIns*       insImmf(double f);
 	};
 
 #ifdef NJ_VERBOSE

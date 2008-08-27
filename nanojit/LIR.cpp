@@ -104,10 +104,7 @@ namespace nanojit
 		clear();
 		_start = pageAlloc();
 		if (_start)
-		{
-			verbose_only(_start->seq = 0;)
 			_unused = &_start->lir[0];
-		}
 		//buffer_count++;
 		//fprintf(stderr, "LirBuffer %x start %x\n", (int)this, (int)_start);
 	}
@@ -197,7 +194,6 @@ namespace nanojit
 		{
 			lastPage->next = page;  // forward link to next page 
 			_unused = &page->lir[0];
-            verbose_only(page->seq = lastPage->seq+1;)
 			//fprintf(stderr, "Fragmento::ensureRoom stamping %x with %x; start %x unused %x\n", (int)pageBottom(last), (int)page, (int)_start, (int)_unused);
 			debug_only( validate(); )
 			return true;
@@ -527,6 +523,23 @@ namespace nanojit
     bool FASTCALL isRet(LOpcode c) {
         return (c & ~LIR64) == LIR_ret;
     }
+
+    bool FASTCALL isFloat(LOpcode c) {
+        switch (c) {
+            default:
+                return false;
+            case LIR_fadd:
+            case LIR_fsub:
+            case LIR_fmul:
+            case LIR_fdiv:
+            case LIR_fneg:
+            case LIR_fcall:
+            case LIR_fcalli:
+            case LIR_i2f:
+            case LIR_u2f:
+                return true;
+        }
+    }
     
 	bool LIns::isCmp() const {
 		return nanojit::isCmp(u.code);
@@ -707,8 +720,18 @@ namespace nanojit
 				return i->oprnd2();
 		}
 		else if (v == i->opcode() && (v == LIR_not || v == LIR_neg || v == LIR_fneg)) {
+            // not(not(x)) = x;  neg(neg(x)) = x;  fneg(fneg(x)) = x;
 			return i->oprnd1();
 		}
+        /* [ed 8.27.08] this causes a big slowdown in gameoflife.as.  why?
+        else if (i->isconst()) {
+            if (v == LIR_i2f) {
+                return insImmf(i->constval());
+            }
+            else if (v == LIR_u2f) {
+                return insImmf((uint32_t)i->constval());
+            }
+        }*/
 
 		// todo
 		// -(a-b) = b-a
@@ -939,6 +962,16 @@ namespace nanojit
 	{
 		return sizeof(ptr) == 8 ? insImmq((uintptr_t)ptr) : insImm((intptr_t)ptr);
 	}
+
+    LIns* LirWriter::insImmf(double f)
+    {
+        union {
+            double f;
+            uint64_t q;
+        } u;
+        u.f = f;
+        return insImmq(u.q);
+    }
 
 	LIns* LirWriter::ins_choose(LIns* cond, LIns* iftrue, LIns* iffalse, bool hasConditionalMove)
 	{
@@ -1425,9 +1458,9 @@ namespace nanojit
 		LInsp rp = lirbuf->rp;
 		LiveTable live(gc);
 		uint32_t exits = 0;
-        LirReader br(lirbuf);
-		StackFilter sf(&br, gc, lirbuf, sp);
-		StackFilter r(&sf, gc, lirbuf, rp);
+        LirReader r(lirbuf);
+		//StackFilter sf(&br, gc, lirbuf, sp);
+		//StackFilter r(&sf, gc, lirbuf, rp);
         int total = 0;
         if (lirbuf->state)
             live.add(lirbuf->state, r.pos());
