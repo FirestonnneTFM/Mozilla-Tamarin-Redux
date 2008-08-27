@@ -1454,13 +1454,11 @@ namespace nanojit
 	{
 		// traverse backwards to find live exprs and a few other stats.
 
-		LInsp sp = lirbuf->sp;
-		LInsp rp = lirbuf->rp;
 		LiveTable live(gc);
 		uint32_t exits = 0;
         LirReader r(lirbuf);
-		//StackFilter sf(&br, gc, lirbuf, sp);
-		//StackFilter r(&sf, gc, lirbuf, rp);
+		//StackFilter sf(&br, gc, lirbuf, lirbuf->sp);
+		//StackFilter r(&sf, gc, lirbuf, lirbuf->rp);
         int total = 0;
         if (lirbuf->state)
             live.add(lirbuf->state, r.pos());

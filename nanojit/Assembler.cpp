@@ -810,11 +810,11 @@ namespace nanojit
 	{
 		if (error()) return;	
 		AvmCore *core = _frago->core();
-		GC *gc = core->gc;
         _thisfrag = frag;
 
 		// set up backwards pipeline: assembler -> StackFilter -> LirReader
 		LirReader bufreader(frag->lastIns);
+		//GC *gc = core->gc;
 		//StackFilter storefilter1(&bufreader, gc, frag->lirbuf, frag->lirbuf->sp);
 		//StackFilter storefilter2(&storefilter1, gc, frag->lirbuf, frag->lirbuf->rp);
 		DeadCodeFilter deadfilter(&bufreader, frag->lirbuf->_functions);
