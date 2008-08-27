@@ -659,6 +659,7 @@ namespace avmplus
                 if (verbose()) {
 				    LabelMap *labels = mgr->frago->labels = new (gc) LabelMap(core, 0);
 				    labels->add(core, sizeof(AvmCore), 0, "core");
+                    labels->add(&core->codeContextAtom, sizeof(CodeContextAtom), 0, "codeContextAtom");
                 }
 			)
         }
@@ -1468,11 +1469,6 @@ namespace avmplus
 		{
  			if (!f || f->usesCallerContext())
 			{
-				#ifdef AVMPLUS_VERBOSE
-				if (verbose())
-					core->console << "        	set code context\n";
-				#endif
-
 				// core->codeContext = env;
 				storeIns(env_param, 0, InsConst((uintptr)&core->codeContextAtom));
 			}
@@ -1957,21 +1953,39 @@ namespace avmplus
 
 		// store args for the call
 		int index = objDisp;
-		OP* ap = InsAlloc(4);
+		OP* ap = InsAlloc(sizeof(Atom)); // we will update this size, below
 		int disp = 0;
+        int pad = 0;
+
+        // LIR_alloc of any size >= 8 is always 8-aligned.
+        // if the first double arg would be unaligned, add padding to align it.
+        for (int i=0; i <= argc; i++) {
+            if (state->value(index+i).traits == NUMBER_TYPE) {
+                if ((disp&7) != 0) {
+                    // this double would be unaligned, so add some padding
+                    pad = sizeof(Atom);
+                }
+                break;
+            }
+            else {
+                disp += sizeof(Atom);
+            }
+        }
+        
+        disp = pad;
 		for (int i=0; i <= argc; i++)
 		{
             // use localCopy so we sniff the arg type and use appropriate load instruction
 			OP* v = localCopy(index++);
 			storeIns(v, disp, ap);
-            disp += v->isQuad() ? 8 : 4;
+            disp += v->isQuad() ? sizeof(double) : sizeof(Atom);
 		}
-		// patch the size to what we actually need
-        AvmAssert(isU16(disp));
-		ap->setimm16(disp);
+
+        // patch the size to what we actually need
+		ap->setSize(disp);
 
 		OP* target = loadIns(MIR_ld, offsetof(MethodEnv, impl32), method);
-		OP* apAddr = leaIns(0, ap);
+		OP* apAddr = leaIns(pad, ap);
 
         LIns *out;
         if (!iid) {

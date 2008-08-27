@@ -176,23 +176,11 @@ namespace nanojit
 		bool pad[1];\
 		void nativePageReset();\
 		void nativePageSetup();\
+        void underrunProtect(int);\
         void asm_farg(LInsp);
 		
 	#define swapptrs()  { NIns* _tins = _nIns; _nIns=_nExitIns; _nExitIns=_tins; }
 		
-	// enough room for n bytes
-	#define underrunProtect(n)									\
-		{														\
-			intptr_t u = n + sizeof(PageHeader)/sizeof(NIns) + 5; \
-			if ( !samepage(_nIns-u,_nIns-1) )					\
-			{													\
-				NIns *tt = _nIns; \
-				_nIns = pageAlloc(_inExit);						\
-				int d = tt-_nIns; \
-				JMP_long_nochk_offset(d);			\
-			}													\
-		}														\
-
 #define IMM32(i)	\
 	_nIns -= 4;		\
 	*((int32_t*)_nIns) = (int32_t)(i)
@@ -566,7 +554,7 @@ namespace nanojit
     *(--_nIns) = 0x10;\
     *(--_nIns) = 0x0f;\
     *(--_nIns) = 0xf2;\
-    asm_output3("movsd %s,%p // =%f",gpn(r),(void*)daddr,*daddr); \
+    asm_output3("movsd %s,(#%p) // =%f",gpn(r),(void*)daddr,*daddr); \
     } while(0)
 
 #define STSD(d,b,r)do {     \

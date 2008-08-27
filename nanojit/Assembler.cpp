@@ -815,9 +815,9 @@ namespace nanojit
 
 		// set up backwards pipeline: assembler -> StackFilter -> LirReader
 		LirReader bufreader(frag->lastIns);
-		StackFilter storefilter1(&bufreader, gc, frag->lirbuf, frag->lirbuf->sp);
-		StackFilter storefilter2(&storefilter1, gc, frag->lirbuf, frag->lirbuf->rp);
-		DeadCodeFilter deadfilter(&storefilter2, frag->lirbuf->_functions);
+		//StackFilter storefilter1(&bufreader, gc, frag->lirbuf, frag->lirbuf->sp);
+		//StackFilter storefilter2(&storefilter1, gc, frag->lirbuf, frag->lirbuf->rp);
+		DeadCodeFilter deadfilter(&bufreader, frag->lirbuf->_functions);
 		LirFilter* rdr = &deadfilter;
 		verbose_only(
 			VerboseBlockReader vbr(rdr, this, frag->lirbuf->names);
@@ -1457,7 +1457,7 @@ namespace nanojit
                         intersectRegisterState(label->regs);
                         label->addr = _nIns;
                         verbose_only(
-                            verbose_outputf("Loop label %s", _thisfrag->lirbuf->names->formatRef(ins));
+                            verbose_outputf("Loop %s", _thisfrag->lirbuf->names->formatRef(ins));
                         )
                     }
 					break;
@@ -1512,10 +1512,7 @@ namespace nanojit
 				{
 					// only want certain regs 
 					Register r = prepResultReg(ins, AllowableFlagRegs);
-					// SETcc only sets low 8 bits, so extend 
-					MOVZX8(r,r);
-					SETNP(r);
-					asm_fcmp(ins);
+					asm_setcc(r, ins);
 					break;
 				}
 #endif
@@ -1606,13 +1603,7 @@ namespace nanojit
 #ifndef NJ_SOFTFLOAT
 		if (condop >= LIR_feq && condop <= LIR_fge)
 		{
-			if (branchOnFalse)
-				JP(targ);
-			else
-				JNP(targ);
-			at = _nIns;
-			asm_fcmp(cond);
-			return at;
+			return asm_jmpcc(branchOnFalse, cond, targ);
 		}
 #endif
 		// produce the branch
