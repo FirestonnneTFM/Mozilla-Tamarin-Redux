@@ -795,6 +795,9 @@ namespace nanojit
 		LInsp pos() {
 			return _i;
 		}
+        void setpos(LIns *i) {
+            _i = i;
+        }
 	};
 
     class Assembler;

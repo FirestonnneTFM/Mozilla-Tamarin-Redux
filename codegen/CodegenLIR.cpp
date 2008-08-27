@@ -4169,6 +4169,111 @@ namespace avmplus
     static int loopcount=0;
     static int normalcount=0;
 
+    class DeadVars: public LirFilter
+    {
+        GC *gc;
+        LirBuffer *lirbuf;
+        LInsp vars;
+        BitSet live;
+        SortedMap<LIns*, BitSet*, LIST_GCObjects> labels;
+    public:
+        bool changed;
+        bool kill;
+        int loops;
+        DeadVars(LirFilter *in, GC *gc, LirBuffer *lirbuf, LInsp vars)
+            : LirFilter(in), gc(gc), lirbuf(lirbuf), vars(vars), labels(gc)
+        {}
+
+        void reset(bool kill) {
+            changed = false;
+            loops = 0;
+            live.reset();
+            this->kill = kill;
+        }
+
+        int disp(LIns *i) {
+            int d = i->isStore() ? i->immdisp() : i->oprnd2()->constval();
+            AvmAssert(d >= 0 && (d&7) == 0);
+            return d>>3;
+        }
+
+        LIns *read() {
+            for (;;) {
+                LIns *i = in->read();
+                if (!i)
+                    return i;
+                if (isRet(i->opcode())) {
+                    live.reset();
+                }
+                else if (i->isStore() && i->oprnd2() == vars) {
+                    int d = disp(i);
+                    if (!live.get(d)) {
+                        if (kill) {
+                            verbose_only(if (lirbuf->names)
+                                printf("- %s\n", lirbuf->names->formatIns(i));)
+                            i->initOpcode(LIR_neartramp);
+                        }
+                        continue;
+                    }
+                    live.clear(d);
+                }
+                else if (i->isLoad() && i->oprnd1() == vars) {
+                    int d = disp(i);
+                    live.set(gc, d);
+                }
+                else if (i->isop(LIR_label)) {
+                    BitSet *lset = new (gc) BitSet();
+                    lset->setFrom(gc, live);
+                    BitSet *oldset = labels.put(i, lset);
+                    if (oldset) {
+                        //gc->Free(oldset);
+                    }
+                }
+                else if (i->isBranch()) {
+                    if (i->isop(LIR_j)) {
+                        // the point just after the jump is unreachable.
+                        live.reset();
+                    }
+                    BitSet *lset = labels.get(i->getTarget());
+                    if (lset) {
+                        live.setFrom(gc, *lset);
+                    }
+                    else {
+                        loops++;
+                    }
+                }
+                if (kill) {
+                    verbose_only(if (lirbuf->names)
+                        printf("  %s\n", lirbuf->names->formatIns(i));
+                    )
+                }
+                return i;
+            }
+        }
+    };
+
+    void CodegenLIR::deadvars()
+    {
+        LirReader in(lirbuf);
+        LIns *last = in.pos();
+        DeadVars dv(&in, gc, lirbuf, vars);
+        int iter=0;
+        do {
+            dv.reset(false);
+            in.setpos(last);
+            while (dv.read())
+            {}
+        }
+        while (++iter <= dv.loops);
+        verbose_only( if (verbose()) 
+            printf("killing dead stores after %d LA iterations\n",iter);
+        )
+        dv.reset(true);
+        in.setpos(last);
+        while (dv.read())
+        {}
+    }
+
     void CodegenLIR::emitMD() 
     {
 #ifdef PERFM
@@ -4180,6 +4285,8 @@ namespace avmplus
             while (validator.read())
             {}
         )
+
+        deadvars();
 
         verbose_only(if (verbose()) {
             live(gc, lirbuf);

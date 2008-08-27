@@ -242,6 +242,7 @@ namespace avmplus
         void mirLabel(CodegenLabel &l, LIns *target);
         void markDead(LIns *);
         uint32_t find_fid(uintptr_t addr);
+        void deadvars();
 
 	public:
 		CodegenLIR(MethodInfo* info);

@@ -118,6 +118,19 @@ namespace avmplus
 				return value;
 			}
 
+            void setFrom(MMgc::GC *gc, BitSet &other) {
+                int c = other.capacity;
+                if (c > capacity)
+                    grow(gc, c);
+                if (c > kDefaultCapacity) {
+                    for (int i=0; i < c; i++)
+                        bits.ptr[i] |= other.bits.ptr[i];
+                } else {
+                    for (int i=0; i < c; i++)
+                        bits.ar[i] |= other.bits.ar[i];
+                }
+            }
+
 		private:
 
 			// Grow the array until at least newCapacity big
