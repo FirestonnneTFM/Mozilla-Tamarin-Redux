@@ -1843,7 +1843,6 @@ namespace nanojit
     void Assembler::evictScratchRegs()
     {
         avmplus::SortedMap<int32_t, int32_t, avmplus::LIST_NonGCObjects> primap(_gc);
-        RegisterMask scratch = ~SavedRegs;
         for (Register r = FirstReg; r <= LastReg; r = nextreg(r)) {
             if (_allocator.getActive(r)) {
                 int32_t pri = _allocator.getPriority(r);
