@@ -77,6 +77,7 @@
 #define count_calli() 
 #define count_prolog()
 #define count_alu()
+#define count_mov()
 #define count_fpu()
 #define count_jmp()
 #define count_jcc()
