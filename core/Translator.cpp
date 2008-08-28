@@ -49,11 +49,12 @@ namespace avmplus
 	};
 
 #ifdef AVMPLUS_DIRECT_THREADED
-	Translator::Translator(void** opcode_labels)
+	Translator::Translator(MethodInfo* info, void** opcode_labels)
 #else
-	Translator::Translator()
+	Translator::Translator(MethodInfo* info)
 #endif
-		: backpatches(NULL)
+		: info(info)
+		, backpatches(NULL)
 		, labels(NULL)
 		, exception_fixes(NULL)
 		, buffers(NULL)
@@ -61,7 +62,32 @@ namespace avmplus
 #ifdef AVMPLUS_DIRECT_THREADED
 		, opcode_labels(opcode_labels)
 #endif
+		, exceptions_consumed(false)
+		, dest(NULL)
+		, dest_limit(NULL)
+		, pool(NULL)
+		, code_start(NULL)
 	{
+		AvmCore *core = info->core();
+		
+		const byte* pos = info->body_pos;
+		info->word_code.max_stack = AvmCore::readU30(pos);
+		info->word_code.local_count = AvmCore::readU30(pos);
+		info->word_code.init_scope_depth = AvmCore::readU30(pos);
+		info->word_code.max_scope_depth = AvmCore::readU30(pos);
+		AvmCore::readU30(pos);  // code_length
+		code_start = pos;
+		pool = info->pool;
+		
+		if (pool->word_code.cpool_mn == NULL)
+			pool->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (pool->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), pool);
+		
+		// FIXME: If info->exceptions is not NULL then copy into info->word_code.exceptions, 
+		// but 'from', 'to', and 'target' fields must be updated.
+		
+		computeExceptionFixups();
+		
+		refill();	
 	}
 
 	Translator::~Translator()
@@ -88,7 +114,7 @@ namespace avmplus
 		DELETE_LIST(buffer_info, buffers);
 	}
 	
-	void Translator::refill(uint32 *&dest, uint32 *&dest_limit) 
+	void Translator::refill() 
 	{
 		if (buffers != NULL) {
 			buffers->entries_used = dest - buffers->data;
@@ -101,7 +127,7 @@ namespace avmplus
 		dest_limit = dest + sizeof(b->data)/sizeof(b->data[0]);
 	}
 	
-	void Translator::emitRelativeOffset(uint32 base_offset, uint32 *&dest, const byte *base_pc, const byte *code_start, int32 offset) 
+	void Translator::emitRelativeOffset(uint32 base_offset, const byte *base_pc, int32 offset) 
 	{
 		if (offset < 0) {
 			// There must be a label for the target location
@@ -137,7 +163,7 @@ namespace avmplus
 		}
 	}
 	
-	void Translator::computeExceptionFixups(MethodInfo* info, const byte* code_start) 
+	void Translator::computeExceptionFixups() 
 	{
 		AvmCore *core = info->core();
 	
@@ -224,39 +250,6 @@ namespace avmplus
 		}
 		
 		WB(core->GetGC(), info, &info->word_code.exceptions, new_table);
-	}
-	
-	// Modify the MethodInfo's 'word_code' structure by translating the code and
-	
-    void Translator::translate(MethodEnv *env)
-    {
-		MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
-		AvmCore *core = info->core();
-	
-		AvmAssert(info->word_code.body_pos == NULL);
-
-		const byte* pos = info->body_pos;
-		info->word_code.max_stack = AvmCore::readU30(pos);
-		info->word_code.local_count = AvmCore::readU30(pos);
-		info->word_code.init_scope_depth = AvmCore::readU30(pos);
-		info->word_code.max_scope_depth = AvmCore::readU30(pos);
-		uint32 code_length = AvmCore::readU30(pos);
-		const byte* code_start = pos;
-		const byte* pc = code_start;
-		const byte* limit = pc + code_length;
-		
-		PoolObject *pool = info->pool;
-		const List<int,LIST_NonGCObjects>& cpool_int = pool->cpool_int;
-		const List<uint32,LIST_NonGCObjects>& cpool_uint = pool->cpool_uint;
-
-		if (pool->word_code.cpool_mn == NULL)
-			pool->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (pool->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), pool);
-		
-		// FIXME: If info->exceptions is not NULL then copy into info->word_code.exceptions, 
-		// but 'from', 'to', and 'target' fields must be updated.
-		
-		computeExceptionFixups(info, code_start);
-		bool exceptions_consumed = false;
 		
 #ifdef _DEBUG
 		if (exception_fixes != NULL) {
@@ -267,13 +260,34 @@ namespace avmplus
 			e = e->next;
 		}
 #endif
+	}
+
+	void Translator::fixExceptionsAndLabels(const byte *pc) 
+	{
+		while (exception_fixes != NULL && exception_fixes->pc <= pc) {
+			AvmAssert(exception_fixes->pc == pc);
+			exceptions_consumed = true;
+			if (exception_fixes->is_target)
+				*(sintptr*)(exception_fixes->fixup_loc) = (sintptr)(buffer_offset + (dest - buffers->data));
+			else
+				*(int*)(exception_fixes->fixup_loc) = (int)(buffer_offset + (dest - buffers->data));
+			catch_info* tmp = exception_fixes;
+			exception_fixes = exception_fixes->next;
+			delete tmp;
+		}
 		
-		uint32 *dest = 0, *dest_limit = 0;
-		refill(dest, dest_limit);
-		
+		while (backpatches != NULL && backpatches->target_pc <= pc) {
+			AvmAssert(backpatches->target_pc == pc);
+			AvmAssert(*backpatches->patch_loc == ~0U);
+			*backpatches->patch_loc = buffer_offset + (dest - buffers->data) - backpatches->patch_offset;
+			backpatch_info* tmp = backpatches;
+			backpatches = backpatches->next;
+			delete tmp;
+		}
+	}
+	
 #define CHECK(n) \
-		if (dest+n > dest_limit) \
-			refill(dest, dest_limit);
+		if (dest+n > dest_limit) refill();
 
 #ifdef AVMPLUS_DIRECT_THREADED
 #  define NEW_OPCODE(opcode) \
@@ -286,383 +300,396 @@ namespace avmplus
 #    define NEW_OPCODE(opcode)  opcode
 #  endif
 #endif
-		
+					
+	// These take no arguments
+	void Translator::emitOp0(const byte *pc, int opcode) {
 #ifdef _DEBUG
-		uint32 prev_opcodes[4];
-		for ( uint32 i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0]) ; i++ )
-			prev_opcodes[i] = ~0U;
-#endif // _DEBUG
-		while (pc < limit)
-		{
-			while (exception_fixes != NULL && exception_fixes->pc <= pc) {
-				AvmAssert(exception_fixes->pc == pc);
-				exceptions_consumed = true;
-				if (exception_fixes->is_target)
-					*(sintptr*)(exception_fixes->fixup_loc) = (sintptr)(buffer_offset + (dest - buffers->data));
-				else
-					*(int*)(exception_fixes->fixup_loc) = (int)(buffer_offset + (dest - buffers->data));
-				catch_info* tmp = exception_fixes;
-				exception_fixes = exception_fixes->next;
-				delete tmp;
-			}
-			
-			while (backpatches != NULL && backpatches->target_pc <= pc) {
-				AvmAssert(backpatches->target_pc == pc);
-				AvmAssert(*backpatches->patch_loc == ~0U);
-				*backpatches->patch_loc = buffer_offset + (dest - buffers->data) - backpatches->patch_offset;
-				backpatch_info* tmp = backpatches;
-				backpatches = backpatches->next;
-				delete tmp;
-			}
-
-			int opcode = *pc++;
-			switch (opcode)
-			{
-				// More cases below, but catches errors here
-				case OP_add_d:  // in JIT'ed code only, for the moment.  If we hit this case then it's 0xdededede...
-				default:
-					AvmAssert(false);
-					return;
-
-				// These take no arguments and disappear in the translation - unless the verifier needs them
-				case OP_nop:
-				case OP_timestamp:
-					break;
-					
-				// These take no arguments
-				case OP_add:
-				case OP_add_i:
-				case OP_astypelate:
-				case OP_bitand:
-				case OP_bitnot:
-				case OP_bitor:
-				case OP_bitxor:
-				case OP_bkpt:
-				case OP_checkfilter:
-				case OP_coerce_b:
-				case OP_coerce_a:
-				case OP_coerce_d:
-				case OP_coerce_i:
-				case OP_coerce_o:
-				case OP_coerce_s:
-				case OP_coerce_u:
-				case OP_convert_b:
-				case OP_convert_d:
-				case OP_convert_i:
-				case OP_convert_o:
-				case OP_convert_s:
-				case OP_convert_u:
-				case OP_decrement:
-				case OP_decrement_i:
-				case OP_divide:
-				case OP_dup:
-				case OP_dxnslate:
-				case OP_equals:
-				case OP_esc_xelem:
-				case OP_esc_xattr:
-				case OP_getglobalscope:
-				case OP_getlocal0:
-				case OP_getlocal1:
-				case OP_getlocal2:
-				case OP_getlocal3:
-				case OP_greaterequals:
-				case OP_greaterthan:
-				case OP_hasnext:
-				case OP_increment:
-				case OP_increment_i:
-				case OP_in:
-				case OP_instanceof:
-				case OP_istypelate:
-				case OP_lessequals:
-				case OP_lessthan:
-				case OP_lshift:
-				case OP_modulo:
-				case OP_multiply:
-				case OP_multiply_i:
-				case OP_negate:
-				case OP_negate_i:
-				case OP_newactivation:
-				case OP_nextname:
-				case OP_nextvalue:
-				case OP_not:
-				case OP_pop:
-				case OP_popscope:
-				case OP_pushfalse:
-				case OP_pushnan:
-				case OP_pushnull:
-				case OP_pushscope:
-				case OP_pushtrue:
-				case OP_pushwith:
-				case OP_pushundefined:
-				case OP_returnvalue:
-				case OP_returnvoid:
-				case OP_rshift:
-				case OP_setlocal0:
-				case OP_setlocal1:
-				case OP_setlocal2:
-				case OP_setlocal3:
-				case OP_strictequals:
-				case OP_subtract:
-				case OP_subtract_i:
-				case OP_swap:
-				case OP_throw:
-				case OP_typeof:
-				case OP_urshift:
-					CHECK(1);
-					*dest++ = NEW_OPCODE(opcode);
-					break;
-					
-				// These take one U30 argument
-				case OP_applytype:
-				case OP_astype:
-				case OP_bkptline:
-				case OP_call:
-				case OP_coerce:
-				case OP_construct:
-				case OP_constructsuper:
-				case OP_debugline:
-				case OP_debugfile:
-				case OP_declocal:
-				case OP_declocal_i:
-				case OP_deleteproperty:
-				case OP_dxns:
-				case OP_finddef:
-				case OP_findproperty:
-				case OP_findpropstrict:
-				case OP_getdescendants:
-				case OP_getglobalslot:
-				case OP_getlex:
-				case OP_getlocal:
-				case OP_getouterscope:
-				case OP_getproperty:
-				case OP_getslot:
-				case OP_getsuper:
-				case OP_inclocal:
-				case OP_inclocal_i:
-				case OP_initproperty:
-				case OP_istype:
-				case OP_kill:
-				case OP_newarray:
-				case OP_newcatch:
-				case OP_newclass:
-				case OP_newfunction:
-				case OP_newobject:
-				case OP_pushdouble:
-				case OP_pushnamespace:
-				case OP_pushstring:
-				case OP_setglobalslot:
-				case OP_setlocal:
-				case OP_setproperty:
-				case OP_setslot:
-				case OP_setsuper:
-				{
-					CHECK(2);
-					*dest++ = NEW_OPCODE(opcode);
-					*dest++ = AvmCore::readU30(pc);
-					break;
-				}
-					
-				// These take one S24 argument that is PC-relative.  If the offset is negative
-				// then the target must be a LABEL instruction, and we can just look it up.
-				// Otherwise, we enter the target offset into an ordered list with the current
-				// transformed PC and the location to backpatch.
-				case OP_jump:
-				case OP_iftrue:
-				case OP_iffalse:
-				case OP_ifeq:
-				case OP_ifne:
-				case OP_ifstricteq:
-				case OP_ifstrictne:
-				case OP_iflt:
-				case OP_ifnlt:
-				case OP_ifgt:
-				case OP_ifngt:
-				case OP_ifle:
-				case OP_ifnle:
-				case OP_ifge:
-				case OP_ifnge:
-				{
-					CHECK(2);
-					int32 offset = AvmCore::readS24(pc);
-					pc += 3;
-					*dest++ = NEW_OPCODE(opcode);
-					uint32 base_offset = buffer_offset + (dest - buffers->data) + 1;
-					emitRelativeOffset(base_offset, dest, pc, code_start, offset);
-					break;
-				}
-					
-				// These take two U30 arguments
-				case OP_hasnext2:
-				case OP_callstatic:
-				case OP_callmethod:
-				case OP_callproperty:
-				case OP_callproplex:
-				case OP_callpropvoid:
-				case OP_constructprop:
-				case OP_callsuper:
-				case OP_callsupervoid:
-				{
-					CHECK(3);
-					*dest++ = NEW_OPCODE(opcode);
-					*dest++ = AvmCore::readU30(pc);
-					*dest++ = AvmCore::readU30(pc);
-					break;
-				}
-				
-				// Special cases
-				case OP_label:
-				{
-					label_info* l = new label_info;
-					l->old_offset = pc-1-code_start;
-					l->new_offset = buffer_offset + (dest - buffers->data);
-					l->next = labels;
-					labels = l;
-					break;
-				}
-					
-				case OP_debug:
-					// FIXME: shouldn't just skip it, probably
-					pc += AvmCore::calculateInstructionWidth(pc-1) - 1;
-					break;
-					
-				case OP_pushbyte:
-					CHECK(2);
-					*dest++ = NEW_OPCODE(OP_ext_pushbits);
-					*dest++ = (((sint8)*pc++) << 3) | kIntegerType;
-					break;
-					
-				case OP_pushint:
-				{
-					int32 value = cpool_int[AvmCore::readU30(pc)];
-					if ((value & 0xF0000000U) == 0xF0000000U || (value & 0xF0000000U) == 0) {
-						CHECK(2);
-						*dest++ = NEW_OPCODE(OP_ext_pushbits);
-						*dest++ = (value << 3) | kIntegerType;
-					}
-					else {
-						union {
-							double d;
-							uint32 bits[2];
-						} v;
-						v.d = (double)value;
-						CHECK(3);
-						*dest++ = NEW_OPCODE(OP_ext_push_doublebits);
-						*dest++ = v.bits[0];
-						*dest++ = v.bits[1];
-					}
-					break;
-				}
-					
-				case OP_pushuint:
-				{
-					uint32 value = cpool_uint[AvmCore::readU30(pc)];
-					if ((value & 0xF0000000U) == 0) {
-						CHECK(2);
-						*dest++ = NEW_OPCODE(OP_ext_pushbits);
-						*dest++ = (value << 3) | kIntegerType;
-					}
-					else {
-						union {
-							double d;
-							uint32 bits[2];
-						} v;
-						v.d = (double)value;
-						CHECK(3);
-						*dest++ = NEW_OPCODE(OP_ext_push_doublebits);
-						*dest++ = v.bits[0];
-						*dest++ = v.bits[1];
-					}
-					break;
-				}
-					
-				case OP_pushshort:
-					CHECK(2);
-					*dest++ = NEW_OPCODE(OP_ext_pushbits);
-					*dest++ = ((signed short)AvmCore::readU30(pc) << 3) | kIntegerType;
-					break;
-					
-				case OP_lookupswitch:
-				{
-					const byte* base_pc = pc - 1;
-					uint32 base_offset = buffer_offset + (dest - buffers->data);
-					int32 default_offset = AvmCore::readS24(pc);
-					pc += 3;
-					uint32 case_count = AvmCore::readU30(pc);
-					CHECK(3);
-					*dest++ = NEW_OPCODE(opcode);
-					emitRelativeOffset(base_offset, dest, base_pc, code_start, default_offset);
-					*dest++ = case_count;
-					
-					for ( uint32 i=0 ; i <= case_count ; i++ ) {
-						int32 offset = AvmCore::readS24(pc);
-						pc += 3;
-						CHECK(1);
-						emitRelativeOffset(base_offset, dest, base_pc, code_start, offset);
-					}
-					break;
-				}
-					
-				case OP_getscopeobject:
-				{
-					CHECK(2);
-					*dest++ = NEW_OPCODE(opcode);
-					*dest++ = *pc++;
-					break;
-				}
-					
-				// 'OP_abs_jump' is an ABC-only construct, it boils away in the translation,
-				// both here and to MIR/LIR.  It says: My first operand (one word in 32-bit
-				// mode, two words in 64-bit mode) is a raw pointer into a buffer of ABC code.
-				// My second operand is the number of bytes of code starting at that address.
-				// Continue translating from that address as if it were a linear part
-				// of the current code vector.  In other words, it's a forwarding pointer.
-
-				case OP_abs_jump:
-				{
-					uint32 addr = AvmCore::readU30(pc);
-#ifdef AVMPLUS_64BIT
-					uint32 addr_hi = AvmCore::readU30(pc);
-					const byte *new_pc = (const byte *) ((uintptr(addr_hi) << 32) | (uintptr)addr);
-#else
-					const byte *new_pc = (const byte *) addr;
-#endif
-					uint32 new_length = AvmCore::readU30(pc);
-
-					pc = new_pc;
-					code_start = new_pc;
-					limit = pc + new_length;
-
-					// When performing a jump:
-					//  - require that backpatches and labels no longer reference the old
-					//    code vector; those sets must both be empty.  (We could clear out
-					//    labels, alternatively, but that appears not to be required.)
-					//  - recompute all the exception information, and require that none of it
-					//    has been consumed -- this is the only thing that makes sense, and appears
-					//    to be the view the verifier sanctions.  (A full definition for the
-					//    semantics of abs_jump is sorely needed.)
-
-					AvmAssert(!exceptions_consumed);
-					AvmAssert(backpatches == NULL);
-					AvmAssert(labels == NULL);
-					computeExceptionFixups(info, code_start);
-					
-					break;
-				}
-			}
-#ifdef _DEBUG
-			for ( uint32 i=0 ; i < sizeof(prev_opcodes)/sizeof(prev_opcodes[0])-1 ; i++ )
-				prev_opcodes[i+1] = prev_opcodes[i];
-			prev_opcodes[0] = opcode;
-#endif
+		switch (opcode) {
+			case OP_add:
+			case OP_add_i:
+			case OP_astypelate:
+			case OP_bitand:
+			case OP_bitnot:
+			case OP_bitor:
+			case OP_bitxor:
+			case OP_bkpt:
+			case OP_checkfilter:
+			case OP_coerce_b:
+			case OP_coerce_a:
+			case OP_coerce_d:
+			case OP_coerce_i:
+			case OP_coerce_o:
+			case OP_coerce_s:
+			case OP_coerce_u:
+			case OP_convert_b:
+			case OP_convert_d:
+			case OP_convert_i:
+			case OP_convert_o:
+			case OP_convert_s:
+			case OP_convert_u:
+			case OP_decrement:
+			case OP_decrement_i:
+			case OP_divide:
+			case OP_dup:
+			case OP_dxnslate:
+			case OP_equals:
+			case OP_esc_xelem:
+			case OP_esc_xattr:
+			case OP_getglobalscope:
+			case OP_getlocal0:
+			case OP_getlocal1:
+			case OP_getlocal2:
+			case OP_getlocal3:
+			case OP_greaterequals:
+			case OP_greaterthan:
+			case OP_hasnext:
+			case OP_increment:
+			case OP_increment_i:
+			case OP_in:
+			case OP_instanceof:
+			case OP_istypelate:
+			case OP_lessequals:
+			case OP_lessthan:
+			case OP_lshift:
+			case OP_modulo:
+			case OP_multiply:
+			case OP_multiply_i:
+			case OP_negate:
+			case OP_negate_i:
+			case OP_newactivation:
+			case OP_nextname:
+			case OP_nextvalue:
+			case OP_not:
+			case OP_pop:
+			case OP_popscope:
+			case OP_pushfalse:
+			case OP_pushnan:
+			case OP_pushnull:
+			case OP_pushscope:
+			case OP_pushtrue:
+			case OP_pushwith:
+			case OP_pushundefined:
+			case OP_returnvalue:
+			case OP_returnvoid:
+			case OP_rshift:
+			case OP_setlocal0:
+			case OP_setlocal1:
+			case OP_setlocal2:
+			case OP_setlocal3:
+			case OP_strictequals:
+			case OP_subtract:
+			case OP_subtract_i:
+			case OP_swap:
+			case OP_throw:
+			case OP_typeof:
+			case OP_urshift:
+				break;
+			default:
+				AvmAssert(!"Unknown OP0");
 		}
+#endif // _DEBUG
+		(void)pc;
+		CHECK(1);
+		*dest++ = NEW_OPCODE(opcode);
+	}
+
+#ifdef _DEBUG
+#  define CHECK_OP1(opcode, tag) \
+	switch (opcode) { \
+		case OP_applytype: \
+		case OP_astype: \
+		case OP_bkptline: \
+		case OP_call: \
+		case OP_coerce: \
+		case OP_construct: \
+		case OP_constructsuper: \
+		case OP_debugline: \
+		case OP_debugfile: \
+		case OP_declocal: \
+		case OP_declocal_i: \
+		case OP_deleteproperty: \
+		case OP_dxns: \
+		case OP_finddef: \
+		case OP_findproperty: \
+		case OP_findpropstrict: \
+		case OP_getdescendants: \
+		case OP_getglobalslot: \
+		case OP_getlex: \
+		case OP_getlocal: \
+		case OP_getouterscope: \
+		case OP_getproperty: \
+		case OP_getslot: \
+		case OP_getsuper: \
+		case OP_inclocal: \
+		case OP_inclocal_i: \
+		case OP_initproperty: \
+		case OP_istype: \
+		case OP_kill: \
+		case OP_newarray: \
+		case OP_newcatch: \
+		case OP_newclass: \
+		case OP_newfunction: \
+		case OP_newobject: \
+		case OP_pushdouble: \
+		case OP_pushnamespace: \
+		case OP_pushstring: \
+		case OP_setglobalslot: \
+ 		case OP_setlocal: \
+		case OP_setproperty: \
+		case OP_setslot: \
+		case OP_setsuper: \
+			break; \
+		default: \
+			AvmAssert(!"Unknown " tag); \
+	}
+#else
+#  define CHECK_OP1(opcode, tag)
+#endif
+	
+	// These take one U30 argument
+	void Translator::emitOp1(const byte *pc, int opcode)
+	{
+		CHECK_OP1(opcode, "OP1")
+		CHECK(2);
+		pc++;
+		*dest++ = NEW_OPCODE(opcode);
+		*dest++ = AvmCore::readU30(pc);
+	}
+	
+	// These take one U30 argument, and the argument is explicitly passed here (result of optimization)
+	void Translator::emitOp1(int opcode, uint32 operand)
+	{
+#ifdef _DEBUG
+		switch (opcode) {
+			case OP_getscopeobject:
+				break;
+			default:
+				CHECK_OP1(opcode, "OP1/imm")
+		}
+#endif // _DEBUG
+		CHECK(2);
+		*dest++ = NEW_OPCODE(opcode);
+		*dest++ = operand;
+	}
+	
+#ifdef _DEBUG
+#  define CHECK_OP2(opcode, tag) \
+	switch (opcode) { \
+		case OP_hasnext2: \
+		case OP_callstatic: \
+		case OP_callmethod: \
+		case OP_callproperty: \
+		case OP_callproplex: \
+		case OP_callpropvoid: \
+		case OP_constructprop: \
+		case OP_callsuper: \
+		case OP_callsupervoid: \
+			break; \
+		default: \
+			AvmAssert(!"Unknown " tag); \
+		}
+#else
+#  define CHECK_OP2(opcode, tag)	
+#endif // _DEBUG
+
+	// These take two U30 arguments
+	void Translator::emitOp2(const byte *pc, int opcode)
+	{
+		CHECK_OP2(opcode, "OP2")
+		CHECK(3);
+		pc++;
+		*dest++ = NEW_OPCODE(opcode);
+		*dest++ = AvmCore::readU30(pc);
+		*dest++ = AvmCore::readU30(pc);
+	}
+	
+	void Translator::emitOp2(int opcode, uint32 op1, uint32 op2)
+	{
+		CHECK_OP2(opcode, "OP2/imm");
+		CHECK(3);
+		*dest++ = NEW_OPCODE(opcode);
+		*dest++ = op1;
+		*dest++ = op2;
+	}
+
+	
+	// These take one S24 argument that is PC-relative.  If the offset is negative
+	// then the target must be a LABEL instruction, and we can just look it up.
+	// Otherwise, we enter the target offset into an ordered list with the current
+	// transformed PC and the location to backpatch.
+	void Translator::emitRelativeJump(const byte *pc, int opcode)
+	{
+#ifdef _DEBUG
+		switch (opcode) {
+			case OP_jump:
+			case OP_iftrue:
+			case OP_iffalse:
+			case OP_ifeq:
+			case OP_ifne:
+			case OP_ifstricteq:
+			case OP_ifstrictne:
+			case OP_iflt:
+			case OP_ifnlt:
+			case OP_ifgt:
+			case OP_ifngt:
+			case OP_ifle:
+			case OP_ifnle:
+			case OP_ifge:
+			case OP_ifnge:
+				break;
+			default:
+				AvmAssert(!"Unknown relative jump opcode");
+		}
+#endif // _DEBUG
+		CHECK(2);
+		pc++;
+		int32 offset = AvmCore::readS24(pc);
+		pc += 3;
+		*dest++ = NEW_OPCODE(opcode);
+		uint32 base_offset = buffer_offset + (dest - buffers->data) + 1;
+		emitRelativeOffset(base_offset, pc, offset);
+	}
+	
+	void Translator::emitLabel(const byte *pc) 
+	{
+		label_info* l = new label_info;
+		l->old_offset = pc-code_start;
+		l->new_offset = buffer_offset + (dest - buffers->data);
+		l->next = labels;
+		labels = l;
+	}
+
+	void Translator::emitDebug(const byte *pc) 
+	{
+		(void)pc;
+		// FIXME: shouldn't just skip it, probably
+		// pc += AvmCore::calculateInstructionWidth(pc-1) - 1;
+	}
+	
+	void Translator::emitPushbyte(const byte *pc) 
+	{
+		CHECK(2);
+		pc++;
+		*dest++ = NEW_OPCODE(OP_ext_pushbits);
+		*dest++ = (((sint8)*pc++) << 3) | kIntegerType;
+	}
+	
+	void Translator::emitPushshort(const byte *pc) 
+	{
+		CHECK(2);
+		pc++;
+		*dest++ = NEW_OPCODE(OP_ext_pushbits);
+		*dest++ = ((signed short)AvmCore::readU30(pc) << 3) | kIntegerType;
+	}
+	
+	void Translator::emitGetscopeobject(const byte *pc) 
+	{
+		CHECK(2);
+		pc++;
+		*dest++ = NEW_OPCODE(OP_getscopeobject);
+		*dest++ = *pc++;
+	}
+	
+	void Translator::emitPushint(const byte *pc)
+	{
+		pc++;
+		int32 value = pool->cpool_int[AvmCore::readU30(pc)];
+		if ((value & 0xF0000000U) == 0xF0000000U || (value & 0xF0000000U) == 0) {
+			CHECK(2);
+			*dest++ = NEW_OPCODE(OP_ext_pushbits);
+			*dest++ = (value << 3) | kIntegerType;
+		}
+		else {
+			union {
+				double d;
+				uint32 bits[2];
+			} v;
+			v.d = (double)value;
+			CHECK(3);
+			*dest++ = NEW_OPCODE(OP_ext_push_doublebits);
+			*dest++ = v.bits[0];
+			*dest++ = v.bits[1];
+		}
+	}
+
+	void Translator::emitPushuint(const byte *pc)
+	{
+		pc++;
+		uint32 value = pool->cpool_uint[AvmCore::readU30(pc)];
+		if ((value & 0xF0000000U) == 0) {
+			CHECK(2);
+			*dest++ = NEW_OPCODE(OP_ext_pushbits);
+			*dest++ = (value << 3) | kIntegerType;
+		}
+		else {
+			union {
+				double d;
+				uint32 bits[2];
+			} v;
+			v.d = (double)value;
+			CHECK(3);
+			*dest++ = NEW_OPCODE(OP_ext_push_doublebits);
+			*dest++ = v.bits[0];
+			*dest++ = v.bits[1];
+		}
+	}
+	
+	void Translator::emitLookupswitch(const byte *pc)
+	{
+		const byte* base_pc = pc;
+		pc++;
+		uint32 base_offset = buffer_offset + (dest - buffers->data);
+		int32 default_offset = AvmCore::readS24(pc);
+		pc += 3;
+		uint32 case_count = AvmCore::readU30(pc);
+		CHECK(3);
+		*dest++ = NEW_OPCODE(OP_lookupswitch);
+		emitRelativeOffset(base_offset, base_pc, default_offset);
+		*dest++ = case_count;
 		
+		for ( uint32 i=0 ; i <= case_count ; i++ ) {
+			int32 offset = AvmCore::readS24(pc);
+			pc += 3;
+			CHECK(1);
+			emitRelativeOffset(base_offset, base_pc, offset);
+		}
+	}
+	
+	// 'OP_abs_jump' is an ABC-only construct, it boils away in the translation,
+	// both here and to MIR/LIR.  It says: My first operand (one word in 32-bit
+	// mode, two words in 64-bit mode) is a raw pointer into a buffer of ABC code.
+	// My second operand is the number of bytes of code starting at that address.
+	// Continue translating from that address as if it were a linear part
+	// of the current code vector.  In other words, it's a forwarding pointer.
+	
+	void Translator::emitAbsJump(const byte *new_pc)
+	{
+		code_start = new_pc;
+		
+		// When performing a jump:
+		//  - require that backpatches and labels no longer reference the old
+		//    code vector; those sets must both be empty.  (We could clear out
+		//    labels, alternatively, but that appears not to be required.)
+		//  - recompute all the exception information, and require that none of it
+		//    has been consumed -- this is the only thing that makes sense, and appears
+		//    to be the view the verifier sanctions.  (A full definition for the
+		//    semantics of abs_jump is sorely needed.)
+		
+		AvmAssert(!exceptions_consumed);
+		AvmAssert(backpatches == NULL);
+		AvmAssert(labels == NULL);
+		computeExceptionFixups();
+	}
+	
+	void Translator::epilogue() 
+	{
 		AvmAssert(backpatches == NULL);
 		AvmAssert(exception_fixes == NULL);
 
 		buffers->entries_used = dest - buffers->data;
 		uint32 total_size = buffer_offset + buffers->entries_used;
 		
-		TranslatedCode* code_anchor = (TranslatedCode*)core->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uint32), GC::kZero);
+		TranslatedCode* code_anchor = (TranslatedCode*)info->core()->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uint32), GC::kZero);
 		uint32* code = code_anchor->data;
 		
 		// reverse the list of buffers

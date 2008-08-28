@@ -441,8 +441,6 @@
 		1E607A9F09733787007D0E1E /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				D962305A0E5CA2D200DA3F47 /* Translator.cpp */,
-				D962305B0E5CA2D200DA3F47 /* Translator.h */,
 				47D44EB40D37D56B008368EC /* VectorClass.cpp */,
 				47D44EB50D37D56B008368EC /* VectorClass.h */,
 				942BC4330BB991690088A47F /* Sampler.cpp */,
@@ -587,6 +585,8 @@
 				1E60797B097335EF007D0E1E /* Traits.cpp */,
 				1E60797C097335EF007D0E1E /* Traits.h */,
 				1E60797D097335EF007D0E1E /* TraitsIterator.h */,
+				D962305A0E5CA2D200DA3F47 /* Translator.cpp */,
+				D962305B0E5CA2D200DA3F47 /* Translator.h */,
 				1E60797E097335EF007D0E1E /* UnicodeUtils.cpp */,
 				1E60797F097335EF007D0E1E /* UnicodeUtils.h */,
 				1E607980097335EF007D0E1E /* Verifier.cpp */,

@@ -64,7 +64,10 @@ namespace avmplus
 		#ifdef AVMPLUS_MIR
 		CodegenMIR *mir;
 		#endif // AVMPLUS_MIR
-
+		#ifdef AVMPLUS_WORD_CODE
+		Translator *translator;
+		#endif
+		
 		AvmCore *core;
 		SortedIntMap<FrameState*>* blockStates;
 		FrameState *state;
@@ -146,14 +149,23 @@ namespace avmplus
 		void emitCheckNull(int index);
 		#endif
 		void emitCompare(AbcOpcode opcode);
-		void emitFindProperty(AbcOpcode opcode, Multiname& multiname);
-		void emitGetProperty(Multiname &multiname, int n);
+		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32 imm30);
+		void emitGetProperty(Multiname &multiname, int n, uint32 imm30);
 		void emitGetGlobalScope();
 		void emitGetOuterScope(int scope_idx);
 		void emitGetSlot(int slot);
 		void emitSetSlot(int slot);
 		void emitSwap();
-
+		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32 imm30, uint32 imm30b);
+#ifdef AVMPLUS_MIR
+		bool emitCallpropertyMethodMIR(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc);
+		bool emitCallpropertySlotMIR(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32 argc);
+#endif
+#ifdef AVMPLUS_WORD_CODE
+		bool emitCallpropertyMethodXLAT(Traits* t, Binding b, Multiname& multiname, uint32 argc);
+		bool emitCallpropertySlotXLAT(AbcOpcode opcode, Traits* t, Binding b, uint32 argc);
+#endif
+		
 		Binding findMathFunction(Traits* math, Multiname* name, Binding b, int argc);
 
 		Binding findStringFunction(Traits* string, Multiname* name, Binding b, int argc);
