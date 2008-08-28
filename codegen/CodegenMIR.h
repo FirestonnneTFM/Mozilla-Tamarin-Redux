@@ -50,7 +50,7 @@
 #define count_ld() _nvprof("x86-ld",1) count_instr()
 #define count_ldq() _nvprof("x86-ldq",1) count_instr()
 #define count_call() _nvprof("x86-call",1) count_instr()
-#define count_calli() _nvprof("x86-ld",1);  _nvprof("x86-calli",1) count_instr()
+#define count_calli() _nvprof("x86-ld",1); _nvprof("x86-calli",1) count_instr()
 #define count_prolog() _nvprof("x86-prolog",1) count_instr()
 #define count_alu() _nvprof("x86-alu",1) count_instr()
 #define count_mov() _nvprof("x86-mov",1) count_instr()
@@ -63,6 +63,7 @@
 #define count_aluld() _nvprof("x86-ld",1); _nvprof("x86-alu",1); count_instr()
 #define count_pushld() _nvprof("x86-ld",1); _nvprof("x86-push",1); count_instr()
 #define count_jmpld() _nvprof("x86-ld",1); _nvprof("x86-jmp",1); count_instr()
+#define count_leave() _nvprof("x86-alu",1); _nvprof("x86-pop",1); count_instr()
 #else
 #define count_instr() 
 #define count_ret() 
@@ -86,6 +87,7 @@
 #define count_aluld() 
 #define count_pushld() 
 #define count_jmpld()
+#define count_leave()
 #endif
 
 namespace avmplus
@@ -1868,6 +1870,7 @@ namespace avmplus
 
 		void ALU(int op);
 		void RET()				{ count_ret(); ALU(0xc3); }
+		void LEAVE()			{ count_leave(); ALU(0xc9); }
 		void NOP()				{ count_instr(); ALU(0x90); }
 		#ifdef AVMPLUS_64BIT
 		void PUSH(Register r);
@@ -1894,8 +1897,8 @@ namespace avmplus
 		void CVTTSD2SI(Register dest, Register src)	{ count_fpu(); SSE(0xf20f2c, dest, src); }
 		void CVTSI2SD(Register dest, Register src)	{ count_fpu(); SSE(0xf20f2a, dest, src); }
 		void UCOMISD(Register xmm1, Register xmm2)	{ count_fpu(); SSE(0x660f2e, xmm1, xmm2); }
-		void MOVAPD(Register dest, Register src)	{ count_fpu(); SSE(0x660f28, dest, src); }
-		void MOVD (Register xmm1, Register src)		{ count_fpu(); SSE(0x660F6E, xmm1, src); }
+		void MOVAPD(Register dest, Register src)	{ count_mov(); SSE(0x660f28, dest, src); }
+		void MOVD (Register xmm1, Register src)		{ count_mov(); SSE(0x660F6E, xmm1, src); }
 
 		void XORPD(Register dest, uintptr src);
 #ifdef AVMPLUS_AMD64

@@ -6330,7 +6330,7 @@ namespace avmplus
 
 			//ADD(ESP, arSize); 
 			//POP  (EBP);
-			ALU(0xc9); // leave:  esp = ebp, pop ebp
+			LEAVE(); // leave:  esp = ebp, pop ebp
 		}
 		RET  ();
 		mipEnd = mip;
