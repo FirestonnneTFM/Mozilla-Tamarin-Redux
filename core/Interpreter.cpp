@@ -159,54 +159,45 @@ namespace avmplus
 #  endif
 #endif // _MSC_VER
 
+#ifdef AVMPLUS_DIRECT_THREADED
+
+	void** interpGetOpcodeLabels() {
+		return (void**)interp(NULL, 0, NULL);
+	}
+	
+#endif // AVMPLUS_DIRECT_THREADED
+
     /**
      * Interpret the AVM+ instruction set.
      * @return
      */
     Atom interp(MethodEnv *env, int argc, uint32 *ap)
     {
-		MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
-		AvmCore *core = info->core();
-
-		if (core->minstack)
-		{
-			// Take the address of a local variable to get
-			// stack pointer
-			uintptr sp = (uintptr)&core;
-			if (sp < core->minstack)
-			{
-				env->vtable->traits->core->stackOverflow(env);
-			}
-		}
-
-		#ifdef AVMPLUS_VERBOSE
-		if (info->pool->verbose)
-			core->console << "interp " << info << '\n';
-		#endif
-
-#ifdef AVMPLUS_WORD_CODE
-		const uint32* pos = info->word_code.body_pos;
-		if (pos == NULL) {
-#  ifdef AVMPLUS_DIRECT_THREADED
-#    if defined GNUC_THREADING
+#ifdef AVMPLUS_DIRECT_THREADED
+		
+		// If env is NULL return the jump table.  Optionally initialize it here on those
+		// platforms where compile-time initialization is not possible or practical.
+		
+		if (env == NULL) {
+#  if defined GNUC_THREADING
 #      define III(idx, lbl) &&lbl,
 #      define XXX(idx) &&L_illegal_op,
 			static void* opcode_labels[] = {
-#    elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
+#  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
 	    static void* opcode_labels[300];  // FIXME: need better way of computing the size of that table
         if (opcode_labels[0] == 0) {
-#      define XXX(idx) III(idx, L_illegal_op)
-#      ifdef MSVC_X86_ASM_THREADING
+#    define XXX(idx) III(idx, L_illegal_op)
+#    ifdef MSVC_X86_ASM_THREADING
 #        define III(idx, lbl) __asm { \
 	           __asm mov eax, offset opcode_labels \
 	  	       __asm mov ebx, offset lbl \
 		       __asm mov [eax+4*idx], ebx \
 		     }
-#       else
+#     else
 		  extern bool LLLLABEL(int);
 #         define III(a,b) extern void LLLLABEL ## _ ## a ## _ ## b(); LLLLABEL ## _ ## a ## _ ## b();
-#       endif
-#    endif // threading discipline
+#     endif
+#  endif // threading discipline
 			 XXX(0x00)
 			 III(0x01, L_bkpt)
 			 XXX(0x02) /* OP_nop */
@@ -466,25 +457,41 @@ namespace avmplus
 			 XXX(0x100)
 			 III(0x101, L_ext_pushbits)
 			 III(0x102, L_ext_push_doublebits)
-#    if defined GNUC_THREADING
+#  if defined GNUC_THREADING
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
 			AvmAssert(opcode_labels[0x97] == &&L_bitnot);
 			AvmAssert(opcode_labels[0xF0] == &&L_debugline);
 			AvmAssert(opcode_labels[257] == &&L_ext_pushbits);
-#    elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
+#  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
 			} // conditional run-time initialization of jump table
-#    endif // threading discipline
-			Translator *t = new Translator(opcode_labels);
-#  else  // !AVMPLUS_DIRECT_THREADED
-			Translator *t = new Translator();
-#  endif // AVMPLUS_DIRECT_THREADED
-			
-			t->translate(env);
-			delete t;
-			pos = info->word_code.body_pos;
-			AvmAssert(pos != NULL);
-		} // pos == 0
+#  endif // threading discipline
+		return (Atom)opcode_labels;
+		} // env == 0?
+		
+#endif  // !AVMPLUS_DIRECT_THREADED
+
+		MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
+		AvmCore *core = info->core();
+
+		if (core->minstack)
+		{
+			// Take the address of a local variable to get
+			// stack pointer
+			uintptr sp = (uintptr)&core;
+			if (sp < core->minstack)
+			{
+				env->vtable->traits->core->stackOverflow(env);
+			}
+		}
+
+		#ifdef AVMPLUS_VERBOSE
+		if (info->pool->verbose)
+			core->console << "interp " << info << '\n';
+		#endif
+
+#ifdef AVMPLUS_WORD_CODE
+		const uint32* pos = info->word_code.body_pos;
 		const uint32* volatile code_start = pos;
 		int max_stack = info->word_code.max_stack;
 		int local_count = info->word_code.local_count;
@@ -871,20 +878,17 @@ namespace avmplus
 			}
 
             INSTR(pushnull) {
-				sp++;
-                sp[0] = nullObjectAtom;
+                *(++sp) = nullObjectAtom;
                 NEXT;
 			}
 
             INSTR(pushundefined) {
-				sp++;
-                sp[0] = undefinedAtom;
+                *(++sp) = undefinedAtom;
                 NEXT;
 			}
 
             INSTR(pushstring) {
-				sp++;
-                sp[0] = cpool_string[U30ARG]->atom();
+                *(++sp) = cpool_string[U30ARG]->atom();
                 NEXT;
 			}
 
@@ -895,8 +899,7 @@ namespace avmplus
 				// to specialize the operation into a plain 'pushword' that
 				// simply pushes the following word (it could be tagged
 				// already) or a 'pushdouble'
-				sp++;
-                sp[0] = core->intToAtom(cpool_int[U30ARG]);
+                *(++sp) = core->intToAtom(cpool_int[U30ARG]);
                 NEXT;
 			}
 #endif
@@ -908,27 +911,23 @@ namespace avmplus
 				// to specialize the operation into a plain 'pushword' that
 				// simply pushes the following word (it could be tagged
 				// already) or a 'pushdouble'
-				sp++;
-                sp[0] = core->uintToAtom(cpool_uint[U30ARG]);
+                *(++sp) = core->uintToAtom(cpool_uint[U30ARG]);
                 NEXT;
 			}
 #endif
 					
             INSTR(pushdouble) {
-				sp++;
-                sp[0] = kDoubleType|(uintptr)cpool_double[U30ARG];
+                *(++sp) = kDoubleType|(uintptr)cpool_double[U30ARG];
                 NEXT;
 			}
 
             INSTR(pushnamespace) {
-                sp++;
-                sp[0] = cpool_ns[U30ARG]->atom();
+                *(++sp) = cpool_ns[U30ARG]->atom();
                 NEXT;
 			}
 
             INSTR(getlocal) {
-                sp++;
-				sp[0] = framep[U30ARG];
+				*(++sp) = framep[U30ARG];
 				NEXT;
 			}
 
@@ -953,20 +952,17 @@ namespace avmplus
 			}
 
             INSTR(pushtrue) {
-                sp++;
-				sp[0] = trueAtom;
+				*(++sp) = trueAtom;
                 NEXT;
 			}
 
             INSTR(pushfalse) {
-				sp++;
-                sp[0] = falseAtom;
+                *(++sp) = falseAtom;
                 NEXT;
 			}
 
 			INSTR(pushnan) {
-				sp++;
-				sp[0] = core->kNaN;
+				*(++sp) = core->kNaN;
 				NEXT;
 			}
 
@@ -1705,6 +1701,7 @@ namespace avmplus
 #else
 #  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
 #endif
+
 			INSTR(getlex) {
 				SAVE_EXPC;
 				// findpropstrict + getproperty
@@ -1940,6 +1937,8 @@ namespace avmplus
 			INSTR(getslot) {
 				SAVE_EXPC;
 				env->nullcheck(sp[0]);
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				sp[0] = AvmCore::atomToScriptObject(sp[0])->getSlotAtom(U30ARG-1);
 				restore_dxns();
 				NEXT;
@@ -1954,6 +1953,8 @@ namespace avmplus
 				else
 					global = AvmCore::atomToScriptObject(scope->getScope(0));
 
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				int slot_id = U30ARG-1;
 				Atom op = sp[0];
 				sp--;
@@ -1971,6 +1972,8 @@ namespace avmplus
 				else
 					global = AvmCore::atomToScriptObject(scope->getScope(0));
 
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				sp++;
 				sp[0] = global->getSlotAtom(U30ARG-1);
 				restore_dxns();
