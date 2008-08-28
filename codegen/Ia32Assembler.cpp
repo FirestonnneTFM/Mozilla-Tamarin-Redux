@@ -154,7 +154,7 @@ namespace avmplus
 
 	void CodegenMIR::MOV(Register dest, sintptr imm32) 
 	{
-		count_alu();
+		count_mov();
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
