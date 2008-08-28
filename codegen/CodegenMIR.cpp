@@ -6308,7 +6308,7 @@ namespace avmplus
 
 			//ADD(ESP, arSize); 
 			//POP  (EBP);
-			ALU(0xc9); // leave:  esp = ebp, pop ebp
+			LEAVE(); // leave:  esp = ebp, pop ebp
 		}
 		RET  ();
 		mipEnd = mip;
@@ -8412,7 +8412,7 @@ namespace avmplus
 		AvmAssert((int)casePtr);
 		uint64_t stop = rtstamp();
 		const int mhz = 100;
-		double time = (stop-start)/(100*mhz);
+		double time = (stop-start)/(100.0*mhz);
 		_nvprof("compile", time);
 		_nvprof("mir bytes", bytesBetween(ip,ipStart));
 		_nvprof("mir", ip-ipStart);

@@ -199,7 +199,8 @@ namespace avmplus
 		if (core->VTuneStatus == iJIT_CALLGRAPH_ON) 
 		{
 			MMgc::GCHeap* heap = core->GetGC()->GetGCHeap();
-			heap->SetPageProtection(vtune, sizeof (iJIT_Method_NIDS), false, true);   		}
+			heap->SetPageProtection(vtune, sizeof (iJIT_Method_NIDS), false, true);   
+		}
  
 		// free everything we alloc'd  ( @todo did vtune really copy all the strings?!? )
 		if (ML.line_number_table) free(ML.line_number_table);
