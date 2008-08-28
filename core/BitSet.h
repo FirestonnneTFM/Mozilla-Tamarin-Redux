@@ -47,7 +47,7 @@ namespace avmplus
 	 * on a set of items or conditions. Class BitSet provides functions 
 	 * to manipulate individual bits in the vector.
 	 *
-	 * Since most vectors are rather small an array of longs is used by
+	 * Since most vectors are rather small an array of machine words is used by
 	 * default to house the value of the bits.  If more bits are needed
 	 * then an array is allocated dynamically outside of this object. 
 	 * 
@@ -58,7 +58,7 @@ namespace avmplus
 	{
 		public:
 
-			enum {  kUnit = 8*sizeof(long),
+			enum {  kUnit = 8*sizeof(uintptr_t),
 					kDefaultCapacity = 4   };
 
 			BitSet()
@@ -81,8 +81,13 @@ namespace avmplus
 			{
 				int index = bitNbr / kUnit;
 				int bit = bitNbr % kUnit;
-				if (index >= capacity)
-					grow(gc, index+1);
+                if (index >= capacity) {
+                    int c = capacity * 2;
+                    while (index >= c) {
+                        c *= 2;
+                    }
+					grow(gc, c);
+                }
 
 				if (capacity > kDefaultCapacity)
 					bits.ptr[index] |= (1<<bit);
@@ -136,10 +141,8 @@ namespace avmplus
 			// Grow the array until at least newCapacity big
 			void grow(MMgc::GC *gc, int newCapacity)
 			{
-				// create vector that is 2x bigger than requested 
-				newCapacity *= 2;
-				//MEMTAG("BitVector::Grow - long[]");
-				long* newBits = (long*)gc->Alloc(newCapacity * sizeof(long), MMgc::GC::kZero);
+				//MEMTAG("BitVector::Grow - uintptr_t[]");
+				uintptr_t* newBits = (uintptr_t*)gc->Alloc(newCapacity * sizeof(uintptr_t), MMgc::GC::kZero);
 
 				// copy the old one 
                 if (capacity > kDefaultCapacity)
@@ -166,8 +169,8 @@ namespace avmplus
 			int capacity;
 			union
 			{
-				long ar[kDefaultCapacity];
-				long*  ptr;
+				uintptr_t ar[kDefaultCapacity];
+				uintptr_t*  ptr;
 			}
 			bits;
 	};

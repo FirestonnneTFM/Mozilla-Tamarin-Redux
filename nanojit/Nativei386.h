@@ -54,6 +54,7 @@
 #define count_calli() _nvprof("x86-calli",1); count_instr();
 #define count_prolog() _nvprof("x86-prolog",1); count_instr();
 #define count_alu() _nvprof("x86-alu",1); count_instr();
+#define count_mov() _nvprof("x86-mov",1); count_instr();
 #define count_fpu() _nvprof("x86-fpu",1); count_instr();
 #define count_jmp() _nvprof("x86-jmp",1); count_instr();
 #define count_jcc() _nvprof("x86-jcc",1); count_instr();
@@ -74,6 +75,7 @@
 #define count_calli()
 #define count_prolog()
 #define count_alu()
+#define count_mov()
 #define count_fpu()
 #define count_jmp()
 #define count_jcc()
@@ -203,8 +205,11 @@ namespace nanojit
  		}
 
 #define MODRMm(r,d,b) \
-		NanoAssert(unsigned(r)<8 && unsigned(b)<8); \
- 		if ((b) == ESP) { \
+		NanoAssert(unsigned(r)<8 && ((b)==UnknownReg || unsigned(b)<8)); \
+        if ((b) == UnknownReg) {\
+            IMM32(d);\
+            *(--_nIns) = (uint8_t) (0<<6 | (r)<<3 | 5);\
+        } else if ((b) == ESP) { \
  			MODRMs(r, d, b, 0, (Register)4); \
  		} \
 		else if ( (d) == 0 && (b) != EBP) { \
@@ -325,7 +330,7 @@ namespace nanojit
 #define CMP(l,r)	do { count_alu(); ALU(0x3b, (l),(r));			asm_output2("cmp %s,%s",gpn(l),gpn(r)); } while(0)
 #define CMPi(r,i)	do { count_alu(); ALUi(0x3d,r,i);				asm_output2("cmp %s,%d",gpn(r),i); } while(0)
 
-#define MR(d,s)		do { count_alu(); ALU(0x8b,d,s);				asm_output2("mov %s,%s",gpn(d),gpn(s)); } while(0)
+#define MR(d,s)		do { count_mov(); ALU(0x8b,d,s);				asm_output2("mov %s,%s",gpn(d),gpn(s)); } while(0)
 #define LEA(r,d,b)	do { count_alu(); ALUm(0x8d, r,d,b);			asm_output3("lea %s,%d(%s)",gpn(r),d,gpn(b)); } while(0)
 
 #define SETE(r)		do { count_alu(); ALU2(0x0f94,(r),(r));			asm_output1("sete %s",gpn(r)); } while(0)
@@ -380,7 +385,7 @@ namespace nanojit
 	} while(0)
 
 #define LDi(r,i) do { \
-	count_alu();\
+	count_mov();\
 	underrunProtect(5);			\
 	IMM32(i);					\
 	NanoAssert(((unsigned)r)<8); \
@@ -390,7 +395,7 @@ namespace nanojit
 #define ST(base,disp,reg) do {  \
     count_st();\
 	ALUm(0x89,reg,disp,base);	\
-	asm_output3("mov %d(%s),%s",disp,gpn(base),gpn(reg)); } while(0)
+    asm_output3("mov %d(%s),%s",disp,base==UnknownReg?"0":gpn(base),gpn(reg)); } while(0)
 
 #define STi(base,disp,imm)	do { \
 	count_st();\
@@ -589,7 +594,7 @@ namespace nanojit
 
 // move and zero-extend gpreg to xmm reg
 #define SSE_MOVD(d,s) do{ \
-	count_fpu();\
+	count_mov();\
 	if (_is_xmm_reg_(s)) { \
 		NanoAssert(_is_gp_reg_(d)); \
 		SSE(0x660f7e, (s)&7, (d)&7); \
@@ -602,7 +607,7 @@ namespace nanojit
     } while(0)
 
 #define SSE_MOVSD(rd,rs) do{ \
-	count_fpu();\
+	count_mov();\
     SSE(0xf20f10, (rd)&7, (rs)&7); \
     asm_output2("movsd %s,%s",gpn(rd),gpn(rs)); \
     } while(0)

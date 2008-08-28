@@ -580,8 +580,10 @@ namespace nanojit
 		Reservation* resv = getresv(i);
 		if (!resv)
 			resv = reserveAlloc(i);
-		if (!resv->arIndex)
+        if (!resv->arIndex) {
 			resv->arIndex = arReserve(i);
+            NanoAssert(resv->arIndex <= _activation.highwatermark);
+        }
 		return disp(resv);
 	}
 
@@ -1778,11 +1780,6 @@ namespace nanojit
 		int32_t start = ar.lowwatermark;
 		int32_t i = 0;
 		NanoAssert(start>0);
-		if (tos+size >= NJ_MAX_STACK_ENTRY)
-		{	
-			setError(StackFull);
-			return start;
-		}
 
         if (size == 1) {
             // easy most common case -- find a hole, or make the frame bigger
@@ -1790,41 +1787,44 @@ namespace nanojit
                 if (ar.entry[i] == 0) {
                     // found a hole
                     ar.entry[i] = l;
-                    return i;
+                    break;
                 }
             }
-            ar.tos++;
-            ar.highwatermark++;
-            return i;
         }
         else if (size == 2) {
 			if ( (start&1)==1 ) start++;  // even 8 boundary
 			for (i=start; i < NJ_MAX_STACK_ENTRY; i+=2) {
-				if ( (ar.entry[i+stack_direction(1)] == 0) && (i==tos || (ar.entry[i] == 0)) )
-					break;   //  for fp we need 2 adjacent aligned slots
+                if ( (ar.entry[i+stack_direction(1)] == 0) && (i==tos || (ar.entry[i] == 0)) ) {
+                    // found 2 adjacent aligned slots
+                    NanoAssert(_activation.entry[i] == 0);
+                    NanoAssert(_activation.entry[i+stack_direction(1)] == 0);
+                    ar.entry[i] = l;
+                    ar.entry[i+stack_direction(1)] = l;
+                    break;   
+                }
 			}
-            NanoAssert(_activation.entry[i] == 0);
-            NanoAssert(_activation.entry[i+stack_direction(1)] == 0);
-            ar.entry[i] = l;
-            ar.entry[i+stack_direction(1)] = l;
 		}
         else {
             // alloc larger block on 8byte boundary.
             if (start < size) start = size;
             if ((start&1)==1) start++;
             for (i=start; i < NJ_MAX_STACK_ENTRY; i+=2) {
-                if (canfit(size, i, ar))
+                if (canfit(size, i, ar)) {
+		            // place the entry in the table and mark the instruction with it
+                    for (int32_t j=0; j < size; j++) {
+                        NanoAssert(_activation.entry[i+stack_direction(j)] == 0);
+                        _activation.entry[i+stack_direction(j)] = l;
+                    }
                     break;
-            }
-		    // place the entry in the table and mark the instruction with it
-            for (int32_t j=0; j < size; j++) {
-                NanoAssert(_activation.entry[i+stack_direction(j)] == 0);
-                _activation.entry[i+stack_direction(j)] = l;
+                }
             }
 		}
         if (i >= (int32_t)ar.tos) {
             ar.tos = ar.highwatermark = i+1;
         }
+		if (tos+size >= NJ_MAX_STACK_ENTRY) {	
+			setError(StackFull);
+		}
         return i;
 	}
 

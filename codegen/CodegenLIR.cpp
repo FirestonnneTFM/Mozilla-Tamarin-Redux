@@ -1107,7 +1107,6 @@ namespace avmplus
         argc_param = lirout->insParam(1);
         ap_param = lirout->insParam(2);
         vars = InsAlloc(state->verifier->frameSize * 8);
-        lirbuf->sp = vars;
         if (copier)
             copier->init(vars);
 
@@ -4014,20 +4013,6 @@ namespace avmplus
 		}
 		if (t == UINT_TYPE)
 		{
-#ifdef AVMPLUS_IA32
-			if (core->config.sse2)
-			{
-				// Faster to emit this:
-				// sub eax,0x80000000
-				// cvtsi2sd xmm0,eax
-				// addsd xmm0, 2147483648.0
-				OP *op1 = binaryIns(LIR_sub, localGet(i), InsConst(0x80000000));
-				OP *op2 = i2dIns(op1);
-				static const double k_NEGONE = 2147483648.0;
-				return Ins(MIR_faddi, op2, (uintptr) &k_NEGONE);
-			}
-			else
-#endif // AVMPLUS_IA32
 			return u2dIns(localGet(i));
 		}
 		AvmAssert(false);
@@ -4186,22 +4171,23 @@ namespace avmplus
     class DeadVars: public LirFilter
     {
         GC *gc;
-        LirBuffer *lirbuf;
         LInsp vars;
-        BitSet live;
+        BitSet livein; // current livein set during backwards flow analysis.
         SortedMap<LIns*, BitSet*, LIST_GCObjects> labels;
     public:
+        verbose_only(LirNameMap *names;)
+        int loops;
         bool changed;
         bool kill;
-        int loops;
-        DeadVars(LirFilter *in, GC *gc, LirBuffer *lirbuf, LInsp vars)
-            : LirFilter(in), gc(gc), lirbuf(lirbuf), vars(vars), labels(gc)
+        DeadVars(LirFilter *in, GC *gc, LInsp vars)
+            : LirFilter(in), gc(gc), vars(vars), labels(gc)
+            verbose_only( , names(0) )
         {}
 
         void reset(bool kill) {
             changed = false;
             loops = 0;
-            live.reset();
+            livein.reset();
             this->kill = kill;
         }
 
@@ -4217,70 +4203,105 @@ namespace avmplus
                 if (!i)
                     return i;
                 if (isRet(i->opcode())) {
-                    live.reset();
+                    livein.reset();
                 }
                 else if (i->isStore() && i->oprnd2() == vars) {
                     int d = disp(i);
-                    if (!live.get(d)) {
+                    if (!livein.get(d)) {
                         if (kill) {
-                            verbose_only(if (lirbuf->names)
-                                printf("- %s\n", lirbuf->names->formatIns(i));)
+                            verbose_only(if (names)
+                                printf("- %s\n", names->formatIns(i));)
                             i->initOpcode(LIR_neartramp);
                         }
                         continue;
                     }
-                    live.clear(d);
+                    livein.clear(d);
                 }
                 else if (i->isLoad() && i->oprnd1() == vars) {
-                    int d = disp(i);
-                    live.set(gc, d);
+                    livein.set(gc, disp(i));
                 }
                 else if (i->isop(LIR_label)) {
-                    BitSet *lset = new (gc) BitSet();
-                    lset->setFrom(gc, live);
-                    BitSet *oldset = labels.put(i, lset);
-                    if (oldset) {
-                        //gc->Free(oldset);
+                    // we're at the top of a block, save livein for this block
+                    // so it can be propagated to predecessors
+                    BitSet *lset = labels.get(i);
+                    if (!lset) {
+                        lset = new (gc) BitSet();
+                        labels.put(i, lset);
+                    } else {
+                        lset->reset();
                     }
+                    lset->setFrom(gc, livein);
                 }
                 else if (i->isBranch()) {
+                    // merge the LiveIn sets from each successor:  the fall
+                    // through case (live) and the branch case (lset).
                     if (i->isop(LIR_j)) {
-                        // the point just after the jump is unreachable.
-                        live.reset();
+                        // the fallthrough path is unreachable, clear it.
+                        livein.reset();
                     }
                     BitSet *lset = labels.get(i->getTarget());
                     if (lset) {
-                        live.setFrom(gc, *lset);
+                        // the target LiveIn set (lset) is non-empty,
+                        // union it with fall-through set (live).
+                        livein.setFrom(gc, *lset);
                     }
                     else {
+                        // we have not seen the target yet, so this is a backedge.
+                        // we need another iteration to pick up that live set.
                         loops++;
                     }
                 }
-                if (kill) {
-                    verbose_only(if (lirbuf->names)
-                        printf("  %s\n", lirbuf->names->formatIns(i));
-                    )
-                }
+                verbose_only(if (kill && names) {
+                    printf("  %s\n", names->formatIns(i));
+                })
                 return i;
             }
         }
     };
 
+    /*
+     * this is iterative live variable analysis.  We walk backwards through
+     * the code.  when we see a load, we mark the variable live, and when
+     * we see a store, we mark it dead.  Dead stores are dropped, not returned
+     * by read().  
+     *
+     * at labels, we save the liveIn set associated with that label.
+     *
+     * at branches, we merge the liveIn sets from the fall through case (which
+     * is the current set) and the branch case (which was saved with the label).
+     * this filter can be run multiple times, which is required to pick up 
+     * loop-carried live variables.
+     *
+     * once the live sets are stable, the DeadVars.kill flag is set to cause the filter
+     * to not only drop dead stores, but overwrite them as tramps so they'll be
+     * ignored by any later passes even without using this filter.
+     */
+
     void CodegenLIR::deadvars()
     {
         LirReader in(lirbuf);
         LIns *last = in.pos();
-        DeadVars dv(&in, gc, lirbuf, vars);
+        DeadVars dv(&in, gc, vars);
+        verbose_only( if(verbose()) dv.names = lirbuf->names; )
         int iter=0;
+        int loops=0;
         do {
+            // make one pass, plus one additional pass for each backedge encountered.
             dv.reset(false);
             in.setpos(last);
             while (dv.read())
             {}
+            if (iter == 0) {
+                // fixme.  the way DeadVars finds loop edges only works on the first pass.
+                // so capture the # of edges so we know how many times to iterate.
+                loops = dv.loops;
+            }
         }
-        while (++iter <= dv.loops);
+        while (++iter <= loops);
+
+        // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
         verbose_only( if (verbose()) 
-            printf("killing dead stores after %d LA iterations\n",iter);
+            printf("killing dead stores after %d LA iterations.  %d loop edges\n",iter,dv.loops);
         )
         dv.reset(true);
         in.setpos(last);
@@ -4345,7 +4366,10 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (!assm->hasLoop /*&& normalcount <= 0*/ || assm->hasLoop /*&& loopcount <= 0*/) 
+        bool keep = (
+                !assm->hasLoop //&& normalcount <= 0
+              || assm->hasLoop //&& loopcount <= 0
+            ) 
             && !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);
