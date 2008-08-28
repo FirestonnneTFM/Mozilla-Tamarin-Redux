@@ -409,12 +409,8 @@ namespace nanojit
 	{
 		uint32_t op = i->opcode();
 		int prefer = allow;
-        if (op == LIR_call) {
-#if defined NANOJIT_IA32
-			prefer &= rmask(EAX);
-#elif defined NANOJIT_AMD64
-			prefer &= rmask(RAX);
-#endif
+        if (op == LIR_call || op == LIR_calli) {
+			prefer &= rmask(retRegs[0]);
         }
         else if (op == LIR_fcall || op == LIR_fcalli) {
             prefer &= rmask(FST0);
@@ -425,11 +421,7 @@ namespace nanojit
     			prefer &= rmask(Register(i->imm8()));
         }
         else if (op == LIR_callh || op == LIR_rsh && i->oprnd1()->opcode()==LIR_callh) {
-#if defined NANOJIT_IA32
-            prefer &= rmask(EDX);
-#elif defined NANOJIT_AMD64
-            prefer &= rmask(RDX);
-#endif
+            prefer &= rmask(retRegs[1]);
         }
         else if (i->isCmp()) {
 			prefer &= AllowableFlagRegs;
@@ -549,6 +541,11 @@ namespace nanojit
                 rb = FP;
                 dr += findMemFor(base);
                 ra = findRegFor(value, GpRegs);
+            } else if (base->isconst()) {
+                // absolute address
+                dr += base->constval();
+                ra = findRegFor(value, GpRegs);
+                rb = UnknownReg;
             } else {
     		    findRegFor2(GpRegs, value, rA, base, rB);
 		        ra = rA->reg;
