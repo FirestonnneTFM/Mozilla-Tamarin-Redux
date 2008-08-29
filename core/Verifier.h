@@ -162,7 +162,7 @@ namespace avmplus
 		bool emitCallpropertySlotMIR(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32 argc);
 #endif
 #ifdef AVMPLUS_WORD_CODE
-		bool emitCallpropertyMethodXLAT(Traits* t, Binding b, Multiname& multiname, uint32 argc);
+		bool emitCallpropertyMethodXLAT(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc);
 		bool emitCallpropertySlotXLAT(AbcOpcode opcode, Traits* t, Binding b, uint32 argc);
 #endif
 		
