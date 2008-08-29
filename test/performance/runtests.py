@@ -194,6 +194,7 @@ def compile_test(as):
 		cmd = asc
 	cmd += " " + ascargs
 	cmd += " -import " + globalabc
+	cmd += " -optimize "
 	(dir, file) = split(as)
 	verbose_print("   compiling %s" % file)
 	(testdir, ext) = splitext(as)
