@@ -124,10 +124,6 @@ namespace avmplus
 		PrintWriter& operator<< (uint32_t value);
 		PrintWriter& operator<< (uint64_t value);
 		PrintWriter& operator<< (int64_t value);
-#ifdef AVMPLUS_INTPTR_OVERLOADS
-		PrintWriter& operator<< (uintptr_t value);
-		PrintWriter& operator<< (intptr_t value);
-#endif
 		PrintWriter& operator<< (double value);
 		PrintWriter& operator<< (Stringp str);
 		PrintWriter& operator<< (tabstop tabs);

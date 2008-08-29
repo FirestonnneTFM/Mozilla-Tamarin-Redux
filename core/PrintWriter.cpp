@@ -171,28 +171,6 @@ namespace avmplus
 		return *this;
 	}
 
-#ifdef AVMPLUS_INTPTR_OVERLOADS
-	PrintWriter& PrintWriter::operator<< (uintptr_t value)
-	{
-		wchar buffer[256];
-		int len;
-		if (MathUtils::convertIntegerToString((sintptr) value, buffer, len)) {
-			*this << buffer;
-		}
-		return *this;
-	}
-
-	PrintWriter& PrintWriter::operator<< (intptr_t value)
-	{
-		wchar buffer[256];
-		int len;
-		if (MathUtils::convertIntegerToString((sintptr) value, buffer, len)) {
-			*this << buffer;
-		}
-		return *this;
-	}
-#endif
-
 	PrintWriter& PrintWriter::operator<< (uint32_t value)
 	{
 		wchar buffer[256];

@@ -51,13 +51,8 @@
 	typedef unsigned __int16	uint16_t;
 	typedef unsigned __int32	uint32_t; 
 	typedef unsigned __int64	uint64_t;
-	// intptr is same as int64, can't overload it separately
-	//#define AVMPLUS_INTPTR_OVERLOADS
 #else
 	#include <inttypes.h>
-	// intptr is (generally) defined as long, not int, so can (and must) overload it
-	// (true of gcc 4.x, might not be elsewhere)
-	#define AVMPLUS_INTPTR_OVERLOADS
 #endif
 
 #if defined(HAVE_VISIBILITY_ATTRIBUTE)
