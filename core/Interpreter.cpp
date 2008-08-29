@@ -119,7 +119,10 @@ namespace avmplus
 	Atom interp(MethodEnv* method, int argc, uint32 *ap);
 	Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete=false);
 	Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
-
+#ifdef SUPERWORD_PROFILING
+	void swprofCode(const uint32* start, const uint32* limit);
+	void swprofPC(const uint32* pc);
+#endif
 #ifdef AVMPLUS_VERBOSE
 	
 	/**
@@ -497,6 +500,15 @@ namespace avmplus
 		int local_count = info->word_code.local_count;
 		int init_scope_depth = info->word_code.init_scope_depth;
 		int max_scope_depth = info->word_code.max_scope_depth;
+#  ifdef SUPERWORD_PROFILING
+#    ifdef AVMPLUS_DIRECT_THREADED
+#       error "Superword profiling requires switch dispatch"
+#    endif
+		if (!info->word_code.dumped) {
+			swprofCode(pos, info->word_code.body_end);
+			info->word_code.dumped = true;
+		}
+#  endif
 #else // !AVMPLUS_WORD_CODE
 		const byte* pos = info->body_pos;
 		int max_stack = AvmCore::readU30(pos);
@@ -507,7 +519,7 @@ namespace avmplus
 		const byte * volatile code_start = pos;
 #endif // AVMPLUS_WORD_CODE
 		int volatile max_scope = MethodInfo::maxScopeDepth(info, max_scope_depth - init_scope_depth);
-		
+
 		// these should have been checked in AbcParser
 		AvmAssert(local_count+max_scope+max_stack > 0);
 		Atom* framep = (Atom*)alloca(sizeof(Atom)*(local_count + max_scope + max_stack));
@@ -722,9 +734,12 @@ namespace avmplus
 #endif // DIRECT_DISPATCH
 
 #if defined SWITCH_DISPATCH
-			
-        for (;;)
+
+		for (;;)
         {
+#  if defined SUPERWORD_PROFILING
+			swprofPC(pc);
+#  endif
 #  if defined AVMPLUS_WORD_CODE && !defined AVMPLUS_DIRECT_THREADED
 			// See comments around INSTR(ext) below.
 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
@@ -2687,5 +2702,41 @@ namespace avmplus
 		core->formatOpcode(core->console, pc, opcode, off, pool);
 		core->console << '\n';
     }
+#endif // AVMPLUS_VERBOSE
+			
+#ifdef SUPERWORD_PROFILING
+	// 32-bit only
+
+	static FILE *swprof_code_fp = NULL;
+	static FILE *swprof_sample_fp = NULL;
+			
+	void swprofStart()
+	{
+		swprof_code_fp = fopen("superwordprof_code.txt", "wb");
+		swprof_sample_fp = fopen("superwordprof_sample.txt", "wb");
+	}
+	
+	void swprofStop() 
+	{
+		if (swprof_code_fp != NULL)	fclose(swprof_code_fp);
+		if (swprof_sample_fp != NULL) fclose(swprof_sample_fp);
+	}
+			
+	void swprofCode(const uint32* start, const uint32* limit)
+	{
+		if (swprof_code_fp != NULL) {
+			fwrite(&start, sizeof(uint32*), 1, swprof_code_fp);
+			fwrite(&limit, sizeof(uint32*), 1, swprof_code_fp);
+			fwrite(start, sizeof(uint32), limit-start, swprof_code_fp);
+			fflush(swprof_code_fp);
+		}
+	}
+
+	void swprofPC(const uint32* pc)
+	{
+		if (swprof_sample_fp != NULL)
+			fwrite(&pc, sizeof(uint32*), 1, swprof_sample_fp);
+	}
 #endif
+			
 }

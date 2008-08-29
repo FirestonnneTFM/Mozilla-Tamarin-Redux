@@ -271,4 +271,15 @@
 //#  define AVMPLUS_DIRECT_THREADED // see comments in Interpreter.cpp before enabling this
 #endif
 
+//#define SUPERWORD_PROFILING
+
+#ifdef SUPERWORD_PROFILING
+#  ifndef AVMPLUS_WORD_CODE
+#    error "You must have word code enabled to perform superword profiling"
+#  endif
+#  ifdef AVMPLUS_DIRECT_THREADED
+#    error "You must disable direct threading to perform superword profiling"
+#  endif
+#endif
+
 #endif /* __avmbuild__ */

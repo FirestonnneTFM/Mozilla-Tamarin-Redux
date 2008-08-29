@@ -775,7 +775,11 @@ namespace avmplus
 				Value &v = state->stackTop();
 				state->setType(localno, v.traits, v.notNull);
 				state->pop();
+#ifdef SUPERWORD_PROFILING
+				XLAT_ONLY( if (translator) translator->emitOp1(OP_setlocal, localno) );
+#else
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+#endif
 				break;
 			}
 
@@ -799,7 +803,11 @@ namespace avmplus
 				Value& v = checkLocal(localno);
 				MIR_ONLY( if (mir) mir->emitCopy(state, localno, sp+1); )
 				state->push(v);
+#ifdef SUPERWORD_PROFILING
+				XLAT_ONLY( if (translator) translator->emitOp1(OP_getlocal, localno) );
+#else
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+#endif
 				break;
 			}
 			
@@ -2454,7 +2462,7 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 		if (translator)
 		{
-			if (emitCallpropertyMethodXLAT(t, b, multiname, argc))
+			if (emitCallpropertyMethodXLAT(opcode, t, b, multiname, argc))
 				goto xlat_done;
 			
 			if (emitCallpropertySlotXLAT(opcode, t, b, argc))
@@ -2591,7 +2599,7 @@ namespace avmplus
 #endif // AVMPLUS_MIR
 	
 #ifdef AVMPLUS_WORD_CODE
-	bool Verifier::emitCallpropertyMethodXLAT(Traits* t, Binding b, Multiname& multiname, uint32 argc) 
+	bool Verifier::emitCallpropertyMethodXLAT(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc) 
 	{
 		if (!AvmCore::isMethodBinding(b))
 			return false;
@@ -2614,6 +2622,8 @@ namespace avmplus
 			return false;
 		
 		translator->emitOp2(OP_callmethod, disp_id+1, argc);
+		if (opcode == OP_callpropvoid)
+			translator->emitOp0(OP_pop);
 		return true;
 	}
 	
