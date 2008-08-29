@@ -209,6 +209,7 @@ namespace nanojit
 		    regs.used |= rmask(r);
 		    return r;
         }
+        _nvprof("steals",1);
 		counter_increment(steals);
 
 		// nothing free, steal one 
@@ -548,6 +549,7 @@ namespace nanojit
                  (rmask(r)&x87Regs) && !(allow&x87Regs)))
         {
             // x87 <-> xmm copy required
+            _nvprof("fpu-evict",1);
             evict(r);
             r = UnknownReg;
         }
@@ -956,6 +958,61 @@ namespace nanojit
 			}
 		}
 	}
+
+#ifdef PERFM
+#define countlir_live() _nvprof("lir-live",1)
+#define countlir_ret() _nvprof("lir-ret",1)
+#define countlir_alloc() _nvprof("lir-alloc",1)
+#define countlir_var() _nvprof("lir-var",1)
+#define countlir_use() _nvprof("lir-use",1)
+#define countlir_def() _nvprof("lir-def",1)
+#define countlir_imm() _nvprof("lir-imm",1)
+#define countlir_param() _nvprof("lir-param",1)
+#define countlir_cmov() _nvprof("lir-cmov",1)
+#define countlir_ld() _nvprof("lir-ld",1)
+#define countlir_ldq() _nvprof("lir-ldq",1)
+#define countlir_alu() _nvprof("lir-alu",1)
+#define countlir_qjoin() _nvprof("lir-qjoin",1)
+#define countlir_qlo() _nvprof("lir-qlo",1)
+#define countlir_qhi() _nvprof("lir-qhi",1)
+#define countlir_fpu() _nvprof("lir-fpu",1)
+#define countlir_st() _nvprof("lir-st",1)
+#define countlir_stq() _nvprof("lir-stq",1)
+#define countlir_jmp() _nvprof("lir-jmp",1)
+#define countlir_jcc() _nvprof("lir-jcc",1)
+#define countlir_label() _nvprof("lir-label",1)
+#define countlir_xcc() _nvprof("lir-xcc",1)
+#define countlir_x() _nvprof("lir-x",1)
+#define countlir_loop() _nvprof("lir-loop",1)
+#define countlir_call() _nvprof("lir-call",1)
+#else
+#define countlir_live()
+#define countlir_ret()
+#define countlir_alloc()
+#define countlir_var()
+#define countlir_use()
+#define countlir_def()
+#define countlir_imm()
+#define countlir_param()
+#define countlir_cmov()
+#define countlir_ld()
+#define countlir_ldq()
+#define countlir_alu()
+#define countlir_qjoin()
+#define countlir_qlo()
+#define countlir_qhi()
+#define countlir_fpu()
+#define countlir_st()
+#define countlir_stq()
+#define countlir_jmp()
+#define countlir_jcc()
+#define countlir_label()
+#define countlir_xcc()
+#define countlir_x()
+#define countlir_loop()
+#define countlir_call()
+#endif
+
 	
 	void Assembler::gen(LirFilter* reader,  NInsList& loopJumps)
 	{
@@ -964,6 +1021,7 @@ namespace nanojit
 		 
 		for (LInsp ins = reader->read(); ins != 0 && !error(); ins = reader->read())
 		{
+            _nvprof("lir",1);
 			LOpcode op = ins->opcode();			
 			switch(op)
 			{
@@ -972,11 +1030,13 @@ namespace nanojit
 					break;
 
                 case LIR_live: {
+                    countlir_live();
                     findMemFor(ins->oprnd1());
                     break;
                 }
 
                 case LIR_ret:  {
+                    countlir_ret();
                     LIns *val = ins->oprnd1();
                     findSpecificRegFor(val, retRegs[0]);
                     if (_nIns != _epilogue) {
@@ -987,6 +1047,7 @@ namespace nanojit
                 }
 
                 case LIR_fret: {
+                    countlir_ret();
                     LIns *val = ins->oprnd1();
                     findSpecificRegFor(val, FST0);
                     fpu_pop();
@@ -1002,6 +1063,7 @@ namespace nanojit
                 // allocate some stack space.  the value of this instruction
                 // is the address of the stack space.
                 case LIR_alloc: {
+                    countlir_alloc();
                     Reservation *resv = getresv(ins);
                     NanoAssert(resv->arIndex != 0);
                     Register r = resv->reg;
@@ -1016,6 +1078,7 @@ namespace nanojit
 
 				case LIR_var:
 				{
+                    countlir_var();
 					Reservation* r = getresv(ins);
 					NanoAssert(r->reg == UnknownReg); // don't directly access LIR_var, LIR_use it first
 					arFree(r->arIndex);	// free any stack stack space associated with entry
@@ -1024,6 +1087,7 @@ namespace nanojit
 				}					
 				case LIR_use:
 				{
+                    countlir_use();
 					LInsp to = ins->oprnd1();
 					int d = findMemFor(to); // var's mem							
 					Reservation* r = getresv(ins);
@@ -1052,6 +1116,7 @@ namespace nanojit
 			
 				case LIR_def:
 				{
+                    countlir_def();
 					NanoAssert(!getresv(ins));  // like store no one should ref this.
 					LInsp to = ins->oprnd1();
 					LInsp val = ins->oprnd2();
@@ -1063,6 +1128,7 @@ namespace nanojit
 				case LIR_short:
 				case LIR_int:
 				{
+                    countlir_imm();
 					Register rr = prepResultReg(ins, GpRegs);
 					int32_t val;
 					if (op == LIR_int)
@@ -1077,6 +1143,7 @@ namespace nanojit
 				}
 				case LIR_quad:
 				{
+                    countlir_imm();
 					asm_quad(ins);
 					break;
 				}
@@ -1090,6 +1157,7 @@ namespace nanojit
 				}
 				case LIR_param:
 				{
+                    countlir_param();
                     uint32_t a = ins->imm8();
                     AbiKind abi = _thisfrag->lirbuf->abi;
                     uint32_t abi_regcount = abi == ABI_FASTCALL ? 2 : abi == ABI_THISCALL ? 1 : 0;
@@ -1100,6 +1168,7 @@ namespace nanojit
 					    prepResultReg(ins, rmask(w));
                     } else {
                         // incoming arg is on stack, and EAX points nearby (see genPrologue)
+                        _nvprof("param-evict-eax",1);
 						evict(EAX);
                         Register r = prepResultReg(ins, GpRegs & ~rmask(EAX));
                         int d = (a - abi_regcount) * sizeof(intptr_t) + 8;
@@ -1109,6 +1178,7 @@ namespace nanojit
 				}
 				case LIR_qlo:
                 {
+                    countlir_qlo();
 					LIns *q = ins->oprnd1();
 
 					if (!asm_qlo(ins, q))
@@ -1121,6 +1191,7 @@ namespace nanojit
                 }
 				case LIR_qhi:
 				{
+                    countlir_qhi();
 					Register rr = prepResultReg(ins, GpRegs);
 					LIns *q = ins->oprnd1();
 					int d = findMemFor(q);
@@ -1130,6 +1201,7 @@ namespace nanojit
 
 				case LIR_cmov:
 				{
+                    countlir_cmov();
 					LIns* condval = ins->oprnd1();
 					NanoAssert(condval->isCmp());
 
@@ -1170,6 +1242,7 @@ namespace nanojit
 				case LIR_ldc:
 				case LIR_ldcb:
 				{
+                    countlir_ld();
 					LIns* base = ins->oprnd1();
 					LIns* disp = ins->oprnd2();
 					Register rr = prepResultReg(ins, GpRegs);
@@ -1190,6 +1263,7 @@ namespace nanojit
 
 				case LIR_ldq:
 				{
+                    countlir_ldq();
 					asm_load64(ins);
 					break;
 				}
@@ -1197,6 +1271,7 @@ namespace nanojit
 				case LIR_neg:
 				case LIR_not:
 				{
+                    countlir_alu();
 					Register rr = prepResultReg(ins, GpRegs);
 
 					LIns* lhs = ins->oprnd1();
@@ -1219,6 +1294,7 @@ namespace nanojit
 				
 				case LIR_qjoin:
 				{
+                    countlir_qjoin();
                     asm_qjoin(ins);
 					break;
 				}
@@ -1233,6 +1309,7 @@ namespace nanojit
 				case LIR_rsh:
 				case LIR_ush:
 				{
+                    countlir_alu();
                     LInsp lhs = ins->oprnd1();
                     LInsp rhs = ins->oprnd2();
 
@@ -1248,6 +1325,13 @@ namespace nanojit
 							rb = findRegFor(rhs, allow);
 						allow &= ~rmask(rb);
 					}
+                    else if (op == LIR_add && lhs->isop(LIR_alloc) && rhs->isconst()) {
+                        // add alloc+const, use lea
+                        Register rr = prepResultReg(ins, allow);
+                        int d = findMemFor(lhs) + rhs->constval();
+                        LEA(rr, d, FP);
+                        break;
+                    }
 
 					Register rr = prepResultReg(ins, allow);
 					Reservation* rA = getresv(lhs);
@@ -1289,6 +1373,7 @@ namespace nanojit
 						if (op == LIR_add) {
 #ifdef NANOJIT_IA32_TODO
 							if (ra != rr) {
+                                // this doesn't set cc's, only use it when cc's not required.
 								LEA(rr, c, ra);
 								ra = rr; // suppress mov
 							} else
@@ -1329,6 +1414,7 @@ namespace nanojit
 #ifndef NJ_SOFTFLOAT
 				case LIR_fneg:
 				{
+                    countlir_fpu();
 					asm_fneg(ins);
 					break;
 				}
@@ -1337,16 +1423,19 @@ namespace nanojit
 				case LIR_fmul:
 				case LIR_fdiv:
 				{
+                    countlir_fpu();
 					asm_fop(ins);
                     break;
 				}
 				case LIR_i2f:
 				{
+                    countlir_fpu();
 					asm_i2f(ins);
 					break;
 				}
 				case LIR_u2f:
 				{
+                    countlir_fpu();
 					asm_u2f(ins);
 					break;
 				}
@@ -1354,12 +1443,14 @@ namespace nanojit
 				case LIR_st:
 				case LIR_sti:
 				{
+                    countlir_st();
                     asm_store32(ins->oprnd1(), ins->immdisp(), ins->oprnd2());
                     break;
 				}
 				case LIR_stq:
 				case LIR_stqi:
 				{
+                    countlir_stq();
 					LIns* value = ins->oprnd1();
 					LIns* base = ins->oprnd2();
 					int dr = ins->immdisp();
@@ -1378,6 +1469,7 @@ namespace nanojit
 
 				case LIR_j:
 				{
+                    countlir_jmp();
 					LInsp to = ins->oprnd2();
                     LabelState *label = _labels.get(to);
                     // the jump is always taken so whatever register state we
@@ -1414,6 +1506,7 @@ namespace nanojit
 				case LIR_jt:
 				case LIR_jf:
 				{
+                    countlir_jcc();
 					LInsp to = ins->getTarget();
 					LIns* cond = ins->oprnd1();
                     LabelState *label = _labels.get(to);
@@ -1446,6 +1539,7 @@ namespace nanojit
 				}					
 				case LIR_label:
 				{
+                    countlir_label();
                     LabelState *label = _labels.get(ins);
                     if (!label) {
                         // label seen first, normal target of forward jump, save addr & allocator
@@ -1468,6 +1562,7 @@ namespace nanojit
                 case LIR_xt:
 				case LIR_xf:
 				{
+                    countlir_xcc();
 					// we only support cmp with guard right now, also assume it is 'close' and only emit the branch
                     NIns* exit = asm_exit(ins); // does intersectRegisterState()
 					LIns* cond = ins->oprnd1();
@@ -1476,6 +1571,7 @@ namespace nanojit
 				}
 				case LIR_x:
 				{
+                    countlir_x();
 		            verbose_only(verbose_output(""));
 					// generate the side exit branch on the main trace.
                     NIns *exit = asm_exit(ins);
@@ -1484,6 +1580,7 @@ namespace nanojit
 				}
 				case LIR_loop:
 				{
+                    countlir_loop();
 					JMP_long_placeholder(); // jump to SOT	
 					verbose_only( if (_verbose && _outputCache) { _outputCache->removeLast(); outputf("         jmp   SOT"); } );
 					
@@ -1512,6 +1609,7 @@ namespace nanojit
 				case LIR_fgt:
 				case LIR_fge:
 				{
+                    countlir_fpu();
 					// only want certain regs 
 					Register r = prepResultReg(ins, AllowableFlagRegs);
 					asm_setcc(r, ins);
@@ -1530,6 +1628,7 @@ namespace nanojit
 				case LIR_ugt:
 				case LIR_uge:
 				{
+                    countlir_alu();
 					// only want certain regs 
 					Register r = prepResultReg(ins, AllowableFlagRegs);
 					// SETcc only sets low 8 bits, so extend 
@@ -1567,6 +1666,7 @@ namespace nanojit
 				case LIR_call:
 				case LIR_calli:
 				{
+                    countlir_call();
                     Register rr = UnknownReg;
 #ifndef NJ_SOFTFLOAT
                     if ((op&LIR64))
@@ -1664,43 +1764,6 @@ namespace nanojit
 		return at;
 	}
 
-    void Assembler::asm_arg(ArgSize sz, LInsp p, Register r)
-    {
-        if (sz == ARGSIZE_Q) 
-        {
-			// ref arg - use lea
-			if (r != UnknownReg)
-			{
-				// arg in specific reg
-				int da = findMemFor(p);
-				LEA(r, da, FP);
-			}
-			else
-			{
-				NanoAssert(0); // not supported
-			}
-		}
-        else if (sz == ARGSIZE_LO)
-		{
-			if (r != UnknownReg)
-			{
-				// arg goes in specific register
-				if (p->isconst())
-					LDi(r, p->constval());
-				else
-					findSpecificRegFor(p, r);
-			}
-			else
-			{
-				asm_pusharg(p);
-			}
-		}
-        else
-		{
-            NanoAssert(sz == ARGSIZE_F);
-			asm_farg(p);
-		}
-    }
 
 	void Assembler::arFree(uint32_t idx)
 	{
@@ -1860,6 +1923,7 @@ namespace nanojit
             }
             else {
                 // no more saved regs available. evict.
+                _nvprof("scratch-evict",1);
                 evict(r);
             }
         }
@@ -1871,6 +1935,7 @@ namespace nanojit
 		// @todo speed this up
         for (Register r = FirstReg; r <= LastReg; r = nextreg(r)) {
             if ((rmask(r) & regs) && _allocator.getActive(r)) {
+                _nvprof("backedge-evict",1);
 				evict(r);
             }
 		}
@@ -1898,8 +1963,10 @@ namespace nanojit
 			}
 			else 
 			{
-				if (curins)
+                if (curins) {
+                    _nvprof("intersect-evict",1);
 					evict(r);
+                }
 				
     			#ifdef NANOJIT_IA32
 				if (savedins && (rmask(r) & x87Regs))
@@ -1933,8 +2000,10 @@ namespace nanojit
 			}
 			else 
 			{
-				if (curins && savedins)
+                if (curins && savedins) {
+                    _nvprof("union-evict",1);
 					evict(r);
+                }
 				
     			#ifdef NANOJIT_IA32
 				if (savedins && (rmask(r) & x87Regs))

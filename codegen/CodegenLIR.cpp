@@ -419,23 +419,24 @@ namespace avmplus
 	}
 
     LIns *CodegenLIR::localCopy(int i) {
-        return lirout->insLoad(
-            state->value(i).traits == NUMBER_TYPE ? LIR_ldq : LIR_ld,
-            vars, i<<3);
+        return state->value(i).traits != NUMBER_TYPE ? localGet(i) : localGetq(i);
     }
 
 	OP* CodegenLIR::localGet(int i) {
-        return lirout->insLoadi(vars, i*8);
+        Value& v = state->value(i);
+        return v.ins = lirout->insLoadi(vars, i*8);
 	}
 
 	OP* CodegenLIR::localGetq(int i) {
-        return lirout->insLoad(LIR_ldq, vars, i*8);
+        Value& v = state->value(i);
+        return v.ins = lirout->insLoad(LIR_ldq, vars, i*8);
 	}
 
-	void  CodegenLIR::localSet(uintptr i, OP* o)	
+	void CodegenLIR::localSet(uintptr i, LIns* o)	
 	{
         Value &v = state->value(i);
-        v.ins = lirout->store(o, vars, i*8);
+        v.ins = o;
+        lirout->store(o, vars, i*8);
         v.stored = true;
 	}
 
@@ -1053,6 +1054,21 @@ namespace avmplus
         // * suppress stores until saveState() points.
     };
 
+    class CfgCseFilter: public CseFilter
+    {
+    public:
+        CfgCseFilter(LirWriter *out, GC *gc) : CseFilter(out, gc)
+        {
+        }
+
+        LIns *ins0(LOpcode op) {
+            if (op == LIR_label) {
+                exprs.clear();
+            }
+            return out->ins0(op);
+        }
+    };
+
 	// f(env, argc, instance, argv)
 	bool CodegenLIR::prologue(FrameState* state)
 	{
@@ -1076,6 +1092,9 @@ namespace avmplus
                 lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
             }
         )
+        if (core->config.cseopt) {
+            lirout = new (gc) CfgCseFilter(lirout, gc);
+        }
         lirout = new (gc) ExprFilter(lirout);
         CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout);
         lirout = copier;
@@ -1512,12 +1531,8 @@ namespace avmplus
 		storeIns(dxnsAddr, 0, InsConst((uintptr)&core->dxnsAddr));
 	}
 
-	void CodegenLIR::merge(const Value& current, Value& target)
+	void CodegenLIR::merge(const Value&/*current*/, Value&/*target*/)
 	{
-		if (target.ins != current.ins)
-		{
-			AvmAssert(target.ins->isStore() && current.ins->isStore());
-		}
 	}
 
 
@@ -4295,6 +4310,13 @@ namespace avmplus
                 // fixme.  the way DeadVars finds loop edges only works on the first pass.
                 // so capture the # of edges so we know how many times to iterate.
                 loops = dv.loops;
+                if (loops > 50) {
+                    // pathalogical bailout, don't do var removal.
+                    verbose_only( if (verbose()) 
+                        printf("skipping dead store removal, %d backedges is too many.\n",iter,dv.loops);
+                    )
+                    return;
+                }
             }
         }
         while (++iter <= loops);
@@ -4351,12 +4373,12 @@ namespace avmplus
         );
 
 #ifdef PERFM
-		const int mhz = 100;
-		double time = (stop-start)/(100.0*mhz);
-		_nvprof("compile", time);
-		_nvprof("lir bytes", lirbuf->byteCount());
-		_nvprof("lir", lirbuf->insCount());		
-		_nvprof("IR/tick", lirbuf->insCount()/time);		
+		const int mhz = 2600;
+		double time = (stop-start)/(1.0*mhz);
+		_nvprof("x86-micros", time);
+		_nvprof("IR-bytes", lirbuf->byteCount());
+		_nvprof("IR", lirbuf->insCount());		
+		_nvprof("IR/micros", lirbuf->insCount()/time);		
 #endif /* PERFM */
 		
         frag->releaseLirBuffer();

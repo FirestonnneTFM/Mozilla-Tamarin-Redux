@@ -1151,8 +1151,16 @@ namespace nanojit
 #ifdef MEMORY_INFO
 //		m_list.set_meminfo_name("LInsHashSet.list");
 #endif
-		m_list.set(kInitialCap-1, 0);
+		//m_list.set(kInitialCap-1, 0);
+        clear();
 	}
+
+    void LInsHashSet::clear() {
+        uint32_t len = m_list.capacity();
+        for (uint32_t i=0; i < len; i++)
+            m_list.set(i, 0);
+        m_used = 0;
+    }
 	
 	/*static*/ uint32_t FASTCALL LInsHashSet::hashcode(LInsp i)
 	{
@@ -1232,7 +1240,9 @@ namespace nanojit
 #ifdef MEMORY_INFO
 //		newlist.set_meminfo_name("LInsHashSet.list");
 #endif
-		newlist.set(newcap-1, 0);
+        for (uint32_t i=0, n=newcap; i < n; i++)
+            newlist.set(i,0);
+		//newlist.set(newcap-1, 0);
 		for (uint32_t i=0, n=m_list.size(); i < n; i++)
 		{
 			LInsp name = m_list.get(i);

@@ -670,6 +670,7 @@ namespace nanojit
 		LInsp findcall(uint32_t fid, uint32_t argc, LInsp args[], uint32_t &i);
 		LInsp add(LInsp i, uint32_t k);
 		void replace(LInsp i);
+        void clear();
 
 		static uint32_t FASTCALL hashimm(int32_t);
 		static uint32_t FASTCALL hashimmq(uint64_t);
