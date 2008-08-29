@@ -250,10 +250,18 @@ namespace nanojit
         int32_t extra = 0;
 		const int32_t pushsize = 4*istack + 8*fargs; // actual stack space used
 
+#if _MSC_VER
+        // msc is slack, and MIR doesn't do anything extra, so lets use this
+        // call-site alignment to at least have code size parity with MIR.
+        uint32_t align = 4;//NJ_ALIGN_STACK;
+#else
+        uint32_t align = NJ_ALIGN_STACK;
+#endif
+
         if (pushsize) {
 		    // stack re-alignment 
 		    // only pop our adjustment amount since callee pops args in FASTCALL mode
-		    extra = alignUp(pushsize, NJ_ALIGN_STACK) - pushsize;
+		    extra = alignUp(pushsize, align) - pushsize;
             if (call->_abi == ABI_CDECL) {
 				// with CDECL only, caller pops args
                 ADDi(SP, extra+pushsize);
@@ -961,6 +969,58 @@ namespace nanojit
 		}
 #endif
 	}
+
+    void Assembler::asm_arg(ArgSize sz, LInsp p, Register r)
+    {
+        if (sz == ARGSIZE_Q) 
+        {
+			// ref arg - use lea
+			if (r != UnknownReg)
+			{
+				// arg in specific reg
+				int da = findMemFor(p);
+				LEA(r, da, FP);
+			}
+			else
+			{
+				NanoAssert(0); // not supported
+			}
+		}
+        else if (sz == ARGSIZE_LO)
+		{
+			if (r != UnknownReg) {
+				// arg goes in specific register
+                if (p->isconst()) {
+					LDi(r, p->constval());
+                } else {
+            		Reservation* rA = getresv(p);
+                    if (rA) {
+                        if (rA->reg == UnknownReg) {
+                            // load it into the arg reg
+                            int d = findMemFor(p);
+                            LD(r, d, FP);
+                        } else {
+                            // it must be in a saved reg
+                            MR(r, rA->reg);
+                        }
+                    } 
+                    else {
+                        // this is the last use, so fine to assign it
+                        // to the scratch reg, it's dead after this point.
+    					findSpecificRegFor(p, r);
+                    }
+                }
+			}
+            else {
+				asm_pusharg(p);
+			}
+		}
+        else
+		{
+            NanoAssert(sz == ARGSIZE_F);
+			asm_farg(p);
+		}
+    }
 
 	void Assembler::asm_pusharg(LInsp p)
 	{

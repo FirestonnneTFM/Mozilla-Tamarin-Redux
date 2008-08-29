@@ -109,8 +109,8 @@ namespace avmplus
 				verifier.verify(&mir);	// pass 2 - data flow
 		#ifdef PERFM
 				uint64_t stop = rtstamp();
-				const int mhz = 100;
-				_nvprof("verify & IR gen", (stop-start)/(100*mhz));
+				const int mhz = 2600;
+				_nvprof("verify & IR gen", (stop-start)/(1.0*mhz));
 		#endif /* PERFM */
         
 				if (!mir.overflow)
