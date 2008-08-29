@@ -38,7 +38,8 @@
 #include "avmplus.h"
 #include <math.h>
 
-#ifdef AVMPLUS_IA32#define X86_MATH
+#ifdef AVMPLUS_IA32
+#define X86_MATH
 #endif
 
 
@@ -274,7 +275,9 @@ namespace avmplus
 		_asm _emit 0xDD; // fstp st(1);
 		_asm _emit 0xD9;
 	}
-#elif defined(UNDER_CE)	double modInternal(double x, double y) { return ::fmod(x, y); };#else
+#elif defined(UNDER_CE)
+	double modInternal(double x, double y) { return ::fmod(x, y); };
+#else
 extern "C" {
 	double modInternal(double x, double y);
 }
