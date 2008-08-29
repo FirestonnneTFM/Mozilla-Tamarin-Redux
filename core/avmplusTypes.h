@@ -50,13 +50,8 @@
 	typedef unsigned __int16	uint16_t;
 	typedef unsigned __int32	uint32_t; 
 	typedef unsigned __int64	uint64_t;
-	// intptr is same as int64, can't overload it separately
-	//#define AVMPLUS_INTPTR_OVERLOADS
 #else
 	#include <inttypes.h>
-	// intptr is (generally) defined as long, not int, so can (and must) overload it
-	// (true of gcc 4.x, might not be elsewhere)
-	#define AVMPLUS_INTPTR_OVERLOADS
 #endif
 
 namespace avmplus
@@ -89,11 +84,34 @@ namespace avmplus
     #ifndef NULL
     #define NULL 0
     #endif
+	
+	// Atom should really be an intptr_t, but doing so can cause problematic compiles
+	// because some platforms define intptr_t as an int64, and some as a long, which
+	// create different overload possibilities in a few cases. Ideally, Atom should
+	// be a unique pointer type (as it is in TT) but for now, avoid the code churn
+	// by defining it the "old" way
+	//
+	// math friendly pointer (64 bits in LP 64 systems)
+	#if defined (_MSC_VER) && (_MSC_VER >= 1300)
+	    #define AVMPLUS_TYPE_IS_POINTER_SIZED __w64
+	#else
+	    #define AVMPLUS_TYPE_IS_POINTER_SIZED
+	#endif	
+	#ifdef AVMPLUS_64BIT
+	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int64_t Atom;
+	#else
+	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32_t Atom;
+	#endif
+	
+	// nothing overloads on Binding, so we can use intptr_t
+	// Ideally, Binding should be a unique pointer type (as it is in TT) but for now, 
+	// avoid the code churn by defining it the "old" way
+	typedef intptr_t	Binding;
 
-	// @todo -- these should really be unique pointer types, not intptr
-	typedef sintptr          Atom;
-	typedef sintptr			 Binding;
-	typedef sintptr          CodeContextAtom;
+	// nothing overloads on CodeContextAtom, so we can use intptr_t
+	// Ideally, CodeContextAtom should be a unique pointer type (as it is in TT) but for now, 
+	// avoid the code churn by defining it the "old" way
+	typedef intptr_t	CodeContextAtom;
 
 	inline uint32 urshift(Atom atom, int amount)
 	{
