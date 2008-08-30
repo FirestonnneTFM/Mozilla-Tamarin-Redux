@@ -1005,14 +1005,6 @@ namespace avmplus
             this->vars = vars;
         }
 
-        void store(int d, LIns *val) {
-            tracker.put(d, val);
-        }
-
-        void reset() {
-            tracker.clear();
-        }
-
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
             if (base == vars) {
                 int d = disp->constval();
@@ -1026,26 +1018,20 @@ namespace avmplus
 
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
             if (base == vars)
-                store(disp->constval(), value);
+                tracker.put(disp->constval(), value);
             return out->insStore(value, base, disp);
         }
 
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
             if (base == vars)
-                store(d, value);
+                tracker.put(d, value);
             return out->insStorei(value, base, d);
         }
 
         LIns *ins0(LOpcode op) {
             if (op == LIR_label)
-                reset();
+                tracker.clear();
             return out->ins0(op);
-        }
-
-        LIns *ins1(LOpcode op, LIns* a) {
-            if (isRet(op))
-                reset();
-            return out->ins1(op, a);
         }
 
         // TODO
@@ -4313,7 +4299,7 @@ namespace avmplus
                 if (loops > 50) {
                     // pathalogical bailout, don't do var removal.
                     verbose_only( if (verbose()) 
-                        printf("skipping dead store removal, %d backedges is too many.\n",iter,dv.loops);
+                        printf("skipping dead store removal, %d backedges is too many.\n",dv.loops);
                     )
                     return;
                 }
@@ -4323,7 +4309,7 @@ namespace avmplus
 
         // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
         verbose_only( if (verbose()) 
-            printf("killing dead stores after %d LA iterations.  %d loop edges\n",iter,dv.loops);
+            printf("killing dead stores after %d LA iterations.  %d loop edges\n",iter,loops);
         )
         dv.reset(true);
         in.setpos(last);

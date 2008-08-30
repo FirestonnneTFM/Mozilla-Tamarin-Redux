@@ -101,11 +101,14 @@ namespace nanojit
 		void flush() {
             flushnext = false;
             if (!block.isEmpty()) {
-			    assm->outputf("        %p:", assm->_nIns);
-			    assm->output("");
-			    for (int j=0,n=block.size(); j < n; j++)
+			    for (int j=0,n=block.size(); j < n; j++) {
+					LIns *i = block[j];
 				    assm->outputf("    %s", names->formatIns(block[j]));
-			    assm->output("");
+					if (i->isop(LIR_label)) {
+						assm->outputf("        %p:", assm->_nIns);
+						assm->output("");
+					}
+				}
 			    block.clear();
             }
 		}
@@ -132,7 +135,7 @@ namespace nanojit
 			else {
                 if (flushnext)
                     flush();
-				block.add(i);
+				flush_add(i);//block.add(i);
                 if (i->isop(LIR_label))
                     flushnext = true;
 			}
@@ -1896,37 +1899,38 @@ namespace nanojit
      */
     void Assembler::evictScratchRegs()
     {
-        avmplus::SortedMap<int32_t, int32_t, avmplus::LIST_NonGCObjects> primap(_gc);
+		// find the top GpRegs that are candidates to put in SavedRegs
+
+        avmplus::SortedMap<int32_t, LIns*, avmplus::LIST_NonGCObjects> primap(_gc);
         for (Register r = FirstReg; r <= LastReg; r = nextreg(r)) {
-            if (_allocator.getActive(r)) {
-                int32_t pri = _allocator.getPriority(r);
-                NanoAssert(!primap.containsKey(pri));
-                primap.put(pri, r);
+			if (rmask(r) & GpRegs) {
+				LIns *i = _allocator.getActive(r);
+				if (i) {
+					if (canRemat(i)) {
+						evict(r);
+					}
+					else {
+						int32_t pri = _allocator.getPriority(r);
+						NanoAssert(!primap.containsKey(pri));
+						primap.put(pri, i);
+					}
+				}
             }
         }
-        // now primap has the live regs in priority order.  
+
+        // now primap has the live exprs in priority order.  
+		// allocate each of the top priority exprs to a SavedReg
 
         RegisterMask allow = SavedRegs;
-        while (!primap.isEmpty()) {
+        while (allow && !primap.isEmpty()) {
             // get the highest priority var
-            Register r = (Register) primap.removeLast();
-            if (rmask(r) & allow) {
-                // high priority item already in saved reg
-                allow &= ~rmask(r);
-            } 
-            else if (allow && (rmask(r)&GpRegs)) {
-                // move hi-pri item to saved reg.  
-                // if spilling is required, will spill a lower pri saved reg.
-                LIns *i = _allocator.getActive(r);
-                Register s = findRegFor(i, allow);
-                allow &= ~rmask(s);
-            }
-            else {
-                // no more saved regs available. evict.
-                _nvprof("scratch-evict",1);
-                evict(r);
-            }
+			LIns *i = primap.removeLast();
+            Register r = findRegFor(i, allow);
+			allow &= ~rmask(r);
         }
+
+		// now evict everything else.
+		evictRegs(~SavedRegs);
     }
 
 	void Assembler::evictRegs(RegisterMask regs)
@@ -1935,7 +1939,6 @@ namespace nanojit
 		// @todo speed this up
         for (Register r = FirstReg; r <= LastReg; r = nextreg(r)) {
             if ((rmask(r) & regs) && _allocator.getActive(r)) {
-                _nvprof("backedge-evict",1);
 				evict(r);
             }
 		}
