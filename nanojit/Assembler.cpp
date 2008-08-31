@@ -1040,26 +1040,24 @@ namespace nanojit
 
                 case LIR_ret:  {
                     countlir_ret();
-                    LIns *val = ins->oprnd1();
-                    findSpecificRegFor(val, retRegs[0]);
                     if (_nIns != _epilogue) {
                         JMP(_epilogue);
                     }
                     MR(SP,FP);
+					releaseRegisters();
+                    findSpecificRegFor(ins->oprnd1(), retRegs[0]);
                     break;
                 }
 
                 case LIR_fret: {
                     countlir_ret();
-                    LIns *val = ins->oprnd1();
-                    findSpecificRegFor(val, FST0);
-                    fpu_pop();
                     if (_nIns != _epilogue) {
                         JMP(_epilogue);
                     }
                     MR(SP,FP);
-                    //if (sse2)
-                    //    evict(FST0);
+					releaseRegisters();
+                    findSpecificRegFor(ins->oprnd1(), FST0);
+                    fpu_pop();
                     break;
                 }
 
@@ -2009,8 +2007,16 @@ namespace nanojit
                 }
 				
     			#ifdef NANOJIT_IA32
-				if (savedins && (rmask(r) & x87Regs))
-					FSTP(r);
+				if (rmask(r) & x87Regs) {
+					if (savedins) {
+						FSTP(r);
+					}
+					else {
+						// saved state did not have fpu reg allocated,
+						// so we must evict here to keep x87 stack balanced.
+						evict(r);
+					}
+				}
 				#endif
 			}
 		}
