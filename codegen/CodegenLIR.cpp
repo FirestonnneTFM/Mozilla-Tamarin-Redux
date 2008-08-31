@@ -1009,9 +1009,11 @@ namespace avmplus
             if (base == vars) {
                 int d = disp->constval();
                 LIns *val = tracker.get(d);
-                if (val) {
-                    return val;
-                }
+				if (!val) {
+					val = out->insLoad(op, base, disp);
+					tracker.put(d, val);
+				}
+				return val;
             }
             return out->insLoad(op, base, disp);
         }
@@ -4361,10 +4363,10 @@ namespace avmplus
 #ifdef PERFM
 		const int mhz = 2600;
 		double time = (stop-start)/(1.0*mhz);
-		_nvprof("x86-micros", time);
+		_nvprof("compile", time);
 		_nvprof("IR-bytes", lirbuf->byteCount());
 		_nvprof("IR", lirbuf->insCount());		
-		_nvprof("IR/micros", lirbuf->insCount()/time);		
+		_nvprof("IR/tick", lirbuf->insCount()/time);		
 #endif /* PERFM */
 		
         frag->releaseLirBuffer();

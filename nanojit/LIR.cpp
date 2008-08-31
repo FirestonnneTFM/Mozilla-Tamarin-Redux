@@ -719,6 +719,13 @@ namespace nanojit
 			if (i->isop(LIR_qjoin))
 				return i->oprnd2();
 		}
+		else if (i->isconst()) {
+			int32_t c = i->constval();
+			if (v == LIR_neg)
+				return insImm(-c);
+			if (v == LIR_not)
+				return insImm(!c);
+		}
 		else if (v == i->opcode() && (v == LIR_not || v == LIR_neg || v == LIR_fneg)) {
             // not(not(x)) = x;  neg(neg(x)) = x;  fneg(fneg(x)) = x;
 			return i->oprnd1();
@@ -796,6 +803,18 @@ namespace nanojit
 				return insImm(int32_t(c1) << int32_t(c2));
 			if (v == LIR_ush)
 				return insImm(uint32_t(c1) >> int32_t(c2));
+			if (v == LIR_and)
+				return insImm(int32_t(c1) & int32_t(c2));
+			if (v == LIR_or)
+				return insImm(int32_t(c1) | int32_t(c2));
+			if (v == LIR_xor)
+				return insImm(int32_t(c1) ^ int32_t(c2));
+			if (v == LIR_add)
+				return insImm(int32_t(c1) + int32_t(c2));
+			if (v == LIR_sub)
+				return insImm(int32_t(c1) - int32_t(c2));
+			if (v == LIR_mul)
+				return insImm(int32_t(c1) * int32_t(c2));
 		}
 		else if (oprnd1->isconstq() && oprnd2->isconstq())
 		{
