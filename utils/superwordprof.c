@@ -49,6 +49,10 @@
  *    -l n    Cutoff: show only sequences whose length is at most n
  *            (default unbounded)
  *
+ *    -f      Flat: print results in flat form as well as hierarchical
+ *
+ *    -h      Disable hierarchical report
+ *
  *    -v      Verbose: print useful diagnostics on stderr
  *
  *
@@ -56,7 +60,7 @@
  *
  * First enable SUPERWORD_PROFILING in core/avmbuild.h and rebuild
  * Tamarin.  Then run Tamarin on a program; the output will be two
- * files, superwordprof_code.txt and superwordprof_samples.txt.
+ * files, superwordprof_code.txt and superwordprof_sample.txt.
  *
  * Then run the present program, providing those two files in that
  * order as arguments.  Output is presented on stdout describing
@@ -287,8 +291,13 @@ enum {
 #define INSTRCOUNT    LAST_INSTR+1
 #define DEF(name)     assert(name < INSTRCOUNT); iname[name] = #name + 3
 
-const char *progname;
+const char *progname = "superwordprof";
 int verbose = 0;
+int flat = 0;
+int hierarchical = 1;
+int cutoff_count = 100;
+int cutoff_length = INT_MAX;
+int scale = 0;
 codestruct_t codestructs[1000];
 int wordsize = 4;
 int nextcodestruct = 0;
@@ -296,8 +305,6 @@ trie_t toplevel[INSTRCOUNT];
 int jumps[INSTRCOUNT];
 const char *iname[INSTRCOUNT];
 unsigned int ibuf[1000];
-int cutoff_count = 100;
-int cutoff_length = INT_MAX;
 seq_t seqs[10000];
 int nextseq = 0;
 
@@ -514,6 +521,14 @@ int main(int argc, char** argv)
 	    }
 	    i += 2;
 	}
+	else if (strcmp(argv[i], "-f") == 0) {
+	    flat = 1;
+	    i++;
+	}
+	else if (strcmp(argv[i], "-h") == 0) {
+	    hierarchical = 0;
+	    i++;
+	}
 	else if (strcmp(argv[i], "-v") == 0) {
 	    verbose = 1;
 	    i++;
@@ -529,6 +544,8 @@ int main(int argc, char** argv)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -c n     Set sample cutoff = n (default 100)\n");
 	fprintf(stderr, "  -l n     Set length cutoff = n (default unbounded)\n");
+	fprintf(stderr, "  -f       Enable flat report\n");
+	fprintf(stderr, "  -h       Disable hierarchical report\n");
 	fprintf(stderr, "  -v       Verbose");
 	return 1;
     }
@@ -537,6 +554,7 @@ int main(int argc, char** argv)
 	read_code(argv[i]);
 	read_samples(argv[i+1]);
 	i += 2;
+	scale++;
     }
     extract_superwords();
 
@@ -552,6 +570,8 @@ void read_code(const char* filename)
     codestruct_t *codestruct;
 
     (code_fp = fopen(filename, "rb")) != NULL || fail("No such file: %s", filename);
+    if (verbose)
+	fprintf(stderr, "%s\n", filename);
 
     nextcodestruct = 0;    /* Don't bother deallocating data from previous code file */
     total_wordcount = 0;
@@ -617,6 +637,8 @@ void read_samples(const char* filename)
     int bigbufptr = 0;
     int despecializations = 0;
 
+    if (verbose)
+	fprintf(stderr, "%s\n", filename);
     (sample_fp = fopen(filename, "rb")) != NULL || fail("No such file: %s", filename);
 
     fread(&signature, sizeof(unsigned int), 1, sample_fp) == 1 || fail("No sample signature");
@@ -831,20 +853,28 @@ void extract_superwords()
     nextseq = j;
 
     /* Flat */
-    /*
-    for ( i=0 ; i < nextseq ; i++ )
-        printseq(i, 0);
-    */
+
+    if (flat)
+	for ( i=0 ; i < nextseq ; i++ )
+	    printseq(i, 0);
+	
 
     /* Hierarchical.  Every sequence that is a proper prefix of
        another sequence will necessarily have a higher execution
        count, and will be printed with the longer sequence as a
-       child. */
+       child. 
 
-    for ( i=0 ; i < nextseq ; i++ ) {
-	if (!seqs[i].suffix) {
-	    printseq(i, 0);
-	    printhseq(i, 1);
+       Note this messes with the suffix flag.
+    */
+
+    if (hierarchical) {
+	if (flat)
+	    printf("\n\n----------\n\n");
+	for ( i=0 ; i < nextseq ; i++ ) {
+	    if (!seqs[i].suffix) {
+		printseq(i, 0);
+		printhseq(i, 1);
+	    }
 	}
     }
 }
@@ -916,11 +946,11 @@ void descend(trie_t *t, int level)
 
 void emit(int level, unsigned int count)
 {
-    if (level > 1 && level <= cutoff_length && count >= cutoff_count) {
+    if (level > 1 && level <= cutoff_length && count/scale >= cutoff_count) {
 	nextseq < sizeof(seqs)/sizeof(seq_t) || fail("Out of seq memory.");
 	seq_t *seq = &seqs[nextseq++];
 	seq->data = (unsigned int*) safemalloc(sizeof(unsigned int) * level);
-	seq->count = count;
+	seq->count = count/scale;
 	seq->length = level;
 	seq->suffix = 0;
 	memcpy(seq->data, ibuf, level*sizeof(unsigned int));

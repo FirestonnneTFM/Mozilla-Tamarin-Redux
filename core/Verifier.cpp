@@ -810,7 +810,9 @@ namespace avmplus
 				MIR_ONLY( if (mir) mir->emitKill(state, imm30); )
 				v.notNull = false;
 				v.traits = NULL;
+#ifdef AVMPLUS_MIR
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+#endif
 				break;
 			}
 
@@ -1255,7 +1257,7 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(NULL, sp);
-#ifndef AVMPLUS_MIR
+#ifdef AVMPLUS_MIR
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 #endif
 				break;
