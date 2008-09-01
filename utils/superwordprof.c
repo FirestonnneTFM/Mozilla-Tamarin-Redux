@@ -1,14 +1,110 @@
-/* tab-width: 4 */
+/* -*- c-indentation-style: stroustrup -*- */
 
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+/* Superword profiling for Tamarin.
+ *
+ * Usage summary:
+ *    superwordprof [options] ( code-file sample-file ) ...
+ *
+ * Options:
+ *    -c n    Cutoff: do not show sequences whose dynamic execution count
+ *            is less than n (default 100)
+ *
+ *    -v      Verbose: print useful diagnostics on stderr
+ *
+ *
+ * Description:
+ *
+ * First enable SUPERWORD_PROFILING in core/avmbuild.h and rebuild
+ * Tamarin.  Then run Tamarin on a program; the output will be two
+ * files, superwordprof_code.txt and superwordprof_samples.txt.
+ *
+ * Then run the present program, providing those two files in that
+ * order as arguments.  Output is presented on stdout describing
+ * common dynamic code sequences.  More than one pair of files can be
+ * provided; the output represents aggregate statistics across all the
+ * runs.
+ *
+ *
+ * Missing features:
+ *
+ * - Ability to track argument values symbolically, eg, to discover
+ *   whether SETLOCAL; GETLOCAL is really SETLOCAL a; GETLOCAL a
+ *   (which we might optimize) or SETLOCAL a; GETLOCAL b (which we
+ *   shouldn't)
+ *
+ * - Ability to abstract instruction sequences that leave the stack
+ *   invariant, so that GETGLOBALSCOPE; <comp>; SETSLOT can be
+ *   recognized as a cliche, for example.  This also aids the handling
+ *   of commutative operations where the right operand is often a
+ *   constant and an "operate with immediate" instruction would be
+ *   effective.  Consider "C * x" => "x * C" for constant "C" some number 
+ *   (at least) and operator "*" at least in the set &, |, ^, *, ==, ===.
+ *   The key is that that there are no observable changes to the 
+ *   order of evaluation as long as one of the operands is a constant.  
+ *   What we're looking for here is BITS; <comp>; OP.  (The compiler 
+ *   should really be able to help us out here by performing the
+ *   transformation, but doesn't at present.)  A plausible way to handle
+ *   this is to track stack effects (+ / -) separately, so that a
+ *   single instruction that has a +1/-0 effect is considered a trivial
+ *   value generator (like GETGLOBALSCOPE and BITS above); then a
+ *   sequence of instructions that have a +1/-0 effect and never goes
+ *   negative is an arbitrary value producer; then an OP that is (+1/-2)
+ *   or (+0/-2) is the operator (like SETSLOT or AND).  We only need
+ *   to track within the basic block (or even within the peephole
+ *   window), so it's very simple.  But in practice this is like the dog
+ *   chasing a car: what do we do when we catch it?  Tracking this in
+ *   the peephole optimizer in the VM might be a bit too elaborate.
+ *
+ * Bugs:
+ *
+ * - Some of the tables are fixed size and the program halts when they
+ *   overflow.
+ */
+
+#include <assert.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
 typedef struct codestruct codestruct_t;
-typedef struct trie trie_t;
-typedef struct seq seq_t;
-
 struct codestruct {
     unsigned int *code;
     unsigned int start;
@@ -16,6 +112,7 @@ struct codestruct {
     codestruct_t *next;
 };
 
+typedef struct trie trie_t;
 struct trie {
     unsigned int opcode;
     unsigned int count;
@@ -23,6 +120,7 @@ struct trie {
     trie_t *left_child;
 };
 
+typedef struct seq seq_t;
 struct seq {
     unsigned int* data;
     unsigned int length;
@@ -183,9 +281,10 @@ enum {
 
 #define LAST_INSTR    0x102
 #define INSTRCOUNT    LAST_INSTR+1
-#define DEF(name)     iname[name] = #name + 3
+#define DEF(name)     assert(name < INSTRCOUNT); iname[name] = #name + 3
 
 const char *progname;
+int verbose = 0;
 codestruct_t codestructs[1000];
 int wordsize = 4;
 int nextcodestruct = 0;
@@ -401,21 +500,29 @@ int main(int argc, char** argv)
 	    }
 	    i += 2;
 	}
+	else if (strcmp(argv[i], "-v") == 0) {
+	    verbose = 1;
+	    i++;
+	}
 	else {
 	    i = argc;
 	    break;
 	}
     }
  
-    if (i > argc-2) {
-	fprintf(stderr, "Usage: %s [options] code_file sample_file\n\n", progname);
+    if (i > argc-2 || (argc - i) % 2 != 0) {
+	fprintf(stderr, "Usage: %s [options] ( code_file sample_file ) ... \n\n", progname);
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -c n     Set sample cutoff = n (default 100)\n");
+	fprintf(stderr, "  -v       Verbose");
 	return 1;
     }
 
-    read_code(argv[i]);
-    read_samples(argv[i+1]);
+    while (i < argc) {
+	read_code(argv[i]);
+	read_samples(argv[i+1]);
+	i += 2;
+    }
     extract_superwords();
 
     return 0;
@@ -426,13 +533,16 @@ int main(int argc, char** argv)
 void read_code(const char* filename)
 {
     FILE *code_fp;
-    unsigned int total_wordcount, numcodes;
+    unsigned int total_wordcount, numcodes, signature;
     codestruct_t *codestruct;
 
     (code_fp = fopen(filename, "rb")) != NULL || fail("No such file: %s", filename);
 
+    nextcodestruct = 0;    /* Don't bother deallocating data from previous code file */
     total_wordcount = 0;
     numcodes = 0;
+    fread(&signature, sizeof(unsigned int), 1, code_fp) == 1 || fail("No code signature");
+    signature == 0xC0DEC0DE || fail("Bad code signature: %08x", signature);
     for (;;) {
 	unsigned int start, limit, wordcount;
 	unsigned int *codebuf;
@@ -465,8 +575,10 @@ void read_code(const char* filename)
 		fprintf(stderr, "ERROR!\n");
     }
 
-    fprintf(stderr, "Number of code structs: %d\n", nextcodestruct);
-    fprintf(stderr, "Words of code: %d\n", total_wordcount);
+    if (verbose) {
+	fprintf(stderr, "Number of code structs: %d\n", nextcodestruct);
+	fprintf(stderr, "Words of code: %d\n", total_wordcount);
+    }
 }
 
 /* Second pass: read the execution records.  Maintain a trie that is
@@ -481,23 +593,26 @@ void read_samples(const char* filename)
 {
     static unsigned int bigbuf[1000000];
     FILE *sample_fp;
-    unsigned int total_samples;
-    unsigned int prev_pc;
+    unsigned int total_samples, signature, prev_pc;
     codestruct_t *prev_codestruct;
     trie_t* tracker[1000];
     int nexttracker;
     int trie_nodes = 0;
     int bigbuflim = 0;
     int bigbufptr = 0;
+    int despecializations = 0;
 
     (sample_fp = fopen(filename, "rb")) != NULL || fail("No such file: %s", filename);
+
+    fread(&signature, sizeof(unsigned int), 1, sample_fp) == 1 || fail("No sample signature");
+    signature == 0xDA1ADA1A || fail("Bad sample signature: %08x", signature);
 
     total_samples = 0;
     prev_codestruct = NULL;
     prev_pc = 0;
     nexttracker = 0;
     for (;;) {
-	unsigned int pc, opcode, prev_opcode;
+	unsigned int pc, opcode, ops, op, opcodes[10];
 	codestruct_t *codestruct;
 
 	if (bigbufptr == bigbuflim) {
@@ -513,18 +628,100 @@ void read_samples(const char* filename)
 	codestruct = (codestruct_t*)bsearch(&pc, codestructs, nextcodestruct, sizeof(codestruct_t), pc_cmp);
 	codestruct != NULL || fail("Could not find pc=%08x anywhere in code memory.", pc);
 	opcode = codestruct->code[(pc - codestruct->start)/wordsize];
-	if (prev_opcode == OP_getlocal && opcode == OP_getlocal)
-	{
-	    int i = 10;
-	    (void)i;
-	}
-
 	if (opcode > 255)
 	    opcode = 256 + (opcode >> 8);
+
+	/* Despecialize.  We can do it in the interpreter or here;
+	 * doing it here is simpler for the moment, provided we don't
+	 * have to adjust branch targets and so on.  Despecialization
+	 * merely inserts opcodes into a buffer, across which we then
+	 * iterate; in the degenerate case, the single opcode is not
+	 * despecialized and is just inserted into the buffer alone.
+	 *
+	 * Right now there's no need to handle argument values.
+	 *
+	 * Open questions (likely answers are always "no"):
+	 *  - Should we despecialize IFFALSE as NOT; IFTRUE?
+	 *  - Should increment and decrement be despecialized as PUSHINT 1; ADD?
+	 *  - Should inclocal and declocal be despecialized by breaking
+	 *    it into GETLOCAL; INCREMENT; SETLOCAL?
+	 */
+	ops = 0;
+	switch (opcode) {
+	default:
+	    opcodes[ops++] = opcode;
+	    break;
+	case OP_getlocal0:
+	case OP_getlocal1:
+	case OP_getlocal2:
+	case OP_getlocal3:
+	    opcodes[ops++] = OP_getlocal;
+	    break;
+	case OP_setlocal0:
+	case OP_setlocal1:
+	case OP_setlocal2:
+	case OP_setlocal3:
+	    opcodes[ops++] = OP_setlocal;
+	    break;
+	case OP_iflt:
+	    opcodes[ops++] = OP_lessthan;
+	    opcodes[ops++] = OP_iftrue;
+	    break;
+	case OP_ifle:
+	    opcodes[ops++] = OP_lessequals;
+	    opcodes[ops++] = OP_iftrue;
+	    break;
+	case OP_ifnlt:
+	    opcodes[ops++] = OP_lessthan;
+	    opcodes[ops++] = OP_iffalse;
+	    break;
+	case OP_ifnle:
+	    opcodes[ops++] = OP_lessequals;
+	    opcodes[ops++] = OP_iffalse;
+	    break;
+	case OP_ifgt:
+	    opcodes[ops++] = OP_greaterthan;
+	    opcodes[ops++] = OP_iftrue;
+	    break;
+	case OP_ifge:
+	    opcodes[ops++] = OP_greaterequals;
+	    opcodes[ops++] = OP_iftrue;
+	    break;
+	case OP_ifngt:
+	    opcodes[ops++] = OP_greaterthan;
+	    opcodes[ops++] = OP_iffalse;
+	    break;
+	case OP_ifnge:
+	    opcodes[ops++] = OP_greaterequals;
+	    opcodes[ops++] = OP_iffalse;
+	    break;
+	case OP_ifeq:
+	    opcodes[ops++] = OP_equals;
+	    opcodes[ops++] = OP_iftrue;
+	    break;
+	case OP_ifstricteq:
+	    opcodes[ops++] = OP_strictequals;
+	    opcodes[ops++] = OP_iftrue;
+	    break;
+	case OP_ifne:
+	    opcodes[ops++] = OP_equals;
+	    opcodes[ops++] = OP_iffalse;
+	    break;
+	case OP_ifstrictne:
+	    opcodes[ops++] = OP_strictequals;
+	    opcodes[ops++] = OP_iffalse;
+	    break;
+	}
+
+	if (opcodes[0] != opcode || ops > 1)
+	    despecializations++;
+
 	if (prev_codestruct != codestruct)
 	    nexttracker = 0;
-	else {
+
+	for ( op=0 ; op < ops ; op++ ) {
 	    int i;
+	    opcode = opcodes[op];
 	    for ( i=0 ; i < nexttracker ; i++ ) {
 		trie_t *t = tracker[i];
 		if (t->left_child == NULL) {
@@ -548,20 +745,25 @@ void read_samples(const char* filename)
 		}
 	    }
 	    nexttracker < sizeof(tracker)/sizeof(tracker[0]) || fail("Out of tracker memory, probably a bug");
+	    tracker[nexttracker++] = &toplevel[opcode];
+	    toplevel[opcode].count++;
+
+	    if (jumps[opcode]) {
+		assert(op == ops-1);
+		nexttracker = 0;
+	    }
 	}
-	tracker[nexttracker++] = &toplevel[opcode];
-	toplevel[opcode].count++;
 	prev_codestruct = codestruct;
 	prev_pc = pc;
-	if (jumps[opcode]) 
-	    nexttracker = 0;
-	prev_opcode = opcode;
     }
 
     fclose(sample_fp);
 
-    fprintf(stderr, "Samples processed: %d\n", total_samples);
-    fprintf(stderr, "Trie nodes: %d\n", trie_nodes);
+    if (verbose) {
+	fprintf(stderr, "Samples processed: %d\n", total_samples);
+	fprintf(stderr, "Despecializations: %d\n", despecializations);
+	fprintf(stderr, "Trie nodes: %d\n", trie_nodes);
+    }
 }
 
 /* Third pass: extract all sequences and their execution counts.  We
@@ -599,10 +801,10 @@ void extract_superwords()
 
     for ( i=0 ; i < nextseq ; i++ ) {
 	if (!seqs[i].suffix) {
-	    printf("%d\t(", seqs[i].count);
+	    printf("%11d | ", seqs[i].count);
 	    for ( j=0 ; j < seqs[i].length ; j++ )
 		printf("%s ", iname[seqs[i].data[j]]);
-	    printf(")   ");
+	    printf("| ");
 	    for ( j=0 ; j < seqs[i].length ; j++ )
 		printf("%x ", seqs[i].data[j]);
 	    printf("\n");

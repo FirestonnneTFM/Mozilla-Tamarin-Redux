@@ -331,7 +331,11 @@ namespace avmplus
 			 XXX(0x7F)
 			 III(0x80, L_coerce)
 			 III(0x81, L_coerce_b)
+#ifdef AVMPLUS_MIR
 			 III(0x82, L_coerce_a)
+#else
+			 XXX(0x82)
+#endif
 			 III(0x83, L_coerce_i)
 			 III(0x84, L_coerce_d)
 			 III(0x85, L_coerce_s)
@@ -809,13 +813,15 @@ namespace avmplus
 			}
 #endif
 
+#ifndef AVMPLUS_MIR
 			INSTR(coerce_a) { // no-op since interpreter only uses atoms
 #ifdef MSVC_X86_REWRITE_THREADING
 				SAVE_EXPC;    // need to do _something_ or the label disappears completely
 #endif
                 NEXT;
 			}
-
+#endif
+					
 			INSTR(bkpt) {
 				SAVE_EXPC;
 				#ifdef DEBUGGER
@@ -2709,17 +2715,34 @@ namespace avmplus
 
 	static FILE *swprof_code_fp = NULL;
 	static FILE *swprof_sample_fp = NULL;
-			
+#ifdef SUPERWORD_LIMIT
+	static unsigned int sample_count = 0;
+#endif
+
 	void swprofStart()
 	{
 		swprof_code_fp = fopen("superwordprof_code.txt", "wb");
+		if (swprof_code_fp == NULL)
+			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN CODE FILE.\n");
+		else
+		{
+			unsigned int signature = 0xC0DEC0DE;
+			fwrite(&signature, sizeof(uint32), 1, swprof_code_fp);
+		}
 		swprof_sample_fp = fopen("superwordprof_sample.txt", "wb");
+		if (swprof_sample_fp == NULL)
+			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN SAMPLE FILE.\n");
+		else
+		{
+			unsigned int signature = 0xDA1ADA1A;
+			fwrite(&signature, sizeof(uint32), 1, swprof_sample_fp);
+		}
 	}
 	
 	void swprofStop() 
 	{
-		if (swprof_code_fp != NULL)	fclose(swprof_code_fp);
-		if (swprof_sample_fp != NULL) fclose(swprof_sample_fp);
+		if (swprof_code_fp != NULL)	{ fclose(swprof_code_fp); swprof_code_fp = NULL; }
+		if (swprof_sample_fp != NULL) { fclose(swprof_sample_fp); swprof_sample_fp = NULL; }
 	}
 			
 	void swprofCode(const uint32* start, const uint32* limit)
@@ -2734,9 +2757,16 @@ namespace avmplus
 
 	void swprofPC(const uint32* pc)
 	{
-		if (swprof_sample_fp != NULL)
+		if (swprof_sample_fp != NULL) {
 			fwrite(&pc, sizeof(uint32*), 1, swprof_sample_fp);
-	}
+#ifdef SUPERWORD_LIMIT
+			if (++sample_count == SUPERWORD_LIMIT) {
+				swprofStop();
+				fprintf(stderr, "SAMPLING HALTED.\n");
+			}
 #endif
+		}
+	}
+#endif  // SUPERWORD_PROFILING
 			
 }
