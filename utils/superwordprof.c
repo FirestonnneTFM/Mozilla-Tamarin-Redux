@@ -46,6 +46,9 @@
  *    -c n    Cutoff: do not show sequences whose dynamic execution count
  *            is less than n (default 100)
  *
+ *    -l n    Cutoff: show only sequences whose length is at most n
+ *            (default unbounded)
+ *
  *    -v      Verbose: print useful diagnostics on stderr
  *
  *
@@ -103,6 +106,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 typedef struct codestruct codestruct_t;
 struct codestruct {
@@ -292,7 +296,8 @@ trie_t toplevel[INSTRCOUNT];
 int jumps[INSTRCOUNT];
 const char *iname[INSTRCOUNT];
 unsigned int ibuf[1000];
-int cutoff = 100;
+int cutoff_count = 100;
+int cutoff_length = INT_MAX;
 seq_t seqs[10000];
 int nextseq = 0;
 
@@ -306,6 +311,8 @@ int seq_cmp(const void *a, const void *b);
 trie_t* new_trie_node(unsigned int opcode);
 void descend(trie_t *t, int level);
 void emit(int level, unsigned int count);
+void printseq(int i, int indent);
+void printhseq(int i, int level) ;
 void *safemalloc(size_t nbytes);
 
 int main(int argc, char** argv) 
@@ -494,7 +501,14 @@ int main(int argc, char** argv)
     i=1;
     while (i < argc && argv[i][0] == '-') {
 	if (strcmp(argv[i], "-c") == 0) {
-	    if (i+1 == argc || sscanf(argv[i+1], "%d", &cutoff) != 1) {
+	    if (i+1 == argc || sscanf(argv[i+1], "%d", &cutoff_count) != 1) {
+		i=argc;
+		break;
+	    }
+	    i += 2;
+	}
+	else if (strcmp(argv[i], "-l") == 0) {
+	    if (i+1 == argc || sscanf(argv[i+1], "%d", &cutoff_length) != 1) {
 		i=argc;
 		break;
 	    }
@@ -514,6 +528,7 @@ int main(int argc, char** argv)
 	fprintf(stderr, "Usage: %s [options] ( code_file sample_file ) ... \n\n", progname);
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -c n     Set sample cutoff = n (default 100)\n");
+	fprintf(stderr, "  -l n     Set length cutoff = n (default unbounded)\n");
 	fprintf(stderr, "  -v       Verbose");
 	return 1;
     }
@@ -731,10 +746,19 @@ void read_samples(const char* filename)
 		}
 		else {
 		    trie_t *t2 = t->left_child;
+		    trie_t *t3 = NULL;
 		    while (t2 != NULL && t2->opcode != opcode)
-			t2 = t2->right_sibling;
-		    if (t2 != NULL)
+			t3 = t2, t2 = t2->right_sibling;
+		    if (t2 != NULL) {
+			/* Move the node to the head of the list in order to keep the
+			   hottest nodes first */
 			t2->count++;
+			if (t3 != NULL) {  /* Otherwise it's already at the head of the list */
+			    t3->right_sibling = t2->right_sibling;
+			    t2->right_sibling = t->left_child;
+			    t->left_child = t2;
+			}
+		    }
 		    else {
 			t2 = new_trie_node(opcode);
 			++trie_nodes;
@@ -799,17 +823,64 @@ void extract_superwords()
 	}
     }
 
+    /* Remove suffix sequences */
+    j=0;
+    for ( i=0 ; i < nextseq ; i++ )
+	if (!seqs[i].suffix)
+	    seqs[j++] = seqs[i];
+    nextseq = j;
+
+    /* Flat */
+    /*
+    for ( i=0 ; i < nextseq ; i++ )
+        printseq(i, 0);
+    */
+
+    /* Hierarchical.  Every sequence that is a proper prefix of
+       another sequence will necessarily have a higher execution
+       count, and will be printed with the longer sequence as a
+       child. */
+
     for ( i=0 ; i < nextseq ; i++ ) {
 	if (!seqs[i].suffix) {
-	    printf("%11d | ", seqs[i].count);
-	    for ( j=0 ; j < seqs[i].length ; j++ )
-		printf("%s ", iname[seqs[i].data[j]]);
-	    printf("| ");
-	    for ( j=0 ; j < seqs[i].length ; j++ )
-		printf("%x ", seqs[i].data[j]);
-	    printf("\n");
+	    printseq(i, 0);
+	    printhseq(i, 1);
 	}
     }
+}
+
+void printhseq(int i, int level) 
+{
+    int j, k, l;
+
+    l=seqs[i].length;
+    for ( j=i+1 ; j < nextseq ; j++ ) {
+	if (seqs[j].suffix || seqs[j].length < l) 
+	    goto next_j;
+	for ( k=0 ; k < l ; k++ )
+	    if (seqs[i].data[k] != seqs[j].data[k])
+		goto next_j;
+	printseq(j, level);
+	seqs[j].suffix = 1;
+	printhseq(j, level+1);
+    next_j: 
+	;
+    }
+}
+
+void printseq(int i, int indent)
+{
+    int j;
+
+    printf("%11d | ", seqs[i].count);
+    for ( j=0 ; j < indent ; j++ )
+	printf("  ");
+    for ( j=0 ; j < seqs[i].length ; j++ )
+	printf("%s ", iname[seqs[i].data[j]]);
+    printf("| ");
+    for ( j=0 ; j < seqs[i].length ; j++ )
+	printf("%x ", seqs[i].data[j]);
+    printf("\n");
 }
 
 /* t is not NULL, and may or may not have children.  ibuf holds
@@ -845,7 +916,7 @@ void descend(trie_t *t, int level)
 
 void emit(int level, unsigned int count)
 {
-    if (level > 1 && count >= cutoff) {
+    if (level > 1 && level <= cutoff_length && count >= cutoff_count) {
 	nextseq < sizeof(seqs)/sizeof(seq_t) || fail("Out of seq memory.");
 	seq_t *seq = &seqs[nextseq++];
 	seq->data = (unsigned int*) safemalloc(sizeof(unsigned int) * level);
