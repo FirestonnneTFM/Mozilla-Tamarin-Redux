@@ -1067,6 +1067,7 @@ namespace avmplus
         Fragmento *frago = pool->codePages->frago;
         frag = frago->getAnchor(abcStart);
         gc->Free(frag->mergeCounts);
+        frag->mergeCounts = 0;
         lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
