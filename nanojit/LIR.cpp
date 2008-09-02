@@ -951,6 +951,18 @@ namespace nanojit
 		return out->insGuard(v, c, x);
 	}
 
+    LIns* ExprFilter::insBranch(LOpcode v, LIns *c, LIns *t)
+    {
+        if (v == LIR_jt || v == LIR_jf) {
+            while (c->isop(LIR_eq) && c->oprnd1()->isCmp() && c->oprnd2()->isconstval(0)) {
+                // jt(eq(cmp,0)) => jf(cmp)   or   jf(eq(cmp,0)) => jt(cmp)
+                v = LOpcode(v ^ 1);
+                c = c->oprnd1();
+            }
+        }
+        return out->insBranch(v, c, t);
+    }
+
     LIns* LirWriter::insLoadi(LIns *base, int disp) 
     { 
         return insLoad(LIR_ld,base,disp);

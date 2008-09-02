@@ -640,7 +640,8 @@ namespace nanojit
 		ExprFilter(LirWriter *out) : LirWriter(out) {}
 		LIns* ins1(LOpcode v, LIns* a);
 	    LIns* ins2(LOpcode v, LIns* a, LIns* b);
-		LIns* insGuard(LOpcode v, LIns *c, SideExit *x);
+		LIns* insGuard(LOpcode, LIns *cond, SideExit *);
+        LIns* insBranch(LOpcode, LIns *cond, LIns *target);
 	};
 
 	// @todo, this could be replaced by a generic HashMap or HashSet, if we had one
