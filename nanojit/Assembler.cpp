@@ -212,7 +212,7 @@ namespace nanojit
 		    regs.used |= rmask(r);
 		    return r;
         }
-        _nvprof("steals",1);
+        //_nvprof("steals",1);
 		counter_increment(steals);
 
 		// nothing free, steal one 
@@ -552,7 +552,7 @@ namespace nanojit
                  (rmask(r)&x87Regs) && !(allow&x87Regs)))
         {
             // x87 <-> xmm copy required
-            _nvprof("fpu-evict",1);
+            //_nvprof("fpu-evict",1);
             evict(r);
             r = UnknownReg;
         }
@@ -1024,7 +1024,7 @@ namespace nanojit
 		 
 		for (LInsp ins = reader->read(); ins != 0 && !error(); ins = reader->read())
 		{
-            _nvprof("lir",1);
+            //_nvprof("lir",1);
 			LOpcode op = ins->opcode();			
 			switch(op)
 			{
@@ -1169,7 +1169,7 @@ namespace nanojit
 					    prepResultReg(ins, rmask(w));
                     } else {
                         // incoming arg is on stack, and EAX points nearby (see genPrologue)
-                        _nvprof("param-evict-eax",1);
+                        //_nvprof("param-evict-eax",1);
 						evict(EAX);
                         Register r = prepResultReg(ins, GpRegs & ~rmask(EAX));
                         int d = (a - abi_regcount) * sizeof(intptr_t) + 8;
@@ -1965,7 +1965,7 @@ namespace nanojit
 			else 
 			{
                 if (curins) {
-                    _nvprof("intersect-evict",1);
+                    //_nvprof("intersect-evict",1);
 					evict(r);
                 }
 				
@@ -2002,7 +2002,7 @@ namespace nanojit
 			else 
 			{
                 if (curins && savedins) {
-                    _nvprof("union-evict",1);
+                    //_nvprof("union-evict",1);
 					evict(r);
                 }
 				
