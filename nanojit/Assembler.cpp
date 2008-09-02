@@ -124,12 +124,12 @@ namespace nanojit
 				flush();
 				return i;
 			}
-            if (i->isGuard() || i->isBranch()) {
+            if (i->isGuard()) {
 				flush_add(i);
 				if (i->oprnd1())
 					block.add(i->oprnd1());
             }
-            else if (isRet(i->opcode())/* || i->isStore()*/) {
+            else if (isRet(i->opcode()) || i->isBranch()) {
                 flush_add(i);
             }
 			else {
