@@ -294,36 +294,51 @@ namespace avmplus
 
 #ifdef AVMTHUNK_VERSION
 	
-	#define NATIVE_METHOD(method_id, handler) \
-		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunk, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, 0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
-		
-	#define NATIVE_METHOD_FLAGS(method_id, handler, fl) \
-		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunk, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, 0, fl | AbstractFunction::NATIVE_COOKIE },
+	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
+		reinterpret_cast<AvmThunkNativeHandler>((void(CLS::*)())(PTR))
 
-	#define NATIVE_METHOD1(method_id, handler, cookie) \
-		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunkc, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, cookie, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS | AbstractFunction::NATIVE_COOKIE },
-		
-	#define NATIVE_METHOD1_FLAGS(method_id, handler, cookie, fl) \
-		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunkc, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
+	#define _NATIVE_METHOD(CLS, method_id, handler, fl) \
+		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunk, _NATIVE_METHOD_CAST_PTR(CLS, &handler), avmplus::NativeID::method_id, 0, fl },
+
+	#define _NATIVE_METHOD1(CLS, method_id, handler, fl, cookie) \
+		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunkc, _NATIVE_METHOD_CAST_PTR(CLS, &handler), avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
 
 	#define END_NATIVE_MAP() \
 		{ NULL, NULL, -1, 0, 0 } };
-#else
-	#define NATIVE_METHOD(method_id, handler) \
-		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, 0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
-		
-	#define NATIVE_METHOD_FLAGS(method_id, handler, fl) \
-		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, 0, fl },
 
-	#define NATIVE_METHOD1(method_id, handler, cookie) \
-		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, cookie, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS | AbstractFunction::NATIVE_COOKIE },
-		
-	#define NATIVE_METHOD1_FLAGS(method_id, handler, cookie, fl) \
-		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
+#else
+
+	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
+		reinterpret_cast<NativeTableEntry::Handler>((void(CLS::*)())(PTR))
+
+	#define _NATIVE_METHOD(CLS, method_id, handler, fl) \
+		{ _NATIVE_METHOD_CAST_PTR(CLS, &handler), avmplus::NativeID::method_id, 0, fl },
+
+	#define _NATIVE_METHOD1(CLS, method_id, handler, fl, cookie) \
+		{ _NATIVE_METHOD_CAST_PTR(CLS, &handler), avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
 
 	#define END_NATIVE_MAP() \
 		{ NULL, -1, 0, 0 } };
+		
 #endif
+
+	#define NATIVE_METHOD(method_id, handler) \
+		_NATIVE_METHOD(ScriptObject, method_id, handler, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS)
+		
+	#define NATIVE_METHOD_FLAGS(method_id, handler, fl)	\
+		_NATIVE_METHOD(ScriptObject, method_id, handler, fl)
+		
+	#define NATIVE_METHOD1(method_id, handler, cookie) \
+		_NATIVE_METHOD1(ScriptObject, method_id, handler, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS, cookie)
+		
+	#define NATIVE_METHOD1_FLAGS(method_id, handler, cookie, fl) \
+		_NATIVE_METHOD1(ScriptObject, method_id, handler, fl, cookie)
+		
+	#define NATIVE_METHOD_CAST(CLS, method_id, handler)	\
+		_NATIVE_METHOD(CLS, method_id, handler, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS)
+		
+	#define NATIVE_METHOD_CAST_FLAGS(CLS, method_id, handler, fl) \
+		_NATIVE_METHOD(CLS, method_id, handler, fl)
 
     /**
 	 * NativeScriptInfo is an internal structure used for

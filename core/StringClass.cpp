@@ -42,32 +42,32 @@ namespace avmplus
 {
 	BEGIN_NATIVE_MAP(StringClass)
 		// instance methods
-		NATIVE_METHOD_FLAGS(String_length_get, String::length, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_localeCompare, String::localeCompare, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_length_get, String::length, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_localeCompare, String::localeCompare, 0)
 
-		NATIVE_METHOD_FLAGS(String_private__indexOf, String::indexOf, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_indexOf, String::indexOfDouble, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_private__indexOf, String::indexOf, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_indexOf, String::indexOfDouble, 0)
 
-		NATIVE_METHOD_FLAGS(String_private__lastIndexOf, String::lastIndexOf, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_lastIndexOf, String::lastIndexOfDouble, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_private__lastIndexOf, String::lastIndexOf, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_lastIndexOf, String::lastIndexOfDouble, 0)
 
-		NATIVE_METHOD_FLAGS(String_private__charAt, String::charAt, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_charAt, String::charAtDouble, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_private__charAt, String::charAt, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_charAt, String::charAtDouble, 0)
 
-		NATIVE_METHOD_FLAGS(String_private__charCodeAt, String::charCodeAt, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_charCodeAt, String::charCodeAtDouble, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_private__charCodeAt, String::charCodeAt, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_charCodeAt, String::charCodeAtDouble, 0)
 
-		NATIVE_METHOD_FLAGS(String_private__substring, String::substring, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_substring, String::substringDouble, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_private__substring, String::substring, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_substring, String::substringDouble, 0)
 
-		NATIVE_METHOD_FLAGS(String_private__slice, String::slice, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_slice, String::sliceDouble, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_private__slice, String::slice, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_slice, String::sliceDouble, 0)
 
-		NATIVE_METHOD_FLAGS(String_private__substr, String::substr, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_substr, String::substrDouble, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_private__substr, String::substr, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_substr, String::substrDouble, 0)
 
-		NATIVE_METHOD_FLAGS(String_AS3_toLowerCase, String::toLowerCase, 0)
-		NATIVE_METHOD_FLAGS(String_AS3_toUpperCase, String::toUpperCase, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_toLowerCase, String::toLowerCase, 0)
+		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_toUpperCase, String::toUpperCase, 0)
 
 		// static method (language feature - by design)
 		NATIVE_METHOD(String_AS3_fromCharCode, StringClass::fromCharCode)
