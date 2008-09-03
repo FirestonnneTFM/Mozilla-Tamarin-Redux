@@ -694,7 +694,7 @@ namespace nanojit
 		}
 
 #if defined NANOJIT_IA32
-        if (value->isop(LIR_ldq) || value->isop(LIR_qjoin))
+        if (value->isop(LIR_ldq) || value->isop(LIR_ldqc) || value->isop(LIR_qjoin))
 		{
 			// value is 64bit struct or int64_t, or maybe a double.
 			// it may be live in an FPU reg.  Either way, don't
@@ -759,7 +759,7 @@ namespace nanojit
 		/* If this is not a float operation, we can use GpRegs instead.
 		 * We can do this in a few other cases but for now I'll keep it simple.
 		 */
-		if (value->isop(LIR_ldq) || value->isop(LIR_quad))
+		if (value->isop(LIR_ldq) || value->isop(LIR_ldqc) || value->isop(LIR_quad))
 		{
 			Register rv = findRegFor(value, GpRegs);
 			Register rb = findRegFor(base, GpRegs);

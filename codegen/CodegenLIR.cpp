@@ -320,41 +320,10 @@ namespace avmplus
 	 *  format 3  : oprnd1 = ptr  oprnd2 / oprnd3 are optional ptr (only MIR_st should use oprnd3)
 	 */
 
-	// format 2
-	OP* CodegenLIR::Ins(MirOpcode code, OP* a1, uintptr_t v2)
-	{
-        switch(code) {
-            case MIR_faddi: {
-                uint64_t *dp = (uint64_t*)v2;
-                return lirout->ins2(LIR_fadd, a1, lirout->insImmq(*dp));
-            }
-            default:
-                AvmAssert(false);
-                return 0;
-        }
-    }
-
     // unary
     LIns *CodegenLIR::Ins(LOpcode op, LIns* a) {
         return lirout->ins1(op, a);
     }
-
-    // binary
-	OP* CodegenLIR::Ins(MirOpcode code, OP* a1, OP* a2)
-	{
-        LOpcode op;
-        switch(code) {
-            case MIR_addp: op = LIR_add; break; // fixme - need non-cse ptr add
-            default:
-                AvmAssert(false);
-                return 0;
-        }
-        return lirout->ins2(op, a1, a2);
-	}
-
-	OP* CodegenLIR::binaryIns(MirOpcode code, OP* a1, OP* a2) {
-        return Ins(code, a1, a2);
-	}
 
     OP* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b) {
         return lirout->ins2(op, a, b);
@@ -383,7 +352,7 @@ namespace avmplus
 
 	// address calc instruction
 	OP* CodegenLIR::leaIns(int32_t disp, OP* base) {
-        return lirout->ins2(LIR_add, base, lirout->insImm(disp));
+        return lirout->ins2(LIR_addp, base, lirout->insImm(disp));
 	}
 
     // call 
@@ -804,7 +773,7 @@ namespace avmplus
 			if (atom->isconst()) {
 				Atom a = atom->constval();
 				if (AvmCore::isDouble(a)) {
-					return loadIns(MIR_fldop, 0, InsConst(a&~7));
+					return loadIns(LIR_ldqc, 0, InsConst(a&~7));
 				} else {
 					AvmAssert(AvmCore::isInteger(a));
 					return i2dIns(InsConst(a>>3));
@@ -909,6 +878,7 @@ namespace avmplus
                 case LIR_fge: AvmAssert(a->isQuad() && b->isQuad()); break;
                 case LIR_qjoin: AvmAssert(!a->isQuad() && !b->isQuad()); break;
                 case LIR_add: AvmAssert(!a->isQuad() && !b->isQuad()); break;
+                case LIR_addp: AvmAssert(!a->isQuad() && !b->isQuad()); break;
                 case LIR_sub: AvmAssert(!a->isQuad() && !b->isQuad()); break;
                 case LIR_mul: AvmAssert(!a->isQuad() && !b->isQuad()); break;
                 case LIR_and: AvmAssert(!a->isQuad() && !b->isQuad()); break;
@@ -933,9 +903,10 @@ namespace avmplus
 
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
             switch (op) {
-                case LIR_ld: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
+                case LIR_ld:
                 case LIR_ldc: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
-                case LIR_ldq: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
+                case LIR_ldq:
+                case LIR_ldqc: AvmAssert(!base->isQuad() && !disp->isQuad()); break;
                 default: AvmAssert(false);
             }
             return out->insLoad(op, base, disp);
@@ -1164,10 +1135,10 @@ namespace avmplus
 		if(core->sampling())
 		{
 			// FIXME: 64 bit integer math needed!
-			//OP* invocationCount = loadIns(MIR_ldop64, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
+			//OP* invocationCount = loadIns(LIR_ldqc, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
 			//Ins(MIR_inc64, invocationCount);
 			//storeIns64(invocationCount, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
-			OP* invocationCount = loadIns(MIR_ldop, offsetof(MethodEnv, invocationCount), env_param);
+			OP* invocationCount = loadIns(LIR_ldc, offsetof(MethodEnv, invocationCount), env_param);
 			OP *result = binaryIns(LIR_add, invocationCount, InsConst(1));
 			storeIns(result, offsetof(MethodEnv, invocationCount), env_param);
 		}
@@ -1182,13 +1153,13 @@ namespace avmplus
 		if (info->setsDxns())
 		{
 			// dxns = env->vtable->scope->defaultXmlNamespace
-			OP* declVTable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env_param);
-			OP* scope = loadIns(MIR_ldop, offsetof(VTable, scope), declVTable);
-			OP* capturedDxns = loadIns(MIR_ldop, offsetof(ScopeChain, defaultXmlNamespace), scope);
+			OP* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+			OP* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
+			OP* capturedDxns = loadIns(LIR_ldc, offsetof(ScopeChain, defaultXmlNamespace), scope);
 			storeIns(capturedDxns, 0, dxns);
 
 			// dxnsSave = AvmCore::dxnsAddr
-			dxnsAddrSave = loadIns(MIR_ldop, offsetof(AvmCore, dxnsAddr), InsConst((uintptr)core));
+			dxnsAddrSave = loadIns(LIR_ldc, offsetof(AvmCore, dxnsAddr), InsConst((uintptr)core));
 		}
 
 		for (int i=0, n = state->verifier->stackBase+state->stackDepth; i < n; i++)
@@ -1245,12 +1216,12 @@ namespace avmplus
 				OP* arg;
 				if (isDouble(loc))
 				{
-					arg = loadIns(MIR_fldop, offset, apArg);
+					arg = loadIns(LIR_ldqc, offset, apArg);
 					offset += 8;
 				}
 				else
 				{
-					arg = loadIns(MIR_ldop, offset, apArg);
+					arg = loadIns(LIR_ldc, offset, apArg);
 #ifdef AVMPLUS_64BIT
 					offset += 8;
 #else
@@ -1281,13 +1252,13 @@ namespace avmplus
 			OP* arg; 
 			if (t == NUMBER_TYPE)
 			{
-				arg = loadIns(MIR_fldop, offset, apArg);
+				arg = loadIns(LIR_ldqc, offset, apArg);
 				localSet(i, arg);
 				offset += 8;
 			}
 			else
 			{
-				arg = loadIns(MIR_ldop, offset, apArg);
+				arg = loadIns(LIR_ldc, offset, apArg);
 				localSet(i, arg);
 #ifdef AVMPLUS_AMD64
 				offset += 8;
@@ -1392,13 +1363,13 @@ namespace avmplus
 			OP* exBranch = branchIns(LIR_jt, cond);
 
 			// exception case
-			exAtom = loadIns(MIR_ld, offsetof(Exception, atom), ee);
+			exAtom = loadIns(LIR_ld, offsetof(Exception, atom), ee);
 			// need to convert exception from atom to native rep, at top of 
 			// catch handler.  can't do it here because it could be any type.
 
 			// _ef.beginCatch()
 			// ISSUE why do we have to redefine ef? it is NULL when exception happens
-			OP* pc = loadIns(MIR_ld, 0, _save_eip);
+			OP* pc = loadIns(LIR_ld, 0, _save_eip);
 			OP* handler = callIns(FUNCTIONID(beginCatch), 5,
 				InsConst((uintptr)core), leaIns(0,_ef), InsConst((uintptr)info), pc, ee);
 
@@ -1407,7 +1378,7 @@ namespace avmplus
 #endif
 
 			// jump to catch handler
-            handler = loadIns(MIR_ld, offsetof(ExceptionHandler, target), handler);
+            handler = loadIns(LIR_ld, offsetof(ExceptionHandler, target), handler);
 			branchIns(LIR_ji, 0, handler);
 
 			// target of conditional
@@ -1423,9 +1394,9 @@ namespace avmplus
 				storeIns(InsConst(state->pc), 0, _save_eip);
 
 			#ifdef AVMPLUS_64BIT
-			OP* interrupted = loadIns(MIR_ld32, 0, InsConst((uintptr)&core->interrupted));
+			OP* interrupted = loadIns(LIR_ld, 0, InsConst((uintptr)&core->interrupted));
 			#else
-			OP* interrupted = loadIns(MIR_ld, 0, InsConst((uintptr)&core->interrupted));
+			OP* interrupted = loadIns(LIR_ld, 0, InsConst((uintptr)&core->interrupted));
 			#endif
 			OP* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
 			patchLater(br, interrupt_label);
@@ -1447,9 +1418,9 @@ namespace avmplus
 	{
 		this->state = state;
 		Traits* t = info->declaringTraits->scope->scopes[scope_index].traits;
-		OP* declVTable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env_param);
-		OP* scope = loadIns(MIR_ldop, offsetof(VTable, scope), declVTable);
-		OP* scopeobj = loadIns(MIR_ldop, offsetof(ScopeChain, scopes) + scope_index*sizeof(Atom), scope);
+		OP* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+		OP* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
+		OP* scopeobj = loadIns(LIR_ldc, offsetof(ScopeChain, scopes) + scope_index*sizeof(Atom), scope);
 		localSet(dest, atomToNativeRep(t, scopeobj));
 	}
 
@@ -1512,8 +1483,8 @@ namespace avmplus
 		else {
 			// dxnsAddr = &env->vtable->scope->defaultXmlNamespace
 			OP* env = env_param;
-			OP* declVTable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env);
-			OP* scope = loadIns(MIR_ldop, offsetof(VTable, scope), declVTable);
+			OP* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env);
+			OP* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
 			dxnsAddr = leaIns(offsetof(ScopeChain, defaultXmlNamespace), scope);
 		}
 
@@ -1543,9 +1514,9 @@ namespace avmplus
 				storeIns(InsConst(state->pc), 0, _save_eip);
 
 			#ifdef AVMPLUS_AMD64
-			OP* interrupted = loadIns(MIR_ld, 0, InsConst((uintptr)&core->interrupted));
+			OP* interrupted = loadIns(LIR_ld, 0, InsConst((uintptr)&core->interrupted));
 			#else
-			OP* interrupted = loadIns(MIR_ld, 0, InsConst((uintptr)&core->interrupted));
+			OP* interrupted = loadIns(LIR_ld, 0, InsConst((uintptr)&core->interrupted));
 			#endif
 			OP* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
 			patchLater(br, interrupt_label);
@@ -1793,7 +1764,7 @@ namespace avmplus
 #else
 				OP *index = binaryIns(LIR_lsh, localGet(loc), InsConst(2));
 #endif
-				localSet(loc, loadIns(MIR_ldop, (uintptr)&core->booleanStrings, index));
+				localSet(loc, loadIns(LIR_ldc, (uintptr)&core->booleanStrings, index));
 			}
 			else if (value.notNull)
 			{
@@ -1895,9 +1866,9 @@ namespace avmplus
 		{
 			// env->vtable->base->init->enter32v(argc, ...);
 			OP* envArg = env_param;
-			OP* vtable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), envArg);
-			OP* base = loadIns(MIR_ldop, offsetof(VTable,base), vtable);
-			method = loadIns(MIR_ldop, offsetof(VTable,init), base);
+			OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
+			OP* base = loadIns(LIR_ldc, offsetof(VTable,base), vtable);
+			method = loadIns(LIR_ldc, offsetof(VTable,init), base);
 			break;
 		}
 		case OP_callmethod:
@@ -1907,7 +1878,7 @@ namespace avmplus
 			// sp[-argc] = callmethod(disp_id, argc, ...);
 			// method_id is disp_id of virtual method
 			OP* vtable = loadVTable(objDisp);
-			method = loadIns(MIR_ldop, offsetof(VTable, methods)+sizeof(uintptr)*method_id, vtable);
+			method = loadIns(LIR_ldc, offsetof(VTable, methods)+sizeof(uintptr)*method_id, vtable);
 			break;
 		}
 		case OP_callsuperid:
@@ -1915,9 +1886,9 @@ namespace avmplus
 			// stack in: obj arg1..N
 			// stack out: result
 			// method_id is disp_id of super method
-			OP* declvtable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env_param);
-			OP* basevtable = loadIns(MIR_ldop, offsetof(VTable, base), declvtable);
-			method = loadIns(MIR_ldop, offsetof(VTable, methods)+sizeof(uintptr)*method_id, basevtable);
+			OP* declvtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+			OP* basevtable = loadIns(LIR_ldc, offsetof(VTable, base), declvtable);
+			method = loadIns(LIR_ldc, offsetof(VTable, methods)+sizeof(uintptr)*method_id, basevtable);
 			break;
 		}
 		case OP_callstatic:
@@ -1925,9 +1896,9 @@ namespace avmplus
 			// stack in: obj arg1..N
 			// stack out: result
 
-			OP* vtable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env_param);
-			OP* abcenv = loadIns(MIR_ldop, offsetof(VTable, abcEnv), vtable);
-			method = loadIns(MIR_ldop, offsetof(AbcEnv,methods)+sizeof(uintptr)*method_id, abcenv);
+			OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+			OP* abcenv = loadIns(LIR_ldc, offsetof(VTable, abcEnv), vtable);
+			method = loadIns(LIR_ldc, offsetof(AbcEnv,methods)+sizeof(uintptr)*method_id, abcenv);
 			break;
 		}
 		case OP_callinterface:
@@ -1935,7 +1906,7 @@ namespace avmplus
 			// method_id is pointer to interface method name (multiname)
 			int index = int(method_id % Traits::IMT_SIZE);
 			OP* vtable = loadVTable(objDisp);
-			method = loadIns(MIR_ldop, offsetof(VTable, imt)+sizeof(uintptr)*index, vtable);
+			method = loadIns(LIR_ldc, offsetof(VTable, imt)+sizeof(uintptr)*index, vtable);
 			iid = InsConst(method_id);
 			break;
 		}
@@ -1944,8 +1915,8 @@ namespace avmplus
 			// stack in: ctor arg1..N
 			// stack out: newinstance
 			OP* vtable = loadVTable(objDisp);
-			OP* ivtable = loadIns(MIR_ldop, offsetof(VTable, ivtable), vtable);
-			method = loadIns(MIR_ldop, offsetof(VTable, init), ivtable);
+			OP* ivtable = loadIns(LIR_ldc, offsetof(VTable, ivtable), vtable);
+			method = loadIns(LIR_ldc, offsetof(VTable, init), ivtable);
 			OP* inst = callIns(FUNCTIONID(newInstance),1, localGet(objDisp));
 			localSet(dest, inst);
 			break;
@@ -1987,7 +1958,7 @@ namespace avmplus
         // patch the size to what we actually need
 		ap->setSize(disp);
 
-		OP* target = loadIns(MIR_ld, offsetof(MethodEnv, impl32), method);
+		OP* target = loadIns(LIR_ld, offsetof(MethodEnv, impl32), method);
 		OP* apAddr = leaIns(pad, ap);
 
         LIns *out;
@@ -2101,9 +2072,9 @@ namespace avmplus
 					else
 					{
 						t = scopeTypes->scopes[0].traits;
-						OP* declVTable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env_param);
-						OP* scope = loadIns(MIR_ldop, offsetof(VTable, scope), declVTable);
-						OP* scopeobj = loadIns(MIR_ld, offsetof(ScopeChain, scopes) + 0*sizeof(Atom), scope);
+						OP* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+						OP* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
+						OP* scopeobj = loadIns(LIR_ld, offsetof(ScopeChain, scopes) + 0*sizeof(Atom), scope);
 						ptr = atomToNativeRep(t, scopeobj);
 					}				
 				}
@@ -2118,31 +2089,31 @@ namespace avmplus
 				{
 					// t's slots aren't locked in, so we have to adjust for the actual runtime
 					// traits->sizeofInstance.
-					OP* vtable = loadIns(MIR_ldop, offsetof(ScriptObject,vtable), ptr);
-					OP* traits = loadIns(MIR_ldop, offsetof(VTable,traits), vtable);
+					OP* vtable = loadIns(LIR_ldc, offsetof(ScriptObject,vtable), ptr);
+					OP* traits = loadIns(LIR_ldc, offsetof(VTable,traits), vtable);
 					offset -= (int)(t->sizeofInstance);
-					OP* sizeofInstance = loadIns(MIR_ldop, offsetof(Traits, sizeofInstance), traits);
-					ptr = binaryIns(MIR_addp, sizeofInstance, ptr);
+					OP* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, sizeofInstance), traits);
+					ptr = binaryIns(LIR_addp, sizeofInstance, ptr);
 				}
 
 				if (opcode == OP_getslot) 
 				{
 					// get
 					if (result == NUMBER_TYPE)
-						localSet(op2, loadIns(MIR_fld, offset, ptr));
+						localSet(op2, loadIns(LIR_ldq, offset, ptr));
 					else
 					{
 						#ifdef AVMPLUS_64BIT
 						// Could be signed or unsigned 
 						Traits* slotType = t->getSlotTraits(slot);
 						if (slotType==INT_TYPE) //signed
-							localSet(op2, loadIns(MIR_ld32, offset, ptr));
+							localSet(op2, loadIns(LIR_ld, offset, ptr));
 						else if (slotType==UINT_TYPE || slotType==BOOLEAN_TYPE) // unsigned
-							localSet(op2, loadIns(MIR_ld32u, offset, ptr));
+							localSet(op2, loadIns(LIR_ld, offset, ptr));
 						else
-							localSet(op2, loadIns(MIR_ld, offset, ptr));
+							localSet(op2, loadIns(LIR_ld, offset, ptr));
 						#else
-						localSet(op2, loadIns(MIR_ld, offset, ptr));
+						localSet(op2, loadIns(LIR_ld, offset, ptr));
 						#endif
 					}
 				} 
@@ -2181,7 +2152,7 @@ namespace avmplus
 								InsConst((int)core->gc), 
 								unoffsetPtr,
 								(slotType && slotType != OBJECT_TYPE) ? value :
-								binaryIns(MIR_and, value, InsConst(~7)));
+								binaryIns(LIR_and, value, InsConst(~7)));
 						#endif
 					}					
 					#ifdef MMGC_DRC
@@ -2450,8 +2421,8 @@ namespace avmplus
 				storeIns(localGet(op2), 0, index);
 				OP* i1 = callIns(FUNCTIONID(hasnextproto), 3,
 									 env_param, leaIns(0, obj), leaIns(0, index));
-				localSet(op1, loadIns(MIR_ldop, 0, obj));
-				localSet(op2, loadIns(MIR_ldop, 0, index));
+				localSet(op1, loadIns(LIR_ldc, 0, obj));
+				localSet(op2, loadIns(LIR_ldc, 0, index));
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp+1, i1);
 				InsDealloc(obj);
@@ -2469,8 +2440,8 @@ namespace avmplus
 				OP* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
 				OP* envArg = env_param;
-				OP* vtable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), envArg);
-				OP* outer = loadIns(MIR_ldop, offsetof(VTable, scope), vtable);
+				OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
+				OP* outer = loadIns(LIR_ldc, offsetof(VTable, scope), vtable);
 				OP* argv = leaIns(0, ap);
 
 				OP* i3 = callIns(FUNCTIONID(newfunction), 4,
@@ -2709,7 +2680,7 @@ namespace avmplus
 				// convert array elements to Atom[]
 				OP* ap = storeAtomArgs(argc, arg0);
 				OP* toplevel = loadToplevel(env_param);
-				OP* arrayClass = loadIns(MIR_ldop, offsetof(Toplevel,arrayClass), toplevel);
+				OP* arrayClass = loadIns(LIR_ldc, offsetof(Toplevel,arrayClass), toplevel);
 				OP* i3 = callIns(FUNCTIONID(newarray), 3,
 					arrayClass, leaIns(0,ap), InsConst(argc));
 				InsDealloc(ap);
@@ -2727,8 +2698,8 @@ namespace avmplus
 				int extraScopes = state->scopeDepth;
 
 				OP* envArg = env_param;
-				OP* vtable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), envArg);
-				OP* outer = loadIns(MIR_ldop, offsetof(VTable, scope), vtable);
+				OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
+				OP* outer = loadIns(LIR_ldc, offsetof(VTable, scope), vtable);
 				OP* base = localGet(localindex);
 
 				// prepare scopechain args for call
@@ -2787,8 +2758,8 @@ namespace avmplus
 				OP* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
 				OP* envArg = env_param;
-				OP* vtable = loadIns(MIR_ldop, offsetof(MethodEnv,vtable), envArg);
-				OP* outer = loadIns(MIR_ldop, offsetof(VTable,scope), vtable);
+				OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv,vtable), envArg);
+				OP* outer = loadIns(LIR_ldc, offsetof(VTable,scope), vtable);
 
 				OP* withBase;
 				if (state->withBase == -1)
@@ -3517,14 +3488,14 @@ namespace avmplus
 			{
 			#ifdef DEBUGGER
 				// todo refactor api's so we don't have to pass argv/argc
-				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
+				OP* debugger = loadIns(LIR_ldc, offsetof(AvmCore, debugger),
 											InsConst((uintptr)core));
 				callIns(FUNCTIONID(debugFile), 2,
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
 			#ifdef VTUNE
-				Ins(MIR_file, op1);
+				Ins(LIR_file, InsConst(op1));
 			#endif /* VTUNE */
 				break;
 		    }
@@ -3533,14 +3504,14 @@ namespace avmplus
 			{
 			#ifdef DEBUGGER
 				// todo refactor api's so we don't have to pass argv/argc
-				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
+				OP* debugger = loadIns(LIR_ldc, offsetof(AvmCore, debugger),
 											InsConst((uintptr)core));
 				callIns(FUNCTIONID(debugLine), 2,
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
 			#ifdef VTUNE
-				Ins(MIR_line, op1);
+				Ins(LIR_line, InsConst(op1));
 				hasDebugInfo = true;
 			#endif /* VTUNE */
 				break;
@@ -3966,8 +3937,8 @@ namespace avmplus
 
 	OP* CodegenLIR::loadToplevel(OP* env)
 	{
-		OP* vtable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), env);
-		return loadIns(MIR_ldop, offsetof(VTable, toplevel), vtable);
+		OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env);
+		return loadIns(LIR_ldc, offsetof(VTable, toplevel), vtable);
 	}
 
 	OP* CodegenLIR::loadVTable(int i)
@@ -3979,7 +3950,7 @@ namespace avmplus
 		{
 			// must be a pointer to a scriptobject, and we've done the n
 			// all other types are ScriptObject, and we've done the null check
-			return loadIns(MIR_ldop, offsetof(ScriptObject, vtable), localGet(i));
+			return loadIns(LIR_ldc, offsetof(ScriptObject, vtable), localGet(i));
 		}
 
 		OP* toplevel = loadToplevel(env_param);
@@ -4000,9 +3971,9 @@ namespace avmplus
 
 		// now offset != -1 and we are returning a primitive vtable
 
-		OP* cc = loadIns(MIR_ldop, offset, toplevel);
-		OP* cvtable = loadIns(MIR_ldop, offsetof(ClassClosure, vtable), cc);
-		return loadIns(MIR_ldop, offsetof(VTable, ivtable), cvtable);
+		OP* cc = loadIns(LIR_ldc, offset, toplevel);
+		OP* cvtable = loadIns(LIR_ldc, offsetof(ClassClosure, vtable), cc);
+		return loadIns(LIR_ldc, offsetof(VTable, ivtable), cvtable);
 	}
 
 	OP* CodegenLIR::promoteNumberIns(Traits* t, int i)
@@ -4056,7 +4027,7 @@ namespace avmplus
 	void CodegenLIR::emitSampleCheck()
 	{
 		/* @todo  inlined sample check doesn't work, help! 
-			OP* takeSample = loadIns(MIR_ld, (int)&core->takeSample, NULL);
+			OP* takeSample = loadIns(LIR_ld, (int)&core->takeSample, NULL);
 			OP* br = Ins(MIR_jeq, binaryIns(MIR_ucmp, takeSample, InsConst(0)));
 			callIns(FUNCTIONID(sample), 1, InsConst((int32)core));
 			br->target = Ins(LIR_label);
@@ -4123,17 +4094,7 @@ namespace avmplus
         return lirout->insAlloc(size >= 4 ? size : 4);
     }
 
-    LIns* CodegenLIR::loadIns(MirOpcode code, int32_t disp, LIns *base) {
-        LOpcode op;
-        switch (code) {
-            case MIR_ld: op = LIR_ld; break;
-            case MIR_ldop: op = LIR_ldc; break;
-            case MIR_fld: op = LIR_ldq; break;
-            case MIR_fldop: op = LIR_ldq; break; // fixme: need cse version
-            default:
-                AvmAssert(false);
-                return 0;
-        }
+    LIns* CodegenLIR::loadIns(LOpcode op, int32_t disp, LIns *base) {
         return lirout->insLoad(op, base, disp);
     }
 
@@ -4168,9 +4129,6 @@ namespace avmplus
         }
     };
 #endif
-
-    static int loopcount=0;
-    static int normalcount=0;
 
     class DeadVars: public LirFilter
     {
@@ -4320,6 +4278,8 @@ namespace avmplus
         {}
     }
 
+    static int jitcount=0;
+
     void CodegenLIR::emitMD() 
     {
 #ifdef PERFM
@@ -4372,16 +4332,13 @@ namespace avmplus
 		
         frag->releaseLirBuffer();
 
-        assm->hasLoop ? loopcount++ : normalcount++;
+        jitcount++;
         //_nvprof("assm->error", assm->error());
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = (
-                !assm->hasLoop //&& normalcount <= 0
-              || assm->hasLoop //&& loopcount <= 0
-            ) 
-            && !info->hasExceptions() && !assm->error();
+        bool keep = // jitcount <= 0 &&
+            !info->hasExceptions() && !assm->error();
 
         //_nvprof("keep",keep);
         if (keep) {
@@ -4393,11 +4350,7 @@ namespace avmplus
             u.vp = frag->code();
             info->impl32 = u.fp;
             verbose_only(if (verbose()) {
-                if (assm->hasLoop) {
-                    printf("keeping loopy code %d\n", loopcount);
-                } else {
-                    printf("keeping plain code %d\n", normalcount);
-                }
+                printf("keeping %d\n", jitcount);
             })
         } else {
             // assm puked, or we did something untested, so interpret.

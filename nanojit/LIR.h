@@ -51,18 +51,19 @@ namespace nanojit
 		LIR64	= 0x40,			// result is double or quad
 		
 		// special operations (must be 0..N)
-		LIR_start =		2,	
-		LIR_nearskip =  3, // must be LIR_skip-1 and lsb=1
-		LIR_skip =		4,
-        LIR_neartramp = 5, // must be LIR_tramp-1 and lsb=1
-        LIR_tramp =		6,
-
+		LIR_start =		0,	
+		LIR_nearskip =  1, // must be LIR_skip-1 and lsb=1
+		LIR_skip =		2,
+        LIR_neartramp = 3, // must be LIR_tramp-1 and lsb=1
+        LIR_tramp =		4,
+        
 		// variables
-		LIR_var		= 7, // create variable storage
-		LIR_def		= 8, // define (bind) a value to a variable
-		LIR_use		= 9, // use the value of a variable
+		LIR_var		= 5, // create variable storage
+		LIR_def		= 6, // define (bind) a value to a variable
+		LIR_use		= 7, // use the value of a variable
 		
 		// non-pure operations
+        LIR_addp    = 9,
 		LIR_param	= 10,
 		LIR_st		= 11,
 		LIR_ld		= 12,
@@ -127,6 +128,10 @@ namespace nanojit
 		LIR_ule		= 62, // 0x3E 0011 1110
 		LIR_uge		= 63, // 0x3F 0011 1111
 
+        // non-64bit ops, but we're out of code space below 64
+        LIR_file    = 1 | LIR64,
+        LIR_line    = 2 | LIR64,
+
 		/**
 		 * 64bit operations
 		 */
@@ -135,6 +140,7 @@ namespace nanojit
         LIR_fret    = LIR_ret | LIR64,
 		LIR_quad    = LIR_int | LIR64,
 		LIR_ldq		= LIR_ld    | LIR64,
+		LIR_ldqc	= LIR_ldc   | LIR64,
 
         LIR_fcall   = LIR_call  | LIR64,
         LIR_fcalli  = LIR_calli | LIR64,
