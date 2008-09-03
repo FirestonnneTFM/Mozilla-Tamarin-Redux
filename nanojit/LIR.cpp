@@ -724,7 +724,7 @@ namespace nanojit
 			if (v == LIR_neg)
 				return insImm(-c);
 			if (v == LIR_not)
-				return insImm(!c);
+				return insImm(~c);
 		}
 		else if (v == i->opcode() && (v == LIR_not || v == LIR_neg || v == LIR_fneg)) {
             // not(not(x)) = x;  neg(neg(x)) = x;  fneg(fneg(x)) = x;
