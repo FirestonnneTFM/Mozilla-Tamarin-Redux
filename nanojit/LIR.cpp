@@ -50,13 +50,13 @@ namespace nanojit
 	#ifdef FEATURE_NANOJIT
 
 	const uint8_t operandCount[] = {
-	/* 0 */		2, 2, /*trace*/0, /*nearskip*/0, /*skip*/0, /*neartramp*/0, /*tramp*/0, 0, /*def*/2, 1,
+	/* 0 */		/*trace*/0, /*nearskip*/0, /*skip*/0, /*neartramp*/0, /*tramp*/0, /*var*/0, /*def*/2, /*use*/1, 2, /*addp*/2, 
 	/* 10 */	/*param*/0, 2, 2, /*alloc*/0, 2, /*ret*/1, /*live*/1, /*calli*/0, /*call*/0, /*loop*/0,
 	/* 20 */	/*x*/0, 0, 1, 1, /*label*/0, 2, 2, 2, 2, 2,
 	/* 30 */	2, 2, /*short*/0, /*int*/0, 2, 2, /*neg*/1, 2, 2, 2,
 	/* 40 */	/*callh*/1, 2, 2, 2, /*not*/1, 2, 2, 2, /*xt*/1, /*xf*/1,
 	/* 50 */	/*qlo*/1, /*qhi*/1, 2, /*ov*/1, /*cs*/1, 2, 2, 2, 2, 2,
-	/* 60 */	2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+	/* 60 */	2, 2, 2, 2, 2, /*file*/1, /*line*/1, 2, 2, 2,
 	/* 70 */	2, 2, 2, 2, 2, 2, 2, 2, 2, /*fret*/1,
 	/* 80 */	2, /*fcalli*/0, /*fcall*/0, 2, 2, 2, 2, 2, 2, 2,
 	/* 90 */	2, 2, 2, 2, 2, 2, 2, /*quad*/0, 2, 2,
@@ -69,17 +69,17 @@ namespace nanojit
 	#ifdef NJ_VERBOSE
 
 	const char* lirNames[] = {
-	/* 0-9 */	"0","1","start","nearskip","skip","neartramp","tramp","var","def","use",
+	/* 0-9 */	"start","nearskip","skip","neartramp","tramp","var","def","use","8","addp",
 	/* 10-19 */	"param","st","ld","alloc","sti","ret","live","calli","call","loop",
 	/* 20-29 */ "x","j","jt","jf","label","25","feq","flt","fgt","fle",
 	/* 30-39 */ "fge","cmov","short","int","ldc","","neg","add","sub","mul",
 	/* 40-49 */ "callh","and","or","xor","not","lsh","rsh","ush","xt","xf",
 	/* 50-59 */ "qlo","qhi","ldcb","ov","cs","eq","lt","gt","le","ge",
 	/* 60-63 */ "ult","ugt","ule","uge",
-	/* 64-69 */ "LIR64","65","66","67","68","69",
+	/* 64-69 */ "LIR64","file","line","67","68","69",
 	/* 70-79 */ "70","71","72","73","74","stq","ldq","77","stqi","fret",
 	/* 80-89 */ "80","fcalli","fcall","83","84","85","86","87","88","89",
-	/* 90-99 */ "90","91","92","93","94","95","96","quad","98","99",
+	/* 90-99 */ "90","91","92","93","94","95","96","quad","ldqc","99",
 	/* 100-109 */ "fneg","fadd","fsub","fmul","fdiv","qjoin","i2f","u2f","108","109",
 	/* 110-119 */ "110","111","112","113","114","115","116","117","118","119",
 	/* 120-127 */ "120","121","122","123","124","125","126","127"
@@ -568,7 +568,7 @@ namespace nanojit
 
     bool LIns::isLoad() const
     {
-        return u.code == LIR_ldq || u.code == LIR_ld || u.code == LIR_ldc;
+        return u.code == LIR_ldq || u.code == LIR_ld || u.code == LIR_ldc || u.code == LIR_ldqc;
     }
 
 	bool LIns::isconst() const
@@ -833,7 +833,7 @@ namespace nanojit
 		}
 		else if (oprnd1->isconst() && !oprnd2->isconst())
 		{
-			if (v == LIR_add || v == LIR_mul ||
+			if (v == LIR_add || v == LIR_addp || v == LIR_mul ||
 				v == LIR_fadd || v == LIR_fmul ||
 				v == LIR_xor || v == LIR_or || v == LIR_and ||
 				v == LIR_eq) {
@@ -893,7 +893,7 @@ namespace nanojit
 
 			if (c == 0)
 			{
-				if (v == LIR_add || v == LIR_or || v == LIR_xor ||
+				if (v == LIR_add || v == LIR_addp || v == LIR_or || v == LIR_xor ||
 					v == LIR_sub || v == LIR_lsh || v == LIR_rsh || v == LIR_ush)
 					return oprnd1;
 				else if (v == LIR_and || v == LIR_mul)
@@ -1634,15 +1634,6 @@ namespace nanojit
 	{
 		char sbuf[200];
 		char *s = sbuf;
-		if (!i->isStore() && !i->isGuard() && !i->isop(LIR_start) && 
-			!i->isop(LIR_label) && !i->isop(LIR_var) && !i->isop(LIR_def) && 
-			!i->isBranch() && !i->isop(LIR_live)
-		   ) 
-		{
-			sprintf(s, "%s = ", formatRef(i));
-			s += strlen(s);
-		}
-
 		LOpcode op = i->opcode();
 		switch(op)
 		{
@@ -1654,7 +1645,7 @@ namespace nanojit
 			}
 
             case LIR_alloc: {
-                sprintf(s, "%s %d", lirNames[op], i->size());
+                sprintf(s, "%s = %s %d", formatRef(i), lirNames[op], i->size());
                 break;
             }
 
@@ -1673,7 +1664,7 @@ namespace nanojit
 			case LIR_fcall:
 			case LIR_call: {
                 const CallInfo &c = _functions[i->fid()];
-				sprintf(s, "%s ( ", c._name);
+				sprintf(s, "%s = %s ( ", formatRef(i), c._name);
 				for (int32_t j=i->argc()-1; j >= 0; j--) {
 					s += strlen(s);
 					sprintf(s, "%s ",formatRef(i->arg(j)));
@@ -1685,7 +1676,7 @@ namespace nanojit
 			case LIR_fcalli:
 			case LIR_calli: {
                 int32_t argc = i->argc();
-				sprintf(s, "[%s] ( ", formatRef(i->arg(argc-1)));
+				sprintf(s, "%s = [%s] ( ", formatRef(i), formatRef(i->arg(argc-1)));
                 s += strlen(s);
                 argc--;
 				for (int32_t j=argc-1; j >= 0; j--) {
@@ -1698,19 +1689,15 @@ namespace nanojit
 			}
 
 			case LIR_param:
-                sprintf(s, "%s %d", lirNames[op], i->imm8());
+                sprintf(s, "%s = %s %d", formatRef(i), lirNames[op], i->imm8());
 				break;
 
 			case LIR_var:
-                sprintf(s, "%s", formatRef(i));
-				break;
-
-			case LIR_use:
-                sprintf(s, "%s", formatRef(i->oprnd1()));
+                sprintf(s, "%s = %s", formatRef(i), lirNames[op]);
 				break;
 
 			case LIR_def:
-                sprintf(s, "%s = %s", formatRef(i->oprnd1()), formatRef(i->oprnd2()));
+                sprintf(s, "%s %s = %s", lirNames[op], formatRef(i->oprnd1()), formatRef(i->oprnd2()));
 				break;
 
 			case LIR_label:
@@ -1734,6 +1721,7 @@ namespace nanojit
                 sprintf(s, "%s %s", lirNames[op], formatRef(i->oprnd1()));
 				break;
 				
+			case LIR_use:
             case LIR_callh:
 			case LIR_neg:
 			case LIR_fneg:
@@ -1744,7 +1732,7 @@ namespace nanojit
             case LIR_ov:
             case LIR_cs:
 			case LIR_not: 
-				sprintf(s, "%s %s", lirNames[op], formatRef(i->oprnd1()));
+				sprintf(s, "%s = %s %s", formatRef(i), lirNames[op], formatRef(i->oprnd1()));
 				break;
 
 			case LIR_x:
@@ -1754,6 +1742,7 @@ namespace nanojit
 				break;
 
 			case LIR_add:
+			case LIR_addp:
 			case LIR_sub: 
 		 	case LIR_mul: 
 			case LIR_fadd:
@@ -1781,13 +1770,13 @@ namespace nanojit
 			case LIR_fgt:
 			case LIR_fge:
 			case LIR_qjoin:
-				sprintf(s, "%s %s, %s", lirNames[op],
+				sprintf(s, "%s = %s %s, %s", formatRef(i), lirNames[op],
 					formatRef(i->oprnd1()), 
 					formatRef(i->oprnd2()));
 				break;
 
 			case LIR_cmov:
-                sprintf(s, "%s ? %s : %s", 
+                sprintf(s, "%s = %s %s ? %s : %s", formatRef(i), lirNames[op],
 					formatRef(i->oprnd1()), 
 					formatRef(i->oprnd2()->oprnd1()), 
 					formatRef(i->oprnd2()->oprnd2()));
@@ -1796,8 +1785,9 @@ namespace nanojit
 			case LIR_ld: 
 			case LIR_ldc: 
 			case LIR_ldq: 
+			case LIR_ldqc: 
 			case LIR_ldcb: 
-				sprintf(s, "%s %s[%s]", lirNames[op],
+				sprintf(s, "%s = %s %s[%s]", formatRef(i), lirNames[op],
 					formatRef(i->oprnd1()), 
 					formatRef(i->oprnd2()));
 				break;

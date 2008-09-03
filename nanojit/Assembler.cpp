@@ -1263,6 +1263,7 @@ namespace nanojit
 				}
 
 				case LIR_ldq:
+				case LIR_ldqc:
 				{
                     countlir_ldq();
 					asm_load64(ins);
@@ -1301,6 +1302,7 @@ namespace nanojit
 				}
 
 				case LIR_add:
+				case LIR_addp:
 				case LIR_sub:
 				case LIR_mul:
 				case LIR_and:
@@ -1326,7 +1328,7 @@ namespace nanojit
 							rb = findRegFor(rhs, allow);
 						allow &= ~rmask(rb);
 					}
-                    else if (op == LIR_add && lhs->isop(LIR_alloc) && rhs->isconst()) {
+                    else if ((op == LIR_add||op == LIR_addp) && lhs->isop(LIR_alloc) && rhs->isconst()) {
                         // add alloc+const, use lea
                         Register rr = prepResultReg(ins, allow);
                         int d = findMemFor(lhs) + rhs->constval();
@@ -1347,7 +1349,7 @@ namespace nanojit
 						if (lhs == rhs)
 							rb = ra;
 
-						if (op == LIR_add)
+						if (op == LIR_add || op == LIR_addp)
 							ADD(rr, rb);
 						else if (op == LIR_sub)
 							SUB(rr, rb);
@@ -1371,7 +1373,7 @@ namespace nanojit
 					else
 					{
 						int c = rhs->constval();
-						if (op == LIR_add) {
+						if (op == LIR_add || op == LIR_addp) {
 #ifdef NANOJIT_IA32_TODO
 							if (ra != rr) {
                                 // this doesn't set cc's, only use it when cc's not required.
