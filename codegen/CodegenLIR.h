@@ -95,6 +95,7 @@ namespace avmplus
         LIns *dxns, *dxnsAddrSave;
         LIns *csn;
         LIns *undefConst;
+		LIns *coreAddr;
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
         sintptr lastPcSave;
@@ -107,6 +108,7 @@ namespace avmplus
         void storeIns(LIns *val, int32_t disp, LIns *base);
         void storeIns(LIns *val, int32_t disp, LIns *base, bool force32);
         LIns *InsConst(int32_t c);
+        LIns *InsConst(const void *p) { return InsConst((int32_t)p); }
         LIns *defIns(LIns *i);
         LIns *atomToNativeRep(int loc, LIns *i);
         LIns *atomToNativeRep(Traits *, LIns *i);
@@ -135,20 +137,14 @@ namespace avmplus
 	    LIns *u2dIns(LIns* v);
         bool isDouble(int i);
         bool isPointer(int i);
-        void saveState();
         void label(CodegenLabel &label, LIns *bb);
         void emitPrep(AbcOpcode);
         void emitSampleCheck();
-        void InsDealloc(LIns *a);
         bool verbose();
-        void extendDefLifetime(OP*);
-        void extendLastUse(LIns *i, sintptr pc);
-        void extendLastUse(LIns *ins, LIns *use, LIns *target);
         void patchLater(LIns *br, CodegenLabel &);
         void patchLater(LIns *br, intptr_t pc);
         bool isCodeContextChanged() const;
         void mirLabel(CodegenLabel &l, LIns *target);
-        void markDead(LIns *);
         uint32_t find_fid(uintptr_t addr);
         void deadvars();
 
@@ -157,7 +153,7 @@ namespace avmplus
         ~CodegenLIR();
 		void clearMIRBuffers();
 		void emitMD();
-	    void formatOperand(PrintWriter& buffer, OP* oprnd);
+	    void formatOperand(PrintWriter& buffer, LIns* oprnd);
 		void epilogue(FrameState* state);
 		bool prologue(FrameState* state);
 		void emitCall(FrameState* state, AbcOpcode opcode, sintptr method_id, int argc, Traits* result);
@@ -176,7 +172,7 @@ namespace avmplus
 		void emitSetContext(FrameState* state, AbstractFunction* f);
 		void emitSetDxns(FrameState* state);
 		void merge(const Value& current, Value& target);
-		void localSet(uintptr i, OP* o);
+		void localSet(uintptr i, LIns* o);
 
     // helpers for jitted code
 		static Atom coerce_o(Atom v);
