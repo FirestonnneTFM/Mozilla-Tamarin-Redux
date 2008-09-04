@@ -1103,6 +1103,16 @@ namespace avmplus
             lirbuf->names->addName(vars, "vars");
         })
 
+		// stack overflow check - use vars address as comparison
+		if (core->minstack) {
+			LIns *c = binaryIns(LIR_ult, vars, InsConst(core->minstack));
+			LIns *b = branchIns(LIR_jf, c, 0);
+			callIns(FUNCTIONID(stkover), 1, env_param);
+			LIns *label = Ins(LIR_label);
+			label->setimm24(0); // nothing is live yet in vars
+			b->target(label);
+		}
+
         #ifdef DEBUGGER
 		// pointers to traits so that the debugger can decode the locals
 		// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
