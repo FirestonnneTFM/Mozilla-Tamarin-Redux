@@ -298,34 +298,12 @@ namespace avmplus
 #undef INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM
 #undef INTERP_FOPCODE_LIST_END
 
-	#ifdef AVMPLUS_SYMBIAN
-	static const int mir_buffer_reserve_size =	1*1024*1024;	// 2MB
-	#else
-	static const int mir_buffer_reserve_size =	32*1024*1024;	// 32MB
-	#endif
-	static const int mir_buffer_size_min	 =	1024*1024;		// 1MB
-
-	#ifdef AVMPLUS_AMD64
-	static const int prologue_size = 65536; 
-	#else
-	static const int prologue_size = 32768; //3840;
-	#endif
-	static const int epilogue_size = 208;
-
-	/**
-	 * 3 instruction formats 
-	 *
-	 *  format 1  : oprnd1 = 0 and value = imm32
-	 *  format 2  : oprnd1 = ptr | imm8 and value = imm32 (conditional branches oprnd1 = ptr [MIR_cm / MIR_cs / MIR_fcm / MIR_fcs] oprnd1 = imm8)
-	 *  format 3  : oprnd1 = ptr  oprnd2 / oprnd3 are optional ptr (only MIR_st should use oprnd3)
-	 */
-
     // unary
     LIns *CodegenLIR::Ins(LOpcode op, LIns* a) {
         return lirout->ins1(op, a);
     }
 
-    OP* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b) {
+    LIns* CodegenLIR::binaryIns(LOpcode op, LIns *a, LIns *b) {
         return lirout->ins2(op, a, b);
     }
 
@@ -336,7 +314,7 @@ namespace avmplus
 	 */
 
 	// store to register + offset
-	void CodegenLIR::storeIns(OP* value, int32_t disp, OP* base, bool force32) {
+	void CodegenLIR::storeIns(LIns* value, int32_t disp, LIns* base, bool force32) {
         if (force32 && value->isQuad())
             value = lirout->ins1(LIR_qlo, value);
         storeIns(value, disp, base);
@@ -346,17 +324,17 @@ namespace avmplus
         lirout->store(value, base, disp);
 	}
 
-	OP* CodegenLIR::defIns(OP* value) {
+	LIns* CodegenLIR::defIns(LIns* value) {
         return value;
 	}
 
 	// address calc instruction
-	OP* CodegenLIR::leaIns(int32_t disp, OP* base) {
+	LIns* CodegenLIR::leaIns(int32_t disp, LIns* base) {
         return lirout->ins2(LIR_addp, base, lirout->insImm(disp));
 	}
 
     // call 
-	OP* CodegenLIR::callIns(uint32_t fid, uint32_t argc, ...)
+	LIns* CodegenLIR::callIns(uint32_t fid, uint32_t argc, ...)
 	{
         AvmAssert(argc <= MAXARGS);
         AvmAssert(argc == k_functions[fid].count_args());
@@ -371,7 +349,7 @@ namespace avmplus
         return lirout->insCall(fid, args);
 	}
 
-	OP* CodegenLIR::callIndirect(uint32_t fid, OP* target, uint32_t argc, ...)
+	LIns* CodegenLIR::callIndirect(uint32_t fid, LIns* target, uint32_t argc, ...)
 	{
         AvmAssert(argc+1 <= MAXARGS);
         AvmAssert(argc+1 == k_functions[fid].count_args());
@@ -391,12 +369,12 @@ namespace avmplus
         return state->value(i).traits != NUMBER_TYPE ? localGet(i) : localGetq(i);
     }
 
-	OP* CodegenLIR::localGet(int i) {
+	LIns* CodegenLIR::localGet(int i) {
         Value& v = state->value(i);
         return v.ins = lirout->insLoadi(vars, i*8);
 	}
 
-	OP* CodegenLIR::localGetq(int i) {
+	LIns* CodegenLIR::localGetq(int i) {
         Value& v = state->value(i);
         return v.ins = lirout->insLoad(LIR_ldq, vars, i*8);
 	}
@@ -409,12 +387,12 @@ namespace avmplus
         v.stored = true;
 	}
 
-	OP* CodegenLIR::atomToNativeRep(int i, OP* atom)
+	LIns* CodegenLIR::atomToNativeRep(int i, LIns* atom)
 	{
 		return atomToNativeRep(state->value(i).traits, atom);
 	}
 
-	OP* CodegenLIR::ptrToNativeRep(Traits*t, OP* ptr)
+	LIns* CodegenLIR::ptrToNativeRep(Traits*t, LIns* ptr)
 	{
 		if (t->isMachineType)
 		{
@@ -433,7 +411,7 @@ namespace avmplus
 		return state->value(i).traits == NUMBER_TYPE;
 	}
 
-	OP* CodegenLIR::loadAtomRep(int i)
+	LIns* CodegenLIR::loadAtomRep(int i)
 	{
 		Value& v = state->value(i);
 		Traits* t = v.traits;
@@ -446,10 +424,10 @@ namespace avmplus
 			if (core->config.sse2)
 				fid = FUNCTIONID(doubleToAtom_sse2);
 #endif
-			return callIns(fid, 2, InsConst((uintptr)core), localGetq(i));
+			return callIns(fid, 2, coreAddr, localGetq(i));
 		}
 
-		OP* native = localGet(i);
+		LIns* native = localGet(i);
 
 		if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
 		{
@@ -487,16 +465,16 @@ namespace avmplus
 		if (t == INT_TYPE)
 		{
 			return callIns(FUNCTIONID(intToAtom), 2,
-				InsConst((uintptr)core), native);
+				coreAddr, native);
 		}
 		if (t == UINT_TYPE)
 		{
 			return callIns(FUNCTIONID(uintToAtom), 2,
-				InsConst((uintptr)core), native);
+				coreAddr, native);
 		}
 		if (t == BOOLEAN_TYPE)
 		{
-			OP* i1 = binaryIns(LIR_lsh, native, InsConst(3));
+			LIns* i1 = binaryIns(LIR_lsh, native, InsConst(3));
 			return binaryIns(LIR_or, i1, InsConst(kBooleanType));
 		}
 
@@ -513,83 +491,31 @@ namespace avmplus
 		return binaryIns(LIR_or, native, InsConst(kObjectType));
 	}
 
-	OP* CodegenLIR::storeAtomArgs(int count, int index)
+	LIns* CodegenLIR::storeAtomArgs(int count, int index)
 	{
-		OP* ap = InsAlloc(sizeof(Atom)*count);
+		LIns* ap = InsAlloc(sizeof(Atom)*count);
 		for (int i=0; i < count; i++)
 		{
-			OP* v = loadAtomRep(index++);
+			LIns* v = loadAtomRep(index++);
 			storeIns(v, sizeof(Atom)*i, ap);
 		}
 		return ap;
 	}
 
-	OP* CodegenLIR::storeAtomArgs(OP* receiver, int count, int index)
+	LIns* CodegenLIR::storeAtomArgs(LIns* receiver, int count, int index)
 	{
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console << "        	store args\n";
 		#endif
-		OP* ap = InsAlloc(sizeof(Atom)*(count+1));
+		LIns* ap = InsAlloc(sizeof(Atom)*(count+1));
 		storeIns(receiver, 0, ap);
 		for (int i=1; i <= count; i++)
 		{
-			OP* v = loadAtomRep(index++);
+			LIns* v = loadAtomRep(index++);
 			storeIns(v, sizeof(Atom)*i, ap);
 		}
 		return ap;
-	}
-
-#ifdef DEBUGGER
-	void CodegenLIR::extendDefLifetime(OP* current)
-	{
-        AvmAssert(false); (void) current; /*
-		for (int i=0, n=state->verifier->local_count; i < n; i++)
-		{
-			OP* def = state->value(i).ins;
-			if (!def)
-				continue;
-			if ((def->code & ~MIR_float) == MIR_use)
-				def = def->oprnd1;
-			AvmAssert(def && (def->code & ~MIR_float) == MIR_def);
-			while (def->join)
-				def = def->join;
-			def->lastUse = current;
-		}*/
-	}
-#endif
-
-	void CodegenLIR::saveState()
-	{
-#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    save state\n";
-#endif
-	}
-
-	void CodegenLIR::extendLastUse(OP* ins, OP* use, OP* target)
-	{
-        AvmAssert(false);
-        (void) ins;
-        (void) use;
-        (void) target;
-	}
-
-	void CodegenLIR::extendLastUse(OP* use, sintptr targetpc)
-	{
-		// if target of the branch is in the middle of any
-		// live range, extend the live range to include
-		// the branch
-        AvmAssert(false);
-        (void) use;
-        (void) targetpc;
-	}
-
-	void CodegenLIR::InsDealloc(OP* alloc)
-	{
-        (void) alloc;
-		AvmAssert(alloc->isop(LIR_alloc));
-		//alloc->lastUse = ip-1;
 	}
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
@@ -744,25 +670,7 @@ namespace avmplus
 	}
 #endif /* AVMPLUS_ARM */
 
-#ifndef FEATURE_BUFFER_GUARD
-	bool CodegenLIR::checkOverflow()
-	{
-		if (overflow)
-			return overflow;
-
-		// if this fails, we aren't estimating a big enough space for MIR
-		uintptr curSize = (uintptr)ip-(uintptr)ipStart;
-		if (curSize >= mirBuffSize)
-		{
-			// start over with bigger buffer.
-			expansionFactor *= 2;
-			overflow = true;
-		}
-		return overflow;
-	}
-#endif
-
-	OP* CodegenLIR::atomToNativeRep(Traits* t, OP* atom)
+	LIns* CodegenLIR::atomToNativeRep(Traits* t, LIns* atom)
 	{
 		if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
 		{
@@ -1010,7 +918,7 @@ namespace avmplus
         // TODO
         // * reset when vars passed as arg to a function that could modify vars (debugenter/exit)
         // * handle load/store size mismatches -- loading high word of quad, etc
-        // * suppress stores until saveState() points.
+        // * suppress stores until ends of blocks
     };
 
     class CfgCseFilter: public CseFilter
@@ -1070,14 +978,8 @@ namespace avmplus
         for (int i=0, n=sizeof(lirbuf->savedParams)/sizeof(LInsp); i < n; i++)
             lirout->insParam(i, 1);
 
-		if (overflow) return false;
-
-#ifndef FEATURE_BUFFER_GUARD 
-		// if we aren't growing the buffer dynamically then commit a whole bunch of it
-		mirBuffSize = sizeof(OP) * (40*expansionFactor*(abcEnd-abcStart)) + epilogue_size + prologue_size;  // MIR instructions
-		mirBuffSize = BIT_ROUND_UP(mirBuffSize, mirBuffer->pageSize());
-		mirBuffer->growBy(mirBuffSize);
-#endif /* FEATURE_BUFFER_GUARD */
+		if (overflow)
+			return false;
 
 		// last pc value that we generated a store for 
 		lastPcSave = 0;
@@ -1109,9 +1011,10 @@ namespace avmplus
 			LIns *b = branchIns(LIR_jf, c, 0);
 			callIns(FUNCTIONID(stkover), 1, env_param);
 			LIns *label = Ins(LIR_label);
-			label->setimm24(0); // nothing is live yet in vars
 			b->target(label);
 		}
+
+		coreAddr = InsConst(core);
 
         #ifdef DEBUGGER
 		// pointers to traits so that the debugger can decode the locals
@@ -1140,23 +1043,15 @@ namespace avmplus
             })
 		}
 
-		if (info->setsDxns())
-		{
-			dxns = InsAlloc(sizeof(Namespace*));
-            verbose_only( if (lirbuf->names) {
-                lirbuf->names->addName(dxns, "dxns");
-            })
-		}
-
 		#ifdef DEBUGGER
 		if(core->sampling())
 		{
 			// FIXME: 64 bit integer math needed!
-			//OP* invocationCount = loadIns(LIR_ldqc, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
+			//LIns* invocationCount = loadIns(LIR_ldqc, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
 			//Ins(MIR_inc64, invocationCount);
 			//storeIns64(invocationCount, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
-			OP* invocationCount = loadIns(LIR_ldc, offsetof(MethodEnv, invocationCount), env_param);
-			OP *result = binaryIns(LIR_add, invocationCount, InsConst(1));
+			LIns* invocationCount = loadIns(LIR_ldc, offsetof(MethodEnv, invocationCount), env_param);
+			LIns *result = binaryIns(LIR_add, invocationCount, InsConst(1));
 			storeIns(result, offsetof(MethodEnv, invocationCount), env_param);
 		}
 
@@ -1166,17 +1061,22 @@ namespace avmplus
             lirbuf->names->addName(csn, "csn");
         })
 		#endif
-		
+
 		if (info->setsDxns())
 		{
+			dxns = InsAlloc(sizeof(Namespace*));
+            verbose_only( if (lirbuf->names) {
+                lirbuf->names->addName(dxns, "dxns");
+            })
+
 			// dxns = env->vtable->scope->defaultXmlNamespace
-			OP* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
-			OP* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
-			OP* capturedDxns = loadIns(LIR_ldc, offsetof(ScopeChain, defaultXmlNamespace), scope);
+			LIns* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+			LIns* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
+			LIns* capturedDxns = loadIns(LIR_ldc, offsetof(ScopeChain, defaultXmlNamespace), scope);
 			storeIns(capturedDxns, 0, dxns);
 
 			// dxnsSave = AvmCore::dxnsAddr
-			dxnsAddrSave = loadIns(LIR_ldc, offsetof(AvmCore, dxnsAddr), InsConst((uintptr)core));
+			dxnsAddrSave = loadIns(LIR_ldc, offsetof(AvmCore, dxnsAddr), coreAddr);
 		}
 
 		for (int i=0, n = state->verifier->stackBase+state->stackDepth; i < n; i++)
@@ -1194,7 +1094,7 @@ namespace avmplus
 		// this whole section only applies to functions that actually
 		// have arguments.
 
-		OP* apArg = ap_param;
+		LIns* apArg = ap_param;
 		if (info->flags & AbstractFunction::HAS_OPTIONAL)
 		{
 			// compute offset of first optional arg
@@ -1207,30 +1107,26 @@ namespace avmplus
 				}
 				else
 				{
-#ifdef AVMPLUS_64BIT
-					offset += 8;
-#else
-					offset += 4;
-#endif
+					offset += sizeof(Atom);
 				}
 			}
 
 			// now copy the default optional values
-			OP* argcarg = argc_param;
+			LIns* argcarg = argc_param;
 			for (int i=0, n=info->optional_count; i < n; i++)
 			{
 				// first set the local[p+1] = defaultvalue
 				int param = i + info->param_count - info->optional_count; // 0..N
 				int loc = param+1;
 
-				OP* defaultVal = InsConst(info->getDefaultValue(i));
+				LIns* defaultVal = InsConst(info->getDefaultValue(i));
 				defaultVal = defIns(atomToNativeRep(loc, defaultVal));
                 localSet(loc, defaultVal);
 				
 				// then generate: if (argc > p) local[p+1] = arg[p+1]
-				OP* cmp = binaryIns(LIR_le, argcarg, InsConst((int32)param));
-				OP* br = branchIns(LIR_jt, cmp); // will patch
-				OP* arg;
+				LIns* cmp = binaryIns(LIR_le, argcarg, InsConst(param));
+				LIns* br = branchIns(LIR_jt, cmp); // will patch
+				LIns* arg;
 				if (isDouble(loc))
 				{
 					arg = loadIns(LIR_ldqc, offset, apArg);
@@ -1239,18 +1135,13 @@ namespace avmplus
 				else
 				{
 					arg = loadIns(LIR_ldc, offset, apArg);
-#ifdef AVMPLUS_64BIT
-					offset += 8;
-#else
-					offset += 4;
-#endif
+					offset += sizeof(Atom);
 				}
 				arg = defIns(arg);
 				localSet(loc, arg);
 
                 LIns *label = Ins(LIR_label);
 				br->target(label);
-                label->setimm24((loc+1) * 8);
 			}
 		}
 		else
@@ -1266,7 +1157,7 @@ namespace avmplus
 		for (int i=0, n=info->param_count-info->optional_count; i <= n; i++)
 		{
 			Traits* t = info->paramTraits(i);
-			OP* arg; 
+			LIns* arg; 
 			if (t == NUMBER_TYPE)
 			{
 				arg = loadIns(LIR_ldqc, offset, apArg);
@@ -1277,11 +1168,7 @@ namespace avmplus
 			{
 				arg = loadIns(LIR_ldc, offset, apArg);
 				localSet(i, arg);
-#ifdef AVMPLUS_AMD64
-				offset += 8;
-#else
-				offset += 4;
-#endif
+				offset += sizeof(Atom);
 			}
 		}
 
@@ -1296,11 +1183,11 @@ namespace avmplus
 		if (info->flags & AbstractFunction::NEED_REST)
 		{
 			//framep[info->param_count+1] = createRest(env, argv, argc);
-			OP* argcArg = argc_param;
-			OP* apArg = ap_param;
+			LIns* argcArg = argc_param;
+			LIns* apArg = ap_param;
 
 			// use csop so if rest value never used, we don't bother creating array
-			OP* rest = callIns(FUNCTIONID(createRestHelper), 3, 
+			LIns* rest = callIns(FUNCTIONID(createRestHelper), 3, 
 				env_param, argcArg, apArg);
 
 			localSet(firstLocal, rest);
@@ -1309,11 +1196,11 @@ namespace avmplus
 		else if (info->flags & AbstractFunction::NEED_ARGUMENTS)
 		{
 			//framep[info->param_count+1] = createArguments(env, argv, argc);
-			OP* argcArg = argc_param;
-			OP* apArg = ap_param;
+			LIns* argcArg = argc_param;
+			LIns* apArg = ap_param;
 
 			// use csop so if arguments never used, we don't create it
-			OP* arguments = callIns(FUNCTIONID(createArgumentsHelper), 3, 
+			LIns* arguments = callIns(FUNCTIONID(createArgumentsHelper), 3, 
 				env_param, argcArg, apArg);
 
 			localSet(firstLocal, arguments);
@@ -1343,10 +1230,10 @@ namespace avmplus
 
 		callIns(FUNCTIONID(debugEnter), 8,
 			env_param, argc_param, ap_param, // for sendEnter
-			leaIns(0, varTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
-			leaIns(0, csn), 
-			leaIns(0, varPtrs),
-			info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
+			varTraits, InsConst(state->verifier->local_count), // for clearing traits pointers
+			csn, 
+			varPtrs,
+			info->hasExceptions() ? _save_eip : InsConst(0)
 			);
 
 		#endif // DEBUGGER
@@ -1355,20 +1242,15 @@ namespace avmplus
 		{
 			// _ef.beginTry(core);
 			callIns(FUNCTIONID(beginTry), 2,
-				leaIns(0,_ef), InsConst((uintptr)core));
-
-			// spill prior to jmp so that our stack is cleared of 
-			// any transient locals.
-			saveState();
+				_ef, coreAddr);
 
 			// force the locals to be clean for the setjmp call
 			LIns *label = Ins(LIR_label);
-            label->setimm24(state->verifier->frameSize * 8);
 			
 			// Exception* _ee = setjmp(_ef.jmpBuf);
 			// ISSUE this needs to be a cdecl call
-			OP* jmpbuf = leaIns(offsetof(ExceptionFrame, jmpbuf), _ef);
-			OP* ee = callIns(FUNCTIONID(fsetjmp), 2,
+			LIns* jmpbuf = leaIns(offsetof(ExceptionFrame, jmpbuf), _ef);
+			LIns* ee = callIns(FUNCTIONID(fsetjmp), 2,
 				jmpbuf, InsConst(0));
 
 #ifdef AVMPLUS_SPARC
@@ -1376,8 +1258,8 @@ namespace avmplus
 #endif
 
 			// if (setjmp() == 0) goto start
-			OP* cond = binaryIns(LIR_eq, ee, InsConst(0));
-			OP* exBranch = branchIns(LIR_jt, cond);
+			LIns* cond = binaryIns(LIR_eq, ee, InsConst(0));
+			LIns* exBranch = branchIns(LIR_jt, cond);
 
 			// exception case
 			exAtom = loadIns(LIR_ld, offsetof(Exception, atom), ee);
@@ -1386,9 +1268,9 @@ namespace avmplus
 
 			// _ef.beginCatch()
 			// ISSUE why do we have to redefine ef? it is NULL when exception happens
-			OP* pc = loadIns(LIR_ld, 0, _save_eip);
-			OP* handler = callIns(FUNCTIONID(beginCatch), 5,
-				InsConst((uintptr)core), leaIns(0,_ef), InsConst((uintptr)info), pc, ee);
+			LIns* pc = loadIns(LIR_ld, 0, _save_eip);
+			LIns* handler = callIns(FUNCTIONID(beginCatch), 5,
+				coreAddr, _ef, InsConst(info), pc, ee);
 
 #ifdef AVMPLUS_SPARC
 			beginCatch_end = handler;
@@ -1399,7 +1281,6 @@ namespace avmplus
 			branchIns(LIR_ji, 0, handler);
 
 			// target of conditional
-            label->setimm24(state->verifier->frameSize * 8);
 			exBranch->target(label);
 		}
 
@@ -1410,19 +1291,10 @@ namespace avmplus
 			if (state->insideTryBlock)
 				storeIns(InsConst(state->pc), 0, _save_eip);
 
-			#ifdef AVMPLUS_64BIT
-			OP* interrupted = loadIns(LIR_ld, 0, InsConst((uintptr)&core->interrupted));
-			#else
-			OP* interrupted = loadIns(LIR_ld, 0, InsConst((uintptr)&core->interrupted));
-			#endif
-			OP* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
+			LIns* interrupted = loadIns(LIR_ld, 0, InsConst(&core->interrupted));
+			LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
 			patchLater(br, interrupt_label);
 		}
-
-        // mark end of prolog
-        //LIns *label = Ins(LIR_label);
-        //label->setimm24(state->verifier->scopeBase * 8);
-
 		return true;
 	}
 
@@ -1435,15 +1307,15 @@ namespace avmplus
 	{
 		this->state = state;
 		Traits* t = info->declaringTraits->scope->scopes[scope_index].traits;
-		OP* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
-		OP* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
-		OP* scopeobj = loadIns(LIR_ldc, offsetof(ScopeChain, scopes) + scope_index*sizeof(Atom), scope);
+		LIns* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+		LIns* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
+		LIns* scopeobj = loadIns(LIR_ldc, offsetof(ScopeChain, scopes) + scope_index*sizeof(Atom), scope);
 		localSet(dest, atomToNativeRep(t, scopeobj));
 	}
 
 	void CodegenLIR::emitSwap(FrameState* state, int i, int j) {
 		this->state = state;
-		OP* t = localCopy(i);
+		LIns* t = localCopy(i);
 		localSet(i, localCopy(j));
 		localSet(j, t);
 	}
@@ -1465,7 +1337,7 @@ namespace avmplus
  			if (!f || f->usesCallerContext())
 			{
 				// core->codeContext = env;
-				storeIns(env_param, 0, InsConst((uintptr)&core->codeContextAtom));
+				storeIns(env_param, 0, InsConst(&core->codeContextAtom));
 			}
 
 			if (!f || f->usesDefaultXmlNamespace())
@@ -1492,20 +1364,17 @@ namespace avmplus
 	{
 		this->state = state;
 
-		OP* dxnsAddr;
+		LIns* dxnsAddr = dxns;
 
-		if (info->isFlagSet(AbstractFunction::SETS_DXNS)) {
-			dxnsAddr = leaIns(0,dxns);
-		}
-		else {
+		if (!info->setsDxns()) {
 			// dxnsAddr = &env->vtable->scope->defaultXmlNamespace
-			OP* env = env_param;
-			OP* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env);
-			OP* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
+			LIns* env = env_param;
+			LIns* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env);
+			LIns* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
 			dxnsAddr = leaIns(offsetof(ScopeChain, defaultXmlNamespace), scope);
 		}
 
-		storeIns(dxnsAddr, 0, InsConst((uintptr)&core->dxnsAddr));
+		storeIns(dxnsAddr, 0, InsConst(&core->dxnsAddr));
 	}
 
 	void CodegenLIR::merge(const Value&/*current*/, Value&/*target*/)
@@ -1517,8 +1386,7 @@ namespace avmplus
 	{
 		// our new extended BB now starts here, this means that any branch targets
 		// should hit the next instruction our bb start instruction
-		OP* bb = Ins(LIR_label); // mark start of block
-        bb->setimm24((state->sp()+1) * 8);
+		LIns* bb = Ins(LIR_label); // mark start of block
 
 		// get a label for our block start and tie it to this location
 		mirLabel(state->verifier->getFrameState(state->pc)->label, bb);
@@ -1530,12 +1398,8 @@ namespace avmplus
 			if (state->insideTryBlock)
 				storeIns(InsConst(state->pc), 0, _save_eip);
 
-			#ifdef AVMPLUS_AMD64
-			OP* interrupted = loadIns(LIR_ld, 0, InsConst((uintptr)&core->interrupted));
-			#else
-			OP* interrupted = loadIns(LIR_ld, 0, InsConst((uintptr)&core->interrupted));
-			#endif
-			OP* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
+			LIns* interrupted = loadIns(LIR_ld, 0, InsConst(&core->interrupted));
+			LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
 			patchLater(br, interrupt_label);
 		}
 	}
@@ -1543,11 +1407,6 @@ namespace avmplus
 	void CodegenLIR::emitBlockEnd(FrameState* state)
 	{
 		this->state = state;
-
-#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "       block end\n";
-#endif
 
 		// our eBB now terminates.  For all branch instructions we are
 		// able to detect this situation and have already generated the 
@@ -1557,7 +1416,6 @@ namespace avmplus
 		// the states across the various blocks generating this op prior
 		// to the merge.  After this emit, we should receive an emitBlockStart()
 		// from the Verifier.
-		saveState();
 	}
 
 	void CodegenLIR::emitIntConst(FrameState* state, int index, uintptr c)
@@ -1615,7 +1473,7 @@ namespace avmplus
 			{
 				// * -> Number
 				localSet(loc, callIns(FUNCTIONID(number), 2,
-					InsConst((uintptr)core), loadAtomRep(loc)));
+					coreAddr, loadAtomRep(loc)));
 			}
 		}
 		else if (result == INT_TYPE)
@@ -1626,7 +1484,7 @@ namespace avmplus
 			}
 			else if (in == NUMBER_TYPE)
 			{
-				OP* ins = localGetq(loc);
+				LIns* ins = localGetq(loc);
 				if (ins != NULL && ins->isop(LIR_fadd) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
@@ -1634,26 +1492,22 @@ namespace avmplus
 					// old: int(fadd(Number(int),Number(int)))
 					// new: iadd(int,int)
 					localSet(loc, binaryIns(LIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fsub) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
 					localSet(loc, binaryIns(LIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fmul) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
 					localSet(loc, binaryIns(LIR_mul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(ins);
 				}
 				else if (ins != NULL && (ins->isop(LIR_i2f) || ins->isop(LIR_u2f)))
 				{
 					localSet(loc, ins->oprnd1());
-					markDead(ins);
 				}
 				else
 				{
@@ -1670,7 +1524,7 @@ namespace avmplus
 			{
 				// * -> int
 				localSet(loc, callIns(FUNCTIONID(integer), 2,
-					InsConst((uintptr)core), loadAtomRep(loc)));
+					coreAddr, loadAtomRep(loc)));
 			}
 		}
 		else if (result == UINT_TYPE)
@@ -1681,7 +1535,7 @@ namespace avmplus
 			}
 			else if (in == NUMBER_TYPE)
 			{
-				OP* ins = localGetq(loc);
+				LIns* ins = localGetq(loc);
 				if (ins != NULL && ins->isop(LIR_fadd) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
@@ -1689,26 +1543,22 @@ namespace avmplus
 					// old: uint(fadd(Number(uint),Number(uint)))
 					// new: iadd(int,int)
 					localSet(loc, binaryIns(LIR_add, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fsub) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
 					localSet(loc, binaryIns(LIR_sub, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(ins);
 				}
 				else if (ins != NULL && ins->isop(LIR_fmul) &&
 					(ins->oprnd1()->isop(LIR_u2f) || ins->oprnd1()->isop(LIR_i2f)) &&
 					(ins->oprnd2()->isop(LIR_u2f) || ins->oprnd2()->isop(LIR_i2f)))
 				{
 					localSet(loc, binaryIns(LIR_mul, ins->oprnd1()->oprnd1(), ins->oprnd2()->oprnd1()));
-					markDead(ins);
 				}
 				else if (ins != NULL && ((ins->isop(LIR_i2f)) || (ins->isop(LIR_u2f))))
 				{
 					localSet(loc, ins->oprnd1());
-					markDead(ins);
 				}
 				else
 				{
@@ -1733,7 +1583,7 @@ namespace avmplus
 			{
 				// * -> uint
 				localSet(loc, callIns(FUNCTIONID(toUInt32), 2,
-					InsConst((uintptr)core), loadAtomRep(loc)));
+					coreAddr, loadAtomRep(loc)));
 			}
 		}
 		else if (result == BOOLEAN_TYPE)
@@ -1753,7 +1603,7 @@ namespace avmplus
 			{
 				// * -> Boolean
 				localSet(loc, callIns(FUNCTIONID(boolean), 2,
-					InsConst((uintptr)core), loadAtomRep(loc)));
+					coreAddr, loadAtomRep(loc)));
 			}
 		}
 		else if (result == STRING_TYPE)
@@ -1761,25 +1611,25 @@ namespace avmplus
 			if (in == INT_TYPE)
 			{
 				localSet(loc, callIns(FUNCTIONID(intToString), 2,
-					InsConst((uintptr)core), localGet(loc)));
+					coreAddr, localGet(loc)));
 			}
 			else if (in == UINT_TYPE)
 			{
 				localSet(loc, callIns(FUNCTIONID(uintToString), 2,
-					InsConst((uintptr)core), localGet(loc)));
+					coreAddr, localGet(loc)));
 			}
 			else if (in == NUMBER_TYPE)
 			{
 				localSet(loc, callIns(FUNCTIONID(doubleToString), 2,
-					InsConst((uintptr)core), localGetq(loc)));
+					coreAddr, localGetq(loc)));
 			}
 			else if (in == BOOLEAN_TYPE)
 			{
 				// load "true" or "false"
 #ifdef AVMPLUS_64BIT
-				OP *index = binaryIns(LIR_lsh, localGet(loc), InsConst(3));
+				LIns *index = binaryIns(LIR_lsh, localGet(loc), InsConst(3));
 #else
-				OP *index = binaryIns(LIR_lsh, localGet(loc), InsConst(2));
+				LIns *index = binaryIns(LIR_lsh, localGet(loc), InsConst(2));
 #endif
 				localSet(loc, loadIns(LIR_ldc, (uintptr)&core->booleanStrings, index));
 			}
@@ -1787,21 +1637,21 @@ namespace avmplus
 			{
 				// not eligible for CSE, and we know it's not null/undefined
 				localSet(loc, callIns(FUNCTIONID(string), 2,
-					InsConst((uintptr)core), loadAtomRep(loc)));
+					coreAddr, loadAtomRep(loc)));
 			}
 			else
 			{
 				localSet(loc, callIns(FUNCTIONID(coerce_s), 2,
-					InsConst((uintptr)core), loadAtomRep(loc)));
+					coreAddr, loadAtomRep(loc)));
 			}
 		}
 		else if (in && !in->isMachineType && !result->isMachineType
 			   && in != STRING_TYPE && in != NAMESPACE_TYPE)
 		{
-			OP* toplevel = loadToplevel(env_param);
+			LIns* toplevel = loadToplevel(env_param);
 			// coerceobj is void, but we mustn't optimize it out; verifier only calls it when required
 			callIns(FUNCTIONID(coerceobj), 3,
-				toplevel, localGet(loc), InsConst((uintptr)result));
+				toplevel, localGet(loc), InsConst(result));
 			// the input pointer has now been checked but it's still the same value.
 			// verifier remembers this fact by updating the verify time type.
 		}
@@ -1809,17 +1659,17 @@ namespace avmplus
 		{
 			// result is a ScriptObject based type.
 			localSet(loc, callIns(FUNCTIONID(coerceAtom2SO), 3,
-				env_param, loadAtomRep(loc), InsConst((uintptr)result)));
+				env_param, loadAtomRep(loc), InsConst(result)));
 		}
 		else
 		{
-			OP* value = loadAtomRep(loc);
-			OP* toplevel = loadToplevel(env_param);
+			LIns* value = loadAtomRep(loc);
+			LIns* toplevel = loadToplevel(env_param);
 			// sp[0] = toplevel->coerce(sp[0], traits)
-			OP* out = callIns(FUNCTIONID(coerce), 3,
+			LIns* out = callIns(FUNCTIONID(coerce), 3,
 				toplevel,
 				value,
-				InsConst((uintptr)result));
+				InsConst(result));
 
 			// store the result
 			localSet(loc, atomToNativeRep(result, out));
@@ -1837,14 +1687,14 @@ namespace avmplus
 		if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
 		{
 			// checking atom for null or undefined (AvmCore::isNullOrUndefined())
-			OP* value = localGet(index);
+			LIns* value = localGet(index);
 			callIns(FUNCTIONID(nullcheck), 2, env_param, value);
 		}
 		else if (!t->isMachineType)
 		{
 			// checking pointer for null
-			OP* value = localGet(index);
-			OP* br = branchIns(LIR_jt, binaryIns(LIR_eq, value, InsConst(0))); // will be patched
+			LIns* value = localGet(index);
+			LIns* br = branchIns(LIR_jt, binaryIns(LIR_eq, value, InsConst(0))); // will be patched
 			patchLater(br, npe_label);
 		}
 		// else: number, int, uint, and boolean, are never null
@@ -1875,16 +1725,16 @@ namespace avmplus
 		// make sure null check happened.
 		AvmAssert(state->value(objDisp).notNull);
 
-		OP *method = NULL;
-		OP *iid = NULL;
+		LIns *method = NULL;
+		LIns *iid = NULL;
 		switch (opcode)
 		{
 		case OP_constructsuper:
 		{
 			// env->vtable->base->init->enter32v(argc, ...);
-			OP* envArg = env_param;
-			OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
-			OP* base = loadIns(LIR_ldc, offsetof(VTable,base), vtable);
+			LIns* envArg = env_param;
+			LIns* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
+			LIns* base = loadIns(LIR_ldc, offsetof(VTable,base), vtable);
 			method = loadIns(LIR_ldc, offsetof(VTable,init), base);
 			break;
 		}
@@ -1894,7 +1744,7 @@ namespace avmplus
 			// stack out: result
 			// sp[-argc] = callmethod(disp_id, argc, ...);
 			// method_id is disp_id of virtual method
-			OP* vtable = loadVTable(objDisp);
+			LIns* vtable = loadVTable(objDisp);
 			method = loadIns(LIR_ldc, offsetof(VTable, methods)+sizeof(uintptr)*method_id, vtable);
 			break;
 		}
@@ -1903,8 +1753,8 @@ namespace avmplus
 			// stack in: obj arg1..N
 			// stack out: result
 			// method_id is disp_id of super method
-			OP* declvtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
-			OP* basevtable = loadIns(LIR_ldc, offsetof(VTable, base), declvtable);
+			LIns* declvtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+			LIns* basevtable = loadIns(LIR_ldc, offsetof(VTable, base), declvtable);
 			method = loadIns(LIR_ldc, offsetof(VTable, methods)+sizeof(uintptr)*method_id, basevtable);
 			break;
 		}
@@ -1913,8 +1763,8 @@ namespace avmplus
 			// stack in: obj arg1..N
 			// stack out: result
 
-			OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
-			OP* abcenv = loadIns(LIR_ldc, offsetof(VTable, abcEnv), vtable);
+			LIns* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+			LIns* abcenv = loadIns(LIR_ldc, offsetof(VTable, abcEnv), vtable);
 			method = loadIns(LIR_ldc, offsetof(AbcEnv,methods)+sizeof(uintptr)*method_id, abcenv);
 			break;
 		}
@@ -1922,7 +1772,7 @@ namespace avmplus
 		{
 			// method_id is pointer to interface method name (multiname)
 			int index = int(method_id % Traits::IMT_SIZE);
-			OP* vtable = loadVTable(objDisp);
+			LIns* vtable = loadVTable(objDisp);
 			method = loadIns(LIR_ldc, offsetof(VTable, imt)+sizeof(uintptr)*index, vtable);
 			iid = InsConst(method_id);
 			break;
@@ -1931,10 +1781,10 @@ namespace avmplus
 		{
 			// stack in: ctor arg1..N
 			// stack out: newinstance
-			OP* vtable = loadVTable(objDisp);
-			OP* ivtable = loadIns(LIR_ldc, offsetof(VTable, ivtable), vtable);
+			LIns* vtable = loadVTable(objDisp);
+			LIns* ivtable = loadIns(LIR_ldc, offsetof(VTable, ivtable), vtable);
 			method = loadIns(LIR_ldc, offsetof(VTable, init), ivtable);
-			OP* inst = callIns(FUNCTIONID(newInstance),1, localGet(objDisp));
+			LIns* inst = callIns(FUNCTIONID(newInstance),1, localGet(objDisp));
 			localSet(dest, inst);
 			break;
 		}
@@ -1944,7 +1794,7 @@ namespace avmplus
 
 		// store args for the call
 		int index = objDisp;
-		OP* ap = InsAlloc(sizeof(Atom)); // we will update this size, below
+		LIns* ap = InsAlloc(sizeof(Atom)); // we will update this size, below
 		int disp = 0;
         int pad = 0;
 
@@ -1967,7 +1817,7 @@ namespace avmplus
 		for (int i=0; i <= argc; i++)
 		{
             // use localCopy so we sniff the arg type and use appropriate load instruction
-			OP* v = localCopy(index++);
+			LIns* v = localCopy(index++);
 			storeIns(v, disp, ap);
             disp += v->isQuad() ? sizeof(double) : sizeof(Atom);
 		}
@@ -1975,8 +1825,8 @@ namespace avmplus
         // patch the size to what we actually need
 		ap->setSize(disp);
 
-		OP* target = loadIns(LIR_ld, offsetof(MethodEnv, impl32), method);
-		OP* apAddr = leaIns(pad, ap);
+		LIns* target = loadIns(LIR_ld, offsetof(MethodEnv, impl32), method);
+		LIns* apAddr = leaIns(pad, ap);
 
         LIns *out;
         if (!iid) {
@@ -1986,8 +1836,6 @@ namespace avmplus
             uint32_t fid = result==NUMBER_TYPE ? FUNCTIONID(fcallimt) : FUNCTIONID(callimt);
 		    out = callIndirect(fid, target, 4, iid, method, InsConst(argc), apAddr);
         }
-
-		InsDealloc(ap);
 
 		if (opcode != OP_constructsuper && opcode != OP_construct)
 		{
@@ -2009,8 +1857,6 @@ namespace avmplus
 				// spill everything first
 				sintptr targetpc = op1;
 
-				saveState();
-				
 #ifdef DEBUGGER
 				if(core->sampling() && targetpc < state->pc)
 				{
@@ -2019,7 +1865,7 @@ namespace avmplus
 #endif
 
 				// relative branch
-				OP* p = branchIns(LIR_j, 0); // will be patched
+				LIns* p = branchIns(LIR_j, 0); // will be patched
 				patchLater(p, targetpc);
 				break;
 			}
@@ -2035,11 +1881,9 @@ namespace avmplus
 
 				AvmAssert(state->value(sp).traits == INT_TYPE);
 
-				saveState();
-
-				OP* input = localGet(sp);
-				OP* cmp = binaryIns(LIR_ult, input, InsConst(count));
-				OP* p = branchIns(LIR_jf, cmp); // will be patched
+				LIns* input = localGet(sp);
+				LIns* cmp = binaryIns(LIR_ult, input, InsConst(count));
+				LIns* p = branchIns(LIR_jf, cmp); // will be patched
 				patchLater(p, targetpc);
 
                 // fixme - this is just a bunch of if's
@@ -2052,8 +1896,6 @@ namespace avmplus
 					sintptr target = state->pc + AvmCore::readS24(pc+3*i);
                     LIns *br = branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)));
                     patchLater(br, target);
-					//if (target < state->pc)
-					//	extendLastUse(jmpt, target);
 				}
 				break;
 			}
@@ -2063,7 +1905,7 @@ namespace avmplus
 			case OP_getslot:
 			{
 				Traits* t;
-				OP* ptr;
+				LIns* ptr;
 				sintptr ptr_index;
 				
 				if (opcode == OP_getslot || opcode == OP_setslot)
@@ -2089,9 +1931,9 @@ namespace avmplus
 					else
 					{
 						t = scopeTypes->scopes[0].traits;
-						OP* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
-						OP* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
-						OP* scopeobj = loadIns(LIR_ld, offsetof(ScopeChain, scopes) + 0*sizeof(Atom), scope);
+						LIns* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
+						LIns* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
+						LIns* scopeobj = loadIns(LIR_ld, offsetof(ScopeChain, scopes) + 0*sizeof(Atom), scope);
 						ptr = atomToNativeRep(t, scopeobj);
 					}				
 				}
@@ -2101,15 +1943,15 @@ namespace avmplus
 				AvmAssert(t->linked);
 				int offset = t->getOffsets()[slot];
 				
-				OP *unoffsetPtr = ptr;
+				LIns *unoffsetPtr = ptr;
 				if (t->pool->isBuiltin && !t->final)
 				{
 					// t's slots aren't locked in, so we have to adjust for the actual runtime
 					// traits->sizeofInstance.
-					OP* vtable = loadIns(LIR_ldc, offsetof(ScriptObject,vtable), ptr);
-					OP* traits = loadIns(LIR_ldc, offsetof(VTable,traits), vtable);
+					LIns* vtable = loadIns(LIR_ldc, offsetof(ScriptObject,vtable), ptr);
+					LIns* traits = loadIns(LIR_ldc, offsetof(VTable,traits), vtable);
 					offset -= (int)(t->sizeofInstance);
-					OP* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, sizeofInstance), traits);
+					LIns* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, sizeofInstance), traits);
 					ptr = binaryIns(LIR_addp, sizeofInstance, ptr);
 				}
 
@@ -2138,7 +1980,7 @@ namespace avmplus
 				{
 					// set
                     // use localCopy() to sniff the type and use ldq if it's Number
-					OP* value = localCopy(sp);					
+					LIns* value = localCopy(sp);					
 
 					#ifndef MMGC_DRC
 					storeIns(value, offset, ptr);
@@ -2159,14 +2001,14 @@ namespace avmplus
 							wbAddr = FUNCTIONID(atomWriteBarrier);
 						}
 						callIns(wbAddr, 4, 
-								InsConst((uintptr)core->GetGC()), 
+								InsConst(core->GetGC()), 
 								unoffsetPtr, 
 								leaIns(offset, ptr),
 								value);
 						#else // !DRC
 						// use non-substitute WB
 						callIns(FUNCTIONID(WriteBarrierTrap), 3, 
-								InsConst((int)core->gc), 
+								InsConst(core->gc), 
 								unoffsetPtr,
 								(slotType && slotType != OBJECT_TYPE) ? value :
 								binaryIns(LIR_and, value, InsConst(~7)));
@@ -2198,12 +2040,12 @@ namespace avmplus
 
 				// restore AvmCore::dxnsAddr if we set it to a stack addr in our frame
 				if(info->setsDxns()) {
-					storeIns(dxnsAddrSave, 0, InsConst((uintptr)&core->dxnsAddr));
+					storeIns(dxnsAddrSave, 0, InsConst(&core->dxnsAddr));
 				}
 
 				#ifdef DEBUGGER
 				callIns(FUNCTIONID(debugExit), 2,
-					env_param, leaIns(0, csn));
+					env_param, csn);
 				// now we toast the cse and restore contents in order to 
 				// ensure that any variable modifications made by the debugger
 				// will be pulled in.
@@ -2213,12 +2055,10 @@ namespace avmplus
 				if (info->exceptions)
 				{
 					// _ef.endTry();
-					OP* ef = leaIns(0, _ef);
-					callIns(FUNCTIONID(endTry), 1,
-						ef);
+					callIns(FUNCTIONID(endTry), 1, _ef);
 				}
 
-				OP* retvalue;
+				LIns* retvalue;
 				if (opcode == OP_returnvalue)
 				{
 					// already coerced to required native type
@@ -2232,9 +2072,9 @@ namespace avmplus
 					if (t && t != VOID_TYPE)
 					{
 						// implicitly coerce undefined to the return type
-						OP* toplevel = loadToplevel(env_param);
+						LIns* toplevel = loadToplevel(env_param);
 						retvalue = callIns(FUNCTIONID(coerce), 3,
-							toplevel, retvalue, InsConst((uintptr)t));
+							toplevel, retvalue, InsConst(t));
 						retvalue = atomToNativeRep(t, retvalue);
 					}
 				}
@@ -2245,9 +2085,9 @@ namespace avmplus
 			case OP_typeof:
 			{
 				//sp[0] = typeof(sp[0]);
-				OP* value = loadAtomRep(op1);
-				OP* i3 = callIns(FUNCTIONID(typeof), 2,
-					InsConst((uintptr)core), value);
+				LIns* value = loadAtomRep(op1);
+				LIns* i3 = callIns(FUNCTIONID(typeof), 2,
+					coreAddr, value);
 				AvmAssert(result == STRING_TYPE);
 				localSet(op1, i3);
 				break;
@@ -2256,8 +2096,8 @@ namespace avmplus
 			case OP_not:
 			{
 				AvmAssert(state->value(op1).traits == BOOLEAN_TYPE);
-				OP* value = localGet(op1);
-				OP* i3 = binaryIns(LIR_xor, value, InsConst(1));
+				LIns* value = localGet(op1);
+				LIns* i3 = binaryIns(LIR_xor, value, InsConst(1));
 				localSet(op1, i3);
 				break;
 			}
@@ -2299,7 +2139,7 @@ namespace avmplus
 			}
 
             case OP_modulo: {
-				OP* out = callIns(FUNCTIONID(mod), 2,
+				LIns* out = callIns(FUNCTIONID(mod), 2,
 					localGetq(sp-1), localGetq(sp));
 				localSet(sp-1,	out);
 				break;
@@ -2344,21 +2184,18 @@ namespace avmplus
 					case OP_add_i:      mircode = LIR_add;  break;
 					case OP_subtract_i: mircode = LIR_sub;  break;
 				}
-				OP* lhs = localGet(sp-1);
-				OP* rhs = localGet(sp);
-				OP* out = binaryIns(mircode, lhs, rhs);
+				LIns* lhs = localGet(sp-1);
+				LIns* rhs = localGet(sp);
+				LIns* out = binaryIns(mircode, lhs, rhs);
 				localSet(sp-1, out);
 				break;
 			}
 
 			case OP_throw:
 			{
-				// flush it all out
-				OP* value = loadAtomRep(op1);
-				saveState();
 				//throwAtom(*sp--);
 				callIns(FUNCTIONID(throwAtom), 2,
-					InsConst((uintptr)core), value);
+					coreAddr, loadAtomRep(op1));
 				break;
 			}
 
@@ -2368,15 +2205,13 @@ namespace avmplus
 				// stack out: value
 				// sp[0] = env->getsuper(sp[0], multiname)
 				int objDisp = sp;
-				OP* multi = initMultiname((Multiname*)op1, objDisp);
+				LIns* multi = initMultiname((Multiname*)op1, objDisp);
 				AvmAssert(state->value(objDisp).notNull);
 
-				OP* obj = loadAtomRep(objDisp);
+				LIns* obj = loadAtomRep(objDisp);
 
-				OP* i3 = callIns(FUNCTIONID(getsuper), 3,
-					env_param, obj, leaIns(0,multi));
-
-				InsDealloc(multi);
+				LIns* i3 = callIns(FUNCTIONID(getsuper), 3,
+					env_param, obj, multi);
 
 				i3 = atomToNativeRep(result, i3);
 				localSet(objDisp, i3);
@@ -2389,16 +2224,15 @@ namespace avmplus
 				// stack out: nothing
 				// core->setsuper(sp[-1], multiname, sp[0], env->vtable->base)
 				int objDisp = sp-1;
-				OP* multi = initMultiname((Multiname*)op1, objDisp);
+				LIns* multi = initMultiname((Multiname*)op1, objDisp);
 				AvmAssert(state->value(objDisp).notNull);
 
-				OP* obj = loadAtomRep(objDisp);
-				OP* value = loadAtomRep(sp);
+				LIns* obj = loadAtomRep(objDisp);
+				LIns* value = loadAtomRep(sp);
 
 				callIns(FUNCTIONID(setsuper), 4,
-					env_param, obj, leaIns(0, multi), value);
+					env_param, obj, multi, value);
 
-				InsDealloc(multi);
 				break;
 			}
 
@@ -2406,10 +2240,10 @@ namespace avmplus
 			case OP_nextvalue:
 			{
 				// sp[-1] = next[name|value](sp[-1], sp[0]);
-				OP* obj = loadAtomRep(sp-1);
+				LIns* obj = loadAtomRep(sp-1);
 				AvmAssert(state->value(sp).traits == INT_TYPE);
-				OP* index = localGet(sp);
-				OP* i1 = callIns((opcode == OP_nextname) ? FUNCTIONID(nextname) : FUNCTIONID(nextvalue), 3,
+				LIns* index = localGet(sp);
+				LIns* i1 = callIns((opcode == OP_nextname) ? FUNCTIONID(nextname) : FUNCTIONID(nextvalue), 3,
 					env_param, obj, index);
 				localSet(sp-1, atomToNativeRep(result, i1));
 				break;
@@ -2418,10 +2252,10 @@ namespace avmplus
 			case OP_hasnext: 
 			{
 				// sp[-1] = hasnext(sp[-1], sp[0]);
-				OP* obj = loadAtomRep(sp-1);
+				LIns* obj = loadAtomRep(sp-1);
 				AvmAssert(state->value(sp).traits == INT_TYPE);
-				OP* index = localGet(sp);
-				OP* i1 = callIns(FUNCTIONID(hasnext), 3,
+				LIns* index = localGet(sp);
+				LIns* i1 = callIns(FUNCTIONID(hasnext), 3,
 					env_param, obj, index);
 				AvmAssert(result == INT_TYPE);
 				localSet(sp-1, i1);
@@ -2432,18 +2266,16 @@ namespace avmplus
 			{
                 // fixme - if obj is already Atom, or index is already int,
                 // easier to directly reference space in vars.
-				OP* obj = InsAlloc(sizeof(Atom));
-				OP* index = InsAlloc(sizeof(int));
+				LIns* obj = InsAlloc(sizeof(Atom));
+				LIns* index = InsAlloc(sizeof(int));
 				storeIns(loadAtomRep(op1), 0, obj);
 				storeIns(localGet(op2), 0, index);
-				OP* i1 = callIns(FUNCTIONID(hasnextproto), 3,
-									 env_param, leaIns(0, obj), leaIns(0, index));
+				LIns* i1 = callIns(FUNCTIONID(hasnextproto), 3,
+									 env_param, obj, index);
 				localSet(op1, loadIns(LIR_ldc, 0, obj));
 				localSet(op2, loadIns(LIR_ldc, 0, index));
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp+1, i1);
-				InsDealloc(obj);
-				InsDealloc(index);
 				break;
 			}
 			
@@ -2454,17 +2286,14 @@ namespace avmplus
 				int extraScopes = state->scopeDepth;
 
 				// prepare scopechain args for call
-				OP* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
+				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
-				OP* envArg = env_param;
-				OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
-				OP* outer = loadIns(LIR_ldc, offsetof(VTable, scope), vtable);
-				OP* argv = leaIns(0, ap);
+				LIns* envArg = env_param;
+				LIns* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
+				LIns* outer = loadIns(LIR_ldc, offsetof(VTable, scope), vtable);
 
-				OP* i3 = callIns(FUNCTIONID(newfunction), 4,
-					envArg, InsConst((uintptr)func), outer, argv);
-
-				InsDealloc(ap);
+				LIns* i3 = callIns(FUNCTIONID(newfunction), 4,
+					envArg, InsConst(func), outer, ap);
 
 				AvmAssert(!result->isMachineType);
 				localSet(op2, i3);
@@ -2480,16 +2309,13 @@ namespace avmplus
 				int dest = funcDisp;
 
 				// convert args to Atom[] for the call
-				OP* func = loadAtomRep(funcDisp);
-				OP* ap = storeAtomArgs(loadAtomRep(funcDisp+1), argc, funcDisp+2);
+				LIns* func = loadAtomRep(funcDisp);
+				LIns* ap = storeAtomArgs(loadAtomRep(funcDisp+1), argc, funcDisp+2);
 
-				OP* toplevel = loadToplevel(env_param);
-				OP* argv = leaIns(0, ap);
+				LIns* toplevel = loadToplevel(env_param);
 
-				OP* i3 = callIns(FUNCTIONID(op_call), 4, 
-					toplevel, func, InsConst(argc), argv);
-
-				InsDealloc(ap);
+				LIns* i3 = callIns(FUNCTIONID(op_call), 4, 
+					toplevel, func, InsConst(argc), ap);
 
 				localSet(dest, atomToNativeRep(result, i3));
 				break;
@@ -2509,24 +2335,20 @@ namespace avmplus
 				int argv = sp-argc+1;
 
 				int baseDisp = sp-argc;
-				OP* multi = initMultiname((Multiname*)op1, baseDisp);
+				LIns* multi = initMultiname((Multiname*)op1, baseDisp);
 
 				AvmAssert(state->value(baseDisp).notNull);
 
 				// convert args to Atom[] for the call
-				OP* base = loadAtomRep(baseDisp);
-				OP* receiver = opcode == OP_callproplex ? InsConst(nullObjectAtom) : base;
-				OP* ap = storeAtomArgs(receiver, argc, argv);
+				LIns* base = loadAtomRep(baseDisp);
+				LIns* receiver = opcode == OP_callproplex ? InsConst(nullObjectAtom) : base;
+				LIns* ap = storeAtomArgs(receiver, argc, argv);
 
-				OP* vtable = loadVTable(baseDisp);
-				OP* toplevel = loadToplevel(env_param);
-				OP* atomv = leaIns(0, ap);
+				LIns* vtable = loadVTable(baseDisp);
+				LIns* toplevel = loadToplevel(env_param);
 
-				OP* out = callIns(FUNCTIONID(callproperty), 6,
-					toplevel, base, leaIns(0, multi), InsConst(argc), atomv, vtable);
-
-				InsDealloc(ap);
-				InsDealloc(multi);
+				LIns* out = callIns(FUNCTIONID(callproperty), 6,
+					toplevel, base, multi, InsConst(argc), ap, vtable);
 
 				localSet(baseDisp, atomToNativeRep(result, out));
 				break;
@@ -2544,21 +2366,17 @@ namespace avmplus
 				int argv = sp-argc+1;
 
 				int objDisp = sp-argc;
-				OP* multi = initMultiname((Multiname*)op1, objDisp);
+				LIns* multi = initMultiname((Multiname*)op1, objDisp);
 				AvmAssert(state->value(objDisp).notNull);
 
 				// convert args to Atom[] for the call
-				OP* obj = loadAtomRep(objDisp);
-				OP* vtable = loadVTable(objDisp);
-				OP* ap = storeAtomArgs(obj, argc, argv);
+				LIns* obj = loadAtomRep(objDisp);
+				LIns* vtable = loadVTable(objDisp);
+				LIns* ap = storeAtomArgs(obj, argc, argv);
 
-				OP* toplevel = loadToplevel(env_param);
-				OP* atomv = leaIns(0, ap);
-				OP* i3 = callIns(FUNCTIONID(constructprop), 5,
-					toplevel, leaIns(0, multi), InsConst(argc), atomv, vtable);
-
-				InsDealloc(ap);
-				InsDealloc(multi);
+				LIns* toplevel = loadToplevel(env_param);
+				LIns* i3 = callIns(FUNCTIONID(constructprop), 5,
+					toplevel, multi, InsConst(argc), ap, vtable);
 
 				localSet(objDisp, atomToNativeRep(result, i3));
 				break;
@@ -2574,20 +2392,16 @@ namespace avmplus
 				int argc = int(op2);
 				int argv = sp - argc + 1;
 				int objDisp = sp - argc;
-				OP* multi = initMultiname((Multiname*)op1, objDisp);
+				LIns* multi = initMultiname((Multiname*)op1, objDisp);
 				AvmAssert(state->value(objDisp).notNull);
 
 				// convert args to Atom[] for the call
-				OP* obj = loadAtomRep(objDisp);
+				LIns* obj = loadAtomRep(objDisp);
 
-				OP* ap = storeAtomArgs(obj, argc, argv);
+				LIns* ap = storeAtomArgs(obj, argc, argv);
 
-				OP* atomv = leaIns(0, ap);
-				OP* i3 = callIns(FUNCTIONID(callsuper), 4,
-					env_param, leaIns(0, multi), InsConst(argc), atomv);
-
-				InsDealloc(ap);
-				InsDealloc(multi);
+				LIns* i3 = callIns(FUNCTIONID(callsuper), 4,
+					env_param, multi, InsConst(argc), ap);
 
 				localSet(objDisp, atomToNativeRep(result, i3));
 				break;
@@ -2601,18 +2415,15 @@ namespace avmplus
  				int funcDisp = sp - argc;
  				int dest = funcDisp;
 
-				OP* func = loadAtomRep(funcDisp);
+				LIns* func = loadAtomRep(funcDisp);
 
 				// convert args to Atom[] for the call
-				OP* ap = storeAtomArgs(InsConst(nullObjectAtom), argc, funcDisp+1);
+				LIns* ap = storeAtomArgs(InsConst(nullObjectAtom), argc, funcDisp+1);
 
-				OP* toplevel = loadToplevel(env_param);
-				OP* argv = leaIns(0, ap);
+				LIns* toplevel = loadToplevel(env_param);
 
-				OP* i3 = callIns(FUNCTIONID(op_construct), 4,
-					toplevel, func, InsConst(argc), argv);
-
-				InsDealloc(ap);
+				LIns* i3 = callIns(FUNCTIONID(op_construct), 4,
+					toplevel, func, InsConst(argc), ap);
 
 				localSet(dest, atomToNativeRep(result, i3));
 				break;
@@ -2627,18 +2438,15 @@ namespace avmplus
 				int dest = funcDisp;
 				int arg0 = sp - argc + 1;
 
-				OP* func = loadAtomRep(funcDisp);
+				LIns* func = loadAtomRep(funcDisp);
 
 				// convert args to Atom[] for the call
-				OP* ap = storeAtomArgs(argc, arg0);
+				LIns* ap = storeAtomArgs(argc, arg0);
 
-				OP* toplevel = loadToplevel(env_param);
-				OP* argv = leaIns(0, ap);
+				LIns* toplevel = loadToplevel(env_param);
 
-				OP* i3 = callIns(FUNCTIONID(op_applytype), 4,
-					toplevel, func, InsConst(argc), argv);
-
-				InsDealloc(ap);
+				LIns* i3 = callIns(FUNCTIONID(op_applytype), 4,
+					toplevel, func, InsConst(argc), ap);
 
 				localSet(dest, atomToNativeRep(result, i3));
 				break;
@@ -2652,11 +2460,10 @@ namespace avmplus
 				int arg0 = dest;
 
 				// convert args to Atom for the call[]
-				OP* ap = storeAtomArgs(2*argc, arg0);
+				LIns* ap = storeAtomArgs(2*argc, arg0);
 
-				OP* i3 = callIns(FUNCTIONID(op_newobject), 3,
+				LIns* i3 = callIns(FUNCTIONID(op_newobject), 3,
 					env_param, leaIns(sizeof(Atom)*(2*argc-1), ap), InsConst(argc));
-				InsDealloc(ap);
 
 				localSet(dest, ptrToNativeRep(result, i3));
 				break;
@@ -2667,10 +2474,10 @@ namespace avmplus
  				// result = core->newObject(env->activation, NULL);
  				int dest = sp+1;
 
-				OP* envArg = env_param;
-				OP* activationVTable = callIns(FUNCTIONID(getActivation), 1, envArg);
-				OP* activation = callIns(FUNCTIONID(newActivation), 3, 
-										 InsConst((uintptr)core), activationVTable, InsConst(0));
+				LIns* envArg = env_param;
+				LIns* activationVTable = callIns(FUNCTIONID(getActivation), 1, envArg);
+				LIns* activation = callIns(FUNCTIONID(newActivation), 3, 
+										 coreAddr, activationVTable, InsConst(0));
 
 				localSet(dest, ptrToNativeRep(result, activation));
 				break;
@@ -2681,8 +2488,8 @@ namespace avmplus
  				// result = core->newObject(env->activation, NULL);
  				int dest = sp+1;
 
-				OP* activation = callIns(FUNCTIONID(newcatch), 2, 
-										 env_param, InsConst((uintptr)result));
+				LIns* activation = callIns(FUNCTIONID(newcatch), 2, 
+										 env_param, InsConst(result));
 
 				localSet(dest, ptrToNativeRep(result, activation));
 				break;
@@ -2695,12 +2502,11 @@ namespace avmplus
  				int arg0 = sp - 1*argc+1;
 
 				// convert array elements to Atom[]
-				OP* ap = storeAtomArgs(argc, arg0);
-				OP* toplevel = loadToplevel(env_param);
-				OP* arrayClass = loadIns(LIR_ldc, offsetof(Toplevel,arrayClass), toplevel);
-				OP* i3 = callIns(FUNCTIONID(newarray), 3,
-					arrayClass, leaIns(0,ap), InsConst(argc));
-				InsDealloc(ap);
+				LIns* ap = storeAtomArgs(argc, arg0);
+				LIns* toplevel = loadToplevel(env_param);
+				LIns* arrayClass = loadIns(LIR_ldc, offsetof(Toplevel,arrayClass), toplevel);
+				LIns* i3 = callIns(FUNCTIONID(newarray), 3,
+					arrayClass, ap, InsConst(argc));
 
 				AvmAssert(!result->isMachineType);
 				localSet(arg0, i3);
@@ -2714,18 +2520,16 @@ namespace avmplus
 				int localindex = int(op2);
 				int extraScopes = state->scopeDepth;
 
-				OP* envArg = env_param;
-				OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
-				OP* outer = loadIns(LIR_ldc, offsetof(VTable, scope), vtable);
-				OP* base = localGet(localindex);
+				LIns* envArg = env_param;
+				LIns* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), envArg);
+				LIns* outer = loadIns(LIR_ldc, offsetof(VTable, scope), vtable);
+				LIns* base = localGet(localindex);
 
 				// prepare scopechain args for call
-				OP* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
-				OP* argv = leaIns(0, ap);
+				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
-				OP* i3 = callIns(FUNCTIONID(newclass), 5, 
-					envArg, InsConst((sintptr)cinit), base, outer, argv);
-				InsDealloc(ap);
+				LIns* i3 = callIns(FUNCTIONID(newclass), 5, 
+					envArg, InsConst(cinit), base, outer, ap);
 
 				AvmAssert(!result->isMachineType);
 				localSet(localindex, i3);
@@ -2740,16 +2544,15 @@ namespace avmplus
 				int objDisp = sp;
 				Multiname* multiname = (Multiname*) op1;
 
-				OP* envArg = env_param;
-				OP* out;
-				OP* multi = initMultiname(multiname, objDisp);
-				OP* obj = loadAtomRep(objDisp);
+				LIns* envArg = env_param;
+				LIns* out;
+				LIns* multi = initMultiname(multiname, objDisp);
+				LIns* obj = loadAtomRep(objDisp);
 				AvmAssert(state->value(objDisp).notNull);
 
 				out = callIns(FUNCTIONID(getdescendants), 3,
-					envArg, obj, leaIns(0, multi));
+					envArg, obj, multi);
 
-				InsDealloc(multi);
 				localSet(objDisp, atomToNativeRep(result, out));
 				break;
 			}
@@ -2767,18 +2570,18 @@ namespace avmplus
 				// stack out: obj
 				// sp[1] = env->findproperty(scopeBase, scopedepth, name, strict)
 				int dest = sp;
-				OP* multi = initMultiname((Multiname*)op1, dest);
+				LIns* multi = initMultiname((Multiname*)op1, dest);
 				dest++;
 				int extraScopes = state->scopeDepth;
 
 				// prepare scopechain args for call
-				OP* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
+				LIns* ap = storeAtomArgs(extraScopes, state->verifier->scopeBase);
 
-				OP* envArg = env_param;
-				OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv,vtable), envArg);
-				OP* outer = loadIns(LIR_ldc, offsetof(VTable,scope), vtable);
+				LIns* envArg = env_param;
+				LIns* vtable = loadIns(LIR_ldc, offsetof(MethodEnv,vtable), envArg);
+				LIns* outer = loadIns(LIR_ldc, offsetof(VTable,scope), vtable);
 
-				OP* withBase;
+				LIns* withBase;
 				if (state->withBase == -1)
 				{
 					withBase = InsConst(0);
@@ -2790,13 +2593,10 @@ namespace avmplus
 	
 				// 		return env->findproperty(outer, argv, extraScopes, name, strict);
 
-				OP* i3 = callIns(FUNCTIONID(findproperty), 7, 
-					envArg, outer, leaIns(0,ap), InsConst(extraScopes), leaIns(0, multi), 
+				LIns* i3 = callIns(FUNCTIONID(findproperty), 7, 
+					envArg, outer, ap, InsConst(extraScopes), multi, 
 					InsConst((int32)(opcode == OP_findpropstrict)),
 					withBase);
-
-				InsDealloc(ap);
-				InsDealloc(multi);
 
 				localSet(dest, atomToNativeRep(result, i3));
 				break;
@@ -2809,22 +2609,22 @@ namespace avmplus
 				// framep[op2] = env->finddef(name)
 				Multiname* multiname = (Multiname*) op1;
 				sintptr dest = op2;
-				OP* name = InsConst((uintptr)multiname->getName());
-				OP* out;
+				LIns* name = InsConst(multiname->getName());
+				LIns* out;
 
 				AvmAssert(multiname->isBinding());
 				if (multiname->isNsset())
 				{
 					out = callIns(FUNCTIONID(finddefNsset), 3,
 						env_param,
-						InsConst((uintptr)multiname->getNsset()),
+						InsConst(multiname->getNsset()),
 						name);
 				}
 				else
 				{
 					out = callIns(FUNCTIONID(finddefNs), 3,
 						env_param,
-						InsConst((uintptr)multiname->getNamespace()),
+						InsConst(multiname->getNamespace()),
 						name);
 				}
 				localSet(dest, ptrToNativeRep(result, out));
@@ -2848,7 +2648,7 @@ namespace avmplus
 				if (maybeIntegerIndex && indexType == INT_TYPE)
 				{
 					bool valIsAtom = true;
-					OP* index = localGet(objDisp--);
+					LIns* index = localGet(objDisp--);
 					
 					if (multiname->isRtns())
 					{
@@ -2858,7 +2658,7 @@ namespace avmplus
 					
 					Traits* objType = state->value(objDisp).traits;
 
-					OP *value;
+					LIns *value;
 					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)) )
 					{
 						value = callIns((objType==ARRAY_TYPE ? 
@@ -2910,7 +2710,7 @@ namespace avmplus
 				{
 					bool valIsAtom = true;
 
-					OP* index = localGet(objDisp--);
+					LIns* index = localGet(objDisp--);
 					
 					if (multiname->isRtns())
 					{
@@ -2920,7 +2720,7 @@ namespace avmplus
 					
 					Traits* objType = state->value(objDisp).traits;
 
-					OP *value;
+					LIns *value;
 					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
 						value = callIns((objType==ARRAY_TYPE ? 
@@ -2970,44 +2770,38 @@ namespace avmplus
 				}
 				else if (maybeIntegerIndex && indexType != STRING_TYPE)
 				{
-					OP* _tempname = InsAlloc(sizeof(Multiname));
+					LIns* _tempname = InsAlloc(sizeof(Multiname));
 
 					// copy the flags
-					OP* mFlag = InsConst(multiname->ctFlags());
+					LIns* mFlag = InsConst(multiname->ctFlags());
 					storeIns(mFlag, offsetof(Multiname,flags), _tempname);
 
-					OP* index = loadAtomRep(objDisp--);
+					LIns* index = loadAtomRep(objDisp--);
 					AvmAssert(state->value(objDisp).notNull);
 
-					OP* obj = loadAtomRep(objDisp);
+					LIns* obj = loadAtomRep(objDisp);
 
 					// copy the compile-time namespace to the temp multiname
-					OP* mSpace = InsConst((uintptr)multiname->ns);
+					LIns* mSpace = InsConst(multiname->ns);
 					storeIns(mSpace, offsetof(Multiname, ns), _tempname);
 
-					OP *multi = leaIns(0, _tempname);
-
-					OP* value = callIns(FUNCTIONID(getpropertyHelper), 5,
-									    env_param, obj, multi, loadVTable(objDisp), index);
-
-					InsDealloc(_tempname);
+					LIns* value = callIns(FUNCTIONID(getpropertyHelper), 5,
+									    env_param, obj, _tempname, loadVTable(objDisp), index);
 
 					localSet(objDisp, atomToNativeRep(result, value));
 				}
 				else
 				{
-					OP* multi = initMultiname((Multiname*)op1, objDisp);
+					LIns* multi = initMultiname((Multiname*)op1, objDisp);
 					AvmAssert(state->value(objDisp).notNull);
 
-					OP* vtable = loadVTable(objDisp);
-					OP* obj = loadAtomRep(objDisp);
-					OP* toplevel = loadToplevel(env_param);
+					LIns* vtable = loadVTable(objDisp);
+					LIns* obj = loadAtomRep(objDisp);
+					LIns* toplevel = loadToplevel(env_param);
 
 					//return toplevel->getproperty(obj, name, toplevel->toVTable(obj));
-					OP* value = callIns(FUNCTIONID(getproperty), 4,
-										toplevel, obj, leaIns(0, multi), vtable);
-
-					InsDealloc(multi);
+					LIns* value = callIns(FUNCTIONID(getproperty), 4,
+										toplevel, obj, multi, vtable);
 
 					localSet(objDisp, atomToNativeRep(result, value));
 				}
@@ -3021,7 +2815,7 @@ namespace avmplus
 				// stack out:
 				// obj = sp[-1]
 				//env->setproperty(obj, multiname, sp[0], toVTable(obj));
-				//OP* value = loadAtomRep(sp);
+				//LIns* value = loadAtomRep(sp);
 
 				Multiname* multiname = (Multiname*)op1;
 				bool attr = multiname->isAttr();
@@ -3033,7 +2827,7 @@ namespace avmplus
 
 				if (maybeIntegerIndex && indexType == INT_TYPE)
 				{
-					OP* index = localGet(objDisp--);
+					LIns* index = localGet(objDisp--);
 					
 					if (multiname->isRtns())
 					{
@@ -3045,7 +2839,7 @@ namespace avmplus
 
 					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
-						OP* value = loadAtomRep(sp);
+						LIns* value = loadAtomRep(sp);
 						callIns((objType==ARRAY_TYPE ? 
 										FUNCTIONID(ArrayObject_setIntProperty) :
 										FUNCTIONID(ObjectVectorObject_setIntProperty)), 3,
@@ -3055,7 +2849,7 @@ namespace avmplus
 					{
 						if( valueType == INT_TYPE )
 						{
-							OP* value = localGet(sp);
+							LIns* value = localGet(sp);
 							callIns((objType==VECTORINT_TYPE ? 
 											FUNCTIONID(IntVectorObject_setNativeIntProperty) :
 											FUNCTIONID(UIntVectorObject_setNativeIntProperty)),
@@ -3064,7 +2858,7 @@ namespace avmplus
 						}
 						else if( valueType == UINT_TYPE )
 						{
-							OP* value = localGet(sp);
+							LIns* value = localGet(sp);
 							callIns((objType==VECTORINT_TYPE ? 
 											FUNCTIONID(IntVectorObject_setNativeIntProperty) :
 											FUNCTIONID(UIntVectorObject_setNativeIntProperty)), 
@@ -3073,7 +2867,7 @@ namespace avmplus
 						}
 						else
 						{
-							OP* value = loadAtomRep(sp);
+							LIns* value = loadAtomRep(sp);
 							value = callIns((objType==VECTORINT_TYPE ? 
 													FUNCTIONID(IntVectorObject_setIntProperty) :
 													FUNCTIONID(UIntVectorObject_setIntProperty)), 
@@ -3085,27 +2879,27 @@ namespace avmplus
 					{
 						if( valueType == NUMBER_TYPE )
 						{
-							OP* value = localGetq(sp);
+							LIns* value = localGetq(sp);
 							callIns(FUNCTIONID(DoubleVectorObject_setNativeIntProperty), 3,
 								localGet(objDisp), index, value);
 						}
 						else
 						{
-							OP* value = loadAtomRep(sp);
+							LIns* value = loadAtomRep(sp);
 							value = callIns(FUNCTIONID(DoubleVectorObject_setIntProperty), 3,
 								localGet(objDisp), index, value);
 						}
 					}
 					else
 					{
-						OP* value = loadAtomRep(sp);
+						LIns* value = loadAtomRep(sp);
 						callIns(FUNCTIONID(setpropertylate_i), 4,
 							env_param, loadAtomRep(objDisp), index, value);
 					}
 				}
 				else if (maybeIntegerIndex && indexType == UINT_TYPE)
 				{
-					OP* index = localGet(objDisp--);
+					LIns* index = localGet(objDisp--);
 					
 					if (multiname->isRtns())
 					{
@@ -3117,7 +2911,7 @@ namespace avmplus
 
 					if (objType == ARRAY_TYPE || (objType!= NULL && objType->containsInterface(VECTOROBJ_TYPE)))
 					{
-						OP* value = loadAtomRep(sp);
+						LIns* value = loadAtomRep(sp);
 						callIns((objType==ARRAY_TYPE ? 
 										FUNCTIONID(ArrayObject_setUintProperty) :
 										FUNCTIONID(ObjectVectorObject_setUintProperty)), 3,
@@ -3127,7 +2921,7 @@ namespace avmplus
 					{
 						if( valueType == INT_TYPE )
 						{
-							OP* value = localGet(sp);
+							LIns* value = localGet(sp);
 							callIns((objType==VECTORINT_TYPE ? 
 											FUNCTIONID(IntVectorObject_setNativeUintProperty) :
 											FUNCTIONID(UIntVectorObject_setNativeUintProperty)),
@@ -3136,7 +2930,7 @@ namespace avmplus
 						}
 						else if( valueType == UINT_TYPE )
 						{
-							OP* value = localGet(sp);
+							LIns* value = localGet(sp);
 							callIns((objType==VECTORINT_TYPE ? 
 											FUNCTIONID(IntVectorObject_setNativeUintProperty) :
 											FUNCTIONID(UIntVectorObject_setNativeUintProperty)), 
@@ -3145,7 +2939,7 @@ namespace avmplus
 						}
 						else
 						{
-							OP* value = loadAtomRep(sp);
+							LIns* value = loadAtomRep(sp);
 							value = callIns((objType==VECTORINT_TYPE ? 
 													FUNCTIONID(IntVectorObject_setUintProperty) :
 													FUNCTIONID(UIntVectorObject_setUintProperty)), 
@@ -3157,78 +2951,71 @@ namespace avmplus
 					{
 						if( valueType == NUMBER_TYPE )
 						{
-							OP* value = localGetq(sp);
+							LIns* value = localGetq(sp);
 							callIns(FUNCTIONID(DoubleVectorObject_setNativeUintProperty), 3,
 								localGet(objDisp), index, value);
 						}
 						else
 						{
-							OP* value = loadAtomRep(sp);
+							LIns* value = loadAtomRep(sp);
 							value = callIns(FUNCTIONID(DoubleVectorObject_setUintProperty), 3,
 								localGet(objDisp), index, value);
 						}
 					}
 					else
 					{
-						OP* value = loadAtomRep(sp);
+						LIns* value = loadAtomRep(sp);
 						callIns(FUNCTIONID(setpropertylate_u), 4,
 							env_param, loadAtomRep(objDisp), index, value);
 					}
 				}
 				else if (maybeIntegerIndex)
 				{
-					OP* value = loadAtomRep(sp);
-					OP* _tempname = InsAlloc(sizeof(Multiname));
+					LIns* value = loadAtomRep(sp);
+					LIns* _tempname = InsAlloc(sizeof(Multiname));
 
 					// copy the flags
-					OP* mFlag = InsConst(multiname->ctFlags());
+					LIns* mFlag = InsConst(multiname->ctFlags());
 					storeIns(mFlag, offsetof(Multiname,flags), _tempname);
 
-					OP* index = loadAtomRep(objDisp--);
+					LIns* index = loadAtomRep(objDisp--);
 					AvmAssert(state->value(objDisp).notNull);
 
-					OP* vtable = loadVTable(objDisp);
-					OP* obj = loadAtomRep(objDisp);
-					OP* envarg = env_param;
+					LIns* vtable = loadVTable(objDisp);
+					LIns* obj = loadAtomRep(objDisp);
+					LIns* envarg = env_param;
 
 					// copy the compile-time namespace to the temp multiname
-					OP* mSpace = InsConst((uintptr)multiname->ns);
+					LIns* mSpace = InsConst(multiname->ns);
 					storeIns(mSpace, offsetof(Multiname, ns), _tempname);
-
-					OP *multi = leaIns(0, _tempname);
 
 					uint32_t func = opcode==OP_setproperty ? FUNCTIONID(setpropertyHelper) :
 														FUNCTIONID(initpropertyHelper);
-					callIns(func, 6,
-							envarg, obj, multi, value, vtable, index);
-
-					InsDealloc(_tempname);
+					callIns(func, 6, envarg, obj, _tempname, value, vtable, index);
 
 					localSet(objDisp, atomToNativeRep(result, value));
 				}
 				else
 				{
-					OP* value = loadAtomRep(sp);
-					OP* multi = initMultiname((Multiname*)op1, objDisp);
+					LIns* value = loadAtomRep(sp);
+					LIns* multi = initMultiname((Multiname*)op1, objDisp);
 					AvmAssert(state->value(objDisp).notNull);
 
-					OP* vtable = loadVTable(objDisp);
-					OP* obj = loadAtomRep(objDisp);
-					OP* envarg = env_param;
+					LIns* vtable = loadVTable(objDisp);
+					LIns* obj = loadAtomRep(objDisp);
+					LIns* envarg = env_param;
 
 					if (OP_setproperty)
 					{
-						OP* toplevel = loadToplevel(envarg);
+						LIns* toplevel = loadToplevel(envarg);
 						callIns(FUNCTIONID(setproperty), 5,
-										toplevel, obj, leaIns(0, multi), value, vtable);
+										toplevel, obj, multi, value, vtable);
 					}
 					else
 					{
 						callIns(FUNCTIONID(initproperty), 5,
-							envarg, obj, leaIns(0, multi), value, vtable);
+							envarg, obj, multi, value, vtable);
 					}
-
-					InsDealloc(multi);
 				}
 				break;
 			}
@@ -3241,50 +3028,44 @@ namespace avmplus
 				int objDisp = sp;
 				Multiname *multiname = (Multiname*)op1;
 				if(!multiname->isRtname()) {
-					OP* multi = initMultiname(multiname, objDisp, true);
+					LIns* multi = initMultiname(multiname, objDisp, true);
 
-					OP* obj = loadAtomRep(objDisp);
+					LIns* obj = loadAtomRep(objDisp);
 					
-					OP* i3 = callIns(FUNCTIONID(delproperty), 3,
-						env_param, obj, leaIns(0, multi));
-
-					InsDealloc(multi);
+					LIns* i3 = callIns(FUNCTIONID(delproperty), 3,
+						env_param, obj, multi);
 
 					localSet(objDisp, atomToNativeRep(result, i3));
 				} else {
-					OP* _tempname = InsAlloc(sizeof(Multiname));
+					LIns* _tempname = InsAlloc(sizeof(Multiname));
 
 					// copy the flags
-					OP* mFlag = InsConst(multiname->ctFlags());
+					LIns* mFlag = InsConst(multiname->ctFlags());
 					storeIns(mFlag, offsetof(Multiname,flags), _tempname);
 
-					OP* index = loadAtomRep(objDisp--);
+					LIns* index = loadAtomRep(objDisp--);
 
 					if( !multiname->isRtns() )
 					{
 						// copy the compile-time namespace to the temp multiname
-						OP* mSpace = InsConst((uintptr)multiname->ns);
+						LIns* mSpace = InsConst(multiname->ns);
 						storeIns(mSpace, offsetof(Multiname, ns), _tempname);
 					}
 					else
 					{
 						// intern the runtime namespace and copy to the temp multiname
-						OP* nsAtom = loadAtomRep(objDisp--);
-						OP* internNs = callIns(FUNCTIONID(internRtns), 2,
+						LIns* nsAtom = loadAtomRep(objDisp--);
+						LIns* internNs = callIns(FUNCTIONID(internRtns), 2,
 							env_param, nsAtom);
 
 						storeIns(internNs, offsetof(Multiname,ns), _tempname);
 					}
 
 					AvmAssert(state->value(objDisp).notNull);
-					OP* obj = loadAtomRep(objDisp);
+					LIns* obj = loadAtomRep(objDisp);
 
-					OP *multi = leaIns(0, _tempname);
-
-					OP* value = callIns(FUNCTIONID(delpropertyHelper), 4,
-									    env_param, obj, multi, index);
-
-					InsDealloc(_tempname);
+					LIns* value = callIns(FUNCTIONID(delpropertyHelper), 4,
+									    env_param, obj, _tempname, index);
 
 					localSet(objDisp, atomToNativeRep(result, value));
 				}
@@ -3294,16 +3075,16 @@ namespace avmplus
 			case OP_convert_s:
 			{
 				localSet(op1, callIns(FUNCTIONID(string), 2,
-					InsConst((uintptr)core), loadAtomRep(op1)));
+					coreAddr, loadAtomRep(op1)));
 				break;
 			}
 
 			case OP_esc_xelem: // ToXMLString will call EscapeElementValue
 			{
 				//sp[0] = core->ToXMLString(sp[0]);
-				OP* value = loadAtomRep(op1);
-				OP* i3 = callIns(FUNCTIONID(ToXMLString), 2,
-					InsConst((uintptr)core), value);
+				LIns* value = loadAtomRep(op1);
+				LIns* i3 = callIns(FUNCTIONID(ToXMLString), 2,
+					coreAddr, value);
 				AvmAssert(result == STRING_TYPE);
 				localSet(op1, i3);
 				break;
@@ -3312,9 +3093,9 @@ namespace avmplus
 			case OP_esc_xattr:
 			{
 				//sp[0] = core->EscapeAttributeValue(sp[0]);
-				OP* value = loadAtomRep(op1);
-				OP* i3 = callIns(FUNCTIONID(EscapeAttributeValue), 2,
-					InsConst((uintptr)core), value);
+				LIns* value = loadAtomRep(op1);
+				LIns* i3 = callIns(FUNCTIONID(EscapeAttributeValue), 2,
+					coreAddr, value);
 				AvmAssert(result == STRING_TYPE);
 				localSet(op1, i3);
 				break;
@@ -3323,8 +3104,8 @@ namespace avmplus
 			case OP_astype:
 			{
 				// sp[0] = core->astype(sp[0], traits)
-				OP* obj = loadAtomRep(op2);
-				OP* i1 = callIns(FUNCTIONID(astype), 3,
+				LIns* obj = loadAtomRep(op2);
+				LIns* i1 = callIns(FUNCTIONID(astype), 3,
 					env_param,
 					obj,
 					InsConst(op1)); // traits
@@ -3338,15 +3119,15 @@ namespace avmplus
 			{
 				//sp[-1] = astype(sp[-1], toClassITraits(sp[0]));
 				//sp--;
-				OP* type = loadAtomRep(sp);
+				LIns* type = loadAtomRep(sp);
 
-				OP* envarg = env_param;
-				OP* itraits = callIns(FUNCTIONID(toClassITraits), 2,
+				LIns* envarg = env_param;
+				LIns* itraits = callIns(FUNCTIONID(toClassITraits), 2,
 					envarg, type);
 
-				OP* obj = loadAtomRep(sp-1);
+				LIns* obj = loadAtomRep(sp-1);
 
-				OP* i3 = callIns(FUNCTIONID(astype), 3,
+				LIns* i3 = callIns(FUNCTIONID(astype), 3,
 					envarg, obj, itraits);
 
 				i3 = atomToNativeRep(result, i3);
@@ -3357,10 +3138,10 @@ namespace avmplus
 
 			case OP_add:
 			{
-				OP* lhs = loadAtomRep(sp-1);
-				OP* rhs = loadAtomRep(sp);
-				OP* toplevel = loadToplevel(env_param);
-				OP* out = callIns(FUNCTIONID(add2), 3,
+				LIns* lhs = loadAtomRep(sp-1);
+				LIns* rhs = loadAtomRep(sp);
+				LIns* toplevel = loadToplevel(env_param);
+				LIns* out = callIns(FUNCTIONID(add2), 3,
 					toplevel, lhs, rhs);
 				localSet(sp-1, atomToNativeRep(result, out));
 				break;
@@ -3368,10 +3149,10 @@ namespace avmplus
 
 			case OP_concat:
 			{
-				OP* lhs = localGet(sp-1);
-				OP* rhs = localGet(sp);
-				OP* out = callIns(FUNCTIONID(concatStrings), 3,
-					InsConst((uintptr)core), lhs, rhs);
+				LIns* lhs = localGet(sp-1);
+				LIns* rhs = localGet(sp);
+				LIns* out = callIns(FUNCTIONID(concatStrings), 3,
+					coreAddr, lhs, rhs);
 				localSet(sp-1,	out);
 				break;
 			}
@@ -3420,10 +3201,10 @@ namespace avmplus
 
 			case OP_instanceof:
 			{
-				OP* lhs = loadAtomRep(sp-1);
-				OP* rhs = loadAtomRep(sp);
-				OP* toplevel = loadToplevel(env_param);
-				OP* out = callIns(FUNCTIONID(instanceof), 3,
+				LIns* lhs = loadAtomRep(sp-1);
+				LIns* rhs = loadAtomRep(sp);
+				LIns* toplevel = loadToplevel(env_param);
+				LIns* out = callIns(FUNCTIONID(instanceof), 3,
 					toplevel, lhs, rhs);
 				out = atomToNativeRep(result, out);
 				localSet(sp-1,	out);
@@ -3432,9 +3213,9 @@ namespace avmplus
 
 			case OP_in:
 			{
-				OP* lhs = loadAtomRep(sp-1);
-				OP* rhs = loadAtomRep(sp);
-				OP* out = callIns(FUNCTIONID(in), 3,
+				LIns* lhs = loadAtomRep(sp-1);
+				LIns* rhs = loadAtomRep(sp);
+				LIns* out = callIns(FUNCTIONID(in), 3,
 					env_param, lhs, rhs);
 				out = atomToNativeRep(result, out);
 				localSet(sp-1, out);
@@ -3446,10 +3227,10 @@ namespace avmplus
 				// expects a CONSTANT_Multiname cpool index
 				// used when operator "is" RHS is a compile-time type constant
 				//sp[0] = istype(sp[0], itraits);
-				OP* obj = loadAtomRep(op2);
-				OP* itraits = InsConst(op1);
-				OP* out = callIns(FUNCTIONID(istypeAtom), 3,
-					InsConst((uintptr)core), obj, itraits);
+				LIns* obj = loadAtomRep(op2);
+				LIns* itraits = InsConst(op1);
+				LIns* out = callIns(FUNCTIONID(istypeAtom), 3,
+					coreAddr, obj, itraits);
 				out = atomToNativeRep(result, out);
 				localSet(op2, out);
 				break;
@@ -3459,15 +3240,15 @@ namespace avmplus
 			{
 				//sp[-1] = istype(sp[-1], toClassITraits(sp[0]));
 				//sp--;
-				OP* type = loadAtomRep(sp);
+				LIns* type = loadAtomRep(sp);
 
-				OP* traits = callIns(FUNCTIONID(toClassITraits), 2,
+				LIns* traits = callIns(FUNCTIONID(toClassITraits), 2,
 					env_param, type);
 
-				OP* obj = loadAtomRep(sp-1);
+				LIns* obj = loadAtomRep(sp-1);
 
-				OP* i3 = callIns(FUNCTIONID(istypeAtom), 3,
-					InsConst((uintptr)core), obj, traits);
+				LIns* i3 = callIns(FUNCTIONID(istypeAtom), 3,
+					coreAddr, obj, traits);
 
 				i3 = atomToNativeRep(result, i3);
 				localSet(sp-1, i3);
@@ -3476,10 +3257,10 @@ namespace avmplus
 
 			case OP_dxns:
 			{
-				OP* uri = InsConst(op1); // uri
-				OP* ns = callIns(FUNCTIONID(newPublicNamespace), 
+				LIns* uri = InsConst(op1); // uri
+				LIns* ns = callIns(FUNCTIONID(newPublicNamespace), 
 					2, 
-					InsConst((uintptr)core), 
+					coreAddr, 
 					uri);
 				storeIns(ns, 0, dxns);
 				break;
@@ -3487,12 +3268,12 @@ namespace avmplus
 
 			case OP_dxnslate:
 			{
-				OP* atom = loadAtomRep(op1);				
-				OP* uri = callIns(FUNCTIONID(intern), 2,
-					InsConst((uintptr)core), atom);
-				OP* ns = callIns(FUNCTIONID(newPublicNamespace), 
+				LIns* atom = loadAtomRep(op1);				
+				LIns* uri = callIns(FUNCTIONID(intern), 2,
+					coreAddr, atom);
+				LIns* ns = callIns(FUNCTIONID(newPublicNamespace), 
 					2, 
-					InsConst((uintptr)core), 
+					coreAddr, 
 					uri);
 				storeIns(ns, 0, dxns);
 				break;
@@ -3505,8 +3286,8 @@ namespace avmplus
 			{
 			#ifdef DEBUGGER
 				// todo refactor api's so we don't have to pass argv/argc
-				OP* debugger = loadIns(LIR_ldc, offsetof(AvmCore, debugger),
-											InsConst((uintptr)core));
+				LIns* debugger = loadIns(LIR_ldc, offsetof(AvmCore, debugger),
+											coreAddr);
 				callIns(FUNCTIONID(debugFile), 2,
 						debugger,
 						InsConst(op1));
@@ -3521,8 +3302,8 @@ namespace avmplus
 			{
 			#ifdef DEBUGGER
 				// todo refactor api's so we don't have to pass argv/argc
-				OP* debugger = loadIns(LIR_ldc, offsetof(AvmCore, debugger),
-											InsConst((uintptr)core));
+				LIns* debugger = loadIns(LIR_ldc, offsetof(AvmCore, debugger),
+											coreAddr);
 				callIns(FUNCTIONID(debugLine), 2,
 						debugger,
 						InsConst(op1));
@@ -3564,7 +3345,7 @@ namespace avmplus
 		// spill all, dont include cond since it gets consumed
 		// UBER IMPORTANT we need to spill prior to compare since
 		// mir MD generations needs compare and branch to be adjacent.
-		OP* cond;
+		LIns* cond;
 		LOpcode br;
 		
 		switch (opcode)
@@ -3642,11 +3423,10 @@ namespace avmplus
             }
         }
 
-		saveState();
         patchLater(branchIns(br, cond), target);
 	} // emitIf()
 
-	OP* CodegenLIR::i2dIns(OP* v)
+	LIns* CodegenLIR::i2dIns(LIns* v)
 	{
 		#ifdef AVMPLUS_ARM
 		return callIns(FUNCTIONID(i2d), 1, v);
@@ -3655,7 +3435,7 @@ namespace avmplus
 		#endif
 	}
 
-	OP* CodegenLIR::u2dIns(OP* v)
+	LIns* CodegenLIR::u2dIns(LIns* v)
 	{
 		#ifdef AVMPLUS_ARM
 		return callIns(FUNCTIONID(u2d), 1, v);
@@ -3665,21 +3445,21 @@ namespace avmplus
 	}
 	
 	// Faster compares for ints, uint, doubles
-	OP* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
+	LIns* CodegenLIR::cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp)
 	{
 		Traits* lht = state->value(lhsi).traits;
 		Traits* rht = state->value(rhsi).traits;
 
 		if (lht == rht && lht == INT_TYPE)
 		{
-			OP* lhs = localGet(lhsi);
-			OP* rhs = localGet(rhsi);
+			LIns* lhs = localGet(lhsi);
+			LIns* rhs = localGet(rhsi);
 			return binaryIns(icmp, lhs, rhs);
 		}
 		else if (lht == rht && lht == UINT_TYPE)
 		{
-			OP* lhs = localGet(lhsi);
-			OP* rhs = localGet(rhsi);
+			LIns* lhs = localGet(lhsi);
+			LIns* rhs = localGet(rhsi);
 			return binaryIns(ucmp, lhs, rhs);
 		}
 		else if (lht && lht->isNumeric && rht && rht->isNumeric)
@@ -3688,8 +3468,8 @@ namespace avmplus
 			// integer constant, don't promote to doubles for the compare
 			if ((lht == UINT_TYPE) && (rht == INT_TYPE))
 			{
-				OP* lhs = localGet(lhsi);
-				OP* rhs = localGet(rhsi);
+				LIns* lhs = localGet(lhsi);
+				LIns* rhs = localGet(rhsi);
 				#ifdef AVMPLUS_AMD64
 				// 32-bit signed and unsigned values fit in our 64-bit registers
 				// so we can simply do a signed compare with mixed int/uint types
@@ -3703,8 +3483,8 @@ namespace avmplus
 			}
 			else if ((lht == INT_TYPE) && (rht == UINT_TYPE))
 			{
-				OP* lhs = localGet(lhsi);
-				OP* rhs = localGet(rhsi);
+				LIns* lhs = localGet(lhsi);
+				LIns* rhs = localGet(rhsi);
 				#ifdef AVMPLUS_AMD64
 				// 32-bit signed and unsigned values fit in our 64-bit registers
 				// so we can simply do a signed compare with mixed int/uint types
@@ -3717,8 +3497,8 @@ namespace avmplus
 				#endif
 			}
 
-			OP* lhs = promoteNumberIns(lht, lhsi);
-			OP* rhs = promoteNumberIns(rht, rhsi);
+			LIns* lhs = promoteNumberIns(lht, lhsi);
+			LIns* rhs = promoteNumberIns(rht, rhsi);
 			return binaryIns(fcmp, lhs, rhs);
 		}
 
@@ -3726,19 +3506,19 @@ namespace avmplus
 	}	
 
 	// set cc's for < operator
-	OP* CodegenLIR::cmpLt(int lhsi, int rhsi)
+	LIns* CodegenLIR::cmpLt(int lhsi, int rhsi)
 	{
-		OP *result = cmpOptimization (lhsi, rhsi, LIR_lt, LIR_ult, LIR_flt);
+		LIns *result = cmpOptimization (lhsi, rhsi, LIR_lt, LIR_ult, LIR_flt);
 		if (result)
 			return result;
 
 		AvmAssert(trueAtom == 13);
 		AvmAssert(falseAtom == 5);
 		AvmAssert(undefinedAtom == 4);
-		OP* lhs = loadAtomRep(lhsi);
-		OP* rhs = loadAtomRep(rhsi);
-		OP* atom = callIns(FUNCTIONID(compare), 3,
-			InsConst((uintptr)core), lhs, rhs);
+		LIns* lhs = loadAtomRep(lhsi);
+		LIns* rhs = loadAtomRep(rhsi);
+		LIns* atom = callIns(FUNCTIONID(compare), 3,
+			coreAddr, lhs, rhs);
 
 		// caller will use jt for (a<b) and jf for !(a<b)
 		// compare          ^8    <8 
@@ -3746,20 +3526,20 @@ namespace avmplus
 		// false      0101  1101   n 
 		// undefined  0100  1100   n 
 
-		OP* c = InsConst(8);
+		LIns* c = InsConst(8);
 		return binaryIns(LIR_lt, binaryIns(LIR_xor, atom, c), c);
 	}
 
-	OP* CodegenLIR::cmpLe(int lhsi, int rhsi)
+	LIns* CodegenLIR::cmpLe(int lhsi, int rhsi)
 	{
-		OP *result = cmpOptimization (lhsi, rhsi, LIR_le, LIR_ule, LIR_fle);
+		LIns *result = cmpOptimization (lhsi, rhsi, LIR_le, LIR_ule, LIR_fle);
 		if (result)
 			return result;
 
-		OP* lhs = loadAtomRep(lhsi);
-		OP* rhs = loadAtomRep(rhsi);
-		OP* atom = callIns(FUNCTIONID(compare), 3,
-			InsConst((uintptr)core), rhs, lhs);
+		LIns* lhs = loadAtomRep(lhsi);
+		LIns* rhs = loadAtomRep(rhsi);
+		LIns* atom = callIns(FUNCTIONID(compare), 3,
+			coreAddr, rhs, lhs);
 
 		// assume caller will use jt for (a<=b) and jf for !(a<=b)
 		// compare          ^1    <=4
@@ -3767,8 +3547,8 @@ namespace avmplus
 		// false      0101  0100  y
 		// undefined  0100  0101  n
 
-		OP* c2 = InsConst(1);
-		OP* c4 = InsConst(4);
+		LIns* c2 = InsConst(1);
+		LIns* c4 = InsConst(4);
 		return binaryIns(LIR_le, binaryIns(LIR_xor, atom, c2), c4);
 	}
 
@@ -3797,7 +3577,7 @@ namespace avmplus
 		{
 			LIns* lhs = loadAtomRep(lhsi);
 			LIns* rhs = loadAtomRep(rhsi);
-			LIns* out = callIns(fid, 3, InsConst((uintptr)core), lhs, rhs);
+			LIns* out = callIns(fid, 3, coreAddr, lhs, rhs);
 			result = binaryIns(LIR_eq, out, InsConst(trueAtom));
 		}
 		return result;
@@ -3807,66 +3587,28 @@ namespace avmplus
 	{
 		this->state = state;
 
-#ifdef AVMPLUS_SPARC
-		if(beginCatch_start && beginCatch_end) {
-			beginCatch_end->lastUse = ip;
-			for (OP* temp_ip = beginCatch_start; temp_ip <= beginCatch_end; temp_ip++) {
-				switch(temp_ip->code) {
-				case MIR_cs:
-				case MIR_cm:
-				case MIR_ld:
-				case MIR_lea:
-					temp_ip->lastUse = ip;
-				}
-			}
-		}
-#endif
-
-		if (info->setsDxns()) {
-			InsDealloc(dxns);
-		}
-
-		// exceptions dealloc
-		if (info->exceptions)
-		{
-			InsDealloc(_ef);
-			InsDealloc(_save_eip);
-		}
-
-		#ifdef DEBUGGER
-		InsDealloc(varPtrs);
-		InsDealloc(varTraits);
-		InsDealloc(csn);
-		#endif
-
         if (npe_label.preds) {
             LIns *label = Ins(LIR_label);
-            label->setimm24(state->verifier->frameSize * 8);
 			mirLabel(npe_label, label);
 			callIns(FUNCTIONID(npe), 1, env_param);
 		}
 
         if (interrupt_label.preds) {
             LIns *label = Ins(LIR_label);
-            label->setimm24(state->verifier->frameSize * 8);
 			mirLabel(interrupt_label, label);
 			callIns(FUNCTIONID(interrupt), 1, env_param);
 		}
 
         // extend live range of critical stuff
         // fixme -- this should be automatic based on live analysis
-        lirout->ins1(LIR_live, env_param);
-        lirout->ins1(LIR_live, vars);
+        Ins(LIR_live, env_param);
+        Ins(LIR_live, vars);
 
-        // one last label, to make sure it's the first thing we see in reverse
-        LIns *end = lirout->ins0(LIR_label);
-        end->setimm24(state->verifier->frameSize * 8);
-
-		// bail if no room in the buffer.  
-#ifndef FEATURE_BUFFER_GUARD
-		if (checkOverflow())
-			return;
-#endif /* FEATURE_BUFFER_GUARD */
+		#ifdef DEBUGGER
+		Ins(LIR_live, csn);
+		Ins(LIR_live, varPtrs);
+		Ins(LIR_live, varTraits);
+		#endif
 
 		if (info->exceptions)
 		{
@@ -3874,7 +3616,7 @@ namespace avmplus
 			{
 				ExceptionHandler* h = &info->exceptions->exceptions[i]; (void)h;
 				AvmAssertMsg(state->verifier->getFrameState(h->target)->label.bb != NULL, "Exception target address MUST have been resolved");
-				//mirPatchPtr( (OP**)&h->target, h->target );
+				//mirPatchPtr( (LIns**)&h->target, h->target );
 			}
 		}
 
@@ -3887,19 +3629,15 @@ namespace avmplus
         frag->lastIns = lirbuf->next()-1;
 	}
 
-	OP* CodegenLIR::initMultiname(Multiname* multiname, int& csp, bool isDelete /*=false*/)
+	LIns* CodegenLIR::initMultiname(Multiname* multiname, int& csp, bool isDelete /*=false*/)
 	{
-#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "        	init multiname\n";
-#endif
-		OP* _tempname = InsAlloc(sizeof(Multiname));
+		LIns* _tempname = InsAlloc(sizeof(Multiname));
 
 		// copy the flags
-		OP* mFlag = InsConst(multiname->ctFlags());
+		LIns* mFlag = InsConst(multiname->ctFlags());
 		storeIns(mFlag, offsetof(Multiname,flags), _tempname);
 
-		OP* nameAtom = NULL;
+		LIns* nameAtom = NULL;
 		
 		if (multiname->isRtname())
 		{
@@ -3908,15 +3646,15 @@ namespace avmplus
 		else
 		{
 			// copy the compile-time name to the temp name
-			OP* mName = InsConst((uintptr)multiname->name);
+			LIns* mName = InsConst(multiname->name);
 			storeIns(mName, offsetof(Multiname,name), _tempname);
 		}
 
 		if (multiname->isRtns())
 		{
 			// intern the runtime namespace and copy to the temp multiname
-			OP* nsAtom = loadAtomRep(csp--);
-			OP* internNs = callIns(FUNCTIONID(internRtns), 2,
+			LIns* nsAtom = loadAtomRep(csp--);
+			LIns* internNs = callIns(FUNCTIONID(internRtns), 2,
 				env_param, nsAtom);
 
 			storeIns(internNs, offsetof(Multiname,ns), _tempname);
@@ -3924,7 +3662,7 @@ namespace avmplus
 		else
 		{
 			// copy the compile-time namespace to the temp multiname
-			OP* mSpace = InsConst((uintptr)multiname->ns);
+			LIns* mSpace = InsConst(multiname->ns);
 			storeIns(mSpace, offsetof(Multiname, ns), _tempname);
 		}
 
@@ -3936,29 +3674,25 @@ namespace avmplus
 			if (isDelete)
 			{
 				callIns(FUNCTIONID(initMultinameLateForDelete), 3,
-						env_param,
-						leaIns(0, _tempname),
-						nameAtom);
+						env_param, _tempname, nameAtom);
 			}
 			else
 			{
 				callIns(FUNCTIONID(initMultinameLate), 3,
-						InsConst((uintptr)core),
-						leaIns(0, _tempname),
-						nameAtom);
+						coreAddr, _tempname, nameAtom);
 			}				
 		}
 
 		return _tempname;
 	}
 
-	OP* CodegenLIR::loadToplevel(OP* env)
+	LIns* CodegenLIR::loadToplevel(LIns* env)
 	{
-		OP* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env);
+		LIns* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env);
 		return loadIns(LIR_ldc, offsetof(VTable, toplevel), vtable);
 	}
 
-	OP* CodegenLIR::loadVTable(int i)
+	LIns* CodegenLIR::loadVTable(int i)
 	{
 		AvmAssert(state->value(i).notNull);
 		Traits* t = state->value(i).traits;
@@ -3970,7 +3704,7 @@ namespace avmplus
 			return loadIns(LIR_ldc, offsetof(ScriptObject, vtable), localGet(i));
 		}
 
-		OP* toplevel = loadToplevel(env_param);
+		LIns* toplevel = loadToplevel(env_param);
 
 		int offset;
 		if (t == NAMESPACE_TYPE)	offset = offsetof(Toplevel, namespaceClass);
@@ -3982,18 +3716,18 @@ namespace avmplus
 		else 
 		{
 			// *, Object or Void
-			OP* obj = loadAtomRep(i);
+			LIns* obj = loadAtomRep(i);
 			return callIns(FUNCTIONID(toVTable), 2, toplevel, obj);
 		}
 
 		// now offset != -1 and we are returning a primitive vtable
 
-		OP* cc = loadIns(LIR_ldc, offset, toplevel);
-		OP* cvtable = loadIns(LIR_ldc, offsetof(ClassClosure, vtable), cc);
+		LIns* cc = loadIns(LIR_ldc, offset, toplevel);
+		LIns* cvtable = loadIns(LIR_ldc, offsetof(ClassClosure, vtable), cc);
 		return loadIns(LIR_ldc, offsetof(VTable, ivtable), cvtable);
 	}
 
-	OP* CodegenLIR::promoteNumberIns(Traits* t, int i)
+	LIns* CodegenLIR::promoteNumberIns(Traits* t, int i)
 	{
 		if (t == NUMBER_TYPE)
 		{
@@ -4034,7 +3768,7 @@ namespace avmplus
 	}
 
 	/* set position of label */
-	void CodegenLIR::mirLabel(CodegenLabel& l, OP* bb) {
+	void CodegenLIR::mirLabel(CodegenLabel& l, LIns* bb) {
         AvmAssert(bb->isop(LIR_label));
         AvmAssert(l.bb == 0);
         l.bb = bb;
@@ -4044,12 +3778,12 @@ namespace avmplus
 	void CodegenLIR::emitSampleCheck()
 	{
 		/* @todo  inlined sample check doesn't work, help! 
-			OP* takeSample = loadIns(LIR_ld, (int)&core->takeSample, NULL);
-			OP* br = Ins(MIR_jeq, binaryIns(MIR_ucmp, takeSample, InsConst(0)));
-			callIns(FUNCTIONID(sample), 1, InsConst((int32)core));
+			LIns* takeSample = loadIns(LIR_ld, (int)&core->takeSample, NULL);
+			LIns* br = Ins(MIR_jeq, binaryIns(MIR_ucmp, takeSample, InsConst(0)));
+			callIns(FUNCTIONID(sample), 1, coreAddr);
 			br->target = Ins(LIR_label);
 		*/
-		callIns(FUNCTIONID(sampleCheck), 1, InsConst((uintptr)core));
+		callIns(FUNCTIONID(sampleCheck), 1, coreAddr);
 	}
 #endif
 
@@ -4089,7 +3823,7 @@ namespace avmplus
     }
 
 	/* patch the location 'where' with the value of the label */
-	void CodegenLIR::patchLater(OP* br, intptr_t pc)	{
+	void CodegenLIR::patchLater(LIns* br, intptr_t pc)	{
         patchLater(br, state->verifier->getFrameState(pc)->label);
 	}
 
@@ -4114,9 +3848,6 @@ namespace avmplus
     LIns* CodegenLIR::loadIns(LOpcode op, int32_t disp, LIns *base) {
         return lirout->insLoad(op, base, disp);
     }
-
-    void CodegenLIR::markDead(LIns*) 
-    {}
 
     PageMgr::PageMgr() : frago(0)
     {}
@@ -4383,17 +4114,9 @@ namespace avmplus
 
 namespace nanojit
 {
-    int StackFilter::getTop(LIns* i) {
-        if (i->isBranch()) {
-            return i->oprnd2()->imm24();
-        }
-        else if (i->isop(LIR_label)) {
-            return i->imm24();
-        }
-        else {
-            AvmAssert(false);
-            return 0x7fffffff; // highest top possible = most conservative
-        }
+    int StackFilter::getTop(LIns*) {
+		AvmAssert(false);
+		return 0;
     }
 
     #ifdef NJ_VERBOSE
