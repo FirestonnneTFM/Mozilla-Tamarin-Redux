@@ -303,6 +303,11 @@ namespace avmplus
 		vtable->traits->core->interrupt(this);
 	}
 
+    void MethodEnv::stkover()
+    {
+        this->core()->stackOverflow(this);
+    }
+
 	Traits* MethodEnv::toClassITraits(Atom atom)
 	{
 		switch (atom&7)
