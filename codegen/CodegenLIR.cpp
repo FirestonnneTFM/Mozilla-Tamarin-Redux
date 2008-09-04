@@ -836,8 +836,8 @@ namespace avmplus
             return out->ins0(op);
         }
 
-        LIns *insParam(int32_t i) {
-            return out->insParam(i);
+        LIns *insParam(int32_t i, int32_t kind) {
+            return out->insParam(i, kind);
         }
 
         LIns *insImm(int32_t i) {
@@ -1052,8 +1052,10 @@ namespace avmplus
                 lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
             }
         )
+        LoadFilter *loadfilter = 0;
         if (core->config.cseopt) {
-            lirout = new (gc) CfgCseFilter(lirout, gc);
+            loadfilter = new (gc) LoadFilter(lirout, gc);
+            lirout = new (gc) CfgCseFilter(loadfilter, gc);
         }
         lirout = new (gc) ExprFilter(lirout);
         CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout);
@@ -1064,6 +1066,9 @@ namespace avmplus
         )
 
         lirout->ins0(LIR_start);
+        // create param's for saved regs -- abi specific
+        for (int i=0, n=sizeof(lirbuf->savedParams)/sizeof(LInsp); i < n; i++)
+            lirout->insParam(i, 1);
 
 		if (overflow) return false;
 
@@ -1082,12 +1087,14 @@ namespace avmplus
 		// frame allocations follow.
 		//
 
-        env_param = lirout->insParam(0);
-        argc_param = lirout->insParam(1);
-        ap_param = lirout->insParam(2);
+        env_param = lirout->insParam(0, 0);
+        argc_param = lirout->insParam(1, 0);
+        ap_param = lirout->insParam(2, 0);
         vars = InsAlloc(state->verifier->frameSize * 8);
-        if (copier)
-            copier->init(vars);
+        lirbuf->sp = vars;
+        if (loadfilter)
+            loadfilter->sp = vars;
+        copier->init(vars);
 
         verbose_only( if (lirbuf->names) {
             lirbuf->names->addName(env_param, "env");
@@ -4307,7 +4314,7 @@ namespace avmplus
         RegAllocMap regMap(gc);
         NInsList loopJumps(gc);
         assm->hasLoop = false;
-        assm->beginAssembly(&regMap);
+        assm->beginAssembly(frag, &regMap);
         assm->assemble(frag, loopJumps);
         assm->endAssembly(frag, loopJumps);
 #ifdef PERFM
@@ -4350,7 +4357,7 @@ namespace avmplus
             u.vp = frag->code();
             info->impl32 = u.fp;
             verbose_only(if (verbose()) {
-                printf("keeping %d\n", jitcount);
+                printf("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
             })
         } else {
             // assm puked, or we did something untested, so interpret.
@@ -4358,7 +4365,7 @@ namespace avmplus
             frag->releaseCode(frago);
             overflow = true;
             verbose_only(if (verbose()) {
-                printf("reverting to interpreter\n");
+                printf("reverting to interpreter %d\n", jitcount);
             })
         }
     }

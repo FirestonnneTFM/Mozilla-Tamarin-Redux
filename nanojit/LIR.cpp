@@ -305,10 +305,11 @@ namespace nanojit
 	LInsp LirBufWriter::ins0(LOpcode op)
 	{
 		ensureRoom(1);
-		LInsp l = _buf->next();
+        LirBuffer *b = this->_buf;
+		LInsp l = b->next();
 		l->initOpcode(op);
-		_buf->commit(1);
-		_buf->_stats.lir++;
+		b->commit(1);
+		b->_stats.lir++;
 		return l;
 	}
 	
@@ -378,16 +379,21 @@ namespace nanojit
 		return l;
     }
 
-    LInsp LirBufWriter::insParam(int32_t arg)
+    LInsp LirBufWriter::insParam(int32_t arg, int32_t kind)
     {
 		ensureRoom(1);
-		LInsp l = _buf->next();
+        LirBuffer *b = this->_buf;
+		LInsp l = b->next();
 		l->initOpcode(LIR_param);
-        NanoAssert(isU8(arg));
+        NanoAssert(isU8(arg) && isU8(kind));
 		l->c.imm8a = arg;
-
-		_buf->commit(1);
-		_buf->_stats.lir++;
+        l->c.imm8b = kind;
+        if (kind) {
+            NanoAssert(arg < sizeof(b->savedParams)/sizeof(LInsp));
+            b->savedParams[arg] = l;
+        }
+		b->commit(1);
+		b->_stats.lir++;
 		return l;
     }
 	
@@ -1689,7 +1695,8 @@ namespace nanojit
 			}
 
 			case LIR_param:
-                sprintf(s, "%s = %s %d", formatRef(i), lirNames[op], i->imm8());
+                sprintf(s, "%s = %s %s", formatRef(i), lirNames[op], 
+                    i->imm8b() ? gpn(Assembler::savedRegs[i->imm8()]) : gpn(Assembler::argRegs[i->imm8()]));
 				break;
 
 			case LIR_var:
@@ -1936,7 +1943,7 @@ namespace nanojit
 #ifdef MEMORY_INFO
 //		loopJumps.set_meminfo_name("LIR loopjumps");
 #endif
-		assm->beginAssembly(&regMap);
+		assm->beginAssembly(triggerFrag, &regMap);
 
 		//fprintf(stderr, "recompile trigger %X kind %d\n", (int)triggerFrag, triggerFrag->kind);
 		Fragment* root = triggerFrag;
@@ -1995,6 +2002,50 @@ namespace nanojit
 			root->link(assm);
 			if (treeCompile) root->linkBranches(assm);
 		}
+    }
+
+    LInsp LoadFilter::insLoad(LOpcode v, LInsp base, LInsp disp)
+    {
+        if (base != sp && base != rp && (v == LIR_ld || v == LIR_ldq)) {
+            uint32_t k;
+            LInsp found = exprs.find2(v, base, disp, k);
+            if (found)
+                return found;
+            return exprs.add(out->insLoad(v,base,disp), k);
+        }
+        return out->insLoad(v, base, disp);
+    }
+
+    void LoadFilter::clear(LInsp p)
+    {
+        if (p != sp && p != rp)
+            exprs.clear();
+    }
+
+    LInsp LoadFilter::insStore(LInsp v, LInsp b, LInsp d)
+    {
+        clear(b);
+        return out->insStore(v, b, d);
+    }
+
+    LInsp LoadFilter::insStorei(LInsp v, LInsp b, int32_t d)
+    {
+        clear(b);
+        return out->insStorei(v, b, d);
+    }
+
+    LInsp LoadFilter::insCall(uint32_t fid, LInsp args[])
+    {
+        if (!_functions[fid]._cse)
+            exprs.clear();
+        return out->insCall(fid, args);
+    }
+
+    LInsp LoadFilter::ins0(LOpcode op)
+    {
+        if (op == LIR_label)
+            exprs.clear();
+        return out->ins0(op);
     }
 
 	#endif /* FEATURE_NANOJIT */

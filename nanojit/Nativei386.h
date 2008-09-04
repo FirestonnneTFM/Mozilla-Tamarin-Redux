@@ -171,7 +171,7 @@ namespace nanojit
 	#define DECLARE_PLATFORM_REGALLOC()
 
 	#define DECLARE_PLATFORM_ASSEMBLER()	\
-        const static Register argRegs[2], retRegs[2]; \
+        const static Register argRegs[2], retRegs[2], savedRegs[3]; \
 		bool x87Dirty;						\
         bool sse2;							\
 		bool has_cmov; \

@@ -68,6 +68,7 @@ namespace nanojit
 #if defined NANOJIT_IA32
     const Register Assembler::argRegs[] = { ECX, EDX };
     const Register Assembler::retRegs[] = { EAX, EDX };
+    const Register Assembler::savedRegs[] = { EBX, ESI, EDI };
 #elif defined NANOJIT_AMD64
 #if defined WIN64
 	const Register Assembler::argRegs[] = { R8, R9, RCX, RDX };
@@ -99,22 +100,17 @@ namespace nanojit
         OSDep::getDate();
 	}
 
-	NIns* Assembler::genPrologue(RegisterMask needSaving)
+	NIns* Assembler::genPrologue()
 	{
 		count_prolog();
 		/**
 		 * Prologue
 		 */
 		uint32_t stackNeeded = STACK_GRANULARITY * _activation.highwatermark;
-		uint32_t savingCount = 0;
 
-		for(Register i=FirstReg; i <= LastReg; i = nextreg(i))
-			if (needSaving&rmask(i)) 
-				savingCount++;
-
-		// After forcing alignment, we've pushed the pre-alignment SP
-		// and savingCount registers.
-		uint32_t stackPushed = STACK_GRANULARITY * (1+savingCount);
+		uint32_t stackPushed =
+            STACK_GRANULARITY + // returnaddr
+            STACK_GRANULARITY; // ebp
 		uint32_t aligned = alignUp(stackNeeded + stackPushed, NJ_ALIGN_STACK);
 		uint32_t amt = aligned - stackPushed;
 
@@ -133,34 +129,37 @@ namespace nanojit
 		verbose_only( verbose_output("        patch entry:"); )
         NIns *patchEntry = _nIns;
 		MR(FP, SP); // Establish our own FP.
+        PUSHr(FP); // Save caller's FP.
 
-		// Save pre-alignment SP value here, where the FP will point,
-		// to preserve the illusion of a valid frame chain for
-		// functions like MMgc::GetStackTrace.  The 'return address'
-		// of this 'frame' will be the last-saved register, but that's
-		// fine, because the next-older frame will be legit.
-		PUSHr(EAX);
+        /*
+        simple stack overflow check: do it all here, with a predicted-taken fwd branch
+        */
+        
+        AvmCore *core = this->_frago->core();
+        uintptr_t minstack = core->minstack;
+        if (minstack) {
+            NIns *skip = _nIns;
+            verbose_only(if (_verbose) outputf("        %p:", skip); )
+            const CallInfo *c = callInfoFor(FUNCTIONID(stkover));
+            CALL(c);
+            LD(ECX, 4, ESP); // env
+            uintptr_t limit = minstack + stackNeeded;
+            JNB(skip);
+            CMPi(ESP, limit);
+        }
 
-		for(Register i=FirstReg; i <= LastReg; i = nextreg(i))
-			if (needSaving&rmask(i))
-				PUSHr(i);
-
-		// We'd like to be able to use SSE instructions like MOVDQA on
-		// stack slots; it requires 16B alignment.  Darwin requires a
-		// 16B stack alignment, and Linux GCC seems to intend to
-		// establish and preserve the same, but we're told that GCC
-		// has not always done this right.  To avoid doubt, do it on
-		// all platforms.  The prologue runs only when we enter
-		// fragments from the interpreter, so forcing 16B alignment
-		// here is cheap.
-#if defined NANOJIT_IA32
-		ANDi(SP, -NJ_ALIGN_STACK);
-#elif defined NANOJIT_AMD64
-		ANDQi(SP, -NJ_ALIGN_STACK);
-#endif
-		
-		MR(EAX,SP); // save original SP into EAX so we can access stack params
-		PUSHr(FP); // Save caller's FP.
+        // stack overflow check
+        /*
+        AvmCore *core = this->_frago->core();
+        uintptr_t minstack = core->minstack;
+        if (minstack) {
+            int d = stkover_jmp + 5 - _nIns;
+            *((uintptr_t*)(stkover_jmp+1)) = d;
+            uintptr_t limit = minstack + stackNeeded;
+            JB(stkover_label);
+            CMPi(ESP, limit);
+        }
+        */
 
 		return patchEntry;
 	}
@@ -215,17 +214,21 @@ namespace nanojit
 	#endif
 	}
 
-    NIns *Assembler::genEpilogue(RegisterMask restore)
+    NIns *Assembler::genEpilogue()
     {
+        /*AvmCore *core = this->_frago->core();
+        if (core->minstack) {
+            JMP_long_placeholder();
+            stkover_jmp = _nIns;
+            const CallInfo *c = callInfoFor(FUNCTIONID(stkover));
+            CALL(c);
+            LD(ECX, 4, ESP); // env
+            stkover_label = _nIns;
+            verbose_only(if (_verbose) outputf("        %p:", stkover_label); )
+        }*/
         RET();
         POPr(FP); // Restore caller's FP.
-        MR(SP,FP); // Undo forced alignment.
-
-		// Restore saved registers.
-		for (Register i=UnknownReg; i >= FirstReg; i = prevreg(i))
-			if (restore&rmask(i)) { POPr(i); } 
-		
-		POPr(FP); // Pop the pre-alignment SP.
+        MR(SP,FP); // pop the stack frame
         return  _nIns;
     }
 	
@@ -272,6 +275,9 @@ namespace nanojit
 
         bool indirect = false;
         if (ins->isop(LIR_call) || ins->isop(LIR_fcall)) {
+            verbose_only(if (_verbose)
+                outputf("        %p:", _nIns);
+            )
     		CALL(call);
         }
         else {

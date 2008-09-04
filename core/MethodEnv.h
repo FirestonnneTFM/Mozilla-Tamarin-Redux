@@ -117,6 +117,7 @@ namespace avmplus
 	    void nullcheck(Atom atom);
 	    void npe();
 		void interrupt();
+        void stkover();
 
 		/** returns the instance traits of the factorytype of the passed atom */
 		Traits* toClassITraits(Atom atom);

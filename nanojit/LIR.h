@@ -296,6 +296,7 @@ namespace nanojit
 
 		inline LOpcode	opcode() const	{ return u.code; }
 		inline uint8_t	imm8()	 const	{ return c.imm8a; }
+		inline uint8_t	imm8b()	 const	{ return c.imm8b; }
 		inline int16_t	imm16()	 const	{ return i.imm16; }
 		inline int32_t	imm24()	 const	{ return t.imm24; }
 		inline LIns*	ref()	 const	{ 
@@ -455,8 +456,10 @@ namespace nanojit
 		virtual LInsp insBranch(LOpcode v, LInsp condition, LInsp to) {
 			return out->insBranch(v, condition, to);
 		}
-		virtual LInsp insParam(int32_t i) {
-			return out->insParam(i);
+        // arg: 0=first, 1=second, ...
+        // kind: 0=arg 1=saved-reg
+		virtual LInsp insParam(int32_t arg, int32_t kind) {
+			return out->insParam(arg, kind);
 		}
 		virtual LInsp insImm(int32_t imm) {
 			return out->insImm(imm);
@@ -621,8 +624,8 @@ namespace nanojit
 		LIns* insCall(uint32_t fid, LInsp args[]) {
 			return add(out->insCall(fid, args));
 		}
-		LIns* insParam(int32_t i) {
-			return add(out->insParam(i));
+		LIns* insParam(int32_t i, int32_t kind) {
+			return add(out->insParam(i, kind));
 		}
 		LIns* insLoad(LOpcode v, LInsp base, LInsp disp) {
 			return add(out->insLoad(v, base, disp));
@@ -728,6 +731,7 @@ namespace nanojit
 			const CallInfo* _functions;
             AbiKind abi;
             LInsp state,param1,sp,rp;
+            LInsp savedParams[3];// hack, should be sizeof(Assembler::savedRegs)/sizeof(Assembler::savedRegs[0])
 			
 		protected:
 			friend class LirBufWriter;
@@ -759,7 +763,7 @@ namespace nanojit
 			LInsp	ins0(LOpcode op);
 			LInsp	ins1(LOpcode op, LInsp o1);
 			LInsp	ins2(LOpcode op, LInsp o1, LInsp o2);
-			LInsp	insParam(int32_t i);
+			LInsp	insParam(int32_t i, int32_t kind);
 			LInsp	insImm(int32_t imm);
 			LInsp	insImmq(uint64_t imm);
 		    LInsp	insCall(uint32_t fid, LInsp args[]);
@@ -842,5 +846,23 @@ namespace nanojit
 		CseReader(LirFilter *in, LInsHashSet *exprs, const CallInfo*);
 		LInsp read();
 	};
+
+    // eliminate redundant loads by watching for stores & mutator calls
+    class LoadFilter: public LirWriter
+    {
+    public:
+        LInsp sp, rp;
+        LInsHashSet exprs;
+        void clear(LInsp p);
+    public:
+        LoadFilter(LirWriter *out, GC *gc)
+            : LirWriter(out), exprs(gc) { }
+
+        LInsp ins0(LOpcode);
+        LInsp insLoad(LOpcode, LInsp base, LInsp disp);
+        LInsp insStore(LInsp v, LInsp b, LInsp d);
+        LInsp insStorei(LInsp v, LInsp b, int32_t d);
+        LInsp insCall(uint32_t fid, LInsp args[]);
+    };
 }
 #endif // __nanojit_LIR__

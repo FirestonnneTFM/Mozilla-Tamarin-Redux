@@ -201,7 +201,7 @@ namespace nanojit
 
 			void		assemble(Fragment* frag, NInsList& loopJumps);
 			void		endAssembly(Fragment* frag, NInsList& loopJumps);
-			void		beginAssembly(RegAllocMap* map);
+			void		beginAssembly(Fragment *frag, RegAllocMap* map);
 			void		copyRegisters(RegAlloc* copyTo);
 			void		releaseRegisters();
             void        patch(GuardRecord *lr);
@@ -231,8 +231,8 @@ namespace nanojit
 		private:
 			
 			void		gen(LirFilter* toCompile, NInsList& loopJumps);
-			NIns*		genPrologue(RegisterMask);
-			NIns*		genEpilogue(RegisterMask);
+			NIns*		genPrologue();
+			NIns*		genEpilogue();
 
 			GuardRecord* placeGuardRecord(LInsp guard);
 			void		initGuardRecord(LInsp guard, GuardRecord*);
@@ -323,6 +323,8 @@ namespace nanojit
 			void		asm_call(LInsp);
             void        asm_arg(ArgSize, LInsp, Register);					
 			NIns*		asm_branch(bool branchOnFalse, LInsp cond, NIns* targ);
+            void        assignSavedParams();
+            void        reserveSavedParams();
 
 			// platform specific implementation (see NativeXXX.cpp file)
 			void		nInit(uint32_t flags);

@@ -773,8 +773,9 @@ namespace nanojit
         return jmpTarget;
     }
 	
-	void Assembler::beginAssembly(RegAllocMap* branchStateMap)
+	void Assembler::beginAssembly(Fragment *frag, RegAllocMap* branchStateMap)
 	{
+        _thisfrag = frag;
 		_activation.lowwatermark = 1;
 		_activation.tos = _activation.lowwatermark;
 		_activation.highwatermark = _activation.tos;
@@ -805,7 +806,7 @@ namespace nanojit
 		//fprintf(stderr,"pageReset %d start %x exit start %x\n", _stats.pages, (int)_stats.codeStart, (int)_stats.codeExitStart);
 #endif /* PERFM */
 
-        _epilogue = genEpilogue(SavedRegs);
+        _epilogue = genEpilogue();
 		_branchStateMap = branchStateMap;
         _labels.clear();
 
@@ -870,7 +871,7 @@ namespace nanojit
 		NIns* patchEntry = 0;
 		if (!error())
 		{
-			patchEntry = genPrologue(SavedRegs);
+			patchEntry = genPrologue();
 			verbose_only( verbose_outputf("        %p:",_nIns); )
 			verbose_only( verbose_output("        prologue"); )
 		}
@@ -1016,7 +1017,6 @@ namespace nanojit
 #define countlir_call()
 #endif
 
-	
 	void Assembler::gen(LirFilter* reader,  NInsList& loopJumps)
 	{
 		// trace must start with LIR_x or LIR_loop
@@ -1043,8 +1043,7 @@ namespace nanojit
                     if (_nIns != _epilogue) {
                         JMP(_epilogue);
                     }
-                    MR(SP,FP);
-					releaseRegisters();
+                    assignSavedParams();
                     findSpecificRegFor(ins->oprnd1(), retRegs[0]);
                     break;
                 }
@@ -1054,8 +1053,7 @@ namespace nanojit
                     if (_nIns != _epilogue) {
                         JMP(_epilogue);
                     }
-                    MR(SP,FP);
-					releaseRegisters();
+                    assignSavedParams();
                     findSpecificRegFor(ins->oprnd1(), FST0);
                     fpu_pop();
                     break;
@@ -1160,20 +1158,25 @@ namespace nanojit
 				{
                     countlir_param();
                     uint32_t a = ins->imm8();
-                    AbiKind abi = _thisfrag->lirbuf->abi;
-                    uint32_t abi_regcount = abi == ABI_FASTCALL ? 2 : abi == ABI_THISCALL ? 1 : 0;
-                    if (a < abi_regcount) {
-					    Register w = argRegs[a];
-                        NanoAssert(w != UnknownReg);
-					    // incoming arg in register
-					    prepResultReg(ins, rmask(w));
-                    } else {
-                        // incoming arg is on stack, and EAX points nearby (see genPrologue)
-                        //_nvprof("param-evict-eax",1);
-						evict(EAX);
-                        Register r = prepResultReg(ins, GpRegs & ~rmask(EAX));
-                        int d = (a - abi_regcount) * sizeof(intptr_t) + 8;
-                        LD(r, d, EAX); 
+                    uint32_t kind = ins->imm8b();
+                    if (kind == 0) {
+                        // ordinary param
+                        AbiKind abi = _thisfrag->lirbuf->abi;
+                        uint32_t abi_regcount = abi == ABI_FASTCALL ? 2 : abi == ABI_THISCALL ? 1 : 0;
+                        if (a < abi_regcount) {
+					        // incoming arg in register
+					        prepResultReg(ins, rmask(argRegs[a]));
+                        } else {
+                            // incoming arg is on stack, and EAX points nearby (see genPrologue)
+                            //_nvprof("param-evict-eax",1);
+                            Register r = prepResultReg(ins, GpRegs & ~rmask(EAX));
+                            int d = (a - abi_regcount) * sizeof(intptr_t) + 8;
+                            LD(r, d, FP); 
+                        }
+                    } 
+                    else {
+                        // saved param
+                        prepResultReg(ins, rmask(savedRegs[a]));
                     }
 					break;
 				}
@@ -1488,6 +1491,7 @@ namespace nanojit
                     else {
                         // backwards jump
                         hasLoop = true;
+                        reserveSavedParams();
                         if (!label) {
                             // save empty register state at loop header
                             _labels.add(to, 0, _allocator);
@@ -1521,6 +1525,7 @@ namespace nanojit
                     else {
                         // back edge.
                         hasLoop = true;
+                        reserveSavedParams();
                         if (!label) {
                             // evict all registers, most conservative approach.
                             evictRegs(~_allocator.free);
@@ -1767,6 +1772,27 @@ namespace nanojit
 		return at;
 	}
 
+    void Assembler::assignSavedParams()
+    {
+        // restore saved regs
+		releaseRegisters();
+        LirBuffer *b = _thisfrag->lirbuf;
+        for (int i=0, n = sizeof(b->savedParams)/sizeof(LInsp); i < n; i++) {
+            LIns *p = b->savedParams[i];
+            if (p)
+                findSpecificRegFor(p, savedRegs[p->imm8()]);
+        }
+    }
+
+    void Assembler::reserveSavedParams()
+    {
+        LirBuffer *b = _thisfrag->lirbuf;
+        for (int i=0, n = sizeof(b->savedParams)/sizeof(LInsp); i < n; i++) {
+            LIns *p = b->savedParams[i];
+            if (p)
+                findMemFor(p);
+        }
+    }
 
 	void Assembler::arFree(uint32_t idx)
 	{
