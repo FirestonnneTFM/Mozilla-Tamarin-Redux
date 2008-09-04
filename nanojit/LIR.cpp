@@ -389,7 +389,7 @@ namespace nanojit
 		l->c.imm8a = arg;
         l->c.imm8b = kind;
         if (kind) {
-            NanoAssert(arg < sizeof(b->savedParams)/sizeof(LInsp));
+            NanoAssert(uint32_t(arg) < sizeof(b->savedParams)/sizeof(LInsp));
             b->savedParams[arg] = l;
         }
 		b->commit(1);
@@ -1694,10 +1694,21 @@ namespace nanojit
 				break;
 			}
 
-			case LIR_param:
-                sprintf(s, "%s = %s %s", formatRef(i), lirNames[op], 
-                    i->imm8b() ? gpn(Assembler::savedRegs[i->imm8()]) : gpn(Assembler::argRegs[i->imm8()]));
+			case LIR_param: { 
+				uint32_t arg = i->imm8();
+				if (!i->imm8b()) {
+					if (arg < sizeof(Assembler::argRegs)/sizeof(Assembler::argRegs[0])) {
+						sprintf(s, "%s = %s %d %s", formatRef(i), lirNames[op],
+							arg, gpn(Assembler::argRegs[arg]));
+					} else {
+						sprintf(s, "%s = %s %d", formatRef(i), lirNames[op], arg);
+					}
+				} else {
+					sprintf(s, "%s = %s %d %s", formatRef(i), lirNames[op],
+						arg, gpn(Assembler::savedRegs[arg]));
+				}
 				break;
+			}
 
 			case LIR_var:
                 sprintf(s, "%s = %s", formatRef(i), lirNames[op]);

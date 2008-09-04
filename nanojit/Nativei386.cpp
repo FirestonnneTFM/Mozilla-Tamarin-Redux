@@ -135,18 +135,20 @@ namespace nanojit
         simple stack overflow check: do it all here, with a predicted-taken fwd branch
         */
         
-        AvmCore *core = this->_frago->core();
+        /*AvmCore *core = this->_frago->core();
         uintptr_t minstack = core->minstack;
         if (minstack) {
             NIns *skip = _nIns;
             verbose_only(if (_verbose) outputf("        %p:", skip); )
             const CallInfo *c = callInfoFor(FUNCTIONID(stkover));
+			ADDi(ESP,12);
             CALL(c);
             LD(ECX, 4, ESP); // env
-            uintptr_t limit = minstack + stackNeeded;
+			SUBi(ESP, 12);
+            int32_t limit = minstack + stackNeeded;
             JNB(skip);
             CMPi(ESP, limit);
-        }
+        }*/
 
         // stack overflow check
         /*

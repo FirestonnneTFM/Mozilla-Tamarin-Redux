@@ -646,8 +646,8 @@ namespace nanojit
 		if (rhs->isconst())
 		{
 			int c = rhs->constval();
-			Register r = findRegFor(lhs, GpRegs);
 			if (c == 0 && cond->isop(LIR_eq)) {
+				Register r = findRegFor(lhs, GpRegs);
 				if (rhs->isQuad()) {
 #if defined NANOJIT_64BIT
 					TESTQ(r, r);
@@ -656,7 +656,15 @@ namespace nanojit
 					TEST(r,r);
 				}
 			// No 64-bit immediates so fall-back to below
-			} else if (!rhs->isQuad()) {
+			}
+			else if (!rhs->isQuad()) {
+				Register r;
+				if (lhs->isop(LIR_alloc)) {
+					r = FP;
+					c += findMemFor(lhs);
+				} else {
+					r = findRegFor(lhs, GpRegs);
+				}
 				CMPi(r, c);
 			}
 		}
