@@ -53,6 +53,8 @@
  *
  *    -h      Disable hierarchical report
  *
+ *    -o      Track operand values symbolically
+ *
  *    -v      Verbose: print useful diagnostics on stderr
  *
  *
@@ -114,25 +116,29 @@
 
 typedef struct codestruct codestruct_t;
 struct codestruct {
-    unsigned int *code;
-    unsigned int start;
-    unsigned int limit;
+    unsigned *code;
+    unsigned start;
+    unsigned limit;
     codestruct_t *next;
 };
 
 typedef struct trie trie_t;
 struct trie {
-    unsigned int opcode;
-    unsigned int count;
+    unsigned opcode;
+    unsigned opd1;
+    unsigned opd2;
+    unsigned count;
     trie_t *right_sibling;
     trie_t *left_child;
 };
 
 typedef struct seq seq_t;
 struct seq {
-    unsigned int* data;
-    unsigned int length;
-    unsigned int count;
+    unsigned* opcode;
+    unsigned* operand1;
+    unsigned* operand2;
+    unsigned length;
+    unsigned count;
     int suffix;
 };
 
@@ -289,12 +295,14 @@ enum {
 
 #define LAST_INSTR    0x102
 #define INSTRCOUNT    LAST_INSTR+1
-#define DEF(name)     assert(name < INSTRCOUNT); iname[name] = #name + 3
+#define DEF(name, opds)     assert(name < INSTRCOUNT); iname[name] = #name + 3; operands[name] = opds
+#define MIN(a,b)      ((a) < (b) ? (a) : (b))
 
 const char *progname = "superwordprof";
 int verbose = 0;
 int flat = 0;
 int hierarchical = 1;
+int operand_tracking = 0;
 int cutoff_count = 100;
 int cutoff_length = INT_MAX;
 int scale = 0;
@@ -303,8 +311,11 @@ int wordsize = 4;
 int nextcodestruct = 0;
 trie_t toplevel[INSTRCOUNT];
 int jumps[INSTRCOUNT];
+int operands[INSTRCOUNT];
 const char *iname[INSTRCOUNT];
-unsigned int ibuf[1000];
+unsigned ibuf[1000];
+unsigned operand1[1000];
+unsigned operand2[1000];
 seq_t seqs[10000];
 int nextseq = 0;
 
@@ -315,9 +326,10 @@ int fail(const char *s, ...);
 int codestruct_cmp(const void *a, const void *b);
 int pc_cmp(const void *a, const void *b);
 int seq_cmp(const void *a, const void *b);
-trie_t* new_trie_node(unsigned int opcode);
+trie_t* new_trie_node(unsigned opcode, unsigned opd1, unsigned opd2);
+unsigned compute_operands(unsigned opcodes[], unsigned op, unsigned* opd1, unsigned* opd2, int trackeridx, unsigned opd[][10], unsigned next[]);
 void descend(trie_t *t, int level);
-void emit(int level, unsigned int count);
+void emit(int level, unsigned count);
 void printseq(int i, int indent);
 void printhseq(int i, int level) ;
 void *safemalloc(size_t nbytes);
@@ -332,6 +344,7 @@ int main(int argc, char** argv)
 	toplevel[i].left_child = NULL;
 	toplevel[i].right_sibling = NULL;
 	jumps[i] = 0;
+	operands[i] = 0;
 	iname[i] = "***";
     }
     jumps[OP_throw] = 1;
@@ -354,154 +367,161 @@ int main(int argc, char** argv)
     jumps[OP_returnvoid] = 1;
     jumps[OP_returnvalue] = 1;
 
-    DEF(OP_bkpt);
-    DEF(OP_throw);
-    DEF(OP_getsuper);
-    DEF(OP_setsuper);
-    DEF(OP_dxns);
-    DEF(OP_dxnslate);
-    DEF(OP_kill);
-    DEF(OP_ifnlt);
-    DEF(OP_ifnle);
-    DEF(OP_ifngt);
-    DEF(OP_ifnge);
-    DEF(OP_jump);
-    DEF(OP_iftrue);
-    DEF(OP_iffalse);
-    DEF(OP_ifeq);
-    DEF(OP_ifne);
-    DEF(OP_iflt);
-    DEF(OP_ifle);
-    DEF(OP_ifgt);
-    DEF(OP_ifge);
-    DEF(OP_ifstricteq);
-    DEF(OP_ifstrictne);
-    DEF(OP_lookupswitch);
-    DEF(OP_pushwith);
-    DEF(OP_popscope);
-    DEF(OP_nextname);
-    DEF(OP_hasnext);
-    DEF(OP_pushnull);
-    DEF(OP_pushundefined);
-    DEF(OP_nextvalue);
-    DEF(OP_pushtrue);
-    DEF(OP_pushfalse);
-    DEF(OP_pushnan);
-    DEF(OP_pop);
-    DEF(OP_dup);
-    DEF(OP_swap);
-    DEF(OP_pushstring);
-    DEF(OP_pushdouble);
-    DEF(OP_pushscope);
-    DEF(OP_pushnamespace);
-    DEF(OP_hasnext2);
-    DEF(OP_newfunction);
-    DEF(OP_call);
-    DEF(OP_construct);
-    DEF(OP_callmethod);
-    DEF(OP_callstatic);
-    DEF(OP_callsuper);
-    DEF(OP_callproperty);
-    DEF(OP_returnvoid);
-    DEF(OP_returnvalue);
-    DEF(OP_constructsuper);
-    DEF(OP_constructprop);
-    DEF(OP_callproplex);
-    DEF(OP_callsupervoid);
-    DEF(OP_callpropvoid);
-    DEF(OP_applytype);
-    DEF(OP_newobject);
-    DEF(OP_newarray);
-    DEF(OP_newactivation);
-    DEF(OP_newclass);
-    DEF(OP_getdescendants);
-    DEF(OP_newcatch);
-    DEF(OP_findpropstrict);
-    DEF(OP_findproperty);
-    DEF(OP_finddef);
-    DEF(OP_getlex);
-    DEF(OP_setproperty);
-    DEF(OP_getlocal);
-    DEF(OP_setlocal);
-    DEF(OP_getglobalscope);
-    DEF(OP_getscopeobject);
-    DEF(OP_getproperty);
-    DEF(OP_getouterscope);
-    DEF(OP_initproperty);
-    DEF(OP_deleteproperty);
-    DEF(OP_getslot);
-    DEF(OP_setslot);
-    DEF(OP_getglobalslot);
-    DEF(OP_setglobalslot);
-    DEF(OP_convert_s);
-    DEF(OP_esc_xelem);
-    DEF(OP_esc_xattr);
-    DEF(OP_convert_i);
-    DEF(OP_convert_u);
-    DEF(OP_convert_d);
-    DEF(OP_convert_b);
-    DEF(OP_convert_o);
-    DEF(OP_checkfilter);
-    DEF(OP_coerce);
-    DEF(OP_coerce_b);
-    DEF(OP_coerce_a);
-    DEF(OP_coerce_i);
-    DEF(OP_coerce_d);
-    DEF(OP_coerce_s);
-    DEF(OP_astype);
-    DEF(OP_astypelate);
-    DEF(OP_coerce_u);
-    DEF(OP_coerce_o);
-    DEF(OP_negate);
-    DEF(OP_increment);
-    DEF(OP_inclocal);
-    DEF(OP_decrement);
-    DEF(OP_declocal);
-    DEF(OP_typeof);
-    DEF(OP_not);
-    DEF(OP_bitnot);
-    DEF(OP_add);
-    DEF(OP_subtract);
-    DEF(OP_multiply);
-    DEF(OP_divide);
-    DEF(OP_modulo);
-    DEF(OP_lshift);
-    DEF(OP_rshift);
-    DEF(OP_urshift);
-    DEF(OP_bitand);
-    DEF(OP_bitor);
-    DEF(OP_bitxor);
-    DEF(OP_equals);
-    DEF(OP_strictequals);
-    DEF(OP_lessthan);
-    DEF(OP_lessequals);
-    DEF(OP_greaterthan);
-    DEF(OP_greaterequals);
-    DEF(OP_instanceof);
-    DEF(OP_istype);
-    DEF(OP_istypelate);
-    DEF(OP_in);
-    DEF(OP_increment_i);
-    DEF(OP_decrement_i);
-    DEF(OP_inclocal_i);
-    DEF(OP_declocal_i);
-    DEF(OP_negate_i);
-    DEF(OP_add_i);
-    DEF(OP_subtract_i);
-    DEF(OP_multiply_i);
-    DEF(OP_getlocal0);
-    DEF(OP_getlocal1);
-    DEF(OP_getlocal2);
-    DEF(OP_getlocal3);
-    DEF(OP_setlocal0);
-    DEF(OP_setlocal1);
-    DEF(OP_setlocal2);
-    DEF(OP_setlocal3);
-    DEF(OP_debugline);
-    DEF(OP_debugfile);
-    DEF(OP_bkptline);
-    DEF(OP_ext_pushbits);
-    DEF(OP_ext_push_doublebits);
+    /* The operand count here is not important for correctness.  0 is
+     * always a safe answer, and a too high number will result in an
+     * out-of-bounds reference only occasionally :-P
+     *
+     * Getting the operand count right makes for better analysis,
+     * though.
+     */
+    DEF(OP_bkpt, 0);
+    DEF(OP_throw, 0);
+    DEF(OP_getsuper, 1);
+    DEF(OP_setsuper, 1);
+    DEF(OP_dxns, 1);
+    DEF(OP_dxnslate, 0);
+    DEF(OP_kill, 1);
+    DEF(OP_ifnlt, 1);
+    DEF(OP_ifnle, 1);
+    DEF(OP_ifngt, 1);
+    DEF(OP_ifnge, 1);
+    DEF(OP_jump, 1);
+    DEF(OP_iftrue, 1);
+    DEF(OP_iffalse, 1);
+    DEF(OP_ifeq, 1);
+    DEF(OP_ifne, 1);
+    DEF(OP_iflt, 1);
+    DEF(OP_ifle, 1);
+    DEF(OP_ifgt, 1);
+    DEF(OP_ifge, 1);
+    DEF(OP_ifstricteq, 1);
+    DEF(OP_ifstrictne, 1);
+    DEF(OP_lookupswitch, 2);
+    DEF(OP_pushwith, 0);
+    DEF(OP_popscope, 0);
+    DEF(OP_nextname, 0);
+    DEF(OP_hasnext, 0);
+    DEF(OP_pushnull, 0);
+    DEF(OP_pushundefined, 0);
+    DEF(OP_nextvalue, 0);
+    DEF(OP_pushtrue, 0);
+    DEF(OP_pushfalse, 0);
+    DEF(OP_pushnan, 0);
+    DEF(OP_pop, 0);
+    DEF(OP_dup, 0);
+    DEF(OP_swap, 0);
+    DEF(OP_pushstring, 1);
+    DEF(OP_pushdouble, 1);
+    DEF(OP_pushscope, 0);
+    DEF(OP_pushnamespace, 1);
+    DEF(OP_hasnext2, 2);
+    DEF(OP_newfunction, 1);
+    DEF(OP_call, 1);
+    DEF(OP_construct, 1);
+    DEF(OP_callmethod, 2);
+    DEF(OP_callstatic, 2);
+    DEF(OP_callsuper, 2);
+    DEF(OP_callproperty, 2);
+    DEF(OP_returnvoid, 0);
+    DEF(OP_returnvalue, 0);
+    DEF(OP_constructsuper, 1);
+    DEF(OP_constructprop, 1);
+    DEF(OP_callproplex, 1);
+    DEF(OP_callsupervoid, 2);
+    DEF(OP_callpropvoid, 2);
+    DEF(OP_applytype, 1);
+    DEF(OP_newobject, 1);
+    DEF(OP_newarray, 1);
+    DEF(OP_newactivation, 0);
+    DEF(OP_newclass, 1);
+    DEF(OP_getdescendants, 1);
+    DEF(OP_newcatch, 1);
+    DEF(OP_findpropstrict, 1);
+    DEF(OP_findproperty, 1);
+    DEF(OP_finddef, 1);
+    DEF(OP_getlex, 1);
+    DEF(OP_setproperty, 1);
+    DEF(OP_getlocal, 1);
+    DEF(OP_setlocal, 1);
+    DEF(OP_getglobalscope, 0);
+    DEF(OP_getscopeobject, 1);
+    DEF(OP_getproperty, 1);
+    DEF(OP_getouterscope, 1);
+    DEF(OP_initproperty, 1);
+    DEF(OP_deleteproperty, 1);
+    DEF(OP_getslot, 1);
+    DEF(OP_setslot, 1);
+    DEF(OP_getglobalslot, 1);
+    DEF(OP_setglobalslot, 1);
+    DEF(OP_convert_s, 0);
+    DEF(OP_esc_xelem, 0);
+    DEF(OP_esc_xattr, 0);
+    DEF(OP_convert_i, 0);
+    DEF(OP_convert_u, 0);
+    DEF(OP_convert_d, 0);
+    DEF(OP_convert_b, 0);
+    DEF(OP_convert_o, 0);
+    DEF(OP_checkfilter, 0);
+    DEF(OP_coerce, 1);
+    DEF(OP_coerce_b, 0);
+    DEF(OP_coerce_a, 0);
+    DEF(OP_coerce_i, 0);
+    DEF(OP_coerce_d, 0);
+    DEF(OP_coerce_s, 0);
+    DEF(OP_astype, 1);
+    DEF(OP_astypelate, 0);
+    DEF(OP_coerce_u, 0);
+    DEF(OP_coerce_o, 0);
+    DEF(OP_negate, 0);
+    DEF(OP_increment, 0);
+    DEF(OP_inclocal, 1);
+    DEF(OP_decrement, 0);
+    DEF(OP_declocal, 1);
+    DEF(OP_typeof, 0);
+    DEF(OP_not, 0);
+    DEF(OP_bitnot, 0);
+    DEF(OP_add, 0);
+    DEF(OP_subtract, 0);
+    DEF(OP_multiply, 0);
+    DEF(OP_divide, 0);
+    DEF(OP_modulo, 0);
+    DEF(OP_lshift, 0);
+    DEF(OP_rshift, 0);
+    DEF(OP_urshift, 0);
+    DEF(OP_bitand, 0);
+    DEF(OP_bitor, 0);
+    DEF(OP_bitxor, 0);
+    DEF(OP_equals, 0);
+    DEF(OP_strictequals, 0);
+    DEF(OP_lessthan, 0);
+    DEF(OP_lessequals, 0);
+    DEF(OP_greaterthan, 0);
+    DEF(OP_greaterequals, 0);
+    DEF(OP_instanceof, 0);
+    DEF(OP_istype, 1);
+    DEF(OP_istypelate, 0);
+    DEF(OP_in, 0);
+    DEF(OP_increment_i, 0);
+    DEF(OP_decrement_i, 0);
+    DEF(OP_inclocal_i, 1);
+    DEF(OP_declocal_i, 1);
+    DEF(OP_negate_i, 0);
+    DEF(OP_add_i, 0);
+    DEF(OP_subtract_i, 0);
+    DEF(OP_multiply_i, 0);
+    DEF(OP_getlocal0, 0);
+    DEF(OP_getlocal1, 0);
+    DEF(OP_getlocal2, 0);
+    DEF(OP_getlocal3, 0);
+    DEF(OP_setlocal0, 0);
+    DEF(OP_setlocal1, 0);
+    DEF(OP_setlocal2, 0);
+    DEF(OP_setlocal3, 0);
+    DEF(OP_debugline, 1);
+    DEF(OP_debugfile, 1);
+    DEF(OP_bkptline, 1);
+    DEF(OP_ext_pushbits, 1);
+    DEF(OP_ext_push_doublebits, 2);
 
     progname = argv[0];
 
@@ -529,6 +549,10 @@ int main(int argc, char** argv)
 	    hierarchical = 0;
 	    i++;
 	}
+	else if (strcmp(argv[i], "-o") == 0) {
+	    operand_tracking = 1;
+	    i++;
+	}
 	else if (strcmp(argv[i], "-v") == 0) {
 	    verbose = 1;
 	    i++;
@@ -546,6 +570,7 @@ int main(int argc, char** argv)
 	fprintf(stderr, "  -l n     Set length cutoff = n (default unbounded)\n");
 	fprintf(stderr, "  -f       Enable flat report\n");
 	fprintf(stderr, "  -h       Disable hierarchical report\n");
+	fprintf(stderr, "  -o       Operand tracking\n");
 	fprintf(stderr, "  -v       Verbose");
 	return 1;
     }
@@ -566,7 +591,7 @@ int main(int argc, char** argv)
 void read_code(const char* filename)
 {
     FILE *code_fp;
-    unsigned int total_wordcount, numcodes, signature;
+    unsigned total_wordcount, numcodes, signature;
     codestruct_t *codestruct;
 
     (code_fp = fopen(filename, "rb")) != NULL || fail("No such file: %s", filename);
@@ -576,20 +601,20 @@ void read_code(const char* filename)
     nextcodestruct = 0;    /* Don't bother deallocating data from previous code file */
     total_wordcount = 0;
     numcodes = 0;
-    fread(&signature, sizeof(unsigned int), 1, code_fp) == 1 || fail("No code signature");
+    fread(&signature, sizeof(unsigned), 1, code_fp) == 1 || fail("No code signature");
     signature == 0xC0DEC0DE || fail("Bad code signature: %08x", signature);
     for (;;) {
-	unsigned int start, limit, wordcount;
-	unsigned int *codebuf;
+	unsigned start, limit, wordcount;
+	unsigned *codebuf;
 	int res;
 
-	if (fread(&start, sizeof(unsigned int), 1, code_fp) != 1) 
+	if (fread(&start, sizeof(unsigned), 1, code_fp) != 1) 
 	    break;
-	fread(&limit, sizeof(unsigned int), 1, code_fp) || fail("Could not read end");
+	fread(&limit, sizeof(unsigned), 1, code_fp) || fail("Could not read end");
 	wordcount = (limit - start) / wordsize;
 	total_wordcount += wordcount;
-	codebuf = (unsigned int*)safemalloc(wordcount * sizeof(unsigned int));
-	(res = fread(codebuf, sizeof(unsigned int), wordcount, code_fp)) == wordcount || fail("Could not read code vector: %08x %08x %d (%d) %d", start, limit, wordcount, numcodes, res);
+	codebuf = (unsigned*)safemalloc(wordcount * sizeof(unsigned));
+	(res = fread(codebuf, sizeof(unsigned), wordcount, code_fp)) == wordcount || fail("Could not read code vector: %08x %08x %d (%d) %d", start, limit, wordcount, numcodes, res);
 	nextcodestruct < sizeof(codestructs)/sizeof(codestruct_t) || fail("Out of codestruct memory: %d", nextcodestruct);
 	codestruct = &codestructs[nextcodestruct++];
 	codestruct->code = codebuf;
@@ -601,14 +626,6 @@ void read_code(const char* filename)
     fclose(code_fp);
 
     qsort(codestructs, nextcodestruct, sizeof(codestruct_t), codestruct_cmp);
-
-    // debugging
-    {
-	int i;
-	for ( i=0 ; i < nextcodestruct-1 ; i++ )
-	    if (codestructs[i].start >= codestructs[i+1].start)
-		fprintf(stderr, "ERROR!\n");
-    }
 
     if (verbose) {
 	fprintf(stderr, "Number of code structs: %d\n", nextcodestruct);
@@ -626,11 +643,13 @@ void read_code(const char* filename)
  */
 void read_samples(const char* filename)
 {
-    static unsigned int bigbuf[1000000];
+    static unsigned bigbuf[1000000];
     FILE *sample_fp;
-    unsigned int total_samples, signature, prev_pc;
+    unsigned total_samples, signature, prev_pc;
     codestruct_t *prev_codestruct;
     trie_t* tracker[1000];
+    unsigned operand_value[1000][10];  /* Up to 10 distinct operand values per tracker.  We use offset 0..9 + 1; 0 means "no information" */
+    unsigned next_symbol[1000];        /* Next symbol (= operand slot, if below 10) */
     int nexttracker;
     int trie_nodes = 0;
     int bigbuflim = 0;
@@ -641,7 +660,7 @@ void read_samples(const char* filename)
 	fprintf(stderr, "%s\n", filename);
     (sample_fp = fopen(filename, "rb")) != NULL || fail("No such file: %s", filename);
 
-    fread(&signature, sizeof(unsigned int), 1, sample_fp) == 1 || fail("No sample signature");
+    fread(&signature, sizeof(unsigned), 1, sample_fp) == 1 || fail("No sample signature");
     signature == 0xDA1ADA1A || fail("Bad sample signature: %08x", signature);
 
     total_samples = 0;
@@ -649,12 +668,12 @@ void read_samples(const char* filename)
     prev_pc = 0;
     nexttracker = 0;
     for (;;) {
-	unsigned int pc, opcode, ops, op, opcodes[10];
+	unsigned pc, opcode, ops, op, opcodes[10];
 	codestruct_t *codestruct;
 
 	if (bigbufptr == bigbuflim) {
 	    int res;
-	    res = fread(bigbuf, sizeof(unsigned int), sizeof(bigbuf)/sizeof(bigbuf[0]), sample_fp);
+	    res = fread(bigbuf, sizeof(unsigned), sizeof(bigbuf)/sizeof(bigbuf[0]), sample_fp);
 	    if (res <= 0)
 		break;
 	    bigbufptr = 0;
@@ -685,68 +704,87 @@ void read_samples(const char* filename)
 	 */
 	ops = 0;
 	switch (opcode) {
-	default:
+	default: {
+	    int n = operands[opcode];
 	    opcodes[ops++] = opcode;
+	    if (n > 0) { n--; opcodes[ops++] = codestruct->code[(pc - codestruct->start)/wordsize + 1]; }
+	    if (n > 0) { n--; opcodes[ops++] = codestruct->code[(pc - codestruct->start)/wordsize + 2]; }
+	    assert(n == 0);
 	    break;
+	}
 	case OP_getlocal0:
 	case OP_getlocal1:
 	case OP_getlocal2:
 	case OP_getlocal3:
 	    opcodes[ops++] = OP_getlocal;
+	    opcodes[ops++] = OP_getlocal - opcode;
 	    break;
 	case OP_setlocal0:
 	case OP_setlocal1:
 	case OP_setlocal2:
 	case OP_setlocal3:
 	    opcodes[ops++] = OP_setlocal;
+	    opcodes[ops++] = OP_setlocal - opcode;
 	    break;
 	case OP_iflt:
 	    opcodes[ops++] = OP_lessthan;
 	    opcodes[ops++] = OP_iftrue;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifle:
 	    opcodes[ops++] = OP_lessequals;
 	    opcodes[ops++] = OP_iftrue;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifnlt:
 	    opcodes[ops++] = OP_lessthan;
 	    opcodes[ops++] = OP_iffalse;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifnle:
 	    opcodes[ops++] = OP_lessequals;
 	    opcodes[ops++] = OP_iffalse;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifgt:
 	    opcodes[ops++] = OP_greaterthan;
 	    opcodes[ops++] = OP_iftrue;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifge:
 	    opcodes[ops++] = OP_greaterequals;
 	    opcodes[ops++] = OP_iftrue;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifngt:
 	    opcodes[ops++] = OP_greaterthan;
 	    opcodes[ops++] = OP_iffalse;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifnge:
 	    opcodes[ops++] = OP_greaterequals;
 	    opcodes[ops++] = OP_iffalse;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifeq:
 	    opcodes[ops++] = OP_equals;
 	    opcodes[ops++] = OP_iftrue;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifstricteq:
 	    opcodes[ops++] = OP_strictequals;
 	    opcodes[ops++] = OP_iftrue;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifne:
 	    opcodes[ops++] = OP_equals;
 	    opcodes[ops++] = OP_iffalse;
+	    opcodes[ops++] = 0;
 	    break;
 	case OP_ifstrictne:
 	    opcodes[ops++] = OP_strictequals;
 	    opcodes[ops++] = OP_iffalse;
+	    opcodes[ops++] = 0;
 	    break;
 	}
 
@@ -756,21 +794,32 @@ void read_samples(const char* filename)
 	if (prev_codestruct != codestruct)
 	    nexttracker = 0;
 
-	for ( op=0 ; op < ops ; op++ ) {
+	op = 0;
+	while ( op < ops ) {
 	    int i;
 	    opcode = opcodes[op];
+	    assert( opcode < INSTRCOUNT );
 	    for ( i=0 ; i < nexttracker ; i++ ) {
 		trie_t *t = tracker[i];
+		unsigned opd1=0, opd2=0;
+		if (operand_tracking)
+		    compute_operands(opcodes, op, &opd1, &opd2, i, operand_value, next_symbol);
 		if (t->left_child == NULL) {
-		    t->left_child = new_trie_node(opcode);
+		    t->left_child = new_trie_node(opcode, opd1, opd2);
 		    ++trie_nodes;
 		    tracker[i] = t->left_child;
 		}
 		else {
 		    trie_t *t2 = t->left_child;
 		    trie_t *t3 = NULL;
-		    while (t2 != NULL && t2->opcode != opcode)
-			t3 = t2, t2 = t2->right_sibling;
+		    if (operand_tracking) {
+			while (t2 != NULL && (t2->opcode != opcode || t2->opd1 != opd1 || t2->opd2 != opd2))
+			    t3 = t2, t2 = t2->right_sibling;
+		    }
+		    else {
+			while (t2 != NULL && t2->opcode != opcode)
+			    t3 = t2, t2 = t2->right_sibling;
+		    }
 		    if (t2 != NULL) {
 			/* Move the node to the head of the list in order to keep the
 			   hottest nodes first */
@@ -782,7 +831,7 @@ void read_samples(const char* filename)
 			}
 		    }
 		    else {
-			t2 = new_trie_node(opcode);
+			t2 = new_trie_node(opcode, opd1, opd2);
 			++trie_nodes;
 			t2->right_sibling = t->left_child;
 			t->left_child = t2;
@@ -793,9 +842,23 @@ void read_samples(const char* filename)
 	    nexttracker < sizeof(tracker)/sizeof(tracker[0]) || fail("Out of tracker memory, probably a bug");
 	    tracker[nexttracker++] = &toplevel[opcode];
 	    toplevel[opcode].count++;
+	    if (operand_tracking) {
+		unsigned opd1, opd2;
+		next_symbol[nexttracker-1] = 0;
+		compute_operands(opcodes, op, &opd1, &opd2, nexttracker-1, operand_value, next_symbol);
+		/* Wrong.  This breaks down for two-operand instructions at the top level,
+		 * as there may be two variants: op[1,1] and op[1,2].  In almost all cases
+		 * it will be latter, and it is very unlikely that this bug will cause 
+		 * actual problems.  So ignore it, rather than reengineering it.
+		 */
+		toplevel[opcode].opd1 = opd1;
+		toplevel[opcode].opd2 = opd2;
+	    }
+
+	    op += operands[opcode] + 1;
 
 	    if (jumps[opcode]) {
-		assert(op == ops-1);
+		assert(op == ops);
 		nexttracker = 0;
 	    }
 	}
@@ -810,6 +873,46 @@ void read_samples(const char* filename)
 	fprintf(stderr, "Despecializations: %d\n", despecializations);
 	fprintf(stderr, "Trie nodes: %d\n", trie_nodes);
     }
+}
+
+/* In the node, the operand values are represented symbolically.  The
+ * real values pertaining to this particular block are in the tracker
+ * data.  So lookup the values there, grab symbols for matches,
+ * generate new symbols for non-matches.  If symbols were generated
+ * then we could still have a match, so must search.  Generated
+ * symbols should be made available for the insertion code, below.
+ */
+unsigned compute_operands(unsigned code[], unsigned codeidx, unsigned* opd1, unsigned* opd2, int trackeridx, unsigned operand_value[][10], unsigned next_symbol[])
+{
+    int n;
+    unsigned *p[2];
+    p[0] = opd1;
+    p[1] = opd2;
+    unsigned **q = p;
+    *opd1 = *opd2 = 0;
+
+    for ( n=operands[code[codeidx++]] ; n > 0 ; n-- ) {
+	unsigned x = code[codeidx++];
+	unsigned symbol = 0;
+	unsigned i;
+	unsigned limit=MIN(next_symbol[trackeridx],10);
+	for ( i=0 ; i < limit ; i++ ) {
+	    if (operand_value[trackeridx][i] == x) {
+		symbol = i+1;
+		break;
+	    }
+	}
+	if (symbol == 0) {
+	    unsigned value_index = next_symbol[trackeridx]++;
+	    if (value_index < 10)
+		operand_value[trackeridx][value_index] = x;
+	    symbol = value_index + 1;
+	}
+	assert(symbol != 0);
+	**q++ = symbol;
+    }
+
+    return codeidx;
 }
 
 /* Third pass: extract all sequences and their execution counts.  We
@@ -837,7 +940,7 @@ void extract_superwords()
     for ( i=0 ; i < nextseq ; i++ ) {
 	for ( j=i+1 ; j < nextseq && seqs[i].count == seqs[j].count ; j++ ) {
 	    if (seqs[j].length < seqs[i].length) {
-		for ( ki=seqs[i].length-1, kj=seqs[j].length-1 ; kj >= 0 && seqs[i].data[ki] == seqs[j].data[kj] ; ki--, kj-- )
+		for ( ki=seqs[i].length-1, kj=seqs[j].length-1 ; kj >= 0 && seqs[i].opcode[ki] == seqs[j].opcode[kj] ; ki--, kj-- )
 		    ;
 		if (kj < 0)
 		    seqs[j].suffix = 1;
@@ -888,7 +991,7 @@ void printhseq(int i, int level)
 	if (seqs[j].suffix || seqs[j].length < l) 
 	    goto next_j;
 	for ( k=0 ; k < l ; k++ )
-	    if (seqs[i].data[k] != seqs[j].data[k])
+	    if (seqs[i].opcode[k] != seqs[j].opcode[k])
 		goto next_j;
 	printseq(j, level);
 	seqs[j].suffix = 1;
@@ -905,11 +1008,26 @@ void printseq(int i, int indent)
     printf("%11d | ", seqs[i].count);
     for ( j=0 ; j < indent ; j++ )
 	printf("  ");
-    for ( j=0 ; j < seqs[i].length ; j++ )
-	printf("%s ", iname[seqs[i].data[j]]);
+    if (operand_tracking) {
+	for ( j=0 ; j < seqs[i].length ; j++ ) {
+	    printf("%s", iname[seqs[i].opcode[j]]);
+	    if (seqs[i].operand1[j] != 0) {
+		printf("[%d", seqs[i].operand1[j]);
+		if (seqs[i].operand2[j] != 0)
+		    printf(",%d", seqs[i].operand2[j]);
+		printf("] ");
+	    }
+	    else
+		printf(" ");
+	}
+    }
+    else {
+	for ( j=0 ; j < seqs[i].length ; j++ )
+	    printf("%s ", iname[seqs[i].opcode[j]]);
+    }
     printf("| ");
     for ( j=0 ; j < seqs[i].length ; j++ )
-	printf("%x ", seqs[i].data[j]);
+	printf("%x ", seqs[i].opcode[j]);
     printf("\n");
 }
 
@@ -927,6 +1045,8 @@ void descend(trie_t *t, int level)
 	int emitted = 0;
 
 	ibuf[level] = t2->opcode;
+	operand1[level] = t2->opd1;
+	operand2[level] = t2->opd2;
 
 	if (t2->left_child == NULL) {
 	    emit(level+1, t2->count);
@@ -944,24 +1064,36 @@ void descend(trie_t *t, int level)
     }
 }
 
-void emit(int level, unsigned int count)
+void emit(int level, unsigned count)
 {
     if (level > 1 && level <= cutoff_length && count/scale >= cutoff_count) {
 	nextseq < sizeof(seqs)/sizeof(seq_t) || fail("Out of seq memory.");
 	seq_t *seq = &seqs[nextseq++];
-	seq->data = (unsigned int*) safemalloc(sizeof(unsigned int) * level);
+	seq->opcode = (unsigned*) safemalloc(sizeof(unsigned) * level);
+	memcpy(seq->opcode, ibuf, level*sizeof(unsigned));
+	if (operand_tracking) {
+	    seq->operand1 = (unsigned*) safemalloc(sizeof(unsigned) * level);
+	    memcpy(seq->operand1, operand1, level*sizeof(unsigned));
+	    seq->operand2 = (unsigned*) safemalloc(sizeof(unsigned) * level);
+	    memcpy(seq->operand2, operand2, level*sizeof(unsigned));
+	}
+	else {
+	    seq->operand1 = NULL;
+	    seq->operand2 = NULL;
+	}
 	seq->count = count/scale;
 	seq->length = level;
 	seq->suffix = 0;
-	memcpy(seq->data, ibuf, level*sizeof(unsigned int));
     }
 }
 
-trie_t* new_trie_node(unsigned int opcode)
+trie_t* new_trie_node(unsigned opcode, unsigned opd1, unsigned opd2)
 {
     trie_t* t2 = (trie_t*)malloc(sizeof(trie_t));
     t2 != NULL || fail("allocation failure: trie_t");
     t2->opcode = opcode;
+    t2->opd1 = opd1;
+    t2->opd2 = opd2;
     t2->count = 1;
     t2->left_child = NULL;
     t2->right_sibling = NULL;
@@ -987,7 +1119,7 @@ int codestruct_cmp(const void *a, const void *b)
 }
 
 int pc_cmp(const void *a, const void *b) {
-    unsigned int pc = *(unsigned int*)a;
+    unsigned pc = *(unsigned*)a;
     codestruct_t* elt = (codestruct_t*)b;
     if (pc >= elt->start && pc < elt->limit)
 	return 0;
