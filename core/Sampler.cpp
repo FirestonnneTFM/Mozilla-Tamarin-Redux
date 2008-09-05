@@ -320,7 +320,7 @@ namespace avmplus
 		if(name_str == NULL)
 			return NULL;
 		Atom a = fakeMethodInfos->get(name_str->atom());
-		AvmAssertMsg(a != undefinedAtom, "name was interned but need to call createFakeFunction with that name");
+//		AvmAssertMsg(a != undefinedAtom, "name was interned but need to call createFakeFunction with that name");
 		AbstractFunction *af = (AbstractFunction*)AvmCore::atomToGCObject(a);
 		sampleCheck();
 		return af;

@@ -990,8 +990,8 @@ namespace avmplus
 
 		#ifdef AVMPLUS_VERBOSE
 		#ifdef _DEBUG
-		const char *nameCheck = (const char *)core->codegenMethodNames->get(ip->addr); 
-		AvmAssertMsg((Atom)(nameCheck) != undefinedAtom && nameCheck, "Add method name to codegenMethodNames table\n");
+//		const char *nameCheck = (const char *)core->codegenMethodNames->get(ip->addr); 
+//		AvmAssertMsg((Atom)(nameCheck) != undefinedAtom && nameCheck, "Add method name to codegenMethodNames table\n");
 		#endif // DEBUG
 		if (verbose())
 		{

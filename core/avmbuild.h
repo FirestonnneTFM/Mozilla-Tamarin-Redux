@@ -276,12 +276,37 @@
 // also be used by a direct threaded interpreter
 #ifdef AVMPLUS_MAC
 #  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
-#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
+#  define AVMPLUS_PEEPHOLE_OPTIMIZER
+//#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
 #endif
 
 #ifdef AVMPLUS_WIN32
 #  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
+//#  define AVMPLUS_PEEPHOLE_OPTIMIZER
 //#  define AVMPLUS_DIRECT_THREADED // see comments in Interpreter.cpp before enabling this
+#endif
+
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#  ifndef AVMPLUS_WORD_CODE
+#    error "You must have word code enabled to perform peephole optimization"
+#  endif
+#endif
+
+// The use of this switch is described in comments at the head of utils/superwordprof.c
+//
+// The limit is optional and describes a cutoff for sampling; the program continues to
+// run after sampling ends but data are no longer gathered or stored.  A limit of 250e6
+// produces 1GB of sample data.  There is one sample per VM instruction executed.
+//#define SUPERWORD_PROFILING
+//#define SUPERWORD_LIMIT 250000000
+
+#ifdef SUPERWORD_PROFILING
+#  ifndef AVMPLUS_WORD_CODE
+#    error "You must have word code enabled to perform superword profiling"
+#  endif
+#  ifdef AVMPLUS_DIRECT_THREADED
+#    error "You must disable direct threading to perform superword profiling"
+#  endif
 #endif
 
 #endif /* __avmbuild__ */

@@ -119,7 +119,10 @@ namespace avmplus
 	Atom interp(MethodEnv* method, int argc, uint32 *ap);
 	Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete=false);
 	Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
-
+#ifdef SUPERWORD_PROFILING
+	void swprofCode(const uint32* start, const uint32* limit);
+	void swprofPC(const uint32* pc);
+#endif
 #ifdef AVMPLUS_VERBOSE
 	
 	/**
@@ -159,54 +162,45 @@ namespace avmplus
 #  endif
 #endif // _MSC_VER
 
+#ifdef AVMPLUS_DIRECT_THREADED
+
+	void** interpGetOpcodeLabels() {
+		return (void**)interp(NULL, 0, NULL);
+	}
+	
+#endif // AVMPLUS_DIRECT_THREADED
+
     /**
      * Interpret the AVM+ instruction set.
      * @return
      */
     Atom interp(MethodEnv *env, int argc, uint32 *ap)
     {
-		MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
-		AvmCore *core = info->core();
-
-		if (core->minstack)
-		{
-			// Take the address of a local variable to get
-			// stack pointer
-			uintptr sp = (uintptr)&core;
-			if (sp < core->minstack)
-			{
-				env->vtable->traits->core->stackOverflow(env);
-			}
-		}
-
-		#ifdef AVMPLUS_VERBOSE
-		if (info->pool->verbose)
-			core->console << "interp " << info << '\n';
-		#endif
-
-#ifdef AVMPLUS_WORD_CODE
-		const uint32* pos = info->word_code.body_pos;
-		if (pos == NULL) {
-#  ifdef AVMPLUS_DIRECT_THREADED
-#    if defined GNUC_THREADING
+#ifdef AVMPLUS_DIRECT_THREADED
+		
+		// If env is NULL return the jump table.  Optionally initialize it here on those
+		// platforms where compile-time initialization is not possible or practical.
+		
+		if (env == NULL) {
+#  if defined GNUC_THREADING
 #      define III(idx, lbl) &&lbl,
 #      define XXX(idx) &&L_illegal_op,
 			static void* opcode_labels[] = {
-#    elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
+#  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
 	    static void* opcode_labels[300];  // FIXME: need better way of computing the size of that table
         if (opcode_labels[0] == 0) {
-#      define XXX(idx) III(idx, L_illegal_op)
-#      ifdef MSVC_X86_ASM_THREADING
+#    define XXX(idx) III(idx, L_illegal_op)
+#    ifdef MSVC_X86_ASM_THREADING
 #        define III(idx, lbl) __asm { \
 	           __asm mov eax, offset opcode_labels \
 	  	       __asm mov ebx, offset lbl \
 		       __asm mov [eax+4*idx], ebx \
 		     }
-#       else
+#     else
 		  extern bool LLLLABEL(int);
 #         define III(a,b) extern void LLLLABEL ## _ ## a ## _ ## b(); LLLLABEL ## _ ## a ## _ ## b();
-#       endif
-#    endif // threading discipline
+#     endif
+#  endif // threading discipline
 			 XXX(0x00)
 			 III(0x01, L_bkpt)
 			 XXX(0x02) /* OP_nop */
@@ -215,7 +209,11 @@ namespace avmplus
 			 III(0x05, L_setsuper)
 			 III(0x06, L_dxns)
 			 III(0x07, L_dxnslate)
+#  ifdef AVMPLUS_MIR
 			 III(0x08, L_kill)
+#  else
+			 XXX(0x08)
+#  endif
 			 XXX(0x09) /* OP_label */
 			 XXX(0x0A)
 			 XXX(0x0B)
@@ -337,7 +335,11 @@ namespace avmplus
 			 XXX(0x7F)
 			 III(0x80, L_coerce)
 			 III(0x81, L_coerce_b)
+#  ifdef AVMPLUS_MIR
 			 III(0x82, L_coerce_a)
+#  else
+			 XXX(0x82)
+#  endif
 			 III(0x83, L_coerce_i)
 			 III(0x84, L_coerce_d)
 			 III(0x85, L_coerce_s)
@@ -466,30 +468,58 @@ namespace avmplus
 			 XXX(0x100)
 			 III(0x101, L_ext_pushbits)
 			 III(0x102, L_ext_push_doublebits)
-#    if defined GNUC_THREADING
+			 III(0x103, L_ext_get2locals)
+			 III(0x104, L_ext_get3locals)
+			 III(0x105, L_ext_storelocal)
+#  if defined GNUC_THREADING
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
 			AvmAssert(opcode_labels[0x97] == &&L_bitnot);
 			AvmAssert(opcode_labels[0xF0] == &&L_debugline);
 			AvmAssert(opcode_labels[257] == &&L_ext_pushbits);
-#    elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
+#  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
 			} // conditional run-time initialization of jump table
-#    endif // threading discipline
-			Translator *t = new Translator(opcode_labels);
-#  else  // !AVMPLUS_DIRECT_THREADED
-			Translator *t = new Translator();
-#  endif // AVMPLUS_DIRECT_THREADED
-			
-			t->translate(env);
-			delete t;
-			pos = info->word_code.body_pos;
-			AvmAssert(pos != NULL);
-		} // pos == 0
+#  endif // threading discipline
+		return (Atom)opcode_labels;
+		} // env == 0?
+		
+#endif  // !AVMPLUS_DIRECT_THREADED
+
+		MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
+		AvmCore *core = info->core();
+
+		if (core->minstack)
+		{
+			// Take the address of a local variable to get
+			// stack pointer
+			uintptr sp = (uintptr)&core;
+			if (sp < core->minstack)
+			{
+				env->vtable->traits->core->stackOverflow(env);
+			}
+		}
+
+		#ifdef AVMPLUS_VERBOSE
+		if (info->pool->verbose)
+			core->console << "interp " << info << '\n';
+		#endif
+
+#ifdef AVMPLUS_WORD_CODE
+		const uint32* pos = info->word_code.body_pos;
 		const uint32* volatile code_start = pos;
 		int max_stack = info->word_code.max_stack;
 		int local_count = info->word_code.local_count;
 		int init_scope_depth = info->word_code.init_scope_depth;
 		int max_scope_depth = info->word_code.max_scope_depth;
+#  ifdef SUPERWORD_PROFILING
+#    ifdef AVMPLUS_DIRECT_THREADED
+#       error "Superword profiling requires switch dispatch"
+#    endif
+		if (!info->word_code.dumped) {
+			swprofCode(pos, info->word_code.body_end);
+			info->word_code.dumped = true;
+		}
+#  endif
 #else // !AVMPLUS_WORD_CODE
 		const byte* pos = info->body_pos;
 		int max_stack = AvmCore::readU30(pos);
@@ -500,7 +530,7 @@ namespace avmplus
 		const byte * volatile code_start = pos;
 #endif // AVMPLUS_WORD_CODE
 		int volatile max_scope = MethodInfo::maxScopeDepth(info, max_scope_depth - init_scope_depth);
-		
+
 		// these should have been checked in AbcParser
 		AvmAssert(local_count+max_scope+max_stack > 0);
 		Atom* framep = (Atom*)alloca(sizeof(Atom)*(local_count + max_scope + max_stack));
@@ -715,10 +745,13 @@ namespace avmplus
 #endif // DIRECT_DISPATCH
 
 #if defined SWITCH_DISPATCH
-			
-        for (;;)
+
+		for (;;)
         {
-#  if defined AVMPLUS_WORD_CODE && !defined AVMPLUS_DIRECT_THREADED
+#  if defined SUPERWORD_PROFILING
+			swprofPC(pc);
+#  endif
+#  if defined AVMPLUS_WORD_CODE
 			// See comments around INSTR(ext) below.
 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
 			switch ((*pc++) & 255)
@@ -787,13 +820,15 @@ namespace avmplus
 			}
 #endif
 
+#ifdef AVMPLUS_MIR
 			INSTR(coerce_a) { // no-op since interpreter only uses atoms
 #ifdef MSVC_X86_REWRITE_THREADING
 				SAVE_EXPC;    // need to do _something_ or the label disappears completely
 #endif
                 NEXT;
 			}
-
+#endif  // AVMPLUS_MIR
+					
 			INSTR(bkpt) {
 				SAVE_EXPC;
 				#ifdef DEBUGGER
@@ -871,20 +906,17 @@ namespace avmplus
 			}
 
             INSTR(pushnull) {
-				sp++;
-                sp[0] = nullObjectAtom;
+                *(++sp) = nullObjectAtom;
                 NEXT;
 			}
 
             INSTR(pushundefined) {
-				sp++;
-                sp[0] = undefinedAtom;
+                *(++sp) = undefinedAtom;
                 NEXT;
 			}
 
             INSTR(pushstring) {
-				sp++;
-                sp[0] = cpool_string[U30ARG]->atom();
+                *(++sp) = cpool_string[U30ARG]->atom();
                 NEXT;
 			}
 
@@ -895,8 +927,7 @@ namespace avmplus
 				// to specialize the operation into a plain 'pushword' that
 				// simply pushes the following word (it could be tagged
 				// already) or a 'pushdouble'
-				sp++;
-                sp[0] = core->intToAtom(cpool_int[U30ARG]);
+                *(++sp) = core->intToAtom(cpool_int[U30ARG]);
                 NEXT;
 			}
 #endif
@@ -908,27 +939,23 @@ namespace avmplus
 				// to specialize the operation into a plain 'pushword' that
 				// simply pushes the following word (it could be tagged
 				// already) or a 'pushdouble'
-				sp++;
-                sp[0] = core->uintToAtom(cpool_uint[U30ARG]);
+                *(++sp) = core->uintToAtom(cpool_uint[U30ARG]);
                 NEXT;
 			}
 #endif
 					
             INSTR(pushdouble) {
-				sp++;
-                sp[0] = kDoubleType|(uintptr)cpool_double[U30ARG];
+                *(++sp) = kDoubleType|(uintptr)cpool_double[U30ARG];
                 NEXT;
 			}
 
             INSTR(pushnamespace) {
-                sp++;
-                sp[0] = cpool_ns[U30ARG]->atom();
+                *(++sp) = cpool_ns[U30ARG]->atom();
                 NEXT;
 			}
 
             INSTR(getlocal) {
-                sp++;
-				sp[0] = framep[U30ARG];
+				*(++sp) = framep[U30ARG];
 				NEXT;
 			}
 
@@ -953,20 +980,17 @@ namespace avmplus
 			}
 
             INSTR(pushtrue) {
-                sp++;
-				sp[0] = trueAtom;
+				*(++sp) = trueAtom;
                 NEXT;
 			}
 
             INSTR(pushfalse) {
-				sp++;
-                sp[0] = falseAtom;
+                *(++sp) = falseAtom;
                 NEXT;
 			}
 
 			INSTR(pushnan) {
-				sp++;
-				sp[0] = core->kNaN;
+				*(++sp) = core->kNaN;
 				NEXT;
 			}
 
@@ -1077,10 +1101,12 @@ namespace avmplus
                 NEXT;
 			}
 
+#ifdef AVMPLUS_MIR
 			INSTR(kill) {
 				framep[U30ARG] = undefinedAtom;
 				NEXT;
 			}
+#endif
 
             INSTR(typeof) {
 				*sp = core->_typeof(*sp)->atom();
@@ -1705,6 +1731,7 @@ namespace avmplus
 #else
 #  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
 #endif
+
 			INSTR(getlex) {
 				SAVE_EXPC;
 				// findpropstrict + getproperty
@@ -1940,6 +1967,8 @@ namespace avmplus
 			INSTR(getslot) {
 				SAVE_EXPC;
 				env->nullcheck(sp[0]);
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				sp[0] = AvmCore::atomToScriptObject(sp[0])->getSlotAtom(U30ARG-1);
 				restore_dxns();
 				NEXT;
@@ -1954,6 +1983,8 @@ namespace avmplus
 				else
 					global = AvmCore::atomToScriptObject(scope->getScope(0));
 
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				int slot_id = U30ARG-1;
 				Atom op = sp[0];
 				sp--;
@@ -1971,6 +2002,8 @@ namespace avmplus
 				else
 					global = AvmCore::atomToScriptObject(scope->getScope(0));
 
+				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
+				// in the bytecode translator, not here every time.
 				sp++;
 				sp[0] = global->getSlotAtom(U30ARG-1);
 				restore_dxns();
@@ -2502,6 +2535,8 @@ namespace avmplus
 #    else
 			switch (pc[-1]) {
 #    endif
+			default:
+				goto L_illegal_op;
 #  endif // !AVMPLUS_DIRECT_THREADED
 #  ifdef MSVC_X86_REWRITE_THREADING
 			default:
@@ -2527,6 +2562,27 @@ namespace avmplus
 				NEXT;
 			}
 
+			INSTR(ext_get2locals) {
+				uint32 regs = *pc++;
+				*(++sp) = framep[regs & 65535];
+				*(++sp) = framep[regs >> 16];
+				NEXT;
+			}
+					
+			INSTR(ext_get3locals) {
+				uint32 regs = *pc++;
+				*(++sp) = framep[regs & 1023];
+				regs >>= 10;
+				*(++sp) = framep[regs & 1023];
+				*(++sp) = framep[regs >> 10];
+				NEXT;
+			}
+					
+			INSTR(ext_storelocal) {
+				framep[*pc++] = *sp;
+				NEXT;
+			}
+					
 #  ifndef AVMPLUS_DIRECT_THREADED
 			} // switch
 			} // INSTR(ext)
@@ -2684,5 +2740,65 @@ namespace avmplus
 		core->formatOpcode(core->console, pc, opcode, off, pool);
 		core->console << '\n';
     }
+#endif // AVMPLUS_VERBOSE
+			
+#ifdef SUPERWORD_PROFILING
+	// 32-bit only
+
+	static FILE *swprof_code_fp = NULL;
+	static FILE *swprof_sample_fp = NULL;
+#ifdef SUPERWORD_LIMIT
+	static unsigned int sample_count = 0;
 #endif
+
+	void swprofStart()
+	{
+		swprof_code_fp = fopen("superwordprof_code.txt", "wb");
+		if (swprof_code_fp == NULL)
+			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN CODE FILE.\n");
+		else
+		{
+			unsigned int signature = 0xC0DEC0DE;
+			fwrite(&signature, sizeof(uint32), 1, swprof_code_fp);
+		}
+		swprof_sample_fp = fopen("superwordprof_sample.txt", "wb");
+		if (swprof_sample_fp == NULL)
+			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN SAMPLE FILE.\n");
+		else
+		{
+			unsigned int signature = 0xDA1ADA1A;
+			fwrite(&signature, sizeof(uint32), 1, swprof_sample_fp);
+		}
+	}
+	
+	void swprofStop() 
+	{
+		if (swprof_code_fp != NULL)	{ fclose(swprof_code_fp); swprof_code_fp = NULL; }
+		if (swprof_sample_fp != NULL) { fclose(swprof_sample_fp); swprof_sample_fp = NULL; }
+	}
+			
+	void swprofCode(const uint32* start, const uint32* limit)
+	{
+		if (swprof_code_fp != NULL) {
+			fwrite(&start, sizeof(uint32*), 1, swprof_code_fp);
+			fwrite(&limit, sizeof(uint32*), 1, swprof_code_fp);
+			fwrite(start, sizeof(uint32), limit-start, swprof_code_fp);
+			fflush(swprof_code_fp);
+		}
+	}
+
+	void swprofPC(const uint32* pc)
+	{
+		if (swprof_sample_fp != NULL) {
+			fwrite(&pc, sizeof(uint32*), 1, swprof_sample_fp);
+#ifdef SUPERWORD_LIMIT
+			if (++sample_count == SUPERWORD_LIMIT) {
+				swprofStop();
+				fprintf(stderr, "SAMPLING HALTED.\n");
+			}
+#endif
+		}
+	}
+#endif  // SUPERWORD_PROFILING
+			
 }
