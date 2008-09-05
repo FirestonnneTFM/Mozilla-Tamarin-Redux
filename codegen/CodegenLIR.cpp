@@ -4104,7 +4104,7 @@ namespace avmplus
         //_nvprof("hasLoop", assm->hasLoop);
 
         bool keep = //jitcount <= 0 &&
-            !info->hasExceptions() && 
+            //!info->hasExceptions() && 
             !assm->error();
 
         //_nvprof("keep",keep);
