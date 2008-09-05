@@ -76,7 +76,6 @@ namespace avmplus
 	class CodegenLIR {
 	public:
 		bool overflow;
-		LIns *exAtom;
 		const byte *abcStart;
 		const byte *abcEnd;
 
@@ -100,6 +99,8 @@ namespace avmplus
         CodegenLabel interrupt_label, npe_label;
         sintptr lastPcSave;
         List<Patch, LIST_NonGCObjects> patches;
+        LIns *exBranch;
+        LIns *setjmpResult;
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(LOpcode op, int32_t disp, LIns *base);

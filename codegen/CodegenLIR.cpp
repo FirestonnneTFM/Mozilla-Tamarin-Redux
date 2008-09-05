@@ -1238,51 +1238,22 @@ namespace avmplus
 
 		#endif // DEBUGGER
 
-		if (info->isFlagSet(AbstractFunction::HAS_EXCEPTIONS))
-		{
+		if (info->hasExceptions()) {
 			// _ef.beginTry(core);
-			callIns(FUNCTIONID(beginTry), 2,
-				_ef, coreAddr);
+			callIns(FUNCTIONID(beginTry), 2, _ef, coreAddr);
 
-			// force the locals to be clean for the setjmp call
-			LIns *label = Ins(LIR_label);
-			
-			// Exception* _ee = setjmp(_ef.jmpBuf);
+			// Exception* setjmpResult = setjmp(_ef.jmpBuf);
 			// ISSUE this needs to be a cdecl call
 			LIns* jmpbuf = leaIns(offsetof(ExceptionFrame, jmpbuf), _ef);
-			LIns* ee = callIns(FUNCTIONID(fsetjmp), 2,
+			setjmpResult = callIns(FUNCTIONID(fsetjmp), 2,
 				jmpbuf, InsConst(0));
 
-#ifdef AVMPLUS_SPARC
-			beginCatch_start = ee;
-#endif
-
-			// if (setjmp() == 0) goto start
-			LIns* cond = binaryIns(LIR_eq, ee, InsConst(0));
-			LIns* exBranch = branchIns(LIR_jt, cond);
-
-			// exception case
-			exAtom = loadIns(LIR_ld, offsetof(Exception, atom), ee);
-			// need to convert exception from atom to native rep, at top of 
-			// catch handler.  can't do it here because it could be any type.
-
-			// _ef.beginCatch()
-			// ISSUE why do we have to redefine ef? it is NULL when exception happens
-			LIns* pc = loadIns(LIR_ld, 0, _save_eip);
-			LIns* handler = callIns(FUNCTIONID(beginCatch), 5,
-				coreAddr, _ef, InsConst(info), pc, ee);
-
-#ifdef AVMPLUS_SPARC
-			beginCatch_end = handler;
-#endif
-
-			// jump to catch handler
-            handler = loadIns(LIR_ld, offsetof(ExceptionHandler, target), handler);
-			branchIns(LIR_ji, 0, handler);
-
-			// target of conditional
-			exBranch->target(label);
+			// if (setjmp() != 0) goto catch dispatcher, which we generate in the epilog.
+			exBranch = branchIns(LIR_jf, binaryIns(LIR_eq, setjmpResult, InsConst(0)));
 		}
+        else {
+            exBranch = 0;
+        }
 
 		// If interrupts are enabled, generate an interrupt check.
 		// This ensures at least one interrupt check per method.
@@ -3599,26 +3570,54 @@ namespace avmplus
 			callIns(FUNCTIONID(interrupt), 1, env_param);
 		}
 
+        if (info->hasExceptions()) {
+            LIns *catchlabel = Ins(LIR_label);
+            exBranch->target(catchlabel);
+
+			// exception case
+			LIns *exAtom = loadIns(LIR_ld, offsetof(Exception, atom), setjmpResult);
+            localSet(state->verifier->stackBase, exAtom);
+			// need to convert exception from atom to native rep, at top of 
+			// catch handler.  can't do it here because it could be any type.
+
+			// _ef.beginCatch()
+			LIns* pc = loadIns(LIR_ld, 0, _save_eip);
+			LIns* handler = callIns(FUNCTIONID(beginCatch), 5,
+				coreAddr, _ef, InsConst(info), pc, setjmpResult);
+
+            int handler_count = info->exceptions->exception_count;
+			// jump to catch handler
+            LIns *handler_target = loadIns(LIR_ld, offsetof(ExceptionHandler, target), handler);
+			// we dont have LIR_ji yet, so do a compare & branch to each possible target.
+			for (int i=0; i < handler_count; i++)
+			{
+				ExceptionHandler* h = &info->exceptions->exceptions[i];
+                intptr_t handler_pc = h->target;
+                LIns *br;
+                if (i+1 < handler_count) {
+                    br = branchIns(LIR_jt, binaryIns(LIR_eq, handler_target, InsConst(handler_pc)));
+                } else {
+                    br = branchIns(LIR_j, 0);
+                }
+                patchLater(br, handler_pc);
+			}
+        }
+
         // extend live range of critical stuff
         // fixme -- this should be automatic based on live analysis
         Ins(LIR_live, env_param);
         Ins(LIR_live, vars);
+
+        if (info->hasExceptions()) {
+            Ins(LIR_live, _ef);
+            Ins(LIR_live, _save_eip);
+        }
 
 		#ifdef DEBUGGER
 		Ins(LIR_live, csn);
 		Ins(LIR_live, varPtrs);
 		Ins(LIR_live, varTraits);
 		#endif
-
-		if (info->exceptions)
-		{
-			for (int i=0, n=info->exceptions->exception_count; i < n; i++)
-			{
-				ExceptionHandler* h = &info->exceptions->exceptions[i]; (void)h;
-				AvmAssertMsg(state->verifier->getFrameState(h->target)->label.bb != NULL, "Exception target address MUST have been resolved");
-				//mirPatchPtr( (LIns**)&h->target, h->target );
-			}
-		}
 
         for (int i=0, n=patches.size(); i < n; i++) {
             Patch p = patches[i];
@@ -3885,12 +3884,14 @@ namespace avmplus
         BitSet livein; // current livein set during backwards flow analysis.
         SortedMap<LIns*, BitSet*, LIST_GCObjects> labels;
     public:
+        LInsp catcher;
+        const CallInfo *functions;
         verbose_only(LirNameMap *names;)
         int loops;
         bool changed;
         bool kill;
         DeadVars(LirFilter *in, GC *gc, LInsp vars)
-            : LirFilter(in), gc(gc), vars(vars), labels(gc)
+            : LirFilter(in), gc(gc), vars(vars), labels(gc), catcher(0), functions(0)
             verbose_only( , names(0) )
         {}
 
@@ -3905,6 +3906,20 @@ namespace avmplus
             int d = i->isStore() ? i->immdisp() : i->oprnd2()->constval();
             AvmAssert(d >= 0 && (d&7) == 0);
             return d>>3;
+        }
+
+        void branch(LIns *target) {
+            BitSet *lset = labels.get(target);
+            if (lset) {
+                // the target LiveIn set (lset) is non-empty,
+                // union it with fall-through set (live).
+                livein.setFrom(gc, *lset);
+            }
+            else {
+                // we have not seen the target yet, so this is a backedge.
+                // we need another iteration to pick up that live set.
+                loops++;
+            }
         }
 
         LIns *read() {
@@ -3949,16 +3964,15 @@ namespace avmplus
                         // the fallthrough path is unreachable, clear it.
                         livein.reset();
                     }
-                    BitSet *lset = labels.get(i->getTarget());
-                    if (lset) {
-                        // the target LiveIn set (lset) is non-empty,
-                        // union it with fall-through set (live).
-                        livein.setFrom(gc, *lset);
-                    }
-                    else {
-                        // we have not seen the target yet, so this is a backedge.
-                        // we need another iteration to pick up that live set.
-                        loops++;
+                    branch(i->getTarget());
+                }
+                else if (i->isCall()) {
+                    if (catcher && !i->isCse(functions)) {
+                        // non-cse call is like a conditional branch to the catcher label.
+                        // this could be made more precise by checking whether this call
+                        // can really throw, and only processing edges to the subset of
+                        // reachable catch blocks.
+                        branch(catcher);
                     }
                 }
                 verbose_only(if (kill && names) {
@@ -3992,6 +4006,10 @@ namespace avmplus
         LirReader in(lirbuf);
         LIns *last = in.pos();
         DeadVars dv(&in, gc, vars);
+        if (exBranch) {
+            dv.catcher = exBranch->getTarget();
+            dv.functions = lirbuf->_functions;
+        }
         verbose_only( if(verbose()) dv.names = lirbuf->names; )
         int iter=0;
         int loops=0;
@@ -4085,8 +4103,9 @@ namespace avmplus
         //_nvprof("hasExceptions", info->hasExceptions());
         //_nvprof("hasLoop", assm->hasLoop);
 
-        bool keep = // jitcount <= 0 &&
-            !info->hasExceptions() && !assm->error();
+        bool keep = //jitcount <= 0 &&
+            //!info->hasExceptions() && 
+            !assm->error();
 
         //_nvprof("keep",keep);
         if (keep) {
@@ -4106,7 +4125,7 @@ namespace avmplus
             frag->releaseCode(frago);
             overflow = true;
             verbose_only(if (verbose()) {
-                printf("reverting to interpreter %d\n", jitcount);
+                printf("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
             })
         }
     }
