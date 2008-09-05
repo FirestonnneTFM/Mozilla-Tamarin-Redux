@@ -608,18 +608,21 @@ namespace nanojit
 
 #define SSE_MOVSD(rd,rs) do{ \
 	count_mov();\
+    NanoAssert(_is_xmm_reg_(rd) && _is_xmm_reg_(rs));\
     SSE(0xf20f10, (rd)&7, (rs)&7); \
     asm_output2("movsd %s,%s",gpn(rd),gpn(rs)); \
     } while(0)
 
 #define SSE_MOVDm(d,b,xrs) do {\
 	count_st();\
+    NanoAssert(_is_xmm_reg_(xrs) && _is_gp_reg_(b));\
     SSEm(0x660f7e, (xrs)&7, d, b);\
     asm_output3("movd %d(%s),%s", d, gpn(b), gpn(xrs));\
     } while(0)
 
 #define SSE_ADDSD(rd,rs) do{ \
 	count_fpu();\
+    NanoAssert(_is_xmm_reg_(rd) && _is_xmm_reg_(rs));\
     SSE(0xf20f58, (rd)&7, (rs)&7); \
     asm_output2("addsd %s,%s",gpn(rd),gpn(rs)); \
     } while(0)
@@ -627,6 +630,7 @@ namespace nanojit
 #define SSE_ADDSDm(r,addr)do {     \
 	count_fpuld();\
     underrunProtect(8); \
+    NanoAssert(_is_xmm_reg_(r));\
 	const double* daddr = addr; \
     IMM32(int32_t(daddr));\
     *(--_nIns) = uint8_t(((r)&7)<<3|5); \
@@ -638,27 +642,32 @@ namespace nanojit
 
 #define SSE_SUBSD(rd,rs) do{ \
 	count_fpu();\
+    NanoAssert(_is_xmm_reg_(rd) && _is_xmm_reg_(rs));\
     SSE(0xf20f5c, (rd)&7, (rs)&7); \
     asm_output2("subsd %s,%s",gpn(rd),gpn(rs)); \
     } while(0)
 #define SSE_MULSD(rd,rs) do{ \
 	count_fpu();\
+    NanoAssert(_is_xmm_reg_(rd) && _is_xmm_reg_(rs));\
     SSE(0xf20f59, (rd)&7, (rs)&7); \
     asm_output2("mulsd %s,%s",gpn(rd),gpn(rs)); \
     } while(0)
 #define SSE_DIVSD(rd,rs) do{ \
 	count_fpu();\
+    NanoAssert(_is_xmm_reg_(rd) && _is_xmm_reg_(rs));\
     SSE(0xf20f5e, (rd)&7, (rs)&7); \
     asm_output2("divsd %s,%s",gpn(rd),gpn(rs)); \
     } while(0)
 #define SSE_UCOMISD(rl,rr) do{ \
 	count_fpu();\
+    NanoAssert(_is_xmm_reg_(rl) && _is_xmm_reg_(rr));\
     SSE(0x660f2e, (rl)&7, (rr)&7); \
     asm_output2("ucomisd %s,%s",gpn(rl),gpn(rr)); \
     } while(0)
 
 #define CVTSI2SDm(xr,d,b) do{ \
 	count_fpuld();\
+    NanoAssert(_is_xmm_reg_(xr) && _is_gp_reg_(b));\
     SSEm(0xf20f2a, (xr)&7, (d), (b)); \
     asm_output3("cvtsi2sd %s,%d(%s)",gpn(xr),(d),gpn(b)); \
     } while(0)

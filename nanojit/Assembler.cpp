@@ -817,6 +817,7 @@ namespace nanojit
         _epilogue = genEpilogue();
 		_branchStateMap = branchStateMap;
         _labels.clear();
+        _patches.clear();
 
 		verbose_only( verbose_outputf("        %p:",_nIns) );
 		verbose_only( verbose_output("        epilogue:") );
@@ -851,21 +852,23 @@ namespace nanojit
 		frag->outbound = core->config.tree_opt? _latestGuard : 0;
 		//fprintf(stderr, "assemble frag %X entry %X\n", (int)frag, (int)frag->fragEntry);
 
-		// patch all branches
-		while(!_patches.isEmpty())
-		{
-			NIns* where = _patches.lastKey();
-			LInsp targ = _patches.removeLast();
-            LabelState *label = _labels.get(targ);
-			NIns* ntarg = label->addr;
-            if (ntarg) {
-				nPatchBranch(where,ntarg);
-			}
-            else {
-				_err = UnknownBranch;
-				break;
-			}
-		}
+        if (!error()) {
+		    // patch all branches
+		    while(!_patches.isEmpty())
+		    {
+			    NIns* where = _patches.lastKey();
+			    LInsp targ = _patches.removeLast();
+                LabelState *label = _labels.get(targ);
+			    NIns* ntarg = label->addr;
+                if (ntarg) {
+				    nPatchBranch(where,ntarg);
+			    }
+                else {
+				    _err = UnknownBranch;
+				    break;
+			    }
+		    }
+        }
 	}
 
 	void Assembler::endAssembly(Fragment* frag, NInsList& loopJumps)
