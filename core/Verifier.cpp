@@ -775,7 +775,11 @@ namespace avmplus
 				Value &v = state->stackTop();
 				state->setType(localno, v.traits, v.notNull);
 				state->pop();
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+				XLAT_ONLY( if (translator) translator->emitOp1(OP_setlocal, localno) );
+#else
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+#endif
 				break;
 			}
 
@@ -799,7 +803,11 @@ namespace avmplus
 				Value& v = checkLocal(localno);
 				MIR_ONLY( if (mir) mir->emitCopy(state, localno, sp+1); )
 				state->push(v);
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+				XLAT_ONLY( if (translator) translator->emitOp1(OP_getlocal, localno) );
+#else
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+#endif
 				break;
 			}
 			

@@ -82,8 +82,8 @@ namespace avmplus
 		void emitAbsJump(const byte *new_pc);
 
 	private:
-		// 'backpatches' represent target addresses of jumps in the original code, along
-		// with locations in the translated code that must be patched when the target
+		// 'backpatches' represent target addresses of forward jumps in the original code,
+		// along with locations in the translated code that must be patched when the target
 		// address in the new code is known.  There can be multiple backpatch structures
 		// per target, one for each location that must be patched.  The backpatches are
 		// sorted in address order: lowest address first.  Once a backpatch has been
@@ -107,38 +107,40 @@ namespace avmplus
 		// translation, at which point buffers can be freed.  Buffer objects are managed
 		// by new/delete.
 		
-		class backpatch_info 
+		struct backpatch_info 
 		{
-		public:
 			const byte* target_pc;		// the instruction in the old code that is the target of a forward control transfer
 			uint32* patch_loc;			// location in the new code into which to write the new offset
 			uint32 patch_offset;		// value to subtract from offset of translated pc
 			backpatch_info* next;
 		};
 	
-		class label_info 
+		struct label_info 
 		{
-		public:
 			uint32 old_offset;
 			uint32 new_offset;
 			label_info* next;
 		};
 	
-		class catch_info
+		struct catch_info
 		{
-		public:
 			const byte* pc;			// address in ABC code to trigger use of this structure
 			void *fixup_loc;		// points to a location to update
 			bool is_target;			// The 'target' field is a sintptr, not an int (sigh).
 			catch_info* next;
 		};
 		
-		class buffer_info
+		struct buffer_info
 		{
-		public:
 			uint32 data[100];
 			int entries_used;
 			buffer_info* next;
+		};
+		
+		struct backtrack_t
+		{
+			uint32 state;
+			uint32 nextI;
 		};
 		
 		MethodInfo* info;
@@ -147,6 +149,7 @@ namespace avmplus
 		catch_info* exception_fixes; // in address order
 		buffer_info* buffers;			 // newest buffer first
 		uint32 buffer_offset;			 // offset of first word of current buffer
+		buffer_info* spare_buffer;		// may be populated during peephole optimization; reused by refill
 #ifdef AVMPLUS_DIRECT_THREADED
 		void** opcode_labels;
 #endif
@@ -157,9 +160,34 @@ namespace avmplus
 		uint32 *dest;
 		uint32 *dest_limit;
 
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		// state should imply height of I?
+		// ditto backtrack?
+		// and then address of following instruction too?
+		uint32  state;					// current state in the matcher, or 0
+		backtrack_t backtrack_stack[10];	// commit candidates
+		uint32  backtrack_idx;          // next slot in backtrack_state
+		uint32* I[10];					// longest window 10 instructions, not a problem now, generator can generate constant later
+		uint32  O[10];                  // symbolic opcodes for each I entry
+		uint32  nextI;                  // next slot in I and O
+		uint32  R[30];                  // replacement data
+		uint32  S[30];                  // symbolic opcode for some R entries
+#endif		
+
 		void cleanup();
 		void refill();
 		void emitRelativeOffset(uint32 base_offset, const byte *pc, int32 offset);
+		void makeAndInsertBackpatch(const byte* target_pc, uint32 patch_offset);
+
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		void peep(uint32 opcode, uint32* loc);
+		void peepFlush();				// this may commit to a backtrack state, if available, so dest may change
+		bool commit(uint32 action);
+		bool replace(uint32 start, uint32 old_instr, uint32 new_words);
+		bool isJumpInstruction(uint32 opcode);
+		uint32 calculateInstructionWidth(uint32 opcode);
+#endif
+		
 	};
 #endif // AVMPUS_WORD_CODE
 }

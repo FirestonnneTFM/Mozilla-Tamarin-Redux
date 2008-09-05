@@ -1,0 +1,44 @@
+pattern  OP_getlocal ; OP_getlocal
+guard    $0.1 < 65536 && $1.1 < 65536
+action   OP_ext_get2locals ; (($1.1 << 16) | $0.1)
+
+pattern  OP_getlocal ; OP_getlocal ; OP_getlocal
+guard    $0.1 < 1024 && $1.1 < 1024 && $2.1 < 1024
+action   OP_ext_get3locals ; (($2.1 << 20) | ($1.1 << 10) | $0.1)
+
+pattern  OP_getlocal ; OP_getlocal ; OP_getlocal ; OP_getlocal
+guard    $0.1 < 256 && $1.1 < 256 && $2.1 < 256 && $3.1 < 256
+action   OP_ext_get4locals ; (($3.1 << 24) | ($2.1 << 16) | ($1.1 << 8) | $0.1)
+
+pattern  OP_setlocal ; OP_getlocal
+guard    $0.1 == $1.1
+action   OP_ext_storelocal ; $0.1
+
+pattern  OP_getlocal ; OP_getlocal ; OP_add
+guard    $1.1 < 65536 && $1.1 < 65536
+action   OP_ext_add_ll ; (($1.1 << 16) | $0.1)
+
+pattern  OP_getlocal ; OP_ext_pusbits ; OP_add
+action   OP_ext_add_lb ; $0.1 ; $1.1
+
+pattern  OP_swap ; OP_pop
+action   OP_ext_drop
+
+pattern  OP_getlocal
+guard    $0.1 < 4
+action   OP_getlocal0 + $0.1
+
+pattern  OP_setlocal
+guard    $0.1 < 4
+action   OP_setlocal0 + $0.1
+
+// This is an example of a sequence that would not appear in a rational instruction
+// set but which might occur frequently in an executed sequence even after the 
+// more common patterns above have been accounted for.  Only iterative analysis will tell.
+// Using this pattern means the peephole generator has to account for multiple guards
+// and actions per final state.
+
+//pattern  OP_setlocal ; OP_getlocal
+//guard    $0.1 != $1.1 && $0.1 < 65536 && $1.1 < 65536
+//action   OP_shiftlocal ; ($1.1 << 16) | $0.1
+

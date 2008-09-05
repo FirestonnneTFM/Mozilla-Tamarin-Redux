@@ -59,6 +59,7 @@ namespace avmplus
 		, exception_fixes(NULL)
 		, buffers(NULL)
 		, buffer_offset(0)
+		, spare_buffer(NULL)
 #ifdef AVMPLUS_DIRECT_THREADED
 		, opcode_labels(opcode_labels)
 #endif
@@ -87,7 +88,10 @@ namespace avmplus
 		
 		computeExceptionFixups();
 		
-		refill();	
+		refill();
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		state = 0;
+#endif
 	}
 
 	Translator::~Translator()
@@ -112,6 +116,10 @@ namespace avmplus
 		DELETE_LIST(label_info, labels);
 		DELETE_LIST(catch_info, exception_fixes);
 		DELETE_LIST(buffer_info, buffers);
+		if (spare_buffer) {
+			delete spare_buffer;
+			spare_buffer = NULL;
+		}
 	}
 	
 	void Translator::refill() 
@@ -120,7 +128,13 @@ namespace avmplus
 			buffers->entries_used = dest - buffers->data;
 			buffer_offset += buffers->entries_used;
 		}
-		buffer_info* b = new buffer_info;
+		buffer_info* b;
+		if (spare_buffer != NULL) {
+			b = spare_buffer;
+			spare_buffer = NULL;
+		}
+		else
+			b = new buffer_info;
 		b->next = buffers;
 		buffers = b;
 		dest = b->data;
@@ -138,29 +152,40 @@ namespace avmplus
 			AvmAssert(l != NULL);
 			*dest++ = l->new_offset - base_offset;
 		}
-		else {
-			// Leave a backpatch for the target location.  Backpatches are sorted in
-			// increasing address order always.
-			backpatch_info* b = new backpatch_info;
-			b->target_pc = base_pc + offset;
-			b->patch_loc = dest;
-			b->patch_offset = base_offset;
-			backpatch_info* q = backpatches;
-			backpatch_info* qq = NULL;
-			while (q != NULL && q->target_pc < b->target_pc) {
-				qq = q;
-				q = q->next;
-			}
-			if (qq == NULL) {
-				b->next = backpatches;
-				backpatches = b;
-			}
-			else {
-				b->next = q;
-				qq->next = b;
-			}
-			*dest++ = (uint32)~0;
+		else
+			makeAndInsertBackpatch(base_pc + offset, base_offset);
+	}
+	
+	void Translator::makeAndInsertBackpatch(const byte* target_pc, uint32 patch_offset)
+	{
+		// Leave a backpatch for the target location.  Backpatches are sorted in
+		// increasing address order always.
+		backpatch_info* b = new backpatch_info;
+		b->target_pc = target_pc;
+		b->patch_loc = dest;
+		b->patch_offset = patch_offset;
+		backpatch_info* q = backpatches;
+		backpatch_info* qq = NULL;
+#ifdef _DEBUG
+		while (q != NULL) {
+			AvmAssert(q->patch_offset != patch_offset);
+			q = q->next;
 		}
+		q = backpatches;
+#endif
+		while (q != NULL && q->target_pc < b->target_pc) {
+			qq = q;
+			q = q->next;
+		}
+		if (qq == NULL) {
+			b->next = backpatches;
+			backpatches = b;
+		}
+		else {
+			b->next = q;
+			qq->next = b;
+		}
+		*dest++ = 0x80000000U;
 	}
 	
 	void Translator::computeExceptionFixups() 
@@ -264,6 +289,13 @@ namespace avmplus
 
 	void Translator::fixExceptionsAndLabels(const byte *pc) 
 	{
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		// Do not optimize across control flow targets, so flush the peephole window here
+		if (exception_fixes != NULL && exception_fixes->pc == pc ||
+			backpatches != NULL && backpatches->target_pc == pc)
+			peepFlush();
+#endif
+
 		while (exception_fixes != NULL && exception_fixes->pc <= pc) {
 			AvmAssert(exception_fixes->pc == pc);
 			exceptions_consumed = true;
@@ -278,7 +310,7 @@ namespace avmplus
 		
 		while (backpatches != NULL && backpatches->target_pc <= pc) {
 			AvmAssert(backpatches->target_pc == pc);
-			AvmAssert(*backpatches->patch_loc == ~0U);
+			AvmAssert(*backpatches->patch_loc == 0x80000000U);
 			*backpatches->patch_loc = buffer_offset + (dest - buffers->data) - backpatches->patch_offset;
 			backpatch_info* tmp = backpatches;
 			backpatches = backpatches->next;
@@ -391,6 +423,9 @@ namespace avmplus
 		(void)pc;
 		CHECK(1);
 		*dest++ = NEW_OPCODE(opcode);
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(opcode, dest-1);
+#endif
 	}
 
 #ifdef _DEBUG
@@ -454,6 +489,9 @@ namespace avmplus
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
 		*dest++ = AvmCore::readU30(pc);
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(opcode, dest-2);
+#endif
 	}
 	
 	// These take one U30 argument, and the argument is explicitly passed here (result of optimization)
@@ -462,6 +500,9 @@ namespace avmplus
 #ifdef _DEBUG
 		switch (opcode) {
 			case OP_getscopeobject:
+			case OP_ext_get2locals:
+			case OP_ext_get3locals:
+			case OP_ext_storelocal:
 				break;
 			default:
 				CHECK_OP1(opcode, "OP1/imm")
@@ -470,6 +511,9 @@ namespace avmplus
 		CHECK(2);
 		*dest++ = NEW_OPCODE(opcode);
 		*dest++ = operand;
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(opcode, dest-2);
+#endif
 	}
 	
 #ifdef _DEBUG
@@ -501,6 +545,9 @@ namespace avmplus
 		*dest++ = NEW_OPCODE(opcode);
 		*dest++ = AvmCore::readU30(pc);
 		*dest++ = AvmCore::readU30(pc);
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(opcode, dest-3);
+#endif
 	}
 	
 	void Translator::emitOp2(int opcode, uint32 op1, uint32 op2)
@@ -510,6 +557,9 @@ namespace avmplus
 		*dest++ = NEW_OPCODE(opcode);
 		*dest++ = op1;
 		*dest++ = op2;
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(opcode, dest-3);
+#endif
 	}
 
 	
@@ -548,10 +598,18 @@ namespace avmplus
 		*dest++ = NEW_OPCODE(opcode);
 		uint32 base_offset = buffer_offset + (dest - buffers->data) + 1;
 		emitRelativeOffset(base_offset, pc, offset);
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(opcode, dest-2);
+		AvmAssert(state == 0);		// Never allow a jump instruction to be in the middle of a match
+#endif
 	}
 	
 	void Translator::emitLabel(const byte *pc) 
 	{
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		// Do not optimize across control control flow targets, so flush the peephole window here.
+		peepFlush();
+#endif
 		label_info* l = new label_info;
 		l->old_offset = pc-code_start;
 		l->new_offset = buffer_offset + (dest - buffers->data);
@@ -572,6 +630,9 @@ namespace avmplus
 		pc++;
 		*dest++ = NEW_OPCODE(OP_ext_pushbits);
 		*dest++ = (((sint8)*pc++) << 3) | kIntegerType;
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(OP_ext_pushbits, dest-2);
+#endif
 	}
 	
 	void Translator::emitPushshort(const byte *pc) 
@@ -580,6 +641,9 @@ namespace avmplus
 		pc++;
 		*dest++ = NEW_OPCODE(OP_ext_pushbits);
 		*dest++ = ((signed short)AvmCore::readU30(pc) << 3) | kIntegerType;
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(OP_ext_pushbits, dest-2);
+#endif
 	}
 	
 	void Translator::emitGetscopeobject(const byte *pc) 
@@ -588,6 +652,9 @@ namespace avmplus
 		pc++;
 		*dest++ = NEW_OPCODE(OP_getscopeobject);
 		*dest++ = *pc++;
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		peep(OP_getscopeobject, dest-2);
+#endif
 	}
 	
 	void Translator::emitPushint(const byte *pc)
@@ -598,6 +665,9 @@ namespace avmplus
 			CHECK(2);
 			*dest++ = NEW_OPCODE(OP_ext_pushbits);
 			*dest++ = (value << 3) | kIntegerType;
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			peep(OP_ext_pushbits, dest-2);
+#endif
 		}
 		else {
 			union {
@@ -609,6 +679,9 @@ namespace avmplus
 			*dest++ = NEW_OPCODE(OP_ext_push_doublebits);
 			*dest++ = v.bits[0];
 			*dest++ = v.bits[1];
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			peep(OP_ext_push_doublebits, dest-3);
+#endif
 		}
 	}
 
@@ -620,6 +693,9 @@ namespace avmplus
 			CHECK(2);
 			*dest++ = NEW_OPCODE(OP_ext_pushbits);
 			*dest++ = (value << 3) | kIntegerType;
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			peep(OP_ext_pushbits, dest-2);
+#endif
 		}
 		else {
 			union {
@@ -631,11 +707,18 @@ namespace avmplus
 			*dest++ = NEW_OPCODE(OP_ext_push_doublebits);
 			*dest++ = v.bits[0];
 			*dest++ = v.bits[1];
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			peep(OP_ext_push_doublebits, dest-3);
+#endif
 		}
 	}
 	
 	void Translator::emitLookupswitch(const byte *pc)
 	{
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		// Avoid a lot of hair by flushing before LOOKUPSWITCH and not peepholing after.
+		peepFlush();
+#endif
 		const byte* base_pc = pc;
 		pc++;
 		uint32 base_offset = buffer_offset + (dest - buffers->data);
@@ -653,6 +736,10 @@ namespace avmplus
 			CHECK(1);
 			emitRelativeOffset(base_offset, base_pc, offset);
 		}
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		// need a forward declaration for toplevel.
+//		AvmAssert(toplevel[OP_lookupswitch] == 0);
+#endif
 	}
 	
 	// 'OP_abs_jump' is an ABC-only construct, it boils away in the translation,
@@ -722,5 +809,458 @@ namespace avmplus
 
 		cleanup();
 	}
+
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+	
+	// Peephole optimization.
+	//
+	// This is a state machine driven peephole optimizer.  The tables 'states', 'transitions',
+	// and 'toplevel' are generated by the program utils/peephole.as based on the patterns
+	// described in utils/peephole.txt, which are in turn hand-selected with aid of the
+	// dynamic instruction profiling infrastructure built into Tamarin - see comments in
+	// utils/superwordprof.c for help on how to use that.
+	//
+	// The state machine is deterministic and attempts to match the instruction stream to
+	// the patterns, and to reduce longer strings of instructions to shorter strings.
+	// A reduction is possible when the machine enters a final state.  However, the
+	// machine is greedy and may leave the final state looking for a longer match.  As
+	// the longer match may fail, the machine maintains a stack of final states it may
+	// backtrack to.  A match may fail in two ways, either because a state is reached
+	// from which there is no move to a final state on the actual input, or if a final
+	// state is reached but the guard condition for the state is not satisfied.  The
+	// guard is only tested when the machine is ready to commit; for that reason, a stack
+	// of backtrack states is required (instead of a single backtrack state).  The guard
+	// is mixed in with the commit code in order to keep code size down, though it
+	// probably does not matter much.
+	//
+	// This machine is not powerful enough to handle all deterministic automata that
+	// result from a translation of a nondeterministic set of patterns (as may result if
+	// some patterns are non-prefix subpatterns of other patterns), as the machine insists
+	// on reducing the entire prefix matched so far, not a suffix of that prefix.  That
+	// can likely be fixed without too much hassle by tracking the start of each instruction
+	// and making the action part a little richer.
+	//
+	// The peephole optimizer function peep() /must/ be called every time an instruction 
+	// has been emitted to the instruction stream, as the state machine in the peephole
+	// optimizer tracks the emitted instruction stream (it does not inspect it repeatedly).
+	// The operands to peep() are the symbolic opcode that was just emitted and the address
+	// at which that opcode was emitted.
+	//
+	// If optimization must not cross some instruction boundary (as for control flow targets)
+	// then peepFlush() must be called before instructions are emitted for the point beyond
+	// the boundary.
+
+	// It is possible to optimize the entry to peep, the in-line test is state==0 && toplevel[opcode] == 0,
+	// if this is true then peep() need not be called as there will not be a state transition.  This
+	// factoid may be useful if emitOp0, emitOp1, and emitOp2 are in-lined into the verifier.
+
+	
+	// should we use an actual window, ie, a buffer, for simplicity?  as it is, I[] is not
+	// actually contiguous, we need I to contain pointers to instructions, eg I[1][1] is
+	// the first operand of the second instruction... and then how do we handle the output?
+	// some sort of replace(I, 1, 2, buf, len) setup?  Not bad, would avoid dependencies
+	// on order of evaluation when updating I.
+	
+	// In practice, most of these fields don't need to be uint32.  But for the 
+	// same reason, there aren't a lot of savings to be had by shrinking them.
+	
+	struct state_t {
+		uint32 isFinal;
+		uint32 numTransitions;
+		uint32 transitionPtr;
+		uint32 guardAndAction;
+	};
+	
+	struct transition_t {
+		uint32 opcode;
+		uint32 next_state;
+	};
+	
+	// Begin code that should be generated
+	//
+	// Note that transitions in a run are always sorted in increasing token value order,
+	// so it's possible to binary search the run.
+	
+	static state_t states[] = {
+	{ 0, 0, 0, 0 },    // 0 is never a valid state
+	{ 0, 1, 0, 0 },    // 62
+	{ 1, 1, 1, 1 },    // 62 62
+	{ 1, 0, 0, 2 },    // 62 62 62
+	{ 0, 1, 2, 0 },    // 63
+	{ 1, 0, 0, 3 },    // 63 62
+	};
+	
+	static transition_t transitions[] = {
+	{ OP_getlocal, 2 },
+	{ OP_getlocal, 3 }, 
+	{ OP_getlocal, 5 },
+	};
+	
+	static uint32 toplevel[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 1, 4, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0,
+	};
+	
+	bool Translator::commit(uint32 action) {
+		switch (action) {
+			case 1:
+				AvmAssert(O[0] == OP_getlocal && O[1] == OP_getlocal);
+				if (!(I[0][1] < 65536 && I[1][1] < 65536)) return false;
+				S[0] = OP_ext_get2locals;
+				R[0] = NEW_OPCODE(OP_ext_get2locals);
+				R[1] = (I[1][1] << 16) | I[0][1];
+				return replace(0, 2, 2);
+			case 2:
+				AvmAssert(O[0] == OP_getlocal && O[1] == OP_getlocal && O[2] == OP_getlocal);
+				if (!(I[0][1] < 1024 && I[1][1] < 1024 && I[2][1] < 1024)) return false;
+				S[0] = OP_ext_get3locals;
+				R[0] = NEW_OPCODE(OP_ext_get3locals);
+				R[1] = (I[2][1] << 20) | (I[1][1] << 10) | I[0][1];
+				return replace(0, 3, 2);
+			case 3:
+				AvmAssert(O[0] == OP_setlocal && O[1] == OP_getlocal);
+				if (!(I[0][1] == I[1][1])) return false;
+				S[0] = OP_ext_storelocal;
+				R[0] = NEW_OPCODE(OP_ext_storelocal);
+				R[1] = I[0][1];
+				return replace(0, 2, 2);
+			default:
+				AvmAssert(!"Should never get here");
+				return false;
+		}
+	}
+	
+	// End code that should be generated
+
+	// Invariants here:
+	//
+	//   - Lookupswitch never appears in the peephole window (reduces complexity
+	//     and guarantees we won't ever have more than one buffer boundary crossing)
+	//
+	//   - Relative branch instructions only ever appear as the last instruction in 
+	//     the window.  At that point, if it is a forward branch, then the backpatch
+	//     may not be the first backpatch in the list, but it will usually be near
+	//     the beginning (most branches are short).  Backpatches are uniquely 
+	//     identified by the patch location they point to so it's always safe to
+	//     remove one if we're squashing a branch instruction.
+	//
+	//     That means that if the peephole optimizer processes a branch instruction
+	//     then it /must/ reduce at that point, it can't wait until the next
+	//     instruction even if the current state is a final state.
+	//
+	//   - If the optimizer inserts a branch then the address in the branch must
+	//     be absolute.  If the branch is backward it must be the negative of the
+	//     absolute word offset of the target.  If the branch is forward it must
+	//     be the positive absolute ABC byte offset of the branch target; a backpatch
+	//     structure will be created in the latter case.
+	
+	bool Translator::replace(uint32 start, uint32 old_instr, uint32 new_words) 
+	{
+		// Undo any relative offsets in the last instruction
+
+		bool forward = false;
+		if (isJumpInstruction(O[nextI - 1])) {
+			
+			AvmAssert(I[nextI - 1] + 2 == dest);
+			
+			uint32 offset = I[nextI - 1][1];
+			if (offset == 0x80000000U) {
+				// Forward branch, must find and nuke the backpatch
+				forward = true;
+				backpatch_info *b = backpatches;
+				backpatch_info *b2 = NULL;
+				while (b != NULL && b->patch_loc != &I[nextI - 1][1])
+					b2 = b, b = b->next;
+				AvmAssert(b != NULL);
+				if (b2 == NULL)
+					backpatches = b->next;
+				else
+					b2->next = b->next;
+				// b is unlinked
+				// Install the ABC byte offset from the backpatch structure (will be positive)
+				I[nextI - 1][1] = b->target_pc - code_start;
+				delete b;
+			}
+			else {
+				// Backward branch
+				AvmAssert((int32)I[nextI - 1][1] < 0);
+				// Install the negative of the absolute word offset of the target
+				I[nextI - 1][1] = -(buffer_offset + (dest - buffers->data) + (int32)I[nextI - 1][1]);
+			}
+		}
+		
+		// Catenate unconsumed instructions onto R (it's easier than struggling with moving instructions
+		// across buffer boundaries)
+
+		uint32 k = new_words;
+		for ( uint32 n=start + old_instr ; n < nextI ; n++ ) {
+			uint32 len = calculateInstructionWidth(O[n]);
+			S[k] = O[n];
+			for ( uint32 j=0 ; j < len ; j++ )
+				R[k++] = I[n][j];
+		}
+		
+		// Unlink the last buffer segment if we took everything from it, maybe push it onto
+		// a reserve (there can only ever be one free).  We know I[nextI-1] points into the
+		// current buffer, so check if I[start] is between the start of the buffer and
+		// the last instruction.
+		
+		if (!(buffers->data <= I[start] && I[start] <= I[nextI-1])) {
+			spare_buffer = buffers;
+			buffers = buffers->next;
+			spare_buffer->next = NULL;
+			dest = I[start];
+			dest_limit = buffers->data + sizeof(buffers->data)/sizeof(buffers->data[0]);
+			buffer_offset -= buffers->entries_used;
+		}
+		else
+			dest = I[start];
+		
+		// Emit the various instructions from new_data, handling branches specially
+
+		uint32 i=0;
+		while (i < k) {
+			if (isJumpInstruction(S[i])) {
+				CHECK(2);
+				*dest++ = R[i++];
+				int32 offset = (int32)R[i++];
+				if (offset >= 0) {
+					// Forward jump
+					// Install a new backpatch structure
+					AvmAssert(forward);
+					makeAndInsertBackpatch(code_start + offset, buffer_offset + (dest + 1 - buffers->data));
+				}
+				else {
+					// Backward jump
+					// Compute new jump offset
+					AvmAssert(!forward);
+					*dest = -(buffer_offset + (dest + 1 - buffers->data) + offset);
+					dest++;
+				}
+			}
+			else {
+				switch (calculateInstructionWidth(S[i])) {
+					default:
+						AvmAssert(!"Can't happen");
+					case 1:
+						CHECK(1);
+						*dest++ = R[i++];
+						break;
+					case 2:
+						CHECK(2);
+						*dest++ = R[i++];
+						*dest++ = R[i++];
+						break;
+					case 3:
+						CHECK(3);
+						*dest++ = R[i++];
+						*dest++ = R[i++];
+						*dest++ = R[i++];
+						break;
+				}
+			}
+		}
+		
+#ifdef _DEBUG
+		backpatch_info *q = backpatches;
+		while (q != NULL) {
+			AvmAssert(*q->patch_loc == 0x80000000U);
+			q = q->next;
+		}
+#endif
+		
+		return true;  // always
+	}
+
+	// Clean this up later
+	uint32 Translator::calculateInstructionWidth(uint32 opcode)
+	{
+		if (opcode < 255)
+			return opOperandCount[opcode] + 1;
+		switch (opcode) {
+			case OP_ext_pushbits:
+			case OP_ext_get2locals:
+			case OP_ext_get3locals:
+			case OP_ext_storelocal:
+				return 2;
+			case OP_ext_push_doublebits:
+				return 3;
+			default:
+				AvmAssert(!"Should not happen");
+				return 1;
+		}
+	}
+				
+	// Clean this up later
+	bool Translator::isJumpInstruction(uint32 opcode)
+	{
+		switch (opcode) {
+			case OP_jump:
+			case OP_iftrue:
+			case OP_iffalse:
+			case OP_ifeq:
+			case OP_ifne:
+			case OP_ifstricteq:
+			case OP_ifstrictne:
+			case OP_iflt:
+			case OP_ifnlt:
+			case OP_ifgt:
+			case OP_ifngt:
+			case OP_ifle:
+			case OP_ifnle:
+			case OP_ifge:
+			case OP_ifnge:
+				return true;
+			default:
+				return false;
+		}
+	}
+	
+	void Translator::peep(uint32 opcode, uint32* loc)
+	{
+		state_t *s;
+		transition_t *t;
+		uint32 i, limit, next_state, toplevel_index;
+		
+		// bug: 
+
+		AvmAssert(opcode != OP_lookupswitch);
+
+		if (state == 0) 
+			goto initial_state;
+		
+		// Search for a transition from the current state to a next
+		// state on input 'opcode'.  This search is sequential now,
+		// but things are set up so that we can use binary search later.
+		
+		O[nextI] = opcode;
+		I[nextI] = loc;
+		nextI++;
+		s = &states[state];
+		t = &transitions[s->transitionPtr];
+		limit = s->numTransitions;
+		
+		i = 0;
+		while (i < limit && t->opcode != opcode) 
+			i++, t++;
+		
+		next_state = (i == limit) ? 0 : t->next_state;
+		
+		if (next_state != 0) {
+
+			// Advance
+			//
+			// There is a next state, so push the current state on the backtrack
+			// stack if it is final, and move to the next state.  If that state has
+			// successor states then return, as the search continues.  Otherwise, the
+			// next state must be final and we try to accept.
+			//
+			// (The shortcut of checking the successors is necessary for correctness,
+			// as otherwise the peephole window could contain a branch in the non-final
+			// position.)
+			
+			if (s->isFinal) {
+				int bi = backtrack_idx++;
+				backtrack_stack[bi].state = state;
+				backtrack_stack[bi].nextI = nextI;
+			}
+			state = next_state;
+			s = &states[state];
+			if (s->numTransitions > 0)
+				return;
+			
+			next_state = 0;
+			AvmAssert(s->isFinal);
+		}
+
+		// Accept
+		//
+		// The next state is 0.  Commit to 'state' if it is final; otherwise to 
+		// successive backtrack states.  Committing means checking the guard
+		// (which may fail, forcing further backtracking) and if the guard passes
+		// then performing the transformation.  The commit function is generated,
+		// see above; the replace logic is in the function replace() above.
+		
+		if (s->isFinal && commit(s->guardAndAction)) 
+			goto accepted;
+		
+		for ( int bi=backtrack_idx-1 ; bi >= 0 ; bi-- ) {
+			state_t *b = &states[backtrack_stack[bi].state];
+			AvmAssert(b->isFinal);
+			if (commit(b->guardAndAction)) 
+				goto accepted;
+		}
+
+		// Even if we failed to find an accepting state then fall through to initial_state
+		// to reset the machine.
+
+	initial_state:
+		toplevel_index = opcode < 255 ? opcode : 256 + (opcode >> 8);
+		AvmAssert(toplevel_index < sizeof(toplevel)/sizeof(toplevel[0]));
+
+		state = toplevel[toplevel_index];  // may remain 0
+		nextI = 0;
+		backtrack_idx = 0;
+		if (state != 0) {
+			O[nextI] = opcode;
+			I[nextI] = loc;
+			nextI++;
+		}
+		return;
+		
+	accepted:
+		// We should do better here: we should enter at the last opcode left behind in
+		// the stream provided it was not just inserted.  The replace() function could
+		// record that opcode for us.
+		state = 0;
+		return;
+	}
+	
+	// Here we should probably not just set the state to 0, but force a commit to a 
+	// pending backtrack state if there is one.  The idea is to sync the instruction
+	// stream so that we don't peephole across a label or an exception handling
+	// boundary.
+
+	void Translator::peepFlush()
+	{
+		if (state != 0)
+			state = 0;
+	}
+
+#endif  // AVMPLUS_PEEPHOLE_OPTIMIZER
+
 #endif // AVMPLUS_WORD_CODE
 }

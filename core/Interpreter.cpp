@@ -468,6 +468,9 @@ namespace avmplus
 			 XXX(0x100)
 			 III(0x101, L_ext_pushbits)
 			 III(0x102, L_ext_push_doublebits)
+			 III(0x103, L_ext_get2locals)
+			 III(0x104, L_ext_get3locals)
+			 III(0x105, L_ext_storelocal)
 #  if defined GNUC_THREADING
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
@@ -748,7 +751,7 @@ namespace avmplus
 #  if defined SUPERWORD_PROFILING
 			swprofPC(pc);
 #  endif
-#  if defined AVMPLUS_WORD_CODE && !defined AVMPLUS_DIRECT_THREADED
+#  if defined AVMPLUS_WORD_CODE
 			// See comments around INSTR(ext) below.
 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
 			switch ((*pc++) & 255)
@@ -817,14 +820,14 @@ namespace avmplus
 			}
 #endif
 
-#ifndef AVMPLUS_MIR
+#ifdef AVMPLUS_MIR
 			INSTR(coerce_a) { // no-op since interpreter only uses atoms
 #ifdef MSVC_X86_REWRITE_THREADING
 				SAVE_EXPC;    // need to do _something_ or the label disappears completely
 #endif
                 NEXT;
 			}
-#endif
+#endif  // AVMPLUS_MIR
 					
 			INSTR(bkpt) {
 				SAVE_EXPC;
@@ -2532,6 +2535,8 @@ namespace avmplus
 #    else
 			switch (pc[-1]) {
 #    endif
+			default:
+				goto L_illegal_op;
 #  endif // !AVMPLUS_DIRECT_THREADED
 #  ifdef MSVC_X86_REWRITE_THREADING
 			default:
@@ -2557,6 +2562,27 @@ namespace avmplus
 				NEXT;
 			}
 
+			INSTR(ext_get2locals) {
+				uint32 regs = *pc++;
+				*(++sp) = framep[regs & 65535];
+				*(++sp) = framep[regs >> 16];
+				NEXT;
+			}
+					
+			INSTR(ext_get3locals) {
+				uint32 regs = *pc++;
+				*(++sp) = framep[regs & 1023];
+				regs >>= 10;
+				*(++sp) = framep[regs & 1023];
+				*(++sp) = framep[regs >> 10];
+				NEXT;
+			}
+					
+			INSTR(ext_storelocal) {
+				framep[*pc++] = *sp;
+				NEXT;
+			}
+					
 #  ifndef AVMPLUS_DIRECT_THREADED
 			} // switch
 			} // INSTR(ext)
