@@ -944,9 +944,13 @@ namespace nanojit
 			Register ra;
 
 			// if this is last use of lhs in reg, we can re-use result reg
-			if (rA == 0 || (ra = rA->reg) == UnknownReg)
+            if (rA == 0 || (ra = rA->reg) == UnknownReg) {
 				ra = findSpecificRegFor(lhs, rr);
-			// else, rA already has a register assigned.
+            }
+            else {
+    			// rA already has a register assigned, but maybe wrong set
+                ra = findRegFor(lhs, XmmRegs);
+            }
 
 			static const AVMPLUS_ALIGN16(uint32_t) negateMask[] = {0,0x80000000,0,0};
 			SSE_XORPD(rr, negateMask);
@@ -1006,7 +1010,11 @@ namespace nanojit
                         if (rA->reg == UnknownReg) {
                             // load it into the arg reg
                             int d = findMemFor(p);
-                            LD(r, d, FP);
+                            if (p->isop(LIR_alloc)) {
+                                LEA(r, d, FP);
+                            } else {
+                                LD(r, d, FP);
+                            }
                         } else {
                             // it must be in a saved reg
                             MR(r, rA->reg);
@@ -1090,9 +1098,13 @@ namespace nanojit
 			Register ra;
 
 			// if this is last use of lhs in reg, we can re-use result reg
-			if (rA == 0 || (ra = rA->reg) == UnknownReg)
+            if (rA == 0 || (ra = rA->reg) == UnknownReg) {
 				ra = findSpecificRegFor(lhs, rr);
-			// else, rA already has a register assigned.
+            }
+            else {
+    			// rA already has a register assigned but maybe not from the allow set
+                ra = findRegFor(lhs, allow);
+            }
 
 			if (lhs == rhs)
 				rb = ra;
