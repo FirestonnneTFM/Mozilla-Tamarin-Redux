@@ -278,6 +278,9 @@ namespace avmplus
 		#ifdef FEATURE_JNI
 		java = NULL;
 		#endif
+#ifdef SUPERWORD_PROFILING
+		swprofStart();
+#endif
 	}
 
 	AvmCore::~AvmCore()
@@ -302,6 +305,9 @@ namespace avmplus
 		// free all the mir buffers
 		while(mirBuffers.size() > 0)
 			mirBuffers.removeFirst()->free();
+#endif
+#ifdef SUPERWORD_PROFILING
+		swprofStop();
 #endif
 	}
 
