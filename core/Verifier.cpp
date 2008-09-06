@@ -170,25 +170,18 @@ namespace avmplus
 		#endif
 
 #ifdef AVMPLUS_WORD_CODE
-#  ifdef AVMPLUS_MIR
-		// If MIR generation fails due to OOM then we must translate anyhow,
-		// so need to start again.  FIXME - logic for that looks unclear.
-		// Also unclear if any of the existing logic is working, since none
-		// of it can really handle running out of memory anyhow.
-#    ifdef AVMPLUS_DIRECT_THREADED
-		if (mir == NULL)
-			this->translator = new Translator(info, interpGetOpcodeLabels());
-#    else
-		this->translator = new Translator(info);
-#    endif
-#  else
+	// If MIR generation fails due to OOM then we must translate anyhow,
+	// FIXME - logic for that looks unclear.
+	// Also unclear if any of the existing logic is working, since none
+	// of it can really handle running out of memory anyhow.
+	// FIXME - if MIR generation doesn't fail, then we've translated for
+	// no good reason.
 #    ifdef AVMPLUS_DIRECT_THREADED
 		this->translator = new Translator(info, interpGetOpcodeLabels());
 #    else
-		this->translator = new Translator(info, );
+		this->translator = new Translator(info);
 #    endif
-#  endif
-		Translator *translator = this->translator;
+	    Translator *translator = this->translator;
 #endif
 
 		MIR_ONLY( this->mir = mir; )
