@@ -62,6 +62,7 @@
 #define count_aluld() _nvprof("x86-ld",1); _nvprof("x86-alu",1); count_instr()
 #define count_alust() _nvprof("x86-ld",1); _nvprof("x86-alu",1); _nvprof("x86-st",1); count_instr()
 #define count_pushld() _nvprof("x86-ld",1); _nvprof("x86-push",1); count_instr()
+#define count_imt() _nvprof("x86-imt",1) count_instr()
 #else
 #define count_instr()
 #define count_ret()
@@ -83,6 +84,7 @@
 #define count_aluld()
 #define count_alust()
 #define count_pushld()
+#define count_imt()
 #endif
 
 namespace nanojit
@@ -179,7 +181,8 @@ namespace nanojit
 		void nativePageReset();\
 		void nativePageSetup();\
         void underrunProtect(int);\
-        void asm_farg(LInsp);
+        void asm_farg(LInsp);\
+        void asm_align_code();
 		
 	#define swapptrs()  { NIns* _tins = _nIns; _nIns=_nExitIns; _nExitIns=_tins; }
 		

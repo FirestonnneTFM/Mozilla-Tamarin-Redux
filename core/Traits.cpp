@@ -37,7 +37,9 @@
 
 
 #include "avmplus.h"
-#include "../codegen/CodegenMIR.h"
+#ifdef AVMPLUS_MIR
+#include "../codegen/CodegenLIR.h"
+#endif
 
 namespace avmplus
 {
@@ -911,7 +913,7 @@ namespace avmplus
 			else
 			{
 				// build conflict stub
-				CodegenMIR mir(pool);
+				CodegenIMT mir(pool);
 				TRY(pool->core, kCatchAction_Rethrow)
 				{
 					imt[i] = BIND_ITRAMP | (uintptr)mir.emitImtThunk(e);
