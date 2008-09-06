@@ -518,6 +518,23 @@ namespace avmplus
 		return ap;
 	}
 
+    void initCodePages(PoolObject *pool) {
+        if (!pool->codePages) {
+            AvmCore *core = pool->core;
+            GC *gc = core->gc;
+			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
+            mgr->frago = new (gc) Fragmento(core, 24/*16mb*/);
+			verbose_only(
+                mgr->frago->assm()->_verbose = pool->verbose;
+                if (pool->verbose) {
+				    LabelMap *labels = mgr->frago->labels = new (gc) LabelMap(core, 0);
+				    labels->add(core, sizeof(AvmCore), 0, "core");
+                    labels->add(&core->codeContextAtom, sizeof(CodeContextAtom), 0, "codeContextAtom");
+                }
+			)
+        }
+    }
+
 	CodegenLIR::CodegenLIR(MethodInfo* i)
 		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc), 
 			interruptable(true)
@@ -936,6 +953,18 @@ namespace avmplus
         }
     };
 
+	void emitStart(LirBuffer *lirbuf, LirWriter *lirout) {
+        lirout->ins0(LIR_start);
+        // create param's for saved regs -- abi specific
+        for (int i=0, n=sizeof(lirbuf->savedParams)/sizeof(LInsp); i < n; i++)
+            lirout->insParam(i, 1);
+	}
+
+    LirWriter *pushVerboseWriter(GC *gc, LirWriter *lirout, LirBuffer *lirbuf) {
+        lirbuf->names = new (gc) LirNameMap(gc, k_functions, lirbuf->_frago->labels);
+        return new (gc) VerboseWriter(gc, lirout, lirbuf->names);
+    }
+
 	// f(env, argc, instance, argv)
 	bool CodegenLIR::prologue(FrameState* state)
 	{
@@ -951,15 +980,11 @@ namespace avmplus
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
         debug_only(
-            // catch problems before they hit the buffer
             lirout = new (gc) ValidateWriter(lirout);
         )
-        verbose_only(
-            if (verbose()) {
-                lirbuf->names = new (gc) LirNameMap(gc, k_functions, frago->labels);
-                lirout = new (gc) VerboseWriter(gc, lirout, lirbuf->names);
-            }
-        )
+        verbose_only(if (verbose()) {
+            lirout = pushVerboseWriter(gc, lirout, lirbuf);
+        })
         LoadFilter *loadfilter = 0;
         if (core->config.cseopt) {
             loadfilter = new (gc) LoadFilter(lirout, gc);
@@ -973,10 +998,7 @@ namespace avmplus
             lirout = new (gc) ValidateWriter(lirout);
         )
 
-        lirout->ins0(LIR_start);
-        // create param's for saved regs -- abi specific
-        for (int i=0, n=sizeof(lirbuf->savedParams)/sizeof(LInsp); i < n; i++)
-            lirout->insParam(i, 1);
+		emitStart(lirbuf, lirout);
 
 		if (overflow)
 			return false;
@@ -4129,6 +4151,127 @@ namespace avmplus
             })
         }
     }
+
+	CodegenIMT::CodegenIMT(PoolObject *pool)
+		: pool(pool), overflow(false)
+	{}
+
+	CodegenIMT::~CodegenIMT()
+	{}
+
+	void CodegenIMT::clearMIRBuffers()
+	{}
+
+
+	void* CodegenIMT::emitImtThunk(ImtBuilder::ImtEntry *e)
+	{
+        count_imt();
+
+        initCodePages(pool);
+        Fragmento *frago = pool->codePages->frago;
+		AvmCore *core = pool->core;
+		GC *gc = core->gc;
+
+        Fragment *frag = frago->getAnchor(e->virt);
+        gc->Free(frag->mergeCounts);
+        frag->mergeCounts = 0;
+        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
+        lirbuf->abi = ABI_FASTCALL;
+        LirWriter *lirout = new (gc) LirBufWriter(lirbuf);
+        verbose_only(if (pool->verbose) {
+            lirout = pushVerboseWriter(gc, lirout, lirbuf);
+        })
+        debug_only(
+            // catch problems before they hit the buffer
+            lirout = new (gc) ValidateWriter(lirout);
+        )
+
+		// x86-specific notes:
+		// the thunk we're generating is really a CDECL thunk.  We mark
+		// it as fastcall to enable the incoming iid arg in EDX.  Assembler
+		// doesn't actually know how to pop stack args, so this will all end
+		// up doing the right thing.  this is very fragile and should be fixed!
+
+		emitStart(lirbuf, lirout);
+
+		LIns *iid_param = lirout->insParam(1, 0); // edx
+		//env_param = lirout->insParam(2, 0); // stack
+		argc_param = lirout->insParam(3, 0); // stack
+		ap_param = lirout->insParam(4, 0); // stack
+
+		LIns *obj = lirout->insLoadi(ap_param, 0);
+		LIns *vtable = lirout->insLoadi(obj, offsetof(ScriptObject,vtable));
+
+        verbose_only( if (lirbuf->names) {
+            lirbuf->names->addName(argc_param, "argc");
+            lirbuf->names->addName(ap_param, "ap");
+            lirbuf->names->addName(obj, "this");
+            lirbuf->names->addName(vtable, "vtable");
+        })
+
+		AvmAssert(e->next != NULL); // must have 2 or more entries
+		while (e->next)
+		{
+			ImtBuilder::ImtEntry *next = e->next;
+
+			LIns *cmp = lirout->ins2(LIR_eq, iid_param, lirout->insImm(e->virt->iid()));
+			LIns *br = lirout->insBranch(LIR_jf, cmp, 0);
+			emitCall(lirout, vtable, e);
+			br->target(lirout->ins0(LIR_label));
+
+			pool->core->GetGC()->Free(e);
+			e = next;
+		}
+
+		// last one is unconditional
+		emitCall(lirout, vtable, e);
+        frag->lastIns = lirbuf->next()-1;
+
+		// now actually generate machine code
+        Assembler *assm = frago->assm();
+
+		verbose_only( StringList asmOutput(gc); )
+		verbose_only( assm->_outputCache = &asmOutput; )
+
+        RegAllocMap regMap(gc);
+        NInsList loopJumps(gc);
+        assm->hasLoop = false;
+        assm->beginAssembly(frag, &regMap);
+        assm->assemble(frag, loopJumps);
+        assm->endAssembly(frag, loopJumps);
+		verbose_only(
+            assm->_outputCache = 0;
+            for (int i=asmOutput.size()-1; i>=0; --i) {
+                assm->outputf("%s",asmOutput.get(i)); 
+            }
+        );
+        frag->releaseLirBuffer();
+		return frag->code();
+	}
+
+	void CodegenIMT::emitCall(LirWriter *lirout, LIns *vtable, ImtBuilder::ImtEntry *e)
+	{
+		AvmCore *core = pool->core;
+		verbose_only( if (pool->verbose) {
+			core->console << "              disp_id="<< e->disp_id << " " << e->virt << "\n";
+		})
+		// load the concrete env.
+		// fixme: this should always be == to the one passed into the thunk, right?
+		LIns *env = lirout->insLoadi(vtable, offsetof(VTable, methods)+4*e->disp_id);
+		LIns *target = lirout->insLoadi(env, offsetof(MethodEnv, impl32));
+		LOpcode returnop;
+		uint32_t fid;
+		if (e->virt->returnTraits() == NUMBER_TYPE) {
+			returnop = LIR_fret;
+			fid = FUNCTIONID(fcalli);
+		} else {
+			returnop = LIR_ret;
+			fid = FUNCTIONID(calli);
+		}
+		LInsp args[] = { ap_param, argc_param, env, target };
+		LIns *call = lirout->insCall(fid, args);
+		lirout->ins1(returnop, call);
+	}
 }
 
 namespace nanojit

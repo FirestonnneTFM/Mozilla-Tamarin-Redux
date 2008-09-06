@@ -131,40 +131,19 @@ namespace nanojit
 		MR(FP, SP); // Establish our own FP.
         PUSHr(FP); // Save caller's FP.
 
-        /*
-        simple stack overflow check: do it all here, with a predicted-taken fwd branch
-        */
-        
-        /*AvmCore *core = this->_frago->core();
-        uintptr_t minstack = core->minstack;
-        if (minstack) {
-            NIns *skip = _nIns;
-            verbose_only(if (_verbose) outputf("        %p:", skip); )
-            const CallInfo *c = callInfoFor(FUNCTIONID(stkover));
-			ADDi(ESP,12);
-            CALL(c);
-            LD(ECX, 4, ESP); // env
-			SUBi(ESP, 12);
-            int32_t limit = minstack + stackNeeded;
-            JNB(skip);
-            CMPi(ESP, limit);
-        }*/
-
-        // stack overflow check
-        /*
-        AvmCore *core = this->_frago->core();
-        uintptr_t minstack = core->minstack;
-        if (minstack) {
-            int d = stkover_jmp + 5 - _nIns;
-            *((uintptr_t*)(stkover_jmp+1)) = d;
-            uintptr_t limit = minstack + stackNeeded;
-            JB(stkover_label);
-            CMPi(ESP, limit);
-        }
-        */
+        // align the entry point
+        asm_align_code();
 
 		return patchEntry;
 	}
+
+    void Assembler::asm_align_code() {
+        // todo: the intel optimization guide suggests canonical nop 
+        // instructions for sizes from 1..9; use them!
+        while(uintptr_t(_nIns) & 15) {
+            NOP();
+        }
+    }
 
 	void Assembler::nFragExit(LInsp guard)
 	{

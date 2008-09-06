@@ -178,6 +178,19 @@ namespace avmplus
     // helpers for jitted code
 		static Atom coerce_o(Atom v);
 	};
+
+	class CodegenIMT
+	{
+		PoolObject *pool;
+		LIns *ap_param, *argc_param;
+		void emitCall(LirWriter *lirout, LIns *vtable, ImtBuilder::ImtEntry *e);
+	public:
+		bool overflow;
+		CodegenIMT(PoolObject *pool);
+		~CodegenIMT();
+		void clearMIRBuffers();
+		void* emitImtThunk(ImtBuilder::ImtEntry *e);
+	};
 }
 
 #endif /* __avmplus_CodegenLIR__ */
