@@ -198,6 +198,7 @@
  * which is quite picky.  Disable warnings we don't care about.
  */
 #ifdef _MSC_VER
+    #pragma warning(disable:4102) // unreferenced label
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#pragma warning(disable:4512) //assignment operator could not be generated
 	#pragma warning(disable:4511) //can't generate copy ctor
@@ -286,7 +287,7 @@
 
 #ifdef AVMPLUS_WIN32
 #  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
-//#  define AVMPLUS_PEEPHOLE_OPTIMIZER
+#  define AVMPLUS_PEEPHOLE_OPTIMIZER
 //#  define AVMPLUS_DIRECT_THREADED // see comments in Interpreter.cpp before enabling this
 #endif
 
