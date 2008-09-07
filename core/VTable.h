@@ -58,7 +58,7 @@ namespace avmplus
 		DWB(VTable*) base;
 		DWB(VTable*) ivtable;
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		MethodEnv* imt[Traits::IMT_SIZE];
 #endif
 		MethodEnv* methods[1]; // virtual method table

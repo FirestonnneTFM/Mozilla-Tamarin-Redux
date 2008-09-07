@@ -38,11 +38,6 @@
 #ifndef __avmplus_FrameState__
 #define __avmplus_FrameState__
 
-namespace nanojit
-{
-	class LIns;
-}
-
 namespace avmplus
 {
 	/**
@@ -55,9 +50,11 @@ namespace avmplus
 		bool notNull;
 		bool isWith;
 		bool killed;
-	#ifdef AVMPLUS_MIR
+	#if defined AVMPLUS_MIR
 		bool stored;  // set if codegen has already stored the OP
 		OP* ins;  // spot for codegen to hang data.
+	#elif defined FEATURE_NANOJIT
+		LIns* ins;
 	#endif //AVMPLUS_MIR
 	};
 
@@ -78,7 +75,7 @@ namespace avmplus
 		bool initialized;
 		bool targetOfBackwardsBranch;
 		bool insideTryBlock;
-	#ifdef AVMPLUS_MIR
+	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		CodegenLabel label;
 	#endif
 		

@@ -209,7 +209,7 @@ namespace avmplus
 			 III(0x05, L_setsuper)
 			 III(0x06, L_dxns)
 			 III(0x07, L_dxnslate)
-#  ifdef AVMPLUS_MIR
+#  if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			 III(0x08, L_kill)
 #  else
 			 XXX(0x08)
@@ -335,7 +335,7 @@ namespace avmplus
 			 XXX(0x7F)
 			 III(0x80, L_coerce)
 			 III(0x81, L_coerce_b)
-#  ifdef AVMPLUS_MIR
+#  if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			 III(0x82, L_coerce_a)
 #  else
 			 XXX(0x82)
@@ -820,14 +820,14 @@ namespace avmplus
 			}
 #endif
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR||defined FEATURE_NANOJIT
 			INSTR(coerce_a) { // no-op since interpreter only uses atoms
 #ifdef MSVC_X86_REWRITE_THREADING
 				SAVE_EXPC;    // need to do _something_ or the label disappears completely
 #endif
                 NEXT;
 			}
-#endif  // AVMPLUS_MIR
+#endif  // AVMPLUS_MIR || FEATURE_NANOJIT
 					
 			INSTR(bkpt) {
 				SAVE_EXPC;
@@ -1101,7 +1101,7 @@ namespace avmplus
                 NEXT;
 			}
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			INSTR(kill) {
 				framep[U30ARG] = undefinedAtom;
 				NEXT;

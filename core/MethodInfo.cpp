@@ -38,6 +38,9 @@
 
 #include "avmplus.h"
 #ifdef AVMPLUS_MIR
+#include "../codegen/CodegenMIR.h"
+#endif
+#ifdef FEATURE_NANOJIT
 #include "../codegen/CodegenLIR.h"
 #endif
 
@@ -93,7 +96,7 @@ namespace avmplus
 			toplevel->throwVerifyError(kNotImplementedError, toplevel->core()->toErrorString(this));
 		}
 
-		#ifdef AVMPLUS_MIR
+		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
 		Verifier verifier(this, toplevel);
 
@@ -103,7 +106,13 @@ namespace avmplus
 		#ifdef PERFM
 			uint64_t start = rtstamp();
 		#endif /* PERFM */
+
+			#if defined AVMPLUS_MIR
+			CodegenMIR mir(this);
+			#elif defined FEATURE_NANOJIT
 			CodegenLIR mir(this);
+			#endif
+
 			TRY(core, kCatchAction_Rethrow)
 			{
 				verifier.verify(&mir);	// pass 2 - data flow

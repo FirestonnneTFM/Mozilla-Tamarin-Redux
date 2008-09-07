@@ -133,13 +133,17 @@
 // don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
 #ifndef AVMPLUS_DISABLE_MIR
 	#define AVMPLUS_MIR
-	#define FEATURE_NANOJIT
 #endif
 
 #if defined(AVMPLUS_MAC) && defined(AVMPLUS_64BIT)
 	// MIR not yet supported on 64-bit Mac
 	#undef AVMPLUS_MIR
-	#undef FEATURE_NANOJIT
+#endif
+
+#if defined(AVMPLUS_MIR) && defined(AVMPLUS_IA32)
+    // use nanojit on ia32 (win, mac, linux)
+    #undef AVMPLUS_MIR
+    #define FEATURE_NANOJIT
 #endif
 
 // if a function meets the E4 criteria for being unchecked, then make
