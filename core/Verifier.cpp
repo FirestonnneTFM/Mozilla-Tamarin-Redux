@@ -183,7 +183,7 @@ namespace avmplus
 #    ifdef AVMPLUS_DIRECT_THREADED
 		this->translator = new Translator(info, interpGetOpcodeLabels());
 #    else
-		this->translator = new Translator(info, );
+		this->translator = new Translator(info);
 #    endif
 #  endif
 		Translator *translator = this->translator;
@@ -1052,7 +1052,7 @@ namespace avmplus
 
 				Binding b = toplevel->getBinding(obj.traits, &multiname);
 				bool needsSetContext = true;
-				MIR_ONLY( Traits* propTraits = ) readBinding(obj.traits, b);
+				Traits* propTraits = readBinding(obj.traits, b);
 				#if defined AVMPLUS_MIR || defined AVMPLUS_WORD_CODE
 				if (AvmCore::isSlotBinding(b) && /*mir &&*/
 					// it's a var, or a const being set from the init function
@@ -2496,6 +2496,8 @@ namespace avmplus
 			mir->emitSetContext(state, NULL);
 			mir->emit(state, opcode, (uintptr)&multiname, argc, NULL);
 		}
+#else
+        (void)sp;
 #endif
 
 		// If early binding in the case of MIR then the state will have been updated,
