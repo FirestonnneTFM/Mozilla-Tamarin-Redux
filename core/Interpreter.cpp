@@ -202,7 +202,11 @@ namespace avmplus
 #     endif
 #  endif // threading discipline
 			 XXX(0x00)
+#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			 III(0x01, L_bkpt)
+#else
+			 XXX(0x01) /* OP_bkpt */
+#endif
 			 XXX(0x02) /* OP_nop */
 			 III(0x03, L_throw)
 			 III(0x04, L_getsuper)
@@ -448,11 +452,18 @@ namespace avmplus
 			 XXX(0xEC)
 			 XXX(0xED)
 			 XXX(0xEE) /* OP_abs_jump */
-			 XXX(0xEF) /* OP_debug */
+#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+			 III(0xEF, L_debug)
 			 III(0xF0, L_debugline)
 			 III(0xF1, L_debugfile)
 			 III(0xF2, L_bkptline)
-			 XXX(0xF3)  /* OP_timestamp */
+#else
+ 			 XXX(0xEF) /* OP_debug */
+			 XXX(0xF0) /* L_debugline */
+			 XXX(0xF1) /* L_debugfile */
+			 XXX(0xF2) /* L_bkptline */
+#endif
+	 		 XXX(0xF3)  /* OP_timestamp */
 			 XXX(0xF4)
 			 XXX(0xF5)
 			 XXX(0xF6)
@@ -828,7 +839,8 @@ namespace avmplus
                 NEXT;
 			}
 #endif  // AVMPLUS_MIR
-					
+
+#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(bkpt) {
 				SAVE_EXPC;
 				#ifdef DEBUGGER
@@ -840,7 +852,9 @@ namespace avmplus
 				restore_dxns();
 				NEXT;
 			}
-
+#endif
+					
+#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(debugline) {
 				SAVE_EXPC;
 				int line = U30ARG;
@@ -855,7 +869,9 @@ namespace avmplus
 				restore_dxns();
 				NEXT;
 			}
-
+#endif
+					
+#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(bkptline) {
 				SAVE_EXPC;
 				int line = U30ARG;
@@ -871,14 +887,16 @@ namespace avmplus
 				restore_dxns();
 				NEXT;
 			}
-
-#ifndef AVMPLUS_WORD_CODE
+#endif
+					
+#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(debug) {
-				pc += AvmCore::calculateInstructionWidth(pc-1) - 1;
+				pc += 4;
 				NEXT;
 			}
 #endif
 
+#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(debugfile) {
 				SAVE_EXPC;
 				int index = U30ARG;
@@ -893,6 +911,7 @@ namespace avmplus
 				restore_dxns();
 				NEXT;
 			}
+#endif
 
 			INSTR(jump) {
 				int offset = S24ARG;
