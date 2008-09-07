@@ -137,7 +137,7 @@ namespace avmplus
 	    SetMIREnabled(true);
 
 		#ifdef AVMPLUS_VERIFYALL
-		config.verifyall = false;
+	    	config.verifyall = false;
 		#endif
 
 		#ifdef FEATURE_NANOJIT
@@ -148,22 +148,21 @@ namespace avmplus
 		#endif
 
 		#ifdef AVMPLUS_MIR
-
-			// forcemir flag forces use of MIR instead of interpreter
-			config.forcemir = false;
-	
-			config.cseopt = true;
 			config.dceopt = true;
-
-		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-    		config.sse2 = true;
-			#endif
-
 			#ifdef AVMPLUS_VERBOSE
 			config.bbgraph = false;
 			#endif
+        #endif
 
-		#endif // AVMPLUS_MIR
+        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			// forcemir flag forces use of MIR instead of interpreter
+			config.forcemir = false;
+			config.cseopt = true;
+        #endif
+
+	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+    		config.sse2 = true;
+		#endif
 
 	#ifdef VTUNE
 			VTuneStatus = CheckVTuneStatus();
@@ -271,7 +270,7 @@ namespace avmplus
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
 
-		#if defined(AVMPLUS_MIR) && defined(AVMPLUS_VERBOSE)
+		#if defined AVMPLUS_MIR && defined(AVMPLUS_VERBOSE)
 		codegenMethodNames = CodegenMIR::initMethodNames(this);
 		#endif
 
@@ -292,7 +291,7 @@ namespace avmplus
 			gc->SetGCContextVariable(GC::GCV_AVMCORE, NULL);
 		}
 
-		#if defined(AVMPLUS_MIR) && defined(AVMPLUS_VERBOSE)
+		#if defined AVMPLUS_MIR && defined(AVMPLUS_VERBOSE)
 		delete codegenMethodNames;
 		#endif
 
@@ -3989,7 +3988,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return (Atom)obj|kDoubleType;
 	}
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
 	void AvmCore::initMultinameLate(Multiname& name, Atom index)
 	{
@@ -4008,5 +4007,5 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		name.setName(intern(index));
 	}		
-#endif
+#endif // MIR or NANOJIT
 }

@@ -126,7 +126,7 @@ namespace avmplus
 		Atom getpropertylate_i(Atom obj, int index) const;
 		Atom getpropertylate_u(Atom obj, uint32 index) const;
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		void setpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index);
 		void initpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index);
 		Atom getpropertyHelper(Atom obj, Multiname *multi, VTable *vtable, Atom index);

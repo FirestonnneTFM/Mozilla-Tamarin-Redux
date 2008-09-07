@@ -1682,7 +1682,7 @@ namespace avmplus
 			script->name = core->concatStrings(traits->format(core), core->newString("$init"));
 			#endif
 
-            #if defined(AVMPLUS_MIR)
+            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			if (!core->config.forcemir)
 			{
 				// suggest that we don't jit the $init methods
@@ -1990,7 +1990,7 @@ namespace avmplus
 			ctraits->final = true;
 			ctraits->needsHashtable = true;
 
-            #if defined(AVMPLUS_MIR)
+            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			if (!core->config.forcemir)
 			{
 				// suggest that we don't jit the class initializer

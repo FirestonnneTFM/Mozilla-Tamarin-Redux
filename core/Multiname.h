@@ -41,8 +41,13 @@
 
 namespace avmplus
 {
+	#ifdef AVMPLUS_MIR
 	class CodegenMIR;
+	#endif
+
+	#ifdef FEATURE_NANOJIT
 	class CodegenLIR;
+	#endif
 
 	/**
 	 * Multiname is a reference to an identifier in 0 or more namespaces.  It consists
@@ -62,6 +67,8 @@ namespace avmplus
 		const static int TYPEPARAM = 0x40;
 		#ifdef AVMPLUS_MIR
 		friend class CodegenMIR;
+		#endif
+		#ifdef FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif 
 		friend class HeapMultiname;

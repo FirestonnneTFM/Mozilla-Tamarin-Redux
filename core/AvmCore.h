@@ -103,7 +103,17 @@ const int kBufferPadding = 16;
 		bool turbo;
 
 		#ifdef AVMPLUS_MIR
+		bool dceopt;
+		/**
+		 * Genearate a graph for the basic blocks.  Can be used by
+		 * 'dot' utility to generate a jpg.
+		 */
+		#ifdef AVMPLUS_VERBOSE
+		bool bbgraph;
+		#endif //AVMPLUS_VERBOSE
+        #endif
 
+        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		/**
 		 * To speed up initialization, we don't use MIR on
 		 * $init methods; we use interp instead.  For testing
@@ -113,9 +123,7 @@ const int kBufferPadding = 16;
 		 * instead of interp.
 		 */
 		bool forcemir;
-
 		bool cseopt;
-		bool dceopt;
 
 		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		bool sse2;
@@ -127,16 +135,7 @@ const int kBufferPadding = 16;
 		 * to be handled.
 		 */
 		bool interrupts;
-
-		/**
-		 * Genearate a graph for the basic blocks.  Can be used by
-		 * 'dot' utility to generate a jpg.
-		 */
-		#ifdef AVMPLUS_VERBOSE
-		bool bbgraph;
-		#endif //AVMPLUS_VERBOSE
-
-		#endif // AVMPLUS_MIR
+		#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 #ifdef AVMPLUS_VERIFYALL
 		bool verifyall;
@@ -217,10 +216,12 @@ const int kBufferPadding = 16;
 		#ifdef AVMPLUS_VERBOSE
 		MMgc::GCHashtable* codegenMethodNames;
 		#endif /* AVMPLUS_VERBOSE */
-
-		void initMultinameLate(Multiname& name, Atom index);
-
 		#endif /* MIR */
+
+        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		void initMultinameLate(Multiname& name, Atom index);
+        #endif
+
 
 		/**
 		 * Redirects the standard output of the VM to the specified

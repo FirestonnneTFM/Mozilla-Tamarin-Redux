@@ -256,11 +256,15 @@ namespace avmshell
 		#endif
 
     #ifdef AVMPLUS_MIR
-		printf("          [-Dforcemir]  use MIR always, never interp\n");
 		printf("          [-Dmem]       show compiler memory usage \n");
 		printf("          [-Dnodce]     disable DCE optimization \n");
+		#ifdef AVMPLUS_VERBOSE
+			printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
+		#endif
+    #endif
+    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		printf("          [-Dforcemir]  use MIR always, never interp\n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
-
         #ifdef AVMPLUS_IA32
             printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         #endif /* AVMPLUS_IA32 */
@@ -543,7 +547,7 @@ namespace avmshell
 
 		TRY(this, kCatchAction_ReportAsError)
 		{
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 			#ifdef AVMPLUS_MAC
 			config.sse2 = true;
@@ -598,9 +602,9 @@ namespace avmshell
 
 						#ifdef AVMPLUS_IA32
 						} else if (!strcmp(arg+2, "nosse")) {
-#ifdef AVMPLUS_MIR
+                            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 							config.sse2 = false;
-#endif
+                            #endif
 						#endif
 
 	                    #ifdef AVMPLUS_VERIFYALL
@@ -646,23 +650,23 @@ namespace avmshell
 						#endif
 
 	                #ifdef AVMPLUS_MIR
-						} else if (!strcmp(arg+2, "forcemir")) {
-							config.forcemir = true;
-
 						} else if (!strcmp(arg+2, "nodce")) {
 							config.dceopt = false;
-							
-						} else if (!strcmp(arg+2, "nocse")) {
-							config.cseopt = false;
-
 						} else if (!strcmp(arg+2, "mem")) {
 							show_mem = true;
-
                         #ifdef AVMPLUS_VERBOSE
 						} else if (!strcmp(arg+2, "bbgraph")) {
 							config.bbgraph = true;  // generate basic block graph (only valid with mir switch)
                         #endif
-                    #endif /* AVMPLUS_MIR */
+                    #endif
+
+                    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+						} else if (!strcmp(arg+2, "forcemir")) {
+							config.forcemir = true;
+							
+						} else if (!strcmp(arg+2, "nocse")) {
+							config.cseopt = false;
+                    #endif
 
 						} else {
 							usage();

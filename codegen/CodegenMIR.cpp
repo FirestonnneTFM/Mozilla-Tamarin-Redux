@@ -38,10 +38,11 @@
 
 
 #include "avmplus.h"
-#include "CodegenMIR.h"
-#include "../core/FrameState.h"
 
 #ifdef AVMPLUS_MIR
+
+#include "CodegenMIR.h"
+#include "../core/FrameState.h"
 
 #ifdef DARWIN
     #if defined(AVMPLUS_MAC_CARBON)
@@ -12191,4 +12192,4 @@ namespace avmplus
 
 }
 
-#endif
+#endif // AVMPLUS_MIR

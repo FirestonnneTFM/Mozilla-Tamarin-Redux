@@ -47,7 +47,6 @@ namespace avmplus
     using namespace MMgc;
 
 	class MethodInfo;
-	typedef LIns OP;
 
 	class CodegenLabel {
     public:

@@ -38,6 +38,9 @@
 
 
 #include "avmplus.h"
+
+#ifdef FEATURE_NANOJIT
+
 #include "CodegenLIR.h"
 #include "../core/FrameState.h"
 
@@ -265,8 +268,6 @@ namespace avmplus
 	using namespace MMgc;
 	using namespace nanojit;
 
-	#ifdef AVMPLUS_MIR
-
     enum IndirectFunctionId {
         CALL_INDIRECT, FCALL_INDIRECT, CALL_IMT, FCALL_IMT
     };
@@ -384,7 +385,6 @@ namespace avmplus
         Value &v = state->value(i);
         v.ins = o;
         lirout->store(o, vars, i*8);
-        v.stored = true;
 	}
 
 	LIns* CodegenLIR::atomToNativeRep(int i, LIns* atom)
@@ -1105,7 +1105,6 @@ namespace avmplus
 		{
 			Value& v = state->value(i);
 			v.ins = 0;
-			v.stored = false;
 		}
 
 		//
@@ -3307,7 +3306,6 @@ namespace avmplus
 			#endif /* VTUNE */
 				break;
             }
-            #endif // DEBUGGER
 
 			default:
 			{
@@ -3771,9 +3769,6 @@ namespace avmplus
 	void CodegenLIR::formatOperand(PrintWriter& buffer, LIns* opr)
 	{
         if (opr) {
-            if (opr->isStore() && opr->oprnd2() == vars) {
-                opr = opr->oprnd1(); // show the value stored
-            }
 			buffer.format("@%s", lirbuf->names->formatRef(opr));
         }
         else {
@@ -4295,3 +4290,5 @@ namespace nanojit
         AvmAssert(false);
     }
 }
+
+#endif // FEATURE_NANOJIT
