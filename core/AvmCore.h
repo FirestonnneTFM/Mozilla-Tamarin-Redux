@@ -125,17 +125,18 @@ const int kBufferPadding = 16;
 		bool forcemir;
 		bool cseopt;
 
-		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+        #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		bool sse2;
 		#endif
 
-		/**
+        #endif // AVMPLUS_MIR || FEATURE_NANOJIT
+
+        /**
 		 * If this switch is set, executing code will check the
 		 * "interrupted" flag to see whether an interrupt needs
 		 * to be handled.
 		 */
 		bool interrupts;
-		#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 #ifdef AVMPLUS_VERIFYALL
 		bool verifyall;

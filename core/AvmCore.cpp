@@ -158,11 +158,11 @@ namespace avmplus
 			// forcemir flag forces use of MIR instead of interpreter
 			config.forcemir = false;
 			config.cseopt = true;
-        #endif
 
-	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+    	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     		config.sse2 = true;
-		#endif
+	    	#endif
+        #endif
 
 	#ifdef VTUNE
 			VTuneStatus = CheckVTuneStatus();
@@ -1671,18 +1671,16 @@ return the result of the comparison ToPrimitive(x) == y.
 		//[ed] we only call this from methods with catch blocks, when exceptions != NULL
 		AvmAssert(info->exceptions != NULL);
 #ifdef AVMPLUS_WORD_CODE
-		// This is hacky and will go away.  Choose the exception handler table that
-		// has from/to/target addresses appropriate to the code for that method --
-		// either word code or jit'd code.  Even when jitting is enabled it does not
-		// always apply to every method (due to a performance heuristic or memory pressure)
+		// This is hacky and will go away.  If the target method was not jitted, use
+        // word_code.exceptions, otherwise use info->exceptions.  methods may or may
+        // not be JITted based on memory, configuration, or heuristics.
 
-		//AvmAssert(info->word_code.exceptions != NULL);
 		ExceptionHandlerTable* exceptions;
-		
-		if (info->impl32 == avmplus::interp32 || info->implN == avmplus::interpN)
-			exceptions = info->word_code.exceptions;
-		else
+        if (info->impl32 == avmplus::interp32 || info->implN == avmplus::interpN)
+            exceptions = info->word_code.exceptions;
+        else
 			exceptions = info->exceptions;
+		AvmAssert(exceptions != NULL);
 #else
 		ExceptionHandlerTable* exceptions = info->exceptions;
 #endif

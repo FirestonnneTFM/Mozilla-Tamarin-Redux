@@ -38,9 +38,9 @@
 
 
 #include "avmplus.h"
+#ifdef AVMPLUS_MIR
 #include "CodegenMIR.h"
 
-#ifdef AVMPLUS_MIR
 namespace avmplus
 {
 	using namespace MMgc;
