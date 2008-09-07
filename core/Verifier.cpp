@@ -659,7 +659,9 @@ namespace avmplus
 				MIR_ONLY( Atom filename = ) checkCpoolOperand(imm30, kStringType);
 				MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)AvmCore::atomToString(filename)); )
 				#endif
+#ifdef DEBUGGER
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+#endif
 				break;
 			}
 
@@ -2248,18 +2250,24 @@ namespace avmplus
 			}
 
 			case OP_bkpt:
+#ifdef DEBUGGER
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+#endif
 				break;
 					
 			case OP_bkptline:
+#ifdef DEBUGGER
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+#endif
 				break;
 					
 			case OP_nop:
 				break;
 					
 			case OP_debug:
+#ifdef DEBUGGER
 				XLAT_ONLY( if (translator) translator->emitDebug(pc) );
+#endif
 				break;
 					
 			case OP_label:
@@ -2271,7 +2279,9 @@ namespace avmplus
 				// we actually do generate code for these, in debugger mode
 				MIR_ONLY( if (mir) mir->emit(state, opcode, imm30); )
 				#endif
+#ifdef DEBUGGER
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+#endif
 				break;
 
 			case OP_nextvalue:

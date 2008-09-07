@@ -68,7 +68,9 @@ namespace avmplus
 		void emitOp1(int opcode, uint32 operand);
 		void emitOp2(const byte *pc, int opcode);
 		void emitOp2(int opcode, uint32 op1, uint32 op2);
+#ifdef DEBUGGER
 		void emitDebug(const byte *pc);
+#endif
 		void emitRelativeJump(const byte *pc, int opcode);
 		void emitLookupswitch(const byte *pc);
 		void emitLabel(const byte *pc);

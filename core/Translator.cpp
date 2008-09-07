@@ -202,8 +202,8 @@ namespace avmplus
 		size_t extra = sizeof(ExceptionHandler)*(exception_count - 1);
 		ExceptionHandlerTable* new_table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
 		
-		// insert items in the exn list for from, to, and target, with the pc pointing
-		// to the correct triggering instruction in the ABC and the updateloc
+		// Insert items in the exn list for from, to, and target, with the pc pointing
+		// to the correct triggering instruction in the ABC and the update loc
 		// pointing to the location to be patched; and a flag is_int_offset (if false
 		// it's a sintptr).
 		
@@ -291,8 +291,7 @@ namespace avmplus
 	{
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		// Do not optimize across control flow targets, so flush the peephole window here
-		if (exception_fixes != NULL && exception_fixes->pc == pc ||
-			backpatches != NULL && backpatches->target_pc == pc)
+		if (exception_fixes != NULL && exception_fixes->pc == pc || backpatches != NULL && backpatches->target_pc == pc)
 			peepFlush();
 #endif
 
@@ -617,12 +616,25 @@ namespace avmplus
 		labels = l;
 	}
 
+#ifdef DEBUGGER
 	void Translator::emitDebug(const byte *pc) 
 	{
-		(void)pc;
-		// FIXME: shouldn't just skip it, probably
-		// pc += AvmCore::calculateInstructionWidth(pc-1) - 1;
+		CHECK(5);
+		pc++;
+		byte debug_type = *pc++;
+		uint32 index = AvmCore::readU30(pc);
+		byte reg = *pc++;
+		uint32 extra = AvmCore::readU30(pc);
+		// 4 separate operands to match the value in the operand count table,
+		// though obviously we could pack debug_type and reg into one word and
+		// we could also omit extra.
+		*dest++ = NEW_OPCODE(OP_debug);
+		*dest++ = debug_type;
+		*dest++ = index;
+		*dest++ = reg;
+		*dest++ = extra;
 	}
+#endif
 	
 	void Translator::emitPushbyte(const byte *pc) 
 	{
@@ -849,17 +861,14 @@ namespace avmplus
 	// If optimization must not cross some instruction boundary (as for control flow targets)
 	// then peepFlush() must be called before instructions are emitted for the point beyond
 	// the boundary.
+	//
+	// It is possible to optimize the entry to peep, the in-line test is 
+	//     state==0 && toplevel[toplevel_index] == 0
+	// where toplevel_index is computed from the opcode, maybe worth simplifying that in 
+	// order to make this test faster.  Anyhow, if the test is true then peep() need 
+	// not be called as there will not be a state transition.  This factoid may be useful
+	// if emitOp0, emitOp1, and emitOp2 are in-lined into the verifier.
 
-	// It is possible to optimize the entry to peep, the in-line test is state==0 && toplevel[opcode] == 0,
-	// if this is true then peep() need not be called as there will not be a state transition.  This
-	// factoid may be useful if emitOp0, emitOp1, and emitOp2 are in-lined into the verifier.
-
-	
-	// should we use an actual window, ie, a buffer, for simplicity?  as it is, I[] is not
-	// actually contiguous, we need I to contain pointers to instructions, eg I[1][1] is
-	// the first operand of the second instruction... and then how do we handle the output?
-	// some sort of replace(I, 1, 2, buf, len) setup?  Not bad, would avoid dependencies
-	// on order of evaluation when updating I.
 	
 	// In practice, most of these fields don't need to be uint32.  But for the 
 	// same reason, there aren't a lot of savings to be had by shrinking them.
@@ -876,18 +885,18 @@ namespace avmplus
 		uint32 next_state;
 	};
 	
-	// Begin code that should be generated
-	//
 	// Note that transitions in a run are always sorted in increasing token value order,
 	// so it's possible to binary search the run.
 	
+	// Begin code that should be generated
+	
 	static state_t states[] = {
 	{ 0, 0, 0, 0 },    // 0 is never a valid state
-	{ 0, 1, 0, 0 },    // 62
-	{ 1, 1, 1, 1 },    // 62 62
-	{ 1, 0, 0, 2 },    // 62 62 62
-	{ 0, 1, 2, 0 },    // 63
-	{ 1, 0, 0, 3 },    // 63 62
+	{ 0, 1, 0, 0 },    // 0x62
+	{ 1, 1, 1, 1 },    // 0x62 0x62
+	{ 1, 0, 0, 2 },    // 0x62 0x62 0x62
+	{ 0, 1, 2, 0 },    // 0x63
+	{ 1, 0, 0, 3 },    // 0x63 0x62
 	};
 	
 	static transition_t transitions[] = {
@@ -991,7 +1000,6 @@ namespace avmplus
 	{
 		// Undo any relative offsets in the last instruction
 
-		bool forward = false;
 		if (isJumpInstruction(O[nextI - 1])) {
 			
 			AvmAssert(I[nextI - 1] + 2 == dest);
@@ -999,7 +1007,6 @@ namespace avmplus
 			uint32 offset = I[nextI - 1][1];
 			if (offset == 0x80000000U) {
 				// Forward branch, must find and nuke the backpatch
-				forward = true;
 				backpatch_info *b = backpatches;
 				backpatch_info *b2 = NULL;
 				while (b != NULL && b->patch_loc != &I[nextI - 1][1])
@@ -1022,8 +1029,8 @@ namespace avmplus
 			}
 		}
 		
-		// Catenate unconsumed instructions onto R (it's easier than struggling with moving instructions
-		// across buffer boundaries)
+		// Catenate unconsumed instructions onto R (it's easier than struggling with
+		// moving instructions across buffer boundaries)
 
 		uint32 k = new_words;
 		for ( uint32 n=start + old_instr ; n < nextI ; n++ ) {
@@ -1033,7 +1040,7 @@ namespace avmplus
 				R[k++] = I[n][j];
 		}
 		
-		// Unlink the last buffer segment if we took everything from it, maybe push it onto
+		// Unlink the last buffer segment if we took everything from it, push it onto
 		// a reserve (there can only ever be one free).  We know I[nextI-1] points into the
 		// current buffer, so check if I[start] is between the start of the buffer and
 		// the last instruction.
@@ -1060,13 +1067,11 @@ namespace avmplus
 				if (offset >= 0) {
 					// Forward jump
 					// Install a new backpatch structure
-					AvmAssert(forward);
 					makeAndInsertBackpatch(code_start + offset, buffer_offset + (dest + 1 - buffers->data));
 				}
 				else {
 					// Backward jump
 					// Compute new jump offset
-					AvmAssert(!forward);
 					*dest = -(buffer_offset + (dest + 1 - buffers->data) + offset);
 					dest++;
 				}
@@ -1090,22 +1095,24 @@ namespace avmplus
 						*dest++ = R[i++];
 						*dest++ = R[i++];
 						break;
+					case 5:  // OP_debug
+						CHECK(5);
+						*dest++ = R[i++];
+						*dest++ = R[i++];
+						*dest++ = R[i++];
+						*dest++ = R[i++];
+						*dest++ = R[i++];
+						break;
 				}
 			}
 		}
 		
-#ifdef _DEBUG
-		backpatch_info *q = backpatches;
-		while (q != NULL) {
-			AvmAssert(*q->patch_loc == 0x80000000U);
-			q = q->next;
-		}
-#endif
-		
 		return true;  // always
 	}
 
-	// Clean this up later
+	// OPTIMIZEME - instruction width lookup must be fast.
+	// Should use a table lookup for all the opcodes.
+	
 	uint32 Translator::calculateInstructionWidth(uint32 opcode)
 	{
 		if (opcode < 255)
@@ -1123,8 +1130,11 @@ namespace avmplus
 				return 1;
 		}
 	}
-				
-	// Clean this up later
+	
+	// OPTIMIZEME - determining jump instruction must be fast.
+	// Should use a fast lookup or an inlinable
+	// comparison (all these instructions are in a dense range).
+	
 	bool Translator::isJumpInstruction(uint32 opcode)
 	{
 		switch (opcode) {
@@ -1155,16 +1165,18 @@ namespace avmplus
 		transition_t *t;
 		uint32 i, limit, next_state, toplevel_index;
 		
-		// bug: 
-
 		AvmAssert(opcode != OP_lookupswitch);
 
 		if (state == 0) 
 			goto initial_state;
 		
 		// Search for a transition from the current state to a next
-		// state on input 'opcode'.  This search is sequential now,
-		// but things are set up so that we can use binary search later.
+		// state on input 'opcode'.  
+		//
+		// OPTIMIZEME - search for next state
+		// This search is sequential now, but things are set up so 
+		// that we can use binary search later: transitions are sorted
+		// in token value order
 		
 		O[nextI] = opcode;
 		I[nextI] = loc;
@@ -1224,7 +1236,7 @@ namespace avmplus
 				goto accepted;
 		}
 
-		// Even if we failed to find an accepting state then fall through to initial_state
+		// If we failed to find an accepting state then fall through to initial_state
 		// to reset the machine.
 
 	initial_state:
@@ -1242,13 +1254,15 @@ namespace avmplus
 		return;
 		
 	accepted:
+		// FIXME - improve state selection following acceptance
+		//
 		// We should do better here: we should enter at the last opcode left behind in
-		// the stream provided it was not just inserted.  The replace() function could
-		// record that opcode for us.
+		// the stream.  The replace() function could record that opcode for us.
 		state = 0;
-		return;
 	}
 	
+	// FIXME - improve peephole window flushing
+	//
 	// Here we should probably not just set the state to 0, but force a commit to a 
 	// pending backtrack state if there is one.  The idea is to sync the instruction
 	// stream so that we don't peephole across a label or an exception handling
