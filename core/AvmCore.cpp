@@ -1660,16 +1660,16 @@ return the result of the comparison ToPrimitive(x) == y.
 		//[ed] we only call this from methods with catch blocks, when exceptions != NULL
 		AvmAssert(info->exceptions != NULL);
 #ifdef AVMPLUS_WORD_CODE
-		// This is hacky and will go away.  If we're not running in the pure interpreter
-		// then methods are JITted on first entry, bypassing translation altogether.  In
-		// this case, info->word_code.exceptions will be NULL, causing the AVM to crash.
-		// So the right thing to do in this case is to fall back on info->exceptions.
+		// This is hacky and will go away.  If the target method was not jitted, use
+        // word_code.exceptions, otherwise use info->exceptions.  methods may or may
+        // not be JITted based on memory, configuration, or heuristics.
 
-		//AvmAssert(info->word_code.exceptions != NULL);
-		ExceptionHandlerTable* exceptions = info->word_code.exceptions;
-
-		if (exceptions == NULL)
+		ExceptionHandlerTable* exceptions;
+        if (info->impl32 == avmplus::interp32 || info->implN == avmplus::interpN)
+            exceptions = info->word_code.exceptions;
+        else
 			exceptions = info->exceptions;
+		AvmAssert(exceptions != NULL);
 #else
 		ExceptionHandlerTable* exceptions = info->exceptions;
 #endif
