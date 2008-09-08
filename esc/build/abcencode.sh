@@ -12,7 +12,7 @@
 
 DIR=../bin
 
-$DIR/shell \
+$DIR/shell\
     $DIR/debug.es.abc \
     $DIR/util.es.abc \
     $DIR/bytes-tamarin.es.abc \
