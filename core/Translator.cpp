@@ -1025,7 +1025,7 @@ namespace avmplus
 				// Backward branch
 				AvmAssert((int32)I[nextI - 1][1] < 0);
 				// Install the negative of the absolute word offset of the target
-				I[nextI - 1][1] = -(buffer_offset + (dest - buffers->data) + (int32)I[nextI - 1][1]);
+				I[nextI - 1][1] = -int32(buffer_offset + (dest - buffers->data) + (int32)I[nextI - 1][1]);
 			}
 		}
 		
@@ -1072,7 +1072,7 @@ namespace avmplus
 				else {
 					// Backward jump
 					// Compute new jump offset
-					*dest = -(buffer_offset + (dest + 1 - buffers->data) + offset);
+					*dest = -int32(buffer_offset + (dest + 1 - buffers->data) + offset);
 					dest++;
 				}
 			}

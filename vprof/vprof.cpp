@@ -372,11 +372,7 @@ uint64_t tstamp()
 uint64_t rtstamp() 
 {
 	#ifdef WIN32
-		#ifdef 64BIT
 		return __rdtsc();
-		#else /* 32bit */
-		_asm rdtsc;
-		#endif
 	#elif __i386__
 		// Assume IA32, gcc or Intel Compiler                                                                          
 		uint64_t temp;
