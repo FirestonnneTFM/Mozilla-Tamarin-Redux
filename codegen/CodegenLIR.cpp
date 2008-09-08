@@ -960,10 +960,12 @@ namespace avmplus
             lirout->insParam(i, 1);
 	}
 
+#ifdef AVMPLUS_VERBOSE
     LirWriter *pushVerboseWriter(GC *gc, LirWriter *lirout, LirBuffer *lirbuf) {
         lirbuf->names = new (gc) LirNameMap(gc, k_functions, lirbuf->_frago->labels);
         return new (gc) VerboseWriter(gc, lirout, lirbuf->names);
     }
+#endif
 
 	// f(env, argc, instance, argv)
 	bool CodegenLIR::prologue(FrameState* state)
