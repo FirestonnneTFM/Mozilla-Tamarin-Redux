@@ -69,7 +69,7 @@ def _configGuess():
     return _configSub(ostest, cputest)
 
 def _configSub(ostest, cputest):
-    if ostest.startswith('win'):
+    if ostest.startswith('win') or ostest.startswith('cygwin'):
         os = 'windows'
     elif ostest.startswith('darwin') or ostest.startswith('apple-darwin'):
         os = 'darwin'
@@ -191,7 +191,7 @@ class Configuration:
                 'DLL_SUFFIX'   : 'dll',
                 'PROGRAM_SUFFIX': '.exe',
                 'CPPFLAGS'     : static_crt and (self._debug and '-MTd' or '-MT') or (self._debug and '-MDd' or '-MD'),
-                'CXX'          : 'cl.exe',
+                'CXX'          : 'cl.exe -nologo',
                 'CXXFLAGS'     : '-TP',
                 'DLL_CFLAGS'   : '',
                 'AR'           : 'lib.exe',
@@ -205,6 +205,8 @@ class Configuration:
                 'OUTOPTION' : '-Fo',
                 'LIBPATH'   : '-LIBPATH:'
                 })
+            if sys.platform.startswith('cygwin'):
+                self._acvars.update({'CXX'          : '$(topsrcdir)/build/cygwin-wrapper.sh cl.exe -nologo'})
 
         # Hackery! Make assumptions that we want to build with GCC 3.3 on MacPPC
         # and GCC4 on MacIntel
@@ -279,7 +281,9 @@ class Configuration:
         writeFileIfChanged(outpath, contents)
 
 def toMSYSPath(path):
-    if path[1] != ':':
+    if sys.platform.startswith('cygwin'):
+        return path
+    elif path[1] != ':':
         raise ValueError("win32 path without drive letter!")
 
     return '/%s%s' % (path[0], path[2:].replace('\\', '/'))
