@@ -49,38 +49,46 @@
      ident    ::= C++ identifier
      eol      ::= newline or end-of-file
 
-   The idea is that the identifiers in the pattern are opcode values that
-   are resolved at compile time and which drive the peephole optimizer
-   state machine.  The guard is evaluated in case there are side conditions
-   apart from the opcode values; it must be a C++ expression.  The action
-   represents individual instruction words that replace the instructions
-   matched by the pattern.
+   Identifiers in the pattern must be opcode names; these are resolved at 
+   compile time and the peephole optimizer state machine uses them to
+   transition from one state to another.  The guard is evaluated in case 
+   there are side conditions apart from the opcode values; the guard must 
+   be a C++ expression.  The action represents individual instruction
+   words that replace the instructions matched by the pattern; each word
+   should be a C++ expression.
 
    The syntax $n.m refers to the m'th word of the n'th matched instruction.
+   It can be used in the guard and action.
 
-   The guard will normally be evaluated zero or one times, but it would
-   be good not to depend on that.
+   The guard will be evaluated zero or one times per match.  (The current
+   implementation only invokes a guard after longer matches have failed,
+   so zero times is typical - you can't track state machine progress by
+   having side effects in the guard.)
 
-   For example (this one has only one instruction in the action)
+   For example (this one has only one instruction in the action):
 
      pattern  OP_getlocal ; OP_getlocal ; OP_getlocal
      guard    $0.1 < 1024 && $1.1 < 1024 && $2.1 < 1024
-     action   OP_get2locals ; (($2.1 << 20) | ($1.1 << 10) | $0.1)
+     action   OP_get3locals ; ($2.1 << 20) | ($1.1 << 10) | $0.1
 
    Continuation lines are allowed, they start with '*' in the first column.
+   The continuation line, less its '*', is pasted onto the end of the
+   preceding line.
 
-   Comment lines start with //.  Comment lines and blank lines are ignored
-   everywhere before continuation lines are resolved.
+   Comment lines start with // (possibly preceded by blanks).  Comment lines
+   and blank lines are ignored everywhere before continuation lines are 
+   resolved.  Comments can't follow patterns, guards, or actions on the 
+   same line.
 
-   Restrictions:
+   Restrictions (not checked by this program):
 
    - The action cannot introduce more words than the instruction originally
      occupied  (it would not be hard to lift this restriction). 
 
-   - Lookupswitch may not appear in these patterns
+   - Lookupswitch must not appear in these patterns.
 
-   - Any PC-relative branch instruction must be the last in the pattern as
-     well as in the replacement code
+   - Any PC-relative branch instruction must be the last in the pattern or
+     in the replacement code.
 
  */
    
@@ -103,7 +111,7 @@ package peephole
             throw new Error("Assertion failed");
     }
 
-    function cleanup(lines) {
+    function preprocess(lines) {
 	var j = 0;
 	var first = true;
 	for ( var i=0, limit=lines.length ; i < limit ; i++ ) {
@@ -124,14 +132,14 @@ package peephole
 	return lines;
     }
 
-    function patterns(lines) {
+    function parse(lines) {
 	var output = [];
 	var P = null;
 	var G = null;
 	var A = null;
 	var res;
 	for ( var i=0, limit=lines.length ; i < limit ; i++ ) {
-	    var L = lines[i];
+	    var L = lines[i].replace(/\$([0-9]+)\.([0-9]+)/g, "I[$1][$2]");
 	    if (P == null) {
 		res = /^pattern\s+(.*)$/.exec(L);
 		assert(res != null);
@@ -160,24 +168,14 @@ package peephole
 	return output;
     }
 
-    function printT(x) {
-	var s = "{";
-	for ( var i in x ) {
-	    if (i == "toString") continue;
-	    s += i + ": " + x[i] + ", ";
-	}
-	s += "}";
-	return s;
-    }
-
     function build(patterns) {
-	var T = { toString: function () { return printT(this); } };
+	var T = {};
 	for ( var i=0, ilimit=patterns.length ; i < ilimit ; i++ ) {
 	    var p = patterns[i];
 	    var container = T;
 	    for ( var j=0, jlimit=p.P.length ; j < jlimit ; j++ ) {
 		if (!(p.P[j] in container))
-		    container[p.P[j]] = { toString: function () { return printT(this); } };
+		    container[p.P[j]] = {};
 		container = container[p.P[j]];
 	    }
 	    if (!("actions" in container))
@@ -216,7 +214,6 @@ package peephole
         System.exit(1);
     }
 
-    var T = build(patterns(cleanup(File.read(System.argv[0]).split("\n"))));
-    print(String(T));
+    var T = build(parse(preprocess(File.read(System.argv[0]).split("\n"))));
     display(T, null);
 }
