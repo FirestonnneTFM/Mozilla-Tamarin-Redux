@@ -333,11 +333,6 @@ def parsePerfm(line,dic):
       dic['count'].append(int(line.strip().split(' ')[-1]))
   except:
     pass
-
-# setup dictionary for vprof (perfm) results
-if globs['perfm']:
-  perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'tick':[], 'ir':[], 'count':[] }
-  perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'tick':[], 'ir':[], 'count':[] }
   
 
 
@@ -373,8 +368,8 @@ if len(avm2)>0:
     log_print("\n%-50s %7s %7s %7s\n" % ("test",globs['avmname'],globs['avm2name'], "%sp"))
   else:
     log_print("\n%-50s %20s   %20s" % ("test",globs['avmname'],globs['avm2name']))
-    log_print('%-50s  %5s :%5s  %5s    %5s :%5s  %5s %7s' % ('', 'min','max','avg','min','max','avg','%diff'))
-    log_print('                                                   --------------------   --------------------   -----')
+    log_print('%-50s  %6s :%6s  %6s    %6s :%6s  %6s %7s' % ('', 'min','max','avg','min','max','avg','%diff'))
+    log_print('                                                   -----------------------   -----------------------   -----')
 else:
   if (iterations>2):
     log_print("\n\n%-50s %7s %12s\n" % ("test",globs['avmname'],"95% conf"))
@@ -409,10 +404,14 @@ for ast in tests:
   result1=9999999
   resultList = []
   resultList2 = []
+  rl1 = []
+  rl2 = []
   result2=9999999
-  
-  perfm1 = {}
-  perfm2 = {}
+
+  # setup dictionary for vprof (perfm) results
+  if globs['perfm']:
+    perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'tick':[], 'ir':[], 'count':[] }
+    perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'tick':[], 'ir':[], 'count':[] }
   
   for i in range(iterations):
     f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
@@ -446,6 +445,8 @@ for ast in tests:
       spdup = 9999
     else:
       spdup = ((result1-result2)/result2)*100.0
+      rl1.append(result1)
+      rl2.append(result2)
     #except:
     #  log_print("exception: %s" % sys.exc_info()[0])
     #  exit(-1)
@@ -455,34 +456,37 @@ for ast in tests:
       log_print('%-50s %7s %7s %7.1f' % (ast,result1,result2,spdup))
     else:
       try:
-        log_print('%-50s [%5s :%5s] %5.1f   [%5s :%5s] %5.1f %7.1f' % (ast, min(resultList), max(resultList), sum(resultList)/len(resultList), min(resultList2), max(resultList2), sum(resultList2)/len(resultList2),spdup))
+        rl1_avg=sum(rl1)/len(rl1)
+        rl2_avg=sum(rl2)/len(rl2)
+        log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, min(rl1), max(rl1), rl1_avg, min(rl2), max(rl2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0))
       except:
-        log_print('%-50s [%5s :%5s] %5.1f   [%5s :%5s] %5.1f %7.1f' % (ast, '', '', result1, '', '', result2, spdup))
+        log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, '', '', result1, '', '', result2, spdup))
     
     if globs['perfm']:
       def calcPerfm(desc, key):
         # calculate min, max, average and %diff of averages
         try:
           if iterations == 1:
-            return '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
-                                ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0))
+            log_print( '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
+                                ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0)))
           else:
             avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
             avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
-            return '     %-45s [%5s :%5s] %5s   [%5s :%5s] %5s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
+            log_print('     %-45s [%6s :%6s] %6s   [%6s :%6s] %6s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
                                                                  min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
-                                                                 ((avg1-avg2)/float(avg2))*100.0)
+                                                                 ((avg1-avg2)/float(avg2))*100.0))
         except:
-          return ''
+          pass
           
-      log_print(calcPerfm('verify & IR gen (time)','verify'))
-      log_print(calcPerfm('compile (time)','compile'))
-      log_print(calcPerfm('code size (bytes)','code'))
-      log_print(calcPerfm('mir/lir bytes', 'irbytes'))
-      log_print(calcPerfm('mir/lir (# of inst)', 'ir'))
-      log_print(calcPerfm('IR/tick', 'tick'))
-      log_print(calcPerfm('count', 'count'))
-      log_print('------------------------------------------------------------------------------------------------------')
+          
+      calcPerfm('verify & IR gen (time)','verify')
+      calcPerfm('compile (time)','compile')
+      calcPerfm('code size (bytes)','code')
+      calcPerfm('mir/lir bytes', 'irbytes')
+      calcPerfm('mir/lir (# of inst)', 'ir')
+      calcPerfm('IR/tick', 'tick')
+      calcPerfm('count', 'count')
+      log_print('-------------------------------------------------------------------------------------------------------------')
   else:
     if result1 < 9999999 :
       meanRes = mean(resultList)
