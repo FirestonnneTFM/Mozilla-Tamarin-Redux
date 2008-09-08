@@ -133,7 +133,6 @@ namespace avmplus
 
 	void CodegenMIR::PUSH(sintptr imm)
  	{
-		count_push();
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
@@ -154,7 +153,6 @@ namespace avmplus
 
 	void CodegenMIR::MOV(Register dest, sintptr imm32) 
 	{
-		count_mov();
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
@@ -168,7 +166,6 @@ namespace avmplus
 
 	void CodegenMIR::MOV(int disp, Register base, sintptr imm, bool /*unused*/) 
 	{
-		count_st();
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
@@ -332,7 +329,6 @@ namespace avmplus
 	
 	void CodegenMIR::XORPD(Register dest, uintptr addr) 
 	{
-		count_fpuld();
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
@@ -350,7 +346,6 @@ namespace avmplus
 
 	void CodegenMIR::IMUL(Register dst, sintptr imm)
 	{
-		count_alu();
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
@@ -489,7 +484,6 @@ namespace avmplus
 	
 	void CodegenMIR::JMP(sintptr offset)
 	{
-		count_jmp();
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
@@ -508,7 +502,6 @@ namespace avmplus
 
 	void CodegenMIR::CALL(sintptr offset)
 	{
-		count_call();
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
@@ -596,7 +589,6 @@ namespace avmplus
 
 	void CodegenMIR::TEST_AH(uint8 imm8)
 	{
-		count_alu();
 		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verbose())
@@ -700,7 +692,6 @@ namespace avmplus
 	 */
 	void CodegenMIR::emitNativeThunk(NativeMethod *info)
 	{
-		count_thunk();
 		code = mip = mipStart = getMDBuffer(pool);
 		if (!code)
 		{
@@ -1093,7 +1084,6 @@ namespace avmplus
 
 	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
 	{
-		count_imt();
 		mip = mipStart = getMDBuffer(pool);
 		if (!mip)
 		{

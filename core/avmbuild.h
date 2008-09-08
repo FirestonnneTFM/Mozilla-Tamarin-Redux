@@ -237,9 +237,6 @@
 
 #define PCRE_STATIC
 
-// performance metrics for NJ 
-//#define PERFM
-
 #ifdef SOLARIS
 #define HAVE_ALLOCA_H
 #endif
