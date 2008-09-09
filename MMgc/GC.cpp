@@ -2107,32 +2107,6 @@ bail:
 		}
 	}
 
-	void GC::CheckFreelist(GCAlloc *gca)
-	{	
-		GCAlloc::GCBlock *b = gca->m_firstFree;
-		while(b)
-		{
-			void *freelist = b->firstFree;
-			while(freelist)
-			{			
-				// b->firstFree should be either 0 end of free list or a pointer into b, otherwise, someone
-				// wrote to freed memory and hosed our freelist
-				GCAssert(freelist == 0 || ((uintptr) freelist >= (uintptr) b->items && (uintptr) freelist < (uintptr) b + GCHeap::kBlockSize));
-				freelist = *((void**)freelist);
-			}
-			b = b->nextFree;
-		}
-	}
-
-	void GC::CheckFreelists()
-	{
-		for(int i=0; i < kNumSizeClasses; i++)
-		{
-			CheckFreelist(containsPointersAllocs[i]);
-			CheckFreelist(noPointersAllocs[i]);
-		}
-	}
-
 	void GC::UnmarkedScan(const void *mem, size_t size)
 	{
 		uintptr lowerBound = memStart;
