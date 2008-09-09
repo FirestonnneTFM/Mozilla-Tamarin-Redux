@@ -261,50 +261,5 @@ namespace MMgc
 		}	
 		return total;
 	}
-
-	void *FixedMalloc::LargeAlloc(size_t size)
-	{
-		size += DebugSize();
-		int blocksNeeded = GCHeap::SizeToBlocks(size);
-		void *item = m_heap->Alloc(blocksNeeded, true, false);
-		if(!item)
-		{
-			GCAssertMsg(item != NULL, "Large allocation failed!");
-		}
-		else
-		{
-			numLargeChunks += blocksNeeded;
-#ifdef MEMORY_INFO
-			item = DebugDecorate(item, size, 5);
-			memset(item, 0xfb, size - DebugSize());
-#endif
-		}
-		return item;
-	}
-	
-	
-	void FixedMalloc::LargeFree(void *item)
-	{
-#ifdef MEMORY_INFO
-		item = DebugFree(item, 0xed, 5);
-#endif
-		numLargeChunks -= GCHeap::SizeToBlocks(LargeSize(item));
-		m_heap->Free(item);
-	}
-	
-	size_t FixedMalloc::LargeSize(const void *item)
-	{
-		return m_heap->Size(item) * GCHeap::kBlockSize;
-	}
-
-	size_t FixedMalloc::GetTotalSize()
-	{
-		size_t total = numLargeChunks;
-		for (int i=0; i<kNumSizeClasses; i++) {
-			FixedAllocSafe *a = m_allocs[i];
-			total += a->GetNumChunks();
-		}	
-		return total;
-	}
 }
 
