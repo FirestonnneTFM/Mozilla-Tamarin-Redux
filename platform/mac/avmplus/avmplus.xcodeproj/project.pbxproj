@@ -70,6 +70,8 @@
 		1E6079CA097335EF007D0E1E /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60792A097335EF007D0E1E /* Domain.h */; };
 		1E6079CB097335EF007D0E1E /* DomainEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60792B097335EF007D0E1E /* DomainEnv.cpp */; };
 		1E6079CC097335EF007D0E1E /* DomainEnv.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60792C097335EF007D0E1E /* DomainEnv.h */; };
+		1E6079CD097335EF007D0E1E /* DynamicProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60792D097335EF007D0E1E /* DynamicProfiler.cpp */; };
+		1E6079CE097335EF007D0E1E /* DynamicProfiler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60792E097335EF007D0E1E /* DynamicProfiler.h */; };
 		1E6079CF097335EF007D0E1E /* E4XNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60792F097335EF007D0E1E /* E4XNode.cpp */; };
 		1E6079D0097335EF007D0E1E /* E4XNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607930097335EF007D0E1E /* E4XNode.h */; };
 		1E6079D1097335EF007D0E1E /* ErrorClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607931097335EF007D0E1E /* ErrorClass.cpp */; };
@@ -136,6 +138,8 @@
 		1E607A0E097335EF007D0E1E /* SortedIntMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60796E097335EF007D0E1E /* SortedIntMap.h */; };
 		1E607A0F097335EF007D0E1E /* StackTrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60796F097335EF007D0E1E /* StackTrace.cpp */; };
 		1E607A10097335EF007D0E1E /* StackTrace.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607970097335EF007D0E1E /* StackTrace.h */; };
+		1E607A11097335EF007D0E1E /* StaticProfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607971097335EF007D0E1E /* StaticProfiler.cpp */; };
+		1E607A12097335EF007D0E1E /* StaticProfiler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607972097335EF007D0E1E /* StaticProfiler.h */; };
 		1E607A13097335EF007D0E1E /* StringBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607973097335EF007D0E1E /* StringBuffer.cpp */; };
 		1E607A14097335EF007D0E1E /* StringBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607974097335EF007D0E1E /* StringBuffer.h */; };
 		1E607A15097335EF007D0E1E /* StringClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607975097335EF007D0E1E /* StringClass.cpp */; };
@@ -196,8 +200,6 @@
 		942BC4350BB991690088A47F /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 942BC4330BB991690088A47F /* Sampler.cpp */; };
 		942BC4360BB991690088A47F /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 942BC4340BB991690088A47F /* Sampler.h */; };
 		CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */; };
-		D962305C0E5CA2D200DA3F47 /* Translator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D962305A0E5CA2D200DA3F47 /* Translator.cpp */; };
-		D962305D0E5CA2D200DA3F47 /* Translator.h in Headers */ = {isa = PBXBuildFile; fileRef = D962305B0E5CA2D200DA3F47 /* Translator.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -264,6 +266,8 @@
 		1E60792A097335EF007D0E1E /* Domain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Domain.h; path = ../../../core/Domain.h; sourceTree = SOURCE_ROOT; };
 		1E60792B097335EF007D0E1E /* DomainEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DomainEnv.cpp; path = ../../../core/DomainEnv.cpp; sourceTree = SOURCE_ROOT; };
 		1E60792C097335EF007D0E1E /* DomainEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DomainEnv.h; path = ../../../core/DomainEnv.h; sourceTree = SOURCE_ROOT; };
+		1E60792D097335EF007D0E1E /* DynamicProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DynamicProfiler.cpp; path = ../../../core/DynamicProfiler.cpp; sourceTree = SOURCE_ROOT; };
+		1E60792E097335EF007D0E1E /* DynamicProfiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DynamicProfiler.h; path = ../../../core/DynamicProfiler.h; sourceTree = SOURCE_ROOT; };
 		1E60792F097335EF007D0E1E /* E4XNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = E4XNode.cpp; path = ../../../core/E4XNode.cpp; sourceTree = SOURCE_ROOT; };
 		1E607930097335EF007D0E1E /* E4XNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = E4XNode.h; path = ../../../core/E4XNode.h; sourceTree = SOURCE_ROOT; };
 		1E607931097335EF007D0E1E /* ErrorClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ErrorClass.cpp; path = ../../../core/ErrorClass.cpp; sourceTree = SOURCE_ROOT; };
@@ -330,6 +334,8 @@
 		1E60796E097335EF007D0E1E /* SortedIntMap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SortedIntMap.h; path = ../../../core/SortedIntMap.h; sourceTree = SOURCE_ROOT; };
 		1E60796F097335EF007D0E1E /* StackTrace.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StackTrace.cpp; path = ../../../core/StackTrace.cpp; sourceTree = SOURCE_ROOT; };
 		1E607970097335EF007D0E1E /* StackTrace.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StackTrace.h; path = ../../../core/StackTrace.h; sourceTree = SOURCE_ROOT; };
+		1E607971097335EF007D0E1E /* StaticProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StaticProfiler.cpp; path = ../../../core/StaticProfiler.cpp; sourceTree = SOURCE_ROOT; };
+		1E607972097335EF007D0E1E /* StaticProfiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StaticProfiler.h; path = ../../../core/StaticProfiler.h; sourceTree = SOURCE_ROOT; };
 		1E607973097335EF007D0E1E /* StringBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StringBuffer.cpp; path = ../../../core/StringBuffer.cpp; sourceTree = SOURCE_ROOT; };
 		1E607974097335EF007D0E1E /* StringBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StringBuffer.h; path = ../../../core/StringBuffer.h; sourceTree = SOURCE_ROOT; };
 		1E607975097335EF007D0E1E /* StringClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StringClass.cpp; path = ../../../core/StringClass.cpp; sourceTree = SOURCE_ROOT; };
@@ -391,8 +397,6 @@
 		942BC4340BB991690088A47F /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sampler.h; path = ../../../core/Sampler.h; sourceTree = SOURCE_ROOT; };
 		CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_newline.cpp; path = ../../../pcre/pcre_newline.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libavmplus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libavmplus.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		D962305A0E5CA2D200DA3F47 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Translator.cpp; path = ../../../core/Translator.cpp; sourceTree = SOURCE_ROOT; };
-		D962305B0E5CA2D200DA3F47 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Translator.h; path = ../../../core/Translator.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -508,6 +512,8 @@
 				1E60792A097335EF007D0E1E /* Domain.h */,
 				1E60792B097335EF007D0E1E /* DomainEnv.cpp */,
 				1E60792C097335EF007D0E1E /* DomainEnv.h */,
+				1E60792D097335EF007D0E1E /* DynamicProfiler.cpp */,
+				1E60792E097335EF007D0E1E /* DynamicProfiler.h */,
 				1E60792F097335EF007D0E1E /* E4XNode.cpp */,
 				1E607930097335EF007D0E1E /* E4XNode.h */,
 				1E607931097335EF007D0E1E /* ErrorClass.cpp */,
@@ -574,6 +580,8 @@
 				1E60796E097335EF007D0E1E /* SortedIntMap.h */,
 				1E60796F097335EF007D0E1E /* StackTrace.cpp */,
 				1E607970097335EF007D0E1E /* StackTrace.h */,
+				1E607971097335EF007D0E1E /* StaticProfiler.cpp */,
+				1E607972097335EF007D0E1E /* StaticProfiler.h */,
 				1E607973097335EF007D0E1E /* StringBuffer.cpp */,
 				1E607974097335EF007D0E1E /* StringBuffer.h */,
 				1E607975097335EF007D0E1E /* StringClass.cpp */,
@@ -585,8 +593,6 @@
 				1E60797B097335EF007D0E1E /* Traits.cpp */,
 				1E60797C097335EF007D0E1E /* Traits.h */,
 				1E60797D097335EF007D0E1E /* TraitsIterator.h */,
-				D962305A0E5CA2D200DA3F47 /* Translator.cpp */,
-				D962305B0E5CA2D200DA3F47 /* Translator.h */,
 				1E60797E097335EF007D0E1E /* UnicodeUtils.cpp */,
 				1E60797F097335EF007D0E1E /* UnicodeUtils.h */,
 				1E607980097335EF007D0E1E /* Verifier.cpp */,
@@ -713,6 +719,7 @@
 				1E6079C8097335EF007D0E1E /* DateObject.h in Headers */,
 				1E6079CA097335EF007D0E1E /* Domain.h in Headers */,
 				1E6079CC097335EF007D0E1E /* DomainEnv.h in Headers */,
+				1E6079CE097335EF007D0E1E /* DynamicProfiler.h in Headers */,
 				1E6079D0097335EF007D0E1E /* E4XNode.h in Headers */,
 				1E6079D2097335EF007D0E1E /* ErrorClass.h in Headers */,
 				1E6079D4097335EF007D0E1E /* ErrorConstants.h in Headers */,
@@ -748,6 +755,7 @@
 				1E607A0D097335EF007D0E1E /* ScriptObject.h in Headers */,
 				1E607A0E097335EF007D0E1E /* SortedIntMap.h in Headers */,
 				1E607A10097335EF007D0E1E /* StackTrace.h in Headers */,
+				1E607A12097335EF007D0E1E /* StaticProfiler.h in Headers */,
 				1E607A14097335EF007D0E1E /* StringBuffer.h in Headers */,
 				1E607A16097335EF007D0E1E /* StringClass.h in Headers */,
 				1E607A18097335EF007D0E1E /* StringObject.h in Headers */,
@@ -768,7 +776,6 @@
 				85125AE00A5C648300502345 /* AvmPlusScriptableObject.h in Headers */,
 				942BC4360BB991690088A47F /* Sampler.h in Headers */,
 				47D44EB70D37D56B008368EC /* VectorClass.h in Headers */,
-				D962305D0E5CA2D200DA3F47 /* Translator.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -802,7 +809,7 @@
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* avmplus */;
 			projectDirPath = "";
-			projectRoot = ../../..;
+			projectRoot = "";
 			targets = (
 				D2AAC045055464E500DB518D /* avmplus */,
 			);
@@ -840,6 +847,7 @@
 				1E6079C7097335EF007D0E1E /* DateObject.cpp in Sources */,
 				1E6079C9097335EF007D0E1E /* Domain.cpp in Sources */,
 				1E6079CB097335EF007D0E1E /* DomainEnv.cpp in Sources */,
+				1E6079CD097335EF007D0E1E /* DynamicProfiler.cpp in Sources */,
 				1E6079CF097335EF007D0E1E /* E4XNode.cpp in Sources */,
 				1E6079D1097335EF007D0E1E /* ErrorClass.cpp in Sources */,
 				1E6079D3097335EF007D0E1E /* ErrorConstants.cpp in Sources */,
@@ -871,6 +879,7 @@
 				1E607A0A097335EF007D0E1E /* ScriptBuffer.cpp in Sources */,
 				1E607A0C097335EF007D0E1E /* ScriptObject.cpp in Sources */,
 				1E607A0F097335EF007D0E1E /* StackTrace.cpp in Sources */,
+				1E607A11097335EF007D0E1E /* StaticProfiler.cpp in Sources */,
 				1E607A13097335EF007D0E1E /* StringBuffer.cpp in Sources */,
 				1E607A15097335EF007D0E1E /* StringClass.cpp in Sources */,
 				1E607A17097335EF007D0E1E /* StringObject.cpp in Sources */,
@@ -911,7 +920,6 @@
 				942BC4350BB991690088A47F /* Sampler.cpp in Sources */,
 				CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */,
 				47D44EB60D37D56B008368EC /* VectorClass.cpp in Sources */,
-				D962305C0E5CA2D200DA3F47 /* Translator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -921,7 +929,8 @@
 		1DEB91EC08733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				COPY_PHASE_STRIP = NO;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -957,10 +966,8 @@
 		1DEB91ED08733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				COPY_PHASE_STRIP = NO;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DEBUGGING_SYMBOLS = full;
@@ -994,8 +1001,9 @@
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1007,7 +1015,7 @@
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = NO;
+				GCC_WARN_PEDANTIC = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
@@ -1016,7 +1024,6 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WARNING_CFLAGS = (
@@ -1029,8 +1036,9 @@
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -1043,7 +1051,7 @@
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = NO;
+				GCC_WARN_PEDANTIC = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -1053,7 +1061,6 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WARNING_CFLAGS = (
@@ -1066,7 +1073,8 @@
 		8E8B52EB09AABCA50057BEE4 /* Debug_Debugger */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				COPY_PHASE_STRIP = NO;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1103,10 +1111,8 @@
 		8E8B52EC09AABCA50057BEE4 /* Release_Debugger */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				COPY_PHASE_STRIP = NO;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DEBUGGING_SYMBOLS = full;
@@ -1141,8 +1147,9 @@
 		8E8B52ED09AABCA50057BEE4 /* Debug_Debugger */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1154,7 +1161,7 @@
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = NO;
+				GCC_WARN_PEDANTIC = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNKNOWN_PRAGMAS = YES;
@@ -1163,7 +1170,6 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WARNING_CFLAGS = (
@@ -1176,8 +1182,9 @@
 		8E8B52EE09AABCA50057BEE4 /* Release_Debugger */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -1190,7 +1197,7 @@
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = NO;
+				GCC_WARN_PEDANTIC = YES;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -1200,7 +1207,6 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WARNING_CFLAGS = (
