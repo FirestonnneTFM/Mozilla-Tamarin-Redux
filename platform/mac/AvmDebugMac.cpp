@@ -48,7 +48,11 @@
 #include <strsafe.h>
 #endif
 
-#if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)	void AVMPlusCustomDebugMessageHandler(const char *message);#endifnamespace avmplus
+#if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)
+	void AVMPlusCustomDebugMessageHandler(const char *message);
+#endif
+
+namespace avmplus
 {
 	#ifdef DARWIN
 	void AvmDebugMsg(bool debuggerBreak, const char* format, ...)
@@ -64,7 +68,25 @@
 
 	void AvmDebugMsg(const char* p, bool debugBreak)
 	{
-        #if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)            AVMPlusCustomDebugMessageHandler(p);		#else	  	    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);			if(debugBreak)			{				Str255 buf;				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);				DebugStr(buf);			}			else			{				::CFShow(cfStr);			}					::CFRelease (cfStr);		#endif	}	
+        #if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)
+            AVMPlusCustomDebugMessageHandler(p);
+		#else
+	  	    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);
+
+			if(debugBreak)
+			{
+				Str255 buf;
+				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
+				DebugStr(buf);
+			}
+			else
+			{
+				::CFShow(cfStr);
+			}
+		
+			::CFRelease (cfStr);
+		#endif
+	}	
 	#else
 	void AvmDebugMsg(bool debuggerBreak, const char* format, ...)
 	{

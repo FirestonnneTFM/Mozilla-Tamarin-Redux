@@ -55,11 +55,3 @@ obj-dir/**
 axscript/vc2008/obj/**
 axscript/vc2008/*.ncb
 axscript/vc2008/axtam.vcproj.*.user
-core/*.out
-shell/*.out
-*.pp
-*.ii
-*.deps
-rd/**
-dd/**
-rel/**
