@@ -60,22 +60,29 @@ namespace avmplus
 		}
 
 	public:
-		int size;
-		int fullsize;
-		struct Entry {
-			Traits* traits;
-			bool isWith;
-		}
-		scopes[1]; // actual length = fullsize;
-		
 		static ScopeTypeChain* create(MMgc::GC* gc, ScopeTypeChain* outer, int capture, int extra=0)
 		{
 			int pad = capture+extra;
-			size_t padSize = sizeof(struct Entry) *
+			size_t padSize = sizeof(uintptr_t) *
 				(((pad > 0) ? (pad - 1) : 0) + (outer ? outer->size : 0));
 			return new (gc, padSize) ScopeTypeChain(outer, capture, extra);
 		}
 
+		inline Traits* getScopeTraitsAt(uint32_t i) const { return (Traits*)(scopes[i] & ~ISWITH); }
+		inline bool getScopeIsWithAt(uint32_t i) const { return (scopes[i] & ISWITH) != 0; }
+		inline void setScopeAt(uint32_t i, Traits* t, bool w) { scopes[i] = uintptr_t(t) | (w ? ISWITH : 0); }
+
+	private:
+		// Traits are MMgc-allocated, thus always 8-byte-aligned, so the low 3 bits are available for us to use
+		static const uintptr_t ISWITH = 0x01;
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		int32_t		size;
+		int32_t		fullsize;
+	private:
+		uintptr_t	scopes[1];	// actual length = fullsize;
+	// ------------------------ DATA SECTION END
     };
 
 	/**
@@ -83,13 +90,7 @@ namespace avmplus
 	*/
 	class ScopeChain : public MMgc::GCObject
 	{
-	public:
-		ScopeTypeChain* const scopeTraits;
-		DRCWB(Namespace*) const defaultXmlNamespace;
-	private:
 		friend class CodegenMIR;
-		Atom scopes[1]; // actual length == size
-
 	public:
 
 		/*
@@ -133,7 +134,7 @@ namespace avmplus
 		//
 		// Shut up these false positives:
 		//
-		// In member function ‘avmplus::Namespace** avmplus::ScopeChain::getDefaultNamespaceAddr() const’:
+		// In member function avmplus::Namespace** avmplus::ScopeChain::getDefaultNamespaceAddr() const:
 		// warning: dereferencing type-punned pointer might break strict-aliasing rules
  		//
 		#ifdef __GNUC__
@@ -149,6 +150,13 @@ namespace avmplus
 			size_t padSize = depth > 0 ? sizeof(Atom) * (depth-1) : 0;
 			return new (gc, padSize) ScopeChain(scopeTraits, outer, dxns);
 		}
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		ScopeTypeChain* const	scopeTraits;
+		DRCWB(Namespace*) const	defaultXmlNamespace;
+	private:
+		Atom					scopes[1];			// actual length == size
+	// ------------------------ DATA SECTION END
     };
 	
 }

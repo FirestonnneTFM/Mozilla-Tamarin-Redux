@@ -182,12 +182,12 @@ namespace avmshell
 		GetSystemInfo(&sysinfo);
 
 		int dummy;
-		int sp = (int)(&dummy);
-		sp &= ~(sysinfo.dwPageSize-1);
+		uintptr_t sp = (uintptr_t)(&dummy);
+		sp &= ~uintptr_t(sysinfo.dwPageSize-1);
 
 		MEMORY_BASIC_INFORMATION buf;
 		if (VirtualQuery((void*)sp, &buf, sizeof(buf)) == sizeof(buf)) {
-			minstack = (uint32)buf.AllocationBase + kStackMargin;
+			minstack = (uintptr)buf.AllocationBase + kStackMargin;
 		}
 	}
 	
@@ -365,12 +365,12 @@ namespace avmshell
 	void Shell::initShellPool()
 	{
 		AbstractFunction *nativeMethods[avmplus::NativeID::toplevel_abc_method_count];
-		NativeClassInfo *nativeClasses[avmplus::NativeID::toplevel_abc_class_count];
-		NativeScriptInfo *nativeScripts[avmplus::NativeID::toplevel_abc_script_count];
+		NativeClassInfop nativeClasses[avmplus::NativeID::toplevel_abc_class_count];
+		NativeScriptInfop nativeScripts[avmplus::NativeID::toplevel_abc_script_count];
 
 		memset(nativeMethods, 0, sizeof(AbstractFunction*)*avmplus::NativeID::toplevel_abc_method_count);
-		memset(nativeClasses, 0, sizeof(NativeClassInfo*)*avmplus::NativeID::toplevel_abc_class_count);
-		memset(nativeScripts, 0, sizeof(NativeScriptInfo*)*avmplus::NativeID::toplevel_abc_script_count);
+		memset(nativeClasses, 0, sizeof(NativeClassInfop)*avmplus::NativeID::toplevel_abc_class_count);
+		memset(nativeScripts, 0, sizeof(NativeScriptInfop)*avmplus::NativeID::toplevel_abc_script_count);
 
 		initNativeTables(classEntries, scriptEntries, 
 			nativeMethods, nativeClasses, nativeScripts);

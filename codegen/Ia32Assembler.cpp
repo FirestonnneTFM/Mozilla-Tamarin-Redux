@@ -164,7 +164,7 @@ namespace avmplus
 		IMM32(imm32);
 	}
 
-	void CodegenMIR::MOV(int disp, Register base, sintptr imm, bool /*unused*/) 
+	void CodegenMIR::MOV(sintptr disp, Register base, sintptr imm, bool /*unused*/) 
 	{
 		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE

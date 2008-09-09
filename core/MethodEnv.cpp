@@ -676,7 +676,7 @@ namespace avmplus
 		// object not defined yet.  define it by running the script that exports it
 		Traits* traits = vtable->traits;
 		vtable->resolveSignatures();
-		NativeScriptInfo* nativeEntry = traits->getNativeScriptInfo();
+		NativeScriptInfop nativeEntry = traits->getNativeScriptInfo();
 
 		Toplevel* toplevel = this->toplevel();
 		traits->resolveSignatures(toplevel);
@@ -977,7 +977,7 @@ namespace avmplus
 			toplevel->objectClass->vtable->base = ivtable;
 		}
 
-		NativeClassInfo* nativeEntry;
+		NativeClassInfop nativeEntry;
 		ClassClosure *cc;
 		if ((nativeEntry = cvtable->traits->getNativeClassInfo()) != NULL)
 		{
@@ -1357,7 +1357,7 @@ namespace avmplus
 			if (outerTraits->fullsize > outerTraits->size)
 			{
 				// scope traits has extra constraint for "this" scope, see OP_newclass in verifier
-				t = outerTraits->scopes[outerTraits->size].traits;
+				t = outerTraits->getScopeTraitsAt(outerTraits->size);
 			}
 			else
 			{
@@ -1373,7 +1373,7 @@ namespace avmplus
 		// now search outer scopes
 		for (int i=outer_depth-1; i > 0; i--)
 		{
-			if (outerTraits->scopes[i].isWith)
+			if (outerTraits->getScopeIsWithAt(i))
 			{
 				Atom result = findWithProperty(outer->getScope(i), multiname);
 				if (!AvmCore::isNull(result))
@@ -1384,7 +1384,7 @@ namespace avmplus
 				// only look at the properties on the captured (verify time) type, not the actual type,
 				// of the outer scope object.
 				Atom a = outer->getScope(i);
-				Traits* t = outerTraits->scopes[i].traits;
+				Traits* t = outerTraits->getScopeTraitsAt(i);
 				Binding b = toplevel->getBinding(t, multiname);
 				if (b != BIND_NONE)
 					return a;

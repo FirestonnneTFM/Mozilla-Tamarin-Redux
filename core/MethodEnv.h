@@ -46,27 +46,11 @@ namespace avmplus
 		static Atom delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
 
 	public:
-		// pointers are write-once so we don't need WB's
-
-		/** the vtable for the scope where this env was declared */
-		VTable* const vtable;
-
-		/** runtime independent type info for this method */
-		AbstractFunction* const method;
-		Traits * const declTraits;
-
 		/** vtable for the activation scope inside this method */
 		VTable *getActivation();
 
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
-
-		// pointer to invoke trampoline 
-		union {
-			Atom (*impl32)(MethodEnv*, int, uint32 *);
-			double (*implN)(MethodEnv*, int, uint32 *);
-			void *implV;
-		};
 
 		MethodEnv(void* addr, VTable *vtable);
 		MethodEnv(AbstractFunction* method, VTable *vtable);
@@ -263,10 +247,12 @@ namespace avmplus
 		public:
 			ActivationMethodTablePair(VTable *a, WeakKeyHashtable*wkh) :
 				activation(a), methodTable(wkh) {}
-			VTable* const activation;
-			WeakKeyHashtable* const methodTable;
+		// ------------------------ DATA SECTION BEGIN
+		public:
+			VTable* const				activation;
+			WeakKeyHashtable* const		methodTable;
+		// ------------------------ DATA SECTION END
 		};
-		uintptr activationOrMCTable;
 
 		// low 2 bits of activationOrMCTable
 		enum { kActivation=0, kMethodTable, kActivationMethodTablePair };
@@ -277,12 +263,25 @@ namespace avmplus
 		{
 			WB(core()->GetGC(), this, &activationOrMCTable, (uintptr)ptr|type);
 		}
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		// pointers are write-once so we don't need WB's
+		VTable* const				vtable;		// the vtable for the scope where this env was declared 
+		AbstractFunction* const		method;		// runtime independent type info for this method 
+		Traits* const				declTraits;
+		union {
+			AtomMethodProc			impl32;	// pointer to invoke trampoline 
+			DoubleMethodProc		implN;
+			void*					implV;
+		};
+	private:
+		uintptr_t					activationOrMCTable;
+	// ------------------------ DATA SECTION END
 	};
 
 	class ScriptEnv : public MethodEnv
 	{
 	public:
-		DRCWB(ScriptObject*) global; // initially null, set after initialization
 		ScriptEnv(AbstractFunction* _method, VTable * _vtable)
 			: MethodEnv(_method, _vtable)
 		{
@@ -290,6 +289,10 @@ namespace avmplus
 
 		ScriptObject* initGlobal();
 
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		DRCWB(ScriptObject*) global; // initially null, set after initialization
+	// ------------------------ DATA SECTION END
 	};
 
 	class FunctionEnv : public MethodEnv
@@ -297,7 +300,10 @@ namespace avmplus
 	  public:
 		FunctionEnv(AbstractFunction* _method, VTable * _vtable)
 			: MethodEnv(_method, _vtable) {}
+	// ------------------------ DATA SECTION BEGIN
+	  public:
 		DRCWB(ClassClosure*) closure;
+	// ------------------------ DATA SECTION END
 	};
 }
 
