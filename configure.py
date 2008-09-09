@@ -146,7 +146,7 @@ if os == "darwin":
     else:
         APP_CXXFLAGS += "-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
         config.subst("MACOSX_DEPLOYMENT_TARGET",10.4)
-elif os == "windows":
+elif os == "windows" or os == "cygwin":
     MMGC_DEFINES.update({'WIN32': None,
                          '_CRT_SECURE_NO_DEPRECATE': None})
     APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
@@ -187,6 +187,12 @@ else:
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
+    
+if o.getBoolArg('perfm'):
+    APP_CPPFLAGS += "-DPERFM "
+    
+if o.getBoolArg('disable-nj'):
+    APP_CPPFLAGS += '-DAVMPLUS_DISABLE_NJ '
 
 # We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))

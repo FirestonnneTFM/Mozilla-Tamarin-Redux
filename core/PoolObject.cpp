@@ -61,7 +61,7 @@ namespace avmplus
 	{
 		namedTraits = new(core->GetGC()) MultinameHashtable();
 		m_code = sb.getImpl();
-#ifdef AVMPLUS_MIR
+#if defined(AVMPLUS_MIR)
 		codeBuffer = new (core->GetGC()) GrowableBuffer(core->GetGC()->GetGCHeap());
 #endif
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;

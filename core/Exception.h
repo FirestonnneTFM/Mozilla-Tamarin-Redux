@@ -103,12 +103,7 @@ namespace avmplus
 		int to;
 
 		/** The target location to branch to when the exception occurs. */
-		union {
-			sintptr target;
-#ifdef AVMPLUS_MIR
-			CodegenMIR::OP* targetIns;
-#endif
-		};
+		sintptr target;
 
 		/** The type of exceptions handled by this exception handler. */
 		Traits* traits;

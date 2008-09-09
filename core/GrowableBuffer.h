@@ -54,7 +54,7 @@
 
 namespace avmplus
 {
-#if defined(AVMPLUS_MIR) || defined(DEBUGGER)
+#if defined(DEBUGGER) || defined(AVMPLUS_MIR) 
 	class GrowableBuffer : public MMgc::GCObject
 	{
 	public:

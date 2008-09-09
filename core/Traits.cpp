@@ -37,6 +37,12 @@
 
 
 #include "avmplus.h"
+#ifdef AVMPLUS_MIR
+#include "../codegen/CodegenMIR.h"
+#endif
+#ifdef FEATURE_NANOJIT
+#include "../codegen/CodegenLIR.h"
+#endif
 
 namespace avmplus
 {
@@ -156,7 +162,7 @@ namespace avmplus
 						slotCount*sizeof(int) + // slot offsets
 						methodCount*sizeof(AbstractFunction*);
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			if(hasInterfaces)
 				size += IMT_SIZE * sizeof(Binding);
 #else
@@ -337,7 +343,7 @@ namespace avmplus
 
 			if (hasInterfaces && legal && !this->isInterface)
 			{
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				ImtBuilder imtBuilder(core->GetGC());
 #endif
 
@@ -391,7 +397,7 @@ namespace avmplus
 									over = getMethod(disp_id);
 									if (over != virt)
 										legal &= checkOverride(virt, over);
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 									imtBuilder.addEntry(virt, disp_id);
 #endif
 								}
@@ -447,7 +453,7 @@ namespace avmplus
 											over = getMethod(disp_id);
 											if (over != virt)
 												legal &= checkOverride(virt,over);
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 											imtBuilder.addEntry(virt, disp_id);
 #endif
 										}
@@ -473,7 +479,7 @@ namespace avmplus
 											over = getMethod(disp_id);
 											if (over != virt)
 												legal &= checkOverride(virt,over);
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 											imtBuilder.addEntry(virt, disp_id);
 #endif
 										}
@@ -483,7 +489,7 @@ namespace avmplus
 						}
 					}
 				}
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				imtBuilder.finish(getIMT(), pool, toplevel);
 #endif
 			}
@@ -875,7 +881,7 @@ namespace avmplus
 	}
 #endif
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	ImtBuilder::ImtBuilder(MMgc::GC *gc)
 	{
 		this->gc = gc;
@@ -910,7 +916,12 @@ namespace avmplus
 			else
 			{
 				// build conflict stub
+				#if defined AVMPLUS_MIR
 				CodegenMIR mir(pool);
+				#elif defined FEATURE_NANOJIT
+				CodegenIMT mir(pool);
+				#endif
+
 				TRY(pool->core, kCatchAction_Rethrow)
 				{
 					imt[i] = BIND_ITRAMP | (uintptr)mir.emitImtThunk(e);

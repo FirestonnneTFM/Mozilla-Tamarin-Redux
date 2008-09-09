@@ -37,6 +37,9 @@
 
 
 #include "avmplus.h"
+#ifdef AVMPLUS_MIR
+#include "CodegenMIR.h"
+#endif
 
 #if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
 #include <emmintrin.h>
@@ -127,38 +130,45 @@ namespace avmplus
 			
 		// set default mode flags
 		#ifdef AVMPLUS_VERBOSE
-		verbose = false;
+		config.verbose = false;
+		config.verbose_addrs = false;
 		#endif
 
 	    SetMIREnabled(true);
 
 		#ifdef AVMPLUS_VERIFYALL
-		verifyall = false;
+	    	config.verifyall = false;
+		#endif
+
+		#ifdef FEATURE_NANOJIT
+			config.show_stats = false;
+			config.tree_opt = false;
+			config.verbose_live = false;;
+			config.verbose_exits = false;
 		#endif
 
 		#ifdef AVMPLUS_MIR
-
-			// forcemir flag forces use of MIR instead of interpreter
-			forcemir = false;
-	
-			cseopt = true;
-			dceopt = true;
-
-		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-    		sse2 = true;
-			#endif
-
+			config.dceopt = true;
 			#ifdef AVMPLUS_VERBOSE
-			bbgraph = false;
+			config.bbgraph = false;
 			#endif
+        #endif
 
-		#endif // AVMPLUS_MIR
+        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			// forcemir flag forces use of MIR instead of interpreter
+			config.forcemir = false;
+			config.cseopt = true;
+
+    	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+    		config.sse2 = true;
+	    	#endif
+        #endif
 
 	#ifdef VTUNE
 			VTuneStatus = CheckVTuneStatus();
 	#endif // VTUNE
 
-		interrupts = false;
+		config.interrupts = false;
 
 		gcInterface.SetCore(this);
 		resources          = NULL;
@@ -260,7 +270,7 @@ namespace avmplus
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
 
-		#if defined(AVMPLUS_MIR) && defined(AVMPLUS_VERBOSE)
+		#if defined AVMPLUS_MIR && defined(AVMPLUS_VERBOSE)
 		codegenMethodNames = CodegenMIR::initMethodNames(this);
 		#endif
 
@@ -281,7 +291,7 @@ namespace avmplus
 			gc->SetGCContextVariable(GC::GCV_AVMCORE, NULL);
 		}
 
-		#if defined(AVMPLUS_MIR) && defined(AVMPLUS_VERBOSE)
+		#if defined AVMPLUS_MIR && defined(AVMPLUS_VERBOSE)
 		delete codegenMethodNames;
 		#endif
 
@@ -648,7 +658,7 @@ return the result of the comparison ToPrimitive(x) == y.
 22. Return false.
 	*/
 
-    Atom AvmCore::eq(Atom lhs, Atom rhs)
+    Atom AvmCore::equals(Atom lhs, Atom rhs)
     {
 		if (isNull(lhs)) lhs = 0;
 		if (isNull(rhs)) rhs = 0;
@@ -726,12 +736,12 @@ return the result of the comparison ToPrimitive(x) == y.
 			// 16. If Type(x) is Number and Type(y) is String,
 			// return the result of the comparison x == ToNumber(y).
             if (isNumber(lhs) && isString(rhs))
-                return eq(lhs, doubleToAtom(number(rhs)));
+                return equals(lhs, doubleToAtom(number(rhs)));
 			
 			// 17. If Type(x) is String and Type(y) is Number,
 			// return the result of the comparison ToNumber(x) == y.
             if (isString(lhs) && isNumber(rhs))
-                return eq(doubleToAtom(number(lhs)), rhs);
+                return equals(doubleToAtom(number(lhs)), rhs);
 
 			// E4X 11.5.1, step 4.  Placed slightly lower then in the spec
 			// to handle quicker cases earlier.  No cases above should be comparing
@@ -744,22 +754,22 @@ return the result of the comparison ToPrimitive(x) == y.
 
 			// 18. If Type(x) is Boolean, return the result of the comparison ToNumber(x) == y.
             if (ltype == kBooleanType)
-                return eq(lhs&~7|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
+                return equals(lhs&~7|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
 			
 			// 19. If Type(y) is Boolean, return the result of the comparison x == ToNumber(y).
             if (rtype == kBooleanType)
-                return eq(lhs, rhs&~7|kIntegerType);  // equal(lhs, toInteger(rhs))
+                return equals(lhs, rhs&~7|kIntegerType);  // equal(lhs, toInteger(rhs))
 
 			// 20. If Type(x) is either String or Number and Type(y) is Object,
 			// return the result of the comparison x == ToPrimitive(y).
 
             if ((isString(lhs) || isNumber(lhs)) && rtype == kObjectType)
-				return eq(lhs, atomToScriptObject(rhs)->defaultValue());
+				return equals(lhs, atomToScriptObject(rhs)->defaultValue());
 
 			// 21. If Type(x) is Object and Type(y) is either String or Number,
 			// return the result of the comparison ToPrimitive(x) == y.
             if ((isString(rhs) || isNumber(rhs)) && ltype == kObjectType)
-				return eq(atomToScriptObject(lhs)->defaultValue(), rhs);
+				return equals(atomToScriptObject(lhs)->defaultValue(), rhs);
         }
 		return falseAtom;
     }
@@ -1543,7 +1553,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		case OP_newclass: 
 			{
-				AbstractFunction* c = pool->cinits[readU30(pc)];
+                uint32_t id = readU30(pc);
+				AbstractFunction* c = pool->cinits[id];
 				buffer << opNames[opcode] << " " << c;
 				break;
 			}
@@ -1687,7 +1698,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				if (istype(atom, handler->traits)) 
 				{
 					#ifdef AVMPLUS_VERBOSE
-					if (verbose)
+					if (config.verbose)
 					{
 						console << "enter " << info << " catch " << handler->traits << '\n';
 					}
@@ -3975,7 +3986,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return (Atom)obj|kDoubleType;
 	}
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
 	void AvmCore::initMultinameLate(Multiname& name, Atom index)
 	{
@@ -3994,5 +4005,5 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		name.setName(intern(index));
 	}		
-#endif
+#endif // MIR or NANOJIT
 }

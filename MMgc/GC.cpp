@@ -2126,15 +2126,6 @@ bail:
 
 			while(m < memEnd)
 			{
-#ifdef WIN32
-				// first skip uncommitted memory
-				MEMORY_BASIC_INFORMATION mib;
-				VirtualQuery((void*) m, &mib, sizeof(MEMORY_BASIC_INFORMATION));
-				if((mib.Protect & PAGE_READWRITE) == 0) {
-					m += mib.RegionSize;
-					continue;
-				}
-#endif
 				// divide by 4K to get index
 				int bits = GetPageMapValue(m);
 				if(bits == kNonGC) {
@@ -2275,17 +2266,6 @@ bail:
 		GCDebugMsg(false, "[%d] Probing for pointers to : 0x%08x\n", currentDepth, me);
 		while(m < memEnd)
 		{
-#ifdef WIN32
-			// first skip uncommitted memory
-			MEMORY_BASIC_INFORMATION mib;
-			VirtualQuery((void*) m, &mib, sizeof(MEMORY_BASIC_INFORMATION));
-			if((mib.Protect & PAGE_READWRITE) == 0) 
-			{
-				m += mib.RegionSize;
-				continue;
-			}
-#endif
-
 			// divide by 4K to get index
 			int bits = GetPageMapValueAlreadyLocked(m);
 			if(bits == kNonGC) 
@@ -3209,56 +3189,44 @@ bail:
 
 		if(!incrementalValidation)
 			return;
-
+		
 		uintptr m = memStart;
 		while(m < memEnd)
 		{
-#ifdef WIN32
-			// first skip uncommitted memory
-			MEMORY_BASIC_INFORMATION mib;
-			VirtualQuery((void*) m, &mib, sizeof(MEMORY_BASIC_INFORMATION));
-			if((mib.Protect & PAGE_READWRITE) == 0) {
-				m += mib.RegionSize;
-				continue;
-			}
-#endif
 			// divide by 4K to get index
 			int bits = GetPageMapValue(m);
-			switch(bits)
-			{
-			case 0:
+			GCAssert(bits == 0 || bits == 1 || bits == 3);
+			if (bits == 0) {
+				// owned by GCHeap
 				m += GCHeap::kBlockSize;
-				break;
-			case 3:
-				{
-					GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
-					const void *item = GetUserPointer((const void*)(lb+1));
-					if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
-						WhitePointerScan(item, lb->usableSize - DebugSize());
+				continue;
+			}
+			
+			if (bits == 1) {
+				// owned by GCAlloc
+				// go through all marked objects in this page
+				GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
+				for (int i=0; i< b->alloc->m_itemsPerBlock; i++) {
+					// find all marked objects and search them
+                    if(!GCAlloc::GetBit(b, i, GCAlloc::kMark))
+                        continue;
+					
+					if(b->alloc->ContainsPointers()) {
+                        void* item = (char*)b->items + b->alloc->m_itemSize*i;
+						WhitePointerScan(GetUserPointer(item), b->alloc->m_itemSize - DebugSize());
 					}
-					m += lb->GetNumBlocks() * GCHeap::kBlockSize;
 				}
-				break;
-			case 1:
-				{
-					// go through all marked objects in this page
-					GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
-                    for (int i=0; i< b->alloc->m_itemsPerBlock; i++) {
-                        // find all marked objects and search them
-                        if(!GCAlloc::GetBit(b, i, GCAlloc::kMark))
-                            continue;
-
-						if(b->alloc->ContainsPointers()) {
-	                        void* item = (char*)b->items + b->alloc->m_itemSize*i;
-							WhitePointerScan(GetUserPointer(item), b->alloc->m_itemSize - DebugSize());
-						}
-					}
-					m += GCHeap::kBlockSize;
+				m += GCHeap::kBlockSize;
+			}
+			else if(bits == 3)
+			{
+				// owned by GCLargeAlloc
+				GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
+				const void *item = GetUserPointer((const void*)(lb+1));
+				if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
+					WhitePointerScan(item, lb->usableSize - DebugSize());
 				}
-				break;
-			default:
-				GCAssert(false);
-				break;
+				m += lb->GetNumBlocks() * GCHeap::kBlockSize;
 			}
 		}
 	}

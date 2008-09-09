@@ -46,7 +46,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include "vprof.h"
 
 #define MIN(x,y) ((x) <= (y) ? x : y)
@@ -105,7 +104,7 @@ static char* f (double d)
 {
     static char s[80];
     char* p;
-    sprintf_s (s, sizeof(s), "%f", d);
+    sprintf_s (s, sizeof(s), "%lf", d);
     p = s+strlen(s)-1;
     while (*p == '0') {
         *p = '\0';
@@ -150,7 +149,7 @@ static void dumpProfile (void)
             }
             for (j = 0; j < NUM_EVARS; j++) {
                 if (e->dvar[j] != 0) {
-                    printf ("DVAR%d %f ", j, e->dvar[j]);
+                    printf ("DVAR%d %lf ", j, e->dvar[j]);
                 }
             }
         }
@@ -214,10 +213,8 @@ int profileValue(void** id, char* file, int line, int64_t value, ...)
             e->min = value;
             e->max = value;
 
-			union { void (*foo)(void*); void* f; } u;
             va_start (va, value);
-			u.f = va_arg(va, void*);
-			e->func = u.foo;
+            e->func = (void (__cdecl*)(void*)) va_arg (va, void*);
             va_end (va);
 
             e->h = NULL;
@@ -362,31 +359,32 @@ int histValue(void** id, char* file, int line, int64_t value, int nbins, ...)
     return 0;
 }
 
-uint64_t tstamp()
+#if defined(_MSC_VER) && defined(_M_IX86)
+inline uint64_t _rdtsc() 
 {
-	uint64_t t = (uint64_t) clock();
-	return t;
+	// read the cpu cycle counter.  1 tick = 1 cycle on IA32
+	_asm rdtsc;
 }
+#define have_rdtsc
+#elif defined(__GNUC__) && (__i386__ || __x86_64__)
+inline uint64_t _rdtsc() 
+{
+   uint32_t lo, hi;
+   __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+   return (uint64_t(hi) << 32) | lo;
+}
+#define have_rdtsc
+#endif
 
-// read the cpu cycle counter.  1 tick = 1 cycle on IA32                                                       
-uint64_t rtstamp() 
+#ifdef have_rdtsc
+void* _tprof_before_id=0;
+uint64_t _tprof_before;
+int64_t _tprof_time() 
 {
-	#ifdef WIN32
-		return __rdtsc();
-	#elif __i386__
-		// Assume IA32, gcc or Intel Compiler                                                                          
-		uint64_t temp;
-		asm
-		(
-			"rdtsc\n\t"
-			"leal %0, %%ecx\n\t"
-			"movl %%eax, (%%ecx)\n\t"
-			"movl %%edx, 4(%%ecx)\n\t"
-			: "=m"(temp)
-			:
-			: "%eax", "%ecx", "%edx"
-		);
-		return temp;
-	#endif
+    uint64_t now = _rdtsc();
+    uint64_t v = _tprof_before ? now-_tprof_before : 0;
+    _tprof_before = now;
+    return v>>10;
 }
+#endif
 
