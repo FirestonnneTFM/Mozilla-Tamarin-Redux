@@ -53,6 +53,9 @@ namespace avmshell
 		NATIVE_METHOD(avmplus_System_getTimer, SystemClass::getTimer)
 		NATIVE_METHOD(avmplus_System_readLine, SystemClass::readLine)
 		NATIVE_METHOD(avmplus_System_private_getArgv, SystemClass::getArgv)
+		NATIVE_METHOD(avmplus_System_totalMemory_get, SystemClass::getTotalMemory)
+		NATIVE_METHOD(avmplus_System_freeMemory_get, SystemClass::getFreeMemory)
+		NATIVE_METHOD(avmplus_System_privateMemory_get, SystemClass::getPrivateMemory)
 	END_NATIVE_MAP()
 					  
 	SystemClass::SystemClass(VTable *cvtable)
@@ -217,5 +220,23 @@ namespace avmshell
 			s = core->concatStrings(s, core->newString(wc));
 		}
 		return s;
+	}
+
+	double SystemClass::getTotalMemory()
+	{
+		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
+		return gcheap->GetUsedHeapSize() * MMgc::GCHeap::kBlockSize;
+	}
+
+	double SystemClass::getFreeMemory()
+	{
+		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
+		return gcheap->GetFreeHeapSize() * MMgc::GCHeap::kBlockSize;
+	}
+	
+	double SystemClass::getPrivateMemory()
+	{
+		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
+		return gcheap->GetPrivateBytes() * MMgc::GCHeap::kBlockSize;
 	}
 }

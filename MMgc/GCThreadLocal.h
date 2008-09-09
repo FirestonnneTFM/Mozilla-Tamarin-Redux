@@ -16,7 +16,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -36,94 +36,120 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-//
-// GCWeakRef.h
-// GC weak references (aka safe handles) as template classes
-//
+#ifndef __GCThreadLocal__
+#define __GCThreadLocal__
 
-#ifndef _GC_WEAK_REF_H_
-#define _GC_WEAK_REF_H_
+#ifdef HAVE_PTHREADS
+#include <pthread.h>
+#endif
 
 namespace MMgc
 {
-	// new improved weak ref
-	class GCWeakRef : public GCFinalizedObject
+#ifdef WIN32
+	/**
+	 * GCCriticalSection is a simple Critical Section class used by GCMemoryProfiler to
+	 * ensure mutually exclusive access.  GCSpinLock doesn't suffice since its not
+	 * re-entrant and we need that
+	 */
+	class GCCriticalSection
 	{
-		friend class GC;
 	public:
-		GCObject *get() { return (GCObject*)m_obj; }
-		~GCWeakRef() 
-		{ 
-			if(m_obj) {
-				GC::GetGC(this)->ClearWeakRef(m_obj); 
-			}
-		}
-	private:
-		/**
-		 * When allocating a GCWeakRef, tell the GC we don't contain pointers
-		 * (overriding the default base-class behavior).
-		 *
-		 * In MMGC_THREADSAFE builds, the caller always holds m_lock.
-		 *
-		 * @access Requires(gc->m_lock)
-		 */
-		static void *operator new(size_t size, GC *gc)
+		GCCriticalSection()
 		{
-#ifdef MMGC_THREADSAFE
-			return gc->AllocAlreadyLocked(size, GC::kFinalize);
-#else
-			return gc->Alloc(size, GC::kFinalize);
-#endif
+			InitializeCriticalSection(&cs);
 		}
-		// private, only GC can access
-		GCWeakRef(const void *obj) : m_obj(obj) 
-		{
-#ifdef _DEBUG
-			obj_creation = *((int*)GetRealPointer(obj)+1);
-#endif
-		}
-		const void *m_obj;
-#ifdef _DEBUG
-		int obj_creation;
-#endif
-	};
 
-#if 0
-	// something like this would be nice
-	template<class T> class GCWeakRefPtr 
-	{
+		inline void Acquire()
+		{
+			EnterCriticalSection(&cs);
+		}
 		
-	public:
-		GCWeakRefPtr() {}
-		GCWeakRefPtr(T t) {  set(t);}
-		~GCWeakRefPtr() { t = NULL;	}
-
-		T operator=(const GCWeakRefPtr<T>& wb)
+		inline void Release()
 		{
-			return set(wb.t);	
+			LeaveCriticalSection(&cs);
 		}
 
+	private:
+		CRITICAL_SECTION cs;
+	};
+	
+	template<typename T>
+	class GCThreadLocal
+	{
+	public:
+		GCThreadLocal()
+		{
+			GCAssert(sizeof(T) <= sizeof(LPVOID));
+			tlsId = TlsAlloc();
+		}
 		T operator=(T tNew)
 		{
-			return set(tNew);
+			TlsSetValue(tlsId, (LPVOID) tNew);
+			return tNew;
 		}
-
-		operator T() const { return (T) t->get(); }
-
-		bool operator!=(T other) const { return other != t; }
-
-		T operator->() const
+		operator T() const
 		{
-			return (T) t->get();
+			return (T) TlsGetValue(tlsId);
 		}
-	private:		
-		T set(const T tNew)
+	private:
+		DWORD tlsId;
+	};
+#else
+
+	template<typename T>
+	class GCThreadLocal
+	{
+	public:
+		GCThreadLocal()
 		{
-			t = tNew->GetWeakRef();
+			GCAssert(sizeof(T) <= sizeof(void*));
+			pthread_key_create(&tlsId, NULL);
 		}
-		GCWeakRef* t;
+		T operator=(T tNew)
+		{
+			pthread_setspecific(tlsId, (const void*)tNew);
+			return tNew;
+		}
+		operator T() const
+		{
+			return (T)pthread_getspecific(tlsId);
+		}
+	private:
+		pthread_key_t tlsId ;
+	};
+
+	class GCCriticalSection
+	{
+	public:
+		GCCriticalSection()
+		{
+		}
+
+		inline void Acquire()
+		{
+		}
+		
+		inline void Release()
+		{
+		}
 	};
 #endif
+
+	class GCEnterCriticalSection
+	{
+	public:
+		GCEnterCriticalSection(GCCriticalSection& cs) : m_cs(cs)
+		{
+			m_cs.Acquire();
+		}
+		~GCEnterCriticalSection()
+		{
+			m_cs.Release();
+		}
+
+	private:
+		GCCriticalSection& m_cs;
+	};
 }
 
-#endif // _GC_WEAK_REF_H_
+#endif

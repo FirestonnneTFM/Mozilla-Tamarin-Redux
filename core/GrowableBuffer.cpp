@@ -36,11 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmplus.h"
+using namespace MMgc;
 
 #ifdef DARWIN
     #if defined(AVMPLUS_MAC_CARBON)
-		#include <Carbon/Carbon.h>
-	#endif
+#include <Carbon/Carbon.h>
+#endif
 #endif
 
 #ifdef AVMPLUS_ROSETTA
@@ -194,6 +195,7 @@ namespace avmplus
 		MMgc::ChangeSizeForObject(this, (int)grow);
 #endif
 		void* res = heap->CommitCodeMemory((void*)uncommit, grow);
+		GC::GetGC(this)->UpdateStat("jit", GCHeap::SizeToBlocks(grow));
 		AvmAssert(res != 0);
 		if(res == 0)
 		  return uncommit;
@@ -217,6 +219,7 @@ namespace avmplus
 			MMgc::ChangeSizeForObject(this, (int)(-1 * size));
 #endif
 			void* res = heap->DecommitCodeMemory((void*)shrinkTo, size);
+			GC::GetGC(this)->UpdateStat("jit", -1 * GCHeap::SizeToBlocks(size));
 			AvmAssert(res != 0);
 			(void)res;
 			uncommit = shrinkTo;
@@ -236,6 +239,7 @@ namespace avmplus
 			MMgc::ChangeSizeForObject(this, (int)(-1 * (uncommit-first)));
 			heap->DecommitCodeMemory(first, uncommit-first);
 #endif
+			GC::GetGC(this)->UpdateStat("jit", -1 * GCHeap::SizeToBlocks(uncommit-first));
 			if (forMir)
 				heap->ReleaseMirMemory(first, size());
 			else

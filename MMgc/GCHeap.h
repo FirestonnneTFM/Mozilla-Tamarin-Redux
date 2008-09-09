@@ -243,13 +243,19 @@ namespace MMgc
 		 * free space.
 		 * @return the total heap size in pages (kBlockSize bytes apiece)
 		 */
-		unsigned int GetTotalHeapSize() const { return blocksLen - numDecommitted; }
+		unsigned int GetTotalHeapSize() const;
 		
 		/**
 		 * gives memory back to the OS when there hasn't been any memory activity in a while
 		 * and we have lots of free memory
 		 */
 		void Decommit();
+
+		static size_t SizeToBlocks(size_t bytes) { return ((bytes + kBlockSize - 1) & ~(kBlockSize-1)) / kBlockSize; }
+
+		static size_t GetPrivateBytes();
+		
+		void SetHeapLimit(size_t numpages) { heapLimit = numpages; }
 	private:
 
 		// -- Implementation
@@ -295,6 +301,7 @@ namespace MMgc
 		unsigned int numDecommitted;
 		HeapBlock freelists[kNumFreeLists];
 		unsigned int numAlloc;
+		size_t heapLimit;
 		
 		// Core methods
 		void AddToFreeList(HeapBlock *block);

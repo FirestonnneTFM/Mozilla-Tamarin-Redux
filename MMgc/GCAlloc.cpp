@@ -715,4 +715,15 @@ start:
 		// Add this item to the free list
 		*((void**)item) = oldFree;	
 	}
+	
+	size_t GCAlloc::GetBytesInUse()
+	{
+		size_t bytes=0;
+		GCBlock *b=m_firstBlock;
+		while (b) {
+			bytes += b->numItems * m_itemSize;
+			b = b->next;
+		}		
+		return bytes;
+	}
 }

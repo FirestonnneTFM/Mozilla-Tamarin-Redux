@@ -116,7 +116,10 @@ namespace MMgc
 			return Alloc(num * elsize);
 		}
 
-//	private:
+		size_t GetTotalSize();
+		size_t GetBytesInUse();
+		
+	private:
 		FixedMalloc(GCHeap* heap);
 		~FixedMalloc();
 		static FixedMalloc *instance;
@@ -138,6 +141,8 @@ namespace MMgc
 
 		GCHeap *m_heap;
 		FixedAllocSafe *m_allocs[kNumSizeClasses];	
+		size_t numLargeChunks;
+
 		FixedAllocSafe *FindSizeClass(size_t size) const;
 
 		static bool IsLargeAlloc(const void *item)
@@ -147,38 +152,9 @@ namespace MMgc
 			return ((uintptr) item & 0xFFF) == 0;
 		}
 
-		inline void *LargeAlloc(size_t size)
-		{
-			size += DebugSize();
-			size_t blocksNeeded = ((size+0xfff)&~0xfff) >> 12;
-			void *item = m_heap->Alloc((int)blocksNeeded, true, false);
-			if(!item)
-			{
-				GCAssertMsg(item != NULL, "Large allocation of %d blocks failed!");
-			}
-			else
-			{
-#ifdef MEMORY_INFO
-				item = DebugDecorate(item, size, 5);
-				memset(item, 0xfb, size - DebugSize());
-#endif
-			}
-			return item;
-		}
-
-	
-		inline void LargeFree(void *item)
-		{
-#ifdef MEMORY_INFO
-			item = DebugFree(item, 0xed, 5);
-#endif
-			m_heap->Free(item);
-		}
-
-		size_t LargeSize(const void *item)
-		{
-			return m_heap->Size(item) * GCHeap::kBlockSize;
-		}
+		void *LargeAlloc(size_t size);	
+		void LargeFree(void *item);
+		size_t LargeSize(const void *item);
 	};
 }
 #endif /* __Malloc__ */

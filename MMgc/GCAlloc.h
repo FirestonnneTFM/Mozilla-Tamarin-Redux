@@ -205,6 +205,8 @@ namespace MMgc
 				ClearBits(block, GetIndex(block, item), kHasWeakRef);
 			}
 		}
+		
+		size_t GetBytesInUse();
 
 	private:
 		const static int kBlockSize = 4096;
