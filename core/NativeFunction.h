@@ -125,8 +125,7 @@ namespace avmplus
 	#if defined(AVMPLUS_64BIT)
 		AvmAssert(sizeof(AvmBox) == sizeof(double));
 		return *(const double*)b;
-	#elif defined(AVMPLUS_IA32)
-		// unaligned access is fine on x86-32
+	#elif defined(AVMPLUS_UNALIGNED_ACCESS)
 		AvmAssert(sizeof(AvmBox)*2 == sizeof(double));
 		return *(const double*)b;
 	#else
@@ -135,6 +134,7 @@ namespace avmplus
 			double d;
 			AvmBox b[2];
 		} u;
+		// @todo, does this need endian attention?
 		u.b[0] = b[0];
 		u.b[1] = b[1];
 		return u.d;
@@ -197,7 +197,6 @@ namespace avmplus
 	 * Class           ClassClosure*
 	 * MovieClip       MovieClipObject*   (similar for any other class)
 	 */
-	struct NativeTableEntry;
 	class NativeMethod : public AbstractFunction
 	{
 	public:
@@ -215,6 +214,8 @@ namespace avmplus
 
 		virtual void verify(Toplevel* toplevel);
 
+	// ------------------------ DATA SECTION BEGIN
+	public:
 #ifdef AVMTHUNK_VERSION
 		const NativeTableEntry& nte;
 #else
@@ -224,7 +225,7 @@ namespace avmplus
 		};
 		int m_cookie;
 #endif
-		
+	// ------------------------ DATA SECTION END
 	};
 
 	/**
@@ -234,10 +235,13 @@ namespace avmplus
 	 */
 	struct NativeTableEntry
 	{
+	// ------------------------ DATA SECTION BEGIN
+	public:
 		enum {
 			kNativeMethod,
 			kNativeMethod1
 		};
+
 #ifdef AVMTHUNK_VERSION
 		AvmThunkNativeThunker thunker;
 		AvmThunkNativeHandler handler;
@@ -248,6 +252,7 @@ namespace avmplus
 		int32_t method_id;
 		int32_t cookie;
 		int32_t flags;
+	// ------------------------ DATA SECTION END
 	};
 
 	/**
@@ -279,7 +284,7 @@ namespace avmplus
 		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunkc, (AvmThunkNativeHandler)&handler, avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
 
 	#define END_NATIVE_MAP() \
-		{ NULL, NULL, -1, 0 } };
+		{ NULL, NULL, -1, 0, 0 } };
 #else
 	#define NATIVE_METHOD(method_id, handler) \
 		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, 0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS },
@@ -294,7 +299,7 @@ namespace avmplus
 		{ (NativeTableEntry::Handler)&handler, avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
 
 	#define END_NATIVE_MAP() \
-		{ NULL, -1, 0 } };
+		{ NULL, -1, 0, 0 } };
 #endif
 
     /**
@@ -306,10 +311,13 @@ namespace avmplus
 	{
 		typedef ScriptObject* (*Handler)(VTable*, ScriptObject*);
 
-		int script_id;
+	// ------------------------ DATA SECTION BEGIN
+	public:
 		Handler handler;
-		NativeTableEntry *nativeMap;
-		int sizeofInstance;
+		NativeTableEntryp nativeMap;
+		int32_t script_id;
+		uint32_t sizeofInstance;
+	// ------------------------ DATA SECTION END
 	};
 
 	/**
@@ -320,11 +328,14 @@ namespace avmplus
 	{
 		typedef ClassClosure* (*Handler)(VTable*);
 
-		int class_id;
+	// ------------------------ DATA SECTION BEGIN
+	public:
 		Handler handler;
-		NativeTableEntry *nativeMap;
-		int sizeofClass;
-		int sizeofInstance;
+		NativeTableEntryp nativeMap;
+		int32_t class_id;
+		uint32_t sizeofClass;
+		uint32_t sizeofInstance;
+	// ------------------------ DATA SECTION END
 	};
 }	
 

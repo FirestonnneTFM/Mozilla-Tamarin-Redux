@@ -120,10 +120,14 @@ namespace avmplus
 		PrintWriter& operator<< (const wchar *str);
 		PrintWriter& operator<< (char value);
 		PrintWriter& operator<< (wchar value);		
-		PrintWriter& operator<< (int value);
-		PrintWriter& operator<< (uint64 value);
-		PrintWriter& operator<< (int64 value);
-		PrintWriter& operator<< (uint32 value);
+		PrintWriter& operator<< (int32_t value);
+		PrintWriter& operator<< (uint32_t value);
+		PrintWriter& operator<< (uint64_t value);
+		PrintWriter& operator<< (int64_t value);
+#ifdef AVMPLUS_INTPTR_OVERLOADS
+		PrintWriter& operator<< (uintptr_t value);
+		PrintWriter& operator<< (intptr_t value);
+#endif
 		PrintWriter& operator<< (double value);
 		PrintWriter& operator<< (Stringp str);
 		PrintWriter& operator<< (tabstop tabs);

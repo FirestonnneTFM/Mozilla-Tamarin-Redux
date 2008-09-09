@@ -77,10 +77,6 @@ namespace avmplus
 		};
 
 	private:
-		int size;
-		short logNumAtoms;
-		short flags;
-
 		// Flags used in the "flags" variable
 		enum
 		{
@@ -162,11 +158,6 @@ namespace avmplus
 #endif
 		
 		void setAtoms(Atom *atoms);
-
-	protected:
-
-		/** property hashtable, this has no DWB on purpose, setAtoms contains the WB */
-		Atom* atoms;
 
 	public:
 
@@ -269,6 +260,15 @@ namespace avmplus
 	protected:
 		void put(Atom name, Atom value);
 		int rehash(Atom *oldAtoms, int oldlen, Atom *newAtoms, int newlen);
+
+	// ------------------------ DATA SECTION BEGIN
+	protected:
+		Atom*		atoms;	// property hashtable, this has no DWB on purpose, setAtoms contains the WB
+	private:
+		int32_t		size;
+		int16_t		logNumAtoms;
+		int16_t		flags;
+	// ------------------------ DATA SECTION END
 	};
 
 	/** 

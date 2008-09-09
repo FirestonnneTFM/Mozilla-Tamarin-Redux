@@ -45,6 +45,9 @@
 
 namespace avmplus
 {
+	typedef Atom (*AtomMethodProc)(MethodEnv*, int, uint32 *);
+	typedef double (*DoubleMethodProc)(MethodEnv*, int, uint32 *);
+
 	/**
 	 * AbstractFunction is the base class for all functions that
 	 * can be executed by the VM: Actionscript functions,
@@ -144,10 +147,7 @@ namespace avmplus
 		static const int NATIVE_COOKIE      = 0x10000000;
 		/*@}*/
 
-		DWB(Traits*) declaringTraits;
-		DWB(Traits*) activationTraits;
-		DWB(PoolObject*) pool;
-		
+	public:
 		inline AvmCore* core() const;
 
 		uintptr iid() const
@@ -161,24 +161,6 @@ namespace avmplus
 		// Builtin + native functions have flags to specify if they need the dxns code
 		inline bool usesDefaultXmlNamespace() const;
 
-		/** number of declared parameters including optionals */
-		int param_count;
-
-		/** last optional_count params are optional */		
-		int optional_count;
-
-		// offset to first rest arg,
-		// including the instance parameter.  
-		// this is sum(sizeof(paramType(0..N)))
-		int restOffset; 
-
-		/** see bitmask defs above */
-		int flags; 
-		int method_id;
-
-		/** pointer to abc MethodInfo record */
-		const byte* info_pos;
-
 		void initParamTypes(int count);
 		void initDefaultValues(int count);
 
@@ -189,16 +171,6 @@ namespace avmplus
 			return argc >= param_count-optional_count && 
 				(argc <= param_count || allowExtraArgs());
 		}
-
-		/** 
-		 * invoke this method. args are already coerced.  argc
-		 * is the number of arguments AFTER the instance, which
-		 * is arg 0.  ap will always have at least the instance.
-		 */
-		union {
-			Atom (*impl32)(MethodEnv*, int, uint32 *);
-			double (*implN)(MethodEnv*, int, uint32 *);
-		};
 
     protected:
 		AbstractFunction();
@@ -266,10 +238,6 @@ namespace avmplus
 		void boxArgs(int argc, uint32 *ap, Atom* out);
 
 	protected:
-		DWB(Traits*) m_returnType;
-		DWB(Traits**) m_types; // actual length will be 1+param_count
-		DWB(Atom*) m_values; // default values for any optional params. size = optional_count
-
 #if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 
 		/** Dummy destructor to avoid warnings */
@@ -282,7 +250,6 @@ namespace avmplus
 
 #if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 	public:
-		DRCWB(Stringp) name;
 	#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		Stringp getStackTraceLine(Stringp filename);
 	#endif
@@ -291,6 +258,35 @@ namespace avmplus
 		virtual uint32 size() const;
 		virtual bool isFakeFunction() { return false; }
 #endif
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		DWB(Traits*)		declaringTraits;
+		DWB(Traits*)		activationTraits;
+		DWB(PoolObject*)	pool;
+#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+		DRCWB(Stringp)		name;
+#endif
+	private:
+		DWB(Traits*)		m_returnType;
+		DWB(Traits**)		m_types;		// actual length will be 1+param_count
+		DWB(Atom*)			m_values;		// default values for any optional params. size = optional_count
+	public:
+		/** 
+		 * invoke this method. args are already coerced.  argc
+		 * is the number of arguments AFTER the instance, which
+		 * is arg 0.  ap will always have at least the instance.
+		 */
+		union {
+			AtomMethodProc impl32;
+			DoubleMethodProc implN;
+		};
+		const byte*	info_pos;			// pointer to abc MethodInfo record 
+		int			param_count;		// number of declared parameters including optionals 
+		int			optional_count;		// last optional_count params are optional 
+		int			restOffset;			// offset to first rest arg, including the instance parameter. this is sum(sizeof(paramType(0..N)))
+		int			flags;				// see bitmask defs above 
+		int			method_id;		
+	// ------------------------ DATA SECTION END
 	};
 
 #ifdef DEBUGGER	
