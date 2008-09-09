@@ -236,7 +236,6 @@ namespace avmshell
 	
 	double SystemClass::getPrivateMemory()
 	{
-		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
-		return gcheap->GetPrivateBytes() * MMgc::GCHeap::kBlockSize;
+		return MMgc::GCHeap::GetPrivateBytes() * MMgc::GCHeap::kBlockSize;
 	}
 }
