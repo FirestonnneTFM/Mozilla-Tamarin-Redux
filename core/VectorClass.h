@@ -323,14 +323,6 @@ namespace avmplus
 
 		enum { kGrowthIncr = 4096 };
 
-		void atomToValue(Atom atom, sint8& value)
-		{
-			value = (sint8) core()->integer(atom);						
-		}
-		void atomToValue(Atom atom, uint8& value)
-		{
-			value = (uint8) core()->integer(atom);						
-		}
 		void atomToValue(Atom atom, sint16& value)
 		{
 			value = (sint16) core()->integer(atom);						
@@ -343,28 +335,14 @@ namespace avmplus
 		{
 			value = core()->integer(atom);						
 		}
-		void atomToValue(Atom atom, uint32& value)
-		{
-			value = core()->toUInt32(atom);			
-		}
 		void atomToValue(Atom atom, sint64& value)
 		{
 			value = core()->integer(int(atom));						
 		}
-		void atomToValue(Atom atom, uint64& value)
+		void atomToValue(Atom atom, uint32& value)
 		{
-			value = core()->integer(uint32(atom));						
+			value = core()->toUInt32(atom);			
 		}
-#ifdef AVMPLUS_INTPTR_OVERLOADS
-		void atomToValue(Atom atom, sintptr& value)
-		{
-			value = core()->integer(int(atom));						
-		}
-		void atomToValue(Atom atom, uintptr& value)
-		{
-			value = core()->integer(uint32(atom));						
-		}
-#endif
 		void atomToValue(Atom atom, float& value)
 		{
 			value = (float) core()->number(atom);
@@ -378,14 +356,6 @@ namespace avmplus
 			value = core()->atomToScriptObject(atom);
 		}
 
-		Atom valueToAtom(sint8 value) const
-		{
-			return core()->intToAtom(value);
-		}
-		Atom valueToAtom(uint8 value) const
-		{
-			return core()->uintToAtom(value);
-		}
 		Atom valueToAtom(sint16 value) const
 		{
 			return core()->intToAtom(value);
@@ -406,20 +376,6 @@ namespace avmplus
 		{
 			return core()->intToAtom(int(value));
 		}
-		Atom valueToAtom(uint64 value) const
-		{
-			return core()->uintToAtom(uint32(value));
-		}
-#ifdef AVMPLUS_INTPTR_OVERLOADS
-		Atom valueToAtom(sintptr value) const
-		{
-			return core()->intToAtom(int(value));
-		}
-		Atom valueToAtom(uintptr value) const
-		{
-			return core()->uintToAtom(uint32(value));
-		}
-#endif
 		Atom valueToAtom(float value) const
 		{
 			return core()->doubleToAtom((double)value);
