@@ -195,7 +195,7 @@ namespace avmplus
 		MMgc::ChangeSizeForObject(this, (int)grow);
 #endif
 		void* res = heap->CommitCodeMemory((void*)uncommit, grow);
-		GC::GetGC(this)->UpdateStat("jit", GCHeap::SizeToBlocks(grow));
+		GC::GetGC(this)->UpdateStat("jit", (int) GCHeap::SizeToBlocks(grow));
 		AvmAssert(res != 0);
 		if(res == 0)
 		  return uncommit;
@@ -219,7 +219,7 @@ namespace avmplus
 			MMgc::ChangeSizeForObject(this, (int)(-1 * size));
 #endif
 			void* res = heap->DecommitCodeMemory((void*)shrinkTo, size);
-			GC::GetGC(this)->UpdateStat("jit", -1 * GCHeap::SizeToBlocks(size));
+			GC::GetGC(this)->UpdateStat("jit", -1 * (int)GCHeap::SizeToBlocks(size));
 			AvmAssert(res != 0);
 			(void)res;
 			uncommit = shrinkTo;
@@ -239,7 +239,7 @@ namespace avmplus
 			MMgc::ChangeSizeForObject(this, (int)(-1 * (uncommit-first)));
 			heap->DecommitCodeMemory(first, uncommit-first);
 #endif
-			GC::GetGC(this)->UpdateStat("jit", -1 * GCHeap::SizeToBlocks(uncommit-first));
+			GC::GetGC(this)->UpdateStat("jit", -1 * (int)GCHeap::SizeToBlocks(uncommit-first));
 			if (forMir)
 				heap->ReleaseMirMemory(first, size());
 			else

@@ -228,14 +228,14 @@ namespace MMgc
 		 * space actually used by allocated objects.
 		 * @return the minimum heap size in pages (kBlockSize bytes apiece)
 		 */
-		unsigned int GetUsedHeapSize() const { return numAlloc; }
+		size_t GetUsedHeapSize() const { return numAlloc; }
 
 		/**
 		 * Returns the "free heap size", that is, the difference in the
 		 * total heap size and the used heap size
 		 * @return the minimum heap size in pages (kBlockSize bytes apiece)
 		 */
-		unsigned int GetFreeHeapSize() const { return GetTotalHeapSize()-numAlloc; }
+		size_t GetFreeHeapSize() const { return GetTotalHeapSize()-numAlloc; }
 
 		/**
 		 * Returns the total heap size, that is, the total amount
@@ -243,7 +243,7 @@ namespace MMgc
 		 * free space.
 		 * @return the total heap size in pages (kBlockSize bytes apiece)
 		 */
-		unsigned int GetTotalHeapSize() const;
+		size_t GetTotalHeapSize() const;
 		
 		/**
 		 * gives memory back to the OS when there hasn't been any memory activity in a while

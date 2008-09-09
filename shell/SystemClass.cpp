@@ -225,17 +225,17 @@ namespace avmshell
 	double SystemClass::getTotalMemory()
 	{
 		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
-		return gcheap->GetUsedHeapSize() * MMgc::GCHeap::kBlockSize;
+		return double(gcheap->GetUsedHeapSize() * MMgc::GCHeap::kBlockSize);
 	}
 
 	double SystemClass::getFreeMemory()
 	{
 		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
-		return gcheap->GetFreeHeapSize() * MMgc::GCHeap::kBlockSize;
+		return double(gcheap->GetFreeHeapSize() * MMgc::GCHeap::kBlockSize);
 	}
 	
 	double SystemClass::getPrivateMemory()
 	{
-		return MMgc::GCHeap::GetPrivateBytes() * MMgc::GCHeap::kBlockSize;
+		return double(MMgc::GCHeap::GetPrivateBytes() * MMgc::GCHeap::kBlockSize);
 	}
 }
