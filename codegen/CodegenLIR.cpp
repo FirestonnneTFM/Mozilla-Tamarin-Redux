@@ -350,41 +350,31 @@ namespace avmplus
         return lirout->insCall(fid, args);
 	}
 
-	LIns* CodegenLIR::callIndirect(uint32_t fid, LIns* target, uint32_t argc, ...)
-	{
-        AvmAssert(argc+1 <= MAXARGS);
-        AvmAssert(argc+1 == k_functions[fid].count_args());
-
-        LInsp args[MAXARGS];
-        va_list ap;
-        va_start(ap, argc);
-        for (uint32_t i=0; i < argc; i++)
-            args[argc-i-1] = va_arg(ap, LIns*);
-        va_end(ap);
-        args[argc] = target; // addr is final arg in arglist
-
-        return lirout->insCall(fid, args);
-	}
-
     LIns *CodegenLIR::localCopy(int i) {
         return state->value(i).traits != NUMBER_TYPE ? localGet(i) : localGetq(i);
     }
 
 	LIns* CodegenLIR::localGet(int i) {
         Value& v = state->value(i);
+        NanoAssert(v.traits != NUMBER_TYPE);
         return v.ins = lirout->insLoadi(vars, i*8);
 	}
 
 	LIns* CodegenLIR::localGetq(int i) {
         Value& v = state->value(i);
+        NanoAssert(v.traits == NUMBER_TYPE);
         return v.ins = lirout->insLoad(LIR_ldq, vars, i*8);
 	}
 
-	void CodegenLIR::localSet(uintptr i, LIns* o)	
+	void CodegenLIR::localSet(int i, LIns* o)	
 	{
         Value &v = state->value(i);
         v.ins = o;
         lirout->store(o, vars, i*8);
+        DEBUGGER_ONLY(
+            if (int(i) < state->verifier->local_count)
+                lirout->store(InsConst(v.traits), varTraits, i*sizeof(Traits*));
+        )
 	}
 
 	LIns* CodegenLIR::atomToNativeRep(int i, LIns* atom)
@@ -401,10 +391,11 @@ namespace avmplus
 		return ptr;
 	}
 
-	bool CodegenLIR::isPointer(int i)
-	{
+#ifdef _DEBUG
+	bool CodegenLIR::isPointer(int i)	{
 		return !state->value(i).traits->isMachineType;
 	}
+#endif
 
 	bool CodegenLIR::isDouble(int i)
 	{
@@ -953,7 +944,12 @@ namespace avmplus
         }
     };
 
-	void emitStart(LirBuffer *lirbuf, LirWriter *lirout) {
+	void emitStart(LirBuffer *lirbuf, LirWriter* &lirout) {
+        debug_only(
+            GC *gc = lirbuf->_frago->core()->gc;
+            // catch problems before they hit the buffer
+            lirout = new (gc) ValidateWriter(lirout);
+        )
         lirout->ins0(LIR_start);
         // create param's for saved regs -- abi specific
         for (int i=0, n=sizeof(lirbuf->savedParams)/sizeof(LInsp); i < n; i++)
@@ -995,10 +991,6 @@ namespace avmplus
         lirout = new (gc) ExprFilter(lirout);
         CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout);
         lirout = copier;
-        debug_only(
-            // catch problems before they hit the pipeline
-            lirout = new (gc) ValidateWriter(lirout);
-        )
 
 		emitStart(lirbuf, lirout);
 
@@ -1049,6 +1041,10 @@ namespace avmplus
             lirbuf->names->addName(varTraits, "varTraits");
             lirbuf->names->addName(varPtrs, "varPtrs");
         })
+        // in LIR the variables never move around, so initialize varPtrs once and we're done.
+        for (int i=0; i < state->verifier->max_scope; i++) {
+            storeIns(leaIns(i*sizeof(double), vars), i*sizeof(void*), varPtrs);
+        }
 		#endif //DEBUGGER
 
 		// whether this sequence is interruptable or not.
@@ -1122,16 +1118,8 @@ namespace avmplus
 		{
 			// compute offset of first optional arg
 			int offset = 0;
-			for (int i=0, n=info->param_count-info->optional_count; i <= n; i++)
-			{
-				if (info->paramTraits(i) == NUMBER_TYPE)
-				{
-					offset += 8;
-				}
-				else
-				{
-					offset += sizeof(Atom);
-				}
+			for (int i=0, n=info->param_count-info->optional_count; i <= n; i++) {
+                offset += info->paramTraits(i) == NUMBER_TYPE ? sizeof(double) : sizeof(Atom);
 			}
 
 			// now copy the default optional values
@@ -1153,7 +1141,7 @@ namespace avmplus
 				if (isDouble(loc))
 				{
 					arg = loadIns(LIR_ldqc, offset, apArg);
-					offset += 8;
+					offset += sizeof(double);
 				}
 				else
 				{
@@ -1185,7 +1173,7 @@ namespace avmplus
 			{
 				arg = loadIns(LIR_ldqc, offset, apArg);
 				localSet(i, arg);
-				offset += 8;
+				offset += sizeof(double);
 			}
 			else
 			{
@@ -1825,10 +1813,10 @@ namespace avmplus
         LIns *out;
         if (!iid) {
             uint32_t fid = result==NUMBER_TYPE ? FUNCTIONID(fcalli) : FUNCTIONID(calli);
-		    out = callIndirect(fid, target, 3, method, InsConst(argc), apAddr);
+		    out = callIns(fid, 4, target, method, InsConst(argc), apAddr);
         } else {
             uint32_t fid = result==NUMBER_TYPE ? FUNCTIONID(fcallimt) : FUNCTIONID(callimt);
-		    out = callIndirect(fid, target, 4, iid, method, InsConst(argc), apAddr);
+		    out = callIns(fid, 5, target, iid, method, InsConst(argc), apAddr);
         }
 
 		if (opcode != OP_constructsuper && opcode != OP_construct)
@@ -4067,9 +4055,9 @@ namespace avmplus
 
     void CodegenLIR::emitMD() 
     {
-#ifdef PERFM
-		uint64_t start = rtstamp();
-#endif /* PERFM */
+        #ifdef PERFM
+        _ntprof("compile");
+        #endif
         debug_only(
             LirReader reader(lirbuf);
             ValidateReader validator(&reader);
@@ -4095,9 +4083,9 @@ namespace avmplus
         assm->beginAssembly(frag, &regMap);
         assm->assemble(frag, loopJumps);
         assm->endAssembly(frag, loopJumps);
-#ifdef PERFM
-		uint64_t stop = rtstamp();
-#endif /* PERFM */
+        #ifdef PERFM
+        _tprof_end();
+        #endif
 		
 		verbose_only(
             assm->_outputCache = 0;
@@ -4107,12 +4095,8 @@ namespace avmplus
         );
 
 #ifdef PERFM
-		const int mhz = 2600;
-		double time = (stop-start)/(1.0*mhz);
-		_nvprof("compile", time);
 		_nvprof("IR-bytes", lirbuf->byteCount());
 		_nvprof("IR", lirbuf->insCount());		
-		_nvprof("IR/tick", lirbuf->insCount()/time);		
 #endif /* PERFM */
 		
         frag->releaseLirBuffer();
@@ -4178,15 +4162,11 @@ namespace avmplus
         verbose_only(if (pool->verbose) {
             lirout = pushVerboseWriter(gc, lirout, lirbuf);
         })
-        debug_only(
-            // catch problems before they hit the buffer
-            lirout = new (gc) ValidateWriter(lirout);
-        )
 
 		// x86-specific notes:
-		// the thunk we're generating is really a CDECL thunk.  We mark
+		// the thunk we're generating is really a CDECL function.  We mark
 		// it as fastcall to enable the incoming iid arg in EDX.  Assembler
-		// doesn't actually know how to pop stack args, so this will all end
+		// doesn't actually know how to pop stack args, so this will end
 		// up doing the right thing.  this is very fragile and should be fixed!
 
 		emitStart(lirbuf, lirout);

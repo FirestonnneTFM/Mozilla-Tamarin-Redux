@@ -8377,9 +8377,9 @@ namespace avmplus
 		}
 		#endif
 
-#ifdef PERFM
-		uint64_t start = rtstamp();
-#endif /* PERFM */
+        #ifdef PERFM
+        _ntprof("compile");
+        #endif
 
 		/* 
 		* Use access exceptions to manage our buffer growth.  We
@@ -8433,15 +8433,10 @@ namespace avmplus
 		#define bytesBetween(x,y)   ( (size_t)(x) - (size_t)(y) )
 
 		AvmAssert((int)casePtr);
-		uint64_t stop = rtstamp();
-		const int mhz = 100;
-		double time = (stop-start)/(100.0*mhz);
-		_nvprof("compile", time);
+        _tprof_end();
 		_nvprof("mir bytes", bytesBetween(ip,ipStart));
 		_nvprof("mir", ip-ipStart);
 		_nvprof("code", bytesBetween(mip,casePtr));
-		_nvprof("IR/tick", (ip-ipStart)/time);
-//		_nvprof("code buffer", bytesBetween(pool->codeBuffer->getPos(),pool->codeBuffer->start()));
 
 		#undef bytesBetween
 #endif /* PERFM */

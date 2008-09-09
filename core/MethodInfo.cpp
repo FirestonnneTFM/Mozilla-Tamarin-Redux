@@ -103,9 +103,9 @@ namespace avmplus
 		AvmCore* core = this->core();
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
-		#ifdef PERFM
-			uint64_t start = rtstamp();
-		#endif /* PERFM */
+            #ifdef PERFM
+            _ntprof("verify & IR gen");
+            #endif
 
 			#if defined AVMPLUS_MIR
 			CodegenMIR mir(this);
@@ -116,11 +116,9 @@ namespace avmplus
 			TRY(core, kCatchAction_Rethrow)
 			{
 				verifier.verify(&mir);	// pass 2 - data flow
-		#ifdef PERFM
-				uint64_t stop = rtstamp();
-				const int mhz = 2600;
-				_nvprof("verify & IR gen", (stop-start)/(1.0*mhz));
-		#endif /* PERFM */
+                #ifdef PERFM
+                _tprof_end();
+                #endif
         
 				if (!mir.overflow)
 					mir.emitMD(); // pass 3 - generate code

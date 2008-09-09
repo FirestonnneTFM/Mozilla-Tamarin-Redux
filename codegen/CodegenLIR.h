@@ -41,6 +41,12 @@
 
 #include "../nanojit/nanojit.h"
 
+#ifdef DEBUGGER
+#define DEBUGGER_ONLY(...) __VA_ARGS__
+#else
+#define DEBUGGER_ONLY(...)
+#endif
+
 namespace avmplus
 {
 	using namespace nanojit;
@@ -115,7 +121,6 @@ namespace avmplus
         LIns *ptrToNativeRep(Traits*, LIns*);
         LIns *loadAtomRep(int i);
         LIns *callIns(uint32_t fid, uint32_t argc, ...);
-        LIns *callIndirect(uint32_t fid, LIns* addr, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *binaryIns(LOpcode, LIns *a, LIns *b);
         LIns *localGet(int i);
@@ -136,7 +141,7 @@ namespace avmplus
 	    LIns *i2dIns(LIns* v);
 	    LIns *u2dIns(LIns* v);
         bool isDouble(int i);
-        bool isPointer(int i);
+        debug_only( bool isPointer(int i); )
         void label(CodegenLabel &label, LIns *bb);
         void emitPrep(AbcOpcode);
         void emitSampleCheck();
@@ -172,7 +177,7 @@ namespace avmplus
 		void emitSetContext(FrameState* state, AbstractFunction* f);
 		void emitSetDxns(FrameState* state);
 		void merge(const Value& current, Value& target);
-		void localSet(uintptr i, LIns* o);
+		void localSet(int i, LIns* o);
 
     // helpers for jitted code
 		static Atom coerce_o(Atom v);
