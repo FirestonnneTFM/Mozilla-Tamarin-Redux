@@ -1314,7 +1314,7 @@ namespace MMgc
 		if (b) b->free = true;
 	}
 	
-	unsigned int GCHeap::GetTotalHeapSize() const
+	size_t GCHeap::GetTotalHeapSize() const
 	{
 		size_t size = 0;
 		// Release all of the heap regions

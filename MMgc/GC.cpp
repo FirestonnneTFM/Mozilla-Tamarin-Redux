@@ -3349,7 +3349,7 @@ bail:
 	
 	void *GC::heapAlloc(size_t siz, bool expand, bool zero)
 	{
-		void *ptr = heap->Alloc(siz, expand, zero);
+		void *ptr = heap->Alloc((int)siz, expand, zero);
 		if(ptr)
 			totalGCPages += siz;
 		return ptr;

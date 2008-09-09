@@ -220,7 +220,7 @@ namespace MMgc
 	void *FixedMalloc::LargeAlloc(size_t size)
 	{
 		size += DebugSize();
-		int blocksNeeded = GCHeap::SizeToBlocks(size);
+		int blocksNeeded = (int)GCHeap::SizeToBlocks(size);
 		void *item = m_heap->Alloc(blocksNeeded, true, false);
 		if(!item)
 		{
