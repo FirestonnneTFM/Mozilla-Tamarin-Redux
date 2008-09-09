@@ -104,6 +104,39 @@ package peephole
 	    this.G = G;
 	    this.A = A;
 	}
+
+	public function toString() {
+	    return G + " " + A;
+	}
+    }
+
+    class Node 
+    {
+	function Node(instr) {
+	    this.instr = instr;
+	}
+
+	var instr;
+	var patterns = [];     // for the guard/action pairs
+	var children = [];     // map from names to nodes
+
+	function getChild(instr) {
+	    for ( var i=0, limit=children.length ; i < limit ; i++ )
+		if (children[i].instr == instr)
+		    return children[i];
+	    var c = new Node(instr);
+	    children.push(c);
+	    return c;
+	}
+
+	public function toString() {
+	    var s = "";
+	    if (patterns.length > 0)
+		s += " (" + instr + " -> {" + patterns.join(",") + "})";
+	    if (children.length > 0) 
+		s += " (" + instr + " -> [" + children.join(",") + "])";
+	    return s;
+	}
     }
 
     function assert(cond) {
@@ -111,6 +144,13 @@ package peephole
             throw new Error("Assertion failed");
     }
 
+    function makeArray(k, v) {
+	var A = [];
+	for ( var i=0 ; i < k ; i++ )
+	    A[i] = (v is Function) ? v() : v;
+	return A;
+    }
+		
     function preprocess(lines) {
 	var j = 0;
 	var first = true;
@@ -168,45 +208,168 @@ package peephole
 	return output;
     }
 
-    function build(patterns) {
-	var T = {};
+    function buildTrie(patterns) {
+	var T = new Node("");
+
 	for ( var i=0, ilimit=patterns.length ; i < ilimit ; i++ ) {
 	    var p = patterns[i];
 	    var container = T;
-	    for ( var j=0, jlimit=p.P.length ; j < jlimit ; j++ ) {
-		if (!(p.P[j] in container))
-		    container[p.P[j]] = {};
-		container = container[p.P[j]];
-	    }
-	    if (!("actions" in container))
-		container.actions = [];
-	    container.actions.push(p);
+
+	    for ( var j=0, jlimit=p.P.length ; j < jlimit-1 ; j++ )
+		container = container.getChild(p.P[j]);
+	    container.getChild(p.P[jlimit-1]).patterns.push(p);
 	}
 	return T;
     }
 
-    function generate(toplevel) {
-	var initial = [];
-	for ( var n in toplevel ) {
-	    if (n == "actions" || n == "toString")
-		continue;
-	    initial.push({name: n, state: expand(toplevel[n])});
-	}
-	return initial;
+    // transitions is array of transition tables
+    // transition table is array of pairs [v, s] where v is a string and s is a state number.
+    // state zero is the start state.
+
+    class State
+    {
+	var numTransitions = 0;
+	var transitionPtr = 0;
+	var guardIndex = 0;
+	var fail = 0;
+	var failShift = 0;
     }
 
-    function display(container, sofar) {
-	if (container.actions) {
+    var states = [];
+    var transitions = [];     // array of [instr, state]
+    var actions = [];         // array of Pattern nodes
+    var toplevel = [];
+
+    // FIXME: this is partial
+    var MAXINSTR = 300;
+    var opcode = { OP_getlocal: 0x62,
+		   OP_setlocal: 0x63,
+		   OP_add: 0xA0,
+		   OP_ext_pushbits: 0x101,
+		   OP_swap: 0x2B,
+		   OP_pop: 0x29 };
+
+    function generate(trie) {
+	var c = trie.children;
+	for ( var i=0 ; i < c.length ; i++ ) {
+	    assert(c[i].instr in opcode);
+	    toplevel[opcode[c[i].instr]] = expand(c[i]);
+	}
+    }
+
+    function expand(node) {
+	var state = new State;
+	if (node.patterns.length > 0) {
+	    state.guardIndex = actions.length + 1;
+	    if (node.patterns.length > 1)
+		actions.push(node.patterns);
+	    else
+		actions.push(node.patterns[0]);
+	}
+	var trans = [];
+	for ( var i=0 ; i < node.children.length ; i++ ) {
+	    var ci = node.children[i];
+	    if (!(ci.instr in opcode))
+		throw ci.instr;
+	    trans.push([opcode[ci.instr], expand(ci)]);
+	}
+	trans.sort(function (a,b) { return a[0] - b[0] });
+	state.numTransitions = trans.length;
+	state.transitionPtr = trans.length > 0 ? transitions.length : 0;
+	for ( var i=0 ; i < trans.length ; i++ )
+	    transitions.push(trans[i]);
+	var stateno = states.push(state);
+	return stateno;
+    }
+
+    function formatStates() {
+	var s = [];
+	s.push("static state_t states[] = {");
+	s.push("{ 0, 0, 0, 0, 0 },  /* state 0 is invalid */");
+	for ( var i=0 ; i < states.length ; i++ ) {
+	    var S = states[i];
+	    s.push( "{ " + 
+		    S.numTransitions + ", " +
+		    S.transitionPtr + ", " +
+		    S.guardIndex + ", " +
+		    S.fail +", " +
+		    S.failShift + " },");
+	}
+	s.push("};");
+	return s.join("\n");
+    }
+
+    function formatTransitions() {
+	var s = [];
+	s.push("static transition_t transitions[] = {");
+	for ( var i=0 ; i < transitions.length ; i++ )
+	    s.push("{ " + transitions[i][0] + ", " + transitions[i][1] + " },");
+	s.push("};");
+	return s.join("\n");
+    }
+
+    function formatToplevel() {
+	var s = [];
+	s.push("static uint32 toplevel[] = {");
+	var i=0;
+	while (i < MAXINSTR) {
+	    var t = "";
+	    for ( var j=0 ; j < 8 ; j++, i++ )
+		t += int(toplevel[i]) + ", ";
+	    s.push(t);
+	}
+	s.push("};");
+	return s.join("\n");
+    }
+
+    function formatActions() {
+
+	function makeAssert(P) {
 	    var s = "";
-	    for ( var p=sofar ; p != null ; p=p.next )
-		s = s + p.name + " ";
-	    print(s);
+	    for ( var i=0 ; i < P.length ; i++ ) {
+		if (i > 0)
+		    s += " && ";
+		s += "I[" + i + "][0] == " + P[i];
+	    }
+	    return "        AvmAssert(" + s + ");";
 	}
-	for (var n in container) {
-	    if (n == "actions" || n == "toString")
-		continue;
-	    display(container[n], { name: n, next: sofar });
+
+	function emit(A) {
+	    var s = [];
+	    s.push("        if (" + (A.G ? A.G : "true") + ") {");
+	    s.push("            S[0] = " + A.A[0] + ";");
+	    s.push("            R[0] = NEW_OPCODE(" + A.A[0] + ");");
+	    for ( var j=1 ; j < A.A.length ; j++ )
+		s.push("            R[" + j + "] = " + A.A[j] + ";");
+	    s.push("            return replace(0," + A.P.length + "," + A.A.length + ");");
+	    s.push("        }");
+	    return s.join("\n");
 	}
+
+	var s = [];
+	s.push("bool Translator::commit(uint32 action)");
+	s.push("{");
+	s.push("    switch (action) {");
+	for ( var i=0 ; i < actions.length ; i++ ) {
+	    var A = actions[i];
+	    s.push("    case " + (i+1) + ":");
+	    if (A is Array) {
+		s.push(makeAssert(A[0].P));
+		for ( var j=0 ; j < A.length ; j++ )
+		    s.push(emit(A[j]));
+	    }
+	    else {
+		s.push(makeAssert(A.P));
+		s.push(emit(A));
+	    }
+	    s.push("        return false;");
+	}
+	s.push("    default:");
+	s.push("        AvmAssert(!\"Should not happen\");");
+	s.push("        return false;");
+	s.push("    }");
+	s.push("}");
+	return s.join("\n");
     }
 
     if (System.argv.length != 2) {
@@ -214,6 +377,10 @@ package peephole
         System.exit(1);
     }
 
-    var T = build(parse(preprocess(File.read(System.argv[0]).split("\n"))));
-    display(T, null);
+    generate(buildTrie(parse(preprocess(File.read(System.argv[0]).split("\n")))));
+    File.write(System.argv[1],
+	       formatStates() + "\n\n" +
+	       formatTransitions() + "\n\n" +
+	       formatToplevel() + "\n\n" +
+	       formatActions());
 }

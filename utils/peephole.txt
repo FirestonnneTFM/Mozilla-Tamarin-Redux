@@ -18,7 +18,7 @@ pattern  OP_getlocal ; OP_getlocal ; OP_add
 guard    $1.1 < 65536 && $1.1 < 65536
 action   OP_ext_add_ll ; (($1.1 << 16) | $0.1)
 
-pattern  OP_getlocal ; OP_ext_pusbits ; OP_add
+pattern  OP_getlocal ; OP_ext_pushbits ; OP_add
 action   OP_ext_add_lb ; $0.1 ; $1.1
 
 pattern  OP_swap ; OP_pop
@@ -38,7 +38,7 @@ action   OP_setlocal0 + $0.1
 // Using this pattern means the peephole generator has to account for multiple guards
 // and actions per final state.
 
-//pattern  OP_setlocal ; OP_getlocal
-//guard    $0.1 != $1.1 && $0.1 < 65536 && $1.1 < 65536
-//action   OP_shiftlocal ; ($1.1 << 16) | $0.1
+pattern  OP_setlocal ; OP_getlocal
+guard    $0.1 != $1.1 && $0.1 < 65536 && $1.1 < 65536
+action   OP_shiftlocal ; ($1.1 << 16) | $0.1
 
