@@ -303,6 +303,11 @@ namespace avmplus
 		vtable->traits->core->interrupt(this);
 	}
 
+    void MethodEnv::stkover()
+    {
+        this->core()->stackOverflow(this);
+    }
+
 	Traits* MethodEnv::toClassITraits(Atom atom)
 	{
 		switch (atom&7)
@@ -336,7 +341,7 @@ namespace avmplus
 		return toplevel()->arrayClass->newarray(extra, extra_count);
 	}
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
 	Atom MethodEnv::getpropertyHelper(Atom obj, Multiname *multi, VTable *vtable, Atom index)
 	{
@@ -555,7 +560,7 @@ namespace avmplus
 		}
 	}
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	ArrayObject* MethodEnv::createArgumentsHelper(int argc, uint32 *ap)
 	{
 		// create arguments using argv[1..argc].
@@ -574,7 +579,7 @@ namespace avmplus
 		return toplevel()->arrayClass->newarray(extra, extra_count);
 	}
 
-#endif // AVMPLUS_MIR
+#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 	Atom MethodEnv::getpropertylate_i(Atom obj, int index) const
 	{
@@ -777,7 +782,7 @@ namespace avmplus
 		}
 	}
 
-	int MethodEnv::hasnext2(Atom& objAtom, int& index) const
+	int MethodEnv::hasnextproto(Atom& objAtom, int& index) const
 	{
 		if (index < 0)
 			return 0;

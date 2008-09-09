@@ -47,11 +47,6 @@ namespace avmplus
 	 */
 	class ScriptObject : public AvmPlusScriptableObject
 	{
-	private:
-		#ifdef AVMPLUS_MIR
-		friend class CodegenMIR;
-		#endif
-
 	public:
 		VTable* const vtable;
 		

@@ -41,11 +41,11 @@
 # operation=skip is only supported operation
 
 jsbench/.*                      ,	sunspider	,	skip	,	skip jsbench
-misc/.*                      	,	sunspider	,	skip	,	skip misc
+#misc/.*                      	,	sunspider	,	skip	,	skip misc
 scimark/.*			,	sunspider	,	skip	,	skip scimark
 
 sunspider/.*                    ,	jsbench		,	skip	,	skip sunspider
-misc/.*                   	,	jsbench		,	skip	,	skip misc
+#misc/.*                   	,	jsbench		,	skip	,	skip misc
 scimark/.*			,	jsbench		,	skip	,	skip scimark
 
 sunspider/.*                    ,	misc		,	skip	, 	skip sunspider
@@ -53,7 +53,7 @@ jsbench/.*                      ,	misc		,	skip	, 	skip jsbench
 
 sunspider/.*                    ,	scimark		,	skip	, 	skip sunspider
 jsbench/.*                      ,	scimark		,	skip	, 	skip jsbench
-misc/.*                    	,	scimark		,	skip	, 	skip jsbench
+#misc/.*                    	,	scimark		,	skip	, 	skip jsbench
 
 jsbench/Search.as               ,       .*              ,       skip    ,       skip test runs too long and times out buildbot
 .*util.*                        ,       .*              ,       skip    ,       ship internal files

@@ -41,6 +41,10 @@
 
 namespace avmplus
 {
+#ifdef FEATURE_NANOJIT
+    class PageMgr;
+#endif
+
 #ifdef AVMPLUS_WORD_CODE
 	
 	// This needs to be a root because there are GCObjects referenced from the multinames
@@ -145,6 +149,10 @@ namespace avmplus
 		GrowableBuffer *codeBuffer;
 		sintptr stackOverflowHandler; // address of stack overflow handler
 		#endif /*AVMPLUS_MIR */
+
+        #ifdef FEATURE_NANOJIT
+        DWB(PageMgr*) codePages;
+        #endif
 
 		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos);
 		~PoolObject();

@@ -194,6 +194,8 @@ namespace avmplus
 				delete [] data;
 			// list can be a stack object so this can help the gc
 			data = NULL;
+            len = 0;
+            max = 0;
 		}
 		uint32 add(T value)
 		{
@@ -219,6 +221,10 @@ namespace avmplus
 		T get(uint32 index) const
 		{
 			return data[index];
+		}
+		T last() const
+		{
+			return data[len-1];
 		}
 		void set(uint32 index, T value)
 		{
@@ -339,6 +345,13 @@ namespace avmplus
 		}
 
 		const T *getData() const { return data; }
+
+        void become(List<T, kElementType> &list) {
+            clear();
+            for (int i=0, n=list.len; i < n; i++)
+                add(list[i]);
+            list.clear();
+        }
 
 	private:
 

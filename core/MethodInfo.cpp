@@ -37,9 +37,15 @@
 
 
 #include "avmplus.h"
+#ifdef AVMPLUS_MIR
+#include "../codegen/CodegenMIR.h"
+#endif
+#ifdef FEATURE_NANOJIT
+#include "../codegen/CodegenLIR.h"
+#endif
 
 #ifdef PERFM
-  #include "../vprof/vprof.h"
+#include "../vprof/vprof.h"
 #endif /* PERFM */
 
 namespace avmplus
@@ -67,7 +73,7 @@ namespace avmplus
 
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		if (f->pool->core->verifyall && f->pool)
+		if (f->pool->core->config.verifyall && f->pool)
 			f->pool->processVerifyQueue(env->toplevel());
 		#endif
 
@@ -90,25 +96,29 @@ namespace avmplus
 			toplevel->throwVerifyError(kNotImplementedError, toplevel->core()->toErrorString(this));
 		}
 
-		#ifdef AVMPLUS_MIR
+		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
 		Verifier verifier(this, toplevel);
 
 		AvmCore* core = this->core();
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
-		#ifdef PERFM
-			uint64_t start = rtstamp();
-		#endif /* PERFM */
+            #ifdef PERFM
+            _ntprof("verify & IR gen");
+            #endif
+
+			#if defined AVMPLUS_MIR
 			CodegenMIR mir(this);
+			#elif defined FEATURE_NANOJIT
+			CodegenLIR mir(this);
+			#endif
+
 			TRY(core, kCatchAction_Rethrow)
 			{
 				verifier.verify(&mir);	// pass 2 - data flow
-		#ifdef PERFM
-				uint64_t stop = rtstamp();
-				const int mhz = 100;
-				_nvprof("verify & IR gen", (stop-start)/(100*mhz));
-		#endif /* PERFM */
+                #ifdef PERFM
+                _tprof_end();
+                #endif
         
 				if (!mir.overflow)
 					mir.emitMD(); // pass 3 - generate code
@@ -129,7 +139,8 @@ namespace avmplus
 			}
 			CATCH (Exception *exception) 
 			{
-				mir.clearMIRBuffers();
+				// fixme! 
+				//mir.clearMIRBuffers();
 
 				// re-throw exception
 				core->throwException(exception);

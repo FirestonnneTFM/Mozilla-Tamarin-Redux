@@ -117,6 +117,7 @@ namespace avmplus
 	    void nullcheck(Atom atom);
 	    void npe();
 		void interrupt();
+        void stkover();
 
 		/** returns the instance traits of the factorytype of the passed atom */
 		Traits* toClassITraits(Atom atom);
@@ -125,7 +126,7 @@ namespace avmplus
 		Atom getpropertylate_i(Atom obj, int index) const;
 		Atom getpropertylate_u(Atom obj, uint32 index) const;
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		void setpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index);
 		void initpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index);
 		Atom getpropertyHelper(Atom obj, Multiname *multi, VTable *vtable, Atom index);
@@ -159,7 +160,7 @@ namespace avmplus
 		int hasnext(Atom objAtom, int index) const;
 
 		/** Implementation of OP_hasnext2 */		
-		int hasnext2(Atom& objAtom, int& index) const;
+		int hasnextproto(Atom& objAtom, int& index) const;
 		
 		/**
 		 * operator in from ES3

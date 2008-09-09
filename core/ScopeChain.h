@@ -38,6 +38,11 @@
 
 namespace avmplus
 {
+	#if defined AVMPLUS_MIR
+	class CodegenMIR;
+	#elif defined FEATURE_NANOJIT
+	class CodegenLIR;
+	#endif
 
 	/**
 	 * type descriptor for a captured scope chain
@@ -87,7 +92,11 @@ namespace avmplus
 		ScopeTypeChain* const scopeTraits;
 		DRCWB(Namespace*) const defaultXmlNamespace;
 	private:
+		#if defined AVMPLUS_MIR
 		friend class CodegenMIR;
+		#elif defined FEATURE_NANOJIT
+		friend class CodegenLIR;
+		#endif
 		Atom scopes[1]; // actual length == size
 
 	public:
