@@ -39,62 +39,6 @@
 #ifndef __GCMemoryProfiler__
 #define __GCMemoryProfiler__
 
-#ifndef WIN32
-#include <pthread.h>
-#endif
-
-/**
-* GCThreadLocal turned out to be useful class not only for the memory profiler so it is defined in Release and Debug (It is not controlled by MEMORY_INFO)
-**/
-namespace MMgc
-{
-#ifdef WIN32
-	template<typename T>
-	class GCThreadLocal
-	{
-	public:
-		GCThreadLocal()
-		{
-			GCAssert(sizeof(T) <= sizeof(LPVOID));
-			tlsId = TlsAlloc();
-		}
-		T operator=(T tNew)
-		{
-			TlsSetValue(tlsId, (LPVOID) tNew);
-			return tNew;
-		}
-		operator T() const
-		{
-			return (T) TlsGetValue(tlsId);
-		}
-	private:
-		DWORD tlsId;
-	};
-#else
-	template<typename T>
-	class GCThreadLocal
-	{
-	public:
-		GCThreadLocal()
-		{
-			GCAssert(sizeof(T) <= sizeof(void*));
-			pthread_key_create(&tlsId, NULL);
-		}
-		T operator=(T tNew)
-		{
-			pthread_setspecific(tlsId, (const void*)tNew);
-			return tNew;
-		}
-		operator T() const
-		{
-			return (T)pthread_getspecific(tlsId);
-		}
-	private:
-		pthread_key_t tlsId ;
-	};
-#endif
-}
-
 #ifndef MEMORY_INFO
 
 #define MMGC_MEM_TAG(_x)
@@ -109,68 +53,6 @@ namespace MMgc
 
 namespace MMgc
 {
-#ifdef WIN32
-	/**
-	 * GCCriticalSection is a simple Critical Section class used by GCMemoryProfiler to
-	 * ensure mutually exclusive access.  GCSpinLock doesn't suffice since its not
-	 * re-entrant and we need that
-	 */
-	class GCCriticalSection
-	{
-	public:
-		GCCriticalSection()
-		{
-			InitializeCriticalSection(&cs);
-		}
-
-		inline void Acquire()
-		{
-			EnterCriticalSection(&cs);
-		}
-
-		inline void Release()
-		{
-			LeaveCriticalSection(&cs);
-		}
-
-	private:
-		CRITICAL_SECTION cs;
-	};
-	
-#else
-	class GCCriticalSection
-	{
-	public:
-		GCCriticalSection()
-		{
-		}
-
-		inline void Acquire()
-		{
-		}
-		
-		inline void Release()
-		{
-		}
-	};
-#endif
-
-	class GCEnterCriticalSection
-	{
-	public:
-		GCEnterCriticalSection(GCCriticalSection& cs) : m_cs(cs)
-		{
-			m_cs.Acquire();
-		}
-		~GCEnterCriticalSection()
-		{
-			m_cs.Release();
-		}
-
-	private:
-		GCCriticalSection& m_cs;
-	};
-
 	MMGC_API void SetMemTag(const char *memtag);
 	MMGC_API void SetMemType(void *memtype);
 

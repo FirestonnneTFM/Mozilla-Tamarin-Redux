@@ -151,6 +151,8 @@ namespace MMgc
 			LargeBlock *block = GetBlockHeader(item);
 			return (block->flags & kRCObject) != 0;
 		}
+		
+		size_t GetBytesInUse();
 
 	private:
 		struct LargeBlock

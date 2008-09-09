@@ -77,7 +77,8 @@ namespace MMgc
 
 	GCHeap::GCHeap(GCMallocFuncPtr m, GCFreeFuncPtr f, int initialSize)
 		: heapVerbose(false),
-		  kNativePageSize(0)
+		  kNativePageSize(0),
+		  heapLimit((size_t)-1)
 	{
 #ifdef _DEBUG
 		// dump memory profile after sweeps
@@ -869,6 +870,9 @@ namespace MMgc
 #else
 		const int defaultReserve = kDefaultReserve;
 #endif
+
+		if(GetTotalHeapSize() > heapLimit)
+			return false;
 		
 		char *baseAddr = NULL;
 		char *newRegionAddr = NULL;
@@ -1308,5 +1312,17 @@ namespace MMgc
 		GCAcquireSpinlock lock(m_mirBufferLock);  // technically needed 
 #endif
 		if (b) b->free = true;
+	}
+	
+	unsigned int GCHeap::GetTotalHeapSize() const
+	{
+		size_t size = 0;
+		// Release all of the heap regions
+		Region *region = lastRegion;
+		while (region != NULL) {
+			size += region->commitTop - region->baseAddr;
+			region = region->prev;
+		}
+		return SizeToBlocks(size);
 	}
 }

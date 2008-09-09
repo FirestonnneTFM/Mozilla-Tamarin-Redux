@@ -150,6 +150,7 @@ namespace MMgc
 #include "GCHeap.h"
 #include "GCAlloc.h"
 #include "GCLargeAlloc.h"
+#include "GCThreadLocal.h"
 #include "GCMemoryProfiler.h"
 #include "FixedAlloc.h"
 #include "FixedMalloc.h"

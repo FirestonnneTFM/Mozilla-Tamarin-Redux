@@ -235,7 +235,9 @@ namespace avmshell
 		printf("usage: avmplus\n");
 		#ifdef DEBUGGER
 			printf("          [-d]          enter debugger on start\n");
-		#endif
+        #endif
+		printf("          [-memstats]   generate statistics on memory usage\n");
+		printf("          [-memlimit d] limit the heap size to d pages\n");
 		#ifdef AVMPLUS_PROFILE
 			printf("          [-Ddprofile]  dynamic instruction stats\n");
 			printf("          [-Dsprofile]  show static instruction stats\n");
@@ -245,7 +247,6 @@ namespace avmshell
 		#endif /* _DEBUG */
 		#ifdef DEBUGGER
 			printf("          [-Dnogc]      don't collect\n");
-			printf("          [-Dgcstats]   generate statistics on gc\n");
 			printf("          [-Dnoincgc]   don't use incremental collection\n");
 			printf("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
 			printf("          [-Dlanguage l] localize runtime errors, languages are:\n");
@@ -633,10 +634,7 @@ namespace avmshell
 						} else if (!strcmp(arg+2, "sprofile")) {
 							sprof.sprofile = true;
 						#endif /* AVMPLUS_PROFILE */
-
 	                    #ifdef DEBUGGER
-						} else if (!strcmp(arg+2, "gcstats")) {
-							GetGC()->gcstats = true;
 						} else if (!strcmp(arg+2, "nogc")) {
 							GetGC()->nogc = true;
 						} else if (!strcmp(arg+2, "noincgc")) {
@@ -689,6 +687,10 @@ namespace avmshell
 						} else {
 							usage();
 						}
+					} else if (!strcmp(arg, "-memstats")) {
+						GetGC()->gcstats = true;
+					} else if (!strcmp(arg, "-memlimit")) {
+						GetGC()->GetGCHeap()->SetHeapLimit(strtol(argv[++i], 0, 10));
 					} else if (!strcmp(arg, "-log")) {
 						do_log = true;
 					#ifdef AVMPLUS_INTERACTIVE

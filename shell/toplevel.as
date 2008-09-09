@@ -51,7 +51,10 @@ package avmplus
 		public native static function getTimer():uint
 		private native static function getArgv():Array
 		public static const argv:Array = getArgv();
-		public native static function readLine():String
+		public native static function readLine():String;
+		public native static function get totalMemory():Number;
+		public native static function get freeMemory():Number;
+		public native static function get privateMemory():Number;
 	}	
 	
 	public class File

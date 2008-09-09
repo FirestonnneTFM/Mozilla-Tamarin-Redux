@@ -109,6 +109,10 @@ namespace avmshell
 
 		Stringp readLine();
 
+		double getTotalMemory();
+		double getFreeMemory();
+		double getPrivateMemory();
+
 		DECLARE_NATIVE_MAP(SystemClass)
     };
 }
