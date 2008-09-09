@@ -439,7 +439,8 @@ for ast in tests:
       testName=incfile+" "+testName
   f = run_pipe('%s %s %s' % (avm, vmargs, testName))
   if f == "timedOut":
-    fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)    ltimeout += 1
+    fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
+    ltimeout += 1
   else:
     try:
       outputLines = []
