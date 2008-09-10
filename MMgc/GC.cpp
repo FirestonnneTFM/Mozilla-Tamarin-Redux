@@ -45,6 +45,9 @@
 #include "MMgc.h"
 #include "StaticAssert.h"
 
+#ifdef HAVE_STDARG
+#include <stdarg.h>
+#endif
 
 #ifdef MEMORY_INFO
 #if !defined(__MWERKS__)
