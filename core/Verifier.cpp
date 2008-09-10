@@ -1830,7 +1830,7 @@ namespace avmplus
 				if (scope->fullsize > (scope->size+state->scopeDepth))
 				{
 					// extra constraints on type of pushscope allowed
-					Traits* requiredType = scope->scopes[scope->size+state->scopeDepth].traits;
+					Traits* requiredType = scope->getScopeTraitsAt(scope->size+state->scopeDepth);
 					if (!scopeTraits || !scopeTraits->containsInterface(requiredType))
 					{
 						verifyFailed(kIllegalOperandTypeError, core->toErrorString(scopeTraits), core->toErrorString(requiredType));
@@ -2757,7 +2757,7 @@ namespace avmplus
 						XLAT_ONLY( if (translator) translator->emitOp1(OP_getouterscope, index) );
 						return;
 					}
-					if (scope->scopes[index].isWith)
+					if (scope->getScopeIsWithAt(index))
 						break;  // with scope could have dynamic property
 				}
 				if (index <= 0)
