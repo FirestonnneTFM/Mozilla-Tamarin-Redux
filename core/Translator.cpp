@@ -907,7 +907,8 @@ namespace avmplus
 	// guards; this means that matching instructions are candidates no matter what
 	// their operand values.
 
-	// Structures are laid out to improve packing and conserve space.
+	// Structures are laid out to improve packing and conserve space.  The included
+	// code below knows the order of fields, do not rearrange lightly.
 
 	struct state_t {
 		uint8  numTransitions;
@@ -917,104 +918,18 @@ namespace avmplus
 		uint16 fail;
 	};
 	
+	// Transitions in a run are always sorted in increasing token value order,
+	// so it's possible to binary search the run.
+	
 	struct transition_t {
 		uint16 opcode;
 		uint16 next_state;
 	};
 	
-	// Note that transitions in a run are always sorted in increasing token value order,
-	// so it's possible to binary search the run.
+	// Include generated state machine tables for the peephole optimizer.
 	
-	// Begin code that should be generated
+	#include "peephole.icc"
 	
-#if 1
-#  include "peephole.icc"
-#else
-	static state_t states[] = {
-	{ 0, 0, 0, 0, 0 },    // 0 is never a valid state
-	{ 1, 0, 0, 0, 0 },    // 0x62
-	{ 1, 0, 1, 1, 0 },    // 0x62 0x62
-	{ 0, 0, 0, 2, 0 },    // 0x62 0x62 0x62
-	{ 1, 0, 2, 0, 0 },    // 0x63
-	{ 0, 1, 0, 3, 1 },    // 0x63 0x62
-	};
-	
-	static transition_t transitions[] = {
-	{ OP_getlocal, 2 },
-	{ OP_getlocal, 3 }, 
-	{ OP_getlocal, 5 },
-	};
-	
-	static uint16 toplevel[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 1, 4, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0,
-	};
-	
-	bool Translator::commit(uint32 action) {
-		switch (action) {
-			case 1:
-				AvmAssert(O[0] == OP_getlocal && O[1] == OP_getlocal);
-				if (!(I[0][1] < 65536 && I[1][1] < 65536)) return false;
-				S[0] = OP_ext_get2locals;
-				R[0] = NEW_OPCODE(OP_ext_get2locals);
-				R[1] = (I[1][1] << 16) | I[0][1];
-				return replace(2, 2);
-			case 2:
-				AvmAssert(O[0] == OP_getlocal && O[1] == OP_getlocal && O[2] == OP_getlocal);
-				if (!(I[0][1] < 1024 && I[1][1] < 1024 && I[2][1] < 1024)) return false;
-				S[0] = OP_ext_get3locals;
-				R[0] = NEW_OPCODE(OP_ext_get3locals);
-				R[1] = (I[2][1] << 20) | (I[1][1] << 10) | I[0][1];
-				return replace(3, 2);
-			case 3:
-				AvmAssert(O[0] == OP_setlocal && O[1] == OP_getlocal);
-				if (!(I[0][1] == I[1][1])) return false;
-				S[0] = OP_ext_storelocal;
-				R[0] = NEW_OPCODE(OP_ext_storelocal);
-				R[1] = I[0][1];
-				return replace(2, 2);
-			default:
-				AvmAssert(!"Should never get here");
-				return false;
-		}
-	}
-#endif
-	
-	// End code that should be generated
-
 	// Invariants here:
 	//
 	//   - Lookupswitch never appears in the peephole window (reduces complexity
