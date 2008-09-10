@@ -39,6 +39,10 @@
 
 #include "avmplus.h"
 
+#ifdef AVMPLUS_MIR
+#include "../codegen/CodegenMIR.h"
+#endif
+
 namespace avmplus
 {
 #ifdef AVMTHUNK_VERSION
@@ -67,7 +71,7 @@ namespace avmplus
 
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		if (f->pool->core->verifyall && f->pool)
+		if (f->pool->core->config.verifyall && f->pool)
 			f->pool->processVerifyQueue(env->toplevel());
 		#endif
 

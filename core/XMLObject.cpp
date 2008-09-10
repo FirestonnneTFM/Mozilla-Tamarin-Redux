@@ -1708,7 +1708,7 @@ namespace avmplus
 		E4XNode *v = core->atomToXML(value);
 
 		return getNode()->_equals (core, v) == trueAtom; // rhino
-		//SPEC - return (core()->eq (this->atom(), value) == trueAtom);
+		//SPEC - return (core()->equals (this->atom(), value) == trueAtom);
 	}
 
 	// E4X 13.4.4.11, pg 76
@@ -2793,7 +2793,7 @@ namespace avmplus
 			{
 				if (index == 0)
 				{
-					if (core->eq (this->atom(), value))
+					if (core->equals (this->atom(), value))
 					{
 						l->_append (this->getNode());
 					}
@@ -2816,7 +2816,7 @@ namespace avmplus
 				xml->getQName (core, &m);
 				if (name.matches (&m))
 				{
-					if (core->eq(xml->getValue()->atom(), value) == trueAtom)
+					if (core->equals(xml->getValue()->atom(), value) == trueAtom)
 						l->_append (xml);
 				}
 			}
@@ -2844,14 +2844,14 @@ namespace avmplus
 					// node so we can call out to AvmCore::eq with an atom.
 					E4XNode *savedNode = this->m_node;
 					this->m_node = child;
-					if (core->eq(this->atom(), value) == trueAtom)
+					if (core->equals(this->atom(), value) == trueAtom)
 						l->_append (child);
 					this->m_node = savedNode;
 				}
 				else
 				{
 					// !!@ this needs testing with comments/PI/text/etc.
-					if (core->eq(child->getValue()->atom(), value) == trueAtom)
+					if (core->equals(child->getValue()->atom(), value) == trueAtom)
 						l->_append (child);
 				}
 

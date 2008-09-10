@@ -59,7 +59,7 @@ namespace avmplus
 		int version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
 
 		#ifdef AVMPLUS_VERBOSE
-		if (core->verbose)
+		if (core->config.verbose)
 			core->console << "major=" << (version&0xFFFF) << " minor=" << (version>>16) << "\n";
 		#endif
 
@@ -1154,7 +1154,7 @@ namespace avmplus
 		pool->constantIntCount = int_count;
 
 #ifdef AVMPLUS_VERBOSE
-		pool->verbose = core->verbose;
+		pool->verbose = core->config.verbose;
 #endif
 
 #if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
@@ -1682,8 +1682,8 @@ namespace avmplus
 			script->name = core->concatStrings(traits->format(core), core->newString("$init"));
 			#endif
 
-            #if defined(AVMPLUS_MIR)
-			if (!core->forcemir)
+            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			if (!core->config.forcemir)
 			{
 				// suggest that we don't jit the $init methods
 				script->flags |= AbstractFunction::SUGGEST_INTERP;
@@ -1990,8 +1990,8 @@ namespace avmplus
 			ctraits->final = true;
 			ctraits->needsHashtable = true;
 
-            #if defined(AVMPLUS_MIR)
-			if (!core->forcemir)
+            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			if (!core->config.forcemir)
 			{
 				// suggest that we don't jit the class initializer
 				cinit->flags |= AbstractFunction::SUGGEST_INTERP;

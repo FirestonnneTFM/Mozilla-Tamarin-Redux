@@ -661,9 +661,10 @@ namespace avmplus
 		if (func->lastSourceLine == 0 || linenum > func->lastSourceLine)
 			func->lastSourceLine = linenum;
 
+        MMgc::GC *gc = core->GetGC();
 		if (sourceLines == NULL)
-			sourceLines = new (core->GetGC()) BitSet();
-		sourceLines->set(linenum);
+			sourceLines = new (gc) BitSet();
+		sourceLines->set(gc,linenum);
 	}
 
 	int SourceFile::functionCount() const 
@@ -681,9 +682,10 @@ namespace avmplus
 		if (sourceLines == NULL || !sourceLines->get(linenum))
 			return false;
 
+        MMgc::GC *gc = GC::GetGC(this);
 		if (breakpoints == NULL)
-			breakpoints = new (GC::GetGC(this)) BitSet();
-		breakpoints->set(linenum);
+			breakpoints = new (gc) BitSet();
+		breakpoints->set(gc, linenum);
 		return true;
 	}
 

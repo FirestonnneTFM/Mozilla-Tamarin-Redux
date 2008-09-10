@@ -57,13 +57,25 @@ namespace avmplus
 	 * incompatible frame states cause verify errors.
 	 */
 
+	class FrameState;
+	#if defined AVMPLUS_MIR
+	class CodegenMIR;
+	#elif defined FEATURE_NANOJIT
+	class CodegenLIR;
+	#endif
+
 	class Verifier
 	{
 	public:
 
-		#ifdef AVMPLUS_MIR
+		#if defined AVMPLUS_MIR
 		CodegenMIR *mir;
 		#endif // AVMPLUS_MIR
+
+		#ifdef FEATURE_NANOJIT
+		CodegenLIR *mir;
+		#endif
+
 		#ifdef AVMPLUS_WORD_CODE
 		Translator *translator;
 		#endif
@@ -102,8 +114,10 @@ namespace avmplus
 		 * an exception will be thrown, of type VerifyError.
 		 * @param info the method to verify
 		 */
-#ifdef AVMPLUS_MIR
-		void verify(CodegenMIR *mir);
+#if defined AVMPLUS_MIR
+		void verify(CodegenMIR*);
+#elif defined FEATURE_NANOJIT
+		void verify(CodegenLIR*);
 #else
 		void verify();
 #endif
@@ -145,7 +159,7 @@ namespace avmplus
 
 		void emitCoerce(Traits* target, int i);
 		void emitToString(AbcOpcode opcode, int index);
-		#ifdef AVMPLUS_MIR
+		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		void emitCheckNull(int index);
 		#endif
 		void emitCompare(AbcOpcode opcode);
@@ -156,8 +170,10 @@ namespace avmplus
 		void emitGetSlot(int slot);
 		void emitSetSlot(int slot);
 		void emitSwap();
+        void emitNip();
+
 		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32 imm30, uint32 imm30b);
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		bool emitCallpropertyMethodMIR(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc);
 		bool emitCallpropertySlotMIR(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32 argc);
 #endif
@@ -165,7 +181,6 @@ namespace avmplus
 		bool emitCallpropertyMethodXLAT(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc);
 		bool emitCallpropertySlotXLAT(AbcOpcode opcode, Traits* t, Binding b, uint32 argc);
 #endif
-		
 		Binding findMathFunction(Traits* math, Multiname* name, Binding b, int argc);
 
 		Binding findStringFunction(Traits* string, Multiname* name, Binding b, int argc);
@@ -178,6 +193,23 @@ namespace avmplus
 		void verifyWarn(int errorId, ...);
 		#endif
     };
+}
+
+namespace nanojit {
+    class Fragment;
+    struct GuardRecord {
+        int calldepth;
+        Fragment *from, *target;
+        void *jmp, *origTarget;
+        GuardRecord *next, *outgoing;
+    };
+    #define GuardRecordSize(r) sizeof(GuardRecord)
+
+    struct SideExit {
+        int sid;
+        Fragment *target;
+    };
+    #define SideExitSize(x) sizeof(SideExit)
 }
 
 #endif /* __avmplus_Verifier__ */

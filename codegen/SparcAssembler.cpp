@@ -39,6 +39,7 @@
 
 
 #include "avmplus.h"
+#include "CodegenMIR.h"
 
 namespace avmplus
 {

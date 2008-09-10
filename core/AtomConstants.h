@@ -138,7 +138,7 @@ namespace avmplus
 		const Binding BIND_METHOD    = 1;       // int disp_id local method number
 		const Binding BIND_VAR       = 2;       // int local slot number (r/w var)
 		const Binding BIND_CONST     = 3;       // int local slot number (r/o const)
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		const Binding BIND_ITRAMP    = 4;       // interface trampoline in imt table
 #endif
 		const Binding BIND_GET       = 5;		// get-only property   101

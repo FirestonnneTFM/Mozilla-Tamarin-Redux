@@ -1222,4 +1222,26 @@ namespace avmplus
 		return size;
 	}
 #endif
+
+	StringNullTerminatedUTF8::StringNullTerminatedUTF8(MMgc::GC *gc, Stringp str) :
+		m_str(str),
+		m_bufptr(NULL),
+		gc(gc)
+	{
+		MMGC_MEM_TYPE("StringNullTerminatedUTF8");
+		int len = str->length();
+		m_bufptr = (char*)gc->Alloc(len + 1);
+		const wchar *data = str->getData();
+		for (int i=0; i < len; i++) {
+			m_bufptr[i] = (char) data[i];
+		}
+		m_bufptr[len] = 0;
+	}
+
+	StringNullTerminatedUTF8::~StringNullTerminatedUTF8()
+	{
+		gc->Free(m_bufptr);
+		m_str = NULL;
+		m_bufptr = NULL;
+	}
 }	

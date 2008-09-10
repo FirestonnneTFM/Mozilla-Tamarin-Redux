@@ -133,7 +133,7 @@ namespace avmplus
 			}
 		}
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		if(traits->hasInterfaces)
 		{
 			for (int i=0; i < Traits::IMT_SIZE; i++)
