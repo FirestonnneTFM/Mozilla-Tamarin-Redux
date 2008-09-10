@@ -39,6 +39,25 @@
 #ifndef __GCMemoryProfiler__
 #define __GCMemoryProfiler__
 
+
+#ifdef FEATURE_SAMPLER
+// Sampling support
+namespace avmplus
+{
+	class Sampler;
+}
+#endif
+
+
+#ifdef FEATURE_SAMPLER
+namespace MMgc
+{
+	extern GCThreadLocal<avmplus::Sampler*> m_sampler;
+	extern bool sampling;
+	void recordAllocationSample(void* item, size_t size);
+	void recordDeallocationSample(const void* item, size_t size);
+}
+#endif
 #ifndef MEMORY_INFO
 
 #define MMGC_MEM_TAG(_x)
@@ -109,6 +128,7 @@ namespace MMgc
 	MMGC_API void PrintStackTrace(const void *item);
 	// print stack trace of caller
 	void DumpStackTrace(int skip=1);
+
 }
 
 #endif //MEMORY_INFO

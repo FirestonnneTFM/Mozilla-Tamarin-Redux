@@ -99,8 +99,8 @@
 #pragma warning(disable:4291) // no matching operator delete found; memory will not be freed if initialization throws an exception
 #endif
 
-#ifdef DEBUGGER
-// sampling support
+#ifdef FEATURE_SAMPLER
+ //sampling support
 #include "avmplus.h"
 #else
 #define SAMPLE_FRAME(_x, _s) 
@@ -662,7 +662,7 @@ namespace MMgc
 
 	void *GC::AllocAlreadyLocked(size_t size, int flags/*0*/)
 	{
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
 		if(core)
 			core->sampleCheck();
@@ -742,6 +742,11 @@ namespace MMgc
 		}
 #endif
 
+#if defined FEATURE_SAMPLER
+		if( core && core->sampling() )
+			core->sampler()->recordAllocationSample(item, GC::Size(item));
+#endif
+
 		return item;
 	}
 
@@ -806,6 +811,8 @@ namespace MMgc
 		}
 
 		bool isLarge;
+
+		SAMPLE_DEALLOC(GetRealPointer(item), GC::Size(item));
 
 		// we can't allow free'ing something during Sweeping, otherwise alloc counters
 		// get decremented twice and destructors will be called twice.
@@ -1765,7 +1772,8 @@ bail:
 
 				GCAssert(*(int*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
-				((GCFinalizable*)rcobj)->~GCFinalizable();
+//				((GCFinalizable*)rcobj)->~GCFinalizable();
+				((GCFinalizable*)rcobj)->Finalize();
 				numObjects++;
 				objSize += (uint32)GC::Size(rcobj);
 				gc->Free(rcobj);
@@ -3431,4 +3439,25 @@ uintptr_t	GC::GetStackTop() const
 		log_mem("[mem] \tunmanaged bytes ", fixed_alloced, unmanaged);
 		gclog("[mem] -------- gross stats end -----\n");
 	}
+
+#if defined (FEATURE_SAMPLER)
+	// For sampling support
+	GCThreadLocal<avmplus::Sampler*> m_sampler;
+	bool sampling = false;
+
+	void recordAllocationSample(void* item, size_t size)
+	{
+		avmplus::Sampler* sampler = m_sampler;
+		if( sampler && sampler->sampling )
+			sampler->recordAllocationSample(item, size);
+	}
+
+	void recordDeallocationSample(const void* item, size_t size)
+	{
+		avmplus::Sampler* sampler = m_sampler;
+		if( sampler /*&& sampler->sampling*/ )
+			sampler->recordDeallocationSample(item, size);
+	}
+#endif
+
 }

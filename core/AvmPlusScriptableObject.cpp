@@ -51,32 +51,13 @@ namespace avmplus
 			
 		if(core->sampling())
 		{
-			objId = core->sampler()->recordAllocationSample(this, typeOrVTable);
+			core->sampler()->recordAllocationInfo(this, typeOrVTable);
 		}		
 	}
 
 	AvmPlusScriptableObject::~AvmPlusScriptableObject()
 	{
-		AvmCore *core = this->core();		
-		if(objId && core) // core should never be null except during tear down^
-		{
-			// this should have happened in Finalize
-			AvmAssertMsg(true, "Please add a call do Finalize when explicitly deleting script objects for profiling purposes");
-			core->sampler()->recordDeallocationSample(objId, 0);
-		}
-		objId = 0;
 	}
 
-	void AvmPlusScriptableObject::Finalize()
-	{
-		AvmCore *core = this->core();		
-		if(objId && core) // core should never be null except during tear down^
-		{
-			uint64 s = size();
-			core->sampler()->recordDeallocationSample(objId, s);
-		}
-		objId = 0;
-		RCObject::Finalize();
-	}
 #endif
 }

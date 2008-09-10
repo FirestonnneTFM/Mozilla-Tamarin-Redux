@@ -250,7 +250,7 @@ namespace avmplus
 		virtual Stringp format(AvmCore* core) const;
 #endif
 
-#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER) || defined FEATURE_SAMPLER
 	public:
 	#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 		Stringp getStackTraceLine(Stringp filename);
@@ -265,7 +265,7 @@ namespace avmplus
 		DWB(Traits*)		declaringTraits;
 		DWB(Traits*)		activationTraits;
 		DWB(PoolObject*)	pool;
-#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER) || defined FEATURE_SAMPLER
 		DRCWB(Stringp)		name;
 #endif
 	private:
@@ -291,14 +291,16 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
-#ifdef DEBUGGER	
+#ifdef FEATURE_SAMPLER
 	// for sampling
 	class FakeAbstractFunction : public AbstractFunction
 	{
 	public:
 		FakeAbstractFunction(Stringp name) { this->name = name; }
 		void verify(Toplevel *) {}
+#ifdef DEBUGGER
 		virtual bool isFakeFunction() { return true; }
+#endif
 	};
 #endif
 }
