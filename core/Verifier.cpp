@@ -822,9 +822,8 @@ namespace avmplus
 				MIR_ONLY( if (mir) mir->emitKill(state, imm30); )
 				v.notNull = false;
 				v.traits = NULL;
-				MIR_ONLY(
-					XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
-				)
+				// No sense in emitting this for the interpreter, as all
+				// stacked values are atoms and fully type checked
 				break;
 			}
 
@@ -1263,9 +1262,10 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(NULL, sp);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
-#endif
+				// We decided that the word code will not be the basis for
+				// LIR/MIR generation, so there's no sense in emitting a coerce_a
+				// instruction for the interpreter here - since all stacked
+				// values in the interpreter are atoms already.
 				break;
 			}
 
