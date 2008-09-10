@@ -627,7 +627,7 @@ nosym:
 			if((mib.State & MEM_COMMIT) && (mib.Type & MEM_PRIVATE))
 				bytes += mib.RegionSize;
 
-			addr = (void*) ((intptr_t)mib.BaseAddress + mib.RegionSize);
+			addr = (void*) ((sintptr)mib.BaseAddress + mib.RegionSize);
 		}
 	
 		return bytes / GCHeap::kBlockSize;

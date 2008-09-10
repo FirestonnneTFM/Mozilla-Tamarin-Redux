@@ -88,7 +88,7 @@ namespace avmplus
 {
 	namespace NativeID
 	{
-        #include "toplevel.h"
+        #include "shell_toplevel.h"
     }
 }
 
@@ -137,7 +137,7 @@ namespace avmshell
 		DECLARE_NATIVE_CLASSES()
 		DECLARE_NATIVE_SCRIPTS()			
 
-		ConsoleOutputStream *consoleOutputStream;
+		OutputStream *consoleOutputStream;
 		bool gracePeriod;
 		bool inStackOverflow;
 

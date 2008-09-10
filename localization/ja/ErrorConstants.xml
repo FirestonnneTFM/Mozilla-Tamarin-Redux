@@ -705,8 +705,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 を明示的に登録するには、オブジェクトとインデックスが必要です。</error>
   <error id="1125" label="kOutOfRangeError">インデックス %1 は %2 の範囲外です。</error>
   <error id="1126" label="kVectorFixedError">固定ベクターの長さは変更できません。</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">非パラメータ化された型に対して型指定を実行しようとしました。</error>
+  <error id="1127" label="kTypeAppOfNonParamType">非パラメータ化された型に対して型指定を実行しようとしました。</error>
   <error id="1128" label="kWrongTypeArgCountError">%1 の型パラメータ数が正しくありません。%2 である必要がありますが、%3 が指定されました。</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

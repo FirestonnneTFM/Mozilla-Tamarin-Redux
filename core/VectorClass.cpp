@@ -48,29 +48,86 @@ namespace avmplus
 		return ScriptObject::hasAtomProperty(name) || getAtomProperty(name) != undefinedAtom;
 	}
 	
+	// helper method
+	// sets index to the uint32 value of name, if it can be converted
+	// isNumber is set to true if name was a number (whether it was a uint32 value or not)
+	bool VectorBaseObject::getVectorIndex(Atom name, uint32& index, bool& isNumber) const
+	{
+		AvmCore* core = this->core();
+		isNumber = false;
+		if (core->getIndexFromAtom(name, &index))
+		{
+			isNumber = true;
+			return true;
+		}
+		else
+		{
+			if( AvmCore::isString(name) )
+			{
+				Stringp s = core->string(name);
+				const wchar *c = s->c_str();
+				// Does it look like a number?
+				if( s->length() > 0 && *c >= '0' && *c <= '9' )
+				{
+					double index_d = s->toNumber();
+					if( !MathUtils::isNaN(index_d) )
+					{
+						isNumber = true;
+
+						// name is a string that looks like a number
+						int i = MathUtils::real2int(index_d);
+						if ((double)i == index_d)
+						{
+							// It's an indexed property name
+							index = i;
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	void VectorBaseObject::setAtomProperty(Atom name, Atom value)
 	{
 		uint32 index;
-		if (core()->getIndexFromAtom(name, &index))
+		bool isNumber=false;
+		if (getVectorIndex(name, index, isNumber))
 		{
 			setUintProperty(index, value);
 		}
 		else
 		{
-			ScriptObject::setAtomProperty(name, value);
+			Multiname mn(core()->publicNamespace,core()->string(name));
+			// Vector is sorta sealed, can only write to "indexed" properties
+			toplevel()->throwReferenceError(kWriteSealedError, &mn, traits());
 		}
 	}
 	
 	Atom VectorBaseObject::getAtomProperty(Atom name) const
 	{
 		uint32 index;
-		if (core()->getIndexFromAtom(name, &index))
+		bool isNumber=false;
+		AvmCore* core = this->core();
+		if (getVectorIndex(name, index, isNumber))
 		{
 			return getUintProperty(index);
 		}
 		else
 		{
-			return ScriptObject::getAtomProperty(name);
+			if(isNumber)
+			{
+				// Not a valid indexed name - has a decimal part
+				Multiname mn(core->publicNamespace,core->string(name));
+				toplevel()->throwReferenceError(kReadSealedError, &mn, traits());
+			}
+			// Check the prototype chain - that will throw if there is no match
+			return getAtomPropertyFromProtoChain(name, getDelegate(), traits());
 		}
 	}
 

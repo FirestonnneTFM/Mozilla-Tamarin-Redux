@@ -39,6 +39,8 @@
 #ifndef __avmplus_VectorClass__
 #define __avmplus_VectorClass__
 
+#include "AvmCore.h"
+#include "Toplevel.h"
 
 namespace avmplus
 {
@@ -88,6 +90,8 @@ namespace avmplus
 
 		virtual void grow(uint32 newCapacity, bool exact=false) = 0;
 		virtual VectorBaseObject* newVector(uint32 length = 0) = 0;
+
+		bool getVectorIndex(Atom name, uint32& index, bool& isNumber) const;
 	};
 
 	template <class T>

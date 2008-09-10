@@ -80,9 +80,9 @@ namespace MMgc
 	typedef __int64          sint64;
 	typedef unsigned __int64 uint64;
 	#elif defined(_MAC)
-	typedef int64_t		int64;
-	typedef int64_t		sint64;
-	typedef uint64_t	uint64;
+	typedef int64_t          int64;
+	typedef int64_t          sint64;
+	typedef uint64_t         uint64;
 	#else
 	typedef long long          int64;
 	typedef long long          sint64;

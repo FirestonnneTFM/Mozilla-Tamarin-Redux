@@ -1,0 +1,11 @@
+	AREA mmgc,CODE,READONLY
+
+	EXPORT push_stack_vals
+	
+push_stack_vals
+	
+	stmia r0,{r4-r12}
+	mov r0, sp
+	bx lr
+		
+	END

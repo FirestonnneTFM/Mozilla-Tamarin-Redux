@@ -205,7 +205,7 @@ namespace MMgc
 				ClearBits(block, GetIndex(block, item), kHasWeakRef);
 			}
 		}
-		
+
 		size_t GetBytesInUse();
 
 	private:

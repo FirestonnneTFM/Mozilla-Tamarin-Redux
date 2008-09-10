@@ -51,10 +51,6 @@ namespace MMgc
 	public:
 		static void Init();
 		static void Destroy();
-		/**
-		* return the number of bytes of memory issued
-		*/
-		size_t Allocated();
 
 		static FixedMalloc *GetInstance() { 
 			GCAssert(instance != NULL);

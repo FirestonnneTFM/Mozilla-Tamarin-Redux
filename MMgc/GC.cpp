@@ -45,9 +45,6 @@
 #include "MMgc.h"
 #include "StaticAssert.h"
 
-#ifdef HAVE_STDARG
-#include <stdarg.h>
-#endif
 
 #ifdef MEMORY_INFO
 #if !defined(__MWERKS__)
@@ -59,7 +56,7 @@
 #endif
 #endif
 
- #ifdef _DEBUG
+#ifdef _DEBUG
 #include "GCTests.h"
 #endif
 
@@ -77,12 +74,12 @@
 #endif
 
 #ifdef UNIX
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#else // HAVE_ALLOCA_H
-#include <stdlib.h>
-#endif // HAVE_ALLOCA_H
-#include <sys/time.h>
+	#ifdef HAVE_ALLOCA_H
+		#include <alloca.h>
+	#else // HAVE_ALLOCA_H
+		#include <stdlib.h>
+	#endif // HAVE_ALLOCA_H
+	#include <sys/time.h>
 #endif // UNIX
 
 #if defined(_MAC) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
@@ -356,10 +353,12 @@ namespace MMgc
 		// keep GC::Size honest
 		GCAssert(offsetof(GCLargeAlloc::LargeBlock, usableSize) == offsetof(GCAlloc::GCBlock, size));
 
+#ifndef MMGC_PORTING_API
 #ifndef MMGC_ARM // TODO MMGC_ARM
 #ifdef _DEBUG
 		if (!nogc)
-		RunGCTests(this);
+			RunGCTests(this);
+#endif
 #endif
 #endif
 
@@ -916,7 +915,7 @@ bail:
 		SAMPLE_FRAME("[sweep]", core());
 		sweeps++;
 
-		int heapSize = heap->GetUsedHeapSize();
+		size_t heapSize = heap->GetUsedHeapSize();
 
 #ifdef MEMORY_INFO
 		if(heap->enableMemoryProfiling) {
@@ -1022,7 +1021,7 @@ bail:
 				lbb = lbb->next;
 			}
 			// include large pages given back
-			sweepResults += (heapSize - heap->GetUsedHeapSize());
+			sweepResults += int(heapSize - heap->GetUsedHeapSize());
 			double millis = duration(sweepStart);
 			gclog("[mem] sweep(%d) reclaimed %d whole pages (%d kb) in %.2f millis (%.4f s)\n", 
 				sweeps, sweepResults, sweepResults*GCHeap::kBlockSize>>10, millis,
@@ -1301,7 +1300,7 @@ bail:
 		int foo;
 		stackP = &foo;
 	#else
-	asm("mov %%rsp,%0" : "=r" (stackP));
+		asm("mov %%rsp,%0" : "=r" (stackP));
 	#endif
 #endif
 
@@ -1312,7 +1311,7 @@ bail:
 #if defined MMGC_PPC
 		// save off sp
 	#ifdef _MAC
-		asm("mr %0,r1" : "=r" (stackP));
+			asm("mr %0,r1" : "=r" (stackP));
 	#else // _MAC
 			asm("mr %0,%%r1" : "=r" (stackP));
 	#endif // _MAC
@@ -1940,11 +1939,12 @@ bail:
 		GCAssert(strlen(buf) < 4096);
 
 		{
-		USING_CALLBACK_LIST(this);
-		GCCallback *cb = m_callbacks;
-			if(cb) {
-			cb->log(buf);
-		}
+			USING_CALLBACK_LIST(this);
+			GCCallback *cb = m_callbacks;
+				if(cb) {
+				cb->log(buf);
+				cb = cb->nextCB;
+			}
 		}
 		// log gross stats any time anything interesting happens
 		if(!ingclog) {
@@ -2271,6 +2271,8 @@ bail:
 				if (buffer) GCDebugMsg(false, buffer);
 #ifdef MEMORY_INFO
 				PrintStackTraceByIndex(traceIndex);
+#else
+				(void)traceIndex;
 #endif
 
 				if (recurseDepth > 0)
@@ -2414,7 +2416,7 @@ bail:
 			while(r) {
 				GCWorkItem item = r->GetWorkItem();
 				if(item.ptr)
-				MarkItem(item, m_incrementalWork);
+					MarkItem(item, m_incrementalWork);
 				r = r->next;
 			}
 		}
@@ -2780,6 +2782,9 @@ bail:
 
 	uint64 GC::GetPerformanceCounter()
 	{
+  	#if defined(MMGC_PORTING_API)
+  		return MMGC_PortAPI_Time();
+  	#else
 		#ifdef WIN32
 		LARGE_INTEGER value;
 		QueryPerformanceCounter(&value);
@@ -2792,14 +2797,23 @@ bail:
 		#elif defined(AVMPLUS_UNIX)
 		struct timeval tv;
 		::gettimeofday(&tv, NULL);
-		return (uint64) (tv.tv_sec * 1000000) + (uint64) tv.tv_usec;
+
+        uint64 seconds = (uint64)(tv.tv_sec * 1000000);
+        uint64 microseconds = (uint64)tv.tv_usec;
+        uint64 result = seconds + microseconds;
+        
+		return result;
 		#else
 		#error "Need high res timer"
 		#endif
+	#endif // MMMGC_PORTING_API
 	}
 
 	uint64 GC::GetPerformanceFrequency()
 	{
+  	#if defined(MMGC_PORTING_API)
+  		return MMGC_PortAPI_Frequency();
+  	#else
 		#ifdef WIN32
 		static uint64 gPerformanceFrequency = 0;		
 		if (gPerformanceFrequency == 0) {
@@ -2816,9 +2830,10 @@ bail:
 		return frequency;
 		#elif defined(AVMPLUS_UNIX)
 		return 1000000;
-	  #else
+		#else
 		#error "need high res time impl"
 		#endif
+	#endif // MMGC_PORTING_API
 	}
 
 	void GC::IncrementalMark()
@@ -2908,7 +2923,7 @@ bail:
 				// up trying to scan a deleted item later, another reason to keep
 				// the root set small
 				if(item.ptr) {
-				MarkItem(item, m_incrementalWork);
+					MarkItem(item, m_incrementalWork);
 				}
 				r = r->next;
 			}
@@ -3329,6 +3344,12 @@ bail:
 	}
 #endif  /* DEBUGGER*/
 
+#if defined(MMGC_PORTING_API)
+uintptr_t	GC::GetStackTop() const
+{
+	return MMGC_PortAPI_GetStackTop();
+}
+#else
 #if defined(_MAC) && (defined(MMGC_IA32) || defined(MMGC_AMD64)) || defined(MMGC_MAC_NO_CARBON)
 	uintptr GC::GetStackTop() const
 	{
@@ -3346,7 +3367,8 @@ bail:
 		return (uintptr)sp;
 	}
 #endif
-	
+#endif /*<<GC_PORTING_API*/
+
 	void *GC::heapAlloc(size_t siz, bool expand, bool zero)
 	{
 		void *ptr = heap->Alloc((int)siz, expand, zero);

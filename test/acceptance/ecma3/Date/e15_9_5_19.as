@@ -44,7 +44,7 @@
 
     var testcases = getTestCases();
     test();
-
+    
 function compareDate(d1, d2) {
 	//Dates may be off by a second
 	if (d1 == d2) {

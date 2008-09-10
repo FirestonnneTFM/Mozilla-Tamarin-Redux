@@ -184,7 +184,7 @@ namespace MMgc
 			size = GCHeap::kNativePageSize;  // default of one page
 
 		// this doesn't "decommit" it, it just makes it unwritable, Mac OS still backs it with real pages :-(
- int res = mprotect (address, size, PROT_NONE);
+		int res = mprotect (address, size, PROT_NONE);
 		GCAssert(res == 0);
 		(void) res;
 		committedCodeMemory -= size;
@@ -387,7 +387,12 @@ namespace MMgc
 
 			addr += size;
 
+#ifdef MMGC_64BIT
+			ret = vm_region_64(task, &addr, &size, VM_REGION_TOP_INFO, (vm_region_info_t)&info, &count, &object_name);
+#else
 			ret = vm_region(task, &addr, &size, VM_REGION_TOP_INFO, (vm_region_info_t)&info, &count, &object_name);
+#endif
+
 			if (ret != KERN_SUCCESS)
 				break;
 			private_bytes += info.private_pages_resident;

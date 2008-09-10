@@ -149,6 +149,9 @@ namespace MMgc
 
 	private:
 		GCCriticalSection& m_cs;
+
+		GCEnterCriticalSection & operator = (const GCEnterCriticalSection&);
+		GCEnterCriticalSection(const GCEnterCriticalSection&);
 	};
 }
 
