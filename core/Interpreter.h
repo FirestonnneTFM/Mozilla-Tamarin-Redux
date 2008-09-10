@@ -71,6 +71,9 @@ namespace avmplus
 	
 }
 
+// FIXME: these should be defined in opcodes.tbl.
+// Note that eg utils/peephole.as knows about these values.
+
 #ifdef AVMPLUS_WORD_CODE
 #  define OP_ext 0xFF   // FIXME! define elsewhere
 #  define OP_ext_pushbits           ((1<<8) | OP_ext)

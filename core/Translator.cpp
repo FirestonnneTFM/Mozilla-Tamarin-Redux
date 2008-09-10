@@ -906,24 +906,20 @@ namespace avmplus
 	// pattern, given that the present pattern failed.  Failure transitions ignore
 	// guards; this means that matching instructions are candidates no matter what
 	// their operand values.
-	
 
-	
-	// In practice, most of these fields don't need to be uint32.  But for the 
-	// same reason, there aren't a lot of savings to be had by shrinking them.
-	// But it appears that all the data would fit into two words instead of five.
-	
+	// Structures are laid out to improve packing and conserve space.
+
 	struct state_t {
-		uint32 numTransitions;	// 9 bits are enough; fewer (3-4) are almost certainly enough
-		uint32 transitionPtr;	// 16 bits are enough
-		uint32 guardAndAction;	// 16 bits are enough.  Non-zero if this is a final state.
-		uint32 fail;			// 16 bits are enough
-		uint32 failShift;		// four bits are probably enough
+		uint8  numTransitions;
+		uint8  failShift;
+		uint16 transitionPtr;
+		uint16 guardAndAction;
+		uint16 fail;
 	};
 	
 	struct transition_t {
-		uint32 opcode;			// 16 bits are enough
-		uint32 next_state;		// 16 bits are enough
+		uint16 opcode;
+		uint16 next_state;
 	};
 	
 	// Note that transitions in a run are always sorted in increasing token value order,
@@ -934,10 +930,10 @@ namespace avmplus
 	static state_t states[] = {
 	{ 0, 0, 0, 0, 0 },    // 0 is never a valid state
 	{ 1, 0, 0, 0, 0 },    // 0x62
-	{ 1, 1, 1, 0, 0 },    // 0x62 0x62
-	{ 0, 0, 2, 0, 0 },    // 0x62 0x62 0x62
-	{ 1, 2, 0, 0, 0 },    // 0x63
-	{ 0, 0, 3, 1, 1 },    // 0x63 0x62
+	{ 1, 0, 1, 1, 0 },    // 0x62 0x62
+	{ 0, 0, 0, 2, 0 },    // 0x62 0x62 0x62
+	{ 1, 0, 2, 0, 0 },    // 0x63
+	{ 0, 1, 0, 3, 1 },    // 0x63 0x62
 	};
 	
 	static transition_t transitions[] = {
@@ -946,7 +942,7 @@ namespace avmplus
 	{ OP_getlocal, 5 },
 	};
 	
-	static uint32 toplevel[] = {
+	static uint16 toplevel[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
@@ -992,21 +988,21 @@ namespace avmplus
 				S[0] = OP_ext_get2locals;
 				R[0] = NEW_OPCODE(OP_ext_get2locals);
 				R[1] = (I[1][1] << 16) | I[0][1];
-				return replace(0, 2, 2);
+				return replace(2, 2);
 			case 2:
 				AvmAssert(O[0] == OP_getlocal && O[1] == OP_getlocal && O[2] == OP_getlocal);
 				if (!(I[0][1] < 1024 && I[1][1] < 1024 && I[2][1] < 1024)) return false;
 				S[0] = OP_ext_get3locals;
 				R[0] = NEW_OPCODE(OP_ext_get3locals);
 				R[1] = (I[2][1] << 20) | (I[1][1] << 10) | I[0][1];
-				return replace(0, 3, 2);
+				return replace(3, 2);
 			case 3:
 				AvmAssert(O[0] == OP_setlocal && O[1] == OP_getlocal);
 				if (!(I[0][1] == I[1][1])) return false;
 				S[0] = OP_ext_storelocal;
 				R[0] = NEW_OPCODE(OP_ext_storelocal);
 				R[1] = I[0][1];
-				return replace(0, 2, 2);
+				return replace(2, 2);
 			default:
 				AvmAssert(!"Should never get here");
 				return false;
@@ -1037,7 +1033,7 @@ namespace avmplus
 	//     be the positive absolute ABC byte offset of the branch target; a backpatch
 	//     structure will be created in the latter case.
 	
-	bool Translator::replace(uint32 start, uint32 old_instr, uint32 new_words) 
+	bool Translator::replace(uint32 old_instr, uint32 new_words) 
 	{
 		// Undo any relative offsets in the last instruction
 
@@ -1074,7 +1070,7 @@ namespace avmplus
 		// moving instructions across buffer boundaries)
 
 		uint32 k = new_words;
-		for ( uint32 n=start + old_instr ; n < nextI ; n++ ) {
+		for ( uint32 n=old_instr ; n < nextI ; n++ ) {
 			uint32 len = calculateInstructionWidth(O[n]);
 			S[k] = O[n];
 			for ( uint32 j=0 ; j < len ; j++ )
@@ -1083,19 +1079,19 @@ namespace avmplus
 		
 		// Unlink the last buffer segment if we took everything from it, push it onto
 		// a reserve (there can only ever be one free).  We know I[nextI-1] points into the
-		// current buffer, so check if I[start] is between the start of the buffer and
+		// current buffer, so check if I[0] is between the start of the buffer and
 		// the last instruction.
 		
-		if (!(buffers->data <= I[start] && I[start] <= I[nextI-1])) {
+		if (!(buffers->data <= I[0] && I[0] <= I[nextI-1])) {
 			spare_buffer = buffers;
 			buffers = buffers->next;
 			spare_buffer->next = NULL;
-			dest = I[start];
+			dest = I[0];
 			dest_limit = buffers->data + sizeof(buffers->data)/sizeof(buffers->data[0]);
 			buffer_offset -= buffers->entries_used;
 		}
 		else
-			dest = I[start];
+			dest = I[0];
 		
 		// Emit the various instructions from new_data, handling branches specially
 

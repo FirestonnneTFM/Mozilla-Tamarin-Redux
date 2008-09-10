@@ -185,7 +185,7 @@ namespace avmplus
 		void peep(uint32 opcode, uint32* loc);
 		void peepFlush();				// this may commit to a backtrack state, if available, so dest may change
 		bool commit(uint32 action);
-		bool replace(uint32 start, uint32 old_instr, uint32 new_words);
+		bool replace(uint32 old_instr, uint32 new_words);
 		bool isJumpInstruction(uint32 opcode);
 		uint32 calculateInstructionWidth(uint32 opcode);
 #endif
