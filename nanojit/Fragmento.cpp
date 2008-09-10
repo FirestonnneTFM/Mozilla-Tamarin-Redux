@@ -39,8 +39,6 @@
 #include "nanojit.h"
 #undef MEMORY_INFO
 
-#include "../vprof/vprof.h"
-
 namespace nanojit
 {	
 	#ifdef FEATURE_NANOJIT

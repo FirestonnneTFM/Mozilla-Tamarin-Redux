@@ -47,22 +47,7 @@ namespace avmplus
 		MethodEnv *makeMethodEnv(AbstractFunction *method);
 		void addInterface(AbstractFunction* virt, int disp_id);
 
-		bool linked;
 	public:
-		DWB(AbcEnv*) abcEnv;
-		DRCWB(Toplevel*) toplevel;   // not const because native ClassClosure ctors modify it
-		DWB(MethodEnv*) call;
-		DWB(MethodEnv*) init;
-		DWB(ScopeChain*) scope;
-		DWB(Traits*) traits;
-		DWB(VTable*) base;
-		DWB(VTable*) ivtable;
-
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		MethodEnv* imt[Traits::IMT_SIZE];
-#endif
-		MethodEnv* methods[1]; // virtual method table
-
 		VTable(Traits* traits, VTable* base, ScopeChain* scope, AbcEnv* abcEnv, Toplevel* toplevel);
 		void resolveSignatures();
 
@@ -79,6 +64,25 @@ namespace avmplus
 #ifdef DEBUGGER
 		uint32 size() const;
 #endif
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		DWB(AbcEnv*) abcEnv;
+		DRCWB(Toplevel*) toplevel;   // not const because native ClassClosure ctors modify it
+		DWB(MethodEnv*) call;
+		DWB(MethodEnv*) init;
+		DWB(ScopeChain*) scope;
+		DWB(VTable*) base;
+		DWB(VTable*) ivtable;
+		Traits* const traits;
+		bool linked;	// @todo -- surely there's a spare bit we can use for this.
+		bool pad[3];
+
+#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
+		MethodEnv* imt[Traits::IMT_SIZE];
+#endif
+		MethodEnv* methods[1]; // virtual method table
+	// ------------------------ DATA SECTION END
 	};
 
 }

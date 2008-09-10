@@ -45,7 +45,19 @@
     var testcases = getTestCases();
     test();
     
-function compareDate(d1, d2) {	//Dates may be off by a second	if (d1 == d2) {		return true;	} else if (Math.abs(new Date(d1) - new Date(d2)) <= 1000) {		return true;	} else {		return false;	}}    function getTestCases() {
+function compareDate(d1, d2) {
+	//Dates may be off by a second
+	if (d1 == d2) {
+		return true;
+	} else if (Math.abs(new Date(d1) - new Date(d2)) <= 1000) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+    
+function getTestCases() {
     var array = new Array();
     var item = 0;    
 
@@ -92,7 +104,9 @@ function compareDate(d1, d2) {	//Dates may be off by a second	if (d1 == d2) {
                 t += 1000;
                 array[item++] = new TestCase( SECTION,
                                         "(new Date("+t+")).getUTCSeconds()",
-                                        true, compareDate(SecFromTime(t),                                        (new Date(t)).getUTCSeconds()) );        }
+                                        true, compareDate(SecFromTime(t),
+                                        (new Date(t)).getUTCSeconds()) );
+        }
     }
     
     
@@ -102,7 +116,10 @@ function compareDate(d1, d2) {	//Dates may be off by a second	if (d1 == d2) {
                 t += 1000;
                 array[item++] = new TestCase( SECTION,
                                         "(new Date(currentDate)).getUTCSeconds()",
-                                        true, 					compareDate(SecFromTime(t),                                        (new Date(t)).getUTCSeconds()) );        }
+                                        true, 
+					compareDate(SecFromTime(t),
+                                        (new Date(t)).getUTCSeconds()) );
+        }
     }
     return array;
 }

@@ -1288,7 +1288,7 @@ namespace avmplus
 	void CodegenLIR::emitGetscope(FrameState* state, int scope_index, int dest)
 	{
 		this->state = state;
-		Traits* t = info->declaringTraits->scope->scopes[scope_index].traits;
+		Traits* t = info->declaringTraits->scope->getScopeTraitsAt(scope_index);
 		LIns* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
 		LIns* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
 		LIns* scopeobj = loadIns(LIR_ldc, offsetof(ScopeChain, scopes) + scope_index*sizeof(Atom), scope);
@@ -1912,7 +1912,7 @@ namespace avmplus
 					}
 					else
 					{
-						t = scopeTypes->scopes[0].traits;
+						t = scopeTypes->getScopeTraitsAt(0);
 						LIns* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
 						LIns* scope = loadIns(LIR_ldc, offsetof(VTable, scope), declVTable);
 						LIns* scopeobj = loadIns(LIR_ld, offsetof(ScopeChain, scopes) + 0*sizeof(Atom), scope);

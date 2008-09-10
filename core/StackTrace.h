@@ -155,24 +155,27 @@ namespace avmplus
 
 		void exit();
 
-		MethodEnv *env;
-		AbstractFunction* info;
-		Stringp      filename;			// in the form "C:\path\to\package\root;package/package;filename"
-		int         linenum;
-		CallStackNode *next;
-
-		int         depth;
-		uint32 *    ap;
-		int			argc;
-		Atom*		framep;		// pointer to top of AS registers
-		Traits**    traits;		// array of traits for AS registers
-		sintptr volatile * eip; 	// ptr to where the current pc is stored
-
 		void**		scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
-		int*		scopeDepth; // Only used by the interpreter! With MIR, look for NULL entires in the scopeBase array.
+
 	protected:
 		// allow more flexibility to subclasses
 		CallStackNode(){}
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		CallStackNode*		next;
+		MethodEnv*			env;
+		AbstractFunction*	info;
+		Stringp				filename;			// in the form "C:\path\to\package\root;package/package;filename"
+		Atom*				framep;		// pointer to top of AS registers
+		Traits**			traits;		// array of traits for AS registers
+		sintptr volatile*	eip; 	// ptr to where the current pc is stored
+		uint32_t*			ap;
+		int32_t*			scopeDepth; // Only used by the interpreter! With MIR, look for NULL entires in the scopeBase array.
+		int32_t				linenum;
+		int32_t				depth;
+		uint32_t			argc;
+	// ------------------------ DATA SECTION END
 	};
 	
 	// for sampling
@@ -182,8 +185,10 @@ namespace avmplus
 		FakeCallStackNode(AvmCore *core, const char *name);
 		~FakeCallStackNode();
 		void sampleCheck() { if(core) core->sampler()->sampleCheck(); }
+	// ------------------------ DATA SECTION BEGIN
 	private:
 		AvmCore *core;
+	// ------------------------ DATA SECTION END
 	};
 
 #endif /* DEBUGGER */

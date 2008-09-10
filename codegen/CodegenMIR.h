@@ -192,6 +192,7 @@ namespace avmplus
 			MIR_ld32u	= 31,
 #else
 			MIR_ld32	= MIR_ld,
+			MIR_ld32u	= MIR_ld,
 #endif
 
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)

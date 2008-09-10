@@ -105,7 +105,9 @@ class AbcEncoder
     function intPool (pool, nesting : int = 0) : string {
         enter ("AbcEncode::intPool ", nesting);
         var str = "undefined";
-        for each (var v:int in pool.slice(1)) {
+        //        for each (var v in pool.slice(1)) {   // FIXME esc bug
+        for (var p=pool.slice(1), i=0; i<p.length; ++i) {
+            var v = p[i]
             str = str
                 + indent (nesting-2)
                 + ", "
@@ -119,7 +121,9 @@ class AbcEncoder
     function uintPool (pool, nesting : int = 0) : string {
         enter ("AbcEncode::uintPool ", nesting);
         var str = "undefined";
-        for each (var v:uint in pool.slice(1)) {
+        //        for each (var v in pool.slice(1)) {   // FIXME esc bug
+        for (var p=pool.slice(1), i=0; i<p.length; ++i) {
+            var v = p[i]
             str = str
                 + indent (nesting-2)
                 + ", "
@@ -133,7 +137,9 @@ class AbcEncoder
     function doublePool (pool, nesting : int = 0) : string {
         enter ("AbcEncode::doublePool ", nesting);
         var str = "undefined";
-        for each (var v:double in pool.slice(1)) {
+        //        for each (var v in pool.slice(1)) {   // FIXME esc bug
+        for (var p=pool.slice(1), i=0; i<p.length; ++i) {
+            var v = p[i]
             str = str
                 + indent (nesting-2)
                 + ", "
@@ -148,7 +154,9 @@ class AbcEncoder
         enter ("AbcEncode::utf8Pool ", nesting);
 
         var str = "undefined";
-        for each (var v:string in pool.slice(1)) {
+        //        for each (var v in pool.slice(1)) {   // FIXME esc bug
+        for (var p=pool.slice(1), i=0; i<p.length; ++i) {
+            var v = p[i]
             str = str
                 + indent (nesting-2)
                 + ", "
@@ -163,7 +171,10 @@ class AbcEncoder
         enter ("AbcEncode::namespacePool ", nesting);
 
         var str = "undefined";
-        for each (var v in pool.slice(1)) {
+
+        //        for each (var v in pool.slice(1)) {   // FIXME esc bug
+        for (var p=pool.slice(1), i=0; i<p.length; ++i) {
+            var v = p[i]
             // v is an array: kind,nd
             str = str
                 + indent (nesting-2)
@@ -222,7 +233,9 @@ class AbcEncoder
 
         var str = "undefined";
 
-        for each (var v in pool.slice(1)) {
+        //        for each (var v in pool.slice(1)) {   // FIXME esc bug
+        for (var p=pool.slice(1), i=0; i<p.length; ++i) {
+            var v = p[i]
             str = str
                 + indent (nesting-2)
                 + ", "
@@ -238,7 +251,9 @@ class AbcEncoder
         enter ("AbcEncode::namespacesetConst ", nesting);
 
         var str = "";
-        for each (var elt in nd) {
+        //        for each (var elt in nd) {
+        for (var i=0; i<nd.length; ++i) {
+            var elt = nd[i];
             str = str
                 + elt
                 + indent (nesting-2)
@@ -253,7 +268,9 @@ class AbcEncoder
         enter ("AbcEncode::namePool ", nesting);
 
         var str = "undefined";
-        for each (var v in pool.slice(1)) {
+        //        for each (var v in pool.slice(1)) {   // FIXME esc bug
+        for (var p=pool.slice(1), i=0; i<p.length; ++i) {
+            var v = p[i]
             str = str
                 + indent (nesting-2)
                 + ", "
