@@ -1033,11 +1033,24 @@ namespace avmplus
 		else
 			dest = I[0];
 		
-		// Emit the various instructions from new_data, handling branches specially
-
+		// Emit the various instructions from new_data, handling branches specially.
+		//
+		// Instructions that are emitted here but which were not the output of the
+		// reducer need to be subjected to peephole optimization, so we invoke peep()
+		// on those instructions.  This works because (a) we don't use nextI here, so
+		// when nextI is reset to zero it starts filling up I and S, (b) the entries
+		// of I, S, O, and R we examine here will not be caught up by the peephole
+		// optimizer, because we advance one instruction for each one we peephole, and
+		// the optimizer can't make instruction sequences longer, and (c) dest is
+		// shared, so even if the peephole optimizer shortens the sequence we're working
+		// on then we emit the remainder to the correct location.
+		
+		state = 0;
+		
 		uint32 i=0;
 		while (i < k) {
-			if (isJumpInstruction(S[i])) {
+			uint32 op = S[i];
+			if (isJumpInstruction(op)) {
 				CHECK(2);
 				*dest++ = R[i++];
 				int32 offset = (int32)R[i++];
@@ -1052,25 +1065,33 @@ namespace avmplus
 					*dest = -int32(buffer_offset + (dest + 1 - buffers->data) + offset);
 					dest++;
 				}
+				if (i-2 >= new_words)
+					peep(op, dest-2);
 			}
 			else {
-				switch (calculateInstructionWidth(S[i])) {
+				switch (calculateInstructionWidth(op)) {
 					default:
 						AvmAssert(!"Can't happen");
 					case 1:
 						CHECK(1);
 						*dest++ = R[i++];
+						if (i-1 >= new_words)
+							peep(op, dest-1);
 						break;
 					case 2:
 						CHECK(2);
 						*dest++ = R[i++];
 						*dest++ = R[i++];
+						if (i-2 >= new_words)
+							peep(op, dest-2);
 						break;
 					case 3:
 						CHECK(3);
 						*dest++ = R[i++];
 						*dest++ = R[i++];
 						*dest++ = R[i++];
+						if (i-3 >= new_words)
+							peep(op, dest-3);
 						break;
 					case 5:  // OP_debug
 						CHECK(5);
@@ -1079,6 +1100,7 @@ namespace avmplus
 						*dest++ = R[i++];
 						*dest++ = R[i++];
 						*dest++ = R[i++];
+						peepFlush();
 						break;
 				}
 			}
@@ -1212,13 +1234,13 @@ namespace avmplus
 		
 	accept:
 		if (s->guardAndAction && commit(s->guardAndAction)) 
-			goto accepted;
+			return;
 		
 		for ( int bi=backtrack_idx-1 ; bi >= 0 ; bi-- ) {
 			state_t *b = &states[backtrack_stack[bi].state];
 			AvmAssert(b->guardAndAction != 0);
 			if (commit(b->guardAndAction)) 
-				goto accepted;
+				return;
 		}
 		
 		// If we could not accept or backtrack because of failing guards then
@@ -1252,39 +1274,6 @@ namespace avmplus
 			I[nextI] = loc;
 			nextI++;
 		}
-		return;
-		
-	accepted:
-		// FIXME - improve state selection following acceptance
-		//
-		// The correct behavior here is to roll back the window so that it aligns
-		// with the first instruction untouched by the acceptance, and to restart
-		// the matcher there.  Finding that instruction is easy - replace() knows it -
-		// but how do we restart the matcher?  The brute force way is to copy
-		// the information out of I and O into a local buffer here, then re-emit the
-		// instructions.
-		
-		// Can we avoid backtracking??  That would make a lot of things a lot simpler.
-
-		// backtracking can be avoided by breaking up overlapping instructions
-		// and by executing guards early and always committing when we reach a
-		// final state with a guard that passes.  So if we have
-		//
-		//   a b
-		//   a b c d
-		//
-		// then the patterns are
-		//
-		//   a b => ab
-		//   ab c d => abcd
-		//
-		// However it gets complicated for specializing one-instruction transformations,
-		// eg getlocal 3 => getlocal3, since the number of patterns will explode.
-		//
-		// That in turn may be fixed by having a two-layer optimizer; single-instruction
-		// transformations are evaluated last.  Yet more complexity.
-
-		state = 0;
 	}
 	
 	void Translator::peepFlush()
