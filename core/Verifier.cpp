@@ -878,8 +878,7 @@ namespace avmplus
 				ftraits->scope = ScopeTypeChain::create(core->GetGC(), scope, extraScopes);
 				for (int i=0,j=scope->size, n=state->scopeDepth; i < n; i++, j++)
 				{
-					ftraits->scope->scopes[j].traits = state->scopeValue(i).traits;
-					ftraits->scope->scopes[j].isWith = state->scopeValue(i).isWith;
+					ftraits->scope->setScopeAt(j, state->scopeValue(i).traits, state->scopeValue(i).isWith);
 				}
 
 				if (f->activationTraits)
@@ -953,12 +952,11 @@ namespace avmplus
 				int j=scope->size;
 				for (int i=0, n=state->scopeDepth; i < n; i++, j++)
 				{
-					cscope->scopes[j].traits = state->scopeValue(i).traits;
-					cscope->scopes[j].isWith = state->scopeValue(i).isWith;
+					cscope->setScopeAt(j, state->scopeValue(i).traits, state->scopeValue(i).isWith);
 				}
 
 				// add a type constraint for the "this" scope of static methods
-				cscope->scopes[state->scopeDepth].traits = ctraits;
+				cscope->setScopeAt(state->scopeDepth, ctraits, false);
 
 				if (state->scopeDepth > 0)
 				{
@@ -971,10 +969,10 @@ namespace avmplus
 				}
 
 				ScopeTypeChain* iscope = ScopeTypeChain::create(core->GetGC(), cscope, 1, 1);
-				iscope->scopes[iscope->size-1].traits = ctraits;
+				iscope->setScopeAt(iscope->size-1, ctraits, false);
 
 				// add a type constraint for the "this" scope of instance methods
-				iscope->scopes[iscope->size].traits = itraits;
+				iscope->setScopeAt(iscope->size, itraits, false);
 
 				ctraits->scope = cscope;
 				itraits->scope = iscope;
@@ -1830,7 +1828,7 @@ namespace avmplus
 				if (scope->fullsize > (scope->size+state->scopeDepth))
 				{
 					// extra constraints on type of pushscope allowed
-					Traits* requiredType = scope->scopes[scope->size+state->scopeDepth].traits;
+					Traits* requiredType = scope->getScopeTraitsAt(scope->size+state->scopeDepth);
 					if (!scopeTraits || !scopeTraits->containsInterface(requiredType))
 					{
 						verifyFailed(kIllegalOperandTypeError, core->toErrorString(scopeTraits), core->toErrorString(requiredType));
@@ -1983,7 +1981,7 @@ namespace avmplus
 				{
 					verifyFailed(kNoGlobalScopeError);
 				}
-				Traits *globalTraits = scope->size > 0 ? scope->scopes[0].traits : state->scopeValue(0).traits;
+				Traits *globalTraits = scope->size > 0 ? scope->getScopeTraitsAt(0) : state->scopeValue(0).traits;
 				checkStack(1,0);
 				checkEarlySlotBinding(globalTraits);
 				MIR_ONLY( Traits* slotTraits = ) checkSlot(globalTraits, imm30-1);
@@ -2329,11 +2327,11 @@ namespace avmplus
 					verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(OP_abs_jump), core->toErrorString((int)(pc-code_pos)));
 				}
 
-				const byte* new_pc = (const byte*) imm30;
 				#ifdef AVMPLUS_64BIT
-				new_pc = (const byte *) (uintptr(new_pc) | (((uintptr) imm30b) << 32));
+				const byte* new_pc = (const byte *) (uintptr(imm30) | (((uintptr) imm30b) << 32));
 				const byte* new_code_end = new_pc + AvmCore::readU30 (nextpc);
 				#else
+				const byte* new_pc = (const byte*) imm30;
 				const byte* new_code_end = new_pc + imm30b;
 				#endif
 
@@ -2754,7 +2752,7 @@ namespace avmplus
 				// look at captured scope types
 				for (index = scope->size-1; index > 0; index--)
 				{
-					Traits* t = scope->scopes[index].traits;
+					Traits* t = scope->getScopeTraitsAt(index);
 					Binding b = toplevel->getBinding(t, &multiname);
 					if (b != BIND_NONE)
 					{
@@ -2763,7 +2761,7 @@ namespace avmplus
 						XLAT_ONLY( if (translator) translator->emitOp1(OP_getouterscope, index) );
 						return;
 					}
-					if (scope->scopes[index].isWith)
+					if (scope->getScopeIsWithAt(index))
 						break;  // with scope could have dynamic property
 				}
 				if (index <= 0)
@@ -2914,7 +2912,7 @@ namespace avmplus
 		{
 			// enclosing scope
 			MIR_ONLY( if (mir) mir->emitGetscope(state, 0, state->sp()+1); )
-			state->push(scope->scopes[0].traits, true);
+			state->push(scope->getScopeTraitsAt(0), true);
 		}
 		else
 		{
@@ -2944,7 +2942,7 @@ namespace avmplus
 		{
 			// enclosing scope
 			MIR_ONLY( if (mir) mir->emitGetscope(state, scope_index, state->sp()+1); )
-			state->push(scope->scopes[scope_index].traits, true);
+			state->push(scope->getScopeTraitsAt(scope_index), true);
 		}
 		else
 		{
@@ -3637,7 +3635,7 @@ namespace avmplus
 				{
 					core->console << "            exception["<<i<<"] from="<< handler->from
 						<< " to=" << handler->to
-						<< " target=" << handler->target 
+						<< " target=" << (uint64_t)handler->target 
 						<< " type=" << t
 						<< " name=";
 					if (name_index != 0)
@@ -3724,8 +3722,8 @@ namespace avmplus
 			for (int i=0, n=info->declaringTraits->scope->size; i < n; i++)
 			{
 				Value v;
-				v.traits = info->declaringTraits->scope->scopes[i].traits;
-				v.isWith = info->declaringTraits->scope->scopes[i].isWith;
+				v.traits = info->declaringTraits->scope->getScopeTraitsAt(i);
+				v.isWith = info->declaringTraits->scope->getScopeIsWithAt(i);
 				v.killed = false;
 				v.notNull = true;
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -3760,7 +3758,7 @@ namespace avmplus
 			core->console << "- ";
 		else
 			core->console << "  ";
-		core->console << state->pc << ':';
+		core->console << (uint64_t)state->pc << ':';
         core->formatOpcode(core->console, pc, (AbcOpcode)*pc, (int)(state->pc), pool);
 		core->console << '\n';
     }

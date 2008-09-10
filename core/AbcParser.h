@@ -51,8 +51,8 @@ namespace avmplus
 			Toplevel* toplevel,
 			Domain* domain,
 			AbstractFunction *nativeMethods[],
-			NativeClassInfo *nativeClasses[],
-			NativeScriptInfo *nativeScripts[],
+			NativeClassInfop nativeClasses[],
+			NativeScriptInfop nativeScripts[],
 			List<Stringp>* keepVersions = NULL);
 
 		~AbcParser();
@@ -66,8 +66,8 @@ namespace avmplus
 			Toplevel* toplevel,
 			Domain* domain,
 			AbstractFunction *nativeMethods[],
-			NativeClassInfo *nativeClasses[],
-			NativeScriptInfo *nativeScripts[],
+			NativeClassInfop nativeClasses[],
+			NativeScriptInfop nativeScripts[],
 			List<Stringp>* keepVersions = NULL);
 
 	protected:
@@ -185,31 +185,34 @@ namespace avmplus
 		unsigned int readU30(const byte *&p) const;
 
 	private:
-		Toplevel* const		toplevel;
-		Domain* const       domain;
-		AvmCore*		core;
-		ScriptBuffer	code;
-		int				version;
-		PoolObject*		pool;
-		const byte*			pos;
-		AbstractFunction **nativeMethods;
-		NativeClassInfo **nativeClasses;
-		NativeScriptInfo **nativeScripts;
-		int				classCount;
-		List<Traits*>		instances;
-		byte* abcStart;
-		byte* abcEnd; // one past the end, actually
-		Stringp* metaNames;
-		Stringp kNeedsDxns;
-		List<Stringp>* keepVersions;
-#ifdef AVMPLUS_VERBOSE
-		Stringp kVerboseVerify;
-#endif
-#ifdef FEATURE_BUFFER_GUARD // no Carbon
-		BufferGuard *guard;
-#endif
 		void addTraits(Hashtable *ht, Traits *traits, Traits *baseTraits);
 
+	// ------------------------ DATA SECTION BEGIN
+	private:
+		ScriptBuffer				code;
+		List<Traits*>				instances;
+		Toplevel* const				toplevel;
+		Domain* const				domain;
+		AvmCore*					core;
+		PoolObject*					pool;
+		const byte*					pos;
+		AbstractFunction**			nativeMethods;
+		const NativeClassInfop*		nativeClasses;
+		const NativeScriptInfop*	nativeScripts;
+		byte*						abcStart;
+		byte*						abcEnd; // one past the end, actually
+		Stringp*					metaNames;
+		Stringp						kNeedsDxns;
+		List<Stringp>*				keepVersions;
+#ifdef AVMPLUS_VERBOSE
+		Stringp 					kVerboseVerify;
+#endif
+#ifdef FEATURE_BUFFER_GUARD // no Carbon
+		BufferGuard*				guard;
+#endif
+		int32_t						version;
+		int32_t						classCount;
+	// ------------------------ DATA SECTION END
 	};
 
 }

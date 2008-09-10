@@ -55,9 +55,6 @@ namespace avmplus
 #endif /* DEBUGGER */
 		);
 
-		ATOM_WB atom;
-		int flags;
-
 		bool isValid();
 		enum
 		{
@@ -78,8 +75,17 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		StackTrace* getStackTrace() const { return stackTrace; }
- 		DWB(StackTrace*) stackTrace;
 #endif /* DEBUGGER */
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		ATOM_WB				atom;
+#ifdef DEBUGGER
+ 		DWB(StackTrace*)	stackTrace;
+#endif
+		int32_t				flags;
+
+	// ------------------------ DATA SECTION END
 	};
 
 	/**
@@ -95,21 +101,14 @@ namespace avmplus
 	 */
 	class ExceptionHandler
 	{
+	// ------------------------ DATA SECTION BEGIN
 	public:
-		/** Start of code range the exception applies to.  Inclusive. */
-		int from;
-
-		/** End of code range the exception applies to.  Exclusive. */
-		int to;
-
-		/** The target location to branch to when the exception occurs. */
-		sintptr target;
-
-		/** The type of exceptions handled by this exception handler. */
-		Traits* traits;
-
-		/** The exception scope traits. */
-		Traits* scopeTraits;
+		Traits* traits;			// The type of exceptions handled by this exception handler. 
+		Traits* scopeTraits;	// The exception scope traits. 
+		sintptr target;		// The target location to branch to when the exception occurs. 
+		int32_t from;			// Start of code range the exception applies to.  Inclusive. 
+		int32_t to;				// End of code range the exception applies to.  Exclusive. 
+	// ------------------------ DATA SECTION END
 	};
 
 	/**
@@ -122,8 +121,11 @@ namespace avmplus
 	public:
 		ExceptionHandlerTable(int exception_count);
 
-		int exception_count;
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		int32_t exception_count;
 		ExceptionHandler exceptions[1];
+	// ------------------------ DATA SECTION END
 	};
 
 #ifdef DEBUGGER
@@ -181,20 +183,6 @@ namespace avmplus
 		void beginCatch();
 		void throwException(Exception *exception);
 
-		AvmCore *core;
-		ExceptionFrame *prevFrame;
-		jmp_buf jmpbuf;
-		Namespace*const* dxnsAddr;
-		CodeContextAtom codeContextAtom;
-#ifdef DEBUGGER
-		CallStackNode *callStack;
-
-		// Indicates what the CATCH block is going to do if it sees an exception.
-		// (A CatchAction should only need 3 bits, but I have to give it 4 in
-		// order to avoid problems with sign-extension.)
-		CatchAction catchAction:4;
-#endif /* DEBUGGER */
-
 #if defined(AVMPLUS_AMD64) && !defined(_WIN64)
 		friend class CodegenMIR;
 		enum {
@@ -203,6 +191,21 @@ namespace avmplus
 		static void *lptr[MAX_LONG_JMP_COUNT];
 		static int   lptrcounter;
 #endif //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		jmp_buf				jmpbuf;
+		AvmCore*			core;
+		ExceptionFrame*		prevFrame;
+		Namespace* const *	dxnsAddr;
+		CodeContextAtom		codeContextAtom;
+#ifdef DEBUGGER
+		CallStackNode*		callStack;
+		CatchAction			catchAction;
+#endif /* DEBUGGER */
+
+	// ------------------------ DATA SECTION END
+
 	};
 
 	/**

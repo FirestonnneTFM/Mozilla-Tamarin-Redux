@@ -375,7 +375,7 @@ namespace avmplus
 		scanResources(abc, pool);
 
 		// build a bridging table from pools to abcs
-		int index = abcList.size();
+		uintptr index = abcList.size();
 		pool2abcIndex.add(pool, (const void*)index);
 
 		// at this point our abc object has been populated with

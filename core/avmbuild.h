@@ -218,6 +218,7 @@
 
 	// some that might be useful to turn on someday, but would require too much twiddly code tweaking right now
 //	#pragma warning(error:4296)	// expression is always true (false) (Generally, an unsigned variable was used in a comparison operation with zero.)
+//	#pragma warning(error:4820) // 'bytes' bytes padding added after construct 'member_name' (MSFT system headers generate zillions of these, sadly)
 
 	#ifndef DEBUG
 	#include <memory.h>

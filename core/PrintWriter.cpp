@@ -146,7 +146,7 @@ namespace avmplus
 		return *this;
 	}
 	
-	PrintWriter& PrintWriter::operator<< (int value)
+	PrintWriter& PrintWriter::operator<< (int32_t value)
 	{
 		wchar buffer[256];
 		int len;
@@ -156,7 +156,7 @@ namespace avmplus
 		return *this;
 	}
 
-	PrintWriter& PrintWriter::operator<< (uint64 value)
+	PrintWriter& PrintWriter::operator<< (uint64_t value)
 	{
 		wchar buffer[256];
 		int len;
@@ -166,7 +166,7 @@ namespace avmplus
 		return *this;
 	}
 
-	PrintWriter& PrintWriter::operator<< (int64 value)
+	PrintWriter& PrintWriter::operator<< (int64_t value)
 	{
 		wchar buffer[256];
 		int len;
@@ -176,7 +176,7 @@ namespace avmplus
 		return *this;
 	}
 
-	PrintWriter& PrintWriter::operator<< (uint32 value)
+	PrintWriter& PrintWriter::operator<< (uint32_t value)
 	{
 		wchar buffer[256];
 		int len;

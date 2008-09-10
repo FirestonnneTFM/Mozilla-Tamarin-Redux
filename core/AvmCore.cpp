@@ -316,12 +316,12 @@ namespace avmplus
 
 		// stack allocated array of pointers
 		AbstractFunction* nativeMethods[builtin_abc_method_count];
-		NativeClassInfo* nativeClasses[builtin_abc_class_count];
-		NativeScriptInfo* nativeScripts[builtin_abc_script_count];
+		NativeClassInfop nativeClasses[builtin_abc_class_count];
+		NativeScriptInfop nativeScripts[builtin_abc_script_count];
 
 		memset(nativeMethods, 0, sizeof(AbstractFunction*)*builtin_abc_method_count);
-		memset(nativeClasses, 0, sizeof(NativeClassInfo*)*builtin_abc_class_count);
-		memset(nativeScripts, 0, sizeof(NativeScriptInfo*)*builtin_abc_script_count);
+		memset(nativeClasses, 0, sizeof(NativeClassInfop)*builtin_abc_class_count);
+		memset(nativeScripts, 0, sizeof(NativeScriptInfop)*builtin_abc_script_count);
 
 		initNativeTables(classEntries, scriptEntries,
 			nativeMethods, nativeClasses, nativeScripts);
@@ -395,7 +395,7 @@ namespace avmplus
 
 			object_vtable = newVTable(traits.object_itraits, NULL, emptyScope, abcEnv, NULL);
 			object_vtable->resolveSignatures();
-			mainTraits->sizeofInstance = getToplevelSize();
+			mainTraits->sizeofInstance = (uint32_t)getToplevelSize();
 		}
 		else
 		{
@@ -526,8 +526,8 @@ namespace avmplus
 										  Toplevel* toplevel,
 										  Domain* domain,
 										  AbstractFunction *nativeMethods[],
-										  NativeClassInfo *nativeClasses[],
-										  NativeScriptInfo *nativeScripts[],
+										  NativeClassInfop nativeClasses[],
+										  NativeScriptInfop nativeScripts[],
 										  List<Stringp>* include_versions)
 	{
 		// parse constants and attributes.
@@ -554,8 +554,8 @@ namespace avmplus
 										 DomainEnv* domainEnv,
 										 Toplevel* &toplevel,
 										 AbstractFunction *nativeMethods[],
-										 NativeClassInfo *nativeClasses[],
-										 NativeScriptInfo *nativeScripts[],
+										 NativeClassInfop nativeClasses[],
+										 NativeScriptInfop nativeScripts[],
 										 CodeContext *codeContext)
     {
 		resources = new (GetGC()) Hashtable(GetGC());
@@ -1864,7 +1864,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		console.setOutputStream(stream);
 	}
 
-	void AvmCore::registerNatives(NativeTableEntry *nativeMap, AbstractFunction *nativeMethods[])
+	void AvmCore::registerNatives(NativeTableEntryp nativeMap, AbstractFunction *nativeMethods[])
 	{
 		while (nativeMap->method_id != -1)
 		{
@@ -1881,11 +1881,11 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	void AvmCore::initNativeTables(NativeClassInfo* classEntry,
-								  NativeScriptInfo* scriptEntry,
-								  AbstractFunction *nativeMethods[],
-								  NativeClassInfo *nativeClasses[],
-								  NativeScriptInfo *nativeScripts[])
+	void AvmCore::initNativeTables(NativeClassInfop classEntry,
+								  NativeScriptInfop scriptEntry,
+								  AbstractFunction* nativeMethods[],
+								  NativeClassInfop nativeClasses[],
+								  NativeScriptInfop nativeScripts[])
 	{
 		while (classEntry->class_id != -1)
 		{
@@ -3408,7 +3408,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	Traits* AvmCore::newTraits(Traits *base,
 							int nameCount,
 							int interfaceDelta,
-							size_t objectSize)
+							uint32 objectSize)
 	{
 		int interfaceCount = interfaceDelta;
 		if (base)
@@ -3937,7 +3937,8 @@ return the result of the comparison ToPrimitive(x) == y.
 	/*static*/ 
 	void AvmCore::atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew)
 	{ 
-#ifdef MMGC_DRC
+#ifdef MMGC_DRC	
+		
 		Atom atom = *address;
 		if(!isNull(atom)) {
 			switch(atom&7)

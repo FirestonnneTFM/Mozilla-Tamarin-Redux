@@ -267,7 +267,7 @@ namespace avmplus
 		 * @param traits    The traits of the class
 		 * @param multiname The multiname of the property
 		 */
-		Atom getBinding(Traits* traits, Multiname* multiname) const;
+		Binding getBinding(Traits* traits, Multiname* multiname) const;
 
 		/**
 		 * @name ECMA-262 Appendix B.2 extensions

@@ -40,63 +40,78 @@
 
 
 #ifdef _MSC_VER
-#include "../utils/msc_inttypes.h"
+	// MSVC doesn't support inttypes.h or most C99 types directly
+	#include <crtdefs.h>	// defines intrptr_t and uintptr_t, but not the rest of C99 int types
+	typedef __int8				int8_t;
+	typedef __int16				int16_t;
+	typedef __int32				int32_t;
+	typedef __int64				int64_t;
+	typedef unsigned __int8		uint8_t;
+	typedef unsigned __int16	uint16_t;
+	typedef unsigned __int32	uint32_t; 
+	typedef unsigned __int64	uint64_t;
 #else
-#include <inttypes.h>
+	#include <inttypes.h>
 #endif
 
 namespace avmplus
 {
-	typedef unsigned char    byte;
-	typedef unsigned char    uint8;
-	typedef unsigned short   uint16;
-	typedef char             sint8;
-	typedef char             int8;
-	typedef short            sint16;
-	typedef short            int16;
-	typedef unsigned int     uint32; 
-	typedef signed int       sint32;
-	typedef signed int       int32;
-	#ifdef _MSC_VER
-	typedef __int64          int64;
-	typedef __int64          sint64;
-	typedef unsigned __int64 uint64;
-	#elif defined(_MAC)
-	typedef int64_t          int64;
-	typedef int64_t          sint64;
-	typedef uint64_t         uint64;
-	#else
-	typedef long long          int64;
-	typedef long long          sint64;
-	typedef unsigned long long         uint64;
-	#endif
+	// legacy types
+	typedef int8_t		sint8;
+	typedef int8_t		int8;
+	typedef uint8_t		byte;
+	typedef uint8_t		uint8;
+
+	typedef int16_t		sint16;
+	typedef int16_t		int16;
+	typedef uint16_t	uint16;
+
+	typedef int32_t		sint32;
+	typedef int32_t		int32;
+	typedef uint32_t	uint32; 
+
+	typedef int64_t		int64;
+	typedef int64_t		sint64;
+	typedef uint64_t	uint64;
+
+	typedef intptr_t	sintptr;
+	typedef uintptr_t	uintptr;
 
 	/* wchar is our version of wchar_t, since wchar_t is different sizes
 	   on different platforms, but we want to use UTF-16 uniformly. */
-	typedef unsigned short wchar;
+	typedef uint16_t wchar;
 	
     #ifndef NULL
     #define NULL 0
     #endif
-
+	
+	// Atom should really be an intptr_t, but doing so can cause problematic compiles
+	// because some platforms define intptr_t as an int64, and some as a long, which
+	// create different overload possibilities in a few cases. Ideally, Atom should
+	// be a unique pointer type (as it is in TT) but for now, avoid the code churn
+	// by defining it the "old" way
+	//
 	// math friendly pointer (64 bits in LP 64 systems)
 	#if defined (_MSC_VER) && (_MSC_VER >= 1300)
 	    #define AVMPLUS_TYPE_IS_POINTER_SIZED __w64
 	#else
 	    #define AVMPLUS_TYPE_IS_POINTER_SIZED
 	#endif	
-	
 	#ifdef AVMPLUS_64BIT
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED uint64 uintptr;
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int64 sintptr;
+	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int64_t Atom;
 	#else
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED uint32 uintptr;
-	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32 sintptr;
+	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32_t Atom;
 	#endif
 	
-	typedef sintptr          Atom;
-	typedef sintptr			 Binding;
-	typedef sintptr          CodeContextAtom;
+	// nothing overloads on Binding, so we can use intptr_t
+	// Ideally, Binding should be a unique pointer type (as it is in TT) but for now, 
+	// avoid the code churn by defining it the "old" way
+	typedef intptr_t	Binding;
+
+	// nothing overloads on CodeContextAtom, so we can use intptr_t
+	// Ideally, CodeContextAtom should be a unique pointer type (as it is in TT) but for now, 
+	// avoid the code churn by defining it the "old" way
+	typedef intptr_t	CodeContextAtom;
 
 	inline uint32 urshift(Atom atom, int amount)
 	{

@@ -43,6 +43,8 @@ $DIR/shell \
     $DIR/parse.es.abc \
     $DIR/asm.es.abc \
     $DIR/abc.es.abc \
+    $DIR/abc-encode.es.abc \
+    $DIR/abc-decode.es.abc \
     $DIR/emit.es.abc \
     $DIR/cogen.es.abc \
     $DIR/cogen-stmt.es.abc \

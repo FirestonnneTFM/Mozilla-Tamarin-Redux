@@ -308,7 +308,7 @@ namespace MMgc
 	// no idea how to do this with codewarrior
 	void GetInfoFromPC(sintptr pc, char *buff, int /*buffSize*/) 
 	{
-		sprintf(buff, "0x%x", pc);	
+		sprintf(buff, "0x%x", (uint32)pc);	
 	}
 
 	void GetStackTrace(sintptr *trace, int len, int skip) 
