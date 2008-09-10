@@ -83,6 +83,7 @@ namespace avmplus
 	XMLObject::XMLObject(XMLClass *type, E4XNode *node)
 		: ScriptObject(type->ivtable(), type->prototype)
 	{
+		SAMPLE_FRAME("XML", this->core());
 		setNode( node );
 	}
 
@@ -90,6 +91,7 @@ namespace avmplus
 	XMLObject::XMLObject(XMLClass *type, Stringp str, Namespace *defaultNamespace)
 		: ScriptObject(type->ivtable(), type->prototype)
 	{
+		SAMPLE_FRAME("XML", this->core());
 		#if 0//def _DEBUG
 		static bool once = false;
 		if (!once)

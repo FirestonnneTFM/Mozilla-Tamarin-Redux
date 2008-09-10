@@ -239,13 +239,16 @@ namespace avmplus
 		 */
 		Atom astype(Atom atom, Traits* expected);
 		
+#ifdef FEATURE_SAMPLER
+		void debugEnter(int argc, uint32 *ap, 
+			Traits**frameTraits, int localCount,
+			CallStackNode* callstack,
+			Atom* framep, volatile sintptr *eip);
+		void debugExit(CallStackNode* callstack);
+#endif
+
 #ifdef DEBUGGER
 		uint64 invocationCount;
-		void debugEnter(int argc, uint32 *ap, 
-							   Traits**frameTraits, int localCount,
-							   CallStackNode* callstack,
-							   Atom* framep, volatile sintptr *eip);
-		void debugExit(CallStackNode* callstack);
 		void sendEnter(int argc, uint32 *ap);
 		void sendExit();
 #endif

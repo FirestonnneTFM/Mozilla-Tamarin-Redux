@@ -600,6 +600,8 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kcolon;
 		DRC(Stringp) ktabat;
 		DRC(Stringp) kparens;
+#endif
+#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
 		DRC(Stringp) kanonymousFunc;
 #endif
 		Atom kNaN;
@@ -1043,27 +1045,31 @@ const int kBufferPadding = 16;
 		virtual int determineLanguage();
 		int langID;
 		
-		/** The call stack of currently executing code. */
-		CallStackNode *callStack;
 
 		/**
 		 * Creates a StackTrace from the current executing call stack
 		 */
 		StackTrace* newStackTrace();
 
-		/**
-		 Sampling profiler interface
-		 */
-		Sampler *sampler() { return &_sampler; }
-		void sampleCheck() { _sampler.sampleCheck(); }
-		bool sampling() { return _sampler.sampling; }
-
-		bool passAllExceptionsToDebugger;
-
 		#ifdef _DEBUG
 		void dumpStackTrace();
 		#endif
 #endif /* DEBUGGER */
+
+		/** The call stack of currently executing code. */
+		CallStackNode *callStack;
+
+#ifdef FEATURE_SAMPLER
+
+		/**
+		Sampling profiler interface
+		*/
+		Sampler *sampler() { return &_sampler; }
+		void sampleCheck() { _sampler.sampleCheck(); }
+		bool sampling() { return _sampler.sampling; }
+		bool passAllExceptionsToDebugger;
+
+#endif
 
 		CodeContextAtom codeContextAtom;
 
@@ -1277,7 +1283,7 @@ const int kBufferPadding = 16;
 		Stringp internAlloc(const wchar *s, int len);
 		Stringp internAllocUtf8(const byte *s, int len);
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		/**
 		 * intern without allocating memory, returns NULL if its not already interned
 		 */
@@ -1386,7 +1392,7 @@ const int kBufferPadding = 16;
 		};
 		GCInterface gcInterface;
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 	private:
 		Sampler _sampler;
 #endif

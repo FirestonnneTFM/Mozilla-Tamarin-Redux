@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 	void CallStackNode::initialize(MethodEnv *			env,
 								   AbstractFunction *	info,
 								   Atom*				framep,
@@ -50,13 +50,16 @@ namespace avmplus
 								   sintptr volatile *	eip)
 	{
 		AvmCore *core = info->core();
-		this->env       = env;
+
 		this->info      = info;
+		this->eip		= eip;     // ptr to where the current instruction pointer is stored
+
+#ifdef DEBUGGER
+		this->env       = env;
 		this->ap        = ap;
 		this->argc      = argc;
 		this->framep	= framep;  // pointer to top of AS registers
 		this->traits    = traits;  // pointer to traits of top of AS registers
-		this->eip		= eip;     // ptr to where the current instruction pointer is stored
 		filename        = NULL;
 		linenum         = 0;
 
@@ -64,7 +67,15 @@ namespace avmplus
 		#ifdef AVMPLUS_INTERP
 		this->scopeDepth = NULL;
 		#endif
+#else
+		// Avoid compiler warnings
+		(void)ap;
+		(void)argc;
+		(void)traits;
+		(void)framep;
+		(void)env;
 
+#endif
 		// link into callstack
 		next            = core->callStack;
 		core->callStack = this;
@@ -78,7 +89,7 @@ namespace avmplus
 		info->core()->callStack = next;
 		next = NULL;
 	}
-
+#ifdef DEBUGGER
 	void** CallStackNode::scopeBase()
 	{
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
@@ -87,7 +98,6 @@ namespace avmplus
 		else
 			return NULL;
 	}
-
 	// Dump a filename.  The incoming filename is of the form
 	// "C:\path\to\package\root;package/package;filename".  The path format
 	// will depend on the platform on which the movie was originally
@@ -169,5 +179,8 @@ namespace avmplus
 		}
 		return stringRep;
 	}
+
 #endif /* DEBUGGER */
+
+#endif /* FEATURE_SAMPLER */
 }

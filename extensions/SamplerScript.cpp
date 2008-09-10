@@ -144,6 +144,7 @@ namespace avmplus
 		NATIVE_METHOD(flash_sampler_pauseSampling, SamplerScript::pauseSampling)
 		NATIVE_METHOD(flash_sampler__getInvocationCount, SamplerScript::getInvocationCount)
 		NATIVE_METHOD(flash_sampler_isGetterSetter, SamplerScript::isGetterSetter)
+		NATIVE_METHOD(flash_sampler_sampleInternalAllocs, SamplerScript::sampleInternalAllocs)
 	END_NATIVE_MAP()
 	
 	BEGIN_NATIVE_MAP(SampleClass)
@@ -151,10 +152,11 @@ namespace avmplus
 
 	BEGIN_NATIVE_MAP(NewObjectSampleClass)
 		NATIVE_METHOD(flash_sampler_NewObjectSample_object_get,        NewObjectSampleObject::object_get)
+		NATIVE_METHOD(flash_sampler_NewObjectSample_size_get,        NewObjectSampleObject::size_get)
 	END_NATIVE_MAP()
 
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 
 	class SampleIterator : public ScriptObject
 	{
@@ -176,8 +178,9 @@ namespace avmplus
 			return index+1;
 		}
 
-		Atom nextValue(int)
+		Atom nextValue(int i)
 		{
+			(void) i;
 			Sample s;
 			sampler->readSample(cursor, s);
 			count--;
@@ -280,7 +283,7 @@ namespace avmplus
 		return (double)num;
 	}
 
-	ClassClosure *SamplerScript::getType(uintptr typeOrVTable, GCWeakRef *weakRef)
+	ClassClosure *SamplerScript::getType(Atom typeOrVTable, const void *ptr)
 	{
 		Toplevel *tl = toplevel();
 		AvmCore *core = this->core();
@@ -299,11 +302,12 @@ namespace avmplus
 		}
 		
 		VTable *vtable = (VTable*)typeOrVTable;
-		tl = vtable->toplevel;
+		if( vtable && vtable->toplevel )
+			tl = vtable->toplevel;
 
 		ScriptObject *obj=NULL;
-		if (weakRef != NULL && weakRef->get()) {
-			obj = (ScriptObject*)weakRef->get();	
+		if (ptr != NULL ) {
+			obj = (ScriptObject*)ptr;	
 		}
 		
 		ClassClosure *type;
@@ -315,10 +319,12 @@ namespace avmplus
 		{
 			type = tl->functionClass;
 		}
+#ifdef DEBUGGER
 		else if(obj && obj->traits()->isActivationTraits)
 		{
 			type = tl->objectClass;
 		}
+#endif
 		else
 		{
 			// fallback answer
@@ -341,15 +347,22 @@ namespace avmplus
 				}
 			}
 		}
-
+#ifdef DEBUGGER
 		// If this fires off, Tommy Reilly says: "It basically means we exhausting all efforts to
 		// associate an object with some "type" and failed.  You can ignore it.
+		AvmAssert(!obj || 
+			typeOrVTable < 7 || 
+			  (obj->traits()->name && obj->traits()->name->Equals("global")) ||
+			(core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
+			(obj->traits()->isActivationTraits && type == tl->objectClass) ||
+			core->istype(obj->atom(), type->traits()->itraits));
+#else
 		AvmAssert(!obj || 
 			  typeOrVTable < 7 || 
 			  (obj->traits()->name && obj->traits()->name->Equals("global")) ||
 			  (core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
-			  (obj->traits()->isActivationTraits && type == tl->objectClass) ||
 			  core->istype(obj->atom(), type->traits()->itraits));
+#endif
 		AvmAssert(core->istype(type->atom(), CLASS_TYPE));	
 		return type;	
 	}
@@ -359,7 +372,7 @@ namespace avmplus
 		AvmCore *core = this->core();
 		int clsId = NativeID::abcclass_flash_sampler_Sample;
 		
-		if(sample.sampleType == Sampler::NEW_OBJECT_SAMPLE)
+		if(sample.sampleType == Sampler::NEW_OBJECT_SAMPLE || sample.sampleType == Sampler::NEW_AUX_SAMPLE)
 			clsId = NativeID::abcclass_flash_sampler_NewObjectSample;
 		else if(sample.sampleType == Sampler::DELETED_OBJECT_SAMPLE)
 			clsId = NativeID::abcclass_flash_sampler_DeleteObjectSample;
@@ -410,15 +423,22 @@ namespace avmplus
 		if(sample.sampleType == Sampler::RAW_SAMPLE)
 			return sam;
 
-		ScriptObject *obj=NULL;
-		if (sample.weakRef != NULL && sample.weakRef->get()) {
-			((NewObjectSampleObject*)sam)->setWeakRef(sample.weakRef);
-			obj = (ScriptObject*)sample.weakRef->get();	
-		}
+		if( sample.sampleType == Sampler::NEW_OBJECT_SAMPLE ) {
 
-		ClassClosure *type = getType(sample.typeOrVTable, sample.weakRef);
-		WBRC(gc(), sam, ((char*)sam + cc->typeOffset), type);
-	
+			if (sample.ptr != NULL ) {
+				((NewObjectSampleObject*)sam)->setRef((AvmPlusScriptableObject*)sample.ptr);
+			}
+#ifdef DEBUGGER
+			ClassClosure *type = getType(sample.typeOrVTable, sample.ptr);
+			WBRC(gc(), sam, ((char*)sam + cc->typeOffset), type);
+#endif
+
+			((NewObjectSampleObject*)sam)->setSize(sample.alloc_size);
+		}
+		else if( sample.sampleType == Sampler::NEW_AUX_SAMPLE ) {
+			// Set up size... we know these samples won't have weakref or type info 
+			((NewObjectSampleObject*)sam)->setSize(sample.alloc_size);
+		}
 		return sam;
 	}
 
@@ -440,8 +460,9 @@ namespace avmplus
 		return undefinedAtom;
 	}
 
-	double SamplerScript::getSize(Atom a)
+	double get_size(Atom a)
 	{
+#ifdef DEBUGGER
 		switch(a&7)
 		{
 		case kDoubleType:
@@ -454,6 +475,15 @@ namespace avmplus
 				return (double)o->size();
 		}
 		return 4;
+#else
+		(void)a;
+		return 0;
+#endif
+	}
+
+	double SamplerScript::getSize(Atom a)
+	{
+		return get_size(a);
 	}
 
 	void SamplerScript::startSampling() 
@@ -483,12 +513,20 @@ namespace avmplus
 		if (!trusted())
 			return;
 		core()->sampler()->pauseSampling();
-	}		
+	}	
+
+	void SamplerScript::sampleInternalAllocs(bool b)
+	{
+		if(!trusted())
+			return;
+		core()->sampler()->sampleInternalAllocs(b);
+	}
 
 	double SamplerScript::getInvocationCount(Atom a, QNameObject* qname, uint32 type) 
 	{
 		if (!trusted())
 			return -1;
+#ifdef DEBUGGER
 		AvmCore *core = this->core();
 		Multiname multiname;
 		if(qname)
@@ -583,6 +621,11 @@ namespace avmplus
 
 		if(env)
 			return (double)env->invocationCount;
+#else
+		(void)type;
+		(void)qname;
+		(void)a;
+#endif
 
 		return -1;
 	}
@@ -622,7 +665,13 @@ namespace avmplus
 	{
 	}
 
-#endif // DEBUGGER
+	double get_size(Atom a)
+	{
+		(void)a;
+		return 0;
+	}
+
+#endif // FEATURE_SAMPLER
 
 	
 	SampleObject::SampleObject(VTable *vtable, ScriptObject *delegate)
@@ -631,23 +680,29 @@ namespace avmplus
 
 	
 	NewObjectSampleObject::NewObjectSampleObject(VTable *vtable, ScriptObject *delegate)
-		: SampleObject(vtable, delegate) 
+		: size(0), SampleObject(vtable, delegate) 
 	{}
 
 	Atom NewObjectSampleObject::object_get()
 	{
-		if(weakRef) {
-			if(weakRef->get())
-			{
-				Atom a = ((AvmPlusScriptableObject*)weakRef->get())->toAtom();
-				AvmAssert((a&~7) != 0);
-				return a;
-			}
-			weakRef = NULL;
+		if(obj) {
+			Atom a = obj->toAtom();
+			AvmAssert((a&~7) != 0);
+			return a;
 		}
 		return undefinedAtom;
 	}
-		
+
+	double NewObjectSampleObject::size_get()
+	{
+		double s = (double)size;
+		if( !size ) {
+			Atom a = object_get();
+			s = get_size(a);
+		}
+		return s;
+	}
+
 	SampleClass::SampleClass(VTable *vtable)
 		: ClassClosure(vtable)
 	{
