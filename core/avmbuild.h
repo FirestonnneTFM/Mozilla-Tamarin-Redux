@@ -140,6 +140,12 @@
 	#undef AVMPLUS_MIR
 #endif
 
+#if defined(AVMPLUS_MIR) && defined(AVMPLUS_IA32) && !defined(AVMPLUS_DISABLE_NJ)
+    // use nanojit on ia32 (win, mac, linux)
+    #undef AVMPLUS_MIR
+    #define FEATURE_NANOJIT
+#endif
+
 // if a function meets the E4 criteria for being unchecked, then make
 // all its parameters optional and add a rest arg.  asc should do this
 // at compile time so we don't have to do it in avmplus.
@@ -238,6 +244,9 @@
 
 #define PCRE_STATIC
 
+// performance metrics for NJ 
+//#define PERFM
+
 #ifdef SOLARIS
 #define HAVE_ALLOCA_H
 #endif
@@ -256,6 +265,17 @@
 #ifdef AVMPLUS_BIG_ENDIAN
 	// define in case any old code relies on this
 	#define AVM10_BIG_ENDIAN
+#endif
+
+// FASTCALL 
+#ifdef AVMPLUS_IA32
+	#if _MSC_VER
+		#define FASTCALL __fastcall
+	#elif __GNUC__
+		#define FASTCALL __attribute__((fastcall))
+	#else
+		#define FASTCALL
+	#endif
 #endif
 
 // Enable translation from ABC byte code to a wider word code that can

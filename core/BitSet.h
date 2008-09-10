@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -46,40 +47,47 @@ namespace avmplus
 	 * on a set of items or conditions. Class BitSet provides functions 
 	 * to manipulate individual bits in the vector.
 	 *
-	 * Since most vectors are rather small an array of longs is used by
+	 * Since most vectors are rather small an array of machine words is used by
 	 * default to house the value of the bits.  If more bits are needed
 	 * then an array is allocated dynamically outside of this object. 
 	 * 
 	 * This object is not optimized for a fixed sized bit vector
 	 * it instead allows for dynamically growing the bit vector.
 	 */ 
-	class BitSet: public MMgc::GCFinalizedObject
+	class BitSet
 	{
 		public:
 
-			enum {  kUnit = 8*sizeof(long),
+			enum {  kUnit = 8*sizeof(uintptr_t),
 					kDefaultCapacity = 4   };
 
 			BitSet()
 			{
 				capacity = kDefaultCapacity;
-				for(int i=0; i<capacity; i++)
-					bits.ar[i] = 0;
+                reset();
 			}
 
-			~BitSet()
-			{
-				if (capacity > kDefaultCapacity)
-					delete [] bits.ptr;
-				capacity = 0;
-			}
+            void reset()
+            {
+                if (capacity > kDefaultCapacity)
+    				for(int i=0; i<capacity; i++)
+	    				bits.ptr[i] = 0;
+                else
+    				for(int i=0; i<capacity; i++)
+	    				bits.ar[i] = 0;
+            }
 
-			void set(int bitNbr)
+            void set(MMgc::GC *gc, int bitNbr)
 			{
 				int index = bitNbr / kUnit;
 				int bit = bitNbr % kUnit;
-				if (index >= capacity)
-					grow(index+1);
+                if (index >= capacity) {
+                    int c = capacity * 2;
+                    while (index >= c) {
+                        c *= 2;
+                    }
+					grow(gc, c);
+                }
 
 				if (capacity > kDefaultCapacity)
 					bits.ptr[index] |= (1<<bit);
@@ -115,34 +123,43 @@ namespace avmplus
 				return value;
 			}
 
+            void setFrom(MMgc::GC *gc, BitSet &other) {
+                int c = other.capacity;
+                if (c > capacity)
+                    grow(gc, c);
+                if (c > kDefaultCapacity) {
+                    for (int i=0; i < c; i++)
+                        bits.ptr[i] |= other.bits.ptr[i];
+                } else {
+                    for (int i=0; i < c; i++)
+                        bits.ar[i] |= other.bits.ar[i];
+                }
+            }
+
 		private:
 
 			// Grow the array until at least newCapacity big
-			void grow(int newCapacity)
+			void grow(MMgc::GC *gc, int newCapacity)
 			{
-				// create vector that is 2x bigger than requested 
-				newCapacity *= 2;
-				//MEMTAG("BitVector::Grow - long[]");
-				long* newBits = new long[newCapacity];
+				//MEMTAG("BitVector::Grow - uintptr_t[]");
+				uintptr_t* newBits = (uintptr_t*)gc->Alloc(newCapacity * sizeof(uintptr_t), MMgc::GC::kZero);
 
 				// copy the old one 
-				for(int i=0; i<capacity; i++)
-				{
-					if (capacity > kDefaultCapacity)
+                if (capacity > kDefaultCapacity)
+				    for(int i=0; i<capacity; i++)
 						newBits[i] = bits.ptr[i];
-					else
+				else
+				    for(int i=0; i<capacity; i++)
 						newBits[i] = bits.ar[i];
-				}
-
-				// clear out the rest
-				for(int i=capacity; i<newCapacity; i++)
-					newBits[i] = 0;
 
 				// in with the new out with the old
 				if (capacity > kDefaultCapacity)
-					delete [] bits.ptr;
+					gc->Free(bits.ptr);
 
-				bits.ptr = newBits;
+                if (gc->IsPointerToGCPage(this))
+    				WB(gc, this, &bits.ptr, newBits);
+                else
+                    bits.ptr = newBits;
 				capacity = newCapacity;
 			}
 
@@ -152,8 +169,8 @@ namespace avmplus
 			int capacity;
 			union
 			{
-				long   ar[kDefaultCapacity];
-				long*  ptr;
+				uintptr_t ar[kDefaultCapacity];
+				uintptr_t*  ptr;
 			}
 			bits;
 	};

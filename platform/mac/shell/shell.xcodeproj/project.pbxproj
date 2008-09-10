@@ -118,6 +118,20 @@
 
 /* Begin PBXFileReference section */
 		1A91570E0B012A3F00744986 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
+		4E1E42490E6339A40095C2E7 /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cpp; path = ../../../nanojit/Assembler.cpp; sourceTree = SOURCE_ROOT; };
+		4E1E424A0E6339A40095C2E7 /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Assembler.h; path = ../../../nanojit/Assembler.h; sourceTree = SOURCE_ROOT; };
+		4E1E424B0E6339A40095C2E7 /* Fragmento.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Fragmento.cpp; path = ../../../nanojit/Fragmento.cpp; sourceTree = SOURCE_ROOT; };
+		4E1E424C0E6339A40095C2E7 /* Fragmento.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Fragmento.h; path = ../../../nanojit/Fragmento.h; sourceTree = SOURCE_ROOT; };
+		4E1E424D0E6339A40095C2E7 /* LIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = LIR.cpp; path = ../../../nanojit/LIR.cpp; sourceTree = SOURCE_ROOT; };
+		4E1E424E0E6339A40095C2E7 /* LIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = LIR.h; path = ../../../nanojit/LIR.h; sourceTree = SOURCE_ROOT; };
+		4E1E424F0E6339A40095C2E7 /* nanojit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = nanojit.h; path = ../../../nanojit/nanojit.h; sourceTree = SOURCE_ROOT; };
+		4E1E42500E6339A40095C2E7 /* Native.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Native.h; path = ../../../nanojit/Native.h; sourceTree = SOURCE_ROOT; };
+		4E1E42510E6339A40095C2E7 /* Nativei386.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Nativei386.cpp; path = ../../../nanojit/Nativei386.cpp; sourceTree = SOURCE_ROOT; };
+		4E1E42520E6339A40095C2E7 /* Nativei386.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Nativei386.h; path = ../../../nanojit/Nativei386.h; sourceTree = SOURCE_ROOT; };
+		4E1E42530E6339A40095C2E7 /* RegAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = RegAlloc.cpp; path = ../../../nanojit/RegAlloc.cpp; sourceTree = SOURCE_ROOT; };
+		4E1E42540E6339A40095C2E7 /* RegAlloc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = RegAlloc.h; path = ../../../nanojit/RegAlloc.h; sourceTree = SOURCE_ROOT; };
+		4E1E42550E6339CD0095C2E7 /* CodegenLIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CodegenLIR.cpp; sourceTree = "<group>"; };
+		4E1E42560E6339CD0095C2E7 /* CodegenLIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CodegenLIR.h; sourceTree = "<group>"; };
 		4E5ADFA20E5CD46C00038D0B /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
 		4E62BE2C0D6244D300A24F2D /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AbcData.cpp; sourceTree = "<group>"; };
 		4E62BE2D0D6244D300A24F2D /* AbcEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AbcEnv.cpp; sourceTree = "<group>"; };
@@ -462,9 +476,29 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		4E1E42480E63396E0095C2E7 /* nanojit */ = {
+			isa = PBXGroup;
+			children = (
+				4E1E42490E6339A40095C2E7 /* Assembler.cpp */,
+				4E1E424A0E6339A40095C2E7 /* Assembler.h */,
+				4E1E424B0E6339A40095C2E7 /* Fragmento.cpp */,
+				4E1E424C0E6339A40095C2E7 /* Fragmento.h */,
+				4E1E424D0E6339A40095C2E7 /* LIR.cpp */,
+				4E1E424E0E6339A40095C2E7 /* LIR.h */,
+				4E1E424F0E6339A40095C2E7 /* nanojit.h */,
+				4E1E42500E6339A40095C2E7 /* Native.h */,
+				4E1E42510E6339A40095C2E7 /* Nativei386.cpp */,
+				4E1E42520E6339A40095C2E7 /* Nativei386.h */,
+				4E1E42530E6339A40095C2E7 /* RegAlloc.cpp */,
+				4E1E42540E6339A40095C2E7 /* RegAlloc.h */,
+			);
+			name = nanojit;
+			sourceTree = "<group>";
+		};
 		4E62BE2A0D62449900A24F2D /* no_compile_for_debugging_only */ = {
 			isa = PBXGroup;
 			children = (
+				4E1E42480E63396E0095C2E7 /* nanojit */,
 				4E62BF030D62451F00A24F2D /* MMgc */,
 				4E62BEFA0D62450800A24F2D /* codegen */,
 				4E62BE2B0D6244D300A24F2D /* core */,
@@ -671,6 +705,8 @@
 		4E62BEFA0D62450800A24F2D /* codegen */ = {
 			isa = PBXGroup;
 			children = (
+				4E1E42550E6339CD0095C2E7 /* CodegenLIR.cpp */,
+				4E1E42560E6339CD0095C2E7 /* CodegenLIR.h */,
 				4E62BEFB0D62450800A24F2D /* Amd64Assembler.cpp */,
 				4E62BEFC0D62450800A24F2D /* ArmAssembler.cpp */,
 				4E62BEFD0D62450800A24F2D /* ArmAssembler.h */,

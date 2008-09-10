@@ -76,6 +76,80 @@ namespace avmplus
 
 const int kBufferPadding = 16;
 
+	struct Config
+	{
+		#ifdef AVMPLUS_VERBOSE
+		/**
+		 * The verbose flag may be set to display each bytecode
+		 * instruction as it is executed, along with a snapshot of
+		 * the state of the stack and scope chain.
+		 * Caution!  This shoots out a ton of output!
+		 */
+		bool verbose;
+		bool verbose_addrs;
+		#endif /* AVMPLUS_VERBOSE */
+
+		/**
+		 * The turbo switch determines how bytecode is executed.
+		 * When turbo is true, bytecode is translated to native code.
+		 * When turbo is false, the gallop() interpreter loop is used.
+		 * turbo defaults to true except on platforms where it is
+		 * not supported, and except when debugging is in progress.
+		 * 
+		 * Turbo is a debugger-only option.  release builds always
+		 * have it turned on.  This means we can only build release
+		 * builds on supported platforms.
+		 */
+		bool turbo;
+
+		#ifdef AVMPLUS_MIR
+		bool dceopt;
+		/**
+		 * Genearate a graph for the basic blocks.  Can be used by
+		 * 'dot' utility to generate a jpg.
+		 */
+		#ifdef AVMPLUS_VERBOSE
+		bool bbgraph;
+		#endif //AVMPLUS_VERBOSE
+        #endif
+
+        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		/**
+		 * To speed up initialization, we don't use MIR on
+		 * $init methods; we use interp instead.  For testing
+		 * purposes, one may want to force the MIR to be used
+		 * for all code including $init methods.  The
+		 * forcemir switch forces all code to run through MIR
+		 * instead of interp.
+		 */
+		bool forcemir;
+		bool cseopt;
+
+        #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+		bool sse2;
+		#endif
+
+        #endif // AVMPLUS_MIR || FEATURE_NANOJIT
+
+        /**
+		 * If this switch is set, executing code will check the
+		 * "interrupted" flag to see whether an interrupt needs
+		 * to be handled.
+		 */
+		bool interrupts;
+
+#ifdef AVMPLUS_VERIFYALL
+		bool verifyall;
+#endif
+
+#ifdef FEATURE_NANOJIT
+        bool show_stats;
+        bool tree_opt;
+        bool verbose_live;
+        bool verbose_exits;
+#endif
+	};
+
 	/**
 	 * The main class of the AVM+ virtual machine.  This is the
 	 * main entry point to the VM for running ActionScript code.
@@ -143,10 +217,12 @@ const int kBufferPadding = 16;
 		#ifdef AVMPLUS_VERBOSE
 		MMgc::GCHashtable* codegenMethodNames;
 		#endif /* AVMPLUS_VERBOSE */
-
-		void initMultinameLate(Multiname& name, Atom index);
-
 		#endif /* MIR */
+
+        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		void initMultinameLate(Multiname& name, Atom index);
+        #endif
+
 
 		/**
 		 * Redirects the standard output of the VM to the specified
@@ -162,70 +238,27 @@ const int kBufferPadding = 16;
 		virtual void presweep();
 		virtual void postsweep();
 		
-		#ifdef AVMPLUS_VERBOSE
-		/**
-		 * The verbose flag may be set to display each bytecode
-		 * instruction as it is executed, along with a snapshot of
-		 * the state of the stack and scope chain.
-		 * Caution!  This shoots out a ton of output!
-		 */
-		bool verbose;
-		#endif /* AVMPLUS_VERBOSE */
+		Config config;
+        
+        #ifdef FEATURE_NANOJIT // accessors
+            bool quiet_opt() { return false; } 
+            bool use_sse2() { return config.sse2; }
+		    #ifdef AVMPLUS_VERBOSE
+                bool verbose() { return config.verbose; }
+                bool verbose_exits() { return config.verbose_exits; }
+                bool verbose_live() { return config.verbose_live; }
+            #endif
+        #endif
 
 	    inline void SetMIREnabled(bool isEnabled)
 		{
-			turbo = isEnabled;
+			config.turbo = isEnabled;
 		}
 
 	    inline bool IsMIREnabled() const
 		{
-			return turbo;
+			return config.turbo;
 		}
-
-	protected:
-
-		/**
-		 * The turbo switch determines how bytecode is executed.
-		 * When turbo is true, bytecode is translated to native code.
-		 * When turbo is false, the gallop() interpreter loop is used.
-		 * turbo defaults to true except on platforms where it is
-		 * not supported, and except when debugging is in progress.
-		 * 
-		 * Turbo is a debugger-only option.  release builds always
-		 * have it turned on.  This means we can only build release
-		 * builds on supported platforms.
-		 */
-		bool turbo;
-
-	public:
-
-		#ifdef AVMPLUS_MIR
-
-		/**
-		 * To speed up initialization, we don't use MIR on
-		 * $init methods; we use interp instead.  For testing
-		 * purposes, one may want to force the MIR to be used
-		 * for all code including $init methods.  The
-		 * forcemir switch forces all code to run through MIR
-		 * instead of interp.
-		 */
-		bool forcemir;
-
-		bool cseopt;
-		bool dceopt;
-
-		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-		bool sse2;
-		#endif
-
-		#endif // AVMPLUS_MIR
-		
-		/**
-		 * If this switch is set, executing code will check the
-		 * "interrupted" flag to see whether an interrupt needs
-		 * to be handled.
-		 */
-		bool interrupts;
 
 		/**
 		 * If this is set to a nonzero value, executing code
@@ -240,22 +273,6 @@ const int kBufferPadding = 16;
 		 * minstack.
 		 */
 		virtual void setStackBase() {}
-		
-		#ifdef AVMPLUS_MIR
-
-		/**
-		 * Genearate a graph for the basic blocks.  Can be used by
-		 * 'dot' utility to generate a jpg.
-		 */
-		#ifdef AVMPLUS_VERBOSE
-		bool bbgraph;
-		#endif //AVMPLUS_VERBOSE
-
-		#endif // AVMPLUS_MIR
-
-#ifdef AVMPLUS_VERIFYALL
-		bool verifyall;
-#endif
 
 		/** Internal table of strings for boolean type ("true", "false") */
 		DRC(Stringp) booleanStrings[2];
@@ -388,7 +405,7 @@ const int kBufferPadding = 16;
 
 
 		/** Implementation of OP_equals */
-		Atom eq(Atom lhs, Atom rhs);
+		Atom equals(Atom lhs, Atom rhs);
 		
 		/**
 		 * this is the abstract relational comparison algorithm according to ECMA 262 11.8.5
@@ -1302,7 +1319,6 @@ const int kBufferPadding = 16;
 						  int interfaceCount,
 						  uint32 sizeofInstance);
 		
-		FrameState* newFrameState(int frameSize, int scopeBase, int stackBase);
         Namespace* newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespace* newNamespace(Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespace* newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public);
