@@ -1,14 +1,17 @@
+// Peephole and superword optimization patterns for the word-code interpreter.
+// See comments in utils/peephole.as for more information.
+
 pattern  OP_getlocal ; OP_getlocal
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_get2locals ; (($1.1 << 16) | $0.1)
+action   OP_ext_get2locals ; ($1.1 << 16) | $0.1
 
 pattern  OP_getlocal ; OP_getlocal ; OP_getlocal
 guard    $0.1 < 1024 && $1.1 < 1024 && $2.1 < 1024
-action   OP_ext_get3locals ; (($2.1 << 20) | ($1.1 << 10) | $0.1)
+action   OP_ext_get3locals ; ($2.1 << 20) | ($1.1 << 10) | $0.1
 
 pattern  OP_getlocal ; OP_getlocal ; OP_getlocal ; OP_getlocal
 guard    $0.1 < 256 && $1.1 < 256 && $2.1 < 256 && $3.1 < 256
-action   OP_ext_get4locals ; (($3.1 << 24) | ($2.1 << 16) | ($1.1 << 8) | $0.1)
+action   OP_ext_get4locals ; ($3.1 << 24) | ($2.1 << 16) | ($1.1 << 8) | $0.1
 
 pattern  OP_setlocal ; OP_getlocal
 guard    $0.1 == $1.1
@@ -16,7 +19,7 @@ action   OP_ext_storelocal ; $0.1
 
 pattern  OP_getlocal ; OP_getlocal ; OP_add
 guard    $1.1 < 65536 && $1.1 < 65536
-action   OP_ext_add_ll ; (($1.1 << 16) | $0.1)
+action   OP_ext_add_ll ; ($1.1 << 16) | $0.1
 
 pattern  OP_getlocal ; OP_ext_pushbits ; OP_add
 action   OP_ext_add_lb ; $0.1 ; $1.1
@@ -35,10 +38,11 @@ action   OP_setlocal0 + $0.1
 // This is an example of a sequence that would not appear in a rational instruction
 // set but which might occur frequently in an executed sequence even after the 
 // more common patterns above have been accounted for.  Only iterative analysis will tell.
-// Using this pattern means the peephole generator has to account for multiple guards
-// and actions per final state.
-
-pattern  OP_setlocal ; OP_getlocal
-guard    $0.1 != $1.1 && $0.1 < 65536 && $1.1 < 65536
-action   OP_shiftlocal ; ($1.1 << 16) | $0.1
+//
+// Another consideration here is that it may make sense to conflate storelocal and shiftlocal,
+// since it's dispatches we want to reduce as much as possible.
+//
+//pattern  OP_setlocal ; OP_getlocal
+//guard    $0.1 < 65536 && $1.1 < 65536
+//action   OP_ext_shiftlocal ; ($1.1 << 16) | $0.1
 

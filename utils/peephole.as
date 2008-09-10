@@ -36,6 +36,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/* Usage: 
+
+   Run this from the core/ directory, the program needs to know where
+   to find opcodes.tbl and there's no parameter to specify it.
+   Normally you want the output to be "peephole.icc", which is
+   included into Translator.cpp.
+ */
+
 /* Generate peephole optimization state tables from a description.
 
      peepspec ::= peep*
@@ -80,10 +88,15 @@
    resolved.  Comments can't follow patterns, guards, or actions on the 
    same line.
 
+   There can be multiple patterns that match the same instruction
+   sequence.  The guards are evaluated in the order they appear in the
+   input file, and the first action whose guard is true is selected;
+   the other actions are ignored.
+
    Restrictions (not checked by this program):
 
    - The action cannot introduce more words than the instruction originally
-     occupied  (it would not be hard to lift this restriction). 
+     occupied  (it might not be hard to lift this restriction). 
 
    - Lookupswitch must not appear in these patterns.
 
@@ -98,7 +111,8 @@ package peephole
 
     class Pattern
     {
-	var P, G, A;
+	const P, G, A;
+
 	function Pattern(P, G, A) {
 	    this.P = P;
 	    this.G = G;
@@ -112,13 +126,13 @@ package peephole
 
     class Node 
     {
+	const instr;
+	const patterns = new Vector.<Pattern>;
+	const children = new Vector.<Node>;
+
 	function Node(instr) {
 	    this.instr = instr;
 	}
-
-	var instr;
-	var patterns = [];     // for the guard/action pairs
-	var children = [];     // map from names to nodes
 
 	function getChild(instr) {
 	    for ( var i=0, limit=children.length ; i < limit ; i++ )
@@ -139,18 +153,63 @@ package peephole
 	}
     }
 
+    class State
+    {
+	var stateno = 0;
+	var numTransitions = 0;
+	var transitionPtr = 0;
+	var guardIndex = 0;
+	var fail = 0;
+	var failShift = 0;
+	var next = null;   // next node at same depth as this node, see computeFailures
+	var depth = 0;     // depth of this node
+	var ancestor = null;  // the node we came from, or null for the start state
+	var documentation = "";
+
+	public function toString() {
+	    return "[" + [stateno,numTransitions,transitionPtr,guardIndex,fail,failShift,depth].join(",") + "]";
+	}
+    }
+
+    // FIXME: these should be read with the other opcodes, but their
+    // encodings are currently ad-hoc.  See core/Interpreter.h.
+    //
+    // readOpcodes fleshes out this table.
+
+    const opcode = { OP_ext_pushbits: 0x101,
+		     OP_ext_push_doublebits: 0x102,
+		     OP_ext_get2locals: 0x103,
+		     OP_ext_get3locals: 0x104,
+		     OP_ext_storelocal: 0x105 };
+
+    const MAXINSTR = 300; // last opcode in table above plus one would be adequate
+
+    const opname = new Vector.<String>(MAXINSTR, true);
+    for ( var i=0 ; i < opname.length ; i++ )
+	opname[i] = "-";
+
     function assert(cond) {
         if (!cond)
             throw new Error("Assertion failed");
     }
 
-    function makeArray(k, v) {
-	var A = [];
-	for ( var i=0 ; i < k ; i++ )
-	    A[i] = (v is Function) ? v() : v;
-	return A;
+    var longest = 0;
+
+    function readOpcodes() {
+	File.read("opcodes.tbl").
+	    split("\n").
+	    filter(function (elt) { return !(/^\s*$/.test(elt) || /^\s*\/\//.test(elt)) }).
+	    forEach(function (elt) { 
+		        var xs=elt.split(/\s+/); 
+			if (!(xs[0].match(/^OP_0x/)))
+			    opcode[xs[0]] = parseInt(xs[2]); 
+		    });
+	for ( var n in opcode ) {
+	    opname[opcode[n]] = n;
+	    longest = Math.max(longest, n.length);
+	}
     }
-		
+
     function preprocess(lines) {
 	var j = 0;
 	var first = true;
@@ -222,43 +281,92 @@ package peephole
 	return T;
     }
 
-    // transitions is array of transition tables
-    // transition table is array of pairs [v, s] where v is a string and s is a state number.
-    // state zero is the start state.
-
-    class State
-    {
-	var numTransitions = 0;
-	var transitionPtr = 0;
-	var guardIndex = 0;
-	var fail = 0;
-	var failShift = 0;
-    }
-
-    var states = [];
-    var transitions = [];     // array of [instr, state]
-    var actions = [];         // array of Pattern nodes
-    var toplevel = [];
-
-    // FIXME: this is partial
-    var MAXINSTR = 300;
-    var opcode = { OP_getlocal: 0x62,
-		   OP_setlocal: 0x63,
-		   OP_add: 0xA0,
-		   OP_ext_pushbits: 0x101,
-		   OP_swap: 0x2B,
-		   OP_pop: 0x29 };
+    const states = new Vector.<State>;
+    const transitions = new Vector.<Array>;
+    const actions = new Vector.<* /* (Pattern | Vector.<Pattern>) */>;
+    const toplevel = new Vector.<int>(MAXINSTR, true);
+    const depths = new Vector.<State>(20, true);
 
     function generate(trie) {
 	var c = trie.children;
 	for ( var i=0 ; i < c.length ; i++ ) {
+	    if (!(c[i].instr in opcode)) {
+		print(c[i].instr);
+		for ( var y in opcode ) 
+		    print(y);
+	    }
 	    assert(c[i].instr in opcode);
-	    toplevel[opcode[c[i].instr]] = expand(c[i]);
+	    toplevel[opcode[c[i].instr]] = expand(c[i], 1, null, c[i].instr);
+	}
+	var failures = computeFailures();
+	for ( var i=1 ; i < failures.length ; i++ ) {
+	    assert(failures[i] >= 0);
+	    if (failures[i] > 0) {
+		var s = states[i-1];
+		var t = states[failures[i]-1];
+		// Only record failure transition if target state is not on the path to
+		// this state (because if it is then the backtracking logic takes care of it)
+		var q;
+		for ( q=s.ancestor ; q != t && q != null ; q=q.ancestor )
+		    ;
+		if (q == null) {
+		    // record a shift that is the difference in depth of the current node and the target node.
+		    s.fail = failures[i];
+		    s.failShift = s.depth-t.depth;
+		}
+	    }
 	}
     }
 
-    function expand(node) {
+    // Dragon Book 2nd Ed exercises 3.31 and 3.32.
+
+    function computeFailures() {
+	var f = new Vector.<int>(states.length+1, true);
+	for ( var i=0 ; i < f.length ; i++ )
+	    f[i] = -1;
+
+	for ( var s=depths[1] ; s != null ; s=s.next )
+	    f[s.stateno] = 0;
+
+	for ( var d=1 ; d < depths.length ; d++ ) {
+	    for ( var sd=depths[d] ; sd != null ; sd=sd.next ) {
+		for ( var a=0 ; a < MAXINSTR ; a++ ) {
+		    var s2 = g(sd.stateno, a);
+		    if (s2 != -1) {
+			var s = f[sd.stateno];
+			while (g(s, a) == -1)
+			    s = f[s];
+			f[s2] = g(s, a);
+		    }
+		}
+	    }
+	}
+	return f;
+
+	// g(m,x) = n >= 0 if there is a transition from m to n on x
+	// g(0,x) = 0      if there is no transition from 0 on x
+	// g(m,x) = -1     if m > 0 and there is no transition from m on x 
+
+	function g(stateno, input) {
+	    if (stateno == 0)
+		return toplevel[input];
+	    var s = states[stateno-1];
+	    var t = s.transitionPtr;
+	    var n = s.numTransitions;
+	    for ( var i=0 ; i < n ; i++ )
+		if (transitions[t+i][0] == input)
+		    return transitions[t+i][1];
+	    return -1;
+	}
+    }
+
+    function expand(node, depth, ancestor, documentation) {
 	var state = new State;
+	state.next = depths[depth];
+	depths[depth] = state;
+	state.depth = depth;
+	state.ancestor = ancestor;
+	state.documentation = documentation;
 	if (node.patterns.length > 0) {
 	    state.guardIndex = actions.length + 1;
 	    if (node.patterns.length > 1)
@@ -266,12 +374,11 @@ package peephole
 	    else
 		actions.push(node.patterns[0]);
 	}
-	var trans = [];
+	var trans = new Vector.<Array>;
 	for ( var i=0 ; i < node.children.length ; i++ ) {
 	    var ci = node.children[i];
-	    if (!(ci.instr in opcode))
-		throw ci.instr;
-	    trans.push([opcode[ci.instr], expand(ci)]);
+	    assert(ci.instr in opcode);
+	    trans.push([opcode[ci.instr], expand(ci, depth+1, state, documentation + " " + ci.instr)]);
 	}
 	trans.sort(function (a,b) { return a[0] - b[0] });
 	state.numTransitions = trans.length;
@@ -279,21 +386,29 @@ package peephole
 	for ( var i=0 ; i < trans.length ; i++ )
 	    transitions.push(trans[i]);
 	var stateno = states.push(state);
+	state.stateno = stateno;
 	return stateno;
     }
 
     function formatStates() {
 	var s = [];
 	s.push("static state_t states[] = {");
-	s.push("{ 0, 0, 0, 0, 0 },  /* state 0 is invalid */");
+	s.push("//n  s  t  g  f");
+	s.push("{ 0, 0, 0, 0, 0 }, // Invalid");
 	for ( var i=0 ; i < states.length ; i++ ) {
 	    var S = states[i];
+	    assert(S.numTransitions < 256);
+	    assert(S.failShift < 256);
+	    assert(S.transitionPtr < 65536);
+	    assert(S.guardIndex < 65536);
+	    assert(S.fail < 65536);
 	    s.push( "{ " + 
 		    S.numTransitions + ", " +
+		    S.failShift + ", " +
 		    S.transitionPtr + ", " +
 		    S.guardIndex + ", " +
-		    S.fail +", " +
-		    S.failShift + " },");
+		    S.fail +" }, " + 
+		    "// " + ((i+1)%10 == 0 ? pad(i+1,4) : "   ") + S.documentation);
 	}
 	s.push("};");
 	return s.join("\n");
@@ -302,20 +417,34 @@ package peephole
     function formatTransitions() {
 	var s = [];
 	s.push("static transition_t transitions[] = {");
-	for ( var i=0 ; i < transitions.length ; i++ )
-	    s.push("{ " + transitions[i][0] + ", " + transitions[i][1] + " },");
+	for ( var i=0 ; i < transitions.length ; i++ ) {
+	    assert(transitions[i][1] < 65536);
+	    s.push("{ " + opname[transitions[i][0]] + ", " + transitions[i][1] + " }," + (i > 0 && i % 10 == 0 ? " // " + i : ""));
+	}
 	s.push("};");
 	return s.join("\n");
     }
 
+    function pad(s,n) {
+	s = String(s);
+	while (s.length < n)
+	    s += " ";
+	return s;
+    }
+
     function formatToplevel() {
 	var s = [];
-	s.push("static uint32 toplevel[] = {");
+	s.push("static uint16 toplevel[] = {");
 	var i=0;
 	while (i < MAXINSTR) {
 	    var t = "";
-	    for ( var j=0 ; j < 8 ; j++, i++ )
-		t += int(toplevel[i]) + ", ";
+	    var n = "";
+	    for ( var j=0 ; j < 8 && i < MAXINSTR ; j++, i++ ) {
+		assert(toplevel[i] < 65536);
+		t += toplevel[i] + ", ";
+		n += " " + pad(opname[i], longest);
+	    }
+	    t += "//" + n;
 	    s.push(t);
 	}
 	s.push("};");
@@ -341,7 +470,7 @@ package peephole
 	    s.push("            R[0] = NEW_OPCODE(" + A.A[0] + ");");
 	    for ( var j=1 ; j < A.A.length ; j++ )
 		s.push("            R[" + j + "] = " + A.A[j] + ";");
-	    s.push("            return replace(0," + A.P.length + "," + A.A.length + ");");
+	    s.push("            return replace(" + A.P.length + "," + A.A.length + ");");
 	    s.push("        }");
 	    return s.join("\n");
 	}
@@ -353,7 +482,7 @@ package peephole
 	for ( var i=0 ; i < actions.length ; i++ ) {
 	    var A = actions[i];
 	    s.push("    case " + (i+1) + ":");
-	    if (A is Array) {
+	    if (A is Vector.<Pattern>) {
 		s.push(makeAssert(A[0].P));
 		for ( var j=0 ; j < A.length ; j++ )
 		    s.push(emit(A[j]));
@@ -377,6 +506,7 @@ package peephole
         System.exit(1);
     }
 
+    readOpcodes();
     generate(buildTrie(parse(preprocess(File.read(System.argv[0]).split("\n")))));
     File.write(System.argv[1],
 	       formatStates() + "\n\n" +
