@@ -927,6 +927,9 @@ namespace avmplus
 	
 	// Begin code that should be generated
 	
+#if 1
+#  include "peephole.icc"
+#else
 	static state_t states[] = {
 	{ 0, 0, 0, 0, 0 },    // 0 is never a valid state
 	{ 1, 0, 0, 0, 0 },    // 0x62
@@ -1008,6 +1011,7 @@ namespace avmplus
 				return false;
 		}
 	}
+#endif
 	
 	// End code that should be generated
 
