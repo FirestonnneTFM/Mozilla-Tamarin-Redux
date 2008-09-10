@@ -40,7 +40,7 @@
 // build number counts 1-n for development builds, and restarts at 1-n for release builds
 
 // the visible build code d for development, r for release candidate
-#define AVMPLUS_BUILD_CODE		"cyclone"
+#define AVMPLUS_BUILD_CODE		"667:99021e832676"
 
 #define AVMPLUS_VERSION_USER		"1.0"
 
