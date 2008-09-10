@@ -106,4 +106,3 @@
 #define AVMPLUS_JIT_READONLY
 
 #define HAVE_PTHREADS
-#define HAVE_STDARG

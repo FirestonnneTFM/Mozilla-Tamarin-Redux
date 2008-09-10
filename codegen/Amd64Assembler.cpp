@@ -457,7 +457,7 @@ namespace avmplus
 		// SHR/SAR and SAL/SHL need to mask the shift operand to 
 		// 5 bits, to make a 31-bit shift maximum
 		// shift op is always in RCX
-			REX(r, rhs, false);
+		REX(r, rhs, false);
 
 		*mip++ = (MDInstruction)op; 
 		MODRM(r, rhs);
@@ -772,7 +772,7 @@ namespace avmplus
 		}
 		#endif /* AVMPLUS_VERBOSE */
 
-			REX(r, base, false);
+		REX(r, base, false);
 
 		*mip++ = (MDInstruction)op;
 		MODRM(r, disp, base);

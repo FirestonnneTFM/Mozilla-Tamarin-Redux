@@ -90,6 +90,9 @@ namespace avmplus
 
 		// argc is args only, argv[0] = receiver
 		Atom call(int argc, Atom* argv);
+		Atom call_this(Atom);
+		Atom call_this_a(Atom, ArrayObject *a);
+		Atom call_this_aa(Atom, int argc, Atom *argv);
 
 		// argc is args only, argv[0] = receiver(ignored)
 		Atom construct(int argc, Atom* argv);

@@ -521,6 +521,33 @@ namespace avmplus
 		return undefinedAtom;
 	}
 
+	Atom ScriptObject::call_this(Atom thisArg)
+	{
+		Atom newargs[1] = { thisArg };
+		return call(0, newargs);
+	}
+
+	Atom ScriptObject::call_this_aa(Atom thisArg, int argc, Atom *argv)
+	{
+		// argc = # of AS3 arguments
+		AvmAssert(argc >= 0);
+		Atom *newargs = (Atom *) alloca(sizeof(Atom)*(argc+1));
+		newargs[0] = thisArg;
+		memcpy(&newargs[1], argv, argc*sizeof(Atom));
+		return call(argc, newargs);
+	}
+
+	Atom ScriptObject::call_this_a(Atom thisArg, ArrayObject *a)
+	{
+		int count = a->getLength();
+		Atom* newargs = (Atom*) alloca(sizeof(Atom)*(1+count));
+		newargs[0] = thisArg;
+		for (int i=0; i<count; i++) {
+			newargs[i+1] = a->getUintProperty(i);
+		}
+		return call(count, newargs);
+	}
+
 	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]
@@ -715,20 +742,9 @@ namespace avmplus
 							 int argc)
 	{
 		if (argc > 0) 
-		{
-			// argc = # of AS3 arguments
-			AvmAssert(argc >= 0);
-			Atom *newargs = (Atom *) alloca(sizeof(Atom)*(argc+1));
-			newargs[0] = thisArg;
-			memcpy(&newargs[1], argv, argc*sizeof(Atom));
-			return call(argc, newargs);
-		}
+			return call_this_aa(thisArg, argc, argv);
 		else
-		{
-			// AS3 caller didn't supply any args
-			Atom newargs[1] = { thisArg };
-			return call(0, newargs);
-		}
+			return call_this(thisArg);
 	}
 
 	/**
@@ -746,21 +762,11 @@ namespace avmplus
 			if (!core->istype(argArray, ARRAY_TYPE))
 				toplevel()->throwTypeError(kApplyError);
 
-			ArrayObject *a = (ArrayObject*)AvmCore::atomToScriptObject(argArray);
+			return call_this_a(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
 			
-			int count = a->getLength();
-			Atom* newargs = (Atom*) alloca(sizeof(Atom)*(1+count));
-			newargs[0] = thisArg;
-			for (int i=0; i<count; i++) {
-				newargs[i+1] = a->getUintProperty(i);
-			}
-			return call(count, newargs);
 		}
 		else
-		{
-			Atom newargs[1] = { thisArg };
-			return call(0, newargs);
-		}
+			return call_this(thisArg);
 	}
  
 #ifdef DEBUGGER

@@ -140,6 +140,60 @@ namespace avmplus
 		}
 	}
 
+	Atom ClassClosure::call_this(Atom thisArg)
+	{
+		MethodEnv* call = vtable->call;
+		Toplevel* toplevel = this->toplevel();
+		if (!call)
+			toplevel->throwArgumentError(kCoerceArgumentCountError, toplevel->core()->toErrorString((int)0));
+		// invoke function body
+		// TODO if we kept track of a type's call signature we could do this at verify time
+		if (AvmCore::isNullOrUndefined(thisArg))
+		{
+			// use callee's global object as this.
+			// see E3 15.3.4.4
+			AvmAssert(call->vtable->scope->getSize() > 0);
+			thisArg = call->vtable->scope->getScope(0);
+		}
+
+		// make sure receiver is legal for callee
+		thisArg = toplevel->coerce(thisArg, call->method->paramTraits(0));
+
+		return call->coerceEnter(thisArg);
+	}
+
+	Atom ClassClosure::call_this_a(Atom thisArg, ArrayObject *a)
+	{
+		MethodEnv* call = vtable->call;
+		Toplevel* toplevel = this->toplevel();
+		if (call)
+		{
+			// invoke function body
+			// TODO if we kept track of a type's call signature we could do this at verify time
+			if (AvmCore::isNullOrUndefined(thisArg))
+			{
+				// use callee's global object as this.
+				// see E3 15.3.4.4
+				AvmAssert(call->vtable->scope->getSize() > 0);
+				thisArg = call->vtable->scope->getScope(0);
+			}
+
+			// make sure receiver is legal for callee
+			thisArg = toplevel->coerce(thisArg, call->method->paramTraits(0));
+
+			return call->coerceEnter(thisArg, a);
+		}
+		else
+		{
+			// explicit coercion of a class object.
+			if (a->getLength() != 1)
+			{
+				toplevel->throwArgumentError(kCoerceArgumentCountError, toplevel->core()->toErrorString(a->getLength()));
+			}
+			return toplevel->coerce(a->getUintProperty(0), (Traits*)ivtable()->traits);
+		}
+	}
+
 	// this = argv[0]
 	// arg1 = argv[1]
 	// argN = argv[argc]

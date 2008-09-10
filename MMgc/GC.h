@@ -40,6 +40,14 @@
 #ifndef __GC__
 #define __GC__
 
+#if defined(MMGC_PORTING_API)
+	// When the porting API is in use, we exclude
+	// stdlib functions or use them through
+	// #defines for portability to platforms
+	// that don't have them.
+	#include "portapi_mmgc.h"
+#else
+
 #if defined MMGC_IA32
 
 #ifdef WIN32
@@ -229,6 +237,8 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 #define MMGC_ASSERT_GC_LOCK(gc)      ((void) 0)
 #define MMGC_ASSERT_EXCLUSIVE_GC(gc) ((void) 0)
 #endif
+
+#endif // MMGC_PORTING_API
 
 #ifdef DEBUGGER
 namespace avmplus

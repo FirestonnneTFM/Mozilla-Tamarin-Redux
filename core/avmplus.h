@@ -89,7 +89,9 @@
 #endif
 
 #ifdef UNIX
-	#include <stdint.h>
+	#ifndef AVMPLUS_SYMBIAN
+		#include <stdint.h>
+	#endif
 	#ifdef HAVE_ALLOCA_H
 		#include <alloca.h>
 	#else // HAVE_ALLOCA_H
@@ -328,7 +330,7 @@ namespace avmplus
 #endif
 
 #ifdef AVMPLUS_MIR
-#include "CodegenMIR.h"
+#include "../codegen/CodegenMIR.h"
 #endif
 
 #include "AtomArray.h"

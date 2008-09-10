@@ -622,8 +622,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 vereist dat object en index verschillende registers hebben.</error>
   <error id="1125" label="kOutOfRangeError">De index %1 is buiten bereik %2.</error>
   <error id="1126" label="kVectorFixedError">Kan de lengte van een vaste vector niet wijzigen.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">Er is geprobeerd een type toepassing te maken op een type dat geen parameter is.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Er is geprobeerd een type toepassing te maken op een type dat geen parameter is.</error>
   <error id="1128" label="kWrongTypeArgCountError">Onjuist aantal type parameters voor %1. %2 verwacht, huidige waarde %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

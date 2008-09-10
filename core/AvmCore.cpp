@@ -39,7 +39,7 @@
 #include "avmplus.h"
 
 #if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
-#include <emmintrin.h>
+    #include <emmintrin.h>
 #endif
 
 namespace avmplus
@@ -446,14 +446,13 @@ namespace avmplus
 			main->initGlobal();
 		}
 		
-		Atom argv[1] = { main->global->atom() };
 		Atom result = 0; // init to zero to make GCC happy
 		#ifndef DEBUGGER
-		result = main->coerceEnter(0, argv);
+		result = main->coerceEnter(main->global->atom());
 		#else
 		TRY(this, kCatchAction_Rethrow)
 		{
-			result = main->coerceEnter(0, argv);
+			result = main->coerceEnter(main->global->atom());
 			#ifdef AVMPLUS_PROFILE
 			if (dprof.dprofile)
 				dprof.mark((AbcOpcode)0);
@@ -1691,7 +1690,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		AvmAssert(isNumber(*ap));
 		if (isInteger(*ap))
-                *ap = intToAtom(delta+((sint32)((sintptr)*ap>>3)));
+			*ap = intToAtom(delta+((sint32)((sintptr)*ap>>3)));
 		else
 			*ap = doubleToAtom(atomToDouble(*ap)+delta);
 	}
@@ -1865,7 +1864,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	void AvmCore::initNativeTables(NativeClassInfop classEntry,
 								  NativeScriptInfop scriptEntry,
-								  AbstractFunction* nativeMethods[],
+								  AbstractFunction *nativeMethods[],
 								  NativeClassInfop nativeClasses[],
 								  NativeScriptInfop nativeScripts[])
 	{
@@ -3036,10 +3035,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		ScriptObject* obj = new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
 		if(vtable->init)
 		{
-			Atom argv[1];
-			argv[0] = obj->atom(); // new object is receiver
 			MethodEnv* init = vtable->init;
-			init->coerceEnter(0, argv);
+			init->coerceEnter(obj->atom());
 		}
 		return obj;
 	}
@@ -3912,8 +3909,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	/*static*/ 
 	void AvmCore::atomWriteBarrier(MMgc::GC *gc, const void *container, Atom *address, Atom atomNew)
 	{ 
-#ifdef MMGC_DRC	
-		
+#ifdef MMGC_DRC
 		Atom atom = *address;
 		if(!isNull(atom)) {
 			switch(atom&7)

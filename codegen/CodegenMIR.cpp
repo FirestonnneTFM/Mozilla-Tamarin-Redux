@@ -1685,7 +1685,7 @@ namespace avmplus
 		mirNames[MIR_ldop]  = "ldop ";
 		mirNames[MIR_fldop] = "fldop";
 		mirNames[MIR_st]    = "st   ";
-		mirNames[MIR_st32]    = "st32   ";
+		mirNames[MIR_st32]  = "st32   ";
 		mirNames[MIR_arg]   = "arg  ";
 		mirNames[MIR_cm]    = "cm   ";
 		mirNames[MIR_cs]    = "cs   ";
@@ -6962,6 +6962,11 @@ namespace avmplus
 		regs.free &= ~rmask(i);
 		return (Register) i;
 
+#elif defined (__ARMCC__)
+		register int i;
+		__asm { clz i,set }
+		i = 31 - i;
+		regs.free &= ~rmask(i);
 #else
 		// Note: The clz instruction only works on armv5 and up.
 		register int i;
@@ -9548,7 +9553,7 @@ namespace avmplus
 									if ( rDst != Unknown ) ADD64(R11,rDst);
 									MOV32(0,R11,(Register)rValue);
 								} else {
-								MOV32(disp, rDst, rValue);
+									MOV32(disp, rDst, rValue);
 								}
 							} else if ( !is32bit(disp) ) {
 								MOV(R11,disp);

@@ -42,12 +42,16 @@
 
 //hack
 #ifdef AVMPLUS_ARM
-	#if !defined(AVMPLUS_SYMBIAN) && !defined(UNDER_CE)
+	#if !defined(AVMPLUS_SYMBIAN) && !defined(UNDER_CE) && !defined(__ARMCC__)
 		#include <sys/mman.h>
 	#endif
 #endif
 
 #include <stdio.h>
+
+#ifdef AVMPLUS_SYMBIAN
+	#include <e32std.h>
+#endif
 
 namespace avmplus
 {

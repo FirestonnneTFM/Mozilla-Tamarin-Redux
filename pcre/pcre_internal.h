@@ -59,12 +59,17 @@ all, it had only been about 10 years then...
 It turns out that the Mac Debugging.h header also defines the macro DPRINTF, so
 be absolutely sure we get our version. */
 
+#ifdef AVMPLUS_PORTING_API
+#define DPRINTF(p)
+#else
+
 #ifndef __MWERKS__
 #undef DPRINTF
 #ifdef PCRE_DEBUG
 #define DPRINTF(p) printf p
 #else
 #define DPRINTF(p) /* Nothing */
+#endif
 #endif
 #endif
 

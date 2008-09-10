@@ -270,7 +270,7 @@ namespace MMgc
 #endif
 			FixedAlloc::Free(ptr);
 		}
-		
+
 		static FixedAllocSafe *GetFixedAllocSafe(void *item)
 		{
 			return (FixedAllocSafe*) FixedAlloc::GetFixedAlloc(item);

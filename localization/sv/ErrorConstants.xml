@@ -622,14 +622,13 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 kräver att objekt och index är olika register.</error>
   <error id="1125" label="kOutOfRangeError">Indexvärdet %1 är utan för området %2.</error>
   <error id="1126" label="kVectorFixedError">Det går inte att ändra längden på en fast vektor.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">En typ försökte användas på en typ utan parametrar.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">En typ försökte användas på en typ utan parametrar.</error>
   <error id="1128" label="kWrongTypeArgCountError">Felaktigt antal typparametrar för %1. %2 förväntades, men antalet var %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  
   <error id="1500" hidden="true" label="kFileOpenError">Fel vid öppning av filen %1.</error>
   <error id="1501" hidden="true" label="kFileWriteError">Fel vid skrivning till filen %1.
-        <description><![CDATA[
+.        <description><![CDATA[
 		The file you are writing to cannot be opened. Possibly the filename contains an error, the file is read-only, or 
 		you do not have access privileges.
 	  	]]></description>

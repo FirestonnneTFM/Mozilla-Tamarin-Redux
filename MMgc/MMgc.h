@@ -66,12 +66,12 @@
 		#include "macbuild.h"
 	#endif
 
-	#ifdef LINUX
-	#include "linuxbuild.h"
+	#ifdef UNIX
+		#include "linuxbuild.h"
 	#endif
 
 	#ifdef SOLARIS
-	#include "solarisbuild.h"
+		#include "solarisbuild.h"
 	#endif
 #endif
 
@@ -123,7 +123,7 @@
 #ifdef _MAC
 #include "GCSpinLockMac.h"
 #endif
-#ifdef LINUX
+#ifdef UNIX
 #include "GCSpinLockLinux.h"
 #endif
 #ifdef SOLARIS

@@ -510,8 +510,7 @@ namespace avmplus
 				if (object == NULL)
 				{
 					object = script->initGlobal();
-					Atom argv[1] = { script->global->atom() };
-					script->coerceEnter(0, argv);
+					script->coerceEnter(script->global->atom());
 				}				
 			}
 		}

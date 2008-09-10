@@ -622,8 +622,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 nesne ve dizinin farklı kayıtlar olmasına gerek duyar.</error>
   <error id="1125" label="kOutOfRangeError">%1 dizini %2 aralığının dışındadır.</error>
   <error id="1126" label="kVectorFixedError">Sabit bir vektörün uzunluğu değiştirilemez.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">Tür uygulaması parametreleştirilmemiş bir türde denendi.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Tür uygulaması parametreleştirilmemiş bir türde denendi.</error>
   <error id="1128" label="kWrongTypeArgCountError">%1 için hatalı sayıda tür parametresi. Beklenen: %2, alınan: %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

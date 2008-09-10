@@ -227,8 +227,8 @@ namespace avmplus
 		Traitsp* findInterface(Traits* t) const;
 
 
-#ifdef AVMPLUS_VERBOSE
 	public:
+#ifdef AVMPLUS_VERBOSE
 		virtual Stringp format(AvmCore* core) const;
 #endif
 
