@@ -478,7 +478,6 @@ namespace avmplus
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
 			AvmAssert(opcode_labels[0x97] == &&L_bitnot);
-			AvmAssert(opcode_labels[0xF0] == &&L_debugline);
 			AvmAssert(opcode_labels[257] == &&L_ext_pushbits);
 #  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
 			} // conditional run-time initialization of jump table
