@@ -319,11 +319,11 @@ namespace avmplus
 
 #ifdef AVMPLUS_DIRECT_THREADED
 #  define NEW_OPCODE(opcode) \
-	((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode])); \
-	AvmAssert(((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8)+256] : opcode_labels[opcode])) != 0)
+	((uint32)((opcode) >= 255 ? opcode_labels[((opcode)>>8) + 256] : opcode_labels[opcode])); \
+	AvmAssert(((uint32)(opcode) >= 255 ? opcode_labels[((opcode)>>8)+256] : opcode_labels[opcode])) != 0)
 #else
 #  ifdef _DEBUG
-#    define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // debugging...
+#    define NEW_OPCODE(opcode)  ((opcode) | ((opcode) << 16))  // debugging...
 #  else
 #    define NEW_OPCODE(opcode)  opcode
 #  endif
