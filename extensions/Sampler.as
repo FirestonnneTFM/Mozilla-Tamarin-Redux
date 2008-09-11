@@ -194,8 +194,8 @@ package flash.sampler
 
     /**
      * Clears the current set of Sample objects. This method is usually called after calling <code>getSamples()</code>
-     * For Flash Player debugger version only.
      * and iterating over the Sample objects.
+     * For Flash Player debugger version only.
      * @playerversion Flash 9.0.115.0
      * @langversion 3.0     
      * @keyword clearSamples      

@@ -976,6 +976,7 @@ namespace avmplus
 		if (needsNormalization()) normalize();
 		return getData(); 
 	}
+
 	wchar String::operator[] (int index)
 	{
 		AvmAssert(index >=0 && index < length());
@@ -1008,10 +1009,12 @@ namespace avmplus
 		if (needsNormalization()) normalize();
 		return (wchar*) getData(); 
 	}
+
 	/*static*/ bool String::isSpace(wchar ch)
 	{
 		return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r');
 	}
+
 	bool String::isWhitespace()
 	{
 		Stringp s = this;
@@ -1043,6 +1046,7 @@ namespace avmplus
 
 		if (sublen == 0)
 			return iStartPos;
+
 		const wchar *substrstr = substr->c_str();
 		const wchar *selfstr = this->c_str() + iStartPos;
 		for ( ; iStartPos >= 0 ; iStartPos-- )

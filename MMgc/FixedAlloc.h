@@ -189,7 +189,7 @@ namespace MMgc
 			}
 		}
 
-		size_t Allocated();
+		size_t GetBytesInUse();
 
 		size_t GetItemSize() const;
 		int GetMaxAlloc() const { return m_maxAlloc; }
@@ -203,6 +203,8 @@ namespace MMgc
 #endif
 			return b->alloc;
 		}
+
+		size_t GetNumChunks() { return m_maxAlloc / m_itemsPerBlock; }
 
 	private:
 

@@ -49,17 +49,17 @@
 #ifdef __SUNPRO_CC
 inline void *operator new(size_t size, MMgc::GC *gc)
 {
-	return gc->Alloc(size, MMgc::GC::kContainsPointers|MMgc::GC::kZero, 4);
+	return gc->Alloc(size, MMgc::GC::kContainsPointers|MMgc::GC::kZero);
 }
 
 inline void *operator new(size_t size, MMgc::GC *gc, int flags)
 {
-	return gc->Alloc(size, flags, 4);
+	return gc->Alloc(size, flags);
 }
 #else
 inline void *operator new(size_t size, MMgc::GC *gc, int flags=MMgc::GC::kContainsPointers|MMgc::GC::kZero)
 {
-	return gc->Alloc(size, flags, 4);
+	return gc->Alloc(size, flags);
 }
 #endif
 
@@ -83,7 +83,7 @@ namespace MMgc
 				GCAssert(0);
 				return 0;
 			}
-			return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero, 4);
+			return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero);
 		}
 
 		static void operator delete (void *gcObject)
@@ -306,7 +306,7 @@ namespace MMgc
 		
 		static void *operator new(size_t size, GC *gc, size_t extra = 0)
 		{
-			return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize, 4);
+			return gc->Alloc(size + extra, GC::kContainsPointers|GC::kZero|GC::kRCObject|GC::kFinalize);
 		}
 
 	private:

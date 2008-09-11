@@ -480,31 +480,38 @@ namespace avmplus
 	{
 	public:
 		SourceFile(MMgc::GC* gc, Stringp name);
+
 		/**
 		 * name of source file 
 		 */
 		Stringp name() const;
+
 		/**
 		 * Number of functions defined in this file.  
 		 */
 		int functionCount() const;
+
 		/**
 		 * Access to each function 
 		 */
 		MethodInfo* functionAt(int index) const;
+
 		/**
 		 * A line - offset pair should be recorded 
 		 */
 		void addLine(AvmCore* core, int linenum, MethodInfo* function, int offset);
+
 		bool setBreakpoint(int linenum);
 		bool clearBreakpoint(int linenum);
 		bool hasBreakpoint(int linenum);
+
 	protected:
 		Stringp							named;
 		List<MethodInfo*>				functions;
 		DWB(BitSet*)					sourceLines;	// lines that have source code on them
 		DWB(BitSet*)					breakpoints;
 	};
+
 	class AbcFile : public AbcInfo
 	{
 	public:

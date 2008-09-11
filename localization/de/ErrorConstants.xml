@@ -705,8 +705,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">Für OP_hasnext2 müssen object und index verschiedene Register sein.</error>
   <error id="1125" label="kOutOfRangeError">Der Index %1 liegt außerhalb des gültigen Bereichs %2.</error>
   <error id="1126" label="kVectorFixedError">Die Länge eines festen Vektors kann nicht geändert werden.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">Typanwendung für einen Typ ohne Parameter versucht.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Typanwendung für einen Typ ohne Parameter versucht.</error>
   <error id="1128" label="kWrongTypeArgCountError">Falsche Anzahl von type-Parametern für %1. Erwartet wurden %2, erhalten wurden %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

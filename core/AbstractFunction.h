@@ -302,16 +302,19 @@ namespace avmplus
 }
 
 #include "PoolObject.h"
+
 namespace avmplus
 {
 	inline AvmCore* AbstractFunction::core() const
 	{
 		return pool->core;
 	}
+
 	inline bool AbstractFunction::usesCallerContext() const
 	{
 		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));
 	}
+
 	// Builtin + non-native functions always need the dxns code emitted 
 	// Builtin + native functions have flags to specify if they need the dxns code
 	inline bool AbstractFunction::usesDefaultXmlNamespace() const
@@ -319,4 +322,5 @@ namespace avmplus
 		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
 	}
 }
+
 #endif /* __avmplus_AbstractFunction__ */

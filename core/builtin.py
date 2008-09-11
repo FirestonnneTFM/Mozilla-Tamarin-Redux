@@ -44,8 +44,10 @@ import sys
 def mv(oldfile, newfile):
 	shutil.copyfile(oldfile,newfile)
 	os.remove(oldfile)
+
 def rm(file):
 	os.remove(file)
+
 classpath = os.environ.get('ASC')
 if classpath == None:
 	classpath = "../utils/asc.jar"
@@ -64,5 +66,7 @@ os.system(asc+" -builtin -out builtin builtin.as Math.as Error.as Date.as RegExp
 
 print("Generating native thunks...")
 os.system(thunkgen+" builtin.abc > builtin.out")
+
 mv("builtin.cpp2", "builtin.cpp")
 mv("builtin.h2", "builtin.h")
+

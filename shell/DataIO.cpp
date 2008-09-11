@@ -117,6 +117,7 @@ namespace avmshell
 		{
 			utf8chars += 3;
 		}
+
 		String *out = m_toplevel->core()->newString(utf8chars);
 		delete [] buffer;
 		

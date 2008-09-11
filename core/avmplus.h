@@ -89,7 +89,9 @@
 #endif
 
 #ifdef UNIX
-	#include <stdint.h>
+	#ifndef AVMPLUS_SYMBIAN
+		#include <stdint.h>
+	#endif
 	#ifdef HAVE_ALLOCA_H
 		#include <alloca.h>
 	#else // HAVE_ALLOCA_H
@@ -250,6 +252,7 @@ namespace avmplus
 {
 //#ifdef AVMTHUNK_VERSION
 // Native-Method helpers (only used when AVMTHUNK_VERSION defined, but must be declared before we know...)
+
 	typedef avmplus::AbcEnv* AvmInstance;
 	typedef avmplus::ScriptObject* AvmObject;
 	typedef avmplus::String* AvmString;
@@ -257,6 +260,7 @@ namespace avmplus
 	typedef avmplus::Atom AvmBox;
 	typedef avmplus::MethodEnv* AvmMethodEnv;
 	typedef uint32_t AvmBoolArg;
+
 	#define AvmThunkRetType_AvmObject		(error ??? illegal) /* all Objects are return as AvmBox */
 	typedef AvmBox AvmThunkRetType_AvmBoolArg;
 	typedef AvmBox AvmThunkRetType_int32_t;
@@ -266,9 +270,13 @@ namespace avmplus
 	typedef AvmBox AvmThunkRetType_AvmString;
 	typedef AvmBox AvmThunkRetType_void;
 	typedef double AvmThunkRetType_double;
+
 	#define AVMTHUNK_CALLTYPE	 /* could be used to declare custom call type (eg __fastcall) */
+
 	typedef AvmThunkRetType_AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+
 //#endif
+
 	namespace NativeID
 	{
         #include "builtin.h"

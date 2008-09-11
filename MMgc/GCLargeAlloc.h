@@ -152,6 +152,8 @@ namespace MMgc
 			return (block->flags & kRCObject) != 0;
 		}
 
+		size_t GetBytesInUse();
+
 	private:
 		struct LargeBlock
 		{

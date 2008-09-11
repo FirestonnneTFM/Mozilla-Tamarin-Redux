@@ -410,4 +410,7 @@ namespace MMgc
 #endif
 
 #endif
+
+	/*static*/
+	size_t GCHeap::GetPrivateBytes() { return 0; } // TODO
 }

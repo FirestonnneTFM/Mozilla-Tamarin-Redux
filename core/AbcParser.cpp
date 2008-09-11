@@ -372,6 +372,7 @@ namespace avmplus
 			Multiname typeName;
 #endif
 			int flags = 0;
+
 			// Read in the trait entry.
 			// Skip any traits that have version metadata that indicates they should be removed.
 			switch (kind)
@@ -397,6 +398,7 @@ namespace avmplus
 #endif //SAFE_PARSE
 						value_kind = (CPoolKind)*(pos++);
 					}
+
 				}
 				else
 				{
@@ -483,6 +485,7 @@ namespace avmplus
 // in practice we don't, as it causes problems with some existing content
 //				if (traits->findBinding(name, ns) != BIND_NONE)
 //					toplevel->throwVerifyError(kIllegalOverrideError, toplevel->core()->toErrorString(&qn), toplevel->core()->toErrorString(traits));
+
 				if (script)
 					addNamedScript(ns, name, script);
 
@@ -598,6 +601,7 @@ namespace avmplus
 				}
 
 				f->flags |= flags;
+
 				if (tag & ATTR_final)
 					f->flags |= AbstractFunction::FINAL;
 

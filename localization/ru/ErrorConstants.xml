@@ -622,8 +622,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 требует наличия объекта и индекса в виде отдельных регистров.</error>
   <error id="1125" label="kOutOfRangeError">Индекс %1 выходит за границы диапазона %2.</error>
   <error id="1126" label="kVectorFixedError">Невозможно изменить длину фиксированного вектора.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">Выполнена попытка выбора непараметризованного типа приложения.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Выполнена попытка выбора непараметризованного типа приложения.</error>
   <error id="1128" label="kWrongTypeArgCountError">Неверное количество параметров типа для %1. Ожидалось %2, получено %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

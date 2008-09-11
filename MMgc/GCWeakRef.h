@@ -70,9 +70,9 @@ namespace MMgc
 		static void *operator new(size_t size, GC *gc)
 		{
 #ifdef MMGC_THREADSAFE
-			return gc->AllocAlreadyLocked(size, GC::kFinalize, 4);
+			return gc->AllocAlreadyLocked(size, GC::kFinalize);
 #else
-			return gc->Alloc(size, GC::kFinalize, 4);
+			return gc->Alloc(size, GC::kFinalize);
 #endif
 		}
 		// private, only GC can access
