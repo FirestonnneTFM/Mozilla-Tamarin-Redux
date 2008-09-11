@@ -54,7 +54,7 @@
 namespace MMgc
 {
 	MMGC_API void SetMemTag(const char *memtag);
-	MMGC_API void SetMemType(void *memtype);
+	MMGC_API void SetMemType(const void *memtype);
 
 	/**
 	 * calculate a stack trace skipping skip frames and return index into
