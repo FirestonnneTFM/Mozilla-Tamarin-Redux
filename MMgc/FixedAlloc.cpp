@@ -125,7 +125,7 @@ namespace MMgc
 	}
 
 	
-	size_t FixedAlloc::Allocated()
+	size_t FixedAlloc::GetBytesInUse()
 	{
 		size_t bytes = 0;
 		FixedBlock *b = m_firstBlock;

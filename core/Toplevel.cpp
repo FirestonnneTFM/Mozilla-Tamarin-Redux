@@ -530,8 +530,7 @@ namespace avmplus
 			// Invoke the getter on base
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = vtable->methods[m];
-			Atom atomv_out[1] = { base };
-			Atom method = f->coerceEnter(0, atomv_out);
+			Atom method = f->coerceEnter(base);
 			return op_call(method, argc, atomv);
 		}
 		case BIND_SET:
@@ -594,8 +593,7 @@ namespace avmplus
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = vtable->methods[m];
-			Atom atomv_out[1] = { obj };
-			Atom ctor = f->coerceEnter(0, atomv_out);
+			Atom ctor = f->coerceEnter(obj);
 			return op_construct(ctor, argc, atomv);
 		}
 		case BIND_SET:
@@ -872,8 +870,7 @@ namespace avmplus
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
 			MethodEnv *f = vtable->methods[m];
-			Atom atomv_out[1] = { obj };
-			return f->coerceEnter(0, atomv_out);
+			return f->coerceEnter(obj);
 		}
 		case BIND_SET:
 		{

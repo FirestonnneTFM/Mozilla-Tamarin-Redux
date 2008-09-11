@@ -39,6 +39,10 @@
 #ifndef __GCStack__
 #define __GCStack__
 
+#ifdef __SYMBIAN32__
+#include <e32cmn.h>
+#endif
+
 #ifdef UNIX
 #include <string.h>
 #endif

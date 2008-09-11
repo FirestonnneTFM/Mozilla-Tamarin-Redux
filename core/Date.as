@@ -110,6 +110,7 @@ package
 		private native function _setUTCMinutes(...rest):Number
 		private native function _setUTCSeconds(...rest):Number
 		private native function _setUTCMilliseconds(...rest):Number
+
 		AS3 function setFullYear(year=void 0, month=void 0, date=void 0):Number { return _setFullYear.apply(this, arguments); }
 		AS3 function setMonth(month=void 0, date=void 0):Number { return _setMonth.apply(this, arguments); }
 		AS3 function setDate(date=void 0):Number { return _setDate.apply(this, arguments); }
@@ -117,6 +118,7 @@ package
 		AS3 function setMinutes(min=void 0, sec=void 0, ms=void 0):Number { return _setMinutes.apply(this, arguments); }
 		AS3 function setSeconds(sec=void 0, ms=void 0):Number { return _setSeconds.apply(this, arguments); }
 		AS3 function setMilliseconds(ms=void 0):Number { return _setMilliseconds.apply(this, arguments); }
+
 		AS3 function setUTCFullYear(year=void 0, month=void 0, date=void 0):Number { return _setUTCFullYear.apply(this, arguments); }
 		AS3 function setUTCMonth(month=void 0, date=void 0):Number { return _setUTCMonth.apply(this, arguments); }
 		AS3 function setUTCDate(date=void 0):Number { return _setUTCDate.apply(this, arguments); }

@@ -99,10 +99,10 @@ namespace avmplus
 		//convert time from milliseconds
 		newtime=newtime/kMsecPerSecond;
 
-		long int longint_time=(long int) newtime;
+		time_t time_t_time=(time_t)newtime;
 
 		//pull out a struct tm
-		broken_down_time = localtime( (const time_t*) &longint_time );
+		broken_down_time = localtime( &time_t_time );
 
 		if (!broken_down_time)
 		{

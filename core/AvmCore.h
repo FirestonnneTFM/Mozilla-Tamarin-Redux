@@ -392,7 +392,7 @@ const int kBufferPadding = 16;
 		 */
 		void initNativeTables(NativeClassInfop classEntries,
 							 NativeScriptInfop scriptEntries,
-							 AbstractFunction* nativeMethods[],
+							 AbstractFunction *nativeMethods[],
 							 NativeClassInfop nativeClasses[],
 							 NativeScriptInfop nativeScripts[]);
 

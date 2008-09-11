@@ -99,8 +99,7 @@ namespace avmplus
 		// invoke AS3 private static function emptyCtor, which returns an empty function.
 		Binding b = traits()->getName(core()->constantString("emptyCtor"));
 		MethodEnv *f = vtable->methods[AvmCore::bindingToMethodId(b)];
-		Atom args[1] = { this->atom() };
-		return (ClassClosure*)AvmCore::atomToScriptObject(f->coerceEnter(0,args));
+		return (ClassClosure*)AvmCore::atomToScriptObject(f->coerceEnter(this->atom()));
 	}
 
 }

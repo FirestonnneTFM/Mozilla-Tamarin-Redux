@@ -106,7 +106,7 @@ namespace MMgc
 					size,
 					PROT_NONE,
 					MAP_PRIVATE | MAP_ANONYMOUS,
-					-1, 0);
+					VM_MAKE_TAG(VM_MEMORY_APPLICATION_SPECIFIC_1+1), 0);
 	}
 
 	void GCHeap::ReleaseCodeMemory(void* address,
@@ -183,6 +183,7 @@ namespace MMgc
 		if (size == 0)
 			size = GCHeap::kNativePageSize;  // default of one page
 
+		// this doesn't "decommit" it, it just makes it unwritable, Mac OS still backs it with real pages :-(
 		int res = mprotect (address, size, PROT_NONE);
 		GCAssert(res == 0);
 		(void) res;
@@ -244,7 +245,7 @@ namespace MMgc
 					 size,
 					 PROT_NONE,
 					 MAP_PRIVATE | MAP_ANONYMOUS,
-					 -1, 0);
+					 VM_MAKE_TAG(VM_MEMORY_APPLICATION_SPECIFIC_1), 0);
 					 
 		// the man page for mmap documents it returns -1 to signal failure. 
 		if (addr == (char *)-1) return NULL;
@@ -266,6 +267,7 @@ namespace MMgc
 
 	bool GCHeap::DecommitMemory(char *address, size_t size)
 	{
+		// FIXME: this doesn't actually untie the pages from real memory
 		int res = mprotect (address, size, PROT_NONE);
 		GCAssert(res == 0);
 		return (res == 0);
@@ -365,4 +367,36 @@ namespace MMgc
 #endif
 
 #endif
+
+	size_t GCHeap::GetPrivateBytes()
+	{
+		size_t private_bytes = 0;
+		kern_return_t ret;
+		task_t task = mach_task_self();
+		
+		vm_size_t pagesize = 0;
+		ret = host_page_size(mach_host_self(), &pagesize);
+		
+		vm_address_t addr = VM_MIN_ADDRESS;
+		vm_size_t size = 0;
+		while (true)
+		{
+			mach_msg_type_number_t count = VM_REGION_TOP_INFO_COUNT;
+			vm_region_top_info_data_t info;
+			mach_port_t object_name;
+
+			addr += size;
+
+#ifdef MMGC_64BIT
+			ret = vm_region_64(task, &addr, &size, VM_REGION_TOP_INFO, (vm_region_info_t)&info, &count, &object_name);
+#else
+			ret = vm_region(task, &addr, &size, VM_REGION_TOP_INFO, (vm_region_info_t)&info, &count, &object_name);
+#endif
+
+			if (ret != KERN_SUCCESS)
+				break;
+			private_bytes += info.private_pages_resident;
+		}
+		return private_bytes;
+	}
 }

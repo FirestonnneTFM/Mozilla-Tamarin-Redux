@@ -128,6 +128,7 @@ namespace MMgc
 	FixedMalloc::FixedMalloc(GCHeap* heap)
 	{
 		m_heap = heap;
+		numLargeChunks = 0;
 		// Create all the allocators up front (not lazy)
 		// so that we don't have to check the pointers for
 		// NULL on every allocation.
@@ -167,14 +168,15 @@ namespace MMgc
 		}		
 	}
 
-	size_t FixedMalloc::Allocated()
+	size_t FixedMalloc::GetBytesInUse()
 	{
 		size_t bytes = 0;
 		for (int i=0; i<kNumSizeClasses; i++) {
 			FixedAllocSafe *a = m_allocs[i];
-			bytes += a->Allocated();
+			bytes += a->GetBytesInUse();
 		}
-		// FIXME: what about big blocks?
+		// not entirely accurate
+		bytes += numLargeChunks * GCHeap::kBlockSize;
 		return bytes;
 	}
 
@@ -213,6 +215,51 @@ namespace MMgc
 		GCAssert(size > m_allocs[index-1]->GetItemSize());
 
 	    return m_allocs[index];
+	}
+
+	void *FixedMalloc::LargeAlloc(size_t size)
+	{
+		size += DebugSize();
+		int blocksNeeded = (int)GCHeap::SizeToBlocks(size);
+		void *item = m_heap->Alloc(blocksNeeded, true, false);
+		if(!item)
+		{
+			GCAssertMsg(item != NULL, "Large allocation failed!");
+		}
+		else
+		{
+			numLargeChunks += blocksNeeded;
+#ifdef MEMORY_INFO
+			item = DebugDecorate(item, size, 5);
+			memset(item, 0xfb, size - DebugSize());
+#endif
+		}
+		return item;
+	}
+	
+	
+	void FixedMalloc::LargeFree(void *item)
+	{
+#ifdef MEMORY_INFO
+		item = DebugFree(item, 0xed, 5);
+#endif
+		numLargeChunks -= GCHeap::SizeToBlocks(LargeSize(item));
+		m_heap->Free(item);
+	}
+	
+	size_t FixedMalloc::LargeSize(const void *item)
+	{
+		return m_heap->Size(item) * GCHeap::kBlockSize;
+	}
+
+	size_t FixedMalloc::GetTotalSize()
+	{
+		size_t total = numLargeChunks;
+		for (int i=0; i<kNumSizeClasses; i++) {
+			FixedAllocSafe *a = m_allocs[i];
+			total += a->GetNumChunks();
+		}	
+		return total;
 	}
 }
 

@@ -81,6 +81,7 @@
  */
 
 #define MMGC_DRC
+
 #if !defined(AVMPLUS_NO_JIT_READONLY)
 	#define AVMPLUS_JIT_READONLY
 #endif

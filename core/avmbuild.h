@@ -58,7 +58,7 @@
 
 #if defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX)
   // Are we PowerPC or i386 (Macintel) or x86_64 (64-bit)?
-  #ifdef __i386__
+  #if defined(__i386__)
     #ifndef AVMPLUS_IA32
       #define AVMPLUS_IA32
     #endif
@@ -79,7 +79,7 @@
     #ifdef __powerpc64__
       #define AVMPLUS_64BIT
     #endif
-  #elif (__arm__)
+  #elif (__arm__) || (__ARM__)
     #ifndef AVMPLUS_ARM
       #define AVMPLUS_ARM
     #endif	
@@ -168,8 +168,8 @@
 		#define AVMPLUS_MAC_NO_CARBON
 	#endif
     #if !defined(TARGET_RT_MAC_MACHO) && !defined(AVMPLUS_MAC_NO_CARBON)
-		#define AVMPLUS_MAC_CARBON
-	#endif
+        #define AVMPLUS_MAC_CARBON
+    #endif
 #endif
 
 #ifdef AVMPLUS_MAC
@@ -313,6 +313,13 @@
 #  ifdef AVMPLUS_DIRECT_THREADED
 #    error "You must disable direct threading to perform superword profiling"
 #  endif
+#endif
+
+#if defined(AVMPLUS_PORTING_API)
+	// The portapi_avmbuild.h file is used to override
+	// definitions in this file. E.g. turning off
+	// features, etc.
+	#include "portapi_avmbuild.h"
 #endif
 
 #endif /* __avmbuild__ */

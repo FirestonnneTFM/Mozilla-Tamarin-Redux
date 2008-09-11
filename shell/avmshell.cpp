@@ -67,6 +67,16 @@ bool P4Available();
 bool P4Available();
 #endif
 
+#if defined(AVM_SHELL_PLATFORM_HOOKS)
+    void AVMShellDidEndTest();
+    void AVMShellDidTimeout();
+    OutputStream *AVMShellNewConsoleStream(MMgc::GC *gc);
+    int AVMShellPlatformMain(int argc, char **argv);
+    void AVMShellPlatformTeardown();
+    bool AVMShellShouldExitOnException(Exception *exception);
+    void AVMShellWillBeginTest(const char *filename);
+#endif
+
 static MMgc::FixedMalloc* fm = NULL;
 
 #ifndef OVERRIDE_GLOBAL_NEW
@@ -129,7 +139,7 @@ PRIVATE void operator delete[]( void *p )
 
 namespace avmplus {
 	namespace NativeID {
-		#include "toplevel.cpp"
+		#include "shell_toplevel.cpp"
 	}
 }
 
@@ -226,7 +236,7 @@ namespace avmshell
 	ShellToplevel::ShellToplevel(VTable* vtable, ScriptObject* delegate)
 		: Toplevel(vtable, delegate)
 	{
-		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+		shellClasses = (ClassClosure**) core()->GetGC()->Calloc(avmplus::NativeID::shell_toplevel_abc_class_count, sizeof(ClassClosure*), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
 	}
 
 	void Shell::usage()
@@ -236,12 +246,13 @@ namespace avmshell
 		#ifdef DEBUGGER
 			printf("          [-d]          enter debugger on start\n");
 		#endif
+		printf("          [-memstats]   generate statistics on memory usage\n");
+		printf("          [-memlimit d] limit the heap size to d pages\n");
 		#ifdef _DEBUG
 			printf("          [-Dgreedy]    collect before every allocation\n");
 		#endif /* _DEBUG */
 		#ifdef DEBUGGER
 			printf("          [-Dnogc]      don't collect\n");
-			printf("          [-Dgcstats]   generate statistics on gc\n");
 			printf("          [-Dnoincgc]   don't use incremental collection\n");
 			printf("          [-Dastrace N] display AS execution information, where N is [1..4]\n");
 			printf("          [-Dlanguage l] localize runtime errors, languages are:\n");
@@ -293,6 +304,7 @@ namespace avmshell
 #define strlen(_str)				_tcslen(_str)
 #define strcpy(_str, _conststr)		_tcscpy(_str, _conststr)
 #endif
+
 	void Shell::stackOverflow(MethodEnv *env)
 	{
 		if (inStackOverflow)
@@ -364,24 +376,28 @@ namespace avmshell
 		#endif
 		#endif
 
+        #if defined(AVM_SHELL_PLATFORM_HOOKS)
+		    AVMShellDidTimeout();
+		#endif
+
 		toplevel->throwError(kScriptTimeoutError);
 	}
 	
 	void Shell::initShellPool()
 	{
-		AbstractFunction *nativeMethods[avmplus::NativeID::toplevel_abc_method_count];
-		NativeClassInfop nativeClasses[avmplus::NativeID::toplevel_abc_class_count];
-		NativeScriptInfop nativeScripts[avmplus::NativeID::toplevel_abc_script_count];
+		AbstractFunction *nativeMethods[avmplus::NativeID::shell_toplevel_abc_method_count];
+		NativeClassInfop nativeClasses[avmplus::NativeID::shell_toplevel_abc_class_count];
+		NativeScriptInfop nativeScripts[avmplus::NativeID::shell_toplevel_abc_script_count];
 
-		memset(nativeMethods, 0, sizeof(AbstractFunction*)*avmplus::NativeID::toplevel_abc_method_count);
-		memset(nativeClasses, 0, sizeof(NativeClassInfop)*avmplus::NativeID::toplevel_abc_class_count);
-		memset(nativeScripts, 0, sizeof(NativeScriptInfop)*avmplus::NativeID::toplevel_abc_script_count);
+		memset(nativeMethods, 0, sizeof(AbstractFunction*)*avmplus::NativeID::shell_toplevel_abc_method_count);
+		memset(nativeClasses, 0, sizeof(NativeClassInfop)*avmplus::NativeID::shell_toplevel_abc_class_count);
+		memset(nativeScripts, 0, sizeof(NativeScriptInfop)*avmplus::NativeID::shell_toplevel_abc_script_count);
 
 		initNativeTables(classEntries, scriptEntries, 
 			nativeMethods, nativeClasses, nativeScripts);
 
-		avmplus::ScriptBuffer code = newScriptBuffer(avmplus::NativeID::toplevel_abc_length);
-		memcpy(code.getBuffer(), avmplus::NativeID::toplevel_abc_data, avmplus::NativeID::toplevel_abc_length);
+		avmplus::ScriptBuffer code = newScriptBuffer(avmplus::NativeID::shell_toplevel_abc_length);
+		memcpy(code.getBuffer(), avmplus::NativeID::shell_toplevel_abc_data, avmplus::NativeID::shell_toplevel_abc_length);
 		shellPool = parseActionBlock(code, 0, NULL, builtinDomain, nativeMethods, nativeClasses, nativeScripts);
 	}
 
@@ -421,7 +437,12 @@ namespace avmshell
 		gracePeriod = false;
 		inStackOverflow = false;
 
-		consoleOutputStream = new (gc) ConsoleOutputStream();
+        #if defined(AVM_SHELL_PLATFORM_HOOKS)
+		    consoleOutputStream = AVMShellNewConsoleStream(gc);
+		#else	
+			consoleOutputStream = new (gc) ConsoleOutputStream();
+		#endif
+	
 		setConsoleStream(consoleOutputStream);
 
 		computeStackBase();
@@ -559,13 +580,14 @@ namespace avmshell
 			#endif
 #endif
 
-#ifndef UNDER_CE
-			int exitCode = 0;
-			if (executeProjector(argc, argv, exitCode))
-			{
-				return exitCode;
-			}
-#endif
+            #if !defined(UNDER_CE) && !defined(AVM_SHELL_NO_PROJECTOR)
+			    int exitCode = 0;
+
+				if (executeProjector(argc, argv, exitCode))
+				{
+					return exitCode;
+				}
+            #endif
 						
 			if (argc < 2) {
 				usage();
@@ -618,8 +640,6 @@ namespace avmshell
 		                #endif /* _DEBUG */
 
 	                    #ifdef DEBUGGER
-						} else if (!strcmp(arg+2, "gcstats")) {
-							GetGC()->gcstats = true;
 						} else if (!strcmp(arg+2, "nogc")) {
 							GetGC()->nogc = true;
 						} else if (!strcmp(arg+2, "noincgc")) {
@@ -671,6 +691,10 @@ namespace avmshell
 						} else {
 							usage();
 						}
+					} else if (!strcmp(arg, "-memstats")) {
+						GetGC()->gcstats = true;
+					} else if (!strcmp(arg, "-memlimit")) {
+						GetGC()->GetGCHeap()->SetHeapLimit(strtol(argv[++i], 0, 10));
 					} else if (!strcmp(arg, "-log")) {
 						do_log = true;
 					#ifdef AVMPLUS_INTERACTIVE
@@ -827,6 +851,10 @@ namespace avmshell
 				}
 				#endif
 
+                #if defined(AVM_SHELL_PLATFORM_HOOKS)
+				    AVMShellWillBeginTest(filename);
+				#endif
+
 				FileInputStream f(filename);
 				bool isValid = f.valid();
 				if (!isValid) {
@@ -850,6 +878,10 @@ namespace avmshell
 				}
 
 				lastCodeContext = codeContext;
+
+                #if defined(AVM_SHELL_PLATFORM_HOOKS)
+				    AVMShellDidEndTest();
+				#endif
 			}
 
 			#ifdef MMGC_COUNTERS
@@ -1097,7 +1129,15 @@ namespace avmshell
 			// see bug #121382
 			console << string(exception->atom) << "\n";
 			#endif
-			exit(1);
+
+            #if defined(AVM_SHELL_PLATFORM_HOOKS)
+			    if (AVMShellShouldExitOnException(exception))
+				{
+					exit(1);
+				}
+			#else
+                exit(1);
+			#endif	
 		}
 		END_CATCH
 		END_TRY
@@ -1164,6 +1204,10 @@ int _main(int argc, char *argv[])
 		exitCode = avmshell::shell->main(argc, argv);
 		delete avmshell::shell;
 	}
+
+    #if defined(AVM_SHELL_PLATFORM_HOOKS)
+	    AVMShellPlatformTeardown();
+	#endif
 
 	MMgc::FixedMalloc::Destroy();
 	MMgc::GCHeap::Destroy();
@@ -1275,7 +1319,14 @@ int main(int argc, char *argv[])
 #ifdef AVMPLUS_MACH_EXCEPTIONS
 	GenericGuard::staticInit();
 #endif
-	int code = _main(argc, argv);
+	int code;
+	
+    #if defined(AVM_SHELL_PLATFORM_HOOKS)
+	    code = AVMShellPlatformMain(argc, argv);
+	#else
+	    code = _main(argc, argv);
+	#endif
+	
 	if (avmshell::show_error) printf("error %d", code);
 	
 #ifdef AVMPLUS_MACH_EXCEPTIONS

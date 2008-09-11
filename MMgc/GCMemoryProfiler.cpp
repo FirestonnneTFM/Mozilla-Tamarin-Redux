@@ -261,9 +261,9 @@ namespace MMgc
 #ifdef MMGC_AVMPLUS
 		codeSize = heap->GetCodeMemorySize();
 #endif
-		int inUse = heap->GetUsedHeapSize() * GCHeap::kBlockSize;
+		size_t inUse = heap->GetUsedHeapSize() * GCHeap::kBlockSize;
 		size_t committed = heap->GetTotalHeapSize() * GCHeap::kBlockSize + codeSize;
-		int free = heap->GetFreeHeapSize() * GCHeap::kBlockSize;
+		size_t free = heap->GetFreeHeapSize() * GCHeap::kBlockSize;
 
 		int memInfo = residentCount*16;
 

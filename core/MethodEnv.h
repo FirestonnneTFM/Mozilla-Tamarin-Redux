@@ -92,8 +92,18 @@ namespace avmplus
 		 *         TypeError if an argument cannot be coerced
 		 *         to the required type
 		 */
+		Atom coerceEnter(Atom thisArg);
+		Atom coerceEnter(Atom thisArg, ArrayObject *a);
+		Atom coerceEnter(Atom thisArg, int argc, Atom *argv);
 		Atom coerceEnter(int argc, Atom* atomv);
+
+	private:
+		Atom endCoerce(int argc, uint32 *ap);
+		int  startCoerce(int argc);
+		static Atom *unbox1(AvmCore* core, Toplevel* toplevel, Atom in, Traits *t, Atom *argv);
+		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv);
 		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap);
+		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv);
 
 	// helper functions used from compiled code
 	public:
@@ -250,8 +260,8 @@ namespace avmplus
 				activation(a), methodTable(wkh) {}
 		// ------------------------ DATA SECTION BEGIN
 		public:
-			VTable* const				activation;
-			WeakKeyHashtable* const		methodTable;
+			VTable* const activation;
+			WeakKeyHashtable* const methodTable;
 		// ------------------------ DATA SECTION END
 		};
 

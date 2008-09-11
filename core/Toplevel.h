@@ -41,6 +41,12 @@
 
 namespace avmplus
 {
+	class IntVectorClass;
+	class UIntVectorClass;
+	class DoubleVectorClass;
+	class ObjectVectorClass;
+	class VectorClass;
+
 	/**
 	 * class Toplevel
 	 */

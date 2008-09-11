@@ -65,6 +65,13 @@ void avmplus_pcre_free(void *ptr)
 	delete [] cp;
 }
 
+#ifdef __ARMCC__
+extern "C" void *(*pcre_malloc)(size_t) = avmplus_pcre_malloc;;
+extern "C" void  (*pcre_free)(void *) = avmplus_pcre_free;;
+extern "C" void *(*pcre_stack_malloc)(size_t) = avmplus_pcre_malloc;;
+extern "C" void  (*pcre_stack_free)(void *) = avmplus_pcre_free;;
+extern "C" int   (*pcre_callout)(pcre_callout_block *)  = NULL;;
+#else
 // GCC complains if you declare as extern and init in same statement
 
 extern "C" void *(*pcre_malloc)(size_t);
@@ -78,6 +85,7 @@ void  (*pcre_free)(void *) = avmplus_pcre_free;
 void *(*pcre_stack_malloc)(size_t) = avmplus_pcre_malloc;
 void  (*pcre_stack_free)(void *) = avmplus_pcre_free;
 int   (*pcre_callout)(pcre_callout_block *) = NULL;
+#endif
 
 #else
 #ifndef VPCOMPAT

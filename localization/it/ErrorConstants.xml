@@ -705,8 +705,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 richiede che oggetto e indice siano registri distinti.</error>
   <error id="1125" label="kOutOfRangeError">L'indice %1 non è nell'intervallo %2.</error>
   <error id="1126" label="kVectorFixedError">Impossibile modificare la lunghezza di un vettore fisso.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">Tentativo di applicazione del tipo a un tipo non parametrizzato.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Tentativo di applicazione del tipo a un tipo non parametrizzato.</error>
   <error id="1128" label="kWrongTypeArgCountError">Numero di parametri di tipo non corretto per %1. Previsti: %2, ricevuti: %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  
