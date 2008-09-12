@@ -50,7 +50,7 @@ namespace nanojit
 	#ifdef FEATURE_NANOJIT
 
 	const uint8_t operandCount[] = {
-	/* 0 */		/*trace*/0, /*nearskip*/0, /*skip*/0, /*neartramp*/0, /*tramp*/0, /*var*/0, /*def*/2, /*use*/1, 2, /*addp*/2, 
+	/* 0 */		/*trace*/0, /*nearskip*/0, /*skip*/0, /*neartramp*/0, /*tramp*/0, 2, 2, 2, 2, /*addp*/2, 
 	/* 10 */	/*param*/0, 2, 2, /*alloc*/0, 2, /*ret*/1, /*live*/1, /*calli*/0, /*call*/0, /*loop*/0,
 	/* 20 */	/*x*/0, 0, 1, 1, /*label*/0, 2, 2, 2, 2, 2,
 	/* 30 */	2, 2, /*short*/0, /*int*/0, 2, 2, /*neg*/1, 2, 2, 2,
@@ -69,7 +69,7 @@ namespace nanojit
 	#ifdef NJ_VERBOSE
 
 	const char* lirNames[] = {
-	/* 0-9 */	"start","nearskip","skip","neartramp","tramp","var","def","use","8","addp",
+	/* 0-9 */	"start","nearskip","skip","neartramp","tramp","5","6","7","8","addp",
 	/* 10-19 */	"param","st","ld","alloc","sti","ret","live","calli","call","loop",
 	/* 20-29 */ "x","j","jt","jf","label","25","feq","flt","fgt","fle",
 	/* 30-39 */ "fge","cmov","short","int","ldc","","neg","add","sub","mul",
@@ -1710,14 +1710,6 @@ namespace nanojit
 				break;
 			}
 
-			case LIR_var:
-                sprintf(s, "%s = %s", formatRef(i), lirNames[op]);
-				break;
-
-			case LIR_def:
-                sprintf(s, "%s %s = %s", lirNames[op], formatRef(i->oprnd1()), formatRef(i->oprnd2()));
-				break;
-
 			case LIR_label:
                 sprintf(s, "%s:", formatRef(i));
 				break;
@@ -1739,7 +1731,6 @@ namespace nanojit
                 sprintf(s, "%s %s", lirNames[op], formatRef(i->oprnd1()));
 				break;
 				
-			case LIR_use:
             case LIR_callh:
 			case LIR_neg:
 			case LIR_fneg:

@@ -57,11 +57,6 @@ namespace nanojit
         LIR_neartramp = 3, // must be LIR_tramp-1 and lsb=1
         LIR_tramp =		4,
         
-		// variables
-		LIR_var		= 5, // create variable storage
-		LIR_def		= 6, // define (bind) a value to a variable
-		LIR_use		= 7, // use the value of a variable
-		
 		// non-pure operations
         LIR_addp    = 9,
 		LIR_param	= 10,
