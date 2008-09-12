@@ -40,6 +40,17 @@
 namespace avmplus
 {
 #ifdef AVMPLUS_WORD_CODE
+
+#  ifdef AVMPLUS_DIRECT_THREADED
+#    define NEW_OPCODE(opcode)    ((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode]));
+#  else
+#    ifdef _DEBUG
+#      define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // aids debugging
+#    else
+#      define NEW_OPCODE(opcode)  opcode
+#    endif
+#  endif
+	
 	class Translator 
 	{
 	public:
@@ -139,12 +150,6 @@ namespace avmplus
 			buffer_info* next;
 		};
 		
-		struct backtrack_t
-		{
-			uint32 state;
-			uint32 nextI;
-		};
-		
 		MethodInfo* info;
 		backpatch_info* backpatches;	 // in address order
 		label_info* labels;				 // in reverse offset order
@@ -162,34 +167,54 @@ namespace avmplus
 		uint32 *dest;
 		uint32 *dest_limit;
 
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-		// state should imply height of I?
-		// ditto backtrack?
-		// and then address of following instruction too?
-		uint32  state;					// current state in the matcher, or 0
-		backtrack_t backtrack_stack[10];	// commit candidates
-		uint32  backtrack_idx;          // next slot in backtrack_state
-		uint32* I[10];					// longest window 10 instructions, not a problem now, generator can generate constant later
-		uint32  O[10];                  // symbolic opcodes for each I entry
-		uint32  nextI;                  // next slot in I and O
-		uint32  R[30];                  // replacement data
-		uint32  S[30];                  // symbolic opcode for some R entries
-#endif		
-
 		void cleanup();
 		void refill();
 		void emitRelativeOffset(uint32 base_offset, const byte *pc, int32 offset);
 		void makeAndInsertBackpatch(const byte* target_pc, uint32 patch_offset);
 
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-		void peep(uint32 opcode, uint32* loc);
-		void peepFlush();				// this may commit to a backtrack state, if available, so dest may change
-		bool commit(uint32 action);
-		bool replace(uint32 old_instr, uint32 new_words);
-		bool isJumpInstruction(uint32 opcode);
-		uint32 calculateInstructionWidth(uint32 opcode);
-#endif
 		
+		// The structures are laid out so as to improve packing and conserve space.  The
+		// included initialization code below knows the order of fields.
+		
+		struct peep_state_t
+		{
+			uint8  numTransitions;				// Number of consecutive in the transitions[] array starting at transitionPtr
+			uint8  failShift;					// Initial tokens to discard on a failure transition
+			uint16 transitionPtr;				// Location in transitions[] for our transitions, sorted in increasing token order
+			uint16 guardAndAction;				// 0 if this is not a final state, otherwise an identifier for a case in 'commit()'
+			uint16 fail;						// 0 if there is no failure transition, otherwise a state number
+		};
+		
+		struct peep_transition_t
+		{
+			uint16 opcode;						// on this opcode
+			uint16 next_state;					//   move to this state (never 0)
+		};
+		
+		static uint16 toplevel[];               // Transition table for initial state
+		static peep_state_t states[];           // State 0 is not used
+		static peep_transition_t transitions[]; // Compact transition representation
+
+		uint32  state;							// current state in the matcher, or 0
+		uint32  backtrack_stack[10];			// commit candidates (state numbers)
+		uint32  backtrack_idx;					// next slot in backtrack_state
+		uint32* I[10];							// longest window 10 instructions, not a problem now, generator can generate constant later
+		uint32  O[10];							// symbolic opcodes for each I entry
+		uint32  nextI;							// next slot in I and O
+		uint32  R[30];							// replacement data
+		uint32  S[30];							// symbolic opcode for some R entries
+		
+		void peep(uint32 opcode, uint32* loc);
+		void peepFlush();
+		bool commit(uint32 action);
+		bool replace(uint32 old_instr, uint32 new_words, bool jump_has_been_translated=false);
+		bool isJumpInstruction(uint32 opcode);
+		void undoRelativeOffsetInJump();
+		uint32 calculateInstructionWidth(uint32 opcode);
+		
+#endif	// AVMPLUS_PEEPHOLE_OPTIMIZER
+
 	};
 #endif // AVMPUS_WORD_CODE
 }

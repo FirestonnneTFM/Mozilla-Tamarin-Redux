@@ -78,6 +78,7 @@ namespace avmplus
 				Str255 buf;
 				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
 				DebugStr(buf);
+				exit(1);
 			}
 			else
 			{

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07D76BD10E7A5D1F0038B3FF /* peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07D76BD00E7A5D1F0038B3FF /* peephole.cpp */; };
 		1A91570F0B012A3F00744986 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A91570E0B012A3F00744986 /* libz.dylib */; };
 		4E5ADFA30E5CD46C00038D0B /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4E5ADFA20E5CD46C00038D0B /* vprof.cpp */; };
 		6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6803D2C70A5064FD00C797BB /* JavaGlue.cpp */; };
@@ -117,6 +118,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		07D76BD00E7A5D1F0038B3FF /* peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peephole.cpp; sourceTree = "<group>"; };
 		1A91570E0B012A3F00744986 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		4E1E42490E6339A40095C2E7 /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cpp; path = ../../../nanojit/Assembler.cpp; sourceTree = SOURCE_ROOT; };
 		4E1E424A0E6339A40095C2E7 /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Assembler.h; path = ../../../nanojit/Assembler.h; sourceTree = SOURCE_ROOT; };
@@ -642,6 +644,7 @@
 				4E62BEC00D6244D300A24F2D /* opcodes.tbl */,
 				4E62BEC10D6244D300A24F2D /* OSDep.h */,
 				4E62BEC20D6244D300A24F2D /* OutputStream.h */,
+				07D76BD00E7A5D1F0038B3FF /* peephole.cpp */,
 				4E62BEC30D6244D300A24F2D /* PoolObject.cpp */,
 				4E62BEC40D6244D300A24F2D /* PoolObject.h */,
 				4E62BEC50D6244D300A24F2D /* PrintWriter.cpp */,
@@ -968,6 +971,7 @@
 				6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */,
 				858088D80C8F604F0093F49B /* SamplerScript.cpp in Sources */,
 				4E5ADFA30E5CD46C00038D0B /* vprof.cpp in Sources */,
+				07D76BD10E7A5D1F0038B3FF /* peephole.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

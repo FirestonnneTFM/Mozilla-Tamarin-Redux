@@ -202,11 +202,11 @@ namespace avmplus
 #     endif
 #  endif // threading discipline
 			 XXX(0x00)
-#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			 III(0x01, L_bkpt)
-#else
+#  else
 			 XXX(0x01) /* OP_bkpt */
-#endif
+#  endif
 			 XXX(0x02) /* OP_nop */
 			 III(0x03, L_throw)
 			 III(0x04, L_getsuper)
@@ -444,17 +444,17 @@ namespace avmplus
 			 XXX(0xEC)
 			 XXX(0xED)
 			 XXX(0xEE) /* OP_abs_jump */
-#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			 III(0xEF, L_debug)
 			 III(0xF0, L_debugline)
 			 III(0xF1, L_debugfile)
 			 III(0xF2, L_bkptline)
-#else
+#  else
  			 XXX(0xEF) /* OP_debug */
 			 XXX(0xF0) /* L_debugline */
 			 XXX(0xF1) /* L_debugfile */
 			 XXX(0xF2) /* L_bkptline */
-#endif
+#  endif
 	 		 XXX(0xF3)  /* OP_timestamp */
 			 XXX(0xF4)
 			 XXX(0xF5)
@@ -471,14 +471,62 @@ namespace avmplus
 			 XXX(0x100)
 			 III(0x101, L_ext_pushbits)
 			 III(0x102, L_ext_push_doublebits)
+#  ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 			 III(0x103, L_ext_get2locals)
 			 III(0x104, L_ext_get3locals)
-			 III(0x105, L_ext_storelocal)
+ 			 III(0x105, L_ext_get4locals)
+			 III(0x106, L_ext_get5locals)
+			 III(0x107, L_ext_storelocal)
+			 III(0x108, L_ext_add_ll)
+			 III(0x109, L_ext_add_set_lll)
+			 III(0x10A, L_ext_subtract_ll)
+			 III(0x10B, L_ext_multiply_ll)
+			 III(0x10C, L_ext_divide_ll)
+			 III(0x10D, L_ext_modulo_ll)
+			 III(0x10E, L_ext_bitand_ll)
+			 III(0x10F, L_ext_bitor_ll)
+			 III(0x110, L_ext_bitxor_ll)
+			 III(0x111, L_ext_add_lb)
+			 III(0x112, L_ext_subtract_lb)
+			 III(0x113, L_ext_multiply_lb)
+			 III(0x114, L_ext_divide_lb)
+			 III(0x115, L_ext_bitand_lb)
+			 III(0x116, L_ext_bitor_lb)
+			 III(0x117, L_ext_bitxor_lb)
+			 III(0x118, L_ext_iflt_ll)
+			 III(0x119, L_ext_ifnlt_ll)
+			 III(0x11A, L_ext_ifle_ll)
+			 III(0x11B, L_ext_ifnle_ll)
+			 III(0x11C, L_ext_ifgt_ll)
+			 III(0x11D, L_ext_ifngt_ll)
+			 III(0x11E, L_ext_ifge_ll)
+			 III(0x11F, L_ext_ifnge_ll)
+			 III(0x120, L_ext_ifeq_ll)
+			 III(0x121, L_ext_ifne_ll)
+			 III(0x122, L_ext_ifstricteq_ll)
+			 III(0x123, L_ext_ifstrictne_ll)
+			 III(0x124, L_ext_iflt_lb)
+			 III(0x125, L_ext_ifnlt_lb)
+			 III(0x126, L_ext_ifle_lb)
+			 III(0x127, L_ext_ifnle_lb)
+			 III(0x128, L_ext_ifgt_lb)
+			 III(0x129, L_ext_ifngt_lb)
+			 III(0x12A, L_ext_ifge_lb)
+			 III(0x12B, L_ext_ifnge_lb)
+			 III(0x12C, L_ext_ifeq_lb)
+			 III(0x12D, L_ext_ifne_lb)
+			 III(0x12E, L_ext_ifstricteq_lb)
+			 III(0x12F, L_ext_ifstrictne_lb)
+			 III(0x130, L_ext_swap_pop)
+#  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
 #  if defined GNUC_THREADING
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
 			AvmAssert(opcode_labels[0x97] == &&L_bitnot);
 			AvmAssert(opcode_labels[257] == &&L_ext_pushbits);
+#    ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			AvmAssert(opcode_labels[48 + 256] == &&L_ext_swap_pop);
+#    endif
 #  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
 			} // conditional run-time initialization of jump table
 #  endif // threading discipline
@@ -879,7 +927,11 @@ namespace avmplus
 					
 #if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(debug) {
+# ifdef AVMPLUS_WORD_CODE
 				pc += 4;
+# else
+				pc += AvmCore::calculateInstructionWidth(pc-1) - 1;
+# endif
 				NEXT;
 			}
 #endif
@@ -1311,14 +1363,17 @@ namespace avmplus
                 NEXT;
 			}
 
+#define ADD_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
+	FAST_ADD_MAYBE(lhs,rhs,dest); \
+	SAVE_EXPC; \
+	dest = toplevel->add2(lhs, rhs); \
+	restore_dxns(); \
+	NEXT
+					
             INSTR(add) {
 				Atom lhs = sp[-1], rhs=sp[0];
 				sp--;
-				FAST_ADD_MAYBE(lhs,rhs,sp[0]);
-				SAVE_EXPC;
-                sp[0] = toplevel->add2(lhs, rhs);
-				restore_dxns();
-                NEXT;
+				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
 			INSTR(add_i) {
@@ -1331,14 +1386,17 @@ namespace avmplus
                 NEXT;
 			}
 
-            INSTR(subtract) {
+#define SUB_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
+	FAST_SUB_MAYBE(lhs,rhs,dest); \
+	SAVE_EXPC; \
+	dest = core->doubleToAtom(core->number(lhs) - core->number(rhs)); \
+	restore_dxns(); \
+	NEXT
+					
+			INSTR(subtract) {
 				Atom lhs = sp[-1], rhs=sp[0];
 				sp--;
-				FAST_SUB_MAYBE(lhs,rhs,sp[0]);
-				SAVE_EXPC;
-                sp[0] = core->doubleToAtom(core->number(lhs) - core->number(rhs));
-				restore_dxns();
-                NEXT;
+				SUB_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
             INSTR(subtract_i) {
@@ -1351,18 +1409,22 @@ namespace avmplus
                 NEXT;
 			}
 
+// OPTIMIZEME - multiplication of small integers might be faster
+
+#define MUL_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
+	if (IS_BOTH_DOUBLE(lhs, rhs)) { \
+		dest = core->doubleToAtom(DOUBLE_VALUE(lhs) * DOUBLE_VALUE(rhs)); \
+		NEXT; \
+	} \
+	SAVE_EXPC; \
+	dest = core->doubleToAtom(core->number(lhs) * core->number(rhs)); \
+	restore_dxns(); \
+	NEXT
+			
             INSTR(multiply) {
-				// OPTIMIZEME? for small integer
 				Atom lhs = sp[-1], rhs = sp[0];
 				sp--;
-				if (IS_BOTH_DOUBLE(lhs, rhs)) {
-					sp[0] = core->doubleToAtom(DOUBLE_VALUE(lhs) * DOUBLE_VALUE(rhs));
-					NEXT;
-				}
-				SAVE_EXPC;
-                sp[0] = core->doubleToAtom(core->number(lhs) * core->number(rhs));
-				restore_dxns();
-                NEXT;
+				MUL_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
 			INSTR(multiply_i) {
@@ -1374,126 +1436,139 @@ namespace avmplus
                 NEXT;
 			}
 
+#define DIV_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
+	if (IS_BOTH_DOUBLE(lhs, rhs)) { \
+		dest = core->doubleToAtom(DOUBLE_VALUE(lhs) / DOUBLE_VALUE(rhs)); \
+		NEXT; \
+	} \
+	SAVE_EXPC; \
+	dest = core->doubleToAtom(core->number(lhs) / core->number(rhs)); \
+	restore_dxns(); \
+	NEXT
+
             INSTR(divide) {
 				Atom lhs = sp[-1], rhs = sp[0];
 				sp--;
-				if (IS_BOTH_DOUBLE(lhs, rhs)) {
-					sp[0] = core->doubleToAtom(DOUBLE_VALUE(lhs) / DOUBLE_VALUE(rhs));
-					NEXT;
-				}
-				SAVE_EXPC;
-				sp[0] = core->doubleToAtom(core->number(lhs) / core->number(rhs));
-				restore_dxns();
-                NEXT;
+				DIV_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
+// FIXME - dodgy optimization
+// Can the integer modulo overflow somehow?  Is it portable?
+					
+#define MOD_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
+	if (IS_BOTH_INTEGER(lhs, rhs) && rhs != kIntegerType) { \
+		int result = (lhs >> 3) % (rhs >> 3); \
+		if (FITS_IN_INTEGER(result)) { \
+			dest = MAKE_INTEGER(result); \
+			NEXT; \
+		} \
+	} \
+	else if (IS_BOTH_DOUBLE(lhs, rhs)) { \
+		dest = core->doubleToAtom(MathUtils::mod(DOUBLE_VALUE(lhs), DOUBLE_VALUE(rhs))); \
+		NEXT; \
+	} \
+	SAVE_EXPC; \
+	dest = core->doubleToAtom(MathUtils::mod(core->number(lhs), core->number(rhs))); \
+	restore_dxns(); \
+	NEXT
+			
             INSTR(modulo) {
 				Atom lhs = sp[-1], rhs = sp[0];
 				sp--;
-				if (IS_BOTH_INTEGER(lhs, rhs) && rhs != kIntegerType) {
-					int result = (lhs >> 3) % (rhs >> 3);  // can this overflow somehow? 
-					if (FITS_IN_INTEGER(result)) {
-						sp[0] = MAKE_INTEGER(result);
-						NEXT;
-					}
-				}
-				else if (IS_BOTH_DOUBLE(lhs, rhs)) {
-					sp[0] = core->doubleToAtom(MathUtils::mod(DOUBLE_VALUE(lhs), DOUBLE_VALUE(rhs)));
-					NEXT;
-				}
-				SAVE_EXPC;
-				sp[0] = core->doubleToAtom(MathUtils::mod(core->number(lhs), core->number(rhs)));
-				restore_dxns();
-				NEXT;
+				MOD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
+#define LSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
+	if (IS_BOTH_INTEGER(lhs,rhs)) { \
+		int32 result = INTEGER_VALUE(lhs) << (INTEGER_VALUE(rhs) & 0x1F); \
+		if (FITS_IN_INTEGER(result)) { \
+			dest = MAKE_INTEGER(result); \
+			NEXT; \
+		} \
+	} \
+	SAVE_EXPC; \
+	dest = core->intToAtom( core->integer(lhs) << (core->toUInt32(rhs)&0x1F) ); \
+	restore_dxns(); \
+	NEXT
+			
             INSTR(lshift) {
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs)) {
-					int32 result = INTEGER_VALUE(lhs) << (INTEGER_VALUE(rhs) & 0x1F);
-					if (FITS_IN_INTEGER(result)) {
-						sp[0] = MAKE_INTEGER(result);
-						NEXT;
-					}
-				}
-				SAVE_EXPC;
-				sp[0] = core->intToAtom( core->integer(lhs) << (core->toUInt32(rhs)&0x1F) );
-				restore_dxns();
-                NEXT;
+				LSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
+#define RSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
+	if (IS_BOTH_INTEGER(lhs,rhs)) { \
+		dest = MAKE_INTEGER(INTEGER_VALUE(lhs) >> (INTEGER_VALUE(rhs) & 0x1F)); \
+		NEXT; \
+	} \
+	SAVE_EXPC; \
+	dest = core->intToAtom( core->integer(lhs) >> (core->toUInt32(rhs)&0x1F) ); \
+	restore_dxns(); \
+	NEXT
+			
             INSTR(rshift) {
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs)) {
-					sp[0] = MAKE_INTEGER(INTEGER_VALUE(lhs) >> (INTEGER_VALUE(rhs) & 0x1F));
-					NEXT;
-				}
-				SAVE_EXPC;
-				sp[0] = core->intToAtom( core->integer(lhs) >> (core->toUInt32(rhs)&0x1F) );
-				restore_dxns();
-                NEXT;
+				RSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
+#define URSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
+	if (IS_BOTH_INTEGER(lhs,rhs)) { \
+		uint32 result = ((uint32)INTEGER_VALUE(lhs) >> (INTEGER_VALUE(rhs) & 0x1F)); \
+		if ((result & 0xF0000000U) == 0) { \
+			dest = MAKE_INTEGER(result); \
+			NEXT; \
+		} \
+	} \
+	SAVE_EXPC; \
+	dest = core->uintToAtom( core->toUInt32(lhs) >> (core->toUInt32(rhs)&0x1F) ); \
+	NEXT
+			
             INSTR(urshift) {
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs)) {
-					uint32 result = ((uint32)INTEGER_VALUE(lhs) >> (INTEGER_VALUE(rhs) & 0x1F));
-					if ((result & 0xF0000000U) == 0) {
-						sp[0] = MAKE_INTEGER(result);
-						NEXT;
-					}
-				}
-				SAVE_EXPC;
-                sp[0] = core->uintToAtom( core->toUInt32(lhs) >> (core->toUInt32(rhs)&0x1F) );
-                NEXT;
+				URSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
+
+#define BITOP_TWO_VALUES_AND_NEXT(op, lhs, rhs, dest) \
+	if (IS_BOTH_INTEGER(lhs,rhs)) { \
+		dest = (lhs op rhs) | kIntegerType; \
+		NEXT; \
+	} \
+	SAVE_EXPC; \
+	dest = core->intToAtom(core->integer(lhs) op core->integer(rhs)); \
+	restore_dxns(); \
+	NEXT
+
+#define BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(&, lhs, rhs, dest)
 
             INSTR(bitand) {
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs)) {
-					sp[0] = lhs & rhs;
-					NEXT;
-				}
-				SAVE_EXPC;
-				sp[0] = core->intToAtom(core->integer(lhs) & core->integer(rhs));
-				restore_dxns();
-				NEXT;
+				BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
+#define BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(|, lhs, rhs, dest)
+					
             INSTR(bitor) {
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs)) {
-					sp[0] = lhs | rhs;
-					NEXT;
-				}
-				SAVE_EXPC;
-                sp[0] = core->intToAtom(core->integer(lhs) | core->integer(rhs));
-				restore_dxns();
-                NEXT;
+				BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
-
+					
+#define BITXOR_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(^, lhs, rhs, dest)
+					
             INSTR(bitxor) {
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				if (IS_BOTH_INTEGER(lhs,rhs)) {
-					sp[0] = (lhs ^ rhs) | kIntegerType;
-					NEXT;
-				}
-				SAVE_EXPC;
-				sp[0] = core->intToAtom(core->integer(lhs) ^ core->integer(rhs));
-				restore_dxns();
-                NEXT;
+				BITXOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
             INSTR(equals) {
@@ -1573,52 +1648,66 @@ namespace avmplus
 				NEXT;
 			}
 
-#define IFEQ(intcmp, comparator, truish) \
-	do { \
-		SAVE_EXPC; \
-		Atom lhs = sp[-1], rhs=sp[0]; \
-		bool result; \
-		if (IS_BOTH_INTEGER(lhs, rhs)) \
-			result = lhs intcmp rhs; \
-		else if (IS_BOTH_DOUBLE(lhs, rhs)) \
-			result = DOUBLE_VALUE(lhs) intcmp DOUBLE_VALUE(rhs); \
-		else \
-			result = core->comparator(lhs, rhs) == truish; \
-		sp -= 2; \
-		int offset = S24ARG; \
-		if (result) \
-		{ \
-			if (offset < 0) \
-				core->branchCheck(env, interruptable, offset); \
-			pc += offset; \
-		} \
-		restore_dxns(); \
-	} while(0)
-	
+// Ick.  The user of this macro must save the EXPC before extracting the operands
+// from the instruction stream.
+
+#define IFEQ_TWO_VALUES(intcmp, comparator, truish, lhs, rhs, offset) \
+	bool result; \
+	if (IS_BOTH_INTEGER(lhs, rhs)) \
+		result = lhs intcmp rhs; \
+	else if (IS_BOTH_DOUBLE(lhs, rhs)) \
+		result = DOUBLE_VALUE(lhs) intcmp DOUBLE_VALUE(rhs); \
+	else \
+		result = core->comparator(lhs, rhs) == truish; \
+	if (result) \
+	{ \
+		if (offset < 0) \
+			core->branchCheck(env, interruptable, offset); \
+		pc += offset; \
+	} \
+	restore_dxns();
+
+#define IFEQ2(intcmp, comparator, truish) \
+	SAVE_EXPC; \
+	Atom lhs = sp[-1], rhs=sp[0]; \
+    sp -= 2; \
+	int offset = S24ARG; \
+	IFEQ_TWO_VALUES(intcmp, comparator, truish, lhs, rhs, offset);
+
+#define IFEQ(x) IFEQ2(x)
+
+#define COMPARE_EQUAL  ==, equals, trueAtom
+					
 		   INSTR(ifeq) {
-				IFEQ(==, equals, trueAtom);
+				IFEQ(COMPARE_EQUAL);
                 NEXT;
+			}
+
+#define COMPARE_NOTEQUAL  !=, equals, falseAtom
+
+			INSTR(ifne) {
+				IFEQ(COMPARE_NOTEQUAL);
+                NEXT;
+			}
+
+#define COMPARE_STRICTEQUAL  ==, stricteq, trueAtom
+					
+		    INSTR(ifstricteq) {
+				IFEQ(COMPARE_STRICTEQUAL);
+				NEXT;
 			}
 					
-			INSTR(ifne) {
-				IFEQ(!=, equals, falseAtom);
-                NEXT;
-			}
-
-		    INSTR(ifstricteq) {
-				IFEQ(==, stricteq, trueAtom);
-				NEXT;
-			}
+#define COMPARE_NOTSTRICTEQUAL  !=, stricteq, falseAtom
 
 			INSTR(ifstrictne) {
-				IFEQ(!=, stricteq, falseAtom);
+				IFEQ(COMPARE_NOTSTRICTEQUAL);
 				NEXT;
 			}
 
-#define IFCMP(numeric_cmp, generic_cmp) \
-		SAVE_EXPC; \
-		Atom lhs = sp[-1], rhs=sp[0]; \
-		sp -= 2; \
+// Ick.  The user of this macro must save the EXPC before extracting the operands
+// from the instruction stream.
+					
+#define IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, lhs, rhs, offset) \
 		bool result; \
 		if (IS_BOTH_INTEGER(lhs, rhs)) \
 			result = lhs numeric_cmp rhs; \
@@ -1626,56 +1715,80 @@ namespace avmplus
 			result = DOUBLE_VALUE(lhs) numeric_cmp DOUBLE_VALUE(rhs); \
 		else \
 			result = generic_cmp; \
-		int offset = S24ARG; \
 		if (result) \
 		{ \
 			if (offset < 0) \
 				core->branchCheck(env, interruptable, offset); \
 			pc += offset; \
 		} \
-		restore_dxns();
+		restore_dxns()
 
+#define IFCMP2(numeric_cmp, generic_cmp) \
+		SAVE_EXPC; \
+		Atom lhs = sp[-1], rhs=sp[0]; \
+		sp -= 2; \
+		int offset = S24ARG; \
+		IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, lhs, rhs, offset)
+
+#define IFCMP(x)  IFCMP2(x)
+
+#define COMPARE_LESS  <, core->compare(lhs,rhs) == trueAtom
+					
 			INSTR(iflt) {
-				IFCMP(<, core->compare(lhs,rhs) == trueAtom);
+				IFCMP(COMPARE_LESS);
                 NEXT;
 			}
 
+#define COMPARE_NOTLESS  >=, core->compare(lhs, rhs) != trueAtom
+					
 			INSTR(ifnlt) {
-				IFCMP(>=, core->compare(lhs, rhs) != trueAtom);
+				IFCMP(COMPARE_NOTLESS);
                 NEXT;
 			}
 
+#define COMPARE_LESSEQUAL  <=, core->compare(rhs, lhs) == falseAtom
+					
 			INSTR(ifle) {
-				IFCMP(<=, core->compare(rhs, lhs) == falseAtom);
+				IFCMP(COMPARE_LESSEQUAL);
                 NEXT;
 			}
 
+#define COMPARE_NOTLESSEQUAL  >, core->compare(rhs, lhs) != falseAtom
+					
 			INSTR(ifnle) {
-				IFCMP(>, core->compare(rhs, lhs) != falseAtom);
+				IFCMP(COMPARE_NOTLESSEQUAL);
                 NEXT;
 			}
 
+#define COMPARE_GREATER  >, core->compare(rhs, lhs) == trueAtom
+					
 			INSTR(ifgt) {
-				IFCMP(>, core->compare(rhs, lhs) == trueAtom);
+				IFCMP(COMPARE_GREATER);
                 NEXT;
 			}
 
+#define COMPARE_NOTGREATER  <=, core->compare(rhs, lhs) != trueAtom
+					
 			INSTR(ifngt) {
-				IFCMP(<=, core->compare(rhs, lhs) != trueAtom);
+				IFCMP(COMPARE_NOTGREATER);
                 NEXT;
 			}
 
+#define COMPARE_GREATEREQUAL  >=, core->compare(lhs, rhs) == falseAtom
+					
 			INSTR(ifge) {
-				IFCMP(>=, core->compare(lhs, rhs) == falseAtom);
+				IFCMP(COMPARE_GREATEREQUAL);
                 NEXT;
 			}
+					
+#define COMPARE_NOTGREATEREQUAL  <, core->compare(lhs, rhs) != falseAtom
 			
 			INSTR(ifnge) {
-				IFCMP(<, core->compare(lhs, rhs) != falseAtom);
+				IFCMP(COMPARE_NOTGREATEREQUAL);
                 NEXT;
 			}
 
-#define CMP(numeric_cmp, generic_cmp) \
+#define CMP2(numeric_cmp, generic_cmp) \
 	Atom lhs=sp[-1], rhs=sp[0]; \
 	sp--; \
 	if (IS_BOTH_INTEGER(lhs,rhs)) \
@@ -1688,23 +1801,25 @@ namespace avmplus
 		restore_dxns(); \
 	}
 
+#define CMP(x)  CMP2(x)
+					
             INSTR(lessthan) {
-				CMP(<, core->compare(lhs, rhs) == trueAtom);
+				CMP(COMPARE_LESS);
                 NEXT;
 			}
 
             INSTR(lessequals) {
-				CMP(<=, core->compare(rhs,lhs) == falseAtom);
+				CMP(COMPARE_LESSEQUAL);
                 NEXT;
 			}
 
             INSTR(greaterthan) {
-				CMP(>, core->compare(rhs, lhs) == trueAtom);
+				CMP(COMPARE_GREATER);
                 NEXT;
 			}
 
             INSTR(greaterequals) {
-				CMP(>=, core->compare(lhs, rhs) == falseAtom);
+				CMP(COMPARE_GREATEREQUAL);
                 NEXT;
 			}
 
@@ -2569,6 +2684,11 @@ namespace avmplus
 				NEXT;
 			}
 
+#  ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			
+			// Superwords not in the instruction set.  These are selected by a table
+			// driven peephole optimizer, see comments and code in core/Translator.cpp.
+
 			INSTR(ext_get2locals) {
 				uint32 regs = *pc++;
 				*(++sp) = framep[regs & 65535];
@@ -2585,11 +2705,325 @@ namespace avmplus
 				NEXT;
 			}
 					
+			INSTR(ext_get4locals) {
+				uint32 regs = *pc++;
+				*(++sp) = framep[regs & 255];
+				regs >>= 8;
+				*(++sp) = framep[regs & 255];
+				regs >>= 8;
+				*(++sp) = framep[regs & 255];
+				*(++sp) = framep[regs >> 8];
+				NEXT;
+			}
+					
+			INSTR(ext_get5locals) {
+				uint32 regs = *pc++;
+				*(++sp) = framep[regs & 63];
+				regs >>= 6;
+				*(++sp) = framep[regs & 63];
+				regs >>= 6;
+				*(++sp) = framep[regs & 63];
+				regs >>= 6;
+				*(++sp) = framep[regs & 63];
+				*(++sp) = framep[regs >> 6];
+				NEXT;
+			}
+					
 			INSTR(ext_storelocal) {
 				framep[*pc++] = *sp;
 				NEXT;
 			}
 					
+			INSTR(ext_add_ll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 65535];
+				Atom rhs=framep[regs >> 16];
+				++sp;
+				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_add_set_lll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 1023];
+				regs >>= 10;
+				Atom rhs=framep[regs & 1023];
+				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, framep[regs >> 10]);
+			}
+					
+			INSTR(ext_subtract_ll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 65535];
+				Atom rhs=framep[regs >> 16];
+				++sp;
+				SUB_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_multiply_ll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 65535];
+				Atom rhs=framep[regs >> 16];
+				++sp;
+				MUL_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_divide_ll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 65535];
+				Atom rhs=framep[regs >> 16];
+				++sp;
+				DIV_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_modulo_ll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 65535];
+				Atom rhs=framep[regs >> 16];
+				++sp;
+				MOD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_bitand_ll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 65535];
+				Atom rhs=framep[regs >> 16];
+				++sp;
+				BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_bitor_ll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 65535];
+				Atom rhs=framep[regs >> 16];
+				++sp;
+				BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_bitxor_ll) {
+				uint32 regs = *pc++;
+				Atom lhs=framep[regs & 65535];
+				Atom rhs=framep[regs >> 16];
+				++sp;
+				BITXOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+			
+			// OPTIMIZEME - redundant type check.
+			// As long as ext_pushbits is only used for integer data we know that
+			// rhs is an int in the cases below, so the macros need not check.
+					
+			INSTR(ext_add_lb) {
+				Atom lhs=framep[*pc++];
+				Atom rhs=*pc++;
+				++sp;
+				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_subtract_lb) {
+				Atom lhs=framep[*pc++];
+				Atom rhs=*pc++;
+				++sp;
+				SUB_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_multiply_lb) {
+				Atom lhs=framep[*pc++];
+				Atom rhs=*pc++;
+				++sp;
+				MUL_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_divide_lb) {
+				Atom lhs=framep[*pc++];
+				Atom rhs=*pc++;
+				++sp;
+				DIV_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_bitand_lb) {
+				Atom lhs=framep[*pc++];
+				Atom rhs=*pc++;
+				++sp;
+				BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_bitor_lb) {
+				Atom lhs=framep[*pc++];
+				Atom rhs=*pc++;
+				++sp;
+				BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+			INSTR(ext_bitxor_lb) {
+				Atom lhs=framep[*pc++];
+				Atom rhs=*pc++;
+				++sp;
+				BITXOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
+			}
+					
+#define IFCMP_LL2(numeric_cmp, generic_cmp) \
+		SAVE_EXPC; \
+		int32 offset = (int32)*pc++; \
+		uint32 regs = *pc++; \
+		Atom lhs = framep[regs & 65535]; \
+		Atom rhs = framep[regs >> 16]; \
+		IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, lhs, rhs, offset)
+
+#define IFCMP_LL(x) IFCMP_LL2(x)
+
+			INSTR(ext_iflt_ll) {
+				IFCMP_LL(COMPARE_LESS);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifnlt_ll) {
+				IFCMP_LL(COMPARE_NOTLESS);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifle_ll) {
+				IFCMP_LL(COMPARE_LESSEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifnle_ll) {
+				IFCMP_LL(COMPARE_NOTLESSEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifgt_ll) {
+				IFCMP_LL(COMPARE_GREATER);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifngt_ll) {
+				IFCMP_LL(COMPARE_NOTGREATER);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifge_ll) {
+				IFCMP_LL(COMPARE_GREATEREQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifnge_ll) {
+				IFCMP_LL(COMPARE_NOTGREATEREQUAL);
+			    NEXT;
+			}
+					
+#define IFEQ_LL2(intcmp, comparator, truish) \
+	SAVE_EXPC; \
+	int32 offset = (int32)*pc++; \
+	uint32 regs = *pc++; \
+	Atom lhs = framep[regs & 65535]; \
+	Atom rhs = framep[regs >> 16]; \
+	IFEQ_TWO_VALUES(intcmp, comparator, truish, lhs, rhs, offset);
+
+#define IFEQ_LL(x) IFEQ_LL2(x)
+					
+			INSTR(ext_ifeq_ll) {
+				IFEQ_LL(COMPARE_EQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifne_ll) {
+				IFEQ_LL(COMPARE_NOTEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifstricteq_ll) {
+				IFEQ_LL(COMPARE_STRICTEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifstrictne_ll) {
+				IFEQ_LL(COMPARE_NOTSTRICTEQUAL);
+			    NEXT;
+			}
+
+#define IFCMP_LB2(numeric_cmp, generic_cmp) \
+		SAVE_EXPC; \
+		int32 offset = (int32)*pc++; \
+		Atom lhs = framep[*pc++]; \
+		Atom rhs = *pc++; \
+		IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, lhs, rhs, offset)
+
+#define IFCMP_LB(x) IFCMP_LB2(x)
+
+			INSTR(ext_iflt_lb) {
+				IFCMP_LB(COMPARE_LESS);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifnlt_lb) {
+				IFCMP_LB(COMPARE_NOTLESS);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifle_lb) {
+				IFCMP_LB(COMPARE_LESSEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifnle_lb) {
+				IFCMP_LB(COMPARE_NOTLESSEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifgt_lb) {
+				IFCMP_LB(COMPARE_GREATER);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifngt_lb) {
+				IFCMP_LB(COMPARE_NOTGREATER);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifge_lb) {
+				IFCMP_LB(COMPARE_GREATEREQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifnge_lb) {
+				IFCMP_LB(COMPARE_NOTGREATEREQUAL);
+			    NEXT;
+			}
+					
+#define IFEQ_LB2(intcmp, comparator, truish) \
+	SAVE_EXPC; \
+	int32 offset = (int32)*pc++; \
+	Atom lhs = framep[*pc++]; \
+	Atom rhs = *pc++; \
+	IFEQ_TWO_VALUES(intcmp, comparator, truish, lhs, rhs, offset);
+
+#define IFEQ_LB(x) IFEQ_LB2(x)
+					
+			INSTR(ext_ifeq_lb) {
+				IFEQ_LB(COMPARE_EQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifne_lb) {
+				IFEQ_LB(COMPARE_NOTEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifstricteq_lb) {
+				IFEQ_LB(COMPARE_STRICTEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_ifstrictne_lb) {
+				IFEQ_LB(COMPARE_NOTSTRICTEQUAL);
+			    NEXT;
+			}
+					
+			INSTR(ext_swap_pop) {
+				sp[-1] = sp[0];
+				--sp;
+			    NEXT;
+			}
+
+#  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
 #  ifndef AVMPLUS_DIRECT_THREADED
 			} // switch
 			} // INSTR(ext)
