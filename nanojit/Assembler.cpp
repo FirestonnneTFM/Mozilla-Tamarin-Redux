@@ -63,7 +63,6 @@ namespace nanojit
 	    {
             LOpcode op = ins->opcode();
             if (ins->isStore() ||
-                op == LIR_def ||
                 op == LIR_loop ||
                 op == LIR_label ||
                 op == LIR_live ||
@@ -1085,56 +1084,6 @@ namespace nanojit
                     freeRsrcOf(ins, 0);
                     break;
                 }
-
-				case LIR_var:
-				{
-                    countlir_var();
-					Reservation* r = getresv(ins);
-					NanoAssert(r->reg == UnknownReg); // don't directly access LIR_var, LIR_use it first
-					arFree(r->arIndex);	// free any stack stack space associated with entry
-					reserveFree(ins);	// clear fields of entry and add it to free list
-					break;
-				}					
-				case LIR_use:
-				{
-                    countlir_use();
-					LInsp to = ins->oprnd1();
-					int d = findMemFor(to); // var's mem							
-					Reservation* r = getresv(ins);
-					if (r->reg == UnknownReg)
-					{
-						// was spilled so we need to ld/st
-						NanoAssert(r->arIndex);  // must be on the stack ; otherwise this is dead code!
-						Register rr = findRegFor(ins, GpRegs);
-						evict(rr);      // store to spill'd location						
-						asm_load(d,rr); // load from var 
-						NanoAssertMsg(0,"Call me if you hit this untested path [rickr]");
-					}
-					else
-					{
-						// should be in a reg so we just need a load
-						asm_load(d,r->reg);
-						_allocator.retire(r->reg);
-						r->reg = UnknownReg;
-					}
-
-					arFree(r->arIndex);	// free any stack stack space associated with entry
-					reserveFree(ins);	// clear fields of entry and add it to free list
-					break;
-				}					
-			
-			
-				case LIR_def:
-				{
-                    countlir_def();
-					NanoAssert(!getresv(ins));  // like store no one should ref this.
-					LInsp to = ins->oprnd1();
-					LInsp val = ins->oprnd2();
-					int d = findMemFor(to); // var's mem
-					Register valreg = findRegFor(val, GpRegs);					
-					asm_spill(valreg, d);
-					break;
-				}					
 				case LIR_short:
 				case LIR_int:
 				{
