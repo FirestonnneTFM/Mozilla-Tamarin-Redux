@@ -42,6 +42,10 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 	using namespace MMgc;
 	
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+	Translator::peep_attr_t Translator::attrs[OP_INDEX(LAST_SUPERWORD_OPCODE)+1];
+#endif
+	
 	class TranslatedCode : public GCObject
 	{
 	public:
@@ -87,7 +91,7 @@ namespace avmplus
 		
 		refill();
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-		state = 0;
+		peepInit();
 #endif
 	}
 
@@ -912,8 +916,122 @@ namespace avmplus
 	// in order to commit to the longest prefix of the instructions still in the peephole
 	// window.
 	
-	// Replace old instructions with new words of code, tail called from the 
-	// commit() function.
+	void Translator::peepInit()
+	{
+		state = 0;
+		
+		// Initialize the instruction attribute table.
+		//
+		// FIXME: optimize for code size
+		//
+		// Silly to do this work here, there needs to be a constant table, but
+		// it needs to incorporate the tables in opcodes.h / opcodes.cpp as well
+		// so for the moment this will do.
+		//
+		// Could also hold flags for whether something is op0, op1, etc, so that
+		// the big switch statements below are not needed.
+		
+		if (attrs[OP_dup].width > 0)
+			return;
+		
+		for ( int i=0 ; i < 255 ; i++ )
+			attrs[i].width = opOperandCount[i] + 1;
+				
+		attrs[OP_INDEX(OP_ext_swap_pop)].width = 1;
+		
+		attrs[OP_INDEX(OP_ext_pushbits)].width = 2;
+		attrs[OP_INDEX(OP_ext_get2locals)].width = 2;
+		attrs[OP_INDEX(OP_ext_get3locals)].width = 2;
+		attrs[OP_INDEX(OP_ext_get4locals)].width = 2;
+		attrs[OP_INDEX(OP_ext_get5locals)].width = 2;
+		attrs[OP_INDEX(OP_ext_storelocal)].width = 2;
+		attrs[OP_INDEX(OP_ext_add_ll)].width = 2;
+		attrs[OP_INDEX(OP_ext_add_set_lll)].width = 2;
+		attrs[OP_INDEX(OP_ext_subtract_ll)].width = 2;
+		attrs[OP_INDEX(OP_ext_multiply_ll)].width = 2;
+		attrs[OP_INDEX(OP_ext_divide_ll)].width = 2;
+		attrs[OP_INDEX(OP_ext_modulo_ll)].width = 2;
+		attrs[OP_INDEX(OP_ext_bitand_ll)].width = 2;
+		attrs[OP_INDEX(OP_ext_bitor_ll)].width = 2;
+		attrs[OP_INDEX(OP_ext_bitxor_ll)].width = 2;
+		
+		attrs[OP_INDEX(OP_ext_push_doublebits)].width = 3;
+		attrs[OP_INDEX(OP_ext_add_lb)].width = 3;
+		attrs[OP_INDEX(OP_ext_subtract_lb)].width = 3;
+		attrs[OP_INDEX(OP_ext_multiply_lb)].width = 3;
+		attrs[OP_INDEX(OP_ext_divide_lb)].width = 3;
+		attrs[OP_INDEX(OP_ext_bitand_lb)].width = 3;
+		attrs[OP_INDEX(OP_ext_bitor_lb)].width = 3;
+		attrs[OP_INDEX(OP_ext_bitxor_lb)].width = 3;
+		attrs[OP_INDEX(OP_ext_iflt_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifnlt_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifle_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifnle_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifgt_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifngt_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifge_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifnge_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifeq_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifne_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifstricteq_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_ifstrictne_ll)].width = 3;
+		
+		attrs[OP_INDEX(OP_ext_iflt_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifnlt_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifle_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifnle_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifgt_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifngt_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifge_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifnge_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifeq_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifne_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifstricteq_lb)].width = 4;
+		attrs[OP_INDEX(OP_ext_ifstrictne_lb)].width = 4;
+		
+		attrs[OP_INDEX(OP_jump)].jumps = 1;
+		attrs[OP_INDEX(OP_iftrue)].jumps = 1;
+		attrs[OP_INDEX(OP_iffalse)].jumps = 1;
+		attrs[OP_INDEX(OP_ifeq)].jumps = 1;
+		attrs[OP_INDEX(OP_ifne)].jumps = 1;
+		attrs[OP_INDEX(OP_ifstricteq)].jumps = 1;
+		attrs[OP_INDEX(OP_ifstrictne)].jumps = 1;
+		attrs[OP_INDEX(OP_iflt)].jumps = 1;
+		attrs[OP_INDEX(OP_ifnlt)].jumps = 1;
+		attrs[OP_INDEX(OP_ifgt)].jumps = 1;
+		attrs[OP_INDEX(OP_ifngt)].jumps = 1;
+		attrs[OP_INDEX(OP_ifle)].jumps = 1;
+		attrs[OP_INDEX(OP_ifnle)].jumps = 1;
+		attrs[OP_INDEX(OP_ifge)].jumps = 1;
+		attrs[OP_INDEX(OP_ifnge)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_iflt_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifnlt_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifle_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifnle_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifgt_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifngt_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifge_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifnge_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifeq_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifne_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifstricteq_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifstrictne_ll)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_iflt_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifnlt_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifle_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifnle_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifgt_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifngt_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifge_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifnge_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifeq_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifne_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifstricteq_lb)].jumps = 1;
+		attrs[OP_INDEX(OP_ext_ifstrictne_lb)].jumps = 1;
+	}
+	
+	// Replace old instructions with new words of code.  This is tail called from the 
+	// generated commit() function (see peephole.cpp).
 	//
 	// Invariants here:
 	//
@@ -1090,125 +1208,7 @@ namespace avmplus
 			I[nextI - 1][1] = -int32(buffer_offset + (dest - buffers->data) + (int32)I[nextI - 1][1]);
 		}
 	}
-	
-	// OPTIMIZEME - instruction width lookup must be fast.
-	// Should use a table lookup for all the opcodes.
-	
-	uint32 Translator::calculateInstructionWidth(uint32 opcode)
-	{
-		if (opcode < 255)
-			return opOperandCount[opcode] + 1;
-		switch (opcode) {
-			case OP_ext_swap_pop:
-				return 1;
-			case OP_ext_pushbits:
-			case OP_ext_get2locals:
-			case OP_ext_get3locals:
-			case OP_ext_get4locals:
-			case OP_ext_get5locals:
-			case OP_ext_storelocal:
-			case OP_ext_add_ll:
-			case OP_ext_add_set_lll:
-			case OP_ext_subtract_ll:
-			case OP_ext_multiply_ll:
-			case OP_ext_divide_ll:
-			case OP_ext_modulo_ll:
-			case OP_ext_bitand_ll:
-			case OP_ext_bitor_ll:
-			case OP_ext_bitxor_ll:
-				return 2;
-			case OP_ext_push_doublebits:
-			case OP_ext_add_lb:
-			case OP_ext_subtract_lb:
-			case OP_ext_multiply_lb:
-			case OP_ext_divide_lb:
-			case OP_ext_bitand_lb:
-			case OP_ext_bitor_lb:
-			case OP_ext_bitxor_lb:
-			case OP_ext_iflt_ll:
-			case OP_ext_ifnlt_ll:
-			case OP_ext_ifle_ll:
-			case OP_ext_ifnle_ll:
-			case OP_ext_ifgt_ll:
-			case OP_ext_ifngt_ll:
-			case OP_ext_ifge_ll:
-			case OP_ext_ifnge_ll:
-			case OP_ext_ifeq_ll:
-			case OP_ext_ifne_ll:
-			case OP_ext_ifstricteq_ll:
-			case OP_ext_ifstrictne_ll:
-				return 3;
-			case OP_ext_iflt_lb:
-			case OP_ext_ifnlt_lb:
-			case OP_ext_ifle_lb:
-			case OP_ext_ifnle_lb:
-			case OP_ext_ifgt_lb:
-			case OP_ext_ifngt_lb:
-			case OP_ext_ifge_lb:
-			case OP_ext_ifnge_lb:
-			case OP_ext_ifeq_lb:
-			case OP_ext_ifne_lb:
-			case OP_ext_ifstricteq_lb:
-			case OP_ext_ifstrictne_lb:
-				return 4;
-			default:
-				AvmAssert(!"Should not happen");
-				return 1;
-		}
-	}
-	
-	// OPTIMIZEME - determining jump instruction must be fast.
-	// Should use a fast lookup or an inlinable
-	// comparison (all these instructions are in a dense range).
-	
-	bool Translator::isJumpInstruction(uint32 opcode)
-	{
-		switch (opcode) {
-			case OP_jump:
-			case OP_iftrue:
-			case OP_iffalse:
-			case OP_ifeq:
-			case OP_ifne:
-			case OP_ifstricteq:
-			case OP_ifstrictne:
-			case OP_iflt:
-			case OP_ifnlt:
-			case OP_ifgt:
-			case OP_ifngt:
-			case OP_ifle:
-			case OP_ifnle:
-			case OP_ifge:
-			case OP_ifnge:
-			case OP_ext_iflt_ll:
-			case OP_ext_ifnlt_ll:
-			case OP_ext_ifle_ll:
-			case OP_ext_ifnle_ll:
-			case OP_ext_ifgt_ll:
-			case OP_ext_ifngt_ll:
-			case OP_ext_ifge_ll:
-			case OP_ext_ifnge_ll:
-			case OP_ext_ifeq_ll:
-			case OP_ext_ifne_ll:
-			case OP_ext_ifstricteq_ll:
-			case OP_ext_ifstrictne_ll:
-			case OP_ext_iflt_lb:
-			case OP_ext_ifnlt_lb:
-			case OP_ext_ifle_lb:
-			case OP_ext_ifnle_lb:
-			case OP_ext_ifgt_lb:
-			case OP_ext_ifngt_lb:
-			case OP_ext_ifge_lb:
-			case OP_ext_ifnge_lb:
-			case OP_ext_ifeq_lb:
-			case OP_ext_ifne_lb:
-			case OP_ext_ifstricteq_lb:
-			case OP_ext_ifstrictne_lb:
-				return true;
-			default:
-				return false;
-		}
-	}
-	
+
 	void Translator::peep(uint32 opcode, uint32* loc)
 	{
 		peep_state_t *s;
