@@ -58,8 +58,8 @@ sourceExt = '.as' # can be changed to .js, .es ...
 testTimeOut = -1 #by default tests will NOT timeout
 debug = False
 
-globs = { 'avm':'', 'asc':'', 'globalabc':'', 'exclude':[],
-          'config':'', 'ascargs':'', 'vmargs':'', 'escbin':'', 'optimize':True}
+globs = { 'avm':'', 'asc':'', 'globalabc':'', 'shellabc':'','exclude':[],
+          'config':'', 'ascargs':'', 'vmargs':'', 'escbin':''}
 
 # default value for escbin
 globs['escbin'] = '../../esc/bin/'
@@ -70,6 +70,8 @@ if 'ASC' in environ:
     globs['asc'] = environ['ASC'].strip()
 if 'GLOBALABC' in environ:
     globs['globalabc'] = environ['GLOBALABC'].strip()
+if 'SHELLABC' in environ:
+    globs['shellabc'] = environ['SHELLABC'].strip()
 if 'CVS' in environ:
     globs['exclude'] = ['CVS'].strip()
 if 'CONFIG' in environ:
@@ -117,6 +119,7 @@ def usage(c):
     print ' -E --avm           avmplus command to use'
     print ' -a --asc           compiler to use'
     print ' -g --globalabc     location of global.abc'
+    print ' -s --shellabc      location of shell_toplevel.abc'
     print ' -x --exclude       comma separated list of directories to skip'
     print ' -h --help          display help and exit'
     print ' -t --notime        do not generate timestamps (cleaner diffs)'
@@ -128,13 +131,12 @@ def usage(c):
     print '    --ascargs       args to pass to asc on rebuild of test files'
     print '    --vmargs        args to pass to vm'
     print '    --timeout       max time to let a test run, in sec (default -1 = never timeout)'
-    print '    --nooptimize    don\'t optimize files when compiling'
     exit(c)
 
 try:
-    opts, args = getopt(argv[1:], 'vE:a:g:x:htfc:d', ['verbose','avm=','asc=','globalabc=',
+    opts, args = getopt(argv[1:], 'vE:a:g:s:x:htfc:d', ['verbose','avm=','asc=','globalabc=','shellabc=',
                 'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                'ext=','timeout=','esc','escbin=','nooptimize'])
+                'ext=','timeout=','esc','escbin='])
 except:
     usage(2)
 
@@ -151,6 +153,8 @@ for o, v in opts:
         globs['asc'] = v
     elif o in ('-g', '--globalabc'):
         globs['globalabc'] = v
+    elif o in ('-s', '--shellabc'):
+        globs['shellabc'] = v
     elif o in ('-x', '--exclude'):
         globs['exclude'] += v.split(',')
     elif o in ('-t', '--notime'):
@@ -173,9 +177,6 @@ for o, v in opts:
         globs['escbin'] = v
     elif o in ('-d'):
         debug = True
-    elif o in ('--nooptimize'):
-        globs['optimize'] = False
-
 
 exclude = globs['exclude']
 
@@ -268,20 +269,20 @@ def dict_match(dict,test,value):
                 return dict[k][value]
 
 def compile_test(as):
-    asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
+    asc, globalabc, shellabc, ascargs = globs['asc'], globs['globalabc'], globs['shellabc'], globs['ascargs']
     if not isfile(asc):
         exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as)
     if not isfile(globalabc):
         exit('ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc' % globalabc)
+    if not isfile(shellabc):
+        exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % shellabc)
   
     if asc.endswith('.jar'):
         cmd = 'java -jar ' + asc
     else:
         cmd = asc
     cmd += ' ' + ascargs
-    cmd += ' -import ' + globalabc
-    if globs['optimize']:
-        cmd += ' -optimize'
+    cmd += ' -import %s -import %s ' %(globalabc,shellabc)
     (dir, file) = split(as)
     verbose_print('   compiling %s' % file)
     for p in parents(dir):
