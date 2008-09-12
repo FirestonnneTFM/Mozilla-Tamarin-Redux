@@ -1212,8 +1212,7 @@ namespace avmplus
 	void Translator::peep(uint32 opcode, uint32* loc)
 	{
 		peep_state_t *s;
-		peep_transition_t *t;
-		uint32 i, limit, next_state, toplevel_index;
+		uint32 limit, next_state, toplevel_index;
 		
 		AvmAssert(opcode != OP_lookupswitch);
 
@@ -1226,25 +1225,42 @@ namespace avmplus
 		}
 		
 		// Search for a transition from the current state to a next
-		// state on input 'opcode'.  
-		//
-		// OPTIMIZEME - search for next state
-		// This search is sequential now, but things are set up so 
-		// that we can use binary search later: transitions are sorted
-		// in token value order
+		// state on input 'opcode'.
 		
 		O[nextI] = opcode;
 		I[nextI] = loc;
 		nextI++;
 		s = &states[state];
-		t = &transitions[s->transitionPtr];
 		limit = s->numTransitions;
 		
-		i = 0;
-		while (i < limit && t->opcode != opcode) 
-			i++, t++;
+		// The transition lists can get quite long for popular instructions like GETLOCAL;
+		// binary search if it that might be profitable.
 		
-		next_state = (i == limit) ? 0 : t->next_state;
+		if (limit > 4) {
+			int32 lo = s->transitionPtr;
+			int32 hi = lo + limit - 1;
+			while (lo <= hi) {
+				uint32 mid = (unsigned)(lo + hi) / 2;
+				uint32 probe = transitions[mid].opcode;
+				if (probe == opcode) {
+					next_state = transitions[mid].next_state;
+					break;
+				}
+				if (opcode < probe)
+					hi = mid-1;
+				else
+					lo = mid+1;
+			}
+			next_state = 0;
+		}
+		else {
+			peep_transition_t* t = &transitions[s->transitionPtr];
+			uint32 i = 0;
+			while (i < limit && t->opcode != opcode) 
+				i++, t++;
+			
+			next_state = (i == limit) ? 0 : t->next_state;
+		}
 		
 		if (next_state != 0) {
 
