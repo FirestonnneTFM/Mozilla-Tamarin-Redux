@@ -75,7 +75,8 @@ namespace avmplus
 // Note that eg utils/peephole.as knows about these values.
 
 #ifdef AVMPLUS_WORD_CODE
-#  define OP_ext 0xFF                                  // FIXME! Define this in opcodes.tbl!
+
+#  define OP_ext 0xFF                                  // Reserved in opcodes.tbl as the extension prefix for superwords
 
 #  define OP_ext_pushbits           ((1<<8) | OP_ext)  // pushint, pushuint, pushshort, pushbyte
 #  define OP_ext_push_doublebits    ((2<<8) | OP_ext)  // pushint, pushuint if value is outside atom range
@@ -125,6 +126,8 @@ namespace avmplus
 #  define OP_ext_ifstricteq_lb     ((46<<8) | OP_ext)
 #  define OP_ext_ifstrictne_lb     ((47<<8) | OP_ext)
 #  define OP_ext_swap_pop          ((48<<8) | OP_ext)
+
+#  define LAST_SUPERWORD_OPCODE    ((48<<8) | OP_ext)
 
 #endif // AVMPLUS_WORD_CODE
 #endif // __avmplus_Interpreter__

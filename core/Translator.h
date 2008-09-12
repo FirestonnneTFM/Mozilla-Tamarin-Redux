@@ -42,8 +42,10 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 
 #  ifdef AVMPLUS_DIRECT_THREADED
-#    define NEW_OPCODE(opcode)    ((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode]));
+#    define OP_INDEX(n)           (n >= 256 ? (n>>8) + 256 : n)
+#    define NEW_OPCODE(opcode)    ((uint32)opcode_labels[OP_INDEX(n)])
 #  else
+#    define OP_INDEX(n)           n
 #    ifdef _DEBUG
 #      define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // aids debugging
 #    else
@@ -195,6 +197,14 @@ namespace avmplus
 		static uint16 toplevel[];               // Transition table for initial state
 		static peep_state_t states[];           // State 0 is not used
 		static peep_transition_t transitions[]; // Compact transition representation
+		
+		struct peep_attr_t
+		{
+			unsigned char width;				// Number of words including opcode
+			unsigned jumps:1;					// True if the instruction jumps
+		};
+		
+		static peep_attr_t attrs[];				// Instruction attributes and widths
 
 		uint32  state;							// current state in the matcher, or 0
 		uint32  backtrack_stack[10];			// commit candidates (state numbers)
@@ -205,14 +215,20 @@ namespace avmplus
 		uint32  R[30];							// replacement data
 		uint32  S[30];							// symbolic opcode for some R entries
 		
+		void peepInit();
 		void peep(uint32 opcode, uint32* loc);
 		void peepFlush();
 		bool commit(uint32 action);
 		bool replace(uint32 old_instr, uint32 new_words, bool jump_has_been_translated=false);
-		bool isJumpInstruction(uint32 opcode);
 		void undoRelativeOffsetInJump();
-		uint32 calculateInstructionWidth(uint32 opcode);
 		
+		bool isJumpInstruction(uint32 opcode) {
+			return attrs[OP_INDEX(opcode)].jumps;
+		}
+		
+		uint32 calculateInstructionWidth(uint32 opcode) {
+			return attrs[OP_INDEX(opcode)].width;
+		}
 #endif	// AVMPLUS_PEEPHOLE_OPTIMIZER
 
 	};
