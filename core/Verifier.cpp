@@ -2625,7 +2625,8 @@ namespace avmplus
 		if (!m->argcOk(argc))
 			return false;
 		
-		// OPTIMIZEME: handle interfaces here, but the interpreter currently does not handle OP_callinterface.
+		// OPTIMIZEME - early-bind OP_callinterface for the interpreter
+		// The interpreter currently does not handle OP_callinterface at all.
 		if (t->isInterface) 
 			return false;
 		
@@ -2789,7 +2790,7 @@ namespace avmplus
 						(void)opcode;
 						#endif
 						state->push(script->declaringTraits, true);
-						// OPTIMIZEME: could do better here?
+						// OPTIMIZEME - more early binding for interpreter on getproperty?
 						XLAT_ONLY( if (translator) translator->emitOp1(opcode, imm30) );
 						return;
 					}

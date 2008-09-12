@@ -187,7 +187,7 @@ namespace avmplus
 #      define XXX(idx) &&L_illegal_op,
 			static void* opcode_labels[] = {
 #  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
-	    static void* opcode_labels[300];  // FIXME: need better way of computing the size of that table
+	    static void* opcode_labels[OP_INDEX(LAST_SUPERWORD_OPCODE)+1];
         if (opcode_labels[0] == 0) {
 #    define XXX(idx) III(idx, L_illegal_op)
 #    ifdef MSVC_X86_ASM_THREADING
@@ -848,24 +848,18 @@ namespace avmplus
 
 #ifndef AVMPLUS_WORD_CODE
             INSTR(nop) {
-				// FIXME: In the direct threaded translation these should probably
-				// not be in the instruction stream at all.
                 NEXT;
 			}
 #endif
 					
 #ifndef AVMPLUS_WORD_CODE
             INSTR(label) {
-				// FIXME: In the direct threaded translation these should probably
-				// not be in the instruction stream at all.
                 NEXT;
 			}
 #endif
 
 #ifndef AVMPLUS_WORD_CODE
 			INSTR(timestamp) {
-				// FIXME: In the direct threaded translation these should probably
-				// not be in the instruction stream at all.
                 NEXT;
 			}
 #endif
@@ -981,11 +975,6 @@ namespace avmplus
 
 #ifndef AVMPLUS_WORD_CODE
             INSTR(pushint) {
-				// FIXME
-				// Here we want the translator to direct threaded code
-				// to specialize the operation into a plain 'pushword' that
-				// simply pushes the following word (it could be tagged
-				// already) or a 'pushdouble'
                 *(++sp) = core->intToAtom(cpool_int[U30ARG]);
                 NEXT;
 			}
@@ -993,11 +982,6 @@ namespace avmplus
 					
 #ifndef AVMPLUS_WORD_CODE
             INSTR(pushuint) {
-				// FIXME
-				// Here we want the translator to direct threaded code
-				// to specialize the operation into a plain 'pushword' that
-				// simply pushes the following word (it could be tagged
-				// already) or a 'pushdouble'
                 *(++sp) = core->uintToAtom(cpool_uint[U30ARG]);
                 NEXT;
 			}
@@ -1185,7 +1169,7 @@ namespace avmplus
 			}
 
 			INSTR(bitnot) {
-				// OPTIMIZEME
+				// OPTIMIZEME - bitnot on integer values
 				SAVE_EXPC;
 				*sp = core->intToAtom(~core->integer(*sp));
 				restore_dxns();
@@ -1428,7 +1412,7 @@ namespace avmplus
 			}
 
 			INSTR(multiply_i) {
-				// OPTIMIZEME? for small integer
+				// OPTIMIZEME - multiplication of small integers might be faster
 				SAVE_EXPC;
                 sp[-1] = core->intToAtom(core->integer(sp[-1]) * core->integer(sp[0]));
                 sp--;
@@ -1452,7 +1436,7 @@ namespace avmplus
 				DIV_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
-// FIXME - dodgy optimization
+// FIXME - dodgy optimization?
 // Can the integer modulo overflow somehow?  Is it portable?
 					
 #define MOD_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
@@ -1572,7 +1556,7 @@ namespace avmplus
 			}
 
             INSTR(equals) {
-				// OPTIMIZEME?
+				// OPTIMIZEME - equals on some classes of values?
 				SAVE_EXPC;
 				sp[-1] = core->equals(sp[-1], sp[0]);
                 sp--;
@@ -1581,7 +1565,7 @@ namespace avmplus
 			}
 
             INSTR(strictequals) {
-				// OPTIMIZEME?
+				// OPTIMIZEME - strictequals on some classes of values?
                 sp[-1] = core->stricteq(sp[-1], sp[0]);
                 sp--;
                 NEXT;
@@ -2089,8 +2073,8 @@ namespace avmplus
 			INSTR(getslot) {
 				SAVE_EXPC;
 				env->nullcheck(sp[0]);
-				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
-				// in the bytecode translator, not here every time.
+				// FIXME: cleanup after ABC interpreter defenestration.
+				// Perform the -1 adjustment in the bytecode translator, not here every time.
 				sp[0] = AvmCore::atomToScriptObject(sp[0])->getSlotAtom(U30ARG-1);
 				restore_dxns();
 				NEXT;
@@ -2105,8 +2089,8 @@ namespace avmplus
 				else
 					global = AvmCore::atomToScriptObject(scope->getScope(0));
 
-				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
-				// in the bytecode translator, not here every time.
+				// FIXME: cleanup after ABC interpreter defenestration.
+				// Perform the -1 adjustment in the bytecode translator, not here every time.
 				int slot_id = U30ARG-1;
 				Atom op = sp[0];
 				sp--;
@@ -2124,8 +2108,8 @@ namespace avmplus
 				else
 					global = AvmCore::atomToScriptObject(scope->getScope(0));
 
-				// FIXME: when we get rid of the ABC interpreter then do the -1 translation 
-				// in the bytecode translator, not here every time.
+				// FIXME: cleanup after ABC interpreter defenestration.
+				// Perform the -1 adjustment in the bytecode translator, not here every time.
 				sp++;
 				sp[0] = global->getSlotAtom(U30ARG-1);
 				restore_dxns();
@@ -2806,7 +2790,7 @@ namespace avmplus
 				BITXOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 			
-			// OPTIMIZEME - redundant type check.
+			// OPTIMIZEME - redundant type check in superword.
 			// As long as ext_pushbits is only used for integer data we know that
 			// rhs is an int in the cases below, so the macros need not check.
 					
