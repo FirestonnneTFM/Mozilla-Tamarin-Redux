@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="MMgc"
 	ProjectGUID="{B004A8CC-B3A9-4600-A1A9-EF1BBCF2434B}"
 	Keyword="Win32Proj"

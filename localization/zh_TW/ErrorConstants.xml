@@ -705,8 +705,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 要求物件及索引為可辨識的登錄。</error>
   <error id="1125" label="kOutOfRangeError">索引 %1 超出範圍 %2。</error>
   <error id="1126" label="kVectorFixedError">無法變更固定向量的長度。</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">嘗試在非參數化的類型上使用類型應用程式。</error>
+  <error id="1127" label="kTypeAppOfNonParamType">嘗試在非參數化的類型上使用類型應用程式。</error>
   <error id="1128" label="kWrongTypeArgCountError">%1 上的類型參數個數錯誤。需要 %2 個，目前為 %3 個。</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

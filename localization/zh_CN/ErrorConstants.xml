@@ -705,8 +705,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2 要求对象和索引位于不同的寄存器。</error>
   <error id="1125" label="kOutOfRangeError">索引 %1 超出范围 %2。</error>
   <error id="1126" label="kVectorFixedError">无法更改固定矢量的长度。</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">尝试对非参数化类型执行类型应用程序。</error>
+  <error id="1127" label="kTypeAppOfNonParamType">尝试对非参数化类型执行类型应用程序。</error>
   <error id="1128" label="kWrongTypeArgCountError">%1 的类型参数的个数不正确。应为 %2，当前为 %3。</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

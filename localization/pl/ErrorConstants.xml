@@ -622,8 +622,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">Kod operacji OP_hasnext2 wymaga, aby obiekt i indeks były różnymi rejestrami.</error>
   <error id="1125" label="kOutOfRangeError">Indeks %1 jest poza zakresem %2.</error>
   <error id="1126" label="kVectorFixedError">Nie można zmienić długości stałego wektora.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">Podjęto próbę zastosowania typu do niesparametryzowanego typu.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Podjęto próbę zastosowania typu do niesparametryzowanego typu.</error>
   <error id="1128" label="kWrongTypeArgCountError">Nieprawidłowa liczba parametrów typu dla %1. Oczekiwano %2, otrzymano %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

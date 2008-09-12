@@ -622,8 +622,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">O OP_hasnext2 requer que um objeto e um índice sejam registradores distintos.</error>
   <error id="1125" label="kOutOfRangeError">O índice %1 está fora do intervalo %2.</error>
   <error id="1126" label="kVectorFixedError">Não é possível alterar o comprimento de um vetor fixo.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">Tipo de aplicativo tentado de forma não-parametrizada.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">Tipo de aplicativo tentado de forma não-parametrizada.</error>
   <error id="1128" label="kWrongTypeArgCountError">Número incorreto de parâmetros de tipo para %1. Era esperado %2, mas foi recebido %3.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

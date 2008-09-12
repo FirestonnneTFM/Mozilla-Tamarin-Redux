@@ -106,8 +106,8 @@ namespace avmplus
 		ExceptionHandlerTable*	exceptions;	// we write this once, in Verifier, with an explicit WB.  so no DWB.
 #ifdef DEBUGGER
 	protected:
-		DWB(AbcFile*)			file;			// the abc file from which this method came
-		DWB(Stringp*)			localNames;		// array of names for args and locals in framep order
+		DWB(AbcFile*)			file;				// the abc file from which this method came
+		DWB(Stringp*)			localNames;			// array of names for args and locals in framep order
 	public:
 		int32_t					firstSourceLine;	// source line number where function starts
 		int32_t					lastSourceLine;		// source line number where function ends

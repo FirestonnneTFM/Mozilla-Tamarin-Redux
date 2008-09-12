@@ -471,6 +471,7 @@ namespace MMgc
 			}
 			inited = true;
 		}
+
 		HANDLE ht = GetCurrentThread();
 		HANDLE hp = GetCurrentProcess();
 
@@ -532,6 +533,7 @@ namespace MMgc
 
 			// Sometimes fires off in 64-bit 
 			// GCAssert(!frame.AddrPC.Offset || frame.AddrPC.Offset > 0x1000);
+
 			trace[i++] = (sintptr) frame.AddrPC.Offset;
 		}
 		trace[i] = 0;
@@ -609,4 +611,25 @@ nosym:
 	}
 #endif // MEMORY_INFO
 
+	/*static*/
+	size_t GCHeap::GetPrivateBytes()
+	{
+		void *addr = 0;
+		size_t ret;
+		size_t bytes=0;
+		MEMORY_BASIC_INFORMATION mib;
+		while(true)
+		{
+			ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
+			if(ret == 0)
+				break;
+
+			if((mib.State & MEM_COMMIT) && (mib.Type & MEM_PRIVATE))
+				bytes += mib.RegionSize;
+
+			addr = (void*) ((sintptr)mib.BaseAddress + mib.RegionSize);
+		}
+	
+		return bytes / GCHeap::kBlockSize;
+	}
 }

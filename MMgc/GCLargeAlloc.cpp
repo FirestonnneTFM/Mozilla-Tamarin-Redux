@@ -169,4 +169,15 @@ namespace MMgc
 		}
 		return bogusPointerReturnValue;
 	}
+	
+	size_t GCLargeAlloc::GetBytesInUse()
+	{
+		size_t bytes=0; 
+		LargeBlock *block = m_blocks;
+		while (block) {
+			bytes += block->usableSize;
+			block = block->next;
+		}		
+		return bytes;
+	}
 }

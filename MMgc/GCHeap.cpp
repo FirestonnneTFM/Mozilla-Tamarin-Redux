@@ -38,7 +38,10 @@
 
 
 #include <string.h>
-
+// TODO: remove this hack:
+#ifdef __WINSCW__
+#include <e32std.h>
+#endif
 #include "MMgc.h"
 
 #if defined(DARWIN) || defined(MMGC_ARM) || defined (MMGC_SPARC)
@@ -77,19 +80,26 @@ namespace MMgc
 
 	GCHeap::GCHeap(GCMallocFuncPtr m, GCFreeFuncPtr f, int initialSize)
 		: heapVerbose(false),
-		  kNativePageSize(0)
+		  kNativePageSize(0),
+		  heapLimit((size_t)-1)
 	{
 #ifdef _DEBUG
 		// dump memory profile after sweeps
 		enableMemoryProfiling = false;
 #endif
 
+#if defined(MMGC_PORTING_API)
+		// When Porting API is in use, we don't want explicit mention of malloc or free.
+		m_malloc = m ? m : MMGC_PortAPI_Alloc_func;
+		m_free = f ? f : MMGC_PortAPI_Free_func;		
+#else
 #if defined(_MAC) || defined(MMGC_ARM) || defined (MMGC_SPARC)
 		m_malloc = m ? m : (GCMallocFuncPtr)malloc;
 		m_free = f ? f : (GCFreeFuncPtr)free;		
 #else
 		(void)m;
 		(void)f;
+#endif
 #endif
 		#ifdef _DEBUG
 		// Initialize the megamap for debugging.
@@ -283,7 +293,7 @@ namespace MMgc
 #endif /* GCHEAP_LOCK */
 
 		// commit if > %25 of the heap stays free
-		int decommitSize = GetFreeHeapSize() * 100 - GetTotalHeapSize() * kDecommitThresholdPercentage;
+		size_t decommitSize = GetFreeHeapSize() * 100 - GetTotalHeapSize() * kDecommitThresholdPercentage;
 
 		decommitSize /= 100;
 
@@ -306,7 +316,7 @@ namespace MMgc
 		decommitTicks = 0;
 
 		// don't trifle
-		if(decommitSize < kMinHeapIncrement)
+		if(decommitSize < (size_t)kMinHeapIncrement)
 			return;
 
 		// search from the end of the free list so we decommit big blocks, if
@@ -326,16 +336,16 @@ namespace MMgc
 
 #ifdef USE_MMAP				
 				RemoveFromList(block);
-				if(block->size > decommitSize)
+				if((size_t)block->size > decommitSize)
 				{
 					HeapBlock *newBlock = block + decommitSize;
 					newBlock->baseAddr = block->baseAddr + kBlockSize * decommitSize;
 
-					newBlock->size = block->size - decommitSize;
-					newBlock->sizePrevious = decommitSize;
+					newBlock->size = (int)(block->size - decommitSize);
+					newBlock->sizePrevious = (int)decommitSize;
 					newBlock->committed = block->committed;
 					newBlock->dirty = block->dirty;
-					block->size = decommitSize;
+					block->size = (int)decommitSize;
 
 					// Update sizePrevious in block after that
 					HeapBlock *nextBlock = newBlock + newBlock->size;
@@ -870,6 +880,9 @@ namespace MMgc
 		const int defaultReserve = kDefaultReserve;
 #endif
 		
+		if(GetTotalHeapSize() > heapLimit)
+			return false;
+		
 		char *baseAddr = NULL;
 		char *newRegionAddr = NULL;
 		int newRegionSize = 0;
@@ -1308,5 +1321,17 @@ namespace MMgc
 		GCAcquireSpinlock lock(m_mirBufferLock);  // technically needed 
 #endif
 		if (b) b->free = true;
+	}
+	
+	size_t GCHeap::GetTotalHeapSize() const
+	{
+		size_t size = 0;
+		// Release all of the heap regions
+		Region *region = lastRegion;
+		while (region != NULL) {
+			size += region->commitTop - region->baseAddr;
+			region = region->prev;
+		}
+		return SizeToBlocks(size);
 	}
 }

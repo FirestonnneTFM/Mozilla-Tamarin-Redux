@@ -48,8 +48,10 @@
 #endif /* AVMPLUS_MACH_EXCEPTIONS */
 
 #ifdef AVMPLUS_UNIX
-#include <pthread.h>
-#include <stdio.h>
+	#ifndef AVMPLUS_SYMBIAN
+		#include <pthread.h>
+	#endif
+	#include <stdio.h>
 #endif /* AVMPLUS_UNIX */
 
 namespace avmplus

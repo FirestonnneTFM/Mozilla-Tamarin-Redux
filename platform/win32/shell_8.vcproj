@@ -654,7 +654,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\shell\toplevel.h"
+				RelativePath="..\..\shell\shell_toplevel.h"
 				>
 			</File>
 		</Filter>
@@ -702,7 +702,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\shell\toplevel.as"
+				RelativePath="..\..\shell\shell_toplevel.as"
 				>
 			</File>
 			<File

@@ -57,6 +57,7 @@ namespace avmplus
 	{
 		friend class VTable;
 	public:
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
 		// since we use the AbstractFunction pointer as the interface method id
 		// smaller = dense table, few large conflict stubs
@@ -67,6 +68,7 @@ namespace avmplus
 #else
 		static const int IMT_SIZE = 7;  // good for performance
 #endif
+#endif // AVMPLUS_MIR | FEATURE_NANOJIT
 
 		const byte* getTraitsPos() const {
 			AvmAssert(!linked);
@@ -225,8 +227,8 @@ namespace avmplus
 		Traitsp* findInterface(Traits* t) const;
 
 
-#ifdef AVMPLUS_VERBOSE
 	public:
+#ifdef AVMPLUS_VERBOSE
 		virtual Stringp format(AvmCore* core) const;
 #endif
 

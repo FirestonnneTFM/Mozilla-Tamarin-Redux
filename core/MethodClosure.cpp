@@ -67,6 +67,21 @@ namespace avmplus
 		return env->coerceEnter(argc, argv);
     }
 
+	Atom MethodClosure::call_this(Atom)
+	{
+		return env->coerceEnter(savedThis);
+	}
+
+	Atom MethodClosure::call_this_a(Atom, ArrayObject *a)
+	{
+		return env->coerceEnter(savedThis, a);
+	}
+
+	Atom MethodClosure::call_this_aa(Atom, int argc, Atom *argv)
+	{
+		return env->coerceEnter(savedThis, argc, argv);
+	}
+
 	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]

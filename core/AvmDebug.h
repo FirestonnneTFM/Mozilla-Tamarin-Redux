@@ -42,7 +42,7 @@
 #include "avmplusTypes.h"
 
 #ifdef WIN32
-#include <windows.h>
+    #include <windows.h>
 #endif
 
 #if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
@@ -51,9 +51,11 @@
         void AVMPlusCustomAssertionHandler(const char *message);
     }
 #endif
+
 #ifdef _MAC
     #if !defined(AVMPLUS_MAC_NO_CARBON)
         typedef const unsigned char* ConstStr255Param;
+
         extern "C"
 		{
             #ifdef powerc

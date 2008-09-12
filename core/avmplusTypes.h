@@ -84,7 +84,7 @@ namespace avmplus
     #ifndef NULL
     #define NULL 0
     #endif
-	
+
 	// Atom should really be an intptr_t, but doing so can cause problematic compiles
 	// because some platforms define intptr_t as an int64, and some as a long, which
 	// create different overload possibilities in a few cases. Ideally, Atom should
