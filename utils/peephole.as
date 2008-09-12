@@ -176,13 +176,98 @@ package peephole
     //
     // readOpcodes fleshes out this table.
 
-    const opcode = { OP_ext_pushbits: 0x101,
-		     OP_ext_push_doublebits: 0x102,
-		     OP_ext_get2locals: 0x103,
-		     OP_ext_get3locals: 0x104,
-		     OP_ext_storelocal: 0x105 };
+    const OP_ext = 255;
+    const opcode = { OP_ext_pushbits:        (1 + 256),
+		     OP_ext_push_doublebits: (2 + 256),
+		     OP_ext_get2locals:      (3 + 256),
+		     OP_ext_get3locals:      (4 + 256),
+		     OP_ext_get4locals:      (5 + 256),
+		     OP_ext_get5locals:      (6 + 256),
+		     OP_ext_storelocal:      (7 + 256),
+		     OP_ext_add_ll:          (8 + 256),
+		     OP_ext_add_set_lll:     (9 + 256),
+		     OP_ext_subtract_ll:     (10 + 256),
+		     OP_ext_multiply_ll:     (11 + 256),
+		     OP_ext_divide_ll:       (12 + 256),
+		     OP_ext_modulo_ll:       (13 + 256),
+		     OP_ext_bitand_ll:       (14 + 256),
+		     OP_ext_bitor_ll:        (15 + 256),
+		     OP_ext_bitxor_ll:       (16 + 256),
+		     OP_ext_add_lb:          (17 + 256),
+		     OP_ext_subtract_lb:     (18 + 256),
+		     OP_ext_multiply_lb:     (19 + 256),
+		     OP_ext_divide_lb:       (20 + 256),
+		     OP_ext_bitand_lb:       (21 + 256),
+		     OP_ext_bitor_lb:        (22 + 256),
+		     OP_ext_bitxor_lb:       (23 + 256),
+		     OP_ext_iflt_ll:         (24 + 256),
+		     OP_ext_ifnlt_ll:        (25 + 256),
+		     OP_ext_ifle_ll:         (26 + 256),
+		     OP_ext_ifnle_ll:        (27 + 256),
+		     OP_ext_ifgt_ll:         (28 + 256),
+		     OP_ext_ifngt_ll:        (29 + 256),
+		     OP_ext_ifge_ll:         (30 + 256),
+		     OP_ext_ifnge_ll:        (31 + 256),
+		     OP_ext_ifeq_ll:         (32 + 256),
+		     OP_ext_ifne_ll:         (33 + 256),
+		     OP_ext_ifstricteq_ll:   (34 + 256),
+		     OP_ext_ifstrictne_ll:   (35 + 256),
+		     OP_ext_iflt_lb:         (36 + 256),
+		     OP_ext_ifnlt_lb:        (37 + 256),
+		     OP_ext_ifle_lb:         (38 + 256),
+		     OP_ext_ifnle_lb:        (39 + 256),
+		     OP_ext_ifgt_lb:         (40 + 256),
+		     OP_ext_ifngt_lb:        (41 + 256),
+		     OP_ext_ifge_lb:         (42 + 256),
+		     OP_ext_ifnge_lb:        (43 + 256),
+		     OP_ext_ifeq_lb:         (44 + 256),
+		     OP_ext_ifne_lb:         (45 + 256),
+		     OP_ext_ifstricteq_lb:   (46 + 256),
+		     OP_ext_ifstrictne_lb:   (47 + 256),
+		     OP_ext_swap_pop:        (48 + 256) };
 
-    const MAXINSTR = 300; // last opcode in table above plus one would be adequate
+    const jump_opcodes = 
+	{ OP_jump:               true,
+	  OP_iftrue:             true,
+	  OP_iffalse:            true,
+	  OP_iflt:               true,
+	  OP_ifnlt:              true,
+	  OP_ifle:               true,
+	  OP_ifnle:              true,
+	  OP_ifgt:               true,
+	  OP_ifngt:              true,
+	  OP_ifge:               true,
+	  OP_ifnge:              true,
+	  OP_ifeq:               true,
+	  OP_ifne:               true,
+	  OP_ifstricteq:          true,
+	  OP_ifstrictne:          true,
+	  OP_ext_iflt_ll:         true,
+	  OP_ext_ifnlt_ll:        true,
+	  OP_ext_ifle_ll:         true,
+	  OP_ext_ifnle_ll:        true,
+	  OP_ext_ifgt_ll:         true,
+	  OP_ext_ifngt_ll:        true,
+	  OP_ext_ifge_ll:         true,
+	  OP_ext_ifnge_ll:        true,
+	  OP_ext_ifeq_ll:         true,
+	  OP_ext_ifne_ll:         true,
+	  OP_ext_ifstricteq_ll:   true,
+	  OP_ext_ifstrictne_ll:   true,
+	  OP_ext_iflt_lb:         true,
+	  OP_ext_ifnlt_lb:        true,
+	  OP_ext_ifle_lb:         true,
+	  OP_ext_ifnle_lb:        true,
+	  OP_ext_ifgt_lb:         true,
+	  OP_ext_ifngt_lb:        true,
+	  OP_ext_ifge_lb:         true,
+	  OP_ext_ifnge_lb:        true,
+	  OP_ext_ifeq_lb:         true,
+	  OP_ext_ifne_lb:         true,
+	  OP_ext_ifstricteq_lb:   true,
+	  OP_ext_ifstrictne_lb:   true };
+
+    const MAXINSTR = 350; // last opcode in table above plus one would be adequate
 
     const opname = new Vector.<String>(MAXINSTR, true);
     for ( var i=0 ; i < opname.length ; i++ )
@@ -392,7 +477,7 @@ package peephole
 
     function formatStates() {
 	var s = [];
-	s.push("static state_t states[] = {");
+	s.push("Translator::peep_state_t Translator::states[] = {");
 	s.push("//n  s  t  g  f");
 	s.push("{ 0, 0, 0, 0, 0 }, // Invalid");
 	for ( var i=0 ; i < states.length ; i++ ) {
@@ -416,7 +501,7 @@ package peephole
 
     function formatTransitions() {
 	var s = [];
-	s.push("static transition_t transitions[] = {");
+	s.push("Translator::peep_transition_t Translator::transitions[] = {");
 	for ( var i=0 ; i < transitions.length ; i++ ) {
 	    assert(transitions[i][1] < 65536);
 	    s.push("{ " + opname[transitions[i][0]] + ", " + transitions[i][1] + " }," + (i > 0 && i % 10 == 0 ? " // " + i : ""));
@@ -434,7 +519,7 @@ package peephole
 
     function formatToplevel() {
 	var s = [];
-	s.push("static uint16 toplevel[] = {");
+	s.push("uint16 Translator::toplevel[] = {");
 	var i=0;
 	while (i < MAXINSTR) {
 	    var t = "";
@@ -458,19 +543,24 @@ package peephole
 	    for ( var i=0 ; i < P.length ; i++ ) {
 		if (i > 0)
 		    s += " && ";
-		s += "I[" + i + "][0] == " + P[i];
+		s += "I[" + i + "][0] == NEW_OPCODE(" + P[i] + ")";
 	    }
 	    return "        AvmAssert(" + s + ");";
 	}
 
 	function emit(A) {
 	    var s = [];
+	    var undo = false;
 	    s.push("        if (" + (A.G ? A.G : "true") + ") {");
+	    if (A.P[A.P.length-1] in jump_opcodes) {
+		undo = true;
+		s.push("            undoRelativeOffsetInJump();");
+	    }
 	    s.push("            S[0] = " + A.A[0] + ";");
 	    s.push("            R[0] = NEW_OPCODE(" + A.A[0] + ");");
 	    for ( var j=1 ; j < A.A.length ; j++ )
 		s.push("            R[" + j + "] = " + A.A[j] + ";");
-	    s.push("            return replace(" + A.P.length + "," + A.A.length + ");");
+	    s.push("            return replace(" + A.P.length + "," + A.A.length + (undo ? ",true" : "") + ");");
 	    s.push("        }");
 	    return s.join("\n");
 	}
@@ -510,8 +600,16 @@ package peephole
     generate(buildTrie(parse(preprocess(File.read(System.argv[0]).split("\n")))));
     File.write(System.argv[1],
 	       "// Generated by utils/peephole.as\n\n" +
+	       "#include \"avmplus.h\"\n\n" +
+	       "namespace avmplus\n" +
+	       "{\n" +
+	       "#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER\n\n" +
+
 	       formatStates() + "\n\n" +
 	       formatTransitions() + "\n\n" +
 	       formatToplevel() + "\n\n" +
-	       formatActions() + "\n");
+	       formatActions() + "\n\n" +
+
+	       "#endif // AVMPLUS_PEEPHOLE_OPTIMIZER\n" +
+	       "}\n");
 }

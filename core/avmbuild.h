@@ -283,7 +283,7 @@
 #ifdef AVMPLUS_MAC
 #  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
 #  define AVMPLUS_PEEPHOLE_OPTIMIZER
-#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
+//#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
 #endif
 
 #ifdef AVMPLUS_WIN32

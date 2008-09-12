@@ -317,18 +317,6 @@ namespace avmplus
 #define CHECK(n) \
 		if (dest+n > dest_limit) refill();
 
-#ifdef AVMPLUS_DIRECT_THREADED
-#  define NEW_OPCODE(opcode) \
-	((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8) + 256] : opcode_labels[opcode])); \
-	AvmAssert(((uint32)(opcode >= 255 ? opcode_labels[(opcode>>8)+256] : opcode_labels[opcode])) != 0)
-#else
-#  ifdef _DEBUG
-#    define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // debugging...
-#  else
-#    define NEW_OPCODE(opcode)  opcode
-#  endif
-#endif
-					
 	// These take no arguments
 	void Translator::emitOp0(const byte *pc, int opcode) {
 #ifdef _DEBUG
@@ -842,12 +830,12 @@ namespace avmplus
 	// single backtrack state).  The guard is mixed in with the commit code in order to
 	// keep code size down, though it probably does not matter much.
 	//
+	// Instructions inserted by reductions are not subject to repeated matching (though
+	// they could be).
+	//
 	// In order to handle patterns that are subpatterns but not prefixes of other patterns,
 	// a special failure transition is encoded in each state and used if the matcher fails
-	// at that state; the failure transition allows the matcher to continue matching
-	// efficiently.  (The alternative would be to drop the initial instruction in the
-	// peephole window and then re-run the match on the new peephole window - probably a
-	// viable alternative, depending on how often a failure occurs.)
+	// at that state.
 	//
 	// The peephole optimizer function peep() /must/ be called every time an instruction 
 	// has been emitted to the instruction stream, as the state machine in the peephole
@@ -855,7 +843,8 @@ namespace avmplus
 	// The operands to peep() are the symbolic opcode that was just emitted and the address
 	// at which that opcode was emitted.  The function peep() drives the state machine.
 	//
-	// If optimization must not cross some instruction boundary (as for control flow targets)
+	// If optimization must not cross some instruction boundary (for example it must not
+	// merge the instruction at a control flow target with the previous instruction)
 	// then peepFlush() must be called before instructions are emitted for the point beyond
 	// the boundary.  This must also be called at the end of the instruction stream, and for
 	// instructions that must not appear in the peephole window (currently only LOOKUPSWITCH).
@@ -878,10 +867,10 @@ namespace avmplus
 	// OPTIMALITY.  We wish to establish that if there is a stream of instructions s1, s2, ...
 	// and patterns p1, p2, ... then (a) if some p matches a prefix of the stream then
 	// the algorithm finds the match; (b) if several p match a prefix of the stream then
-	// one of the the longest p is chosen (subject to guard evaluation); (c) the
+	// (one of) the longest p is chosen, subject to guard evaluation; (c) the
 	// properties (a) and (b) hold for the remainder of the stream when the instructions
-	// matching the pattern are removed from the stream; and (d) properties (a) and (b) hold
-	// for the remainder of the stream if no patterns match the prefix and the first
+	// matching the pattern are removed from the stream; and (d) the properties (a) and (b)
+	// hold for the remainder of the stream if no patterns match the prefix and the first
 	// instruction is removed from the stream.
 	//
 	// Note that the optimality result - if established - does not imply that the "best"
@@ -889,13 +878,10 @@ namespace avmplus
 	// stack pointer updates, or maximizes intra-instruction optimization in the C compiler,
 	// or is best according to any criteria like that) is found, since a best match can
 	// sometimes be obtained by choosing a shorter match against a prefix in order
-	// to make a longer match possible subsequently.
+	// to make a longer match possible subsequently.  It only implies that we do as well
+	// as we can with a greedy matching strategy.
 	//
-	// Sketch of proof:
-	//
-	// First of all, observe that peepFlush() commits to the longest match possible
-	// at the time it is called, and then skips the remaining instructions; by definition (??),
-	// these cannot be matched.
+	// Sketch of proof of optimality:
 	//
 	// To establish (a) and (b), note that the automaton tracks the prefix of the instruction
 	// stream and stacks all accepting states.  If it reaches a state without a successor
@@ -905,49 +891,27 @@ namespace avmplus
 	// and does not interfere.)
 	// 
 	// To establish (c), note that the automaton consumes exactly the instructions that
-	// were matched, then resets and runs the automaton on the non-matched instructions.
-	// If this succeeds then (a) and (b) apply; if it fails, (d) applies.  Either way
-	// the automaton eventually consumes all of the originally non-matching instructions,
-	// after which it is once again driven by instructions pushed into the peephole window.
+	// were matched, then sets state=0 and re-emits the non-matched instructions, running
+	// the automaton by calling peep() for each non-matched instruction.  If this succeeds 
+	// then (a) and (b) apply; if it fails, (d) applies.  Either way the automaton
+	// eventually consumes all of the originally non-matching instructions, after which it
+	// is once again driven by instructions pushed into the peephole window.
 	//
 	// To establish (d), note that the automaton makes a failure transition if no match
-	// could be made, and that the failure transition discards the fewest possible 
-	// instructions from the prefix of the stream: those that will not match any
-	// pattern, given that the present pattern failed.  Failure transitions ignore
-	// guards; this means that matching instructions are candidates no matter what
-	// their operand values.
-
-	// Data structures for the automaton.
+	// could be made, and that the failure transition by construction (see utils/peephole.as)
+	// discards the fewest possible instructions from the prefix of the stream: those that 
+	// will not match any pattern, given that the present pattern failed.  Thus matching
+	// will start at the earlies possible point, and (a), (b), (c), or (d) apply.
 	//
-	// The structures are laid out so as to improve packing and conserve space.  The
-	// included initialization code below knows the order of fields.
-	
-	struct state_t
-	{
-		uint8  numTransitions;		// Number of consecutive in the transitions[] array starting at transitionPtr
-		uint8  failShift;			// Initial tokens to discard on a failure transition
-		uint16 transitionPtr;		// Location in transitions[] for our transitions, sorted in increasing token order
-		uint16 guardAndAction;		// 0 if this is not a final state, otherwise an identifier for a case in 'commit()'
-		uint16 fail;				// 0 if there is no failure transition, otherwise a state number
-	};
-	
-	struct transition_t
-	{
-		uint16 opcode;				// on this opcode
-		uint16 next_state;			//   move to this state (never 0)
-	};
-	
-	// Include generated state machine tables for the peephole optimizer.
+	// Then, observe that peepFlush() commits to the longest match possible at the time
+	// it is called, and then skips the remaining instructions.  By definition, the
+	// skipped instructions cannot be matched (or they would have been part of the "longest
+	// match possible").  Thus peepFlush() preserve (a) and (b).
 	//
-	// Defines these:
-	//
-	//   static uint16 toplevel[]                Transition table for initial state
-	//   static state_t states[]                 State 0 is not used
-	//   static transition_t transitions[]       Compact transition representation
-	//   bool Toplevel::commit(uint32 action)    Guard and transformation code
+	// Finally, observe that peepFlush() is called following the last instruction emitted
+	// in order to commit to the longest prefix of the instructions still in the peephole
+	// window.
 	
-	#include "peephole.icc"
-
 	// Replace old instructions with new words of code, tail called from the 
 	// commit() function.
 	//
@@ -973,38 +937,13 @@ namespace avmplus
 	//     be the positive absolute ABC byte offset of the branch target; a backpatch
 	//     structure will be created in the latter case.
 	
-	bool Translator::replace(uint32 old_instr, uint32 new_words) 
+	bool Translator::replace(uint32 old_instr, uint32 new_words, bool jump_has_been_translated) 
 	{
-		// Undo any relative offsets in the last instruction
+		// Undo any relative offsets in the last instruction, if that wasn't done by
+		// the commit code.
 
-		if (isJumpInstruction(O[nextI - 1])) {
-			
-			AvmAssert(I[nextI - 1] + 2 == dest);
-			
-			uint32 offset = I[nextI - 1][1];
-			if (offset == 0x80000000U) {
-				// Forward branch, must find and nuke the backpatch
-				backpatch_info *b = backpatches;
-				backpatch_info *b2 = NULL;
-				while (b != NULL && b->patch_loc != &I[nextI - 1][1])
-					b2 = b, b = b->next;
-				AvmAssert(b != NULL);
-				if (b2 == NULL)
-					backpatches = b->next;
-				else
-					b2->next = b->next;
-				// b is unlinked
-				// Install the ABC byte offset from the backpatch structure (will be positive)
-				I[nextI - 1][1] = b->target_pc - code_start;
-				delete b;
-			}
-			else {
-				// Backward branch
-				AvmAssert((int32)I[nextI - 1][1] < 0);
-				// Install the negative of the absolute word offset of the target
-				I[nextI - 1][1] = -int32(buffer_offset + (dest - buffers->data) + (int32)I[nextI - 1][1]);
-			}
-		}
+		if (isJumpInstruction(O[nextI - 1]) && !jump_has_been_translated)
+			undoRelativeOffsetInJump();
 		
 		// Catenate unconsumed instructions onto R (it's easier than struggling with
 		// moving instructions across buffer boundaries)
@@ -1026,24 +965,31 @@ namespace avmplus
 			spare_buffer = buffers;
 			buffers = buffers->next;
 			spare_buffer->next = NULL;
-			dest = I[0];
 			dest_limit = buffers->data + sizeof(buffers->data)/sizeof(buffers->data[0]);
 			buffer_offset -= buffers->entries_used;
 		}
-		else
-			dest = I[0];
+		dest = I[0];
 		
 		// Emit the various instructions from new_data, handling branches specially.
 		//
-		// Instructions that are emitted here but which were not the output of the
-		// reducer need to be subjected to peephole optimization, so we invoke peep()
-		// on those instructions.  This works because (a) we don't use nextI here, so
-		// when nextI is reset to zero it starts filling up I and S, (b) the entries
-		// of I, S, O, and R we examine here will not be caught up by the peephole
-		// optimizer, because we advance one instruction for each one we peephole, and
-		// the optimizer can't make instruction sequences longer, and (c) dest is
-		// shared, so even if the peephole optimizer shortens the sequence we're working
-		// on then we emit the remainder to the correct location.
+		// At this point the instance variables state, I, O, nextI, backtrack_stack,
+		// and backtrack_idx are dead, and all the data we need for emitting the
+		// instructions are in S and R.  In addition, dest has been rolled back and
+		// points to the address of the first instruction in the peephole window, and
+		// nothing is live in the code buffer beyond that point.  It's as if we are
+		// in a context where we're just emitting instructions.
+		//
+		// Consequently, we set state to 0 and start emitting instructions from S/R
+		// normally, calling peep() after each instruction that was not replaced by
+		// the current action.  This works without having local copies of S and R
+		// because peephole optimization cannot insert a replacement sequence that is 
+		// longer than the matched sequence; so the segments of S and R used by any
+		// recursive match will not affect what we're doing here.  Furthermore, 'dest'
+		// is shared between this match and recursive matches, so if a recursive match
+		// shortens the instruction sequence the correct value of dest will be used
+		// when we get back to the present invocation of replace().
+
+		// Reset the machine.
 		
 		state = 0;
 		
@@ -1051,22 +997,28 @@ namespace avmplus
 		while (i < k) {
 			uint32 op = S[i];
 			if (isJumpInstruction(op)) {
-				CHECK(2);
+				uint32 w = calculateInstructionWidth(op);
+				CHECK(w);
 				*dest++ = R[i++];
 				int32 offset = (int32)R[i++];
 				if (offset >= 0) {
 					// Forward jump
 					// Install a new backpatch structure
-					makeAndInsertBackpatch(code_start + offset, buffer_offset + (dest + 1 - buffers->data));
+					makeAndInsertBackpatch(code_start + offset, buffer_offset + (dest + (w - 1) - buffers->data));
 				}
 				else {
 					// Backward jump
 					// Compute new jump offset
-					*dest = -int32(buffer_offset + (dest + 1 - buffers->data) + offset);
+					*dest = -int32(buffer_offset + (dest + (w - 1) - buffers->data) + offset);
 					dest++;
 				}
-				if (i-2 >= new_words)
-					peep(op, dest-2);
+				if (w >= 3)
+					*dest++ = R[i++];
+				if (w >= 4)
+					*dest++ = R[i++];
+				AvmAssert(w <= 4);
+				if (i-w >= new_words)
+					peep(op, dest-w);
 			}
 			else {
 				switch (calculateInstructionWidth(op)) {
@@ -1109,6 +1061,36 @@ namespace avmplus
 		return true;  // always
 	}
 
+	void Translator::undoRelativeOffsetInJump()
+	{
+		AvmAssert(isJumpInstruction(O[nextI - 1]));
+		AvmAssert(I[nextI - 1] + 2 == dest);
+		
+		uint32 offset = I[nextI - 1][1];
+		if (offset == 0x80000000U) {
+			// Forward branch, must find and nuke the backpatch
+			backpatch_info *b = backpatches;
+			backpatch_info *b2 = NULL;
+			while (b != NULL && b->patch_loc != &I[nextI - 1][1])
+				b2 = b, b = b->next;
+			AvmAssert(b != NULL);
+			if (b2 == NULL)
+				backpatches = b->next;
+			else
+				b2->next = b->next;
+			// b is unlinked
+			// Install the ABC byte offset from the backpatch structure (will be positive)
+			I[nextI - 1][1] = b->target_pc - code_start;
+			delete b;
+		}
+		else {
+			// Backward branch
+			AvmAssert((int32)I[nextI - 1][1] < 0);
+			// Install the negative of the absolute word offset of the target
+			I[nextI - 1][1] = -int32(buffer_offset + (dest - buffers->data) + (int32)I[nextI - 1][1]);
+		}
+	}
+	
 	// OPTIMIZEME - instruction width lookup must be fast.
 	// Should use a table lookup for all the opcodes.
 	
@@ -1117,13 +1099,58 @@ namespace avmplus
 		if (opcode < 255)
 			return opOperandCount[opcode] + 1;
 		switch (opcode) {
+			case OP_ext_swap_pop:
+				return 1;
 			case OP_ext_pushbits:
 			case OP_ext_get2locals:
 			case OP_ext_get3locals:
+			case OP_ext_get4locals:
+			case OP_ext_get5locals:
 			case OP_ext_storelocal:
+			case OP_ext_add_ll:
+			case OP_ext_add_set_lll:
+			case OP_ext_subtract_ll:
+			case OP_ext_multiply_ll:
+			case OP_ext_divide_ll:
+			case OP_ext_modulo_ll:
+			case OP_ext_bitand_ll:
+			case OP_ext_bitor_ll:
+			case OP_ext_bitxor_ll:
 				return 2;
 			case OP_ext_push_doublebits:
+			case OP_ext_add_lb:
+			case OP_ext_subtract_lb:
+			case OP_ext_multiply_lb:
+			case OP_ext_divide_lb:
+			case OP_ext_bitand_lb:
+			case OP_ext_bitor_lb:
+			case OP_ext_bitxor_lb:
+			case OP_ext_iflt_ll:
+			case OP_ext_ifnlt_ll:
+			case OP_ext_ifle_ll:
+			case OP_ext_ifnle_ll:
+			case OP_ext_ifgt_ll:
+			case OP_ext_ifngt_ll:
+			case OP_ext_ifge_ll:
+			case OP_ext_ifnge_ll:
+			case OP_ext_ifeq_ll:
+			case OP_ext_ifne_ll:
+			case OP_ext_ifstricteq_ll:
+			case OP_ext_ifstrictne_ll:
 				return 3;
+			case OP_ext_iflt_lb:
+			case OP_ext_ifnlt_lb:
+			case OP_ext_ifle_lb:
+			case OP_ext_ifnle_lb:
+			case OP_ext_ifgt_lb:
+			case OP_ext_ifngt_lb:
+			case OP_ext_ifge_lb:
+			case OP_ext_ifnge_lb:
+			case OP_ext_ifeq_lb:
+			case OP_ext_ifne_lb:
+			case OP_ext_ifstricteq_lb:
+			case OP_ext_ifstrictne_lb:
+				return 4;
 			default:
 				AvmAssert(!"Should not happen");
 				return 1;
@@ -1152,6 +1179,30 @@ namespace avmplus
 			case OP_ifnle:
 			case OP_ifge:
 			case OP_ifnge:
+			case OP_ext_iflt_ll:
+			case OP_ext_ifnlt_ll:
+			case OP_ext_ifle_ll:
+			case OP_ext_ifnle_ll:
+			case OP_ext_ifgt_ll:
+			case OP_ext_ifngt_ll:
+			case OP_ext_ifge_ll:
+			case OP_ext_ifnge_ll:
+			case OP_ext_ifeq_ll:
+			case OP_ext_ifne_ll:
+			case OP_ext_ifstricteq_ll:
+			case OP_ext_ifstrictne_ll:
+			case OP_ext_iflt_lb:
+			case OP_ext_ifnlt_lb:
+			case OP_ext_ifle_lb:
+			case OP_ext_ifnle_lb:
+			case OP_ext_ifgt_lb:
+			case OP_ext_ifngt_lb:
+			case OP_ext_ifge_lb:
+			case OP_ext_ifnge_lb:
+			case OP_ext_ifeq_lb:
+			case OP_ext_ifne_lb:
+			case OP_ext_ifstricteq_lb:
+			case OP_ext_ifstrictne_lb:
 				return true;
 			default:
 				return false;
@@ -1160,8 +1211,8 @@ namespace avmplus
 	
 	void Translator::peep(uint32 opcode, uint32* loc)
 	{
-		state_t *s;
-		transition_t *t;
+		peep_state_t *s;
+		peep_transition_t *t;
 		uint32 i, limit, next_state, toplevel_index;
 		
 		AvmAssert(opcode != OP_lookupswitch);
@@ -1208,11 +1259,8 @@ namespace avmplus
 			// as otherwise the peephole window could contain a branch in the non-final
 			// position.)
 			
-			if (s->guardAndAction != 0) {
-				int bi = backtrack_idx++;
-				backtrack_stack[bi].state = state;
-				backtrack_stack[bi].nextI = nextI;
-			}
+			if (s->guardAndAction != 0)
+				backtrack_stack[backtrack_idx++] = state;
 
 		advance:
 			state = next_state;
@@ -1237,7 +1285,7 @@ namespace avmplus
 			return;
 		
 		for ( int bi=backtrack_idx-1 ; bi >= 0 ; bi-- ) {
-			state_t *b = &states[backtrack_stack[bi].state];
+			peep_state_t *b = &states[backtrack_stack[bi]];
 			AvmAssert(b->guardAndAction != 0);
 			if (commit(b->guardAndAction)) 
 				return;
@@ -1264,7 +1312,7 @@ namespace avmplus
 
 	initial_state:
 		toplevel_index = opcode < 255 ? opcode : 256 + (opcode >> 8);
-		AvmAssert(toplevel_index < sizeof(toplevel)/sizeof(toplevel[0]));
+		//AvmAssert(toplevel_index < sizeof(toplevel)/sizeof(toplevel[0]));
 
 		state = toplevel[toplevel_index];  // may remain 0
 		nextI = 0;
