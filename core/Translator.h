@@ -43,7 +43,7 @@ namespace avmplus
 
 #  ifdef AVMPLUS_DIRECT_THREADED
 #    define OP_INDEX(n)           (n >= 256 ? (n>>8) + 256 : n)
-#    define NEW_OPCODE(opcode)    ((uint32)opcode_labels[OP_INDEX(n)])
+#    define NEW_OPCODE(n)         ((uint32)opcode_labels[OP_INDEX(n)])
 #  else
 #    define OP_INDEX(n)           n
 #    ifdef _DEBUG

@@ -282,14 +282,20 @@
 // also be used by a direct threaded interpreter
 #ifdef AVMPLUS_MAC
 #  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER
-//#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
+#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
+#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
 #endif
 
 #ifdef AVMPLUS_WIN32
 #  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER
+#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
 //#  define AVMPLUS_DIRECT_THREADED // see comments in Interpreter.cpp before enabling this
+#endif
+
+#ifdef AVMPLUS_DIRECT_THREADED
+#  ifndef AVMPLUS_WORD_CODE
+#    error "You must have word code enabled to use direct threading"
+#  endif
 #endif
 
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
