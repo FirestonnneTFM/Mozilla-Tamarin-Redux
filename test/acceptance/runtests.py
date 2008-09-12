@@ -362,7 +362,7 @@ if globs['config'] == '':
     # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
     # ================================================
     try:
-        ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-5.2-WOW64':'win','CYGWIN_NT-6.0-WOW64':'win','Windows':'win','Darwin':'mac','Linux':'lnx','SunOS':'sol',}[platform.system()]
+        ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-5.2-WOW64':'win64','CYGWIN_NT-6.0-WOW64':'win64','Windows':'win','Darwin':'mac','Linux':'lnx','SunOS':'sol',}[platform.system()]
     except:
         print("ERROR: os %s is unknown, expected values are (win,mac,lnx,sol), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.system()))
         exit(1)
