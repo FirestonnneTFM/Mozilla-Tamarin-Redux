@@ -46,59 +46,62 @@ import sys, string, time
 import pexpect
 
 
-globs = { 'asc':'', 'globalabc':''}
+globs = { 'asc':'', 'globalabc':'', 'optimize':True}
 if 'ASC' in environ:
     globs['asc'] = environ['ASC'].strip()
 if 'GLOBALABC' in environ:
-	globs['globalabc'] = environ['GLOBALABC'].strip()
+    globs['globalabc'] = environ['GLOBALABC'].strip()
 
 def usage(c):
-	print 'usage: %s [options] ' % basename(argv[0])
-	print ' -a --asc           compiler to use'
-	print ' -g --globalabc     location of global.abc'
-	print ' -h --help          display help and exit'
-	print ''
-	exit(c)
+    print 'usage: %s [options] ' % basename(argv[0])
+    print ' -a --asc           compiler to use'
+    print ' -g --globalabc     location of global.abc'
+    print ' -h --help          display help and exit'
+    print "    --nooptimize    do not optimize files when compiling"
+    print ''
+    exit(c)
 
 try:
-	opts, args = getopt(argv[1:], 'a:g:h', ['asc=','globalabc=','help'])
+    opts, args = getopt(argv[1:], 'a:g:h', ['asc=','globalabc=','help', 'nooptimize'])
 except:
-	opts = [('', '')]
-	args = ['.']
+    opts = [('', '')]
+    args = ['.']
 
 if not args:
   args = ['.']
 for o, v in opts:
-	if o in ('-h', '--help'):
-		usage(0)
-	elif o in ('-a', '--asc'):
-		globs['asc'] = v
-	elif o in ('-g', '--globalabc'):
-		globs['globalabc'] = v
-     
+    if o in ('-h', '--help'):
+        usage(0)
+    elif o in ('-a', '--asc'):
+        globs['asc'] = v
+    elif o in ('-g', '--globalabc'):
+        globs['globalabc'] = v
+    elif o in ('--nooptimize'):
+        globs['optimize'] = False
+
 
 if not isfile(globs['asc']):
-	usage('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % globs['asc'])
-	
+    usage('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % globs['asc'])
+
 if not isfile(globs['globalabc']):
-	usage('ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to builtin.abc' % globs['globalabc'])
+    usage('ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to builtin.abc' % globs['globalabc'])
 
 def istest(f):
-	return f.endswith(".as") and basename(f) != "shell.as" and not f.endswith("Util.as")
+    return f.endswith(".as") and basename(f) != "shell.as" and not f.endswith("Util.as")
 
 def parents(d):
-	while d != "":
-		yield d
-		d = dirname(d)
-	yield d
+    while d != "":
+        yield d
+        d = dirname(d)
+    yield d
 
 tests = [a for a in args if isfile(a) and istest(a)]
 for a in [d for d in args if isdir(d)]:
-	for d, dirs, files in walk(a):
-		tests += [join(d,f) for f in files if istest(f)]
-		utils = [d for d in dirs if d+".as" in files]
-		for x in [x for x in utils if x in dirs]:
-			dirs.remove(x)
+    for d, dirs, files in walk(a):
+        tests += [join(d,f) for f in files if istest(f)]
+        utils = [d for d in dirs if d+".as" in files]
+        for x in [x for x in utils if x in dirs]:
+            dirs.remove(x)
 
 child = pexpect.spawn("java -classpath %s macromedia.asc.embedding.Shell" % globs['asc'])
 child.logfile = sys.stdout
@@ -110,29 +113,31 @@ print("starting compile of %d tests at %s" % (len(tests),start_time))
 total=len(tests)
 counter=0
 for test in tests:
-	cmd = "asc -import " + globs['globalabc']
-	(dir, file) = split(test)
-	#print("   compiling %s" % file)
-	for p in parents(dir):
-		shell = join(p,"shell.as")
-		if isfile(shell):
-			cmd += " -in " + shell
-			break
-	(testdir, ext) = splitext(test)
-	deps = glob(join(testdir,"*.as"))
-	deps.sort()
-	for util in deps + glob(join(dir,"*Util.as")):
-		cmd += " -in %s" % string.replace(util, "$", "\$")
-	cmd += " %s" % test
+    cmd = "asc -import " + globs['globalabc']
+    if globs['optimize']:
+        cmd += " -optimize"
+    (dir, file) = split(test)
+    #print("   compiling %s" % file)
+    for p in parents(dir):
+        shell = join(p,"shell.as")
+        if isfile(shell):
+            cmd += " -in " + shell
+            break
+    (testdir, ext) = splitext(test)
+    deps = glob(join(testdir,"*.as"))
+    deps.sort()
+    for util in deps + glob(join(dir,"*Util.as")):
+        cmd += " -in %s" % string.replace(util, "$", "\$")
+    cmd += " %s" % test
 
-	if exists(testdir+".abc"):
-		remove(testdir+".abc")
+    if exists(testdir+".abc"):
+        remove(testdir+".abc")
 
-	child.sendline(cmd)
-	child.expect("\(ash\)")
-	if exists(testdir+".abc")==False:
-		print("ERROR abc files %s.abc not created" % (testdir))
-	counter += 1;
-	print("%d remaining, %s" % (total-counter,cmd))
+    child.sendline(cmd)
+    child.expect("\(ash\)")
+    if exists(testdir+".abc")==False:
+        print("ERROR abc files %s.abc not created" % (testdir))
+    counter += 1;
+    print("%d remaining, %s" % (total-counter,cmd))
 end_time = datetime.today()
 print("finished compile of %d tests at %s elapsed time is %s" % (len(tests),start_time,end_time-start_time))

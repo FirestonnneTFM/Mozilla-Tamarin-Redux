@@ -103,7 +103,7 @@ def usage(c):
     print "    --ascargs       args to pass to asc on rebuild of test files"
     print "    --vmargs        args to pass to vm"
     print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
-    print "    --nooptimize    don't optimize files when compiling"
+    print "    --nooptimize    do not optimize files when compiling"
     exit(c)
 
 try:
