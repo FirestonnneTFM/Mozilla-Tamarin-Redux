@@ -46,23 +46,25 @@ import sys, string, time
 import pexpect
 
 
-globs = { 'asc':'', 'globalabc':'', 'optimize':True}
+globs = { 'asc':'', 'globalabc':'', 'shellabc':'' }
 if 'ASC' in environ:
     globs['asc'] = environ['ASC'].strip()
 if 'GLOBALABC' in environ:
     globs['globalabc'] = environ['GLOBALABC'].strip()
+if 'SHELLABC' in environ:
+    globs['shellabc'] = environ['SHELLABC'].strip()
 
 def usage(c):
     print 'usage: %s [options] ' % basename(argv[0])
     print ' -a --asc           compiler to use'
     print ' -g --globalabc     location of global.abc'
+    print ' -s --shellabc      location of shell.abc'
     print ' -h --help          display help and exit'
-    print "    --nooptimize    do not optimize files when compiling"
     print ''
     exit(c)
 
 try:
-    opts, args = getopt(argv[1:], 'a:g:h', ['asc=','globalabc=','help', 'nooptimize'])
+    opts, args = getopt(argv[1:], 'a:g:s:h', ['asc=','globalabc=','shellabc=','help'])
 except:
     opts = [('', '')]
     args = ['.']
@@ -76,15 +78,17 @@ for o, v in opts:
         globs['asc'] = v
     elif o in ('-g', '--globalabc'):
         globs['globalabc'] = v
-    elif o in ('--nooptimize'):
-        globs['optimize'] = False
-
+    elif o in ('-s', '--shellabc'):
+        globs['shellabc'] = v
 
 if not isfile(globs['asc']):
     usage('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % globs['asc'])
 
 if not isfile(globs['globalabc']):
     usage('ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to builtin.abc' % globs['globalabc'])
+
+if not isfile(globs['shellabc']):
+    usage('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % globs['shellabc'])
 
 def istest(f):
     return f.endswith(".as") and basename(f) != "shell.as" and not f.endswith("Util.as")
@@ -113,9 +117,7 @@ print("starting compile of %d tests at %s" % (len(tests),start_time))
 total=len(tests)
 counter=0
 for test in tests:
-    cmd = "asc -import " + globs['globalabc']
-    if globs['optimize']:
-        cmd += " -optimize"
+    cmd = "asc -import %s -import %s" % (globs['globalabc'],globs['shellabc'])
     (dir, file) = split(test)
     #print("   compiling %s" % file)
     for p in parents(dir):
