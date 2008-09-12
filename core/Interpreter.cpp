@@ -1663,28 +1663,28 @@ namespace avmplus
 #define COMPARE_EQUAL  ==, equals, trueAtom
 					
 		   INSTR(ifeq) {
-				IFEQ(COMPARE_EQUAL);
+				IFEQ2(==, equals, trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_NOTEQUAL  !=, equals, falseAtom
 
 			INSTR(ifne) {
-				IFEQ(COMPARE_NOTEQUAL);
+				IFEQ2(!=, equals, falseAtom);
                 NEXT;
 			}
 
 #define COMPARE_STRICTEQUAL  ==, stricteq, trueAtom
 					
 		    INSTR(ifstricteq) {
-				IFEQ(COMPARE_STRICTEQUAL);
+				IFEQ2(==, stricteq, trueAtom);
 				NEXT;
 			}
 					
 #define COMPARE_NOTSTRICTEQUAL  !=, stricteq, falseAtom
 
 			INSTR(ifstrictne) {
-				IFEQ(COMPARE_NOTSTRICTEQUAL);
+				IFEQ2(!=, stricteq, falseAtom);
 				NEXT;
 			}
 
@@ -1719,56 +1719,56 @@ namespace avmplus
 #define COMPARE_LESS  <, core->compare(lhs,rhs) == trueAtom
 					
 			INSTR(iflt) {
-				IFCMP(COMPARE_LESS);
+				IFCMP2(<, core->compare(lhs,rhs) == trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_NOTLESS  >=, core->compare(lhs, rhs) != trueAtom
 					
 			INSTR(ifnlt) {
-				IFCMP(COMPARE_NOTLESS);
+				IFCMP2(>=, core->compare(lhs, rhs) != trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_LESSEQUAL  <=, core->compare(rhs, lhs) == falseAtom
 					
 			INSTR(ifle) {
-				IFCMP(COMPARE_LESSEQUAL);
+				IFCMP2(<=, core->compare(rhs, lhs) == falseAtom);
                 NEXT;
 			}
 
 #define COMPARE_NOTLESSEQUAL  >, core->compare(rhs, lhs) != falseAtom
 					
 			INSTR(ifnle) {
-				IFCMP(COMPARE_NOTLESSEQUAL);
+				IFCMP2(>, core->compare(rhs, lhs) != falseAtom);
                 NEXT;
 			}
 
 #define COMPARE_GREATER  >, core->compare(rhs, lhs) == trueAtom
 					
 			INSTR(ifgt) {
-				IFCMP(COMPARE_GREATER);
+				IFCMP2(>, core->compare(rhs, lhs) == trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_NOTGREATER  <=, core->compare(rhs, lhs) != trueAtom
 					
 			INSTR(ifngt) {
-				IFCMP(COMPARE_NOTGREATER);
+				IFCMP2(<=, core->compare(rhs, lhs) != trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_GREATEREQUAL  >=, core->compare(lhs, rhs) == falseAtom
 					
 			INSTR(ifge) {
-				IFCMP(COMPARE_GREATEREQUAL);
+				IFCMP2(>=, core->compare(lhs, rhs) == falseAtom);
                 NEXT;
 			}
 					
 #define COMPARE_NOTGREATEREQUAL  <, core->compare(lhs, rhs) != falseAtom
 			
 			INSTR(ifnge) {
-				IFCMP(COMPARE_NOTGREATEREQUAL);
+				IFCMP2(<, core->compare(lhs, rhs) != falseAtom);
                 NEXT;
 			}
 
@@ -1788,22 +1788,22 @@ namespace avmplus
 #define CMP(x)  CMP2(x)
 					
             INSTR(lessthan) {
-				CMP(COMPARE_LESS);
+				CMP2(<, core->compare(lhs,rhs) == trueAtom);
                 NEXT;
 			}
 
             INSTR(lessequals) {
-				CMP(COMPARE_LESSEQUAL);
+				CMP2(<=, core->compare(rhs, lhs) == falseAtom);
                 NEXT;
 			}
 
             INSTR(greaterthan) {
-				CMP(COMPARE_GREATER);
+				CMP2(>, core->compare(rhs, lhs) == trueAtom);
                 NEXT;
 			}
 
             INSTR(greaterequals) {
-				CMP(COMPARE_GREATEREQUAL);
+				CMP2(>=, core->compare(lhs, rhs) == falseAtom);
                 NEXT;
 			}
 
@@ -2854,42 +2854,42 @@ namespace avmplus
 #define IFCMP_LL(x) IFCMP_LL2(x)
 
 			INSTR(ext_iflt_ll) {
-				IFCMP_LL(COMPARE_LESS);
+				IFCMP_LL2(<, core->compare(lhs,rhs) == trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifnlt_ll) {
-				IFCMP_LL(COMPARE_NOTLESS);
+				IFCMP_LL2(>=, core->compare(lhs, rhs) != trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifle_ll) {
-				IFCMP_LL(COMPARE_LESSEQUAL);
+				IFCMP_LL2(<=, core->compare(rhs, lhs) == falseAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifnle_ll) {
-				IFCMP_LL(COMPARE_NOTLESSEQUAL);
+				IFCMP_LL2(>, core->compare(rhs, lhs) != falseAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifgt_ll) {
-				IFCMP_LL(COMPARE_GREATER);
+				IFCMP_LL2(>, core->compare(rhs, lhs) == trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifngt_ll) {
-				IFCMP_LL(COMPARE_NOTGREATER);
+				IFCMP_LL2(<=, core->compare(rhs, lhs) != trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifge_ll) {
-				IFCMP_LL(COMPARE_GREATEREQUAL);
+				IFCMP_LL2(>=, core->compare(lhs, rhs) == falseAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifnge_ll) {
-				IFCMP_LL(COMPARE_NOTGREATEREQUAL);
+				IFCMP_LL2(<, core->compare(lhs, rhs) != falseAtom);
 			    NEXT;
 			}
 					
@@ -2904,22 +2904,22 @@ namespace avmplus
 #define IFEQ_LL(x) IFEQ_LL2(x)
 					
 			INSTR(ext_ifeq_ll) {
-				IFEQ_LL(COMPARE_EQUAL);
+				IFEQ_LL2(==, equals, trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifne_ll) {
-				IFEQ_LL(COMPARE_NOTEQUAL);
+				IFEQ_LL2(!=, equals, falseAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifstricteq_ll) {
-				IFEQ_LL(COMPARE_STRICTEQUAL);
+				IFEQ_LL2(==, stricteq, trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifstrictne_ll) {
-				IFEQ_LL(COMPARE_NOTSTRICTEQUAL);
+				IFEQ_LL2(!=, stricteq, falseAtom);
 			    NEXT;
 			}
 
@@ -2933,42 +2933,42 @@ namespace avmplus
 #define IFCMP_LB(x) IFCMP_LB2(x)
 
 			INSTR(ext_iflt_lb) {
-				IFCMP_LB(COMPARE_LESS);
+				IFCMP_LB2(<, core->compare(lhs,rhs) == trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifnlt_lb) {
-				IFCMP_LB(COMPARE_NOTLESS);
+				IFCMP_LB2(>=, core->compare(lhs, rhs) != trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifle_lb) {
-				IFCMP_LB(COMPARE_LESSEQUAL);
+				IFCMP_LB2(<=, core->compare(rhs, lhs) == falseAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifnle_lb) {
-				IFCMP_LB(COMPARE_NOTLESSEQUAL);
+				IFCMP_LB2(>, core->compare(rhs, lhs) != falseAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifgt_lb) {
-				IFCMP_LB(COMPARE_GREATER);
+				IFCMP_LB2(>, core->compare(rhs, lhs) == trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifngt_lb) {
-				IFCMP_LB(COMPARE_NOTGREATER);
+				IFCMP_LB2(<=, core->compare(rhs, lhs) != trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifge_lb) {
-				IFCMP_LB(COMPARE_GREATEREQUAL);
+				IFCMP_LB2(>=, core->compare(lhs, rhs) == falseAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifnge_lb) {
-				IFCMP_LB(COMPARE_NOTGREATEREQUAL);
+				IFCMP_LB2(<, core->compare(lhs, rhs) != falseAtom);
 			    NEXT;
 			}
 					
@@ -2982,22 +2982,22 @@ namespace avmplus
 #define IFEQ_LB(x) IFEQ_LB2(x)
 					
 			INSTR(ext_ifeq_lb) {
-				IFEQ_LB(COMPARE_EQUAL);
+				IFEQ_LB2(==, equals, trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifne_lb) {
-				IFEQ_LB(COMPARE_NOTEQUAL);
+				IFEQ_LB2(!=, equals, falseAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifstricteq_lb) {
-				IFEQ_LB(COMPARE_STRICTEQUAL);
+				IFEQ_LB2(==, stricteq, trueAtom);
 			    NEXT;
 			}
 					
 			INSTR(ext_ifstrictne_lb) {
-				IFEQ_LB(COMPARE_NOTSTRICTEQUAL);
+				IFEQ_LB2(!=, stricteq, falseAtom);
 			    NEXT;
 			}
 					
