@@ -206,6 +206,8 @@ namespace MMgc
 			}
 		}
 
+		size_t GetBytesInUse();
+
 	private:
 		const static int kBlockSize = 4096;
 

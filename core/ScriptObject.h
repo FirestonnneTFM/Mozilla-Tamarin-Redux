@@ -160,6 +160,10 @@ namespace avmplus
 		virtual Atom defaultValue();		// ECMA [[DefaultValue]]
 		virtual Atom toString();
 		
+		virtual Atom call_this(Atom thisAtom);
+		virtual Atom call_this_aa(Atom thisAtom, int argc, Atom *argv);
+		virtual Atom call_this_a(Atom thisAtom, ArrayObject *a);
+
 		// argv[0] = receiver
 		virtual Atom call(int argc, Atom* argv);
 

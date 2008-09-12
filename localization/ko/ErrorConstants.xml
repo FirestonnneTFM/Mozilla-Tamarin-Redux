@@ -705,8 +705,7 @@ class B extends A {
   <error id="1124" label="kInvalidHasNextError">OP_hasnext2는 개별 레지스터가 되려면 객체 및 인덱스가 있어야 합니다.</error>
   <error id="1125" label="kOutOfRangeError">인덱스 %1이(가) 범위 %2을(를) 벗어났습니다.</error>
   <error id="1126" label="kVectorFixedError">고정된 벡터의 길이를 변경할 수 없습니다.</error>
-
-<error id="1127" label="kTypeAppOfNonParamType">매개 변수가 없는 유형에서 유형을 적용하려고 했습니다.</error>
+  <error id="1127" label="kTypeAppOfNonParamType">매개 변수가 없는 유형에서 유형을 적용하려고 했습니다.</error>
   <error id="1128" label="kWrongTypeArgCountError">%1에 대한 형식 매개 변수의 개수가 잘못되었습니다. %2개가 필요하지만 %3개가 있습니다.</error>
 
   <!-- The following errors are specific to the AVM2 command-line shell.-->  

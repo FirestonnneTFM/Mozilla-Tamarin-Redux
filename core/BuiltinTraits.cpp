@@ -150,10 +150,12 @@ namespace avmplus
 		xmlList_itraits->hasCustomConstruct		= true;
 		qName_itraits->hasCustomConstruct		= true;
 		math_itraits->hasCustomConstruct		= true;
+
 		vectordouble_itraits->name = core->constantString("Vector.<Number>");
 		vectorint_itraits->name = core->constantString("Vector.<int>");
 		vectoruint_itraits->name = core->constantString("Vector.<uint>");
 		vectorobj_itraits->name = core->constantString("Vector.<*>");
+
 		Traits* methodClosure_itraits;
 		methodClosure_itraits = pool->getBuiltinTraits(core->constantString("MethodClosure"));
 		methodClosure_itraits->notDerivedObjectOrXML = true;

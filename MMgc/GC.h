@@ -40,6 +40,14 @@
 #ifndef __GC__
 #define __GC__
 
+#if defined(MMGC_PORTING_API)
+	// When the porting API is in use, we exclude
+	// stdlib functions or use them through
+	// #defines for portability to platforms
+	// that don't have them.
+	#include "portapi_mmgc.h"
+#else
+
 #if defined MMGC_IA32
 
 #ifdef WIN32
@@ -135,7 +143,9 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 // TPR - increasing to 20 causes this code to not get optimized out
 
 #ifdef __GNUC__
+
 #ifdef _MAC
+
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\
@@ -148,7 +158,9 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 			"cmpi cr0,r3,0\n"\
 			"bne 1b" : "=b" (__stackBase) : : "r3");\
 		_size = (uintptr) __stackBase - (uintptr) _stack;
+
 #else // _MAC
+
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw %%r13,0(%0)" : : "b" (__ppcregs));\
@@ -161,8 +173,11 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 			"cmpi cr0,%%r3,0\n"\
 		     "bne StackBaseLoop%1%2" : "=b" (__stackBase) : "i" (__FILE__), "i" (__LINE__) : "r3"); \
 		_size = (uintptr) __stackBase - (uintptr) _stack;
+
 #endif // _MAC
+
 #else // __GNUC__
+
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\
@@ -175,6 +190,7 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 			"cmpi cr0,r3,0\n"\
 		     "bne StackBaseLoop" : "=b" (__stackBase) : : "r3"); \
 		_size = (uintptr) __stackBase - (uintptr) _stack;
+
 #endif // __GNUC__
 
 #elif defined MMGC_ARM
@@ -200,7 +216,9 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 		asm("mov %0,sp" : "=r" (_stack));\
 		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
 #endif //__ARMCC__
+
 #endif
+
 
 #elif defined MMGC_SPARC
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
@@ -219,6 +237,8 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 #define MMGC_ASSERT_GC_LOCK(gc)      ((void) 0)
 #define MMGC_ASSERT_EXCLUSIVE_GC(gc) ((void) 0)
 #endif
+
+#endif // MMGC_PORTING_API
 
 #ifdef DEBUGGER
 namespace avmplus
@@ -389,10 +409,9 @@ namespace MMgc
 		 * This method is called before an RC object is reaped
 		 */
 		virtual void prereap(void* /*rcobj*/) {}
-
-#ifdef DEBUGGER
 		virtual void log(const char* /*str*/) {}
 
+#ifdef DEBUGGER
 		virtual void startGCActivity() {}	
 		virtual void stopGCActivity() {}
 		// negative when blocks are reclaimed
@@ -449,7 +468,7 @@ namespace MMgc
 		// size of table in pages
 		static const int ZCT_START_SIZE;
 	public:
-		ZCT(GCHeap *heap);
+		ZCT();
 		~ZCT();
 		void Add(RCObject *obj);
 		void Remove(RCObject *obj);
@@ -459,6 +478,7 @@ namespace MMgc
 		uintptr StackTop;
 
 		GC *gc;
+		void SetGC(GC*);
 
 		// in pages
 		int zctSize;
@@ -609,8 +629,8 @@ namespace MMgc
 		bool gcstats;
 
 		bool dontAddToZCTDuringCollection;
-
 		bool incrementalValidation;
+
 #ifdef _DEBUG
 		bool incrementalValidationPedantic;
 #endif
@@ -681,10 +701,10 @@ namespace MMgc
 		 *
 		 * @access Requires(request)
 		 */
-		void *Alloc(size_t size, int flags=0, int skip=3);
+		void *Alloc(size_t size, int flags=0);
 
 		/** @access Requires(request && m_lock) */
-		void *AllocAlreadyLocked(size_t size, int flags=0, int skip=3);
+		void *AllocAlreadyLocked(size_t size, int flags=0);
 
 		
 		/**
@@ -696,7 +716,7 @@ namespace MMgc
 		 *
 		 * @access Requires(request)
 		 */
-		void *Calloc(size_t num, size_t elsize, int flags=0, int skip=3);
+		void *Calloc(size_t num, size_t elsize, int flags=0);
 
 		/**
 		 * One can free a GC allocated pointer, this will throw an assertion
@@ -1116,7 +1136,11 @@ namespace MMgc
 
 	private:
 
+		void *heapAlloc(size_t size, bool expand=true, bool zero=true);
+		void heapFree(void *ptr, size_t siz=0);
+
 		void gclog(const char *format, ...);
+		void log_mem(const char *name, size_t s, size_t comp );
 
 		const static int kNumSizeClasses = 40;
 
@@ -1210,6 +1234,9 @@ namespace MMgc
 
 		/** @access Requires(m_lock) */
 		size_t totalGCPages;
+
+		GCHashtable stats;
+		void updateGrossMemoryStats();
 
 		/**
 		 * The bitmap for what pages are in use.  Any access to either the
@@ -1453,8 +1480,10 @@ private:
 		void AllocActivity(int blocks);
 #endif
 
+#ifdef _DEBUG		
+		void CheckFreelist(GCAlloc *gca);
 		void CheckFreelists();
-#ifdef _DEBUG
+
 
 		int m_gcLastStackTrace;
 
@@ -1516,6 +1545,13 @@ public:
 		 */
     	void ProbeForMatch(const void *mem, size_t size, uintptr value, int recurseDepth, int currentDepth);
 #endif
+
+		void UpdateStat(const char *key, int delta)
+		{
+			stats.put(key, (const void*)((size_t)stats.get(key) + delta));
+		}
+		
+		size_t GetBytesInUse();
 
 #ifdef MMGC_THREADSAFE
 	public:

@@ -42,16 +42,65 @@
 namespace avmplus
 {
 #undef DEBUG_EARLY_BINDING
-	Atom MethodEnv::coerceEnter(int argc, Atom* atomv)
+
+	inline Atom *MethodEnv::unbox1(AvmCore* core, Toplevel* toplevel, Atom in, Traits *t, Atom *args)
+	{
+		AvmAssert(t != VOID_TYPE);
+
+		if (t == NUMBER_TYPE) 
+		{
+			union {
+				double d;
+				uint32 l[2];
+			};
+			d = core->number(in);
+			#ifdef AVMPLUS_64BIT
+			AvmAssert(sizeof(Atom) == sizeof(double));
+			*(double *) args = d;
+			args++;
+			#else
+			AvmAssert(sizeof(Atom) * 2 == sizeof(double));
+			*args++ = l[0];
+			*args++ = l[1];
+			#endif
+		}
+		else if (t == INT_TYPE)
+		{
+			*args++ = core->integer(in);
+		}
+		else if (t == UINT_TYPE)
+		{
+			*args++ = core->toUInt32(in);
+		}
+		else if (t == BOOLEAN_TYPE)
+		{
+			*args++ = core->boolean(in);
+		}
+		else if (t == OBJECT_TYPE)
+		{
+			*args++ = in == undefinedAtom ? nullObjectAtom : in;
+		}
+		else if (!t)
+		{
+			*args++ = in;
+		}
+		else
+		{
+			// ScriptObject, String, or Namespace, or Null
+			*args++ = toplevel->coerce(in,t) & ~7;
+		}
+		return args;
+	}
+
+	// helper
+	inline int MethodEnv::startCoerce(int argc)
 	{
 		Toplevel* toplevel = vtable->toplevel;
-		
+
 		if (!method->argcOk(argc))
 		{
 			toplevel->argumentErrorClass()->throwError(kWrongArgumentCountError, core()->toErrorString((AbstractFunction*)method), core()->toErrorString(method->requiredParamCount()), core()->toErrorString(argc));
 		}
-
-		AbstractFunction* method = this->method;
 
 		// Can happen with duplicate function definitions from corrupt ABC data.  F1 is defined
 		// and F2 overrides the F1 slot which is okay as long as F1's MethodEnv is never called again.
@@ -63,18 +112,16 @@ namespace avmplus
 		// just do enough to resolve signatures.  Don't do a full verify yet.
 		method->resolveSignature(toplevel);
 
-		// check receiver type first
-		// caller will coerce instance if necessary,
-		// so make sure it was done.
-		AvmAssert(atomv[0] == toplevel->coerce(atomv[0], method->paramTraits(0)));
-
 		// now unbox everything, including instance and rest args
 		int extra = argc > method->param_count ? argc - method->param_count : 0;
 		AvmAssert(method->restOffset > 0 && extra >= 0);
-		uint32 *ap = (uint32 *) alloca(method->restOffset + sizeof(Atom)*extra);
 
-		unboxCoerceArgs(argc, atomv, ap);
+		return extra;
+	}
 
+	// helper
+	inline Atom MethodEnv::endCoerce(int argc, uint32 *ap)
+	{
 		// we know we have verified the method, so we can go right into it.
 		Traits* returnType = method->returnTraits();
 		AvmCore* core = this->core();
@@ -105,7 +152,78 @@ namespace avmplus
 		}
 	}
 
-	
+	// fast/optimized call to a function without parameters
+	Atom MethodEnv::coerceEnter(Atom thisArg)
+	{
+		startCoerce(0);
+		// check receiver type first
+		// caller will coerce instance if necessary,
+		// so make sure it was done.
+		AvmAssert(thisArg == toplevel()->coerce(thisArg, method->paramTraits(0)));
+		unbox1(core(), toplevel(), thisArg, method->paramTraits(0), &thisArg);
+
+		return endCoerce(0, (uint32*)&thisArg);
+	}
+
+	Atom MethodEnv::coerceEnter(Atom thisArg, ArrayObject *a)
+	{
+		int argc = a->getLength();
+		if (argc == 0)
+			return coerceEnter(thisArg);
+		int extra = startCoerce(argc);
+
+		// check receiver type first
+		// caller will coerce instance if necessary,
+		// so make sure it was done.
+		AvmAssert(thisArg == toplevel()->coerce(thisArg, method->paramTraits(0)));
+
+		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
+		uint32 *ap;
+		ap = (uint32 *) alloca(extra_sz);
+
+		unboxCoerceArgs(thisArg, a, ap);
+		Atom res = endCoerce(argc, ap);
+		// we know we have verified the method, so we can go right into it.
+		return res;
+	}
+
+	Atom MethodEnv::coerceEnter(Atom thisArg, int argc, Atom *argv)
+	{
+		int extra = startCoerce(argc);
+
+		// check receiver type first
+		// caller will coerce instance if necessary,
+		// so make sure it was done.
+		AvmAssert(thisArg == toplevel()->coerce(thisArg, method->paramTraits(0)));
+
+		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
+		uint32 *ap;
+		ap = (uint32 *) alloca(extra_sz);
+			
+		unboxCoerceArgs(thisArg, argc, argv, ap);
+		Atom res = endCoerce(argc, ap);
+		return res;
+	}
+
+	Atom MethodEnv::coerceEnter(int argc, Atom* atomv)
+	{
+		int extra = startCoerce(argc);
+
+		// check receiver type first
+		// caller will coerce instance if necessary,
+		// so make sure it was done.
+		AvmAssert(atomv[0] == toplevel()->coerce(atomv[0], method->paramTraits(0)));
+
+		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
+		uint32 *ap;
+		ap = (uint32 *) alloca(extra_sz);
+			
+		unboxCoerceArgs(argc, atomv, ap);
+		Atom res = endCoerce(argc, ap);
+		return res;
+	}
+
+
 	/**
 	 * convert atoms to native args.  argc is the number of
 	 * args, not counting the instance which is arg[0].  the
@@ -117,65 +235,45 @@ namespace avmplus
 		AvmCore* core = this->core();
 		Toplevel* toplevel = this->toplevel();
 
-		Atom *args = (Atom *) argv;
+		Atom *args = unbox1(core, toplevel, in[0], f->paramTraits(0), (Atom *) argv);
 
-		for (int i=0; i <= argc; i++)
-		{
-			if (i <= f->param_count)
-			{
-				Traits* t = f->paramTraits(i);
-				AvmAssert(t != VOID_TYPE);
-
-				if (t == NUMBER_TYPE) 
-				{
-					union {
-						double d;
-						uint32 l[2];
-					};
-					d = core->number(in[i]);
-					#ifdef AVMPLUS_64BIT
-					AvmAssert(sizeof(Atom) == sizeof(double));
-					*(double *) args = d;
-					args++;
-					#else
-					AvmAssert(sizeof(Atom) * 2 == sizeof(double));
-					*args++ = l[0];
-					*args++ = l[1];
-					#endif
-				}
-				else if (t == INT_TYPE)
-				{
-					*args++ = core->integer(in[i]);
-				}
-				else if (t == UINT_TYPE)
-				{
-					*args++ = core->toUInt32(in[i]);
-				}
-				else if (t == BOOLEAN_TYPE)
-				{
-					*args++ = core->boolean(in[i]);
-				}
-				else if (t == OBJECT_TYPE)
-				{
-					*args++ = in[i] == undefinedAtom ? nullObjectAtom : in[i];
-				}
-				else if (!t)
-				{
-					*args++ = in[i];
-				}
-				else
-				{
-					// ScriptObject, String, or Namespace, or Null
-					*args++ = toplevel->coerce(in[i],t) & ~7;
-				}
-			}
-			else
-			{
-				*args++ = in[i];
-			}
-		}
+		int end = argc >= f->param_count ? f->param_count : argc;
+		for (int i=0; i < end; i++)
+			args = unbox1(core, toplevel, in[i+1], f->paramTraits(i+1), args);
+		while (end < argc)
+			*args++ = in[++end];
 	}
 
+	void MethodEnv::unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv)
+	{
+		AbstractFunction* f = this->method;
+		AvmCore* core = this->core();
+		Toplevel* toplevel = this->toplevel();
+		int argc = a->getLength();
+
+		Atom *args = unbox1(core, toplevel, thisArg, f->paramTraits(0), (Atom *) argv);
+
+		int end = argc >= f->param_count ? f->param_count : argc;
+		for (int i=0; i < end; i++)
+			args = unbox1(core, toplevel, a->getUintProperty(i), f->paramTraits(i+1), args);
+		while (end < argc)
+			*args++ = a->getUintProperty(end++);
+	}
+
+	void MethodEnv::unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv)
+	{
+		AbstractFunction* f = this->method;
+		AvmCore* core = this->core();
+		Toplevel* toplevel = this->toplevel();
+
+		Atom *args = unbox1(core, toplevel, thisArg, f->paramTraits(0), (Atom *) argv);
+
+		int end = argc >= f->param_count ? f->param_count : argc;
+		for (int i=0; i < end; i++)
+			args = unbox1(core, toplevel, in[i], f->paramTraits(i+1), args);
+		while (end < argc)
+			*args++ = in[end++];
+	}
 
 	Atom MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
 	{
@@ -1014,8 +1112,7 @@ namespace avmplus
 		}
 
 		// Invoke the class init function.
-		Atom argv[1] = { cc->atom() };
-		cvtable->init->coerceEnter(0, argv);
+		cvtable->init->coerceEnter(cc->atom());
 		return cc;
     }
 

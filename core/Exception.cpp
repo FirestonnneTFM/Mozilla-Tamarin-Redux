@@ -44,6 +44,7 @@
 		_int64 __cdecl longjmp64(jmp_buf jmpbuf, _int64 arg);
 	}
 #endif
+
 namespace avmplus
 {
 	//
@@ -97,6 +98,7 @@ namespace avmplus
 	void *ExceptionFrame::lptr[MAX_LONG_JMP_COUNT] = {0};
 	int   ExceptionFrame::lptrcounter = 1;
 #endif //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+
 	void ExceptionFrame::beginTry(AvmCore* core)
 	{
 		this->core = core;

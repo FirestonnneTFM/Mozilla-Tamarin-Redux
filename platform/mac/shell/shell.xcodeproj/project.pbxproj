@@ -41,8 +41,8 @@
 		8E8B52B909AABAA30057BEE4 /* StringBuilderClass.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529409AABAA30057BEE4 /* StringBuilderClass.h */; };
 		8E8B52BA09AABAA30057BEE4 /* SystemClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E8B529509AABAA30057BEE4 /* SystemClass.cpp */; };
 		8E8B52BB09AABAA30057BEE4 /* SystemClass.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529609AABAA30057BEE4 /* SystemClass.h */; };
-		8E8B52BC09AABAA30057BEE4 /* toplevel.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529709AABAA30057BEE4 /* toplevel.as */; };
-		8E8B52BE09AABAA30057BEE4 /* toplevel.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529909AABAA30057BEE4 /* toplevel.h */; };
+		8E8B52BC09AABAA30057BEE4 /* shell_toplevel.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529709AABAA30057BEE4 /* shell_toplevel.as */; };
+		8E8B52BE09AABAA30057BEE4 /* shell_toplevel.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E8B529909AABAA30057BEE4 /* shell_toplevel.h */; };
 		8EDDB9DE09AAD17F00FB9EE5 /* libavmplus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E8B52C809AABABE0057BEE4 /* libavmplus.a */; };
 		8EDDB9DF09AAD18200FB9EE5 /* libMMgc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E8B52D309AABB120057BEE4 /* libMMgc.a */; };
 		8EDDB9E809AAD1D300FB9EE5 /* Dictionary.as in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8EDDB9E509AAD1D300FB9EE5 /* Dictionary.as */; };
@@ -105,8 +105,8 @@
 				8E8B52B709AABAA30057BEE4 /* StringBuilder.as in CopyFiles */,
 				8E8B52B909AABAA30057BEE4 /* StringBuilderClass.h in CopyFiles */,
 				8E8B52BB09AABAA30057BEE4 /* SystemClass.h in CopyFiles */,
-				8E8B52BC09AABAA30057BEE4 /* toplevel.as in CopyFiles */,
-				8E8B52BE09AABAA30057BEE4 /* toplevel.h in CopyFiles */,
+				8E8B52BC09AABAA30057BEE4 /* shell_toplevel.as in CopyFiles */,
+				8E8B52BE09AABAA30057BEE4 /* shell_toplevel.h in CopyFiles */,
 				8EDDB9E809AAD1D300FB9EE5 /* Dictionary.as in CopyFiles */,
 				8EDDB9EA09AAD1D300FB9EE5 /* DictionaryGlue.h in CopyFiles */,
 				6803D2CA0A5064FD00C797BB /* JavaGlue.h in CopyFiles */,
@@ -422,8 +422,8 @@
 		8E8B529409AABAA30057BEE4 /* StringBuilderClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StringBuilderClass.h; path = ../../../shell/StringBuilderClass.h; sourceTree = SOURCE_ROOT; };
 		8E8B529509AABAA30057BEE4 /* SystemClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = SystemClass.cpp; path = ../../../shell/SystemClass.cpp; sourceTree = SOURCE_ROOT; };
 		8E8B529609AABAA30057BEE4 /* SystemClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SystemClass.h; path = ../../../shell/SystemClass.h; sourceTree = SOURCE_ROOT; };
-		8E8B529709AABAA30057BEE4 /* toplevel.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = toplevel.as; path = ../../../shell/toplevel.as; sourceTree = SOURCE_ROOT; };
-		8E8B529909AABAA30057BEE4 /* toplevel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = toplevel.h; path = ../../../shell/toplevel.h; sourceTree = SOURCE_ROOT; };
+		8E8B529709AABAA30057BEE4 /* shell_toplevel.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = shell_toplevel.as; path = ../../../shell/shell_toplevel.as; sourceTree = SOURCE_ROOT; };
+		8E8B529909AABAA30057BEE4 /* shell_toplevel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = shell_toplevel.h; path = ../../../shell/shell_toplevel.h; sourceTree = SOURCE_ROOT; };
 		8E8B52C309AABABE0057BEE4 /* avmplus.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = avmplus.xcodeproj; path = ../avmplus/avmplus.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8E8B52CD09AABB120057BEE4 /* MMgc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MMgc.xcodeproj; path = ../MMgc/MMgc.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8EDDB9E509AAD1D300FB9EE5 /* Dictionary.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = Dictionary.as; path = ../../../extensions/Dictionary.as; sourceTree = SOURCE_ROOT; };
@@ -859,8 +859,8 @@
 				8E8B529409AABAA30057BEE4 /* StringBuilderClass.h */,
 				8E8B529509AABAA30057BEE4 /* SystemClass.cpp */,
 				8E8B529609AABAA30057BEE4 /* SystemClass.h */,
-				8E8B529709AABAA30057BEE4 /* toplevel.as */,
-				8E8B529909AABAA30057BEE4 /* toplevel.h */,
+				8E8B529709AABAA30057BEE4 /* shell_toplevel.as */,
+				8E8B529909AABAA30057BEE4 /* shell_toplevel.h */,
 			);
 			name = shell;
 			sourceTree = "<group>";

@@ -37,6 +37,7 @@
 
 
 #include "avmplus.h"
+
 #ifdef AVMPLUS_MIR
 #include "CodegenMIR.h"
 
@@ -382,6 +383,7 @@ namespace avmplus
 			core->console.format("    %A  %s %R, %d\n", mip, opstr, reg, imm);
 		}
 		#endif
+
 		// REX is odd here, because the Register is in ModRM r/m, not reg
 		REX(Unknown, reg, true);
 		reg = (Register)(int(reg) & 0x7);
@@ -409,6 +411,7 @@ namespace avmplus
 			AvmAssert(0);
 		}
  	}
+
 	void CodegenMIR::ALU64(int op, Register r, Register rhs)
 	{
 		incInstructionCount();
@@ -455,7 +458,7 @@ namespace avmplus
 		// SHR/SAR and SAL/SHL need to mask the shift operand to 
 		// 5 bits, to make a 31-bit shift maximum
 		// shift op is always in RCX
-			REX(r, rhs, false);
+		REX(r, rhs, false);
 
 		*mip++ = (MDInstruction)op; 
 		MODRM(r, rhs);
@@ -581,9 +584,13 @@ namespace avmplus
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose()) core->console.format("    %A  cvtsi2sd %F, %R\n", mip, dest, src);
 		#endif /* AVMPLUS_VERBOSE */
+
 		 int op = 0xf20f2a;
+
  		*mip++ = (MDInstruction)(op>>16);
+
 		REX(dest, src, true);
+
 		mip[0] = (MDInstruction)(op>>8);
 		mip[1] = (MDInstruction)op;
 		mip += 2;
@@ -738,6 +745,7 @@ namespace avmplus
 			base = R11;
 			disp = 0;
 		}
+
 		REX(r, base, true);
 		*mip++ = (MDInstruction)op;
 		MODRM(r, disp, base);
@@ -765,7 +773,7 @@ namespace avmplus
 		}
 		#endif /* AVMPLUS_VERBOSE */
 
-			REX(r, base, false);
+		REX(r, base, false);
 
 		*mip++ = (MDInstruction)op;
 		MODRM(r, disp, base);
@@ -1170,6 +1178,7 @@ namespace avmplus
 		// Make room for first 4 params, patch later if needed
 		const int param_space = 32;
 #endif //#ifdef _WIN64
+
 		int stack_adjust = 8;
 		int frame_size = stack_adjust + param_space;
 
@@ -1187,17 +1196,23 @@ namespace avmplus
 		int push_count = 0;	
 				
 #ifndef _WIN64
+
 		MOV (R10, RDX); // AP
 		MOV (RAX, RSI); // ARGC
+
 		// place our 'this' pointer in the first reg slot (RDI)
 		MOV (intRegUsage[parameterCount++], 0, RDX);
+
 		// In the GCC ABI there is no shadow space so
 		// there is not need to update push_count here
+
 		if (info->flags & AbstractFunction::UNBOX_THIS)
 		{
 			AND64(RDI,~7); // clear atom tag from bottom of pointer
 		}
+
 #else //#ifdef _WIN64
+
 		// rax, r11, r10 are scratch registers
 		// !!@ emit these only when needed?
 
@@ -1211,6 +1226,7 @@ namespace avmplus
 		// ALL parameters, including the first 4 (RCX,RDX,R8,R9). So we need
 		// to make space for every parameter
 		push_count += 8;	
+
 		if (info->flags & AbstractFunction::UNBOX_THIS)
 		{
 			AND64(RCX,~7); // clear atom tag from bottom of pointer
