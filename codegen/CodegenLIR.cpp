@@ -882,11 +882,15 @@ namespace avmplus
 
     class CopyPropagation: public LirWriter
     {
-        SortedMap<int, LIns*, LIST_NonGCObjects> tracker;
+        LInsp *tracker; // we use WB() macro, so no DWB() here.
         LIns *vars;
+        int nvar;
     public:
-        CopyPropagation(GC *gc, LirWriter *out) : LirWriter(out), tracker(gc)
-        {}
+        CopyPropagation(GC *gc, LirWriter *out, int nvar) : LirWriter(out), nvar(nvar)
+        {
+            LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
+            WB(gc, this, &tracker, a);
+        }
 
         void init(LIns *vars) {
             this->vars = vars;
@@ -895,10 +899,12 @@ namespace avmplus
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
             if (base == vars) {
                 int d = disp->constval();
-                LIns *val = tracker.get(d);
+                AvmAssert((d&7) == 0);
+                int i = d >> 3;
+                LIns *val = tracker[i];
 				if (!val) {
 					val = out->insLoad(op, base, disp);
-					tracker.put(d, val);
+					tracker[i] = val;
 				}
 				return val;
             }
@@ -906,20 +912,27 @@ namespace avmplus
         }
 
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
-            if (base == vars)
-                tracker.put(disp->constval(), value);
+            if (base == vars) {
+                int d = disp->constval();
+                AvmAssert((d&7) == 0);
+                int i = d >> 3;
+                tracker[i] = value;
+            }
             return out->insStore(value, base, disp);
         }
 
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
-            if (base == vars)
-                tracker.put(d, value);
+            if (base == vars) {
+                AvmAssert((d&7) == 0);
+                int i = d >> 3;
+                tracker[i] = value;
+            }
             return out->insStorei(value, base, d);
         }
 
         LIns *ins0(LOpcode op) {
             if (op == LIR_label)
-                tracker.clear();
+                memset(tracker, 0, nvar*sizeof(LInsp));
             return out->ins0(op);
         }
 
@@ -989,7 +1002,7 @@ namespace avmplus
             lirout = new (gc) CfgCseFilter(loadfilter, gc);
         }
         lirout = new (gc) ExprFilter(lirout);
-        CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout);
+        CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout, state->verifier->frameSize);
         lirout = copier;
 
 		emitStart(lirbuf, lirout);
@@ -3883,76 +3896,57 @@ namespace avmplus
         }
     };
 #endif
-
-    class DeadVars: public LirFilter
+    int deadvars_branch(GC *gc, LIns *target, BitSet &livein,
+        SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
     {
-        GC *gc;
-        LInsp vars;
-        BitSet livein; // current livein set during backwards flow analysis.
-        SortedMap<LIns*, BitSet*, LIST_GCObjects> labels;
-    public:
-        LInsp catcher;
-        const CallInfo *functions;
-        verbose_only(LirNameMap *names;)
-        int loops;
-        bool changed;
-        bool kill;
-        DeadVars(LirFilter *in, GC *gc, LInsp vars)
-            : LirFilter(in), gc(gc), vars(vars), labels(gc), catcher(0), functions(0)
-            verbose_only( , names(0) )
-        {}
-
-        void reset(bool kill) {
-            changed = false;
-            loops = 0;
-            livein.reset();
-            this->kill = kill;
+        BitSet *lset = labels.get(target);
+        if (lset) {
+            // the target LiveIn set (lset) is non-empty,
+            // union it with fall-through set (live).
+            livein.setFrom(gc, *lset);
+            return 0;
         }
-
-        int disp(LIns *i) {
-            int d = i->isStore() ? i->immdisp() : i->oprnd2()->constval();
-            AvmAssert(d >= 0 && (d&7) == 0);
-            return d>>3;
+        else {
+            // we have not seen the target yet, so this is a backedge.
+            // we need another iteration to pick up that live set.
+            return 1;
         }
+    }
 
-        void branch(LIns *target) {
-            BitSet *lset = labels.get(target);
-            if (lset) {
-                // the target LiveIn set (lset) is non-empty,
-                // union it with fall-through set (live).
-                livein.setFrom(gc, *lset);
-            }
-            else {
-                // we have not seen the target yet, so this is a backedge.
-                // we need another iteration to pick up that live set.
-                loops++;
-            }
-        }
+    int deadvars_analyze(GC *gc, LirBuffer *lirbuf, LIns *catcher,
+        SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
+    {
+        LIns *vars = lirbuf->sp;
+        int loops = 0;
+        BitSet livein;
+        LirReader in(lirbuf);
 
-        LIns *read() {
-            for (;;) {
-                LIns *i = in->read();
-                if (!i)
-                    return i;
-                if (isRet(i->opcode())) {
+        for (LIns *i = in.read(); i != 0; i = in.read()) {
+            LOpcode op = i->opcode();
+            switch (op) {
+                case LIR_ret:
+                case LIR_fret:
                     livein.reset();
-                }
-                else if (i->isStore() && i->oprnd2() == vars) {
-                    int d = disp(i);
-                    if (!livein.get(d)) {
-                        if (kill) {
-                            verbose_only(if (names)
-                                printf("- %s\n", names->formatIns(i));)
-                            i->initOpcode(LIR_neartramp);
-                        }
-                        continue;
+                    break;
+                case LIR_st:
+                case LIR_sti:
+                case LIR_stq:
+                case LIR_stqi:
+                    if (i->oprnd2() == vars) {
+                        int d = i->immdisp() >> 3;
+                        livein.clear(d);
                     }
-                    livein.clear(d);
-                }
-                else if (i->isLoad() && i->oprnd1() == vars) {
-                    livein.set(gc, disp(i));
-                }
-                else if (i->isop(LIR_label)) {
+                    break;
+                case LIR_ld:
+                case LIR_ldc:
+                case LIR_ldq:
+                case LIR_ldqc:
+                    if (i->oprnd1() == vars) {
+                        int d = i->oprnd2()->constval() >> 3;
+                        livein.set(gc, d);
+                    }
+                    break;
+                case LIR_label: {
                     // we're at the top of a block, save livein for this block
                     // so it can be propagated to predecessors
                     BitSet *lset = labels.get(i);
@@ -3963,32 +3957,114 @@ namespace avmplus
                         lset->reset();
                     }
                     lset->setFrom(gc, livein);
+                    break;
                 }
-                else if (i->isBranch()) {
+                case LIR_j:
+                    // the fallthrough path is unreachable, clear it.
+                    livein.reset();
+                    // fall through to other branch cases
+                case LIR_jt:
+                case LIR_jf:
                     // merge the LiveIn sets from each successor:  the fall
                     // through case (live) and the branch case (lset).
-                    if (i->isop(LIR_j)) {
-                        // the fallthrough path is unreachable, clear it.
-                        livein.reset();
-                    }
-                    branch(i->getTarget());
-                }
-                else if (i->isCall()) {
-                    if (catcher && !i->isCse(functions)) {
+                    loops += deadvars_branch(gc, i->getTarget(), livein, labels);
+                    break;
+                case LIR_call:
+                case LIR_calli:
+                case LIR_fcall:
+                case LIR_fcalli:
+                    if (catcher && !i->isCse(lirbuf->_functions)) {
                         // non-cse call is like a conditional branch to the catcher label.
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
                         // reachable catch blocks.
-                        branch(catcher);
+                        loops += deadvars_branch(gc, catcher, livein, labels);
                     }
-                }
-                verbose_only(if (kill && names) {
-                    printf("  %s\n", names->formatIns(i));
-                })
-                return i;
+                    break;
             }
         }
-    };
+        return loops;
+    }
+
+    void deadvars_kill(GC *gc, LirBuffer *lirbuf, LIns *catcher,
+        SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels
+        verbose_only(, LirNameMap *names))
+    {
+        LIns *vars = lirbuf->sp;
+        BitSet livein;
+        LirReader in(lirbuf);
+        for (LIns *i = in.read(); i != 0; i = in.read()) {
+            LOpcode op = i->opcode();
+            switch (op) {
+                case LIR_ret:
+                case LIR_fret:
+                    livein.reset();
+                    break;
+                case LIR_st:
+                case LIR_sti:
+                case LIR_stq:
+                case LIR_stqi:
+                    if (i->oprnd2() == vars) {
+                        int d = i->immdisp() >> 3;
+                        if (!livein.get(d)) {
+                            verbose_only(if (names)
+                                printf("- %s\n", names->formatIns(i));)
+                            i->initOpcode(LIR_neartramp);
+                        } else {
+                            livein.clear(d);
+                        }
+                    }
+                    break;
+                case LIR_ld:
+                case LIR_ldc:
+                case LIR_ldq:
+                case LIR_ldqc:
+                    if (i->oprnd1() == vars) {
+                        int d = i->oprnd2()->constval() >> 3;
+                        livein.set(gc, d);
+                    }
+                    break;
+                case LIR_label: {
+                    // we're at the top of a block, save livein for this block
+                    // so it can be propagated to predecessors
+                    BitSet *lset = labels.get(i);
+                    if (!lset) {
+                        lset = new (gc) BitSet();
+                        labels.put(i, lset);
+                    } else {
+                        lset->reset();
+                    }
+                    lset->setFrom(gc, livein);
+                    break;
+                }
+                case LIR_j:
+                    // the fallthrough path is unreachable, clear it.
+                    livein.reset();
+                    // fall through to other branch cases
+                case LIR_jt:
+                case LIR_jf:
+                    // merge the LiveIn sets from each successor:  the fall
+                    // through case (live) and the branch case (lset).
+                    deadvars_branch(gc, i->getTarget(), livein, labels);
+                    break;
+                case LIR_call:
+                case LIR_calli:
+                case LIR_fcall:
+                case LIR_fcalli:
+                    if (catcher && !i->isCse(lirbuf->_functions)) {
+                        // non-cse call is like a conditional branch to the catcher label.
+                        // this could be made more precise by checking whether this call
+                        // can really throw, and only processing edges to the subset of
+                        // reachable catch blocks.
+                        deadvars_branch(gc, catcher, livein, labels);
+                    }
+                    break;
+            }
+            verbose_only(if (names) {
+                printf("  %s\n", names->formatIns(i));
+            })
+        }
+    }
 
     /*
      * this is iterative live variable analysis.  We walk backwards through
@@ -4010,45 +4086,28 @@ namespace avmplus
 
     void CodegenLIR::deadvars()
     {
+        SortedMap<LIns*, BitSet*, LIST_GCObjects> labels(gc);
+
         LirReader in(lirbuf);
-        LIns *last = in.pos();
-        DeadVars dv(&in, gc, vars);
-        if (exBranch) {
-            dv.catcher = exBranch->getTarget();
-            dv.functions = lirbuf->_functions;
-        }
-        verbose_only( if(verbose()) dv.names = lirbuf->names; )
+        LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         int iter=0;
-        int loops=0;
-        do {
-            // make one pass, plus one additional pass for each backedge encountered.
-            dv.reset(false);
-            in.setpos(last);
-            while (dv.read())
-            {}
-            if (iter == 0) {
-                // fixme.  the way DeadVars finds loop edges only works on the first pass.
-                // so capture the # of edges so we know how many times to iterate.
-                loops = dv.loops;
-                if (loops > 50) {
-                    // pathalogical bailout, don't do var removal.
-                    verbose_only( if (verbose()) 
-                        printf("skipping dead store removal, %d backedges is too many.\n",dv.loops);
-                    )
-                    return;
-                }
-            }
+        int loops = deadvars_analyze(gc, lirbuf, catcher, labels);
+        if (loops > 50) {
+            // pathalogical bailout, don't do var removal.
+            verbose_only( if (verbose()) 
+                printf("skipping dead store removal, %d backedges is too many.\n", loops);
+            )
+            return;
         }
-        while (++iter <= loops);
+        while (++iter <= loops)
+            deadvars_analyze(gc, lirbuf, catcher, labels);
 
         // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
         verbose_only( if (verbose()) 
             printf("killing dead stores after %d LA iterations.  %d loop edges\n",iter,loops);
         )
-        dv.reset(true);
-        in.setpos(last);
-        while (dv.read())
-        {}
+        deadvars_kill(gc, lirbuf, catcher, labels
+            verbose_only(, lirbuf->names));
     }
 
     static int jitcount=0;

@@ -154,6 +154,7 @@ namespace nanojit
         , _labels(_gc)
         , _patches(_gc)
         , hasLoop(0)
+        , pending_lives(_gc)
 	{
         AvmCore *core = frago->core();
 		nInit(core);
@@ -277,6 +278,7 @@ namespace nanojit
 		registerResetAll();
 		reserveReset();
 		arReset();
+        pending_lives.clear();
 	}
 
 	NIns* Assembler::pageAlloc(bool exitPage)
@@ -1044,7 +1046,7 @@ namespace nanojit
 
                 case LIR_live: {
                     countlir_live();
-                    findMemFor(ins->oprnd1());
+                    pending_lives.add(ins->oprnd1());
                     break;
                 }
 
@@ -1436,7 +1438,7 @@ namespace nanojit
 				case LIR_j:
 				{
                     countlir_jmp();
-					LInsp to = ins->oprnd2();
+					LInsp to = ins->getTarget();
                     LabelState *label = _labels.get(to);
                     // the jump is always taken so whatever register state we
                     // have from downstream code, is irrelevant to code before
@@ -1451,7 +1453,7 @@ namespace nanojit
                     else {
                         // backwards jump
                         hasLoop = true;
-                        reserveSavedParams();
+                        handleLoopCarriedExprs();
                         if (!label) {
                             // save empty register state at loop header
                             _labels.add(to, 0, _allocator);
@@ -1485,7 +1487,7 @@ namespace nanojit
                     else {
                         // back edge.
                         hasLoop = true;
-                        reserveSavedParams();
+                        handleLoopCarriedExprs();
                         if (!label) {
                             // evict all registers, most conservative approach.
                             evictRegs(~_allocator.free);
@@ -1754,6 +1756,15 @@ namespace nanojit
         }
     }
 
+    void Assembler::handleLoopCarriedExprs()
+    {
+        // ensure that exprs spanning the loop are marked live at the end of the loop
+        reserveSavedParams();
+        for (int i=0, n=pending_lives.size(); i < n; i++) {
+            findMemFor(pending_lives[i]);
+        }
+    }
+
 	void Assembler::arFree(uint32_t idx)
 	{
         AR &ar = _activation;
@@ -1886,19 +1897,25 @@ namespace nanojit
     void Assembler::evictScratchRegs()
     {
 		// find the top GpRegs that are candidates to put in SavedRegs
-
-        avmplus::SortedMap<int32_t, LIns*, avmplus::LIST_NonGCObjects> primap(_gc);
+        Register tosave[8];
+        int len=0;
+        RegAlloc *regs = &_allocator;
         for (Register r = FirstReg; r <= LastReg; r = nextreg(r)) {
 			if (rmask(r) & GpRegs) {
-				LIns *i = _allocator.getActive(r);
+				LIns *i = regs->getActive(r);
 				if (i) {
 					if (canRemat(i)) {
 						evict(r);
 					}
 					else {
-						int32_t pri = _allocator.getPriority(r);
-						NanoAssert(!primap.containsKey(pri));
-						primap.put(pri, i);
+						int32_t pri = regs->getPriority(r);
+                        // add to heap.
+                        int j = len++;
+                        while (j > 0 && pri > regs->getPriority(tosave[j/2])) {
+                            tosave[j] = tosave[j/2];
+                            j /= 2;
+                        }
+                        tosave[j] = r;
 					}
 				}
             }
@@ -1908,11 +1925,28 @@ namespace nanojit
 		// allocate each of the top priority exprs to a SavedReg
 
         RegisterMask allow = SavedRegs;
-        while (allow && !primap.isEmpty()) {
+        while (allow && len > 0) {
             // get the highest priority var
-			LIns *i = primap.removeLast();
+            Register hi = tosave[0];
+            LIns *i = regs->getActive(hi);
             Register r = findRegFor(i, allow);
 			allow &= ~rmask(r);
+
+            // remove from heap
+            if (allow && --len > 0) {
+                Register last = tosave[len];
+                int j = 0;
+                while (j+1 < len) {
+                    int child = j+1;
+                    if (j+2 < len && regs->getPriority(tosave[j+2]) > regs->getPriority(tosave[j+1]))
+                        child++;
+                    if (regs->getPriority(last) > regs->getPriority(tosave[child]))
+                        break;
+                    tosave[j] = tosave[child];
+                    j = child;
+                }
+                tosave[j] = last;
+            }
         }
 
 		// now evict everything else.
