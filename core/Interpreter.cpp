@@ -1169,9 +1169,13 @@ namespace avmplus
 			}
 
 			INSTR(bitnot) {
-				// OPTIMIZEME - bitnot on integer values
+				Atom val = sp[0];
+				if (IS_INTEGER(val)) {
+					sp[0] = ~val ^ 7;
+					NEXT;
+				}
 				SAVE_EXPC;
-				*sp = core->intToAtom(~core->integer(*sp));
+				*sp = core->intToAtom(~core->integer(val));
 				restore_dxns();
                 NEXT;
 			}
@@ -1287,7 +1291,8 @@ namespace avmplus
 			}
 
 			INSTR(inclocal) {
-				SAVE_EXPC;  // because U30ARG prevents it from being done after FAST_INC_MAYBE.  Clean up for threaded code.
+				SAVE_EXPC;  // OPTIMIZEME - Clean up for word code.
+							// Because U30ARG prevents it from being done after FAST_DEC_MAYBE.  
 				Atom* rp = framep+U30ARG;
 				Atom lhs = *rp;
 				FAST_INC_MAYBE(lhs,*rp);
@@ -1298,7 +1303,8 @@ namespace avmplus
 			}
 
             INSTR(inclocal_i) {
-				SAVE_EXPC;  // because U30ARG prevents it from being done after FAST_INC_MAYBE.  Clean up for threaded code.
+				SAVE_EXPC;  // OPTIMIZEME - Clean up for word code.
+							// Because U30ARG prevents it from being done after FAST_DEC_MAYBE.  
 				Atom* rp = framep+U30ARG;
 				Atom lhs = *rp;
 				FAST_INC_MAYBE(lhs,*rp);
@@ -1327,7 +1333,8 @@ namespace avmplus
 			}
 
 			INSTR(declocal) {
-				SAVE_EXPC;  // because U30ARG prevents it from being done after FAST_DEC_MAYBE.  Clean up for threaded code.
+				SAVE_EXPC;  // OPTIMIZEME - Clean up for word code.
+							// Because U30ARG prevents it from being done after FAST_DEC_MAYBE.  
 				Atom* rp = framep+U30ARG;
 				Atom lhs = *rp;
 				FAST_DEC_MAYBE(lhs,*rp);
@@ -1338,7 +1345,8 @@ namespace avmplus
 			}
 
 			INSTR(declocal_i) {
-				SAVE_EXPC;  // because U30ARG prevents it from being done after FAST_DEC_MAYBE.  Clean up for threaded code.
+				SAVE_EXPC; // OPTIMIZEME - Clean up for word code.
+						   // because U30ARG prevents it from being done after FAST_DEC_MAYBE.
 				Atom* rp = framep+U30ARG;
 				Atom lhs = *rp;
 				FAST_DEC_MAYBE(lhs,*rp);
@@ -1518,9 +1526,12 @@ namespace avmplus
 				URSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
-#define BITOP_TWO_VALUES_AND_NEXT(op, lhs, rhs, dest) \
+// The OR with tag is only necessary for xor, which passes kIntegerType.  The
+// others pass 0, and we assume the compiler optimizes the OR away.
+
+#define BITOP_TWO_VALUES_AND_NEXT(op, lhs, rhs, dest, tag) \
 	if (IS_BOTH_INTEGER(lhs,rhs)) { \
-		dest = (lhs op rhs) | kIntegerType; \
+		dest = (lhs op rhs) | tag; \
 		NEXT; \
 	} \
 	SAVE_EXPC; \
@@ -1528,7 +1539,7 @@ namespace avmplus
 	restore_dxns(); \
 	NEXT
 
-#define BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(&, lhs, rhs, dest)
+#define BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(&, lhs, rhs, dest, 0)
 
             INSTR(bitand) {
 				Atom lhs = sp[-1];
@@ -1537,7 +1548,7 @@ namespace avmplus
 				BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 
-#define BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(|, lhs, rhs, dest)
+#define BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(|, lhs, rhs, dest, 0)
 					
             INSTR(bitor) {
 				Atom lhs = sp[-1];
@@ -1546,7 +1557,7 @@ namespace avmplus
 				BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-#define BITXOR_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(^, lhs, rhs, dest)
+#define BITXOR_TWO_VALUES_AND_NEXT(lhs, rhs, dest) BITOP_TWO_VALUES_AND_NEXT(^, lhs, rhs, dest, kIntegerType)
 					
             INSTR(bitxor) {
 				Atom lhs = sp[-1];
