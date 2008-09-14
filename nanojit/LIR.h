@@ -654,14 +654,14 @@ namespace nanojit
 		// must be a power of 2. 
 		// don't start too small, or we'll waste time growing and rehashing.
 		// don't start too large, will waste memory. 
-		static const uint32_t kInitialCap = 2048;	
+		static const uint32_t kInitialCap = 64;	
 
-		InsList m_list;
-		uint32_t m_used;
+		LInsp *m_list; // explicit WB's are used, no DWB needed.
+		uint32_t m_used, m_cap;
 		GC* m_gc;
 
 		static uint32_t FASTCALL hashcode(LInsp i);
-		uint32_t FASTCALL find(LInsp name, uint32_t hash, const InsList& list, uint32_t cap);
+		uint32_t FASTCALL find(LInsp name, uint32_t hash, const LInsp *list, uint32_t cap);
 		static bool FASTCALL equals(LInsp a, LInsp b);
 		void FASTCALL grow();
 

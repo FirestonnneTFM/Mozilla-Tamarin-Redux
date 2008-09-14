@@ -235,8 +235,9 @@ namespace nanojit
     LIns* LIns::deref(int32_t off) const
     {
 		LInsp i = (LInsp) this-1 - off;
-        while (i && i->isTramp())
+        while (i && i->isTramp()) {
             i = i->ref();
+        }
 		return i;
     }
 
@@ -1183,19 +1184,17 @@ namespace nanojit
 	}
 
 	LInsHashSet::LInsHashSet(GC* gc) : 
-			m_list(gc, kInitialCap), m_used(0), m_gc(gc)
+			m_used(0), m_cap(kInitialCap), m_gc(gc)
 	{
 #ifdef MEMORY_INFO
 //		m_list.set_meminfo_name("LInsHashSet.list");
 #endif
-		//m_list.set(kInitialCap-1, 0);
-        clear();
+        LInsp *list = (LInsp*) gc->Alloc(sizeof(LInsp)*m_cap, GC::kZero);
+        WB(gc, this, &m_list, list);
 	}
 
     void LInsHashSet::clear() {
-        uint32_t len = m_list.capacity();
-        for (uint32_t i=0; i < len; i++)
-            m_list.set(i, 0);
+        memset(m_list, 0, sizeof(LInsp)*m_cap);
         m_used = 0;
     }
 	
@@ -1272,32 +1271,30 @@ namespace nanojit
 
 	void FASTCALL LInsHashSet::grow()
 	{
-		const uint32_t newcap = m_list.size() << 1;
-		InsList newlist(m_gc, newcap);
+		const uint32_t newcap = m_cap << 1;
+        LInsp *newlist = (LInsp*) m_gc->Alloc(newcap * sizeof(LInsp), GC::kZero);
+        LInsp *list = m_list;
 #ifdef MEMORY_INFO
 //		newlist.set_meminfo_name("LInsHashSet.list");
 #endif
-        for (uint32_t i=0, n=newcap; i < n; i++)
-            newlist.set(i,0);
-		//newlist.set(newcap-1, 0);
-		for (uint32_t i=0, n=m_list.size(); i < n; i++)
-		{
-			LInsp name = m_list.get(i);
+		for (uint32_t i=0, n=m_cap; i < n; i++) {
+			LInsp name = list[i];
 			if (!name) continue;
 			uint32_t j = find(name, hashcode(name), newlist, newcap);
-			newlist.set(j, name);
+            newlist[j] = name;
 		}
-		m_list.become(newlist);
+        m_cap = newcap;
+        WB(m_gc, this, &m_list, newlist);
 	}
 
-	uint32_t FASTCALL LInsHashSet::find(LInsp name, uint32_t hash, const InsList& list, uint32_t cap)
+	uint32_t FASTCALL LInsHashSet::find(LInsp name, uint32_t hash, const LInsp *list, uint32_t cap)
 	{
 		const uint32_t bitmask = (cap - 1) & ~0x1;
 
 		uint32_t n = 7 << 1;
 		hash &= bitmask;  
 		LInsp k;
-		while ((k = list.get(hash)) != NULL &&
+		while ((k = list[hash]) != NULL &&
 			(!LIns::sameop(k,name) || !equals(k, name)))
 		{
 			hash = (hash + (n += 2)) & bitmask;		// quadratic probe
@@ -1309,23 +1306,23 @@ namespace nanojit
 	{
 		// this is relatively short-lived so let's try a more aggressive load factor
 		// in the interest of improving performance
-		if (((m_used+1)<<1) >= m_list.size()) // 0.50
+		if (((m_used+1)<<1) >= m_cap) // 0.50
 		{
 			grow();
-			k = find(name, hashcode(name), m_list, m_list.size());
+			k = find(name, hashcode(name), m_list, m_cap);
 		}
-		NanoAssert(!m_list.get(k));
+		NanoAssert(!m_list[k]);
 		m_used++;
-		m_list.set(k, name);
-		return name;
+        return m_list[k] = name;
 	}
 
 	void LInsHashSet::replace(LInsp i)
 	{
-		uint32_t k = find(i, hashcode(i), m_list, m_list.size());
-		if (m_list.get(k)) {
+        LInsp *list = m_list;
+		uint32_t k = find(i, hashcode(i), list, m_cap);
+		if (list[k]) {
 			// already there, so replace it
-			m_list.set(k, i);
+			list[k] = i;
 		} else {
 			add(i, k);
 		}
@@ -1360,13 +1357,13 @@ namespace nanojit
 
 	LInsp LInsHashSet::find32(int32_t a, uint32_t &i)
 	{
-		uint32_t cap = m_list.size();
-		const InsList& list = m_list;
+		uint32_t cap = m_cap;
+		const LInsp *list = m_list;
 		const uint32_t bitmask = (cap - 1) & ~0x1;
 		uint32_t hash = hashimm(a) & bitmask;
 		uint32_t n = 7 << 1;
 		LInsp k;
-		while ((k = list.get(hash)) != NULL && 
+		while ((k = list[hash]) != NULL && 
 			(!k->isconst() || k->constval() != a))
 		{
 			hash = (hash + (n += 2)) & bitmask;		// quadratic probe
@@ -1377,13 +1374,13 @@ namespace nanojit
 
 	LInsp LInsHashSet::find64(uint64_t a, uint32_t &i)
 	{
-		uint32_t cap = m_list.size();
-		const InsList& list = m_list;
+		uint32_t cap = m_cap;
+		const LInsp *list = m_list;
 		const uint32_t bitmask = (cap - 1) & ~0x1;
 		uint32_t hash = hashimmq(a) & bitmask;  
 		uint32_t n = 7 << 1;
 		LInsp k;
-		while ((k = list.get(hash)) != NULL && 
+		while ((k = list[hash]) != NULL && 
 			(!k->isconstq() || k->constvalq() != a))
 		{
 			hash = (hash + (n += 2)) & bitmask;		// quadratic probe
@@ -1394,13 +1391,13 @@ namespace nanojit
 
 	LInsp LInsHashSet::find1(LOpcode op, LInsp a, uint32_t &i)
 	{
-		uint32_t cap = m_list.size();
-		const InsList& list = m_list;
+		uint32_t cap = m_cap;
+		const LInsp *list = m_list;
 		const uint32_t bitmask = (cap - 1) & ~0x1;
 		uint32_t hash = hash1(op,a) & bitmask;  
 		uint32_t n = 7 << 1;
 		LInsp k;
-		while ((k = list.get(hash)) != NULL && 
+		while ((k = list[hash]) != NULL && 
 			(k->opcode() != op || k->oprnd1() != a))
 		{
 			hash = (hash + (n += 2)) & bitmask;		// quadratic probe
@@ -1411,13 +1408,13 @@ namespace nanojit
 
 	LInsp LInsHashSet::find2(LOpcode op, LInsp a, LInsp b, uint32_t &i)
 	{
-		uint32_t cap = m_list.size();
-		const InsList& list = m_list;
+		uint32_t cap = m_cap;
+		const LInsp *list = m_list;
 		const uint32_t bitmask = (cap - 1) & ~0x1;
 		uint32_t hash = hash2(op,a,b) & bitmask;  
 		uint32_t n = 7 << 1;
 		LInsp k;
-		while ((k = list.get(hash)) != NULL && 
+		while ((k = list[hash]) != NULL && 
 			(k->opcode() != op || k->oprnd1() != a || k->oprnd2() != b))
 		{
 			hash = (hash + (n += 2)) & bitmask;		// quadratic probe
@@ -1436,13 +1433,13 @@ namespace nanojit
 
 	LInsp LInsHashSet::findcall(uint32_t fid, uint32_t argc, LInsp args[], uint32_t &i)
 	{
-		uint32_t cap = m_list.size();
-		const InsList& list = m_list;
+		uint32_t cap = m_cap;
+		const LInsp *list = m_list;
 		const uint32_t bitmask = (cap - 1) & ~0x1;
 		uint32_t hash = hashcall(fid, argc, args) & bitmask;  
 		uint32_t n = 7 << 1;
 		LInsp k;
-		while ((k = list.get(hash)) != NULL &&
+		while ((k = list[hash]) != NULL &&
 			(!k->isCall() || k->fid() != fid || !argsmatch(k, argc, args)))
 		{
 			hash = (hash + (n += 2)) & bitmask;		// quadratic probe
@@ -1558,7 +1555,7 @@ namespace nanojit
 		for (int j=live.retired.size()-1; j >= 0; j--) 
         {
             RetiredEntry *e = live.retired[j];
-            char livebuf[1000], *s=livebuf;
+            char livebuf[4000], *s=livebuf;
             *s = 0;
             if (!newblock && e->i->isop(LIR_label)) {
                 printf("\n");
