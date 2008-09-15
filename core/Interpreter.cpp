@@ -1841,16 +1841,6 @@ namespace avmplus
                 NEXT;
 			}
 
-// OPTIMIZEME - multiname handling.
-//
-// Right now there's a lot of data copying going on.
-// We can do better than this if, in the optimized case, 'name' is a "const Multiname&" or "const Multiname*" that
-// points into the table.  The const-ness is crucial, we do not want anyone, anywhere, to modify the pointed-to
-// structure.  Code that does modify it (like initMultiname) would make an explicit copy and work on that.  (Edwin
-// even suggest that it would be better to keep the Multiname constant and variable parts separate, and that
-// that's what they did in TT.)  But that change spreads "const" throughout the system; need to check with a 
-// Higher Authority before doing that.
-
 // OPTIMIZEME - isRuntime and isRtns are known at translation time.
 // Using type information in the verifier it may be possible to determine
 // that isDictionaryLookup is false, too.  Should specialize instructions to
@@ -1858,8 +1848,8 @@ namespace avmplus
 //
 // But does it matter? getproperty, findproperty are heavyweight operations, and
 // opportunities for early binding are resolved during translation.  Still, it may
-// make a small difference in connection with avoiding multiname copying, since
-// most fields of the multiname data structure will not be accessed.
+// make a small difference in connection with avoiding multiname copying (now implemented), 
+// since most fields of the multiname data structure will not be accessed.
 
 // OPTIMIZEME - inline fast case for toVTable?
 // Presumably it will very often be a non-null object; now we have to make a call and
@@ -1868,8 +1858,10 @@ namespace avmplus
 
 #ifdef AVMPLUS_WORD_CODE
 #  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; name = pool->word_code.cpool_mn->multinames[tmp]; } while(0)
+#  define GET_MULTINAME_PTR(decl, arg)  const Multiname* decl = &pool->word_code.cpool_mn->multinames[arg]
 #else
 #  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
+#  define GET_MULTINAME_PTR(decl, arg)  Multiname _multiname = pool->parseMultiname(name, arg); const Multiname* decl = &_multiname
 #endif
 
 			INSTR(getlex) {
@@ -1877,12 +1869,11 @@ namespace avmplus
 				// findpropstrict + getproperty
 				// stack in:  -
 				// stack out: value
-				Multiname name;
-				GET_MULTINAME(name, U30ARG);
+				GET_MULTINAME_PTR(multiname, U30ARG);
 				// only non-runtime names are allowed.  but this still includes
 				// wildcard and attribute names.
-				Atom obj = env->findproperty(scope, scopeBase, scopeDepth, &name, true, withBase);
-				*(++sp) = toplevel->getproperty(obj, &name, toplevel->toVTable(obj));
+				Atom obj = env->findproperty(scope, scopeBase, scopeDepth, multiname, true, withBase);
+				*(++sp) = toplevel->getproperty(obj, multiname, toplevel->toVTable(obj));
 				restore_dxns();
 				NEXT;
 			}	
@@ -1891,33 +1882,36 @@ namespace avmplus
 			// Multiname is neither isRuntime or isRtns
 			INSTR(getproperty_fast) {
 				SAVE_EXPC;
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				sp[0] = toplevel->getproperty(sp[0], &multiname, toplevel->toVTable(sp[0]));
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				sp[0] = toplevel->getproperty(sp[0], multiname, toplevel->toVTable(sp[0]));
 				restore_dxns();
 				NEXT;
 			}
-					
 #endif
 					
 			// get a property using a multiname ref
             INSTR(getproperty) {
 				SAVE_EXPC;
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				if (!multiname.isRuntime())
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				if (!multiname->isRuntime())
 				{
-					sp[0] = toplevel->getproperty(sp[0], &multiname, toplevel->toVTable(sp[0]));
+					*sp = toplevel->getproperty(*sp, multiname, toplevel->toVTable(*sp));
 				}
-				else
+				else if (!multiname->isRtns() && IS_INTEGER(*sp) && *sp >= 0 && AvmCore::isObject(sp[-1]))
 				{
-					if(multiname.isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) {
-						initMultiname(env, multiname, sp);
-						*sp = toplevel->getproperty(*sp, &multiname, toplevel->toVTable(*sp));
-					} else {
-						Atom key = *(sp--);
-						sp[0] = AvmCore::atomToScriptObject(sp[0])->getAtomProperty(key);
-					}
+					Atom key = *(sp--);
+					*sp = AvmCore::atomToScriptObject(*sp)->getUintProperty(key>>3);
+				}
+				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) 
+				{
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
+					*sp = toplevel->getproperty(*sp, &multiname2, toplevel->toVTable(*sp));
+				} 
+				else 
+				{
+					Atom key = *(sp--);
+					*sp = AvmCore::atomToScriptObject(*sp)->getAtomProperty(key);
 				}
 				restore_dxns();
 				NEXT;
@@ -1926,25 +1920,31 @@ namespace avmplus
 			// set a property using a multiname ref
 			INSTR(setproperty) {
 				SAVE_EXPC;
-				Multiname multiname; 
-				GET_MULTINAME(multiname, U30ARG);
+				GET_MULTINAME_PTR(multiname, U30ARG);
 				Atom value = *(sp--);
-				if (!multiname.isRuntime())
+				if (!multiname->isRuntime())
 				{
 					Atom obj = *(sp--);
-					toplevel->setproperty(obj, &multiname, value, toplevel->toVTable(obj));
+					toplevel->setproperty(obj, multiname, value, toplevel->toVTable(obj));
 				}
-				else
+				else if (!multiname->isRtns() && IS_INTEGER(*sp) && *sp >= 0 && AvmCore::isObject(sp[-1]))
 				{
-					if(multiname.isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) {
-						initMultiname(env, multiname, sp);
-						Atom obj = *(sp--);
-						toplevel->setproperty(obj, &multiname, value, toplevel->toVTable(obj));
-					} else {
-						Atom key = *(sp--);
-						Atom obj = *(sp--);
-						AvmCore::atomToScriptObject(obj)->setAtomProperty(key, value);
-					}
+					Atom key = *(sp--);
+					Atom obj = *(sp--);
+					AvmCore::atomToScriptObject(obj)->setUintProperty(key>>3, value);
+				}
+				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1)))
+				{
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
+					Atom obj = *(sp--);
+					toplevel->setproperty(obj, &multiname2, value, toplevel->toVTable(obj));
+				} 
+				else 
+				{
+					Atom key = *(sp--);
+					Atom obj = *(sp--);
+					AvmCore::atomToScriptObject(obj)->setAtomProperty(key, value);
 				}
 				restore_dxns();
                 NEXT;
@@ -1952,19 +1952,19 @@ namespace avmplus
 
 			INSTR(initproperty) {
 				SAVE_EXPC;
-				Multiname multiname; 
-				GET_MULTINAME(multiname, U30ARG);
+				GET_MULTINAME_PTR(multiname, U30ARG);
 				Atom value = *(sp--);
-				if (!multiname.isRuntime())
+				if (!multiname->isRuntime())
 				{
 					Atom obj = *(sp--);
-					env->initproperty(obj, &multiname, value, toplevel->toVTable(obj));
+					env->initproperty(obj, multiname, value, toplevel->toVTable(obj));
 				}
 				else
 				{
-					initMultiname(env, multiname, sp);
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
 					Atom obj = *(sp--);
-					env->initproperty(obj, &multiname, value, toplevel->toVTable(obj));
+					env->initproperty(obj, &multiname2, value, toplevel->toVTable(obj));
 				}
 				restore_dxns();
                 NEXT;
@@ -1972,16 +1972,16 @@ namespace avmplus
 
 			INSTR(getdescendants) {
 				SAVE_EXPC;
-				Multiname name;
-				GET_MULTINAME(name, U30ARG);
-				if (!name.isRuntime())
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				if (!multiname->isRuntime())
 				{
-					sp[0] = env->getdescendants(sp[0], &name);
+					sp[0] = env->getdescendants(sp[0], multiname);
 				}
 				else
 				{
-					initMultiname(env, name, sp);
-					sp[0] = env->getdescendants(sp[0], &name);
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
+					sp[0] = env->getdescendants(sp[0], &multiname2);
 				}
 				restore_dxns();
 				NEXT;
@@ -2001,11 +2001,15 @@ namespace avmplus
 				// stack in:  [ns [name]]
 				// stack out: obj
 				SAVE_EXPC;
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				if (multiname.isRuntime())
-					initMultiname(env, multiname, sp);
-				*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, &multiname, true, withBase);
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				if (!multiname->isRuntime())
+					*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, multiname, true, withBase);
+				else 
+				{
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
+					*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, &multiname2, true, withBase);
+				}
 				restore_dxns();
 				NEXT;
 			}
@@ -2014,11 +2018,15 @@ namespace avmplus
 				// stack in:  [ns [name]]
 				// stack out: obj
 				SAVE_EXPC;
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				if (multiname.isRuntime())
-					initMultiname(env, multiname, sp);
-				*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, &multiname, false, withBase);
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				if (!multiname->isRuntime())
+					*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, multiname, false, withBase);
+				else
+				{
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
+					*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, &multiname2, false, withBase);
+				}
 				restore_dxns();
 				NEXT;
 			}
@@ -2027,9 +2035,8 @@ namespace avmplus
 				// stack in: 
 				// stack out: obj
 				SAVE_EXPC;
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				*(++sp) = env->finddef(&multiname)->atom();
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				*(++sp) = env->finddef(multiname)->atom();
 				restore_dxns();
 				NEXT;
 			}
@@ -2083,22 +2090,27 @@ namespace avmplus
 			// delete property using multiname
 			INSTR(deleteproperty) {
 				SAVE_EXPC;
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				if (!multiname.isRuntime())
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				if (!multiname->isRuntime())
 				{
-					sp[0] = env->delproperty(sp[0], &multiname);
+					sp[0] = env->delproperty(sp[0], multiname);
 				}
-				else
+				else if (!multiname->isRtns() && IS_INTEGER(*sp) && *sp >= 0 && AvmCore::isObject(sp[-1]))
 				{
-					if(multiname.isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) {
-						initMultinameNoXMLList(env, multiname, sp);
-						sp[0] = env->delproperty(sp[0], &multiname);
-					} else {
-						Atom key = *(sp--);
-						bool res = AvmCore::atomToScriptObject(sp[0])->deleteAtomProperty(key);
-						sp[0] = res ? trueAtom : falseAtom;
-					}
+					Atom key = *(sp--);
+					*sp = AvmCore::atomToScriptObject(*sp)->delUintProperty(key>>3) ? trueAtom : falseAtom;
+				}
+				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) 
+				{
+					Multiname multiname2 = *multiname;
+					initMultinameNoXMLList(env, multiname2, sp);
+					sp[0] = env->delproperty(sp[0], &multiname2);
+				} 
+				else 
+				{
+					Atom key = *(sp--);
+					bool res = AvmCore::atomToScriptObject(sp[0])->deleteAtomProperty(key);
+					sp[0] = res ? trueAtom : falseAtom;
 				}
 				restore_dxns();
 				NEXT;
@@ -2281,22 +2293,22 @@ namespace avmplus
 				SAVE_EXPC;
 				// stack in: obj [ns [name]] arg1..N
 				// stack out: result
-				Multiname name;
-				GET_MULTINAME(name, U30ARG);
+				GET_MULTINAME_PTR(multiname, U30ARG);
 				int32 argc = U30ARG;
-				if (!name.isRuntime())
+				if (!multiname->isRuntime())
 				{
 					// np check in toVTable
-					Atom tempAtom = toplevel->constructprop(&name, argc, sp-argc, toplevel->toVTable(sp[-argc]));
+					Atom tempAtom = toplevel->constructprop(multiname, argc, sp-argc, toplevel->toVTable(sp[-argc]));
 					*(sp -= argc) = tempAtom;
 				}
 				else
 				{
 					sp -= argc;
 					Atom* atomv = sp;
-					initMultiname(env, name, sp);
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
 					atomv[0] = *sp;
-					*sp = toplevel->constructprop(&name, argc, atomv, toplevel->toVTable(atomv[0]));
+					*sp = toplevel->constructprop(&multiname2, argc, atomv, toplevel->toVTable(atomv[0]));
 				}
 				restore_dxns();
 				NEXT;
@@ -2349,20 +2361,20 @@ namespace avmplus
 
 			INSTR(getsuper) {
 				SAVE_EXPC;
-				Multiname name;
-				GET_MULTINAME(name, U30ARG);
-				if (!name.isRuntime())
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				if (!multiname->isRuntime())
 				{
 					Atom objAtom = *sp;
-					env->nullcheck(objAtom);//null check
-					*sp = env->getsuper(objAtom, &name);
+					env->nullcheck(objAtom);
+					*sp = env->getsuper(objAtom, multiname);
 				}
 				else
 				{
-					initMultiname(env, name, sp);
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
 					Atom objAtom = *sp;
-					env->nullcheck(objAtom);//null check
-					*sp = env->getsuper(objAtom, &name);
+					env->nullcheck(objAtom);
+					*sp = env->getsuper(objAtom, &multiname2);
 				}
 				restore_dxns();
 				NEXT;
@@ -2370,22 +2382,21 @@ namespace avmplus
 
 			INSTR(setsuper) {
 				SAVE_EXPC;
-				int index = U30ARG;
-				Multiname name;
-				GET_MULTINAME(name, index);
+				GET_MULTINAME_PTR(multiname, U30ARG);
 				Atom valueAtom = *(sp--);
-				if (!name.isRuntime())
+				if (!multiname->isRuntime())
 				{
 					Atom objAtom = *(sp--);
 					env->nullcheck(objAtom);
-					env->setsuper(objAtom, &name, valueAtom);
+					env->setsuper(objAtom, multiname, valueAtom);
 				}
 				else
 				{
-					initMultiname(env, name, sp);
+					Multiname multiname2 = *multiname;
+					initMultiname(env, multiname2, sp);
 					Atom objAtom = *(sp--);
 					env->nullcheck(objAtom);
-					env->setsuper(objAtom, &name, valueAtom);
+					env->setsuper(objAtom, &multiname2, valueAtom);
 				}
 				restore_dxns();
 				NEXT;
@@ -2415,9 +2426,8 @@ namespace avmplus
 
 			INSTR(astype) {
 				SAVE_EXPC;
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				sp[0] = env->astype(sp[0], getTraits(&multiname, pool, toplevel, core));
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				sp[0] = env->astype(sp[0], getTraits(multiname, pool, toplevel, core));
 				restore_dxns();
 				NEXT;
 			}
@@ -2436,9 +2446,8 @@ namespace avmplus
 				SAVE_EXPC;
                 // expects a CONSTANT_Multiname cpool index
 				// this is the ES4 implicit coersion
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				sp[0] = toplevel->coerce(sp[0], getTraits(&multiname, pool, toplevel, core));
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				sp[0] = toplevel->coerce(sp[0], getTraits(multiname, pool, toplevel, core));
 				restore_dxns();
                 NEXT;
 			}
@@ -2466,9 +2475,8 @@ namespace avmplus
 				SAVE_EXPC;
                 // expects a CONSTANT_Multiname cpool index
 				// used when operator "is" RHS is a compile-time type constant
-				Multiname multiname;
-				GET_MULTINAME(multiname, U30ARG);
-				Traits* itraits = getTraits(&multiname, pool, toplevel, core);
+				GET_MULTINAME_PTR(multiname, U30ARG);
+				Traits* itraits = getTraits(multiname, pool, toplevel, core);
 				sp[0] = core->istypeAtom(sp[0], itraits);
 				restore_dxns();
                 NEXT;
@@ -3102,7 +3110,8 @@ namespace avmplus
 		//
     }
 
-	// OPTIMIZEME - avoid interning here if possible, see comments above OP_getlex above.
+	// Note, this function is not on the hot path normally, so optimizing it is not urgent.
+	//
 	// OPTIMIZEME - statically knowable if name isRtname or isRtns; exploit this somehow?
 	// OPTIMIZEME - often knowable whether the TOS is an object or something simple; exploit this?
 
