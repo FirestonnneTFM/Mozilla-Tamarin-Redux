@@ -1377,8 +1377,11 @@ const int kBufferPadding = 16;
 			DRCWB(Stringp) string;
 		};
 		
+#ifdef AVMPLUS_INTERNINT_CACHE
+		// See code in AvmCore::internInt
 		IndexString* index_strings[256];
-
+#endif
+		
 		// avoid multiple inheritance issues
 		class GCInterface : MMgc::GCCallback
 		{
