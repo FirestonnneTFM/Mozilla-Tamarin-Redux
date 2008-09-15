@@ -324,11 +324,9 @@ def parsePerfm(line,dic):
       dic['code'].append(int(result))
     elif 'compile ' in line:
       dic['compile'].append(int(result))
-    elif 'ir bytes' in line:
+    elif ('IR-bytes' in line) or ('mir bytes' in line):
       dic['irbytes'].append(int(result))
-    elif 'IR/tick' in line:
-      dic['tick'].append(int(result))
-    elif ('lir ' in line) or ('mir ' in line): #note trailing space
+    elif ('IR ' in line) or ('mir ' in line): #note trailing space
       dic['ir'].append(int(result))
       dic['count'].append(int(line.strip().split(' ')[-1]))
   except:
@@ -410,8 +408,8 @@ for ast in tests:
 
   # setup dictionary for vprof (perfm) results
   if globs['perfm']:
-    perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'tick':[], 'ir':[], 'count':[] }
-    perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'tick':[], 'ir':[], 'count':[] }
+    perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
+    perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
   
   for i in range(iterations):
     f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
@@ -484,7 +482,6 @@ for ast in tests:
       calcPerfm('code size (bytes)','code')
       calcPerfm('mir/lir bytes', 'irbytes')
       calcPerfm('mir/lir (# of inst)', 'ir')
-      calcPerfm('IR/tick', 'tick')
       calcPerfm('count', 'count')
       log_print('-------------------------------------------------------------------------------------------------------------')
   else:
@@ -496,8 +493,21 @@ for ast in tests:
         else:
           confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
         config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
+        if globs['perfm']:  #send vprof results to db
+          #calc confidence and mean for each stat
+          def calcConf(list):
+            return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
+          def perfmSocketlog(metric,key):
+            socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % 
+              (ast, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), iterations, OS_name, config, VM_version))
+          perfmSocketlog('vprof-compile-time','compile')
+          perfmSocketlog('vprof-code-size','code')
+          perfmSocketlog('vprof-verify-time','verify')
+          perfmSocketlog('vprof-ir-bytes','irbytes')
+          perfmSocketlog('vprof-ir-time','ir')
+          perfmSocketlog('vprof-count','count')
         socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
-        log_print("%-50s %7s %10.1f%%" % (ast,result1,confidence)) 
+        log_print("%-50s %7s %10.1f%%" % (ast,result1,confidence))
       else:
         log_print("%-50s %7s" % (ast,result1)) 
     else:
