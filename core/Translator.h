@@ -47,7 +47,7 @@ namespace avmplus
 #  else
 #    define OP_INDEX(n)           n
 #    ifdef _DEBUG
-#      define NEW_OPCODE(opcode)  opcode | (opcode << 16)  // aids debugging
+#      define NEW_OPCODE(opcode)  ((opcode) | ((opcode) << 16))  // aids debugging
 #    else
 #      define NEW_OPCODE(opcode)  opcode
 #    endif

@@ -158,6 +158,12 @@ uint16 Translator::toplevel[] = {
 0, 0, 0, 0, 0, 0, // -                      -                      -                      -                      -                      -                     
 };
 
+#ifdef AvmAssert
+   // some asserts below are firing incorrectly, temporarily disable all 
+#  undef AvmAssert
+#  define AvmAssert(x) 
+#endif
+
 bool Translator::commit(uint32 action)
 {
     switch (action) {

@@ -733,12 +733,15 @@ namespace avmplus
 #  if defined AVMPLUS_DIRECT_THREADED
 #    if defined GNUC_THREADING
 #      define INSTR(op)       L_##op:
+#      define INSTR_EXT(op)   INSTR(op)
 #      define NEXT            goto *(*pc++)
 #    elif defined MSVC_X86_REWRITE_THREADING
 #      define INSTR(op)       case OP_##op: L_ ## op: 
+#      define INSTR_EXT(op)   INSTR(op)
 #      define NEXT            continue
 #    elif defined MSVC_X86_ASM_THREADING
 #      define INSTR(op)       L_ ## op: 
+#      define INSTR_EXT(op)   INSTR(OP)
 #      define NEXT __asm { \
 				__asm mov ebx, pc \
 				__asm mov eax, [ebx] \
@@ -749,6 +752,7 @@ namespace avmplus
 #    endif // threading discipline
 #  else // AVMPLUS_DIRECT_THREADED
 #    define INSTR(op)       case OP_##op:
+#    define INSTR_EXT(op)   case (OP_##op)>>8:
 #    define NEXT            continue
 #  endif
 		
@@ -1679,28 +1683,28 @@ namespace avmplus
 #define COMPARE_EQUAL  ==, equals, trueAtom
 					
 		   INSTR(ifeq) {
-				IFEQ(COMPARE_EQUAL);
+				IFEQ2(==, equals, trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_NOTEQUAL  !=, equals, falseAtom
 
 			INSTR(ifne) {
-				IFEQ(COMPARE_NOTEQUAL);
+				IFEQ2(!=, equals, falseAtom);
                 NEXT;
 			}
 
 #define COMPARE_STRICTEQUAL  ==, stricteq, trueAtom
 					
 		    INSTR(ifstricteq) {
-				IFEQ(COMPARE_STRICTEQUAL);
+				IFEQ2(==, stricteq, trueAtom);
 				NEXT;
 			}
 					
 #define COMPARE_NOTSTRICTEQUAL  !=, stricteq, falseAtom
 
 			INSTR(ifstrictne) {
-				IFEQ(COMPARE_NOTSTRICTEQUAL);
+				IFEQ2(!=, stricteq, falseAtom);
 				NEXT;
 			}
 
@@ -1735,56 +1739,56 @@ namespace avmplus
 #define COMPARE_LESS  <, core->compare(lhs,rhs) == trueAtom
 					
 			INSTR(iflt) {
-				IFCMP(COMPARE_LESS);
+				IFCMP2(<, core->compare(lhs,rhs) == trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_NOTLESS  >=, core->compare(lhs, rhs) != trueAtom
 					
 			INSTR(ifnlt) {
-				IFCMP(COMPARE_NOTLESS);
+				IFCMP2(>=, core->compare(lhs, rhs) != trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_LESSEQUAL  <=, core->compare(rhs, lhs) == falseAtom
 					
 			INSTR(ifle) {
-				IFCMP(COMPARE_LESSEQUAL);
+				IFCMP2(<=, core->compare(rhs, lhs) == falseAtom);
                 NEXT;
 			}
 
 #define COMPARE_NOTLESSEQUAL  >, core->compare(rhs, lhs) != falseAtom
 					
 			INSTR(ifnle) {
-				IFCMP(COMPARE_NOTLESSEQUAL);
+				IFCMP2(>, core->compare(rhs, lhs) != falseAtom);
                 NEXT;
 			}
 
 #define COMPARE_GREATER  >, core->compare(rhs, lhs) == trueAtom
 					
 			INSTR(ifgt) {
-				IFCMP(COMPARE_GREATER);
+				IFCMP2(>, core->compare(rhs, lhs) == trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_NOTGREATER  <=, core->compare(rhs, lhs) != trueAtom
 					
 			INSTR(ifngt) {
-				IFCMP(COMPARE_NOTGREATER);
+				IFCMP2(<=, core->compare(rhs, lhs) != trueAtom);
                 NEXT;
 			}
 
 #define COMPARE_GREATEREQUAL  >=, core->compare(lhs, rhs) == falseAtom
 					
 			INSTR(ifge) {
-				IFCMP(COMPARE_GREATEREQUAL);
+				IFCMP2(>=, core->compare(lhs, rhs) == falseAtom);
                 NEXT;
 			}
 					
 #define COMPARE_NOTGREATEREQUAL  <, core->compare(lhs, rhs) != falseAtom
 			
 			INSTR(ifnge) {
-				IFCMP(COMPARE_NOTGREATEREQUAL);
+				IFCMP2(<, core->compare(lhs, rhs) != falseAtom);
                 NEXT;
 			}
 
@@ -1804,22 +1808,22 @@ namespace avmplus
 #define CMP(x)  CMP2(x)
 					
             INSTR(lessthan) {
-				CMP(COMPARE_LESS);
+				CMP2(<, core->compare(lhs,rhs) == trueAtom);
                 NEXT;
 			}
 
             INSTR(lessequals) {
-				CMP(COMPARE_LESSEQUAL);
+				CMP2(<=, core->compare(rhs, lhs) == falseAtom);
                 NEXT;
 			}
 
             INSTR(greaterthan) {
-				CMP(COMPARE_GREATER);
+				CMP2(>, core->compare(rhs, lhs) == trueAtom);
                 NEXT;
 			}
 
             INSTR(greaterequals) {
-				CMP(COMPARE_GREATEREQUAL);
+				CMP2(>=, core->compare(lhs, rhs) == falseAtom);
                 NEXT;
 			}
 
@@ -2693,9 +2697,9 @@ namespace avmplus
 			// that direct threading will be used and (b) the effect of the optimizations enabled
 			// by the extended opcodes should make up for it.
 #    ifdef _DEBUG
-			switch (pc[-1] & 65535) {
+			switch ((pc[-1] & 65535)>>8) {
 #    else
-			switch (pc[-1]) {
+			switch (pc[-1] >> 8) {
 #    endif
 			default:
 				goto L_illegal_op;
@@ -2708,7 +2712,7 @@ namespace avmplus
 				break;
 #  endif
 
-			INSTR(ext_pushbits) {
+			INSTR_EXT(ext_pushbits) {
 				*++sp = *pc++;
 				NEXT;
 			}
@@ -2716,7 +2720,7 @@ namespace avmplus
 			// OPTIMIZEME - push_doublebits should probably not cons up a new atom every time,
 			// it would be better to keep it in the constant pool.
 
-			INSTR(ext_push_doublebits) {
+			INSTR_EXT(ext_push_doublebits) {
 				union {
 					double d;
 					uint32 bits[2];
@@ -2732,14 +2736,14 @@ namespace avmplus
 			// Superwords not in the instruction set.  These are selected by a table
 			// driven peephole optimizer, see comments and code in core/Translator.cpp.
 
-			INSTR(ext_get2locals) {
+			INSTR_EXT(ext_get2locals) {
 				uint32 regs = *pc++;
 				*(++sp) = framep[regs & 65535];
 				*(++sp) = framep[regs >> 16];
 				NEXT;
 			}
 					
-			INSTR(ext_get3locals) {
+			INSTR_EXT(ext_get3locals) {
 				uint32 regs = *pc++;
 				*(++sp) = framep[regs & 1023];
 				regs >>= 10;
@@ -2748,7 +2752,7 @@ namespace avmplus
 				NEXT;
 			}
 					
-			INSTR(ext_get4locals) {
+			INSTR_EXT(ext_get4locals) {
 				uint32 regs = *pc++;
 				*(++sp) = framep[regs & 255];
 				regs >>= 8;
@@ -2759,7 +2763,7 @@ namespace avmplus
 				NEXT;
 			}
 					
-			INSTR(ext_get5locals) {
+			INSTR_EXT(ext_get5locals) {
 				uint32 regs = *pc++;
 				*(++sp) = framep[regs & 63];
 				regs >>= 6;
@@ -2772,12 +2776,12 @@ namespace avmplus
 				NEXT;
 			}
 					
-			INSTR(ext_storelocal) {
+			INSTR_EXT(ext_storelocal) {
 				framep[*pc++] = *sp;
 				NEXT;
 			}
 					
-			INSTR(ext_add_ll) {
+			INSTR_EXT(ext_add_ll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2785,7 +2789,7 @@ namespace avmplus
 				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_add_set_lll) {
+			INSTR_EXT(ext_add_set_lll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 1023];
 				regs >>= 10;
@@ -2793,7 +2797,7 @@ namespace avmplus
 				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, framep[regs >> 10]);
 			}
 					
-			INSTR(ext_subtract_ll) {
+			INSTR_EXT(ext_subtract_ll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2801,7 +2805,7 @@ namespace avmplus
 				SUB_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_multiply_ll) {
+			INSTR_EXT(ext_multiply_ll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2809,7 +2813,7 @@ namespace avmplus
 				MUL_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_divide_ll) {
+			INSTR_EXT(ext_divide_ll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2817,7 +2821,7 @@ namespace avmplus
 				DIV_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_modulo_ll) {
+			INSTR_EXT(ext_modulo_ll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2825,7 +2829,7 @@ namespace avmplus
 				MOD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_bitand_ll) {
+			INSTR_EXT(ext_bitand_ll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2833,7 +2837,7 @@ namespace avmplus
 				BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_bitor_ll) {
+			INSTR_EXT(ext_bitor_ll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2841,7 +2845,7 @@ namespace avmplus
 				BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_bitxor_ll) {
+			INSTR_EXT(ext_bitxor_ll) {
 				uint32 regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2853,49 +2857,49 @@ namespace avmplus
 			// As long as ext_pushbits is only used for integer data we know that
 			// rhs is an int in the cases below, so the macros need not check.
 					
-			INSTR(ext_add_lb) {
+			INSTR_EXT(ext_add_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_subtract_lb) {
+			INSTR_EXT(ext_subtract_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				SUB_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_multiply_lb) {
+			INSTR_EXT(ext_multiply_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				MUL_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_divide_lb) {
+			INSTR_EXT(ext_divide_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				DIV_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_bitand_lb) {
+			INSTR_EXT(ext_bitand_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_bitor_lb) {
+			INSTR_EXT(ext_bitor_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR(ext_bitxor_lb) {
+			INSTR_EXT(ext_bitxor_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
@@ -2912,43 +2916,43 @@ namespace avmplus
 
 #define IFCMP_LL(x) IFCMP_LL2(x)
 
-			INSTR(ext_iflt_ll) {
-				IFCMP_LL(COMPARE_LESS);
+			INSTR_EXT(ext_iflt_ll) {
+				IFCMP_LL2(<, core->compare(lhs,rhs) == trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifnlt_ll) {
-				IFCMP_LL(COMPARE_NOTLESS);
+			INSTR_EXT(ext_ifnlt_ll) {
+				IFCMP_LL2(>=, core->compare(lhs, rhs) != trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifle_ll) {
-				IFCMP_LL(COMPARE_LESSEQUAL);
+			INSTR_EXT(ext_ifle_ll) {
+				IFCMP_LL2(<=, core->compare(rhs, lhs) == falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifnle_ll) {
-				IFCMP_LL(COMPARE_NOTLESSEQUAL);
+			INSTR_EXT(ext_ifnle_ll) {
+				IFCMP_LL2(>, core->compare(rhs, lhs) != falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifgt_ll) {
-				IFCMP_LL(COMPARE_GREATER);
+			INSTR_EXT(ext_ifgt_ll) {
+				IFCMP_LL2(>, core->compare(rhs, lhs) == trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifngt_ll) {
-				IFCMP_LL(COMPARE_NOTGREATER);
+			INSTR_EXT(ext_ifngt_ll) {
+				IFCMP_LL2(<=, core->compare(rhs, lhs) != trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifge_ll) {
-				IFCMP_LL(COMPARE_GREATEREQUAL);
+			INSTR_EXT(ext_ifge_ll) {
+				IFCMP_LL2(>=, core->compare(lhs, rhs) == falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifnge_ll) {
-				IFCMP_LL(COMPARE_NOTGREATEREQUAL);
+			INSTR_EXT(ext_ifnge_ll) {
+				IFCMP_LL2(<, core->compare(lhs, rhs) != falseAtom);
 			    NEXT;
 			}
 					
@@ -2962,23 +2966,23 @@ namespace avmplus
 
 #define IFEQ_LL(x) IFEQ_LL2(x)
 					
-			INSTR(ext_ifeq_ll) {
-				IFEQ_LL(COMPARE_EQUAL);
+			INSTR_EXT(ext_ifeq_ll) {
+				IFEQ_LL2(==, equals, trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifne_ll) {
-				IFEQ_LL(COMPARE_NOTEQUAL);
+			INSTR_EXT(ext_ifne_ll) {
+				IFEQ_LL2(!=, equals, falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifstricteq_ll) {
-				IFEQ_LL(COMPARE_STRICTEQUAL);
+			INSTR_EXT(ext_ifstricteq_ll) {
+				IFEQ_LL2(==, stricteq, trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifstrictne_ll) {
-				IFEQ_LL(COMPARE_NOTSTRICTEQUAL);
+			INSTR_EXT(ext_ifstrictne_ll) {
+				IFEQ_LL2(!=, stricteq, falseAtom);
 			    NEXT;
 			}
 
@@ -2991,43 +2995,43 @@ namespace avmplus
 
 #define IFCMP_LB(x) IFCMP_LB2(x)
 
-			INSTR(ext_iflt_lb) {
-				IFCMP_LB(COMPARE_LESS);
+			INSTR_EXT(ext_iflt_lb) {
+				IFCMP_LB2(<, core->compare(lhs,rhs) == trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifnlt_lb) {
-				IFCMP_LB(COMPARE_NOTLESS);
+			INSTR_EXT(ext_ifnlt_lb) {
+				IFCMP_LB2(>=, core->compare(lhs, rhs) != trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifle_lb) {
-				IFCMP_LB(COMPARE_LESSEQUAL);
+			INSTR_EXT(ext_ifle_lb) {
+				IFCMP_LB2(<=, core->compare(rhs, lhs) == falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifnle_lb) {
-				IFCMP_LB(COMPARE_NOTLESSEQUAL);
+			INSTR_EXT(ext_ifnle_lb) {
+				IFCMP_LB2(>, core->compare(rhs, lhs) != falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifgt_lb) {
-				IFCMP_LB(COMPARE_GREATER);
+			INSTR_EXT(ext_ifgt_lb) {
+				IFCMP_LB2(>, core->compare(rhs, lhs) == trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifngt_lb) {
-				IFCMP_LB(COMPARE_NOTGREATER);
+			INSTR_EXT(ext_ifngt_lb) {
+				IFCMP_LB2(<=, core->compare(rhs, lhs) != trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifge_lb) {
-				IFCMP_LB(COMPARE_GREATEREQUAL);
+			INSTR_EXT(ext_ifge_lb) {
+				IFCMP_LB2(>=, core->compare(lhs, rhs) == falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifnge_lb) {
-				IFCMP_LB(COMPARE_NOTGREATEREQUAL);
+			INSTR_EXT(ext_ifnge_lb) {
+				IFCMP_LB2(<, core->compare(lhs, rhs) != falseAtom);
 			    NEXT;
 			}
 					
@@ -3040,27 +3044,27 @@ namespace avmplus
 
 #define IFEQ_LB(x) IFEQ_LB2(x)
 					
-			INSTR(ext_ifeq_lb) {
-				IFEQ_LB(COMPARE_EQUAL);
+			INSTR_EXT(ext_ifeq_lb) {
+				IFEQ_LB2(==, equals, trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifne_lb) {
-				IFEQ_LB(COMPARE_NOTEQUAL);
+			INSTR_EXT(ext_ifne_lb) {
+				IFEQ_LB2(!=, equals, falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifstricteq_lb) {
-				IFEQ_LB(COMPARE_STRICTEQUAL);
+			INSTR_EXT(ext_ifstricteq_lb) {
+				IFEQ_LB2(==, stricteq, trueAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_ifstrictne_lb) {
-				IFEQ_LB(COMPARE_NOTSTRICTEQUAL);
+			INSTR_EXT(ext_ifstrictne_lb) {
+				IFEQ_LB2(!=, stricteq, falseAtom);
 			    NEXT;
 			}
 					
-			INSTR(ext_swap_pop) {
+			INSTR_EXT(ext_swap_pop) {
 				sp[-1] = sp[0];
 				--sp;
 			    NEXT;
