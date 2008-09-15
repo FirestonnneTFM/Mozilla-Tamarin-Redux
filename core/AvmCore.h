@@ -1004,7 +1004,7 @@ const int kBufferPadding = 16;
 		 */
 		String* toErrorString(int d);
 		String* toErrorString(AbstractFunction* m);
-		String* toErrorString(Multiname* n);
+		String* toErrorString(const Multiname* n);
 		String* toErrorString(Namespace* ns);
 		String* toErrorString(Traits* t);
 		String* toErrorString(const char* s);

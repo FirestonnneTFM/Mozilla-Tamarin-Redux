@@ -58,7 +58,7 @@ namespace avmplus
 		return traits;
 	}
 
-	Traits* Domain::getNamedTraits(Multiname *multiname, bool recursive/*=true*/) const
+	Traits* Domain::getNamedTraits(const Multiname *multiname, bool recursive/*=true*/) const
 	{
 		Traits *traits = NULL;
 		if (recursive && base) {
@@ -82,7 +82,7 @@ namespace avmplus
 		return f;
 	}
 
-	AbstractFunction* Domain::getNamedScript(Multiname *multiname) const
+	AbstractFunction* Domain::getNamedScript(const Multiname *multiname) const
 	{
 		AbstractFunction *f = NULL;
 		if (base) {

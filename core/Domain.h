@@ -55,9 +55,9 @@ namespace avmplus
 		Domain(AvmCore *core, Domain* base);
 		
 		Traits* getNamedTraits(Stringp name, Namespace* ns, bool recursive/*=true*/) const;
-		Traits* getNamedTraits(Multiname* multiname, bool recursive/*=true*/) const;
+		Traits* getNamedTraits(const Multiname* multiname, bool recursive/*=true*/) const;
 		AbstractFunction* getNamedScript(Stringp name, Namespace* ns) const;
-		AbstractFunction* getNamedScript(Multiname* multiname) const;
+		AbstractFunction* getNamedScript(const Multiname* multiname) const;
 	};
 }
 

@@ -51,7 +51,7 @@ namespace avmplus
 		}
 	}
 
-	ScriptEnv* AbcEnv::getScriptEnv(Multiname *multiname)
+	ScriptEnv* AbcEnv::getScriptEnv(const Multiname *multiname)
 	{
 		ScriptEnv *se = (ScriptEnv*)domainEnv->getScriptInit(multiname);
 		if(!se)

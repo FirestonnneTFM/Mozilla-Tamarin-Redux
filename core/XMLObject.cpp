@@ -458,7 +458,7 @@ namespace avmplus
 	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]
-	Atom XMLObject::callProperty(Multiname* multiname, int argc, Atom* argv)
+	Atom XMLObject::callProperty(const Multiname* multiname, int argc, Atom* argv)
 	{
 		AvmCore *core = this->core();
 
@@ -492,7 +492,7 @@ namespace avmplus
 	}
 
 	// E4X 9.1.1.1, pg 12 - [[GET]]
-	Atom XMLObject::getMultinameProperty(Multiname* name_in) const
+	Atom XMLObject::getMultinameProperty(const Multiname* name_in) const
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -580,7 +580,7 @@ namespace avmplus
 		return xl->atom();
 	}
 
-	void XMLObject::setMultinameProperty(Multiname* name_in, Atom V)
+	void XMLObject::setMultinameProperty(const Multiname* name_in, Atom V)
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -850,7 +850,7 @@ namespace avmplus
 		return;
 	}
 
-	bool XMLObject::deleteMultinameProperty(Multiname* name_in)
+	bool XMLObject::deleteMultinameProperty(const Multiname* name_in)
 	{
 		AvmCore *core = this->core();
 
@@ -939,7 +939,7 @@ namespace avmplus
 		return true;
 	}
 
-	Atom XMLObject::getDescendants(Multiname* name_in) const
+	Atom XMLObject::getDescendants(const Multiname* name_in) const
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -1046,7 +1046,7 @@ namespace avmplus
 		return (index == 0);
 	}
 
-	bool XMLObject::hasMultinameProperty(Multiname* name_in) const
+	bool XMLObject::hasMultinameProperty(const Multiname* name_in) const
 	{
 		AvmCore *core = this->core();
 
