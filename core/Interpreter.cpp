@@ -117,8 +117,9 @@ namespace avmplus
 #endif // compiler/platform vipers' nest
 
 	Atom interp(MethodEnv* method, int argc, uint32 *ap);
-	Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete=false);
-	Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
+	void initMultiname(MethodEnv* env, Multiname &name, Atom* &sp);
+	void initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* &sp);
+	Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
 #ifdef SUPERWORD_PROFILING
 	void swprofCode(const uint32* start, const uint32* limit);
 	void swprofPC(const uint32* pc);
@@ -1860,6 +1861,11 @@ namespace avmplus
 // make a small difference in connection with avoiding multiname copying, since
 // most fields of the multiname data structure will not be accessed.
 
+// OPTIMIZEME - inline fast case for toVTable?
+// Presumably it will very often be a non-null object; now we have to make a call and
+// a test and a switch to get to that.  Should we in-line?
+// How will RTTI caching affect that?
+
 #ifdef AVMPLUS_WORD_CODE
 #  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; name = pool->word_code.cpool_mn->multinames[tmp]; } while(0)
 #else
@@ -1881,6 +1887,19 @@ namespace avmplus
 				NEXT;
 			}	
 
+#if 0
+			// Multiname is neither isRuntime or isRtns
+			INSTR(getproperty_fast) {
+				SAVE_EXPC;
+				Multiname multiname;
+				GET_MULTINAME(multiname, U30ARG);
+				sp[0] = toplevel->getproperty(sp[0], &multiname, toplevel->toVTable(sp[0]));
+				restore_dxns();
+				NEXT;
+			}
+					
+#endif
+					
 			// get a property using a multiname ref
             INSTR(getproperty) {
 				SAVE_EXPC;
@@ -1893,7 +1912,7 @@ namespace avmplus
 				else
 				{
 					if(multiname.isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) {
-						sp = initMultiname(env, multiname, sp);
+						initMultiname(env, multiname, sp);
 						*sp = toplevel->getproperty(*sp, &multiname, toplevel->toVTable(*sp));
 					} else {
 						Atom key = *(sp--);
@@ -1918,7 +1937,7 @@ namespace avmplus
 				else
 				{
 					if(multiname.isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) {
-						sp = initMultiname(env, multiname, sp);
+						initMultiname(env, multiname, sp);
 						Atom obj = *(sp--);
 						toplevel->setproperty(obj, &multiname, value, toplevel->toVTable(obj));
 					} else {
@@ -1943,7 +1962,7 @@ namespace avmplus
 				}
 				else
 				{
-					sp = initMultiname(env, multiname, sp);
+					initMultiname(env, multiname, sp);
 					Atom obj = *(sp--);
 					env->initproperty(obj, &multiname, value, toplevel->toVTable(obj));
 				}
@@ -1961,7 +1980,7 @@ namespace avmplus
 				}
 				else
 				{
-					sp = initMultiname(env, name, sp);
+					initMultiname(env, name, sp);
 					sp[0] = env->getdescendants(sp[0], &name);
 				}
 				restore_dxns();
@@ -1985,7 +2004,7 @@ namespace avmplus
 				Multiname multiname;
 				GET_MULTINAME(multiname, U30ARG);
 				if (multiname.isRuntime())
-					sp = initMultiname(env, multiname, sp);
+					initMultiname(env, multiname, sp);
 				*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, &multiname, true, withBase);
 				restore_dxns();
 				NEXT;
@@ -1998,7 +2017,7 @@ namespace avmplus
 				Multiname multiname;
 				GET_MULTINAME(multiname, U30ARG);
 				if (multiname.isRuntime())
-					sp = initMultiname(env, multiname, sp);
+					initMultiname(env, multiname, sp);
 				*(++sp) = env->findproperty(scope, scopeBase, scopeDepth, &multiname, false, withBase);
 				restore_dxns();
 				NEXT;
@@ -2073,7 +2092,7 @@ namespace avmplus
 				else
 				{
 					if(multiname.isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) {
-						sp = initMultiname(env, multiname, sp, true);
+						initMultinameNoXMLList(env, multiname, sp);
 						sp[0] = env->delproperty(sp[0], &multiname);
 					} else {
 						Atom key = *(sp--);
@@ -2234,7 +2253,9 @@ namespace avmplus
 		int32 argc = U30ARG;\
 		Atom base;\
 		Atom *atomv = sp - argc;\
-		sp = multiname.isRuntime() ? initMultiname(env, multiname, atomv) : atomv;\
+		sp = atomv; \
+		if (multiname.isRuntime()) \
+			initMultiname(env, multiname, sp); \
 		base = *sp;\
 		atomv[0] = atomv0;\
 		*sp = toplevel->callproperty(base, &multiname, argc, atomv, toplevel->toVTable(base));\
@@ -2271,8 +2292,9 @@ namespace avmplus
 				}
 				else
 				{
-					Atom* atomv = sp-argc;
-					sp = initMultiname(env, name, sp-argc);
+					sp -= argc;
+					Atom* atomv = sp;
+					initMultiname(env, name, sp);
 					atomv[0] = *sp;
 					*sp = toplevel->constructprop(&name, argc, atomv, toplevel->toVTable(atomv[0]));
 				}
@@ -2305,8 +2327,9 @@ namespace avmplus
 		} \
 		else \
 		{ \
-			Atom* atomv = sp-argc; \
-			sp = initMultiname(env, name, sp-argc); \
+			sp -= argc; \
+			Atom* atomv = sp; \
+			initMultiname(env, name, sp); \
 			atomv[0] = *sp; \
 			env->nullcheck(atomv[0]); \
 			*sp = env->callsuper(&name, argc, atomv); \
@@ -2336,7 +2359,7 @@ namespace avmplus
 				}
 				else
 				{
-					sp = initMultiname(env, name, sp);
+					initMultiname(env, name, sp);
 					Atom objAtom = *sp;
 					env->nullcheck(objAtom);//null check
 					*sp = env->getsuper(objAtom, &name);
@@ -2359,7 +2382,7 @@ namespace avmplus
 				}
 				else
 				{
-					sp = initMultiname(env, name, sp);
+					initMultiname(env, name, sp);
 					Atom objAtom = *(sp--);
 					env->nullcheck(objAtom);
 					env->setsuper(objAtom, &name, valueAtom);
@@ -3083,25 +3106,13 @@ namespace avmplus
 	// OPTIMIZEME - statically knowable if name isRtname or isRtns; exploit this somehow?
 	// OPTIMIZEME - often knowable whether the TOS is an object or something simple; exploit this?
 
-	Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete/*=false*/)
+	void initMultiname(MethodEnv* env, Multiname &name, Atom* &sp)
 	{
 		if (name.isRtname())
 		{
 			Atom index = *(sp--);
 			AvmCore* core = env->core();
 
-			// OPTIMIZEME - passing isDelete is not right.
-			// It is passed for every multiname, but it is always false except
-			// for statically determinable situations (the delete opcodes).
-			if (isDelete)
-			{
-				if (core->isXMLList(index))
-				{
-					// Error according to E4X spec, section 11.3.1
-					env->toplevel()->throwTypeError(kDeleteTypeError, core->toErrorString(env->toplevel()->toTraits(index)));
-				}
-			}
-			
 			// is it a qname?
 			if (AvmCore::isObject(index))
 			{
@@ -3117,8 +3128,8 @@ namespace avmplus
 					// Discard runtime namespace if present
 					if (name.isRtns())
 						sp--;
-
-					return sp;
+					
+					return;
 				}
 			}
 					
@@ -3127,11 +3138,18 @@ namespace avmplus
 
 		if (name.isRtns())
 			name.setNamespace(env->internRtns(*(sp--)));
-
-		return sp;
 	}
 
-	Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core)
+	void initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* &sp)
+	{
+		if (name.isRtname() && env->core()->isXMLList(sp[0])) {
+			// Error according to E4X spec, section 11.3.1
+			env->toplevel()->throwTypeError(kDeleteTypeError, env->core()->toErrorString(env->toplevel()->toTraits(sp[0])));
+		}
+		initMultiname(env, name, sp);
+	}
+	
+	Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core)
 	{
 		Traits* t = pool->getTraits(name, toplevel);
 		if( name->isParameterizedType() )

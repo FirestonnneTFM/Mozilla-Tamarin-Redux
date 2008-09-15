@@ -141,7 +141,7 @@ namespace avmplus
 		return undefinedAtom;
 	}
 
-	bool ScriptObject::hasMultinameProperty(Multiname* multiname) const
+	bool ScriptObject::hasMultinameProperty(const Multiname* multiname) const
 	{
 		if (traits()->needsHashtable)
 		{
@@ -206,7 +206,7 @@ namespace avmplus
 		}
     }
 
-	void ScriptObject::setMultinameProperty(Multiname* name, Atom value)
+	void ScriptObject::setMultinameProperty(const Multiname* name, Atom value)
 	{
 		if (traits()->needsHashtable && isValidDynamicName(name))
 		{
@@ -283,7 +283,7 @@ namespace avmplus
 		}
 	}
 	
-	bool ScriptObject::deleteMultinameProperty(Multiname* name)
+	bool ScriptObject::deleteMultinameProperty(const Multiname* name)
 	{
 		if (traits()->needsHashtable && isValidDynamicName(name))
 		{
@@ -398,7 +398,7 @@ namespace avmplus
 		}
 	}
 
-	Atom ScriptObject::getMultinameProperty(Multiname* multiname) const
+	Atom ScriptObject::getMultinameProperty(const Multiname* multiname) const
 	{
 		if (isValidDynamicName(multiname))
 		{
@@ -419,7 +419,7 @@ namespace avmplus
 	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]
-	Atom ScriptObject::callProperty(Multiname* multiname, int argc, Atom* argv)
+	Atom ScriptObject::callProperty(const Multiname* multiname, int argc, Atom* argv)
 	{
 		Toplevel* toplevel = this->toplevel();
 		Atom method = getMultinameProperty(multiname);
@@ -429,14 +429,14 @@ namespace avmplus
 		return toplevel->op_call(method, argc, argv);
 	}
 
-	Atom ScriptObject::constructProperty(Multiname* multiname, int argc, Atom* argv)
+	Atom ScriptObject::constructProperty(const Multiname* multiname, int argc, Atom* argv)
 	{
 		Atom ctor = getMultinameProperty(multiname);
 		argv[0] = atom(); // replace receiver
 		return toplevel()->op_construct(ctor, argc, argv);
 	}
 	
-	Atom ScriptObject::getDescendants(Multiname* /*name*/) const
+	Atom ScriptObject::getDescendants(const Multiname* /*name*/) const
 	{
 		toplevel()->throwTypeError(kDescendentsError, core()->toErrorString(traits()));
 		return undefinedAtom;// not reached

@@ -65,7 +65,7 @@ namespace avmplus
 			return vtable->abcEnv;
 		}
 
-		ScriptEnv* getScriptEnv(Multiname *m) const;
+		ScriptEnv* getScriptEnv(const Multiname *m) const;
 
 		DomainEnv* domainEnv() const
 		{
@@ -121,10 +121,10 @@ namespace avmplus
 		Atom getpropertylate_u(Atom obj, uint32 index) const;
 
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		void setpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index);
-		void initpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index);
-		Atom getpropertyHelper(Atom obj, Multiname *multi, VTable *vtable, Atom index);
-		Atom delpropertyHelper(Atom obj, Multiname *multi, Atom index);
+		void setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
+		void initpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
+		Atom getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index);
+		Atom delpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom index);
 
 		void initMultinameLateForDelete(Multiname& name, Atom index);
 		ArrayObject* createArgumentsHelper(int argc, uint32 *ap);
@@ -135,7 +135,7 @@ namespace avmplus
 		/**
 		 * used for defining and resolving imported definitions.
 		 */
-		ScriptObject* finddef(Multiname* name) const;
+		ScriptObject* finddef(const Multiname* name) const;
 		ScriptObject* finddefNsset(NamespaceSet* nsset, Stringp name) const;
 		ScriptObject* finddefNs(Namespace* ns, Stringp name) const;
 
@@ -178,14 +178,14 @@ namespace avmplus
 					  ScopeChain* outer,
 					  Atom* scopes) const;
 
-		void initproperty(Atom obj, Multiname* multiname, Atom value, VTable* vtable) const;
+		void initproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
 		void setpropertylate_i(Atom obj, int index, Atom value) const;
 		void setpropertylate_u(Atom obj, uint32 index, Atom value) const;
 
 		/** same as callproperty but only considers the bindings in given vtable */
-		Atom callsuper(Multiname* name, int argc, Atom* atomv) const;
+		Atom callsuper(const Multiname* name, int argc, Atom* atomv) const;
 
-		Atom delproperty(Atom obj, Multiname* multiname) const;
+		Atom delproperty(Atom obj, const Multiname* multiname) const;
 
 		/**
 		 * Reads a property from an object, with the property
@@ -195,7 +195,7 @@ namespace avmplus
 		 * @param b The binding of the property
 		 * @param traits The traits of the object
 		 */
-		Atom getsuper(Atom obj, Multiname* name) const;
+		Atom getsuper(Atom obj, const Multiname* name) const;
 
 		/**
 		 * Write to a property of an object, with the property
@@ -205,13 +205,13 @@ namespace avmplus
 		 * @param b The binding of the property
 		 * @param value The new value of the property
 		 */
-		void setsuper(Atom obj, Multiname* name, Atom value) const;
+		void setsuper(Atom obj, const Multiname* name, Atom value) const;
 
 		/** Implementation of OP_findproperty */		
 		Atom findproperty(ScopeChain* outer, 
 						  Atom* scopes,
 						  int extraScopes,
-						  Multiname* multiname,
+						  const Multiname* multiname,
 						  bool strict,
 						  Atom* withBase);
 
@@ -223,7 +223,7 @@ namespace avmplus
 		/**
 		 * E4X descendants operator (..)
 		 */
-		Atom getdescendants(Atom obj, Multiname* multiname);
+		Atom getdescendants(Atom obj, const Multiname* multiname);
 		Atom getdescendantslate(Atom obj, Atom name, bool attr);
 
 		/**
@@ -251,7 +251,7 @@ namespace avmplus
 #endif
 
 	private:
-		Atom findWithProperty(Atom obj, Multiname* multiname);
+		Atom findWithProperty(Atom obj, const Multiname* multiname);
 		
 		class ActivationMethodTablePair
 		{

@@ -1130,7 +1130,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s;
 	}
 
-	String* AvmCore::toErrorString(Multiname* n)
+	String* AvmCore::toErrorString(const Multiname* n)
 	{
 		String* s = NULL;
 	#ifdef DEBUGGER

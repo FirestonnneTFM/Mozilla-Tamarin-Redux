@@ -98,7 +98,7 @@ namespace avmshell
 								  NULL, NULL, NULL, codeContext);
 	}
 
-	ScriptObject* DomainObject::finddef(Multiname* multiname,
+	ScriptObject* DomainObject::finddef(const Multiname* multiname,
 										DomainEnv* domainEnv)
 	{
 		Toplevel* toplevel = this->toplevel();
