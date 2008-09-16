@@ -26,8 +26,10 @@ platform/mac/shell/build/**
 platform/mac/MMgc/build64/**
 platform/mac/avmplus/build64/**
 platform/mac/shell/build64/**
+platform/win32/Windows Mobile*
 MMgc/obj_8/**
 MMgc/x64/**
+MMgc/Windows Mobile*
 objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**
