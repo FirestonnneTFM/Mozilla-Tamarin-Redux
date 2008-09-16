@@ -290,8 +290,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -798,8 +797,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
