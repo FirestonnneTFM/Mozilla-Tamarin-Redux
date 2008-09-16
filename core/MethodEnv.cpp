@@ -319,7 +319,7 @@ namespace avmplus
 		}
 	}
 	
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 	void MethodEnv::debugEnter(int argc, uint32 *ap, 
 							   Traits**frameTraits, int localCount,
 							   CallStackNode* callstack,
@@ -327,6 +327,7 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 
+#ifdef DEBUGGER
 		// update profiler
 		sendEnter(argc, ap);
 
@@ -334,11 +335,19 @@ namespace avmplus
 		int firstLocalAt = method->param_count+1;
 		AvmAssert(!frameTraits || localCount >= firstLocalAt);
 		if (frameTraits) memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
+#else
+		(void)localCount;
+#endif
 		if (callstack) callstack->initialize(this, method, framep, frameTraits, argc, ap, eip);
+#ifdef DEBUGGER
 		if (core->debugger) core->debugger->_debugMethod(this);
+#endif
 
 		core->sampleCheck();
+
+#ifdef DEBUGGER
 		invocationCount++;
+#endif
 	}
 
 	void MethodEnv::debugExit(CallStackNode* callstack)
@@ -346,11 +355,14 @@ namespace avmplus
 		AvmAssert(this != 0);
 		AvmCore* core = this->core();
 
+#ifdef DEBUGGER
 		// update profiler 
 		sendExit();
+#endif
 
 		core->callStack = callstack->next;
 
+#ifdef DEBUGGER
 		// trigger a faked "line number changed" since we exited the function and are now back on the old line (well, almost)
 		if (core->callStack && core->callStack->linenum > 0)
 		{
@@ -358,8 +370,11 @@ namespace avmplus
 			core->callStack->linenum = -1;
 			if (core->debugger) core->debugger->debugLine(line);
 		}
+#endif
 	}
+#endif
 
+#ifdef DEBUGGER
 	void MethodEnv::sendEnter(int /*argc*/, uint32 * /*ap*/)
 	{
 		Profiler *profiler = core()->profiler;
@@ -441,7 +456,7 @@ namespace avmplus
 
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
-	Atom MethodEnv::getpropertyHelper(Atom obj, Multiname *multi, VTable *vtable, Atom index)
+	Atom MethodEnv::getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index)
 	{
 		if ((index&7) == kIntegerType)
 		{
@@ -482,7 +497,7 @@ namespace avmplus
 		return toplevel()->getproperty(obj, multi, vtable);
 	}
 
-	void MethodEnv::initpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index)
+	void MethodEnv::initpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index)
 	{
 		if ((index&7) == kIntegerType)
 		{
@@ -527,7 +542,7 @@ namespace avmplus
 		initproperty(obj, multi, value, vtable);
 	}
 
-	void MethodEnv::setpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index)
+	void MethodEnv::setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index)
 	{
 		if ((index&7) == kIntegerType)
 		{
@@ -577,7 +592,7 @@ namespace avmplus
 		toplevel()->setproperty(obj, multi, value, vtable);
 	}
 	
-	Atom MethodEnv::delpropertyHelper(Atom obj, Multiname *multi, Atom index)
+	Atom MethodEnv::delpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom index)
 	{
 		AvmCore* core = this->core();
 
@@ -729,7 +744,7 @@ namespace avmplus
 		}
 	}
 
-	ScriptObject* MethodEnv::finddef(Multiname* multiname) const
+	ScriptObject* MethodEnv::finddef(const Multiname* multiname) const
 	{
 		Toplevel* toplevel = vtable->toplevel;
 
@@ -750,7 +765,7 @@ namespace avmplus
 		return global;
 	}
 
-	ScriptEnv* MethodEnv::getScriptEnv(Multiname *multiname) const
+	ScriptEnv* MethodEnv::getScriptEnv(const Multiname *multiname) const
 	{
 		ScriptEnv *se = (ScriptEnv*)abcEnv()->domainEnv->getScriptInit(multiname);
 		if(!se)
@@ -1116,7 +1131,7 @@ namespace avmplus
 		return cc;
     }
 
-    void MethodEnv::initproperty(Atom obj, Multiname* multiname, Atom value, VTable* vtable) const
+    void MethodEnv::initproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const
     {
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
@@ -1172,7 +1187,7 @@ namespace avmplus
 		}
 	}
 
-	Atom MethodEnv::callsuper(Multiname* multiname, int argc, Atom* atomv) const
+	Atom MethodEnv::callsuper(const Multiname* multiname, int argc, Atom* atomv) const
 	{
 		VTable* base = vtable->base;
 		Toplevel* toplevel = this->toplevel();
@@ -1224,7 +1239,7 @@ namespace avmplus
 		}
 	}
 
-	Atom MethodEnv::delproperty(Atom obj, Multiname* multiname) const
+	Atom MethodEnv::delproperty(Atom obj, const Multiname* multiname) const
 	{
 		Toplevel* toplevel = this->toplevel();
 		Traits* traits = toplevel->toTraits(obj); // includes null check
@@ -1255,7 +1270,7 @@ namespace avmplus
 		return falseAtom;
 	}
 	
-    Atom MethodEnv::getsuper(Atom obj, Multiname* multiname) const
+    Atom MethodEnv::getsuper(Atom obj, const Multiname* multiname) const
     {
 		VTable* vtable = this->vtable->base;
 		Toplevel* toplevel = this->toplevel();
@@ -1306,7 +1321,7 @@ namespace avmplus
     }
 
 	
-    void MethodEnv::setsuper(Atom obj, Multiname* multiname, Atom value) const
+    void MethodEnv::setsuper(Atom obj, const Multiname* multiname, Atom value) const
     {
 		VTable* vtable = this->vtable->base;
 		Toplevel* toplevel = this->toplevel();
@@ -1353,7 +1368,7 @@ namespace avmplus
         }
     }
 
-	Atom MethodEnv::findWithProperty(Atom atom, Multiname* multiname)
+	Atom MethodEnv::findWithProperty(Atom atom, const Multiname* multiname)
 	{
 		Toplevel* toplevel = this->toplevel();
 		if ((atom&7)==kObjectType)
@@ -1417,7 +1432,7 @@ namespace avmplus
 	Atom MethodEnv::findproperty(ScopeChain* outer,
 								 Atom* scopes,
 								 int extraScopes,
-								 Multiname* multiname,
+								 const Multiname* multiname,
 								 bool strict,
 								 Atom* withBase)
     {
@@ -1575,7 +1590,7 @@ namespace avmplus
 		return arguments;
 	}
 
-	Atom MethodEnv::getdescendants(Atom obj, Multiname* multiname)
+	Atom MethodEnv::getdescendants(Atom obj, const Multiname* multiname)
 	{
 		if (AvmCore::isObject (obj))
 		{
@@ -1680,7 +1695,9 @@ namespace avmplus
     ScriptObject *MethodEnv::newActivation()
     {
         VTable *vtable = getActivation();
-        MMgc::GC *gc = core()->GetGC();
+		AvmCore *core = this->core();
+        MMgc::GC *gc = core->GetGC();
+		SAMPLE_FRAME("[activation-object]", core);
 		ScriptObject* obj = new (gc, vtable->getExtraSize()) ScriptObject(vtable, 0/*delegate*/);
         MethodEnv *init = vtable->init;
         if (init)

@@ -46,6 +46,8 @@
 
 #ifdef USE_MMAP
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 #endif
 
 #if defined(__MACH__)
@@ -92,6 +94,26 @@ namespace MMgc
 
 #ifdef MMGC_AVMPLUS
 #ifdef USE_MMAP
+	static int get_major_version()
+	{
+		int mib[2];
+		mib[0]=CTL_KERN;
+		mib[1]=KERN_OSRELEASE;
+		char buf[10];
+		size_t siz=sizeof(buf);
+		sysctl(mib, 2, &buf, &siz, NULL, 0);
+		return strtol(buf, 0, 10);
+	}
+
+    static int get_mmap_fdes(int delta)
+	{
+	  // ensure runtime version
+	  if(get_major_version() >= 9) // 9 == 10.5
+		  return VM_MAKE_TAG(VM_MEMORY_APPLICATION_SPECIFIC_1+delta);
+	  else
+		  return -1;
+	}
+
 	int GCHeap::vmPageSize()
 	{
 		long v = sysconf(_SC_PAGESIZE);
@@ -106,7 +128,7 @@ namespace MMgc
 					size,
 					PROT_NONE,
 					MAP_PRIVATE | MAP_ANONYMOUS,
-					VM_MAKE_TAG(VM_MEMORY_APPLICATION_SPECIFIC_1+1), 0);
+					get_mmap_fdes(1), 0);
 	}
 
 	void GCHeap::ReleaseCodeMemory(void* address,
@@ -245,7 +267,7 @@ namespace MMgc
 					 size,
 					 PROT_NONE,
 					 MAP_PRIVATE | MAP_ANONYMOUS,
-					 VM_MAKE_TAG(VM_MEMORY_APPLICATION_SPECIFIC_1), 0);
+					 get_mmap_fdes(0), 0);
 					 
 		// the man page for mmap documents it returns -1 to signal failure. 
 		if (addr == (char *)-1) return NULL;

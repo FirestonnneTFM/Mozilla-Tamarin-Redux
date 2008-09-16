@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 	struct Sample
 	{
 		uint64 micros;
@@ -54,9 +54,10 @@ namespace avmplus
 			
 		};
 		uint64 id; // filled for DELETED_OBJECT_SAMPLE + NEW_OBJECT_SAMPLE
-		// these are only filled in for sampleType==NEW_OBJECT_SAMPLE
+		// these are only filled in for sampleType==NEW_OBJECT_SAMPLE or NEW_MEM_SAMPLE
 		uintptr typeOrVTable;
-		MMgc::GCWeakRef *weakRef;
+		void *ptr;
+		uint64 alloc_size; // size for new mem sample
 	};
 
 	class Sampler
@@ -69,7 +70,8 @@ namespace avmplus
 		{ 
 			RAW_SAMPLE=0x55555555,
 			NEW_OBJECT_SAMPLE=0xaaaaaaaa, 
-			DELETED_OBJECT_SAMPLE=0xdddddddd
+			DELETED_OBJECT_SAMPLE=0xdddddddd,
+			NEW_AUX_SAMPLE=0xeeeeeeee
 		};
 		
 		// are we sampling at all
@@ -86,13 +88,16 @@ namespace avmplus
 		void init(bool sampling, bool autoStart);
 		void sampleCheck() { if(takeSample) sample(); }
 
-		uint64 recordAllocationSample(AvmPlusScriptableObject *obj, uintptr typeOrVTable);
-		void recordDeallocationSample(uint64 id, uint64 size);
+		uint64 recordAllocationInfo(AvmPlusScriptableObject *obj, Atom typeOrVTable);
+		uint64 recordAllocationSample(void* item, uint64 size);
+		void recordDeallocationSample(const void* item, uint64 size);
 
 		void startSampling();
 		void stopSampling();
 		void clearSamples();
 		void pauseSampling();
+
+		void sampleInternalAllocs(bool b);
 
 		
 		// called by VM after initBuiltin's
@@ -108,8 +113,7 @@ namespace avmplus
 		bool activelySampling() { return samplingNow; }
 		
 	private:	
-
-
+		
 		static void inline align(byte*&b)
 		{
 			if((sintptr)b & 4)
@@ -141,14 +145,18 @@ namespace avmplus
 		uint64 allocId;
 				
 		bool samplingNow;
+		bool samplingAllAllocs;
 		int takeSample;
 		uint32 numSamples;
 		GrowableBuffer samples;
 		byte *currentSample;
+		byte *lastAllocSample;
 		void sample();
 
 		uintptr timerHandle;
 		Hashtable *fakeMethodInfos; 
+		MMgc::GCHashtable uids;
+		MMgc::GCHashtable* ptrSamples;
 		
 		void rewind(byte*&b, uint32 amount)
 		{

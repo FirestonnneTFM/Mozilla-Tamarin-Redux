@@ -244,7 +244,7 @@ namespace avmplus
 #endif
 	}
 
-	PrintWriter& PrintWriter::operator<< (Multiname *obj)
+	PrintWriter& PrintWriter::operator<< (const Multiname *obj)
 	{
 		// Made available in non-AVMPLUS_VERBOSE builds for describeType
 //#ifdef AVMPLUS_VERBOSE

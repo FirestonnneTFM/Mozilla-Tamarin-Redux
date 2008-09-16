@@ -157,7 +157,8 @@ package flash.sampler
          * @see flash.sampler.DeleteObjectSample         
     	 */
     	public native function get object():*;
-   
+
+        public native function get size() : Number;
     };
 	
 	/**
@@ -235,6 +236,16 @@ package flash.sampler
 	 */
 	public native function pauseSampling():void;
 	
+	/**
+     * Tells the sampler if it should create NewObjectSamples for internal allocations from the flash player.
+     * If this is set to true, then every allocation will generate a NewObjectSample.  These internal allocs will
+     * not have a type, or a reference to the Object.  They will have the ActionScript stack trace that triggered the
+     * allocation.  Defaults to false, which only collects allocations for ActionScript objects.
+     * @langversion 3.0
+     * @keyword sampleInternalAllocs
+     */
+	public native function sampleInternalAllocs(b:Boolean):void;
+    
 	/**
 	* Returns the size in memory of a specified object when used with the Flash Player 9.0.115.0 or later debugger version. If 
     * used with a Flash Player that is not the debugger version, this method returns <code>0</code>.

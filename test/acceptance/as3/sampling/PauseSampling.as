@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,40 +35,84 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmshell_DomainClass__
-#define __avmshell_DomainClass__
+import flash.sampler.*
+import avmplus.*
 
+var SECTION = "Sampling";
+var VERSION = "AS3";
+var TITLE   = "Sampling Basic Usage";
 
-namespace avmshell
-{
-	class DomainObject : public ScriptObject
-	{
-	public:		
-		DomainObject(VTable *vtable, ScriptObject *delegate);
-		~DomainObject();
+var isdebugger=System.isDebugger();
 
-		void constructFromDomain(DomainObject *base);
-		Atom loadBytes(ByteArrayObject *bytes);
-		ClassClosure* getClass(Stringp name);
-		
-		DWB(DomainEnv*) domainEnv;
-		DRCWB(Toplevel*) domainToplevel;
+startTest();
+writeHeaderToLog("Sampling api");
 
-	  private:
-	    ScriptObject* finddef(const Multiname* multiname, DomainEnv* domainEnv);
-	};
-
-	class DomainClass : public ClassClosure
-	{
-    public:
-		DomainClass(VTable* cvtable);
-
-		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-
-		DomainObject* get_currentDomain();
-		
-		DECLARE_NATIVE_MAP(DomainClass)
-	};
+var objs:Array=new Array();
+class simpleobject {
+    var str:String;
+    function simpleobject(s:String) { 
+        this.str=s;
+    }
+}
+function simpleLoop() {
+    for (var i:int=0;i<10;i++) {
+       objs.push(new simpleobject(""+i));
+    }
 }
 
-#endif /* __avmshell_DomainClass__ */
+sampleInternalAllocs(true);
+
+simpleLoop();
+if (isdebugger) {
+    AddTestCase(
+      "BeforeStartSampling: test before startSampling sample count 0",
+      0,
+      getSampleCount()
+    );
+} else {
+    AddTestCase(
+      "BeforeStartSampling: test before startSampling sample count 0",
+      -1,
+      getSampleCount()
+    );
+}
+startSampling();
+simpleLoop();
+pauseSampling();
+var time=getTimer();
+while (getTimer()<time+50) {}
+var count=getSampleCount();
+
+simpleLoop();
+if (isdebugger) {
+    AddTestCase(
+      "PauseSampling: after pauseSampling verify no more samples are counted",
+      count+1,
+      getSampleCount()
+    );
+} else {
+    AddTestCase(
+      "PauseSampling: after pauseSampling verify no more samples are counted",
+      -1,
+      getSampleCount()
+    );
+}
+startSampling();
+simpleLoop();
+stopSampling();
+
+if (isdebugger) {
+    AddTestCase(
+      "StopSampling: after stopSampling samples are reset",
+      0,
+      getSampleCount()
+    );
+} else {
+    AddTestCase(
+      "StopSampling: after stopSampling samples are reset",
+      -1,
+      getSampleCount()
+    );
+}
+test();
+

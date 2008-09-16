@@ -65,7 +65,7 @@ if (buildShell):
     config.subst("ENABLE_SHELL", 1)
 
 # Get CPP, CC, etc
-config.getCompiler(static_crt=o.getBoolArg('static-crt'))
+# config.getCompiler(static_crt=o.getBoolArg('static-crt'))
 
 APP_CPPFLAGS = ""
 APP_CXXFLAGS = ""
@@ -102,21 +102,36 @@ if MMGC_THREADSAFE:
     NSPR_LDOPTS = o.getStringArg('nspr-ldopts')
     OS_LDFLAGS += " " + NSPR_LDOPTS
 
-if config.COMPILER_IS_GCC:
+os, cpu = config.getTarget()
+
+if config.getCompiler() == 'GCC':
     APP_CXXFLAGS = "-fstrict-aliasing -fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -finline-functions -finline-limit=65536 "
     if config.getDebug():
         APP_CXXFLAGS += "-frtti -fexceptions "
     else:
         APP_CXXFLAGS += "-fno-rtti -fno-exceptions -Wuninitialized  "
     DEBUG_CXXFLAGS += "-g "
-else:
-    APP_CXXFLAGS = "-W4 -WX -wd4291 "
+elif config.getCompiler() == 'VS':
+    if cpu == "arm" or cpu == "thumb":
+        APP_CXXFLAGS = "-W3 -wd4291 -wd4201 "
+        if config.getDebug():
+            DEBUG_CXXFLAGS = "-Od -Os "
+        else:
+            OPT_CXXFLAGS = "-Ox -Os"
+            APP_CXXFLAGS += "-GR- "
+        DEBUG_CXXFLAGS += "-Zi "
+        DEBUG_LDFLAGS += "-DEBUG "
+    else:
+        APP_CXXFLAGS = "-W4 -WX -wd4291 "
     if config.getDebug():
         APP_CXXFLAGS += "-EHsc "
     else:
+        OPT_CXXFLAGS = "-Ox -Os "
         APP_CXXFLAGS += "-GR- "
     DEBUG_CXXFLAGS += "-Zi "
     DEBUG_LDFLAGS += "-DEBUG "
+else:
+    raise Exception('Unrecognized compiler: ' + config.getCompiler())
 
 zlib_include_dir = o.getStringArg('zlib-include-dir')
 if zlib_include_dir is not None:
@@ -128,7 +143,6 @@ if zlib_lib is not None:
 else:
     AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,z)'
 
-os, cpu = config.getTarget()
 if os == "darwin":
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
@@ -176,6 +190,8 @@ else:
 
 if cpu == "i686":
     APP_CPPFLAGS += "-DAVMPLUS_IA32 "
+    if config.getCompiler() == 'GCC':
+        APP_CPPFLAGS += "-msse2 "
 elif cpu == "powerpc":
     APP_CPPFLAGS += "-DAVMPLUS_PPC "
 elif cpu == "sparc":

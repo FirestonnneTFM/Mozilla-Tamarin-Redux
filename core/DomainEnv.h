@@ -53,7 +53,7 @@ namespace avmplus
 		DomainEnv* const base;
 
 		MethodEnv* getScriptInit(Namespace* ns, Stringp name) const;
-		MethodEnv* getScriptInit(Multiname* multiname) const;
+		MethodEnv* getScriptInit(const Multiname* multiname) const;
 
 		Domain* getDomain() const { return domain; }
 
