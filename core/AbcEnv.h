@@ -75,7 +75,7 @@ namespace avmplus
 		}
 
 		ScriptEnv* getScriptEnv(Stringp name, Namespacep ns);
-		ScriptEnv* getScriptEnv(Multiname *m);
+		ScriptEnv* getScriptEnv(const Multiname *m);
 	};
 
 }

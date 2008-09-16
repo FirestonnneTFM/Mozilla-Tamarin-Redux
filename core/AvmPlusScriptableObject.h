@@ -50,7 +50,6 @@ namespace avmplus
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(Atom atom);
 		~AvmPlusScriptableObject();
-		virtual void Finalize();
 		virtual uint64 size() const = 0;
 
 		AvmCore *core() const
@@ -60,9 +59,6 @@ namespace avmplus
 			return core;
 		}
 
-		uint64 getObjId() const { return objId; }
-	private:
-		uint64 objId;
 #endif
 
 	};

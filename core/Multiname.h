@@ -96,7 +96,7 @@ namespace avmplus
 			this->name = _name;
 		}
 
-		void setName(Multiname* other)
+		void setName(const Multiname* other)
 		{
 			// copy name settings from other
 			flags &= ~RTNAME;
@@ -123,7 +123,7 @@ namespace avmplus
 			this->ns = _ns;
 		}
 
-		void setNamespace(Multiname* other)
+		void setNamespace(const Multiname* other)
 		{
 			// copy namespace settings from other
 			flags &= ~(NSSET|RTNS);
@@ -145,7 +145,7 @@ namespace avmplus
 			this->nsset = _nsset;
 		}
 
-		uint32 getTypeParameter() 
+		uint32 getTypeParameter() const
 		{
 			AvmAssert(isParameterizedType());
 			return next_index;
@@ -337,7 +337,7 @@ namespace avmplus
 			name.setName(n);
 		}
 
-		void setName(Multiname* other) {
+		void setName(const Multiname* other) {
 			WBRC(gc(), this, &name.name, other->name);
 			name.setName(other);
 		}
@@ -347,7 +347,7 @@ namespace avmplus
 			name.setNamespace(ns);
 		}
 
-		void setNamespace(Multiname* other)	{
+		void setNamespace(const Multiname* other)	{
 			WBRC(gc(), this, &name.ns, other->ns);
 			name.setNamespace(other);
 		}

@@ -1078,10 +1078,12 @@ namespace avmplus
 		OP*  dxns;
 		OP*  dxnsAddrSave; // methods that set dxns need to save/restore
 
+		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
+		OP*  _callStackNode;
+		#endif
 		#ifdef DEBUGGER
 		OP*  localPtrs;		// array of local_count + max_scope (holds locals and scopes)
 		OP*  localTraits;	// array of local_count (holds snapshot of Traits* per local)
-		OP*  _callStackNode;
 		#endif
 
 		// track last function call issued

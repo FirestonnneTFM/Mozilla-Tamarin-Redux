@@ -59,7 +59,7 @@ namespace avmplus
 		return env;
 	}	
 
-	MethodEnv* DomainEnv::getScriptInit(Multiname* multiname) const
+	MethodEnv* DomainEnv::getScriptInit(const Multiname* multiname) const
 	{
 		MethodEnv *env = NULL;
 		if (base) {

@@ -105,7 +105,7 @@ namespace avmplus
 		mirBuffers(g, 4), 
 #endif
 		gcInterface(g)
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		,_sampler(g)
 #endif
     {
@@ -181,15 +181,23 @@ namespace avmplus
 		GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
 
 		minstack           = 0;
-		
-		#ifdef DEBUGGER
+
+#ifdef FEATURE_SAMPLER
 		_sampler.setCore(this);
+#endif
+
+		#ifdef DEBUGGER
 		langID			   = -1;
 		debugger           = NULL;
 		profiler		   = NULL;
-		callStack          = NULL;
 		passAllExceptionsToDebugger = false;
         #endif /* DEBUGGER */
+
+		callStack          = NULL;
+
+#ifdef FEATURE_SAMPLER
+		MMgc::m_sampler = sampler();
+#endif
 
 		interrupted        = false;
 
@@ -249,9 +257,10 @@ namespace avmplus
 		kcolon = newString(":");
 		ktabat = newString("\tat ");
 		kparens = newString("()");
+#endif
+#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
 		kanonymousFunc = newString("<anonymous>");
 #endif
-
 		for (int i = 0; i < 128; i++)
 		{
 			char singleChar = (char)i;
@@ -264,8 +273,11 @@ namespace avmplus
 		booleanStrings[0] = kfalse;
         booleanStrings[1] = ktrue;
 
+#ifdef AVMPLUS_INTERNINT_CACHE
+		// See code in AvmCore::internInt
 		for (int i=0 ; i < 256 ; i++ )
 			index_strings[i] = NULL;
+#endif
 
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
@@ -346,7 +358,7 @@ namespace avmplus
 		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
 			builtinPool->scripts[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		// sampling can begin now, requires builtinPool
 		_sampler.initSampling();
 #endif
@@ -1130,7 +1142,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s;
 	}
 
-	String* AvmCore::toErrorString(Multiname* n)
+	String* AvmCore::toErrorString(const Multiname* n)
 	{
 		String* s = NULL;
 	#ifdef DEBUGGER
@@ -2620,14 +2632,14 @@ return the result of the comparison ToPrimitive(x) == y.
 				rehashNamespaces(numNamespaces);
 		}
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		_sampler.presweep();
 #endif
     }
 
 	void AvmCore::postsweep()
 	{
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		_sampler.postsweep();
 #endif
 	}
@@ -2778,25 +2790,32 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::internInt(int value)
     {
+#ifdef AVMPLUS_INTERNINT_CACHE
 		// This simple cache of interned strings representing integers greatly benefits
 		// array-heavy code in the interpreter, at least for the time being (2008-08-13).
 		// But it would be better not to intern integers at all.
-
+		//
+		// #ifdeffed out on 2008-09-15 because the integer lookup optimizations in the
+		// interpreter ought to make it unnecessary; code should be removed later if it
+		// is not re-enabled.
+		
 		int index = value & 255;
 		if (value >= 0 && index_strings[index] != NULL && index_strings[index]->value == value)
 			return index_strings[index]->string;
-		
+#endif	
 		wchar buffer[65];
 		int len;
 		MathUtils::convertIntegerToString(value, buffer, len);
 		Stringp s = internAlloc(buffer, len);
 
+#ifdef AVMPLUS_INTERNINT_CACHE
 		if (value >= 0) {
 			if (index_strings[index] == NULL)
 				index_strings[index] = new (GetGC()) IndexString;
 			index_strings[index]->value = value;
 			index_strings[index]->string = s;
 		}
+#endif
 
 		return s;
 
@@ -2863,7 +2882,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	    return internAlloc(buffer, len);
     }
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 	Stringp AvmCore::findInternedString(const char *cs, int len8)
 	{
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);

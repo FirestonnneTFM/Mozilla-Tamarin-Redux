@@ -131,8 +131,8 @@ namespace avmplus
 		void throwRangeError(int id, Stringp arg1, Stringp arg2) const;
 		void throwRangeError(int id, Stringp arg1, Stringp arg2, Stringp arg3) const;
 
-		void throwReferenceError(int id, Multiname* multiname, const Traits* traits) const;
-		void throwReferenceError(int id, Multiname* multiname) const;
+		void throwReferenceError(int id, const Multiname* multiname, const Traits* traits) const;
+		void throwReferenceError(int id, const Multiname* multiname) const;
 
 		DWB(VTable*) object_vtable; // instance vtable
 		DWB(VTable*) class_vtable; // instance vtable
@@ -170,10 +170,10 @@ namespace avmplus
 
 
 		/** Implementation of OP_callproperty */
-		Atom callproperty(Atom base, Multiname* name, int argc, Atom* atomv, VTable* vtable);
+		Atom callproperty(Atom base, const Multiname* name, int argc, Atom* atomv, VTable* vtable);
 
 		/** Implementation of OP_constructprop */
-		Atom constructprop(Multiname* name, int argc, Atom* atomv, VTable* vtable);
+		Atom constructprop(const Multiname* name, int argc, Atom* atomv, VTable* vtable);
 		
 		/**
 		* OP_applytype.
@@ -202,7 +202,7 @@ namespace avmplus
 		/**
 		 * E4X support for coercing regular Multinames into E4X specific ones
 		 */
-		void CoerceE4XMultiname (Multiname *m, Multiname &out) const;
+		void CoerceE4XMultiname (const Multiname *m, Multiname &out) const;
 
 		/**
 		 * operator instanceof from ES3
@@ -236,10 +236,10 @@ namespace avmplus
 		 * @param b The binding of the property
 		 * @param traits The traits of the object
 		 */
-		Atom getproperty(Atom obj, Multiname* name, VTable* vtable);
+		Atom getproperty(Atom obj, const Multiname* name, VTable* vtable);
 
-	    void setproperty(Atom obj, Multiname* multiname, Atom value, VTable* vtable) const;
-	    void setproperty_b(Atom obj, Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
+	    void setproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
+	    void setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
 
 		bool isXmlBase(Atom obj) const
 		{
@@ -273,7 +273,7 @@ namespace avmplus
 		 * @param traits    The traits of the class
 		 * @param multiname The multiname of the property
 		 */
-		Binding getBinding(Traits* traits, Multiname* multiname) const;
+		Binding getBinding(Traits* traits, const Multiname* multiname) const;
 
 		/**
 		 * @name ECMA-262 Appendix B.2 extensions

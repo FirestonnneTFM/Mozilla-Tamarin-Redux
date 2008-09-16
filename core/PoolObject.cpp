@@ -111,7 +111,7 @@ namespace avmplus
 		return getTraits(name, core->publicNamespace, recursive);
 	}
 
-	Traits* PoolObject::getTraits(Multiname* mname, const Toplevel* toplevel, bool recursive/*=true*/) const
+	Traits* PoolObject::getTraits(const Multiname* mname, const Toplevel* toplevel, bool recursive/*=true*/) const
 	{
 		// do full lookup of multiname, error if more than 1 match
 		// return Traits if 1 match, NULL if 0 match, throw ambiguity error if >1 match
@@ -954,7 +954,7 @@ namespace avmplus
 		privateNamedScripts.add(name, ns, (Atom)script);
 	}
 
-	AbstractFunction* PoolObject::getNamedScript(Multiname* multiname) const
+	AbstractFunction* PoolObject::getNamedScript(const Multiname* multiname) const
 	{
 		AbstractFunction *f = domain->getNamedScript(multiname);
 		if(!f)

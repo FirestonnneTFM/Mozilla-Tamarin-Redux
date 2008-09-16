@@ -215,8 +215,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\shell;..\..\extensions;..\..\MMgc;..\..\codegen;..\..\..\..\modules\zlib\src;..\..\core;."
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;AVMPLUS_SHELL;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;USE_REAL2INT;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -1144,10 +1143,6 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\SystemClass.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\vprof\vprof.cpp"
 				>
 			</File>
 			<File

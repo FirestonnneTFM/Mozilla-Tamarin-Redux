@@ -159,11 +159,11 @@ namespace avmplus
 
 		AbstractFunction* getMethodInfo(uint32 index);
 
-		AbstractFunction* getNamedScript(Multiname* multiname) const;
+		AbstractFunction* getNamedScript(const Multiname* multiname) const;
 
 		const byte* getMetadataInfoPos(uint32 index);
 		Traits* getTraits(Stringp name, Namespace* ns, bool recursive=true) const;
-		Traits* getTraits(Multiname* n, const Toplevel* toplevel, bool recursive=true) const;
+		Traits* getTraits(const Multiname* n, const Toplevel* toplevel, bool recursive=true) const;
 		Traits* getTraits(Stringp name, bool recursive=true) const;
 
 		Traits* getBuiltinTraits(Stringp name) const;
