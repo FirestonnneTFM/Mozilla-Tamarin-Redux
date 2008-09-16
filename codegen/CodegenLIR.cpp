@@ -882,18 +882,54 @@ namespace avmplus
 
     class CopyPropagation: public LirWriter
     {
+        GC *gc;
         LInsp *tracker; // we use WB() macro, so no DWB() here.
         LIns *vars;
         int nvar;
+        BitSet dirty;
     public:
-        CopyPropagation(GC *gc, LirWriter *out, int nvar) : LirWriter(out), nvar(nvar)
+        CopyPropagation(GC *gc, LirWriter *out, int nvar) 
+            : LirWriter(out), gc(gc), nvar(nvar), dirty()
         {
             LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
             WB(gc, this, &tracker, a);
         }
 
+        ~CopyPropagation() {
+            gc->Free(tracker);
+        }
+
         void init(LIns *vars) {
             this->vars = vars;
+        }
+
+        void saveState() {
+            LIns *vars = this->vars;
+            for (int i=0, n=nvar; i < n; i++) {
+                LIns *v = tracker[i];
+                if (!v) 
+                    continue;
+                if (dirty.get(i)) {
+                    if (v->isLoad() && v->oprnd1() == vars && v->oprnd2()->isconstval(i*sizeof(double))) {
+                        // not modified
+                        continue;
+                    }
+                    out->store(v, vars, i*sizeof(double));
+                    dirty.clear(i);
+                }
+            }
+        }
+
+        void clearState() {
+            memset(tracker, 0, nvar*sizeof(LInsp));
+            dirty.reset();
+        }
+
+        void trackStore(LIns *value, int d) {
+            AvmAssert((d&7) == 0);
+            int i = d >> 3;
+            tracker[i] = value;
+            dirty.set(gc, i);
         }
 
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
@@ -913,27 +949,45 @@ namespace avmplus
 
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
             if (base == vars) {
-                int d = disp->constval();
-                AvmAssert((d&7) == 0);
-                int i = d >> 3;
-                tracker[i] = value;
+                trackStore(value, disp->constval());
+                return 0;
             }
             return out->insStore(value, base, disp);
         }
 
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
             if (base == vars) {
-                AvmAssert((d&7) == 0);
-                int i = d >> 3;
-                tracker[i] = value;
+                trackStore(value, d);
+                return 0;
             }
             return out->insStorei(value, base, d);
         }
 
         LIns *ins0(LOpcode op) {
-            if (op == LIR_label)
-                memset(tracker, 0, nvar*sizeof(LInsp));
+            if (op == LIR_label) {
+                saveState();
+                clearState();
+            }
             return out->ins0(op);
+        }
+
+        LIns *insBranch(LOpcode v, LInsp cond, LInsp to) {
+            saveState();
+            return out->insBranch(v, cond, to);
+        }
+
+        LIns *insCall(uint32_t fid, LInsp args[]) {
+            if (!_functions[fid]._cse)
+                saveState();
+            LIns *i = out->insCall(fid, args);
+
+            #ifdef DEBUGGER
+            // debugger might have modified locals, so make sure we reload after call.
+            if (!_functions[fid]._cse)
+                clearState();
+            #endif
+
+            return i;
         }
 
         // TODO
@@ -1402,7 +1456,6 @@ namespace avmplus
 	void CodegenLIR::emitBlockEnd(FrameState* state)
 	{
 		this->state = state;
-
 		// our eBB now terminates.  For all branch instructions we are
 		// able to detect this situation and have already generated the 
 		// correct spill code prior to the jump, only for the case where 
@@ -2466,15 +2519,9 @@ namespace avmplus
 
 			case OP_newactivation:
 			{
- 				// result = core->newObject(env->activation, NULL);
- 				int dest = sp+1;
-
-				LIns* envArg = env_param;
-				LIns* activationVTable = callIns(FUNCTIONID(getActivation), 1, envArg);
-				LIns* activation = callIns(FUNCTIONID(newActivation), 3, 
-										 coreAddr, activationVTable, InsConst(0));
-
-				localSet(dest, ptrToNativeRep(result, activation));
+ 				// result = env->newActivation()
+				LIns* activation = callIns(FUNCTIONID(newActivation), 1, env_param);
+				localSet(sp+1, ptrToNativeRep(result, activation));
 				break;
 			}
 
@@ -4010,6 +4057,7 @@ namespace avmplus
                             verbose_only(if (names)
                                 printf("- %s\n", names->formatIns(i));)
                             i->initOpcode(LIR_neartramp);
+                            continue;
                         } else {
                             livein.clear(d);
                         }
