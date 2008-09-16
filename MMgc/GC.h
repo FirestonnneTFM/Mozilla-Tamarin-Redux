@@ -240,12 +240,10 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 
 #endif // MMGC_PORTING_API
 
-#ifdef DEBUGGER
 namespace avmplus
 {
 	class AvmCore;
 }
-#endif
 
 namespace MMgc
 {
@@ -567,9 +565,7 @@ namespace MMgc
 		void *GetGCContextVariable(int var) const { return m_contextVars[var]; }
 		void SetGCContextVariable(int var, void *val) { m_contextVars[var] = val; }
 		
-#ifdef DEBUGGER
 		avmplus::AvmCore *core() const { return (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE); }
-#endif
 
 		/**
 		 * greedy is a debugging flag.  When set, every allocation

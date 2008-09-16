@@ -105,7 +105,7 @@ namespace avmplus
 		mirBuffers(g, 4), 
 #endif
 		gcInterface(g)
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		,_sampler(g)
 #endif
     {
@@ -181,15 +181,23 @@ namespace avmplus
 		GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
 
 		minstack           = 0;
-		
-		#ifdef DEBUGGER
+
+#ifdef FEATURE_SAMPLER
 		_sampler.setCore(this);
+#endif
+
+		#ifdef DEBUGGER
 		langID			   = -1;
 		debugger           = NULL;
 		profiler		   = NULL;
-		callStack          = NULL;
 		passAllExceptionsToDebugger = false;
         #endif /* DEBUGGER */
+
+		callStack          = NULL;
+
+#ifdef FEATURE_SAMPLER
+		MMgc::m_sampler = sampler();
+#endif
 
 		interrupted        = false;
 
@@ -249,9 +257,10 @@ namespace avmplus
 		kcolon = newString(":");
 		ktabat = newString("\tat ");
 		kparens = newString("()");
+#endif
+#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
 		kanonymousFunc = newString("<anonymous>");
 #endif
-
 		for (int i = 0; i < 128; i++)
 		{
 			char singleChar = (char)i;
@@ -349,7 +358,7 @@ namespace avmplus
 		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
 			builtinPool->scripts[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		// sampling can begin now, requires builtinPool
 		_sampler.initSampling();
 #endif
@@ -2623,14 +2632,14 @@ return the result of the comparison ToPrimitive(x) == y.
 				rehashNamespaces(numNamespaces);
 		}
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		_sampler.presweep();
 #endif
     }
 
 	void AvmCore::postsweep()
 	{
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		_sampler.postsweep();
 #endif
 	}
@@ -2873,7 +2882,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	    return internAlloc(buffer, len);
     }
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 	Stringp AvmCore::findInternedString(const char *cs, int len8)
 	{
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
@@ -3081,6 +3090,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	ScriptObject* AvmCore::newActivation(VTable *vtable, ScriptObject *delegate)
 	{
+		SAMPLE_FRAME("[activation-object]", this);
 		ScriptObject* obj = new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
 		if(vtable->init)
 		{

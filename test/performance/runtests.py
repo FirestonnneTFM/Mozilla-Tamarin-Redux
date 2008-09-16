@@ -60,105 +60,106 @@ js_output_f=False
 globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider', 'ascargs':'', 
           'vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':'', 'perfm':False, 'avmname':'avm', 'avm2name':'avm2'}
 if 'AVM' in environ:
-  globs['avm'] = environ['AVM'].strip()
+    globs['avm'] = environ['AVM'].strip()
 if 'AVM2' in environ:
-  globs['avm2'] = environ['AVM2'].strip()
+    globs['avm2'] = environ['AVM2'].strip()
 if 'ASC' in environ:
-  globs['asc'] = environ['ASC'].strip()
+    globs['asc'] = environ['ASC'].strip()
 if 'GLOBALABC' in environ:
-  globs['globalabc'] = environ['GLOBALABC'].strip()
+    globs['globalabc'] = environ['GLOBALABC'].strip()
 if 'ASCARGS' in environ:
-  globs['ascargs'] = environ['ASCARGS'].strip()
+    globs['ascargs'] = environ['ASCARGS'].strip()
 if 'VMARGS' in environ:
-  globs['vmargs'] = environ['VMARGS'].strip()
+    globs['vmargs'] = environ['VMARGS'].strip()
 if 'VMARGS2' in environ:
-  globs['vmargs2'] = environ['VMARGS2'].strip()
+    globs['vmargs2'] = environ['VMARGS2'].strip()
 
 def log_print(m):
-  print(m)
-  if (js_output_f):
-    js_output_f.write("%s\n" % m)
-    js_output_f.flush()
+    print(m)
+    if (js_output_f):
+        js_output_f.write("%s\n" % m)
+        js_output_f.flush()
 
 
 def verbose_print(m):
-  if verbose:
-    log_print(m)
+    if verbose:
+        log_print(m)
 
 def usage(c):
-  print "usage: %s [options] [tests]" % basename(argv[0])
-  print " -v --verbose       enable additional output"
-  print " -E --avm           avmplus command to use"
-  print " -S --avm2          second avmplus command to use"
+    print "usage: %s [options] [tests]" % basename(argv[0])
+    print " -v --verbose       enable additional output"
+    print " -E --avm           avmplus command to use"
+    print " -S --avm2          second avmplus command to use"
   print "    --avmname       nickname for avm to use as column header"
   print "    --avm2name      nickname for avm2 to use as column header"
-  print " -a --asc           compiler to use"
-  print " -c --config        configuration to use with testconfig.txt"
-  print " -g --globalabc     location of global.abc"
-  print " -h --help          display help and exit"
-  print " -f --forcerebuild  force rebuild all test files"
-  print " -i --iterations    number of times to repeat test"
-  print " -l --log           logs results to a file"
-  print " -d --socketlog     logs results to a socket server"
-  print " -r --runtime     name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
-  print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
-  print "    --ascargs     args to pass to asc on rebuild of test files"
-  print "    --vmargs        args to pass to vm"
-  print "    --vmargs2     args to pass to avm2, if not specified --vmargs will be used"
+    print " -a --asc           compiler to use"
+    print " -c --config        configuration to use with testconfig.txt"
+    print " -g --globalabc     location of global.abc"
+    print " -h --help          display help and exit"
+    print " -f --forcerebuild  force rebuild all test files"
+    print " -i --iterations    number of times to repeat test"
+    print " -l --log           logs results to a file"
+    print " -d --socketlog     logs results to a socket server"
+    print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
+    print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
+    print "    --ascargs       args to pass to asc on rebuild of test files"
+    print "    --vmargs        args to pass to vm"
+    print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
+    print "    --nooptimize    don't optimize files when compiling"
   print "    --perfm         parse the perfm results from avm"
-  exit(c)
+    exit(c)
 
 try:
   opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log",
                       "socketlog","avm2=","vmargs2=","iterations=","config=","runtime=","vmversion=","perfm", "avmname=","avm2name="])
 except:
-  usage(2)
+    usage(2)
 
 if not args:
-  args = ["."]
+    args = ["."]
 for o, v in opts:
-  if o in ("-v", "--verbose"):
-    verbose = True
-  elif o in ("-h", "--help"):
-    usage(0)
-  elif o in ("-E", "--avm"):
-    globs['avm'] = v
-  elif o in ("-S", "--avm2"):
-    globs['avm2'] = v
-  elif o in ("-a", "--asc"):
-    globs['asc'] = v
-  elif o in ("-g", "--globalabc"):
-    globs['globalabc'] = v
-  elif o in ("-x", "--exclude"):
-    globs['exclude'] += v.split(",")
-  elif o in ("-t", "--notime"):
-    timestamps = False
-  elif o in ("-f", "--forcerebuild"):
-    forcerebuild = True
-  elif o in ("-i", "--iterations"):
-    iterations = int(v)
-  elif o in ("-c", "--config"):
-    globs['config'] = v
-  elif o in ("--ascargs"):
-    globs['ascargs'] = v
-  elif o in ("--vmargs"):
-    globs['vmargs'] = v
-  elif o in ("--vmargs2"):
-    globs['vmargs2'] = v
-  elif o in ("-l","--log"):
-    now = datetime.today()
-    for i in count(1):
-      js_output = "%d-%s-%s.%d.log" % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i)
-      if not isfile(js_output):
-        break
-    print "Writing results to %s" % js_output
-    js_output_f = open(js_output, "w")
-  elif o in ("-d", "--socketlog"):
-    logresults = True
-  elif o in ("-r", "--runtime"):
-    globs['vmname'] = v
-  elif o in ("--vmversion"):
-    globs['vmversion'] = v
+    if o in ("-v", "--verbose"):
+        verbose = True
+    elif o in ("-h", "--help"):
+        usage(0)
+    elif o in ("-E", "--avm"):
+        globs['avm'] = v
+    elif o in ("-S", "--avm2"):
+        globs['avm2'] = v
+    elif o in ("-a", "--asc"):
+        globs['asc'] = v
+    elif o in ("-g", "--globalabc"):
+        globs['globalabc'] = v
+    elif o in ("-x", "--exclude"):
+        globs['exclude'] += v.split(",")
+    elif o in ("-t", "--notime"):
+        timestamps = False
+    elif o in ("-f", "--forcerebuild"):
+        forcerebuild = True
+    elif o in ("-i", "--iterations"):
+        iterations = int(v)
+    elif o in ("-c", "--config"):
+        globs['config'] = v
+    elif o in ("--ascargs"):
+        globs['ascargs'] = v
+    elif o in ("--vmargs"):
+        globs['vmargs'] = v
+    elif o in ("--vmargs2"):
+        globs['vmargs2'] = v
+    elif o in ("-l","--log"):
+        now = datetime.today()
+        for i in count(1):
+            js_output = "%d-%s-%s.%d.log" % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), i)
+            if not isfile(js_output):
+                break
+        print "Writing results to %s" % js_output
+        js_output_f = open(js_output, "w")
+    elif o in ("-d", "--socketlog"):
+        logresults = True
+    elif o in ("-r", "--runtime"):
+        globs['vmname'] = v
+    elif o in ("--vmversion"):
+        globs['vmversion'] = v
   elif o in ("--perfm"):
     globs['perfm'] = True
   elif o in ("--avmname"):
@@ -167,81 +168,81 @@ for o, v in opts:
     globs['avm2name'] = v
 
 def istest(f):
-  return f.endswith(".as")
+    return f.endswith(".as")
 
 tests = [a for a in args if isfile(a) and istest(a)]
 for a in [d for d in args if isdir(d)]:
-  for d, dirs, files in walk(a):
-    tests += [join(d,f) for f in files if istest(f)]
-    utils = [d for d in dirs if d+".as" in files]
+    for d, dirs, files in walk(a):
+        tests += [join(d,f) for f in files if istest(f)]
+        utils = [d for d in dirs if d+".as" in files]
 
 def parents(d):
-  while d != "":
+    while d != "":
+        yield d
+        d = dirname(d)
     yield d
-    d = dirname(d)
-  yield d
 
 # run a command and return its output
 def run_pipe(cmd):
-  proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, shell=False)
-  proc.wait()
-  return proc.stdout
-  #t = pipes.Template()
-  #t.append("%s 2>&1" % cmd, "--")
-  #verbose_print(cmd)
-  #return t.open(globs['tmpfile'], "r")
+    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, shell=False)
+    proc.wait()
+    return proc.stdout
+    #t = pipes.Template()
+    #t.append("%s 2>&1" % cmd, "--")
+    #verbose_print(cmd)
+    #return t.open(globs['tmpfile'], "r")
 
 
 def compile_test(as):
-  asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
-  if not isfile(asc):
-    exit("ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar" % as)
-  if not isfile(globalabc):
-    exit("ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc" % globalabc)
-  
-  if asc.endswith(".jar"):
-    cmd = "java -jar " + asc
-  else:
-    cmd = asc
-  cmd += " " + ascargs
-  cmd += " -import " + globalabc
-  cmd += " -optimize "
-  (dir, file) = split(as)
-  verbose_print("   compiling %s" % file)
-  (testdir, ext) = splitext(as)
-  try:
-    f = run_pipe("%s %s" % (cmd,as))
-    for line in f:
-      verbose_print(line.strip())
-  finally:
-    f.close()
+    asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
+    if not isfile(asc):
+        exit("ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar" % as)
+    if not isfile(globalabc):
+        exit("ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc" % globalabc)
+    
+    if asc.endswith(".jar"):
+        cmd = "java -jar " + asc
+    else:
+        cmd = asc
+    cmd += " " + ascargs
+    cmd += " -import " + globalabc
+        cmd += " -optimize"
+    (dir, file) = split(as)
+    verbose_print("   compiling %s" % file)
+    (testdir, ext) = splitext(as)
+    try:
+        f = run_pipe("%s %s" % (cmd,as))
+        for line in f:
+            verbose_print(line.strip())
+    finally:
+        f.close()
 
 def mean(population):
-  mean = 0.0
-  for x in population:
-    mean = mean + float(x)
-  return mean / len(population)
+    mean = 0.0
+    for x in population:
+        mean = mean + float(x)
+    return mean / len(population)
 
 def variance(population):
-  n = 0
-  mean = 0.0
-  s = 0.0
-  for x in population:
-    n = n + 1
-    delta = int(x) - mean
-    mean = mean + (delta / n)
-    s = s + delta * (int(x) - mean)
+    n = 0
+    mean = 0.0
+    s = 0.0
+    for x in population:
+        n = n + 1
+        delta = int(x) - mean
+        mean = mean + (delta / n)
+        s = s + delta * (int(x) - mean)
 
-  # if you want to calculate std deviation
-  # of a sample change this to "s / (n-1)"
-  return s / (n-1)
+    # if you want to calculate std deviation
+    # of a sample change this to "s / (n-1)"
+    return s / (n-1)
 
 def standard_deviation(population):
-  return sqrt(variance(population))
+    return sqrt(variance(population))
 
 
 def standard_error(population):
-  return standard_deviation(population) / sqrt(len(population))
+    return standard_deviation(population) / sqrt(len(population))
 
 tDistribution = [ 999, 999, 12.71, 4.30, 3.18, 2.78, 2.57, 2.45, 2.36, 2.31, 2.26, 2.23, 2.20, 2.18, 2.16, 2.14, 2.13, 2.12, 2.11, 2.10, 2.09, 2.09, 2.08, 2.07, 2.07, 2.06, 2.06, 2.06, 2.05, 2.05, 2.05, 2.04, 2.04, 2.04, 2.03, 2.03, 2.03, 2.03, 2.03, 2.02, 2.02, 2.02, 2.02, 2.02, 2.02, 2.02, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.96]
 tMax = len(tDistribution)
@@ -261,21 +262,21 @@ VM_version = ''
 VM_name = globs['vmname']
 
 if globs['vmversion']:
-  VM_version=globs['vmversion']
+    VM_version=globs['vmversion']
 else:
     f = run_pipe("%s" % globs['avm'])
     try:
-      for line in f:
-        version = line.split()
-        version = version[len(version)-1]
-        if version.find(":") != -1:   # if this is an actual build we need to remove the hash
-          version = version.split(":")
-          version = version[0]
-        VM_version = version
-        globs['vmversion'] = version
-        break
+        for line in f:
+            version = line.split()
+            version = version[len(version)-1]
+            if version.find(":") != -1:     # if this is an actual build we need to remove the hash
+                version = version.split(":")
+                version = version[0]
+            VM_version = version
+            globs['vmversion'] = version
+            break
     except:
-      nop = True
+        nop = True
 
 OS_name = {'CYGWIN_NT-5.1':'WIN','CYGWIN_NT-5.2':'WIN','CYGWIN_NT-6.0-WOW64':'WIN','Windows':'WIN','Darwin':'MAC','Linux':'LNX','Solaris':'SOL','SunOS':'SOL',}[system()]
 VM_reporting = '%s %s %s' % (VM_name,OS_name,VM_version)
@@ -290,29 +291,29 @@ serverPort = 1188
 # performance database
 # ===========================================
 def socketlog(msg):
-  if logresults:
-    if globs['socketlog']=='':
-      file="socketlog-%s.txt" % globs['vmversion']
-      ctr=0
-      while os.path.exists(file):
-        ctr+=1
-        file="socketlog-%s-%s.txt" % (globs['vmversion'],ctr)
-      globs['socketlog']=file
-    alltext=''
-    try:
-      alltext=open(globs['socketlog']).read()
-    except:
-      print("creating new socket log file %s" % globs['socketlog'])
-    alltext+="%s\n" % msg
-    open(globs['socketlog'],'w').write(alltext)
-    s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
-    s.connect((serverHost, serverPort)) # connect to server on the port
-    s.send("%s;exit\r\n" % msg)         # send the data
-    data = s.recv(1024)
-    #print('Sent: %s' % msg)
-    #print('Received: %s \n\n' % data)
-    s.shutdown(SHUT_RDWR)
-    s.close()
+    if logresults:
+        if globs['socketlog']=='':
+            file="socketlog-%s.txt" % globs['vmversion']
+            ctr=0
+            while os.path.exists(file):
+                ctr+=1
+                file="socketlog-%s-%s.txt" % (globs['vmversion'],ctr)
+            globs['socketlog']=file
+        alltext=''
+        try:
+            alltext=open(globs['socketlog']).read()
+        except:
+            print("creating new socket log file %s" % globs['socketlog'])
+        alltext+="%s\n" % msg
+        open(globs['socketlog'],'w').write(alltext)
+        s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
+        s.connect((serverHost, serverPort)) # connect to server on the port
+        s.send("%s;exit\r\n" % msg)         # send the data
+        data = s.recv(1024)
+        #print('Sent: %s' % msg)
+        #print('Received: %s \n\n' % data)
+        s.shutdown(SHUT_RDWR)
+        s.close()
 
 
 def parsePerfm(line,dic):
@@ -336,22 +337,22 @@ def parsePerfm(line,dic):
 
 skips=[]
 if isfile('./testconfig.txt'):
-  for line in open('./testconfig.txt').read().splitlines():
-    fields = line.split(',')
-    for f in range(len(fields)):
-      fields[f]=fields[f].strip()
-    if len(fields)<3:
-      continue
-    if re.match(fields[1],globs['config'])==None:
-      continue
-    if fields[2]=='skip':
-      skips.append(fields[0])
+    for line in open('./testconfig.txt').read().splitlines():
+        fields = line.split(',')
+        for f in range(len(fields)):
+            fields[f]=fields[f].strip()
+        if len(fields)<3:
+            continue
+        if re.match(fields[1],globs['config'])==None:
+            continue
+        if fields[2]=='skip':
+            skips.append(fields[0])
 vmargs = globs['vmargs']
 vmargs2 = globs['vmargs2']
 avm = globs['avm']
 avm2 = globs['avm2']
 if not avm: # or not isfile(avm.split()[0]): /* isfile() fails for alias on OSX */
-  exit("ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus" % avm)
+    exit("ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus" % avm)
 log_print("Executing tests at %s" % (datetime.now()))
 log_print("avm: %s %s" % (avm,vmargs));
 if len(avm2)>0:
@@ -369,80 +370,80 @@ if len(avm2)>0:
     log_print('%-50s  %6s :%6s  %6s    %6s :%6s  %6s %7s' % ('', 'min','max','avg','min','max','avg','%diff'))
     log_print('                                                   -----------------------   -----------------------   -----')
 else:
-  if (iterations>2):
+    if (iterations>2):
     log_print("\n\n%-50s %7s %12s\n" % ("test",globs['avmname'],"95% conf"))
-  else:
+    else:
     log_print("\n\n%-50s %7s\n" % ("test",globs['avmname']))
 testnum = len(tests)
 for ast in tests:
-  if ast.startswith("./"):
-    ast=ast[2:]
-  skip=False
-  for sk in skips:
-    if re.match("^%s$" % sk,ast):
-      verbose_print("skipping %s" % ast)
-      testnum-=1
-      skip=True
-      break
-  if skip:
-    continue
-  testnum -= 1
-  dir =ast[0:ast.rfind('/')]
-  root,ext = splitext(ast)
-  tname = root[root.rfind('/')+1:]
-  abc = "%s.abc" % root
-  verbose_print("%d running %s" % (testnum, ast));
-  if forcerebuild and isfile(abc):
-    os.unlink(abc)
-  if not isfile(abc):
-    compile_test(ast)
+    if ast.startswith("./"):
+        ast=ast[2:]
+    skip=False
+    for sk in skips:
+        if re.match("^%s$" % sk,ast):
+            verbose_print("skipping %s" % ast)
+            testnum-=1
+            skip=True
+            break
+    if skip:
+        continue
+    testnum -= 1
+    dir =ast[0:ast.rfind('/')]
+    root,ext = splitext(ast)
+    tname = root[root.rfind('/')+1:]
+    abc = "%s.abc" % root
+    verbose_print("%d running %s" % (testnum, ast));
+    if forcerebuild and isfile(abc):
+        os.unlink(abc)
     if not isfile(abc):
-      log_print("compile FAILED!, file not found " + abc)
-      
-  result1=9999999
-  resultList = []
+        compile_test(ast)
+        if not isfile(abc):
+            log_print("compile FAILED!, file not found " + abc)
+            
+    result1=9999999
+    resultList = []
   resultList2 = []
   rl1 = []
   rl2 = []
-  result2=9999999
+    result2=9999999
 
   # setup dictionary for vprof (perfm) results
   if globs['perfm']:
     perfm1Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
     perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
   
-  for i in range(iterations):
-    f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
-    if len(avm2)>0:
+    for i in range(iterations):
+        f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
+        if len(avm2)>0:
       if len(vmargs2)>0:
-        f2 = run_pipe("%s %s %s" % (avm2, vmargs2, abc))
-      else:
-        f2 = run_pipe("%s %s %s" % (avm2, vmargs, abc))
+                f2 = run_pipe("%s %s %s" % (avm2, vmargs2, abc))
+            else:
+                f2 = run_pipe("%s %s %s" % (avm2, vmargs, abc))
     #try:
-    for line in f1:
-      if "metric" in line:
-        result1list=line.rsplit()
-        if len(result1list)>2:
+            for line in f1:
+                if "metric" in line:
+                    result1list=line.rsplit()
+                    if len(result1list)>2:
           resultList.append(int(result1list[2]))
-          if result1 > int(result1list[2]):
-            result1=float(result1list[2])
+                        if result1 > int(result1list[2]):
+                            result1=float(result1list[2])
       elif globs['perfm']:
         parsePerfm(line, perfm1Dict)
-          
-    if len(avm2)>0:
-      for line in f2:
-        if "metric" in line:
-          result2list=line.rsplit()
-          if len(result2list)>2:
+
+            if len(avm2)>0:
+                for line in f2:
+                    if "metric" in line:
+                        result2list=line.rsplit()
+                        if len(result2list)>2:
             resultList2.append(int(result1list[2]))
-            if result2 > int(result2list[2]):
-              result2=float(result2list[2])
+                            if result2 > int(result2list[2]):
+                                result2=float(result2list[2])
         elif globs['perfm']:
           parsePerfm(line, perfm2Dict)
-    if result1==0:
-      spdup = 9999
-    else:
-      spdup = ((result1-result2)/result2)*100.0
+            if result1==0:
+                spdup = 9999
+            else:
+                spdup = ((result1-result2)/result2)*100.0
       rl1.append(result1)
       rl2.append(result2)
     #except:
@@ -457,9 +458,9 @@ for ast in tests:
         rl1_avg=sum(rl1)/len(rl1)
         rl2_avg=sum(rl2)/len(rl2)
         log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, min(rl1), max(rl1), rl1_avg, min(rl2), max(rl2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0))
-      except:
+        except:
         log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, '', '', result1, '', '', result2, spdup))
-    
+
     if globs['perfm']:
       def calcPerfm(desc, key):
         # calculate min, max, average and %diff of averages
@@ -484,15 +485,15 @@ for ast in tests:
       calcPerfm('mir/lir (# of inst)', 'ir')
       calcPerfm('count', 'count')
       log_print('-------------------------------------------------------------------------------------------------------------')
-  else:
-    if result1 < 9999999 :
-      meanRes = mean(resultList)
-      if (iterations > 2):
-        if meanRes==0:
-          confidence = 0
-        else:
-          confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
-        config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
+    else:
+        if result1 < 9999999 :
+            meanRes = mean(resultList)
+            if (iterations > 2):
+                if meanRes==0:
+                    confidence = 0
+                else:
+                    confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
+                config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
         if globs['perfm']:  #send vprof results to db
           #calc confidence and mean for each stat
           def calcConf(list):
@@ -506,10 +507,10 @@ for ast in tests:
           perfmSocketlog('vprof-ir-bytes','irbytes')
           perfmSocketlog('vprof-ir-time','ir')
           perfmSocketlog('vprof-count','count')
-        socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
-        log_print("%-50s %7s %10.1f%%" % (ast,result1,confidence))
-      else:
-        log_print("%-50s %7s" % (ast,result1)) 
-    else:
-        log_print("%-50s crash" % (ast)) 
+                socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
+                log_print("%-50s %7s %10.1f%%" % (ast,result1,confidence)) 
+            else:
+                log_print("%-50s %7s" % (ast,result1)) 
+        else:
+                log_print("%-50s crash" % (ast)) 
 

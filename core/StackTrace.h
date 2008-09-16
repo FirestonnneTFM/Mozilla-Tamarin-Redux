@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 	class StackTrace : public MMgc::GCObject
 	{
 	public:
