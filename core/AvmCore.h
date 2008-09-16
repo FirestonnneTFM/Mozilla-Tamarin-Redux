@@ -1308,9 +1308,6 @@ const int kBufferPadding = 16;
 
 		ScriptObject* newObject(VTable* ivtable, ScriptObject *delegate);
 
-		// like newObject but runs init if there is one
-		ScriptObject* newActivation(VTable *vtable, ScriptObject *delegate);
-
 		/**
 		 * traits with base traits (inheritance)
 		 */

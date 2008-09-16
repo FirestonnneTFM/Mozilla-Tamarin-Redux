@@ -576,7 +576,7 @@ namespace nanojit
 		{}
 
 		LInsp add(LInsp i) {
-			if (i) 
+            if (i)
                 code.add(i);
 			return i;
 		}
@@ -589,10 +589,14 @@ namespace nanojit
 
 		void flush()
 		{
-			for (int j=0, n=code.size(); j < n; j++)
-				printf("    %s\n",names->formatIns(code[j]));
-			code.clear();
-			printf("\n");
+            int n = code.size();
+            if (n) {
+			    for (int i=0; i < n; i++)
+				    printf("    %s\n",names->formatIns(code[i]));
+			    code.clear();
+                if (n > 1)
+        			printf("\n");
+            }
 		}
 
 		LIns* insGuard(LOpcode op, LInsp cond, SideExit *x) {
@@ -617,7 +621,7 @@ namespace nanojit
 			return v == LIR_2 ? out->ins2(v,a,b) : add(out->ins2(v, a, b));
 		}
 		LIns* insCall(uint32_t fid, LInsp args[]) {
-			return add(out->insCall(fid, args));
+			return add_flush(out->insCall(fid, args));
 		}
 		LIns* insParam(int32_t i, int32_t kind) {
 			return add(out->insParam(i, kind));
@@ -629,7 +633,7 @@ namespace nanojit
 			return add(out->insStore(v, b, d));
 		}
 		LIns* insStorei(LInsp v, LInsp b, int32_t d) {
-			return add_flush(out->insStorei(v, b, d));
+			return add(out->insStorei(v, b, d));
 		}
         LIns* insAlloc(int32_t size) {
             return add(out->insAlloc(size));

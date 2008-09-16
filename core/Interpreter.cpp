@@ -2487,7 +2487,7 @@ namespace avmplus
             INSTR(newactivation) {
 				SAVE_EXPC;
 				sp++;
-				sp[0] = core->newActivation(env->getActivation(), NULL)->atom();
+				sp[0] = env->newActivation()->atom();
 				restore_dxns();
 				NEXT;
 			}

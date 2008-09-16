@@ -1655,7 +1655,7 @@ namespace nanojit
 			case LIR_quad:
 			{
 				int32_t *p = (int32_t*) (i-2);
-				sprintf(s, "#%X:%X /* %.f */", p[1], p[0], i->constvalf());
+				sprintf(s, "#%X:%X /* %g */", p[1], p[0], i->constvalf());
 				break;
 			}
 

@@ -60,8 +60,7 @@ INTERP_FOPCODE_LIST_BEGIN
     FUNCTION(CALL_IMT, I_I4, callimt)
     FUNCTION(FCALL_IMT, D_I4, fcallimt)
 
-    METHOD(ENVADDR(MethodEnv::getActivation), I_I, getActivation)
-    METHOD(COREADDR(AvmCore::newActivation), I_III, newActivation)
+    METHOD(ENVADDR(MethodEnv::newActivation), I_I, newActivation)
     METHOD(ENVADDR(MethodEnv::newcatch), I_II, newcatch)
     METHOD(ENVADDR(MethodEnv::newfunction), I_I4, newfunction)
     METHOD(TOPLEVELADDR(Toplevel::op_call), I_I4, op_call)
@@ -102,7 +101,7 @@ INTERP_FOPCODE_LIST_BEGIN
     CSEMETHOD(ENVADDR(MethodEnv::toClassITraits), I_II, toClassITraits)
     METHOD(ENVADDR(MethodEnv::in), I_III, in)
     METHOD(TOPLEVELADDR(Toplevel::instanceof), I_III, instanceof)
-    METHOD(COREADDR(AvmCore::stricteq), I_III, stricteq)
+    CSEMETHOD(COREADDR(AvmCore::stricteq), I_III, stricteq)
     METHOD(COREADDR(AvmCore::equals), I_III, equals)
     CSEMETHOD(COREADDR(AvmCore::concatStrings), I_III, concatStrings)
     METHOD(TOPLEVELADDR(Toplevel::add2), I_III, add2)

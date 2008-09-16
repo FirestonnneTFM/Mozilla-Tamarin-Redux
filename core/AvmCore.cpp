@@ -3069,17 +3069,6 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
 	}
 
-	ScriptObject* AvmCore::newActivation(VTable *vtable, ScriptObject *delegate)
-	{
-		ScriptObject* obj = new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
-		if(vtable->init)
-		{
-			MethodEnv* init = vtable->init;
-			init->coerceEnter(obj->atom());
-		}
-		return obj;
-	}
-
     Namespace* AvmCore::newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type)
 	{
 		// E4X - this is 13.2.3, step 3 - prefix IS specified

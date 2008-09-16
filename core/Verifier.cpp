@@ -349,10 +349,18 @@ namespace avmplus
 
 				if (!blockState->targetOfBackwardsBranch)
 				{
-                    // fixme: CodegenLIR wants to do all patching in epilog() so we cannot
-                    // free the block early.
-					//blockStates->remove((uintptr)pc);
-					//core->GetGC()->Free(blockState);
+                    #ifdef FEATURE_NANOJIT
+                        // fixme: CodegenLIR wants to do all patching in epilog() so we cannot
+                        // free the block early.
+                        if (!mir) {
+					        blockStates->remove((uintptr)pc);
+					        core->GetGC()->Free(blockState);
+                        }
+                    #else
+                        // mir and translator are okay with this
+				        blockStates->remove((uintptr)pc);
+				        core->GetGC()->Free(blockState);
+                    #endif
 				}
 			}
 			else
@@ -393,12 +401,10 @@ namespace avmplus
 							state->scopeDepth = outer_depth;
 							Value stackEntryZero = state->stackValue(0);
 
-							#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-							if (mir && !mirSavedState) {
+							MIR_ONLY(if (mir && !mirSavedState) {
 								mir->emitBlockEnd(state);
 								mirSavedState = true;
-							}
-							#endif
+							})
 
 							// add edge from try statement to catch block
 							const byte* target = code_pos + handler->target;
