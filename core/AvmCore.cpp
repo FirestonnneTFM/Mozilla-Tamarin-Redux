@@ -131,7 +131,11 @@ namespace avmplus
 		#endif
 
 		#ifdef AVMPLUS_INTERP
+			#ifdef AVMPLUS_ARM
+			SetMIREnabled(false);
+			#else
  		    SetMIREnabled(true);
+			#endif
 		#endif
 
 		#ifdef AVMPLUS_VERIFYALL
