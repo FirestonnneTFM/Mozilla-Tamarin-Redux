@@ -60,7 +60,6 @@ namespace MMgc
 	GCThreadLocal<int> lastTrace;
 #endif
 
-
 	// Turn this to see GC stack traces.
 	const bool enableTraces = false;
 
@@ -544,7 +543,7 @@ namespace MMgc
 		GetStackTrace(trace, kMaxTraceDepth, skip);
 		DumpStackTraceHelper(trace);
 	}
- 
+
 	void PrintStackTrace(const void *item)
 	{ 
 		if (item)

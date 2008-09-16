@@ -726,7 +726,7 @@ namespace avmplus
 		
 		// prologue
 		// save args in regs
-#ifdef DEBUGGER
+#if (defined DEBUGGER || defined FEATURE_SAMPLER)
 		const int stack_adjust = BIT_ROUND_UP(sizeof(CallStackNode), 16);
 #else		
 		const int stack_adjust = 0;
@@ -745,7 +745,7 @@ namespace avmplus
 		}
 #endif
 		
-#ifdef DEBUGGER
+#if (defined DEBUGGER || defined FEATURE_SAMPLER)
  		SUB(ESP, stack_adjust);
 
 		// Note: This call is already 16-byte aligned for MacOS X ABI
@@ -765,7 +765,7 @@ namespace avmplus
 		#ifdef AVMPLUS_CDECL
 		ADD (ESP, 32);
 		#endif
-#endif /* DEBUGGER */
+#endif /* DEBUGGER || FEATURE_SAMPLER*/
 
 		#ifdef AVMPLUS_CDECL
 		int pushCount = 0;
@@ -1020,7 +1020,7 @@ namespace avmplus
 		ADD(ESP, popAmount);
 #endif
 
-#ifdef DEBUGGER
+#if (defined DEBUGGER || defined FEATURE_SAMPLER)
 	{ // scope ifdef
 		MOV (ECX, _env, ESP);
 		
@@ -1082,7 +1082,7 @@ namespace avmplus
 		}
 		// else, result in FPU register ST(0)
 
-#ifdef DEBUGGER
+#if (defined DEBUGGER || defined FEATURE_SAMPLER)
 		ADD(ESP, stack_adjust);
 #endif /*DEBUGGER*/
 
