@@ -384,7 +384,7 @@ int64_t _tprof_time()
     uint64_t now = _rdtsc();
     uint64_t v = _tprof_before ? now-_tprof_before : 0;
     _tprof_before = now;
-    return v>>10;
+    return v/2600; // v = microseconds on a 2.6ghz cpu
 }
 #endif
 

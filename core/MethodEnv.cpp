@@ -1692,6 +1692,19 @@ namespace avmplus
 		}
 	}
 
+    ScriptObject *MethodEnv::newActivation()
+    {
+        VTable *vtable = getActivation();
+		AvmCore *core = this->core();
+        MMgc::GC *gc = core->GetGC();
+		SAMPLE_FRAME("[activation-object]", core);
+		ScriptObject* obj = new (gc, vtable->getExtraSize()) ScriptObject(vtable, 0/*delegate*/);
+        MethodEnv *init = vtable->init;
+        if (init)
+			init->coerceEnter(obj->atom());
+		return obj;
+    }
+
 	WeakKeyHashtable *MethodEnv::getMethodClosureTable()
 	{
 		int type = getType();
