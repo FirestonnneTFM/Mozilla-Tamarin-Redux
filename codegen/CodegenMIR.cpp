@@ -2664,7 +2664,7 @@ namespace avmplus
 		storeIns(dxnsAddr, (uintptr)&core->dxnsAddr, 0);
 	}
 
-	void CodegenMIR::merge(const Value& current, Value& target)
+	void CodegenMIR::merge(int, const Value& current, Value& target)
 	{
 		if (target.ins != current.ins)
 		{

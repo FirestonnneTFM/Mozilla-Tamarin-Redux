@@ -305,7 +305,7 @@ namespace avmplus
 		void emitCheckNull(FrameState* state, int index);
 		void emitSetContext(FrameState* state, AbstractFunction* f);
 		void emitSetDxns(FrameState* state);
-		void merge(const Value& current, Value& target);
+		void merge(int, const Value& current, Value& target);
 
 #ifdef AVMPLUS_VERBOSE
 		bool verbose();
