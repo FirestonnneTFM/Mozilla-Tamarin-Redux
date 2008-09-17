@@ -48,6 +48,7 @@ namespace avmplus
 	public:
 		/** vtable for the activation scope inside this method */
 		VTable *getActivation();
+        ScriptObject *newActivation();
 
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();

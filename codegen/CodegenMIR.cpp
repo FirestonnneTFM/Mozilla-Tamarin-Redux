@@ -1893,8 +1893,7 @@ namespace avmplus
 		names->add(ENVADDR(MethodEnv::interrupt), "MethodEnv::interrupt");
 		names->add(ENVADDR(MethodEnv::toClassITraits), "MethodEnv::toClassITraits");
 		names->add(COREADDR(AvmCore::newObject), "AvmCore::newObject");
-		names->add(COREADDR(AvmCore::newActivation), "AvmCore::newActivation");
-		names->add(ENVADDR(MethodEnv::getActivation), "MethodEnv::getActivation");
+		names->add(ENVADDR(MethodEnv::newActivation), "MethodEnv::newActivation");
 		names->add(ENVADDR(MethodEnv::delproperty), "MethodEnv::delproperty");
 		names->add(ENVADDR(MethodEnv::delpropertyHelper), "MethodEnv::delpropertyHelper");
 		names->add(ENVADDR(MethodEnv::in), "MethodEnv::in");
@@ -3895,10 +3894,7 @@ namespace avmplus
  				int dest = sp+1;
 
 				OP* envArg = ldargIns(_env);
-				OP* activationVTable = callIns(MIR_cm, ENVADDR(MethodEnv::getActivation), 1, envArg);
-				OP* activation = callIns(MIR_cm, COREADDR(AvmCore::newActivation), 3, 
-										 InsConst((uintptr)core), activationVTable, InsConst(0));
-
+				OP* activation = callIns(MIR_cm, ENVADDR(MethodEnv::newActivation), 1, envArg);
 				localSet(dest, ptrToNativeRep(result, activation));
 				break;
 			}
