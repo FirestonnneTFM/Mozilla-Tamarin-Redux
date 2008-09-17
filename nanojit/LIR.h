@@ -208,6 +208,28 @@ namespace nanojit
 		// fargs = args - iargs
 	};
 
+    inline bool isGuard(LOpcode op) {
+        return op==LIR_x || op==LIR_xf || op==LIR_xt || op==LIR_loop;
+    }
+
+    inline bool isCall(LOpcode op) {
+        op = LOpcode(op & ~LIR64);
+        return op == LIR_call || op == LIR_calli;
+    }
+
+    inline bool isStore(LOpcode op) {
+        op = LOpcode(op & ~LIR64);
+        return op == LIR_st || op == LIR_sti;
+    }
+
+    inline bool isConst(LOpcode op) {
+        return (op & ~1) == LIR_short;
+    }
+
+    inline bool isLoad(LOpcode op) {
+        return op == LIR_ldq || op == LIR_ld || op == LIR_ldc || op == LIR_ldqc;
+    }
+
 	// Low-level Instruction 4B
 	// had to lay it our as a union with duplicate code fields since msvc couldn't figure out how to compact it otherwise.
 	class LIns
@@ -375,11 +397,11 @@ namespace nanojit
 		bool isQuad() const { return (u.code & LIR64) != 0; }
 		bool isCond() const;
 		bool isCmp() const;
-		bool isCall() const;
-        bool isStore() const;
-        bool isLoad() const;
-		bool isGuard() const;
-		bool isconst() const;
+        bool isCall() const { return nanojit::isCall(u.code); }
+        bool isStore() const { return nanojit::isStore(u.code); }
+        bool isLoad() const { return nanojit::isLoad(u.code); }
+        bool isGuard() const { return nanojit::isGuard(u.code); }
+        bool isconst() const { return nanojit::isConst(u.code); }
 		bool isconstval(int32_t val) const;
 		bool isconstq() const;
         bool isTramp() const {return isop(LIR_neartramp) || isop(LIR_tramp); }
@@ -415,7 +437,9 @@ namespace nanojit
 	bool FASTCALL isCse(LOpcode v);
 	bool FASTCALL isCmp(LOpcode v);
 	bool FASTCALL isCond(LOpcode v);
-    bool FASTCALL isRet(LOpcode v);
+    inline bool isRet(LOpcode c) {
+        return (c & ~LIR64) == LIR_ret;
+    }
     bool FASTCALL isFloat(LOpcode v);
 	LIns* FASTCALL callArgN(LInsp i, uint32_t n);
 	extern const uint8_t operandCount[];
@@ -429,7 +453,6 @@ namespace nanojit
 	{
 	public:
 		LirWriter *out;
-	public:
         const CallInfo *_functions;
 
 		virtual ~LirWriter() {}

@@ -571,11 +571,6 @@ namespace avmplus
 
 	CodegenLIR::~CodegenLIR()
 	{
-		//if (arg_count > 0)
-		//	core->console << "mir_arg " << arg_count << " of " << InsNbr(ip) << "\n";
-		//arg_count = 0;
-
-		//clearMIRBuffers();
 	}
 
 	void CodegenLIR::clearMIRBuffers()
@@ -932,6 +927,14 @@ namespace avmplus
             dirty.set(gc, i);
         }
 
+        void trackMerge(int i, LIns *cur, LIns *target) {
+            (void) i; (void) cur; (void) target;
+            /*AvmAssert(cur == tracker[i]);
+            if (cur != target) {
+                tracker[i] = 0;
+            }*/
+        }
+
         LIns *insLoad(LOpcode op, LIns *base, LIns *disp) {
             if (base == vars) {
                 int d = disp->constval();
@@ -1041,7 +1044,7 @@ namespace avmplus
         frag = frago->getAnchor(abcStart);
         gc->Free(frag->mergeCounts);
         frag->mergeCounts = 0;
-        lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
+        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
         debug_only(
@@ -1057,7 +1060,7 @@ namespace avmplus
         }
         lirout = new (gc) ExprFilter(lirout);
         CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout, state->verifier->frameSize);
-        lirout = copier;
+        lirout = this->copier = copier;
 
 		emitStart(lirbuf, lirout);
 
@@ -1091,7 +1094,7 @@ namespace avmplus
 		// stack overflow check - use vars address as comparison
 		if (core->minstack) {
 			LIns *c = binaryIns(LIR_ult, vars, InsConst(core->minstack));
-			LIns *b = branchIns(LIR_jf, c, 0);
+			LIns *b = branchIns(LIR_jf, c);
 			callIns(FUNCTIONID(stkover), 1, env_param);
 			LIns *label = Ins(LIR_label);
 			b->target(label);
@@ -1426,8 +1429,8 @@ namespace avmplus
 		storeIns(dxnsAddr, 0, InsConst(&core->dxnsAddr));
 	}
 
-	void CodegenLIR::merge(const Value&/*current*/, Value&/*target*/)
-	{
+	void CodegenLIR::merge(int i, const Value& current, Value& target) {
+        copier->trackMerge(i, current.ins, target.ins);
 	}
 
 
@@ -1913,8 +1916,7 @@ namespace avmplus
 #endif
 
 				// relative branch
-				LIns* p = branchIns(LIR_j, 0); // will be patched
-				patchLater(p, targetpc);
+				branchIns(LIR_j, 0, targetpc); // will be patched
 				break;
 			}
 
@@ -1931,8 +1933,7 @@ namespace avmplus
 
 				LIns* input = localGet(sp);
 				LIns* cmp = binaryIns(LIR_ult, input, InsConst(count));
-				LIns* p = branchIns(LIR_jf, cmp); // will be patched
-				patchLater(p, targetpc);
+				branchIns(LIR_jf, cmp, targetpc); // will be patched
 
                 // fixme - this is just a bunch of if's
 
@@ -1942,8 +1943,7 @@ namespace avmplus
 				for (int i=0; i < count; i++)
 				{
 					sintptr target = state->pc + AvmCore::readS24(pc+3*i);
-                    LIns *br = branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)));
-                    patchLater(br, target);
+                    branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)), target);
 				}
 				break;
 			}
@@ -3464,7 +3464,7 @@ namespace avmplus
             }
         }
 
-        patchLater(branchIns(br, cond), target);
+        branchIns(br, cond, target);
 	} // emitIf()
 
 	LIns* CodegenLIR::i2dIns(LIns* v)
@@ -3663,13 +3663,11 @@ namespace avmplus
 			{
 				ExceptionHandler* h = &info->exceptions->exceptions[i];
                 intptr_t handler_pc = h->target;
-                LIns *br;
                 if (i+1 < handler_count) {
-                    br = branchIns(LIR_jt, binaryIns(LIR_eq, handler_target, InsConst(handler_pc)));
+                    branchIns(LIR_jt, binaryIns(LIR_eq, handler_target, InsConst(handler_pc)), handler_pc);
                 } else {
-                    br = branchIns(LIR_j, 0);
+                    branchIns(LIR_j, 0, handler_pc);
                 }
-                patchLater(br, handler_pc);
 			}
         }
 
@@ -3695,7 +3693,7 @@ namespace avmplus
             p.br->target(p.label->bb);
         }
 
-        frag->lastIns = lirbuf->next()-1;
+        frag->lastIns = frag->lirbuf->next()-1;
 	}
 
 	LIns* CodegenLIR::initMultiname(Multiname* multiname, int& csp, bool isDelete /*=false*/)
@@ -3819,7 +3817,7 @@ namespace avmplus
 	void CodegenLIR::formatOperand(PrintWriter& buffer, LIns* opr)
 	{
         if (opr) {
-			buffer.format("@%s", lirbuf->names->formatRef(opr));
+			buffer.format("@%s", frag->lirbuf->names->formatRef(opr));
         }
         else {
 			buffer << "0";
@@ -3860,7 +3858,7 @@ namespace avmplus
 	}
 #endif
 
-    LIns *CodegenLIR::branchIns(LOpcode op, LIns *cond, LIns *target) {
+    LIns *CodegenLIR::branchIns(LOpcode op, LIns *cond) {
         if (cond) {
             if (!cond->isCmp()) {
                 // branching on a non-condition expression, so test (v==0)
@@ -3881,7 +3879,13 @@ namespace avmplus
                 }
             }
         }
-        return lirout->insBranch(op, cond, target);
+        return lirout->insBranch(op, cond, 0);
+    }
+
+    LIns *CodegenLIR::branchIns(LOpcode op, LIns *cond, uintptr_t pc) {
+        LIns *br = branchIns(op, cond);
+        patchLater(br, pc);
+        return br;
     }
 
     LIns *CodegenLIR::Ins(LOpcode code) {
@@ -3943,34 +3947,23 @@ namespace avmplus
         }
     };
 #endif
-    int deadvars_branch(GC *gc, LIns *target, BitSet &livein,
-        SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
-    {
-        BitSet *lset = labels.get(target);
-        if (lset) {
-            // the target LiveIn set (lset) is non-empty,
-            // union it with fall-through set (live).
-            livein.setFrom(gc, *lset);
-            return 0;
-        }
-        else {
-            // we have not seen the target yet, so this is a backedge.
-            // we need another iteration to pick up that live set.
-            return 1;
-        }
-    }
 
     int deadvars_analyze(GC *gc, LirBuffer *lirbuf, LIns *catcher,
         SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
     {
         LIns *vars = lirbuf->sp;
-        int loops = 0;
+        List<LIns*, LIST_NonGCObjects> looplabels(gc);
+        int iter = 0;
         BitSet livein;
-        LirReader in(lirbuf);
 
-        for (LIns *i = in.read(); i != 0; i = in.read()) {
-            LOpcode op = i->opcode();
-            switch (op) {
+        bool again;
+        do {
+            again = false;
+            livein.reset();
+            LirReader in(lirbuf);
+            for (LIns *i = in.read(); i != 0; i = in.read()) {
+                LOpcode op = i->opcode();
+                switch (op) {
                 case LIR_ret:
                 case LIR_fret:
                     livein.reset();
@@ -4000,10 +3993,15 @@ namespace avmplus
                     if (!lset) {
                         lset = new (gc) BitSet();
                         labels.put(i, lset);
-                    } else {
-                        lset->reset();
                     }
-                    lset->setFrom(gc, livein);
+                    if (lset->setFrom(gc, livein) && !again) {
+                        for (int j=0, n=looplabels.size(); j < n; j++) {
+                            if (looplabels[j] == i) {
+                                again = true;
+                                break;
+                            }
+                        }
+                    }
                     break;
                 }
                 case LIR_j:
@@ -4011,26 +4009,41 @@ namespace avmplus
                     livein.reset();
                     // fall through to other branch cases
                 case LIR_jt:
-                case LIR_jf:
+                case LIR_jf: {
                     // merge the LiveIn sets from each successor:  the fall
-                    // through case (live) and the branch case (lset).
-                    loops += deadvars_branch(gc, i->getTarget(), livein, labels);
+                    // through case (livein) and the branch case (lset).
+                    LIns *label = i->getTarget();
+                    BitSet *lset = labels.get(label);
+                    if (lset) {
+                        livein.setFrom(gc, *lset);
+                    } else {
+                        AvmAssert(iter == 0);
+                        looplabels.add(label);
+                    }
                     break;
+                }
                 case LIR_call:
                 case LIR_calli:
                 case LIR_fcall:
                 case LIR_fcalli:
                     if (catcher && !i->isCse(lirbuf->_functions)) {
-                        // non-cse call is like a conditional branch to the catcher label.
+                        // non-cse call is like a conditional forward branch to the catcher label.
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
-                        // reachable catch blocks.
-                        loops += deadvars_branch(gc, catcher, livein, labels);
+                        // reachable catch blocks.  If we haven't seen the catch label yet then
+                        // the call is to an exception handling helper (eg beginCatch()) 
+                        // that won't throw.
+                        BitSet *lset = labels.get(catcher);
+                        if (lset)
+                            livein.setFrom(gc, *lset);
                     }
                     break;
+                }
             }
+            ++iter;
         }
-        return loops;
+        while (again);
+        return iter;
     }
 
     void deadvars_kill(GC *gc, LirBuffer *lirbuf, LIns *catcher,
@@ -4090,11 +4103,16 @@ namespace avmplus
                     livein.reset();
                     // fall through to other branch cases
                 case LIR_jt:
-                case LIR_jf:
+                case LIR_jf: {
                     // merge the LiveIn sets from each successor:  the fall
                     // through case (live) and the branch case (lset).
-                    deadvars_branch(gc, i->getTarget(), livein, labels);
+                    BitSet *lset = labels.get(i->getTarget());
+                    AvmAssert(lset != 0); // all labels have been seen by deadvars_analyze()
+                    // the target LiveIn set (lset) is non-empty,
+                    // union it with fall-through set (live).
+                    livein.setFrom(gc, *lset);
                     break;
+                }
                 case LIR_call:
                 case LIR_calli:
                 case LIR_fcall:
@@ -4104,7 +4122,11 @@ namespace avmplus
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
                         // reachable catch blocks.
-                        deadvars_branch(gc, catcher, livein, labels);
+                        BitSet *lset = labels.get(catcher);
+                        AvmAssert(lset != 0); // this is a forward branch, we have seen the label.
+                        // the target LiveIn set (lset) is non-empty,
+                        // union it with fall-through set (live).
+                        livein.setFrom(gc, *lset);
                     }
                     break;
             }
@@ -4136,23 +4158,14 @@ namespace avmplus
     {
         SortedMap<LIns*, BitSet*, LIST_GCObjects> labels(gc);
 
+        LirBuffer *lirbuf = frag->lirbuf;
         LirReader in(lirbuf);
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
-        int iter=0;
-        int loops = deadvars_analyze(gc, lirbuf, catcher, labels);
-        if (loops > 50) {
-            // pathalogical bailout, don't do var removal.
-            verbose_only( if (verbose()) 
-                printf("skipping dead store removal, %d backedges is too many.\n", loops);
-            )
-            return;
-        }
-        while (++iter <= loops)
-            deadvars_analyze(gc, lirbuf, catcher, labels);
+        int iter = deadvars_analyze(gc, lirbuf, catcher, labels);
 
         // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
         verbose_only( if (verbose()) 
-            printf("killing dead stores after %d LA iterations.  %d loop edges\n",iter,loops);
+            printf("killing dead stores after %d LA iterations.\n",iter);
         )
         deadvars_kill(gc, lirbuf, catcher, labels
             verbose_only(, lirbuf->names));
@@ -4166,7 +4179,7 @@ namespace avmplus
         _ntprof("compile");
         #endif
         debug_only(
-            LirReader reader(lirbuf);
+            LirReader reader(frag->lirbuf);
             ValidateReader validator(&reader);
             while (validator.read())
             {}
@@ -4175,7 +4188,7 @@ namespace avmplus
         deadvars();
 
         verbose_only(if (verbose()) {
-            live(gc, lirbuf);
+            live(gc, frag->lirbuf);
         })
 
         Fragmento *frago = pool->codePages->frago;
@@ -4206,7 +4219,13 @@ namespace avmplus
 		_nvprof("IR", lirbuf->insCount());		
 #endif /* PERFM */
 		
+        LirBuffer *lirbuf = frag->lirbuf;
         frag->releaseLirBuffer();
+        for (LirWriter *w = lirout, *wnext; w != 0; w = wnext) {
+            wnext = w->out;
+            gc->Free(w);
+        }
+        gc->Free(lirbuf);
 
         jitcount++;
         //_nvprof("assm->error", assm->error());

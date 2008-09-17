@@ -3447,7 +3447,7 @@ namespace avmplus
 				
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				if (mir)
-					mir->merge(curValue, targetValue);
+					mir->merge(i, curValue, targetValue);
 				#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 				bool notNull = targetValue.notNull && curValue.notNull;

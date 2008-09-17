@@ -268,7 +268,10 @@ namespace nanojit
 			void		reserveFree(LInsp i);
 			void		reserveReset();
 
-			Reservation* getresv(LIns *x) { return x->resv() ? &_resvTable[x->resv()] : 0; }
+			Reservation* getresv(LIns *x) {
+                uint32_t resv_index = x->resv();
+                return resv_index ? &_resvTable[resv_index] : 0;
+            }
 
 			DWB(Fragmento*)		_frago;
             GC*					_gc;
