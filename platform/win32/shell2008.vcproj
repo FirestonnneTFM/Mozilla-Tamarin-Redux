@@ -1146,6 +1146,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\vprof\vprof.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\platform\win32\win32cpuid.cpp"
 				>
 				<FileConfiguration
