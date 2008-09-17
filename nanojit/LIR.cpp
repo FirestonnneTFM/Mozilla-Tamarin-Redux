@@ -527,10 +527,6 @@ namespace nanojit
 		return (c == LIR_ov) || (c == LIR_cs) || isCmp(c);
 	}
 
-    bool FASTCALL isRet(LOpcode c) {
-        return (c & ~LIR64) == LIR_ret;
-    }
-
     bool FASTCALL isFloat(LOpcode c) {
         switch (c) {
             default:
@@ -556,33 +552,6 @@ namespace nanojit
         return nanojit::isCond(u.code);
     }
     
-	bool LIns::isCall() const
-	{
-        int c = u.code & ~LIR64;
-		return c == LIR_call || c == LIR_calli;
-	}
-
-	bool LIns::isGuard() const
-	{
-		return u.code==LIR_x || u.code==LIR_xf || u.code==LIR_xt || u.code==LIR_loop;
-	}
-
-    bool LIns::isStore() const
-    {
-		int c = u.code & ~LIR64;
-        return c == LIR_st || c == LIR_sti;
-    }
-
-    bool LIns::isLoad() const
-    {
-        return u.code == LIR_ldq || u.code == LIR_ld || u.code == LIR_ldc || u.code == LIR_ldqc;
-    }
-
-	bool LIns::isconst() const
-	{
-		return (opcode()&~1) == LIR_short;
-	}
-
 	bool LIns::isconstval(int32_t val) const
 	{
 		return isconst() && constval()==val;

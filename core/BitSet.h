@@ -123,17 +123,26 @@ namespace avmplus
 				return value;
 			}
 
-            void setFrom(MMgc::GC *gc, BitSet &other) {
+            uintptr_t setFrom(MMgc::GC *gc, BitSet &other) {
                 int c = other.capacity;
                 if (c > capacity)
                     grow(gc, c);
+                uintptr_t *bits, *otherbits;
                 if (c > kDefaultCapacity) {
-                    for (int i=0; i < c; i++)
-                        bits.ptr[i] |= other.bits.ptr[i];
+                    bits = this->bits.ptr;
+                    otherbits = other.bits.ptr;
                 } else {
-                    for (int i=0; i < c; i++)
-                        bits.ar[i] |= other.bits.ar[i];
+                    bits = this->bits.ar;
+                    otherbits = other.bits.ar;
                 }
+                uintptr_t newbits = 0;
+                for (int i=0; i < c; i++) {
+                    uintptr_t b = bits[i];
+                    uintptr_t b2 = otherbits[i];
+                    newbits |= b2 & ~b; // bits in b2 that are not in b
+                    bits[i] = b|b2;
+                }
+                return newbits;
             }
 
 		private:
