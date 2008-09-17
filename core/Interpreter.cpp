@@ -1865,7 +1865,7 @@ namespace avmplus
 #  define GET_MULTINAME_PTR(decl, arg)  const Multiname* decl = &pool->word_code.cpool_mn->multinames[arg]
 #else
 #  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
-#  define GET_MULTINAME_PTR(decl, arg)  Multiname _multiname; pool->parseMultiname(_multiname, arg); const Multiname* decl = &_multiname;
+#  define GET_MULTINAME_PTR(decl, arg)  Multiname _multiname; pool->parseMultiname(_multiname, arg); const Multiname* decl = &_multiname
 #endif
 
 			INSTR(getlex) {
