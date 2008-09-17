@@ -54,3 +54,4 @@ e4x/Regress/b121219: ,   .*lnx-tvm-releasedebugger   ,  expectedfail   ,   bug t
 
 as3/sampling/ProcessSampling: , x86-win64-tvm-.*debugger , expectedfail  , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455062
 as3/sampling/SimpleSampling:  , x86-win64-tvm-.*debugger , expectedfail  , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455062
+as3/sampling/.*               , .*-tvm-debug.*           , skip          , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455712
