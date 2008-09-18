@@ -1503,6 +1503,14 @@ namespace avmplus
 		}
 
 		// now we have searched all the scopes, except global
+		return findglobalproperty(AvmCore::atomToScriptObject(outer->getSize() > 0 ? outer->getScope(0) : *scopes),
+								  multiname, 
+								  strict);
+	}
+	
+	Atom MethodEnv::findglobalproperty(ScriptObject* target_global, const Multiname* multiname, bool strict)
+	{
+		Toplevel* toplevel = this->toplevel();
 		
 		// look for imported definition (similar logic to OP_finddef).  This will
 		// find definitions in this script and in other scripts.
@@ -1525,9 +1533,7 @@ namespace avmplus
 		// no imported definition found.  look for dynamic props
 		// on the global object
 
-		ScriptObject* global = AvmCore::atomToScriptObject(
-			outer_depth > 0 ? outer->getScope(0) : *scopes
-		);
+		ScriptObject* global = target_global;
 
 		// search the delegate chain for a value.  The delegate
 		// chain for the global object will only contain vanilla

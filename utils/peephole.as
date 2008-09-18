@@ -176,7 +176,6 @@ package peephole
     //
     // readOpcodes fleshes out this table.
 
-    const OP_ext = 255;
     const opcode = { OP_ext_pushbits:        (1 + 256),
 		     OP_ext_push_doublebits: (2 + 256),
 		     OP_ext_get2locals:      (3 + 256),
@@ -224,7 +223,9 @@ package peephole
 		     OP_ext_ifne_lb:         (45 + 256),
 		     OP_ext_ifstricteq_lb:   (46 + 256),
 		     OP_ext_ifstrictne_lb:   (47 + 256),
-		     OP_ext_swap_pop:        (48 + 256) };
+		     OP_ext_swap_pop:        (48 + 256),
+		     OP_ext_findpropglobal:  (49 + 256),
+		     OP_ext_findpropglobalstrict:  (50 + 256), };
 
     const jump_opcodes = 
 	{ OP_jump:               true,

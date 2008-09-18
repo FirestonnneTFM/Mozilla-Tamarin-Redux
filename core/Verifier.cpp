@@ -2723,6 +2723,7 @@ namespace avmplus
 #ifndef AVMPLUS_WORD_CODE
 		(void)imm30;
 #endif
+		XLAT_ONLY(bool no_translate = false);
 		ScopeTypeChain* scope = info->declaringTraits->scope;
 		if (multiname.isBinding())
 		{
@@ -2790,10 +2791,28 @@ namespace avmplus
 						(void)opcode;
 						#endif
 						state->push(script->declaringTraits, true);
-						// OPTIMIZEME - more early binding for interpreter on getproperty?
-						XLAT_ONLY( if (translator) translator->emitOp1(opcode, imm30) );
+						// OPTIMIZEME - more early binding for interpreter on findproperty!
+						XLAT_ONLY(if (translator) translator->emitOp1(opcode, imm30));
 						return;
 					}
+#if defined AVMPLUS_WORD_CODE
+					else {
+						if (translator) {
+							switch (opcode) {
+								case OP_findproperty: 
+									translator->emitOp1(OP_ext_findpropglobal, imm30);
+									break;
+								case OP_findpropstrict:
+									translator->emitOp1(OP_ext_findpropglobalstrict, imm30);
+									break;
+								default:
+									translator->emitOp1(opcode, imm30);
+									break;
+							}
+							no_translate = true;
+						}
+					}
+#endif
 				}
 			}
 		}
@@ -2802,7 +2821,7 @@ namespace avmplus
 		checkPropertyMultiname(n, multiname);
 		MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE); )
 		state->pop_push(n-1, OBJECT_TYPE, true);
-		XLAT_ONLY( if (translator) translator->emitOp1(opcode, imm30) );
+		XLAT_ONLY( if (translator && !no_translate) translator->emitOp1(opcode, imm30) );
 	}
 
 	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32 imm30)

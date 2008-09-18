@@ -150,7 +150,7 @@ uint16 Translator::toplevel[] = {
 0, 0, 0, 0, 0, 0, 0, 0, // OP_ext_iflt_ll         OP_ext_ifnlt_ll        OP_ext_ifle_ll         OP_ext_ifnle_ll        OP_ext_ifgt_ll         OP_ext_ifngt_ll        OP_ext_ifge_ll         OP_ext_ifnge_ll       
 0, 0, 0, 0, 0, 0, 0, 0, // OP_ext_ifeq_ll         OP_ext_ifne_ll         OP_ext_ifstricteq_ll   OP_ext_ifstrictne_ll   OP_ext_iflt_lb         OP_ext_ifnlt_lb        OP_ext_ifle_lb         OP_ext_ifnle_lb       
 0, 0, 0, 0, 0, 0, 0, 0, // OP_ext_ifgt_lb         OP_ext_ifngt_lb        OP_ext_ifge_lb         OP_ext_ifnge_lb        OP_ext_ifeq_lb         OP_ext_ifne_lb         OP_ext_ifstricteq_lb   OP_ext_ifstrictne_lb  
-0, 0, 0, 0, 0, 0, 0, 0, // OP_ext_swap_pop        -                      -                      -                      -                      -                      -                      -                     
+0, 0, 0, 0, 0, 0, 0, 0, // OP_ext_swap_pop        OP_ext_findpropglobal  OP_ext_findpropglobalstrict -                      -                      -                      -                      -                     
 0, 0, 0, 0, 0, 0, 0, 0, // -                      -                      -                      -                      -                      -                      -                      -                     
 0, 0, 0, 0, 0, 0, 0, 0, // -                      -                      -                      -                      -                      -                      -                      -                     
 0, 0, 0, 0, 0, 0, 0, 0, // -                      -                      -                      -                      -                      -                      -                      -                     

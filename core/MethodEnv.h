@@ -214,6 +214,9 @@ namespace avmplus
 						  const Multiname* multiname,
 						  bool strict,
 						  Atom* withBase);
+		
+		/** Precisely like findproperty, but ignoring all lexical and 'this' scopes */
+		Atom findglobalproperty(ScriptObject* target_global, const Multiname* multiname, bool strict);
 
 		Namespace* internRtns(Atom ns);
 

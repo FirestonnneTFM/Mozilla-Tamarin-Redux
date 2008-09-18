@@ -42,13 +42,16 @@ namespace avmplus
 {
 	class Domain : public MMgc::GCObject
 	{
-	  public:
+	private:
+		// These are private so that we can invalidate global lookup caches if they change
+		
 		/** The domain-wide traits table (type name => instance Traits) */
 		DWB(MultinameHashtable*) namedTraits;
-
+		
 		/** domain-wide type table of scripts, indexed by definition name */
 		DWB(MultinameHashtable*) namedScripts;
-
+		
+	public:
 		/** Parent domain */
 		Domain* const base;
 		
@@ -58,6 +61,10 @@ namespace avmplus
 		Traits* getNamedTraits(const Multiname* multiname, bool recursive/*=true*/) const;
 		AbstractFunction* getNamedScript(Stringp name, Namespace* ns) const;
 		AbstractFunction* getNamedScript(const Multiname* multiname) const;
+		
+		Binding getNamedTrait(Stringp name, Namespace* ns) const { return namedTraits->get(name, ns); }
+		void addNamedTrait(Stringp name, Namespace* ns, Binding v) { namedTraits->add(name, ns, v); }
+		void addNamedScript(Stringp name, Namespace* ns, Binding v) { namedScripts->add(name, ns, v); }
 	};
 }
 

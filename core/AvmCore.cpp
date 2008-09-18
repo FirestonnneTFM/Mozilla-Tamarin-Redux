@@ -506,7 +506,7 @@ namespace avmplus
 			// otherwise we keep the first one that was encountered.
 			if (!ns->isPrivate())
 			{				
-				if (!domainEnv->namedScripts->get(name, ns))
+				if (!domainEnv->getNamedScript(name, ns))
 				{
 					// add ns/name to global table
 					// ISSUE should we filter out Object traits and/or private members?
@@ -514,7 +514,7 @@ namespace avmplus
 					if (scriptTraits->pool->verbose)
 						console << "exporting " << ns << "::" << name << "\n";
 					#endif
-					domainEnv->namedScripts->add(name, ns, (Binding)scriptEnv);
+					domainEnv->addNamedScript(name, ns, (Binding)scriptEnv);
 				}
 			}
 			else
