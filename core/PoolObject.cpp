@@ -454,7 +454,7 @@ namespace avmplus
 				if( !r )
 				{
 					r = core->makeParameterizedITraits(fullname, base->ns, core->traits.vectorobj_itraits);
-					core->traits.vector_itraits->pool->domain->namedTraits->add(fullname, base->ns, (Binding)r);
+					core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, (Binding)r);
 				}
 			}
 		}

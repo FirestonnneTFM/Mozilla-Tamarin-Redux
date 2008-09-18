@@ -72,7 +72,10 @@ namespace avmplus
 }
 
 // FIXME: these should be defined in opcodes.tbl.
-// Note that eg utils/peephole.as knows about these values.
+//
+// Note that eg utils/peephole.as knows about these values, and that when you add
+// opcodes here you will need to rerun that script to generate a new jump table
+// for the peephole optimizer.
 
 #ifdef AVMPLUS_WORD_CODE
 
@@ -126,8 +129,10 @@ namespace avmplus
 #  define OP_ext_ifstricteq_lb     ((46<<8) | OP_ext)
 #  define OP_ext_ifstrictne_lb     ((47<<8) | OP_ext)
 #  define OP_ext_swap_pop          ((48<<8) | OP_ext)
+#  define OP_ext_findpropglobal    ((49<<8) | OP_ext)
+#  define OP_ext_findpropglobalstrict ((50<<8) | OP_ext)
 
-#  define LAST_SUPERWORD_OPCODE    ((48<<8) | OP_ext)
+#  define LAST_SUPERWORD_OPCODE    ((50<<8) | OP_ext)
 
 #endif // AVMPLUS_WORD_CODE
 #endif // __avmplus_Interpreter__
