@@ -886,7 +886,7 @@ namespace avmshell
 				FileInputStream f(filename);
 				bool isValid = f.valid();
 				if (!isValid) {
-					fprintf(stderr, "cannot open file: %s\n", filename);
+                    console << "cannot open file: " << filename << "\n";
 					#ifdef DEBUGGER
 					delete profiler;
 					#endif
