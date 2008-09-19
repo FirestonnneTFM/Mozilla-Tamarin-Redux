@@ -44,6 +44,7 @@ namespace avmplus
 		: ScriptObject(vtable, proto, 0),
 		m_denseArr(capacity)
 	{
+		SAMPLE_FRAME("Array", core());
 		AvmAssert(traits()->sizeofInstance >= sizeof(ArrayObject));
 		m_length = 0;
 		m_lowHTentry = NO_LOW_HTENTRY;

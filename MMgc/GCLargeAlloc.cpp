@@ -143,6 +143,8 @@ namespace MMgc
 				if(b->flags & kHasWeakRef) {
 					b->gc->ClearWeakRef(GetUserPointer(item));
 				}
+				SAMPLE_DEALLOC(item, GC::Size(item));
+
 				// unlink from list
 				*prev = b->next;
 				b->gc->AddToLargeEmptyBlockList(b);

@@ -268,7 +268,10 @@ namespace nanojit
 			void		reserveFree(LInsp i);
 			void		reserveReset();
 
-			Reservation* getresv(LIns *x) { return x->resv() ? &_resvTable[x->resv()] : 0; }
+			Reservation* getresv(LIns *x) {
+                uint32_t resv_index = x->resv();
+                return resv_index ? &_resvTable[resv_index] : 0;
+            }
 
 			DWB(Fragmento*)		_frago;
             GC*					_gc;
@@ -291,6 +294,7 @@ namespace nanojit
 			Reservation _resvTable[ NJ_MAX_STACK_ENTRY ]; // table where we house stack and register information
 			uint32_t	_resvFree;
 			bool		_inExit, vpad2[3];
+            avmplus::List<LIns*> pending_lives;
 
 			void		asm_cmp(LIns *cond);
 #ifndef NJ_SOFTFLOAT
@@ -325,6 +329,7 @@ namespace nanojit
 			NIns*		asm_branch(bool branchOnFalse, LInsp cond, NIns* targ);
             void        assignSavedParams();
             void        reserveSavedParams();
+            void        handleLoopCarriedExprs();
 
 			// platform specific implementation (see NativeXXX.cpp file)
 			void		nInit(uint32_t flags);

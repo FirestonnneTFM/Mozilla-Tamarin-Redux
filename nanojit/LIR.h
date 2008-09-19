@@ -57,11 +57,6 @@ namespace nanojit
         LIR_neartramp = 3, // must be LIR_tramp-1 and lsb=1
         LIR_tramp =		4,
         
-		// variables
-		LIR_var		= 5, // create variable storage
-		LIR_def		= 6, // define (bind) a value to a variable
-		LIR_use		= 7, // use the value of a variable
-		
 		// non-pure operations
         LIR_addp    = 9,
 		LIR_param	= 10,
@@ -212,6 +207,28 @@ namespace nanojit
         }
 		// fargs = args - iargs
 	};
+
+    inline bool isGuard(LOpcode op) {
+        return op==LIR_x || op==LIR_xf || op==LIR_xt || op==LIR_loop;
+    }
+
+    inline bool isCall(LOpcode op) {
+        op = LOpcode(op & ~LIR64);
+        return op == LIR_call || op == LIR_calli;
+    }
+
+    inline bool isStore(LOpcode op) {
+        op = LOpcode(op & ~LIR64);
+        return op == LIR_st || op == LIR_sti;
+    }
+
+    inline bool isConst(LOpcode op) {
+        return (op & ~1) == LIR_short;
+    }
+
+    inline bool isLoad(LOpcode op) {
+        return op == LIR_ldq || op == LIR_ld || op == LIR_ldc || op == LIR_ldqc;
+    }
 
 	// Low-level Instruction 4B
 	// had to lay it our as a union with duplicate code fields since msvc couldn't figure out how to compact it otherwise.
@@ -380,11 +397,11 @@ namespace nanojit
 		bool isQuad() const { return (u.code & LIR64) != 0; }
 		bool isCond() const;
 		bool isCmp() const;
-		bool isCall() const;
-        bool isStore() const;
-        bool isLoad() const;
-		bool isGuard() const;
-		bool isconst() const;
+        bool isCall() const { return nanojit::isCall(u.code); }
+        bool isStore() const { return nanojit::isStore(u.code); }
+        bool isLoad() const { return nanojit::isLoad(u.code); }
+        bool isGuard() const { return nanojit::isGuard(u.code); }
+        bool isconst() const { return nanojit::isConst(u.code); }
 		bool isconstval(int32_t val) const;
 		bool isconstq() const;
         bool isTramp() const {return isop(LIR_neartramp) || isop(LIR_tramp); }
@@ -420,7 +437,9 @@ namespace nanojit
 	bool FASTCALL isCse(LOpcode v);
 	bool FASTCALL isCmp(LOpcode v);
 	bool FASTCALL isCond(LOpcode v);
-    bool FASTCALL isRet(LOpcode v);
+    inline bool isRet(LOpcode c) {
+        return (c & ~LIR64) == LIR_ret;
+    }
     bool FASTCALL isFloat(LOpcode v);
 	LIns* FASTCALL callArgN(LInsp i, uint32_t n);
 	extern const uint8_t operandCount[];
@@ -434,7 +453,6 @@ namespace nanojit
 	{
 	public:
 		LirWriter *out;
-	public:
         const CallInfo *_functions;
 
 		virtual ~LirWriter() {}
@@ -581,7 +599,7 @@ namespace nanojit
 		{}
 
 		LInsp add(LInsp i) {
-			if (i) 
+            if (i)
                 code.add(i);
 			return i;
 		}
@@ -594,10 +612,14 @@ namespace nanojit
 
 		void flush()
 		{
-			for (int j=0, n=code.size(); j < n; j++)
-				printf("    %s\n",names->formatIns(code[j]));
-			code.clear();
-			printf("\n");
+            int n = code.size();
+            if (n) {
+			    for (int i=0; i < n; i++)
+				    printf("    %s\n",names->formatIns(code[i]));
+			    code.clear();
+                if (n > 1)
+        			printf("\n");
+            }
 		}
 
 		LIns* insGuard(LOpcode op, LInsp cond, SideExit *x) {
@@ -622,7 +644,7 @@ namespace nanojit
 			return v == LIR_2 ? out->ins2(v,a,b) : add(out->ins2(v, a, b));
 		}
 		LIns* insCall(uint32_t fid, LInsp args[]) {
-			return add(out->insCall(fid, args));
+			return add_flush(out->insCall(fid, args));
 		}
 		LIns* insParam(int32_t i, int32_t kind) {
 			return add(out->insParam(i, kind));
@@ -634,7 +656,7 @@ namespace nanojit
 			return add(out->insStore(v, b, d));
 		}
 		LIns* insStorei(LInsp v, LInsp b, int32_t d) {
-			return add_flush(out->insStorei(v, b, d));
+			return add(out->insStorei(v, b, d));
 		}
         LIns* insAlloc(int32_t size) {
             return add(out->insAlloc(size));
@@ -659,14 +681,14 @@ namespace nanojit
 		// must be a power of 2. 
 		// don't start too small, or we'll waste time growing and rehashing.
 		// don't start too large, will waste memory. 
-		static const uint32_t kInitialCap = 2048;	
+		static const uint32_t kInitialCap = 64;	
 
-		InsList m_list;
-		uint32_t m_used;
+		LInsp *m_list; // explicit WB's are used, no DWB needed.
+		uint32_t m_used, m_cap;
 		GC* m_gc;
 
 		static uint32_t FASTCALL hashcode(LInsp i);
-		uint32_t FASTCALL find(LInsp name, uint32_t hash, const InsList& list, uint32_t cap);
+		uint32_t FASTCALL find(LInsp name, uint32_t hash, const LInsp *list, uint32_t cap);
 		static bool FASTCALL equals(LInsp a, LInsp b);
 		void FASTCALL grow();
 
