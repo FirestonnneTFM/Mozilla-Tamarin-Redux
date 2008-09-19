@@ -274,7 +274,8 @@ namespace avmshell
 		#endif
     #endif
     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		printf("          [-Dforcemir]  use MIR always, never interp\n");
+		printf("          [-Dforcemir]  deprecated, use forcejit\n");
+		printf("          [-Ojit]       use jit always, never interp\n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
         #ifdef AVMPLUS_IA32
             printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
@@ -676,13 +677,13 @@ namespace avmshell
 							show_mem = true;
                         #ifdef AVMPLUS_VERBOSE
 						} else if (!strcmp(arg+2, "bbgraph")) {
-							config.bbgraph = true;  // generate basic block graph (only valid with mir switch)
+							config.bbgraph = true;  // generate basic block graph (only valid with MIR)
                         #endif
                     #endif
 
                     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 						} else if (!strcmp(arg+2, "forcemir")) {
-							config.forcemir = true;
+							config.jit = true;
 							
 						} else if (!strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
@@ -691,6 +692,10 @@ namespace avmshell
 						} else {
 							usage();
 						}
+                #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                    } else if (!strcmp(arg, "-Ojit")) {
+                        config.jit = true;
+                #endif
 					} else if (!strcmp(arg, "-memstats")) {
 						GetGC()->gcstats = true;
 					} else if (!strcmp(arg, "-memlimit")) {

@@ -1897,7 +1897,11 @@ namespace nanojit
     void Assembler::evictScratchRegs()
     {
 		// find the top GpRegs that are candidates to put in SavedRegs
-        Register tosave[8];
+
+        // tosave is a binary heap stored in an array.  the root is tosave[0],
+        // left child is at i+1, right child is at i+2.  
+
+        Register tosave[LastReg-FirstReg+1];
         int len=0;
         RegAlloc *regs = &_allocator;
         for (Register r = FirstReg; r <= LastReg; r = nextreg(r)) {
@@ -1909,12 +1913,13 @@ namespace nanojit
 					}
 					else {
 						int32_t pri = regs->getPriority(r);
-                        // add to heap.
+                        // add to heap by adding to end and bubbling up
                         int j = len++;
                         while (j > 0 && pri > regs->getPriority(tosave[j/2])) {
                             tosave[j] = tosave[j/2];
                             j /= 2;
                         }
+                        NanoAssert(j < sizeof(tosave)/sizeof(tosave[0]));
                         tosave[j] = r;
 					}
 				}
@@ -1932,7 +1937,7 @@ namespace nanojit
             Register r = findRegFor(i, allow);
 			allow &= ~rmask(r);
 
-            // remove from heap
+            // remove from heap by replacing root with end element and bubbling down.
             if (allow && --len > 0) {
                 Register last = tosave[len];
                 int j = 0;

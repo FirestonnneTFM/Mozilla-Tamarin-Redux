@@ -56,43 +56,52 @@ namespace avmplus
 	 */ 
 	class BitSet
 	{
+        private:
+            uintptr_t *getbits() {
+                return capacity > kDefaultCapacity ? bits.ptr : bits.ar;
+            }
+            const uintptr_t *getbits() const {
+                return capacity > kDefaultCapacity ? bits.ptr : bits.ar;
+            }
+
 		public:
 
 			enum {  kUnit = 8*sizeof(uintptr_t),
 					kDefaultCapacity = 4   };
 
-			BitSet()
-			{
-				capacity = kDefaultCapacity;
+            BitSet() : capacity(kDefaultCapacity)
+            {
                 reset();
+            }
+
+            BitSet(MMgc::GC *gc, int bitcap=kDefaultCapacity*kUnit) : capacity(kDefaultCapacity)
+			{
+                reset();
+                int cap = ((bitcap+kUnit-1)/kUnit);
+                if (cap > kDefaultCapacity)
+                    grow(gc, cap);
 			}
 
             void reset()
             {
-                if (capacity > kDefaultCapacity)
-    				for(int i=0; i<capacity; i++)
-	    				bits.ptr[i] = 0;
-                else
-    				for(int i=0; i<capacity; i++)
-	    				bits.ar[i] = 0;
+                uintptr_t *bits = getbits();
+                for (int i=0, n = capacity; i < n; i++)
+                    bits[i] = 0;
             }
 
             void set(MMgc::GC *gc, int bitNbr)
 			{
 				int index = bitNbr / kUnit;
 				int bit = bitNbr % kUnit;
-                if (index >= capacity) {
-                    int c = capacity * 2;
-                    while (index >= c) {
-                        c *= 2;
+                int cap = this->capacity;
+                if (index >= cap) {
+                    cap *= 2;
+                    while (index >= cap) {
+                        cap *= 2;
                     }
-					grow(gc, c);
+					grow(gc, cap);
                 }
-
-				if (capacity > kDefaultCapacity)
-					bits.ptr[index] |= (1<<bit);
-				else
-					bits.ar[index] |= (1<<bit);
+    			getbits()[index] |= 1 << bit;
 			}
 
 			void clear(int bitNbr)
@@ -100,41 +109,22 @@ namespace avmplus
 				int index = bitNbr / kUnit;
 				int bit = bitNbr % kUnit;
 				if (index < capacity)
-				{
-					if (capacity > kDefaultCapacity)
-						bits.ptr[index] &= ~(1<<bit);
-					else
-						bits.ar[index] &= ~(1<<bit);
-				}
+                    getbits()[index] &= ~(1<<bit);
 			}
 
 			bool get(int bitNbr) const
 			{
 				int index = bitNbr / kUnit;
 				int bit = bitNbr % kUnit;
-				bool value = false;
-				if (index < capacity)
-				{
-					if (capacity > kDefaultCapacity)
-						value = ( bits.ptr[index] & (1<<bit) ) ? true : false;
-					else
-						value = ( bits.ar[index] & (1<<bit) ) ? true : false;
-				}
-				return value;
+                return index < capacity && (getbits()[index] & 1<<bit) != 0;
 			}
 
             uintptr_t setFrom(MMgc::GC *gc, BitSet &other) {
                 int c = other.capacity;
                 if (c > capacity)
                     grow(gc, c);
-                uintptr_t *bits, *otherbits;
-                if (c > kDefaultCapacity) {
-                    bits = this->bits.ptr;
-                    otherbits = other.bits.ptr;
-                } else {
-                    bits = this->bits.ar;
-                    otherbits = other.bits.ar;
-                }
+                uintptr_t *bits = getbits();
+                uintptr_t *otherbits = other.getbits();
                 uintptr_t newbits = 0;
                 for (int i=0; i < c; i++) {
                     uintptr_t b = bits[i];
@@ -154,21 +144,18 @@ namespace avmplus
 				uintptr_t* newBits = (uintptr_t*)gc->Alloc(newCapacity * sizeof(uintptr_t), MMgc::GC::kZero);
 
 				// copy the old one 
-                if (capacity > kDefaultCapacity)
-				    for(int i=0; i<capacity; i++)
-						newBits[i] = bits.ptr[i];
-				else
-				    for(int i=0; i<capacity; i++)
-						newBits[i] = bits.ar[i];
+                uintptr_t *bits = getbits();
+                for (int i=0, n=capacity; i < n; i++)
+                    newBits[i] = bits[i];
 
 				// in with the new out with the old
 				if (capacity > kDefaultCapacity)
-					gc->Free(bits.ptr);
+					gc->Free(bits);
 
                 if (gc->IsPointerToGCPage(this))
-    				WB(gc, this, &bits.ptr, newBits);
+    				WB(gc, this, &this->bits.ptr, newBits);
                 else
-                    bits.ptr = newBits;
+                    this->bits.ptr = newBits;
 				capacity = newCapacity;
 			}
 

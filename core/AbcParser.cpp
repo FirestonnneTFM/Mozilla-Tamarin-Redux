@@ -1691,7 +1691,7 @@ namespace avmplus
 			#endif
 
             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if (!core->config.forcemir)
+			if (!core->config.jit)
 			{
 				// suggest that we don't jit the $init methods
 				script->flags |= AbstractFunction::SUGGEST_INTERP;
@@ -1999,7 +1999,7 @@ namespace avmplus
 			ctraits->needsHashtable = true;
 
             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if (!core->config.forcemir)
+			if (!core->config.jit)
 			{
 				// suggest that we don't jit the class initializer
 				cinit->flags |= AbstractFunction::SUGGEST_INTERP;
