@@ -78,6 +78,9 @@ namespace avmplus
 
 		#ifdef AVMPLUS_WORD_CODE
 		Translator *translator;
+		int num_caches;			// number of entries in 'caches'
+		int next_cache;			// next free entry in 'caches'
+		uint32* caches;			// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
 		#endif
 		
 		AvmCore *core;
@@ -180,6 +183,7 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 		bool emitCallpropertyMethodXLAT(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc);
 		bool emitCallpropertySlotXLAT(AbcOpcode opcode, Traits* t, Binding b, uint32 argc);
+		uint32 allocateCacheSlot(uint32 imm30);
 #endif
 		Binding findMathFunction(Traits* math, Multiname* name, Binding b, int argc);
 

@@ -461,8 +461,6 @@ namespace avmplus
 		case OP_setproperty: \
 		case OP_setslot: \
 		case OP_setsuper: \
-		case OP_ext_findpropglobal: \
-		case OP_ext_findpropglobalstrict: \
 			break; \
 		default: \
 			AvmAssert(!"Unknown " tag); \
@@ -518,6 +516,8 @@ namespace avmplus
 		case OP_constructprop: \
 		case OP_callsuper: \
 		case OP_callsupervoid: \
+		case OP_ext_findpropglobal: \
+		case OP_ext_findpropglobalstrict: \
 			break; \
 		default: \
 			AvmAssert(!"Unknown " tag); \
@@ -977,6 +977,8 @@ namespace avmplus
 		attrs[OP_INDEX(OP_ext_ifne_ll)].width = 3;
 		attrs[OP_INDEX(OP_ext_ifstricteq_ll)].width = 3;
 		attrs[OP_INDEX(OP_ext_ifstrictne_ll)].width = 3;
+		attrs[OP_INDEX(OP_ext_findpropglobal)].width = 3; 
+		attrs[OP_INDEX(OP_ext_findpropglobalstrict)].width = 3; 
 		
 		attrs[OP_INDEX(OP_ext_iflt_lb)].width = 4;
 		attrs[OP_INDEX(OP_ext_ifnlt_lb)].width = 4;
@@ -990,9 +992,6 @@ namespace avmplus
 		attrs[OP_INDEX(OP_ext_ifne_lb)].width = 4;
 		attrs[OP_INDEX(OP_ext_ifstricteq_lb)].width = 4;
 		attrs[OP_INDEX(OP_ext_ifstrictne_lb)].width = 4;
-		
-		attrs[OP_INDEX(OP_ext_findpropglobal)].width = 2;  // will change 
-		attrs[OP_INDEX(OP_ext_findpropglobalstrict)].width = 2;  // will change 
 		
 		attrs[OP_INDEX(OP_jump)].jumps = 1;
 		attrs[OP_INDEX(OP_iftrue)].jumps = 1;

@@ -108,6 +108,9 @@ namespace avmplus
 #ifdef DEBUGGER
 		,_sampler(g)
 #endif
+#ifdef AVMPLUS_WORD_CODE
+		, lookup_cache_timestamp(1)
+#endif
     {
 		// sanity check for all our types
 		AvmAssert (sizeof(int8) == 1);
@@ -525,6 +528,10 @@ namespace avmplus
 				}
 			}
 		}
+#ifdef AVMPLUS_WORD_CODE
+		// Adding scripts to a domain always invalidates the lookup cache.
+		invalidateLookupCache();
+#endif
 	}
 
 	PoolObject* AvmCore::parseActionBlock(ScriptBuffer code,

@@ -1370,6 +1370,8 @@ const int kBufferPadding = 16;
 		// hash set containing namespaces
 		DRC(Namespacep) * namespaces;
 
+#ifdef AVMPLUS_INTERNINT_CACHE
+		// See code in AvmCore::internInt
 		// cache of interned names of nonnegative integers (numeric value % 256)
 		class IndexString : public MMgc::GCObject {
 		public:
@@ -1377,9 +1379,17 @@ const int kBufferPadding = 16;
 			DRCWB(Stringp) string;
 		};
 		
-#ifdef AVMPLUS_INTERNINT_CACHE
-		// See code in AvmCore::internInt
 		IndexString* index_strings[256];
+#endif
+		
+#ifdef AVMPLUS_WORD_CODE
+	private:
+		// Saturating counter.  
+		uint32 lookup_cache_timestamp;
+	public:
+		uint32 lookupCacheTimestamp() { return lookup_cache_timestamp == ~0U ? 0 : lookup_cache_timestamp; }
+		bool   lookupCacheIsValid(uint32 t) { return t == lookup_cache_timestamp; }
+		void   invalidateLookupCache() { if (lookup_cache_timestamp != ~0U) ++lookup_cache_timestamp; }
 #endif
 		
 		// avoid multiple inheritance issues

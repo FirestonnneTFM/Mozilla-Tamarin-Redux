@@ -3084,21 +3084,47 @@ namespace avmplus
 #  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
 					
 			INSTR_EXT(ext_findpropglobal) {
+				uint32 multiname_index = *pc++;
+				uint32 cache_slot = *pc++;
+				if (core->lookupCacheIsValid(env->lookup_cache[cache_slot].timestamp)) {
+					*(++sp) = env->lookup_cache[cache_slot].object->atom();
+					NEXT;
+				}
 				SAVE_EXPC;
-				GET_MULTINAME_PTR(multiname, U30ARG);
+				GET_MULTINAME_PTR(multiname, multiname_index);
 				AvmAssert(multiname->isBinding());
 				ScriptObject* global = AvmCore::atomToScriptObject((outer_depth > 0) ? scope->getScope(0) : scopeBase[0]);
-				*(++sp) = env->findglobalproperty(global, multiname, false);
+				ScriptObject* container = env->findglobalproperty(global, multiname);
+				if (container == NULL) 
+					*(++sp) = global->atom();
+				else {
+					*(++sp) = container->atom();
+					env->lookup_cache[cache_slot].timestamp = core->lookupCacheTimestamp();
+					env->lookup_cache[cache_slot].object = AvmCore::atomToScriptObject(sp[0]);
+				}
 				restore_dxns();
 				NEXT;
 			}
 					
 			INSTR_EXT(ext_findpropglobalstrict) {
+				uint32 multiname_index = *pc++;
+				uint32 cache_slot = *pc++;
+				if (core->lookupCacheIsValid(env->lookup_cache[cache_slot].timestamp)) {
+					*(++sp) = env->lookup_cache[cache_slot].object->atom();
+					NEXT;
+				}
 				SAVE_EXPC;
-				GET_MULTINAME_PTR(multiname, U30ARG);
+				GET_MULTINAME_PTR(multiname, multiname_index);
 				AvmAssert(multiname->isBinding());
 				ScriptObject* global = AvmCore::atomToScriptObject((outer_depth > 0) ? scope->getScope(0) : scopeBase[0]);
-				*(++sp) = env->findglobalproperty(global, multiname, true);
+				ScriptObject* container = env->findglobalproperty(global, multiname);
+				if (container == NULL)
+					toplevel->throwReferenceError(kUndefinedVarError, multiname);
+				else {
+					*(++sp) = container->atom();
+					env->lookup_cache[cache_slot].timestamp = core->lookupCacheTimestamp();
+					env->lookup_cache[cache_slot].object = AvmCore::atomToScriptObject(sp[0]);
+				}
 				restore_dxns();
 				NEXT;
 			}

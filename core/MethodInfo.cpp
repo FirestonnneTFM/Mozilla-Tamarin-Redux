@@ -71,6 +71,14 @@ namespace avmplus
 
 		f->verify(env->vtable->toplevel);
 
+#ifdef AVMPLUS_WORD_CODE
+		{
+			int n;
+			if ((int32)(n = f->word_code.cache_size) > 0)
+				env->lookup_cache = (MethodEnv::LookupCache*)env->core()->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*n, GC::kContainsPointers|GC::kZero);
+		}
+#endif
+		
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
 		if (f->pool->core->config.verifyall && f->pool)
@@ -156,7 +164,7 @@ namespace avmplus
 		Verifier verifier(this, toplevel);
 		verifier.verify();
 		#endif
-
+		
         #ifdef DEBUGGER
 		callStackNode.exit();
         #endif /* DEBUGGER */
