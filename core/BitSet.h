@@ -63,6 +63,7 @@ namespace avmplus
             const uintptr_t *getbits() const {
                 return capacity > kDefaultCapacity ? bits.ptr : bits.ar;
             }
+			static const uintptr_t kOne = 1;
 
 		public:
 
@@ -101,7 +102,7 @@ namespace avmplus
                     }
 					grow(gc, cap);
                 }
-    			getbits()[index] |= 1 << bit;
+    			getbits()[index] |= kOne << bit;
 			}
 
 			void clear(int bitNbr)
@@ -109,14 +110,14 @@ namespace avmplus
 				int index = bitNbr / kUnit;
 				int bit = bitNbr % kUnit;
 				if (index < capacity)
-                    getbits()[index] &= ~(1<<bit);
+                    getbits()[index] &= ~(kOne << bit);
 			}
 
 			bool get(int bitNbr) const
 			{
 				int index = bitNbr / kUnit;
 				int bit = bitNbr % kUnit;
-                return index < capacity && (getbits()[index] & 1<<bit) != 0;
+                return index < capacity && (getbits()[index] & kOne<<bit) != 0;
 			}
 
             uintptr_t setFrom(MMgc::GC *gc, BitSet &other) {

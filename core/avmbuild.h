@@ -135,12 +135,12 @@
 	#define AVMPLUS_MIR
 #endif
 
-#if defined(AVMPLUS_MAC) && defined(AVMPLUS_64BIT)
-	// MIR not yet supported on 64-bit Mac
+#if defined(AVMPLUS_MAC) && defined(AVMPLUS_64BIT) || defined(AVMPLUS_ARM)
+	// MIR not yet supported on these platforms.
 	#undef AVMPLUS_MIR
 #endif
 
-#if defined(AVMPLUS_MIR) && defined(AVMPLUS_IA32) && !defined(AVMPLUS_DISABLE_NJ)
+#if defined(AVMPLUS_MIR) && defined(AVMPLUS_IA32) && !defined(AVMPLUS_64BIT) && !defined(AVMPLUS_DISABLE_NJ)
     // use nanojit on ia32 (win, mac, linux)
     #undef AVMPLUS_MIR
     #define FEATURE_NANOJIT
@@ -276,6 +276,8 @@
 	#else
 		#define FASTCALL
 	#endif
+#else
+	#define FASTCALL
 #endif
 
 // Enable translation from ABC byte code to a wider word code that can

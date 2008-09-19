@@ -134,7 +134,11 @@ namespace avmplus
 		config.verbose_addrs = false;
 		#endif
 
-	    SetMIREnabled(true);
+		#ifdef AVMPLUS_ARM
+		SetMIREnabled(false);
+		#else
+		SetMIREnabled(true);
+		#endif
 
 		#ifdef AVMPLUS_VERIFYALL
 	    	config.verifyall = false;
