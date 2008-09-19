@@ -18,7 +18,9 @@ MMgc/obj*/**
 platform/win32/obj*/**
 platform/win32/x64/**
 platform/mac/*/build*/**
+platform/win32/Windows Mobile*
 MMgc/x64/**
+MMgc/Windows Mobile*
 objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**
