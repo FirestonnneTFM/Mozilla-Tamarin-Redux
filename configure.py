@@ -123,6 +123,7 @@ elif config.getCompiler() == 'VS':
         DEBUG_LDFLAGS += "-DEBUG "
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 "
+        OS_LDFLAGS += "-SAFESEH:NO "
     if config.getDebug():
         APP_CXXFLAGS += "-EHsc "
     else:
