@@ -82,13 +82,15 @@ pauseSampling();
 var time=getTimer();
 while (getTimer()<time+50) {}
 var count=getSampleCount();
+var newcount=getNewObjectCount();
 
 simpleLoop();
+
 if (isdebugger) {
     AddTestCase(
-      "PauseSampling: after pauseSampling verify no more samples are counted",
-      count+1,
-      getSampleCount()
+      "PauseSampling: after pauseSampling verify no more NewObjectSamples",
+      newcount,
+      getNewObjectCount()
     );
 } else {
     AddTestCase(
@@ -116,3 +118,13 @@ if (isdebugger) {
 }
 test();
 
+function getNewObjectCount():int {
+    var ct:int=0;
+    var nos:NewObjectSample;
+    for each (var sample in getSamples()) {
+        if ((nos=sample as NewObjectSample) != null) {
+            ct++;
+        }
+    }
+    return ct;
+}
