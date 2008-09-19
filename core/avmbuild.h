@@ -140,6 +140,7 @@
 	#undef AVMPLUS_MIR
 #endif
 
+//#define AVMPLUS_DISABLE_NJ
 #if defined(AVMPLUS_MIR) && defined(AVMPLUS_IA32) && !defined(AVMPLUS_64BIT) && !defined(AVMPLUS_DISABLE_NJ)
     // use nanojit on ia32 (win, mac, linux)
     #undef AVMPLUS_MIR
