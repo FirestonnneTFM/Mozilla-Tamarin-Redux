@@ -917,22 +917,24 @@ namespace avmplus
 			{
 				// build conflict stub
 				#if defined AVMPLUS_MIR
-				CodegenMIR mir(pool);
+				CodegenMIR imtgen(pool);
 				#elif defined FEATURE_NANOJIT
-				CodegenIMT mir(pool);
+				CodegenIMT imtgen(pool);
 				#endif
 
 				TRY(pool->core, kCatchAction_Rethrow)
 				{
-					imt[i] = BIND_ITRAMP | (uintptr)mir.emitImtThunk(e);
-					if (mir.overflow)
+					imt[i] = BIND_ITRAMP | (uintptr)imtgen.emitImtThunk(e);
+					if (imtgen.overflow)
 						toplevel->throwError(kOutOfMemoryError);
 	
 					AvmAssert((imt[i]&7)==BIND_ITRAMP); // addr must be 8-aligned
 				}
 				CATCH (Exception *exception) 
 				{
-					mir.clearMIRBuffers();
+                    #ifdef AVMPLUS_MIR
+					imtgen.clearMIRBuffers();
+                    #endif
 
 					// re-throw exception
 					pool->core->throwException(exception);

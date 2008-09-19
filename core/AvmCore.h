@@ -119,10 +119,10 @@ const int kBufferPadding = 16;
 		 * $init methods; we use interp instead.  For testing
 		 * purposes, one may want to force the MIR to be used
 		 * for all code including $init methods.  The
-		 * forcemir switch forces all code to run through MIR
-		 * instead of interp.
+		 * jit switch forces all code to run through MIR/LIR
+		 * instead of interpreter.
 		 */
-		bool forcemir;
+		bool jit;
 		bool cseopt;
 
         #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)

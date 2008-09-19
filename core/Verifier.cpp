@@ -40,12 +40,12 @@
 
 #if defined AVMPLUS_MIR
 	#include "../codegen/CodegenMIR.h"
-	#define MIR_ONLY(x) x
+	#define JIT_ONLY(x) x
 #elif defined FEATURE_NANOJIT
 	#include "../codegen/CodegenLIR.h"
-	#define MIR_ONLY(x) x
+	#define JIT_ONLY(x) x
 #else
-	#define MIR_ONLY(x) 
+	#define JIT_ONLY(x) 
 #endif
 
 #include "FrameState.h"
@@ -159,9 +159,9 @@ namespace avmplus
 	 * @param info
 	 */
 #if defined AVMPLUS_MIR
-    void Verifier::verify(CodegenMIR *mir)
+    void Verifier::verify(CodegenMIR *jit)
 #elif defined FEATURE_NANOJIT
-	void Verifier::verify(CodegenLIR *mir)
+	void Verifier::verify(CodegenLIR *jit)
 #else
     void Verifier::verify()
 #endif
@@ -189,7 +189,7 @@ namespace avmplus
 	    Translator *translator = this->translator;
 #endif
 
-		MIR_ONLY( this->mir = mir; )
+		JIT_ONLY( this->jit = jit; )
 		if ( (state = newFrameState()) == 0 ){
 			verifyFailed(kCorruptABCError);
 		}
@@ -269,8 +269,8 @@ namespace avmplus
 
 #ifdef FEATURE_BUFFER_GUARD
 		#ifdef AVMPLUS_MIR
-		// allow the mir buffer to grow dynamically
-		GrowthGuard guard(mir ? mir->mirBuffer : NULL);
+		// allow the jit buffer to grow dynamically
+		GrowthGuard guard(jit ? jit->mirBuffer : NULL);
 		this->growthGuard = &guard;
 		#endif //AVMPLUS_MIR
 #endif /* FEATURE_BUFFER_GUARD */
@@ -278,16 +278,16 @@ namespace avmplus
 		TRY(core, kCatchAction_Rethrow){
 
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (mir)
+		if (jit)
 		{
-			if( !mir->prologue(state) ) 
+			if( !jit->prologue(state) ) 
 			{
-				if (!mir->overflow)
+				if (!jit->overflow)
 					verifyFailed(kCorruptABCError);
 
 				// we're out of code memory so try to carry on with interpreter
-				mir = 0;
-				this->mir = 0;
+				jit = 0;
+				this->jit = 0;
 			}
 		}
 		#endif
@@ -298,10 +298,10 @@ namespace avmplus
 			SAMPLE_CHECK();
 
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if (mir && mir->overflow)
+			if (jit && jit->overflow)
 			{
-				mir = 0;
-				this->mir = 0;
+				jit = 0;
+				this->jit = 0;
 			}
 		#endif
 			
@@ -322,7 +322,7 @@ namespace avmplus
 			if ( blockStates && (blockState = blockStates->get((uintptr)pc)) != 0 )
 			{
 				// send a bbend prior to the merge
-				MIR_ONLY( if (mir) mir->emitBlockEnd(state); )
+				JIT_ONLY( if (jit) jit->emitBlockEnd(state); )
 
 				if (!blockEnd || !blockState->initialized)
 				{
@@ -340,7 +340,7 @@ namespace avmplus
 				state->pc = pc - code_pos;
 
 				// found the start of a new basic block
-				MIR_ONLY( if (mir) mir->emitBlockStart(state); )
+				JIT_ONLY( if (jit) jit->emitBlockStart(state); )
 
 				state->targetOfBackwardsBranch = false;
 
@@ -352,12 +352,12 @@ namespace avmplus
                     #ifdef FEATURE_NANOJIT
                         // fixme: CodegenLIR wants to do all patching in epilog() so we cannot
                         // free the block early.
-                        if (!mir) {
+                        if (!jit) {
 					        blockStates->remove((uintptr)pc);
 					        core->GetGC()->Free(blockState);
                         }
                     #else
-                        // mir and translator are okay with this
+                        // jit and translator are okay with this
 				        blockStates->remove((uintptr)pc);
 				        core->GetGC()->Free(blockState);
                     #endif
@@ -380,7 +380,7 @@ namespace avmplus
 
 			if (info->exceptions)
 			{
-				MIR_ONLY( bool mirSavedState = false; )
+				JIT_ONLY( bool mirSavedState = false; )
 				for (int i=0, n=info->exceptions->exception_count; i < n; i++)
 				{
 					ExceptionHandler* handler = &info->exceptions->exceptions[i];
@@ -401,8 +401,8 @@ namespace avmplus
 							state->scopeDepth = outer_depth;
 							Value stackEntryZero = state->stackValue(0);
 
-							MIR_ONLY(if (mir && !mirSavedState) {
-								mir->emitBlockEnd(state);
+							JIT_ONLY(if (jit && !mirSavedState) {
+								jit->emitBlockEnd(state);
 								mirSavedState = true;
 							})
 
@@ -412,8 +412,8 @@ namespace avmplus
 							state->push(NULL);
 
 							#ifdef AVMPLUS_MIR
-							// only for mir, not nanojit
-							if (mir) mir->localSet(stackBase, mir->exAtom);
+							// only for jit, not nanojit
+							if (jit) jit->localSet(stackBase, jit->exAtom);
 							#endif
 
 							checkTarget(target);
@@ -518,10 +518,10 @@ namespace avmplus
 			case OP_ifstrictne:
 			{
 				checkStack(2,0);
-				MIR_ONLY( int lhs = sp-1; )
+				JIT_ONLY( int lhs = sp-1; )
 				state->pop();
 				state->pop();
-				MIR_ONLY( if (mir) mir->emitIf(state, opcode, state->pc+size+imm24, lhs, lhs+1); )
+				JIT_ONLY( if (jit) jit->emitIf(state, opcode, state->pc+size+imm24, lhs, lhs+1); )
 				checkTarget(nextpc+imm24);
 				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, opcode) );
 				break;
@@ -534,7 +534,7 @@ namespace avmplus
 				int cond = sp;
 				emitCoerce(BOOLEAN_TYPE, cond);
 				state->pop();
-				MIR_ONLY( if (mir) mir->emitIf(state, opcode, state->pc+size+imm24, cond, 0); )
+				JIT_ONLY( if (jit) jit->emitIf(state, opcode, state->pc+size+imm24, cond, 0); )
 				checkTarget(nextpc+imm24);
 				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, opcode) );
 				break;
@@ -543,7 +543,7 @@ namespace avmplus
 			case OP_jump:
 			{
 				//checkStack(0,0)
-				MIR_ONLY( if (mir) mir->emit(state, opcode, state->pc+size+imm24); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, state->pc+size+imm24); )
 				checkTarget(nextpc+imm24);	// target block;
 				blockEnd = true;
 				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, opcode) );
@@ -555,7 +555,7 @@ namespace avmplus
 				checkStack(1,0);
 				peekType(INT_TYPE);
 				const uint32 count = imm30b;
-				MIR_ONLY( if (mir) mir->emit(state, opcode, state->pc+imm24, count); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, state->pc+imm24, count); )
 
 				state->pop();
 
@@ -578,7 +578,7 @@ namespace avmplus
 			{
 				checkStack(1,0);
 				// [ggrossman] it is legal to throw anything at all; don't check
-				MIR_ONLY( if (mir) mir->emit(state, opcode, sp); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp); )
 				state->pop();
 				blockEnd = true;
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
@@ -589,10 +589,10 @@ namespace avmplus
 			{
 				checkStack(1,0);
 
-				MIR_ONLY( if (mir) {
+				JIT_ONLY( if (jit) {
 					Traits* returnTraits = info->returnTraits();
 					emitCoerce(returnTraits, sp);
-					mir->emit(state, opcode, sp);
+					jit->emit(state, opcode, sp);
 				})
 				// make sure stack state is updated, since verifier scans
 				// straight through to the next block.
@@ -605,7 +605,7 @@ namespace avmplus
 			case OP_returnvoid: 
 			{
 				//checkStack(1,0)
-				MIR_ONLY( if (mir) mir->emit(state, opcode); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode); )
 				blockEnd = true;
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -613,49 +613,49 @@ namespace avmplus
 
 			case OP_pushnull:
 				checkStack(0,1);
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, 0); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, 0); )
 				state->push(NULL_TYPE);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
 			case OP_pushundefined:
 				checkStack(0,1);
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, undefinedAtom); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, undefinedAtom); )
 				state->push(VOID_TYPE);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
 			case OP_pushtrue:
 				checkStack(0,1);
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, 1); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, 1); )
 				state->push(BOOLEAN_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
 			case OP_pushfalse:
 				checkStack(0,1);
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, 0); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, 0); )
 				state->push(BOOLEAN_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
 			case OP_pushnan:
 				checkStack(0,1);
-				MIR_ONLY( if (mir) mir->emitDoubleConst(state, sp+1, (double*)(core->kNaN & ~7)); )
+				JIT_ONLY( if (jit) jit->emitDoubleConst(state, sp+1, (double*)(core->kNaN & ~7)); )
 				state->push(NUMBER_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
 			case OP_pushshort:
 				checkStack(0,1);
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, (signed short)imm30); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, (signed short)imm30); )
 				state->push(INT_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitPushshort(pc) );
 				break;
 
 			case OP_pushbyte:
 				checkStack(0,1);
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, (signed char)imm8); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, (signed char)imm8); )
 				state->push(INT_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitPushbyte(pc) );
 				break;
@@ -664,8 +664,8 @@ namespace avmplus
 			{
 				//checkStack(0,0)
 				#if defined(DEBUGGER) || defined(VTUNE)
-				MIR_ONLY( Atom filename = ) checkCpoolOperand(imm30, kStringType);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)AvmCore::atomToString(filename)); )
+				JIT_ONLY( Atom filename = ) checkCpoolOperand(imm30, kStringType);
+				JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)AvmCore::atomToString(filename)); )
 				#endif
 #ifdef DEBUGGER
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
@@ -678,8 +678,8 @@ namespace avmplus
 				//checkStack(0,0)
 				if (!info->isFlagSet(AbstractFunction::SETS_DXNS))
 					verifyFailed(kIllegalSetDxns, core->toErrorString(info));
-				MIR_ONLY( Atom uri = ) checkCpoolOperand(imm30, kStringType);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)AvmCore::atomToString(uri)); )
+				JIT_ONLY( Atom uri = ) checkCpoolOperand(imm30, kStringType);
+				JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)AvmCore::atomToString(uri)); )
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
 			}
@@ -690,7 +690,7 @@ namespace avmplus
 				if (!info->isFlagSet(AbstractFunction::SETS_DXNS))
 					verifyFailed(kIllegalSetDxns, core->toErrorString(info));
 				// codgeen will call intern on the input atom.
-				MIR_ONLY( if (mir) mir->emit(state, opcode, sp); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp); )
 				state->pop();
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -704,7 +704,7 @@ namespace avmplus
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantStringCount));
 
 				Stringp value = pool->cpool_string[index];
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, (uintptr)value); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, (uintptr)value); )
 				state->push(STRING_TYPE, value != NULL);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
@@ -717,7 +717,7 @@ namespace avmplus
 				if (index == 0 || index >= pool->constantIntCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantIntCount));
 				
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, pool->cpool_int[index]); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, pool->cpool_int[index]); )
 				state->push(INT_TYPE,true);
 				XLAT_ONLY( if (translator) translator->emitPushint(pc) );
 				break;
@@ -729,7 +729,7 @@ namespace avmplus
 				if (index == 0 || index >= pool->constantUIntCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantUIntCount));
 				
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, pool->cpool_uint[index]); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, pool->cpool_uint[index]); )
 				state->push(UINT_TYPE,true);
 				XLAT_ONLY( if (translator) translator->emitPushuint(pc) );
 				break;
@@ -741,7 +741,7 @@ namespace avmplus
 				if (index == 0 || index >= pool->constantDoubleCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantDoubleCount));
 				
-				MIR_ONLY( if (mir) mir->emitDoubleConst(state, sp+1, pool->cpool_double[index]); )
+				JIT_ONLY( if (jit) jit->emitDoubleConst(state, sp+1, pool->cpool_double[index]); )
 				state->push(NUMBER_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
@@ -755,7 +755,7 @@ namespace avmplus
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantNsCount));
 
 				Namespace* value = pool->cpool_ns[index];
-				MIR_ONLY( if (mir) mir->emitIntConst(state, sp+1, (uintptr)value); )
+				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, (uintptr)value); )
 				state->push(NAMESPACE_TYPE, value != NULL);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
@@ -765,7 +765,7 @@ namespace avmplus
 			{
 				checkStack(1,0);
 				checkLocal(imm30);
-				MIR_ONLY( if (mir) mir->emitCopy(state, sp, imm30); )
+				JIT_ONLY( if (jit) jit->emitCopy(state, sp, imm30); )
 				Value &v = state->stackTop();
 				state->setType(imm30, v.traits, v.notNull);
 				state->pop();
@@ -781,7 +781,7 @@ namespace avmplus
 				int localno = opcode-OP_setlocal0;
 				checkStack(1,0);
 				checkLocal(localno);
-				MIR_ONLY( if (mir) mir->emitCopy(state, sp, localno); )
+				JIT_ONLY( if (jit) jit->emitCopy(state, sp, localno); )
 				Value &v = state->stackTop();
 				state->setType(localno, v.traits, v.notNull);
 				state->pop();
@@ -797,7 +797,7 @@ namespace avmplus
 			{
 				checkStack(0,1);
 				Value& v = checkLocal(imm30);
-				MIR_ONLY( if (mir) mir->emitCopy(state, imm30, sp+1); )
+				JIT_ONLY( if (jit) jit->emitCopy(state, imm30, sp+1); )
 				state->push(v);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
@@ -811,7 +811,7 @@ namespace avmplus
 				int localno = opcode-OP_getlocal0;
 				checkStack(0,1);
 				Value& v = checkLocal(localno);
-				MIR_ONLY( if (mir) mir->emitCopy(state, localno, sp+1); )
+				JIT_ONLY( if (jit) jit->emitCopy(state, localno, sp+1); )
 				state->push(v);
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 				XLAT_ONLY( if (translator) translator->emitOp1(OP_getlocal, localno) );
@@ -825,7 +825,7 @@ namespace avmplus
 			{
 				//checkStack(0,0)
 				Value &v = checkLocal(imm30);
-				MIR_ONLY( if (mir) mir->emitKill(state, imm30); )
+				JIT_ONLY( if (jit) jit->emitKill(state, imm30); )
 				v.notNull = false;
 				v.traits = NULL;
 				// No sense in emitting this for the interpreter, as all
@@ -839,7 +839,7 @@ namespace avmplus
 				//checkStack(0,0);
 				checkLocal(imm30);
 				emitCoerce(NUMBER_TYPE, imm30);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE); )
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
 			}
@@ -850,7 +850,7 @@ namespace avmplus
 				//checkStack(0,0);
 				checkLocal(imm30);
 				emitCoerce(INT_TYPE, imm30);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE); )
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
 			}
@@ -898,9 +898,9 @@ namespace avmplus
 					pool->enq(f);
 				#endif
 
-				MIR_ONLY( if (mir) {
-					mir->emitSetDxns(state);
-					mir->emit(state, opcode, imm30, sp+1, ftraits);
+				JIT_ONLY( if (jit) {
+					jit->emitSetDxns(state);
+					jit->emit(state, opcode, imm30, sp+1, ftraits);
 				})
 
 				state->push(ftraits, true);
@@ -995,10 +995,10 @@ namespace avmplus
 				#endif
 
 				// make sure base class is really a class
-				MIR_ONLY( if (mir) {
-					mir->emitSetDxns(state);
+				JIT_ONLY( if (jit) {
+					jit->emitSetDxns(state);
 					emitCoerce(CLASS_TYPE, state->sp());
-					mir->emit(state, opcode, (uintptr)(void*)pool->cinits[imm30], sp, ctraits);
+					jit->emit(state, opcode, (uintptr)(void*)pool->cinits[imm30], sp, ctraits);
 				})
 				state->pop_push(1, ctraits, true);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
@@ -1022,14 +1022,14 @@ namespace avmplus
 				if (script != (AbstractFunction*)BIND_NONE && script != (AbstractFunction*)BIND_AMBIGUOUS)
 				{
 					// found a single matching traits
-					MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)&multiname, sp+1, script->declaringTraits); )
+					JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)&multiname, sp+1, script->declaringTraits); )
 					state->push(script->declaringTraits, true);
 				}
 				else
 				{
 					// no traits, or ambiguous reference.  use Object, anticipating
 					// a runtime exception
-					MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)&multiname, sp+1, OBJECT_TYPE); )
+					JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)&multiname, sp+1, OBJECT_TYPE); )
 					state->push(OBJECT_TYPE, true);
 				}
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
@@ -1048,20 +1048,20 @@ namespace avmplus
 				checkPropertyMultiname(n, multiname);
 				Value& obj = state->peek(n);
 
-				MIR_ONLY( int ptrIndex = sp-(n-1); )
-				MIR_ONLY( if (mir) emitCheckNull(ptrIndex); )
+				JIT_ONLY( int ptrIndex = sp-(n-1); )
+				JIT_ONLY( if (jit) emitCheckNull(ptrIndex); )
 
 				Binding b = toplevel->getBinding(obj.traits, &multiname);
 				bool needsSetContext = true;
 				Traits* propTraits = readBinding(obj.traits, b);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT || defined AVMPLUS_WORD_CODE
-				if (AvmCore::isSlotBinding(b) && /*mir &&*/
+				if (AvmCore::isSlotBinding(b) && /*jit &&*/
 					// it's a var, or a const being set from the init function
 					(!AvmCore::isConstBinding(b) || 
 						obj.traits->init == info && opcode == OP_initproperty))
 				{
 					emitCoerce(propTraits, state->sp());
-					MIR_ONLY( if (mir) mir->emit(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex, propTraits); );
+					JIT_ONLY( if (jit) jit->emit(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex, propTraits); );
 					XLAT_ONLY( if (translator) translator->emitOp1( OP_setslot, AvmCore::bindingToSlotId(b)+1 ) );
 					state->pop(n);
 					break;
@@ -1073,19 +1073,19 @@ namespace avmplus
 				// If it's an accessor that we can early bind, do so.
 				// Note that this cannot be done on String or Namespace,
 				// since those are represented by non-ScriptObjects
-				if (mir && AvmCore::hasSetterBinding(b))
+				if (jit && AvmCore::hasSetterBinding(b))
 				{
 					// early bind to the setter
 					int disp_id = AvmCore::bindingToSetterId(b);
 					AbstractFunction *f = obj.traits->getMethod(disp_id);
 					AvmAssert(f != NULL);
 					emitCoerceArgs(f, 1);
-					mir->emitSetContext(state, f);
+					jit->emitSetContext(state, f);
 					Traits* result = f->returnTraits();
 					if (!obj.traits->isInterface)
-						mir->emitCall(state, OP_callmethod, disp_id, 1, result);
+						jit->emitCall(state, OP_callmethod, disp_id, 1, result);
 					else
-						mir->emitCall(state, OP_callinterface, f->iid(), 1, result);
+						jit->emitCall(state, OP_callinterface, f->iid(), 1, result);
 					state->pop(n);
 					goto setproperty_end;
 				}
@@ -1117,11 +1117,11 @@ namespace avmplus
 
 				// not a var binding or early bindable accessor
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					if (needsSetContext)
-						mir->emitSetContext(state, NULL);
-					mir->emit(state, opcode, (uintptr)&multiname);
+						jit->emitSetContext(state, NULL);
+					jit->emit(state, opcode, (uintptr)&multiname);
 				}
 				#endif
 				state->pop(n);
@@ -1153,10 +1153,10 @@ namespace avmplus
 				uint32 n=1;
 				checkPropertyMultiname(n, multiname);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCheckNull(sp-(n-1));
-					mir->emit(state, opcode, (uintptr)&multiname, 0, NULL);
+					jit->emit(state, opcode, (uintptr)&multiname, 0, NULL);
 				}
 				#endif
 				state->pop_push(n, NULL);
@@ -1170,10 +1170,10 @@ namespace avmplus
 				// stack out: object
 				checkStack(1, 1);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCheckNull(state->sp());
-					mir->emit(state, opcode, state->sp(), 0, NULL);
+					jit->emit(state, opcode, state->sp(), 0, NULL);
 				}
 				#endif
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
@@ -1188,10 +1188,10 @@ namespace avmplus
 				uint32 n=1;
 				checkPropertyMultiname(n, multiname);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir) 
+				if (jit) 
 				{
 					emitCheckNull(sp-(n-1));
-					mir->emit(state, opcode, (uintptr)&multiname, 0, BOOLEAN_TYPE);
+					jit->emit(state, opcode, (uintptr)&multiname, 0, BOOLEAN_TYPE);
 				}
 				#endif
 				state->pop_push(n, BOOLEAN_TYPE);
@@ -1213,7 +1213,7 @@ namespace avmplus
 					// then result type is Object. 
 					if (t && t->isMachineType)
 						resultType = OBJECT_TYPE;
-					MIR_ONLY( if (mir) mir->emit(state, OP_astype, (uintptr)t, index, resultType); )
+					JIT_ONLY( if (jit) jit->emit(state, OP_astype, (uintptr)t, index, resultType); )
 					state->pop_push(1, t);
 				}
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
@@ -1230,7 +1230,7 @@ namespace avmplus
 					if (t->isMachineType)
 						t = OBJECT_TYPE;
 
-				MIR_ONLY( if (mir) mir->emit(state, opcode, 0, 0, t); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, t); )
 				state->pop_push(2, t);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -1312,8 +1312,8 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				// resolve operand into a traits, and test if value is that type
-				MIR_ONLY( Traits* itraits = ) checkTypeName(imm30); // CONSTANT_Multiname
-				MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)itraits, sp, BOOLEAN_TYPE); )
+				JIT_ONLY( Traits* itraits = ) checkTypeName(imm30); // CONSTANT_Multiname
+				JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)itraits, sp, BOOLEAN_TYPE); )
 				state->pop();
 				state->pop();
 				state->push(OBJECT_TYPE);
@@ -1325,7 +1325,7 @@ namespace avmplus
 			case OP_istypelate: 
 			{
 				checkStack(2,1);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, 0, 0, BOOLEAN_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, BOOLEAN_TYPE); )
 				// TODO if the only common base type of lhs,rhs is Object, then result is always false
 				state->pop_push(2, BOOLEAN_TYPE);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
@@ -1338,7 +1338,7 @@ namespace avmplus
 				// ISSUE should result be Object, laundering the type?
 				// ToObject throws an exception on null and undefined, so after this runs we
 				// know the value is safe to dereference.
-				MIR_ONLY( if (mir) emitCheckNull(sp); )
+				JIT_ONLY( if (jit) emitCheckNull(sp); )
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 			}
@@ -1358,7 +1358,7 @@ namespace avmplus
 			case OP_callstatic: 
 			{
 				AbstractFunction* m = checkMethodInfo(imm30);
-				MIR_ONLY( int method_id = m->method_id; )
+				JIT_ONLY( int method_id = m->method_id; )
 				const uint32 argc = imm30b;
 
 				checkStack(argc+1, 1);
@@ -1377,11 +1377,11 @@ namespace avmplus
 				
 				Traits* resultType = m->returnTraits();
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCheckNull(sp-argc);
-					mir->emitSetContext(state, m);
-					mir->emitCall(state, OP_callstatic, method_id, argc, resultType);
+					jit->emitSetContext(state, m);
+					jit->emitCall(state, OP_callstatic, method_id, argc, resultType);
 				}
 				#endif
 				state->pop_push(argc+1, resultType);
@@ -1402,10 +1402,10 @@ namespace avmplus
 						- optimize simple cases of casts to builtin types
 				*/
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir) 
+				if (jit) 
 				{
-					mir->emitSetContext(state, NULL);
-					mir->emit(state, opcode, argc, 0, NULL);
+					jit->emitSetContext(state, NULL);
+					jit->emit(state, opcode, argc, 0, NULL);
 				}
 				#endif
 				state->pop_push(argc+2, NULL);
@@ -1423,10 +1423,10 @@ namespace avmplus
 				// don't need null check, AvmCore::construct() uses toFunction() for null check.
 				Traits* itraits = ctraits ? ctraits->itraits : NULL;
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
-					mir->emitSetContext(state, NULL);
-					mir->emit(state, opcode, argc, 0, itraits);
+					jit->emitSetContext(state, NULL);
+					jit->emit(state, opcode, argc, 0, itraits);
 				}
 				#endif
 				state->pop_push(argc+1, itraits, true);
@@ -1447,15 +1447,15 @@ namespace avmplus
 					AbstractFunction* m = checkDispId(obj.traits, disp_id);
 					Traits *resultType = m->returnTraits();
 					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					if (mir)
+					if (jit)
 					{
 						emitCheckNull(sp-argc);
 						emitCoerceArgs(m, argc);
-						mir->emitSetContext(state, m);
+						jit->emitSetContext(state, m);
 						if (!obj.traits->isInterface)
-							mir->emitCall(state, OP_callmethod, disp_id, argc, resultType);
+							jit->emitCall(state, OP_callmethod, disp_id, argc, resultType);
 						else
-							mir->emitCall(state, OP_callinterface, m->iid(), argc, resultType);
+							jit->emitCall(state, OP_callinterface, m->iid(), argc, resultType);
 					}
 					#endif
 					state->pop_push(argc+1, resultType);
@@ -1502,7 +1502,7 @@ namespace avmplus
 				checkPropertyMultiname(n, multiname);
 
 				Value& obj = state->peek(n); // make sure object is there
-				MIR_ONLY( if (mir) emitCheckNull(sp-(n-1)); )
+				JIT_ONLY( if (jit) emitCheckNull(sp-(n-1)); )
 
 				#ifdef DEBUG_EARLY_BINDING
 				//core->console << "verify constructprop " << t << " " << multiname->getName() << " from within " << info << "\n";
@@ -1512,25 +1512,25 @@ namespace avmplus
 				
 				if (AvmCore::isSlotBinding(b))
 				{
-					MIR_ONLY( int slot_id = AvmCore::bindingToSlotId(b); )
+					JIT_ONLY( int slot_id = AvmCore::bindingToSlotId(b); )
 					Traits* ctraits = readBinding(obj.traits, b);
-					MIR_ONLY( if (mir) mir->emit(state, OP_getslot, slot_id, sp-(n-1), ctraits); )
+					JIT_ONLY( if (jit) jit->emit(state, OP_getslot, slot_id, sp-(n-1), ctraits); )
 					obj.notNull = false;
 					obj.traits = ctraits;
 					Traits* itraits = ctraits ? ctraits->itraits : NULL;
 					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					if (mir)
+					if (jit)
 					{
-						mir->emitSetContext(state, NULL);
+						jit->emitSetContext(state, NULL);
 						if( itraits && !itraits->hasCustomConstruct && itraits->init->argcOk(argc))
 						{
 							emitCheckNull(sp-(n-1));
 							emitCoerceArgs(itraits->init, argc, true);
-							mir->emitCall(state, OP_construct, 0, argc, itraits);
+							jit->emitCall(state, OP_construct, 0, argc, itraits);
 						}
 						else
 						{
-							mir->emit(state, OP_construct, argc, 0, itraits);
+							jit->emit(state, OP_construct, argc, 0, itraits);
 						}
 					}
 					#endif
@@ -1540,10 +1540,10 @@ namespace avmplus
 
 				// don't know the binding now, resolve at runtime
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir) 
+				if (jit) 
 				{
-					mir->emitSetContext(state, NULL);
-					mir->emit(state, opcode, (uintptr)&multiname, argc, NULL);
+					jit->emitSetContext(state, NULL);
+					jit->emit(state, opcode, (uintptr)&multiname, argc, NULL);
 				}
 				#endif
 				state->pop_push(n, NULL);
@@ -1562,10 +1562,10 @@ namespace avmplus
 				// when we implement type parameters fully, we should do something here.
 				Traits* itraits = NULL;
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
-					mir->emitSetContext(state, NULL);
-					mir->emit(state, opcode, argc, 0, itraits);
+					jit->emitSetContext(state, NULL);
+					jit->emit(state, opcode, argc, 0, itraits);
 				}
 				#endif
 				state->pop_push(argc+1, itraits, true);
@@ -1588,7 +1588,7 @@ namespace avmplus
 				uint32 n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
 
-				MIR_ONLY( if (mir) emitCheckNull(sp-(n-1)); )
+				JIT_ONLY( if (jit) emitCheckNull(sp-(n-1)); )
 				Traits* base = emitCoerceSuper(sp-(n-1));
 
 				Binding b = toplevel->getBinding(base, &multiname);
@@ -1600,10 +1600,10 @@ namespace avmplus
 					emitCoerceArgs(m, argc);
 					Traits* resultType = m->returnTraits();
 					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					if (mir) 
+					if (jit) 
 					{
-						mir->emitSetContext(state, m);
-						mir->emitCall(state, OP_callsuperid, disp_id, argc, resultType);
+						jit->emitSetContext(state, m);
+						jit->emitCall(state, OP_callsuperid, disp_id, argc, resultType);
 					}
 					#endif
 					state->pop_push(n, resultType);
@@ -1618,10 +1618,10 @@ namespace avmplus
 
 				// TODO optimize other cases
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
-					mir->emitSetContext(state, NULL);
-					mir->emit(state, opcode, (uintptr)&multiname, argc, NULL);
+					jit->emitSetContext(state, NULL);
+					jit->emit(state, opcode, (uintptr)&multiname, argc, NULL);
 				}
 				#endif
 				state->pop_push(n, NULL);
@@ -1652,14 +1652,14 @@ namespace avmplus
 				Traits* propType = readBinding(base, b);
 
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCheckNull(ptrIndex);
 
 					if (AvmCore::isSlotBinding(b))
 					{
 						int slot_id = AvmCore::bindingToSlotId(b);
-						if (mir) mir->emit(state, OP_getslot, slot_id, ptrIndex, propType);
+						if (jit) jit->emit(state, OP_getslot, slot_id, ptrIndex, propType);
 						state->pop_push(n, propType);
 						goto getsuper_end;
 					}
@@ -1672,10 +1672,10 @@ namespace avmplus
 						AvmAssert(f != NULL);
 						emitCoerceArgs(f, 0);
 						Traits* resultType = f->returnTraits();
-						if (mir) 
+						if (jit) 
 						{
-							mir->emitSetContext(state, f);
-							mir->emitCall(state, OP_callsuperid, disp_id, 0, resultType);
+							jit->emitSetContext(state, f);
+							jit->emitCall(state, OP_callsuperid, disp_id, 0, resultType);
 						}
 						state->pop_push(n, resultType);
 						goto getsuper_end;
@@ -1688,10 +1688,10 @@ namespace avmplus
 				#endif
 
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir) 
+				if (jit) 
 				{
-					mir->emitSetContext(state, NULL);
-					mir->emit(state, opcode, (uintptr)&multiname, 0, propType);
+					jit->emitSetContext(state, NULL);
+					jit->emit(state, opcode, (uintptr)&multiname, 0, propType);
 				}
 				#endif
 				state->pop_push(n, propType);
@@ -1713,10 +1713,10 @@ namespace avmplus
 					verifyFailed(kIllegalOpMultinameError, core->toErrorString(&multiname));
 
 				int ptrIndex = sp-(n-1);
-				MIR_ONLY( Traits* base = ) emitCoerceSuper(ptrIndex);
+				JIT_ONLY( Traits* base = ) emitCoerceSuper(ptrIndex);
 
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCheckNull(ptrIndex);
 
@@ -1729,7 +1729,7 @@ namespace avmplus
 						{
 							int slot_id = AvmCore::bindingToSlotId(b);
 							emitCoerce(propType, sp);
-							mir->emit(state, OP_setslot, slot_id, ptrIndex);
+							jit->emit(state, OP_setslot, slot_id, ptrIndex);
 						}
 						// else, it's a readonly slot so ignore
 						state->pop(n);
@@ -1745,8 +1745,8 @@ namespace avmplus
 							AbstractFunction *f = base->getMethod(disp_id);
 							AvmAssert(f != NULL);
 							emitCoerceArgs(f, 1);
-							mir->emitSetContext(state, f);
-							mir->emitCall(state, OP_callsuperid, disp_id, 1, f->returnTraits());
+							jit->emitSetContext(state, f);
+							jit->emitCall(state, OP_callsuperid, disp_id, 1, f->returnTraits());
 						}
 						// else, ignore write to readonly accessor
 						state->pop(n);
@@ -1757,8 +1757,8 @@ namespace avmplus
 					core->console << "verify setsuper " << base << " " << multiname.getName() << " from within " << info << "\n";
 					#endif
 
-					mir->emitSetContext(state, NULL);
-					mir->emit(state, opcode, (uintptr)&multiname);
+					jit->emitSetContext(state, NULL);
+					jit->emit(state, opcode, (uintptr)&multiname);
 				}
 				#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
@@ -1783,11 +1783,11 @@ namespace avmplus
 				emitCoerceArgs(f, argc);
 
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
-					mir->emitSetContext(state, f);
+					jit->emitSetContext(state, f);
 					emitCheckNull(ptrIndex);
-					mir->emitCall(state, opcode, 0, argc, VOID_TYPE);
+					jit->emitCall(state, opcode, 0, argc, VOID_TYPE);
 				}
 				#endif
 
@@ -1807,7 +1807,7 @@ namespace avmplus
 					n += 2;
 					peekType(STRING_TYPE, n); // name; will call intern on it 
 				}
-				MIR_ONLY( if (mir) mir->emit(state, opcode, imm30, 0, OBJECT_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30, 0, OBJECT_TYPE); )
 				state->pop_push(n, OBJECT_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
@@ -1817,7 +1817,7 @@ namespace avmplus
 			{
 				const uint32 argc = imm30;
 				checkStack(argc, 1);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, argc, 0, ARRAY_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, argc, 0, ARRAY_TYPE); )
 				state->pop_push(argc, ARRAY_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
@@ -1841,10 +1841,10 @@ namespace avmplus
 					}
 				}
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCheckNull(sp);
-					mir->emitCopy(state, sp, scopeBase+state->scopeDepth);
+					jit->emitCopy(state, sp, scopeBase+state->scopeDepth);
 				}
 				#endif
 				state->pop();
@@ -1863,10 +1863,10 @@ namespace avmplus
 					verifyFailed(kScopeStackOverflowError);
 
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCheckNull(sp);
-					mir->emitCopy(state, sp, scopeBase+state->scopeDepth);
+					jit->emitCopy(state, sp, scopeBase+state->scopeDepth);
 				}
 				#endif
 				state->pop();
@@ -1891,7 +1891,7 @@ namespace avmplus
 				//AvmAssert(!info->activationTraits->dynamic);
 				// [ed] does the vm really care if an activation object is dynamic or not?
 				checkStack(0, 1);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, 0, 0, info->activationTraits); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, info->activationTraits); )
 				state->push(info->activationTraits, true);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -1915,7 +1915,7 @@ namespace avmplus
 				ExceptionHandler* handler = &info->exceptions->exceptions[index];
 				
 				checkStack(0, 1);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, 0, 0, handler->scopeTraits); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, handler->scopeTraits); )
 				state->push(handler->scopeTraits, true);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
 				break;
@@ -1930,7 +1930,7 @@ namespace avmplus
 					verifyFailed(kScopeStackUnderflowError);
 				}
 				#ifdef DEBUGGER
-				MIR_ONLY( if (mir) mir->emitKill(state, scopeBase + state->scopeDepth); )
+				JIT_ONLY( if (jit) jit->emitKill(state, scopeBase + state->scopeDepth); )
 				#endif
 				if (state->withBase >= state->scopeDepth)
 				{
@@ -1948,7 +1948,7 @@ namespace avmplus
 				if (scope_index >= state->scopeDepth)
 					verifyFailed(kGetScopeObjectBoundsError, core->toErrorString(imm8));
 				
-				MIR_ONLY( if (mir) mir->emitCopy(state, scopeBase+scope_index, sp+1); )
+				JIT_ONLY( if (jit) jit->emitCopy(state, scopeBase+scope_index, sp+1); )
 				// this will copy type and all attributes too
 				state->push(state->scopeValue(scope_index));
 				XLAT_ONLY( if (translator) translator->emitGetscopeobject(pc) );
@@ -1990,12 +1990,12 @@ namespace avmplus
 				Traits *globalTraits = scope->size > 0 ? scope->getScopeTraitsAt(0) : state->scopeValue(0).traits;
 				checkStack(1,0);
 				checkEarlySlotBinding(globalTraits);
-				MIR_ONLY( Traits* slotTraits = ) checkSlot(globalTraits, imm30-1);
+				JIT_ONLY( Traits* slotTraits = ) checkSlot(globalTraits, imm30-1);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCoerce(slotTraits, state->sp());
-					mir->emit(state, opcode, imm30-1, sp, slotTraits);
+					jit->emit(state, opcode, imm30-1, sp, slotTraits);
 				}
 				#endif
 				state->pop();
@@ -2031,7 +2031,7 @@ namespace avmplus
 			{
 				checkStack(1, 2);
 				Value& v = state->peek();
-				MIR_ONLY( if (mir) mir->emitCopy(state, sp, sp+1); )
+				JIT_ONLY( if (jit) jit->emitCopy(state, sp, sp+1); )
 				state->push(v);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -2062,7 +2062,7 @@ namespace avmplus
 			case OP_in:
 			{
 				checkStack(2,1);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, 0, 0, BOOLEAN_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, BOOLEAN_TYPE); )
 				state->pop_push(2, BOOLEAN_TYPE);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -2071,10 +2071,10 @@ namespace avmplus
 			case OP_not:
 				checkStack(1,1);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCoerce(BOOLEAN_TYPE, sp);
-					mir->emit(state, opcode, sp);
+					jit->emit(state, opcode, sp);
 				}
 				#endif
 				state->pop_push(1, BOOLEAN_TYPE);
@@ -2091,11 +2091,11 @@ namespace avmplus
 				if (lhst == STRING_TYPE && lhs.notNull || rhst == STRING_TYPE && rhs.notNull)
 				{
 					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					if (mir)
+					if (jit)
 					{
 						emitToString(OP_convert_s, sp-1);
 						emitToString(OP_convert_s, sp);
-						mir->emit(state, OP_concat, 0, 0, STRING_TYPE);
+						jit->emit(state, OP_concat, 0, 0, STRING_TYPE);
 					}
 					#endif
 					state->pop_push(2, STRING_TYPE, true);
@@ -2103,18 +2103,18 @@ namespace avmplus
 				else if (lhst && lhst->isNumeric && rhst && rhst->isNumeric)
 				{
 					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					if (mir)
+					if (jit)
 					{
 						emitCoerce(NUMBER_TYPE, sp-1);
 						emitCoerce(NUMBER_TYPE, sp);
-						mir->emit(state, OP_add_d, 0, 0, NUMBER_TYPE);
+						jit->emit(state, OP_add_d, 0, 0, NUMBER_TYPE);
 					}
 					#endif
 					state->pop_push(2, NUMBER_TYPE);
 				}
 				else
 				{
-					MIR_ONLY( if (mir) mir->emit(state, OP_add, 0, 0, OBJECT_TYPE); )
+					JIT_ONLY( if (jit) jit->emit(state, OP_add, 0, 0, OBJECT_TYPE); )
 					// dont know if it will return number or string, but neither will be null.
 					state->pop_push(2,OBJECT_TYPE, true);
 				}
@@ -2128,11 +2128,11 @@ namespace avmplus
 			case OP_multiply:
 				checkStack(2,1);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCoerce(NUMBER_TYPE, sp-1); // convert LHS to number
 					emitCoerce(NUMBER_TYPE, sp); // convert RHS to number
-					mir->emit(state, opcode, 0, 0, NUMBER_TYPE);
+					jit->emit(state, opcode, 0, 0, NUMBER_TYPE);
 				}
 				#endif
 				state->pop_push(2, NUMBER_TYPE);
@@ -2142,7 +2142,7 @@ namespace avmplus
 			case OP_negate:
 				checkStack(1,1);
 				emitCoerce(NUMBER_TYPE, sp);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, sp, 0, NUMBER_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, NUMBER_TYPE); )
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
@@ -2150,7 +2150,7 @@ namespace avmplus
 			case OP_decrement:
 				checkStack(1,1);
 				emitCoerce(NUMBER_TYPE, sp);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE); )
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
@@ -2158,7 +2158,7 @@ namespace avmplus
 			case OP_decrement_i:
 				checkStack(1,1);
 				emitCoerce(INT_TYPE, sp);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, state->sp(), opcode == OP_increment_i ? 1 : -1, INT_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, state->sp(), opcode == OP_increment_i ? 1 : -1, INT_TYPE); )
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
@@ -2167,11 +2167,11 @@ namespace avmplus
 			case OP_multiply_i:
 				checkStack(2,1);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCoerce(INT_TYPE, sp-1);
 					emitCoerce(INT_TYPE, sp);
-					mir->emit(state, opcode, 0, 0, INT_TYPE);
+					jit->emit(state, opcode, 0, 0, INT_TYPE);
 				}
 				#endif
 				state->pop_push(2, INT_TYPE);
@@ -2181,7 +2181,7 @@ namespace avmplus
 			case OP_negate_i:
 				checkStack(1,1);
 				emitCoerce(INT_TYPE, sp);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, sp, 0, INT_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, INT_TYPE); )
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
@@ -2190,11 +2190,11 @@ namespace avmplus
 			case OP_bitxor:
 				checkStack(2,1);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCoerce(INT_TYPE, sp-1);
 					emitCoerce(INT_TYPE, sp);
-					mir->emit(state, opcode, 0, 0, INT_TYPE);
+					jit->emit(state, opcode, 0, 0, INT_TYPE);
 				}
 				#endif
 				state->pop_push(2, INT_TYPE);
@@ -2208,11 +2208,11 @@ namespace avmplus
 			case OP_rshift:
 				checkStack(2,1);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCoerce(INT_TYPE, sp-1); // lhs
 					emitCoerce(UINT_TYPE, sp); // rhs
-					mir->emit(state, opcode, 0, 0, INT_TYPE);
+					jit->emit(state, opcode, 0, 0, INT_TYPE);
 				}
 				#endif
 				state->pop_push(2, INT_TYPE);
@@ -2222,11 +2222,11 @@ namespace avmplus
 			case OP_urshift:
 				checkStack(2,1);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
+				if (jit)
 				{
 					emitCoerce(UINT_TYPE, sp-1); // lhs
 					emitCoerce(UINT_TYPE, sp); // rhs
-					mir->emit(state, opcode, 0, 0, UINT_TYPE);
+					jit->emit(state, opcode, 0, 0, UINT_TYPE);
 				}
 				#endif
 				state->pop_push(2, UINT_TYPE);
@@ -2236,14 +2236,14 @@ namespace avmplus
 			case OP_bitnot:
 				checkStack(1,1);
 				emitCoerce(INT_TYPE, sp); // lhs
-				MIR_ONLY( if (mir) mir->emit(state, opcode, sp, 0, INT_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, INT_TYPE); )
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
 
 			case OP_typeof:
 			{
 				checkStack(1,1);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, sp, 0, STRING_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, STRING_TYPE); )
 				state->pop_push(1, STRING_TYPE, true);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -2277,7 +2277,7 @@ namespace avmplus
 			case OP_debugline:
 				#if defined(DEBUGGER) || defined(VTUNE)
 				// we actually do generate code for these, in debugger mode
-				MIR_ONLY( if (mir) mir->emit(state, opcode, imm30); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30); )
 				#endif
 #ifdef DEBUGGER
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
@@ -2289,7 +2289,7 @@ namespace avmplus
 			{
 				checkStack(2,1);
 				peekType(INT_TYPE,1);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, 0, 0, NULL); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, NULL); )
 				state->pop_push(2, NULL);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -2299,7 +2299,7 @@ namespace avmplus
 			{
 				checkStack(2,1);
 				peekType(INT_TYPE,1);
-				MIR_ONLY( if (mir) mir->emit(state, opcode, 0, 0, INT_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, INT_TYPE); )
 				state->pop_push(2, INT_TYPE);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 				break;
@@ -2318,7 +2318,7 @@ namespace avmplus
 				{
 					verifyFailed(kIllegalOperandTypeError, core->toErrorString(v.traits), core->toErrorString(INT_TYPE));
 				}
-				MIR_ONLY( if (mir) mir->emit(state, opcode, imm30, imm30b, BOOLEAN_TYPE); )
+				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30, imm30b, BOOLEAN_TYPE); )
 				state->setType(imm30, NULL, false);
 				state->push(BOOLEAN_TYPE);
 				XLAT_ONLY( if (translator) translator->emitOp2(pc, opcode) );
@@ -2353,11 +2353,11 @@ namespace avmplus
 				code_end = new_code_end;
 				size = 0;
 				
-				//set mir abcStart/End
+				//set jit abcStart/End
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if(mir) {
-					mir->abcStart = pc;
-					mir->abcEnd = code_end;
+				if(jit) {
+					jit->abcStart = pc;
+					jit->abcEnd = code_end;
 					//core->GetGC()->Free((void*) info->body_pos);
 					//info->body_pos = NULL;
 				}
@@ -2386,7 +2386,7 @@ namespace avmplus
 		}
 
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (!mir || mir->overflow) 
+		if (!jit || jit->overflow) 
 		{
 			if (info->returnTraits() == NUMBER_TYPE)
 				info->implN = avmplus::interpN;
@@ -2395,7 +2395,7 @@ namespace avmplus
 		}
 		else
 		{
-			mir->epilogue(state);
+			jit->epilogue(state);
 		}
 		#else
 		if (info->returnTraits() == NUMBER_TYPE)
@@ -2492,7 +2492,7 @@ namespace avmplus
 #endif
 		
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (mir) 
+		if (jit) 
 		{
 			emitCheckNull(sp-(n-1));
 
@@ -2503,8 +2503,8 @@ namespace avmplus
 				goto finished_early_binding;
 
 			// don't know the binding now, resolve at runtime
-			mir->emitSetContext(state, NULL);
-			mir->emit(state, opcode, (uintptr)&multiname, argc, NULL);
+			jit->emitSetContext(state, NULL);
+			jit->emit(state, opcode, (uintptr)&multiname, argc, NULL);
 		}
 #else
         (void)sp;
@@ -2530,7 +2530,7 @@ namespace avmplus
 		if (!AvmCore::isMethodBinding(b))
 			return false;
 		
-		AvmAssert(mir != NULL);
+		AvmAssert(jit != NULL);
 		
 		uint32 n = argc+1;
 		
@@ -2548,11 +2548,11 @@ namespace avmplus
 		Traits* resultType = m->returnTraits();
 
 		emitCoerceArgs(m, argc);
-		mir->emitSetContext(state, m);
+		jit->emitSetContext(state, m);
 		if (!t->isInterface)
-			mir->emitCall(state, OP_callmethod, disp_id, argc, resultType);
+			jit->emitCall(state, OP_callmethod, disp_id, argc, resultType);
 		else
-			mir->emitCall(state, OP_callinterface, m->iid(), argc, resultType);
+			jit->emitCall(state, OP_callinterface, m->iid(), argc, resultType);
 
 		state->pop_push(n, resultType);
 		if (opcode == OP_callpropvoid)
@@ -2565,7 +2565,7 @@ namespace avmplus
 		if (!AvmCore::isSlotBinding(b) || argc != 1)
 			return false;
 		
-		AvmAssert( mir != NULL );
+		AvmAssert( jit != NULL );
 		
 		int slot_id = AvmCore::bindingToSlotId(b);
 		Traits* slotType = t->getSlotTraits(slot_id);
@@ -2704,7 +2704,7 @@ namespace avmplus
 		Value& lhs = state->peek(2);
 		Traits *lhst = lhs.traits;
 		Traits *rhst = rhs.traits;
-		if (mir)
+		if (jit)
 		{
 			if (rhst && rhst->isNumeric && lhst && !lhst->isNumeric)
 			{
@@ -2716,7 +2716,7 @@ namespace avmplus
 				// promote rhs to Number
 				emitCoerce(NUMBER_TYPE, state->sp());
 			}
-			mir->emit(state, opcode, 0, 0, BOOLEAN_TYPE);
+			jit->emit(state, opcode, 0, 0, BOOLEAN_TYPE);
 		}
 		#else
 		(void)opcode;
@@ -2746,7 +2746,7 @@ namespace avmplus
 				Binding b = toplevel->getBinding(v.traits, &multiname);
 				if (b != BIND_NONE)
 				{
-					MIR_ONLY( if (mir) mir->emitCopy(state, index, state->sp()+1); )
+					JIT_ONLY( if (jit) jit->emitCopy(state, index, state->sp()+1); )
 					state->push(v);
 					XLAT_ONLY( if (translator) translator->emitOp1(OP_getscopeobject, index-scopeBase) );
 					return;
@@ -2763,7 +2763,7 @@ namespace avmplus
 					Binding b = toplevel->getBinding(t, &multiname);
 					if (b != BIND_NONE)
 					{
-						MIR_ONLY( if (mir) mir->emitGetscope(state, index, state->sp()+1); )
+						JIT_ONLY( if (jit) jit->emitGetscope(state, index, state->sp()+1); )
 						state->push(t, true);
 						XLAT_ONLY( if (translator) translator->emitOp1(OP_getouterscope, index) );
 						return;
@@ -2778,19 +2778,19 @@ namespace avmplus
 					if (script != (AbstractFunction*)BIND_NONE && script != (AbstractFunction*)BIND_AMBIGUOUS)
 					{
 						#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-						if (mir)
+						if (jit)
 						{
 							if (script == info)
 							{
 								// ISSUE what if there is an ambiguity at runtime? is VT too early to bind?
 								// its defined here, use getscopeobject 0
 								if (scope->size > 0)
-									mir->emitGetscope(state, 0, state->sp()+1);
+									jit->emitGetscope(state, 0, state->sp()+1);
 								else
-									mir->emitCopy(state, scopeBase, state->sp()+1);
+									jit->emitCopy(state, scopeBase, state->sp()+1);
 							}
 							else // found a single matching traits
-								mir->emit(state, OP_finddef, (uintptr)&multiname, state->sp()+1, script->declaringTraits);
+								jit->emit(state, OP_finddef, (uintptr)&multiname, state->sp()+1, script->declaringTraits);
 						}
 						#else
 						(void)opcode;
@@ -2806,7 +2806,7 @@ namespace avmplus
 
 		uint32 n=1;
 		checkPropertyMultiname(n, multiname);
-		MIR_ONLY( if (mir) mir->emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE); )
+		JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE); )
 		state->pop_push(n-1, OBJECT_TYPE, true);
 		XLAT_ONLY( if (translator) translator->emitOp1(opcode, imm30) );
 	}
@@ -2818,7 +2818,7 @@ namespace avmplus
 #endif
 		Value& obj = state->peek(n); // object
 
-		MIR_ONLY( if (mir) emitCheckNull(state->sp()-(n-1)); )
+		JIT_ONLY( if (jit) emitCheckNull(state->sp()-(n-1)); )
 
 		Binding b = toplevel->getBinding(obj.traits, &multiname);
 		Traits* propType = readBinding(obj.traits, b);
@@ -2826,7 +2826,7 @@ namespace avmplus
 		if (AvmCore::isSlotBinding(b))
 		{
 			// early bind to slot
-			MIR_ONLY( if (mir) mir->emit(state, OP_getslot, AvmCore::bindingToSlotId(b), state->sp(), propType); )
+			JIT_ONLY( if (jit) jit->emit(state, OP_getslot, AvmCore::bindingToSlotId(b), state->sp(), propType); )
 #ifdef AVMPLUS_WORD_CODE
 			if (translator)
 			{
@@ -2855,14 +2855,14 @@ namespace avmplus
 			AbstractFunction *f = obj.traits->getMethod(disp_id);
 			AvmAssert(f != NULL);
 			#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if (mir)
+			if (jit)
 			{
 				emitCoerceArgs(f, 0);
-				mir->emitSetContext(state, f);
+				jit->emitSetContext(state, f);
 				if (!obj.traits->isInterface)
-					mir->emitCall(state, OP_callmethod, disp_id, 0, propType);
+					jit->emitCall(state, OP_callmethod, disp_id, 0, propType);
 				else
-					mir->emitCall(state, OP_callinterface, f->iid(), 0, propType);
+					jit->emitCall(state, OP_callinterface, f->iid(), 0, propType);
 			}
 			#else
 			(void)f;
@@ -2901,11 +2901,11 @@ namespace avmplus
 		}
 		// default - do getproperty at runtime
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (mir)
+		if (jit)
 		{
 			if (needsSetContext)
-				mir->emitSetContext(state, NULL);
-			mir->emit(state, OP_getproperty, (uintptr)&multiname, 0, propType);
+				jit->emitSetContext(state, NULL);
+			jit->emit(state, OP_getproperty, (uintptr)&multiname, 0, propType);
 		}
 		#endif
 		state->pop_push(n, propType);
@@ -2918,7 +2918,7 @@ namespace avmplus
 		if (captured_depth > 0)
 		{
 			// enclosing scope
-			MIR_ONLY( if (mir) mir->emitGetscope(state, 0, state->sp()+1); )
+			JIT_ONLY( if (jit) jit->emitGetscope(state, 0, state->sp()+1); )
 			state->push(scope->getScopeTraitsAt(0), true);
 		}
 		else
@@ -2926,7 +2926,7 @@ namespace avmplus
 			// local scope
 			if (state->scopeDepth > 0)
 			{
-				MIR_ONLY( if (mir) mir->emitCopy(state, scopeBase, state->sp()+1); )
+				JIT_ONLY( if (jit) jit->emitCopy(state, scopeBase, state->sp()+1); )
 				// this will copy type and all attributes too
 				state->push(state->scopeValue(0));
 			}
@@ -2948,7 +2948,7 @@ namespace avmplus
 		if (captured_depth > 0)
 		{
 			// enclosing scope
-			MIR_ONLY( if (mir) mir->emitGetscope(state, scope_index, state->sp()+1); )
+			JIT_ONLY( if (jit) jit->emitGetscope(state, scope_index, state->sp()+1); )
 			state->push(scope->getScopeTraitsAt(scope_index), true);
 		}
 		else
@@ -2967,10 +2967,10 @@ namespace avmplus
 		checkEarlySlotBinding(obj.traits);
 		Traits* slotTraits = checkSlot(obj.traits, slot);
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (mir)
+		if (jit)
 		{
 			emitCheckNull(state->sp());
-			mir->emit(state, OP_getslot, slot, state->sp(), slotTraits);
+			jit->emit(state, OP_getslot, slot, state->sp(), slotTraits);
 		}
 		#endif
 		state->pop_push(1, slotTraits);
@@ -2983,13 +2983,13 @@ namespace avmplus
 		// allow early binding on
 		if(pool->isCodePointer(info->body_pos))
 			checkEarlySlotBinding(obj.traits);
-		MIR_ONLY( Traits* slotTraits = ) checkSlot(obj.traits, slot); 
+		JIT_ONLY( Traits* slotTraits = ) checkSlot(obj.traits, slot); 
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (mir)
+		if (jit)
 		{
 			emitCoerce(slotTraits, state->sp());
 			emitCheckNull(state->sp()-1);
-			mir->emit(state, OP_setslot, slot, state->sp()-1, slotTraits);
+			jit->emit(state, OP_setslot, slot, state->sp()-1, slotTraits);
 		}
 		#else
 		(void)slot;
@@ -3000,7 +3000,7 @@ namespace avmplus
     // ( x1 x2 -- x2 x1 )
 	void Verifier::emitSwap()
 	{
-		MIR_ONLY( if (mir) mir->emitSwap(state, state->sp(), state->sp()-1); )
+		JIT_ONLY( if (jit) jit->emitSwap(state, state->sp(), state->sp()-1); )
 		Value v1 = state->peek(1);
 		Value v2 = state->peek(2);
 		state->pop(2);
@@ -3011,7 +3011,7 @@ namespace avmplus
     // ( x1 x2 -- x2 )
     void Verifier::emitNip()
     {
-        MIR_ONLY( if (mir) mir->emitCopy(state, state->sp(), state->sp()-1); )
+        JIT_ONLY( if (jit) jit->emitCopy(state, state->sp(), state->sp()-1); )
         Value v = state->stackTop();
         state->pop(2);
         state->push(v);
@@ -3044,16 +3044,16 @@ namespace avmplus
 		if (in != st || !value.notNull || opcode != OP_convert_s)
 		{
 			#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if (mir)
+			if (jit)
 			{
 				if (opcode == OP_convert_s && in && 
 					(value.notNull || in->isNumeric || in == BOOLEAN_TYPE))
 				{
-					mir->emitCoerce(state, i, st);
+					jit->emitCoerce(state, i, st);
 				}
 				else
 				{
-					mir->emit(state, opcode, i, 0, st);
+					jit->emit(state, opcode, i, 0, st);
 				}
 			}
 			#endif
@@ -3068,7 +3068,7 @@ namespace avmplus
 		Value& value = state->value(i);
 		if (!value.notNull)
 		{
-			mir->emitCheckNull(state, i);
+			jit->emitCheckNull(state, i);
 			for (int j=0, n = frameSize; j < n; j++) 
 			{
 				// also mark all copies of value.ins as non-null
@@ -3093,7 +3093,7 @@ namespace avmplus
 		Traits* base = info->declaringTraits->base;
 		if (base != NULL)
 		{
-			MIR_ONLY( if (mir) emitCoerce(base, index); )
+			JIT_ONLY( if (jit) emitCoerce(base, index); )
 		}
 		else
 		{
@@ -3108,8 +3108,8 @@ namespace avmplus
 		Value &v = state->value(index);
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		Traits* rhs = v.traits;
-		if (mir && (!canAssign(target, rhs) || !Traits::isMachineCompatible(target,rhs)))
-			mir->emitCoerce(state, index, target);
+		if (jit && (!canAssign(target, rhs) || !Traits::isMachineCompatible(target,rhs)))
+			jit->emitCoerce(state, index, target);
 		#endif
 		state->setType(index, target, v.notNull);
 	}
@@ -3162,7 +3162,7 @@ namespace avmplus
 		int n=1;
 		while (argc > 0) 
 		{
-			if (mir)
+			if (jit)
 			{
 				Traits* target = (argc <= m->param_count) ? m->paramTraits(argc) : NULL;
 				emitCoerce(target, state->sp()-(n-1));
@@ -3172,7 +3172,7 @@ namespace avmplus
 		}
 
 		// coerce receiver type
-		if (mir && !isctor)  // don't coerce if this is for a ctor, since the ctor will be on the stack instead of the new object
+		if (jit && !isctor)  // don't coerce if this is for a ctor, since the ctor will be on the stack instead of the new object
 			emitCoerce(m->paramTraits(0), state->sp()-(n-1));
 		#else
 		(void)isctor;
@@ -3446,8 +3446,8 @@ namespace avmplus
 				Traits* t3 = (t1 == t2) ? t1 : findCommonBase(t1, t2);
 				
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				if (mir)
-					mir->merge(i, curValue, targetValue);
+				if (jit)
+					jit->merge(i, curValue, targetValue);
 				#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 				bool notNull = targetValue.notNull && curValue.notNull;
@@ -3784,8 +3784,8 @@ namespace avmplus
 				core->console << "?";
 		}
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (mir && v.ins)
-			mir->formatOperand(core->console, v.ins);
+		if (jit && v.ins)
+			jit->formatOperand(core->console, v.ins);
 #endif
 	}
 
