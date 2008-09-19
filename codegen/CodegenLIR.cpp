@@ -544,7 +544,7 @@ namespace avmplus
 
 		overflow = false;
 	
-		#ifdef VTUNE
+		/*#ifdef VTUNE
 		hasDebugInfo = false;
 		vtune = 0;
 		mdOffsets = 0;
@@ -3344,7 +3344,7 @@ namespace avmplus
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
-			#ifdef VTUNE
+			/*#ifdef VTUNE
 				Ins(LIR_file, InsConst(op1));
 			#endif /* VTUNE */
 				break;
@@ -3360,7 +3360,7 @@ namespace avmplus
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
-			#ifdef VTUNE
+			/*#ifdef VTUNE
 				Ins(LIR_line, InsConst(op1));
 				hasDebugInfo = true;
 			#endif /* VTUNE */

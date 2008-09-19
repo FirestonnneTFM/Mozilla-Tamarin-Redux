@@ -287,7 +287,6 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				FavorSizeOrSpeed="2"
 				AdditionalIncludeDirectories=".;..\core;..\codegen"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;AVMPLUS_IA32;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -949,9 +948,9 @@
 		</Configuration>
 		<Configuration
 			Name="VTune|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			ConfigurationType="4"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -973,6 +972,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="2"
+				AdditionalIncludeDirectories=".;..\core;..\codegen"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;AVMPLUS_IA32;_CRT_SECURE_NO_DEPRECATE;VTUNE"
+				StringPooling="true"
+				ExceptionHandling="0"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="false"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -984,13 +990,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1000,9 +1003,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1292,6 +1292,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GCMemoryProfiler.h"
@@ -1474,6 +1482,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug_Debugger|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
