@@ -75,6 +75,9 @@ namespace avmplus
 		this->toplevel = toplevel;
 #ifdef AVMPLUS_WORD_CODE
 		this->translator = NULL;
+		this->num_caches = 0;
+		this->next_cache = 0;
+		this->caches = NULL;
 #endif
 		
 		#if defined FEATURE_BUFFER_GUARD && defined AVMPLUS_MIR
@@ -120,6 +123,10 @@ namespace avmplus
 
 	Verifier::~Verifier()
 	{
+#ifdef AVMPLUS_WORD_CODE
+		delete [] caches;
+		caches = NULL;
+#endif
 		if (blockStates)
 		{
 			MMgc::GC* gc = core->GetGC();
@@ -187,6 +194,8 @@ namespace avmplus
 		this->translator = new Translator(info);
 #    endif
 	    Translator *translator = this->translator;
+		caches = new uint32[5];
+		num_caches = 5;
 #endif
 
 		MIR_ONLY( this->mir = mir; )
@@ -2400,6 +2409,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_WORD_CODE
 		if (translator) {
+			info->word_code.cache_size = next_cache;
 			translator->epilogue();
 			delete translator;
 		}
@@ -2800,10 +2810,10 @@ namespace avmplus
 						if (translator) {
 							switch (opcode) {
 								case OP_findproperty: 
-									translator->emitOp1(OP_ext_findpropglobal, imm30);
+									translator->emitOp2(OP_ext_findpropglobal, imm30, allocateCacheSlot(imm30));
 									break;
 								case OP_findpropstrict:
-									translator->emitOp1(OP_ext_findpropglobalstrict, imm30);
+									translator->emitOp2(OP_ext_findpropglobalstrict, imm30, allocateCacheSlot(imm30));
 									break;
 								default:
 									translator->emitOp1(opcode, imm30);
@@ -2824,6 +2834,27 @@ namespace avmplus
 		XLAT_ONLY( if (translator && !no_translate) translator->emitOp1(opcode, imm30) );
 	}
 
+#ifdef AVMPLUS_WORD_CODE
+	// The cache structure is expected to be small in the normal case, so use a
+	// linear list.  For some programs, notably classical JS programs, it may however
+	// be larger, and we may need a more sophisticated structure.
+	uint32 Verifier::allocateCacheSlot(uint32 imm30)
+	{
+		for ( int i=0 ; i < next_cache ; i++ )
+			if (caches[i] == imm30)
+				return i;
+		if (next_cache == num_caches) {
+			uint32* new_cache = new uint32[num_caches*2];
+			memcpy(new_cache, caches, sizeof(uint32)*num_caches);
+			delete [] caches;
+			caches = new_cache;
+			num_caches *= 2;
+		}
+		caches[next_cache] = imm30;
+		return next_cache++;
+	}
+#endif // AVMPLUS_WORD_CODE
+	
 	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32 imm30)
 	{
 #ifndef AVMPLUS_WORD_CODE

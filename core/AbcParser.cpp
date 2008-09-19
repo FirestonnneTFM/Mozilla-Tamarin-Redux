@@ -219,6 +219,11 @@ namespace avmplus
 
 	PoolObject* AbcParser::parse()
 	{
+#ifdef AVMPLUS_WORD_CODE
+		// Loading a new ABC file always invalidates the lookup cache
+		core->invalidateLookupCache();
+#endif
+
 #ifdef FEATURE_BUFFER_GUARD // no Carbon
 		TRY(this->core, kCatchAction_Rethrow)
 		{
@@ -300,7 +305,7 @@ namespace avmplus
 	{
 		const byte* traits_pos = pos;
 		unsigned int nameCount = readU30(pos);
-
+		
 		// Very generous check for nameCount being way too large.
 		if (nameCount > (unsigned int)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
