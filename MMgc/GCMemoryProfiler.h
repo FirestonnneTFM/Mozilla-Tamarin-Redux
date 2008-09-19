@@ -54,7 +54,7 @@ namespace MMgc
 {
 	extern GCThreadLocal<avmplus::Sampler*> m_sampler;
 	extern bool sampling;
-	void recordAllocationSample(void* item, size_t size);
+	void recordAllocationSample(void* item, size_t size, bool in_lock = false);
 	void recordDeallocationSample(const void* item, size_t size);
 }
 #endif

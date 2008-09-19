@@ -2,9 +2,9 @@
 #define AVMTHUNK_VERSION 1
 const uint32_t shell_toplevel_abc_class_count = 14;
 const uint32_t shell_toplevel_abc_script_count = 9;
-const uint32_t shell_toplevel_abc_method_count = 147;
-const uint32_t shell_toplevel_abc_length = 5481;
-extern const uint8_t shell_toplevel_abc_data[5481];
+const uint32_t shell_toplevel_abc_method_count = 148;
+const uint32_t shell_toplevel_abc_length = 5514;
+extern const uint8_t shell_toplevel_abc_data[5514];
 
 const uint32_t abcclass_avmplus_Domain = 3;
 
@@ -17,6 +17,7 @@ const uint32_t abcscript_getSampleCount = 3;
 const uint32_t abcscript_getSize = 3;
 const uint32_t abcscript_startSampling = 3;
 const uint32_t abcscript_getMemberNames = 3;
+const uint32_t abcscript_setSamplerCallback = 3;
 const uint32_t abcscript_isGetterSetter = 3;
 const uint32_t abcscript__getInvocationCount = 3;
 const uint32_t abcscript_getSamples = 3;
@@ -46,7 +47,7 @@ const uint32_t abcclass_avmplus_File = 1;
 const uint32_t abcclass_flash_system_Capabilities = 2;
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_os_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_os_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t avmplus_JObject_create = 138;
+  const uint32_t avmplus_JObject_create = 139;
   #define avmplus_JObject_create_thunk  shell_toplevel_a2a_os_rest_thunk
   #define avmplus_JObject_create_thunkc shell_toplevel_a2a_os_rest_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE shell_toplevel_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -68,13 +69,13 @@ extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_o_thunkc(AvmM
   const uint32_t avmplus_System_private_getArgv = 15;
   #define avmplus_System_private_getArgv_thunk  shell_toplevel_a2a_o_thunk
   #define avmplus_System_private_getArgv_thunkc shell_toplevel_a2a_o_thunkc
-  const uint32_t flash_trace_Trace_getListener = 128;
+  const uint32_t flash_trace_Trace_getListener = 129;
   #define flash_trace_Trace_getListener_thunk  shell_toplevel_a2a_o_thunk
   #define flash_trace_Trace_getListener_thunkc shell_toplevel_a2a_o_thunkc
   const uint32_t flash_sampler_getSamples = 104;
   #define flash_sampler_getSamples_thunk  shell_toplevel_a2a_o_thunk
   #define flash_sampler_getSamples_thunkc shell_toplevel_a2a_o_thunkc
-  const uint32_t flash_sampler_NewObjectSample_object_get = 118;
+  const uint32_t flash_sampler_NewObjectSample_object_get = 119;
   #define flash_sampler_NewObjectSample_object_get_thunk  shell_toplevel_a2a_o_thunk
   #define flash_sampler_NewObjectSample_object_get_thunkc shell_toplevel_a2a_o_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_os_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -100,12 +101,12 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_oouu_opti0_opti
   #define flash_utils_ByteArray_writeBytes_thunkc shell_toplevel_v2a_oouu_opti0_opti0_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_oii_opti2_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_oii_opti2_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t flash_trace_Trace_setLevel = 125;
+  const uint32_t flash_trace_Trace_setLevel = 126;
   #define flash_trace_Trace_setLevel_thunk  shell_toplevel_a2a_oii_opti2_thunk
   #define flash_trace_Trace_setLevel_thunkc shell_toplevel_a2a_oii_opti2_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_ooio_optakAvmThunkNull_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_ooio_optakAvmThunkNull_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t avmplus_JObject_createArray = 139;
+  const uint32_t avmplus_JObject_createArray = 140;
   #define avmplus_JObject_createArray_thunk  shell_toplevel_a2a_ooio_optakAvmThunkNull_thunk
   #define avmplus_JObject_createArray_thunkc shell_toplevel_a2a_ooio_optakAvmThunkNull_thunkc
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_ouu_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -121,7 +122,7 @@ extern AvmThunkRetType_double AVMTHUNK_CALLTYPE shell_toplevel_d2d_o_thunkc(AvmM
   const uint32_t avmplus_System_privateMemory_get = 19;
   #define avmplus_System_privateMemory_get_thunk  shell_toplevel_d2d_o_thunk
   #define avmplus_System_privateMemory_get_thunkc shell_toplevel_d2d_o_thunkc
-  const uint32_t flash_sampler_NewObjectSample_size_get = 119;
+  const uint32_t flash_sampler_NewObjectSample_size_get = 120;
   #define flash_sampler_NewObjectSample_size_get_thunk  shell_toplevel_d2d_o_thunk
   #define flash_sampler_NewObjectSample_size_get_thunkc shell_toplevel_d2d_o_thunkc
   const uint32_t flash_utils_ByteArray_readFloat = 82;
@@ -138,12 +139,12 @@ extern AvmThunkRetType_double AVMTHUNK_CALLTYPE shell_toplevel_d2d_o_thunkc(AvmM
   #define avmplus_System_freeMemory_get_thunkc shell_toplevel_d2d_o_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_os_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_os_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t avmplus_JObject_constructorSignature = 141;
+  const uint32_t avmplus_JObject_constructorSignature = 142;
   #define avmplus_JObject_constructorSignature_thunk  shell_toplevel_s2a_os_rest_thunk
   #define avmplus_JObject_constructorSignature_thunkc shell_toplevel_s2a_os_rest_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE shell_toplevel_i2a_oi_opti2_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE shell_toplevel_i2a_oi_opti2_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t flash_trace_Trace_getLevel = 126;
+  const uint32_t flash_trace_Trace_getLevel = 127;
   #define flash_trace_Trace_getLevel_thunk  shell_toplevel_i2a_oi_opti2_thunk
   #define flash_trace_Trace_getLevel_thunkc shell_toplevel_i2a_oi_opti2_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE shell_toplevel_i2a_osu_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -158,7 +159,7 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_ouus_thunkc(Avm
   #define avmplus_StringBuilder_replace_thunkc shell_toplevel_v2a_ouus_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_ob_optbfalse_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_ob_optbfalse_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t flash_utils_Dictionary_Dictionary = 132;
+  const uint32_t flash_utils_Dictionary_Dictionary = 133;
   #define flash_utils_Dictionary_Dictionary_thunk  shell_toplevel_a2a_ob_optbfalse_thunk
   #define flash_utils_Dictionary_Dictionary_thunkc shell_toplevel_a2a_ob_optbfalse_thunkc
 extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE shell_toplevel_i2a_osu_optu4294967295U_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -209,7 +210,7 @@ extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_o_thunkc(A
   const uint32_t avmplus_System_readLine = 16;
   #define avmplus_System_readLine_thunk  shell_toplevel_s2a_o_thunk
   #define avmplus_System_readLine_thunkc shell_toplevel_s2a_o_thunkc
-  const uint32_t avmplus_JObject_toString = 144;
+  const uint32_t avmplus_JObject_toString = 145;
   #define avmplus_JObject_toString_thunk  shell_toplevel_s2a_o_thunk
   #define avmplus_JObject_toString_thunkc shell_toplevel_s2a_o_thunkc
 extern AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE shell_toplevel_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -243,15 +244,18 @@ extern AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE shell_toplevel_u2a_o_thunkc(Av
   #define flash_utils_ByteArray_readUnsignedInt_thunkc shell_toplevel_u2a_o_thunkc
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_oo_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+  const uint32_t flash_sampler_setSamplerCallback = 107;
+  #define flash_sampler_setSamplerCallback_thunk  shell_toplevel_v2a_oo_thunk
+  #define flash_sampler_setSamplerCallback_thunkc shell_toplevel_v2a_oo_thunkc
   const uint32_t avmplus_System_trace = 10;
   #define avmplus_System_trace_thunk  shell_toplevel_v2a_oo_thunk
   #define avmplus_System_trace_thunkc shell_toplevel_v2a_oo_thunkc
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t flash_sampler_pauseSampling = 108;
+  const uint32_t flash_sampler_pauseSampling = 109;
   #define flash_sampler_pauseSampling_thunk  shell_toplevel_v2a_o_thunk
   #define flash_sampler_pauseSampling_thunkc shell_toplevel_v2a_o_thunkc
-  const uint32_t flash_sampler_stopSampling = 109;
+  const uint32_t flash_sampler_stopSampling = 110;
   #define flash_sampler_stopSampling_thunk  shell_toplevel_v2a_o_thunk
   #define flash_sampler_stopSampling_thunkc shell_toplevel_v2a_o_thunkc
   const uint32_t flash_utils_ByteArray_uncompress = 89;
@@ -263,10 +267,10 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_o_thunkc(AvmMet
   const uint32_t flash_utils_ByteArray_compress = 88;
   #define flash_utils_ByteArray_compress_thunk  shell_toplevel_v2a_o_thunk
   #define flash_utils_ByteArray_compress_thunkc shell_toplevel_v2a_o_thunkc
-  const uint32_t flash_sampler_startSampling = 110;
+  const uint32_t flash_sampler_startSampling = 111;
   #define flash_sampler_startSampling_thunk  shell_toplevel_v2a_o_thunk
   #define flash_sampler_startSampling_thunkc shell_toplevel_v2a_o_thunkc
-  const uint32_t flash_sampler_clearSamples = 111;
+  const uint32_t flash_sampler_clearSamples = 112;
   #define flash_sampler_clearSamples_thunk  shell_toplevel_v2a_o_thunk
   #define flash_sampler_clearSamples_thunkc shell_toplevel_v2a_o_thunkc
   const uint32_t avmplus_StringBuilder_trimToSize = 59;
@@ -290,12 +294,12 @@ extern AvmThunkRetType_double AVMTHUNK_CALLTYPE shell_toplevel_d2d_oaou_thunkc(A
   #define flash_sampler__getInvocationCount_thunkc shell_toplevel_d2d_oaou_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_oos_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_oos_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t avmplus_JObject_fieldSignature = 143;
+  const uint32_t avmplus_JObject_fieldSignature = 144;
   #define avmplus_JObject_fieldSignature_thunk  shell_toplevel_s2a_oos_thunk
   #define avmplus_JObject_fieldSignature_thunkc shell_toplevel_s2a_oos_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_oos_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t avmplus_JObject_methodSignature = 142;
+  const uint32_t avmplus_JObject_methodSignature = 143;
   #define avmplus_JObject_methodSignature_thunk  shell_toplevel_s2a_oos_rest_thunk
   #define avmplus_JObject_methodSignature_thunkc shell_toplevel_s2a_oos_rest_thunkc
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -357,15 +361,15 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_ob_thunkc(AvmMe
   const uint32_t flash_utils_ByteArray_writeBoolean = 66;
   #define flash_utils_ByteArray_writeBoolean_thunk  shell_toplevel_v2a_ob_thunk
   #define flash_utils_ByteArray_writeBoolean_thunkc shell_toplevel_v2a_ob_thunkc
-  const uint32_t flash_sampler_sampleInternalAllocs = 107;
+  const uint32_t flash_sampler_sampleInternalAllocs = 108;
   #define flash_sampler_sampleInternalAllocs_thunk  shell_toplevel_v2a_ob_thunk
   #define flash_sampler_sampleInternalAllocs_thunkc shell_toplevel_v2a_ob_thunkc
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_oo_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-  const uint32_t avmplus_JObject_toArray = 140;
+  const uint32_t avmplus_JObject_toArray = 141;
   #define avmplus_JObject_toArray_thunk  shell_toplevel_a2a_oo_thunk
   #define avmplus_JObject_toArray_thunkc shell_toplevel_a2a_oo_thunkc
-  const uint32_t flash_trace_Trace_setListener = 127;
+  const uint32_t flash_trace_Trace_setListener = 128;
   #define flash_trace_Trace_setListener_thunk  shell_toplevel_a2a_oo_thunk
   #define flash_trace_Trace_setListener_thunkc shell_toplevel_a2a_oo_thunkc
   const uint32_t avmplus_Domain_loadBytes = 36;

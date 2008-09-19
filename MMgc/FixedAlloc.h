@@ -121,7 +121,7 @@ namespace MMgc
 					memset(item, 0xfa, size);
 #endif
 
-					SAMPLE_ALLOC(item, Size(item));
+					SAMPLE_FIXED_ALLOC(item, Size(item));
 					return item;
 				}
 				b->nextItem = 0;
@@ -147,7 +147,7 @@ namespace MMgc
 			memset(item, 0xfa, size);
 #endif
 
-			SAMPLE_ALLOC(item, Size(item));
+			SAMPLE_FIXED_ALLOC(item, Size(item));
 
 			GCAssertMsg(item != NULL, "Out of memory");
 			return item;
