@@ -1919,7 +1919,7 @@ namespace nanojit
                             tosave[j] = tosave[j/2];
                             j /= 2;
                         }
-                        NanoAssert(j < sizeof(tosave)/sizeof(tosave[0]));
+                        NanoAssert(size_t(j) < sizeof(tosave)/sizeof(tosave[0]));
                         tosave[j] = r;
 					}
 				}
