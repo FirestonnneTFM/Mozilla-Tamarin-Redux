@@ -745,10 +745,7 @@ namespace MMgc
 		}
 #endif
 
-#if defined FEATURE_SAMPLER
-		if( core && core->sampling() )
-			core->sampler()->recordAllocationSample(item, GC::Size(item));
-#endif
+		SAMPLE_ALLOC(item, GC::Size(item));
 
 		return item;
 	}
@@ -3448,11 +3445,11 @@ uintptr_t	GC::GetStackTop() const
 	GCThreadLocal<avmplus::Sampler*> m_sampler;
 	bool sampling = false;
 
-	void recordAllocationSample(void* item, size_t size)
+	void recordAllocationSample(void* item, size_t size, bool in_lock)
 	{
 		avmplus::Sampler* sampler = m_sampler;
 		if( sampler && sampler->sampling )
-			sampler->recordAllocationSample(item, size);
+			sampler->recordAllocationSample(item, size, !in_lock);
 	}
 
 	void recordDeallocationSample(const void* item, size_t size)

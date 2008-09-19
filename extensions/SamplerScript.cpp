@@ -145,6 +145,7 @@ namespace avmplus
 		NATIVE_METHOD(flash_sampler__getInvocationCount, SamplerScript::getInvocationCount)
 		NATIVE_METHOD(flash_sampler_isGetterSetter, SamplerScript::isGetterSetter)
 		NATIVE_METHOD(flash_sampler_sampleInternalAllocs, SamplerScript::sampleInternalAllocs)
+		NATIVE_METHOD(flash_sampler_setSamplerCallback, SamplerScript::setCallback)
 	END_NATIVE_MAP()
 	
 	BEGIN_NATIVE_MAP(SampleClass)
@@ -522,6 +523,14 @@ namespace avmplus
 		core()->sampler()->sampleInternalAllocs(b);
 	}
 
+	void SamplerScript::setCallback(ScriptObject *callback)
+	{
+		if(!trusted())
+			return;
+		core()->sampler()->setCallback(callback);
+
+	}
+
 	double SamplerScript::getInvocationCount(Atom a, QNameObject* qname, uint32 type) 
 	{
 		if (!trusted())
@@ -724,9 +733,8 @@ namespace avmplus
 		}
 
 		b = t->findBinding(core()->constantString("size"), core()->publicNamespace);
-		if(b != BIND_NONE)
+		if((b&7) == BIND_CONST)
 		{
-			AvmAssert((b&7) == BIND_CONST);
 			sizeOffset = t->getOffsets()[b>>3];
 		}
 
