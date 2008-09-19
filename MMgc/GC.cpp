@@ -45,6 +45,9 @@
 #include "MMgc.h"
 #include "StaticAssert.h"
 
+#ifdef HAVE_STDARG
+#include <stdarg.h>
+#endif
 
 #ifdef MEMORY_INFO
 #if !defined(__MWERKS__)
@@ -99,8 +102,8 @@
 #pragma warning(disable:4291) // no matching operator delete found; memory will not be freed if initialization throws an exception
 #endif
 
-#ifdef DEBUGGER
-// sampling support
+#ifdef FEATURE_SAMPLER
+ //sampling support
 #include "avmplus.h"
 #else
 #define SAMPLE_FRAME(_x, _s) 
@@ -662,7 +665,7 @@ namespace MMgc
 
 	void *GC::AllocAlreadyLocked(size_t size, int flags/*0*/)
 	{
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
 		if(core)
 			core->sampleCheck();
@@ -742,6 +745,11 @@ namespace MMgc
 		}
 #endif
 
+#if defined FEATURE_SAMPLER
+		if( core && core->sampling() )
+			core->sampler()->recordAllocationSample(item, GC::Size(item));
+#endif
+
 		return item;
 	}
 
@@ -806,6 +814,8 @@ namespace MMgc
 		}
 
 		bool isLarge;
+
+		SAMPLE_DEALLOC(GetRealPointer(item), GC::Size(item));
 
 		// we can't allow free'ing something during Sweeping, otherwise alloc counters
 		// get decremented twice and destructors will be called twice.
@@ -1765,7 +1775,8 @@ bail:
 
 				GCAssert(*(int*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
-				((GCFinalizable*)rcobj)->~GCFinalizable();
+//				((GCFinalizable*)rcobj)->~GCFinalizable();
+				((GCFinalizable*)rcobj)->Finalize();
 				numObjects++;
 				objSize += (uint32)GC::Size(rcobj);
 				gc->Free(rcobj);
@@ -3258,53 +3269,41 @@ bail:
 		uintptr m = memStart;
 		while(m < memEnd)
 		{
-#ifdef WIN32
-			// first skip uncommitted memory
-			MEMORY_BASIC_INFORMATION mib;
-			VirtualQuery((void*) m, &mib, sizeof(MEMORY_BASIC_INFORMATION));
-			if((mib.Protect & PAGE_READWRITE) == 0) {
-				m += mib.RegionSize;
-				continue;
-			}
-#endif
 			// divide by 4K to get index
 			int bits = GetPageMapValue(m);
-			switch(bits)
-			{
-			case 0:
+            if (bits == 0) {
+                // owned by GCHeap
 				m += GCHeap::kBlockSize;
-				break;
-			case 3:
-				{
-					GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
-					const void *item = GetUserPointer((const void*)(lb+1));
-					if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
-						WhitePointerScan(item, lb->usableSize - DebugSize());
-					}
-					m += lb->GetNumBlocks() * GCHeap::kBlockSize;
-				}
-				break;
-			case 1:
-				{
-					// go through all marked objects in this page
-					GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
-                    for (int i=0; i< b->alloc->m_itemsPerBlock; i++) {
-                        // find all marked objects and search them
-                        if(!GCAlloc::GetBit(b, i, GCAlloc::kMark))
-                            continue;
+            }
+            else if (bits == 1) {
+                // owned by GCAlloc
+				// go through all marked objects in this page
+				GCAlloc::GCBlock *b = (GCAlloc::GCBlock *) m;
+                for (int i=0; i< b->alloc->m_itemsPerBlock; i++) {
+                    // find all marked objects and search them
+                    if(!GCAlloc::GetBit(b, i, GCAlloc::kMark))
+                        continue;
 
-						if(b->alloc->ContainsPointers()) {
-	                        void* item = (char*)b->items + b->alloc->m_itemSize*i;
-							WhitePointerScan(GetUserPointer(item), b->alloc->m_itemSize - DebugSize());
-						}
+					if(b->alloc->ContainsPointers()) {
+                        void* item = (char*)b->items + b->alloc->m_itemSize*i;
+						WhitePointerScan(GetUserPointer(item), b->alloc->m_itemSize - DebugSize());
 					}
-					m += GCHeap::kBlockSize;
 				}
-				break;
-			default:
-				GCAssert(false);
-				break;
-			}
+				m += GCHeap::kBlockSize;
+            }
+            else if (bits == 3) {
+                // owned by GCLargeAlloc
+				GCLargeAlloc::LargeBlock *lb = (GCLargeAlloc::LargeBlock*)m;
+				const void *item = GetUserPointer((const void*)(lb+1));
+				if(GCLargeAlloc::GetMark(item) && GCLargeAlloc::ContainsPointers(item)) {
+					WhitePointerScan(item, lb->usableSize - DebugSize());
+				}
+				m += lb->GetNumBlocks() * GCHeap::kBlockSize;
+            }
+            else {
+                // middle page of large alloc
+                GCAssert(false);
+            }
 		}
 	}
 #endif
@@ -3431,4 +3430,25 @@ uintptr_t	GC::GetStackTop() const
 		log_mem("[mem] \tunmanaged bytes ", fixed_alloced, unmanaged);
 		gclog("[mem] -------- gross stats end -----\n");
 	}
+
+#if defined (FEATURE_SAMPLER)
+	// For sampling support
+	GCThreadLocal<avmplus::Sampler*> m_sampler;
+	bool sampling = false;
+
+	void recordAllocationSample(void* item, size_t size)
+	{
+		avmplus::Sampler* sampler = m_sampler;
+		if( sampler && sampler->sampling )
+			sampler->recordAllocationSample(item, size);
+	}
+
+	void recordDeallocationSample(const void* item, size_t size)
+	{
+		avmplus::Sampler* sampler = m_sampler;
+		if( sampler /*&& sampler->sampling*/ )
+			sampler->recordDeallocationSample(item, size);
+	}
+#endif
+
 }

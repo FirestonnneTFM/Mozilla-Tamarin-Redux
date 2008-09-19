@@ -72,7 +72,7 @@ namespace nanojit
 
 	void RegAlloc::addActive(Register r, LIns* v)
 	{
-		//addActiveCount++;
+		//  Count++;
 		NanoAssert(v && r != UnknownReg && active[r] == NULL );
 		active[r] = v;
         useActive(r);
@@ -93,18 +93,6 @@ namespace nanojit
 		// remove the given register from the active list
 		active[r] = NULL;
 	}
-
-	LIns* RegAlloc::getActive(Register r)
-	{
-		NanoAssert(r != UnknownReg);
-		return active[r];
-	}
-
-    int32_t RegAlloc::getPriority(Register r)
-    {
-        NanoAssert(r != UnknownReg && active[r]);
-        return usepri[r];
-    }
 
 	void RegAlloc::retire(Register r)
 	{

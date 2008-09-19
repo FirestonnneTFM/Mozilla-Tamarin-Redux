@@ -333,7 +333,7 @@ namespace avmplus
 		}
 	}
 	
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 	void MethodEnv::debugEnter(int argc, uint32 *ap, 
 							   Traits**frameTraits, int localCount,
 							   CallStackNode* callstack,
@@ -341,6 +341,7 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 
+#ifdef DEBUGGER
 		// update profiler
 		sendEnter(argc, ap);
 
@@ -348,11 +349,19 @@ namespace avmplus
 		int firstLocalAt = method->param_count+1;
 		AvmAssert(!frameTraits || localCount >= firstLocalAt);
 		if (frameTraits) memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
+#else
+		(void)localCount;
+#endif
 		if (callstack) callstack->initialize(this, method, framep, frameTraits, argc, ap, eip);
+#ifdef DEBUGGER
 		if (core->debugger) core->debugger->_debugMethod(this);
+#endif
 
 		core->sampleCheck();
+
+#ifdef DEBUGGER
 		invocationCount++;
+#endif
 	}
 
 	void MethodEnv::debugExit(CallStackNode* callstack)
@@ -360,11 +369,14 @@ namespace avmplus
 		AvmAssert(this != 0);
 		AvmCore* core = this->core();
 
+#ifdef DEBUGGER
 		// update profiler 
 		sendExit();
+#endif
 
 		core->callStack = callstack->next;
 
+#ifdef DEBUGGER
 		// trigger a faked "line number changed" since we exited the function and are now back on the old line (well, almost)
 		if (core->callStack && core->callStack->linenum > 0)
 		{
@@ -372,8 +384,11 @@ namespace avmplus
 			core->callStack->linenum = -1;
 			if (core->debugger) core->debugger->debugLine(line);
 		}
+#endif
 	}
+#endif
 
+#ifdef DEBUGGER
 	void MethodEnv::sendEnter(int /*argc*/, uint32 * /*ap*/)
 	{
 		Profiler *profiler = core()->profiler;
@@ -1703,6 +1718,19 @@ namespace avmplus
 			return NULL;
 		}
 	}
+
+    ScriptObject *MethodEnv::newActivation()
+    {
+        VTable *vtable = getActivation();
+		AvmCore *core = this->core();
+        MMgc::GC *gc = core->GetGC();
+		SAMPLE_FRAME("[activation-object]", core);
+		ScriptObject* obj = new (gc, vtable->getExtraSize()) ScriptObject(vtable, 0/*delegate*/);
+        MethodEnv *init = vtable->init;
+        if (init)
+			init->coerceEnter(obj->atom());
+		return obj;
+    }
 
 	WeakKeyHashtable *MethodEnv::getMethodClosureTable()
 	{

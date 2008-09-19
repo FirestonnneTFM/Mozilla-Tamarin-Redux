@@ -245,7 +245,7 @@ start:
 				return NULL;
 			}
 		}
-	
+
 		GCBlock* b = m_firstFree ? m_firstFree : m_needsSweeping;
 
 		// lazy sweeping
@@ -366,6 +366,7 @@ start:
 			b->gc->ClearWeakRef(GetUserPointer(item));
 		}
 		
+
 		bool wasFull = b->IsFull();
 
 		if(b->needsSweeping) {
@@ -441,17 +442,19 @@ start:
 
 					GCAssertMsg(mq != kQueued, "No queued objects should exist when finalizing");
 
+					void* item = (char*)b->items + m_itemSize*((i*8)+j);
+
+					SAMPLE_DEALLOC(item, GC::Size(GetUserPointer(item)));
+
 					if(!(marks & (kFinalize|kHasWeakRef)))
 						continue;
         
-					void* item = (char*)b->items + m_itemSize*((i*8)+j);
-
 					if (marks & kFinalize)
 					{     
 						GCFinalizable *obj = (GCFinalizedObject*)GetUserPointer(item);
 						GCAssert(*(int*)obj != 0);
-						obj->~GCFinalizable();
-
+//						obj->~GCFinalizable();
+						obj->Finalize();
 						bits[i] &= ~(kFinalize<<(j*4));
 
 #if defined(_DEBUG) && defined(MMGC_DRC)
@@ -460,6 +463,7 @@ start:
 						}
 #endif
 					}
+
 
 					if (marks & kHasWeakRef) {							
 						b->gc->ClearWeakRef(GetUserPointer(item));

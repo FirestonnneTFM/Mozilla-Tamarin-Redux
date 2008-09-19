@@ -591,8 +591,12 @@ namespace avmplus
 
 				f = resolveMethodInfo(method_info);
 
+				#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
 				#ifdef AVMPLUS_VERBOSE
 				Stringp s1 = traits->format(core);
+				#else
+				Stringp s1 = Multiname::format(core, traits->ns, traits->name);
+				#endif
 				Stringp s2 = core->newString(kind == TRAIT_Method ? "/" : (kind == TRAIT_Getter ? "/get " : "/set "));
 				Stringp s3 = Multiname::format(core,ns,name);
 				Stringp s4 = core->concatStrings(s2,s3);
@@ -811,7 +815,7 @@ namespace avmplus
 			{
 				MethodInfo *methodInfo = new (core->GetGC()) MethodInfo();
 				
-				#ifdef AVMPLUS_VERBOSE
+				#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
 				if (name_index != 0) {
 					methodInfo->name = resolveUtf8(name_index);
 					if(methodInfo->name->length() == 0) 
@@ -1852,7 +1856,7 @@ namespace avmplus
 			}
 #endif
 
-			#ifdef AVMPLUS_VERBOSE
+			#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
 			iinit->name = Multiname::format(core,ns,name);
 			#endif
 
@@ -1965,7 +1969,7 @@ namespace avmplus
 			}
 #endif
 
-			#ifdef AVMPLUS_VERBOSE
+			#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
 			Stringp cinitName = core->concatStrings(name, core->newString("$cinit"));
 			cinit->name = Multiname::format(core,ns,cinitName);
 			#endif

@@ -65,7 +65,7 @@ namespace avmplus
 		SamplerScript(VTable *vtable, ScriptObject *delegate);
 		DECLARE_NATIVE_SCRIPT(SamplerScript)
 
-#ifdef DEBUGGER
+#ifdef FEATURE_SAMPLER
 		static const uint32 GET=1;
 		static const uint32 SET=2;
 		double getSize(Atom o);
@@ -75,6 +75,7 @@ namespace avmplus
 		void startSampling();
 		void stopSampling();
 		void pauseSampling();
+		void sampleInternalAllocs(bool b);
 		double getSampleCount();
 
 		double getInvocationCount(Atom a, QNameObject* qname, uint32 type);
@@ -83,7 +84,7 @@ namespace avmplus
 	private:		
 		VTable* const sampleIteratorVTable;
 		VTable* const slotIteratorVTable;
-		ClassClosure *getType(uintptr typeOrVTable, MMgc::GCWeakRef *weakRef);
+		ClassClosure *getType(Atom typeOrVTable, const void *obj);
 #else
 		// stubs for release
 		double getSize(Atom ) { return 0; }
@@ -96,6 +97,7 @@ namespace avmplus
 		double getSampleCount() { return -1; }
 		double getInvocationCount(Atom, QNameObject*, uint32) { return -1; }
 		bool isGetterSetter(Atom, QNameObject*) { return false; }
+		void sampleInternalAllocs(bool){};
 #endif
 	};
 
@@ -121,9 +123,12 @@ namespace avmplus
 	public:
 		NewObjectSampleObject(VTable *vtable, ScriptObject *delegate);
 		Atom object_get();
-		void setWeakRef(MMgc::GCWeakRef* wr) { weakRef = wr; }
+		double size_get();
+		void setRef(AvmPlusScriptableObject* o) { obj = o; }
+		void setSize(uint64 s) { size = s; }
 	private:
-		MMgc::GCWeakRef *weakRef;
+		AvmPlusScriptableObject *obj;
+		uint64 size;
 	};
 
 	class NewObjectSampleClass : public SampleClass

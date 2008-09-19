@@ -67,8 +67,10 @@ namespace MMgc
 			size = (size+3)&~3;
 			if (size <= (size_t)kLargestAlloc) {
 				item = FindSizeClass(size)->Alloc(size);
+				SAMPLE_ALLOC(item, FindSizeClass(size)->Size(item));
 			} else {
 				item = LargeAlloc(size);
+				SAMPLE_ALLOC(item, Size(item));
 			}
 			return item;
 		}
@@ -81,8 +83,10 @@ namespace MMgc
 			// small things are never allocated on the 4K boundary b/c the block
 			// header structure is stored there, large things always are		
 			if(IsLargeAlloc(item)) {
+				SAMPLE_DEALLOC(item, Size(item));
 				LargeFree(item);
 			} else {		
+				SAMPLE_DEALLOC(item, FixedAllocSafe::GetFixedAllocSafe(item)->Size(item));
 				FixedAllocSafe::GetFixedAllocSafe(item)->Free(item);
 			}
 		}

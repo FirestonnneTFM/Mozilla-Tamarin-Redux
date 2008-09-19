@@ -78,6 +78,8 @@ namespace avmplus
         Patch(LIns *br, CodegenLabel &l) : br(br), label(&l) {}
     };
 
+    class CopyPropagation;
+
 	class CodegenLIR {
 	public:
 		bool overflow;
@@ -90,7 +92,6 @@ namespace avmplus
         MethodInfo *info;
         PoolObject *pool;
         Fragment *frag;
-		LirBuffer *lirbuf;
 		LirWriter *lirout;
 		FrameState *state;
         LIns *vars, *varTraits, *varPtrs;
@@ -106,6 +107,7 @@ namespace avmplus
         List<Patch, LIST_NonGCObjects> patches;
         LIns *exBranch;
         LIns *setjmpResult;
+        CopyPropagation *copier;
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(LOpcode op, int32_t disp, LIns *base);
@@ -126,7 +128,8 @@ namespace avmplus
         LIns *localGet(int i);
         LIns *localGetq(int i);
         LIns *localCopy(int i); // sniff's type
-        LIns *branchIns(LOpcode op, LIns *cond, LIns *target=0);
+        LIns *branchIns(LOpcode op, LIns *cond);
+        LIns *branchIns(LOpcode op, LIns *cond, uintptr_t targetpc);
         LIns *retIns(LIns *val);
         LIns *loadToplevel(LIns* env);
         LIns *initMultiname(Multiname* multiname, int& csp, bool isDelete =false);
@@ -150,7 +153,6 @@ namespace avmplus
         void patchLater(LIns *br, intptr_t pc);
         bool isCodeContextChanged() const;
         void mirLabel(CodegenLabel &l, LIns *target);
-        uint32_t find_fid(uintptr_t addr);
         void deadvars();
 
 	public:
@@ -176,7 +178,7 @@ namespace avmplus
 		void emitCheckNull(FrameState* state, int index);
 		void emitSetContext(FrameState* state, AbstractFunction* f);
 		void emitSetDxns(FrameState* state);
-		void merge(const Value& current, Value& target);
+		void merge(int i, const Value& current, Value& target);
 		void localSet(int i, LIns* o);
 
     // helpers for jitted code

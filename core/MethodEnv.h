@@ -48,6 +48,7 @@ namespace avmplus
 	public:
 		/** vtable for the activation scope inside this method */
 		VTable *getActivation();
+        ScriptObject *newActivation();
 
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
@@ -245,13 +246,16 @@ namespace avmplus
 		 */
 		Atom astype(Atom atom, Traits* expected);
 		
+#ifdef FEATURE_SAMPLER
+		void debugEnter(int argc, uint32 *ap, 
+			Traits**frameTraits, int localCount,
+			CallStackNode* callstack,
+			Atom* framep, volatile sintptr *eip);
+		void debugExit(CallStackNode* callstack);
+#endif
+
 #ifdef DEBUGGER
 		uint64 invocationCount;
-		void debugEnter(int argc, uint32 *ap, 
-							   Traits**frameTraits, int localCount,
-							   CallStackNode* callstack,
-							   Atom* framep, volatile sintptr *eip);
-		void debugExit(CallStackNode* callstack);
 		void sendEnter(int argc, uint32 *ap);
 		void sendExit();
 #endif

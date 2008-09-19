@@ -59,12 +59,20 @@ namespace nanojit
 			void	addActive(Register r, LIns* ins);
             void    useActive(Register r);
 			void	removeActive(Register r);
-			LIns*	getActive(Register r); 
 			void	retire(Register r);
             bool    isValid() {
                 return (free|used) != 0;
             }
-            int32_t getPriority(Register r);
+
+            int32_t getPriority(Register r) {
+                NanoAssert(r != UnknownReg && active[r]);
+                return usepri[r];
+            }
+
+	        LIns* getActive(Register r) {
+		        NanoAssert(r != UnknownReg);
+		        return active[r];
+	        }
 
 			debug_only( uint32_t	countFree(); )
 			debug_only( uint32_t	countActive(); )

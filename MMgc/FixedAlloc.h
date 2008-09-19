@@ -120,6 +120,8 @@ namespace MMgc
 					item = DebugDecorate(item, size + DebugSize(), 6);
 					memset(item, 0xfa, size);
 #endif
+
+					SAMPLE_ALLOC(item, Size(item));
 					return item;
 				}
 				b->nextItem = 0;
@@ -145,6 +147,8 @@ namespace MMgc
 			memset(item, 0xfa, size);
 #endif
 
+			SAMPLE_ALLOC(item, Size(item));
+
 			GCAssertMsg(item != NULL, "Out of memory");
 			return item;
 		}
@@ -161,6 +165,8 @@ namespace MMgc
 			// ensure that we are freeing a pointer on a item boundary
 			GCAssert(((uintptr)item - (uintptr)b->items) % b->alloc->m_itemSize == 0);
 #endif
+
+			SAMPLE_DEALLOC(item, Size(item));
 
 			// Add this item to the free list
 			*((void**)item) = b->firstFree;
@@ -248,6 +254,7 @@ namespace MMgc
 #endif
 			return b->size;
 		}
+
 	};
 
 	class FixedAllocSafe : public FixedAlloc

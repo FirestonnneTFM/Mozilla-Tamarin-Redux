@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2005-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,33 +35,84 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_AvmPlusScriptableObject__
-#define __avmplus_AvmPlusScriptableObject__
+import flash.sampler.*
+import avmplus.*
 
+var SECTION = "Sampling";
+var VERSION = "AS3";
+var TITLE   = "Sampling Basic Usage";
 
-namespace avmplus
-{
-	class AvmPlusScriptableObject : public MMgc::RCObject
-	{
-	public:
-		// used by WeakValueHashtable to correctly atom'ize a pointer to one of these
-		virtual Atom toAtom() const = 0;
+var isdebugger=System.isDebugger();
 
-#ifdef DEBUGGER
-		AvmPlusScriptableObject(Atom atom);
-		~AvmPlusScriptableObject();
-		virtual uint64 size() const = 0;
+startTest();
+writeHeaderToLog("Sampling api");
 
-		AvmCore *core() const
-		{
-			MMgc::GC *gc = MMgc::GC::GetGC(this);
-			AvmCore *core = (AvmCore*)gc->GetGCContextVariable(MMgc::GC::GCV_AVMCORE);
-			return core;
-		}
-
-#endif
-
-	};
+var objs:Array=new Array();
+class simpleobject {
+    var str:String;
+    function simpleobject(s:String) { 
+        this.str=s;
+    }
+}
+function simpleLoop() {
+    for (var i:int=0;i<10;i++) {
+       objs.push(new simpleobject(""+i));
+    }
 }
 
-#endif //__avmplus_AvmPlusScriptableObject__
+sampleInternalAllocs(true);
+
+simpleLoop();
+if (isdebugger) {
+    AddTestCase(
+      "BeforeStartSampling: test before startSampling sample count 0",
+      0,
+      getSampleCount()
+    );
+} else {
+    AddTestCase(
+      "BeforeStartSampling: test before startSampling sample count 0",
+      -1,
+      getSampleCount()
+    );
+}
+startSampling();
+simpleLoop();
+pauseSampling();
+var time=getTimer();
+while (getTimer()<time+50) {}
+var count=getSampleCount();
+
+simpleLoop();
+if (isdebugger) {
+    AddTestCase(
+      "PauseSampling: after pauseSampling verify no more samples are counted",
+      count+1,
+      getSampleCount()
+    );
+} else {
+    AddTestCase(
+      "PauseSampling: after pauseSampling verify no more samples are counted",
+      -1,
+      getSampleCount()
+    );
+}
+startSampling();
+simpleLoop();
+stopSampling();
+
+if (isdebugger) {
+    AddTestCase(
+      "StopSampling: after stopSampling samples are reset",
+      0,
+      getSampleCount()
+    );
+} else {
+    AddTestCase(
+      "StopSampling: after stopSampling samples are reset",
+      -1,
+      getSampleCount()
+    );
+}
+test();
+
