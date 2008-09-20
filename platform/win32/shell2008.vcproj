@@ -1117,7 +1117,7 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 				DisableSpecificWarnings="4201"
 			/>
 			<Tool
@@ -1131,7 +1131,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/SAFESEH:NO"
+				AdditionalOptions="/SAFESEH:NO /fixed:no"
 				AdditionalDependencies="winmm.lib JitProfiling.lib"
 				OutputFile="$(OutDir)/avmplus.exe"
 				LinkIncremental="1"

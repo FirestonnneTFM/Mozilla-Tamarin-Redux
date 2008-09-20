@@ -544,11 +544,13 @@ namespace avmplus
 
 		overflow = false;
 	
-		/*#ifdef VTUNE
+        /*
+		#ifdef VTUNE
 		hasDebugInfo = false;
 		vtune = 0;
 		mdOffsets = 0;
-		#endif /* VTUNE */
+		#endif // VTUNE
+        */
 
         // set up the generator LIR pipeline
         if (!pool->codePages) {
@@ -3344,9 +3346,11 @@ namespace avmplus
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
-			/*#ifdef VTUNE
+			/*
+            #ifdef VTUNE
 				Ins(LIR_file, InsConst(op1));
-			#endif /* VTUNE */
+			#endif // VTUNE
+            */
 				break;
 		    }
 
@@ -3360,10 +3364,12 @@ namespace avmplus
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
-			/*#ifdef VTUNE
+            /*
+			#ifdef VTUNE
 				Ins(LIR_line, InsConst(op1));
 				hasDebugInfo = true;
-			#endif /* VTUNE */
+			#endif // VTUNE
+            */
 				break;
             }
 

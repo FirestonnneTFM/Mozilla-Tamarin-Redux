@@ -995,6 +995,7 @@
 				BrowseInformation="0"
 				WarningLevel="4"
 				WarnAsError="true"
+        DebugInformationFormat="3"
 				DisableSpecificWarnings="4189;4740;4189"
 			/>
 			<Tool
