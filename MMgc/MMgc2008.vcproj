@@ -979,6 +979,7 @@
 				ExceptionHandling="0"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
