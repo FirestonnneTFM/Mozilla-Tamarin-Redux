@@ -69,7 +69,6 @@ namespace avmplus
 		
 		// Encapsulate namedScripts so that we can invalidate global reference caches when it is updated.
 		Binding getNamedScript(Stringp name, Namespace* ns) const { return namedScripts->get(name, ns); }
-		void addNamedScript(Stringp name, Namespace* ns, Atom script) { namedScripts->add(name, ns, script); }
 		void addNamedScript(Stringp name, Namespace* ns, Binding scriptEnv) { namedScripts->add(name, ns, scriptEnv); }
 	private:
 		/**
