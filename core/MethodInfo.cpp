@@ -71,13 +71,17 @@ namespace avmplus
 
 		f->verify(env->vtable->toplevel);
 
+#if 0 // This is handled near the top of interp() for the moment, see comments there
 #ifdef AVMPLUS_WORD_CODE
 		{
 			int n;
-			if ((int32)(n = f->word_code.cache_size) > 0)
+			if ((int32)(n = f->word_code.cache_size) > 0) {
+				AvmAssert(env->lookup_cache == NULL);
 				env->lookup_cache = (MethodEnv::LookupCache*)env->core()->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*n, GC::kContainsPointers|GC::kZero);
+			}
 		}
 #endif
+#endif // 0
 		
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
