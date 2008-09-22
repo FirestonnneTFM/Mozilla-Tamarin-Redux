@@ -1530,13 +1530,6 @@ namespace avmplus
 		mirBuffer = core->requestMirBuffer();
 		overflow = (mirBuffer) ? false : true; // if no buffer then we have no room
 
-#ifdef AVMPLUS_PROFILE
-		cseHits = 0;
-		dceHits = 0;
-		// time stuff
-		verifyStartTime = GC::GetPerformanceCounter();
-#endif /* AVMPLUS_PROFILE */
-
 		#ifdef VTUNE
 		hasDebugInfo = false;
 		vtune = 0;
@@ -1750,10 +1743,6 @@ namespace avmplus
 		GCHashtable* names = new GCHashtable();
 
 		#ifdef DEBUGGER
-		#ifdef AVMPLUS_PROFILE
-		names->add(PROFADDR(DynamicProfiler::mark), "DynamicProfiler::mark");
-		names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");		
-		#endif
 		names->add(ENVADDR(MethodEnv::sendEnter), "MethodEnv::sendEnter");
 		names->add(ENVADDR(MethodEnv::sendExit), "MethodEnv::sendExit");
 		names->add(CALLSTACKADDR(CallStackNode::initialize), "CallStackNode::initialize");
@@ -1765,6 +1754,7 @@ namespace avmplus
 		#if (defined DEBUGGER || defined FEATURE_SAMPLER )
 		names->add(ENVADDR(MethodEnv::debugEnter), "MethodEnv::debugEnter");
 		names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
+		names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");
 		#endif
 
 		names->add(FUNCADDR(AvmCore::atomWriteBarrier), "AvmCore::atomWriteBarrier");
@@ -1859,7 +1849,7 @@ namespace avmplus
 		names->add(ENVADDR(MethodEnv::initproperty), "MethodEnv::initproperty");
 		names->add(ENVADDR(MethodEnv::setpropertylate_i), "MethodEnv::setpropertylate_i");
 		names->add(ENVADDR(MethodEnv::setpropertylate_u), "MethodEnv::setpropertylate_u");
-		names->add(COREADDR(AvmCore::eq), "AvmCore::eq");
+		names->add(COREADDR(AvmCore::equals), "AvmCore::equals");
 		names->add(COREADDR(AvmCore::stricteq), "AvmCore::stricteq");
 		names->add(COREADDR(AvmCore::compare), "AvmCore::compare");
 		names->add(TOPLEVELADDR(Toplevel::add2), "Toplevel::add2");
@@ -2005,21 +1995,6 @@ namespace avmplus
 		{
 			// start over with bigger buffer.
 			expansionFactor *= 2;
-			#ifdef AVMPLUS_PROFILE
-			if (core->sprof.sprofile)
-			{
-				core->console  << "INFO: MIR buffer expanding ("
-					<< " abc " << int(abcEnd-abcStart)
-					<< " factor " << expansionFactor
-					<< " pro " << prologue_size << " epi " << epilogue_size
-					<< " est " << mirBuffSize 
-					#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-					<< " name " << info->name
-					#endif
-					<< " )\n";
-			}
-			#endif /* AVMPLUS_PROFILE */
-
 			overflow = true;
 		}
 		return overflow;
@@ -2086,10 +2061,6 @@ namespace avmplus
 	{
 		this->state = state;
 		if (overflow) return false;
-
-		#ifdef AVMPLUS_PROFILE
-		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
-		#endif /* AVMPLUS_PROFILE */
 
 		abcStart = state->verifier->code_pos;
 		abcEnd   = abcStart + state->verifier->code_length;
@@ -2270,14 +2241,6 @@ namespace avmplus
 		_callStackNode = InsAlloc(sizeof(CallStackNode));
 		#endif
 		
-		#ifdef AVMPLUS_PROFILE
-		if (core->dprof.dprofile)
-		{
-			callIns(MIR_cm, PROFADDR(DynamicProfiler::mark), 2,
-				(uintptr)&core->dprof, InsConst(OP_prologue));
-		}
-		#endif
-
 		if (info->setsDxns())
 		{
 			#ifdef AVMPLUS_VERBOSE
@@ -2581,15 +2544,6 @@ namespace avmplus
 			mirPatchPtr(&br->target, interrupt_label);
 		}
 
-		// this is not fatal but its good to know if our prologue estimation code is off.
-		#if defined(AVMPLUS_PROFILE) && defined(_DEBUG)
-		sizingStats[SZ_ABC] = (double)((uintptr)abcEnd-(uintptr)abcStart);
-		sizingStats[SZ_MIREXP] = expansionFactor;
-		uintptr actual_prologue_size = ((uintptr)ip-(uintptr)ipStart);
-		sizingStats[SZ_MIRPRO] = (double)(actual_prologue_size-prologue_size) / prologue_size;
-		AvmAssertMsg( (uintptr)prologue_size >= actual_prologue_size , "Increase prologue_size estimation\n");
-		#endif
-		
 		InsAlloc(0);
 
 		return true;
@@ -3079,16 +3033,7 @@ namespace avmplus
 
 	void CodegenMIR::emitPrep(AbcOpcode opcode)
 	{
-		#ifdef AVMPLUS_PROFILE
-		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
-		if (core->dprof.dprofile)
-		{
-			callIns(MIR_cm, PROFADDR(DynamicProfiler::mark), 1,
-				(uintptr)&core->dprof, InsConst(opcode));
-		}
-		#else
 		(void)opcode;
-		#endif /* AVMPLUS_PROFILE */
 
 		// update bytecode ip if necessary
 		if (state->insideTryBlock && lastPcSave != state->pc)
@@ -4649,7 +4594,7 @@ namespace avmplus
 			case OP_equals:
 			{
 				AvmAssert(result == BOOLEAN_TYPE);
-				localSet(sp-1, Ins(MIR_eq, cmpEq(COREADDR(AvmCore::eq), sp-1, sp)));
+				localSet(sp-1, Ins(MIR_eq, cmpEq(COREADDR(AvmCore::equals), sp-1, sp)));
 				break;
 			}
 
@@ -4819,15 +4764,6 @@ namespace avmplus
 	{
 		this->state = state;
 
-		#ifdef AVMPLUS_PROFILE
-		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
-		if (core->dprof.dprofile)
-		{
-			callIns(MIR_cm, PROFADDR(DynamicProfiler::mark), 1,
-				(uintptr)&core->dprof, InsConst(opcode));
-		}
-		#endif /* AVMPLUS_PROFILE */
-
 #ifdef DEBUGGER
 		if(core->sampling() && target < state->pc)
 		{
@@ -4892,11 +4828,11 @@ namespace avmplus
 			break;
 		case OP_ifeq:
 			br = MIR_jeq;
-			cond = cmpEq(COREADDR(AvmCore::eq), a, b);
+			cond = cmpEq(COREADDR(AvmCore::equals), a, b);
 			break;
 		case OP_ifne:
 			br = MIR_jne;
-			cond = cmpEq(COREADDR(AvmCore::eq), a, b);
+			cond = cmpEq(COREADDR(AvmCore::equals), a, b);
 			break;
 		case OP_ifstricteq:
 			br = MIR_jeq;
@@ -5113,10 +5049,6 @@ namespace avmplus
 		}
 #endif
 
-		#ifdef AVMPLUS_PROFILE
-		DynamicProfiler::StackMark mark(OP_codegenop, &core->dprof);
-		#endif /* AVMPLUS_PROFILE */
-
 		if (calleeVars)
 		{
 			calleeVars[0].lastUse = ip;
@@ -5184,16 +5116,6 @@ namespace avmplus
 				mirPatchPtr( &h->targetIns, h->target );
 			}
 		}
-
-		// this is not fatal but its good to know if our epilogue estimation code is off.
-		#if defined(AVMPLUS_PROFILE) && defined(_DEBUG)
-		uintptr actual_size = ((uintptr)ip-(uintptr)ipStart);
-		int actual_epilogue_size = 0;//((int)ip-(int)_epilogue);
-		sizingStats[SZ_MIR] = (double)actual_size;
-		sizingStats[SZ_MIRWASTE] = ((double)(mirBuffSize-actual_size)) / mirBuffSize;
-		sizingStats[SZ_MIREPI] = (double)(actual_epilogue_size-epilogue_size) / epilogue_size;
-		AvmAssertMsg( epilogue_size >= actual_epilogue_size, "Increase epilogue_size constant\n");
-		#endif /* AVMPLUS_PROFILE && _DEBUG */
 
 		#ifdef AVMPLUS_VERBOSE
 		if (core->bbgraph)
@@ -5723,15 +5645,6 @@ namespace avmplus
 		activation.size = 0;
 		activation.temps.clear();
 		activation.highwatermark = 0;
-
-        #ifdef AVMPLUS_PROFILE
-		fullyUsedCount = 0;					
-		longestSpan= 0;						
-		spills = 0;
-		steals = 0;
-		remats = 0;						
-		mInstructionCount = 0;
-		#endif /* AVMPLUS_PROFILE */
 
 		// point to the start of MIR code that we will be converting
 		ip = ipStart;
@@ -6631,29 +6544,6 @@ namespace avmplus
 
 		#endif /* AVMPLUS_AMD64 */
 		
-		#ifdef AVMPLUS_PROFILE
-			if (core->sprof.sprofile)
-			{
-				int	asByteCount = int(abcEnd-abcStart); 
-				uintptr mirBytes = (uintptr)ipEnd-(uintptr)ipStart;
-				uintptr mdBytes = (uintptr)mip - (uintptr)&code[0];
-				Stringp name = info->name;
-				if (!name) name = core->kEmptyString;
-				core->console 
-							  << "size profile "
-							#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-							  << name
-							#endif
-							  << "\n  "
-							  << "abc " << asByteCount
-						      << " mir " << int(mirBytes)
-							  //<< "/" << 100*(mirBytes-asByteCount)/asByteCount << "% "
-							  << " md " << int(mdBytes)
-							  //<<  "/"<<100*(mdBytes-asByteCount)/asByteCount << "%"
-							  << "\n";
-			}
-		#endif /* AVMPLUS_PROFILE */
-
 		// fix case tables.  Each entry contains the absolute bytecode
 		// offset, we replace with absolute machine address
 		// now that the code buffer is at a known starting address.
@@ -6678,10 +6568,8 @@ namespace avmplus
 			}
 		}
 
-		#ifdef AVMPLUS_INTERP
 		// mark method as been JIT'd
 		info->flags |= AbstractFunction::TURBO;
-		#endif /* AVMPLUS_INTERP */
 			
 		uintptr mipEnd = (uintptr) mip;
 		(void)mipEnd;
@@ -6704,63 +6592,6 @@ namespace avmplus
 		if ((byte*)mipEnd >= pool->codeBuffer->end())
 			AvmAssert(false);
 		#endif /* DEBUG */
-
-		#ifdef AVMPLUS_PROFILE
-		if (core->sprof.sprofile)
-		{
-			uint64 endTime = GC::GetPerformanceCounter();
-			uint64 freq = GC::GetPerformanceFrequency();
-			double mddiff = (double)(endTime-mdStartTime);
-			double alldiff = (double)endTime - verifyStartTime;
-			double mirdiff = alldiff - mddiff;
-			mddiff = 1000*mddiff/freq;
-			alldiff = 1000*alldiff/freq;
-			mirdiff = 1000*mirdiff/freq;
-			double mdrate = mInstructionCount / mddiff; // K instructions per second (diff in ms)
-			double mirrate = (ipEnd-ipStart) / mirdiff; // K OP's per sec
-			double mdperc = mddiff/alldiff*100;
-			uintptr size = mipEnd - (uintptr)mipStart;
-
-			// perf
-			core->console << "  " << (int)mirrate << "K mir/s  " 
-				<< (int)(mdrate) << "K md/s  " 
-				<< (int)(mdperc) << "% in compile during " 
-				<< (int)(1000*alldiff) << " micros\n";
-
-			// sizing
-			core->console << "  " << int(size) << " bytes from " 
-				<< InsNbr(ip) << " MIR instructions " 
-				<< (mInstructionCount) << " MD. max span " 
-				<< longestSpan 
-				<< " cse " << cseHits 
-				<< " dead " << dceHits 
-				<< "\n";
-
-			// stack / registers
-			core->console << "  " << 
-				activation.highwatermark << " bytes of stack with " 
-				<< spills << " spills " 
-				<< steals << " steals " 
-				<< remats << " remats using " 
-				<< fullyUsedCount << " times" << "\n";
-		}
-
-		//#define SZ_TUNING
-		#if defined(SZ_TUNING) && defined(DEBUGGER) && defined(_DEBUG)
-		// output is raw numbers so that we can import into excel easily
-		sizingStats[SZ_MD] = mipEnd - (int)mipStart;
-				core->console << info->name << ", "
-							  << sizingStats[SZ_ABC] << ", "     // bytes of abc
-							  << sizingStats[SZ_MIREXP] << ", "	 // expansion factor abc -> mir
-							  << sizingStats[SZ_MIR] << ", "	 // bytes of mir
-							  << sizingStats[SZ_MIRWASTE] << ", " // % mir buffer wasted 
-							  << sizingStats[SZ_MIRPRO] << ", "  // deviation from mir prologue estimate
-							  << sizingStats[SZ_MIREPI] << ", "  // deviation from mir epilogue estimate
-							  << sizingStats[SZ_MD] << " "		 // bytes of machine dependent code
-							  << "\n";
-		#endif /* _DEBUG */
-		#endif /* AVMPLUS_PROFILE */
-
 	}
 
 	/**
@@ -6811,10 +6642,6 @@ namespace avmplus
 			spill(vic);
 			vic->reg = Unknown;
 			regs.removeActive(r);
-
-			#ifdef AVMPLUS_PROFILE
-			steals++;
-			#endif 
 		}
 
 	    #ifdef AVMPLUS_ARM
@@ -6894,10 +6721,6 @@ namespace avmplus
 
 			spill(vic);
 			regs.retire(vic);
-
-			#ifdef AVMPLUS_PROFILE
-			steals++;
-			#endif
 		}
 
 		// ok we have at least 1 free register so let's try to pick 
@@ -7647,9 +7470,6 @@ namespace avmplus
 		{
 			reserveStackSpace(ins);
 			copyToStack(ins, ins->reg);		
-			#ifdef AVMPLUS_PROFILE
-			spills++;
-			#endif 
 		}
 	}
 
@@ -7805,9 +7625,6 @@ namespace avmplus
 				MOV(ins->reg, disp, framep);  // argN(ESP) => r
 			}
 			#endif
-			#ifdef AVMPLUS_PROFILE
-			remats++;
-			#endif 
 		}
 	}
 
@@ -8216,10 +8033,6 @@ namespace avmplus
 								vic->reg = Unknown;
 								gpregs.removeActive(r);
 							}
-
-							#ifdef AVMPLUS_PROFILE
-							steals++;
-							#endif 
 						}
 
 
@@ -8572,11 +8385,6 @@ namespace avmplus
 			core->console << "generate " << info << "\n";
 		}
 		#endif
-
-		#ifdef AVMPLUS_PROFILE
-		// time MIR -> MD compilation  
-		mdStartTime = GC::GetPerformanceCounter();
-		#endif /*  AVMPLUS_PROFILE */
 
 		/* 
 		* Use access exceptions to manage our buffer growth.  We
@@ -12069,21 +11877,6 @@ namespace avmplus
 			if (regs.active[i])
 				active_size++;
 
-
-#ifdef AVMPLUS_PROFILE
-		// def-use stats
-		OP* lastUse = ip->lastUse;
-		int span = int(lastUse - (ip+1));
-
-
-		if (span > longestSpan)
-			longestSpan = span;
-
-		// Debugger version track statistics and dumps out data along the way
-		// if wanted.
-		if (!regs.free)
-			fullyUsedCount++;
-#endif
 
 		// dump out a register map
       

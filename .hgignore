@@ -14,22 +14,13 @@ ErrorConstants.xml
 extensions/Sampler*
 classicprefix_*.pch++
 stale.xml
-MMgc/obj_7/**
-MMgc/obj/**
-platform/win32/obj/**
-platform/win32/obj_7/**
-platform/win32/obj_8/**
-platform/win32/x64/**
-platform/mac/MMgc/build/**
-platform/mac/avmplus/build/**
-platform/mac/shell/build/**
-platform/mac/MMgc/build64/**
-platform/mac/avmplus/build64/**
-platform/mac/shell/build64/**
-platform/win32/Windows Mobile*
-MMgc/obj_8/**
+MMgc/obj*/**
 MMgc/x64/**
 MMgc/Windows Mobile*
+platform/win32/obj*/**
+platform/win32/x64/**
+platform/win32/Windows Mobile*
+platform/mac/*/build*/**
 objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**

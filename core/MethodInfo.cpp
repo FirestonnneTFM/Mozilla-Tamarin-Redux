@@ -107,15 +107,11 @@ namespace avmplus
 				// mark it as interpreted and try to limp along
 				if (mir.overflow)
 				{
-					#ifdef AVMPLUS_INTERP
 					AvmCore* core = this->core();
 					if (returnTraits() == NUMBER_TYPE)
 						implN = Interpreter::interpN;
 					else
 						impl32 = Interpreter::interp32;
-					#else
-					toplevel()->throwError(kOutOfMemoryError);
-					#endif //AVMPLUS_INTERP
 				}
 			}
 			CATCH (Exception *exception) 
@@ -206,9 +202,7 @@ namespace avmplus
 
 		// if we are running mir then the types are native and we
 		// need to box em.
-		#ifdef AVMPLUS_INTERP
 		if (isFlagSet(TURBO))
-		#endif //AVMPLUS_INTERP
 		{
 			// each entry is a pointer into the function's stack frame
 			void **in = (void**)src;			// WARNING this must match with MIR generator
@@ -259,7 +253,6 @@ namespace avmplus
 				at++;
 			}
 		}
-		#ifdef AVMPLUS_INTERP
 		else
 		{
 			// no MIR then we know they are Atoms and we just copy them
@@ -267,7 +260,6 @@ namespace avmplus
 			for(int i=srcPos; i<size; i++)
 				dest[at++] = in[i];
 		}
-		#endif //AVMPLUS_INTERP
 	}
 
 	/**
@@ -289,9 +281,7 @@ namespace avmplus
 
 		// If the method has been jit'd then we need to box em, otherwise just
 		// copy them 
-		#ifdef AVMPLUS_INTERP
 		if (isFlagSet(TURBO))
-		#endif //AVMPLUS_srcTERP
 		{
 			// we allocated double sized entry for each local src CodegenMIR
 			void** out = (void**)dest;		// WARNING this must match with MIR generator
@@ -329,7 +319,6 @@ namespace avmplus
 				}
 			}
 		}
-		#ifdef AVMPLUS_INTERP
 		else
 		{
 			// no MIR then we know they are Atoms and we just copy them
@@ -337,7 +326,6 @@ namespace avmplus
 			for(int i=destPos; i<size; i++)
 				out[i] = src[at++];
 		}
-		#endif //AVMPLUS_srcTERP
 	}
 
 	uint32 MethodInfo::size() const

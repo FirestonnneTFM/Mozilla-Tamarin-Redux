@@ -39,7 +39,6 @@
 #define __avmplus_Interpreter__
 
 
-#ifdef AVMPLUS_INTERP
 namespace avmplus
 {
 	class Interpreter
@@ -87,6 +86,5 @@ namespace avmplus
 #endif
 	};
 }
-#endif /* AVMPLUS_INTERP */
 
 #endif // __avmplus_Interpreter__

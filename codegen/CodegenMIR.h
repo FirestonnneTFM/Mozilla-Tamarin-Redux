@@ -986,33 +986,8 @@ namespace avmplus
 
 		uint32  maxArgCount;        // most number of arguments used in a call
 
-		#ifdef AVMPLUS_PROFILE
-		// register allocator stats
-		int     fullyUsedCount;     // number of times all registers fully used
-		int     longestSpan;        // most number of instructions that a register is used
-		int		spills;			    // number of spills required
-		int     steals;				// number of spills due to a register being stolen.
-		int		remats;				// number of rematerializations 
-
-		// profiler stats	 
-		uint64  verifyStartTime;	// note the time we started verification
-		uint64  mdStartTime;		// note the time we started MD generation
-
-		int		mInstructionCount;  // number of machine instructions
-		#define incInstructionCount() mInstructionCount++
-
-		#ifdef _DEBUG
-		// buffer tuning information
-		enum { SZ_ABC, SZ_MIR, SZ_MD, SZ_MIRWASTE, SZ_MDWASTE, SZ_MIREPI, SZ_MDEPI, SZ_MIRPRO, SZ_MDPRO, SZ_MIREXP, SZ_MDEXP, SZ_LAST };
-		double sizingStats[SZ_LAST];
-		#endif /* _DEBUG */
-
-		#else
-
 		#undef incInstructionCount
 		#define incInstructionCount()
-		
-		#endif /* AVMPLUS_PROFILE */
 
 		// pointer to list of argument definitions
 		OP* methodArgs; 
@@ -1042,15 +1017,8 @@ namespace avmplus
 		// cse table which prevents duplicate instructions in the same bb
 		OP* cseTable[MIR_last];
 		OP* firstCse;
-#ifdef AVMPLUS_PROFILE
-		int cseHits;		// measure effectiveness of cse optimizer
-		#define incCseHits() cseHits++
-		int dceHits;		// measure effectiveness of dead code eliminator
-		#define incDceHits() dceHits++
-#else
 		#define incCseHits()
 		#define incDceHits()
-#endif
 
 #ifdef DEBUGGER
 		void extendDefLifetime(OP* current);
