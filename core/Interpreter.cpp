@@ -541,6 +541,15 @@ namespace avmplus
 		MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
 		AvmCore *core = info->core();
 
+		// Should not have to do this on every entry, but the logic that tries to do
+		// it elsewhere is not currently working - at least the verifier installs an impl32 that
+		// bypasses delegateInvoke, so the structure is not created on all paths.
+		
+		if (info->word_code.cache_size > 0 && env->lookup_cache == NULL) {
+			using namespace MMgc;
+			env->lookup_cache = (MethodEnv::LookupCache*)env->core()->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code.cache_size, GC::kContainsPointers|GC::kZero);
+		}
+
 		if (core->minstack)
 		{
 			// Take the address of a local variable to get
@@ -3100,7 +3109,7 @@ namespace avmplus
 				else {
 					*(++sp) = container->atom();
 					env->lookup_cache[cache_slot].timestamp = core->lookupCacheTimestamp();
-					env->lookup_cache[cache_slot].object = AvmCore::atomToScriptObject(sp[0]);
+					WBRC(core->GetGC(), env->lookup_cache, &env->lookup_cache[cache_slot].object, AvmCore::atomToScriptObject(sp[0]));
 				}
 				restore_dxns();
 				NEXT;
@@ -3123,7 +3132,7 @@ namespace avmplus
 				else {
 					*(++sp) = container->atom();
 					env->lookup_cache[cache_slot].timestamp = core->lookupCacheTimestamp();
-					env->lookup_cache[cache_slot].object = AvmCore::atomToScriptObject(sp[0]);
+					WBRC(core->GetGC(), env->lookup_cache, &env->lookup_cache[cache_slot].object, AvmCore::atomToScriptObject(sp[0]));
 				}
 				restore_dxns();
 				NEXT;

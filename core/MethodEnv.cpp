@@ -278,6 +278,7 @@ namespace avmplus
 	Atom MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
 	{
 		env->impl32 = env->method->impl32;
+#if 0 // This is handled near the top of interp() for the moment, see comments there
 #ifdef AVMPLUS_WORD_CODE
 		{
 			// Install the lookup cache here, if the information is available to create it.
@@ -286,10 +287,12 @@ namespace avmplus
 			MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
 			int n;
 			if ((n = info->word_code.cache_size) > 0) {
+				AvmAssert(env->lookup_cache == NULL);
 				env->lookup_cache = (LookupCache*)env->core()->GetGC()->Alloc(sizeof(LookupCache)*n, GC::kContainsPointers|GC::kZero);
 			}
 		}
 #endif
+#endif // 0
 		return env->impl32(env, argc, ap);
 	}
 
