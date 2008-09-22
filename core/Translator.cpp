@@ -167,13 +167,6 @@ namespace avmplus
 		b->patch_offset = patch_offset;
 		backpatch_info* q = backpatches;
 		backpatch_info* qq = NULL;
-#ifdef _DEBUG
-		while (q != NULL) {
-			AvmAssert(q->patch_offset != patch_offset);
-			q = q->next;
-		}
-		q = backpatches;
-#endif
 		while (q != NULL && q->target_pc < b->target_pc) {
 			qq = q;
 			q = q->next;
