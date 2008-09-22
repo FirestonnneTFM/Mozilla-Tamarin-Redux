@@ -13,10 +13,10 @@
 			Name="Win32"
 		/>
 		<Platform
-			Name="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
+			Name="Windows Mobile 6 Professional SDK (ARMV4I)"
 		/>
 		<Platform
-			Name="Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+			Name="x64"
 		/>
 	</Platforms>
 	<ToolFiles>
@@ -95,12 +95,12 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="obj_9_PocketPC/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9_PocketPC/$(ProjectName)/$(ConfigurationName)"
+			Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -121,24 +121,22 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
-				AdditionalOptions="/QRthumb"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="THUMB;WIN32_LEAN_AND_MEAN;ARM;_ARM_;ARMV4;UNICODE;WIN32;AVMPLUS_ARM;UNDER_CE=$(CEVER);NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_VERBOSE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;UNICODE;UNDER_CE=0x501;_WIN32_WCE=0x501;AVMPLUS_ARM;ARM;_ARM_;ARMV5;_DEBUG;DEBUG;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderThrough=""
 				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
-				CompileForArchitecture="2"
+				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -180,9 +178,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			Name="Debug|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -201,29 +199,28 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TargetEnvironment="1"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				AdditionalOptions="/QRthumb"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;ARM;_ARM_;ARMV4;UNICODE;WIN32;AVMPLUS_ARM;UNDER_CE=$(CEVER);_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_VERBOSE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
+				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderThrough=""
 				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201;4291"
-				CompileForArchitecture="2"
+				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -250,18 +247,7 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
 			/>
 		</Configuration>
 		<Configuration
@@ -340,12 +326,12 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="obj_9_PocketPC/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9_PocketPC/$(ProjectName)/$(ConfigurationName)"
+			Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
+			CharacterSet="1"
 			WholeProgramOptimization="0"
 			>
 			<Tool
@@ -367,30 +353,24 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
-				AdditionalOptions="/QRthumb"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="THUMB;WIN32_LEAN_AND_MEAN;ARM;_ARM_;ARMV4;UNICODE;WIN32;AVMPLUS_ARM;UNDER_CE=$(CEVER);NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;UNICODE;UNDER_CE=0x501;_WIN32_WCE=0x501;AVMPLUS_ARM;ARM;_ARM_;ARMV5;NDEBUG;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
-				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
-				StructMemberAlignment="3"
-				BufferSecurityCheck="false"
+				BufferSecurityCheck="true"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough="nanojit.h"
+				PrecompiledHeaderThrough=""
 				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
-				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
-				CompileForArchitecture="2"
-				InterworkCalls="false"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -432,9 +412,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			Name="Release|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -454,35 +434,30 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TargetEnvironment="1"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				AdditionalOptions="/QRthumb"
-				Optimization="0"
-				FavorSizeOrSpeed="2"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;ARM;_ARM_;ARMV4;UNICODE;WIN32;AVMPLUS_ARM;UNDER_CE=$(CEVER);NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_VERBOSE"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
-				ExceptionHandling="2"
+				ExceptionHandling="0"
 				RuntimeLibrary="0"
-				StructMemberAlignment="3"
-				BufferSecurityCheck="false"
+				BufferSecurityCheck="true"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough="nanojit.h"
+				PrecompiledHeaderThrough=""
 				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201;4291"
-				CompileForArchitecture="2"
-				InterworkCalls="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="0"
+				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -509,18 +484,7 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
 			/>
 		</Configuration>
 		<Configuration
@@ -544,6 +508,168 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="0"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit;;..\..\..\..\modules\vtune"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;VTUNE;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;VTUNE"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderThrough=""
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
+				BrowseInformation="1"
+				WarningLevel="4"
+				WarnAsError="true"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4189;4740;4189;4310"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="VTune|Windows Mobile 6 Professional SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="3"
+				InlineFunctionExpansion="0"
+				FavorSizeOrSpeed="2"
+				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;VTUNE;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderThrough=""
+				AssemblerOutput="4"
+				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
+				BrowseInformation="1"
+				WarningLevel="4"
+				WarnAsError="true"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4189;4740;4189;4310"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="VTune|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -595,180 +721,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="VTune|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="3"
-				InlineFunctionExpansion="0"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;VTUNE;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="false"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				AssemblerOutput="4"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="VTune|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="3"
-				InlineFunctionExpansion="0"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;VTUNE;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="false"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				AssemblerOutput="4"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201;4291"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
 			/>
 		</Configuration>
 		<Configuration
@@ -847,9 +799,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_Debugger|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
+			Name="Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -874,8 +826,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -885,15 +836,15 @@
 				BufferSecurityCheck="true"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderThrough=""
 				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
+				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -935,9 +886,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_Debugger|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			Name="Release_Debugger|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -957,13 +908,11 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TargetEnvironment="1"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
@@ -973,15 +922,16 @@
 				BufferSecurityCheck="true"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderThrough=""
 				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
-				DisableSpecificWarnings="4201;4291"
+				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1008,18 +958,7 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
 			/>
 		</Configuration>
 		<Configuration
@@ -1095,9 +1034,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug_Debugger|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
+			Name="Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -1129,183 +1068,13 @@
 				RuntimeLibrary="1"
 				TreatWChar_tAsBuiltInType="false"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_Debugger|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_DEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="1"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201;4291"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release_MinBuild|Win32"
-			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_MINBUILD"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="true"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderThrough=""
-				AssemblerOutput="4"
 				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
@@ -1333,83 +1102,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release_MinBuild|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_MINBUILD"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="true"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				AssemblerOutput="4"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
 				Name="VCCodeSignTool"
 			/>
 			<Tool
@@ -1425,97 +1117,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release_MinBuild|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_MINBUILD"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="true"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				AssemblerOutput="4"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="0"
-				DisableSpecificWarnings="4201;4291"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_MinBuild|Win32"
-			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			Name="Debug_Debugger|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -1534,12 +1138,13 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_MINBUILD"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_DEBUG;_CONSOLE;DEBUGGER;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="false"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -1582,675 +1187,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_MinBuild|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_MINBUILD"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="1"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_MinBuild|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_MINBUILD"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="1"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201;4291"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release_ARM|Win32"
-			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="true"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
-				AssemblerOutput="4"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release_ARM|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="obj_9_PocketPC/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9_PocketPC/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="3"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;ARM;_ARM_;ARMV4;UNICODE;WIN32;AVMPLUS_ARM;UNDER_CE=$(CEVER);NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				StructMemberAlignment="3"
-				BufferSecurityCheck="false"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough="nanojit.h"
-				AssemblerOutput="4"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
-				CompileForArchitecture="2"
-				InterworkCalls="false"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release_ARM|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			WholeProgramOptimization="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				AdditionalOptions="/QRthumb"
-				Optimization="0"
-				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;ARM;_ARM_;ARMV4;UNICODE;WIN32;AVMPLUS_ARM;UNDER_CE=$(CEVER);NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_VERBOSE"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="2"
-				RuntimeLibrary="0"
-				StructMemberAlignment="3"
-				BufferSecurityCheck="false"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough="nanojit.h"
-				AssemblerOutput="4"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201;4291"
-				CompileForArchitecture="2"
-				InterworkCalls="true"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_ARM|Win32"
-			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;AVMPLUS_IA32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_ARM|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-			OutputDirectory="obj_9_PocketPC/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj_9_PocketPC/$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="NDEBUG;WIN32_LEAN_AND_MEAN;WIN32;ARM;_ARM_;ARMV4;UNICODE;UNDER_CE=$(CEVER);AVMPLUS_ARM;_CRT_SECURE_NO_DEPRECATE;MMGC_ARM;AVMPLUS_VERBOSE"
-				StringPooling="true"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				StructMemberAlignment="4"
-				BufferSecurityCheck="true"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310;4201;4291"
-				CompileForArchitecture="2"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_ARM|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="1"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				AdditionalOptions="/QRthumb"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\MMgc;..\..\core;..\..\pcre;..\..\nanojit"
-				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;ARM;_ARM_;ARMV4;UNICODE;WIN32;AVMPLUS_ARM;UNDER_CE=$(CEVER);_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_VERBOSE"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
-				RuntimeLibrary="1"
-				TreatWChar_tAsBuiltInType="false"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="nanojit.h"
-				ProgramDataBaseFileName="$(IntDir)/nanojit.pdb"
-				BrowseInformation="1"
-				WarningLevel="4"
-				WarnAsError="true"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4201;4291"
-				CompileForArchitecture="2"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
 			/>
 		</Configuration>
 	</Configurations>
@@ -2290,7 +1226,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
+					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2298,7 +1234,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2314,7 +1250,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
+					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2322,7 +1258,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2338,7 +1274,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
+					Name="VTune|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2346,7 +1282,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="VTune|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					Name="VTune|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2362,7 +1298,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
+					Name="Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2370,7 +1306,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_Debugger|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					Name="Release_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2386,7 +1322,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Debugger|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
+					Name="Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2394,103 +1330,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_Debugger|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_MinBuild|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_MinBuild|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_MinBuild|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_MinBuild|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_MinBuild|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_MinBuild|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_ARM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_ARM|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_ARM|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_ARM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_ARM|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_ARM|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					Name="Debug_Debugger|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2517,76 +1357,28 @@
 			<File
 				RelativePath="..\..\nanojit\Nativei386.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_ARM|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_ARM|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_ARM|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_ARM|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\nanojit\NativeThumb.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -2602,7 +1394,39 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="VTune|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|Windows Mobile 6 Professional SDK (ARMV4I)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -2618,6 +1442,22 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Debugger|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Debug_Debugger|Win32"
 					ExcludedFromBuild="true"
 					>
@@ -2626,7 +1466,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release_MinBuild|Win32"
+					Name="Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -2634,23 +1474,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug_MinBuild|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_ARM|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_ARM|Win32"
+					Name="Debug_Debugger|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool

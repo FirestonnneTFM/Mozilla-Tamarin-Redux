@@ -137,7 +137,11 @@ namespace avmplus
 		config.verbose_addrs = false;
 		#endif
 
-	    SetMIREnabled(true);
+		#ifdef AVMPLUS_ARM
+		SetMIREnabled(false);
+		#else
+		SetMIREnabled(true);
+		#endif
 
 		#ifdef AVMPLUS_VERIFYALL
 	    	config.verifyall = false;
@@ -158,8 +162,8 @@ namespace avmplus
         #endif
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			// forcemir flag forces use of MIR instead of interpreter
-			config.forcemir = false;
+			// jit flag forces use of MIR/LIR instead of interpreter
+			config.jit = false;
 			config.cseopt = true;
 
     	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)

@@ -120,27 +120,27 @@ namespace avmplus
             #endif
 
 			#if defined AVMPLUS_MIR
-			CodegenMIR mir(this);
+			CodegenMIR jit(this);
 			#elif defined FEATURE_NANOJIT
-			CodegenLIR mir(this);
+			CodegenLIR jit(this);
 			#endif
 
 			TRY(core, kCatchAction_Rethrow)
 			{
-				verifier.verify(&mir);	// pass 2 - data flow
+				verifier.verify(&jit);	// pass 2 - data flow
                 #ifdef PERFM
                 _tprof_end();
                 #endif
         
-				if (!mir.overflow)
-					mir.emitMD(); // pass 3 - generate code
+				if (!jit.overflow)
+					jit.emitMD(); // pass 3 - generate code
 
 				// the MD buffer can overflow so we need to re-iterate
 				// over the whole thing, since we aren't yet robust enough
 				// to just rebuild the MD code.
 
 				// mark it as interpreted and try to limp along
-				if (mir.overflow)
+				if (jit.overflow)
 				{
 					AvmCore* core = this->core();
 					if (returnTraits() == NUMBER_TYPE)
@@ -151,8 +151,9 @@ namespace avmplus
 			}
 			CATCH (Exception *exception) 
 			{
-				// fixme! 
-				//mir.clearMIRBuffers();
+                #ifdef AVMPLUS_MIR
+				jit.clearMIRBuffers();
+                #endif
 
 				// re-throw exception
 				core->throwException(exception);
@@ -236,7 +237,7 @@ namespace avmplus
 		int size = srcPos+length;
 		int at = destPos;
 
-		// if we are running mir then the types are native and we
+		// if we are running jit then the types are native and we
 		// need to box em.
 		if (isFlagSet(TURBO))
 		{

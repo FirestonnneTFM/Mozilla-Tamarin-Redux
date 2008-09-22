@@ -165,10 +165,6 @@ extern  "C"
 #endif
 namespace avmplus
 {
-	#ifdef VTUNE
-		extern void VTune_RegisterMethod(MethodInfo* info, CodegenLIR *mir, AvmCore* core); 
-	#endif  // VTUNE
-
 		#define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
 		#define COREADDR(f) coreAddr((int (AvmCore::*)())(&f))
 		#define GCADDR(f) gcAddr((int (MMgc::GC::*)())(&f))
@@ -548,11 +544,13 @@ namespace avmplus
 
 		overflow = false;
 	
+        /*
 		#ifdef VTUNE
 		hasDebugInfo = false;
 		vtune = 0;
 		mdOffsets = 0;
-		#endif /* VTUNE */
+		#endif // VTUNE
+        */
 
         // set up the generator LIR pipeline
         if (!pool->codePages) {
@@ -875,6 +873,11 @@ namespace avmplus
     };
 #endif //  _DEBUG
 
+// if DEFER_STORES is defined, we defer local variable stores to the
+// ends of basic blocks, then only emit the ones that are live
+#define DEFER_STORES(...) __VA_ARGS__
+//#define DEFER_STORES(...) 
+
     class CopyPropagation: public LirWriter
     {
         GC *gc;
@@ -882,9 +885,10 @@ namespace avmplus
         LIns *vars;
         int nvar;
         BitSet dirty;
+        bool hasExceptions;
     public:
-        CopyPropagation(GC *gc, LirWriter *out, int nvar) 
-            : LirWriter(out), gc(gc), nvar(nvar), dirty()
+        CopyPropagation(GC *gc, LirWriter *out, int nvar, bool ex) 
+            : LirWriter(out), gc(gc), nvar(nvar), dirty(gc,nvar), hasExceptions(ex)
         {
             LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
             WB(gc, this, &tracker, a);
@@ -929,9 +933,9 @@ namespace avmplus
 
         void trackMerge(int i, LIns *cur, LIns *target) {
             (void) i; (void) cur; (void) target;
-            /*AvmAssert(cur == tracker[i]);
-            if (cur != target) {
+            /*if (cur != target) {
                 tracker[i] = 0;
+                dirty.clear(i);
             }*/
         }
 
@@ -953,7 +957,7 @@ namespace avmplus
         LIns *insStore(LIns *value, LIns *base, LIns *disp) {
             if (base == vars) {
                 trackStore(value, disp->constval());
-                return 0;
+                DEFER_STORES(return 0;)
             }
             return out->insStore(value, base, disp);
         }
@@ -961,36 +965,42 @@ namespace avmplus
         LIns *insStorei(LIns *value, LIns *base, int32_t d) {
             if (base == vars) {
                 trackStore(value, d);
-                return 0;
+                DEFER_STORES(return 0;)
             }
             return out->insStorei(value, base, d);
         }
 
         LIns *ins0(LOpcode op) {
             if (op == LIR_label) {
-                saveState();
+                DEFER_STORES(saveState();)
                 clearState();
             }
             return out->ins0(op);
         }
 
         LIns *insBranch(LOpcode v, LInsp cond, LInsp to) {
-            saveState();
+            DEFER_STORES(saveState();)
             return out->insBranch(v, cond, to);
         }
 
         LIns *insCall(uint32_t fid, LInsp args[]) {
-            if (!_functions[fid]._cse)
-                saveState();
-            LIns *i = out->insCall(fid, args);
-
             #ifdef DEBUGGER
-            // debugger might have modified locals, so make sure we reload after call.
-            if (!_functions[fid]._cse)
-                clearState();
+                DEFER_STORES(
+                    if (!_functions[fid]._cse)
+                        saveState();
+                )
+                LIns *i = out->insCall(fid, args);
+                // debugger might have modified locals, so make sure we reload after call.
+                if (!_functions[fid]._cse)
+                    clearState();
+                return i;
+            #else
+                DEFER_STORES(
+                    if (hasExceptions && !_functions[fid]._cse)
+                        saveState();
+                )
+                return out->insCall(fid, args);
             #endif
-
-            return i;
         }
 
         // TODO
@@ -1039,6 +1049,7 @@ namespace avmplus
 		this->state = state;
 		abcStart = state->verifier->code_pos;
 		abcEnd   = abcStart + state->verifier->code_length;
+        framesize = state->verifier->frameSize;
 
         Fragmento *frago = pool->codePages->frago;
         frag = frago->getAnchor(abcStart);
@@ -1059,7 +1070,8 @@ namespace avmplus
             lirout = new (gc) CfgCseFilter(loadfilter, gc);
         }
         lirout = new (gc) ExprFilter(lirout);
-        CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout, state->verifier->frameSize);
+        CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout,
+            framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
 
 		emitStart(lirbuf, lirout);
@@ -1071,14 +1083,14 @@ namespace avmplus
 		lastPcSave = 0;
 
 		//
-		// mir to define incoming method arguments.  Stack 
+		// generate lir to define incoming method arguments.  Stack 
 		// frame allocations follow.
 		//
 
         env_param = lirout->insParam(0, 0);
         argc_param = lirout->insParam(1, 0);
         ap_param = lirout->insParam(2, 0);
-        vars = InsAlloc(state->verifier->frameSize * 8);
+        vars = InsAlloc(framesize * 8);
         lirbuf->sp = vars;
         if (loadfilter)
             loadfilter->sp = vars;
@@ -3334,9 +3346,11 @@ namespace avmplus
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
-			#ifdef VTUNE
+			/*
+            #ifdef VTUNE
 				Ins(LIR_file, InsConst(op1));
-			#endif /* VTUNE */
+			#endif // VTUNE
+            */
 				break;
 		    }
 
@@ -3350,10 +3364,12 @@ namespace avmplus
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
+            /*
 			#ifdef VTUNE
 				Ins(LIR_line, InsConst(op1));
 				hasDebugInfo = true;
-			#endif /* VTUNE */
+			#endif // VTUNE
+            */
 				break;
             }
 
@@ -3383,9 +3399,6 @@ namespace avmplus
 		// op1 = abc opcode target
 		// op2 = what local var contains condition
 
-		// spill all, dont include cond since it gets consumed
-		// UBER IMPORTANT we need to spill prior to compare since
-		// mir MD generations needs compare and branch to be adjacent.
 		LIns* cond;
 		LOpcode br;
 		
@@ -3948,14 +3961,15 @@ namespace avmplus
     };
 #endif
 
-    int deadvars_analyze(GC *gc, LirBuffer *lirbuf, LIns *catcher,
-        SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
+    void CodegenLIR::deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
     {
+        LirBuffer *lirbuf = frag->lirbuf;
+        LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         LIns *vars = lirbuf->sp;
         List<LIns*, LIST_NonGCObjects> looplabels(gc);
-        int iter = 0;
-        BitSet livein;
+        BitSet livein(gc, framesize);
 
+        verbose_only(int iter = 0;)
         bool again;
         do {
             again = false;
@@ -3991,7 +4005,7 @@ namespace avmplus
                     // so it can be propagated to predecessors
                     BitSet *lset = labels.get(i);
                     if (!lset) {
-                        lset = new (gc) BitSet();
+                        lset = new (gc) BitSet(gc, framesize);
                         labels.put(i, lset);
                     }
                     if (lset->setFrom(gc, livein) && !again) {
@@ -4040,18 +4054,23 @@ namespace avmplus
                     break;
                 }
             }
-            ++iter;
+            verbose_only(iter++;)
         }
         while (again);
-        return iter;
+
+        // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
+        verbose_only( if (verbose()) 
+            printf("killing dead stores after %d LA iterations.\n",iter);
+        )
     }
 
-    void deadvars_kill(GC *gc, LirBuffer *lirbuf, LIns *catcher,
-        SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels
-        verbose_only(, LirNameMap *names))
+    void CodegenLIR::deadvars_kill(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels)
     {
+        verbose_only(LirNameMap *names = frag->lirbuf->names;)
+        LIns *catcher = exBranch ? exBranch->getTarget() : 0;
+        LirBuffer *lirbuf = frag->lirbuf;
         LIns *vars = lirbuf->sp;
-        BitSet livein;
+        BitSet livein(gc, framesize);
         LirReader in(lirbuf);
         for (LIns *i = in.read(); i != 0; i = in.read()) {
             LOpcode op = i->opcode();
@@ -4089,12 +4108,7 @@ namespace avmplus
                     // we're at the top of a block, save livein for this block
                     // so it can be propagated to predecessors
                     BitSet *lset = labels.get(i);
-                    if (!lset) {
-                        lset = new (gc) BitSet();
-                        labels.put(i, lset);
-                    } else {
-                        lset->reset();
-                    }
+                    AvmAssert(lset != 0); // all labels have been seen by deadvars_analyze()
                     lset->setFrom(gc, livein);
                     break;
                 }
@@ -4157,18 +4171,8 @@ namespace avmplus
     void CodegenLIR::deadvars()
     {
         SortedMap<LIns*, BitSet*, LIST_GCObjects> labels(gc);
-
-        LirBuffer *lirbuf = frag->lirbuf;
-        LirReader in(lirbuf);
-        LIns *catcher = exBranch ? exBranch->getTarget() : 0;
-        int iter = deadvars_analyze(gc, lirbuf, catcher, labels); (void) iter;
-
-        // now make a final pass, modifying LIR to delete dead stores (make them LIR_neartramps)
-        verbose_only( if (verbose()) 
-            printf("killing dead stores after %d LA iterations.\n",iter);
-        )
-        deadvars_kill(gc, lirbuf, catcher, labels
-            verbose_only(, lirbuf->names));
+        deadvars_analyze(labels);
+        deadvars_kill(labels);
     }
 
     static int jitcount=0;

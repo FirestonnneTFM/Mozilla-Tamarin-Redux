@@ -108,6 +108,7 @@ namespace avmplus
         LIns *exBranch;
         LIns *setjmpResult;
         CopyPropagation *copier;
+        int framesize;
 
         LIns *InsAlloc(int32_t);
         LIns *loadIns(LOpcode op, int32_t disp, LIns *base);
@@ -154,6 +155,8 @@ namespace avmplus
         bool isCodeContextChanged() const;
         void mirLabel(CodegenLabel &l, LIns *target);
         void deadvars();
+        void deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
+        void deadvars_kill(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
 
 	public:
 		CodegenLIR(MethodInfo* info);
