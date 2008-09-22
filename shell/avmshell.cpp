@@ -183,7 +183,7 @@ namespace avmshell
 #ifdef AVMPLUS_AMD64
 		const int kStackMargin = 262144;
 #elif defined(UNDER_CE)
-		const int kStackMargin = 32768;
+		const int kStackMargin = 16384;
 #else
 		const int kStackMargin = 131072;
 #endif
@@ -277,7 +277,8 @@ namespace avmshell
 		#endif
     #endif
     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		printf("          [-Dforcemir]  use MIR always, never interp\n");
+		printf("          [-Dforcemir]  deprecated, use forcejit\n");
+		printf("          [-Ojit]       use jit always, never interp\n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
         #ifdef AVMPLUS_IA32
             printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
@@ -679,13 +680,13 @@ namespace avmshell
 							show_mem = true;
                         #ifdef AVMPLUS_VERBOSE
 						} else if (!strcmp(arg+2, "bbgraph")) {
-							config.bbgraph = true;  // generate basic block graph (only valid with mir switch)
+							config.bbgraph = true;  // generate basic block graph (only valid with MIR)
                         #endif
                     #endif
 
                     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 						} else if (!strcmp(arg+2, "forcemir")) {
-							config.forcemir = true;
+							config.jit = true;
 							
 						} else if (!strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
@@ -694,10 +695,18 @@ namespace avmshell
 						} else {
 							usage();
 						}
+                #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                    } else if (!strcmp(arg, "-Ojit")) {
+                        config.jit = true;
+                #endif
 					} else if (!strcmp(arg, "-memstats")) {
 						GetGC()->gcstats = true;
 					} else if (!strcmp(arg, "-memlimit")) {
+#ifdef UNDER_CE
+						GetGC()->GetGCHeap()->SetHeapLimit(wcstol(argv[++i], 0, 10));
+#else
 						GetGC()->GetGCHeap()->SetHeapLimit(strtol(argv[++i], 0, 10));
+#endif
 					} else if (!strcmp(arg, "-log")) {
 						do_log = true;
 					#ifdef AVMPLUS_INTERACTIVE
@@ -761,28 +770,36 @@ namespace avmshell
 				usage();
 			}
 
-#ifndef UNDER_CE
 			if( do_log )
 			{
 				// open logfile based on last filename
+#ifdef UNDER_CE
+				TCHAR* dot = _tcsrchr(filename, '.');
+				if (!dot)
+					dot = filename+wcslen(filename);
+
+				TCHAR* logname = new TCHAR[dot-filename+5];  // free upon exit
+				wcscpy(logname,filename);
+
+				_tcscpy(logname+(dot-filename),_T(".log"));
+				_wfreopen(logname, L"w", stdout);
+#else
 				const char* dot = strrchr(filename, '.');
 				if (!dot)
 					dot = filename+strlen(filename);
 
 				char* logname = new char[dot-filename+5];  // free upon exit
 				strcpy(logname,filename);
-#ifdef UNDER_CE
-				_tcscpy(logname+(dot-filename),_T(".log"));
-#else
+
 				strcpy(logname+(dot-filename),".log");
-#endif
+
 				printf("%s\n",filename); // but first print name to default stdout
 				FILE *f = freopen(logname, "w", stdout);
 				if (!f)
 				  printf("freopen %s failed.\n",filename);
+#endif
 				delete [] logname;
 			}
-#endif
 			initBuiltinPool();
 			initShellPool();
 
@@ -861,7 +878,7 @@ namespace avmshell
 				FileInputStream f(filename);
 				bool isValid = f.valid();
 				if (!isValid) {
-					fprintf(stderr, "cannot open file: %s\n", filename);
+                    console << "cannot open file: " << filename << "\n";
 					#ifdef DEBUGGER
 					delete profiler;
 					#endif

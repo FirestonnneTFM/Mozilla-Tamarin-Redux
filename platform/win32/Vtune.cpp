@@ -35,10 +35,12 @@
 * the terms of any one of the MPL, the GPL or the LGPL.
 *
 * ***** END LICENSE BLOCK ***** */
-
 #include "avmplus.h"
 
 #ifdef VTUNE
+#ifdef AVMPLUS_MIR
+#include "CodegenMIR.h"
+#endif
 
 namespace avmplus
 {
@@ -131,6 +133,7 @@ namespace avmplus
 		core->console << "env = " << ML->env << "\n\n";
 	}
 	
+#ifdef AVMPLUS_MIR
 	void VTune_RegisterMethod(MethodInfo* info, CodegenMIR *mir, AvmCore* core) 
 	{
 		// vtune method info record
@@ -206,7 +209,8 @@ namespace avmplus
 		if (ML.line_number_table) free(ML.line_number_table);
 		if (ML.method_name) free(ML.method_name);
 		if (ML.source_file_name) free(ML.source_file_name);
-	}		
+	}	
+#endif
 }
 
 #endif /* VTUNE */

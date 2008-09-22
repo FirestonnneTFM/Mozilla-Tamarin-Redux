@@ -69,11 +69,11 @@ namespace avmplus
 	public:
 
 		#if defined AVMPLUS_MIR
-		CodegenMIR *mir;
+		CodegenMIR *jit;
 		#endif // AVMPLUS_MIR
 
 		#ifdef FEATURE_NANOJIT
-		CodegenLIR *mir;
+		CodegenLIR *jit;
 		#endif
 
 		#ifdef AVMPLUS_WORD_CODE
