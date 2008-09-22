@@ -223,7 +223,6 @@ const int kBufferPadding = 16;
 		void initMultinameLate(Multiname& name, Atom index);
         #endif
 
-
 		/**
 		 * Redirects the standard output of the VM to the specified
 		 * output stream.  Output from print() statements and

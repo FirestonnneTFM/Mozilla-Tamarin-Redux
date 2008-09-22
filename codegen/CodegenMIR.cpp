@@ -1773,6 +1773,7 @@ namespace avmplus
 		#if (defined DEBUGGER || defined FEATURE_SAMPLER )
 		names->add(ENVADDR(MethodEnv::debugEnter), "MethodEnv::debugEnter");
 		names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
+		names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");
 		#endif
 
 		names->add(FUNCADDR(AvmCore::atomWriteBarrier), "AvmCore::atomWriteBarrier");
@@ -2561,7 +2562,6 @@ namespace avmplus
 			mirPatchPtr(&br->target, interrupt_label);
 		}
 
-		// this is not fatal but its good to know if our prologue estimation code is off.
 		InsAlloc(0);
 
 		return true;
@@ -5132,7 +5132,6 @@ namespace avmplus
 			}
 		}
 
-		// this is not fatal but its good to know if our epilogue estimation code is off.
 		#ifdef AVMPLUS_VERBOSE
 		if (core->config.bbgraph)
 			buildFlowGraph();

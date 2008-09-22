@@ -67,7 +67,7 @@ namespace MMgc
 			size = (size+3)&~3;
 			if (size <= (size_t)kLargestAlloc) {
 				item = FindSizeClass(size)->Alloc(size);
-				SAMPLE_ALLOC(item, FindSizeClass(size)->Size(item));
+				//No sample here, called from FixedAlloc::Alloc
 			} else {
 				item = LargeAlloc(size);
 				SAMPLE_ALLOC(item, Size(item));
@@ -86,7 +86,7 @@ namespace MMgc
 				SAMPLE_DEALLOC(item, Size(item));
 				LargeFree(item);
 			} else {		
-				SAMPLE_DEALLOC(item, FixedAllocSafe::GetFixedAllocSafe(item)->Size(item));
+				//No sample here, called from FixedAlloc::Free
 				FixedAllocSafe::GetFixedAllocSafe(item)->Free(item);
 			}
 		}

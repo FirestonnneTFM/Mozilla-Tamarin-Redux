@@ -487,10 +487,6 @@ namespace avmplus
 		TRY(this, kCatchAction_Rethrow)
 		{
 			result = main->coerceEnter(main->global->atom());
-			#ifdef AVMPLUS_PROFILE
-			if (dprof.dprofile)
-				dprof.mark((AbcOpcode)0);
-			#endif
 		}
 		CATCH(Exception *exception)
 		{

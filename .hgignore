@@ -15,12 +15,12 @@ extensions/Sampler*
 classicprefix_*.pch++
 stale.xml
 MMgc/obj*/**
-platform/win32/obj*/**
-platform/win32/x64/**
-platform/mac/*/build*/**
-platform/win32/Windows Mobile*
 MMgc/x64/**
 MMgc/Windows Mobile*
+platform/win32/obj*/**
+platform/win32/x64/**
+platform/win32/Windows Mobile*
+platform/mac/*/build*/**
 objdir-*/**
 *_DBG.OBJ/**
 *_OPT.OBJ/**
@@ -47,3 +47,9 @@ obj-dir/**
 axscript/vc2008/obj/**
 axscript/vc2008/*.ncb
 axscript/vc2008/axtam.vcproj.*.user
+core/*.out
+shell/*.out
+*.pp
+*.ii
+*.deps
+

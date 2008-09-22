@@ -245,6 +245,15 @@ package flash.sampler
      * @keyword sampleInternalAllocs
      */
 	public native function sampleInternalAllocs(b:Boolean):void;
+
+	/**
+     * Set a callback function for the sampler - this function will be called when the sample stream is almost
+     * exhausted.  This should be used to process samples before the sample buffer is filled.  pauseSampling will be called
+     * before the callback is called, and startSampling will be called after the callback has been executed.
+     * @langversion 3.0
+     * @keyword sampleInternalAllocs
+     */
+	public native function setSamplerCallback(f:Function):void;
     
 	/**
 	* Returns the size in memory of a specified object when used with the Flash Player 9.0.115.0 or later debugger version. If 

@@ -167,7 +167,7 @@ out += " * Use the script '" + SCRIPT_NAME + "' to generate this file.\n";
 out += " */\n";
 out += "\n";
 
-out += "#if defined(AVMPLUS_PROFILE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)\n";
+out += "#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)\n";
 out += "const char * const opNames[] = {\n";
 var first=true;
 for (var i=0; i<opcodes.length; i++) {
