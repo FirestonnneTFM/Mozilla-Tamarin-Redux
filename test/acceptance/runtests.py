@@ -274,15 +274,15 @@ def compile_test(as):
         exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as)
     if not isfile(globalabc):
         exit('ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc' % globalabc)
-    #if not isfile(shellabc):
-    #    exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % shellabc)
+    if not isfile(shellabc):
+        exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % shellabc)
   
     if asc.endswith('.jar'):
         cmd = 'java -jar ' + asc
     else:
         cmd = asc
     cmd += ' ' + ascargs
-    cmd += ' -import %s ' %(globalabc)
+    cmd += ' -import %s -import %s ' %(globalabc,shellabc)
     (dir, file) = split(as)
     verbose_print('   compiling %s' % file)
     for p in parents(dir):

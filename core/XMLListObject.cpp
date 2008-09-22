@@ -729,7 +729,7 @@ namespace avmplus
 		}
 		else if (_length() == 1)
 		{
-			return core->equals (m_children.getAt(0), V);
+			return core->equals(m_children.getAt(0), V);
 		}
 
 		return falseAtom;
@@ -958,7 +958,7 @@ namespace avmplus
 		for (uint32 i = 0; i < _length(); i++)
 		{
 			// Spec says "comparison l[i] == value)" which is different than _equals
-			if (core->equals (m_children.getAt(i), value) == trueAtom)
+			if (core->equals(m_children.getAt(i), value) == trueAtom)
 				return true;
 		}
 

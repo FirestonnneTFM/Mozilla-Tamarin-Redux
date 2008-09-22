@@ -604,10 +604,10 @@ namespace avmplus
 		Atom* scopeBase = framep + local_count;
 		Atom* withBase = NULL;
 
-#ifdef DEBUGGER
+		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
 		CallStackNode callStackNode(env, info, framep, 0, argc, ap, 0 /* later changed to 'pc' */);
 		// don't allow entry into the debugger until we have setup the frame
-#endif
+		#endif
 
 		CodeContextAtom savedCodeContext = core->codeContextAtom;
 		if (info->pool->domain->base != NULL) {
