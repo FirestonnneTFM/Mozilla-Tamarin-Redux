@@ -2163,15 +2163,6 @@ bail:
 
 			while(m < memEnd)
 			{
-#ifdef WIN32
-				// first skip uncommitted memory
-				MEMORY_BASIC_INFORMATION mib;
-				VirtualQuery((void*) m, &mib, sizeof(MEMORY_BASIC_INFORMATION));
-				if((mib.Protect & PAGE_READWRITE) == 0) {
-					m += mib.RegionSize;
-					continue;
-				}
-#endif
 				// divide by 4K to get index
 				int bits = GetPageMapValue(m);
 				if(bits == kNonGC) {
