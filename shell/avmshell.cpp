@@ -213,7 +213,10 @@ namespace avmshell
 	#else
 	void Shell::computeStackBase()
 	{
-		const int kMaxAvmPlusStack = 512*1024;
+		// A hard limit here is always wrong on every system.
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=456054
+		
+		const int kMaxAvmPlusStack = 4096*1024;  // changed to 4MB for testing purposes, used to be 512KB
 		int sp;
 		#ifdef AVMPLUS_PPC
 		asm("mr %0,r1" : "=r" (sp));
