@@ -64,9 +64,7 @@ namespace avmplus
 		linenum         = 0;
 
 		// scopechain stuff
-		#ifdef AVMPLUS_INTERP
 		this->scopeDepth = NULL;
-		#endif
 #else
 		// Avoid compiler warnings
 		(void)ap;

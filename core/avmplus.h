@@ -306,8 +306,6 @@ namespace avmplus
 #include "BuiltinTraits.h"
 #include "NamespaceSet.h"
 #include "Multiname.h"
-#include "DynamicProfiler.h"
-#include "StaticProfiler.h"
 #include "Sampler.h"
 #include "AvmCore.h"
 #include "AtomWriteBarrier.h"

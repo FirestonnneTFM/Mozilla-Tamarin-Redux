@@ -130,12 +130,10 @@ namespace avmplus
 		verbose = false;
 		#endif
 
-		#ifdef AVMPLUS_INTERP
-			#ifdef AVMPLUS_ARM
-			SetMIREnabled(false);
-			#else
- 		    SetMIREnabled(true);
-			#endif
+		#ifdef AVMPLUS_ARM
+		SetMIREnabled(false);
+		#else
+		SetMIREnabled(true);
 		#endif
 
 		#ifdef AVMPLUS_VERIFYALL
@@ -144,10 +142,8 @@ namespace avmplus
 
 		#ifdef AVMPLUS_MIR
 
-			#ifdef AVMPLUS_INTERP
 			// forcemir flag forces use of MIR instead of interpreter
 			forcemir = false;
-			#endif
 	
 			cseopt = true;
 			dceopt = true;
@@ -466,17 +462,9 @@ namespace avmplus
 		TRY(this, kCatchAction_Rethrow)
 		{
 			result = main->coerceEnter(main->global->atom());
-			#ifdef AVMPLUS_PROFILE
-			if (dprof.dprofile)
-				dprof.mark((AbcOpcode)0);
-			#endif
 		}
 		CATCH(Exception *exception)
 		{
-			#ifdef AVMPLUS_PROFILE
-			if (dprof.dprofile)
-				dprof.mark((AbcOpcode)0);
-			#endif
 			// Re-throw exception
 			throwException(exception);
 		}
@@ -663,7 +651,7 @@ return the result of the comparison ToPrimitive(x) == y.
 22. Return false.
 	*/
 
-    Atom AvmCore::eq(Atom lhs, Atom rhs)
+    Atom AvmCore::equals(Atom lhs, Atom rhs)
     {
 		if (isNull(lhs)) lhs = 0;
 		if (isNull(rhs)) rhs = 0;
@@ -741,12 +729,12 @@ return the result of the comparison ToPrimitive(x) == y.
 			// 16. If Type(x) is Number and Type(y) is String,
 			// return the result of the comparison x == ToNumber(y).
             if (isNumber(lhs) && isString(rhs))
-                return eq(lhs, doubleToAtom(number(rhs)));
+                return equals(lhs, doubleToAtom(number(rhs)));
 			
 			// 17. If Type(x) is String and Type(y) is Number,
 			// return the result of the comparison ToNumber(x) == y.
             if (isString(lhs) && isNumber(rhs))
-                return eq(doubleToAtom(number(lhs)), rhs);
+                return equals(doubleToAtom(number(lhs)), rhs);
 
 			// E4X 11.5.1, step 4.  Placed slightly lower then in the spec
 			// to handle quicker cases earlier.  No cases above should be comparing
@@ -759,22 +747,22 @@ return the result of the comparison ToPrimitive(x) == y.
 
 			// 18. If Type(x) is Boolean, return the result of the comparison ToNumber(x) == y.
             if (ltype == kBooleanType)
-                return eq(lhs&~7|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
+                return equals(lhs&~7|kIntegerType, rhs);  // equal(toInteger(lhs), rhs)
 			
 			// 19. If Type(y) is Boolean, return the result of the comparison x == ToNumber(y).
             if (rtype == kBooleanType)
-                return eq(lhs, rhs&~7|kIntegerType);  // equal(lhs, toInteger(rhs))
+                return equals(lhs, rhs&~7|kIntegerType);  // equal(lhs, toInteger(rhs))
 
 			// 20. If Type(x) is either String or Number and Type(y) is Object,
 			// return the result of the comparison x == ToPrimitive(y).
 
             if ((isString(lhs) || isNumber(lhs)) && rtype == kObjectType)
-				return eq(lhs, atomToScriptObject(rhs)->defaultValue());
+				return equals(lhs, atomToScriptObject(rhs)->defaultValue());
 
 			// 21. If Type(x) is Object and Type(y) is either String or Number,
 			// return the result of the comparison ToPrimitive(x) == y.
             if ((isString(rhs) || isNumber(rhs)) && ltype == kObjectType)
-				return eq(atomToScriptObject(lhs)->defaultValue(), rhs);
+				return equals(atomToScriptObject(lhs)->defaultValue(), rhs);
         }
 		return falseAtom;
     }
@@ -1843,15 +1831,6 @@ return the result of the comparison ToPrimitive(x) == y.
 			return knull;
 		}
     }
-
-#ifdef AVMPLUS_PROFILE
-	void AvmCore::dump()
-	{
-		sprof.dump(console);
-		dprof.dump(console);
-	}
-#endif
-
 
 	void AvmCore::setConsoleStream(OutputStream *stream)
 	{
@@ -3174,11 +3153,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	#endif
 	Atom AvmCore::doubleToAtom_sse2(double n)
 	{
-		#ifdef AVMPLUS_PROFILE
-		if (dprof.dprofile)
-			DynamicProfiler::StackMark mark(OP_doubletoatom, &dprof);
-		#endif
-
 		// handle integer values w/out allocation
 		// this logic rounds in the wrong direction for E3, but
 		// we never use a rounded value, only cleanly converted values.
@@ -3281,11 +3255,6 @@ return the result of the comparison ToPrimitive(x) == y.
 #ifndef AVMPLUS_AMD64
 	Atom AvmCore::doubleToAtom(double n)
 	{
-		#ifdef AVMPLUS_PROFILE
-		if (dprof.dprofile)
-			DynamicProfiler::StackMark mark(OP_doubletoatom, &dprof);
-		#endif
-
 		// There is no need for special logic for NaN or +/-Inf since we don't
         // ever test for those values in coreplayer.  As far as we're concerned
         // they are regular numeric values.

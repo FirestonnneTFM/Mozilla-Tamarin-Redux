@@ -148,11 +148,6 @@ const int kBufferPadding = 16;
 
 		#endif /* MIR */
 
-#ifdef AVMPLUS_PROFILE
-		StaticProfiler sprof;
-		DynamicProfiler dprof;
-#endif
-
 		/**
 		 * Redirects the standard output of the VM to the specified
 		 * output stream.  Output from print() statements and
@@ -177,17 +172,15 @@ const int kBufferPadding = 16;
 		bool verbose;
 		#endif /* AVMPLUS_VERBOSE */
 
-        #ifdef AVMPLUS_INTERP
-		    inline void SetMIREnabled(bool isEnabled)
-			{
-				turbo = isEnabled;
-			}
+		inline void SetMIREnabled(bool isEnabled)
+		{
+			turbo = isEnabled;
+		}
 
-		    inline bool IsMIREnabled() const
-			{
-				return turbo;
-			}
-		#endif	
+		inline bool IsMIREnabled() const
+		{
+			return turbo;
+		}
 
 	protected:
 
@@ -203,14 +196,11 @@ const int kBufferPadding = 16;
 		 * builds on supported platforms.
 		 */
 
-        #ifdef AVMPLUS_INTERP
-		    bool turbo;
-		#endif	
+		bool turbo;
 	public:
 
 		#ifdef AVMPLUS_MIR
 
-		#ifdef AVMPLUS_INTERP
 		/**
 		 * To speed up initialization, we don't use MIR on
 		 * $init methods; we use interp instead.  For testing
@@ -220,7 +210,6 @@ const int kBufferPadding = 16;
 		 * instead of interp.
 		 */
 		bool forcemir;
-		#endif
 
 		bool cseopt;
 		bool dceopt;
@@ -399,7 +388,7 @@ const int kBufferPadding = 16;
 
 
 		/** Implementation of OP_equals */
-		Atom eq(Atom lhs, Atom rhs);
+		Atom equals(Atom lhs, Atom rhs);
 		
 		/**
 		 * this is the abstract relational comparison algorithm according to ECMA 262 11.8.5
@@ -942,13 +931,6 @@ const int kBufferPadding = 16;
 		 */
 		double number(Atom atom) const;
 
-#ifdef AVMPLUS_PROFILE
-		/**
-		 * dump profiler stats 
-		 */
-		void dump();
-#endif
-		
 		/**
 		 * produce an atom from a string.  used only for string constants.
 		 * @param s

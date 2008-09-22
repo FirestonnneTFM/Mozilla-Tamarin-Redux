@@ -60,9 +60,7 @@ namespace avmplus
 		#ifdef AVMPLUS_MIR
 		friend class CodegenMIR;
 		#endif 
-		#ifdef AVMPLUS_INTERP
 		friend class Interpreter;
-		#endif
 		friend class HeapMultiname;
 		int flags;
 		Stringp name;

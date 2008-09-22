@@ -171,9 +171,7 @@ namespace avmplus
 		Traits**			traits;		// array of traits for AS registers
 		sintptr volatile*	eip; 	// ptr to where the current pc is stored
 		uint32_t*			ap;
-		#ifdef AVMPLUS_INTERP
 		int32_t*			scopeDepth; // Only used by the interpreter! With MIR, look for NULL entires in the scopeBase array.
-		#endif
 		int32_t				linenum;
 		int32_t				depth;
 		uint32_t			argc;

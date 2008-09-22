@@ -332,13 +332,9 @@ namespace avmplus
 		TRY(core, kCatchAction_ReportAsError)
 		{
 			trace_callback->call(argc, argv);
-			if (core->dprof.dprofile)
-				core->dprof.endmark();
 		}
 		CATCH(Exception *exception)
 		{
-			if (core->dprof.dprofile)
-				core->dprof.endmark();
 			(void) exception;
 			//core->uncaughtException(exception);
 		}

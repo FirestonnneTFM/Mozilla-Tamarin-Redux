@@ -117,7 +117,6 @@ namespace avmplus
 		/** set to indicate that a function has no bytecode body. */
 		static const int ABSTRACT_METHOD	= 0x08000000;
 
-		#ifdef AVMPLUS_INTERP
 		/**
 		 * set to indicate that a function has been compiled
 		 * to native code.  In release mode we always compile
@@ -130,7 +129,6 @@ namespace avmplus
 		 * recommended to be interpreted. 
 		 */
 		static const int SUGGEST_INTERP		= 0x40000000;
-		#endif /* AVMPLUS_INTERP */
 
 		/**
 		 * set once the signature types have been resolved and

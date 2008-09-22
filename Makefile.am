@@ -56,7 +56,6 @@ libavmplus_la_SOURCES = \
 	core/DateObject.cpp \
 	core/Domain.cpp \
 	core/DomainEnv.cpp \
-	core/DynamicProfiler.cpp \
 	core/E4XNode.cpp \
 	core/ErrorClass.cpp \
 	core/ErrorConstants.cpp \
@@ -88,7 +87,6 @@ libavmplus_la_SOURCES = \
 	core/ScriptBuffer.cpp \
 	core/ScriptObject.cpp \
 	core/StackTrace.cpp \
-	core/StaticProfiler.cpp \
 	core/StringBuffer.cpp \
 	core/StringClass.cpp \
 	core/StringObject.cpp \

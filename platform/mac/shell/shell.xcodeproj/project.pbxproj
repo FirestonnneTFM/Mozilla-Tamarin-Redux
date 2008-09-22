@@ -191,8 +191,6 @@
 		4E62BE800D6244D300A24F2D /* Domain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Domain.h; sourceTree = "<group>"; };
 		4E62BE810D6244D300A24F2D /* DomainEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DomainEnv.cpp; sourceTree = "<group>"; };
 		4E62BE820D6244D300A24F2D /* DomainEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DomainEnv.h; sourceTree = "<group>"; };
-		4E62BE850D6244D300A24F2D /* DynamicProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DynamicProfiler.cpp; sourceTree = "<group>"; };
-		4E62BE860D6244D300A24F2D /* DynamicProfiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DynamicProfiler.h; sourceTree = "<group>"; };
 		4E62BE870D6244D300A24F2D /* E4XNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = E4XNode.cpp; sourceTree = "<group>"; };
 		4E62BE880D6244D300A24F2D /* E4XNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = E4XNode.h; sourceTree = "<group>"; };
 		4E62BE890D6244D300A24F2D /* Error.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Error.as; sourceTree = "<group>"; };
@@ -272,8 +270,6 @@
 		4E62BED40D6244D300A24F2D /* SortedIntMap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SortedIntMap.h; sourceTree = "<group>"; };
 		4E62BED50D6244D300A24F2D /* StackTrace.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = StackTrace.cpp; sourceTree = "<group>"; };
 		4E62BED60D6244D300A24F2D /* StackTrace.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = StackTrace.h; sourceTree = "<group>"; };
-		4E62BED70D6244D300A24F2D /* StaticProfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = StaticProfiler.cpp; sourceTree = "<group>"; };
-		4E62BED80D6244D300A24F2D /* StaticProfiler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = StaticProfiler.h; sourceTree = "<group>"; };
 		4E62BED90D6244D300A24F2D /* String.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = String.as; sourceTree = "<group>"; };
 		4E62BEDA0D6244D300A24F2D /* StringBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = StringBuffer.cpp; sourceTree = "<group>"; };
 		4E62BEDB0D6244D300A24F2D /* StringBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = StringBuffer.h; sourceTree = "<group>"; };
@@ -549,8 +545,6 @@
 				4E62BE800D6244D300A24F2D /* Domain.h */,
 				4E62BE810D6244D300A24F2D /* DomainEnv.cpp */,
 				4E62BE820D6244D300A24F2D /* DomainEnv.h */,
-				4E62BE850D6244D300A24F2D /* DynamicProfiler.cpp */,
-				4E62BE860D6244D300A24F2D /* DynamicProfiler.h */,
 				4E62BE870D6244D300A24F2D /* E4XNode.cpp */,
 				4E62BE880D6244D300A24F2D /* E4XNode.h */,
 				4E62BE890D6244D300A24F2D /* Error.as */,
@@ -630,8 +624,6 @@
 				4E62BED40D6244D300A24F2D /* SortedIntMap.h */,
 				4E62BED50D6244D300A24F2D /* StackTrace.cpp */,
 				4E62BED60D6244D300A24F2D /* StackTrace.h */,
-				4E62BED70D6244D300A24F2D /* StaticProfiler.cpp */,
-				4E62BED80D6244D300A24F2D /* StaticProfiler.h */,
 				4E62BED90D6244D300A24F2D /* String.as */,
 				4E62BEDA0D6244D300A24F2D /* StringBuffer.cpp */,
 				4E62BEDB0D6244D300A24F2D /* StringBuffer.h */,

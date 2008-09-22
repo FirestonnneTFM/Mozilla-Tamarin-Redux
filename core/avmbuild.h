@@ -135,8 +135,6 @@
 	#define AVMPLUS_MIR
 #endif
 
-#define AVMPLUS_INTERP
-
 #if defined(AVMPLUS_MAC) && defined(AVMPLUS_64BIT)
 	// MIR not yet supported on 64-bit Mac
 	#undef AVMPLUS_MIR
@@ -153,7 +151,6 @@
 
 #if defined(VTUNE) || defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
 #define AVMPLUS_VERBOSE
-#define AVMPLUS_PROFILE
 #endif
 
 // #undef verify, a Mac thing

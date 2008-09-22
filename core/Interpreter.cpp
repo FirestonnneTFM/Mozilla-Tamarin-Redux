@@ -48,7 +48,6 @@
 #endif
 #endif
 
-#ifdef AVMPLUS_INTERP
 namespace avmplus
 {	
 	Atom Interpreter::interp32(MethodEnv* env, int argc, uint32 *ap)
@@ -254,11 +253,6 @@ namespace avmplus
 					(int)(scopeBase+scopeDepth-1-framep), (int)(scopeBase-framep), (int)(scopeBase+max_scope-framep),
 					code_start);
             }
-			#endif
-
-			#ifdef AVMPLUS_PROFILE
-			if (core->dprof.dprofile)
-				core->dprof.mark(opcode);
 			#endif
 
             switch (opcode)
@@ -593,7 +587,7 @@ namespace avmplus
                 continue;
 
             case OP_equals:
-				sp[-1] = core->eq(sp[-1], sp[0]);
+				sp[-1] = core->equals(sp[-1], sp[0]);
                 sp--;
                 continue;
 
@@ -638,7 +632,7 @@ namespace avmplus
 
 			case OP_ifeq:
 				sp -= 2;
-				if (core->eq(sp[1], sp[2]) == trueAtom)
+				if (core->equals(sp[1], sp[2]) == trueAtom)
 				{
 					int j = readS24(pc);
 					core->branchCheck(env, interruptable, j);
@@ -649,7 +643,7 @@ namespace avmplus
 
 			case OP_ifne:
 				sp -= 2;
-                if (core->eq(sp[1], sp[2]) == falseAtom)
+                if (core->equals(sp[1], sp[2]) == falseAtom)
 				{
 					int j = readS24(pc);
 					core->branchCheck(env, interruptable, j);
@@ -1602,4 +1596,3 @@ namespace avmplus
     }
 #endif
 }
-#endif /* AVMPLUS_INTERP */
