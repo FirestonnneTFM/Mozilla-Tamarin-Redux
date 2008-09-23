@@ -58,9 +58,15 @@ namespace avmplus
 #define IS_DOUBLE(v)         (((v) & 7) == kDoubleType)
 #define IS_BOOLEAN(v)        (((v) & 7) == kBooleanType)
 #define IS_STRING(v)		 (((v) & 7) == kStringType)
-#define FITS_IN_INTEGER(v)   ((((int32)v << 3) >> 3) == v)
-#define MAKE_INTEGER(v)      (((v) << 3) | kIntegerType)
-#define INTEGER_VALUE(v)     ((int32)(v) >> 3)
+#ifdef AVMPLUS_64BIT
+#define FITS_IN_INTEGER(v)   true
+#else
+#define FITS_IN_INTEGER(v)   (((int32_t(v) << 3) >> 3) == int32_t(v))
+#endif
+#define MAKE_INTEGER(v)      ((intptr_t(v) << 3) | kIntegerType)
+#define INTEGER_VALUE(v)     (intptr_t(v) >> 3)
+#define INT32_VALUE(v)       int32_t(INTEGER_VALUE(v))
+#define UINT32_VALUE(v)      uint32_t(INTEGER_VALUE(v))
 #define DOUBLE_VALUE(v)		 (*(double*)((v) ^ kDoubleType))
 #define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0) // less control flow but more registers -- which is better?
 //#define IS_BOTH_INTEGER(a,b) ((IS_INTEGER(a) && IS_INTEGER(b))
@@ -116,13 +122,13 @@ namespace avmplus
 #  define SWITCH_DISPATCH
 #endif // compiler/platform vipers' nest
 
-	Atom interp(MethodEnv* method, int argc, uint32 *ap);
+	Atom interp(MethodEnv* method, int argc, uint32_t *ap);
 	void initMultiname(MethodEnv* env, Multiname &name, Atom* &sp);
 	void initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* &sp);
 	Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
 #ifdef SUPERWORD_PROFILING
-	void swprofCode(const uint32* start, const uint32* limit);
-	void swprofPC(const uint32* pc);
+	void swprofCode(const uint32_t* start, const uint32_t* limit);
+	void swprofPC(const uint32_t* pc);
 #endif
 #ifdef AVMPLUS_VERBOSE
 	
@@ -134,7 +140,7 @@ namespace avmplus
 							int max_scope);
 #endif
 
-	Atom interp32(MethodEnv* env, int argc, uint32 *ap)
+	Atom interp32(MethodEnv* env, int argc, uint32_t *ap)
 	{
 		Atom a = interp(env, argc, ap);
 		Traits* t = env->method->returnTraits();
@@ -150,7 +156,7 @@ namespace avmplus
 		return a & ~7; // possibly null pointer
 	}
 
-	double interpN(MethodEnv* env, int argc, uint32 * ap)
+	double interpN(MethodEnv* env, int argc, uint32_t * ap)
 	{
 		Atom a = interp(env, argc, ap);
 		return AvmCore::number_d(a);
@@ -175,7 +181,7 @@ namespace avmplus
      * Interpret the AVM+ instruction set.
      * @return
      */
-    Atom interp(MethodEnv *env, int argc, uint32 *ap)
+    Atom interp(MethodEnv *env, int argc, uint32_t *ap)
     {
 #ifdef AVMPLUS_DIRECT_THREADED
 		
@@ -541,20 +547,11 @@ namespace avmplus
 		MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
 		AvmCore *core = info->core();
 
-		// Should not have to do this on every entry, but the logic that tries to do
-		// it elsewhere is not currently working - at least the verifier installs an impl32 that
-		// bypasses delegateInvoke, so the structure is not created on all paths.
-		
-		if (info->word_code.cache_size > 0 && env->lookup_cache == NULL) {
-			using namespace MMgc;
-			env->lookup_cache = (MethodEnv::LookupCache*)env->core()->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code.cache_size, GC::kContainsPointers|GC::kZero);
-		}
-
 		if (core->minstack)
 		{
 			// Take the address of a local variable to get
 			// stack pointer
-			uintptr sp = (uintptr)&core;
+			uintptr_t sp = (uintptr_t)&core;
 			if (sp < core->minstack)
 			{
 				env->vtable->traits->core->stackOverflow(env);
@@ -567,8 +564,17 @@ namespace avmplus
 		#endif
 
 #ifdef AVMPLUS_WORD_CODE
-		const uint32* pos = info->word_code.body_pos;
-		const uint32* volatile code_start = pos;
+		// Should not have to do this on every entry, but the logic that tries to do
+		// it elsewhere is not currently working - at least the verifier installs an impl32 that
+		// bypasses delegateInvoke, so the structure is not created on all paths.
+		
+		if (info->word_code.cache_size > 0 && env->lookup_cache == NULL) {
+			using namespace MMgc;
+			env->lookup_cache = (MethodEnv::LookupCache*)env->core()->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code.cache_size, GC::kContainsPointers|GC::kZero);
+		}
+
+		const uint32_t* pos = info->word_code.body_pos;
+		const uint32_t* volatile code_start = pos;
 		int max_stack = info->word_code.max_stack;
 		int local_count = info->word_code.local_count;
 		int init_scope_depth = info->word_code.init_scope_depth;
@@ -692,7 +698,7 @@ namespace avmplus
 		const List<Stringp>& cpool_string = pool->cpool_string;
 #ifndef AVMPLUS_WORD_CODE
         const List<int>& cpool_int = pool->cpool_int;
-        const List<uint32>& cpool_uint = pool->cpool_uint;
+        const List<uint32_t>& cpool_uint = pool->cpool_uint;
 #endif // !AVMPLUS_WORD_CODE
         const List<double*, LIST_GCObjects>& cpool_double = pool->cpool_double;
 		const List<Namespace*>& cpool_ns = pool->cpool_ns;
@@ -709,11 +715,11 @@ namespace avmplus
 		#endif
 
 #ifdef AVMPLUS_WORD_CODE
-		const uint32* pc = code_start;
+		const uint32_t* pc = code_start;
 #else
 		const byte* pc = code_start;
 #endif
-		sintptr volatile expc=0;
+		intptr_t volatile expc=0;
 
 		#ifdef DEBUGGER
 		callStackNode.eip = &expc;
@@ -778,7 +784,7 @@ namespace avmplus
 		
 #  define U30ARG          (*pc++)
 #  define U8ARG           (*pc++)
-#  define S24ARG          (int32)(*pc++)
+#  define S24ARG          (int32_t)(*pc++)
 #  define SAVE_EXPC       expc = pc-1-code_start
 #  define SAVE_EXPC_U30   expc = pc-2-code_start  // only defined for word code
 #  define SAVE_EXPC_S24   expc = pc-2-code_start
@@ -966,7 +972,7 @@ namespace avmplus
 #endif
 
 			INSTR(jump) {
-				int32 offset = S24ARG;
+				int32_t offset = S24ARG;
 				if (offset < 0) {
 					SAVE_EXPC_S24;
 				    core->branchCheck(env, interruptable, offset);
@@ -1006,7 +1012,7 @@ namespace avmplus
 #endif
 					
             INSTR(pushdouble) {
-                *(++sp) = kDoubleType|(uintptr)cpool_double[U30ARG];
+                *(++sp) = kDoubleType|(uintptr_t)cpool_double[U30ARG];
                 NEXT;
 			}
 
@@ -1143,7 +1149,7 @@ namespace avmplus
             INSTR(negate) {
 				Atom val = sp[0];
 				if (IS_INTEGER(val) && val != MAKE_INTEGER(0)) {
-					int32 v = -(val >> 3);
+					intptr_t v = -INTEGER_VALUE(val);
 					if (FITS_IN_INTEGER(v)) {
 						sp[0] = MAKE_INTEGER(v);
 						NEXT;
@@ -1229,9 +1235,9 @@ namespace avmplus
 
 #define FAST_ADD_MAYBE(lhs,rhs,dest) \
 	if (IS_BOTH_INTEGER(lhs, rhs)) { \
-		uint32 lop = (uint32)lhs ^ kIntegerType, rop = (uint32)rhs ^ kIntegerType; \
-		uint32 result = lop + rop; \
-		if ((int32)(lop ^ rop) < 0 || (int32)(result ^ lop) >= 0) { \
+		uintptr_t lop = (uintptr_t)lhs ^ kIntegerType, rop = (uintptr_t)rhs ^ kIntegerType; \
+		uintptr_t result = lop + rop; \
+		if ((intptr_t)(lop ^ rop) < 0 || (intptr_t)(result ^ lop) >= 0) { \
 			dest = result | kIntegerType; \
 			NEXT; \
 		} \
@@ -1246,9 +1252,9 @@ namespace avmplus
 					
 #define FAST_INC_MAYBE(lhs,dest) \
 	if (IS_INTEGER(lhs)) { \
-		uint32 lop = (uint32)lhs ^ kIntegerType; \
-		uint32 result = lop + (1 << 3); \
-		if ((int32)lop < 0 || (int32)(result ^ lop) >= 0) { \
+		uintptr_t lop = (uintptr_t)lhs ^ kIntegerType; \
+		uintptr_t result = lop + (1 << 3); \
+		if ((intptr_t)lop < 0 || (intptr_t)(result ^ lop) >= 0) { \
 			dest = result | kIntegerType; \
 			NEXT; \
 		} \
@@ -1262,9 +1268,9 @@ namespace avmplus
 // On success, store the result in dest, and NEXT.
 #define FAST_SUB_MAYBE(lhs,rhs,dest) \
 	if (IS_BOTH_INTEGER(lhs, rhs)) { \
-		uint32 lop = (uint32)lhs ^ kIntegerType, rop = (uint32)rhs ^ kIntegerType; \
-		uint32 result = lop - rop; \
-		if ((int32)(lop ^ rop) >= 0 || (int32)(result ^ lop) >= 0) { \
+		uintptr_t lop = (uintptr_t)lhs ^ kIntegerType, rop = (uintptr_t)rhs ^ kIntegerType; \
+		uintptr_t result = lop - rop; \
+		if ((intptr_t)(lop ^ rop) >= 0 || (intptr_t)(result ^ lop) >= 0) { \
 			dest = result | kIntegerType; \
 			NEXT; \
 		} \
@@ -1278,9 +1284,9 @@ namespace avmplus
 // On success, store the result in dest, and NEXT.
 #define FAST_DEC_MAYBE(lhs,dest) \
 	if (IS_INTEGER(lhs)) { \
-		uint32 lop = (uint32)lhs ^ kIntegerType; \
-		uint32 result = lop - (1 << 3); \
-		if ((int32)lop >= 0 || (int32)(result ^ lop) >= 0) { \
+		uintptr_t lop = (uintptr_t)lhs ^ kIntegerType; \
+		uintptr_t result = lop - (1 << 3); \
+		if ((intptr_t)lop >= 0 || (intptr_t)(result ^ lop) >= 0) { \
 			dest = result | kIntegerType; \
 			NEXT; \
 		} \
@@ -1478,7 +1484,7 @@ namespace avmplus
 					
 #define MOD_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
 	if (IS_BOTH_INTEGER(lhs, rhs) && rhs != kIntegerType) { \
-		int result = (lhs >> 3) % (rhs >> 3); \
+		intptr_t result = INTEGER_VALUE(lhs) % INTEGER_VALUE(rhs); \
 		if (FITS_IN_INTEGER(result)) { \
 			dest = MAKE_INTEGER(result); \
 			NEXT; \
@@ -1501,7 +1507,7 @@ namespace avmplus
 
 #define LSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
 	if (IS_BOTH_INTEGER(lhs,rhs)) { \
-		int32 result = INTEGER_VALUE(lhs) << (INTEGER_VALUE(rhs) & 0x1F); \
+		int32_t result = INT32_VALUE(lhs) << (INT32_VALUE(rhs) & 0x1F); \
 		if (FITS_IN_INTEGER(result)) { \
 			dest = MAKE_INTEGER(result); \
 			NEXT; \
@@ -1521,7 +1527,7 @@ namespace avmplus
 
 #define RSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
 	if (IS_BOTH_INTEGER(lhs,rhs)) { \
-		dest = MAKE_INTEGER(INTEGER_VALUE(lhs) >> (INTEGER_VALUE(rhs) & 0x1F)); \
+		dest = MAKE_INTEGER(INT32_VALUE(lhs) >> (INT32_VALUE(rhs) & 0x1F)); \
 		NEXT; \
 	} \
 	SAVE_EXPC; \
@@ -1538,7 +1544,7 @@ namespace avmplus
 
 #define URSHIFT_TWO_VALUES_AND_NEXT(lhs, rhs, dest) \
 	if (IS_BOTH_INTEGER(lhs,rhs)) { \
-		uint32 result = ((uint32)INTEGER_VALUE(lhs) >> (INTEGER_VALUE(rhs) & 0x1F)); \
+		uint32_t result = (UINT32_VALUE(lhs) >> (INT32_VALUE(rhs) & 0x1F)); \
 		if ((result & 0xF0000000U) == 0) { \
 			dest = MAKE_INTEGER(result); \
 			NEXT; \
@@ -1613,10 +1619,10 @@ namespace avmplus
 				
 			INSTR(lookupswitch) {
 #ifdef AVMPLUS_WORD_CODE
-				const uint32* base = pc-1;
-				uint32 index = AvmCore::integer_u(*(sp--));
-				uint32 default_offset = S24ARG;
-				uint32 case_count = U30ARG;
+				const uint32_t* base = pc-1;
+				uint32_t index = AvmCore::integer_u(*(sp--));
+				uint32_t default_offset = S24ARG;
+				uint32_t case_count = U30ARG;
 				if (index <= case_count)
 					pc = base + pc[index];
 				else
@@ -1624,9 +1630,9 @@ namespace avmplus
 #else
 				const byte* base = pc-1;
 				// safe to assume int since verifier checks for int
-				uint32 index = AvmCore::integer_u(*(sp--));
+				uint32_t index = AvmCore::integer_u(*(sp--));
 				const byte* switch_pc = pc+3;
-				uint32 case_count = readU30(switch_pc) + 1;
+				uint32_t case_count = readU30(switch_pc) + 1;
                 pc = base+readS24( index < case_count ? (switch_pc + 3*index) : pc );
 #endif
 				NEXT;
@@ -1849,7 +1855,7 @@ namespace avmplus
 
             INSTR(newobject) {
 				SAVE_EXPC;
-                int32 argc = U30ARG;
+                int32_t argc = U30ARG;
                 Atom tempAtom = env->op_newobject(sp, argc)->atom();
                 *(sp -= 2*argc-1) = tempAtom;
 				restore_dxns();
@@ -1858,7 +1864,7 @@ namespace avmplus
 
             INSTR(newarray) {
 				SAVE_EXPC;
-                int32 argc = U30ARG;
+                int32_t argc = U30ARG;
                 Atom tempAtom = toplevel->arrayClass->newarray(sp-argc+1, argc)->atom();
                 *(sp -= argc-1) = tempAtom;
 				restore_dxns();
@@ -1881,10 +1887,10 @@ namespace avmplus
 // How will RTTI caching affect that?
 
 #ifdef AVMPLUS_WORD_CODE
-#  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; name = pool->word_code.cpool_mn->multinames[tmp]; } while(0)
+#  define GET_MULTINAME(name, arg)  do { uint32_t tmp=arg; name = pool->word_code.cpool_mn->multinames[tmp]; } while(0)
 #  define GET_MULTINAME_PTR(decl, arg)  const Multiname* decl = &pool->word_code.cpool_mn->multinames[arg]
 #else
-#  define GET_MULTINAME(name, arg)  do { uint32 tmp=arg; pool->parseMultiname(name, tmp); } while(0)
+#  define GET_MULTINAME(name, arg)  do { uint32_t tmp=arg; pool->parseMultiname(name, tmp); } while(0)
 #  define GET_MULTINAME_PTR(decl, arg)  Multiname _multiname; pool->parseMultiname(_multiname, arg); const Multiname* decl = &_multiname
 #endif
 
@@ -1924,7 +1930,7 @@ namespace avmplus
 				else if (!multiname->isRtns() && IS_INTEGER(*sp) && *sp >= 0 && AvmCore::isObject(sp[-1]))
 				{
 					Atom key = *(sp--);
-					*sp = AvmCore::atomToScriptObject(*sp)->getUintProperty(key>>3);
+					*sp = AvmCore::atomToScriptObject(*sp)->getUintProperty(UINT32_VALUE(key));
 				}
 				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) 
 				{
@@ -1955,7 +1961,7 @@ namespace avmplus
 				{
 					Atom key = *(sp--);
 					Atom obj = *(sp--);
-					AvmCore::atomToScriptObject(obj)->setUintProperty(key>>3, value);
+					AvmCore::atomToScriptObject(obj)->setUintProperty(UINT32_VALUE(key), value);
 				}
 				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1)))
 				{
@@ -2122,7 +2128,7 @@ namespace avmplus
 				else if (!multiname->isRtns() && IS_INTEGER(*sp) && *sp >= 0 && AvmCore::isObject(sp[-1]))
 				{
 					Atom key = *(sp--);
-					*sp = AvmCore::atomToScriptObject(*sp)->delUintProperty(key>>3) ? trueAtom : falseAtom;
+					*sp = AvmCore::atomToScriptObject(*sp)->delUintProperty(UINT32_VALUE(key)) ? trueAtom : falseAtom;
 				}
 				else if(multiname->isRtns() || !core->isDictionaryLookup(*sp, *(sp-1))) 
 				{
@@ -2204,7 +2210,7 @@ namespace avmplus
 	
 			INSTR(call) {
 				SAVE_EXPC;
-                int32 argc = U30ARG;
+                int32_t argc = U30ARG;
                 // stack in: function, receiver, arg1, ... argN
                 // stack out: result
                 Atom tempAtom = toplevel->op_call(sp[-argc-1]/*function*/, argc, sp-argc);
@@ -2215,7 +2221,7 @@ namespace avmplus
 
 			INSTR(construct) {
 				SAVE_EXPC;
-                int32 argc = U30ARG;
+                int32_t argc = U30ARG;
                 // stack in: function, arg1, ..., argN
                 // stack out: new instance
                 Atom tempAtom = toplevel->op_construct(sp[-argc]/*function*/, argc, sp-argc);				
@@ -2248,7 +2254,7 @@ namespace avmplus
 				// stack in: receiver, arg1..N
 				// stack out: result
 				int method_id = U30ARG;
-				int32 argc = U30ARG;
+				int32_t argc = U30ARG;
 				env->nullcheck(sp[-argc]);
 				// ISSUE if arg types were checked in verifier, this coerces again.
 				MethodEnv* f = env->vtable->abcEnv->methods[method_id];
@@ -2262,8 +2268,8 @@ namespace avmplus
 				SAVE_EXPC;
 				// stack in: receiver, arg1..N
 				// stack out: result
-				uint32 disp_id = U30ARG-1;
-				int32 argc = U30ARG;
+				uint32_t disp_id = U30ARG-1;
+				int32_t argc = U30ARG;
 				// null check included in env->callmethod
 				//tempAtom = env->callmethod(disp_id, argc, sp-argc);
 				Atom* atomv = sp-argc;
@@ -2286,7 +2292,7 @@ namespace avmplus
 		/* ( obj [ns [name]] arg1..N -- result ) */ \
 		Multiname multiname;\
 		GET_MULTINAME(multiname, U30ARG);\
-		int32 argc = U30ARG;\
+		int32_t argc = U30ARG;\
 		Atom base;\
 		Atom *atomv = sp - argc;\
 		sp = atomv; \
@@ -2318,7 +2324,7 @@ namespace avmplus
 				// stack in: obj [ns [name]] arg1..N
 				// stack out: result
 				GET_MULTINAME_PTR(multiname, U30ARG);
-				int32 argc = U30ARG;
+				int32_t argc = U30ARG;
 				if (!multiname->isRuntime())
 				{
 					// np check in toVTable
@@ -2340,7 +2346,7 @@ namespace avmplus
 
 			INSTR(applytype) {
 				SAVE_EXPC;
-				int32 argc = U30ARG;
+				int32_t argc = U30ARG;
 				// stack in: factory, arg1, ... argN
 				// stack out: result
 				Atom tempAtom = toplevel->op_applytype(sp[-argc]/*function*/, argc, sp-argc+1);				
@@ -2354,7 +2360,7 @@ namespace avmplus
 		/* ( obj [ns [name]] arg1..N -- ) */ \
 		Multiname name; \
 		GET_MULTINAME(name, U30ARG); \
-		int32 argc = U30ARG; \
+		int32_t argc = U30ARG; \
 		if (!name.isRuntime()) \
 		{ \
 			env->nullcheck(sp[-argc]); \
@@ -2432,7 +2438,7 @@ namespace avmplus
 				SAVE_EXPC;
 				// stack in:  obj arg1..N
 				// stack out: 
-				int32 argc = U30ARG;
+				int32_t argc = U30ARG;
 				env->nullcheck(sp[-argc]);
 				env->vtable->base->init->coerceEnter(argc, sp-argc);
 				sp -= argc+1;
@@ -2518,7 +2524,7 @@ namespace avmplus
 
 #ifndef AVMPLUS_WORD_CODE
             INSTR(pushbyte) {
-				*(++sp) = MAKE_INTEGER((sint8)U8ARG);
+				*(++sp) = MAKE_INTEGER((int8_t)U8ARG);
                 NEXT;
 			}
 #endif
@@ -2684,9 +2690,9 @@ namespace avmplus
 					env->interrupt();
 				}
 #  ifdef AVMPLUS_64BIT
-				uint32 base = AvmCore::readU30(pc);
-				byte *target = (byte *) ((uintptr(AvmCore::readU30(pc)) << 32));
-				target = (byte*)((uintptr)target | base);
+				uint32_t base = AvmCore::readU30(pc);
+				byte *target = (byte *) ((uintptr_t(AvmCore::readU30(pc)) << 32));
+				target = (byte*)((uintptr_t)target | base);
 				code_start = pc = (const byte*) target;
 #  else // !AVMPLUS_64BIT
 				const byte *target = (const byte *) U30ARG;
@@ -2743,7 +2749,7 @@ namespace avmplus
 			INSTR_EXT(ext_push_doublebits) {
 				union {
 					double d;
-					uint32 bits[2];
+					uint32_t bits[2];
 				} u;
 				u.bits[0] = *pc++;
 				u.bits[1] = *pc++;
@@ -2757,14 +2763,14 @@ namespace avmplus
 			// driven peephole optimizer, see comments and code in core/Translator.cpp.
 
 			INSTR_EXT(ext_get2locals) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				*(++sp) = framep[regs & 65535];
 				*(++sp) = framep[regs >> 16];
 				NEXT;
 			}
 					
 			INSTR_EXT(ext_get3locals) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				*(++sp) = framep[regs & 1023];
 				regs >>= 10;
 				*(++sp) = framep[regs & 1023];
@@ -2773,7 +2779,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_get4locals) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				*(++sp) = framep[regs & 255];
 				regs >>= 8;
 				*(++sp) = framep[regs & 255];
@@ -2784,7 +2790,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_get5locals) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				*(++sp) = framep[regs & 63];
 				regs >>= 6;
 				*(++sp) = framep[regs & 63];
@@ -2802,7 +2808,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_add_ll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2810,7 +2816,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_add_set_lll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 1023];
 				regs >>= 10;
 				Atom rhs=framep[regs & 1023];
@@ -2818,7 +2824,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_subtract_ll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2826,7 +2832,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_multiply_ll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2834,7 +2840,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_divide_ll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2842,7 +2848,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_modulo_ll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2850,7 +2856,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_bitand_ll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2858,7 +2864,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_bitor_ll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2866,7 +2872,7 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_bitxor_ll) {
-				uint32 regs = *pc++;
+				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2928,8 +2934,8 @@ namespace avmplus
 					
 #define IFCMP_LL2(numeric_cmp, generic_cmp) \
 		SAVE_EXPC; \
-		int32 offset = (int32)*pc++; \
-		uint32 regs = *pc++; \
+		int32_t offset = (int32_t)*pc++; \
+		uint32_t regs = *pc++; \
 		Atom lhs = framep[regs & 65535]; \
 		Atom rhs = framep[regs >> 16]; \
 		IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, lhs, rhs, offset)
@@ -2978,8 +2984,8 @@ namespace avmplus
 					
 #define IFEQ_LL2(intcmp, comparator, truish) \
 	SAVE_EXPC; \
-	int32 offset = (int32)*pc++; \
-	uint32 regs = *pc++; \
+	int32_t offset = (int32_t)*pc++; \
+	uint32_t regs = *pc++; \
 	Atom lhs = framep[regs & 65535]; \
 	Atom rhs = framep[regs >> 16]; \
 	IFEQ_TWO_VALUES(intcmp, comparator, truish, lhs, rhs, offset);
@@ -3008,7 +3014,7 @@ namespace avmplus
 
 #define IFCMP_LB2(numeric_cmp, generic_cmp) \
 		SAVE_EXPC; \
-		int32 offset = (int32)*pc++; \
+		int32_t offset = (int32_t)*pc++; \
 		Atom lhs = framep[*pc++]; \
 		Atom rhs = *pc++; \
 		IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, lhs, rhs, offset)
@@ -3057,7 +3063,7 @@ namespace avmplus
 					
 #define IFEQ_LB2(intcmp, comparator, truish) \
 	SAVE_EXPC; \
-	int32 offset = (int32)*pc++; \
+	int32_t offset = (int32_t)*pc++; \
 	Atom lhs = framep[*pc++]; \
 	Atom rhs = *pc++; \
 	IFEQ_TWO_VALUES(intcmp, comparator, truish, lhs, rhs, offset);
@@ -3093,8 +3099,8 @@ namespace avmplus
 #  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
 					
 			INSTR_EXT(ext_findpropglobal) {
-				uint32 multiname_index = *pc++;
-				uint32 cache_slot = *pc++;
+				uint32_t multiname_index = *pc++;
+				uint32_t cache_slot = *pc++;
 				if (core->lookupCacheIsValid(env->lookup_cache[cache_slot].timestamp)) {
 					*(++sp) = env->lookup_cache[cache_slot].object->atom();
 					NEXT;
@@ -3116,8 +3122,8 @@ namespace avmplus
 			}
 					
 			INSTR_EXT(ext_findpropglobalstrict) {
-				uint32 multiname_index = *pc++;
-				uint32 cache_slot = *pc++;
+				uint32_t multiname_index = *pc++;
+				uint32_t cache_slot = *pc++;
 				if (core->lookupCacheIsValid(env->lookup_cache[cache_slot].timestamp)) {
 					*(++sp) = env->lookup_cache[cache_slot].object->atom();
 					NEXT;
@@ -3260,29 +3266,29 @@ namespace avmplus
 		AbcOpcode opcode = (AbcOpcode) *pc;
 		PoolObject* pool = info->pool;
 		AvmCore* core = pool->core;
-		int off = pc - code_start;
-		int sp = spp - framep;
-		int scopep = scopebasep + scopeDepth - 1 - framep;
-		int scopeBase = scopebasep - framep;
-		int stackBase = scopebasep + max_scope - framep;
+		ptrdiff_t off = pc - code_start;
+		ptrdiff_t sp = spp - framep;
+		ptrdiff_t scopep = scopebasep + scopeDepth - 1 - framep;
+		ptrdiff_t scopeBase = scopebasep - framep;
+		ptrdiff_t stackBase = scopebasep + max_scope - framep;
 
 		// stack
 		core->console << "                        stack:";
-		for (int i=stackBase; i <= sp; i++) {
+		for (ptrdiff_t i=stackBase; i <= sp; i++) {
 			core->console << " " << core->format(framep[i]);
 		}
 		core->console << '\n';
 
         // scope chain
 		core->console << "                        scope: ";
-		for (int i=scopeBase; i <= scopep; i++) {
+		for (ptrdiff_t i=scopeBase; i <= scopep; i++) {
             core->console << core->format(framep[i]) << " ";
         }
 		core->console << '\n';
 
         // locals
 		core->console << "                         locals: ";
-		for (int i=0; i < scopeBase; i++) {
+		for (ptrdiff_t i=0; i < scopeBase; i++) {
             core->console << core->format(framep[i]) << " ";
         }
 		core->console << '\n';
@@ -3292,7 +3298,7 @@ namespace avmplus
 #ifdef DEBUGGER
 		if (core->debugger && core->callStack && core->callStack->filename)
 		{
-			core->console << '[' << core->callStack->filename << ':' << (uint32)core->callStack->linenum << "] ";
+			core->console << '[' << core->callStack->filename << ':' << (uint32_t)core->callStack->linenum << "] ";
 		}
 #endif
 		core->console << off << ':';
@@ -3318,7 +3324,7 @@ namespace avmplus
 		else
 		{
 			unsigned int signature = 0xC0DEC0DE;
-			fwrite(&signature, sizeof(uint32), 1, swprof_code_fp);
+			fwrite(&signature, sizeof(uint32_t), 1, swprof_code_fp);
 		}
 		swprof_sample_fp = fopen("superwordprof_sample.txt", "wb");
 		if (swprof_sample_fp == NULL)
@@ -3326,7 +3332,7 @@ namespace avmplus
 		else
 		{
 			unsigned int signature = 0xDA1ADA1A;
-			fwrite(&signature, sizeof(uint32), 1, swprof_sample_fp);
+			fwrite(&signature, sizeof(uint32_t), 1, swprof_sample_fp);
 		}
 	}
 	
@@ -3336,20 +3342,20 @@ namespace avmplus
 		if (swprof_sample_fp != NULL) { fclose(swprof_sample_fp); swprof_sample_fp = NULL; }
 	}
 			
-	void swprofCode(const uint32* start, const uint32* limit)
+	void swprofCode(const uint32_t* start, const uint32_t* limit)
 	{
 		if (swprof_code_fp != NULL) {
-			fwrite(&start, sizeof(uint32*), 1, swprof_code_fp);
-			fwrite(&limit, sizeof(uint32*), 1, swprof_code_fp);
-			fwrite(start, sizeof(uint32), limit-start, swprof_code_fp);
+			fwrite(&start, sizeof(uint32_t*), 1, swprof_code_fp);
+			fwrite(&limit, sizeof(uint32_t*), 1, swprof_code_fp);
+			fwrite(start, sizeof(uint32_t), limit-start, swprof_code_fp);
 			fflush(swprof_code_fp);
 		}
 	}
 
-	void swprofPC(const uint32* pc)
+	void swprofPC(const uint32_t* pc)
 	{
 		if (swprof_sample_fp != NULL) {
-			fwrite(&pc, sizeof(uint32*), 1, swprof_sample_fp);
+			fwrite(&pc, sizeof(uint32_t*), 1, swprof_sample_fp);
 #ifdef SUPERWORD_LIMIT
 			if (++sample_count == SUPERWORD_LIMIT) {
 				swprofStop();

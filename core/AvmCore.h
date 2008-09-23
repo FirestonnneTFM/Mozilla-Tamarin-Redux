@@ -554,7 +554,7 @@ const int kBufferPadding = 16;
 
 #ifdef AVMPLUS_VERBOSE
 		/** Disassembles an opcode and places the text in str. */
-		void formatOpcode(PrintWriter& out, const byte *pc, AbcOpcode opcode, int off, PoolObject* pool);
+		void formatOpcode(PrintWriter& out, const byte *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool);
 		static void formatMultiname(PrintWriter& out, uint32 index, PoolObject* pool);
 #endif
 
@@ -699,8 +699,12 @@ const int kBufferPadding = 16;
 		}
 
 #ifdef AVMPLUS_AMD64
-		#define integer_d integer_d_sse2
-		#define doubleToAtom doubleToAtom_sse2
+        static int integer_d(double d) {
+            return integer_d_sse2(d);
+        }
+        Atom doubleToAtom(double n) {
+            return doubleToAtom_sse2(n);
+        }
 #else
 		static int integer_d(double d);
 		Atom doubleToAtom(double n);

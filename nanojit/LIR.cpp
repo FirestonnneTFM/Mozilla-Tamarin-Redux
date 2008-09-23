@@ -2056,7 +2056,7 @@ namespace nanojit
 				return dup(b);
 			}
 			else if (p > start && p < end) {
-				int d = (intptr_t(p)-intptr_t(start)) >> e->align;
+				int32_t d = int32_t(intptr_t(p)-intptr_t(start)) >> e->align;
 				if (addrs)
 					sprintf(b, "%p %s+%d", p, name, d);
 				else
@@ -2080,7 +2080,7 @@ namespace nanojit
 
 	const char *LabelMap::dup(const char *b)
 	{
-		int need = strlen(b)+1;
+		size_t need = strlen(b)+1;
 		char *s = end;
 		end += need;
 		if (end > buf+sizeof(buf)) {

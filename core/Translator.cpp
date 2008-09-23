@@ -49,7 +49,7 @@ namespace avmplus
 	class TranslatedCode : public GCObject
 	{
 	public:
-		uint32 data[1];  // more follows
+		uint32_t data[1];  // more follows
 	};
 
 #ifdef AVMPLUS_DIRECT_THREADED
@@ -126,7 +126,7 @@ namespace avmplus
 	void Translator::refill() 
 	{
 		if (buffers != NULL) {
-			buffers->entries_used = dest - buffers->data;
+			buffers->entries_used = int(dest - buffers->data);
 			buffer_offset += buffers->entries_used;
 		}
 		buffer_info* b;
@@ -142,11 +142,11 @@ namespace avmplus
 		dest_limit = dest + sizeof(b->data)/sizeof(b->data[0]);
 	}
 	
-	void Translator::emitRelativeOffset(uint32 base_offset, const byte *base_pc, int32 offset) 
+	void Translator::emitRelativeOffset(uint32_t base_offset, const byte *base_pc, int32_t offset) 
 	{
 		if (offset < 0) {
 			// There must be a label for the target location
-			uint32 old_offset = (base_pc - code_start) + offset;
+			uint32_t old_offset = uint32_t((base_pc - code_start) + offset);
 			label_info* l = labels;
 			while (l != NULL && l->old_offset != old_offset)
 				l = l->next;
@@ -157,7 +157,7 @@ namespace avmplus
 			makeAndInsertBackpatch(base_pc + offset, base_offset);
 	}
 	
-	void Translator::makeAndInsertBackpatch(const byte* target_pc, uint32 patch_offset)
+	void Translator::makeAndInsertBackpatch(const byte* target_pc, uint32_t patch_offset)
 	{
 		// Leave a backpatch for the target location.  Backpatches are sorted in
 		// increasing address order always.
@@ -199,7 +199,7 @@ namespace avmplus
 		// Insert items in the exn list for from, to, and target, with the pc pointing
 		// to the correct triggering instruction in the ABC and the update loc
 		// pointing to the location to be patched; and a flag is_int_offset (if false
-		// it's a sintptr).
+		// it's a intptr_t).
 		
 		for ( int i=0 ; i < exception_count ; i++ ) {
 			
@@ -293,7 +293,7 @@ namespace avmplus
 			AvmAssert(exception_fixes->pc == pc);
 			exceptions_consumed = true;
 			if (exception_fixes->is_target)
-				*(sintptr*)(exception_fixes->fixup_loc) = (sintptr)(buffer_offset + (dest - buffers->data));
+				*(intptr_t*)(exception_fixes->fixup_loc) = (intptr_t)(buffer_offset + (dest - buffers->data));
 			else
 				*(int*)(exception_fixes->fixup_loc) = (int)(buffer_offset + (dest - buffers->data));
 			catch_info* tmp = exception_fixes;
@@ -304,7 +304,7 @@ namespace avmplus
 		while (backpatches != NULL && backpatches->target_pc <= pc) {
 			AvmAssert(backpatches->target_pc == pc);
 			AvmAssert(*backpatches->patch_loc == 0x80000000U);
-			*backpatches->patch_loc = buffer_offset + (dest - buffers->data) - backpatches->patch_offset;
+			*backpatches->patch_loc = uint32_t(buffer_offset + (dest - buffers->data) - backpatches->patch_offset);
 			backpatch_info* tmp = backpatches;
 			backpatches = backpatches->next;
 			delete tmp;
@@ -476,7 +476,7 @@ namespace avmplus
 	}
 	
 	// These take one U30 argument, and the argument is explicitly passed here (result of optimization)
-	void Translator::emitOp1(int opcode, uint32 operand)
+	void Translator::emitOp1(int opcode, uint32_t operand)
 	{
 #ifdef _DEBUG
 		switch (opcode) {
@@ -533,7 +533,7 @@ namespace avmplus
 #endif
 	}
 	
-	void Translator::emitOp2(int opcode, uint32 op1, uint32 op2)
+	void Translator::emitOp2(int opcode, uint32_t op1, uint32_t op2)
 	{
 		CHECK_OP2(opcode, "OP2/imm");
 		CHECK(3);
@@ -576,10 +576,10 @@ namespace avmplus
 #endif // _DEBUG
 		CHECK(2);
 		pc++;
-		int32 offset = AvmCore::readS24(pc);
+		int32_t offset = AvmCore::readS24(pc);
 		pc += 3;
 		*dest++ = NEW_OPCODE(opcode);
-		uint32 base_offset = buffer_offset + (dest - buffers->data) + 1;
+		uint32_t base_offset = uint32_t(buffer_offset + (dest - buffers->data) + 1);
 		emitRelativeOffset(base_offset, pc, offset);
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(opcode, dest-2);
@@ -594,8 +594,8 @@ namespace avmplus
 		peepFlush();
 #endif
 		label_info* l = new label_info;
-		l->old_offset = pc-code_start;
-		l->new_offset = buffer_offset + (dest - buffers->data);
+		l->old_offset = uint32_t(pc-code_start);
+		l->new_offset = uint32_t(buffer_offset + (dest - buffers->data));
 		l->next = labels;
 		labels = l;
 	}
@@ -606,9 +606,9 @@ namespace avmplus
 		CHECK(5);
 		pc++;
 		byte debug_type = *pc++;
-		uint32 index = AvmCore::readU30(pc);
+		uint32_t index = AvmCore::readU30(pc);
 		byte reg = *pc++;
-		uint32 extra = AvmCore::readU30(pc);
+		uint32_t extra = AvmCore::readU30(pc);
 		// 4 separate operands to match the value in the operand count table,
 		// though obviously we could pack debug_type and reg into one word and
 		// we could also omit extra.
@@ -656,7 +656,7 @@ namespace avmplus
 	void Translator::emitPushint(const byte *pc)
 	{
 		pc++;
-		int32 value = pool->cpool_int[AvmCore::readU30(pc)];
+		int32_t value = pool->cpool_int[AvmCore::readU30(pc)];
 		if ((value & 0xF0000000U) == 0xF0000000U || (value & 0xF0000000U) == 0) {
 			CHECK(2);
 			*dest++ = NEW_OPCODE(OP_ext_pushbits);
@@ -668,7 +668,7 @@ namespace avmplus
 		else {
 			union {
 				double d;
-				uint32 bits[2];
+				uint32_t bits[2];
 			} v;
 			v.d = (double)value;
 			CHECK(3);
@@ -684,7 +684,7 @@ namespace avmplus
 	void Translator::emitPushuint(const byte *pc)
 	{
 		pc++;
-		uint32 value = pool->cpool_uint[AvmCore::readU30(pc)];
+		uint32_t value = pool->cpool_uint[AvmCore::readU30(pc)];
 		if ((value & 0xF0000000U) == 0) {
 			CHECK(2);
 			*dest++ = NEW_OPCODE(OP_ext_pushbits);
@@ -696,7 +696,7 @@ namespace avmplus
 		else {
 			union {
 				double d;
-				uint32 bits[2];
+				uint32_t bits[2];
 			} v;
 			v.d = (double)value;
 			CHECK(3);
@@ -717,17 +717,17 @@ namespace avmplus
 #endif
 		const byte* base_pc = pc;
 		pc++;
-		uint32 base_offset = buffer_offset + (dest - buffers->data);
-		int32 default_offset = AvmCore::readS24(pc);
+		uint32_t base_offset = uint32_t(buffer_offset + (dest - buffers->data));
+		int32_t default_offset = AvmCore::readS24(pc);
 		pc += 3;
-		uint32 case_count = AvmCore::readU30(pc);
+		uint32_t case_count = AvmCore::readU30(pc);
 		CHECK(3);
 		*dest++ = NEW_OPCODE(OP_lookupswitch);
 		emitRelativeOffset(base_offset, base_pc, default_offset);
 		*dest++ = case_count;
 		
-		for ( uint32 i=0 ; i <= case_count ; i++ ) {
-			int32 offset = AvmCore::readS24(pc);
+		for ( uint32_t i=0 ; i <= case_count ; i++ ) {
+			int32_t offset = AvmCore::readS24(pc);
 			pc += 3;
 			CHECK(1);
 			emitRelativeOffset(base_offset, base_pc, offset);
@@ -773,11 +773,11 @@ namespace avmplus
 		peepFlush();
 #endif
 
-		buffers->entries_used = dest - buffers->data;
-		uint32 total_size = buffer_offset + buffers->entries_used;
+		buffers->entries_used = uint32_t(dest - buffers->data);
+		uint32_t total_size = buffer_offset + buffers->entries_used;
 		
-		TranslatedCode* code_anchor = (TranslatedCode*)info->core()->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uint32), GC::kZero);
-		uint32* code = code_anchor->data;
+		TranslatedCode* code_anchor = (TranslatedCode*)info->core()->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uint32_t), GC::kZero);
+		uint32_t* code = code_anchor->data;
 		
 		// reverse the list of buffers
 		buffer_info* first = buffers;
@@ -792,9 +792,9 @@ namespace avmplus
 		buffers = first;
 		
 		// move the data
-		uint32* ptr = code;
+		uint32_t* ptr = code;
 		while (first != NULL) {
-			memcpy(ptr, first->data, first->entries_used*sizeof(uint32));
+			memcpy(ptr, first->data, first->entries_used*sizeof(uint32_t));
 			ptr += first->entries_used;
 			first = first->next;
 		}
@@ -1052,7 +1052,7 @@ namespace avmplus
 	//     be the positive absolute ABC byte offset of the branch target; a backpatch
 	//     structure will be created in the latter case.
 	
-	bool Translator::replace(uint32 old_instr, uint32 new_words, bool jump_has_been_translated) 
+	bool Translator::replace(uint32_t old_instr, uint32_t new_words, bool jump_has_been_translated) 
 	{
 		// Undo any relative offsets in the last instruction, if that wasn't done by
 		// the commit code.
@@ -1063,11 +1063,11 @@ namespace avmplus
 		// Catenate unconsumed instructions onto R (it's easier than struggling with
 		// moving instructions across buffer boundaries)
 
-		uint32 k = new_words;
-		for ( uint32 n=old_instr ; n < nextI ; n++ ) {
-			uint32 len = calculateInstructionWidth(O[n]);
+		uint32_t k = new_words;
+		for ( uint32_t n=old_instr ; n < nextI ; n++ ) {
+			uint32_t len = calculateInstructionWidth(O[n]);
 			S[k] = O[n];
-			for ( uint32 j=0 ; j < len ; j++ )
+			for ( uint32_t j=0 ; j < len ; j++ )
 				R[k++] = I[n][j];
 		}
 		
@@ -1108,23 +1108,23 @@ namespace avmplus
 		
 		state = 0;
 		
-		uint32 i=0;
+		uint32_t i=0;
 		while (i < k) {
-			uint32 op = S[i];
+			uint32_t op = S[i];
 			if (isJumpInstruction(op)) {
-				uint32 w = calculateInstructionWidth(op);
+				uint32_t w = calculateInstructionWidth(op);
 				CHECK(w);
 				*dest++ = R[i++];
-				int32 offset = (int32)R[i++];
+				int32_t offset = (int32_t)R[i++];
 				if (offset >= 0) {
 					// Forward jump
 					// Install a new backpatch structure
-					makeAndInsertBackpatch(code_start + offset, buffer_offset + (dest + (w - 1) - buffers->data));
+					makeAndInsertBackpatch(code_start + offset, uint32_t(buffer_offset + (dest + (w - 1) - buffers->data)));
 				}
 				else {
 					// Backward jump
 					// Compute new jump offset
-					*dest = -int32(buffer_offset + (dest + (w - 1) - buffers->data) + offset);
+					*dest = -int32_t(buffer_offset + (dest + (w - 1) - buffers->data) + offset);
 					dest++;
 				}
 				if (w >= 3)
@@ -1181,7 +1181,7 @@ namespace avmplus
 		AvmAssert(isJumpInstruction(O[nextI - 1]));
 		AvmAssert(I[nextI - 1] + 2 == dest);
 		
-		uint32 offset = I[nextI - 1][1];
+		uint32_t offset = I[nextI - 1][1];
 		if (offset == 0x80000000U) {
 			// Forward branch, must find and nuke the backpatch
 			backpatch_info *b = backpatches;
@@ -1195,21 +1195,21 @@ namespace avmplus
 				b2->next = b->next;
 			// b is unlinked
 			// Install the ABC byte offset from the backpatch structure (will be positive)
-			I[nextI - 1][1] = b->target_pc - code_start;
+			I[nextI - 1][1] = uint32_t(b->target_pc - code_start);
 			delete b;
 		}
 		else {
 			// Backward branch
-			AvmAssert((int32)I[nextI - 1][1] < 0);
+			AvmAssert((int32_t)I[nextI - 1][1] < 0);
 			// Install the negative of the absolute word offset of the target
-			I[nextI - 1][1] = -int32(buffer_offset + (dest - buffers->data) + (int32)I[nextI - 1][1]);
+			I[nextI - 1][1] = -int32_t(buffer_offset + (dest - buffers->data) + (int32_t)I[nextI - 1][1]);
 		}
 	}
 
-	void Translator::peep(uint32 opcode, uint32* loc)
+	void Translator::peep(uint32_t opcode, uint32_t* loc)
 	{
 		peep_state_t *s;
-		uint32 limit, next_state, toplevel_index;
+		uint32_t limit, next_state, toplevel_index;
 		
 		AvmAssert(opcode != OP_lookupswitch);
 
@@ -1234,11 +1234,11 @@ namespace avmplus
 		// binary search if it that might be profitable.
 		
 		if (limit > 4) {
-			int32 lo = s->transitionPtr;
-			int32 hi = lo + limit - 1;
+			int32_t lo = s->transitionPtr;
+			int32_t hi = lo + limit - 1;
 			while (lo <= hi) {
-				uint32 mid = (unsigned)(lo + hi) / 2;
-				uint32 probe = transitions[mid].opcode;
+				uint32_t mid = (unsigned)(lo + hi) / 2;
+				uint32_t probe = transitions[mid].opcode;
 				if (probe == opcode) {
 					next_state = transitions[mid].next_state;
 					break;
@@ -1252,7 +1252,7 @@ namespace avmplus
 		}
 		else {
 			peep_transition_t* t = &transitions[s->transitionPtr];
-			uint32 i = 0;
+			uint32_t i = 0;
 			while (i < limit && t->opcode != opcode) 
 				i++, t++;
 			
@@ -1311,8 +1311,8 @@ namespace avmplus
 		
 		if (s->fail != 0) {
 			next_state = s->fail;
-			uint32 shift = s->failShift;
-			for ( uint32 i=0, limit=nextI-shift ; i < limit ; i++ ) {
+			uint32_t shift = s->failShift;
+			for ( uint32_t i=0, limit=nextI-shift ; i < limit ; i++ ) {
 				I[i] = I[i+shift];
 				O[i] = O[i+shift];
 			}
