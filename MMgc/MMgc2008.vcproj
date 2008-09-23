@@ -1122,6 +1122,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				PreprocessorDefinitions="VTUNE;WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_AMD64"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1491,6 +1492,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="VTune|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
