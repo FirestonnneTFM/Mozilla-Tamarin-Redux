@@ -40,7 +40,6 @@
 #ifndef __nanojit_Assembler__
 #define __nanojit_Assembler__
 
-
 namespace nanojit
 {
 	/**
@@ -149,6 +148,10 @@ namespace nanojit
 	typedef avmplus::SortedMap<LIns*,NIns*,avmplus::LIST_NonGCObjects> InsMap;
 	typedef avmplus::SortedMap<NIns*,LIns*,avmplus::LIST_NonGCObjects> NInsMap;
 
+#if !defined(AVMPLUS_MIR) && defined(VTUNE)
+   class avmplus::CodegenLIR;
+#endif
+
     class LabelState MMGC_SUBCLASS_DECL
     {
     public:
@@ -196,6 +199,9 @@ namespace nanojit
 			StringList* _outputCache;
 			#endif
 
+#if !defined(AVMPLUS_MIR) && defined(VTUNE)
+           avmplus::CodegenLIR* cgen;
+#endif
 			Assembler(Fragmento* frago);
             ~Assembler() {}
 

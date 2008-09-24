@@ -191,6 +191,10 @@ namespace avmplus
 		#endif
 	#endif
 
+   #ifdef VTUNE
+       extern void VTune_RegisterMethod(AvmCore* core, JITCodeInfo* inf);
+   #endif  // VTUNE
+
 		sintptr coreAddr( int (AvmCore::*f)() )
 		{
 			RETURN_METHOD_PTR(AvmCore, f);
@@ -525,6 +529,10 @@ namespace avmplus
 	CodegenLIR::CodegenLIR(MethodInfo* i)
 		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc), 
 			interruptable(true)
+#ifdef VTUNE
+           , jitInfoList(i->core()->gc)
+           , jitPendingRecords(i->core()->gc)
+#endif
 	{
 		state = NULL;
 
@@ -544,13 +552,9 @@ namespace avmplus
 
 		overflow = false;
 	
-        /*
 		#ifdef VTUNE
 		hasDebugInfo = false;
-		vtune = 0;
-		mdOffsets = 0;
-		#endif // VTUNE
-        */
+       #endif /* VTUNE */
 
         // set up the generator LIR pipeline
         if (!pool->codePages) {
@@ -3346,11 +3350,9 @@ namespace avmplus
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
-			/*
-            #ifdef VTUNE
+           #ifdef VTUNE
 				Ins(LIR_file, InsConst(op1));
-			#endif // VTUNE
-            */
+           #endif /* VTUNE */
 				break;
 		    }
 
@@ -3364,12 +3366,10 @@ namespace avmplus
 						debugger,
 						InsConst(op1));
 			#endif // DEBUGGER
-            /*
 			#ifdef VTUNE
 				Ins(LIR_line, InsConst(op1));
 				hasDebugInfo = true;
-			#endif // VTUNE
-            */
+           #endif /* VTUNE */
 				break;
             }
 
@@ -4197,6 +4197,9 @@ namespace avmplus
 
         Fragmento *frago = pool->codePages->frago;
         Assembler *assm = frago->assm();
+        #ifdef VTUNE
+        assm->cgen = this;
+        #endif
 
 		verbose_only( StringList asmOutput(gc); )
 		verbose_only( assm->_outputCache = &asmOutput; )
@@ -4261,7 +4264,89 @@ namespace avmplus
                 printf("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
             })
         }
+
+       #ifdef VTUNE
+       if (keep) 
+       {
+           AvmAssert(!jitPendingRecords.size());  // all should be resolved by now
+           int32_t count = jitInfoList.size(); 
+           uint32_t id = 0;        
+           for(int i=0; i<count; i++) 
+           {
+               JITCodeInfo* jitInfo = jitInfoList.get(i);
+               if (jitInfo->lineNumTable.size()) {
+                   jitInfo->sid = id++;
+                   VTune_RegisterMethod(core, jitInfo);
+               }
+               jitInfo->clear();
+           }
+           jitInfoList.clear();
+       }
+       #endif /* VTUNE */
     }
+
+#ifdef VTUNE
+   JITCodeInfo* CodegenLIR::jitCurrentInfo()
+   {
+       if (jitInfoList.size()<1)
+           jitPushInfo();
+       return jitInfoList[jitInfoList.size()-1];
+   }
+
+   void CodegenLIR::jitPushInfo()
+   {
+       JITCodeInfo* inf = new (gc) JITCodeInfo(gc);
+       jitInfoList.add(inf);
+       inf->method = info;
+   }
+
+   LineNumberRecord* CodegenLIR::jitAddRecord(uint32_t pos, uint32_t filename, uint32_t line, bool pending)
+   {
+       // create a new record in the table; possibly overwriting an existing one.
+       // for pending (i.e. reverse code gen) we want to keep the first line entry we, see
+       // for forwards generation we'll take the last one then we encounter
+       AvmAssert(pending || (filename && line));
+       if (pending && jitCurrentInfo()->lineNumTable.containsKey(pos)) return 0;
+       LineNumberRecord* rec = new (gc) LineNumberRecord((Stringp)filename, line);
+       jitCurrentInfo()->lineNumTable.put(pos,rec);
+       if (pending) jitPendingRecords.add(rec);
+       return rec;
+   }
+
+   void CodegenLIR::jitFilenameUpdate(uint32_t filename) 
+   {
+       AvmAssert(filename);
+       int32_t size = jitPendingRecords.size();
+       for(int32_t i=size-1; i>=0; i--)    {
+           LineNumberRecord* rec = jitPendingRecords.get(i);
+           if (!rec->filename) {
+               rec->filename = (Stringp)filename;
+               if (rec->lineno && rec->filename) jitPendingRecords.removeAt(i); // has both fields set?
+           }
+       }
+   }
+
+   void CodegenLIR::jitLineNumUpdate(uint32_t num) 
+   {
+       AvmAssert(num);
+       int32_t size = jitPendingRecords.size();
+       for(int32_t i=size-1; i>=0; i--)    {
+           LineNumberRecord* rec = jitPendingRecords.get(i);
+           if (!rec->lineno)   {
+               rec->lineno = num;
+               if (rec->lineno && rec->filename) jitPendingRecords.removeAt(i); // has both fields set?
+           }
+       }
+   }
+
+   void CodegenLIR::jitCodePosUpdate(uint32_t pos) 
+   {
+       JITCodeInfo* inf = jitCurrentInfo();
+       if (!inf->endAddr) inf->endAddr = pos;
+       inf->startAddr = pos;
+   }
+
+#endif
 
 	CodegenIMT::CodegenIMT(PoolObject *pool)
 		: pool(pool), overflow(false)

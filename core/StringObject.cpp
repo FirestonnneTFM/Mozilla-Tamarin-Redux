@@ -1235,7 +1235,7 @@ namespace avmplus
 		MMGC_MEM_TYPE("StringNullTerminatedUTF8");
 		int len = str->length();
 		m_bufptr = (char*)gc->Alloc(len + 1);
-		const wchar *data = str->getData();
+       const wchar *data = str->c_str();
 		for (int i=0; i < len; i++) {
 			m_bufptr[i] = (char) data[i];
 		}

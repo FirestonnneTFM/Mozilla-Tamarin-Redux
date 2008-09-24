@@ -178,7 +178,7 @@ extern  "C"
 namespace avmplus
 {
 	#ifdef VTUNE
-		extern void VTune_RegisterMethod(MethodInfo* info, CodegenMIR *mir, AvmCore* core); 
+       extern void VTune_RegisterMethod(AvmCore* core, JITCodeInfo* inf); 
 	#endif  // VTUNE
 
 		sintptr CodegenMIR::coreAddr( int (AvmCore::*f)() )
@@ -1486,8 +1486,7 @@ namespace avmplus
 
 		#ifdef VTUNE
 		hasDebugInfo = false;
-		vtune = 0;
-		mdOffsets = 0;
+       jitInfo = new (core->GetGC()) JITCodeInfo(core->GetGC());
 		#endif /* VTUNE */
 	}
 
@@ -1551,8 +1550,7 @@ namespace avmplus
 
 		#ifdef VTUNE
 		hasDebugInfo = false;
-		vtune = 0;
-		mdOffsets = 0;
+       jitInfo = new (core->GetGC()) JITCodeInfo(core->GetGC());
 		#endif /* VTUNE */
 	}
 
@@ -1612,8 +1610,7 @@ namespace avmplus
 
 		#ifdef VTUNE
 		hasDebugInfo = false;
-		vtune = 0;
-		mdOffsets = 0;
+       jitInfo = new (core->GetGC()) JITCodeInfo(core->GetGC());
 		#endif /* VTUNE */
 	}
 
@@ -2562,6 +2559,7 @@ namespace avmplus
 			mirPatchPtr(&br->target, interrupt_label);
 		}
 
+       // this is not fatal but its good to know if our prologue estimation code is off.
 		InsAlloc(0);
 
 		return true;
@@ -5132,6 +5130,7 @@ namespace avmplus
 			}
 		}
 
+       // this is not fatal but its good to know if our epilogue estimation code is off.
 		#ifdef AVMPLUS_VERBOSE
 		if (core->config.bbgraph)
 			buildFlowGraph();
@@ -5689,12 +5688,13 @@ namespace avmplus
 		// squeeze our vtune record in between the case table and the start of code 
 		if (hasDebugInfo)
 		{
-			vtune = (iJIT_Method_NIDS*) (casePtr+case_count);
+           iJIT_Method_NIDS* vtune = (iJIT_Method_NIDS*) (casePtr+case_count);
 			vtune->method_id = iJIT_GetNewMethodID();
 			vtune->stack_id = 0;
 			vtune->method_name = 0;   // @todo moh said this could be empty ?!?
-		}
-		mipStart = mip = (MDInstruction*) (vtune+1);
+           jitInfo->vtune = vtune;     
+           mipStart = mip = (MDInstruction*) (vtune+1);
+       }
 		#endif /* VTUNE */
 
 		// make sure we have enough space for our prologue 
@@ -5948,11 +5948,11 @@ namespace avmplus
 		#ifdef AVMPLUS_IA32
 
 			#ifdef VTUNE
-				if (vtune && (core->VTuneStatus == iJIT_CALLGRAPH_ON)) 
+               if (jitInfo->vtune && (core->VTuneStatus == iJIT_CALLGRAPH_ON)) 
 				{
 					MDInstruction* VTmip = mip;
 
-					MOV(EAX, (sintptr)vtune);
+                   MOV(EAX, (sintptr)jitInfo->vtune);
 					PUSH(EAX);
 					PUSH(0x13);
 			
@@ -6331,12 +6331,12 @@ namespace avmplus
 			}
 
 			#ifdef VTUNE
-				if (vtune && (core->VTuneStatus == iJIT_CALLGRAPH_ON)) 
+               if (jitInfo->vtune && (core->VTuneStatus == iJIT_CALLGRAPH_ON)) 
 				{
 					MDInstruction* VTmip = mip+1;
 
 					PUSH(EAX);
-					MOV(EAX, (sintptr)vtune);
+                   MOV(EAX, (sintptr)jitInfo->vtune);
 					PUSH(EAX);
 					PUSH(0x14);
 			
@@ -8436,9 +8436,13 @@ namespace avmplus
 #endif
 
 		#ifdef VTUNE
-		if (vtune && !overflow)
-			VTune_RegisterMethod(info, this, core);
-		mdOffsets = 0;  // clear the address to file:line table
+       if (jitInfo->vtune && !overflow) {
+           jitInfo->method = info;
+           jitInfo->startAddr = (uintptr_t)mipStart;
+           jitInfo->endAddr = (uintptr_t)mipEnd;
+           VTune_RegisterMethod(core, jitInfo);
+       }
+       jitInfo->clear();
 		#endif /* VTUNE */    
 
 #ifdef FEATURE_BUFFER_GUARD // no buffer guard in Carbon builds
@@ -8721,7 +8725,6 @@ namespace avmplus
 		#ifdef VTUNE
 		Stringp currentFile = 0;
 		uint32  currentLine = 0; 
-		mdOffsets = new (core->GetGC()) SortedIntMap<LineNumberRecord*>(core->GetGC(), 512);
 		#endif /* VTUNE */
         
 		// linked list of instructions that need to be spilled prior to a branch.
@@ -8822,8 +8825,7 @@ namespace avmplus
 					currentLine = (uint32)ip->imm;
 
 					// add the current line/file info to our table tracking such stuff
-					LineNumberRecord* record = new (core->GetGC()) LineNumberRecord(currentFile,currentLine);
-					mdOffsets->put( (sintptr)mip, record );
+                   jitInfo->add(core->GetGC(),(uintptr_t)mip,currentFile,currentLine);
 					break;
 				}
 				#endif /* VTUNE */
