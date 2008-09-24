@@ -24,8 +24,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -255,8 +255,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -490,8 +490,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Debugger|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -724,8 +724,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Debugger|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -954,8 +954,8 @@
 		</Configuration>
 		<Configuration
 			Name="VTune|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
