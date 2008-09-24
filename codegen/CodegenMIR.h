@@ -115,9 +115,38 @@ namespace avmplus
 			, lineno(ln)
 			{ }
 
-		String*	filename;
-		uint32	lineno;
-	};    
+       String*  filename;
+       uint32_t lineno;
+   }; 
+
+   class JITCodeInfo : public MMgc::GCObject
+   {
+       public:
+           JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
+
+           uint32_t sid;  // code info id
+           MethodInfo* method;
+           SortedIntMap<LineNumberRecord*> lineNumTable;       // populated during code generation 
+           uintptr startAddr;
+           uintptr endAddr;
+           iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
+
+           LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
+           {
+               LineNumberRecord* record = new (gc) LineNumberRecord(file,line);
+               lineNumTable.put(loc,record);
+               return record;
+           }
+
+           void clear() 
+           {
+               lineNumTable.clear();
+               method = 0;
+               vtune = 0;
+               startAddr = 0;
+               endAddr = 0;
+           }
+   };
 	#endif /* VTUNE */
 
 	inline unsigned int rmask(int r) {
@@ -847,18 +876,8 @@ namespace avmplus
 		OP* exAtom;
 
 	#ifdef VTUNE
-
-		iJIT_Method_NIDS*					getVtuneInfo()		{ return vtune; }
-		SortedIntMap<LineNumberRecord*>*	getLineNumberMap()	{ return mdOffsets; }
-		uintptr								getMdStart()		{ return (uintptr)mipStart; }
-		uintptr								getMdEnd()			{ return (uintptr)mipEnd; }
-
-	private:
-
-		bool								hasDebugInfo;   // OP_debugline seen during MIR pass
-		iJIT_Method_NIDS*					vtune;			// points to vtune record
-		SortedIntMap<LineNumberRecord*>*	mdOffsets;		// populated during code generation 
-
+       bool hasDebugInfo;
+       JITCodeInfo* jitInfo;
 	#endif /* VTUNE */
 
 	private:
@@ -1039,8 +1058,33 @@ namespace avmplus
 
 		uint32  maxArgCount;        // most number of arguments used in a call
 
+       #ifdef AVMPLUS_PROFILE
+       // register allocator stats
+       int     fullyUsedCount;     // number of times all registers fully used
+       int     longestSpan;        // most number of instructions that a register is used
+       int     spills;             // number of spills required
+       int     steals;             // number of spills due to a register being stolen.
+       int     remats;             // number of rematerializations 
+
+       // profiler stats    
+       uint64  verifyStartTime;    // note the time we started verification
+       uint64  mdStartTime;        // note the time we started MD generation
+
+       int     mInstructionCount;  // number of machine instructions
+       #define incInstructionCount() mInstructionCount++
+
+       #ifdef _DEBUG
+       // buffer tuning information
+       enum { SZ_ABC, SZ_MIR, SZ_MD, SZ_MIRWASTE, SZ_MDWASTE, SZ_MIREPI, SZ_MDEPI, SZ_MIRPRO, SZ_MDPRO, SZ_MIREXP, SZ_MDEXP, SZ_LAST };
+       double sizingStats[SZ_LAST];
+       #endif /* _DEBUG */
+
+       #else
+
 		#undef incInstructionCount
 		#define incInstructionCount()
+       
+       #endif /* AVMPLUS_PROFILE */
 
 		// pointer to list of argument definitions
 		OP* methodArgs; 
