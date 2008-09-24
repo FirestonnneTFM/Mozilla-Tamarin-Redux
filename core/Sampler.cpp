@@ -229,7 +229,7 @@ namespace avmplus
 		return uid; 
 	}
 
-	uint64 Sampler::recordAllocationInfo(AvmPlusScriptableObject *obj, Atom  typeOrVTable)
+	uint64 Sampler::recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable)
 	{
 		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
 		if(!samplingNow)
