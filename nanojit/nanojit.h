@@ -42,6 +42,8 @@
 #include <stddef.h>
 #include "avmplus.h"
 
+#ifdef FEATURE_NANOJIT
+
 #ifdef AVMPLUS_IA32
 #define NANOJIT_IA32
 #elif AVMPLUS_ARM
@@ -170,4 +172,5 @@ namespace nanojit
 #include "Fragmento.h"
 #include "Assembler.h"
 
+#endif // FEATURE_NANOJIT
 #endif // __nanojit_h__
