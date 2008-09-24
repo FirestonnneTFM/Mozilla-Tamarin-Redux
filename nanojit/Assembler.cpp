@@ -38,6 +38,8 @@
 
 #include "nanojit.h"
 
+#ifdef FEATURE_NANOJIT
+
 #ifdef AVMPLUS_PORTING_API
 #include "portapi_nanojit.h"
 #endif
@@ -56,8 +58,6 @@
 
 namespace nanojit
 {
-	#ifdef FEATURE_NANOJIT
-
 
 	class DeadCodeFilter: public LirFilter
 	{
@@ -2224,7 +2224,6 @@ namespace nanojit
         }
         return argc;
     }
-#endif
 
     void LabelStateMap::add(LIns *label, NIns *addr, RegAlloc &regs) {
         LabelState *st = new (gc) LabelState(addr, regs);
@@ -2235,3 +2234,4 @@ namespace nanojit
         return labels.get(label);
     }
 }
+#endif // FEATURE_NANOJIT
