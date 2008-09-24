@@ -5126,7 +5126,9 @@ namespace avmplus
 			{
 				ExceptionHandler* h = &info->exceptions->exceptions[i];
 				AvmAssertMsg(state->verifier->getFrameState(h->target)->label.bb != NULL, "Exception target address MUST have been resolved");
-				mirPatchPtr( (OP**)&h->target, h->target );
+				sintptr *p = &h->target;
+				OP** p2 = (OP**) p;
+				mirPatchPtr(p2, h->target );
 			}
 		}
 

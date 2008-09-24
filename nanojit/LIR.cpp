@@ -39,6 +39,7 @@
 
 #include "nanojit.h"
 #include <stdio.h>
+#include <ctype.h>
 
 #ifdef PERFM
 #include "../vprof/vprof.h"

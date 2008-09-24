@@ -42,7 +42,7 @@
 #include "portapi_nanojit.h"
 #endif
 
-#if defined(AVMPLUS_LINUX) && defined(AVMPLUS_ARM)
+#if defined(AVMPLUS_UNIX) && defined(AVMPLUS_ARM)
 #include <asm/unistd.h>
 #endif
 
@@ -934,7 +934,7 @@ namespace nanojit
 		// If we've modified the code, we need to flush so we don't end up trying 
 		// to execute junk
 		FlushInstructionCache(GetCurrentProcess(), NULL, NULL);
-		#elif defined(AVMPLUS_LINUX) && defined(AVMPLUS_ARM)
+		#elif defined(AVMPLUS_UNIX) && defined(AVMPLUS_ARM)
 			// N A S T Y - obviously have to fix this
 		// determine our page range
 

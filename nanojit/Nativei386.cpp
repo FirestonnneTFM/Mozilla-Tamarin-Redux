@@ -41,7 +41,7 @@
 #include <CoreServices/CoreServices.h>
 #endif
 
-#if defined DARWIN || defined LINUX
+#if defined DARWIN || defined AVMPLUS_UNIX
 #include <sys/mman.h>
 #include <errno.h>
 #endif
@@ -342,7 +342,7 @@ namespace nanojit
 		#if defined WIN32 || defined WIN64
 			DWORD dwIgnore;
 			VirtualProtect(&page->code, count*NJ_PAGE_SIZE, PAGE_EXECUTE_READWRITE, &dwIgnore);
-		#elif defined DARWIN || defined AVMPLUS_LINUX
+		#elif defined DARWIN || defined AVMPLUS_UNIX
 			intptr_t addr = (intptr_t)&page->code;
 			addr &= ~((uintptr_t)NJ_PAGE_SIZE - 1);
 			mprotect((void *)addr, count*NJ_PAGE_SIZE, PROT_READ|PROT_WRITE|PROT_EXEC);
