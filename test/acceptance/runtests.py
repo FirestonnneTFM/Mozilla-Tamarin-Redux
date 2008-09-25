@@ -453,8 +453,10 @@ def fail(abc, msg, failmsgs):
 
 vmargs = globs['vmargs']
 avm = globs['avm']
-if not avm: # or not isfile(avm.split()[0]): /* isfile() fails for alias on OSX */
+
+if (not globs['rebuildtests']) and (not avm): #don't need AVM if rebuilding tests
     exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % avm)
+    
 js_print('Executing %d tests against vm: %s' % (len(tests), avm));
 
 # Are we running esc - depends on a valid avm
