@@ -88,7 +88,7 @@ if not isfile(globs['globalabc']):
     usage('ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to builtin.abc' % globs['globalabc'])
 
 if not isfile(globs['shellabc']):
-    usage('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % globs['shellabc'])
+    globs['shellabc'] = False
 
 def istest(f):
     return f.endswith(".as") and basename(f) != "shell.as" and not f.endswith("Util.as")
@@ -117,7 +117,10 @@ print("starting compile of %d tests at %s" % (len(tests),start_time))
 total=len(tests)
 counter=0
 for test in tests:
-    cmd = "asc -import %s -import %s" % (globs['globalabc'],globs['shellabc'])
+    if globs['shellabc']:
+        cmd = "asc -import %s -import %s" % (globs['globalabc'],globs['shellabc'])
+    else:
+        cmd = "asc -import %s " % globs['globalabc']
     (dir, file) = split(test)
     #print("   compiling %s" % file)
     for p in parents(dir):
