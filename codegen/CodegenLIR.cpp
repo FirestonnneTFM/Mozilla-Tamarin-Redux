@@ -1150,17 +1150,6 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		if(core->sampling())
-		{
-			// FIXME: 64 bit integer math needed!
-			//LIns* invocationCount = loadIns(LIR_ldqc, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
-			//Ins(MIR_inc64, invocationCount);
-			//storeIns64(invocationCount, offsetof(MethodEnv, invocationCount), ldargsIns(_env));
-			LIns* invocationCount = loadIns(LIR_ldc, offsetof(MethodEnv, invocationCount), env_param);
-			LIns *result = binaryIns(LIR_add, invocationCount, InsConst(1));
-			storeIns(result, offsetof(MethodEnv, invocationCount), env_param);
-		}
-
 		// Allocate space for the call stack
 		csn = InsAlloc(sizeof(CallStackNode));
         verbose_only( if (lirbuf->names) {
