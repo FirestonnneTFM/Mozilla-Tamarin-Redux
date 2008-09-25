@@ -51,7 +51,7 @@ namespace avmplus
 			
 		if(core->sampling())
 		{
-			core->sampler()->recordAllocationInfo(this, typeOrVTable);
+		  core->sampler()->recordAllocationInfo(this, (uintptr)typeOrVTable);
 		}		
 	}
 
