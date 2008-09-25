@@ -49,6 +49,15 @@ from itertools import count
 from subprocess import PIPE,STDOUT
 from util.killableprocess import Popen
 
+
+globs = { 'avm':'', 'asc':'', 'builtinabc':'', 'shellabc':'','exclude':[],'config':'',
+          'ascargs':'', 'vmargs':'', 'escbin':'', 'rebuildtests':False,
+          'pexpect':True}
+try:
+    import pexpect
+except ImportError:
+    globs['pexpect'] = False
+
 verbose = False
 timestamps = True
 forcerebuild = False
@@ -58,8 +67,6 @@ sourceExt = '.as' # can be changed to .js, .es ...
 testTimeOut = -1 #by default tests will NOT timeout
 debug = False
 
-globs = { 'avm':'', 'asc':'', 'globalabc':'', 'shellabc':'','exclude':[],
-          'config':'', 'ascargs':'', 'vmargs':'', 'escbin':''}
 
 # default value for escbin
 globs['escbin'] = '../../esc/bin/'
@@ -69,7 +76,9 @@ if 'AVM' in environ:
 if 'ASC' in environ:
     globs['asc'] = environ['ASC'].strip()
 if 'GLOBALABC' in environ:
-    globs['globalabc'] = environ['GLOBALABC'].strip()
+    globs['builtinabc'] = environ['GLOBALABC'].strip()
+if 'BUILTINABC' in environ:
+    globs['builtinabc'] = environ['BUILTINABC'].strip()
 if 'SHELLABC' in environ:
     globs['shellabc'] = environ['SHELLABC'].strip()
 if 'CVS' in environ:
@@ -96,7 +105,7 @@ def js_print(m, start_tag='<p><tt>', end_tag='</tt></p>'):
         js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
         js_output_f.flush()
 
-# yet another way to specify asc,avm,globalabc ...from a file
+# yet another way to specify asc,avm,builtinabc ...from a file
 pf = 'runtests.properties'
 if os.path.exists(pf):
     verbose_print( 'reading properties from %s' % (pf) )
@@ -118,13 +127,15 @@ def usage(c):
     print ' -v --verbose       enable additional output'
     print ' -E --avm           avmplus command to use'
     print ' -a --asc           compiler to use'
-    print ' -g --globalabc     location of global.abc'
+    print ' -g --globalabc     DEPRECATED but still works - use builtin.abc (used to be location of global.abc)'
+    print ' -b --builtinabc    location of builtin.abc'
     print ' -s --shellabc      location of shell_toplevel.abc'
     print ' -x --exclude       comma separated list of directories to skip'
     print ' -h --help          display help and exit'
     print ' -t --notime        do not generate timestamps (cleaner diffs)'
     print ' -f --forcerebuild  force rebuild all test files'
     print ' -c --config        sets the config string [default OS-tvm]'
+    print '    --rebuildtests  rebuild the tests only - do not run against VM'
     print '    --esc           run esc instead of avm'
     print '    --escbin        location of esc/bin directory - defaults to ../../esc/bin'
     print '    --ext           set the testfile extension (defaults to .as)'
@@ -134,9 +145,9 @@ def usage(c):
     exit(c)
 
 try:
-    opts, args = getopt(argv[1:], 'vE:a:g:s:x:htfc:d', ['verbose','avm=','asc=','globalabc=','shellabc=',
+    opts, args = getopt(argv[1:], 'vE:a:g:b:s:x:htfc:d', ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                 'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                'ext=','timeout=','esc','escbin='])
+                'ext=','timeout=','esc','escbin=', 'rebuildtests'])
 except:
     usage(2)
 
@@ -152,7 +163,9 @@ for o, v in opts:
     elif o in ('-a', '--asc'):
         globs['asc'] = v
     elif o in ('-g', '--globalabc'):
-        globs['globalabc'] = v
+        globs['builtinabc'] = v
+    elif o in ('-b', '--builtinabc'):
+        globs['builtinabc'] = v
     elif o in ('-s', '--shellabc'):
         globs['shellabc'] = v
     elif o in ('-x', '--exclude'):
@@ -177,6 +190,8 @@ for o, v in opts:
         globs['escbin'] = v
     elif o in ('-d'):
         debug = True
+    elif o in ('--rebuildtests'):
+        globs['rebuildtests'] = True
 
 exclude = globs['exclude']
 
@@ -268,22 +283,96 @@ def dict_match(dict,test,value):
             if dict[k].has_key(value):
                 return dict[k][value]
 
+def parseArgStringToList(argStr):
+    args = argStr.strip().split(' ')
+    # recombine any args that have spaces in them
+    argList = []
+    for a in args:
+        if a == '':
+            pass
+        elif a[0] == '-':
+            argList.append(a)
+        else:   # append the space and text to the last arg
+            argList[len(argList)-1] += ' ' + a
+    return argList
+
+def parseAscArgs(ascArgFile, currentdir):
+    # reads an .asc_args file and returns a tuple of the arg mode (override or merge) and a list of args
+    f = open(ascArgFile,'r')
+    while True: # skip comment lines
+        ascargs = f.readline()
+        if (ascargs[0] != '#'):
+            break
+    ascargs = ascargs.split(':')
+    ascargs[0] = ascargs[0].strip()
+    if (len(ascargs) == 1): #treat no keyword as a merge
+        ascargs.insert(0,'merge')
+    elif (ascargs[0] != 'override') or (ascargs[0] != 'merge'): # default to merge if mode not recognized
+        ascargs[0] = 'merge'
+    # replace the $DIR keyword with actual directory
+    ascargs[1] = string.replace(ascargs[1], '$DIR', currentdir)
+    if ascargs[1].find('$SHELLABC') != -1:  
+        if not isfile(globs['shellabc']):   # TODO: not the best place to check for this
+            exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % globs['shellabc'])
+        ascargs[1] = string.replace(ascargs[1], '$SHELLABC', globs['shellabc'])
+    ascargs[1] = parseArgStringToList(ascargs[1])
+    removeArgList = []
+    argList = []
+    for a in ascargs[1]:
+        if a[0:3] == '-no':
+            removeArgList.append(a[3:])
+        else:
+            argList.append(a)
+
+    return ascargs[0], argList, removeArgList
+    
+def loadAscArgs(arglist,dir,file):
+    mode = ''
+    newArgList = []
+    removeArgList = []
+    # Loads an asc_args file and modifies arglist accordingly
+    if file and isfile('%s.asc_args' % file):  #file takes precendence over directory
+        mode, newArgList, removeArgList = parseAscArgs('%s.asc_args' % file, dir)
+    elif isfile(dir+'/dir.asc_args'):
+        mode, newArgList, removeArgList = parseAscArgs(dir+'/dir.asc_args', dir)
+    elif isfile('./dir.asc_args'):
+        mode, newArgList, removeArgList = parseAscArgs('./dir.asc_args', './')
+    
+    if mode == 'merge':
+        arglist.extend(newArgList)
+    elif mode == 'override':
+        arglist = newArgList
+    # remove any duplicate args
+    arglist = list(set(arglist))
+    if removeArgList:
+        for removeArg in removeArgList:
+            try:
+                arglist.remove(removeArg)
+            except:
+                pass
+
+    
 def compile_test(as):
-    asc, globalabc, shellabc, ascargs = globs['asc'], globs['globalabc'], globs['shellabc'], globs['ascargs']
+    asc, builtinabc, shellabc, ascargs = globs['asc'], globs['builtinabc'], globs['shellabc'], globs['ascargs']
     if not isfile(asc):
         exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as)
-    if not isfile(globalabc):
-        exit('ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc' % globalabc)
-    if not isfile(shellabc):
-        exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % shellabc)
-  
+    if not isfile(builtinabc):
+        exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
+
     if asc.endswith('.jar'):
         cmd = 'java -jar ' + asc
     else:
         cmd = asc
-    cmd += ' ' + ascargs
-    cmd += ' -import %s -import %s ' %(globalabc,shellabc)
+    
+    arglist = parseArgStringToList(ascargs)
+
     (dir, file) = split(as)
+    # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
+    loadAscArgs(arglist, dir, as)
+    
+    cmd += ' -import %s' % builtinabc
+    for arg in arglist:
+        cmd += ' %s' % arg
     verbose_print('   compiling %s' % file)
     for p in parents(dir):
         shell = join(p,'shell'+sourceExt)
@@ -302,6 +391,60 @@ def compile_test(as):
     except:
         print 'Exception'
 
+def compileWithAsh(tests):
+    start_time = datetime.today()
+    print("starting compile of %d tests at %s" % (len(tests),start_time))
+    total=len(tests)
+    counter=0
+    if not globs['pexpect']:
+        for test in tests:
+            print 'compiling %s' % test
+            compile_test(test)
+            (testdir, ext) = splitext(test)
+            if exists(testdir+".abc")==False:
+                print("ERROR abc files %s.abc not created" % (testdir))
+            counter += 1;
+            print("%d remaining" % (total-counter))
+    else:  #pexpect available
+        child = pexpect.spawn("java -classpath %s macromedia.asc.embedding.Shell" % globs['asc'])
+        child.logfile = sys.stdout
+        child.expect("\(ash\)")
+        child.expect("\(ash\)")
+
+        for test in tests:
+            arglist = parseArgStringToList(globs['ascargs'])
+        
+            (dir, file) = split(test)
+            # look for .asc_args files to specify dir / file level compile args
+            loadAscArgs(arglist, dir, file)
+            
+            cmd = "asc -import %s " % (globs['builtinabc'])
+            for arg in arglist:
+                cmd += ' %s' % arg
+            
+            for p in parents(dir):
+                shell = join(p,"shell.as")
+                if isfile(shell):
+                    cmd += " -in " + shell
+                    break
+            (testdir, ext) = splitext(test)
+            deps = glob(join(testdir,"*.as"))
+            deps.sort()
+            for util in deps + glob(join(dir,"*Util.as")):
+                cmd += " -in %s" % string.replace(util, "$", "\$")
+            cmd += " %s" % test
+        
+            if exists(testdir+".abc"):
+                os.unlink(testdir+".abc")
+        
+            child.sendline(cmd)
+            child.expect("\(ash\)")
+            if exists(testdir+".abc")==False:
+                print("ERROR abc files %s.abc not created" % (testdir))
+            counter += 1;
+            print("%d remaining, %s" % (total-counter,cmd))
+    end_time = datetime.today()
+    print("finished compile of %d tests at %s elapsed time is %s" % (len(tests),start_time,end_time-start_time))
 
 def fail(abc, msg, failmsgs):
     msg = msg.strip()
@@ -378,172 +521,178 @@ js_print('current configuration: %s' % globs['config'])
 
 
 testnum = len(tests)
-for ast in tests:
-    if ast.startswith('./'):
-        ast=ast[2:]
-    testnum -= 1
-    lpass = 0
-    lfail = 0
-    lexpfail = 0
-    lunpass = 0
-    ltimeout = 0
-    dir = ast[0:ast.rfind('/')]
-    root,ext = splitext(ast)
-    if runSource:
-        testName = ast
-    else:
-        testName = root + '.abc'
-    settings=dict()
-    names=None
-    lines=[]
-    includes=None
-    if isfile(dir+'/testconfig.txt'):
-        lines=open(dir+'/testconfig.txt').read().splitlines()
-        for i in range(len(lines)):
-            if not lines[i].startswith('#'):
-                lines[i] = '%s/%s' %(dir,lines[i])
-    if isfile('./testconfig.txt'):
-        for line in open('./testconfig.txt').read().splitlines():
-            lines.append(line)
-    for line in lines:
-        if line.startswith('#') or len(line)==0:
-            continue
-        fields = line.split(',')
-        for f in range(len(fields)):
-            fields[f]=fields[f].strip()
-        while len(fields)<4:
-            fields.append('');
-        names=fields[0].split(':')
-        if len(names)==1:
-            names.append('.*')
-        rs='^%s$' % names[0]
-        if re.search(fields[1],globs['config']) and fields[2]=='include':
-            if includes==None:
-                includes=[]
-            includes.append(fields[0])
-        if re.search(rs,root) and re.search('^%s$' % fields[1],globs['config']):
-            if not settings.has_key(names[1]):
-                settings[names[1]]={}
-            settings[names[1]][fields[2]]=fields[3]
-    if includes and not list_match(includes,root):
-        continue
-    js_print('%d running %s' % (testnum, ast), '<b>', '</b><br/>');
-    if names and dict_match(settings,names[1],'skip'):
-        js_print('  skipping')
-        allskips += 1
-        continue
-    if forcerebuild and isfile(testName):
-        os.unlink(testName)
-    if not isfile(testName):
-        compile_test(ast)
-        if not isfile(testName):
-            lfail += 1
-            fail(testName, 'FAILED! file not found ' + testName, failmsgs)
-    if runSource:
-        incfiles=build_incfiles(testName)
-        for incfile in incfiles:
-            testName=incfile+" "+testName
-    f = run_pipe('%s %s %s' % (avm, vmargs, testName))
-    if f == "timedOut":
-        fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
-        ltimeout += 1
-    else:
-        try:
-            outputLines = []
-            for line in f:
-                outputLines.append(line)
-                verbose_print(line.strip())
-                testcase=''
-                if len(line)>9:
-                    testcase=line.strip()
-                if dict_match(settings,testcase,'skip'):
-                    js_print('  skipping %s' % line.strip())
-                    allskips+=1
-                    continue
-                if 'PASSED!' in line:
-                    res=dict_match(settings,testcase,'expectedfail')
-                    if res:
-                        fail(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, unpassmsgs)
-                        lunpass += 1
-                    else:
-                        lpass += 1
-                if 'FAILED!' in line:
-                    res=dict_match(settings,testcase,'expectedfail')
-                    if res:
-                        fail(testName, 'expected failure: ' + line.strip() + ' reason: '+res, expfailmsgs)
-                        lexpfail += 1
-                    else:
-                        lfail += 1
-                        fail(testName, line, failmsgs)
-        except:
-            print 'exception running avm'
-            exit(-1)
-        if lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
-            res=dict_match(settings,'*','expectedfail')
-            if res:
-                fail(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,expfailmsgs)
-                lexpfail += 1
-            else:
-                lfail = 1
-                fail(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), failmsgs)
-    
-        allfails += lfail
-        allpasses += lpass
-        allexpfails += lexpfail
-        allunpass += lunpass
-        alltimeouts += ltimeout
-        if lfail or lunpass:
-            js_print('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
-        else:
-            js_print('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
-
-#
-# cleanup
-#
-
-if timeoutmsgs:
-    js_print('\nTIMEOUTS:', '', '<br/>')
-    for m in timeoutmsgs:
-        js_print('  %s' % m, '', '<br/>')
-
-if failmsgs:
-    js_print('\nFAILURES:', '', '<br/>')
-    for m in failmsgs:
-        js_print('  %s' % m, '', '<br/>')
-
-if expfailmsgs:
-    js_print('\nEXPECTED FAILURES:', '', '<br/>')
-    for m in expfailmsgs:
-        js_print('  %s' % m, '', '<br/>')
-
-if unpassmsgs:
-    js_print('\nUNEXPECTED PASSES:', '', '<br/>')
-    for m in unpassmsgs:
-        js_print('  %s' % m, '', '<br/>')
-
-if not allfails and not allunpass:
-    js_print('\ntest run PASSED!')
+if globs['rebuildtests']:
+    compileWithAsh(tests)
 else:
-    js_print('\ntest run FAILED!')
-
-if timestamps:
-    end_time = datetime.today()
-    js_print('Tests complete at %s' % end_time, '<hr><tt>', '</tt>')
-    js_print('Start Date: %s' % start_time, '<tt><br>', '')
-    js_print('End Date  : %s' % end_time, '<br>', '')
-    js_print('Test Time : %s' % (end_time-start_time), '<br>', '')
-js_print('passes               : %d' % allpasses, '<br>', '')
-js_print('failures             : %d' % allfails, '<br>', '')
-if allunpass>0:
-    js_print('unexpected passes    : %d' % allunpass, '<br>', '')
-if allexpfails>0:
-    js_print('expected failures    : %d' % allexpfails, '<br>', '')
-if allskips>0:
-    js_print('tests skipped        : %d' % allskips, '<br>', '')
-if allexceptions>0:
-    js_print('test exceptions      : %d' % allexceptions, '<br>', '')
-if alltimeouts>0:
-    js_print('test timeouts        : %d' % alltimeouts, '<br>', '')
-
-print 'Results were written to %s' % js_output
+    for ast in tests:
+        if ast.startswith('./'):
+            ast=ast[2:]
+        testnum -= 1
+        lpass = 0
+        lfail = 0
+        lexpfail = 0
+        lunpass = 0
+        ltimeout = 0
+        dir = ast[0:ast.rfind('/')]
+        root,ext = splitext(ast)
+        if runSource:
+            testName = ast
+        else:
+            testName = root + '.abc'
+        settings=dict()
+        names=None
+        lines=[]
+        includes=None
+        if isfile(dir+'/testconfig.txt'):
+            lines=open(dir+'/testconfig.txt').read().splitlines()
+            for i in range(len(lines)):
+                if not lines[i].startswith('#'):
+                    lines[i] = '%s/%s' %(dir,lines[i])
+        if isfile('./testconfig.txt'):
+            for line in open('./testconfig.txt').read().splitlines():
+                lines.append(line)
+        for line in lines:
+            if line.startswith('#') or len(line)==0:
+                continue
+            fields = line.split(',')
+            for f in range(len(fields)):
+                fields[f]=fields[f].strip()
+            while len(fields)<4:
+                fields.append('');
+            names=fields[0].split(':')
+            if len(names)==1:
+                names.append('.*')
+            rs='^%s$' % names[0]
+            if re.search(fields[1],globs['config']) and fields[2]=='include':
+                if includes==None:
+                    includes=[]
+                includes.append(fields[0])
+            if re.search(rs,root) and re.search('^%s$' % fields[1],globs['config']):
+                if not settings.has_key(names[1]):
+                    settings[names[1]]={}
+                settings[names[1]][fields[2]]=fields[3]
+        if includes and not list_match(includes,root):
+            continue
+        js_print('%d running %s' % (testnum, ast), '<b>', '</b><br/>');
+        if names and dict_match(settings,names[1],'skip'):
+            js_print('  skipping')
+            allskips += 1
+            continue
+        if forcerebuild and isfile(testName):
+            os.unlink(testName)
+        # load any asc_args files
+        
+        
+        if not isfile(testName):
+            compile_test(ast)
+            if not isfile(testName):
+                lfail += 1
+                fail(testName, 'FAILED! file not found ' + testName, failmsgs)
+        if runSource:
+            incfiles=build_incfiles(testName)
+            for incfile in incfiles:
+                testName=incfile+" "+testName
+        f = run_pipe('%s %s %s' % (avm, vmargs, testName))
+        if f == "timedOut":
+            fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
+            ltimeout += 1
+        else:
+            try:
+                outputLines = []
+                for line in f:
+                    outputLines.append(line)
+                    verbose_print(line.strip())
+                    testcase=''
+                    if len(line)>9:
+                        testcase=line.strip()
+                    if dict_match(settings,testcase,'skip'):
+                        js_print('  skipping %s' % line.strip())
+                        allskips+=1
+                        continue
+                    if 'PASSED!' in line:
+                        res=dict_match(settings,testcase,'expectedfail')
+                        if res:
+                            fail(testName, 'unexpected pass: ' + line.strip() + ' reason: '+res, unpassmsgs)
+                            lunpass += 1
+                        else:
+                            lpass += 1
+                    if 'FAILED!' in line:
+                        res=dict_match(settings,testcase,'expectedfail')
+                        if res:
+                            fail(testName, 'expected failure: ' + line.strip() + ' reason: '+res, expfailmsgs)
+                            lexpfail += 1
+                        else:
+                            lfail += 1
+                            fail(testName, line, failmsgs)
+            except:
+                print 'exception running avm'
+                exit(-1)
+            if lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
+                res=dict_match(settings,'*','expectedfail')
+                if res:
+                    fail(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,expfailmsgs)
+                    lexpfail += 1
+                else:
+                    lfail = 1
+                    fail(testName, '   FAILED contained no testcase messages - reason: %s' % string.join([l.strip() for l in outputLines], ' | '), failmsgs)
+        
+            allfails += lfail
+            allpasses += lpass
+            allexpfails += lexpfail
+            allunpass += lunpass
+            alltimeouts += ltimeout
+            if lfail or lunpass:
+                js_print('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
+            else:
+                js_print('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
+    
+    #
+    # cleanup
+    #
+    
+    if timeoutmsgs:
+        js_print('\nTIMEOUTS:', '', '<br/>')
+        for m in timeoutmsgs:
+            js_print('  %s' % m, '', '<br/>')
+    
+    if failmsgs:
+        js_print('\nFAILURES:', '', '<br/>')
+        for m in failmsgs:
+            js_print('  %s' % m, '', '<br/>')
+    
+    if expfailmsgs:
+        js_print('\nEXPECTED FAILURES:', '', '<br/>')
+        for m in expfailmsgs:
+            js_print('  %s' % m, '', '<br/>')
+    
+    if unpassmsgs:
+        js_print('\nUNEXPECTED PASSES:', '', '<br/>')
+        for m in unpassmsgs:
+            js_print('  %s' % m, '', '<br/>')
+    
+    if not allfails and not allunpass:
+        js_print('\ntest run PASSED!')
+    else:
+        js_print('\ntest run FAILED!')
+    
+    if timestamps:
+        end_time = datetime.today()
+        js_print('Tests complete at %s' % end_time, '<hr><tt>', '</tt>')
+        js_print('Start Date: %s' % start_time, '<tt><br>', '')
+        js_print('End Date  : %s' % end_time, '<br>', '')
+        js_print('Test Time : %s' % (end_time-start_time), '<br>', '')
+    js_print('passes               : %d' % allpasses, '<br>', '')
+    js_print('failures             : %d' % allfails, '<br>', '')
+    if allunpass>0:
+        js_print('unexpected passes    : %d' % allunpass, '<br>', '')
+    if allexpfails>0:
+        js_print('expected failures    : %d' % allexpfails, '<br>', '')
+    if allskips>0:
+        js_print('tests skipped        : %d' % allskips, '<br>', '')
+    if allexceptions>0:
+        js_print('test exceptions      : %d' % allexceptions, '<br>', '')
+    if alltimeouts>0:
+        js_print('test timeouts        : %d' % alltimeouts, '<br>', '')
+    
+    print 'Results were written to %s' % js_output
 
