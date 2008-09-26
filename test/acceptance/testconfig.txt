@@ -51,6 +51,7 @@ ecma3/TypeConversion/e9_3_1_3_rt:parseInt\("123456789012345678"\) ,   .*lnx-tvm-
 
 # windows 64 sampling api crashes bug 455062
 as3/sampling/.*: , x86-win64-tvm-.*debugger , skip       , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455062
+as3/sampling/ProcessSampling: , .*mac-tvm-debugdebugger , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=457266
 
 e4x/Regress/b121219: ,   .*lnx-tvm-release   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=450347
 e4x/Regress/b121219: ,   .*lnx-tvm-releasedebugger   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=450347

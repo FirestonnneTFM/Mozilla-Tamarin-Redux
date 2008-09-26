@@ -48,6 +48,7 @@ from getopt import getopt
 from itertools import count
 from subprocess import PIPE,STDOUT
 from util.killableprocess import Popen
+from time import time
 
 
 globs = { 'avm':'', 'asc':'', 'builtinabc':'', 'shellabc':'','exclude':[],'config':'',
@@ -266,8 +267,9 @@ def run_pipe(cmd):
         print('cmd: %s' % cmd)
     p = Popen((cmd), shell=True, stdout=PIPE, stderr=STDOUT)
     output = p.stdout.readlines()
+    starttime=time()
     exitCode = p.wait(testTimeOut) #abort if it takes longer than 60 seconds
-    if exitCode < 0:  # process timed out
+    if exitCode < 0 and testTimeOut>-1 and time()-starttime>testTimeOut:  # process timed out
         return 'timedOut'
     return output
   
