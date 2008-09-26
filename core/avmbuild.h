@@ -307,6 +307,10 @@
 #  endif
 #endif
 
+// temporary impedance-matching define for code that needs to build with different versions of tamarin...
+// will be removed soon
+#define AVMPLUS_REDUX_API 1
+
 // The use of this switch is described in comments at the head of utils/superwordprof.c
 //
 // The limit is optional and describes a cutoff for sampling; the program continues to
