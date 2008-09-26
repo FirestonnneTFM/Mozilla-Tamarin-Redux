@@ -65,7 +65,7 @@ if (buildShell):
     config.subst("ENABLE_SHELL", 1)
 
 # Get CPP, CC, etc
-config.getCompiler(static_crt=o.getBoolArg('static-crt'))
+# config.getCompiler(static_crt=o.getBoolArg('static-crt'))
 
 APP_CPPFLAGS = ""
 APP_CXXFLAGS = ""
@@ -102,21 +102,35 @@ if MMGC_THREADSAFE:
     NSPR_LDOPTS = o.getStringArg('nspr-ldopts')
     OS_LDFLAGS += " " + NSPR_LDOPTS
 
-if config.COMPILER_IS_GCC:
+if config.getCompiler() == 'GCC':
     APP_CXXFLAGS = "-fstrict-aliasing -fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -finline-functions -finline-limit=65536 "
     if config.getDebug():
         APP_CXXFLAGS += "-frtti -fexceptions "
     else:
         APP_CXXFLAGS += "-fno-rtti -fno-exceptions -Wuninitialized  "
     DEBUG_CXXFLAGS += "-g "
-else:
-    APP_CXXFLAGS = "-W4 -WX -wd4291 "
-    if config.getDebug():
-        APP_CXXFLAGS += "-EHsc "
+elif config.getCompiler() == 'VS':
+    if cpu == "arm" or cpu == "thumb":
+        APP_CXXFLAGS = "-W3 -wd4291 -wd4201 "
+        if config.getDebug():
+            DEBUG_CXXFLAGS = "-Od -Os "
+        else:
+            OPT_CXXFLAGS = "-Ox -Os"
+            APP_CXXFLAGS += "-GR- "
+        DEBUG_CXXFLAGS += "-Zi "
+        DEBUG_LDFLAGS += "-DEBUG "
     else:
-        APP_CXXFLAGS += "-GR- "
-    DEBUG_CXXFLAGS += "-Zi "
-    DEBUG_LDFLAGS += "-DEBUG "
+        APP_CXXFLAGS = "-W4 -WX -wd4291 "
+        OS_LDFLAGS += "-SAFESEH:NO "
+        if config.getDebug():
+            APP_CXXFLAGS += "-EHsc "
+        else:
+            OPT_CXXFLAGS = "-Ox -Os "
+            APP_CXXFLAGS += "-GR- "
+        DEBUG_CXXFLAGS += "-Zi "
+        DEBUG_LDFLAGS += "-DEBUG "
+else:
+    raise Exception('Unrecognized compiler: ' + config.getCompiler())
 
 zlib_include_dir = o.getStringArg('zlib-include-dir')
 if zlib_include_dir is not None:
@@ -146,7 +160,7 @@ if os == "darwin":
     else:
         APP_CXXFLAGS += "-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk "
         config.subst("MACOSX_DEPLOYMENT_TARGET",10.4)
-elif os == "windows":
+elif os == "windows" or os == "cygwin":
     MMGC_DEFINES.update({'WIN32': None,
                          '_CRT_SECURE_NO_DEPRECATE': None})
     APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
@@ -176,6 +190,8 @@ else:
 
 if cpu == "i686":
     APP_CPPFLAGS += "-DAVMPLUS_IA32 "
+    if config.getCompiler() == 'GCC':
+        APP_CPPFLAGS += "-msse2 "
 elif cpu == "powerpc":
     APP_CPPFLAGS += "-DAVMPLUS_PPC "
 elif cpu == "sparc":
@@ -187,6 +203,12 @@ else:
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
+
+if o.getBoolArg('perfm'):
+    APP_CPPFLAGS += "-DPERFM "
+    
+if o.getBoolArg('disable-nj'):
+    APP_CPPFLAGS += '-DAVMPLUS_DISABLE_NJ '
 
 # We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))
