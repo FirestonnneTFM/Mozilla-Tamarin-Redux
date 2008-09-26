@@ -63,8 +63,13 @@ namespace avmplus
 		if (!traits->linked)
 			traits->resolveSignatures(toplevel);
 
+#if defined(DEBUG) || defined(_DEBUG)
+		// have to use local variables for CodeWarrior
+		Traits* traitsBase = traits->base;
+		Traits* baseTraits = base ? base->traits : 0;
 		// make sure the traits of the base vtable matches the base traits
-		AvmAssert(base == NULL && traits->base == NULL || base != NULL && traits->base == base->traits);
+		AvmAssert(base == NULL && traits->base == NULL || base != NULL && traitsBase == baseTraits );
+#endif // DEBUG
 
 		AvmCore* core = traits->core;
 

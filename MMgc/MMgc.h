@@ -73,10 +73,11 @@
 	#ifdef SOLARIS
 		#include "solarisbuild.h"
 	#endif
-#endif
 
-#ifdef MMGC_ARM
-#include "armbuild.h"
+	// don't include armbuild.h when MMGC_CUSTOM_BUILD is used
+	#ifdef MMGC_ARM
+		#include "armbuild.h"
+	#endif
 #endif
 
 #ifdef SCRIPT_DEBUGGER

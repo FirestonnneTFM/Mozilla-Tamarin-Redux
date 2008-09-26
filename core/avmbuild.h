@@ -324,6 +324,10 @@
 #  endif
 #endif
 
+// default definition, may be overridden in portapi_avmbuild.h
+#define AVMPlus_PortAPI_StackAlloc(_gc, _size) alloca(_size)
+#define AVMPlus_PortAPI_StackFree(_gc, _ptr) do {} while(0) /* no semi */
+
 #if defined(AVMPLUS_PORTING_API)
 	// The portapi_avmbuild.h file is used to override
 	// definitions in this file. E.g. turning off
