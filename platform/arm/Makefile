@@ -182,7 +182,6 @@ AVMPLUS_SRCS := ../../core/AbcEnv.cpp \
 	../../core/DateObject.cpp \
 	../../core/Domain.cpp \
 	../../core/DomainEnv.cpp \
-	../../core/DynamicProfiler.cpp \
 	../../core/E4XNode.cpp \
 	../../core/ErrorClass.cpp \
 	../../core/ErrorConstants.cpp \
@@ -215,7 +214,6 @@ AVMPLUS_SRCS := ../../core/AbcEnv.cpp \
 	../../core/ScriptBuffer.cpp \
 	../../core/ScriptObject.cpp \
 	../../core/StackTrace.cpp \
-	../../core/StaticProfiler.cpp \
 	../../core/StringBuffer.cpp \
 	../../core/StringClass.cpp \
 	../../core/StringObject.cpp \
