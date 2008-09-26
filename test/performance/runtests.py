@@ -34,7 +34,7 @@
 #
 # simple script that executes tests on tamarin-central or tamarin-tracing vm
 #
-import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, time, subprocess, socket, math
+import os, os.path, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform, time, subprocess, socket, math, traceback
 from math import sqrt
 from os.path import *
 from os import getcwd,environ,walk
@@ -57,8 +57,10 @@ fd,tmpfile = tempfile.mkstemp()
 os.close(fd)
 js_output_f=False
 
-globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider', 'ascargs':'', 
-          'vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':'', 'perfm':False, 'avmname':'avm', 'avm2name':'avm2'}
+globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider',
+          'ascargs':'','vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':'',
+          'perfm':False, 'avmname':'avm', 'avm2name':'avm2', 'memory':False,'optimize':True}
+          
 if 'AVM' in environ:
     globs['avm'] = environ['AVM'].strip()
 if 'AVM2' in environ:
@@ -101,17 +103,19 @@ def usage(c):
     print " -l --log           logs results to a file"
     print " -d --socketlog     logs results to a socket server"
     print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
+    print " -m --memory        logs the high water memory mark"
     print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
     print "    --ascargs       args to pass to asc on rebuild of test files"
     print "    --vmargs        args to pass to vm"
     print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
-    print "    --nooptimize    don't optimize files when compiling"
+    print "    --nooptimize    do not optimize files when compiling"
     print "    --perfm         parse the perfm results from avm"
     exit(c)
 
 try:
-  opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:", ["verbose","avm=","asc=","globalabc=","help","forcerebuild","ascargs=","vmargs=","log",
-                      "socketlog","avm2=","vmargs2=","iterations=","config=","runtime=","vmversion=","perfm", "avmname=","avm2name="])
+  opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:m", ["verbose","avm=","asc=","globalabc=","help",
+                "forcerebuild","ascargs=","vmargs=","log","socketlog","avm2=","vmargs2=","iterations=",
+                "config=","runtime=","vmversion=","perfm", "avmname=","avm2name=","nooptimize","memory"])
 except:
     usage(2)
 
@@ -122,6 +126,8 @@ for o, v in opts:
         verbose = True
     elif o in ("-h", "--help"):
         usage(0)
+    elif o in ("-m", "--memory"):
+        globs['memory'] = True
     elif o in ("-E", "--avm"):
         globs['avm'] = v
     elif o in ("-S", "--avm2"):
@@ -166,6 +172,8 @@ for o, v in opts:
         globs['avmname'] = v
     elif o in ("--avm2name"):
         globs['avm2name'] = v
+    elif o in ('--nooptimize'):
+        globs['optimize'] = False
 
 def istest(f):
     return f.endswith(".as")
@@ -184,9 +192,12 @@ def parents(d):
 
 # run a command and return its output
 def run_pipe(cmd):
+    verbose_print(cmd)
     proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, shell=False)
-    proc.wait()
-    return proc.stdout
+    (stdo,stde)=proc.communicate()
+    for _line in stdo.split('\n'):
+        verbose_print(_line.strip())
+    return stdo.split('\n')
     #t = pipes.Template()
     #t.append("%s 2>&1" % cmd, "--")
     #verbose_print(cmd)
@@ -206,16 +217,12 @@ def compile_test(as):
         cmd = asc
     cmd += " " + ascargs
     cmd += " -import " + globalabc
-    cmd += " -optimize"     # optimize files by default
+    if globs['optimize']:
+        cmd += " -optimize"
     (dir, file) = split(as)
     verbose_print("   compiling %s" % file)
     (testdir, ext) = splitext(as)
-    try:
-        f = run_pipe("%s %s" % (cmd,as))
-        for line in f:
-            verbose_print(line.strip())
-    finally:
-        f.close()
+    f = run_pipe("%s %s" % (cmd,as))
 
 def mean(population):
     mean = 0.0
@@ -240,9 +247,33 @@ def variance(population):
 def standard_deviation(population):
     return sqrt(variance(population))
 
-
 def standard_error(population):
     return standard_deviation(population) / sqrt(len(population))
+
+def formatMemoryList(lst):
+    out=""
+    for mem in lst:
+        out="%s%s, " %(out,formatMemory(mem))
+    out=out[:-2]
+    return out
+
+def formatMemory(mem):
+    if mem<1024:
+        out="%dK" % mem
+    else:
+        out="%.1fM" % (mem/1024.0)
+    return  out
+
+
+def formatExceptionInfo(maxTBlevel=5):
+    cla, exc, trbk = sys.exc_info()
+    excName = cla.__name__
+    try:
+        excArgs = exc.__dict__["args"]
+    except KeyError:
+        excArgs = "<no args>"
+    excTb = traceback.format_tb(trbk, maxTBlevel)
+    return (excName, excArgs, excTb)
 
 tDistribution = [ 999, 999, 12.71, 4.30, 3.18, 2.78, 2.57, 2.45, 2.36, 2.31, 2.26, 2.23, 2.20, 2.18, 2.16, 2.14, 2.13, 2.12, 2.11, 2.10, 2.09, 2.09, 2.08, 2.07, 2.07, 2.06, 2.06, 2.06, 2.05, 2.05, 2.05, 2.04, 2.04, 2.04, 2.03, 2.03, 2.03, 2.03, 2.03, 2.02, 2.02, 2.02, 2.02, 2.02, 2.02, 2.02, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.01, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 2.00, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.99, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.98, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.97, 1.96]
 tMax = len(tDistribution)
@@ -299,20 +330,14 @@ def socketlog(msg):
                 ctr+=1
                 file="socketlog-%s-%s.txt" % (globs['vmversion'],ctr)
             globs['socketlog']=file
-        alltext=''
-        try:
-            alltext=open(globs['socketlog']).read()
-        except:
-            print("creating new socket log file %s" % globs['socketlog'])
-        alltext+="%s\n" % msg
-        open(globs['socketlog'],'w').write(alltext)
+        open(globs['socketlog'],'a').write(msg)
         s = socket(AF_INET, SOCK_STREAM)    # create a TCP socket
         s.connect((serverHost, serverPort)) # connect to server on the port
         s.send("%s;exit\r\n" % msg)         # send the data
         data = s.recv(1024)
         #print('Sent: %s' % msg)
         #print('Received: %s \n\n' % data)
-        s.shutdown(SHUT_RDWR)
+        #s.shutdown(SHUT_RDWR)
         s.close()
 
 
@@ -407,6 +432,10 @@ for ast in tests:
     rl1 = []
     rl2 = []
     result2=9999999
+    if globs['memory'] and vmargs.find("-memstats")==-1:
+        vmargs="%s -memstats" % vmargs
+    if globs['memory'] and len(vmargs2)>0 and vmargs2.find("-memstats")==-1:
+        vmargs2="%s -memstats" % vmargs2
 
     # setup dictionary for vprof (perfm) results
     if globs['perfm']:
@@ -414,6 +443,8 @@ for ast in tests:
         perfm2Dict = {'verify':[], 'code':[], 'compile':[], 'irbytes':[], 'ir':[], 'count':[] }
   
     for i in range(iterations):
+        memoryhigh = 0
+        memoryhigh2 = 0
         f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
         if len(avm2)>0:
             if len(vmargs2)>0:
@@ -422,16 +453,46 @@ for ast in tests:
                 f2 = run_pipe("%s %s %s" % (avm2, vmargs, abc))
         try:
             for line in f1:
-                if "metric" in line:
+                if globs['memory'] and "[mem]" in line and "private" in line:
+                    tokens=line.rsplit()
+                    if len(tokens)>4:
+                        _mem=tokens[3]
+                        if _mem.startswith('('):
+                            _mem=_mem[1:]
+                        if _mem.endswith(')'):
+                            _mem=_mem[:-1]
+                        if _mem.endswith('M'):
+                            val=float(_mem[:-1])*1024
+                        else:
+                            val=float(_mem[:-1])
+                        if val>memoryhigh:
+                            memoryhigh=val
+                if not globs['memory'] and "metric" in line:
                     result1list=line.rsplit()
                     if len(result1list)>2:
-                        resultList.append(int(result1list[2]))
+                        resultList.append(result1list[2])
                         if result1 > int(result1list[2]):
                             result1=float(result1list[2])
                 elif globs['perfm']:
                     parsePerfm(line, perfm1Dict)
+            if globs['memory']:
+                resultList.append(memoryhigh)
             if len(avm2)>0:
                 for line in f2:
+                    if globs['memory'] and "[mem]" in line and "private" in line:
+                        tokens=line.rsplit()
+                        if len(tokens)>4:
+                            _mem=tokens[3]
+                            if _mem.startswith('('):
+                                _mem=_mem[1:]
+                            if _mem.endswith(')'):
+                                _mem=_mem[:-1]
+                            if _mem.endswith('M'):
+                                val=float(_mem[:-1])*1024
+                            else:
+                                val=float(_mem[:-1])
+                            if val>memoryhigh2:
+                                memoryhigh2=val
                     if "metric" in line:
                         result2list=line.rsplit()
                         if len(result2list)>2:
@@ -440,76 +501,99 @@ for ast in tests:
                                 result2=float(result2list[2])
                     elif globs['perfm']:
                         parsePerfm(line, perfm2Dict)
-            if result1==0:
-                spdup = 9999
+            if globs['memory']:
+                if memoryhigh<=0:
+                    spdup = 9999
+                else:
+                    spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
             else:
-                spdup = ((result1-result2)/result2)*100.0
+                if result1==0:
+                    spdup = 9999
+                else:
+                    spdup = ((result1-result2)/result2)*100.0
             rl1.append(result1)
             rl2.append(result2)
         except:
-            log_print("exception: %s" % sys.exc_info()[0])
+            print formatExceptionInfo()
             exit(-1)
 
-    if len(avm2)>0:
-        if iterations == 1:
-            log_print('%-50s %7s %7s %7.1f' % (ast,result1,result2,spdup))
+    if globs['memory']:
+        if len(avm2)>0:
+            log_print("%-50s %7s %7s %7.1f" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup))
         else:
-            try:
-                rl1_avg=sum(rl1)/len(rl1)
-                rl2_avg=sum(rl2)/len(rl2)
-                log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, min(rl1), max(rl1), rl1_avg, min(rl2), max(rl2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0))
-            except:
-                log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, '', '', result1, '', '', result2, spdup))
-
-        if globs['perfm']:
-            def calcPerfm(desc, key):
-            # calculate min, max, average and %diff of averages
-                try:
-                    if iterations == 1:
-                        log_print( '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
-                                    ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0)))
-                    else:
-                        avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
-                        avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
-                        log_print('     %-45s [%6s :%6s] %6s   [%6s :%6s] %6s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
-                                                                     min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
-                                                                     ((avg1-avg2)/float(avg2))*100.0))
-                except:
-                    pass
-    
-            calcPerfm('verify & IR gen (time)','verify')
-            calcPerfm('compile (time)','compile')
-            calcPerfm('code size (bytes)','code')
-            calcPerfm('mir/lir bytes', 'irbytes')
-            calcPerfm('mir/lir (# of inst)', 'ir')
-            calcPerfm('count', 'count')
-            log_print('-------------------------------------------------------------------------------------------------------------')
-    else: #only one avm tested
-        if result1 < 9999999 :
-            meanRes = mean(resultList)
-            if (iterations > 2):
-                if meanRes==0:
-                    confidence = 0
-                else:
+            confidence=0
+            meanRes=memoryhigh
+            if iterations>2:
+                meanRes=mean(resultList)
+                if meanRes>0:
                     confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
-                config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
-                if globs['perfm']:  #send vprof results to db
-                    #calc confidence and mean for each stat
-                    def calcConf(list):
-                      return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
-                    def perfmSocketlog(metric,key):
-                      socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % 
-                               (ast, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), iterations, OS_name, config, VM_version))
-                    perfmSocketlog('vprof-compile-time','compile')
-                    perfmSocketlog('vprof-code-size','code')
-                    perfmSocketlog('vprof-verify-time','verify')
-                    perfmSocketlog('vprof-ir-bytes','irbytes')
-                    perfmSocketlog('vprof-ir-time','ir')
-                    perfmSocketlog('vprof-count','count')
-                socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
-                log_print("%-50s %7s %10.1f%%" % (ast,result1,confidence)) 
-            else: #one iteration
-                log_print("%-50s %7s" % (ast,result1)) 
-        else:
-                log_print("%-50s crash" % (ast)) 
+                log_print("%-50s %7s %10.1f%%     [%s]" % (ast,formatMemory(memoryhigh),confidence,formatMemoryList(resultList)))
+            else:
+                log_print("%-50s %7s" % (ast,formatMemory(memoryhigh)))
+            config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
+            config = config.replace("-memstats","")
+            socketlog("addresult2::%s::memory::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, memoryhigh, confidence, meanRes, iterations, OS_name, config, VM_version))
+    else:
+        if len(avm2)>0:
+            if iterations == 1:
+                log_print('%-50s %7s %7s %7.1f' % (ast,result1,result2,spdup))
+            else:
+                try:
+                    rl1_avg=sum(rl1)/len(rl1)
+                    rl2_avg=sum(rl2)/len(rl2)
+                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, min(rl1), max(rl1), rl1_avg, min(rl2), max(rl2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0))
+                except:
+                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, '', '', result1, '', '', result2, spdup))
+    
+            if globs['perfm']:
+                def calcPerfm(desc, key):
+                # calculate min, max, average and %diff of averages
+                    try:
+                        if iterations == 1:
+                            log_print( '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
+                                        ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0)))
+                        else:
+                            avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
+                            avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
+                            log_print('     %-45s [%6s :%6s] %6s   [%6s :%6s] %6s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
+                                                                         min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
+                                                                         ((avg1-avg2)/float(avg2))*100.0))
+                    except:
+                        pass
+        
+                calcPerfm('verify & IR gen (time)','verify')
+                calcPerfm('compile (time)','compile')
+                calcPerfm('code size (bytes)','code')
+                calcPerfm('mir/lir bytes', 'irbytes')
+                calcPerfm('mir/lir (# of inst)', 'ir')
+                calcPerfm('count', 'count')
+                log_print('-------------------------------------------------------------------------------------------------------------')
+        else: #only one avm tested
+            if result1 < 9999999 :
+                meanRes = mean(resultList)
+                if (iterations > 2):
+                    if meanRes==0:
+                        confidence = 0
+                    else:
+                        confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
+                    config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
+                    if globs['perfm']:  #send vprof results to db
+                        #calc confidence and mean for each stat
+                        def calcConf(list):
+                          return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
+                        def perfmSocketlog(metric,key):
+                          socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % 
+                                   (ast, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), iterations, OS_name, config, VM_version))
+                        perfmSocketlog('vprof-compile-time','compile')
+                        perfmSocketlog('vprof-code-size','code')
+                        perfmSocketlog('vprof-verify-time','verify')
+                        perfmSocketlog('vprof-ir-bytes','irbytes')
+                        perfmSocketlog('vprof-ir-time','ir')
+                        perfmSocketlog('vprof-count','count')
+                    socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
+                    log_print("%-50s %7s %10.1f%%    %s" % (ast,result1,confidence,resultList)) 
+                else: #one iteration
+                    log_print("%-50s %7s" % (ast,result1)) 
+            else:
+                    log_print("%-50s crash" % (ast)) 
 

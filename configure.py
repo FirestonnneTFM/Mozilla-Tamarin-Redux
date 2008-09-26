@@ -102,8 +102,6 @@ if MMGC_THREADSAFE:
     NSPR_LDOPTS = o.getStringArg('nspr-ldopts')
     OS_LDFLAGS += " " + NSPR_LDOPTS
 
-os, cpu = config.getTarget()
-
 if config.getCompiler() == 'GCC':
     APP_CXXFLAGS = "-fstrict-aliasing -fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -finline-functions -finline-limit=65536 "
     if config.getDebug():
@@ -124,13 +122,13 @@ elif config.getCompiler() == 'VS':
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 "
         OS_LDFLAGS += "-SAFESEH:NO "
-    if config.getDebug():
-        APP_CXXFLAGS += "-EHsc "
-    else:
-        OPT_CXXFLAGS = "-Ox -Os "
-        APP_CXXFLAGS += "-GR- "
-    DEBUG_CXXFLAGS += "-Zi "
-    DEBUG_LDFLAGS += "-DEBUG "
+        if config.getDebug():
+            APP_CXXFLAGS += "-EHsc "
+        else:
+            OPT_CXXFLAGS = "-Ox -Os "
+            APP_CXXFLAGS += "-GR- "
+        DEBUG_CXXFLAGS += "-Zi "
+        DEBUG_LDFLAGS += "-DEBUG "
 else:
     raise Exception('Unrecognized compiler: ' + config.getCompiler())
 
@@ -144,6 +142,7 @@ if zlib_lib is not None:
 else:
     AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,z)'
 
+os, cpu = config.getTarget()
 if os == "darwin":
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
@@ -204,7 +203,7 @@ else:
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
-    
+
 if o.getBoolArg('perfm'):
     APP_CPPFLAGS += "-DPERFM "
     
