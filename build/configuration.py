@@ -185,7 +185,6 @@ class Configuration:
             self._compiler = 'VS'
             del self._acvars['USE_COMPILER_DEPS']
             
-            static_crt = options.getBoolArg('static-crt')
             self._acvars.update({
                 'OBJ_SUFFIX'   : 'obj',
                 'LIB_PREFIX'   : '',
