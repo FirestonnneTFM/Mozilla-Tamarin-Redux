@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		07D76BD10E7A5D1F0038B3FF /* peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07D76BD00E7A5D1F0038B3FF /* peephole.cpp */; };
 		1A91570F0B012A3F00744986 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A91570E0B012A3F00744986 /* libz.dylib */; };
 		4E5ADFA30E5CD46C00038D0B /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4E5ADFA20E5CD46C00038D0B /* vprof.cpp */; };
 		6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6803D2C70A5064FD00C797BB /* JavaGlue.cpp */; };
@@ -971,7 +970,6 @@
 				6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */,
 				858088D80C8F604F0093F49B /* SamplerScript.cpp in Sources */,
 				4E5ADFA30E5CD46C00038D0B /* vprof.cpp in Sources */,
-				07D76BD10E7A5D1F0038B3FF /* peephole.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1019,6 +1017,8 @@
 		1DEB928A08733DD80010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					AVMPLUS_SHELL,
@@ -1061,6 +1061,8 @@
 		1DEB928B08733DD80010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
@@ -1127,6 +1129,8 @@
 		8E8B530009AABD020057BEE4 /* Debug_Debugger */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					AVMPLUS_SHELL,
@@ -1170,6 +1174,8 @@
 		8E8B530109AABD020057BEE4 /* Release_Debugger */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
