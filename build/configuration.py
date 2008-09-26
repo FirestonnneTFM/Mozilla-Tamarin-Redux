@@ -84,7 +84,7 @@ def _configSub(ostest, cputest):
         cpu = 'i686'
     elif re.search('^(x86_64|amd64)$', cputest):
         cpu = 'x86_64'
-    elif re.search('^(ppc|powerpc)$', cputest):
+    elif re.search('^(ppc|powerpc|Power Macintosh)$', cputest):
         cpu = 'powerpc'
     elif re.search('sun', cputest):
         cpu = 'sparc'
