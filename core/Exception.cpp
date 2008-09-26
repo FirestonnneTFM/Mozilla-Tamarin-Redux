@@ -158,7 +158,7 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		//AvmAssert(callStack && callStack->env);
-		if (core->profiler->profilingDataWanted && callStack && callStack->env)
+		if (core->profiler && core->profiler->profilingDataWanted && callStack && callStack->env)
 			core->profiler->sendCatch(callStack->env->method);
 
 		core->callStack = callStack;

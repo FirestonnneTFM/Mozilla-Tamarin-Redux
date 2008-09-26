@@ -307,6 +307,8 @@
 #  endif
 #endif
 
+//#define AVMPLUS_SELFTEST
+
 // The use of this switch is described in comments at the head of utils/superwordprof.c
 //
 // The limit is optional and describes a cutoff for sampling; the program continues to
