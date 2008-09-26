@@ -58,6 +58,7 @@ namespace avmplus
 	Translator::Translator(MethodInfo* info)
 #endif
 		: info(info)
+		, core(info->core())
 		, backpatches(NULL)
 		, labels(NULL)
 		, exception_fixes(NULL)
@@ -73,8 +74,8 @@ namespace avmplus
 		, pool(NULL)
 		, code_start(NULL)
 	{
-		AvmCore *core = info->core();
-		
+		AvmAssert(info != NULL);
+
 		const byte* pos = info->body_pos;
 		info->word_code.max_stack = AvmCore::readU30(pos);
 		info->word_code.local_count = AvmCore::readU30(pos);
@@ -84,17 +85,48 @@ namespace avmplus
 		code_start = pos;
 		pool = info->pool;
 		
-		if (pool->word_code.cpool_mn == NULL)
+		boot();
+	}
+
+#ifdef AVMPLUS_SELFTEST
+#  ifdef AVMPLUS_DIRECT_THREADED
+	Translator::Translator(AvmCore* core, byte* code_start, void** opcode_labels)
+#  else
+	Translator::Translator(AvmCore* core, byte* code_start)
+#  endif
+
+		: info(NULL)
+		, core(core)
+		, backpatches(NULL)
+		, labels(NULL)
+		, exception_fixes(NULL)
+		, buffers(NULL)
+		, buffer_offset(0)
+		, spare_buffer(NULL)
+#ifdef AVMPLUS_DIRECT_THREADED
+		, opcode_labels(opcode_labels)
+#endif
+		, exceptions_consumed(false)
+		, dest(NULL)
+		, dest_limit(NULL)
+		, pool(NULL)
+		, code_start(code_start)
+	{
+		boot();
+	}
+	
+#endif // AVMPLUS_SELFTEST
+	
+	void Translator::boot() {
+		if (pool != NULL && pool->word_code.cpool_mn == NULL)
 			pool->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (pool->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), pool);
-		
 		computeExceptionFixups();
-		
 		refill();
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peepInit();
 #endif
 	}
-
+	
 	Translator::~Translator()
 	{
 		cleanup();
@@ -184,9 +216,7 @@ namespace avmplus
 	
 	void Translator::computeExceptionFixups() 
 	{
-		AvmCore *core = info->core();
-	
-		if (info->exceptions == NULL)
+		if (info == NULL || info->exceptions == NULL)
 			return;
 		
 		DELETE_LIST(catch_info, exception_fixes);
@@ -764,7 +794,7 @@ namespace avmplus
 		computeExceptionFixups();
 	}
 	
-	void Translator::epilogue() 
+	uint32 Translator::epilogue(uint32** code_result)
 	{
 		AvmAssert(backpatches == NULL);
 		AvmAssert(exception_fixes == NULL);
@@ -776,7 +806,7 @@ namespace avmplus
 		buffers->entries_used = dest - buffers->data;
 		uint32 total_size = buffer_offset + buffers->entries_used;
 		
-		TranslatedCode* code_anchor = (TranslatedCode*)info->core()->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uint32), GC::kZero);
+		TranslatedCode* code_anchor = (TranslatedCode*)core->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uint32), GC::kZero);
 		uint32* code = code_anchor->data;
 		
 		// reverse the list of buffers
@@ -800,14 +830,19 @@ namespace avmplus
 		}
 		AvmAssert(ptr == code + total_size);
 		
-		info->word_code.code_anchor = code_anchor;
-		info->word_code.body_pos = code;
+		if (info != NULL) {
+			info->word_code.code_anchor = code_anchor;
+			info->word_code.body_pos = code;
 #ifdef SUPERWORD_PROFILING
-		info->word_code.body_end = ptr;
-		info->word_code.dumped = false;
+			info->word_code.body_end = ptr;
+			info->word_code.dumped = false;
 #endif
-
+		}
+		
 		cleanup();
+		if (code_result != NULL)
+			*code_result = code;
+		return total_size;
 	}
 
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER

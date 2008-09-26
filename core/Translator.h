@@ -58,8 +58,14 @@ namespace avmplus
 	public:
 #  ifdef AVMPLUS_DIRECT_THREADED
 		Translator(MethodInfo* info, void** opcode_labels);
+#    ifdef AVMPLUS_SELFTEST
+		Translator(AvmCore* core, byte* code_start, void** opcode_labels);
+#    endif
 #  else
 		Translator(MethodInfo* info);
+#    ifdef AVMPLUS_SELFTEST
+		Translator(AvmCore* core, byte* code_start);
+#    endif
 #  endif
 		~Translator();
 		
@@ -71,8 +77,9 @@ namespace avmplus
 		// fix up branches to this address
 		void fixExceptionsAndLabels(const byte *pc);
 		
-		// Paste up the translated code and install it in info
-		void epilogue();
+		// Paste up the translated code and install it in info.  Return the number
+		// of words and install a pointer to the first word in 'code' if not NULL
+		uint32 epilogue(uint32** code=NULL);
 		
 		// Handle specific instructions or instruction classes
 		void emitOp0(const byte *pc, int opcode);
@@ -153,6 +160,7 @@ namespace avmplus
 		};
 		
 		MethodInfo* info;
+		AvmCore* core;
 		backpatch_info* backpatches;	 // in address order
 		label_info* labels;				 // in reverse offset order
 		catch_info* exception_fixes; // in address order
@@ -173,7 +181,8 @@ namespace avmplus
 		void refill();
 		void emitRelativeOffset(uint32 base_offset, const byte *pc, int32 offset);
 		void makeAndInsertBackpatch(const byte* target_pc, uint32 patch_offset);
-
+		void boot();
+		
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		
 		// The structures are laid out so as to improve packing and conserve space.  The

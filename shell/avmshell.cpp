@@ -273,7 +273,7 @@ namespace avmshell
 		printf("          [-Dmem]       show compiler memory usage \n");
 		printf("          [-Dnodce]     disable DCE optimization \n");
 		#ifdef AVMPLUS_VERBOSE
-			printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
+	    printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
 		#endif
     #endif
     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -281,14 +281,16 @@ namespace avmshell
 		printf("          [-Ojit]       use jit always, never interp\n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
         #ifdef AVMPLUS_IA32
-            printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
+        printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         #endif /* AVMPLUS_IA32 */
     #endif
 		
 		#ifdef AVMPLUS_VERIFYALL
-		    printf("          [-Dverifyall] verify greedily instead of lazily\n");
+	    printf("          [-Dverifyall] verify greedily instead of lazily\n");
 		#endif
-
+		#ifdef AVMPLUS_SELFTEST
+		printf("          [-Dselftest]  run selftests\n");
+		#endif
 		printf("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
 		printf("          [-error]      crash opens debug dialog, instead of dumping\n");
 		#ifdef AVMPLUS_INTERACTIVE
@@ -612,6 +614,13 @@ namespace avmshell
 #ifdef AVMPLUS_VERBOSE
 			bool do_verbose = false;
 #endif
+#ifdef AVMPLUS_SELFTEST
+			bool do_selftest = false;
+			const char* st_component = NULL;
+			const char* st_category = NULL;
+			const char* st_name = NULL;
+			char *st_mem = NULL;
+#endif
 
 			for (int i=1; i<argc && endFilenamePos == -1; i++) {
 #ifdef UNDER_CE
@@ -663,6 +672,34 @@ namespace avmshell
 							}
 							i++;
                     	#endif /* DEBUGGER */
+							
+						#ifdef AVMPLUS_SELFTEST
+						} else if (!strncmp(arg+2, "selftest", 8)) {
+							do_selftest = true;
+							if (arg[10] == '=') {
+								size_t k = strlen(arg+11);
+								st_mem = new char[k+1];
+								strcpy(st_mem, arg+11);
+								char *p = st_mem;
+								st_component = p;
+								while (*p && *p != ',')
+									p++;
+								if (*p == ',')
+									*p++ = 0;
+								st_category = p;
+								while (*p && *p != ',')
+									p++;
+								if (*p == ',')
+									*p++ = 0;
+								st_name = p;
+								if (*st_component == 0)
+									st_component = NULL;
+								if (*st_category == 0)
+									st_category = NULL;
+								if (*st_name == 0)
+									st_name = NULL;
+							}
+						#endif
 						} else if (!strcmp(arg+2, "interp")) {
 							config.turbo = false;
 						#ifdef AVMPLUS_VERBOSE
@@ -766,7 +803,13 @@ namespace avmshell
 				}
 			}
 		
-			if (!filename && !do_interactive) {
+			if (!filename && !do_interactive
+
+#ifdef AVMPLUS_SELFTEST
+				&& !do_selftest
+#endif
+				) 
+			{
 				usage();
 			}
 
@@ -808,6 +851,15 @@ namespace avmshell
 				config.verbose = true;
 #endif
 
+#ifdef AVMPLUS_SELFTEST
+			if (do_selftest) {
+				selftests(this, st_component, st_category, st_name);
+				if (st_mem != NULL)
+					delete [] st_mem;
+				return 0;  // FIXME: not ideal
+			}
+#endif
+			
 			#ifdef DEBUGGER
 			// Create the debugger
 			debugCLI = new (GetGC()) DebugCLI(this);
