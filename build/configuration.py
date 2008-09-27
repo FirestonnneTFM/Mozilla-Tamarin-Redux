@@ -151,6 +151,20 @@ class Configuration:
         if self._debug:
             self._acvars['ENABLE_DEBUG'] = 1
 
+    def getObjDir(self):
+        """Returns the build directory being configured."""
+        return self._objdir
+
+    def getHost(self):
+        """Returns an (os, cpu) tuple of the host machine."""
+        return self._host
+
+    def getTarget(self):
+        """Returns an (os, cpu) tuple of the target machine."""
+        return self._target
+
+    def getCompiler(self, static_crt=False):
+        self.COMPILER_IS_GCC = True
         self._compiler = 'GCC'
         self._acvars.update({
             'I_SUFFIX': 'i',
@@ -171,7 +185,6 @@ class Configuration:
             self._compiler = 'VS'
             del self._acvars['USE_COMPILER_DEPS']
             
-            static_crt = options.getBoolArg('static-crt')
             self._acvars.update({
                 'OBJ_SUFFIX'   : 'obj',
                 'LIB_PREFIX'   : '',
@@ -249,26 +262,6 @@ class Configuration:
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
         self._acvars['COMPILER'] = self._compiler
-
-    def getObjDir(self):
-        """Returns the build directory being configured."""
-        return self._objdir
-
-    def getHost(self):
-        """Returns an (os, cpu) tuple of the host machine."""
-        return self._host
-
-    def getTarget(self):
-        """Returns an (os, cpu) tuple of the target machine."""
-        return self._target
-        
-    def getCompiler(self):
-        """Returns the compiler in use, as a string.
-Possible values are:
-- 'GCC': the GNU Compiler Collection, including GCC and G++
-- 'VS': Microsoft Visual Studio
-- 'SunStudio': Sun Studio
-- 'rvct: RealView Compiler"""
         return self._compiler
 
     def getDebug(self):

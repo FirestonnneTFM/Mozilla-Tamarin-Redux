@@ -44,22 +44,38 @@ namespace MMgc
 {
 	void* GCAllocObject::operator new (size_t size)
 	{
-		return malloc(size);
+		#ifdef MMGC_PORTING_API
+			return MMGC_PortAPI_Alloc(size);
+		#else
+			return malloc(size);
+		#endif
 	}
 
 	void* GCAllocObject::operator new[] (size_t size)
 	{
-		return malloc(size);
+		#ifdef MMGC_PORTING_API
+			return MMGC_PortAPI_Alloc(size);
+		#else
+			return malloc(size);
+		#endif
 	}
 	
 	void GCAllocObject::operator delete (void *ptr)
 	{
-		free(ptr);
+		#ifdef MMGC_PORTING_API
+			MMGC_PortAPI_Free(ptr);
+		#else
+			free(ptr);
+		#endif
 	}
 
 	void GCAllocObject::operator delete [] (void *ptr)
 	{
-		free(ptr);
+		#ifdef MMGC_PORTING_API
+			MMGC_PortAPI_Free(ptr);
+		#else
+			free(ptr);
+		#endif
 	}
 }
 
