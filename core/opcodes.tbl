@@ -147,7 +147,7 @@ OP_callpropvoid		"callpropvoid"		0x4F	1+2+2		2 	        0		0		-1		 0        1 //
 OP_0x50				"OP_0x50"			0x50	0			-1	        0		0		0		 0        0
 OP_0x51				"OP_0x51"			0x51	0			-1	        0		0		0		 0        0
 OP_0x52				"OP_0x52"			0x52	0			-1	        0		0		0		 0        0
-OP_applytype		"applytype"				0x53	1+2			1	        0		0		-1		 1        1
+OP_applytype		"applytype"			0x53	1+2			1	        0		0		-1		 1        1
 OP_0x54				"OP_0x54"			0x54	0			-1	        0		0		0		 0        0
 OP_newobject		"newobject" 		0x55	1+2			1	        0		0		-1		 1        1
 OP_newarray			"newarray" 			0x56	1+2			1	        0		0		-1		 1        1

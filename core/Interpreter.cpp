@@ -194,7 +194,7 @@ namespace avmplus
 #      define XXX(idx) &&L_illegal_op,
 			static void* opcode_labels[] = {
 #  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
-	    static void* opcode_labels[OP_INDEX(LAST_SUPERWORD_OPCODE)+1];
+	    static void* opcode_labels[WOP_LAST+1];
         if (opcode_labels[0] == 0) {
 #    define XXX(idx) III(idx, L_illegal_op)
 #    ifdef MSVC_X86_ASM_THREADING
@@ -209,11 +209,7 @@ namespace avmplus
 #     endif
 #  endif // threading discipline
 			 XXX(0x00)
-#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
-			 III(0x01, L_bkpt)
-#  else
 			 XXX(0x01) /* OP_bkpt */
-#  endif
 			 XXX(0x02) /* OP_nop */
 			 III(0x03, L_throw)
 			 III(0x04, L_getsuper)
@@ -455,14 +451,13 @@ namespace avmplus
 			 III(0xEF, L_debug)
 			 III(0xF0, L_debugline)
 			 III(0xF1, L_debugfile)
-			 III(0xF2, L_bkptline)
 #  else
  			 XXX(0xEF) /* OP_debug */
 			 XXX(0xF0) /* L_debugline */
 			 XXX(0xF1) /* L_debugfile */
-			 XXX(0xF2) /* L_bkptline */
 #  endif
-	 		 XXX(0xF3)  /* OP_timestamp */
+			 XXX(0xF2) /* L_bkptline */
+	 		 XXX(0xF3) /* OP_timestamp */
 			 XXX(0xF4)
 			 XXX(0xF5)
 			 XXX(0xF6)
@@ -476,65 +471,65 @@ namespace avmplus
 			 XXX(0xFE)
 			 XXX(0xFF)  /* OP_ext */
 			 XXX(0x100)
-			 III(0x101, L_ext_pushbits)
-			 III(0x102, L_ext_push_doublebits)
+			 III(0x101, L_pushbits)
+			 III(0x102, L_push_doublebits)
 #  ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-			 III(0x103, L_ext_get2locals)
-			 III(0x104, L_ext_get3locals)
- 			 III(0x105, L_ext_get4locals)
-			 III(0x106, L_ext_get5locals)
-			 III(0x107, L_ext_storelocal)
-			 III(0x108, L_ext_add_ll)
-			 III(0x109, L_ext_add_set_lll)
-			 III(0x10A, L_ext_subtract_ll)
-			 III(0x10B, L_ext_multiply_ll)
-			 III(0x10C, L_ext_divide_ll)
-			 III(0x10D, L_ext_modulo_ll)
-			 III(0x10E, L_ext_bitand_ll)
-			 III(0x10F, L_ext_bitor_ll)
-			 III(0x110, L_ext_bitxor_ll)
-			 III(0x111, L_ext_add_lb)
-			 III(0x112, L_ext_subtract_lb)
-			 III(0x113, L_ext_multiply_lb)
-			 III(0x114, L_ext_divide_lb)
-			 III(0x115, L_ext_bitand_lb)
-			 III(0x116, L_ext_bitor_lb)
-			 III(0x117, L_ext_bitxor_lb)
-			 III(0x118, L_ext_iflt_ll)
-			 III(0x119, L_ext_ifnlt_ll)
-			 III(0x11A, L_ext_ifle_ll)
-			 III(0x11B, L_ext_ifnle_ll)
-			 III(0x11C, L_ext_ifgt_ll)
-			 III(0x11D, L_ext_ifngt_ll)
-			 III(0x11E, L_ext_ifge_ll)
-			 III(0x11F, L_ext_ifnge_ll)
-			 III(0x120, L_ext_ifeq_ll)
-			 III(0x121, L_ext_ifne_ll)
-			 III(0x122, L_ext_ifstricteq_ll)
-			 III(0x123, L_ext_ifstrictne_ll)
-			 III(0x124, L_ext_iflt_lb)
-			 III(0x125, L_ext_ifnlt_lb)
-			 III(0x126, L_ext_ifle_lb)
-			 III(0x127, L_ext_ifnle_lb)
-			 III(0x128, L_ext_ifgt_lb)
-			 III(0x129, L_ext_ifngt_lb)
-			 III(0x12A, L_ext_ifge_lb)
-			 III(0x12B, L_ext_ifnge_lb)
-			 III(0x12C, L_ext_ifeq_lb)
-			 III(0x12D, L_ext_ifne_lb)
-			 III(0x12E, L_ext_ifstricteq_lb)
-			 III(0x12F, L_ext_ifstrictne_lb)
-			 III(0x130, L_ext_swap_pop)
+			 III(0x103, L_get2locals)
+			 III(0x104, L_get3locals)
+ 			 III(0x105, L_get4locals)
+			 III(0x106, L_get5locals)
+			 III(0x107, L_storelocal)
+			 III(0x108, L_add_ll)
+			 III(0x109, L_add_set_lll)
+			 III(0x10A, L_subtract_ll)
+			 III(0x10B, L_multiply_ll)
+			 III(0x10C, L_divide_ll)
+			 III(0x10D, L_modulo_ll)
+			 III(0x10E, L_bitand_ll)
+			 III(0x10F, L_bitor_ll)
+			 III(0x110, L_bitxor_ll)
+			 III(0x111, L_add_lb)
+			 III(0x112, L_subtract_lb)
+			 III(0x113, L_multiply_lb)
+			 III(0x114, L_divide_lb)
+			 III(0x115, L_bitand_lb)
+			 III(0x116, L_bitor_lb)
+			 III(0x117, L_bitxor_lb)
+			 III(0x118, L_iflt_ll)
+			 III(0x119, L_ifnlt_ll)
+			 III(0x11A, L_ifle_ll)
+			 III(0x11B, L_ifnle_ll)
+			 III(0x11C, L_ifgt_ll)
+			 III(0x11D, L_ifngt_ll)
+			 III(0x11E, L_ifge_ll)
+			 III(0x11F, L_ifnge_ll)
+			 III(0x120, L_ifeq_ll)
+			 III(0x121, L_ifne_ll)
+			 III(0x122, L_ifstricteq_ll)
+			 III(0x123, L_ifstrictne_ll)
+			 III(0x124, L_iflt_lb)
+			 III(0x125, L_ifnlt_lb)
+			 III(0x126, L_ifle_lb)
+			 III(0x127, L_ifnle_lb)
+			 III(0x128, L_ifgt_lb)
+			 III(0x129, L_ifngt_lb)
+			 III(0x12A, L_ifge_lb)
+			 III(0x12B, L_ifnge_lb)
+			 III(0x12C, L_ifeq_lb)
+			 III(0x12D, L_ifne_lb)
+			 III(0x12E, L_ifstricteq_lb)
+			 III(0x12F, L_ifstrictne_lb)
+			 III(0x130, L_swap_pop)
 #  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
-			 III(0x131, L_ext_findpropglobal)
-			 III(0x132, L_ext_findpropglobalstrict)
+			 III(0x131, L_findpropglobal)
+			 III(0x132, L_findpropglobalstrict)
 #  if defined GNUC_THREADING
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
 			AvmAssert(opcode_labels[0x97] == &&L_bitnot);
-			AvmAssert(opcode_labels[257] == &&L_ext_pushbits);
+			AvmAssert(opcode_labels[257] == &&L_pushbits);
 #    ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-			AvmAssert(opcode_labels[48 + 256] == &&L_ext_swap_pop);
+			AvmAssert(opcode_labels[48 + 256] == &&L_swap_pop);
 #    endif
 #  elif defined MSVC_X86_ASM_THREADING || defined MSVC_X86_REWRITE_THREADING
 			} // conditional run-time initialization of jump table
@@ -759,15 +754,12 @@ namespace avmplus
 #  if defined AVMPLUS_DIRECT_THREADED
 #    if defined GNUC_THREADING
 #      define INSTR(op)       L_##op:
-#      define INSTR_EXT(op)   INSTR(op)
 #      define NEXT            goto *(*pc++)
 #    elif defined MSVC_X86_REWRITE_THREADING
-#      define INSTR(op)       case OP_##op: L_ ## op: 
-#      define INSTR_EXT(op)   INSTR(op)
+#      define INSTR(op)       case WOP_##op: L_ ## op: 
 #      define NEXT            continue
 #    elif defined MSVC_X86_ASM_THREADING
 #      define INSTR(op)       L_ ## op: 
-#      define INSTR_EXT(op)   INSTR(OP)
 #      define NEXT __asm { \
 				__asm mov ebx, pc \
 				__asm mov eax, [ebx] \
@@ -777,8 +769,7 @@ namespace avmplus
 		   }
 #    endif // threading discipline
 #  else // AVMPLUS_DIRECT_THREADED
-#    define INSTR(op)       case OP_##op:
-#    define INSTR_EXT(op)   case (OP_##op)>>8:
+#    define INSTR(op)       case WOP_##op:
 #    define NEXT            continue
 #  endif
 		
@@ -836,10 +827,10 @@ namespace avmplus
 #  if defined AVMPLUS_WORD_CODE
 			// See comments around INSTR(ext) below.
 			AvmAssert((*pc & 65535) == ((*pc >> 16) & 65535));
-			switch ((*pc++) & 255)
+			switch ((*pc++) & 65535)
 #  else
             switch (*pc++)
-#  endif // AVMPLUS_WORD_CODE && !AVMPLUS_DIRECT_THREADING
+#  endif // AVMPLUS_WORD_CODE
             {
 
 #endif // SWITCH_DISPATCH
@@ -901,18 +892,6 @@ namespace avmplus
 #endif
 
 #if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
-			INSTR(bkpt) {
-				SAVE_EXPC;
-#  ifdef DEBUGGER
-				if (debugger)
-					debugger->enterDebugger();
-#  endif
-				restore_dxns();
-				NEXT;
-			}
-#endif
-					
-#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(debugline) {
 				SAVE_EXPC;
 				int line = U30ARG;
@@ -926,25 +905,7 @@ namespace avmplus
 				NEXT;
 			}
 #endif
-					
-#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
-			INSTR(bkptline) {
-				SAVE_EXPC;
-				int line = U30ARG;
-#  ifdef DEBUGGER
-				if (debugger)
-				{
-					debugger->debugLine(line);
-					debugger->enterDebugger();
-				}
-#  else
-				(void)line;
-#  endif
-				restore_dxns();
-				NEXT;
-			}
-#endif
-					
+										
 #if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(debug) {
 #  ifdef AVMPLUS_WORD_CODE
@@ -2714,31 +2675,15 @@ namespace avmplus
 #endif
 
 #ifdef AVMPLUS_WORD_CODE
-#  ifndef AVMPLUS_DIRECT_THREADED
-			INSTR(ext) {
-			// When using token threading, opcodes for introduced (rewritten) instructions are 
-			// represented with the low byte being OP_ext (0xFF) and the second byte being one
-			// of the OP_ext_ opcodes.  The main dispatch loop must mask off the higher bits
-			// during initial dispatch; this incurs a slight cost but (a) the normal case is
-			// that direct threading will be used and (b) the effect of the optimizations enabled
-			// by the extended opcodes should make up for it.
-#    ifdef _DEBUG
-			switch ((pc[-1] & 65535)>>8) {
-#    else
-			switch (pc[-1] >> 8) {
-#    endif
-			default:
-				goto L_illegal_op;
-#  endif // !AVMPLUS_DIRECT_THREADED
 #  ifdef MSVC_X86_REWRITE_THREADING
 			default:
-				// Keep L_illegal_op and L_ext_push_doublebits alive...
+				// Keep L_illegal_op and L_push_doublebits alive...
 				if ((int)pc > 0x100000)
-					goto L_ext_push_doublebits;
+					goto L_push_doublebits;
 				break;
 #  endif
 
-			INSTR_EXT(ext_pushbits) {
+			INSTR(pushbits) {
 				*++sp = *pc++;
 				NEXT;
 			}
@@ -2746,7 +2691,7 @@ namespace avmplus
 			// OPTIMIZEME - push_doublebits should probably not cons up a new atom every time,
 			// it would be better to keep it in the constant pool.
 
-			INSTR_EXT(ext_push_doublebits) {
+			INSTR(push_doublebits) {
 				union {
 					double d;
 					uint32_t bits[2];
@@ -2762,14 +2707,14 @@ namespace avmplus
 			// Superwords not in the instruction set.  These are selected by a table
 			// driven peephole optimizer, see comments and code in core/Translator.cpp.
 
-			INSTR_EXT(ext_get2locals) {
+			INSTR(get2locals) {
 				uint32_t regs = *pc++;
 				*(++sp) = framep[regs & 65535];
 				*(++sp) = framep[regs >> 16];
 				NEXT;
 			}
 					
-			INSTR_EXT(ext_get3locals) {
+			INSTR(get3locals) {
 				uint32_t regs = *pc++;
 				*(++sp) = framep[regs & 1023];
 				regs >>= 10;
@@ -2778,7 +2723,7 @@ namespace avmplus
 				NEXT;
 			}
 					
-			INSTR_EXT(ext_get4locals) {
+			INSTR(get4locals) {
 				uint32_t regs = *pc++;
 				*(++sp) = framep[regs & 255];
 				regs >>= 8;
@@ -2789,7 +2734,7 @@ namespace avmplus
 				NEXT;
 			}
 					
-			INSTR_EXT(ext_get5locals) {
+			INSTR(get5locals) {
 				uint32_t regs = *pc++;
 				*(++sp) = framep[regs & 63];
 				regs >>= 6;
@@ -2802,12 +2747,12 @@ namespace avmplus
 				NEXT;
 			}
 					
-			INSTR_EXT(ext_storelocal) {
+			INSTR(storelocal) {
 				framep[*pc++] = *sp;
 				NEXT;
 			}
 					
-			INSTR_EXT(ext_add_ll) {
+			INSTR(add_ll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2815,7 +2760,7 @@ namespace avmplus
 				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_add_set_lll) {
+			INSTR(add_set_lll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 1023];
 				regs >>= 10;
@@ -2823,7 +2768,7 @@ namespace avmplus
 				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, framep[regs >> 10]);
 			}
 					
-			INSTR_EXT(ext_subtract_ll) {
+			INSTR(subtract_ll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2831,7 +2776,7 @@ namespace avmplus
 				SUB_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_multiply_ll) {
+			INSTR(multiply_ll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2839,7 +2784,7 @@ namespace avmplus
 				MUL_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_divide_ll) {
+			INSTR(divide_ll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2847,7 +2792,7 @@ namespace avmplus
 				DIV_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_modulo_ll) {
+			INSTR(modulo_ll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2855,7 +2800,7 @@ namespace avmplus
 				MOD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_bitand_ll) {
+			INSTR(bitand_ll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2863,7 +2808,7 @@ namespace avmplus
 				BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_bitor_ll) {
+			INSTR(bitor_ll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2871,7 +2816,7 @@ namespace avmplus
 				BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_bitxor_ll) {
+			INSTR(bitxor_ll) {
 				uint32_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
@@ -2883,49 +2828,49 @@ namespace avmplus
 			// As long as ext_pushbits is only used for integer data we know that
 			// rhs is an int in the cases below, so the macros need not check.
 					
-			INSTR_EXT(ext_add_lb) {
+			INSTR(add_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				ADD_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_subtract_lb) {
+			INSTR(subtract_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				SUB_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_multiply_lb) {
+			INSTR(multiply_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				MUL_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_divide_lb) {
+			INSTR(divide_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				DIV_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_bitand_lb) {
+			INSTR(bitand_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				BITAND_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_bitor_lb) {
+			INSTR(bitor_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
 				BITOR_TWO_VALUES_AND_NEXT(lhs, rhs, sp[0]);
 			}
 					
-			INSTR_EXT(ext_bitxor_lb) {
+			INSTR(bitxor_lb) {
 				Atom lhs=framep[*pc++];
 				Atom rhs=*pc++;
 				++sp;
@@ -2942,42 +2887,42 @@ namespace avmplus
 
 #define IFCMP_LL(x) IFCMP_LL2(x)
 
-			INSTR_EXT(ext_iflt_ll) {
+			INSTR(iflt_ll) {
 				IFCMP_LL2(<, core->compare(lhs,rhs) == trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifnlt_ll) {
+			INSTR(ifnlt_ll) {
 				IFCMP_LL2(>=, core->compare(lhs, rhs) != trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifle_ll) {
+			INSTR(ifle_ll) {
 				IFCMP_LL2(<=, core->compare(rhs, lhs) == falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifnle_ll) {
+			INSTR(ifnle_ll) {
 				IFCMP_LL2(>, core->compare(rhs, lhs) != falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifgt_ll) {
+			INSTR(ifgt_ll) {
 				IFCMP_LL2(>, core->compare(rhs, lhs) == trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifngt_ll) {
+			INSTR(ifngt_ll) {
 				IFCMP_LL2(<=, core->compare(rhs, lhs) != trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifge_ll) {
+			INSTR(ifge_ll) {
 				IFCMP_LL2(>=, core->compare(lhs, rhs) == falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifnge_ll) {
+			INSTR(ifnge_ll) {
 				IFCMP_LL2(<, core->compare(lhs, rhs) != falseAtom);
 			    NEXT;
 			}
@@ -2992,22 +2937,22 @@ namespace avmplus
 
 #define IFEQ_LL(x) IFEQ_LL2(x)
 					
-			INSTR_EXT(ext_ifeq_ll) {
+			INSTR(ifeq_ll) {
 				IFEQ_LL2(==, equals, trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifne_ll) {
+			INSTR(ifne_ll) {
 				IFEQ_LL2(!=, equals, falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifstricteq_ll) {
+			INSTR(ifstricteq_ll) {
 				IFEQ_LL2(==, stricteq, trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifstrictne_ll) {
+			INSTR(ifstrictne_ll) {
 				IFEQ_LL2(!=, stricteq, falseAtom);
 			    NEXT;
 			}
@@ -3021,42 +2966,42 @@ namespace avmplus
 
 #define IFCMP_LB(x) IFCMP_LB2(x)
 
-			INSTR_EXT(ext_iflt_lb) {
+			INSTR(iflt_lb) {
 				IFCMP_LB2(<, core->compare(lhs,rhs) == trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifnlt_lb) {
+			INSTR(ifnlt_lb) {
 				IFCMP_LB2(>=, core->compare(lhs, rhs) != trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifle_lb) {
+			INSTR(ifle_lb) {
 				IFCMP_LB2(<=, core->compare(rhs, lhs) == falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifnle_lb) {
+			INSTR(ifnle_lb) {
 				IFCMP_LB2(>, core->compare(rhs, lhs) != falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifgt_lb) {
+			INSTR(ifgt_lb) {
 				IFCMP_LB2(>, core->compare(rhs, lhs) == trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifngt_lb) {
+			INSTR(ifngt_lb) {
 				IFCMP_LB2(<=, core->compare(rhs, lhs) != trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifge_lb) {
+			INSTR(ifge_lb) {
 				IFCMP_LB2(>=, core->compare(lhs, rhs) == falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifnge_lb) {
+			INSTR(ifnge_lb) {
 				IFCMP_LB2(<, core->compare(lhs, rhs) != falseAtom);
 			    NEXT;
 			}
@@ -3070,27 +3015,27 @@ namespace avmplus
 
 #define IFEQ_LB(x) IFEQ_LB2(x)
 					
-			INSTR_EXT(ext_ifeq_lb) {
+			INSTR(ifeq_lb) {
 				IFEQ_LB2(==, equals, trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifne_lb) {
+			INSTR(ifne_lb) {
 				IFEQ_LB2(!=, equals, falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifstricteq_lb) {
+			INSTR(ifstricteq_lb) {
 				IFEQ_LB2(==, stricteq, trueAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_ifstrictne_lb) {
+			INSTR(ifstrictne_lb) {
 				IFEQ_LB2(!=, stricteq, falseAtom);
 			    NEXT;
 			}
 					
-			INSTR_EXT(ext_swap_pop) {
+			INSTR(swap_pop) {
 				sp[-1] = sp[0];
 				--sp;
 			    NEXT;
@@ -3098,7 +3043,7 @@ namespace avmplus
 
 #  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
 					
-			INSTR_EXT(ext_findpropglobal) {
+			INSTR(findpropglobal) {
 				uint32_t multiname_index = *pc++;
 				uint32_t cache_slot = *pc++;
 				if (core->lookupCacheIsValid(env->lookup_cache[cache_slot].timestamp)) {
@@ -3121,7 +3066,7 @@ namespace avmplus
 				NEXT;
 			}
 					
-			INSTR_EXT(ext_findpropglobalstrict) {
+			INSTR(findpropglobalstrict) {
 				uint32_t multiname_index = *pc++;
 				uint32_t cache_slot = *pc++;
 				if (core->lookupCacheIsValid(env->lookup_cache[cache_slot].timestamp)) {
@@ -3143,11 +3088,6 @@ namespace avmplus
 				restore_dxns();
 				NEXT;
 			}
-
-#  ifndef AVMPLUS_DIRECT_THREADED
-			} // switch
-			} // INSTR(ext)
-#  endif
 
 #endif
 #if defined SWITCH_DISPATCH

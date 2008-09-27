@@ -239,6 +239,7 @@ namespace avmplus
 	struct NativeClassInfo;
 	struct NativeScriptInfo;
 	struct NativeTableEntry;
+	struct WordOpcodeAttr;
 
 	typedef Traits* Traitsp;
 	typedef String* Stringp;
@@ -323,6 +324,7 @@ namespace avmplus
 #include "avmplusProfiler.h"
 #include "StringBuffer.h"
 #include "AtomArray.h"
+#include "wopcodes.h"
 #include "Translator.h"
 #include "Verifier.h"
 #include "NativeFunction.h"

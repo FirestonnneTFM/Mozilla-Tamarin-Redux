@@ -71,68 +71,6 @@ namespace avmplus
 	
 }
 
-// FIXME: these should be defined in opcodes.tbl.
-//
-// Note that eg utils/peephole.as knows about these values, and that when you add
-// opcodes here you will need to rerun that script to generate a new jump table
-// for the peephole optimizer.
+//#  define LAST_SUPERWORD_OPCODE    ((50<<8) | OP_ext)
 
-#ifdef AVMPLUS_WORD_CODE
-
-#  define OP_ext 0xFF                                  // Reserved in opcodes.tbl as the extension prefix for superwords
-
-#  define OP_ext_pushbits           ((1<<8) | OP_ext)  // pushint, pushuint, pushshort, pushbyte
-#  define OP_ext_push_doublebits    ((2<<8) | OP_ext)  // pushint, pushuint if value is outside atom range
-#  define OP_ext_get2locals         ((3<<8) | OP_ext)  // this and all the following ones introduced by peephole optimization
-#  define OP_ext_get3locals         ((4<<8) | OP_ext)
-#  define OP_ext_get4locals         ((5<<8) | OP_ext)
-#  define OP_ext_get5locals         ((6<<8) | OP_ext)
-#  define OP_ext_storelocal         ((7<<8) | OP_ext)
-#  define OP_ext_add_ll             ((8<<8) | OP_ext)
-#  define OP_ext_add_set_lll        ((9<<8) | OP_ext)
-#  define OP_ext_subtract_ll       ((10<<8) | OP_ext)
-#  define OP_ext_multiply_ll       ((11<<8) | OP_ext)
-#  define OP_ext_divide_ll         ((12<<8) | OP_ext)
-#  define OP_ext_modulo_ll         ((13<<8) | OP_ext)
-#  define OP_ext_bitand_ll         ((14<<8) | OP_ext)
-#  define OP_ext_bitor_ll          ((15<<8) | OP_ext)
-#  define OP_ext_bitxor_ll         ((16<<8) | OP_ext)
-#  define OP_ext_add_lb            ((17<<8) | OP_ext)
-#  define OP_ext_subtract_lb       ((18<<8) | OP_ext)
-#  define OP_ext_multiply_lb       ((19<<8) | OP_ext)
-#  define OP_ext_divide_lb         ((20<<8) | OP_ext)
-#  define OP_ext_bitand_lb         ((21<<8) | OP_ext)
-#  define OP_ext_bitor_lb          ((22<<8) | OP_ext)
-#  define OP_ext_bitxor_lb         ((23<<8) | OP_ext)
-#  define OP_ext_iflt_ll           ((24<<8) | OP_ext)
-#  define OP_ext_ifnlt_ll          ((25<<8) | OP_ext)
-#  define OP_ext_ifle_ll           ((26<<8) | OP_ext)
-#  define OP_ext_ifnle_ll          ((27<<8) | OP_ext)
-#  define OP_ext_ifgt_ll           ((28<<8) | OP_ext)
-#  define OP_ext_ifngt_ll          ((29<<8) | OP_ext)
-#  define OP_ext_ifge_ll           ((30<<8) | OP_ext)
-#  define OP_ext_ifnge_ll          ((31<<8) | OP_ext)
-#  define OP_ext_ifeq_ll           ((32<<8) | OP_ext)
-#  define OP_ext_ifne_ll           ((33<<8) | OP_ext)
-#  define OP_ext_ifstricteq_ll     ((34<<8) | OP_ext)
-#  define OP_ext_ifstrictne_ll     ((35<<8) | OP_ext)
-#  define OP_ext_iflt_lb           ((36<<8) | OP_ext)
-#  define OP_ext_ifnlt_lb          ((37<<8) | OP_ext)
-#  define OP_ext_ifle_lb           ((38<<8) | OP_ext)
-#  define OP_ext_ifnle_lb          ((39<<8) | OP_ext)
-#  define OP_ext_ifgt_lb           ((40<<8) | OP_ext)
-#  define OP_ext_ifngt_lb          ((41<<8) | OP_ext)
-#  define OP_ext_ifge_lb           ((42<<8) | OP_ext)
-#  define OP_ext_ifnge_lb          ((43<<8) | OP_ext)
-#  define OP_ext_ifeq_lb           ((44<<8) | OP_ext)
-#  define OP_ext_ifne_lb           ((45<<8) | OP_ext)
-#  define OP_ext_ifstricteq_lb     ((46<<8) | OP_ext)
-#  define OP_ext_ifstrictne_lb     ((47<<8) | OP_ext)
-#  define OP_ext_swap_pop          ((48<<8) | OP_ext)
-#  define OP_ext_findpropglobal    ((49<<8) | OP_ext)
-#  define OP_ext_findpropglobalstrict ((50<<8) | OP_ext)
-
-#  define LAST_SUPERWORD_OPCODE    ((50<<8) | OP_ext)
-
-#endif // AVMPLUS_WORD_CODE
 #endif // __avmplus_Interpreter__

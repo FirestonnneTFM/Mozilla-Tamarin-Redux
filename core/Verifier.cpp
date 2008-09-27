@@ -2816,10 +2816,10 @@ namespace avmplus
 						if (translator) {
 							switch (opcode) {
 								case OP_findproperty: 
-									translator->emitOp2(OP_ext_findpropglobal, imm30, allocateCacheSlot(imm30));
+									translator->emitOp2(WOP_findpropglobal, imm30, allocateCacheSlot(imm30));
 									break;
 								case OP_findpropstrict:
-									translator->emitOp2(OP_ext_findpropglobalstrict, imm30, allocateCacheSlot(imm30));
+									translator->emitOp2(WOP_findpropglobalstrict, imm30, allocateCacheSlot(imm30));
 									break;
 								default:
 									translator->emitOp1(opcode, imm30);

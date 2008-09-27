@@ -69,12 +69,10 @@ case 0: test0(); return;
 void ST_avmplus_peephole::prologue() {
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    int len = OP_INDEX(LAST_SUPERWORD_OPCODE)+1;
+    int len = WOP_LAST+1;
     opcodes = new void*[len];
-    for ( int i=0 ; i < 256 ; i++ )
+    for ( int i=0 ; i < len ; i++ )
         opcodes[i] = (void*)i;
-    for ( int i=256 ; i < len ; i++ )
-        opcodes[i] = (void*)(((i-256)<<8) | OP_ext);
 #endif
 
 }
@@ -96,32 +94,32 @@ void ST_avmplus_peephole::test0() {
 // to push the selftest infrastructure at this point than to fix
 // the bug.
 
-//     t->emitOp1(OP_getlocal, 5);
-//     t->emitOp1(OP_getlocal, 4);
-//     t->emitOp1(OP_getlocal, 65536);
-//     t->emitOp1(OP_getlocal, 7);
-//     t->emitOp1(OP_getlocal, 6);
+//     t->emitOp1(WOP_getlocal, 5);
+//     t->emitOp1(WOP_getlocal, 4);
+//     t->emitOp1(WOP_getlocal, 65536);
+//     t->emitOp1(WOP_getlocal, 7);
+//     t->emitOp1(WOP_getlocal, 6);
 //     uint32_t* code;
 //     uint32_t len = t->epilogue(&code);
 
 // %%verify len == 6
-// %%verify code[0] == OP_ext_get2locals
+// %%verify code[0] == WOP_get2locals
 // %%verify code[1] == (4 << 16) | 5
-// %%verify code[2] == OP_getlocal
+// %%verify code[2] == WOP_getlocal
 // %%verify code[3] == 65536
-// %%verify code[4] == OP_ext_get2locals
+// %%verify code[4] == WOP_get2locals
 // %%verify code[5] == (6 << 16) | 7
 
-    t->emitOp1(OP_getlocal, 5);
-    t->emitOp1(OP_getlocal, 4);
-    t->emitOp1(OP_getlocal, 65536);
+    t->emitOp1(WOP_getlocal, 5);
+    t->emitOp1(WOP_getlocal, 4);
+    t->emitOp1(WOP_getlocal, 65536);
     uint32_t* code;
     uint32_t len = t->epilogue(&code);
 
 verifyPass(len == 4, "len == 4", __FILE__, __LINE__);
-verifyPass(code[0] == OP_ext_get2locals, "code[0] == OP_ext_get2locals", __FILE__, __LINE__);
+verifyPass(code[0] == WOP_get2locals, "code[0] == WOP_get2locals", __FILE__, __LINE__);
 verifyPass(code[1] == (4 << 16) | 5, "code[1] == (4 << 16) | 5", __FILE__, __LINE__);
-verifyPass(code[2] == OP_getlocal, "code[2] == OP_getlocal", __FILE__, __LINE__);
+verifyPass(code[2] == WOP_getlocal, "code[2] == WOP_getlocal", __FILE__, __LINE__);
 verifyPass(code[3] == 65536, "code[3] == 65536", __FILE__, __LINE__);
 
     delete t;
