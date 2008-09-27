@@ -27,8 +27,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="0"
@@ -260,8 +260,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="0"
@@ -497,8 +497,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Debugger|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			>
@@ -715,8 +715,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Debugger|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="0"
@@ -948,8 +948,8 @@
 		</Configuration>
 		<Configuration
 			Name="VTune|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			>
 			<Tool
@@ -1122,6 +1122,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				PreprocessorDefinitions="VTUNE;WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CRT_SECURE_NO_DEPRECATE;AVMPLUS_AMD64"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1491,6 +1492,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="VTune|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="Arm asm"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="VTune|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool

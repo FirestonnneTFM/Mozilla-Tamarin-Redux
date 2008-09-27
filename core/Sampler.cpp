@@ -47,7 +47,7 @@ namespace avmplus
 	Sampler::Sampler(GC *gc) : allocId(1), sampling(true),
 			autoStartSampling(false), samplingNow(false), samplingAllAllocs(false), takeSample(0),
 			numSamples(0), samples(gc->GetGCHeap()), currentSample(NULL), timerHandle(0), lastAllocSample(0),
-			uids(1024), ptrSamples(0)
+			uids(1024), ptrSamples(0), callback(0), runningCallback(false)
 	{
 		fakeMethodInfos = new (gc) Hashtable(gc);
 	}
@@ -87,7 +87,7 @@ namespace avmplus
 		numSamples++;
 	}
 
-	int Sampler::sampleSpaceCheck()
+	int Sampler::sampleSpaceCheck(bool callback_ok)
 	{
 		if(!samples.start())
 			return 0;
@@ -96,9 +96,22 @@ namespace avmplus
 		uint32 callStackDepth = core->callStack ? core->callStack->depth : 0;
 		sampleSize += callStackDepth * sizeof(StackTrace::Element);
 		sampleSize += sizeof(uint64) * 2;
+		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples.size()/3 > samples.end() && !core->GetGC()->Collecting() )		{
+			runningCallback = true;
+			pauseSampling();
+			Atom args[1] = { nullObjectAtom };
+			callback->call(0, args);
+			startSampling();
+			runningCallback = false;
+		}
 		while(currentSample + sampleSize > samples.uncommitted()) {
 			samples.grow();
 			if(currentSample + sampleSize > samples.uncommitted()) {
+/*
+#ifdef AVMPLUS_VERBOSE
+				core->console << "****** Exhausted Sample Buffer *******\n";
+#endif
+*/
 				// exhausted buffer
 				stopSampling();
 				return 0;
@@ -185,7 +198,7 @@ namespace avmplus
 		}
 	}
 
-	uint64 Sampler::recordAllocationSample(void* item, uint64 size)
+	uint64 Sampler::recordAllocationSample(void* item, uint64 size, bool callback_ok)
 	{
 		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
 		if(!samplingNow)
@@ -194,7 +207,7 @@ namespace avmplus
 		if(!samplingAllAllocs)
 			return 0;
 
-		if(!sampleSpaceCheck())
+		if(!sampleSpaceCheck(callback_ok))
 			return 0;
 
 		(void)item;
@@ -208,9 +221,6 @@ namespace avmplus
 		write(currentSample, uid);
 		write(currentSample, item);
 		write(currentSample, 0);
-		if( size > 1000000 )
-			write(currentSample, size);
-		else
 		write(currentSample, size);
 
 		AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.\n");
@@ -219,7 +229,7 @@ namespace avmplus
 		return uid; 
 	}
 
-	uint64 Sampler::recordAllocationInfo(AvmPlusScriptableObject *obj, Atom  typeOrVTable)
+	uint64 Sampler::recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable)
 	{
 		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
 		if(!samplingNow)
@@ -256,6 +266,7 @@ namespace avmplus
 		write(currentSample, s.id);
 
 		samplingNow = false;
+		AvmAssertMsg( ptrSamples->get(GetRealPointer(obj))==0, "Missing dealloc sample - same memory alloc'ed twice.\n");
 		ptrSamples->add(GetRealPointer(obj), currentSample);
 		samplingNow = true;
 
@@ -278,15 +289,15 @@ namespace avmplus
 		// this is to avoid dropping deleted object samples when sampling is paused.
 		uint64 uid = (uint64)uids.get(item);
 		// If we didn't find a UID then this wasn't memory that the sampler knew was allocated
-		if(uid && sampleSpaceCheck()) {
+		if(uid && sampleSpaceCheck(false)) {
 
 			
 //			if( !uid )
 //				uid = (uint64)-1;
 
-		writeRawSample(DELETED_OBJECT_SAMPLE);
-		write(currentSample, uid);
-		write(currentSample, size);
+			writeRawSample(DELETED_OBJECT_SAMPLE);
+			write(currentSample, uid);
+			write(currentSample, size);
 
 			numSamples++;
 
@@ -311,7 +322,7 @@ namespace avmplus
 		}
 		}
 		if(uid)
-		uids.remove(item);
+			uids.remove(item);
 	}
 
 	void Sampler::clearSamples()
@@ -335,8 +346,8 @@ namespace avmplus
 
 		if (!currentSample)
 		{
-			int megs=512;
-			while(!currentSample && megs >= 16) {
+			int megs=16;
+			while(!currentSample && megs > 0) {
 				currentSample = samples.reserve(megs * 1024 * 1024);
 				megs >>= 1;
 			}
@@ -368,6 +379,11 @@ namespace avmplus
 	void Sampler::sampleInternalAllocs(bool b)
 	{
 		samplingAllAllocs = b;
+	}
+
+	void Sampler::setCallback(ScriptObject* callback)
+	{
+		this->callback = callback;
 	}
 
 	void Sampler::stopSampling()
@@ -483,6 +499,9 @@ namespace avmplus
 			Sample s;
 			readSample(p, s);			
 			if(s.sampleType == NEW_OBJECT_SAMPLE) {
+				// keep all weak refs and type's live, in postsweep we'll erase our weak refs
+				// to objects that were finalized.  we can't nuke them here b/c pushing the
+				// types could cause currently unmarked things to become live
 				if (s.typeOrVTable > 7 && !GC::GetMark((void*)s.typeOrVTable))
 				{
 					GCWorkItem item((void*)s.typeOrVTable, (uint32)GC::Size((void*)s.typeOrVTable), true);

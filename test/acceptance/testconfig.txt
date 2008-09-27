@@ -51,8 +51,20 @@ ecma3/TypeConversion/e9_3_1_3_rt:parseInt\("123456789012345678"\) ,   .*lnx-tvm-
 
 e4x/Regress/b121219: ,   .*lnx-tvm-release   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=450347
 e4x/Regress/b121219: ,   .*lnx-tvm-releasedebugger   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=450347
+as3/RuntimeErrors/Error1115NotAConstructor:.* , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+es4/vector/nonindexproperty:index -6.* , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+e4x/Expressions/e11_1_1:.* , x86-lnx-tvm-release.*-Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456853
+e4x/QName/e13_3_2:.*       , x86-lnx-tvm-release.*-Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456853
+e4x/Regress/b121219:.*      , x86-lnx-tvm-release.*-Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456853
 
-as3/sampling/ProcessSampling: , x86-win64-tvm-.*debugger , expectedfail  , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455062
-as3/sampling/SimpleSampling:  , x86-win64-tvm-.*debugger , expectedfail  , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455062
-as3/sampling/.*               , .*-tvm-debug.*           , skip          , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455712
-as3/sampling/ProcessSampling: , x86-lnx-tvm-releasedebugger, expectedfail, bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455712
+# full run for windows mobile - Dell Axim
+ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+ecma3/Math/e15_8_2_5:Math.atan2\(Infinity. Infinity\)            ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+ecma3/Math/e15_8_2_5:Math.atan2\(Infinity. -Infinity\)           ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+ecma3/Math/e15_8_2_5:Math.atan2\(-Infinity. Infinity\)           ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+ecma3/Math/e15_8_2_5:Math.atan2\(-Infinity. -Infinity\)          ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+ecma3/Math/e15_8_2_5:Math.atan2\(0. -0\)                         ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+ecma3/Math/e15_8_2_5:Math.atan2\(-0.[\t]*-0\)                    ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+ecma3/Math/e15_8_2_5:Math.atan2\(-0.[\t]*-1\)                    ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+ecma3/Math/e15_8_2_5:Infinity/Math.atan2\(-0. 1\)                ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
+

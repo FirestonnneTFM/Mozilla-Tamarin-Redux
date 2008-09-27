@@ -96,9 +96,11 @@
 
 #ifdef FEATURE_SAMPLER
 #define SAMPLE_ALLOC(_item, _size) if(MMgc::sampling) recordAllocationSample(_item, _size)
+#define SAMPLE_FIXED_ALLOC(_item, _size) if( MMgc::sampling) recordAllocationSample(_item, _size, true)
 #define SAMPLE_DEALLOC(_item, _size) if(MMgc::sampling) recordDeallocationSample(_item, _size)
 #else
 #define SAMPLE_ALLOC(_x, _s)
+#define SAMPLE_FIXED_ALLOC(_x, _s)
 #define SAMPLE_DEALLOC(_x, _s)
 #endif
 

@@ -38,11 +38,13 @@
 
 #include "nanojit.h"
 
+#ifdef FEATURE_NANOJIT
+
 #ifdef AVMPLUS_PORTING_API
 #include "portapi_nanojit.h"
 #endif
 
-#if defined(AVMPLUS_LINUX) && defined(AVMPLUS_ARM)
+#if defined(AVMPLUS_UNIX) && defined(AVMPLUS_ARM)
 #include <asm/unistd.h>
 #endif
 
@@ -50,10 +52,12 @@
 #include "../vprof/vprof.h"
 #endif /* PERFM */
 
+#ifdef VTUNE
+#include "../codegen/CodegenLIR.h"
+#endif
+
 namespace nanojit
 {
-	#ifdef FEATURE_NANOJIT
-
 
 	class DeadCodeFilter: public LirFilter
 	{
@@ -63,6 +67,10 @@ namespace nanojit
 	    {
             LOpcode op = ins->opcode();
             if (ins->isStore() ||
+                #ifdef VTUNE
+                  op == LIR_line ||
+                  op == LIR_file ||
+                #endif
                 op == LIR_loop ||
                 op == LIR_label ||
                 op == LIR_live ||
@@ -287,6 +295,13 @@ namespace nanojit
 		Page* page = _frago->pageAlloc();
 		if (page)
 		{
+            #ifdef VTUNE
+           if (_nIns && _nExitIns) {
+               //cgen->jitAddRecord( (uintptr_t)list->code, 0, 0, true); // add a placeholder record for top of page
+               cgen->jitCodePosUpdate( (uintptr_t)list->code );
+               cgen->jitPushInfo();  // new page requires new entry
+           }
+            #endif
 			page->next = list;
 			list = page;
 			nMarkExecute(page);
@@ -919,7 +934,7 @@ namespace nanojit
 		// If we've modified the code, we need to flush so we don't end up trying 
 		// to execute junk
 		FlushInstructionCache(GetCurrentProcess(), NULL, NULL);
-		#elif defined(AVMPLUS_LINUX) && defined(AVMPLUS_ARM)
+		#elif defined(AVMPLUS_UNIX) && defined(AVMPLUS_ARM)
 			// N A S T Y - obviously have to fix this
 		// determine our page range
 
@@ -1033,7 +1048,6 @@ namespace nanojit
 	{
 		// trace must start with LIR_x or LIR_loop
 		//NanoAssert(reader->pos()->isop(LIR_x) || reader->pos()->isop(LIR_loop));
-		 
 		for (LInsp ins = reader->read(); ins != 0 && !error(); ins = reader->read())
 		{
             //_nvprof("lir",1);
@@ -1658,10 +1672,33 @@ namespace nanojit
 					evictScratchRegs();
 
 					asm_call(ins);
-				}
+                   break;
+               }
+               #ifdef VTUNE
+               case LIR_file:
+               {
+                   // we traverse backwards so we are now hitting the file
+                   // that is associated with a bunch of LIR_lines we have already seen.
+                   uintptr_t currentFile = ins->oprnd1()->constval();
+                   cgen->jitFilenameUpdate(currentFile);
+                   break;
+               }
+               case LIR_line:
+               {
+                   // add a new table entry, we don't yet know which file it belongs 
+                   // to so we need to add it to the update table too
+                   // note the alloc, actual act is delayed; see above                 
+                   uint32_t currentLine = (uint32_t)ins->oprnd1()->constval();
+                   cgen->jitLineNumUpdate(currentLine);
+                   cgen->jitAddRecord((uintptr_t)_nIns,0,currentLine,true);
+                   break;
+               }
+               #endif /* VTUNE */
 			}
-
-			// check that all is well (don't check in exit paths since its more complicated)
+#ifdef VTUNE
+           cgen->jitCodePosUpdate( (uintptr_t)_nIns );
+#endif 
+           // check that all is well (don't check in exit paths since its more complicated)
 			debug_only( pageValidate(); )
 			debug_only( resourceConsistencyCheck();  )
 		}
@@ -2187,7 +2224,6 @@ namespace nanojit
         }
         return argc;
     }
-#endif
 
     void LabelStateMap::add(LIns *label, NIns *addr, RegAlloc &regs) {
         LabelState *st = new (gc) LabelState(addr, regs);
@@ -2198,3 +2234,4 @@ namespace nanojit
         return labels.get(label);
     }
 }
+#endif // FEATURE_NANOJIT
