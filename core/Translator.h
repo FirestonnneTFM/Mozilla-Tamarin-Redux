@@ -43,7 +43,7 @@ namespace avmplus
 
 #  ifdef AVMPLUS_DIRECT_THREADED
 #    define OP_INDEX(n)           (n >= 256 ? (n>>8) + 256 : n)
-#    define NEW_OPCODE(n)         ((uint32)opcode_labels[OP_INDEX(n)])
+#    define NEW_OPCODE(n)         ((uint32_t)opcode_labels[OP_INDEX(n)])
 #  else
 #    define OP_INDEX(n)           n
 #    ifdef _DEBUG
@@ -85,9 +85,9 @@ namespace avmplus
 		void emitOp0(const byte *pc, int opcode);
 		void emitOp0(int opcode) { emitOp0(NULL, opcode); }
 		void emitOp1(const byte *pc, int opcode);
-		void emitOp1(int opcode, uint32 operand);
+		void emitOp1(int opcode, uint32_t operand);
 		void emitOp2(const byte *pc, int opcode);
-		void emitOp2(int opcode, uint32 op1, uint32 op2);
+		void emitOp2(int opcode, uint32_t op1, uint32_t op2);
 #ifdef DEBUGGER
 		void emitDebug(const byte *pc);
 #endif
@@ -132,15 +132,15 @@ namespace avmplus
 		struct backpatch_info 
 		{
 			const byte* target_pc;		// the instruction in the old code that is the target of a forward control transfer
-			uint32* patch_loc;			// location in the new code into which to write the new offset
-			uint32 patch_offset;		// value to subtract from offset of translated pc
+			uint32_t* patch_loc;			// location in the new code into which to write the new offset
+			uint32_t patch_offset;		// value to subtract from offset of translated pc
 			backpatch_info* next;
 		};
 	
 		struct label_info 
 		{
-			uint32 old_offset;
-			uint32 new_offset;
+			uint32_t old_offset;
+			uint32_t new_offset;
 			label_info* next;
 		};
 	
@@ -148,13 +148,13 @@ namespace avmplus
 		{
 			const byte* pc;			// address in ABC code to trigger use of this structure
 			void *fixup_loc;		// points to a location to update
-			bool is_target;			// The 'target' field is a sintptr, not an int (sigh).
+			bool is_target;			// The 'target' field is a intptr_t, not an int (sigh).
 			catch_info* next;
 		};
 		
 		struct buffer_info
 		{
-			uint32 data[100];
+			uint32_t data[100];
 			int entries_used;
 			buffer_info* next;
 		};
@@ -165,7 +165,7 @@ namespace avmplus
 		label_info* labels;				 // in reverse offset order
 		catch_info* exception_fixes; // in address order
 		buffer_info* buffers;			 // newest buffer first
-		uint32 buffer_offset;			 // offset of first word of current buffer
+		uint32_t buffer_offset;			 // offset of first word of current buffer
 		buffer_info* spare_buffer;		// may be populated during peephole optimization; reused by refill
 #ifdef AVMPLUS_DIRECT_THREADED
 		void** opcode_labels;
@@ -174,15 +174,15 @@ namespace avmplus
 		const byte* code_start;
 		
 		bool exceptions_consumed;
-		uint32 *dest;
-		uint32 *dest_limit;
+		uint32_t *dest;
+		uint32_t *dest_limit;
 
 		void cleanup();
 		void refill();
-		void emitRelativeOffset(uint32 base_offset, const byte *pc, int32 offset);
-		void makeAndInsertBackpatch(const byte* target_pc, uint32 patch_offset);
+		void emitRelativeOffset(uint32_t base_offset, const byte *pc, int32_t offset);
+		void makeAndInsertBackpatch(const byte* target_pc, uint32_t patch_offset);
 		void boot();
-		
+
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		
 		// The structures are laid out so as to improve packing and conserve space.  The
@@ -215,27 +215,27 @@ namespace avmplus
 		
 		static peep_attr_t attrs[];				// Instruction attributes and widths
 
-		uint32  state;							// current state in the matcher, or 0
-		uint32  backtrack_stack[10];			// commit candidates (state numbers)
-		uint32  backtrack_idx;					// next slot in backtrack_state
-		uint32* I[10];							// longest window 10 instructions, not a problem now, generator can generate constant later
-		uint32  O[10];							// symbolic opcodes for each I entry
-		uint32  nextI;							// next slot in I and O
-		uint32  R[30];							// replacement data
-		uint32  S[30];							// symbolic opcode for some R entries
+		uint32_t  state;							// current state in the matcher, or 0
+		uint32_t  backtrack_stack[10];			// commit candidates (state numbers)
+		uint32_t  backtrack_idx;					// next slot in backtrack_state
+		uint32_t* I[10];							// longest window 10 instructions, not a problem now, generator can generate constant later
+		uint32_t  O[10];							// symbolic opcodes for each I entry
+		uint32_t  nextI;							// next slot in I and O
+		uint32_t  R[30];							// replacement data
+		uint32_t  S[30];							// symbolic opcode for some R entries
 		
 		void peepInit();
-		void peep(uint32 opcode, uint32* loc);
+		void peep(uint32_t opcode, uint32_t* loc);
 		void peepFlush();
-		bool commit(uint32 action);
-		bool replace(uint32 old_instr, uint32 new_words, bool jump_has_been_translated=false);
+		bool commit(uint32_t action);
+		bool replace(uint32_t old_instr, uint32_t new_words, bool jump_has_been_translated=false);
 		void undoRelativeOffsetInJump();
 		
-		bool isJumpInstruction(uint32 opcode) {
+		bool isJumpInstruction(uint32_t opcode) {
 			return attrs[OP_INDEX(opcode)].jumps;
 		}
 		
-		uint32 calculateInstructionWidth(uint32 opcode) {
+		uint32_t calculateInstructionWidth(uint32_t opcode) {
 			return attrs[OP_INDEX(opcode)].width;
 		}
 #endif	// AVMPLUS_PEEPHOLE_OPTIMIZER

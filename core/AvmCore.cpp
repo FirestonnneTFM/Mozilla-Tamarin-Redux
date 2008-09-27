@@ -487,10 +487,6 @@ namespace avmplus
 		TRY(this, kCatchAction_Rethrow)
 		{
 			result = main->coerceEnter(main->global->atom());
-			#ifdef AVMPLUS_PROFILE
-			if (dprof.dprofile)
-				dprof.mark((AbcOpcode)0);
-			#endif
 		}
 		CATCH(Exception *exception)
 		{
@@ -1478,7 +1474,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-    void AvmCore::formatOpcode(PrintWriter& buffer, const byte *pc, AbcOpcode opcode, int off, PoolObject* pool)
+    void AvmCore::formatOpcode(PrintWriter& buffer, const byte *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool)
     {
 		pc++;
 		switch (opcode)
@@ -1586,7 +1582,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		case OP_lookupswitch:
 			{
-				int target = off + readS24(pc);
+				ptrdiff_t target = off + readS24(pc);
 				pc += 3;
 				int maxindex = readU30(pc);
 				buffer << opNames[opcode] << " default:" << target << " maxcase:"<<maxindex;
@@ -1622,7 +1618,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				readOperands(p2, imm30, imm24, imm30b, imm8);
 				int insWidth = (int)(p2-pc);
 
-				int target = off + insWidth + imm24 + 1;
+				ptrdiff_t target = off + insWidth + imm24 + 1;
 				buffer << opNames[opcode] << " " << (double)target;
 				break;
 			}
@@ -1870,7 +1866,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				return booleanStrings[atom>>3];
 			case kIntegerType:
 #ifdef AVMPLUS_64BIT
-				return intToString (int(atom>>3));
+				return intToString (int(intptr_t(atom)>>3));
 #else
 				return intToString (int(sint32(atom)>>3));
 #endif
@@ -3195,7 +3191,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	Atom AvmCore::intToAtom(int n)
 	{
 #ifdef AVMPLUS_64BIT
-		// We can always fit the value in an Atom
+		// We can always fi t the value in an Atom
 		return (((Atom)n)<<3) | kIntegerType;
 #else
 		// handle integer values w/out allocation

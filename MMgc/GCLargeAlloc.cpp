@@ -133,7 +133,8 @@ namespace MMgc
 				if (NeedsFinalize(b)) {
 					GCFinalizable *obj = (GCFinalizable *) item;
 					obj = (GCFinalizable *) GetUserPointer(obj);
-					obj->~GCFinalizable();
+					//obj->~GCFinalizable();
+					obj->Finalize();
 #if defined(_DEBUG) && defined(MMGC_DRC)
 					if((b->flags & kRCObject) != 0) {
 						b->gc->RCObjectZeroCheck((RCObject*)obj);

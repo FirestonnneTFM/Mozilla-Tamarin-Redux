@@ -1702,6 +1702,7 @@ namespace avmplus
 				script->flags |= AbstractFunction::SUGGEST_INTERP;
 			}
 			#endif
+
 			pool->scripts.set(i, script);
 
 			// initial scope chain is []
@@ -2010,6 +2011,7 @@ namespace avmplus
 				cinit->flags |= AbstractFunction::SUGGEST_INTERP;
 			}
 			#endif
+
 			pool->cinits.set(i, cinit);
         }
     }

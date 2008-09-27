@@ -52,6 +52,49 @@ namespace avmplus
 	using namespace nanojit;
     using namespace MMgc;
 
+   #ifdef VTUNE
+   class LineNumberRecord : public MMgc::GCObject
+   {
+       public:
+           LineNumberRecord(Stringp fn, uint32 ln)
+           : filename(fn)
+           , lineno(ln)
+           { }
+
+       String*  filename;
+       uint32_t lineno;
+   }; 
+
+   class JITCodeInfo : public MMgc::GCObject
+   {
+       public:
+           JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
+
+           uint32_t sid;  // code info id
+           MethodInfo* method;
+           SortedIntMap<LineNumberRecord*> lineNumTable;       // populated during code generation 
+           uintptr startAddr;
+           uintptr endAddr;
+           iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
+
+           LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
+           {
+               LineNumberRecord* record = new (gc) LineNumberRecord(file,line);
+               lineNumTable.put(loc,record);
+               return record;
+           }
+
+           void clear() 
+           {
+               lineNumTable.clear();
+               method = 0;
+               vtune = 0;
+               startAddr = 0;
+               endAddr = 0;
+           }
+   };
+   #endif /* VTUNE */
+
 	class MethodInfo;
 
 	class CodegenLabel {
@@ -85,6 +128,19 @@ namespace avmplus
 		bool overflow;
 		const byte *abcStart;
 		const byte *abcEnd;
+
+       #ifdef VTUNE
+       bool hasDebugInfo;
+       List<JITCodeInfo*,LIST_GCObjects> jitInfoList;
+       List<LineNumberRecord*,LIST_GCObjects> jitPendingRecords;
+       void jitPushInfo();
+       JITCodeInfo* jitCurrentInfo();
+
+       LineNumberRecord* jitAddRecord(uintptr_t pos, uint32_t filename, uint32_t line, bool pending=false);
+       void jitFilenameUpdate(uint32_t filename);
+       void jitLineNumUpdate(uint32_t line);
+       void jitCodePosUpdate(uint32_t pos);
+       #endif /* VTUNE */
 
 	private:
         GC *gc;

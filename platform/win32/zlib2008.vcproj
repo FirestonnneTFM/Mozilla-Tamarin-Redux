@@ -24,8 +24,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="0"
 			>
@@ -239,8 +239,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="obj/$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="obj/$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="obj_9/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="0"
 			>

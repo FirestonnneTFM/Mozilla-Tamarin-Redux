@@ -263,6 +263,7 @@ namespace avmshell
 		#endif
 
 		printf("          [-Dinterp]    do not generate machine code, interpret instead\n");
+
 		#ifdef AVMPLUS_VERBOSE
 			printf("          [-Dverbose]   trace every instruction (verbose!)\n");
 			printf("          [-Dverbose_init] trace the builtins too\n");
@@ -289,7 +290,7 @@ namespace avmshell
 	    printf("          [-Dverifyall] verify greedily instead of lazily\n");
 		#endif
 		#ifdef AVMPLUS_SELFTEST
-		printf("          [-Dselftest]  run selftests\n");
+		printf("          [-Dselftest[=component,category,test]]  run selftests\n");
 		#endif
 		printf("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
 		printf("          [-error]      crash opens debug dialog, instead of dumping\n");
@@ -738,6 +739,10 @@ namespace avmshell
                 #endif
 					} else if (!strcmp(arg, "-memstats")) {
 						GetGC()->gcstats = true;
+					#ifdef AVMPLUS_MIR
+					} else if (!strcmp(arg, "-Ojit")) {
+						config.jit = true;
+					#endif
 					} else if (!strcmp(arg, "-memlimit")) {
 #ifdef UNDER_CE
 						GetGC()->GetGCHeap()->SetHeapLimit(wcstol(argv[++i], 0, 10));
