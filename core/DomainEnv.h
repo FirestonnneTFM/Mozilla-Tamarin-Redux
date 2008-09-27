@@ -68,6 +68,7 @@ namespace avmplus
 		void setToplevel(Toplevel *t) { m_toplevel = t; }
 		
 		// Encapsulate namedScripts so that we can invalidate global reference caches when it is updated.
+		Binding getNamedScript(Stringp name) const { return namedScripts->getName(name); }
 		Binding getNamedScript(Stringp name, Namespace* ns) const { return namedScripts->get(name, ns); }
 		void addNamedScript(Stringp name, Namespace* ns, Binding scriptEnv) { namedScripts->add(name, ns, scriptEnv); }
 	private:

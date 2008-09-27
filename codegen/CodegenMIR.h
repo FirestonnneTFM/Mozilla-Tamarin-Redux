@@ -881,7 +881,6 @@ namespace avmplus
 	#endif /* VTUNE */
 
 	private:
-		#define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
 		#define COREADDR(f) coreAddr((int (AvmCore::*)())(&f))
 		#define GCADDR(f) gcAddr((int (MMgc::GC::*)())(&f))
 		#define ENVADDR(f) envAddr((int (MethodEnv::*)())(&f))

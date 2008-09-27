@@ -161,5 +161,6 @@ unsigned int ChunkTracker::s_maxblocks = 0;
 		ReleaseMemory((char*)address);
 	}
 
-	
+	/*static*/
+	size_t GCHeap::GetPrivateBytes() { return 0; } // TODO	
 }

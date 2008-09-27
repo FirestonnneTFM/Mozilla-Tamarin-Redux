@@ -39,6 +39,8 @@
 #ifndef __GCThreadLocal__
 #define __GCThreadLocal__
 
+#ifndef MMGC_PORTING_API
+
 #ifdef HAVE_PTHREADS
 #include <pthread.h>
 #endif
@@ -96,6 +98,7 @@ namespace MMgc
 	};
 #else
 
+#ifdef HAVE_PTHREADS
 	template<typename T>
 	class GCThreadLocal
 	{
@@ -117,6 +120,27 @@ namespace MMgc
 	private:
 		pthread_key_t tlsId ;
 	};
+#else	//HAVE_PTHREADS
+	template<typename T>
+	class GCThreadLocal
+	{
+	public:
+		GCThreadLocal()
+		{
+			GCAssert(sizeof(T) <= sizeof(void*));
+		}
+		T operator=(T tNew)
+		{
+			return value=tNew;
+		}
+		operator T() const
+		{
+			return value;
+		}
+	private:
+		T value ;
+	};
+#endif	//HAVE_PTHREADS
 
 	class GCCriticalSection
 	{
@@ -154,5 +178,7 @@ namespace MMgc
 		GCEnterCriticalSection(const GCEnterCriticalSection&);
 	};
 }
+
+#endif // MMGC_PORTING_API
 
 #endif

@@ -179,11 +179,12 @@ namespace avmplus
 
 		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
 		uint32 *ap;
-		ap = (uint32 *) alloca(extra_sz);
+		ap = (uint32 *)AVMPlus_PortAPI_StackAlloc(MMgc::GC::GetGC(this), extra_sz);
 
 		unboxCoerceArgs(thisArg, a, ap);
 		Atom res = endCoerce(argc, ap);
 		// we know we have verified the method, so we can go right into it.
+		AVMPlus_PortAPI_StackFree(MMgc::GC::GetGC(this), ap);
 		return res;
 	}
 
@@ -198,10 +199,11 @@ namespace avmplus
 
 		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
 		uint32 *ap;
-		ap = (uint32 *) alloca(extra_sz);
+		ap = (uint32 *)AVMPlus_PortAPI_StackAlloc(MMgc::GC::GetGC(this), extra_sz);
 			
 		unboxCoerceArgs(thisArg, argc, argv, ap);
 		Atom res = endCoerce(argc, ap);
+		AVMPlus_PortAPI_StackFree(MMgc::GC::GetGC(this), ap);
 		return res;
 	}
 
@@ -216,10 +218,11 @@ namespace avmplus
 
 		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
 		uint32 *ap;
-		ap = (uint32 *) alloca(extra_sz);
+		ap = (uint32 *)AVMPlus_PortAPI_StackAlloc(MMgc::GC::GetGC(this), extra_sz);
 			
 		unboxCoerceArgs(argc, atomv, ap);
 		Atom res = endCoerce(argc, ap);
+		AVMPlus_PortAPI_StackFree(MMgc::GC::GetGC(this), ap);
 		return res;
 	}
 
@@ -1068,8 +1071,11 @@ namespace avmplus
 				toplevel->throwTypeError(kCorruptABCError);
 		}
 
+		// have to use local variables for CodeWarrior
+		Traits* baseIvtableTraits = base ? base->ivtable()->traits : 0;
+		Traits* itraitsBase = itraits->base;
 		// make sure the traits of the base vtable matches the base traits
-		if (!(base == NULL && itraits->base == NULL || base != NULL && itraits->base == base->ivtable()->traits))
+		if (!(base == NULL && itraits->base == NULL || base != NULL && itraitsBase == baseIvtableTraits))
 		{
 			ErrorClass *error = toplevel->verifyErrorClass();
 			if( error )

@@ -307,7 +307,14 @@
 #  endif
 #endif
 
-//#define AVMPLUS_SELFTEST
+// Enable selftests.  These can be run by -Dselftest at the shell or by calling the
+// global function avmplus::selftests(), see extensions/Selftest.h.
+
+#define AVMPLUS_SELFTEST
+
+// temporary impedance-matching define for code that needs to build with different versions of tamarin...
+// will be removed soon
+#define AVMPLUS_REDUX_API 1
 
 // The use of this switch is described in comments at the head of utils/superwordprof.c
 //
@@ -325,6 +332,10 @@
 #    error "You must disable direct threading to perform superword profiling"
 #  endif
 #endif
+
+// default definition, may be overridden in portapi_avmbuild.h
+#define AVMPlus_PortAPI_StackAlloc(_gc, _size) alloca(_size)
+#define AVMPlus_PortAPI_StackFree(_gc, _ptr) do {} while(0) /* no semi */
 
 #if defined(AVMPLUS_PORTING_API)
 	// The portapi_avmbuild.h file is used to override
