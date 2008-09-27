@@ -1,4 +1,4 @@
-/* -*- java-mode -*- */
+/* -*- mode: java -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -176,7 +176,7 @@ package peephole
     //
     // readOpcodes fleshes out this table.
 
-    const opcode = { OP_ext_pushbits:        (1 + 256),
+    const opcode = { /* OP_ext_pushbits:        (1 + 256),
 		     OP_ext_push_doublebits: (2 + 256),
 		     OP_ext_get2locals:      (3 + 256),
 		     OP_ext_get3locals:      (4 + 256),
@@ -225,10 +225,10 @@ package peephole
 		     OP_ext_ifstrictne_lb:   (47 + 256),
 		     OP_ext_swap_pop:        (48 + 256),
 		     OP_ext_findpropglobal:  (49 + 256),
-		     OP_ext_findpropglobalstrict:  (50 + 256), };
+		     OP_ext_findpropglobalstrict:  (50 + 256), */ };
 
     const jump_opcodes = 
-	{ OP_jump:               true,
+	{ /* OP_jump:               true,
 	  OP_iftrue:             true,
 	  OP_iffalse:            true,
 	  OP_iflt:               true,
@@ -266,7 +266,7 @@ package peephole
 	  OP_ext_ifeq_lb:         true,
 	  OP_ext_ifne_lb:         true,
 	  OP_ext_ifstricteq_lb:   true,
-	  OP_ext_ifstrictne_lb:   true };
+	  OP_ext_ifstrictne_lb:   true */ };
 
     const MAXINSTR = 350; // last opcode in table above plus one would be adequate
 
@@ -282,6 +282,36 @@ package peephole
     var longest = 0;
 
     function readOpcodes() {
+	var state = 0;
+	var i = 0;
+	File.read("wopcodes.cpp").
+	    split("\n").
+	    filter(function (l) { 
+		    var r = state == 1;
+		    if (state == 0 && l.match(/^\s*\/\/\s*BEGIN\s*$/))
+			state = 1;
+		    else if (state == 1 && l.match(/^\s*\/\/\s*END\s*$/))
+			state = 2;
+		    if (r && l.match(/^\s*\/\//))
+			r = false;
+		    if (r && l.match(/^\s*$/))
+			r = false;
+		    return r;
+		}).
+	    forEach(function (l) {
+		     var r = (/^\s*\{\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*N\(\"([^\"]+)\"\)/.exec(l));
+		     assert(r != null);
+		     if (!(r[4].match(/^0x/))) {
+			 opcode[r[4]] = i;
+			 opname[i] = r[4];
+			 longest = Math.max(longest, r[4].length);
+			 if (parseInt(r[2]) != 0)
+			     jump_opcodes[r[4]] = true;
+		     }
+		     i++;
+		 });
+
+	/*
 	File.read("opcodes.tbl").
 	    split("\n").
 	    filter(function (elt) { return !(/^\s*$/.test(elt) || /^\s*\/\//.test(elt)) }).
@@ -294,6 +324,7 @@ package peephole
 	    opname[opcode[n]] = n;
 	    longest = Math.max(longest, n.length);
 	}
+	*/
     }
 
     function preprocess(lines) {
@@ -463,6 +494,8 @@ package peephole
 	var trans = new Vector.<Array>;
 	for ( var i=0 ; i < node.children.length ; i++ ) {
 	    var ci = node.children[i];
+	    if (!(ci.instr in opcode))
+		print(ci.instr);
 	    assert(ci.instr in opcode);
 	    trans.push([opcode[ci.instr], expand(ci, depth+1, state, documentation + " " + ci.instr)]);
 	}
@@ -505,7 +538,7 @@ package peephole
 	s.push("Translator::peep_transition_t Translator::transitions[] = {");
 	for ( var i=0 ; i < transitions.length ; i++ ) {
 	    assert(transitions[i][1] < 65536);
-	    s.push("{ " + opname[transitions[i][0]] + ", " + transitions[i][1] + " }," + (i > 0 && i % 10 == 0 ? " // " + i : ""));
+	    s.push("{ WOP_" + opname[transitions[i][0]] + ", " + transitions[i][1] + " }," + (i > 0 && i % 10 == 0 ? " // " + i : ""));
 	}
 	s.push("};");
 	return s.join("\n");
@@ -544,7 +577,7 @@ package peephole
 	    for ( var i=0 ; i < P.length ; i++ ) {
 		if (i > 0)
 		    s += " && ";
-		s += "I[" + i + "][0] == NEW_OPCODE(" + P[i] + ")";
+		s += "I[" + i + "][0] == NEW_OPCODE(WOP_" + P[i] + ")";
 	    }
 	    return "        AvmAssert(" + s + ");";
 	}
@@ -557,8 +590,8 @@ package peephole
 		undo = true;
 		s.push("            undoRelativeOffsetInJump();");
 	    }
-	    s.push("            S[0] = " + A.A[0] + ";");
-	    s.push("            R[0] = NEW_OPCODE(" + A.A[0] + ");");
+	    s.push("            S[0] = WOP_" + A.A[0] + ";");
+	    s.push("            R[0] = NEW_OPCODE(WOP_" + A.A[0] + ");");
 	    for ( var j=1 ; j < A.A.length ; j++ )
 		s.push("            R[" + j + "] = " + A.A[j] + ";");
 	    s.push("            return replace(" + A.P.length + "," + A.A.length + (undo ? ",true" : "") + ");");

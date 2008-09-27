@@ -42,10 +42,6 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 	using namespace MMgc;
 	
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-	Translator::peep_attr_t Translator::attrs[OP_INDEX(LAST_SUPERWORD_OPCODE)+1];
-#endif
-	
 	class TranslatedCode : public GCObject
 	{
 	public:
@@ -347,89 +343,7 @@ namespace avmplus
 	// These take no arguments
 	void Translator::emitOp0(const byte *pc, int opcode) {
 #ifdef _DEBUG
-		switch (opcode) {
-			case OP_add:
-			case OP_add_i:
-			case OP_astypelate:
-			case OP_bitand:
-			case OP_bitnot:
-			case OP_bitor:
-			case OP_bitxor:
-			case OP_bkpt:
-			case OP_checkfilter:
-			case OP_coerce_b:
-			case OP_coerce_a:
-			case OP_coerce_d:
-			case OP_coerce_i:
-			case OP_coerce_o:
-			case OP_coerce_s:
-			case OP_coerce_u:
-			case OP_convert_b:
-			case OP_convert_d:
-			case OP_convert_i:
-			case OP_convert_o:
-			case OP_convert_s:
-			case OP_convert_u:
-			case OP_decrement:
-			case OP_decrement_i:
-			case OP_divide:
-			case OP_dup:
-			case OP_dxnslate:
-			case OP_equals:
-			case OP_esc_xelem:
-			case OP_esc_xattr:
-			case OP_getglobalscope:
-			case OP_getlocal0:
-			case OP_getlocal1:
-			case OP_getlocal2:
-			case OP_getlocal3:
-			case OP_greaterequals:
-			case OP_greaterthan:
-			case OP_hasnext:
-			case OP_increment:
-			case OP_increment_i:
-			case OP_in:
-			case OP_instanceof:
-			case OP_istypelate:
-			case OP_lessequals:
-			case OP_lessthan:
-			case OP_lshift:
-			case OP_modulo:
-			case OP_multiply:
-			case OP_multiply_i:
-			case OP_negate:
-			case OP_negate_i:
-			case OP_newactivation:
-			case OP_nextname:
-			case OP_nextvalue:
-			case OP_not:
-			case OP_pop:
-			case OP_popscope:
-			case OP_pushfalse:
-			case OP_pushnan:
-			case OP_pushnull:
-			case OP_pushscope:
-			case OP_pushtrue:
-			case OP_pushwith:
-			case OP_pushundefined:
-			case OP_returnvalue:
-			case OP_returnvoid:
-			case OP_rshift:
-			case OP_setlocal0:
-			case OP_setlocal1:
-			case OP_setlocal2:
-			case OP_setlocal3:
-			case OP_strictequals:
-			case OP_subtract:
-			case OP_subtract_i:
-			case OP_swap:
-			case OP_throw:
-			case OP_typeof:
-			case OP_urshift:
-				break;
-			default:
-				AvmAssert(!"Unknown OP0");
-		}
+		AvmAssert(wopAttrs[opcode].width == 1);
 #endif // _DEBUG
 		(void)pc;
 		CHECK(1);
@@ -439,63 +353,12 @@ namespace avmplus
 #endif
 	}
 
-#ifdef _DEBUG
-#  define CHECK_OP1(opcode, tag) \
-	switch (opcode) { \
-		case OP_applytype: \
-		case OP_astype: \
-		case OP_bkptline: \
-		case OP_call: \
-		case OP_coerce: \
-		case OP_construct: \
-		case OP_constructsuper: \
-		case OP_debugline: \
-		case OP_debugfile: \
-		case OP_declocal: \
-		case OP_declocal_i: \
-		case OP_deleteproperty: \
-		case OP_dxns: \
-		case OP_finddef: \
-		case OP_findproperty: \
-		case OP_findpropstrict: \
-		case OP_getdescendants: \
-		case OP_getglobalslot: \
-		case OP_getlex: \
-		case OP_getlocal: \
-		case OP_getouterscope: \
-		case OP_getproperty: \
-		case OP_getslot: \
-		case OP_getsuper: \
-		case OP_inclocal: \
-		case OP_inclocal_i: \
-		case OP_initproperty: \
-		case OP_istype: \
-		case OP_kill: \
-		case OP_newarray: \
-		case OP_newcatch: \
-		case OP_newclass: \
-		case OP_newfunction: \
-		case OP_newobject: \
-		case OP_pushdouble: \
-		case OP_pushnamespace: \
-		case OP_pushstring: \
-		case OP_setglobalslot: \
- 		case OP_setlocal: \
-		case OP_setproperty: \
-		case OP_setslot: \
-		case OP_setsuper: \
-			break; \
-		default: \
-			AvmAssert(!"Unknown " tag); \
-	}
-#else
-#  define CHECK_OP1(opcode, tag)
-#endif
-	
 	// These take one U30 argument
 	void Translator::emitOp1(const byte *pc, int opcode)
 	{
-		CHECK_OP1(opcode, "OP1")
+#ifdef _DEBUG
+		AvmAssert(wopAttrs[opcode].width == 2);
+#endif // _DEBUG
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
@@ -509,15 +372,7 @@ namespace avmplus
 	void Translator::emitOp1(int opcode, uint32_t operand)
 	{
 #ifdef _DEBUG
-		switch (opcode) {
-			case OP_getscopeobject:
-			case OP_ext_get2locals:
-			case OP_ext_get3locals:
-			case OP_ext_storelocal:
-				break;
-			default:
-				CHECK_OP1(opcode, "OP1/imm")
-		}
+		AvmAssert(wopAttrs[opcode].width == 2);
 #endif // _DEBUG
 		CHECK(2);
 		*dest++ = NEW_OPCODE(opcode);
@@ -527,32 +382,12 @@ namespace avmplus
 #endif
 	}
 	
-#ifdef _DEBUG
-#  define CHECK_OP2(opcode, tag) \
-	switch (opcode) { \
-		case OP_hasnext2: \
-		case OP_callstatic: \
-		case OP_callmethod: \
-		case OP_callproperty: \
-		case OP_callproplex: \
-		case OP_callpropvoid: \
-		case OP_constructprop: \
-		case OP_callsuper: \
-		case OP_callsupervoid: \
-		case OP_ext_findpropglobal: \
-		case OP_ext_findpropglobalstrict: \
-			break; \
-		default: \
-			AvmAssert(!"Unknown " tag); \
-		}
-#else
-#  define CHECK_OP2(opcode, tag)	
-#endif // _DEBUG
-
 	// These take two U30 arguments
 	void Translator::emitOp2(const byte *pc, int opcode)
 	{
-		CHECK_OP2(opcode, "OP2")
+#ifdef _DEBUG
+		AvmAssert(wopAttrs[opcode].width == 3);
+#endif
 		CHECK(3);
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
@@ -565,7 +400,9 @@ namespace avmplus
 	
 	void Translator::emitOp2(int opcode, uint32_t op1, uint32_t op2)
 	{
-		CHECK_OP2(opcode, "OP2/imm");
+#ifdef _DEBUG
+		AvmAssert(wopAttrs[opcode].width == 3);
+#endif
 		CHECK(3);
 		*dest++ = NEW_OPCODE(opcode);
 		*dest++ = op1;
@@ -583,27 +420,8 @@ namespace avmplus
 	void Translator::emitRelativeJump(const byte *pc, int opcode)
 	{
 #ifdef _DEBUG
-		switch (opcode) {
-			case OP_jump:
-			case OP_iftrue:
-			case OP_iffalse:
-			case OP_ifeq:
-			case OP_ifne:
-			case OP_ifstricteq:
-			case OP_ifstrictne:
-			case OP_iflt:
-			case OP_ifnlt:
-			case OP_ifgt:
-			case OP_ifngt:
-			case OP_ifle:
-			case OP_ifnle:
-			case OP_ifge:
-			case OP_ifnge:
-				break;
-			default:
-				AvmAssert(!"Unknown relative jump opcode");
-		}
-#endif // _DEBUG
+		AvmAssert(wopAttrs[opcode].jumps);
+#endif
 		CHECK(2);
 		pc++;
 		int32_t offset = AvmCore::readS24(pc);
@@ -654,10 +472,10 @@ namespace avmplus
 	{
 		CHECK(2);
 		pc++;
-		*dest++ = NEW_OPCODE(OP_ext_pushbits);
+		*dest++ = NEW_OPCODE(WOP_pushbits);
 		*dest++ = (((sint8)*pc++) << 3) | kIntegerType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-		peep(OP_ext_pushbits, dest-2);
+		peep(WOP_pushbits, dest-2);
 #endif
 	}
 	
@@ -665,10 +483,10 @@ namespace avmplus
 	{
 		CHECK(2);
 		pc++;
-		*dest++ = NEW_OPCODE(OP_ext_pushbits);
+		*dest++ = NEW_OPCODE(WOP_pushbits);
 		*dest++ = ((signed short)AvmCore::readU30(pc) << 3) | kIntegerType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-		peep(OP_ext_pushbits, dest-2);
+		peep(WOP_pushbits, dest-2);
 #endif
 	}
 	
@@ -689,10 +507,10 @@ namespace avmplus
 		int32_t value = pool->cpool_int[AvmCore::readU30(pc)];
 		if ((value & 0xF0000000U) == 0xF0000000U || (value & 0xF0000000U) == 0) {
 			CHECK(2);
-			*dest++ = NEW_OPCODE(OP_ext_pushbits);
+			*dest++ = NEW_OPCODE(WOP_pushbits);
 			*dest++ = (value << 3) | kIntegerType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-			peep(OP_ext_pushbits, dest-2);
+			peep(WOP_pushbits, dest-2);
 #endif
 		}
 		else {
@@ -702,11 +520,11 @@ namespace avmplus
 			} v;
 			v.d = (double)value;
 			CHECK(3);
-			*dest++ = NEW_OPCODE(OP_ext_push_doublebits);
+			*dest++ = NEW_OPCODE(WOP_push_doublebits);
 			*dest++ = v.bits[0];
 			*dest++ = v.bits[1];
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-			peep(OP_ext_push_doublebits, dest-3);
+			peep(WOP_push_doublebits, dest-3);
 #endif
 		}
 	}
@@ -717,10 +535,10 @@ namespace avmplus
 		uint32_t value = pool->cpool_uint[AvmCore::readU30(pc)];
 		if ((value & 0xF0000000U) == 0) {
 			CHECK(2);
-			*dest++ = NEW_OPCODE(OP_ext_pushbits);
+			*dest++ = NEW_OPCODE(WOP_pushbits);
 			*dest++ = (value << 3) | kIntegerType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-			peep(OP_ext_pushbits, dest-2);
+			peep(WOP_pushbits, dest-2);
 #endif
 		}
 		else {
@@ -730,11 +548,11 @@ namespace avmplus
 			} v;
 			v.d = (double)value;
 			CHECK(3);
-			*dest++ = NEW_OPCODE(OP_ext_push_doublebits);
+			*dest++ = NEW_OPCODE(WOP_push_doublebits);
 			*dest++ = v.bits[0];
 			*dest++ = v.bits[1];
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-			peep(OP_ext_push_doublebits, dest-3);
+			peep(WOP_push_doublebits, dest-3);
 #endif
 		}
 	}
@@ -949,117 +767,6 @@ namespace avmplus
 	void Translator::peepInit()
 	{
 		state = 0;
-		
-		// Initialize the instruction attribute table.
-		//
-		// FIXME: optimize for code size
-		//
-		// Silly to do this work here, there needs to be a constant table, but
-		// it needs to incorporate the tables in opcodes.h / opcodes.cpp as well
-		// so for the moment this will do.
-		//
-		// Could also hold flags for whether something is op0, op1, etc, so that
-		// the big switch statements below are not needed.
-		
-		if (attrs[OP_dup].width > 0)
-			return;
-		
-		for ( int i=0 ; i < 255 ; i++ )
-			attrs[i].width = opOperandCount[i] + 1;
-				
-		attrs[OP_INDEX(OP_ext_swap_pop)].width = 1;
-		
-		attrs[OP_INDEX(OP_ext_pushbits)].width = 2;
-		attrs[OP_INDEX(OP_ext_get2locals)].width = 2;
-		attrs[OP_INDEX(OP_ext_get3locals)].width = 2;
-		attrs[OP_INDEX(OP_ext_get4locals)].width = 2;
-		attrs[OP_INDEX(OP_ext_get5locals)].width = 2;
-		attrs[OP_INDEX(OP_ext_storelocal)].width = 2;
-		attrs[OP_INDEX(OP_ext_add_ll)].width = 2;
-		attrs[OP_INDEX(OP_ext_add_set_lll)].width = 2;
-		attrs[OP_INDEX(OP_ext_subtract_ll)].width = 2;
-		attrs[OP_INDEX(OP_ext_multiply_ll)].width = 2;
-		attrs[OP_INDEX(OP_ext_divide_ll)].width = 2;
-		attrs[OP_INDEX(OP_ext_modulo_ll)].width = 2;
-		attrs[OP_INDEX(OP_ext_bitand_ll)].width = 2;
-		attrs[OP_INDEX(OP_ext_bitor_ll)].width = 2;
-		attrs[OP_INDEX(OP_ext_bitxor_ll)].width = 2;
-		
-		attrs[OP_INDEX(OP_ext_push_doublebits)].width = 3;
-		attrs[OP_INDEX(OP_ext_add_lb)].width = 3;
-		attrs[OP_INDEX(OP_ext_subtract_lb)].width = 3;
-		attrs[OP_INDEX(OP_ext_multiply_lb)].width = 3;
-		attrs[OP_INDEX(OP_ext_divide_lb)].width = 3;
-		attrs[OP_INDEX(OP_ext_bitand_lb)].width = 3;
-		attrs[OP_INDEX(OP_ext_bitor_lb)].width = 3;
-		attrs[OP_INDEX(OP_ext_bitxor_lb)].width = 3;
-		attrs[OP_INDEX(OP_ext_iflt_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifnlt_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifle_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifnle_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifgt_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifngt_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifge_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifnge_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifeq_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifne_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifstricteq_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_ifstrictne_ll)].width = 3;
-		attrs[OP_INDEX(OP_ext_findpropglobal)].width = 3; 
-		attrs[OP_INDEX(OP_ext_findpropglobalstrict)].width = 3; 
-		
-		attrs[OP_INDEX(OP_ext_iflt_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifnlt_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifle_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifnle_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifgt_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifngt_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifge_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifnge_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifeq_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifne_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifstricteq_lb)].width = 4;
-		attrs[OP_INDEX(OP_ext_ifstrictne_lb)].width = 4;
-		
-		attrs[OP_INDEX(OP_jump)].jumps = 1;
-		attrs[OP_INDEX(OP_iftrue)].jumps = 1;
-		attrs[OP_INDEX(OP_iffalse)].jumps = 1;
-		attrs[OP_INDEX(OP_ifeq)].jumps = 1;
-		attrs[OP_INDEX(OP_ifne)].jumps = 1;
-		attrs[OP_INDEX(OP_ifstricteq)].jumps = 1;
-		attrs[OP_INDEX(OP_ifstrictne)].jumps = 1;
-		attrs[OP_INDEX(OP_iflt)].jumps = 1;
-		attrs[OP_INDEX(OP_ifnlt)].jumps = 1;
-		attrs[OP_INDEX(OP_ifgt)].jumps = 1;
-		attrs[OP_INDEX(OP_ifngt)].jumps = 1;
-		attrs[OP_INDEX(OP_ifle)].jumps = 1;
-		attrs[OP_INDEX(OP_ifnle)].jumps = 1;
-		attrs[OP_INDEX(OP_ifge)].jumps = 1;
-		attrs[OP_INDEX(OP_ifnge)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_iflt_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifnlt_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifle_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifnle_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifgt_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifngt_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifge_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifnge_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifeq_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifne_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifstricteq_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifstrictne_ll)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_iflt_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifnlt_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifle_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifnle_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifgt_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifngt_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifge_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifnge_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifeq_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifne_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifstricteq_lb)].jumps = 1;
-		attrs[OP_INDEX(OP_ext_ifstrictne_lb)].jumps = 1;
 	}
 	
 	// Replace old instructions with new words of code.  This is tail called from the 
