@@ -41,7 +41,6 @@
  */
 
 enum AbcOpcode {
-OP_bkpt = 0x01,
 OP_nop = 0x02,
 OP_throw = 0x03,
 OP_getsuper = 0x04,
@@ -198,6 +197,5 @@ OP_abs_jump = 0xEE,
 OP_debug = 0xEF,
 OP_debugline = 0xF0,
 OP_debugfile = 0xF1,
-OP_bkptline = 0xF2,
 OP_timestamp = 0xF3
 };

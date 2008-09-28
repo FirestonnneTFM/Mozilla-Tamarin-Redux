@@ -2258,18 +2258,6 @@ namespace avmplus
 				break;
 			}
 
-			case OP_bkpt:
-#ifdef DEBUGGER
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
-#endif
-				break;
-					
-			case OP_bkptline:
-#ifdef DEBUGGER
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
-#endif
-				break;
-					
 			case OP_nop:
 				break;
 					

@@ -70,7 +70,7 @@ namespace avmplus
 		// BEGIN
 		// width jumps term     name
 		{    0,    0,    0      N("0x00") },
-		{    0,    0,    0      N("0x01") },            // bkpt
+		{    0,    0,    0      N("0x01") },
 		{    0,    0,    0      N("0x02") },            // nop
 		{    1,    0,    1      N("throw") },
 		{    2,    0,    0      N("getsuper") },
@@ -311,7 +311,7 @@ namespace avmplus
 		{    5,    0,    0      N("debug") },
 		{    2,    0,    0      N("debugline") },       // 0xF0
 		{    2,    0,    0      N("debugfile") },
-		{    0,    0,    0      N("0xF2") },            // bkptline
+		{    0,    0,    0      N("0xF2") },
 		{    0,    0,    0      N("0xF3") },            // timestamp
 		{    0,    0,    0      N("0xF4") },
 		{    0,    0,    0      N("0xF5") },
