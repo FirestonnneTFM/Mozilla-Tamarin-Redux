@@ -38,7 +38,7 @@
 //
 // ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
+#include "avmshell.h"
 #if defined AVMPLUS_SELFTEST
 namespace avmplus {
 class ST_avmplus_basics : public Selftest {

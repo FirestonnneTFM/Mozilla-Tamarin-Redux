@@ -213,8 +213,6 @@ namespace avmplus
 	class ScriptBuffer;
 	class ScriptEnv;
 	class ScriptObject;
-	class Selftest;
-	class SelftestRunner;
 	class StackTrace;
 	class StringBuffer;
 	class StringClass;
@@ -307,7 +305,6 @@ namespace avmplus
 #include "NamespaceSet.h"
 #include "Multiname.h"
 #include "Sampler.h"
-#include "Selftest.h"
 #include "AvmCore.h"
 #include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"

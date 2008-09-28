@@ -45,28 +45,28 @@
 
 private:
 #ifdef AVMPLUS_DIRECT_THREADED
-    void** opcodes;
+    void** opcode_labels; // the name is not arbitrary
 #endif
 
 %%prologue
 
 #ifdef AVMPLUS_DIRECT_THREADED
     int len = WOP_LAST+1
-    opcodes = new void*[len];
+    opcode_labels = new void*[len];
     for ( int i=0 ; i < len ; i++ )
-        opcodes[i] = (void*)i;
+        opcode_labels[i] = (void*)i;
 #endif
 
 %%epilogue
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    delete [] opcodes;
+    delete [] opcode_labels;
 #endif
 
 %%test get2locals
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    Translator* t = new Translator(core, NULL, opcodes);
+    Translator* t = new Translator(core, NULL, opcode_labels);
 #else
     Translator* t = new Translator(core, NULL);
 #endif
@@ -83,12 +83,12 @@ private:
 //     uint32_t len = t->epilogue(&code);
 
 // %%verify len == 6
-// %%verify code[0] == WOP_get2locals
-// %%verify code[1] == (4 << 16) | 5
-// %%verify code[2] == WOP_getlocal
+// %%verify code[0] == NEW_OPCODE(WOP_get2locals)
+// %%verify code[1] == ((4 << 16) | 5)
+// %%verify code[2] == NEW_OPCODE(WOP_getlocal)
 // %%verify code[3] == 65536
-// %%verify code[4] == WOP_get2locals
-// %%verify code[5] == (6 << 16) | 7
+// %%verify code[4] == NEW_OPCODE(WOP_get2locals)
+// %%verify code[5] == ((6 << 16) | 7)
 
     t->emitOp1(WOP_getlocal, 5);
     t->emitOp1(WOP_getlocal, 4);
@@ -97,9 +97,9 @@ private:
     uint32_t len = t->epilogue(&code);
 
 %%verify len == 4
-%%verify code[0] == WOP_get2locals
-%%verify code[1] == (4 << 16) | 5
-%%verify code[2] == WOP_getlocal
+%%verify code[0] == NEW_OPCODE(WOP_get2locals)
+%%verify code[1] == ((4 << 16) | 5)
+%%verify code[2] == NEW_OPCODE(WOP_getlocal)
 %%verify code[3] == 65536
 
     delete t;

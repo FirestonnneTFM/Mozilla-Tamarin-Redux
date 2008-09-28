@@ -220,7 +220,7 @@ package selftest
 	st.classname = classname;
 	s.push("// Generated from " + input);
 	pushMultiple(s, st.comments);
-	s.push("#include \"avmplus.h\"");
+	s.push("#include \"avmshell.h\"");
 	st.ifdef_text = "#if defined AVMPLUS_SELFTEST" + (st.ifdefs.length > 0 ? " && defined " : "") + st.ifdefs.join(" && defined ");
 	s.push(st.ifdef_text);
 	s.push("namespace avmplus {");
@@ -290,22 +290,29 @@ package selftest
 	return stk;
     }
 
+    // VS2008 requires the extern declarations to be at the top level for
+    // the namespace tagging to work out correctly.
     function formatGeneratedInitializer() {
 	var s = [];
 	s.push("// Initialization code for generated selftest code");
-	s.push("#include \"avmplus.h\"");
+	s.push("#include \"avmshell.h\"");
 	s.push("namespace avmplus {");
 	s.push("#ifdef AVMPLUS_SELFTEST");
-	s.push("void SelftestRunner::createGeneratedSelftestClasses() {");
 	for ( var i=0 ; i < selftests.length ; i++ ) {
 	    var st = selftests[i];
 	    s.push(st.ifdef_text);
 	    s.push("extern void create_" + st.component + "_" + st.category + "(AvmCore* core);");
+	    s.push("#endif");
+	}
+	s.push("void SelftestRunner::createGeneratedSelftestClasses() {");
+	for ( var i=0 ; i < selftests.length ; i++ ) {
+	    var st = selftests[i];
+	    s.push(st.ifdef_text);
 	    s.push("create_" + st.component + "_" + st.category + "(core);");
 	    s.push("#endif");
 	}
 	s.push("}");
-	s.push("#endif");
+	s.push("#endif // AVMPLUS_SELFTEST");
 	s.push("}");
 	return s.join("\n") + "\n";
     }

@@ -1,5 +1,5 @@
 // Generated from ST_avmplus_peephole.st
-// -*- mode: c -*-
+// -*- mode: c++ -*-
 //
 // ***** BEGIN LICENSE BLOCK *****
 // Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -38,7 +38,7 @@
 //
 // ***** END LICENSE BLOCK ***** */
 
-#include "avmplus.h"
+#include "avmshell.h"
 #if defined AVMPLUS_SELFTEST && defined AVMPLUS_PEEPHOLE_OPTIMIZER
 namespace avmplus {
 class ST_avmplus_peephole : public Selftest {
@@ -53,7 +53,7 @@ void test0();
 
 private:
 #ifdef AVMPLUS_DIRECT_THREADED
-    void** opcodes;
+    void** opcode_labels;
 #endif
 
 };
@@ -70,23 +70,23 @@ void ST_avmplus_peephole::prologue() {
 
 #ifdef AVMPLUS_DIRECT_THREADED
     int len = WOP_LAST+1;
-    opcodes = new void*[len];
+    opcode_labels = new void*[len];
     for ( int i=0 ; i < len ; i++ )
-        opcodes[i] = (void*)i;
+        opcode_labels[i] = (void*)i;
 #endif
 
 }
 void ST_avmplus_peephole::epilogue() {
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    delete [] opcodes;
+    delete [] opcode_labels;
 #endif
 
 }
 void ST_avmplus_peephole::test0() {
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    Translator* t = new Translator(core, NULL, opcodes);
+    Translator* t = new Translator(core, NULL, opcode_labels);
 #else
     Translator* t = new Translator(core, NULL);
 #endif
@@ -104,11 +104,11 @@ void ST_avmplus_peephole::test0() {
 
 // %%verify len == 6
 // %%verify code[0] == WOP_get2locals
-// %%verify code[1] == (4 << 16) | 5
+// %%verify code[1] == ((4 << 16) | 5)
 // %%verify code[2] == WOP_getlocal
 // %%verify code[3] == 65536
 // %%verify code[4] == WOP_get2locals
-// %%verify code[5] == (6 << 16) | 7
+// %%verify code[5] == ((6 << 16) | 7)
 
     t->emitOp1(WOP_getlocal, 5);
     t->emitOp1(WOP_getlocal, 4);
@@ -117,9 +117,9 @@ void ST_avmplus_peephole::test0() {
     uint32_t len = t->epilogue(&code);
 
 verifyPass(len == 4, "len == 4", __FILE__, __LINE__);
-verifyPass(code[0] == WOP_get2locals, "code[0] == WOP_get2locals", __FILE__, __LINE__);
-verifyPass(code[1] == (4 << 16) | 5, "code[1] == (4 << 16) | 5", __FILE__, __LINE__);
-verifyPass(code[2] == WOP_getlocal, "code[2] == WOP_getlocal", __FILE__, __LINE__);
+verifyPass(code[0] == NEW_OPCODE(WOP_get2locals), "code[0] == WOP_get2locals", __FILE__, __LINE__);
+verifyPass(code[1] == ((4 << 16) | 5), "code[1] == ((4 << 16) | 5)", __FILE__, __LINE__);
+verifyPass(code[2] == NEW_OPCODE(WOP_getlocal), "code[2] == WOP_getlocal", __FILE__, __LINE__);
 verifyPass(code[3] == 65536, "code[3] == 65536", __FILE__, __LINE__);
 
     delete t;

@@ -867,6 +867,11 @@
 				6803D2C70A5064FD00C797BB /* JavaGlue.cpp */,
 				6803D2C80A5064FD00C797BB /* JavaGlue.h */,
 				8E8B529009AABAA30057BEE4 /* Profiler.h */,
+				074E40AC0E8E6FF900146B6F /* ST_avmplus_basics.cpp */,
+				074E40AD0E8E6FF900146B6F /* ST_avmplus_peephole.cpp */,
+				074E40A90E8E6FF900146B6F /* Selftest.cpp */,
+				074E40AA0E8E6FF900146B6F /* Selftest.h */,
+				074E40AB0E8E6FF900146B6F /* SelftestInit.cpp */,
 				8E8B529209AABAA30057BEE4 /* StringBuilder.as */,
 				8E8B529309AABAA30057BEE4 /* StringBuilderClass.cpp */,
 				8E8B529409AABAA30057BEE4 /* StringBuilderClass.h */,
@@ -884,14 +889,9 @@
 				8EDDB9E509AAD1D300FB9EE5 /* Dictionary.as */,
 				8EDDB9E609AAD1D300FB9EE5 /* DictionaryGlue.cpp */,
 				8EDDB9E709AAD1D300FB9EE5 /* DictionaryGlue.h */,
-				074E40AC0E8E6FF900146B6F /* ST_avmplus_basics.cpp */,
-				074E40AD0E8E6FF900146B6F /* ST_avmplus_peephole.cpp */,
 				858088D40C8F604F0093F49B /* Sampler.as */,
 				858088D50C8F604F0093F49B /* SamplerScript.cpp */,
 				858088D60C8F604F0093F49B /* SamplerScript.h */,
-				074E40A90E8E6FF900146B6F /* Selftest.cpp */,
-				074E40AA0E8E6FF900146B6F /* Selftest.h */,
-				074E40AB0E8E6FF900146B6F /* SelftestInit.cpp */,
 			);
 			name = extensions;
 			sourceTree = "<group>";
