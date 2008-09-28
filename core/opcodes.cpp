@@ -43,7 +43,7 @@
 #if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
 const char * const opNames[] = {
     "OP_0x00",
-    "bkpt",
+    "OP_0x01",
     "nop",
     "throw",
     "getsuper",
@@ -284,7 +284,7 @@ const char * const opNames[] = {
     "debug",
     "debugline",
     "debugfile",
-    "bkptline",
+    "OP_0xF2",
     "timestamp",
     "OP_0xF4",
     "OP_0xF5",
@@ -305,7 +305,7 @@ const char * const opNames[] = {
 
 const signed char opOperandCount[] = {
     -1,	// "OP_0x00"
-    0,	// "bkpt"
+    0,	// "OP_0x01"
     0,	// "nop"
     0,	// "throw"
     1,	// "getsuper"
@@ -546,7 +546,7 @@ const signed char opOperandCount[] = {
     4,	// "debug"
     1,	// "debugline"
     1,	// "debugfile"
-    1,	// "bkptline"
+    1,	// "OP_0xF2"
     0,	// "timestamp"
     -1,	// "OP_0xF4"
     -1,	// "OP_0xF5"
@@ -570,7 +570,7 @@ const signed char opOperandCount[] = {
 // no. of bytes in the opcode stream.  0 means unsupported opcode.
 const unsigned char opSizes[] = {
     0,	// "OP_0x00"
-    1,	// "bkpt"
+    1,	// "OP_0x01"
     1,	// "nop"
     1,	// "throw"
     1+2,	// "getsuper"
@@ -811,7 +811,7 @@ const unsigned char opSizes[] = {
     1+1+2+4,	// "debug"
     1+3,	// "debugline"
     1+2,	// "debugfile"
-    1+3,	// "bkptline"
+    0,	// "OP_0xF2"
     1,	// "timestamp"
     0,	// "OP_0xF4"
     0,	// "OP_0xF5"

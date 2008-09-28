@@ -209,7 +209,7 @@ namespace avmplus
 #     endif
 #  endif // threading discipline
 			 XXX(0x00)
-			 XXX(0x01) /* OP_bkpt */
+			 XXX(0x01)
 			 XXX(0x02) /* OP_nop */
 			 III(0x03, L_throw)
 			 III(0x04, L_getsuper)
@@ -456,7 +456,7 @@ namespace avmplus
 			 XXX(0xF0) /* L_debugline */
 			 XXX(0xF1) /* L_debugfile */
 #  endif
-			 XXX(0xF2) /* L_bkptline */
+			 XXX(0xF2)
 	 		 XXX(0xF3) /* OP_timestamp */
 			 XXX(0xF4)
 			 XXX(0xF5)
