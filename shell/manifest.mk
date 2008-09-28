@@ -26,4 +26,8 @@ shell_CXXSRCS := $(shell_CXXSRCS) \
   $(curdir)/../extensions/DictionaryGlue.cpp \
   $(curdir)/../extensions/JavaGlue.cpp \
   $(curdir)/../extensions/SamplerScript.cpp \
+  $(curdir)/../extensions/Selftest.cpp \
+  $(curdir)/../extensions/SelftestInit.cpp \
+  $(curdir)/../extensions/ST_avmplus_basics.cpp \
+  $(curdir)/../extensions/ST_avmplus_peephole.cpp \
   $(NULL)
