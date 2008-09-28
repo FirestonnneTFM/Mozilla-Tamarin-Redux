@@ -248,7 +248,7 @@ namespace avmplus
 		unsigned terminates:1;   // True if the instruction terminates control flow (return, throw)
 #if defined _DEBUG || defined DEBUGGER
 		// Keep this field last
-		const char * const name; // Printable name for the instruction
+		const char * name;       // Printable name for the instruction
 #endif
 	};
 	

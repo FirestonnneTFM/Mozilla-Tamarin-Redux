@@ -299,7 +299,10 @@ package peephole
 		    return r;
 		}).
 	    forEach(function (l) {
-		     var r = (/^\s*\{\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*N\(\"([^\"]+)\"\)/.exec(l));
+		     // The format of a line is { num, ... N("name") }
+		     // We only care about the second number (the "jumps" attribute) and the
+		     // name for the time being.
+		     var r = (/^\s*\{\s*([0-9]+)\s*,\s*([0-9]+)[^N]+N\(\"([^\"]+)\"\)/.exec(l));
 		     assert(r != null);
 		     if (!(r[4].match(/^0x/))) {
 			 opcode[r[4]] = i;

@@ -42,6 +42,7 @@
 #include <stdlib.h>
 
 #include "avmplus.h"
+#include "Selftest.h"
 
 // interactive shell requires functional external compiler, not yet
 // present in Tamarin. commented out for now.

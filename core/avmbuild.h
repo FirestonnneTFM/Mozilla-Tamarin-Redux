@@ -284,9 +284,9 @@
 // Enable translation from ABC byte code to a wider word code that can
 // also be used by a direct threaded interpreter
 #if defined AVMPLUS_MAC && !defined AVMPLUS_64BIT
-//#  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
-//#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
-//#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
+#  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
+#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
+#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
 #endif
 
 #if defined AVMPLUS_WIN32 && !defined AVMPLUS_64BIT
@@ -309,8 +309,10 @@
 
 // Enable selftests.  These can be run by -Dselftest at the shell or by calling the
 // global function avmplus::selftests(), see extensions/Selftest.h.
+//
+// Apart from code size considerations this can be enabled for release builds.
 
-#define AVMPLUS_SELFTEST
+//#define AVMPLUS_SELFTEST
 
 // temporary impedance-matching define for code that needs to build with different versions of tamarin...
 // will be removed soon

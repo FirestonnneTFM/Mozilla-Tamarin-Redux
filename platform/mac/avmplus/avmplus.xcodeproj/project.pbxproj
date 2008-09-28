@@ -1088,7 +1088,7 @@
 				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = ../../../extensions;
+				USER_HEADER_SEARCH_PATHS = "";
 				WARNING_CFLAGS = (
 					"-Wno-long-long",
 					"-Wno-variadic-macros",
@@ -1130,7 +1130,7 @@
 				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = ../../../extensions;
+				USER_HEADER_SEARCH_PATHS = "";
 				WARNING_CFLAGS = (
 					"-Wno-long-long",
 					"-Wno-variadic-macros",
@@ -1241,7 +1241,7 @@
 				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = ../../../extensions;
+				USER_HEADER_SEARCH_PATHS = "";
 				WARNING_CFLAGS = (
 					"-Wno-long-long",
 					"-Wno-variadic-macros",
@@ -1282,7 +1282,7 @@
 				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = ../../../extensions;
+				USER_HEADER_SEARCH_PATHS = "";
 				WARNING_CFLAGS = (
 					"-Wno-long-long",
 					"-Wno-variadic-macros",
