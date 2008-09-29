@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		19F932730E913D1D00BB1C0E /* wopcodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19F932710E913D1D00BB1C0E /* wopcodes.cpp */; };
+		19F932740E913D1D00BB1C0E /* wopcodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 19F932720E913D1D00BB1C0E /* wopcodes.h */; };
 		1E6078E9097335B3007D0E1E /* CodegenMIR.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6078E5097335B3007D0E1E /* CodegenMIR.h */; };
 		1E6078EA097335B3007D0E1E /* Ia32Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6078E6097335B3007D0E1E /* Ia32Assembler.cpp */; };
 		1E6078EB097335B3007D0E1E /* PpcAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6078E7097335B3007D0E1E /* PpcAssembler.cpp */; };
@@ -216,6 +218,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		19F932710E913D1D00BB1C0E /* wopcodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wopcodes.cpp; path = ../../../core/wopcodes.cpp; sourceTree = SOURCE_ROOT; };
+		19F932720E913D1D00BB1C0E /* wopcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wopcodes.h; path = ../../../core/wopcodes.h; sourceTree = SOURCE_ROOT; };
 		1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenMIR.cpp; path = ../../../codegen/CodegenMIR.cpp; sourceTree = SOURCE_ROOT; };
 		1E6078E5097335B3007D0E1E /* CodegenMIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = CodegenMIR.h; path = ../../../codegen/CodegenMIR.h; sourceTree = SOURCE_ROOT; };
 		1E6078E6097335B3007D0E1E /* Ia32Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Ia32Assembler.cpp; path = ../../../codegen/Ia32Assembler.cpp; sourceTree = SOURCE_ROOT; };
@@ -474,6 +478,8 @@
 		1E607A9F09733787007D0E1E /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				19F932710E913D1D00BB1C0E /* wopcodes.cpp */,
+				19F932720E913D1D00BB1C0E /* wopcodes.h */,
 				D981288B0E8D7D9700C48B85 /* peephole.cpp */,
 				47D44EB40D37D56B008368EC /* VectorClass.cpp */,
 				47D44EB50D37D56B008368EC /* VectorClass.h */,
@@ -830,6 +836,7 @@
 				4E0F4EDF0E5A34F900DA786F /* RegAlloc.h in Headers */,
 				4E0F4F350E5A374200DA786F /* CodegenLIR.h in Headers */,
 				D962305D0E5CA2D200DA3F47 /* Translator.h in Headers */,
+				19F932740E913D1D00BB1C0E /* wopcodes.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -980,6 +987,7 @@
 				4E9A321B0E5A417C00376C46 /* CodegenMIR.cpp in Sources */,
 				D962305C0E5CA2D200DA3F47 /* Translator.cpp in Sources */,
 				D981288C0E8D7D9700C48B85 /* peephole.cpp in Sources */,
+				19F932730E913D1D00BB1C0E /* wopcodes.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
