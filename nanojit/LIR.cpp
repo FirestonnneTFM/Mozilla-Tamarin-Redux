@@ -312,6 +312,12 @@ namespace nanojit
 		l->initOpcode(op);
 		b->commit(1);
 		b->_stats.lir++;
+		if (op == LIR_start) {
+			// create params for saved regs -- processor specific
+			for (int i=0; i < NumSavedRegs; i++) {
+				insParam(i, 1);
+			}
+		}
 		return l;
 	}
 	
@@ -391,7 +397,7 @@ namespace nanojit
 		l->c.imm8a = arg;
         l->c.imm8b = kind;
         if (kind) {
-            NanoAssert(uint32_t(arg) < sizeof(b->savedParams)/sizeof(LInsp));
+            NanoAssert(uint32_t(arg) < NumSavedRegs);
             b->savedParams[arg] = l;
         }
 		b->commit(1);

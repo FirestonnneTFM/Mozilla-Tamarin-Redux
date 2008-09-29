@@ -349,6 +349,7 @@ namespace nanojit
 
 			// platform specific methods
         public:
+			const static Register savedRegs[NumSavedRegs];
 			DECLARE_PLATFORM_ASSEMBLER()
 
 		private:

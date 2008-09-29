@@ -76,6 +76,7 @@ namespace nanojit
 	const Register Assembler::argRegs[] = { RDI, RSI, RDX, RCX, R8, R9 };
 #endif
 	const Register Assembler::retRegs[] = { RAX, RDX };
+	const Register Assembler::savedRegs[] = { R13, R14, R15 };
 #endif
 
     const static uint8_t max_abi_regs[] = {
