@@ -2559,7 +2559,6 @@ namespace avmplus
 			mirPatchPtr(&br->target, interrupt_label);
 		}
 
-       // this is not fatal but its good to know if our prologue estimation code is off.
 		InsAlloc(0);
 
 		return true;
