@@ -753,7 +753,7 @@ namespace nanojit
 			const CallInfo* _functions;
             AbiKind abi;
             LInsp state,param1,sp,rp;
-            LInsp savedParams[3];// hack, should be sizeof(Assembler::savedRegs)/sizeof(Assembler::savedRegs[0])
+            LInsp savedParams[NumSavedRegs];
 			
 		protected:
 			friend class LirBufWriter;

@@ -157,11 +157,11 @@ namespace nanojit
 	 *	- merging paths ( build a graph? ), possibly use external rep to drive codegen
 	 */
     Assembler::Assembler(Fragmento* frago)
-        : _frago(frago)
+        : hasLoop(0)
+        , _frago(frago)
         , _gc(frago->core()->gc)
         , _labels(_gc)
         , _patches(_gc)
-        , hasLoop(0)
         , pending_lives(_gc)
 	{
         AvmCore *core = frago->core();
@@ -763,10 +763,13 @@ namespace nanojit
 
 		nFragExit(guard);
 
+		// restore the callee-saved register (aka saved params)
+		assignSavedParams();
+
 		// if/when we patch this exit to jump over to another fragment,
 		// that fragment will need its parameters set up just like ours.
         LInsp stateins = _thisfrag->lirbuf->state;
-		Register state = findSpecificRegFor(stateins, Register(stateins->imm8()));
+		Register state = findSpecificRegFor(stateins, argRegs[stateins->imm8()]);
 		asm_bailout(guard, state);
 
 		intersectRegisterState(capture);
@@ -1580,10 +1583,11 @@ namespace nanojit
                     #endif
                     #endif
 
+					assignSavedParams();
+
 					// restore first parameter, the only one we use
                     LInsp state = _thisfrag->lirbuf->state;
-                    Register a0 = Register(state->imm8());
-					findSpecificRegFor(state, a0); 
+					findSpecificRegFor(state, argRegs[state->imm8()]); 
 					break;
 				}
 #ifndef NJ_SOFTFLOAT
@@ -1776,7 +1780,7 @@ namespace nanojit
         // restore saved regs
 		releaseRegisters();
         LirBuffer *b = _thisfrag->lirbuf;
-        for (int i=0, n = sizeof(b->savedParams)/sizeof(LInsp); i < n; i++) {
+        for (int i=0, n = NumSavedRegs; i < n; i++) {
             LIns *p = b->savedParams[i];
             if (p)
                 findSpecificRegFor(p, savedRegs[p->imm8()]);
@@ -1786,7 +1790,7 @@ namespace nanojit
     void Assembler::reserveSavedParams()
     {
         LirBuffer *b = _thisfrag->lirbuf;
-        for (int i=0, n = sizeof(b->savedParams)/sizeof(LInsp); i < n; i++) {
+        for (int i=0, n = NumSavedRegs; i < n; i++) {
             LIns *p = b->savedParams[i];
             if (p)
                 findMemFor(p);

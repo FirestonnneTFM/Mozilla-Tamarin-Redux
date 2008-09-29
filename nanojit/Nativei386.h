@@ -147,13 +147,13 @@ namespace nanojit
 
 	typedef int RegisterMask;
 
+    static const int NumSavedRegs = 3;
 	static const RegisterMask SavedRegs = 1<<EBX | 1<<EDI | 1<<ESI;
 	static const RegisterMask GpRegs = SavedRegs | 1<<EAX | 1<<ECX | 1<<EDX;
     static const RegisterMask XmmRegs = 1<<XMM0|1<<XMM1|1<<XMM2|1<<XMM3|1<<XMM4|1<<XMM5|1<<XMM6|1<<XMM7;
     static const RegisterMask x87Regs = 1<<FST0;
 	static const RegisterMask FpRegs = x87Regs | XmmRegs;
 	static const RegisterMask ScratchRegs = 1<<EAX | 1<<ECX | 1<<EDX | FpRegs;
-    static const int NumSavedRegs = 3;
 
 	static const RegisterMask AllowableFlagRegs = 1<<EAX |1<<ECX | 1<<EDX | 1<<EBX;
 
@@ -174,7 +174,7 @@ namespace nanojit
 	#define DECLARE_PLATFORM_REGALLOC()
 
 	#define DECLARE_PLATFORM_ASSEMBLER()	\
-        const static Register argRegs[2], retRegs[2], savedRegs[3]; \
+        const static Register argRegs[2], retRegs[2]; \
 		bool x87Dirty;						\
         bool sse2;							\
 		bool has_cmov; \

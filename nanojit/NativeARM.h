@@ -126,6 +126,7 @@ namespace nanojit
 	} 
 	FragInfo;
 
+	static const int NumSavedRegs = 7;
 	static const RegisterMask SavedRegs = 1<<R4 | 1<<R5 | 1<<R6 | 1<<R7 | 1<<R8 | 1<<R9 | 1<<R10;
 	static const RegisterMask FpRegs = 0x0000; // FST0-FST7
 	static const RegisterMask GpRegs = 0x07FF;
