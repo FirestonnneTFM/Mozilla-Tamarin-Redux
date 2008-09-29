@@ -397,7 +397,7 @@ namespace nanojit
 		l->c.imm8a = arg;
         l->c.imm8b = kind;
         if (kind) {
-            NanoAssert(uint32_t(arg) < NumSavedRegs);
+            NanoAssert(arg < NumSavedRegs);
             b->savedParams[arg] = l;
         }
 		b->commit(1);
