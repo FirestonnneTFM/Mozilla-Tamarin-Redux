@@ -278,7 +278,7 @@ namespace avmshell
 		#endif
     #endif
     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		printf("          [-Dforcemir]  deprecated, use forcejit\n");
+		printf("          [-Dforcemir]  deprecated, use -Ojit\n");
 		printf("          [-Ojit]       use jit always, never interp\n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
         #ifdef AVMPLUS_IA32

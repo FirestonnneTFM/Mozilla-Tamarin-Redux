@@ -56,7 +56,7 @@ namespace avmplus
    class LineNumberRecord : public MMgc::GCObject
    {
        public:
-           LineNumberRecord(Stringp fn, uint32 ln)
+           LineNumberRecord(Stringp fn, uint32_t ln)
            : filename(fn)
            , lineno(ln)
            { }
@@ -70,12 +70,12 @@ namespace avmplus
        public:
            JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
 
-           uint32_t sid;  // code info id
            MethodInfo* method;
            SortedIntMap<LineNumberRecord*> lineNumTable;       // populated during code generation 
            uintptr startAddr;
            uintptr endAddr;
            iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
+           uint32_t sid;  // code info id
 
            LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
            {
@@ -159,7 +159,7 @@ namespace avmplus
 		LIns *coreAddr;
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
-        sintptr lastPcSave;
+        intptr_t lastPcSave;
         List<Patch, LIST_NonGCObjects> patches;
         LIns *exBranch;
         LIns *setjmpResult;
@@ -222,9 +222,9 @@ namespace avmplus
 	    void formatOperand(PrintWriter& buffer, LIns* oprnd);
 		void epilogue(FrameState* state);
 		bool prologue(FrameState* state);
-		void emitCall(FrameState* state, AbcOpcode opcode, sintptr method_id, int argc, Traits* result);
+		void emitCall(FrameState* state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
 		void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
-		void emitIf(FrameState* state, AbcOpcode opcode, sintptr target, int lhs, int rhs);
+		void emitIf(FrameState* state, AbcOpcode opcode, intptr_t target, int lhs, int rhs);
 		void emitSwap(FrameState* state, int i, int j);
 		void emitCopy(FrameState* state, int src, int dest);
 		void emitGetscope(FrameState* state, int scope, int dest);
