@@ -54,5 +54,6 @@ endif
 
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/CodegenMIR.cpp \
+  $(curdir)/CodegenLIR.cpp \
   $(curdir)/$(codegen_cpu_cxxsrc) \
   $(NULL)

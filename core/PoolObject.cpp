@@ -61,7 +61,7 @@ namespace avmplus
 	{
 		namedTraits = new(core->GetGC()) MultinameHashtable();
 		m_code = sb.getImpl();
-#ifdef AVMPLUS_MIR
+#if defined(AVMPLUS_MIR)
 		codeBuffer = new (core->GetGC()) GrowableBuffer(core->GetGC()->GetGCHeap());
 #endif
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
@@ -71,6 +71,9 @@ namespace avmplus
 	{
 		#ifdef AVMPLUS_MIR
 		delete codeBuffer;
+		#endif
+		#ifdef AVMPLUS_WORD_CODE
+		delete word_code.cpool_mn;
 		#endif
 	}
 	
@@ -108,7 +111,7 @@ namespace avmplus
 		return getTraits(name, core->publicNamespace, recursive);
 	}
 
-	Traits* PoolObject::getTraits(Multiname* mname, const Toplevel* toplevel, bool recursive/*=true*/) const
+	Traits* PoolObject::getTraits(const Multiname* mname, const Toplevel* toplevel, bool recursive/*=true*/) const
 	{
 		// do full lookup of multiname, error if more than 1 match
 		// return Traits if 1 match, NULL if 0 match, throw ambiguity error if >1 match
@@ -451,7 +454,7 @@ namespace avmplus
 				if( !r )
 				{
 					r = core->makeParameterizedITraits(fullname, base->ns, core->traits.vectorobj_itraits);
-					core->traits.vector_itraits->pool->domain->namedTraits->add(fullname, base->ns, (Binding)r);
+					core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, (Binding)r);
 				}
 			}
 		}
@@ -512,7 +515,6 @@ namespace avmplus
 			int info = 0;
 			int value_index = 0;
 			CPoolKind value_kind = (CPoolKind)0;
-
 			// Check for version metadata
 			switch (kind)
 			{
@@ -952,7 +954,7 @@ namespace avmplus
 		privateNamedScripts.add(name, ns, (Atom)script);
 	}
 
-	AbstractFunction* PoolObject::getNamedScript(Multiname* multiname) const
+	AbstractFunction* PoolObject::getNamedScript(const Multiname* multiname) const
 	{
 		AbstractFunction *f = domain->getNamedScript(multiname);
 		if(!f)
@@ -961,4 +963,25 @@ namespace avmplus
 		}
 		return f;
 	}
+	
+#ifdef AVMPLUS_WORD_CODE
+	PrecomputedMultinames::PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool)
+		: MMgc::GCRoot(gc)
+		, nNames (0)
+	{
+		nNames = pool->constantMnCount;
+		for ( uint32 i=1 ; i < nNames ; i++ ) {
+			Multiname mn;
+			pool->parseMultiname(mn, i);
+			mn.IncrementRef();
+			multinames[i] = mn;
+		}
+	}
+	
+	PrecomputedMultinames::~PrecomputedMultinames() {
+		for ( uint32 i=1 ; i < nNames ; i++ ) 
+			multinames[i].DecrementRef();
+	}
+#endif
+	
 }

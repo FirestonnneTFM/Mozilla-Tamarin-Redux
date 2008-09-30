@@ -41,6 +41,14 @@
 
 namespace avmplus
 {
+	#ifdef AVMPLUS_MIR
+	class CodegenMIR;
+	#endif
+
+	#ifdef FEATURE_NANOJIT
+	class CodegenLIR;
+	#endif
+
 	/**
 	 * Multiname is a reference to an identifier in 0 or more namespaces.  It consists
 	 * of the simple name and a list of namespaces.
@@ -59,8 +67,10 @@ namespace avmplus
 		const static int TYPEPARAM = 0x40;
 		#ifdef AVMPLUS_MIR
 		friend class CodegenMIR;
+		#endif
+		#ifdef FEATURE_NANOJIT
+		friend class CodegenLIR;
 		#endif 
-		friend class Interpreter;
 		friend class HeapMultiname;
 		int flags;
 		Stringp name;
@@ -86,7 +96,7 @@ namespace avmplus
 			this->name = _name;
 		}
 
-		void setName(Multiname* other)
+		void setName(const Multiname* other)
 		{
 			// copy name settings from other
 			flags &= ~RTNAME;
@@ -113,7 +123,7 @@ namespace avmplus
 			this->ns = _ns;
 		}
 
-		void setNamespace(Multiname* other)
+		void setNamespace(const Multiname* other)
 		{
 			// copy namespace settings from other
 			flags &= ~(NSSET|RTNS);
@@ -135,7 +145,7 @@ namespace avmplus
 			this->nsset = _nsset;
 		}
 
-		uint32 getTypeParameter() 
+		uint32 getTypeParameter() const
 		{
 			AvmAssert(isParameterizedType());
 			return next_index;
@@ -248,6 +258,28 @@ namespace avmplus
 
 		bool matches (const Multiname *mn) const;
 
+#ifdef AVMPLUS_WORD_CODE
+		// As an optimization a Multiname may be part of a GCRoot.  The following
+		// two methods make sure the reference counted dependents of a Multiname
+		// stick around (or not, as the case may be).  The reference counts are
+		// *not* adjusted by the methods above; multinames on which IncrementRef
+		// and DecrementRef are called *must* be considered constant.
+	public:
+		void IncrementRef() {
+			if (name != NULL)
+				name->IncrementRef();
+			if (ns != NULL && (flags & NSSET) == 0)
+				ns->IncrementRef();
+		}
+		
+		void DecrementRef() {
+			if (name != NULL)
+				name->DecrementRef();
+			if (ns != NULL && (flags & NSSET) == 0)
+				ns->DecrementRef();
+		}
+#endif
+		
 //#ifdef AVMPLUS_VERBOSE
 	public:
 		typedef enum _MultiFormat
@@ -305,7 +337,7 @@ namespace avmplus
 			name.setName(n);
 		}
 
-		void setName(Multiname* other) {
+		void setName(const Multiname* other) {
 			WBRC(gc(), this, &name.name, other->name);
 			name.setName(other);
 		}
@@ -315,7 +347,7 @@ namespace avmplus
 			name.setNamespace(ns);
 		}
 
-		void setNamespace(Multiname* other)	{
+		void setNamespace(const Multiname* other)	{
 			WBRC(gc(), this, &name.ns, other->ns);
 			name.setNamespace(other);
 		}

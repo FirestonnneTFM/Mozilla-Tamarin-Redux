@@ -105,12 +105,7 @@ namespace avmplus
 	public:
 		Traits* traits;			// The type of exceptions handled by this exception handler. 
 		Traits* scopeTraits;	// The exception scope traits. 
-		union {
-			sintptr target;		// The target location to branch to when the exception occurs. 
-#ifdef AVMPLUS_MIR
-			CodegenMIR::OP* targetIns;
-#endif
-		};
+		sintptr target;		// The target location to branch to when the exception occurs. 
 		int32_t from;			// Start of code range the exception applies to.  Inclusive. 
 		int32_t to;				// End of code range the exception applies to.  Exclusive. 
 	// ------------------------ DATA SECTION END

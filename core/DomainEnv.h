@@ -53,7 +53,7 @@ namespace avmplus
 		DomainEnv* const base;
 
 		MethodEnv* getScriptInit(Namespace* ns, Stringp name) const;
-		MethodEnv* getScriptInit(Multiname* multiname) const;
+		MethodEnv* getScriptInit(const Multiname* multiname) const;
 
 		Domain* getDomain() const { return domain; }
 
@@ -64,14 +64,18 @@ namespace avmplus
 		Stringp scriptNameAt(int index) const;
 		Namespace* scriptNsAt(int index) const;
 
+		Toplevel* toplevel() const;
+		void setToplevel(Toplevel *t) { m_toplevel = t; }
+		
+		// Encapsulate namedScripts so that we can invalidate global reference caches when it is updated.
+		Binding getNamedScript(Stringp name, Namespace* ns) const { return namedScripts->get(name, ns); }
+		void addNamedScript(Stringp name, Namespace* ns, Binding scriptEnv) { namedScripts->add(name, ns, scriptEnv); }
+	private:
 		/**
 		 * table of named program init functions. (ns,name => MethodEnv) 
 		 */
 		DWB(MultinameHashtable*) namedScripts;
-
-		Toplevel* toplevel() const;
-		void setToplevel(Toplevel *t) { m_toplevel = t; }
-	private:
+		
 		DRCWB(Toplevel*) m_toplevel;
 	};
 }

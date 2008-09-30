@@ -47,11 +47,6 @@ namespace avmplus
 	 */
 	class ScriptObject : public AvmPlusScriptableObject
 	{
-	private:
-		#ifdef AVMPLUS_MIR
-		friend class CodegenMIR;
-		#endif
-
 	public:
 		VTable* const vtable;
 		
@@ -95,18 +90,18 @@ namespace avmplus
 			return (Hashtable*)((byte*)this+vtable->traits->hashTableOffset);
 		}
 
-		bool isValidDynamicName(Multiname* m) const {
+		bool isValidDynamicName(const Multiname* m) const {
 			return m->contains(core()->publicNamespace) && !m->isAnyName() && !m->isAttr();
 		}
 		
 		Atom getSlotAtom(int slot);
 		void setSlotAtom(int slot, Atom atom);
 
-		virtual Atom getDescendants(Multiname* name) const;
+		virtual Atom getDescendants(const Multiname* name) const;
 
 		// argv[0] = receiver
-		virtual Atom callProperty(Multiname* name, int argc, Atom* argv);
-		virtual Atom constructProperty(Multiname* name, int argc, Atom* argv);
+		virtual Atom callProperty(const Multiname* name, int argc, Atom* argv);
+		virtual Atom constructProperty(const Multiname* name, int argc, Atom* argv);
 
 		// common set/set/has/delete/etc virtual methods renamed to explicitly name the expected arg types,
 		// to avoid potentially hidden virtual functions
@@ -118,10 +113,10 @@ namespace avmplus
 		virtual bool getAtomPropertyIsEnumerable(Atom name) const;
 		virtual void setAtomPropertyIsEnumerable(Atom name, bool enumerable);
 
-		virtual Atom getMultinameProperty(Multiname* name) const;
-		virtual void setMultinameProperty(Multiname* name, Atom value);
-		virtual bool deleteMultinameProperty(Multiname* name);
-		virtual bool hasMultinameProperty(Multiname* name) const;
+		virtual Atom getMultinameProperty(const Multiname* name) const;
+		virtual void setMultinameProperty(const Multiname* name, Atom value);
+		virtual bool deleteMultinameProperty(const Multiname* name);
+		virtual bool hasMultinameProperty(const Multiname* name) const;
 
 		virtual Atom getUintProperty(uint32 i) const;
 		virtual void setUintProperty(uint32 i, Atom value);

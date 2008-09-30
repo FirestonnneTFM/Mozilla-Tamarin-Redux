@@ -65,6 +65,26 @@ namespace avmplus
 		void unboxLocals(Atom* src, int srcPos, Traits** traitArr, void* dest, int destPos, int length);
 #endif // DEBUGGER
 		
+#ifdef AVMPLUS_WORD_CODE
+		struct 
+		{
+			const uint32 *body_pos; // NULL iff not yet translated
+#  ifdef SUPERWORD_PROFILING
+			const uint32 *body_end; // one past the end
+			bool dumped;
+#  endif
+			DWB(GCObject*) code_anchor;  // The object that contains the code pointed to by body_pos
+			int max_stack;
+			int local_count;
+			int init_scope_depth;
+			int max_scope_depth;
+			int cache_size;              // Number of items in lookup cache
+			// We write this once, in Translator, with an explicit WB.  so no DWB.
+			// The contents are the same as the 'exceptions' structure below, except the 'from', 'to', and 'target' fields.
+			ExceptionHandlerTable* exceptions;
+		} word_code;
+#endif
+
 		MethodInfo();
 
 		static Atom verifyEnter(MethodEnv* env, int argc, uint32 *ap);

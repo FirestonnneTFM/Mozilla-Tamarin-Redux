@@ -39,6 +39,7 @@
 #include "avmplus.h"
 
 #ifdef AVMPLUS_MIR
+#include "CodegenMIR.h"
 
 namespace avmplus
 {
@@ -240,7 +241,6 @@ namespace avmplus
 
 	void CodegenMIR::PUSH(sintptr imm)
  	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  push  %d\n", mip, imm);
@@ -264,7 +264,6 @@ namespace avmplus
 
 	void CodegenMIR::MOV(Register dest, sintptr imm) 
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  mov   %R, %D\n", mip, dest, imm);
@@ -293,7 +292,6 @@ namespace avmplus
 
 	void CodegenMIR::MOV(sintptr disp, Register base, sintptr imm, bool force32) 
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  mov   %d(%R), %d\n", mip, disp, base, imm);
@@ -317,7 +315,6 @@ namespace avmplus
 
 	void CodegenMIR::ALU (byte op, Register reg, sintptr imm)
  	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -365,7 +362,6 @@ namespace avmplus
 
 	void CodegenMIR::ALU64 (byte op, Register reg, sintptr imm)
  	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -413,7 +409,6 @@ namespace avmplus
 
 	void CodegenMIR::ALU64(int op, Register r, Register rhs)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -433,7 +428,6 @@ namespace avmplus
 
 	void CodegenMIR::ALU(int op, Register r, Register rhs)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -465,7 +459,6 @@ namespace avmplus
 
 	void CodegenMIR::ALU2(int op, Register r, Register rhs)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -496,7 +489,6 @@ namespace avmplus
 
 	void CodegenMIR::SSE(int op, Register dest, Register src)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -541,7 +533,6 @@ namespace avmplus
 
 	void CodegenMIR::SSE(int op, Register r, sintptr disp, Register base)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -579,7 +570,6 @@ namespace avmplus
 	
 	void CodegenMIR::CVTSI2SD64(Register dest, Register src)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose()) core->console.format("    %A  cvtsi2sd %F, %R\n", mip, dest, src);
 		#endif /* AVMPLUS_VERBOSE */
@@ -598,7 +588,6 @@ namespace avmplus
 	
 	void CodegenMIR::XORPD(Register dest, uintptr addr) 
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  xorpd %F, %A\n", mip, dest, addr);
@@ -622,7 +611,6 @@ namespace avmplus
 
 	void CodegenMIR::XORPD(Register dest, Register src) 
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  xorpd %F, %F\n", mip, dest, src);
@@ -640,7 +628,6 @@ namespace avmplus
 	}
 	void CodegenMIR::IMUL(Register dst, sintptr imm)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  imul  %R, %d\n", mip, dst, imm);
@@ -668,7 +655,6 @@ namespace avmplus
 
 	void CodegenMIR::ALU(int op)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -691,7 +677,6 @@ namespace avmplus
 
 	void CodegenMIR::SHIFT(int op, Register r, int imm8)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -714,7 +699,6 @@ namespace avmplus
 
 	void CodegenMIR::ALU64(int op, Register r, sintptr disp, Register base)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -752,7 +736,6 @@ namespace avmplus
 
 	void CodegenMIR::ALU(int op, Register r, sintptr disp, Register base)
 		{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -780,7 +763,6 @@ namespace avmplus
 
 	void CodegenMIR::JCC(byte op, sintptr offset)
  	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -822,7 +804,6 @@ namespace avmplus
 	
 	void CodegenMIR::JMP(sintptr offset)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  jmp   %d\n", mip, offset);
@@ -844,7 +825,6 @@ namespace avmplus
 
 	void CodegenMIR::CALL(sintptr offset)
 	{		
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  call  %A\n", mip, offset+(uintptr)(mip+5));
@@ -866,7 +846,6 @@ namespace avmplus
 
 	void CodegenMIR::FPU(int op, Register r)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -889,7 +868,6 @@ namespace avmplus
 
 	void CodegenMIR::FPU(int op, sintptr disp, Register base)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -917,7 +895,6 @@ namespace avmplus
 
 	void CodegenMIR::FPU(int op)
 	{
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verbose())
 		{
@@ -939,7 +916,6 @@ namespace avmplus
 
 	void CodegenMIR::TEST_AH(uint8 imm8)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verbose())
 			core->console.format("    %A  test  ah, %d\n", mip, imm8);

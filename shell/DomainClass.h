@@ -55,7 +55,7 @@ namespace avmshell
 		DRCWB(Toplevel*) domainToplevel;
 
 	  private:
-	    ScriptObject* finddef(Multiname* multiname, DomainEnv* domainEnv);
+	    ScriptObject* finddef(const Multiname* multiname, DomainEnv* domainEnv);
 	};
 
 	class DomainClass : public ClassClosure

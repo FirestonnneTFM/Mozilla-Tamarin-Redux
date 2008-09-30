@@ -54,7 +54,7 @@ namespace avmplus
 		numQuads = capacity;
 	}
 
-	Binding MultinameHashtable::getMulti(Multiname* mname) const
+	Binding MultinameHashtable::getMulti(const Multiname* mname) const
 	{
 		// multiname must not be an attr name, have wildcards, or have runtime parts.
 		AvmAssert(mname->isBinding() && !mname->isAnyName());

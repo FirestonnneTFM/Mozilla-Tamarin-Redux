@@ -57,7 +57,7 @@ namespace avmplus
 	{
 		friend class VTable;
 	public:
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
 		// since we use the AbstractFunction pointer as the interface method id
 		// smaller = dense table, few large conflict stubs
@@ -68,7 +68,7 @@ namespace avmplus
 #else
 		static const int IMT_SIZE = 7;  // good for performance
 #endif
-#endif
+#endif // AVMPLUS_MIR | FEATURE_NANOJIT
 
 		const byte* getTraitsPos() const {
 			AvmAssert(!linked);
@@ -118,7 +118,7 @@ namespace avmplus
 		// BIND_METHOD+disp_id = no conflict, dispatches to concrete method
 		// BIND_ITRAMP+addr    = conflict, dispatch to conflict resolution stub
 		// IMT table (if we have one, comes after the interfaces)
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		Binding *getIMT() const {
 			AvmAssert(hasInterfaces);
 			return (Binding*) (getMethods() + methodCount);
@@ -291,7 +291,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	class ImtBuilder
 	{
 	public:

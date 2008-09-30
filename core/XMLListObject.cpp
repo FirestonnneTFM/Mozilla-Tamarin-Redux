@@ -63,7 +63,7 @@ namespace avmplus
 	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]
-	Atom XMLListObject::callProperty(Multiname* multiname, int argc, Atom* argv)
+	Atom XMLListObject::callProperty(const Multiname* multiname, int argc, Atom* argv)
 	{
 		AvmCore *core = this->core();
 
@@ -90,7 +90,7 @@ namespace avmplus
 		return toplevel()->op_call(f, argc, argv);
 	}
 
-	Atom XMLListObject::getMultinameProperty(Multiname* m) const
+	Atom XMLListObject::getMultinameProperty(const Multiname* m) const
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -137,7 +137,7 @@ namespace avmplus
 		return l->atom();
 	}
 
-	void XMLListObject::setMultinameProperty(Multiname* m, Atom V)
+	void XMLListObject::setMultinameProperty(const Multiname* m, Atom V)
 	{
 		AvmCore *core = this->core();
 		Toplevel *toplevel = this->toplevel();
@@ -186,7 +186,7 @@ namespace avmplus
 		return;
 	}
 
-	bool XMLListObject::deleteMultinameProperty(Multiname* m)
+	bool XMLListObject::deleteMultinameProperty(const Multiname* m)
 	{
 		if (!m->isAnyName() && !m->isAttr())
 		{
@@ -210,7 +210,7 @@ namespace avmplus
 		return true;
 	}
 
-	Atom XMLListObject::getDescendants(Multiname* m) const
+	Atom XMLListObject::getDescendants(const Multiname* m) const
 	{
 		AvmCore *core = this->core();
 
@@ -593,7 +593,7 @@ namespace avmplus
 		return (index < _length());
 	}
 
-	bool XMLListObject::hasMultinameProperty(Multiname* m) const
+	bool XMLListObject::hasMultinameProperty(const Multiname* m) const
 	{
 		if (!m->isAnyName() && !m->isAttr())
 		{
