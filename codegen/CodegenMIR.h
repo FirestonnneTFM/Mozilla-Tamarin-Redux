@@ -124,12 +124,12 @@ namespace avmplus
        public:
            JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
 
-           uint32_t sid;  // code info id
            MethodInfo* method;
            SortedIntMap<LineNumberRecord*> lineNumTable;       // populated during code generation 
            uintptr startAddr;
            uintptr endAddr;
            iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
+           uint32_t sid;  // code info id
 
            LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
            {
@@ -146,7 +146,7 @@ namespace avmplus
                startAddr = 0;
                endAddr = 0;
            }
-   };
+    };
 	#endif /* VTUNE */
 
 	inline unsigned int rmask(int r) {
@@ -1056,34 +1056,6 @@ namespace avmplus
 		#endif
 
 		uint32  maxArgCount;        // most number of arguments used in a call
-
-       #ifdef AVMPLUS_PROFILE
-       // register allocator stats
-       int     fullyUsedCount;     // number of times all registers fully used
-       int     longestSpan;        // most number of instructions that a register is used
-       int     spills;             // number of spills required
-       int     steals;             // number of spills due to a register being stolen.
-       int     remats;             // number of rematerializations 
-
-       // profiler stats    
-       uint64  verifyStartTime;    // note the time we started verification
-       uint64  mdStartTime;        // note the time we started MD generation
-
-       int     mInstructionCount;  // number of machine instructions
-       #define incInstructionCount() mInstructionCount++
-
-       #ifdef _DEBUG
-       // buffer tuning information
-       enum { SZ_ABC, SZ_MIR, SZ_MD, SZ_MIRWASTE, SZ_MDWASTE, SZ_MIREPI, SZ_MDEPI, SZ_MIRPRO, SZ_MDPRO, SZ_MIREXP, SZ_MDEXP, SZ_LAST };
-       double sizingStats[SZ_LAST];
-       #endif /* _DEBUG */
-
-       #else
-
-		#undef incInstructionCount
-		#define incInstructionCount()
-       
-       #endif /* AVMPLUS_PROFILE */
 
 		// pointer to list of argument definitions
 		OP* methodArgs; 
@@ -2173,7 +2145,6 @@ namespace avmplus
 				LEA(R11, -8, RSP);
 
 				// CALL code
-				incInstructionCount();
 				*mip++ = 0x4D; //64-bit mode
 				*mip++ = 0xFF;
 				*mip++ = 0x13; // call address in [R11]
