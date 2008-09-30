@@ -529,7 +529,7 @@ namespace nanojit
 			Register ra = findRegFor(ia, allow);
 			resva = getresv(ia);
 			NanoAssert(error() || (resva != 0 && ra != UnknownReg));
-			if (rb == UnknownReg)
+			if (rb == UnknownReg || !(rmask(rb) & allow))
 			{
 				allow &= ~rmask(ra);
 				findRegFor(ib, allow);
