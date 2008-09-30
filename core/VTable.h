@@ -78,7 +78,7 @@ namespace avmplus
 		bool linked;	// @todo -- surely there's a spare bit we can use for this.
 		bool pad[3];
 
-#ifdef AVMPLUS_MIR
+#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
 		MethodEnv* imt[Traits::IMT_SIZE];
 #endif
 		MethodEnv* methods[1]; // virtual method table

@@ -37,6 +37,11 @@
 
 
 #include "avmplus.h"
+#if defined AVMPLUS_MIR
+#include "../codegen/CodegenMIR.h"
+#elif defined FEATURE_NANOJIT
+#include "../codegen/CodegenLIR.h"
+#endif 
 
 namespace avmplus
 {
@@ -239,7 +244,7 @@ namespace avmplus
 #endif
 	}
 
-	PrintWriter& PrintWriter::operator<< (Multiname *obj)
+	PrintWriter& PrintWriter::operator<< (const Multiname *obj)
 	{
 		// Made available in non-AVMPLUS_VERBOSE builds for describeType
 //#ifdef AVMPLUS_VERBOSE
@@ -402,7 +407,7 @@ namespace avmplus
 				case 'N':
 					*this << va_arg(ap, Multiname*)->format(m_core, Multiname::MULTI_FORMAT_NS_ONLY);
 					break;
-	#ifdef AVMPLUS_MIR
+	#if defined(AVMPLUS_MIR)
 				case 'A': // addr
 	#ifdef AVMPLUS_64BIT
 					*this << hexAddr(va_arg(ap,int64));

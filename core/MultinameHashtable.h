@@ -121,7 +121,7 @@ namespace avmplus
 
 		Binding get(Stringp name, Namespace* ns) const;
 		Binding get(Stringp name, NamespaceSet* nsset) const;
-		Binding getMulti(Multiname* name) const;
+		Binding getMulti(const Multiname* name) const;
 		Binding getName(Stringp name) const;
 		/*@}*/
 

@@ -41,6 +41,36 @@
 
 namespace avmplus
 {
+#ifdef FEATURE_NANOJIT
+    class PageMgr;
+#endif
+
+#ifdef AVMPLUS_WORD_CODE
+	
+	// This needs to be a root because there are GCObjects referenced from the multinames
+	// that are not protected by write barriers (namely, the NamespaceSet objects).
+	// Other objects in the multinames are RC; the PrecomputedMultinames constructor
+	// explicitly increments their reference counts, and the destructor decrements
+	// them.  There are no barriers here, because we want to be able to reach in
+	// and reference a Multiname structure directly.
+	
+	class PrecomputedMultinames : public MMgc::GCRoot
+	{
+	public:
+        void *operator new(size_t size, size_t extra=0)
+        {
+			return MMgc::FixedMalloc::GetInstance()->Alloc(size+extra);
+        }
+
+		PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool);		
+		~PrecomputedMultinames();
+		void Initialize(PoolObject* pool);		// Eagerly parses all multinames
+		uint32 nNames;							// Number of elements
+		Multiname multinames[1];				// Allocated size is MAX(1,nName)
+	};
+	
+#endif  // AVMPLUS_WORD_CODE
+	
 	/**
 	 * The PoolObject class is a container for the pool of resources
 	 * decoded from an ABC file: the constant pool, the methods
@@ -99,32 +129,41 @@ namespace avmplus
 
 		/** flags to control certain bugfix behavior */
 		uint32 bugFlags;
-
 		// Numbers here correspond to Bugzilla bug numbers (i.e. bugzilla bug 444630 is kbug444630
 		enum {
 			kbug444630 = 0x00000001
 		};
-
 		// true if this pool is baked into the player.  used to control
 		// whether callees will set their context.
 		bool isBuiltin;
 
+#ifdef AVMPLUS_WORD_CODE
+		struct 
+		{
+			PrecomputedMultinames* cpool_mn;	// a GCRoot
+		} word_code;
+#endif
+		
 		#ifdef AVMPLUS_MIR
 		/** buffer containing generated machine code for all methods */
 		GrowableBuffer *codeBuffer;
 		sintptr stackOverflowHandler; // address of stack overflow handler
 		#endif /*AVMPLUS_MIR */
 
+        #ifdef FEATURE_NANOJIT
+        DWB(PageMgr*) codePages;
+        #endif
+
 		PoolObject(AvmCore* core, ScriptBuffer& sb, const byte* startpos);
 		~PoolObject();
 
 		AbstractFunction* getMethodInfo(uint32 index);
 
-		AbstractFunction* getNamedScript(Multiname* multiname) const;
+		AbstractFunction* getNamedScript(const Multiname* multiname) const;
 
 		const byte* getMetadataInfoPos(uint32 index);
 		Traits* getTraits(Stringp name, Namespace* ns, bool recursive=true) const;
-		Traits* getTraits(Multiname* n, const Toplevel* toplevel, bool recursive=true) const;
+		Traits* getTraits(const Multiname* n, const Toplevel* toplevel, bool recursive=true) const;
 		Traits* getTraits(Stringp name, bool recursive=true) const;
 
 		Traits* getBuiltinTraits(Stringp name) const;

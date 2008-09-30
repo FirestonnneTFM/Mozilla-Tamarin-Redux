@@ -168,7 +168,6 @@ namespace avmplus
 	class Debugger;
 	class Domain;
 	class DomainEnv;
-	class DynamicProfiler;
 	class E4XNode;
 	class ErrorClass;
 	class ErrorObject;
@@ -176,11 +175,9 @@ namespace avmplus
 	class ExceptionFrame;
 	class ExceptionHandler;
 	class ExceptionHandlerTable;
-	class FrameState;
 	class GrowableBuffer;
 	class Hashtable;
 	class HeapMultiname;
-	class Interpreter;
 	class IntVectorObject;
 	class DoubleVectorObject;
 	class UIntVectorObject;
@@ -217,12 +214,12 @@ namespace avmplus
 	class ScriptEnv;
 	class ScriptObject;
 	class StackTrace;
-	class StaticProfiler;
 	class StringBuffer;
 	class StringClass;
 	class String;
 	class Toplevel;
 	class Traits;
+	class Translator;
 	class UnicodeUtils;
 	class Value;
 	class Verifier; 
@@ -322,18 +319,9 @@ namespace avmplus
 #include "ScriptObject.h"
 #include "avmplusProfiler.h"
 #include "StringBuffer.h"
-
-#ifdef AVMPLUS_ARM
-#include "ArmAssembler.h"
-#endif
-
-#ifdef AVMPLUS_MIR
-#include "../codegen/CodegenMIR.h"
-#endif
-
 #include "AtomArray.h"
+#include "Translator.h"
 #include "Verifier.h"
-#include "FrameState.h"
 #include "NativeFunction.h"
 #include "ClassClosure.h"
 #include "ClassClass.h"

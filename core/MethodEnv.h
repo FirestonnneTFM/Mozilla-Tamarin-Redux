@@ -48,6 +48,7 @@ namespace avmplus
 	public:
 		/** vtable for the activation scope inside this method */
 		VTable *getActivation();
+        ScriptObject *newActivation();
 
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
@@ -65,7 +66,7 @@ namespace avmplus
 			return vtable->abcEnv;
 		}
 
-		ScriptEnv* getScriptEnv(Multiname *m) const;
+		ScriptEnv* getScriptEnv(const Multiname *m) const;
 
 		DomainEnv* domainEnv() const
 		{
@@ -111,6 +112,7 @@ namespace avmplus
 	    void nullcheck(Atom atom);
 	    void npe();
 		void interrupt();
+        void stkover();
 
 		/** returns the instance traits of the factorytype of the passed atom */
 		Traits* toClassITraits(Atom atom);
@@ -119,11 +121,11 @@ namespace avmplus
 		Atom getpropertylate_i(Atom obj, int index) const;
 		Atom getpropertylate_u(Atom obj, uint32 index) const;
 
-#ifdef AVMPLUS_MIR
-		void setpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index);
-		void initpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index);
-		Atom getpropertyHelper(Atom obj, Multiname *multi, VTable *vtable, Atom index);
-		Atom delpropertyHelper(Atom obj, Multiname *multi, Atom index);
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		void setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
+		void initpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
+		Atom getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index);
+		Atom delpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom index);
 
 		void initMultinameLateForDelete(Multiname& name, Atom index);
 		ArrayObject* createArgumentsHelper(int argc, uint32 *ap);
@@ -131,11 +133,10 @@ namespace avmplus
 #endif
 
 		ScriptObject* newcatch(Traits *traits);
-
 		/**
 		 * used for defining and resolving imported definitions.
 		 */
-		ScriptObject* finddef(Multiname* name) const;
+		ScriptObject* finddef(const Multiname* name) const;
 		ScriptObject* finddefNsset(NamespaceSet* nsset, Stringp name) const;
 		ScriptObject* finddefNs(Namespace* ns, Stringp name) const;
 
@@ -154,7 +155,7 @@ namespace avmplus
 		int hasnext(Atom objAtom, int index) const;
 
 		/** Implementation of OP_hasnext2 */		
-		int hasnext2(Atom& objAtom, int& index) const;
+		int hasnextproto(Atom& objAtom, int& index) const;
 		
 		/**
 		 * operator in from ES3
@@ -178,14 +179,14 @@ namespace avmplus
 					  ScopeChain* outer,
 					  Atom* scopes) const;
 
-		void initproperty(Atom obj, Multiname* multiname, Atom value, VTable* vtable) const;
+		void initproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
 		void setpropertylate_i(Atom obj, int index, Atom value) const;
 		void setpropertylate_u(Atom obj, uint32 index, Atom value) const;
 
 		/** same as callproperty but only considers the bindings in given vtable */
-		Atom callsuper(Multiname* name, int argc, Atom* atomv) const;
+		Atom callsuper(const Multiname* name, int argc, Atom* atomv) const;
 
-		Atom delproperty(Atom obj, Multiname* multiname) const;
+		Atom delproperty(Atom obj, const Multiname* multiname) const;
 
 		/**
 		 * Reads a property from an object, with the property
@@ -195,7 +196,7 @@ namespace avmplus
 		 * @param b The binding of the property
 		 * @param traits The traits of the object
 		 */
-		Atom getsuper(Atom obj, Multiname* name) const;
+		Atom getsuper(Atom obj, const Multiname* name) const;
 
 		/**
 		 * Write to a property of an object, with the property
@@ -205,15 +206,21 @@ namespace avmplus
 		 * @param b The binding of the property
 		 * @param value The new value of the property
 		 */
-		void setsuper(Atom obj, Multiname* name, Atom value) const;
+		void setsuper(Atom obj, const Multiname* name, Atom value) const;
 
 		/** Implementation of OP_findproperty */		
 		Atom findproperty(ScopeChain* outer, 
 						  Atom* scopes,
 						  int extraScopes,
-						  Multiname* multiname,
+						  const Multiname* multiname,
 						  bool strict,
 						  Atom* withBase);
+		
+		/** Like findproperty, but ignoring all lexical and 'this' scopes.  Returns NULL if
+		 *  property could not be found; caller should signal strict error or return the
+		 *  target_global as appropriate.
+		 */
+		ScriptObject* findglobalproperty(ScriptObject* target_global, const Multiname* multiname);
 
 		Namespace* internRtns(Atom ns);
 
@@ -223,7 +230,7 @@ namespace avmplus
 		/**
 		 * E4X descendants operator (..)
 		 */
-		Atom getdescendants(Atom obj, Multiname* multiname);
+		Atom getdescendants(Atom obj, const Multiname* multiname);
 		Atom getdescendantslate(Atom obj, Atom name, bool attr);
 
 		/**
@@ -254,7 +261,7 @@ namespace avmplus
 #endif
 
 	private:
-		Atom findWithProperty(Atom obj, Multiname* multiname);
+		Atom findWithProperty(Atom obj, const Multiname* multiname);
 		
 		class ActivationMethodTablePair
 		{
@@ -291,6 +298,16 @@ namespace avmplus
 	private:
 		uintptr_t					activationOrMCTable;
 	// ------------------------ DATA SECTION END
+	public:
+#ifdef AVMPLUS_WORD_CODE
+		class LookupCache : public MMgc::GCObject
+		{
+		public:
+			uint32 timestamp;
+			DRCWB(ScriptObject*) object;
+		};
+		DWB(LookupCache*) lookup_cache;
+#endif
 	};
 
 	class ScriptEnv : public MethodEnv

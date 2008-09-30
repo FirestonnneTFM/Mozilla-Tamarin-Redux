@@ -460,7 +460,7 @@ namespace avmplus
 	// this = argv[0] (ignored)
 	// arg1 = argv[1]
 	// argN = argv[argc]
-	Atom XMLObject::callProperty(Multiname* multiname, int argc, Atom* argv)
+	Atom XMLObject::callProperty(const Multiname* multiname, int argc, Atom* argv)
 	{
 		AvmCore *core = this->core();
 
@@ -494,7 +494,7 @@ namespace avmplus
 	}
 
 	// E4X 9.1.1.1, pg 12 - [[GET]]
-	Atom XMLObject::getMultinameProperty(Multiname* name_in) const
+	Atom XMLObject::getMultinameProperty(const Multiname* name_in) const
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -582,7 +582,7 @@ namespace avmplus
 		return xl->atom();
 	}
 
-	void XMLObject::setMultinameProperty(Multiname* name_in, Atom V)
+	void XMLObject::setMultinameProperty(const Multiname* name_in, Atom V)
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -852,7 +852,7 @@ namespace avmplus
 		return;
 	}
 
-	bool XMLObject::deleteMultinameProperty(Multiname* name_in)
+	bool XMLObject::deleteMultinameProperty(const Multiname* name_in)
 	{
 		AvmCore *core = this->core();
 
@@ -941,7 +941,7 @@ namespace avmplus
 		return true;
 	}
 
-	Atom XMLObject::getDescendants(Multiname* name_in) const
+	Atom XMLObject::getDescendants(const Multiname* name_in) const
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -1048,7 +1048,7 @@ namespace avmplus
 		return (index == 0);
 	}
 
-	bool XMLObject::hasMultinameProperty(Multiname* name_in) const
+	bool XMLObject::hasMultinameProperty(const Multiname* name_in) const
 	{
 		AvmCore *core = this->core();
 
@@ -1710,7 +1710,7 @@ namespace avmplus
 		E4XNode *v = core->atomToXML(value);
 
 		return getNode()->_equals (core, v) == trueAtom; // rhino
-		//SPEC - return (core()->eq (this->atom(), value) == trueAtom);
+		//SPEC - return (core()->equals (this->atom(), value) == trueAtom);
 	}
 
 	// E4X 13.4.4.11, pg 76
@@ -2796,7 +2796,7 @@ namespace avmplus
 			{
 				if (index == 0)
 				{
-					if (core->eq (this->atom(), value))
+					if (core->equals (this->atom(), value))
 					{
 						l->_append (this->getNode());
 					}
@@ -2819,7 +2819,7 @@ namespace avmplus
 				xml->getQName (core, &m);
 				if (name.matches (&m))
 				{
-					if (core->eq(xml->getValue()->atom(), value) == trueAtom)
+					if (core->equals(xml->getValue()->atom(), value) == trueAtom)
 						l->_append (xml);
 				}
 			}
@@ -2847,14 +2847,14 @@ namespace avmplus
 					// node so we can call out to AvmCore::eq with an atom.
 					E4XNode *savedNode = this->m_node;
 					this->m_node = child;
-					if (core->eq(this->atom(), value) == trueAtom)
+					if (core->equals(this->atom(), value) == trueAtom)
 						l->_append (child);
 					this->m_node = savedNode;
 				}
 				else
 				{
 					// !!@ this needs testing with comments/PI/text/etc.
-					if (core->eq(child->getValue()->atom(), value) == trueAtom)
+					if (core->equals(child->getValue()->atom(), value) == trueAtom)
 						l->_append (child);
 				}
 

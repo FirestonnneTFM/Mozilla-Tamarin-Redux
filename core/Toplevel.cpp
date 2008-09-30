@@ -378,7 +378,7 @@ namespace avmplus
 		m.setNamespace(core->publicNamespace);
 	}
 
-	void Toplevel::CoerceE4XMultiname (Multiname *m, Multiname &out) const
+	void Toplevel::CoerceE4XMultiname (const Multiname *m, Multiname &out) const
 	{
 		// This function is used to convert raw string access into correct
 		// Multiname types:
@@ -496,7 +496,7 @@ namespace avmplus
 		}
 	}
 
-	Atom Toplevel::callproperty(Atom base, Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
+	Atom Toplevel::callproperty(Atom base, const Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
 	{
 		Binding b = getBinding(vtable->traits, multiname);
 		switch (b&7)
@@ -560,7 +560,7 @@ namespace avmplus
 		}
 	}
 
-	Atom Toplevel::constructprop(Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
+	Atom Toplevel::constructprop(const Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
 	{
 		Binding b = getBinding(vtable->traits, multiname);
 		Atom obj = atomv[0];
@@ -801,7 +801,7 @@ namespace avmplus
 		}
     }
 
-    Atom Toplevel::getproperty(Atom obj, Multiname* multiname, VTable* vtable)
+    Atom Toplevel::getproperty(Atom obj, const Multiname* multiname, VTable* vtable)
     {
 		Binding b = getBinding(vtable->traits, multiname);
 		AvmCore* core = this->core();
@@ -888,13 +888,13 @@ namespace avmplus
         }
     }
 
-    void Toplevel::setproperty(Atom obj, Multiname* multiname, Atom value, VTable* vtable) const
+    void Toplevel::setproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const
     {
 		Binding b = getBinding(vtable->traits, multiname);
 		setproperty_b(obj,multiname,value,vtable,b);
 	}
 
-	void Toplevel::setproperty_b(Atom obj, Multiname* multiname, Atom value, VTable* vtable, Binding b) const
+	void Toplevel::setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const
 	{
         switch (b&7)
         {
@@ -1001,7 +1001,7 @@ namespace avmplus
 	 * must produce a single binding, or it's an error.  Note that the name could be
 	 * bound to the same binding in multiple namespaces.
 	 */
-	Binding Toplevel::getBinding(Traits* traits, Multiname* ref) const
+	Binding Toplevel::getBinding(Traits* traits, const Multiname* ref) const
 	{
 		Binding b = BIND_NONE;
 		if (traits && ref->isBinding())
@@ -1512,12 +1512,12 @@ namespace avmplus
 		rangeErrorClass()->throwError(id, arg1, arg2, arg3);
 	}
 
-	void Toplevel::throwReferenceError(int id, Multiname* multiname, const Traits* traits) const
+	void Toplevel::throwReferenceError(int id, const Multiname* multiname, const Traits* traits) const
 	{
 		referenceErrorClass()->throwError(id, core()->toErrorString(multiname), core()->toErrorString((Traits*)traits));
 	}
 
-	void Toplevel::throwReferenceError(int id, Multiname* multiname) const
+	void Toplevel::throwReferenceError(int id, const Multiname* multiname) const
 	{
 		referenceErrorClass()->throwError(id, core()->toErrorString(multiname));
 	}

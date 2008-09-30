@@ -59,7 +59,7 @@ namespace avmplus
 		int version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
 
 		#ifdef AVMPLUS_VERBOSE
-		if (core->verbose)
+		if (core->config.verbose)
 			core->console << "major=" << (version&0xFFFF) << " minor=" << (version>>16) << "\n";
 		#endif
 
@@ -219,6 +219,11 @@ namespace avmplus
 
 	PoolObject* AbcParser::parse()
 	{
+#ifdef AVMPLUS_WORD_CODE
+		// Loading a new ABC file always invalidates the lookup cache
+		core->invalidateLookupCache();
+#endif
+
 #ifdef FEATURE_BUFFER_GUARD // no Carbon
 		TRY(this->core, kCatchAction_Rethrow)
 		{
@@ -300,7 +305,7 @@ namespace avmplus
 	{
 		const byte* traits_pos = pos;
 		unsigned int nameCount = readU30(pos);
-
+		
 		// Very generous check for nameCount being way too large.
 		if (nameCount > (unsigned int)(abcEnd - pos))
 			toplevel->throwVerifyError(kCorruptABCError);
@@ -362,7 +367,7 @@ namespace avmplus
 #endif //SAFE_PARSE
             int tag = *pos++;
             TraitKind kind = (TraitKind) (tag & 0x0f);
-
+			
 			int skip = 0;
 			int id = 0;
 			int info = 0;
@@ -480,7 +485,7 @@ namespace avmplus
 				// a slot cannot override anything else.
 				if (traits->get(name, ns) != BIND_NONE)
 					toplevel->throwVerifyError(kCorruptABCError);
-
+				
 // In theory we should reject duplicate slots here; 
 // in practice we don't, as it causes problems with some existing content
 //				if (traits->findBinding(name, ns) != BIND_NONE)
@@ -955,10 +960,6 @@ namespace avmplus
 				
 			}
 		}
-
-#ifdef AVMPLUS_VERBOSE
-//StaticProfiler::methodsSize += (pos-startpos);
-#endif
     }
 
     void AbcParser::parseMethodBodies()
@@ -1166,7 +1167,7 @@ namespace avmplus
 		pool->constantIntCount = int_count;
 
 #ifdef AVMPLUS_VERBOSE
-		pool->verbose = core->verbose;
+		pool->verbose = core->config.verbose;
 #endif
 
 #if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
@@ -1568,9 +1569,9 @@ namespace avmplus
 
 	void AbcParser::addNamedTraits(Namespace* ns, Stringp name, Traits* itraits)
 	{
-		if (!ns->isPrivate() && !domain->namedTraits->get(name, ns))
+		if (!ns->isPrivate() && !domain->getNamedTrait(name, ns))
 		{
-			domain->namedTraits->add(name, ns, (Atom)itraits);
+			domain->addNamedTrait(name, ns, (Atom)itraits);
 		}
 		else
 		{
@@ -1582,7 +1583,7 @@ namespace avmplus
 	
 	void AbcParser::addNamedScript(Namespace* ns, Stringp name, AbstractFunction* script)
 	{
-		AbstractFunction* s = (AbstractFunction*) domain->namedScripts->get(name, ns);
+		AbstractFunction* s = (AbstractFunction*) domain->getNamedScript(name, ns);
 		if (!s)
 		{
 			if(ns->isPrivate())
@@ -1591,7 +1592,7 @@ namespace avmplus
 			}
 			else
 			{
-				domain->namedScripts->add(name, ns, (Atom)script);
+				domain->addNamedScript(name, ns, (Atom)script);
 			}
 		}
 		else
@@ -1694,13 +1695,13 @@ namespace avmplus
 			script->name = core->concatStrings(traits->format(core), core->newString("$init"));
 			#endif
 
-            #if defined(AVMPLUS_MIR)
-			if (!core->forcemir)
+            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			if (!core->config.jit)
 			{
 				// suggest that we don't jit the $init methods
 				script->flags |= AbstractFunction::SUGGEST_INTERP;
 			}
-			#endif /* AVMPLUS_MIR */
+			#endif
 
 			pool->scripts.set(i, script);
 
@@ -2003,13 +2004,13 @@ namespace avmplus
 			ctraits->final = true;
 			ctraits->needsHashtable = true;
 
-            #if defined(AVMPLUS_MIR)
-			if (!core->forcemir)
+            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			if (!core->config.jit)
 			{
 				// suggest that we don't jit the class initializer
 				cinit->flags |= AbstractFunction::SUGGEST_INTERP;
 			}
-			#endif /* AVMPLUS_MIR */
+			#endif
 
 			pool->cinits.set(i, cinit);
         }

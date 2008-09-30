@@ -278,6 +278,21 @@ namespace avmplus
 	Atom MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
 	{
 		env->impl32 = env->method->impl32;
+#if 0 // This is handled near the top of interp() for the moment, see comments there
+#ifdef AVMPLUS_WORD_CODE
+		{
+			// Install the lookup cache here, if the information is available to create it.
+			// Otherwise it's done in verifyEnter, inside env->impl32() below.
+			using namespace MMgc;
+			MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
+			int n;
+			if ((n = info->word_code.cache_size) > 0) {
+				AvmAssert(env->lookup_cache == NULL);
+				env->lookup_cache = (LookupCache*)env->core()->GetGC()->Alloc(sizeof(LookupCache)*n, GC::kContainsPointers|GC::kZero);
+			}
+		}
+#endif
+#endif // 0
 		return env->impl32(env, argc, ap);
 	}
 
@@ -288,7 +303,9 @@ namespace avmplus
 	}
 
 	MethodEnv::MethodEnv(AbstractFunction* method, VTable *vtable)
-		: vtable(vtable), method(method), declTraits(method->declaringTraits)
+		: vtable(vtable)
+		, method(method)
+		, declTraits(method->declaringTraits)
 	{
 		// make the first call go to the method impl
 		impl32 = delegateInvoke;
@@ -416,6 +433,11 @@ namespace avmplus
 		vtable->traits->core->interrupt(this);
 	}
 
+    void MethodEnv::stkover()
+    {
+        this->core()->stackOverflow(this);
+    }
+
 	Traits* MethodEnv::toClassITraits(Atom atom)
 	{
 		switch (atom&7)
@@ -449,9 +471,9 @@ namespace avmplus
 		return toplevel()->arrayClass->newarray(extra, extra_count);
 	}
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
-	Atom MethodEnv::getpropertyHelper(Atom obj, Multiname *multi, VTable *vtable, Atom index)
+	Atom MethodEnv::getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index)
 	{
 		if ((index&7) == kIntegerType)
 		{
@@ -492,7 +514,7 @@ namespace avmplus
 		return toplevel()->getproperty(obj, multi, vtable);
 	}
 
-	void MethodEnv::initpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index)
+	void MethodEnv::initpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index)
 	{
 		if ((index&7) == kIntegerType)
 		{
@@ -537,7 +559,7 @@ namespace avmplus
 		initproperty(obj, multi, value, vtable);
 	}
 
-	void MethodEnv::setpropertyHelper(Atom obj, Multiname *multi, Atom value, VTable *vtable, Atom index)
+	void MethodEnv::setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index)
 	{
 		if ((index&7) == kIntegerType)
 		{
@@ -587,7 +609,7 @@ namespace avmplus
 		toplevel()->setproperty(obj, multi, value, vtable);
 	}
 	
-	Atom MethodEnv::delpropertyHelper(Atom obj, Multiname *multi, Atom index)
+	Atom MethodEnv::delpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom index)
 	{
 		AvmCore* core = this->core();
 
@@ -668,7 +690,7 @@ namespace avmplus
 		}
 	}
 
-#ifdef AVMPLUS_MIR
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	ArrayObject* MethodEnv::createArgumentsHelper(int argc, uint32 *ap)
 	{
 		// create arguments using argv[1..argc].
@@ -687,7 +709,7 @@ namespace avmplus
 		return toplevel()->arrayClass->newarray(extra, extra_count);
 	}
 
-#endif // AVMPLUS_MIR
+#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 	Atom MethodEnv::getpropertylate_i(Atom obj, int index) const
 	{
@@ -739,7 +761,7 @@ namespace avmplus
 		}
 	}
 
-	ScriptObject* MethodEnv::finddef(Multiname* multiname) const
+	ScriptObject* MethodEnv::finddef(const Multiname* multiname) const
 	{
 		Toplevel* toplevel = vtable->toplevel;
 
@@ -760,7 +782,7 @@ namespace avmplus
 		return global;
 	}
 
-	ScriptEnv* MethodEnv::getScriptEnv(Multiname *multiname) const
+	ScriptEnv* MethodEnv::getScriptEnv(const Multiname *multiname) const
 	{
 		ScriptEnv *se = (ScriptEnv*)abcEnv()->domainEnv->getScriptInit(multiname);
 		if(!se)
@@ -890,7 +912,7 @@ namespace avmplus
 		}
 	}
 
-	int MethodEnv::hasnext2(Atom& objAtom, int& index) const
+	int MethodEnv::hasnextproto(Atom& objAtom, int& index) const
 	{
 		if (index < 0)
 			return 0;
@@ -1126,7 +1148,7 @@ namespace avmplus
 		return cc;
     }
 
-    void MethodEnv::initproperty(Atom obj, Multiname* multiname, Atom value, VTable* vtable) const
+    void MethodEnv::initproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const
     {
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
@@ -1182,7 +1204,7 @@ namespace avmplus
 		}
 	}
 
-	Atom MethodEnv::callsuper(Multiname* multiname, int argc, Atom* atomv) const
+	Atom MethodEnv::callsuper(const Multiname* multiname, int argc, Atom* atomv) const
 	{
 		VTable* base = vtable->base;
 		Toplevel* toplevel = this->toplevel();
@@ -1234,7 +1256,7 @@ namespace avmplus
 		}
 	}
 
-	Atom MethodEnv::delproperty(Atom obj, Multiname* multiname) const
+	Atom MethodEnv::delproperty(Atom obj, const Multiname* multiname) const
 	{
 		Toplevel* toplevel = this->toplevel();
 		Traits* traits = toplevel->toTraits(obj); // includes null check
@@ -1244,6 +1266,12 @@ namespace avmplus
 			if (b == BIND_NONE) 
 			{
 				bool b = AvmCore::atomToScriptObject(obj)->deleteMultinameProperty(multiname);
+#ifdef AVMPLUS_WORD_CODE
+				// Deleting a deletable bound property means deleting a dynamic global property, so
+				// invalidate the lookup cache (because subsequent lookups should fail).
+				if (b)
+					core()->invalidateLookupCache();
+#endif
 				return b ? trueAtom : falseAtom;
 			}
 			else if (AvmCore::isMethodBinding(b))
@@ -1265,7 +1293,7 @@ namespace avmplus
 		return falseAtom;
 	}
 	
-    Atom MethodEnv::getsuper(Atom obj, Multiname* multiname) const
+    Atom MethodEnv::getsuper(Atom obj, const Multiname* multiname) const
     {
 		VTable* vtable = this->vtable->base;
 		Toplevel* toplevel = this->toplevel();
@@ -1316,7 +1344,7 @@ namespace avmplus
     }
 
 	
-    void MethodEnv::setsuper(Atom obj, Multiname* multiname, Atom value) const
+    void MethodEnv::setsuper(Atom obj, const Multiname* multiname, Atom value) const
     {
 		VTable* vtable = this->vtable->base;
 		Toplevel* toplevel = this->toplevel();
@@ -1363,7 +1391,7 @@ namespace avmplus
         }
     }
 
-	Atom MethodEnv::findWithProperty(Atom atom, Multiname* multiname)
+	Atom MethodEnv::findWithProperty(Atom atom, const Multiname* multiname)
 	{
 		Toplevel* toplevel = this->toplevel();
 		if ((atom&7)==kObjectType)
@@ -1427,7 +1455,7 @@ namespace avmplus
 	Atom MethodEnv::findproperty(ScopeChain* outer,
 								 Atom* scopes,
 								 int extraScopes,
-								 Multiname* multiname,
+								 const Multiname* multiname,
 								 bool strict,
 								 Atom* withBase)
     {
@@ -1513,6 +1541,21 @@ namespace avmplus
 		}
 
 		// now we have searched all the scopes, except global
+		{
+			ScriptObject* global = AvmCore::atomToScriptObject(outer->getSize() > 0 ? outer->getScope(0) : *scopes);
+			ScriptObject* obj = findglobalproperty(global, multiname);
+			if (obj == NULL) {
+				if (strict)
+					toplevel->throwReferenceError(kUndefinedVarError, multiname);
+				obj = global;
+			}
+			return obj->atom();
+		}
+	}
+	
+	ScriptObject* MethodEnv::findglobalproperty(ScriptObject* target_global, const Multiname* multiname)
+	{
+		Toplevel* toplevel = this->toplevel();
 		
 		// look for imported definition (similar logic to OP_finddef).  This will
 		// find definitions in this script and in other scripts.
@@ -1529,15 +1572,13 @@ namespace avmplus
 				Atom argv[1] = { script->global->atom() };
 				script->coerceEnter(0, argv);
 			}
-			return global->atom();
+			return global;
 		}
 
 		// no imported definition found.  look for dynamic props
 		// on the global object
 
-		ScriptObject* global = AvmCore::atomToScriptObject(
-			outer_depth > 0 ? outer->getScope(0) : *scopes
-		);
+		ScriptObject* global = target_global;
 
 		// search the delegate chain for a value.  The delegate
 		// chain for the global object will only contain vanilla
@@ -1547,17 +1588,11 @@ namespace avmplus
 		do
 		{
 			if (o->hasMultinameProperty(multiname))
-				return global->atom();
+				return global;
 		}
 		while ((o = o->getDelegate()) != NULL);
 
-		// If a variable cannot be found
-		// throw reference error if strict
-
-		if (strict)
-			toplevel->throwReferenceError(kUndefinedVarError, multiname);
-
-		return global->atom();
+		return NULL;
     }
 
 	Namespace* MethodEnv::internRtns(Atom nsAtom)
@@ -1585,7 +1620,7 @@ namespace avmplus
 		return arguments;
 	}
 
-	Atom MethodEnv::getdescendants(Atom obj, Multiname* multiname)
+	Atom MethodEnv::getdescendants(Atom obj, const Multiname* multiname)
 	{
 		if (AvmCore::isObject (obj))
 		{
@@ -1686,6 +1721,19 @@ namespace avmplus
 			return NULL;
 		}
 	}
+
+    ScriptObject *MethodEnv::newActivation()
+    {
+        VTable *vtable = getActivation();
+		AvmCore *core = this->core();
+        MMgc::GC *gc = core->GetGC();
+		SAMPLE_FRAME("[activation-object]", core);
+		ScriptObject* obj = new (gc, vtable->getExtraSize()) ScriptObject(vtable, 0/*delegate*/);
+        MethodEnv *init = vtable->init;
+        if (init)
+			init->coerceEnter(obj->atom());
+		return obj;
+    }
 
 	WeakKeyHashtable *MethodEnv::getMethodClosureTable()
 	{

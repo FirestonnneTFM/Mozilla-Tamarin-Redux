@@ -335,4 +335,4 @@ OP_0xFB				"OP_0xFB"			0xFB	0			-1	        0		0		0		 0        0
 OP_0xFC				"OP_0xFC"			0xFC	0			-1	        0		0		0		 0        0
 OP_0xFD				"OP_0xFD" 			0xFD	0			-1	        0		0		0		 0        0
 OP_0xFE				"OP_0xFE" 			0xFE	0			-1	        0		0		0		 0        0
-OP_0xFF				"OP_0xFF" 			0xFF	0			-1	        0		0		0		 0        0
+OP_0xFF				"OP_0xFF" 			0xFF	0			-1	        0		0		0		 0        0 // reserved by the VM as a superword extension prefix

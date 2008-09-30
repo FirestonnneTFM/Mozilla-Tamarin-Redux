@@ -135,21 +135,21 @@ namespace avmplus
 		// Get (getProperty)
 		// HasProperty 
 		// Put (setProperty)
-		Atom callProperty(Multiname* name, int argc, Atom* argv);
+		Atom callProperty(const Multiname* name, int argc, Atom* argv);
 
 		Atom getAtomProperty(Atom name) const;		
 		void setAtomProperty(Atom name, Atom value);
 		bool deleteAtomProperty(Atom name);
 
-		Atom getMultinameProperty(Multiname* name) const;
-		void setMultinameProperty(Multiname* name, Atom value);
-		bool deleteMultinameProperty(Multiname* name);
+		Atom getMultinameProperty(const Multiname* name) const;
+		void setMultinameProperty(const Multiname* name, Atom value);
+		bool deleteMultinameProperty(const Multiname* name);
 
-		bool hasMultinameProperty(Multiname* name) const;
+		bool hasMultinameProperty(const Multiname* name) const;
 		bool hasAtomProperty(Atom name) const;
 		bool hasUintProperty(uint32 i) const;
 
-		Atom getDescendants(Multiname* name) const;
+		Atom getDescendants(const Multiname* name) const;
 
 		Atom getUintProperty(uint32 i) const;
 		void setUintProperty(uint32 i, Atom value);
@@ -249,7 +249,7 @@ namespace avmplus
 		 * Conversion routine to verify XML related flags of Multiname
 		 * (strips @ from strings and marks multiname as attribute)
 		 */
-		void CoerceE4XMultiname (Multiname *m, Multiname &out) const;
+		void CoerceE4XMultiname (const Multiname *m, Multiname &out) const;
 
 		bool NodeNameEquals (const wchar *NodeName, int len, Stringp parentName, Namespace *ns);
 	};

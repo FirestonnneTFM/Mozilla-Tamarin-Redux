@@ -38,6 +38,11 @@
 
 namespace avmplus
 {
+	#if defined AVMPLUS_MIR
+	class CodegenMIR;
+	#elif defined FEATURE_NANOJIT
+	class CodegenLIR;
+	#endif
 
 	/**
 	 * type descriptor for a captured scope chain
@@ -90,7 +95,11 @@ namespace avmplus
 	*/
 	class ScopeChain : public MMgc::GCObject
 	{
+		#if defined AVMPLUS_MIR
 		friend class CodegenMIR;
+		#elif defined FEATURE_NANOJIT
+		friend class CodegenLIR;
+		#endif
 	public:
 
 		/*

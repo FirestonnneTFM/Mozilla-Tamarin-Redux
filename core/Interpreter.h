@@ -38,53 +38,101 @@
 #ifndef __avmplus_Interpreter__
 #define __avmplus_Interpreter__
 
-
 namespace avmplus
 {
-	class Interpreter
-	{
-	public:
-		/**
-		 * interp32/N() is the main loop of the AVM+ interpreter.
-		 *
-		 * The native code compiler CodegenMIR is used by default
-		 * for executing AVM+ bytecode, since it is faster by
-		 * nature, but the AVM+ interpreter is used in some cases:
-		 *
-		 * - It is used to execute AVM+ code when the turbo flag is
-		 *   set to false (-Dinterp in command-line shell)
-		 * - It is also used when a debug session is in progress.
-		 * - It is used when the target platform does not support
-		 *   the native code compiler.
-		 *
-		 * @param methodEnv   The method to execute.
-		 * @param argc number of args
-		 * @param ap arg list
-		 * @return The return value of the method that was executed.
-		 * @throws Exception if the method throws an exception.
-		 */
-		static Atom interp32(MethodEnv* method, int argc, uint32 *ap);
-		static double interpN(MethodEnv* method, int argc, uint32 *ap);
-
-	private:
-		static Atom interp(MethodEnv* method, int argc, uint32 *ap);
-		static Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp, bool isDelete=false);
-		static Traits* getTraits(Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
-
-		static int readS24(const byte *pc) { return AvmCore::readS24(pc); }
-		static int readU16(const byte *pc) { return AvmCore::readU16(pc); }
-		static int readU30(const byte *&pc) { return AvmCore::readU30(pc); }
-
-#ifdef AVMPLUS_VERBOSE
-		
-		/**
-		 * display contents of current stack frame only.
-		 */
-		static void showState(MethodInfo* info, AbcOpcode opcode, int off,
-					   Atom* framep, int sp, int scopep, int scopeBase, int stackBase,
-					   const byte *code_start);
+	/**
+	 * interp32/N() is the main loop of the AVM+ interpreter.
+	 *
+	 * The native code compiler CodegenMIR is used by default
+	 * for executing AVM+ bytecode, since it is faster by
+	 * nature, but the AVM+ interpreter is used in some cases:
+	 *
+	 * - It is used to execute AVM+ code when the turbo flag is
+	 *   set to false (-Dinterp in command-line shell)
+	 * - It is also used when a debug session is in progress.
+	 * - It is used when the target platform does not support
+	 *   the native code compiler.
+	 *
+	 * @param methodEnv   The method to execute.
+	 * @param argc number of args
+	 * @param ap arg list
+	 * @return The return value of the method that was executed.
+	 * @throws Exception if the method throws an exception.
+	 */
+	Atom interp32(MethodEnv* method, int argc, uint32 *ap);
+	double interpN(MethodEnv* method, int argc, uint32 *ap);
+#ifdef AVMPLUS_DIRECT_THREADED
+	void** interpGetOpcodeLabels();
 #endif
-	};
+#ifdef SUPERWORD_PROFILING
+	void swprofStart();
+	void swprofStop();
+#endif
+	
 }
 
+// FIXME: these should be defined in opcodes.tbl.
+//
+// Note that eg utils/peephole.as knows about these values, and that when you add
+// opcodes here you will need to rerun that script to generate a new jump table
+// for the peephole optimizer.
+
+#ifdef AVMPLUS_WORD_CODE
+
+#  define OP_ext 0xFF                                  // Reserved in opcodes.tbl as the extension prefix for superwords
+
+#  define OP_ext_pushbits           ((1<<8) | OP_ext)  // pushint, pushuint, pushshort, pushbyte
+#  define OP_ext_push_doublebits    ((2<<8) | OP_ext)  // pushint, pushuint if value is outside atom range
+#  define OP_ext_get2locals         ((3<<8) | OP_ext)  // this and all the following ones introduced by peephole optimization
+#  define OP_ext_get3locals         ((4<<8) | OP_ext)
+#  define OP_ext_get4locals         ((5<<8) | OP_ext)
+#  define OP_ext_get5locals         ((6<<8) | OP_ext)
+#  define OP_ext_storelocal         ((7<<8) | OP_ext)
+#  define OP_ext_add_ll             ((8<<8) | OP_ext)
+#  define OP_ext_add_set_lll        ((9<<8) | OP_ext)
+#  define OP_ext_subtract_ll       ((10<<8) | OP_ext)
+#  define OP_ext_multiply_ll       ((11<<8) | OP_ext)
+#  define OP_ext_divide_ll         ((12<<8) | OP_ext)
+#  define OP_ext_modulo_ll         ((13<<8) | OP_ext)
+#  define OP_ext_bitand_ll         ((14<<8) | OP_ext)
+#  define OP_ext_bitor_ll          ((15<<8) | OP_ext)
+#  define OP_ext_bitxor_ll         ((16<<8) | OP_ext)
+#  define OP_ext_add_lb            ((17<<8) | OP_ext)
+#  define OP_ext_subtract_lb       ((18<<8) | OP_ext)
+#  define OP_ext_multiply_lb       ((19<<8) | OP_ext)
+#  define OP_ext_divide_lb         ((20<<8) | OP_ext)
+#  define OP_ext_bitand_lb         ((21<<8) | OP_ext)
+#  define OP_ext_bitor_lb          ((22<<8) | OP_ext)
+#  define OP_ext_bitxor_lb         ((23<<8) | OP_ext)
+#  define OP_ext_iflt_ll           ((24<<8) | OP_ext)
+#  define OP_ext_ifnlt_ll          ((25<<8) | OP_ext)
+#  define OP_ext_ifle_ll           ((26<<8) | OP_ext)
+#  define OP_ext_ifnle_ll          ((27<<8) | OP_ext)
+#  define OP_ext_ifgt_ll           ((28<<8) | OP_ext)
+#  define OP_ext_ifngt_ll          ((29<<8) | OP_ext)
+#  define OP_ext_ifge_ll           ((30<<8) | OP_ext)
+#  define OP_ext_ifnge_ll          ((31<<8) | OP_ext)
+#  define OP_ext_ifeq_ll           ((32<<8) | OP_ext)
+#  define OP_ext_ifne_ll           ((33<<8) | OP_ext)
+#  define OP_ext_ifstricteq_ll     ((34<<8) | OP_ext)
+#  define OP_ext_ifstrictne_ll     ((35<<8) | OP_ext)
+#  define OP_ext_iflt_lb           ((36<<8) | OP_ext)
+#  define OP_ext_ifnlt_lb          ((37<<8) | OP_ext)
+#  define OP_ext_ifle_lb           ((38<<8) | OP_ext)
+#  define OP_ext_ifnle_lb          ((39<<8) | OP_ext)
+#  define OP_ext_ifgt_lb           ((40<<8) | OP_ext)
+#  define OP_ext_ifngt_lb          ((41<<8) | OP_ext)
+#  define OP_ext_ifge_lb           ((42<<8) | OP_ext)
+#  define OP_ext_ifnge_lb          ((43<<8) | OP_ext)
+#  define OP_ext_ifeq_lb           ((44<<8) | OP_ext)
+#  define OP_ext_ifne_lb           ((45<<8) | OP_ext)
+#  define OP_ext_ifstricteq_lb     ((46<<8) | OP_ext)
+#  define OP_ext_ifstrictne_lb     ((47<<8) | OP_ext)
+#  define OP_ext_swap_pop          ((48<<8) | OP_ext)
+#  define OP_ext_findpropglobal    ((49<<8) | OP_ext)
+#  define OP_ext_findpropglobalstrict ((50<<8) | OP_ext)
+
+#  define LAST_SUPERWORD_OPCODE    ((50<<8) | OP_ext)
+
+#endif // AVMPLUS_WORD_CODE
 #endif // __avmplus_Interpreter__

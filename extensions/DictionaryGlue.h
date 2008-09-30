@@ -60,7 +60,6 @@ namespace avmplus
 		virtual int nextNameIndex(int index);
 
 		bool isUsingWeakKeys() const { return weakKeys; }
-
 	private:
 		DWB(Hashtable*) table;
 		bool weakKeys;
