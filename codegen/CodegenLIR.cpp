@@ -91,7 +91,7 @@ return foo;
 #define RETURN_METHOD_PTR(_class, _method) \
 union { \
     int (_class::*bar)(); \
-    sintptr foo; \
+    intptr_t foo; \
 }; \
 bar = _method; \
 return foo;
@@ -99,7 +99,7 @@ return foo;
 
 #else
 #define RETURN_METHOD_PTR(_class, _method) \
-return *((sintptr*)&_method);
+return *((intptr_t*)&_method);
 #endif
 
 // VOID variant
@@ -130,7 +130,7 @@ return foo;
 #define RETURN_VOID_METHOD_PTR(_class, _method) \
 union { \
     void (_class::*bar)(); \
-    sintptr foo; \
+    intptr_t foo; \
 }; \
 bar = _method; \
 return foo;
@@ -138,7 +138,7 @@ return foo;
 
 #else
 #define RETURN_VOID_METHOD_PTR(_class, _method) \
-return *((sintptr*)&_method);
+return *((intptr_t*)&_method);
 #endif
 
 #ifdef AVMPLUS_SPARC
@@ -195,72 +195,72 @@ namespace avmplus
        extern void VTune_RegisterMethod(AvmCore* core, JITCodeInfo* inf);
    #endif  // VTUNE
 
-		sintptr coreAddr( int (AvmCore::*f)() )
+		intptr_t coreAddr( int (AvmCore::*f)() )
 		{
 			RETURN_METHOD_PTR(AvmCore, f);
 		}
 
-		sintptr  gcAddr( int (MMgc::GC::*f)() )
+		intptr_t  gcAddr( int (MMgc::GC::*f)() )
 		{
 			RETURN_METHOD_PTR(MMgc::GC, f);
 		}
 		
-		sintptr  envAddr( int (MethodEnv::*f)() )
+		intptr_t  envAddr( int (MethodEnv::*f)() )
 		{
 			RETURN_METHOD_PTR(MethodEnv, f);
 		}
 
-		sintptr  toplevelAddr( int (Toplevel::*f)() )
+		intptr_t  toplevelAddr( int (Toplevel::*f)() )
 		{
 			RETURN_METHOD_PTR(Toplevel, f);
 		}
 
 	#ifdef DEBUGGER
-		sintptr  callStackAddr( int (CallStackNode::*f)() )
+		intptr_t  callStackAddr( int (CallStackNode::*f)() )
 		{
 			RETURN_METHOD_PTR(CallStackNode, f);
 		}
 		
-		sintptr  debuggerAddr( int (Debugger::*f)() )
+		intptr_t  debuggerAddr( int (Debugger::*f)() )
 		{
 			RETURN_METHOD_PTR(Debugger, f);
 		}		
 	#endif /* DEBUGGER */
 
-		sintptr scriptAddr(int (ScriptObject::*f)())
+		intptr_t scriptAddr(int (ScriptObject::*f)())
 		{
 			RETURN_METHOD_PTR(ScriptObject, f);
 		}
 
-		sintptr  arrayAddr(int (ArrayObject::*f)())
+		intptr_t  arrayAddr(int (ArrayObject::*f)())
 		{
 			RETURN_METHOD_PTR(ArrayObject, f);
 		}
 
-		sintptr vectorIntAddr(int (IntVectorObject::*f)())
+		intptr_t vectorIntAddr(int (IntVectorObject::*f)())
 		{
 			RETURN_METHOD_PTR(IntVectorObject, f);
 		}
 
-		sintptr vectorUIntAddr(int (UIntVectorObject::*f)())
+		intptr_t vectorUIntAddr(int (UIntVectorObject::*f)())
 		{
 			RETURN_METHOD_PTR(UIntVectorObject, f);
 		}
 
-		sintptr vectorDoubleAddr(int (DoubleVectorObject::*f)())
+		intptr_t vectorDoubleAddr(int (DoubleVectorObject::*f)())
 		{
 			RETURN_METHOD_PTR(DoubleVectorObject, f);
 		}
 
-		sintptr vectorObjAddr(int (ObjectVectorObject::*f)())
+		intptr_t vectorObjAddr(int (ObjectVectorObject::*f)())
 		{
 			RETURN_METHOD_PTR(ObjectVectorObject, f);
 		}
-		sintptr efAddr( int (ExceptionFrame::*f)() )
+		intptr_t efAddr( int (ExceptionFrame::*f)() )
 		{
 			RETURN_METHOD_PTR(ExceptionFrame, f);
 		}
-		sintptr classClosureAddr(int (ClassClosure::*f)())
+		intptr_t classClosureAddr(int (ClassClosure::*f)())
 		{
 			RETURN_METHOD_PTR(ClassClosure, f);
 		}
@@ -669,7 +669,7 @@ namespace avmplus
 		return (double)i;
 	}
 	
-	double CodegenLIR::u2d(uint32 i)
+	double CodegenLIR::u2d(uint32_t i)
 	{
 		return (double)i;
 	}
@@ -879,8 +879,8 @@ namespace avmplus
 
 // if DEFER_STORES is defined, we defer local variable stores to the
 // ends of basic blocks, then only emit the ones that are live
-#define DEFER_STORES(...) __VA_ARGS__
-//#define DEFER_STORES(...) 
+// #define DEFER_STORES(...) __VA_ARGS__
+#define DEFER_STORES(...) 
 
     class CopyPropagation: public LirWriter
     {
@@ -1768,7 +1768,7 @@ namespace avmplus
 		}
 	}
 
-	void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, sintptr method_id, int argc, Traits* result)
+	void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
 	{
 		this->state = state;
 		emitPrep(opcode);
@@ -1911,7 +1911,7 @@ namespace avmplus
 			case OP_jump:
 			{
 				// spill everything first
-				sintptr targetpc = op1;
+				intptr_t targetpc = op1;
 
 #ifdef DEBUGGER
 				if(core->sampling() && targetpc < state->pc)
@@ -1932,7 +1932,7 @@ namespace avmplus
 				//	(pc+6+3*index) :	// matched case
 				//	(pc+1));			// default
 				int count = int(1 + op2);
-				sintptr targetpc = op1;
+				intptr_t targetpc = op1;
 
 				AvmAssert(state->value(sp).traits == INT_TYPE);
 
@@ -1947,7 +1947,7 @@ namespace avmplus
 
 				for (int i=0; i < count; i++)
 				{
-					sintptr target = state->pc + AvmCore::readS24(pc+3*i);
+					intptr_t target = state->pc + AvmCore::readS24(pc+3*i);
                     branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)), target);
 				}
 				break;
@@ -1959,7 +1959,7 @@ namespace avmplus
 			{
 				Traits* t;
 				LIns* ptr;
-				sintptr ptr_index;
+				intptr_t ptr_index;
 				
 				if (opcode == OP_getslot || opcode == OP_setslot)
 				{
@@ -2069,7 +2069,7 @@ namespace avmplus
 					}					
 					#ifdef MMGC_DRC
 					else {
-#ifdef AVMPLUS_AMD64
+#ifdef AVMPLUS_64BIT
 					if (slotType==INT_TYPE || slotType==UINT_TYPE || slotType==BOOLEAN_TYPE)
 					{
 						// Need to force a 32-bit store here, since we
@@ -2335,7 +2335,7 @@ namespace avmplus
 			case OP_newfunction:
 			{
 				//sp[0] = core->newfunction(env, body, _scopeBase, scopeDepth);
- 				AbstractFunction* func = pool->getMethodInfo((uint32)op1);
+ 				AbstractFunction* func = pool->getMethodInfo((uint32_t)op1);
 				int extraScopes = state->scopeDepth;
 
 				// prepare scopechain args for call
@@ -2563,7 +2563,7 @@ namespace avmplus
 			case OP_newclass:
 			{
 				// sp[0] = core->newclass(env, cinit, scopeBase, scopeDepth, base)
-				sintptr cinit = op1;
+				intptr_t cinit = op1;
 				int localindex = int(op2);
 				int extraScopes = state->scopeDepth;
 
@@ -2642,7 +2642,7 @@ namespace avmplus
 
 				LIns* i3 = callIns(FUNCTIONID(findproperty), 7, 
 					envArg, outer, ap, InsConst(extraScopes), multi, 
-					InsConst((int32)(opcode == OP_findpropstrict)),
+					InsConst((int32_t)(opcode == OP_findpropstrict)),
 					withBase);
 
 				localSet(dest, atomToNativeRep(result, i3));
@@ -2655,7 +2655,7 @@ namespace avmplus
 				// stack out: obj
 				// framep[op2] = env->finddef(name)
 				Multiname* multiname = (Multiname*) op1;
-				sintptr dest = op2;
+				intptr_t dest = op2;
 				LIns* name = InsConst(multiname->getName());
 				LIns* out;
 
@@ -3370,7 +3370,7 @@ namespace avmplus
 
 	} // emit()
 
-	void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, sintptr target, int a, int b)
+	void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, intptr_t target, int a, int b)
 	{
 		this->state = state;
 
