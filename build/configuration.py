@@ -88,6 +88,8 @@ def _configSub(ostest, cputest):
         cpu = 'powerpc'
     elif re.search('sun', cputest):
         cpu = 'sparc'
+    elif re.search('arm', cputest):
+        cpu = 'arm'
     else:
         raise Exception('Unrecognized CPU: ' + cputest)
 
@@ -151,20 +153,7 @@ class Configuration:
         if self._debug:
             self._acvars['ENABLE_DEBUG'] = 1
 
-    def getObjDir(self):
-        """Returns the build directory being configured."""
-        return self._objdir
 
-    def getHost(self):
-        """Returns an (os, cpu) tuple of the host machine."""
-        return self._host
-
-    def getTarget(self):
-        """Returns an (os, cpu) tuple of the target machine."""
-        return self._target
-
-    def getCompiler(self, static_crt=False):
-        self.COMPILER_IS_GCC = True
         self._compiler = 'GCC'
         self._acvars.update({
             'I_SUFFIX': 'i',
@@ -185,6 +174,7 @@ class Configuration:
             self._compiler = 'VS'
             del self._acvars['USE_COMPILER_DEPS']
             
+            static_crt = options.getBoolArg('static-crt')
             self._acvars.update({
                 'OBJ_SUFFIX'   : 'obj',
                 'LIB_PREFIX'   : '',
@@ -195,8 +185,8 @@ class Configuration:
                 'CXX'          : 'cl.exe -nologo',
                 'CXXFLAGS'     : '-TP',
                 'DLL_CFLAGS'   : '',
-                'AR'           : 'lib.exe',
-                'LD'           : 'link.exe',
+                'AR'           : 'lib.exe -nologo',
+                'LD'           : 'link.exe -nologo',
                 'LDFLAGS'      : '',
                 'MKSTATICLIB'  : '$(AR) -OUT:$(1)',
                 'MKDLL'        : '$(LD) -DLL -OUT:$(1)',
@@ -206,6 +196,8 @@ class Configuration:
                 'OUTOPTION' : '-Fo',
                 'LIBPATH'   : '-LIBPATH:'
                 })
+            if self._target[1] == "arm":
+                self._acvars.update({'LDFLAGS' : '/NODEFAULTLIB:"oldnames.lib" /ENTRY:"mainWCRTStartup"'})
             if sys.platform.startswith('cygwin'):
                 self._acvars.update({'CXX'          : '$(topsrcdir)/build/cygwin-wrapper.sh cl.exe -nologo'})
 
@@ -248,7 +240,6 @@ class Configuration:
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
         elif self._target[0] == 'sunos':
-            self.COMPILER_IS_GCC = False
             self._compiler = 'SunStudio'
             self._acvars.update({
                 'I_SUFFIX': 'i',
@@ -262,6 +253,25 @@ class Configuration:
                 'MKPROGRAM'    : '$(CXX) -o $(1)'
                 })
         self._acvars['COMPILER'] = self._compiler
+
+    def getObjDir(self):
+        """Returns the build directory being configured."""
+        return self._objdir
+
+    def getHost(self):
+        """Returns an (os, cpu) tuple of the host machine."""
+        return self._host
+
+    def getTarget(self):
+        """Returns an (os, cpu) tuple of the target machine."""
+        return self._target
+
+    def getCompiler(self):
+        """Returns the compiler in use, as a string.
+Possible values are:
+- 'GCC': the GNU Compiler Collection, including GCC and G++
+- 'VS': Microsoft Visual Studio
+- 'SunStudio': Sun Studio"""
         return self._compiler
 
     def getDebug(self):
