@@ -37,9 +37,11 @@
 
 
 #include "avmplus.h"
+
 #ifdef AVMPLUS_MIR
 #include "../codegen/CodegenMIR.h"
 #endif
+
 #ifdef FEATURE_NANOJIT
 #include "../codegen/CodegenLIR.h"
 #endif
@@ -85,8 +87,7 @@ namespace avmplus
 		
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		if (f->pool->core->config.verifyall && f->pool)
-			f->pool->processVerifyQueue(env->toplevel());
+		f->core()->processVerifyQueue(env->toplevel());
 		#endif
 
 		env->impl32 = f->impl32;
@@ -115,9 +116,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
-            #ifdef PERFM
-            _ntprof("verify & IR gen");
-            #endif
+            PERFM_NTPROF("verify & IR gen");
 
 			#if defined AVMPLUS_MIR
 			CodegenMIR jit(this);
@@ -128,9 +127,7 @@ namespace avmplus
 			TRY(core, kCatchAction_Rethrow)
 			{
 				verifier.verify(&jit);	// pass 2 - data flow
-                #ifdef PERFM
-                _tprof_end();
-                #endif
+                PERFM_TPROF_END();
         
 				if (!jit.overflow)
 					jit.emitMD(); // pass 3 - generate code
@@ -142,11 +139,8 @@ namespace avmplus
 				// mark it as interpreted and try to limp along
 				if (jit.overflow)
 				{
-					AvmCore* core = this->core();
-					if (returnTraits() == NUMBER_TYPE)
-						implN = avmplus::interpN;
-					else
-						impl32 = avmplus::interp32;
+                    Verifier v2(this, toplevel);
+                    v2.verify(0);
 				}
 			}
 			CATCH (Exception *exception) 

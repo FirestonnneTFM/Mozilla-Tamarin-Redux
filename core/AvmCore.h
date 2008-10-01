@@ -193,6 +193,12 @@ const int kBufferPadding = 16;
 		Debugger *debugger;
 		Profiler *profiler;
 		#endif
+#ifdef AVMPLUS_VERIFYALL
+        List<AbstractFunction*, LIST_GCObjects> verifyQueue;
+		void enq(AbstractFunction* f);
+		void enq(Traits* t);
+		void processVerifyQueue(Toplevel* toplevel);
+#endif
 
 		void branchCheck(MethodEnv *env, bool interruptable, int go)
 		{

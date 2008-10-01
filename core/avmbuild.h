@@ -248,6 +248,16 @@
 // performance metrics for NJ 
 //#define PERFM
 
+#ifdef PERFM
+# define PERFM_NVPROF(n,v) _nvprof(n,v)
+# define PERFM_NTPROF(n) _ntprof(n)
+# define PERFM_TPROF_END() _tprof_end()
+#else
+# define PERFM_NVPROF(n,v)
+# define PERFM_NTPROF(n)
+# define PERFM_TPROF_END() 
+#endif
+
 #ifdef SOLARIS
 #define HAVE_ALLOCA_H
 #endif

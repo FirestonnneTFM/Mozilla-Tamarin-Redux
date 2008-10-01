@@ -89,7 +89,6 @@ INTERP_FOPCODE_LIST_BEGIN
     CSEFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), I_D, integer_d_sse2)
     CSEMETHOD(COREADDR(AVMCORE_integer), I_II, integer)
     CSEMETHOD(COREADDR(AvmCore::number), D_II, number)
-    CSEFUNCTION(FUNCADDR(CodegenLIR::coerce_o), I_I, coerce_o)
     METHOD(ENVADDR(MethodEnv::hasnextproto), I_III, hasnextproto)
     METHOD(ENVADDR(MethodEnv::nullcheck), I_II, nullcheck)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toVTable), I_II, toVTable)
