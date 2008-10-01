@@ -67,12 +67,12 @@ namespace avmplus
 	{
 		NativeMethod* f = (NativeMethod*) env->method;
 
+        //f->core()->console << "native verify " << f << "\n";
 		f->verify(env->vtable->toplevel);
 
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		if (f->pool->core->config.verifyall && f->pool)
-			f->pool->processVerifyQueue(env->toplevel());
+		f->core()->processVerifyQueue(env->toplevel());
 		#endif
 
 		env->impl32 = f->impl32;

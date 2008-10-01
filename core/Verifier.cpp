@@ -41,11 +41,17 @@
 #if defined AVMPLUS_MIR
 	#include "../codegen/CodegenMIR.h"
 	#define JIT_ONLY(x) x
+	#define MIR_ONLY(x) x
+	#define LIR_ONLY(x)
 #elif defined FEATURE_NANOJIT
 	#include "../codegen/CodegenLIR.h"
 	#define JIT_ONLY(x) x
+	#define MIR_ONLY(x) 
+	#define LIR_ONLY(x) x
 #else
 	#define JIT_ONLY(x) 
+	#define MIR_ONLY(x) 
+	#define LIR_ONLY(x) 
 #endif
 
 #include "FrameState.h"
@@ -191,7 +197,10 @@ namespace avmplus
 #    ifdef AVMPLUS_DIRECT_THREADED
 		this->translator = new Translator(info, interpGetOpcodeLabels());
 #    else
-		this->translator = new Translator(info);
+        // the jit can fail, and we dont want to have to re-run the verifier
+        // until we know it's safe to do so, so run jit & translator concurrently.
+        //this->translator = jit ? 0 : new Translator(info);
+        this->translator = new Translator(info);
 #    endif
 	    Translator *translator = this->translator;
 		caches = new uint32[5];
@@ -301,18 +310,18 @@ namespace avmplus
 		}
 		#endif
 
+        PERFM_NVPROF("abc-bytes", code_length);
+
 		int size;
 		for (const byte* pc = code_pos, *code_end=code_pos+code_length; pc < code_end; pc += size)
 		{
 			SAMPLE_CHECK();
+            PERFM_NVPROF("abc-verify", 1);
 
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if (jit && jit->overflow)
-			{
+		    JIT_ONLY(if (jit && jit->overflow) {
 				jit = 0;
 				this->jit = 0;
-			}
-		#endif
+			})
 			
 			XLAT_ONLY( if (translator) translator->fixExceptionsAndLabels(pc); )
 			
@@ -420,10 +429,7 @@ namespace avmplus
 							// atom received as *, will coerce to correct type in catch handler.
 							state->push(NULL);
 
-							#ifdef AVMPLUS_MIR
-							// only for jit, not nanojit
-							if (jit) jit->localSet(stackBase, jit->exAtom);
-							#endif
+                            MIR_ONLY(if (jit) jit->localSet(stackBase, jit->exAtom);)
 
 							checkTarget(target);
  							state->pop();
@@ -884,7 +890,8 @@ namespace avmplus
 				// make sure the traits of the base vtable matches the base traits
 				// This is also caught by an assert in VTable.cpp, however that turns
 				// out to be too late and may cause crashes
-				if( ftraits->base != toplevel->functionClass->ivtable()->traits ){
+				if(toplevel->functionClass != 0 &&
+                   ftraits->base != toplevel->functionClass->ivtable()->traits ){
 					AvmAssertMsg(0, "Verify failed:OP_newfunction");
  					if (toplevel->verifyErrorClass() != NULL)
  						verifyFailed(kInvalidBaseClassError);
@@ -903,8 +910,7 @@ namespace avmplus
 				}
 
 				#ifdef AVMPLUS_VERIFYALL
-				if (core->config.verifyall)
-					pool->enq(f);
+				core->enq(f);
 				#endif
 
 				JIT_ONLY( if (jit) {
@@ -996,11 +1002,8 @@ namespace avmplus
 				itraits->resolveSignatures(toplevel);
 
 				#ifdef AVMPLUS_VERIFYALL
-				if (core->config.verifyall)
-				{
-					pool->enq(ctraits);
-					pool->enq(itraits);
-				}
+				core->enq(ctraits);
+				core->enq(itraits);
 				#endif
 
 				// make sure base class is really a class
@@ -1070,7 +1073,8 @@ namespace avmplus
 						obj.traits->init == info && opcode == OP_initproperty))
 				{
 					emitCoerce(propTraits, state->sp());
-					JIT_ONLY( if (jit) jit->emit(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex, propTraits); );
+					MIR_ONLY( if (jit) jit->emit(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex, propTraits); );
+					LIR_ONLY( if (jit) jit->emitSetslot(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex); );
 					XLAT_ONLY( if (translator) translator->emitOp1( OP_setslot, AvmCore::bindingToSlotId(b)+1 ) );
 					state->pop(n);
 					break;
@@ -1378,8 +1382,7 @@ namespace avmplus
 				}
 
 				#ifdef AVMPLUS_VERIFYALL
-				if (core->config.verifyall)
-					pool->enq(m);
+				core->enq(m);
 				#endif
 
 				emitCoerceArgs(m, argc);
@@ -1523,7 +1526,8 @@ namespace avmplus
 				{
 					JIT_ONLY( int slot_id = AvmCore::bindingToSlotId(b); )
 					Traits* ctraits = readBinding(obj.traits, b);
-					JIT_ONLY( if (jit) jit->emit(state, OP_getslot, slot_id, sp-(n-1), ctraits); )
+					MIR_ONLY( if (jit) jit->emit(state, OP_getslot, slot_id, sp-(n-1), ctraits); )
+					LIR_ONLY( if (jit) jit->emitGetslot(state, slot_id, sp-(n-1), ctraits); )
 					obj.notNull = false;
 					obj.traits = ctraits;
 					Traits* itraits = ctraits ? ctraits->itraits : NULL;
@@ -1668,7 +1672,8 @@ namespace avmplus
 					if (AvmCore::isSlotBinding(b))
 					{
 						int slot_id = AvmCore::bindingToSlotId(b);
-						if (jit) jit->emit(state, OP_getslot, slot_id, ptrIndex, propType);
+						MIR_ONLY(if (jit) jit->emit(state, OP_getslot, slot_id, ptrIndex, propType);)
+						LIR_ONLY(if (jit) jit->emitGetslot(state, slot_id, ptrIndex, propType);)
 						state->pop_push(n, propType);
 						goto getsuper_end;
 					}
@@ -1738,7 +1743,8 @@ namespace avmplus
 						{
 							int slot_id = AvmCore::bindingToSlotId(b);
 							emitCoerce(propType, sp);
-							jit->emit(state, OP_setslot, slot_id, ptrIndex);
+							MIR_ONLY(jit->emit(state, OP_setslot, slot_id, ptrIndex);)
+							LIR_ONLY(jit->emitSetslot(state, OP_setslot, slot_id, ptrIndex);)
 						}
 						// else, it's a readonly slot so ignore
 						state->pop(n);
@@ -2795,8 +2801,15 @@ namespace avmplus
 						(void)opcode;
 						#endif
 						state->push(script->declaringTraits, true);
+
 						// OPTIMIZEME - more early binding for interpreter on findproperty!
 						XLAT_ONLY(if (translator) translator->emitOp1(opcode, imm30));
+
+                        #ifdef AVMPLUS_VERIFYALL
+                        core->enq(script);
+                        core->enq(script->declaringTraits);
+                        #endif
+
 						return;
 					}
 #if defined AVMPLUS_WORD_CODE
@@ -2864,7 +2877,8 @@ namespace avmplus
 		if (AvmCore::isSlotBinding(b))
 		{
 			// early bind to slot
-			JIT_ONLY( if (jit) jit->emit(state, OP_getslot, AvmCore::bindingToSlotId(b), state->sp(), propType); )
+			MIR_ONLY( if (jit) jit->emit(state, OP_getslot, AvmCore::bindingToSlotId(b), state->sp(), propType); )
+			LIR_ONLY( if (jit) jit->emitGetslot(state, AvmCore::bindingToSlotId(b), state->sp(), propType); )
 #ifdef AVMPLUS_WORD_CODE
 			if (translator)
 			{
@@ -3004,13 +3018,14 @@ namespace avmplus
 		Value& obj = state->peek();
 		checkEarlySlotBinding(obj.traits);
 		Traits* slotTraits = checkSlot(obj.traits, slot);
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (jit)
-		{
-			emitCheckNull(state->sp());
-			jit->emit(state, OP_getslot, slot, state->sp(), slotTraits);
-		}
-		#endif
+        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+        if (jit) {
+            int obj = state->sp();
+            emitCheckNull(obj);
+            MIR_ONLY(jit->emit(state, OP_getslot, slot, obj, slotTraits);)
+            LIR_ONLY(jit->emitGetslot(state, slot, obj, slotTraits);)
+        }
+        #endif
 		state->pop_push(1, slotTraits);
 	}
 
@@ -3027,7 +3042,8 @@ namespace avmplus
 		{
 			emitCoerce(slotTraits, state->sp());
 			emitCheckNull(state->sp()-1);
-			jit->emit(state, OP_setslot, slot, state->sp()-1, slotTraits);
+			MIR_ONLY(jit->emit(state, OP_setslot, slot, state->sp()-1, slotTraits);)
+            LIR_ONLY(jit->emitSetslot(state, OP_setslot, slot, state->sp()-1);)
 		}
 		#else
 		(void)slot;
@@ -3145,9 +3161,11 @@ namespace avmplus
 	{
 		Value &v = state->value(index);
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		Traits* rhs = v.traits;
-		if (jit && (!canAssign(target, rhs) || !Traits::isMachineCompatible(target,rhs)))
-			jit->emitCoerce(state, index, target);
+        if (jit) {
+    		Traits* rhs = v.traits;
+		    if ((!canAssign(target, rhs) || !Traits::isMachineCompatible(target, rhs)))
+    			jit->emitCoerce(state, index, target);
+        }
 		#endif
 		state->setType(index, target, v.notNull);
 	}

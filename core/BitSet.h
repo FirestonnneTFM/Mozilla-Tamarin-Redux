@@ -75,6 +75,14 @@ namespace avmplus
                 reset();
             }
 
+            BitSet(MMgc::GC *gc, int bitcap=kDefaultCapacity*kUnit) : capacity(kDefaultCapacity)
+			{
+                reset();
+                int cap = ((bitcap+kUnit-1)/kUnit);
+                if (cap > kDefaultCapacity)
+                    grow(gc, cap);
+			}
+
 			virtual ~BitSet() {
 				if (capacity > kDefaultCapacity) {
 					uintptr_t *p = bits.ptr;
@@ -82,14 +90,6 @@ namespace avmplus
 					bits.ptr = 0;
 					capacity = kDefaultCapacity;
 				}
-			}
-
-            BitSet(MMgc::GC *gc, int bitcap=kDefaultCapacity*kUnit) : capacity(kDefaultCapacity)
-			{
-                reset();
-                int cap = ((bitcap+kUnit-1)/kUnit);
-                if (cap > kDefaultCapacity)
-                    grow(gc, cap);
 			}
 
             void reset()

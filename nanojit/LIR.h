@@ -143,7 +143,7 @@ namespace nanojit
 		LIR_fadd	= LIR_add  | LIR64,
 		LIR_fsub	= LIR_sub  | LIR64,
 		LIR_fmul	= LIR_mul  | LIR64,
-		LIR_fdiv	= 40        | LIR64,
+		LIR_fdiv	= 40       | LIR64,
 
 		LIR_qjoin	= 41 | LIR64,
 		LIR_i2f		= 42 | LIR64,
@@ -449,7 +449,7 @@ namespace nanojit
 	struct CallInfo;
 
 	// make it a GCObject so we can explicitly delete it early
-	class LirWriter : public GCObject
+	class LirWriter : public GCFinalizedObject
 	{
 	public:
 		LirWriter *out;
