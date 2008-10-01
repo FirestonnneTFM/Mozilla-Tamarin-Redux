@@ -1028,16 +1028,13 @@ namespace avmplus
         }
     };
 
-	void emitStart(LirBuffer *lirbuf, LirWriter* &lirout) {
+	void emitStart(LirWriter* &lirout) {
         debug_only(
             GC *gc = lirbuf->_frago->core()->gc;
             // catch problems before they hit the buffer
             lirout = new (gc) ValidateWriter(lirout);
         )
         lirout->ins0(LIR_start);
-        // create param's for saved regs -- abi specific
-        for (int i=0, n=sizeof(lirbuf->savedParams)/sizeof(LInsp); i < n; i++)
-            lirout->insParam(i, 1);
 	}
 
 #ifdef AVMPLUS_VERBOSE
@@ -1078,7 +1075,7 @@ namespace avmplus
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
 
-		emitStart(lirbuf, lirout);
+		emitStart(lirout);
 
 		if (overflow)
 			return false;
@@ -4373,7 +4370,7 @@ namespace avmplus
 		// doesn't actually know how to pop stack args, so this will end
 		// up doing the right thing.  this is very fragile and should be fixed!
 
-		emitStart(lirbuf, lirout);
+		emitStart(lirout);
 
 		LIns *iid_param = lirout->insParam(1, 0); // edx
 		//env_param = lirout->insParam(2, 0); // stack
