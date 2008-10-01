@@ -1203,10 +1203,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\codegen\CodegenLIR.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\nanojit\Fragmento.cpp"
 				>
 			</File>
