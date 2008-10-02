@@ -301,7 +301,7 @@
 
 #if defined AVMPLUS_WIN32 && !defined AVMPLUS_64BIT
 #  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
+//#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
 //#  define AVMPLUS_DIRECT_THREADED // see comments in Interpreter.cpp before enabling this
 #endif
 
