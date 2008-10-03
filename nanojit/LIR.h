@@ -663,6 +663,65 @@ namespace nanojit
         }
     };
 
+	class BBNode : public GCObject
+	{
+	public:
+	
+		enum BBKind
+		{
+			UNKNOWN = 0,
+			FALL_THRU,
+			ENDS_WITH_CALL,
+			ENDS_WITH_RET
+		};
+	
+		uint32_t num;	// unique id 
+		BBList	pred;	// list of predecssors
+		BBList	succ;	// list of successors
+		LInsp	start;
+		LInsp	end;
+		BBKind  kind;
+
+		BBNode(GC* gc, uint32_t id) : pred(gc),succ(gc) { num=id; } 
+	};
+	
+	class BlockLocator : public LirWriter
+	{
+		LirWriter*	_out;
+		GC*			_gc;
+		BBNode*		_current;	// bb we are currently building
+		BBNode*		_previous;	// bb we last built in linear fashion
+		LInsp		_priorIns;	// last instruction seen
+		BBList		_tbd;		// bb's where succ is unknown (last instruction is a forward jump)
+		BBMap		_bbs;		// LInsp to bb 
+		uint32_t	_gid;		// unique id gen for bb's
+			
+	public:
+		BlockLocator(GC* gc, LirWriter* out);
+
+		BBNode*	entry()			{ return _bbs.get(0); }
+		void	fin();
+		void	print(char* name);
+	
+		// interface to LirWriter
+		LInsp ins1(LOpcode v, LIns* a);
+		LInsp ins2(LOpcode v, LIns* a, LIns* b);
+		LInsp insLoad(LOpcode op, LIns* base, LIns* d);
+		LInsp insStore(LIns* value, LIns* base, LIns* disp);
+		LInsp insStorei(LIns* value, LIns* base, int32_t d);
+		LInsp insCall(uint32_t fid, LInsp args[]);
+		LInsp insGuard(LOpcode v, LIns *c, SideExit *x);
+		LInsp ins0(LOpcode v);
+		LInsp insBranch(LOpcode v, LInsp condition, LInsp to);
+
+	protected:
+		BBNode* bbFor(LInsp n);
+		void	ensureCurrent(LInsp n);
+		void	blockEnd(LInsp at);
+		LInsp	update(LInsp i);
+		void	link(BBNode* from, BBNode* to);
+	};
+	
 #endif
 
 	class ExprFilter: public LirWriter

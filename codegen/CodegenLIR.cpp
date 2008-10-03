@@ -1067,6 +1067,9 @@ namespace avmplus
         LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
+		verbose_only(if (core->config.bbgraph) {
+			lirout = frag->cfg = new (gc) BlockLocator(gc, lirout);
+		})
         debug_only(
             lirout = new (gc) ValidateWriter(lirout);
         )
@@ -4180,6 +4183,12 @@ namespace avmplus
             {}
         )
 
+		verbose_only( if (core->config.bbgraph) { 
+			StringNullTerminatedUTF8 cname(gc, info->format(core));
+			frag->cfg->fin();
+			frag->cfg->print((char*)cname.c_str());
+		});
+		
         deadvars();
 
         verbose_only(if (verbose()) {
