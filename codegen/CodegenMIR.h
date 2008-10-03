@@ -109,44 +109,44 @@ namespace avmplus
 	#ifdef VTUNE
 	class LineNumberRecord : public MMgc::GCObject
 	{
-		public:
-			LineNumberRecord(Stringp fn, uint32 ln)
-			: filename(fn)
-			, lineno(ln)
-			{ }
+	public:
+		LineNumberRecord(Stringp fn, uint32 ln)
+		: filename(fn)
+		, lineno(ln)
+		{ }
 
        String*  filename;
        uint32_t lineno;
-   }; 
+	}; 
 
-   class JITCodeInfo : public MMgc::GCObject
-   {
-       public:
-           JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
+	class JITCodeInfo : public MMgc::GCObject
+	{
+	public:
+		JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
 
-           MethodInfo* method;
-           SortedIntMap<LineNumberRecord*> lineNumTable;       // populated during code generation 
-           uintptr startAddr;
-           uintptr endAddr;
-           iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
-           uint32_t sid;  // code info id
+		MethodInfo* method;
+		SortedIntMap<LineNumberRecord*> lineNumTable;       // populated during code generation 
+		uintptr startAddr;
+		uintptr endAddr;
+		iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
+		uint32_t sid;  // code info id
 
-           LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
-           {
-               LineNumberRecord* record = new (gc) LineNumberRecord(file,line);
-               lineNumTable.put(loc,record);
-               return record;
-           }
+		LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
+		{
+			LineNumberRecord* record = new (gc) LineNumberRecord(file,line);
+			lineNumTable.put(loc,record);
+			return record;
+		}
 
-           void clear() 
-           {
-               lineNumTable.clear();
-               method = 0;
-               vtune = 0;
-               startAddr = 0;
-               endAddr = 0;
-           }
-    };
+		void clear() 
+		{
+			lineNumTable.clear();
+			method = 0;
+			vtune = 0;
+			startAddr = 0;
+			endAddr = 0;
+		}
+	};
 	#endif /* VTUNE */
 
 	inline unsigned int rmask(int r) {
