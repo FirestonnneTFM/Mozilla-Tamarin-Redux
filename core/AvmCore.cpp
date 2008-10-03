@@ -159,15 +159,16 @@ namespace avmplus
 
 		#ifdef AVMPLUS_MIR
 			config.dceopt = true;
-			#ifdef AVMPLUS_VERBOSE
-			config.bbgraph = false;
-			#endif
         #endif
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			// jit flag forces use of MIR/LIR instead of interpreter
 			config.jit = false;
 			config.cseopt = true;
+
+			#ifdef AVMPLUS_VERBOSE
+			config.bbgraph = false;
+			#endif
 
     	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     		config.sse2 = true;

@@ -104,13 +104,6 @@ const int kBufferPadding = 16;
 
 		#ifdef AVMPLUS_MIR
 		bool dceopt;
-		/**
-		 * Genearate a graph for the basic blocks.  Can be used by
-		 * 'dot' utility to generate a jpg.
-		 */
-		#ifdef AVMPLUS_VERBOSE
-		bool bbgraph;
-		#endif //AVMPLUS_VERBOSE
         #endif
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -128,6 +121,14 @@ const int kBufferPadding = 16;
         #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		bool sse2;
 		#endif
+
+		#ifdef AVMPLUS_VERBOSE
+		/**
+		 * Genearate a graph for the basic blocks.  Can be used by
+		 * 'dot' utility to generate a jpg.
+		 */
+		bool bbgraph;
+		#endif //AVMPLUS_VERBOSE
 
         #endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
