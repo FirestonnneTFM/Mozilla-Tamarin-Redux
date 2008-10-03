@@ -21,6 +21,8 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   Mozilla TraceMonkey Team
+ *   Asko Tontti <atontti@cc.hut.fi>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -40,6 +42,10 @@
 #ifndef __nanojit_Fragmento__
 #define __nanojit_Fragmento__
 
+/*#ifdef AVMPLUS_VERBOSE
+extern void drawTraceTrees(Fragmento *frago, FragmentMap * _frags, avmplus::AvmCore *core, char *fileName);
+#endif*/
+
 namespace nanojit
 {
 	struct GuardRecord;
@@ -56,7 +62,12 @@ namespace nanojit
             NIns code[(NJ_PAGE_SIZE-sizeof(PageHeader))/sizeof(NIns)];
         };
     };
-	typedef avmplus::List<Page*,avmplus::LIST_NonGCObjects>	AllocList;
+    struct AllocEntry : public GCObject
+    {
+        Page *page;
+        uint32_t allocSize;
+    };
+	typedef avmplus::List<AllocEntry*,avmplus::LIST_GCObjects>	AllocList;
 
 	typedef avmplus::GCSortedMap<const void*, uint32_t, avmplus::LIST_NonGCObjects> BlockSortedMap;
 	class BlockHist: public BlockSortedMap
@@ -89,6 +100,7 @@ namespace nanojit
 			Page*		pageAlloc();
 			void		pageFree(Page* page);
 			
+            Fragment*   getLoop(const void* ip);
             Fragment*   getAnchor(const void* ip);
 			void        clearFrags();	// clear all fragments from the cache
             Fragment*   getMerge(GuardRecord *lr, const void* ip);
@@ -130,7 +142,7 @@ namespace nanojit
 
 			AvmCore*			_core;
 			DWB(Assembler*)		_assm;
-			DWB(FragmentMap*)	_frags;		/* map from ip -> Fragment ptr  */
+			FragmentMap 	_frags;		/* map from ip -> Fragment ptr  */
 			Page*			_pageList;
 
 			/* unmanaged mem */
@@ -180,6 +192,7 @@ namespace nanojit
 			void			releaseTreeMem(Fragmento* frago);
 			bool			isAnchor() { return anchor == this; }
 			bool			isRoot() { return root == this; }
+            void            onDestroy();
 			
 			verbose_only( uint32_t		_called; )
 			verbose_only( uint32_t		_native; )
@@ -199,6 +212,8 @@ namespace nanojit
             DWB(Fragment*) anchor;
             DWB(Fragment*) root;
             DWB(Fragment*) parent;
+            DWB(Fragment*) first;
+            DWB(Fragment*) peer;
 			DWB(BlockHist*) mergeCounts;
             DWB(LirBuffer*) lirbuf;
 			LIns*			lastIns;

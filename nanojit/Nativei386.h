@@ -147,7 +147,7 @@ namespace nanojit
 
 	typedef int RegisterMask;
 
-    static const int NumSavedRegs = 3;
+	static const int NumSavedRegs = 3;
 	static const RegisterMask SavedRegs = 1<<EBX | 1<<EDI | 1<<ESI;
 	static const RegisterMask GpRegs = SavedRegs | 1<<EAX | 1<<ECX | 1<<EDX;
     static const RegisterMask XmmRegs = 1<<XMM0|1<<XMM1|1<<XMM2|1<<XMM3|1<<XMM4|1<<XMM5|1<<XMM6|1<<XMM7;
@@ -176,9 +176,7 @@ namespace nanojit
 	#define DECLARE_PLATFORM_ASSEMBLER()	\
         const static Register argRegs[2], retRegs[2]; \
 		bool x87Dirty;						\
-        bool sse2;							\
-		bool has_cmov; \
-		bool pad[1];\
+		bool pad[3];\
 		void nativePageReset();\
 		void nativePageSetup();\
         void underrunProtect(int);\
@@ -325,10 +323,7 @@ namespace nanojit
 #define ORi(r,i)	do { count_alu(); ALUi(0x0d,r,i);				asm_output2("or %s,%d",gpn(r),i); } while(0)
 #define XORi(r,i)	do { count_alu(); ALUi(0x35,r,i);				asm_output2("xor %s,%d",gpn(r),i); } while(0)
 
-#define ADDmi(d,b,i) do {\
-	count_alust();\
-	ALUmi(0x05, d, b, i); asm_output3("add %d(%s), %d", d, gpn(b), i);\
-	} while(0)
+#define ADDmi(d,b,i) do { count_alust(); ALUmi(0x05, d, b, i); asm_output3("add %d(%s), %d", d, gpn(b), i); } while(0)
 
 #define TEST(d,s)	do { count_alu(); ALU(0x85,d,s);				asm_output2("test %s,%s",gpn(d),gpn(s)); } while(0)
 #define CMP(l,r)	do { count_alu(); ALU(0x3b, (l),(r));			asm_output2("cmp %s,%s",gpn(l),gpn(r)); } while(0)
@@ -373,23 +368,15 @@ namespace nanojit
 	asm_output3("mov %s,%d(%s)",gpn(reg),disp,gpn(base)); } while(0)
 
 // load 16-bit, sign extend
-#define LD16S(r,d,b) do {\
-	count_ld();\
-	ALU2m(0x0fbf,r,d,b); asm_output3("movsx %s,%d(%s)", gpn(r),d,gpn(b));\
-	} while(0)
+#define LD16S(r,d,b) do { count_ld(); ALU2m(0x0fbf,r,d,b); asm_output3("movsx %s,%d(%s)", gpn(r),d,gpn(b)); } while(0)
 
 // load 8-bit, zero extend
 // note, only 5-bit offsets (!) are supported for this, but that's all we need at the moment
 // (movzx actually allows larger offsets mode but 5-bit gives us advantage in Thumb mode)
-#define LD8Z(r,d,b)	do {\
-	count_ld();\
-	NanoAssert((d)>=0&&(d)<=31);\
-	ALU2m(0x0fb6,r,d,b);\
-	asm_output3("movzx %s,%d(%s)", gpn(r),d,gpn(b));\
-	} while(0)
+#define LD8Z(r,d,b)	do { count_ld(); NanoAssert((d)>=0&&(d)<=31); ALU2m(0x0fb6,r,d,b); asm_output3("movzx %s,%d(%s)", gpn(r),d,gpn(b)); } while(0)
 
 #define LDi(r,i) do { \
-	count_mov();\
+	count_ld();\
 	underrunProtect(5);			\
 	IMM32(i);					\
 	NanoAssert(((unsigned)r)<8); \
@@ -397,7 +384,7 @@ namespace nanojit
 	asm_output2("mov %s,%d",gpn(r),i); } while(0)
 
 #define ST(base,disp,reg) do {  \
-    count_st();\
+	count_st();\
 	ALUm(0x89,reg,disp,base);	\
     asm_output3("mov %d(%s),%s",disp,base==UnknownReg?"0":gpn(base),gpn(reg)); } while(0)
 
@@ -423,6 +410,7 @@ namespace nanojit
 		{ PUSHi32(i); } } while(0)
 
 #define PUSHi32(i)	do {	\
+	count_push();\
 	underrunProtect(5);	\
 	IMM32(i);			\
 	*(--_nIns) = 0x68;	\
@@ -670,7 +658,7 @@ namespace nanojit
     } while(0)
 
 #define CVTSI2SDm(xr,d,b) do{ \
-	count_fpuld();\
+	count_fpu();\
     NanoAssert(_is_xmm_reg_(xr) && _is_gp_reg_(b));\
     SSEm(0xf20f2a, (xr)&7, (d), (b)); \
     asm_output3("cvtsi2sd %s,%d(%s)",gpn(xr),(d),gpn(b)); \
@@ -678,7 +666,7 @@ namespace nanojit
 
 #define SSE_XORPD(r, maskaddr) do {\
 	count_fpuld();\
-    underrunProtect(8); \
+	underrunProtect(8); \
     IMM32(maskaddr);\
     *(--_nIns) = uint8_t(((r)&7)<<3|5); \
     *(--_nIns) = 0x57;\
@@ -732,37 +720,12 @@ namespace nanojit
 #define FLD1()		do { count_fpu(); FPUc(0xd9e8);				asm_output("fld1"); fpu_push(); } while(0)
 #define FLDZ()		do { count_fpu(); FPUc(0xd9ee);				asm_output("fldz"); fpu_push(); } while(0)
 #define FFREE(r)	do { count_fpu(); FPU(0xddc0, r);			asm_output1("ffree %s",fpn(r)); } while(0)
-#define FSTQ(p,d,b)	do {\
-	count_stq();\
-	FPUm(0xdd02|(p), d, b);\
-	asm_output3("fst%sq %d(%s)",((p)?"p":""),d,gpn(b));\
-	if (p) fpu_pop();\
-	} while(0)
+#define FSTQ(p,d,b)	do { count_stq(); FPUm(0xdd02|(p), d, b);	asm_output3("fst%sq %d(%s)",((p)?"p":""),d,gpn(b)); if (p) fpu_pop(); } while(0)
 #define FSTPQ(d,b)  FSTQ(1,d,b)
-#define FCOM(p,d,b)	do {\
-	count_fpuld();\
-	FPUm(0xdc02|(p), d, b);\
-	asm_output3("fcom%s %d(%s)",((p)?"p":""),d,gpn(b));\
-	if (p) fpu_pop();\
-	} while(0)
-#define FLDQ(d,b)	do {\
-	count_ldq();\
-	FPUm(0xdd00, d, b);\
-	asm_output2("fldq %d(%s)",d,gpn(b));\
-	fpu_push();\
-	} while(0)
-#define FILDQ(d,b)	do {\
-	count_fpuld();\
-	FPUm(0xdf05, d, b);\
-	asm_output2("fildq %d(%s)",d,gpn(b));\
-	fpu_push();\
-	} while(0)
-#define FILD(d,b)	do {\
-	count_fpuld();\
-	FPUm(0xdb00, d, b);\
-	asm_output2("fild %d(%s)",d,gpn(b));\
-	fpu_push();\
-	} while(0)
+#define FCOM(p,d,b)	do { count_fpuld(); FPUm(0xdc02|(p), d, b);	asm_output3("fcom%s %d(%s)",((p)?"p":""),d,gpn(b)); if (p) fpu_pop(); } while(0)
+#define FLDQ(d,b)	do { count_ldq(); FPUm(0xdd00, d, b);		asm_output2("fldq %d(%s)",d,gpn(b)); fpu_push();} while(0)
+#define FILDQ(d,b)	do { count_fpuld(); FPUm(0xdf05, d, b);		asm_output2("fildq %d(%s)",d,gpn(b)); fpu_push(); } while(0)
+#define FILD(d,b)	do { count_fpuld(); FPUm(0xdb00, d, b);		asm_output2("fild %d(%s)",d,gpn(b)); fpu_push(); } while(0)
 #define FADD(d,b)	do { count_fpu(); FPUm(0xdc00, d, b);		asm_output2("fadd %d(%s)",d,gpn(b)); } while(0)
 #define FSUB(d,b)	do { count_fpu(); FPUm(0xdc04, d, b);		asm_output2("fsub %d(%s)",d,gpn(b)); } while(0)
 #define FSUBR(d,b)	do { count_fpu(); FPUm(0xdc05, d, b);		asm_output2("fsubr %d(%s)",d,gpn(b)); } while(0)
@@ -773,12 +736,12 @@ namespace nanojit
 #define FSTP(r)		do { count_fpu(); FPU(0xddd8, r&7);			asm_output1("fstp %s",fpn(r)); fpu_pop();} while(0)
 #define FCOMP()		do { count_fpu(); FPUc(0xD8D9);				asm_output("fcomp"); fpu_pop();} while(0)
 #define FCOMPP()	do { count_fpu(); FPUc(0xDED9);				asm_output("fcompp"); fpu_pop();fpu_pop();} while(0)
-#define FLDr(r)		do { count_fpu(); FPU(0xd9c0,r);				asm_output1("fld %s",fpn(r)); fpu_push(); } while(0)
+#define FLDr(r)		do { count_ldq(); FPU(0xd9c0,r);				asm_output1("fld %s",fpn(r)); fpu_push(); } while(0)
 #define EMMS()		do { count_fpu(); FPUc(0x0f77);				asm_output("emms"); } while (0)
 
 // standard direct call
 #define CALL(c)	do { \
-	count_call();\
+  count_call();\
   underrunProtect(5);					\
   int offset = (c->_address) - ((int)_nIns); \
   IMM32( (uint32_t)offset );	\

@@ -40,6 +40,7 @@
 #ifndef __nanojit_Assembler__
 #define __nanojit_Assembler__
 
+
 namespace nanojit
 {
 	/**
@@ -148,8 +149,8 @@ namespace nanojit
 	typedef avmplus::SortedMap<LIns*,NIns*,avmplus::LIST_NonGCObjects> InsMap;
 	typedef avmplus::SortedMap<NIns*,LIns*,avmplus::LIST_NonGCObjects> NInsMap;
 
-#if !defined(AVMPLUS_MIR) && defined(VTUNE)
-   class avmplus::CodegenLIR;
+#ifdef VTUNE
+	class avmplus::CodegenLIR;
 #endif
 
     class LabelState MMGC_SUBCLASS_DECL
@@ -199,9 +200,10 @@ namespace nanojit
 			StringList* _outputCache;
 			#endif
 
-#if !defined(AVMPLUS_MIR) && defined(VTUNE)
-           avmplus::CodegenLIR* cgen;
-#endif
+			#ifdef VTUNE
+			avmplus::CodegenLIR *cgen;
+			#endif
+
 			Assembler(Fragmento* frago);
             ~Assembler() {}
 
@@ -214,6 +216,7 @@ namespace nanojit
 			void		unpatch(GuardRecord *lr);
 			AssmError   error()	{ return _err; }
 			void		setError(AssmError e) { _err = e; }
+			void		setCallTable(const CallInfo *functions);
 			void		pageReset();
 			int32_t		codeBytes();
 			Page*		handoverPages(bool exitPages=false);
@@ -284,6 +287,8 @@ namespace nanojit
             DWB(Fragment*)		_thisfrag;
 			RegAllocMap*		_branchStateMap;
 			GuardRecord*		_latestGuard;
+		
+			const CallInfo	*_functions;
 			
 			NIns*		_nIns;			// current native instruction
 			NIns*		_nExitIns;		// current instruction in exit fragment page
@@ -300,7 +305,7 @@ namespace nanojit
 			Reservation _resvTable[ NJ_MAX_STACK_ENTRY ]; // table where we house stack and register information
 			uint32_t	_resvFree;
 			bool		_inExit, vpad2[3];
-            avmplus::List<LIns*> pending_lives;
+            avmplus::List<LIns*, avmplus::LIST_NonGCObjects> pending_lives;
 
 			void		asm_cmp(LIns *cond);
 #ifndef NJ_SOFTFLOAT
@@ -331,14 +336,14 @@ namespace nanojit
 			void		asm_nongp_copy(Register r, Register s);
 			void		asm_bailout(LInsp guard, Register state);
 			void		asm_call(LInsp);
-            void        asm_arg(ArgSize, LInsp, Register);					
+            void        asm_arg(ArgSize, LInsp, Register);
+			Register	asm_binop_rhs_reg(LInsp ins);
 			NIns*		asm_branch(bool branchOnFalse, LInsp cond, NIns* targ);
             void        assignSavedParams();
             void        reserveSavedParams();
             void        handleLoopCarriedExprs();
 
 			// platform specific implementation (see NativeXXX.cpp file)
-			void		nInit(uint32_t flags);
 			void		nInit(AvmCore *);
 			Register	nRegisterAllocFromSet(int32_t set);
 			void		nRegisterResetAll(RegAlloc& a);
@@ -370,6 +375,7 @@ namespace nanojit
 			void* _endJit1Addr;
 			void* _endJit2Addr;
 	#endif // AVMPLUS_PORTING_API
+			avmplus::Config &config;
 	};
 
 	inline int32_t disp(Reservation* r) 

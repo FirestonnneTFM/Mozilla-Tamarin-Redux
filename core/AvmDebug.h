@@ -74,16 +74,17 @@ namespace avmplus
 	void AvmDebugMsg(const wchar* msg, bool debuggerBreak);
 
 	#ifdef _DEBUG
-		inline void _AvmAssertMsg(int32 assertion, const char* message)
-		{
-			if (assertion == 0)
-            {
-                #if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
-                    AVMPlusCustomAssertionHandler(message);
-                #else
-				    AvmDebugMsg(message, true);
-                #endif
-            }
+		inline void AvmAssertFail(const char *message) {
+			#if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
+				AVMPlusCustomAssertionHandler(message);
+			#else
+				AvmDebugMsg(message, true);
+			#endif
+		}
+
+		inline void _AvmAssertMsg(int32 assertion, const char* message) {
+			if (!assertion)
+				AvmAssertFail(message);
 		}
 
 		#define AvmAssertMsg(x,y)				do { avmplus::_AvmAssertMsg((x), (y)); } while (0) /* no semi */
@@ -123,5 +124,15 @@ namespace avmplus
 		#endif // SOFT_ASSERTS
 	#endif
 }
+
+#ifdef FEATURE_NANOJIT
+namespace nanojit {
+	#ifdef _DEBUG
+	inline void NanoAssertFail() {
+		avmplus::AvmAssertFail("");
+	}
+	#endif
+}
+#endif
 
 #endif /* __AvmDebug__ */

@@ -46,6 +46,7 @@
 
 #if defined(AVMPLUS_UNIX) && defined(AVMPLUS_ARM)
 #include <asm/unistd.h>
+extern "C" void __clear_cache(char *BEG, char *END);
 #endif
 
 #ifdef PERFM
@@ -54,6 +55,9 @@
 
 #ifdef VTUNE
 #include "../codegen/CodegenLIR.h"
+#define vtune_only(...) __VA_ARGS__
+#else
+#define vtune_only(...)
 #endif
 
 namespace nanojit
@@ -67,10 +71,7 @@ namespace nanojit
 	    {
             LOpcode op = ins->opcode();
             if (ins->isStore() ||
-                #ifdef VTUNE
-                  op == LIR_line ||
-                  op == LIR_file ||
-                #endif
+				vtune_only( op == LIR_line || op == LIR_file || )
                 op == LIR_loop ||
                 op == LIR_label ||
                 op == LIR_live ||
@@ -163,6 +164,7 @@ namespace nanojit
         , _labels(_gc)
         , _patches(_gc)
         , pending_lives(_gc)
+		, config(frago->core()->config)
 	{
         AvmCore *core = frago->core();
 		nInit(core);
@@ -220,7 +222,6 @@ namespace nanojit
 		    regs.used |= rmask(r);
 		    return r;
         }
-        //_nvprof("steals",1);
 		counter_increment(steals);
 
 		// nothing free, steal one 
@@ -295,13 +296,13 @@ namespace nanojit
 		Page* page = _frago->pageAlloc();
 		if (page)
 		{
-            #ifdef VTUNE
-           if (_nIns && _nExitIns) {
-               //cgen->jitAddRecord( (uintptr_t)list->code, 0, 0, true); // add a placeholder record for top of page
-               cgen->jitCodePosUpdate( (uintptr_t)list->code );
-               cgen->jitPushInfo();  // new page requires new entry
-           }
-            #endif
+			#ifdef VTUNE
+			if (_nIns && _nExitIns) {
+				//cgen->jitAddRecord((uintptr_t)list->code, 0, 0, true); // add placeholder record for top of page
+				cgen->jitCodePosUpdate((uintptr_t)list->code);
+				cgen->jitPushInfo(); // new page requires new entry
+			}
+			#endif
 			page->next = list;
 			list = page;
 			nMarkExecute(page);
@@ -553,12 +554,18 @@ namespace nanojit
         Reservation* resv = getresv(i);
 		Register r;
 
+		// if we have an existing reservation and it has a non-unknown
+		// register allocated, and that register is in our allowed mask,
+		// return it.
         if (resv && (r=resv->reg) != UnknownReg && (rmask(r) & allow)) {
             _allocator.useActive(r);
 			return r;
         }
 
+		// figure out what registers are preferred for this instruction
 		RegisterMask prefer = hint(i, allow);
+
+		// if we didn't have a reservation, allocate one now
         if (!resv)
 			resv = reserveAlloc(i);
 
@@ -581,12 +588,14 @@ namespace nanojit
 		}
 		else
 		{
-			// r not allowed
+			// the already-allocated register isn't in the allowed mask;
+			// we need to grab a new one and then copy over the old
+			// contents to the new.
 			resv->reg = UnknownReg;
 			_allocator.retire(r);
 			Register s = resv->reg = registerAlloc(prefer);
 			_allocator.addActive(s, i);
-            if (rmask(r) & GpRegs) {
+            if ((rmask(r) & GpRegs) && (rmask(s) & GpRegs)) {
     			MR(r, s);
             } 
             else {
@@ -790,7 +799,7 @@ namespace nanojit
 		verbose_only( verbose_outputf("--------------------------------------- exit block (LIR_xt|LIR_xf)") );
 
 #ifdef NANOJIT_IA32
-		NanoAssertMsgf(_fpuStkDepth == _sv_fpuStkDepth, ("LIR_xtf, _fpuStkDepth=%d, expect %d\n",_fpuStkDepth, _sv_fpuStkDepth));
+		NanoAssertMsgf(_fpuStkDepth == _sv_fpuStkDepth, "LIR_xtf, _fpuStkDepth=%d, expect %d\n",_fpuStkDepth, _sv_fpuStkDepth);
 		debug_only( _fpuStkDepth = _sv_fpuStkDepth; _sv_fpuStkDepth = 9999; )
 #endif
 
@@ -912,7 +921,7 @@ namespace nanojit
 			// check for resource leaks 
 			debug_only( 
 				for(uint32_t i=_activation.lowwatermark;i<_activation.highwatermark; i++) {
-					NanoAssertMsgf(_activation.entry[i] == 0, ("frame entry %d wasn't freed\n",-4*i)); 
+					NanoAssertMsgf(_activation.entry[i] == 0, "frame entry %d wasn't freed\n",-4*i);
 				}
 			)
 
@@ -927,43 +936,37 @@ namespace nanojit
 			//fprintf(stderr, "endAssembly frag %X entry %X\n", (int)frag, (int)frag->fragEntry);
 		}
 		
-		NanoAssertMsgf(error() || _fpuStkDepth == 0, ("_fpuStkDepth %d\n",_fpuStkDepth));
+		NanoAssertMsgf(error() || _fpuStkDepth == 0,"_fpuStkDepth %d\n",_fpuStkDepth);
 
 		internalReset();  // clear the reservation tables and regalloc
 		NanoAssert(_branchStateMap->isEmpty());
 		_branchStateMap = 0;
-		
-		#if defined(UNDER_CE)
+
+#ifdef AVMPLUS_ARM
 		// If we've modified the code, we need to flush so we don't end up trying 
 		// to execute junk
+# if defined(UNDER_CE)
 		FlushInstructionCache(GetCurrentProcess(), NULL, NULL);
-		#elif defined(AVMPLUS_UNIX) && defined(AVMPLUS_ARM)
-			// N A S T Y - obviously have to fix this
-		// determine our page range
+# elif defined(AVMPLUS_UNIX)
+		for (int i = 0; i < 2; i++) {
+			Page *p = (i == 0) ? _nativePages : _nativeExitPages;
 
-		Page *page=0, *first=0, *last=0;
-		for (int i=2;i!=0;i--) {
-			page = first = last = (i==2 ? _nativePages : _nativeExitPages);
-			while (page)
-			{
-				if (page<first)
-					first = page;
-				if (page>last)
-					last = page;
-				page = page->next;
+			Page *first = p;
+			while (p) {
+				if (!p->next || p->next != p+1) {
+					__clear_cache((char*)first, (char*)(p+1));
+					first = p->next;
+				}
+				p = p->next;
 			}
-	
-			register unsigned long _beg __asm("a1") = (unsigned long)(first);
-			register unsigned long _end __asm("a2") = (unsigned long)(last+NJ_PAGE_SIZE);
-			register unsigned long _flg __asm("a3") = 0;
-			register unsigned long _swi __asm("r7") = 0xF0002;
-			__asm __volatile ("swi 0 	@ sys_cacheflush" : "=r" (_beg) : "0" (_beg), "r" (_end), "r" (_flg), "r" (_swi));
 		}
-		#endif
-	#ifdef AVMPLUS_PORTING_API
+# endif
+#endif
+
+# ifdef AVMPLUS_PORTING_API
 		NanoJIT_PortAPI_FlushInstructionCache(_nIns, _endJit1Addr);
 		NanoJIT_PortAPI_FlushInstructionCache(_nExitIns, _endJit2Addr);
-	#endif
+# endif
 	}
 	
 	void Assembler::copyRegisters(RegAlloc* copyTo)
@@ -1051,16 +1054,16 @@ namespace nanojit
 	{
 		// trace must start with LIR_x or LIR_loop
 		//NanoAssert(reader->pos()->isop(LIR_x) || reader->pos()->isop(LIR_loop));
+		 
 		for (LInsp ins = reader->read(); ins != 0 && !error(); ins = reader->read())
 		{
-            //_nvprof("lir",1);
 			LOpcode op = ins->opcode();			
 			switch(op)
 			{
 				default:
-					NanoAssertMsg(false, "unsupported LIR instruction");
+					NanoAssertMsgf(false, "unsupported LIR instruction: %d (~0x40: %d)\n", op, op&~LIR64);
 					break;
-
+					
                 case LIR_live: {
                     countlir_live();
                     pending_lives.add(ins->oprnd1());
@@ -1125,6 +1128,7 @@ namespace nanojit
 					asm_quad(ins);
 					break;
 				}
+#if !defined NANOJIT_64BIT
 				case LIR_callh:
 				{
 					// return result of quad-call in register
@@ -1133,6 +1137,7 @@ namespace nanojit
                     findRegFor(ins->oprnd1(), rmask(retRegs[0]));
 					break;
 				}
+#endif
 				case LIR_param:
 				{
                     countlir_param();
@@ -1182,6 +1187,7 @@ namespace nanojit
 					break;
 				}
 
+				case LIR_qcmov:
 				case LIR_cmov:
 				{
                     countlir_cmov();
@@ -1193,28 +1199,52 @@ namespace nanojit
 					NanoAssert(values->opcode() == LIR_2);
 					LIns* iftrue = values->oprnd1();
 					LIns* iffalse = values->oprnd2();
-					NanoAssert(!iftrue->isQuad() && !iffalse->isQuad());
+
+					NanoAssert(op == LIR_qcmov || (!iftrue->isQuad() && !iffalse->isQuad()));
 					
 					const Register rr = prepResultReg(ins, GpRegs);
 
 					// this code assumes that neither LD nor MR nor MRcc set any of the condition flags.
 					// (This is true on Intel, is it true on all architectures?)
 					const Register iffalsereg = findRegFor(iffalse, GpRegs & ~rmask(rr));
-					switch (condval->opcode())
-					{
-						// note that these are all opposites...
-						case LIR_eq:	MRNE(rr, iffalsereg);	break;
-                        case LIR_ov:    MRNO(rr, iffalsereg);   break;
-                        case LIR_cs:    MRNC(rr, iffalsereg);   break;
-						case LIR_lt:	MRGE(rr, iffalsereg);	break;
-						case LIR_le:	MRG(rr, iffalsereg);	break;
-						case LIR_gt:	MRLE(rr, iffalsereg);	break;
-						case LIR_ge:	MRL(rr, iffalsereg);	break;
-						case LIR_ult:	MRAE(rr, iffalsereg);	break;
-						case LIR_ule:	MRA(rr, iffalsereg);	break;
-						case LIR_ugt:	MRBE(rr, iffalsereg);	break;
-						case LIR_uge:	MRB(rr, iffalsereg);	break;
-						debug_only( default: NanoAssert(0); break; )
+					if (op == LIR_cmov) {
+						switch (condval->opcode())
+						{
+							// note that these are all opposites...
+							case LIR_eq:	MRNE(rr, iffalsereg);	break;
+							case LIR_ov:    MRNO(rr, iffalsereg);   break;
+							case LIR_cs:    MRNC(rr, iffalsereg);   break;
+							case LIR_lt:	MRGE(rr, iffalsereg);	break;
+							case LIR_le:	MRG(rr, iffalsereg);	break;
+							case LIR_gt:	MRLE(rr, iffalsereg);	break;
+							case LIR_ge:	MRL(rr, iffalsereg);	break;
+							case LIR_ult:	MRAE(rr, iffalsereg);	break;
+							case LIR_ule:	MRA(rr, iffalsereg);	break;
+							case LIR_ugt:	MRBE(rr, iffalsereg);	break;
+							case LIR_uge:	MRB(rr, iffalsereg);	break;
+							debug_only( default: NanoAssert(0); break; )
+						}
+					} else if (op == LIR_qcmov) {
+#if !defined NANOJIT_64BIT
+						NanoAssert(0);
+#else
+						switch (condval->opcode())
+						{
+							// note that these are all opposites...
+							case LIR_eq:	MRQNE(rr, iffalsereg);	break;
+							case LIR_ov:    MRQNO(rr, iffalsereg);   break;
+							case LIR_cs:    MRQNC(rr, iffalsereg);   break;
+							case LIR_lt:	MRQGE(rr, iffalsereg);	break;
+							case LIR_le:	MRQG(rr, iffalsereg);	break;
+							case LIR_gt:	MRQLE(rr, iffalsereg);	break;
+							case LIR_ge:	MRQL(rr, iffalsereg);	break;
+							case LIR_ult:	MRQAE(rr, iffalsereg);	break;
+							case LIR_ule:	MRQA(rr, iffalsereg);	break;
+							case LIR_ugt:	MRQBE(rr, iffalsereg);	break;
+							case LIR_uge:	MRQB(rr, iffalsereg);	break;
+							debug_only( default: NanoAssert(0); break; )
+						}
+#endif
 					}
 					/*const Register iftruereg =*/ findSpecificRegFor(iftrue, rr);
 					asm_cmp(condval);
@@ -1283,6 +1313,17 @@ namespace nanojit
 					break;
 				}
 
+#if defined NANOJIT_64BIT
+                case LIR_qiadd:
+                case LIR_qiand:
+                case LIR_qilsh:
+                case LIR_qior:
+                {
+                    asm_qbinop(ins);
+                    break;
+                }
+#endif
+
 				case LIR_add:
 				case LIR_addp:
 				case LIR_sub:
@@ -1300,14 +1341,24 @@ namespace nanojit
 
 					Register rb = UnknownReg;
 					RegisterMask allow = GpRegs;
-					if (lhs != rhs && (op == LIR_mul || !rhs->isconst()))
+					bool forceReg = (op == LIR_mul || !rhs->isconst());
+
+#ifdef NANOJIT_ARM
+					// Arm can't do an immediate op with immediates
+					// outside of +/-255 (for AND) r outside of
+					// 0..255 for others.
+					if (!forceReg)
 					{
-#ifdef NANOJIT_IA32
-						if (op == LIR_lsh || op == LIR_rsh || op == LIR_ush)
-							rb = findSpecificRegFor(rhs, ECX);
-						else
+						if (rhs->isconst() && !isU8(rhs->constval()))
+							forceReg = true;
+					}
 #endif
+
+					if (lhs != rhs && forceReg)
+					{
+						if ((rb = asm_binop_rhs_reg(ins)) == UnknownReg) {
 							rb = findRegFor(rhs, allow);
+						}
 						allow &= ~rmask(rb);
 					}
                     else if ((op == LIR_add||op == LIR_addp) && lhs->isop(LIR_alloc) && rhs->isconst()) {
@@ -1326,7 +1377,7 @@ namespace nanojit
 						ra = findSpecificRegFor(lhs, rr);
 					// else, rA already has a register assigned.
 
-					if (!rhs->isconst() || op == LIR_mul)
+					if (forceReg)
 					{
 						if (lhs == rhs)
 							rb = ra;
@@ -1601,6 +1652,14 @@ namespace nanojit
 					// only want certain regs 
 					Register r = prepResultReg(ins, AllowableFlagRegs);
 					asm_setcc(r, ins);
+#ifdef NJ_ARM_VFP
+					SETE(r);
+#else
+					// SETcc only sets low 8 bits, so extend 
+					MOVZX8(r,r);
+					SETNP(r);
+#endif
+					asm_fcmp(ins);
 					break;
 				}
 #endif
@@ -1651,6 +1710,9 @@ namespace nanojit
 				case LIR_fcall:
 				case LIR_fcalli:
 #endif
+#if defined NANOJIT_64BIT
+				case LIR_callh:
+#endif
 				case LIR_call:
 				case LIR_calli:
 				{
@@ -1676,33 +1738,36 @@ namespace nanojit
 					evictScratchRegs();
 
 					asm_call(ins);
-                   break;
-               }
-               #ifdef VTUNE
-               case LIR_file:
-               {
-                   // we traverse backwards so we are now hitting the file
-                   // that is associated with a bunch of LIR_lines we have already seen.
-                   uintptr_t currentFile = ins->oprnd1()->constval();
-                   cgen->jitFilenameUpdate(currentFile);
-                   break;
-               }
-               case LIR_line:
-               {
-                   // add a new table entry, we don't yet know which file it belongs 
-                   // to so we need to add it to the update table too
-                   // note the alloc, actual act is delayed; see above                 
-                   uint32_t currentLine = (uint32_t)ins->oprnd1()->constval();
-                   cgen->jitLineNumUpdate(currentLine);
-                   cgen->jitAddRecord((uintptr_t)_nIns,0,currentLine,true);
-                   break;
-               }
-               #endif /* VTUNE */
+					break;
+				}
+
+				#ifdef VTUNE
+				case LIR_file:
+				{
+					// we traverse backwards so we are now hitting the file
+					// that is associated with a bunch of LIR_lines we already have seen
+					uintptr_t currentFile = ins->oprnd1()->constval();
+					cgen->jitFilenameUpdate(currentFile);
+					break;
+				}
+				case LIR_line:
+				{
+					// add a new table entry, we don't yet knwo which file it belongs
+					// to so we need to add it to the update table too
+					// note the alloc, actual act is delayed; see above
+					uint32_t currentLine = (uint32_t) ins->oprnd1()->constval();
+					cgen->jitLineNumUpdate(currentLine);
+					cgen->jitAddRecord((uintptr_t)_nIns, 0, currentLine, true);
+					break;
+				}
+				#endif // VTUNE
 			}
-#ifdef VTUNE
-           cgen->jitCodePosUpdate( (uintptr_t)_nIns );
-#endif 
-           // check that all is well (don't check in exit paths since its more complicated)
+
+			vtune_only(
+				cgen->jitCodePosUpdate((uintptr_t)_nIns);
+			)
+
+			// check that all is well (don't check in exit paths since its more complicated)
 			debug_only( pageValidate(); )
 			debug_only( resourceConsistencyCheck();  )
 		}
@@ -2144,6 +2209,11 @@ namespace nanojit
 		if (exit->target) 
 			exit->target->addLink(rec);
 		return rec;
+	}
+
+	void Assembler::setCallTable(const CallInfo* functions)
+	{
+		_functions = functions;
 	}
 
 	#ifdef NJ_VERBOSE

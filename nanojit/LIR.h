@@ -39,35 +39,48 @@
 #ifndef __nanojit_LIR__
 #define __nanojit_LIR__
 
-namespace avmplus { class RegionTracker; }    
+namespace avmplus { class RegionTracker; }
 
+/**
+ * Fundamentally, the arguments to the various operands can be grouped along
+ * two dimensions.  One dimension is size: can the arguments fit into a 32-bit
+ * register, or not?  The other dimension is whether the argument is an integer
+ * (including pointers) or a floating-point value.  In all comments below,
+ * "integer" means integer of any size, including 64-bit, unless otherwise
+ * specified.  All floating-point values are always 64-bit.  Below, "quad" is
+ * used for a 64-bit value that might be either integer or floating-point.
+ */
 namespace nanojit
 {
 	#define is_trace_skip_tramp(op) ((op) <= LIR_tramp)
 	
-	enum LOpcode 
+	enum LOpcode
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#pragma warning(disable:4480) // nonstandard extension used: specifying underlying type for enum
+          : unsigned
+#endif
 	{
 		// flags; upper bits reserved
 		LIR64	= 0x40,			// result is double or quad
 		
 		// special operations (must be 0..N)
-		LIR_start =		0,	
-		LIR_nearskip =  1, // must be LIR_skip-1 and lsb=1
-		LIR_skip =		2,
+		LIR_start = 0,	
+		LIR_nearskip = 1, // must be LIR_skip-1 and lsb=1
+		LIR_skip = 2,
         LIR_neartramp = 3, // must be LIR_tramp-1 and lsb=1
-        LIR_tramp =		4,
-        
+        LIR_tramp = 4,
+
 		// non-pure operations
-        LIR_addp    = 9,
+		LIR_addp    = 9,
 		LIR_param	= 10,
-		LIR_st		= 11,
-		LIR_ld		= 12,
-        LIR_alloc   = 13, // alloca some stack space
+		LIR_st		= 11, // 32-bit store
+		LIR_ld		= 12, // 32-bit load
+		LIR_alloc   = 13, // alloca some stack space
         LIR_sti     = 14,
-        LIR_ret     = 15,
-        LIR_live    = 16, // extend live range of reference
-        LIR_calli   = 17, // indirect call
-		LIR_call	= 18, // direct call
+		LIR_ret     = 15,
+		LIR_live    = 16, // extend live range of reference
+		LIR_calli   = 17, // indirect call	
+		LIR_call	= 18, // subroutine call returning a 32-bit value
 			
 		// guards
 		LIR_loop    = 19, // loop fragment
@@ -78,24 +91,29 @@ namespace nanojit
 		LIR_jt		= 22, // jump true
 		LIR_jf		= 23, // jump false
 		LIR_label	= 24, // a jump target
-        LIR_ji      = 25, // jump indirect
-		
+		LIR_ji      = 25, // jump indirect
 		// operators
-		LIR_feq		= 26,
-		LIR_flt		= 27,
-		LIR_fgt		= 28,
-		LIR_fle		= 29,
-		LIR_fge		= 30,
-        LIR_cmov    = 31, // conditional move (op1=cond, op2=cond(iftrue,iffalse))
-		LIR_short   = 32,
-		LIR_int		= 33,
+
+		// LIR_feq though LIR_fge must only be used on float arguments.  They
+		// return integers.
+		LIR_feq		= 26, // floating-point equality [2 float inputs]
+		LIR_flt		= 27, // floating-point less than: arg1 < arg2
+		LIR_fgt		= 28, // floating-point greater than: arg1 > arg2
+		LIR_fle		= 29, // arg1 <= arg2, both floating-point
+		LIR_fge		= 30, // arg1 >= arg2, both floating-point
+
+		LIR_cmov    = 31, // conditional move (op1=cond, op2=cond(iftrue,iffalse))
+		LIR_short   = 32, // constant 16-bit integer
+		LIR_int		= 33, // constant 32-bit integer
 		LIR_ldc     = 34, // non-volatile load
 		LIR_2       = 35, // wraps a pair of refs
-		LIR_neg		= 36,					// [ 1 integer input / integer output ]
-		LIR_add		= 37,					// [ 2 operand integer intputs / integer output ]
-		LIR_sub		= 38,
-		LIR_mul		= 39,
-        LIR_callh   = 40,
+
+		// LIR_neg through LIR_ush are all integer operations
+		LIR_neg		= 36, // numeric negation [ 1 integer input / integer output ]
+		LIR_add		= 37, // integer addition [ 2 operand integer intputs / integer output ]
+		LIR_sub		= 38, // integer subtraction
+		LIR_mul		= 39, // integer multiplication
+		LIR_callh   = 40, 
 		LIR_and		= 41,
 		LIR_or		= 42,
 		LIR_xor		= 43,
@@ -103,59 +121,83 @@ namespace nanojit
 		LIR_lsh		= 45,
 		LIR_rsh		= 46,	// >>
 		LIR_ush		= 47,	// >>>
-        // conditional guards, op^1 to complement
+
+		// conditional guards, op^1 to complement.  Only things that are
+		// isCond() can be passed to these.
 		LIR_xt		= 48, // exit if true   0x30 0011 0000
 		LIR_xf		= 49, // exit if false  0x31 0011 0001
+
+		// qlo and qhi take a single quad argument and return its low and high
+		// 32 bits respectively as 32-bit integers.
 		LIR_qlo		= 50,
 		LIR_qhi		= 51,
+
 		LIR_ldcb    = 52, // non-volatile 8-bit load
 
         LIR_ov      = 53,
         LIR_cs      = 54,
-        LIR_eq      = 55,
-        // relational operators.  op^1 to swap left/right, op^3 to complement.
+		LIR_eq      = 55, // integer equality
+        // integer (all sizes) relational operators.  op^1 to swap left/right,
+        // op^3 to complement.
 		LIR_lt      = 56, // 0x38 0011 1000
 		LIR_gt      = 57, // 0x39 0011 1001
 		LIR_le		= 58, // 0x3A 0011 1010
 		LIR_ge		= 59, // 0x3B 0011 1011
+		// and the unsigned integer versions
 		LIR_ult		= 60, // 0x3C 0011 1100
 		LIR_ugt		= 61, // 0x3D 0011 1101
 		LIR_ule		= 62, // 0x3E 0011 1110
 		LIR_uge		= 63, // 0x3F 0011 1111
 
-        // non-64bit ops, but we're out of code space below 64
-        LIR_file    = 1 | LIR64,
-        LIR_line    = 2 | LIR64,
+		// non-64bit ops, but we're out of code space below 64
+		LIR_file    = 1 | LIR64,
+		LIR_line    = 2 | LIR64,
 
 		/**
 		 * 64bit operations
 		 */
-		LIR_stq		= LIR_st | LIR64,
+		LIR_stq		= LIR_st | LIR64, // quad store
 		LIR_stqi	= LIR_sti | LIR64,
-        LIR_fret    = LIR_ret | LIR64,
-		LIR_quad    = LIR_int | LIR64,
-		LIR_ldq		= LIR_ld    | LIR64,
-		LIR_ldqc	= LIR_ldc   | LIR64,
+		LIR_fret    = LIR_ret | LIR64,
+		LIR_quad    = LIR_int | LIR64, // quad constant value
+		LIR_ldq		= LIR_ld    | LIR64, // quad load
+		LIR_ldqc    = LIR_ldc   | LIR64,
+        LIR_qiand   = 24 | LIR64,
+        LIR_qiadd   = 25 | LIR64,
+        LIR_qilsh   = LIR_lsh | LIR64,
 
-        LIR_fcall   = LIR_call  | LIR64,
-        LIR_fcalli  = LIR_calli | LIR64,
-		LIR_fneg	= LIR_neg  | LIR64,
-		LIR_fadd	= LIR_add  | LIR64,
-		LIR_fsub	= LIR_sub  | LIR64,
-		LIR_fmul	= LIR_mul  | LIR64,
-		LIR_fdiv	= 40        | LIR64,
+		LIR_fcall   = LIR_call  | LIR64, // subroutine call returning quad
+		LIR_fcalli  = LIR_calli | LIR64,
+		LIR_fneg	= LIR_neg  | LIR64, // floating-point numeric negation
+		LIR_fadd	= LIR_add  | LIR64, // floating-point addition
+		LIR_fsub	= LIR_sub  | LIR64, // floating-point subtraction
+		LIR_fmul	= LIR_mul  | LIR64, // floating-point multiplication
+		LIR_fdiv	= 40        | LIR64, // floating-point division
+		LIR_qcmov	= LIR_cmov | LIR64, 
 
 		LIR_qjoin	= 41 | LIR64,
-		LIR_i2f		= 42 | LIR64,
-		LIR_u2f		= 43 | LIR64
+		LIR_i2f		= 42 | LIR64, // convert an integer to a float
+		LIR_u2f		= 43 | LIR64, // convert an unsigned integer to a float
+        LIR_qior    = 44 | LIR64
 	};
 
-	#if defined AVMPLUS_64BIT
-	#define LIR_ldp LIR_ldq
-	#define LIR_stp LIR_stq
+	// should these be more enum entries that alias existing ones?
+	#if defined NANOJIT_64BIT
+	#define LIR_ldp     LIR_ldq
+	#define LIR_stp     LIR_stq
+    #define LIR_piadd   LIR_qiadd
+    #define LIR_piand   LIR_qiand
+    #define LIR_pilsh   LIR_qilsh
+	#define LIR_pcmov	LIR_qcmov
+    #define LIR_pior    LIR_qior
 	#else
-	#define LIR_ldp LIR_ld
-	#define LIR_stp LIR_st
+	#define LIR_ldp     LIR_ld
+	#define LIR_stp     LIR_st
+    #define LIR_piadd   LIR_add
+    #define LIR_piand   LIR_and
+    #define LIR_pilsh   LIR_lsh
+	#define LIR_pcmov	LIR_cmov
+    #define LIR_pior    LIR_or
 	#endif
 
 	inline uint32_t argwords(uint32_t argc) {
@@ -247,7 +289,11 @@ namespace nanojit
         struct sti_type
         {
 			LOpcode			code:8;
+#if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+			signed int      disp:8;     // Sun Studio requires explicitly declaring signed int bit-field
+#else
 			int32_t	    	disp:8;
+#endif
 			uint32_t		oprnd_1:8;  // 256 ins window and since they only point backwards this is sufficient.
 			uint32_t		oprnd_2:8;  
         };
@@ -265,7 +311,11 @@ namespace nanojit
         struct t_type
         {
             LOpcode         code:8;
+#if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+            signed int      imm24:24;
+#else
             int32_t         imm24:24;
+#endif
         };
 
 		// imm16 form
@@ -273,7 +323,11 @@ namespace nanojit
 		{
 			LOpcode			code:8;
 			uint32_t		resv:8;  // cobberred during assembly
+#if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+			signed int		imm16:16;
+#else
 			int32_t			imm16:16;
+#endif
 		};
 
 		// overlay used during code generation ( note that last byte is reserved for allocation )
@@ -317,7 +371,11 @@ namespace nanojit
 		inline int16_t	imm16()	 const	{ return i.imm16; }
 		inline int32_t	imm24()	 const	{ return t.imm24; }
 		inline LIns*	ref()	 const	{ 
+#if defined NANOJIT_64BIT
+            return (t.code & 1) ? (LIns*)this+t.imm24 : *(LIns**)(this-2);
+#else
             return (t.code & 1) ? (LIns*)this+t.imm24 : *(LIns**)(this-1);
+#endif
         }
 		inline int32_t	imm32()	 const	{ return *(int32_t*)(this-1); }
 		inline uint8_t	resv()	 const  { return g.resv; }
@@ -368,13 +426,21 @@ namespace nanojit
 		#ifdef AVMPLUS_UNALIGNED_ACCESS
 			return *(const uint64_t*)(this-2);
 		#else
-			uint64_t tmp;
+			union { uint64_t tmp; int32_t dst[2]; } u;
 			const int32_t* src = (const int32_t*)(this-2);
-			int32_t* dst = (int32_t*)&tmp;
-			dst[0] = src[0];
-			dst[1] = src[1];
-			return tmp;
+			u.dst[0] = src[0];
+			u.dst[1] = src[1];
+			return u.tmp;
 		#endif
+		}
+		
+		inline void* constvalp() const
+		{
+        #ifdef AVMPLUS_64BIT
+		    return (void*)constvalq();
+		#else
+		    return (void*)constval();
+        #endif      
 		}
 		
 		inline double constvalf() const
@@ -383,36 +449,48 @@ namespace nanojit
 		#ifdef AVMPLUS_UNALIGNED_ACCESS
 			return *(const double*)(this-2);
 		#else
-			union { uint64_t tmp; double tmpf; } u;
+			union { uint32_t dst[2]; double tmpf; } u;
 			const int32_t* src = (const int32_t*)(this-2);
-			int32_t* dst = (int32_t*)&u;
-			dst[0] = src[0];
-			dst[1] = src[1];
+			u.dst[0] = src[0];
+			u.dst[1] = src[1];
 			return u.tmpf;
 		#endif
 		}
 
 		bool isCse(const CallInfo *functions) const;
 		bool isop(LOpcode o) const { return u.code == o; }
-		bool isQuad() const { return (u.code & LIR64) != 0; }
+		bool isQuad() const;
 		bool isCond() const;
 		bool isCmp() const;
-        bool isCall() const { return nanojit::isCall(u.code); }
+		bool isCall() const { return nanojit::isCall(u.code); }
         bool isStore() const { return nanojit::isStore(u.code); }
         bool isLoad() const { return nanojit::isLoad(u.code); }
-        bool isGuard() const { return nanojit::isGuard(u.code); }
-        bool isconst() const { return nanojit::isConst(u.code); }
+		bool isGuard() const { return nanojit::isGuard(u.code); }
+		// True if the instruction is a 32-bit or smaller constant integer.
+		bool isconst() const { return nanojit::isConst(u.code); }
+		// True if the instruction is a 32-bit or smaller constant integer and
+		// has the value val when treated as a 32-bit signed integer.
 		bool isconstval(int32_t val) const;
+		// True if the instruction is a constant quad value.
 		bool isconstq() const;
-        bool isTramp() const {return isop(LIR_neartramp) || isop(LIR_tramp); }
-		bool isBranch() const {
-            return isop(LIR_jt) || isop(LIR_jf) || isop(LIR_j);
+		// True if the instruction is a constant pointer value.
+		bool isconstp() const;
+        bool isTramp() {
+            return isop(LIR_neartramp) || isop(LIR_tramp);
         }
-		
+		bool isBranch() const {
+			return isop(LIR_jt) || isop(LIR_jf) || isop(LIR_j);
+		}
+		// Set the imm16 member.  Should only be used on instructions that use
+		// that.  If you're not sure, you shouldn't be calling it.
 		void setimm16(int32_t i);
-		void setimm24(int32_t i);
+		void setimm24(int32_t x);
+		// Set the resv member.  Should only be used on instructions that use
+		// that.  If you're not sure, you shouldn't be calling it.
 		void setresv(uint32_t resv);
+		// Set the opcode
 		void initOpcode(LOpcode);
+		// operand-setting methods
 		void setOprnd1(LIns*);
 		void setOprnd2(LIns*);
 		void setOprnd3(LIns*);
@@ -446,16 +524,14 @@ namespace nanojit
 
 	class Fragmento;	// @todo remove this ; needed for minbuild for some reason?!?  Should not be compiling this code at all
 	class LirFilter;
-	struct CallInfo;
 
 	// make it a GCObject so we can explicitly delete it early
-	class LirWriter : public GCObject
+	class LirWriter : public GCFinalizedObject
 	{
 	public:
 		LirWriter *out;
         const CallInfo *_functions;
 
-		virtual ~LirWriter() {}
 		LirWriter(LirWriter* out) 
 			: out(out), _functions(out?out->_functions : 0) {}
 
@@ -498,20 +574,21 @@ namespace nanojit
 		virtual LInsp insCall(uint32_t fid, LInsp args[]) {
 			return out->insCall(fid, args);
 		}
-        virtual LInsp insAlloc(int32_t size) {
-            return out->insAlloc(size);
-        }
+		virtual LInsp insAlloc(int32_t size) {
+			return out->insAlloc(size);
+		}
 
 		// convenience
 	    LIns*		insLoadi(LIns *base, int disp);
 	    LIns*		insLoad(LOpcode op, LIns *base, int disp);
-		LIns*       store(LIns* value, LIns* base, int32_t d);
-	    LIns*		ins_choose(LIns* cond, LIns* iftrue, LIns* iffalse, bool);
+	    LIns*		store(LIns* value, LIns* base, int32_t d);
+	    LIns*		ins_choose(LIns* cond, LIns* iftrue, LIns* iffalse);
+	    // Inserts an integer comparison to 0
 	    LIns*		ins_eq0(LIns* oprnd1);
         LIns*       ins2i(LOpcode op, LIns *oprnd1, int32_t);
 		LIns*		qjoin(LInsp lo, LInsp hi);
 		LIns*		insImmPtr(const void *ptr);
-        LIns*       insImmf(double f);
+		LIns*		insImmf(double f);
 	};
 
 #ifdef NJ_VERBOSE
@@ -520,14 +597,15 @@ namespace nanojit
 	/**
 	 * map address ranges to meaningful names.
 	 */
-    class LabelMap MMGC_SUBCLASS_DECL
+    class LabelMap : public GCFinalizedObject
     {
 		LabelMap* parent;
-		class Entry MMGC_SUBCLASS_DECL
+		class Entry : public GCFinalizedObject
 		{
 		public:
 			Entry(int) : name(0), size(0), align(0) {}
 			Entry(avmplus::String *n, size_t s, size_t a) : name(n),size(s),align(a) {}
+            ~Entry(); 
 			DRCWB(avmplus::String*) name;
 			size_t size:29, align:3;
 		};
@@ -538,6 +616,7 @@ namespace nanojit
     public:
         avmplus::AvmCore *core;
         LabelMap(avmplus::AvmCore *, LabelMap* parent);
+        ~LabelMap();
         void add(const void *p, size_t size, size_t align, const char *name);
 		void add(const void *p, size_t size, size_t align, avmplus::String*);
 		const char *dup(const char *);
@@ -545,7 +624,7 @@ namespace nanojit
 		void promoteAll(const void *newbase);
     };
 
-	class LirNameMap MMGC_SUBCLASS_DECL
+	class LirNameMap : public GCFinalizedObject
 	{
 		class CountMap: public avmplus::SortedMap<int, int, avmplus::LIST_NonGCObjects> {
 		public:
@@ -559,11 +638,12 @@ namespace nanojit
 				return c;
 			}
 		} lircounts, funccounts;
-		class Entry MMGC_SUBCLASS_DECL 
+		class Entry : public GCFinalizedObject
 		{
 		public:
 			Entry(int) : name(0) {}
 			Entry(avmplus::String *n) : name(n) {}
+            ~Entry();
 			DRCWB(avmplus::String*) name;
 		};
 		avmplus::SortedMap<LInsp, Entry*, avmplus::LIST_GCObjects> names;
@@ -572,16 +652,19 @@ namespace nanojit
 		void formatImm(int32_t c, char *buf);
 	public:
 
-		LirNameMap(GC *gc, const CallInfo *_functions, LabelMap *r) 
+		LirNameMap(GC *gc,
+		const CallInfo *_functions,
+		LabelMap *r) 
 			: lircounts(gc),
 			funccounts(gc),
 			names(gc),
 			_functions(_functions),
 			labels(r)
 		{}
+        ~LirNameMap();
 
 		void addName(LInsp i, const char *s);
-		void addName(LInsp i, avmplus::String *s);
+		bool addName(LInsp i, avmplus::String *s);
 		void copyName(LInsp i, const char *s, int suffix);
         const char *formatRef(LIns *ref);
 		const char *formatIns(LInsp i);
@@ -676,7 +759,7 @@ namespace nanojit
 	};
 
 	// @todo, this could be replaced by a generic HashMap or HashSet, if we had one
-	class LInsHashSet
+	class LInsHashSet: public GCFinalizedObject
 	{
 		// must be a power of 2. 
 		// don't start too small, or we'll waste time growing and rehashing.
@@ -725,13 +808,12 @@ namespace nanojit
 		LIns* insGuard(LOpcode op, LInsp cond, SideExit *x);
 	};
 
-	struct Page;
 	class LirBuffer : public GCFinalizedObject
 	{
 		public:
 			DWB(Fragmento*)		_frago;
 			LirBuffer(Fragmento* frago, const CallInfo* functions);
-			virtual ~LirBuffer();
+			~LirBuffer();
 			void        clear();
 			LInsp		next();
 			bool		outOmem() { return _noMem != 0; }
@@ -777,6 +859,7 @@ namespace nanojit
 				: LirWriter(0), _buf(buf) {
 				_functions = buf->_functions;
 			}
+			~LirBufWriter() {}
 
 			// LirWriter interface
 			LInsp   insLoad(LOpcode op, LInsp base, LInsp off);
@@ -803,6 +886,9 @@ namespace nanojit
 			bool	ensureRoom(uint32_t count);
 			bool	can8bReach(LInsp from, LInsp to) { return isU8(from-to-1); }
 			bool	can24bReach(LInsp from, LInsp to){ return isS24(from-to); }		
+			bool	canReference(LInsp from, LInsp to) {
+				return isU8(from-to-1);
+			}
 	};
 
 	class LirFilter
@@ -810,7 +896,7 @@ namespace nanojit
 	public:
 		LirFilter *in;
 		LirFilter(LirFilter *in) : in(in) {}
-		virtual ~LirFilter() {}
+        virtual ~LirFilter(){}
 
 		virtual LInsp read() {
 			return in->read();
@@ -828,7 +914,6 @@ namespace nanojit
 	public:
 		LirReader(LirBuffer* buf) : LirFilter(0), _i(buf->next()-1) { }
 		LirReader(LInsp i) : LirFilter(0), _i(i) { }
-		virtual ~LirReader() {}
 
 		// LirReader i/f
 		LInsp read(); // advance to the prior instruction
@@ -856,7 +941,6 @@ namespace nanojit
 		int getTop(LInsp br);
 	public:
 		StackFilter(LirFilter *in, GC *gc, LirBuffer *lirbuf, LInsp sp); 
-		virtual ~StackFilter() {}
 		LInsp read();
 	};
 

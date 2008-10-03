@@ -46,7 +46,7 @@ endif
 #endif
 
 ifeq (arm,$(TARGET_CPU))
-nanojit_cpu_cxxsrc := NativeThumb.cpp
+nanojit_cpu_cxxsrc := NativeARM.cpp
 endif
 
 ifeq (thumb,$(TARGET_CPU))

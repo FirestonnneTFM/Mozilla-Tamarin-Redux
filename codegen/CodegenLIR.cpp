@@ -1056,9 +1056,7 @@ namespace avmplus
         framesize = state->verifier->frameSize;
 
         Fragmento *frago = pool->codePages->frago;
-        frag = frago->getAnchor(abcStart);
-        gc->Free(frag->mergeCounts);
-        frag->mergeCounts = 0;
+        frag = new (gc) Fragment(abcStart);
         LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
@@ -4219,9 +4217,9 @@ namespace avmplus
         frag->releaseLirBuffer();
         for (LirWriter *w = lirout, *wnext; w != 0; w = wnext) {
             wnext = w->out;
-            gc->Free(w);
+            delete w;
         }
-        gc->Free(lirbuf);
+        delete lirbuf;
 
         jitcount++;
         //_nvprof("assm->error", assm->error());
@@ -4475,6 +4473,19 @@ namespace nanojit
     void Assembler::initGuardRecord(LIns*, GuardRecord*) {
         AvmAssert(false);
     }
+
+	void Fragment::onDestroy() {
+		if (root == this) {
+            if (mergeCounts) {
+                delete mergeCounts;
+                mergeCounts = 0;
+            }
+            if (lirbuf) {
+			    delete lirbuf;
+                lirbuf = 0;
+            }
+		}
+	}
 }
 
 #endif // FEATURE_NANOJIT

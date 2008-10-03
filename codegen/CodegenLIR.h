@@ -39,6 +39,7 @@
 #ifndef __avmplus_CodegenLIR__
 #define __avmplus_CodegenLIR__
 
+using namespace MMgc;
 #include "../nanojit/nanojit.h"
 
 #ifdef DEBUGGER
@@ -50,7 +51,6 @@
 namespace avmplus
 {
 	using namespace nanojit;
-    using namespace MMgc;
 
    #ifdef VTUNE
    class LineNumberRecord : public MMgc::GCObject
