@@ -45,7 +45,21 @@ namespace avmplus
 {
 	bool VectorBaseObject::hasAtomProperty(Atom name) const
 	{
-		return ScriptObject::hasAtomProperty(name) || getAtomProperty(name) != undefinedAtom;
+		uint32 index;
+		bool isNumber=false;
+		AvmCore* core = this->core();
+		if (getVectorIndex(name, index, isNumber))
+		{
+			return index < m_length;
+		}
+		else
+		{
+			if(isNumber)
+			{
+				return false;
+			}
+			return ScriptObject::hasAtomProperty(name);
+		}
 	}
 	
 	// helper method
