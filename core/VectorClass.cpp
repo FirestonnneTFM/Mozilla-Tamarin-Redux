@@ -47,7 +47,6 @@ namespace avmplus
 	{
 		uint32 index;
 		bool isNumber=false;
-		AvmCore* core = this->core();
 		if (getVectorIndex(name, index, isNumber))
 		{
 			return index < m_length;
