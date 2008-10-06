@@ -814,25 +814,26 @@ namespace nanojit
 			if (v == LIR_uge)
 				return insImm(uint32_t(c1) >= uint32_t(c2));
 			if (v == LIR_rsh)
-				return insImm(int32_t(c1) >> int32_t(c2));
+				return insImm(int32_t(c1) >> c2);
 			if (v == LIR_lsh)
-				return insImm(int32_t(c1) << int32_t(c2));
+				return insImm(int32_t(c1) << c2);
 			if (v == LIR_ush)
-				return insImm(uint32_t(c1) >> int32_t(c2));
+				return insImm(uint32_t(c1) >> c2);
             if (v == LIR_or)
-                return insImm(uint32_t(c1) | int32_t(c2));
+                return insImm(c1 | c2);
             if (v == LIR_and)
-                return insImm(uint32_t(c1) & int32_t(c2));
+                return insImm(c1 & c2);
             if (v == LIR_xor)
-                return insImm(uint32_t(c1) ^ int32_t(c2));
-			#if NJ_IGNORE_CONST_OVERFLOW
-			if (v == LIR_add)
-				return insImm(int32_t(c1) + int32_t(c2));
-			if (v == LIR_sub)
-				return insImm(int32_t(c1) - int32_t(c2));
-			if (v == LIR_mul)
-				return insImm(int32_t(c1) * int32_t(c2));
-			#endif
+                return insImm(c1 ^ c2);
+
+			// only fold arithmetic if no overflow.
+			int result;
+			if (v == LIR_add && (result = c1 + c2) == int64_t(c1) + int64_t(c2))
+				return insImm(result);
+			if (v == LIR_sub && (result = c1 - c2) == int64_t(c1) - int64_t(c2))
+				return insImm(result);
+			if (v == LIR_mul && (result = c1 * c2) == int64_t(c1) * int64_t(c2))
+				return insImm(result);
 		}
 		else if (oprnd1->isconstq() && oprnd2->isconstq())
 		{
@@ -866,10 +867,6 @@ namespace nanojit
 				oprnd2 = oprnd1;
 				oprnd1 = t;
 				v = LOpcode(v^1);
-			}
-			else if (v == LIR_cmov) {
-				// const ? x : y => return x or y depending on const
-				return oprnd1->constval() ? oprnd2->oprnd1() : oprnd2->oprnd2();
 			}
 		}
 
