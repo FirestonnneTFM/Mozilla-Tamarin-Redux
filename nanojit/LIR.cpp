@@ -2221,6 +2221,195 @@ namespace nanojit
 			parent->names.put(base, names.at(i));
 		}
 	}
+	
+	// BB mgmt functions
+	BlockLocator::BlockLocator(GC* gc, LirWriter* out)
+		: LirWriter(out), _tbd(gc), _bbs(gc), _gc(gc) 
+	{		
+		_out = out;
+	}
+
+	BBNode* BlockLocator::bbFor(LInsp n)
+	{
+		BBNode* e = _bbs.get(n);
+		if (!e)
+		{
+			e = new (_gc) BBNode(_gc,++_gid);
+			_bbs.put(n,e);
+			
+			if (!_bbs.get(0)) _bbs.put(0,e);
+		}
+		return e;
+	}
+
+	void BlockLocator::ensureCurrent(LInsp n)
+	{
+		if (!_current)
+		{
+			_current = bbFor(n);
+			NanoAssert(_current->start==0);
+			_current->start = n;
+		}
+		_priorIns = n;
+	}
+	
+	void BlockLocator::blockEnd(LInsp i)
+	{
+		if (i && _current)
+		{
+			_current->end = i;
+			_previous = _current;
+			_current = 0;
+			
+			// does control flow drop to the next block?
+			if (i->isCall())
+			{
+				_previous->kind = BBNode::ENDS_WITH_CALL;
+				_previous = 0;  // in abc->lir this pattern implies a terminal block, would
+								// be more precise to de-mark the CallInfo record and check that
+			}
+			else if (isRet(i->opcode()))
+			{
+				_previous->kind = BBNode::ENDS_WITH_RET;
+				_previous = 0;	// definately terminates the block
+			}
+			else
+			{
+				_previous->kind = BBNode::FALL_THRU;
+			}
+
+		}
+	}
+	
+	LInsp BlockLocator::update(LInsp i)
+	{
+		if (!i) return i;
+		ensureCurrent(i);
+		if (_previous)
+		{
+			link(_previous, _current);
+			_previous = 0;
+		}
+		return i;
+	}
+
+	void BlockLocator::link(BBNode* from, BBNode* to)
+	{
+		from->succ.add(to);
+		to->pred.add(from);
+	}
+
+	void BlockLocator::fin()
+	{
+		blockEnd(_priorIns);
+		_previous = 0;
+		
+		// process the tbd list
+		uint32_t c = _tbd.size();
+		for(uint32_t i = 0; i<c;i++)
+		{
+			BBNode* n = _tbd.get(i);
+			LInsp target = n->end->getTarget();
+			BBNode* to = _bbs.get(target);
+			link(n,to);
+		}
+		_tbd.clear();
+	}
+	
+	static const char* BBArrow(uint32_t from, BBNode* to)
+	{
+		if (from <= to->num)
+			return ",arrowhead=empty";
+		else
+			return "";
+	}
+	
+	static const char* BBShape(BBNode* b)
+	{
+		BBNode::BBKind k = b->kind;
+		if (k == BBNode::ENDS_WITH_CALL)
+			return ",shape=oval";
+		else if (k == BBNode::ENDS_WITH_RET)
+			return ",shape=invhouse";
+		else
+			return "";
+	}
+	
+	static void printLinks(FILE* o, uint32_t num, BBList& l)
+	{
+		uint32_t c = l.size();
+		for(uint32_t i=0; i<c; i++)
+		{
+			BBNode* to = l.get(i);
+			fprintf(o, "bb%d -> bb%d [weight=2 %s] \n", num, to->num, BBArrow(num,to));
+		}
+	}
+
+	void BlockLocator::print(char* name)
+	{
+		// generate dot info for the graph 
+		//   'dot -Tjpg a.txt > a.jpg'  - will then generate a pretty picture for you
+		FILE* o = stdout;
+		fprintf(o, "digraph \"%s\" {\n", name);
+		fprintf(o, "ratio=fill\n");
+		fprintf(o, "ranksep=.1\n");
+		fprintf(o, "nodesep=.2\n");
+		fprintf(o, "rankdir=LR\n");
+		fprintf(o, "edge [arrowsize=.7,labeldistance=1.0,labelangle=-45,labelfontsize=9]\n");
+		fprintf(o, "node [fontsize=9,shape=box,width=.2,height=.2]\n");
+
+		uint32_t c = _bbs.size();
+		for(uint32_t i=1; i<c; i++)
+		{
+			BBNode* b = _bbs.at(i);  // zero node is repeated starting node so skip it
+			fprintf(o, "bb%d [label=\"BB%d\" %s]\n", (int)i, (int)i, BBShape(b));
+			printLinks(o,b->num,b->succ);
+		}
+		fprintf(o, "}\n");
+	}
+	
+	LInsp BlockLocator::ins1(LOpcode v, LIns* a)						{ return update( _out->ins1(v,a) ); }
+	LInsp BlockLocator::ins2(LOpcode v, LIns* a, LIns* b)				{ return update( _out->ins2(v,a,b) ); }
+	LInsp BlockLocator::insLoad(LOpcode op, LIns* base, LIns* d)		{ return update( _out->insLoad(op,base,d) ); }
+	LInsp BlockLocator::insStore(LIns* value, LIns* base, LIns* disp)	{ return update( _out->insStore(value,base,disp) ); }
+	LInsp BlockLocator::insStorei(LIns* value, LIns* base, int32_t d)	{ return update( _out->insStorei(value,base,d) ); }
+	LInsp BlockLocator::insCall(uint32_t fid, LInsp args[])				{ return update( _out->insCall(fid,args) ); }
+
+	LInsp BlockLocator::insGuard(LOpcode v, LIns *c, SideExit *x)
+	{
+		LInsp i = out->insGuard(v, c, x);
+		blockEnd(_priorIns);
+		return i;
+	}
+
+	LInsp BlockLocator::ins0(LOpcode v)
+	{
+		LInsp i = _out->ins0(v);
+		if (v == LIR_label || isRet(v))
+			blockEnd(_priorIns);
+
+		update(i);
+		return i;
+	}
+
+	LInsp BlockLocator::insBranch(LOpcode v, LInsp condition, LInsp to)
+	{
+		LInsp i = _out->insBranch(v, condition, to);
+		if (!i) return i;
+		
+		blockEnd(i);
+		if (to)
+		{
+			BBNode* e = _bbs.get(to); // must have already been processed
+			link(_previous, e);
+		}
+		else
+		{
+			_tbd.add(_previous);
+		}
+		return i;
+	}
+	
 #endif // NJ_VERBOSE
 }
 	

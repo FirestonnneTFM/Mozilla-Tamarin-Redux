@@ -248,6 +248,16 @@
 // performance metrics for NJ 
 //#define PERFM
 
+#ifdef PERFM
+# define PERFM_NVPROF(n,v) _nvprof(n,v)
+# define PERFM_NTPROF(n) _ntprof(n)
+# define PERFM_TPROF_END() _tprof_end()
+#else
+# define PERFM_NVPROF(n,v)
+# define PERFM_NTPROF(n)
+# define PERFM_TPROF_END() 
+#endif
+
 #ifdef SOLARIS
 #define HAVE_ALLOCA_H
 #endif
@@ -291,7 +301,7 @@
 
 #if defined AVMPLUS_WIN32 && !defined AVMPLUS_64BIT
 #  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
+//#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
 //#  define AVMPLUS_DIRECT_THREADED // see comments in Interpreter.cpp before enabling this
 #endif
 

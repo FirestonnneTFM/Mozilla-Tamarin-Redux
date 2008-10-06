@@ -927,10 +927,10 @@ namespace nanojit
 
             frag->fragEntry = patchEntry;
 			NIns* code = _nIns;
-#ifdef PERFM
-			_nvprof("code", codeBytes());  // requires that all pages are released between begin/endAssembly()otherwise we double count
-#endif
-			// let the fragment manage the pages if we're using trees and there are branches
+
+            PERFM_NVPROF("code", codeBytes()); // requires that all pages are released between begin/endAssembly()otherwise we double count
+
+            // let the fragment manage the pages if we're using trees and there are branches
 			Page* manage = (_frago->core()->config.tree_opt) ? handoverPages() : 0;			
 			frag->setCode(code, manage); // root of tree should manage all pages
 			//fprintf(stderr, "endAssembly frag %X entry %X\n", (int)frag, (int)frag->fragEntry);

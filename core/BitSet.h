@@ -54,7 +54,7 @@ namespace avmplus
 	 * This object is not optimized for a fixed sized bit vector
 	 * it instead allows for dynamically growing the bit vector.
 	 */ 
-	class BitSet
+	class BitSet: public MMgc::GCFinalizedObject
 	{
         private:
             uintptr_t *getbits() {
@@ -81,6 +81,15 @@ namespace avmplus
                 int cap = ((bitcap+kUnit-1)/kUnit);
                 if (cap > kDefaultCapacity)
                     grow(gc, cap);
+			}
+
+			virtual ~BitSet() {
+				if (capacity > kDefaultCapacity) {
+					uintptr_t *p = bits.ptr;
+					MMgc::GC::GetGC(p)->Free(p);
+					bits.ptr = 0;
+					capacity = kDefaultCapacity;
+				}
 			}
 
             void reset()

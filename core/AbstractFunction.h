@@ -174,6 +174,7 @@ namespace avmplus
 
     protected:
 		AbstractFunction();
+		virtual ~AbstractFunction() {}
 
 	public:
 		
@@ -237,12 +238,6 @@ namespace avmplus
 
 		void boxArgs(int argc, uint32 *ap, Atom* out);
 
-	protected:
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-
-		/** Dummy destructor to avoid warnings */
-		virtual ~AbstractFunction() {}
-#endif 
 #ifdef AVMPLUS_VERBOSE
 	public:
 		virtual Stringp format(AvmCore* core) const;

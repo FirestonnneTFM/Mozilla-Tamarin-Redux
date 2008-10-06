@@ -56,7 +56,7 @@ namespace avmplus
    class LineNumberRecord : public MMgc::GCObject
    {
        public:
-           LineNumberRecord(Stringp fn, uint32 ln)
+           LineNumberRecord(Stringp fn, uint32_t ln)
            : filename(fn)
            , lineno(ln)
            { }
@@ -70,12 +70,12 @@ namespace avmplus
        public:
            JITCodeInfo(MMgc::GC* gc) : lineNumTable(gc,512) {}
 
-           uint32_t sid;  // code info id
            MethodInfo* method;
            SortedIntMap<LineNumberRecord*> lineNumTable;       // populated during code generation 
            uintptr startAddr;
            uintptr endAddr;
            iJIT_Method_NIDS* vtune;            // vtune record inlined in code (if any)
+           uint32_t sid;  // code info id
 
            LineNumberRecord* add(MMgc::GC* gc, uintptr_t loc, Stringp file, uint32_t line)
            {
@@ -159,7 +159,7 @@ namespace avmplus
 		LIns *coreAddr;
         bool interruptable;
         CodegenLabel interrupt_label, npe_label;
-        sintptr lastPcSave;
+        intptr_t lastPcSave;
         List<Patch, LIST_NonGCObjects> patches;
         LIns *exBranch;
         LIns *setjmpResult;
@@ -167,28 +167,21 @@ namespace avmplus
         int framesize;
 
         LIns *InsAlloc(int32_t);
-        LIns *loadIns(LOpcode op, int32_t disp, LIns *base);
-        LIns *Ins(LOpcode);
-        LIns *Ins(LOpcode, LIns *a);
-        void storeIns(LIns *val, int32_t disp, LIns *base);
         void storeIns(LIns *val, int32_t disp, LIns *base, bool force32);
-        LIns *InsConst(int32_t c);
         LIns *InsConst(const void *p) { return InsConst((int32_t)p); }
-        LIns *defIns(LIns *i);
         LIns *atomToNativeRep(int loc, LIns *i);
         LIns *atomToNativeRep(Traits *, LIns *i);
         LIns *ptrToNativeRep(Traits*, LIns*);
         LIns *loadAtomRep(int i);
         LIns *callIns(uint32_t fid, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
-        LIns *binaryIns(LOpcode, LIns *a, LIns *b);
         LIns *localGet(int i);
         LIns *localGetq(int i);
         LIns *localCopy(int i); // sniff's type
         LIns *branchIns(LOpcode op, LIns *cond);
         LIns *branchIns(LOpcode op, LIns *cond, uintptr_t targetpc);
         LIns *retIns(LIns *val);
-        LIns *loadToplevel(LIns* env);
+        LIns *loadToplevel();
         LIns *initMultiname(Multiname* multiname, int& csp, bool isDelete =false);
         LIns *storeAtomArgs(int count, int index);
         LIns *storeAtomArgs(LIns *obj, int count, int index);
@@ -198,12 +191,9 @@ namespace avmplus
     	LIns *cmpLt(int lhsi, int rhsi);
     	LIns *cmpLe(int lhsi, int rhsi);
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
-	    LIns *i2dIns(LIns* v);
-	    LIns *u2dIns(LIns* v);
-        bool isDouble(int i);
         debug_only( bool isPointer(int i); )
         void label(CodegenLabel &label, LIns *bb);
-        void emitPrep(AbcOpcode);
+        void emitPrep();
         void emitSampleCheck();
         bool verbose();
         void patchLater(LIns *br, CodegenLabel &);
@@ -214,6 +204,31 @@ namespace avmplus
         void deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
         void deadvars_kill(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
 
+        LIns *loadIns(LOpcode op, int32_t disp, LIns *base) {
+            return lirout->insLoad(op, base, disp);
+        }
+        LIns *Ins(LOpcode op) {
+            return lirout->ins0(op);
+        }
+        LIns *Ins(LOpcode op, LIns *a) {
+            return lirout->ins1(op, a);
+        }
+        void storeIns(LIns *val, int32_t disp, LIns *base) {
+            lirout->store(val, base, disp);
+        }
+        LIns *i2dIns(LIns* v) {
+            return lirout->ins1(LIR_i2f, v);
+        }
+        LIns *u2dIns(LIns* v) {
+            return lirout->ins1(LIR_u2f, v);
+        }
+        LIns *binaryIns(LOpcode op, LIns *a, LIns *b) {
+            return lirout->ins2(op,a,b); 
+        }
+        LIns *InsConst(int32_t c) {
+            return lirout->insImm(c);
+        }
+
 	public:
 		CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
@@ -222,9 +237,9 @@ namespace avmplus
 	    void formatOperand(PrintWriter& buffer, LIns* oprnd);
 		void epilogue(FrameState* state);
 		bool prologue(FrameState* state);
-		void emitCall(FrameState* state, AbcOpcode opcode, sintptr method_id, int argc, Traits* result);
+		void emitCall(FrameState* state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result);
 		void emit(FrameState* state, AbcOpcode opcode, uintptr op1=0, uintptr op2=0, Traits* result=NULL);
-		void emitIf(FrameState* state, AbcOpcode opcode, sintptr target, int lhs, int rhs);
+		void emitIf(FrameState* state, AbcOpcode opcode, intptr_t target, int lhs, int rhs);
 		void emitSwap(FrameState* state, int i, int j);
 		void emitCopy(FrameState* state, int src, int dest);
 		void emitGetscope(FrameState* state, int scope, int dest);
@@ -237,11 +252,10 @@ namespace avmplus
 		void emitCheckNull(FrameState* state, int index);
 		void emitSetContext(FrameState* state, AbstractFunction* f);
 		void emitSetDxns(FrameState* state);
+        void emitGetslot(FrameState*, int slot, int ptr_index, Traits *result);
+        void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
 		void merge(int i, const Value& current, Value& target);
 		void localSet(int i, LIns* o);
-
-    // helpers for jitted code
-		static Atom coerce_o(Atom v);
 	};
 
 	class CodegenIMT

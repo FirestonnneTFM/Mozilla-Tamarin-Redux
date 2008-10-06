@@ -55,9 +55,6 @@ namespace avmplus
 		cinits(core->GetGC(), 0),
 		scripts(core->GetGC(), 0),
 		abcStart(startPos)
-#ifdef AVMPLUS_VERIFYALL
-		,verifyQueue(core->GetGC(), 0)
-#endif
 	{
 		namedTraits = new(core->GetGC()) MultinameHashtable();
 		m_code = sb.getImpl();
@@ -143,37 +140,6 @@ namespace avmplus
 	{
 		namedTraits->add(name, ns, (Binding)traits);
 	}
-
-#ifdef AVMPLUS_VERIFYALL
-	void PoolObject::enq(AbstractFunction* f)
-	{
-		if (!f->isVerified() && !(f->flags & AbstractFunction::VERIFY_PENDING))
-		{
-			f->flags |= AbstractFunction::VERIFY_PENDING;
-			verifyQueue.add(f);
-		}
-	}
-
-	void PoolObject::enq(Traits* t)
-	{
-		for (int i=0, n=t->methodCount; i < n; i++)
-		{
-			AbstractFunction* f = t->getMethod(i);
-			if (f)
-				enq(f);
-		}
-	}
-
-	void PoolObject::processVerifyQueue(Toplevel* toplevel)
-	{
-		while (!verifyQueue.isEmpty())
-		{
-			AbstractFunction* f = verifyQueue.removeLast();
-			AvmAssert(!f->isVerified());
-			f->verify(toplevel);
-		}
-	}
-#endif
 
 	Namespace* PoolObject::getNamespace(int index) const
 	{

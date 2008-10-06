@@ -128,7 +128,6 @@ namespace avmplus
 	
 	void ArmAssembler::MOV(Register dst, Register src)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  mov%s   %R, %R\n", mip, conditionCodes[conditionCode], dst, src);
@@ -140,7 +139,6 @@ namespace avmplus
 
 	void ArmAssembler::LSL(Register dst, Register src, Register rShift)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  lsl%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src, rShift);
@@ -152,7 +150,6 @@ namespace avmplus
 
 	void ArmAssembler::LSR(Register dst, Register src, Register rShift)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  lsr%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src, rShift);
@@ -164,7 +161,6 @@ namespace avmplus
 
 	void ArmAssembler::ASR(Register dst, Register src, Register rShift)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  asr%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src, rShift);
@@ -176,7 +172,6 @@ namespace avmplus
 
 	void ArmAssembler::LSL_i(Register dst, Register src, int iShift)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  lsl%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, iShift);
@@ -188,7 +183,6 @@ namespace avmplus
 	
 	void ArmAssembler::LSR_i(Register dst, Register src, int iShift)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  lsr%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, iShift);
@@ -200,7 +194,6 @@ namespace avmplus
 
 	void ArmAssembler::ASR_i(Register dst, Register src, int iShift)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  asr%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, iShift);
@@ -212,7 +205,6 @@ namespace avmplus
 	
 	void ArmAssembler::CMP(Register Rn, Register Rm)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  cmp%s   %R, %R\n", mip, conditionCodes[conditionCode], Rn, Rm);
@@ -224,7 +216,6 @@ namespace avmplus
 
 	void ArmAssembler::ADD(Register dst, Register src1, Register src2)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  add%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src1, src2);
@@ -236,7 +227,6 @@ namespace avmplus
 
 	void ArmAssembler::AND(Register dst, Register src1, Register src2)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  and%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src1, src2);
@@ -248,7 +238,6 @@ namespace avmplus
 	
 	void ArmAssembler::ORR(Register dst, Register src1, Register src2)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  orr%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src1, src2);
@@ -260,7 +249,6 @@ namespace avmplus
 
 	void ArmAssembler::EOR(Register dst, Register src1, Register src2)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  eor%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src1, src2);
@@ -272,7 +260,6 @@ namespace avmplus
 	
 	void ArmAssembler::MUL(Register dst, Register src1, Register src2)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  mul%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src1, src2);
@@ -284,7 +271,6 @@ namespace avmplus
 	
 	void ArmAssembler::SUB(Register dst, Register src1, Register src2)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  sub%s   %R, %R, %R\n", mip, conditionCodes[conditionCode], dst, src1, src2);
@@ -296,7 +282,6 @@ namespace avmplus
 	
 	void ArmAssembler::STMFD_bang(Register dst, int mask)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  stmfd%s %R!, %A\n", mip, conditionCodes[conditionCode], dst, mask);
@@ -310,7 +295,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  sub%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, imm8);
@@ -323,7 +307,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  eor%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, imm8);
@@ -336,7 +319,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  orr%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, imm8);
@@ -349,7 +331,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  rsb%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, imm8);
@@ -360,7 +341,6 @@ namespace avmplus
 	
 	void ArmAssembler::BL(int offset24)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  bl%s    %A\n", mip, conditionCodes[conditionCode], offset24);
@@ -371,7 +351,6 @@ namespace avmplus
 
 	void ArmAssembler::B(int offset24)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  b%s     %A\n", mip, conditionCodes[conditionCode], offset24);
@@ -400,7 +379,6 @@ namespace avmplus
 			opcode |= 0x02000000;
 		}
 
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag) {
 			if (base == PC) {
@@ -422,7 +400,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  bic%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, imm8);
@@ -435,7 +412,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  mov%s   %R, %d\n", mip, conditionCodes[conditionCode], dst, imm8);
@@ -519,7 +495,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  cmp%s   %R, %d\n", mip, conditionCodes[conditionCode], src, imm8);
@@ -549,7 +524,6 @@ namespace avmplus
 			opcode |= 0x02000000;
 		}
 
-		incInstructionCount();
 		#ifdef AVMPLUS_VERBOSE
 		if (verboseFlag) {
 			if (base == PC) {
@@ -571,7 +545,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  add%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, imm8);
@@ -584,7 +557,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  add%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, imm8 << 8);
@@ -597,7 +569,6 @@ namespace avmplus
 	{
 		AvmAssert((imm8 & 0xFFFFFF00) == 0);
 		
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  and%s   %R, %R, %d\n", mip, conditionCodes[conditionCode], dst, src, imm8);
@@ -608,7 +579,6 @@ namespace avmplus
 	
 	void ArmAssembler::LDMFD(Register src, int mask)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  ldmfd%s %R, %A\n", mip, conditionCodes[conditionCode], src, mask);
@@ -619,7 +589,6 @@ namespace avmplus
 
 	void ArmAssembler::LDMFD_bang(Register src, int mask)
 	{
-		incInstructionCount();
         #ifdef AVMPLUS_VERBOSE
 		if (verboseFlag)
 			console->format("    %A  ldmfd%s! %R, %A\n", mip, conditionCodes[conditionCode], src, mask);
