@@ -103,14 +103,14 @@ namespace nanojit
 	
 	// LCompressedBuffer
 	LirBuffer::LirBuffer(Fragmento* frago, const CallInfo* functions)
-		: _frago(frago), _functions(functions), abi(ABI_FASTCALL), _start(0)
+		: _frago(frago), _functions(functions), _pages(frago->core()->GetGC()), abi(ABI_FASTCALL)
 	{
 		clear();
-		_start = pageAlloc();
-		if (_start)
-			_unused = &_start->lir[0];
+		Page* start = pageAlloc();
+		if (start)
+			_unused = &start->lir[0];
 		//buffer_count++;
-		//fprintf(stderr, "LirBuffer %x start %x\n", (int)this, (int)_start);
+		//fprintf(stderr, "LirBuffer %x unused %x\n", (int)this, (int)_unused);
 	}
 
 	LirBuffer::~LirBuffer()
@@ -125,46 +125,22 @@ namespace nanojit
 	void LirBuffer::clear()
 	{
 		// free all the memory and clear the stats
-		debug_only( if (_start) validate();)
-		while( _start )
-		{
-			Page *next = _start->next;
-			_frago->pageFree( _start );
-			_start = next;
-			_stats.pages--;
-		}
-		NanoAssert(_stats.pages == 0);
+		_frago->pagesRelease(_pages);
+		NanoAssert(!_pages.size());
 		_unused = 0;
 		_stats.lir = 0;
 		_noMem = 0;
 	}
-
-	#ifdef _DEBUG
-	void LirBuffer::validate() const
-	{
-		uint32_t count = 0;
-		Page *last = 0;
-		Page *page = _start;
-		while(page)
-		{
-			last = page;
-			page = page->next;
-			count++;
-		}
-		NanoAssert(count == _stats.pages);
-		NanoAssert(_noMem || _unused->page()->next == 0);
-		NanoAssert(_noMem || samepage(last,_unused));
-	}
-	#endif 
 
 	int32_t LirBuffer::insCount() 
 	{
 		// doesn't include embedded constants nor LIR_skip payload
 		return _stats.lir;
 	}
+
 	int32_t LirBuffer::byteCount() 
 	{
-		return ((_stats.pages-1) * sizeof(Page)) +
+		return ((_pages.size() ? _pages.size()-1 : 0) * sizeof(Page)) +
 			((int32_t)_unused - (int32_t)pageTop(_unused));
 	}
 
@@ -172,41 +148,31 @@ namespace nanojit
 	{
 		Page* page = _frago->pageAlloc();
 		if (page)
-		{
-			page->next = 0;	// end of list marker for new page
-			_stats.pages++;
-		}
+			_pages.add(page);
 		else
-		{
 			_noMem = 1;
-		}
 		return page;
 	}
 	
 	LInsp LirBuffer::next()
 	{
-		debug_only( validate(); )
 		return _unused;
 	}
 
 	bool LirBuffer::addPage()
 	{
-		LInsp last = _unused;
-		// we need to pull in a new page and stamp the old one with a link to it
-        Page *lastPage = last->page();
 		Page *page = pageAlloc();
 		if (page)
 		{
-			lastPage->next = page;  // forward link to next page 
 			_unused = &page->lir[0];
 			//fprintf(stderr, "Fragmento::ensureRoom stamping %x with %x; start %x unused %x\n", (int)pageBottom(last), (int)page, (int)_start, (int)_unused);
-			debug_only( validate(); )
 			return true;
 		} 
 		else {
 			// mem failure, rewind pointer to top of page so that subsequent instruction works
 			verbose_only(if (_frago->assm()->_verbose) _frago->assm()->outputf("page alloc failed");)
-			_unused = &lastPage->lir[0];
+			uint32_t sz = _pages.size();
+			_unused = (sz>0) ? &(_pages[sz-1]->lir[0]) : 0;
 		}
 		return false;
 	}
@@ -225,7 +191,6 @@ namespace nanojit
 
 	LInsp LirBuffer::commit(uint32_t count)
 	{
-		debug_only(validate();)
 		NanoAssertMsg( samepage(_unused, _unused+count), "You need to call ensureRoom first!" );
 		return _unused += count;
 	}

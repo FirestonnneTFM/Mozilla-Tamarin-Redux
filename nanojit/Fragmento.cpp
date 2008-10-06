@@ -59,6 +59,7 @@ namespace nanojit
 	 */
 	Fragmento::Fragmento(AvmCore* core, uint32_t cacheSizeLog2) 
 		:  _frags(core->GetGC()), 
+           _freePages(core->GetGC(), 1024),
            _allocList(core->GetGC()),
 		    _max_pages(1 << (calcSaneCacheSize(cacheSizeLog2) - NJ_LOG2_PAGE_SIZE)),
 			_pagesGrowth(16)
@@ -80,6 +81,7 @@ namespace nanojit
 
 		clearFrags();
         _frags.clear();		
+		_freePages.clear();
 		while( _allocList.size() > 0 )
 		{
 			//fprintf(stderr,"dealloc %x\n", (intptr_t)_allocList.get(_allocList.size()-1));
@@ -95,13 +97,11 @@ namespace nanojit
         //delete enterCounts;
         //delete mergeCounts;
 #endif
-		NanoAssert(_stats.freePages == _stats.pages );
 	}
 
-	void Fragmento::trackFree(int32_t delta)
+	void Fragmento::trackPages()
 	{
-		_stats.freePages += delta;
-		const uint32_t pageUse = _stats.pages - _stats.freePages;
+		const uint32_t pageUse = _stats.pages - _freePages.size();
 		if (_stats.maxPageUse < pageUse)
 			_stats.maxPageUse = pageUse;
 	}
@@ -109,33 +109,32 @@ namespace nanojit
 	Page* Fragmento::pageAlloc()
 	{
         NanoAssert(sizeof(Page) == NJ_PAGE_SIZE);
-		if (!_pageList)
+		if (!_freePages.size())
 			pagesGrow(_pagesGrowth);	// try to get more mem
-		Page *page = _pageList;
-		if (page)
-		{
-			_pageList = page->next;
-			trackFree(-1);
-		}
-		//fprintf(stderr, "Fragmento::pageAlloc %X,  %d free pages of %d\n", (int)page, _stats.freePages, _stats.pages);
-		NanoAssert(pageCount()==_stats.freePages);
+
+		trackPages();
+		Page* page = 0;
+		if (_freePages.size()) 
+			page = _freePages.removeLast();
 		return page;
 	}
 	
-	void Fragmento::pageFree(Page* page)
-	{ 
-		//fprintf(stderr, "Fragmento::pageFree %X,  %d free pages of %d\n", (int)page, _stats.freePages+1, _stats.pages);
-
-		// link in the page
-		page->next = _pageList;
-		_pageList = page;
-		trackFree(+1);
-		NanoAssert(pageCount()==_stats.freePages);
+	void Fragmento::pagesRelease(PageList& l)
+	{
+		_freePages.add(l);
+		l.clear();
+		NanoAssert(_freePages.size() <= _stats.pages);
 	}
 
+	void Fragmento::pageFree(Page* page)
+	{ 
+		_freePages.add(page);
+		NanoAssert(_freePages.size() <= _stats.pages);
+	}
+	
 	void Fragmento::pagesGrow(int32_t count)
 	{
-		NanoAssert(!_pageList);
+		NanoAssert(!_freePages.size());
 		MMGC_MEM_TYPE("NanojitFragmentoMem"); 
 		Page* memory = 0;
         GC *gc = _core->GetGC();
@@ -167,21 +166,14 @@ namespace nanojit
             entry->allocSize = gcpages;
             _allocList.add(entry);
 
-			Page* page = memory;
-			_pageList = page;
 			_stats.pages += count;
-			_stats.freePages += count;
-			trackFree(0);
-			while(--count > 0)
+			Page* page = memory;
+			while(--count >= 0)
 			{
-				Page *next = page + 1;
-				//fprintf(stderr,"Fragmento::pageGrow adding page %x ; %d\n", (intptr_t)page, count);
-				page->next = next;
-				page = next; 
+				//fprintf(stderr,"Fragmento::pageGrow adding page %x ; %d\n", (unsigned)page, _freePages.size()+1);
+				_freePages.add(page++);
 			}
-			page->next = 0;
-			NanoAssert(pageCount()==_stats.freePages);
-			//fprintf(stderr,"Fragmento::pageGrow adding page %x ; %d\n", (intptr_t)page, count);
+			trackPages();
 		}
 	}
 	
@@ -207,7 +199,6 @@ namespace nanojit
 		verbose_only( mergeCounts->clear();)
 		verbose_only( _stats.flushes++ );
 		verbose_only( _stats.compiles = 0 );
-		//fprintf(stderr, "Fragmento.clearFrags %d free pages of %d\n", _stats.freePages, _stats.pages);
 	}
 
 	Assembler* Fragmento::assm()
@@ -293,14 +284,6 @@ namespace nanojit
     }
 
 #ifdef NJ_VERBOSE
-	uint32_t Fragmento::pageCount()
-	{
-		uint32_t n = 0;
-		for(Page* page=_pageList; page; page = page->next)
-			n++;
-		return n;
-	}
-
 	struct fragstats {
 		int size;
 		uint64_t traceDur;
@@ -401,7 +384,7 @@ namespace nanojit
 		int32_t count = _frags.size();
 		int32_t pages =  _stats.pages;
 		int32_t maxPageUse =  _stats.maxPageUse;
-		int32_t free = _stats.freePages;
+		int32_t free = _freePages.size();
 		int32_t flushes = _stats.flushes;
 		if (!count)
 		{

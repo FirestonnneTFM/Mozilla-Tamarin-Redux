@@ -99,6 +99,7 @@ namespace nanojit
 			AvmCore*	core();
 			Page*		pageAlloc();
 			void		pageFree(Page* page);
+			void		pagesRelease(PageList& list);
 			
             Fragment*   getLoop(const void* ip);
             Fragment*   getAnchor(const void* ip);
@@ -108,7 +109,6 @@ namespace nanojit
             Fragment*   newFrag(const void* ip);
             Fragment*   newBranch(Fragment *from, const void* ip);
 
-            verbose_only ( uint32_t pageCount(); )
 			verbose_only ( void dumpStats(); )
 			verbose_only ( void dumpRatio(const char*, BlockHist*);)
 			verbose_only ( void dumpFragStats(Fragment*, int level, fragstats&); )
@@ -120,8 +120,7 @@ namespace nanojit
 			struct 
 			{
 				uint32_t	pages;					// pages consumed
-				uint32_t	freePages;				// how many pages not in use (<= pages)
-				uint32_t	maxPageUse;				// highwater mark of (poges-freePages)
+				uint32_t	maxPageUse;				// highwater mark of (pages-freePages)
 				uint32_t	flushes, ilsize, abcsize, compiles, totalCompiles;
 			}
 			_stats;
@@ -134,16 +133,16 @@ namespace nanojit
     		void	drawTrees(char *fileName);
             #endif
 			
-			uint32_t cacheUsed() const { return (_stats.pages-_stats.freePages)<<NJ_LOG2_PAGE_SIZE; }
+			uint32_t cacheUsed() const { return (_stats.pages-_freePages.size())<<NJ_LOG2_PAGE_SIZE; }
 			uint32_t cacheUsedMax() const { return (_stats.maxPageUse)<<NJ_LOG2_PAGE_SIZE; }
 		private:
 			void		pagesGrow(int32_t count);
-			void		trackFree(int32_t delta);
+			void		trackPages();
 
-			AvmCore*			_core;
-			DWB(Assembler*)		_assm;
+			AvmCore*		_core;
+			DWB(Assembler*)	_assm;
 			FragmentMap 	_frags;		/* map from ip -> Fragment ptr  */
-			Page*			_pageList;
+			PageList		_freePages;
 
 			/* unmanaged mem */
 			AllocList	_allocList;

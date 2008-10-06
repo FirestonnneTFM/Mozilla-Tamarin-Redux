@@ -205,7 +205,6 @@ namespace nanojit
 	}
 
     struct SideExit;
-    struct Page;
 
     enum AbiKind {
         ABI_FASTCALL,
@@ -870,14 +869,12 @@ namespace nanojit
 	class LirBuffer : public GCFinalizedObject
 	{
 		public:
-			DWB(Fragmento*)		_frago;
 			LirBuffer(Fragmento* frago, const CallInfo* functions);
 			~LirBuffer();
 			void        clear();
 			LInsp		next();
 			bool		outOmem() { return _noMem != 0; }
 			
-			debug_only (void validate() const;)
 			verbose_only(DWB(LirNameMap*) names;)
 			
 			int32_t insCount();
@@ -887,7 +884,6 @@ namespace nanojit
 			struct 
 			{
 				uint32_t lir;	// # instructions
-				uint32_t pages;	// pages consumed
 			}
 			_stats;
 
@@ -895,6 +891,7 @@ namespace nanojit
             AbiKind abi;
             LInsp state,param1,sp,rp;
             LInsp savedParams[NumSavedRegs];
+			DWB(Fragmento*)	_frago;
 			
 		protected:
 			friend class LirBufWriter;
@@ -903,7 +900,7 @@ namespace nanojit
 			bool		addPage();
 			Page*		pageAlloc();
 
-			Page*		_start;		// first page
+			PageList	_pages;
 			LInsp		_unused;	// next unused instruction slot
 			int			_noMem;		// set if ran out of memory when writing to buffer
 	};	
