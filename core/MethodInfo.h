@@ -90,6 +90,7 @@ namespace avmplus
 		static Atom verifyEnter(MethodEnv* env, int argc, uint32 *ap);
 
 		void verify(Toplevel* toplevel);
+        void setInterpImpl();
 
 		static int maxScopeDepth(MethodInfo* /*info*/, int max_scope) 
 		{

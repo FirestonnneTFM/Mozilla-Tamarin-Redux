@@ -2388,25 +2388,6 @@ namespace avmplus
 			verifyFailed(kInvalidBranchTargetError);
 		}
 
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (!jit || jit->overflow) 
-		{
-			if (info->returnTraits() == NUMBER_TYPE)
-				info->implN = avmplus::interpN;
-			else
-				info->impl32 = avmplus::interp32;
-		}
-		else
-		{
-			jit->epilogue(state);
-		}
-		#else
-		if (info->returnTraits() == NUMBER_TYPE)
-			info->implN = avmplus::interpN;
-		else
-			info->impl32 = avmplus::interp32;
-		#endif
-
 #ifdef AVMPLUS_WORD_CODE
 		if (translator) {
 			info->word_code.cache_size = next_cache;
@@ -2414,6 +2395,7 @@ namespace avmplus
 			delete translator;
 		}
 #endif
+        JIT_ONLY(if (jit) jit->epilogue(state);)
 			
 		#ifdef FEATURE_BUFFER_GUARD
 		#ifdef AVMPLUS_MIR

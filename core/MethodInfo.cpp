@@ -67,6 +67,13 @@ namespace avmplus
 		this->impl32 = verifyEnter;
 	}
 
+    void MethodInfo::setInterpImpl() {
+		if (returnTraits() == core()->traits.number_itraits)
+			implN = avmplus::interpN;
+		else
+			impl32 = avmplus::interp32;
+    }
+
 	Atom MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
 	{
 		MethodInfo* f = (MethodInfo*) env->method;
@@ -90,6 +97,7 @@ namespace avmplus
 		f->core()->processVerifyQueue(env->toplevel());
 		#endif
 
+        AvmAssert(f->impl32 != MethodInfo::verifyEnter);
 		env->impl32 = f->impl32;
 		return f->impl32(env, argc, ap);
 	}
@@ -138,10 +146,7 @@ namespace avmplus
 
 				// mark it as interpreted and try to limp along
 				if (jit.overflow)
-				{
-                    Verifier v2(this, toplevel);
-                    v2.verify(0);
-				}
+                    setInterpImpl();
 			}
 			CATCH (Exception *exception) 
 			{
@@ -158,6 +163,7 @@ namespace avmplus
 		else
 		{
 			verifier.verify(NULL); // pass2 dataflow
+            setInterpImpl();
 		}
 		#else
 		Verifier verifier(this, toplevel);
