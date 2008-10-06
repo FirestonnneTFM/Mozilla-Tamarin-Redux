@@ -114,6 +114,7 @@ elif config.getCompiler() == 'VS':
         APP_CXXFLAGS = "-W4 -WX -wd4291 -wd4201 -wd4189 -wd4740 -wd4127 "
         if config.getDebug():
             DEBUG_CXXFLAGS = "-Od "
+            APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- -Zc:forScope "
         else:
             OPT_CXXFLAGS = "-O2 "
             APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- "
