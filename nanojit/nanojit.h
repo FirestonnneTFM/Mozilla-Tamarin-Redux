@@ -67,6 +67,7 @@ namespace nanojit
 	class Fragment;
 	class LIns;
 	struct SideExit;
+	struct Page;
 	class RegAlloc;
 	class BBNode;
 	typedef avmplus::AvmCore AvmCore;
@@ -77,6 +78,7 @@ namespace nanojit
 	typedef avmplus::SortedMap<LIns*,BBNode*,avmplus::LIST_GCObjects> BBMap;
 	typedef avmplus::List<char*, avmplus::LIST_GCObjects> StringList;
 	typedef avmplus::List<BBNode*,avmplus::LIST_GCObjects>	BBList;
+	typedef avmplus::List<Page*,avmplus::LIST_NonGCObjects>	PageList;
 
     const uint32_t MAXARGS = 8;
 
