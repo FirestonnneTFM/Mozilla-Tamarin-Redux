@@ -108,6 +108,9 @@ namespace avmplus
 #ifdef FEATURE_SAMPLER
 		,_sampler(g)
 #endif
+#ifdef AVMPLUS_VERIFYALL
+		,verifyQueue(g, 0)
+#endif
 #ifdef AVMPLUS_WORD_CODE
 		, lookup_cache_timestamp(1)
 #endif
@@ -156,15 +159,16 @@ namespace avmplus
 
 		#ifdef AVMPLUS_MIR
 			config.dceopt = true;
-			#ifdef AVMPLUS_VERBOSE
-			config.bbgraph = false;
-			#endif
         #endif
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			// jit flag forces use of MIR/LIR instead of interpreter
 			config.jit = false;
 			config.cseopt = true;
+
+			#ifdef AVMPLUS_VERBOSE
+			config.bbgraph = false;
+			#endif
 
     	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     		config.sse2 = true;
@@ -4022,4 +4026,34 @@ return the result of the comparison ToPrimitive(x) == y.
 		name.setName(intern(index));
 	}		
 #endif // MIR or NANOJIT
+
+#ifdef AVMPLUS_VERIFYALL
+	void AvmCore::enq(AbstractFunction* f) {
+		if (config.verifyall &&
+                f && !f->isVerified() && 
+                !(f->flags & AbstractFunction::VERIFY_PENDING)) {
+			f->flags |= AbstractFunction::VERIFY_PENDING;
+			verifyQueue.add(f);
+		}
+	}
+
+	void AvmCore::enq(Traits* t) {
+        if (config.verifyall && !t->isInterface) {
+            enq(t->init);
+		    for (int i=0, n=t->methodCount; i < n; i++)
+                enq(t->getMethod(i));
+        }
+	}
+
+    void AvmCore::processVerifyQueue(Toplevel* toplevel) {
+		while (!verifyQueue.isEmpty()) {
+			AbstractFunction* f = verifyQueue.removeLast();
+            if (!f->isVerified()) {
+                //console << "pre verify " << f << "\n";
+			    f->verify(toplevel);
+                f->flags = f->flags | AbstractFunction::VERIFIED & ~AbstractFunction::VERIFY_PENDING;
+            }
+		}
+	}
+#endif
 }

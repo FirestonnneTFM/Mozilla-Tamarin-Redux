@@ -64,8 +64,6 @@ buildShell = o.getBoolArg("shell", False)
 if (buildShell):
     config.subst("ENABLE_SHELL", 1)
 
-# Get CPP, CC, etc
-# config.getCompiler(static_crt=o.getBoolArg('static-crt'))
 
 APP_CPPFLAGS = ""
 APP_CXXFLAGS = ""
@@ -102,6 +100,8 @@ if MMGC_THREADSAFE:
     NSPR_LDOPTS = o.getStringArg('nspr-ldopts')
     OS_LDFLAGS += " " + NSPR_LDOPTS
 
+os, cpu = config.getTarget()
+
 if config.getCompiler() == 'GCC':
     APP_CXXFLAGS = "-fstrict-aliasing -fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -finline-functions -finline-limit=65536 "
     if config.getDebug():
@@ -110,25 +110,24 @@ if config.getCompiler() == 'GCC':
         APP_CXXFLAGS += "-fno-rtti -fno-exceptions -Wuninitialized  "
     DEBUG_CXXFLAGS += "-g "
 elif config.getCompiler() == 'VS':
-    if cpu == "arm" or cpu == "thumb":
-        APP_CXXFLAGS = "-W3 -wd4291 -wd4201 "
+    if cpu == "arm":
+        APP_CXXFLAGS = "-W4 -WX -wd4291 -wd4201 -wd4189 -wd4740 -wd4127 "
         if config.getDebug():
-            DEBUG_CXXFLAGS = "-Od -Os "
+            DEBUG_CXXFLAGS = "-Od "
         else:
-            OPT_CXXFLAGS = "-Ox -Os"
-            APP_CXXFLAGS += "-GR- "
-        DEBUG_CXXFLAGS += "-Zi "
-        DEBUG_LDFLAGS += "-DEBUG "
+            OPT_CXXFLAGS = "-O2 "
+            APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- "
     else:
         APP_CXXFLAGS = "-W4 -WX -wd4291 "
         OS_LDFLAGS += "-SAFESEH:NO "
         if config.getDebug():
+            OPT_CXXFLAGS = "-Od "
             APP_CXXFLAGS += "-EHsc "
         else:
-            OPT_CXXFLAGS = "-Ox -Os "
-            APP_CXXFLAGS += "-GR- "
-        DEBUG_CXXFLAGS += "-Zi "
-        DEBUG_LDFLAGS += "-DEBUG "
+            OPT_CXXFLAGS = "-O2 -Ob1 "
+            APP_CXXFLAGS += "-GF -GR- -fp:fast -GS- -Zc:wchar_t- "
+    DEBUG_CXXFLAGS += "-Zi "
+    DEBUG_LDFLAGS += "-DEBUG "
 else:
     raise Exception('Unrecognized compiler: ' + config.getCompiler())
 
@@ -142,7 +141,7 @@ if zlib_lib is not None:
 else:
     AVMSHELL_LDFLAGS = '$(call EXPAND_LIBNAME,z)'
 
-os, cpu = config.getTarget()
+
 if os == "darwin":
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
@@ -163,8 +162,12 @@ if os == "darwin":
 elif os == "windows" or os == "cygwin":
     MMGC_DEFINES.update({'WIN32': None,
                          '_CRT_SECURE_NO_DEPRECATE': None})
-    APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
-    OS_LIBS.append('winmm')
+    if cpu == "arm":
+        APP_CPPFLAGS += "-DARM -D_ARM_ -DARMV5 -DUNICODE -DUNDER_CE=1 -DMMGC_ARM -QRarch5t "
+        OS_LIBS.append('mmtimer corelibc coredll')
+    else:
+        APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
+        OS_LIBS.append('winmm')
 elif os == "linux":
     MMGC_DEFINES.update({'UNIX': None,
                          'AVMPLUS_UNIX': None,
@@ -174,7 +177,7 @@ elif os == "linux":
     if config.getDebug():
         OS_LIBS.append("dl")
 elif os == "sunos":
-    if not config.COMPILER_IS_GCC:
+    if config.getCompiler() != 'GCC':
         APP_CXXFLAGS = ""
         OPT_CXXFLAGS = "-xO5 "
         DEBUG_CXXFLAGS = "-g "
@@ -198,8 +201,10 @@ elif cpu == "sparc":
     APP_CPPFLAGS += "-DAVMPLUS_SPARC "
 elif cpu == "x86_64":
     APP_CPPFLAGS += "-DAVMPLUS_AMD64 "
+elif cpu == "arm":
+    APP_CPPFLAGS += "-DAVMPLUS_ARM "
 else:
-    raise Exception("Unsupported OS")
+    raise Exception("Unsupported CPU")
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "

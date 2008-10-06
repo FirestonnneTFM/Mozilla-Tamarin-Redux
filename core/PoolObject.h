@@ -229,12 +229,6 @@ namespace avmplus
 			stripMetadataIndexes.add(index);
 		}
 
-#ifdef AVMPLUS_VERIFYALL
-		List<AbstractFunction*> verifyQueue;
-		void enq(AbstractFunction* f);
-		void enq(Traits* t);
-		void processVerifyQueue(Toplevel* toplevel);
-#endif
 		#ifdef AVMPLUS_VERBOSE
 		bool verbose;
 		#endif

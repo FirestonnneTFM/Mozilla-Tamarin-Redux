@@ -59,6 +59,15 @@ try:
 except ImportError:
     globs['pexpect'] = False
 
+
+globs = { 'avm':'', 'asc':'', 'builtinabc':'', 'shellabc':'','exclude':[],'config':'',
+          'ascargs':'', 'vmargs':'', 'escbin':'', 'rebuildtests':False,
+          'pexpect':True}
+try:
+    import pexpect
+except ImportError:
+    globs['pexpect'] = False
+
 verbose = False
 timestamps = True
 forcerebuild = False

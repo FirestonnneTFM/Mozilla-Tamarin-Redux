@@ -104,13 +104,6 @@ const int kBufferPadding = 16;
 
 		#ifdef AVMPLUS_MIR
 		bool dceopt;
-		/**
-		 * Genearate a graph for the basic blocks.  Can be used by
-		 * 'dot' utility to generate a jpg.
-		 */
-		#ifdef AVMPLUS_VERBOSE
-		bool bbgraph;
-		#endif //AVMPLUS_VERBOSE
         #endif
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -129,6 +122,14 @@ const int kBufferPadding = 16;
 		bool sse2;
 		bool use_cmov;
 		#endif
+
+		#ifdef AVMPLUS_VERBOSE
+		/**
+		 * Genearate a graph for the basic blocks.  Can be used by
+		 * 'dot' utility to generate a jpg.
+		 */
+		bool bbgraph;
+		#endif //AVMPLUS_VERBOSE
 
         #endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
@@ -194,6 +195,12 @@ const int kBufferPadding = 16;
 		Debugger *debugger;
 		Profiler *profiler;
 		#endif
+#ifdef AVMPLUS_VERIFYALL
+        List<AbstractFunction*, LIST_GCObjects> verifyQueue;
+		void enq(AbstractFunction* f);
+		void enq(Traits* t);
+		void processVerifyQueue(Toplevel* toplevel);
+#endif
 
 		void branchCheck(MethodEnv *env, bool interruptable, int go)
 		{

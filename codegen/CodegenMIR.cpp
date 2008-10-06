@@ -8403,9 +8403,7 @@ namespace avmplus
 		}
 		#endif
 
-        #ifdef PERFM
-        _ntprof("compile");
-        #endif
+        PERFM_NTPROF("compile");
 
 		/* 
 		* Use access exceptions to manage our buffer growth.  We
@@ -8459,17 +8457,11 @@ namespace avmplus
 		END_CATCH
 		END_TRY
 #endif // FEATURE_BUFFER_GUARD
-#ifdef PERFM
-		#define bytesBetween(x,y)   ( (size_t)(x) - (size_t)(y) )
 
-		AvmAssert((int)casePtr);
-        _tprof_end();
-		_nvprof("mir bytes", bytesBetween(ip,ipStart));
-		_nvprof("mir", ip-ipStart);
-		_nvprof("code", bytesBetween(mip,casePtr));
-
-		#undef bytesBetween
-#endif /* PERFM */
+        PERFM_TPROF_END();
+		PERFM_NVPROF("mir bytes", size_t(ip)-size_t(ipStart));
+		PERFM_NVPROF("mir", ip-ipStart);
+		PERFM_NVPROF("code", size_t(mip)-size_t(casePtr));
 	}
 
 #ifdef FEATURE_BUFFER_GUARD
