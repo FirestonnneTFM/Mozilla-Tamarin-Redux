@@ -86,16 +86,15 @@ for each (var sample in getSamples()) {
 	if (alloctable[dos.id]!=dos.size) {
 	    badalloc+="dealloc id:"+dos.id+" "+dos.size+" does not match alloc size: "+alloctable[dos.id]+"\n";
 	}
-    } else {
-        badalloc+="error sample was neither NewObjectSample nor DeleteObjectSample\n";
     }
 }
 print("nallocs  ="+nallocs+" allocs  ="+allocs);
 print("ndeallocs="+ndeallocs+" deallocs="+deallocs);
+
 AddTestCase(
-  "ProcessSamples: deallocs match allocs",
-  "",
-  badalloc
+    "ProcessSamples: deallocs match allocs",
+    "",
+    badalloc
 );
 
 var sizeAllocs:uint=0;
