@@ -79,14 +79,12 @@ INTERP_FOPCODE_LIST_BEGIN
     CSEMETHOD(COREADDR(AvmCore::uintToString), I_II, uintToString) 
     CSEMETHOD(COREADDR(AvmCore::intToString), I_II, intToString) 
     CSEMETHOD(COREADDR(AvmCore::doubleToAtom), I_ID, doubleToAtom)
-    CSEMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), I_ID, doubleToAtom_sse2)
     CSEMETHOD(COREADDR(AvmCore::boolean), I_II, boolean)
     CSEMETHOD(COREADDR(AvmCore::toUInt32), I_II, toUInt32)
     CSEFUNCTION(FUNCADDR(AVMCORE_integer_d), I_D, integer_d)
     CSEFUNCTION(FUNCADDR(AVMCORE_integer_i), I_I, integer_i)
     CSEFUNCTION(FUNCADDR(AvmCore::number_d), D_I, number_d)
     CSEFUNCTION(FUNCADDR(AvmCore::integer_u), I_I, integer_u)
-    CSEFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), I_D, integer_d_sse2)
     CSEMETHOD(COREADDR(AVMCORE_integer), I_II, integer)
     CSEMETHOD(COREADDR(AvmCore::number), D_II, number)
     METHOD(ENVADDR(MethodEnv::hasnextproto), I_III, hasnextproto)
@@ -184,6 +182,11 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(EFADDR(ExceptionFrame::beginTry), I_II, beginTry)
     FUNCTION(SETJMP, I_II, fsetjmp)
     METHOD(COREADDR(AvmCore::beginCatch), I_I5, beginCatch)
+
+#ifdef AVMPLUS_IA32
+    CSEMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), I_ID, doubleToAtom_sse2)
+    CSEFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), I_D, integer_d_sse2)
+#endif
 
 #ifdef DEBUGGER
     METHOD(ENVADDR(MethodEnv::debugEnter), I_I8, debugEnter)

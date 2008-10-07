@@ -52,16 +52,28 @@
 #include <cmnintrin.h>
 #endif
 
-#ifdef _MSC_VER
-#if !defined (AVMPLUS_ARM)
-extern "C"
-{
-	int __cdecl _setjmp3(jmp_buf jmpbuf, int arg);
-}
+#if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
+# define SSE2_ONLY(...) __VA_ARGS__
+# define HAVE_CMOV(config) config.sse2
 #else
-#include <setjmp.h>
-jmp_buf buf;
-#endif // AVMPLUS_ARM
+# define SSE2_ONLY(...)
+# define HAVE_CMOV(config) false
+#endif
+
+#ifdef _MSC_VER
+    #if !defined (AVMPLUS_ARM)
+    extern "C"
+    {
+	    int __cdecl _setjmp3(jmp_buf jmpbuf, int arg);
+    }
+    #else
+    #include <setjmp.h>
+    #undef setjmp
+    extern "C"
+    {
+	    int __cdecl setjmp(jmp_buf jmpbuf);
+    }
+    #endif // AVMPLUS_ARM
 #endif // _MSC_VER
 
 #ifdef AVMPLUS_ARM
@@ -139,13 +151,6 @@ return foo;
 #else
 #define RETURN_VOID_METHOD_PTR(_class, _method) \
 return *((intptr_t*)&_method);
-#endif
-
-#ifdef AVMPLUS_SPARC
-extern  "C"
-{
-	void sync_instruction_memory(caddr_t v, u_int len);
-}
 #endif
 
 #ifdef PERFM
@@ -272,15 +277,13 @@ namespace avmplus
         CALL_INDIRECT, FCALL_INDIRECT, CALL_IMT, FCALL_IMT
     };
 
-	#if defined(_MSC_VER) && !defined(AVMPLUS_ARM)
-	#define SETJMP ((uintptr)_setjmp3)
-	#else
-		#ifdef AVMPLUS_MAC_CARBON
-			#define SETJMP setjmpAddress
-		#else
-			#define SETJMP ((uintptr)setjmp)
-		#endif
-	#endif /* _MSC_VER */
+	#if defined _MSC_VER && !defined AVMPLUS_ARM
+	#  define SETJMP ((uintptr)_setjmp3)
+    #elif defined AVMPLUS_MAC_CARBON
+	#  define SETJMP setjmpAddress
+    #else
+    #  define SETJMP ((uintptr)::setjmp)
+	#endif // _MSC_VER
 
 #define INTERP_FOPCODE_LIST_BEGIN static const CallInfo k_functions[] = {
 #define INTERP_FOPCODE_LIST_END };
@@ -517,13 +520,6 @@ namespace avmplus
 		#ifdef AVMPLUS_MAC_CARBON
 		setjmpInit();
 		#endif
-		
-		#ifdef AVMPLUS_ARM
-		#ifdef AVMPLUS_VERBOSE
-		this->verboseFlag = pool->verbose;
-		#endif
-		this->console = &core->console;
-		#endif		
 
 		abcStart = NULL;
 		abcEnd   = NULL;
@@ -534,19 +530,7 @@ namespace avmplus
 		hasDebugInfo = false;
        #endif /* VTUNE */
 
-        // set up the generator LIR pipeline
-        if (!pool->codePages) {
-			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
-            mgr->frago = new (gc) Fragmento(core, 24/*16mb*/);
-			verbose_only(
-                mgr->frago->assm()->_verbose = verbose();
-                if (verbose()) {
-				    LabelMap *labels = mgr->frago->labels = new (gc) LabelMap(core, 0);
-				    labels->add(core, sizeof(AvmCore), 0, "core");
-                    labels->add(&core->codeContextAtom, sizeof(CodeContextAtom), 0, "codeContextAtom");
-                }
-			)
-        }
+        initCodePages(pool);
 	}
 
 	CodegenLIR::~CodegenLIR()
@@ -586,67 +570,6 @@ namespace avmplus
 		}
 	}
 	#endif
-
-#if defined AVMPLUS_PPC || defined AVMPLUS_SPARC
-	// This helper function exists only on PowerPC in order to
-	// minimize the code size of generated stack overflow checks.
-	// It is static and takes only one parameter, env.
-	// The env parameter goes into R3, which is where it also goes
-	// in a JIT-ted function's method signature (env, argc, ap)
-	// This enables us to not move any registers around.
-	void CodegenLIR::stackOverflow(MethodEnv *env)
-	{
-		env->core()->stackOverflow(env);		
-	}
-#endif
-
-#ifdef AVMPLUS_ARM
-	double CodegenLIR::fadd(double x, double y)
-	{
-		return x+y;
-	}
-	
-	double CodegenLIR::fsub(double x, double y)
-	{
-		return x-y;
-	}
-
-	double CodegenLIR::fmul(double x, double y)
-	{
-		return x*y;
-	}
-
-	double CodegenLIR::fdiv(double x, double y)
-	{
-		return x/y;
-	}
-	
-	int   CodegenLIR::fcmp(double x, double y)
-	{
-		if (x<y)
-		{
-			return -1;
-		}
-		else if (x>y)
-		{
-			return 1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	
-	double CodegenLIR::i2d(int i)
-	{
-		return (double)i;
-	}
-	
-	double CodegenLIR::u2d(uint32_t i)
-	{
-		return (double)i;
-	}
-#endif /* AVMPLUS_ARM */
 
 	LIns* CodegenLIR::atomToNativeRep(Traits* t, LIns* atom)
 	{
@@ -1029,8 +952,9 @@ namespace avmplus
      */
     class Specializer: public ExprFilter
     {
+        Config &config;
     public:
-        Specializer(LirWriter *out) : ExprFilter(out)
+        Specializer(LirWriter *out, Config &config) : ExprFilter(out), config(config)
         {}
 
         bool isPromote(LOpcode op) {
@@ -1038,7 +962,7 @@ namespace avmplus
         }
 
         LIns *insCall(uint32_t fid, LInsp args[]) {
-            if (fid == FUNCTIONID(integer_d) || fid == FUNCTIONID(integer_d_sse2)) {
+            if (fid == FUNCTIONID(integer_d)) {
                 LIns *v = args[0];
                 LOpcode op = v->opcode();
                 if (isPromote(op))
@@ -1049,6 +973,9 @@ namespace avmplus
                     if (isPromote(a->opcode()) && isPromote(b->opcode()))
                         return out->ins2(LOpcode(op & ~LIR64), a->oprnd1(), b->oprnd1());
                 }
+                SSE2_ONLY(if (config.sse2) 
+                    fid = FUNCTIONID(integer_d_sse2);
+                )
             }
             return out->insCall(fid, args);
         }
@@ -1081,7 +1008,7 @@ namespace avmplus
             loadfilter = new (gc) LoadFilter(lirout, gc);
             lirout = new (gc) CfgCseFilter(loadfilter, gc);
         }
-        lirout = new (gc) Specializer(lirout);
+        lirout = new (gc) Specializer(lirout, core->config);
         CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout,
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;

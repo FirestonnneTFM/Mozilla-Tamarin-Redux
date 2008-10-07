@@ -132,19 +132,19 @@
 
 // don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
 #ifndef AVMPLUS_DISABLE_MIR
-	#define AVMPLUS_MIR
+#  if defined AVMPLUS_PPC || defined AVMPLUS_SPARC
+#    define AVMPLUS_MIR
+#  endif
 #endif
 
-#if defined(AVMPLUS_MAC) && defined(AVMPLUS_64BIT) || defined(AVMPLUS_ARM)
-	// MIR not yet supported on these platforms.
-	#undef AVMPLUS_MIR
+#ifndef AVMPLUS_DISABLE_NJ
+#  if defined AVMPLUS_IA32 && !defined AVMPLUS_64BIT //|| defined AVMPLUS_ARM
+#    define FEATURE_NANOJIT
+#  endif
 #endif
 
-//#define AVMPLUS_DISABLE_NJ
-#if defined(AVMPLUS_MIR) && defined(AVMPLUS_IA32) && !defined(AVMPLUS_64BIT) && !defined(AVMPLUS_DISABLE_NJ)
-    // use nanojit on ia32 (win, mac, linux)
-    #undef AVMPLUS_MIR
-    #define FEATURE_NANOJIT
+#if defined AVMPLUS_MIR && defined FEATURE_NANOJIT
+#  error "must not define AVMPLUS_MIR and FEATURE_NANOJIT at the same time"
 #endif
 
 // if a function meets the E4 criteria for being unchecked, then make

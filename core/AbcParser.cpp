@@ -64,10 +64,10 @@ namespace avmplus
 
 		int version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
 
-		#ifdef AVMPLUS_VERBOSE
+        #ifdef AVMPLUS_VERBOSE
 		if (core->config.verbose)
 			core->console << "major=" << (version&0xFFFF) << " minor=" << (version>>16) << "\n";
-		#endif
+        #endif
 
 		switch (version)
 		{
