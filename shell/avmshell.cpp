@@ -701,8 +701,6 @@ namespace avmshell
 									st_name = NULL;
 							}
 						#endif
-						} else if (!strcmp(arg+2, "interp")) {
-							config.turbo = false;
 						#ifdef AVMPLUS_VERBOSE
 						} else if (!strcmp(arg+2, "verbose")) {
 							do_verbose = true;
@@ -725,7 +723,8 @@ namespace avmshell
                         #endif
 						} else if (!strcmp(arg+2, "forcemir")) {
 							config.jit = true;
-							
+						} else if (!strcmp(arg+2, "interp")) {
+							config.jit = false;
 						} else if (!strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
                     #endif

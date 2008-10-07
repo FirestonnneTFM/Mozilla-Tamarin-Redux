@@ -89,19 +89,6 @@ const int kBufferPadding = 16;
 		bool verbose_addrs;
 		#endif /* AVMPLUS_VERBOSE */
 
-		/**
-		 * The turbo switch determines how bytecode is executed.
-		 * When turbo is true, bytecode is translated to native code.
-		 * When turbo is false, the gallop() interpreter loop is used.
-		 * turbo defaults to true except on platforms where it is
-		 * not supported, and except when debugging is in progress.
-		 * 
-		 * Turbo is a debugger-only option.  release builds always
-		 * have it turned on.  This means we can only build release
-		 * builds on supported platforms.
-		 */
-		bool turbo;
-
 		#ifdef AVMPLUS_MIR
 		bool dceopt;
         #endif
@@ -249,7 +236,9 @@ const int kBufferPadding = 16;
         
         #ifdef FEATURE_NANOJIT // accessors
             bool quiet_opt() { return false; } 
+            #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
             bool use_sse2() { return config.sse2; }
+            #endif
 		    #ifdef AVMPLUS_VERBOSE
                 bool verbose_exits() { return config.verbose_exits; }
                 bool verbose_live() { return config.verbose_live; }
@@ -258,16 +247,18 @@ const int kBufferPadding = 16;
 		#ifdef AVMPLUS_VERBOSE
 			bool verbose() { return config.verbose; }
 		#endif
-			
-	    inline void SetMIREnabled(bool isEnabled)
-		{
-			config.turbo = isEnabled;
-		}
 
-	    inline bool IsMIREnabled() const
-		{
-			return config.turbo;
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	    inline void SetMIREnabled(bool isEnabled) {
+			config.jit = isEnabled;
 		}
+        inline bool IsMIREnabled() const {
+			return config.jit;
+		}
+#else
+        inline void SetMIREnabled(bool) {}
+        inline bool IsMirEnabled() { return false; }
+#endif
 
 		/**
 		 * If this is set to a nonzero value, executing code

@@ -140,10 +140,8 @@ namespace avmplus
 		config.verbose_addrs = false;
 		#endif
 
-		#ifdef AVMPLUS_ARM
-		SetMIREnabled(false);
-		#else
-		SetMIREnabled(true);
+		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		config.jit = true;
 		#endif
 
 		#ifdef AVMPLUS_VERIFYALL
