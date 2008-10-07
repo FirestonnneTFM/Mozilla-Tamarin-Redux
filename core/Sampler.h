@@ -150,7 +150,7 @@ namespace avmplus
 		bool samplingAllAllocs;
 		int takeSample;
 		uint32 numSamples;
-		GrowableBuffer samples;
+		GrowableBuffer* samples;
 		byte *currentSample;
 		byte *lastAllocSample;
 		bool runningCallback;
