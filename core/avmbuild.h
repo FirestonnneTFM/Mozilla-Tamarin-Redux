@@ -294,15 +294,15 @@
 // Enable translation from ABC byte code to a wider word code that can
 // also be used by a direct threaded interpreter
 #if defined AVMPLUS_MAC && !defined AVMPLUS_64BIT
-#  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
+#  define AVMPLUS_WORD_CODE           // probably broken on 64-bit
 #  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
-#  define AVMPLUS_DIRECT_THREADED   // gcc on this platform
+#  define AVMPLUS_DIRECT_THREADED     // gcc on this platform
 #endif
 
 #if defined AVMPLUS_WIN32 && !defined AVMPLUS_64BIT
-#  define AVMPLUS_WORD_CODE         // probably broken on 64-bit
-//#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
-//#  define AVMPLUS_DIRECT_THREADED // see comments in Interpreter.cpp before enabling this
+#  define AVMPLUS_WORD_CODE           // probably broken on 64-bit
+#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
+//#  define AVMPLUS_DIRECT_THREADED   // see comments in Interpreter.cpp before enabling this
 #endif
 
 #ifdef AVMPLUS_DIRECT_THREADED
