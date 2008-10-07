@@ -168,6 +168,7 @@ namespace avmplus
 		#else
 		Verifier verifier(this, toplevel);
 		verifier.verify();
+		setInterpImpl();
 		#endif
 		
         #ifdef DEBUGGER
