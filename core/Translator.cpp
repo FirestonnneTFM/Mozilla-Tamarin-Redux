@@ -951,7 +951,7 @@ namespace avmplus
 	void Translator::peep(uint32_t opcode, uint32_t* loc)
 	{
 		peep_state_t *s;
-		uint32_t limit, next_state, toplevel_index;
+		uint32_t limit, next_state;
 		
 		AvmAssert(opcode != OP_lookupswitch);
 
@@ -1059,6 +1059,7 @@ namespace avmplus
 				O[i] = O[i+shift];
 			}
 			nextI -= shift;
+			backtrack_idx = 0;  // We could do better if we knew how many final states to discard
 			goto advance;
 		}
 
@@ -1066,10 +1067,9 @@ namespace avmplus
 		// to reset the machine.
 
 	initial_state:
-		toplevel_index = opcode < 255 ? opcode : 256 + (opcode >> 8);
-		//AvmAssert(toplevel_index < sizeof(toplevel)/sizeof(toplevel[0]));
+		AvmAssert(opcode < WOP_LAST+1);
 
-		state = toplevel[toplevel_index];  // may remain 0
+		state = toplevel[opcode];  // may remain 0
 		nextI = 0;
 		backtrack_idx = 0;
 		if (state != 0) {
