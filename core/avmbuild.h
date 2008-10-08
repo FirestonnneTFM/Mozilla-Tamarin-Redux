@@ -99,10 +99,10 @@
       #define AVMPLUS_ARM
     #endif
   #else
-  #ifndef AVMPLUS_IA32
-    #define AVMPLUS_IA32
+    #ifndef AVMPLUS_IA32
+      #define AVMPLUS_IA32
+    #endif
   #endif
-#endif
 #endif
 
 /// START: CRUFT 
@@ -130,16 +130,16 @@
   #endif
 #endif
 
-// don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
-#ifndef AVMPLUS_DISABLE_MIR
-#  if defined AVMPLUS_PPC || defined AVMPLUS_SPARC
-#    define AVMPLUS_MIR
-#  endif
-#endif
-
 #ifndef AVMPLUS_DISABLE_NJ
 #  if defined AVMPLUS_IA32 && !defined AVMPLUS_64BIT //|| defined AVMPLUS_ARM
 #    define FEATURE_NANOJIT
+#  endif
+#endif
+
+// don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
+#if !defined AVMPLUS_DISABLE_MIR && !defined FEATURE_NANOJIT
+#  if defined AVMPLUS_PPC || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && !defined AVMPLUS_MAC
+#    define AVMPLUS_MIR
 #  endif
 #endif
 
