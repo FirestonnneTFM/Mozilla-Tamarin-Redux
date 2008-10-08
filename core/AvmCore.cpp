@@ -140,10 +140,6 @@ namespace avmplus
 		config.verbose_addrs = false;
 		#endif
 
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		config.jit = true;
-		#endif
-
 		#ifdef AVMPLUS_VERIFYALL
 	    	config.verifyall = false;
 		#endif
@@ -161,7 +157,7 @@ namespace avmplus
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			// jit flag forces use of MIR/LIR instead of interpreter
-			config.jit = false;
+			config.jit = true;
 			config.cseopt = true;
 
 			#ifdef AVMPLUS_VERBOSE
