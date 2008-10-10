@@ -65,6 +65,9 @@ namespace avmplus
 		if(gc_sampler == this)
 			MMgc::m_sampler = NULL;
 		delete samples;
+		samples = 0;
+		delete fakeMethodInfos;
+		fakeMethodInfos = 0;
 	}
 
 	void Sampler::init(bool sampling, bool autoStart)
@@ -98,7 +101,12 @@ namespace avmplus
 		uint32 callStackDepth = core->callStack ? core->callStack->depth : 0;
 		sampleSize += callStackDepth * sizeof(StackTrace::Element);
 		sampleSize += sizeof(uint64) * 2;
-		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples->size()/3 > samples->end() && !core->GetGC()->Collecting() )		{
+		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples->size()/3 > samples->end() 
+			&& !core->GetGC()->Collecting() 
+#ifdef MMGC_DRC
+			&& !core->GetGC()->Reaping()
+#endif
+			)		{
 			runningCallback = true;
 			pauseSampling();
 			Atom args[1] = { nullObjectAtom };
