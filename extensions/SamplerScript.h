@@ -83,8 +83,8 @@ namespace avmplus
 		ScriptObject *makeSample(Sample sample);
 		bool isGetterSetter(Atom a, QNameObject* name);
 	private:		
-		VTable* const sampleIteratorVTable;
-		VTable* const slotIteratorVTable;
+		DWB(VTable*) const sampleIteratorVTable;
+		DWB(VTable*) const slotIteratorVTable;
 		ClassClosure *getType(Atom typeOrVTable, const void *obj);
 #else
 		// stubs for release
@@ -129,7 +129,7 @@ namespace avmplus
 		void setRef(AvmPlusScriptableObject* o) { obj = o; }
 		void setSize(uint64 s) { size = s; }
 	private:
-		AvmPlusScriptableObject *obj;
+		DRCWB(AvmPlusScriptableObject*) obj;
 		uint64 size;
 	};
 
