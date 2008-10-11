@@ -341,7 +341,7 @@ namespace avmplus
 		if (dest+n > dest_limit) refill();
 
 	// These take no arguments
-	void Translator::emitOp0(const byte *pc, int opcode) {
+	void Translator::emitOp0(const byte *pc, WordOpcode opcode) {
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 1);
 #endif // _DEBUG
@@ -354,7 +354,7 @@ namespace avmplus
 	}
 
 	// These take one U30 argument
-	void Translator::emitOp1(const byte *pc, int opcode)
+	void Translator::emitOp1(const byte *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 2);
@@ -369,7 +369,7 @@ namespace avmplus
 	}
 	
 	// These take one U30 argument, and the argument is explicitly passed here (result of optimization)
-	void Translator::emitOp1(int opcode, uint32_t operand)
+	void Translator::emitOp1(WordOpcode opcode, uint32_t operand)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 2);
@@ -383,7 +383,7 @@ namespace avmplus
 	}
 	
 	// These take two U30 arguments
-	void Translator::emitOp2(const byte *pc, int opcode)
+	void Translator::emitOp2(const byte *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 3);
@@ -398,7 +398,7 @@ namespace avmplus
 #endif
 	}
 	
-	void Translator::emitOp2(int opcode, uint32_t op1, uint32_t op2)
+	void Translator::emitOp2(WordOpcode opcode, uint32_t op1, uint32_t op2)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 3);
@@ -417,7 +417,7 @@ namespace avmplus
 	// then the target must be a LABEL instruction, and we can just look it up.
 	// Otherwise, we enter the target offset into an ordered list with the current
 	// transformed PC and the location to backpatch.
-	void Translator::emitRelativeJump(const byte *pc, int opcode)
+	void Translator::emitRelativeJump(const byte *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].jumps);

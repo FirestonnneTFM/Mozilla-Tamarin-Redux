@@ -80,16 +80,16 @@ namespace avmplus
 		uint32 epilogue(uint32** code=NULL);
 		
 		// Handle specific instructions or instruction classes
-		void emitOp0(const byte *pc, int opcode);
-		void emitOp0(int opcode) { emitOp0(NULL, opcode); }
-		void emitOp1(const byte *pc, int opcode);
-		void emitOp1(int opcode, uint32_t operand);
-		void emitOp2(const byte *pc, int opcode);
-		void emitOp2(int opcode, uint32_t op1, uint32_t op2);
+		void emitOp0(const byte *pc, WordOpcode opcode);
+		void emitOp0(WordOpcode opcode) { emitOp0(NULL, opcode); }
+		void emitOp1(const byte *pc, WordOpcode opcode);
+		void emitOp1(WordOpcode opcode, uint32_t operand);
+		void emitOp2(const byte *pc, WordOpcode opcode);
+		void emitOp2(WordOpcode opcode, uint32_t op1, uint32_t op2);
 #ifdef DEBUGGER
 		void emitDebug(const byte *pc);
 #endif
-		void emitRelativeJump(const byte *pc, int opcode);
+		void emitRelativeJump(const byte *pc, WordOpcode opcode);
 		void emitLookupswitch(const byte *pc);
 		void emitLabel(const byte *pc);
 		void emitPushbyte(const byte *pc);

@@ -435,7 +435,7 @@ namespace avmplus
 		SourceFile* active = NULL; // current source file
         for (const byte* pc=start; pc < end; pc += size)
         {
-            op_count = opOperandCount[*pc];
+            op_count = opcodeInfo[*pc].operandCount;
 			if (op_count == -1 && *pc != OP_lookupswitch)
 				return false; // ohh very bad, verifier will catch this
 

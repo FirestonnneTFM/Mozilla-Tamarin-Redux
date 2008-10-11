@@ -66,6 +66,10 @@ namespace avmplus
 {
 #undef DEBUG_EARLY_BINDING
 
+	inline WordOpcode wordCode(AbcOpcode opcode) {
+		return (WordOpcode)opcodeInfo[opcode].wordCode;
+	}
+	
 	Verifier::Verifier(MethodInfo* info, Toplevel* toplevel
 #ifdef AVMPLUS_VERBOSE
 		, bool secondTry
@@ -326,7 +330,7 @@ namespace avmplus
 			XLAT_ONLY( if (translator) translator->fixExceptionsAndLabels(pc); )
 			
 			AbcOpcode opcode = (AbcOpcode) *pc;
-			if (opOperandCount[opcode] == -1)
+			if (opcodeInfo[opcode].operandCount == -1)
 				verifyFailed(kIllegalOpcodeError, core->toErrorString(info), core->toErrorString(opcode), core->toErrorString((int)(pc-code_pos)));
 
 			if (opcode == OP_label)
@@ -410,7 +414,7 @@ namespace avmplus
 
 						// If this instruction can throw exceptions, add an edge to
 						// the catch handler.
-						if (opCanThrow[opcode] || pc == code_pos + handler->from)
+						if (opcodeInfo[opcode].canThrow || pc == code_pos + handler->from)
 						{
 							// TODO check stack is empty because catch handlers assume so.
 							int saveStackDepth = state->stackDepth;
@@ -538,7 +542,7 @@ namespace avmplus
 				state->pop();
 				JIT_ONLY( if (jit) jit->emitIf(state, opcode, state->pc+size+imm24, lhs, lhs+1); )
 				checkTarget(nextpc+imm24);
-				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -551,7 +555,7 @@ namespace avmplus
 				state->pop();
 				JIT_ONLY( if (jit) jit->emitIf(state, opcode, state->pc+size+imm24, cond, 0); )
 				checkTarget(nextpc+imm24);
-				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -561,7 +565,7 @@ namespace avmplus
 				JIT_ONLY( if (jit) jit->emit(state, opcode, state->pc+size+imm24); )
 				checkTarget(nextpc+imm24);	// target block;
 				blockEnd = true;
-				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitRelativeJump(pc, WOP_jump) );
 				break;
 			}
 
@@ -596,7 +600,7 @@ namespace avmplus
 				JIT_ONLY( if (jit) jit->emit(state, opcode, sp); )
 				state->pop();
 				blockEnd = true;
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_throw) );
 				break;
 			}
 
@@ -613,7 +617,7 @@ namespace avmplus
 				// straight through to the next block.
 				state->pop();
 				blockEnd = true;
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_returnvalue) );
 				break;
 			}
 
@@ -622,7 +626,7 @@ namespace avmplus
 				//checkStack(1,0)
 				JIT_ONLY( if (jit) jit->emit(state, opcode); )
 				blockEnd = true;
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_returnvoid) );
 				break;
 			}
 
@@ -630,35 +634,35 @@ namespace avmplus
 				checkStack(0,1);
 				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, 0); )
 				state->push(NULL_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushnull) );
 				break;
 
 			case OP_pushundefined:
 				checkStack(0,1);
 				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, undefinedAtom); )
 				state->push(VOID_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushundefined) );
 				break;
 
 			case OP_pushtrue:
 				checkStack(0,1);
 				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, 1); )
 				state->push(BOOLEAN_TYPE, true);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushtrue) );
 				break;
 
 			case OP_pushfalse:
 				checkStack(0,1);
 				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, 0); )
 				state->push(BOOLEAN_TYPE, true);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushfalse) );
 				break;
 
 			case OP_pushnan:
 				checkStack(0,1);
 				JIT_ONLY( if (jit) jit->emitDoubleConst(state, sp+1, (double*)(core->kNaN & ~7)); )
 				state->push(NUMBER_TYPE, true);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushnan) );
 				break;
 
 			case OP_pushshort:
@@ -683,7 +687,7 @@ namespace avmplus
 				JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)AvmCore::atomToString(filename)); )
 				#endif
 #ifdef DEBUGGER
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_debugfile) );
 #endif
 				break;
 			}
@@ -695,7 +699,7 @@ namespace avmplus
 					verifyFailed(kIllegalSetDxns, core->toErrorString(info));
 				JIT_ONLY( Atom uri = ) checkCpoolOperand(imm30, kStringType);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)AvmCore::atomToString(uri)); )
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_dxns) );
 				break;
 			}
 
@@ -707,7 +711,7 @@ namespace avmplus
 				// codgeen will call intern on the input atom.
 				JIT_ONLY( if (jit) jit->emit(state, opcode, sp); )
 				state->pop();
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_dxnslate) );
 				break;
 			}
 
@@ -721,7 +725,7 @@ namespace avmplus
 				Stringp value = pool->cpool_string[index];
 				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, (uintptr)value); )
 				state->push(STRING_TYPE, value != NULL);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_pushstring) );
 				break;
 			}
 
@@ -758,7 +762,7 @@ namespace avmplus
 				
 				JIT_ONLY( if (jit) jit->emitDoubleConst(state, sp+1, pool->cpool_double[index]); )
 				state->push(NUMBER_TYPE, true);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_pushdouble) );
 				break;
 			}
 
@@ -772,7 +776,7 @@ namespace avmplus
 				Namespace* value = pool->cpool_ns[index];
 				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, (uintptr)value); )
 				state->push(NAMESPACE_TYPE, value != NULL);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_pushnamespace) );
 				break;
 			}
 
@@ -784,7 +788,7 @@ namespace avmplus
 				Value &v = state->stackTop();
 				state->setType(imm30, v.traits, v.notNull);
 				state->pop();
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_setlocal) );
 				break;
 			}
 
@@ -801,7 +805,7 @@ namespace avmplus
 				state->setType(localno, v.traits, v.notNull);
 				state->pop();
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-				XLAT_ONLY( if (translator) translator->emitOp1(OP_setlocal, localno) );
+				XLAT_ONLY( if (translator) translator->emitOp1(WOP_setlocal, localno) );
 #else
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 #endif
@@ -814,7 +818,7 @@ namespace avmplus
 				Value& v = checkLocal(imm30);
 				JIT_ONLY( if (jit) jit->emitCopy(state, imm30, sp+1); )
 				state->push(v);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_getlocal) );
 				break;
 			}
 
@@ -829,7 +833,7 @@ namespace avmplus
 				JIT_ONLY( if (jit) jit->emitCopy(state, localno, sp+1); )
 				state->push(v);
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-				XLAT_ONLY( if (translator) translator->emitOp1(OP_getlocal, localno) );
+				XLAT_ONLY( if (translator) translator->emitOp1(WOP_getlocal, localno) );
 #else
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
 #endif
@@ -855,7 +859,7 @@ namespace avmplus
 				checkLocal(imm30);
 				emitCoerce(NUMBER_TYPE, imm30);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE); )
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -866,7 +870,7 @@ namespace avmplus
 				checkLocal(imm30);
 				emitCoerce(INT_TYPE, imm30);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE); )
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -919,7 +923,7 @@ namespace avmplus
 				})
 
 				state->push(ftraits, true);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_newfunction) );
 				break;
 			}
 
@@ -1013,7 +1017,7 @@ namespace avmplus
 					jit->emit(state, opcode, (uintptr)(void*)pool->cinits[imm30], sp, ctraits);
 				})
 				state->pop_push(1, ctraits, true);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_newclass) );
 				break;
 			}
 
@@ -1044,7 +1048,7 @@ namespace avmplus
 					JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)&multiname, sp+1, OBJECT_TYPE); )
 					state->push(OBJECT_TYPE, true);
 				}
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_finddef) );
 				break;
 			}
 
@@ -1075,7 +1079,7 @@ namespace avmplus
 					emitCoerce(propTraits, state->sp());
 					MIR_ONLY( if (jit) jit->emit(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex, propTraits); );
 					LIR_ONLY( if (jit) jit->emitSetslot(state, OP_setslot, AvmCore::bindingToSlotId(b), ptrIndex); );
-					XLAT_ONLY( if (translator) translator->emitOp1( OP_setslot, AvmCore::bindingToSlotId(b)+1 ) );
+					XLAT_ONLY( if (translator) translator->emitOp1( WOP_setslot, AvmCore::bindingToSlotId(b)+1 ) );
 					state->pop(n);
 					break;
 				}
@@ -1139,7 +1143,7 @@ namespace avmplus
 				#endif
 				state->pop(n);
 			setproperty_end:
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -1173,7 +1177,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(n, NULL);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_getdescendants) );
 				break;
 			}
 
@@ -1189,7 +1193,7 @@ namespace avmplus
 					jit->emit(state, opcode, state->sp(), 0, NULL);
 				}
 				#endif
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_checkfilter) );
 				break;
 			}
 
@@ -1208,7 +1212,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(n, BOOLEAN_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_deleteproperty) );
 				break;
 			}
 
@@ -1229,7 +1233,7 @@ namespace avmplus
 					JIT_ONLY( if (jit) jit->emit(state, OP_astype, (uintptr)t, index, resultType); )
 					state->pop_push(1, t);
 				}
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_astype) );
 				break;
 			}
 
@@ -1245,7 +1249,7 @@ namespace avmplus
 
 				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, t); )
 				state->pop_push(2, t);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_astypelate) );
 				break;
 			}
 
@@ -1254,7 +1258,7 @@ namespace avmplus
 				checkStack(1,1);
 				// resolve operand into a traits, and push that type.
 				emitCoerce(checkTypeName(imm30), sp);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_coerce) );
 				break;
 			}
 
@@ -1263,7 +1267,7 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(BOOLEAN_TYPE, sp);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -1271,7 +1275,7 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(OBJECT_TYPE, sp);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_coerce_o) );
 				break;
 			}
 
@@ -1291,7 +1295,7 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(INT_TYPE, sp);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -1300,7 +1304,7 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(UINT_TYPE, sp);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -1309,7 +1313,7 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(NUMBER_TYPE, sp);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -1317,7 +1321,7 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitCoerce(STRING_TYPE, sp);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_coerce_s) );
 				break;
 			}
 
@@ -1331,7 +1335,7 @@ namespace avmplus
 				state->pop();
 				state->push(OBJECT_TYPE);
 				state->push(INT_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_istype) );
 				break;
 			}
 
@@ -1341,7 +1345,7 @@ namespace avmplus
 				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, BOOLEAN_TYPE); )
 				// TODO if the only common base type of lhs,rhs is Object, then result is always false
 				state->pop_push(2, BOOLEAN_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_istypelate) );
 				break;
 			}
 
@@ -1352,7 +1356,7 @@ namespace avmplus
 				// ToObject throws an exception on null and undefined, so after this runs we
 				// know the value is safe to dereference.
 				JIT_ONLY( if (jit) emitCheckNull(sp); )
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_convert_o) );
 				break;
 			}
 
@@ -1364,7 +1368,7 @@ namespace avmplus
 				// this is the ECMA ToString and ToXMLString operators, so the result must not be null
 				// (ToXMLString is split into two variants - escaping elements and attributes)
 				emitToString(opcode, sp);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -1397,7 +1401,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(argc+1, resultType);
-				XLAT_ONLY( if (translator) translator->emitOp2(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp2(pc, WOP_callstatic) );
 				break;
 			}
 
@@ -1421,7 +1425,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(argc+2, NULL);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_call) );
 				break;
 			}
 
@@ -1442,7 +1446,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(argc+1, itraits, true);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_construct) );
 				break;
 			}
 
@@ -1476,7 +1480,7 @@ namespace avmplus
 				{
 					verifyFailed(kZeroDispIdError);
 				}
-				XLAT_ONLY( if (translator) translator->emitOp2(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp2(pc, WOP_callmethod) );
 				break;
 			}
 
@@ -1561,7 +1565,7 @@ namespace avmplus
 				#endif
 				state->pop_push(n, NULL);
 			constructprop_end:
-				XLAT_ONLY( if (translator) translator->emitOp2(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp2(pc, WOP_constructprop) );
 				break;
 			}
 
@@ -1582,7 +1586,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(argc+1, itraits, true);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_applytype) );
 				break;
 			}
 
@@ -1641,7 +1645,7 @@ namespace avmplus
 				if (opcode == OP_callsupervoid)
 					state->pop();
 			callsuper_end:
-				XLAT_ONLY( if (translator) translator->emitOp2(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp2(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -1710,7 +1714,7 @@ namespace avmplus
 				#endif
 				state->pop_push(n, propType);
 			getsuper_end:
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_getsuper) );
 				break;
 			}
 
@@ -1779,7 +1783,7 @@ namespace avmplus
 
 				state->pop(n);
 			setsuper_end:
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_setsuper) );
 				break;
 			}
 
@@ -1808,7 +1812,7 @@ namespace avmplus
 
 				state->pop(argc+1);
 				// this is a true void call, no result to push.
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_constructsuper) );
 				break;
 			}
 
@@ -1824,7 +1828,7 @@ namespace avmplus
 				}
 				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30, 0, OBJECT_TYPE); )
 				state->pop_push(n, OBJECT_TYPE, true);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_newobject) );
 				break;
 			}
 
@@ -1834,7 +1838,7 @@ namespace avmplus
 				checkStack(argc, 1);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, argc, 0, ARRAY_TYPE); )
 				state->pop_push(argc, ARRAY_TYPE, true);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_newarray) );
 				break;
 			}
 
@@ -1865,7 +1869,7 @@ namespace avmplus
 				state->pop();
 				state->setType(scopeBase+state->scopeDepth, scopeTraits, true, false);
 				state->scopeDepth++;
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushscope) );
 				break;
 			}
 
@@ -1893,7 +1897,7 @@ namespace avmplus
 				}
 					
 				state->scopeDepth++;
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushwith) );
 				break;
 			}
 
@@ -1908,7 +1912,7 @@ namespace avmplus
 				checkStack(0, 1);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, info->activationTraits); )
 				state->push(info->activationTraits, true);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_newactivation) );
 				break;
 			}
 
@@ -1932,7 +1936,7 @@ namespace avmplus
 				checkStack(0, 1);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, handler->scopeTraits); )
 				state->push(handler->scopeTraits, true);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_newcatch) );
 				break;
 			}
 			
@@ -1951,7 +1955,7 @@ namespace avmplus
 				{
 					state->withBase = -1;
 				}
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_popscope) );
 				break;
 			}
 
@@ -1975,7 +1979,7 @@ namespace avmplus
 				checkStack(0,1);
 				int scope_index = imm30;
 				emitGetOuterScope(scope_index);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_getouterscope) );
                 break;
             }
 
@@ -1983,7 +1987,7 @@ namespace avmplus
 			{
 				checkStack(0,1);
 				emitGetGlobalScope();
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_getglobalscope) );
 				break;
 			}
 			
@@ -1992,7 +1996,7 @@ namespace avmplus
 				checkStack(0,1);
 				emitGetGlobalScope();
 				emitGetSlot(imm30-1);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_getglobalslot) );
 				break;
 			}
 
@@ -2014,7 +2018,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop();
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_setglobalslot) );
 				break;
 			}
 			
@@ -2022,7 +2026,7 @@ namespace avmplus
 			{
 				checkStack(1,1);
 				emitGetSlot(imm30-1);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_getslot) );
 				break;
 			}
 
@@ -2030,7 +2034,7 @@ namespace avmplus
 			{
 				checkStack(2,0);
 				emitSetSlot(imm30-1);
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_setslot) );
 				break;
 			}
 
@@ -2038,7 +2042,7 @@ namespace avmplus
 			{
 				checkStack(1,0);
 				state->pop();
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pop) );
 				break;
 			}
 
@@ -2048,7 +2052,7 @@ namespace avmplus
 				Value& v = state->peek();
 				JIT_ONLY( if (jit) jit->emitCopy(state, sp, sp+1); )
 				state->push(v);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_dup) );
 				break;
 			}
 
@@ -2056,7 +2060,7 @@ namespace avmplus
 			{
 				checkStack(2,2);
 				emitSwap();
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_swap) );
 				break;
 			}
 
@@ -2067,7 +2071,7 @@ namespace avmplus
 			{
 				checkStack(2,1);
 				emitCompare(opcode);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -2079,7 +2083,7 @@ namespace avmplus
 				checkStack(2,1);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, BOOLEAN_TYPE); )
 				state->pop_push(2, BOOLEAN_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -2093,7 +2097,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(1, BOOLEAN_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_not) );
 				break;
 
 			case OP_add: 
@@ -2133,7 +2137,7 @@ namespace avmplus
 					// dont know if it will return number or string, but neither will be null.
 					state->pop_push(2,OBJECT_TYPE, true);
 				}
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_add) );
 				break;
 			}
 
@@ -2151,14 +2155,14 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(2, NUMBER_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 
 			case OP_negate:
 				checkStack(1,1);
 				emitCoerce(NUMBER_TYPE, sp);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, NUMBER_TYPE); )
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_negate) );
 				break;
 
 			case OP_increment:
@@ -2166,7 +2170,7 @@ namespace avmplus
 				checkStack(1,1);
 				emitCoerce(NUMBER_TYPE, sp);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE); )
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 
 			case OP_increment_i:
@@ -2174,7 +2178,7 @@ namespace avmplus
 				checkStack(1,1);
 				emitCoerce(INT_TYPE, sp);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, state->sp(), opcode == OP_increment_i ? 1 : -1, INT_TYPE); )
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 
 			case OP_add_i:
@@ -2190,14 +2194,14 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(2, INT_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 
 			case OP_negate_i:
 				checkStack(1,1);
 				emitCoerce(INT_TYPE, sp);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, INT_TYPE); )
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_negate_i) );
 				break;
 
 			case OP_bitand:
@@ -2213,7 +2217,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(2, INT_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 
 			// ISSUE do we care if shift amount is signed or not?  we mask 
@@ -2231,7 +2235,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(2, INT_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 
 			case OP_urshift:
@@ -2245,14 +2249,14 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(2, UINT_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_urshift) );
 				break;
 
 			case OP_bitnot:
 				checkStack(1,1);
 				emitCoerce(INT_TYPE, sp); // lhs
 				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, INT_TYPE); )
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_bitnot) );
 				break;
 
 			case OP_typeof:
@@ -2260,7 +2264,7 @@ namespace avmplus
 				checkStack(1,1);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, STRING_TYPE); )
 				state->pop_push(1, STRING_TYPE, true);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_typeof) );
 				break;
 			}
 
@@ -2283,7 +2287,7 @@ namespace avmplus
 				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30); )
 				#endif
 #ifdef DEBUGGER
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_debugline) );
 #endif
 				break;
 
@@ -2294,7 +2298,7 @@ namespace avmplus
 				peekType(INT_TYPE,1);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, NULL); )
 				state->pop_push(2, NULL);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 				break;
 			}
 
@@ -2304,7 +2308,7 @@ namespace avmplus
 				peekType(INT_TYPE,1);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, INT_TYPE); )
 				state->pop_push(2, INT_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_hasnext) );
 				break;
 			}
 
@@ -2324,7 +2328,7 @@ namespace avmplus
 				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30, imm30b, BOOLEAN_TYPE); )
 				state->setType(imm30, NULL, false);
 				state->push(BOOLEAN_TYPE);
-				XLAT_ONLY( if (translator) translator->emitOp2(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp2(pc, WOP_hasnext2) );
 				break;
 			}
 
@@ -2469,7 +2473,7 @@ namespace avmplus
 				goto xlat_done;
 
 			// don't know the binding now, resolve at runtime
-			XLAT_ONLY( translator->emitOp2(opcode, imm30, imm30b) );
+			XLAT_ONLY( translator->emitOp2(wordCode(opcode), imm30, imm30b) );
 		xlat_done:
 			;
 		}
@@ -2622,9 +2626,9 @@ namespace avmplus
 		if (t->isInterface) 
 			return false;
 		
-		translator->emitOp2(OP_callmethod, disp_id+1, argc);
+		translator->emitOp2(WOP_callmethod, disp_id+1, argc);
 		if (opcode == OP_callpropvoid)
-			translator->emitOp0(OP_pop);
+			translator->emitOp0(WOP_pop);
 		return true;
 	}
 	
@@ -2640,27 +2644,27 @@ namespace avmplus
 			
 		if (slotType == core->traits.int_ctraits)
 		{
-			translator->emitOp0(OP_coerce_i);
+			translator->emitOp0(WOP_coerce_i);
 			goto fast_path;
 		}
 		if (slotType == core->traits.uint_ctraits)
 		{
-			translator->emitOp0(OP_coerce_u);
+			translator->emitOp0(WOP_coerce_u);
 			goto fast_path;
 		}
 		if (slotType == core->traits.number_ctraits)
 		{
-			translator->emitOp0(OP_coerce_d);
+			translator->emitOp0(WOP_coerce_d);
 			goto fast_path;
 		}
 		if (slotType == core->traits.boolean_ctraits)
 		{
-			translator->emitOp0(OP_coerce_b);
+			translator->emitOp0(WOP_coerce_b);
 			goto fast_path;
 		}
 		if (slotType == core->traits.string_ctraits)
 		{
-			translator->emitOp0(OP_convert_s);
+			translator->emitOp0(WOP_convert_s);
 			goto fast_path;
 		}
 		return false;
@@ -2668,13 +2672,13 @@ namespace avmplus
 	fast_path:
 		if (opcode == OP_callpropvoid)
 		{
-			translator->emitOp0(OP_pop);  // result
-			translator->emitOp0(OP_pop);  // function
+			translator->emitOp0(WOP_pop);  // result
+			translator->emitOp0(WOP_pop);  // function
 		}
 		else
 		{
-			translator->emitOp0(OP_swap); // function on top
-			translator->emitOp0(OP_pop);  //   and discard it
+			translator->emitOp0(WOP_swap); // function on top
+			translator->emitOp0(WOP_pop);  //   and discard it
 		}
 		return true;
 	}
@@ -2735,7 +2739,7 @@ namespace avmplus
 				{
 					JIT_ONLY( if (jit) jit->emitCopy(state, index, state->sp()+1); )
 					state->push(v);
-					XLAT_ONLY( if (translator) translator->emitOp1(OP_getscopeobject, index-scopeBase) );
+					XLAT_ONLY( if (translator) translator->emitOp1(WOP_getscopeobject, index-scopeBase) );
 					return;
 				}
 				if (v.isWith)
@@ -2752,7 +2756,7 @@ namespace avmplus
 					{
 						JIT_ONLY( if (jit) jit->emitGetscope(state, index, state->sp()+1); )
 						state->push(t, true);
-						XLAT_ONLY( if (translator) translator->emitOp1(OP_getouterscope, index) );
+						XLAT_ONLY( if (translator) translator->emitOp1(WOP_getouterscope, index) );
 						return;
 					}
 					if (scope->getScopeIsWithAt(index))
@@ -2785,7 +2789,7 @@ namespace avmplus
 						state->push(script->declaringTraits, true);
 
 						// OPTIMIZEME - more early binding for interpreter on findproperty!
-						XLAT_ONLY(if (translator) translator->emitOp1(opcode, imm30));
+						XLAT_ONLY(if (translator) translator->emitOp1(wordCode(opcode), imm30));
 
                         #ifdef AVMPLUS_VERIFYALL
                         core->enq(script);
@@ -2805,7 +2809,7 @@ namespace avmplus
 									translator->emitOp2(WOP_findpropglobalstrict, imm30, allocateCacheSlot(imm30));
 									break;
 								default:
-									translator->emitOp1(opcode, imm30);
+									translator->emitOp1(wordCode(opcode), imm30);
 									break;
 							}
 							no_translate = true;
@@ -2820,7 +2824,7 @@ namespace avmplus
 		checkPropertyMultiname(n, multiname);
 		JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE); )
 		state->pop_push(n-1, OBJECT_TYPE, true);
-		XLAT_ONLY( if (translator && !no_translate) translator->emitOp1(opcode, imm30) );
+		XLAT_ONLY( if (translator && !no_translate) translator->emitOp1(wordCode(opcode), imm30) );
 	}
 
 #ifdef AVMPLUS_WORD_CODE
@@ -2870,16 +2874,16 @@ namespace avmplus
 				AvmAssert(t->linked);
 				
 				if (!(t->pool->isBuiltin && !t->final))
-					translator->emitOp1(OP_getslot, slot+1);
+					translator->emitOp1(WOP_getslot, slot+1);
 				else
-					translator->emitOp1(OP_getproperty, imm30);
+					translator->emitOp1(WOP_getproperty, imm30);
 			}
 #endif
 			state->pop_push(n, propType);
 			return;
 		}
 
-		XLAT_ONLY( if (translator) translator->emitOp1(OP_getproperty, imm30) );
+		XLAT_ONLY( if (translator) translator->emitOp1(WOP_getproperty, imm30) );
 		
 		// Do early binding to accessors.
 		if (AvmCore::hasGetterBinding(b))

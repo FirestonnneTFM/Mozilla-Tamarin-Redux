@@ -823,7 +823,7 @@ const int kBufferPadding = 16;
         static void readOperands(const byte* &pc, unsigned int& imm32, int& imm24, unsigned int& imm32b, int& imm8 )
         {
             AbcOpcode opcode = (AbcOpcode)*pc++;
-            int op_count = opOperandCount[opcode];
+            int op_count = opcodeInfo[opcode].operandCount;
 
             imm8 = pc[0];
 			if( opcode == OP_pushbyte || opcode == OP_debug )

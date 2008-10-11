@@ -61,7 +61,7 @@ namespace avmplus
 			AvmAssert(kind >=0 && kind <= CONSTANT_StaticProtectedNs && kindToPushOp[kind] != 0);
 			int op = kindToPushOp[kind];
 			bytes.add((byte)op);
-			if(opOperandCount[op] > 0)
+			if(opcodeInfo[op].operandCount > 0)
 				writeInt(index); 
 		}
 		void getlocalN(int N) { bytes.add((byte)(OP_getlocal0+N)); }
