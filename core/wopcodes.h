@@ -246,6 +246,15 @@ namespace avmplus
 		unsigned width:3;        // Number of words including opcode
 		unsigned jumps:1;	     // True if the instruction jumps
 		unsigned terminates:1;   // True if the instruction terminates control flow (return, throw)
+		unsigned throws:1;       // True if the instruction may throw an exception (not including timer interrupts and other unhandleable errors)
+		unsigned calls:1;	     // True if the last argument is arg_count
+							     // An 'arg_count' number of extra parameters are pop from the stack
+		unsigned pushes:2;	     // Number of items pushed on the stack
+		unsigned pops:2;		 // Number of items popped from the stack
+		unsigned pops_extra:1;   // True if the instruction has extra stack pops, determined by verifier
+		unsigned uses_local:1;	 // Use local slot
+		unsigned defs_local:1;	 // Defines local slot
+
 #if defined _DEBUG || defined DEBUGGER
 		// Keep this field last
 		const char * name;       // Printable name for the instruction

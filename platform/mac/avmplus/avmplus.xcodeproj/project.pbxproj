@@ -116,8 +116,6 @@
 		1E6079F9097335EF007D0E1E /* NumberClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607959097335EF007D0E1E /* NumberClass.h */; };
 		1E6079FA097335EF007D0E1E /* ObjectClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60795A097335EF007D0E1E /* ObjectClass.cpp */; };
 		1E6079FB097335EF007D0E1E /* ObjectClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60795B097335EF007D0E1E /* ObjectClass.h */; };
-		1E6079FC097335EF007D0E1E /* opcodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60795C097335EF007D0E1E /* opcodes.cpp */; };
-		1E6079FD097335EF007D0E1E /* opcodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60795D097335EF007D0E1E /* opcodes.h */; };
 		1E6079FE097335EF007D0E1E /* OSDep.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60795E097335EF007D0E1E /* OSDep.h */; };
 		1E6079FF097335EF007D0E1E /* OutputStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60795F097335EF007D0E1E /* OutputStream.h */; };
 		1E607A00097335EF007D0E1E /* PoolObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607960097335EF007D0E1E /* PoolObject.cpp */; };
@@ -328,8 +326,6 @@
 		1E607959097335EF007D0E1E /* NumberClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = NumberClass.h; path = ../../../core/NumberClass.h; sourceTree = SOURCE_ROOT; };
 		1E60795A097335EF007D0E1E /* ObjectClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectClass.cpp; path = ../../../core/ObjectClass.cpp; sourceTree = SOURCE_ROOT; };
 		1E60795B097335EF007D0E1E /* ObjectClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ObjectClass.h; path = ../../../core/ObjectClass.h; sourceTree = SOURCE_ROOT; };
-		1E60795C097335EF007D0E1E /* opcodes.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = opcodes.cpp; path = ../../../core/opcodes.cpp; sourceTree = SOURCE_ROOT; };
-		1E60795D097335EF007D0E1E /* opcodes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = opcodes.h; path = ../../../core/opcodes.h; sourceTree = SOURCE_ROOT; };
 		1E60795E097335EF007D0E1E /* OSDep.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = OSDep.h; path = ../../../core/OSDep.h; sourceTree = SOURCE_ROOT; };
 		1E60795F097335EF007D0E1E /* OutputStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = OutputStream.h; path = ../../../core/OutputStream.h; sourceTree = SOURCE_ROOT; };
 		1E607960097335EF007D0E1E /* PoolObject.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = PoolObject.cpp; path = ../../../core/PoolObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -593,8 +589,6 @@
 				1E607959097335EF007D0E1E /* NumberClass.h */,
 				1E60795A097335EF007D0E1E /* ObjectClass.cpp */,
 				1E60795B097335EF007D0E1E /* ObjectClass.h */,
-				1E60795C097335EF007D0E1E /* opcodes.cpp */,
-				1E60795D097335EF007D0E1E /* opcodes.h */,
 				1E60795E097335EF007D0E1E /* OSDep.h */,
 				1E60795F097335EF007D0E1E /* OutputStream.h */,
 				1E607960097335EF007D0E1E /* PoolObject.cpp */,
@@ -795,7 +789,6 @@
 				1E6079F7097335EF007D0E1E /* NativeObjectHelpers.h in Headers */,
 				1E6079F9097335EF007D0E1E /* NumberClass.h in Headers */,
 				1E6079FB097335EF007D0E1E /* ObjectClass.h in Headers */,
-				1E6079FD097335EF007D0E1E /* opcodes.h in Headers */,
 				1E6079FE097335EF007D0E1E /* OSDep.h in Headers */,
 				1E6079FF097335EF007D0E1E /* OutputStream.h in Headers */,
 				1E607A01097335EF007D0E1E /* PoolObject.h in Headers */,
@@ -929,7 +922,6 @@
 				1E6079F5097335EF007D0E1E /* NativeFunction.cpp in Sources */,
 				1E6079F8097335EF007D0E1E /* NumberClass.cpp in Sources */,
 				1E6079FA097335EF007D0E1E /* ObjectClass.cpp in Sources */,
-				1E6079FC097335EF007D0E1E /* opcodes.cpp in Sources */,
 				1E607A00097335EF007D0E1E /* PoolObject.cpp in Sources */,
 				1E607A02097335EF007D0E1E /* PrintWriter.cpp in Sources */,
 				1E607A04097335EF007D0E1E /* RegExpClass.cpp in Sources */,

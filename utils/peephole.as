@@ -39,7 +39,7 @@
 /* Usage: 
 
    Run this from the core/ directory, the program needs to know where
-   to find opcodes.tbl and there's no parameter to specify it.
+   to find wopcodes.cpp and there's no parameter to specify it.
    Normally you want the output to be "peephole.icc", which is
    included into Translator.cpp.
  */
@@ -313,21 +313,6 @@ package peephole
 		     }
 		     i++;
 		 });
-
-	/*
-	File.read("opcodes.tbl").
-	    split("\n").
-	    filter(function (elt) { return !(/^\s*$/.test(elt) || /^\s*\/\//.test(elt)) }).
-	    forEach(function (elt) { 
-		        var xs=elt.split(/\s+/); 
-			if (!(xs[0].match(/^OP_0x/)))
-			    opcode[xs[0]] = parseInt(xs[2]); 
-		    });
-	for ( var n in opcode ) {
-	    opname[opcode[n]] = n;
-	    longest = Math.max(longest, n.length);
-	}
-	*/
     }
 
     function preprocess(lines) {

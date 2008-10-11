@@ -2333,10 +2333,6 @@
 			RelativePath="..\..\core\ErrorConstants.xml"
 			>
 		</File>
-		<File
-			RelativePath="..\..\core\opcodes.tbl"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

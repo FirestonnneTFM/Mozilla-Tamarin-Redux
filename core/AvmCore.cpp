@@ -1480,7 +1480,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		case OP_debugfile:
 		case OP_pushstring:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				String *s = format(pool->cpool_string[index]->atom());
 				if (index < pool->cpool_string.size())
@@ -1488,11 +1488,11 @@ return the result of the comparison ToPrimitive(x) == y.
 				break;
 			}
         case OP_pushbyte:
-            buffer << opNames[opcode] << " " << int(int8(*pc));
+            buffer << opcodeInfo[opcode].name << " " << int(int8(*pc));
             break;
 		case OP_pushint:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_int.size())
 					buffer << " " << pool->cpool_int[index];
@@ -1500,7 +1500,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		case OP_pushuint:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_uint.size())
 					buffer << " " << (double)pool->cpool_uint[index];
@@ -1508,7 +1508,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		case OP_pushdouble:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_double.size())
 					buffer << " " << *pool->cpool_double[index];
@@ -1516,7 +1516,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		case OP_pushnamespace:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_ns.size())
                 {
@@ -1537,7 +1537,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		case OP_coerce: 
 		case OP_astype: 
 			{
-				buffer << opNames[opcode] << " ";
+				buffer << opcodeInfo[opcode].name << " ";
 				formatMultiname(buffer, readU30(pc), pool);
 				break;
 			}
@@ -1549,7 +1549,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				uint32 index = readU30(pc);
 				int argc = readU30(pc);
-				buffer << opNames[opcode] << " ";
+				buffer << opcodeInfo[opcode].name << " ";
 				formatMultiname(buffer, index, pool);
 				buffer << " " << argc;
 				break;
@@ -1559,7 +1559,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				int method_id = readU30(pc);
 				AbstractFunction* f = pool->methods[method_id];
-				buffer << opNames[opcode] << " method_id=" << method_id;
+				buffer << opcodeInfo[opcode].name << " method_id=" << method_id;
 				if (opcode == OP_callstatic)
 				{
 					buffer << " argc=" << (int)readU30(pc); // argc
@@ -1575,7 +1575,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
                 uint32_t id = readU30(pc);
 				AbstractFunction* c = pool->cinits[id];
-				buffer << opNames[opcode] << " " << c;
+				buffer << opcodeInfo[opcode].name << " " << c;
 				break;
 			}
 		case OP_lookupswitch:
@@ -1583,7 +1583,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				ptrdiff_t target = off + readS24(pc);
 				pc += 3;
 				int maxindex = readU30(pc);
-				buffer << opNames[opcode] << " default:" << target << " maxcase:"<<maxindex;
+				buffer << opcodeInfo[opcode].name << " default:" << target << " maxcase:"<<maxindex;
 				for (int i=0; i <= maxindex; i++)
 				{
 					target = off + readS24(pc);
@@ -1617,18 +1617,18 @@ return the result of the comparison ToPrimitive(x) == y.
 				int insWidth = (int)(p2-pc);
 
 				ptrdiff_t target = off + insWidth + imm24 + 1;
-				buffer << opNames[opcode] << " " << (double)target;
+				buffer << opcodeInfo[opcode].name << " " << (double)target;
 				break;
 			}
 		default:
-			switch (opOperandCount[opcode])
+			switch (opcodeInfo[opcode].operandCount)
 			{
 			default:
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				break;
 			case 1:
 				{
-					buffer << opNames[opcode]
+					buffer << opcodeInfo[opcode].name
 						<< ' '
 						<< (int)readU30(pc);
 				}
@@ -1637,7 +1637,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				{
 					int first = readU30(pc);
 					int second = readU30(pc);
-					buffer << opNames[opcode]
+					buffer << opcodeInfo[opcode].name
 						<< ' '
 						<< first
 						<< ' '

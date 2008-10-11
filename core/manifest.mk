@@ -81,7 +81,6 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/NativeFunction.cpp \
   $(curdir)/NumberClass.cpp \
   $(curdir)/ObjectClass.cpp \
-  $(curdir)/opcodes.cpp \
   $(curdir)/peephole.cpp \
   $(curdir)/PoolObject.cpp \
   $(curdir)/PrintWriter.cpp \
