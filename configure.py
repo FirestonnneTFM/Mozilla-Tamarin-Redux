@@ -215,6 +215,9 @@ if o.getBoolArg('perfm'):
 if o.getBoolArg('disable-nj'):
     APP_CPPFLAGS += '-DAVMPLUS_DISABLE_NJ '
 
+if o.getBoolArg('selftest'):
+    APP_CPPFLAGS += '-DAVMPLUS_SELFTEST '
+
 # We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))
                         for (var, val) in MMGC_DEFINES.iteritems())
