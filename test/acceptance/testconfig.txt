@@ -51,8 +51,6 @@ ecma3/TypeConversion/e9_3_1_3_rt:parseInt\("123456789012345678"\) ,   .*lnx-tvm-
 
 # windows 64 sampling api crashes bug 455062
 as3/sampling/.*: , x86-win64-tvm-.*debugger , skip       , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455062
-# sampling api: windows debug debugger assertion fails crashes: bug 457311
-as3/sampling/Callback: , x86-win-tvm-debugdebugger , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=457311
 # mmgc seg fault on linux debug-debugger: bug 457903
 ecma3/Exceptions/number_00[12]_rt: , x86-lnx-tvm-debugdebugger  , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=457903
 
