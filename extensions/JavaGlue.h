@@ -42,7 +42,7 @@
 #ifdef AVMPLUS_WITH_JNI
 
 #define NO_JNI_STDIO
-#include <jni.h>
+#include <javaVM/jni.h>
 
 /**
  * Pointers to the routines that we will be calling.  We bind
@@ -73,7 +73,7 @@ namespace avmplus
 		static JObjectClass* cc; //@todo hack to remove
 
 		JObjectClass(VTable *cvtable);
-		ScriptObject* JObjectClass::createInstance(VTable *ivtable, ScriptObject *prototype);
+		ScriptObject* createInstance(VTable *ivtable, ScriptObject *prototype);
 
 		/**
 		 * Implementations of AS JObject.xxx() methods
@@ -109,9 +109,9 @@ namespace avmplus
 		ScriptObject* createInstance(VTable *ivtable, ScriptObject *prototype);
 
 		Atom getAtomProperty(Atom name) const;
-		bool hasMultinameProperty(Multiname* multi) const;
-		Atom callProperty(Multiname* multiname, int argc, Atom* argv);
-		void setMultinameProperty(Multiname* name, Atom value);
+		bool hasMultinameProperty(const Multiname* name) const;
+		Atom callProperty(const Multiname* name, int argc, Atom* argv);
+		void setMultinameProperty(const Multiname* name, Atom value);
 
 		// internal 
 		void setClass(JClass* clazz) { this->jclass = clazz; }
@@ -134,7 +134,7 @@ namespace avmplus
 	class JClass : public MMgc::GCObject
 	{
 	public:
-		JClass::JClass(Java* vm, String* name, jclass cref);
+		JClass(Java* vm, String* name, jclass cref);
 
 		jobject		callConstructor(JObjectClass* jobj, int argc, Atom* argv);
 		jarray		createArray(JObjectClass* jobj, int size, ArrayObject* arr);
@@ -180,21 +180,21 @@ namespace avmplus
 	};
 
 // auto class determination
-#define BEGIN_DEFINE_JCLASS()			static const int _classRef_0_= __LINE__ + 1; 
+#define BEGIN_DEFINE_JCLASS()			static const int _classRef_0_= __LINE__ + 1
 #define DEFINE_JCLASS(c) 				static const int _classRef_##c = __LINE__ - _classRef_0_; jclass c() const { return classRefTable[_classRef_##c]; }
-#define END_DEFINE_JCLASS() 			jclass classRefTable[__LINE__-_classRef_0_];
+#define END_DEFINE_JCLASS() 			jclass classRefTable[__LINE__-_classRef_0_]
 #define INIT_JCLASS(c)					classRefTable[_classRef_##c] = jni->FindClass( replace(dst, #c) );
 
 // instances of Class objects
-#define BEGIN_DEFINE_PRIMITIVE_TYPE()	static const int _primitiveRef_0_= __LINE__ + 1; 
+#define BEGIN_DEFINE_PRIMITIVE_TYPE()	static const int _primitiveRef_0_= __LINE__ + 1
 #define DEFINE_PRIMITIVE_TYPE(c)		static const int _primitiveRef_##c = __LINE__ - _primitiveRef_0_; jclass c##_class() const { return primitiveRefTable[_primitiveRef_##c]; }
-#define END_DEFINE_PRIMITIVE_TYPE() 	jclass primitiveRefTable[__LINE__-_primitiveRef_0_];
+#define END_DEFINE_PRIMITIVE_TYPE() 	jclass primitiveRefTable[__LINE__-_primitiveRef_0_]
 #define INIT_PRIMITIVE_TYPE(c)			primitiveRefTable[_primitiveRef_##c] = (jclass)jni->GetStaticObjectField( c(), jni->GetStaticFieldID( c(), "TYPE", "Ljava/lang/Class;") );
 
 // auto method id determination
-#define BEGIN_DEFINE_JMETHODID()		static const int _methodId_0_= __LINE__ + 1; 
+#define BEGIN_DEFINE_JMETHODID()		static const int _methodId_0_= __LINE__ + 1
 #define DEFINE_JMETHODID(c, m, s)		static const int _methodId_##c##m = __LINE__ - _methodId_0_; jmethodID c##_##m() const { return methodIdTable[_methodId_##c##m]; }
-#define END_DEFINE_JMETHODID()			jmethodID methodIdTable[__LINE__-_methodId_0_];
+#define END_DEFINE_JMETHODID()			jmethodID methodIdTable[__LINE__-_methodId_0_]
 #define INIT_JMETHODID(c, m, s)			methodIdTable[_methodId_##c##m] = jni->GetMethodID( c(), #m, s);
 #define INIT_SJMETHODID(c, m, s)		methodIdTable[_methodId_##c##m] = jni->GetStaticMethodID( c(), #m, s);
 #define DEFINE_SJMETHODID DEFINE_JMETHODID

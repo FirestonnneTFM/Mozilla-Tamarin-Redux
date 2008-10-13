@@ -291,7 +291,7 @@ namespace avmplus
 		codegenMethodNames = CodegenMIR::initMethodNames(this);
 		#endif
 
-		#ifdef FEATURE_JNI
+		#ifdef AVMPLUS_WITH_JNI
 		java = NULL;
 		#endif
 #ifdef SUPERWORD_PROFILING

@@ -260,6 +260,7 @@ namespace avmplus
 
 	ArrayObject* JObjectClass::toArray(JObject* jobj)
 	{
+		(void)jobj;
 		return 0;
 	}
 
@@ -365,7 +366,7 @@ namespace avmplus
 	}
 
 	// for calls
-	Atom JObject::callProperty(Multiname* multiname, int argc, Atom* argv) 
+	Atom JObject::callProperty(const Multiname* multiname, int argc, Atom* argv) 
 	{
 		String* nm = multiname->getName();
 		Atom a = jclass->callMethod(this, nm, argc, argv);
@@ -381,7 +382,7 @@ namespace avmplus
 		return a;
 	}
 
-	bool JObject::hasMultinameProperty(Multiname* multi) const
+	bool JObject::hasMultinameProperty(const Multiname* multi) const
 	{
 		String* nm = multi->getName();
 		bool has = jclass->hasField( (JObject*)this, nm);
@@ -389,7 +390,7 @@ namespace avmplus
 		return has;
 	}
 
-	void JObject::setMultinameProperty(Multiname* multi, Atom value)
+	void JObject::setMultinameProperty(const Multiname* multi, Atom value)
 	{
 		Java*	vm = jclass->jvm();
 		JNIEnv* jni = vm->jni;
@@ -444,6 +445,9 @@ namespace avmplus
 
 	jarray JClass::createArray(JObjectClass* obj, int size, ArrayObject* fillWith)
 	{
+		(void)obj;
+		(void)fillWith;
+			
 		JNIEnv* jni = vm->jni;
 
 		// use the type character to tell us what kind of array this is 
@@ -624,6 +628,7 @@ namespace avmplus
 
 	bool JClass::hasField(JObject* jobj, String* nm)
 	{
+		(void)jobj;
 		jobject field = fieldFor(nm);
 		return (field == 0) ? false : true;
 	}
@@ -1391,6 +1396,7 @@ namespace avmplus
 	 */
 	const char* JClass::jvalueToAtom(AvmCore* core, Toplevel* toplevel, jvalue& val, const char* type, Atom& a)
 	{
+		(void)toplevel;
 		switch( *type++ )
 		{
 			case 'Z':
@@ -1534,6 +1540,7 @@ namespace avmplus
 
 	bool Java::bindLibrary(AvmCore* core)
 	{
+		(void)core;
 		if (!bound)
 		{
 #ifdef AVMPLUS_WIN32

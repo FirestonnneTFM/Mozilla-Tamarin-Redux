@@ -303,7 +303,7 @@ const int kBufferPadding = 16;
 		DRC(Namespace*) publicNamespace;
 		VTable* namespaceVTable;
 
-		#ifdef FEATURE_JNI
+		#ifdef AVMPLUS_WITH_JNI
 		Java* java;     /* java vm control */
 		#endif
 

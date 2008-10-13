@@ -240,8 +240,9 @@
 //want to turn this on
 #define SAFE_PARSE
 
-// Enable interfacing Java
-#define FEATURE_JNI
+// Enable interfacing Java ; so you can access java methods/properties like native AS; e.g.
+// var hello = JObject.create("java.lang.String", " hello world ");  print(hello.indexOf('o')); 
+//#define AVMPLUS_WITH_JNI
 
 #define PCRE_STATIC
 
