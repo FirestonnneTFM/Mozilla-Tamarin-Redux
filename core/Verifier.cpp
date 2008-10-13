@@ -66,9 +66,11 @@ namespace avmplus
 {
 #undef DEBUG_EARLY_BINDING
 
+#ifdef AVMPLUS_WORD_CODE
 	inline WordOpcode wordCode(AbcOpcode opcode) {
 		return (WordOpcode)opcodeInfo[opcode].wordCode;
 	}
+#endif
 	
 	Verifier::Verifier(MethodInfo* info, Toplevel* toplevel
 #ifdef AVMPLUS_VERBOSE
