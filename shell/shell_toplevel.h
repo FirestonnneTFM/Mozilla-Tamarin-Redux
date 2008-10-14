@@ -83,9 +83,6 @@ extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_os_thunkc(
   const uint32_t avmplus_File_read = 23;
   #define avmplus_File_read_thunk  shell_toplevel_s2a_os_thunk
   #define avmplus_File_read_thunkc shell_toplevel_s2a_os_thunkc
-  const uint32_t avmplus_File_exists = 22;
-  #define avmplus_File_exists_thunk  shell_toplevel_s2a_os_thunk
-  #define avmplus_File_exists_thunkc shell_toplevel_s2a_os_thunkc
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_oss_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_oss_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t avmplus_File_write = 24;
@@ -338,6 +335,11 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_os_thunkc(AvmMe
   const uint32_t avmplus_System_write = 11;
   #define avmplus_System_write_thunk  shell_toplevel_v2a_os_thunk
   #define avmplus_System_write_thunkc shell_toplevel_v2a_os_thunkc
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE shell_toplevel_b2a_os_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE shell_toplevel_b2a_os_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+  const uint32_t avmplus_File_exists = 22;
+  #define avmplus_File_exists_thunk  shell_toplevel_b2a_os_thunk
+  #define avmplus_File_exists_thunkc shell_toplevel_b2a_os_thunkc
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_ouu_optu4294967295U_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_ouu_optu4294967295U_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t avmplus_StringBuilder_substring = 57;

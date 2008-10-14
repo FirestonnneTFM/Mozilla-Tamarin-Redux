@@ -1,5 +1,5 @@
 /* machine generated file -- do not edit */
-// 42 unique thunks
+// 43 unique thunks
 
 // avmplus_JObject_create
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_os_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -91,7 +91,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_o_thunkc(AvmMethodEn
 }
 
 // avmplus_File_read
-// avmplus_File_exists
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_os_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
     const uint32_t argoff0 = 0;    
@@ -984,6 +983,35 @@ AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_os_thunkc(AvmMethodEnv
     return AvmToRetType_void(ret);    
 }
 
+// avmplus_File_exists
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE shell_toplevel_b2a_os_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;    
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
+    (void)argc;    
+    AVMTHUNK_DEBUG_ENTER(env)    
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
+    );    
+    AVMTHUNK_DEBUG_EXIT(env)    
+    return AvmToRetType_AvmBoolArg(ret);    
+}
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE shell_toplevel_b2a_os_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;    
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
+    (void)argc;    
+    AVMTHUNK_DEBUG_ENTER(env)    
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
+        , int32_t, AVMTHUNK_GET_COOKIE(env)        
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
+    );    
+    AVMTHUNK_DEBUG_EXIT(env)    
+    return AvmToRetType_AvmBoolArg(ret);    
+}
+
 // avmplus_StringBuilder_substring
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_ouu_optu4294967295U_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1505,7 +1533,7 @@ const uint8_t shell_toplevel_abc_data[5514] = {
   0,   3,   3,  32,   1,  15,  17,   3,  32,   1,  15,   3,   3,  32,   0,  15, 
   3,  32,   0,  18,   3,  32,   0,   5,   3,  32,   0,  17,   3,  32,   0,   3, 
   3,  32,   0,  19,   3,  32,   0,  19,   3,  32,   0,  19,   3,  32,   0,   0, 
-  3,   0,   0,   0,   3,   0,   1,   3,   3,   3,  32,   1,   3,   3,   3,  32, 
+  3,   0,   0,   0,   3,   0,   1,  18,   3,   3,  32,   1,   3,   3,   3,  32, 
   2,  15,   3,   3,   3,  32,   2,  37,   3,  18,   3,   0,   2,  18,   3,  37, 
   3,   0,   0,   0,   3,   0,   0,   0,   3,   0,   0,   3,   3,   0,   0,  18, 
   3,   0,   0,   0,   3,   0,   0,   0,   3,   0,   0,   0,   3,   0,   0,  56, 
