@@ -49,6 +49,10 @@ util/shell_ats, .*, skip, shell file for ats media creation
 ecma3/GlobalObject/e15_1_2_2_2:parseInt\("123456789012345678"\)   ,   .*lnx-tvm-(release|releasedebugger).*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 ecma3/TypeConversion/e9_3_1_3_rt:parseInt\("123456789012345678"\) ,   .*lnx-tvm-(release|releasedebugger).*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 
+# bug #459038: linux memstats private bytes shows 0K always
+as3/ShellClasses/toplevel:System.privateMemory >0.*, x86-lnx.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459038
+as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile-tvm.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
+
 # winmobile as3/sampling/Callback is intermittently failing bug 459916
 as3/sampling/Callback.* , arm-winmobile-tvm.* , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=459916
 
