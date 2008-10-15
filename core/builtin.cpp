@@ -1,2423 +1,2423 @@
 /* machine generated file -- do not edit */
 // 71 unique thunks
 
-// XML_prettyIndent_get
-// XMLList_AS3_length
-// builtin_as_0_MethodClosure_length_get
-// XMLList_AS3_childIndex
-// Function_length_get
-// RegExp_lastIndex_get
-// XML_AS3_childIndex
-// __AS3___vec_Vector_int_AS3_pop
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// Array_private__filter
+// Array_private__map
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-
-// XML_AS3_descendants
-// XMLList_AS3_processingInstructions
-// XMLList_AS3_descendants
-// XMLList_AS3_elements
-// XML_AS3_elements
-// XML_AS3_processingInstructions
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, (argc < 1 ? AvmThunkCoerce_AvmString_AvmBox(AvmThunkConstant_AvmString(355)/* "*" */) : AvmThunkUnbox_AvmBox(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_AvmString_355___________thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, (argc < 1 ? AvmThunkCoerce_AvmString_AvmBox(AvmThunkConstant_AvmString(355)/* "*" */) : AvmThunkUnbox_AvmBox(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
 
-// XML_AS3_attribute
-// XMLList_AS3_setChildren
-// XML_AS3_setChildren
-// XMLList_AS3_appendChild
-// XML_AS3_prependChild
-// Array_private__shift
-// XMLList_AS3_removeNamespace
-// XML_AS3_child
-// XML_AS3_removeNamespace
-// Array_private__pop
-// Function_prototype_set
-// XML_AS3_appendChild
-// Array_private__reverse
-// XMLList_AS3_child
-// XMLList_AS3_addNamespace
-// XMLList_AS3_attribute
-// XMLList_AS3_prependChild
-// XML_AS3_addNamespace
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// __AS3___vec_Vector_object_private__spliceHelper
+// __AS3___vec_Vector_uint_private__spliceHelper
+// __AS3___vec_Vector_int_private__spliceHelper
+// __AS3___vec_Vector_double_private__spliceHelper
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_uint32_t;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_uint32_t;
+    const uint32_t argoff4 = argoff3 + AvmThunkArgSize_uint32_t;
+    const uint32_t argoff5 = argoff4 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_5(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff1])
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff2])
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff3])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff4])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff5])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
 }
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_ouuuai_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_uint32_t;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_uint32_t;
+    const uint32_t argoff4 = argoff3 + AvmThunkArgSize_uint32_t;
+    const uint32_t argoff5 = argoff4 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_6(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff1])
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff2])
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff3])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff4])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff5])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
 }
 
-// Date_private__setMilliseconds
-// Date_private__setMinutes
-// Date_private__setUTCMinutes
-// Date_private__setHours
-// Date_private__setUTCDate
-// Date_private__setMonth
-// Date_private__setFullYear
-// Date_private__setUTCFullYear
-// Date_private__setDate
-// Date_private__setUTCMilliseconds
-// Date_private__setSeconds
-// Date_private__setUTCMonth
-// Date_private__setUTCSeconds
-// Date_private__setUTCHours
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// String_private__charCodeAt
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 0 ? 0 : argc - 0)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_si_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 0 ? 0 : argc - 0)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// Date_AS3_getUTCDate
+// __AS3___vec_Vector_double_AS3_pop
+// Date_AS3_valueOf
+// Date_AS3_getDay
+// Date_AS3_getSeconds
+// Date_AS3_getUTCFullYear
+// Date_AS3_getMilliseconds
+// Date_AS3_getUTCDay
+// Date_AS3_getMonth
+// Date_AS3_getUTCHours
+// Date_AS3_getMinutes
+// Date_AS3_getUTCMilliseconds
+// Date_AS3_getUTCMonth
+// Date_AS3_getTime
+// Date_AS3_getTimezoneOffset
+// Date_AS3_getFullYear
+// Math_random
+// Date_AS3_getUTCSeconds
+// Date_AS3_getDate
+// Date_AS3_getUTCMinutes
+// Date_AS3_getHours
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
 
 // String_AS3_localeCompare
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ss_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , AvmString, (argc < 1 ? AvmThunkCoerce_AvmBox_AvmString(kAvmThunkUndefined) : AvmThunkUnbox_AvmString(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , AvmString, (argc < 1 ? AvmThunkCoerce_AvmBox_AvmString(kAvmThunkUndefined) : AvmThunkUnbox_AvmString(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ss_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, (argc < 1 ? AvmThunkCoerce_AvmBox_AvmString(kAvmThunkUndefined) : AvmThunkUnbox_AvmString(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, (argc < 1 ? AvmThunkCoerce_AvmBox_AvmString(kAvmThunkUndefined) : AvmThunkUnbox_AvmString(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
 
-// XML_AS3_hasOwnProperty
-// XMLList_AS3_hasOwnProperty
-// XMLList_AS3_propertyIsEnumerable
-// XML_AS3_propertyIsEnumerable
-// isXMLName
-AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// __AS3___vec_Vector_double_AS3_push
+// __AS3___vec_Vector_object_AS3_push
+// __AS3___vec_Vector_uint_AS3_push
+// Array_AS3_unshift
+// Array_AS3_push
+// __AS3___vec_Vector_int_AS3_unshift
+// __AS3___vec_Vector_uint_AS3_unshift
+// __AS3___vec_Vector_double_AS3_unshift
+// __AS3___vec_Vector_object_AS3_unshift
+// __AS3___vec_Vector_int_AS3_push
+AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const uint32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), uint32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 0 ? 0 : argc - 0)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_uint32_t(ret);
 }
-AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
-}
-
-// Namespace_uri_get
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_n_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmNamespace, AvmThunkUnbox_AvmNamespace(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_n_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmNamespace, AvmThunkUnbox_AvmNamespace(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const uint32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), uint32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 0 ? 0 : argc - 0)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_uint32_t(ret);
 }
 
-// __AS3___vec_Vector_object_fixed_set
-// __AS3___vec_Vector_int_fixed_set
+// __AS3___vec_Vector_uint_length_set
+// __AS3___vec_Vector_object_length_set
+// __AS3___vec_Vector_int_length_set
+// __AS3___vec_Vector_double_length_set
+// Array_length_set
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ou_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ou_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// Number_private__toString
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , double, AvmThunkUnbox_double(argv[argoff1])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, AvmThunkUnbox_double(argv[argoff1])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// XML_prettyIndent_set
+// RegExp_lastIndex_set
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// XML_AS3_setNotification
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oo_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// unescape
+// decodeURI
+// decodeURIComponent
+// escape
+// encodeURIComponent
+// encodeURI
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_os_optsAvmThunkConstant_AvmString_3_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_os_optsAvmThunkConstant_AvmString_3_____undefined_____thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// XML_AS3_toXMLString
+// XML_AS3_toString
+// Error_getStackTrace
+// QName_localName_get
+// XMLList_AS3_toString
+// XML_AS3_nodeKind
+// RegExp_source_get
+// XMLList_AS3_toXMLString
+// XMLList_AS3_nodeKind
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
 // __AS3___vec_Vector_uint_fixed_set
 // XML_prettyPrinting_set
+// __AS3___vec_Vector_object_fixed_set
+// XML_ignoreComments_set
+// XML_ignoreWhitespace_set
 // __AS3___vec_Vector_double_fixed_set
 // XML_ignoreProcessingInstructions_set
-// XML_ignoreWhitespace_set
-// XML_ignoreComments_set
+// __AS3___vec_Vector_int_fixed_set
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ob_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBoolArg, AvmThunkUnbox_AvmBoolArg(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBoolArg, AvmThunkUnbox_AvmBoolArg(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ob_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBoolArg, AvmThunkUnbox_AvmBoolArg(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBoolArg, AvmThunkUnbox_AvmBoolArg(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
 
-// Function_AS3_apply
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// Math_max
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))        
-        , AvmBox, (argc < 2 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , double, (argc < 1 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff1]))
+        , double, (argc < 2 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff2]))
+        , const AvmBox*, (argc <= 2 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 2 ? 0 : argc - 2)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))        
-        , AvmBox, (argc < 2 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_5(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, (argc < 1 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff1]))
+        , double, (argc < 2 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff2]))
+        , const AvmBox*, (argc <= 2 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 2 ? 0 : argc - 2)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// XML_AS3_addNamespace
+// Array_private__pop
+// XML_AS3_removeNamespace
+// Array_private__reverse
+// XMLList_AS3_setChildren
+// XMLList_AS3_prependChild
+// XML_AS3_appendChild
+// XMLList_AS3_appendChild
+// XML_AS3_prependChild
+// XMLList_AS3_child
+// Function_prototype_set
+// XMLList_AS3_attribute
+// XMLList_AS3_addNamespace
+// XML_AS3_child
+// XML_AS3_attribute
+// XMLList_AS3_removeNamespace
+// Array_private__shift
+// XML_AS3_setChildren
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// String_AS3_charAt
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sd_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// Date_private__setUTCDate
+// Date_private__setFullYear
+// Date_private__setMinutes
+// Date_private__setUTCMonth
+// Date_private__setUTCSeconds
+// Date_private__setHours
+// Date_private__setDate
+// Date_private__setUTCMinutes
+// Date_private__setMonth
+// Date_private__setUTCHours
+// Date_private__setSeconds
+// Date_private__setUTCFullYear
+// Date_private__setMilliseconds
+// Date_private__setUTCMilliseconds
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 0 ? 0 : argc - 0)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 0 ? 0 : argc - 0)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
 
 // Date_UTC
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff4 = argoff3 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff5 = argoff4 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff6 = argoff5 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff7 = argoff6 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoffV = argoff7 + AvmThunkArgSize_AvmBox;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_9(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , AvmBox, (argc < 3 ? AvmThunkCoerce_int32_t_AvmBox(1) : AvmThunkUnbox_AvmBox(argv[argoff3]))        
-        , AvmBox, (argc < 4 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff4]))        
-        , AvmBox, (argc < 5 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff5]))        
-        , AvmBox, (argc < 6 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff6]))        
-        , AvmBox, (argc < 7 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff7]))        
-        , const AvmBox*, (argc <= 7 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 7 ? 0 : argc - 7)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff4 = argoff3 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff5 = argoff4 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff6 = argoff5 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff7 = argoff6 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoffV = argoff7 + AvmThunkArgSize_AvmBox;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_9(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , AvmBox, (argc < 3 ? AvmThunkCoerce_int32_t_AvmBox(1) : AvmThunkUnbox_AvmBox(argv[argoff3]))
+        , AvmBox, (argc < 4 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff4]))
+        , AvmBox, (argc < 5 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff5]))
+        , AvmBox, (argc < 6 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff6]))
+        , AvmBox, (argc < 7 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff7]))
+        , const AvmBox*, (argc <= 7 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 7 ? 0 : argc - 7)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff4 = argoff3 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff5 = argoff4 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff6 = argoff5 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff7 = argoff6 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoffV = argoff7 + AvmThunkArgSize_AvmBox;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_10(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , AvmBox, (argc < 3 ? AvmThunkCoerce_int32_t_AvmBox(1) : AvmThunkUnbox_AvmBox(argv[argoff3]))        
-        , AvmBox, (argc < 4 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff4]))        
-        , AvmBox, (argc < 5 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff5]))        
-        , AvmBox, (argc < 6 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff6]))        
-        , AvmBox, (argc < 7 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff7]))        
-        , const AvmBox*, (argc <= 7 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 7 ? 0 : argc - 7)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff4 = argoff3 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff5 = argoff4 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff6 = argoff5 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff7 = argoff6 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoffV = argoff7 + AvmThunkArgSize_AvmBox;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_10(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , AvmBox, (argc < 3 ? AvmThunkCoerce_int32_t_AvmBox(1) : AvmThunkUnbox_AvmBox(argv[argoff3]))
+        , AvmBox, (argc < 4 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff4]))
+        , AvmBox, (argc < 5 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff5]))
+        , AvmBox, (argc < 6 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff6]))
+        , AvmBox, (argc < 7 ? AvmThunkCoerce_int32_t_AvmBox(0) : AvmThunkUnbox_AvmBox(argv[argoff7]))
+        , const AvmBox*, (argc <= 7 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 7 ? 0 : argc - 7)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
 
-// __AS3___vec_Vector_int_private__spliceHelper
-// __AS3___vec_Vector_object_private__spliceHelper
-// __AS3___vec_Vector_uint_private__spliceHelper
-// __AS3___vec_Vector_double_private__spliceHelper
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// String_length_get
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_uint32_t;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_uint32_t;    
-    const uint32_t argoff4 = argoff3 + AvmThunkArgSize_uint32_t;    
-    const uint32_t argoff5 = argoff4 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_5(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff1])        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff2])        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff3])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff4])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff5])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_ouuuai_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_s_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_uint32_t;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_uint32_t;    
-    const uint32_t argoff4 = argoff3 + AvmThunkArgSize_uint32_t;    
-    const uint32_t argoff5 = argoff4 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_6(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff1])        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff2])        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff3])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff4])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff5])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
 
-// String_private__search
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_osa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// Object_private__isPrototypeOf
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_osa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
+}
+
+// Array_private__sortOn
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// __AS3___vec_Vector_uint_length_get
+// __AS3___vec_Vector_int_length_get
+// Array_length_get
+// __AS3___vec_Vector_uint_AS3_pop
+// __AS3___vec_Vector_object_length_get
+// __AS3___vec_Vector_double_length_get
+AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const uint32_t ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), uint32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_uint32_t(ret);
+}
+AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const uint32_t ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), uint32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_uint32_t(ret);
+}
+
+// parseInt
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_osi_optsAvmThunkConstant_AvmString_5_____NaN_____opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(5)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+        , int32_t, (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_osi_optsAvmThunkConstant_AvmString_5_____NaN_____opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(5)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+        , int32_t, (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// Function_AS3_call
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoffV = argoff1 + AvmThunkArgSize_AvmBox;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
+        , const AvmBox*, (argc <= 1 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 1 ? 0 : argc - 1)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optakAvmThunkUndefined_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoffV = argoff1 + AvmThunkArgSize_AvmBox;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
+        , const AvmBox*, (argc <= 1 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 1 ? 0 : argc - 1)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// String_private__charAt
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_si_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
 }
 
 // isNaN
 // isFinite
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , double, (argc < 1 ? AvmThunkCoerce_AvmBox_double(kAvmThunkUndefined) : AvmThunkUnbox_double(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , double, (argc < 1 ? AvmThunkCoerce_AvmBox_double(kAvmThunkUndefined) : AvmThunkUnbox_double(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_od_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, (argc < 1 ? AvmThunkCoerce_AvmBox_double(kAvmThunkUndefined) : AvmThunkUnbox_double(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, (argc < 1 ? AvmThunkCoerce_AvmBox_double(kAvmThunkUndefined) : AvmThunkUnbox_double(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
 
-// Namespace_prefix_get
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_n_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// String_AS3_lastIndexOf
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmNamespace, AvmThunkUnbox_AvmNamespace(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_n_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti2147483647_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmNamespace, AvmThunkUnbox_AvmNamespace(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// XML_AS3_setLocalName
-// XML_AS3_setNamespace
-// XMLList_AS3_setLocalName
-// XMLList_AS3_setNamespace
-// XMLList_AS3_setName
-// __AS3___vec_Vector_object_private_type_set
-// XML_AS3_setName
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
-}
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
 
-// String_length_get
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// XML_AS3_childIndex
+// XML_prettyIndent_get
+// private_MethodClosure_length_get
+// __AS3___vec_Vector_int_AS3_pop
+// XMLList_AS3_length
+// RegExp_lastIndex_get
+// XMLList_AS3_childIndex
+// Function_length_get
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_s_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-
-// Array_private__forEach
-// __AS3___vec_Vector_int_private__forEach
-// __AS3___vec_Vector_double_private__forEach
-// __AS3___vec_Vector_object_private__forEach
-// __AS3___vec_Vector_uint_private__forEach
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
-}
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
-}
-
-// String_AS3_fromCharCode
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 0 ? 0 : argc - 0)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 0 ? 0 : argc - 0)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// Number_private__convert
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odii_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_int32_t;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , double, AvmThunkUnbox_double(argv[argoff1])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odii_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_int32_t;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, AvmThunkUnbox_double(argv[argoff1])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// Math_pow
-// Math_private__min
-// Math_atan2
-// Math_private__max
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , double, AvmThunkUnbox_double(argv[argoff1])        
-        , double, AvmThunkUnbox_double(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, AvmThunkUnbox_double(argv[argoff1])        
-        , double, AvmThunkUnbox_double(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-
-// String_private__lastIndexOf
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , int32_t, (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti2147483647_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , int32_t, (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-
-// Error_getErrorMessage
-// Date_private__toString
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// String_AS3_substring
-// String_AS3_slice
-// String_AS3_substr
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))        
-        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sdd_opti0_opti2147483647_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))        
-        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// Array_private__indexOf
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-
-// String_private__substr
-// String_private__substring
-// String_private__slice
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_int32_t;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))        
-        , int32_t, (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sii_opti0_opti2147483647_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_int32_t;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))        
-        , int32_t, (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
 
 // String_AS3_indexOf
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
 
-// Object_protected__setPropertyIsEnumerable
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oasb_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// __AS3___vec_Vector_object_private__map
+// __AS3___vec_Vector_double_private__filter
+// __AS3___vec_Vector_object_private__filter
+// __AS3___vec_Vector_int_private__map
+// __AS3___vec_Vector_uint_private__map
+// __AS3___vec_Vector_int_private__filter
+// __AS3___vec_Vector_double_private__map
+// __AS3___vec_Vector_uint_private__filter
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmString;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff2])        
-        , AvmBoolArg, AvmThunkUnbox_AvmBoolArg(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oasb_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ooa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmString;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff2])        
-        , AvmBoolArg, AvmThunkUnbox_AvmBoolArg(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
-}
-
-// encodeURI
-// unescape
-// encodeURIComponent
-// decodeURI
-// decodeURIComponent
-// escape
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_os_optsAvmThunkConstant_AvmString_3_____undefined_____thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_os_optsAvmThunkConstant_AvmString_3_____undefined_____thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// XML_AS3_name
-// XMLList_AS3_inScopeNamespaces
-// XML_AS3_localName
-// XML_AS3_namespaceDeclarations
-// XMLList_AS3_namespaceDeclarations
-// XMLList_AS3_comments
-// __AS3___vec_Vector_object_private_type_get
-// XML_AS3_notification
-// XML_AS3_parent
-// XMLList_AS3_parent
-// XMLList_AS3_localName
-// XMLList_AS3_attributes
-// Class_prototype_get
-// builtin_as_0_MethodClosure_private_savedThis_get
-// XMLList_AS3_children
-// XML_AS3_children
-// XML_AS3_text
-// XMLList_AS3_normalize
-// XML_AS3_comments
-// XMLList_AS3_text
-// XMLList_AS3_name
-// XML_AS3_copy
-// QName_uri_get
-// Array_AS3_pop
-// XML_AS3_inScopeNamespaces
-// XML_AS3_attributes
-// __AS3___vec_Vector_object_AS3_pop
-// Function_prototype_get
-// XML_AS3_normalize
-// XMLList_AS3_copy
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// Array_private__sortOn
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// Object_private__toString
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// Array_private__lastIndexOf
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , int32_t, (argc < 3 ? 0 : AvmThunkUnbox_int32_t(argv[argoff3]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , int32_t, (argc < 3 ? 0 : AvmThunkUnbox_int32_t(argv[argoff3]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-
-// parseInt
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_osi_optsAvmThunkConstant_AvmString_5_____NaN_____opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(5)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-        , int32_t, (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_osi_optsAvmThunkConstant_AvmString_5_____NaN_____opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(5)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-        , int32_t, (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-
-// XMLList_private__namespace
-// XML_private__namespace
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oai_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// String_private__indexOf
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , int32_t, (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , int32_t, (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-
-// String_private__match
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// String_AS3_charAt
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sd_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// String_private__split
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osau_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osau_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// String_private__charCodeAt
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_si_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-
-// RegExp_lastIndex_set
-// XML_prettyIndent_set
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// Date_AS3_getMonth
-// Date_AS3_getUTCMonth
-// Date_AS3_getDay
-// Date_AS3_getUTCSeconds
-// Date_AS3_getMilliseconds
-// Date_AS3_valueOf
-// Date_AS3_getUTCMilliseconds
-// Date_AS3_getFullYear
-// Date_AS3_getDate
-// Date_AS3_getSeconds
-// Date_AS3_getTimezoneOffset
-// Date_AS3_getUTCFullYear
-// Date_AS3_getHours
-// Date_AS3_getUTCDay
-// Date_AS3_getUTCMinutes
-// Date_AS3_getMinutes
-// Date_AS3_getTime
-// Date_AS3_getUTCDate
-// Date_AS3_getUTCHours
-// Math_random
-// __AS3___vec_Vector_double_AS3_pop
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-
-// RegExp_AS3_exec
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(0)/* "" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(0)/* "" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// XMLList_AS3_replace
-// XMLList_AS3_insertChildAfter
-// XMLList_AS3_insertChildBefore
-// XML_AS3_insertChildAfter
-// XML_AS3_replace
-// XML_AS3_insertChildBefore
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// __AS3___vec_Vector_object_AS3_unshift
-// __AS3___vec_Vector_double_AS3_push
-// __AS3___vec_Vector_double_AS3_unshift
-// __AS3___vec_Vector_object_AS3_push
-// __AS3___vec_Vector_int_AS3_push
-// Array_AS3_push
-// __AS3___vec_Vector_uint_AS3_push
-// __AS3___vec_Vector_uint_AS3_unshift
-// Array_AS3_unshift
-// __AS3___vec_Vector_int_AS3_unshift
-AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const uint32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), uint32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 0 ? 0 : argc - 0)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_uint32_t(ret);    
-}
-AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const uint32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), uint32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 0 ? 0 : argc - 0)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_uint32_t(ret);    
-}
-
-// Math_max
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , double, (argc < 1 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff1]))        
-        , double, (argc < 2 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff2]))        
-        , const AvmBox*, (argc <= 2 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 2 ? 0 : argc - 2)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_5(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, (argc < 1 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff1]))        
-        , double, (argc < 2 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff2]))        
-        , const AvmBox*, (argc <= 2 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 2 ? 0 : argc - 2)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-
-// parseFloat
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(5)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(5)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-
-// XMLList_AS3_contains
-// XML_AS3_contains
-AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
-}
-AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
 
 // Object_private__hasOwnProperty
 // Object_private__propertyIsEnumerable
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oas_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
-}
-
-// __AS3___vec_Vector_double_length_set
-// __AS3___vec_Vector_int_length_set
-// __AS3___vec_Vector_object_length_set
-// __AS3___vec_Vector_uint_length_set
-// Array_length_set
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ou_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ou_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// Date_private__get
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-
-// Math_min
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , double, (argc < 1 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff1]))        
-        , double, (argc < 2 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff2]))        
-        , const AvmBox*, (argc <= 2 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 2 ? 0 : argc - 2)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_5(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, (argc < 1 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff1]))        
-        , double, (argc < 2 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff2]))        
-        , const AvmBox*, (argc <= 2 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 2 ? 0 : argc - 2)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
-}
-
-// XML_AS3_toString
-// XMLList_AS3_toString
-// Error_getStackTrace
-// QName_localName_get
-// XMLList_AS3_toXMLString
-// XML_AS3_toXMLString
-// RegExp_source_get
-// XML_AS3_nodeKind
-// XMLList_AS3_nodeKind
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// __AS3___vec_Vector_double_length_get
-// __AS3___vec_Vector_uint_length_get
-// __AS3___vec_Vector_uint_AS3_pop
-// Array_length_get
-// __AS3___vec_Vector_int_length_get
-// __AS3___vec_Vector_object_length_get
-AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const uint32_t ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), uint32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_uint32_t(ret);    
-}
-AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const uint32_t ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), uint32_t    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_uint32_t(ret);    
-}
-
-// __AS3___vec_Vector_object_private__reverse
-// __AS3___vec_Vector_int_private__reverse
-// __AS3___vec_Vector_uint_private__reverse
-// __AS3___vec_Vector_double_private__reverse
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
-}
-AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), void    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_void(ret);    
-}
-
-// Array_private__filter
-// Array_private__map
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// Object_private__isPrototypeOf
-AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
-}
-AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
-}
-
-// XML_prettyPrinting_get
-// RegExp_multiline_get
-// XML_AS3_hasComplexContent
-// __AS3___vec_Vector_object_fixed_get
-// XML_ignoreProcessingInstructions_get
-// __AS3___vec_Vector_double_fixed_get
-// RegExp_dotall_get
-// XMLList_AS3_hasComplexContent
-// RegExp_ignoreCase_get
-// XML_ignoreComments_get
-// XMLList_AS3_hasSimpleContent
-// XML_AS3_hasSimpleContent
-// RegExp_extended_get
-// __AS3___vec_Vector_int_fixed_get
-// __AS3___vec_Vector_uint_fixed_get
-// RegExp_global_get
-// XML_ignoreWhitespace_get
-AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
-}
-AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
-}
-
-// String_AS3_lastIndexOf
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti2147483647_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(3)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))        
-        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_int32_t(ret);    
-}
-
-// Number_private__toString
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , double, AvmThunkUnbox_double(argv[argoff1])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, AvmThunkUnbox_double(argv[argoff1])        
-        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-
-// Array_private__slice
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oadd_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_double;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , double, AvmThunkUnbox_double(argv[argoff2])        
-        , double, AvmThunkUnbox_double(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oadd_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_double;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , double, AvmThunkUnbox_double(argv[argoff2])        
-        , double, AvmThunkUnbox_double(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// Array_private__sort
-// __AS3___vec_Vector_double_private__sort
-// Array_private__splice
-// __AS3___vec_Vector_int_private__sort
-// __AS3___vec_Vector_uint_private__sort
-// __AS3___vec_Vector_object_private__sort
-// Array_private__concat
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oao_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// __AS3___vec_Vector_uint_private__map
-// __AS3___vec_Vector_int_private__map
-// __AS3___vec_Vector_double_private__map
-// __AS3___vec_Vector_object_private__filter
-// __AS3___vec_Vector_uint_private__filter
-// __AS3___vec_Vector_object_private__map
-// __AS3___vec_Vector_int_private__filter
-// __AS3___vec_Vector_double_private__filter
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ooa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// String_private__charAt
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
-}
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_si_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
 
 // String_AS3_charCodeAt
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_sd_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
 
+// Object_private__toString
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// __AS3___vec_Vector_double_private__every
+// __AS3___vec_Vector_int_private__some
+// __AS3___vec_Vector_object_private__some
+// Array_private__some
+// __AS3___vec_Vector_double_private__some
+// __AS3___vec_Vector_uint_private__some
+// __AS3___vec_Vector_object_private__every
 // Array_private__every
 // __AS3___vec_Vector_int_private__every
-// __AS3___vec_Vector_object_private__some
-// __AS3___vec_Vector_double_private__some
-// __AS3___vec_Vector_int_private__some
 // __AS3___vec_Vector_uint_private__every
-// __AS3___vec_Vector_uint_private__some
-// Array_private__some
-// __AS3___vec_Vector_double_private__every
-// __AS3___vec_Vector_object_private__every
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBoolArg    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBoolArg(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
 
-// XML_AS3_setNotification
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// String_private__lastIndexOf
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , int32_t, (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oo_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti2147483647_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-
-// Function_AS3_call
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoffV = argoff1 + AvmThunkArgSize_AvmBox;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))        
-        , const AvmBox*, (argc <= 1 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 1 ? 0 : argc - 1)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
-}
-AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optakAvmThunkUndefined_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
-{
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoffV = argoff1 + AvmThunkArgSize_AvmBox;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))        
-        , const AvmBox*, (argc <= 1 ? NULL : argv + argoffV)        
-        , uint32_t, (argc <= 1 ? 0 : argc - 1)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmBox(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , int32_t, (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
 }
 
-// Date_parse
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// XMLList_AS3_contains
+// XML_AS3_contains
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
-AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
 }
 
-// String_private__replace
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_osaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+// String_private__match
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
-AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_osaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;    
-    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])        
-        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// __AS3___vec_Vector_double_private__forEach
+// __AS3___vec_Vector_object_private__forEach
+// __AS3___vec_Vector_int_private__forEach
+// __AS3___vec_Vector_uint_private__forEach
+// Array_private__forEach
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
+}
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
+}
+
+// XMLList_AS3_elements
+// XMLList_AS3_descendants
+// XML_AS3_processingInstructions
+// XML_AS3_elements
+// XML_AS3_descendants
+// XMLList_AS3_processingInstructions
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_AvmString_0___________thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, (argc < 1 ? AvmThunkCoerce_AvmString_AvmBox(AvmThunkConstant_AvmString(0)/* "*" */) : AvmThunkUnbox_AvmBox(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_AvmString_0___________thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, (argc < 1 ? AvmThunkCoerce_AvmString_AvmBox(AvmThunkConstant_AvmString(0)/* "*" */) : AvmThunkUnbox_AvmBox(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
 
 // String_AS3_toLowerCase
 // String_AS3_toUpperCase
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_s_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
 }
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_s_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString    
-        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_AvmString(ret);    
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
 }
 
+// String_AS3_substr
+// String_AS3_substring
+// String_AS3_slice
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
+        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sdd_opti0_opti2147483647_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
+        , double, (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// Math_private__min
+// Math_private__max
+// Math_pow
+// Math_atan2
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , double, AvmThunkUnbox_double(argv[argoff1])
+        , double, AvmThunkUnbox_double(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, AvmThunkUnbox_double(argv[argoff1])
+        , double, AvmThunkUnbox_double(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// Namespace_prefix_get
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_n_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmNamespace, AvmThunkUnbox_AvmNamespace(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_n_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmNamespace, AvmThunkUnbox_AvmNamespace(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// private_MethodClosure_private_savedThis_get
+// XMLList_AS3_inScopeNamespaces
+// XML_AS3_notification
+// XML_AS3_inScopeNamespaces
+// XMLList_AS3_copy
+// XMLList_AS3_children
+// XMLList_AS3_text
+// XML_AS3_attributes
+// __AS3___vec_Vector_object_AS3_pop
+// __AS3___vec_Vector_object_private_type_get
+// XML_AS3_name
+// XML_AS3_namespaceDeclarations
+// Class_prototype_get
+// XMLList_AS3_name
+// QName_uri_get
+// XMLList_AS3_normalize
+// XML_AS3_text
+// XMLList_AS3_namespaceDeclarations
+// Function_prototype_get
+// XML_AS3_children
+// XML_AS3_parent
+// XMLList_AS3_comments
+// XMLList_AS3_attributes
+// XML_AS3_copy
+// XML_AS3_normalize
+// Array_AS3_pop
+// XMLList_AS3_parent
+// XML_AS3_localName
+// XMLList_AS3_localName
+// XML_AS3_comments
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// String_private__replace
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_osaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_osaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// Object_protected__setPropertyIsEnumerable
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oasb_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmString;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff2])
+        , AvmBoolArg, AvmThunkUnbox_AvmBoolArg(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
+}
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oasb_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmString;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff2])
+        , AvmBoolArg, AvmThunkUnbox_AvmBoolArg(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
+}
+
+// String_private__split
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osau_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osau_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , uint32_t, AvmThunkUnbox_uint32_t(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// XMLList_private__namespace
+// XML_private__namespace
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oai_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// Date_private__toString
+// Error_getErrorMessage
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// String_private__indexOf
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , int32_t, (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
+}
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , int32_t, (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
+}
+
+// Array_private__lastIndexOf
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , int32_t, (argc < 3 ? 0 : AvmThunkUnbox_int32_t(argv[argoff3]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
+}
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_opti0_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , int32_t, (argc < 3 ? 0 : AvmThunkUnbox_int32_t(argv[argoff3]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
+}
+
+// Date_private__setTime
+// Math_cos
+// Math_ceil
+// Math_acos
 // Math_abs
-// Math_round
+// Math_atan
+// Math_asin
 // Math_exp
 // Math_log
-// Math_acos
-// Date_private__setTime
-// Math_floor
+// Math_round
 // Math_tan
-// Math_sqrt
-// Math_cos
-// Math_asin
-// Math_ceil
 // Math_sin
-// Math_atan
+// Math_sqrt
+// Math_floor
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , double, AvmThunkUnbox_double(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , double, AvmThunkUnbox_double(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
 }
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_od_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
-    const uint32_t argoff0 = 0;    
-    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;    
-    (void)argc;    
-    AVMTHUNK_DEBUG_ENTER(env)    
-    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double    
-        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])        
-        , int32_t, AVMTHUNK_GET_COOKIE(env)        
-        , double, AvmThunkUnbox_double(argv[argoff1])        
-    );    
-    AVMTHUNK_DEBUG_EXIT(env)    
-    return AvmToRetType_double(ret);    
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, AvmThunkUnbox_double(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// Function_AS3_apply
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
+        , AvmBox, (argc < 2 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
+        , AvmBox, (argc < 2 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// String_private__substr
+// String_private__slice
+// String_private__substring
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_int32_t;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
+        , int32_t, (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sii_opti0_opti2147483647_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmString;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_int32_t;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , int32_t, (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
+        , int32_t, (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// String_AS3_fromCharCode
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 0 ? 0 : argc - 0)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , const AvmBox*, (argc <= 0 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 0 ? 0 : argc - 0)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// XMLList_AS3_setName
+// __AS3___vec_Vector_object_private_type_set
+// XMLList_AS3_setLocalName
+// XMLList_AS3_setNamespace
+// XML_AS3_setName
+// XML_AS3_setNamespace
+// XML_AS3_setLocalName
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
+}
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
+}
+
+// Date_parse
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// Namespace_uri_get
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_n_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmNamespace, AvmThunkUnbox_AvmNamespace(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_n_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmNamespace, AvmThunkUnbox_AvmNamespace(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// parseFloat
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(5)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(5)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// XML_AS3_hasOwnProperty
+// XMLList_AS3_propertyIsEnumerable
+// XML_AS3_propertyIsEnumerable
+// XMLList_AS3_hasOwnProperty
+// isXMLName
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
+}
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefined_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
+}
+
+// __AS3___vec_Vector_double_private__reverse
+// __AS3___vec_Vector_uint_private__reverse
+// __AS3___vec_Vector_object_private__reverse
+// __AS3___vec_Vector_int_private__reverse
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
+}
+AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), void
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_void(ret);
+}
+
+// Date_private__get
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oi_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff1])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// XML_AS3_insertChildAfter
+// XMLList_AS3_insertChildBefore
+// XMLList_AS3_insertChildAfter
+// XML_AS3_insertChildBefore
+// XMLList_AS3_replace
+// XML_AS3_replace
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// RegExp_multiline_get
+// __AS3___vec_Vector_double_fixed_get
+// RegExp_dotall_get
+// XMLList_AS3_hasComplexContent
+// XML_prettyPrinting_get
+// __AS3___vec_Vector_uint_fixed_get
+// XML_ignoreComments_get
+// __AS3___vec_Vector_int_fixed_get
+// RegExp_global_get
+// RegExp_ignoreCase_get
+// __AS3___vec_Vector_object_fixed_get
+// XML_AS3_hasSimpleContent
+// XMLList_AS3_hasSimpleContent
+// XML_ignoreWhitespace_get
+// RegExp_extended_get
+// XML_AS3_hasComplexContent
+// XML_ignoreProcessingInstructions_get
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_0(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
+}
+AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBoolArg ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBoolArg
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBoolArg(ret);
+}
+
+// String_private__search
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_osa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
+}
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_osa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmString;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, AvmThunkUnbox_AvmString(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
+}
+
+// Array_private__slice
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oadd_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_double;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , double, AvmThunkUnbox_double(argv[argoff2])
+        , double, AvmThunkUnbox_double(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oadd_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_double;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , double, AvmThunkUnbox_double(argv[argoff2])
+        , double, AvmThunkUnbox_double(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// RegExp_AS3_exec
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_os_optsAvmThunkConstant_AvmString_1__________thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_1(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(1)/* "" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_os_optsAvmThunkConstant_AvmString_1__________thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmString, (argc < 1 ? AvmThunkConstant_AvmString(1)/* "" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+
+// Array_private__indexOf
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
+}
+AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const int32_t ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), int32_t
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff2])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_int32_t(ret);
+}
+
+// Number_private__convert
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odii_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_int32_t;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , double, AvmThunkUnbox_double(argv[argoff1])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odii_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    const uint32_t argoff3 = argoff2 + AvmThunkArgSize_int32_t;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmString ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), AvmString
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, AvmThunkUnbox_double(argv[argoff1])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff2])
+        , int32_t, AvmThunkUnbox_int32_t(argv[argoff3])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmString(ret);
+}
+
+// Math_min
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_4(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , double, (argc < 1 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff1]))
+        , double, (argc < 2 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff2]))
+        , const AvmBox*, (argc <= 2 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 2 ? 0 : argc - 2)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_double;
+    const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const double ret = AVMTHUNK_CALL_FUNCTION_5(AVMTHUNK_GET_HANDLER(env), double
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , double, (argc < 1 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff1]))
+        , double, (argc < 2 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff2]))
+        , const AvmBox*, (argc <= 2 ? NULL : argv + argoffV)
+        , uint32_t, (argc <= 2 ? 0 : argc - 2)
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_double(ret);
+}
+
+// __AS3___vec_Vector_uint_private__sort
+// __AS3___vec_Vector_object_private__sort
+// Array_private__splice
+// __AS3___vec_Vector_int_private__sort
+// __AS3___vec_Vector_double_private__sort
+// Array_private__concat
+// Array_private__sort
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_2(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
+}
+AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oao_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
+{
+    const uint32_t argoff0 = 0;
+    const uint32_t argoff1 = argoff0 + AvmThunkArgSize_AvmObject;
+    const uint32_t argoff2 = argoff1 + AvmThunkArgSize_AvmBox;
+    (void)argc;
+    AVMTHUNK_DEBUG_ENTER(env)
+    const AvmBox ret = AVMTHUNK_CALL_FUNCTION_3(AVMTHUNK_GET_HANDLER(env), AvmBox
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff0])
+        , int32_t, AVMTHUNK_GET_COOKIE(env)
+        , AvmBox, AvmThunkUnbox_AvmBox(argv[argoff1])
+        , AvmObject, AvmThunkUnbox_AvmObject(argv[argoff2])
+    );
+    AVMTHUNK_DEBUG_EXIT(env)
+    return AvmToRetType_AvmBox(ret);
 }
 const uint8_t builtin_abc_data[38886] = {
  16,   0,  46,   0,  12,   0,   1,   2,  10,   3, 128, 128, 128, 128,   8, 255, 
