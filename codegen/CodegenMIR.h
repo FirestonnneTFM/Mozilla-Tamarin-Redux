@@ -92,6 +92,14 @@
 
 namespace avmplus
 {
+#ifdef AVMPLUS_MOPS
+	#ifdef AVMPLUS_IA32
+	#ifndef AVMPLUS_64BIT
+	#define HAVE_MIR_SMOPS 1
+	#endif
+	#endif
+#endif
+
 	// bit insert and extraction macros.  
 	// usage   v - variable, h - high bit number. l - lower bit number, q qunatity to insert
 	// E.g.  pull out bits 6..2 of a variable BIT_EXTRACT(v,6,2).... 0xxx xx00 
@@ -182,6 +190,23 @@ namespace avmplus
 		/** set to true if the no more memory. */
 		bool overflow;
 
+#if HAVE_MIR_SMOPS
+		// the lower two bits of the displacement
+		// of a "sized" load or store indicate
+		// size and sign extension info...
+		// masks and bits for said...
+		enum
+		{
+			SMOP_F32 = 0, // 32 bit float sized MOP
+			SMOP_SX = 1, // sign extend bit
+			SMOP_I8 = 0, // 8 bit MOP
+			SMOP_I8SX = SMOP_I8 | SMOP_SX, // 8 bit sign extend MOP
+			SMOP_I16 = 2, // 16 bit MOP
+			SMOP_I16SX = SMOP_I16 | SMOP_SX, // 16 bit sign extend MOP
+			SMOP_MASK = 3, // mask for sized memory ops
+			SMOP_BITS = 2 // bits in sized memory ops
+		};
+#endif
 		static const int MIR_float = 0x40;		// result is double
 		static const int MIR_oper  = 0x80;		// eligible for cse
 
@@ -223,6 +248,12 @@ namespace avmplus
 			MIR_ld32	= MIR_ld,
 			MIR_ld32u	= MIR_ld,
 #endif
+#if HAVE_MIR_SMOPS            
+			// like regular loads or stores except lower 2 bits of disp indicate size / sign extend info
+			// using bits from SMOP_xxx
+			MIR_sld		= 32,				// sized memory load
+			MIR_sst		= 33,				// sized memory store
+#endif
 
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 			MIR_d2i		= 36,				// cvttsd2si for SSE2
@@ -247,7 +278,24 @@ namespace avmplus
 			MIR_ne		= 17 | MIR_oper,
 			MIR_lea		= 18 | MIR_oper,	// ptr, disp
 
+#if HAVE_MIR_SMOPS
+			MIR_sx8		= 19 | MIR_oper,	// 8 bit sign extend
+			MIR_sx16	= 20 | MIR_oper,	// 16 bit sign extend
+			// range check for memory access and bless for raw access
+			// oprnd1 is the base expression
+			// disp holds the range for which the expression is checked
+			// where the low 16 bits are a signed 16 bit value
+			// representing the base of the range and the high
+			// 16 bits are a signed 16 bit value representing the
+			// bound of the range
+			// TODO add a struct to Op's oprnd2 union that holds signed
+			// 16 bit high / lo?  mildly complicated but doable
+			MIR_maddr	= 21 | MIR_oper,
+#endif
 			MIR_ldop    = 22 | MIR_oper,    // ptr, disp (optimizable)
+#if HAVE_MIR_SMOPS
+			MIR_sldop	= 27 | MIR_oper,	// optimizable sized memory load
+#endif
 
 #ifdef AVMPLUS_64BIT
 			MIR_orp     = 23 | MIR_oper,	// ptr sized OR operation
@@ -267,6 +315,10 @@ namespace avmplus
 			MIR_fuse    = 18 | MIR_float,   // 
 
 			MIR_fld		= 22 | MIR_float,	// float load
+#if HAVE_MIR_SMOPS
+			MIR_fsld	= 32 | MIR_float,	// sized memory float load
+#endif
+
 
 			MIR_i2d		= 1  | MIR_float | MIR_oper,	// ptr
 			MIR_fneg	= 2  | MIR_float | MIR_oper,	// ptr
@@ -280,7 +332,14 @@ namespace avmplus
 			
 			MIR_fldop   = 22 | MIR_float | MIR_oper,	// ptr, disp (optimizable load)
 
+#if HAVE_MIR_SMOPS
+			MIR_fsldop	= 32 | MIR_float | MIR_oper,	// sized memory float load (optimizable)
+			// MIR_last should be one greater than the highest opcode value.
+			MIR_last	= 33 | MIR_float | MIR_oper
+#else
 			MIR_last	= 23 | MIR_float | MIR_oper // highest ordinal value possible
+#endif
+
 		};
 
 		enum ArgNumber {
@@ -1057,6 +1116,13 @@ namespace avmplus
 
 		uint32  maxArgCount;        // most number of arguments used in a call
 
+#if (defined(_DEBUG)) && HAVE_MIR_SMOPS
+		// raw memory stats
+		static int		totalRangeChecks;
+		static int		implicitMaddrDisps;
+		static int		singleCmpRangeChecks;
+		static int		doubleCmpRangeChecks;
+#endif
 		// pointer to list of argument definitions
 		OP* methodArgs; 
 		OP* calleeVars;
@@ -1082,6 +1148,44 @@ namespace avmplus
 		// track last pc value we generated a store for
 		sintptr lastPcSave;
 
+#if HAVE_MIR_SMOPS
+		// path address for last range check failure
+		// (jmp's exsiting address will be a pointer
+		// to the previous patch... saves a few bytes
+		// over a general label)
+		uint32 *lastMOPRangeCheckJmp;
+
+		// makes the calling convention a little easier
+		static void mopRangeCheckFailedShim(const MethodEnv *env)
+			{ env->mopRangeCheckFailed(); }
+
+		// implicit disp used by maddr op to optimize range check...
+		// this value is applied to the expression being range checked
+		// so, if this returns 4 for a given mir_maddr(x), the result of
+		// the mir_maddr will be (x - 4) such that 4 must be added to
+		// the displacement used by any load or store using this
+		// mir_maddr as the address
+		int32 maddrImplicitDisp(OP *op);
+		// try to opimize an MIR_maddr for a memory op with the given size
+		// for a = (x + 12), will return maddr(x, [-12, -8)) (assuming 32 bit op)
+		// and set *disp to 12
+		// asm pseudo code:
+
+		// ** materialize "x" in eax
+		// ** range check eax against [-12, -8)
+		// ** mov ebx, [eax+12+globalMemBase] ; add folded into here
+
+		// so the load/store can just add 12 to its disp and skip the extra math
+		// if this optimization failed it would be more like:
+
+		// ** materialize "x" in eax
+		// ** add eax, 12 ; add actually happens
+		// ** range check eax against [0, 4)
+		// ** mov ebx, [eax+globalMemBase]
+
+		// returns an OP and fills in *disp on success
+		OP *maddrOpt(OP *a, int32 size, int32 *disp);
+#endif
 		// cse table which prevents duplicate instructions in the same bb
 		OP* cseTable[MIR_last];
 		OP* firstCse;
@@ -1391,6 +1495,14 @@ namespace avmplus
 		Register registerAllocAny(RegInfo& regs, OP* ins);
 		Register registerAllocFromSet(RegInfo& regs, int set);
 
+#if HAVE_MIR_SMOPS
+#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)		
+		// find (but don't allocate) an appropriate 8 bit-able
+		// register to use with the value
+		// (eax | ebx | ecx | edx)
+		Register registerFor8Bit(RegInfo &regs, OP* value);
+#endif
+#endif
 		Register registerAlloc(RegInfo& regs, OP* ins, Register r)
 		{
 			return r == Unknown 
@@ -1892,6 +2004,10 @@ namespace avmplus
 		void UCOMISD(Register xmm1, Register xmm2)	{ count_fpu(); SSE(0x660f2e, xmm1, xmm2); }
 		void MOVAPD(Register dest, Register src)	{ count_mov(); SSE(0x660f28, dest, src); }
 		void MOVD (Register xmm1, Register src)		{ count_mov(); SSE(0x660F6E, xmm1, src); }
+#if HAVE_MIR_SMOPS
+		void CVTPD2PS(Register dest, Register src)	{ count_fpu(); SSE(0x660f5a, dest, src); }
+		void CVTPS2PD(Register dest, Register src)	{ count_fpu(); ALU2(0x0f5a, dest, src); }
+#endif
 
 		void XORPD(Register dest, uintptr src);
 #ifdef AVMPLUS_AMD64
@@ -1903,6 +2019,10 @@ namespace avmplus
 		void SUBSD(Register r, sintptr disp, Register base)		{ count_fpuld(); SSE(0xf20f5C, r, disp, base); }
 		void MULSD(Register r, sintptr disp, Register base)		{ count_fpuld(); SSE(0xf20f59, r, disp, base); }
 		void DIVSD(Register r, sintptr disp, Register base)		{ count_fpuld(); SSE(0xf20f5E, r, disp, base); }
+#if HAVE_MIR_SMOPS
+		void MOVSS(Register r, sintptr disp, Register base)		{ count_ldq(); SSE(0xf30f10, r, disp, base); }
+		void MOVSS(sintptr disp, Register base, Register r)		{ count_stq(); SSE(0xf30f11, r, disp, base); }
+#endif
 		void MOVSD(Register r, sintptr disp, Register base)		{ count_ldq(); SSE(0xf20f10, r, disp, base); }
 		void MOVSD(sintptr disp, Register base, Register r)		{ count_stq(); SSE(0xf20f11, r, disp, base); }
 #ifdef AVMPLUS_AMD64
@@ -1961,6 +2081,10 @@ namespace avmplus
 		void SETL  (Register reg)	{ count_alu(); ALU2(0x0f9C, reg, reg); }
 		void SETLE (Register reg)	{ count_alu(); ALU2(0x0f9E, reg, reg); }
 		void MOVZX_r8 (Register dest, Register src) { count_alu(); ALU2(0x0fb6, dest, src); }
+#if HAVE_MIR_SMOPS
+		void MOVSX_r8 (Register dest, Register src) { count_alu(); ALU2(0x0fbe, dest, src); }
+		void MOVSX_r16 (Register dest, Register src) { count_alu(); ALU2(0x0fbf, dest, src); }
+#endif
 
 		void ALU(int op, Register r, sintptr disp, Register base);
 
@@ -2017,6 +2141,15 @@ namespace avmplus
 			
 		#endif // AVMPLUS_AMD64
 
+#if HAVE_MIR_SMOPS
+		void MOV_8 (sintptr disp, Register base, Register r)  { count_st(); ALU(0x88, r, disp, base); }
+		void MOV_16 (sintptr disp, Register base, Register r)  { count_st(); ALU(0x6689, r, disp, base); }
+		void MOVSX_8 (Register r, sintptr disp, Register base)  { count_ld(); ALU(0x0fbe, r, disp, base); }
+		void MOVSX_16 (Register r, sintptr disp, Register base)  { count_ld(); ALU(0x0fbf, r, disp, base); }
+		void MOVZX_8 (Register r, sintptr disp, Register base)  { count_ld(); ALU(0x0fb6, r, disp, base); }
+		void MOVZX_16 (Register r, sintptr disp, Register base)  { count_ld(); ALU(0x0fb7, r, disp, base); }
+#endif // HAVE_MIR_SMOPS
+
 		void SHIFT(int op, Register reg, int imm8);
 		void SAR(Register reg, int imm8) { count_alu(); SHIFT(7, reg, imm8); } // signed >> imm
 		void SHR(Register reg, int imm8) { count_alu(); SHIFT(5, reg, imm8); } // unsigned >> imm
@@ -2040,9 +2173,15 @@ namespace avmplus
 		void CALL(sintptr offset);
 
 		void FPU(int op, sintptr disp, Register base);
+#if HAVE_MIR_SMOPS
+		void FSTD(sintptr disp, Register base)  { count_stq(); FPU(0xd902, disp, base); }
+#endif
 		void FSTQ(sintptr disp, Register base)  { count_stq(); FPU(0xdd02, disp, base); }
 		void FSTPQ(sintptr disp, Register base) { count_stq(); FPU(0xdd03, disp, base); }
 		void FCOM(sintptr disp, Register base)	{ count_fpuld(); FPU(0xdc02, disp, base); } 
+#if HAVE_MIR_SMOPS
+		void FLDD(sintptr disp, Register base)  { count_fpuld(); x87Dirty=true; FPU(0xd900, disp, base); }
+#endif
 		void FLDQ(sintptr disp, Register base)  { count_ldq(); x87Dirty=true; FPU(0xdd00, disp, base); }
 		void FILDQ(sintptr disp, Register base)	{ count_fpuld(); x87Dirty=true; FPU(0xdf05, disp, base); }
 		void FILD(sintptr disp, Register base)  { count_fpuld(); x87Dirty=true; FPU(0xdb00, disp, base); }

@@ -5,6 +5,7 @@
 #define D_II  (nanojit::ARGSIZE_F  | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
 #define I_III (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
 #define I_IID (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_F<<2)
+#define I_IDI (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_F<<4  | nanojit::ARGSIZE_LO<<2)
 #define D_III (nanojit::ARGSIZE_F  | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
 #define I_I4  (nanojit::ARGSIZE_LO | \
     nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 |\
@@ -194,6 +195,19 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(DEBUGGERADDR(Debugger::debugFile), I_II, debugFile)
     METHOD(DEBUGGERADDR(Debugger::debugLine), I_II, debugLine)
     METHOD(COREADDR(AvmCore::sampleCheck), I_I, sampleCheck)
+#endif
+
+#ifdef AVMPLUS_MOPS
+    METHOD(ENVADDR(MethodEnv::li8), I_II, li8)
+    METHOD(ENVADDR(MethodEnv::li16), I_II, li16)
+    METHOD(ENVADDR(MethodEnv::li32), I_II, li32)
+    METHOD(ENVADDR(MethodEnv::lf32), D_II, lf32)
+    METHOD(ENVADDR(MethodEnv::lf64), D_II, lf64)
+    METHOD(ENVADDR(MethodEnv::si8), I_III, si8)
+    METHOD(ENVADDR(MethodEnv::si16), I_III, si16)
+    METHOD(ENVADDR(MethodEnv::si32), I_III, si32)
+    METHOD(ENVADDR(MethodEnv::sf32), I_IDI, sf32)
+    METHOD(ENVADDR(MethodEnv::sf64), I_IDI, sf64)
 #endif
 
 INTERP_FOPCODE_LIST_END

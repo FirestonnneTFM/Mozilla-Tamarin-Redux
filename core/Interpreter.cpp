@@ -140,6 +140,18 @@ namespace avmplus
 							int max_scope);
 #endif
 
+#if defined(AVMPLUS_MOPS)
+	#if defined(AVMPLUS_BIG_ENDIAN)
+		static void SWAP_BYTES_16(void* p);
+		static void SWAP_BYTES_32(void* p);
+		static void SWAP_BYTES_64(void* p);
+	#else
+		#define SWAP_BYTES_16(p) do {} while (0)
+		#define SWAP_BYTES_32(p) do {} while (0)
+		#define SWAP_BYTES_64(p) do {} while (0)
+	#endif
+#endif
+
 	Atom interp32(MethodEnv* env, int argc, uint32_t *ap)
 	{
 		Atom a = interp(env, argc, ap);
@@ -264,6 +276,18 @@ namespace avmplus
 			 III(0x32, L_hasnext2)
 			 XXX(0x33)
 			 XXX(0x34)
+#ifdef AVMPLUS_MOPS
+			 III(0x35, L_li8)
+			 III(0x36, L_li16)
+			 III(0x37, L_li32)
+			 III(0x38, L_lf32)
+			 III(0x39, L_lf64)
+			 III(0x3A, L_si8)
+			 III(0x3B, L_si16)
+			 III(0x3C, L_si32)
+			 III(0x3D, L_sf32)
+			 III(0x3E, L_sf64)
+#else
 			 XXX(0x35)
 			 XXX(0x36)
 			 XXX(0x37)
@@ -274,6 +298,7 @@ namespace avmplus
 			 XXX(0x3C)
 			 XXX(0x3D)
 			 XXX(0x3E)
+#endif
 			 XXX(0x3F)
 			 III(0x40, L_newfunction)
 			 III(0x41, L_call)
@@ -291,9 +316,15 @@ namespace avmplus
 			 XXX(0x4D) /* OP_callinterface */
 			 III(0x4E, L_callsupervoid)
 			 III(0x4F, L_callpropvoid)
+#ifdef AVMPLUS_MOPS
+			 III(0x50, L_sxi1)
+			 III(0x51, L_sxi8)
+			 III(0x52, L_sxi16)
+#else
 			 XXX(0x50)
 			 XXX(0x51)
 			 XXX(0x52)
+#endif
 			 III(0x53, L_applytype)
 			 XXX(0x54)
 			 III(0x55, L_newobject)
@@ -711,6 +742,10 @@ namespace avmplus
 		// notify the debugger that we are entering a new frame.
 		env->debugEnter(argc, ap, NULL, local_count, NULL, framep, 0);  // call it but make sure that callStackNode is not re-init'd
 		#endif
+
+#ifdef AVMPLUS_MOPS
+		const Domain* envDomain = env->domainEnv()->domain();
+#endif
 
 #ifdef AVMPLUS_WORD_CODE
 		const uint32_t* pc = code_start;
@@ -2081,6 +2116,125 @@ namespace avmplus
 				NEXT;
 			}
 
+#ifdef AVMPLUS_MOPS
+			// sign extends -- results always fit into an atom, no need to call intToAtom
+			// since we are downshifting anyway, integrate final upshift-by-3 into downshift
+			// rather than using MAKE_INTEGER macro.
+			INSTR(sxi1) {
+				const int value = core->integer(sp[0]);
+				sp[0] = Atom(((value << 31) >> (31-3)) | kIntegerType);
+				NEXT;
+			}
+
+			INSTR(sxi8) {
+				const int value = core->integer(sp[0]);
+				sp[0] = Atom(((value << 24) >> (24-3)) | kIntegerType);
+				NEXT;
+			}
+
+			INSTR(sxi16) {
+				const int value = core->integer(sp[0]);
+				sp[0] = Atom(((value << 16) >> (16-3)) | kIntegerType);
+				NEXT;
+			}
+
+#define MOPS_RANGE_CHECK(addr, type) \
+		if (addr < 0 || (uint32_t)((addr) + sizeof(type)) > envDomain->globalMemorySize) { env->mopRangeCheckFailed(); }
+
+#define MOPS_LOAD(addr, type, result) \
+		MOPS_RANGE_CHECK(addr, type) \
+		type result = *(const type*)(envDomain->globalMemoryBase + (addr));
+
+#define MOPS_STORE(addr, type, value) \
+		MOPS_RANGE_CHECK(addr, type) \
+		*(type*)(envDomain->globalMemoryBase + (addr)) = (type)(value);
+			
+			// loads
+			INSTR(li8) {
+				const int addr = core->integer(sp[0]);
+				MOPS_LOAD(addr, uint8_t, result);
+				sp[0] = MAKE_INTEGER(result);	// always fits in atom
+				NEXT;
+			}
+
+			INSTR(li16) {
+				const int addr = core->integer(sp[0]);
+				MOPS_LOAD(addr, uint16_t, result);
+				SWAP_BYTES_16(&result);
+				sp[0] = MAKE_INTEGER(result);	// always fits in atom
+				NEXT;
+			}
+
+			INSTR(li32) {
+				const int addr = core->integer(sp[0]);
+				MOPS_LOAD(addr, uint32_t, result);
+				SWAP_BYTES_32(&result);
+				sp[0] = core->intToAtom(result);
+				NEXT;
+			}
+
+			INSTR(lf32) {
+				const int addr = core->integer(sp[0]);
+				MOPS_LOAD(addr, float, result);
+				SWAP_BYTES_32(&result);
+				sp[0] = core->doubleToAtom(result);
+				NEXT;
+			}
+
+			INSTR(lf64) {
+				const int addr = core->integer(sp[0]);
+				MOPS_LOAD(addr, double, result);
+				SWAP_BYTES_64(&result);
+				sp[0] = core->doubleToAtom(result);
+				NEXT;
+			}
+			
+			// stores
+			INSTR(si8) {
+				const int addr = core->integer(sp[0]);
+				const int value = core->integer(sp[-1]);
+				MOPS_STORE(addr, uint8_t, value);
+				sp -= 2;
+				NEXT;
+			}
+
+			INSTR(si16) {
+				const int addr = core->integer(sp[0]);
+				int value = core->integer(sp[-1]);
+				SWAP_BYTES_16(&value);
+				MOPS_STORE(addr, uint16_t, value);
+				sp -= 2;
+				NEXT;
+			}
+
+			INSTR(si32) {
+				const int addr = core->integer(sp[0]);
+				int value = core->integer(sp[-1]);
+				MOPS_STORE(addr, uint32_t, value);
+				SWAP_BYTES_32(&value);
+				sp -= 2;
+				NEXT;
+			}
+
+			INSTR(sf32) {
+				const int addr = core->integer(sp[0]);
+				double value = core->number(sp[-1]);
+				SWAP_BYTES_32(&value);
+				MOPS_STORE(addr, float, value);
+				sp -= 2;
+				NEXT;
+			}
+
+			INSTR(sf64) {
+				const int addr = core->integer(sp[0]);
+				double value = core->number(sp[-1]);
+				SWAP_BYTES_64(&value);
+				MOPS_STORE(addr, double, value);
+				sp -= 2;
+				NEXT;
+			}
+#endif
+
 			// delete property using multiname
 			INSTR(deleteproperty) {
 				SAVE_EXPC;
@@ -3211,6 +3365,36 @@ namespace avmplus
 		}
 		return t;
 	}
+
+#if defined(AVMPLUS_MOPS) && defined(AVMPLUS_BIG_ENDIAN)
+	static void SWAP_BYTES_16(void *p)
+	{
+		uint8_t* c = (uint8_t*)p;
+		uint8_t t = c[0];
+		c[0] = c[1];
+		c[1] = t;
+	}
+
+	static void SWAP_BYTES_32(void *p)
+	{
+		uint16_t* c = (uint16_t*)p;
+		SWAP_BYTES_16(c + 0);
+		SWAP_BYTES_16(c + 1);
+		uint16_t t = c[0];
+		c[0] = c[1];
+		c[1] = t;
+	}
+
+	static void SWAP_BYTES_64(void *p)
+	{
+		uint32_t *c = (uint32_t*)p;
+		SWAP_BYTES_32(c + 0);
+		SWAP_BYTES_32(c + 1);
+		uint32_t t = c[0];
+		c[0] = c[1];
+		c[1] = t;
+	}
+#endif
 			
 #ifdef AVMPLUS_VERBOSE
 	/**

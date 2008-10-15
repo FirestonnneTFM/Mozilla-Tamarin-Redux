@@ -978,6 +978,183 @@ namespace avmplus
 		return index != 0;
 	}
 	
+	
+#if defined(AVMPLUS_BIG_ENDIAN)
+	static void flip16(void *p)
+	{
+		uint8 *c = (uint8 *)p;
+		uint8 t = c[0];
+		c[0] = c[1];
+		c[1] = t;
+	}
+
+	static void flip32(void *p)
+	{
+		uint16 *c = (uint16 *)p;
+		flip16(c + 0);
+		flip16(c + 1);
+		uint16 t = c[0];
+		c[0] = c[1];
+		c[1] = t;
+	}
+
+	static void flip64(void *p)
+	{
+		uint32 *c = (uint32 *)p;
+		flip32(c + 0);
+		flip32(c + 1);
+		uint32 t = c[0];
+		c[0] = c[1];
+		c[1] = t;
+	}
+#endif
+
+#ifdef AVMPLUS_MOPS
+
+	void MethodEnv::mopRangeCheckFailed() const
+	{
+		toplevel()->throwRangeError(kInvalidRangeError);
+	}
+
+	int MethodEnv::li8(int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 1) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+		uint8 result = *(uint8 *)(dom->globalMemoryBase + addr);
+		return result;
+	}
+
+	int MethodEnv::li16(int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 2) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+		uint16 result = *(uint16 *)(dom->globalMemoryBase + addr);
+
+#if defined(AVMPLUS_BIG_ENDIAN)
+		flip16(&result);
+#endif
+		return result;
+	}
+
+	int MethodEnv::li32(int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+		// TODO is using raw "int" type correct?
+		int result = *(int *)(dom->globalMemoryBase + addr);
+
+#if defined(AVMPLUS_BIG_ENDIAN)
+		flip32(&result);
+#endif
+		return result;
+	}
+
+	double MethodEnv::lf32(int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+		float result = *(float *)(dom->globalMemoryBase + addr);
+
+#if defined(AVMPLUS_BIG_ENDIAN)
+		flip32(&result);
+#endif
+		return result;
+	}
+
+	double MethodEnv::lf64(int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 8) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+		double result = *(double *)(dom->globalMemoryBase + addr);
+
+#if defined(AVMPLUS_BIG_ENDIAN)
+		flip64(&result);
+#endif
+		return result;
+	}
+
+	void MethodEnv::si8(int value, int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 1) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+		*(uint8 *)(dom->globalMemoryBase + addr) = (uint8)value;
+	}
+
+	void MethodEnv::si16(int value, int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 2) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+		uint16 svalue = (uint16)value;
+
+#if defined(AVMPLUS_BIG_ENDIAN)
+		flip16(&svalue);
+#endif
+		*(uint16 *)(dom->globalMemoryBase + addr) = svalue;
+	}
+
+	void MethodEnv::si32(int value, int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+#if defined(AVMPLUS_BIG_ENDIAN)
+		flip32(&value);
+#endif
+		*(int *)(dom->globalMemoryBase + addr) = value;
+	}
+
+	void MethodEnv::sf32(double value, int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+		float fvalue = (float)value;
+
+#if defined(AVMPLUS_BIG_ENDIAN)
+		flip32(&fvalue);
+#endif
+		*(float *)(dom->globalMemoryBase + addr) = fvalue;
+	}
+
+	void MethodEnv::sf64(double value, int addr) const
+	{
+		const Domain *dom = domainEnv()->domain();
+
+		if(addr < 0 || (uint32)(addr + 8) > dom->globalMemorySize)
+			mopRangeCheckFailed();
+
+#if defined(AVMPLUS_BIG_ENDIAN)
+		flip64(&value);
+#endif
+		*(double *)(dom->globalMemoryBase + addr) = value;
+	}
+
+#endif // AVMPLUS_MOPS
+
 	Atom MethodEnv::in(Atom nameatom, Atom obj) const
 	{
 		AvmCore* core = method->core();

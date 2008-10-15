@@ -70,6 +70,7 @@ namespace avmplus
 		inline AbcEnv* abcEnv() const { return vtable->abcEnv; }
 		inline AvmCore* core() const { return method->pool->core; }
 		inline Traits* traits() const { return vtable->traits; }
+		inline DomainEnv* domainEnv() const { return vtable->abcEnv->domainEnv(); }
 
 		ScriptEnv* getScriptEnv(const Multiname *m) const;
 
@@ -159,6 +160,37 @@ namespace avmplus
 		/** Implementation of OP_hasnext2 */		
 		int hasnextproto(Atom& objAtom, int& index) const;
 		
+#ifdef AVMPLUS_MOPS
+		/** Implementation of memory op helpers */
+		void mopRangeCheckFailed() const;
+
+		/** Implementations of OP_lXXX */
+		int li8(int addr) const;
+		int li16(int addr) const;
+		int li32(int addr) const;
+#if defined(AVMPLUS_64BIT) && defined(AVMPLUS_MIR)
+		// MIR needs helpers, LIR does not
+		int64 li8_64(int addr) const { return (int64)li8(addr); }
+		int64 li16_64(int addr) const { return (int64)li16(addr); }
+		int64 li32_64(int addr) const { return (int64)li32(addr); }
+#endif
+		double lf32(int addr) const;
+		double lf64(int addr) const;
+
+		/** Implementations of OP_sXXX */
+		void si8(int value, int addr) const;
+		void si16(int value, int addr) const;
+		void si32(int value, int addr) const;
+		void sf32(double value, int addr) const;
+		void sf64(double value, int addr) const;
+
+		/** Implementations of OP_sxXXX */
+		// (not actually used anywhere, left here for reference) */
+		//inline static int sxi1(int value) { return (value << 31) >> 31; }
+		//inline static int sxi8(int value) { return (value << 24) >> 24; }
+		//inline static int sxi16(int value) { return (value << 16) >> 16; }
+#endif
+
 		/**
 		 * operator in from ES3
 		 */

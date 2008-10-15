@@ -186,6 +186,18 @@ namespace avmplus
 		{    2,  1    W(WOP_hasnext2)        N("hasnext2") },
 		{   -1,  0    W(0)                   N("OP_0x33") },
 		{   -1,  0    W(0)                   N("OP_0x34") },
+#ifdef AVMPLUS_MOPS
+		{   0,   1    W(WOP_li8)             N("li8") },
+		{   0,   1    W(WOP_li16)            N("li16") },
+		{   0,   1    W(WOP_li32)            N("li32") },
+		{   0,   1    W(WOP_lf32)            N("lf32") },
+		{   0,   1    W(WOP_lf64)            N("lf64") },
+		{   0,   1    W(WOP_si8)             N("si8") },
+		{   0,   1    W(WOP_si16)            N("si16") },
+		{   0,   1    W(WOP_si32)            N("si32") },
+		{   0,   1    W(WOP_sf32)            N("sf32") },
+		{   0,   1    W(WOP_sf64)            N("sf64") },
+#else
 		{   -1,  0    W(0)                   N("OP_0x35") },
 		{   -1,  0    W(0)                   N("OP_0x36") },
 		{   -1,  0    W(0)                   N("OP_0x37") },
@@ -196,6 +208,7 @@ namespace avmplus
 		{   -1,  0    W(0)                   N("OP_0x3C") },
 		{   -1,  0    W(0)                   N("OP_0x3D") },
 		{   -1,  0    W(0)                   N("OP_0x3E") },
+#endif
 		{   -1,  0    W(0)                   N("OP_0x3F") },
 		{    1,  1    W(WOP_newfunction)     N("newfunction") },
 		{    1,  1    W(WOP_call)            N("call") },
@@ -213,9 +226,15 @@ namespace avmplus
 		{   -1,  1    W(0)                   N("callinterface") },
 		{    2,  1    W(WOP_callsupervoid)   N("callsupervoid") },
 		{    2,  1    W(WOP_callpropvoid)    N("callpropvoid") },
+#ifdef AVMPLUS_MOPS
+		{   0,   0    W(WOP_sxi1)            N("sxi1") },
+		{   0,   0    W(WOP_sxi8)            N("sxi8") },
+		{   0,   0    W(WOP_sxi16)           N("sxi16") },
+#else
 		{   -1,  0    W(0)                   N("OP_0x50") },
 		{   -1,  0    W(0)                   N("OP_0x51") },
 		{   -1,  0    W(0)                   N("OP_0x52") },
+#endif
 		{    1,  1    W(WOP_applytype)       N("applytype") },
 		{   -1,  0    W(0)                   N("OP_0x54") },
 		{    1,  1    W(WOP_newobject)       N("newobject") },

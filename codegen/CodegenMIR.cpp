@@ -362,10 +362,14 @@ namespace avmplus
 		OP* o = 0;
 
 #ifdef AVMPLUS_64BIT
-		if (core->config.cseopt && ((code & MIR_oper) || (code&~MIR_float)==MIR_ld || (code&~MIR_float)==MIR_ld32 || (code&~MIR_float)==MIR_ld32u))
+		if (core->config.cseopt && ((code & MIR_oper) || (code&~MIR_float)==MIR_ld || (code&~MIR_float)==MIR_ld32 || (code&~MIR_float)==MIR_ld32u
 #else
-		if (core->config.cseopt && ((code & MIR_oper) || (code&~MIR_float)==MIR_ld))
+		if (core->config.cseopt && ((code & MIR_oper) || (code&~MIR_float)==MIR_ld
 #endif
+#if HAVE_MIR_SMOPS
+			|| (code&~MIR_float)==MIR_sld
+#endif
+                             ))
 			o = cseMatch(code, a1, (OP*) v2);
 
 		if (o == 0)
@@ -499,6 +503,19 @@ namespace avmplus
 			AvmAssert(0);
 #endif
 
+#if HAVE_MIR_SMOPS
+#ifdef AVMPLUS_64BIT
+		AvmAssert((_code & ~MIR_float & ~MIR_oper) == MIR_ld
+			|| (_code & ~MIR_float & ~MIR_oper) == MIR_sld
+			|| (_code & ~MIR_float & ~MIR_oper) == MIR_ld32
+			|| (_code & ~MIR_float & ~MIR_oper) == MIR_ld32u
+			);
+#else
+		AvmAssert((_code & ~MIR_float & ~MIR_oper) == MIR_ld
+			|| (_code & ~MIR_float & ~MIR_oper) == MIR_sld
+			);
+#endif
+#else
 #ifdef AVMPLUS_64BIT
 		AvmAssert((_code & ~MIR_float & ~MIR_oper) == MIR_ld
 			|| (_code & ~MIR_float & ~MIR_oper) == MIR_ld32
@@ -507,6 +524,7 @@ namespace avmplus
 #else
 		AvmAssert((_code & ~MIR_float & ~MIR_oper) == MIR_ld
 			);
+#endif
 #endif
 		return Ins(_code, _base, _disp);
 	}
@@ -608,14 +626,34 @@ namespace avmplus
 		while (ins >= stop)
 		{
 			AvmAssert(ins->code == code);
+			// address check ranges don't factor in
+			// as they're updated on match
 			if (ins->code == code &&
 				ins->oprnd1 == a1 &&
-				ins->oprnd2 == a2)
+				(ins->oprnd2 == a2
+#if HAVE_MIR_SMOPS
+				|| code == MIR_maddr
+#endif
+				))
 			{
 				#ifdef AVMPLUS_VERBOSE
 				if (verbose())
 					core->console  << "        \tcse   @" << InsNbr(ins) << "\n";
 				#endif /* AVMPLUS_VERBOSE */
+#if HAVE_MIR_SMOPS
+				// update range for memory address operation
+				if(code == MIR_maddr)
+				{
+					int32 mn1 = (int32)a2 >> 16;
+					int32 mx1 = ((int32)a2 << 16) >> 16;
+					int32 mn2 = (int32)ins->oprnd2 >> 16;
+					int32 mx2 = ((int32)ins->oprnd2 << 16) >> 16;
+					int32 mn = mn1 < mn2 ? mn1 : mn2;
+					int32 mx = mx1 > mx2 ? mx1 : mx2;
+
+					ins->imm = (mn << 16) | (mx & 0xffff);
+				}
+#endif
 				return ins;
 			}
 
@@ -755,6 +793,9 @@ namespace avmplus
 						remove = true;
 					}
 					else if ( ( ((currIns->code == MIR_st) ||
+#if HAVE_MIR_SMOPS
+                                 (currIns->code == MIR_sst) ||
+#endif
                                  (currIns->code == MIR_st32)) ||
 								((currIns->code&~MIR_float&~MIR_oper) == MIR_cm) ||
 							    ((currIns->code&~MIR_float&~MIR_oper) == MIR_cs) ||
@@ -816,7 +857,11 @@ namespace avmplus
 	// store to register + offset
 	void CodegenMIR::storeIns(MirOpcode _code, OP* value, uintptr disp, OP* base)
 	{
+#if HAVE_MIR_SMOPS
+		AvmAssert(_code == MIR_st || _code == MIR_sst || _code == MIR_st32);
+#else
 		AvmAssert(_code == MIR_st || _code == MIR_st32);
+#endif
 		OP* ip = this->ip;
 #ifndef FEATURE_BUFFER_GUARD
 		if (checkOverflow())
@@ -832,17 +877,28 @@ namespace avmplus
 		if (value->isDouble())
 		{
 			cseTable[MIR_fld] = 0;
+#if HAVE_MIR_SMOPS
+			cseTable[MIR_fsld] = 0;
+#endif
 		}
 		else
 		{
 			cseTable[MIR_ld] = 0;
+#if HAVE_MIR_SMOPS
+			cseTable[MIR_sld] = 0;
+#endif
 #ifdef AVMPLUS_64BIT
 			cseTable[MIR_ld32] = 0;
 			cseTable[MIR_ld32u] = 0;
 #endif
 		}
 
+#if HAVE_MIR_SMOPS
+		// MIR_sst uses lower 2 bits for size / sign extend info
+		AvmAssert(_code == MIR_sst || (disp % 4) == 0);
+#else
 		AvmAssert((disp % 4) == 0);
+#endif
 		ip->code =_code;
 		ip->base = base;
 		ip->disp = disp;
@@ -948,6 +1004,13 @@ namespace avmplus
 		while (argCount-- > 0)
 			argIns(va_arg(ap, OP*));
 		va_end(ap);
+
+		// clear this out so a call that changes the backing store won't get reuse a stale
+		// (and possibly insecure) mchecked value
+#if HAVE_MIR_SMOPS
+		// could theoretically not do this if we're an oper...
+		cseTable[MIR_maddr] = 0;
+#endif
 		return result;
 	}
 
@@ -979,6 +1042,10 @@ namespace avmplus
 			cseTable[MIR_ld32] = 0;
 			cseTable[MIR_ld32u] = 0;
 			#endif
+#if HAVE_MIR_SMOPS
+			cseTable[MIR_fsld] = 0;
+			cseTable[MIR_sld] = 0;
+#endif
 		}
 
 		ip->code = code;
@@ -1030,6 +1097,12 @@ namespace avmplus
 			extendDefLifetime(where);
 		#endif
 
+		// clear this out so a call that changes the backing store won't get reuse a stale
+		// (and possibly insecure) mchecked value
+#if HAVE_MIR_SMOPS
+		// could theoretically not do this if we're an oper...
+		cseTable[MIR_maddr] = 0;
+#endif
 		return where;
 	}
 
@@ -1059,6 +1132,10 @@ namespace avmplus
 		cseTable[MIR_ld32] = 0;
 		cseTable[MIR_ld32u] = 0;
 		#endif
+#if HAVE_MIR_SMOPS
+		cseTable[MIR_fsld] = 0;
+		cseTable[MIR_sld] = 0;
+#endif
 		ip->code = code;
 		ip->lastUse = 0;
 		ip->argc = argCount;
@@ -1109,6 +1186,12 @@ namespace avmplus
 			extendDefLifetime(where);
 		#endif
 
+		// clear this out so a call that changes the backing store won't get reuse a stale
+		// (and possibly insecure) mchecked value
+#if HAVE_MIR_SMOPS
+		// could theoretically not do this if we're an oper...
+		cseTable[MIR_maddr] = 0;
+#endif
 		return where;
 	}
 
@@ -1690,6 +1773,15 @@ namespace avmplus
 		mirNames[MIR_ld32]  = "ld32   ";
 		mirNames[MIR_ld32u]  = "ld32u   ";
 		#endif
+#if HAVE_MIR_SMOPS
+		mirNames[MIR_sld]   = "sld  ";
+		mirNames[MIR_sst]   = "sst  ";
+		mirNames[MIR_sx8]   = "sx8  ";
+		mirNames[MIR_sx16]   = "sx16 ";
+		mirNames[MIR_maddr]   = "maddr";
+		mirNames[MIR_sldop]   = "sldop";
+		mirNames[MIR_fsldop]   = "fsldop";
+#endif
 		mirNames[MIR_fld]   = "fld  ";
 		mirNames[MIR_ldop]  = "ldop ";
 		mirNames[MIR_fldop] = "fldop";
@@ -2132,6 +2224,10 @@ namespace avmplus
 		// last pc value that we generated a store for 
 		lastPcSave = 0;
 
+#if HAVE_MIR_SMOPS
+		// last jmp address of a memory range check
+		lastMOPRangeCheckJmp = 0;
+#endif
 		//
 		// mir to define incoming method arguments.  Stack 
 		// frame allocations follow.
@@ -3672,6 +3768,328 @@ namespace avmplus
 				break;
 			}
 			
+			
+			case OP_sxi1:
+			case OP_sxi8:
+			case OP_sxi16:
+				//framep[op1] = sext framep[op1]
+			{
+				AvmAssert(state->value(op1).traits == INT_TYPE);
+#if HAVE_MIR_SMOPS
+				if(opcode == OP_sxi16 || opcode == OP_sxi8)
+				{
+					Value& value = state->value(op1);
+					OP* a = value.ins;
+					// optimize cases like sxi8(li8(x))
+					if((opcode == OP_sxi8 &&
+						(a->code & ~MIR_oper) == MIR_sld &&
+						(a->disp & (SMOP_MASK ^ SMOP_SX)) == SMOP_I8) ||
+						(opcode == OP_sxi16 &&
+						(a->code & ~MIR_oper) == MIR_sld &&
+						(a->disp & (SMOP_MASK ^ SMOP_SX)) == SMOP_I16))
+					{
+						localSet(op1, loadIns(a->code, a->disp | SMOP_SX, a->base));
+						markDead(a);
+					}
+					else
+					{
+						OP* val = localGet(op1);
+						OP* res = Ins((opcode == OP_sxi8) ? MIR_sx8 : MIR_sx16, val);
+						localSet(op1, res);
+					}
+				}
+				else
+#endif
+				{
+					// straightforward shift based sign extension
+					OP* val = localGet(op1);
+					enum { WORDSIZE = 32 }; // TODO maybe switch on 64 bit systems
+					OP* sh = InsConst(opcode == OP_sxi16 ? (WORDSIZE - 16) : opcode == OP_sxi8 ? (WORDSIZE - 8) : (WORDSIZE - 1));
+					OP* shl = binaryIns(MIR_lsh, val, sh);
+					OP* res = binaryIns(MIR_rsh, shl, sh);
+					localSet(op1, res);
+				}
+
+				break;
+			}
+			case OP_li8:
+			case OP_li16:
+			case OP_li32:
+			case OP_lf32:
+			case OP_lf64:
+				//framep[op1] = *framep[op1]
+			{
+				AvmAssert(state->value(op1).traits == INT_TYPE);
+#if HAVE_MIR_SMOPS
+				// case where we have MIR instructions for
+				// sized loads
+				int32 size;
+
+  				switch(opcode)
+   				{
+   				default:
+   					AvmAssert(false); // shouldn't get here
+   					// fall through
+   				case OP_li8:
+   					size = 1;
+   					break;
+   				case OP_li16:
+   					size = 2;
+   					break;
+   				case OP_li32:
+   				case OP_lf32:
+   					size = 4;
+   					break;
+   				case OP_lf64:
+   					size = 8;
+   					break;
+   				}
+
+				Value& value = state->value(op1);
+				OP* a = value.ins;
+				int32 disp2;
+				// try to get an optimized mir_maddr...
+				OP* maddrO = maddrOpt(a, size, &disp2);
+
+				if(maddrO)
+				{
+					// success! dink disp2 (displacement given to actual load)
+					// with the sign extend / size bits
+					MirOpcode code;
+					switch(opcode)
+					{
+					default:
+						AvmAssert(false); // shouldn't get here
+						// fall through
+					case OP_li8:
+						code = MIR_sld;
+						disp2 |= SMOP_I8;
+						break;
+					case OP_li16:
+						code = MIR_sld;
+						disp2 |= SMOP_I16;
+						break;
+					case OP_li32:
+						code = MIR_ld;
+						break;
+					case OP_lf32:
+						code = MIR_fsld;
+						disp2 |= SMOP_F32;
+						break;
+					case OP_lf64:
+						code = MIR_fld;
+						break;
+					}
+					// and create the load
+					OP *result = loadIns(code, disp2, maddrO);
+					localSet(op1, result);
+					// and get rid of the original addr as maddrOpt
+					// optimized for us!
+					markDead(a);
+					break;
+				}
+
+				// straightforward case...
+				OP* addr = localGet(op1);
+				// just range check [0,size) and have no displacement
+				// in the actual load
+				OP* maddr = Ins(MIR_maddr, addr, size);
+				OP* i2;
+
+  				switch(opcode)
+   				{
+   				default:
+   					AvmAssert(false); // shouldn't get here
+   					// fall through
+   				case OP_li8:
+   					i2 = loadIns(MIR_sld, SMOP_I8, maddr);
+   					break;
+   				case OP_li16:
+   					i2 = loadIns(MIR_sld, SMOP_I16, maddr);
+   					break;
+   				case OP_li32:
+   					i2 = loadIns(MIR_ld, 0, maddr);
+   					break;
+   				case OP_lf32:
+   					i2 = loadIns(MIR_fsld, SMOP_F32, maddr);
+   					break;
+   				case OP_lf64:
+   					i2 = loadIns(MIR_fld, 0, maddr);
+   					break;
+   				}
+
+				localSet(op1, i2);
+#else
+				// no MIR help... use helper functions
+				OP* addr = localGet(op1);
+				OP* i2;
+				bool isFloat = false;
+				sintptr helper;
+
+				switch(opcode)
+				{
+				default:
+					AvmAssert(false); // shouldn't get here
+					// fall through
+#ifdef AVMPLUS_64BIT
+				case OP_li8:
+					helper = ENVADDR(MethodEnv::li8_64);
+					break;
+				case OP_li16:
+					helper = ENVADDR(MethodEnv::li16_64);
+					break;
+				case OP_li32:
+					helper = ENVADDR(MethodEnv::li32_64);
+					break;
+#else
+				case OP_li8:
+					helper = ENVADDR(MethodEnv::li8);
+					break;
+				case OP_li16:
+					helper = ENVADDR(MethodEnv::li16);
+					break;
+				case OP_li32:
+					helper = ENVADDR(MethodEnv::li32);
+					break;
+#endif
+				case OP_lf32:
+					helper = ENVADDR(MethodEnv::lf32);
+					isFloat = true;
+					break;
+				case OP_lf64:
+					helper = ENVADDR(MethodEnv::lf64);
+					isFloat = true;
+					break;
+				}
+				i2 = callIns(isFloat ? MIR_fcm : MIR_cm,
+					helper, 2, ldargIns(_env), addr);
+				localSet(op1, i2);
+#endif
+				break;
+			}
+
+			// these implementations are VERY similar to the
+			// OP_li8, etc. versions which are decently commented
+			case OP_si8:
+			case OP_si16:
+			case OP_si32:
+			case OP_sf32:
+			case OP_sf64:
+			{
+				OP* svalue = localGet(sp-1);
+#if HAVE_MIR_SMOPS
+				int32 size;
+
+  				switch(opcode)
+   				{
+   				default:
+   					AvmAssert(false); // shouldn't get here
+   					// fall through
+   				case OP_si8:
+   					size = 1;
+   					break;
+   				case OP_si16:
+   					size = 2;
+   					break;
+   				case OP_si32:
+   				case OP_sf32:
+   					size = 4;
+   					break;
+   				case OP_sf64:
+   					size = 8;
+   					break;
+   				}
+
+				Value& value = state->value(sp);
+				OP* a = value.ins;
+				int32 disp2;
+				OP* maddrO = maddrOpt(a, size, &disp2);
+				// store(maddr(x + y),z) -> store(maddr(x),z+y) with updated range checking
+				if(maddrO)
+				{
+					MirOpcode code;
+					switch(opcode)
+					{
+					default:
+						AvmAssert(false); // shouldn't get here
+						// fall through
+					case OP_si8:
+						code = MIR_sst;
+						disp2 |= SMOP_I8;
+						break;
+					case OP_si16:
+						code = MIR_sst;
+						disp2 |= SMOP_I16;
+						break;
+					case OP_sf64:
+					case OP_si32:
+						code = MIR_st;
+						break;
+					case OP_sf32:
+						code = MIR_sst;
+						disp2 |= SMOP_F32;
+						break;
+					}
+					storeIns(code, svalue, disp2, maddrO);
+					emitKill(state, sp);
+					markDead(a);
+					break;
+				}
+
+				OP* addr = localGet(sp);
+				OP* maddr = Ins(MIR_maddr, addr, size);
+
+				switch(opcode)
+				{
+				default:
+					AvmAssert(false); // shouldn't get here
+					// fall through
+				case OP_si8:
+					storeIns(MIR_sst, svalue, SMOP_I8, maddr);
+					break;
+				case OP_si16:
+					storeIns(MIR_sst, svalue, SMOP_I16, maddr);
+					break;
+				case OP_si32:
+					storeIns(MIR_st, svalue, 0, maddr);
+					break;
+				case OP_sf32:
+					storeIns(MIR_sst, svalue, SMOP_F32, maddr);
+					break;
+				case OP_sf64:
+					storeIns(MIR_st, svalue, 0, maddr);
+					break;
+				}
+#else
+				OP* addr = localGet(sp);
+				sintptr helper;
+
+				switch(opcode)
+				{
+				default:
+					AvmAssert(false); // shouldn't get here
+					// fall through
+				case OP_si8:
+					helper = ENVADDR(MethodEnv::si8);
+					break;
+				case OP_si16:
+					helper = ENVADDR(MethodEnv::si16);
+					break;
+				case OP_si32:
+					helper = ENVADDR(MethodEnv::si32);
+					break;
+				case OP_sf32:
+					helper = ENVADDR(MethodEnv::sf32);
+					break;
+				case OP_sf64:
+					helper = ENVADDR(MethodEnv::sf64);
+					break;
+				}
+				callIns(MIR_cm, helper, 3, ldargIns(_env), svalue, addr);
+#endif
+				break;
+			}
+
 			case OP_newfunction:
 			{
 				//sp[0] = core->newfunction(env, body, _scopeBase, scopeDepth);
@@ -5491,6 +5909,12 @@ namespace avmplus
 				break;
 			}
 
+#if HAVE_MIR_SMOPS // TODO disp will show wrong
+			case MIR_sld:
+			case MIR_fsld:
+			case MIR_sldop:
+			case MIR_fsldop:
+#endif
 			case MIR_ld:
 #ifdef AVMPLUS_64BIT
 			case MIR_ld32:
@@ -5510,6 +5934,9 @@ namespace avmplus
 				break;
 			}
 
+#if HAVE_MIR_SMOPS // TODO disp will show wrong
+			case MIR_sst:
+#endif
 			case MIR_st:
 			case MIR_st32:
 			{
@@ -6361,6 +6788,51 @@ namespace avmplus
 			LEAVE(); // leave:  esp = ebp, pop ebp
 		}
 		RET  ();
+
+#if HAVE_MIR_SMOPS
+		sintptr mopCheckLoc;
+
+		if(lastMOPRangeCheckJmp)
+		{
+			mopCheckLoc = (sintptr)mip;
+
+#if DBG_MADDR && defined(_DEBUG)
+			ALU(0xcc); // breakpoint
+#endif
+
+			// generate for every method to eke out
+			// a bit more branch prediction accuracy
+#ifdef _MAC
+			// we never return so we can cheese the alignment
+			// (a single mir_maddr may generate two jumps so using
+			// the typical mirLabel stuff is problematic)
+			AND(ESP, 0xfffffff0);
+			SUB(ESP, 12);
+#endif
+			PUSH(8, framep); // env
+#if DBG_MADDR && defined(_DEBUG)
+			// make up a call frame
+			POP(EAX); // env
+			PUSH(EBP);
+			MOV(EBP, ESP);
+			PUSH(EAX); // env
+#endif
+			thincall((sintptr)&mopRangeCheckFailedShim);
+#ifdef _DEBUG
+			ALU(0xcc); // breakpoint
+#endif
+
+			while(lastMOPRangeCheckJmp)
+			{
+				uint32 *cur = lastMOPRangeCheckJmp;
+				lastMOPRangeCheckJmp = (uint32 *)*cur;
+				mdApplyPatch(cur, mopCheckLoc);
+			}
+#ifdef _DEBUG
+			lastMOPRangeCheckJmp = NULL;
+#endif
+		}
+#endif
 		mipEnd = mip;
 
 		// Patch stack overflow check
@@ -6615,6 +7087,11 @@ namespace avmplus
 		if ((byte*)mipEnd >= pool->codeBuffer->end())
 			AvmAssert(false);
 		#endif /* DEBUG */
+
+#if HAVE_MIR_SMOPS
+	  // did these get patched?
+	  AvmAssert(!lastMOPRangeCheckJmp);
+#endif
 	}
 
 	/**
@@ -6716,6 +7193,37 @@ namespace avmplus
 		setResultReg(regs, ins, r);
 		return r;
 	}
+
+#if HAVE_MIR_SMOPS
+#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)		
+	CodegenMIR::Register CodegenMIR::registerFor8Bit(RegInfo& regs, OP* value)
+	{
+		Register r;
+
+		AvmAssert(&regs == &gpregs);
+		// can only do 8 bit truncations
+		// with these regs
+		int set = EAX | EBX | ECX | EDX;
+
+		// keep the register in the value if it's compatible
+		if(set & rmask(value->reg))
+			r = value->reg;
+		// otherwise take a free reg
+		else if(regs.free & set)
+		{
+			set &= regs.free;
+			int i=0;
+			while (!(set & rmask(i)))
+				i ++;
+			r = (Register)i;
+		}
+		// otherwise do a scan
+		else
+			r = regs.findLastActive(set)->reg;
+		return r;
+	}
+#endif
+#endif
 
 	CodegenMIR::Register CodegenMIR::registerAllocAny(RegInfo& regs, OP* ins)
 	{
@@ -9018,6 +9526,317 @@ namespace avmplus
 					break;
 				}
 
+
+#if HAVE_MIR_SMOPS
+				case MIR_maddr:
+				{
+					OP* lhs = ip->oprnd1; // lhs
+
+#if (defined(_DEBUG))
+					totalRangeChecks++;
+#endif
+					if (!ip->lastUse)
+					{
+						gpregs.expire(lhs, ip);
+						break;
+					}
+
+					#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+					Register r = Unknown;
+					InsRegisterPrepA(ip, gpregs, lhs, r);
+					registerAllocSpecific(gpregs, r);
+
+					int32 mn = ip->imm >> 16;
+					int32 mx = (ip->imm << 16) >> 16;
+					int32 idisp = maddrImplicitDisp(ip);
+
+					if(idisp)
+					{
+#if (defined(_DEBUG))
+						implicitMaddrDisps++;
+#endif
+						mn += idisp;
+						mx += idisp;
+						if(idisp < 0)
+							SUB(r, idisp);
+						else
+							ADD(r, -idisp);
+						AvmAssert(!mn);
+					}
+					if(!mn && mx <= Domain::GLOBAL_MEMORY_MIN_SIZE) // range is zero through something
+					{
+#if (defined(_DEBUG))
+						singleCmpRangeChecks++;
+#endif
+						CMP(r, 0x80000000); // ensure 32 bit
+						uint32 *p32 = (uint32 *)(mip - 4);
+						*p32 = pool->domain->globalMemorySize - mx;
+						pool->domain->addGlobalMemorySizeRef(p32);
+						#if DBG_MADDR && defined(_DEBUG) && defined(AVMPLUS_IA32)
+						CALL(0);
+						#endif
+						JNBE(0x80000000); // ensure 32 bit
+						// link range check jumps
+						p32 = (uint32 *)(mip - 4);
+						*p32 = (uint32)lastMOPRangeCheckJmp;
+						lastMOPRangeCheckJmp = p32;
+						#if DBG_MADDR && defined(_DEBUG) && defined(AVMPLUS_IA32)
+						ADD(ESP, 4);
+						#endif
+					}
+					else
+					{
+						AvmAssert(!idisp);
+#if (defined(_DEBUG))
+						doubleCmpRangeChecks++;
+#endif
+						CMP(r, -mn);
+						#if DBG_MADDR && defined(_DEBUG) && defined(AVMPLUS_IA32)
+						CALL(0);
+						#endif
+						JL(0x80000000); // ensure 32 bit
+						// link range check jumps
+						uint32 *p32 = (uint32 *)(mip - 4);
+						*p32 = (uint32)lastMOPRangeCheckJmp;
+						lastMOPRangeCheckJmp = p32;
+						#if DBG_MADDR && defined(_DEBUG) && defined(AVMPLUS_IA32)
+						ADD(ESP, 4);
+						#endif
+
+						CMP(r, 0x80000000); // ensure 32 bit
+						p32 = (uint32 *)(mip - 4);
+						*p32 = pool->domain->globalMemorySize - mx;
+						pool->domain->addGlobalMemorySizeRef(p32);
+ 						#if DBG_MADDR && defined(_DEBUG) && defined(AVMPLUS_IA32)
+						CALL(0);
+						#endif
+						JNLE(0x80000000); // ensure 32 bit
+						// link range check jumps
+						p32 = (uint32 *)(mip - 4);
+						*p32 = (uint32)lastMOPRangeCheckJmp;
+						lastMOPRangeCheckJmp = p32;
+						#if DBG_MADDR && defined(_DEBUG) && defined(AVMPLUS_IA32)
+						ADD(ESP, 4);
+						#endif
+					}
+
+					#endif
+
+					#if defined(AVMPLUS_PPC) || defined(AVMPLUS_ARM)
+					#error Not implemented
+					#endif
+					
+					setResultReg(gpregs, ip, r);
+					break;
+				}
+				case MIR_sx8:
+				case MIR_sx16:
+				{
+					OP* lhs = ip->oprnd1; // lhs
+
+					if (!ip->lastUse)
+					{
+						gpregs.expire(lhs, ip);
+						break;
+					}
+
+					#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+
+					Register r = ip->code == MIR_sx8 ? registerFor8Bit(gpregs, lhs) : Unknown;
+					InsRegisterPrepA(ip, gpregs, lhs, r);
+					registerAllocSpecific(gpregs, r);
+
+					if(ip->code == MIR_sx8)
+						MOVSX_r8(r, r);
+					if(ip->code == MIR_sx16)
+						MOVSX_r16(r, r);
+
+					#endif
+
+					#if defined(AVMPLUS_PPC) || defined(AVMPLUS_ARM)
+					#error Not implemented
+					#endif
+					
+					setResultReg(gpregs, ip, r);
+					break;
+				}
+				case MIR_sld:
+				case MIR_sldop:
+				case MIR_fsld:
+				case MIR_fsldop:
+				{
+					OP* addr = ip->oprnd1;
+
+					// no immediate or stack relative variants
+					AvmAssert(addr && addr->code != MIR_alloc);
+
+					// don't generate it if its not used
+					if (!ip->lastUse)
+					{
+						gpregs.expire(addr, ip);
+						break;
+					}
+					// 2 bits of size / sign extend info
+					int disp = ip->disp & ~SMOP_MASK;
+					// real displacement if disp is modified to ensure 3 bit disp
+					int realDisp = disp;
+					int size = ip->disp & SMOP_MASK;
+
+					if(addr->code == MIR_maddr)
+					{
+#ifdef AVMPLUS_AMD64
+						if (!is32bit(disp))
+							AvmAssert(0);
+#endif
+						realDisp += (intptr_t)pool->domain->globalMemoryBase;
+						realDisp += maddrImplicitDisp(addr);
+						disp = 0x80000000; // ensure 32 bit
+					}
+					RegInfo& regs = ip->isDouble() ? fpregs : gpregs;
+					Register r;
+					Register rSrc = Unknown;
+
+					InsRegisterPrepA(ip, gpregs, addr, rSrc);
+					r = InsPrepResult(regs, ip, rmask(rSrc));
+
+					#ifdef AVMPLUS_IA32
+					if (ip->isDouble()) 
+					{
+						// only 32 bit float w/o sign-extend here
+						AvmAssert(size == SMOP_F32);
+						if (core->config.sse2)
+						{
+							MOVSS(r, disp, rSrc);
+						}
+						else
+						{
+							AvmAssert(r == FST0);
+							FFREE(FST7);
+							FLDD(disp, rSrc);
+						}
+					}
+					else
+					{
+						switch(size)
+						{
+						default:
+							AvmAssert(false);
+							// fall through
+						case SMOP_I8: // 8 bit zero-ext
+							MOVZX_8(r, disp, rSrc);
+							break;
+						case SMOP_I8SX: // 8 bit sign-ext
+							MOVSX_8(r, disp, rSrc);
+							break;
+						case SMOP_I16: // 16 bit zero-ext
+							MOVZX_16(r, disp, rSrc);
+							break;
+						case SMOP_I16SX: // 16 bit sign-ext
+							MOVSX_16(r, disp, rSrc);
+							break;
+						}
+					}
+					unsigned char **pdisp = (unsigned char **)(mip - 4);
+					if(disp != realDisp)
+					{
+						AvmAssert((int)*pdisp == disp);
+						AvmAssert(addr->code == MIR_maddr);
+						*pdisp = (unsigned char *)realDisp;
+					}
+					if(addr->code == MIR_maddr)
+						pool->domain->addGlobalMemoryBaseRef(pdisp);
+					if(ip->isDouble() && core->config.sse2)
+						CVTPS2PD(r, r);
+					#endif
+					#if defined(AVMPLUS_PPC) || defined(AVMPLUS_ARM)
+					#error Not implemented
+					#endif
+					break;
+				}
+				case MIR_sst:
+				{
+					OP* addr = ip->base;
+					OP* value = ip->value;
+
+					// no immediate or stack relative variants
+					AvmAssert(addr && addr->code != MIR_alloc);
+
+					// 2 bits of size / sign extend info
+					int disp = ip->disp & ~SMOP_MASK;
+					// real displacement if disp is modified to ensure 3 bit disp
+					int realDisp = disp;
+					int size = ip->disp & SMOP_MASK;
+
+					if(addr->code == MIR_maddr)
+					{
+#ifdef AVMPLUS_AMD64
+						if (!is32bit(disp))
+							AvmAssert(0);
+#endif
+						realDisp += (intptr_t)pool->domain->globalMemoryBase;
+						realDisp += maddrImplicitDisp(addr);
+						disp = 0x80000000; // ensure 32 bit
+					}
+					RegInfo& regs = value->isDouble() ? fpregs : gpregs;
+					Register r = Unknown;
+					Register rDst = Unknown;
+
+					AvmAssert(!(size & SMOP_SX));
+					#ifdef AVMPLUS_IA32
+					if(!value->isDouble() && size == SMOP_I8)
+						r = registerFor8Bit(gpregs, value);
+
+					InsRegisterPrepAB(ip, regs, value, r, gpregs, addr, rDst);
+
+					if (value->isDouble()) 
+					{
+						// only 32 bit float w/o sign-extend here
+						AvmAssert(size == SMOP_F32);
+						if (core->config.sse2)
+						{
+							Register rTrunc = registerAllocAny(regs, ip);
+							CVTPD2PS(rTrunc, r);
+							MOVSS(disp, rDst, rTrunc);
+							regs.addFree(rTrunc);
+						}
+						else
+						{
+							AvmAssert(r == FST0);
+							FFREE(FST7);
+							FSTD(disp, rDst);
+						}
+					}
+					else
+					{
+						switch(size)
+						{
+						default:
+							AvmAssert(false);
+							// fall through
+						case SMOP_I8: // 8 bit trunc
+							MOV_8(disp, rDst, r);
+							break;
+						case SMOP_I16: // 16 bit trunc
+							MOV_16(disp, rDst, r);
+							break;
+						}
+					}
+					unsigned char **pdisp = (unsigned char **)(mip - 4);
+					if(disp != realDisp)
+					{
+						AvmAssert((int)*pdisp == disp);
+						AvmAssert(addr->code == MIR_maddr);
+						*pdisp = (unsigned char *)realDisp;
+					}
+					if(addr->code == MIR_maddr)
+						pool->domain->addGlobalMemoryBaseRef(pdisp);
+					#endif
+					#if defined(AVMPLUS_PPC) || defined(AVMPLUS_ARM)
+					#error Not implemented
+					#endif
+					break;
+				}
+#endif /* HAVE_MIR_SMOPS */
 				case MIR_ld:
 #ifdef AVMPLUS_64BIT
 				case MIR_ld32:
@@ -9071,6 +9890,19 @@ namespace avmplus
 					}
 					else
 					{
+						// memory op? tack on offset to backing store
+#if HAVE_MIR_SMOPS
+						if(addr->code == MIR_maddr)
+						{
+#ifdef AVMPLUS_AMD64
+							if (!is32bit(disp))
+								AvmAssert(0);
+#endif
+							realDisp += (intptr_t)pool->domain->globalMemoryBase;
+							realDisp += maddrImplicitDisp(addr);
+							disp = 0x80000000; // ensure 32 bit
+						}
+#endif
 						InsRegisterPrepA(ip, gpregs, addr, rSrc);
 						r = InsPrepResult(regs, ip, rmask(rSrc));
 					}
@@ -9167,8 +9999,16 @@ namespace avmplus
 					if(disp != realDisp)
 					{
 						AvmAssert((sintptr)*pdisp == disp);
+#if HAVE_MIR_SMOPS
+						AvmAssert(addr->code == MIR_maddr);
+#endif
 						*pdisp = (unsigned char *)realDisp;
 					}
+					// memory op?  remember it for updates
+#if HAVE_MIR_SMOPS
+					if(addr && addr->code == MIR_maddr)
+						pool->domain->addGlobalMemoryBaseRef(pdisp);
+#endif
 					break;
 				}
 
@@ -9287,6 +10127,19 @@ namespace avmplus
 					}
 					else
 					{
+						// memory op? tack on offset to backing store
+#if HAVE_MIR_SMOPS
+						if(addr->code == MIR_maddr)
+						{
+#ifdef AVMPLUS_AMD64
+							if (!is32bit(disp))
+								AvmAssert(0);
+#endif
+							realDisp += (intptr_t)pool->domain->globalMemoryBase;
+							realDisp += maddrImplicitDisp(addr);
+							disp = 0x80000000; // ensure 32 bit
+						}
+#endif
 						InsRegisterPrepAB(ip, regsValue, value, rValue, gpregs, addr, rDst);
 					}
 					
@@ -9320,6 +10173,19 @@ namespace avmplus
 					}
 					else
 					{
+						// memory op? tack on offset to backing store
+#if HAVE_MIR_SMOPS
+						if(addr->code == MIR_maddr)
+						{
+#ifdef AVMPLUS_AMD64
+							if (!is32bit(disp))
+								AvmAssert(0);
+#endif
+							realDisp += (intptr_t)pool->domain->globalMemoryBase;
+							realDisp += maddrImplicitDisp(addr);
+							disp = 0x80000000; // ensure 32 bit
+						}
+#endif
 						InsRegisterPrepAB(ip, regsValue, value, rValue, gpregs, addr, rDst);
 					}
 					
@@ -9354,6 +10220,19 @@ namespace avmplus
 					}
 					else
 					{
+						// memory op? tack on offset to backing store
+#if HAVE_MIR_SMOPS
+						if(addr->code == MIR_maddr)
+						{
+#ifdef AVMPLUS_AMD64
+							if (!is32bit(disp))
+								AvmAssert(0);
+#endif
+							realDisp += (intptr_t)pool->domain->globalMemoryBase;
+							realDisp += maddrImplicitDisp(addr);
+							disp = 0x80000000; // ensure 32 bit
+						}
+#endif
 						if (!canImmFold(ip,value)) //value->code != MIR_imm)
 							InsRegisterPrepAB(ip, regsValue, value, rValue, gpregs, addr, rDst);
 						else
@@ -9437,8 +10316,16 @@ namespace avmplus
 					if(disp != realDisp)
 					{
 						AvmAssert((sintptr)*pdisp == disp);
+#if HAVE_MIR_SMOPS
+						AvmAssert(addr->code == MIR_maddr);
+#endif
 						*pdisp = (unsigned char *)realDisp;
 					}
+					// memory op?  remember it for updates
+#if HAVE_MIR_SMOPS
+					if(addr && addr->code == MIR_maddr)
+						pool->domain->addGlobalMemoryBaseRef(pdisp);
+#endif
 					break;
 				}
 				case MIR_lsh:
@@ -12211,6 +13098,69 @@ namespace avmplus
 	}
 #endif
 
+#if HAVE_MIR_SMOPS
+	int32 CodegenMIR::maddrImplicitDisp(OP *op)
+	{
+		AvmAssert(op->code == MIR_maddr);
+		int32 mn = op->imm >> 16;
+		int32 mx = (op->imm << 16) >> 16;
+
+		AvmAssert(mx > mn);
+		// if the whole range can fit into the min size,
+		// we can move the range from [mn, mx) to 
+		// [0, (mx-mn) ) and use only one unsigned compare
+		// to range check and then factor the adjustment
+		// into the actual loads and stores
+		if((mx - mn) <= Domain::GLOBAL_MEMORY_MIN_SIZE)
+			return -mn;
+		return 0;
 }
 
+	OP *CodegenMIR::maddrOpt(OP *a, int32 size, int32 *disp)
+	{
+		if((a->code == MIR_add ||
+			a->code == MIR_sub) &&
+			((a->oprnd1->code == MIR_imm &&
+			!(a->oprnd1->imm % 4)) || 
+			(a->oprnd2->code == MIR_imm &&
+			!(a->oprnd2->imm % 4))
+			))
+		{
+			OP* imm;
+			OP* notImm;
+			
+			if(a->oprnd1->code == MIR_imm)
+			{
+				imm = a->oprnd1;
+				notImm = a->oprnd2;
+			}
+			else
+			{
+				imm = a->oprnd2;
+				notImm = a->oprnd1;
+			}
+			int32 mn = 0;
+			int32 mx = size;
+			int32 disp2 = (a->code == MIR_sub) ? -imm->imm : imm->imm;
+			mn += disp2;
+			mx += disp2;
+			// both going to fit in 15 bits?
+			if((mn << 17) >> 17 == mn && (mx << 17) >> 17 == mx)
+			{
+				*disp = disp2;
+				return Ins(MIR_maddr, notImm, (mn << 16) | (mx & 0xffff));
+			}
+		}
+		return NULL;
+}
+
+#endif
+#if (defined(_DEBUG)) && HAVE_MIR_SMOPS
+		// raw memory stats
+	int CodegenMIR::totalRangeChecks = 0;
+	int CodegenMIR::implicitMaddrDisps = 0;
+	int CodegenMIR::singleCmpRangeChecks = 0;
+	int CodegenMIR::doubleCmpRangeChecks = 0;
+#endif
+}
 #endif // AVMPLUS_MIR

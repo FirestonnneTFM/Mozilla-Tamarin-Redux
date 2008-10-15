@@ -82,6 +82,18 @@ namespace avmplus
 		WOP_pushscope = 0x30,
 		WOP_pushnamespace = 0x31,
 		WOP_hasnext2 = 0x32,
+#ifdef AVMPLUS_MOPS
+		WOP_li8 = 0x35,
+		WOP_li16 = 0x36,
+		WOP_li32 = 0x37,
+		WOP_lf32 = 0x38,
+		WOP_lf64 = 0x39,
+		WOP_si8 = 0x3A,
+		WOP_si16 = 0x3B,
+		WOP_si32 = 0x3C,
+		WOP_sf32 = 0x3D,
+		WOP_sf64 = 0x3E,
+#endif
 		WOP_newfunction = 0x40,
 		WOP_call = 0x41,
 		WOP_construct = 0x42,
@@ -96,6 +108,11 @@ namespace avmplus
 		WOP_callproplex = 0x4C,
 		WOP_callsupervoid = 0x4E,
 		WOP_callpropvoid = 0x4F,
+#ifdef AVMPLUS_MOPS
+		WOP_sxi1 = 0x50,
+		WOP_sxi8 = 0x51,
+		WOP_sxi16 = 0x52,
+#endif
 		WOP_applytype = 0x53,
 		WOP_newobject = 0x55,
 		WOP_newarray = 0x56,
