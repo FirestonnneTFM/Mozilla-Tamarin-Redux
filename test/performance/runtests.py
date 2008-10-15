@@ -204,10 +204,10 @@ def run_pipe(cmd):
     #return t.open(globs['tmpfile'], "r")
 
 
-def compile_test(as):
+def compile_test(as_file):
     asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
     if not isfile(asc):
-        exit("ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar" % as)
+        exit("ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar" % as_file)
     if not isfile(globalabc):
         exit("ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc" % globalabc)
     
@@ -219,10 +219,10 @@ def compile_test(as):
     cmd += " -import " + globalabc
     if globs['optimize']:
         cmd += " -optimize"
-    (dir, file) = split(as)
+    (dir, file) = split(as_file)
     verbose_print("   compiling %s" % file)
-    (testdir, ext) = splitext(as)
-    f = run_pipe("%s %s" % (cmd,as))
+    (testdir, ext) = splitext(as_file)
+    f = run_pipe("%s %s" % (cmd,as_file))
 
 def mean(population):
     mean = 0.0
