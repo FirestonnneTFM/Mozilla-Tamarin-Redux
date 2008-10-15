@@ -49,12 +49,17 @@ namespace avmplus
 {
 	using namespace MMgc;
 
+
 	BEGIN_NATIVE_CLASSES(AvmCore)
 		NATIVE_CLASS(abcclass_Object,				ObjectClass,	ScriptObject)
 		NATIVE_CLASS(abcclass_Class,				ClassClass,		ClassClosure)
 		NATIVE_CLASS(abcclass_Namespace,			NamespaceClass,	Namespace)
 		NATIVE_CLASS(abcclass_Function, 			FunctionClass,	ClassClosure)
+#if AVMTHUNK_VERSION >= 2
+		NATIVE_CLASS(abcclass_private_MethodClosure, 			MethodClosureClass,	MethodClosure)
+#else
 		NATIVE_CLASS(abcclass_builtin_as_0_MethodClosure, 			MethodClosureClass,	MethodClosure)
+#endif
 
 		NATIVE_CLASS(abcclass_Error,				ErrorClass,	ErrorObject)
 

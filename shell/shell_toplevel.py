@@ -56,7 +56,6 @@ def rm(file):
 
 javacmd = "java -ea -DAS3 -DAVMPLUS -classpath "+classpath
 asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
-thunkgen = javacmd+" adobe.abc.AbcThunkGen "
 
 print("ASC="+classpath)
 print("Building shell_toplevel...")
@@ -65,8 +64,9 @@ print("Building shell_toplevel...")
 os.system(asc+" -abcfuture -import ../core/builtin.abc -builtin -out shell_toplevel shell_toplevel.as Domain.as StringBuilder.as ByteArray.as ../extensions/Sampler.as ../extensions/Trace.as ../extensions/Dictionary.as Endian.as Java.as")
 
 print("Generating native thunks...")
-os.system(thunkgen+" -import ../core/builtin.abc shell_toplevel.abc > shell_toplevel.out")
+os.system("python ../utils/nativegen.py ../core/builtin.abc shell_toplevel.abc")
 
 mv("shell_toplevel.cpp2", "shell_toplevel.cpp")
 mv("shell_toplevel.h2", "shell_toplevel.h")
 
+print("Done.")
