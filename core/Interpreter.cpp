@@ -2642,7 +2642,7 @@ namespace avmplus
 			}
 
 			// 'OP_abs_jump' always boils away in the translation to word code, see
-			// comments in Translator.cpp.
+			// comments in WordcodeTranslator.cpp.
 #ifndef AVMPLUS_WORD_CODE
 					
 			INSTR(abs_jump)	{
@@ -2705,7 +2705,7 @@ namespace avmplus
 #  ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 			
 			// Superwords not in the instruction set.  These are selected by a table
-			// driven peephole optimizer, see comments and code in core/Translator.cpp.
+			// driven peephole optimizer, see comments and code in core/WordcodeTranslator.cpp.
 
 			INSTR(get2locals) {
 				uint32_t regs = *pc++;

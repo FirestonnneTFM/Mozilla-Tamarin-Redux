@@ -1915,14 +1915,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\Translator.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\Translator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\UnicodeUtils.cpp"
 				>
 			</File>
@@ -2122,6 +2114,18 @@
 			</File>
 			<File
 				RelativePath="..\..\core\wopcodes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\WordcodeEmitter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\WordcodeEmitter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\WordcodeTranslator.h"
 				>
 			</File>
 			<File

@@ -42,6 +42,7 @@ namespace avmplus
 
 	enum WordOpcode 
 	{
+		WOP_nop = 0x02,
 		WOP_throw = 0x03,
 		WOP_getsuper = 0x04,
 		WOP_setsuper = 0x05,

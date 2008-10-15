@@ -219,7 +219,8 @@ namespace avmplus
 	class String;
 	class Toplevel;
 	class Traits;
-	class Translator;
+	class WordcodeTranslator;
+	class WordcodeEmitter;
 	class UnicodeUtils;
 	class Value;
 	class Verifier; 
@@ -330,7 +331,8 @@ using MMgc::GCHeap;
 #include "StringBuffer.h"
 #include "AtomArray.h"
 #include "wopcodes.h"
-#include "Translator.h"
+#include "WordcodeTranslator.h"
+#include "WordcodeEmitter.h"
 #include "Verifier.h"
 #include "NativeFunction.h"
 #include "ClassClosure.h"

@@ -79,7 +79,7 @@ namespace avmplus
 			int init_scope_depth;
 			int max_scope_depth;
 			int cache_size;              // Number of items in lookup cache
-			// We write this once, in Translator, with an explicit WB.  so no DWB.
+			// We write this once, in WordcodeTranslator, with an explicit WB.  so no DWB.
 			// The contents are the same as the 'exceptions' structure below, except the 'from', 'to', and 'target' fields.
 			ExceptionHandlerTable* exceptions;
 		} word_code;

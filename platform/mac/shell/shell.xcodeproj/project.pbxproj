@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		074A00520EA5FBBC0016A8AC /* WordcodeEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 074A004F0EA5FBBC0016A8AC /* WordcodeEmitter.cpp */; };
 		074E40AE0E8E6FF900146B6F /* Selftest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 074E40A90E8E6FF900146B6F /* Selftest.cpp */; };
 		074E40AF0E8E6FF900146B6F /* SelftestInit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 074E40AB0E8E6FF900146B6F /* SelftestInit.cpp */; };
 		074E40B00E8E6FF900146B6F /* ST_avmplus_basics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 074E40AC0E8E6FF900146B6F /* ST_avmplus_basics.cpp */; };
@@ -122,6 +123,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		074A004F0EA5FBBC0016A8AC /* WordcodeEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WordcodeEmitter.cpp; sourceTree = "<group>"; };
+		074A00500EA5FBBC0016A8AC /* WordcodeEmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordcodeEmitter.h; sourceTree = "<group>"; };
+		074A00510EA5FBBC0016A8AC /* WordcodeTranslator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordcodeTranslator.h; sourceTree = "<group>"; };
 		074E40A90E8E6FF900146B6F /* Selftest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Selftest.cpp; path = ../../../extensions/Selftest.cpp; sourceTree = SOURCE_ROOT; };
 		074E40AA0E8E6FF900146B6F /* Selftest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Selftest.h; path = ../../../extensions/Selftest.h; sourceTree = SOURCE_ROOT; };
 		074E40AB0E8E6FF900146B6F /* SelftestInit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SelftestInit.cpp; path = ../../../extensions/SelftestInit.cpp; sourceTree = SOURCE_ROOT; };
@@ -438,8 +442,6 @@
 		8EDDB9E609AAD1D300FB9EE5 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../extensions/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
 		8EDDB9E709AAD1D300FB9EE5 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../extensions/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
 		8EDDB9F309AAD2B700FB9EE5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
-		D96230640E5CA30100DA3F47 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Translator.cpp; sourceTree = "<group>"; };
-		D96230650E5CA30100DA3F47 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Translator.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -682,8 +684,6 @@
 				4E62BEE20D6244D300A24F2D /* Traits.cpp */,
 				4E62BEE30D6244D300A24F2D /* Traits.h */,
 				4E62BEE40D6244D300A24F2D /* TraitsIterator.h */,
-				D96230640E5CA30100DA3F47 /* Translator.cpp */,
-				D96230650E5CA30100DA3F47 /* Translator.h */,
 				4E62BEE50D6244D300A24F2D /* UnicodeUtils.cpp */,
 				4E62BEE60D6244D300A24F2D /* UnicodeUtils.h */,
 				4E62BEE70D6244D300A24F2D /* Vector.as */,
@@ -696,6 +696,9 @@
 				4E62BEEE0D6244D300A24F2D /* VTable.h */,
 				074E40EC0E8E750100146B6F /* wopcodes.cpp */,
 				074E40ED0E8E750100146B6F /* wopcodes.h */,
+				074A004F0EA5FBBC0016A8AC /* WordcodeEmitter.cpp */,
+				074A00500EA5FBBC0016A8AC /* WordcodeEmitter.h */,
+				074A00510EA5FBBC0016A8AC /* WordcodeTranslator.h */,
 				4E62BEEF0D6244D300A24F2D /* XML.as */,
 				4E62BEF00D6244D300A24F2D /* XMLClass.cpp */,
 				4E62BEF10D6244D300A24F2D /* XMLClass.h */,
@@ -988,6 +991,7 @@
 				074E40B00E8E6FF900146B6F /* ST_avmplus_basics.cpp in Sources */,
 				074E40B10E8E6FF900146B6F /* ST_avmplus_peephole.cpp in Sources */,
 				074E40EE0E8E750100146B6F /* wopcodes.cpp in Sources */,
+				074A00520EA5FBBC0016A8AC /* WordcodeEmitter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

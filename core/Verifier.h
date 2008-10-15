@@ -77,7 +77,7 @@ namespace avmplus
 		#endif
 
 		#ifdef AVMPLUS_WORD_CODE
-		Translator *translator;
+		WordcodeTranslator *translator;
 		int num_caches;			// number of entries in 'caches'
 		int next_cache;			// next free entry in 'caches'
 		uint32* caches;			// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
