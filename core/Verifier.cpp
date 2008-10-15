@@ -201,14 +201,14 @@ namespace avmplus
 	// FIXME - if MIR generation doesn't fail, then we've translated for
 	// no good reason.
 #    ifdef AVMPLUS_DIRECT_THREADED
-		this->translator = new Translator(info, interpGetOpcodeLabels());
+		this->translator = new WordcodeEmitter(info, interpGetOpcodeLabels());
 #    else
         // the jit can fail, and we dont want to have to re-run the verifier
         // until we know it's safe to do so, so run jit & translator concurrently.
-        //this->translator = jit ? 0 : new Translator(info);
-        this->translator = new Translator(info);
+        //this->translator = jit ? 0 : new WordcodeEmitter(info);
+		this->translator = new WordcodeEmitter(info);
 #    endif
-	    Translator *translator = this->translator;
+	    WordcodeTranslator *translator = this->translator;
 		caches = new uint32[5];
 		num_caches = 5;
 #endif

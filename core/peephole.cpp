@@ -6,7 +6,7 @@ namespace avmplus
 {
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 
-Translator::peep_state_t Translator::states[] = {
+WordcodeEmitter::peep_state_t WordcodeEmitter::states[] = {
 //n  s  t  g  f
 { 0, 0, 0, 0, 0 }, // Invalid
 { 0, 0, 0, 5, 0 }, //    getlocal getlocal getlocal getlocal getlocal
@@ -61,7 +61,7 @@ Translator::peep_state_t Translator::states[] = {
 { 1, 0, 46, 0, 0 }, // 50  swap
 };
 
-Translator::peep_transition_t Translator::transitions[] = {
+WordcodeEmitter::peep_transition_t WordcodeEmitter::transitions[] = {
 { WOP_getlocal, 1 },
 { WOP_getlocal, 2 },
 { WOP_setlocal, 4 },
@@ -111,7 +111,7 @@ Translator::peep_transition_t Translator::transitions[] = {
 { WOP_pop, 49 },
 };
 
-uint16 Translator::toplevel[] = {
+uint16 WordcodeEmitter::toplevel[] = {
 0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    throw                getsuper             setsuper             dxns                 dxnslate            
 0, 0, 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    ifnlt                ifnle                ifngt                ifnge               
 0, 0, 0, 0, 0, 0, 0, 0, // jump                 iftrue               iffalse              ifeq                 ifne                 iflt                 ifle                 ifgt                
@@ -158,7 +158,7 @@ uint16 Translator::toplevel[] = {
 0, 0, 0, 0, 0, 0, // -                    -                    -                    -                    -                    -                   
 };
 
-bool Translator::commit(uint32 action)
+bool WordcodeEmitter::commit(uint32 action)
 {
     switch (action) {
     case 1:

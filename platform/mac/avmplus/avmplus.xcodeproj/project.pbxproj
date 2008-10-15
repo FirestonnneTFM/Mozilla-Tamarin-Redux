@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		074A00660EA5FCBB0016A8AC /* WordcodeEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 074A00630EA5FCBB0016A8AC /* WordcodeEmitter.cpp */; };
+		074A00670EA5FCBB0016A8AC /* WordcodeEmitter.h in Headers */ = {isa = PBXBuildFile; fileRef = 074A00640EA5FCBB0016A8AC /* WordcodeEmitter.h */; };
+		074A00680EA5FCBB0016A8AC /* WordcodeTranslator.h in Headers */ = {isa = PBXBuildFile; fileRef = 074A00650EA5FCBB0016A8AC /* WordcodeTranslator.h */; };
 		19F932730E913D1D00BB1C0E /* wopcodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19F932710E913D1D00BB1C0E /* wopcodes.cpp */; };
 		19F932740E913D1D00BB1C0E /* wopcodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 19F932720E913D1D00BB1C0E /* wopcodes.h */; };
 		1E6078E9097335B3007D0E1E /* CodegenMIR.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6078E5097335B3007D0E1E /* CodegenMIR.h */; };
@@ -210,12 +213,13 @@
 		942BC4350BB991690088A47F /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 942BC4330BB991690088A47F /* Sampler.cpp */; };
 		942BC4360BB991690088A47F /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 942BC4340BB991690088A47F /* Sampler.h */; };
 		CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */; };
-		D962305C0E5CA2D200DA3F47 /* Translator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D962305A0E5CA2D200DA3F47 /* Translator.cpp */; };
-		D962305D0E5CA2D200DA3F47 /* Translator.h in Headers */ = {isa = PBXBuildFile; fileRef = D962305B0E5CA2D200DA3F47 /* Translator.h */; };
 		D981288C0E8D7D9700C48B85 /* peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D981288B0E8D7D9700C48B85 /* peephole.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		074A00630EA5FCBB0016A8AC /* WordcodeEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordcodeEmitter.cpp; path = ../../../core/WordcodeEmitter.cpp; sourceTree = SOURCE_ROOT; };
+		074A00640EA5FCBB0016A8AC /* WordcodeEmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordcodeEmitter.h; path = ../../../core/WordcodeEmitter.h; sourceTree = SOURCE_ROOT; };
+		074A00650EA5FCBB0016A8AC /* WordcodeTranslator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordcodeTranslator.h; path = ../../../core/WordcodeTranslator.h; sourceTree = SOURCE_ROOT; };
 		19F932710E913D1D00BB1C0E /* wopcodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wopcodes.cpp; path = ../../../core/wopcodes.cpp; sourceTree = SOURCE_ROOT; };
 		19F932720E913D1D00BB1C0E /* wopcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wopcodes.h; path = ../../../core/wopcodes.h; sourceTree = SOURCE_ROOT; };
 		1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenMIR.cpp; path = ../../../codegen/CodegenMIR.cpp; sourceTree = SOURCE_ROOT; };
@@ -420,8 +424,6 @@
 		942BC4340BB991690088A47F /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sampler.h; path = ../../../core/Sampler.h; sourceTree = SOURCE_ROOT; };
 		CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_newline.cpp; path = ../../../pcre/pcre_newline.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libavmplus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libavmplus.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		D962305A0E5CA2D200DA3F47 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Translator.cpp; path = ../../../core/Translator.cpp; sourceTree = SOURCE_ROOT; };
-		D962305B0E5CA2D200DA3F47 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Translator.h; path = ../../../core/Translator.h; sourceTree = SOURCE_ROOT; };
 		D981288B0E8D7D9700C48B85 /* peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peephole.cpp; path = ../../../core/peephole.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -474,8 +476,6 @@
 		1E607A9F09733787007D0E1E /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				19F932710E913D1D00BB1C0E /* wopcodes.cpp */,
-				19F932720E913D1D00BB1C0E /* wopcodes.h */,
 				D981288B0E8D7D9700C48B85 /* peephole.cpp */,
 				47D44EB40D37D56B008368EC /* VectorClass.cpp */,
 				47D44EB50D37D56B008368EC /* VectorClass.h */,
@@ -619,14 +619,17 @@
 				1E60797B097335EF007D0E1E /* Traits.cpp */,
 				1E60797C097335EF007D0E1E /* Traits.h */,
 				1E60797D097335EF007D0E1E /* TraitsIterator.h */,
-				D962305A0E5CA2D200DA3F47 /* Translator.cpp */,
-				D962305B0E5CA2D200DA3F47 /* Translator.h */,
 				1E60797E097335EF007D0E1E /* UnicodeUtils.cpp */,
 				1E60797F097335EF007D0E1E /* UnicodeUtils.h */,
 				1E607980097335EF007D0E1E /* Verifier.cpp */,
 				1E607981097335EF007D0E1E /* Verifier.h */,
 				1E607982097335EF007D0E1E /* VTable.cpp */,
 				1E607983097335EF007D0E1E /* VTable.h */,
+				19F932710E913D1D00BB1C0E /* wopcodes.cpp */,
+				19F932720E913D1D00BB1C0E /* wopcodes.h */,
+				074A00630EA5FCBB0016A8AC /* WordcodeEmitter.cpp */,
+				074A00640EA5FCBB0016A8AC /* WordcodeEmitter.h */,
+				074A00650EA5FCBB0016A8AC /* WordcodeTranslator.h */,
 				1E607984097335EF007D0E1E /* XMLClass.cpp */,
 				1E607985097335EF007D0E1E /* XMLClass.h */,
 				1E607986097335EF007D0E1E /* XMLListClass.cpp */,
@@ -828,8 +831,9 @@
 				4E0F4EDD0E5A34F900DA786F /* Nativei386.h in Headers */,
 				4E0F4EDF0E5A34F900DA786F /* RegAlloc.h in Headers */,
 				4E0F4F350E5A374200DA786F /* CodegenLIR.h in Headers */,
-				D962305D0E5CA2D200DA3F47 /* Translator.h in Headers */,
 				19F932740E913D1D00BB1C0E /* wopcodes.h in Headers */,
+				074A00670EA5FCBB0016A8AC /* WordcodeEmitter.h in Headers */,
+				074A00680EA5FCBB0016A8AC /* WordcodeTranslator.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -977,9 +981,9 @@
 				4E0F4EDE0E5A34F900DA786F /* RegAlloc.cpp in Sources */,
 				4E0F4F340E5A374200DA786F /* CodegenLIR.cpp in Sources */,
 				4E9A321B0E5A417C00376C46 /* CodegenMIR.cpp in Sources */,
-				D962305C0E5CA2D200DA3F47 /* Translator.cpp in Sources */,
 				D981288C0E8D7D9700C48B85 /* peephole.cpp in Sources */,
 				19F932730E913D1D00BB1C0E /* wopcodes.cpp in Sources */,
+				074A00660EA5FCBB0016A8AC /* WordcodeEmitter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

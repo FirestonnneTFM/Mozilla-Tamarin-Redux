@@ -49,11 +49,12 @@ namespace avmplus
 	};
 
 #ifdef AVMPLUS_DIRECT_THREADED
-	Translator::Translator(MethodInfo* info, void** opcode_labels)
+	WordcodeEmitter::WordcodeEmitter(MethodInfo* info, void** opcode_labels)
 #else
-	Translator::Translator(MethodInfo* info)
+	WordcodeEmitter::WordcodeEmitter(MethodInfo* info)
 #endif
-		: info(info)
+		: WordcodeTranslator()
+		, info(info)
 		, core(info->core())
 		, backpatches(NULL)
 		, labels(NULL)
@@ -86,12 +87,13 @@ namespace avmplus
 
 #ifdef AVMPLUS_SELFTEST
 #  ifdef AVMPLUS_DIRECT_THREADED
-	Translator::Translator(AvmCore* core, byte* code_start, void** opcode_labels)
+	WordcodeEmitter::WordcodeEmitter(AvmCore* core, byte* code_start, void** opcode_labels)
 #  else
-	Translator::Translator(AvmCore* core, byte* code_start)
+	WordcodeEmitter::WordcodeEmitter(AvmCore* core, byte* code_start)
 #  endif
 
-		: info(NULL)
+		: WordcodeTranslator()
+		, info(info)
 		, core(core)
 		, backpatches(NULL)
 		, labels(NULL)
@@ -113,7 +115,7 @@ namespace avmplus
 	
 #endif // AVMPLUS_SELFTEST
 	
-	void Translator::boot() {
+	void WordcodeEmitter::boot() {
 		if (pool != NULL && pool->word_code.cpool_mn == NULL)
 			pool->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (pool->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), pool);
 		computeExceptionFixups();
@@ -123,7 +125,7 @@ namespace avmplus
 #endif
 	}
 	
-	Translator::~Translator()
+	WordcodeEmitter::~WordcodeEmitter()
 	{
 		cleanup();
 	}
@@ -139,7 +141,7 @@ namespace avmplus
 		v = NULL; \
 	} while (0)
 	
-	void Translator::cleanup() 
+	void WordcodeEmitter::cleanup() 
 	{
 		DELETE_LIST(backpatch_info, backpatches);
 		DELETE_LIST(label_info, labels);
@@ -151,7 +153,7 @@ namespace avmplus
 		}
 	}
 	
-	void Translator::refill() 
+	void WordcodeEmitter::refill() 
 	{
 		if (buffers != NULL) {
 			buffers->entries_used = int(dest - buffers->data);
@@ -170,7 +172,7 @@ namespace avmplus
 		dest_limit = dest + sizeof(b->data)/sizeof(b->data[0]);
 	}
 	
-	void Translator::emitRelativeOffset(uint32_t base_offset, const byte *base_pc, int32_t offset) 
+	void WordcodeEmitter::emitRelativeOffset(uint32_t base_offset, const byte *base_pc, int32_t offset) 
 	{
 		if (offset < 0) {
 			// There must be a label for the target location
@@ -185,7 +187,7 @@ namespace avmplus
 			makeAndInsertBackpatch(base_pc + offset, base_offset);
 	}
 	
-	void Translator::makeAndInsertBackpatch(const byte* target_pc, uint32_t patch_offset)
+	void WordcodeEmitter::makeAndInsertBackpatch(const byte* target_pc, uint32_t patch_offset)
 	{
 		// Leave a backpatch for the target location.  Backpatches are sorted in
 		// increasing address order always.
@@ -210,7 +212,7 @@ namespace avmplus
 		*dest++ = 0x80000000U;
 	}
 	
-	void Translator::computeExceptionFixups() 
+	void WordcodeEmitter::computeExceptionFixups() 
 	{
 		if (info == NULL || info->exceptions == NULL)
 			return;
@@ -307,7 +309,7 @@ namespace avmplus
 #endif
 	}
 
-	void Translator::fixExceptionsAndLabels(const byte *pc) 
+	void WordcodeEmitter::fixExceptionsAndLabels(const byte *pc) 
 	{
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		// Do not optimize across control flow targets, so flush the peephole window here
@@ -341,7 +343,7 @@ namespace avmplus
 		if (dest+n > dest_limit) refill();
 
 	// These take no arguments
-	void Translator::emitOp0(const byte *pc, WordOpcode opcode) {
+	void WordcodeEmitter::emitOp0(const byte *pc, WordOpcode opcode) {
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 1);
 #endif // _DEBUG
@@ -354,7 +356,7 @@ namespace avmplus
 	}
 
 	// These take one U30 argument
-	void Translator::emitOp1(const byte *pc, WordOpcode opcode)
+	void WordcodeEmitter::emitOp1(const byte *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 2);
@@ -369,7 +371,7 @@ namespace avmplus
 	}
 	
 	// These take one U30 argument, and the argument is explicitly passed here (result of optimization)
-	void Translator::emitOp1(WordOpcode opcode, uint32_t operand)
+	void WordcodeEmitter::emitOp1(WordOpcode opcode, uint32_t operand)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 2);
@@ -383,7 +385,7 @@ namespace avmplus
 	}
 	
 	// These take two U30 arguments
-	void Translator::emitOp2(const byte *pc, WordOpcode opcode)
+	void WordcodeEmitter::emitOp2(const byte *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 3);
@@ -398,7 +400,7 @@ namespace avmplus
 #endif
 	}
 	
-	void Translator::emitOp2(WordOpcode opcode, uint32_t op1, uint32_t op2)
+	void WordcodeEmitter::emitOp2(WordOpcode opcode, uint32_t op1, uint32_t op2)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 3);
@@ -417,7 +419,7 @@ namespace avmplus
 	// then the target must be a LABEL instruction, and we can just look it up.
 	// Otherwise, we enter the target offset into an ordered list with the current
 	// transformed PC and the location to backpatch.
-	void Translator::emitRelativeJump(const byte *pc, WordOpcode opcode)
+	void WordcodeEmitter::emitRelativeJump(const byte *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].jumps);
@@ -435,7 +437,7 @@ namespace avmplus
 #endif
 	}
 	
-	void Translator::emitLabel(const byte *pc) 
+	void WordcodeEmitter::emitLabel(const byte *pc) 
 	{
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		// Do not optimize across control control flow targets, so flush the peephole window here.
@@ -449,7 +451,7 @@ namespace avmplus
 	}
 
 #ifdef DEBUGGER
-	void Translator::emitDebug(const byte *pc) 
+	void WordcodeEmitter::emitDebug(const byte *pc) 
 	{
 		CHECK(5);
 		pc++;
@@ -468,7 +470,7 @@ namespace avmplus
 	}
 #endif
 	
-	void Translator::emitPushbyte(const byte *pc) 
+	void WordcodeEmitter::emitPushbyte(const byte *pc) 
 	{
 		CHECK(2);
 		pc++;
@@ -479,7 +481,7 @@ namespace avmplus
 #endif
 	}
 	
-	void Translator::emitPushshort(const byte *pc) 
+	void WordcodeEmitter::emitPushshort(const byte *pc) 
 	{
 		CHECK(2);
 		pc++;
@@ -490,7 +492,7 @@ namespace avmplus
 #endif
 	}
 	
-	void Translator::emitGetscopeobject(const byte *pc) 
+	void WordcodeEmitter::emitGetscopeobject(const byte *pc) 
 	{
 		CHECK(2);
 		pc++;
@@ -501,7 +503,7 @@ namespace avmplus
 #endif
 	}
 	
-	void Translator::emitPushint(const byte *pc)
+	void WordcodeEmitter::emitPushint(const byte *pc)
 	{
 		pc++;
 		int32_t value = pool->cpool_int[AvmCore::readU30(pc)];
@@ -529,7 +531,7 @@ namespace avmplus
 		}
 	}
 
-	void Translator::emitPushuint(const byte *pc)
+	void WordcodeEmitter::emitPushuint(const byte *pc)
 	{
 		pc++;
 		uint32_t value = pool->cpool_uint[AvmCore::readU30(pc)];
@@ -557,7 +559,7 @@ namespace avmplus
 		}
 	}
 	
-	void Translator::emitLookupswitch(const byte *pc)
+	void WordcodeEmitter::emitLookupswitch(const byte *pc)
 	{
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		// Avoid a lot of hair by flushing before LOOKUPSWITCH and not peepholing after.
@@ -593,7 +595,7 @@ namespace avmplus
 	// Continue translating from that address as if it were a linear part
 	// of the current code vector.  In other words, it's a forwarding pointer.
 	
-	void Translator::emitAbsJump(const byte *new_pc)
+	void WordcodeEmitter::emitAbsJump(const byte *new_pc)
 	{
 		code_start = new_pc;
 		
@@ -612,7 +614,7 @@ namespace avmplus
 		computeExceptionFixups();
 	}
 	
-	uint32 Translator::epilogue(uint32** code_result)
+	uint32 WordcodeEmitter::epilogue(uint32** code_result)
 	{
 		AvmAssert(backpatches == NULL);
 		AvmAssert(exception_fixes == NULL);
@@ -764,7 +766,7 @@ namespace avmplus
 	// in order to commit to the longest prefix of the instructions still in the peephole
 	// window.
 	
-	void Translator::peepInit()
+	void WordcodeEmitter::peepInit()
 	{
 		state = 0;
 	}
@@ -794,7 +796,7 @@ namespace avmplus
 	//     be the positive absolute ABC byte offset of the branch target; a backpatch
 	//     structure will be created in the latter case.
 	
-	bool Translator::replace(uint32_t old_instr, uint32_t new_words, bool jump_has_been_translated) 
+	bool WordcodeEmitter::replace(uint32_t old_instr, uint32_t new_words, bool jump_has_been_translated) 
 	{
 		// Undo any relative offsets in the last instruction, if that wasn't done by
 		// the commit code.
@@ -853,72 +855,61 @@ namespace avmplus
 		uint32_t i=0;
 		while (i < k) {
 			uint32_t op = S[i];
+			uint32_t width = calculateInstructionWidth(op);
+			CHECK(width);
 			if (isJumpInstruction(op)) {
-				uint32_t w = calculateInstructionWidth(op);
-				CHECK(w);
 				*dest++ = R[i++];
-				int32_t offset = (int32_t)R[i++];
+				int32_t offset = int32_t(R[i++]);
 				if (offset >= 0) {
 					// Forward jump
 					// Install a new backpatch structure
-					makeAndInsertBackpatch(code_start + offset, uint32_t(buffer_offset + (dest + (w - 1) - buffers->data)));
+					makeAndInsertBackpatch(code_start + offset, uint32_t(buffer_offset + (dest + (width - 1) - buffers->data)));
 				}
 				else {
 					// Backward jump
 					// Compute new jump offset
-					*dest = -int32_t(buffer_offset + (dest + (w - 1) - buffers->data) + offset);
+					*dest = -int32_t(buffer_offset + (dest + (width - 1) - buffers->data) + offset);
 					dest++;
 				}
-				if (w >= 3)
+				if (width >= 3)
 					*dest++ = R[i++];
-				if (w >= 4)
+				if (width >= 4)
 					*dest++ = R[i++];
-				AvmAssert(w <= 4);
-				if (i-w >= new_words)
-					peep(op, dest-w);
+				AvmAssert(width <= 4);
 			}
 			else {
-				switch (calculateInstructionWidth(op)) {
+				switch (width) {
 					default:
 						AvmAssert(!"Can't happen");
 					case 1:
-						CHECK(1);
 						*dest++ = R[i++];
-						if (i-1 >= new_words)
-							peep(op, dest-1);
 						break;
 					case 2:
-						CHECK(2);
 						*dest++ = R[i++];
 						*dest++ = R[i++];
-						if (i-2 >= new_words)
-							peep(op, dest-2);
 						break;
 					case 3:
-						CHECK(3);
 						*dest++ = R[i++];
 						*dest++ = R[i++];
 						*dest++ = R[i++];
-						if (i-3 >= new_words)
-							peep(op, dest-3);
 						break;
 					case 5:  // OP_debug
-						CHECK(5);
 						*dest++ = R[i++];
 						*dest++ = R[i++];
 						*dest++ = R[i++];
 						*dest++ = R[i++];
 						*dest++ = R[i++];
-						peepFlush();
 						break;
 				}
 			}
+			if (i-width >= new_words)
+				peep(op, dest-width);
 		}
 		
 		return true;  // always
 	}
 
-	void Translator::undoRelativeOffsetInJump()
+	void WordcodeEmitter::undoRelativeOffsetInJump()
 	{
 		AvmAssert(isJumpInstruction(O[nextI - 1]));
 		AvmAssert(I[nextI - 1] + 2 == dest);
@@ -948,7 +939,7 @@ namespace avmplus
 		}
 	}
 
-	void Translator::peep(uint32_t opcode, uint32_t* loc)
+	void WordcodeEmitter::peep(uint32_t opcode, uint32_t* loc)
 	{
 		peep_state_t *s;
 		uint32_t limit, next_state;
@@ -983,7 +974,7 @@ namespace avmplus
 				uint32_t probe = transitions[mid].opcode;
 				if (probe == opcode) {
 					next_state = transitions[mid].next_state;
-					break;
+					goto found;
 				}
 				if (opcode < probe)
 					hi = mid-1;
@@ -1000,6 +991,7 @@ namespace avmplus
 			
 			next_state = (i == limit) ? 0 : t->next_state;
 		}
+	found:
 		
 		if (next_state != 0) {
 
@@ -1052,20 +1044,26 @@ namespace avmplus
 		// always begin in offset 0 of the window.
 		
 		if (s->fail != 0) {
+			shiftBuffers(s->failShift);
 			next_state = s->fail;
-			uint32_t shift = s->failShift;
-			for ( uint32_t i=0, limit=nextI-shift ; i < limit ; i++ ) {
-				I[i] = I[i+shift];
-				O[i] = O[i+shift];
-			}
-			nextI -= shift;
-			backtrack_idx = 0;  // We could do better if we knew how many final states to discard
 			goto advance;
 		}
 
 		// If we failed to find an accepting state then fall through to initial_state
-		// to reset the machine.
+		// to reset the machine.  Resetting discards the first instruction only,
+		// other cases - where larger shifts are possible - are handled above, because
+		// in that case s->fail will be nonzero.
+		//
+		// After shifting, rerun the optimizer on the input buffer, since there may
+		// be optimization opportunities there.
 
+		shiftBuffers(1);
+		if (nextI > 0) {
+			replace(0, 0);
+			peepFlush();
+		}
+		return;
+		
 	initial_state:
 		AvmAssert(opcode < WOP_LAST+1);
 
@@ -1079,7 +1077,17 @@ namespace avmplus
 		}
 	}
 	
-	void Translator::peepFlush()
+ 	void WordcodeEmitter::shiftBuffers(uint32_t shift) 
+ 	{
+ 		for ( uint32_t i=0, limit=nextI-shift ; i < limit ; i++ ) {
+ 			I[i] = I[i+shift];
+ 			O[i] = O[i+shift];
+ 		}
+ 		nextI -= shift;
+ 		backtrack_idx = 0;  // We could do better if we knew how many final states to discard
+ 	}
+ 	
+	void WordcodeEmitter::peepFlush()
 	{
 		peep(0, NULL);		// commits, but may start another match
 		state = 0;			// ignore any partial match
