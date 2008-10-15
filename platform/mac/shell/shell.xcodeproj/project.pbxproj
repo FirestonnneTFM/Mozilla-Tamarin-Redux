@@ -442,6 +442,8 @@
 		8EDDB9E609AAD1D300FB9EE5 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../extensions/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
 		8EDDB9E709AAD1D300FB9EE5 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../extensions/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
 		8EDDB9F309AAD2B700FB9EE5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		D940282E0E5F793900818E5B /* QCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QCache.h; sourceTree = "<group>"; };
+		D966B38F0E7EFEA700C19EF5 /* QCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QCache.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -656,6 +658,8 @@
 				4E62BEC40D6244D300A24F2D /* PoolObject.h */,
 				4E62BEC50D6244D300A24F2D /* PrintWriter.cpp */,
 				4E62BEC60D6244D300A24F2D /* PrintWriter.h */,
+				D940282E0E5F793900818E5B /* QCache.h */,
+				D966B38F0E7EFEA700C19EF5 /* QCache.cpp */,
 				4E62BEC70D6244D300A24F2D /* RegExp.as */,
 				4E62BEC80D6244D300A24F2D /* RegExpClass.cpp */,
 				4E62BEC90D6244D300A24F2D /* RegExpClass.h */,

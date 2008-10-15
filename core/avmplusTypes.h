@@ -103,19 +103,22 @@ namespace avmplus
 	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32_t Atom;
 	#endif
 	
-	// nothing overloads on Binding, so we can use intptr_t
-	// Ideally, Binding should be a unique pointer type (as it is in TT) but for now, 
-	// avoid the code churn by defining it the "old" way
-	typedef intptr_t	Binding;
-
-	// nothing overloads on CodeContextAtom, so we can use intptr_t
-	// Ideally, CodeContextAtom should be a unique pointer type (as it is in TT) but for now, 
-	// avoid the code churn by defining it the "old" way
-	typedef intptr_t	CodeContextAtom;
+	typedef struct Binding_* Binding;
+	typedef struct CodeContextAtom_* CodeContextAtom;
 
 	inline uint32 urshift(Atom atom, int amount)
 	{
 		return ((uint32)atom >> amount);
+	}
+
+	inline uint32 urshift(Binding b, int amount)
+	{
+		return (uint32_t(uintptr_t(b)) >> amount);
+	}
+
+	inline uint32 urshift(CodeContextAtom c, int amount)
+	{
+		return (uint32_t(uintptr_t(c)) >> amount);
 	}
 }
 

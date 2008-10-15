@@ -1141,7 +1141,7 @@ namespace avmplus
 
 	OP* CodegenMIR::ptrToNativeRep(Traits*t, OP* ptr)
 	{
-		if (t->isMachineType)
+		if (t->isMachineType())
 		{
 			return binaryIns(MIR_orp, ptr, InsConst(kObjectType));
 		}
@@ -1150,7 +1150,7 @@ namespace avmplus
 
 	bool CodegenMIR::isPointer(int i)
 	{
-		return !state->value(i).traits->isMachineType;
+		return !state->value(i).traits->isMachineType();
 	}
 
 	bool CodegenMIR::isDouble(int i)
@@ -1191,7 +1191,7 @@ namespace avmplus
 				return InsConst(native->imm ? trueAtom : falseAtom);
 			}
 
-			if (!t->isMachineType && native->imm == 0)
+			if (!t->isMachineType() && native->imm == 0)
 			{
 				return InsConst(nullObjectAtom);
 			}
@@ -2808,13 +2808,13 @@ namespace avmplus
 				localSet(loc, loadAtomRep(loc));
 			}
 		}
-		else if (!result->isMachineType && in == NULL_TYPE)
+		else if (!result->isMachineType() && in == NULL_TYPE)
 		{
 			// do nothing, it's fine to coerce null to a pointer type
 		}
 		else if (result == NUMBER_TYPE)
 		{
-			if (in && in->isNumeric || in == BOOLEAN_TYPE)
+			if (in && in->isNumeric() || in == BOOLEAN_TYPE)
 			{
 				localSet(loc, promoteNumberIns(in, loc));
 			}
@@ -2938,7 +2938,7 @@ namespace avmplus
 				localSet(loc, Ins(MIR_ne, binaryFcmpIns(
 					localGet(loc), i2dIns(InsConst(0)))));
 			}
-			else if (in == INT_TYPE || in == UINT_TYPE || (in && !in->notDerivedObjectOrXML))
+			else if (in == INT_TYPE || in == UINT_TYPE || (in && !in->notDerivedObjectOrXML()))
 			{
 				localSet(loc, Ins(MIR_ne, binaryIns(MIR_icmp, 
 					localGet(loc), InsConst(0))));
@@ -2991,7 +2991,7 @@ namespace avmplus
 					InsConst((uintptr)core), loadAtomRep(loc)));
 			}
 		}
-		else if (in && !in->isMachineType && !result->isMachineType
+		else if (in && !in->isMachineType() && !result->isMachineType()
 			   && in != STRING_TYPE && in != NAMESPACE_TYPE)
 		{
 			OP* toplevel = loadToplevel(ldargIns(_env));
@@ -3001,7 +3001,7 @@ namespace avmplus
 			// the input pointer has now been checked but it's still the same value.
 			// verifier remembers this fact by updating the verify time type.
 		}
-		else if (!result->isMachineType && result != NAMESPACE_TYPE)
+		else if (!result->isMachineType() && result != NAMESPACE_TYPE)
 		{
 			// result is a ScriptObject based type.
 			localSet(loc, callIns(MIR_cm, ENVADDR(MethodEnv::coerceAtom2SO), 3,
@@ -3036,7 +3036,7 @@ namespace avmplus
 			OP* value = localGet(index);
 			callIns(MIR_cm, ENVADDR(MethodEnv::nullcheck), 2, ldargIns(_env), value);
 		}
-		else if (!t->isMachineType)
+		else if (!t->isMachineType())
 		{
 			// checking pointer for null
 			OP* value = localGet(index);
@@ -3111,7 +3111,7 @@ namespace avmplus
 
 			OP* vtable = loadIns(MIR_ldop, offsetof(MethodEnv, vtable), ldargIns(_env));
 			OP* abcenv = loadIns(MIR_ldop, offsetof(VTable, abcEnv), vtable);
-			method = loadIns(MIR_ldop, offsetof(AbcEnv,methods)+sizeof(uintptr)*method_id, abcenv);
+			method = loadIns(MIR_ldop, offsetof(AbcEnv,m_methods)+sizeof(uintptr)*method_id, abcenv);
 			break;
 		}
 		case OP_callinterface:
@@ -3291,18 +3291,24 @@ namespace avmplus
 
 				int slot = int(op1);
 
-				AvmAssert(t->linked);
-				int offset = t->getOffsets()[slot];
+				AvmAssert(t->isResolved());
+#ifdef AVMPLUS_TRAITS_CACHE
+				const TraitsBindingsp tb = t->getTraitsBindings();
+#else
+				const Traitsp tb = t;
+#endif
+				int offset = tb->getSlotOffset(slot);
 				
 				OP *unoffsetPtr = ptr;
 				if (t->pool->isBuiltin && !t->final)
 				{
 					// t's slots aren't locked in, so we have to adjust for the actual runtime
-					// traits->sizeofInstance.
+					// traits->m_sizeofInstance.
 					OP* vtable = loadIns(MIR_ldop, offsetof(ScriptObject,vtable), ptr);
 					OP* traits = loadIns(MIR_ldop, offsetof(VTable,traits), vtable);
-					offset -= (int)(t->sizeofInstance);
-					OP* sizeofInstance = loadIns(MIR_ld32u, offsetof(Traits, sizeofInstance), traits);
+					offset -= (int)(t->m_sizeofInstance);
+					AvmAssert(sizeof(t->m_sizeofInstance) == 4);
+					OP* sizeofInstance = loadIns(MIR_ld32u, offsetof(Traits, m_sizeofInstance), traits);
 					ptr = binaryIns(MIR_addp, sizeofInstance, ptr);
 				}
 
@@ -3315,7 +3321,7 @@ namespace avmplus
 					{
 						#ifdef AVMPLUS_64BIT
 						// Could be signed or unsigned 
-						Traits* slotType = t->getSlotTraits(slot);
+						Traits* slotType = tb->getSlotTraits(slot);
 						if (slotType==INT_TYPE) //signed
 							localSet(op2, loadIns(MIR_ld32, offset, ptr));
 						else if (slotType==UINT_TYPE || slotType==BOOLEAN_TYPE) // unsigned
@@ -3338,10 +3344,10 @@ namespace avmplus
 
 					#ifdef WRITE_BARRIERS
 					// if storing to a pointer-typed slot, inline a WB
-					Traits* slotType = t->getSlotTraits(slot);
+					Traits* slotType = tb->getSlotTraits(slot);
 
 					if (core->GetGC()->incremental &&
-						(!slotType || !slotType->isMachineType || slotType == OBJECT_TYPE))
+						(!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE))
 					{
 						#ifdef MMGC_DRC
 						MirOpcode op = MIR_cm;
@@ -3685,7 +3691,7 @@ namespace avmplus
 
 				InsDealloc(ap);
 
-				AvmAssert(!result->isMachineType);
+				AvmAssert(!result->isMachineType());
 				localSet(op2, i3);
 				break;
 			}
@@ -3922,7 +3928,7 @@ namespace avmplus
 					arrayClass, leaIns(0,ap), InsConst(argc));
 				InsDealloc(ap);
 
-				AvmAssert(!result->isMachineType);
+				AvmAssert(!result->isMachineType());
 				localSet(arg0, i3);
 				break;
  			}
@@ -3947,7 +3953,7 @@ namespace avmplus
 					envArg, InsConst((sintptr)cinit), base, outer, argv);
 				InsDealloc(ap);
 
-				AvmAssert(!result->isMachineType);
+				AvmAssert(!result->isMachineType());
 				localSet(localindex, i3);
 				break;
 			}
@@ -4920,7 +4926,7 @@ namespace avmplus
 			OP* rhs = localGet(rhsi);
 			return binaryIns(MIR_ucmp, lhs, rhs);
 		}
-		else if (lht && lht->isNumeric && rht && rht->isNumeric)
+		else if (lht && lht->isNumeric() && rht && rht->isNumeric())
 		{
 			// If we're comparing a uint to an int and the int is a non-negative
 			// integer constant, don't promote to doubles for the compare
@@ -5022,9 +5028,9 @@ namespace avmplus
 		// If we have null and a type that is derived from an Object (but not Object or XML)
 		// we can optimize our equal comparison down to a simple ptr comparison. This also
 		// works when both types are derived Object types.
-		if (((lht == NULL_TYPE) && (rht && !rht->notDerivedObjectOrXML)) || 
-			((rht == NULL_TYPE) && (lht && !lht->notDerivedObjectOrXML)) ||
-			((rht && !rht->notDerivedObjectOrXML) && (lht && !lht->notDerivedObjectOrXML)))
+		if (((lht == NULL_TYPE) && (rht && !rht->notDerivedObjectOrXML())) || 
+			((rht == NULL_TYPE) && (lht && !lht->notDerivedObjectOrXML())) ||
+			((rht && !rht->notDerivedObjectOrXML()) && (lht && !lht->notDerivedObjectOrXML())))
 		{
 			OP* lhs = localGet(lhsi);
 			OP* rhs = localGet(rhsi);
@@ -5351,7 +5357,7 @@ namespace avmplus
 		AvmAssert(state->value(i).notNull);
 		Traits* t = state->value(i).traits;
 
-		if (t && !t->isMachineType && t != STRING_TYPE && t != NAMESPACE_TYPE && t != NULL_TYPE)
+		if (t && !t->isMachineType() && t != STRING_TYPE && t != NAMESPACE_TYPE && t != NULL_TYPE)
 		{
 			// must be a pointer to a scriptobject, and we've done the n
 			// all other types are ScriptObject, and we've done the null check

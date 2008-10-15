@@ -70,7 +70,7 @@ namespace avmplus
 	RegExpClass::RegExpClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(RegExpClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpClass));
 		pcre_malloc = &fmalloc;
 		pcre_free = &ffree;
 

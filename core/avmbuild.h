@@ -99,10 +99,15 @@
       #define AVMPLUS_ARM
     #endif
   #else
-    #ifndef AVMPLUS_IA32
-      #define AVMPLUS_IA32
-    #endif
+  #ifndef AVMPLUS_IA32
+    #define AVMPLUS_IA32
   #endif
+#endif
+#endif
+
+// all x64, and all MacTel machines, always have sse2
+#if defined(AVMPLUS_AMD64) || (defined(AVMPLUS_MAC) && defined(AVMPLUS_IA32))
+	#define AVMPLUS_SSE2_ALWAYS
 #endif
 
 /// START: CRUFT 
@@ -345,6 +350,23 @@
 #    error "You must disable direct threading to perform superword profiling"
 #  endif
 #endif
+
+// enable caching of Traits binding and metadata information. By default, allow
+// unlimited cache size for bindings; this can be configured in AvmCore. A cache size
+// of 32 will give minimal performance impact but substantially lower memory use
+// for code with complex class hierarchies. (Unlimited cache size has performance impact
+// that is close to the noise level.) This should be removed soon (along with the old code)
+// but is left in temporarily for downstream consumers who may need to adjust their
+// code.
+#ifndef AVMPLUS_TRAITS_CACHE_DISABLE
+	#define AVMPLUS_TRAITS_CACHE
+#endif
+
+// this can be useful in tracking down memory usage for Traits and Traits-related caches,
+// but is very invasive and should only be used in special engineering builds. It should be
+// be left in place (but disabled) even after AVMPLUS_TRAITS_CACHE is finalized, as it's still in use...
+// it will go away at some point in the not-too-distant future, however.
+//#define AVMPLUS_TRAITS_MEMTRACK
 
 // default definition, may be overridden in portapi_avmbuild.h
 #define AVMPlus_PortAPI_StackAlloc(_gc, _size) alloca(_size)

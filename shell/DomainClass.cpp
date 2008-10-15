@@ -62,7 +62,7 @@ namespace avmshell
 
 		Domain* baseDomain;
 		if (parentDomain) {
-			baseDomain = parentDomain->domainEnv->getDomain();
+			baseDomain = parentDomain->domainEnv->domain();
 		} else {
 			baseDomain = core->builtinDomain;
 		}
@@ -98,7 +98,7 @@ namespace avmshell
 								  NULL, NULL, NULL, codeContext);
 	}
 
-	ScriptObject* DomainObject::finddef(const Multiname* multiname,
+	ScriptObject* DomainObject::finddef(const Multiname& multiname,
 										DomainEnv* domainEnv)
 	{
 		Toplevel* toplevel = this->toplevel();
@@ -152,7 +152,7 @@ namespace avmshell
 
 		ShellCodeContext* codeContext = (ShellCodeContext*)core->codeContext();
 		
-		ScriptObject *container = finddef(&multiname, codeContext->domainEnv());
+		ScriptObject *container = finddef(multiname, codeContext->domainEnv());
 		if (!container) {
 			toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
 		}

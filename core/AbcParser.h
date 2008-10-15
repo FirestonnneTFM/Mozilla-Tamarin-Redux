@@ -78,11 +78,11 @@ namespace avmplus
 		void parseTypeName(const byte* &p, Multiname& m) const;
 		#endif
 
-		Namespace* parseNsRef(const byte* &pc) const;
+		Namespacep parseNsRef(const byte* &pc) const;
 		Stringp resolveUtf8(uint32 index) const;
 		Stringp parseName(const byte* &pc) const;
-		Atom resolveQName(const byte* &pc, Multiname &m) const;
-		int computeInstanceSize(int class_id, Traits* base) const;
+		void resolveQName(const byte* &pc, Multiname &m) const;
+		uint32_t computeInstanceSize(int class_id, Traits* base) const;
 		void parseMethodInfos();
 		void parseMetadataInfos();
 		bool parseInstanceInfos();
@@ -90,12 +90,23 @@ namespace avmplus
 		bool parseScriptInfos();
 		void parseMethodBodies();
 		void parseCpool();
-		Traits* parseTraits(Traits* base, Namespace* ns, Stringp name, AbstractFunction* script, int interfaceDelta, Namespace* protectedNamespace = NULL);
+		Traits* parseTraits(uint32_t sizeofInstance,
+							Traits* base, 
+							Namespacep ns, 
+							Stringp name, 
+							AbstractFunction* script, 
+#ifdef AVMPLUS_TRAITS_CACHE
+							TraitsPosPtr traitsPos,
+#else
+							int interfaceDelta, 
+#endif
+							TraitsPosType posType, 
+							Namespacep protectedNamespace);
 		
 		/**
 		 * add script to VM-wide table
 		 */
-		void addNamedScript(Namespace* ns, Stringp name, AbstractFunction* script);
+		void addNamedScript(Namespacep ns, Stringp name, AbstractFunction* script);
 
 		/**
 		 * Adds traits to the VM-wide traits table, for types
@@ -104,7 +115,7 @@ namespace avmplus
 		 * @param ns The namespace of the class
 		 * @param itraits The instance traits of the class
 		 */
-		void addNamedTraits(Namespace* ns, Stringp name, Traits* itraits);
+		void addNamedTraits(Namespacep ns, Stringp name, Traits* itraits);
 
 		sint64 readS64(const byte* &p) const
 		{
@@ -182,10 +193,13 @@ namespace avmplus
 			return result;
 		}
 
-		unsigned int readU30(const byte *&p) const;
+		uint32_t readU30(const byte*& p) const;
 
+#ifdef AVMPLUS_TRAITS_CACHE
+#else
 	private:
 		void addTraits(Hashtable *ht, Traits *traits, Traits *baseTraits);
+#endif
 
 	// ------------------------ DATA SECTION BEGIN
 	private:
@@ -211,7 +225,7 @@ namespace avmplus
 		BufferGuard*				guard;
 #endif
 		int32_t						version;
-		int32_t						classCount;
+		uint32_t					classCount;
 	// ------------------------ DATA SECTION END
 	};
 

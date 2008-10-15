@@ -469,6 +469,9 @@
 				RelativePath="..\..\core\PrintWriter.cpp">
 			</File>
 			<File
+				RelativePath="..\..\core\QCache.cpp">
+			</File>
+			<File
 				RelativePath="..\..\core\RegExpClass.cpp">
 			</File>
 			<File

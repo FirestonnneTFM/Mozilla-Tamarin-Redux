@@ -193,6 +193,7 @@
 		8EE6F45C09AA545E00DE11A0 /* pcre.h in Headers */ = {isa = PBXBuildFile; fileRef = 8EE6F45A09AA545E00DE11A0 /* pcre.h */; };
 		94A154610BB9966700DD0F47 /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94A1545F0BB9966700DD0F47 /* Sampler.cpp */; };
 		94A154620BB9966700DD0F47 /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 94A154600BB9966700DD0F47 /* Sampler.h */; };
+		D967CDFF0E82FEC700F15FCE /* QCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D967CDFE0E82FEC700F15FCE /* QCache.cpp */; };
 		D96230200E5CA14400DA3F47 /* Translator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D962301E0E5CA14400DA3F47 /* Translator.cpp */; };
 		D96230210E5CA14400DA3F47 /* Translator.h in Headers */ = {isa = PBXBuildFile; fileRef = D962301F0E5CA14400DA3F47 /* Translator.h */; };
 		D9A92C2D0E512ACE001AA197 /* pcre_newline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9A92C2C0E512ACE001AA197 /* pcre_newline.cpp */; };
@@ -390,6 +391,7 @@
 		D2AAC046055464E500DB518D /* libavmplus64.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libavmplus64.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D962301E0E5CA14400DA3F47 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Translator.cpp; path = ../../../core/Translator.cpp; sourceTree = SOURCE_ROOT; };
 		D962301F0E5CA14400DA3F47 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Translator.h; path = ../../../core/Translator.h; sourceTree = SOURCE_ROOT; };
+		D967CDFE0E82FEC700F15FCE /* QCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = QCache.cpp; path = ../../../core/QCache.cpp; sourceTree = SOURCE_ROOT; };
 		D9A92C2C0E512ACE001AA197 /* pcre_newline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_newline.cpp; path = ../../../pcre/pcre_newline.cpp; sourceTree = SOURCE_ROOT; };
 		D9A92C2E0E512B00001AA197 /* VectorClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VectorClass.cpp; path = ../../../core/VectorClass.cpp; sourceTree = SOURCE_ROOT; };
 		D9A92C2F0E512B00001AA197 /* VectorClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VectorClass.h; path = ../../../core/VectorClass.h; sourceTree = SOURCE_ROOT; };
@@ -441,6 +443,7 @@
 		1E607A9F09733787007D0E1E /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				D967CDFE0E82FEC700F15FCE /* QCache.cpp */,
 				D962301E0E5CA14400DA3F47 /* Translator.cpp */,
 				D962301F0E5CA14400DA3F47 /* Translator.h */,
 				D9A92C2E0E512B00001AA197 /* VectorClass.cpp */,
@@ -912,6 +915,7 @@
 				D9A92C2D0E512ACE001AA197 /* pcre_newline.cpp in Sources */,
 				D9A92C300E512B00001AA197 /* VectorClass.cpp in Sources */,
 				D96230200E5CA14400DA3F47 /* Translator.cpp in Sources */,
+				D967CDFF0E82FEC700F15FCE /* QCache.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

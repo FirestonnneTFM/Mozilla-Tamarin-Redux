@@ -46,16 +46,16 @@ namespace avmplus
 	  public:
 		DomainEnv(AvmCore *core, Domain *domain, DomainEnv* base);
 		
-		/** Domain associated with this DomainEnv */
-		Domain* const domain;
+		// these peek into base DomainEnv as appropriate
+		MethodEnv* getScriptInit(Namespacep ns, Stringp name) const;
+		MethodEnv* getScriptInit(const Multiname& multiname) const;
 
-		/** Parent DomainEnv */
-		DomainEnv* const base;
+		inline ScriptEnv* getNamedScript(Stringp name) const { return (ScriptEnv*)m_namedScripts->getName(name); }
+		inline ScriptEnv* getNamedScript(Stringp name, Namespacep ns) const { return (ScriptEnv*)m_namedScripts->get(name, ns); }
+		inline void addNamedScript(Stringp name, Namespacep ns, ScriptEnv* scriptEnv) { m_namedScripts->add(name, ns, Binding(scriptEnv)); }
 
-		MethodEnv* getScriptInit(Namespace* ns, Stringp name) const;
-		MethodEnv* getScriptInit(const Multiname* multiname) const;
-
-		Domain* getDomain() const { return domain; }
+		inline Domain* domain() const { return m_domain; }
+		inline DomainEnv* base() const { return m_base; }
 
 		/**
 		 * Allow caller to enumerate the named entries in the table.
@@ -67,17 +67,13 @@ namespace avmplus
 		Toplevel* toplevel() const;
 		void setToplevel(Toplevel *t) { m_toplevel = t; }
 		
-		// Encapsulate namedScripts so that we can invalidate global reference caches when it is updated.
-		Binding getNamedScript(Stringp name) const { return namedScripts->getName(name); }
-		Binding getNamedScript(Stringp name, Namespace* ns) const { return namedScripts->get(name, ns); }
-		void addNamedScript(Stringp name, Namespace* ns, Binding scriptEnv) { namedScripts->add(name, ns, scriptEnv); }
+	// ------------------------ DATA SECTION BEGIN
 	private:
-		/**
-		 * table of named program init functions. (ns,name => MethodEnv) 
-		 */
-		DWB(MultinameHashtable*) namedScripts;
-		
-		DRCWB(Toplevel*) m_toplevel;
+		Domain* const				m_domain;		// Domain associated with this DomainEnv 
+		DomainEnv* const			m_base;			// Parent DomainEnv 
+		DWB(MultinameHashtable*)	m_namedScripts;	// table of named program init functions. (ns,name => MethodEnv) 
+		DRCWB(Toplevel*)			m_toplevel;
+	// ------------------------ DATA SECTION END
 	};
 }
 

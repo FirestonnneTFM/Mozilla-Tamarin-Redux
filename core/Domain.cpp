@@ -46,7 +46,7 @@ namespace avmplus
 		namedScripts = new (core->GetGC()) MultinameHashtable();
 	}
 
-	Traits* Domain::getNamedTraits(Stringp name, Namespace* ns, bool recursive/*=true*/) const
+	Traits* Domain::getNamedTraits(Stringp name, Namespacep ns, bool recursive/*=true*/) const
 	{
 		Traits *traits = NULL;
 		if (recursive && base) {
@@ -70,7 +70,7 @@ namespace avmplus
 		return traits;
 	}
 	
-	AbstractFunction* Domain::getNamedScript(Stringp name, Namespace* ns) const
+	AbstractFunction* Domain::getNamedScript(Stringp name, Namespacep ns) const
 	{
 		AbstractFunction *f = NULL;
 		if (base) {

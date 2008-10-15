@@ -197,23 +197,10 @@
 		4EF1E53C0D62459F000392CC /* DateClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DateClass.h; sourceTree = "<group>"; };
 		4EF1E53D0D62459F000392CC /* DateObject.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DateObject.cpp; sourceTree = "<group>"; };
 		4EF1E53E0D62459F000392CC /* DateObject.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DateObject.h; sourceTree = "<group>"; };
-		4EF1E53F0D62459F000392CC /* decContext.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = decContext.cpp; sourceTree = "<group>"; };
-		4EF1E5400D62459F000392CC /* decContext.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decContext.h; sourceTree = "<group>"; };
-		4EF1E5410D62459F000392CC /* decDPD.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decDPD.h; sourceTree = "<group>"; };
-		4EF1E5420D62459F000392CC /* decimal128.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = decimal128.cpp; sourceTree = "<group>"; };
-		4EF1E5430D62459F000392CC /* decimal128.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decimal128.h; sourceTree = "<group>"; };
-		4EF1E5440D62459F000392CC /* DecimalClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DecimalClass.cpp; sourceTree = "<group>"; };
-		4EF1E5450D62459F000392CC /* DecimalClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DecimalClass.h; sourceTree = "<group>"; };
-		4EF1E5460D62459F000392CC /* DecimalRep.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DecimalRep.h; sourceTree = "<group>"; };
-		4EF1E5470D62459F000392CC /* decNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = decNumber.cpp; sourceTree = "<group>"; };
-		4EF1E5480D62459F000392CC /* decNumber.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decNumber.h; sourceTree = "<group>"; };
-		4EF1E5490D62459F000392CC /* decNumberLocal.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = decNumberLocal.h; sourceTree = "<group>"; };
 		4EF1E54A0D62459F000392CC /* Domain.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Domain.cpp; sourceTree = "<group>"; };
 		4EF1E54B0D62459F000392CC /* Domain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Domain.h; sourceTree = "<group>"; };
 		4EF1E54C0D62459F000392CC /* DomainEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DomainEnv.cpp; sourceTree = "<group>"; };
 		4EF1E54D0D62459F000392CC /* DomainEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DomainEnv.h; sourceTree = "<group>"; };
-		4EF1E54E0D62459F000392CC /* DoubleClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DoubleClass.cpp; sourceTree = "<group>"; };
-		4EF1E54F0D62459F000392CC /* DoubleClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DoubleClass.h; sourceTree = "<group>"; };
 		4EF1E5520D62459F000392CC /* E4XNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = E4XNode.cpp; sourceTree = "<group>"; };
 		4EF1E5530D62459F000392CC /* E4XNode.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = E4XNode.h; sourceTree = "<group>"; };
 		4EF1E5540D62459F000392CC /* Error.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Error.as; sourceTree = "<group>"; };
@@ -428,6 +415,7 @@
 		8EDDB9F309AAD2B700FB9EE5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		D96230250E5CA15700DA3F47 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Translator.cpp; sourceTree = "<group>"; };
 		D96230260E5CA15700DA3F47 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Translator.h; sourceTree = "<group>"; };
+		D967CE150E82FEDD00F15FCE /* QCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QCache.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -519,6 +507,7 @@
 		4EF1E4F60D62459F000392CC /* core */ = {
 			isa = PBXGroup;
 			children = (
+				D967CE150E82FEDD00F15FCE /* QCache.cpp */,
 				D96230250E5CA15700DA3F47 /* Translator.cpp */,
 				D96230260E5CA15700DA3F47 /* Translator.h */,
 				4EF1E4F70D62459F000392CC /* AbcData.cpp */,
@@ -591,23 +580,10 @@
 				4EF1E53C0D62459F000392CC /* DateClass.h */,
 				4EF1E53D0D62459F000392CC /* DateObject.cpp */,
 				4EF1E53E0D62459F000392CC /* DateObject.h */,
-				4EF1E53F0D62459F000392CC /* decContext.cpp */,
-				4EF1E5400D62459F000392CC /* decContext.h */,
-				4EF1E5410D62459F000392CC /* decDPD.h */,
-				4EF1E5420D62459F000392CC /* decimal128.cpp */,
-				4EF1E5430D62459F000392CC /* decimal128.h */,
-				4EF1E5440D62459F000392CC /* DecimalClass.cpp */,
-				4EF1E5450D62459F000392CC /* DecimalClass.h */,
-				4EF1E5460D62459F000392CC /* DecimalRep.h */,
-				4EF1E5470D62459F000392CC /* decNumber.cpp */,
-				4EF1E5480D62459F000392CC /* decNumber.h */,
-				4EF1E5490D62459F000392CC /* decNumberLocal.h */,
 				4EF1E54A0D62459F000392CC /* Domain.cpp */,
 				4EF1E54B0D62459F000392CC /* Domain.h */,
 				4EF1E54C0D62459F000392CC /* DomainEnv.cpp */,
 				4EF1E54D0D62459F000392CC /* DomainEnv.h */,
-				4EF1E54E0D62459F000392CC /* DoubleClass.cpp */,
-				4EF1E54F0D62459F000392CC /* DoubleClass.h */,
 				4EF1E5520D62459F000392CC /* E4XNode.cpp */,
 				4EF1E5530D62459F000392CC /* E4XNode.h */,
 				4EF1E5540D62459F000392CC /* Error.as */,

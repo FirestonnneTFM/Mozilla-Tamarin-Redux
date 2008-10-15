@@ -66,20 +66,20 @@ namespace avmplus
 		}
 		void getlocalN(int N) { bytes.add((byte)(OP_getlocal0+N)); }
 		void setslot(int slot) { bytes.add(OP_setslot); writeInt(slot+1); }
-		void abs_jump(const byte *pc, int code_length) 
+		void abs_jump(const uint8_t* pc, uint32_t code_length) 
 		{ 
 			bytes.add(OP_abs_jump); 
 #ifdef AVMPLUS_64BIT
-			writeInt((int)(uintptr)pc);
-			writeInt((int)(((uintptr)pc) >> 32));
+			writeInt(uint32_t(uintptr_t(pc)));
+			writeInt(uint32_t(uintptr_t(pc) >> 32));
 #else			
-			writeInt((int)pc); 
+			writeInt(uint32_t(pc)); 
 #endif			
 			writeInt(code_length); 
 		}
 		void returnvoid() { bytes.add(OP_returnvoid); }
 		void writeBytes(List<byte>& b) { bytes.add(b); }
-		void writeInt(unsigned int n);
+		void writeInt(uint32_t n);
 		size_t size() { return bytes.size(); }
 	private:
 		List<byte> bytes;

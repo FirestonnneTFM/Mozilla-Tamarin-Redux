@@ -98,7 +98,7 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 
 		toplevel->arrayClass = this;
-		AvmAssert(traits()->sizeofInstance == sizeof(ArrayClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(ArrayClass));
 
 		VTable* ivtable = this->ivtable();
 		ScriptObject* objectPrototype = toplevel->objectClass->prototype;

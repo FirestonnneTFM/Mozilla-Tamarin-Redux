@@ -370,7 +370,7 @@ namespace avmplus
 
 	LIns* CodegenLIR::ptrToNativeRep(Traits*t, LIns* ptr)
 	{
-		if (t->isMachineType)
+		if (t->isMachineType())
 		{
 			return binaryIns(LIR_or, ptr, InsConst(kObjectType));
 		}
@@ -379,7 +379,7 @@ namespace avmplus
 
 #ifdef _DEBUG
 	bool CodegenLIR::isPointer(int i)	{
-		return !state->value(i).traits->isMachineType;
+		return !state->value(i).traits->isMachineType();
 	}
 #endif
 
@@ -428,7 +428,7 @@ namespace avmplus
 				return InsConst(native->constval() ? trueAtom : falseAtom);
 			}
 
-			if (!t->isMachineType && native->constval() == 0)
+			if (!t->isMachineType() && native->constval() == 0)
 			{
 				return InsConst(nullObjectAtom);
 			}
@@ -1453,13 +1453,13 @@ namespace avmplus
 				localSet(loc, loadAtomRep(loc));
 			}
 		}
-		else if (!result->isMachineType && in == NULL_TYPE)
+		else if (!result->isMachineType() && in == NULL_TYPE)
 		{
 			// do nothing, it's fine to coerce null to a pointer type
 		}
 		else if (result == NUMBER_TYPE)
 		{
-			if (in && in->isNumeric || in == BOOLEAN_TYPE)
+			if (in && in->isNumeric() || in == BOOLEAN_TYPE)
 			{
 				localSet(loc, promoteNumberIns(in, loc));
 			}
@@ -1531,7 +1531,7 @@ namespace avmplus
 			{
                 localSet(loc, callIns(FUNCTIONID(doubleToBool), 1, localGetq(loc)));
 			}
-			else if (in == INT_TYPE || in == UINT_TYPE || (in && !in->notDerivedObjectOrXML))
+			else if (in == INT_TYPE || in == UINT_TYPE || (in && !in->notDerivedObjectOrXML()))
 			{
                 // int to bool: b = !!i
 				localSet(loc, binaryIns(LIR_eq, 
@@ -1584,7 +1584,7 @@ namespace avmplus
 					coreAddr, loadAtomRep(loc)));
 			}
 		}
-		else if (in && !in->isMachineType && !result->isMachineType
+		else if (in && !in->isMachineType() && !result->isMachineType()
 			   && in != STRING_TYPE && in != NAMESPACE_TYPE)
 		{
 			LIns* toplevel = loadToplevel();
@@ -1594,7 +1594,7 @@ namespace avmplus
 			// the input pointer has now been checked but it's still the same value.
 			// verifier remembers this fact by updating the verify time type.
 		}
-		else if (!result->isMachineType && result != NAMESPACE_TYPE)
+		else if (!result->isMachineType() && result != NAMESPACE_TYPE)
 		{
 			// result is a ScriptObject based type.
 			localSet(loc, callIns(FUNCTIONID(coerceAtom2SO), 3,
@@ -1629,7 +1629,7 @@ namespace avmplus
 			LIns* value = localGet(index);
 			callIns(FUNCTIONID(nullcheck), 2, env_param, value);
 		}
-		else if (!t->isMachineType)
+		else if (!t->isMachineType())
 		{
 			// checking pointer for null
 			LIns* value = localGet(index);
@@ -1702,7 +1702,7 @@ namespace avmplus
 
 			LIns* vtable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
 			LIns* abcenv = loadIns(LIR_ldc, offsetof(VTable, abcEnv), vtable);
-			method = loadIns(LIR_ldc, offsetof(AbcEnv,methods)+sizeof(uintptr)*method_id, abcenv);
+			method = loadIns(LIR_ldc, offsetof(AbcEnv,m_methods)+sizeof(uintptr)*method_id, abcenv);
 			break;
 		}
 		case OP_callinterface:
@@ -1791,8 +1791,13 @@ namespace avmplus
 		AvmAssert(state->value(ptr_index).notNull);
 		AvmAssert(isPointer((int)ptr_index)); // obj
 
-		AvmAssert(t->linked);
-		int offset = t->getOffsets()[slot];
+		AvmAssert(t->isResolved());
+#ifdef AVMPLUS_TRAITS_CACHE
+		const TraitsBindingsp tb = t->getTraitsBindings();
+#else
+		const Traitsp tb = t;
+#endif
+		int offset = tb->getSlotOffset(slot);
 		
 		if (t->pool->isBuiltin && !t->final)
 		{
@@ -1800,8 +1805,8 @@ namespace avmplus
 			// traits->sizeofInstance.
 			LIns* vtable = loadIns(LIR_ldc, offsetof(ScriptObject,vtable), ptr);
 			LIns* traits = loadIns(LIR_ldc, offsetof(VTable,traits), vtable);
-			offset -= (int)(t->sizeofInstance);
-			LIns* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, sizeofInstance), traits);
+			offset -= (int)(t->m_sizeofInstance);
+			LIns* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, m_sizeofInstance), traits);
 			ptr = binaryIns(LIR_addp, sizeofInstance, ptr);
 		}
 
@@ -1866,8 +1871,13 @@ namespace avmplus
 			}				
 		}
 
-		AvmAssert(t->linked);
-		int offset = t->getOffsets()[slot];
+		AvmAssert(t->isResolved());
+#ifdef AVMPLUS_TRAITS_CACHE
+		const TraitsBindingsp tb = t->getTraitsBindings();
+#else
+		const Traitsp tb = t;
+#endif
+		int offset = tb->getSlotOffset(slot);
 		
 		LIns *unoffsetPtr = ptr;
 		if (t->pool->isBuiltin && !t->final)
@@ -1876,8 +1886,8 @@ namespace avmplus
 			// traits->sizeofInstance.
 			LIns* vtable = loadIns(LIR_ldc, offsetof(ScriptObject,vtable), ptr);
 			LIns* traits = loadIns(LIR_ldc, offsetof(VTable,traits), vtable);
-			offset -= (int)(t->sizeofInstance);
-			LIns* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, sizeofInstance), traits);
+			offset -= (int)(t->m_sizeofInstance);
+			LIns* sizeofInstance = loadIns(LIR_ldc, offsetof(Traits, m_sizeofInstance), traits);
 			ptr = binaryIns(LIR_addp, sizeofInstance, ptr);
 		}
 
@@ -1891,10 +1901,10 @@ namespace avmplus
 
 		#ifdef WRITE_BARRIERS
 		// if storing to a pointer-typed slot, inline a WB
-		Traits* slotType = t->getSlotTraits(slot);
+		Traits* slotType = tb->getSlotTraits(slot);
 
 		if (core->GetGC()->incremental &&
-			(!slotType || !slotType->isMachineType || slotType == OBJECT_TYPE))
+			(!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE))
 		{
 			#ifdef MMGC_DRC
 			uint32_t wbAddr = FUNCTIONID(writeBarrierRC);
@@ -2270,7 +2280,7 @@ namespace avmplus
 				LIns* i3 = callIns(FUNCTIONID(newfunction), 4,
 					envArg, InsConst(func), outer, ap);
 
-				AvmAssert(!result->isMachineType);
+				AvmAssert(!result->isMachineType());
 				localSet(op2, i3);
 				break;
 			}
@@ -2487,7 +2497,7 @@ namespace avmplus
 				LIns* i3 = callIns(FUNCTIONID(newarray), 3,
 					arrayClass, ap, InsConst(argc));
 
-				AvmAssert(!result->isMachineType);
+				AvmAssert(!result->isMachineType());
 				localSet(arg0, i3);
 				break;
  			}
@@ -2511,7 +2521,7 @@ namespace avmplus
 				LIns* i3 = callIns(FUNCTIONID(newclass), 5, 
 					envArg, InsConst(cinit), base, outer, ap);
 
-				AvmAssert(!result->isMachineType);
+				AvmAssert(!result->isMachineType());
 				localSet(localindex, i3);
 				break;
 			}
@@ -3447,7 +3457,7 @@ namespace avmplus
 			LIns* rhs = localGet(rhsi);
 			return binaryIns(ucmp, lhs, rhs);
 		}
-		else if (lht && lht->isNumeric && rht && rht->isNumeric)
+		else if (lht && lht->isNumeric() && rht && rht->isNumeric())
 		{
 			// If we're comparing a uint to an int and the int is a non-negative
 			// integer constant, don't promote to doubles for the compare
@@ -3550,9 +3560,9 @@ namespace avmplus
 		// If we have null and a type that is derived from an Object (but not Object or XML)
 		// we can optimize our equal comparison down to a simple ptr comparison. This also
 		// works when both types are derived Object types.
-		if (((lht == NULL_TYPE) && (rht && !rht->notDerivedObjectOrXML)) || 
-			((rht == NULL_TYPE) && (lht && !lht->notDerivedObjectOrXML)) ||
-			((rht && !rht->notDerivedObjectOrXML) && (lht && !lht->notDerivedObjectOrXML)))
+		if (((lht == NULL_TYPE) && (rht && !rht->notDerivedObjectOrXML())) || 
+			((rht == NULL_TYPE) && (lht && !lht->notDerivedObjectOrXML())) ||
+			((rht && !rht->notDerivedObjectOrXML()) && (lht && !lht->notDerivedObjectOrXML())))
 		{
 			LIns* lhs = localGet(lhsi);
 			LIns* rhs = localGet(rhsi);
@@ -3708,7 +3718,7 @@ namespace avmplus
 		AvmAssert(state->value(i).notNull);
 		Traits* t = state->value(i).traits;
 
-		if (t && !t->isMachineType && t != STRING_TYPE && t != NAMESPACE_TYPE && t != NULL_TYPE)
+		if (t && !t->isMachineType() && t != STRING_TYPE && t != NAMESPACE_TYPE && t != NULL_TYPE)
 		{
 			// must be a pointer to a scriptobject, and we've done the n
 			// all other types are ScriptObject, and we've done the null check

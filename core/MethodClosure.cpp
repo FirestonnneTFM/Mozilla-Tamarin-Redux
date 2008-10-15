@@ -51,7 +51,7 @@ namespace avmplus
 								 MethodEnv *env, Atom savedThis)
 		: ScriptObject(ivtable, prototype)
     {
-		AvmAssert(traits()->sizeofInstance == sizeof(MethodClosure));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosure));
 		AvmAssert(env != NULL);
 		AvmAssert(!AvmCore::isNullOrUndefined(savedThis));
         this->env = env;
@@ -127,7 +127,7 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 
 		toplevel->methodClosureClass = this;
-		AvmAssert(traits()->sizeofInstance == sizeof(MethodClosureClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosureClass));
 
 		prototype = toplevel->functionClass->createEmptyFunction();
 	}

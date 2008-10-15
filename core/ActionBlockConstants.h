@@ -49,6 +49,7 @@ namespace avmplus
 		/** @name cpool tags */
 		/*@{*/
 		enum CPoolKind {
+			CONSTANT_unused_0x00		= 0x00,
 			CONSTANT_Utf8               = 0x01,
 			CONSTANT_Int	            = 0x03,
 			CONSTANT_UInt               = 0x04,
@@ -88,6 +89,7 @@ namespace avmplus
 			TRAIT_Setter		= 0x03,
 			TRAIT_Class			= 0x04,
 			TRAIT_Const			= 0x06,
+			TRAIT_COUNT			= TRAIT_Const+1,
 			TRAIT_mask			= 15
 		};
 		/*@}*/

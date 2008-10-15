@@ -519,18 +519,13 @@ namespace avmplus
 
 			Traits* itraits = traits()->pool->resolveParameterizedType(toplevel(), ivtable()->traits, param_traits);
 
-			Traits* ctraits = traits()->pool->getTraits(&class_mname, toplevel());
+			Traits* ctraits = traits()->pool->getTraits(class_mname, toplevel());
 			if( !ctraits ){
-				ctraits = core->makeParameterizedCTraits(classname, this->traits()->ns, vecobj_traits);
+				ctraits = vecobj_traits->newParameterizedCTraits(classname, this->traits()->ns);
 			}
 
 			itraits->resolveSignatures(toplevel());
 			ctraits->resolveSignatures(toplevel());
-
-			itraits->hashTableOffset = vecobj_traits->itraits->hashTableOffset;
-			itraits->setTotalSize(itraits->hashTableOffset+sizeof(Hashtable));
-			ctraits->hashTableOffset = vecobj_traits->hashTableOffset;
-			ctraits->setTotalSize(ctraits->hashTableOffset+sizeof(Hashtable));
 
 			ctraits->itraits = itraits;
 

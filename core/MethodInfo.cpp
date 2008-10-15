@@ -104,7 +104,7 @@ namespace avmplus
 
 	void MethodInfo::verify(Toplevel* toplevel)
 	{
-		AvmAssert(declaringTraits->linked);
+		AvmAssert(declaringTraits->isResolved());
 		resolveSignature(toplevel);
 
 		#ifdef DEBUGGER

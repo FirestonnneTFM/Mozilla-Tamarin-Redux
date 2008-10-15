@@ -41,7 +41,11 @@
 
 namespace avmplus
 {
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	class MethodEnv : public MMgc::GCFinalizedObject
+#else
 	class MethodEnv : public MMgc::GCObject
+#endif
 	{
 		static Atom delegateInvoke(MethodEnv* env, int argc, uint32 *ap);
 
@@ -53,30 +57,21 @@ namespace avmplus
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
 
+#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
 		MethodEnv(void* addr, VTable *vtable);
+#endif
 		MethodEnv(AbstractFunction* method, VTable *vtable);
 
-		Toplevel* toplevel() const
-		{
-			return vtable->toplevel;
-		}
+#ifdef AVMPLUS_TRAITS_MEMTRACK 
+		virtual ~MethodEnv();
+#endif
 
-		AbcEnv* abcEnv() const
-		{
-			return vtable->abcEnv;
-		}
+		inline Toplevel* toplevel() const { return vtable->toplevel; }
+		inline AbcEnv* abcEnv() const { return vtable->abcEnv; }
+		inline AvmCore* core() const { return method->pool->core; }
+		inline Traits* traits() const { return vtable->traits; }
 
 		ScriptEnv* getScriptEnv(const Multiname *m) const;
-
-		DomainEnv* domainEnv() const
-		{
-			return vtable->abcEnv->domainEnv;
-		}
-
-		AvmCore* core() const
-		{
-			return method->pool->core;
-		}
 
 		/**
 		 * Coerces an array of actual parameters to the types
@@ -105,11 +100,18 @@ namespace avmplus
 		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv);
 		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap);
 		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv);
+		void FASTCALL nullcheckfail(Atom atom);
 
 	// helper functions used from compiled code
 	public:
 		/** null pointer check */
-	    void nullcheck(Atom atom);
+	    inline void nullcheck(Atom atom)
+		{
+			// Shark recommends inlining the isNullOrUndefined call
+			if (AvmCore::isNullOrUndefined(atom))
+				nullcheckfail(atom);
+		}
+		
 	    void npe();
 		void interrupt();
         void stkover();
@@ -293,7 +295,9 @@ namespace avmplus
 		union {
 			AtomMethodProc			impl32;	// pointer to invoke trampoline 
 			DoubleMethodProc		implN;
+#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
 			void*					implV;
+#endif
 		};
 	private:
 		uintptr_t					activationOrMCTable;

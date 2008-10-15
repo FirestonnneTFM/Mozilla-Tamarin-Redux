@@ -1815,6 +1815,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\QCache.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\RegExpClass.cpp"
 				>
 			</File>

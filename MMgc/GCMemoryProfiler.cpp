@@ -167,7 +167,7 @@ namespace MMgc
 		const char*name="unknown";
 
 // Disabled for 64-bit Windows.  Debugger doesn't allow exception to go uncaught so always breaks
-#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || ( defined(AVMPLIS_UNIX) && !defined(__ICC) )
+#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || defined(MMGC_MAC)
 		try {
 			const std::type_info *ti = &typeid(*(MMgc::GCObject*)obj);
 			if(ti->name())
@@ -527,7 +527,7 @@ namespace MMgc
 			GetInfoFromPC(trace[i], buff, 256);
 			strcpy(tp, buff);
 			tp += strlen(buff);
-			*tp++ = ' ';		
+			*tp++ = '\n';		
 		}
 		*tp++ = '\n';
 		*tp = '\0';

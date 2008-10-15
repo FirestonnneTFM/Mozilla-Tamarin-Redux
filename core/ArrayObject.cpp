@@ -45,7 +45,7 @@ namespace avmplus
 		m_denseArr(capacity)
 	{
 		SAMPLE_FRAME("Array", core());
-		AvmAssert(traits()->sizeofInstance >= sizeof(ArrayObject));
+		AvmAssert(traits()->getSizeOfInstance() >= sizeof(ArrayObject));
 		m_length = 0;
 		m_lowHTentry = NO_LOW_HTENTRY;
 	}
@@ -134,7 +134,7 @@ namespace avmplus
 
 	void ArrayObject::setAtomProperty(Atom name, Atom value)
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			AvmCore *core = this->core();
 			// Update the array length.
@@ -153,7 +153,7 @@ namespace avmplus
 	
 	void ArrayObject::_setUintProperty(uint32 index, Atom value)
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			if (hasDense())
 			{
@@ -208,7 +208,7 @@ namespace avmplus
 
 	Atom ArrayObject::getAtomProperty(Atom name) const
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			AvmCore *core = this->core();
 			if (hasDense())
@@ -231,7 +231,7 @@ namespace avmplus
 
 	Atom ArrayObject::_getUintProperty(uint32 index) const
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			if (hasDense())
 			{
@@ -262,7 +262,7 @@ namespace avmplus
 	// This does NOT affect the length of the array
 	bool ArrayObject::deleteAtomProperty(Atom name)
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			if (hasDense())
 			{
@@ -280,7 +280,7 @@ namespace avmplus
 	bool ArrayObject::delUintProperty(uint32 index)
 	{
 		// if we get here, we have a valid integer index.
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			if ((index < getDenseLength()))
 			{
@@ -308,7 +308,7 @@ namespace avmplus
 
 	bool ArrayObject::getAtomPropertyIsEnumerable(Atom name) const
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			if (hasDense())
 			{
@@ -328,7 +328,7 @@ namespace avmplus
 	
 	bool ArrayObject::hasAtomProperty(Atom name) const
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			if (hasDense())
 			{
@@ -346,7 +346,7 @@ namespace avmplus
 
 	bool ArrayObject::hasUintProperty(uint32 index) const
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			if (hasDense())
 			{
@@ -416,7 +416,7 @@ namespace avmplus
 
 	void ArrayObject::setLength(uint32 newLength)
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			// Delete all items between size and newLength
 			uint32 oldLength = getLength();

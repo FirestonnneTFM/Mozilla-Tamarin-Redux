@@ -159,6 +159,7 @@ namespace avmplus
 		static int parseIntDigit(wchar ch);
 		static int roundInt(double x);
 
+	public:
 		static void RandomFastInit(pTRandomFast pRandomFast);
 		static sint32 RandomPureHasher(sint32 iSeed);
 		static sint32 GenerateRandomNumber(pTRandomFast pRandomFast);

@@ -38,11 +38,6 @@
 
 namespace avmplus
 {
-	#if defined AVMPLUS_MIR
-	class CodegenMIR;
-	#elif defined FEATURE_NANOJIT
-	class CodegenLIR;
-	#endif
 
 	/**
 	 * type descriptor for a captured scope chain
@@ -108,7 +103,7 @@ namespace avmplus
 		When it changes, it's new valuable is visible in all closures in scope.
 		*/
 		
-		ScopeChain(ScopeTypeChain* _scopeTraits, ScopeChain* _outer, Namespace * _dxns)
+		ScopeChain(ScopeTypeChain* _scopeTraits, ScopeChain* _outer, Namespacep _dxns)
 		  : scopeTraits(_scopeTraits), defaultXmlNamespace(_dxns)
 		{
 			if (_outer)
@@ -143,17 +138,17 @@ namespace avmplus
 		//
 		// Shut up these false positives:
 		//
-		// In member function avmplus::Namespace** avmplus::ScopeChain::getDefaultNamespaceAddr() const:
+		// In member function avmplus::Namespacep* avmplus::ScopeChain::getDefaultNamespaceAddr() const:
 		// warning: dereferencing type-punned pointer might break strict-aliasing rules
  		//
 		#ifdef __GNUC__
 		#pragma GCC system_header
 		#endif // __GNUC__
-		Namespace** getDefaultNamespaceAddr() const { 
-			return (Namespace **)(&defaultXmlNamespace);
+		Namespacep* getDefaultNamespaceAddr() const { 
+			return (Namespacep*)(&defaultXmlNamespace);
 		}
 		
-		static ScopeChain* create(MMgc::GC* gc, ScopeTypeChain *scopeTraits, ScopeChain* outer, Namespace *dxns)
+		static ScopeChain* create(MMgc::GC* gc, ScopeTypeChain *scopeTraits, ScopeChain* outer, Namespacep dxns)
 		{
 			int depth = scopeTraits->size;
 			size_t padSize = depth > 0 ? sizeof(Atom) * (depth-1) : 0;
@@ -162,7 +157,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION BEGIN
 	public:
 		ScopeTypeChain* const	scopeTraits;
-		DRCWB(Namespace*) const	defaultXmlNamespace;
+		DRCWB(Namespacep) const	defaultXmlNamespace;
 	private:
 		Atom					scopes[1];			// actual length == size
 	// ------------------------ DATA SECTION END

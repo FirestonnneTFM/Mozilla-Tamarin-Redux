@@ -80,7 +80,7 @@ namespace avmplus
 	MathClass::MathClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(MathClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(MathClass));
 		MathUtils::initRandom(&seed);
 
         // todo does ES4 Math have a prototype object?

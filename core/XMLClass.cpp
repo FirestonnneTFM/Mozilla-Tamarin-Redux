@@ -96,7 +96,7 @@ namespace avmplus
 	XMLClass::XMLClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(XMLClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(XMLClass));
 
 		AvmCore* core = this->core();
 
@@ -374,7 +374,7 @@ namespace avmplus
 	QNameClass::QNameClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(QNameClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(QNameClass));
 
 		createVanillaPrototype();
 

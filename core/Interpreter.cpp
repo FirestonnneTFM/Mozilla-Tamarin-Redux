@@ -122,20 +122,20 @@ namespace avmplus
 #  define SWITCH_DISPATCH
 #endif // compiler/platform vipers' nest
 
-	Atom interp(MethodEnv* method, int argc, uint32_t *ap);
-	void initMultiname(MethodEnv* env, Multiname &name, Atom* &sp);
-	void initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* &sp);
-	Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
+	static Atom interp(MethodEnv* method, int argc, uint32_t *ap);
+	static void initMultiname(MethodEnv* env, Multiname &name, Atom* &sp);
+	static void initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* &sp);
+	static Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
 #ifdef SUPERWORD_PROFILING
-	void swprofCode(const uint32_t* start, const uint32_t* limit);
-	void swprofPC(const uint32_t* pc);
+	static void swprofCode(const uint32_t* start, const uint32_t* limit);
+	static void swprofPC(const uint32_t* pc);
 #endif
-#ifdef AVMPLUS_VERBOSE
+#if defined(AVMPLUS_VERBOSE) && !defined(AVMPLUS_WORD_CODE)
 	
 	/**
 	 * display contents of current stack frame only.
 	 */
-	void showState(MethodInfo* info, const byte *code_start, const byte *pc,
+	static void showState(MethodInfo* info, const byte *code_start, const byte *pc,
 							Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep,
 							int max_scope);
 #endif
@@ -144,14 +144,17 @@ namespace avmplus
 	{
 		Atom a = interp(env, argc, ap);
 		Traits* t = env->method->returnTraits();
-		AvmCore* core = env->core();
-		if (!t || t == OBJECT_TYPE || t == VOID_TYPE)
+		if (!t)
+			return a; // same as BUILTIN_any
+		const BuiltinType bt = BuiltinType(t->builtinType);
+		const uint32_t ATOM_MASK = (1U<<BUILTIN_object) | (1U<<BUILTIN_void) | (1U << BUILTIN_any);
+		if ((1U<<bt) & ATOM_MASK)
 			return a;
-		if (t == INT_TYPE)
+		if (bt == BUILTIN_int)
 			return AvmCore::integer_i(a);
-		if (t == UINT_TYPE)
+		if (bt == BUILTIN_uint)
 			return AvmCore::integer_u(a);
-		if (t == BOOLEAN_TYPE)
+		if (bt == BUILTIN_boolean)
 			return a>>3;
 		return a & ~7; // possibly null pointer
 	}
@@ -612,7 +615,7 @@ namespace avmplus
 
 		CodeContextAtom savedCodeContext = core->codeContextAtom;
 		if (info->pool->domain->base != NULL) {
-			core->codeContextAtom = (CodeContextAtom)env | CONTEXT_ENV;
+			core->codeContextAtom = makeCodeContextAtom(env);
 		}
 
 		Atom* atomv = (Atom*)ap;
@@ -2115,7 +2118,12 @@ namespace avmplus
 				env->nullcheck(lhs);
 				int slot_id = U30ARG-1;
 				ScriptObject* o = AvmCore::atomToScriptObject(lhs);
-				o->setSlotAtom(slot_id, toplevel->coerce(rhs, o->traits()->getSlotTraits(slot_id)));
+#ifdef AVMPLUS_TRAITS_CACHE
+				const TraitsBindingsp td = o->traits()->getTraitsBindings();
+#else
+				const Traitsp td = o->traits();
+#endif
+				o->setSlotAtom(slot_id, toplevel->coerce(rhs, td->getSlotTraits(slot_id)));
 				restore_dxns();
 				NEXT;
 			}
@@ -2144,7 +2152,12 @@ namespace avmplus
 				int slot_id = U30ARG-1;
 				Atom op = sp[0];
 				sp--;
-				global->setSlotAtom(slot_id, toplevel->coerce(op, global->traits()->getSlotTraits(slot_id)));
+#ifdef AVMPLUS_TRAITS_CACHE
+				const TraitsBindingsp td = global->traits()->getTraitsBindings();
+#else
+				const Traitsp td = global->traits();
+#endif
+				global->setSlotAtom(slot_id, toplevel->coerce(op, td->getSlotTraits(slot_id)));
 				restore_dxns();
 				NEXT;
 			}
@@ -2218,7 +2231,7 @@ namespace avmplus
 				int32_t argc = U30ARG;
 				env->nullcheck(sp[-argc]);
 				// ISSUE if arg types were checked in verifier, this coerces again.
-				MethodEnv* f = env->vtable->abcEnv->methods[method_id];
+				MethodEnv* f = env->vtable->abcEnv->getMethod(method_id);
 				Atom tempAtom = f->coerceEnter(argc, sp-argc);
 				*(sp -= argc) = tempAtom;
 				restore_dxns();
@@ -2238,7 +2251,11 @@ namespace avmplus
 				// must be a real class instance for this to be used.  primitives that have
 				// methods will only have final bindings and no dispatch table.
 				VTable* vtable = toplevel->toVTable(atomv[0]); // includes null check
+#ifdef AVMPLUS_TRAITS_CACHE
+				AvmAssert(disp_id < vtable->traits->getTraitsBindings()->methodCount);
+#else
 				AvmAssert(disp_id < vtable->traits->methodCount);
+#endif
 				MethodEnv *f = vtable->methods[disp_id];
 				// ISSUE if arg types were checked in verifier, this coerces again.
 				Atom tempAtom = f->coerceEnter(argc, atomv);
@@ -3177,7 +3194,7 @@ namespace avmplus
 	
 	Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core)
 	{
-		Traits* t = pool->getTraits(name, toplevel);
+		Traits* t = pool->getTraits(*name, toplevel);
 		if( name->isParameterizedType() )
 		{
 			Multiname param_name;
@@ -3190,7 +3207,7 @@ namespace avmplus
 			Multiname newname;
 			newname.setName(fullname);
 			newname.setNamespace(t->ns);
-			t = pool->getTraits(&newname, toplevel);
+			t = pool->getTraits(newname, toplevel);
 		}
 		return t;
 	}
@@ -3241,7 +3258,7 @@ namespace avmplus
 			core->console << '[' << core->callStack->filename << ':' << (uint32_t)core->callStack->linenum << "] ";
 		}
 #endif
-		core->console << off << ':';
+		core->console << (int)off << ':';
 		core->formatOpcode(core->console, pc, opcode, off, pool);
 		core->console << '\n';
     }
