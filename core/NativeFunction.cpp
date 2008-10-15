@@ -81,7 +81,7 @@ namespace avmplus
 
 	void NativeMethod::verify(Toplevel *toplevel)
 	{
-		AvmAssert(declaringTraits->linked);
+		AvmAssert(declaringTraits->isResolved());
 		resolveSignature(toplevel);
 
 #ifdef AVMTHUNK_VERSION

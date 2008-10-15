@@ -41,18 +41,24 @@
 
 namespace avmplus
 {
-
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	class VTable : public MMgc::GCFinalizedObject
+#else
 	class VTable : public MMgc::GCObject
+#endif
 	{
 		MethodEnv *makeMethodEnv(AbstractFunction *method);
 		void addInterface(AbstractFunction* virt, int disp_id);
 
 	public:
 		VTable(Traits* traits, VTable* base, ScopeChain* scope, AbcEnv* abcEnv, Toplevel* toplevel);
+#ifdef AVMPLUS_TRAITS_MEMTRACK 
+		virtual ~VTable();
+#endif
 		void resolveSignatures();
 
-		size_t getExtraSize() const { return traits->getTotalSize() - traits->sizeofInstance; }
-		MMgc::GC *gc() const { return traits->core->GetGC(); }
+		inline size_t getExtraSize() const { return traits->getExtraSize(); }
+		inline MMgc::GC *gc() const { return traits->core->GetGC(); }
 
 #ifdef AVMPLUS_VERBOSE
 		Stringp format(AvmCore* core) const

@@ -111,7 +111,8 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 		MMgc::GC *gc = core->GetGC();
 
-		AvmAssert(traits()->sizeofInstance == sizeof(XMLObject));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(XMLObject));
+		AvmAssert(traits()->getExtraSize() == 0);
 
 		// str, ignoreWhite
 		bool bIgnoreWhite = toplevel->xmlClass()->getIgnoreWhitespace() != 0;

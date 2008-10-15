@@ -57,7 +57,7 @@ namespace avmplus
 			: ScriptObject(type->ivtable(), objectPrototype)
 		{
 			SAMPLE_FRAME("Date", core());
-			AvmAssert(traits()->sizeofInstance == sizeof(DateObject));
+			AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
 			date.setTime(MathUtils::nan());  // Date.prototype should be the "Invalid Date"
 		}
 
@@ -68,7 +68,7 @@ namespace avmplus
 		DateObject(DateClass *type, const Date& date)
 			: ScriptObject(type->ivtable(), type->prototype)
 		{
-			AvmAssert(traits()->sizeofInstance == sizeof(DateObject));
+			AvmAssert(traits()->getSizeOfInstance() == sizeof(DateObject));
 			this->date = date;
 		}
 		

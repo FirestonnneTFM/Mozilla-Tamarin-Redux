@@ -57,7 +57,7 @@ namespace avmplus
 		// bootstrapping
 		//ivtable()->scope = cvtable->scope;
 
-		AvmAssert(traits()->sizeofInstance == sizeof(ObjectClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(ObjectClass));
         // it is correct call construct() when this.prototype == null
         prototype = construct();
 	}
@@ -121,7 +121,32 @@ namespace avmplus
 		AvmCore* core = this->core();
 		name = name ? core->internString(name) : (Stringp)core->knull;
 
-		switch (thisAtom&7)
+#ifdef AVMPLUS_TRAITS_CACHE
+		Traitsp t = NULL;
+		switch (atomKind(thisAtom))
+		{
+			case kObjectType:
+			{
+				// ISSUE should this look in traits and dynamic vars, or just dynamic vars.
+				ScriptObject* obj = AvmCore::atomToScriptObject(thisAtom);
+				if (obj->hasStringProperty(name))
+					return true;
+				t = obj->traits();
+				break;
+			}
+			case kNamespaceType:
+			case kStringType:
+			case kBooleanType:
+			case kDoubleType:
+			case kIntegerType:
+				t = toplevel()->toTraits(thisAtom);
+				break;
+			default:
+				return false;
+		}
+		return t->getTraitsBindings()->findBinding(name, core->publicNamespace) != BIND_NONE;
+#else
+		switch (atomKind(thisAtom))
 		{
 		case kObjectType:
 		{
@@ -139,6 +164,7 @@ namespace avmplus
 		default:
 			return false;
 		}
+#endif
 	}
 
 	bool ObjectClass::objectPropertyIsEnumerable(Atom thisAtom, Stringp name)

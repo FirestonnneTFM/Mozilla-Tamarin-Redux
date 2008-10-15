@@ -84,6 +84,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/peephole.cpp \
   $(curdir)/PoolObject.cpp \
   $(curdir)/PrintWriter.cpp \
+  $(curdir)/QCache.cpp \
   $(curdir)/RegExpClass.cpp \
   $(curdir)/RegExpObject.cpp \
   $(curdir)/Sampler.cpp \

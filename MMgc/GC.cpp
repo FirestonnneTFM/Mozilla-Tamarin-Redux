@@ -272,6 +272,7 @@ namespace MMgc
 		  dontAddToZCTDuringCollection(false),
 		  numObjects(0),
 		  hitZeroObjects(false),
+		  emptyWeakRef(0),
 		  smallEmptyPageList(NULL),
 		  largeEmptyPageList(NULL),
 		  sweepStart(0),
@@ -368,6 +369,9 @@ namespace MMgc
 		// keep GC::Size honest
 		GCAssert(offsetof(GCLargeAlloc::LargeBlock, usableSize) == offsetof(GCAlloc::GCBlock, size));
 
+		//WB(this, this, &emptyWeakRef, new (this) GCWeakRef(NULL));
+		// no need for WB
+		emptyWeakRef = new (this) GCWeakRef(NULL);
 	}
 
 	GC::~GC()
@@ -1974,12 +1978,12 @@ bail:
 		//}
 		const char *typeName = GetTypeName(traceIndex, o);
 // Disabled for 64-bit Windows.  Debugger doesn't allow exception to go uncaught so always breaks
-#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || ( defined(AVMPLIS_UNIX) && !defined(__ICC) )
+#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || defined(MMGC_MAC)
 		if (strncmp(typeName, "unknown ", 7))
 		{
 			try {
 				const std::type_info *ti = &typeid(*(MMgc::GCObject*)p);
-				if (ti->name() && (int(ti->name()) > 0x10000))
+				if (ti->name() && (uintptr_t(ti->name()) > 0x10000))
 					typeName = ti->name();
 				// sometimes name will get set to bogus memory with no exceptions catch that
 				char c = *typeName;

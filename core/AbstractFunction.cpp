@@ -46,18 +46,30 @@ namespace avmplus
 	{
 		this->flags = 0;
 		this->method_id = -1;
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_abstractfunction, this); )
+	}
+
+	AbstractFunction::~AbstractFunction()
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( if (m_types) tmt_sub_mem(TMT_abstractfunction, GC::Size(m_types) ); )
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( if (m_values) tmt_sub_mem(TMT_abstractfunction, GC::Size(m_values) ); )
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_abstractfunction, this); )
 	}
 
 	void AbstractFunction::initParamTypes(int count)
 	{
 		MMGC_MEM_TYPE(this);
+		AvmAssert(m_types == NULL);
 		m_types = (Traits**)core()->GetGC()->Calloc(count, sizeof(Traits*), GC::kContainsPointers|GC::kZero);
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_abstractfunction, GC::Size(m_types) ); )
 	}
 
 	void AbstractFunction::initDefaultValues(int count)
 	{
 		MMGC_MEM_TYPE(this);
+		AvmAssert(m_values == NULL);
 		m_values = (Atom*)core()->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_abstractfunction, GC::Size(m_values) ); )
 	}
 	
 	void AbstractFunction::setParamType(int index, Traits* t)
@@ -131,42 +143,11 @@ namespace avmplus
 			// still happen before the function runs the first time.
 			resolveSignature(toplevel);
 
-			// ftraits = new traits, extends function
-			// this->declaringTraits = ftraits
-			// ftraits->call = this
-			// ftraits->construct = create object, call this(), return obj or result
-
-			AvmCore* core = this->core();
-			int functionSlotCount = core->traits.function_itraits->slotCount;
-			int functionMethodCount = core->traits.function_itraits->methodCount;
-
 			// type of F is synthetic subclass of Function, with a unique
 			// [[call]] property and a unique scope
 
-			Traits* ftraits = core->newTraits(core->traits.function_itraits, 1, 1,
-									  sizeof(ClassClosure));
-			ftraits->slotCount = functionSlotCount;
-			ftraits->methodCount = functionMethodCount;
-			ftraits->pool = pool;
-			ftraits->final = true;
-			ftraits->needsHashtable = true;
-			ftraits->itraits = core->traits.object_itraits;
+			Traits* ftraits = Traits::newFunctionTraits(toplevel, pool, method_id);
 			this->declaringTraits = ftraits;
-
-			ftraits->ns = core->publicNamespace;
-#ifdef AVMPLUS_VERBOSE
-			ftraits->name = core->internString(
-					core->concatStrings(core->newString("Function-"), core->intToString(method_id))
-				);
-#endif
-
-			ftraits->hashTableOffset = (int)ftraits->sizeofInstance; 
-			ftraits->setTotalSize(ftraits->hashTableOffset + sizeof(Hashtable));
-
-			ftraits->initTables(toplevel);
-
-			AvmAssert(core->traits.function_itraits->linked);
-			ftraits->linked = true;
 			
 
 #ifdef AVMPLUS_UNCHECKED_HACK

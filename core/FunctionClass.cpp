@@ -54,7 +54,7 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 
 		toplevel->functionClass = this;
-		AvmAssert(traits()->sizeofInstance == sizeof(FunctionClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(FunctionClass));
 
 		prototype = createEmptyFunction();
 		prototype->setDelegate(toplevel->objectClass->prototype);
@@ -97,7 +97,12 @@ namespace avmplus
 	ClassClosure* FunctionClass::createEmptyFunction()
 	{
 		// invoke AS3 private static function emptyCtor, which returns an empty function.
-		Binding b = traits()->getName(core()->constantString("emptyCtor"));
+#ifdef AVMPLUS_TRAITS_CACHE
+		TraitsBindingsp t = traits()->getTraitsBindings();
+#else
+		Traitsp t = traits();
+#endif
+		Binding b = t->findBinding(core()->constantString("emptyCtor"));
 		MethodEnv *f = vtable->methods[AvmCore::bindingToMethodId(b)];
 		return (ClassClosure*)AvmCore::atomToScriptObject(f->coerceEnter(this->atom()));
 	}

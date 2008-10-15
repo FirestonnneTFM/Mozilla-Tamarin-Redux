@@ -87,7 +87,7 @@ namespace avmplus
 	XMLListClass::XMLListClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(XMLListClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(XMLListClass));
 		createVanillaPrototype();
 	}
 

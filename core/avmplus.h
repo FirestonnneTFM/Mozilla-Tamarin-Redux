@@ -175,6 +175,7 @@ namespace avmplus
 	class ExceptionFrame;
 	class ExceptionHandler;
 	class ExceptionHandlerTable;
+	class FrameState;
 	class GrowableBuffer;
 	class Hashtable;
 	class HeapMultiname;
@@ -219,6 +220,10 @@ namespace avmplus
 	class String;
 	class Toplevel;
 	class Traits;
+#ifdef AVMPLUS_TRAITS_CACHE
+	class TraitsBindings;
+	class TraitsMetadata;
+#endif
 	class WordcodeTranslator;
 	class WordcodeEmitter;
 	class UnicodeUtils;
@@ -241,8 +246,14 @@ namespace avmplus
 	struct WordOpcodeAttr;
 
 	typedef Traits* Traitsp;
+	// Stringp and Namespacep should be const, but RCObject doens't allow it yet
 	typedef String* Stringp;
 	typedef Namespace* Namespacep;
+	typedef const NamespaceSet* NamespaceSetp;
+#ifdef AVMPLUS_TRAITS_CACHE
+	typedef const TraitsBindings* TraitsBindingsp;
+	typedef const TraitsMetadata* TraitsMetadatap;
+#endif
 
 	typedef const NativeScriptInfo* NativeScriptInfop;
 	typedef const NativeClassInfo* NativeClassInfop;
@@ -295,6 +306,9 @@ using MMgc::GCHeap;
 
 #define MMGC_SUBCLASS_DECL : public GCObject
 
+#ifdef AVMPLUS_TRAITS_CACHE
+#include "QCache.h"
+#endif
 #include "GrowableBuffer.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"

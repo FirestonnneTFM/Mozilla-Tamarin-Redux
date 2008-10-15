@@ -48,8 +48,7 @@ namespace avmplus
 	class ScriptObject : public AvmPlusScriptableObject
 	{
 	public:
-		VTable* const vtable;
-		
+	
 		ScriptObject(VTable* vtable, ScriptObject* delegate,
 					 int capacity = Hashtable::kDefaultCapacity);
 		~ScriptObject();
@@ -82,20 +81,20 @@ namespace avmplus
 		}
 
 		DomainEnv* domainEnv() const {
-			return vtable->abcEnv->domainEnv;
+			return vtable->abcEnv->domainEnv();
 		}
 
 		virtual Hashtable* getTable() const {
-			AvmAssert(vtable->traits->hashTableOffset != -1);
-			return (Hashtable*)((byte*)this+vtable->traits->hashTableOffset);
+			AvmAssert(vtable->traits->getHashtableOffset() != 0);
+			return (Hashtable*)((byte*)this + vtable->traits->getHashtableOffset());
 		}
 
 		bool isValidDynamicName(const Multiname* m) const {
 			return m->contains(core()->publicNamespace) && !m->isAnyName() && !m->isAttr();
 		}
 		
-		Atom getSlotAtom(int slot);
-		void setSlotAtom(int slot, Atom atom);
+		Atom getSlotAtom(uint32_t slot);
+		void setSlotAtom(uint32_t slot, Atom atom);
 
 		virtual Atom getDescendants(const Multiname* name) const;
 
@@ -199,14 +198,16 @@ namespace avmplus
 	public:
 		virtual Stringp format(AvmCore* core) const;
 #endif
-	private:
-        ScriptObject* delegate;     // __proto__ in AS2, archetype in semantics
 		
 #ifdef DEBUGGER
 	public:
 		uint64 size() const;
 		virtual MethodEnv *getCallMethodEnv() { return NULL; }
 #endif
+	// ------------------------ DATA SECTION BEGIN
+	public:		VTable* const		vtable;
+	private:	ScriptObject*		delegate;     // __proto__ in AS2, archetype in semantics
+	// ------------------------ DATA SECTION END
 	};
 }
 

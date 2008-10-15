@@ -198,7 +198,10 @@ namespace avmplus
 
 	PrintWriter& PrintWriter::operator<< (Stringp str)
 	{
+		if (str)
 		return *this << str->c_str();
+		else
+			return *this << "(null)";
 	}
 
 	PrintWriter& PrintWriter::operator<< (ScriptObject *obj)
@@ -244,23 +247,19 @@ namespace avmplus
 #endif
 	}
 
-	PrintWriter& PrintWriter::operator<< (const Multiname *obj)
+	PrintWriter& PrintWriter::operator<< (const Multiname& obj)
 	{
 		// Made available in non-AVMPLUS_VERBOSE builds for describeType
 //#ifdef AVMPLUS_VERBOSE
 #if 1
-		if (obj) {
-			return *this << obj->format(m_core);
-		} else {
-			return *this << "null";
-		}
+		return *this << obj.format(m_core);
 #else
 		AvmAssert(0); // this is only supported in AVMPLUS_VERBOSE builds
 		return *this;
 #endif
 	}
 
-	PrintWriter& PrintWriter::operator<< (Namespace* ns)
+	PrintWriter& PrintWriter::operator<< (Namespacep ns)
 	{
 		// Made available in non-AVMPLUS_VERBOSE builds for describeType
 //#ifdef AVMPLUS_VERBOSE

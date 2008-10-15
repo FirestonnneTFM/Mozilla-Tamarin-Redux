@@ -91,7 +91,7 @@ namespace avmplus
 		this->next_cache = 0;
 		this->caches = NULL;
 #endif
-		
+
 		#if defined FEATURE_BUFFER_GUARD && defined AVMPLUS_MIR
 		this->growthGuard = 0;
 		#endif /* FEATURE_BUFFER_GUARD && AVMPLUS_MIR */
@@ -184,7 +184,7 @@ namespace avmplus
 #else
     void Verifier::verify()
 #endif
-	{
+	{		
 		SAMPLE_FRAME("[verify]", core);
 
 		#ifdef AVMPLUS_VERBOSE
@@ -382,8 +382,8 @@ namespace avmplus
                         }
                     #else
                         // jit and translator are okay with this
-				        blockStates->remove((uintptr)pc);
-				        core->GetGC()->Free(blockState);
+						blockStates->remove((uintptr)pc);
+						core->GetGC()->Free(blockState);
                     #endif
 				}
 			}
@@ -918,7 +918,7 @@ namespace avmplus
 				#ifdef AVMPLUS_VERIFYALL
 				core->enq(f);
 				#endif
-
+				
 				JIT_ONLY( if (jit) {
 					jit->emitSetDxns(state);
 					jit->emit(state, opcode, imm30, sp+1, ftraits);
@@ -1087,7 +1087,7 @@ namespace avmplus
 				}
 				// else: setting const from illegal context, fall through
 				#endif
-
+				
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				// If it's an accessor that we can early bind, do so.
 				// Note that this cannot be done on String or Namespace,
@@ -1096,7 +1096,12 @@ namespace avmplus
 				{
 					// early bind to the setter
 					int disp_id = AvmCore::bindingToSetterId(b);
-					AbstractFunction *f = obj.traits->getMethod(disp_id);
+#ifdef AVMPLUS_TRAITS_CACHE
+					const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
+#else
+					const Traitsp objtd = obj.traits;
+#endif
+					AbstractFunction *f = objtd->getMethod(disp_id);
 					AvmAssert(f != NULL);
 					emitCoerceArgs(f, 1);
 					jit->emitSetContext(state, f);
@@ -1230,7 +1235,7 @@ namespace avmplus
 					Traits* resultType = t;
 					// result is typed value or null, so if type can't hold null,
 					// then result type is Object. 
-					if (t && t->isMachineType)
+					if (t && t->isMachineType())
 						resultType = OBJECT_TYPE;
 					JIT_ONLY( if (jit) jit->emit(state, OP_astype, (uintptr)t, index, resultType); )
 					state->pop_push(1, t);
@@ -1246,7 +1251,7 @@ namespace avmplus
 				Traits* ct = classValue.traits;
 				Traits* t = NULL;
 				if (ct && (t=ct->itraits) != 0)
-					if (t->isMachineType)
+					if (t->isMachineType())
 						t = OBJECT_TYPE;
 
 				JIT_ONLY( if (jit) jit->emit(state, opcode, 0, 0, t); )
@@ -1454,29 +1459,25 @@ namespace avmplus
 
 			case OP_callmethod: 
 			{
+				/*
+					OP_callmethod will always throw a verify error.  that's on purpose, it's a 
+					last minute change before we shipped FP9 and was necessary when we added methods to class Object.
+					 
+					since then we realized that OP_callmethod need only have failed when used outside
+					of the builtin abc, but it's a moot point now.  We dont have to worry about it.
+					 
+					code has since been simplified but existing failure modes preserved.
+				*/
 				const uint32 argc = imm30b;
 				const int disp_id = imm30-1;
 				checkStack(argc+1,1);
 				if (disp_id >= 0)
 				{
 					Value& obj = state->peek(argc+1);
-					if( !obj.traits ) verifyFailed(kCorruptABCError);
-					checkEarlyMethodBinding(obj.traits);
-					AbstractFunction* m = checkDispId(obj.traits, disp_id);
-					Traits *resultType = m->returnTraits();
-					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					if (jit)
-					{
-						emitCheckNull(sp-argc);
-						emitCoerceArgs(m, argc);
-						jit->emitSetContext(state, m);
-						if (!obj.traits->isInterface)
-							jit->emitCall(state, OP_callmethod, disp_id, argc, resultType);
-						else
-							jit->emitCall(state, OP_callinterface, m->iid(), argc, resultType);
-					}
-					#endif
-					state->pop_push(argc+1, resultType);
+					if( !obj.traits ) 
+						verifyFailed(kCorruptABCError);
+					else
+						verifyFailed(kIllegalEarlyBindingError, core->toErrorString(obj.traits));
 				}
 				else
 				{
@@ -1609,12 +1610,17 @@ namespace avmplus
 
 				JIT_ONLY( if (jit) emitCheckNull(sp-(n-1)); )
 				Traits* base = emitCoerceSuper(sp-(n-1));
+#ifdef AVMPLUS_TRAITS_CACHE
+				const TraitsBindingsp basetd = base->getTraitsBindings();
+#else
+				const Traitsp basetd = base;
+#endif
 
 				Binding b = toplevel->getBinding(base, &multiname);
 				if (AvmCore::isMethodBinding(b))
 				{
 					int disp_id = AvmCore::bindingToMethodId(b);
-					AbstractFunction* m = base->getMethod(disp_id);
+					AbstractFunction* m = basetd->getMethod(disp_id);
 					if( !m ) verifyFailed(kCorruptABCError);
 					emitCoerceArgs(m, argc);
 					Traits* resultType = m->returnTraits();
@@ -1669,7 +1675,7 @@ namespace avmplus
 
 				Binding b = toplevel->getBinding(base, &multiname);
 				Traits* propType = readBinding(base, b);
-
+				
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				if (jit)
 				{
@@ -1688,7 +1694,12 @@ namespace avmplus
 					{
 						// Invoke the getter
 						int disp_id = AvmCore::bindingToGetterId(b);
-						AbstractFunction *f = base->getMethod(disp_id);
+#ifdef AVMPLUS_TRAITS_CACHE
+						const TraitsBindingsp basetd = base->getTraitsBindings();
+#else
+						const Traitsp basetd = base;
+#endif
+						AbstractFunction *f = basetd->getMethod(disp_id);
 						AvmAssert(f != NULL);
 						emitCoerceArgs(f, 0);
 						Traits* resultType = f->returnTraits();
@@ -1706,7 +1717,7 @@ namespace avmplus
 				#ifdef DEBUG_EARLY_BINDING
 				core->console << "verify getsuper " << base << " " << multiname.getName() << " from within " << info << "\n";
 				#endif
-
+				
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				if (jit) 
 				{
@@ -1734,12 +1745,17 @@ namespace avmplus
 
 				int ptrIndex = sp-(n-1);
 				JIT_ONLY( Traits* base = ) emitCoerceSuper(ptrIndex);
-
+				
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				if (jit)
 				{
 					emitCheckNull(ptrIndex);
 
+#ifdef AVMPLUS_TRAITS_CACHE
+					const TraitsBindingsp basetd = base->getTraitsBindings();
+#else
+					const Traitsp basetd = base;
+#endif
 					Binding b = toplevel->getBinding(base, &multiname);
 					Traits* propType = readBinding(base, b);
 
@@ -1763,7 +1779,7 @@ namespace avmplus
 						{
 							// Invoke the setter
 							int disp_id = AvmCore::bindingToSetterId(b);
-							AbstractFunction *f = base->getMethod(disp_id);
+							AbstractFunction *f = basetd->getMethod(disp_id);
 							AvmAssert(f != NULL);
 							emitCoerceArgs(f, 1);
 							jit->emitSetContext(state, f);
@@ -1802,7 +1818,7 @@ namespace avmplus
 				AvmAssert(f != NULL);
 
 				emitCoerceArgs(f, argc);
-
+				
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				if (jit)
 				{
@@ -2121,7 +2137,7 @@ namespace avmplus
 					#endif
 					state->pop_push(2, STRING_TYPE, true);
 				}
-				else if (lhst && lhst->isNumeric && rhst && rhst->isNumeric)
+				else if (lhst && lhst->isNumeric() && rhst && rhst->isNumeric())
 				{
 					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 					if (jit)
@@ -2526,13 +2542,19 @@ namespace avmplus
 		
 		uint32 n = argc+1;
 		
+#ifdef AVMPLUS_TRAITS_CACHE
+		const TraitsBindingsp tb = t->getTraitsBindings();
+#else
+		const Traitsp tb = t;
+#endif
+
 		if (t == core->traits.math_ctraits)
-			b = findMathFunction(t, &multiname, b, argc);
+			b = findMathFunction(tb, multiname, b, argc);
 		else if (t == core->traits.string_itraits)
-			b = findStringFunction(t, &multiname, b, argc);
+			b = findStringFunction(tb, multiname, b, argc);
 		
 		int disp_id = AvmCore::bindingToMethodId(b);
-		AbstractFunction* m = t->getMethod(disp_id);
+		AbstractFunction* m = tb->getMethod(disp_id);
 		
 		if (!m->argcOk(argc))
 			return false;
@@ -2559,8 +2581,14 @@ namespace avmplus
 		
 		AvmAssert( jit != NULL );
 		
+#ifdef AVMPLUS_TRAITS_CACHE
+		const TraitsBindingsp tb = t->getTraitsBindings();
+#else
+		const Traitsp tb = t;
+#endif
+
 		int slot_id = AvmCore::bindingToSlotId(b);
-		Traits* slotType = t->getSlotTraits(slot_id);
+		Traits* slotType = tb->getSlotTraits(slot_id);
 		
 		if (slotType == core->traits.int_ctraits)
 		{
@@ -2612,13 +2640,19 @@ namespace avmplus
 
 		AvmAssert( translator != NULL );
 
+#ifdef AVMPLUS_TRAITS_CACHE
+		const TraitsBindingsp tb = t->getTraitsBindings();
+#else
+		const Traitsp tb = t;
+#endif
+
 		if (t == core->traits.math_ctraits)
-			b = findMathFunction(t, &multiname, b, argc);
+			b = findMathFunction(tb, multiname, b, argc);
 		else if (t == core->traits.string_itraits)
-			b = findStringFunction(t, &multiname, b, argc);
+			b = findStringFunction(tb, multiname, b, argc);
 			
 		int disp_id = AvmCore::bindingToMethodId(b);
-		AbstractFunction* m = t->getMethod(disp_id);
+		AbstractFunction* m = tb->getMethod(disp_id);
 		
 		if (!m->argcOk(argc))
 			return false;
@@ -2641,8 +2675,14 @@ namespace avmplus
 		
 		AvmAssert( translator != NULL );
 
+#ifdef AVMPLUS_TRAITS_CACHE
+		const TraitsBindingsp tb = t->getTraitsBindings();
+#else
+		const Traitsp tb = t;
+#endif
+
 		int slot_id = AvmCore::bindingToSlotId(b);
-		Traits* slotType = t->getSlotTraits(slot_id);
+		Traits* slotType = tb->getSlotTraits(slot_id);
 			
 		if (slotType == core->traits.int_ctraits)
 		{
@@ -2698,12 +2738,12 @@ namespace avmplus
 		Traits *rhst = rhs.traits;
 		if (jit)
 		{
-			if (rhst && rhst->isNumeric && lhst && !lhst->isNumeric)
+			if (rhst && rhst->isNumeric() && lhst && !lhst->isNumeric())
 			{
 				// convert lhs to Number
 				emitCoerce(NUMBER_TYPE, state->sp()-1);
 			}
-			else if (lhst && lhst->isNumeric && rhst && !rhst->isNumeric)
+			else if (lhst && lhst->isNumeric() && rhst && !rhst->isNumeric())
 			{
 				// promote rhs to Number
 				emitCoerce(NUMBER_TYPE, state->sp());
@@ -2849,7 +2889,7 @@ namespace avmplus
 		return next_cache++;
 	}
 #endif // AVMPLUS_WORD_CODE
-	
+
 	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32 imm30)
 	{
 #ifndef AVMPLUS_WORD_CODE
@@ -2873,7 +2913,7 @@ namespace avmplus
 				Traits* t = state->value(state->sp()).traits;
 				int slot = int(AvmCore::bindingToSlotId(b));
 				
-				AvmAssert(t->linked);
+				AvmAssert(t->isResolved());
 				
 				if (!(t->pool->isBuiltin && !t->final))
 					translator->emitOp1(WOP_getslot, slot+1);
@@ -2892,7 +2932,12 @@ namespace avmplus
 		{
 			// Invoke the getter
 			int disp_id = AvmCore::bindingToGetterId(b);
-			AbstractFunction *f = obj.traits->getMethod(disp_id);
+#ifdef AVMPLUS_TRAITS_CACHE
+			const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
+#else
+			const Traitsp objtd = obj.traits;
+#endif
+			AbstractFunction *f = objtd->getMethod(disp_id);
 			AvmAssert(f != NULL);
 			#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			if (jit)
@@ -3089,7 +3134,7 @@ namespace avmplus
 			if (jit)
 			{
 				if (opcode == OP_convert_s && in && 
-					(value.notNull || in->isNumeric || in == BOOLEAN_TYPE))
+					(value.notNull || in->isNumeric() || in == BOOLEAN_TYPE))
 				{
 					jit->emitCoerce(state, i, st);
 				}
@@ -3170,26 +3215,18 @@ namespace avmplus
 
 	void Verifier::checkEarlySlotBinding(Traits* t)
 	{
-		bool slotAllow;
-		pool->allowEarlyBinding(t, slotAllow);
+#ifdef AVMPLUS_TRAITS_CACHE
+		if (!t->allowEarlyBinding())
+			verifyFailed(kIllegalEarlyBindingError, core->toErrorString(t));
+#else
+		bool slotAllow = pool->allowEarlyBinding(t);
 		if (!slotAllow)
 		{
 			// illegal disp_id or slot_id access since dispatch table layout and instance layout
 			// are not known at compile time
 			verifyFailed(kIllegalEarlyBindingError, core->toErrorString(t));
 		}
-	}
-
-	void Verifier::checkEarlyMethodBinding(Traits* t)
-	{
-		bool slotAllow;
-		pool->allowEarlyBinding(t, slotAllow);
-		if (true)
-		{
-			// illegal disp_id or slot_id access since dispatch table layout and instance layout
-			// are not known at compile time
-			verifyFailed(kIllegalEarlyBindingError, core->toErrorString(t));
-		}
+#endif
 	}
 
 	void Verifier::emitCoerceArgs(AbstractFunction* m, int argc, bool isctor)
@@ -3200,7 +3237,7 @@ namespace avmplus
 		}
 
 		m->resolveSignature(toplevel);
-
+	
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		// coerce parameter types
 		int n=1;
@@ -3265,42 +3302,62 @@ namespace avmplus
 	
 	Traits* Verifier::checkSlot(Traits *traits, int imm30)
 	{
-        uint32 slot = imm30;
-        if (!traits || slot >= traits->slotCount)
+        uint32_t slot = imm30;
+#ifdef AVMPLUS_TRAITS_CACHE
+		if (traits)
+			traits->resolveSignatures(toplevel);
+		TraitsBindingsp td = traits ? traits->getTraitsBindings() : NULL;
+		const uint32_t count = td ? td->slotCount : 0;
+        if (!traits || slot >= count)
 		{
-			verifyFailed(kSlotExceedsCountError, core->toErrorString(slot+1), core->toErrorString(traits?traits->slotCount:0), core->toErrorString(traits));
+			verifyFailed(kSlotExceedsCountError, core->toErrorString(slot+1), core->toErrorString(count), core->toErrorString(traits));
+		}
+		return td->getSlotTraits(slot);
+#else
+		const uint32_t count = traits ? traits->slotCount : 0;
+        if (!traits || slot >= count)
+		{
+			verifyFailed(kSlotExceedsCountError, core->toErrorString(slot+1), core->toErrorString(count), core->toErrorString(traits));
 		}
 		traits->resolveSignatures(toplevel);
-
 		return traits->getSlotTraits(slot);
+#endif
 	}
 
 	Traits* Verifier::readBinding(Traits* traits, Binding b)
 	{
 		if (traits)
 			traits->resolveSignatures(toplevel);
-		switch (b&7)
+		switch (AvmCore::bindingKind(b))
 		{
 		default:
 			AvmAssert(false); // internal error - illegal binding type
-		case BIND_GET:
-		case BIND_GETSET:
+		case BKIND_GET:
+		case BKIND_GETSET:
 		{
 			int m = AvmCore::bindingToGetterId(b);
+#ifdef AVMPLUS_TRAITS_CACHE
+			AbstractFunction *f = traits->getTraitsBindings()->getMethod(m);
+#else
 			AbstractFunction *f = traits->getMethod(m);
+#endif
 			return f->returnTraits();
 		}
-		case BIND_SET:
+		case BKIND_SET:
 			// TODO lookup type here. get/set must have same type.
-		case BIND_NONE:
+		case BKIND_NONE:
 			// dont know what this is
 			// fall through
-		case BIND_METHOD:
+		case BKIND_METHOD:
 			// extracted method or dynamic data, don't know which
 			return NULL;
-		case BIND_VAR:
-		case BIND_CONST:
+		case BKIND_VAR:
+		case BKIND_CONST:
+#ifdef AVMPLUS_TRAITS_CACHE
+			return traits->getTraitsBindings()->getSlotTraits(AvmCore::bindingToSlotId(b));
+#else
 			return traits->getSlotTraits(AvmCore::bindingToSlotId(b));
+#endif
 		}
 	}
 
@@ -3334,7 +3391,7 @@ namespace avmplus
 	{
 		Multiname name;
 		checkConstantMultiname(index, name); // CONSTANT_Multiname
-		Traits *t = pool->getTraits(&name, toplevel);
+		Traits *t = pool->getTraits(name, toplevel);
 		if (t == NULL)
 			verifyFailed(kClassNotFoundError, core->toErrorString(&name));
 		else
@@ -3348,19 +3405,35 @@ namespace avmplus
 
     AbstractFunction* Verifier::checkDispId(Traits* traits, uint32 disp_id)
     {
-        if (disp_id > traits->methodCount)
+#ifdef AVMPLUS_TRAITS_CACHE
+		TraitsBindingsp td = traits->getTraitsBindings();
+        if (disp_id > td->methodCount)
 		{
-            verifyFailed(kDispIdExceedsCountError, core->toErrorString(disp_id), core->toErrorString(traits->methodCount), core->toErrorString(traits));
+            verifyFailed(kDispIdExceedsCountError, core->toErrorString(disp_id), core->toErrorString(td->methodCount), core->toErrorString(traits));
+		}
+		AbstractFunction* m = td->getMethod(disp_id);
+		if (!m) 
+		{
+			verifyFailed(kDispIdUndefinedError, core->toErrorString(disp_id), core->toErrorString(traits));
+		}
+		return m;
+#else
+		uint32_t count = traits->methodCount;
+        if (disp_id > count)
+		{
+            verifyFailed(kDispIdExceedsCountError, core->toErrorString(disp_id), core->toErrorString(count), core->toErrorString(traits));
 			return NULL;
 		}
 		else
 		{
-			if (!traits->getMethod(disp_id)) 
+			AbstractFunction* m = traits->getMethod(disp_id);
+			if (!m) 
 			{
 				verifyFailed(kDispIdUndefinedError, core->toErrorString(disp_id), core->toErrorString(traits));
 			}
-			return traits->getMethod(disp_id);
+			return m;
 		}
+#endif
     }
 
     void Verifier::verifyFailed(int errorID, Stringp arg1, Stringp arg2, Stringp arg3) const
@@ -3496,7 +3569,7 @@ namespace avmplus
 
 				bool notNull = targetValue.notNull && curValue.notNull;
 				if (targetState->pc < state->pc && 
-					(t3 != t1 || t1 && !t1->isNumeric && notNull != targetValue.notNull))
+					(t3 != t1 || t1 && !t1->isNumeric() && notNull != targetValue.notNull))
 				{
 					// failure: merge on back-edge
 					verifyFailed(kCannotMergeTypesError, core->toErrorString(t1), core->toErrorString(t3));
@@ -3539,12 +3612,12 @@ namespace avmplus
 			verifyFailed(kCannotMergeTypesError, core->toErrorString(t1), core->toErrorString(t2));
 		}
 
-		if (t1 == NULL_TYPE && t2 && !t2->isMachineType)
+		if (t1 == NULL_TYPE && t2 && !t2->isMachineType())
 		{
 			// okay to merge null with pointer type
 			return t2;
 		}
-		if (t2 == NULL_TYPE && t1 && !t1->isMachineType)
+		if (t2 == NULL_TYPE && t1 && !t1->isMachineType())
 		{
 			// okay to merge null with pointer type
 			return t1;
@@ -3610,10 +3683,14 @@ namespace avmplus
 		pool->parseMultiname(m, index);
 	}
 
-	Binding Verifier::findMathFunction(Traits* math, Multiname* multiname, Binding b, int argc)
+#ifdef AVMPLUS_TRAITS_CACHE
+	Binding Verifier::findMathFunction(TraitsBindingsp math, const Multiname& multiname, Binding b, int argc)
+#else
+	Binding Verifier::findMathFunction(Traits* math, const Multiname& multiname, Binding b, int argc)
+#endif
 	{
-		Stringp newname = core->internString(core->concatStrings(core->constantString("_"), multiname->getName()));
-		Binding newb = math->getName(newname);
+		Stringp newname = core->internString(core->concatStrings(core->constantString("_"), multiname.getName()));
+		Binding newb = math->findBinding(newname);
 		if (AvmCore::isMethodBinding(newb))
 		{
 			int disp_id = AvmCore::bindingToMethodId(newb);
@@ -3623,7 +3700,7 @@ namespace avmplus
 				for (int i=state->stackDepth-argc, n=state->stackDepth; i < n; i++)
 				{
 					Traits* t = state->stackValue(i).traits;
-					if (t != NUMBER_TYPE && t != INT_TYPE && t != UINT_TYPE)
+					if (!t || !t->isNumeric())
 						return b;
 				}
 				b = newb;
@@ -3632,10 +3709,14 @@ namespace avmplus
 		return b;
 	}
 
-	Binding Verifier::findStringFunction(Traits* str, Multiname* multiname, Binding b, int argc)
+#ifdef AVMPLUS_TRAITS_CACHE
+	Binding Verifier::findStringFunction(TraitsBindingsp str, const Multiname& multiname, Binding b, int argc)
+#else
+	Binding Verifier::findStringFunction(Traits* str, const Multiname& multiname, Binding b, int argc)
+#endif
 	{
-		Stringp newname = core->internString(core->concatStrings(core->constantString("_"), multiname->getName()));
-		Binding newb = str->getName(newname);
+		Stringp newname = core->internString(core->concatStrings(core->constantString("_"), multiname.getName()));
+		Binding newb = str->findBinding(newname);
 		if (AvmCore::isMethodBinding(newb))
 		{
 			int disp_id = AvmCore::bindingToMethodId(newb);
@@ -3671,6 +3752,8 @@ namespace avmplus
 				handler->to = toplevel->readU30(pos);
 				handler->target = toplevel->readU30(pos);
 
+				const uint8_t* const scopePosInPool = pos;
+
 				int type_index = toplevel->readU30(pos);
 				Traits* t = type_index ? checkTypeName(type_index) : NULL;
 
@@ -3690,7 +3773,7 @@ namespace avmplus
 						<< " type=" << t
 						<< " name=";
 					if (name_index != 0)
-					    core->console << &qn;
+					    core->console << qn;
 					else
 						core->console << "(none)";
 					core->console << "\n";
@@ -3717,20 +3800,7 @@ namespace avmplus
 				}
 				else
 				{
-					scopeTraits = core->newTraits(NULL, 1, 0, sizeof(ScriptObject));
-					scopeTraits->pool = pool;
-					scopeTraits->final = true;
-					scopeTraits->defineSlot(qn.getName(), qn.getNamespace(), 0, BIND_VAR);
-					scopeTraits->slotCount = 1;
-					scopeTraits->initTables(toplevel);
-					AbcGen gen(core->GetGC());
-					scopeTraits->setSlotInfo(0, 0, toplevel, t, (int)scopeTraits->sizeofInstance, CPoolKind(0), gen);
-					scopeTraits->setTotalSize(scopeTraits->sizeofInstance + 16);
-					scopeTraits->linked = true;
-#ifdef DEBUGGER
-					scopeTraits->name = qn.getName();
-					scopeTraits->ns = qn.getNamespace();
-#endif
+					scopeTraits = Traits::newCatchTraits(toplevel, pool, scopePosInPool, qn.getName(), qn.getNamespace());
 				}
 				
 				// handler->scopeTraits = scopeTraits
@@ -3824,7 +3894,7 @@ namespace avmplus
 		else
 		{
 			core->console << t->format(core);
-			if (!t->isNumeric && !v.notNull && t != BOOLEAN_TYPE && t != NULL_TYPE)
+			if (!t->isNumeric() && !v.notNull && t != BOOLEAN_TYPE && t != NULL_TYPE)
 				core->console << "?";
 		}
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT

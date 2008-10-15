@@ -211,8 +211,12 @@ namespace avmplus
 	class SlotIterator : public ScriptObject
 	{
 	public:
-		SlotIterator(Traits *t, VTable *vtable)
-			: currTraits(t),
+		SlotIterator(Traits *t, VTable *vtable) : 
+#ifdef AVMPLUS_TRAITS_CACHE
+			currTraits(t ? t->getTraitsBindings() : NULL),
+#else
+			currTraits(t),
+#endif
 			ScriptObject(vtable, NULL) {}
 
 		int nextNameIndex(int index)
@@ -247,19 +251,30 @@ namespace avmplus
 		}
 
 	private:
+#ifdef AVMPLUS_TRAITS_CACHE
+		DWB(TraitsBindingsp) currTraits;
+#else
 		DWB(Traits *) currTraits;
+#endif
 	};
 
 
 	SamplerScript::SamplerScript(VTable *vtable, ScriptObject *delegate)
 	  : ScriptObject(vtable, delegate), 
-	    sampleIteratorVTable(core()->newVTable(core()->newTraits(NULL, 0, 0, sizeof(SampleIterator)), 
+#ifdef AVMPLUS_TRAITS_CACHE
+	    sampleIteratorVTable(core()->newVTable(Traits::newTraits(vtable->abcEnv->pool(), NULL, sizeof(SampleIterator), 0, TRAITSTYPE_RT),
 						   NULL, NULL, NULL, toplevel())),
-	    slotIteratorVTable(core()->newVTable(core()->newTraits(NULL, 0, 0, sizeof(SlotIterator)), 
+	    slotIteratorVTable(core()->newVTable(Traits::newTraits(vtable->abcEnv->pool(), NULL, sizeof(SlotIterator), 0, TRAITSTYPE_RT),
 						 NULL, NULL, NULL, toplevel()))
+#else
+	    sampleIteratorVTable(core()->newVTable(Traits::newTraits(vtable->abcEnv->pool(), NULL, 0, 0, sizeof(SampleIterator), 0, TRAITSTYPE_RT),
+						   NULL, NULL, NULL, toplevel())),
+	    slotIteratorVTable(core()->newVTable(Traits::newTraits(vtable->abcEnv->pool(), NULL, 0, 0, sizeof(SlotIterator), 0, TRAITSTYPE_RT),
+						 NULL, NULL, NULL, toplevel()))
+#endif
 	{
-		sampleIteratorVTable->traits->linked = true;
-		slotIteratorVTable->traits->linked = true;
+		sampleIteratorVTable->traits->resolveSignatures(NULL);
+		slotIteratorVTable->traits->resolveSignatures(NULL);
 	}
 
 	Atom SamplerScript::getSamples()
@@ -321,7 +336,7 @@ namespace avmplus
 			type = tl->functionClass;
 		}
 #ifdef DEBUGGER
-		else if(obj && obj->traits()->isActivationTraits)
+		else if(obj && obj->traits()->isActivationTraits())
 		{
 			type = tl->objectClass;
 		}
@@ -355,7 +370,7 @@ namespace avmplus
 			typeOrVTable < 7 || 
 			  (obj->traits()->name && obj->traits()->name->Equals("global")) ||
 			(core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
-			(obj->traits()->isActivationTraits && type == tl->objectClass) ||
+			(obj->traits()->isActivationTraits() && type == tl->objectClass) ||
 			core->istype(obj->atom(), type->traits()->itraits));
 #else
 		AvmAssert(!obj || 
@@ -390,6 +405,7 @@ namespace avmplus
 
 		if(sample.sampleType == Sampler::DELETED_OBJECT_SAMPLE)
 		{
+			if (cc->sizeOffset > 0)
 			*(double*)((char*)sam + cc->sizeOffset) = (double)sample.size;
 			return sam;
 		}
@@ -547,7 +563,7 @@ namespace avmplus
 			// not sure if this will be true for standalone avmplus
 			AvmAssert(core->codeContext() != NULL);
 			DomainEnv *domainEnv = core->codeContext()->domainEnv();
-			ScriptEnv* script = (ScriptEnv*) domainEnv->getScriptInit(&multiname);
+			ScriptEnv* script = (ScriptEnv*) domainEnv->getScriptInit(multiname);
 			if (script != (ScriptEnv*)BIND_NONE)
 			{
 				if (script == (ScriptEnv*)BIND_AMBIGUOUS)
@@ -582,10 +598,10 @@ namespace avmplus
 
 		MethodEnv *env = NULL;
 		Binding b = toplevel()->getBinding(v->traits, &multiname);
-		switch (b&7)
+		switch (AvmCore::bindingKind(b))
 		{
-		case BIND_VAR:
-		case BIND_CONST:
+		case BKIND_VAR:
+		case BKIND_CONST:
 		{	
 			// only look at slots for first pass, otherwise we're applying instance traits to the Class
 			if(v == object->vtable) {
@@ -597,15 +613,15 @@ namespace avmplus
 			}
 			break;
 		}
-		case BIND_METHOD:
+		case BKIND_METHOD:
 		{
 			int m = AvmCore::bindingToMethodId(b);
 			env = v->methods[m];
 			break;
 		}
-		case BIND_GET:
-		case BIND_GETSET:
-		case BIND_SET:
+		case BKIND_GET:
+		case BKIND_GETSET:
+		case BKIND_SET:
 		{	
 			if(type == GET && AvmCore::hasGetterBinding(b))
 				env = v->methods[AvmCore::bindingToGetterId(b)];
@@ -613,7 +629,7 @@ namespace avmplus
 				env = v->methods[AvmCore::bindingToSetterId(b)];
 			break;
 		}
-		case BIND_NONE:
+		case BKIND_NONE:
 		{
 			Atom method = object->getStringProperty(multiname.getName());
 			if(AvmCore::isObject(method))
@@ -626,6 +642,8 @@ namespace avmplus
 				goto again;
 			}
 		}
+		default:
+			break;
 		}
 
 		if(env)
@@ -716,41 +734,50 @@ namespace avmplus
 		: ClassClosure(vtable)
 	{
 		createVanillaPrototype();
+#ifdef AVMPLUS_TRAITS_CACHE
+		TraitsBindingsp t = vtable->ivtable->traits->getTraitsBindings();
+#else
 		Traits *t = vtable->ivtable->traits;
+#endif
 		Binding b =  t->findBinding(core()->constantString("time"), core()->publicNamespace);
-		AvmAssert((b&7) == BIND_CONST);
-		timeOffset = t->getOffsets()[b>>3];
+		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
+		timeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 
 		b = t->findBinding(core()->constantString("stack"), core()->publicNamespace);
-		AvmAssert((b&7) == BIND_CONST);
-		stackOffset = t->getOffsets()[b>>3];
+		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
+		stackOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 
 		b = t->findBinding(core()->constantString("id"), core()->publicNamespace);
 		if(b != BIND_NONE)
 		{
-			AvmAssert((b&7) == BIND_CONST);
-			idOffset = t->getOffsets()[b>>3];
+			AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
+			idOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 		}
 
+		sizeOffset = 0;
 		b = t->findBinding(core()->constantString("size"), core()->publicNamespace);
-		if((b&7) == BIND_CONST)
+		if(AvmCore::bindingKind(b) == BKIND_CONST)
 		{
-			sizeOffset = t->getOffsets()[b>>3];
+			sizeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 		}
 
+#ifdef AVMPLUS_TRAITS_CACHE
+		t = toplevel()->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame)->vtable->ivtable->traits->getTraitsBindings();
+#else
 		t = toplevel()->getBuiltinExtensionClass(NativeID::abcclass_flash_sampler_StackFrame)->vtable->ivtable->traits;
+#endif
 
 		b =  t->findBinding(core()->constantString("name"), core()->publicNamespace);
-		AvmAssert((b&7) == BIND_CONST);
-		nameOffset = t->getOffsets()[b>>3];
+		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
+		nameOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 
 		b = t->findBinding(core()->constantString("file"), core()->publicNamespace);
-		AvmAssert((b&7) == BIND_CONST);
-		fileOffset = t->getOffsets()[b>>3];
+		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
+		fileOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 
 		b = t->findBinding(core()->constantString("line"), core()->publicNamespace);
-		AvmAssert((b&7) == BIND_CONST);
-		lineOffset = t->getOffsets()[b>>3];
+		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
+		lineOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 	}
 
 	ScriptObject *SampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)
@@ -761,11 +788,15 @@ namespace avmplus
 	NewObjectSampleClass::NewObjectSampleClass(VTable *vtable)
 		: SampleClass(vtable)
 	{		
+#ifdef AVMPLUS_TRAITS_CACHE
+		TraitsBindingsp t = vtable->ivtable->traits->getTraitsBindings();
+#else
 		Traits *t = vtable->ivtable->traits;
+#endif
 
 		Binding b =  t->findBinding(core()->constantString("type"), core()->publicNamespace);
-		AvmAssert((b&7) == BIND_CONST);
-		typeOffset = t->getOffsets()[b>>3];
+		AvmAssert(AvmCore::bindingKind(b) == BKIND_CONST);
+		typeOffset = t->getSlotOffset(AvmCore::bindingToSlotId(b));
 	}
 	
 	ScriptObject *NewObjectSampleClass::createInstance(VTable *ivtable, ScriptObject* /*delegate*/)

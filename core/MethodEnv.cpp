@@ -299,11 +299,14 @@ namespace avmplus
 		return env->impl32(env, argc, ap);
 	}
 
+#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
 	MethodEnv::MethodEnv(void *addr, VTable *vtable)
 		: vtable(vtable), method(NULL), declTraits(NULL)
 	{
 		implV = addr;
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
 	}
+#endif
 
 	MethodEnv::MethodEnv(AbstractFunction* method, VTable *vtable)
 		: vtable(vtable)
@@ -314,13 +317,11 @@ namespace avmplus
 		impl32 = delegateInvoke;
 
 		AvmCore* core = vtable->traits->core;
-		#ifdef AVMPLUS_VERBOSE
 		if (method->declaringTraits != vtable->traits)
 		{
+		#ifdef AVMPLUS_VERBOSE
 			core->console << "ERROR " << method->name << " " << method->declaringTraits << " " << vtable->traits << "\n";
-		}
 		#endif
-		if(method->declaringTraits != vtable->traits){
 			AvmAssertMsg(0, "(method->declaringTraits != vtable->traits)");
 			toplevel()->throwVerifyError(kCorruptABCError);
 		}
@@ -337,8 +338,16 @@ namespace avmplus
 			activation->resolveSignatures();
 			setActivationOrMCTable(activation, kActivation);
 		}
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
 	}
 	
+#ifdef AVMPLUS_TRAITS_MEMTRACK 
+	MethodEnv::~MethodEnv()
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_methodenv, this); )
+	}
+#endif
+
 #ifdef FEATURE_SAMPLER
 	void MethodEnv::debugEnter(int argc, uint32 *ap, 
 							   Traits**frameTraits, int localCount,
@@ -410,10 +419,9 @@ namespace avmplus
 	}
 #endif
 
-    void MethodEnv::nullcheck(Atom atom)
+    void FASTCALL MethodEnv::nullcheckfail(Atom atom)
     {
-		if (!AvmCore::isNullOrUndefined(atom))
-			return;
+		AvmAssert(AvmCore::isNullOrUndefined(atom));
 
 		// TypeError in ECMA
 		ErrorClass *error = toplevel()->typeErrorClass();
@@ -787,11 +795,11 @@ namespace avmplus
 
 	ScriptEnv* MethodEnv::getScriptEnv(const Multiname *multiname) const
 	{
-		ScriptEnv *se = (ScriptEnv*)abcEnv()->domainEnv->getScriptInit(multiname);
+		ScriptEnv *se = (ScriptEnv*)abcEnv()->domainEnv()->getScriptInit(*multiname);
 		if(!se)
 		{	
 			// check privates
-			se = (ScriptEnv*)abcEnv()->privateScriptEnvs.getMulti(multiname);
+			se = abcEnv()->getPrivateScriptEnv(*multiname);
 		}
 		return se;
 	}
@@ -980,10 +988,14 @@ namespace avmplus
 			Stringp name = core->intern(nameatom);
 
 			// ISSUE should we try this on each object on the proto chain or just the first?
-			if (t->findBinding(name, core->publicNamespace) != BIND_NONE)
-			{
+#ifdef AVMPLUS_TRAITS_CACHE
+			TraitsBindingsp td = t->getTraitsBindings();
+			if (td->findBinding(name, core->publicNamespace) != BIND_NONE)
 				return trueAtom;
-			}
+#else
+			if (t->findBinding(name, core->publicNamespace) != BIND_NONE)
+				return trueAtom;
+#endif
 
 			nameatom = name->atom();
 		}
@@ -1158,11 +1170,11 @@ namespace avmplus
     {
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
-		if ((b&7) == BIND_CONST)
+		if (AvmCore::bindingKind(b) == BKIND_CONST)
 		{
 			if (vtable->init != this)
 				toplevel->throwReferenceError(kConstWriteError, multiname, vtable->traits);
-			b = (b & ~7) | BIND_VAR;
+			b = AvmCore::makeSlotBinding(AvmCore::bindingToSlotId(b), BKIND_VAR);
 		}
 		toplevel->setproperty_b(obj, multiname, value, vtable, b);
     }
@@ -1215,12 +1227,12 @@ namespace avmplus
 		VTable* base = vtable->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(base->traits, multiname);
-		switch (b&7)
+		switch (AvmCore::bindingKind(b))
 		{
 		default:
 			toplevel->throwReferenceError(kCallNotFoundError, multiname, base->traits);
 
-		case BIND_METHOD:
+		case BKIND_METHOD:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callsuper method " << base->traits << " " << multiname->name << "\n";
@@ -1228,8 +1240,8 @@ namespace avmplus
 			MethodEnv* superenv = base->methods[AvmCore::bindingToMethodId(b)];
 			return superenv->coerceEnter(argc, atomv);
 		}
-		case BIND_VAR:
-		case BIND_CONST:
+		case BKIND_VAR:
+		case BKIND_CONST:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callsuper slot " << base->traits << " " << multiname->name << "\n";
@@ -1238,7 +1250,7 @@ namespace avmplus
 			Atom method = AvmCore::atomToScriptObject(atomv[0])->getSlotAtom(slot);
 			return toplevel->op_call(method, argc, atomv);
 		}
-		case BIND_SET:
+		case BKIND_SET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callsuper setter " << base->traits << " " << multiname->name << "\n";
@@ -1246,8 +1258,8 @@ namespace avmplus
 			// read on write-only property
 			toplevel->throwReferenceError(kWriteOnlyError, multiname, base->traits);
 		}
-		case BIND_GET:
-		case BIND_GETSET:
+		case BKIND_GET:
+		case BKIND_GETSET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callsuper getter " << base->traits << " " << multiname->name << "\n";
@@ -1304,12 +1316,12 @@ namespace avmplus
 		VTable* vtable = this->vtable->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
-        switch (b&7)
+        switch (AvmCore::bindingKind(b))
         {
 		default:
 			toplevel->throwReferenceError(kReadSealedError, multiname, vtable->traits);
 
-		case BIND_METHOD: 
+		case BKIND_METHOD: 
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getsuper method " << vtable->traits << " " << multiname->name << "\n";
@@ -1319,14 +1331,14 @@ namespace avmplus
 			return toplevel->methodClosureClass->create(m, obj)->atom();
 		}
 
-        case BIND_VAR:
-        case BIND_CONST:
+        case BKIND_VAR:
+        case BKIND_CONST:
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getsuper slot " << vtable->traits << " " << multiname->name << "\n";
 			#endif
 			return AvmCore::atomToScriptObject(obj)->getSlotAtom(AvmCore::bindingToSlotId(b));
 
-		case BIND_SET:
+		case BKIND_SET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getsuper setter " << vtable->traits << " " << multiname->name << "\n";
@@ -1334,8 +1346,8 @@ namespace avmplus
 			// read on write-only property
 			toplevel->throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
 		}
-		case BIND_GET:
-		case BIND_GETSET:
+		case BKIND_GET:
+		case BKIND_GETSET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getsuper getter " << vtable->traits << " " << multiname->name << "\n";
@@ -1355,39 +1367,43 @@ namespace avmplus
 		VTable* vtable = this->vtable->base;
 		Toplevel* toplevel = this->toplevel();
 		Binding b = toplevel->getBinding(vtable->traits, multiname);
-        switch (b&7)
+        switch (AvmCore::bindingKind(b))
         {
 		default:
 			toplevel->throwReferenceError(kWriteSealedError, multiname, vtable->traits);
 
-		case BIND_CONST:
+		case BKIND_CONST:
 			toplevel->throwReferenceError(kConstWriteError, multiname, vtable->traits);
 
-		case BIND_METHOD: 
+		case BKIND_METHOD: 
 			toplevel->throwReferenceError(kCannotAssignToMethodError, multiname, vtable->traits);
 
-		case BIND_GET: 
+		case BKIND_GET: 
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setsuper getter " << vtable->traits << " " << multiname->name << "\n";
 			#endif
 			toplevel->throwReferenceError(kConstWriteError, multiname, vtable->traits);
 
-		case BIND_VAR:
+		case BKIND_VAR:
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setsuper slot " << vtable->traits << " " << multiname->name << "\n";
 			#endif
 			AvmCore::atomToScriptObject(obj)->setSlotAtom(AvmCore::bindingToSlotId(b), value);
             return;
 
-		case BIND_SET: 
-		case BIND_GETSET: 
+		case BKIND_SET: 
+		case BKIND_GETSET: 
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setsuper setter " << vtable->traits << " " << multiname->name << "\n";
 			#endif
 			// Invoke the setter
 			uint32 m = AvmCore::bindingToSetterId(b);
+#ifdef AVMPLUS_TRAITS_CACHE
+			AvmAssert(m < vtable->traits->getTraitsBindings()->methodCount);
+#else
 			AvmAssert(m < vtable->traits->methodCount);
+#endif
 			MethodEnv* method = vtable->methods[m];
 			Atom atomv_out[2] = { obj, value };
 			// coerce value to proper type, then call enter
@@ -1682,28 +1698,28 @@ namespace avmplus
     ScriptObject* MethodEnv::coerceAtom2SO(Atom atom, Traits* expected) const
     {
 		AvmAssert(expected != NULL);
-		AvmAssert(!expected->isMachineType);
+		AvmAssert(!expected->isMachineType());
 		AvmAssert(expected != core()->traits.string_itraits);
 		AvmAssert(expected != core()->traits.namespace_itraits);
 
 		if (AvmCore::isNullOrUndefined(atom))
 			return NULL;
 
-		ScriptObject *so;
-		if ((atom&7) == kObjectType &&
-			(so=AvmCore::atomToScriptObject(atom))->traits()->containsInterface(expected))
+		if ((atom&7) == kObjectType)
 		{
-			return so;
+			ScriptObject* so = AvmCore::atomToScriptObject(atom);
+			if (so->traits()->containsInterface(expected))
+			{
+				return so;
+			}
 		}
-		else
-		{
-			// failed
+
+		// failed
 #ifdef AVMPLUS_VERBOSE
-			//core->console << "checktype failed " << expected << " <- " << atom << "\n";
+		//core->console << "checktype failed " << expected << " <- " << atom << "\n";
 #endif
-			toplevel()->throwTypeError(kCheckTypeFailedError, core()->atomToErrorString(atom), core()->toErrorString(expected));
-			return NULL;
-		}
+		toplevel()->throwTypeError(kCheckTypeFailedError, core()->atomToErrorString(atom), core()->toErrorString(expected));
+		return NULL;
     }
 
 	/**

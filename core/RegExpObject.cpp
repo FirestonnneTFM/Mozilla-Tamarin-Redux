@@ -81,7 +81,7 @@ namespace avmplus
 							   ScriptObject *objectPrototype)
 		: ScriptObject(regExpClass->ivtable(), objectPrototype)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(RegExpObject));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
 
 		GC::SetFinalize(this);
 
@@ -99,7 +99,7 @@ namespace avmplus
 	RegExpObject::RegExpObject(RegExpObject *toCopy)
 		: ScriptObject(toCopy->vtable, toCopy->getDelegate())
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(RegExpObject));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
 
 		GC::SetFinalize(this);
 
@@ -120,7 +120,7 @@ namespace avmplus
 							   Stringp options)
 	   : ScriptObject(type->ivtable(), type->prototype)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(RegExpObject));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpObject));
 		m_source = pattern;
 
 		GC::SetFinalize(this);

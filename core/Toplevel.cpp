@@ -499,9 +499,9 @@ namespace avmplus
 	Atom Toplevel::callproperty(Atom base, const Multiname* multiname, int argc, Atom* atomv, VTable* vtable)
 	{
 		Binding b = getBinding(vtable->traits, multiname);
-		switch (b&7)
+		switch (AvmCore::bindingKind(b))
 		{
-		case BIND_METHOD:
+		case BKIND_METHOD:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callproperty method " << vtable->traits << " " << multiname->getName() << "\n";
@@ -512,8 +512,8 @@ namespace avmplus
 			AvmAssert(method != NULL);
 			return method->coerceEnter(argc, atomv);
 		}
-		case BIND_VAR:
-		case BIND_CONST:
+		case BKIND_VAR:
+		case BKIND_CONST:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
@@ -521,8 +521,8 @@ namespace avmplus
 			Atom method = AvmCore::atomToScriptObject(base)->getSlotAtom(AvmCore::bindingToSlotId(b));
 			return op_call(method, argc, atomv);
 		}
-		case BIND_GET:
-		case BIND_GETSET:
+		case BKIND_GET:
+		case BKIND_GETSET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callproperty getter " << vtable->traits << " " << multiname->getName() << "\n";
@@ -533,7 +533,7 @@ namespace avmplus
 			Atom method = f->coerceEnter(base);
 			return op_call(method, argc, atomv);
 		}
-		case BIND_SET:
+		case BKIND_SET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "callproperty setter " << vtable->traits << " " << multiname->getName() << "\n";
@@ -565,16 +565,16 @@ namespace avmplus
 		Binding b = getBinding(vtable->traits, multiname);
 		Atom obj = atomv[0];
 		AvmCore* core = this->core();
-		switch (b&7)
+		switch (AvmCore::bindingKind(b))
 		{
-		case BIND_METHOD:
+		case BKIND_METHOD:
 		{
 			// can't invoke method as constructor
 			MethodEnv* env = vtable->methods[AvmCore::bindingToMethodId(b)];
 			throwTypeError(kCannotCallMethodAsConstructor, core->toErrorString((AbstractFunction*)env->method));
 		}
-		case BIND_VAR:
-		case BIND_CONST:
+		case BKIND_VAR:
+		case BKIND_CONST:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "constructprop slot " << vtable->traits << " " << multiname->getName() << "\n";
@@ -584,11 +584,11 @@ namespace avmplus
 				throwTypeError(kNotConstructorError, core->toErrorString(multiname));
 			return op_construct(ctor, argc, atomv);
 		}
-		case BIND_GET:
-		case BIND_GETSET:
+		case BKIND_GET:
+		case BKIND_GETSET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "constructprop getter " << vtable->traits << " " << multiname->getName() << "\n";
+			core->console << "constructprop getter " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
 			// Invoke the getter
 			int m = AvmCore::bindingToGetterId(b);
@@ -596,17 +596,17 @@ namespace avmplus
 			Atom ctor = f->coerceEnter(obj);
 			return op_construct(ctor, argc, atomv);
 		}
-		case BIND_SET:
+		case BKIND_SET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "constructprop setter " << vtable->traits << " " << multiname->getName() << "\n";
+			core->console << "constructprop setter " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
 			// read on write-only property
 			throwReferenceError(kWriteOnlyError, multiname, vtable->traits);
 		}
 		default:
 			#ifdef DEBUG_EARLY_BINDING
-			core()->console << "constructprop dynamic " << vtable->traits << " " << multiname->getName() << "\n";
+			core->console << "constructprop dynamic " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
 			if ((obj&7)==kObjectType)
 			{
@@ -661,25 +661,30 @@ namespace avmplus
 		AvmCore* core = this->core();
 
 		// these types always succeed
-		if (expected == NULL)
-			return atom;
-		if (expected == BOOLEAN_TYPE)
-			return core->booleanAtom(atom);
-		if (expected == NUMBER_TYPE)
-			return core->numberAtom(atom);
-		if ((expected == STRING_TYPE))
-			return AvmCore::isNullOrUndefined(atom) ? 0|kStringType : core->string(atom)->atom();
-		if (expected == INT_TYPE)
-			return core->intAtom(atom);
-		if (expected == UINT_TYPE)
-			return core->uintAtom(atom);
-		if (expected == OBJECT_TYPE)
-			return atom == undefinedAtom ? nullObjectAtom : atom;
+		const BuiltinType ebt = Traits::getBuiltinType(expected);
+		switch (ebt)
+		{
+			case BUILTIN_any:
+				return atom;
+			case BUILTIN_boolean:
+				return core->booleanAtom(atom);
+			case BUILTIN_number:
+				return core->numberAtom(atom);
+			case BUILTIN_string:
+				return AvmCore::isNullOrUndefined(atom) ? nullStringAtom : core->string(atom)->atom();
+			case BUILTIN_int:
+				return core->intAtom(atom);
+			case BUILTIN_uint:
+				return core->uintAtom(atom);
+			case BUILTIN_object:
+				return atom == undefinedAtom ? nullObjectAtom : atom;
+		}
+		// else fall thru
 
 		if (AvmCore::isNullOrUndefined(atom))
-			return expected == VOID_TYPE ? undefinedAtom : nullObjectAtom;
+			return (ebt == BUILTIN_void) ? undefinedAtom : nullObjectAtom;
 
-		switch (atom&7)
+		switch (atomKind(atom))
 		{
 		case kStringType:
 			actual = STRING_TYPE;
@@ -805,9 +810,9 @@ namespace avmplus
     {
 		Binding b = getBinding(vtable->traits, multiname);
 		AvmCore* core = this->core();
-        switch (b&7)
+        switch (AvmCore::bindingKind(b))
         {
-		case BIND_METHOD: 
+		case BKIND_METHOD: 
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getproperty method " << vtable->traits << " " << multiname->getName() << "\n";
@@ -823,8 +828,8 @@ namespace avmplus
 			return methodClosureClass->create(m, obj)->atom();
 		}
 
-        case BIND_VAR:
-        case BIND_CONST:
+        case BKIND_VAR:
+        case BKIND_CONST:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
@@ -833,7 +838,7 @@ namespace avmplus
 			return AvmCore::atomToScriptObject(obj)->getSlotAtom(slot);
 		}
 
-		case BIND_NONE:
+		case BKIND_NONE:
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getproperty dynamic " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
@@ -861,8 +866,8 @@ namespace avmplus
 				}
 			}
 
-		case BIND_GET:
-		case BIND_GETSET:
+		case BKIND_GET:
+		case BKIND_GETSET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getproperty getter " << vtable->traits << " " << multiname->getName() << "\n";
@@ -872,7 +877,7 @@ namespace avmplus
 			MethodEnv *f = vtable->methods[m];
 			return f->coerceEnter(obj);
 		}
-		case BIND_SET:
+		case BKIND_SET:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core->console << "getproperty setter " << vtable->traits << " " << multiname->getName() << "\n";
@@ -896,9 +901,9 @@ namespace avmplus
 
 	void Toplevel::setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const
 	{
-        switch (b&7)
+        switch (AvmCore::bindingKind(b))
         {
-		case BIND_METHOD: 
+		case BKIND_METHOD: 
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setproperty method " << vtable->traits << " " << multiname->getName() << "\n";
@@ -914,38 +919,46 @@ namespace avmplus
 			throwReferenceError(kCannotAssignToMethodError, multiname, vtable->traits);
 		}
 
-		case BIND_CONST:
+		case BKIND_CONST:
 		{
 			// OP_setproperty can never set a const.  initproperty must be used
 			throwReferenceError(kConstWriteError, multiname, vtable->traits);
 			return;
 		}
-		case BIND_VAR:
+		case BKIND_VAR:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
 			int slot = AvmCore::bindingToSlotId(b);
-			AvmCore::atomToScriptObject(obj)->setSlotAtom(slot, 
-				coerce(value, vtable->traits->getSlotTraits(slot)));
+#ifdef AVMPLUS_TRAITS_CACHE
+			const TraitsBindingsp td = vtable->traits->getTraitsBindings();
+#else
+			const Traitsp td = vtable->traits;
+#endif
+			AvmCore::atomToScriptObject(obj)->setSlotAtom(slot, coerce(value, td->getSlotTraits(slot)));
             return;
 		}
 
-		case BIND_SET: 
-		case BIND_GETSET: 
+		case BKIND_SET: 
+		case BKIND_GETSET: 
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setproperty setter " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
 			// Invoke the setter
 			uint32 m = AvmCore::bindingToSetterId(b);
+#ifdef AVMPLUS_TRAITS_CACHE
+			AvmAssert(m < vtable->traits->getTraitsBindings()->methodCount);
+#else
 			AvmAssert(m < vtable->traits->methodCount);
+#endif
 			MethodEnv* method = vtable->methods[m];
 			Atom atomv_out[2] = { obj, value };
 			method->coerceEnter(1, atomv_out);
 			return;
 		}
-		case BIND_GET: 
+		case BKIND_GET: 
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setproperty getter " << vtable->traits << " " << multiname->getName() << "\n";
@@ -954,7 +967,7 @@ namespace avmplus
 			return;
 		}
 
-		case BIND_NONE:
+		case BKIND_NONE:
 		{
 			#ifdef DEBUG_EARLY_BINDING
 			core()->console << "setproperty dynamic " << vtable->traits << " " << multiname->getName() << "\n";
@@ -1006,18 +1019,25 @@ namespace avmplus
 		Binding b = BIND_NONE;
 		if (traits && ref->isBinding())
 		{
+#ifdef AVMPLUS_TRAITS_CACHE
+			if (!traits->isResolved())
+				traits->resolveSignatures(this);
+				
+			TraitsBindingsp tb = traits->getTraitsBindings();
+#else
+			Traitsp tb = traits;
+#endif
 			if (!ref->isNsset())
 			{
-				b = traits->findBinding(ref->getName(), ref->getNamespace());
+				b = tb->findBinding(ref->getName(), ref->getNamespace());
 			}
 			else
 			{
-				b = traits->findBinding(ref->getName(), ref->getNsset());
+				b = tb->findBinding(ref->getName(), ref->getNsset());
 				if (b == BIND_AMBIGUOUS)
 				{
 					// ERROR.  more than one binding is available.  throw exception.
-					throwTypeError(
-									kAmbiguousBindingError, core()->toErrorString(ref));
+					throwTypeError(kAmbiguousBindingError, core()->toErrorString(ref));
 				}
 			}
 		}

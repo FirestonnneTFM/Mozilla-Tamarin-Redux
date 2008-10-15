@@ -180,6 +180,91 @@ namespace avmplus
 			}
 			bits;
 	};
+	
+	// a simpler version of BitSet that doesn't dynamically grow,
+	// and doesn't require allocation for <=31 (or 63) size. This expects
+	// to be embedded as a member variable in a GCObject and will
+	// use WB if allocation is necessary.
+	class FixedBitSet
+	{
+	public:
+		inline explicit FixedBitSet() : m_bits(0) 
+		#ifdef _DEBUG
+			, m_cap(0)
+		#endif
+		{
+		}
+		
+		// blows away existing content, sets all bits to 0
+		inline void resize(MMgc::GC* gc, uint32_t cap)
+		{
+			const uint32_t MAX_INLINE_BITS = BITS_PER_UINTPTR - 1;
+			if (cap > MAX_INLINE_BITS)
+			{
+				// always allocate one more bit than we need to simplify the logic elsewhere (bit 0 goes unused)
+				const uint32_t sz = (cap + (BITS_PER_UINTPTR - 1) + 1) / sizeof(uintptr_t);
+				uintptr_t* v = (uintptr_t*)gc->Alloc(sz, MMgc::GC::kZero);
+				void* beginning =  gc->FindBeginning(this);
+				if (beginning)
+				{
+					WB(gc, beginning, &m_bits, v);
+				}
+				else
+				{
+					m_bits = uintptr_t(v);
+				}
+			}
+			else
+			{
+				m_bits = 0x1;
+			}
+		#ifdef _DEBUG
+			m_cap = cap;
+		#endif
+		}
+
+		inline void set(uint32_t bit)
+		{
+			AvmAssert(bit < m_cap);
+			uintptr_t* v = (m_bits & 1) ? &m_bits : (uintptr_t*)m_bits;
+			const uint32_t nbit = bit + 1;
+			v[nbit / BITS_PER_UINTPTR] |= (uintptr_t(1) << (nbit & (BITS_PER_UINTPTR-1)));
+		}
+
+		inline void clr(uint32_t bit)
+		{
+			AvmAssert(bit < m_cap);
+			uintptr_t* v = (m_bits & 1) ? &m_bits : (uintptr_t*)m_bits;
+			const uint32_t nbit = bit + 1;
+			v[nbit / BITS_PER_UINTPTR] &= ~(uintptr_t(1) << (nbit & (BITS_PER_UINTPTR-1)));
+		}
+		
+		inline bool test(uint32_t bit) const
+		{
+			AvmAssert(bit < m_cap);
+			const uintptr_t* v = (m_bits & 1) ? &m_bits : (const uintptr_t*)m_bits;
+			const uint32_t nbit = bit + 1;
+			return (v[nbit / BITS_PER_UINTPTR] & (uintptr_t(1) << (nbit & (BITS_PER_UINTPTR-1)))) != 0;
+		}
+
+		inline size_t allocatedSize()
+		{
+			return ((m_bits & 1) || (m_bits == 0)) ? 0 : MMgc::GC::Size((void*)m_bits);
+		}
+
+		#ifdef _DEBUG
+		inline uint32_t cap() const { return uint32_t(m_cap); }
+		#endif
+
+	private:
+		enum { BITS_PER_UINTPTR = sizeof(uintptr_t)*8 };
+	private:
+		uintptr_t m_bits;	// low bit 1 == inline, low bit 0 == dynamic alloc
+		#ifdef _DEBUG
+		uintptr_t m_cap;
+		#endif
+	};
+	
 }
 
 #endif /* __avmplus_BitSet__ */

@@ -53,7 +53,7 @@ namespace avmplus
 		// bootstrapping
 		ivtable()->scope = cvtable->scope;
 
-		AvmAssert(traits()->sizeofInstance == sizeof(ClassClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(ClassClass));
 
 		createVanillaPrototype();
 	}

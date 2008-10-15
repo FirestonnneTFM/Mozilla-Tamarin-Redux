@@ -57,7 +57,6 @@ namespace avmplus
 	 * incompatible frame states cause verify errors.
 	 */
 
-	class FrameState;
 	#if defined AVMPLUS_MIR
 	class CodegenMIR;
 	#elif defined FEATURE_NANOJIT
@@ -151,7 +150,6 @@ namespace avmplus
 		void printValue(Value& v);
 		Traits* readBinding(Traits* traits, Binding b);
 		void checkEarlySlotBinding(Traits* traits);
-		void checkEarlyMethodBinding(Traits* traits);
 		Traits* peekType(Traits* requiredType, int n=1);
 		Traits* emitCoerceSuper(int index);
 		void checkCallMultiname(AbcOpcode opcode, Multiname* multiname) const;
@@ -185,9 +183,13 @@ namespace avmplus
 		bool emitCallpropertySlotXLAT(AbcOpcode opcode, Traits* t, Binding b, uint32 argc);
 		uint32 allocateCacheSlot(uint32 imm30);
 #endif
-		Binding findMathFunction(Traits* math, Multiname* name, Binding b, int argc);
-
-		Binding findStringFunction(Traits* string, Multiname* name, Binding b, int argc);
+#ifdef AVMPLUS_TRAITS_CACHE
+		Binding findMathFunction(TraitsBindingsp math, const Multiname& name, Binding b, int argc);
+		Binding findStringFunction(TraitsBindingsp string, const Multiname& name, Binding b, int argc);
+#else
+		Binding findMathFunction(Traits* math, const Multiname& name, Binding b, int argc);
+		Binding findStringFunction(Traits* string, const Multiname& name, Binding b, int argc);
+#endif
 
 		#ifdef AVMPLUS_VERBOSE
 	public:

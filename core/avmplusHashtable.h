@@ -53,7 +53,7 @@ namespace avmplus
 		 */
 		const static Atom EMPTY = 0;
 
-		/** DELETED is stored as the key for deleted items5 */
+		/** DELETED is stored as the key for deleted items */
 		const static Atom DELETED = undefinedAtom;
 
 		/** kDefaultCapacity must be a power of 2 */

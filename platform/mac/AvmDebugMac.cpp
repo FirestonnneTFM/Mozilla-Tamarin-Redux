@@ -78,7 +78,7 @@ namespace avmplus
 				Str255 buf;
 				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
 				DebugStr(buf);
-				exit(1);
+				exit(1);	// ensure we die
 			}
 			else
 			{
@@ -108,7 +108,11 @@ namespace avmplus
 		char buf[256];
 		strcpy(buf, p);
 		::CopyCStringToPascal(buf, (StringPtr)buf);
-		DebugStr((StringPtr) buf);
+		if(debuggerBreak)
+		{
+			DebugStr((StringPtr) buf);
+			exit(1);	// ensure we die
+		}
 	}
 	#endif
 }

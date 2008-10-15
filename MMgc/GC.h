@@ -872,7 +872,7 @@ namespace MMgc
 		/**
 		 * Are we currently marking
 		 */
-		bool IncrementalMarking() { return marking; }
+		inline bool IncrementalMarking() const { return marking; }
 
 		/**
 		 * A magical write barrier that finds the container's address and the
@@ -1121,6 +1121,9 @@ namespace MMgc
 
 		/** @access Requires(request) */
 		static GCWeakRef *GetWeakRef(const void *obj);
+		
+		// a WeakRef that always refers to null. useful if you need one.
+		GCWeakRef* emptyWeakRef;
 
 		/** @access Requires((request && m_lock) || exclusiveGC) */
 		void ClearWeakRef(const void *obj);

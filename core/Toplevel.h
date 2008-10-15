@@ -134,6 +134,9 @@ namespace avmplus
 		void throwReferenceError(int id, const Multiname* multiname, const Traits* traits) const;
 		void throwReferenceError(int id, const Multiname* multiname) const;
 
+		inline void throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const { throwReferenceError(id, &multiname, traits); }
+		inline void throwReferenceError(int id, const Multiname& multiname) const { throwReferenceError(id, &multiname); }
+
 		DWB(VTable*) object_vtable; // instance vtable
 		DWB(VTable*) class_vtable; // instance vtable
 

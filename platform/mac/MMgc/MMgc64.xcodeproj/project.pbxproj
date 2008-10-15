@@ -392,6 +392,7 @@
 					ENABLE_PROFILER,
 					ENABLE_COMPILER,
 					SOFT_ASSERTS,
+					DEBUGGER,
 				);
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
 				INSTALL_PATH = /usr/local/lib;
@@ -421,6 +422,7 @@
 					"TARGET_RT_MAC_MACHO=1",
 					USE_MMAP,
 					_MAC,
+					DEBUGGER,
 				);
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
 				INSTALL_PATH = /usr/local/lib;

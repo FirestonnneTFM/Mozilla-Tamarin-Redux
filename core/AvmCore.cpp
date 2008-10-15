@@ -100,7 +100,32 @@ namespace avmplus
 		NATIVE_SCRIPT(0, Toplevel)
 	END_NATIVE_SCRIPTS()
 
+#ifdef AVMPLUS_TRAITS_CACHE
+	void AvmCore::setCacheSizes(const CacheSizes& cs)
+	{
+		#ifdef AVMPLUS_VERBOSE
+		if (verbose())
+		{
+			console << "setCacheSize: bindings " << cs.bindings << " metadata " << cs.metadata << '\n';
+		}
+		#endif // DEBUGGER
+
+		//printf("setCacheSize: bindings %d metadata %d\n",cs.bindings,cs.metadata);
+
+ 		m_tbCache->resize(cs.bindings);	
+ 		m_tmCache->resize(cs.metadata);
+	}
+#endif
+
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	extern AvmCore* g_tmcore;
+#endif
+
 	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), 
+#ifdef AVMPLUS_TRAITS_CACHE
+ 		m_tbCache(new (g) QCache(0, g)),	// bindings: unlimited by default
+ 		m_tmCache(new (g) QCache(1, g)),	// metadata: limited to 1 by default
+#endif
 #ifdef AVMPLUS_MIR
 		mirBuffers(g, 4), 
 #endif
@@ -115,6 +140,10 @@ namespace avmplus
 		, lookup_cache_timestamp(1)
 #endif
     {
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+		AvmAssert(g_tmcore == NULL);
+		g_tmcore = this;
+#endif
 		// sanity check for all our types
 		AvmAssert (sizeof(int8) == 1);
 		AvmAssert (sizeof(uint8) == 1);		
@@ -164,10 +193,10 @@ namespace avmplus
 			config.bbgraph = false;
 			#endif
 
-    	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     		config.sse2 = true;
-	    	#endif
-        #endif
+			#endif
+			#endif
 
 	#ifdef VTUNE
 			VTuneStatus = CheckVTuneStatus();
@@ -223,7 +252,7 @@ namespace avmplus
 
 		numNamespaces = 1024;  // power of 2
 		namespaces = new DRC(Namespacep)[numNamespaces];
-		memset(namespaces, 0, numNamespaces*sizeof(Namespace*));
+		memset(namespaces, 0, numNamespaces*sizeof(Namespacep));
 
 		console.setCore(this);
 		
@@ -322,6 +351,10 @@ namespace avmplus
 		while(mirBuffers.size() > 0)
 			mirBuffers.removeFirst()->free();
 #endif
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+		AvmAssert(g_tmcore == this);
+		g_tmcore = NULL;
+#endif
 #ifdef SUPERWORD_PROFILING
 		swprofStop();
 #endif
@@ -409,10 +442,9 @@ namespace avmplus
 			// create a temp object vtable to use, since the real one isn't created yet
 			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
 			// of Object and Class have the right scope.
-
 			object_vtable = newVTable(traits.object_itraits, NULL, emptyScope, abcEnv, NULL);
 			object_vtable->resolveSignatures();
-			mainTraits->sizeofInstance = (uint32_t)getToplevelSize();
+			mainTraits->resetSizeof(uint32_t(getToplevelSize()));
 		}
 		else
 		{
@@ -500,17 +532,22 @@ namespace avmplus
 	
 	void AvmCore::exportDefs(Traits* scriptTraits, ScriptEnv* scriptEnv)
 	{
-		DomainEnv* domainEnv = scriptEnv->domainEnv();
 		AbcEnv* abcEnv = scriptEnv->abcEnv();
+		DomainEnv* domainEnv = abcEnv->domainEnv();
 
 		// iterate thru each of the definitions exported by this script
 		int i=0;
-		while((i=scriptTraits->next(i)) != 0)
+#ifdef AVMPLUS_TRAITS_CACHE
+		TraitsBindingsp tb = scriptTraits->getTraitsBindings();
+#else
+		Traitsp tb = scriptTraits;
+#endif
+		while((i=tb->next(i)) != 0)
 		{
 			// don't need to check for DELETED because we never remove trait bindings
-			AvmAssert(scriptTraits->keyAt(i) != NULL);
-			Stringp name = scriptTraits->keyAt(i);
-			Namespace* ns = scriptTraits->nsAt(i);
+			AvmAssert(tb->keyAt(i) != NULL);
+			Stringp name = tb->keyAt(i);
+			Namespacep ns = tb->nsAt(i);
 				
 			// not already in the table then export it 
 			// otherwise we keep the first one that was encountered.
@@ -524,14 +561,14 @@ namespace avmplus
 					if (scriptTraits->pool->verbose)
 						console << "exporting " << ns << "::" << name << "\n";
 					#endif
-					domainEnv->addNamedScript(name, ns, (Binding)scriptEnv);
+					domainEnv->addNamedScript(name, ns, scriptEnv);
 				}
 			}
 			else
 			{
-				if (!abcEnv->privateScriptEnvs.get(name, ns))
+				if (!abcEnv->getPrivateScriptEnv(name, ns))
 				{
-					abcEnv->privateScriptEnvs.add(name, ns, (Binding) scriptEnv);
+					abcEnv->addPrivateScriptEnv(name, ns, scriptEnv);
 				}
 			}
 		}
@@ -589,7 +626,7 @@ namespace avmplus
 		} 
 		else 
 		{
-			Domain* domain = domainEnv ? domainEnv->getDomain() : builtinDomain;
+			Domain* domain = domainEnv ? domainEnv->domain() : builtinDomain;
 			
 			// parse constants and attributes.
 			pool = parseActionBlock(code,
@@ -606,28 +643,6 @@ namespace avmplus
 		}
 
 		return handleActionPool(pool, domainEnv, toplevel, codeContext);
-	}
-
-	Traits* AvmCore::makeParameterizedITraits(Stringp name, Namespace* ns, Traits* t)
-	{
-		Traits* newtraits = newTraits(t, 0, 0, t->sizeofInstance);
-		newtraits->name = name;
-		newtraits->ns = ns;
-		newtraits->slotCount = t->slotCount;
-		newtraits->methodCount = t->methodCount;
-		newtraits->needsHashtable = t->needsHashtable;
-		return newtraits;
-	}
-
-	Traits* AvmCore::makeParameterizedCTraits(Stringp name, Namespace* ns, Traits* t)
-	{
-		Traits* newtraits = newTraits(t->base, 0, 0, t->sizeofInstance);
-		newtraits->name = name;
-		newtraits->ns = ns;
-		newtraits->slotCount = t->base->slotCount;
-		newtraits->methodCount = t->base->methodCount;
-		newtraits->needsHashtable = t->needsHashtable;
-		return newtraits;
 	}
 
 /*
@@ -1147,6 +1162,18 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s;
 	}
 
+	String* AvmCore::toErrorString(const Multiname& n)
+	{
+		String* s = NULL;
+	#ifdef DEBUGGER
+		s = n.format(this, Multiname::MULTI_FORMAT_NAME_ONLY);
+	#else
+		s = kEmptyString;
+		(void)n;
+	#endif /* DEBUGGER */
+		return s;
+	}
+
 	String* AvmCore::toErrorString(const Multiname* n)
 	{
 		String* s = NULL;
@@ -1162,7 +1189,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s;
 	}
 
-	String* AvmCore::toErrorString(Namespace* ns)
+	String* AvmCore::toErrorString(Namespacep ns)
 	{
 		String* s = NULL;
 	#ifdef DEBUGGER
@@ -1177,7 +1204,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s;
 	}
 
-	String* AvmCore::toErrorString(Traits* t)
+	String* AvmCore::toErrorString(const Traits* t)
 	{
 		#ifndef DEBUGGER
 		(void)t;
@@ -1434,7 +1461,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 
-	Namespace* AvmCore::internNamespace(Namespace* ns)
+	Namespacep AvmCore::internNamespace(Namespacep ns)
 	{
 		if (ns->isPrivate())
 		{
@@ -1464,7 +1491,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			Multiname name;
 			pool->parseMultiname(name, index);
-			out << &name;
+			out << name;
 		}
 		else
 		{
@@ -1583,12 +1610,12 @@ return the result of the comparison ToPrimitive(x) == y.
 				ptrdiff_t target = off + readS24(pc);
 				pc += 3;
 				int maxindex = readU30(pc);
-				buffer << opcodeInfo[opcode].name << " default:" << target << " maxcase:"<<maxindex;
+				buffer << opcodeInfo[opcode].name << " default:" << (int)target << " maxcase:"<<maxindex;
 				for (int i=0; i <= maxindex; i++)
 				{
 					target = off + readS24(pc);
 					pc += 3;
-					buffer << " " << target;
+					buffer << " " << (int)target;
 				}
 				break;
 			}
@@ -1835,8 +1862,11 @@ return the result of the comparison ToPrimitive(x) == y.
 			AvmAssert(false);
 			return false;
 		}
-
+#ifdef AVMPLUS_TRAITS_CACHE
+		return lhs->containsInterface(itraits);
+#else
 		return lhs->containsInterface(itraits)!=0;
+#endif
     }
 
 	Stringp AvmCore::coerce_s(Atom atom)
@@ -2728,7 +2758,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	 * uri.  We assume uri's are already interned, so interning a namespace
 	 * is quick because uri's can be compared quickly.
 	 */
-	int AvmCore::findNamespace(const Namespace* ns)
+	int AvmCore::findNamespace(Namespacep ns)
 	{
         int m = numNamespaces;
 		// 80% load factor
@@ -2744,7 +2774,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // find the slot to use
         int i = (hashCode&0x7FFFFFFF) & bitMask;
         int n = 7;
-		Namespace* k;
+		Namespacep k;
         while ((k=namespaces[i]) != NULL && k->m_uri != ns->m_uri ) {
             i = (i + (n++)) & bitMask; // quadratic probe
 		}
@@ -3054,12 +3084,12 @@ return the result of the comparison ToPrimitive(x) == y.
 		int oldCount = numNamespaces;
 
 		namespaces = new DRC(Namespacep)[newlen];
-		memset(namespaces, 0, newlen*sizeof(Namespace*));
+		memset(namespaces, 0, newlen*sizeof(Namespacep));
 		numNamespaces = newlen;
 		
         for (int i=0; i < oldCount; i++)
         {
-			Namespace* o = old[i];
+			Namespacep o = old[i];
             if (o != NULL)
                 namespaces[findNamespace(o)] = o;
         }
@@ -3076,7 +3106,13 @@ return the result of the comparison ToPrimitive(x) == y.
 	VTable* AvmCore::newVTable(Traits* traits, VTable* base, ScopeChain* scope,
 		AbcEnv* abcEnv, Toplevel* toplevel)
 	{
-		size_t extraSize = sizeof(MethodEnv*)*(traits->methodCount > 0 ? traits->methodCount-1 : 0);
+#ifdef AVMPLUS_TRAITS_CACHE
+		traits->resolveSignatures(toplevel);
+		const uint32_t count = traits->getTraitsBindings()->methodCount;
+#else
+		const uint32_t count = traits->methodCount;
+#endif
+		size_t extraSize = sizeof(MethodEnv*)*(count > 0 ? count-1 : 0);
 		return new (GetGC(), extraSize) VTable(traits, base, scope, abcEnv, toplevel);
 	}
 
@@ -3093,7 +3129,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
 	}
 
-    Namespace* AvmCore::newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type)
+    Namespacep AvmCore::newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type)
 	{
 		// E4X - this is 13.2.3, step 3 - prefix IS specified
 
@@ -3136,14 +3172,14 @@ return the result of the comparison ToPrimitive(x) == y.
         return new (GetGC()) Namespace(p, u, type);
 	}
 
-	Namespace* AvmCore::newNamespace(Atom uri, Namespace::NamespaceType type)
+	Namespacep AvmCore::newNamespace(Atom uri, Namespace::NamespaceType type)
 	{
 		// prefix and uri must be interned!
 		// E4X - this is 13.2.2, step 3 - "prefix not specified"
 
 		if (isNamespace (uri))
 		{
-			Namespace *ns = atomToNamespace (uri);
+			Namespacep ns = atomToNamespace (uri);
 			return new (GetGC()) Namespace (ns->getPrefix(), ns->getURI(), type);
 		}
 		else if (isObject(uri) && isQName (uri) && !isNull(atomToQName (uri)->getURI()))
@@ -3158,7 +3194,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	Namespace* AvmCore::newNamespace(Stringp uri, Namespace::NamespaceType type)
+	Namespacep AvmCore::newNamespace(Stringp uri, Namespace::NamespaceType type)
 	{
 		uri = internString(uri);
 		Atom prefix = (uri == kEmptyString) ? kEmptyString->atom() : undefinedAtom;
@@ -3189,7 +3225,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	Atom AvmCore::intToAtom(int n)
 	{
 #ifdef AVMPLUS_64BIT
-		// We can always fi t the value in an Atom
+		// We can always fit the value in an Atom
 		return (((Atom)n)<<3) | kIntegerType;
 #else
 		// handle integer values w/out allocation
@@ -3311,7 +3347,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif
 
-#ifndef AVMPLUS_AMD64
+#ifndef AVMPLUS_SSE2_ALWAYS
 	Atom AvmCore::doubleToAtom(double n)
 	{
 		// There is no need for special logic for NaN or +/-Inf since we don't
@@ -3357,7 +3393,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			return allocDouble(n);
 		}
 	}
-#endif // not AVMPLUS_AMD64
+#endif // not AVMPLUS_SSE2_ALWAYS
 
 #ifdef AVMPLUS_VERBOSE
     /**
@@ -3414,29 +3450,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif
 
-    /**
-     * traits with base traits.  These should only be used
-	 * for Object instance traits, and activation objects (e.g. global scope)
-	 * that are not normally accessable to users.
-     */
-	Traits* AvmCore::newTraits(Traits *base,
-							int nameCount,
-							int interfaceDelta,
-							uint32 objectSize)
-	{
-		int interfaceCount = interfaceDelta;
-		if (base)
-			interfaceCount += base->interfaceCount+1; // +1 b/c base is added
-		int interfaceCapacity = MathUtils::nextPowerOfTwo((5*interfaceCount >> 2) + 1);
-		size_t extra = interfaceCapacity*sizeof(Traits*);
-		Traits* traits = new (GetGC(), extra) Traits(this, base,
-											  nameCount,
-											  interfaceCount,
-											  interfaceCapacity,
-											  objectSize);
-		return traits;
-	}
-	
 	Stringp AvmCore::newString(const char *s) const
 	{
 		int len = String::Length(s);
@@ -3541,7 +3554,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	// static
 
-#ifndef AVMPLUS_AMD64
+#ifndef AVMPLUS_SSE2_ALWAYS
 	int AvmCore::integer_d(double d)
 	{
 		// Try a simple case first to see if we have a in-range float value
@@ -3559,7 +3572,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		return doubleToInt32(d);
 	}
-#endif // not AVMPLUS_AMD64
+#endif // not AVMPLUS_SSE2_ALWAYS
 
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 	int AvmCore::integer_d_sse2(double d)
@@ -3705,7 +3718,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			// |d|<2^31
 			return int32(d);
 		}
-
+	    
 		if(u_tmp > 0x01f00000) {
 			// |d|>=2^32
 			expon = u_tmp >> 20;
@@ -3891,11 +3904,10 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		if (codeContextAtom == CONTEXT_NONE) {
 			return NULL;
-		} else if ((codeContextAtom&7) == CONTEXT_ENV) {
-			MethodEnv *env = (MethodEnv*)(codeContextAtom&~7);
-			return env->vtable->abcEnv->codeContext;
+		} else if (getCodeContextKind(codeContextAtom) == CONTEXTKIND_ENV) {
+			return getCodeContextEnv(codeContextAtom)->vtable->abcEnv->codeContext();
 		} else {
-			return (CodeContext*)(codeContextAtom&~7);
+			return getCodeContextObject(codeContextAtom);
 		}
 	}
 
@@ -3939,7 +3951,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				case kStringType:
 				case kObjectType:
 				case kNamespaceType:
-					((RCObject*)(a&~7))->DecrementRef();
+					obj->DecrementRef();
 					break;
 				}
 			}
@@ -4034,8 +4046,13 @@ return the result of the comparison ToPrimitive(x) == y.
 	void AvmCore::enq(Traits* t) {
         if (config.verifyall && !t->isInterface) {
             enq(t->init);
-		    for (int i=0, n=t->methodCount; i < n; i++)
-                enq(t->getMethod(i));
+#ifdef AVMPLUS_TRAITS_CACHE
+			TraitsBindingsp td = t->getTraitsBindings();
+#else
+			Traitsp td = t;
+#endif
+		    for (int i=0, n=td->methodCount; i < n; i++)
+                enq(td->getMethod(i));
         }
 	}
 

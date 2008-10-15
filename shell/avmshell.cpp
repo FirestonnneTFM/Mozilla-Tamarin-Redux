@@ -67,6 +67,12 @@ bool P4Available();
 bool P4Available();
 #endif
 
+#ifdef UNDER_CE
+	#define STRTOL10(x,y,z) wcstol((x),(y),(z))
+#else
+	#define STRTOL10(x,y,z) strtol((x),(y),(z))
+#endif
+
 #if defined(AVM_SHELL_PLATFORM_HOOKS)
     void AVMShellDidEndTest();
     void AVMShellDidTimeout();
@@ -251,6 +257,12 @@ namespace avmshell
 		#endif
 		printf("          [-memstats]   generate statistics on memory usage\n");
 		printf("          [-memlimit d] limit the heap size to d pages\n");
+
+		#ifdef AVMPLUS_TRAITS_CACHE
+			printf("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
+			printf("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
+		#endif
+
 		#ifdef _DEBUG
 			printf("          [-Dgreedy]    collect before every allocation\n");
 		#endif /* _DEBUG */
@@ -573,11 +585,15 @@ namespace avmshell
 	{
 		bool show_mem = false;
 
+#ifdef AVMPLUS_TRAITS_CACHE
+		AvmCore::CacheSizes cacheSizes;	// defaults to unlimited
+#endif
+
 		TRY(this, kCatchAction_ReportAsError)
 		{
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-			#ifdef AVMPLUS_MAC
+			#ifdef AVMPLUS_SSE2_ALWAYS
 			config.sse2 = true;
 			#else
 			if (!P4Available()) {
@@ -635,31 +651,34 @@ namespace avmshell
 					if (arg[1] == 'D') {
 						if (!strcmp(arg+2, "timeout")) {
 							config.interrupts = true;
-
+						}
 						#ifdef AVMPLUS_IA32
-						} else if (!strcmp(arg+2, "nosse")) {
+						else if (!strcmp(arg+2, "nosse")) {
                             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 							config.sse2 = false;
-                            #endif
+							#endif
+						}
 						#endif
 
 	                    #ifdef AVMPLUS_VERIFYALL
-						} else if (!strcmp(arg+2, "verifyall")) {
+						else if (!strcmp(arg+2, "verifyall")) {
 							config.verifyall = true;
+						}
 		                #endif /* AVMPLUS_VERIFYALL */
 
 	                    #ifdef _DEBUG
-						} else if (!strcmp(arg+2, "greedy")) {
+						else if (!strcmp(arg+2, "greedy")) {
 							GetGC()->greedy = true;
+						}
 		                #endif /* _DEBUG */
 
 	                    #ifdef DEBUGGER
-						} else if (!strcmp(arg+2, "nogc")) {
+						else if (!strcmp(arg+2, "nogc")) {
 							GetGC()->nogc = true;
 						} else if (!strcmp(arg+2, "noincgc")) {
 							GetGC()->incremental = false;
 						} else if (!strcmp(arg+2, "astrace")) {
-							avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) strtol(argv[++i], 0, 10);
+							avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) STRTOL10(argv[++i], 0, 10);
 						} else if (!strcmp(arg+2, "language")) {
 							langID=-1;
 							for (int j=0;j<kLanguages;j++) {
@@ -672,10 +691,11 @@ namespace avmshell
 								langID = atoi(argv[i+1]);
 							}
 							i++;
+						}
                     	#endif /* DEBUGGER */
 							
 						#ifdef AVMPLUS_SELFTEST
-						} else if (!strncmp(arg+2, "selftest", 8)) {
+						else if (!strncmp(arg+2, "selftest", 8)) {
 							do_selftest = true;
 							if (arg[10] == '=') {
 								size_t k = strlen(arg+11);
@@ -700,61 +720,71 @@ namespace avmshell
 								if (*st_name == 0)
 									st_name = NULL;
 							}
+						}
 						#endif
 						#ifdef AVMPLUS_VERBOSE
-						} else if (!strcmp(arg+2, "verbose")) {
+						else if (!strcmp(arg+2, "verbose")) {
 							do_verbose = true;
 						} else if (!strcmp(arg+2, "verbose_init")) {
                             do_verbose = this->config.verbose = true;
-                        
+                        }
 						#endif
 
 	                #ifdef AVMPLUS_MIR
-						} else if (!strcmp(arg+2, "nodce")) {
+						else if (!strcmp(arg+2, "nodce")) {
 							config.dceopt = false;
 						} else if (!strcmp(arg+2, "mem")) {
 							show_mem = true;
+						}
                     #endif
 
                     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
                         #ifdef AVMPLUS_VERBOSE
-						} else if (!strcmp(arg+2, "bbgraph")) {
+						else if (!strcmp(arg+2, "bbgraph")) {
 							config.bbgraph = true;  // generate basic block graph (only valid with MIR)
-                        #endif
-						} else if (!strcmp(arg+2, "forcemir")) {
+                        }
+						#endif
+                    #endif
+
+                    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+						else if (!strcmp(arg+2, "forcemir")) {
 							config.jit = true;
 						} else if (!strcmp(arg+2, "interp")) {
 							config.jit = false;
 						} else if (!strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
-                    #endif
+						}
+                        #endif
 
-						} else {
+						else {
 							usage();
 						}
+					} 
+				#ifdef AVMPLUS_TRAITS_CACHE
+					else if (!strcmp(arg, "-cache_bindings")) {
+						cacheSizes.bindings = (uint16_t)STRTOL10(argv[++i], 0, 10);
+					} else if (!strcmp(arg, "-cache_metadata")) {
+						cacheSizes.metadata = (uint16_t)STRTOL10(argv[++i], 0, 10);
+					}
+				#endif
                 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-                    } else if (!strcmp(arg, "-Ojit")) {
+					else if (!strcmp(arg, "-Ojit")) 
+					{
                         config.jit = true;
-                #endif
-					} else if (!strcmp(arg, "-memstats")) {
+					} 
+				#endif
+					else if (!strcmp(arg, "-memstats")) {
 						GetGC()->gcstats = true;
-					#ifdef AVMPLUS_MIR
-					} else if (!strcmp(arg, "-Ojit")) {
-						config.jit = true;
-					#endif
 					} else if (!strcmp(arg, "-memlimit")) {
-#ifdef UNDER_CE
-						GetGC()->GetGCHeap()->SetHeapLimit(wcstol(argv[++i], 0, 10));
-#else
-						GetGC()->GetGCHeap()->SetHeapLimit(strtol(argv[++i], 0, 10));
-#endif
+						GetGC()->GetGCHeap()->SetHeapLimit(STRTOL10(argv[++i], 0, 10));
 					} else if (!strcmp(arg, "-log")) {
 						do_log = true;
+					} 
 					#ifdef AVMPLUS_INTERACTIVE
-					} else if (!strcmp(arg, "-i")) {
+					else if (!strcmp(arg, "-i")) {
 						do_interactive = true;
-					#endif //AVMPLUS_INTERACTIVE
 					}
+					#endif //AVMPLUS_INTERACTIVE
 					else if (!strcmp(arg, "-error")) {
 						show_error = true;
 						#ifdef WIN32
@@ -847,6 +877,11 @@ namespace avmshell
 #endif
 				delete [] logname;
 			}
+
+#ifdef AVMPLUS_TRAITS_CACHE
+			setCacheSizes(cacheSizes);
+#endif
+			
 			initBuiltinPool();
 			initShellPool();
 

@@ -47,24 +47,24 @@ namespace avmplus
 		
 		/** The domain-wide traits table (type name => instance Traits) */
 		DWB(MultinameHashtable*) namedTraits;
-		
+
 		/** domain-wide type table of scripts, indexed by definition name */
 		DWB(MultinameHashtable*) namedScripts;
-		
+
 	public:
 		/** Parent domain */
 		Domain* const base;
 		
 		Domain(AvmCore *core, Domain* base);
 		
-		Traits* getNamedTraits(Stringp name, Namespace* ns, bool recursive/*=true*/) const;
+		Traits* getNamedTraits(Stringp name, Namespacep ns, bool recursive/*=true*/) const;
 		Traits* getNamedTraits(const Multiname* multiname, bool recursive/*=true*/) const;
-		AbstractFunction* getNamedScript(Stringp name, Namespace* ns) const;
+		AbstractFunction* getNamedScript(Stringp name, Namespacep ns) const;
 		AbstractFunction* getNamedScript(const Multiname* multiname) const;
 		
-		Binding getNamedTrait(Stringp name, Namespace* ns) const { return namedTraits->get(name, ns); }
-		void addNamedTrait(Stringp name, Namespace* ns, Binding v) { namedTraits->add(name, ns, v); }
-		void addNamedScript(Stringp name, Namespace* ns, Binding v) { namedScripts->add(name, ns, v); }
+		Traits* getNamedTrait(Stringp name, Namespace* ns) const { return (Traits*)namedTraits->get(name, ns); }
+		void addNamedTrait(Stringp name, Namespace* ns, Traits* v) { namedTraits->add(name, ns, (Binding)v); }
+		void addNamedScript(Stringp name, Namespace* ns, AbstractFunction* v) { namedScripts->add(name, ns, (Binding)v); }
 	};
 }
 

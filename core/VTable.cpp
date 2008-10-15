@@ -53,14 +53,22 @@ namespace avmplus
 		linked(false)
 	{
 		AvmAssert(traits != NULL);
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_vtable, this); )
 	}
+
+#ifdef AVMPLUS_TRAITS_MEMTRACK 
+	VTable::~VTable()
+	{
+		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_vtable, this); )
+	}
+#endif
 
 	void VTable::resolveSignatures()
 	{
 		if( this->linked )
 			return;
 		linked = true;
-		if (!traits->linked)
+		if (!traits->isResolved())
 			traits->resolveSignatures(toplevel);
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -72,6 +80,7 @@ namespace avmplus
 #endif // DEBUG
 
 		AvmCore* core = traits->core;
+		MMgc::GC* gc = core->GetGC();
 
 		if (traits->init && !this->init)
 		{
@@ -80,88 +89,78 @@ namespace avmplus
 
 		// populate method table
 
-		if (base)
+#ifdef AVMPLUS_TRAITS_CACHE
+		const TraitsBindingsp td = traits->getTraitsBindings();
+		const TraitsBindingsp btd = td->base;
+#else
+		const Traitsp td = traits;
+		const Traitsp btd = traits->base;
+#endif
+		for (uint32_t i = 0, n = td->methodCount; i < n; i++)
 		{
-			// inheriting
-			int baseMethodCount = base->traits->methodCount;
-			for (int i=0, n=traits->methodCount; i < n; i++)
-			{
-				AbstractFunction* method = traits->getMethod(i);
+			AbstractFunction* method = td->getMethod(i);
 
-				if (i < baseMethodCount && method == traits->base->getMethod(i))
-				{
+			if (btd && i < btd->methodCount && method == btd->getMethod(i))
+			{
 					// inherited method
 					//this->methods[i] = base->methods[i];
-					WB(core->GetGC(), this, &methods[i], base->methods[i]);
-				}
-				else
-				{
-					// new definition
-					if (method != NULL)
-					{
-						//this->methods[i] = new (core->GetGC()) MethodEnv(method, this);
-						WB(core->GetGC(), this, &methods[i], makeMethodEnv(method));
-					}
-					#ifdef AVMPLUS_VERBOSE
-					else if (traits->pool->verbose)
-					{
-						// why would the compiler assign sparse disp_id's?
-						traits->core->console << "WARNING: empty disp_id " << i << " on " << traits << "\n";
-					}
-					#endif
-				}
+				WB(gc, this, &methods[i], base->methods[i]);
+				continue;
 			}
+					// new definition
+			if (method != NULL)
+			{
+				//this->methods[i] = new (gc) MethodEnv(method, this);
+				WB(gc, this, &methods[i], makeMethodEnv(method));
+				continue;
+			}
+			#ifdef AVMPLUS_VERBOSE
+			if (traits->pool->verbose)
+			{
+				// why would the compiler assign sparse disp_id's?
+				traits->core->console << "WARNING: empty disp_id " << i << " on " << traits << "\n";
+			}
+			#endif
+		}
 
 			// this is done here b/c this property of the traits isn't set until the
 			// Dictionary's ClassClosure is called
+		if (base)
 			traits->isDictionary = base->traits->isDictionary;
-		}
-		else
-		{
-			// not inheriting
-			for (int i=0, n=traits->methodCount; i < n; i++)
-			{
-				AbstractFunction* method = traits->getMethod(i);
-				if (method != NULL)
-				{
-					MethodEnv *env = makeMethodEnv(method);
-					//this->methods[i] = env;
-					WB(core->GetGC(), this, &methods[i], env);
-				}
-				#ifdef AVMPLUS_VERBOSE
-				else if (traits->pool->verbose)
-				{
-					// why would the compiler assign sparse disp_id's?
-					traits->core->console << "WARNING: empty disp_id " << i << " on " << traits << "\n";
-				}
-				#endif
-			}
-		}
 
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#ifdef AVMPLUS_TRAITS_CACHE
+	#else
 		if(traits->hasInterfaces)
+	#endif
 		{
-			for (int i=0; i < Traits::IMT_SIZE; i++)
+			for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
 			{
 				Binding b = traits->getIMT()[i];
 				if (AvmCore::isMethodBinding(b))
 				{
 					//imt[i] = methods[AvmCore::bindingToMethodId(b)];
-					WB(core->GetGC(), this, &imt[i], methods[AvmCore::bindingToMethodId(b)]);
+					WB(gc, this, &imt[i], methods[AvmCore::bindingToMethodId(b)]);
 				}
-				else if ((b&7) == BIND_ITRAMP)
+				else if (AvmCore::bindingKind(b) == BKIND_ITRAMP)
 				{
+#ifdef AVMPLUS_TRAITS_CACHE
+					if (base && b == traits->base->getIMT()[i])
+#else
 					if (base && traits->base->hasInterfaces && b == traits->base->getIMT()[i])
+#endif
 					{
 						// copy down imt stub from base class
 						//imt[i] = base->imt[i];
-						WB(core->GetGC(), this, &imt[i], base->imt[i]);
+						WB(gc, this, &imt[i], base->imt[i]);
 					}
 					else
 					{
 						// create new imt stub
-						//imt[i] = new (core->GetGC()) MethodEnv((void*)(b&~7));
-						WB(core->GetGC(), this, &imt[i], new (core->GetGC()) MethodEnv((void*)(b&~7), this));
+						//imt[i] = new (gc) MethodEnv((void*)(b&~7));
+						void* tramp = AvmCore::getITrampAddr(b);
+						MethodEnv* e = new (gc) MethodEnv(tramp, this);
+						WB(gc, this, &imt[i], e);
 					}
 				}
 			}
@@ -177,8 +176,8 @@ namespace avmplus
 		int method_id = func->method_id;
 		if (method_id != -1)
 		{
-			AvmAssert(abcEnv->pool == (PoolObject *) func->pool);
-			if (abcEnv->methods[method_id] == NULL)
+			AvmAssert(abcEnv->pool() == (PoolObject *) func->pool);
+			if (abcEnv->getMethod(method_id) == NULL)
 			{
 				abcEnv->setMethod(method_id, methodEnv);
 			}
@@ -200,16 +199,25 @@ namespace avmplus
 		if(ivtable != NULL)
 			size += ivtable->size();
 
-		size += traits->numQuads * sizeof(MultinameHashtable::Quad);
+#ifdef AVMPLUS_TRAITS_CACHE
+		const TraitsBindingsp td = traits->getTraitsBindings();
+		const uint32_t n = td->methodCount;
+		const uint32_t baseMethodCount = base ? td->base->methodCount : 0;
+		size += td->methodCount*sizeof(AbstractFunction*);
+#else
+		const Traitsp td = traits;
+		const uint32_t n = traits->methodCount;
+		const uint32_t baseMethodCount = base ? base->traits->methodCount : 0;
 
+		size += traits->allocatedSize();
 		size += traits->methodCount*sizeof(AbstractFunction*);
+#endif
 
-		int baseMethodCount = base ? base->traits->methodCount : 0;
-		for (int i=0, n=traits->methodCount; i < n; i++)
+		for (uint32_t i=0; i < n; i++)
 		{
-			AbstractFunction* method = traits->getMethod(i);
+			AbstractFunction* method = td->getMethod(i);
 			
-			if (i < baseMethodCount && traits->base && method == traits->base->getMethod(i))
+			if (i < baseMethodCount && td->base && method == td->base->getMethod(i))
 			{
 				continue;
 			}
