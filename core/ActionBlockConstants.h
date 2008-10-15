@@ -150,6 +150,18 @@ namespace avmplus
 			OP_pushscope = 0x30,
 			OP_pushnamespace = 0x31,
 			OP_hasnext2 = 0x32,
+#ifdef AVMPLUS_MOPS
+			OP_li8 = 0x35,
+			OP_li16 = 0x36,
+			OP_li32 = 0x37,
+			OP_lf32 = 0x38,
+			OP_lf64 = 0x39,
+			OP_si8 = 0x3A,
+			OP_si16 = 0x3B,
+			OP_si32 = 0x3C,
+			OP_sf32 = 0x3D,
+			OP_sf64 = 0x3E,
+#endif
 			OP_newfunction = 0x40,
 			OP_call = 0x41,
 			OP_construct = 0x42,
@@ -166,6 +178,11 @@ namespace avmplus
 			OP_callinterface = 0x4D,
 			OP_callsupervoid = 0x4E,
 			OP_callpropvoid = 0x4F,
+#ifdef AVMPLUS_MOPS
+			OP_sxi1 = 0x50,
+			OP_sxi8 = 0x51,
+			OP_sxi16 = 0x52,
+#endif
 			OP_applytype = 0x53,
 			OP_newobject = 0x55,
 			OP_newarray = 0x56,

@@ -1086,6 +1086,8 @@ namespace avmplus
 					break;
 				}
 				// else: setting const from illegal context, fall through
+				#else
+				(void)propTraits;
 				#endif
 				
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -2350,6 +2352,59 @@ namespace avmplus
 				break;
 			}
 
+
+#ifdef AVMPLUS_MOPS
+			// sign extends
+			case OP_sxi1:
+			case OP_sxi8:
+			case OP_sxi16:
+			{
+				checkStack(1,1);
+				emitCoerce(INT_TYPE, sp);
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, INT_TYPE); )
+				state->pop_push(1, INT_TYPE);
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)); )
+				break;
+			}
+
+			// loads
+			case OP_li8:
+			case OP_li16:
+			case OP_li32:
+			case OP_lf32:
+			case OP_lf64:
+			{
+				Traits* result = (opcode == OP_lf32 || opcode == OP_lf64) ? NUMBER_TYPE : INT_TYPE;
+				checkStack(1,1);
+				emitCoerce(INT_TYPE, sp);
+				JIT_ONLY( if (jit) jit->emit(state, opcode, sp, 0, result); )
+				state->pop_push(1, result);
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)); )
+				break;
+			}
+
+			// stores
+			case OP_si8:
+			case OP_si16:
+			case OP_si32:
+			case OP_sf32:
+			case OP_sf64:
+			{
+				checkStack(2,0);
+				#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
+				if (jit)
+				{
+					emitCoerce((opcode == OP_sf32 || opcode == OP_sf64) ? NUMBER_TYPE : INT_TYPE, sp-1);
+					emitCoerce(INT_TYPE, sp);
+					jit->emit(state, opcode, 0, 0, VOID_TYPE);
+				}
+				#endif
+				state->pop(2);
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)); )
+				break;
+			}
+#endif
+
 			case OP_abs_jump:
 			{
 				// first ensure the executing code isn't user code (only VM generated abc can use this op)
@@ -2497,6 +2552,7 @@ namespace avmplus
 		}
 #else
 		(void)imm30;
+		(void)b;
 #endif
 		
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -2525,7 +2581,10 @@ namespace avmplus
 			state->pop();
 		return;
 		
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	finished_early_binding:
+#endif
+
 		;
 #ifdef DEBUG_EARLY_BINDING
 		core->console << "verify callproperty " << t << " " << multiname->getName() << " from within " << info << "\n";

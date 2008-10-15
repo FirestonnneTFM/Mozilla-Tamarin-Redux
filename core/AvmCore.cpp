@@ -3232,7 +3232,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int i29 = n << 3;
 		if ((i29>>3) == n)
 		{
-			return uint32(i29 | kIntegerType);;
+			return uint32(i29 | kIntegerType);
 		}
 		else 
 		{

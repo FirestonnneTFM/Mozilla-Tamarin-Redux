@@ -45,6 +45,11 @@ namespace avmshell
 		NATIVE_METHOD(avmplus_Domain_loadBytes, DomainObject::loadBytes)
 		NATIVE_METHOD(avmplus_Domain_currentDomain_get, DomainClass::get_currentDomain)
 		NATIVE_METHOD(avmplus_Domain_getClass, DomainObject::getClass)
+//#ifdef AVMPLUS_MOPS
+ 		NATIVE_METHOD(avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get, DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH)	
+ 		NATIVE_METHOD(avmplus_Domain_domainMemory_get, DomainObject::get_domainMemory)
+ 		NATIVE_METHOD(avmplus_Domain_domainMemory_set, DomainObject::set_domainMemory)
+//#endif AVMPLUS_MOPS
 	END_NATIVE_MAP()
 	
 	DomainObject::DomainObject(VTable *vtable, ScriptObject *delegate)
@@ -188,4 +193,35 @@ namespace avmshell
 		
 		return domainObject;
 	}
+	
+	int DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH()
+ 	{
+#ifdef AVMPLUS_MOPS
+ 		return Domain::GLOBAL_MEMORY_MIN_SIZE;
+#else
+		AvmAssert(0);
+		return 0;
+#endif
+ 	}
+
+ 	ScriptObject *DomainObject::get_domainMemory() const
+ 	{
+#ifdef AVMPLUS_MOPS
+ 		return domainEnv->domain()->globalMemory();
+#else
+		AvmAssert(0);
+		return 0;
+#endif
+ 	}
+ 
+ 	void DomainObject::set_domainMemory(ScriptObject *mem)
+ 	{
+#ifdef AVMPLUS_MOPS
+ 		if(!domainEnv->domain()->setGlobalMemory(mem))
+ 			toplevel()->throwError(kEndOfFileError);
+#else
+		AvmAssert(0);
+#endif
+ 	}
+
 }

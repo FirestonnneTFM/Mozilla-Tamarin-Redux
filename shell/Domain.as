@@ -51,6 +51,28 @@ public class Domain
 	{
 		return loadBytes(ByteArray.readFile(filename))
 	}
+//#ifdef AVMPLUS_MOPS
+	/**
+	 * Gets the minimum length of a ByteArray required to be used as
+	 * ApplicationDomain.globalMemory
+	 *
+     * @tiptext 
+     * @playerversion Flash 10
+     * @langversion 3.0
+	 */	 
+	public native static function get MIN_DOMAIN_MEMORY_LENGTH():uint;
+	
+	/**
+	 * Gets and sets the ByteArray object on which global memory operations
+	 * will operate within this ApplicationDomain
+	 *
+     * @tiptext 
+     * @playerversion Flash 10
+     * @langversion 3.0
+	 */	 
+	public native function get domainMemory():ByteArray;
+	public native function set domainMemory(mem:ByteArray);
+//#endif AVMPLUS_MOPS
 }
  
 }

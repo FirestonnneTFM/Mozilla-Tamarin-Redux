@@ -1953,6 +1953,65 @@ namespace avmplus
 
 		switch (opcode)
 		{
+#ifdef AVMPLUS_MOPS
+			// sign extends
+			case OP_sxi1:
+			case OP_sxi8:
+			case OP_sxi16:
+			{
+				// straightforward shift based sign extension
+				static const uint8_t kShiftAmt[3] = { 31, 24, 16 };
+				LIns* val = localGet(op1);
+				LIns* sh = InsConst(kShiftAmt[opcode - OP_sxi1]);
+				LIns* shl = binaryIns(LIR_lsh, val, sh);
+				LIns* res = binaryIns(LIR_rsh, shl, sh);
+				localSet(op1, res);
+				break;
+			}
+			
+			// loads
+			case OP_li8:
+			case OP_li16:
+			case OP_li32:
+			case OP_lf32:
+			case OP_lf64:
+			{
+				static const FunctionID kFuncID[5] = { 
+					FUNCTIONID(li8),  
+					FUNCTIONID(li16),  
+					FUNCTIONID(li32),  
+					FUNCTIONID(lf32),  
+					FUNCTIONID(lf64)
+				};
+
+				LIns* addr = localGet(op1);
+				LIns* i2 = callIns(kFuncID[opcode-OP_li8], 2, env_param, addr);
+				localSet(op1, i2);
+				break;
+			}
+			
+			// stores
+			case OP_si8:
+			case OP_si16:
+			case OP_si32:
+			case OP_sf32:
+			case OP_sf64:
+			{
+				static const FunctionID kFuncID[5] = { 
+					FUNCTIONID(si8),  
+					FUNCTIONID(si16),  
+					FUNCTIONID(si32),  
+					FUNCTIONID(sf32),  
+					FUNCTIONID(sf64)
+				};
+
+				LIns* svalue = (opcode == OP_sf32 || opcode == OP_sf64) ? localGetq(sp-1) : localGet(sp-1);
+				LIns* addr = localGet(sp);
+				callIns(kFuncID[opcode-OP_si8], 3, env_param, svalue, addr);
+				break;
+			}
+#endif
+
 			case OP_jump:
 			{
                 PERFM_NVPROF("emit(jump",1);
