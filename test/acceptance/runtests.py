@@ -363,10 +363,10 @@ def loadAscArgs(arglist,dir,file):
                 pass
 
     
-def compile_test(as):
+def compile_test(as_file):
     asc, builtinabc, shellabc, ascargs = globs['asc'], globs['builtinabc'], globs['shellabc'], globs['ascargs']
     if not isfile(asc):
-        exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as)
+        exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
     if not isfile(builtinabc):
         exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
 
@@ -377,9 +377,9 @@ def compile_test(as):
     
     arglist = parseArgStringToList(ascargs)
 
-    (dir, file) = split(as)
+    (dir, file) = split(as_file)
     # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
-    loadAscArgs(arglist, dir, as)
+    loadAscArgs(arglist, dir, as_file)
     
     cmd += ' -import %s' % builtinabc
     for arg in arglist:
@@ -390,13 +390,13 @@ def compile_test(as):
         if isfile(shell):
             cmd += ' -in ' + shell
             break
-    (testdir, ext) = splitext(as)
+    (testdir, ext) = splitext(as_file)
     deps = glob(join(testdir,'*'+sourceExt))
     deps.sort()
     for util in deps + glob(join(dir,'*Util'+sourceExt)):
         cmd += ' -in %s' % string.replace(util, '$', '\$')
     try:
-        f = run_pipe('%s %s' % (cmd,as))
+        f = run_pipe('%s %s' % (cmd,as_file))
         for line in f:
             verbose_print(line.strip())
     except:
@@ -486,14 +486,14 @@ if runESC:
     avm += ' %s../test/spidermonkey-prefix.es' % globs['escbin']  #needed to run shell harness
 
 
-def build_incfiles(as):
+def build_incfiles(as_file):
     files=[]
-    (dir, file) = split(as)
+    (dir, file) = split(as_file)
     for p in parents(dir):
         shell = join(p,'shell'+sourceExt)
         if isfile(shell):
             files.append(shell)
-    (testdir, ext) = splitext(as)
+    (testdir, ext) = splitext(as_file)
     for util in glob(join(testdir,'*'+sourceExt)) + glob(join(dir,'*Util'+sourceExt)):
         files.append(string.replace(util, "$", "\$"))
     return files

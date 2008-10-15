@@ -139,11 +139,11 @@ def dict_match(dict,test,value):
       if dict[k].has_key(value):
         return dict[k][value]
 
-def compile_test(as):
+def compile_test(as_file):
   outputCalls = [] #store output calls in list to pass back to main loop
   asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
   if not isfile(asc):
-    exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as)
+    exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
   if not isfile(globalabc):
     exit('ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc' % globalabc)
   
@@ -153,14 +153,14 @@ def compile_test(as):
     cmd = asc
   cmd += ' ' + ascargs
   cmd += ' -import ' + globalabc
-  (dir, file) = split(as)
+  (dir, file) = split(as_file)
   outputCalls.append((verbose_print,('   compiling %s' % file,)))
   for p in parents(dir):
     shell = join(p,'shell'+sourceExt)
     if isfile(shell):
       cmd += ' -in ' + shell
       break
-  (testdir, ext) = splitext(as)
+  (testdir, ext) = splitext(as_file)
   deps = glob(join(testdir,'*'+sourceExt))
   deps.sort()
   for util in deps + glob(join(dir,'*Util'+sourceExt)):
@@ -175,14 +175,14 @@ def compile_test(as):
     atsFile.write(atsTempStr)
     atsFile.close()
     atsCmd = cmd + ' -in util/temp_ATS_include.as -swf 200,200 -import '+globs['playerglobal']+' -in util/shell_ats.as' 
-    atsRun = run_pipe('%s %s' % (atsCmd, as))
+    atsRun = run_pipe('%s %s' % (atsCmd, as_file))
     if not os.path.exists(globs['swfout']+'/'+dir+'/'):
       os.makedirs(globs['swfout']+'/'+dir+'/')
     if os.path.exists(dir+'/'+swfName+'.swf'):
       shutil.move(dir+'/'+swfName+'.swf', globs['swfout']+'/'+dir+'/'+swfName+'_.swf')
     #end ATS
   try:
-    f = run_pipe('%s %s' % (cmd,as))
+    f = run_pipe('%s %s' % (cmd,as_file))
     for line in f:
       outputCalls.append((verbose_print,(line.strip(),)))
   except:
@@ -195,14 +195,14 @@ def fail(abc, msg, failmsgs):
   err_print('   %s' % msg)
   failmsgs += ['%s : %s' % (abc, msg)]
 
-def build_incfiles(as):
+def build_incfiles(as_file):
   files=[]
-  (dir, file) = split(as)
+  (dir, file) = split(as_file)
   for p in parents(dir):
     shell = join(p,'shell'+sourceExt)
     if isfile(shell):
       files.append(shell)
-  (testdir, ext) = splitext(as)
+  (testdir, ext) = splitext(as_file)
   for util in glob(join(testdir,'*'+sourceExt)) + glob(join(dir,'*Util'+sourceExt)):
     files.append(string.replace(util, "$", "\$"))
   return files
