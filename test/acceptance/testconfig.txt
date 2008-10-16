@@ -85,3 +85,6 @@ ecma3/Math/e15_8_2_5:Infinity/Math.atan2\(-0. 1\)                ,   .*winmobile
 # Recursive PCRE testcases kills the stack on PocketPC builds
 ecma3/RegExp/eregress_119909,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
 
+# mops test can not be compiled by current asc.jar
+mops/.*                      ,   .*                , skip, https://bugzilla.mozilla.org/show_bug.cgi?id=460305
+
