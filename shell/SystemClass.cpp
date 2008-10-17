@@ -56,6 +56,7 @@ namespace avmshell
 		NATIVE_METHOD(avmplus_System_totalMemory_get, SystemClass::getTotalMemory)
 		NATIVE_METHOD(avmplus_System_freeMemory_get, SystemClass::getFreeMemory)
 		NATIVE_METHOD(avmplus_System_privateMemory_get, SystemClass::getPrivateMemory)
+		NATIVE_METHOD(avmplus_System_ns_example_nstest, SystemClass::nstest)
 	END_NATIVE_MAP()
 					  
 	SystemClass::SystemClass(VTable *cvtable)

@@ -95,8 +95,8 @@ TRAIT_Const			= 0x06
 TRAIT_mask			= 15
 
 ATTR_final			= 0x10
-ATTR_override         = 0x20
-ATTR_metadata         = 0x40
+ATTR_override       = 0x20
+ATTR_metadata       = 0x40
 
 CTYPE_VOID			= 0
 CTYPE_ATOM			= 1
@@ -194,13 +194,14 @@ class TypeName:
 		self.name = name
 		self.types = types
 	def __str__(self):
-		assert(0)
-		return "FOO"
+		return str(self.name)
 
 class MetaData:
 	name = ""
+	attrs = {}
 	def __init__(self, name):
 		self.name = name
+		self.attrs = {}
 
 class MemberInfo:
 	id = -1
@@ -238,7 +239,7 @@ class SlotInfo(MemberInfo):
 	value = ""
 
 BMAP = {
-	"Object": CTYPE_ATOM,
+	"Object": CTYPE_ATOM, # yes, items of exactly class "Object" are stored as Atom; subclasses are stored as pointer-to-Object
 	"null": CTYPE_ATOM,
 	"*": CTYPE_ATOM,
 	"void": CTYPE_VOID,
@@ -388,8 +389,10 @@ class Abc:
 			val = str(deftable[0][index])
 			ct = deftable[1]
 		else:
+			assert(kind == 0 and index == 0)
 			val = "kAvmThunkUndefined"
 			ct = CTYPE_ATOM # yes, not void
+		rawval = val
 		if ct == CTYPE_DOUBLE:
 			# Python apparently doesn't have isNaN, isInf
 			if str(val) == "inf":
@@ -410,13 +413,14 @@ class Abc:
 					val = "AvmThunkConstant_AvmString("+str(i)+")/* \""+self.strings[i]+"\" */";
 					break
 		elif ct == CTYPE_BOOLEAN:
-			if val:
-				val = "true"
-			else:
+			assert(str(val) == "False" or str(val) == "True")
+			if str(val) == "False":
 				val = "false"
+			else:
+				val = "true"
 		if str(val) == "None":
 			val = "kAvmThunkNull"
-		return ct, val
+		return ct,val,rawval
 	
 	def parseCpool(self):
 		
@@ -537,17 +541,17 @@ class Abc:
 
 	def parseMetadataInfos(self):
 		count = self.data.readU30()
-		self.metadata = []
+		self.metadata = [ None ] * count
 		for i in range (0, count):
-			m = MetaData()
+			mname = self.strings[self.data.readU30()]
+			m = MetaData(mname)
 			self.metadata[i] = m
-			m.name = self.strings[self.data.readU30()];
-			values_count = self.data.readU30();
-			names = []
+			values_count = self.data.readU30()
+			names = [ None ] * values_count
 			for q in range(0, values_count):
 				names[q] = self.strings[self.data.readU30()]
 			for q in range(0, values_count):
-				m[names[q]] = self.strings[self.data.readU30()] 
+				m.attrs[names[q]] = self.strings[self.data.readU30()] 
 
 	def parseInstanceInfos(self):
 		count = self.data.readU30()
@@ -561,8 +565,9 @@ class Abc:
 			if (t.flags & 8) != 0:
 				t.protectedNs = self.namespaces[self.data.readU30()]
 			interface_count = self.data.readU30()
+			t.interfaces = [None] * interface_count
 			for j in range(0, interface_count):
-				t.interfaces[i] = self.names[self.data.readU30()]
+				t.interfaces[j] = self.names[self.data.readU30()]
 			methid = self.data.readU30()
 			t.init = self.methods[methid]
 			t.init.name = t.name
@@ -592,7 +597,7 @@ class Abc:
 						member.value = deftable[0][index]
 						if deftable[1] == CTYPE_NAMESPACE:
 							assert(isinstance(member.value, Namespace))
-							member.value.srcname = name
+							member.value.srcname = name.name
 				else:
 					member.value = self.classes[self.data.readU30()]
 			elif kind in [TRAIT_Method, TRAIT_Getter, TRAIT_Setter]:
@@ -606,9 +611,9 @@ class Abc:
 			t.members[i] = member
 			t.names[str(name)] = member
 			
-			if ((tag >> 4) & ATTR_metadata):
-				member.metadata = []
+			if (tag & ATTR_metadata) != 0:
 				mdCount = self.data.readU30()
+				member.metadata = [ None ] * mdCount
 				for j in range(0, mdCount):
 					member.metadata[j] = self.metadata[self.data.readU30()]
 
@@ -623,7 +628,6 @@ class Abc:
 			t.init = self.methods[self.data.readU30()]
 			t.base = "Class"
 			t.itraits = itraits
-			t.name = str(t.itraits.name) + "$"
 			t.init.name = str(t.itraits.name) + "$cinit"
 			t.init.kind = TRAIT_Method
 			self.parseTraits(t)
@@ -665,23 +669,20 @@ class Abc:
 
 
 class IndentingPrintWriter:
+	f = None
 	indent = 0
-	str = ""
+
+	def __init__(self, file):
+		self.f = file
+
 	def prnt(self, s):
-		self.str += s;
+		self.f.write(s)
 
 	def println(self, s):
 		for i in range(0, self.indent):
-			s = "    " + s;
-		self.str += s + "\n";
-
-	def dump(self, file):
-		try:
-			f = open(file,"w")
-			f.truncate()
-			f.write(self.str)
-		finally:
-			f.close()
+			self.f.write("    ")
+		self.f.write(s)
+		self.f.write("\n")
 
 def to_cname(nm):
 	nm = str(nm)
@@ -716,6 +717,7 @@ class AbcThunkGen:
 
 	def addAbc(self, a):
 		self.abcs.append(a)
+		self.lookup_traits = None
 
 	def emit(self, abc, name, out_h, out_c):
 		self.abc = abc;
@@ -755,7 +757,6 @@ class AbcThunkGen:
 
 		for sig in self.unique_thunks:
 			users = self.unique_thunks[sig]
-			out_c.println("");
 			receiver = None;
 			m = None;
 			for native_name in users:
@@ -778,7 +779,6 @@ class AbcThunkGen:
 				out_h.println("  #define "+native_name+"_thunkc "+thunkname+"_thunkc")
 
 		# cpp file - abc data, thunks
-		# @todo, this is insanely inefficient and slow
 		#print "Emit ABC Data..." 
 		n = len(abc.data.data)
 		out_c.println("const uint8_t "+name+"_abc_data["+str(n)+"] = {");
@@ -830,18 +830,12 @@ class AbcThunkGen:
 		
 		args = []
 
-		#cts = ctype_from_traits(receiver, True);
-		#val = "AvmThunkUnbox_"+cts+"(argv[argoff0])";
-		#args.append((val, cts))
-		#if cookie:
-		#	args.append(("AVMTHUNK_GET_COOKIE(env)", "int32_t"))
-
 		for i in range(0, len(argtraits)):
 			cts = ctype_from_traits(argtraits[i], True)
 			val = "AvmThunkUnbox_"+cts+"(argv[argoff" + str(i) + "])";
 			# argtraits includes receiver at 0, optionalValues does not
 			if i > param_count - optional_count:
-				dct,defval = self.abc.default_ctype_and_value(m.optionalValues[i-1]);
+				dct,defval,defvalraw = self.abc.default_ctype_and_value(m.optionalValues[i-1]);
 				dts = ctype_from_enum(dct, True)
 				if dts != cts:
 					defval = "AvmThunkCoerce_"+dts+"_"+cts+"("+defval+")";
@@ -912,7 +906,7 @@ class AbcThunkGen:
 		if m.hasOptional():
 			param_count = len(m.paramTypes)
 			for i in range(param_count - m.optional_count, param_count):
-				dct,defval = self.abc.default_ctype_and_value(m.optionalValues[i]);
+				dct,defval,defvalraw = self.abc.default_ctype_and_value(m.optionalValues[i]);
 				sig += "_opt" + sigchar_from_enum(dct, True) + to_cname(defval)
 		if m.needRest():
 			sig += "_rest"
@@ -932,7 +926,7 @@ class AbcThunkGen:
 			if ns.isProtected():
 				return "protected_";
 			if ns.srcname != None:
-				return str(ns.srcname) + "_"
+				return to_cname(str(ns.srcname)) + "_"
 		p = to_cname(ns.uri);
 		if len(p) > 0:
 			p += "_"
@@ -940,14 +934,13 @@ class AbcThunkGen:
 
 	def propLabel(self, b):
 		assert(isinstance(b.name,QName))
-		return self.ns_prefix(b.name.ns, False) + b.name.name
+		return self.ns_prefix(b.name.ns, False) + to_cname(b.name.name)
 
 	def emitSourceClass(self, b):
 		assert(isinstance(b.name,QName))
 		label = self.ns_prefix(b.name.ns, True) + to_cname(b.name.name)
 		c = b.value
-		self.out_h.println("");
-		self.out_h.println("const uint32_t abcclass_"+ label + " = " + str(c.class_id) + ";");
+		self.out_h.println("const int abcclass_"+ label + " = " + str(c.class_id) + ";");
 		self.emitSourceTraits(label+"_", c)
 		self.emitSourceTraits(label+"_", c.itraits)
 
@@ -959,10 +952,10 @@ class AbcThunkGen:
 			elif m.kind == TRAIT_Setter:
 				native_name += "_set"		
 			self.gatherThunk(native_name, receiver, m)
-		
+
 	def emitSourceTraits(self, prefix, s):
 		if s.init != None and s.init.isNative():
-			native_name = prefix + s.name.name # not self.propLabel(s)
+			native_name = prefix + to_cname(s.name.name) # not self.propLabel(s)
 			self.gatherThunk(native_name, s, s.init)
 		for i in range(0, len(s.members)):
 			if s.members[i].kind in [TRAIT_Method,TRAIT_Getter,TRAIT_Setter]:
@@ -987,13 +980,16 @@ for file in args:
 	abcGenName = os.path.splitext(file)[0]
 
 if abcGenFor:
-	h = IndentingPrintWriter()
-	c = IndentingPrintWriter()
-	ngen.emit(abcGenFor, abcScriptName, h, c);
-	h.dump(abcGenName+".h2")
-	c.dump(abcGenName+".cpp2")
+	try:
+		hf = open(abcGenName+".h2","w")
+		hc = open(abcGenName+".cpp2","w")
+		h = IndentingPrintWriter(hf)
+		c = IndentingPrintWriter(hc)
+		ngen.emit(abcGenFor, abcScriptName, h, c);
+	finally:
+		hf.close()
+		hc.close()
 
-#print "done"
 
 
 		
