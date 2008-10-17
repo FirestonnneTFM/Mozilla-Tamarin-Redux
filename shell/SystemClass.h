@@ -113,6 +113,9 @@ namespace avmshell
 		double getFreeMemory();
 		double getPrivateMemory();
 
+		// function exists solely to test native-methods with custom namespaces
+		void nstest() { }
+
 		DECLARE_NATIVE_MAP(SystemClass)
     };
 }

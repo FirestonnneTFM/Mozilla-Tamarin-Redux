@@ -5,43 +5,25 @@ const uint32_t builtin_abc_script_count = 6;
 const uint32_t builtin_abc_method_count = 846;
 const uint32_t builtin_abc_length = 38886;
 extern const uint8_t builtin_abc_data[38886];
-
-const uint32_t abcclass_Math = 16;
-
-const uint32_t abcclass_SecurityError = 22;
-
-const uint32_t abcclass_URIError = 25;
-
-const uint32_t abcclass_ReferenceError = 21;
-
-const uint32_t abcclass_ArgumentError = 28;
-
-const uint32_t abcclass_EvalError = 19;
-
-const uint32_t abcclass_SyntaxError = 23;
-
-const uint32_t abcclass_UninitializedError = 27;
-
-const uint32_t abcclass_TypeError = 24;
-
-const uint32_t abcclass_DefinitionError = 18;
-
-const uint32_t abcclass_Error = 17;
-
-const uint32_t abcclass_RangeError = 20;
-
-const uint32_t abcclass_VerifyError = 26;
-
-const uint32_t abcclass_Date = 29;
-
-const uint32_t abcclass_RegExp = 30;
+const int abcclass_Math = 16;
+const int abcclass_SecurityError = 22;
+const int abcclass_URIError = 25;
+const int abcclass_ReferenceError = 21;
+const int abcclass_ArgumentError = 28;
+const int abcclass_EvalError = 19;
+const int abcclass_SyntaxError = 23;
+const int abcclass_UninitializedError = 27;
+const int abcclass_TypeError = 24;
+const int abcclass_DefinitionError = 18;
+const int abcclass_Error = 17;
+const int abcclass_RangeError = 20;
+const int abcclass_VerifyError = 26;
+const int abcclass_Date = 29;
+const int abcclass_RegExp = 30;
 const uint32_t abcscript_isXMLName = 4;
-
-const uint32_t abcclass_XMLList = 32;
-
-const uint32_t abcclass_XML = 31;
-
-const uint32_t abcclass_QName = 33;
+const int abcclass_XMLList = 32;
+const int abcclass_XML = 31;
+const int abcclass_QName = 33;
 const uint32_t abcscript_escape = 5;
 const uint32_t abcscript_encodeURI = 5;
 const uint32_t abcscript_decodeURI = 5;
@@ -52,38 +34,22 @@ const uint32_t abcscript_parseFloat = 5;
 const uint32_t abcscript_isNaN = 5;
 const uint32_t abcscript_isFinite = 5;
 const uint32_t abcscript_decodeURIComponent = 5;
-
-const uint32_t abcclass_Boolean = 4;
-
-const uint32_t abcclass___AS3___vec_Vector_object = 11;
-
-const uint32_t abcclass_String = 8;
-
-const uint32_t abcclass___AS3___vec_Vector_double = 14;
-
-const uint32_t abcclass___AS3___vec_Vector_int = 12;
-
-const uint32_t abcclass_Array = 9;
-
-const uint32_t abcclass_Namespace = 3;
-
-const uint32_t abcclass_Class = 1;
-
-const uint32_t abcclass_uint = 7;
-
-const uint32_t abcclass_Object = 0;
-
-const uint32_t abcclass___AS3___vec_Vector = 10;
-
-const uint32_t abcclass_int = 6;
-
-const uint32_t abcclass_Number = 5;
-
-const uint32_t abcclass_Function = 2;
-
-const uint32_t abcclass_private_MethodClosure = 15;
-
-const uint32_t abcclass___AS3___vec_Vector_uint = 13;
+const int abcclass_Boolean = 4;
+const int abcclass___AS3___vec_Vector_object = 11;
+const int abcclass_String = 8;
+const int abcclass___AS3___vec_Vector_double = 14;
+const int abcclass___AS3___vec_Vector_int = 12;
+const int abcclass_Array = 9;
+const int abcclass_Namespace = 3;
+const int abcclass_Class = 1;
+const int abcclass_uint = 7;
+const int abcclass_Object = 0;
+const int abcclass___AS3___vec_Vector = 10;
+const int abcclass_int = 6;
+const int abcclass_Number = 5;
+const int abcclass_Function = 2;
+const int abcclass_private_MethodClosure = 15;
+const int abcclass___AS3___vec_Vector_uint = 13;
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
   const uint32_t Array_private__filter = 180;

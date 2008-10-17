@@ -1,6 +1,5 @@
 /* machine generated file -- do not edit */
 // 71 unique thunks
-
 // Array_private__filter
 // Array_private__map
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -38,7 +37,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaoa_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // __AS3___vec_Vector_object_private__spliceHelper
 // __AS3___vec_Vector_uint_private__spliceHelper
 // __AS3___vec_Vector_int_private__spliceHelper
@@ -86,7 +84,6 @@ AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_ouuuai_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_void(ret);
 }
-
 // String_private__charCodeAt
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -113,7 +110,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_si_opti0_thunkc(AvmMethodEn
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // Date_AS3_getUTCDate
 // __AS3___vec_Vector_double_AS3_pop
 // Date_AS3_valueOf
@@ -158,7 +154,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_thunkc(AvmMethodEnv env, 
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // String_AS3_localeCompare
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ss_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -185,7 +180,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ss_optakAvmThunkUndefined_
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // __AS3___vec_Vector_double_AS3_push
 // __AS3___vec_Vector_object_AS3_push
 // __AS3___vec_Vector_uint_AS3_push
@@ -223,7 +217,6 @@ AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_rest_thunkc(AvmMethodEn
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_uint32_t(ret);
 }
-
 // __AS3___vec_Vector_uint_length_set
 // __AS3___vec_Vector_object_length_set
 // __AS3___vec_Vector_int_length_set
@@ -256,7 +249,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ou_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // Number_private__toString
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -289,7 +281,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odi_thunkc(AvmMethodEnv 
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // XML_prettyIndent_set
 // RegExp_lastIndex_set
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -319,7 +310,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oi_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // XML_AS3_setNotification
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -348,7 +338,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oo_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // unescape
 // decodeURI
 // decodeURIComponent
@@ -380,7 +369,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_os_optsAvmThunkConstant_
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // XML_AS3_toXMLString
 // XML_AS3_toString
 // Error_getStackTrace
@@ -413,7 +401,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // __AS3___vec_Vector_uint_fixed_set
 // XML_prettyPrinting_set
 // __AS3___vec_Vector_object_fixed_set
@@ -449,7 +436,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ob_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // Math_max
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -486,7 +472,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkNegInfinit
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // XML_AS3_addNamespace
 // Array_private__pop
 // XML_AS3_removeNamespace
@@ -532,7 +517,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // String_AS3_charAt
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -559,7 +543,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sd_opti0_thunkc(AvmMetho
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // Date_private__setUTCDate
 // Date_private__setFullYear
 // Date_private__setMinutes
@@ -601,7 +584,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_o_rest_thunkc(AvmMethodEnv 
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // Date_UTC
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -658,7 +640,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oaaaaaaa_opti1_opti0_opti0_
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // String_length_get
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -683,7 +664,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_s_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // Object_private__isPrototypeOf
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -716,7 +696,6 @@ AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaa_thunkc(AvmMethodEnv
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBoolArg(ret);
 }
-
 // Array_private__sortOn
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -753,7 +732,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaaa_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // __AS3___vec_Vector_uint_length_get
 // __AS3___vec_Vector_int_length_get
 // Array_length_get
@@ -783,7 +761,6 @@ AvmThunkRetType_uint32_t AVMTHUNK_CALLTYPE builtin_u2a_o_thunkc(AvmMethodEnv env
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_uint32_t(ret);
 }
-
 // parseInt
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_osi_optsAvmThunkConstant_AvmString_5_____NaN_____opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -814,7 +791,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_osi_optsAvmThunkConstant_Av
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // Function_AS3_call
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -847,7 +823,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optakAvmThunkUndefined_r
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // String_private__charAt
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -874,7 +849,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_si_opti0_thunkc(AvmMetho
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // isNaN
 // isFinite
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -902,7 +876,6 @@ AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_od_optakAvmThunkUndefin
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBoolArg(ret);
 }
-
 // String_AS3_lastIndexOf
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -933,7 +906,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_A
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // XML_AS3_childIndex
 // XML_prettyIndent_get
 // private_MethodClosure_length_get
@@ -965,7 +937,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_o_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // String_AS3_indexOf
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_AvmString_3_____undefined_____opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -996,7 +967,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssd_optsAvmThunkConstant_A
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // __AS3___vec_Vector_object_private__map
 // __AS3___vec_Vector_double_private__filter
 // __AS3___vec_Vector_object_private__filter
@@ -1036,7 +1006,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_ooa_thunkc(AvmMethodEnv env
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // Object_private__hasOwnProperty
 // Object_private__propertyIsEnumerable
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -1070,7 +1039,6 @@ AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oas_thunkc(AvmMethodEnv
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBoolArg(ret);
 }
-
 // String_AS3_charCodeAt
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1097,7 +1065,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_sd_opti0_thunkc(AvmMethodEn
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // Object_private__toString
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1126,7 +1093,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oa_thunkc(AvmMethodEnv e
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // __AS3___vec_Vector_double_private__every
 // __AS3___vec_Vector_int_private__some
 // __AS3___vec_Vector_object_private__some
@@ -1172,7 +1138,6 @@ AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oaoa_thunkc(AvmMethodEn
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBoolArg(ret);
 }
-
 // String_private__lastIndexOf
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1203,7 +1168,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti2147483647_thunkc(
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // XMLList_AS3_contains
 // XML_AS3_contains
 AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -1233,7 +1197,6 @@ AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_thunkc(AvmMethodEnv 
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBoolArg(ret);
 }
-
 // String_private__match
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1266,7 +1229,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osa_thunkc(AvmMethodEnv env
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // __AS3___vec_Vector_double_private__forEach
 // __AS3___vec_Vector_object_private__forEach
 // __AS3___vec_Vector_int_private__forEach
@@ -1307,7 +1269,6 @@ AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oaoa_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_void(ret);
 }
-
 // XMLList_AS3_elements
 // XMLList_AS3_descendants
 // XML_AS3_processingInstructions
@@ -1339,7 +1300,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oa_optsAvmThunkConstant_Avm
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // String_AS3_toLowerCase
 // String_AS3_toUpperCase
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_s_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -1365,7 +1325,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_s_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // String_AS3_substr
 // String_AS3_substring
 // String_AS3_slice
@@ -1398,7 +1357,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sdd_opti0_opti2147483647
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // Math_private__min
 // Math_private__max
 // Math_pow
@@ -1434,7 +1392,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_thunkc(AvmMethodEnv env
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // Namespace_prefix_get
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_n_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1459,7 +1416,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_n_thunkc(AvmMethodEnv env, 
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // private_MethodClosure_private_savedThis_get
 // XMLList_AS3_inScopeNamespaces
 // XML_AS3_notification
@@ -1513,7 +1469,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_o_thunkc(AvmMethodEnv env, 
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // String_private__replace
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_osaa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1550,7 +1505,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_osaa_thunkc(AvmMethodEnv
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // Object_protected__setPropertyIsEnumerable
 AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oasb_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1587,7 +1541,6 @@ AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oasb_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_void(ret);
 }
-
 // String_private__split
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osau_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1624,7 +1577,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_osau_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // XMLList_private__namespace
 // XML_private__namespace
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -1658,7 +1610,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oai_thunkc(AvmMethodEnv env
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // Date_private__toString
 // Error_getErrorMessage
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
@@ -1688,7 +1639,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_oi_thunkc(AvmMethodEnv e
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // String_private__indexOf
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1719,7 +1669,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_ssi_opti0_thunkc(AvmMethod
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // Array_private__lastIndexOf
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1754,7 +1703,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_opti0_thunkc(AvmMetho
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // Date_private__setTime
 // Math_cos
 // Math_ceil
@@ -1796,7 +1744,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_od_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // Function_AS3_apply
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1827,7 +1774,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_optakAvmThunkUndefined_
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // String_private__substr
 // String_private__slice
 // String_private__substring
@@ -1860,7 +1806,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_sii_opti0_opti2147483647
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // String_AS3_fromCharCode
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1889,7 +1834,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_o_rest_thunkc(AvmMethodE
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // XMLList_AS3_setName
 // __AS3___vec_Vector_object_private_type_set
 // XMLList_AS3_setLocalName
@@ -1924,7 +1868,6 @@ AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_oa_thunkc(AvmMethodEnv env, u
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_void(ret);
 }
-
 // Date_parse
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1953,7 +1896,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oa_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // Namespace_uri_get
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_n_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -1978,7 +1920,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_n_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // parseFloat
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConstant_AvmString_5_____NaN_____thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -2005,7 +1946,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_os_optsAvmThunkConstant_Avm
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // XML_AS3_hasOwnProperty
 // XMLList_AS3_propertyIsEnumerable
 // XML_AS3_propertyIsEnumerable
@@ -2036,7 +1976,6 @@ AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_oa_optakAvmThunkUndefin
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBoolArg(ret);
 }
-
 // __AS3___vec_Vector_double_private__reverse
 // __AS3___vec_Vector_uint_private__reverse
 // __AS3___vec_Vector_object_private__reverse
@@ -2064,7 +2003,6 @@ AvmThunkRetType_void AVMTHUNK_CALLTYPE builtin_v2a_o_thunkc(AvmMethodEnv env, ui
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_void(ret);
 }
-
 // Date_private__get
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oi_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -2093,7 +2031,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_oi_thunkc(AvmMethodEnv env,
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // XML_AS3_insertChildAfter
 // XMLList_AS3_insertChildBefore
 // XMLList_AS3_insertChildAfter
@@ -2131,7 +2068,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oaa_thunkc(AvmMethodEnv env
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // RegExp_multiline_get
 // __AS3___vec_Vector_double_fixed_get
 // RegExp_dotall_get
@@ -2172,7 +2108,6 @@ AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE builtin_b2a_o_thunkc(AvmMethodEnv e
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBoolArg(ret);
 }
-
 // String_private__search
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_osa_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -2205,7 +2140,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_osa_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // Array_private__slice
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oadd_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -2242,7 +2176,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_oadd_thunkc(AvmMethodEnv en
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // RegExp_AS3_exec
 AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_os_optsAvmThunkConstant_AvmString_1__________thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -2269,7 +2202,6 @@ AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE builtin_a2a_os_optsAvmThunkConstant_Avm
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmBox(ret);
 }
-
 // Array_private__indexOf
 AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -2306,7 +2238,6 @@ AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE builtin_i2a_oaai_thunkc(AvmMethodEnv e
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_int32_t(ret);
 }
-
 // Number_private__convert
 AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odii_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -2343,7 +2274,6 @@ AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE builtin_s2a_odii_thunkc(AvmMethodEnv
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_AvmString(ret);
 }
-
 // Math_min
 AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)
 {
@@ -2380,7 +2310,6 @@ AvmThunkRetType_double AVMTHUNK_CALLTYPE builtin_d2d_odd_optdkAvmThunkInfinity_o
     AVMTHUNK_DEBUG_EXIT(env)
     return AvmToRetType_double(ret);
 }
-
 // __AS3___vec_Vector_uint_private__sort
 // __AS3___vec_Vector_object_private__sort
 // Array_private__splice
