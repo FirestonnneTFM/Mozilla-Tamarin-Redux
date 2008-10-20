@@ -394,6 +394,7 @@ namespace avmplus
 		void emitSetContext(FrameState* state, AbstractFunction* f);
 		void emitSetDxns(FrameState* state);
 		void merge(int, const Value& current, Value& target);
+		void opcodeVerified(AbcOpcode /*opcode*/, FrameState* /*state*/) {}
 
 #ifdef AVMPLUS_VERBOSE
 		bool verbose();

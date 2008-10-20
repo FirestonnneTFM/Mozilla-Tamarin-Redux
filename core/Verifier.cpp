@@ -355,7 +355,7 @@ namespace avmplus
 
 				#ifdef AVMPLUS_VERBOSE
 				if (verbose)
-					core->console << "B" << actualCount << ":\n";
+					core->console << "B" << (pc - code_pos) << ":\n";
 				#endif
 
 				// now load the merged state
@@ -2454,6 +2454,8 @@ namespace avmplus
 				// size was nonzero, but no case handled the opcode.  someone asleep at the wheel!
 				AvmAssert(false);
 			}
+			
+			JIT_ONLY( if (jit) jit->opcodeVerified(opcode, state); )
 		}
 		
 		if (!blockEnd)
