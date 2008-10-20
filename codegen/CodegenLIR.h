@@ -165,6 +165,7 @@ namespace avmplus
         LIns *setjmpResult;
         CopyPropagation *copier;
         int framesize;
+		verbose_only(VerboseWriter *vbWriter;)
 
         LIns *InsAlloc(int32_t);
         void storeIns(LIns *val, int32_t disp, LIns *base, bool force32);
@@ -256,6 +257,7 @@ namespace avmplus
         void emitSetslot(FrameState*, AbcOpcode opcode, int slot, int ptr_index);
 		void merge(int i, const Value& current, Value& target);
 		void localSet(int i, LIns* o);
+		void opcodeVerified(AbcOpcode opcode, FrameState* state);
 	};
 
 	class CodegenIMT
