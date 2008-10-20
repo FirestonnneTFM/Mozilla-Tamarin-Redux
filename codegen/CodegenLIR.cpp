@@ -937,7 +937,7 @@ namespace avmplus
 	}
 
 #ifdef AVMPLUS_VERBOSE
-    LirWriter *pushVerboseWriter(GC *gc, LirWriter *lirout, LirBuffer *lirbuf) {
+    VerboseWriter *pushVerboseWriter(GC *gc, LirWriter *lirout, LirBuffer *lirbuf) {
         lirbuf->names = new (gc) LirNameMap(gc, k_functions, lirbuf->_frago->labels);
         return new (gc) VerboseWriter(gc, lirout, lirbuf->names);
     }
@@ -1000,9 +1000,12 @@ namespace avmplus
         debug_only(
             lirout = new (gc) ValidateWriter(lirout);
         )
-        verbose_only(if (verbose()) {
-            lirout = pushVerboseWriter(gc, lirout, lirbuf);
-        })
+        verbose_only(
+			vbWriter = 0;
+			if (verbose()) {
+				lirout = vbWriter = pushVerboseWriter(gc, lirout, lirbuf);
+			}
+		)
         LoadFilter *loadfilter = 0;
         if (core->config.cseopt) {
             loadfilter = new (gc) LoadFilter(lirout, gc);
@@ -1048,6 +1051,7 @@ namespace avmplus
 			LIns *b = branchIns(LIR_jf, c);
 			callIns(FUNCTIONID(stkover), 1, env_param);
 			LIns *label = Ins(LIR_label);
+			verbose_only( if (lirbuf->names) { lirbuf->names->addName(label, "begin");	})
 			b->target(label);
 		}
 
@@ -1161,6 +1165,11 @@ namespace avmplus
 				localSet(loc, arg);
 
                 LIns *label = Ins(LIR_label);
+				verbose_only( if (lirbuf->names) {
+					char str[64];
+					sprintf(str,"param_%d",i);
+					lirbuf->names->addName(label,str);
+				})
 				br->target(label);
 			}
 		}
@@ -1286,6 +1295,7 @@ namespace avmplus
 			LIns* br = branchIns(LIR_jf, binaryIns(LIR_eq, interrupted, InsConst(0)));
 			patchLater(br, interrupt_label);
 		}
+		verbose_only( if (vbWriter) { vbWriter->flush();} )
 		return true;
 	}
 
@@ -1378,6 +1388,11 @@ namespace avmplus
 		// our new extended BB now starts here, this means that any branch targets
 		// should hit the next instruction our bb start instruction
 		LIns* bb = Ins(LIR_label); // mark start of block
+        verbose_only( if (frag->lirbuf->names) {
+			char str[64];
+			sprintf(str,"B%d",(int)state->pc);
+            frag->lirbuf->names->addName(bb, str);
+        });
 
 		// get a label for our block start and tie it to this location
 		mirLabel(state->verifier->getFrameState(state->pc)->label, bb);
@@ -3399,6 +3414,14 @@ namespace avmplus
 
 	} // emit()
 
+	void CodegenLIR::opcodeVerified(AbcOpcode opcode, FrameState* state)
+	{
+		// flush the buffer after each opcode is processed.
+		(void)opcode;
+		(void) state;
+		verbose_only( if (vbWriter) { vbWriter->flush();} )
+	}
+
 	void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, intptr_t target, int a, int b)
 	{
 		this->state = state;
@@ -3643,18 +3666,21 @@ namespace avmplus
 
         if (npe_label.preds) {
             LIns *label = Ins(LIR_label);
+			verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "npe"); })
 			mirLabel(npe_label, label);
 			callIns(FUNCTIONID(npe), 1, env_param);
 		}
 
         if (interrupt_label.preds) {
             LIns *label = Ins(LIR_label);
+			verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "interrupt"); })
 			mirLabel(interrupt_label, label);
 			callIns(FUNCTIONID(interrupt), 1, env_param);
 		}
 
         if (info->hasExceptions()) {
             LIns *catchlabel = Ins(LIR_label);
+			verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(catchlabel, "catch");	})
             exBranch->target(catchlabel);
 
 			// exception case
