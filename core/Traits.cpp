@@ -1851,12 +1851,20 @@ namespace avmplus
 		}
 
 		AbcGen gen(gc);	
+		TraitsBindings* tb;
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		ImtBuilder imtBuilder(gc);
-		TraitsBindings* tb = _buildTraitsBindings(toplevel, &gen, &imtBuilder);
-		imtBuilder.finish(m_imt, pool, toplevel);
+		if (core->IsMIREnabled())
+		{
+			ImtBuilder imtBuilder(gc);
+			tb = _buildTraitsBindings(toplevel, &gen, &imtBuilder);
+			imtBuilder.finish(m_imt, pool, toplevel);
+		}
+		else
+		{
+			tb = _buildTraitsBindings(toplevel, &gen, NULL);
+		}
 #else
-		TraitsBindings* tb = _buildTraitsBindings(toplevel, &gen);
+		tb = _buildTraitsBindings(toplevel, &gen);
 #endif
 		this->genInitBody(toplevel, gen);
 
