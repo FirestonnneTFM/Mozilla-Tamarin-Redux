@@ -605,6 +605,10 @@ else:
             incfiles=build_incfiles(testName)
             for incfile in incfiles:
                 testName=incfile+" "+testName
+                
+        if isfile("%s.avm_args" % ast):
+            testName = " %s %s" % (string.replace(open("%s.avm_args" % ast).readline(), "$DIR", dir), testName)
+        
         f = run_pipe('%s %s %s' % (avm, vmargs, testName))
         if f == "timedOut":
             fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
