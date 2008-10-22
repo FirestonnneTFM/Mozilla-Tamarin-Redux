@@ -191,7 +191,7 @@ namespace avmplus
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			// jit flag forces use of MIR/LIR instead of interpreter
-			config.jit = true;
+			config.runmode = RM_mixed;
 			config.cseopt = true;
 
 			#ifdef AVMPLUS_VERBOSE
