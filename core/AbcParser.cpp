@@ -1900,7 +1900,7 @@ namespace avmplus
 			#endif
 
             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if (!core->config.jit)
+			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the $init methods
 				script->flags |= AbstractFunction::SUGGEST_INTERP;
@@ -2229,7 +2229,7 @@ namespace avmplus
 			ctraits->set_needsHashtable(true);
 
             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if (!core->config.jit)
+			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the class initializer
 				cinit->flags |= AbstractFunction::SUGGEST_INTERP;

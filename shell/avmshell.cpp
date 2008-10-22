@@ -750,9 +750,9 @@ namespace avmshell
 
                     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 						else if (!strcmp(arg+2, "forcemir")) {
-							config.jit = true;
+							config.runmode = RM_jit_all;
 						} else if (!strcmp(arg+2, "interp")) {
-							config.jit = false;
+							config.runmode = RM_interp_all;
 						} else if (!strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
 						}
@@ -772,7 +772,7 @@ namespace avmshell
                 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 					else if (!strcmp(arg, "-Ojit")) 
 					{
-                        config.jit = true;
+                        config.runmode = RM_jit_all;
 					} 
 				#endif
 					else if (!strcmp(arg, "-memstats")) {
