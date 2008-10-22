@@ -146,6 +146,7 @@ if os == "darwin":
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
                          '_MAC': None,
+                         'AVMPLUS_MAC': None,
                          'TARGET_RT_MAC_MACHO': 1,
                          'USE_MMAP': None})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
