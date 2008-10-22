@@ -45,23 +45,12 @@
 
 namespace avmplus
 {
-#ifdef AVMTHUNK_VERSION
 	NativeMethod::NativeMethod(const NativeTableEntry& _nte)
 		: AbstractFunction(), nte(_nte)
 	{
 		this->flags |= nte.flags;
 		this->impl32 = verifyEnter;
 	}
-#else
-	NativeMethod::NativeMethod(int flags, Handler handler, int cookie)
-		: AbstractFunction()
-	{
-		m_handler = handler;
-		m_cookie  = cookie;
-		this->flags |= flags;
-		this->impl32 = verifyEnter;
-	}
-#endif
 
 	Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
 	{
@@ -84,34 +73,11 @@ namespace avmplus
 		AvmAssert(declaringTraits->isResolved());
 		resolveSignature(toplevel);
 
-#ifdef AVMTHUNK_VERSION
 		union {
 			Atom (*impl32)(MethodEnv*, int, uint32 *);
 			AvmThunkNativeThunker thunker;
 		} u;
 		u.thunker = this->nte.thunker;
 		this->impl32 = u.impl32;
-#else
-		// generate the native method thunk
-		CodegenMIR cgen(this);
-		AvmCore *c = core();
-		
-		TRY(c, kCatchAction_Rethrow)
-		{
-			cgen.emitNativeThunk(this);
-		} 
-		CATCH (Exception *exception) 
-		{
-			cgen.clearMIRBuffers();
-
-			// re-throw exception
-			c->throwException(exception);
-		}
-		END_CATCH
-		END_TRY
-
-		if (cgen.overflow)
-			toplevel->throwError(kOutOfMemoryError);
-#endif
 	}
 }
