@@ -55,11 +55,7 @@ namespace avmplus
 		NATIVE_CLASS(abcclass_Class,				ClassClass,		ClassClosure)
 		NATIVE_CLASS(abcclass_Namespace,			NamespaceClass,	Namespace)
 		NATIVE_CLASS(abcclass_Function, 			FunctionClass,	ClassClosure)
-#if AVMTHUNK_VERSION >= 2
 		NATIVE_CLASS(abcclass_private_MethodClosure, 			MethodClosureClass,	MethodClosure)
-#else
-		NATIVE_CLASS(abcclass_builtin_as_0_MethodClosure, 			MethodClosureClass,	MethodClosure)
-#endif
 
 		NATIVE_CLASS(abcclass_Error,				ErrorClass,	ErrorObject)
 
@@ -1923,11 +1919,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		while (nativeMap->method_id != -1)
 		{
-#ifdef AVMTHUNK_VERSION
 			AbstractFunction* f = new (GetGC()) NativeMethod(*nativeMap);
-#else
-			AbstractFunction* f = new (GetGC()) NativeMethod(nativeMap->flags, (NativeMethod::Handler)nativeMap->handler, nativeMap->cookie);
-#endif
             				
 			// if we overwrite a native method mapping, something is hosed
 			AvmAssert(nativeMethods[nativeMap->method_id]==NULL);

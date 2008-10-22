@@ -42,8 +42,6 @@
 namespace avmplus
 {
 
-#ifdef AVMTHUNK_VERSION
-
 	#define kAvmThunkNull		nullObjectAtom
 	#define kAvmThunkUndefined	undefinedAtom
 
@@ -266,8 +264,6 @@ namespace avmplus
 	#define AVMTHUNK_DEBUG_EXIT(env)	
 #endif
 
-#endif
-
 	/**
 	 * The NativeMethod class is a wrapper to bind a native C++ function
 	 * to a class method surfaced into the ActionScript world.
@@ -290,12 +286,7 @@ namespace avmplus
 	class NativeMethod : public AbstractFunction
 	{
 	public:
-#ifdef AVMTHUNK_VERSION
 		NativeMethod(const NativeTableEntry& nte);
-#else
-		typedef void (ScriptObject::*Handler)();
-		NativeMethod(int flags, Handler handler, int cookie);
-#endif
 		
 		// we have virtual functions, so we probably need a virtual dtor
 		virtual ~NativeMethod() {}
@@ -306,15 +297,7 @@ namespace avmplus
 
 	// ------------------------ DATA SECTION BEGIN
 	public:
-#ifdef AVMTHUNK_VERSION
 		const NativeTableEntry& nte;
-#else
-		union {
-			Handler m_handler;
-			uintptr m_handler_addr;
-		};
-		int m_cookie;
-#endif
 	// ------------------------ DATA SECTION END
 	};
 
@@ -327,13 +310,8 @@ namespace avmplus
 	{
 	// ------------------------ DATA SECTION BEGIN
 	public:
-#ifdef AVMTHUNK_VERSION
 		AvmThunkNativeThunker thunker;
 		AvmThunkNativeHandler handler;
-#else
-		typedef void (ScriptObject::*Handler)();
-		Handler handler;
-#endif
 		int32_t method_id;
 		int32_t cookie;
 		int32_t flags;
@@ -356,8 +334,6 @@ namespace avmplus
 		{ return new (vtable->gc(), vtable->getExtraSize()) _Script(vtable, delegate); } \
 		static NativeTableEntry natives[];
 
-#ifdef AVMTHUNK_VERSION
-	
 	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
 		reinterpret_cast<AvmThunkNativeHandler>((void(CLS::*)())(PTR))
 
@@ -369,22 +345,6 @@ namespace avmplus
 
 	#define END_NATIVE_MAP() \
 		{ NULL, NULL, -1, 0, 0 } };
-
-#else
-		
-	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
-		reinterpret_cast<NativeTableEntry::Handler>((void(CLS::*)())(PTR))
-
-	#define _NATIVE_METHOD(CLS, method_id, handler, fl) \
-		{ _NATIVE_METHOD_CAST_PTR(CLS, &handler), avmplus::NativeID::method_id, 0, fl },
-		
-	#define _NATIVE_METHOD1(CLS, method_id, handler, fl, cookie) \
-		{ _NATIVE_METHOD_CAST_PTR(CLS, &handler), avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
-
-	#define END_NATIVE_MAP() \
-		{ NULL, -1, 0, 0 } };
-		
-#endif
 
 	#define NATIVE_METHOD(method_id, handler) \
 		_NATIVE_METHOD(ScriptObject, method_id, handler, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS)

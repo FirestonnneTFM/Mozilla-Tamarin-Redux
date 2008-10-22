@@ -170,13 +170,7 @@ namespace avmshell
 
 	BEGIN_NATIVE_SCRIPTS(Shell)
 		NATIVE_SCRIPT(0/*abcscript_avmplus_debugger*/, AvmplusScript)
-#if AVMTHUNK_VERSION >= 2
 		NATIVE_SCRIPT(avmplus::NativeID::abcscript_flash_sampler_startSampling, SamplerScript)
-#elif defined(AVMTHUNK_VERSION)
-		NATIVE_SCRIPT(avmplus::NativeID::abcscript_startSampling, SamplerScript)
-#else
-		NATIVE_SCRIPT(avmplus::NativeID::abcpackage_Sampler_as, SamplerScript)
-#endif
 	END_NATIVE_SCRIPTS()
 
 	BEGIN_NATIVE_MAP(AvmplusScript)
