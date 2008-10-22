@@ -76,6 +76,8 @@ namespace avmplus
 
 const int kBufferPadding = 16;
 
+	enum Runmode { RM_mixed, RM_jit_all, RM_interp_all };
+
 	struct Config
 	{
 		#ifdef AVMPLUS_VERBOSE
@@ -102,7 +104,7 @@ const int kBufferPadding = 16;
 		 * jit switch forces all code to run through MIR/LIR
 		 * instead of interpreter.
 		 */
-		bool jit;
+		enum Runmode runmode;
 		bool cseopt;
 
         #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
@@ -269,10 +271,10 @@ const int kBufferPadding = 16;
 
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	    inline void SetMIREnabled(bool isEnabled) {
-			config.jit = isEnabled;
+			config.runmode = (isEnabled) ? RM_mixed : RM_interp_all;
 		}
         inline bool IsMIREnabled() const {
-			return config.jit;
+			return (config.runmode == RM_mixed || config.runmode == RM_jit_all) ? true : false;
 		}
 #else
         inline void SetMIREnabled(bool) {}
