@@ -285,6 +285,18 @@ namespace avmplus
     #  define SETJMP ((uintptr)::setjmp)
 	#endif // _MSC_VER
 
+#define FUNCTIONID(n) CI_avmplus_##n
+
+#define INTERP_FOPCODE_LIST_BEGIN enum FunctionID {
+#define INTERP_FOPCODE_LIST_END };
+#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) FUNCTIONID(name),
+
+    #include "../core/vm_fops.h"
+
+#undef INTERP_FOPCODE_LIST_BEGIN
+#undef INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM
+#undef INTERP_FOPCODE_LIST_END
+
 #define INTERP_FOPCODE_LIST_BEGIN static const CallInfo k_functions[] = {
 #define INTERP_FOPCODE_LIST_END };
 
@@ -333,7 +345,7 @@ namespace avmplus
             args[argc-i-1] = va_arg(ap, LIns*);
         va_end(ap);
 
-        return lirout->insCall(fid, args);
+        return lirout->insCall(&k_functions[fid], args);
 	}
 
     LIns *CodegenLIR::localCopy(int i) {
@@ -754,11 +766,10 @@ namespace avmplus
             return out->insAlloc(size);
         }
 
-        LIns *insCall(uint32_t fid, LInsp args[]) {
-            const CallInfo &call = k_functions[fid];
+        LIns *insCall(const CallInfo *call, LInsp args[]) {
             ArgSize sizes[2*MAXARGS];
-            uint32_t argc = call.get_sizes(sizes);
-            if (call.isIndirect()) {
+            uint32_t argc = call->get_sizes(sizes);
+            if (call->isIndirect()) {
                 argc--;
                 AvmAssert(!args[argc]->isQuad());
             }
@@ -770,7 +781,7 @@ namespace avmplus
                     case ARGSIZE_F: NanoAssert(args[i]->isQuad()); break;
                 }
             }
-            return out->insCall(fid, args);
+            return out->insCall(call, args);
         }
     };
 #endif //  _DEBUG
@@ -885,23 +896,23 @@ namespace avmplus
             return out->insBranch(v, cond, to);
         }
 
-        LIns *insCall(uint32_t fid, LInsp args[]) {
+        LIns *insCall(const CallInfo *call, LInsp args[]) {
             #ifdef DEBUGGER
                 DEFER_STORES(
-                    if (!_functions[fid]._cse)
+                    if (!call->_cse)
                         saveState();
                 )
-                LIns *i = out->insCall(fid, args);
+                LIns *i = out->insCall(call, args);
                 // debugger might have modified locals, so make sure we reload after call.
-                if (!_functions[fid]._cse)
+                if (!call->_cse)
                     clearState();
                 return i;
             #else
                 DEFER_STORES(
-                    if (hasExceptions && !_functions[fid]._cse)
+                    if (hasExceptions && !call->_cse)
                         saveState();
                 )
-                return out->insCall(fid, args);
+                return out->insCall(call, args);
             #endif
         }
 
@@ -938,7 +949,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_VERBOSE
     VerboseWriter *pushVerboseWriter(GC *gc, LirWriter *lirout, LirBuffer *lirbuf) {
-        lirbuf->names = new (gc) LirNameMap(gc, k_functions, lirbuf->_frago->labels);
+        lirbuf->names = new (gc) LirNameMap(gc, lirbuf->_frago->labels);
         return new (gc) VerboseWriter(gc, lirout, lirbuf->names);
     }
 #endif
@@ -961,8 +972,8 @@ namespace avmplus
             return (op & ~1) == LIR_i2f;
         }
 
-        LIns *insCall(uint32_t fid, LInsp args[]) {
-            if (fid == FUNCTIONID(integer_d)) {
+        LIns *insCall(const CallInfo *call, LInsp args[]) {
+            if (call == &k_functions[FUNCTIONID(integer_d)]) {
                 LIns *v = args[0];
                 LOpcode op = v->opcode();
                 if (isPromote(op))
@@ -974,10 +985,10 @@ namespace avmplus
                         return out->ins2(LOpcode(op & ~LIR64), a->oprnd1(), b->oprnd1());
                 }
                 SSE2_ONLY(if (config.sse2) 
-                    fid = FUNCTIONID(integer_d_sse2);
+                    call = &k_functions[FUNCTIONID(integer_d_sse2)];
                 )
             }
-            return out->insCall(fid, args);
+            return out->insCall(call, args);
         }
     };
 
@@ -991,7 +1002,7 @@ namespace avmplus
 
         Fragmento *frago = pool->codePages->frago;
         frag = new (gc) Fragment(abcStart);
-        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
+        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago);
         lirbuf->abi = ABI_CDECL;
         lirout = new (gc) LirBufWriter(lirbuf);
 		verbose_only(if (core->config.bbgraph) {
@@ -4054,7 +4065,7 @@ namespace avmplus
                 case LIR_calli:
                 case LIR_fcall:
                 case LIR_fcalli:
-                    if (catcher && !i->isCse(lirbuf->_functions)) {
+                    if (catcher && !i->isCse()) {
                         // non-cse call is like a conditional forward branch to the catcher label.
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
@@ -4145,7 +4156,7 @@ namespace avmplus
                 case LIR_calli:
                 case LIR_fcall:
                 case LIR_fcalli:
-                    if (catcher && !i->isCse(lirbuf->_functions)) {
+                    if (catcher && !i->isCse()) {
                         // non-cse call is like a conditional branch to the catcher label.
                         // this could be made more precise by checking whether this call
                         // can really throw, and only processing edges to the subset of
@@ -4390,7 +4401,7 @@ namespace avmplus
         Fragment *frag = frago->getAnchor(e->virt);
         gc->Free(frag->mergeCounts);
         frag->mergeCounts = 0;
-        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago, k_functions);
+        LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago);
         lirbuf->abi = ABI_FASTCALL;
         LirWriter *lirout = new (gc) LirBufWriter(lirbuf);
         verbose_only(if (pool->verbose) {
@@ -4480,7 +4491,7 @@ namespace avmplus
 			fid = FUNCTIONID(calli);
 		}
 		LInsp args[] = { ap_param, argc_param, env, target };
-		LIns *call = lirout->insCall(fid, args);
+		LIns *call = lirout->insCall(&k_functions[fid], args);
 		lirout->ins1(returnop, call);
 	}
 }
