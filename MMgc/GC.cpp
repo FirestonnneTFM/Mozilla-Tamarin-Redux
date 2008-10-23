@@ -273,6 +273,7 @@ namespace MMgc
 		  numObjects(0),
 		  hitZeroObjects(false),
 		  emptyWeakRef(0),
+		  emptyWeakRefRoot(0),
 		  smallEmptyPageList(NULL),
 		  largeEmptyPageList(NULL),
 		  sweepStart(0),
@@ -369,8 +370,7 @@ namespace MMgc
 		// keep GC::Size honest
 		GCAssert(offsetof(GCLargeAlloc::LargeBlock, usableSize) == offsetof(GCAlloc::GCBlock, size));
 
-		//WB(this, this, &emptyWeakRef, new (this) GCWeakRef(NULL));
-		// no need for WB
+		emptyWeakRefRoot = new GCRoot(this, &this->emptyWeakRef, sizeof(this->emptyWeakRef)),
 		emptyWeakRef = new (this) GCWeakRef(NULL);
 	}
 
@@ -423,7 +423,7 @@ namespace MMgc
 #ifndef MMGC_THREADSAFE
 		CheckThread();
 #endif
-
+		delete emptyWeakRefRoot;
 		GCAssert(!m_roots);
 		GCAssert(!m_callbacks);
 
