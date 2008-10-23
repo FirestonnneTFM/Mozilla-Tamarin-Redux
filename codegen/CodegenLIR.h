@@ -174,7 +174,7 @@ namespace avmplus
         LIns *atomToNativeRep(Traits *, LIns *i);
         LIns *ptrToNativeRep(Traits*, LIns*);
         LIns *loadAtomRep(int i);
-        LIns *callIns(uint32_t fid, uint32_t argc, ...);
+        LIns *callIns(const CallInfo *, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *localGet(int i);
         LIns *localGetq(int i);
@@ -188,7 +188,7 @@ namespace avmplus
         LIns *storeAtomArgs(LIns *obj, int count, int index);
         LIns *promoteNumberIns(Traits *t, int i);
         LIns *loadVTable(int i);
-    	LIns *cmpEq(uint32_t fid, int lhsi, int rhsi);
+    	LIns *cmpEq(const CallInfo *fid, int lhsi, int rhsi);
     	LIns *cmpLt(int lhsi, int rhsi);
     	LIns *cmpLe(int lhsi, int rhsi);
         LIns *cmpOptimization(int lhsi, int rhsi, LOpcode icmp, LOpcode ucmp, LOpcode fcmp);
