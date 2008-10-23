@@ -284,11 +284,6 @@ namespace avmplus
 	#define AVMTHUNK_CALLTYPE	 /* could be used to declare custom call type (eg __fastcall) */
 
 	typedef AvmThunkRetType_AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-
-	namespace NativeID
-	{
-        #include "builtin.h"
-	}
 }
 
 #include "MMgc.h"

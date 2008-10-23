@@ -37,6 +37,7 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 namespace avmplus
 {
@@ -1541,4 +1542,19 @@ namespace avmplus
 	{
 		referenceErrorClass()->throwError(id, core()->toErrorString(multiname));
 	}
+
+	DateClass* Toplevel::dateClass() { return (DateClass*)getBuiltinClass(avmplus::NativeID::abcclass_Date); }
+	RegExpClass* Toplevel::regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
+	XMLClass* Toplevel::xmlClass() { return (XMLClass*)getBuiltinClass(avmplus::NativeID::abcclass_XML); }
+	XMLListClass* Toplevel::xmlListClass() { return (XMLListClass*)getBuiltinClass(avmplus::NativeID::abcclass_XMLList); }
+	QNameClass* Toplevel::qnameClass() { return (QNameClass*)getBuiltinClass(avmplus::NativeID::abcclass_QName); }
+	ErrorClass* Toplevel::errorClass() const { return getErrorClass(avmplus::NativeID::abcclass_Error); }
+	ErrorClass* Toplevel::argumentErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ArgumentError); }
+	ErrorClass* Toplevel::evalErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_EvalError); }
+	ErrorClass* Toplevel::typeErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_TypeError); }
+	ErrorClass* Toplevel::rangeErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_RangeError); }
+	ErrorClass* Toplevel::uriErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_URIError); }
+	ErrorClass* Toplevel::referenceErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ReferenceError); }
+	ErrorClass* Toplevel::securityErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SecurityError); }
+	ErrorClass* Toplevel::verifyErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_VerifyError); }
 }
