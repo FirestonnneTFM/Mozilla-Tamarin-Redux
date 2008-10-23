@@ -751,14 +751,14 @@ namespace avmshell
                     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 						else if (!strcmp(arg+2, "forcemir")) {
 							config.runmode = RM_jit_all;
-						} else if (!strcmp(arg+2, "interp")) {
-							config.runmode = RM_interp_all;
 						} else if (!strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
 						}
                         #endif
 
-						else {
+						else if (!strcmp(arg+2, "interp")) {
+							config.runmode = RM_interp_all;
+						} else {
 							usage();
 						}
 					} 
