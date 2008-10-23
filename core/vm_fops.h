@@ -45,16 +45,14 @@
 #endif
 
 #define FUNCTION(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,0,0,ABI_FUNCTION,/*ret*/,/*args*/,name)
+    DEFINE_CALLINFO(f,sig,0,0,ABI_FUNCTION,name)
 #define CSEFUNCTION(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,1,0,ABI_FUNCTION,/*ret*/,/*args*/,name)
+    DEFINE_CALLINFO(f,sig,1,0,ABI_FUNCTION,name)
 
 #define METHOD(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,0,0,ABI_METHOD,/*ret*/,/*args*/,name)
+    DEFINE_CALLINFO(f,sig,0,0,ABI_METHOD,name)
 #define CSEMETHOD(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,1,0,ABI_METHOD,/*ret*/,/*args*/,name)
-
-INTERP_FOPCODE_LIST_BEGIN
+    DEFINE_CALLINFO(f,sig,1,0,ABI_METHOD,name)
 
     FUNCTION(CALL_INDIRECT, I_III, calli)
     FUNCTION(FCALL_INDIRECT, D_III, fcalli)
@@ -184,10 +182,10 @@ INTERP_FOPCODE_LIST_BEGIN
     FUNCTION(SETJMP, I_II, fsetjmp)
     METHOD(COREADDR(AvmCore::beginCatch), I_I5, beginCatch)
 
-#ifdef AVMPLUS_IA32
+SSE2_ONLY(
     CSEMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), I_ID, doubleToAtom_sse2)
     CSEFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), I_D, integer_d_sse2)
-#endif
+)
 
 #ifdef DEBUGGER
     METHOD(ENVADDR(MethodEnv::debugEnter), I_I8, debugEnter)
@@ -209,8 +207,6 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(ENVADDR(MethodEnv::sf32), I_IDI, sf32)
     METHOD(ENVADDR(MethodEnv::sf64), I_IDI, sf64)
 #endif
-
-INTERP_FOPCODE_LIST_END
 
 #undef I_I
 #undef I_II

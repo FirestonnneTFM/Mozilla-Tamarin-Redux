@@ -274,7 +274,7 @@ namespace avmplus
 		friend class QNameClass;
 
 	public:
-		QNameObject(QNameClass *type, Multiname &mn);
+		QNameObject(QNameClass *type, const Multiname &mn);
 		QNameObject(QNameClass *type, Atom name, bool bAttribute=false);
 		QNameObject(QNameClass *type, Namespace *nameSpace, Atom name, bool bAttribute=false);
 

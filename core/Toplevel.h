@@ -67,7 +67,6 @@ namespace avmplus
 		DRCWB(ArrayClass*)     arrayClass;
 		DRCWB(BooleanClass*)   booleanClass;
 		DRCWB(ClassClass*)     classClass;
-		DateClass*           dateClass() { return (DateClass*)getBuiltinClass(avmplus::NativeID::abcclass_Date); }
 		DRCWB(FunctionClass*)  functionClass;		
 		DRCWB(MethodClosureClass*)  methodClosureClass;		
 		DRCWB(NamespaceClass*) namespaceClass;
@@ -80,27 +79,28 @@ namespace avmplus
 		DRCWB(UIntVectorClass*)   uintVectorClass;
 		DRCWB(ObjectVectorClass*)    objectVectorClass;
 		DRCWB(VectorClass*)    vectorClass;
-		RegExpClass*         regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
 		DRCWB(StringClass*)    stringClass;
-		XMLClass*            xmlClass() { return (XMLClass*)getBuiltinClass(avmplus::NativeID::abcclass_XML); }
-		XMLListClass*        xmlListClass() { return (XMLListClass*)getBuiltinClass(avmplus::NativeID::abcclass_XMLList); }
-		QNameClass*          qnameClass() { return (QNameClass*)getBuiltinClass(avmplus::NativeID::abcclass_QName); }
 		/*@}*/
 
+		DateClass* dateClass();
+		RegExpClass* regexpClass();
+		XMLClass* xmlClass();
+		XMLListClass* xmlListClass();
+		QNameClass* qnameClass();
 		/**
 		 * @name Error Subclasses
 		 * These are subclasses of Error used in the VM.
 		 */
 		/*@{*/
-		ErrorClass *errorClass() const { return getErrorClass(avmplus::NativeID::abcclass_Error); }
-		ErrorClass *argumentErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ArgumentError); }
-		ErrorClass *evalErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_EvalError); }
-		ErrorClass *typeErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_TypeError); }
-		ErrorClass *rangeErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_RangeError); }
-		ErrorClass *uriErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_URIError); }
-		ErrorClass *referenceErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ReferenceError); }
-		ErrorClass *securityErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SecurityError); }
-		ErrorClass *verifyErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_VerifyError); }
+		ErrorClass* errorClass() const;
+		ErrorClass* argumentErrorClass() const;
+		ErrorClass* evalErrorClass() const;
+		ErrorClass* typeErrorClass() const;
+		ErrorClass* rangeErrorClass() const;
+		ErrorClass* uriErrorClass() const;
+		ErrorClass* referenceErrorClass() const;
+		ErrorClass* securityErrorClass() const;
+		ErrorClass* verifyErrorClass() const;
 		/*@}*/
 
 		void throwVerifyError(int id) const;

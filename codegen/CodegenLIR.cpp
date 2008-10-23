@@ -162,12 +162,15 @@ return *((intptr_t*)&_method);
 #define AVMCORE_integer_i		AvmCore::integer64_i
 #define AVMCORE_integer_d		AvmCore::integer64_d
 #define AVMCORE_integer_d_sse2	AvmCore::integer64_d_sse2
+#define PTR_SCALE 3
 #else
 #define AVMCORE_integer			AvmCore::integer
 #define AVMCORE_integer_i		AvmCore::integer_i
 #define AVMCORE_integer_d		AvmCore::integer_d
 #define AVMCORE_integer_d_sse2	AvmCore::integer_d_sse2
+#define PTR_SCALE 2
 #endif
+
 namespace avmplus
 {
 		#define PROFADDR(f) profAddr((void (DynamicProfiler::*)())(&f))
@@ -285,34 +288,19 @@ namespace avmplus
     #  define SETJMP ((uintptr)::setjmp)
 	#endif // _MSC_VER
 
-#define FUNCTIONID(n) CI_avmplus_##n
-
-#define INTERP_FOPCODE_LIST_BEGIN enum FunctionID {
-#define INTERP_FOPCODE_LIST_END };
-#define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) FUNCTIONID(name),
-
-    #include "../core/vm_fops.h"
-
-#undef INTERP_FOPCODE_LIST_BEGIN
-#undef INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM
-#undef INTERP_FOPCODE_LIST_END
-
-#define INTERP_FOPCODE_LIST_BEGIN static const CallInfo k_functions[] = {
-#define INTERP_FOPCODE_LIST_END };
+#define FUNCTIONID(n) &ci_##n
 
 #ifdef NJ_VERBOSE
-    #define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
-        { f, sig, cse, fold, abi, #name },
+    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
+        static const CallInfo ci_##name = { f, sig, cse, fold, abi, #name };
 #else
-    #define INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,cse,fold,abi,ret,args,name) \
-        { f, sig, cse, fold, abi },
+    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
+        static const CallInfo ci_##name = { f, sig, cse, fold, abi };
 #endif
 
     #include "../core/vm_fops.h"
 
-#undef INTERP_FOPCODE_LIST_BEGIN
 #undef INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM
-#undef INTERP_FOPCODE_LIST_END
 
 	/**
  	 * ---------------------------------
@@ -333,10 +321,10 @@ namespace avmplus
 	}
 
     // call 
-	LIns* CodegenLIR::callIns(uint32_t fid, uint32_t argc, ...)
+	LIns* CodegenLIR::callIns(const CallInfo *ci, uint32_t argc, ...)
 	{
         AvmAssert(argc <= MAXARGS);
-        AvmAssert(argc == k_functions[fid].count_args());
+        AvmAssert(argc == ci->count_args());
 
         LInsp args[MAXARGS];
         va_list ap;
@@ -345,7 +333,7 @@ namespace avmplus
             args[argc-i-1] = va_arg(ap, LIns*);
         va_end(ap);
 
-        return lirout->insCall(&k_functions[fid], args);
+        return lirout->insCall(ci, args);
 	}
 
     LIns *CodegenLIR::localCopy(int i) {
@@ -403,12 +391,7 @@ namespace avmplus
         // handle Number first in case we need to do a quad load
 		if (t == NUMBER_TYPE)
 		{
-			uint32_t fid = FUNCTIONID(doubleToAtom);
-#ifdef AVMPLUS_IA32
-			if (core->config.sse2)
-				fid = FUNCTIONID(doubleToAtom_sse2);
-#endif
-			return callIns(fid, 2, coreAddr, localGetq(i));
+			return callIns(FUNCTIONID(doubleToAtom), 2, coreAddr, localGetq(i));
 		}
 
 		LIns* native = localGet(i);
@@ -973,7 +956,7 @@ namespace avmplus
         }
 
         LIns *insCall(const CallInfo *call, LInsp args[]) {
-            if (call == &k_functions[FUNCTIONID(integer_d)]) {
+            if (call == FUNCTIONID(integer_d)) {
                 LIns *v = args[0];
                 LOpcode op = v->opcode();
                 if (isPromote(op))
@@ -984,10 +967,15 @@ namespace avmplus
                     if (isPromote(a->opcode()) && isPromote(b->opcode()))
                         return out->ins2(LOpcode(op & ~LIR64), a->oprnd1(), b->oprnd1());
                 }
-                SSE2_ONLY(if (config.sse2) 
-                    call = &k_functions[FUNCTIONID(integer_d_sse2)];
-                )
             }
+
+            SSE2_ONLY(if(config.sse2) {
+                if (call == FUNCTIONID(integer_d))
+                    call = FUNCTIONID(integer_d_sse2);
+                else if (call == FUNCTIONID(doubleToAtom))
+                    call = FUNCTIONID(doubleToAtom_sse2);
+            })
+
             return out->insCall(call, args);
         }
     };
@@ -1504,14 +1492,9 @@ namespace avmplus
 			}
 			else if (in == NUMBER_TYPE)
 			{
-				LIns* ins = localGetq(loc);
-				uint32_t funcaddr = FUNCTIONID(integer_d);
 				// narrowing conversion number->int
-#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-				if (core->config.sse2)
-					funcaddr = FUNCTIONID(integer_d_sse2);
-#endif
-				localSet(loc, callIns(funcaddr, 1, ins));
+				LIns* ins = localGetq(loc);
+				localSet(loc, callIns(FUNCTIONID(integer_d), 1, ins));
 			}
 			else
 			{
@@ -1529,20 +1512,7 @@ namespace avmplus
 			else if (in == NUMBER_TYPE)
 			{
 				LIns* ins = localGetq(loc);
-#if defined(AVMPLUS_IA32) || defined (AVMPLUS_AMD64)
-				if (core->config.sse2)
-				{
-					// Note: make sure we call the version that returns a
-					// 32-bit result here
-					localSet(loc, callIns(FUNCTIONID(integer_d_sse2), 1,
-										ins));
-				}
-				else
-#endif
-				{
-					localSet(loc, callIns(FUNCTIONID(integer_d), 1,
-										ins));
-				}
+				localSet(loc, callIns(FUNCTIONID(integer_d), 1, ins));
 			}
 			else
 			{
@@ -1591,11 +1561,7 @@ namespace avmplus
 			else if (in == BOOLEAN_TYPE)
 			{
 				// load "true" or "false"
-#ifdef AVMPLUS_64BIT
-				LIns *index = binaryIns(LIR_lsh, localGet(loc), InsConst(3));
-#else
-				LIns *index = binaryIns(LIR_lsh, localGet(loc), InsConst(2));
-#endif
+				LIns *index = binaryIns(LIR_lsh, localGet(loc), InsConst(PTR_SCALE));
 				localSet(loc, loadIns(LIR_ldc, (uintptr)&core->booleanStrings, index));
 			}
 			else if (value.notNull)
@@ -1793,10 +1759,10 @@ namespace avmplus
 
         LIns *out;
         if (!iid) {
-            uint32_t fid = result==NUMBER_TYPE ? FUNCTIONID(fcalli) : FUNCTIONID(calli);
+            const CallInfo *fid = result==NUMBER_TYPE ? FUNCTIONID(fcalli) : FUNCTIONID(calli);
 		    out = callIns(fid, 4, target, method, InsConst(argc), apAddr);
         } else {
-            uint32_t fid = result==NUMBER_TYPE ? FUNCTIONID(fcallimt) : FUNCTIONID(callimt);
+            const CallInfo *fid = result==NUMBER_TYPE ? FUNCTIONID(fcallimt) : FUNCTIONID(callimt);
 		    out = callIns(fid, 5, target, iid, method, InsConst(argc), apAddr);
         }
 
@@ -1933,7 +1899,7 @@ namespace avmplus
 			(!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE))
 		{
 			#ifdef MMGC_DRC
-			uint32_t wbAddr = FUNCTIONID(writeBarrierRC);
+			const CallInfo *wbAddr = FUNCTIONID(writeBarrierRC);
 			if(slotType == NULL || slotType == OBJECT_TYPE) {
 				// use fast atom wb
 				// TODO: inline pointer check
@@ -1970,6 +1936,8 @@ namespace avmplus
 		#endif //WRITE_BARRIERS
     }
 
+    typedef const CallInfo *CallInfop;
+
 	void CodegenLIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
 	{
 		this->state = state;
@@ -2002,7 +1970,7 @@ namespace avmplus
 			case OP_lf32:
 			case OP_lf64:
 			{
-				static const FunctionID kFuncID[5] = { 
+				static const CallInfop kFuncID[5] = { 
 					FUNCTIONID(li8),  
 					FUNCTIONID(li16),  
 					FUNCTIONID(li32),  
@@ -2023,7 +1991,7 @@ namespace avmplus
 			case OP_sf32:
 			case OP_sf64:
 			{
-				static const FunctionID kFuncID[5] = { 
+				static const CallInfop kFuncID[5] = { 
 					FUNCTIONID(si8),  
 					FUNCTIONID(si16),  
 					FUNCTIONID(si32),  
@@ -3070,7 +3038,7 @@ namespace avmplus
 					LIns* mSpace = InsConst(multiname->ns);
 					storeIns(mSpace, offsetof(Multiname, ns), _tempname);
 
-					uint32_t func = opcode==OP_setproperty ? FUNCTIONID(setpropertyHelper) :
+					const CallInfo *func = opcode==OP_setproperty ? FUNCTIONID(setpropertyHelper) :
 														FUNCTIONID(initpropertyHelper);
 					callIns(func, 6, envarg, obj, _tempname, value, vtable, index);
 
@@ -3640,7 +3608,7 @@ namespace avmplus
 		return binaryIns(LIR_le, binaryIns(LIR_xor, atom, c2), c4);
 	}
 
-	LIns* CodegenLIR::cmpEq(uint32_t fid, int lhsi, int rhsi)
+	LIns* CodegenLIR::cmpEq(const CallInfo *fid, int lhsi, int rhsi)
 	{
 		LIns *result = cmpOptimization (lhsi, rhsi, LIR_eq, LIR_eq, LIR_feq);
 		if (result) {
@@ -4482,7 +4450,7 @@ namespace avmplus
 		LIns *env = lirout->insLoadi(vtable, offsetof(VTable, methods)+4*e->disp_id);
 		LIns *target = lirout->insLoadi(env, offsetof(MethodEnv, impl32));
 		LOpcode returnop;
-		uint32_t fid;
+		const CallInfo *fid;
 		if (e->virt->returnTraits() == NUMBER_TYPE) {
 			returnop = LIR_fret;
 			fid = FUNCTIONID(fcalli);
@@ -4491,7 +4459,7 @@ namespace avmplus
 			fid = FUNCTIONID(calli);
 		}
 		LInsp args[] = { ap_param, argc_param, env, target };
-		LIns *call = lirout->insCall(&k_functions[fid], args);
+		LIns *call = lirout->insCall(fid, args);
 		lirout->ins1(returnop, call);
 	}
 }
