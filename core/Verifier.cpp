@@ -194,12 +194,12 @@ namespace avmplus
 		#endif
 
 #ifdef AVMPLUS_WORD_CODE
-	// If MIR generation fails due to OOM then we must translate anyhow,
-	// FIXME - logic for that looks unclear.
-	// Also unclear if any of the existing logic is working, since none
-	// of it can really handle running out of memory anyhow.
-	// FIXME - if MIR generation doesn't fail, then we've translated for
-	// no good reason.
+	   // If MIR generation fails due to OOM then we must translate anyhow,
+	   // FIXME - logic for that looks unclear.
+	   // Also unclear if any of the existing logic is working, since none
+	   // of it can really handle running out of memory anyhow.
+	   // FIXME - if MIR generation doesn't fail, then we've translated for
+	   // no good reason.
 #    ifdef AVMPLUS_DIRECT_THREADED
 		this->translator = new WordcodeEmitter(info, interpGetOpcodeLabels());
 #    else
@@ -209,7 +209,7 @@ namespace avmplus
 		this->translator = new WordcodeEmitter(info);
 #    endif
 	    WordcodeTranslator *translator = this->translator;
-		caches = new uint32[5];
+		caches = new uint32_t[5];
 		num_caches = 5;
 #endif
 
@@ -575,17 +575,17 @@ namespace avmplus
 			{
 				checkStack(1,0);
 				peekType(INT_TYPE);
-				const uint32 count = imm30b;
+				const uint32_t count = imm30b;
 				JIT_ONLY( if (jit) jit->emit(state, opcode, state->pc+imm24, count); )
 
 				state->pop();
 
 				checkTarget(pc+imm24);
-				uint32 case_count = 1 + count;
+				uint32_t case_count = 1 + count;
 				if (pc + size + 3*case_count > code_end) 
 					verifyFailed(kLastInstExceedsCodeSizeError);
 
-				for (uint32 i=0; i < case_count; i++) {
+				for (uint32_t i=0; i < case_count; i++) {
 					int off = AvmCore::readS24(pc+size);
 					checkTarget(pc+off);
 					size += 3;
@@ -720,7 +720,7 @@ namespace avmplus
 			case OP_pushstring: 
 			{
 				checkStack(0,1);
-				uint32 index = imm30;
+				uint32_t index = imm30;
 				if (index == 0 || index >= pool->constantStringCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantStringCount));
 
@@ -734,7 +734,7 @@ namespace avmplus
 			case OP_pushint: 
 			{
 				checkStack(0,1);
-				uint32 index = imm30;
+				uint32_t index = imm30;
 				if (index == 0 || index >= pool->constantIntCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantIntCount));
 				
@@ -746,7 +746,7 @@ namespace avmplus
 			case OP_pushuint: 
 			{
 				checkStack(0,1);
-				uint32 index = imm30;
+				uint32_t index = imm30;
 				if (index == 0 || index >= pool->constantUIntCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantUIntCount));
 				
@@ -758,7 +758,7 @@ namespace avmplus
 			case OP_pushdouble: 
 			{
 				checkStack(0,1);
-				uint32 index = imm30;
+				uint32_t index = imm30;
 				if (index == 0 || index >= pool->constantDoubleCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantDoubleCount));
 				
@@ -771,7 +771,7 @@ namespace avmplus
 			case OP_pushnamespace: 
 			{
 				checkStack(0,1);
-				uint32 index = imm30;
+				uint32_t index = imm30;
 				if (index == 0 || index >= pool->constantNsCount)
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantNsCount));
 
@@ -1062,7 +1062,7 @@ namespace avmplus
 				checkConstantMultiname(imm30, multiname); // CONSTANT_Multiname
 				checkStackMulti(2, 0, &multiname);
 
-				uint32 n=2;
+				uint32_t n=2;
 				checkPropertyMultiname(n, multiname);
 				Value& obj = state->peek(n);
 
@@ -1151,7 +1151,9 @@ namespace avmplus
 				}
 				#endif
 				state->pop(n);
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			setproperty_end:
+#endif
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, wordCode(opcode)) );
 				break;
 			}
@@ -1163,7 +1165,7 @@ namespace avmplus
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname); // CONSTANT_Multiname
 				checkStackMulti(1, 1, &multiname);
-				uint32 n=1;
+				uint32_t n=1;
 				checkPropertyMultiname(n, multiname);
 				emitGetProperty(multiname, n, imm30);
 				break;
@@ -1176,7 +1178,7 @@ namespace avmplus
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(1, 1, &multiname);
-				uint32 n=1;
+				uint32_t n=1;
 				checkPropertyMultiname(n, multiname);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				if (jit)
@@ -1211,7 +1213,7 @@ namespace avmplus
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(1, 1, &multiname);
-				uint32 n=1;
+				uint32_t n=1;
 				checkPropertyMultiname(n, multiname);
 				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				if (jit) 
@@ -1385,7 +1387,7 @@ namespace avmplus
 			{
 				AbstractFunction* m = checkMethodInfo(imm30);
 				JIT_ONLY( int method_id = m->method_id; )
-				const uint32 argc = imm30b;
+				const uint32_t argc = imm30b;
 
 				checkStack(argc+1, 1);
 
@@ -1416,7 +1418,7 @@ namespace avmplus
 
 			case OP_call: 
 			{
-				const uint32 argc = imm30;
+				const uint32_t argc = imm30;
 				checkStack(argc+2, 1);
 				// don't need null check, AvmCore::call() uses toFunction() for null check.
 				
@@ -1442,7 +1444,7 @@ namespace avmplus
 			{
 				// in: ctor arg1..N
 				// out: obj
-				const uint32 argc = imm30;
+				const uint32_t argc = imm30;
 				checkStack(argc+1, 1);
 				Traits* ctraits = state->peek(argc+1).traits;
 				// don't need null check, AvmCore::construct() uses toFunction() for null check.
@@ -1470,7 +1472,7 @@ namespace avmplus
 					 
 					code has since been simplified but existing failure modes preserved.
 				*/
-				const uint32 argc = imm30b;
+				const uint32_t argc = imm30b;
 				const int disp_id = imm30-1;
 				checkStack(argc+1,1);
 				if (disp_id >= 0)
@@ -1485,7 +1487,6 @@ namespace avmplus
 				{
 					verifyFailed(kZeroDispIdError);
 				}
-				XLAT_ONLY( if (translator) translator->emitOp2(pc, WOP_callmethod) );
 				break;
 			}
 
@@ -1495,14 +1496,14 @@ namespace avmplus
 			{
 				// stack in: obj [ns [name]] args
 				// stack out: result
-				const uint32 argc = imm30b;
+				const uint32_t argc = imm30b;
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(argc+1, 1, &multiname);
 
 				checkCallMultiname(opcode, &multiname);
 
-				uint32 n = argc+1; // index of receiver
+				uint32_t n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
 
 				emitCallproperty(opcode, sp, multiname, imm30, imm30b);
@@ -1512,14 +1513,14 @@ namespace avmplus
 			case OP_constructprop: 
 			{
 				// stack in: obj [ns [name]] args
-				const uint32 argc = imm30b;
+				const uint32_t argc = imm30b;
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(argc+1, 1, &multiname);
 
 				checkCallMultiname(opcode, &multiname);
 
-				uint32 n = argc+1; // index of receiver
+				uint32_t n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
 
 				Value& obj = state->peek(n); // make sure object is there
@@ -1578,7 +1579,7 @@ namespace avmplus
 			{
 				// in: factory arg1..N
 				// out: type
-				const uint32 argc = imm30;
+				const uint32_t argc = imm30;
 				checkStack(argc+1, 1);
 				// * is ok for the type, as Vector classes have no statics
 				// when we implement type parameters fully, we should do something here.
@@ -1599,7 +1600,7 @@ namespace avmplus
 			case OP_callsupervoid:
 			{
 				// stack in: obj [ns [name]] args
-				const uint32 argc = imm30b;
+				const uint32_t argc = imm30b;
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(argc+1, 1, &multiname);
@@ -1607,7 +1608,7 @@ namespace avmplus
 				if (multiname.isAttr())
 					verifyFailed(kIllegalOpMultinameError, core->toErrorString(&multiname));
 				
-				uint32 n = argc+1; // index of receiver
+				uint32_t n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
 
 				JIT_ONLY( if (jit) emitCheckNull(sp-(n-1)); )
@@ -1666,7 +1667,7 @@ namespace avmplus
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(1, 1, &multiname);
-				uint32 n=1;
+				uint32_t n=1;
 				checkPropertyMultiname(n, multiname);
 
 				if (multiname.isAttr())
@@ -1728,7 +1729,9 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(n, propType);
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			getsuper_end:
+#endif
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_getsuper) );
 				break;
 			}
@@ -1739,7 +1742,7 @@ namespace avmplus
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(2, 0, &multiname);
-				uint32 n=2;
+				uint32_t n=2;
 				checkPropertyMultiname(n, multiname);
 
 				if (multiname.isAttr())
@@ -1802,7 +1805,9 @@ namespace avmplus
 				#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 				state->pop(n);
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			setsuper_end:
+#endif
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_setsuper) );
 				break;
 			}
@@ -1810,7 +1815,7 @@ namespace avmplus
 			case OP_constructsuper:
 			{
 				// stack in: obj, args ...
-				const uint32 argc = imm30;
+				const uint32_t argc = imm30;
 				checkStack(argc+1, 0);
 
 				int ptrIndex = sp-argc;
@@ -1838,7 +1843,7 @@ namespace avmplus
 
 			case OP_newobject: 
 			{
-				uint32 argc = imm30;
+				uint32_t argc = imm30;
 				checkStack(2*argc, 1);
 				int n=0;
 				while (argc-- > 0)
@@ -1854,7 +1859,7 @@ namespace avmplus
 
 			case OP_newarray: 
 			{
-				const uint32 argc = imm30;
+				const uint32_t argc = imm30;
 				checkStack(argc, 1);
 				JIT_ONLY( if (jit) jit->emit(state, opcode, argc, 0, ARRAY_TYPE); )
 				state->pop_push(argc, ARRAY_TYPE, true);
@@ -2127,6 +2132,8 @@ namespace avmplus
 				Value& lhs = state->peek(2);
 				Traits* lhst = lhs.traits;
 				Traits* rhst = rhs.traits;
+				// Note that for correctness the inference of the result type must
+				// remain even in the non-JIT case
 				if (lhst == STRING_TYPE && lhs.notNull || rhst == STRING_TYPE && rhs.notNull)
 				{
 					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -2503,7 +2510,7 @@ namespace avmplus
 		END_TRY
 	}
 
-	void Verifier::checkPropertyMultiname(uint32 &depth, Multiname &multiname)
+	void Verifier::checkPropertyMultiname(uint32_t &depth, Multiname &multiname)
 	{
 		if (multiname.isRtname())
 		{
@@ -2525,83 +2532,51 @@ namespace avmplus
 		}
 	}
 
-	void Verifier::emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32 imm30, uint32 imm30b)
+	void Verifier::emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc)
 	{
-		uint32 argc = imm30b;
-		uint32 n = argc+1;
+		uint32_t n = argc+1;
 		Traits* t = state->peek(n).traits;
 		
 		Binding b = toplevel->getBinding(t, &multiname);
 		if (t)
 			t->resolveSignatures(toplevel);
 
-		// Too painful to mix these two threads of code generation.
-		// The overhead of splitting them is not likely prohibitive.
+		JIT_ONLY( if (jit) emitCheckNull(sp-(n-1)) );
 		
-#ifdef AVMPLUS_WORD_CODE
-		if (translator)
-		{
-			if (emitCallpropertyMethodXLAT(opcode, t, b, multiname, argc))
-				goto xlat_done;
-			
-			if (emitCallpropertySlotXLAT(opcode, t, b, argc))
-				goto xlat_done;
-
-			// don't know the binding now, resolve at runtime
-			XLAT_ONLY( translator->emitOp2(wordCode(opcode), imm30, imm30b) );
-		xlat_done:
-			;
-		}
-#else
-		(void)imm30;
-		(void)b;
-#endif
+		if (emitCallpropertyMethod(opcode, t, b, multiname, multiname_index, argc))
+			goto callproperty_done;
 		
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (jit) 
-		{
-			emitCheckNull(sp-(n-1));
-
-			if (emitCallpropertyMethodMIR(opcode, t, b, multiname, argc))
-				goto finished_early_binding;
-			
-			if (emitCallpropertySlotMIR(opcode, sp, t, b, argc))
-				goto finished_early_binding;
-
-			// don't know the binding now, resolve at runtime
-			jit->emitSetContext(state, NULL);
-			jit->emit(state, opcode, (uintptr)&multiname, argc, NULL);
-		}
-#else
-        (void)sp;
-#endif
-
-		// If early binding in the case of MIR then the state will have been updated,
-		// so this will be skipped
+		if (emitCallpropertySlot(opcode, sp, t, b, argc))
+			goto callproperty_done;
+		
+		// don't know the binding now, resolve at runtime
+		XLAT_ONLY( if (translator) translator->emitOp2(wordCode(opcode), multiname_index, argc) );
+		JIT_ONLY( if (jit) {
+				      jit->emitSetContext(state, NULL);
+				      jit->emit(state, opcode, (uintptr)&multiname, argc, NULL);
+				   });
+		
+		// If early binding then the state will have been updated, so this will be skipped
 		state->pop_push(n, NULL);
 		if (opcode == OP_callpropvoid)
 			state->pop();
-		return;
 		
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-	finished_early_binding:
-#endif
-
+	callproperty_done:
 		;
 #ifdef DEBUG_EARLY_BINDING
 		core->console << "verify callproperty " << t << " " << multiname->getName() << " from within " << info << "\n";
 #endif
-	}		
+	}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-	bool Verifier::emitCallpropertyMethodMIR(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc) 
+	bool Verifier::emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc) 
 	{
+#ifndef AVMPLUS_WORD_CODE
+		(void)multiname_index;
+#endif
 		if (!AvmCore::isMethodBinding(b))
 			return false;
-		
-		AvmAssert(jit != NULL);
-		
-		uint32 n = argc+1;
+
+		uint32_t n = argc+1;
 		
 #ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp tb = t->getTraitsBindings();
@@ -2622,25 +2597,53 @@ namespace avmplus
 		
 		Traits* resultType = m->returnTraits();
 
-		emitCoerceArgs(m, argc);
-		jit->emitSetContext(state, m);
-		if (!t->isInterface)
-			jit->emitCall(state, OP_callmethod, disp_id, argc, resultType);
-		else
-			jit->emitCall(state, OP_callinterface, m->iid(), argc, resultType);
+#if defined AVMPLUS_WORD_CODE	
+		if (translator)
+		{
+			if (t->isInterface) 
+			{
+				// OPTIMIZEME - early-bind OP_callinterface for the interpreter
+				// The interpreter currently does not handle OP_callinterface at all.
+				
+				// We model the effect of returning 'false' from the present
+				// method.  We can't just return 'false' here because we must
+				// emit good code for the JIT (below).  So do what must be done 
+				// and then return 'true'.
 
+				translator->emitOp2(wordCode(opcode), multiname_index, argc);
+				// OK to keep the resultType here, even if we don't exploit it.
+				// Actually it's necessary - type modeling must not depend on the
+				// execution engine, so we can't set it to NULL.
+			}
+			else
+			{
+				translator->emitOp2(WOP_callmethod, disp_id+1, argc);
+				if (opcode == OP_callpropvoid)
+					translator->emitOp0(WOP_pop);
+			}
+		}
+#endif
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		if (jit)
+		{
+			emitCoerceArgs(m, argc);
+			jit->emitSetContext(state, m);
+			if (!t->isInterface)
+				jit->emitCall(state, OP_callmethod, disp_id, argc, resultType);
+			else
+				jit->emitCall(state, OP_callinterface, m->iid(), argc, resultType);
+		}
+#endif
 		state->pop_push(n, resultType);
 		if (opcode == OP_callpropvoid)
 			state->pop();
 		return true;
 	}
 	
-	bool Verifier::emitCallpropertySlotMIR(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32 argc) 
+	bool Verifier::emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc) 
 	{
 		if (!AvmCore::isSlotBinding(b) || argc != 1)
 			return false;
-		
-		AvmAssert( jit != NULL );
 		
 #ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp tb = t->getTraitsBindings();
@@ -2653,139 +2656,74 @@ namespace avmplus
 		
 		if (slotType == core->traits.int_ctraits)
 		{
-			emitCoerce(INT_TYPE, sp);
+			JIT_ONLY( if (jit) emitCoerce(INT_TYPE, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_coerce_i) );
+			state->setType(sp, INT_TYPE, true); 
 			goto fast_path;
 		}
 		if (slotType == core->traits.uint_ctraits)
 		{
-			emitCoerce(UINT_TYPE, sp);
+			JIT_ONLY( if (jit) emitCoerce(UINT_TYPE, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_coerce_u) );
+			state->setType(sp, UINT_TYPE, true);
 			goto fast_path;
 		}
 		if (slotType == core->traits.number_ctraits)
 		{
-			emitCoerce(NUMBER_TYPE, sp);
+			JIT_ONLY( if (jit) emitCoerce(NUMBER_TYPE, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_coerce_d) );
+			state->setType(sp, NUMBER_TYPE, true);
 			goto fast_path;
 		}
 		if (slotType == core->traits.boolean_ctraits)
 		{
-			emitCoerce(BOOLEAN_TYPE, sp);
+			JIT_ONLY( if (jit) emitCoerce(BOOLEAN_TYPE, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_coerce_b) );
+			state->setType(sp, BOOLEAN_TYPE, true); 
 			goto fast_path;
 		}
 		if (slotType == core->traits.string_ctraits)
 		{
-			emitToString(OP_convert_s, sp);
+			JIT_ONLY( if (jit) emitToString(OP_convert_s, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_s) );
+			state->setType(sp, STRING_TYPE, true); 
 			goto fast_path;
 		}
-		if (slotType && slotType->base == CLASS_TYPE && slotType->getNativeClassInfo() == NULL)
+#if	defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		if (jit && slotType && slotType->base == CLASS_TYPE && slotType->getNativeClassInfo() == NULL)
 		{
 			// is this a user defined class?  A(1+ args) means coerce to A
 			AvmAssert(slotType->itraits != NULL);
 			emitCoerce(slotType->itraits, state->sp());
-			goto fast_path;
+			goto fast_path2;
 		}
+#endif
 		return false;
 	
 	fast_path:
+#if defined AVMPLUS_WORD_CODE
+		if (translator)
+		{
+			if (opcode == OP_callpropvoid)
+			{
+				translator->emitOp0(WOP_pop);  // result
+				translator->emitOp0(WOP_pop);  // function
+			}
+			else
+			{
+				translator->emitOp0(WOP_swap); // function on top
+				translator->emitOp0(WOP_pop);  //   and discard it
+			}
+		}
+#endif
+#if	defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	fast_path2:
+#endif
 		emitNip();
 		if (opcode == OP_callpropvoid)
 			state->pop();
 		return true;
 	}
-#endif // AVMPLUS_MIR || FEATURE_NANOJIT
-	
-#ifdef AVMPLUS_WORD_CODE
-	bool Verifier::emitCallpropertyMethodXLAT(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc) 
-	{
-		if (!AvmCore::isMethodBinding(b))
-			return false;
-
-		AvmAssert( translator != NULL );
-
-#ifdef AVMPLUS_TRAITS_CACHE
-		const TraitsBindingsp tb = t->getTraitsBindings();
-#else
-		const Traitsp tb = t;
-#endif
-
-		if (t == core->traits.math_ctraits)
-			b = findMathFunction(tb, multiname, b, argc);
-		else if (t == core->traits.string_itraits)
-			b = findStringFunction(tb, multiname, b, argc);
-			
-		int disp_id = AvmCore::bindingToMethodId(b);
-		AbstractFunction* m = tb->getMethod(disp_id);
-		
-		if (!m->argcOk(argc))
-			return false;
-		
-		// OPTIMIZEME - early-bind OP_callinterface for the interpreter
-		// The interpreter currently does not handle OP_callinterface at all.
-		if (t->isInterface) 
-			return false;
-		
-		translator->emitOp2(WOP_callmethod, disp_id+1, argc);
-		if (opcode == OP_callpropvoid)
-			translator->emitOp0(WOP_pop);
-		return true;
-	}
-	
-	bool Verifier::emitCallpropertySlotXLAT(AbcOpcode opcode, Traits* t, Binding b, uint32 argc) 
-	{
-		if (!AvmCore::isSlotBinding(b) || argc != 1)
-			return false;
-		
-		AvmAssert( translator != NULL );
-
-#ifdef AVMPLUS_TRAITS_CACHE
-		const TraitsBindingsp tb = t->getTraitsBindings();
-#else
-		const Traitsp tb = t;
-#endif
-
-		int slot_id = AvmCore::bindingToSlotId(b);
-		Traits* slotType = tb->getSlotTraits(slot_id);
-			
-		if (slotType == core->traits.int_ctraits)
-		{
-			translator->emitOp0(WOP_coerce_i);
-			goto fast_path;
-		}
-		if (slotType == core->traits.uint_ctraits)
-		{
-			translator->emitOp0(WOP_coerce_u);
-			goto fast_path;
-		}
-		if (slotType == core->traits.number_ctraits)
-		{
-			translator->emitOp0(WOP_coerce_d);
-			goto fast_path;
-		}
-		if (slotType == core->traits.boolean_ctraits)
-		{
-			translator->emitOp0(WOP_coerce_b);
-			goto fast_path;
-		}
-		if (slotType == core->traits.string_ctraits)
-		{
-			translator->emitOp0(WOP_convert_s);
-			goto fast_path;
-		}
-		return false;
-
-	fast_path:
-		if (opcode == OP_callpropvoid)
-		{
-			translator->emitOp0(WOP_pop);  // result
-			translator->emitOp0(WOP_pop);  // function
-		}
-		else
-		{
-			translator->emitOp0(WOP_swap); // function on top
-			translator->emitOp0(WOP_pop);  //   and discard it
-		}
-		return true;
-	}
-#endif // AVMPLUS_WORD_CODE
 
 	void Verifier::emitCompare(AbcOpcode opcode)
 	{
@@ -2817,7 +2755,7 @@ namespace avmplus
 		state->pop_push(2, BOOLEAN_TYPE);
 	}
 
-	void Verifier::emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32 imm30)
+	void Verifier::emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30)
 	{
 #ifndef AVMPLUS_WORD_CODE
 		(void)imm30;
@@ -2923,7 +2861,7 @@ namespace avmplus
 			}
 		}
 
-		uint32 n=1;
+		uint32_t n=1;
 		checkPropertyMultiname(n, multiname);
 		JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE); )
 		state->pop_push(n-1, OBJECT_TYPE, true);
@@ -2934,14 +2872,14 @@ namespace avmplus
 	// The cache structure is expected to be small in the normal case, so use a
 	// linear list.  For some programs, notably classical JS programs, it may however
 	// be larger, and we may need a more sophisticated structure.
-	uint32 Verifier::allocateCacheSlot(uint32 imm30)
+	uint32_t Verifier::allocateCacheSlot(uint32_t imm30)
 	{
 		for ( int i=0 ; i < next_cache ; i++ )
 			if (caches[i] == imm30)
 				return i;
 		if (next_cache == num_caches) {
-			uint32* new_cache = new uint32[num_caches*2];
-			memcpy(new_cache, caches, sizeof(uint32)*num_caches);
+			uint32_t* new_cache = new uint32_t[num_caches*2];
+			memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
 			delete [] caches;
 			caches = new_cache;
 			num_caches *= 2;
@@ -2951,7 +2889,7 @@ namespace avmplus
 	}
 #endif // AVMPLUS_WORD_CODE
 
-	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32 imm30)
+	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32_t imm30)
 	{
 #ifndef AVMPLUS_WORD_CODE
 		(void)imm30;
@@ -3339,15 +3277,15 @@ namespace avmplus
 		return t != NULL;
 	}
 
-	void Verifier::checkStack(uint32 pop, uint32 push)
+	void Verifier::checkStack(uint32_t pop, uint32_t push)
 	{
-		if (uint32(state->stackDepth) < pop)
+		if (uint32_t(state->stackDepth) < pop)
 			verifyFailed(kStackUnderflowError);
-		if (state->stackDepth-pop+push > uint32(max_stack))
+		if (state->stackDepth-pop+push > uint32_t(max_stack))
 			verifyFailed(kStackOverflowError);
 	}
 
-	void Verifier::checkStackMulti(uint32 pop, uint32 push, Multiname* m)
+	void Verifier::checkStackMulti(uint32_t pop, uint32_t push, Multiname* m)
 	{
 		if (m->isRtname()) pop++;
 		if (m->isRtns()) pop++;
@@ -3422,7 +3360,7 @@ namespace avmplus
 		}
 	}
 
-	AbstractFunction* Verifier::checkMethodInfo(uint32 id)
+	AbstractFunction* Verifier::checkMethodInfo(uint32_t id)
 	{
 		if (id >= pool->methodCount)
 		{
@@ -3435,7 +3373,7 @@ namespace avmplus
 		}
 	}
 
-	Traits* Verifier::checkClassInfo(uint32 id)
+	Traits* Verifier::checkClassInfo(uint32_t id)
 	{
 		if (id >= pool->classCount)
 		{
@@ -3448,7 +3386,7 @@ namespace avmplus
 		}
 	}
 
-	Traits* Verifier::checkTypeName(uint32 index)
+	Traits* Verifier::checkTypeName(uint32_t index)
 	{
 		Multiname name;
 		checkConstantMultiname(index, name); // CONSTANT_Multiname
@@ -3464,7 +3402,7 @@ namespace avmplus
 		return t;
 	}
 
-    AbstractFunction* Verifier::checkDispId(Traits* traits, uint32 disp_id)
+    AbstractFunction* Verifier::checkDispId(Traits* traits, uint32_t disp_id)
     {
 #ifdef AVMPLUS_TRAITS_CACHE
 		TraitsBindingsp td = traits->getTraitsBindings();
@@ -3712,7 +3650,7 @@ namespace avmplus
 		return common;
 	}
 
-    Atom Verifier::checkCpoolOperand(uint32 index, int requiredAtomType)
+    Atom Verifier::checkCpoolOperand(uint32_t index, int requiredAtomType)
     {
 		switch( requiredAtomType )
 		{
@@ -3738,7 +3676,7 @@ namespace avmplus
 		}
     }
 
-	void Verifier::checkConstantMultiname(uint32 index, Multiname& m)
+	void Verifier::checkConstantMultiname(uint32_t index, Multiname& m)
 	{
 		checkCpoolOperand(index, kObjectType);
 		pool->parseMultiname(m, index);
