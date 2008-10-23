@@ -1122,9 +1122,13 @@ namespace MMgc
 		/** @access Requires(request) */
 		static GCWeakRef *GetWeakRef(const void *obj);
 		
+	public:
 		// a WeakRef that always refers to null. useful if you need one.
 		GCWeakRef* emptyWeakRef;
-
+	private:
+		GCRoot* emptyWeakRefRoot;
+	
+	public:
 		/** @access Requires((request && m_lock) || exclusiveGC) */
 		void ClearWeakRef(const void *obj);
 

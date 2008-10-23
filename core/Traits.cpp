@@ -763,6 +763,10 @@ namespace avmplus
 		builtinType(BUILTIN_none),
 		m_posType(uint8_t(posType))
     {
+#ifdef AVMPLUS_TRAITS_CACHE
+		AvmAssert(m_tbref->get() == NULL);
+		AvmAssert(m_tmref->get() == NULL);
+#endif
 		AvmAssert(BUILTIN_COUNT <= 32);
 		AvmAssert(_sizeofInstance <= 0xffff);
 #ifdef AVMPLUS_TRAITS_CACHE
@@ -2894,7 +2898,7 @@ failure:
 #else
 		TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*abcGen*/NULL);
 #endif
-		WB(core->GetGC(), this, &m_tbref, tb->GetWeakRef());
+		m_tbref = tb->GetWeakRef();
 		core->tbCache()->add(tb);
 		return tb;
 	}
@@ -2903,7 +2907,7 @@ failure:
 	{ 
 		AvmAssert(this->linked);
 		TraitsMetadata* tm = _buildTraitsMetadata();
-		WB(core->GetGC(), this, &m_tmref, tm->GetWeakRef());
+		m_tmref = tm->GetWeakRef();
 		core->tmCache()->add(tm);
  		return tm;
 	}

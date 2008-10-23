@@ -38,6 +38,7 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 using namespace MMgc;
 

@@ -263,9 +263,6 @@ namespace avmplus
 
 namespace avmplus
 {
-//#ifdef AVMTHUNK_VERSION
-// Native-Method helpers (only used when AVMTHUNK_VERSION defined, but must be declared before we know...)
-
 	typedef avmplus::AbcEnv* AvmInstance;
 	typedef avmplus::ScriptObject* AvmObject;
 	typedef avmplus::String* AvmString;
@@ -287,13 +284,6 @@ namespace avmplus
 	#define AVMTHUNK_CALLTYPE	 /* could be used to declare custom call type (eg __fastcall) */
 
 	typedef AvmThunkRetType_AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-
-//#endif
-
-	namespace NativeID
-	{
-        #include "builtin.h"
-	}
 }
 
 #include "MMgc.h"
