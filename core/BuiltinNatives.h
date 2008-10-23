@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -35,60 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#include "avmplus.h"
-#include "BuiltinNatives.h"
+#ifndef __avmplus_BuiltinNatives__
+#define __avmplus_BuiltinNatives__
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(NamespaceClass)
-		NATIVE_METHOD_CAST(Namespace, Namespace_prefix_get, Namespace::getPrefix)
-		NATIVE_METHOD_CAST(Namespace, Namespace_uri_get, Namespace::getURI)
-	END_NATIVE_MAP()
-
-	NamespaceClass::NamespaceClass(VTable* cvtable)
-		: ClassClosure(cvtable)
+	namespace NativeID
 	{
-		toplevel()->namespaceClass = this;
-		AvmAssert(traits()->getSizeOfInstance() == sizeof(NamespaceClass));
-		createVanillaPrototype();
-	}
-
-
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom NamespaceClass::construct(int argc, Atom* argv)
-	{
-		AvmCore* core = this->core();
-
-		// See E4X 13.2.2, pg 65
-		if (argc < 1)
-			return core->newNamespace(core->kEmptyString)->atom();
-		else if (argc == 1)
-			return core->newNamespace(argv[1])->atom();
-		else
-		{
-			// Rhino throws an error when prefix is specified and uri is not a valid string
-			String *p = core->string (argv[1]);
-			String *u = core->string (argv[2]);
-			if (p->length() && !u->length())
-			{
-				toplevel()->throwTypeError(kXMLNamespaceWithPrefixAndNoURI, p);
-			}
-
-			return core->newNamespace(argv[1], argv[2])->atom();
-		}
-	}
-
-	// this = argv[0] (ignored)
-	// arg1 = argv[1]
-	// argN = argv[argc]
-	Atom NamespaceClass::call(int argc, Atom* argv)
-	{
-		if ((argc == 1) && (core()->isNamespace(argv[1])))
-			return argv[1];
-		else
-			return construct (argc, argv);
+        #include "builtin.h"
 	}
 }
+
+#endif

@@ -75,6 +75,7 @@
 //   unqualified: one or more namespaces (the public namespace, plus others)
 //   anyName operator - matches both qualified and unqualified properties
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 //#define STRING_DEBUG
 
@@ -2868,7 +2869,7 @@ namespace avmplus
 	/////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////
 
-	QNameObject::QNameObject (QNameClass *factory, Multiname &name)
+	QNameObject::QNameObject (QNameClass *factory, const Multiname &name)
 		: ScriptObject(factory->ivtable(), factory->prototype), m_mn(name)
 	{
 	}

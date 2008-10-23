@@ -38,6 +38,7 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 #ifdef AVMPLUS_MIR
 #include "../codegen/CodegenMIR.h"

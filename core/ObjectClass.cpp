@@ -37,6 +37,7 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 namespace avmplus
 {
