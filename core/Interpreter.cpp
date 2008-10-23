@@ -3348,20 +3348,14 @@ namespace avmplus
 	
 	Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core)
 	{
+		// See Verifier::checkTypeName for the canonical code
+
 		Traits* t = pool->getTraits(*name, toplevel);
 		if( name->isParameterizedType() )
 		{
-			Multiname param_name;
-			GET_MULTINAME(param_name, name->getTypeParameter());
-
-			Traits* param_traits = getTraits(&param_name, pool, toplevel, core);
-			Stringp fullname = core->internString( core->concatStrings(t->name, 
-				core->concatStrings(core->concatStrings(core->newString(".<"), param_traits->formatClassName()), core->newString(">")))->atom());
-
-			Multiname newname;
-			newname.setName(fullname);
-			newname.setNamespace(t->ns);
-			t = pool->getTraits(newname, toplevel);
+			GET_MULTINAME_PTR(param_name, name->getTypeParameter());
+			Traits* param_traits = name->getTypeParameter() ? getTraits(param_name, pool, toplevel, core) : NULL;
+			t = pool->resolveParameterizedType(toplevel, t, param_traits);
 		}
 		return t;
 	}
