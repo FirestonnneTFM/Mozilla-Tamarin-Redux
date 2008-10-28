@@ -56,7 +56,7 @@ as3/sampling/ProcessSampling: , .*(win|lnx|mac)-tvm-debugdebugger , skip , bug h
 # sampling api: windows debug debugger assertion fails crashes: bug 457311
 as3/sampling/Callback: , x86-win-tvm-debugdebugger , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=457311
 # mmgc seg fault on linux debug-debugger: bug 457903
-ecma3/Exceptions/number_00[12]_rt: , x86-lnx-tvm-debugdebugger  , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=457903
+ecma3/Exceptions/number_00[12]_rt: , x86-lnx-tvm-debugdebugger  , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=457903
 
 
 e4x/Regress/b121219: ,   .*lnx-tvm-release   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=450347
@@ -82,4 +82,5 @@ ecma3/Math/e15_8_2_5:Infinity/Math.atan2\(-0. 1\)                ,   .*winmobile
 # Recursive PCRE testcases kills the stack on PocketPC builds
 ecma3/RegExp/eregress_119909,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
 
-
+# MOPS/FLACC failures when running on PPC.
+mops/.* , ppc.* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=462010
