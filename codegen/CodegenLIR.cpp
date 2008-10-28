@@ -87,7 +87,7 @@ union { \
     int foo[2]; \
 }; \
 bar = _method; \
-return foo[1];
+return foo[0];
 #endif
 
 #elif defined AVMPLUS_MAC

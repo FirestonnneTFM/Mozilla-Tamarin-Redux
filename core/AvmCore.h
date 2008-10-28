@@ -95,6 +95,8 @@ const int kBufferPadding = 16;
 		bool dceopt;
         #endif
 
+		enum Runmode runmode;
+
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		/**
 		 * To speed up initialization, we don't use MIR on
@@ -104,7 +106,6 @@ const int kBufferPadding = 16;
 		 * jit switch forces all code to run through MIR/LIR
 		 * instead of interpreter.
 		 */
-		enum Runmode runmode;
 		bool cseopt;
 
         #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)

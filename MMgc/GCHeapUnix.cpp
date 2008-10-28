@@ -415,7 +415,11 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_ARM
-	void GetStackTrace(sintptr *trace, int len, int skip) {}
+	void GetStackTrace(sintptr *trace, int len, int skip) {
+		(void) trace;
+		(void) len;
+		(void) skip;
+	}
 #endif
 
 #endif

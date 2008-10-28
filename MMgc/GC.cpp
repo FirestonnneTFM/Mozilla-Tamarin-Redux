@@ -1282,7 +1282,7 @@ bail:
 
 	void GC::CleanStack(bool force)
 	{
-#if defined(_MSC_VER) && (defined(_DEBUG) || defined(_ARM_))
+#if defined _MSC_VER && defined _DEBUG
 		// debug builds poison the stack already
 		(void)force;
 		return;
@@ -1327,6 +1327,16 @@ bail:
 			asm("mr %0,%%r1" : "=r" (stackP));
 	#endif // _MAC
 #endif // MMGC_PPC
+
+#if defined MMGC_ARM
+    #ifdef _MSC_VER
+        // no inline asm available
+        int foo;
+        stackP = &foo;
+    #else
+        asm("mov %0,sp" : "=r" (stackP));
+    #endif
+#endif //MMGC_ARM
 
 		if( ((char*) stackP > (char*)rememberedStackTop) && ((char *)rememberedStackBottom > (char*)stackP)) {
 			size_t amount = (char*) stackP - (char*)rememberedStackTop;
