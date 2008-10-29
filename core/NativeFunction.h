@@ -310,11 +310,11 @@ namespace avmplus
 	{
 	// ------------------------ DATA SECTION BEGIN
 	public:
-		const AvmThunkNativeThunker thunker;
-		const AvmThunkNativeHandler handler;
-		const int32_t method_id;
-		const int32_t cookie;
-		const int32_t flags;
+		AvmThunkNativeThunker thunker;
+		AvmThunkNativeHandler handler;
+		int32_t method_id;
+		int32_t cookie;
+		int32_t flags;
 	// ------------------------ DATA SECTION END
 	};
 
@@ -329,10 +329,10 @@ namespace avmplus
 
 	// ------------------------ DATA SECTION BEGIN
 	public:
-		const Handler handler;
-		const NativeMethodInfop nativeMap;
-		const int32_t script_id;
-		const uint32_t sizeofInstance;
+		Handler handler;
+		NativeMethodInfop nativeMap;
+		int32_t script_id;
+		uint32_t sizeofInstance;
 	// ------------------------ DATA SECTION END
 	};
 
@@ -346,11 +346,11 @@ namespace avmplus
 
 	// ------------------------ DATA SECTION BEGIN
 	public:
-		const Handler handler;
-		const NativeMethodInfop nativeMap;
-		const int32_t class_id;
-		const uint32_t sizeofClass;
-		const uint32_t sizeofInstance;
+		Handler handler;
+		NativeMethodInfop nativeMap;
+		int32_t class_id;
+		uint32_t sizeofClass;
+		uint32_t sizeofInstance;
 	// ------------------------ DATA SECTION END
 	};
 

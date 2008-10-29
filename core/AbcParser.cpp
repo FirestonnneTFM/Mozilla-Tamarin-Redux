@@ -1072,7 +1072,7 @@ namespace avmplus
 			else
 			{
 				NativeMethodInfop ni = NULL;
-				if (!natives || !(ni = natives->get_method(i)))
+				if (!natives || (ni = natives->get_method(i)) == NULL)
 				{
 					// If this assert hits, you're missing a native method.  Method "i"
 					// corresponds to the function of the same number in 
