@@ -654,8 +654,7 @@ namespace avmplus
 			info->word_code.code_anchor = code_anchor;
 			info->word_code.body_pos = code;
 #ifdef SUPERWORD_PROFILING
-			info->word_code.body_end = ptr;
-			info->word_code.dumped = false;
+			WordcodeTranslator::swprofCode(code, code + total_size);
 #endif
 		}
 		

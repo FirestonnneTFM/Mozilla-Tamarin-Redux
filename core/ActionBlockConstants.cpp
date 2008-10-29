@@ -391,9 +391,15 @@ namespace avmplus
 		{   -1,  0    W(0)                   N("OP_0xEC") },
 		{   -1,  0    W(0)                   N("OP_0xED") },
 		{    2,  0    W(0)                   N("abs_jump") },
+#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 		{    4,  1    W(WOP_debug)           N("debug") },
 		{    1,  1    W(WOP_debugline)       N("debugline") },
 		{    1,  1    W(WOP_debugfile)       N("debugfile") },
+#else
+		{   -1,  0    W(0)                   N("OP_0xEF") },
+		{   -1,  0    W(0)                   N("OP_0xF0") },
+		{   -1,  0    W(0)                   N("OP_0xF1") },
+#endif
 		{    1,  0    W(0)                   N("OP_0xF2") },
 		{    0,  0    W(0)                   N("timestamp") },
 		{   -1,  0    W(0)                   N("OP_0xF4") },

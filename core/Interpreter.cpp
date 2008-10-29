@@ -126,10 +126,6 @@ namespace avmplus
 	static void initMultiname(MethodEnv* env, Multiname &name, Atom* &sp);
 	static void initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* &sp);
 	static Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
-#ifdef SUPERWORD_PROFILING
-	static void swprofCode(const uint32_t* start, const uint32_t* limit);
-	static void swprofPC(const uint32_t* pc);
-#endif
 #if defined(AVMPLUS_VERBOSE) && !defined(AVMPLUS_WORD_CODE)
 	
 	/**
@@ -218,11 +214,26 @@ namespace avmplus
 	  	       __asm mov ebx, offset lbl \
 		       __asm mov [eax+4*idx], ebx \
 		     }
-#     else
+#    else
 		  extern bool LLLLABEL(int);
 #         define III(a,b) extern void LLLLABEL ## _ ## a ## _ ## b(); LLLLABEL ## _ ## a ## _ ## b();
-#     endif
+#    endif
 #  endif // threading discipline
+#  if defined AVMPLUS_MOPS
+#      define IIM(a,b) III(a,b)
+#  else
+#      define IIM(a,b) XXX(a)
+#  endif
+#  if defined AVMPLUS_PEEPHOLE_OPTIMIZER
+#      define IIP(a,b) III(a,b)
+#  else
+#      define IIP(a,b) XXX(a)
+#  endif
+#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#      define IID(a,b) III(a,b)
+#  else
+#      define IID(a,b) XXX(a)
+#  endif
 			 XXX(0x00)
 			 XXX(0x01)
 			 XXX(0x02) /* OP_nop */
@@ -276,29 +287,16 @@ namespace avmplus
 			 III(0x32, L_hasnext2)
 			 XXX(0x33)
 			 XXX(0x34)
-#ifdef AVMPLUS_MOPS
-			 III(0x35, L_li8)
-			 III(0x36, L_li16)
-			 III(0x37, L_li32)
-			 III(0x38, L_lf32)
-			 III(0x39, L_lf64)
-			 III(0x3A, L_si8)
-			 III(0x3B, L_si16)
-			 III(0x3C, L_si32)
-			 III(0x3D, L_sf32)
-			 III(0x3E, L_sf64)
-#else
-			 XXX(0x35)
-			 XXX(0x36)
-			 XXX(0x37)
-			 XXX(0x38)
-			 XXX(0x39)
-			 XXX(0x3A)
-			 XXX(0x3B)
-			 XXX(0x3C)
-			 XXX(0x3D)
-			 XXX(0x3E)
-#endif
+			 IIM(0x35, L_li8)
+			 IIM(0x36, L_li16)
+			 IIM(0x37, L_li32)
+			 IIM(0x38, L_lf32)
+			 IIM(0x39, L_lf64)
+			 IIM(0x3A, L_si8)
+			 IIM(0x3B, L_si16)
+			 IIM(0x3C, L_si32)
+			 IIM(0x3D, L_sf32)
+			 IIM(0x3E, L_sf64)
 			 XXX(0x3F)
 			 III(0x40, L_newfunction)
 			 III(0x41, L_call)
@@ -316,15 +314,9 @@ namespace avmplus
 			 XXX(0x4D) /* OP_callinterface */
 			 III(0x4E, L_callsupervoid)
 			 III(0x4F, L_callpropvoid)
-#ifdef AVMPLUS_MOPS
-			 III(0x50, L_sxi1)
-			 III(0x51, L_sxi8)
-			 III(0x52, L_sxi16)
-#else
-			 XXX(0x50)
-			 XXX(0x51)
-			 XXX(0x52)
-#endif
+			 IIM(0x50, L_sxi1)
+			 IIM(0x51, L_sxi8)
+			 IIM(0x52, L_sxi16)
 			 III(0x53, L_applytype)
 			 XXX(0x54)
 			 III(0x55, L_newobject)
@@ -481,15 +473,9 @@ namespace avmplus
 			 XXX(0xEC)
 			 XXX(0xED)
 			 XXX(0xEE) /* OP_abs_jump */
-#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
-			 III(0xEF, L_debug)
-			 III(0xF0, L_debugline)
-			 III(0xF1, L_debugfile)
-#  else
- 			 XXX(0xEF) /* OP_debug */
-			 XXX(0xF0) /* L_debugline */
-			 XXX(0xF1) /* L_debugfile */
-#  endif
+			 IID(0xEF, L_debug)
+			 IID(0xF0, L_debugline)
+			 IID(0xF1, L_debugfile)
 			 XXX(0xF2)
 	 		 XXX(0xF3) /* OP_timestamp */
 			 XXX(0xF4)
@@ -507,54 +493,52 @@ namespace avmplus
 			 XXX(0x100)
 			 III(0x101, L_pushbits)
 			 III(0x102, L_push_doublebits)
-#  ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
-			 III(0x103, L_get2locals)
-			 III(0x104, L_get3locals)
- 			 III(0x105, L_get4locals)
-			 III(0x106, L_get5locals)
-			 III(0x107, L_storelocal)
-			 III(0x108, L_add_ll)
-			 III(0x109, L_add_set_lll)
-			 III(0x10A, L_subtract_ll)
-			 III(0x10B, L_multiply_ll)
-			 III(0x10C, L_divide_ll)
-			 III(0x10D, L_modulo_ll)
-			 III(0x10E, L_bitand_ll)
-			 III(0x10F, L_bitor_ll)
-			 III(0x110, L_bitxor_ll)
-			 III(0x111, L_add_lb)
-			 III(0x112, L_subtract_lb)
-			 III(0x113, L_multiply_lb)
-			 III(0x114, L_divide_lb)
-			 III(0x115, L_bitand_lb)
-			 III(0x116, L_bitor_lb)
-			 III(0x117, L_bitxor_lb)
-			 III(0x118, L_iflt_ll)
-			 III(0x119, L_ifnlt_ll)
-			 III(0x11A, L_ifle_ll)
-			 III(0x11B, L_ifnle_ll)
-			 III(0x11C, L_ifgt_ll)
-			 III(0x11D, L_ifngt_ll)
-			 III(0x11E, L_ifge_ll)
-			 III(0x11F, L_ifnge_ll)
-			 III(0x120, L_ifeq_ll)
-			 III(0x121, L_ifne_ll)
-			 III(0x122, L_ifstricteq_ll)
-			 III(0x123, L_ifstrictne_ll)
-			 III(0x124, L_iflt_lb)
-			 III(0x125, L_ifnlt_lb)
-			 III(0x126, L_ifle_lb)
-			 III(0x127, L_ifnle_lb)
-			 III(0x128, L_ifgt_lb)
-			 III(0x129, L_ifngt_lb)
-			 III(0x12A, L_ifge_lb)
-			 III(0x12B, L_ifnge_lb)
-			 III(0x12C, L_ifeq_lb)
-			 III(0x12D, L_ifne_lb)
-			 III(0x12E, L_ifstricteq_lb)
-			 III(0x12F, L_ifstrictne_lb)
-			 III(0x130, L_swap_pop)
-#  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
+			 IIP(0x103, L_get2locals)
+			 IIP(0x104, L_get3locals)
+ 			 IIP(0x105, L_get4locals)
+			 IIP(0x106, L_get5locals)
+			 IIP(0x107, L_storelocal)
+			 IIP(0x108, L_add_ll)
+			 IIP(0x109, L_add_set_lll)
+			 IIP(0x10A, L_subtract_ll)
+			 IIP(0x10B, L_multiply_ll)
+			 IIP(0x10C, L_divide_ll)
+			 IIP(0x10D, L_modulo_ll)
+			 IIP(0x10E, L_bitand_ll)
+			 IIP(0x10F, L_bitor_ll)
+			 IIP(0x110, L_bitxor_ll)
+			 IIP(0x111, L_add_lb)
+			 IIP(0x112, L_subtract_lb)
+			 IIP(0x113, L_multiply_lb)
+			 IIP(0x114, L_divide_lb)
+			 IIP(0x115, L_bitand_lb)
+			 IIP(0x116, L_bitor_lb)
+			 IIP(0x117, L_bitxor_lb)
+			 IIP(0x118, L_iflt_ll)
+			 IIP(0x119, L_ifnlt_ll)
+			 IIP(0x11A, L_ifle_ll)
+			 IIP(0x11B, L_ifnle_ll)
+			 IIP(0x11C, L_ifgt_ll)
+			 IIP(0x11D, L_ifngt_ll)
+			 IIP(0x11E, L_ifge_ll)
+			 IIP(0x11F, L_ifnge_ll)
+			 IIP(0x120, L_ifeq_ll)
+			 IIP(0x121, L_ifne_ll)
+			 IIP(0x122, L_ifstricteq_ll)
+			 IIP(0x123, L_ifstrictne_ll)
+			 IIP(0x124, L_iflt_lb)
+			 IIP(0x125, L_ifnlt_lb)
+			 IIP(0x126, L_ifle_lb)
+			 IIP(0x127, L_ifnle_lb)
+			 IIP(0x128, L_ifgt_lb)
+			 IIP(0x129, L_ifngt_lb)
+			 IIP(0x12A, L_ifge_lb)
+			 IIP(0x12B, L_ifnge_lb)
+			 IIP(0x12C, L_ifeq_lb)
+			 IIP(0x12D, L_ifne_lb)
+			 IIP(0x12E, L_ifstricteq_lb)
+			 IIP(0x12F, L_ifstrictne_lb)
+			 IIP(0x130, L_swap_pop)
 			 III(0x131, L_findpropglobal)
 			 III(0x132, L_findpropglobalstrict)
 #  if defined GNUC_THREADING
@@ -608,15 +592,6 @@ namespace avmplus
 		int local_count = info->word_code.local_count;
 		int init_scope_depth = info->word_code.init_scope_depth;
 		int max_scope_depth = info->word_code.max_scope_depth;
-#  ifdef SUPERWORD_PROFILING
-#    ifdef AVMPLUS_DIRECT_THREADED
-#       error "Superword profiling requires switch dispatch"
-#    endif
-		if (!info->word_code.dumped) {
-			swprofCode(pos, info->word_code.body_end);
-			info->word_code.dumped = true;
-		}
-#  endif
 #else // !AVMPLUS_WORD_CODE
 		const byte* pos = info->body_pos;
 		int max_stack = AvmCore::readU30(pos);
@@ -860,7 +835,7 @@ namespace avmplus
 		for (;;)
         {
 #  if defined SUPERWORD_PROFILING
-			swprofPC(pc);
+			WordcodeTranslator::swprofPC(pc);
 #  endif
 #  if defined AVMPLUS_WORD_CODE
 			// See comments around INSTR(ext) below.
@@ -3442,63 +3417,5 @@ namespace avmplus
     }
 #endif // AVMPLUS_VERBOSE
 			
-#ifdef SUPERWORD_PROFILING
-	// 32-bit only
 
-	static FILE *swprof_code_fp = NULL;
-	static FILE *swprof_sample_fp = NULL;
-#ifdef SUPERWORD_LIMIT
-	static unsigned int sample_count = 0;
-#endif
-
-	void swprofStart()
-	{
-		swprof_code_fp = fopen("superwordprof_code.txt", "wb");
-		if (swprof_code_fp == NULL)
-			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN CODE FILE.\n");
-		else
-		{
-			unsigned int signature = 0xC0DEC0DE;
-			fwrite(&signature, sizeof(uint32_t), 1, swprof_code_fp);
-		}
-		swprof_sample_fp = fopen("superwordprof_sample.txt", "wb");
-		if (swprof_sample_fp == NULL)
-			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN SAMPLE FILE.\n");
-		else
-		{
-			unsigned int signature = 0xDA1ADA1A;
-			fwrite(&signature, sizeof(uint32_t), 1, swprof_sample_fp);
-		}
-	}
-	
-	void swprofStop() 
-	{
-		if (swprof_code_fp != NULL)	{ fclose(swprof_code_fp); swprof_code_fp = NULL; }
-		if (swprof_sample_fp != NULL) { fclose(swprof_sample_fp); swprof_sample_fp = NULL; }
-	}
-			
-	void swprofCode(const uint32_t* start, const uint32_t* limit)
-	{
-		if (swprof_code_fp != NULL) {
-			fwrite(&start, sizeof(uint32_t*), 1, swprof_code_fp);
-			fwrite(&limit, sizeof(uint32_t*), 1, swprof_code_fp);
-			fwrite(start, sizeof(uint32_t), limit-start, swprof_code_fp);
-			fflush(swprof_code_fp);
-		}
-	}
-
-	void swprofPC(const uint32_t* pc)
-	{
-		if (swprof_sample_fp != NULL) {
-			fwrite(&pc, sizeof(uint32_t*), 1, swprof_sample_fp);
-#ifdef SUPERWORD_LIMIT
-			if (++sample_count == SUPERWORD_LIMIT) {
-				swprofStop();
-				fprintf(stderr, "SAMPLING HALTED.\n");
-			}
-#endif
-		}
-	}
-#endif  // SUPERWORD_PROFILING
-			
 }

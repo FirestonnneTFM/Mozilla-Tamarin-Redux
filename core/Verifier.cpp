@@ -809,7 +809,7 @@ namespace avmplus
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 				XLAT_ONLY( if (translator) translator->emitOp1(WOP_setlocal, localno) );
 #else
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 #endif
 				break;
 			}
@@ -837,7 +837,7 @@ namespace avmplus
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 				XLAT_ONLY( if (translator) translator->emitOp1(WOP_getlocal, localno) );
 #else
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, opcode) );
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, wordCode(opcode)) );
 #endif
 				break;
 			}
