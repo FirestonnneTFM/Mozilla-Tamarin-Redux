@@ -979,36 +979,6 @@ namespace avmplus
 	}
 	
 	
-#if defined(AVMPLUS_BIG_ENDIAN)
-	static void flip16(void *p)
-	{
-		uint8 *c = (uint8 *)p;
-		uint8 t = c[0];
-		c[0] = c[1];
-		c[1] = t;
-	}
-
-	static void flip32(void *p)
-	{
-		uint16 *c = (uint16 *)p;
-		flip16(c + 0);
-		flip16(c + 1);
-		uint16 t = c[0];
-		c[0] = c[1];
-		c[1] = t;
-	}
-
-	static void flip64(void *p)
-	{
-		uint32 *c = (uint32 *)p;
-		flip32(c + 0);
-		flip32(c + 1);
-		uint32 t = c[0];
-		c[0] = c[1];
-		c[1] = t;
-	}
-#endif
-
 #ifdef AVMPLUS_MOPS
 
 	void MethodEnv::mopRangeCheckFailed() const
@@ -1033,11 +1003,10 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 2) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
-		uint16 result = *(uint16 *)(dom->globalMemoryBase + addr);
+		uint16_t result = *(uint16_t *)(dom->globalMemoryBase + addr);
 
-#if defined(AVMPLUS_BIG_ENDIAN)
-		flip16(&result);
-#endif
+		MOPS_SWAP_BYTES(&result);
+
 		return result;
 	}
 
@@ -1049,11 +1018,10 @@ namespace avmplus
 			mopRangeCheckFailed();
 
 		// TODO is using raw "int" type correct?
-		int result = *(int *)(dom->globalMemoryBase + addr);
+		int32_t result = *(int32_t *)(dom->globalMemoryBase + addr);
 
-#if defined(AVMPLUS_BIG_ENDIAN)
-		flip32(&result);
-#endif
+		MOPS_SWAP_BYTES(&result);
+
 		return result;
 	}
 
@@ -1066,9 +1034,8 @@ namespace avmplus
 
 		float result = *(float *)(dom->globalMemoryBase + addr);
 
-#if defined(AVMPLUS_BIG_ENDIAN)
-		flip32(&result);
-#endif
+		MOPS_SWAP_BYTES(&result);
+
 		return result;
 	}
 
@@ -1081,9 +1048,8 @@ namespace avmplus
 
 		double result = *(double *)(dom->globalMemoryBase + addr);
 
-#if defined(AVMPLUS_BIG_ENDIAN)
-		flip64(&result);
-#endif
+		MOPS_SWAP_BYTES(&result);
+
 		return result;
 	}
 
@@ -1106,9 +1072,8 @@ namespace avmplus
 
 		uint16 svalue = (uint16)value;
 
-#if defined(AVMPLUS_BIG_ENDIAN)
-		flip16(&svalue);
-#endif
+		MOPS_SWAP_BYTES(&svalue);
+
 		*(uint16 *)(dom->globalMemoryBase + addr) = svalue;
 	}
 
@@ -1119,9 +1084,8 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 4) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
-#if defined(AVMPLUS_BIG_ENDIAN)
-		flip32(&value);
-#endif
+		MOPS_SWAP_BYTES(&value);
+
 		*(int *)(dom->globalMemoryBase + addr) = value;
 	}
 
@@ -1134,9 +1098,8 @@ namespace avmplus
 
 		float fvalue = (float)value;
 
-#if defined(AVMPLUS_BIG_ENDIAN)
-		flip32(&fvalue);
-#endif
+		MOPS_SWAP_BYTES(&fvalue);
+
 		*(float *)(dom->globalMemoryBase + addr) = fvalue;
 	}
 
@@ -1147,9 +1110,8 @@ namespace avmplus
 		if(addr < 0 || (uint32)(addr + 8) > dom->globalMemorySize)
 			mopRangeCheckFailed();
 
-#if defined(AVMPLUS_BIG_ENDIAN)
-		flip64(&value);
-#endif
+		MOPS_SWAP_BYTES(&value);
+
 		*(double *)(dom->globalMemoryBase + addr) = value;
 	}
 

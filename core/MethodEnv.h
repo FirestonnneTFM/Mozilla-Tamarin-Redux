@@ -372,6 +372,66 @@ namespace avmplus
 		DRCWB(ClassClosure*) closure;
 	// ------------------------ DATA SECTION END
 	};
+
+// probably should go elsewhere, but this is adequate for now.
+#if defined(AVMPLUS_MOPS)
+	#if defined(AVMPLUS_BIG_ENDIAN)
+		inline void _swap8(uint8_t& a, uint8_t& b)
+		{
+			const uint8_t t = a;
+			a = b;
+			b = t;
+		}
+
+		inline void MOPS_SWAP_BYTES(uint16_t* p)
+		{
+			union {
+				uint16_t* pv;
+				uint8_t* c;
+			};
+			pv = p;
+			_swap8(c[0], c[1]);
+		}
+		
+		inline void MOPS_SWAP_BYTES(int32_t* p)
+		{
+			union {
+				int32_t* pv;
+				uint8_t* c;
+			};
+			pv = p;
+			_swap8(c[0], c[3]);
+			_swap8(c[1], c[2]);
+		}
+
+		inline void MOPS_SWAP_BYTES(float* p)
+		{
+			union {
+				float* pv;
+				uint8_t* c;
+			};
+			pv = p;
+			_swap8(c[0], c[3]);
+			_swap8(c[1], c[2]);
+		}
+		
+		inline void MOPS_SWAP_BYTES(double* p)
+		{
+			union {
+				double* pv;
+				uint8_t* c;
+			};
+			pv = p;
+			_swap8(c[0], c[7]);
+			_swap8(c[1], c[6]);
+			_swap8(c[2], c[5]);
+			_swap8(c[3], c[4]);
+		}
+	#else
+		#define MOPS_SWAP_BYTES(p) do {} while (0)
+	#endif
+#endif
+
 }
 
 #endif // __avmplus_MethodEnv__
