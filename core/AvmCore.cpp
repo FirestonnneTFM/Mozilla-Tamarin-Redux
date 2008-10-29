@@ -327,7 +327,7 @@ namespace avmplus
 		java = NULL;
 		#endif
 #ifdef SUPERWORD_PROFILING
-		swprofStart();
+		WordcodeTranslator::swprofStart();
 #endif
 	}
 
@@ -359,7 +359,7 @@ namespace avmplus
 		g_tmcore = NULL;
 #endif
 #ifdef SUPERWORD_PROFILING
-		swprofStop();
+		WordcodeTranslator::swprofStop();
 #endif
 	}
 

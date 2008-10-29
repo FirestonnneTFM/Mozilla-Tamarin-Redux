@@ -69,10 +69,6 @@ namespace avmplus
 		struct 
 		{
 			const uint32 *body_pos; // NULL iff not yet translated
-#  ifdef SUPERWORD_PROFILING
-			const uint32 *body_end; // one past the end
-			bool dumped;
-#  endif
 			DWB(GCObject*) code_anchor;  // The object that contains the code pointed to by body_pos
 			int max_stack;
 			int local_count;

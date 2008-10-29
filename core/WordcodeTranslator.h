@@ -90,6 +90,13 @@ namespace avmplus
 
 		// In this case, new_pc is the pc being jumped to
 		virtual void emitAbsJump(const byte *new_pc) = 0;
+		
+#ifdef SUPERWORD_PROFILING
+		static void swprofStart();
+		static void swprofStop();
+		static void swprofCode(const uint32_t* start, const uint32_t* limit);
+		static void swprofPC(const uint32_t* pc);
+#endif
 	};
 
 #endif // AVMPUS_WORD_CODE
