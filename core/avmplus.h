@@ -195,8 +195,9 @@ namespace avmplus
 	class NamespaceClass;
 	class NativeMethod;
 	class NativeClassFactory;
+	class NativeInitializer;
 	class NativeScriptFactory;
-	struct NativeTableEntry;
+	struct NativeMethodInfo;
 	class NumberClass;
 	class IntClass;
 	class UIntClass;
@@ -242,7 +243,7 @@ namespace avmplus
 
 	struct NativeClassInfo;
 	struct NativeScriptInfo;
-	struct NativeTableEntry;
+	struct NativeMethodInfo;
 	struct WordOpcodeAttr;
 
 	typedef Traits* Traitsp;
@@ -257,7 +258,7 @@ namespace avmplus
 
 	typedef const NativeScriptInfo* NativeScriptInfop;
 	typedef const NativeClassInfo* NativeClassInfop;
-	typedef const NativeTableEntry* NativeTableEntryp;
+	typedef const NativeMethodInfo* NativeMethodInfop;
 	#define AVMTHUNK_NativeClassInfop_DEFINED
 }
 

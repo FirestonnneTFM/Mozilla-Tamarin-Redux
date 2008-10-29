@@ -55,11 +55,8 @@ namespace avmplus
 
 	class SamplerScript : public ScriptObject
 	{
-	protected:
-		// subclasses can override this to check for security violations
-		// and prohibit certain operations. default implementation always
-		// allows but FlashPlayer takes advantage of this.
-		virtual bool trusted() { return true; }
+	private:
+		bool trusted() { return toplevel()->sampler_trusted(this); }
 		
 	public:
 		SamplerScript(VTable *vtable, ScriptObject *delegate);

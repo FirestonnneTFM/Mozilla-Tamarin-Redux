@@ -145,6 +145,7 @@ PRIVATE void operator delete[]( void *p )
 
 namespace avmplus {
 	namespace NativeID {
+		using namespace avmshell;
 		#include "shell_toplevel.cpp"
 	}
 }
@@ -153,28 +154,6 @@ namespace avmshell
 {
 	const int kScriptTimeout = 15;
 	const int kScriptGracePeriod = 5;
-
-	BEGIN_NATIVE_CLASSES(Shell)
-		NATIVE_CLASS(abcclass_avmplus_System,          SystemClass,        ScriptObject)
-		NATIVE_CLASS(abcclass_avmplus_File,            FileClass,          ScriptObject)
-		NATIVE_CLASS(abcclass_avmplus_Domain,          DomainClass,        DomainObject)
-		NATIVE_CLASS(abcclass_avmplus_StringBuilder,   StringBuilderClass, StringBuilderObject)		
-		NATIVE_CLASS(abcclass_avmplus_JObject,          JObjectClass,		JObject)
-		NATIVE_CLASS(abcclass_flash_utils_ByteArray,    ByteArrayClass,     ByteArrayObject)		
-		NATIVE_CLASS(abcclass_flash_utils_Dictionary,   DictionaryClass,    DictionaryObject)
-		NATIVE_CLASS(abcclass_flash_sampler_Sample,     SampleClass,        SampleObject)
-		NATIVE_CLASS(abcclass_flash_sampler_NewObjectSample, NewObjectSampleClass, NewObjectSampleObject)
-		NATIVE_CLASS(abcclass_flash_sampler_DeleteObjectSample, SampleClass, SampleObject)
-		NATIVE_CLASS(abcclass_flash_trace_Trace,		TraceClass,			ScriptObject)
-	END_NATIVE_CLASSES()
-
-	BEGIN_NATIVE_SCRIPTS(Shell)
-		NATIVE_SCRIPT(0/*abcscript_avmplus_debugger*/, AvmplusScript)
-		NATIVE_SCRIPT(avmplus::NativeID::abcscript_flash_sampler_startSampling, SamplerScript)
-	END_NATIVE_SCRIPTS()
-
-	BEGIN_NATIVE_MAP(AvmplusScript)
-	END_NATIVE_MAP()
 
 	Shell *shell = NULL;
 	bool show_error = false;
@@ -400,20 +379,7 @@ namespace avmshell
 	
 	void Shell::initShellPool()
 	{
-		AbstractFunction *nativeMethods[avmplus::NativeID::shell_toplevel_abc_method_count];
-		NativeClassInfop nativeClasses[avmplus::NativeID::shell_toplevel_abc_class_count];
-		NativeScriptInfop nativeScripts[avmplus::NativeID::shell_toplevel_abc_script_count];
-
-		memset(nativeMethods, 0, sizeof(AbstractFunction*)*avmplus::NativeID::shell_toplevel_abc_method_count);
-		memset(nativeClasses, 0, sizeof(NativeClassInfop)*avmplus::NativeID::shell_toplevel_abc_class_count);
-		memset(nativeScripts, 0, sizeof(NativeScriptInfop)*avmplus::NativeID::shell_toplevel_abc_script_count);
-
-		initNativeTables(classEntries, scriptEntries, 
-			nativeMethods, nativeClasses, nativeScripts);
-
-		avmplus::ScriptBuffer code = newScriptBuffer(avmplus::NativeID::shell_toplevel_abc_length);
-		memcpy(code.getBuffer(), avmplus::NativeID::shell_toplevel_abc_data, avmplus::NativeID::shell_toplevel_abc_length);
-		shellPool = parseActionBlock(code, 0, NULL, builtinDomain, nativeMethods, nativeClasses, nativeScripts);
+		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this, NULL);
 	}
 
 	Toplevel* Shell::initShellBuiltins()
@@ -542,7 +508,7 @@ namespace avmshell
 			codeContext->m_domainEnv = domainEnv;
 				
 			// parse new bytecode
-			handleActionBlock(code, 0, domainEnv, toplevel, NULL, NULL, NULL, codeContext);
+			handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
 
 			#ifdef DEBUGGER
 			delete profiler;
@@ -981,7 +947,7 @@ namespace avmshell
 				{
 					ScriptBuffer code = newScriptBuffer(f.available());
 					f.read(code.getBuffer(), f.available());
-					handleActionBlock(code, 0, domainEnv, toplevel, NULL, NULL, NULL, codeContext);
+					handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
 				}
 
 				lastCodeContext = codeContext;

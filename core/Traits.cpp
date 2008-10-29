@@ -1556,7 +1556,7 @@ namespace avmplus
 	}
 
 	TraitsMetadata* Traits::_buildTraitsMetadata()
-		{
+	{
 		AvmAssert(this->linked);
 
 		switch (posType())

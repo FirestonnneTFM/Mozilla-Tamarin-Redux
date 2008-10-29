@@ -51,58 +51,6 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-
-	BEGIN_NATIVE_CLASSES(AvmCore)
-		NATIVE_CLASS(abcclass_Object,				ObjectClass,	ScriptObject)
-		NATIVE_CLASS(abcclass_Class,				ClassClass,		ClassClosure)
-		NATIVE_CLASS(abcclass_Namespace,			NamespaceClass,	Namespace)
-		NATIVE_CLASS(abcclass_Function, 			FunctionClass,	ClassClosure)
-		NATIVE_CLASS(abcclass_private_MethodClosure, 			MethodClosureClass,	MethodClosure)
-
-		NATIVE_CLASS(abcclass_Error,				ErrorClass,	ErrorObject)
-
-		// The Error subclasses are included in the NATIVE_CLASS map
-		// so that their [[Call]] action is mapped to [[Construct]]
-		NATIVE_CLASS(abcclass_DefinitionError,      NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_EvalError,            NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_RangeError,           NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_ReferenceError,       NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_SecurityError,        NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_SyntaxError,          NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_TypeError,            NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_URIError,             NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_VerifyError,          NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_UninitializedError,   NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_ArgumentError,        NativeErrorClass, ErrorObject)
-
-		NATIVE_CLASS(abcclass_String,				StringClass,	String)
-		NATIVE_CLASS(abcclass_Boolean,			BooleanClass,	bool)
-		NATIVE_CLASS(abcclass_Number,				NumberClass,	double)
-		NATIVE_CLASS(abcclass_int,				IntClass,		int)
-		NATIVE_CLASS(abcclass_uint,				UIntClass,		uint32)
-		NATIVE_CLASS(abcclass_Math,				MathClass,		double)
-		NATIVE_CLASS(abcclass_Array,				ArrayClass,		ArrayObject)
-		NATIVE_CLASS(abcclass_RegExp,				RegExpClass,	RegExpObject)
-		NATIVE_CLASS(abcclass_Date,				DateClass,		DateObject)
-
-		// Vector
-		NATIVE_CLASS(abcclass___AS3___vec_Vector_int,     IntVectorClass,      IntVectorObject)		
-		NATIVE_CLASS(abcclass___AS3___vec_Vector_uint,    UIntVectorClass,     UIntVectorObject)		
-		NATIVE_CLASS(abcclass___AS3___vec_Vector_double,  DoubleVectorClass,   DoubleVectorObject)	
-		NATIVE_CLASS(abcclass___AS3___vec_Vector,	      VectorClass,		   ObjectVectorObject)		
-		NATIVE_CLASS(abcclass___AS3___vec_Vector_object,  ObjectVectorClass,  ObjectVectorObject)		
-
-		// E4X
-		NATIVE_CLASS(abcclass_XML,				XMLClass,		XMLObject)
-		NATIVE_CLASS(abcclass_XMLList,			XMLListClass,	XMLListObject)
-		NATIVE_CLASS(abcclass_QName,			QNameClass,		QNameObject)
-	END_NATIVE_CLASSES()
-
-	// don't need toplevel here because we create it manually
-	BEGIN_NATIVE_SCRIPTS(AvmCore)
-		NATIVE_SCRIPT(0, Toplevel)
-	END_NATIVE_SCRIPTS()
-
 #ifdef AVMPLUS_TRAITS_CACHE
 	void AvmCore::setCacheSizes(const CacheSizes& cs)
 	{
@@ -365,29 +313,9 @@ namespace avmplus
 
 	void AvmCore::initBuiltinPool()
 	{
-		using namespace NativeID;
-
-		// stack allocated array of pointers
-		AbstractFunction* nativeMethods[builtin_abc_method_count];
-		NativeClassInfop nativeClasses[builtin_abc_class_count];
-		NativeScriptInfop nativeScripts[builtin_abc_script_count];
-
-		memset(nativeMethods, 0, sizeof(AbstractFunction*)*builtin_abc_method_count);
-		memset(nativeClasses, 0, sizeof(NativeClassInfop)*builtin_abc_class_count);
-		memset(nativeScripts, 0, sizeof(NativeScriptInfop)*builtin_abc_script_count);
-
-		initNativeTables(classEntries, scriptEntries,
-			nativeMethods, nativeClasses, nativeScripts);
-
-		ScriptBuffer code = ScriptBuffer(new (GetGC()) ReadOnlyScriptBufferImpl (builtin_abc_data, builtin_abc_length));
-
 		builtinDomain = new (GetGC()) Domain(this, NULL);
 		
-		builtinPool = parseActionBlock(code, 0, NULL,
-									   builtinDomain,
-									   nativeMethods,
-									   nativeClasses,
-									   nativeScripts);
+		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this, NULL);
 
 		// whack the the non-interruptable bit on all builtin functions
 		for(int i=0, size=builtinPool->methods.size(); i<size; i++)
@@ -585,19 +513,15 @@ namespace avmplus
 										  int /*start*/,
 										  Toplevel* toplevel,
 										  Domain* domain,
-										  AbstractFunction *nativeMethods[],
-										  NativeClassInfop nativeClasses[],
-										  NativeScriptInfop nativeScripts[],
-										  List<Stringp>* include_versions)
+										  const NativeInitializer* ninit,
+										  const List<Stringp>* include_versions)
 	{
 		// parse constants and attributes.
 		PoolObject* pool = AbcParser::decodeAbc(this,
 												code,
 												toplevel,
 												domain,
-												nativeMethods,
-												nativeClasses,
-												nativeScripts,
+												ninit,
 												include_versions);
 
         #ifdef DEBUGGER
@@ -613,9 +537,7 @@ namespace avmplus
 										 int start,
 										 DomainEnv* domainEnv,
 										 Toplevel* &toplevel,
-										 AbstractFunction *nativeMethods[],
-										 NativeClassInfop nativeClasses[],
-										 NativeScriptInfop nativeScripts[],
+										 const NativeInitializer* ninit,
 										 CodeContext *codeContext)
     {
 		resources = new (GetGC()) Hashtable(GetGC());
@@ -636,9 +558,7 @@ namespace avmplus
 									start,
 									toplevel,
 									domain,
-									nativeMethods,
-									nativeClasses,
-									nativeScripts);
+									ninit);
 			if (pool != NULL)
 			{
 				resources->put(start+1, pool);
@@ -1915,40 +1835,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	void AvmCore::setConsoleStream(OutputStream *stream)
 	{
 		console.setOutputStream(stream);
-	}
-
-	void AvmCore::registerNatives(NativeTableEntryp nativeMap, AbstractFunction *nativeMethods[])
-	{
-		while (nativeMap->method_id != -1)
-		{
-			AbstractFunction* f = new (GetGC()) NativeMethod(*nativeMap);
-            				
-			// if we overwrite a native method mapping, something is hosed
-			AvmAssert(nativeMethods[nativeMap->method_id]==NULL);
-			nativeMethods[nativeMap->method_id] = f;
-			nativeMap++;
-		}
-	}
-
-	void AvmCore::initNativeTables(NativeClassInfop classEntry,
-								  NativeScriptInfop scriptEntry,
-								  AbstractFunction *nativeMethods[],
-								  NativeClassInfop nativeClasses[],
-								  NativeScriptInfop nativeScripts[])
-	{
-		while (classEntry->class_id != -1)
-		{
-			nativeClasses[classEntry->class_id] = classEntry;
-			registerNatives(classEntry->nativeMap, nativeMethods);
-			classEntry++;
-		}
-
-		while (scriptEntry->script_id != -1)
-		{
-			nativeScripts[scriptEntry->script_id] = scriptEntry;
-			registerNatives(scriptEntry->nativeMap, nativeMethods);
-			scriptEntry++;
-		}
 	}
 
 	bool AvmCore::isXML (Atom atm) 

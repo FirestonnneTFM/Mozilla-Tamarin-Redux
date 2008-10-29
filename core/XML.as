@@ -42,6 +42,7 @@ package {
 // {DontEnum} length=1
 public native function isXMLName(str=void 0):Boolean
 
+[native(cls="XMLClass", instance="XMLObject")]
 public final dynamic class XML extends Object
 {
 	// { ReadOnly, DontDelete, DontEnum }
@@ -397,6 +398,7 @@ public final dynamic class XML extends Object
     _dontEnumPrototype(prototype);
 }
 
+[native(cls="XMLListClass", instance="XMLListObject")]
 public final dynamic class XMLList extends Object
 {
 	// { ReadOnly, DontDelete, DontEnum }
@@ -676,6 +678,7 @@ public final dynamic class XMLList extends Object
 
 }
 
+[native(cls="QNameClass", instance="QNameObject")]
 public final class QName extends Object
 {
 	// E262 {DontDelete, ReadOnly, DontEnum}

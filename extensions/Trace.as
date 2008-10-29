@@ -38,6 +38,7 @@
 
 package flash.trace
 {
+	[native(cls="TraceClass")]
 	public class Trace
 	{
 		/* levels of desired logging */

@@ -1261,7 +1261,7 @@ namespace avmplus
 
 			for (uint32 i = 0; i < nFields; i++)
 			{
-				fn[i].name = core->internString(obj->getUintProperty(i));
+				fn[i].name = core->intern(obj->getUintProperty(i));
 				fn[i].options = 0;
 			}
 

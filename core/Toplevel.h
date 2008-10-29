@@ -324,6 +324,11 @@ namespace avmplus
 		// implementations supporting any of our extensions should override this
 		virtual ClassClosure *getBuiltinExtensionClass(int /*clsid*/) { return NULL; }
 
+		// subclasses can override this to check for security violations
+		// and prohibit certain operations. default implementation always
+		// allows but FlashPlayer takes advantage of this.
+		virtual bool sampler_trusted(ScriptObject* /*sampler*/) { return true; }
+
 	private:
 
 		int parseHexChar(wchar c);

@@ -38,6 +38,7 @@
 
 package avmplus
 {
+	[native(cls="JObjectClass", instance="JObject")]
 	public class JObject 
 	{
 		public native static function create(name:String, ...args):JObject;

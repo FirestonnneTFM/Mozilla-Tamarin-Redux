@@ -65,6 +65,7 @@ namespace avmplus
 		: ScriptObject(cvtable, delegate)
 	{
 		builtinClasses = (ClassClosure**) core()->GetGC()->Alloc(sizeof(ClassClosure*) * core()->builtinPool->cinits.capacity(), MMgc::GC::kZero | MMgc::GC::kContainsPointers);
+		AvmAssert(traits()->getSizeOfInstance() >= sizeof(Toplevel));
 	}
 
 	Toplevel::~Toplevel()

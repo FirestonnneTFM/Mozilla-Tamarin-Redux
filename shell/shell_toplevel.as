@@ -54,9 +54,7 @@ package avmplus
 		public function test() { }
 	}
 
-	// this metadata exists solely so that nativegen.py will encounter it during shell building,
-	// thus giving us a test case for metadata parsing in nativegen.py
-	[metafun]
+	[native(cls="SystemClass")]
 	public class System
 	{
 		// this metadata exists solely so that nativegen.py will encounter it during shell building,
@@ -86,6 +84,7 @@ package avmplus
 		ns_example native static function nstest():void;
 	}	
 	
+	[native(cls="FileClass")]
 	public class File
 	{
 		public native static function exists(filename:String):String;

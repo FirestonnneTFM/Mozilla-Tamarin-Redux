@@ -50,10 +50,8 @@ namespace avmplus
 		AbcParser(AvmCore* core, ScriptBuffer code, 
 			Toplevel* toplevel,
 			Domain* domain,
-			AbstractFunction *nativeMethods[],
-			NativeClassInfop nativeClasses[],
-			NativeScriptInfop nativeScripts[],
-			List<Stringp>* keepVersions = NULL);
+			const NativeInitializer* natives,
+			const List<Stringp>* keepVersions = NULL);
 
 		~AbcParser();
 
@@ -65,10 +63,8 @@ namespace avmplus
 		static PoolObject* decodeAbc(AvmCore* core, ScriptBuffer code, 
 			Toplevel* toplevel,
 			Domain* domain,
-			AbstractFunction *nativeMethods[],
-			NativeClassInfop nativeClasses[],
-			NativeScriptInfop nativeScripts[],
-			List<Stringp>* keepVersions = NULL);
+			const NativeInitializer* natives,
+			const List<Stringp>* keepVersions = NULL);
 
 	protected:
 		PoolObject* parse();
@@ -210,14 +206,12 @@ namespace avmplus
 		AvmCore*					core;
 		PoolObject*					pool;
 		const byte*					pos;
-		AbstractFunction**			nativeMethods;
-		const NativeClassInfop*		nativeClasses;
-		const NativeScriptInfop*	nativeScripts;
+		const NativeInitializer*	natives;
 		byte*						abcStart;
 		byte*						abcEnd; // one past the end, actually
 		Stringp*					metaNames;
 		Stringp						kNeedsDxns;
-		List<Stringp>*				keepVersions;
+		const List<Stringp>*		keepVersions;
 #ifdef AVMPLUS_VERBOSE
 		Stringp 					kVerboseVerify;
 #endif

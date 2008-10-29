@@ -39,6 +39,7 @@
 package 
 {
 	//pseudo-final - no user class can extend Function
+	[native(cls="FunctionClass", instance="ClassClosure")]
 	dynamic public class Function
 	{
 		// Function.length = 1 per ES3
@@ -105,6 +106,7 @@ package
 }
 
 // not dynamic
+[native(cls="MethodClosureClass", instance="MethodClosure")]
 final class MethodClosure extends Function
 {
 	override public function get prototype()

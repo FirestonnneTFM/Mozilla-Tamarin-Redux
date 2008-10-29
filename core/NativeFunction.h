@@ -286,7 +286,7 @@ namespace avmplus
 	class NativeMethod : public AbstractFunction
 	{
 	public:
-		NativeMethod(const NativeTableEntry& nte);
+		NativeMethod(const NativeMethodInfo& nte);
 		
 		// we have virtual functions, so we probably need a virtual dtor
 		virtual ~NativeMethod() {}
@@ -297,42 +297,80 @@ namespace avmplus
 
 	// ------------------------ DATA SECTION BEGIN
 	public:
-		const NativeTableEntry& nte;
+		const NativeMethodInfo& nte;
 	// ------------------------ DATA SECTION END
 	};
 
 	/**
-	 * NativeTableEntry is an internal structure used for native
+	 * NativeMethodInfo is an internal structure used for native
 	 * method tables.  It is wrapped by the NATIVE_METHOD() macros
 	 * below.
 	 */
-	struct NativeTableEntry
+	struct NativeMethodInfo
 	{
 	// ------------------------ DATA SECTION BEGIN
 	public:
-		AvmThunkNativeThunker thunker;
-		AvmThunkNativeHandler handler;
-		int32_t method_id;
-		int32_t cookie;
-		int32_t flags;
+		const AvmThunkNativeThunker thunker;
+		const AvmThunkNativeHandler handler;
+		const int32_t method_id;
+		const int32_t cookie;
+		const int32_t flags;
 	// ------------------------ DATA SECTION END
 	};
 
+    /**
+	 * NativeScriptInfo is an internal structure used for
+	 * native script tables.  It is wrapped by the
+	 * NATIVE_SCRIPT() macro.
+	 */
+    struct NativeScriptInfo
+	{
+		typedef ScriptObject* (*Handler)(VTable*, ScriptObject*);
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		const Handler handler;
+		const NativeMethodInfop nativeMap;
+		const int32_t script_id;
+		const uint32_t sizeofInstance;
+	// ------------------------ DATA SECTION END
+	};
+
+	/**
+	 * NativeClassInfo is an internal structure used for native
+	 * method tables.  It is wrapped by the NATIVE_CLASS() macro.
+	 */
+	struct NativeClassInfo
+	{
+		typedef ClassClosure* (*Handler)(VTable*);
+
+	// ------------------------ DATA SECTION BEGIN
+	public:
+		const Handler handler;
+		const NativeMethodInfop nativeMap;
+		const int32_t class_id;
+		const uint32_t sizeofClass;
+		const uint32_t sizeofInstance;
+	// ------------------------ DATA SECTION END
+	};
+
+	// ---------------
+	
 	/**
 	 * Macros for declaring native methods
 	 */
 	#define BEGIN_NATIVE_MAP(_Class) \
-		NativeTableEntry _Class::natives[] = {
+		/*static*/ const NativeMethodInfo _Class::natives[] = {
 			
 	#define DECLARE_NATIVE_MAP(_Class) \
 		static ClassClosure* createClassClosure(VTable* cvtable) \
 		{ return new (cvtable->gc(), cvtable->getExtraSize()) _Class(cvtable); } \
-		static NativeTableEntry natives[];
+		static const NativeMethodInfo natives[];
 
 	#define DECLARE_NATIVE_SCRIPT(_Script) \
 		static ScriptObject* createGlobalObject(VTable* vtable, ScriptObject* delegate) \
 		{ return new (vtable->gc(), vtable->getExtraSize()) _Script(vtable, delegate); } \
-		static NativeTableEntry natives[];
+		static const NativeMethodInfo natives[];
 
 	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
 		reinterpret_cast<AvmThunkNativeHandler>((void(CLS::*)())(PTR))
@@ -364,41 +402,120 @@ namespace avmplus
 	#define NATIVE_METHOD_CAST_FLAGS(CLS, method_id, handler, fl) \
 		_NATIVE_METHOD(CLS, method_id, handler, fl)
 
-    /**
-	 * NativeScriptInfo is an internal structure used for
-	 * native script tables.  It is wrapped by the
-	 * NATIVE_SCRIPT() macro.
-	 */
-    struct NativeScriptInfo
-	{
-		typedef ScriptObject* (*Handler)(VTable*, ScriptObject*);
+	// ---------------
 
-	// ------------------------ DATA SECTION BEGIN
+	class NativeInitializer
+	{
 	public:
-		Handler handler;
-		NativeTableEntryp nativeMap;
-		int32_t script_id;
-		uint32_t sizeofInstance;
-	// ------------------------ DATA SECTION END
+		NativeInitializer(AvmCore* core, 
+			NativeClassInfop classEntry, 
+			NativeScriptInfop scriptEntry,
+			NativeClassInfop classEntry2, 
+			NativeScriptInfop scriptEntry2,
+			const uint8_t* abcData,
+			uint32_t abcDataLen,
+			uint32_t methodCount,
+			uint32_t classCount,
+			uint32_t scriptCount);
+
+		~NativeInitializer();
+
+		PoolObject* parseBuiltinABC(const List<Stringp, LIST_RCObjects>* includes = NULL);
+
+		inline NativeMethodInfop get_method(uint32_t i) const { AvmAssert(i < methodCount); return methods[i]; }
+		inline NativeClassInfop get_class(uint32_t i) const { AvmAssert(i < classCount); return classes[i]; }
+		inline NativeScriptInfop get_script(uint32_t i) const { AvmAssert(i < scriptCount); return scripts[i]; }
+
+	private:
+		void fillInMethods(NativeMethodInfop methodEntry);
+		void fillInClasses(NativeClassInfop classEntry);
+		void fillInScripts(NativeScriptInfop scriptEntry);
+
+	private:
+		AvmCore* const core;
+		const uint8_t* const abcData;
+		uint32_t const abcDataLen;
+		NativeMethodInfop* const methods;
+		NativeClassInfop* const classes;
+		NativeScriptInfop* const scripts;
+		const uint32_t methodCount;
+		const uint32_t classCount;
+		const uint32_t scriptCount;
 	};
+
+	// ---------------
 
 	/**
-	 * NativeClassInfo is an internal structure used for native
-	 * method tables.  It is wrapped by the NATIVE_CLASS() macro.
+	 * Macros for declaring native scripts & classes
 	 */
-	struct NativeClassInfo
-	{
-		typedef ClassClosure* (*Handler)(VTable*);
 
-	// ------------------------ DATA SECTION BEGIN
-	public:
-		Handler handler;
-		NativeTableEntryp nativeMap;
-		int32_t class_id;
-		uint32_t sizeofClass;
-		uint32_t sizeofInstance;
-	// ------------------------ DATA SECTION END
-	};
+	#define _AVMTHUNK_BEGIN_NATIVE_SCRIPTS(NAME) \
+		const avmplus::NativeScriptInfo NAME##_scriptEntries[] = {
+
+	#define AVMTHUNK_BEGIN_NATIVE_SCRIPTS(NAME) \
+		static _AVMTHUNK_BEGIN_NATIVE_SCRIPTS(NAME)
+
+	#define AVMTHUNK_NATIVE_SCRIPT(SCRIPTID, SCRIPTCLS) \
+		{ (avmplus::NativeScriptInfo::Handler)SCRIPTCLS::createGlobalObject, SCRIPTCLS::natives, SCRIPTID, sizeof(SCRIPTCLS) },
+
+	#define AVMTHUNK_END_NATIVE_SCRIPTS() \
+		{ NULL, NULL, -1, 0 } };
+
+	#define _AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) \
+		const NativeClassInfo NAME##_classEntries[] = {
+
+	#define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) \
+		static _AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME)
+
+	#define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, INST) \
+		{ (NativeClassInfo::Handler)CLS::createClassClosure, CLS::natives, avmplus::NativeID::CLSID, sizeof(CLS), sizeof(INST) },
+
+	#define AVMTHUNK_END_NATIVE_CLASSES() \
+		{ NULL, NULL, -1, 0, 0 } };
+
+	#define AVMTHUNK_DECLARE_EXTERN_NATIVE_MAPS(MAPNAME) \
+		extern const NativeScriptInfo MAPNAME##_scriptEntries[]; \
+		extern const NativeClassInfo MAPNAME##_classEntries[]; 
+
+	#define AVMTHUNK_DECLARE_NATIVE_INITIALIZER(NAME, MAPNAME) \
+		extern PoolObject* initBuiltinABC_##MAPNAME(\
+			AvmCore* core, \
+			const List<Stringp, LIST_RCObjects>* includes);
+
+	#define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME, MAPNAME) \
+		PoolObject* initBuiltinABC_##MAPNAME(\
+											AvmCore* core, \
+											const List<Stringp, LIST_RCObjects>* includes) { \
+			NativeInitializer ninit(core, \
+				NAME##_classEntries, \
+				NAME##_scriptEntries, \
+				MAPNAME##_classEntries, \
+				MAPNAME##_scriptEntries, \
+				avmplus::NativeID::NAME##_abc_data, \
+				avmplus::NativeID::NAME##_abc_length, \
+				avmplus::NativeID::NAME##_abc_method_count, \
+				avmplus::NativeID::NAME##_abc_class_count, \
+				avmplus::NativeID::NAME##_abc_script_count); \
+			return ninit.parseBuiltinABC(includes); \
+		}
+
+	#define AVM_INIT_BUILTIN_ABC(MAPNAME, CORE, INCLUDES) \
+		avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (INCLUDES))
+
+	// BEGIN legacy macros for glue code that explicitly specifies maps for native classes, scripts, and methods
+	// (rather than using metadata to specify it and allowing nativegen.py to generate the map).
+	// someday this will be deprecated, when all clients have migrated to the new approach.
+	#define DECLARE_NATIVE_SCRIPTS()			/* nothing */
+	#define DECLARE_NATIVE_CLASSES()			/* nothing */
+	#define BEGIN_NATIVE_SCRIPTS(CLS)			_AVMTHUNK_BEGIN_NATIVE_SCRIPTS(CLS)
+	#define NATIVE_SCRIPT(SCRIPTID, SCRIPTCLS)	AVMTHUNK_NATIVE_SCRIPT(SCRIPTID, SCRIPTCLS)
+	#define END_NATIVE_SCRIPTS()				AVMTHUNK_END_NATIVE_SCRIPTS()
+	#define BEGIN_NATIVE_CLASSES(CLS)			_AVMTHUNK_BEGIN_NATIVE_CLASSES(CLS)
+	#define NATIVE_CLASS(CLSID, CLS, INST)		AVMTHUNK_NATIVE_CLASS(CLSID, CLS, INST)
+	#define END_NATIVE_CLASSES()				AVMTHUNK_END_NATIVE_CLASSES()
+	// END legacy macros
+
+
 }	
 
 #endif /* __avmplus_NativeFunction__ */

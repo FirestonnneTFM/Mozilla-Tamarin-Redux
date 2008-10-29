@@ -444,6 +444,8 @@
 		8EDDB9F309AAD2B700FB9EE5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		D940282E0E5F793900818E5B /* QCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QCache.h; sourceTree = "<group>"; };
 		D966B38F0E7EFEA700C19EF5 /* QCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QCache.cpp; sourceTree = "<group>"; };
+		D98338330EB11B6900B81872 /* nativegen.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = nativegen.py; path = ../../../utils/nativegen.py; sourceTree = SOURCE_ROOT; };
+		D98339E40EB13CC700B81872 /* BuiltinNatives.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BuiltinNatives.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -512,6 +514,7 @@
 		4E62BE2A0D62449900A24F2D /* no_compile_for_debugging_only */ = {
 			isa = PBXGroup;
 			children = (
+				D98338330EB11B6900B81872 /* nativegen.py */,
 				4E1E42480E63396E0095C2E7 /* nanojit */,
 				4E62BF030D62451F00A24F2D /* MMgc */,
 				4E62BEFA0D62450800A24F2D /* codegen */,
@@ -523,6 +526,7 @@
 		4E62BE2B0D6244D300A24F2D /* core */ = {
 			isa = PBXGroup;
 			children = (
+				D98339E40EB13CC700B81872 /* BuiltinNatives.h */,
 				4E62BE2C0D6244D300A24F2D /* AbcData.cpp */,
 				4E62BE2D0D6244D300A24F2D /* AbcEnv.cpp */,
 				4E62BE2E0D6244D300A24F2D /* AbcEnv.h */,

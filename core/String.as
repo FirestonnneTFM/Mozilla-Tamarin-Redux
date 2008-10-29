@@ -38,6 +38,7 @@
 
 package
 {
+	[native(cls="StringClass", instance="String")]
 	public final class String extends Object
 	{
 		// String.length = 1 per ES3
