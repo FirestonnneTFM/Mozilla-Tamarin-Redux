@@ -102,6 +102,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/Verifier.cpp \
   $(curdir)/VTable.cpp \
   $(curdir)/WordcodeEmitter.cpp \
+  $(curdir)/WordcodeTranslator.cpp \
   $(curdir)/wopcodes.cpp \
   $(curdir)/XMLClass.cpp \
   $(curdir)/XMLListClass.cpp \
