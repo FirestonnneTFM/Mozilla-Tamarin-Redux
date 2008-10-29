@@ -40,6 +40,9 @@ namespace avmplus
 
 #ifdef AVMPLUS_WORD_CODE
 
+	// Try to keep the opcodes commented out if the table in Interpreter.cpp does
+	// not use them; it's the best way of catching errors elsewhere.
+	
 	enum WordOpcode 
 	{
 		WOP_nop = 0x02,
@@ -202,11 +205,14 @@ namespace avmplus
 		WOP_setlocal1 = 0xD5,
 		WOP_setlocal2 = 0xD6,
 		WOP_setlocal3 = 0xD7,
+#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 		WOP_debug = 0xEF,
 		WOP_debugline = 0xF0,
 		WOP_debugfile = 0xF1,
+#endif
 		WOP_pushbits = 0x101,
 		WOP_push_doublebits = 0x102,
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		WOP_get2locals = 0x103,
 		WOP_get3locals = 0x104,
 		WOP_get4locals = 0x105,
@@ -253,6 +259,7 @@ namespace avmplus
 		WOP_ifstricteq_lb = 0x12E,
 		WOP_ifstrictne_lb = 0x12F,
 		WOP_swap_pop = 0x130,
+#endif
 		WOP_findpropglobal = 0x131,
 		WOP_findpropglobalstrict = 0x132,
 		
