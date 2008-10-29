@@ -136,18 +136,6 @@ namespace avmplus
 							int max_scope);
 #endif
 
-#if defined(AVMPLUS_MOPS)
-	#if defined(AVMPLUS_BIG_ENDIAN)
-		static void SWAP_BYTES_16(void* p);
-		static void SWAP_BYTES_32(void* p);
-		static void SWAP_BYTES_64(void* p);
-	#else
-		#define SWAP_BYTES_16(p) do {} while (0)
-		#define SWAP_BYTES_32(p) do {} while (0)
-		#define SWAP_BYTES_64(p) do {} while (0)
-	#endif
-#endif
-
 	Atom interp32(MethodEnv* env, int argc, uint32_t *ap)
 	{
 		Atom a = interp(env, argc, ap);
@@ -2135,15 +2123,15 @@ namespace avmplus
 			INSTR(li16) {
 				const int addr = core->integer(sp[0]);
 				MOPS_LOAD(addr, uint16_t, result);
-				SWAP_BYTES_16(&result);
+				MOPS_SWAP_BYTES(&result);
 				sp[0] = MAKE_INTEGER(result);	// always fits in atom
 				NEXT;
 			}
 
 			INSTR(li32) {
 				const int addr = core->integer(sp[0]);
-				MOPS_LOAD(addr, uint32_t, result);
-				SWAP_BYTES_32(&result);
+				MOPS_LOAD(addr, int32_t, result);
+				MOPS_SWAP_BYTES(&result);
 				sp[0] = core->intToAtom(result);
 				NEXT;
 			}
@@ -2151,7 +2139,7 @@ namespace avmplus
 			INSTR(lf32) {
 				const int addr = core->integer(sp[0]);
 				MOPS_LOAD(addr, float, result);
-				SWAP_BYTES_32(&result);
+				MOPS_SWAP_BYTES(&result);
 				sp[0] = core->doubleToAtom(result);
 				NEXT;
 			}
@@ -2159,7 +2147,7 @@ namespace avmplus
 			INSTR(lf64) {
 				const int addr = core->integer(sp[0]);
 				MOPS_LOAD(addr, double, result);
-				SWAP_BYTES_64(&result);
+				MOPS_SWAP_BYTES(&result);
 				sp[0] = core->doubleToAtom(result);
 				NEXT;
 			}
@@ -2167,7 +2155,7 @@ namespace avmplus
 			// stores
 			INSTR(si8) {
 				const int addr = core->integer(sp[0]);
-				const int value = core->integer(sp[-1]);
+				const uint8_t value = (uint8_t)core->integer(sp[-1]);
 				MOPS_STORE(addr, uint8_t, value);
 				sp -= 2;
 				NEXT;
@@ -2175,8 +2163,8 @@ namespace avmplus
 
 			INSTR(si16) {
 				const int addr = core->integer(sp[0]);
-				int value = core->integer(sp[-1]);
-				SWAP_BYTES_16(&value);
+				uint16_t value = (uint16_t)core->integer(sp[-1]);
+				MOPS_SWAP_BYTES(&value);
 				MOPS_STORE(addr, uint16_t, value);
 				sp -= 2;
 				NEXT;
@@ -2184,17 +2172,17 @@ namespace avmplus
 
 			INSTR(si32) {
 				const int addr = core->integer(sp[0]);
-				int value = core->integer(sp[-1]);
+				int32_t value = core->integer(sp[-1]);
+				MOPS_SWAP_BYTES(&value);
 				MOPS_STORE(addr, uint32_t, value);
-				SWAP_BYTES_32(&value);
 				sp -= 2;
 				NEXT;
 			}
 
 			INSTR(sf32) {
 				const int addr = core->integer(sp[0]);
-				double value = core->number(sp[-1]);
-				SWAP_BYTES_32(&value);
+				float value = (float)core->number(sp[-1]);
+				MOPS_SWAP_BYTES(&value);
 				MOPS_STORE(addr, float, value);
 				sp -= 2;
 				NEXT;
@@ -2203,7 +2191,7 @@ namespace avmplus
 			INSTR(sf64) {
 				const int addr = core->integer(sp[0]);
 				double value = core->number(sp[-1]);
-				SWAP_BYTES_64(&value);
+				MOPS_SWAP_BYTES(&value);
 				MOPS_STORE(addr, double, value);
 				sp -= 2;
 				NEXT;
@@ -3335,36 +3323,6 @@ namespace avmplus
 		return t;
 	}
 
-#if defined(AVMPLUS_MOPS) && defined(AVMPLUS_BIG_ENDIAN)
-	static void SWAP_BYTES_16(void *p)
-	{
-		uint8_t* c = (uint8_t*)p;
-		uint8_t t = c[0];
-		c[0] = c[1];
-		c[1] = t;
-	}
-
-	static void SWAP_BYTES_32(void *p)
-	{
-		uint16_t* c = (uint16_t*)p;
-		SWAP_BYTES_16(c + 0);
-		SWAP_BYTES_16(c + 1);
-		uint16_t t = c[0];
-		c[0] = c[1];
-		c[1] = t;
-	}
-
-	static void SWAP_BYTES_64(void *p)
-	{
-		uint32_t *c = (uint32_t*)p;
-		SWAP_BYTES_32(c + 0);
-		SWAP_BYTES_32(c + 1);
-		uint32_t t = c[0];
-		c[0] = c[1];
-		c[1] = t;
-	}
-#endif
-			
 #ifdef AVMPLUS_VERBOSE
 	/**
      * display contents of current stack frame only.
