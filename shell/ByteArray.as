@@ -81,6 +81,7 @@ package flash.utils
  * @refpath 
  * @keyword ByteArray
  */
+[native(cls="ByteArrayClass", instance="ByteArrayObject")]
 public class ByteArray
 {
 	public native static function readFile(filename:String):ByteArray;

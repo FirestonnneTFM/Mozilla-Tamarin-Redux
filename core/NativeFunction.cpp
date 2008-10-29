@@ -46,7 +46,7 @@
 
 namespace avmplus
 {
-	NativeMethod::NativeMethod(const NativeTableEntry& _nte)
+	NativeMethod::NativeMethod(const NativeMethodInfo& _nte)
 		: AbstractFunction(), nte(_nte)
 	{
 		this->flags |= nte.flags;
@@ -80,5 +80,84 @@ namespace avmplus
 		} u;
 		u.thunker = this->nte.thunker;
 		this->impl32 = u.impl32;
+	}
+
+	// ---------------
+
+	NativeInitializer::NativeInitializer(AvmCore* _core, 
+											NativeClassInfop _classEntry, 
+											NativeScriptInfop _scriptEntry,
+											NativeClassInfop _classEntry2, 
+											NativeScriptInfop _scriptEntry2,
+											const uint8_t* _abcData,
+											uint32_t _abcDataLen,
+											uint32_t _methodCount,
+											uint32_t _classCount,
+											uint32_t _scriptCount) :
+		core(_core),
+		abcData(_abcData),
+		abcDataLen(_abcDataLen),
+		methods((NativeMethodInfop*)core->GetGC()->Calloc(_methodCount, sizeof(NativeMethodInfop), GC::kZero)),
+		classes((NativeClassInfop*)core->GetGC()->Calloc(_classCount, sizeof(NativeClassInfop), GC::kZero)),
+		scripts((NativeScriptInfop*)core->GetGC()->Calloc(_scriptCount, sizeof(NativeScriptInfop), GC::kZero)),
+		methodCount(_methodCount),
+		classCount(_classCount),
+		scriptCount(_scriptCount)
+	{
+		fillInClasses(_classEntry);
+		if (_classEntry2 != _classEntry)
+			fillInClasses(_classEntry2);
+
+		fillInScripts(_scriptEntry);
+		if (_scriptEntry2 != _scriptEntry)
+			fillInScripts(_scriptEntry2);
+	}
+
+	void NativeInitializer::fillInMethods(NativeMethodInfop _methodEntry)
+	{
+		while (_methodEntry->method_id != -1)
+		{
+			// if we overwrite a native method mapping, something is hosed
+			AvmAssert(methods[_methodEntry->method_id] == NULL);
+			methods[_methodEntry->method_id] = _methodEntry;
+			_methodEntry++;
+		}
+	}
+
+	void NativeInitializer::fillInClasses(NativeClassInfop _classEntry)
+	{
+		while (_classEntry->class_id != -1)
+		{
+			classes[_classEntry->class_id] = _classEntry;
+			fillInMethods(_classEntry->nativeMap);
+			_classEntry++;
+		}
+	}
+
+	void NativeInitializer::fillInScripts(NativeScriptInfop _scriptEntry)
+	{
+		while (_scriptEntry->script_id != -1)
+		{
+			scripts[_scriptEntry->script_id] = _scriptEntry;
+			fillInMethods(_scriptEntry->nativeMap);
+			_scriptEntry++;
+		}
+	}
+	
+	PoolObject* NativeInitializer::parseBuiltinABC(const List<Stringp, LIST_RCObjects>* includes)
+	{
+		AvmAssert(core->builtinDomain != NULL);
+		
+		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ReadOnlyScriptBufferImpl(abcData, abcDataLen));
+
+		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, core->builtinDomain, this, includes);
+	}
+	
+	NativeInitializer::~NativeInitializer()
+	{
+		// might as well explicitly free now
+		core->GetGC()->Free(methods);
+		core->GetGC()->Free(classes);
+		core->GetGC()->Free(scripts);
 	}
 }

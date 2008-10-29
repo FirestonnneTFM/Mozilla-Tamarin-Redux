@@ -38,7 +38,7 @@
 package
 {
 
-
+[native(cls="MathClass", instance="double")]
 public final class Math 
 {
 	// the value properties of math are {DontEnum,DontDelete,ReadOnly}

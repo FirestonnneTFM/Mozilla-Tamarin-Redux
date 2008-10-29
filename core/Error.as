@@ -37,6 +37,7 @@
 
 package 
 {
+	[native(cls="ErrorClass", instance="ErrorObject")]
 	public dynamic class Error
 	{
 		prototype.name = "Error"
@@ -123,6 +124,7 @@ package
         }
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class DefinitionError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -136,6 +138,7 @@ package
 		}	
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class EvalError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -149,6 +152,7 @@ package
 		}
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class RangeError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -162,6 +166,7 @@ package
 		}	
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class ReferenceError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -175,6 +180,7 @@ package
 		}
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class SecurityError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -188,6 +194,7 @@ package
 		}	
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class SyntaxError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -201,6 +208,7 @@ package
 		}	
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class TypeError extends Error
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -214,6 +222,7 @@ package
 		}	
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class URIError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -227,6 +236,7 @@ package
 		}	
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class VerifyError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -240,6 +250,7 @@ package
 		}	
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class UninitializedError	extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }
@@ -253,6 +264,7 @@ package
 		}	
 	}
 
+	[native(cls="NativeErrorClass", instance="ErrorObject")]
 	public dynamic class ArgumentError extends Error 
 	{
 		// E262 {ReadOnly, DontDelete, DontEnum }

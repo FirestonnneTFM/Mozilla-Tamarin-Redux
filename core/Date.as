@@ -37,6 +37,7 @@
 
 package 
 {
+	[native(cls="DateClass", instance="DateObject")]
 	public final dynamic class Date
 	{
 		// Date.length = 7 per ES3

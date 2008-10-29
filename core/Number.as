@@ -38,6 +38,7 @@
 
 package
 {
+	[native(cls="NumberClass", instance="double")]
 	public final class Number 
 	{
 		// Number.length = 1 per ES3
@@ -124,6 +125,7 @@ package
 		_dontEnumPrototype(prototype);
 	}
 
+	[native(cls="IntClass", instance="int32_t")]
 	public final class int
 	{
 		// based on Number: E262 {ReadOnly, DontDelete, DontEnum}
@@ -191,6 +193,7 @@ package
 		_dontEnumPrototype(prototype);		
 	}
 
+	[native(cls="UIntClass", instance="uint32_t")]
 	public final class uint
 	{
 		// based on Number: E262 {ReadOnly, DontDelete, DontEnum}

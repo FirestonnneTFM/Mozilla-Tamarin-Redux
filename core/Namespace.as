@@ -38,6 +38,7 @@
 
 package 
 {
+	[native(cls="NamespaceClass", instance="Namespace")]
 	public final class Namespace
 	{
 		// E262 {ReadOnly,DontDelete,DontEnum}

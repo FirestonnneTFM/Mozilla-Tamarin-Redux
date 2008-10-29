@@ -37,10 +37,12 @@
 
 package __AS3__.vec
 {
+	[native(cls="VectorClass", instance="ObjectVectorObject")]
     dynamic final public class Vector
     {
     }
 
+	[native(cls="ObjectVectorClass", instance="ObjectVectorObject")]
 	dynamic final class Vector$object
 	{
         public function Vector$object(length:uint=0, fixed:Boolean=false)
@@ -123,6 +125,7 @@ package __AS3__.vec
 
 	}
     
+	[native(cls="IntVectorClass", instance="IntVectorObject")]
 	dynamic final class Vector$int
 	{
         
@@ -201,6 +204,7 @@ package __AS3__.vec
 	}
     
     
+	[native(cls="UIntVectorClass", instance="UIntVectorObject")]
 	dynamic final class Vector$uint
 	{
         public function Vector$uint(length:uint=0, fixed:Boolean=false)
@@ -278,6 +282,7 @@ package __AS3__.vec
 
 	}
     
+	[native(cls="DoubleVectorClass", instance="DoubleVectorObject")]
 	dynamic final class Vector$double
 	{
         public function Vector$double(length:uint=0, fixed:Boolean=false)

@@ -100,7 +100,7 @@ namespace avmshell
 		return core->handleActionBlock(code, 0,
 								  domainEnv,
 								  toplevel,
-								  NULL, NULL, NULL, codeContext);
+								  NULL, codeContext);
 	}
 
 	ScriptObject* DomainObject::finddef(const Multiname& multiname,

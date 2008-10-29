@@ -42,7 +42,8 @@ from struct import *
 from os import path
 from math import floor
 
-parser = OptionParser(usage="usage: %prog [importfile [, importfile]...] file...")
+parser = OptionParser(usage="usage: %prog [--nativemapname=name] [importfile [, importfile]...] file...")
+parser.add_option("-n", "--nativemapname", help="if using explicit maps for native classes and scripts, the name as argument")
 opts, args = parser.parse_args()
 
 if not args:
@@ -223,7 +224,7 @@ class MethodInfo(MemberInfo):
 	code_length = 0
 	code = None
 	activation = None
-	anon = False
+	native_id_name = None
 
 	def isNative(self):
 		return (self.flags & NATIVE) != 0
@@ -237,6 +238,30 @@ class MethodInfo(MemberInfo):
 class SlotInfo(MemberInfo):
 	type = ""
 	value = ""
+
+class NativeInfo:
+	class_name = None
+	instance_name = None
+	script_name = None
+	
+	def set_script(self, name):
+		if self.script_name != None:
+			raise Error("native(script) may not be specified multiple times for the same script")
+		self.script_name = name
+
+	def set_class(self, name):
+		if self.class_name != None:
+			raise Error("native(cls) may not be specified multiple times for the same class")
+		self.class_name = name
+
+	def set_instance(self, name):
+		if self.instance_name != None:
+			raise Error("native(instance) may not be specified multiple times for the same class")
+		self.instance_name = name
+		
+	def validate(self):
+		if (self.script_name != None) and (self.class_name != None or self.instance_name != None):
+			raise Error("cannot mix script and class/instance attributes")
 
 BMAP = {
 	"Object": CTYPE_ATOM, # yes, items of exactly class "Object" are stored as Atom; subclasses are stored as pointer-to-Object
@@ -253,11 +278,13 @@ BMAP = {
 
 class Traits:
 	name = ""
+	qname = None
 	init = None
 	itraits = None
 	base = None
 	flags = 0
 	protectedNs = 0
+	is_interface = False
 	interfaces = None
 	names = None
 	slots = None
@@ -265,6 +292,7 @@ class Traits:
 	members = None
 	class_id = -1
 	ctype = CTYPE_OBJECT
+	metadata = None
 	def __init__(self, name):
 		self.names = {}
 		self.slots = []
@@ -292,13 +320,13 @@ class ByteArray:
 		return r
 
 	def readU16(self):
-		r = unpack_from("h", self.data, self.pos)[0]
+		r = unpack_from("<h", self.data, self.pos)[0]
 		self.pos += 2
 		assert(r >= 0 and r <= 65535)
 		return r
 
 	def readDouble(self):
-		r = unpack_from("d", self.data, self.pos)[0]
+		r = unpack_from("<d", self.data, self.pos)[0]
 		self.pos += 8
 		return r
 
@@ -562,6 +590,8 @@ class Abc:
 			self.instances[i] = t
 			t.base = self.names[self.data.readU30()]
 			t.flags = self.data.readU8()
+			if (t.flags & 4) != 0:
+				t.is_interface = True
 			if (t.flags & 8) != 0:
 				t.protectedNs = self.namespaces[self.data.readU30()]
 			interface_count = self.data.readU30()
@@ -600,6 +630,7 @@ class Abc:
 							member.value.srcname = name.name
 				else:
 					member.value = self.classes[self.data.readU30()]
+					member.value.qname = name
 			elif kind in [TRAIT_Method, TRAIT_Getter, TRAIT_Setter]:
 				self.data.readU30()	# disp_id, ignored
 				methid = self.data.readU30()
@@ -616,7 +647,40 @@ class Abc:
 				member.metadata = [ None ] * mdCount
 				for j in range(0, mdCount):
 					member.metadata[j] = self.metadata[self.data.readU30()]
+				# stash class metadata in the ctraits and itraits too, makes it much easier later
+				if kind == TRAIT_Class:
+					member.value.metadata = member.metadata
+					member.value.itraits.metadata = member.metadata
 
+	def find_nativeinfo(self, m, ni):
+		if m != None:
+			for md in m:
+				if md.name == "native":
+					if md.attrs.has_key("script"):
+						ni.set_script(md.attrs["script"])
+					if md.attrs.has_key("cls"):
+						ni.set_class(md.attrs["cls"])
+					if md.attrs.has_key("instance"):
+						ni.set_instance(md.attrs["instance"])
+					if (ni.script_name == None) and (ni.class_name == None) and (ni.instance_name == None):
+						raise Error("native metadata must specify (script) or (cls,instance)")
+
+	def find_script_nativeinfo(self, t):
+		ni = NativeInfo()
+		# since asc doesn't allow us to put metadata on scripts, look for it on methods of the script. 
+		for j in range(0, len(t.tmethods)):
+			self.find_nativeinfo(t.tmethods[j].metadata, ni)
+		ni.validate()
+		return ni
+
+	def find_class_nativeinfo(self, t):
+		ni = NativeInfo()
+		self.find_nativeinfo(t.metadata, ni)
+		if ni.instance_name != None and t.itraits.is_interface:
+			raise Error("interfaces may not specify native(instance)")
+		ni.validate()
+		return ni
+		
 	def parseClassInfos(self):
 		count = len(self.instances)
 		self.classes = [ None ] * count
@@ -671,18 +735,26 @@ class Abc:
 class IndentingPrintWriter:
 	f = None
 	indent = 0
+	do_indent = True
 
 	def __init__(self, file):
 		self.f = file
 
+	def dent(self):
+		if self.do_indent:
+			for i in range(0, self.indent):
+				self.f.write("    ")
+			self.do_indent = False
+
 	def prnt(self, s):
+		self.dent();
 		self.f.write(s)
 
 	def println(self, s):
-		for i in range(0, self.indent):
-			self.f.write("    ")
+		self.dent();
 		self.f.write(s)
 		self.f.write("\n")
+		self.do_indent = True
 
 def to_cname(nm):
 	nm = str(nm)
@@ -719,6 +791,9 @@ class AbcThunkGen:
 		self.abcs.append(a)
 		self.lookup_traits = None
 
+	def class_id_name(self, c):
+		return "abcclass_" + self.ns_prefix(c.qname.ns, True) + to_cname(c.qname.name)
+
 	def emit(self, abc, name, out_h, out_c):
 		self.abc = abc;
 		self.out_h = out_h;
@@ -730,10 +805,15 @@ class AbcThunkGen:
 		for i in range(0, len(abc.classes)):
 			abc.classes[i].class_id = i
 
+		for i in range(0, len(abc.scripts)):
+			script = abc.scripts[i]
+			if script != None:
+				self.processTraits("", script)
+
 		out_h.println("/* machine generated file -- do not edit */");
 		out_c.println("/* machine generated file -- do not edit */");
 
-		out_h.println("#define AVMTHUNK_VERSION 2");
+		out_h.println("#define AVMTHUNK_VERSION 3");
 		
 		out_h.println("const uint32_t "+name+"_abc_class_count = "+str(len(abc.classes))+";");
 		out_h.println("const uint32_t "+name+"_abc_script_count = "+str(len(abc.scripts))+";");
@@ -741,19 +821,45 @@ class AbcThunkGen:
 		out_h.println("const uint32_t "+name+"_abc_length = "+str(len(abc.data.data))+";");
 		out_h.println("extern const uint8_t "+name+"_abc_data["+str(len(abc.data.data))+"];");
 
-		for i in range(0, len(abc.scripts)):
-			script = abc.scripts[i]
-			if script == None:
-				continue
-			# not enough info in the ABC to recover the original name (eg abcpackage_Foo_as) 
-			# so output identifiers based on the native script functions found
-			for j in range(0, len(script.tmethods)):
-				m = script.tmethods[j]
-				if (m != None) and m.isNative():
-					out_h.println("const uint32_t abcscript_"+ to_cname(m.name) + " = " + str(i) + ";") # yes, i, not j
-			self.emitSourceTraits("", script)
+		if opts.nativemapname:
+			out_c.println("AVMTHUNK_DECLARE_EXTERN_NATIVE_MAPS(%s)" % (opts.nativemapname));
+			out_h.println("AVMTHUNK_DECLARE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
+			# this section is only needed for legacy glue code that is specifying its native maps
+			# manually; it can be eliminated someday (but does no real harm)
+			out_h.println("/* scripts */");
+			for i in range(0, len(abc.scripts)):
+				script = abc.scripts[i]
+				if script == None:
+					continue
+				# not enough info in the ABC to recover the original name (eg abcpackage_Foo_as) 
+				# so output identifiers based on the native script functions found
+				for j in range(0, len(script.tmethods)):
+					m = script.tmethods[j]
+					if (m != None) and m.isNative():
+						out_h.println("const uint32_t abcscript_"+ to_cname(m.name) + " = " + str(i) + ";") # yes, i, not j
+		else:
+			out_h.println("AVMTHUNK_DECLARE_NATIVE_INITIALIZER(%s, %s)" % (name, name));
+		
+		out_h.println("/* classes */");
+		for i in range(0, len(abc.classes)):
+			c = abc.classes[i]
+			self.out_h.println("const uint32_t " + self.class_id_name(c) + " = " + str(c.class_id) + ";");
 
-		out_c.println("// "+str(len(self.unique_thunks.keys()))+" unique thunks");
+		out_h.println("/* methods */");
+		for i in range(0, len(abc.methods)):
+			m = abc.methods[i]
+			if m.native_id_name != None:
+				assert(m.id == i)
+				if m.isNative():
+					out_h.println("const uint32_t "+m.native_id_name+" = "+str(m.id)+";");
+				else:
+					# not sure if we want to expose method id's for non-native methods; emit as comments for now
+					out_h.println("/* const uint32_t "+m.native_id_name+" = "+str(m.id)+"; */");
+
+		out_h.println("");
+		out_h.println("/* thunks ("+str(len(self.unique_thunks.keys()))+" unique) */");
+		out_c.println("");
+		out_c.println("/* thunks ("+str(len(self.unique_thunks.keys()))+" unique) */");
 
 		for sig in self.unique_thunks:
 			users = self.unique_thunks[sig]
@@ -764,22 +870,56 @@ class AbcThunkGen:
 				receiver = users[native_name][0];
 				m = users[native_name][1];
 			thunkname = name+"_"+sig;
-			# emit both with and without-cookie versions, since we can't tell at this point which
+			# emit both with-cookie and without-cookie versions, since we can't tell at this point which
 			# might be used for a particular method. rely on linker to strip the unused ones.
-			self.emitThunk(thunkname, receiver, m, False);
-			self.emitThunk(thunkname, receiver, m, True);
+			self.emitThunkProto(thunkname, receiver, m, False);
+			self.emitThunkProto(thunkname, receiver, m, True);
 			for native_name in users:
-				receiver = users[native_name][0];
-				m = users[native_name][1];
-				assert(m.id >= 0)
-				out_h.println("  const uint32_t "+native_name+" = "+str(m.id)+";");
 				# use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
 				# (sad but true, happens in some environments)
-				out_h.println("  #define "+native_name+"_thunk  "+thunkname+"_thunk")
-				out_h.println("  #define "+native_name+"_thunkc "+thunkname+"_thunkc")
+				out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
+				out_h.println("#define "+native_name+"_thunkc "+thunkname+"_thunkc")
+			out_h.println("")
 
-		# cpp file - abc data, thunks
-		#print "Emit ABC Data..." 
+			self.emitThunkBody(thunkname, receiver, m, False);
+			self.emitThunkBody(thunkname, receiver, m, True);
+
+		out_c.println("");
+		out_c.println("/* scripts */");
+		out_c.println("AVMTHUNK_BEGIN_NATIVE_SCRIPTS(%s)" % self.abc.scriptName)
+		out_c.indent += 1
+		for i in range(0, len(abc.scripts)):
+			script = abc.scripts[i]
+			ni = abc.find_script_nativeinfo(script)
+			if ni.script_name != None:
+				out_c.println("AVMTHUNK_NATIVE_SCRIPT(%d, %s)" % (i, ni.script_name))
+		out_c.indent -= 1
+		out_c.println("AVMTHUNK_END_NATIVE_SCRIPTS()")
+
+		out_c.println("");
+		out_c.println("/* classes */");
+		out_c.println("AVMTHUNK_BEGIN_NATIVE_CLASSES(%s)" % self.abc.scriptName)
+		out_c.indent += 1
+		for i in range(0, len(abc.classes)):
+			c = abc.classes[i]
+			ni = abc.find_class_nativeinfo(c)
+			if ni.class_name != None or ni.instance_name != None:
+				# if nothing specified, use ClassClosure/ScriptObject.
+				if ni.class_name == None:
+					ni.class_name = "ClassClosure"
+				if ni.instance_name == None:
+					ni.instance_name = "ScriptObject"
+				out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), ni.class_name, ni.instance_name))
+		out_c.indent -= 1
+		out_c.println("AVMTHUNK_END_NATIVE_CLASSES()")
+
+		if opts.nativemapname:
+			out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
+		else:
+			out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s, %s)" % (name, name));
+
+		out_c.println("");
+		out_c.println("/* abc */");
 		n = len(abc.data.data)
 		out_c.println("const uint8_t "+name+"_abc_data["+str(n)+"] = {");
 		for i in range(0, n):
@@ -797,15 +937,21 @@ class AbcThunkGen:
 			argtraits.append(self.lookupTraits(m.paramTypes[i]))
 		return argtraits
 
-	def emitThunk(self, name, receiver, m, cookie):
+	def emitThunkProto(self, name, receiver, m, cookie):
+		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
+		cstr = ""
+		if cookie:
+			cstr = "c"
+		decl = "AvmThunkRetType_"+ret+" AVMTHUNK_CALLTYPE "+name+"_thunk"+cstr+"(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)"
+		self.out_h.println("extern "+decl+";");
+
+	def emitThunkBody(self, name, receiver, m, cookie):
 		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
 		
 		cstr = ""
 		if cookie:
 			cstr = "c"
 		decl = "AvmThunkRetType_"+ret+" AVMTHUNK_CALLTYPE "+name+"_thunk"+cstr+"(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)"
-
-		self.out_h.println("extern "+decl+";");
 
 		self.out_c.println(decl);
 		self.out_c.println("{");
@@ -912,12 +1058,13 @@ class AbcThunkGen:
 			sig += "_rest"
 		return sig;
 
-	def gatherThunk(self, native_name, receiver, m):
-		self.native_methods[m.id] = native_name		
+	def gatherThunk(self, receiver, m):
+		assert(m.native_id_name != None)
+		self.native_methods[m.id] = m.native_id_name		
 		sig = self.thunkSig(receiver, m)
 		if not self.unique_thunks.has_key(sig):
 			self.unique_thunks[sig] = {}
-		self.unique_thunks[sig][native_name] = (receiver, m)
+		self.unique_thunks[sig][m.native_id_name] = (receiver, m)
 
 	def ns_prefix(self, ns, iscls):
 		if not ns.isPublic() and not ns.isInternal():
@@ -936,32 +1083,32 @@ class AbcThunkGen:
 		assert(isinstance(b.name,QName))
 		return self.ns_prefix(b.name.ns, False) + to_cname(b.name.name)
 
-	def emitSourceClass(self, b):
+	def processClass(self, b):
 		assert(isinstance(b.name,QName))
 		label = self.ns_prefix(b.name.ns, True) + to_cname(b.name.name)
 		c = b.value
-		self.out_h.println("const int abcclass_"+ label + " = " + str(c.class_id) + ";");
-		self.emitSourceTraits(label+"_", c)
-		self.emitSourceTraits(label+"_", c.itraits)
+		self.processTraits(label+"_", c)
+		self.processTraits(label+"_", c.itraits)
 
-	def emitSourceMethod(self, prefix, receiver, m):
-		if m != None and m.isNative():
-			native_name = prefix + self.propLabel(m)
+	def processMethod(self, prefix, receiver, m):
+		assert(m != None)
+		m.native_id_name = prefix + self.propLabel(m)
+		if m.isNative():
 			if m.kind == TRAIT_Getter:
-				native_name += "_get"
+				m.native_id_name += "_get"
 			elif m.kind == TRAIT_Setter:
-				native_name += "_set"		
-			self.gatherThunk(native_name, receiver, m)
+				m.native_id_name += "_set"		
+			self.gatherThunk(receiver, m)
 
-	def emitSourceTraits(self, prefix, s):
+	def processTraits(self, prefix, s):
 		if s.init != None and s.init.isNative():
-			native_name = prefix + to_cname(s.name.name) # not self.propLabel(s)
-			self.gatherThunk(native_name, s, s.init)
+			s.init.native_id_name = prefix + to_cname(s.name.name) # not self.propLabel(s)
+			self.gatherThunk(s, s.init)
 		for i in range(0, len(s.members)):
 			if s.members[i].kind in [TRAIT_Method,TRAIT_Getter,TRAIT_Setter]:
-				self.emitSourceMethod(prefix, s, s.members[i])
+				self.processMethod(prefix, s, s.members[i])
 			elif s.members[i].kind in [TRAIT_Class]:
-				self.emitSourceClass(s.members[i]);
+				self.processClass(s.members[i]);
 	
 ngen = AbcThunkGen();
 abcGenFor = None

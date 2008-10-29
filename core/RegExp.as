@@ -37,6 +37,7 @@
 
 package 
 {
+	[native(cls="RegExpClass", instance="RegExpObject")]
 	public dynamic class RegExp
 	{
 		// RegExp.length = 1 per ES3

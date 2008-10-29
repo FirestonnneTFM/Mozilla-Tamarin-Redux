@@ -67,6 +67,7 @@ package flash.utils
  * @see ../../operators.html#strict_equality === (strict equality)
  * 
  */
+[native(cls="DictionaryClass", instance="DictionaryObject")]
 dynamic public class Dictionary
 {
 	/**

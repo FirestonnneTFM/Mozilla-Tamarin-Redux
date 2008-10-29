@@ -41,22 +41,6 @@
 namespace avmplus
 {
 
-#define DECLARE_NATIVE_SCRIPTS() static const NativeScriptInfo scriptEntries[];
-
-#define BEGIN_NATIVE_SCRIPTS(_Class) /*static*/ const  NativeScriptInfo _Class::scriptEntries[] = {
-
-#define NATIVE_SCRIPT(script_id, _Script) { (NativeScriptInfo::Handler)_Script::createGlobalObject, _Script::natives, script_id, sizeof(_Script) },
-
-#define END_NATIVE_SCRIPTS() { NULL, NULL, -1, 0 } };
-
-#define DECLARE_NATIVE_CLASSES() static const NativeClassInfo classEntries[];
-
-#define BEGIN_NATIVE_CLASSES(_Class) /*static*/ const NativeClassInfo _Class::classEntries[] = {
-
-#define NATIVE_CLASS(class_id, _Class, _Instance) { (NativeClassInfo::Handler)_Class::createClassClosure, _Class::natives, avmplus::NativeID::class_id, sizeof(_Class), sizeof(_Instance) },
-
-#define END_NATIVE_CLASSES() { NULL, NULL, -1, 0, 0 } };
-
 #define OBJECT_TYPE		(core->traits.object_itraits)
 #define CLASS_TYPE		(core->traits.class_itraits)
 #define FUNCTION_TYPE	(core->traits.function_itraits)
@@ -377,10 +361,8 @@ const int kBufferPadding = 16;
 									 int start,
 									 Toplevel* toplevel,
 									 Domain* domain,
-									 AbstractFunction *nativeMethods[],
-									 NativeClassInfop nativeClasses[],
-									 NativeScriptInfop nativeScripts[],
-									 List<Stringp>* include_versions = NULL);
+									 const NativeInitializer* ninit,
+									 const List<Stringp>* include_versions = NULL);
 		
 		/**
 		 * Execute the ABC block starting at offset start in code.
@@ -402,23 +384,10 @@ const int kBufferPadding = 16;
 									int start,
 									DomainEnv* domainEnv,
 									Toplevel* &toplevel,
-									AbstractFunction *nativeMethods[],
-									NativeClassInfop nativeClasses[],
-									NativeScriptInfop nativeScripts[],
+									const NativeInitializer* ninit,
 									CodeContext *codeContext);
 
 				
-		/**
-		 * Initializes the native table with the specified
-		 * class/script entries.
-		 */
-		void initNativeTables(NativeClassInfop classEntries,
-							 NativeScriptInfop scriptEntries,
-							 AbstractFunction *nativeMethods[],
-							 NativeClassInfop nativeClasses[],
-							 NativeScriptInfop nativeScripts[]);
-
-
 		/** Implementation of OP_equals */
 		Atom equals(Atom lhs, Atom rhs);
 		
@@ -1263,11 +1232,6 @@ const int kBufferPadding = 16;
 		Hashtable *xmlEntities;
 		
 	private:
-		DECLARE_NATIVE_CLASSES()
-		DECLARE_NATIVE_SCRIPTS()
-
-		void registerNatives(NativeTableEntryp nativeMap, AbstractFunction *nativeMethods[]);
-
 		//
 		// this used to be Heap
 		//

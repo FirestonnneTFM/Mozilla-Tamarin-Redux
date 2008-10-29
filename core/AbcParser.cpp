@@ -54,10 +54,8 @@ namespace avmplus
     PoolObject* AbcParser::decodeAbc(AvmCore* core, ScriptBuffer code, 
 		Toplevel* toplevel,
 		Domain* domain,
-		AbstractFunction *nativeMethods[],
-		NativeClassInfop nativeClasses[],
-		NativeScriptInfop nativeScripts[],
-		List<Stringp>* keepVersions)
+		const NativeInitializer* natives,
+		const List<Stringp>* keepVersions)
     {
 		if (code.getSize() < 4)
 			toplevel->throwVerifyError(kCorruptABCError);
@@ -73,7 +71,7 @@ namespace avmplus
 		{
 		case (46<<16|16):
 		{
-			AbcParser parser(core, code, toplevel, domain, nativeMethods, nativeClasses, nativeScripts, keepVersions);
+			AbcParser parser(core, code, toplevel, domain, natives, keepVersions);
 			PoolObject *pObject = parser.parse();
  			if ( !pObject )
  				toplevel->throwVerifyError( kCorruptABCError );
@@ -89,10 +87,8 @@ namespace avmplus
 	AbcParser::AbcParser(AvmCore* core, ScriptBuffer code, 
 		Toplevel* toplevel,
 		Domain* domain,
-		AbstractFunction *nativeMethods[],
-		NativeClassInfop nativeClasses[],
-		NativeScriptInfop nativeScripts[],
-		List<Stringp>* keepVersions)
+		const NativeInitializer* natives,
+		const List<Stringp>* keepVersions)
 		: toplevel(toplevel),
 		  domain(domain),
 		  instances(core->GetGC(), 0)
@@ -102,9 +98,7 @@ namespace avmplus
 		this->pool = NULL;
 		this->version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
 		this->pos = &code[4];
-		this->nativeMethods = nativeMethods;
-		this->nativeClasses = nativeClasses;
-		this->nativeScripts = nativeScripts;
+		this->natives = natives;
 		this->keepVersions = keepVersions;
 
 		abcStart = &code[0];
@@ -125,7 +119,7 @@ namespace avmplus
 	{
 		// If this is a native class, return the stated instance size
 		NativeClassInfop nativeEntry;
-		if (nativeClasses && (nativeEntry = nativeClasses[class_id]) != 0)
+		if (natives && (nativeEntry = natives->get_class(class_id)) != NULL)
 		{
 			return nativeEntry->sizeofInstance;
 		}
@@ -1077,16 +1071,16 @@ namespace avmplus
 			}
 			else
 			{
-				if (!nativeMethods)
+				NativeMethodInfop ni = NULL;
+				if (!natives || !(ni = natives->get_method(i)))
 				{
+					// If this assert hits, you're missing a native method.  Method "i"
+					// corresponds to the function of the same number in 
+					// source\avmglue\avmglue.h if you're running the Flash player.
+					AvmAssertMsg(0, "missing native method decl");
 					toplevel->throwVerifyError(kIllegalNativeMethodError);
 				}
-				info = nativeMethods[i];
-
-				// If this assert hits, you're missing a native method.  Method "i"
-				// corresponds to the function of the same number in 
-				// source\avmglue\avmglue.h if you're running the Flash player.
-				AvmAssertMsg(info != 0, "missing native method decl");
+				info = new (core->GetGC()) NativeMethod(*ni);
 
 				// todo assert that the .abc signature matches the C++ code?
 				info->flags |= AbstractFunction::ABSTRACT_METHOD;
@@ -1398,7 +1392,7 @@ namespace avmplus
     {
 		pool = new (core->GetGC()) PoolObject(core, code, pos);
 		pool->domain = domain;
-		pool->isBuiltin = (nativeMethods != NULL);
+		pool->isBuiltin = (natives != NULL);
 
 		uint32 int_count = readU30(pos);
 		// sanity check to prevent huge allocations
@@ -1870,7 +1864,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString((Traits*)script->declaringTraits));
 			}
 
-			NativeScriptInfop nativeEntry = nativeScripts ? nativeScripts[i] : NULL;
+			NativeScriptInfop nativeEntry = natives ? natives->get_script(i) : NULL;
 			Traits* traits = parseTraits(nativeEntry ? nativeEntry->sizeofInstance : sizeof(ScriptObject), 
 											core->traits.object_itraits, 
 											core->publicNamespace, 
@@ -2198,7 +2192,7 @@ namespace avmplus
 			cinit->name = Multiname::format(core,ns,cinitName);
 			#endif
 
-			NativeClassInfop nativeEntry = nativeClasses ? nativeClasses[i] : NULL;
+			NativeClassInfop nativeEntry = natives ? natives->get_class(i) : NULL;
 			Traits* ctraits = parseTraits(nativeEntry ? nativeEntry->sizeofClass : sizeof(ClassClosure),
 											CLASS_TYPE, 
 											ns, 

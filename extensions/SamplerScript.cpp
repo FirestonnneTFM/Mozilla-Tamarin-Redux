@@ -275,6 +275,7 @@ namespace avmplus
 	{
 		sampleIteratorVTable->traits->resolveSignatures(NULL);
 		slotIteratorVTable->traits->resolveSignatures(NULL);
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(SamplerScript));
 	}
 
 	Atom SamplerScript::getSamples()
