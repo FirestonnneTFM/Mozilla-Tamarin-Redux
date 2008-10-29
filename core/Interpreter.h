@@ -64,11 +64,6 @@ namespace avmplus
 #ifdef AVMPLUS_DIRECT_THREADED
 	void** interpGetOpcodeLabels();
 #endif
-#ifdef SUPERWORD_PROFILING
-	void swprofStart();
-	void swprofStop();
-#endif
-	
 }
 
 //#  define LAST_SUPERWORD_OPCODE    ((50<<8) | OP_ext)

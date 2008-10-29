@@ -126,10 +126,6 @@ namespace avmplus
 	static void initMultiname(MethodEnv* env, Multiname &name, Atom* &sp);
 	static void initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* &sp);
 	static Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
-#ifdef SUPERWORD_PROFILING
-	static void swprofCode(const uint32_t* start, const uint32_t* limit);
-	static void swprofPC(const uint32_t* pc);
-#endif
 #if defined(AVMPLUS_VERBOSE) && !defined(AVMPLUS_WORD_CODE)
 	
 	/**
@@ -596,15 +592,6 @@ namespace avmplus
 		int local_count = info->word_code.local_count;
 		int init_scope_depth = info->word_code.init_scope_depth;
 		int max_scope_depth = info->word_code.max_scope_depth;
-#  ifdef SUPERWORD_PROFILING
-#    ifdef AVMPLUS_DIRECT_THREADED
-#       error "Superword profiling requires switch dispatch"
-#    endif
-		if (!info->word_code.dumped) {
-			swprofCode(pos, info->word_code.body_end);
-			info->word_code.dumped = true;
-		}
-#  endif
 #else // !AVMPLUS_WORD_CODE
 		const byte* pos = info->body_pos;
 		int max_stack = AvmCore::readU30(pos);
@@ -848,7 +835,7 @@ namespace avmplus
 		for (;;)
         {
 #  if defined SUPERWORD_PROFILING
-			swprofPC(pc);
+			WordcodeTranslator::swprofPC(pc);
 #  endif
 #  if defined AVMPLUS_WORD_CODE
 			// See comments around INSTR(ext) below.
@@ -3430,63 +3417,5 @@ namespace avmplus
     }
 #endif // AVMPLUS_VERBOSE
 			
-#ifdef SUPERWORD_PROFILING
-	// 32-bit only
 
-	static FILE *swprof_code_fp = NULL;
-	static FILE *swprof_sample_fp = NULL;
-#ifdef SUPERWORD_LIMIT
-	static unsigned int sample_count = 0;
-#endif
-
-	void swprofStart()
-	{
-		swprof_code_fp = fopen("superwordprof_code.txt", "wb");
-		if (swprof_code_fp == NULL)
-			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN CODE FILE.\n");
-		else
-		{
-			unsigned int signature = 0xC0DEC0DE;
-			fwrite(&signature, sizeof(uint32_t), 1, swprof_code_fp);
-		}
-		swprof_sample_fp = fopen("superwordprof_sample.txt", "wb");
-		if (swprof_sample_fp == NULL)
-			fprintf(stderr, "SUPERWORD PROFILING: COULD NOT OPEN SAMPLE FILE.\n");
-		else
-		{
-			unsigned int signature = 0xDA1ADA1A;
-			fwrite(&signature, sizeof(uint32_t), 1, swprof_sample_fp);
-		}
-	}
-	
-	void swprofStop() 
-	{
-		if (swprof_code_fp != NULL)	{ fclose(swprof_code_fp); swprof_code_fp = NULL; }
-		if (swprof_sample_fp != NULL) { fclose(swprof_sample_fp); swprof_sample_fp = NULL; }
-	}
-			
-	void swprofCode(const uint32_t* start, const uint32_t* limit)
-	{
-		if (swprof_code_fp != NULL) {
-			fwrite(&start, sizeof(uint32_t*), 1, swprof_code_fp);
-			fwrite(&limit, sizeof(uint32_t*), 1, swprof_code_fp);
-			fwrite(start, sizeof(uint32_t), limit-start, swprof_code_fp);
-			fflush(swprof_code_fp);
-		}
-	}
-
-	void swprofPC(const uint32_t* pc)
-	{
-		if (swprof_sample_fp != NULL) {
-			fwrite(&pc, sizeof(uint32_t*), 1, swprof_sample_fp);
-#ifdef SUPERWORD_LIMIT
-			if (++sample_count == SUPERWORD_LIMIT) {
-				swprofStop();
-				fprintf(stderr, "SAMPLING HALTED.\n");
-			}
-#endif
-		}
-	}
-#endif  // SUPERWORD_PROFILING
-			
 }
