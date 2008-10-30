@@ -81,6 +81,10 @@ MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
 
+selfTest = o.getBoolArg("selftests", False)
+if selfTest:
+    APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
+
 MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', True)
 if MMGC_INTERIOR_PTRS:
     MMGC_DEFINES['MMGC_INTERIOR_PTRS'] = None
