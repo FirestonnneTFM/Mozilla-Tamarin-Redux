@@ -55,6 +55,8 @@ as3/sampling/.*: , x86-win64-tvm-.*debugger , skip       , bug tamarin: https://
 as3/sampling/ProcessSampling: , .*(win|lnx|mac)-tvm-debugdebugger , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=457266
 # sampling api: windows debug debugger assertion fails crashes: bug 457311
 as3/sampling/Callback: , x86-win-tvm-debugdebugger , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=457311
+# sampling api: mac 10.5 debug debugger assertion fails: bug 462354
+as3/sampling/Callback: , x86-mac-tvm-debugdebugger , skip,  https://bugzilla.mozilla.org/show_bug.cgi?id=462354
 # mmgc seg fault on linux debug-debugger: bug 457903
 ecma3/Exceptions/number_00[12]_rt: , x86-lnx-tvm-debugdebugger  , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=457903
 
