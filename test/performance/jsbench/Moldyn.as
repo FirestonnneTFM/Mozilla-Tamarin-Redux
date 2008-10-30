@@ -21,9 +21,10 @@ var ITERS = 100;
 
     var size;
 
-    var datasizes = new Array(20);
-    datasizes[0] = 8;
-    datasizes[1] = 13;
+    var datasizes = new Array(3);
+    datasizes[0] = 6;
+    datasizes[1] = 8;
+    datasizes[2] = 13;
 
     var interactions = 0;
 

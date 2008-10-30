@@ -56,9 +56,10 @@
 	 */
 	var width;
 
-	var datasizes = new Array(2);
-	datasizes[0] = 150;
-	datasizes[1] = 500;
+	var datasizes = new Array(3);
+	datasizes[0] = 50;
+	datasizes[1] = 150;
+	datasizes[2] = 500;
 
 	var checksum = 0;
 	var lastValue = 0;
