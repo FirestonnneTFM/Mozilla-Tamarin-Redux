@@ -596,4 +596,4 @@ for ast in tests:
                     log_print("%-50s %7s" % (ast,result1)) 
             else:
                     log_print("%-50s crash" % (ast)) 
-
+                    exit(1)
