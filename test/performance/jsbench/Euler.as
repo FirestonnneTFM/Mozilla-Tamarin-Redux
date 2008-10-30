@@ -1,8 +1,9 @@
 	var size;
 	var errorCheck=false;
-	var datasizes = new Array(2);
-	datasizes[0] = 8;
-	datasizes[1] = 12;
+	var datasizes = new Array(3);
+	datasizes[0] = 2;
+	datasizes[1] = 8;
+	datasizes[2] = 12;
 
 	var machff = 0.7; /* Inflow mach number */
 
