@@ -518,7 +518,7 @@ namespace avmshell
 		m_byteArray.WriteDouble(value);
 	}
 
-	void ByteArrayObject::compress()
+	void ByteArrayObject::zlib_compress()
 	{
 		int len = m_byteArray.GetLength();
 		if (!len) // empty buffer should give us a empty result
@@ -538,7 +538,7 @@ namespace avmshell
 		delete [] gzdata;
 	}
 
-    void ByteArrayObject::uncompress()
+    void ByteArrayObject::zlib_uncompress()
     {
         // Snapshot the compressed data.
         unsigned long gzlen = m_byteArray.GetLength();
