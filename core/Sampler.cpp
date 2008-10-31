@@ -46,10 +46,11 @@ namespace avmplus
 
 	Sampler::Sampler(GC *gc) : allocId(1), sampling(true),
 			autoStartSampling(false), samplingNow(false), samplingAllAllocs(false), takeSample(0),
-			numSamples(0), samples(gc->GetGCHeap()), currentSample(NULL), timerHandle(0), lastAllocSample(0),
+			numSamples(0), currentSample(NULL), timerHandle(0), lastAllocSample(0),
 			uids(1024), ptrSamples(0), callback(0), runningCallback(false)
 	{
 		fakeMethodInfos = new (gc) Hashtable(gc);
+		samples = new (gc) GrowableBuffer(gc->GetGCHeap());
 	}
 
 	void Sampler::setCore(AvmCore *core)
@@ -63,6 +64,10 @@ namespace avmplus
 		Sampler* gc_sampler = MMgc::m_sampler;
 		if(gc_sampler == this)
 			MMgc::m_sampler = NULL;
+		delete samples;
+		samples = 0;
+		delete fakeMethodInfos;
+		fakeMethodInfos = 0;
 	}
 
 	void Sampler::init(bool sampling, bool autoStart)
@@ -74,7 +79,7 @@ namespace avmplus
 	byte *Sampler::getSamples(uint32 &num)
 	{
 		num = numSamples;
-		byte *start = samples.start();
+		byte *start = samples->start();
 		return start;
 	}
 
@@ -89,14 +94,19 @@ namespace avmplus
 
 	int Sampler::sampleSpaceCheck(bool callback_ok)
 	{
-		if(!samples.start())
+		if(!samples->start())
 			return 0;
 
 		uint32 sampleSize = sizeof(Sample);
 		uint32 callStackDepth = core->callStack ? core->callStack->depth : 0;
 		sampleSize += callStackDepth * sizeof(StackTrace::Element);
 		sampleSize += sizeof(uint64) * 2;
-		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples.size()/3 > samples.end() && !core->GetGC()->Collecting() )		{
+		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples->size()/3 > samples->end() 
+			&& !core->GetGC()->Collecting() 
+#ifdef MMGC_DRC
+			&& !core->GetGC()->Reaping()
+#endif
+			)		{
 			runningCallback = true;
 			pauseSampling();
 			Atom args[1] = { nullObjectAtom };
@@ -104,9 +114,9 @@ namespace avmplus
 			startSampling();
 			runningCallback = false;
 		}
-		while(currentSample + sampleSize > samples.uncommitted()) {
-			samples.grow();
-			if(currentSample + sampleSize > samples.uncommitted()) {
+		while(currentSample + sampleSize > samples->uncommitted()) {
+			samples->grow();
+			if(currentSample + sampleSize > samples->uncommitted()) {
 /*
 #ifdef AVMPLUS_VERBOSE
 				core->console << "****** Exhausted Sample Buffer *******\n";
@@ -305,7 +315,7 @@ namespace avmplus
 		}
 
 		// Nuke the ptr in the sample stream for the newobject sample
-		if( samples.start() )
+		if( samples->start() )
 		{
 
 		byte* oldptr = 0;
@@ -327,8 +337,8 @@ namespace avmplus
 
 	void Sampler::clearSamples()
 	{
-		//samples.free();
-		currentSample = samples.start();
+		//samples->free();
+		currentSample = samples->start();
 		GCHashtable* t = ptrSamples;
 		ptrSamples = new MMgc::GCHashtable(4096);
 		delete t;
@@ -348,12 +358,12 @@ namespace avmplus
 		{
 			int megs=16;
 			while(!currentSample && megs > 0) {
-				currentSample = samples.reserve(megs * 1024 * 1024);
+				currentSample = samples->reserve(megs * 1024 * 1024);
 				megs >>= 1;
 			}
 			if(!currentSample) {
 				sampling = autoStartSampling = false;
-				samples.free();
+				samples->free();
 				return;
 			}
 		}
@@ -396,7 +406,12 @@ namespace avmplus
 			timerHandle = 0;
 		}
 
-		samples.free();
+		samples->free();
+
+		if( ptrSamples ) {
+			delete ptrSamples;
+			ptrSamples = 0;
+		}
 
 		MMgc::sampling = false;
 		samplingNow = false;
@@ -456,7 +471,7 @@ namespace avmplus
 		if(name_str == NULL)
 			return NULL;
 		Atom a = fakeMethodInfos->get(name_str->atom());
-//		AvmAssertMsg(a != undefinedAtom, "name was interned but need to call createFakeFunction with that name");
+		AvmAssertMsg(a != undefinedAtom, "name was interned but need to call createFakeFunction with that name");
 		AbstractFunction *af = (AbstractFunction*)AvmCore::atomToGCObject(a);
 		sampleCheck();
 		return af;
