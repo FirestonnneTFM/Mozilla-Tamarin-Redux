@@ -73,8 +73,6 @@ namespace avmplus
 				   Atom *args, int argc);
 		/*@}*/
 
-		DECLARE_NATIVE_MAP(DateClass)
-
 	private:
 		double		stringToDateDouble(String &s);
 	};

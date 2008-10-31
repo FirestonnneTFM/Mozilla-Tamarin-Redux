@@ -79,7 +79,6 @@ namespace avmshell
     public:
 		StringBuilderClass(VTable* cvtable);
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
-		DECLARE_NATIVE_MAP(StringBuilderClass)
 	};
 }
 

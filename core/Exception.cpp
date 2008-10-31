@@ -65,7 +65,7 @@ namespace avmplus
 		// Otherwise, generate a new stack trace.
 		if (core->istype(atom, core->traits.error_itraits))
 		{
-			stackTrace = ((ErrorObject*)AvmCore::atomToScriptObject(atom))->getStackTrace();
+			stackTrace = ((ErrorObject*)AvmCore::atomToScriptObject(atom))->getStackTraceObject();
 		}
 		else
 		{

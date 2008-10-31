@@ -96,7 +96,7 @@ package flash.sampler
      * @keyword Sample      
      * @see package.html#getSamples() flash.sampler.getSamples()
      */
-	[native(cls="SampleClass", instance="SampleObject")]
+	[native(cls="SampleClass", instance="SampleObject", methods="auto")]
     public class Sample
     {
 		/**
@@ -128,7 +128,7 @@ package flash.sampler
     * @see package.html#getSamples() flash.sampler.getSamples()
     * @includeExample examples\SampleTypesExample.as -noswf    
     */
-	[native(cls="NewObjectSampleClass", instance="NewObjectSampleObject")]
+	[native(cls="NewObjectSampleClass", instance="NewObjectSampleObject", methods="auto")]
     public final class NewObjectSample extends Sample
     {
     	/** 
@@ -172,7 +172,7 @@ package flash.sampler
     * @see package.html#getSamples() flash.sampler.getSamples()
     * @includeExample examples\SampleTypesExample.as -noswf    
     */    
-	[native(cls="SampleClass", instance="SampleObject")]
+	[native(cls="DeleteObjectSampleClass", instance="DeleteObjectSampleObject", methods="auto")]
     public final class DeleteObjectSample extends Sample
     {
     	/** 
@@ -382,6 +382,6 @@ package flash.sampler
      * @see package.html#getSetterInvocationCount() getSetterInvocationCount() 
      * @see package.html#getGetterInvocationCount() getGetterInvocationCount() 
      */
-	[native(script="SamplerScript")]
+	[native(script="SamplerScript", methods="auto")]
     public native function isGetterSetter(obj:Object, qname:QName):Boolean;
 };

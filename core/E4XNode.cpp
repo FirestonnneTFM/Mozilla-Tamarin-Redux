@@ -679,8 +679,8 @@ namespace avmplus
 				for (uint32 k = 0; k < _length(); k++)
 				{
 					E4XNode *child = _getAt(k);
-					if (((child->getClass() == E4XNode::kComment) && toplevel->xmlClass()->getIgnoreComments()) ||
-						((child->getClass() == E4XNode::kProcessingInstruction) && toplevel->xmlClass()->getIgnoreProcessingInstructions()))
+					if (((child->getClass() == E4XNode::kComment) && toplevel->xmlClass()->get_ignoreComments()) ||
+						((child->getClass() == E4XNode::kProcessingInstruction) && toplevel->xmlClass()->get_ignoreProcessingInstructions()))
 					{
 						continue;
 					}

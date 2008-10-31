@@ -208,7 +208,7 @@ namespace avmplus
 		// this call occurs when a regexp object is invoked directly as a function ala "/a|b/('dcab')"
 		AvmCore *core = this->core();
 		Atom inAtom = argc ? core->string(argv[1])->atom() : core->kEmptyString->atom();
-		return execSimple(core->atomToString(inAtom));
+		return AS3_exec(core->atomToString(inAtom));
 	}
 
     /**
@@ -232,7 +232,7 @@ namespace avmplus
 	{
 		int matchIndex, matchLen;
 		UsesUTF8String utf8Subject(subject);
-		if (!exec(subject, utf8Subject, 0, matchIndex, matchLen))
+		if (!_exec(subject, utf8Subject, 0, matchIndex, matchLen))
 		{
 			matchIndex = -1;
 		}
@@ -303,7 +303,7 @@ namespace avmplus
 		ArrayObject* matchArray;
 		unsigned n=0;
 		bool isEmptyRE = m_source->length() == 0;
-		while ((matchArray = exec(subject,
+		while ((matchArray = _exec(subject,
 								  utf8Subject,
 								  startIndex,
 								  matchIndex,
@@ -382,33 +382,33 @@ namespace avmplus
 										 0);
 	}
 	
-	Atom RegExpObject::execSimple(Stringp subject)
+	Atom RegExpObject::AS3_exec(Stringp subject)
 	{
 		if (!subject)
 		{
 			subject = core()->knull;
 		}
 		UsesUTF8String utf8Subject(subject);
-		ArrayObject *result = exec(subject, utf8Subject);
+		ArrayObject *result = _exec(subject, utf8Subject);
 		return result ? result->atom() : nullStringAtom;
 	}
 
-	ArrayObject* RegExpObject::exec(Stringp subject, UTF8String *utf8Subject)
+	ArrayObject* RegExpObject::_exec(Stringp subject, UTF8String *utf8Subject)
 	{
 		AvmAssert(subject != NULL);
 		AvmAssert(utf8Subject != NULL);
 
 		int matchIndex = 0, matchLen = 0;
-		int startIndex = (isGlobal() ? Utf16ToUtf8Index(subject,
+		int startIndex = (get_global() ? Utf16ToUtf8Index(subject,
 													utf8Subject,
 													m_lastIndex) : 0);
 
-		ArrayObject* result = exec(subject,
+		ArrayObject* result = _exec(subject,
 								   utf8Subject,
 								   startIndex,
 								   matchIndex,
 								   matchLen);
-		if (isGlobal())
+		if (get_global())
 		{
 			m_lastIndex = Utf8ToUtf16Index(subject,
 										 utf8Subject,
@@ -418,7 +418,7 @@ namespace avmplus
 		return result;
 	}
 
-    ArrayObject* RegExpObject::exec(Stringp subject, 
+    ArrayObject* RegExpObject::_exec(Stringp subject, 
 									UTF8String *utf8Subject,
 									int startIndex,
 									int& matchIndex,
@@ -509,9 +509,9 @@ namespace avmplus
 	ArrayObject* RegExpObject::match(Stringp subject)
 	{
 		UsesUTF8String utf8Subject(subject);
-		if (!isGlobal())
+		if (!get_global())
 		{
-			return exec(subject, utf8Subject);
+			return _exec(subject, utf8Subject);
 		}
 		else
 		{
@@ -529,7 +529,7 @@ namespace avmplus
 				int matchIndex = 0, matchLen = 0;
 				int startIndex = Utf16ToUtf8Index(subject, utf8Subject,	m_lastIndex);
 
-				matchArray = exec(subject,
+				matchArray = _exec(subject,
 								  utf8Subject,
 								  startIndex,
 								  matchIndex,
@@ -655,7 +655,7 @@ namespace avmplus
 
 			lastIndex = newLastIndex;
 
-			if (!isGlobal())
+			if (!get_global())
 			{
 				break;
 			}
@@ -736,7 +736,7 @@ namespace avmplus
 
 			lastIndex = newLastIndex;
 
-			if (!isGlobal())
+			if (!get_global())
 				break;
 		}
 
@@ -756,7 +756,7 @@ namespace avmplus
 										   int& newLastIndex,
 										   StringBuffer& resultBuffer)
 	{
-		if (lastIndex == newLastIndex && isGlobal())
+		if (lastIndex == newLastIndex && get_global())
 		{
 			// Advance one character
 			if (lastIndex < subjectLength)
@@ -781,4 +781,10 @@ namespace avmplus
 	//
 	// Accessors
 	//
+
+	bool RegExpObject::get_ignoreCase() { return hasOption(PCRE_CASELESS); }
+	bool RegExpObject::get_multiline() { return hasOption(PCRE_MULTILINE); }
+	bool RegExpObject::get_dotall() { return hasOption(PCRE_DOTALL); }
+	bool RegExpObject::get_extended() { return hasOption(PCRE_EXTENDED); }
+
 }

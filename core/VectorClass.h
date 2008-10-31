@@ -78,10 +78,10 @@ namespace avmplus
 		Atom nextValue(int index);
 		int nextNameIndex(int index);
 
-		Atom map (ScriptObject *callback, Atom thisObject);
-		Atom filter (ScriptObject *callback, Atom thisObject);
+		Atom map(ScriptObject *callback, Atom thisObject);
+		Atom filter(ScriptObject *callback, Atom thisObject);
 
-		uint32 push(Atom *args, int argc);
+		uint32 AS3_push(Atom *args, int argc);
 
 		uint32 m_length;
 	protected:
@@ -109,6 +109,9 @@ namespace avmplus
 			delete [] m_array;
 			m_array = NULL;
 		}
+
+		ArrayObject* _filter(ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_filter(toplevel(), this->atom(), callback, thisObject); }
+		ArrayObject* _map(ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_map(toplevel(), this->atom(), callback, thisObject); }
 
 		virtual Atom getUintProperty(uint32 index) const
 		{
@@ -207,7 +210,7 @@ namespace avmplus
 			VectorBaseObject::set_length(newLength);
 		}
 
-		uint32 unshift(Atom* argv, int argc)
+		uint32 AS3_unshift(Atom* argv, int argc)
 		{
 			// shift elements up by argc
 			// inserts args into initial spots
@@ -290,7 +293,7 @@ namespace avmplus
 			return;
 		}
 
-		T pop() 
+		T AS3_pop() 
 		{
 			if(m_fixed)
 				toplevel()->throwRangeError(kVectorFixedError);
@@ -312,7 +315,7 @@ namespace avmplus
 			ScriptObject* so_args = (obj&7)==kObjectType ?  AvmCore::atomToScriptObject(obj) : 0;
 			if( so_args )
 			{
-				uint32 len = toplevel()->arrayClass->getLengthHelper(so_args);
+				uint32 len = ArrayClass::getLengthHelper(toplevel(), so_args);
 				for( uint32 i = 0; i < len; ++i )
 				{
 					this->setUintProperty(i, so_args->getUintProperty(i));
@@ -505,10 +508,10 @@ namespace avmplus
 
 		//void _reverse();
 		// insert array of arguments at front of array
-		uint32 unshift(Atom* argv, int argc);
+		uint32 AS3_unshift(Atom* argv, int argc);
 		void _spliceHelper(uint32 insertPoint, uint32 insertCount, uint32 deleteCount, Atom args, int offset);
 
-		Atom pop();
+		Atom AS3_pop();
 
 	protected:
 		virtual void grow(uint32 newCapacity, bool exact=false);
@@ -537,7 +540,10 @@ namespace avmplus
 
 		IntVectorObject* newVector(uint32 length = 0);
 
-		DECLARE_NATIVE_MAP(IntVectorClass)
+		void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
+		bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
+		bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
+		Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
     };
 
 	class UIntVectorClass : public ClassClosure
@@ -551,7 +557,10 @@ namespace avmplus
 
 		UIntVectorObject* newVector(uint32 length = 0);
 
-		DECLARE_NATIVE_MAP(UIntVectorClass)
+		void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
+		bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
+		bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
+		Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
     };
 
 	class DoubleVectorClass : public ClassClosure
@@ -565,7 +574,10 @@ namespace avmplus
 
 		DoubleVectorObject* newVector(uint32 length = 0);
 
-		DECLARE_NATIVE_MAP(DoubleVectorClass)
+		void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
+		bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
+		bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
+		Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
     };
 
 	class VectorClass : public ClassClosure
@@ -578,8 +590,6 @@ namespace avmplus
 		ObjectVectorObject* newVector(ClassClosure* type, uint32 length = 0);
 
 		virtual Atom applyTypeArgs(int argc, Atom* argv);
-
-		DECLARE_NATIVE_MAP(VectorClass)
 	
 	private:
 		DWB(Hashtable*) instantiated_types;
@@ -596,9 +606,12 @@ namespace avmplus
 		Atom call(int argc, Atom* argv);
 
 		ObjectVectorObject* newVector(uint32 length = 0);
-
-		DECLARE_NATIVE_MAP(ObjectVectorClass)
 	
+		void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
+		bool _every(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_every(toplevel(), thisAtom, callback, thisObject); }
+		bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
+		Atom _sort(Atom thisAtom, ArrayObject *args) { return ArrayClass::generic_sort(toplevel(), thisAtom, args); }
+
 	private:
 		DRCWB(ClassClosure*) index_type;
 	};

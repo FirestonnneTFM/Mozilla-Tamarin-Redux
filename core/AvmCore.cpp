@@ -670,7 +670,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				{
 					QNameObject *qn1 = atomToQName (lhs);
 					QNameObject *qn2 = atomToQName (rhs);
-					return (((qn1->getURI() == qn2->getURI()) && (qn1->getLocalName() == qn2->getLocalName()))? trueAtom : falseAtom);
+					return (((qn1->get_uri() == qn2->get_uri()) && (qn1->get_localName() == qn2->get_localName()))? trueAtom : falseAtom);
 				}
 				else
 				{
@@ -3020,9 +3020,9 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		Atom p;
 		Stringp u;
-		if (isQName (uri) && !isNull(atomToQName (uri)->getURI()))
+		if (isQName(uri) && !isNull(atomToQName(uri)->get_uri()))
 		{
-			u = atomToString(atomToQName (uri)->getURI());
+			u = atomToString(atomToQName(uri)->get_uri());
 		}
 		else
 		{
@@ -3067,9 +3067,9 @@ return the result of the comparison ToPrimitive(x) == y.
 			Namespacep ns = atomToNamespace (uri);
 			return new (GetGC()) Namespace (ns->getPrefix(), ns->getURI(), type);
 		}
-		else if (isObject(uri) && isQName (uri) && !isNull(atomToQName (uri)->getURI()))
+		else if (isObject(uri) && isQName(uri) && !isNull(atomToQName(uri)->get_uri()))
 		{
-			return new (GetGC()) Namespace (undefinedAtom, atomToString(atomToQName (uri)->getURI()), type);
+			return new (GetGC()) Namespace(undefinedAtom, atomToString(atomToQName(uri)->get_uri()), type);
 		}
 		else
 		{

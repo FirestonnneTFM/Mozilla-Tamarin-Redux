@@ -42,12 +42,6 @@
 
 namespace avmshell
 {
-	BEGIN_NATIVE_MAP(FileClass)
-		NATIVE_METHOD(avmplus_File_exists, FileClass::exists)
-		NATIVE_METHOD(avmplus_File_read, FileClass::read)
-		NATIVE_METHOD(avmplus_File_write, FileClass::write)
-	END_NATIVE_MAP()
-					  
 	FileClass::FileClass(VTable *cvtable)
 		: ClassClosure(cvtable)
     {

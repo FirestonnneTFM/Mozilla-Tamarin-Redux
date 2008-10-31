@@ -186,9 +186,6 @@ namespace avmplus
 
 		virtual ScriptObject* createInstance(VTable* ivtable, ScriptObject* prototype);
 
-		Atom function_call(Atom thisAtom, Atom *argv, int argc);
-		Atom function_apply(Atom thisAtom, Atom argArray);
-		
 		// The maximum integer key we can use with our ScriptObject
 		// HashTable must fit within 28 bits.  Any integer larger
 		// than 28 bits will use a string key.

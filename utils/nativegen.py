@@ -225,6 +225,8 @@ class MethodInfo(MemberInfo):
 	code = None
 	activation = None
 	native_id_name = None
+	final = False
+	override = False
 
 	def isNative(self):
 		return (self.flags & NATIVE) != 0
@@ -235,6 +237,16 @@ class MethodInfo(MemberInfo):
 	def hasOptional(self):
 		return (self.flags & HAS_OPTIONAL) != 0
 
+	def native_method_name(self, traits):
+		n = self.name.name
+		if self.kind == TRAIT_Getter:
+			n = "get_" + n
+		elif self.kind == TRAIT_Setter:
+			n = "set_" + n
+		if self.name.ns.srcname != None:
+			n = str(self.name.ns.srcname) + "_" + n
+		return to_cname(n)
+		
 class SlotInfo(MemberInfo):
 	type = ""
 	value = ""
@@ -243,6 +255,7 @@ class NativeInfo:
 	class_name = None
 	instance_name = None
 	script_name = None
+	gen_method_map = False
 	
 	def set_script(self, name):
 		if self.script_name != None:
@@ -262,6 +275,15 @@ class NativeInfo:
 	def validate(self):
 		if (self.script_name != None) and (self.class_name != None or self.instance_name != None):
 			raise Error("cannot mix script and class/instance attributes")
+		if self.gen_method_map and self.script_name == None and self.class_name == None and self.instance_name == None:
+			raise Error("cannot specify native(methods) without native(script) or native(cls)")
+		if self.class_name != None or self.instance_name != None:
+			# if nothing specified, use ClassClosure/ScriptObject.
+			if self.class_name == None:
+				self.class_name = "ClassClosure"
+			if self.instance_name == None:
+				self.instance_name = "ScriptObject"
+			
 
 BMAP = {
 	"Object": CTYPE_ATOM, # yes, items of exactly class "Object" are stored as Atom; subclasses are stored as pointer-to-Object
@@ -637,6 +659,8 @@ class Abc:
 				member = self.methods[methid]
 				t.tmethods.append(member)
 				member.id = methid
+				member.final = (tag & ATTR_final) != 0
+				member.override = (tag & ATTR_override) != 0
 			member.kind = kind
 			member.name = name
 			t.members[i] = member
@@ -662,6 +686,11 @@ class Abc:
 						ni.set_class(md.attrs["cls"])
 					if md.attrs.has_key("instance"):
 						ni.set_instance(md.attrs["instance"])
+					if md.attrs.has_key("methods"):
+						v = md.attrs["methods"]
+						if v != "auto":
+							raise Error("the only legal value for native(methods) is auto")
+						ni.gen_method_map = True
 					if (ni.script_name == None) and (ni.class_name == None) and (ni.instance_name == None):
 						raise Error("native metadata must specify (script) or (cls,instance)")
 
@@ -794,6 +823,22 @@ class AbcThunkGen:
 	def class_id_name(self, c):
 		return "abcclass_" + self.ns_prefix(c.qname.ns, True) + to_cname(c.qname.name)
 
+	def emitMethods(self, traits, niname):
+		if traits.init != None and traits.init.isNative():
+			self.out_c.println("AVMTHUNK_NATIVE_METHOD(%s, %s::%s)" % (traits.init.native_id_name, niname, "construct"+niname))
+		for j in range(0, len(traits.tmethods)):
+			m = traits.tmethods[j]
+			if m.isNative():
+				cname = m.native_method_name(traits)
+				# if we are an override, prepend the classname to the C method name.
+				# (native method implementations must not be virtual, and some compilers
+				# will be unhappy if a subclass overrides a method with the same name and signature
+				# without it being virtual.) Note that we really only need to do this if the ancestor
+				# implementation is native, rather than pure AS3, but we currently do it regardless.
+				if m.override:
+					cname = traits.name.name + "_" + cname
+				self.out_c.println("AVMTHUNK_NATIVE_METHOD(%s, %s::%s)" % (m.native_id_name, niname, cname))
+
 	def emit(self, abc, name, out_h, out_c):
 		self.abc = abc;
 		self.out_h = out_h;
@@ -885,6 +930,30 @@ class AbcThunkGen:
 			self.emitThunkBody(thunkname, receiver, m, True);
 
 		out_c.println("");
+		out_c.println("/* methods */");
+		for i in range(0, len(abc.classes)):
+			c = abc.classes[i]
+			ni = abc.find_class_nativeinfo(c)
+			if ni.gen_method_map:
+				out_c.println("")
+				out_c.println("AVMTHUNK_BEGIN_CLASS_NATIVE_METHOD_MAP(%s)" % ni.class_name)
+				out_c.indent += 1
+				self.emitMethods(c, ni.class_name)
+				self.emitMethods(c.itraits, ni.instance_name)
+				out_c.indent -= 1
+				out_c.println("AVMTHUNK_END_NATIVE_METHOD_MAP()")
+		for i in range(0, len(abc.scripts)):
+			c = abc.scripts[i]
+			ni = abc.find_script_nativeinfo(c)
+			if ni.gen_method_map:
+				out_c.println("")
+				out_c.println("AVMTHUNK_BEGIN_SCRIPT_NATIVE_METHOD_MAP(%s)" % ni.script_name)
+				out_c.indent += 1
+				self.emitMethods(c, ni.script_name)
+				out_c.indent -= 1
+				out_c.println("AVMTHUNK_END_NATIVE_METHOD_MAP()")
+
+		out_c.println("");
 		out_c.println("/* scripts */");
 		out_c.println("AVMTHUNK_BEGIN_NATIVE_SCRIPTS(%s)" % self.abc.scriptName)
 		out_c.indent += 1
@@ -892,7 +961,10 @@ class AbcThunkGen:
 			script = abc.scripts[i]
 			ni = abc.find_script_nativeinfo(script)
 			if ni.script_name != None:
-				out_c.println("AVMTHUNK_NATIVE_SCRIPT(%d, %s)" % (i, ni.script_name))
+				if ni.gen_method_map:
+					out_c.println("AVMTHUNK_NATIVE_SCRIPT(%d, %s)" % (i, ni.script_name))
+				else:
+					out_c.println("NATIVE_SCRIPT(%d, %s)" % (i, ni.script_name))
 		out_c.indent -= 1
 		out_c.println("AVMTHUNK_END_NATIVE_SCRIPTS()")
 
@@ -904,15 +976,14 @@ class AbcThunkGen:
 			c = abc.classes[i]
 			ni = abc.find_class_nativeinfo(c)
 			if ni.class_name != None or ni.instance_name != None:
-				# if nothing specified, use ClassClosure/ScriptObject.
-				if ni.class_name == None:
-					ni.class_name = "ClassClosure"
-				if ni.instance_name == None:
-					ni.instance_name = "ScriptObject"
-				out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), ni.class_name, ni.instance_name))
+				if ni.gen_method_map:
+					out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), ni.class_name, ni.instance_name))
+				else:
+					out_c.println("NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), ni.class_name, ni.instance_name))
 		out_c.indent -= 1
 		out_c.println("AVMTHUNK_END_NATIVE_CLASSES()")
 
+		out_c.println("");
 		if opts.nativemapname:
 			out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
 		else:

@@ -57,16 +57,6 @@
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(JObjectClass)
-		NATIVE_METHOD(avmplus_JObject_toString,				JObject::_toString)
-		NATIVE_METHOD(avmplus_JObject_methodSignature,		JObjectClass::methodSignature)
-		NATIVE_METHOD(avmplus_JObject_fieldSignature,		JObjectClass::fieldSignature)
-		NATIVE_METHOD(avmplus_JObject_constructorSignature,	JObjectClass::constructorSignature)
-		NATIVE_METHOD(avmplus_JObject_create,				JObjectClass::create)
-		NATIVE_METHOD(avmplus_JObject_createArray,			JObjectClass::createArray)
-		NATIVE_METHOD(avmplus_JObject_toArray,				JObjectClass::toArray)
-	END_NATIVE_MAP()
-
 	JObjectClass* JObjectClass::cc = 0; //@todo hack to remove
 
 	JObjectClass::JObjectClass(VTable *cvtable)
@@ -406,7 +396,7 @@ namespace avmplus
 		AvmAssert( jclass->jvm()->jni->ExceptionOccurred() == 0);
 	}
 
-	String* JObject::_toString() const
+	String* JObject::javaObjectToString() const
 	{
 		AvmCore* core = this->core();
 		String* s = 0;
@@ -1602,7 +1592,7 @@ namespace avmplus
 		vm.args.nOptions = (startup_options) ? 2 : 1;
 
 		#ifdef AVMPLUS_VERBOSE
-		if (core->verbose)
+		if (core->verbose())
 			core->console << "Creating JavaVM with options " << startup_options;
 		#endif /* AVMPLUS_VERBOSE */
 #ifdef SUPPORT_JNI_1_1
@@ -1698,18 +1688,4 @@ namespace avmplus
 		return JNI_OK;
 	}
 }	
-#else /* !AVMPLUS_WITH_JNI */
-namespace avmplus {
-	BEGIN_NATIVE_MAP(JObjectClass)
-		NATIVE_METHOD(avmplus_JObject_toString,				JObjectClass::NYI)
-		NATIVE_METHOD(avmplus_JObject_methodSignature,		JObjectClass::NYI)
-		NATIVE_METHOD(avmplus_JObject_fieldSignature,		JObjectClass::NYI)
-		NATIVE_METHOD(avmplus_JObject_constructorSignature,	JObjectClass::NYI)
-		NATIVE_METHOD(avmplus_JObject_create,				JObjectClass::NYI)
-		NATIVE_METHOD(avmplus_JObject_createArray,			JObjectClass::NYI)
-		NATIVE_METHOD(avmplus_JObject_toArray,				JObjectClass::NYI)
-	END_NATIVE_MAP()
-
-	void JObjectClass::NYI() { }
-}
 #endif /* AVMPLUS_WITH_JNI */

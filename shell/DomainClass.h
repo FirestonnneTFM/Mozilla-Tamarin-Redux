@@ -47,7 +47,7 @@ namespace avmshell
 		DomainObject(VTable *vtable, ScriptObject *delegate);
 		~DomainObject();
 
-		void constructFromDomain(DomainObject *base);
+		void constructDomainObject(DomainObject *base);
 		Atom loadBytes(ByteArrayObject *bytes);
 		ClassClosure* getClass(Stringp name);
 //#ifdef AVMPLUS_MOPS
@@ -73,8 +73,6 @@ namespace avmshell
 //#ifdef AVMPLUS_MOPS
  		int get_MIN_DOMAIN_MEMORY_LENGTH();
 //#endif AVMPLUS_MOPS
-		
-		DECLARE_NATIVE_MAP(DomainClass)
 	};
 }
 

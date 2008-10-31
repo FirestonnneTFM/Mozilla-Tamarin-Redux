@@ -40,18 +40,6 @@
 
 namespace avmshell
 {
-	BEGIN_NATIVE_MAP(DomainClass)
-		NATIVE_METHOD(avmplus_Domain_Domain, DomainObject::constructFromDomain)
-		NATIVE_METHOD(avmplus_Domain_loadBytes, DomainObject::loadBytes)
-		NATIVE_METHOD(avmplus_Domain_currentDomain_get, DomainClass::get_currentDomain)
-		NATIVE_METHOD(avmplus_Domain_getClass, DomainObject::getClass)
-//#ifdef AVMPLUS_MOPS
- 		NATIVE_METHOD(avmplus_Domain_MIN_DOMAIN_MEMORY_LENGTH_get, DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH)	
- 		NATIVE_METHOD(avmplus_Domain_domainMemory_get, DomainObject::get_domainMemory)
- 		NATIVE_METHOD(avmplus_Domain_domainMemory_set, DomainObject::set_domainMemory)
-//#endif AVMPLUS_MOPS
-	END_NATIVE_MAP()
-	
 	DomainObject::DomainObject(VTable *vtable, ScriptObject *delegate)
 		: ScriptObject(vtable, delegate)
 	{
@@ -61,7 +49,7 @@ namespace avmshell
 	{
 	}
 
-	void DomainObject::constructFromDomain(DomainObject *parentDomain)
+	void DomainObject::constructDomainObject(DomainObject *parentDomain)
 	{
 		Shell *core = (Shell*) this->core();
 

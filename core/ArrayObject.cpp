@@ -414,7 +414,7 @@ namespace avmplus
 	}
 #endif
 
-	void ArrayObject::setLength(uint32 newLength)
+	void ArrayObject::set_length(uint32 newLength)
 	{
 		if (traits()->needsHashtable())
 		{
@@ -440,7 +440,7 @@ namespace avmplus
 	}
 
 	// public native function pop(...rest):Object
-	Atom ArrayObject::pop()
+	Atom ArrayObject::AS3_pop()
 	{
 		if (isSimpleDense())
 		{
@@ -463,7 +463,7 @@ namespace avmplus
 		}
 	}
 
-	uint32 ArrayObject::push(Atom* argv, int argc)
+	uint32 ArrayObject::AS3_push(Atom* argv, int argc)
 	{
 		if (isSimpleDense())
 		{
@@ -479,7 +479,7 @@ namespace avmplus
 		return m_length;
 	}
 
-	uint32 ArrayObject::unshift(Atom* argv, int argc)
+	uint32 ArrayObject::AS3_unshift(Atom* argv, int argc)
 	{
 		if (argc != 0) 
 		{

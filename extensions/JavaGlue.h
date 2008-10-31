@@ -92,8 +92,6 @@ namespace avmplus
 		JClass* forName(String* name);
 		JClass* forType(jstring type);
 
-		DECLARE_NATIVE_MAP(JObjectClass)
-
 		static void throwException(Java* j, Toplevel* top, int errorId, jthrowable jthrow, String* arg1=0, String* arg2=0);
 
 	private:
@@ -121,7 +119,7 @@ namespace avmplus
 		JClass* getClass()			{ return jclass; }
 		jobject getObject()			{ return obj; }
 
-		String* _toString() const;
+		String* javaObjectToString() const;
 
 		// AS exposed functions
 
@@ -298,14 +296,19 @@ namespace avmplus
 	{
 	public:
 		JObjectClass(VTable *cvtable) : ClassClosure(cvtable) { }
-		void NYI();
-		DECLARE_NATIVE_MAP(JObjectClass)
+		ArrayObject* toArray(JObject* ) { return 0; }
+		String*	 fieldSignature(JObject* , String* ) { return 0; }
+		String*	 methodSignature(JObject* , String* , Atom* , int ) { return 0; }
+		JObject* create(String* , Atom* , int ) { return 0; }
+		JObject* createArray(JObject* , int , ArrayObject* ) { return 0; }
+		String*	 constructorSignature(String* , Atom* , int ) { return 0; }
 	};
 
 	class JObject : public ScriptObject
 	{
 	public:
 		JObject(VTable *vtable, ScriptObject *proto) : ScriptObject(vtable, proto) { }
+		String* javaObjectToString() const { return 0; }
 	};
 }
 #endif /* AVMPLUS_WITH_JNI */

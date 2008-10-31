@@ -116,7 +116,7 @@ namespace avmplus
 		AvmAssert(traits()->getExtraSize() == 0);
 
 		// str, ignoreWhite
-		bool bIgnoreWhite = toplevel->xmlClass()->getIgnoreWhitespace() != 0;
+		bool bIgnoreWhite = toplevel->xmlClass()->get_ignoreWhitespace() != 0;
 		XMLParser parser(core);
 		parser.parse(str, bIgnoreWhite);
 		parser.setCondenseWhite(true);
@@ -294,7 +294,7 @@ namespace avmplus
 				break;
 
 			case XMLTag::kComment:
-				if (!toplevel->xmlClass()->getIgnoreComments()) 
+				if (!toplevel->xmlClass()->get_ignoreComments()) 
 				{
 					pNewElement = new (gc) CommentE4XNode (0, tag.text);
 					if (!m_node)
@@ -331,7 +331,7 @@ namespace avmplus
 					setNode( pNewElement );
 				break;
 			case XMLTag::kProcessingInstruction:
-				if (!toplevel->xmlClass()->getIgnoreProcessingInstructions()) 
+				if (!toplevel->xmlClass()->get_ignoreProcessingInstructions()) 
 				{
 
 					const wchar *nameStart = tag.text->c_str();
@@ -1124,7 +1124,7 @@ namespace avmplus
 	}
 
 	// E4X 9.1.1.8, page 17
-	XMLListObject *XMLObject::descendants(Atom P) const
+	XMLListObject *XMLObject::AS3_descendants(Atom P) const
 	{
 		Multiname m;
 		toplevel()->ToXMLName (P, m);
@@ -1426,9 +1426,9 @@ namespace avmplus
 
 		// step 21/22
 		int nextIndentLevel = 0;
-		if (toplevel()->xmlClass()->getPrettyPrinting() && bIndentChildren)
+		if (toplevel()->xmlClass()->get_prettyPrinting() && bIndentChildren)
 		{
-			nextIndentLevel = indentLevel + toplevel()->xmlClass()->getPrettyIndent();
+			nextIndentLevel = indentLevel + toplevel()->xmlClass()->get_prettyIndent();
 		}
 
 		// We need to prune any namespaces with duplicate prefixes in our AncestorNamespace
@@ -1559,7 +1559,7 @@ namespace avmplus
 			return 0;
 	}
 
-	XMLObject *XMLObject::addNamespace (Atom _namespace)
+	XMLObject *XMLObject::AS3_addNamespace (Atom _namespace)
 	{
 		AvmCore *core = this->core();
 		if (core->isNamespace (_namespace))
@@ -1578,7 +1578,7 @@ namespace avmplus
 		return this;
 	}
 
-	XMLObject *XMLObject::appendChild (Atom child)
+	XMLObject *XMLObject::AS3_appendChild (Atom child)
 	{
 		AvmCore *core = this->core();
 
@@ -1606,7 +1606,7 @@ namespace avmplus
 		return this;
 	}
 
-	XMLListObject *XMLObject::attribute (Atom arg)
+	XMLListObject *XMLObject::AS3_attribute (Atom arg)
 	{
 		// E4X 13.4.4.4
 		// name= ToAttributeName (attributeName);
@@ -1614,7 +1614,7 @@ namespace avmplus
 		return core()->atomToXMLList(getAtomProperty(toplevel()->ToAttributeName(arg)->atom()));
 	}
 
-	XMLListObject *XMLObject::attributes ()
+	XMLListObject *XMLObject::AS3_attributes ()
 	{
 		// E4X 13.4.4.5
 		// name= ToAttributeName ("*");
@@ -1623,7 +1623,7 @@ namespace avmplus
 		return core()->atomToXMLList(getAtomProperty(toplevel()->ToAttributeName(core()->kAsterisk)->atom()));
 	}
 
-	XMLListObject *XMLObject::child (Atom P)
+	XMLListObject *XMLObject::AS3_child (Atom P)
 	{
 		AvmCore *core = this->core();
 
@@ -1642,7 +1642,7 @@ namespace avmplus
 		return core->atomToXMLList(getAtomProperty(P));
 	}
 
-	int XMLObject::childIndex()
+	int XMLObject::AS3_childIndex()
 	{
 		if ((m_node->getParent() == NULL) || (getClass() == E4XNode::kAttribute))
 			return -1;
@@ -1667,13 +1667,13 @@ namespace avmplus
 		return -1;
 	}
 
-	XMLListObject *XMLObject::children ()
+	XMLListObject *XMLObject::AS3_children ()
 	{
 		return core()->atomToXMLList(getStringProperty(core()->kAsterisk));
 	}
 
 	// E4X 13.4.4.8, pg 75
-	XMLListObject *XMLObject::comments ()
+	XMLListObject *XMLObject::AS3_comments ()
 	{
 		AvmCore *core = this->core();
 
@@ -1693,7 +1693,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.10, pg 75
-	bool XMLObject::contains (Atom value)
+	bool XMLObject::AS3_contains (Atom value)
 	{
 		AvmCore *core = this->core();
 
@@ -1716,13 +1716,13 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.11, pg 76
-	XMLObject *XMLObject::copy ()
+	XMLObject *XMLObject::AS3_copy ()
 	{
 		return _deepCopy ();
 	}
 
 	// E4X 13.4.4.13, pg 76
-	XMLListObject *XMLObject::elements (Atom name) // name defaults to '*'
+	XMLListObject *XMLObject::AS3_elements (Atom name) // name defaults to '*'
 	{
 		AvmCore *core = this->core();
 		Multiname m;
@@ -1754,7 +1754,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.14, page 77
-	bool XMLObject::hasOwnProperty (Atom P)
+	bool XMLObject::XML_AS3_hasOwnProperty (Atom P)
 	{
 		if (hasAtomProperty(P))
 			return true;
@@ -1766,7 +1766,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.15, page 77
-	bool XMLObject::hasComplexContent ()
+	bool XMLObject::AS3_hasComplexContent ()
 	{
 		if (m_node->getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
 			return false;
@@ -1785,7 +1785,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.16, page 77
-	bool XMLObject::hasSimpleContent ()
+	bool XMLObject::AS3_hasSimpleContent ()
 	{
 		if (m_node->getClass() & (E4XNode::kComment | E4XNode::kProcessingInstruction))
 			return false;
@@ -1805,7 +1805,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.17, page 78
-	ArrayObject *XMLObject::inScopeNamespaces ()
+	ArrayObject *XMLObject::AS3_inScopeNamespaces ()
 	{
 		AvmCore *core = this->core();
 		// step 2
@@ -1832,7 +1832,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.18, page 78
-	Atom XMLObject::insertChildAfter (Atom child1, Atom child2)
+	Atom XMLObject::AS3_insertChildAfter (Atom child1, Atom child2)
 	{
 		AvmCore *core = this->core();
 		Toplevel *toplevel = this->toplevel();
@@ -1892,7 +1892,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.19, page 79
-	Atom XMLObject::insertChildBefore (Atom child1, Atom child2)
+	Atom XMLObject::AS3_insertChildBefore (Atom child1, Atom child2)
 	{
 		AvmCore *core = this->core();
 		Toplevel *toplevel = this->toplevel();
@@ -1952,7 +1952,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.21, page 80
-	Atom XMLObject::localName ()
+	Atom XMLObject::AS3_localName ()
 	{
 		Multiname m;
 		if (m_node->getQName(core(), &m) == 0)
@@ -1966,7 +1966,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.22, page 80
-	Atom XMLObject::name ()
+	Atom XMLObject::AS3_name ()
 	{
 		AvmCore *core = this->core();
 		Multiname m;
@@ -1977,7 +1977,7 @@ namespace avmplus
 	}
 
 	// E4X 13.4.4.23, page 80
-	Atom XMLObject::getNamespace (Atom p_prefix, int argc) // prefix is optional
+	Atom XMLObject::_namespace (Atom p_prefix, int argc) // prefix is optional
 	{
 		AvmAssert(argc == 0 || argc == 1);
 
@@ -2022,7 +2022,7 @@ namespace avmplus
 	}
 
 	// 13.4.4.24, pg 80-81
-	ArrayObject *XMLObject::namespaceDeclarations ()
+	ArrayObject *XMLObject::AS3_namespaceDeclarations ()
 	{
 		AvmCore *core = this->core();
 		ArrayObject *a = toplevel()->arrayClass->newArray();
@@ -2088,7 +2088,7 @@ namespace avmplus
 		return a;
 	}
 
-	String *XMLObject::nodeKind () const
+	String *XMLObject::AS3_nodeKind () const
 	{
 		switch (m_node->getClass())
 		{
@@ -2110,7 +2110,7 @@ namespace avmplus
 		}
 	}
 
-	XMLObject *XMLObject::normalize ()
+	XMLObject *XMLObject::AS3_normalize ()
 	{
 		AvmCore* core = this->core();
 
@@ -2176,7 +2176,7 @@ namespace avmplus
 		return this;
 	}
 
-	Atom XMLObject::parent ()
+	Atom XMLObject::AS3_parent ()
 	{
 		if (m_node->getParent())
 			return (new (core()->GetGC()) XMLObject (toplevel()->xmlClass(), m_node->getParent()))->atom();
@@ -2184,7 +2184,7 @@ namespace avmplus
 			return undefinedAtom;
 	}
 
-	XMLListObject *XMLObject::processingInstructions (Atom name) // name defaults to '*'
+	XMLListObject *XMLObject::AS3_processingInstructions (Atom name) // name defaults to '*'
 	{
 		AvmCore *core = this->core();
 
@@ -2217,7 +2217,7 @@ namespace avmplus
 		return xl;
 	}
 
-	XMLObject *XMLObject::prependChild (Atom value)
+	XMLObject *XMLObject::AS3_prependChild (Atom value)
 	{
 		AvmCore *core = this->core();
 		Toplevel *toplevel = this->toplevel();
@@ -2244,7 +2244,7 @@ namespace avmplus
 		return this;
 	}
 
-	bool XMLObject::xmlPropertyIsEnumerable(Atom P)	// NOT virtual, not an override
+	bool XMLObject::XML_AS3_propertyIsEnumerable(Atom P)	// NOT virtual, not an override
 	{
 		AvmCore *core = this->core();
 		if (core->intern(P) == core->internString (core->newString("0")))
@@ -2254,7 +2254,7 @@ namespace avmplus
 	}
 
 	// 13.4.4.31, pg 83
-	XMLObject *XMLObject::removeNamespace (Atom nsAtom)
+	XMLObject *XMLObject::AS3_removeNamespace (Atom nsAtom)
 	{
 		AvmCore *core = this->core();
 		if (getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kProcessingInstruction | E4XNode::kAttribute | E4XNode::kCDATA))
@@ -2308,7 +2308,7 @@ namespace avmplus
 		return this;
 	}
 
-	XMLObject *XMLObject::replace (Atom P, Atom value)
+	XMLObject *XMLObject::AS3_replace (Atom P, Atom value)
 	{
 		AvmCore *core = this->core();
 		Toplevel *toplevel = this->toplevel();
@@ -2390,13 +2390,13 @@ namespace avmplus
 		return this;
 	}
 
-	XMLObject *XMLObject::setChildren (Atom value)
+	XMLObject *XMLObject::AS3_setChildren (Atom value)
 	{
 		setStringProperty(core()->kAsterisk, value);
 		return this;
 	}
 
-	void XMLObject::setLocalName (Atom name)
+	void XMLObject::AS3_setLocalName (Atom name)
 	{
 		if (m_node->getClass() & (E4XNode::kText | E4XNode::kComment | E4XNode::kCDATA))
 			return;
@@ -2407,7 +2407,7 @@ namespace avmplus
 		Stringp newname;
 		if (qn)
 		{
-			newname = qn->getLocalName();
+			newname = qn->get_localName();
 		}
 		else
 		{
@@ -2432,7 +2432,7 @@ namespace avmplus
 		return;
 	}
 
-	void XMLObject::setName (Atom name)
+	void XMLObject::AS3_setName (Atom name)
 	{
 		AvmCore *core = this->core();
 
@@ -2442,15 +2442,15 @@ namespace avmplus
 		if (core->isQName (name))
 		{
 			QNameObject *q  = core->atomToQName (name);
-			if (AvmCore::isNull(q->getURI()))
+			if (AvmCore::isNull(q->get_uri()))
 			{
-				name = q->getLocalName()->atom();
+				name = q->get_localName()->atom();
 			}
 		}
 
 		QNameObject *n = new (core->GetGC(), toplevel()->qnameClass()->ivtable()->getExtraSize()) QNameObject(toplevel()->qnameClass(), name); 
 
-		Stringp s = n->getLocalName();
+		Stringp s = n->get_localName();
 		if (!core->isXMLName (s->atom()))
 			toplevel()->throwTypeError(kXMLInvalidName, s);
 
@@ -2459,7 +2459,7 @@ namespace avmplus
 		{
 			if (m_node->getClass() == E4XNode::kProcessingInstruction)
 			{
-				m_node->setQName (core, n->getLocalName(), core->publicNamespace);
+				m_node->setQName (core, n->get_localName(), core->publicNamespace);
 			}
 			else // only for attribute and element nodes
 			{
@@ -2468,7 +2468,7 @@ namespace avmplus
 				m_node->setQName (core, &m2);
 
 				// ISNS changes
-				if (n->getURI() != core->kEmptyString->atom())
+				if (n->get_uri() != core->kEmptyString->atom())
 				{
 					m_node->getQName(core, &m); // get our new multiname
 
@@ -2488,7 +2488,7 @@ namespace avmplus
 		return;
 	}
 
-	void XMLObject::setNamespace (Atom ns)
+	void XMLObject::AS3_setNamespace (Atom ns)
 	{
 		AvmCore *core = this->core();
 
@@ -2517,7 +2517,7 @@ namespace avmplus
 		return;
 	}
 
-	XMLListObject *XMLObject::text ()
+	XMLListObject *XMLObject::AS3_text ()
 	{
 		XMLListObject *l = new (gc()) XMLListObject(toplevel()->xmlListClass(), this->atom());
 
@@ -2570,16 +2570,12 @@ namespace avmplus
 		}
 	}
 
-	Stringp XMLObject::toStringMethod()
+	Stringp XMLObject::AS3_toString()
 	{
-		// This is a non-virtual version of toString.
-		// This method is needed because pointer->method in Codewarrior
-		// is different depending on wheher the method is virtual or not,
-		// causing problems with NATIVE_METHOD.
         return core()->atomToString(toString());
 	}
 
-	String *XMLObject::toXMLString ()
+	String *XMLObject::AS3_toXMLString ()
 	{
 		AtomArray *AncestorNamespaces = new (MMgc::GC::GetGC(this)) AtomArray();
 		StringBuffer s(core());
@@ -2644,7 +2640,7 @@ namespace avmplus
 		return m_node->getQName(core(), m); 
 	}
 
-	void XMLObject::setNotification(ScriptObject* f)
+	void XMLObject::AS3_setNotification(ScriptObject* f)
 	{
 		AvmCore* core  = this->core();
 
@@ -2655,7 +2651,7 @@ namespace avmplus
 			m_node->setNotification(core, f);
 	}
 
-	ScriptObject* XMLObject::getNotification()
+	ScriptObject* XMLObject::AS3_notification()
 	{
 		return m_node->getNotification();
 	}
@@ -2974,7 +2970,7 @@ namespace avmplus
 		}
 	}
 
-	Stringp QNameObject::getLocalName() const
+	Stringp QNameObject::get_localName() const
 	{
 		if (this->m_mn.isAnyName())
 			return core()->kAsterisk;
@@ -2982,7 +2978,7 @@ namespace avmplus
 		return m_mn.getName();
 	}
 
-	Atom QNameObject::getURI() const
+	Atom QNameObject::get_uri() const
 	{
 		if (m_mn.isAnyNamespace())
 		{
@@ -3044,9 +3040,9 @@ namespace avmplus
 		AvmAssert(index > 0);
 		// first return uri then localName
 		if (index == 1)
-			return this->getLocalName()->atom();
+			return this->get_localName()->atom();
 		else if (index == 2)
-			return this->getURI();
+			return this->get_uri();
 		else
 			return nullStringAtom;
 	}

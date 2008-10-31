@@ -142,8 +142,8 @@ namespace avmshell
 		String* _toString();
 
 		// renamed to avoid preprocessor conflict with mozilla's zlib, which #define's compress and uncompress
-		void zlib_compress();
-		void zlib_uncompress();
+		void compress();
+		void uncompress();
 
 		void writeBoolean(bool value);
 		void writeByte(int value);
@@ -167,9 +167,12 @@ namespace avmshell
 		String* readUTF();
 		String* readUTFBytes(uint32 length);		
 		
-		int available();
-		int getFilePointer();
-		void seek(int offset);
+		int get_bytesAvailable();
+		int get_position();
+		void set_position(int offset);
+		inline int available() { return get_bytesAvailable(); }
+		inline int getFilePointer() { return get_position(); }
+		inline void seek(int offset) { set_position(offset); }
 
 		uint32 get_length();
 		void set_length(uint32 value);
@@ -209,8 +212,6 @@ namespace avmshell
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
 		ByteArrayObject *readFile(Stringp filename);
-
-		DECLARE_NATIVE_MAP(ByteArrayClass)
     };
 }
 

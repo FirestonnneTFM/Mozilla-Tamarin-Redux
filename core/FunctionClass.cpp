@@ -41,14 +41,6 @@
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(FunctionClass)
-		NATIVE_METHOD(Function_prototype_get, ClassClosure::get_prototype)
-		NATIVE_METHOD(Function_prototype_set, ClassClosure::set_prototype)
-		NATIVE_METHOD(Function_AS3_call, ScriptObject::function_call)
-		NATIVE_METHOD(Function_AS3_apply, ScriptObject::function_apply)
-		NATIVE_METHOD(Function_length_get, ClassClosure::get_length)
-	END_NATIVE_MAP()
-
 	FunctionClass::FunctionClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
@@ -108,4 +100,39 @@ namespace avmplus
 		return (ClassClosure*)AvmCore::atomToScriptObject(f->coerceEnter(this->atom()));
 	}
 
+	/**
+     * Function.prototype.call()
+     */
+	Atom FunctionObject::AS3_call(Atom thisArg,
+							 Atom *argv,
+							 int argc)
+	{
+		if (argc > 0) 
+			return call_this_aa(thisArg, argc, argv);
+		else
+			return call_this(thisArg);
+	}
+
+	/**
+     * Function.prototype.apply()
+     */
+	Atom FunctionObject::AS3_apply(Atom thisArg, Atom argArray)
+	{
+		// when argArray == undefined or null, same as not being there at all
+		// see Function/e15_3_4_3_1.as 
+	
+		if (!AvmCore::isNullOrUndefined(argArray))
+		{
+			AvmCore* core = this->core();
+
+			if (!core->istype(argArray, ARRAY_TYPE))
+				toplevel()->throwTypeError(kApplyError);
+
+			return call_this_a(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
+			
+		}
+		else
+			return call_this(thisArg);
+	}
+ 
 }

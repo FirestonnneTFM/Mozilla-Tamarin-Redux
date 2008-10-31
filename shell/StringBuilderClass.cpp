@@ -39,28 +39,7 @@
 #include "avmshell.h"
 
 namespace avmshell
-{
-	BEGIN_NATIVE_MAP(StringBuilderClass)
-		NATIVE_METHOD(avmplus_StringBuilder_append, StringBuilderObject::append)
-		NATIVE_METHOD(avmplus_StringBuilder_capacity_get, StringBuilderObject::get_capacity)
-		NATIVE_METHOD(avmplus_StringBuilder_charAt, StringBuilderObject::charAt)
-		NATIVE_METHOD(avmplus_StringBuilder_charCodeAt, StringBuilderObject::charCodeAt)
-		NATIVE_METHOD(avmplus_StringBuilder_ensureCapacity, StringBuilderObject::ensureCapacity)
-		NATIVE_METHOD(avmplus_StringBuilder_indexOf, StringBuilderObject::indexOf)
-		NATIVE_METHOD(avmplus_StringBuilder_insert, StringBuilderObject::insert)
-		NATIVE_METHOD(avmplus_StringBuilder_lastIndexOf, StringBuilderObject::lastIndexOf)
-		NATIVE_METHOD(avmplus_StringBuilder_length_get, StringBuilderObject::get_length)
-		NATIVE_METHOD(avmplus_StringBuilder_length_set, StringBuilderObject::set_length)
-		NATIVE_METHOD(avmplus_StringBuilder_remove, StringBuilderObject::remove)
-		NATIVE_METHOD(avmplus_StringBuilder_removeCharAt, StringBuilderObject::removeCharAt)
-		NATIVE_METHOD(avmplus_StringBuilder_replace, StringBuilderObject::replace)
-		NATIVE_METHOD(avmplus_StringBuilder_reverse, StringBuilderObject::reverse)
-		NATIVE_METHOD(avmplus_StringBuilder_setCharAt, StringBuilderObject::setCharAt)
-		NATIVE_METHOD(avmplus_StringBuilder_substring, StringBuilderObject::substring)
-		NATIVE_METHOD(avmplus_StringBuilder_toString, StringBuilderObject::_toString)
-		NATIVE_METHOD(avmplus_StringBuilder_trimToSize, StringBuilderObject::trimToSize)
-	END_NATIVE_MAP()
-	
+{	
 	StringBuilderObject::StringBuilderObject(VTable *vtable, ScriptObject *delegate)
 		: ScriptObject(vtable, delegate)
 	{

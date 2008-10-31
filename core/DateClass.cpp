@@ -41,51 +41,6 @@
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(DateClass)
-		NATIVE_METHOD(Date_parse,   DateClass::parse)
-		NATIVE_METHOD(Date_UTC,     DateClass::UTC)
-		NATIVE_METHOD(Date_private__toString, DateObject::dateToString)
-		NATIVE_METHOD(Date_AS3_valueOf, DateObject::valueOf)
-		NATIVE_METHOD(Date_private__setTime, DateObject::setTime)
-		NATIVE_METHOD(Date_private__get, DateObject::get)
-
-		NATIVE_METHOD1(Date_AS3_getUTCFullYear, DateObject::get, Date::kUTCFullYear)
-		NATIVE_METHOD1(Date_AS3_getUTCMonth, DateObject::get, Date::kUTCMonth)
-		NATIVE_METHOD1(Date_AS3_getUTCDate, DateObject::get, Date::kUTCDate)
-		NATIVE_METHOD1(Date_AS3_getUTCDay, DateObject::get, Date::kUTCDay)
-		NATIVE_METHOD1(Date_AS3_getUTCHours, DateObject::get, Date::kUTCHours)
-		NATIVE_METHOD1(Date_AS3_getUTCMinutes, DateObject::get, Date::kUTCMinutes)
-		NATIVE_METHOD1(Date_AS3_getUTCSeconds, DateObject::get, Date::kUTCSeconds)
-		NATIVE_METHOD1(Date_AS3_getUTCMilliseconds, DateObject::get, Date::kUTCMilliseconds)
-		NATIVE_METHOD1(Date_AS3_getFullYear, DateObject::get, Date::kFullYear)
-		NATIVE_METHOD1(Date_AS3_getMonth, DateObject::get, Date::kMonth)
-		NATIVE_METHOD1(Date_AS3_getDate, DateObject::get, Date::kDate)
-		NATIVE_METHOD1(Date_AS3_getDay, DateObject::get, Date::kDay)
-		NATIVE_METHOD1(Date_AS3_getHours, DateObject::get, Date::kHours)
-		NATIVE_METHOD1(Date_AS3_getMinutes, DateObject::get, Date::kMinutes)
-		NATIVE_METHOD1(Date_AS3_getSeconds, DateObject::get, Date::kSeconds)
-		NATIVE_METHOD1(Date_AS3_getMilliseconds, DateObject::get, Date::kMilliseconds)
-		NATIVE_METHOD1(Date_AS3_getTimezoneOffset, DateObject::get, Date::kTimezoneOffset)
-		NATIVE_METHOD1(Date_AS3_getTime, DateObject::get, Date::kTime)
-
-		NATIVE_METHOD1(Date_private__setFullYear, DateObject::set, 1)
-		NATIVE_METHOD1(Date_private__setMonth, DateObject::set, 2)
-		NATIVE_METHOD1(Date_private__setDate, DateObject::set, 3)
-		NATIVE_METHOD1(Date_private__setHours, DateObject::set, 4)
-		NATIVE_METHOD1(Date_private__setMinutes, DateObject::set, 5)
-		NATIVE_METHOD1(Date_private__setSeconds, DateObject::set, 6)
-		NATIVE_METHOD1(Date_private__setMilliseconds, DateObject::set, 7)
-
-		NATIVE_METHOD1(Date_private__setUTCFullYear, DateObject::set, -1)
-		NATIVE_METHOD1(Date_private__setUTCMonth, DateObject::set, -2)
-		NATIVE_METHOD1(Date_private__setUTCDate, DateObject::set, -3)
-		NATIVE_METHOD1(Date_private__setUTCHours, DateObject::set, -4)
-		NATIVE_METHOD1(Date_private__setUTCMinutes, DateObject::set, -5)
-		NATIVE_METHOD1(Date_private__setUTCSeconds, DateObject::set, -6)
-		NATIVE_METHOD1(Date_private__setUTCMilliseconds, DateObject::set, -7)
-
-	END_NATIVE_MAP()
-
 	DateClass::DateClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{

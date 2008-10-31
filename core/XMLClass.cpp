@@ -41,59 +41,6 @@
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(XMLClass)
-		NATIVE_METHOD(XML_ignoreComments_get, XMLClass::getIgnoreComments)
-		NATIVE_METHOD(XML_ignoreComments_set, XMLClass::setIgnoreComments)
-		NATIVE_METHOD(XML_ignoreProcessingInstructions_get, XMLClass::getIgnoreProcessingInstructions)
-		NATIVE_METHOD(XML_ignoreProcessingInstructions_set, XMLClass::setIgnoreProcessingInstructions)
-		NATIVE_METHOD(XML_ignoreWhitespace_get, XMLClass::getIgnoreWhitespace)
-		NATIVE_METHOD(XML_ignoreWhitespace_set, XMLClass::setIgnoreWhitespace)
-		NATIVE_METHOD(XML_prettyPrinting_get, XMLClass::getPrettyPrinting)
-		NATIVE_METHOD(XML_prettyPrinting_set, XMLClass::setPrettyPrinting)
-		NATIVE_METHOD(XML_prettyIndent_get, XMLClass::getPrettyIndent)
-		NATIVE_METHOD(XML_prettyIndent_set, XMLClass::setPrettyIndent)
-
-		NATIVE_METHOD(XML_AS3_addNamespace, XMLObject::addNamespace)
-		NATIVE_METHOD(XML_AS3_appendChild, XMLObject::appendChild)
-		NATIVE_METHOD(XML_AS3_attribute, XMLObject::attribute)
-		NATIVE_METHOD(XML_AS3_attributes, XMLObject::attributes)
-		NATIVE_METHOD(XML_AS3_child, XMLObject::child)
-		NATIVE_METHOD(XML_AS3_childIndex, XMLObject::childIndex)
-		NATIVE_METHOD(XML_AS3_children, XMLObject::children)
-		NATIVE_METHOD(XML_AS3_comments, XMLObject::comments)
-		NATIVE_METHOD(XML_AS3_contains, XMLObject::contains)
-		NATIVE_METHOD(XML_AS3_copy, XMLObject::copy)
-		NATIVE_METHOD(XML_AS3_descendants, XMLObject::descendants)
-		NATIVE_METHOD(XML_AS3_elements, XMLObject::elements)
-		NATIVE_METHOD(XML_AS3_hasOwnProperty, XMLObject::hasOwnProperty)
-		NATIVE_METHOD(XML_AS3_hasComplexContent, XMLObject::hasComplexContent)
-		NATIVE_METHOD(XML_AS3_hasSimpleContent, XMLObject::hasSimpleContent)
-		NATIVE_METHOD(XML_AS3_inScopeNamespaces, XMLObject::inScopeNamespaces)
-		NATIVE_METHOD(XML_AS3_insertChildAfter, XMLObject::insertChildAfter)
-		NATIVE_METHOD(XML_AS3_insertChildBefore, XMLObject::insertChildBefore)
-		NATIVE_METHOD(XML_AS3_localName, XMLObject::localName)
-		NATIVE_METHOD(XML_AS3_name, XMLObject::name)
-		NATIVE_METHOD(XML_private__namespace, XMLObject::getNamespace)
-		NATIVE_METHOD(XML_AS3_namespaceDeclarations, XMLObject::namespaceDeclarations)
-		NATIVE_METHOD(XML_AS3_nodeKind, XMLObject::nodeKind)
-		NATIVE_METHOD(XML_AS3_normalize, XMLObject::normalize)
-		NATIVE_METHOD(XML_AS3_notification, XMLObject::getNotification)
-		NATIVE_METHOD(XML_AS3_parent, XMLObject::parent)
-		NATIVE_METHOD(XML_AS3_processingInstructions, XMLObject::processingInstructions)
-		NATIVE_METHOD(XML_AS3_prependChild, XMLObject::prependChild)
-		NATIVE_METHOD(XML_AS3_propertyIsEnumerable, XMLObject::xmlPropertyIsEnumerable)
-		NATIVE_METHOD(XML_AS3_removeNamespace, XMLObject::removeNamespace)
-		NATIVE_METHOD(XML_AS3_replace, XMLObject::replace)
-		NATIVE_METHOD(XML_AS3_setChildren, XMLObject::setChildren)
-		NATIVE_METHOD(XML_AS3_setLocalName, XMLObject::setLocalName)
-		NATIVE_METHOD(XML_AS3_setName, XMLObject::setName)
-		NATIVE_METHOD(XML_AS3_setNamespace, XMLObject::setNamespace)
-		NATIVE_METHOD(XML_AS3_setNotification, XMLObject::setNotification)
-		NATIVE_METHOD(XML_AS3_text, XMLObject::text)
-		NATIVE_METHOD(XML_AS3_toString, XMLObject::toStringMethod)
-		NATIVE_METHOD(XML_AS3_toXMLString, XMLObject::toXMLString)
-	END_NATIVE_MAP()
-
 	XMLClass::XMLClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
@@ -301,7 +248,7 @@ namespace avmplus
 		}
 	}
 
-	void XMLClass::setIgnoreComments(uint32 ignoreFlag) 
+	void XMLClass::set_ignoreComments(uint32 ignoreFlag) 
 	{ 
 		if (ignoreFlag)
 			m_flags |= kFlagIgnoreComments; 
@@ -309,12 +256,12 @@ namespace avmplus
 			m_flags &= ~kFlagIgnoreComments; 
 	}
 
-	uint32 XMLClass::getIgnoreComments() 
+	uint32 XMLClass::get_ignoreComments() 
 	{ 
 		return ((m_flags & kFlagIgnoreComments) != 0); 
 	}
 
-	void XMLClass::setIgnoreProcessingInstructions(uint32 ignoreFlag)
+	void XMLClass::set_ignoreProcessingInstructions(uint32 ignoreFlag)
 	{ 
 		if (ignoreFlag)
 			m_flags |= kFlagIgnoreProcessingInstructions; 
@@ -322,12 +269,12 @@ namespace avmplus
 			m_flags &= ~kFlagIgnoreProcessingInstructions; 
 	}
 
-	uint32 XMLClass::getIgnoreProcessingInstructions() 
+	uint32 XMLClass::get_ignoreProcessingInstructions() 
 	{ 
 		return ((m_flags & kFlagIgnoreProcessingInstructions) != 0); 
 	}
 
-	void XMLClass::setIgnoreWhitespace(uint32 ignoreFlag)
+	void XMLClass::set_ignoreWhitespace(uint32 ignoreFlag)
 	{ 
 		if (ignoreFlag)
 			m_flags |= kFlagIgnoreWhitespace; 
@@ -335,12 +282,12 @@ namespace avmplus
 			m_flags &= ~kFlagIgnoreWhitespace; 
 	}
 	
-	uint32 XMLClass::getIgnoreWhitespace()
+	uint32 XMLClass::get_ignoreWhitespace()
 	{ 
 		return ((m_flags & kFlagIgnoreWhitespace) != 0); 
 	}
 
-	void XMLClass::setPrettyPrinting(uint32 prettyFlag)
+	void XMLClass::set_prettyPrinting(uint32 prettyFlag)
 	{
 		if (prettyFlag)
 			m_flags |= kFlagPrettyPrinting; 
@@ -348,17 +295,17 @@ namespace avmplus
 			m_flags &= ~kFlagPrettyPrinting; 
 	}
 
-	uint32 XMLClass::getPrettyPrinting()
+	uint32 XMLClass::get_prettyPrinting()
 	{
 		return ((m_flags & kFlagPrettyPrinting) != 0); 
 	}
 
-	void XMLClass::setPrettyIndent(int printVal)
+	void XMLClass::set_prettyIndent(int printVal)
 	{
 		m_prettyIndent = printVal;
 	}
 
-	int XMLClass::getPrettyIndent()
+	int XMLClass::get_prettyIndent()
 	{
 		return m_prettyIndent;
 	}
@@ -366,11 +313,6 @@ namespace avmplus
 	/////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////
-
-	BEGIN_NATIVE_MAP(QNameClass)
-		NATIVE_METHOD(QName_localName_get, QNameObject::getLocalName)
-		NATIVE_METHOD(QName_uri_get, QNameObject::getURI)
-	END_NATIVE_MAP()
 
 	QNameClass::QNameClass(VTable* cvtable)
 		: ClassClosure(cvtable)

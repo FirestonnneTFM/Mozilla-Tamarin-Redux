@@ -44,8 +44,6 @@ namespace avmplus
 	class MethodClosureClass : public ClassClosure
 	{
 	public:
-		DECLARE_NATIVE_MAP(MethodClosureClass)
-
 		MethodClosureClass(VTable* cvtable);
 
 		// Function called as constructor ... not supported from user code
@@ -97,7 +95,7 @@ namespace avmplus
 		// argc is args only, argv[0] = receiver(ignored)
 		Atom construct(int argc, Atom* argv);
 
-		int get_length() const;
+		int MethodClosure_get_length() const;
 		Atom get_savedThis();
 
 		bool isMethodClosure() { return true; }
