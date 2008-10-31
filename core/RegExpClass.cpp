@@ -43,19 +43,6 @@
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(RegExpClass)
-		NATIVE_METHOD(RegExp_source_get, RegExpObject::getSource)
-		NATIVE_METHOD(RegExp_global_get, RegExpObject::isGlobal)
-		NATIVE_METHOD(RegExp_lastIndex_get, RegExpObject::getLastIndex)
-		NATIVE_METHOD(RegExp_lastIndex_set, RegExpObject::setLastIndex)
-		NATIVE_METHOD1(RegExp_ignoreCase_get, RegExpObject::hasOption, PCRE_CASELESS)
-		NATIVE_METHOD1(RegExp_multiline_get, RegExpObject::hasOption, PCRE_MULTILINE)
-		NATIVE_METHOD1(RegExp_dotall_get, RegExpObject::hasOption, PCRE_DOTALL)
-		NATIVE_METHOD1(RegExp_extended_get, RegExpObject::hasOption, PCRE_EXTENDED)
-
-		NATIVE_METHOD(RegExp_AS3_exec, RegExpObject::execSimple)
-	END_NATIVE_MAP()
-
 	// make pcre's allocators use Flash's
 	void *fmalloc(size_t size)
 	{

@@ -41,46 +41,6 @@
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(StringClass)
-		// instance methods
-		NATIVE_METHOD_CAST_FLAGS(String, String_length_get, String::length, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_localeCompare, String::localeCompare, 0)
-
-		NATIVE_METHOD_CAST_FLAGS(String, String_private__indexOf, String::indexOf, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_indexOf, String::indexOfDouble, 0)
-
-		NATIVE_METHOD_CAST_FLAGS(String, String_private__lastIndexOf, String::lastIndexOf, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_lastIndexOf, String::lastIndexOfDouble, 0)
-
-		NATIVE_METHOD_CAST_FLAGS(String, String_private__charAt, String::charAt, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_charAt, String::charAtDouble, 0)
-
-		NATIVE_METHOD_CAST_FLAGS(String, String_private__charCodeAt, String::charCodeAt, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_charCodeAt, String::charCodeAtDouble, 0)
-
-		NATIVE_METHOD_CAST_FLAGS(String, String_private__substring, String::substring, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_substring, String::substringDouble, 0)
-
-		NATIVE_METHOD_CAST_FLAGS(String, String_private__slice, String::slice, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_slice, String::sliceDouble, 0)
-
-		NATIVE_METHOD_CAST_FLAGS(String, String_private__substr, String::substr, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_substr, String::substrDouble, 0)
-
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_toLowerCase, String::toLowerCase, 0)
-		NATIVE_METHOD_CAST_FLAGS(String, String_AS3_toUpperCase, String::toUpperCase, 0)
-
-		// static method (language feature - by design)
-		NATIVE_METHOD(String_AS3_fromCharCode, StringClass::fromCharCode)
-
-		// static methods (require AvmCore *)
-		NATIVE_METHOD(String_private__match, StringClass::match)
-		NATIVE_METHOD(String_private__replace, StringClass::replace)
-		NATIVE_METHOD(String_private__search, StringClass::search)
-		NATIVE_METHOD(String_private__split, StringClass::split)
-
-	END_NATIVE_MAP()
-		
 	StringClass::StringClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
@@ -173,7 +133,7 @@ namespace avmplus
 		return construct(argc, argv);
 	}
 
-	Stringp StringClass::fromCharCode(Atom *argv, int argc)
+	Stringp StringClass::AS3_fromCharCode(Atom *argv, int argc)
 	{
 		AvmCore* core = this->core();
 		Stringp out = new (core->GetGC()) String(argc);
@@ -188,7 +148,7 @@ namespace avmplus
 		return out;
 	}
 
-	ArrayObject *StringClass::match(Stringp in, Atom regexpAtom)
+	ArrayObject* StringClass::_match(Stringp in, Atom regexpAtom)
 	{
 		AvmCore* core = this->core();
 
@@ -205,7 +165,7 @@ namespace avmplus
 		return reObj->match(in);
 	}
 
-	Stringp StringClass::replace(Stringp subject, Atom pattern, Atom replacementAtom)
+	Stringp StringClass::_replace(Stringp subject, Atom pattern, Atom replacementAtom)
 	{
 		AvmCore* core = this->core();
 
@@ -264,7 +224,7 @@ namespace avmplus
 		}
 	}
 
-	int StringClass::search(Stringp in, Atom regexpAtom)
+	int StringClass::_search(Stringp in, Atom regexpAtom)
 	{
 		AvmCore* core = this->core();
 
@@ -280,7 +240,7 @@ namespace avmplus
 		return reObj->search(in);
 	}
 
-	ArrayObject* StringClass::split(Stringp in, Atom delimAtom, uint32 limit)
+	ArrayObject* StringClass::_split(Stringp in, Atom delimAtom, uint32 limit)
     {
 		AvmCore* core = this->core();
 

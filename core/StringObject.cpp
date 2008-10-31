@@ -757,7 +757,7 @@ namespace avmplus
 		return result;
 	}
 
-	Stringp String::toUpperCase()
+	Stringp String::AS3_toUpperCase()
 	{
 		GC* gc = GC::GetGC(this);
 		int len = length();
@@ -806,7 +806,7 @@ namespace avmplus
 		return changed ? out : this;
 	}
 
-	Stringp String::toLowerCase() 
+	Stringp String::AS3_toLowerCase() 
 	{
 		GC* gc = GC::GetGC(this);
 		int len = length();
@@ -855,7 +855,7 @@ namespace avmplus
 		return changed ? out : this;
 	}
 
-	int String::indexOf(Stringp substr, int iStartPos)
+	int String::_indexOf(Stringp substr, int iStartPos)
 	{
 		if(!substr)
 			return -1;
@@ -919,14 +919,14 @@ namespace avmplus
 		return -1;
 	}
 
-	int String::indexOfDouble(Stringp substr, double dStartPos)
+	int String::AS3_indexOf(Stringp substr, double dStartPos)
 	{
 		dStartPos = MathUtils::toInt(dStartPos);
 		int iStartPos = (dStartPos > (double)this->length() ? this->length() : (int)dStartPos);
 		return indexOf (substr, iStartPos);
 	}
 
-	Stringp String::charAt(int iPos)
+	Stringp String::_charAt(int iPos)
 	{
 		GC *gc = GC::GetGC(this);
 		AvmCore *core = (AvmCore *) gc->GetGCContextVariable (MMgc::GC::GCV_AVMCORE);
@@ -948,14 +948,14 @@ namespace avmplus
 		}
 	}
 
-	Stringp String::charAtDouble(double dPos)
+	Stringp String::AS3_charAt(double dPos)
 	{
 		dPos = MathUtils::toInt(dPos);
 		int iPos = (dPos > (double)this->length()) ? this->length() : (int)dPos;
 		return charAt (iPos);
 	}
 
-	double String::charCodeAt(int iPos)
+	double String::_charCodeAt(int iPos)
 	{
 		if (iPos >= 0 && iPos < length())
 			return (*this)[iPos];
@@ -963,7 +963,7 @@ namespace avmplus
 			return MathUtils::nan();
 	}
 
-	double String::charCodeAtDouble(double dPos)
+	double String::AS3_charCodeAt(double dPos)
     {
 		dPos = MathUtils::toInt(dPos);
 		int iPos = (dPos > (double)this->length()) ? this->length() : (int)dPos;
@@ -1029,7 +1029,7 @@ namespace avmplus
 		return true;
 	}
 
-	int String::lastIndexOf(Stringp substr, int iStartPos)
+	int String::_lastIndexOf(Stringp substr, int iStartPos)
 	{
 		int sublen = substr->length();
 		iStartPos = (iStartPos > this->length()) ? this->length() : iStartPos;
@@ -1068,7 +1068,7 @@ namespace avmplus
 		return -1;
 	}
 
-	int String::lastIndexOfDouble(Stringp substr, double dStartPos)
+	int String::AS3_lastIndexOf(Stringp substr, double dStartPos)
 	{
 		if (!MathUtils::isNaN(dStartPos))
 			dStartPos = MathUtils::toInt(dStartPos);
@@ -1078,7 +1078,7 @@ namespace avmplus
 		return lastIndexOf (substr, iStartPos);
 	}
 
-	int String::localeCompare(Stringp other)
+	int String::AS3_localeCompare(Stringp other)
 	{  
 		if ( !other )
         {
@@ -1112,14 +1112,14 @@ namespace avmplus
 		return new (gc, sizeof(wchar)*(numChars+1)) StringBuf();
 	}
 
-	Stringp String::substring(int start, int end)
+	Stringp String::_substring(int start, int end)
     {
 		GC *gc = GC::GetGC(this);
 		NativeObjectHelpers::ClampBInt(start, end, this->length());
 		return new (gc) String(this, start, (end-start));
     }
 
-	Stringp String::substringDouble(double d_start, double d_end)
+	Stringp String::AS3_substring(double d_start, double d_end)
     {
 		GC *gc = GC::GetGC(this);
 		double start = MathUtils::toInt(d_start);
@@ -1128,7 +1128,7 @@ namespace avmplus
 		return new (gc) String(this, (int)start, (int)(end-start));
 	}
 
-	Stringp String::slice(int start, int end)
+	Stringp String::_slice(int start, int end)
     {
 		GC *gc = GC::GetGC(this);
 		int len = this->length();
@@ -1140,7 +1140,7 @@ namespace avmplus
 		return new (gc) String(this, start, end-start);
     }
 
-	Stringp String::sliceDouble(double d_start, double d_end)
+	Stringp String::AS3_slice(double d_start, double d_end)
     {
 		GC *gc = GC::GetGC(this);
 		int len = this->length();
@@ -1152,7 +1152,7 @@ namespace avmplus
 		return new (gc) String(this, start, end-start);
     }
 
-	Stringp String::substr(int start, int end)
+	Stringp String::_substr(int start, int end)
     {
 		GC *gc = GC::GetGC(this);
 		int len = this->length();
@@ -1183,7 +1183,7 @@ namespace avmplus
 		return new (gc) String(this, start, end-start);
     }
 
-	Stringp String::substrDouble(double d_start, double d_end)
+	Stringp String::AS3_substr(double d_start, double d_end)
     {
 		GC *gc = GC::GetGC(this);
 		int len = this->length();

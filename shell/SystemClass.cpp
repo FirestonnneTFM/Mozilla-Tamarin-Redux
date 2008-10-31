@@ -42,23 +42,6 @@
 
 namespace avmshell
 {
-	BEGIN_NATIVE_MAP(SystemClass)
-		NATIVE_METHOD(avmplus_System_exit, SystemClass::exit)
-		NATIVE_METHOD(avmplus_System_exec, SystemClass::exec)
-		NATIVE_METHOD(avmplus_System_getAvmplusVersion, SystemClass::getAvmplusVersion)
-		NATIVE_METHOD(avmplus_System_trace, SystemClass::trace)
-		NATIVE_METHOD(avmplus_System_write, SystemClass::write)
-		NATIVE_METHOD(avmplus_System_debugger, SystemClass::debugger)
-		NATIVE_METHOD(avmplus_System_isDebugger, SystemClass::isDebugger)
-		NATIVE_METHOD(avmplus_System_getTimer, SystemClass::getTimer)
-		NATIVE_METHOD(avmplus_System_readLine, SystemClass::readLine)
-		NATIVE_METHOD(avmplus_System_private_getArgv, SystemClass::getArgv)
-		NATIVE_METHOD(avmplus_System_totalMemory_get, SystemClass::getTotalMemory)
-		NATIVE_METHOD(avmplus_System_freeMemory_get, SystemClass::getFreeMemory)
-		NATIVE_METHOD(avmplus_System_privateMemory_get, SystemClass::getPrivateMemory)
-		NATIVE_METHOD(avmplus_System_ns_example_nstest, SystemClass::nstest)
-	END_NATIVE_MAP()
-					  
 	SystemClass::SystemClass(VTable *cvtable)
 		: ClassClosure(cvtable)
     {
@@ -223,19 +206,19 @@ namespace avmshell
 		return s;
 	}
 
-	double SystemClass::getTotalMemory()
+	double SystemClass::get_totalMemory()
 	{
 		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
 		return double(gcheap->GetUsedHeapSize() * MMgc::GCHeap::kBlockSize);
 	}
 
-	double SystemClass::getFreeMemory()
+	double SystemClass::get_freeMemory()
 	{
 		MMgc::GCHeap* gcheap = core()->GetGC()->GetGCHeap();
 		return double(gcheap->GetFreeHeapSize() * MMgc::GCHeap::kBlockSize);
 	}
 	
-	double SystemClass::getPrivateMemory()
+	double SystemClass::get_privateMemory()
 	{
 		return double(MMgc::GCHeap::GetPrivateBytes() * MMgc::GCHeap::kBlockSize);
 	}

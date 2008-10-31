@@ -71,8 +71,11 @@ namespace avmplus
 		bool isSimpleDense() const { return (m_denseArr.getLength() == m_length); };
 		uint32 getDenseLength() const { return m_denseArr.getLength(); }
 
-		uint32 getLength() const { return (m_length); }
-		void setLength(uint32 newLength);
+		uint32_t get_length() const { return m_length; }
+		void set_length(uint32 newLength);
+
+		inline uint32 getLength() const { return get_length(); }
+		inline void setLength(uint32 newLength) { set_length(newLength); }
 
 		Atom getAtomProperty(Atom name) const;
 		void setAtomProperty(Atom name, Atom value);
@@ -113,9 +116,13 @@ namespace avmplus
 		int nextNameIndex(int index);
 
 		// native methods
-		Atom pop(); // pop(...rest)
-		uint32 push(Atom *args, int argc); // push(...args):uint
-		uint32 unshift(Atom *args, int argc); // unshift(...args):
+		Atom AS3_pop(); // pop(...rest)
+		uint32 AS3_push(Atom *args, int argc); // push(...args):uint
+		uint32 AS3_unshift(Atom *args, int argc); // unshift(...args):
+
+		inline Atom pop() { return AS3_pop(); }
+		inline uint32 push(Atom *args, int argc) { return AS3_push(args, argc); }
+		inline uint32 unshift(Atom *args, int argc) { return AS3_unshift(args, argc); }
 
 		void checkForSparseToDenseConversion();
 

@@ -2,9 +2,9 @@
 #define AVMTHUNK_VERSION 3
 const uint32_t shell_toplevel_abc_class_count = 16;
 const uint32_t shell_toplevel_abc_script_count = 9;
-const uint32_t shell_toplevel_abc_method_count = 158;
-const uint32_t shell_toplevel_abc_length = 6321;
-extern const uint8_t shell_toplevel_abc_data[6321];
+const uint32_t shell_toplevel_abc_method_count = 157;
+const uint32_t shell_toplevel_abc_length = 6408;
+extern const uint8_t shell_toplevel_abc_data[6408];
 AVMTHUNK_DECLARE_NATIVE_INITIALIZER(shell_toplevel, shell_toplevel)
 /* classes */
 const uint32_t abcclass_avmplus_ITest = 0;
@@ -142,7 +142,6 @@ const uint32_t avmplus_JObject_toArray = 151;
 const uint32_t avmplus_JObject_constructorSignature = 152;
 const uint32_t avmplus_JObject_methodSignature = 153;
 const uint32_t avmplus_JObject_fieldSignature = 154;
-const uint32_t avmplus_JObject_toString = 155;
 
 /* thunks (42 unique) */
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -206,8 +205,6 @@ extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_o_thunk(Av
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 #define avmplus_System_readLine_thunk  shell_toplevel_s2a_o_thunk
 #define avmplus_System_readLine_thunkc shell_toplevel_s2a_o_thunkc
-#define avmplus_JObject_toString_thunk  shell_toplevel_s2a_o_thunk
-#define avmplus_JObject_toString_thunkc shell_toplevel_s2a_o_thunkc
 #define flash_utils_ByteArray_toString_thunk  shell_toplevel_s2a_o_thunk
 #define flash_utils_ByteArray_toString_thunkc shell_toplevel_s2a_o_thunkc
 #define flash_utils_ByteArray_endian_get_thunk  shell_toplevel_s2a_o_thunk

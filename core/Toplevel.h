@@ -311,8 +311,6 @@ namespace avmplus
 		// For E4X
 		bool isXMLName(Atom v);
 
-		DECLARE_NATIVE_SCRIPT(Toplevel)
-
         ClassClosure* getBuiltinClass(int class_id) const
         {
             return builtinClasses[class_id] ? builtinClasses[class_id] : const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);

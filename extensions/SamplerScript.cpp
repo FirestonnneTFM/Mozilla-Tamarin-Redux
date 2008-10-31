@@ -50,13 +50,6 @@ using namespace MMgc;
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(TraceClass)
-		NATIVE_METHOD(flash_trace_Trace_setLevel,	 TraceClass::setLevel)
-		NATIVE_METHOD(flash_trace_Trace_getLevel,	 TraceClass::getLevel)
-		NATIVE_METHOD(flash_trace_Trace_setListener, TraceClass::setListener)
-		NATIVE_METHOD(flash_trace_Trace_getListener, TraceClass::getListener)
-	END_NATIVE_MAP()
-
 	TraceClass::TraceClass(VTable *cvtable)
 		: ClassClosure(cvtable)
     {
@@ -132,30 +125,6 @@ namespace avmplus
 	}
 
 	using namespace MMgc;
-
-	BEGIN_NATIVE_MAP(SamplerScript)
-		NATIVE_METHOD(flash_sampler_getSize, SamplerScript::getSize)
-		NATIVE_METHOD(flash_sampler_getMemberNames, SamplerScript::getMemberNames)
-		NATIVE_METHOD(flash_sampler_getSamples, SamplerScript::getSamples)
-		NATIVE_METHOD(flash_sampler_getSampleCount, SamplerScript::getSampleCount)
-		NATIVE_METHOD(flash_sampler_startSampling, SamplerScript::startSampling)
-		NATIVE_METHOD(flash_sampler_stopSampling, SamplerScript::stopSampling)
-		NATIVE_METHOD(flash_sampler_clearSamples, SamplerScript::clearSamples)
-		NATIVE_METHOD(flash_sampler_pauseSampling, SamplerScript::pauseSampling)
-		NATIVE_METHOD(flash_sampler__getInvocationCount, SamplerScript::getInvocationCount)
-		NATIVE_METHOD(flash_sampler_isGetterSetter, SamplerScript::isGetterSetter)
-		NATIVE_METHOD(flash_sampler_sampleInternalAllocs, SamplerScript::sampleInternalAllocs)
-		NATIVE_METHOD(flash_sampler_setSamplerCallback, SamplerScript::setCallback)
-	END_NATIVE_MAP()
-	
-	BEGIN_NATIVE_MAP(SampleClass)
-	END_NATIVE_MAP()
-
-	BEGIN_NATIVE_MAP(NewObjectSampleClass)
-		NATIVE_METHOD(flash_sampler_NewObjectSample_object_get,        NewObjectSampleObject::object_get)
-		NATIVE_METHOD(flash_sampler_NewObjectSample_size_get,        NewObjectSampleObject::size_get)
-	END_NATIVE_MAP()
-
 
 #ifdef FEATURE_SAMPLER
 
@@ -478,7 +447,7 @@ namespace avmplus
 		return undefinedAtom;
 	}
 
-	double get_size(Atom a)
+	static double _get_size(Atom a)
 	{
 #ifdef DEBUGGER
 		switch(a&7)
@@ -501,7 +470,7 @@ namespace avmplus
 
 	double SamplerScript::getSize(Atom a)
 	{
-		return get_size(a);
+		return _get_size(a);
 	}
 
 	void SamplerScript::startSampling() 
@@ -540,7 +509,7 @@ namespace avmplus
 		core()->sampler()->sampleInternalAllocs(b);
 	}
 
-	void SamplerScript::setCallback(ScriptObject *callback)
+	void SamplerScript::setSamplerCallback(ScriptObject *callback)
 	{
 		if(!trusted())
 			return;
@@ -548,7 +517,7 @@ namespace avmplus
 
 	}
 
-	double SamplerScript::getInvocationCount(Atom a, QNameObject* qname, uint32 type) 
+	double SamplerScript::_getInvocationCount(Atom a, QNameObject* qname, uint32 type) 
 	{
 		if (!trusted())
 			return -1;
@@ -693,7 +662,7 @@ namespace avmplus
 	{
 	}
 
-	double get_size(Atom a)
+	static double _get_size(Atom a)
 	{
 		(void)a;
 		return 0;
@@ -711,7 +680,7 @@ namespace avmplus
 		: size(0), SampleObject(vtable, delegate) 
 	{}
 
-	Atom NewObjectSampleObject::object_get()
+	Atom NewObjectSampleObject::get_object()
 	{
 		if(obj) {
 			Atom a = obj->toAtom();
@@ -721,12 +690,12 @@ namespace avmplus
 		return undefinedAtom;
 	}
 
-	double NewObjectSampleObject::size_get()
+	double NewObjectSampleObject::get_size()
 	{
 		double s = (double)size;
 		if( !size ) {
-			Atom a = object_get();
-			s = get_size(a);
+			Atom a = get_object();
+			s = _get_size(a);
 		}
 		return s;
 	}

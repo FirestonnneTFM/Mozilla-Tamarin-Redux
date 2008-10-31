@@ -697,7 +697,7 @@ namespace avmplus
 	}
 
 	// E4X 9.2.1.8, pg 25
-	XMLListObject *XMLListObject::descendants (Atom P)
+	XMLListObject *XMLListObject::AS3_descendants (Atom P)
 	{
 		Multiname m;
 		toplevel()->ToXMLName (P, m);
@@ -891,7 +891,7 @@ namespace avmplus
 	//////////////////////////////////////////////////////////////////////
 
 	// E4X 13.5.4.2, pg 88
-	XMLListObject *XMLListObject::attribute (Atom arg)
+	XMLListObject *XMLListObject::AS3_attribute (Atom arg)
 	{
 		// name= ToAttributeName (attributeName);
 		// return [[get]](name)
@@ -900,13 +900,13 @@ namespace avmplus
 	}
 
 	// E4X 13.5.4.3, pg 88
-	XMLListObject *XMLListObject::attributes ()
+	XMLListObject *XMLListObject::AS3_attributes ()
 	{
 		return core()->atomToXMLList(getAtomProperty(toplevel()->ToAttributeName(core()->kAsterisk)->atom()));
 	}
 
 	// E4X 13.5.4.4, pg 88
-	XMLListObject *XMLListObject::child (Atom propertyName)
+	XMLListObject *XMLListObject::AS3_child (Atom propertyName)
 	{
 		AvmCore *core = this->core();
 
@@ -925,12 +925,12 @@ namespace avmplus
 		return m;
 	}
 
-	XMLListObject *XMLListObject::children ()
+	XMLListObject *XMLListObject::AS3_children ()
 	{
 		return core()->atomToXMLList(getStringProperty(core()->kAsterisk));
 	}
 
-	XMLListObject *XMLListObject::comments ()
+	XMLListObject *XMLListObject::AS3_comments ()
 	{
 		AvmCore *core = this->core();
 
@@ -952,7 +952,7 @@ namespace avmplus
 		return m;
 	}
 
-	bool XMLListObject::contains (Atom value)
+	bool XMLListObject::AS3_contains (Atom value)
 	{
 		AvmCore *core = this->core();;
 		for (uint32 i = 0; i < _length(); i++)
@@ -965,13 +965,13 @@ namespace avmplus
 		return false;
 	}
 
-	XMLListObject *XMLListObject::copy ()
+	XMLListObject *XMLListObject::AS3_copy ()
 	{
 		return _deepCopy();
 	}
 
 	// E4X 13.5.4.10, pg 90
-	XMLListObject *XMLListObject::elements (Atom name) // name defaults to '*'
+	XMLListObject *XMLListObject::AS3_elements (Atom name) // name defaults to '*'
 	{
 		AvmCore *core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -998,7 +998,7 @@ namespace avmplus
 	}
 
 	// E4X 13.5.4.11, pg 90
-	bool XMLListObject::hasOwnProperty (Atom P)
+	bool XMLListObject::XMLList_AS3_hasOwnProperty (Atom P)
 	{
 		if (hasAtomProperty(P))
 			return true;
@@ -1010,7 +1010,7 @@ namespace avmplus
 	}
 
 	// E4X 13.5.4.12, pg 90
-	bool XMLListObject::hasComplexContent ()
+	bool XMLListObject::AS3_hasComplexContent ()
 	{
 		if (_length() == 0)
 			return false;
@@ -1034,7 +1034,7 @@ namespace avmplus
 	}
 
 	// E4X 13.5.4.13, pg 91
-	bool XMLListObject::hasSimpleContent ()
+	bool XMLListObject::AS3_hasSimpleContent ()
 	{
 		if (!_length())
 		{
@@ -1067,12 +1067,12 @@ namespace avmplus
 		return true;
 	}
 
-	uint32 XMLListObject::AS_based_length () const
+	uint32 XMLListObject::AS3_length() const
 	{
 		return _length();
 	}
 
-	XMLListObject *XMLListObject::normalize ()
+	XMLListObject *XMLListObject::AS3_normalize ()
 	{
 		AvmCore *core = this->core();
 
@@ -1110,7 +1110,7 @@ namespace avmplus
 		return this;
 	}
 
-	Atom XMLListObject::parent ()
+	Atom XMLListObject::AS3_parent ()
 	{
 		if (!_length())
 			return undefinedAtom;
@@ -1129,7 +1129,7 @@ namespace avmplus
 			return undefinedAtom;
 	}
 
-	XMLListObject *XMLListObject::processingInstructions (Atom name) // name defaults to '*'
+	XMLListObject *XMLListObject::AS3_processingInstructions (Atom name) // name defaults to '*'
 	{
 		AvmCore *core = this->core();
 		XMLListObject *m = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass(), this->atom());
@@ -1150,7 +1150,7 @@ namespace avmplus
 		return m;
 	}
 
-	bool XMLListObject::xmlListPropertyIsEnumerable(Atom P) // NOT virtual, NOT an override
+	bool XMLListObject::XMLList_AS3_propertyIsEnumerable(Atom P) // NOT virtual, NOT an override
 	{
 		AvmCore *core = this->core();
 		double index = core->number(P);
@@ -1160,7 +1160,7 @@ namespace avmplus
 		return false;
 	}
 
-	XMLListObject *XMLListObject::text ()
+	XMLListObject *XMLListObject::AS3_text ()
 	{
 		AvmCore *core = this->core();
 
@@ -1213,16 +1213,12 @@ namespace avmplus
 		}
 	}
 
-	Stringp XMLListObject::toStringMethod()
+	Stringp XMLListObject::AS3_toString()
 	{
-		// This is a non-virtual version of toString.
-		// This method is needed because pointer->method in Codewarrior
-		// is different depending on wheher the method is virtual or not,
-		// causing problems with NATIVE_METHOD.
         return core()->atomToString(toString());
 	}
 	
-	String *XMLListObject::toXMLString ()
+	String *XMLListObject::AS3_toXMLString ()
 	{
 		StringBuffer output(core());
 		this->__toXMLString(output, nullStringAtom, 0);
@@ -1235,7 +1231,7 @@ namespace avmplus
 	/////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////
 
-	XMLObject *XMLListObject::addNamespace (Atom _namespace)
+	XMLObject *XMLListObject::AS3_addNamespace (Atom _namespace)
 	{
 		if (_length() == 1)
 		{
@@ -1249,7 +1245,7 @@ namespace avmplus
 		}
 	}
 
-	XMLObject *XMLListObject::appendChild (Atom child)
+	XMLObject *XMLListObject::AS3_appendChild (Atom child)
 	{
 		if (_length() == 1)
 		{
@@ -1263,7 +1259,7 @@ namespace avmplus
 		}
 	}
 
-	int XMLListObject::childIndex ()
+	int XMLListObject::AS3_childIndex ()
 	{
 		if (_length() == 1)
 		{
@@ -1277,7 +1273,7 @@ namespace avmplus
 		}
 	}
 
-	ArrayObject *XMLListObject::inScopeNamespaces ()
+	ArrayObject *XMLListObject::AS3_inScopeNamespaces ()
 	{
 		if (_length() == 1)
 		{
@@ -1291,7 +1287,7 @@ namespace avmplus
 		}
 	}
 
-	Atom XMLListObject::insertChildAfter (Atom child1, Atom child2)
+	Atom XMLListObject::AS3_insertChildAfter (Atom child1, Atom child2)
 	{
 		if (_length() == 1)
 		{
@@ -1305,7 +1301,7 @@ namespace avmplus
 		}
 	}
 
-	Atom XMLListObject::insertChildBefore (Atom child1, Atom child2)
+	Atom XMLListObject::AS3_insertChildBefore (Atom child1, Atom child2)
 	{
 		if (_length() == 1)
 		{
@@ -1319,7 +1315,7 @@ namespace avmplus
 		}
 	}
 
-	Atom XMLListObject::name() 
+	Atom XMLListObject::AS3_name() 
 	{
 		if (_length() == 1)
 		{
@@ -1334,13 +1330,13 @@ namespace avmplus
 	}
 
 
-	Atom XMLListObject::getNamespace (Atom prefix, int argc) // prefix is optional
+	Atom XMLListObject::_namespace (Atom prefix, int argc) // prefix is optional
 	{
 		AvmAssert(argc == 0 || argc == 1);
 		
 		if (_length() == 1)
 		{
-			return _getAt(0)->getNamespace(prefix, argc);
+			return _getAt(0)->_namespace(prefix, argc);
 		}
 		else
 		{
@@ -1350,7 +1346,7 @@ namespace avmplus
 		}
 	}
 
-	Atom XMLListObject::localName ()
+	Atom XMLListObject::AS3_localName ()
 	{
 		if (_length() == 1)
 		{
@@ -1364,7 +1360,7 @@ namespace avmplus
 		}
 	}
 
-	ArrayObject *XMLListObject::namespaceDeclarations ()
+	ArrayObject *XMLListObject::AS3_namespaceDeclarations ()
 	{
 		if (_length() == 1)
 		{
@@ -1378,7 +1374,7 @@ namespace avmplus
 		}
 	}
 
-	String *XMLListObject::nodeKind ()
+	String *XMLListObject::AS3_nodeKind ()
 	{
 		// if our list has one element, return the nodeKind of the first element
 		if (_length() == 1)
@@ -1393,7 +1389,7 @@ namespace avmplus
 		}
 	}
 
-	XMLObject *XMLListObject::prependChild (Atom value)
+	XMLObject *XMLListObject::AS3_prependChild (Atom value)
 	{
 		if (_length() == 1)
 		{
@@ -1407,7 +1403,7 @@ namespace avmplus
 		}
 	}
 
-	XMLObject *XMLListObject::removeNamespace (Atom _namespace)
+	XMLObject *XMLListObject::AS3_removeNamespace (Atom _namespace)
 	{
 		if (_length() == 1)
 		{
@@ -1421,7 +1417,7 @@ namespace avmplus
 		}
 	}
 
-	XMLObject *XMLListObject::replace (Atom propertyName, Atom value)
+	XMLObject *XMLListObject::AS3_replace (Atom propertyName, Atom value)
 	{
 		if (_length() == 1)
 		{
@@ -1435,7 +1431,7 @@ namespace avmplus
 		}
 	}
 
-	XMLObject *XMLListObject::setChildren (Atom value)
+	XMLObject *XMLListObject::AS3_setChildren (Atom value)
 	{
 		if (_length() == 1)
 		{
@@ -1449,7 +1445,7 @@ namespace avmplus
 		}
 	}
 
-	void XMLListObject::setLocalName (Atom name)
+	void XMLListObject::AS3_setLocalName (Atom name)
 	{
 		if (_length() == 1)
 		{
@@ -1462,7 +1458,7 @@ namespace avmplus
 		}
 	}
 
-	void XMLListObject::setName (Atom name)
+	void XMLListObject::AS3_setName (Atom name)
 	{
 		if (_length() == 1)
 		{
@@ -1475,7 +1471,7 @@ namespace avmplus
 		}
 	}
 
-	void XMLListObject::setNamespace (Atom ns)
+	void XMLListObject::AS3_setNamespace (Atom ns)
 	{
 		if (_length() == 1)
 		{

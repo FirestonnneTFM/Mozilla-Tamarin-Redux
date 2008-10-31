@@ -38,7 +38,7 @@
 
 package avmplus
 {
-	[native(cls="JObjectClass", instance="JObject")]
+	[native(cls="JObjectClass", instance="JObject", methods="auto")]
 	public class JObject 
 	{
 		public native static function create(name:String, ...args):JObject;
@@ -50,6 +50,6 @@ package avmplus
 		public native static function methodSignature(j:JObject, name:String, ...args):String;
 		public native static function fieldSignature(j:JObject, name:String):String;
 
-		public native function toString():String;
+		//public native function toString():String;
 	}
 }

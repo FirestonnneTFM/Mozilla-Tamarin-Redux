@@ -359,19 +359,6 @@ namespace avmplus
 	/**
 	 * Macros for declaring native methods
 	 */
-	#define BEGIN_NATIVE_MAP(_Class) \
-		/*static*/ const NativeMethodInfo _Class::natives[] = {
-			
-	#define DECLARE_NATIVE_MAP(_Class) \
-		static ClassClosure* createClassClosure(VTable* cvtable) \
-		{ return new (cvtable->gc(), cvtable->getExtraSize()) _Class(cvtable); } \
-		static const NativeMethodInfo natives[];
-
-	#define DECLARE_NATIVE_SCRIPT(_Script) \
-		static ScriptObject* createGlobalObject(VTable* vtable, ScriptObject* delegate) \
-		{ return new (vtable->gc(), vtable->getExtraSize()) _Script(vtable, delegate); } \
-		static const NativeMethodInfo natives[];
-
 	#define _NATIVE_METHOD_CAST_PTR(CLS, PTR) \
 		reinterpret_cast<AvmThunkNativeHandler>((void(CLS::*)())(PTR))
 
@@ -380,9 +367,6 @@ namespace avmplus
 
 	#define _NATIVE_METHOD1(CLS, method_id, handler, fl, cookie) \
 		{ (AvmThunkNativeThunker)avmplus::NativeID::method_id##_thunkc, _NATIVE_METHOD_CAST_PTR(CLS, &handler), avmplus::NativeID::method_id, cookie, fl | AbstractFunction::NATIVE_COOKIE },
-
-	#define END_NATIVE_MAP() \
-		{ NULL, NULL, -1, 0, 0 } };
 
 	#define NATIVE_METHOD(method_id, handler) \
 		_NATIVE_METHOD(ScriptObject, method_id, handler, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS)
@@ -401,6 +385,23 @@ namespace avmplus
 		
 	#define NATIVE_METHOD_CAST_FLAGS(CLS, method_id, handler, fl) \
 		_NATIVE_METHOD(CLS, method_id, handler, fl)
+
+	#define AVMTHUNK_BEGIN_CLASS_NATIVE_METHOD_MAP(CLS) \
+		static ClassClosure* CLS##_createClassClosure(VTable* cvtable) \
+		{ return new (cvtable->gc(), cvtable->getExtraSize()) CLS(cvtable); } \
+		static const NativeMethodInfo CLS##_natives[] = {
+			
+	#define AVMTHUNK_BEGIN_SCRIPT_NATIVE_METHOD_MAP(SCRIPTCLS) \
+		static ScriptObject* SCRIPTCLS##_createGlobalObject(VTable* vtable, ScriptObject* delegate) \
+		{ return new (vtable->gc(), vtable->getExtraSize()) SCRIPTCLS(vtable, delegate); } \
+		static const NativeMethodInfo SCRIPTCLS##_natives[] = {
+			
+	#define AVMTHUNK_NATIVE_METHOD(method_id, handler) \
+		NATIVE_METHOD(method_id, handler)
+
+	#define AVMTHUNK_END_NATIVE_METHOD_MAP() \
+		{ NULL, NULL, -1, 0, 0 } };
+
 
 	// ---------------
 
@@ -455,8 +456,11 @@ namespace avmplus
 	#define AVMTHUNK_BEGIN_NATIVE_SCRIPTS(NAME) \
 		static _AVMTHUNK_BEGIN_NATIVE_SCRIPTS(NAME)
 
+	#define _AVMTHUNK_NATIVE_SCRIPT(SCCC, SCLSNATIVES, SCRIPTID, SCRIPTCLS) \
+		{ (avmplus::NativeScriptInfo::Handler)SCCC, SCLSNATIVES, SCRIPTID, sizeof(SCRIPTCLS) },
+
 	#define AVMTHUNK_NATIVE_SCRIPT(SCRIPTID, SCRIPTCLS) \
-		{ (avmplus::NativeScriptInfo::Handler)SCRIPTCLS::createGlobalObject, SCRIPTCLS::natives, SCRIPTID, sizeof(SCRIPTCLS) },
+		_AVMTHUNK_NATIVE_SCRIPT(SCRIPTCLS##_createGlobalObject, SCRIPTCLS##_natives, SCRIPTID, SCRIPTCLS)
 
 	#define AVMTHUNK_END_NATIVE_SCRIPTS() \
 		{ NULL, NULL, -1, 0 } };
@@ -467,8 +471,11 @@ namespace avmplus
 	#define AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME) \
 		static _AVMTHUNK_BEGIN_NATIVE_CLASSES(NAME)
 
+	#define _AVMTHUNK_NATIVE_CLASS(CCC, CLSNATIVES, CLSID, CLS, INST) \
+		{ (NativeClassInfo::Handler)CCC, CLSNATIVES, avmplus::NativeID::CLSID, sizeof(CLS), sizeof(INST) },
+
 	#define AVMTHUNK_NATIVE_CLASS(CLSID, CLS, INST) \
-		{ (NativeClassInfo::Handler)CLS::createClassClosure, CLS::natives, avmplus::NativeID::CLSID, sizeof(CLS), sizeof(INST) },
+		_AVMTHUNK_NATIVE_CLASS(CLS##_createClassClosure, CLS##_natives, CLSID, CLS, INST)
 
 	#define AVMTHUNK_END_NATIVE_CLASSES() \
 		{ NULL, NULL, -1, 0, 0 } };
@@ -508,11 +515,21 @@ namespace avmplus
 	#define DECLARE_NATIVE_SCRIPTS()			/* nothing */
 	#define DECLARE_NATIVE_CLASSES()			/* nothing */
 	#define BEGIN_NATIVE_SCRIPTS(CLS)			_AVMTHUNK_BEGIN_NATIVE_SCRIPTS(CLS)
-	#define NATIVE_SCRIPT(SCRIPTID, SCRIPTCLS)	AVMTHUNK_NATIVE_SCRIPT(SCRIPTID, SCRIPTCLS)
+	#define NATIVE_SCRIPT(SCRIPTID, SCRIPTCLS)	_AVMTHUNK_NATIVE_SCRIPT(SCRIPTCLS::createGlobalObject, SCRIPTCLS::natives, SCRIPTID, SCRIPTCLS)
 	#define END_NATIVE_SCRIPTS()				AVMTHUNK_END_NATIVE_SCRIPTS()
 	#define BEGIN_NATIVE_CLASSES(CLS)			_AVMTHUNK_BEGIN_NATIVE_CLASSES(CLS)
-	#define NATIVE_CLASS(CLSID, CLS, INST)		AVMTHUNK_NATIVE_CLASS(CLSID, CLS, INST)
+	#define NATIVE_CLASS(CLSID, CLS, INST)		_AVMTHUNK_NATIVE_CLASS(CLS::createClassClosure, CLS::natives, CLSID, CLS, INST)
 	#define END_NATIVE_CLASSES()				AVMTHUNK_END_NATIVE_CLASSES()
+	#define BEGIN_NATIVE_MAP(CLS)				/*static*/ const NativeMethodInfo CLS::natives[] = {
+	#define END_NATIVE_MAP()					AVMTHUNK_END_NATIVE_METHOD_MAP()
+	#define DECLARE_NATIVE_MAP(_Class) \
+		static ClassClosure* createClassClosure(VTable* cvtable) \
+		{ return new (cvtable->gc(), cvtable->getExtraSize()) _Class(cvtable); } \
+		static const NativeMethodInfo natives[];
+	#define DECLARE_NATIVE_SCRIPT(_Script) \
+		static ScriptObject* createGlobalObject(VTable* vtable, ScriptObject* delegate) \
+		{ return new (vtable->gc(), vtable->getExtraSize()) _Script(vtable, delegate); } \
+		static const NativeMethodInfo natives[];
 	// END legacy macros
 
 

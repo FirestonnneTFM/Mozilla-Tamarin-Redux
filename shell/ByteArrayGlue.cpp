@@ -42,48 +42,6 @@
 
 namespace avmshell
 {
-	BEGIN_NATIVE_MAP(ByteArrayClass)
-		NATIVE_METHOD(flash_utils_ByteArray_toString,          ByteArrayObject::_toString)
-		NATIVE_METHOD(flash_utils_ByteArray_length_get,        ByteArrayObject::get_length)
-		NATIVE_METHOD(flash_utils_ByteArray_length_set,        ByteArrayObject::set_length)
-
-		NATIVE_METHOD(flash_utils_ByteArray_readBytes,         ByteArrayObject::readBytes)
-		NATIVE_METHOD(flash_utils_ByteArray_writeBytes,        ByteArrayObject::writeBytes)
-
-		NATIVE_METHOD(flash_utils_ByteArray_writeBoolean,      ByteArrayObject::writeBoolean)
-		NATIVE_METHOD(flash_utils_ByteArray_writeByte,         ByteArrayObject::writeByte)
-		NATIVE_METHOD(flash_utils_ByteArray_writeShort,        ByteArrayObject::writeShort)
-		NATIVE_METHOD(flash_utils_ByteArray_writeInt,          ByteArrayObject::writeInt)
-		NATIVE_METHOD(flash_utils_ByteArray_writeUnsignedInt,  ByteArrayObject::writeUnsignedInt)		
-		NATIVE_METHOD(flash_utils_ByteArray_writeFloat,        ByteArrayObject::writeFloat)
-		NATIVE_METHOD(flash_utils_ByteArray_writeDouble,       ByteArrayObject::writeDouble)
-		NATIVE_METHOD(flash_utils_ByteArray_writeUTF,          ByteArrayObject::writeUTF)
-		NATIVE_METHOD(flash_utils_ByteArray_writeUTFBytes,     ByteArrayObject::writeUTFBytes)		
-	
-		NATIVE_METHOD(flash_utils_ByteArray_readBoolean,       ByteArrayObject::readBoolean)
-		NATIVE_METHOD(flash_utils_ByteArray_readByte,          ByteArrayObject::readByte)
-		NATIVE_METHOD(flash_utils_ByteArray_readUnsignedByte,  ByteArrayObject::readUnsignedByte)
-		NATIVE_METHOD(flash_utils_ByteArray_readShort,         ByteArrayObject::readShort)
-		NATIVE_METHOD(flash_utils_ByteArray_readUnsignedShort, ByteArrayObject::readUnsignedShort)
-		NATIVE_METHOD(flash_utils_ByteArray_readInt,           ByteArrayObject::readInt)
-		NATIVE_METHOD(flash_utils_ByteArray_readUnsignedInt,   ByteArrayObject::readUnsignedInt)		
-		NATIVE_METHOD(flash_utils_ByteArray_readFloat,         ByteArrayObject::readFloat)
-		NATIVE_METHOD(flash_utils_ByteArray_readDouble,        ByteArrayObject::readDouble)
-		NATIVE_METHOD(flash_utils_ByteArray_readUTF,           ByteArrayObject::readUTF)
-		NATIVE_METHOD(flash_utils_ByteArray_readUTFBytes,      ByteArrayObject::readUTFBytes)		
-		
-		NATIVE_METHOD(flash_utils_ByteArray_bytesAvailable_get,         ByteArrayObject::available)
-		NATIVE_METHOD(flash_utils_ByteArray_position_get,    ByteArrayObject::getFilePointer)
-		NATIVE_METHOD(flash_utils_ByteArray_position_set,              ByteArrayObject::seek)
-		NATIVE_METHOD(flash_utils_ByteArray_compress,          ByteArrayObject::zlib_compress)
-		NATIVE_METHOD(flash_utils_ByteArray_uncompress,        ByteArrayObject::zlib_uncompress)
-		NATIVE_METHOD(flash_utils_ByteArray_endian_get,    ByteArrayObject::get_endian)
-		NATIVE_METHOD(flash_utils_ByteArray_endian_set,              ByteArrayObject::set_endian)
-		NATIVE_METHOD(flash_utils_ByteArray_writeFile,	ByteArrayObject::writeFile)
-
-		NATIVE_METHOD(flash_utils_ByteArray_readFile, ByteArrayClass::readFile)
-	END_NATIVE_MAP()
-		
 	//
 	// ByteArray
 	//
@@ -415,17 +373,17 @@ namespace avmshell
 		setLength(value);
 	}
 
-	int ByteArrayObject::getFilePointer()
+	int ByteArrayObject::get_position()
 	{
 		return m_byteArray.GetFilePointer();
 	}
 
-	int ByteArrayObject::available()
+	int ByteArrayObject::get_bytesAvailable()
 	{
 		return m_byteArray.Available();
 	}
 	
-	void ByteArrayObject::seek(int offset)
+	void ByteArrayObject::set_position(int offset)
 	{
 		if (offset >= 0) {
 			m_byteArray.Seek(offset);
@@ -560,7 +518,7 @@ namespace avmshell
 		m_byteArray.WriteDouble(value);
 	}
 
-	void ByteArrayObject::zlib_compress()
+	void ByteArrayObject::compress()
 	{
 		int len = m_byteArray.GetLength();
 		if (!len) // empty buffer should give us a empty result
@@ -580,7 +538,7 @@ namespace avmshell
 		delete [] gzdata;
 	}
 
-    void ByteArrayObject::zlib_uncompress()
+    void ByteArrayObject::uncompress()
     {
         // Snapshot the compressed data.
         unsigned long gzlen = m_byteArray.GetLength();

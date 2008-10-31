@@ -75,7 +75,7 @@ namespace avmplus
 		 * excluding the null terminator.
 		 */
 		int length() const { return m_length; }
-
+		
 		/**
 		 * This is an advanced method which returns a non-const
 		 * pointer to the UTF8String's internal buffer.  This
@@ -144,6 +144,9 @@ namespace avmplus
 			return m_length & 0x7FFFFFFF; 
 		}
 
+		// overload used by AS3 glue code.
+		int get_length() const { return length(); }
+
 		/**
 		 * Operator overload; returns a pointer to the
 		 * null-terminated string.
@@ -192,7 +195,8 @@ namespace avmplus
 		 * are used.  The conversion behavior is compliant with
 		 * the String.toUpperCase method.
 		 */
-		Stringp toUpperCase();
+		Stringp AS3_toUpperCase();
+		inline Stringp toUpperCase() { return AS3_toUpperCase(); }
 
 		/**
 		 * Returns a new string object which is a copy of this
@@ -203,7 +207,8 @@ namespace avmplus
 		 * are used.  The conversion behavior is compliant with
 		 * the String.toLowerCase method.
 		 */
-		Stringp toLowerCase();
+		Stringp AS3_toLowerCase();
+		inline Stringp toLowerCase() { return AS3_toLowerCase(); }
 
 		/*@{*/
 		/**
@@ -317,24 +322,37 @@ namespace avmplus
 		}
 
 		// native functions
-		int indexOf(Stringp s, int i=0);
-		int indexOfDouble(Stringp s, double i=0);
-		int lastIndexOf(Stringp s, int i=0x7fffffff);
-		int lastIndexOfDouble(Stringp s, double i=0x7fffffff);
-		Stringp charAt(int i=0); 
-		Stringp charAtDouble(double i=0); 
-		double charCodeAt(int i); // returns NaN for out-of-bounds
-		double charCodeAtDouble(double i); // returns NaN for out-of-bounds
-		int localeCompare(Stringp other);
+		int _indexOf(Stringp s, int i=0);
+		int AS3_indexOf(Stringp s, double i=0);
 
-		Stringp substring(int i_start, int i_end);
-		Stringp substringDouble(double d_start, double d_end);
+		int _lastIndexOf(Stringp s, int i=0x7fffffff);
+		int AS3_lastIndexOf(Stringp s, double i=0x7fffffff);
 
-		Stringp slice(int dStart, int dEnd);
-		Stringp sliceDouble(double dStart, double dEnd);
+		Stringp _charAt(int i=0); 
+		Stringp AS3_charAt(double i=0); 
 
-		Stringp substr(int dStart, int dEnd);
-		Stringp substrDouble(double dStart, double dEnd);
+		double _charCodeAt(int i); // returns NaN for out-of-bounds
+		double AS3_charCodeAt(double i); // returns NaN for out-of-bounds
+
+		int AS3_localeCompare(Stringp other);
+		inline int localeCompare(Stringp other) { return AS3_localeCompare(other); }
+
+		Stringp _substring(int i_start, int i_end);
+		Stringp AS3_substring(double d_start, double d_end);
+
+		Stringp _slice(int dStart, int dEnd);
+		Stringp AS3_slice(double dStart, double dEnd);
+
+		Stringp _substr(int dStart, int dEnd);
+		Stringp AS3_substr(double dStart, double dEnd);
+
+		inline int indexOf(Stringp s, int i=0) { return _indexOf(s, i); }
+		inline int lastIndexOf(Stringp s, int i=0x7fffffff) { return _lastIndexOf(s, i); }
+		inline Stringp charAt(int i=0) { return _charAt(i); }
+		inline double charCodeAt(int i) { return _charCodeAt(i); }
+		inline Stringp substring(int a, int b) { return _substring(a, b); }
+		inline Stringp slice(int a, int b) { return _slice(a, b); }
+		inline Stringp substr(int a, int b) { return _substr(a, b); }
 
 		// Useful utilities used by the core code.
 		static wchar wCharToUpper (wchar ch);

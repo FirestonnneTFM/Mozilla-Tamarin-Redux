@@ -95,7 +95,7 @@ namespace avmplus
         return undefinedAtom;
     }
 
-	int MethodClosure::get_length() const
+	int MethodClosure::MethodClosure_get_length() const
 	{
 		return env->method->param_count;
 	}
@@ -116,11 +116,6 @@ namespace avmplus
 		return core->concatStrings(prefix, core->formatAtomPtr(atom()));
     }
 #endif
-
-	BEGIN_NATIVE_MAP(MethodClosureClass)
-		NATIVE_METHOD(private_MethodClosure_length_get, MethodClosure::get_length)
-		NATIVE_METHOD(private_MethodClosure_private_savedThis_get, MethodClosure::get_savedThis)
-	END_NATIVE_MAP()
 
 	MethodClosureClass::MethodClosureClass(VTable* cvtable)
 		: ClassClosure(cvtable)

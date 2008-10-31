@@ -40,7 +40,7 @@ package avmplus {
 
 import flash.utils.ByteArray
 
-[native(cls="DomainClass", instance="DomainObject")]
+[native(cls="DomainClass", instance="DomainObject", methods="auto")]
 public class Domain
 {
 	public native function Domain(base:Domain);

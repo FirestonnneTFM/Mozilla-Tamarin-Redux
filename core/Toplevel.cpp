@@ -43,24 +43,6 @@ namespace avmplus
 {
 #undef DEBUG_EARLY_BINDING
 
-	//
-	// builtins
-	//
-	BEGIN_NATIVE_MAP(Toplevel)
-		NATIVE_METHOD_FLAGS(escape, Toplevel::escape, 0)
-		NATIVE_METHOD_FLAGS(unescape, Toplevel::unescape, 0)
-		NATIVE_METHOD_FLAGS(decodeURI, Toplevel::decodeURI, 0)
-		NATIVE_METHOD_FLAGS(decodeURIComponent, Toplevel::decodeURIComponent, 0)
-		NATIVE_METHOD_FLAGS(encodeURI, Toplevel::encodeURI, 0)
-		NATIVE_METHOD_FLAGS(encodeURIComponent, Toplevel::encodeURIComponent, 0)
-		NATIVE_METHOD_FLAGS(isNaN, Toplevel::isNaN, 0)
-		NATIVE_METHOD_FLAGS(isFinite, Toplevel::isFinite, 0)
-		NATIVE_METHOD_FLAGS(parseInt, Toplevel::parseInt, 0)
-		NATIVE_METHOD_FLAGS(parseFloat, Toplevel::parseFloat, 0)
-		NATIVE_METHOD(isXMLName, Toplevel::isXMLName)		
-	END_NATIVE_MAP()
-
-
 	Toplevel::Toplevel(VTable* cvtable, ScriptObject* delegate)
 		: ScriptObject(cvtable, delegate)
 	{
@@ -320,8 +302,8 @@ namespace avmplus
 						QNameObject *q = core->atomToQName (p);
 
 						m.setAttr(q->isAttr() ? true : false);
-						m.setNamespace(core->newNamespace (q->getURI()));
-						Stringp name = q->getLocalName();
+						m.setNamespace(core->newNamespace(q->get_uri()));
+						Stringp name = q->get_localName();
 						if (name == core->kAsterisk)
 						{
 							m.setAnyName(); // marks it as an anyName

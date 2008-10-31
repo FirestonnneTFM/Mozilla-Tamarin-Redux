@@ -448,6 +448,8 @@
 		D966B38F0E7EFEA700C19EF5 /* QCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QCache.cpp; sourceTree = "<group>"; };
 		D98338330EB11B6900B81872 /* nativegen.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = nativegen.py; path = ../../../utils/nativegen.py; sourceTree = SOURCE_ROOT; };
 		D98339E40EB13CC700B81872 /* BuiltinNatives.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BuiltinNatives.h; sourceTree = "<group>"; };
+		D991708C0EB91DCA00C2B30A /* Trace.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = Trace.as; path = ../../../extensions/Trace.as; sourceTree = SOURCE_ROOT; };
+		D991708D0EB91DE000C2B30A /* Java.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = Java.as; path = ../../../shell/Java.as; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -851,6 +853,8 @@
 		8EDDB9E209AAD1A100FB9EE5 /* shell */ = {
 			isa = PBXGroup;
 			children = (
+				D991708D0EB91DE000C2B30A /* Java.as */,
+				D991708C0EB91DCA00C2B30A /* Trace.as */,
 				4E5ADFA20E5CD46C00038D0B /* vprof.cpp */,
 				8E8B527909AABAA20057BEE4 /* avmshell.cpp */,
 				8E8B527A09AABAA20057BEE4 /* avmshell.h */,

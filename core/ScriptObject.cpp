@@ -818,41 +818,6 @@ namespace avmplus
 	}
 
 	
-	/**
-     * Function.prototype.call()
-     */
-	Atom ScriptObject::function_call(Atom thisArg,
-							 Atom *argv,
-							 int argc)
-	{
-		if (argc > 0) 
-			return call_this_aa(thisArg, argc, argv);
-		else
-			return call_this(thisArg);
-	}
-
-	/**
-     * Function.prototype.apply()
-     */
-	Atom ScriptObject::function_apply(Atom thisArg, Atom argArray)
-	{
-		// when argArray == undefined or null, same as not being there at all
-		// see Function/e15_3_4_3_1.as 
-	
-		if (!AvmCore::isNullOrUndefined(argArray))
-		{
-			AvmCore* core = this->core();
-
-			if (!core->istype(argArray, ARRAY_TYPE))
-				toplevel()->throwTypeError(kApplyError);
-
-			return call_this_a(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
-			
-		}
-		else
-			return call_this(thisArg);
-	}
- 
 #ifdef DEBUGGER
 	uint64 ScriptObject::size() const
 	{
