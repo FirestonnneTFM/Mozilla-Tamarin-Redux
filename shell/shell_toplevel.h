@@ -2,9 +2,9 @@
 #define AVMTHUNK_VERSION 3
 const uint32_t shell_toplevel_abc_class_count = 16;
 const uint32_t shell_toplevel_abc_script_count = 9;
-const uint32_t shell_toplevel_abc_method_count = 157;
-const uint32_t shell_toplevel_abc_length = 6408;
-extern const uint8_t shell_toplevel_abc_data[6408];
+const uint32_t shell_toplevel_abc_method_count = 159;
+const uint32_t shell_toplevel_abc_length = 6524;
+extern const uint8_t shell_toplevel_abc_data[6524];
 AVMTHUNK_DECLARE_NATIVE_INITIALIZER(shell_toplevel, shell_toplevel)
 /* classes */
 const uint32_t abcclass_avmplus_ITest = 0;
@@ -105,43 +105,45 @@ const uint32_t flash_utils_ByteArray_readUTF = 94;
 const uint32_t flash_utils_ByteArray_readUTFBytes = 95;
 const uint32_t flash_utils_ByteArray_length_get = 96;
 const uint32_t flash_utils_ByteArray_length_set = 97;
-const uint32_t flash_utils_ByteArray_compress = 98;
-const uint32_t flash_utils_ByteArray_uncompress = 99;
-const uint32_t flash_utils_ByteArray_toString = 100;
-const uint32_t flash_utils_ByteArray_bytesAvailable_get = 101;
-const uint32_t flash_utils_ByteArray_position_get = 102;
-const uint32_t flash_utils_ByteArray_position_set = 103;
-const uint32_t flash_utils_ByteArray_endian_get = 104;
-const uint32_t flash_utils_ByteArray_endian_set = 105;
-const uint32_t flash_sampler_isGetterSetter = 108;
-const uint32_t flash_sampler__getInvocationCount = 109;
-/* const uint32_t flash_sampler_getGetterInvocationCount = 110; */
-/* const uint32_t flash_sampler_getSetterInvocationCount = 111; */
-/* const uint32_t flash_sampler_getInvocationCount = 112; */
-const uint32_t flash_sampler_getSampleCount = 113;
-const uint32_t flash_sampler_getSamples = 114;
-const uint32_t flash_sampler_getMemberNames = 115;
-const uint32_t flash_sampler_getSize = 116;
-const uint32_t flash_sampler_setSamplerCallback = 117;
-const uint32_t flash_sampler_sampleInternalAllocs = 118;
-const uint32_t flash_sampler_pauseSampling = 119;
-const uint32_t flash_sampler_stopSampling = 120;
-const uint32_t flash_sampler_startSampling = 121;
-const uint32_t flash_sampler_clearSamples = 122;
-/* const uint32_t flash_sampler_StackFrame_toString = 124; */
-const uint32_t flash_sampler_NewObjectSample_object_get = 129;
-const uint32_t flash_sampler_NewObjectSample_size_get = 130;
-const uint32_t flash_trace_Trace_setLevel = 136;
-const uint32_t flash_trace_Trace_getLevel = 137;
-const uint32_t flash_trace_Trace_setListener = 138;
-const uint32_t flash_trace_Trace_getListener = 139;
-const uint32_t flash_utils_Dictionary_Dictionary = 143;
-const uint32_t avmplus_JObject_create = 149;
-const uint32_t avmplus_JObject_createArray = 150;
-const uint32_t avmplus_JObject_toArray = 151;
-const uint32_t avmplus_JObject_constructorSignature = 152;
-const uint32_t avmplus_JObject_methodSignature = 153;
-const uint32_t avmplus_JObject_fieldSignature = 154;
+const uint32_t flash_utils_ByteArray_private_zlib_compress = 98;
+/* const uint32_t flash_utils_ByteArray_compress = 99; */
+const uint32_t flash_utils_ByteArray_private_zlib_uncompress = 100;
+/* const uint32_t flash_utils_ByteArray_uncompress = 101; */
+const uint32_t flash_utils_ByteArray_toString = 102;
+const uint32_t flash_utils_ByteArray_bytesAvailable_get = 103;
+const uint32_t flash_utils_ByteArray_position_get = 104;
+const uint32_t flash_utils_ByteArray_position_set = 105;
+const uint32_t flash_utils_ByteArray_endian_get = 106;
+const uint32_t flash_utils_ByteArray_endian_set = 107;
+const uint32_t flash_sampler_isGetterSetter = 110;
+const uint32_t flash_sampler__getInvocationCount = 111;
+/* const uint32_t flash_sampler_getGetterInvocationCount = 112; */
+/* const uint32_t flash_sampler_getSetterInvocationCount = 113; */
+/* const uint32_t flash_sampler_getInvocationCount = 114; */
+const uint32_t flash_sampler_getSampleCount = 115;
+const uint32_t flash_sampler_getSamples = 116;
+const uint32_t flash_sampler_getMemberNames = 117;
+const uint32_t flash_sampler_getSize = 118;
+const uint32_t flash_sampler_setSamplerCallback = 119;
+const uint32_t flash_sampler_sampleInternalAllocs = 120;
+const uint32_t flash_sampler_pauseSampling = 121;
+const uint32_t flash_sampler_stopSampling = 122;
+const uint32_t flash_sampler_startSampling = 123;
+const uint32_t flash_sampler_clearSamples = 124;
+/* const uint32_t flash_sampler_StackFrame_toString = 126; */
+const uint32_t flash_sampler_NewObjectSample_object_get = 131;
+const uint32_t flash_sampler_NewObjectSample_size_get = 132;
+const uint32_t flash_trace_Trace_setLevel = 138;
+const uint32_t flash_trace_Trace_getLevel = 139;
+const uint32_t flash_trace_Trace_setListener = 140;
+const uint32_t flash_trace_Trace_getListener = 141;
+const uint32_t flash_utils_Dictionary_Dictionary = 145;
+const uint32_t avmplus_JObject_create = 151;
+const uint32_t avmplus_JObject_createArray = 152;
+const uint32_t avmplus_JObject_toArray = 153;
+const uint32_t avmplus_JObject_constructorSignature = 154;
+const uint32_t avmplus_JObject_methodSignature = 155;
+const uint32_t avmplus_JObject_fieldSignature = 156;
 
 /* thunks (42 unique) */
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
@@ -402,10 +404,10 @@ extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE shell_toplevel_i2a_osu_opti0_th
 
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-#define flash_utils_ByteArray_uncompress_thunk  shell_toplevel_v2a_o_thunk
-#define flash_utils_ByteArray_uncompress_thunkc shell_toplevel_v2a_o_thunkc
 #define flash_sampler_startSampling_thunk  shell_toplevel_v2a_o_thunk
 #define flash_sampler_startSampling_thunkc shell_toplevel_v2a_o_thunkc
+#define flash_utils_ByteArray_private_zlib_compress_thunk  shell_toplevel_v2a_o_thunk
+#define flash_utils_ByteArray_private_zlib_compress_thunkc shell_toplevel_v2a_o_thunkc
 #define flash_sampler_pauseSampling_thunk  shell_toplevel_v2a_o_thunk
 #define flash_sampler_pauseSampling_thunkc shell_toplevel_v2a_o_thunkc
 #define flash_sampler_clearSamples_thunk  shell_toplevel_v2a_o_thunk
@@ -418,8 +420,8 @@ extern AvmThunkRetType_void AVMTHUNK_CALLTYPE shell_toplevel_v2a_o_thunkc(AvmMet
 #define avmplus_System_debugger_thunkc shell_toplevel_v2a_o_thunkc
 #define avmplus_StringBuilder_trimToSize_thunk  shell_toplevel_v2a_o_thunk
 #define avmplus_StringBuilder_trimToSize_thunkc shell_toplevel_v2a_o_thunkc
-#define flash_utils_ByteArray_compress_thunk  shell_toplevel_v2a_o_thunk
-#define flash_utils_ByteArray_compress_thunkc shell_toplevel_v2a_o_thunkc
+#define flash_utils_ByteArray_private_zlib_uncompress_thunk  shell_toplevel_v2a_o_thunk
+#define flash_utils_ByteArray_private_zlib_uncompress_thunkc shell_toplevel_v2a_o_thunkc
 #define avmplus_StringBuilder_reverse_thunk  shell_toplevel_v2a_o_thunk
 #define avmplus_StringBuilder_reverse_thunkc shell_toplevel_v2a_o_thunkc
 
