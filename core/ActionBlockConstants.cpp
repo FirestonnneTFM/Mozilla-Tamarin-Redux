@@ -396,9 +396,11 @@ namespace avmplus
 		{    1,  1    W(WOP_debugline)       N("debugline") },
 		{    1,  1    W(WOP_debugfile)       N("debugfile") },
 #else
-		{   -1,  0    W(0)                   N("OP_0xEF") },
-		{   -1,  0    W(0)                   N("OP_0xF0") },
-		{   -1,  0    W(0)                   N("OP_0xF1") },
+		// we must process (and ignore) these ABC bytecodes, so that
+		// ABC with them embedded does not fail verification in non-debug builds
+		{    4,  0    W(0)                   N("OP_0xEF") },
+		{    1,  0    W(0)                   N("OP_0xF0") },
+		{    1,  0    W(0)                   N("OP_0xF1") },
 #endif
 		{    1,  0    W(0)                   N("OP_0xF2") },
 		{    0,  0    W(0)                   N("timestamp") },
