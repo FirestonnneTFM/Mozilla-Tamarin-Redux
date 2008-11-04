@@ -93,7 +93,7 @@ namespace avmplus
     void SelftestRunner::run(const char* component_glob, const char* category_glob, const char* name_glob) 
     {
 		createSelftestClasses();
-		for ( Selftest* ts = tests ; ts != NULL ; ts = ts->next )
+		for ( Selftest* volatile ts = tests ; ts != NULL ; ts = ts->next )
 		{
 			Selftest* t = ts;
 			if ((component_glob == NULL || match(component_glob, t->component)) &&
@@ -106,7 +106,7 @@ namespace avmplus
 				TRY(core, kCatchAction_Ignore)
 				{
 					t->prologue();
-					for (int n=0 ; ; n++) 
+					for (volatile int n=0 ; ; n++) 
 					{
 						test_name = t->names[n];
 						if (test_name == NULL)

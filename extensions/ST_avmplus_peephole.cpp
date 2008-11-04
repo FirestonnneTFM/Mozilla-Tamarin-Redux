@@ -39,7 +39,8 @@
 // ***** END LICENSE BLOCK ***** */
 
 #include "avmshell.h"
-#if defined AVMPLUS_SELFTEST && defined AVMPLUS_PEEPHOLE_OPTIMIZER
+#ifdef AVMPLUS_SELFTEST
+#if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 namespace avmplus {
 class ST_avmplus_peephole : public Selftest {
 public:
@@ -86,9 +87,9 @@ void ST_avmplus_peephole::epilogue() {
 void ST_avmplus_peephole::test0() {
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    Translator* t = new Translator(core, NULL, opcode_labels);
+    WordcodeEmitter* t = new WordcodeEmitter(core, NULL, opcode_labels);
 #else
-    Translator* t = new Translator(core, NULL);
+    WordcodeEmitter* t = new WordcodeEmitter(core, NULL);
 #endif
 
      t->emitOp1(WOP_getlocal, 5);
@@ -113,4 +114,5 @@ verifyPass(code[5] == ((6 << 16) | 7), "code[5] == ((6 << 16) | 7)", __FILE__, _
 }
 void create_avmplus_peephole(AvmCore* core) { new ST_avmplus_peephole(core); }
 }
+#endif
 #endif
