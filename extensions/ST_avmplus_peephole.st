@@ -66,9 +66,9 @@ private:
 %%test get2locals
 
 #ifdef AVMPLUS_DIRECT_THREADED
-    Translator* t = new Translator(core, NULL, opcode_labels);
+    WordcodeEmitter* t = new WordcodeEmitter(core, NULL, opcode_labels);
 #else
-    Translator* t = new Translator(core, NULL);
+    WordcodeEmitter* t = new WordcodeEmitter(core, NULL);
 #endif
 
      t->emitOp1(WOP_getlocal, 5);

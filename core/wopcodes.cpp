@@ -63,6 +63,8 @@ namespace avmplus
 		// trailing '//' comments are OK.  If you add fields you may also
 		// need to change the regex that parses this table, in peephole.as,
 		// as it knows the order and extracts some of them.
+		//
+		// DO NOT INSERT #ifdef ... #endif BLOCKS!!
 
 		// width=0 means the instruction is not used in the word-code interpreter; other 
 		//    attrs should be 0.  Otherwise it's the width in words of the instruction
@@ -86,6 +88,7 @@ namespace avmplus
 		// may call user code.  So there is no separate column for whether such a call may
 		// take place.
 
+		// DO NOT ALTER OR MOVE THE NEXT LINE.
 		// BEGIN
 		// width jumps term thro calls push pop pop_ex use_l def_l       name
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x00") },
@@ -141,8 +144,6 @@ namespace avmplus
 		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("hasnext2") },
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x33") },
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x34") },
-#ifdef AVMPLUS_MOPS
-		// these MOPS instructions can throw a range-check error
 		{    1,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("li8") }, 
 		{    1,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("li16") },
 		{    1,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("li32") },
@@ -153,18 +154,6 @@ namespace avmplus
 		{    1,    0,    0,   1,    0,   0,   2,   0,    0,    0         N("si32") },
 		{    1,    0,    0,   1,    0,   0,   2,   0,    0,    0         N("sf32") },
 		{    1,    0,    0,   1,    0,   0,   2,   0,    0,    0         N("sf64") },
-#else
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x35") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x36") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x37") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x38") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x39") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x3A") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x3B") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x3C") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x3D") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x3E") },
-#endif
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x3F") },
 		{    2,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("newfunction") },     // 0x40
 		{    2,    0,    0,   1,    1,   1,   2,   0,    0,    0         N("call") },
@@ -182,15 +171,9 @@ namespace avmplus
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x4D") },            // callinterface
 		{    3,    0,    0,   1,    1,   0,   1,   1,    0,    0         N("callsupervoid") },
 		{    3,    0,    0,   1,    1,   0,   1,   1,    0,    0         N("callpropvoid") },
-#ifdef AVMPLUS_MOPS
 		{    1,    0,    0,   0,    0,   1,   1,   0,    0,    0         N("sxi1") },    
 		{    1,    0,    0,   0,    0,   1,   1,   0,    0,    0         N("sxi8") },
 		{    1,    0,    0,   0,    0,   1,   1,   0,    0,    0         N("sxi16") },
-#else
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x50") },            // 0x50
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x51") },
-		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x52") },
-#endif
 		{    2,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("applytype") },
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x54") },
 		{    2,    0,    0,   1,    1,   1,   0,   0,    0,    0         N("newobject") },
@@ -414,7 +397,9 @@ namespace avmplus
 		{    4,    1,    0,   0,    0,   0,   0,   0,    1,    0         N("ifstrictne_lb") },
 		{    1,    0,    0,   0,    0,   1,   2,   0,    0,    0         N("swap_pop") },        // 0x130
 		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobal") },
-		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobalstrict") },		// END
+		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobalstrict") },
+		// DO NOT ALTER OR MOVE THE NEXT LINE.
+		// END
 	};
 
 #endif // AVMPLUS_WORD_CODE
