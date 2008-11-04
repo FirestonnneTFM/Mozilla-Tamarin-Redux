@@ -178,9 +178,9 @@ namespace avmplus
 	 * @param info
 	 */
 #if defined AVMPLUS_MIR
-    void Verifier::verify(CodegenMIR *jit)
+    void Verifier::verify(CodegenMIR * volatile jit)
 #elif defined FEATURE_NANOJIT
-	void Verifier::verify(CodegenLIR *jit)
+	void Verifier::verify(CodegenLIR * volatile jit)
 #else
     void Verifier::verify()
 #endif

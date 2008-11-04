@@ -146,7 +146,7 @@ void PlatformZlibStream::SetAvailIn(int nb)
 
 int PlatformZlibStream::AvailIn()
 {
-	PLAYERASSERT(m_zstream.avail_in >= 0);
+	//PLAYERASSERT(m_zstream.avail_in >= 0);
 	return m_zstream.avail_in;
 }
 
@@ -185,14 +185,14 @@ void PlatformZlibStream::SetAvailOut(int nb)
 
 int PlatformZlibStream::AvailOut()
 {
-	PLAYERASSERT(m_zstream.avail_out >= 0);
+	//PLAYERASSERT(m_zstream.avail_out >= 0);
 	return m_zstream.avail_out;
 }
 
 
 int PlatformZlibStream::TotalOut()
 {
-	PLAYERASSERT(m_zstream.total_out >= 0);
+	//PLAYERASSERT(m_zstream.total_out >= 0);
 	return m_zstream.total_out;
 }
 

@@ -195,10 +195,11 @@ namespace avmshell
 		}
 		
 		const wchar *ptr = m_buffer + index;
-		for ( ; index >= 0 ; index-- )
+		int32_t iindex = (int32_t)index;
+		for ( ; iindex >= 0 ; iindex-- )
 		{
 			if (memcmp(ptr, substr->c_str(), sublen*sizeof(wchar)) == 0) {
-				return index;
+				return iindex;
 			}
 			ptr--;
 		}

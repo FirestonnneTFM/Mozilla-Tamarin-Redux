@@ -250,7 +250,7 @@ namespace avmplus
 
 	Atom XMLListObject::getUintProperty(uint32 index) const
 	{
-		if ((index >= 0) && (index < _length()))
+		if (index < _length())
 		{
 			return _getAt(index)->atom();
 		}
@@ -812,7 +812,7 @@ namespace avmplus
 	{
 		AvmCore *core = this->core();
 
-		if ((i < 0) || (i >= _length()))
+		if (i >= _length())
 			return 0;
 
 		return core->atomToXMLObject (m_children.getAt(i));
