@@ -299,7 +299,7 @@ namespace MMgc
 
 		if(!decommitStress)
 		{
-			if(!decommit || decommitSize < 0) {
+			if(!decommit) {
 				
 				decommitTicks = 0;
 				return;

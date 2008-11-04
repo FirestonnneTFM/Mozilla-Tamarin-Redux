@@ -170,7 +170,7 @@ namespace avmplus
 		Traits**			traits;		// array of traits for AS registers
 		sintptr volatile*	eip; 	// ptr to where the current pc is stored
 		uint32_t*			ap;
-		int32_t*			scopeDepth; // Only used by the interpreter! With MIR, look for NULL entires in the scopeBase array.
+		int32_t volatile*	scopeDepth; // Only used by the interpreter! With MIR, look for NULL entires in the scopeBase array.
 		int32_t				linenum;
 		int32_t				depth;
 		uint32_t			argc;

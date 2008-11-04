@@ -598,9 +598,9 @@ namespace avmplus
 
 		// these should have been checked in AbcParser
 		AvmAssert(local_count+max_scope+max_stack > 0);
-		Atom* framep = (Atom*)alloca(sizeof(Atom)*(local_count + max_scope + max_stack));
-		Atom* scopeBase = framep + local_count;
-		Atom* withBase = NULL;
+		Atom* volatile framep = (Atom*)alloca(sizeof(Atom)*(local_count + max_scope + max_stack));
+		Atom* volatile scopeBase = framep + local_count;
+		Atom* volatile withBase = NULL;
 
 		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
 		CallStackNode callStackNode(env, info, framep, 0, argc, ap, 0 /* later changed to 'pc' */);
@@ -670,8 +670,8 @@ namespace avmplus
 		// init the scope chain by copying it from the captured scope
 		ScopeChain* scope = env->vtable->scope;
 		Namespace *dxns = scope->defaultXmlNamespace;
-		Namespace **dxnsAddr;
-		Namespace *const*dxnsAddrSave = NULL;
+		Namespace ** volatile dxnsAddr;
+		Namespace *const* volatile dxnsAddrSave = NULL;
 
 		if(info->setsDxns()) {
 			dxnsAddrSave = core->dxnsAddr;
@@ -680,8 +680,8 @@ namespace avmplus
 			dxnsAddr = scope->getDefaultNamespaceAddr();
 		}
 
-		int outer_depth = scope->getSize();
-		int scopeDepth = 0;
+		volatile int outer_depth = scope->getSize();
+		volatile int32_t scopeDepth = 0;
 	
 		// make sure scope chain depth is right before entering.
 		volatile int initialScopeDepth = scopeDepth;
@@ -2826,7 +2826,7 @@ namespace avmplus
 			// it would be better to keep it in the constant pool.
 
 			INSTR(push_doublebits) {
-				union {
+				volatile union {
 					double d;
 					uint32_t bits[2];
 				} u;

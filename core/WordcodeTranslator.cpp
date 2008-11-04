@@ -42,6 +42,10 @@ namespace avmplus
 #ifdef SUPERWORD_PROFILING
 	// 32-bit only
 
+#ifdef AVMPLUS_WIN32
+#  include <stdio.h>
+#endif
+
 	static FILE *swprof_code_fp = NULL;
 	static FILE *swprof_sample_fp = NULL;
 #ifdef SUPERWORD_LIMIT

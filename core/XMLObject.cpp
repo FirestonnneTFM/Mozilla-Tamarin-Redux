@@ -1632,7 +1632,7 @@ namespace avmplus
 		if (AvmCore::getIndexFromString (core->string(P), &index))
 		{
 			XMLListObject *xl = new (core->GetGC()) XMLListObject(toplevel()->xmlListClass());
-			if ((index >= 0) && (index < m_node->numChildren()))
+			if (index < m_node->numChildren())
 			{
 				xl->_append (m_node->_getAt(index));
 			}
@@ -2734,7 +2734,7 @@ namespace avmplus
 	void XMLObject::issueNotifications(AvmCore* core, Toplevel* top, E4XNode* initialTarget, Atom target, Atom type, Atom value, Atom detail)
 	{
 		// start notification at initialtarget
-		E4XNode* node = initialTarget;
+		E4XNode* volatile node = initialTarget;
 
 		while(node)
 		{

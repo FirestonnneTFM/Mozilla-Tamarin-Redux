@@ -314,7 +314,7 @@ namespace avmplus
 			// and isn't decremented on next add
 			if(kElementType != LIST_NonGCObjects)
 				data[len] = NULL;
-			AvmAssert(len >= 0);
+			AvmAssert((int32_t)len >= 0);
 			return old;
 		}
 

@@ -319,7 +319,7 @@ namespace avmplus
 			return ip;
 #endif /* FEATURE_BUFFER_GUARD */
 
-		AvmAssert(code >= 0 && code < MIR_last);
+		AvmAssert(code < MIR_last);
 		OP* o = 0;
 
 		if (core->config.cseopt && (code & MIR_oper))
@@ -358,7 +358,7 @@ namespace avmplus
 			return ip;
 #endif /* FEATURE_BUFFER_GUARD */
 
-		AvmAssert(code >= 0 && code < MIR_last);
+		AvmAssert(code < MIR_last);
 		OP* o = 0;
 
 #ifdef AVMPLUS_64BIT
@@ -406,7 +406,7 @@ namespace avmplus
 			return ip;
 #endif /* FEATURE_BUFFER_GUARD */
 
-		AvmAssert(code >= 0 && code < MIR_last);
+		AvmAssert(code < MIR_last);
 		OP* o = 0;
 
 		if (core->config.cseopt && (code & MIR_oper))
@@ -571,7 +571,7 @@ namespace avmplus
 			return ip;
 #endif /* FEATURE_BUFFER_GUARD */
 
-		AvmAssert(code >= 0 && code < MIR_last);
+		AvmAssert(code < MIR_last);
 		OP* o = 0;
 
 		if (core->config.cseopt && (code & MIR_oper))
@@ -8335,7 +8335,7 @@ namespace avmplus
 			Register r;
 			if (isDouble) 
 			{
-				r = (FPRIndex >= F14) ? F0 : registerAllocSpecific(fpregs, (Register)FPRIndex);
+				r = (FPRIndex >= F14) ? (Register)F0 : registerAllocSpecific(fpregs, (Register)FPRIndex);
 				FPRIndex++;
 				GPRIndex += 2;
 				offset += 8;
@@ -8346,7 +8346,7 @@ namespace avmplus
 			{
 				// Note: R11 is used as the temp for a stack-based argument,
 				// since R0 is needed for large-displacement stack offsets
-				r = registerAllocSpecific(gpregs, (GPRIndex >= R11) ? R11 : (Register)GPRIndex);
+				r = registerAllocSpecific(gpregs, (GPRIndex >= R11) ? (Register)R11 : (Register)GPRIndex);
 				GPRIndex++;
 				offset += 4;
 				argRegs = &gpregs;
