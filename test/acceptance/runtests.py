@@ -338,12 +338,15 @@ def parseAscArgs(ascArgFile, currentdir):
     return ascargs[0], argList, removeArgList
     
 def loadAscArgs(arglist,dir,file):
+    # It is possible that file is actually a partial path rooted to acceptance,
+    # so make sure that we are only dealing with the actual filename
+    file = split(file)[1]
     mode = ''
     newArgList = []
     removeArgList = []
     # Loads an asc_args file and modifies arglist accordingly
-    if file and isfile('%s.asc_args' % file):  #file takes precendence over directory
-        mode, newArgList, removeArgList = parseAscArgs('%s.asc_args' % file, dir)
+    if file and isfile('%s/%s.asc_args' % (dir, file)):  #file takes precendence over directory
+        mode, newArgList, removeArgList = parseAscArgs('%s/%s.asc_args' % (dir, file), dir)
     elif isfile(dir+'/dir.asc_args'):
         mode, newArgList, removeArgList = parseAscArgs(dir+'/dir.asc_args', dir)
     elif isfile('./dir.asc_args'):
