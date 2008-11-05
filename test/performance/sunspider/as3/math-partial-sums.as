@@ -62,6 +62,6 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric math-partial-sums-as3 " + runMathPartialSums());
+	print("metric time " + runMathPartialSums());
 
 }

@@ -88,6 +88,6 @@ package {
 		return _sunSpiderInterval;
 	}
 
-	print("metric access-binary-trees-as3 " + runAccessBinaryTrees());
+	print("metric time " + runAccessBinaryTrees());
 
 }

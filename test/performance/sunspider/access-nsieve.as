@@ -65,4 +65,4 @@ function runnsieve() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric run-nsieve "+runnsieve());
+print("metric time "+runnsieve());

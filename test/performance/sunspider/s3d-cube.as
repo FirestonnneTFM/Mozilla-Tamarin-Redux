@@ -369,4 +369,4 @@ function run3dcube() {
   return _sunSpiderInterval;
 }
 // main
-print("metric 3d-cube "+run3dcube());
+print("metric time "+run3dcube());

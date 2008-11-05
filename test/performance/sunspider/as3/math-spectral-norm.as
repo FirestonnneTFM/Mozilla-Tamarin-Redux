@@ -85,6 +85,6 @@ package {
 	  return _sunSpiderInterval;
 	}
 
-	print("metric math-spectral-norm-as3 " + runMathSpectralNorm());
+	print("metric time " + runMathSpectralNorm());
 
 }

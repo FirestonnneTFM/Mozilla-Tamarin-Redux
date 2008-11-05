@@ -1589,5 +1589,5 @@ class Vector2 {
 	var start=new Date();
 	JGFrun(0);
 	var elapsed=new Date()-start;
-	print("metric jsbench-euler "+elapsed);
+	print("metric time "+elapsed);
 	

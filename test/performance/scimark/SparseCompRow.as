@@ -97,5 +97,5 @@ for (var i:uint=0; i<nr; i++)
 }
 
 SparseCompRow.matmult(y, val, row, col, x, 400);
-print("metric sparsecomprow-time "+(getTimer()-starttime));
+print("metric time "+(getTimer()-starttime));
 }

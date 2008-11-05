@@ -189,5 +189,5 @@ function runAccessNbody():int {
 	return _sunSpiderInterval;
 }
 
-print("metric access-nbody-as3vector " + runAccessNbody());
+print("metric time " + runAccessNbody());
 

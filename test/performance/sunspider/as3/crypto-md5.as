@@ -318,6 +318,6 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric crypto-md5-as3 " + runCryptoMD5());
+	print("metric time " + runCryptoMD5());
 
 }

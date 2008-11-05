@@ -58,6 +58,6 @@ package {
 		return _sunSpiderInterval;
 	}
 
-	print("metric 3d-morph-as3 " + run3dMorph());
+	print("metric time " + run3dMorph());
 
 }

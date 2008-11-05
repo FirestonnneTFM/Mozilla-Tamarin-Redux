@@ -328,4 +328,4 @@ var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }
-print("metric date-format-tofte "+runDateFormatTofte());
+print("metric time "+runDateFormatTofte());

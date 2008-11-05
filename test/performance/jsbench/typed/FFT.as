@@ -27,7 +27,7 @@ var lastRandom:int=RANDOM_SEED;
 var start=new Date();
 JGFrun(0);
 var elapsed=new Date()-start;
-print("metric jsbench-fft "+elapsed);
+print("metric time "+elapsed);
 
 function JGFrun(sizei):void {
     JGFsetsize(sizei);

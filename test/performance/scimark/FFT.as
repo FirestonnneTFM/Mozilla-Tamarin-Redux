@@ -190,5 +190,5 @@ for (var i:uint=0; i<cycles; i++){
 	FFT.transform(x); // forward transform
 	FFT.inverse(x); // backward transform
 }
-print("metric fft-time "+(getTimer()-starttime));
+print("metric time "+(getTimer()-starttime));
 }

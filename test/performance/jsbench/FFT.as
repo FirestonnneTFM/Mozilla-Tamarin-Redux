@@ -25,7 +25,7 @@ var JDKtotali = 0.0;
 var start=new Date();
 JGFrun(0);
 var elapsed=new Date()-start;
-print("metric jsbench-fft "+elapsed);
+print("metric time "+elapsed);
 function JGFrun(sizei) {
 		JGFsetsize(sizei);
 		JGFinitialise();

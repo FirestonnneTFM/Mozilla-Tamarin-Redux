@@ -75,4 +75,4 @@ function runAccessBinaryTrees() {
     var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
     return _sunSpiderInterval;
 }
-print("metric access-binary-trees "+runAccessBinaryTrees());
+print("metric time "+runAccessBinaryTrees());

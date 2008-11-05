@@ -67,4 +67,4 @@ var _sunSpiderStartDate:int = getTimer();
   var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric run-access-fannkuch-as3vector "+runAccessFannkuch());
+print("metric time "+runAccessFannkuch());
