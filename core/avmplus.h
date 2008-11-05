@@ -166,6 +166,7 @@ namespace avmplus
 	class DateClass;
 	class DateObject;
 	class Debugger;
+	class DescribeTypeClass;
 	class Domain;
 	class DomainEnv;
 	class E4XNode;
@@ -359,6 +360,7 @@ using MMgc::GCHeap;
 #include "Date.h"
 #include "DateClass.h"
 #include "DateObject.h"
+#include "DescribeTypeClass.h"
 #include "Domain.h"
 #include "DomainEnv.h"
 #include "ObjectClass.h"

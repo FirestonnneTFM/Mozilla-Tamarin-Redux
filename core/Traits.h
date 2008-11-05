@@ -333,7 +333,7 @@ namespace avmplus
 		virtual ~TraitsMetadata();
 #endif
 
-		MetadataPtr getMetadataPos() const { return metadataPos; }
+		MetadataPtr getMetadataPos(PoolObject*& residingPool) const { residingPool = this->residingPool; return metadataPos; }
 		MetadataPtr getSlotMetadataPos(uint32_t i, PoolObject*& residingPool) const;
 		MetadataPtr getMethodMetadataPos(uint32_t i, PoolObject*& residingPool) const;
 

@@ -715,7 +715,6 @@ namespace avmplus
 				residingPool = self->residingPool;
 				return pos;
 			}
-			self = self->base;
 		}
 		return NULL;
 	}
@@ -732,7 +731,6 @@ namespace avmplus
 				residingPool = self->residingPool;
 				return pos;
 			}
-			self = self->base;
 		}
 		return NULL;
 	}
@@ -1559,21 +1557,6 @@ namespace avmplus
 	{
 		AvmAssert(this->linked);
 
-		switch (posType())
-		{
-			case TRAITSTYPE_ACTIVATION:
-			case TRAITSTYPE_FUNCTION:
-			case TRAITSTYPE_NVA:
-			case TRAITSTYPE_RT:
-			case TRAITSTYPE_CATCH:
-				AvmAssert(0);
-				return NULL;
-			case TRAITSTYPE_INSTANCE_FROM_ABC:
-			case TRAITSTYPE_CLASS_FROM_ABC:
-			case TRAITSTYPE_SCRIPT_FROM_ABC:
-				break;
-		}
-			
 #ifdef AVMPLUS_VERBOSE
 		if (pool->verbose)
 		{
@@ -1594,8 +1577,7 @@ namespace avmplus
 		tm->methodMetadataPos = (TraitsMetadata::MetadataPtr*)(tm->slotMetadataPos + tm->slotCount);
 
 		const uint8_t* pos = traitsPosStart();
-		AvmAssert(pos != NULL);
-		const uint32_t nameCount = AvmCore::readU30(pos);
+		const uint32_t nameCount = pos ? AvmCore::readU30(pos) : 0;
 		SlotIdCalcer sic(td->base ? td->base->slotCount : 0, this->allowEarlyBinding());
 		NameEntry ne;
 		for (uint32_t i = 0; i < nameCount; i++)
@@ -1624,14 +1606,14 @@ namespace avmplus
 				case TRAIT_Method:
 				{
 					if (ne.tag & ATTR_metadata)
-				{
+					{
 						Multiname qn;
 						// passing NULL for toplevel here, since it's only used if a verification error occurs -- 
 						// but if there was one, we would have encountered it during AbcParser::parseTraits.
 						this->pool->resolveQName(ne.qni, qn, /*toplevel*/NULL);
 						const Binding b = td->findBinding(qn.getName(), qn.getNamespace());
 						AvmAssert(b != BIND_NONE);
-						const uint32 disp_id = urshift(b,3);
+						const uint32 disp_id = urshift(b,3) + (ne.kind == TRAIT_Setter);
 						tm->methodMetadataPos[disp_id] = ne.meta_pos;
 					}
 					break;

@@ -259,17 +259,17 @@ class NativeInfo:
 	
 	def set_script(self, name):
 		if self.script_name != None:
-			raise Error("native(script) may not be specified multiple times for the same script")
+			raise Error("native(script) may not be specified multiple times for the same script: %s %s" % (self.script_name, name) )
 		self.script_name = name
 
 	def set_class(self, name):
 		if self.class_name != None:
-			raise Error("native(cls) may not be specified multiple times for the same class")
+			raise Error("native(cls) may not be specified multiple times for the same class: %s %s" % (self.class_name, name))
 		self.class_name = name
 
 	def set_instance(self, name):
 		if self.instance_name != None:
-			raise Error("native(instance) may not be specified multiple times for the same class")
+			raise Error("native(instance) may not be specified multiple times for the same class: %s %s" % (self.instance_name, name))
 		self.instance_name = name
 		
 	def validate(self):

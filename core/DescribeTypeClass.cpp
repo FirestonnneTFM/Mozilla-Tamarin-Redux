@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -36,18 +36,21 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-// each class is in its own file, we include them all here
-// so they end up in a single script that initializes all
-// at once, in the order of includes below.
+#include "avmplus.h"
+#include "BuiltinNatives.h"
+#include "TypeDescriber.h"
 
-include "Object.as"
-include "Class.as"
-include "Function.as"
-include "Namespace.as"
-include "Boolean.as"
-include "Number.as"
-include "String.as"
-include "Array.as"
-include "actionscript.lang.as"
-include "Vector.as"
-include "DescribeType.as"
+namespace avmplus
+{
+	DescribeTypeClass::DescribeTypeClass(VTable* cvtable) : ClassClosure(cvtable)
+    {
+		createVanillaPrototype();
+	}
+
+	Atom DescribeTypeClass::describeTypeJSON(Atom v, uint32_t flags)
+	{
+		TypeDescriber td(this->toplevel());
+		ScriptObject* o = td.describeType(v, flags);
+		return o ? o->atom() : nullObjectAtom;
+	}
+}
