@@ -53,4 +53,4 @@ function runControlflowRecursive() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric controlflow-recursive "+runControlflowRecursive());
+print("metric time "+runControlflowRecursive());

@@ -48,4 +48,4 @@ function runBitOpsBitsInByte() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric bitops-bit-in-byte "+runBitOpsBitsInByte());
+print("metric time "+runBitOpsBitsInByte());

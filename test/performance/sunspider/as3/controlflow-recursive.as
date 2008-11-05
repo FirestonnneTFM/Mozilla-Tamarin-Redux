@@ -55,6 +55,6 @@ package {
 
 	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 
-	print("metric controlflow-recursive-as3 " + _sunSpiderInterval);
+	print("metric time " + _sunSpiderInterval);
 
 }

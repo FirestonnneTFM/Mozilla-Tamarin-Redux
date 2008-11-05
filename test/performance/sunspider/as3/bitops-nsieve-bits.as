@@ -62,5 +62,5 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric bitops-nsieve-bits-as3 " + runBitopsNsieveBits());
+	print("metric time " + runBitopsNsieveBits());
 }

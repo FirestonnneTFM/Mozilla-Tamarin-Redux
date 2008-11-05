@@ -450,4 +450,4 @@ var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }
-print("metric crypto-aes "+runCryptoAES());
+print("metric time "+runCryptoAES());

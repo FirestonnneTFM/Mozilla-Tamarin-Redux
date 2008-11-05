@@ -60,4 +60,4 @@ function runBitopsNsieveBits() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric bitops-nsieve-bits "+runBitopsNsieveBits());
+print("metric time "+runBitopsNsieveBits());

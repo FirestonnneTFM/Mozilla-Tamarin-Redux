@@ -32,4 +32,4 @@ function runBitopsBitwiseAnd() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric bitops-bitwise-and "+runBitopsBitwiseAnd());
+print("metric time "+runBitopsBitwiseAnd());

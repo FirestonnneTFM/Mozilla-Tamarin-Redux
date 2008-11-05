@@ -255,6 +255,6 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric crypto-sha1-as3 " + runCryptoSHA1());
+	print("metric time " + runCryptoSHA1());
 
 }

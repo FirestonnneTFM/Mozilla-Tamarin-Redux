@@ -61,5 +61,5 @@ var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 
-print("metric bitops-nsieve-bits-as3vector " + runBitopsNsieveBits());
+print("metric time " + runBitopsNsieveBits());
 

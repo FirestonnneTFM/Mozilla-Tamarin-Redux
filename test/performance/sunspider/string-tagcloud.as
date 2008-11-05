@@ -272,4 +272,4 @@ var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }
-print("metric string-tagcloud "+runStringTagcloud());
+print("metric time "+runStringTagcloud());

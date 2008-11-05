@@ -452,6 +452,6 @@ package {
 
 	return(_sunSpiderInterval);
 	}
-	print("metric crypto-aes-as3 "+runCryptoAES());
+	print("metric time "+runCryptoAES());
 	
 }

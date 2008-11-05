@@ -36,7 +36,7 @@
 	var start=new Date();
 	JGFrun(0);
 	var elapsed=new Date()-start;
-	print("metric jsbench-sparsematmult "+elapsed);
+	print("metric time "+elapsed);
 	function _randomInt()
 	{
 		lastRandom = (lastRandom * 214013 + 2531011) % 16777216;

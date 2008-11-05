@@ -196,4 +196,4 @@ function runAccessNBody() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric access-nbody "+runAccessNBody());
+print("metric time "+runAccessNBody());

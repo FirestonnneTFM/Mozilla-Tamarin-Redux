@@ -190,5 +190,5 @@ package{
 	var t = getTimer();
 	var k = new DrawGrid();
 	t = getTimer() - t;
-	print("metric gameoflife "+t);
+	print("metric time "+t);
 }
