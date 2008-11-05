@@ -162,7 +162,6 @@ namespace avmplus
 	}
 
 #ifdef _MSC_VER
-#  pragma warning(disable:4102)    // unreferenced label
 #  ifdef MSVC_X86_ASM_THREADING
 #    pragma warning(disable:4740)  // "inline assembler suppresses global optimization"
 #  endif
