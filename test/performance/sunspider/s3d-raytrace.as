@@ -443,4 +443,4 @@ function run3draytrace() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric 3d-raytrace "+run3draytrace());
+print("metric time "+run3draytrace());

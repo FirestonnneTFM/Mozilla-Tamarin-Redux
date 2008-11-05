@@ -69,6 +69,6 @@ package {
 	  var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 	  return _sunSpiderInterval;
 	}
-	print("metric run-access-fannkuch-as3 "+runAccessFannkuch());
+	print("metric time "+runAccessFannkuch());
 
 }

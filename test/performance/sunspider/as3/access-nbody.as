@@ -189,7 +189,7 @@ package {
 		return _sunSpiderInterval;
 	}
 
-	print("metric access-nbody-as3 " + runAccessNbody());
+	print("metric time " + runAccessNbody());
 
 
 }

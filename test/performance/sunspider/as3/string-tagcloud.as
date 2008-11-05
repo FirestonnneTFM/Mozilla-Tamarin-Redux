@@ -271,6 +271,6 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric string-tagcloud-as3 " + runStringTagCloud());
+	print("metric time " + runStringTagCloud());
 
 }

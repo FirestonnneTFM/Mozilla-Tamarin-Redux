@@ -59,4 +59,4 @@ function runBitops3bitBitsInByte() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric 3bit-bits-in-byte "+runBitops3bitBitsInByte());
+print("metric time "+runBitops3bitBitsInByte());

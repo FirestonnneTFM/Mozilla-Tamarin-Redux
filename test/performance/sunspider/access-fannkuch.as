@@ -91,4 +91,4 @@ function runAccessFannkuch() {
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
-print("metric run-access-fannkuch "+runAccessFannkuch());
+print("metric time "+runAccessFannkuch());

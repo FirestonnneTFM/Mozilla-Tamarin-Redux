@@ -253,4 +253,4 @@ var sha1Output = hex_sha1(plainText);
 var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
-print("metric crypto-sha1 "+runCryptoSHA1());
+print("metric time "+runCryptoSHA1());

@@ -8,7 +8,7 @@ var datasizes = new Array(3);
 var start=new Date();
 JGFrun(0);
 var elapsed=new Date()-start;
-print("metric jsbench-heapsort "+elapsed);
+print("metric time "+elapsed);
 
 /**
  * @author ayermolo

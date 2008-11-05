@@ -317,4 +317,4 @@ var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }
-print("metric crypto-md5 "+runCryptoMD5());
+print("metric time "+runCryptoMD5());

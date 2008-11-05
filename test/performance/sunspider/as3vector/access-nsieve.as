@@ -43,5 +43,5 @@ var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 
-print("metric access-nsieve-as3vector " + runAccessNsieve());
+print("metric time " + runAccessNsieve());
 

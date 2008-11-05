@@ -427,11 +427,12 @@ for ast in tests:
             log_print("compile FAILED!, file not found " + abc)
             
     result1=9999999
-    resultList = []
-    resultList2 = []
+    result2=9999999
+    result1list=[]
+    result2list=[]
+    resultList=[]
     rl1 = []
     rl2 = []
-    result2=9999999
     if globs['memory'] and vmargs.find("-memstats")==-1:
         vmargs="%s -memstats" % vmargs
     if globs['memory'] and len(vmargs2)>0 and vmargs2.find("-memstats")==-1:
@@ -455,7 +456,7 @@ for ast in tests:
             for line in f1:
                 if globs['memory'] and "[mem]" in line and "private" in line:
                     tokens=line.rsplit()
-                    if len(tokens)>4:
+                    if len(tokens)==5:
                         _mem=tokens[3]
                         if _mem.startswith('('):
                             _mem=_mem[1:]
@@ -467,12 +468,14 @@ for ast in tests:
                             val=float(_mem[:-1])
                         if val>memoryhigh:
                             memoryhigh=val
+                        metric="memory"
                 if not globs['memory'] and "metric" in line:
                     result1list=line.rsplit()
                     if len(result1list)>2:
                         resultList.append(result1list[2])
-                        if result1 > int(result1list[2]):
+                        if result1>float(result1list[2]):
                             result1=float(result1list[2])
+                        metric=result1list[1]
                 elif globs['perfm']:
                     parsePerfm(line, perfm1Dict)
             if globs['memory']:
@@ -532,7 +535,7 @@ for ast in tests:
                 log_print("%-50s %7s" % (ast,formatMemory(memoryhigh)))
             config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
             config = config.replace("-memstats","")
-            socketlog("addresult2::%s::memory::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, memoryhigh, confidence, meanRes, iterations, OS_name, config, VM_version))
+            socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, memoryhigh, confidence, meanRes, iterations, OS_name, config, VM_version))
     else:
         if len(avm2)>0:
             if iterations == 1:
@@ -590,7 +593,7 @@ for ast in tests:
                         perfmSocketlog('vprof-ir-bytes','irbytes')
                         perfmSocketlog('vprof-ir-time','ir')
                         perfmSocketlog('vprof-count','count')
-                    socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
+                    socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
                     log_print("%-50s %7s %10.1f%%    %s" % (ast,result1,confidence,resultList)) 
                 else: #one iteration
                     log_print("%-50s %7s" % (ast,result1)) 

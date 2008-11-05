@@ -704,5 +704,5 @@ for (var i=0; i < frames; i++)
 }
 
 t = getTimer() - t;
-print("metric boidshack "+t);
+print("metric time "+t);
 

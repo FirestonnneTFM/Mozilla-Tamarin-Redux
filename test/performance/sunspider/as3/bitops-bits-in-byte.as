@@ -51,5 +51,5 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric bitops-bits-in-byte-as3 " + runBitopsBitsInByte());
+	print("metric time " + runBitopsBitsInByte());
 }

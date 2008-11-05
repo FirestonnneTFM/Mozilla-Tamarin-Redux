@@ -328,6 +328,6 @@ package {
 
 	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 
-	print("metric date-format-tofte-typed " + _sunSpiderInterval);
+	print("metric time " + _sunSpiderInterval);
 
 }
