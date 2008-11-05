@@ -1571,6 +1571,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\core\DescribeTypeClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\DescribeTypeClass.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\core\Domain.cpp"
 				>
 			</File>
@@ -1916,6 +1924,14 @@
 			</File>
 			<File
 				RelativePath="..\..\core\Traits.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\TypeDescriber.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\TypeDescriber.h"
 				>
 			</File>
 			<File
@@ -2290,6 +2306,10 @@
 			</File>
 			<File
 				RelativePath="..\..\core\Date.as"
+				>
+			</File>
+			<File
+				RelativePath="..\..\core\DescribeType.as"
 				>
 			</File>
 			<File

@@ -57,6 +57,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/ClassClosure.cpp \
   $(curdir)/DateClass.cpp \
   $(curdir)/DateObject.cpp \
+  $(curdir)/DescribeTypeClass.cpp \
   $(curdir)/Domain.cpp \
   $(curdir)/DomainEnv.cpp \
   $(curdir)/E4XNode.cpp \
@@ -97,6 +98,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/StringObject.cpp \
   $(curdir)/Toplevel.cpp \
   $(curdir)/Traits.cpp \
+  $(curdir)/TypeDescriber.cpp \
   $(curdir)/UnicodeUtils.cpp \
   $(curdir)/VectorClass.cpp \
   $(curdir)/Verifier.cpp \
