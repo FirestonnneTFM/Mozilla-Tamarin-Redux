@@ -136,6 +136,6 @@ package {
 		return _sunSpiderInterval;
 	}
 
-	print("metric string-fasta-as3 " + runStringFasta());
+	print("metric time " + runStringFasta());
 
 }

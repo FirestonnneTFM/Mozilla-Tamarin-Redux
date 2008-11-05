@@ -122,4 +122,4 @@ cordic(25000);
 var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
-print("metric math-cordic "+runMathCordic());
+print("metric time "+runMathCordic());

@@ -56,6 +56,6 @@ package {
 	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 	return _sunSpiderInterval;
 	}
-	print("metric bitops-bitwise-and-as3 " + runBitopsBitwiseAnd());
+	print("metric time " + runBitopsBitwiseAnd());
 
 }

@@ -136,5 +136,5 @@ function runStringFasta():int {
 	return _sunSpiderInterval;
 }
 
-print("metric string-fasta-as3vector " + runStringFasta());
+print("metric time " + runStringFasta());
 

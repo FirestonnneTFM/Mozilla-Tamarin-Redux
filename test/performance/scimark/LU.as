@@ -307,5 +307,5 @@ for (var i:int=0;i<cycles;i++) {
   CopyMatrix(lu, A);
   LU.factor(lu, pivot);
 }
-print("metric lu-time "+(getTimer()-starttime));
+print("metric time "+(getTimer()-starttime));
 }

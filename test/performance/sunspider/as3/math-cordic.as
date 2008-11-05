@@ -123,6 +123,6 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric math-cordic-as3 " + runMathCordic());
+	print("metric time " + runMathCordic());
 
 }

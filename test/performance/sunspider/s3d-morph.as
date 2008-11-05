@@ -57,4 +57,4 @@ function run3dmorph() {
     var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
     return _sunSpiderInterval;
 }
-print("metric 3dmorph "+run3dmorph());
+print("metric time "+run3dmorph());

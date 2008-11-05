@@ -13,7 +13,7 @@ var size:int;
   var start=new Date();
   JGFrun(0);
   var elapsed=new Date()-start;
-  print("metric jsbench-series "+elapsed);
+  print("metric time "+elapsed);
   function JGFsetsize(sizel:int):void {
     size = sizel;
   }

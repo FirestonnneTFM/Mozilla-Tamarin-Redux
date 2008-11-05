@@ -48,5 +48,5 @@ var N:Number = Constants.SOR_SIZE;
 var G:Array = RandomMatrix(N, N, R);
 var cycles:int=1000;
 SOR.execute(1.25, G, cycles);
-print("metric fft-sor "+(getTimer()-starttime));
+print("metric time "+(getTimer()-starttime));
 }

@@ -44,6 +44,6 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric access-nsieve-as3 " + runAccessNsieve());
+	print("metric time " + runAccessNsieve());
 
 }
