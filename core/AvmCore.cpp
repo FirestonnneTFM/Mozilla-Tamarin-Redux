@@ -164,6 +164,9 @@ namespace avmplus
 		builtinDomain      = NULL;
 
 		GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
+#ifdef AVMPLUS_HEAP_ALLOCA
+		allocaInit();
+#endif
 
 		minstack           = 0;
 
@@ -308,6 +311,9 @@ namespace avmplus
 #endif
 #ifdef SUPERWORD_PROFILING
 		WordcodeTranslator::swprofStop();
+#endif
+#ifdef AVMPLUS_HEAP_ALLOCA
+		allocaShutdown();
 #endif
 	}
 
@@ -2807,7 +2813,8 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
 		// use alloca to avoid heap allocations where possible
-		wchar *buffer = (wchar*) alloca((len16+1)*sizeof(wchar));
+		AvmCore::AllocaAutoPtr _buffer;
+		wchar *buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
 
 		if(!buffer) {
 			AvmAssertMsg(false, "alloca failed!");
@@ -2831,8 +2838,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
 		// use alloca to avoid heap allocations where possible
 		wchar *buffer = 0;
+		AvmCore::AllocaAutoPtr _buffer;
 		if (len16 < 1024)
-			buffer = (wchar*) alloca((len16+1)*sizeof(wchar));
+			buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
 		
 		Stringp s = NULL;
 		if(!buffer) {
@@ -3918,6 +3926,77 @@ return the result of the comparison ToPrimitive(x) == y.
 	}		
 #endif // MIR or NANOJIT
 
+#ifdef AVMPLUS_HEAP_ALLOCA
+	void AvmCore::allocaInit()
+	{
+		top_segment = NULL;
+		stacktop = NULL;
+#ifdef _DEBUG
+		stackdepth = 0;
+#endif
+		pushAllocaSegment(AVMPLUS_PARAM_ALLOCA_DEFSIZE);
+	}
+	
+	void AvmCore::allocaShutdown()
+	{
+		while (top_segment != NULL)
+			popAllocaSegment();
+		top_segment = NULL;
+		stacktop = NULL;
+	}
+	
+	void AvmCore::allocaPopToSlow(void* top)
+	{
+		AvmAssert(top_segment != NULL);
+		AvmAssert(!(top >= top_segment->start && top <= top_segment->limit));
+		while (!(top >= top_segment->start && top <= top_segment->limit))
+			popAllocaSegment();
+		AvmAssert(top_segment != NULL);
+	}
+	
+	void* AvmCore::allocaPushSlow(size_t nbytes)
+	{
+		size_t alloc_nbytes = nbytes;
+		if (alloc_nbytes < AVMPLUS_PARAM_ALLOCA_DEFSIZE)
+			alloc_nbytes = AVMPLUS_PARAM_ALLOCA_DEFSIZE;
+		pushAllocaSegment(alloc_nbytes);
+		void *p = stacktop;
+		stacktop = (char*)stacktop + nbytes;
+		return p;
+	}
+	
+	void AvmCore::pushAllocaSegment(size_t nbytes)
+	{
+		AvmAssert(nbytes % 8 == 0);
+#ifdef _DEBUG
+		stackdepth += nbytes;
+#endif
+		void* memory = gc->AllocRCRoot(nbytes);
+		AllocaStackSegment* seg = new AllocaStackSegment;
+		seg->start = memory;
+		seg->limit = (void*)((char*)memory + nbytes);
+		seg->top = NULL;
+		seg->prev = top_segment;
+		if (top_segment != NULL)
+			top_segment->top = stacktop;
+		top_segment = seg;
+		stacktop = memory;
+	}
+	
+	void AvmCore::popAllocaSegment()
+	{
+#ifdef _DEBUG
+		stackdepth -= (char*)top_segment->limit - (char*)top_segment->start;
+#endif
+		gc->FreeRCRoot(top_segment->start);
+		AllocaStackSegment* seg = top_segment;
+		top_segment = top_segment->prev;
+		if (top_segment != NULL)
+			stacktop = top_segment->top;
+		delete seg;
+	}	
+#endif // AVMPLUS_HEAP_ALLOCA
+	
 #ifdef AVMPLUS_VERIFYALL
 	void AvmCore::enq(AbstractFunction* f) {
 		if (config.verifyall &&

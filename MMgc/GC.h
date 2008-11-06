@@ -699,6 +699,36 @@ namespace MMgc
 		 */
 		void *Alloc(size_t size, int flags=0);
 
+#ifdef MMGC_RCROOT_SUPPORT
+		
+	private:
+		class RCRootSegment : public GCRoot
+		{
+		public:
+			RCRootSegment(GC* gc, void* mem, size_t size);
+			void*			mem;
+			size_t			size;
+			RCRootSegment*	prev;
+			RCRootSegment*	next;
+		};
+		
+		RCRootSegment* rcRootSegments;
+		
+	public:
+		
+		/**
+		 * Allocate memory that will be scanned for pointers to GC memory
+		 * and from which pointers to RC objects will pin those objects.
+		 */
+		void* AllocRCRoot(size_t size);
+		
+		/**
+		 * Free memory allocated with AllocRCRoot.
+		 */
+		void FreeRCRoot(void* mem);
+		
+#endif // MMGC_RCROOT_SUPPORT
+
 		/** @access Requires(request && m_lock) */
 		void *AllocAlreadyLocked(size_t size, int flags=0);
 

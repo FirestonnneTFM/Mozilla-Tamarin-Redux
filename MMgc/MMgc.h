@@ -82,6 +82,10 @@
 #endif
 #endif
 
+#ifdef MMGC_AVMPLUS
+#  define MMGC_RCROOT_SUPPORT
+#endif
+
 /**
 * Controls whether MMgc reports alloc/dealloc info to a Sampler
 */

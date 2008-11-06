@@ -531,7 +531,8 @@ namespace avmplus
 	{
 		// argc = # of AS3 arguments
 		AvmAssert(argc >= 0);
-		Atom *newargs = (Atom *) alloca(sizeof(Atom)*(argc+1));
+		AvmCore::AllocaAutoPtr _newargs;
+		Atom *newargs = (Atom *) VMPI_alloca(core(), _newargs, sizeof(Atom)*(argc+1));
 		newargs[0] = thisArg;
 		memcpy(&newargs[1], argv, argc*sizeof(Atom));
 		return call(argc, newargs);
@@ -540,7 +541,8 @@ namespace avmplus
 	Atom ScriptObject::call_this_a(Atom thisArg, ArrayObject *a)
 	{
 		int count = a->getLength();
-		Atom* newargs = (Atom*) alloca(sizeof(Atom)*(1+count));
+		AvmCore::AllocaAutoPtr _newargs;
+		Atom* newargs = (Atom*) VMPI_alloca(core(), _newargs, sizeof(Atom)*(1+count));
 		newargs[0] = thisArg;
 		for (int i=0; i<count; i++) {
 			newargs[i+1] = a->getUintProperty(i);
