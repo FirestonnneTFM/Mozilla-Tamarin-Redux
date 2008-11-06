@@ -21,7 +21,6 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
- *   leon.sha@sun.com
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,73 +36,84 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __GCSpinLock__
-#define __GCSpinLock__
+#ifdef DEBUG
+#ifndef _DEBUG
+#define _DEBUG
+#endif
+#endif
 
-#include <pthread.h>
+/**
+ * Critical section on GCHeap allocations.
+ */
+#define GCHEAP_LOCK
 
-namespace MMgc
-{
-	/**
-	 * GCSpinLock is a simple spin lock class used by GCHeap to
-	 * ensure mutually exclusive access.  The GCHeap may be accessed
-	 * by multiple threads, so this is necessary to ensure that
-	 * the threads do not step on each other.
-	 */
-	class GCSpinLock
-	{
-	public:
+/**
+ * IA-32
+ */
+#if defined(__i386__) || defined(__i386)
+#define MMGC_IA32
+#elif defined(__x86_64__)
+#define MMGC_AMD64
+#define MMGC_64BIT
+#elif defined(__powerpc__)
+#define MMGC_PPC
+#elif defined(__sparc__) || defined(__sparc)
+#define MMGC_SPARC
+#elif defined(__arm__)
+#define MMGC_ARM
+#else
+#error Unknown CPU type
+#endif
 
-		GCSpinLock()
-		{
-			pthread_spin_init( &m1, 0 );
-		}
-	
-		~GCSpinLock()
-		{
-			pthread_spin_destroy( &m1 );
-		}
+/**
+ * Define this to get stack traces.  Helps with memory leaks.
+ */
+#ifdef DEBUG
+#define MEMORY_INFO
+#endif
 
-		inline void Acquire()
-		{
-			pthread_spin_lock( &m1 );
-		}
-		
-		inline void Release()
-		{
-			pthread_spin_unlock( &m1 );
-		}
+/**
+ * This turns on incremental collection as well as all of
+ * the write barriers.
+ */
+#define WRITE_BARRIERS
 
-	private:
-		pthread_spinlock_t m1;
-	};
+/**
+ * Define this if MMgc is being integrated with avmplus.
+ * Activates dynamic profiling support, etc.
+ */
+#define MMGC_AVMPLUS
 
-	/**
-	 * GCAcquireSpinlock is a convenience class which acquires
-	 * the specified spinlock at construct time, then releases
-	 * the spinlock at desruct time.  The single statement
-	 *
-	 *    GCAcquireSpinlock acquire(spinlock);
-	 *
-	 * ... will acquire the spinlock at the top of the function
-	 * and release it at the end.  This makes for less error-prone
-	 * code than explicit acquire/release.
-	 */
-	class GCAcquireSpinlock
-	{
-	public:
-		GCAcquireSpinlock(GCSpinLock& spinlock) : m_spinlock(spinlock)
-		{
-			m_spinlock.Acquire();
-		}
-		~GCAcquireSpinlock()
-		{
-			m_spinlock.Release();
-		}
+/**
+ * Use VirtualAlloc to reserve/commit memory
+ */
+#define USE_MMAP
 
-	private:
-		GCSpinLock& m_spinlock;
-	};
-}
+/**
+ *
+ */
+#define DECOMMIT_MEMORY
 
-#endif /* __GCSpinLock__ */
+/**
+ * Controls whether DRC is in use
+ */
+
+#define MMGC_DRC
+
+/**
+ * This makes JIT code buffers read-only to reduce the probability of
+ * heap overflow attachs
+ */
+
+#define AVMPLUS_JIT_READONLY
+
+/**
+ * Do not Use VirtualAlloc to reserve/commit memory for sparc
+ * The pagesize of sparc is 8192 which is not supported yet.
+ */
+#ifdef MMGC_SPARC
+#undef USE_MMAP
+#endif
+
+#define HAVE_PTHREADS
+#define HAVE_STDARG

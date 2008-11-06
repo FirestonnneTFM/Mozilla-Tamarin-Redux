@@ -67,11 +67,7 @@
 	#endif
 
 	#ifdef UNIX
-		#include "linuxbuild.h"
-	#endif
-
-	#ifdef SOLARIS
-		#include "solarisbuild.h"
+		#include "unixbuild.h"
 	#endif
 
 	// don't include armbuild.h when MMGC_CUSTOM_BUILD is used
@@ -144,10 +140,7 @@
 #include "GCSpinLockMac.h"
 #endif
 #ifdef UNIX
-#include "GCSpinLockLinux.h"
-#endif
-#ifdef SOLARIS
-#include "GCSpinLockSolaris.h"
+#include "GCSpinLockUnix.h"
 #endif
 #endif
 
