@@ -674,7 +674,7 @@ namespace MMgc
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
 		char* block = new char[size + hdr_size];
 		// FIXME: should allocate with zeroing, probably.
-		memset(block, size + hdr_size, 0);
+		memset(block, 0, size + hdr_size);
 		void* mem = (void*)(block + hdr_size);
 		RCRootSegment *segment = new RCRootSegment(this, mem, size);
 		*(uintptr*)block = (uintptr)segment;
