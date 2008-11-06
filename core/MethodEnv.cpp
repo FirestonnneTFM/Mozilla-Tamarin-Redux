@@ -178,14 +178,11 @@ namespace avmplus
 		AvmAssert(thisArg == toplevel()->coerce(thisArg, method->paramTraits(0)));
 
 		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
-		uint32 *ap;
-		ap = (uint32 *)AVMPlus_PortAPI_StackAlloc(MMgc::GC::GetGC(this), extra_sz);
+		AvmCore::AllocaAutoPtr _ap;
+		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 
 		unboxCoerceArgs(thisArg, a, ap);
-		Atom res = endCoerce(argc, ap);
-		// we know we have verified the method, so we can go right into it.
-		AVMPlus_PortAPI_StackFree(MMgc::GC::GetGC(this), ap);
-		return res;
+		return endCoerce(argc, ap);
 	}
 
 	Atom MethodEnv::coerceEnter(Atom thisArg, int argc, Atom *argv)
@@ -198,13 +195,11 @@ namespace avmplus
 		AvmAssert(thisArg == toplevel()->coerce(thisArg, method->paramTraits(0)));
 
 		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
-		uint32 *ap;
-		ap = (uint32 *)AVMPlus_PortAPI_StackAlloc(MMgc::GC::GetGC(this), extra_sz);
+		AvmCore::AllocaAutoPtr _ap;
+		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 			
 		unboxCoerceArgs(thisArg, argc, argv, ap);
-		Atom res = endCoerce(argc, ap);
-		AVMPlus_PortAPI_StackFree(MMgc::GC::GetGC(this), ap);
-		return res;
+		return endCoerce(argc, ap);
 	}
 
 	Atom MethodEnv::coerceEnter(int argc, Atom* atomv)
@@ -217,12 +212,11 @@ namespace avmplus
 		AvmAssert(atomv[0] == toplevel()->coerce(atomv[0], method->paramTraits(0)));
 
 		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
-		uint32 *ap;
-		ap = (uint32 *)AVMPlus_PortAPI_StackAlloc(MMgc::GC::GetGC(this), extra_sz);
+		AvmCore::AllocaAutoPtr _ap;
+		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 			
 		unboxCoerceArgs(argc, atomv, ap);
 		Atom res = endCoerce(argc, ap);
-		AVMPlus_PortAPI_StackFree(MMgc::GC::GetGC(this), ap);
 		return res;
 	}
 
@@ -707,7 +701,8 @@ namespace avmplus
 		// create arguments using argv[1..argc].
 		// Even tho E3 says create an Object, E4 says create an Array so thats what we will do.
 		AvmAssert(argc >= 0);
-		Atom* atomv = (Atom*) alloca((argc+1) * sizeof(Atom));
+		AvmCore::AllocaAutoPtr _atomv;
+		Atom* atomv = (Atom*) VMPI_alloca(core(), _atomv, (argc+1) * sizeof(Atom));
 		method->boxArgs(argc, ap, atomv);
 		return createArguments(atomv, argc);
 	}

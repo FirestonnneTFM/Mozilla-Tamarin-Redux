@@ -1426,6 +1426,103 @@ const int kBufferPadding = 16;
 		void   invalidateLookupCache() { if (lookup_cache_timestamp != ~0U) ++lookup_cache_timestamp; }
 #endif
 		
+#ifdef AVMPLUS_HEAP_ALLOCA
+		
+		/* A portable replacement for alloca().
+		 *
+		 * Memory is allocated from the heap and not from the stack.  It is freed in 
+		 * one of two ways: If the function returns normally then an auto_ptr like
+		 * mechanism frees the memory.  If the function leaves by throwing an exception
+		 * (or if one of its callees throws an exception) then the exception
+		 * handling mechanism in Exception.{h,cpp} frees the memory by releasing 
+		 * everything that is still allocated that was allocated since the exception
+		 * handler was erected.
+		 *
+		 * The auto_ptr mechanism, based on the class AvmCore::AllocaAutoPtr, cannot be
+		 * circumvented, as allocaPush() takes a reference to such an object as an argument.
+		 *
+		 * Typical usage:
+		 *
+		 *    AvmCore::AllocaAutoPtr _ptr;                      // by convention prefixed by "_"
+		 *    int* ptr = (int*)core->allocaPush(_ptr, nbytes);  // by convention same name, no "_"
+		 *
+		 * In practice the VMPI_alloca() macro, defined in avmbuild.h, should be used so that
+		 * real alloca() can be used on platforms where that makes sense.
+		 *
+		 * Benchmarks suggest that the performance differences from using this mechanism
+		 * instead of real alloca() are slight to nonexistent, and that the heap allocation
+		 * sometimes provides a performance improvement.
+		 */
+	private:
+		struct AllocaStackSegment
+		{
+			void* start;				// first address; also, the RCRoot pointer
+			void* limit;				// address past data
+			void* top;					// address past live if this segment is not the top
+			AllocaStackSegment* prev;	// segments further from the top
+		};
+		
+		void allocaInit();
+		void allocaShutdown();
+		void allocaPopToSlow(void* top);
+		void* allocaPushSlow(size_t nbytes);
+		void pushAllocaSegment(size_t nbytes);
+		void popAllocaSegment();
+
+		AllocaStackSegment* top_segment;// segment at the stack top
+		void* stacktop;					// current first free word in top_segment
+#ifdef _DEBUG
+		uint32_t stackdepth;			// useful to have for debugging
+#endif
+		
+	public:
+		/* See documentation above */
+		
+		class AllocaAutoPtr
+		{
+			friend class AvmCore;
+		public:
+			AllocaAutoPtr() : unwindPtr(NULL), core(NULL) {}  // initialization of 'core' to pacify gcc
+			~AllocaAutoPtr() { if (unwindPtr) core->allocaPopTo(unwindPtr); }
+		private:
+			AvmCore* core;
+			void* unwindPtr;
+		};
+				
+		inline void* allocaTop() 
+		{
+			return stacktop;
+		}
+		
+		inline void allocaPopTo(void* top)
+		{ 
+			if (top >= top_segment->start && top <= top_segment->limit)
+				stacktop = top;
+			else
+				allocaPopToSlow(top);
+		}
+		
+		inline void* allocaPush(size_t nbytes, AllocaAutoPtr& x) 
+		{
+			AvmAssert(x.unwindPtr == NULL);
+			x.core = this;
+			x.unwindPtr = stacktop;
+			nbytes = (nbytes + 7) & ~7;
+			if ((char*)stacktop + nbytes <= top_segment->limit) {
+				stacktop = (char*)stacktop + nbytes;
+				return x.unwindPtr;
+			}
+			return allocaPushSlow(nbytes);
+		}
+		
+#else // AVMPLUS_HEAP_ALLOCA
+		
+		/* Dummy class so that client code does not have to be cluttered with #ifdefs */
+		class AllocaAutoPtr {
+		};
+		
+#endif // AVMPLUS_HEAP_ALLOCA
+		
 		// avoid multiple inheritance issues
 		class GCInterface : MMgc::GCCallback
 		{
