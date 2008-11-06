@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -36,70 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#ifndef __GCTypes__
-#define __GCTypes__
+#ifndef __avmplus_stdint__
+#define __avmplus_stdint__
 
 #include "mmgc_stdint.h"
 
-#ifdef __SYMBIAN32__
-#include <stddef.h>
-#endif
-
-#if defined(HAVE_VISIBILITY_ATTRIBUTE)
-#define MMGC_VISIBILITY_DEFAULT __attribute__ ((visibility ("default")))
-#else
-#define MMGC_VISIBILITY_DEFAULT
-#endif
-
-#ifdef WIN32
-#define MMGC_EXPORT __declspec(dllexport)
-#define MMGC_IMPORT __declspec(dllimport)
-#else
-#define MMGC_EXPORT MMGC_VISIBILITY_DEFAULT
-#define MMGC_IMPORT MMGC_VISIBILITY_DEFAULT
-#endif
-
-// If we're not making a MMgc DLL, MMGC_API is a no-op
-#ifndef MMGC_DLL
-#define MMGC_API
-#else
-#ifdef MMGC_IMPL
-#define MMGC_API MMGC_EXPORT
-#else
-#define MMGC_API MMGC_IMPORT
-#endif
-#endif // MMGC_DLL
-
-namespace MMgc
-{
-	// legacy types
-	typedef int64_t		int64;
-	typedef int64_t		sint64;
-	typedef uint64_t	uint64;
-
-	typedef uint32_t	uint32;
-	typedef int32_t		int32;
-	
-	typedef uint16_t	uint16;
-	typedef int16_t		int16;
-	
-	typedef uint8_t		uint8;
-	typedef int8_t		int8;
-
-	typedef uintptr_t	uintptr;
-	typedef intptr_t	sintptr;
-
-	/* wchar is our version of wchar_t, since wchar_t is different sizes
-	   on different platforms, but we want to use UTF-16 uniformly. */
-	typedef unsigned short wchar;
-
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
-
-#endif /* __GCTypes__ */
+#endif /* __avmplus_stdint__ */

@@ -449,6 +449,8 @@
 		D98338330EB11B6900B81872 /* nativegen.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = nativegen.py; path = ../../../utils/nativegen.py; sourceTree = SOURCE_ROOT; };
 		D991708C0EB91DCA00C2B30A /* Trace.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = Trace.as; path = ../../../extensions/Trace.as; sourceTree = SOURCE_ROOT; };
 		D991708D0EB91DE000C2B30A /* Java.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; name = Java.as; path = ../../../shell/Java.as; sourceTree = SOURCE_ROOT; };
+		D9B1663E0EC376C6005E711E /* avmplus_stdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avmplus_stdint.h; sourceTree = "<group>"; };
+		D9B166400EC376DE005E711E /* mmgc_stdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mmgc_stdint.h; sourceTree = "<group>"; };
 		D9C68CCE0EB6899E0044C84D /* BuiltinNatives.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BuiltinNatives.h; sourceTree = "<group>"; };
 		D9C68CCF0EB6899E0044C84D /* DescribeType.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; path = DescribeType.as; sourceTree = "<group>"; };
 		D9C68CD00EB6899E0044C84D /* DescribeTypeClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DescribeTypeClass.cpp; sourceTree = "<group>"; };
@@ -537,6 +539,7 @@
 		4E62BE2B0D6244D300A24F2D /* core */ = {
 			isa = PBXGroup;
 			children = (
+				D9B1663E0EC376C6005E711E /* avmplus_stdint.h */,
 				D9C68CD20EB6899E0044C84D /* peephole.tbl */,
 				D9C68CD50EB6899E0044C84D /* vm_fops.h */,
 				4E62BE2C0D6244D300A24F2D /* AbcData.cpp */,
@@ -763,6 +766,7 @@
 		4E62BF030D62451F00A24F2D /* MMgc */ = {
 			isa = PBXGroup;
 			children = (
+				D9B166400EC376DE005E711E /* mmgc_stdint.h */,
 				4E62BF040D62451F00A24F2D /* armbuild.h */,
 				4E62BF050D62451F00A24F2D /* FixedAlloc.cpp */,
 				4E62BF060D62451F00A24F2D /* FixedAlloc.h */,
