@@ -137,40 +137,46 @@ namespace avmplus
 	#define AVMTHUNK_CALL_FUNCTION_10(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4, argt5, argv5, argt6, argv6, argt7, argv7, argt8, argv8, argt9, argv9, argt10, argv10) \
 		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7, argt8, argt9, argt10))CoerceHandler_##argt0(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8, argv9, argv10))
 #else // __WINSCW__
+#if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+#define FUNC_CAST(x) reinterpret_cast<x>
+#else
+#define FUNC_CAST(x) (x)
+#endif
+
 	// yuck. could probably get around this with variadic macros, but it's not clear if every target compiler
 	// we need to support will support them fully.
 	#define AVMTHUNK_CALL_FUNCTION_0(func, ret, argt0, argv0) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)())(func)))())
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)())(func)))())
 
 	#define AVMTHUNK_CALL_FUNCTION_1(func, ret, argt0, argv0, argt1, argv1) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1))(func)))(argv1))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1))(func)))(argv1))
 
 	#define AVMTHUNK_CALL_FUNCTION_2(func, ret, argt0, argv0, argt1, argv1, argt2, argv2) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2))(func)))(argv1, argv2))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2))(func)))(argv1, argv2))
 
 	#define AVMTHUNK_CALL_FUNCTION_3(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3))(func)))(argv1, argv2, argv3))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3))(func)))(argv1, argv2, argv3))
 
 	#define AVMTHUNK_CALL_FUNCTION_4(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4))(func)))(argv1, argv2, argv3, argv4))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4))(func)))(argv1, argv2, argv3, argv4))
 
 	#define AVMTHUNK_CALL_FUNCTION_5(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4, argt5, argv5) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5))(func)))(argv1, argv2, argv3, argv4, argv5))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5))(func)))(argv1, argv2, argv3, argv4, argv5))
 
 	#define AVMTHUNK_CALL_FUNCTION_6(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4, argt5, argv5, argt6, argv6) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6))(func)))(argv1, argv2, argv3, argv4, argv5, argv6))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6))(func)))(argv1, argv2, argv3, argv4, argv5, argv6))
 
 	#define AVMTHUNK_CALL_FUNCTION_7(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4, argt5, argv5, argt6, argv6, argt7, argv7) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7))(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7))(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7))
 
 	#define AVMTHUNK_CALL_FUNCTION_8(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4, argt5, argv5, argt6, argv6, argt7, argv7, argt8, argv8) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7, argt8))(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7, argt8))(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8))
 
 	#define AVMTHUNK_CALL_FUNCTION_9(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4, argt5, argv5, argt6, argv6, argt7, argv7, argt8, argv8, argt9, argv9) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7, argt8, argt9))(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8, argv9))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7, argt8, argt9))(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8, argv9))
 
 	#define AVMTHUNK_CALL_FUNCTION_10(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4, argt5, argv5, argt6, argv6, argt7, argv7, argt8, argv8, argt9, argv9, argt10, argv10) \
-		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7, argt8, argt9, argt10))(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8, argv9, argv10))
+		((*(argv0).*(FUNC_CAST(AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7, argt8, argt9, argt10))(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8, argv9, argv10))
 	
 #endif // __WINSCW__
 	

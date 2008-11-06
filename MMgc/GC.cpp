@@ -72,7 +72,7 @@
 #include <malloc.h>
 #endif
 
-#if defined(_MAC)
+#if defined(_MAC) || defined(SOLARIS)
 #include <alloca.h>
 #endif
 
@@ -268,6 +268,9 @@ namespace MMgc
 		  lastMarkTicks(0),
 		  lastSweepTicks(0),
 		  lastStartMarkIncrementCount(0),
+#ifdef MMGC_RCROOT_SUPPORT
+		  rcRootSegments(NULL),
+#endif
 		  t0(GetPerformanceCounter()),
 		  dontAddToZCTDuringCollection(false),
 		  numObjects(0),
@@ -655,6 +658,49 @@ namespace MMgc
 		ClearMarks();
 	}
 #endif
+
+#ifdef MMGC_RCROOT_SUPPORT
+
+	GC::RCRootSegment::RCRootSegment(GC* gc, void* mem, size_t size) 
+		: GCRoot(gc, mem, size)
+		, mem(mem)
+		, size(size)
+		, prev(NULL)
+		, next(NULL)
+	{}
+
+	void* GC::AllocRCRoot(size_t size)
+	{
+		const int hdr_size = (sizeof(void*) + 7) & ~7;
+		char* block = new char[size + hdr_size];
+		// FIXME: should allocate with zeroing, probably.
+		memset(block, 0, size + hdr_size);
+		void* mem = (void*)(block + hdr_size);
+		RCRootSegment *segment = new RCRootSegment(this, mem, size);
+		*(uintptr*)block = (uintptr)segment;
+		segment->next = rcRootSegments;
+		if (rcRootSegments)
+			rcRootSegments->prev = segment;
+		rcRootSegments = segment;
+		return mem;
+	}
+	
+	void GC::FreeRCRoot(void* mem)
+	{
+		const int hdr_size = (sizeof(void*) + 7) & ~7;
+		char* block = (char*)mem - hdr_size;
+		RCRootSegment* segment = (RCRootSegment*)*(uintptr*)block;
+		if (segment->next != NULL)
+			segment->next->prev = segment->prev;
+		if (segment->prev != NULL)
+			segment->prev->next = segment->next;
+		else
+			rcRootSegments = segment->next;
+		delete segment;
+		delete block;
+	}
+
+#endif // MMGC_RCROOT_SUPPORT
 
 	void *GC::Alloc(size_t size, int flags/*0*/)
 	{
@@ -1717,6 +1763,17 @@ bail:
 		GCWorkItem item;
 		MMGC_GET_STACK_EXTENTS(gc, item.ptr, item._size);
 		PinStackObjects(item.ptr, item._size);
+
+#ifdef MMGC_RCROOT_SUPPORT
+		
+		GC::RCRootSegment* segment = gc->rcRootSegments;
+		while(segment)
+		{
+			PinStackObjects(segment->mem, segment->size);
+			segment = segment->next;
+		}
+		
+#endif // MMGC_RCROOT_SUPPORT
 
 		// important to do this before calling prereap
 		// use index to iterate in case it grows, as we go through the list we

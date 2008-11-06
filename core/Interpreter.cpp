@@ -597,7 +597,8 @@ namespace avmplus
 
 		// these should have been checked in AbcParser
 		AvmAssert(local_count+max_scope+max_stack > 0);
-		Atom* volatile framep = (Atom*)alloca(sizeof(Atom)*(local_count + max_scope + max_stack));
+		AvmCore::AllocaAutoPtr _framep;
+		Atom* volatile framep = (Atom*)VMPI_alloca(core, _framep, sizeof(Atom)*(local_count + max_scope + max_stack));
 		Atom* volatile scopeBase = framep + local_count;
 		Atom* volatile withBase = NULL;
 

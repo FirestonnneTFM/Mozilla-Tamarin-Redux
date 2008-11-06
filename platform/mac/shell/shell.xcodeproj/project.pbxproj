@@ -394,10 +394,6 @@
 		4E62BF340D62451F00A24F2D /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = manifest.mk; sourceTree = "<group>"; };
 		4E62BF350D62451F00A24F2D /* MMgc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MMgc.cpp; sourceTree = "<group>"; };
 		4E62BF360D62451F00A24F2D /* MMgc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MMgc.h; sourceTree = "<group>"; };
-		4E62BF370D62451F00A24F2D /* MMgc.sln */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = MMgc.sln; sourceTree = "<group>"; };
-		4E62BF380D62451F00A24F2D /* MMgc.vcproj */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = MMgc.vcproj; sourceTree = "<group>"; };
-		4E62BF390D62451F00A24F2D /* MMgc_8.sln */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = MMgc_8.sln; sourceTree = "<group>"; };
-		4E62BF3A0D62451F00A24F2D /* MMgc_8.vcproj */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = MMgc_8.vcproj; sourceTree = "<group>"; };
 		4E62BF3C0D62451F00A24F2D /* run_alloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = run_alloc.cpp; sourceTree = "<group>"; };
 		4E62BF3D0D62451F00A24F2D /* run_alloc.sln */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = run_alloc.sln; sourceTree = "<group>"; };
 		4E62BF3E0D62451F00A24F2D /* run_alloc.vcproj */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = run_alloc.vcproj; sourceTree = "<group>"; };
@@ -452,7 +448,7 @@
 		D9B1663E0EC376C6005E711E /* avmplus_stdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avmplus_stdint.h; sourceTree = "<group>"; };
 		D9B166400EC376DE005E711E /* mmgc_stdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mmgc_stdint.h; sourceTree = "<group>"; };
 		D9C68CCE0EB6899E0044C84D /* BuiltinNatives.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BuiltinNatives.h; sourceTree = "<group>"; };
-		D9C68CCF0EB6899E0044C84D /* DescribeType.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.actionscript; path = DescribeType.as; sourceTree = "<group>"; };
+		D9C68CCF0EB6899E0044C84D /* DescribeType.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DescribeType.as; sourceTree = "<group>"; };
 		D9C68CD00EB6899E0044C84D /* DescribeTypeClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DescribeTypeClass.cpp; sourceTree = "<group>"; };
 		D9C68CD10EB6899E0044C84D /* DescribeTypeClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DescribeTypeClass.h; sourceTree = "<group>"; };
 		D9C68CD20EB6899E0044C84D /* peephole.tbl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = peephole.tbl; sourceTree = "<group>"; };
@@ -818,10 +814,6 @@
 				4E62BF340D62451F00A24F2D /* manifest.mk */,
 				4E62BF350D62451F00A24F2D /* MMgc.cpp */,
 				4E62BF360D62451F00A24F2D /* MMgc.h */,
-				4E62BF370D62451F00A24F2D /* MMgc.sln */,
-				4E62BF380D62451F00A24F2D /* MMgc.vcproj */,
-				4E62BF390D62451F00A24F2D /* MMgc_8.sln */,
-				4E62BF3A0D62451F00A24F2D /* MMgc_8.vcproj */,
 				4E62BF3B0D62451F00A24F2D /* run_alloc */,
 				4E62BF3F0D62451F00A24F2D /* solarisbuild.h */,
 				4E62BF400D62451F00A24F2D /* winbuild.h */,

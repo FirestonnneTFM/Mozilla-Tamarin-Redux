@@ -86,6 +86,9 @@ ecma3/RegExp/eregress_119909,   .*winmobile-tvm.* ,  expectedfail,   https://bug
 
 
 # Latent overwrite bug? MMgc assertion on linux https://bugzilla.mozilla.org/show_bug.cgi?id=463011
-ecma3/Exceptions/string_001_rt, .*-lnx-tvm-debugdebugger    ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=463011
-ecma3/Exceptions/string_002_rt, .*-lnx-tvm-debugdebugger    ,   expectedfail, https://bugzilla.mozilla.org/show_bug.cgi?id=463011
+ecma3/Exceptions/string_001_rt,       .*-lnx-tvm-debugdebugger    ,   skip , https://bugzilla.mozilla.org/show_bug.cgi?id=463011
+ecma3/Exceptions/string_002_rt,       .*-lnx-tvm-debugdebugger    ,   skip , https://bugzilla.mozilla.org/show_bug.cgi?id=463011
+
+# [redux] over(?)zealous debug mode in MMgc
+ecma3/Statements/eregress_74474_002,  x86-win-tvm-debugdebugger   ,   skip , https://bugzilla.mozilla.org/show_bug.cgi?id=463412
 

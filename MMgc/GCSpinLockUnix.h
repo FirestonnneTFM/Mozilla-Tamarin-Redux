@@ -52,7 +52,7 @@ namespace MMgc
 	class GCSpinLock
 	{
 	public:
-#if defined(MMGC_IA32) || defined(MMGC_AMD64)
+#if defined(__GNUC__) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
 
 		GCSpinLock()
  		{

@@ -334,6 +334,18 @@
 
 //#define AVMPLUS_SELFTEST
 
+#define AVMPLUS_HEAP_ALLOCA						// Use our own alloca() replacement that allocates in the heap
+
+#ifdef AVMPLUS_HEAP_ALLOCA
+#  define AVMPLUS_PARAM_ALLOCA_DEFSIZE	1000	// Default number of bytes in a stack segment
+#endif
+
+#ifdef AVMPLUS_HEAP_ALLOCA
+#  define VMPI_alloca(core, autoptr, nbytes)  core->allocaPush(nbytes, autoptr)
+#else
+#  define VMPI_alloca(core, autoptr, nbytes)  ((void)autoptr, alloca(nbytes))
+#endif
+
 // temporary impedance-matching define for code that needs to build with different versions of tamarin...
 // will be removed soon
 #define AVMPLUS_REDUX_API 1
@@ -371,10 +383,6 @@
 // be left in place (but disabled) even after AVMPLUS_TRAITS_CACHE is finalized, as it's still in use...
 // it will go away at some point in the not-too-distant future, however.
 //#define AVMPLUS_TRAITS_MEMTRACK
-
-// default definition, may be overridden in portapi_avmbuild.h
-#define AVMPlus_PortAPI_StackAlloc(_gc, _size) alloca(_size)
-#define AVMPlus_PortAPI_StackFree(_gc, _ptr) do {} while(0) /* no semi */
 
 #if defined(AVMPLUS_PORTING_API)
 	// The portapi_avmbuild.h file is used to override

@@ -199,6 +199,9 @@ namespace avmplus
 		ExceptionFrame*		prevFrame;
 		Namespace* const *	dxnsAddr;
 		CodeContextAtom		codeContextAtom;
+#ifdef AVMPLUS_HEAP_ALLOCA
+		void*				stacktop;
+#endif
 #ifdef DEBUGGER
 		CallStackNode*		callStack;
 		CatchAction			catchAction;
@@ -220,6 +223,7 @@ namespace avmplus
 	 * in this frame, we don't need to create the exception frame at all.  If expr
 	 * is true, the exception frame is not created.
 	 */
+
 #ifdef DEBUGGER
 	#define TRY(core, CATCH_ACTION) { \
 		ExceptionFrame _ef; \
