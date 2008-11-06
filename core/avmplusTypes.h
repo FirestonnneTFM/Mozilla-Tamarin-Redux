@@ -38,21 +38,7 @@
 #ifndef __avmplus_types__
 #define __avmplus_types__
 
-
-#ifdef _MSC_VER
-	// MSVC doesn't support inttypes.h or most C99 types directly
-	#include <crtdefs.h>	// defines intrptr_t and uintptr_t, but not the rest of C99 int types
-	typedef __int8				int8_t;
-	typedef __int16				int16_t;
-	typedef __int32				int32_t;
-	typedef __int64				int64_t;
-	typedef unsigned __int8		uint8_t;
-	typedef unsigned __int16	uint16_t;
-	typedef unsigned __int32	uint32_t; 
-	typedef unsigned __int64	uint64_t;
-#else
-	#include <inttypes.h>
-#endif
+#include "avmplus_stdint.h"
 
 namespace avmplus
 {

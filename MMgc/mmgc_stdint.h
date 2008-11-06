@@ -1,4 +1,3 @@
-/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 1993-2006
+ * Portions created by the Initial Developer are Copyright (C) 2004-2006
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -36,70 +35,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#ifndef __mmgc_stdint__
+#define __mmgc_stdint__
 
-#ifndef __GCTypes__
-#define __GCTypes__
-
-#include "mmgc_stdint.h"
-
-#ifdef __SYMBIAN32__
-#include <stddef.h>
+#ifdef _MSC_VER
+	// MSVC doesn't support inttypes.h or most C99 types directly
+	#include <crtdefs.h>	// defines intrptr_t and uintptr_t, but not the rest of C99 int types
+	typedef __int8				int8_t;
+	typedef __int16				int16_t;
+	typedef __int32				int32_t;
+	typedef __int64				int64_t;
+	typedef unsigned __int8		uint8_t;
+	typedef unsigned __int16	uint16_t;
+	typedef unsigned __int32	uint32_t; 
+	typedef unsigned __int64	uint64_t;
+#else
+	#include <inttypes.h>
 #endif
 
-#if defined(HAVE_VISIBILITY_ATTRIBUTE)
-#define MMGC_VISIBILITY_DEFAULT __attribute__ ((visibility ("default")))
-#else
-#define MMGC_VISIBILITY_DEFAULT
-#endif
-
-#ifdef WIN32
-#define MMGC_EXPORT __declspec(dllexport)
-#define MMGC_IMPORT __declspec(dllimport)
-#else
-#define MMGC_EXPORT MMGC_VISIBILITY_DEFAULT
-#define MMGC_IMPORT MMGC_VISIBILITY_DEFAULT
-#endif
-
-// If we're not making a MMgc DLL, MMGC_API is a no-op
-#ifndef MMGC_DLL
-#define MMGC_API
-#else
-#ifdef MMGC_IMPL
-#define MMGC_API MMGC_EXPORT
-#else
-#define MMGC_API MMGC_IMPORT
-#endif
-#endif // MMGC_DLL
-
-namespace MMgc
-{
-	// legacy types
-	typedef int64_t		int64;
-	typedef int64_t		sint64;
-	typedef uint64_t	uint64;
-
-	typedef uint32_t	uint32;
-	typedef int32_t		int32;
-	
-	typedef uint16_t	uint16;
-	typedef int16_t		int16;
-	
-	typedef uint8_t		uint8;
-	typedef int8_t		int8;
-
-	typedef uintptr_t	uintptr;
-	typedef intptr_t	sintptr;
-
-	/* wchar is our version of wchar_t, since wchar_t is different sizes
-	   on different platforms, but we want to use UTF-16 uniformly. */
-	typedef unsigned short wchar;
-
-    typedef void* (*GCMallocFuncPtr)(size_t size);
-    typedef void (*GCFreeFuncPtr)(void* mem);
-	
-    #ifndef NULL
-    #define NULL 0
-    #endif
-}
-
-#endif /* __GCTypes__ */
+#endif /* __mmgc_stdint__ */
