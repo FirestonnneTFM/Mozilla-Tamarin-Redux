@@ -132,6 +132,9 @@ elif config.getCompiler() == 'VS':
             APP_CXXFLAGS += "-GF -GR- -fp:fast -GS- -Zc:wchar_t- "
     DEBUG_CXXFLAGS += "-Zi "
     DEBUG_LDFLAGS += "-DEBUG "
+elif config.getCompiler() == 'SunStudio':
+    OPT_CXXFLAGS = "-xO5 "
+    DEBUG_CXXFLAGS += "-g "
 else:
     raise Exception('Unrecognized compiler: ' + config.getCompiler())
 

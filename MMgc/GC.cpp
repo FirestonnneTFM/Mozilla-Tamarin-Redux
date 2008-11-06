@@ -72,7 +72,7 @@
 #include <malloc.h>
 #endif
 
-#if defined(_MAC)
+#if defined(_MAC) || defined(SOLARIS)
 #include <alloca.h>
 #endif
 
