@@ -677,7 +677,7 @@ namespace MMgc
 		memset(block, size + hdr_size, 0);
 		void* mem = (void*)(block + hdr_size);
 		RCRootSegment *segment = new RCRootSegment(this, mem, size);
-		*(uintptr_t*)block = (uintptr_t)segment;
+		*(uintptr*)block = (uintptr)segment;
 		segment->next = rcRootSegments;
 		if (rcRootSegments)
 			rcRootSegments->prev = segment;
@@ -689,7 +689,7 @@ namespace MMgc
 	{
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
 		char* block = (char*)mem - hdr_size;
-		RCRootSegment* segment = (RCRootSegment*)*(uintptr_t*)block;
+		RCRootSegment* segment = (RCRootSegment*)*(uintptr*)block;
 		if (segment->next != NULL)
 			segment->next->prev = segment->prev;
 		if (segment->prev != NULL)
