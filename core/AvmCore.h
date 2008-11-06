@@ -1472,7 +1472,7 @@ const int kBufferPadding = 16;
 		AllocaStackSegment* top_segment;// segment at the stack top
 		void* stacktop;					// current first free word in top_segment
 #ifdef _DEBUG
-		uint32_t stackdepth;			// useful to have for debugging
+		size_t stackdepth;				// useful to have for debugging
 #endif
 		
 	public:
