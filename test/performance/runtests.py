@@ -456,7 +456,7 @@ for ast in tests:
             for line in f1:
                 if globs['memory'] and "[mem]" in line and "private" in line:
                     tokens=line.rsplit()
-                    if len(tokens)==5:
+                    if len(tokens)>4:
                         _mem=tokens[3]
                         if _mem.startswith('('):
                             _mem=_mem[1:]
@@ -468,7 +468,6 @@ for ast in tests:
                             val=float(_mem[:-1])
                         if val>memoryhigh:
                             memoryhigh=val
-                        metric="memory"
                 if not globs['memory'] and "metric" in line:
                     result1list=line.rsplit()
                     if len(result1list)>2:
@@ -479,6 +478,7 @@ for ast in tests:
                 elif globs['perfm']:
                     parsePerfm(line, perfm1Dict)
             if globs['memory']:
+                metric="memory"
                 resultList.append(memoryhigh)
             if len(avm2)>0:
                 for line in f2:
