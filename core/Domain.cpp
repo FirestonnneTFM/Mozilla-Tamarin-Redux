@@ -38,6 +38,12 @@
 
 #include "avmplus.h"
 
+#ifdef SOLARIS
+typedef caddr_t maddr_ptr;
+#else
+typedef void *maddr_ptr;
+#endif
+
 namespace avmplus
 {
 	Domain::Domain(AvmCore *_core, Domain* base) : base(base)
@@ -243,7 +249,7 @@ namespace avmplus
 			if (m_codeMin)
 			{
 				AvmAssert(m_codeMax != NULL);
-				msync(m_codeMin, (char*)m_codeMax - (char*)m_codeMin + m_pageSize, MS_INVALIDATE);
+				msync((maddr_ptr)m_codeMin, (char*)m_codeMax - (char*)m_codeMin + m_pageSize, MS_INVALIDATE);
 			}
 		#elif defined(AVMPLUS_SYMBIAN)
 			// nothing
@@ -289,7 +295,7 @@ namespace avmplus
 					AvmAssert(0);
 				#endif
 				#elif !defined(AVMPLUS_SYMBIAN)
-					int result = mprotect(m_lastPage, m_lastPageSize, m_lastPageProt);
+					int result = mprotect((maddr_ptr)m_lastPage, m_lastPageSize, m_lastPageProt);
 					AvmAssert(result == 0);
 					(void)result;
 				#else
@@ -307,7 +313,7 @@ namespace avmplus
 					AvmAssert(0);
 				#endif
 				#elif !defined(AVMPLUS_SYMBIAN)
-					int result = mprotect(page, size, PROT_READ | PROT_WRITE);
+					int result = mprotect((maddr_ptr)page, size, PROT_READ | PROT_WRITE);
 					AvmAssert(result == 0);
 					(void)result;
 					m_lastPageProt = PROT_READ | PROT_EXEC;
