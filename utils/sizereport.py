@@ -123,7 +123,7 @@ def logResult(out):
     print('finished sending results to socket server')
 
 try:
-    opts, args = getopt(sys.argv[1:], "m:dp:h",["prefix=","config=","vmversion=","help","verbose"])
+    opts, args = getopt(sys.argv[1:], "m:dp:h",["map=","prefix=","config=","vmversion=","help","verbose","socketlog"])
 except:
     usage(2)
 
