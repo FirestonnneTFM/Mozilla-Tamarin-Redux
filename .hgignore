@@ -49,6 +49,7 @@ axscript/vc2008/*.ncb
 axscript/vc2008/axtam.vcproj.*.user
 core/*.out
 shell/*.out
+util/lastsizereport.txt
 *.pp
 *.ii
 *.deps
