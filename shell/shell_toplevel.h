@@ -181,7 +181,7 @@ const uint32_t avmplus_JObject_constructorSignature = 154;
 const uint32_t avmplus_JObject_methodSignature = 155;
 const uint32_t avmplus_JObject_fieldSignature = 156;
 
-/* thunks (42 unique) */
+/* thunks (43 unique) */
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_oos_rest_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 #define avmplus_JObject_methodSignature_thunk  shell_toplevel_s2a_oos_rest_thunk
@@ -348,8 +348,6 @@ extern AvmThunkRetType_int32_t AVMTHUNK_CALLTYPE shell_toplevel_i2a_os_thunkc(Av
 
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_os_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmString AVMTHUNK_CALLTYPE shell_toplevel_s2a_os_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-#define avmplus_File_exists_thunk  shell_toplevel_s2a_os_thunk
-#define avmplus_File_exists_thunkc shell_toplevel_s2a_os_thunkc
 #define avmplus_File_read_thunk  shell_toplevel_s2a_os_thunk
 #define avmplus_File_read_thunkc shell_toplevel_s2a_os_thunkc
 
@@ -371,6 +369,11 @@ extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE shell_toplevel_b2a_o_thunkc(
 #define flash_utils_ByteArray_readBoolean_thunkc shell_toplevel_b2a_o_thunkc
 #define avmplus_System_isDebugger_thunk  shell_toplevel_b2a_o_thunk
 #define avmplus_System_isDebugger_thunkc shell_toplevel_b2a_o_thunkc
+
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE shell_toplevel_b2a_os_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+extern AvmThunkRetType_AvmBoolArg AVMTHUNK_CALLTYPE shell_toplevel_b2a_os_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+#define avmplus_File_exists_thunk  shell_toplevel_b2a_os_thunk
+#define avmplus_File_exists_thunkc shell_toplevel_b2a_os_thunkc
 
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 extern AvmThunkRetType_AvmBox AVMTHUNK_CALLTYPE shell_toplevel_a2a_o_thunkc(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
