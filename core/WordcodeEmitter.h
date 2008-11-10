@@ -189,9 +189,9 @@ namespace avmplus
 			uint16_t next_state;				//   move to this state (never 0)
 		};
 		
-		static uint16_t toplevel[];             // Transition table for initial state
-		static peep_state_t states[];           // State 0 is not used
-		static peep_transition_t transitions[]; // Compact transition representation
+		static const uint16_t toplevel[];             // Transition table for initial state
+		static const peep_state_t states[];           // State 0 is not used
+		static const peep_transition_t transitions[]; // Compact transition representation
 		
 		uint32_t  state;						// current state in the matcher, or 0
 		uint32_t  backtrack_stack[10];			// commit candidates (state numbers)
