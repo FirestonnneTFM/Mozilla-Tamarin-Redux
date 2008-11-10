@@ -940,7 +940,7 @@ namespace avmplus
 
 	void WordcodeEmitter::peep(uint32_t opcode, uint32_t* loc)
 	{
-		peep_state_t *s;
+		const peep_state_t *s;
 		uint32_t limit, next_state;
 		
 		AvmAssert(opcode != OP_lookupswitch);
@@ -983,7 +983,7 @@ namespace avmplus
 			next_state = 0;
 		}
 		else {
-			peep_transition_t* t = &transitions[s->transitionPtr];
+			const peep_transition_t* t = &transitions[s->transitionPtr];
 			uint32_t i = 0;
 			while (i < limit && t->opcode != opcode) 
 				i++, t++;
@@ -1031,7 +1031,7 @@ namespace avmplus
 			return;
 		
 		for ( int bi=backtrack_idx-1 ; bi >= 0 ; bi-- ) {
-			peep_state_t *b = &states[backtrack_stack[bi]];
+			const peep_state_t *b = &states[backtrack_stack[bi]];
 			AvmAssert(b->guardAndAction != 0);
 			if (commit(b->guardAndAction)) 
 				return;

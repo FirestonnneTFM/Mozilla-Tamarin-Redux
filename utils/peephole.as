@@ -408,7 +408,7 @@ package peephole
 
     function formatStates() {
 	var s = [];
-	s.push("WordcodeEmitter::peep_state_t WordcodeEmitter::states[] = {");
+	s.push("const WordcodeEmitter::peep_state_t WordcodeEmitter::states[] = {");
 	s.push("//n  s  t  g  f");
 	s.push("{ 0, 0, 0, 0, 0 }, // Invalid");
 	for ( var i=0 ; i < states.length ; i++ ) {
@@ -432,7 +432,7 @@ package peephole
 
     function formatTransitions() {
 	var s = [];
-	s.push("WordcodeEmitter::peep_transition_t WordcodeEmitter::transitions[] = {");
+	s.push("const WordcodeEmitter::peep_transition_t WordcodeEmitter::transitions[] = {");
 	for ( var i=0 ; i < transitions.length ; i++ ) {
 	    assert(transitions[i][1] < 65536);
 	    s.push("{ WOP_" + opname[transitions[i][0]] + ", " + transitions[i][1] + " }," + (i > 0 && i % 10 == 0 ? " // " + i : ""));
@@ -450,7 +450,7 @@ package peephole
 
     function formatToplevel() {
 	var s = [];
-	s.push("uint16 WordcodeEmitter::toplevel[] = {");
+	s.push("const uint16 WordcodeEmitter::toplevel[] = {");
 	var i=0;
 	while (i < MAXINSTR) {
 	    var t = "";

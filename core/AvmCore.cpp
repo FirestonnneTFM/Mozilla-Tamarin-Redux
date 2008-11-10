@@ -1891,7 +1891,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	// Tables are from http://www.w3.org/TR/2004/REC-xml-20040204/#NT-NameChar
 	// E4X 13.1.2.1, pg 63
 	/* BaseChar = */
-	wchar letterTable[] = {
+	const wchar letterTable[] = {
 		0x0041, 0x005A,
 		0x0061, 0x007A,
 		0x00C0, 0x00D6,
@@ -2112,7 +2112,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 //[87]   	CombiningChar	   ::=   	
-	wchar combiningCharTable[] = {
+	const wchar combiningCharTable[] = {
 		0x0300, 0x0345,
 		0x0360, 0x0361,
 		0x0483, 0x0486,
@@ -2221,7 +2221,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 //[88]   	Digit	   ::=   	
-	wchar digitTable[] = {
+	const wchar digitTable[] = {
 		0x0030, 0x0039,
 		0x0660, 0x0669,
 		0x06F0, 0x06F9,
@@ -2249,7 +2249,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return false;
 	}
 
-	wchar extenderTable[] = {
+	const wchar extenderTable[] = {
 		0x00B7, 0x00B7, // single 
 		0x02D0, 0x02D0, // single 
 		0x02D1, 0x02D1, // single 
