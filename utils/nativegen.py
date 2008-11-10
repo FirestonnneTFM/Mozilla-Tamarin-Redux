@@ -146,6 +146,28 @@ MPL_HEADER = "/* ***** BEGIN LICENSE BLOCK *****\n" \
             " *\n" \
             " * ***** END LICENSE BLOCK ***** */" 
 
+
+# Python 2.5 and earlier didn't reliably handle float("nan") and friends uniformly
+# across all platforms. This is a workaround that appears to be more reliable.
+# if/when we require Python 2.6 or later we can use a less hack-prone approach
+kPosInf = 1e300000
+kNegInf = -1e300000
+kNaN = kPosInf / kPosInf
+
+def is_nan(val):
+	strValLower = str(val).lower()
+	return strValLower == "nan"
+
+def is_pos_inf(val):
+	# [-]1.#INF on Windows in Python 2.5.2!
+	strValLower = str(val).lower()
+	return strValLower.endswith("inf") and not strValLower.startswith("-")
+
+def is_neg_inf(val):
+	# [-]1.#INF on Windows in Python 2.5.2!
+	strValLower = str(val).lower()
+	return strValLower.endswith("inf") and strValLower.startswith("-")
+
 class Error:
 	nm = ""
 	def __init__(self, n):
@@ -482,12 +504,12 @@ class Abc:
 		rawval = val
 		if ct == CTYPE_DOUBLE:
 			# Python apparently doesn't have isNaN, isInf
-			if str(val) == "inf":
-				val = "kAvmThunkInfinity"
-			elif str(val) == "-inf":
-				val = "kAvmThunkNegInfinity"
-			elif str(val) == "nan":
+			if is_nan(val):
 				val = "kAvmThunkNaN"
+			elif is_neg_inf(val):
+				val = "kAvmThunkNegInfinity"
+			elif is_pos_inf(val):
+				val = "kAvmThunkInfinity"
 			elif float(val) >= -2147483648.0 and float(val) <= 2147483647.0 and float(val) == floor(float(val)):
 				ct = CTYPE_INT
 				val = "%.0f" % float(val)
@@ -526,7 +548,7 @@ class Abc:
 			self.uints[i] = uint(self.data.readU30())
 			
 		n = self.data.readU30()
-		self.doubles = [ float("nan") ] * n
+		self.doubles = [ kNaN ] * n
 		for i in range(1, n):
 			self.doubles[i] = self.data.readDouble()
 
@@ -1226,7 +1248,7 @@ abcGenFor = None
 abcGenName = ""
 for file in args:
 	try:
-		f = open(file,"r")
+		f = open(file,"rb")
 		data = f.read()
 	finally:
 		f.close()
