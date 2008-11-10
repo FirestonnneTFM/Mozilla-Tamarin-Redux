@@ -248,6 +248,22 @@ non-recursive case for "frames". There is also an optional callout function
 that is triggered by the (?) regex item. For Virtual Pascal, these definitions
 have to take another form. */
 
+#ifdef AVMPLUS_PCRE
+
+extern void* avmplus_pcre_malloc(size_t nbytes);
+extern void avmplus_pcre_free(void*);
+
+#define pcre_malloc avmplus_pcre_malloc
+#define pcre_free avmplus_pcre_free
+#define pcre_stack_malloc avmplus_pcre_malloc
+#define pcre_stack_free avmplus_pcre_free
+
+typedef int (*pcre_callout_t)(pcre_callout_block*);
+
+PCRE_EXP_DECL const pcre_callout_t pcre_callout;
+
+#else
+
 #ifndef VPCOMPAT
 PCRE_EXP_DECL void *(*pcre_malloc)(size_t);
 PCRE_EXP_DECL void  (*pcre_free)(void *);
@@ -261,6 +277,8 @@ PCRE_EXP_DECL void *pcre_stack_malloc(size_t);
 PCRE_EXP_DECL void  pcre_stack_free(void *);
 PCRE_EXP_DECL int   pcre_callout(pcre_callout_block *);
 #endif  /* VPCOMPAT */
+
+#endif // AVMPLUS_PCRE
 
 /* Exported PCRE functions */
 

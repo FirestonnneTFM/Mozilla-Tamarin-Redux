@@ -39,28 +39,15 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
+#define AVMPLUS_PCRE
 #include "pcre.h"
 
 namespace avmplus
 {
-	// make pcre's allocators use Flash's
-	void *fmalloc(size_t size)
-	{
-		return new char[size];
-	}
-
-	void ffree(void *data)
-	{
-		char *ptr = (char*) data;
-		delete [] ptr;
-	}
-
 	RegExpClass::RegExpClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(RegExpClass));
-		pcre_malloc = &fmalloc;
-		pcre_free = &ffree;
 
 		AvmCore* core = this->core();
 
