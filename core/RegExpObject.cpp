@@ -38,6 +38,7 @@
 
 #include "avmplus.h"
 
+#define AVMPLUS_PCRE
 #include "pcre.h"
 
 // todo figure out what to do about all the new/delete in here
@@ -192,7 +193,7 @@ namespace avmplus
 
 	RegExpObject::~RegExpObject()
 	{
-		(pcre_free)((pcre*)m_pcreInst);
+		(pcre_free)((void*)(pcre*)m_pcreInst);
 		m_global = false;
 		m_lastIndex = 0;
 		m_optionFlags = 0;
