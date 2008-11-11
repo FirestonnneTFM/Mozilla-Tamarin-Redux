@@ -405,6 +405,12 @@ namespace avmplus
 	#define AVMTHUNK_NATIVE_METHOD(method_id, handler) \
 		NATIVE_METHOD(method_id, handler)
 
+	#define AVMTHUNK_NATIVE_METHOD_STRING(method_id, handler) \
+		NATIVE_METHOD_CAST(avmplus::String, method_id, handler)
+
+	#define AVMTHUNK_NATIVE_METHOD_NAMESPACE(method_id, handler) \
+		NATIVE_METHOD_CAST(avmplus::Namespace, method_id, handler)
+
 	#define AVMTHUNK_END_NATIVE_METHOD_MAP() \
 		{ NULL, NULL, -1, 0, 0 } };
 

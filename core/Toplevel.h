@@ -212,6 +212,14 @@ namespace avmplus
 		 */
 		Atom instanceof(Atom atom, Atom ctor);
 
+		/** returns the instance traits of the factorytype of the passed atom */
+		Traits* toClassITraits(Atom atom);
+
+		/**
+		 * operator in from ES3
+		 */
+		Atom in_operator(Atom name, Atom obj);
+		
 		/**
 		 * This is the implicit coercion operator.  It is kind of like a
 		 * Java downcast, but because of how E4 works, there are some cases

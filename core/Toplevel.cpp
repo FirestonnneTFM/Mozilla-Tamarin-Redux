@@ -635,6 +635,65 @@ namespace avmplus
 	}
 
 	
+	Traits* Toplevel::toClassITraits(Atom atom)
+	{
+		switch (atom&7)
+		{
+		case kObjectType:
+		{
+			if( !AvmCore::isNull(atom) )
+			{
+				Traits* itraits = AvmCore::atomToScriptObject(atom)->traits()->itraits;
+				if (itraits == NULL)
+					throwTypeError(kIsTypeMustBeClassError);
+				return itraits;
+			}
+			// else fall through and report an error
+		}
+		default:
+            // TypeError in ECMA
+			// ISSUE the error message should say "whatever" is not a class
+			throwTypeError(
+					   (atom == undefinedAtom) ? kConvertUndefinedToObjectError :
+											kConvertNullToObjectError);
+			return NULL;
+		}
+	}
+
+	Atom Toplevel::in_operator(Atom nameatom, Atom obj) 
+	{
+		AvmCore* core = this->core();
+		Traits* t = this->toTraits(obj); // includes null check
+
+		if (!core->isDictionaryLookup(nameatom, obj))
+		{
+			Stringp name = core->intern(nameatom);
+
+			// ISSUE should we try this on each object on the proto chain or just the first?
+#ifdef AVMPLUS_TRAITS_CACHE
+			TraitsBindingsp td = t->getTraitsBindings();
+			if (td->findBinding(name, core->publicNamespace) != BIND_NONE)
+				return trueAtom;
+#else
+			if (t->findBinding(name, core->publicNamespace) != BIND_NONE)
+				return trueAtom;
+#endif
+
+			nameatom = name->atom();
+		}
+
+		ScriptObject* o = (obj&7)==kObjectType ? 
+				AvmCore::atomToScriptObject(obj) : 
+				this->toPrototype(obj);
+		do
+		{
+			if (o->hasAtomProperty(nameatom))
+				return trueAtom;
+		}
+		while ((o = o->getDelegate()) != NULL);
+		return falseAtom;
+	}
+
 	/**
 	 * implements ECMA implicit coersion.  returns the coerced value,
 	 * or throws a TypeError if coersion is not possible.
