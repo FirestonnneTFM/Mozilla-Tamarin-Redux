@@ -883,8 +883,16 @@ class AbcThunkGen:
 		return "abcclass_" + self.ns_prefix(c.qname.ns, True) + to_cname(c.qname.name)
 
 	def emitMethods(self, traits, niname):
+		# special-case the two oddballs of the group: String and Namespace
+		# don't descend from ScriptObject and so need a little extra love.
+		if str(traits.name) == "String":
+			nmout = "AVMTHUNK_NATIVE_METHOD_STRING"
+		elif str(traits.name) == "Namespace":
+			nmout = "AVMTHUNK_NATIVE_METHOD_NAMESPACE"
+		else:
+			nmout = "AVMTHUNK_NATIVE_METHOD"
 		if traits.init != None and traits.init.isNative():
-			self.out_c.println("AVMTHUNK_NATIVE_METHOD(%s, %s::%s)" % (traits.init.native_id_name, niname, "construct"+niname))
+			self.out_c.println("%s(%s, %s::%s)" % (nmout, traits.init.native_id_name, niname, "construct"+niname))
 		for j in range(0, len(traits.tmethods)):
 			m = traits.tmethods[j]
 			if m.isNative():
@@ -896,7 +904,7 @@ class AbcThunkGen:
 				# implementation is native, rather than pure AS3, but we currently do it regardless.
 				if m.override:
 					cname = traits.name.name + "_" + cname
-				self.out_c.println("AVMTHUNK_NATIVE_METHOD(%s, %s::%s)" % (m.native_id_name, niname, cname))
+				self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, niname, cname))
 
 	def emit(self, abc, name, out_h, out_c):
 		self.abc = abc;
