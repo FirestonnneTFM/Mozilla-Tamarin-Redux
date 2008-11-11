@@ -962,6 +962,14 @@ const int kBufferPadding = 16;
 		}
 
 		/**
+		 * implements ECMA as operator.  Returns the same value, or null.
+		 */
+		Atom astype(Atom atom, Traits* expected)
+		{
+			return istype(atom, expected) ? atom : nullObjectAtom;
+		}
+
+		/**
 		 * implementation of OP_increg, decreg, increment, decrement which correspond to
 		 * ++ and -- operators in AS.
 		 */

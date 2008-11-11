@@ -41,7 +41,7 @@ function fannkuch(n) {
    while (true) {
       // write-out the first 30 permutations
       if (check < 30){
-         var s = "";
+         var s="";
          for(var i=0; i<n; i++) s += (perm1[i]+1).toString();
          check++;
       }
@@ -89,6 +89,13 @@ function runAccessFannkuch() {
   var n = 8;
   var ret = fannkuch(n);
   var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-  return _sunSpiderInterval;
+  if (ret==22) {
+    return _sunSpiderInterval;
+  } else {
+    print("error: wrong return value, expecting fannkuch(8)=22 actual "+ret);
+    return -1;
+  }
 }
-print("metric time "+runAccessFannkuch());
+var time=runAccessFannkuch();
+if (time!=-1)
+  print("metric time "+runAccessFannkuch());

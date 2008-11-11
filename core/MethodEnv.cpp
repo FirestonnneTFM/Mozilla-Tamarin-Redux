@@ -442,31 +442,6 @@ namespace avmplus
         this->core()->stackOverflow(this);
     }
 
-	Traits* MethodEnv::toClassITraits(Atom atom)
-	{
-		switch (atom&7)
-		{
-		case kObjectType:
-		{
-			if( !AvmCore::isNull(atom) )
-			{
-				Traits* itraits = AvmCore::atomToScriptObject(atom)->traits()->itraits;
-				if (itraits == NULL)
-					toplevel()->throwTypeError(kIsTypeMustBeClassError);
-				return itraits;
-			}
-			// else fall through and report an error
-		}
-		default:
-            // TypeError in ECMA
-			// ISSUE the error message should say "whatever" is not a class
-			toplevel()->throwTypeError(
-					   (atom == undefinedAtom) ? kConvertUndefinedToObjectError :
-											kConvertNullToObjectError);
-			return NULL;
-		}
-	}
-
 	ArrayObject* MethodEnv::createRest(Atom* argv, int argc)
 	{
 		// create arguments Array using argv[param_count..argc]
@@ -1110,39 +1085,6 @@ namespace avmplus
 	}
 
 #endif // AVMPLUS_MOPS
-
-	Atom MethodEnv::in(Atom nameatom, Atom obj) const
-	{
-		AvmCore* core = method->core();
-		Traits *t = toplevel()->toTraits(obj); // includes null check
-
-		if(!core->isDictionaryLookup(nameatom, obj))
-		{
-			Stringp name = core->intern(nameatom);
-
-			// ISSUE should we try this on each object on the proto chain or just the first?
-#ifdef AVMPLUS_TRAITS_CACHE
-			TraitsBindingsp td = t->getTraitsBindings();
-			if (td->findBinding(name, core->publicNamespace) != BIND_NONE)
-				return trueAtom;
-#else
-			if (t->findBinding(name, core->publicNamespace) != BIND_NONE)
-				return trueAtom;
-#endif
-
-			nameatom = name->atom();
-		}
-
-		ScriptObject* o = (obj&7)==kObjectType ? AvmCore::atomToScriptObject(obj) : 
-				toplevel()->toPrototype(obj);
-		do
-		{
-			if (o->hasAtomProperty(nameatom))
-				return trueAtom;
-		}
-		while ((o = o->getDelegate()) != NULL);
-		return falseAtom;
-	}
 
 	// see 13.2 creating function objects
     ClassClosure* MethodEnv::newfunction(AbstractFunction *function,
@@ -1854,14 +1796,6 @@ namespace avmplus
 		toplevel()->throwTypeError(kCheckTypeFailedError, core()->atomToErrorString(atom), core()->toErrorString(expected));
 		return NULL;
     }
-
-	/**
-	 * implements ECMA as operator.  Returns the same value, or null.
-	 */
-    Atom MethodEnv::astype(Atom atom, Traits* expected)
-    {
-		return core()->istype(atom, expected) ? atom : nullObjectAtom;
-	}
 
 	VTable *MethodEnv::getActivation()
 	{

@@ -26,6 +26,8 @@
    http://shootout.alioth.debian.org/
    contributed by Isaac Gouy */
 
+var checkobj=new Object();
+
 function TreeNode(left,right,item){
    this.left = left;
    this.right = right;
@@ -72,7 +74,13 @@ function runAccessBinaryTrees() {
        }
     }
     ret = longLivedTree.itemCheck();
+    checkobj.longlived=ret;
+    checkobj.check=check;
     var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
     return _sunSpiderInterval;
 }
-print("metric time "+runAccessBinaryTrees());
+var time=runAccessBinaryTrees();
+if (checkobj.longlived==-1 && checkobj.check==-64)
+   print("metric time "+time);
+else
+   print("error: incorrect results running accessBinaryTrees longlived -1 != "+checkobj.longlived+" check -64 != "+checkobj.check);

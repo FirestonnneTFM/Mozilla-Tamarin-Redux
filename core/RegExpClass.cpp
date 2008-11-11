@@ -39,7 +39,6 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
-#define AVMPLUS_PCRE
 #include "pcre.h"
 
 namespace avmplus
