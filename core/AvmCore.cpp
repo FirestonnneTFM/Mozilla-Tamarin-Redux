@@ -915,19 +915,19 @@ return the result of the comparison ToPrimitive(x) == y.
 
 					// Walk all the way up the stack, one frame at a time, looking for
 					// one which will catch this exception.
-					for (callStackNode = callStack; callStackNode; callStackNode = callStackNode->next)
+					for (callStackNode = callStack; callStackNode; callStackNode = callStackNode->next())
 					{
-						MethodInfo* info = (MethodInfo*) callStackNode->info;
+						MethodInfo* info = (MethodInfo*) callStackNode->info();
 #ifdef AVMPLUS_WORD_CODE
-						ExceptionHandlerTable* exceptions = info->word_code.exceptions;
+						ExceptionHandlerTable* exceptions = info ? info->word_code.exceptions : NULL;
 #else
-						ExceptionHandlerTable* exceptions = info->exceptions;
+						ExceptionHandlerTable* exceptions = info ? info->exceptions : NULL;
 #endif
-						if (exceptions != NULL && callStackNode->eip && *callStackNode->eip)
+						if (exceptions != NULL && callStackNode->eip() && *callStackNode->eip())
 						{
 							// Check if this particular frame of the callstack
 							// is going to catch the exception.
-							if (findExceptionHandlerNoRethrow(info, *callStackNode->eip, exception) != NULL)
+							if (findExceptionHandlerNoRethrow(info, *callStackNode->eip(), exception) != NULL)
 								return true;
 						}
 					}
@@ -3405,7 +3405,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	#ifdef DEBUGGER
 	StackTrace* AvmCore::newStackTrace()
 	{
-		int depth = callStack ? callStack->depth : 0;
+		int depth = callStack ? callStack->depth() : 0;
 		int extra = depth > 0 ? sizeof(StackTrace::Element) * (depth-1) : 0;
 		StackTrace* stackTrace = new (GetGC(), extra) StackTrace();
 		if (stackTrace)
@@ -3414,11 +3414,9 @@ return the result of the comparison ToPrimitive(x) == y.
 			CallStackNode *curr = callStack;
 			StackTrace::Element *element = stackTrace->elements;
 			while (curr) {
-				element->info     = curr->info;
-				element->filename = curr->filename;
-				element->linenum  = curr->linenum;
+				element->set(*curr);
 				element++;
-				curr = curr->next;
+				curr = curr->next();
 			}
 		}
 		return stackTrace;

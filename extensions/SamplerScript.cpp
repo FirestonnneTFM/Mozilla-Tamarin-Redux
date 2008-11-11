@@ -397,10 +397,10 @@ namespace avmplus
 				if(core->sampler()->getSamples(num) == NULL)
 					return NULL;
 		
-				WBRC(gc(), f, ((char*)f + cc->nameOffset), uintptr(Stringp(e->info->name)));
-				if(e->filename) {
-					WBRC(gc(), f, ((char*)f + cc->fileOffset), e->filename);
-					*(uint32*)((char*)f + cc->lineOffset) = e->linenum;
+				WBRC(gc(), f, ((char*)f + cc->nameOffset), uintptr(e->infoname()));	// NOT e->info()->name() 
+				if(e->filename()) {
+					WBRC(gc(), f, ((char*)f + cc->fileOffset), e->filename());
+					*(uint32*)((char*)f + cc->lineOffset) = e->linenum();
 				}
 				stack->setUintProperty(i, f->atom());
 			}			

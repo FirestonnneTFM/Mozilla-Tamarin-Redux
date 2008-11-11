@@ -178,7 +178,6 @@ namespace avmplus
 		#define GCADDR(f) gcAddr((int (MMgc::GC::*)())(&f))
 		#define ENVADDR(f) envAddr((int (MethodEnv::*)())(&f))
 		#define TOPLEVELADDR(f) toplevelAddr((int (Toplevel::*)())(&f))
-		#define CALLSTACKADDR(f) callStackAddr((int (CallStackNode::*)())(&f))	
 		#define SCRIPTADDR(f) scriptAddr((int (ScriptObject::*)())(&f))
 		#define ARRAYADDR(f) arrayAddr((int (ArrayObject::*)())(&f))
 		#define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
@@ -224,11 +223,6 @@ namespace avmplus
 		}
 
 	#ifdef DEBUGGER
-		intptr_t  callStackAddr( int (CallStackNode::*f)() )
-		{
-			RETURN_METHOD_PTR(CallStackNode, f);
-		}
-		
 		intptr_t  debuggerAddr( int (Debugger::*f)() )
 		{
 			RETURN_METHOD_PTR(Debugger, f);

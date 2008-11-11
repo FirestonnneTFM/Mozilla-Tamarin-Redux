@@ -202,11 +202,6 @@ namespace avmplus
 		}
 
 	#ifdef DEBUGGER
-		sintptr CodegenMIR::callStackAddr( int (CallStackNode::*f)() )
-		{
-			RETURN_METHOD_PTR(CallStackNode, f);
-		}
-		
 		sintptr CodegenMIR::debuggerAddr( int (Debugger::*f)() )
 		{
 			RETURN_METHOD_PTR(Debugger, f);
@@ -1853,7 +1848,6 @@ namespace avmplus
 		#ifdef DEBUGGER
 		names->add(ENVADDR(MethodEnv::sendEnter), "MethodEnv::sendEnter");
 		names->add(ENVADDR(MethodEnv::sendExit), "MethodEnv::sendExit");
-		names->add(CALLSTACKADDR(CallStackNode::initialize), "CallStackNode::initialize");
 		names->add(DEBUGGERADDR(Debugger::debugFile), "Debugger::debugFile");
 		names->add(DEBUGGERADDR(Debugger::debugLine), "Debugger::debugLine");
 		names->add(DEBUGGERADDR(Debugger::_debugMethod), "Debugger::_debugMethod");

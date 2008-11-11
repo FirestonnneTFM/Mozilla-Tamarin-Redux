@@ -108,7 +108,9 @@ namespace avmplus
 		resolveSignature(toplevel);
 
 		#ifdef DEBUGGER
-		CallStackNode callStackNode(NULL, this, NULL, NULL, 0, NULL, NULL);
+		// just a fake CallStackNode here , so that if we throw a verify error, 
+		// we get a stack trace with the method being verified as its top entry
+		CallStackNode callStackNode(core(), this->name);
 		#endif /* DEBUGGER */
 
 		if (!body_pos)
@@ -172,7 +174,8 @@ namespace avmplus
 		#endif
 		
         #ifdef DEBUGGER
-		callStackNode.exit();
+		// no explicit exit call needed for fake CallStackNodes, they auto-cleanup in dtor
+		//callStackNode.exit();
         #endif /* DEBUGGER */
 	}
 	

@@ -263,7 +263,7 @@ namespace avmplus
 	#define AVMTHUNK_GET_COOKIE(env)	(static_cast<NativeMethod*>((env)->method)->nte.cookie)
 
 #ifdef DEBUGGER
-	#define AVMTHUNK_DEBUG_ENTER(env)	CallStackNode csn(0); (env)->debugEnter(argc, (uint32_t*)argv, 0, 0, &csn, 0, 0); 
+	#define AVMTHUNK_DEBUG_ENTER(env)	CallStackNode csn(CallStackNode::kEmpty); (env)->debugEnter(argc, (uint32_t*)argv, 0, 0, &csn, 0, 0); 
 	#define AVMTHUNK_DEBUG_EXIT(env)	(env)->debugExit(&csn);
 #else
 	#define AVMTHUNK_DEBUG_ENTER(env)	

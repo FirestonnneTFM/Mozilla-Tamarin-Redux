@@ -942,7 +942,6 @@ namespace avmplus
 		#define GCADDR(f) gcAddr((int (MMgc::GC::*)())(&f))
 		#define ENVADDR(f) envAddr((int (MethodEnv::*)())(&f))
 		#define TOPLEVELADDR(f) toplevelAddr((int (Toplevel::*)())(&f))
-		#define CALLSTACKADDR(f) callStackAddr((int (CallStackNode::*)())(&f))	
 		#define SCRIPTADDR(f) scriptAddr((int (ScriptObject::*)())(&f))
 		#define ARRAYADDR(f) arrayAddr((int (ArrayObject::*)())(&f))
 		#define VECTORINTADDR(f) vectorIntAddr((int (IntVectorObject::*)())(&f))
@@ -958,7 +957,6 @@ namespace avmplus
 		static sintptr envAddr( int (MethodEnv::*f)() );
 		static sintptr toplevelAddr( int (Toplevel::*f)() );
 	#ifdef DEBUGGER
-		static sintptr callStackAddr( int (CallStackNode::*f)() );
 		static sintptr debuggerAddr( int (Debugger::*f)() );
 	#endif
 		static sintptr efAddr( int (ExceptionFrame::*f)() );
