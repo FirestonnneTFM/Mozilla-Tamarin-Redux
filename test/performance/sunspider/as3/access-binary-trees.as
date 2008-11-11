@@ -32,7 +32,7 @@ package {
 		private var left:TreeNode
 		private var right:TreeNode;
 		private var item:int;
-		
+
 		public function TreeNode(left:TreeNode, right:TreeNode, item:int){
 			this.left = left;
 			this.right = right;
@@ -79,15 +79,20 @@ package {
 		            check += TreeNode.bottomUpTree(-i,depth).itemCheck();
 		        }
 		    }
-
-		    ret = longLivedTree.itemCheck();
 		}
 
-
+		ret = longLivedTree.itemCheck();
+		checkobj.longlived=ret;
+		checkobj.check=check;
 		var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 		return _sunSpiderInterval;
 	}
 
-	print("metric time " + runAccessBinaryTrees());
+	var checkobj:Object=new Object();		
+	var time:int=runAccessBinaryTrees();
+	if (checkobj.longlived==-1 && checkobj.check==-64)
+	   print("metric time "+time);
+	else
+	   print("error: incorrect results running accessBinaryTrees longlived -1 != "+checkobj.longlived+" check -64 != "+checkobj.check);
 
 }
