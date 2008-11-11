@@ -59,8 +59,8 @@ js_output_f=False
 
 globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider',
           'ascargs':'','vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':'',
-          'perfm':False, 'avmname':'avm', 'avm2name':'avm2', 'memory':False,'optimize':True}
-          
+          'perfm':False, 'avmname':'avm', 'avm2name':'avm2', 'memory':False,'optimize':True,'largerIsFaster':False}
+
 if 'AVM' in environ:
     globs['avm'] = environ['AVM'].strip()
 if 'AVM2' in environ:
@@ -104,6 +104,7 @@ def usage(c):
     print " -d --socketlog     logs results to a socket server"
     print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
     print " -m --memory        logs the high water memory mark"
+    print "    --larger        larger values are better than smaller values"
     print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
     print "    --ascargs       args to pass to asc on rebuild of test files"
     print "    --vmargs        args to pass to vm"
@@ -115,7 +116,7 @@ def usage(c):
 try:
   opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:m", ["verbose","avm=","asc=","globalabc=","help",
                 "forcerebuild","ascargs=","vmargs=","log","socketlog","avm2=","vmargs2=","iterations=",
-                "config=","runtime=","vmversion=","perfm", "avmname=","avm2name=","nooptimize","memory"])
+                "config=","runtime=","vmversion=","perfm", "avmname=","avm2name=","nooptimize","memory","larger"])
 except:
     usage(2)
 
@@ -174,6 +175,8 @@ for o, v in opts:
         globs['avm2name'] = v
     elif o in ('--nooptimize'):
         globs['optimize'] = False
+    elif o in ('--larger'):
+        globs['largerIsFaster']= True;
 
 def istest(f):
     return f.endswith(".as")
@@ -215,7 +218,14 @@ def compile_test(as_file):
         cmd = "java -jar " + asc
     else:
         cmd = asc
-    cmd += " " + ascargs
+        
+    # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
+    arglist = parseArgStringToList(ascargs)
+    (dir, file) = split(as_file)
+    loadAscArgs(arglist, dir, as_file)
+    
+    for arg in arglist:
+        cmd += ' %s' % arg
     cmd += " -import " + globalabc
     if globs['optimize']:
         cmd += " -optimize"
@@ -283,6 +293,79 @@ def tDist(n):
     if (n > tMax):
         return tLimit
     return tDistribution[n]
+    
+
+# 3 functions to deal with .asc_args files that specify args for compilation
+def parseArgStringToList(argStr):
+    args = argStr.strip().split(' ')
+    # recombine any args that have spaces in them
+    argList = []
+    for a in args:
+        if a == '':
+            pass
+        elif a[0] == '-':
+            argList.append(a)
+        else:   # append the space and text to the last arg
+            argList[len(argList)-1] += ' ' + a
+    return argList
+
+def parseAscArgs(ascArgFile, currentdir):
+    # reads an .asc_args file and returns a tuple of the arg mode (override or merge) and a list of args
+    f = open(ascArgFile,'r')
+    while True: # skip comment lines
+        ascargs = f.readline()
+        if (ascargs[0] != '#'):
+            break
+    ascargs = ascargs.split(':')
+    ascargs[0] = ascargs[0].strip()
+    if (len(ascargs) == 1): #treat no keyword as a merge
+        ascargs.insert(0,'merge')
+    elif (ascargs[0] != 'override') or (ascargs[0] != 'merge'): # default to merge if mode not recognized
+        ascargs[0] = 'merge'
+    # replace the $DIR keyword with actual directory
+    ascargs[1] = string.replace(ascargs[1], '$DIR', currentdir)
+    if ascargs[1].find('$SHELLABC') != -1:  
+        if not isfile(globs['shellabc']):   # TODO: not the best place to check for this
+            exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % globs['shellabc'])
+        ascargs[1] = string.replace(ascargs[1], '$SHELLABC', globs['shellabc'])
+    ascargs[1] = parseArgStringToList(ascargs[1])
+    removeArgList = []
+    argList = []
+    for a in ascargs[1]:
+        if a[0:3] == '-no':
+            removeArgList.append(a[3:])
+        else:
+            argList.append(a)
+
+    return ascargs[0], argList, removeArgList
+    
+def loadAscArgs(arglist,dir,file):
+    # It is possible that file is actually a partial path rooted to acceptance,
+    # so make sure that we are only dealing with the actual filename
+    file = split(file)[1]
+    mode = ''
+    newArgList = []
+    removeArgList = []
+    # Loads an asc_args file and modifies arglist accordingly
+    if file and isfile('%s/%s.asc_args' % (dir, file)):  #file takes precendence over directory
+        mode, newArgList, removeArgList = parseAscArgs('%s/%s.asc_args' % (dir, file), dir)
+    elif isfile(dir+'/dir.asc_args'):
+        mode, newArgList, removeArgList = parseAscArgs(dir+'/dir.asc_args', dir)
+    elif isfile('./dir.asc_args'):
+        mode, newArgList, removeArgList = parseAscArgs('./dir.asc_args', './')
+    
+    if mode == 'merge':
+        arglist.extend(newArgList)
+    elif mode == 'override':
+        arglist = newArgList
+    # remove any duplicate args
+    arglist = list(set(arglist))
+    if removeArgList:
+        for removeArg in removeArgList:
+            try:
+                arglist.remove(removeArg)
+            except:
+                pass
 
 
 # ================================================
@@ -431,6 +514,7 @@ for ast in tests:
     result1list=[]
     result2list=[]
     resultList=[]
+    resultList2=[]
     rl1 = []
     rl2 = []
     if globs['memory'] and vmargs.find("-memstats")==-1:
@@ -471,9 +555,15 @@ for ast in tests:
                 if not globs['memory'] and "metric" in line:
                     result1list=line.rsplit()
                     if len(result1list)>2:
-                        resultList.append(result1list[2])
-                        if result1>float(result1list[2]):
-                            result1=float(result1list[2])
+                        resultList.append(int(result1list[2]))
+                        '''
+                        if globs['largerIsFaster']:
+                            if result1<float(result1list[2]):
+                                result1=float(result1list[2])
+                        else:
+                            if result1>float(result1list[2]):
+                                result1=float(result1list[2])
+                        '''
                         metric=result1list[1]
                 elif globs['perfm']:
                     parsePerfm(line, perfm1Dict)
@@ -500,16 +590,31 @@ for ast in tests:
                         result2list=line.rsplit()
                         if len(result2list)>2:
                             resultList2.append(int(result1list[2]))
-                            if result2 > int(result2list[2]):
-                                result2=float(result2list[2])
+                            '''
+                            if globs['largerIsFaster']:
+                                if result2 < int(result2list[2]):
+                                    result2=float(result2list[2])
+                            else:
+                                if result2 > int(result2list[2]):
+                                    result2=float(result2list[2])
+                            '''
                     elif globs['perfm']:
                         parsePerfm(line, perfm2Dict)
+            # calculate current best result
+            if globs['largerIsFaster']:
+                result1 = max(resultList)
+                if resultList2:
+                    result2 = max(resultList2)
+            else:
+                result1 = min(resultList)
+                if resultList2:
+                    result2 = min(resultList2)
             if globs['memory']:
                 if memoryhigh<=0:
                     spdup = 9999
                 else:
                     spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
-            else:
+            elif len(avm2)>0:
                 if result1==0:
                     spdup = 9999
                 else:
@@ -519,7 +624,8 @@ for ast in tests:
         except:
             print formatExceptionInfo()
             exit(-1)
-
+    # end for i in range(iterations)
+    
     if globs['memory']:
         if len(avm2)>0:
             log_print("%-50s %7s %7s %7.1f" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup))
