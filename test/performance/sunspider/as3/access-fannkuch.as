@@ -12,6 +12,7 @@ package {
 	   var maxPerm:Array = new Array(n);
 	   var maxFlipsCount:int = 0;
 	   var m:int = n - 1;
+           var s:String = "";
 
 	   for (var i:int = 0; i < n; i++) perm1[i] = i;
 	   var r:int = n;
@@ -19,7 +20,6 @@ package {
 	   while (true) {
 	      // write-out the first 30 permutations
 	      if (check < 30){
-	         var s:String = "";
 	         for(var i:int=0; i<n; i++) s += (perm1[i]+1).toString();
 	         check++;
 	      }
@@ -63,12 +63,21 @@ package {
 	   }
 	}
 	function runAccessFannkuch():int {
-	var _sunSpiderStartDate:int = getTimer();
+	  var _sunSpiderStartDate:int = getTimer();
 	  var n:int = 8;
 	  var ret:int = fannkuch(n);
 	  var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-	  return _sunSpiderInterval;
+	  if (ret==22) {
+	      return _sunSpiderInterval;
+          } else {
+   	      print("error expected fannkuch(8)=22 got "+ret);
+              return -1;
+          }
 	}
-	print("metric time "+runAccessFannkuch());
+	
+	var time:int=runAccessFannkuch();
+	if (time!=-1) {
+	    print("metric time "+time);
+	}
 
 }

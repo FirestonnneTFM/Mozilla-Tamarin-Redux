@@ -38,7 +38,6 @@
 
 #include "avmplus.h"
 
-#define AVMPLUS_PCRE
 #include "pcre.h"
 
 // todo figure out what to do about all the new/delete in here
