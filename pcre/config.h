@@ -221,9 +221,6 @@ bool isUnicodeWhiteSpace(unsigned short x);
 #define VERSION "7.3"
 #endif // VERSION
 
-// AVMPLUS_PCRE is #defined for any code changes avmplus requires
-#define AVMPLUS_PCRE
-
 //#define PCRE_DEBUG
 
 /* Define to empty if `const' does not conform to ANSI C. */

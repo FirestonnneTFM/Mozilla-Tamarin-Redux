@@ -46,6 +46,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PCRE_PRERELEASE     
 #define PCRE_DATE           2007-08-28
 
+// AVMPLUS_PCRE is #defined for any code changes avmplus requires
+#define AVMPLUS_PCRE
+
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE, the appropriate
 export setting is defined in pcre_internal.h, which includes this file. So we
