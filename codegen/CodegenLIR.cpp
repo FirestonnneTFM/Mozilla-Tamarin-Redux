@@ -3159,7 +3159,7 @@ namespace avmplus
 				// sp[0] = core->astype(sp[0], traits)
 				LIns* obj = loadAtomRep(op2);
 				LIns* i1 = callIns(FUNCTIONID(astype), 3,
-					env_param,
+					coreAddr,
 					obj,
 					InsConst(op1)); // traits
 
@@ -3175,14 +3175,13 @@ namespace avmplus
 				//sp--;
 				LIns* type = loadAtomRep(sp);
 
-				LIns* envarg = env_param;
 				LIns* itraits = callIns(FUNCTIONID(toClassITraits), 2,
-					envarg, type);
+					loadToplevel(), type);
 
 				LIns* obj = loadAtomRep(sp-1);
 
 				LIns* i3 = callIns(FUNCTIONID(astype), 3,
-					envarg, obj, itraits);
+					coreAddr, obj, itraits);
 
 				i3 = atomToNativeRep(result, i3);
 				localSet(sp-1, i3);
@@ -3279,8 +3278,9 @@ namespace avmplus
                 PERFM_NVPROF("emit(in",1);
 				LIns* lhs = loadAtomRep(sp-1);
 				LIns* rhs = loadAtomRep(sp);
+				LIns* toplevel = loadToplevel();
 				LIns* out = callIns(FUNCTIONID(in), 3,
-					env_param, lhs, rhs);
+					toplevel, lhs, rhs);
 				out = atomToNativeRep(result, out);
 				localSet(sp-1, out);
 				break;
@@ -3309,7 +3309,7 @@ namespace avmplus
 				LIns* type = loadAtomRep(sp);
 
 				LIns* traits = callIns(FUNCTIONID(toClassITraits), 2,
-					env_param, type);
+					loadToplevel(), type);
 
 				LIns* obj = loadAtomRep(sp-1);
 

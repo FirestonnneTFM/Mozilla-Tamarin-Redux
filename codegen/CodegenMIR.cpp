@@ -1969,7 +1969,7 @@ namespace avmplus
 		names->add(COREADDR(AvmCore::toUInt32), "AvmCore::toUInt32");
 		names->add(COREADDR(AvmCore::istypeAtom), "AvmCore::istypeAtom");
 
-		names->add(ENVADDR(MethodEnv::astype), "MethodEnv::astype");
+		names->add(COREADDR(AvmCore::astype), "AvmCore::astype");
 		names->add(TOPLEVELADDR(Toplevel::instanceof), "Toplevel::instanceof");
 		names->add(TOPLEVELADDR(Toplevel::getproperty), "Toplevel::getproperty");
 		names->add(ARRAYADDR(ArrayObject::_getUintProperty), "ArrayObject::_getUintProperty");
@@ -1981,12 +1981,12 @@ namespace avmplus
 		names->add(ENVADDR(MethodEnv::npe), "MethodEnv::npe");
 		names->add(ENVADDR(MethodEnv::nullcheck), "MethodEnv::nullcheck");
 		names->add(ENVADDR(MethodEnv::interrupt), "MethodEnv::interrupt");
-		names->add(ENVADDR(MethodEnv::toClassITraits), "MethodEnv::toClassITraits");
+		names->add(TOPLEVELADDR(Toplevel::toClassITraits), "Toplevel::toClassITraits");
 		names->add(COREADDR(AvmCore::newObject), "AvmCore::newObject");
 		names->add(ENVADDR(MethodEnv::newActivation), "MethodEnv::newActivation");
 		names->add(ENVADDR(MethodEnv::delproperty), "MethodEnv::delproperty");
 		names->add(ENVADDR(MethodEnv::delpropertyHelper), "MethodEnv::delpropertyHelper");
-		names->add(ENVADDR(MethodEnv::in), "MethodEnv::in");
+		names->add(TOPLEVELADDR(Toplevel::in_operator), "Toplevel::in_operator");
 
 		// exception handling
 		names->add(COREADDR(AvmCore::beginCatch), "AvmCore::beginCatch");
@@ -4975,8 +4975,8 @@ namespace avmplus
 			{
 				// sp[0] = core->astype(sp[0], traits)
 				OP* obj = loadAtomRep(op2);
-				OP* i1 = callIns(MIR_cmop, ENVADDR(MethodEnv::astype), 3,
-					ldargIns(_env),
+				OP* i1 = callIns(MIR_cmop, COREADDR(AvmCore::astype), 3,
+					InsConst((uintptr)core),
 					obj,
 					InsConst(op1)); // traits
 
@@ -4991,14 +4991,13 @@ namespace avmplus
 				//sp--;
 				OP* type = loadAtomRep(sp);
 
-				OP* envarg = ldargIns(_env);
-				OP* itraits = callIns(MIR_cmop, ENVADDR(MethodEnv::toClassITraits), 2,
-					envarg, type);
+				OP* itraits = callIns(MIR_cmop, TOPLEVELADDR(Toplevel::toClassITraits), 2,
+					loadToplevel(ldargIns(_env)), type);
 
 				OP* obj = loadAtomRep(sp-1);
 
-				OP* i3 = callIns(MIR_cmop, ENVADDR(MethodEnv::astype), 3,
-					envarg, obj, itraits);
+				OP* i3 = callIns(MIR_cmop, COREADDR(AvmCore::astype), 3,
+					InsConst((uintptr)core), obj, itraits);
 
 				i3 = atomToNativeRep(result, i3);
 				localSet(sp-1, i3);
@@ -5085,8 +5084,9 @@ namespace avmplus
 			{
 				OP* lhs = loadAtomRep(sp-1);
 				OP* rhs = loadAtomRep(sp);
-				OP* out = callIns(MIR_cm, ENVADDR(MethodEnv::in), 3,
-					ldargIns(_env), lhs, rhs);
+				OP* toplevel = loadToplevel(ldargIns(_env));
+				OP* out = callIns(MIR_cm, TOPLEVELADDR(Toplevel::in_operator), 3,
+					toplevel, lhs, rhs);
 				out = atomToNativeRep(result, out);
 				localSet(sp-1, out);
 				break;
@@ -5112,8 +5112,8 @@ namespace avmplus
 				//sp--;
 				OP* type = loadAtomRep(sp);
 
-				OP* traits = callIns(MIR_cmop, ENVADDR(MethodEnv::toClassITraits), 2,
-					ldargIns(_env), type);
+				OP* traits = callIns(MIR_cmop, TOPLEVELADDR(Toplevel::toClassITraits), 2,
+					loadToplevel(ldargIns(_env)), type);
 
 				OP* obj = loadAtomRep(sp-1);
 
