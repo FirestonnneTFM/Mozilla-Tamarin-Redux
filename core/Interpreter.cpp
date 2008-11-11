@@ -602,9 +602,13 @@ namespace avmplus
 		Atom* volatile scopeBase = framep + local_count;
 		Atom* volatile withBase = NULL;
 
-		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
-		CallStackNode callStackNode(env, info, framep, 0, argc, ap, 0 /* later changed to 'pc' */);
-		// don't allow entry into the debugger until we have setup the frame
+		intptr_t volatile expc = 0;
+		volatile int32_t scopeDepth = 0;
+
+		#if defined(DEBUGGER)
+		CallStackNode callStackNode(env, framep, /*frameTraits*/NULL, argc, ap, &expc, &scopeDepth);
+		#elif defined(FEATURE_SAMPLER)
+		CallStackNode callStackNode(env);
 		#endif
 
 		CodeContextAtom savedCodeContext = core->codeContextAtom;
@@ -681,7 +685,6 @@ namespace avmplus
 		}
 
 		volatile int outer_depth = scope->getSize();
-		volatile int32_t scopeDepth = 0;
 	
 		// make sure scope chain depth is right before entering.
 		volatile int initialScopeDepth = scopeDepth;
@@ -700,7 +703,7 @@ namespace avmplus
 		#ifdef DEBUGGER
 		Debugger* debugger = core->debugger;
 		if (core->callStack)
-			core->callStack->framep = framep;
+			core->callStack->set_framep(framep);
 
 		// notify the debugger that we are entering a new frame.
 		env->debugEnter(argc, ap, NULL, local_count, NULL, framep, 0);  // call it but make sure that callStackNode is not re-init'd
@@ -715,12 +718,6 @@ namespace avmplus
 #else
 		const byte* pc = code_start;
 #endif
-		intptr_t volatile expc=0;
-
-		#ifdef DEBUGGER
-		callStackNode.eip = &expc;
-		callStackNode.scopeDepth = &scopeDepth;
-		#endif
 
 		// Mask that can be XOR'd to flip a boolean atom
 		const int booleanNotMask  = trueAtom^falseAtom;
@@ -3364,9 +3361,9 @@ namespace avmplus
 		// opcode
 		core->console << "  ";
 #ifdef DEBUGGER
-		if (core->debugger && core->callStack && core->callStack->filename)
+		if (core->debugger && core->callStack && core->callStack->filename())
 		{
-			core->console << '[' << core->callStack->filename << ':' << (uint32_t)core->callStack->linenum << "] ";
+			core->console << '[' << core->callStack->filename() << ':' << (uint32_t)core->callStack->linenum() << "] ";
 		}
 #endif
 		core->console << (int)off << ':';

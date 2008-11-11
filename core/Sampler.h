@@ -106,7 +106,7 @@ namespace avmplus
 		void initSampling();
 
 		void createFakeFunction(const char *name);
-		AbstractFunction *getFakeFunction(const char *name);
+		Stringp getFakeFunctionName(const char* name);
 
 		void presweep();
 		void postsweep();
@@ -158,7 +158,6 @@ namespace avmplus
 		void sample();
 
 		uintptr timerHandle;
-		Hashtable *fakeMethodInfos; 
 		MMgc::GCHashtable uids;
 		MMgc::GCHashtable* ptrSamples;
 		
@@ -170,9 +169,12 @@ namespace avmplus
 		int sampleSpaceCheck(bool callback_ok = true);
 		
 		void writeRawSample(SampleType sampleType);
+
+	private:
+		List<Stringp> m_fakeMethodNames; 
 	};
 
-#define SAMPLE_FRAME(_strp, _core) avmplus::FakeCallStackNode __fcsn((avmplus::AvmCore*)_core, _strp)
+#define SAMPLE_FRAME(_strp, _core) avmplus::CallStackNode __fcsn((avmplus::AvmCore*)_core, _strp)
 #define SAMPLE_CHECK()  __fcsn.sampleCheck();
 
 #else
