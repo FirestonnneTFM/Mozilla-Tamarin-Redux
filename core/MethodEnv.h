@@ -117,9 +117,6 @@ namespace avmplus
 		void interrupt();
         void stkover();
 
-		/** returns the instance traits of the factorytype of the passed atom */
-		Traits* toClassITraits(Atom atom);
-
 		ArrayObject* createRest(Atom* argv, int argc);
 		Atom getpropertylate_i(Atom obj, int index) const;
 		Atom getpropertylate_u(Atom obj, uint32 index) const;
@@ -191,11 +188,6 @@ namespace avmplus
 		//inline static int sxi16(int value) { return (value << 16) >> 16; }
 #endif
 
-		/**
-		 * operator in from ES3
-		 */
-		Atom in(Atom name, Atom obj) const;
-		
 		/**
 		 * OP_newfunction
 		 * see 13.2 creating function objects
@@ -274,12 +266,6 @@ namespace avmplus
 
 		ScriptObject* coerceAtom2SO(Atom atom, Traits *expected) const;
 
-		/**
-		 * same as coerce, but returns coerced undefined instead
-		 * of throwing an exception
-		 */
-		Atom astype(Atom atom, Traits* expected);
-		
 #ifdef FEATURE_SAMPLER
 		void debugEnter(int argc, uint32 *ap, 
 			Traits**frameTraits, int localCount,

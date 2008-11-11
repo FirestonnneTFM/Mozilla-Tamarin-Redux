@@ -2552,7 +2552,7 @@ namespace avmplus
 			INSTR(astype) {
 				SAVE_EXPC;
 				GET_MULTINAME_PTR(multiname, U30ARG);
-				sp[0] = env->astype(sp[0], getTraits(multiname, pool, toplevel, core));
+				sp[0] = core->astype(sp[0], getTraits(multiname, pool, toplevel, core));
 				restore_dxns();
 				NEXT;
 			}
@@ -2562,7 +2562,7 @@ namespace avmplus
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				sp[0] = env->astype(lhs, env->toClassITraits(rhs));
+				sp[0] = core->astype(lhs, toplevel->toClassITraits(rhs));
 				restore_dxns();
                 NEXT;
 			}
@@ -2612,7 +2612,7 @@ namespace avmplus
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				sp[0] = core->istypeAtom(lhs, env->toClassITraits(rhs));
+				sp[0] = core->istypeAtom(lhs, toplevel->toClassITraits(rhs));
 				restore_dxns();
                 NEXT;
 			}
@@ -2754,7 +2754,7 @@ namespace avmplus
 				Atom lhs = sp[-1];
 				Atom rhs = sp[0];
 				sp--;
-				sp[0] = env->in(lhs, rhs);
+				sp[0] = toplevel->in_operator(lhs, rhs);
 				restore_dxns();
 				NEXT;
 			}
