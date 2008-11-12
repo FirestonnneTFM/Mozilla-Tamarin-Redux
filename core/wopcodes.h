@@ -85,7 +85,6 @@ namespace avmplus
 		WOP_pushscope = 0x30,
 		WOP_pushnamespace = 0x31,
 		WOP_hasnext2 = 0x32,
-#ifdef AVMPLUS_MOPS
 		WOP_li8 = 0x35,
 		WOP_li16 = 0x36,
 		WOP_li32 = 0x37,
@@ -96,7 +95,6 @@ namespace avmplus
 		WOP_si32 = 0x3C,
 		WOP_sf32 = 0x3D,
 		WOP_sf64 = 0x3E,
-#endif
 		WOP_newfunction = 0x40,
 		WOP_call = 0x41,
 		WOP_construct = 0x42,
@@ -111,11 +109,9 @@ namespace avmplus
 		WOP_callproplex = 0x4C,
 		WOP_callsupervoid = 0x4E,
 		WOP_callpropvoid = 0x4F,
-#ifdef AVMPLUS_MOPS
 		WOP_sxi1 = 0x50,
 		WOP_sxi8 = 0x51,
 		WOP_sxi16 = 0x52,
-#endif
 		WOP_applytype = 0x53,
 		WOP_newobject = 0x55,
 		WOP_newarray = 0x56,
@@ -150,14 +146,9 @@ namespace avmplus
 		WOP_convert_o = 0x77,
 		WOP_checkfilter = 0x78,
 		WOP_coerce = 0x80,
-		WOP_coerce_b = 0x81,
-		WOP_coerce_a = 0x82,
-		WOP_coerce_i = 0x83,
-		WOP_coerce_d = 0x84,
 		WOP_coerce_s = 0x85,
 		WOP_astype = 0x86,
 		WOP_astypelate = 0x87,
-		WOP_coerce_u = 0x88,
 		WOP_coerce_o = 0x89,
 		WOP_negate = 0x90,
 		WOP_increment = 0x91,
@@ -205,7 +196,7 @@ namespace avmplus
 		WOP_setlocal1 = 0xD5,
 		WOP_setlocal2 = 0xD6,
 		WOP_setlocal3 = 0xD7,
-#  if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 		WOP_debug = 0xEF,
 		WOP_debugline = 0xF0,
 		WOP_debugfile = 0xF1,

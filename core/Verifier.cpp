@@ -2657,28 +2657,28 @@ namespace avmplus
 		if (slotType == core->traits.int_ctraits)
 		{
 			JIT_ONLY( if (jit) emitCoerce(INT_TYPE, sp) );
-			XLAT_ONLY( if (translator) translator->emitOp0(WOP_coerce_i) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_i) );
 			state->setType(sp, INT_TYPE, true); 
 			goto fast_path;
 		}
 		if (slotType == core->traits.uint_ctraits)
 		{
 			JIT_ONLY( if (jit) emitCoerce(UINT_TYPE, sp) );
-			XLAT_ONLY( if (translator) translator->emitOp0(WOP_coerce_u) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_u) );
 			state->setType(sp, UINT_TYPE, true);
 			goto fast_path;
 		}
 		if (slotType == core->traits.number_ctraits)
 		{
 			JIT_ONLY( if (jit) emitCoerce(NUMBER_TYPE, sp) );
-			XLAT_ONLY( if (translator) translator->emitOp0(WOP_coerce_d) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_d) );
 			state->setType(sp, NUMBER_TYPE, true);
 			goto fast_path;
 		}
 		if (slotType == core->traits.boolean_ctraits)
 		{
 			JIT_ONLY( if (jit) emitCoerce(BOOLEAN_TYPE, sp) );
-			XLAT_ONLY( if (translator) translator->emitOp0(WOP_coerce_b) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_b) );
 			state->setType(sp, BOOLEAN_TYPE, true); 
 			goto fast_path;
 		}
