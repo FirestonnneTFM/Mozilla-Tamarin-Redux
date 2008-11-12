@@ -281,14 +281,14 @@ namespace avmplus
 		{   -1,  0    W(0)                   N("OP_0x7E") },
 		{   -1,  0    W(0)                   N("OP_0x7F") },
 		{    1,  1    W(WOP_coerce)          N("coerce") },
-		{    0,  1    W(WOP_coerce_b)        N("coerce_b") },
-		{    0,  1    W(WOP_coerce_a)        N("coerce_a") },
-		{    0,  1    W(WOP_coerce_i)        N("coerce_i") },
-		{    0,  1    W(WOP_coerce_d)        N("coerce_d") },
-		{    0,  1    W(WOP_coerce_s)        N("coerce_s") },
+		{    0,  1    W(WOP_convert_b)       N("coerce_b") },   // convert_b is the same operation as coerce_b
+		{    0,  1    W(0)                   N("coerce_a") },
+		{    0,  1    W(WOP_convert_i)       N("coerce_i") },   // convert_i is the same operation as coerce_i
+		{    0,  1    W(WOP_convert_d)       N("coerce_d") },
+		{    0,  1    W(WOP_coerce_s)        N("coerce_s") },   // convert_d is the same operation as coerce_d
 		{    1,  1    W(WOP_astype)          N("astype") },
 		{    0,  1    W(WOP_astypelate)      N("astypelate") },
-		{    0,  1    W(WOP_coerce_u)        N("coerce_u") },
+		{    0,  1    W(WOP_convert_u)       N("coerce_u") },   // convert_u is the same operation as coerce_u
 		{    0,  1    W(WOP_coerce_o)        N("coerce_o") },
 		{   -1,  0    W(0)                   N("OP_0x8A") },
 		{   -1,  0    W(0)                   N("OP_0x8B") },
