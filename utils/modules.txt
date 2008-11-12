@@ -149,6 +149,7 @@ regexp set_bit
 regexp adjust_recurse
 regexp read_repeat_counts
 
+zlib zlib-arm: *
 zlib zlib:deflate.obj
 zlib zlib:inflate.obj
 zlib zlib:trees.obj
