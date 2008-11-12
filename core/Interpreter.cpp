@@ -71,6 +71,15 @@ namespace avmplus
 #define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0) // less control flow but more registers -- which is better?
 //#define IS_BOTH_INTEGER(a,b) ((IS_INTEGER(a) && IS_INTEGER(b))
 #define IS_BOTH_DOUBLE(a,b)  ((((a & kDoubleType) | (b ^ kDoubleType)) & 7) == 0)
+
+#ifdef AVMPLUS_WORD_CODE
+#  define WORD_CODE_ONLY(x)  x
+#  define ABC_CODE_ONLY(x)
+#else
+#  define WORD_CODE_ONLY(x)
+#  define ABC_CODE_ONLY(x)   x
+#endif
+	
 	
 #ifndef AVMPLUS_WORD_CODE
 	inline int readS24(const byte *pc) {
@@ -350,14 +359,14 @@ namespace avmplus
 			 XXX(0x7E)
 			 XXX(0x7F)
 			 III(0x80, L_coerce)
-			 III(0x81, L_coerce_b)
+			 III(0x81, L_convert_b)   // coerce_b -> convert_b, they are the same
 			 XXX(0x82) /* OP_coerce_a */
-			 III(0x83, L_coerce_i)
-			 III(0x84, L_coerce_d)
+			 III(0x83, L_convert_i)   // coerce_i -> convert_i, they are the same
+			 III(0x84, L_convert_d)   // coerce_d -> convert_d, they are the same
 			 III(0x85, L_coerce_s)
 			 III(0x86, L_astype)
 			 III(0x87, L_astypelate)
-			 III(0x88, L_coerce_u)
+			 III(0x88, L_convert_u)   // coerce_u -> convert_u, they are the same
 			 III(0x89, L_coerce_o)
 			 XXX(0x8A)
 			 XXX(0x8B)
@@ -1061,41 +1070,39 @@ namespace avmplus
 				NEXT;
 			}
 
-#define COERCE_D_IMPL() \
-	if (!IS_DOUBLE(sp[0])) { \
-		SAVE_EXPC; \
-		sp[0] = core->numberAtom(sp[0]); \
-		restore_dxns(); \
-	}
-
+#ifndef AVMPLUS_WORD_CODE
             INSTR(coerce_d) {
-				COERCE_D_IMPL();
-				NEXT;
+				goto convert_d_impl;
 			}
+#endif
 
             INSTR(convert_d) {
-				COERCE_D_IMPL();
+			ABC_CODE_ONLY( convert_d_impl: )
+				if (!IS_DOUBLE(sp[0])) {
+					SAVE_EXPC;
+					sp[0] = core->numberAtom(sp[0]);
+					restore_dxns();
+				}
                 NEXT;
 			}
 
-#define COERCE_B_IMPL() \
-	Atom lhs = sp[0]; \
-	if (IS_BOOLEAN(lhs)) \
-		; \
-	else if (IS_INTEGER(lhs)) \
-		sp[0] = lhs == kIntegerType ? falseAtom : trueAtom; \
-	else \
-		sp[0] = core->booleanAtom(lhs);
-
             INSTR(convert_b) {
-				COERCE_B_IMPL();
+			ABC_CODE_ONLY( convert_b_impl: )
+				Atom lhs = sp[0];
+				if (IS_BOOLEAN(lhs))
+					;
+				else if (IS_INTEGER(lhs))
+					sp[0] = lhs == kIntegerType ? falseAtom : trueAtom;
+				else
+					sp[0] = core->booleanAtom(lhs);
 				NEXT;
 			}
 
+#ifndef AVMPLUS_WORD_CODE
             INSTR(coerce_b) {
-				COERCE_B_IMPL();
-                NEXT;
+				goto convert_b_impl;
 			}
+#endif
 
             INSTR(convert_o) {
 				if (AvmCore::isNullOrUndefined(sp[0])) {
@@ -1255,14 +1262,6 @@ namespace avmplus
 		NEXT; \
 	}
 
-#ifdef AVMPLUS_WORD_CODE
-#  define WORD_CODE_ONLY(x)  x
-#  define ABC_CODE_ONLY(x)   (void)0
-#else
-#  define WORD_CODE_ONLY(x)  (void)0
-#  define ABC_CODE_ONLY(x)   x
-#endif
-					
 			INSTR(increment) {
 				Atom lhs = *sp;
 				FAST_INC_MAYBE(lhs,sp[0]);
@@ -2689,17 +2688,14 @@ namespace avmplus
 				NEXT;
 			}
 
+#ifndef AVMPLUS_WORD_CODE
 			INSTR(coerce_i) {
-				Atom val = sp[0];
-				if (!IS_INTEGER(val)) {
-					SAVE_EXPC;
-					sp[0] = core->intAtom(val);
-					restore_dxns();
-				}
-				NEXT;
+				goto convert_i_impl;
 			}
+#endif
 
             INSTR(convert_i) {
+			ABC_CODE_ONLY( convert_i_impl: )
 				Atom val = sp[0];
 				if (!IS_INTEGER(val)) {
 					SAVE_EXPC;
@@ -2709,17 +2705,14 @@ namespace avmplus
                 NEXT;
 			}
 
+#ifndef AVMPLUS_WORD_CODE
 			INSTR(coerce_u) {
-				Atom val = sp[0];
-				if (!IS_INTEGER(val) || val < 0) {
-					SAVE_EXPC;
-					sp[0] = core->uintAtom(val);
-					restore_dxns();
-				}
-                NEXT;
+				goto convert_u_impl;
 			}
+#endif
 
 			INSTR(convert_u) {
+			ABC_CODE_ONLY( convert_u_impl: )
 				Atom val = sp[0];
 				if (!IS_INTEGER(val) || val < 0) {
 					SAVE_EXPC;
