@@ -384,6 +384,16 @@
 // it will go away at some point in the not-too-distant future, however.
 //#define AVMPLUS_TRAITS_MEMTRACK
 
+// If you need to build on a system that forbids static initialization of global constant function pointers,
+// define this -- it will change the way native-method-table initialization is done to be compatible (at the
+// expense of slightly more code size). Note that this cannot be enabled if AVMPLUS_LEGACY_NATIVE_MAPS is defined.
+//#define AVMPLUS_NO_STATIC_POINTERS
+
+// If you need support for old code with explicit native-method maps (rather than having nativegen.p
+// generate them), define AVMPLUS_LEGACY_NATIVE_MAPS. It's on by default (for now), but soon will be deprecated 
+// and removed entirely.
+#define AVMPLUS_LEGACY_NATIVE_MAPS
+
 #if defined(AVMPLUS_PORTING_API)
 	// The portapi_avmbuild.h file is used to override
 	// definitions in this file. E.g. turning off

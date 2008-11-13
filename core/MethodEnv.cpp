@@ -791,21 +791,21 @@ namespace avmplus
 		// object not defined yet.  define it by running the script that exports it
 		Traits* traits = vtable->traits;
 		vtable->resolveSignatures();
-		NativeScriptInfop nativeEntry = traits->getNativeScriptInfo();
 
 		Toplevel* toplevel = this->toplevel();
 		traits->resolveSignatures(toplevel);
 		ScriptObject* delegate = toplevel->objectClass->prototype;
 
-		if (nativeEntry != NULL)
+		CreateGlobalObjectProc createGlobalObject = traits->getCreateGlobalObjectProc();
+		if (createGlobalObject != NULL)
 		{
 			// special script with native impl object
-			return global = nativeEntry->handler(vtable, delegate);
+			return global = (*createGlobalObject)(vtable, delegate);
 		}
 		else
 		{
 			// ordinary user script
-			return global = (ScriptObject*) method->core()->newObject(vtable, delegate);
+			return global = method->core()->newObject(vtable, delegate);
 		}
 	}
 
@@ -1205,11 +1205,11 @@ namespace avmplus
 			toplevel->objectClass->vtable->base = ivtable;
 		}
 
-		NativeClassInfop nativeEntry;
+		CreateClassClosureProc createClassClosure = cvtable->traits->getCreateClassClosureProc();
 		ClassClosure *cc;
-		if ((nativeEntry = cvtable->traits->getNativeClassInfo()) != NULL)
+		if (createClassClosure != NULL)
 		{
-			cc = nativeEntry->handler(cvtable);
+			cc = (*createClassClosure)(cvtable);
 		}
 		else
 		{

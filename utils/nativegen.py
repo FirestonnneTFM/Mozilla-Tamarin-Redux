@@ -179,7 +179,7 @@ TMAP = {
 	CTYPE_OBJECT:		("o", "AvmObject"),
 	CTYPE_ATOM:			("a", "AvmBox"),
 	CTYPE_VOID:			("v", "void"),
-	CTYPE_BOOLEAN:		("b", "AvmBoolArg"),
+	CTYPE_BOOLEAN:		("b", "AvmBool32"),
 	CTYPE_INT:			("i", "int32_t"),
 	CTYPE_UINT:			("u", "uint32_t"),
 	CTYPE_DOUBLE:		("d", "double"),
@@ -205,6 +205,41 @@ def ctype_from_enum(ct, allowObject):
 
 def ctype_from_traits(t, allowObject):
 	return ctype_from_enum(t.ctype, allowObject)
+
+def to_cname(nm):
+	nm = str(nm)
+	nm = nm.replace("+", "_");
+	nm = nm.replace("-", "_");
+	nm = nm.replace("?", "_");
+	nm = nm.replace("!", "_");
+	nm = nm.replace("<", "_");
+	nm = nm.replace(">", "_");
+	nm = nm.replace("=", "_");
+	nm = nm.replace("(", "_");
+	nm = nm.replace(")", "_");
+	nm = nm.replace("\"", "_");
+	nm = nm.replace("'", "_");
+	nm = nm.replace("*", "_");
+	nm = nm.replace(" ", "_");
+	nm = nm.replace(".", "_");
+	nm = nm.replace("$", "_");
+	nm = nm.replace("::", "_");
+	nm = nm.replace(":", "_");
+	nm = nm.replace("/", "_");
+	return nm
+
+def ns_prefix(ns, iscls):
+	if not ns.isPublic() and not ns.isInternal():
+		if ns.isPrivate() and not iscls:
+			return "private_";
+		if ns.isProtected():
+			return "protected_";
+		if ns.srcname != None:
+			return to_cname(str(ns.srcname)) + "_"
+	p = to_cname(ns.uri);
+	if len(p) > 0:
+		p += "_"
+	return p
 
 class Namespace:
 	uri = ""
@@ -284,8 +319,11 @@ class MethodInfo(MemberInfo):
 	code = None
 	activation = None
 	native_id_name = None
+	native_method_name = None
 	final = False
 	override = False
+	gen_method_map = False
+	receiver = None
 
 	def isNative(self):
 		return (self.flags & NATIVE) != 0
@@ -296,16 +334,44 @@ class MethodInfo(MemberInfo):
 	def hasOptional(self):
 		return (self.flags & HAS_OPTIONAL) != 0
 
-	def native_method_name(self, traits):
-		n = self.name.name
-		if self.kind == TRAIT_Getter:
-			n = "get_" + n
-		elif self.kind == TRAIT_Setter:
-			n = "set_" + n
-		if self.name.ns.srcname != None:
-			n = str(self.name.ns.srcname) + "_" + n
-		return to_cname(n)
+	def assign_names(self, traits, prefix):
 		
+		self.receiver = traits
+		self.gen_method_map = traits.ni.gen_method_map
+		
+		if not self.isNative():
+			return
+		
+		if self == traits.init:
+			self.native_id_name = prefix + to_cname(traits.name.name) 
+			if traits.niname != None:
+				self.native_method_name = "construct" + traits.niname	
+
+		else:
+			assert(isinstance(self.name, QName))
+			self.native_id_name = prefix + ns_prefix(self.name.ns, False) + self.name.name
+			self.native_method_name = self.name.name
+
+			if self.kind == TRAIT_Getter:
+				self.native_id_name += "_get"
+				self.native_method_name = "get_" + self.native_method_name
+			elif self.kind == TRAIT_Setter:
+				self.native_id_name += "_set"		
+				self.native_method_name = "set_" + self.native_method_name
+
+			if self.name.ns.srcname != None:
+				self.native_method_name = str(self.name.ns.srcname) + "_" + self.native_method_name
+
+			# if we are an override, prepend the classname to the C method name.
+			# (native method implementations must not be virtual, and some compilers
+			# will be unhappy if a subclass overrides a method with the same name and signature
+			# without it being virtual.) Note that we really only need to do this if the ancestor
+			# implementation is native, rather than pure AS3, but we currently do it regardless.
+			if self.override:
+				self.native_method_name = traits.name.name + "_" + self.native_method_name
+
+			self.native_method_name = to_cname(self.native_method_name)
+					
 class SlotInfo(MemberInfo):
 	type = ""
 	value = ""
@@ -374,6 +440,8 @@ class Traits:
 	class_id = -1
 	ctype = CTYPE_OBJECT
 	metadata = None
+	ni = None
+	niname = None
 	def __init__(self, name):
 		self.names = {}
 		self.slots = []
@@ -491,6 +559,33 @@ class Abc:
 		self.parseScriptInfos()
 		self.parseMethodBodies()
 
+		for i in range(0, len(self.classes)):
+			c = self.classes[i]
+			assert(isinstance(c.name, QName))
+			prefix = ns_prefix(c.name.ns, True) + to_cname(c.name.name)
+			c.class_id = i
+			c.ni = self.find_class_nativeinfo(c)
+			c.niname = c.ni.class_name
+			self.assign_names(c, prefix)
+			if c.itraits:
+				c.itraits.ni = c.ni
+				c.itraits.niname = c.ni.instance_name
+				self.assign_names(c.itraits, prefix)
+
+		for i in range(0, len(self.scripts)):
+			script = self.scripts[i]
+			if script != None:
+				prefix = ""
+				script.ni = self.find_script_nativeinfo(script)
+				script.niname = script.ni.script_name
+				self.assign_names(script, prefix)
+
+	def assign_names(self, traits, prefix):
+		if traits.init != None:
+			traits.init.assign_names(traits, prefix)
+		for j in range(0, len(traits.tmethods)):
+			traits.tmethods[j].assign_names(traits, prefix)
+
 	def default_ctype_and_value(self,d):
 		kind, index = d
 		deftable = self.defaults[kind]
@@ -534,7 +629,7 @@ class Abc:
 	def parseCpool(self):
 		
 		n = self.data.readU30()
-		self.ints = [0] * n
+		self.ints = [0] * max(1,n)
 		for i in range(1, n):
 			ii = self.data.readU30()
 			if float(ii) > 2147483647.0:
@@ -543,22 +638,22 @@ class Abc:
 			self.ints[i] = int(ii)
 			
 		n = self.data.readU30()
-		self.uints = [0] * n
+		self.uints = [0] * max(1,n)
 		for i in range(1, n):
 			self.uints[i] = uint(self.data.readU30())
 			
 		n = self.data.readU30()
-		self.doubles = [ kNaN ] * n
+		self.doubles = [ kNaN ] * max(1,n)
 		for i in range(1, n):
 			self.doubles[i] = self.data.readDouble()
 
 		n = self.data.readU30()
-		self.strings = [""] * n
+		self.strings = [""] * max(1,n)
 		for i in range(1, n):
 			self.strings[i] = self.data.readUTF8()
 
 		n = self.data.readU30()
-		self.namespaces = [self.publicNs] * n
+		self.namespaces = [self.anyNs] * max(1,n)
 		for i in range(1, n):
 			nskind = self.data.readU8()
 			if nskind in [CONSTANT_Namespace, 
@@ -574,7 +669,7 @@ class Abc:
 				self.namespaces[i] = Namespace("private", CONSTANT_PrivateNs)
 
 		n = self.data.readU30()
-		self.nssets = [ None ] * n
+		self.nssets = [ None ] * max(1,n)
 		for i in range(1, n):
 			count = self.data.readU30()
 			self.nssets[i] = []
@@ -582,9 +677,7 @@ class Abc:
 				self.nssets[i].append(self.namespaces[self.data.readU30()])
 
 		n = self.data.readU30()
-		self.names = [ None ] * n
-		self.namespaces[0] = self.anyNs
-		self.strings[0] = "*"
+		self.names = [ None ] * max(1,n)
 		for i in range(1, n):
 			namekind = self.data.readU8()
 			if namekind in [CONSTANT_Qname, CONSTANT_QnameA]:
@@ -618,9 +711,6 @@ class Abc:
 			else:
 				raise Error("Bad Kind")
 
-		self.namespaces[0] = self.publicNs
-		self.strings[0] = "*"
-
 	def parseMethodInfos(self):
 		self.names[0] = QName(self.publicNs,"*")
 		method_count = self.data.readU30()
@@ -631,10 +721,10 @@ class Abc:
 			param_count = self.data.readU30()
 			m.returnType = self.names[self.data.readU30()]
 			m.paramTypes = [ None ] * param_count
+			m.paramNames = [ "" ] * param_count
 			m.optional_count = 0
 			for j in range(0, param_count):
 				m.paramTypes[j] = self.names[self.data.readU30()]
-				m.paramNames = ""
 			m.debugName = self.strings[self.data.readU30()]
 			m.flags = self.data.readU8()
 			if m.hasOptional():
@@ -774,7 +864,7 @@ class Abc:
 		self.classes = [ None ] * count
 		for i in range(0, count):
 			itraits = self.instances[i]
-			tname = str(itraits.name) + "$"
+			tname = QName(itraits.name.ns, (str(itraits.name.name) + "$"))
 			t = Traits(tname)
 			self.classes[i] = t
 			t.init = self.methods[self.data.readU30()]
@@ -844,83 +934,35 @@ class IndentingPrintWriter:
 		self.f.write("\n")
 		self.do_indent = True
 
-def to_cname(nm):
-	nm = str(nm)
-	nm = nm.replace("+", "_");
-	nm = nm.replace("-", "_");
-	nm = nm.replace("?", "_");
-	nm = nm.replace("!", "_");
-	nm = nm.replace("<", "_");
-	nm = nm.replace(">", "_");
-	nm = nm.replace("=", "_");
-	nm = nm.replace("(", "_");
-	nm = nm.replace(")", "_");
-	nm = nm.replace("\"", "_");
-	nm = nm.replace("'", "_");
-	nm = nm.replace("*", "_");
-	nm = nm.replace(" ", "_");
-	nm = nm.replace(".", "_");
-	nm = nm.replace("$", "_");
-	nm = nm.replace("::", "_");
-	nm = nm.replace(":", "_");
-	nm = nm.replace("/", "_");
-	return nm
-
 class AbcThunkGen:
 	abc = None
 	abcs = []
 	out_h = None
 	out_c = None
-	native_methods = {}
-	unique_thunks = {}
+	all_thunks = []
 	lookup_traits = None
 
 	def addAbc(self, a):
 		self.abcs.append(a)
 		self.lookup_traits = None
 
-	def class_id_name(self, c):
-		return "abcclass_" + self.ns_prefix(c.qname.ns, True) + to_cname(c.qname.name)
+	def class_native_name(self, c):
+		return ns_prefix(c.qname.ns, True) + to_cname(c.qname.name)
 
-	def emitMethods(self, traits, niname):
-		# special-case the two oddballs of the group: String and Namespace
-		# don't descend from ScriptObject and so need a little extra love.
-		if str(traits.name) == "String":
-			nmout = "AVMTHUNK_NATIVE_METHOD_STRING"
-		elif str(traits.name) == "Namespace":
-			nmout = "AVMTHUNK_NATIVE_METHOD_NAMESPACE"
-		else:
-			nmout = "AVMTHUNK_NATIVE_METHOD"
-		if traits.init != None and traits.init.isNative():
-			self.out_c.println("%s(%s, %s::%s)" % (nmout, traits.init.native_id_name, niname, "construct"+niname))
-		for j in range(0, len(traits.tmethods)):
-			m = traits.tmethods[j]
-			if m.isNative():
-				cname = m.native_method_name(traits)
-				# if we are an override, prepend the classname to the C method name.
-				# (native method implementations must not be virtual, and some compilers
-				# will be unhappy if a subclass overrides a method with the same name and signature
-				# without it being virtual.) Note that we really only need to do this if the ancestor
-				# implementation is native, rather than pure AS3, but we currently do it regardless.
-				if m.override:
-					cname = traits.name.name + "_" + cname
-				self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, niname, cname))
+	def class_id_name(self, c):
+		return "abcclass_" + self.class_native_name(c)
 
 	def emit(self, abc, name, out_h, out_c):
 		self.abc = abc;
 		self.out_h = out_h;
 		self.out_c = out_c;
-		self.native_methods = {}
-		self.unique_thunks = {}
+		self.all_thunks = []
 		self.lookup_traits = None
-
-		for i in range(0, len(abc.classes)):
-			abc.classes[i].class_id = i
 
 		for i in range(0, len(abc.scripts)):
 			script = abc.scripts[i]
 			if script != None:
-				self.processTraits("", script)
+				self.processTraits(script)
 
 		out_h.println(MPL_HEADER);
 		out_c.println(MPL_HEADER);
@@ -928,17 +970,22 @@ class AbcThunkGen:
 		out_h.println("/* machine generated file -- do not edit */");
 		out_c.println("/* machine generated file -- do not edit */");
 
-		out_h.println("#define AVMTHUNK_VERSION 3");
+		out_h.println("#define AVMTHUNK_VERSION 4");
 		
-		out_h.println("const uint32_t "+name+"_abc_class_count = "+str(len(abc.classes))+";");
-		out_h.println("const uint32_t "+name+"_abc_script_count = "+str(len(abc.scripts))+";");
-		out_h.println("const uint32_t "+name+"_abc_method_count = "+str(len(abc.methods))+";");
-		out_h.println("const uint32_t "+name+"_abc_length = "+str(len(abc.data.data))+";");
-		out_h.println("extern const uint8_t "+name+"_abc_data["+str(len(abc.data.data))+"];");
+		out_h.println("extern const uint32_t "+name+"_abc_class_count;")
+		out_h.println("extern const uint32_t "+name+"_abc_script_count;")
+		out_h.println("extern const uint32_t "+name+"_abc_method_count;")
+		out_h.println("extern const uint32_t "+name+"_abc_length;")
+		out_h.println("extern const uint8_t "+name+"_abc_data[];");
+
+		out_c.println("const uint32_t "+name+"_abc_class_count = "+str(len(abc.classes))+";");
+		out_c.println("const uint32_t "+name+"_abc_script_count = "+str(len(abc.scripts))+";");
+		out_c.println("const uint32_t "+name+"_abc_method_count = "+str(len(abc.methods))+";");
+		out_c.println("const uint32_t "+name+"_abc_length = "+str(len(abc.data.data))+";");
 
 		if opts.nativemapname:
-			out_c.println("AVMTHUNK_DECLARE_EXTERN_NATIVE_MAPS(%s)" % (opts.nativemapname));
-			out_h.println("AVMTHUNK_DECLARE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
+			out_c.println("DECLARE_EXTERN_NATIVE_MAPS(%s)" % (opts.nativemapname));
+			out_h.println("DECLARE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
 			# this section is only needed for legacy glue code that is specifying its native maps
 			# manually; it can be eliminated someday (but does no real harm)
 			out_h.println("/* scripts */");
@@ -953,7 +1000,7 @@ class AbcThunkGen:
 					if (m != None) and m.isNative():
 						out_h.println("const uint32_t abcscript_"+ to_cname(m.name) + " = " + str(i) + ";") # yes, i, not j
 		else:
-			out_h.println("AVMTHUNK_DECLARE_NATIVE_INITIALIZER(%s, %s)" % (name, name));
+			out_h.println("AVMTHUNK_DECLARE_NATIVE_INITIALIZER(%s)" % (name));
 		
 		out_h.println("/* classes */");
 		for i in range(0, len(abc.classes)):
@@ -971,13 +1018,18 @@ class AbcThunkGen:
 					# not sure if we want to expose method id's for non-native methods; emit as comments for now
 					out_h.println("/* const uint32_t "+m.native_id_name+" = "+str(m.id)+"; */");
 
+		unique_thunks = {}
+		for receiver,m in self.all_thunks:
+			sig = self.thunkSig(receiver, m)
+			if not unique_thunks.has_key(sig):
+				unique_thunks[sig] = {}
+			unique_thunks[sig][m.native_id_name] = (receiver, m)
 		out_h.println("");
-		out_h.println("/* thunks ("+str(len(self.unique_thunks.keys()))+" unique) */");
+		out_h.println("/* thunks ("+str(len(unique_thunks.keys()))+" unique) */");
 		out_c.println("");
-		out_c.println("/* thunks ("+str(len(self.unique_thunks.keys()))+" unique) */");
-
-		for sig in self.unique_thunks:
-			users = self.unique_thunks[sig]
+		out_c.println("/* thunks ("+str(len(unique_thunks.keys()))+" unique) */");
+		for sig in unique_thunks:
+			users = unique_thunks[sig]
 			receiver = None;
 			m = None;
 			for native_name in users:
@@ -985,79 +1037,93 @@ class AbcThunkGen:
 				receiver = users[native_name][0];
 				m = users[native_name][1];
 			thunkname = name+"_"+sig;
-			# emit both with-cookie and without-cookie versions, since we can't tell at this point which
-			# might be used for a particular method. rely on linker to strip the unused ones.
 			self.emitThunkProto(thunkname, receiver, m, False);
-			self.emitThunkProto(thunkname, receiver, m, True);
+			if opts.nativemapname:
+				# emit both with-cookie and without-cookie versions, since we can't tell at this point which
+				# might be used for a particular method. rely on linker to strip the unused ones.
+				self.emitThunkProto(thunkname, receiver, m, True);
 			for native_name in users:
 				# use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
 				# (sad but true, happens in some environments)
 				out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
-				out_h.println("#define "+native_name+"_thunkc "+thunkname+"_thunkc")
+				if opts.nativemapname:
+					out_h.println("#define "+native_name+"_thunkc "+thunkname+"_thunkc")
 			out_h.println("")
-
 			self.emitThunkBody(thunkname, receiver, m, False);
-			self.emitThunkBody(thunkname, receiver, m, True);
+			if opts.nativemapname:
+				self.emitThunkBody(thunkname, receiver, m, True);
 
 		out_c.println("");
-		out_c.println("/* methods */");
 		for i in range(0, len(abc.classes)):
 			c = abc.classes[i]
-			ni = abc.find_class_nativeinfo(c)
-			if ni.gen_method_map:
-				out_c.println("")
-				out_c.println("AVMTHUNK_BEGIN_CLASS_NATIVE_METHOD_MAP(%s)" % ni.class_name)
-				out_c.indent += 1
-				self.emitMethods(c, ni.class_name)
-				self.emitMethods(c.itraits, ni.instance_name)
-				out_c.indent -= 1
-				out_c.println("AVMTHUNK_END_NATIVE_METHOD_MAP()")
-		for i in range(0, len(abc.scripts)):
-			c = abc.scripts[i]
-			ni = abc.find_script_nativeinfo(c)
-			if ni.gen_method_map:
-				out_c.println("")
-				out_c.println("AVMTHUNK_BEGIN_SCRIPT_NATIVE_METHOD_MAP(%s)" % ni.script_name)
-				out_c.indent += 1
-				self.emitMethods(c, ni.script_name)
-				out_c.indent -= 1
-				out_c.println("AVMTHUNK_END_NATIVE_METHOD_MAP()")
+			if c.ni.gen_method_map:
+				out_c.println("AVMTHUNK_NATIVE_CLASS_GLUE(%s)" % c.ni.class_name)
 
 		out_c.println("");
-		out_c.println("/* scripts */");
+		for i in range(0, len(abc.scripts)):
+			script = abc.scripts[i]
+			if script.ni.gen_method_map:
+				out_c.println("AVMTHUNK_NATIVE_SCRIPT_GLUE(%s)" % script.ni.script_name)
+
+		out_c.println("");
+		out_c.println("AVMTHUNK_BEGIN_NATIVE_TABLES(%s)" % self.abc.scriptName)
+		out_c.indent += 1
+
+		out_c.println("");
+		out_c.println("AVMTHUNK_BEGIN_NATIVE_METHODS(%s)" % self.abc.scriptName)
+		out_c.indent += 1
+		for i in range(0, len(abc.methods)):
+			m = abc.methods[i]
+			if m.isNative() and m.gen_method_map:
+				assert(m.native_method_name != None)
+				assert(m.native_id_name != None)
+				# special-case the two oddballs of the group: String and Namespace
+				# don't descend from ScriptObject and so need a little extra love.
+				if str(m.receiver.name) == "String":
+					nmout = "AVMTHUNK_NATIVE_METHOD_STRING"
+				elif str(m.receiver.name) == "Namespace":
+					nmout = "AVMTHUNK_NATIVE_METHOD_NAMESPACE"
+				else:
+					nmout = "AVMTHUNK_NATIVE_METHOD"
+				self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, m.receiver.niname, m.native_method_name))
+		out_c.indent -= 1
+		out_c.println("AVMTHUNK_END_NATIVE_METHODS()")
+
+		out_c.println("");
 		out_c.println("AVMTHUNK_BEGIN_NATIVE_SCRIPTS(%s)" % self.abc.scriptName)
 		out_c.indent += 1
 		for i in range(0, len(abc.scripts)):
 			script = abc.scripts[i]
-			ni = abc.find_script_nativeinfo(script)
-			if ni.script_name != None:
-				if ni.gen_method_map:
-					out_c.println("AVMTHUNK_NATIVE_SCRIPT(%d, %s)" % (i, ni.script_name))
+			if script.ni.script_name != None:
+				if script.ni.gen_method_map:
+					out_c.println("AVMTHUNK_NATIVE_SCRIPT(%d, %s)" % (i, script.ni.script_name))
 				else:
-					out_c.println("NATIVE_SCRIPT(%d, %s)" % (i, ni.script_name))
+					out_c.println("NATIVE_SCRIPT(%d, %s)" % (i, script.ni.script_name))
 		out_c.indent -= 1
 		out_c.println("AVMTHUNK_END_NATIVE_SCRIPTS()")
 
 		out_c.println("");
-		out_c.println("/* classes */");
 		out_c.println("AVMTHUNK_BEGIN_NATIVE_CLASSES(%s)" % self.abc.scriptName)
 		out_c.indent += 1
 		for i in range(0, len(abc.classes)):
 			c = abc.classes[i]
-			ni = abc.find_class_nativeinfo(c)
-			if ni.class_name != None or ni.instance_name != None:
-				if ni.gen_method_map:
-					out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), ni.class_name, ni.instance_name))
+			if c.ni.class_name != None or c.ni.instance_name != None:
+				if c.ni.gen_method_map:
+					out_c.println("AVMTHUNK_NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), c.ni.class_name, c.ni.instance_name))
 				else:
-					out_c.println("NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), ni.class_name, ni.instance_name))
+					out_c.println("NATIVE_CLASS(%s, %s, %s)" % (self.class_id_name(c), c.ni.class_name, c.ni.instance_name))
 		out_c.indent -= 1
 		out_c.println("AVMTHUNK_END_NATIVE_CLASSES()")
 
 		out_c.println("");
+		out_c.indent -= 1
+		out_c.println("AVMTHUNK_END_NATIVE_TABLES()")
+
+		out_c.println("");
 		if opts.nativemapname:
-			out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
+			out_c.println("DEFINE_NATIVE_INITIALIZER(%s, %s)" % (name, opts.nativemapname));
 		else:
-			out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s, %s)" % (name, name));
+			out_c.println("AVMTHUNK_DEFINE_NATIVE_INITIALIZER(%s)" % (name));
 
 		out_c.println("");
 		out_c.println("/* abc */");
@@ -1078,21 +1144,24 @@ class AbcThunkGen:
 			argtraits.append(self.lookupTraits(m.paramTypes[i]))
 		return argtraits
 
-	def emitThunkProto(self, name, receiver, m, cookie):
-		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
+	def thunkDecl(self, name, cookie, ret):
 		cstr = ""
 		if cookie:
 			cstr = "c"
-		decl = "AvmThunkRetType_"+ret+" AVMTHUNK_CALLTYPE "+name+"_thunk"+cstr+"(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)"
+		assert(ret != "AvmObject")
+		if ret != "double":
+			ret = "AvmBox"
+		decl = ret+" "+name+"_thunk"+cstr+"(AvmMethodEnv env, uint32_t argc, AvmBox* argv)"
+		return decl
+
+	def emitThunkProto(self, name, receiver, m, cookie):
+		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
+		decl = self.thunkDecl(name, cookie, ret)
 		self.out_h.println("extern "+decl+";");
 
 	def emitThunkBody(self, name, receiver, m, cookie):
 		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
-		
-		cstr = ""
-		if cookie:
-			cstr = "c"
-		decl = "AvmThunkRetType_"+ret+" AVMTHUNK_CALLTYPE "+name+"_thunk"+cstr+"(AvmMethodEnv env, uint32_t argc, const AvmBox* argv)"
+		decl = self.thunkDecl(name, cookie, ret)
 
 		self.out_c.println(decl);
 		self.out_c.println("{");
@@ -1129,10 +1198,11 @@ class AbcThunkGen:
 				val = "(argc < "+str(i)+" ? "+defval+" : "+val+")";
 			args.append((val, cts))
 			if i == 0 and cookie:
+				assert(opts.nativemapname)
 				args.append(("AVMTHUNK_GET_COOKIE(env)", "int32_t"))
 
 		if m.needRest():
-			args.append(("(argc <= "+str(param_count)+" ? NULL : argv + argoffV)", "const AvmBox*"))
+			args.append(("(argc <= "+str(param_count)+" ? NULL : argv + argoffV)", "AvmBox*"))
 			args.append(("(argc <= "+str(param_count)+" ? 0 : argc - "+str(param_count)+")", "uint32_t"))
 
 		if not m.hasOptional() and not m.needRest():
@@ -1140,11 +1210,9 @@ class AbcThunkGen:
 
 		self.out_c.println("AVMTHUNK_DEBUG_ENTER(env)");
 		
-		call = "";
 		if ret != "void":
-			call += "const "+ret+" ret = ";		
-		call += "AVMTHUNK_CALL_FUNCTION_"+str(len(args)-1)+"(AVMTHUNK_GET_HANDLER(env), "+ret;
-		self.out_c.println(call)
+			self.out_c.prnt("const %s ret = " % ret)
+		self.out_c.println("AVMTHUNK_CALL_FUNCTION_%d(AVMTHUNK_GET_HANDLER(env), %s"%(len(args)-1,ret))
 		self.out_c.indent += 1
 		for i in range(0, len(args)):
 			self.out_c.println(", " + args[i][1] + ", " + args[i][0]);
@@ -1153,7 +1221,12 @@ class AbcThunkGen:
 
 		self.out_c.println("AVMTHUNK_DEBUG_EXIT(env)")
 
-		self.out_c.println("return AvmToRetType_"+ret+"(ret);")
+		if ret == "void":
+			self.out_c.println("return kAvmThunkUndefined;")
+		elif ret == "double":
+			self.out_c.println("return ret;")
+		else:
+			self.out_c.println("return AvmBox(ret);")
 		self.out_c.indent -= 1
 		self.out_c.println("}")
 
@@ -1201,53 +1274,23 @@ class AbcThunkGen:
 
 	def gatherThunk(self, receiver, m):
 		assert(m.native_id_name != None)
-		self.native_methods[m.id] = m.native_id_name		
-		sig = self.thunkSig(receiver, m)
-		if not self.unique_thunks.has_key(sig):
-			self.unique_thunks[sig] = {}
-		self.unique_thunks[sig][m.native_id_name] = (receiver, m)
-
-	def ns_prefix(self, ns, iscls):
-		if not ns.isPublic() and not ns.isInternal():
-			if ns.isPrivate() and not iscls:
-				return "private_";
-			if ns.isProtected():
-				return "protected_";
-			if ns.srcname != None:
-				return to_cname(str(ns.srcname)) + "_"
-		p = to_cname(ns.uri);
-		if len(p) > 0:
-			p += "_"
-		return p
-
-	def propLabel(self, b):
-		assert(isinstance(b.name,QName))
-		return self.ns_prefix(b.name.ns, False) + to_cname(b.name.name)
+		self.all_thunks.append((receiver, m))	
 
 	def processClass(self, b):
-		assert(isinstance(b.name,QName))
-		label = self.ns_prefix(b.name.ns, True) + to_cname(b.name.name)
 		c = b.value
-		self.processTraits(label+"_", c)
-		self.processTraits(label+"_", c.itraits)
+		self.processTraits(c)
+		self.processTraits(c.itraits)
 
-	def processMethod(self, prefix, receiver, m):
-		assert(m != None)
-		m.native_id_name = prefix + self.propLabel(m)
+	def processMethod(self, receiver, m):
 		if m.isNative():
-			if m.kind == TRAIT_Getter:
-				m.native_id_name += "_get"
-			elif m.kind == TRAIT_Setter:
-				m.native_id_name += "_set"		
 			self.gatherThunk(receiver, m)
 
-	def processTraits(self, prefix, s):
-		if s.init != None and s.init.isNative():
-			s.init.native_id_name = prefix + to_cname(s.name.name) # not self.propLabel(s)
-			self.gatherThunk(s, s.init)
+	def processTraits(self, s):
+		if s.init != None:
+			self.processMethod(s, s.init)
 		for i in range(0, len(s.members)):
 			if s.members[i].kind in [TRAIT_Method,TRAIT_Getter,TRAIT_Setter]:
-				self.processMethod(prefix, s, s.members[i])
+				self.processMethod(s, s.members[i])
 			elif s.members[i].kind in [TRAIT_Class]:
 				self.processClass(s.members[i]);
 	

@@ -649,11 +649,11 @@ namespace avmplus
 
 		static bool isMachineCompatible(const Traits* a, const Traits* b);
 
-		void setNativeClassInfo(NativeClassInfop entry) { this->m_nativeInfo.nativeClassInfo = entry; }
-		void setNativeScriptInfo(NativeScriptInfop entry) { this->m_nativeInfo.nativeScriptInfo = entry; }
+		void setCreateClassClosureProc(CreateClassClosureProc p) { this->m_nativeInfo.createClassClosure = p; }
+		void setCreateGlobalObjectProc(CreateGlobalObjectProc p) { this->m_nativeInfo.createGlobalObject = p; }
 
-		NativeClassInfop getNativeClassInfo() const { return m_nativeInfo.nativeClassInfo; }
-		NativeScriptInfop getNativeScriptInfo() const { return m_nativeInfo.nativeScriptInfo; }
+		CreateClassClosureProc getCreateClassClosureProc() const { return m_nativeInfo.createClassClosure; }
+		CreateGlobalObjectProc getCreateGlobalObjectProc() const { return m_nativeInfo.createGlobalObject; }
 
 
 		Stringp formatClassName();
@@ -673,8 +673,8 @@ namespace avmplus
 
 	private:
 		union NativeInfo {
-			NativeClassInfop	nativeClassInfo;
-			NativeScriptInfop	nativeScriptInfo;
+			CreateClassClosureProc	createClassClosure;
+			CreateGlobalObjectProc	createGlobalObject;
 		};
 
 	// ------------------------ DATA SECTION BEGIN
