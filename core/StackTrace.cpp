@@ -47,9 +47,10 @@ namespace avmplus
 					, Atom*					framep
 					, Traits**				frameTraits
 					, int					argc
-					, uint32_t*				ap
+					, void*					ap
 					, intptr_t volatile*	eip
 					, int32_t volatile*		scopeDepth
+					, bool                  boxed
 			#endif
 			)
 	{
@@ -64,10 +65,14 @@ namespace avmplus
 		m_filename		= NULL;
 		m_framep		= framep;
 		m_traits		= frameTraits;
-		m_ap			= ap;
+		if (boxed)
+			m_ap		= (uint32_t*)ap;
+		else
+			m_atomv		= (Atom*)ap;
 		m_scopeDepth	= scopeDepth;
 		m_argc			= argc;
 		m_linenum		= 0;
+		m_boxed			= boxed;
 	#endif
 	}
 
@@ -98,6 +103,7 @@ namespace avmplus
 		m_scopeDepth	= 0;
 		m_argc			= 0;
 		m_linenum		= 0;
+		m_boxed			= false;
 	#endif
 	}
 
