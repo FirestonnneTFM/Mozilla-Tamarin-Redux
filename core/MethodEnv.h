@@ -80,6 +80,11 @@ namespace avmplus
 		 * the method.  Args are provided as an array of atoms, not
 		 * an array of native types.
 		 *
+		 * It is not well documented throughout, but it is generally
+		 * assumed that argument arrays may /always/ be modified in
+		 * place by the callee, thus coerceEnter may modify 'argv'
+		 * (though not the ArrayObject 'a', of course).
+		 *
 		 * @param instance The "this" that the function
 		 *                 is being invoked with; may be
 		 *                 coerced by this method.
@@ -90,13 +95,15 @@ namespace avmplus
 		 *         to the required type
 		 */
 		Atom coerceEnter(Atom thisArg);
-		Atom coerceEnter(Atom thisArg, ArrayObject *a);
-		Atom coerceEnter(Atom thisArg, int argc, Atom *argv);
-		Atom coerceEnter(int argc, Atom* atomv);
+		Atom coerceEnter(Atom thisArg, ArrayObject* a);
+		Atom coerceEnter(Atom thisArg, int argc, Atom* argv);
+		Atom coerceEnter(int argc, Atom* argv);
 
 	private:
+		inline bool isInterpreted();
 		Atom endCoerce(int argc, uint32 *ap);
 		int  startCoerce(int argc);
+		Atom coerceUnboxEnter(int argc, Atom* atomv);
 		static Atom *unbox1(AvmCore* core, Toplevel* toplevel, Atom in, Traits *t, Atom *argv);
 		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv);
 		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap);
@@ -271,6 +278,12 @@ namespace avmplus
 			Traits**frameTraits, int localCount,
 			CallStackNode* callstack,
 			Atom* framep, volatile sintptr *eip);
+		void debugEnterInner(int argc, 
+			void *ap, /* Atom* or uint32_t*, depending on whether 'boxed' is true or false */ 
+			Traits**frameTraits, int localCount,
+			CallStackNode* callstack,
+			Atom* framep, volatile sintptr *eip,
+			bool boxed);
 		void debugExit(CallStackNode* callstack);
 #endif
 

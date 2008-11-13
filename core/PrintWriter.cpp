@@ -176,6 +176,18 @@ namespace avmplus
 		return *this;
 	}
 
+#if defined AVMPLUS_MAC && defined AVMPLUS_64BIT
+	PrintWriter& PrintWriter::operator<< (ptrdiff_t value)
+	{
+		wchar buffer[256];
+		int len;
+		if (MathUtils::convertIntegerToString((sintptr) value, buffer, len)) {
+			*this << buffer;
+		}
+		return *this;
+	}
+#endif
+
 	PrintWriter& PrintWriter::operator<< (uint32_t value)
 	{
 		wchar buffer[256];

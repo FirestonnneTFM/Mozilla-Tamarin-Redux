@@ -178,11 +178,15 @@ namespace avmplus
      */
     Atom Toplevel::op_call(Atom method, int argc, Atom* atomv)
     {
+		// The construction of the multiname and the resulting error string is
+		// delegated because in-lining it here prevents the call to call() from
+		// being a tail call - the address of a local multiname is taken, this
+		// makes GCC (arguably incorrectly, given the scope of the variable)
+		// turn off tail calling.
+		
 		if (!AvmCore::isObject(method))
-		{
-			Multiname name(core()->publicNamespace, core()->constantString("value"));
-			throwTypeError(kCallOfNonFunctionError, core()->toErrorString(&name));
-		}
+			throwTypeErrorWithName(kCallOfNonFunctionError, "value");
+		
 		return AvmCore::atomToScriptObject(method)->call(argc, atomv);
     }
 
@@ -1520,6 +1524,16 @@ namespace avmplus
 		typeErrorClass()->throwError(id, arg1, arg2);
 	}
 
+	void Toplevel::throwTypeErrorWithName(int id, const char* namestr) const
+	{
+		// The construction of the multiname and the resulting error string is
+		// delegated to this function because in-lining it in the caller prevents
+		// taill calling.  See comments in op_call, above.
+		
+		Multiname name(core()->publicNamespace, core()->constantString(namestr));
+		throwTypeError(id, core()->toErrorString(&name));
+	}
+	
 	void Toplevel::throwError(int id) const
 	{
 		errorClass()->throwError(id);
