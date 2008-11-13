@@ -41,6 +41,8 @@
 
 namespace avmplus
 {
+	typedef ClassClosure* (*CreateClassClosureProc)(VTable*);
+	typedef ScriptObject* (*CreateGlobalObjectProc)(VTable*, ScriptObject*);
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	// doesn't really belong here, but needs to go somewhere... good enough for now.

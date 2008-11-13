@@ -70,14 +70,14 @@ namespace avmplus
 	typedef avmplus::String AvmStringT;
 	typedef avmplus::Namespace AvmNamespaceT;
 
-	typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
+	typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 	typedef void (ScriptObject::*AvmThunkNativeHandler)();
 
 #ifdef __WINSCW__
+
 	typedef void (AvmObjectT::*AvmObjectHandler)();
 	typedef void (AvmStringT::*AvmStringHandler)();
 	typedef void (AvmNamespaceT::*AvmNamespaceHandler)();
-
 
 	inline AvmObjectHandler CoerceHandler_AvmObject(AvmThunkNativeHandler p)
 	{
@@ -103,7 +103,7 @@ namespace avmplus
 	// yuck. could probably get around this with variadic macros, but it's not clear if every target compiler
 	// we need to support will support them fully.
 	#define AVMTHUNK_CALL_FUNCTION_0(func, ret, argt0, argv0) \
-	((*(argv0).*((AvmRetType_##ret (argt0##T::*)())CoerceHandler_##argt0(func)))())
+		((*(argv0).*((AvmRetType_##ret (argt0##T::*)())CoerceHandler_##argt0(func)))())
 
 	#define AVMTHUNK_CALL_FUNCTION_1(func, ret, argt0, argv0, argt1, argv1) \
 		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1))CoerceHandler_##argt0(func)))(argv1))
@@ -134,12 +134,13 @@ namespace avmplus
 
 	#define AVMTHUNK_CALL_FUNCTION_10(func, ret, argt0, argv0, argt1, argv1, argt2, argv2, argt3, argv3, argt4, argv4, argt5, argv5, argt6, argv6, argt7, argv7, argt8, argv8, argt9, argv9, argt10, argv10) \
 		((*(argv0).*((AvmRetType_##ret (argt0##T::*)(argt1, argt2, argt3, argt4, argt5, argt6, argt7, argt8, argt9, argt10))CoerceHandler_##argt0(func)))(argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8, argv9, argv10))
+
 #else // __WINSCW__
-#if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-#define FUNC_CAST(x) reinterpret_cast<x>
-#else
-#define FUNC_CAST(x) (x)
-#endif
+	#if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+		#define FUNC_CAST(x) reinterpret_cast<x>
+	#else
+		#define FUNC_CAST(x) (x)
+	#endif
 
 	// yuck. could probably get around this with variadic macros, but it's not clear if every target compiler
 	// we need to support will support them fully.
@@ -270,14 +271,11 @@ namespace avmplus
 	#define AVMTHUNK_DEBUG_EXIT(env)	
 #endif
 
-	typedef ClassClosure* (*CreateClassClosureProc)(VTable*);
-	typedef ScriptObject* (*CreateGlobalObjectProc)(VTable*, ScriptObject*);
-
 	struct NativeMethodInfo
 	{
 	public:
-		AvmThunkNativeThunker thunker;
 		AvmThunkNativeHandler handler;
+		AvmThunkNativeThunker thunker;
 #ifndef AVMPLUS_NO_STATIC_POINTERS
 		int32_t method_id;
 #endif
@@ -406,7 +404,7 @@ namespace avmplus
 #ifdef AVMPLUS_NO_STATIC_POINTERS
 
 	#define AVMTHUNK_BEGIN_NATIVE_TABLES(NAME) \
-		static void fillIn_##NAME(NativeMethodInfo* m, NativeClassInfo* c, NativeScriptInfo* s) { \
+		static void fillIn_##NAME(NativeMethodInfo* m, NativeClassInfo* c, NativeScriptInfo* s) { 
 
 	#define AVMTHUNK_END_NATIVE_TABLES() \
 		}
@@ -416,8 +414,8 @@ namespace avmplus
 	#define AVMTHUNK_BEGIN_NATIVE_METHODS(NAME) 
 
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-		m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk; \
-		m[METHID].handler = _NATIVE_METHOD_CAST_PTR(CLS, &IMPL); 
+		m[METHID].handler = _NATIVE_METHOD_CAST_PTR(CLS, &IMPL); \
+		m[METHID].thunker = (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk; 
 
 	#define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
@@ -480,7 +478,7 @@ namespace avmplus
 	#endif
 
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-		{ (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, _NATIVE_METHOD_CAST_PTR(CLS, &IMPL), avmplus::NativeID::METHID _EXTRA_METHOD(0,0) },
+		{ _NATIVE_METHOD_CAST_PTR(CLS, &IMPL), (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID _EXTRA_METHOD(0,0) },
 
 	#define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
@@ -581,10 +579,10 @@ namespace avmplus
 		reinterpret_cast<AvmThunkNativeHandler>((void(CLS::*)())(PTR))
 
 	#define _NATIVE_METHOD(METHID, IMPL, fl) \
-		{ (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, _NATIVE_METHOD_CAST_PTR(ScriptObject, &IMPL), avmplus::NativeID::METHID, 0, fl },
+		{ _NATIVE_METHOD_CAST_PTR(ScriptObject, &IMPL), (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID, 0, fl },
 
 	#define _NATIVE_METHOD1(METHID, IMPL, fl, cookie) \
-		{ (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunkc, _NATIVE_METHOD_CAST_PTR(ScriptObject, &IMPL), avmplus::NativeID::METHID, cookie, fl | AbstractFunction::NATIVE_COOKIE },
+		{ _NATIVE_METHOD_CAST_PTR(ScriptObject, &IMPL), (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunkc, avmplus::NativeID::METHID, cookie, fl | AbstractFunction::NATIVE_COOKIE },
 
 	#define NATIVE_METHOD(METHID, IMPL) \
 		_NATIVE_METHOD(METHID, IMPL, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS)
@@ -635,7 +633,6 @@ namespace avmplus
 		}
 
 #endif // AVMPLUS_LEGACY_NATIVE_MAPS
-
 
 }	
 
