@@ -199,7 +199,7 @@ namespace avmshell
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=456054
 		
 		const int kMaxAvmPlusStack = 4096*1024;  // changed to 4MB for testing purposes, used to be 512KB
-		int sp;
+		uintptr_t sp;
 		#ifdef AVMPLUS_PPC
 		asm("mr %0,r1" : "=r" (sp));
         #elif defined(AVMPLUS_ARM)
@@ -207,7 +207,11 @@ namespace avmshell
 		#elif defined SOLARIS
 		sp = _getsp();
 		#else
+		#ifdef AVMPLUS_64BIT
+		asm("mov %%rsp,%0" : "=r" (sp));
+		#else
 		asm("movl %%esp,%0" : "=r" (sp));
+		#endif
 		#endif
 		minstack = sp-kMaxAvmPlusStack;
 	}

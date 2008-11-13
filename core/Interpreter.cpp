@@ -131,7 +131,6 @@ namespace avmplus
 #  define SWITCH_DISPATCH
 #endif // compiler/platform vipers' nest
 
-	static Atom interp(MethodEnv* method, int argc, uint32_t *ap);
 	static void initMultiname(MethodEnv* env, Multiname &name, Atom* &sp);
 	static void initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* &sp);
 	static Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
@@ -147,7 +146,10 @@ namespace avmplus
 
 	Atom interp32(MethodEnv* env, int argc, uint32_t *ap)
 	{
-		Atom a = interp(env, argc, ap);
+		MethodInfo* const info = (MethodInfo*)(AbstractFunction*) env->method;
+		Atom* const atomv = (Atom*)ap;
+		info->boxArgs(argc, ap, atomv);
+		Atom a = interp(env, argc, atomv);
 		Traits* t = env->method->returnTraits();
 		if (!t)
 			return a; // same as BUILTIN_any
@@ -166,7 +168,10 @@ namespace avmplus
 
 	double interpN(MethodEnv* env, int argc, uint32_t * ap)
 	{
-		Atom a = interp(env, argc, ap);
+		MethodInfo* const info = (MethodInfo*)(AbstractFunction*) env->method;
+		Atom* const atomv = (Atom*)ap;
+		info->boxArgs(argc, ap, atomv);
+		Atom a = interp(env, argc, atomv);
 		return AvmCore::number_d(a);
 	}
 
@@ -184,11 +189,7 @@ namespace avmplus
 	
 #endif // AVMPLUS_DIRECT_THREADED
 
-    /**
-     * Interpret the AVM+ instruction set.
-     * @return
-     */
-    Atom interp(MethodEnv *env, int argc, uint32_t *ap)
+    Atom interp(MethodEnv* env, int argc, Atom* atomv)
     {
 #ifdef AVMPLUS_DIRECT_THREADED
 		
@@ -615,7 +616,7 @@ namespace avmplus
 		volatile int32_t scopeDepth = 0;
 
 		#if defined(DEBUGGER)
-		CallStackNode callStackNode(env, framep, /*frameTraits*/NULL, argc, ap, &expc, &scopeDepth);
+		CallStackNode callStackNode(env, framep, /*frameTraits*/NULL, argc, atomv, &expc, &scopeDepth, true);
 		#elif defined(FEATURE_SAMPLER)
 		CallStackNode callStackNode(env);
 		#endif
@@ -624,12 +625,6 @@ namespace avmplus
 		if (info->pool->domain->base != NULL) {
 			core->codeContextAtom = makeCodeContextAtom(env);
 		}
-
-		Atom* atomv = (Atom*)ap;
-		
-		// OPTIMIZEME - if boxed args were passed from the call they should end up boxed here,
-		// we should not have to unbox and then rebox.
-		info->boxArgs(argc, ap, atomv);
 
 		// OPTIMIZEME - avoid copying by using overlapping frames if possible
 		// 1. copy instance and args to local frame
@@ -715,7 +710,7 @@ namespace avmplus
 			core->callStack->set_framep(framep);
 
 		// notify the debugger that we are entering a new frame.
-		env->debugEnter(argc, ap, NULL, local_count, NULL, framep, 0);  // call it but make sure that callStackNode is not re-init'd
+		env->debugEnterInner(argc, (void*)atomv, NULL, local_count, NULL, framep, 0, true);  // call it but make sure that callStackNode is not re-init'd
 		#endif
 
 #ifdef AVMPLUS_MOPS

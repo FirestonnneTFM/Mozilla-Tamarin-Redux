@@ -116,6 +116,7 @@ namespace avmplus
 		void throwTypeError(int id) const;
 		void throwTypeError(int id, Stringp arg1) const;
 		void throwTypeError(int id, Stringp arg1, Stringp arg2) const;
+		void throwTypeErrorWithName(int id, const char* namestr) const;
 
 		void throwError(int id) const;
 		void throwError(int id, Stringp arg1) const;

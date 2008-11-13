@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07F774620EC82ABE00570C8C /* DescribeTypeClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F774570EC82ABE00570C8C /* DescribeTypeClass.cpp */; };
+		07F774630EC82ABE00570C8C /* peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F774590EC82ABE00570C8C /* peephole.cpp */; };
+		07F774640EC82ABE00570C8C /* wopcodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F7745B0EC82ABE00570C8C /* wopcodes.cpp */; };
+		07F774650EC82ABE00570C8C /* WordcodeEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F7745D0EC82ABE00570C8C /* WordcodeEmitter.cpp */; };
+		07F774660EC82ABE00570C8C /* WordcodeTranslator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F7745F0EC82ABE00570C8C /* WordcodeTranslator.cpp */; };
 		1A91570F0B012A3F00744986 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A91570E0B012A3F00744986 /* libz.dylib */; };
 		47C458250B148CA500FCD007 /* libavmplus64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 47C458200B148C9300FCD007 /* libavmplus64.a */; };
 		47C458260B148CA900FCD007 /* libMMgc64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 47C458000B148C5900FCD007 /* libMMgc64.a */; };
@@ -116,6 +121,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		07F774570EC82ABE00570C8C /* DescribeTypeClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DescribeTypeClass.cpp; sourceTree = "<group>"; };
+		07F774580EC82ABE00570C8C /* DescribeTypeClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DescribeTypeClass.h; sourceTree = "<group>"; };
+		07F774590EC82ABE00570C8C /* peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peephole.cpp; sourceTree = "<group>"; };
+		07F7745A0EC82ABE00570C8C /* peephole.tbl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = peephole.tbl; sourceTree = "<group>"; };
+		07F7745B0EC82ABE00570C8C /* wopcodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wopcodes.cpp; sourceTree = "<group>"; };
+		07F7745C0EC82ABE00570C8C /* wopcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wopcodes.h; sourceTree = "<group>"; };
+		07F7745D0EC82ABE00570C8C /* WordcodeEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WordcodeEmitter.cpp; sourceTree = "<group>"; };
+		07F7745E0EC82ABE00570C8C /* WordcodeEmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordcodeEmitter.h; sourceTree = "<group>"; };
+		07F7745F0EC82ABE00570C8C /* WordcodeTranslator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WordcodeTranslator.cpp; sourceTree = "<group>"; };
+		07F774600EC82ABE00570C8C /* WordcodeTranslator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordcodeTranslator.h; sourceTree = "<group>"; };
 		1A91570E0B012A3F00744986 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		470266390B053A6F007B70DD /* MMgc64.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MMgc64.xcodeproj; path = ../MMgc/MMgc64.xcodeproj; sourceTree = SOURCE_ROOT; };
 		47BA8F1F0B053AB10092107F /* avmplus64.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = avmplus64.xcodeproj; path = ../avmplus/avmplus64.xcodeproj; sourceTree = SOURCE_ROOT; };
@@ -250,15 +265,11 @@
 		4EF1E5800D62459F000392CC /* NativeFunction.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NativeFunction.h; sourceTree = "<group>"; };
 		4EF1E5810D62459F000392CC /* NativeObjectHelpers.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NativeObjectHelpers.h; sourceTree = "<group>"; };
 		4EF1E5820D62459F000392CC /* Number.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Number.as; sourceTree = "<group>"; };
-		4EF1E5830D62459F000392CC /* Number2.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Number2.as; sourceTree = "<group>"; };
 		4EF1E5840D62459F000392CC /* NumberClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = NumberClass.cpp; sourceTree = "<group>"; };
 		4EF1E5850D62459F000392CC /* NumberClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NumberClass.h; sourceTree = "<group>"; };
 		4EF1E5860D62459F000392CC /* Object.as */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Object.as; sourceTree = "<group>"; };
 		4EF1E5870D62459F000392CC /* ObjectClass.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectClass.cpp; sourceTree = "<group>"; };
 		4EF1E5880D62459F000392CC /* ObjectClass.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ObjectClass.h; sourceTree = "<group>"; };
-		4EF1E5890D62459F000392CC /* opcodes.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = opcodes.cpp; sourceTree = "<group>"; };
-		4EF1E58A0D62459F000392CC /* opcodes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = opcodes.h; sourceTree = "<group>"; };
-		4EF1E58B0D62459F000392CC /* opcodes.tbl */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = opcodes.tbl; sourceTree = "<group>"; };
 		4EF1E58C0D62459F000392CC /* OSDep.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OSDep.h; sourceTree = "<group>"; };
 		4EF1E58D0D62459F000392CC /* OutputStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OutputStream.h; sourceTree = "<group>"; };
 		4EF1E58E0D62459F000392CC /* PoolObject.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = PoolObject.cpp; sourceTree = "<group>"; };
@@ -413,8 +424,6 @@
 		8EDDB9E609AAD1D300FB9EE5 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../extensions/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
 		8EDDB9E709AAD1D300FB9EE5 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../extensions/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
 		8EDDB9F309AAD2B700FB9EE5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
-		D96230250E5CA15700DA3F47 /* Translator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Translator.cpp; sourceTree = "<group>"; };
-		D96230260E5CA15700DA3F47 /* Translator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Translator.h; sourceTree = "<group>"; };
 		D967CE150E82FEDD00F15FCE /* QCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QCache.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -507,9 +516,6 @@
 		4EF1E4F60D62459F000392CC /* core */ = {
 			isa = PBXGroup;
 			children = (
-				D967CE150E82FEDD00F15FCE /* QCache.cpp */,
-				D96230250E5CA15700DA3F47 /* Translator.cpp */,
-				D96230260E5CA15700DA3F47 /* Translator.h */,
 				4EF1E4F70D62459F000392CC /* AbcData.cpp */,
 				4EF1E4F80D62459F000392CC /* AbcEnv.cpp */,
 				4EF1E4F90D62459F000392CC /* AbcEnv.h */,
@@ -580,6 +586,8 @@
 				4EF1E53C0D62459F000392CC /* DateClass.h */,
 				4EF1E53D0D62459F000392CC /* DateObject.cpp */,
 				4EF1E53E0D62459F000392CC /* DateObject.h */,
+				07F774570EC82ABE00570C8C /* DescribeTypeClass.cpp */,
+				07F774580EC82ABE00570C8C /* DescribeTypeClass.h */,
 				4EF1E54A0D62459F000392CC /* Domain.cpp */,
 				4EF1E54B0D62459F000392CC /* Domain.h */,
 				4EF1E54C0D62459F000392CC /* DomainEnv.cpp */,
@@ -633,21 +641,20 @@
 				4EF1E5800D62459F000392CC /* NativeFunction.h */,
 				4EF1E5810D62459F000392CC /* NativeObjectHelpers.h */,
 				4EF1E5820D62459F000392CC /* Number.as */,
-				4EF1E5830D62459F000392CC /* Number2.as */,
 				4EF1E5840D62459F000392CC /* NumberClass.cpp */,
 				4EF1E5850D62459F000392CC /* NumberClass.h */,
 				4EF1E5860D62459F000392CC /* Object.as */,
 				4EF1E5870D62459F000392CC /* ObjectClass.cpp */,
 				4EF1E5880D62459F000392CC /* ObjectClass.h */,
-				4EF1E5890D62459F000392CC /* opcodes.cpp */,
-				4EF1E58A0D62459F000392CC /* opcodes.h */,
-				4EF1E58B0D62459F000392CC /* opcodes.tbl */,
 				4EF1E58C0D62459F000392CC /* OSDep.h */,
 				4EF1E58D0D62459F000392CC /* OutputStream.h */,
+				07F774590EC82ABE00570C8C /* peephole.cpp */,
+				07F7745A0EC82ABE00570C8C /* peephole.tbl */,
 				4EF1E58E0D62459F000392CC /* PoolObject.cpp */,
 				4EF1E58F0D62459F000392CC /* PoolObject.h */,
 				4EF1E5900D62459F000392CC /* PrintWriter.cpp */,
 				4EF1E5910D62459F000392CC /* PrintWriter.h */,
+				D967CE150E82FEDD00F15FCE /* QCache.cpp */,
 				4EF1E5920D62459F000392CC /* RegExp.as */,
 				4EF1E5930D62459F000392CC /* RegExpClass.cpp */,
 				4EF1E5940D62459F000392CC /* RegExpClass.h */,
@@ -686,6 +693,12 @@
 				4EF1E5B70D62459F000392CC /* Verifier.h */,
 				4EF1E5B80D62459F000392CC /* VTable.cpp */,
 				4EF1E5B90D62459F000392CC /* VTable.h */,
+				07F7745B0EC82ABE00570C8C /* wopcodes.cpp */,
+				07F7745C0EC82ABE00570C8C /* wopcodes.h */,
+				07F7745D0EC82ABE00570C8C /* WordcodeEmitter.cpp */,
+				07F7745E0EC82ABE00570C8C /* WordcodeEmitter.h */,
+				07F7745F0EC82ABE00570C8C /* WordcodeTranslator.cpp */,
+				07F774600EC82ABE00570C8C /* WordcodeTranslator.h */,
 				4EF1E5BA0D62459F000392CC /* XML.as */,
 				4EF1E5BB0D62459F000392CC /* XMLClass.cpp */,
 				4EF1E5BC0D62459F000392CC /* XMLClass.h */,
@@ -932,6 +945,11 @@
 				8EDDB9E909AAD1D300FB9EE5 /* DictionaryGlue.cpp in Sources */,
 				6803D2C90A5064FD00C797BB /* JavaGlue.cpp in Sources */,
 				858088FF0C8F62B80093F49B /* SamplerScript.cpp in Sources */,
+				07F774620EC82ABE00570C8C /* DescribeTypeClass.cpp in Sources */,
+				07F774630EC82ABE00570C8C /* peephole.cpp in Sources */,
+				07F774640EC82ABE00570C8C /* wopcodes.cpp in Sources */,
+				07F774650EC82ABE00570C8C /* WordcodeEmitter.cpp in Sources */,
+				07F774660EC82ABE00570C8C /* WordcodeTranslator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1009,7 +1027,7 @@
 					USE_MMAP,
 					_MAC,
 				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1028,6 +1046,7 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
@@ -1048,7 +1067,7 @@
 					"TARGET_RT_MAC_MACHO=1",
 					USE_MMAP,
 				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1067,6 +1086,7 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
@@ -1133,7 +1153,7 @@
 					USE_MMAP,
 					_MAC,
 				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1152,6 +1172,7 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
@@ -1163,6 +1184,7 @@
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					AVMPLUS_SHELL,
 					SOFT_ASSERTS,
@@ -1173,7 +1195,7 @@
 					_MAC,
 					DEBUGGER,
 				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1192,6 +1214,7 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";

@@ -256,10 +256,12 @@ allexpfails=0
 allexceptions=0
 allskips=0
 alltimeouts=0
+allasserts=0
 failmsgs=[]
 expfailmsgs=[]
 unpassmsgs=[]
 timeoutmsgs=[]
+assertmsgs=[]
 
 #setup absolute path of base dir to not have parents go beyond that
 absArgPath = abspath(args[0])
@@ -549,6 +551,7 @@ else:
         lexpfail = 0
         lunpass = 0
         ltimeout = 0
+        lassert = 0
         dir = ast[0:ast.rfind('/')]
         root,ext = splitext(ast)
         if runSource:
@@ -622,6 +625,9 @@ else:
                 for line in f:
                     outputLines.append(line)
                     verbose_print(line.strip())
+                    if 'Assertion failed:' in line:
+                        lassert += 1
+                        fail(testName, line, assertmsgs)
                     testcase=''
                     if len(line)>9:
                         testcase=line.strip()
@@ -661,6 +667,7 @@ else:
             allexpfails += lexpfail
             allunpass += lunpass
             alltimeouts += ltimeout
+            allasserts += lassert
             if lfail or lunpass:
                 js_print('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
             else:
@@ -689,6 +696,11 @@ else:
         js_print('\nUNEXPECTED PASSES:', '', '<br/>')
         for m in unpassmsgs:
             js_print('  %s' % m, '', '<br/>')
+
+    if assertmsgs:
+        js_print('\nASSERTIONS:', '', '<br/>')
+        for m in assertmsgs:
+            js_print('  %s' % m, '', '<br/>')
     
     if not allfails and not allunpass:
         js_print('\ntest run PASSED!')
@@ -713,6 +725,9 @@ else:
         js_print('test exceptions      : %d' % allexceptions, '<br>', '')
     if alltimeouts>0:
         js_print('test timeouts        : %d' % alltimeouts, '<br>', '')
+    if allasserts>0:
+        js_print('assertions           : %d' % allasserts, '<br>', '')
+        
     
     print 'Results were written to %s' % js_output
 
