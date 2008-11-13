@@ -59,8 +59,9 @@ namespace avmplus
 	 * @return The return value of the method that was executed.
 	 * @throws Exception if the method throws an exception.
 	 */
-	Atom interp32(MethodEnv* method, int argc, uint32 *ap);
+	Atom interp32(MethodEnv* method, int argc, uint32 *ap);		// does not actually return an atom!
 	double interpN(MethodEnv* method, int argc, uint32 *ap);
+	Atom interp(MethodEnv* method, int argc, Atom* ap);	// actually returns an atom!
 #ifdef AVMPLUS_DIRECT_THREADED
 	void** interpGetOpcodeLabels();
 #endif

@@ -91,7 +91,49 @@ namespace avmplus
 		}
 		return args;
 	}
-
+	
+	inline Atom coerceAtom(AvmCore* core, Toplevel* toplevel, Atom in, Traits *t)
+	{
+		AvmAssert(t != VOID_TYPE);
+		
+		if (t == NUMBER_TYPE)
+		{
+			if (AvmCore::isDouble(in))
+				return in;
+			return core->numberAtom(in);
+		}
+		if (t == INT_TYPE)
+		{
+			if (AvmCore::isInteger(in))
+				return in;
+			return core->intAtom(in);
+		}
+		if (t == UINT_TYPE)
+		{
+			if (AvmCore::isInteger(in) && in >= 0)
+				return in;
+			return core->uintAtom(in);
+		}
+		if (t == BOOLEAN_TYPE)
+		{
+			if (AvmCore::isBoolean(in))
+				return in;
+			return core->booleanAtom(in);
+		}
+		if (t == OBJECT_TYPE)
+		{
+			if (in == undefinedAtom)
+				return nullObjectAtom;
+			return in;
+		}
+		if (t == NULL)
+		{
+			return in;
+		}
+		// ScriptObject, String, or Namespace, or Null
+		return toplevel->coerce(in,t);
+	}
+	
 	// helper
 	inline int MethodEnv::startCoerce(int argc)
 	{
@@ -99,7 +141,10 @@ namespace avmplus
 
 		if (!method->argcOk(argc))
 		{
-			toplevel->argumentErrorClass()->throwError(kWrongArgumentCountError, core()->toErrorString((AbstractFunction*)method), core()->toErrorString(method->requiredParamCount()), core()->toErrorString(argc));
+			toplevel->argumentErrorClass()->throwError(kWrongArgumentCountError, 
+													   core()->toErrorString((AbstractFunction*)method), 
+													   core()->toErrorString(method->requiredParamCount()), 
+													   core()->toErrorString(argc));
 		}
 
 		// Can happen with duplicate function definitions from corrupt ABC data.  F1 is defined
@@ -152,6 +197,28 @@ namespace avmplus
 		}
 	}
 
+	// In interp-only builds this could still be delegateInvoke or verifyEnter.
+	//
+	// OPTIMIZEME: It would be nice to avoid the unbox / rebox paths through
+	// those functions in interpreter-only builds!
+	
+	inline bool MethodEnv::isInterpreted()
+	{
+		return impl32 == interp32 || implN == interpN;
+	}
+	
+	// Optimization opportunities: since we call interp() directly, it is
+	// probably possible to allocate its stack frame here and pass it in.
+	// If we do so then interp() should deallocate it.  This affords us
+	// the optimization of getting rid of alloca() allocation here, 
+	// which means improved tail calls for once.  For another, if the argv
+	// pointer points into the stack segment s.t. argv+argc+1 equals the
+	// current stack pointer then the stack may be extended in place 
+	// provided there's space.  But that optimization may equally well
+	// be performed inside interp(), and in fact if we alloc temp
+	// space on the alloca stack here then interp() would always perform
+	// that optimization.  So we'd just be moving the decision into interp().
+	
 	// fast/optimized call to a function without parameters
 	Atom MethodEnv::coerceEnter(Atom thisArg)
 	{
@@ -160,11 +227,18 @@ namespace avmplus
 		// caller will coerce instance if necessary,
 		// so make sure it was done.
 		AvmAssert(thisArg == toplevel()->coerce(thisArg, method->paramTraits(0)));
-		unbox1(core(), toplevel(), thisArg, method->paramTraits(0), &thisArg);
-
-		return endCoerce(0, (uint32*)&thisArg);
+		if (isInterpreted())
+		{
+			// Tail call inhibited by &thisArg, and also by &thisArg in "else" clause
+			return interp(this, 0, &thisArg);
+		}
+		else
+		{
+			unbox1(core(), toplevel(), thisArg, method->paramTraits(0), &thisArg);
+			return endCoerce(0, (uint32*)&thisArg);
+		}
 	}
-
+	
 	Atom MethodEnv::coerceEnter(Atom thisArg, ArrayObject *a)
 	{
 		int argc = a->getLength();
@@ -177,14 +251,35 @@ namespace avmplus
 		// so make sure it was done.
 		AvmAssert(thisArg == toplevel()->coerce(thisArg, method->paramTraits(0)));
 
-		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
-		AvmCore::AllocaAutoPtr _ap;
-		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
+		if (isInterpreted())
+		{
+			// Tail call inhibited by local allocation/deallocation
+			AvmCore::AllocaAutoPtr _atomv;
+			Atom* atomv = (Atom*)VMPI_alloca(core(), _atomv, sizeof(Atom)*(argc+1));
+			atomv[0] = thisArg;
+			for ( int i=0 ; i < argc ; i++ )
+				atomv[i+1] = a->getUintProperty(i);
+			return coerceEnter(argc, atomv);
+		}
+		else
+		{
+			size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
+			AvmCore::AllocaAutoPtr _ap;
+			uint32_t *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 
-		unboxCoerceArgs(thisArg, a, ap);
-		return endCoerce(argc, ap);
+			unboxCoerceArgs(thisArg, a, ap);
+			return endCoerce(argc, ap);
+		}
 	}
 
+	// It is enough that the exception handling mechanism knows how to unwind the alloca stack.
+	// If TRY captures the current stack top and the CATCH and/or FINALLY just reset it, then
+	// we're done.
+	//
+	// Then we can just call it AVMPI_alloca() and be done.
+	//
+	// Woot!
+	
 	Atom MethodEnv::coerceEnter(Atom thisArg, int argc, Atom *argv)
 	{
 		int extra = startCoerce(argc);
@@ -194,32 +289,68 @@ namespace avmplus
 		// so make sure it was done.
 		AvmAssert(thisArg == toplevel()->coerce(thisArg, method->paramTraits(0)));
 
-		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
-		AvmCore::AllocaAutoPtr _ap;
-		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
-			
-		unboxCoerceArgs(thisArg, argc, argv, ap);
-		return endCoerce(argc, ap);
+		if (isInterpreted())
+		{
+			// Tail call inhibited by local allocation/deallocation
+			AvmCore::AllocaAutoPtr _atomv;
+			Atom* atomv = (Atom*)VMPI_alloca(core(), _atomv, sizeof(Atom)*(argc+1));
+			atomv[0] = thisArg;
+			memcpy(atomv+1, argv, sizeof(Atom)*argc);
+			return coerceEnter(argc, atomv);
+		}
+		else
+		{
+			size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
+			AvmCore::AllocaAutoPtr _ap;
+			uint32_t *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
+				
+			unboxCoerceArgs(thisArg, argc, argv, ap);
+			return endCoerce(argc, ap);
+		}
 	}
 
 	Atom MethodEnv::coerceEnter(int argc, Atom* atomv)
 	{
-		int extra = startCoerce(argc);
-
 		// check receiver type first
 		// caller will coerce instance if necessary,
 		// so make sure it was done.
+
 		AvmAssert(atomv[0] == toplevel()->coerce(atomv[0], method->paramTraits(0)));
 
-		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
-		AvmCore::AllocaAutoPtr _ap;
-		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
+		// Trying hard here to allow this to be a tail call, so don't inline
+		// coerceUnboxEnter into this function - the allocation it performs
+		// may prevent the compiler from performing the tail call.
+		//
+		// The tail call is important in order to keep stack consumption down in an
+		// interpreter-only configuration, but it's good always.
+
+		if (isInterpreted())
+		{
+			AvmCore* core = this->core();
+			Toplevel* toplevel = this->toplevel();
 			
-		unboxCoerceArgs(argc, atomv, ap);
-		Atom res = endCoerce(argc, ap);
-		return res;
+			startCoerce(argc);
+			int end = argc >= method->param_count ? method->param_count : argc;
+			for ( int i=1 ; i <= end ; i++ )
+				atomv[i] = coerceAtom(core, toplevel, atomv[i], method->paramTraits(i));
+			return interp(this, argc, atomv);
+		}
+		else
+			return coerceUnboxEnter(argc, atomv);
 	}
 
+	// In principle we want this to be inlined if the compiler is not tailcall-aware,
+	// and not inlined if it is tailcall-aware (as doing so may inhibit tail calls).
+	Atom MethodEnv::coerceUnboxEnter(int argc, Atom* atomv)
+	{
+		int extra = startCoerce(argc);
+		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
+		AvmCore::AllocaAutoPtr _ap;
+		uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
+			
+		unboxCoerceArgs(argc, atomv, ap);
+		return endCoerce(argc, ap);
+	}
 
 	/**
 	 * convert atoms to native args.  argc is the number of
@@ -348,17 +479,30 @@ namespace avmplus
 							   CallStackNode* callstack,
 							   Atom* framep, volatile sintptr *eip)
 	{
+		debugEnterInner(argc, (void*)ap, frameTraits, localCount, callstack, framep, eip, false);
+	}
+	
+	void MethodEnv::debugEnterInner(int argc, 
+									void *ap, 
+									Traits**frameTraits, 
+									int localCount,
+									CallStackNode* callstack,
+									Atom* framep, 
+									volatile sintptr *eip,
+									bool boxed)
+	{
 		AvmCore* core = this->core();
 
 #ifdef DEBUGGER
 		// update profiler
-		sendEnter(argc, ap);
+		// sendEnter ignores the arguments, ergo we pass 0, 0
+		sendEnter(0, 0 /* argc, ap */);
 
 		// dont reset the parameter traits since they are setup in the prologue
 		int firstLocalAt = method->param_count+1;
 		AvmAssert(!frameTraits || localCount >= firstLocalAt);
 		if (frameTraits) memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
-		if (callstack) callstack->init(this, framep, frameTraits, argc, ap, eip, /*scopeDepth*/NULL);
+		if (callstack) callstack->init(this, framep, frameTraits, argc, ap, eip, /*scopeDepth*/NULL, boxed);
 		if (core->debugger) core->debugger->_debugMethod(this);
 #else
 		(void)localCount;
