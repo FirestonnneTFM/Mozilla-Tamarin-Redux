@@ -2690,7 +2690,7 @@ namespace avmplus
 			goto fast_path;
 		}
 #if	defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		if (jit && slotType && slotType->base == CLASS_TYPE && slotType->getNativeClassInfo() == NULL)
+		if (jit && slotType && slotType->base == CLASS_TYPE && slotType->getCreateClassClosureProc() == NULL)
 		{
 			// is this a user defined class?  A(1+ args) means coerce to A
 			AvmAssert(slotType->itraits != NULL);

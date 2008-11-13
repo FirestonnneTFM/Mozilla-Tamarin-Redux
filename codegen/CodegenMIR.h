@@ -355,11 +355,6 @@ namespace avmplus
 		CodegenMIR(MethodInfo* info);
 
 		/**
-		 * Constructor.  Initializes the generator for native method thunks only.
-		 */
-		CodegenMIR(NativeMethod* m);
-
-		/**
 		 * Constructor for use with emitImtThunk
 		 */
 		CodegenMIR(PoolObject* pool);

@@ -118,8 +118,8 @@ namespace avmplus
 									   Traits* base) const
 	{
 		// If this is a native class, return the stated instance size
-		NativeClassInfop nativeEntry;
-		if (natives && (nativeEntry = natives->get_class(class_id)) != NULL)
+		const NativeClassInfo* nativeEntry;
+		if (natives && (nativeEntry = natives->get_class(class_id)) != NULL && nativeEntry->sizeofInstance)
 		{
 			return nativeEntry->sizeofInstance;
 		}
@@ -1071,8 +1071,8 @@ namespace avmplus
 			}
 			else
 			{
-				NativeMethodInfop ni = NULL;
-				if (!natives || (ni = natives->get_method(i)) == NULL)
+				info = natives->newNativeMethod(i);
+				if (!info)
 				{
 					// If this assert hits, you're missing a native method.  Method "i"
 					// corresponds to the function of the same number in 
@@ -1080,10 +1080,6 @@ namespace avmplus
 					AvmAssertMsg(0, "missing native method decl");
 					toplevel->throwVerifyError(kIllegalNativeMethodError);
 				}
-				info = new (core->GetGC()) NativeMethod(*ni);
-
-				// todo assert that the .abc signature matches the C++ code?
-				info->flags |= AbstractFunction::ABSTRACT_METHOD;
 			}
 
 			info->info_pos = info_pos;
@@ -1864,8 +1860,8 @@ namespace avmplus
 				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString((Traits*)script->declaringTraits));
 			}
 
-			NativeScriptInfop nativeEntry = natives ? natives->get_script(i) : NULL;
-			Traits* traits = parseTraits(nativeEntry ? nativeEntry->sizeofInstance : sizeof(ScriptObject), 
+			const NativeScriptInfo* nativeEntry = natives ? natives->get_script(i) : NULL;
+			Traits* traits = parseTraits(nativeEntry && nativeEntry->sizeofInstance ? nativeEntry->sizeofInstance : sizeof(ScriptObject), 
 											core->traits.object_itraits, 
 											core->publicNamespace, 
 											core->kglobal, 
@@ -1882,7 +1878,7 @@ namespace avmplus
 
 			
 			// global object, make it dynamic
-				traits->setNativeScriptInfo(nativeEntry);
+			traits->setCreateGlobalObjectProc(nativeEntry ? nativeEntry->createGlobalObject : NULL);
 			traits->set_needsHashtable(true);
 			traits->final = true;
 
@@ -2192,8 +2188,8 @@ namespace avmplus
 			cinit->name = Multiname::format(core,ns,cinitName);
 			#endif
 
-			NativeClassInfop nativeEntry = natives ? natives->get_class(i) : NULL;
-			Traits* ctraits = parseTraits(nativeEntry ? nativeEntry->sizeofClass : sizeof(ClassClosure),
+			const NativeClassInfo* nativeEntry = natives ? natives->get_class(i) : NULL;
+			Traits* ctraits = parseTraits(nativeEntry && nativeEntry->sizeofClass ? nativeEntry->sizeofClass : sizeof(ClassClosure),
 											CLASS_TYPE, 
 											ns, 
 											core->internString(core->concatStrings(name, core->newString("$"))), 
@@ -2206,7 +2202,7 @@ namespace avmplus
 											TRAITSTYPE_CLASS_FROM_ABC, 
 											itraits->protectedNamespace);
 
-				ctraits->setNativeClassInfo(nativeEntry);
+			ctraits->setCreateClassClosureProc(nativeEntry ? nativeEntry->createClassClosure : NULL);
 			AvmAssert(cinit->declaringTraits == NULL);
 
 			if (cinit->declaringTraits != NULL)

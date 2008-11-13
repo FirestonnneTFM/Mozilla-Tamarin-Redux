@@ -1632,66 +1632,6 @@ namespace avmplus
 		#endif /* VTUNE */
 	}
 
-	CodegenMIR::CodegenMIR(NativeMethod* m)
-		: core(m->core()), pool(m->pool), info(NULL), activation(m->core()->GetGC())
-	{
-		state = NULL;
-		framep = SP;
-		interruptable = true;
-
-		#ifdef AVMPLUS_MAC_CARBON
-		setjmpInit();
-		#endif
-
-		#ifdef AVMPLUS_ARM
-		#ifdef AVMPLUS_VERBOSE
-		this->verboseFlag = pool->verbose;
-		#endif
-		this->console = &core->console;
-		#endif
-
-		#if defined(AVMPLUS_IA32) && defined(_MAC)
-		patch_esp_padding = NULL;
-		#endif
-		
-		abcStart = NULL;
-		abcEnd   = NULL;
-
-		casePtr = NULL;
-		ipStart = NULL;
-
-		#ifdef AVMPLUS_ARM
-		patch_frame_size = NULL;
-		patch_stmfd = NULL;
-		gpregs.nonVolatileMask  = 0;
-		fpregs.nonVolatileMask  = 0;
-		#endif
-
-		#ifdef AVMPLUS_SPARC
-		patch_frame_size = NULL;
-		beginCatch_start = NULL;
-		beginCatch_end = NULL;
-		#endif
-
-		#ifdef AVMPLUS_PPC
-		fpregs.LowerBound = Unknown;
-		gpregs.LowerBound = Unknown;
-		patch_stwu = NULL;
-		patch_stmw = NULL;
-		#endif
-
-		overflow = false;
-		expansionFactor = 1;
-
-		// native method generation doesn't require a intermediate mir buffer
-		mirBuffer = 0;
-
-		#ifdef VTUNE
-		hasDebugInfo = false;
-       jitInfo = new (core->GetGC()) JITCodeInfo(core->GetGC());
-		#endif /* VTUNE */
-	}
-
 	CodegenMIR::~CodegenMIR()
 	{
 		//if (arg_count > 0)

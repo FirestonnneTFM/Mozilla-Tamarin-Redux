@@ -46,18 +46,18 @@
 
 namespace avmplus
 {
-	NativeMethod::NativeMethod(const NativeMethodInfo& _nte)
-		: AbstractFunction(), nte(_nte)
+	// ---------------
+
+	NativeMethod::NativeMethod(AvmThunkNativeThunker _thunker, AvmThunkNativeHandler _handler)
+		: AbstractFunction(), thunker(_thunker), handler(_handler)
 	{
-		this->flags |= nte.flags;
 		this->impl32 = verifyEnter;
 	}
 
-	Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
+	/*static*/ Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
 	{
 		NativeMethod* f = (NativeMethod*) env->method;
 
-        //f->core()->console << "native verify " << f << "\n";
 		f->verify(env->vtable->toplevel);
 
 		#ifdef AVMPLUS_VERIFYALL
@@ -73,22 +73,17 @@ namespace avmplus
 	{
 		AvmAssert(declaringTraits->isResolved());
 		resolveSignature(toplevel);
-
 		union {
 			Atom (*impl32)(MethodEnv*, int, uint32 *);
 			AvmThunkNativeThunker thunker;
 		} u;
-		u.thunker = this->nte.thunker;
+		u.thunker = this->thunker;
 		this->impl32 = u.impl32;
 	}
 
 	// ---------------
 
 	NativeInitializer::NativeInitializer(AvmCore* _core, 
-											NativeClassInfop _classEntry, 
-											NativeScriptInfop _scriptEntry,
-											NativeClassInfop _classEntry2, 
-											NativeScriptInfop _scriptEntry2,
 											const uint8_t* _abcData,
 											uint32_t _abcDataLen,
 											uint32_t _methodCount,
@@ -97,23 +92,22 @@ namespace avmplus
 		core(_core),
 		abcData(_abcData),
 		abcDataLen(_abcDataLen),
-		methods((NativeMethodInfop*)core->GetGC()->Calloc(_methodCount, sizeof(NativeMethodInfop), GC::kZero)),
-		classes((NativeClassInfop*)core->GetGC()->Calloc(_classCount, sizeof(NativeClassInfop), GC::kZero)),
-		scripts((NativeScriptInfop*)core->GetGC()->Calloc(_scriptCount, sizeof(NativeScriptInfop), GC::kZero)),
+		methods((MethodType*)core->GetGC()->Calloc(_methodCount, sizeof(MethodType), GC::kZero)),
+		classes((ClassType*)core->GetGC()->Calloc(_classCount, sizeof(ClassType), GC::kZero)),
+		scripts((ScriptType*)core->GetGC()->Calloc(_scriptCount, sizeof(ScriptType), GC::kZero)),
 		methodCount(_methodCount),
 		classCount(_classCount),
 		scriptCount(_scriptCount)
 	{
-		fillInClasses(_classEntry);
-		if (_classEntry2 != _classEntry)
-			fillInClasses(_classEntry2);
-
-		fillInScripts(_scriptEntry);
-		if (_scriptEntry2 != _scriptEntry)
-			fillInScripts(_scriptEntry2);
 	}
 
-	void NativeInitializer::fillInMethods(NativeMethodInfop _methodEntry)
+#ifdef AVMPLUS_NO_STATIC_POINTERS
+	void NativeInitializer::fillIn(NativeInitializer::FillInProc p)
+	{
+		(*p)(methods, classes, scripts);
+	}
+#else
+	void NativeInitializer::fillInMethods(const NativeMethodInfo* _methodEntry)
 	{
 		while (_methodEntry->method_id != -1)
 		{
@@ -124,25 +118,36 @@ namespace avmplus
 		}
 	}
 
-	void NativeInitializer::fillInClasses(NativeClassInfop _classEntry)
+	void NativeInitializer::fillInClasses(const NativeClassInfo* _classEntry)
 	{
 		while (_classEntry->class_id != -1)
 		{
+			// if we overwrite a native class mapping, something is hosed
+			AvmAssert(classes[_classEntry->class_id]  == NULL);
 			classes[_classEntry->class_id] = _classEntry;
-			fillInMethods(_classEntry->nativeMap);
+#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
+			if (_classEntry->nativeMap)
+				fillInMethods(_classEntry->nativeMap);
+#endif
 			_classEntry++;
 		}
 	}
 
-	void NativeInitializer::fillInScripts(NativeScriptInfop _scriptEntry)
+	void NativeInitializer::fillInScripts(const NativeScriptInfo* _scriptEntry)
 	{
 		while (_scriptEntry->script_id != -1)
 		{
+			// if we overwrite a native script mapping, something is hosed
+			AvmAssert(scripts[_scriptEntry->script_id]  == NULL);
 			scripts[_scriptEntry->script_id] = _scriptEntry;
-			fillInMethods(_scriptEntry->nativeMap);
+#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
+			if (_scriptEntry->nativeMap)
+				fillInMethods(_scriptEntry->nativeMap);
+#endif
 			_scriptEntry++;
 		}
 	}
+#endif // AVMPLUS_NO_STATIC_POINTERS
 	
 	PoolObject* NativeInitializer::parseBuiltinABC(const List<Stringp, LIST_RCObjects>* includes)
 	{
@@ -153,6 +158,21 @@ namespace avmplus
 		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, core->builtinDomain, this, includes);
 	}
 	
+	NativeMethod* NativeInitializer::newNativeMethod(uint32_t i) const
+	{
+		const NativeMethodInfo* ni = get_method(i);
+		if (!ni)
+			return NULL;
+
+		NativeMethod* info = new (core->GetGC()) NativeMethod(ni->thunker, ni->handler);
+		info->flags |= AbstractFunction::ABSTRACT_METHOD;
+#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
+		info->flags |= ni->flags;
+		info->cookie = ni->cookie;
+#endif
+		return info;
+	}
+
 	NativeInitializer::~NativeInitializer()
 	{
 		// might as well explicitly free now

@@ -194,11 +194,7 @@ namespace avmplus
 	class Namespace;
 	class NamespaceSet;
 	class NamespaceClass;
-	class NativeMethod;
-	class NativeClassFactory;
 	class NativeInitializer;
-	class NativeScriptFactory;
-	struct NativeMethodInfo;
 	class NumberClass;
 	class IntClass;
 	class UIntClass;
@@ -242,9 +238,6 @@ namespace avmplus
 	class XMLParser;
 	class XMLTag;
 
-	struct NativeClassInfo;
-	struct NativeScriptInfo;
-	struct NativeMethodInfo;
 	struct WordOpcodeAttr;
 
 	typedef Traits* Traitsp;
@@ -256,36 +249,6 @@ namespace avmplus
 	typedef const TraitsBindings* TraitsBindingsp;
 	typedef const TraitsMetadata* TraitsMetadatap;
 #endif
-
-	typedef const NativeScriptInfo* NativeScriptInfop;
-	typedef const NativeClassInfo* NativeClassInfop;
-	typedef const NativeMethodInfo* NativeMethodInfop;
-	#define AVMTHUNK_NativeClassInfop_DEFINED
-}
-
-namespace avmplus
-{
-	typedef avmplus::AbcEnv* AvmInstance;
-	typedef avmplus::ScriptObject* AvmObject;
-	typedef avmplus::String* AvmString;
-	typedef avmplus::Namespace* AvmNamespace;
-	typedef avmplus::Atom AvmBox;
-	typedef avmplus::MethodEnv* AvmMethodEnv;
-	typedef uint32_t AvmBoolArg;
-
-	#define AvmThunkRetType_AvmObject		(error ??? illegal) /* all Objects are return as AvmBox */
-	typedef AvmBox AvmThunkRetType_AvmBoolArg;
-	typedef AvmBox AvmThunkRetType_int32_t;
-	typedef AvmBox AvmThunkRetType_uint32_t;
-	typedef AvmBox AvmThunkRetType_AvmNamespace;
-	typedef AvmBox AvmThunkRetType_AvmBox;
-	typedef AvmBox AvmThunkRetType_AvmString;
-	typedef AvmBox AvmThunkRetType_void;
-	typedef double AvmThunkRetType_double;
-
-	#define AVMTHUNK_CALLTYPE	 /* could be used to declare custom call type (eg __fastcall) */
-
-	typedef AvmThunkRetType_AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
 }
 
 #include "MMgc.h"
@@ -327,6 +290,7 @@ using MMgc::GCHeap;
 #include "AbstractFunction.h"
 #include "PoolObject.h"
 #include "AbcEnv.h"
+#include "NativeFunction.h"
 #include "Traits.h"
 #include "TraitsIterator.h"
 #include "VTable.h"
@@ -340,7 +304,6 @@ using MMgc::GCHeap;
 #include "WordcodeTranslator.h"
 #include "WordcodeEmitter.h"
 #include "Verifier.h"
-#include "NativeFunction.h"
 #include "ClassClosure.h"
 #include "ClassClass.h"
 #include "FunctionClass.h"

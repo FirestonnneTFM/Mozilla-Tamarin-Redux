@@ -491,7 +491,8 @@ public class ByteArray
 	 * @refpath 
 	 * @keyword ByteArray, ByteArray.toString, toString
 	 */	
-	public native function toString():String;
+	private native function _toString():String;
+	public function toString():String { return _toString(); }
 	
 	/**
 	 * The number of bytes of data available for reading
