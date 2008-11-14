@@ -1533,6 +1533,12 @@ namespace avmplus
 			thisData->fixInterfaceBindings(core, toplevel);
 #endif
 		}
+
+		// hashtable (if we have one) must start on pointer-sized boundary...
+		// much easier to always round slotsize up unconditionally rather than
+		// only for cases with hashtable, so that's what we'll do. (MMgc currently
+		// allocate in 8-byte increments anyway, so we're not really losing any space.)
+		thisData->m_slotSize = (thisData->m_slotSize + (sizeof(uintptr_t)-1)) & ~(sizeof(uintptr_t)-1);
 		
 		// remember the cap we need
 		if (m_bindingCapLog2 == 0)
@@ -1891,17 +1897,14 @@ namespace avmplus
 		AvmAssert(m_totalSize >= m_sizeofInstance);
 		if (m_needsHashtable || (base && base->m_hashTableOffset && !isXMLType()))
 		{
+			// slotSize is already rounded up to pointer-sized boundary, but totalsize might not be
+			// (eg for bool/int/uint, which have weird sizes)
+			m_totalSize = ((m_totalSize+(sizeof(uintptr_t)-1))&~(sizeof(uintptr_t)-1));
 			m_hashTableOffset = m_totalSize;
 			m_totalSize += sizeof(Hashtable);
 			AvmAssert(builtinType == BUILTIN_boolean ? true : (m_hashTableOffset & 3) == 0);
-			#ifdef AVMPLUS_64BIT
-			// Hashtable must start on pointer-sized boundary
-			if ((m_hashTableOffset & 7) == 4)
-			{
-				m_hashTableOffset += 4;
-				m_totalSize += 4;
-			}
-			#endif
+			AvmAssert((m_hashTableOffset & (sizeof(uintptr_t)-1)) == 0);
+			AvmAssert((m_totalSize & (sizeof(uintptr_t)-1)) == 0);
 		}
 
 		// make sure all the methods have resolved types
