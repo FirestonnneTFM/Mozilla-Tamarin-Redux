@@ -352,8 +352,9 @@ namespace avmplus
         v.ins = o;
         lirout->store(o, vars, i*8);
         DEBUGGER_ONLY(
-            if (int(i) < state->verifier->local_count)
+            if (int(i) < state->verifier->local_count) {
                 lirout->store(InsConst(v.traits), varTraits, i*sizeof(Traits*));
+			}
         )
 	}
 
@@ -455,7 +456,7 @@ namespace avmplus
 	LIns* CodegenLIR::storeAtomArgs(int count, int index)
 	{
 		LIns* ap = InsAlloc(sizeof(Atom)*count);
-		for (int i=0; i < count; i++)
+		for (int i=0; i < count && !outOMem(); i++)
 		{
 			LIns* v = loadAtomRep(index++);
 			storeIns(v, sizeof(Atom)*i, ap);
@@ -471,7 +472,7 @@ namespace avmplus
 		#endif
 		LIns* ap = InsAlloc(sizeof(Atom)*(count+1));
 		storeIns(receiver, 0, ap);
-		for (int i=1; i <= count; i++)
+		for (int i=1; i <= count && !outOMem(); i++)
 		{
 			LIns* v = loadAtomRep(index++);
 			storeIns(v, sizeof(Atom)*i, ap);
@@ -536,7 +537,13 @@ namespace avmplus
 		if (frag) 
 			frag->releaseLirBuffer();
 	}
-	
+
+	bool CodegenLIR::outOMem()
+	{
+		overflow = frag->lirbuf->outOMem();  // OOM mean overflowed the buffer 
+		return overflow;
+	}
+
 	#ifdef AVMPLUS_MAC_CARBON
 	int CodegenLIR::setjmpAddress = 0;
 
@@ -914,14 +921,23 @@ namespace avmplus
         }
     };
 
-	void emitStart(LirBuffer *lirbuf, LirWriter* &lirout) {
-        (void) lirbuf;
+	void emitStart(LirBuffer *lirbuf, LirWriter* &lirout, bool &overflow) {
         debug_only(
-            GC *gc = lirbuf->_frago->core()->gc;
             // catch problems before they hit the buffer
+			GC *gc = lirbuf->_frago->core()->gc;
             lirout = new (gc) ValidateWriter(lirout);
         )
-        lirout->ins0(LIR_start);
+		if (lirbuf->outOMem())
+			overflow = true;
+		else
+		{
+			lirout->ins0(LIR_start);
+
+			// create params for saved regs -- processor specific
+			for (int i=0; i < NumSavedRegs; i++) {
+				lirout->insParam(i, 1);
+			}
+		}
 	}
 
 #ifdef AVMPLUS_VERBOSE
@@ -1008,8 +1024,8 @@ namespace avmplus
         CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout,
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
-
-		emitStart(lirbuf, lirout);
+		
+		emitStart(lirbuf, lirout, overflow);
 
 		if (overflow)
 			return false;
@@ -1060,7 +1076,7 @@ namespace avmplus
             lirbuf->names->addName(varPtrs, "varPtrs");
         })
         // in LIR the variables never move around, so initialize varPtrs once and we're done.
-        for (int i=0; i < state->verifier->max_scope; i++) {
+        for (int i=0; i < state->verifier->max_scope && !outOMem(); i++) {
             storeIns(leaIns(i*sizeof(double), vars), i*sizeof(void*), varPtrs);
         }
 		#endif //DEBUGGER
@@ -1125,13 +1141,13 @@ namespace avmplus
 		{
 			// compute offset of first optional arg
 			int offset = 0;
-			for (int i=0, n=info->param_count-info->optional_count; i <= n; i++) {
+			for (int i=0, n=info->param_count-info->optional_count; i <= n && !outOMem(); i++) {
                 offset += info->paramTraits(i) == NUMBER_TYPE ? sizeof(double) : sizeof(Atom);
 			}
 
 			// now copy the default optional values
 			LIns* argcarg = argc_param;
-			for (int i=0, n=info->optional_count; i < n; i++)
+			for (int i=0, n=info->optional_count; i < n && !outOMem(); i++)
 			{
 				// first set the local[p+1] = defaultvalue
 				int param = i + info->param_count - info->optional_count; // 0..N
@@ -1176,7 +1192,7 @@ namespace avmplus
 		// for (int i=0, n=param_count; i <= n; i++)
 		//     framep[i] = argv[i];
 		int offset = 0;
-		for (int i=0, n=info->param_count-info->optional_count; i <= n; i++)
+		for (int i=0, n=info->param_count-info->optional_count; i <= n && !outOMem(); i++)
 		{
 			Traits* t = info->paramTraits(i);
 			LIns* arg; 
@@ -1233,7 +1249,7 @@ namespace avmplus
 		if (firstLocal < state->verifier->local_count)
 		{
 			// set remaining locals to undefined
-			for (int i=firstLocal, n=state->verifier->local_count; i < n; i++)
+			for (int i=firstLocal, n=state->verifier->local_count; i < n && !outOMem(); i++)
 			{
 				if(!(state->value(i).traits == NULL)){ // expecting *
  					AvmAssertMsg(0,"(state->value(i).traits != NULL)");
@@ -1245,7 +1261,7 @@ namespace avmplus
 
 		#ifdef DEBUGGER
 
-		for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i)
+		for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope && !outOMem(); ++i)
 		{
 			localSet(i, undefConst);
 		}
@@ -1293,12 +1309,14 @@ namespace avmplus
 	}
 
 	void CodegenLIR::emitCopy(FrameState* state, int src, int dest) {
+		if (outOMem()) return;
 		this->state = state;
 		localSet(dest, localCopy(src));
 	}
 
 	void CodegenLIR::emitGetscope(FrameState* state, int scope_index, int dest)
 	{
+		if (outOMem()) return;
 		this->state = state;
 		Traits* t = info->declaringTraits->scope->getScopeTraitsAt(scope_index);
 		LIns* declVTable = loadIns(LIR_ldc, offsetof(MethodEnv, vtable), env_param);
@@ -1308,6 +1326,7 @@ namespace avmplus
 	}
 
 	void CodegenLIR::emitSwap(FrameState* state, int i, int j) {
+		if (outOMem()) return;
 		this->state = state;
 		LIns* t = localCopy(i);
 		localSet(i, localCopy(j));
@@ -1316,12 +1335,14 @@ namespace avmplus
 
 	void CodegenLIR::emitKill(FrameState* state, int i)
 	{
+		if (outOMem()) return;
 		this->state = state;
 		localSet(i, undefConst);
 	}
 
 	void CodegenLIR::emitSetContext(FrameState *state, AbstractFunction *f)
 	{
+		if (outOMem()) return;
 		this->state = state;
 		//
 		// initialize the code context
@@ -1356,6 +1377,7 @@ namespace avmplus
 
 	void CodegenLIR::emitSetDxns(FrameState* state)
 	{
+		if (outOMem()) return;
 		this->state = state;
 
 		LIns* dxnsAddr = dxns;
@@ -1378,6 +1400,8 @@ namespace avmplus
 
 	void CodegenLIR::emitBlockStart(FrameState* state)
 	{
+		if (outOMem()) return;
+
 		// our new extended BB now starts here, this means that any branch targets
 		// should hit the next instruction our bb start instruction
 		LIns* bb = Ins(LIR_label); // mark start of block
@@ -1418,12 +1442,14 @@ namespace avmplus
 
 	void CodegenLIR::emitIntConst(FrameState* state, int index, uintptr c)
 	{
+		if (outOMem()) return;
 		this->state = state;
 		localSet(index, InsConst(c));
 	}
 
 	void CodegenLIR::emitDoubleConst(FrameState* state, int index, double* pd)
 	{
+		if (outOMem()) return;
 		this->state = state;
         uint64_t *pquad = (uint64_t*) pd;
 		localSet(index, lirout->insImmq(*pquad));
@@ -1431,6 +1457,7 @@ namespace avmplus
 
 	void CodegenLIR::emitCoerce(FrameState* state, int loc, Traits* result)
 	{
+		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -1603,6 +1630,7 @@ namespace avmplus
 
 	void CodegenLIR::emitCheckNull(FrameState* state, int index)
 	{
+		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -1637,6 +1665,7 @@ namespace avmplus
 
 	void CodegenLIR::emitCall(FrameState *state, AbcOpcode opcode, intptr_t method_id, int argc, Traits* result)
 	{
+		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -1737,7 +1766,7 @@ namespace avmplus
         }
         
         disp = pad;
-		for (int i=0; i <= argc; i++)
+		for (int i=0; i <= argc && !outOMem(); i++)
 		{
             // use localCopy so we sniff the arg type and use appropriate load instruction
 			LIns* v = localCopy(index++);
@@ -1768,6 +1797,7 @@ namespace avmplus
 
     void CodegenLIR::emitGetslot(FrameState *state, int slot, int ptr_index, Traits *result)
     {
+		if (outOMem()) return;
         this->state = state;
         emitPrep();
         PERFM_NVPROF("emitGetslot",1);
@@ -1818,6 +1848,7 @@ namespace avmplus
 
     void CodegenLIR::emitSetslot(FrameState *state, AbcOpcode opcode, int slot, int ptr_index)
     {
+		if (outOMem()) return;
         this->state = state;
         emitPrep();
         int sp = state->sp();
@@ -1934,6 +1965,7 @@ namespace avmplus
 
 	void CodegenLIR::emit(FrameState* state, AbcOpcode opcode, uintptr op1, uintptr op2, Traits* result)
 	{
+		if (outOMem()) return;
 		this->state = state;
 		emitPrep();
 
@@ -2039,7 +2071,7 @@ namespace avmplus
 				const byte* pc = 4 + abcStart + state->pc;
                 AvmCore::readU30(pc);
 
-				for (int i=0; i < count; i++)
+				for (int i=0; i < count && !outOMem(); i++)
 				{
 					intptr_t target = state->pc + AvmCore::readS24(pc+3*i);
                     branchIns(LIR_jt, binaryIns(LIR_eq, input, InsConst(i)), target);
@@ -3397,6 +3429,7 @@ namespace avmplus
 
 	void CodegenLIR::emitIf(FrameState *state, AbcOpcode opcode, intptr_t target, int a, int b)
 	{
+		if (outOMem()) return;
 		this->state = state;
 
 #ifdef DEBUGGER
@@ -3635,6 +3668,7 @@ namespace avmplus
 
 	void CodegenLIR::epilogue(FrameState *state)
 	{
+		if (outOMem()) return;
 		this->state = state;
 
         if (npe_label.preds) {
@@ -3671,7 +3705,7 @@ namespace avmplus
 			// jump to catch handler
             LIns *handler_target = loadIns(LIR_ld, offsetof(ExceptionHandler, target), handler);
 			// we dont have LIR_ji yet, so do a compare & branch to each possible target.
-			for (int i=0; i < handler_count; i++)
+			for (int i=0; i < handler_count && !outOMem(); i++)
 			{
 				ExceptionHandler* h = &info->exceptions->exceptions[i];
                 intptr_t handler_pc = h->target;
@@ -3953,7 +3987,7 @@ namespace avmplus
         LirBuffer *lirbuf = frag->lirbuf;
         LIns *catcher = exBranch ? exBranch->getTarget() : 0;
         LIns *vars = lirbuf->sp;
-        List<LIns*, LIST_NonGCObjects> looplabels(gc);
+        InsList looplabels(gc);
         BitSet livein(gc, framesize);
 
         verbose_only(int iter = 0;)
@@ -4376,7 +4410,9 @@ namespace avmplus
 		// doesn't actually know how to pop stack args, so this will end
 		// up doing the right thing.  this is very fragile and should be fixed!
 
-		emitStart(lirbuf, lirout);
+		emitStart(lirbuf, lirout, overflow);
+		if (overflow)
+			return false;
 
 		LIns *iid_param = lirout->insParam(1, 0); // edx
 		//env_param = lirout->insParam(2, 0); // stack
@@ -4430,6 +4466,7 @@ namespace avmplus
             }
         );
         frag->releaseLirBuffer();
+		NanoAssert(assm->error() == None); //@todo we should handle this better... 
 		return frag->code();
 	}
 

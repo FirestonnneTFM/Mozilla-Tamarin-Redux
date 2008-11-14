@@ -230,6 +230,8 @@ namespace avmplus
             return lirout->insImm(c);
         }
 
+		bool outOMem();
+		
 	public:
 		CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
