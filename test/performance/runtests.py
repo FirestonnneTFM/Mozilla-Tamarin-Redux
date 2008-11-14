@@ -469,19 +469,20 @@ if len(avm2)>0:
     else:
         log_print("avm2: %s" % (avm2,));
 log_print('iterations: %s' % iterations)
-
+if globs['largerIsFaster']:
+    log_print("Larger values are faster");
 if len(avm2)>0:
     if iterations == 1:
-        log_print("\n%-50s %7s %7s %7s\n" % ("test",globs['avmname'],globs['avm2name'], "%sp"))
+        log_print("\n%-50s %7s %7s %7s %7s\n" % ("test",globs['avmname'],globs['avm2name'], "%sp", "metric"))
     else:
         log_print("\n%-50s %20s   %20s" % ("test",globs['avmname'],globs['avm2name']))
-        log_print('%-50s  %6s :%6s  %6s    %6s :%6s  %6s %7s' % ('', 'min','max','avg','min','max','avg','%diff'))
+        log_print('%-50s  %6s :%6s  %6s    %6s :%6s  %6s %7s %7s' % ('', 'min','max','avg','min','max','avg','%diff','metric'))
         log_print('                                                   -----------------------   -----------------------   -----')
 else:
     if (iterations>2):
-        log_print("\n\n%-50s %7s %12s\n" % ("test",globs['avmname'],"95% conf"))
+        log_print("\n\n%-50s %7s %12s %7s\n" % ("test",globs['avmname'],"95% conf", "metric"))
     else:
-        log_print("\n\n%-50s %7s\n" % ("test",globs['avmname']))
+        log_print("\n\n%-50s %7s %7s\n" % ("test",globs['avmname'], "metric"))
 
 testnum = len(tests)
 for ast in tests:
@@ -515,8 +516,6 @@ for ast in tests:
     result2list=[]
     resultList=[]
     resultList2=[]
-    rl1 = []
-    rl2 = []
     if globs['memory'] and vmargs.find("-memstats")==-1:
         vmargs="%s -memstats" % vmargs
     if globs['memory'] and len(vmargs2)>0 and vmargs2.find("-memstats")==-1:
@@ -556,14 +555,6 @@ for ast in tests:
                     result1list=line.rsplit()
                     if len(result1list)>2:
                         resultList.append(int(result1list[2]))
-                        '''
-                        if globs['largerIsFaster']:
-                            if result1<float(result1list[2]):
-                                result1=float(result1list[2])
-                        else:
-                            if result1>float(result1list[2]):
-                                result1=float(result1list[2])
-                        '''
                         metric=result1list[1]
                 elif globs['perfm']:
                     parsePerfm(line, perfm1Dict)
@@ -589,46 +580,38 @@ for ast in tests:
                     if "metric" in line:
                         result2list=line.rsplit()
                         if len(result2list)>2:
-                            resultList2.append(int(result1list[2]))
-                            '''
-                            if globs['largerIsFaster']:
-                                if result2 < int(result2list[2]):
-                                    result2=float(result2list[2])
-                            else:
-                                if result2 > int(result2list[2]):
-                                    result2=float(result2list[2])
-                            '''
+                            resultList2.append(int(result2list[2]))
                     elif globs['perfm']:
                         parsePerfm(line, perfm2Dict)
-            # calculate current best result
-            if globs['largerIsFaster']:
-                result1 = max(resultList)
-                if resultList2:
-                    result2 = max(resultList2)
-            else:
-                result1 = min(resultList)
-                if resultList2:
-                    result2 = min(resultList2)
-            if globs['memory']:
-                if memoryhigh<=0:
-                    spdup = 9999
-                else:
-                    spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
-            elif len(avm2)>0:
-                if result1==0:
-                    spdup = 9999
-                else:
-                    spdup = ((result1-result2)/result2)*100.0
-            rl1.append(result1)
-            rl2.append(result2)
         except:
             print formatExceptionInfo()
             exit(-1)
     # end for i in range(iterations)
-    
+    # calculate best result
+    if globs['largerIsFaster']:
+        result1 = max(resultList)
+        if resultList2:
+            result2 = max(resultList2)
+    else:
+        result1 = min(resultList)
+        if resultList2:
+            result2 = min(resultList2)
+    if globs['memory']:
+        if memoryhigh<=0:
+            spdup = 9999
+        else:
+            spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
+    elif len(avm2)>0:
+        if result1==0:
+            spdup = 9999
+        else:
+            if globs['largerIsFaster']:
+                spdup = float(result2-result1)/result2*100.0
+            else:
+                spdup = float(result1-result2)/result2*100.0
     if globs['memory']:
         if len(avm2)>0:
-            log_print("%-50s %7s %7s %7.1f" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup))
+            log_print("%-50s %7s %7s %7.1f %7s" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric))
         else:
             confidence=0
             meanRes=memoryhigh
@@ -638,21 +621,21 @@ for ast in tests:
                     confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
                 log_print("%-50s %7s %10.1f%%     [%s]" % (ast,formatMemory(memoryhigh),confidence,formatMemoryList(resultList)))
             else:
-                log_print("%-50s %7s" % (ast,formatMemory(memoryhigh)))
+                log_print("%-50s %7s %7s" % (ast,formatMemory(memoryhigh), metric))
             config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
             config = config.replace("-memstats","")
             socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, memoryhigh, confidence, meanRes, iterations, OS_name, config, VM_version))
     else:
         if len(avm2)>0:
             if iterations == 1:
-                log_print('%-50s %7s %7s %7.1f' % (ast,result1,result2,spdup))
+                log_print('%-50s %7s %7s %7.1f %7s' % (ast,result1,result2,spdup, metric))
             else:
                 try:
-                    rl1_avg=sum(rl1)/len(rl1)
-                    rl2_avg=sum(rl2)/len(rl2)
-                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, min(rl1), max(rl1), rl1_avg, min(rl2), max(rl2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0))
+                    rl1_avg=sum(resultList)/float(len(resultList))
+                    rl2_avg=sum(resultList2)/float(len(resultList2))
+                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, min(resultList), max(resultList), rl1_avg, min(resultList2), max(resultList2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0, metric))
                 except:
-                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, '', '', result1, '', '', result2, spdup))
+                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, '', '', result1, '', '', result2, spdup, metric))
     
             if globs['perfm']:
                 def calcPerfm(desc, key):
@@ -700,9 +683,9 @@ for ast in tests:
                         perfmSocketlog('vprof-ir-time','ir')
                         perfmSocketlog('vprof-count','count')
                     socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
-                    log_print("%-50s %7s %10.1f%%    %s" % (ast,result1,confidence,resultList)) 
+                    log_print("%-50s %7s %10.1f%% %7s  %s" % (ast,result1,confidence,metric,resultList)) 
                 else: #one iteration
-                    log_print("%-50s %7s" % (ast,result1)) 
+                    log_print("%-50s %7s %7s" % (ast,result1,metric)) 
             else:
                     log_print("%-50s crash" % (ast)) 
                     exit(1)
