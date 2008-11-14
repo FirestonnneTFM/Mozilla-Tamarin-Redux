@@ -178,6 +178,7 @@ elif os == "windows" or os == "cygwin":
     else:
         APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
         OS_LIBS.append('winmm')
+        OS_LIBS.append('shlwapi')
 elif os == "linux":
     MMGC_DEFINES.update({'UNIX': None,
                          'AVMPLUS_UNIX': None,
