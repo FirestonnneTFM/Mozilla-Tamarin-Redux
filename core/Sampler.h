@@ -41,20 +41,29 @@
 namespace avmplus
 {
 #ifdef FEATURE_SAMPLER
+
+	// This structure is used to read/write data to the sample stream.
+	// The fields are written out to the sample stream as they are defined here.  
 	struct Sample
 	{
 		uint64 micros;
 		uint32 sampleType;
 		union {
+			// not filled in for sampleType==DELETED_OBJECT_SAMPLE
 			struct {
+				// Number of StackTraceElements in the trace
 				uint32 depth;
-				void *trace; // not filled in for sampleType==DELETED_OBJECT_SAMPLE
+				// Beginning of an array of StackTraceElement.  Basically, an AbstractFunction*, Stringp, Stringp, uint32 for each entry. 
+				void *trace; 
 			} stack;
-			uint64 size; // deleted object size record
-			
+			// deleted object size record, instead of stack
+			uint64 size; 
 		};
-		uint64 id; // filled for DELETED_OBJECT_SAMPLE + NEW_OBJECT_SAMPLE
-		// these are only filled in for sampleType==NEW_OBJECT_SAMPLE or NEW_MEM_SAMPLE
+		// filled for DELETED_OBJECT_SAMPLE + NEW_OBJECT_SAMPLE
+		uint64 id; 
+
+		// Following three fields are only filled in for sampleType==NEW_OBJECT_SAMPLE or NEW_AUX_SAMPLE
+		// They are not present in the sample stream for other sample types
 		uintptr typeOrVTable;
 		void *ptr;
 		uint64 alloc_size; // size for new mem sample

@@ -228,7 +228,7 @@ namespace avmplus
 		samplingNow = true;
 		write(currentSample, uid);
 		write(currentSample, item);
-		write(currentSample, 0);
+		write(currentSample, (uintptr)0);
 		write(currentSample, size);
 
 		AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.\n");
