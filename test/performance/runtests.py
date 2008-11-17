@@ -51,6 +51,7 @@ timestamps = True
 forcerebuild = False
 logresults = False
 iterations = 1
+res=0
 
 # needed for pipe
 fd,tmpfile = tempfile.mkstemp()
@@ -512,8 +513,6 @@ for ast in tests:
             
     result1=9999999
     result2=9999999
-    result1list=[]
-    result2list=[]
     resultList=[]
     resultList2=[]
     if globs['memory'] and vmargs.find("-memstats")==-1:
@@ -552,10 +551,11 @@ for ast in tests:
                         if val>memoryhigh:
                             memoryhigh=val
                 if not globs['memory'] and "metric" in line:
-                    result1list=line.rsplit()
-                    if len(result1list)>2:
-                        resultList.append(int(result1list[2]))
-                        metric=result1list[1]
+                    rl=[]
+                    rl=line.rsplit()
+                    if len(rl)>2:
+                        resultList.append(int(rl[2]))
+                        metric=rl[1]
                 elif globs['perfm']:
                     parsePerfm(line, perfm1Dict)
             if globs['memory']:
@@ -578,11 +578,38 @@ for ast in tests:
                             if val>memoryhigh2:
                                 memoryhigh2=val
                     if "metric" in line:
-                        result2list=line.rsplit()
-                        if len(result2list)>2:
-                            resultList2.append(int(result2list[2]))
+                        rl=[]
+                        rl=line.rsplit()
+                        if len(rl)>2:
+                            resultList2.append(int(rl[2]))
                     elif globs['perfm']:
                         parsePerfm(line, perfm2Dict)
+            # calculate current best result
+            if len(resultList)==0:
+                result1=9999999
+                result2=9999999
+            else:
+                if globs['largerIsFaster']:
+                    result1 = max(resultList)
+                    if resultList2:
+                        result2 = max(resultList2)
+                else:
+                    result1 = min(resultList)
+                    if resultList2:
+                        result2 = min(resultList2)
+                if globs['memory']:
+                    if memoryhigh<=0:
+                        spdup = 9999
+                    else:
+                        spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
+                elif len(avm2)>0:
+                    if result1==0:
+                        spdup = 9999
+                    else:
+                        spdup = ((result1-result2)/result2)*100.0
+            
+            resultList.append(result1)
+            resultList2.append(result2)
         except:
             print formatExceptionInfo()
             exit(-1)
@@ -661,7 +688,7 @@ for ast in tests:
                 calcPerfm('count', 'count')
                 log_print('-------------------------------------------------------------------------------------------------------------')
         else: #only one avm tested
-            if result1 < 9999999 :
+            if result1 < 9999999 and len(resultList)>0:
                 meanRes = mean(resultList)
                 if (iterations > 2):
                     if meanRes==0:
@@ -688,4 +715,5 @@ for ast in tests:
                     log_print("%-50s %7s %7s" % (ast,result1,metric)) 
             else:
                     log_print("%-50s crash" % (ast)) 
-                    exit(1)
+                    res=1
+exit(res)

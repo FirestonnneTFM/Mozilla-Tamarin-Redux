@@ -62,22 +62,13 @@ package {
 	      }
 	   }
 	}
-	function runAccessFannkuch():int {
-	  var _sunSpiderStartDate:int = getTimer();
-	  var n:int = 8;
-	  var ret:int = fannkuch(n);
-	  var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-	  if (ret==22) {
-	      return _sunSpiderInterval;
-          } else {
-   	      print("error expected fannkuch(8)=22 got "+ret);
-              return -1;
-          }
+	var start:Number=new Date();
+	var res:int=fannkuch(8);
+	var totaltime:Number=new Date()-start;
+	print("fannkuch(8)="+res);
+	if (res==22) {
+	    print("metric time "+totaltime);
+        } else {
+   	    print("error expected fannkuch(8)=22 got "+res);
 	}
-	
-	var time:int=runAccessFannkuch();
-	if (time!=-1) {
-	    print("metric time "+time);
-	}
-
 }

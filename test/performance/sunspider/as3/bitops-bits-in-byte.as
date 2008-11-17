@@ -38,18 +38,19 @@ package {
 	return c;
 	}
 
-	function TimeFunc(func:Function):void {
-	var x:int, y:int, t:int;
+	function TimeFunc(func:Function):int {
+	var res:int, x:int, y:int, t:int;
 	for(x=0; x<350; x++)
-	for(y=0; y<256; y++) func(y);
+	for(y=0; y<256; y++) res=func(y);
+        return res;
 	}
 
-	function runBitopsBitsInByte():int {
-	var _sunSpiderStartDate:int = getTimer();
-	TimeFunc(bitsinbyte);
-	var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-	return _sunSpiderInterval;
-	}
-
-	print("metric time " + runBitopsBitsInByte());
+	var start:Number=new Date();
+	var res:int=TimeFunc(bitsinbyte);
+	var totaltime:Number=new Date()-start;
+	print("bitsinbyte()="+res);
+	if (res==8)
+   	    print("metric time " + totaltime);
+	else
+            print("error bitsinbyte() expected 8 got "+res);
 }

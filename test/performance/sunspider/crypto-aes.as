@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2007 Apple Inc.  All rights reserved.
+> Copyright (C) 2007 Apple Inc.  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -404,8 +404,8 @@ function byteArrayToHexStr(b) {  // convert byte array to hex string for display
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-function runCryptoAES() {
-var _sunSpiderStartDate = getTimer();
+var start=new Date();
+
 var plainText = "ROMEO: But, soft! what light through yonder window breaks?\n\
 It is the east, and Juliet is the sun.\n\
 Arise, fair sun, and kill the envious moon,\n\
@@ -445,9 +445,10 @@ var password = "O Romeo, Romeo! wherefore art thou Romeo?";
 var cipherText = AESEncryptCtr(plainText, password, 256);
 var decryptedText = AESDecryptCtr(cipherText, password, 256);
 
-
-var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-
-return(_sunSpiderInterval);
+var totaltime=new Date()-start;
+if (decryptedText==plainText) {
+    print("metric time "+totaltime);
+} else {
+    print("metric time "+totaltime);
+    print("error plaintext and decrypted text did not match\nplaintext=\n"+plainText+"\ndecryptedtext=\n"+decryptedText);
 }
-print("metric time "+runCryptoAES());
