@@ -25,11 +25,18 @@
  */
 
 function runBitopsBitwiseAnd() {
-  var _sunSpiderStartDate = getTimer();
   bitwiseAndValue = 4294967296;
-  for (var i = 0; i < 600000; i++)
+  for (var i = 0; i < 600000; i++) {
     bitwiseAndValue = bitwiseAndValue & i;
-  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-  return _sunSpiderInterval;
+  }
+  return bitwiseAndValue;
 }
-print("metric time "+runBitopsBitwiseAnd());
+
+var start=new Date();
+var res=runBitopsBitwiseAnd();
+var totaltime=new Date()-start;
+print("bitwiseAnd()="+res);
+if (res==0) 
+  print("metric time "+totaltime);
+else
+  print("error bitwiseAnd() expected 0 got "+res);
