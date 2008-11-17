@@ -67,7 +67,7 @@ if (buildShell):
 
 APP_CPPFLAGS = ""
 APP_CXXFLAGS = ""
-OPT_CXXFLAGS = "-Os "
+OPT_CXXFLAGS = "-O3 "
 OPT_CPPFLAGS = ""
 DEBUG_CPPFLAGS = "-DDEBUG -D_DEBUG "
 DEBUG_CXXFLAGS = ""
@@ -107,11 +107,11 @@ if MMGC_THREADSAFE:
 os, cpu = config.getTarget()
 
 if config.getCompiler() == 'GCC':
-    APP_CXXFLAGS = "-fstrict-aliasing -fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -finline-functions -finline-limit=65536 "
+    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wuninitialized -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 "
     if config.getDebug():
         APP_CXXFLAGS += "-frtti -fexceptions "
     else:
-        APP_CXXFLAGS += "-fno-rtti -fno-exceptions -Wuninitialized  "
+        APP_CXXFLAGS += "-fno-rtti -fno-exceptions "
     DEBUG_CXXFLAGS += "-g "
 elif config.getCompiler() == 'VS':
     if cpu == "arm":
