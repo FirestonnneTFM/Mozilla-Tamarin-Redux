@@ -28,20 +28,22 @@ function nsieve(m:int, isPrime:Vector.<Boolean>):int{
    return count;
 }
 
-function sieve():void {
+function sieve():int {
+    var res:int;
     for (var i:int = 1; i <= 3; i++ ) {
         var m:int = (1<<i)*10000;
         var flags:Vector.<Boolean> = new Vector.<Boolean>(m+1,true);
-        nsieve(m, flags);
+        res=nsieve(m, flags);
     }
+    return res;
 }
 
-function runAccessNsieve():int {
-var _sunSpiderStartDate:int = getTimer();
-sieve();
-var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
-return _sunSpiderInterval;
+var start:Number=new Date();
+var res:int=sieve();
+var totaltime:Number=new Date()-start;
+if (res==7837) {
+   print("metric time "+totaltime);
+} else {
+   print("error sieve() expecting 7837 got "+res);
 }
-
-print("metric time " + runAccessNsieve());
 

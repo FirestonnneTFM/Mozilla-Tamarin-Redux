@@ -406,8 +406,8 @@ package {
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-	function runCryptoAES():int {
-	var _sunSpiderStartDate:int = getTimer();
+	var start:Number=new Date();
+
 	var plainText:String = "ROMEO: But, soft! what light through yonder window breaks?\n\
 	It is the east, and Juliet is the sun.\n\
 	Arise, fair sun, and kill the envious moon,\n\
@@ -447,11 +447,11 @@ package {
 	var cipherText:String = AESEncryptCtr(plainText, password, 256);
 	var decryptedText:String = AESDecryptCtr(cipherText, password, 256);
 
-
-	var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-
-	return(_sunSpiderInterval);
+	var totaltime:Number=new Date()-start;
+	if (decryptedText==plainText) {
+	    print("metric time "+totaltime);
+	} else {
+	    print("metric time "+totaltime);
+	    print("error plaintext and decrypted text did not match\nplaintext=\n"+plainText+"\ndecryptedtext=\n"+decryptedText);	
 	}
-	print("metric time "+runCryptoAES());
-	
 }

@@ -46,12 +46,12 @@ namespace avmplus
 #  ifdef AVMPLUS_DIRECT_THREADED
 		WordcodeEmitter(MethodInfo* info, void** opcode_labels);
 #    ifdef AVMPLUS_SELFTEST
-		WordcodeEmitter(AvmCore* core, byte* code_start, void** opcode_labels);
+		WordcodeEmitter(AvmCore* core, uint8_t* code_start, void** opcode_labels);
 #    endif
 #  else
 		WordcodeEmitter(MethodInfo* info);
 #    ifdef AVMPLUS_SELFTEST
-		WordcodeEmitter(AvmCore* core, byte* code_start);
+		WordcodeEmitter(AvmCore* core, uint8_t* code_start);
 #    endif
 #  endif
 		virtual ~WordcodeEmitter();
@@ -62,32 +62,32 @@ namespace avmplus
 
 		// Call before every instruction to handle exception range translation and
 		// fix up branches to this address
-		virtual void fixExceptionsAndLabels(const byte *pc);
+		virtual void fixExceptionsAndLabels(const uint8_t *pc);
 		
 		// Paste up the translated code and install it in info.  Return the number
 		// of words and install a pointer to the first word in 'code' if not NULL
-		virtual uint32 epilogue(uint32** code_result = NULL);
+		virtual uint32 epilogue(uintptr_t** code_result = NULL);
 		
 		// Handle specific instructions or instruction classes
-		virtual void emitOp0(const byte *pc, WordOpcode opcode);
-		virtual void emitOp1(const byte *pc, WordOpcode opcode);
+		virtual void emitOp0(const uint8_t *pc, WordOpcode opcode);
+		virtual void emitOp1(const uint8_t *pc, WordOpcode opcode);
 		virtual void emitOp1(WordOpcode opcode, uint32_t operand);
-		virtual void emitOp2(const byte *pc, WordOpcode opcode);
+		virtual void emitOp2(const uint8_t *pc, WordOpcode opcode);
 		virtual void emitOp2(WordOpcode opcode, uint32_t op1, uint32_t op2);
 #ifdef DEBUGGER
-		virtual void emitDebug(const byte *pc);
+		virtual void emitDebug(const uint8_t *pc);
 #endif
-		virtual void emitRelativeJump(const byte *pc, WordOpcode opcode);
-		virtual void emitLookupswitch(const byte *pc);
-		virtual void emitLabel(const byte *pc);
-		virtual void emitPushbyte(const byte *pc);
-		virtual void emitPushshort(const byte *pc);
-		virtual void emitPushint(const byte *pc);
-		virtual void emitPushuint(const byte *pc);
-		virtual void emitGetscopeobject(const byte *pc);
+		virtual void emitRelativeJump(const uint8_t *pc, WordOpcode opcode);
+		virtual void emitLookupswitch(const uint8_t *pc);
+		virtual void emitLabel(const uint8_t *pc);
+		virtual void emitPushbyte(const uint8_t *pc);
+		virtual void emitPushshort(const uint8_t *pc);
+		virtual void emitPushint(const uint8_t *pc);
+		virtual void emitPushuint(const uint8_t *pc);
+		virtual void emitGetscopeobject(const uint8_t *pc);
 
 		// In this case, new_pc is the pc being jumped to
-		virtual void emitAbsJump(const byte *new_pc);
+		virtual void emitAbsJump(const uint8_t *new_pc);
 
 	private:
 		// 'backpatches' represent target addresses of forward jumps in the original code,
@@ -117,22 +117,22 @@ namespace avmplus
 		
 		struct backpatch_info 
 		{
-			const byte* target_pc;		// the instruction in the old code that is the target of a forward control transfer
-			uint32_t* patch_loc;			// location in the new code into which to write the new offset
-			uint32_t patch_offset;		// value to subtract from offset of translated pc
+			const uint8_t* target_pc;		// the instruction in the old code that is the target of a forward control transfer
+			uintptr_t* patch_loc;		// location in the new code into which to write the new offset
+			uintptr_t patch_offset;		// value to subtract from offset of translated pc
 			backpatch_info* next;
 		};
 	
 		struct label_info 
 		{
-			uint32_t old_offset;
-			uint32_t new_offset;
+			uintptr_t old_offset;
+			uintptr_t new_offset;
 			label_info* next;
 		};
 	
 		struct catch_info
 		{
-			const byte* pc;			// address in ABC code to trigger use of this structure
+			const uint8_t* pc;			// address in ABC code to trigger use of this structure
 			void *fixup_loc;		// points to a location to update
 			bool is_target;			// The 'target' field is a intptr_t, not an int (sigh).
 			catch_info* next;
@@ -140,7 +140,7 @@ namespace avmplus
 		
 		struct buffer_info
 		{
-			uint32_t data[100];
+			uintptr_t data[100];
 			int entries_used;
 			buffer_info* next;
 		};
@@ -157,16 +157,16 @@ namespace avmplus
 		void** opcode_labels;
 #endif
 		PoolObject *pool;
-		const byte* code_start;
+		const uint8_t* code_start;
 		
 		bool exceptions_consumed;
-		uint32_t *dest;
-		uint32_t *dest_limit;
+		uintptr_t *dest;
+		uintptr_t *dest_limit;
 
 		void cleanup();
 		void refill();
-		void emitRelativeOffset(uint32_t base_offset, const byte *pc, int32_t offset);
-		void makeAndInsertBackpatch(const byte* target_pc, uint32_t patch_offset);
+		void emitRelativeOffset(uintptr_t base_offset, const uint8_t *pc, intptr_t offset);
+		void makeAndInsertBackpatch(const uint8_t* target_pc, uintptr_t patch_offset);
 		void boot();
 
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
@@ -196,25 +196,25 @@ namespace avmplus
 		uint32_t  state;						// current state in the matcher, or 0
 		uint32_t  backtrack_stack[10];			// commit candidates (state numbers)
 		uint32_t  backtrack_idx;				// next slot in backtrack_state
-		uint32_t* I[10];						// longest window 10 instructions, not a problem now, generator can generate constant later
-		uint32_t  O[10];						// symbolic opcodes for each I entry
-		uint32_t  nextI;						// next slot in I and O
-		uint32_t  R[30];						// replacement data
-		uint32_t  S[30];						// symbolic opcode for some R entries
+		uintptr_t* I[10];						// longest window 10 instructions, not a problem now, generator can generate constant later
+		uintptr_t  O[10];						// symbolic opcodes for each I entry
+		uintptr_t  nextI;						// next slot in I and O
+		uintptr_t  R[30];						// replacement data
+		uintptr_t  S[30];						// symbolic opcode for some R entries
 		
 		void peepInit();
-		void peep(uint32_t opcode, uint32_t* loc);
+		void peep(uint32_t opcode, uintptr_t* loc);
 		void peepFlush();
 		bool commit(uint32_t action);
 		bool replace(uint32_t old_instr, uint32_t new_words, bool jump_has_been_translated=false);
 		void undoRelativeOffsetInJump();
 		void shiftBuffers(uint32_t shift);
 		
-		bool isJumpInstruction(uint32_t opcode) {
+		bool isJumpInstruction(uintptr_t opcode) {
 			return wopAttrs[opcode].jumps;
 		}
 		
-		uint32_t calculateInstructionWidth(uint32_t opcode) {
+		uint32_t calculateInstructionWidth(uintptr_t opcode) {
 			return wopAttrs[opcode].width;
 		}
 #endif	// AVMPLUS_PEEPHOLE_OPTIMIZER
