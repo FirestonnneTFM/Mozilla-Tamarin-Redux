@@ -238,10 +238,8 @@ namespace avmshell
 		printf("          [-memstats]   generate statistics on memory usage\n");
 		printf("          [-memlimit d] limit the heap size to d pages\n");
 
-		#ifdef AVMPLUS_TRAITS_CACHE
-			printf("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
-			printf("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
-		#endif
+		printf("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
+		printf("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
 
 		#ifdef _DEBUG
 			printf("          [-Dgreedy]    collect before every allocation\n");
@@ -552,9 +550,7 @@ namespace avmshell
 	{
 		bool show_mem = false;
 
-#ifdef AVMPLUS_TRAITS_CACHE
 		AvmCore::CacheSizes cacheSizes;	// defaults to unlimited
-#endif
 
 		TRY(this, kCatchAction_ReportAsError)
 		{
@@ -727,13 +723,11 @@ namespace avmshell
 							usage();
 						}
 					} 
-				#ifdef AVMPLUS_TRAITS_CACHE
 					else if (!strcmp(arg, "-cache_bindings")) {
 						cacheSizes.bindings = (uint16_t)STRTOL10(argv[++i], 0, 10);
 					} else if (!strcmp(arg, "-cache_metadata")) {
 						cacheSizes.metadata = (uint16_t)STRTOL10(argv[++i], 0, 10);
 					}
-				#endif
                 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 					else if (!strcmp(arg, "-Ojit")) 
 					{
@@ -845,9 +839,7 @@ namespace avmshell
 				delete [] logname;
 			}
 
-#ifdef AVMPLUS_TRAITS_CACHE
 			setCacheSizes(cacheSizes);
-#endif
 			
 			initBuiltinPool();
 			initShellPool();

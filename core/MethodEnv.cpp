@@ -1618,11 +1618,7 @@ namespace avmplus
 			#endif
 			// Invoke the setter
 			uint32 m = AvmCore::bindingToSetterId(b);
-#ifdef AVMPLUS_TRAITS_CACHE
 			AvmAssert(m < vtable->traits->getTraitsBindings()->methodCount);
-#else
-			AvmAssert(m < vtable->traits->methodCount);
-#endif
 			MethodEnv* method = vtable->methods[m];
 			Atom atomv_out[2] = { obj, value };
 			// coerce value to proper type, then call enter

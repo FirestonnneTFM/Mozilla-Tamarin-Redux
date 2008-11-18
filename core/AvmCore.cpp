@@ -51,7 +51,6 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-#ifdef AVMPLUS_TRAITS_CACHE
 	void AvmCore::setCacheSizes(const CacheSizes& cs)
 	{
 		#ifdef AVMPLUS_VERBOSE
@@ -66,17 +65,14 @@ namespace avmplus
  		m_tbCache->resize(cs.bindings);	
  		m_tmCache->resize(cs.metadata);
 	}
-#endif
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	extern AvmCore* g_tmcore;
 #endif
 
 	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), 
-#ifdef AVMPLUS_TRAITS_CACHE
  		m_tbCache(new (g) QCache(0, g)),	// bindings: unlimited by default
  		m_tmCache(new (g) QCache(1, g)),	// metadata: limited to 1 by default
-#endif
 #ifdef AVMPLUS_MIR
 		mirBuffers(g, 4), 
 #endif
@@ -474,11 +470,7 @@ namespace avmplus
 
 		// iterate thru each of the definitions exported by this script
 		int i=0;
-#ifdef AVMPLUS_TRAITS_CACHE
 		TraitsBindingsp tb = scriptTraits->getTraitsBindings();
-#else
-		Traitsp tb = scriptTraits;
-#endif
 		while((i=tb->next(i)) != 0)
 		{
 			// don't need to check for DELETED because we never remove trait bindings
@@ -1791,11 +1783,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			AvmAssert(false);
 			return false;
 		}
-#ifdef AVMPLUS_TRAITS_CACHE
 		return lhs->containsInterface(itraits);
-#else
-		return lhs->containsInterface(itraits)!=0;
-#endif
     }
 
 	Stringp AvmCore::coerce_s(Atom atom)
@@ -2999,12 +2987,8 @@ return the result of the comparison ToPrimitive(x) == y.
 	VTable* AvmCore::newVTable(Traits* traits, VTable* base, ScopeChain* scope,
 		AbcEnv* abcEnv, Toplevel* toplevel)
 	{
-#ifdef AVMPLUS_TRAITS_CACHE
 		traits->resolveSignatures(toplevel);
 		const uint32_t count = traits->getTraitsBindings()->methodCount;
-#else
-		const uint32_t count = traits->methodCount;
-#endif
 		size_t extraSize = sizeof(MethodEnv*)*(count > 0 ? count-1 : 0);
 		return new (GetGC(), extraSize) VTable(traits, base, scope, abcEnv, toplevel);
 	}
@@ -4008,11 +3992,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	void AvmCore::enq(Traits* t) {
         if (config.verifyall && !t->isInterface) {
             enq(t->init);
-#ifdef AVMPLUS_TRAITS_CACHE
 			TraitsBindingsp td = t->getTraitsBindings();
-#else
-			Traitsp td = t;
-#endif
 		    for (int i=0, n=td->methodCount; i < n; i++)
                 enq(td->getMethod(i));
         }

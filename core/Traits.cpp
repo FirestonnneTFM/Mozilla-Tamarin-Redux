@@ -81,10 +81,8 @@ namespace avmplus
 	static const char* const g_tinfonm[TMT_COUNT] = 
 	{ 
 		"Traits", 
-#ifdef AVMPLUS_TRAITS_CACHE
 		"TBI", 
 		"TMI", 
-#endif
 		"VTable", 
 		"MethodEnv", 
 		"AbstractFunction" 
@@ -142,7 +140,6 @@ namespace avmplus
 			g_tmcore->GetGC()->CleanStack();
 			g_tmcore->GetGC()->Collect(); // flush out dead WeaKRefs first
 			
-#ifdef AVMPLUS_TRAITS_CACHE
 			static TMT_list g_tmp;	// static only to avoid crushing the stack
 
 			g_tmp.reset();
@@ -162,7 +159,6 @@ namespace avmplus
 			}
 			g_tinfo[TMT_tbi].cached = g_tmcore->tbCache()->count();
 			g_tinfo[TMT_tbi].active = g_tmp.count();
-#endif
 			
 			printf("\nTraitsMemTrack @ %d:\n",g_track_count);
 			uint32_t totmem = 0;
@@ -177,12 +173,12 @@ namespace avmplus
 					g_tinfo[i].count_hw,
 					g_tinfo[i].mem_hw>>10,
 					g_tinfo[i].count_hw?(g_tinfo[i].mem_hw/g_tinfo[i].count_hw):0);
-#ifdef AVMPLUS_TRAITS_CACHE
+
 				if (i == TMT_tmi || i == TMT_tbi)
 					printf(" cached=%d(=%d incl bases)",
 						g_tinfo[i].cached,
 						g_tinfo[i].active);
-#endif
+
 				printf("\n");
 				totmem += g_tinfo[i].mem;
 				totmem_hw += g_tinfo[i].mem_hw;
@@ -190,7 +186,6 @@ namespace avmplus
 			// hw total may be inaccurate because different buckets might HW at different times
 			printf("  totmem: %dk (hw estimate: %dk)\n",totmem>>10,totmem_hw>>10);
 
-#ifdef AVMPLUS_TRAITS_CACHE
 			// g_tmp still contains the list of all active cached TBI
 			uint32_t rogues = 0;
 			for (uint32_t i = 0; i < g_tinfo[TMT_tbi].live.count(); ++i)
@@ -207,7 +202,6 @@ namespace avmplus
 			}
 			if (rogues>10)
 			printf(" **** found %d rogues\n",rogues);
-#endif
 
 			--g_in_delta;
 		}
@@ -259,8 +253,6 @@ namespace avmplus
 			tmt_report();
 	}
 #endif
-
-#ifdef AVMPLUS_TRAITS_CACHE
 
 	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
@@ -738,42 +730,30 @@ namespace avmplus
 	// -------------------------------------------------------------------
 	// -------------------------------------------------------------------
 
-#endif // AVMPLUS_TRAITS_CACHE
-
     Traits::Traits(PoolObject* _pool, 
 				   Traits* _base,
 				   uint32_t _sizeofInstance,
 				   TraitsPosPtr traitsPos,
 				   TraitsPosType posType) : 
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-		MultinameHashtable(0),
-#endif
 		core(_pool->core),
 		base(_base),
 		pool(_pool),
 		m_traitsPos(traitsPos),
-#ifdef AVMPLUS_TRAITS_CACHE
 		m_tbref(_pool->core->GetGC()->emptyWeakRef),
 		m_tmref(_pool->core->GetGC()->emptyWeakRef),
-#endif
 		m_sizeofInstance(uint16_t(_sizeofInstance)),
 		builtinType(BUILTIN_none),
 		m_posType(uint8_t(posType))
     {
-#ifdef AVMPLUS_TRAITS_CACHE
 		AvmAssert(m_tbref->get() == NULL);
 		AvmAssert(m_tmref->get() == NULL);
-#endif
 		AvmAssert(BUILTIN_COUNT <= 32);
 		AvmAssert(_sizeofInstance <= 0xffff);
-#ifdef AVMPLUS_TRAITS_CACHE
 		AvmAssert(m_slotDestroyInfo.allocatedSize() == 0);
 		AvmAssert(m_skips.allocatedSize() == 0);
 		// assume no skips (bit zero = clear)
 		m_skips.resize(core->GetGC(), 1);
 		AvmAssert(!m_skips.test(0));
-#endif
 #ifdef _DEBUG
 		switch (posType)
 		{
@@ -795,57 +775,20 @@ namespace avmplus
 	{
 		if (!GC::GetGC(this)->Destroying())
 		{
-	#ifdef AVMPLUS_TRAITS_CACHE
-	#else
-			AVMPLUS_TRAITS_MEMTRACK_ONLY( if (instanceData) tmt_sub_mem(TMT_traits, GC::Size(instanceData) ); )
-			AVMPLUS_TRAITS_MEMTRACK_ONLY( if (slot_metadata_pos) tmt_sub_mem(TMT_traits, GC::Size(slot_metadata_pos) ); )
-	#endif
 			AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_sub_inst(TMT_traits, this); )
 		}
 	}
 #endif
 
 	/*static*/ Traits* Traits::newTraits(PoolObject* pool,
-				   Traits *base,
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-				   int nameCount,
-							int interfaceDelta,
-#endif
+							Traits *base,
 							uint32 objectSize,
 							TraitsPosPtr traitsPos,
 							TraitsPosType posType)
     {
 		AvmAssert(posType != TRAITSTYPE_CATCH && posType != TRAITSTYPE_FUNCTION);
 		AvmAssert(pool != NULL);
-#ifdef AVMPLUS_TRAITS_CACHE
 		Traits* traits = new (pool->core->GetGC()) Traits(pool, base, objectSize, traitsPos, posType);
-#else
-		int interfaceCount = interfaceDelta;
-		if (base)
-		{
-			interfaceCount += 1; // +1 b/c base is added
-			Traitsp* interfaces = base->getInterfaces();
-			for(uint32_t i=0, n=base->interfaceCapacity; i<n; i++)
-			{
-				if (interfaces[i] != NULL)
-					interfaceCount += 1;
-			}
-		}
-		int interfaceCapacity = MathUtils::nextPowerOfTwo((5*interfaceCount >> 2) + 1);
-		size_t extra = interfaceCapacity * sizeof(Traits*);
-		Traits* traits = new (pool->core->GetGC(), extra) Traits(pool, base, objectSize, traitsPos, posType);
-		// delay initialization to when vtable is setup so memory can be reported appropriately
-		traits->Init(1+5*nameCount/4);
-		traits->interfaceCapacity = interfaceCapacity;
-		if (base != NULL)
-		{
-			// clear and copy interfaces
-			traits->addInterface(base);
-			// don't copy down the symbol table, we'll walk up the tree
-			// when we need to.  This saves a lot of memory for negligable slowdown.
-		}
-#endif
 		return traits;
 	}
 
@@ -853,27 +796,10 @@ namespace avmplus
 	{
 		AvmAssert(pool != NULL);
 		Traits* traits = new (pool->core->GetGC()) Traits(pool, NULL, sizeof(ScriptObject), traitsPos, TRAITSTYPE_CATCH);
-#ifdef AVMPLUS_TRAITS_CACHE
 		traits->final = true;
 		traits->name = name;	
 		traits->ns = ns;
 		traits->resolveSignatures(toplevel);
-#else
-		Traits* catchType = pool->resolveTypeName(traitsPos, toplevel); 	// note, this modifies traitsPos, but we're done with it
-		traits->Init(2);
-		traits->defineSlot(name, ns, 0, BKIND_VAR);
-		traits->slotCount = 1;
-		traits->methodCount = 0;
-		traits->final = true;
-		traits->m_hashTableOffset = 0;
-		traits->m_totalSize = traits->m_sizeofInstance + sizeof(Atom);
-		traits->initTables(toplevel);
-		AbcGen gen(pool->core->GetGC());	// note that the gen here is unused, it's just to satisfy setSlotInfo
-		traits->setSlotInfo(0, 0, toplevel, catchType, sizeof(ScriptObject), CONSTANT_unused_0x00, gen);
-		traits->name = name;
-		traits->ns = ns;
-		traits->linked = true;
-#endif
 		return traits;
 	}
 
@@ -883,7 +809,6 @@ namespace avmplus
 		AvmCore* core = pool->core;
 		Traits* base = core->traits.function_itraits;
 		AvmAssert(base->isResolved());
-#ifdef AVMPLUS_TRAITS_CACHE
 		Traits* traits = new (pool->core->GetGC()) Traits(pool, base, base->m_sizeofInstance, NULL, TRAITSTYPE_FUNCTION);
 		traits->itraits = core->traits.object_itraits;
 		traits->m_needsHashtable = true;
@@ -897,57 +822,17 @@ namespace avmplus
 		(void)method_id;
 	#endif
 		traits->resolveSignatures(toplevel);
-#else
-		AvmAssert(base->interfaceCapacity == 2);
-		const uint32_t interfaceCapacity = 4;
-		size_t extra = interfaceCapacity * sizeof(Traits*);
-		Traits* traits = new (pool->core->GetGC(), extra) Traits(pool, base, base->m_sizeofInstance, NULL, TRAITSTYPE_FUNCTION);
-		traits->itraits = core->traits.object_itraits;
-		traits->m_needsHashtable = true;
-		traits->final = true;
-		// delay initialization to when vtable is setup so memory can be reported appropriately
-		traits->Init(2);
-		traits->interfaceCapacity = interfaceCapacity;
-		traits->addInterface(base);
-		traits->slotCount = base->slotCount;
-		traits->methodCount = base->methodCount;
-		traits->m_hashTableOffset = base->m_hashTableOffset;
-		traits->m_totalSize = base->m_totalSize;
-	#ifdef AVMPLUS_VERBOSE
-		traits->ns = core->publicNamespace;
-		traits->name = core->internString(core->concatStrings(core->newString("Function-"), core->intToString(method_id)));
-	#else
-		traits->ns = NULL;
-		traits->name = NULL;
-		(void)method_id;
-	#endif
-		traits->initTables(toplevel);
-		traits->linked = true;
-#endif
 		return traits;
 	}
 
 	Traits* Traits::_newParameterizedTraits(Stringp name, Namespacep ns, Traits* _base)
 	{
-#ifdef AVMPLUS_TRAITS_CACHE
 		Traits* newtraits = Traits::newTraits(this->pool, _base, this->getSizeOfInstance(), NULL, TRAITSTYPE_RT);
 		newtraits->m_needsHashtable = this->m_needsHashtable;
 		newtraits->name = name;
 		newtraits->ns = ns;
-#else
-		Traits* newtraits = Traits::newTraits(this->pool, _base, /*nameCount*/0, /*interfaceCount*/0, this->getSizeOfInstance(), NULL, TRAITSTYPE_RT);
-		newtraits->name = name;
-		newtraits->ns = ns;
-		newtraits->slotCount = this->slotCount;
-		newtraits->methodCount = this->methodCount;
-		newtraits->m_needsHashtable = this->m_needsHashtable;
-		newtraits->m_hashTableOffset = this->m_hashTableOffset;
-		newtraits->m_totalSize = this->m_totalSize;
-#endif
 		return newtraits;
 	}
-
-#ifdef AVMPLUS_TRAITS_CACHE
 
 	void Traits::enableSkips(uint32_t nameCount) 
 	{ 
@@ -1635,188 +1520,6 @@ namespace avmplus
 		return tm;
 	}
 
-#else // not AVMPLUS_TRAITS_CACHE
-
-	void Traits::addInterface(Traits* ifc)
-	{
-		AvmAssert(ifc != this && ifc != NULL);
-		//*(findInterface(ifc)) = ifc;
-		WB(core->GetGC(), this, findInterface(ifc), ifc);
-
-		if(ifc->isInterface)
-			hasInterfaces = true;
-
-		for (int i=0, n=ifc->interfaceCapacity; i < n; i++)
-		{
-			Traits* t = ifc->getInterface(i);
-			if (t != NULL)
-			{
-				AvmAssert(ifc != this);
-				if(t->isInterface)
-					hasInterfaces = true;
-				//*(findInterface(t)) = t;
-				WB(core->GetGC(), this, findInterface(t), t);
-			}			
-		}
-	}
-
-	Binding Traits::findBinding(Stringp name, Namespacep ns) const
-	{
-		const Traits* t = this;
-		Binding b;
-		do
-		{
-			b = t->get(name, ns);
-		}
-		while (b == BIND_NONE && (t=t->base) != NULL);
-		return b;
-	}
-
-	Binding Traits::findBinding(Stringp name, NamespaceSetp nsset) const
-	{
-		const Traits* t = this;
-		Binding b;
-		do
-		{
-			b = t->get(name, nsset);
-		}
-		while (b == BIND_NONE && (t=t->base) != NULL);
-		return b;
-	}
-
-	void Traits::initTables(const Toplevel *toplevel)
-	{
-		// copy down info from base class
-		AvmAssert(!linked);
-
-		MMgc::GC* gc = core->GetGC();
-
-		if (slotCount > 0 || methodCount > 0 || hasInterfaces)
-		{
-			MMGC_MEM_TYPE(this);
-
-			size_t size = slotCount*sizeof(Traits*) + // slotTypes
-						slotCount*sizeof(int) + // slot offsets
-						methodCount*sizeof(AbstractFunction*);
-
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			if(hasInterfaces)
-				size += IMT_SIZE * sizeof(Binding);
-#else
-			if (!size)
-			{
-				// with no IMT we can end up with a valid size zero.
-				// MMGC can't allocate a zero-size block.
-				// We won't ever access it, just leave it null.
-				AvmAssert(instanceData == 0);
-				return;
-			}
-#endif
-
-			void *idata = gc->Alloc(size, GC::kZero | GC::kContainsPointers);
-
-			// Can happen with corrupt SWFs
-			if (!idata)
-				toplevel->throwError(kOutOfMemoryError);
-
-			WB(gc, this, &instanceData, idata);
-			AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_traits, GC::Size(instanceData) ); )
-		}
-
-		AbstractFunction **methods = getMethods();
-		int *offsets = getOffsets();
-		Traits **slotTypes = getSlotTypes();
-		if (base)
-		{
-			AvmAssert(base->linked);
-
-			//
-			// process the slots: types, offsets, default values
-			//
-			int firstSlot;
-			if ((firstSlot=base->slotCount) > 0)
-			{
-				// copy base offsets and adjust for sizeofInstance
-				AvmAssert(m_sizeofInstance >= base->m_sizeofInstance);
-				int delta = (int)(m_sizeofInstance - base->m_sizeofInstance);
-
-				for (int i=0; i < firstSlot; i++)
-				{
-					WB(gc, instanceData, &slotTypes[i], base->getSlotTypes()[i]);
-					offsets[i] = base->getOffsets()[i] + delta;
-				}
-			}
-
-			int firstMethod;
-			if ((firstMethod = base->methodCount) > 0)
-			{
-				// copy base methods
-				for (int i=0; i < firstMethod; i++)
-				{
-					WB(gc, instanceData, &methods[i], base->getMethods()[i]);
-				}
-			}
-		}
-	}
-
-	void Traits::initMetadataTable() 
-	{
-		if( !slot_metadata_pos )
-		{	
-			MMgc::GC* gc = core->GetGC();
-			// Lots of things won't have any metadata, so only alloc the space if we really need it
-			MMGC_MEM_TYPE(this);
-			const byte** idata = (const byte**)gc->Calloc(slotCount+methodCount, sizeof(const byte*), GC::kZero | GC::kContainsPointers);
-			WB(gc, this, &slot_metadata_pos, idata);
-			AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_traits, GC::Size(slot_metadata_pos) ); )
-		}
-	}
-
-	void Traits::setIndexedMetadataPos(uint32 i, const byte* pos)
-	{
-		AvmAssert(i < (slotCount+methodCount) );
-		if (!slot_metadata_pos)
-			initMetadataTable();
-		slot_metadata_pos[i] = pos;
-	}
-
-	const byte* Traits::getSlotMetadataPos(uint32 i, PoolObject*& residingPool) 
-	{
-		AvmAssert( i < slotCount );
-		Traits* t = (Traits*)this;
-		const byte* pos = 0;
-		while(t && !pos && i<t->slotCount)
-		{
-			if (t->slot_metadata_pos)
-			{
-				pos = t->slot_metadata_pos[i];
-				residingPool = t->pool;
-			}
-			t = t->base;
-		}
-		return pos;
-	}
-
-	const byte* Traits::getMethodMetadataPos(uint32 i, PoolObject*& residingPool) 
-	{
-		AvmAssert( i < methodCount );
-		Traits* t = (Traits*)this;
-		const byte* pos = 0;
-		while(t && !pos && i<t->methodCount)
-		{
-			if (t->slot_metadata_pos)
-			{
-				pos = t->slot_metadata_pos[t->slotCount+i];
-				residingPool = t->pool;
-			}
-			t = t->base;
-		}
-		return pos;
-	}
-#endif // not AVMPLUS_TRAITS_CACHE
-
-#ifdef AVMPLUS_TRAITS_CACHE
-
 	/**
 	 * This must be called before any method is verified or any
 	 * instances are created.  It is not done eagerly in AbcParser
@@ -1963,341 +1666,6 @@ namespace avmplus
 #endif
 	}
 
-#else	// not AVMPLUS_TRAITS_CACHE
-	/**
-	 * This must be called before any method is verified or any
-	 * instances are created.  It is not done eagerly in AbcParser
-	 * because doing so would prevent circular type references between
-	 * slots of cooperating classes.
-     *
-     * Resolve the type and position/width of each slot.
-	 */
-	void Traits::resolveSignatures(const Toplevel* toplevel)
-	{
-		if (!linked)
-		{
-			int firstSlot = 0;
-			int firstMethod = 0;
-
-			Traitsp* interfaces = getInterfaces();
-			// make sure base class and all interfaces are resolved
-			for (int i=0, n=interfaceCapacity; i < n; i++)
-			{
-				Traits* ifc = interfaces[i];
-				if (ifc && !ifc->linked)
-				{
-					ifc->resolveSignatures(toplevel);
-				}
-			}
-
-			if (base)
-			{
-				firstSlot = base->slotCount;
-				firstMethod = base->methodCount;
-			}
-
-			initTables(toplevel);
-
-			switch (posType())
-			{
-				case TRAITSTYPE_INSTANCE_FROM_ABC:
-				case TRAITSTYPE_CLASS_FROM_ABC:
-				case TRAITSTYPE_SCRIPT_FROM_ABC:
-				case TRAITSTYPE_ACTIVATION:
-					m_totalSize = pool->resolveTraits(this, firstSlot, toplevel);
-					break;
-				case TRAITSTYPE_CATCH:
-				case TRAITSTYPE_FUNCTION:
-					AvmAssert(0);	// should never get here
-					// fall thru
-				case TRAITSTYPE_NVA:
-				case TRAITSTYPE_RT:
-					m_totalSize = m_sizeofInstance;
-					break;
-			}
-			
-			AvmAssert(m_totalSize >= m_sizeofInstance);
-			if (m_needsHashtable || (base && base->m_hashTableOffset && !isXMLType()))
-			{
-				m_hashTableOffset = m_totalSize;
-				m_totalSize += sizeof(Hashtable);
-				AvmAssert(builtinType == BUILTIN_boolean ? true : (m_hashTableOffset & 3) == 0);
-				#ifdef AVMPLUS_64BIT
-				// Hashtable must start on 8-byte boundary
-				if ((m_hashTableOffset & 7) == 4)
-				{
-					m_hashTableOffset += 4;
-					m_totalSize += 4;
-				}
-				#endif
-			}
-
-			// make sure all the methods have resolved types
-			for (int i=0, n=methodCount; i < n; i++)
-			{
-				AbstractFunction *f = getMethod(i);
-				if (f != NULL)
-					f->resolveSignature(toplevel);
-
-				// else, sparse method array, why?
-			}
-
-			bool legal = true;
-			if (base && base->methodCount > 0)
-			{
-				// check concrete overrides
-                AbstractFunction *virt=NULL;
-                AbstractFunction *over=NULL;
-
-				for (int i=0, n=base->methodCount; i < n; i++)
-				{
-					virt = base->getMethod(i);
-					over = getMethod(i);
-					if (virt != NULL && virt != over)
-						legal &= checkOverride(virt, over);
-				}
-			}
-
-			if (hasInterfaces && legal && !this->isInterface)
-			{
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				ImtBuilder imtBuilder(core->GetGC());
-#endif
-
-				// make sure every interface method is implemented
-				for (int i=0, n=interfaceCapacity; i < n; i++)
-				{
-					Traits* ifc = interfaces[i];
-					if (ifc && ifc->isInterface)
-					{
-						AbstractFunction *virt=NULL;
-						AbstractFunction *over=NULL;
-
-						for (int j=ifc->next(0); j != 0; j = ifc->next(j))
-						{
-							Stringp name = ifc->keyAt(j);
-							Namespacep ns = ifc->nsAt(j);
-							Binding iBinding = ifc->valueAt(j);
-
-							if (AvmCore::isMethodBinding(iBinding))
-							{
-								virt = ifc->getMethod(AvmCore::bindingToMethodId(iBinding));
-
-								Binding cBinding = findBinding(name, ns);
-
-								if (!AvmCore::isMethodBinding(cBinding))
-								{
-									// Try again with public namespace
-									Binding pBinding = findBinding(name, core->publicNamespace);
-
-									// If that worked, add a trait.
-									if (AvmCore::isMethodBinding(pBinding))
-									{
-										add(name, ns, pBinding);
-										cBinding = pBinding;
-									}
-								}
-
-								if (!AvmCore::isMethodBinding(cBinding))
-								{
-									#ifdef AVMPLUS_VERBOSE
-									core->console << "\n";
-									core->console << "method not implemented " << virt << "\n";
-									core->console << "   over-binding " << (int)(uintptr_t)cBinding << " in " << this << "\n";
-									#endif
-									over = NULL;
-									legal = false;
-								}
-								else
-								{
-									int disp_id = AvmCore::bindingToMethodId(cBinding);
-									over = getMethod(disp_id);
-									if (over != virt)
-										legal &= checkOverride(virt, over);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-									imtBuilder.addEntry(virt, disp_id);
-#endif
-								}
-							}
-							else if (AvmCore::isAccessorBinding(iBinding))
-							{
-								//virtAcc = bindingToAccessor(iBinding)
-								Binding cBinding = findBinding(name, ns);
-
-								if (!AvmCore::isAccessorBinding(cBinding))
-								{
-									// Try again with public namespace
-									Binding pBinding = findBinding(name, core->publicNamespace);
-
-									// If that worked, add a trait.
-									if (AvmCore::isAccessorBinding(pBinding))
-									{
-										add(name, ns, pBinding);
-										cBinding = pBinding;
-									}
-								}
-
-								if (!AvmCore::isAccessorBinding(cBinding))
-								{
-									#ifdef AVMPLUS_VERBOSE
-									core->console << "\n";
-									core->console << "accessor not implemented " << ns << "::" << name << "\n";
-									core->console << "   over-binding " << (int)(uintptr_t)cBinding << " in " << this << "\n";
-									#endif
-									over = NULL;
-									legal = false;
-								}
-								else
-								{
-									// check getter & setter overrides
-									if (AvmCore::hasGetterBinding(iBinding))
-									{
-										virt = ifc->getMethod(AvmCore::bindingToGetterId(iBinding));
-										if (!AvmCore::hasGetterBinding(cBinding))
-										{
-											// missing getter
-											#ifdef AVMPLUS_VERBOSE
-											core->console << "\n";
-											core->console << "getter not implemented " << ns << "::" << name << "\n";
-											core->console << "   over-binding " << (int)(uintptr_t)cBinding << " in " << this << "\n";
-											#endif
-											over = NULL;
-											legal = false;
-										}
-										else
-										{
-											int disp_id = AvmCore::bindingToGetterId(cBinding);
-											over = getMethod(disp_id);
-											if (over != virt)
-												legal &= checkOverride(virt,over);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-											imtBuilder.addEntry(virt, disp_id);
-#endif
-										}
-									}
-
-									if (AvmCore::hasSetterBinding(iBinding))
-									{
-										virt = ifc->getMethod(AvmCore::bindingToSetterId(iBinding));
-										if (!AvmCore::hasSetterBinding(cBinding))
-										{
-											// missing setter
-											#ifdef AVMPLUS_VERBOSE
-											core->console << "\n";
-											core->console << "setter not implemented " << ns << "::" << name << "\n";
-											core->console << "   over-binding " << (int)(uintptr_t)cBinding << " in " << this << "\n";
-											#endif
-											over = NULL;
-											legal = false;
-										}
-										else
-										{
-											int disp_id = AvmCore::bindingToSetterId(cBinding);
-											over = getMethod(disp_id);
-											if (over != virt)
-												legal &= checkOverride(virt,over);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-											imtBuilder.addEntry(virt, disp_id);
-#endif
-										}
-									}
-								}
-							}
-							else
-							{
-								AvmAssert(0);	// interfaces shouldn't have anything but methods, getters, and setters
-							}
-						}
-					}
-				}
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				imtBuilder.finish(getIMT(), pool, toplevel);
-#endif
-			}
-            if (!legal)
-            {
-				AvmAssert(!linked);
-                Multiname qname(ns, name);
-                toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(&qname), core->toErrorString(this));
-            }
-			linked = true;
-		}
-	}
-
-    bool Traits::checkOverride(AbstractFunction* virt, AbstractFunction* over)
-    {
-        Traits* overTraits = over->returnTraits();
-        Traits* virtTraits = virt->returnTraits();
-
-        if (overTraits != virtTraits)
-        {
-#ifdef AVMPLUS_VERBOSE
-            core->console << "\n";
-            core->console << "return types dont match\n";
-            core->console << "   virt " << virtTraits << " " << virt << "\n";
-            core->console << "   over " << overTraits << " " << over << "\n";
-#endif
-            return false;
-        }
-
-        if (over->param_count != virt->param_count ||
-            over->optional_count != virt->optional_count)
-        {
-#ifdef AVMPLUS_VERBOSE
-            core->console << "\n";
-            core->console << "param count mismatch\n";
-            core->console << "   virt params=" << virt->param_count << " optional=" << virt->optional_count << " " << virt << "\n";
-            core->console << "   over params=" << over->param_count << " optional=" << over->optional_count << " " << virt << "\n";
-#endif
-            return false;
-        }
-
-		// allow subclass param 0 to implement or extend base param 0
-		virtTraits = virt->paramTraits(0);
-		if (!containsInterface(virtTraits) || !isMachineCompatible(this,virtTraits))
-		{
-			if (!this->isMachineType() && virtTraits == core->traits.object_itraits)
-			{
-				over->flags |= AbstractFunction::UNBOX_THIS;
-			}
-			else
-			{
-				#ifdef AVMPLUS_VERBOSE
-				core->console << "\n";
-				core->console << "param 0 incompatible\n";
-				core->console << "   virt " << virtTraits << " " << virt << "\n";
-				core->console << "   over " << this << " " << over << "\n";
-				#endif
-				return false;
-			}
-		}
-
-        for (int k=1, p=over->param_count; k <= p; k++)
-        {
-            overTraits = over->paramTraits(k);
-            virtTraits = virt->paramTraits(k);
-            if (overTraits != virtTraits)
-            {
-				#ifdef AVMPLUS_VERBOSE
-				core->console << "\n";
-				core->console << "param " << k << " incompatible\n";
-				core->console << "   virt " << virtTraits << " " << virt << "\n";
-				core->console << "   over " << overTraits << " " << over << "\n";
-				#endif
-				return false;
-            }
-        }
-
-		if (virt->flags & AbstractFunction::UNBOX_THIS)
-		{
-			// the UNBOX_THIS flag is sticky, all the way down the inheritance tree
-			over->flags |= AbstractFunction::UNBOX_THIS;
-		}
-
-        return true;
-    }
-#endif // #ifdef AVMPLUS_TRAITS_CACHE
-
 	// static
 	bool Traits::isMachineCompatible(const Traits* a, const Traits* b)
 	{
@@ -2319,47 +1687,6 @@ namespace avmplus
 									   core->formatAtomPtr((uintptr)this));
 	}
 #endif
-
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-	//
-	// implemented traits, organized as a hash-set
-	//
-
-	Traitsp* Traits::findInterface(Traits* t) const
-	{
-		Traitsp* set = this->getInterfaces();
-        // this is a quadratic probe
-        int n = 7;
-		unsigned bitMask = this->interfaceCapacity - 1;
-
-		// Note: Mask off MSB to avoid negative indices.  Mask off bottom
-		// 3 bits because it doesn't contribute to hash.
-
-		// [ed] math assumes t is 8-aligned!
-		AvmAssert((((uintptr)t) & 7) == 0);
-
-		unsigned i = (((uintptr)t)>>3) & bitMask;
-        Traitsp k;
-        while ((k=set[i]) != t && k != NULL)
-		{
-			i = (i + (n++)) & bitMask;				// quadratic probe
-		}
-        return &set[i];
-	}
-
-	void Traits::setSlotInfo(uint32_t value_index, uint32 slot_id, const Toplevel* toplevel, Traits* slotType, int offset, CPoolKind kind, AbcGen& gen) const
-	{
-		AvmAssert(slot_id < slotCount);
-
-		// slotTypes[slot_id] = slotType;
-		WB(core->GetGC(), instanceData, &getSlotTypes()[slot_id], slotType);
-		getOffsets()[slot_id] = offset;
-		
-		genDefaultValue(value_index, slot_id, toplevel, slotType, kind, gen);
-	}
-			
-#endif // not AVMPLUS_TRAITS_CACHE
 
 	void Traits::genDefaultValue(uint32_t value_index, uint32 slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const
 		{
@@ -2594,7 +1921,6 @@ namespace avmplus
 		const uint32_t mysize = m_sizeofInstance - uint32_t(sizeof(AvmPlusScriptableObject));
 		AvmAssert((mysize & 0x3) == 0); // we assume all sizes are multiples of 4
 
-#ifdef AVMPLUS_TRAITS_CACHE
 		const uint32_t slotAreaSize = getSlotAreaSize();
 		if (!m_slotDestroyInfo.test(0))
 		{
@@ -2643,55 +1969,6 @@ namespace avmplus
 				*p++ = 0;
 			}
 		}
-#else
-		memset(p, 0, mysize);
-		p += (mysize>>2);
-
-		// NOTE: this code can't use type macros or core b/c it can run
-		// after AvmCore has been destructed
-		int *offsets = getOffsets();
-		Traitsp *traits = getSlotTypes();
-		for(int i=0, n=slotCount; i<n; i++) {
-			Traits *t = traits[i];
-			// offset is pointed off the end of our object
-			AvmAssert(offsets[i] < int(MMgc::GC::Size (obj)));
-  			Atom *slot = (Atom*)((char*)obj+offsets[i]);
-			const uint32_t ATOM_OR_RC_MASK = (0xffffffff & ~MACHINE_TYPE_MASK) | (1<<BUILTIN_object);
-			const bool storedAsAtomOrRCObject = !t || ((1<<t->builtinType) & ATOM_OR_RC_MASK);
-			if(storedAsAtomOrRCObject) {
-				RCObject *rc = NULL;
-				if(!t || t->builtinType == BUILTIN_object) { // atom
-					Atom a = *slot;
-					int type = a&7;
-					//if(type == kObjectType || type == kStringType || type == kNamespaceType)
-					AvmAssert(kObjectType == 1 && kStringType == 2 && kNamespaceType == 3);
-					if(type <= kNamespaceType)
-						rc = (RCObject*)(a&~7);
-				} else { // raw pointer
-					rc = *(RCObject**)slot;
-				}
-				if(rc)
-					rc->DecrementRef();
-				*slot = 0;
-			} else { // machineType
-				AvmAssert(t->m_sizeofInstance == 1 || t->m_sizeofInstance == 4 || t->m_sizeofInstance == 8);
-				if (t->m_sizeofInstance == 8)
-				{
-					#ifdef AVMPLUS_64BIT
-					*slot = 0;
-					#else
-					*slot = 0;
-					*(slot + 1) = 0;
-					#endif
-				}
-				else // 4 byte slot
-				{
-					// The Boolean size is 1 but takes up 4 bytes.  (Important on Mac with reverse endian)
-					*(uint32 *)slot = 0;
-				}
-			}
-		}
-#endif
 
 		// finally, zap the hashtable (if any)
 		if (ht)
@@ -2788,22 +2065,14 @@ namespace avmplus
 	}
 
 
-#ifdef AVMPLUS_TRAITS_CACHE
 	Binding Traits::getOverride(TraitsBindingsp basetb, Namespacep ns, Stringp name, int tag, const Toplevel* toplevel) const
-#else
-	Binding Traits::getOverride(Namespacep ns, Stringp name, int tag, const Toplevel* toplevel) const
-#endif
 	{
 		Binding baseBinding = BIND_NONE;
 		if (base)
 		{
 			const Namespacep lookupNS = (protectedNamespace == ns && base->protectedNamespace) ? (Namespacep)base->protectedNamespace : ns;
-#ifdef AVMPLUS_TRAITS_CACHE
 			AvmAssert(basetb != NULL);
 			baseBinding = basetb->findBinding(name, lookupNS);
-#else
-			baseBinding = base->findBinding(name, lookupNS);
-#endif
 		}
 		const BindingKind baseBindingKind = AvmCore::bindingKind(baseBinding);
 
@@ -2870,7 +2139,6 @@ failure:
 		return BIND_NONE;
 	}
 
-#ifdef AVMPLUS_TRAITS_CACHE
 	TraitsBindings* FASTCALL Traits::_getTraitsBindings() 
 	{ 
 		AvmAssert(this->linked);
@@ -2896,5 +2164,4 @@ failure:
 		core->tmCache()->add(tm);
  		return tm;
 	}
-#endif
 }

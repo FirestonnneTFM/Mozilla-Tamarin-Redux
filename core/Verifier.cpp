@@ -1098,11 +1098,7 @@ namespace avmplus
 				{
 					// early bind to the setter
 					int disp_id = AvmCore::bindingToSetterId(b);
-#ifdef AVMPLUS_TRAITS_CACHE
 					const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
-#else
-					const Traitsp objtd = obj.traits;
-#endif
 					AbstractFunction *f = objtd->getMethod(disp_id);
 					AvmAssert(f != NULL);
 					emitCoerceArgs(f, 1);
@@ -1613,11 +1609,7 @@ namespace avmplus
 
 				JIT_ONLY( if (jit) emitCheckNull(sp-(n-1)); )
 				Traits* base = emitCoerceSuper(sp-(n-1));
-#ifdef AVMPLUS_TRAITS_CACHE
 				const TraitsBindingsp basetd = base->getTraitsBindings();
-#else
-				const Traitsp basetd = base;
-#endif
 
 				Binding b = toplevel->getBinding(base, &multiname);
 				if (AvmCore::isMethodBinding(b))
@@ -1697,11 +1689,7 @@ namespace avmplus
 					{
 						// Invoke the getter
 						int disp_id = AvmCore::bindingToGetterId(b);
-#ifdef AVMPLUS_TRAITS_CACHE
 						const TraitsBindingsp basetd = base->getTraitsBindings();
-#else
-						const Traitsp basetd = base;
-#endif
 						AbstractFunction *f = basetd->getMethod(disp_id);
 						AvmAssert(f != NULL);
 						emitCoerceArgs(f, 0);
@@ -1756,11 +1744,7 @@ namespace avmplus
 				{
 					emitCheckNull(ptrIndex);
 
-#ifdef AVMPLUS_TRAITS_CACHE
 					const TraitsBindingsp basetd = base->getTraitsBindings();
-#else
-					const Traitsp basetd = base;
-#endif
 					Binding b = toplevel->getBinding(base, &multiname);
 					Traits* propType = readBinding(base, b);
 
@@ -2578,11 +2562,7 @@ namespace avmplus
 
 		uint32_t n = argc+1;
 		
-#ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp tb = t->getTraitsBindings();
-#else
-		const Traitsp tb = t;
-#endif
 
 		if (t == core->traits.math_ctraits)
 			b = findMathFunction(tb, multiname, b, argc);
@@ -2645,11 +2625,7 @@ namespace avmplus
 		if (!AvmCore::isSlotBinding(b) || argc != 1)
 			return false;
 		
-#ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp tb = t->getTraitsBindings();
-#else
-		const Traitsp tb = t;
-#endif
 
 		int slot_id = AvmCore::bindingToSlotId(b);
 		Traits* slotType = tb->getSlotTraits(slot_id);
@@ -2931,11 +2907,7 @@ namespace avmplus
 		{
 			// Invoke the getter
 			int disp_id = AvmCore::bindingToGetterId(b);
-#ifdef AVMPLUS_TRAITS_CACHE
 			const TraitsBindingsp objtd = obj.traits->getTraitsBindings();
-#else
-			const Traitsp objtd = obj.traits;
-#endif
 			AbstractFunction *f = objtd->getMethod(disp_id);
 			AvmAssert(f != NULL);
 			#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -3214,18 +3186,8 @@ namespace avmplus
 
 	void Verifier::checkEarlySlotBinding(Traits* t)
 	{
-#ifdef AVMPLUS_TRAITS_CACHE
 		if (!t->allowEarlyBinding())
 			verifyFailed(kIllegalEarlyBindingError, core->toErrorString(t));
-#else
-		bool slotAllow = pool->allowEarlyBinding(t);
-		if (!slotAllow)
-		{
-			// illegal disp_id or slot_id access since dispatch table layout and instance layout
-			// are not known at compile time
-			verifyFailed(kIllegalEarlyBindingError, core->toErrorString(t));
-		}
-#endif
 	}
 
 	void Verifier::emitCoerceArgs(AbstractFunction* m, int argc, bool isctor)
@@ -3302,7 +3264,6 @@ namespace avmplus
 	Traits* Verifier::checkSlot(Traits *traits, int imm30)
 	{
         uint32_t slot = imm30;
-#ifdef AVMPLUS_TRAITS_CACHE
 		if (traits)
 			traits->resolveSignatures(toplevel);
 		TraitsBindingsp td = traits ? traits->getTraitsBindings() : NULL;
@@ -3312,15 +3273,6 @@ namespace avmplus
 			verifyFailed(kSlotExceedsCountError, core->toErrorString(slot+1), core->toErrorString(count), core->toErrorString(traits));
 		}
 		return td->getSlotTraits(slot);
-#else
-		const uint32_t count = traits ? traits->slotCount : 0;
-        if (!traits || slot >= count)
-		{
-			verifyFailed(kSlotExceedsCountError, core->toErrorString(slot+1), core->toErrorString(count), core->toErrorString(traits));
-		}
-		traits->resolveSignatures(toplevel);
-		return traits->getSlotTraits(slot);
-#endif
 	}
 
 	Traits* Verifier::readBinding(Traits* traits, Binding b)
@@ -3335,11 +3287,7 @@ namespace avmplus
 		case BKIND_GETSET:
 		{
 			int m = AvmCore::bindingToGetterId(b);
-#ifdef AVMPLUS_TRAITS_CACHE
 			AbstractFunction *f = traits->getTraitsBindings()->getMethod(m);
-#else
-			AbstractFunction *f = traits->getMethod(m);
-#endif
 			return f->returnTraits();
 		}
 		case BKIND_SET:
@@ -3352,11 +3300,7 @@ namespace avmplus
 			return NULL;
 		case BKIND_VAR:
 		case BKIND_CONST:
-#ifdef AVMPLUS_TRAITS_CACHE
 			return traits->getTraitsBindings()->getSlotTraits(AvmCore::bindingToSlotId(b));
-#else
-			return traits->getSlotTraits(AvmCore::bindingToSlotId(b));
-#endif
 		}
 	}
 
@@ -3404,7 +3348,6 @@ namespace avmplus
 
     AbstractFunction* Verifier::checkDispId(Traits* traits, uint32_t disp_id)
     {
-#ifdef AVMPLUS_TRAITS_CACHE
 		TraitsBindingsp td = traits->getTraitsBindings();
         if (disp_id > td->methodCount)
 		{
@@ -3416,23 +3359,6 @@ namespace avmplus
 			verifyFailed(kDispIdUndefinedError, core->toErrorString(disp_id), core->toErrorString(traits));
 		}
 		return m;
-#else
-		uint32_t count = traits->methodCount;
-        if (disp_id > count)
-		{
-            verifyFailed(kDispIdExceedsCountError, core->toErrorString(disp_id), core->toErrorString(count), core->toErrorString(traits));
-			return NULL;
-		}
-		else
-		{
-			AbstractFunction* m = traits->getMethod(disp_id);
-			if (!m) 
-			{
-				verifyFailed(kDispIdUndefinedError, core->toErrorString(disp_id), core->toErrorString(traits));
-			}
-			return m;
-		}
-#endif
     }
 
     void Verifier::verifyFailed(int errorID, Stringp arg1, Stringp arg2, Stringp arg3) const
@@ -3682,11 +3608,7 @@ namespace avmplus
 		pool->parseMultiname(m, index);
 	}
 
-#ifdef AVMPLUS_TRAITS_CACHE
 	Binding Verifier::findMathFunction(TraitsBindingsp math, const Multiname& multiname, Binding b, int argc)
-#else
-	Binding Verifier::findMathFunction(Traits* math, const Multiname& multiname, Binding b, int argc)
-#endif
 	{
 		Stringp newname = core->internString(core->concatStrings(core->constantString("_"), multiname.getName()));
 		Binding newb = math->findBinding(newname);
@@ -3708,11 +3630,7 @@ namespace avmplus
 		return b;
 	}
 
-#ifdef AVMPLUS_TRAITS_CACHE
 	Binding Verifier::findStringFunction(TraitsBindingsp str, const Multiname& multiname, Binding b, int argc)
-#else
-	Binding Verifier::findStringFunction(Traits* str, const Multiname& multiname, Binding b, int argc)
-#endif
 	{
 		Stringp newname = core->internString(core->concatStrings(core->constantString("_"), multiname.getName()));
 		Binding newb = str->findBinding(newname);

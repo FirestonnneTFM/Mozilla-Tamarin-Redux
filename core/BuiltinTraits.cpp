@@ -51,22 +51,14 @@ namespace avmplus
 	{
 		AvmCore* core = pool->core;
 
-#ifdef AVMPLUS_TRAITS_CACHE
 		null_itraits = Traits::newTraits(pool, NULL, 0, 0, TRAITSTYPE_NVA);
-#else
-		null_itraits = Traits::newTraits(pool, NULL, 0, 0, 0, 0, TRAITSTYPE_NVA);
-#endif
 		null_itraits->ns = core->publicNamespace;
 		null_itraits->name = core->constantString("null");
 		null_itraits->final = true;
 		null_itraits->builtinType = BUILTIN_null;
 		null_itraits->resolveSignatures(NULL);
 
-#ifdef AVMPLUS_TRAITS_CACHE
 		void_itraits = Traits::newTraits(pool, NULL, 0, 0, TRAITSTYPE_NVA);
-#else
-		void_itraits = Traits::newTraits(pool, NULL, 0, 0, 0, 0, TRAITSTYPE_NVA);
-#endif
 		void_itraits->ns = core->publicNamespace;
 		void_itraits->name = core->constantString("void");
 		void_itraits->final = true;

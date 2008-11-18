@@ -176,10 +176,6 @@ namespace avmplus
 		//
 
 		void parseMultiname(const byte *pos, Multiname& m) const;
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-		uint32_t resolveTraits(Traits *traits, int firstSlot, const Toplevel* toplevel);
-#endif
 
 		Traits* resolveTypeName(uint32 index, const Toplevel* toplevel, bool allowVoid=false) const;
 		Traits* resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid=false) const
@@ -195,17 +191,6 @@ namespace avmplus
 
 		Traits* resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* type_param) const;
 
-
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-		/**
-		* we allow early binding to a type if it is defined in 
-		* the same abc file as the reference, or if the type is
-		* specially marked to allow early binding by making it's
-		* Traits->pool pointer be null.  We only do this for Object
-		*/
-		bool allowEarlyBinding(Traits* t) const;
-#endif
 
 		void parseMultiname(Multiname& m, int index) const
 		{

@@ -49,10 +49,8 @@ namespace avmplus
 	enum TMTTYPE 
 	{ 
 		TMT_traits, 
-#ifdef AVMPLUS_TRAITS_CACHE
 		TMT_tbi, 
 		TMT_tmi, 
-#endif
 		TMT_vtable, 
 		TMT_methodenv, 
 		TMT_abstractfunction, 
@@ -155,8 +153,6 @@ namespace avmplus
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	class ImtBuilder;
 #endif
-
-#ifdef AVMPLUS_TRAITS_CACHE
 
 	// Note: we rely on this being <= 8 entries.
 	enum SlotStorageType
@@ -350,8 +346,6 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
-#endif // AVMPLUS_TRAITS_CACHE
-
 	/**
 	 * Traits objects describe the layout of objects.  Traits are
 	 * used to describe a variety of things in the VM, such as
@@ -364,15 +358,9 @@ namespace avmplus
 	 * binding to an accessor, binding to a virtual function,
 	 * binding to a final function.
 	 */
-#ifdef AVMPLUS_TRAITS_CACHE
 	class Traits : public TRAITSBASE 
-#else
-	class Traits : public MultinameHashtable
-#endif
 	{
-#ifdef AVMPLUS_TRAITS_CACHE
 		friend class TraitsBindings;	// for m_sizeofInstance
-#endif
 		#if defined AVMPLUS_MIR
 		friend class CodegenMIR;
 		#elif defined FEATURE_NANOJIT
@@ -392,14 +380,6 @@ namespace avmplus
 		static const uint32_t IMT_SIZE = 7;  // good for performance
 #endif
 #endif // AVMPLUS_MIR | FEATURE_NANOJIT
-
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-		TraitsPosPtr getTraitsPos() const {
-			AvmAssert(!linked);
-			return m_traitsPos;
-		}
-#endif
 
 		inline void resetSizeof(uint32_t size)
 		{
@@ -429,7 +409,6 @@ namespace avmplus
 		// in bytes. includes size for all base classes too.
 		inline uint32_t getExtraSize() const { AvmAssert(linked); AvmAssert(m_totalSize >= m_sizeofInstance); return m_totalSize - m_sizeofInstance; }
 
-#ifdef AVMPLUS_TRAITS_CACHE
 		// sadly, it's still more efficient to stash this in Traits itself, as it's nontrivial to recover when
 		// we rebuild the TraitMethodInfo. 
 		void setMetadataPos(const byte* pos) 
@@ -437,32 +416,10 @@ namespace avmplus
 			AvmAssert(metadata_pos == NULL);
 			metadata_pos = pos;
 		}
-#else
-		void setMetadataPos(const byte* pos) {
-			metadata_pos = pos;
-		}
-
-		const byte* getMetadataPos() const {
-			return metadata_pos;
-		}
-
-		void setSlotMetadataPos(uint32 i, const byte* pos) { AvmAssert(i < slotCount);   setIndexedMetadataPos(i, pos); }
-		void setMethodMetadataPos(uint32 i, const byte* pos) { AvmAssert(i < methodCount); setIndexedMetadataPos(i+slotCount, pos); }
-		const byte* getSlotMetadataPos(uint32 i, PoolObject*& residingPool);
-		const byte* getMethodMetadataPos(uint32 i, PoolObject*& residingPool);
-#endif
 
 	private:
 
-#ifdef AVMPLUS_TRAITS_CACHE
-	// nothing
-#else
-		void initMetadataTable();
-		void setIndexedMetadataPos(uint32 i, const byte* pos);
-#endif
-
 	private:
-#ifdef AVMPLUS_TRAITS_CACHE
 		void buildBindings(TraitsBindingsp basetb, 
 							MultinameHashtable* bindings, 
 							uint32_t& slotCount, 
@@ -485,12 +442,6 @@ namespace avmplus
 		void countInterfaces(const Toplevel* toplevel, List<Traitsp, LIST_NonGCObjects>& seen) const;
 		void addInterfaces(TraitsBindings* tb) const;
 		Binding getOverride(TraitsBindingsp basetb, Namespacep ns, Stringp name, int tag, const Toplevel *toplevel) const;
-#else
-		AbstractFunction **getMethods() const { return instanceData ? (AbstractFunction**) (getOffsets() + slotCount) : NULL; }
-		Traits **getSlotTypes() const { return (Traits**) instanceData; }
-		int *getOffsets() const { return instanceData ? (int*) ((Traits **) instanceData + slotCount) : NULL; }
-		bool checkOverride(AbstractFunction* virt, AbstractFunction* over);
-#endif
 
 	private:
 
@@ -511,11 +462,6 @@ namespace avmplus
 		 */
 		static Traits* newTraits(PoolObject* pool,
 			   Traits *base,
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-			   int nameCount,
-			   int interfaceCount,
-#endif
 				uint32_t sizeofInstance,
 				TraitsPosPtr traitsPos,
 				TraitsPosType posType);
@@ -529,7 +475,6 @@ namespace avmplus
 		Traits* newParameterizedITraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this); }
 		Traits* newParameterizedCTraits(Stringp name, Namespacep ns) { return _newParameterizedTraits(name, ns, this->base); }
 
-#ifdef AVMPLUS_TRAITS_CACHE
 	public:
 		void enableSkips(uint32_t nameCount);
 		inline void setSkip(uint32_t i) { AvmAssert(m_skips.test(0)); m_skips.set(i+1); }
@@ -576,58 +521,6 @@ namespace avmplus
 			return m_imt;
 		}
 	#endif
-
-#else
-	public:
-		void initTables(const Toplevel* toplevel);
-		void addInterface(Traits* t);
-		inline uint32_t getSlotOffset(uint32_t i) const { return getOffsets()[i]; }
-		//inline void set_slotAndMethodCount(uint32_t slots, uint32_t methods) { slotCount = slots; methodCount = methods; }
-		void setSlotInfo(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, int offset, CPoolKind kind, AbcGen& gen) const;
-		void defineSlot(Stringp _name, Namespacep _ns, int _slot, BindingKind _kind) { add(_name, _ns, Binding(_slot<<3|_kind)); }
-		Traits* getSlotTraits(uint32 i) const { AvmAssert(i < slotCount); return getSlotTypes()[i]; }
-		AbstractFunction* getMethod(uint32 i) const
-		{
-			AvmAssert(i < methodCount);
-			AbstractFunction **_methods = getMethods();
-			return _methods ? _methods[i] : NULL;
-		}
-		void setMethod(uint32 i, AbstractFunction *method)
-		{
-			AvmAssert(i < methodCount && getMethods() != NULL);
-			//methods[i] = method;
-			WB(core->GetGC(), instanceData, &getMethods()[i], method);
-		}
-		Traitsp* getInterfaces() const { return (Traitsp*)((char*)this+sizeof(Traits)); } 
-		Traits* getInterface(uint32 i) const
-		{
-			AvmAssert(i < interfaceCapacity);
-			return getInterfaces()[i];
-		}
-		// table of interface dispatch stubs.
-		// BIND_NONE   = no entry
-		// BIND_METHOD+disp_id = no conflict, dispatches to concrete method
-		// BIND_ITRAMP+addr    = conflict, dispatch to conflict resolution stub
-		// IMT table (if we have one, comes after the interfaces)
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		Binding *getIMT() const {
-			AvmAssert(hasInterfaces);
-			return (Binding*) (getMethods() + methodCount);
-		}
-	#endif
-		/**
-		 * Returns whether this traits object implements the
-		 * interface described by traits t.
-		 */
-		int containsInterface(Traits* t) const
-		{
-			return this == t || *(findInterface(t)) != NULL;
-		}
-		inline Binding findBinding(Stringp n) { return this->getName(n); }
-		Binding findBinding(Stringp name, Namespacep ns) const;
-		Binding findBinding(Stringp name, NamespaceSetp ns) const;
-		Binding getOverride(Namespacep ns, Stringp name, int tag, const Toplevel *toplevel) const;
-#endif
 
 		void genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traits* slotType, CPoolKind kind, AbcGen& gen) const;
 		void genInitBody(const Toplevel* toplevel, AbcGen& gen);
@@ -698,7 +591,6 @@ namespace avmplus
 	private:	NativeInfo				m_nativeInfo;
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType
 	private:	const byte*				metadata_pos;
-#ifdef AVMPLUS_TRAITS_CACHE
 	private:	FixedBitSet				m_skips;	
 	#ifdef MMGC_DRC
 	private:	FixedBitSet				m_slotDestroyInfo;	
@@ -708,25 +600,14 @@ namespace avmplus
 	#endif
 	private:	DWB(MMgc::GCWeakRef*)	m_tbref;				// our TraitsBindings 
 	private:	DWB(MMgc::GCWeakRef*)	m_tmref;				// our TraitsMetadata
-#else
-	private:	void*					instanceData;		// chunk of memory allocated after traits resolution holding slotTypes, offsets and methods, written with explicit WB
-	private:	const byte**			slot_metadata_pos;
-	public:		uint32_t				methodCount;		// # of methods in the methods array 
-	public:		uint32_t				slotCount;			// # of slots in the slots array 
-	public:		uint32_t				interfaceCapacity;	// size of interfaces array 
-#endif
 // @todo -- we should be able to store m_sizeofInstance in 16 bits but MIR doesn't have a convenient way to do a 16-bit load. Leaving at 32 for now.
 	private:	uint32_t				m_sizeofInstance;	// sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.
 	private:	uint32_t				m_hashTableOffset;	// offset to our hashtable (or 0 if none)
 	private:	uint32_t				m_totalSize;		// total size, including sizeofInstance + slots + hashtable
 	public:		uint8_t					builtinType;				// BuiltinType enumeration -- only need 5 bits but stored in byte for faster access
 	private:	const uint8_t			m_posType;					// TraitsPosType enumeration -- only need 3 bits but stored in byte for faster access
-#ifdef AVMPLUS_TRAITS_CACHE
 	private:	uint8_t					m_bindingCapLog2;			// if nonzero, log2 of the cap needed for bindings
 	private:	uint8_t					m_interfaceCapLog2;			// if nonzero, log2 of the cap needed for interfaces
-#else
-	private:	uint8_t					m_padding[2];				
-#endif
 	// 8 bits follow
 	private:	uint32_t				m_needsHashtable:1;			// If true, the class needs a hash table. Typically true for dynamic classes, but will be false for XML
 	private:	uint32_t				linked:1;					// set once signature types have been resolved */
@@ -737,10 +618,6 @@ namespace avmplus
 	public:		uint32_t				hasCustomConstruct:1;		// does this type use the default ClassClosure::construct method or not?
 										// If the traits are for a type that implements its own construct method, this must be set to true.  
 										// If it is false, the JIT will early bind to the AS defined constructor. 
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-	public:		uint32_t				hasInterfaces:1;			// used to tell us whether we need to allocate space for the IMT */
-#endif
 	// ------------------------ DATA SECTION END
 	};
 

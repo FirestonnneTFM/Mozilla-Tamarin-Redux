@@ -218,10 +218,8 @@ namespace avmplus
 	class String;
 	class Toplevel;
 	class Traits;
-#ifdef AVMPLUS_TRAITS_CACHE
 	class TraitsBindings;
 	class TraitsMetadata;
-#endif
 	class WordcodeTranslator;
 	class WordcodeEmitter;
 	class UnicodeUtils;
@@ -245,10 +243,8 @@ namespace avmplus
 	typedef String* Stringp;
 	typedef Namespace* Namespacep;
 	typedef const NamespaceSet* NamespaceSetp;
-#ifdef AVMPLUS_TRAITS_CACHE
 	typedef const TraitsBindings* TraitsBindingsp;
 	typedef const TraitsMetadata* TraitsMetadatap;
-#endif
 }
 
 #include "MMgc.h"
@@ -261,9 +257,7 @@ using MMgc::GCHeap;
 
 #define MMGC_SUBCLASS_DECL : public GCObject
 
-#ifdef AVMPLUS_TRAITS_CACHE
 #include "QCache.h"
-#endif
 #include "GrowableBuffer.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"

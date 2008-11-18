@@ -674,14 +674,9 @@ namespace avmplus
 			Stringp name = core->intern(nameatom);
 
 			// ISSUE should we try this on each object on the proto chain or just the first?
-#ifdef AVMPLUS_TRAITS_CACHE
 			TraitsBindingsp td = t->getTraitsBindings();
 			if (td->findBinding(name, core->publicNamespace) != BIND_NONE)
 				return trueAtom;
-#else
-			if (t->findBinding(name, core->publicNamespace) != BIND_NONE)
-				return trueAtom;
-#endif
 
 			nameatom = name->atom();
 		}
@@ -978,11 +973,7 @@ namespace avmplus
 			core()->console << "setproperty slot " << vtable->traits << " " << multiname->getName() << "\n";
 			#endif
 			int slot = AvmCore::bindingToSlotId(b);
-#ifdef AVMPLUS_TRAITS_CACHE
 			const TraitsBindingsp td = vtable->traits->getTraitsBindings();
-#else
-			const Traitsp td = vtable->traits;
-#endif
 			AvmCore::atomToScriptObject(obj)->setSlotAtom(slot, coerce(value, td->getSlotTraits(slot)));
             return;
 		}
@@ -995,11 +986,7 @@ namespace avmplus
 			#endif
 			// Invoke the setter
 			uint32 m = AvmCore::bindingToSetterId(b);
-#ifdef AVMPLUS_TRAITS_CACHE
 			AvmAssert(m < vtable->traits->getTraitsBindings()->methodCount);
-#else
-			AvmAssert(m < vtable->traits->methodCount);
-#endif
 			MethodEnv* method = vtable->methods[m];
 			Atom atomv_out[2] = { obj, value };
 			method->coerceEnter(1, atomv_out);
@@ -1066,14 +1053,10 @@ namespace avmplus
 		Binding b = BIND_NONE;
 		if (traits && ref->isBinding())
 		{
-#ifdef AVMPLUS_TRAITS_CACHE
 			if (!traits->isResolved())
 				traits->resolveSignatures(this);
 				
 			TraitsBindingsp tb = traits->getTraitsBindings();
-#else
-			Traitsp tb = traits;
-#endif
 			if (!ref->isNsset())
 			{
 				b = tb->findBinding(ref->getName(), ref->getNamespace());

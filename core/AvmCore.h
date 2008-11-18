@@ -188,7 +188,6 @@ const int kBufferPadding = 16;
 			}
 		}
 
-#ifdef AVMPLUS_TRAITS_CACHE
 	private:
 		QCache*			m_tbCache;
 		QCache*			m_tmCache;
@@ -205,7 +204,7 @@ const int kBufferPadding = 16;
 		// safe to call at any time, but calling tosses existing caches, thus has a perf hit --
 		// don't call cavalierly
 		void setCacheSizes(const CacheSizes& cs);
-#endif
+
 	public:
 		#ifdef AVMPLUS_MIR
 		// MIR intermediate buffer pool

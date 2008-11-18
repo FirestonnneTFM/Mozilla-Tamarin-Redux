@@ -89,13 +89,8 @@ namespace avmplus
 
 		// populate method table
 
-#ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp td = traits->getTraitsBindings();
 		const TraitsBindingsp btd = td->base;
-#else
-		const Traitsp td = traits;
-		const Traitsp btd = traits->base;
-#endif
 		for (uint32_t i = 0, n = td->methodCount; i < n; i++)
 		{
 			AbstractFunction* method = td->getMethod(i);
@@ -129,10 +124,6 @@ namespace avmplus
 			traits->isDictionary = base->traits->isDictionary;
 
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-	#ifdef AVMPLUS_TRAITS_CACHE
-	#else
-		if(traits->hasInterfaces)
-	#endif
 		{
 			for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
 			{
@@ -144,11 +135,7 @@ namespace avmplus
 				}
 				else if (AvmCore::bindingKind(b) == BKIND_ITRAMP)
 				{
-#ifdef AVMPLUS_TRAITS_CACHE
 					if (base && b == traits->base->getIMT()[i])
-#else
-					if (base && traits->base->hasInterfaces && b == traits->base->getIMT()[i])
-#endif
 					{
 						// copy down imt stub from base class
 						//imt[i] = base->imt[i];
@@ -199,19 +186,10 @@ namespace avmplus
 		if(ivtable != NULL)
 			size += ivtable->size();
 
-#ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp td = traits->getTraitsBindings();
 		const uint32_t n = td->methodCount;
 		const uint32_t baseMethodCount = base ? td->base->methodCount : 0;
 		size += td->methodCount*sizeof(AbstractFunction*);
-#else
-		const Traitsp td = traits;
-		const uint32_t n = traits->methodCount;
-		const uint32_t baseMethodCount = base ? base->traits->methodCount : 0;
-
-		size += traits->allocatedSize();
-		size += traits->methodCount*sizeof(AbstractFunction*);
-#endif
 
 		for (uint32_t i=0; i < n; i++)
 		{

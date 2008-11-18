@@ -221,11 +221,9 @@ namespace avmplus
 		// Loading a new ABC file always invalidates the lookup cache
 		core->invalidateLookupCache();
 #endif
-#ifdef AVMPLUS_TRAITS_CACHE
 		// Loading a new ABC file always invalidates the traits cache(s)
 		core->tbCache()->flush();
 		core->tmCache()->flush();
-#endif
 
 #ifdef FEATURE_BUFFER_GUARD // no Carbon
 		TRY(this->core, kCatchAction_Rethrow)
@@ -306,7 +304,6 @@ namespace avmplus
 	#define CHECK_POS(pos) do {  } while (0)
 #endif //SAFE_PARSE
 
-#ifdef AVMPLUS_TRAITS_CACHE
 	/**
 	 * setting up a traits that extends another one.  Two parser passes are required,
 	 * one for sizing the traits object and the other for allocating it and filling
@@ -565,423 +562,6 @@ namespace avmplus
 
 		return traits;
 	}
-#else
-	/**
-	 * setting up a traits that extends another one.  Two parser passes are required,
-	 * one for sizing the traits object and the other for allocating it and filling
-	 * it in.
-	 */
-	Traits* AbcParser::parseTraits(uint32_t sizeofInstance, 
-									Traits* base, 
-									Namespacep ns, 
-									Stringp name, 
-									AbstractFunction* script, 
-									int interfaceDelta, 
-									TraitsPosType posType, 
-									Namespacep protectedNamespace)
-	{
-		const byte* traits_pos = pos;
-		uint32_t nameCount = readU30(pos);
-
-		// Very generous check for nameCount being way too large.
-		if (nameCount > (uint32_t)(abcEnd - pos))
-			toplevel->throwVerifyError(kCorruptABCError);
-
-		if_verbose(
-			core->console << "        trait_count=" << nameCount << "\n";
-		)
-
-		Traits* traits = Traits::newTraits(pool, base, nameCount, interfaceDelta, sizeofInstance, traits_pos, posType);
-		traits->ns = ns;
-		traits->name = name;
-		traits->protectedNamespace = protectedNamespace;
-		
-		// Copy protected traits from base class into new protected namespace
-		if (base && base->protectedNamespace && protectedNamespace)
-		{
-			for (int i=0; (i = base->next(i)) != 0; )
-			{
-				if (base->nsAt(i) == base->protectedNamespace)
-				{
-					traits->add(base->keyAt(i), protectedNamespace, base->valueAt(i));
-				}
-			}
-		}
-
-		uint32 slotCount, methodCount;
-		if (base)
-		{
-			slotCount = base->slotCount;
-			methodCount = base->methodCount;
-		}
-		else
-		{
-			slotCount = 0;
-			methodCount = 0;
-		}
-
-		bool earlySlotBinding = pool->allowEarlyBinding(base);
-		for (uint32_t i=0; i < nameCount; i++)
-        {
-			Multiname qn;
-			resolveQName(pos, qn);
-			Namespacep ns = qn.getNamespace();
-			// TODO name can come out null and fire all kinds of asserts from a broken compiler
-			// and crash a release build, not sure if null is valid in any cases but there's definitely
-			// a missing verify error here somewhere
-			Stringp name = qn.getName();
-			CHECK_POS(pos);
-            int tag = *pos++;
-            TraitKind kind = (TraitKind) (tag & 0x0f);
-
-			bool skip = false;
-			uint32_t id = 0;
-			uint32_t info = 0;
-			uint32_t value_index = 0;
-			CPoolKind value_kind;
-#ifdef AVMPLUS_VERBOSE
-			Multiname typeName;
-#endif
-			int flags = 0;
-
-			// Read in the trait entry.
-			// Skip any traits that have version metadata that indicates they should be removed.
-			switch (kind)
-			{
-			case TRAIT_Slot:
-			case TRAIT_Const:
-			case TRAIT_Class:
-				id = readU30(pos); // slot id
-				if( kind == TRAIT_Slot || kind == TRAIT_Const )
-				{
-#ifdef AVMPLUS_VERBOSE
-					parseTypeName(pos, typeName);
-#else
-					readU30(pos);
-#endif
-					value_index = readU30(pos); // value
-					if( value_index )
-					{
-						CHECK_POS(pos);
-						value_kind = (CPoolKind)*(pos++);
-					}
-				}
-				else
-				{
-					info = readU30(pos);
-				}
-				break;
-			case TRAIT_Getter:
-			case TRAIT_Setter:
-			case TRAIT_Method:
-				id = readU30(pos);  // disp id
-				info = readU30(pos);  // method
-				break;
-			default:
-				// unsupported traits type
-				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
-			}
-			const byte* meta_pos = pos;
-			if( tag & ATTR_metadata )
-			{
-				uint32_t metadataCount = readU30(pos);
-				for( uint32_t metadata = 0; metadata < metadataCount; ++metadata)
-				{
-					uint32_t index = readU30(pos);
-					Stringp name = metaNames[index];
-					if (pool->stripMetadataIndexes.indexOf(index) != -1)
-						skip = true;  // Stripping this definition, 
-					else if (name == core->kNeedsDxns )
-						flags |= AbstractFunction::NEEDS_DXNS;
-#ifdef AVMPLUS_VERBOSE
-					else if (name == kVerboseVerify )
-						flags |= AbstractFunction::VERBOSE_VERIFY;
-#endif
-				}
-			}
-			if( skip ) 
-			{ 
-				if_verbose (
-					core->console << "skipping definition" << " name=" << Multiname::format(core,ns,name)
-						<< "\n";
-				)
-				continue;
-			}
-			
-			// Didn't skip the trait, so do set up for the definition now.
-			AbstractFunction *f = NULL;
-			switch (kind)
-            {
-            case TRAIT_Slot:
-            case TRAIT_Const:
-            case TRAIT_Class:
-			{
-                uint32 slot_id = id;
-				if (!earlySlotBinding) slot_id = 0;
-				if (!slot_id)
-				{
-					// vm assigns slot
-					slot_id = slotCount++;
-				}
-				else
-				{
-					if (slot_id > nameCount)
-						toplevel->throwVerifyError(kCorruptABCError);
-
-					// compiler assigned slot
-					if (slot_id > slotCount)
-						slotCount = slot_id;
-					slot_id--;
-				}
-
-				if (base && slot_id < base->slotCount)
-				{
-					// slots are final.
-					toplevel->throwVerifyError(kIllegalOverrideError, core->toErrorString(&qn), core->toErrorString(base));
-				}
-
-				// a slot cannot override anything else.
-				if (traits->get(name, ns) != BIND_NONE)
-					toplevel->throwVerifyError(kCorruptABCError);
-
-// In theory we should reject duplicate slots here; 
-// in practice we don't, as it causes problems with some existing content
-//				if (traits->findBinding(name, ns) != BIND_NONE)
-//					toplevel->throwVerifyError(kIllegalOverrideError, toplevel->core()->toErrorString(&qn), toplevel->core()->toErrorString(traits));
-
-				if (script)
-					addNamedScript(ns, name, script);
-
-				if( kind == TRAIT_Slot || kind == TRAIT_Const)
-				{
-					if_verbose (
-						core->console << "            " << traitNames[kind]
-							<< " name=" << Multiname::format(core,ns,name)
-							<< " slot_id=" << slot_id
-							<< " value_index=" << value_index
-							<< " type=" << typeName
-							<< "\n";
-					)
-
-					// create a binding
-					// only touches hashtable
-					traits->defineSlot(name, ns, 
-						slot_id, kind==TRAIT_Slot ? BKIND_VAR : BKIND_CONST);
-
-				}
-				else
-				{
-					AvmAssert(kind == TRAIT_Class);
-					// get the class type
-					uint32_t class_info = info;
-					if (class_info >= classCount)
-						toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_info), core->toErrorString(classCount));
-
-					AbstractFunction* cinit = pool->cinits[class_info];
-					if (!cinit) 
-						toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_info));
-
-					Traits* ctraits = cinit->declaringTraits;
-
-					if_verbose(
-						core->console << "            " << traitNames[kind]
-							<< " name=" << Multiname::format(core, ns, name)
-							<< " slot_id=" << slot_id
-							<< " type=" << ctraits
-							<< "\n";
-					)
-
-					if (script)
-					{
-						// promote instance type to the vm-wide type table.
-						Traits* itraits = ctraits->itraits;
-
-						// map type name to traits
-						addNamedTraits(ns, name, itraits);
-
-						if ( tag & ATTR_metadata )
-						{
-							itraits->setMetadataPos(meta_pos);
-						}
-					}
-					else
-					{
-						if ( tag & ATTR_metadata )
-						{
-							ctraits->setMetadataPos(meta_pos);
-						}
-					}
-
-					// create a binding
-					// only touches hashtable
-					traits->defineSlot(name, ns, slot_id, BKIND_CONST);
-
-				}
-	            break;
-			}
-			case TRAIT_Getter:
-			case TRAIT_Setter:
-            case TRAIT_Method:
-			{
-				int earlyDispId = id;
-                (void)earlyDispId;
-				uint32 method_info = info;
-
-				if_verbose(
-					core->console << "            " << traitNames[kind]
-						<< " name=" << Multiname::format(core, ns, name)
-						<< " disp_id=" << earlyDispId << " (ignored)"
-					    << " method_info=" << method_info
-						<< " attr=" << ((tag&ATTR_final)?"final":"virtual");
-					if (tag&ATTR_override)
-						core->console << "|override";
-					core->console << "\n";
-				)
-
-				f = resolveMethodInfo(method_info);
-
-				#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
-				#ifdef AVMPLUS_VERBOSE
-				Stringp s1 = traits->format(core);
-				#else
-				Stringp s1 = Multiname::format(core, traits->ns, traits->name);
-				#endif
-				Stringp s2 = core->newString(kind == TRAIT_Method ? "/" : (kind == TRAIT_Getter ? "/get " : "/set "));
-				Stringp s3 = Multiname::format(core,ns,name);
-				Stringp s4 = core->concatStrings(s2,s3);
-				f->name = core->concatStrings(s1, s4);
-				#endif
-
-				// since this function is ref'ed here, we know the receiver type.
-				if (!f->makeMethodOf(traits))
-				{
-					toplevel->throwVerifyError(kCorruptABCError);
-				}
-
-				f->flags |= flags;
-
-				if (tag & ATTR_final)
-					f->flags |= AbstractFunction::FINAL;
-
-				if (tag & ATTR_override)
-					f->flags |= AbstractFunction::OVERRIDE;
-				
-				Binding baseBinding = traits->getOverride(ns, name, tag, toplevel);
-
-				// issue can you ever import a getter/setter?
-				// is it okay to call this more than once on the same
-				// name/script pair?
-
-				// only export one name for an accessor 
-				if (script && !domain->getNamedScript(name,ns))
-					addNamedScript(ns, name, script);
-
-				if (kind == TRAIT_Method)
-				{
-					if (baseBinding == BIND_NONE)
-					{
-						traits->defineSlot(name, ns, methodCount, BKIND_METHOD);
-						// accessors require 2 vtable slots, methods only need 1.
-						methodCount ++;
-					}
-					else if (AvmCore::isMethodBinding(baseBinding))
-					{
-						// something got overridden, need new name entry for this subclass
-						// but keep the existing disp_id
-						int disp_id = AvmCore::bindingToMethodId(baseBinding);
-						traits->defineSlot(name, ns, disp_id, BKIND_METHOD);
-					}
-					else
-					{
-						toplevel->throwVerifyError(kCorruptABCError);
-					}
-				}
-				else if (kind == TRAIT_Getter)
-				{
-					// if nothing already is defined in this class, use base class
-					// in case setter has already been defined.
-					Binding ourBinding = traits->get(name, ns);
-					if (ourBinding != BIND_NONE)
-						baseBinding = ourBinding;
-
-					if (baseBinding == BIND_NONE)
-					{
-						traits->defineSlot(name, ns, methodCount, BKIND_GET);
-						// accessors require 2 vtable slots, methods only need 1.
-						methodCount += 2;
-					}
-					else if (AvmCore::isAccessorBinding(baseBinding))
-					{
-						// something maybe got overridden, need new name entry for this subclass
-						// but keep the existing disp_id
-						int disp_id = uintptr_t(baseBinding) >> 3;
-						BindingKind bkind = AvmCore::bindingKind(baseBinding);
-						if (bkind == BKIND_SET)
-							bkind = BKIND_GETSET;
-						traits->defineSlot(name, ns, disp_id, bkind);
-					}
-					else
-					{
-						toplevel->throwVerifyError(kCorruptABCError);
-					}
-				}
-				else // TRAIT_Setter
-				{
-					// if nothing already is defined in this class, use base class
-					// in case getter has already been defined.
-					Binding ourBinding = traits->get(name, ns);
-					if (ourBinding != BIND_NONE)
-						baseBinding = ourBinding;
-
-					if (baseBinding == BIND_NONE)
-					{
-						traits->defineSlot(name, ns, methodCount, BKIND_SET);
-						// accessors require 2 vtable slots, methods only need 1.
-						methodCount += 2;
-					}
-					else if (AvmCore::isAccessorBinding(baseBinding))
-					{
-						// something maybe got overridden, need new name entry for this subclass
-						// but keep the existing disp_id
-						// both get & set bindings use the get id.  set_id = get_id + 1.
-						int disp_id = uintptr_t(baseBinding) >> 3;
-						BindingKind bkind = AvmCore::bindingKind(baseBinding);
-						if (bkind == BKIND_GET) 
-							bkind = BKIND_GETSET;
-						traits->defineSlot(name, ns, disp_id, bkind);
-					}
-					else
-					{
-						toplevel->throwVerifyError(kCorruptABCError);
-					}
-				}
-                break;
-			}
-
-			default:
-				// unsupported traits type
-				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
-            }
-
-#ifdef AVMPLUS_VERBOSE
-            if ( tag & ATTR_metadata )
-            {
-                int metadataCount = readU30(meta_pos);
-				for( int metadata = 0; metadata < metadataCount; ++metadata)
-				{
-					int index = readU30(meta_pos);
-					if (pool->verbose)
-						core->console << "            [" << metaNames[index] << "]\n";
-				}
-            }
-#endif
-        }
-
-		traits->slotCount = slotCount;
-		traits->methodCount = methodCount;
-		return traits;
-	}
-#endif // not #ifdef AVMPLUS_TRAITS_CACHE
 
 	void AbcParser::parseMethodInfos()
     {
@@ -1360,11 +940,7 @@ namespace avmplus
 																ns, 
 																name, 
 																NULL, 
-														#ifdef AVMPLUS_TRAITS_CACHE
 																traits_pos,
-					#else
-																0,
-					#endif
 																TRAITSTYPE_ACTIVATION, 
 																NULL);
 					methodInfo->activationTraits->final = true;
@@ -1839,9 +1415,7 @@ namespace avmplus
 
 		for (uint32 i=0; i < count; i++)
 		{
-#if defined(AVMPLUS_VERBOSE) || defined(AVMPLUS_TRAITS_CACHE)
 			const byte* script_pos = pos;
-#endif
 
 			int init_index = readU30(pos);
 
@@ -1866,11 +1440,7 @@ namespace avmplus
 											core->publicNamespace, 
 											core->kglobal, 
 											script, 
-#ifdef AVMPLUS_TRAITS_CACHE
 											script_pos,
-#else
-											0, 
-#endif
 											TRAITSTYPE_SCRIPT_FROM_ABC,
 											NULL);
 
@@ -1906,25 +1476,6 @@ namespace avmplus
 		return true;
 	}
 
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-	// helper for interface flattening
-	void AbcParser::addTraits(Hashtable *ht, Traits *traits, Traits *baseTraits)
-	{
-		if(!baseTraits || !baseTraits->containsInterface(traits))
-		{
-			ht->add((Atom)traits, traits);			
-			Traitsp *interfaces = traits->getInterfaces();
-			for (int i=0, n=traits->interfaceCapacity; i < n; i++) {
-				Traits* t = interfaces[i];
-				if (t != NULL && t->isInterface) {
-					addTraits(ht, t, baseTraits);
-				}			
-			}
-		}
-	}
-#endif
-
 	bool AbcParser::parseInstanceInfos()
     {
         classCount = readU30(pos);
@@ -1953,9 +1504,7 @@ namespace avmplus
 
         for (uint32_t i=0; i < classCount; i++)
         {
-			#if defined(AVMPLUS_VERBOSE) || defined(AVMPLUS_TRAITS_CACHE)
             const byte* instancepos = pos;
-			#endif // AVMPLUS_VERBOSE
 
             // CONSTANT_QName name of this class
 			Namespacep ns;
@@ -2003,7 +1552,6 @@ namespace avmplus
             int interfaceCount = readU30(pos);
 			const byte* interfacePos = pos;
 
-#ifdef AVMPLUS_TRAITS_CACHE
 			if(interfaceCount)
 			{
 				for( int x = 0; x < interfaceCount; ++ x )
@@ -2016,26 +1564,6 @@ namespace avmplus
 					}
 				}
 			}
-#else
-			int interfaceDelta = 0;
-			if(interfaceCount)
-			{
-				Hashtable *ht = new (core->GetGC()) Hashtable(core->GetGC(), interfaceCount*2);
-				for( int x = 0; x < interfaceCount; ++ x )
-				{
-					Traits *t = pool->resolveTypeName(pos, toplevel);
-					if (!t || !t->isInterface)
-					{
-						// error, can't extend interface
-						toplevel->throwVerifyError(kCannotImplementError, core->toErrorString(&qname), core->toErrorString(t));
-					}
-					
-					addTraits(ht, t, baseTraits);
-				}
-				interfaceDelta = ht->getSize();
-				delete ht;
-			}
-#endif
 
 			// TODO make sure the inheritance is legal.  
 			//  - can't override final members
@@ -2068,11 +1596,7 @@ namespace avmplus
 											ns, 
 											name, 
 											0, 
-#ifdef AVMPLUS_TRAITS_CACHE
 											instancepos,
-#else
-											interfaceDelta, 
-#endif
 											TRAITSTYPE_INSTANCE_FROM_ABC, 
 											protectedNamespace);
 			if( !itraits ) return false;
@@ -2091,14 +1615,7 @@ namespace avmplus
 			{
 				itraits->isInterface = true;
 
-#ifdef AVMPLUS_TRAITS_CACHE
-				// check now done at resolve time
-#else
-				if (itraits->slotCount != 0)
-				{
-					toplevel->throwVerifyError(kIllegalSlotError, core->toErrorString(itraits));
-				}
-#endif
+				// check for slotCount != 0 now done at resolve time
 
 				// interface base must be *
 				if (baseTraits)
@@ -2122,11 +1639,7 @@ namespace avmplus
 			for (int j=0, n=interfaceCount; j < n; j++)
 			{
 				Traits *interfaceTraits = pool->resolveTypeName(interfacePos, toplevel);
-#ifdef AVMPLUS_TRAITS_CACHE
 				(void)interfaceTraits;
-#else
-				itraits->addInterface(interfaceTraits);
-#endif
 				if_verbose(
 					core->console << "        interface["<<j<<"]=" << interfaceTraits <<"\n";
 				)
@@ -2166,9 +1679,7 @@ namespace avmplus
 			Namespacep ns = itraits->ns;
 			Stringp name = itraits->name;
 
-#if defined(AVMPLUS_VERBOSE) || defined(AVMPLUS_TRAITS_CACHE)
 			const byte* class_pos = pos;
-#endif
 
 			uint32 cinit_index = readU30(pos);
             AbstractFunction *cinit = resolveMethodInfo(cinit_index);
@@ -2194,11 +1705,7 @@ namespace avmplus
 											ns, 
 											core->internString(core->concatStrings(name, core->newString("$"))), 
 											NULL, 
-#ifdef AVMPLUS_TRAITS_CACHE
 											class_pos,
-#else
-											0, 
-#endif
 											TRAITSTYPE_CLASS_FROM_ABC, 
 											itraits->protectedNamespace);
 

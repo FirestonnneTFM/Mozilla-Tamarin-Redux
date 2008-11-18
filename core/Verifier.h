@@ -179,13 +179,8 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 		uint32_t allocateCacheSlot(uint32_t imm30);
 #endif
-#ifdef AVMPLUS_TRAITS_CACHE
 		Binding findMathFunction(TraitsBindingsp math, const Multiname& name, Binding b, int argc);
 		Binding findStringFunction(TraitsBindingsp string, const Multiname& name, Binding b, int argc);
-#else
-		Binding findMathFunction(Traits* math, const Multiname& name, Binding b, int argc);
-		Binding findStringFunction(Traits* string, const Multiname& name, Binding b, int argc);
-#endif
 
 		#ifdef AVMPLUS_VERBOSE
 	public:

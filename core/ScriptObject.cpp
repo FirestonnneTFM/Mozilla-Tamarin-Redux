@@ -580,7 +580,6 @@ namespace avmplus
 	Atom ScriptObject::getSlotAtom(uint32_t slot)
 	{
 		Traits* traits = this->traits();
-#ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp td = traits->getTraitsBindings();
 		// repeated if-else is actually more performant than a switch statement in this case.
 		// SST_atom is most common case, put it first
@@ -619,52 +618,11 @@ namespace avmplus
 			AvmAssert(sst == SST_scriptobject);
 			return (*((const ScriptObject**)p))->atom(); // may be null|kObjectType, copacetic
 		}
-#else
-		const Traitsp td = traits;
-		Traitsp slotType = td->getSlotTraits(slot);
-		void* p = ((char*)this) + td->getSlotOffset(slot);
-		const BuiltinType bt = Traits::getBuiltinType(slotType);
-		AvmAssert(bt != BUILTIN_void);
-		// repeated if-else is actually more performant than a switch statement in this case.
-		if (bt == BUILTIN_any || bt == BUILTIN_object)
-		{
-			return *((const Atom*)p);
-		}
-		else if (bt == BUILTIN_number)
-		{
-			return traits->core->doubleToAtom(*((const double*)p));				
-		}
-		else if (bt == BUILTIN_int)
-		{
-			return traits->core->intToAtom(*((const int32_t*)p));
-		}
-		else if (bt == BUILTIN_uint)
-		{
-			return traits->core->uintToAtom(*((const int32_t*)p));
-		}
-		else if (bt == BUILTIN_boolean)
-		{
-			return (*((const int32_t*)p)<<3)|kBooleanType;
-		}
-		else if (bt == BUILTIN_string)
-		{
-			return (*((const Stringp*)p))->atom(); // may be null|kStringType, that's ok
-		}
-		else if (bt == BUILTIN_namespace)
-		{
-			return (*((const Namespacep*)p))->atom(); // may be null|kNamespaceType, no problemo
-		}
-		else 
-		{
-			return (*((const ScriptObject**)p))->atom(); // may be null|kObjectType, copacetic
-		}
-#endif
 	}
 
 	void ScriptObject::setSlotAtom(uint32_t slot, Atom value)
 	{
 		Traits* traits = this->traits();
-#ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp td = traits->getTraitsBindings();
 		void* p;
 		const SlotStorageType sst = td->calcSlotAddrAndSST(slot, (void*)this, p);
@@ -701,43 +659,6 @@ namespace avmplus
 			AvmAssert(atomKind(value) == kStringType || atomKind(value) == kNamespaceType || atomKind(value) == kObjectType);
 			WBRC(traits->core->GetGC(), this, p, value & ~7);
 		}
-#else
-		const Traitsp td = traits;
-		void* p = ((char*)this) + td->getSlotOffset(slot);
-		const BuiltinType bt = Traits::getBuiltinType(td->getSlotTraits(slot));
-		AvmAssert(bt != BUILTIN_void);
-		// repeated if-else is actually more performant than a switch statement in this case.
-		if (bt == BUILTIN_any || bt == BUILTIN_object)
-		{
-			AvmAssert(atomKind(value) != 0);
-			WBATOM(traits->core->GetGC(), this, (Atom*)p, value);
-		}
-		else if (bt == BUILTIN_number)
-		{
-			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
-			*((double*)p) = AvmCore::number_d(value);
-		}
-		else if (bt == BUILTIN_int)
-		{
-			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
-			*((int32_t*)p) = AvmCore::integer_i(value);
-		}
-		else if (bt == BUILTIN_uint)
-		{
-			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
-			*((uint32_t*)p) = AvmCore::integer_u(value);
-		}
-		else if (bt == BUILTIN_boolean)
-		{
-			AvmAssert(atomKind(value) == kBooleanType);
-			*((int32_t*)p) = urshift(value,3);
-		}
-		else 
-		{
-			AvmAssert(atomKind(value) == kStringType || atomKind(value) == kNamespaceType || atomKind(value) == kObjectType);
-			WBRC(traits->core->GetGC(), this, p, value & ~7);
-		}
-#endif
 	}
 
 	Atom ScriptObject::nextName(int index)
