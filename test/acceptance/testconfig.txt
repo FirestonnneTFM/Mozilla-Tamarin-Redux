@@ -70,6 +70,7 @@ e4x/QName/e13_3_2:.*       , x86-lnx-tvm-release.*-Dforcemir , expectedfail , bu
 e4x/Regress/b121219:.*      , x86-lnx-tvm-release.*-Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456853
 
 # full run for windows mobile - Dell Axim
+mops/.*                                                          ,   .*winmobile-tvm.*              ,  skip           ,   remote proxy does not have access to additional abc files
 ecma3/Math/e15_8_2_17_1:Math.sqrt\(3\) = 1.7320508075688774      ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
 ecma3/Math/e15_8_2_5:Math.atan2\(Infinity. Infinity\)            ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673
 ecma3/Math/e15_8_2_5:Math.atan2\(Infinity. -Infinity\)           ,   .*winmobile-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=429673

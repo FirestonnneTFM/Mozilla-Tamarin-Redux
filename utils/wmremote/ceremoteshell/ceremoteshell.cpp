@@ -79,6 +79,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		CeRapiUninit();
 		return -1;
 	}
+
+	// remove the log file from previous run if it exists.
+	// It is left in place in the event that you need to debug
+	hr = CeDeleteFile(L"\\Temp\\avmfile.log");
 //    printf("copying avmfile.abc...\n");
 
 	// Create the file on the device in the temp directory
@@ -233,7 +237,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	fflush(stdout);
 	dwErr = GetLastError();
 	CeCloseHandle(ceFile);
-	//hr = CeDeleteFile(L"\\Temp\\avmfile.log");
 
 	// Uninitialize RAPI
 	CeRapiUninit();
