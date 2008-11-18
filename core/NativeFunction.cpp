@@ -169,6 +169,8 @@ namespace avmplus
 #ifdef AVMPLUS_LEGACY_NATIVE_MAPS
 		info->flags |= ni->flags;
 		info->cookie = ni->cookie;
+#else
+		info->flags |= AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS;
 #endif
 		return info;
 	}
