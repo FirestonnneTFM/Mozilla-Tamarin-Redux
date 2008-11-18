@@ -478,7 +478,7 @@ namespace avmplus
 	#endif
 
 	#define _AVMTHUNK_NATIVE_METHOD(CLS, METHID, IMPL) \
-		{ _NATIVE_METHOD_CAST_PTR(CLS, &IMPL), (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID _EXTRA_METHOD(0,0) },
+		{ _NATIVE_METHOD_CAST_PTR(CLS, &IMPL), (AvmThunkNativeThunker)avmplus::NativeID::METHID##_thunk, avmplus::NativeID::METHID _EXTRA_METHOD(0, AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS) },
 
 	#define AVMTHUNK_NATIVE_METHOD(METHID, IMPL) \
 		_AVMTHUNK_NATIVE_METHOD(ScriptObject, METHID, IMPL)
