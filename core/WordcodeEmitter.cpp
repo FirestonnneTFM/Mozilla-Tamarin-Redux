@@ -45,7 +45,7 @@ namespace avmplus
 	class TranslatedCode : public GCObject
 	{
 	public:
-		uint32_t data[1];  // more follows
+		uintptr_t data[1];  // more follows
 	};
 
 #ifdef AVMPLUS_DIRECT_THREADED
@@ -73,7 +73,7 @@ namespace avmplus
 	{
 		AvmAssert(info != NULL);
 
-		const byte* pos = info->body_pos;
+		const uint8_t* pos = info->body_pos;
 		info->word_code.max_stack = AvmCore::readU30(pos);
 		info->word_code.local_count = AvmCore::readU30(pos);
 		info->word_code.init_scope_depth = AvmCore::readU30(pos);
@@ -87,9 +87,9 @@ namespace avmplus
 
 #ifdef AVMPLUS_SELFTEST
 #  ifdef AVMPLUS_DIRECT_THREADED
-	WordcodeEmitter::WordcodeEmitter(AvmCore* core, byte* code_start, void** opcode_labels)
+	WordcodeEmitter::WordcodeEmitter(AvmCore* core, uint8_t* code_start, void** opcode_labels)
 #  else
-	WordcodeEmitter::WordcodeEmitter(AvmCore* core, byte* code_start)
+	WordcodeEmitter::WordcodeEmitter(AvmCore* core, uint8_t* code_start)
 #  endif
 
 		: WordcodeTranslator()
@@ -172,11 +172,11 @@ namespace avmplus
 		dest_limit = dest + sizeof(b->data)/sizeof(b->data[0]);
 	}
 	
-	void WordcodeEmitter::emitRelativeOffset(uint32_t base_offset, const byte *base_pc, int32_t offset) 
+	void WordcodeEmitter::emitRelativeOffset(uintptr_t base_offset, const uint8_t *base_pc, intptr_t offset) 
 	{
 		if (offset < 0) {
 			// There must be a label for the target location
-			uint32_t old_offset = uint32_t((base_pc - code_start) + offset);
+			uintptr_t old_offset = uintptr_t((base_pc - code_start) + offset);
 			label_info* l = labels;
 			while (l != NULL && l->old_offset != old_offset)
 				l = l->next;
@@ -187,7 +187,7 @@ namespace avmplus
 			makeAndInsertBackpatch(base_pc + offset, base_offset);
 	}
 	
-	void WordcodeEmitter::makeAndInsertBackpatch(const byte* target_pc, uint32_t patch_offset)
+	void WordcodeEmitter::makeAndInsertBackpatch(const uint8_t* target_pc, uintptr_t patch_offset)
 	{
 		// Leave a backpatch for the target location.  Backpatches are sorted in
 		// increasing address order always.
@@ -309,7 +309,7 @@ namespace avmplus
 #endif
 	}
 
-	void WordcodeEmitter::fixExceptionsAndLabels(const byte *pc) 
+	void WordcodeEmitter::fixExceptionsAndLabels(const uint8_t *pc) 
 	{
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		// Do not optimize across control flow targets, so flush the peephole window here
@@ -332,7 +332,7 @@ namespace avmplus
 		while (backpatches != NULL && backpatches->target_pc <= pc) {
 			AvmAssert(backpatches->target_pc == pc);
 			AvmAssert(*backpatches->patch_loc == 0x80000000U);
-			*backpatches->patch_loc = uint32_t(buffer_offset + (dest - buffers->data) - backpatches->patch_offset);
+			*backpatches->patch_loc = (intptr_t)buffer_offset + (intptr_t)(dest - buffers->data) - (intptr_t)backpatches->patch_offset;
 			backpatch_info* tmp = backpatches;
 			backpatches = backpatches->next;
 			delete tmp;
@@ -343,7 +343,7 @@ namespace avmplus
 		if (dest+n > dest_limit) refill();
 
 	// These take no arguments
-	void WordcodeEmitter::emitOp0(const byte *pc, WordOpcode opcode) {
+	void WordcodeEmitter::emitOp0(const uint8_t *pc, WordOpcode opcode) {
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 1);
 #endif // _DEBUG
@@ -356,7 +356,7 @@ namespace avmplus
 	}
 
 	// These take one U30 argument
-	void WordcodeEmitter::emitOp1(const byte *pc, WordOpcode opcode)
+	void WordcodeEmitter::emitOp1(const uint8_t *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 2);
@@ -364,7 +364,7 @@ namespace avmplus
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
-		*dest++ = AvmCore::readU30(pc);
+		*dest++ = (intptr_t)(int32_t)AvmCore::readU30(pc);
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(opcode, dest-2);
 #endif
@@ -378,14 +378,14 @@ namespace avmplus
 #endif // _DEBUG
 		CHECK(2);
 		*dest++ = NEW_OPCODE(opcode);
-		*dest++ = operand;
+		*dest++ = (intptr_t)(int32_t)operand;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(opcode, dest-2);
 #endif
 	}
 	
 	// These take two U30 arguments
-	void WordcodeEmitter::emitOp2(const byte *pc, WordOpcode opcode)
+	void WordcodeEmitter::emitOp2(const uint8_t *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].width == 3);
@@ -393,8 +393,8 @@ namespace avmplus
 		CHECK(3);
 		pc++;
 		*dest++ = NEW_OPCODE(opcode);
-		*dest++ = AvmCore::readU30(pc);
-		*dest++ = AvmCore::readU30(pc);
+		*dest++ = (intptr_t)(int32_t)AvmCore::readU30(pc);
+		*dest++ = (intptr_t)(int32_t)AvmCore::readU30(pc);
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(opcode, dest-3);
 #endif
@@ -407,8 +407,8 @@ namespace avmplus
 #endif
 		CHECK(3);
 		*dest++ = NEW_OPCODE(opcode);
-		*dest++ = op1;
-		*dest++ = op2;
+		*dest++ = (intptr_t)(int32_t)op1;
+		*dest++ = (intptr_t)(int32_t)op2;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(opcode, dest-3);
 #endif
@@ -419,17 +419,17 @@ namespace avmplus
 	// then the target must be a LABEL instruction, and we can just look it up.
 	// Otherwise, we enter the target offset into an ordered list with the current
 	// transformed PC and the location to backpatch.
-	void WordcodeEmitter::emitRelativeJump(const byte *pc, WordOpcode opcode)
+	void WordcodeEmitter::emitRelativeJump(const uint8_t *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
 		AvmAssert(wopAttrs[opcode].jumps);
 #endif
 		CHECK(2);
 		pc++;
-		int32_t offset = AvmCore::readS24(pc);
+		intptr_t offset = (intptr_t)AvmCore::readS24(pc);
 		pc += 3;
 		*dest++ = NEW_OPCODE(opcode);
-		uint32_t base_offset = uint32_t(buffer_offset + (dest - buffers->data) + 1);
+		uintptr_t base_offset = uintptr_t(buffer_offset + (dest - buffers->data) + 1);
 		emitRelativeOffset(base_offset, pc, offset);
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(opcode, dest-2);
@@ -437,62 +437,62 @@ namespace avmplus
 #endif
 	}
 	
-	void WordcodeEmitter::emitLabel(const byte *pc) 
+	void WordcodeEmitter::emitLabel(const uint8_t *pc) 
 	{
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		// Do not optimize across control control flow targets, so flush the peephole window here.
 		peepFlush();
 #endif
 		label_info* l = new label_info;
-		l->old_offset = uint32_t(pc-code_start);
+		l->old_offset = uint32_t(pc - code_start);
 		l->new_offset = uint32_t(buffer_offset + (dest - buffers->data));
 		l->next = labels;
 		labels = l;
 	}
 
 #ifdef DEBUGGER
-	void WordcodeEmitter::emitDebug(const byte *pc) 
+	void WordcodeEmitter::emitDebug(const uint8_t *pc) 
 	{
 		CHECK(5);
 		pc++;
-		byte debug_type = *pc++;
+		uint8_t debug_type = *pc++;
 		uint32_t index = AvmCore::readU30(pc);
-		byte reg = *pc++;
+		uint8_t reg = *pc++;
 		uint32_t extra = AvmCore::readU30(pc);
 		// 4 separate operands to match the value in the operand count table,
 		// though obviously we could pack debug_type and reg into one word and
 		// we could also omit extra.
 		*dest++ = NEW_OPCODE(OP_debug);
 		*dest++ = debug_type;
-		*dest++ = index;
-		*dest++ = reg;
-		*dest++ = extra;
+		*dest++ = (intptr_t)(int32_t)index;
+		*dest++ = (intptr_t)(int32_t)reg;
+		*dest++ = (intptr_t)(int32_t)extra;
 	}
 #endif
 	
-	void WordcodeEmitter::emitPushbyte(const byte *pc) 
+	void WordcodeEmitter::emitPushbyte(const uint8_t *pc) 
 	{
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(WOP_pushbits);
-		*dest++ = (((sint8)*pc++) << 3) | kIntegerType;
+		*dest++ = (intptr_t)(((int8_t)*pc++) << 3) | kIntegerType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(WOP_pushbits, dest-2);
 #endif
 	}
 	
-	void WordcodeEmitter::emitPushshort(const byte *pc) 
+	void WordcodeEmitter::emitPushshort(const uint8_t *pc) 
 	{
 		CHECK(2);
 		pc++;
 		*dest++ = NEW_OPCODE(WOP_pushbits);
-		*dest++ = ((signed short)AvmCore::readU30(pc) << 3) | kIntegerType;
+		*dest++ = (intptr_t)((int16_t)AvmCore::readU30(pc) << 3) | kIntegerType;
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peep(WOP_pushbits, dest-2);
 #endif
 	}
 	
-	void WordcodeEmitter::emitGetscopeobject(const byte *pc) 
+	void WordcodeEmitter::emitGetscopeobject(const uint8_t *pc) 
 	{
 		CHECK(2);
 		pc++;
@@ -503,8 +503,9 @@ namespace avmplus
 #endif
 	}
 	
-	void WordcodeEmitter::emitPushint(const byte *pc)
+	void WordcodeEmitter::emitPushint(const uint8_t *pc)
 	{
+		// FIXME: wrong for 64-bit, we want 32 bits of payload
 		pc++;
 		int32_t value = pool->cpool_int[AvmCore::readU30(pc)];
 		if ((value & 0xF0000000U) == 0xF0000000U || (value & 0xF0000000U) == 0) {
@@ -531,8 +532,9 @@ namespace avmplus
 		}
 	}
 
-	void WordcodeEmitter::emitPushuint(const byte *pc)
+	void WordcodeEmitter::emitPushuint(const uint8_t *pc)
 	{
+		// FIXME: wrong for 64-bit, we want 32 bits of payload
 		pc++;
 		uint32_t value = pool->cpool_uint[AvmCore::readU30(pc)];
 		if ((value & 0xF0000000U) == 0) {
@@ -559,16 +561,16 @@ namespace avmplus
 		}
 	}
 	
-	void WordcodeEmitter::emitLookupswitch(const byte *pc)
+	void WordcodeEmitter::emitLookupswitch(const uint8_t *pc)
 	{
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		// Avoid a lot of hair by flushing before LOOKUPSWITCH and not peepholing after.
 		peepFlush();
 #endif
-		const byte* base_pc = pc;
+		const uint8_t* base_pc = pc;
 		pc++;
 		uint32_t base_offset = uint32_t(buffer_offset + (dest - buffers->data));
-		int32_t default_offset = AvmCore::readS24(pc);
+		intptr_t default_offset = AvmCore::readS24(pc);
 		pc += 3;
 		uint32_t case_count = AvmCore::readU30(pc);
 		CHECK(3);
@@ -577,7 +579,7 @@ namespace avmplus
 		*dest++ = case_count;
 		
 		for ( uint32_t i=0 ; i <= case_count ; i++ ) {
-			int32_t offset = AvmCore::readS24(pc);
+			intptr_t offset = AvmCore::readS24(pc);
 			pc += 3;
 			CHECK(1);
 			emitRelativeOffset(base_offset, base_pc, offset);
@@ -595,7 +597,7 @@ namespace avmplus
 	// Continue translating from that address as if it were a linear part
 	// of the current code vector.  In other words, it's a forwarding pointer.
 	
-	void WordcodeEmitter::emitAbsJump(const byte *new_pc)
+	void WordcodeEmitter::emitAbsJump(const uint8_t *new_pc)
 	{
 		code_start = new_pc;
 		
@@ -614,7 +616,7 @@ namespace avmplus
 		computeExceptionFixups();
 	}
 	
-	uint32 WordcodeEmitter::epilogue(uint32** code_result)
+	uint32 WordcodeEmitter::epilogue(uintptr_t** code_result)
 	{
 		AvmAssert(backpatches == NULL);
 		AvmAssert(exception_fixes == NULL);
@@ -626,8 +628,8 @@ namespace avmplus
 		buffers->entries_used = uint32_t(dest - buffers->data);
 		uint32_t total_size = buffer_offset + buffers->entries_used;
 		
-		TranslatedCode* code_anchor = (TranslatedCode*)core->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uint32_t), GC::kZero);
-		uint32_t* code = code_anchor->data;
+		TranslatedCode* code_anchor = (TranslatedCode*)core->GetGC()->Alloc(sizeof(TranslatedCode) + (total_size - 1)*sizeof(uintptr_t), GC::kZero);
+		uintptr_t* code = code_anchor->data;
 		
 		// reverse the list of buffers
 		buffer_info* first = buffers;
@@ -642,9 +644,9 @@ namespace avmplus
 		buffers = first;
 		
 		// move the data
-		uint32_t* ptr = code;
+		uintptr_t* ptr = code;
 		while (first != NULL) {
-			memcpy(ptr, first->data, first->entries_used*sizeof(uint32_t));
+			memcpy(ptr, first->data, first->entries_used*sizeof(uintptr_t));
 			ptr += first->entries_used;
 			first = first->next;
 		}
@@ -853,8 +855,8 @@ namespace avmplus
 		
 		uint32_t i=0;
 		while (i < k) {
-			uint32_t op = S[i];
-			uint32_t width = calculateInstructionWidth(op);
+			uintptr_t op = S[i];
+			uintptr_t width = calculateInstructionWidth(op);
 			CHECK(width);
 			if (isJumpInstruction(op)) {
 				*dest++ = R[i++];
@@ -902,7 +904,7 @@ namespace avmplus
 				}
 			}
 			if (i-width >= new_words)
-				peep(op, dest-width);
+				peep((uint32_t)op, dest-width);
 		}
 		
 		return true;  // always
@@ -913,7 +915,7 @@ namespace avmplus
 		AvmAssert(isJumpInstruction(O[nextI - 1]));
 		AvmAssert(I[nextI - 1] + 2 == dest);
 		
-		uint32_t offset = I[nextI - 1][1];
+		uintptr_t offset = I[nextI - 1][1];
 		if (offset == 0x80000000U) {
 			// Forward branch, must find and nuke the backpatch
 			backpatch_info *b = backpatches;
@@ -938,7 +940,7 @@ namespace avmplus
 		}
 	}
 
-	void WordcodeEmitter::peep(uint32_t opcode, uint32_t* loc)
+	void WordcodeEmitter::peep(uint32_t opcode, uintptr_t* loc)
 	{
 		const peep_state_t *s;
 		uint32_t limit, next_state;
@@ -1078,7 +1080,7 @@ namespace avmplus
 	
  	void WordcodeEmitter::shiftBuffers(uint32_t shift) 
  	{
- 		for ( uint32_t i=0, limit=nextI-shift ; i < limit ; i++ ) {
+ 		for ( uintptr_t i=0, limit=nextI-shift ; i < limit ; i++ ) {
  			I[i] = I[i+shift];
  			O[i] = O[i+shift];
  		}

@@ -52,17 +52,21 @@ function nsieve(m, isPrime){
 }
 
 function sieve() {
+    var res;
     for (var i = 1; i <= 3; i++ ) {
         var m = (1<<i)*10000;
         var flags = Array(m+1);
-        nsieve(m, flags);
+        res=nsieve(m, flags);
     }
+    return res;
 }
 
-function runnsieve() {
-  var _sunSpiderStartDate = getTimer();
-  sieve();
-  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-  return _sunSpiderInterval;
+var start=new Date();
+var res=sieve();
+var totaltime=new Date()-start;
+print("sieve()="+res);
+if (res==7837) {
+   print("metric time "+totaltime);
+} else {
+   print("error sieve() expecting 7837 got "+res);
 }
-print("metric time "+runnsieve());

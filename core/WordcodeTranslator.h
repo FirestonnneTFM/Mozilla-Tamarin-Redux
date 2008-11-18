@@ -42,7 +42,7 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 
 #  ifdef AVMPLUS_DIRECT_THREADED
-#    define NEW_OPCODE(n)         ((uint32_t)opcode_labels[n])
+#    define NEW_OPCODE(n)         ((uintptr_t)opcode_labels[n])
 #  else
 #    ifdef _DEBUG
 #      define NEW_OPCODE(opcode)  ((opcode) | ((opcode) << 16))  // aids debugging
@@ -64,32 +64,32 @@ namespace avmplus
 
 		// Call before every instruction to handle exception range translation and
 		// fix up branches to this address
-		virtual void fixExceptionsAndLabels(const byte *pc) = 0;
+		virtual void fixExceptionsAndLabels(const uint8_t *pc) = 0;
 		
 		// Paste up the translated code and install it in info
-		virtual uint32 epilogue(uint32** code_result = NULL) = 0;
+		virtual uint32 epilogue(uintptr_t** code_result = NULL) = 0;
 		
 		// Handle specific instructions or instruction classes
-		virtual void emitOp0(const byte *pc, WordOpcode opcode) = 0;
+		virtual void emitOp0(const uint8_t *pc, WordOpcode opcode) = 0;
 		void emitOp0(WordOpcode opcode) { emitOp0(NULL, opcode); }
-		virtual void emitOp1(const byte *pc, WordOpcode opcode) = 0;
+		virtual void emitOp1(const uint8_t *pc, WordOpcode opcode) = 0;
 		virtual void emitOp1(WordOpcode opcode, uint32 operand) = 0;
-		virtual void emitOp2(const byte *pc, WordOpcode opcode) = 0;
+		virtual void emitOp2(const uint8_t *pc, WordOpcode opcode) = 0;
 		virtual void emitOp2(WordOpcode opcode, uint32 op1, uint32 op2) = 0;
 #ifdef DEBUGGER
-		virtual void emitDebug(const byte *pc) = 0;
+		virtual void emitDebug(const uint8_t *pc) = 0;
 #endif
-		virtual void emitRelativeJump(const byte *pc, WordOpcode opcode) = 0;
-		virtual void emitLookupswitch(const byte *pc) = 0;
-		virtual void emitLabel(const byte *pc) = 0;
-		virtual void emitPushbyte(const byte *pc) = 0;
-		virtual void emitPushshort(const byte *pc) = 0;
-		virtual void emitPushint(const byte *pc) = 0;
-		virtual void emitPushuint(const byte *pc) = 0;
-		virtual void emitGetscopeobject(const byte *pc) = 0;
+		virtual void emitRelativeJump(const uint8_t *pc, WordOpcode opcode) = 0;
+		virtual void emitLookupswitch(const uint8_t *pc) = 0;
+		virtual void emitLabel(const uint8_t *pc) = 0;
+		virtual void emitPushbyte(const uint8_t *pc) = 0;
+		virtual void emitPushshort(const uint8_t *pc) = 0;
+		virtual void emitPushint(const uint8_t *pc) = 0;
+		virtual void emitPushuint(const uint8_t *pc) = 0;
+		virtual void emitGetscopeobject(const uint8_t *pc) = 0;
 
 		// In this case, new_pc is the pc being jumped to
-		virtual void emitAbsJump(const byte *new_pc) = 0;
+		virtual void emitAbsJump(const uint8_t *new_pc) = 0;
 		
 #ifdef SUPERWORD_PROFILING
 		static void swprofStart();

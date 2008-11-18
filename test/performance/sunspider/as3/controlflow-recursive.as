@@ -23,9 +23,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 package {
-	
-	var _sunSpiderStartDate:int = getTimer();
-
 	// The Computer Language Shootout
 	// http://shootout.alioth.debian.org/
 	// contributed by Isaac Gouy
@@ -46,15 +43,34 @@ package {
 	    return tak(tak(x-1,y,z), tak(y-1,z,x), tak(z-1,x,y));
 	}
 
-	for ( var i:int = 3; i <= 5; i++ ) {
-	    ack(3,i);
-	    fib(17.0+i);
-	    tak(3*i+3,2*i+2,i+1);
-	}
+    var results:Array=new Array();
+    var start:Number=new Date();
+    for ( var i:int = 3; i <= 5; i++ ) {
+        results['ack'+i]=ack(3,i);
+        results['fib'+(17+i)]=fib(17.0+i);
+        results['tak'+i]=tak(3*i+3,2*i+2,i+1);
+    }
+    var totaltime:Number=new Date()-start;
 
+    var expectedresults:Array=new Array();
+    expectedresults['ack3']=61;
+    expectedresults['ack4']=125;
+    expectedresults['ack5']=253;
+    expectedresults['fib20']=10946;
+    expectedresults['fib21']=17711;
+    expectedresults['fib22']=28657;
+    expectedresults['tak3']=5;
+    expectedresults['tak4']=10;
+    expectedresults['tak5']=7;
 
-	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
-
-	print("metric time " + _sunSpiderInterval);
+    var msg:String="";
+    for (var a:String in results) {
+        if (expectedresults[a]!=results[a]) 
+            msg+=" test: "+a+" expected "+expectedresults[a]+" got "+results[a];
+    }
+    if (msg=="")
+        print("metric time "+totaltime);
+    else
+        print("error "+msg);
 
 }

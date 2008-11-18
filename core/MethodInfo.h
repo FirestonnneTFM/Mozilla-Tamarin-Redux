@@ -68,7 +68,7 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
 		struct 
 		{
-			const uint32 *body_pos; // NULL iff not yet translated
+			const uintptr_t *body_pos; // NULL iff not yet translated
 			DWB(GCObject*) code_anchor;  // The object that contains the code pointed to by body_pos
 			int max_stack;
 			int local_count;

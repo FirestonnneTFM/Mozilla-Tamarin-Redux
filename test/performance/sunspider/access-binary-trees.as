@@ -52,9 +52,6 @@ function bottomUpTree(item,depth){
    }
 }
 function runAccessBinaryTrees() {
-    var _sunSpiderStartDate = getTimer();
-    var ret;
-
     for ( var n = 4; n <= 7; n += 1 ) {
        var minDepth = 4;
        var maxDepth = Math.max(minDepth + 2, n);
@@ -73,14 +70,13 @@ function runAccessBinaryTrees() {
           }
        }
     }
-    ret = longLivedTree.itemCheck();
-    checkobj.longlived=ret;
-    checkobj.check=check;
-    var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-    return _sunSpiderInterval;
+    return check;
 }
-var time=runAccessBinaryTrees();
-if (checkobj.longlived==-1 && checkobj.check==-64)
-   print("metric time "+time);
-else
-   print("error: incorrect results running accessBinaryTrees longlived -1 != "+checkobj.longlived+" check -64 != "+checkobj.check);
+var start=new Date();
+var res=runAccessBinaryTrees();
+var totaltime=new Date()-start;
+if (res==-64) {
+   print("metric time "+totaltime);
+} else {
+   print("error binarytrees expecting -64 got "+res);
+}
