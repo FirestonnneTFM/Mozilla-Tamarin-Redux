@@ -3322,11 +3322,7 @@ namespace avmplus
 				int slot = int(op1);
 
 				AvmAssert(t->isResolved());
-#ifdef AVMPLUS_TRAITS_CACHE
 				const TraitsBindingsp tb = t->getTraitsBindings();
-#else
-				const Traitsp tb = t;
-#endif
 				int offset = tb->getSlotOffset(slot);
 				
 				OP *unoffsetPtr = ptr;

@@ -114,7 +114,6 @@ namespace avmplus
 		AvmCore* core = this->core();
 		name = name ? core->internString(name) : (Stringp)core->knull;
 
-#ifdef AVMPLUS_TRAITS_CACHE
 		Traitsp t = NULL;
 		switch (atomKind(thisAtom))
 		{
@@ -138,26 +137,6 @@ namespace avmplus
 				return false;
 		}
 		return t->getTraitsBindings()->findBinding(name, core->publicNamespace) != BIND_NONE;
-#else
-		switch (atomKind(thisAtom))
-		{
-		case kObjectType:
-		{
-			// ISSUE should this look in traits and dynamic vars, or just dynamic vars.
-			ScriptObject* obj = AvmCore::atomToScriptObject(thisAtom);
-			return obj->traits()->findBinding(name, core->publicNamespace) != BIND_NONE ||
-					 obj->hasStringProperty(name);
-		}
-		case kNamespaceType:
-		case kStringType:
-		case kBooleanType:
-		case kDoubleType:
-		case kIntegerType:
-			return toplevel()->toTraits(thisAtom)->findBinding(name, core->publicNamespace) != BIND_NONE;
-		default:
-			return false;
-		}
-#endif
 	}
 
 	bool ObjectClass::_propertyIsEnumerable(Atom thisAtom, Stringp name)

@@ -1808,11 +1808,7 @@ namespace avmplus
 		AvmAssert(isPointer((int)ptr_index)); // obj
 
 		AvmAssert(t->isResolved());
-#ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp tb = t->getTraitsBindings();
-#else
-		const Traitsp tb = t;
-#endif
 		int offset = tb->getSlotOffset(slot);
 		
 		if (t->pool->isBuiltin && !t->final)
@@ -1889,11 +1885,7 @@ namespace avmplus
 		}
 
 		AvmAssert(t->isResolved());
-#ifdef AVMPLUS_TRAITS_CACHE
 		const TraitsBindingsp tb = t->getTraitsBindings();
-#else
-		const Traitsp tb = t;
-#endif
 		int offset = tb->getSlotOffset(slot);
 		
 		LIns *unoffsetPtr = ptr;

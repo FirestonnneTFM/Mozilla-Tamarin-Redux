@@ -45,11 +45,7 @@ namespace avmplus
 	{
 	public:
 		TraitsIterator(Traits * _traits) :
-#ifdef AVMPLUS_TRAITS_CACHE
 			traits(_traits ? _traits->getTraitsBindings() : NULL),
-#else
-			traits(_traits),
-#endif
 			index(0)
 		{
 		}
@@ -82,21 +78,13 @@ namespace avmplus
 		Traits* currentTraits()
 		{
 			// this value changes as we walk up the traits chain
-#ifdef AVMPLUS_TRAITS_CACHE
 			if (traits) return traits->owner;
 			return NULL;
-#else
-			return traits;
-#endif
 		}
 
 	private:
 		// this is stack-allocated so we must not use DWB()
-#ifdef AVMPLUS_TRAITS_CACHE
 		TraitsBindingsp traits;
-#else
-		Traitsp traits;
-#endif
 		int index;
 	};
 }

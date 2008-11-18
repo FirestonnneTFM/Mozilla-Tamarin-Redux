@@ -2226,11 +2226,7 @@ namespace avmplus
 				env->nullcheck(lhs);
 				uintptr_t slot_id = U30ARG-1;
 				ScriptObject* o = AvmCore::atomToScriptObject(lhs);
-#ifdef AVMPLUS_TRAITS_CACHE
 				const TraitsBindingsp td = o->traits()->getTraitsBindings();
-#else
-				const Traitsp td = o->traits();
-#endif
 				o->setSlotAtom((uint32_t)slot_id, toplevel->coerce(rhs, td->getSlotTraits((uint32_t)slot_id)));
 				restore_dxns();
 				NEXT;
@@ -2260,11 +2256,7 @@ namespace avmplus
 				uintptr_t slot_id = U30ARG-1;
 				Atom op = sp[0];
 				sp--;
-#ifdef AVMPLUS_TRAITS_CACHE
 				const TraitsBindingsp td = global->traits()->getTraitsBindings();
-#else
-				const Traitsp td = global->traits();
-#endif
 				global->setSlotAtom((uint32_t)slot_id, toplevel->coerce(op, td->getSlotTraits((uint32_t)slot_id)));
 				restore_dxns();
 				NEXT;
@@ -2359,11 +2351,7 @@ namespace avmplus
 				// must be a real class instance for this to be used.  primitives that have
 				// methods will only have final bindings and no dispatch table.
 				VTable* vtable = toplevel->toVTable(atomv[0]); // includes null check
-#ifdef AVMPLUS_TRAITS_CACHE
 				AvmAssert(disp_id < vtable->traits->getTraitsBindings()->methodCount);
-#else
-				AvmAssert(disp_id < vtable->traits->methodCount);
-#endif
 				MethodEnv *f = vtable->methods[disp_id];
 				// ISSUE if arg types were checked in verifier, this coerces again.
 				Atom tempAtom = f->coerceEnter((int32_t)argc, atomv);

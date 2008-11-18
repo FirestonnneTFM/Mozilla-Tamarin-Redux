@@ -37,8 +37,6 @@
 
 #include "avmplus.h"
 
-#ifdef AVMPLUS_TRAITS_CACHE
-
 namespace avmplus
 {
 	using namespace MMgc;
@@ -150,4 +148,3 @@ namespace avmplus
 	#endif
 }
 
-#endif // #ifdef AVMPLUS_TRAITS_CACHE

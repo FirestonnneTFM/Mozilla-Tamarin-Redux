@@ -367,20 +367,9 @@
 #  endif
 #endif
 
-// enable caching of Traits binding and metadata information. By default, allow
-// unlimited cache size for bindings; this can be configured in AvmCore. A cache size
-// of 32 will give minimal performance impact but substantially lower memory use
-// for code with complex class hierarchies. (Unlimited cache size has performance impact
-// that is close to the noise level.) This should be removed soon (along with the old code)
-// but is left in temporarily for downstream consumers who may need to adjust their
-// code.
-#ifndef AVMPLUS_TRAITS_CACHE_DISABLE
-	#define AVMPLUS_TRAITS_CACHE
-#endif
-
 // this can be useful in tracking down memory usage for Traits and Traits-related caches,
 // but is very invasive and should only be used in special engineering builds. It should be
-// be left in place (but disabled) even after AVMPLUS_TRAITS_CACHE is finalized, as it's still in use...
+// be left in place (but disabled) for now, as it's still in use...
 // it will go away at some point in the not-too-distant future, however.
 //#define AVMPLUS_TRAITS_MEMTRACK
 

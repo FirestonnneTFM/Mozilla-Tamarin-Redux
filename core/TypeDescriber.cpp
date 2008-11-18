@@ -181,13 +181,8 @@ namespace avmplus
 			
 		AvmCore* core = m_toplevel->core();
 		GC* gc = core->GetGC();
-#ifdef AVMPLUS_TRAITS_CACHE
 		TraitsBindingsp tb = traits->getTraitsBindings();
 		TraitsMetadatap tm = traits->getTraitsMetadata();
-#else
-		Traitsp tb = traits;
-		Traitsp tm = traits;
-#endif
 
 		ScriptObject* o = new_object();
 
@@ -224,11 +219,7 @@ namespace avmplus
 			List<Traitsp> unique(gc);
 			for (Traitsp b = traits; b; b = b->base) 
 			{
-			#ifdef AVMPLUS_TRAITS_CACHE
 				TraitsBindingsp tbi = b->getTraitsBindings();
-			#else
-				Traitsp tbi = b;
-			#endif
 				for (uint32_t i = 0; i < tbi->interfaceCapacity; ++i)
 				{
 					Traitsp ti = tbi->getInterface(i);
@@ -267,11 +258,7 @@ namespace avmplus
 				Traitsp ti = tb->getInterface(i);
 				if (ti && ti->isInterface)
 				{
-			#ifdef AVMPLUS_TRAITS_CACHE
 					TraitsBindingsp tbi = ti->getTraitsBindings();
-			#else
-					Traitsp tbi = ti;
-			#endif
 					for (int32_t index = 0; (index = tbi->next(index)) != 0; )
 					{
 						Stringp name = tbi->keyAt(index);
@@ -291,11 +278,7 @@ namespace avmplus
 					// already did interfaces, don't need to do them again
 					if (ti && !ti->isInterface)
 					{
-				#ifdef AVMPLUS_TRAITS_CACHE
 						TraitsBindingsp tbi = ti->getTraitsBindings();
-				#else
-						Traitsp tbi = ti;
-				#endif
 						for (int32_t index = 0; (index = tbi->next(index)) != 0; )
 						{
 							Namespacep ns = tbi->nsAt(index);

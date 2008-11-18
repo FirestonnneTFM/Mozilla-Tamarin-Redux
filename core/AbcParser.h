@@ -91,11 +91,7 @@ namespace avmplus
 							Namespacep ns, 
 							Stringp name, 
 							AbstractFunction* script, 
-#ifdef AVMPLUS_TRAITS_CACHE
 							TraitsPosPtr traitsPos,
-#else
-							int interfaceDelta, 
-#endif
 							TraitsPosType posType, 
 							Namespacep protectedNamespace);
 		
@@ -190,12 +186,6 @@ namespace avmplus
 		}
 
 		uint32_t readU30(const byte*& p) const;
-
-#ifdef AVMPLUS_TRAITS_CACHE
-#else
-	private:
-		void addTraits(Hashtable *ht, Traits *traits, Traits *baseTraits);
-#endif
 
 	// ------------------------ DATA SECTION BEGIN
 	private:
