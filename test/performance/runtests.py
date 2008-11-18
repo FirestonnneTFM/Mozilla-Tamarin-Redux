@@ -696,6 +696,8 @@ for ast in tests:
                     else:
                         confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
                     config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
+                    if config.find("-memlimit")>-1:
+                        config=config[0:config.find("-memlimit")]
                     if globs['perfm']:  #send vprof results to db
                         #calc confidence and mean for each stat
                         def calcConf(list):
