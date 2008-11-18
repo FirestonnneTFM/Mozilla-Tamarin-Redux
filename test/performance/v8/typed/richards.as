@@ -123,7 +123,7 @@ package richards {
         
         public var queueCount:int;
         public var holdCount:int;
-        public var blocks:Array;
+        public var blocks:Vector.<TaskControlBlock>;
         public var list:TaskControlBlock;
         public var currentTcb:TaskControlBlock;
         public var currentId:int;
@@ -131,7 +131,7 @@ package richards {
         public function Scheduler() {
           this.queueCount = 0;
           this.holdCount = 0;
-          this.blocks = new Array(NUMBER_OF_IDS);
+          this.blocks = new Vector.<TaskControlBlock>(NUMBER_OF_IDS);
           this.list = null;
           this.currentTcb = null;
           this.currentId = null;
@@ -586,14 +586,14 @@ package richards {
         public var id:int;
         public var kind:int;
         public var a1:int;
-        public var a2:Array;
+        public var a2:Vector.<int>;
         
         public function Packet(link:Packet, id:int, kind:int):void {
             this.link = link;
             this.id = id;
             this.kind = kind;
             this.a1 = 0;
-            this.a2 = new Array(DATA_SIZE);
+            this.a2 = new Vector.<int>(DATA_SIZE);
         }
     
         /**
