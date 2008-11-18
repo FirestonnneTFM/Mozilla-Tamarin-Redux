@@ -583,8 +583,8 @@ namespace avmplus
 			env->lookup_cache = (MethodEnv::LookupCache*)env->core()->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code.cache_size, GC::kContainsPointers|GC::kZero);
 		}
 
-		const uint32_t* pos = info->word_code.body_pos;
-		const uint32_t* volatile code_start = pos;
+		const uintptr_t* pos = info->word_code.body_pos;
+		const uintptr_t* volatile code_start = pos;
 		int max_stack = info->word_code.max_stack;
 		int local_count = info->word_code.local_count;
 		int init_scope_depth = info->word_code.init_scope_depth;
@@ -718,7 +718,7 @@ namespace avmplus
 #endif
 
 #ifdef AVMPLUS_WORD_CODE
-		const uint32_t* pc = code_start;
+		const uintptr_t* pc = code_start;
 #else
 		const byte* pc = code_start;
 #endif
@@ -896,10 +896,10 @@ namespace avmplus
 #if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(debugline) {
 				SAVE_EXPC;
-				int line = U30ARG;
+				uintptr_t line = U30ARG;
 #  ifdef DEBUGGER
 				if (debugger)
-					debugger->debugLine(line);
+					debugger->debugLine((int32_t)line);
 #  else
 				(void)line;
 #  endif
@@ -922,10 +922,10 @@ namespace avmplus
 #if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
 			INSTR(debugfile) {
 				SAVE_EXPC;
-				int index = U30ARG;
+				uintptr_t index = U30ARG;
 #  ifdef DEBUGGER
 				if (debugger)
-					debugger->debugFile(pool->getString(index));
+					debugger->debugFile(pool->getString((int32_t)index));
 #  else
 				(void)index;
 #  endif
@@ -956,31 +956,31 @@ namespace avmplus
 			}
 
             INSTR(pushstring) {
-                *(++sp) = cpool_string[U30ARG]->atom();
+                *(++sp) = cpool_string[(uint32_t)U30ARG]->atom();
                 NEXT;
 			}
 
 #ifndef AVMPLUS_WORD_CODE
             INSTR(pushint) {
-                *(++sp) = core->intToAtom(cpool_int[U30ARG]);
+                *(++sp) = core->intToAtom(cpool_int[(uint32_t)U30ARG]);
                 NEXT;
 			}
 #endif
 					
 #ifndef AVMPLUS_WORD_CODE
             INSTR(pushuint) {
-                *(++sp) = core->uintToAtom(cpool_uint[U30ARG]);
+                *(++sp) = core->uintToAtom(cpool_uint[(uint32_t)U30ARG]);
                 NEXT;
 			}
 #endif
 					
             INSTR(pushdouble) {
-                *(++sp) = kDoubleType|(uintptr_t)cpool_double[U30ARG];
+                *(++sp) = kDoubleType|(uintptr_t)cpool_double[(uint32_t)U30ARG];
                 NEXT;
 			}
 
             INSTR(pushnamespace) {
-                *(++sp) = cpool_ns[U30ARG]->atom();
+                *(++sp) = cpool_ns[(uint32_t)U30ARG]->atom();
                 NEXT;
 			}
 
@@ -1572,10 +1572,10 @@ namespace avmplus
 				
 			INSTR(lookupswitch) {
 #ifdef AVMPLUS_WORD_CODE
-				const uint32_t* base = pc-1;
+				const uintptr_t* base = pc-1;
 				uint32_t index = AvmCore::integer_u(*(sp--));
-				uint32_t default_offset = S24ARG;
-				uint32_t case_count = U30ARG;
+				intptr_t default_offset = S24ARG;
+				uintptr_t case_count = U30ARG;
 				if (index <= case_count)
 					pc = base + pc[index];
 				else
@@ -1645,7 +1645,7 @@ namespace avmplus
 	if (result) \
 	{ \
 		if (offset < 0) \
-			core->branchCheck(env, interruptable, offset); \
+			core->branchCheck(env, interruptable, (int32_t)offset); \
 		pc += offset; \
 	} \
 	restore_dxns();
@@ -1701,7 +1701,7 @@ namespace avmplus
 		if (result) \
 		{ \
 			if (offset < 0) \
-				core->branchCheck(env, interruptable, offset); \
+				core->branchCheck(env, interruptable, (int32_t)offset); \
 			pc += offset; \
 		} \
 		restore_dxns()
@@ -1808,8 +1808,8 @@ namespace avmplus
 
             INSTR(newobject) {
 				SAVE_EXPC;
-                int32_t argc = U30ARG;
-                Atom tempAtom = env->op_newobject(sp, argc)->atom();
+                intptr_t argc = (intptr_t)U30ARG;
+                Atom tempAtom = env->op_newobject(sp, (int)argc)->atom();
                 *(sp -= 2*argc-1) = tempAtom;
 				restore_dxns();
                 NEXT;
@@ -1817,8 +1817,8 @@ namespace avmplus
 
             INSTR(newarray) {
 				SAVE_EXPC;
-                int32_t argc = U30ARG;
-                Atom tempAtom = toplevel->arrayClass->newarray(sp-argc+1, argc)->atom();
+                intptr_t argc = (intptr_t)U30ARG;
+                Atom tempAtom = toplevel->arrayClass->newarray(sp-argc+1, (int)argc)->atom();
                 *(sp -= argc-1) = tempAtom;
 				restore_dxns();
                 NEXT;
@@ -1840,7 +1840,7 @@ namespace avmplus
 // How will RTTI caching affect that?
 
 #ifdef AVMPLUS_WORD_CODE
-#  define GET_MULTINAME(name, arg)  do { uint32_t tmp=arg; name = pool->word_code.cpool_mn->multinames[tmp]; } while(0)
+#  define GET_MULTINAME(name, arg)  do { uintptr_t tmp=arg; name = pool->word_code.cpool_mn->multinames[tmp]; } while(0)
 #  define GET_MULTINAME_PTR(decl, arg)  const Multiname* decl = &pool->word_code.cpool_mn->multinames[arg]
 #else
 #  define GET_MULTINAME(name, arg)  do { uint32_t tmp=arg; pool->parseMultiname(name, tmp); } while(0)
@@ -2059,8 +2059,8 @@ namespace avmplus
 
 			INSTR(hasnext2) {
 				SAVE_EXPC;
-				int objectReg = U30ARG;
-				int indexReg  = U30ARG;
+				uintptr_t objectReg = U30ARG;
+				uintptr_t indexReg  = U30ARG;
 				Atom objAtom = framep[objectReg];
 				int index = core->integer(framep[indexReg]);
 				*(++sp) = env->hasnextproto(objAtom, index) ? trueAtom : falseAtom;
@@ -2224,14 +2224,14 @@ namespace avmplus
 				Atom rhs = sp[0];
 				sp -= 2;
 				env->nullcheck(lhs);
-				int slot_id = U30ARG-1;
+				uintptr_t slot_id = U30ARG-1;
 				ScriptObject* o = AvmCore::atomToScriptObject(lhs);
 #ifdef AVMPLUS_TRAITS_CACHE
 				const TraitsBindingsp td = o->traits()->getTraitsBindings();
 #else
 				const Traitsp td = o->traits();
 #endif
-				o->setSlotAtom(slot_id, toplevel->coerce(rhs, td->getSlotTraits(slot_id)));
+				o->setSlotAtom((uint32_t)slot_id, toplevel->coerce(rhs, td->getSlotTraits((uint32_t)slot_id)));
 				restore_dxns();
 				NEXT;
 			}
@@ -2241,7 +2241,7 @@ namespace avmplus
 				env->nullcheck(sp[0]);
 				// OPTIMIZEME - cleanup after ABC interpreter defenestration.
 				// Perform the -1 adjustment in the bytecode translator, not here every time.
-				sp[0] = AvmCore::atomToScriptObject(sp[0])->getSlotAtom(U30ARG-1);
+				sp[0] = AvmCore::atomToScriptObject(sp[0])->getSlotAtom((uint32_t)U30ARG-1);
 				restore_dxns();
 				NEXT;
 			}
@@ -2257,7 +2257,7 @@ namespace avmplus
 
 				// OPTIMIZEME - cleanup after ABC interpreter defenestration.
 				// Perform the -1 adjustment in the bytecode translator, not here every time.
-				int slot_id = U30ARG-1;
+				uintptr_t slot_id = U30ARG-1;
 				Atom op = sp[0];
 				sp--;
 #ifdef AVMPLUS_TRAITS_CACHE
@@ -2265,7 +2265,7 @@ namespace avmplus
 #else
 				const Traitsp td = global->traits();
 #endif
-				global->setSlotAtom(slot_id, toplevel->coerce(op, td->getSlotTraits(slot_id)));
+				global->setSlotAtom((uint32_t)slot_id, toplevel->coerce(op, td->getSlotTraits((uint32_t)slot_id)));
 				restore_dxns();
 				NEXT;
 			}
@@ -2282,7 +2282,7 @@ namespace avmplus
 				// OPTIMIZMEME - cleanup after ABC interpreter defenestration.
 				// Perform the -1 adjustment in the bytecode translator, not here every time.
 				sp++;
-				sp[0] = global->getSlotAtom(U30ARG-1);
+				sp[0] = global->getSlotAtom((uint32_t)U30ARG-1);
 				restore_dxns();
 				NEXT;
 			}
@@ -2292,10 +2292,10 @@ namespace avmplus
 	
 			INSTR(call) {
 				SAVE_EXPC;
-                int32_t argc = U30ARG;
+                intptr_t argc = U30ARG;
                 // stack in: function, receiver, arg1, ... argN
                 // stack out: result
-                Atom tempAtom = toplevel->op_call(sp[-argc-1]/*function*/, argc, sp-argc);
+                Atom tempAtom = toplevel->op_call(sp[-argc-1]/*function*/, (int32_t)argc, sp-argc);
                 *(sp = sp-argc-1) = tempAtom;
 				restore_dxns();
                 NEXT;
@@ -2303,10 +2303,10 @@ namespace avmplus
 
 			INSTR(construct) {
 				SAVE_EXPC;
-                int32_t argc = U30ARG;
+                intptr_t argc = U30ARG;
                 // stack in: function, arg1, ..., argN
                 // stack out: new instance
-                Atom tempAtom = toplevel->op_construct(sp[-argc]/*function*/, argc, sp-argc);				
+                Atom tempAtom = toplevel->op_construct(sp[-argc]/*function*/, (int32_t)argc, sp-argc);				
                 *(sp = sp-argc) = tempAtom;
 				restore_dxns();
                 NEXT;
@@ -2315,7 +2315,7 @@ namespace avmplus
             INSTR(newfunction) {
 				SAVE_EXPC;
 				sp++;
-				AbstractFunction *body = pool->getMethodInfo(U30ARG);
+				AbstractFunction *body = pool->getMethodInfo((uint32_t)U30ARG);
 				sp[0] = env->newfunction(body, scope, scopeBase)->atom();
 				restore_dxns();
                 NEXT;
@@ -2323,8 +2323,8 @@ namespace avmplus
 
             INSTR(newclass) {
 				SAVE_EXPC;
-				int class_index = U30ARG;
-				AbstractFunction *cinit = pool->cinits[class_index];
+				uintptr_t class_index = U30ARG;
+				AbstractFunction *cinit = pool->cinits[(uint32_t)class_index];
 				ClassClosure* base = (ClassClosure*)(~7&toplevel->coerce(sp[0], CLASS_TYPE));
 				sp[0] = env->newclass(cinit, base, scope, scopeBase)->atom();
 				restore_dxns();
@@ -2335,12 +2335,12 @@ namespace avmplus
 				SAVE_EXPC;
 				// stack in: receiver, arg1..N
 				// stack out: result
-				int method_id = U30ARG;
-				int32_t argc = U30ARG;
+				uintptr_t method_id = U30ARG;
+				intptr_t argc = (intptr_t)U30ARG;
 				env->nullcheck(sp[-argc]);
 				// ISSUE if arg types were checked in verifier, this coerces again.
-				MethodEnv* f = env->vtable->abcEnv->getMethod(method_id);
-				Atom tempAtom = f->coerceEnter(argc, sp-argc);
+				MethodEnv* f = env->vtable->abcEnv->getMethod((uint32_t)method_id);
+				Atom tempAtom = f->coerceEnter((int32_t)argc, sp-argc);
 				*(sp -= argc) = tempAtom;
 				restore_dxns();
 				NEXT;
@@ -2350,8 +2350,8 @@ namespace avmplus
 				SAVE_EXPC;
 				// stack in: receiver, arg1..N
 				// stack out: result
-				uint32_t disp_id = U30ARG-1;
-				int32_t argc = U30ARG;
+				uintptr_t disp_id = U30ARG-1;
+				intptr_t argc = (intptr_t)U30ARG;
 				// null check included in env->callmethod
 				//tempAtom = env->callmethod(disp_id, argc, sp-argc);
 				Atom* atomv = sp-argc;
@@ -2366,7 +2366,7 @@ namespace avmplus
 #endif
 				MethodEnv *f = vtable->methods[disp_id];
 				// ISSUE if arg types were checked in verifier, this coerces again.
-				Atom tempAtom = f->coerceEnter(argc, atomv);
+				Atom tempAtom = f->coerceEnter((int32_t)argc, atomv);
 
 				*(sp -= argc) = tempAtom;
 				restore_dxns();
@@ -2378,7 +2378,7 @@ namespace avmplus
 		/* ( obj [ns [name]] arg1..N -- result ) */ \
 		Multiname multiname;\
 		GET_MULTINAME(multiname, U30ARG);\
-		int32_t argc = U30ARG;\
+		intptr_t argc = (intptr_t)U30ARG;\
 		Atom base;\
 		Atom *atomv = sp - argc;\
 		sp = atomv; \
@@ -2386,7 +2386,7 @@ namespace avmplus
 			initMultiname(env, multiname, sp); \
 		base = *sp;\
 		atomv[0] = atomv0;\
-		*sp = toplevel->callproperty(base, &multiname, argc, atomv, toplevel->toVTable(base));\
+		*sp = toplevel->callproperty(base, &multiname, (int32_t)argc, atomv, toplevel->toVTable(base));\
 		restore_dxns();
 				
 			INSTR(callproperty) {
@@ -2410,11 +2410,11 @@ namespace avmplus
 				// stack in: obj [ns [name]] arg1..N
 				// stack out: result
 				GET_MULTINAME_PTR(multiname, U30ARG);
-				int32_t argc = U30ARG;
+				intptr_t argc = (intptr_t)U30ARG;
 				if (!multiname->isRuntime())
 				{
 					// np check in toVTable
-					Atom tempAtom = toplevel->constructprop(multiname, argc, sp-argc, toplevel->toVTable(sp[-argc]));
+					Atom tempAtom = toplevel->constructprop(multiname, (int32_t)argc, sp-argc, toplevel->toVTable(sp[-argc]));
 					*(sp -= argc) = tempAtom;
 				}
 				else
@@ -2424,7 +2424,7 @@ namespace avmplus
 					Multiname multiname2 = *multiname;
 					initMultiname(env, multiname2, sp);
 					atomv[0] = *sp;
-					*sp = toplevel->constructprop(&multiname2, argc, atomv, toplevel->toVTable(atomv[0]));
+					*sp = toplevel->constructprop(&multiname2, (int32_t)argc, atomv, toplevel->toVTable(atomv[0]));
 				}
 				restore_dxns();
 				NEXT;
@@ -2432,10 +2432,10 @@ namespace avmplus
 
 			INSTR(applytype) {
 				SAVE_EXPC;
-				int32_t argc = U30ARG;
+				intptr_t argc = (intptr_t)U30ARG;
 				// stack in: factory, arg1, ... argN
 				// stack out: result
-				Atom tempAtom = toplevel->op_applytype(sp[-argc]/*function*/, argc, sp-argc+1);				
+				Atom tempAtom = toplevel->op_applytype(sp[-argc]/*function*/, (int32_t)argc, sp-argc+1);				
 				*(sp = sp-argc) = tempAtom;
 				restore_dxns();
 				NEXT;
@@ -2446,11 +2446,11 @@ namespace avmplus
 		/* ( obj [ns [name]] arg1..N -- ) */ \
 		Multiname name; \
 		GET_MULTINAME(name, U30ARG); \
-		int32_t argc = U30ARG; \
+		intptr_t argc = (intptr_t)U30ARG; \
 		if (!name.isRuntime()) \
 		{ \
 			env->nullcheck(sp[-argc]); \
-			Atom tempAtom = env->callsuper(&name, argc, sp-argc); \
+			Atom tempAtom = env->callsuper(&name, (int32_t)argc, sp-argc); \
 			*(sp -= argc) = tempAtom; \
 		} \
 		else \
@@ -2460,7 +2460,7 @@ namespace avmplus
 			initMultiname(env, name, sp); \
 			atomv[0] = *sp; \
 			env->nullcheck(atomv[0]); \
-			*sp = env->callsuper(&name, argc, atomv); \
+			*sp = env->callsuper(&name, (int32_t)argc, atomv); \
 		}\
 		restore_dxns()
 
@@ -2524,9 +2524,9 @@ namespace avmplus
 				SAVE_EXPC;
 				// stack in:  obj arg1..N
 				// stack out: 
-				int32_t argc = U30ARG;
+				intptr_t argc = (intptr_t)U30ARG;
 				env->nullcheck(sp[-argc]);
-				env->vtable->base->init->coerceEnter(argc, sp-argc);
+				env->vtable->base->init->coerceEnter((int32_t)argc, sp-argc);
 				sp -= argc+1;
 				restore_dxns();
 				NEXT;
@@ -2616,14 +2616,14 @@ namespace avmplus
 #endif
 
             INSTR(getscopeobject) {
-				int scope_index = U8ARG;
-				*(++sp) = scopeBase[scope_index];
+				uintptr_t scope_index = U8ARG;
+				*(++sp) = scopeBase[(uint32_t)scope_index];
 				NEXT;
 			}
 
             INSTR(getouterscope) {
-                int scope_index = U30ARG;
-				*(++sp) = scope->getScope(scope_index);
+                uintptr_t scope_index = U30ARG;
+				*(++sp) = scope->getScope((uint32_t)scope_index);
                 NEXT;
             }
 
@@ -2665,7 +2665,7 @@ namespace avmplus
 
             INSTR(newcatch) {
 				SAVE_EXPC;
-				int catch_index = U30ARG;
+				uintptr_t catch_index = U30ARG;
 #ifdef AVMPLUS_WORD_CODE
 				Traits *t = info->word_code.exceptions->exceptions[catch_index].scopeTraits;
 #else
@@ -2746,7 +2746,7 @@ namespace avmplus
 
 			INSTR(dxns) {
 				SAVE_EXPC;
-				dxns = core->newPublicNamespace(cpool_string[U30ARG]);
+				dxns = core->newPublicNamespace(cpool_string[(uint32_t)U30ARG]);
 				restore_dxns();
 				NEXT;
 			}
@@ -2809,14 +2809,16 @@ namespace avmplus
 
 			// OPTIMIZEME - push_doublebits should probably not cons up a new atom every time,
 			// it would be better to keep it in the constant pool.
+			//
+			// OPTIMIZEME - on 64-bit systems we don't need two operand words here
 
 			INSTR(push_doublebits) {
 				volatile union {
 					double d;
 					uint32_t bits[2];
 				} u;
-				u.bits[0] = *pc++;
-				u.bits[1] = *pc++;
+				u.bits[0] = (uint32_t)*pc++;
+				u.bits[1] = (uint32_t)*pc++;
 				*++sp = core->doubleToAtom(u.d);
 				NEXT;
 			}
@@ -2827,14 +2829,14 @@ namespace avmplus
 			// driven peephole optimizer, see comments and code in core/WordcodeTranslator.cpp.
 
 			INSTR(get2locals) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				*(++sp) = framep[regs & 65535];
 				*(++sp) = framep[regs >> 16];
 				NEXT;
 			}
 					
 			INSTR(get3locals) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				*(++sp) = framep[regs & 1023];
 				regs >>= 10;
 				*(++sp) = framep[regs & 1023];
@@ -2843,7 +2845,7 @@ namespace avmplus
 			}
 					
 			INSTR(get4locals) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				*(++sp) = framep[regs & 255];
 				regs >>= 8;
 				*(++sp) = framep[regs & 255];
@@ -2854,7 +2856,7 @@ namespace avmplus
 			}
 					
 			INSTR(get5locals) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				*(++sp) = framep[regs & 63];
 				regs >>= 6;
 				*(++sp) = framep[regs & 63];
@@ -2872,7 +2874,7 @@ namespace avmplus
 			}
 					
 			INSTR(add_ll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2880,7 +2882,7 @@ namespace avmplus
 			}
 					
 			INSTR(add_set_lll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 1023];
 				regs >>= 10;
 				Atom rhs=framep[regs & 1023];
@@ -2888,7 +2890,7 @@ namespace avmplus
 			}
 					
 			INSTR(subtract_ll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2896,7 +2898,7 @@ namespace avmplus
 			}
 					
 			INSTR(multiply_ll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2904,7 +2906,7 @@ namespace avmplus
 			}
 					
 			INSTR(divide_ll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2912,7 +2914,7 @@ namespace avmplus
 			}
 					
 			INSTR(modulo_ll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2920,7 +2922,7 @@ namespace avmplus
 			}
 					
 			INSTR(bitand_ll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2928,7 +2930,7 @@ namespace avmplus
 			}
 					
 			INSTR(bitor_ll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2936,7 +2938,7 @@ namespace avmplus
 			}
 					
 			INSTR(bitxor_ll) {
-				uint32_t regs = *pc++;
+				uintptr_t regs = *pc++;
 				Atom lhs=framep[regs & 65535];
 				Atom rhs=framep[regs >> 16];
 				++sp;
@@ -2998,8 +3000,8 @@ namespace avmplus
 					
 #define IFCMP_LL2(numeric_cmp, generic_cmp) \
 		SAVE_EXPC; \
-		int32_t offset = (int32_t)*pc++; \
-		uint32_t regs = *pc++; \
+		intptr_t offset = (intptr_t)*pc++; \
+		uintptr_t regs = *pc++; \
 		Atom lhs = framep[regs & 65535]; \
 		Atom rhs = framep[regs >> 16]; \
 		IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, lhs, rhs, offset)
@@ -3048,8 +3050,8 @@ namespace avmplus
 					
 #define IFEQ_LL2(intcmp, comparator, truish) \
 	SAVE_EXPC; \
-	int32_t offset = (int32_t)*pc++; \
-	uint32_t regs = *pc++; \
+	intptr_t offset = (intptr_t)*pc++; \
+	uintptr_t regs = *pc++; \
 	Atom lhs = framep[regs & 65535]; \
 	Atom rhs = framep[regs >> 16]; \
 	IFEQ_TWO_VALUES(intcmp, comparator, truish, lhs, rhs, offset);
@@ -3163,8 +3165,8 @@ namespace avmplus
 #  endif // AVMPLUS_PEEPHOLE_OPTIMIZER
 					
 			INSTR(findpropglobal) {
-				uint32_t multiname_index = *pc++;
-				uint32_t cache_slot = *pc++;
+				uintptr_t multiname_index = *pc++;
+				uintptr_t cache_slot = *pc++;
 				if (core->lookupCacheIsValid(env->lookup_cache[cache_slot].timestamp)) {
 					*(++sp) = env->lookup_cache[cache_slot].object->atom();
 					NEXT;
@@ -3186,8 +3188,8 @@ namespace avmplus
 			}
 					
 			INSTR(findpropglobalstrict) {
-				uint32_t multiname_index = *pc++;
-				uint32_t cache_slot = *pc++;
+				uintptr_t multiname_index = *pc++;
+				uintptr_t cache_slot = *pc++;
 				if (core->lookupCacheIsValid(env->lookup_cache[cache_slot].timestamp)) {
 					*(++sp) = env->lookup_cache[cache_slot].object->atom();
 					NEXT;
