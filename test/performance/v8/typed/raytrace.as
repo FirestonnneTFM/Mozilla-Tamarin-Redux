@@ -269,9 +269,9 @@ public class Ray {
 
 public class Scene {
     public var camera:Camera
-    public var shapes:Array = [];
-    public var lights:Array = [];
-    public var background:Background
+    public var shapes:Vector.<Shape>;
+    public var lights:Vector.<Light>;
+    public var background:Background;
 
     public function Scene ():void {
         this.camera = new Camera(
@@ -279,8 +279,8 @@ public class Scene {
             new RVector(0,0,1),
             new RVector(0,1,0)
         );
-        this.shapes = new Array();
-        this.lights = new Array();
+        this.shapes = new Vector.<Shape>();
+        this.lights = new Vector.<Light>();
         this.background = new Background(new Color(0,0,0.5), 0.2);
     }
 }
