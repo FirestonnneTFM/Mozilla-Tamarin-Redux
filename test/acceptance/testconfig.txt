@@ -61,13 +61,8 @@ as3/sampling/Callback: , (x86|ppc)-mac-tvm-debugdebugger , skip,  https://bugzil
 ecma3/Exceptions/number_00[12]_rt: , x86-lnx-tvm-debugdebugger  , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=457903
 
 
-e4x/Regress/b121219: ,   .*lnx-tvm-release   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=450347
-e4x/Regress/b121219: ,   .*lnx-tvm-releasedebugger   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=450347
-as3/RuntimeErrors/Error1115NotAConstructor:.* , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-es4/vector/nonindexproperty:index -6.* , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-e4x/Expressions/e11_1_1:.* , x86-lnx-tvm-release.*-Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456853
-e4x/QName/e13_3_2:.*       , x86-lnx-tvm-release.*-Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456853
-e4x/Regress/b121219:.*      , x86-lnx-tvm-release.*-Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456853
+as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+es4/vector/nonindexproperty:index -6.*          , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
 # full run for windows mobile - Dell Axim
 mops/.*                                                          ,   .*winmobile-tvm.*              ,  skip           ,   remote proxy does not have access to additional abc files
