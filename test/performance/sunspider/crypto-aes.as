@@ -282,14 +282,17 @@ function AESDecryptCtr(ciphertext, password, nBits) {
     ciphertext[b] = unescCtrlChars(ciphertext[b]);
 
     var pt = '';
+    var a=[]
     for (var i=0; i<ciphertext[b].length; i++) {
       // -- xor plaintext with ciphered counter byte-by-byte --
       var ciphertextByte = ciphertext[b].charCodeAt(i);
+      a.push(ciphertextByte);
       var plaintextByte = ciphertextByte ^ cipherCntr[i];
+      
       pt += String.fromCharCode(plaintextByte);
     }
     // pt is now plaintext for this block
-
+print(a);
     plaintext[b-1] = pt;  // b-1 'cos no initial nonce block in plaintext
   }
 

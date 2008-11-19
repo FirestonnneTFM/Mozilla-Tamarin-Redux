@@ -23,7 +23,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 package {
-	var _sunSpiderStartDate:int = getTimer();
+	var _sunSpiderStartDate:int = (new Date).getTime();
 
 	// The Computer Language Shootout
 	// http://shootout.alioth.debian.org/
@@ -1739,7 +1739,7 @@ package {
 	 // search string, replacement string, flags
 
 
-	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
+	var _sunSpiderInterval:Number = (new Date).getTime() - _sunSpiderStartDate;
 
 	print("metric time " + _sunSpiderInterval);
 

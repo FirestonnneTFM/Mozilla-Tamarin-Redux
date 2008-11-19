@@ -344,17 +344,30 @@ function Init(CubeSize) {
   for (; i < 9; i++) {
     Q[i].V = VMulti(MTrans, Q[i].V);
   }
+    
+    
   DrawQube();
   Testing.Init = true;
   Loop();
+
 }
 function run3dcube() {
-  var _sunSpiderStartDate = getTimer();
+  var _sunSpiderStartDate = (new Date).getTime();
 
   for ( var i = 20; i <= 160; i *= 2 ) {
     Init(i);
   }
-
+  
+  var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  
+  // verify test results
+  var expectedResults = [250.49814997925202, 308.02382919560387, -184.27577256519325];
+  for (i=0; i<3; i++) {
+    if (Q[5].V[i] !== expectedResults[i]) {
+        print("Test validation failed.  Q[5].V["+i+"]: Expected: "+expectedResults[i]+" Got: "+Q[5].V[i]);
+    }
+  }
+  
   Q = null;
   MTrans = null;
   MQube = null;
@@ -363,10 +376,10 @@ function run3dcube() {
   Testing = null;
   LoopTime = null;
   DisplArea = null;
-
-
-  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-  return _sunSpiderInterval;
+  
+  print("metric time "+_sunSpiderInterval);
 }
 // main
-print("metric time "+run3dcube());
+
+
+run3dcube();

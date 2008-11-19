@@ -41,7 +41,7 @@ function morph(a, f) {
 
     
 function run3dmorph() {
-    var _sunSpiderStartDate = getTimer();
+    var _sunSpiderStartDate = (new Date).getTime();
     var a = Array()
     for (var i=0; i < nx*nz*3; ++i) 
        a[i] = 0
@@ -54,7 +54,13 @@ function run3dmorph() {
     for (var i = 0; i < nx; i++)
         testOutput += a[3*(i*nx+i)+1];
     a = null;
-    var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-    return _sunSpiderInterval;
+    var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+    // verify test result
+    if (testOutput !== 6.750155989720952e-14) {
+      print("Test validation failed.  Expected 6.750155989720952e-14 Got: "+testOutput);
+    } else {
+      print("metric time "+ _sunSpiderInterval);
+    }
 }
-print("metric time "+run3dmorph());
+
+run3dmorph();
