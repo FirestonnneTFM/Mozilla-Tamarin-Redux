@@ -262,14 +262,15 @@ function makeTagCloud(tagInfo)
 }
 
 function runStringTagcloud() {
-var _sunSpiderStartDate = getTimer();
-
-var tagcloud = makeTagCloud(tagInfo);
-tagInfo = null;
-
-
-var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-
-return(_sunSpiderInterval);
+    var _sunSpiderStartDate = (new Date).getTime();
+    
+    var tagcloud = makeTagCloud(tagInfo);
+    tagInfo = null;
+    trace(tagcloud);
+    
+    
+    var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+    
+    return(_sunSpiderInterval);
 }
 print("metric time "+runStringTagcloud());

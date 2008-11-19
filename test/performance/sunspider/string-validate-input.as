@@ -112,9 +112,15 @@ function addResult(r)
 }
 
 function runStringValidateInput() {
-var _sunSpiderStartDate = getTimer();
-doTest();
-var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-return(_sunSpiderInterval);
+    var _sunSpiderStartDate = (new Date).getTime();
+    doTest();
+    var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+    // verify test output - nothing concrete to verify, so make sure output length is correct.
+    if (endResult.length != 462000) {
+        print('Test verification failed.  Expected: 462000 Got: '+endResult.length);
+    } else {
+        print("metric time "+_sunSpiderInterval);
+    }
 }
-print("metric time "+runStringValidateInput());
+
+runStringValidateInput();

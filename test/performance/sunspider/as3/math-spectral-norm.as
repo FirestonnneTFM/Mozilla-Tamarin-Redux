@@ -29,62 +29,73 @@
 //
 // contributed by Ian Osgood
 package {
-	function Asn(i:int,j:int):Number {
-	  return 1/((i+j)*(i+j+1)/2+i+1);
-	}
+  function Asn(i:int,j:int):Number {
+    return 1/((i+j)*(i+j+1)/2+i+1);
+  }
 
-	function Au(u:Array, v:Array):void {
-	  for (var i:int=0; i<u.length; ++i) {
-	    var t:Number = 0;
-	    for (var j:int=0; j<u.length; ++j)
-	      t += Asn(i,j) * u[j];
-	    v[i] = t;
-	  }
-	}
+  function Au(u:Array, v:Array):void {
+    for (var i:int=0; i<u.length; ++i) {
+      var t:Number = 0;
+      for (var j:int=0; j<u.length; ++j)
+        t += Asn(i,j) * u[j];
+      v[i] = t;
+    }
+  }
 
-	function Atu(u:Array, v:Array):void {
-	  for (var i:int=0; i<u.length; ++i) {
-	    var t:Number = 0;
-	    for (var j:int=0; j<u.length; ++j)
-	      t += Asn(j,i) * u[j];
-	    v[i] = t;
-	  }
-	}
+  function Atu(u:Array, v:Array):void {
+    for (var i:int=0; i<u.length; ++i) {
+      var t:Number = 0;
+      for (var j:int=0; j<u.length; ++j)
+        t += Asn(j,i) * u[j];
+      v[i] = t;
+    }
+  }
 
-	function AtAu(u:Array, v:Array, w:Array):void {
-	  Au(u,w);
-	  Atu(w,v);
-	}
+  function AtAu(u:Array, v:Array, w:Array):void {
+    Au(u,w);
+    Atu(w,v);
+  }
 
-	function spectralnorm(n:int):Number {
-	  var i:int;
-	  var u:Array = new Array(n);
-	  var v:Array = new Array(n);
-	  var w:Array = new Array(n);
-	  var vv:Number=0, vBv:Number=0;
-	  for (i=0; i<n; ++i) {
-	    u[i] = 1; v[i] = w[i] = 0;
-	  }
-	  for (i=0; i<10; ++i) {
-	    AtAu(u,v,w);
-	    AtAu(v,u,w);
-	  }
-	  for (i=0; i<n; ++i) {
-	    vBv += u[i]*v[i];
-	    vv  += v[i]*v[i];
-	  }
-	  return Math.sqrt(vBv/vv);
-	}
+  function spectralnorm(n:int):Number {
+    var i:int;
+    var u:Array = new Array(n);
+    var v:Array = new Array(n);
+    var w:Array = new Array(n);
+    var vv:Number=0, vBv:Number=0;
+    for (i=0; i<n; ++i) {
+      u[i] = 1; v[i] = w[i] = 0;
+    }
+    for (i=0; i<10; ++i) {
+      AtAu(u,v,w);
+      AtAu(v,u,w);
+    }
+    for (i=0; i<n; ++i) {
+      vBv += u[i]*v[i];
+      vv  += v[i]*v[i];
+    }
+    return Math.sqrt(vBv/vv);
+  }
 
-	function runMathSpectralNorm():int {
-	var _sunSpiderStartDate:int = getTimer();
-	  for (var i:int = 6; i <= 48; i *= 2) {
-	    spectralnorm(i);
-	  }
-	  var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-	  return _sunSpiderInterval;
-	}
+  function runMathSpectralNorm():int {
+  var _sunSpiderStartDate:int = (new Date).getTime();
+    for (var i:int = 6; i <= 48; i *= 2) {
+      spectralnorm(i);
+    }
+    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    return _sunSpiderInterval;
+  }
+  
+  function verifyTest():Boolean {
+    var result:Number = spectralnorm(10);
+    var expectedResult:Number = 1.2718440192507248;
+    if (result !== expectedResult) {
+      print('Test verification failed. spectralnorm(10):  Expected: '+expectedResult+' Got: '+result);
+      return false;
+    }
+    return true;
+  }
 
-	print("metric time " + runMathSpectralNorm());
-
+  if (verifyTest()) {
+    print("metric time " + runMathSpectralNorm());
+  }
 }

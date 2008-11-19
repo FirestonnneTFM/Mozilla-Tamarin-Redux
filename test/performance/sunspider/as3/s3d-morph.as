@@ -23,41 +23,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 package {
-	var loops:int = 15
-	var nx:int = 120
-	var nz:int = 120
+  var loops:int = 15
+  var nx:int = 120
+  var nz:int = 120
 
-	function morph(a:Array, f:Number):void {
-	    var PI2nx:Number = Math.PI * 8/nx
-	    //var sin:Function = Math.sin
-	    var f30:Number = -(50 * Math.sin(f*Math.PI*2))
-	    
-	    for (var i:int = 0; i < nz; ++i) {
-	        for (var j:int = 0; j < nx; ++j) {
-	            a[3*(i*nx+j)+1]    = Math.sin((j-1) * PI2nx ) * -f30
-	        }
-	    }
-	}
+  function morph(a:Array, f:Number):void {
+      var PI2nx:Number = Math.PI * 8/nx
+      //var sin:Function = Math.sin
+      var f30:Number = -(50 * Math.sin(f*Math.PI*2))
+      
+      for (var i:int = 0; i < nz; ++i) {
+          for (var j:int = 0; j < nx; ++j) {
+              a[3*(i*nx+j)+1]    = Math.sin((j-1) * PI2nx ) * -f30
+          }
+      }
+  }
 
-	function run3dMorph():int {    
-		var _sunSpiderStartDate:int = getTimer();
+  function run3dMorph():int {    
+    var _sunSpiderStartDate:int = (new Date).getTime();
 
-		var a:Array = new Array(nx*nz*3);
-		for (var i:int=0; i < nx*nz*3; ++i) 
-		    a[i] = 0
+    var a:Array = new Array(nx*nz*3);
+    for (var i:int=0; i < nx*nz*3; ++i) 
+        a[i] = 0
 
-		for (var i:int = 0; i < loops; ++i) {
-		    morph(a, i/loops)
-		}
+    for (var i:int = 0; i < loops; ++i) {
+        morph(a, i/loops)
+    }
 
-		var testOutput:Number = 0;
-		for (var i:int = 0; i < nx; i++)
-		    testOutput += a[3*(i*nx+i)+1];
-		a = null;
-		var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
-		return _sunSpiderInterval;
-	}
+    var testOutput:Number = 0;
+    for (var i:int = 0; i < nx; i++)
+        testOutput += a[3*(i*nx+i)+1];
+    a = null;
+    var _sunSpiderInterval:Number = (new Date).getTime() - _sunSpiderStartDate;
+    
+    // verify test result
+    if (testOutput !== 6.750155989720952e-14) {
+      print("Test validation failed.  Expected 6.750155989720952e-14 Got: "+testOutput);
+    } else {
+      print("metric time "+ _sunSpiderInterval);
+    }
+  }
 
-	print("metric time " + run3dMorph());
+run3dMorph();
 
 }
