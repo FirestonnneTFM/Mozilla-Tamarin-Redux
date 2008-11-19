@@ -350,9 +350,6 @@ namespace MMgc
 		}
 
 #ifdef _DEBUG
-		// this doens't hurt performance too much so alway leave it on in DEBUG builds
-		// before sweeping we check for missing write barriers
-		incrementalValidation = true;
 #ifdef WIN32
 		m_gcThread = GetCurrentThreadId();
 #endif
