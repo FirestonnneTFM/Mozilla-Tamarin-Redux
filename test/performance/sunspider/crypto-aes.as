@@ -282,17 +282,13 @@ function AESDecryptCtr(ciphertext, password, nBits) {
     ciphertext[b] = unescCtrlChars(ciphertext[b]);
 
     var pt = '';
-    var a=[]
     for (var i=0; i<ciphertext[b].length; i++) {
       // -- xor plaintext with ciphered counter byte-by-byte --
       var ciphertextByte = ciphertext[b].charCodeAt(i);
-      a.push(ciphertextByte);
       var plaintextByte = ciphertextByte ^ cipherCntr[i];
-      
       pt += String.fromCharCode(plaintextByte);
     }
     // pt is now plaintext for this block
-print(a);
     plaintext[b-1] = pt;  // b-1 'cos no initial nonce block in plaintext
   }
 
@@ -300,7 +296,42 @@ print(a);
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
+// Due to bug 464773 (465816) the esc/unesc functions have been replaced
+function escCtrlChars(str) {  // escape control chars which might cause problems handling ciphertext
+  var s = "";
+  for ( var i=0 ; i < str.length ; i++ ) {
+    var c = str.charAt(i);
+    if (c == "\0" || c == "\t" || c == "\n" || c == "\v" || c == "\f" || c == "\r" || c == "\xA0" || c == "'" || c == "\"" || c == "!" || c == "-")
+        s += "!" + c.charCodeAt(0) + "!";
+    else
+        s += c;
+  }
+  return s;
+}
 
+function unescCtrlChars(str) {  // unescape potentially problematic control characters
+  var s = "";
+  var c;
+  var i = 0;
+  while (i < str.length) {
+    if (str.charAt(i) == "!") {
+       i++;
+       var j = i;
+       while (i < str.length && (c = str.charAt(i)) >= "0" && c <= "9")
+           i++;
+       if (i < str.length && str.charAt(i) == "!") {
+           s += String.fromCharCode(parseInt(str.substring(j,i)));
+           i++;
+           continue;
+       }
+       i = j-1;
+    }
+    s += str.charAt(i++);
+  }
+  return s;
+}
+
+/*
 function escCtrlChars(str) {  // escape control chars which might cause problems handling ciphertext
   return str.replace(/[\0\t\n\v\f\r\xa0'"!-]/g, function(c) { return '!' + c.charCodeAt(0) + '!'; });
 }  // \xa0 to cater for bug in Firefox; include '-' to leave it free for use as a block marker
@@ -308,6 +339,7 @@ function escCtrlChars(str) {  // escape control chars which might cause problems
 function unescCtrlChars(str) {  // unescape potentially problematic control characters
   return str.replace(/!\d\d?\d?!/g, function(c) { return String.fromCharCode(c.slice(1,-1)); });
 }
+*/
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
 /*
