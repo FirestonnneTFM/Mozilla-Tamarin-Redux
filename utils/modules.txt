@@ -43,6 +43,9 @@ crt LIBCMT: *
 crt Dll:: *
 crt _E32Dll *
 crt __cpp *
+crt mmtimer: *
+crt coredll: *
+crt corelibc: *
 
 mmgc mmgc: *
 mmgc avmplus:GC *
@@ -146,6 +149,7 @@ regexp set_bit
 regexp adjust_recurse
 regexp read_repeat_counts
 
+zlib zlib-arm: *
 zlib zlib:deflate.obj
 zlib zlib:inflate.obj
 zlib zlib:trees.obj
@@ -187,6 +191,7 @@ vm	avmplus:MethodEnv.obj
 vm avmplus:Toplevel.obj
 vm avmplus:PoolObject.obj
 vm avmplus:Traits.obj
+vm avmplus:Translator.obj
 vm avmplus:AbstractFunction.obj
 vm avmplus:PrintWriter.obj
 vm avmplus:Multiname.obj
