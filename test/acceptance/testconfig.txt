@@ -49,10 +49,12 @@ util/shell_ats, .*, skip, shell file for ats media creation
 ecma3/GlobalObject/e15_1_2_2_2:parseInt\("123456789012345678"\)   ,   .*lnx-tvm-(release|releasedebugger).*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 ecma3/TypeConversion/e9_3_1_3_rt:parseInt\("123456789012345678"\) ,   .*lnx-tvm-(release|releasedebugger).*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 
+# bug #459851:  windows mobile System.privateBytes and -memstats privateBytes always returns 0
+as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile-tvm.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
+
+
 # windows 64 sampling api crashes bug 455062
 as3/sampling/.*: , x86-win64-tvm-.*debugger , skip       , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455062
-# sampling api: mac debug debugger assertion failed bug 457266 , intermittent failure set to skip
-as3/sampling/ProcessSampling: , .*(win|lnx|mac)-tvm-debugdebugger , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=457266
 # sampling api: windows debug debugger assertion fails crashes: bug 457311
 as3/sampling/Callback: , x86-win-tvm-debugdebugger , skip , bug https://bugzilla.mozilla.org/show_bug.cgi?id=457311
 # sampling api: mac 10.5 debug debugger assertion fails: bug 462354
@@ -88,3 +90,6 @@ ecma3/Exceptions/string_002_rt,       .*-lnx-tvm-debugdebugger    ,   skip , htt
 # [redux] over(?)zealous debug mode in MMgc
 ecma3/Statements/eregress_74474_002,  x86-win-tvm-debugdebugger   ,   skip , https://bugzilla.mozilla.org/show_bug.cgi?id=463412
 
+
+# bug 458419: hasAtomProperty should not throw an exception but return false, add testcases for regression to acceptance test suite 
+es4/vector/in   ,  .*  ,   expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=458419
