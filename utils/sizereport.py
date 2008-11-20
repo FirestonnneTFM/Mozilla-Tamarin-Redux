@@ -36,7 +36,7 @@
 #
 # ***** END LICENSE BLOCK *****
 
-import subprocess,sys
+import subprocess,sys,datetime
 from os import environ
 from glob import glob
 from getopt import getopt
@@ -138,10 +138,13 @@ def convertK(val):
 def logResult(out):
     os = {'CYGWIN_NT-5.1':'WIN','CYGWIN_NT-5.2':'WIN','CYGWIN_NT-6.0-WOW64':'WIN','Windows':'WIN','Darwin':'MAC','Linux':'LNX','Solaris':'SOL','SunOS':'SOL',}[system()]
     msg=''
+    date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # for consistency in the performance report, pretend result came from windows performance host
+    ip='10.60.147.246';
     for line in out.split('\n'):
         fields=line.split()
         if len(fields)>1:
-            msg+='addresult2::sizereport/%s::memory::%s::0::%s::1::%s::%s::%s;' % (fields[1],fields[0],fields[0],os,globs['config'],globs['version'])
+            msg+='addresult2::sizereport/%s::memory::%s::0::%s::1::%s::%s::%s::%s::%s;' % (fields[1],fields[0],fields[0],os,globs['config'],globs['version'],date,ip)
     msg+='exit;'
     if globs['verbose']:
         print('sending result to socket server: %s' % msg)
