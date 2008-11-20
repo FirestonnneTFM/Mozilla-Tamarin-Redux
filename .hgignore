@@ -5,6 +5,7 @@ CVS/**
 *.bat
 *.jar
 test/**.abc
+test/acceptance/test.*
 *.pyc
 *~
 pcre/doc/*.1
