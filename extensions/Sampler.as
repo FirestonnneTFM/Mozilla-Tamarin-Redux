@@ -256,7 +256,32 @@ package flash.sampler
      * @langversion 3.0
      * @keyword sampleInternalAllocs
      */
-	public native function setSamplerCallback(f:Function):void;
+	public function setSamplerCallback(f:Function):void
+    {
+        if( f != null )
+        {
+            // Use a wrapper to swallow any exceptions thrown by the callback.
+            var wrapper = function() 
+            {
+                var ret:Boolean = true;
+                try
+                {
+                    f();
+                }
+                catch(e)
+                {
+                    ret = false; 
+                }
+                return ret;
+            }
+            _setSamplerCallback(wrapper);
+        }
+        else
+        {
+            _setSamplerCallback(null);
+        }
+    }
+    native function _setSamplerCallback(f:Function):void;
     
 	/**
 	* Returns the size in memory of a specified object when used with the Flash Player 9.0.115.0 or later debugger version. If 
@@ -382,6 +407,6 @@ package flash.sampler
      * @see package.html#getSetterInvocationCount() getSetterInvocationCount() 
      * @see package.html#getGetterInvocationCount() getGetterInvocationCount() 
      */
-	[native(script="SamplerScript", methods="auto")]
+    [native(script="SamplerScript", methods="auto")]
     public native function isGetterSetter(obj:Object, qname:QName):Boolean;
 };

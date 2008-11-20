@@ -494,12 +494,12 @@ namespace avmplus
 		core()->sampler()->sampleInternalAllocs(b);
 	}
 
-	void SamplerScript::setSamplerCallback(ScriptObject *callback)
+	void SamplerScript::_setSamplerCallback(ScriptObject *callback)
 	{
 		if(!trusted())
 			return;
-		core()->sampler()->setCallback(callback);
 
+		core()->sampler()->setCallback(callback);
 	}
 
 	double SamplerScript::_getInvocationCount(Atom a, QNameObject* qname, uint32 type) 

@@ -107,8 +107,11 @@ namespace avmplus
 			runningCallback = true;
 			pauseSampling();
 			Atom args[1] = { nullObjectAtom };
-			callback->call(0, args);
-			startSampling();
+			Atom ret = callback->call(0, args);
+			if( ret == falseAtom)
+				stopSampling();
+			else
+				startSampling();
 			runningCallback = false;
 		}
 		while(currentSample + sampleSize > samples->uncommitted()) {

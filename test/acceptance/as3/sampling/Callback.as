@@ -126,22 +126,6 @@ AddTestCase(
   callback2_num>0
 );
 
-var errstr1="";
-try {
-    setSamplerCallback(callback3);
-    startSampling();
-    simpleLoop(80000);
-} catch (e) {
-    errstr1=e.toString();
-}
-pauseSampling();
-if (isdebugger)
-AddTestCase(
-  "Callback: callback with parameters throws exception",
-  "ArgumentError: Error #1063",
-  parseError(errstr1,"ArgumentError: Error #1063".length)
-);
-
 var errstr2="";
 
 try {
