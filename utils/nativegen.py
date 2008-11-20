@@ -42,13 +42,17 @@ from struct import *
 from os import path
 from math import floor
 
-parser = OptionParser(usage="usage: %prog [--nativemapname=name] [importfile [, importfile]...] file...")
+parser = OptionParser(usage="usage: %prog [--nativemapname=name] [--uniquethunks] [importfile [, importfile]...] file...")
 parser.add_option("-n", "--nativemapname", help="if using explicit maps for native classes and scripts, the name as argument")
+parser.add_option("-u", "--uniquethunks", help="generate a unique thunk for every native method (don't recycle thunks with similar signatures)")
 opts, args = parser.parse_args()
 
 if not args:
 	parser.print_help()
 	exit(2)
+
+if opts.uniquethunks and opts.nativemapname:
+	raise Error("--uniquethunks cannot be used with --nativemapname")
 
 NEED_ARGUMENTS		= 0x01
 NEED_ACTIVATION		= 0x02
@@ -1018,40 +1022,44 @@ class AbcThunkGen:
 					# not sure if we want to expose method id's for non-native methods; emit as comments for now
 					out_h.println("/* const uint32_t "+m.native_id_name+" = "+str(m.id)+"; */");
 
-		unique_thunks = {}
+		unique_thunk_sigs = {}
 		for receiver,m in self.all_thunks:
 			sig = self.thunkSig(receiver, m)
-			if not unique_thunks.has_key(sig):
-				unique_thunks[sig] = {}
-			unique_thunks[sig][m.native_id_name] = (receiver, m)
-		out_h.println("");
-		out_h.println("/* thunks ("+str(len(unique_thunks.keys()))+" unique) */");
+			if not unique_thunk_sigs.has_key(sig):
+				unique_thunk_sigs[sig] = {}
+			unique_thunk_sigs[sig][m.native_id_name] = (receiver, m)
 		out_c.println("");
-		out_c.println("/* thunks ("+str(len(unique_thunks.keys()))+" unique) */");
-		for sig in unique_thunks:
-			users = unique_thunks[sig]
-			receiver = None;
-			m = None;
-			for native_name in users:
-				out_c.println("// "+native_name);
-				receiver = users[native_name][0];
-				m = users[native_name][1];
-			thunkname = name+"_"+sig;
-			self.emitThunkProto(thunkname, receiver, m, False);
-			if opts.nativemapname:
-				# emit both with-cookie and without-cookie versions, since we can't tell at this point which
-				# might be used for a particular method. rely on linker to strip the unused ones.
-				self.emitThunkProto(thunkname, receiver, m, True);
-			for native_name in users:
-				# use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
-				# (sad but true, happens in some environments)
-				out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
+		out_c.println("/* thunks (%d unique signatures, %d total) */" % (len(unique_thunk_sigs.keys()), len(self.all_thunks)));
+		if opts.uniquethunks:
+			for receiver,m in self.all_thunks:
+				thunkname = m.native_id_name;
+				self.emitThunkProto(thunkname, receiver, m, False);
+				self.emitThunkBody(thunkname, receiver, m, False, True);
+		else:
+			for sig in unique_thunk_sigs:
+				users = unique_thunk_sigs[sig]
+				receiver = None;
+				m = None;
+				for native_name in users:
+					out_c.println("// "+native_name);
+					receiver = users[native_name][0];
+					m = users[native_name][1];
+				thunkname = name+"_"+sig;
+				self.emitThunkProto(thunkname, receiver, m, False);
 				if opts.nativemapname:
-					out_h.println("#define "+native_name+"_thunkc "+thunkname+"_thunkc")
-			out_h.println("")
-			self.emitThunkBody(thunkname, receiver, m, False);
-			if opts.nativemapname:
-				self.emitThunkBody(thunkname, receiver, m, True);
+					# emit both with-cookie and without-cookie versions, since we can't tell at this point which
+					# might be used for a particular method. rely on linker to strip the unused ones. 
+					self.emitThunkProto(thunkname, receiver, m, True);
+				for native_name in users:
+					# use #define here (rather than constants) to avoid the linker including them and thus preventing dead-stripping
+					# (sad but true, happens in some environments)
+					out_h.println("#define "+native_name+"_thunk  "+thunkname+"_thunk")
+					if opts.nativemapname:
+						out_h.println("#define "+native_name+"_thunkc "+thunkname+"_thunkc")
+				out_h.println("")
+				self.emitThunkBody(thunkname, receiver, m, False, False);
+				if opts.nativemapname:
+					self.emitThunkBody(thunkname, receiver, m, True, False);
 
 		out_c.println("");
 		for i in range(0, len(abc.classes)):
@@ -1159,7 +1167,7 @@ class AbcThunkGen:
 		decl = self.thunkDecl(name, cookie, ret)
 		self.out_h.println("extern "+decl+";");
 
-	def emitThunkBody(self, name, receiver, m, cookie):
+	def emitThunkBody(self, name, receiver, m, cookie, directcall):
 		ret = ctype_from_traits(self.lookupTraits(m.returnType), False);
 		decl = self.thunkDecl(name, cookie, ret)
 
@@ -1189,6 +1197,8 @@ class AbcThunkGen:
 		for i in range(0, len(argtraits)):
 			cts = ctype_from_traits(argtraits[i], True)
 			val = "AvmThunkUnbox_"+cts+"(argv[argoff" + str(i) + "])";
+			if directcall and cts == "AvmObject" and argtraits[i].niname != None:
+				val = "(%s*)%s" % (argtraits[i].niname, val)
 			# argtraits includes receiver at 0, optionalValues does not
 			if i > param_count - optional_count:
 				dct,defval,defvalraw = self.abc.default_ctype_and_value(m.optionalValues[i-1]);
@@ -1199,6 +1209,7 @@ class AbcThunkGen:
 			args.append((val, cts))
 			if i == 0 and cookie:
 				assert(opts.nativemapname)
+				assert(not directcall)
 				args.append(("AVMTHUNK_GET_COOKIE(env)", "int32_t"))
 
 		if m.needRest():
@@ -1210,14 +1221,43 @@ class AbcThunkGen:
 
 		self.out_c.println("AVMTHUNK_DEBUG_ENTER(env)");
 		
-		if ret != "void":
-			self.out_c.prnt("const %s ret = " % ret)
-		self.out_c.println("AVMTHUNK_CALL_FUNCTION_%d(AVMTHUNK_GET_HANDLER(env), %s"%(len(args)-1,ret))
-		self.out_c.indent += 1
-		for i in range(0, len(args)):
-			self.out_c.println(", " + args[i][1] + ", " + args[i][0]);
-		self.out_c.indent -= 1
-		self.out_c.println(");")
+		if directcall:
+			self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
+			self.out_c.println("%s* obj = %s;" % (m.receiver.niname, args[0][0]))
+			# many setters are declared as returning "undefined" in as3 but return "void" in C++.
+			# quietly ignore the C++ result. likewise, native ctors always return "undefined" in AS3
+			# but typically are void in C++. (can't do this for non-directcall as sig might be shared between
+			# a setter and nonsetter)
+			if m.kind == TRAIT_Setter or m == m.receiver.init:
+				ret = "void"
+			if ret != "void":
+				self.out_c.prnt("const %s ret = (%s)" % (ret, ret))
+			self.out_c.println("obj->%s(" % m.native_method_name)
+			self.out_c.indent += 1
+			for i in range(1, len(args)):
+				if i > 1:
+					self.out_c.prnt(", ")
+				self.out_c.println(args[i][0]);
+			self.out_c.indent -= 1
+			self.out_c.println(");")
+		else:
+			self.out_c.prnt("typedef AvmRetType_%s (%sT::*FuncType)(" % (ret, args[0][1]))
+			for i in range(1, len(args)):
+				if i > 1:
+					self.out_c.prnt(", ")
+				self.out_c.prnt(args[i][1]);
+			self.out_c.println(");");
+			self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_HANDLER(env));")
+			if ret != "void":
+				self.out_c.prnt("const %s ret = " % ret)
+			self.out_c.println("(*(%s).*(func))(" % (args[0][0]))
+			self.out_c.indent += 1
+			for i in range(1, len(args)):
+				if i > 1:
+					self.out_c.prnt(", ")
+				self.out_c.println(args[i][0]);
+			self.out_c.indent -= 1
+			self.out_c.println(");")
 
 		self.out_c.println("AVMTHUNK_DEBUG_EXIT(env)")
 
