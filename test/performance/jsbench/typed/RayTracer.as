@@ -56,9 +56,10 @@
    */
   var width:int;
 
-  var datasizes:Vector.<int> = new Vector.<int>(2);
-  datasizes[0] = 150;
-  datasizes[1] = 500;
+  var datasizes:Vector.<int> = new Vector.<int>(3);
+  datasizes[0] = 50;
+  datasizes[1] = 150;
+  datasizes[2] = 500;
 
   var checksum:Number = 0;
   var lastValue:Number = 0;
@@ -68,7 +69,7 @@
   var start=new Date();
   JGFrun(0);
   var elapsed=new Date()-start;
-  print("metric jsbench-raytracer "+elapsed);
+  print("metric time "+elapsed);
   function JGFsetsize(sizel):void {
     size = sizel;
   }

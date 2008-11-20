@@ -1,8 +1,9 @@
 var size:int=0;
-var datasizes:Vector.<int> = new Vector.<int>(3);
-datasizes[0] = 2097152;
-datasizes[1] = 8388608;
-datasizes[2] = 16777216;
+var datasizes:Vector.<int> = new Vector.<int>(4);
+datasizes[0] = 524288;
+datasizes[1] = 2097152;
+datasizes[2] = 8388608;
+datasizes[3] = 16777216;
 var RANDOM_SEED:int = 10101010;
 var JDKtotal:Number = 0.0;
 var JDKtotali:Number = 0.0;
@@ -26,7 +27,7 @@ var lastRandom:int=RANDOM_SEED;
 var start=new Date();
 JGFrun(0);
 var elapsed=new Date()-start;
-print("metric jsbench-fft "+elapsed);
+print("metric time "+elapsed);
 
 function JGFrun(sizei):void {
     JGFsetsize(sizei);

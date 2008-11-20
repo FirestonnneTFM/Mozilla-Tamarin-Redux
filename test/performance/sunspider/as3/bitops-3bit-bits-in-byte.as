@@ -26,18 +26,21 @@ package {
 	}
 
 
-	function TimeFunc(func:Function):void {
+	function TimeFunc(func:Function):int {
+        var res:int;
 	var x:int, y:int, t:int;
 	for(x=0; x<500; x++)
-	for(y=0; y<256; y++) func(y);
+	for(y=0; y<256; y++) res=func(y);
+        return res;
 	}
 
-	function runBitops3bitBitsInByte():int {
-	var _sunSpiderStartDate:int = getTimer();
-	TimeFunc(fast3bitlookup);
-	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
-	return _sunSpiderInterval;
-	}
 
-	print("metric bitops-3bit-bits-in-byte-as3 " + runBitops3bitBitsInByte());
+	var start:Number=new Date();
+	var res:int=TimeFunc(fast3bitlookup);
+	var totaltime=new Date()-start;
+	if (res==8) {
+	   print("metric time "+totaltime);
+        } else {
+           print("error fast3bitlookup() expected 8 got "+res);
+        }
 }

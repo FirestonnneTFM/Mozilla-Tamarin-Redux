@@ -79,4 +79,4 @@ for (var i = 6; i <= 48; i *= 2) {
 var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
-print("metric math-spectral-norm "+runMathSpectralNorm());
+print("metric time "+runMathSpectralNorm());

@@ -35,7 +35,7 @@ package {
 	  return s;
 	}
 
-	function primes(isPrime:Array, n:int):void {
+	function primes(isPrime:Array, n:int):int {
 	  var i:int, count:int = 0, m:int = 10000<<n, size:int = m+31>>5;
 
 	  for (i=0; i<size; i++) isPrime[i] = 0xffffffff;
@@ -46,21 +46,23 @@ package {
 	        isPrime[j>>5] &= ~(1<<(j&31));
 	      count++;
 	    }
+          return count;
 	}
 
-	function sieve():void {
-	    for (var i = 4; i <= 4; i++) {
+	function sieve():int {
+            var res:int=0;
+	    for (var i:int = 4; i <= 4; i++) {
 	        var isPrime:Array = new Array((10000<<i)+31>>5);
-	        primes(isPrime, i);
+	        res=primes(isPrime, i);
 	    }
+            return res;
 	}
 
-	function runBitopsNsieveBits():int {
-	var _sunSpiderStartDate:int = getTimer();
-	sieve();
-	var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-	return _sunSpiderInterval;
-	}
-
-	print("metric bitops-nsieve-bits-as3 " + runBitopsNsieveBits());
+	var start:Number=new Date();
+	var res:int=sieve();
+	var totaltime:Number=new Date()-start;
+        if (res==14683)
+  	  print("metric time " + totaltime);
+        else
+          print("error nsieveBits expecting 14683 got "+res);
 }

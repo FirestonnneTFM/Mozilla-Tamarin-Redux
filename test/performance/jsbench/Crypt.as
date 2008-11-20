@@ -29,7 +29,7 @@
 	var start=new Date();
 	JGFrun(0);
 	var elapsed=new Date()-start;
-	print("metric jsbench-crypt "+elapsed);
+	print("metric time "+elapsed);
 	
 	function _randomInt()
 	{

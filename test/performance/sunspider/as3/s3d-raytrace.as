@@ -481,6 +481,6 @@ package {
 		return _sunSpiderInterval;
 	}
 
-	print("metric 3d-raytrace-as3 " + run3dRaytrace());
+	print("metric time " + run3dRaytrace());
 
 }

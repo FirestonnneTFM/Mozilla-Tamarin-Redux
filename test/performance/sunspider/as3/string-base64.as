@@ -170,6 +170,6 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric string-base64-as3 " + runStringBase64()); 
+	print("metric time " + runStringBase64()); 
 	
 }

@@ -167,27 +167,30 @@ package {
 
 }
 
-function runAccessNbody():int {
-	var _sunSpiderStartDate:int = getTimer();
-
-	var ret:Number;
+function runAccessNbody():Number {
+	var res:Number;
 
 	for ( var n:int = 3; n <= 24; n *= 2 ) {
 		var bodies:NBodySystem = new NBodySystem();
 		var max:Number = n * 100;
 
-		ret = bodies.energy();
+		res = bodies.energy();
 		for (var i=0; i<max; i++){
 			bodies.advance(0.01);
 		}
-		ret = bodies.energy();
-		print(bodies.energy())
+		res = bodies.energy();
+		print(""+n+"="+res)
 	}
-
-
-	var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-	return _sunSpiderInterval;
+	return res;
 }
 
-print("metric access-nbody-as3vector " + runAccessNbody());
+var time:Number=new Date();
+var res:Number=runAccessNbody();
+var totaltime=new Date()-time;
+
+if (res-(-0.1690693)<0.00001)
+   print("metric time "+totaltime);
+else
+   print("error nbody result expecting -0.1690693 got "+res);
+
 

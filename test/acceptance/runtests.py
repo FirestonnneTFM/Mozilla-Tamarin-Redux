@@ -59,6 +59,15 @@ try:
 except ImportError:
     globs['pexpect'] = False
 
+
+globs = { 'avm':'', 'asc':'', 'builtinabc':'', 'shellabc':'','exclude':[],'config':'',
+          'ascargs':'', 'vmargs':'', 'escbin':'', 'rebuildtests':False,
+          'pexpect':True}
+try:
+    import pexpect
+except ImportError:
+    globs['pexpect'] = False
+
 verbose = False
 timestamps = True
 forcerebuild = False
@@ -247,10 +256,12 @@ allexpfails=0
 allexceptions=0
 allskips=0
 alltimeouts=0
+allasserts=0
 failmsgs=[]
 expfailmsgs=[]
 unpassmsgs=[]
 timeoutmsgs=[]
+assertmsgs=[]
 
 #setup absolute path of base dir to not have parents go beyond that
 absArgPath = abspath(args[0])
@@ -329,12 +340,15 @@ def parseAscArgs(ascArgFile, currentdir):
     return ascargs[0], argList, removeArgList
     
 def loadAscArgs(arglist,dir,file):
+    # It is possible that file is actually a partial path rooted to acceptance,
+    # so make sure that we are only dealing with the actual filename
+    file = split(file)[1]
     mode = ''
     newArgList = []
     removeArgList = []
     # Loads an asc_args file and modifies arglist accordingly
-    if file and isfile('%s.asc_args' % file):  #file takes precendence over directory
-        mode, newArgList, removeArgList = parseAscArgs('%s.asc_args' % file, dir)
+    if file and isfile('%s/%s.asc_args' % (dir, file)):  #file takes precendence over directory
+        mode, newArgList, removeArgList = parseAscArgs('%s/%s.asc_args' % (dir, file), dir)
     elif isfile(dir+'/dir.asc_args'):
         mode, newArgList, removeArgList = parseAscArgs(dir+'/dir.asc_args', dir)
     elif isfile('./dir.asc_args'):
@@ -354,10 +368,10 @@ def loadAscArgs(arglist,dir,file):
                 pass
 
     
-def compile_test(as):
+def compile_test(as_file):
     asc, builtinabc, shellabc, ascargs = globs['asc'], globs['builtinabc'], globs['shellabc'], globs['ascargs']
     if not isfile(asc):
-        exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as)
+        exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
     if not isfile(builtinabc):
         exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
 
@@ -368,9 +382,9 @@ def compile_test(as):
     
     arglist = parseArgStringToList(ascargs)
 
-    (dir, file) = split(as)
+    (dir, file) = split(as_file)
     # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
-    loadAscArgs(arglist, dir, as)
+    loadAscArgs(arglist, dir, as_file)
     
     cmd += ' -import %s' % builtinabc
     for arg in arglist:
@@ -381,13 +395,13 @@ def compile_test(as):
         if isfile(shell):
             cmd += ' -in ' + shell
             break
-    (testdir, ext) = splitext(as)
+    (testdir, ext) = splitext(as_file)
     deps = glob(join(testdir,'*'+sourceExt))
     deps.sort()
     for util in deps + glob(join(dir,'*Util'+sourceExt)):
         cmd += ' -in %s' % string.replace(util, '$', '\$')
     try:
-        f = run_pipe('%s %s' % (cmd,as))
+        f = run_pipe('%s %s' % (cmd,as_file))
         for line in f:
             verbose_print(line.strip())
     except:
@@ -477,14 +491,14 @@ if runESC:
     avm += ' %s../test/spidermonkey-prefix.es' % globs['escbin']  #needed to run shell harness
 
 
-def build_incfiles(as):
+def build_incfiles(as_file):
     files=[]
-    (dir, file) = split(as)
+    (dir, file) = split(as_file)
     for p in parents(dir):
         shell = join(p,'shell'+sourceExt)
         if isfile(shell):
             files.append(shell)
-    (testdir, ext) = splitext(as)
+    (testdir, ext) = splitext(as_file)
     for util in glob(join(testdir,'*'+sourceExt)) + glob(join(dir,'*Util'+sourceExt)):
         files.append(string.replace(util, "$", "\$"))
     return files
@@ -537,6 +551,7 @@ else:
         lexpfail = 0
         lunpass = 0
         ltimeout = 0
+        lassert = 0
         dir = ast[0:ast.rfind('/')]
         root,ext = splitext(ast)
         if runSource:
@@ -596,6 +611,10 @@ else:
             incfiles=build_incfiles(testName)
             for incfile in incfiles:
                 testName=incfile+" "+testName
+                
+        if isfile("%s.avm_args" % ast):
+            testName = " %s %s" % (string.replace(open("%s.avm_args" % ast).readline(), "$DIR", dir), testName)
+        
         f = run_pipe('%s %s %s' % (avm, vmargs, testName))
         if f == "timedOut":
             fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % testTimeOut, timeoutmsgs)
@@ -606,6 +625,9 @@ else:
                 for line in f:
                     outputLines.append(line)
                     verbose_print(line.strip())
+                    if 'Assertion failed:' in line:
+                        lassert += 1
+                        fail(testName, line, assertmsgs)
                     testcase=''
                     if len(line)>9:
                         testcase=line.strip()
@@ -645,6 +667,7 @@ else:
             allexpfails += lexpfail
             allunpass += lunpass
             alltimeouts += ltimeout
+            allasserts += lassert
             if lfail or lunpass:
                 js_print('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')
             else:
@@ -673,6 +696,11 @@ else:
         js_print('\nUNEXPECTED PASSES:', '', '<br/>')
         for m in unpassmsgs:
             js_print('  %s' % m, '', '<br/>')
+
+    if assertmsgs:
+        js_print('\nASSERTIONS:', '', '<br/>')
+        for m in assertmsgs:
+            js_print('  %s' % m, '', '<br/>')
     
     if not allfails and not allunpass:
         js_print('\ntest run PASSED!')
@@ -697,6 +725,9 @@ else:
         js_print('test exceptions      : %d' % allexceptions, '<br>', '')
     if alltimeouts>0:
         js_print('test timeouts        : %d' % alltimeouts, '<br>', '')
+    if allasserts>0:
+        js_print('assertions           : %d' % allasserts, '<br>', '')
+        
     
     print 'Results were written to %s' % js_output
 

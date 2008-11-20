@@ -85,5 +85,5 @@ var _sunSpiderStartDate:int = getTimer();
   return _sunSpiderInterval;
 }
 
-print("metric math-spectral-norm-as3vector " + runMathSpectralNorm());
+print("metric time " + runMathSpectralNorm());
 

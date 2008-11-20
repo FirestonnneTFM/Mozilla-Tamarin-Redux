@@ -117,4 +117,4 @@ doTest();
 var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
-print("metric string-validate-input "+runStringValidateInput());
+print("metric time "+runStringValidateInput());

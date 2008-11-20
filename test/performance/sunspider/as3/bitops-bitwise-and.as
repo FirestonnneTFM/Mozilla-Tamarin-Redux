@@ -49,13 +49,17 @@
  */
 package {
 	function runBitopsBitwiseAnd():int {
-	var _sunSpiderStartDate:int = getTimer();
-	var bitwiseAndValue:int = 4294967296;
-	for (var i:int = 0; i < 600000; i++)
+	  var bitwiseAndValue:int = 4294967296;
+	  for (var i:int = 0; i < 600000; i++)
 	    bitwiseAndValue = bitwiseAndValue & i;
-	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
-	return _sunSpiderInterval;
-	}
-	print("metric bitops-bitwise-and-as3 " + runBitopsBitwiseAnd());
+          return bitwiseAndValue;
+        }
+        var start:Number=new Date();
+        var res:int=runBitopsBitwiseAnd();
+        var totaltime:Number=new Date()-start;
+        if (res==0)
+  	  print("metric time " + totaltime);
+        else
+          print("error bitwiseAnd() expecting 0 got "+res);
 
 }

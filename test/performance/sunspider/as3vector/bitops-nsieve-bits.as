@@ -34,32 +34,34 @@ function pad(n:int, width:int):String {
   return s;
 }
 
-function primes(isPrime:Vector.<Boolean>, n:int):void {
+function primes(isPrime:Vector.<int>, n:int):int {
   var i:int, count:int = 0, m:int = 10000<<n, size:int = m+31>>5;
 
   for (i=0; i<size; i++) isPrime[i] = 0xffffffff;
 
-  for (i=2; i<m; i++)
+  for (i=2; i<m; i++) {
     if (isPrime[i>>5] & 1<<(i&31)) {
-      for (var j:int=i+i; j<m; j+=i)
+      for (var j:int=i+i; j<m; j+=i) 
         isPrime[j>>5] &= ~(1<<(j&31));
       count++;
     }
+  }
+  return count;
 }
 
-function sieve():void {
+function sieve():int {
+    var res:int;
     for (var i = 4; i <= 4; i++) {
-        var isPrime:Vector.<Boolean> = new Vector.<Boolean>((10000<<i)+31>>5,true);
-        primes(isPrime, i);
+        var isPrime:Vector.<int> = new Vector.<int>((10000<<i)+31>>5,true);
+        res=primes(isPrime, i);
     }
+    return res;
 }
 
-function runBitopsNsieveBits():int {
-var _sunSpiderStartDate:int = getTimer();
-sieve();
-var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-return _sunSpiderInterval;
-}
-
-print("metric bitops-nsieve-bits-as3vector " + runBitopsNsieveBits());
-
+var start:Number=new Date();
+var res:int=sieve();
+var totaltime:Number=new Date()-start;
+if (res==14683)
+  print("metric time " + totaltime);
+else
+  print("error nsieveBits() expecting 14683 got "+res);

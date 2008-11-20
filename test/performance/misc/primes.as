@@ -56,4 +56,4 @@ for(var j:int = n;j>0;--j) {
 	}
 }
 print("found "+numprimes);
-print("metric primes "+getTimer());
+print("metric time "+getTimer());

@@ -96,6 +96,6 @@ package {
 	  var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 	  return _sunSpiderInterval;
 	}
-	print("metric string-unpack-code-as3 " + runStringUnpackCode());
+	print("metric time " + runStringUnpackCode());
 
 }

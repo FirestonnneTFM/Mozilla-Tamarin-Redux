@@ -118,5 +118,5 @@ var _sunSpiderStartDate:int = getTimer();
   return _sunSpiderInterval;
 }
 
-print("metric string-validate-input-as3vector " + runStringValidateInput());
+print("metric time " + runStringValidateInput());
 
