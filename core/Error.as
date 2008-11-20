@@ -113,7 +113,7 @@ package
                 else
                     return "";
             }
-			throw new type(Error.getErrorMessage(index).replace(/%[0-9]/g, f));
+			throw new type(Error.getErrorMessage(index).replace(/%[0-9]/g, f), index);
 		}
 
         private var _errorID : int;
