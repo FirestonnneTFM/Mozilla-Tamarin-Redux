@@ -72,7 +72,7 @@ namespace avmplus
 		weakKeys = false;
 	}
 
-	void DictionaryObject::constructDictionaryObject(bool weakKeys)
+	void DictionaryObject::init(bool weakKeys)
 	{
 		GCAssert(vtable->traits->isDictionary == true);
 		this->weakKeys = weakKeys;

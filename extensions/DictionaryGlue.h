@@ -46,7 +46,7 @@ namespace avmplus
 	public:
 		DictionaryObject(VTable *vtable, ScriptObject *delegate);
 		~DictionaryObject();
-		void constructDictionaryObject(bool weakKeys);
+		void init(bool weakKeys);
 	
 		virtual Hashtable* getTable() const { return table; }
 	

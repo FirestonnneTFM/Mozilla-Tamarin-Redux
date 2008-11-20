@@ -47,7 +47,7 @@ namespace avmshell
 		DomainObject(VTable *vtable, ScriptObject *delegate);
 		~DomainObject();
 
-		void constructDomainObject(DomainObject *base);
+		void init(DomainObject *base);
 		Atom loadBytes(ByteArrayObject *bytes);
 		ClassClosure* getClass(Stringp name);
 //#ifdef AVMPLUS_MOPS
