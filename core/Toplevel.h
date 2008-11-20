@@ -250,6 +250,27 @@ namespace avmplus
 		 */
 		Atom getproperty(Atom obj, const Multiname* name, VTable* vtable);
 
+		/**
+		 * Determines if a specified object has a specified property
+		 * where the property is specified by a multiname.
+		 * @param obj Object on which to look for the property
+		 * @param multiname The name of the property
+		 * @param vtable The vtable of the object
+		 * @return	true if the object has a readable property with the
+					specified name, false otherwise.
+		 */
+		bool hasproperty(Atom obj, const Multiname* multiname, VTable* vtable);
+
+	    /**
+		 * Delete a specified property on a specified object,where the property is specified
+		 * by a multiname.
+		 * @param obj Object on which to look for the specified property.
+		 * @param multiname The name of the property
+		 * @param vtable The vtable of the object
+		 * @return	true if the property is deleted. false if the property cannot be deleted.
+		 */
+		bool deleteproperty( Atom obj, const Multiname* multiname, VTable* vtable ) const;
+
 	    void setproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
 	    void setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
 
