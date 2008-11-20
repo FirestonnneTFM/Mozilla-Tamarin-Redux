@@ -142,25 +142,25 @@ const uint32_t flash_sampler_getSampleCount = 116;
 const uint32_t flash_sampler_getSamples = 117;
 const uint32_t flash_sampler_getMemberNames = 118;
 const uint32_t flash_sampler_getSize = 119;
-const uint32_t flash_sampler_setSamplerCallback = 120;
-const uint32_t flash_sampler_sampleInternalAllocs = 121;
-const uint32_t flash_sampler_pauseSampling = 122;
-const uint32_t flash_sampler_stopSampling = 123;
-const uint32_t flash_sampler_startSampling = 124;
-const uint32_t flash_sampler_clearSamples = 125;
-const uint32_t flash_sampler_NewObjectSample_object_get = 132;
-const uint32_t flash_sampler_NewObjectSample_size_get = 133;
-const uint32_t flash_trace_Trace_setLevel = 139;
-const uint32_t flash_trace_Trace_getLevel = 140;
-const uint32_t flash_trace_Trace_setListener = 141;
-const uint32_t flash_trace_Trace_getListener = 142;
-const uint32_t flash_utils_Dictionary_Dictionary = 146;
-const uint32_t avmplus_JObject_create = 152;
-const uint32_t avmplus_JObject_createArray = 153;
-const uint32_t avmplus_JObject_toArray = 154;
-const uint32_t avmplus_JObject_constructorSignature = 155;
-const uint32_t avmplus_JObject_methodSignature = 156;
-const uint32_t avmplus_JObject_fieldSignature = 157;
+const uint32_t flash_sampler__setSamplerCallback = 120;
+const uint32_t flash_sampler_sampleInternalAllocs = 123;
+const uint32_t flash_sampler_pauseSampling = 124;
+const uint32_t flash_sampler_stopSampling = 125;
+const uint32_t flash_sampler_startSampling = 126;
+const uint32_t flash_sampler_clearSamples = 127;
+const uint32_t flash_sampler_NewObjectSample_object_get = 134;
+const uint32_t flash_sampler_NewObjectSample_size_get = 135;
+const uint32_t flash_trace_Trace_setLevel = 141;
+const uint32_t flash_trace_Trace_getLevel = 142;
+const uint32_t flash_trace_Trace_setListener = 143;
+const uint32_t flash_trace_Trace_getListener = 144;
+const uint32_t flash_utils_Dictionary_Dictionary = 148;
+const uint32_t avmplus_JObject_create = 154;
+const uint32_t avmplus_JObject_createArray = 155;
+const uint32_t avmplus_JObject_toArray = 156;
+const uint32_t avmplus_JObject_constructorSignature = 157;
+const uint32_t avmplus_JObject_methodSignature = 158;
+const uint32_t avmplus_JObject_fieldSignature = 159;
 
 /* thunks (43 unique) */
 extern AvmBox shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
@@ -306,7 +306,7 @@ extern double shell_toplevel_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBo
 
 extern AvmBox shell_toplevel_v2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_System_trace_thunk  shell_toplevel_v2a_oo_thunk
-#define flash_sampler_setSamplerCallback_thunk  shell_toplevel_v2a_oo_thunk
+#define flash_sampler__setSamplerCallback_thunk  shell_toplevel_v2a_oo_thunk
 
 extern AvmBox shell_toplevel_i2a_osu_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_StringBuilder_indexOf_thunk  shell_toplevel_i2a_osu_opti0_thunk

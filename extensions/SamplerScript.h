@@ -71,7 +71,7 @@ namespace avmplus
 		void pauseSampling();
 		void sampleInternalAllocs(bool b);
 		double getSampleCount();
-		void setSamplerCallback(ScriptObject *callback);
+		void _setSamplerCallback(ScriptObject *callback);
 
 		double _getInvocationCount(Atom a, QNameObject* qname, uint32 type);
 		ScriptObject *makeSample(Sample sample);
@@ -93,7 +93,7 @@ namespace avmplus
 		double _getInvocationCount(Atom, QNameObject*, uint32) { return -1; }
 		bool isGetterSetter(Atom, QNameObject*) { return false; }
 		void sampleInternalAllocs(bool){};
-		void setSamplerCallback(ScriptObject *){};
+		void _setSamplerCallback(ScriptObject *){};
 #endif
 	};
 
@@ -124,7 +124,7 @@ namespace avmplus
 		void setRef(AvmPlusScriptableObject* o) { obj = o; }
 		void setSize(uint64 s) { size = s; }
 	private:
-		AvmPlusScriptableObject *obj;
+		DRCWB(AvmPlusScriptableObject*) obj;
 		uint64 size;
 	};
 
