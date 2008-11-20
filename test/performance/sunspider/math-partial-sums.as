@@ -79,7 +79,7 @@ function verifyTest() {
     var a = [a2,a2,a3,a4,a5,a6,a7,a8,a9];
     var expectedAns = [87.9935444652217,87.9935444652217,0.9995002498750635,30.307963126682765,42.99485321081218,8.178368103610284,1.6444341918273961,0.6928972430599403,0.7852731634052603];
     for (var i=0; i<a.length; i++) {
-      if (a[i] !== expectedAns[i]) {
+      if (Math.abs(a[i]-expectedAns[i]) > .0000000000001) {
         print('a'+i+': '+a[i]+' !== expectedAns: '+expectedAns[i]);
         return false;
       }
@@ -98,5 +98,5 @@ return(_sunSpiderInterval);
 }
 
 if (verifyTest()) {
-  print("metric time "+runPartialSums());edi
+  print("metric time "+runPartialSums());
 }
