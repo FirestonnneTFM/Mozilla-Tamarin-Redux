@@ -492,7 +492,7 @@ package {
     var _sunSpiderStartDate:int = (new Date).getTime();
     var pixels:Array = raytraceScene();
     var testOutput:String = arrayToCanvasCommands(pixels);
-    var _sunSpiderInterval:Number = (new Date).getTime() - _sunSpiderStartDate;
+    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
     
 
     

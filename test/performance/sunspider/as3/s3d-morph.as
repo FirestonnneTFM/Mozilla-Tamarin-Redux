@@ -54,7 +54,7 @@ package {
     for (var i:int = 0; i < nx; i++)
         testOutput += a[3*(i*nx+i)+1];
     a = null;
-    var _sunSpiderInterval:Number = (new Date).getTime() - _sunSpiderStartDate;
+    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
     
     // verify test result
     if (testOutput !== 6.750155989720952e-14) {
