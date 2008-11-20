@@ -161,8 +161,6 @@ const uint32_t avmplus_JObject_toArray = 156;
 const uint32_t avmplus_JObject_constructorSignature = 157;
 const uint32_t avmplus_JObject_methodSignature = 158;
 const uint32_t avmplus_JObject_fieldSignature = 159;
-
-/* thunks (43 unique) */
 extern AvmBox shell_toplevel_s2a_oos_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define avmplus_JObject_methodSignature_thunk  shell_toplevel_s2a_oos_rest_thunk
 

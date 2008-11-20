@@ -371,8 +371,6 @@ const uint32_t XMLList_AS3_setName = 845;
 const uint32_t XMLList_AS3_setNamespace = 846;
 const uint32_t QName_localName_get = 850;
 const uint32_t QName_uri_get = 851;
-
-/* thunks (72 unique) */
 extern AvmBox builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 #define Array_private__filter_thunk  builtin_a2a_oaoa_thunk
 #define Array_private__map_thunk  builtin_a2a_oaoa_thunk
