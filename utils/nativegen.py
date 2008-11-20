@@ -172,7 +172,7 @@ def is_neg_inf(val):
 	strValLower = str(val).lower()
 	return strValLower.endswith("inf") and strValLower.startswith("-")
 
-class Error:
+class Error(Exception):
 	nm = ""
 	def __init__(self, n):
 		self.nm = n
@@ -349,7 +349,7 @@ class MethodInfo(MemberInfo):
 		if self == traits.init:
 			self.native_id_name = prefix + to_cname(traits.name.name) 
 			if traits.niname != None:
-				self.native_method_name = "construct" + traits.niname	
+				self.native_method_name = "#error illegal name, ctors cannot be native"
 
 		else:
 			assert(isinstance(self.name, QName))
@@ -1327,6 +1327,8 @@ class AbcThunkGen:
 
 	def processTraits(self, s):
 		if s.init != None:
+			if s.init.isNative():
+				raise Error("native constructors are not allowed: " + str(s))
 			self.processMethod(s, s.init)
 		for i in range(0, len(s.members)):
 			if s.members[i].kind in [TRAIT_Method,TRAIT_Getter,TRAIT_Setter]:
@@ -1357,10 +1359,12 @@ if abcGenFor:
 		h = IndentingPrintWriter(hf)
 		c = IndentingPrintWriter(hc)
 		ngen.emit(abcGenFor, abcScriptName, h, c);
+	except Exception, e:
+		print "ERROR: ", e
+		exit(1)
 	finally:
 		hf.close()
 		hc.close()
-
 
 
 		

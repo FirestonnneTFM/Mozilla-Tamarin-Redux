@@ -43,7 +43,13 @@ import flash.utils.ByteArray
 [native(cls="DomainClass", instance="DomainObject", methods="auto")]
 public class Domain
 {
-	public native function Domain(base:Domain);
+	private native function init(base:Domain):void;
+
+	public function Domain(base:Domain)
+	{
+		init(base);
+	}
+	
 	public native function loadBytes(byteArray:ByteArray);
 	public native function getClass(className:String):Class;
 	public native static function get currentDomain():Domain;
