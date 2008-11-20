@@ -848,7 +848,95 @@ namespace avmplus
 		}
     }
 
-    Atom Toplevel::getproperty(Atom obj, const Multiname* multiname, VTable* vtable)
+	bool Toplevel::hasproperty(Atom obj, const Multiname* multiname, VTable* vtable)
+	{
+		const Binding propBinding = getBinding(vtable->traits, multiname);
+		bool result = false;
+		switch (AvmCore::bindingKind(propBinding))
+		{
+		case BKIND_NONE:
+			{
+				// Property does not have binding.  Might be a dynamic property.
+				// Have to walk the prototype chain.
+				const ScriptObject* curObj = AvmCore::isObject(obj) ?
+												AvmCore::atomToScriptObject(obj) :
+												toPrototype(obj);
+				
+				if (curObj->isValidDynamicName(multiname))
+				{
+					// Walk the prototype chain looking for the property.
+					while ((!result) && (curObj != NULL))
+					{
+						result = curObj->hasMultinameProperty(multiname);
+						curObj = curObj->getDelegate();
+					}
+				}
+			}
+			break;
+		case BKIND_METHOD:	// "property" is really a method.
+		case BKIND_VAR:		// "property" is a member variable.
+		case BKIND_CONST:	// "property" is a member constant.
+		case BKIND_GET:     // "property" is implemented with getter
+		case BKIND_SET:		// "property" is implemented with setter
+		case BKIND_GETSET:	// "property" is implemented with getter and setter
+			result = true;
+			break;
+		default:
+			AvmAssert(false);
+		}
+		return result;
+	}
+
+	bool Toplevel::deleteproperty(Atom obj, const Multiname* multiname, VTable* vtable) const
+	{
+		const Binding propBinding = getBinding(vtable->traits, multiname);
+		bool result = false;
+		switch (AvmCore::bindingKind(propBinding))
+		{
+		case BKIND_NONE:
+			{
+				// Property does not have binding.  See if a dynamic property
+				// with the specified name can be set on the object.
+				// For it to be legal to set a dynamic property on the
+				// object in question, the object must be a regular ( not a primitive )
+				// script object, the property name must be a legal dynamic property name,
+				// and the object must not be sealed ( must be a dynamic object ).
+				if (AvmCore::isObject(obj))
+				{
+					ScriptObject* o = AvmCore::atomToScriptObject(obj);
+					if (o->isValidDynamicName(multiname) && o->traits()->needsHashtable())
+					{
+						result = o->deleteMultinameProperty(multiname);
+					}
+				}
+			}
+			break;
+
+		case BKIND_METHOD:
+			{
+				if (multiname->contains(core()->publicNamespace) && isXmlBase(obj)) 
+				{
+					ScriptObject* o = AvmCore::atomToScriptObject(obj);
+					// dynamic props should hide declared methods
+					result = o->deleteMultinameProperty(multiname);
+				}
+			}
+			break;
+
+		case BKIND_VAR:	
+		case BKIND_CONST:	
+		case BKIND_GET:
+		case BKIND_SET:
+		case BKIND_GETSET:
+			result = false;
+			break;
+		default:
+			AvmAssert(false);
+		}
+		return result;
+	}
+
+	Atom Toplevel::getproperty(Atom obj, const Multiname* multiname, VTable* vtable)
     {
 		Binding b = getBinding(vtable->traits, multiname);
 		AvmCore* core = this->core();
