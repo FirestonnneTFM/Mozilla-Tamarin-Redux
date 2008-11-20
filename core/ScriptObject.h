@@ -191,6 +191,9 @@ namespace avmplus
 		// than 28 bits will use a string key.
 		static const int MAX_INTEGER_MASK = 0xF0000000;
 
+		// return true iff the object is a toplevel script init object.
+        bool isGlobalObject() const;
+
 #ifdef AVMPLUS_VERBOSE
 	public:
 		virtual Stringp format(AvmCore* core) const;

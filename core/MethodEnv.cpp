@@ -426,7 +426,7 @@ namespace avmplus
 
 #if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
 	MethodEnv::MethodEnv(void *addr, VTable *vtable)
-		: vtable(vtable), method(NULL), declTraits(NULL)
+		: vtable(vtable), method(NULL), declTraits(NULL), activationOrMCTable(0)
 	{
 		implV = addr;
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
@@ -437,6 +437,7 @@ namespace avmplus
 		: vtable(vtable)
 		, method(method)
 		, declTraits(method->declaringTraits)
+		, activationOrMCTable(0)
 	{
 		// make the first call go to the method impl
 		impl32 = delegateInvoke;
@@ -544,14 +545,14 @@ namespace avmplus
 	void MethodEnv::sendEnter(int /*argc*/, uint32 * /*ap*/)
 	{
 		Profiler *profiler = core()->profiler;
-		if (profiler->profilingDataWanted && !core()->sampler()->sampling)
+		if (profiler && profiler->profilingDataWanted && !core()->sampler()->sampling)
 			profiler->sendFunctionEnter(method);
 	}
 
 	void MethodEnv::sendExit()
 	{
 		Profiler *profiler = core()->profiler;
-		if (profiler->profilingDataWanted && !core()->sampler()->sampling)
+		if (profiler && profiler->profilingDataWanted && !core()->sampler()->sampling)
 			profiler->sendFunctionExit();
 	}
 #endif
@@ -1943,7 +1944,7 @@ namespace avmplus
 		switch(type)
 		{
 		case kActivation:
-			return (VTable *)(activationOrMCTable&~3);
+			return (VTable *)(activationOrMCTable&~7);
 		case kActivationMethodTablePair:
 			return getPair()->activation;
 		default:
@@ -1984,6 +1985,6 @@ namespace avmplus
 		{
 			return getPair()->methodTable;
 		}
-		return (WeakKeyHashtable*)(activationOrMCTable&~3);
+		return (WeakKeyHashtable*)(activationOrMCTable&~7);
 	}
 }

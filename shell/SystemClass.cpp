@@ -222,4 +222,9 @@ namespace avmshell
 	{
 		return double(MMgc::GCHeap::GetPrivateBytes() * MMgc::GCHeap::kBlockSize);
 	}
+
+	bool SystemClass::isGlobal(Atom o)
+	{
+		return AvmCore::isObject(o) ? AvmCore::atomToScriptObject(o)->isGlobalObject() : false;
+	}
 }
