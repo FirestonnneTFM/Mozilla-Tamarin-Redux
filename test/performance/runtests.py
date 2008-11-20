@@ -695,5 +695,7 @@ for ast in tests:
                     log_print("%-50s %7s %7s" % (ast,result1,metric)) 
             else:
                     log_print("%-50s crash" % (ast)) 
+                    for line in f1:
+                        print(line.strip())
                     res=1
 exit(res)
