@@ -1741,6 +1741,6 @@ package {
 
 	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
 
-	print("metric regexp-dna-as3 " + _sunSpiderInterval);
+	print("metric time " + _sunSpiderInterval);
 
 }

@@ -32,7 +32,7 @@ package {
 		private var left:TreeNode
 		private var right:TreeNode;
 		private var item:int;
-		
+
 		public function TreeNode(left:TreeNode, right:TreeNode, item:int){
 			this.left = left;
 			this.right = right;
@@ -59,9 +59,6 @@ package {
 	}
 
 	function runAccessBinaryTrees():int {
-		var _sunSpiderStartDate:int = getTimer();
-		var ret:int;
-
 		for ( var n:int = 4; n <= 7; n += 1 ) {
 		    var minDepth:int = 4;
 		    var maxDepth:int = Math.max(minDepth + 2, n);
@@ -79,15 +76,18 @@ package {
 		            check += TreeNode.bottomUpTree(-i,depth).itemCheck();
 		        }
 		    }
-
-		    ret = longLivedTree.itemCheck();
 		}
-
-
-		var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-		return _sunSpiderInterval;
+		return check;
 	}
+	
+	var start:Number=new Date();
+	var res:int=runAccessBinaryTrees();
+	var totaltime:Number=new Date()-start;
 
-	print("metric access-binary-trees-as3 " + runAccessBinaryTrees());
+	if (res==-64) {
+	   print("metric time "+totaltime);
+	} else {
+	   print("error binarytrees() expected -64 got "+res);
+	}
 
 }

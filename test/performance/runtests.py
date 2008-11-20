@@ -51,6 +51,7 @@ timestamps = True
 forcerebuild = False
 logresults = False
 iterations = 1
+res=0
 
 # needed for pipe
 fd,tmpfile = tempfile.mkstemp()
@@ -59,8 +60,8 @@ js_output_f=False
 
 globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider',
           'ascargs':'','vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':'',
-          'perfm':False, 'avmname':'avm', 'avm2name':'avm2', 'memory':False,'optimize':True}
-          
+          'perfm':False, 'avmname':'avm', 'avm2name':'avm2', 'memory':False,'optimize':True,'largerIsFaster':False}
+
 if 'AVM' in environ:
     globs['avm'] = environ['AVM'].strip()
 if 'AVM2' in environ:
@@ -104,6 +105,7 @@ def usage(c):
     print " -d --socketlog     logs results to a socket server"
     print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
     print " -m --memory        logs the high water memory mark"
+    print "    --larger        larger values are better than smaller values"
     print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
     print "    --ascargs       args to pass to asc on rebuild of test files"
     print "    --vmargs        args to pass to vm"
@@ -115,7 +117,7 @@ def usage(c):
 try:
   opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:m", ["verbose","avm=","asc=","globalabc=","help",
                 "forcerebuild","ascargs=","vmargs=","log","socketlog","avm2=","vmargs2=","iterations=",
-                "config=","runtime=","vmversion=","perfm", "avmname=","avm2name=","nooptimize","memory"])
+                "config=","runtime=","vmversion=","perfm", "avmname=","avm2name=","nooptimize","memory","larger"])
 except:
     usage(2)
 
@@ -174,6 +176,8 @@ for o, v in opts:
         globs['avm2name'] = v
     elif o in ('--nooptimize'):
         globs['optimize'] = False
+    elif o in ('--larger'):
+        globs['largerIsFaster']= True;
 
 def istest(f):
     return f.endswith(".as")
@@ -204,10 +208,10 @@ def run_pipe(cmd):
     #return t.open(globs['tmpfile'], "r")
 
 
-def compile_test(as):
+def compile_test(as_file):
     asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
     if not isfile(asc):
-        exit("ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar" % as)
+        exit("ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar" % as_file)
     if not isfile(globalabc):
         exit("ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc" % globalabc)
     
@@ -215,14 +219,21 @@ def compile_test(as):
         cmd = "java -jar " + asc
     else:
         cmd = asc
-    cmd += " " + ascargs
+        
+    # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
+    arglist = parseArgStringToList(ascargs)
+    (dir, file) = split(as_file)
+    loadAscArgs(arglist, dir, as_file)
+    
+    for arg in arglist:
+        cmd += ' %s' % arg
     cmd += " -import " + globalabc
     if globs['optimize']:
         cmd += " -optimize"
-    (dir, file) = split(as)
+    (dir, file) = split(as_file)
     verbose_print("   compiling %s" % file)
-    (testdir, ext) = splitext(as)
-    f = run_pipe("%s %s" % (cmd,as))
+    (testdir, ext) = splitext(as_file)
+    f = run_pipe("%s %s" % (cmd,as_file))
 
 def mean(population):
     mean = 0.0
@@ -283,6 +294,79 @@ def tDist(n):
     if (n > tMax):
         return tLimit
     return tDistribution[n]
+    
+
+# 3 functions to deal with .asc_args files that specify args for compilation
+def parseArgStringToList(argStr):
+    args = argStr.strip().split(' ')
+    # recombine any args that have spaces in them
+    argList = []
+    for a in args:
+        if a == '':
+            pass
+        elif a[0] == '-':
+            argList.append(a)
+        else:   # append the space and text to the last arg
+            argList[len(argList)-1] += ' ' + a
+    return argList
+
+def parseAscArgs(ascArgFile, currentdir):
+    # reads an .asc_args file and returns a tuple of the arg mode (override or merge) and a list of args
+    f = open(ascArgFile,'r')
+    while True: # skip comment lines
+        ascargs = f.readline()
+        if (ascargs[0] != '#'):
+            break
+    ascargs = ascargs.split(':')
+    ascargs[0] = ascargs[0].strip()
+    if (len(ascargs) == 1): #treat no keyword as a merge
+        ascargs.insert(0,'merge')
+    elif (ascargs[0] != 'override') or (ascargs[0] != 'merge'): # default to merge if mode not recognized
+        ascargs[0] = 'merge'
+    # replace the $DIR keyword with actual directory
+    ascargs[1] = string.replace(ascargs[1], '$DIR', currentdir)
+    if ascargs[1].find('$SHELLABC') != -1:  
+        if not isfile(globs['shellabc']):   # TODO: not the best place to check for this
+            exit('ERROR: shell.abc %s does not exist, SHELLABC environment variable or --shellabc must be set to shell_toplevel.abc' % globs['shellabc'])
+        ascargs[1] = string.replace(ascargs[1], '$SHELLABC', globs['shellabc'])
+    ascargs[1] = parseArgStringToList(ascargs[1])
+    removeArgList = []
+    argList = []
+    for a in ascargs[1]:
+        if a[0:3] == '-no':
+            removeArgList.append(a[3:])
+        else:
+            argList.append(a)
+
+    return ascargs[0], argList, removeArgList
+    
+def loadAscArgs(arglist,dir,file):
+    # It is possible that file is actually a partial path rooted to acceptance,
+    # so make sure that we are only dealing with the actual filename
+    file = split(file)[1]
+    mode = ''
+    newArgList = []
+    removeArgList = []
+    # Loads an asc_args file and modifies arglist accordingly
+    if file and isfile('%s/%s.asc_args' % (dir, file)):  #file takes precendence over directory
+        mode, newArgList, removeArgList = parseAscArgs('%s/%s.asc_args' % (dir, file), dir)
+    elif isfile(dir+'/dir.asc_args'):
+        mode, newArgList, removeArgList = parseAscArgs(dir+'/dir.asc_args', dir)
+    elif isfile('./dir.asc_args'):
+        mode, newArgList, removeArgList = parseAscArgs('./dir.asc_args', './')
+    
+    if mode == 'merge':
+        arglist.extend(newArgList)
+    elif mode == 'override':
+        arglist = newArgList
+    # remove any duplicate args
+    arglist = list(set(arglist))
+    if removeArgList:
+        for removeArg in removeArgList:
+            try:
+                arglist.remove(removeArg)
+            except:
+                pass
 
 
 # ================================================
@@ -386,19 +470,20 @@ if len(avm2)>0:
     else:
         log_print("avm2: %s" % (avm2,));
 log_print('iterations: %s' % iterations)
-
+if globs['largerIsFaster']:
+    log_print("Larger values are faster");
 if len(avm2)>0:
     if iterations == 1:
-        log_print("\n%-50s %7s %7s %7s\n" % ("test",globs['avmname'],globs['avm2name'], "%sp"))
+        log_print("\n%-50s %7s %7s %7s %7s\n" % ("test",globs['avmname'],globs['avm2name'], "%sp", "metric"))
     else:
         log_print("\n%-50s %20s   %20s" % ("test",globs['avmname'],globs['avm2name']))
-        log_print('%-50s  %6s :%6s  %6s    %6s :%6s  %6s %7s' % ('', 'min','max','avg','min','max','avg','%diff'))
+        log_print('%-50s  %6s :%6s  %6s    %6s :%6s  %6s %7s %7s' % ('', 'min','max','avg','min','max','avg','%diff','metric'))
         log_print('                                                   -----------------------   -----------------------   -----')
 else:
     if (iterations>2):
-        log_print("\n\n%-50s %7s %12s\n" % ("test",globs['avmname'],"95% conf"))
+        log_print("\n\n%-50s %7s %12s %7s\n" % ("test",globs['avmname'],"95% conf", "metric"))
     else:
-        log_print("\n\n%-50s %7s\n" % ("test",globs['avmname']))
+        log_print("\n\n%-50s %7s %7s\n" % ("test",globs['avmname'], "metric"))
 
 testnum = len(tests)
 for ast in tests:
@@ -427,11 +512,9 @@ for ast in tests:
             log_print("compile FAILED!, file not found " + abc)
             
     result1=9999999
-    resultList = []
-    resultList2 = []
-    rl1 = []
-    rl2 = []
     result2=9999999
+    resultList=[]
+    resultList2=[]
     if globs['memory'] and vmargs.find("-memstats")==-1:
         vmargs="%s -memstats" % vmargs
     if globs['memory'] and len(vmargs2)>0 and vmargs2.find("-memstats")==-1:
@@ -468,14 +551,15 @@ for ast in tests:
                         if val>memoryhigh:
                             memoryhigh=val
                 if not globs['memory'] and "metric" in line:
-                    result1list=line.rsplit()
-                    if len(result1list)>2:
-                        resultList.append(result1list[2])
-                        if result1 > int(result1list[2]):
-                            result1=float(result1list[2])
+                    rl=[]
+                    rl=line.rsplit()
+                    if len(rl)>2:
+                        resultList.append(int(rl[2]))
+                        metric=rl[1]
                 elif globs['perfm']:
                     parsePerfm(line, perfm1Dict)
             if globs['memory']:
+                metric="memory"
                 resultList.append(memoryhigh)
             if len(avm2)>0:
                 for line in f2:
@@ -494,32 +578,67 @@ for ast in tests:
                             if val>memoryhigh2:
                                 memoryhigh2=val
                     if "metric" in line:
-                        result2list=line.rsplit()
-                        if len(result2list)>2:
-                            resultList2.append(int(result1list[2]))
-                            if result2 > int(result2list[2]):
-                                result2=float(result2list[2])
+                        rl=[]
+                        rl=line.rsplit()
+                        if len(rl)>2:
+                            resultList2.append(int(rl[2]))
                     elif globs['perfm']:
                         parsePerfm(line, perfm2Dict)
-            if globs['memory']:
-                if memoryhigh<=0:
-                    spdup = 9999
-                else:
-                    spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
+            # calculate current best result
+            if len(resultList)==0:
+                result1=9999999
+                result2=9999999
             else:
-                if result1==0:
-                    spdup = 9999
+                if globs['largerIsFaster']:
+                    result1 = max(resultList)
+                    if resultList2:
+                        result2 = max(resultList2)
                 else:
-                    spdup = ((result1-result2)/result2)*100.0
-            rl1.append(result1)
-            rl2.append(result2)
+                    result1 = min(resultList)
+                    if resultList2:
+                        result2 = min(resultList2)
+                if globs['memory']:
+                    if memoryhigh<=0:
+                        spdup = 9999
+                    else:
+                        spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
+                elif len(avm2)>0:
+                    if result1==0:
+                        spdup = 9999
+                    else:
+                        spdup = ((result1-result2)/result2)*100.0
+            
+            resultList.append(result1)
+            resultList2.append(result2)
         except:
             print formatExceptionInfo()
             exit(-1)
-
+    # end for i in range(iterations)
+    # calculate best result
+    if globs['largerIsFaster']:
+        result1 = max(resultList)
+        if resultList2:
+            result2 = max(resultList2)
+    else:
+        result1 = min(resultList)
+        if resultList2:
+            result2 = min(resultList2)
+    if globs['memory']:
+        if memoryhigh<=0:
+            spdup = 9999
+        else:
+            spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
+    elif len(avm2)>0:
+        if result1==0:
+            spdup = 9999
+        else:
+            if globs['largerIsFaster']:
+                spdup = float(result2-result1)/result2*100.0
+            else:
+                spdup = float(result1-result2)/result2*100.0
     if globs['memory']:
         if len(avm2)>0:
-            log_print("%-50s %7s %7s %7.1f" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup))
+            log_print("%-50s %7s %7s %7.1f %7s" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric))
         else:
             confidence=0
             meanRes=memoryhigh
@@ -529,21 +648,21 @@ for ast in tests:
                     confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
                 log_print("%-50s %7s %10.1f%%     [%s]" % (ast,formatMemory(memoryhigh),confidence,formatMemoryList(resultList)))
             else:
-                log_print("%-50s %7s" % (ast,formatMemory(memoryhigh)))
+                log_print("%-50s %7s %7s" % (ast,formatMemory(memoryhigh), metric))
             config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
             config = config.replace("-memstats","")
-            socketlog("addresult2::%s::memory::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, memoryhigh, confidence, meanRes, iterations, OS_name, config, VM_version))
+            socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, memoryhigh, confidence, meanRes, iterations, OS_name, config, VM_version))
     else:
         if len(avm2)>0:
             if iterations == 1:
-                log_print('%-50s %7s %7s %7.1f' % (ast,result1,result2,spdup))
+                log_print('%-50s %7s %7s %7.1f %7s' % (ast,result1,result2,spdup, metric))
             else:
                 try:
-                    rl1_avg=sum(rl1)/len(rl1)
-                    rl2_avg=sum(rl2)/len(rl2)
-                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, min(rl1), max(rl1), rl1_avg, min(rl2), max(rl2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0))
+                    rl1_avg=sum(resultList)/float(len(resultList))
+                    rl2_avg=sum(resultList2)/float(len(resultList2))
+                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, min(resultList), max(resultList), rl1_avg, min(resultList2), max(resultList2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0, metric))
                 except:
-                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f' % (ast, '', '', result1, '', '', result2, spdup))
+                    log_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, '', '', result1, '', '', result2, spdup, metric))
     
             if globs['perfm']:
                 def calcPerfm(desc, key):
@@ -569,7 +688,7 @@ for ast in tests:
                 calcPerfm('count', 'count')
                 log_print('-------------------------------------------------------------------------------------------------------------')
         else: #only one avm tested
-            if result1 < 9999999 :
+            if result1 < 9999999 and len(resultList)>0:
                 meanRes = mean(resultList)
                 if (iterations > 2):
                     if meanRes==0:
@@ -577,6 +696,8 @@ for ast in tests:
                     else:
                         confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
                     config = "%s%s" % (VM_name, vmargs.replace(" ", ""))
+                    if config.find("-memlimit")>-1:
+                        config=config[0:config.find("-memlimit")]
                     if globs['perfm']:  #send vprof results to db
                         #calc confidence and mean for each stat
                         def calcConf(list):
@@ -590,10 +711,11 @@ for ast in tests:
                         perfmSocketlog('vprof-ir-bytes','irbytes')
                         perfmSocketlog('vprof-ir-time','ir')
                         perfmSocketlog('vprof-count','count')
-                    socketlog("addresult2::%s::time::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
-                    log_print("%-50s %7s %10.1f%%    %s" % (ast,result1,confidence,resultList)) 
+                    socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, iterations, OS_name, config, VM_version))
+                    log_print("%-50s %7s %10.1f%% %7s  %s" % (ast,result1,confidence,metric,resultList)) 
                 else: #one iteration
-                    log_print("%-50s %7s" % (ast,result1)) 
+                    log_print("%-50s %7s %7s" % (ast,result1,metric)) 
             else:
                     log_print("%-50s crash" % (ast)) 
-
+                    res=1
+exit(res)

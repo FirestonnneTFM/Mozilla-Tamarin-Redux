@@ -400,5 +400,5 @@ package {
 	return _sunSpiderInterval;
 	}
 
-	print("metric 3dcube-as3 " + run3dCube());
+	print("metric time " + run3dCube());
 

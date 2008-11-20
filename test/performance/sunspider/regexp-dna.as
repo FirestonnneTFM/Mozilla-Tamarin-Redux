@@ -1742,4 +1742,4 @@ var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }
-print("metric regexp-dna "+runRegexpDna());
+print("metric time "+runRegexpDna());

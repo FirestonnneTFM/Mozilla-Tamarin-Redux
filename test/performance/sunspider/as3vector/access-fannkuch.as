@@ -60,11 +60,14 @@ function fannkuch(n:int):int {
       }
    }
 }
-function runAccessFannkuch():int {
-var _sunSpiderStartDate:int = getTimer();
-  var n:int = 8;
-  var ret:int = fannkuch(n);
-  var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-  return _sunSpiderInterval;
+
+var start:Number=new Date();
+var res:int=fannkuch(8);
+var totaltime=new Date()-start;
+
+print("fannkuch(8)="+res);
+if (res==22) {
+  print("metric time "+totaltime);
+} else {
+  print("error fannkuch(8) expecting 22 got "+res);
 }
-print("metric run-access-fannkuch-as3vector "+runAccessFannkuch());

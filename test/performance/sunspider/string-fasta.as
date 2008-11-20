@@ -116,4 +116,4 @@ var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }
-print("metric string-fasta "+runStringFasta());
+print("metric time "+runStringFasta());

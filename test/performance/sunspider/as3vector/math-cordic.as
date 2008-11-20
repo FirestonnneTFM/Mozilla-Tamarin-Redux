@@ -129,5 +129,5 @@ var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 return _sunSpiderInterval;
 }
 
-print("metric math-cordic-as3vector " + runMathCordic());
+print("metric time " + runMathCordic());
 

@@ -166,4 +166,4 @@ var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 
 return(_sunSpiderInterval);
 }
-print("metric string-base64 "+runStringBase64());
+print("metric time "+runStringBase64());

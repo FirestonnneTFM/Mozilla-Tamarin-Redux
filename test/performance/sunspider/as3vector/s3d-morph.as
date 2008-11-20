@@ -58,5 +58,5 @@ function run3dMorph():int {
 	return _sunSpiderInterval;
 }
 
-print("metric 3d-morph-as3vector " + run3dMorph());
+print("metric time " + run3dMorph());
 

@@ -446,6 +446,6 @@ package {
 
 	var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
 
-	print("metric date-format-xparb-as3 " + _sunSpiderInterval);
+	print("metric time " + _sunSpiderInterval);
 
 }

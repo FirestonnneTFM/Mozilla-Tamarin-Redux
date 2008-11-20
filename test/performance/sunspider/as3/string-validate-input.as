@@ -118,6 +118,6 @@ package {
 	  return _sunSpiderInterval;
 	}
 
-	print("metric string-validate-input-as3 " + runStringValidateInput());
+	print("metric time " + runStringValidateInput());
 
 }

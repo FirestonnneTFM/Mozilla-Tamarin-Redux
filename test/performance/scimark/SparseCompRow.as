@@ -31,15 +31,15 @@ public class SparseCompRow
 	{
 		var M:uint = row.length - 1;
 
-		for (var reps:Number=0; reps<NUM_ITERATIONS; reps++)
+		for (var reps:int=0; reps<NUM_ITERATIONS; reps++)
 		{
 		
-			for (var r:Number=0; r<M; r++)
+			for (var r:int=0; r<M; r++)
 			{
 				var sum:Number = 0.0; 
-				var rowR:Number = row[r];
-				var rowRp1:Number = row[r+1];
-				for (var i:Number=rowR; i<rowRp1; i++)
+				var rowR:int = row[r];
+				var rowRp1:int = row[r+1];
+				for (var i:int=rowR; i<rowRp1; i++)
 					sum += x[ col[i] ] * val[i];
 				y[r] = sum;
 			}
@@ -86,7 +86,7 @@ row[0] = 0;
 for (r=0; r<N; r++)
 {
 // initialize elements for row r
-var rowr:Number = row[r];
+var rowr:int = row[r];
 row[r+1] = rowr + nr;
 var step:Number = r/ nr;
 if (step < 1) step = 1;   // take at least unit steps
@@ -97,5 +97,5 @@ for (var i:uint=0; i<nr; i++)
 }
 
 SparseCompRow.matmult(y, val, row, col, x, 400);
-print("metric sparsecomprow-time "+(getTimer()-starttime));
+print("metric time "+(getTimer()-starttime));
 }

@@ -21,9 +21,10 @@ var ITERS:int = 100;
 
     var size:int;
 
-    var datasizes:Vector.<int> = new Vector.<int>(2);
-    datasizes[0] = 8;
-    datasizes[1] = 13;
+    var datasizes:Vector.<int> = new Vector.<int>(3);
+    datasizes[0] = 6;
+    datasizes[1] = 8;
+    datasizes[2] = 13;
 
     var interactions:int = 0;
 
@@ -553,5 +554,5 @@ class particle {
 	var start=new Date();
 	JGFrun(0);
 	var elapsed=new Date()-start;
-	print("metric jsbench-moldyn "+elapsed);
+	print("metric time "+elapsed);
 

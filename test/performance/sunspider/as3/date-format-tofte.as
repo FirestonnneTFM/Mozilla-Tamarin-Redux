@@ -22,9 +22,6 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
-package {
-	var _sunSpiderStartDate:int = getTimer();
-
 	function arrayExists(array:Array, x:String):Boolean {
 	    for (var i:int = 0; i < array.length; i++) {
 	        if (array[i] == x) return true;
@@ -32,7 +29,7 @@ package {
 	    return false;
 	}
 
-	Date.prototype.formatDate = function (input:String,time:Date):String {
+	Date.prototype.formatDate = function (input:String,time:Date=null):String {
 	    // formatDate :
 	    // a PHP date like function, for formatting date strings
 	    // See: http://www.php.net/date
@@ -49,6 +46,12 @@ package {
 	    //
 	    // unsupported:
 	    // I (capital i), T, Z    
+
+            var prevTime;
+	    if (time!=null) {
+	        prevTime=self.getTime();
+                self.setTime(time);
+            }
 
 	    var switches:Array =    ["a", "A", "B", "d", "D", "F", "g", "G", "h", "H", 
 	                       "i", "j", "l", "L", "m", "M", "n", "O", "r", "s", 
@@ -158,7 +161,7 @@ package {
 	            return 0;
 	        }
 	    }
-	    function m():Number {
+	    function m():String {
 	        // Numeric representation of a month, with leading zeros
 	        return self.getMonth() < 9?
 	        "0"+(self.getMonth()+1) : 
@@ -272,7 +275,7 @@ package {
 	        // else, do this:
 	        // codes thanks to ppk:
 	        // http://www.xs4all.nl/~ppk/js/introdate.html
-	        var x:Number = self.getYear();
+	        var x:Number = self.getFullYear();
 	        var y:Number = x % 100;
 	        y += (y < 38) ? 2000 : 1900;
 	        return y;
@@ -290,12 +293,6 @@ package {
 	    }
 	        
 	    var self:Date = this;
-	    if (time) {
-	        // save time
-	        var prevTime:Number = self.getTime();
-	        self.setTime(time);
-	    }
-	    
 	    var ia:Array = input.split("");
 	    var ij:int = 0;
 	    while (ia[ij]) {
@@ -304,30 +301,65 @@ package {
 	            ia.splice(ij,1);
 	        } else {
 	            if (arrayExists(switches,ia[ij])) {
-	                ia[ij] = eval(ia[ij] + "()");
+ 	                switch (ia[ij]) {
+                            case "A":
+                               ia[ij]=A();
+                               break;
+                            case "d":
+                               ia[ij]=d();
+                               break;
+                            case "F":
+                               ia[ij]=F();
+                               break;
+                            case "g":
+                               ia[ij]=g();
+                               break;
+                            case "i":
+                               ia[ij]=i();
+                               break;
+                            case "l":
+                               ia[ij]=l();
+                               break;
+                            case "m":
+                               ia[ij]=m();
+                               break;
+                            case "s":
+                               ia[ij]=s();
+                               break;
+                            case "Y":
+                               ia[ij]=Y();
+                               break;
+                            default:
+                               print("unknown function: "+ ia[ij]);
+                        }
 	            }
 	        }
 	        ij++;
 	    }
-	    // reset time, back to what it was
-	    if (prevTime) {
-	        self.setTime(prevTime);
-	    }
+            if (time!=null) {
+                self.setTime(prevTime);
+            }
 	    return ia.join("");
 	}
+
+        var start:Number=new Date();
 
 	var date:Date = new Date("1/1/2007 1:11:11");
 
 	for (var i:int = 0; i < 500; ++i) {
-	    var shortFormat:Date = date.formatDate("Y-m-d");
-	    var longFormat:Date = date.formatDate("l, F d, Y g:i:s A");
+	    var shortFormat:String = date.formatDate("Y-m-d");
+	    var longFormat:String = date.formatDate("l, F d, Y g:i:s A");
 	    date.setTime(date.getTime() + 84266956);
 	}
 
-
-
-	var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
-
-	print("metric date-format-tofte-typed " + _sunSpiderInterval);
-
-}
+        var totaltime:Number=new Date()-start;
+        
+    if (shortFormat!="2008-05-01") {
+        print("error shortFormat expecting 2008-05-01 got "+shortFormat);
+    } else {
+        if (longFormat!="Thursday, May 01, 2008 6:31:22 PM") {
+            print("error longFormat expecting Thursday, May 01, 2008 6:31:22 PM got "+longFormat);
+        } else {
+            print("metric time "+totaltime);
+        }
+    }

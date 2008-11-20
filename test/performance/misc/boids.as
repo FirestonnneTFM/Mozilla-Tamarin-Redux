@@ -46,7 +46,7 @@ package {
 	for (var i:int=0;i<frames;i++) {
 		b.move_boids();
 	}
-	print("metric boids " + getTimer());
+	print("metric time " + getTimer());
 
 
 	public class boids {

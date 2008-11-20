@@ -60,4 +60,4 @@ for (var i = 1024; i <= 16384; i *= 2) {
 var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
 return(_sunSpiderInterval);
 }
-print("metric run-partial-sums "+runPartialSums());
+print("metric time "+runPartialSums());

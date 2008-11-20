@@ -1,8 +1,9 @@
   var size:int;
   var errorCheck:Boolean=false;
-  var datasizes:Vector.<int> = new Vector.<int>(2,true);
-  datasizes[0] = 8;
-  datasizes[1] = 12;
+  var datasizes:Vector.<int> = new Vector.<int>(3,true);
+  datasizes[0] = 2;
+  datasizes[1] = 8;
+  datasizes[2] = 12;
 
   var machff:Number = 0.7; /* Inflow mach number */
 
@@ -1609,5 +1610,5 @@ class Vector2 {
   var start=new Date();
   JGFrun(0);
   var elapsed=new Date()-start;
-  print("metric jsbench-euler "+elapsed);
+  print("metric time "+elapsed);
   
