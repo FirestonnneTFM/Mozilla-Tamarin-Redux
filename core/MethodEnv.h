@@ -308,15 +308,25 @@ namespace avmplus
 		// ------------------------ DATA SECTION END
 		};
 
-		// low 2 bits of activationOrMCTable
+		// low 2 bits of activationOrMCTable 
 		enum { kActivation=0, kMethodTable, kActivationMethodTablePair };
+		// and the 3rd bit is a flag for "am I a ScriptEnv"
+		enum { kIsScriptEnv = 4 };
 
-		ActivationMethodTablePair *getPair() const { return (ActivationMethodTablePair*)(activationOrMCTable&~3); }		
+		ActivationMethodTablePair* getPair() const { return (ActivationMethodTablePair*)(activationOrMCTable&~7); }		
 		int getType() const { return activationOrMCTable&3; }
 		void setActivationOrMCTable(void *ptr, int type) 
 		{
-			WB(core()->GetGC(), this, &activationOrMCTable, (uintptr)ptr|type);
+			AvmAssert((uintptr_t(ptr) & 7) == 0);
+			WB(core()->GetGC(), this, &activationOrMCTable, (uintptr_t)ptr | type | (activationOrMCTable & kIsScriptEnv));
 		}
+
+	protected:
+		inline void setIsScriptEnv() { activationOrMCTable |= kIsScriptEnv; }
+
+	public:
+		inline bool isScriptEnv() const { return (activationOrMCTable & kIsScriptEnv) != 0; }
+
 	// ------------------------ DATA SECTION BEGIN
 	public:
 		// pointers are write-once so we don't need WB's
@@ -351,6 +361,7 @@ namespace avmplus
 		ScriptEnv(AbstractFunction* _method, VTable * _vtable)
 			: MethodEnv(_method, _vtable)
 		{
+			setIsScriptEnv(); 
 		}
 
 		ScriptObject* initGlobal();

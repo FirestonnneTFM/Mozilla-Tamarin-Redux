@@ -82,6 +82,9 @@ package avmplus
 
 		// function exists solely to test native-methods with custom namespaces
 		ns_example native static function nstest():void;
+
+		// function exists solely to test ScriptObject::isGlobalObject
+		public native static function isGlobal(o:Object):Boolean;
 	}	
 	
 	[native(cls="FileClass", methods="auto")]

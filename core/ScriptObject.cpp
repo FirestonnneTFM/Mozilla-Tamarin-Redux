@@ -442,6 +442,17 @@ namespace avmplus
 		return undefinedAtom;// not reached
 	}
 
+    bool ScriptObject::isGlobalObject() const
+    {
+        AvmAssert(vtable != 0);
+        AvmAssert(vtable->init != 0);
+		MethodEnv* init = vtable->init;
+		if (!init->isScriptEnv())
+			return false;
+        const ScriptEnv* const scriptInitForVTable = static_cast<const ScriptEnv*>(init);
+        return scriptInitForVTable->global == this;
+    }
+
 #ifdef AVMPLUS_VERBOSE
 	Stringp ScriptObject::format(AvmCore* core) const
 	{

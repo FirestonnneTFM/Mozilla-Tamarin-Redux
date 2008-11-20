@@ -115,6 +115,9 @@ namespace avmshell
 
 		// function exists solely to test native-methods with custom namespaces
 		void ns_example_nstest() { }
+
+		// function exists solely to test ScriptObject::isGlobalObject
+		bool isGlobal(Atom o);
     };
 }
 
