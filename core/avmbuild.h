@@ -136,7 +136,7 @@
 #endif
 
 #ifndef AVMPLUS_DISABLE_NJ
-#  if defined AVMPLUS_IA32 && !defined AVMPLUS_64BIT //|| defined AVMPLUS_ARM
+#  if defined AVMPLUS_IA32 && !defined AVMPLUS_64BIT || defined AVMPLUS_ARM
 #    define FEATURE_NANOJIT
 #  endif
 #endif
@@ -274,9 +274,24 @@
 #endif
 
 #if !defined(AVMPLUS_LITTLE_ENDIAN) && !defined(AVMPLUS_BIG_ENDIAN)
-	#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64) || defined(AVMPLUS_ARM)
-		// assume ARM is always little-endian for now
+	#if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		#define AVMPLUS_LITTLE_ENDIAN
+	#elif defined(AVMPLUS_ARM)
+		#if defined _MSC_VER
+			#define AVMPLUS_LITTLE_ENDIAN
+		#elif defined __GNUC__
+            #include <endian.h>
+			#if __BYTE_ORDER == LITTLE_ENDIAN
+				#define AVMPLUS_LITTLE_ENDIAN
+			#else
+				#define AVMPLUS_BIG_ENDIAN
+			#endif
+			#if __FLOAT_WORD_ORDER == BIG_ENDIAN
+				// old arm linux abi is little endian, but the two 32bit words
+				// of a double value are in big endian order.
+				#define AVMPLUS_ARM_OLDABI
+			#endif
+		#endif
  	#elif defined(AVMPLUS_PPC) || defined(AVMPLUS_SPARC)
  		#define AVMPLUS_BIG_ENDIAN
  	#else

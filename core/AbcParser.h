@@ -109,18 +109,11 @@ namespace avmplus
 		 */
 		void addNamedTraits(Namespacep ns, Stringp name, Traits* itraits);
 
-		sint64 readS64(const byte* &p) const
-		{
-#ifdef SAFE_PARSE
-			// check to see if we are trying to read past the file end.
-			if (p < abcStart || p+7 >= abcEnd )
-				toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
-			unsigned first  = p[0] | p[1]<<8 | p[2]<<16 | p[3]<<24;
-			unsigned second = p[4] | p[5]<<8 | p[6]<<16 | p[7]<<24;
-			p += 8;
-			return first | ((sint64)second)<<32;
-		}
+		/**
+		 * reads in 8 bytes in little endian order and stores in
+		 * memory as an ieee double, doing endian swapping as needed
+		 */
+		double readDouble(const byte* &p) const;
 
         /**
          * Reads in 2 bytes and turns them into a 16 bit number.  Always reads in 2 bytes.  Currently

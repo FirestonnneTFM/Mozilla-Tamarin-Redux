@@ -133,7 +133,13 @@ namespace avmplus
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			// jit flag forces use of MIR/LIR instead of interpreter
-			config.runmode = RM_mixed;
+            #ifdef AVMPLUS_ARM
+                // default is -Dinterp until jit fully debugged
+                config.runmode = RM_interp_all;
+            #else
+    			config.runmode = RM_mixed;
+            #endif
+
 			config.cseopt = true;
 
 			#ifdef AVMPLUS_VERBOSE
@@ -143,7 +149,7 @@ namespace avmplus
 		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     		config.sse2 = true;
 			#endif
-			#endif
+		#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 	#ifdef VTUNE
 			VTuneStatus = CheckVTuneStatus();

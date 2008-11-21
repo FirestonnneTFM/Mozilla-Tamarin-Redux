@@ -437,6 +437,20 @@ namespace avmplus
 			_swap8(c[2], c[5]);
 			_swap8(c[3], c[4]);
 		}
+	#elif AVMPLUS_ARM_OLDABI
+		inline void MOPS_SWAP_BYTES(uint16_t*) {}
+		inline void MOPS_SWAP_BYTES(uint32_t*) {}
+		inline void MOPS_SWAP_BYTES(float*) {}
+		inline void MOPS_SWAP_BYTES(double*)
+		{
+			union {
+				double* pv;
+				uint32_t* w;
+			};
+			uint32_t t = w[0];
+			w[0] = w[1];
+			w[1] = t;
+		}
 	#else
 		#define MOPS_SWAP_BYTES(p) do {} while (0)
 	#endif

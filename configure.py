@@ -115,22 +115,20 @@ if config.getCompiler() == 'GCC':
     DEBUG_CXXFLAGS += "-g "
 elif config.getCompiler() == 'VS':
     if cpu == "arm":
-        APP_CXXFLAGS = "-W4 -WX -wd4291 -wd4201 -wd4189 -wd4740 -wd4127 "
+        APP_CXXFLAGS = "-W4 -WX -wd4291 -wd4201 -wd4189 -wd4740 -wd4127 -fp:fast -GF -GS- -Zc:wchar_t- "
+        OS_LDFLAGS += "-MAP "
         if config.getDebug():
             DEBUG_CXXFLAGS = "-Od "
             APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- -Zc:forScope "
         else:
-            OPT_CXXFLAGS = "-O2 "
-            APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- "
+            OPT_CXXFLAGS = "-O2 -GR- "
     else:
-        APP_CXXFLAGS = "-W4 -WX -wd4291 "
-        OS_LDFLAGS += "-SAFESEH:NO "
+        APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -fp:fast -GS- -Zc:wchar_t- "
+        OS_LDFLAGS += "-SAFESEH:NO -MAP "
         if config.getDebug():
-            OPT_CXXFLAGS = "-Od "
-            APP_CXXFLAGS += "-EHsc "
+            DEBUG_CXXFLAGS = "-Od -EHsc "
         else:
-            OPT_CXXFLAGS = "-O2 -Ob1 "
-            APP_CXXFLAGS += "-GF -GR- -fp:fast -GS- -Zc:wchar_t- "
+            OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
     DEBUG_CXXFLAGS += "-Zi "
     DEBUG_LDFLAGS += "-DEBUG "
 elif config.getCompiler() == 'SunStudio':
