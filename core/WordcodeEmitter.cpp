@@ -73,12 +73,8 @@ namespace avmplus
 	{
 		AvmAssert(info != NULL);
 
-		const uint8_t* pos = info->body_pos;
-		info->word_code.max_stack = AvmCore::readU30(pos);
-		info->word_code.local_count = AvmCore::readU30(pos);
-		info->word_code.init_scope_depth = AvmCore::readU30(pos);
-		info->word_code.max_scope_depth = AvmCore::readU30(pos);
-		AvmCore::readU30(pos);  // code_length
+		const byte* pos = info->body_pos;
+		AvmCore::skipU30(pos, 5);  // max_stack, local_count, init_scope_depth, max_scope_depth, code_length
 		code_start = pos;
 		pool = info->pool;
 		
@@ -654,7 +650,7 @@ namespace avmplus
 		
 		if (info != NULL) {
 			info->word_code.code_anchor = code_anchor;
-			info->word_code.body_pos = code;
+			info->codeStart = code;
 #ifdef SUPERWORD_PROFILING
 			WordcodeTranslator::swprofCode(code, code + total_size);
 #endif

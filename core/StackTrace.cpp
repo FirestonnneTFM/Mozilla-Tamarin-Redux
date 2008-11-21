@@ -118,6 +118,12 @@ namespace avmplus
 
 	CallStackNode::~CallStackNode()
 	{
+		// The destructor /must not/ do anything except call reset()
+		reset();
+	}
+	
+	void CallStackNode::reset()
+	{
 		AvmCore* core = m_core; // save it since exit() resets to null
 		if (core)
 		{

@@ -70,10 +70,6 @@ namespace avmplus
 		{
 			const uintptr_t *body_pos; // NULL iff not yet translated
 			DWB(GCObject*) code_anchor;  // The object that contains the code pointed to by body_pos
-			int max_stack;
-			int local_count;
-			int init_scope_depth;
-			int max_scope_depth;
 			int cache_size;              // Number of items in lookup cache
 			// We write this once, in WordcodeTranslator, with an explicit WB.  so no DWB.
 			// The contents are the same as the 'exceptions' structure below, except the 'from', 'to', and 'target' fields.
@@ -88,11 +84,6 @@ namespace avmplus
 		void verify(Toplevel* toplevel);
         void setInterpImpl();
 
-		static int maxScopeDepth(MethodInfo* /*info*/, int max_scope) 
-		{
-			return max_scope;
-		}
-
 #ifdef DEBUGGER
 		virtual uint32 size() const;
 		void initLocalNames();
@@ -101,7 +92,15 @@ namespace avmplus
 	// ------------------------ DATA SECTION BEGIN
 	public:
 		const uint8_t*			body_pos;
-		ExceptionHandlerTable*	exceptions;	// we write this once, in Verifier, with an explicit WB.  so no DWB.
+		ExceptionHandlerTable*	exceptions;			// we write this once, in Verifier, with an explicit WB.  so no DWB.
+		uint32_t				frameSize;			// total size of frame in number of Atoms
+		uint32_t				localCount;			// maximum number of local registers
+		uint32_t				maxScopeDepth;		// maximum depth of local scope stack
+#ifdef AVMPLUS_WORD_CODE
+		const uintptr_t*        codeStart;			// pointer to first instruction
+#else
+		const uint8_t*			codeStart;			// ditto
+#endif
 #ifdef DEBUGGER
 	protected:
 		DWB(AbcFile*)			file;				// the abc file from which this method came
@@ -111,8 +110,8 @@ namespace avmplus
 		int32_t					lastSourceLine;		// source line number where function ends
 		int32_t					offsetInAbc;		// offset in abc file
 		uint32_t				codeSize;			// abc size pre-jit, native size post jit
-		int32_t					local_count;
-		int32_t					max_scopes;
+		int32_t					local_count;		// FIXME: merge with localCount above; this one may be visible to a debugger?
+		int32_t					max_scopes;			// FIXME: merge with maxScopeDepth above; this one is not used by the VM but may be visible to a debugger?
 #endif
 	// ------------------------ DATA SECTION END
 	};

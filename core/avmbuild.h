@@ -161,7 +161,13 @@
 #define AVMPLUS_VERIFYALL
 #endif
 
-#if defined(VTUNE) || defined(DEBUG) || defined(_DEBUG) || defined(DEBUGGER)
+#ifdef _DEBUG
+#  ifndef DEBUG
+#    define DEBUG 1 // don't use _DEBUG
+#  endif
+#endif
+
+#if defined(VTUNE) || defined(DEBUG) || defined(DEBUGGER)
 #define AVMPLUS_VERBOSE
 #endif
 
