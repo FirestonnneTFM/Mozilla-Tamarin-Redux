@@ -306,7 +306,9 @@
 #if defined AVMPLUS_MAC || defined AVMPLUS_UNIX
 #  define AVMPLUS_WORD_CODE
 #  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
+#ifdef __GNUC__
 #  define AVMPLUS_DIRECT_THREADED     // gcc on these platforms
+#endif
 #endif
 
 #if defined AVMPLUS_WIN32
