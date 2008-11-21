@@ -50,79 +50,85 @@
 
 /////. Start CORDIC
 package {
-	var AG_CONST:Number = 0.6072529350;
+  var AG_CONST:Number = 0.6072529350;
 
-	function FIXED(X:Number):Number
-	{
-	  return X * 65536.0;
-	}
+  function FIXED(X:Number):Number
+  {
+    return X * 65536.0;
+  }
 
-	function FLOAT(X:Number):Number
-	{
-	  return X / 65536.0;
-	}
+  function FLOAT(X:Number):Number
+  {
+    return X / 65536.0;
+  }
 
-	function DEG2RAD(X:Number):Number
-	{
-	  return 0.017453 * (X);
-	}
+  function DEG2RAD(X:Number):Number
+  {
+    return 0.017453 * (X);
+  }
 
 
-	var Angles:Array = [
-	  FIXED(45.0), FIXED(26.565), FIXED(14.0362), FIXED(7.12502),
-	  FIXED(3.57633), FIXED(1.78991), FIXED(0.895174), FIXED(0.447614),
-	  FIXED(0.223811), FIXED(0.111906), FIXED(0.055953),
-	  FIXED(0.027977) 
-	              ];
+  var Angles:Array = [
+    FIXED(45.0), FIXED(26.565), FIXED(14.0362), FIXED(7.12502),
+    FIXED(3.57633), FIXED(1.78991), FIXED(0.895174), FIXED(0.447614),
+    FIXED(0.223811), FIXED(0.111906), FIXED(0.055953),
+    FIXED(0.027977) 
+                ];
 
-	function cordicsincos():void {
-	    var X:Number;
-	    var Y:Number;
-	    var TargetAngle:Number;
-	    var CurrAngle:Number;
-	    var Step:int;
-	 
-	    X = FIXED(AG_CONST);         /* AG_CONST * cos(0) */
-	    Y = 0;                       /* AG_CONST * sin(0) */
+  function cordicsincos():Number {
+      var X:Number;
+      var Y:Number;
+      var TargetAngle:Number;
+      var CurrAngle:Number;
+      var Step:int;
+   
+      X = FIXED(AG_CONST);         /* AG_CONST * cos(0) */
+      Y = 0;                       /* AG_CONST * sin(0) */
 
-	    TargetAngle = FIXED(28.027);
-	    CurrAngle = 0;
-	    for (Step = 0; Step < 12; Step++) {
-	        var NewX:Number;
-	        if (TargetAngle > CurrAngle) {
-	            NewX = X - (Y >> Step);
-	            Y = (X >> Step) + Y;
-	            X = NewX;
-	            CurrAngle += Angles[Step];
-	        } else {
-	            NewX = X + (Y >> Step);
-	            Y = -(X >> Step) + Y;
-	            X = NewX;
-	            CurrAngle -= Angles[Step];
-	        }
-	    }
-	}
+      TargetAngle = FIXED(28.027);
+      CurrAngle = 0;
+      for (Step = 0; Step < 12; Step++) {
+          var NewX:Number;
+          if (TargetAngle > CurrAngle) {
+              NewX = X - (Y >> Step);
+              Y = (X >> Step) + Y;
+              X = NewX;
+              CurrAngle += Angles[Step];
+          } else {
+              NewX = X + (Y >> Step);
+              Y = -(X >> Step) + Y;
+              X = NewX;
+              CurrAngle -= Angles[Step];
+          }
+      }
+      return CurrAngle;
+  }
 
-	///// End CORDIC
+  ///// End CORDIC
 
-	function cordic( runs:int ):int {
-	  var start:int = getTimer();
+  function cordic( runs:int ):int {
+    var start:int = (new Date).getTime();
 
-	  for ( var i:int = 0 ; i < runs ; i++ ) {
-	      cordicsincos();
-	  }
+    for ( var i:int = 0 ; i < runs ; i++ ) {
+        cordicsincos();
+    }
 
-	  var end:int = getTimer();
+    var end:int = (new Date).getTime();
 
-	  return end - start;
-	}
-	function runMathCordic():int {
-	var _sunSpiderStartDate:int = getTimer();
-	cordic(25000);
-	var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-	return _sunSpiderInterval;
-	}
+    return end - start;
+  }
 
-	print("metric time " + runMathCordic());
+  
+  function runMathCordic():int {
+    var _sunSpiderStartDate:int = (new Date).getTime();
+    cordic(25000);
+    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    return _sunSpiderInterval;
+  }
 
+  if (cordicsincos() === 1834995.3515519998) {
+    print("metric time "+runMathCordic());
+  } else {
+    print("Test validation failed. Expected: 1834995.3515519998 Got: "+cordicsincos());
+  }
 }

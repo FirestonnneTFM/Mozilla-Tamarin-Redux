@@ -29,7 +29,7 @@
 // Base on the Ruby version by jose fco. gonzalez
 
 function runRegexpDna() {
-var _sunSpiderStartDate = getTimer();
+var _sunSpiderStartDate = (new Date).getTime();
 var l;
 var dnaInput = ">ONE Homo sapiens alu\n\
 GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGGGAGGCCGAGGCGGGCGGA\n\
@@ -1738,8 +1738,11 @@ for(k in subs)
  // search string, replacement string, flags
 
 
-var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
+var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
 
+ 
 return(_sunSpiderInterval);
-}
+} // end function runRegexpDna() 
+
+
 print("metric time "+runRegexpDna());

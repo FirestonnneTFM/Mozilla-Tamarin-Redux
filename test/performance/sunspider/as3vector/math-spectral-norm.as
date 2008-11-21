@@ -77,13 +77,25 @@ function spectralnorm(n:int):Number {
 }
 
 function runMathSpectralNorm():int {
-var _sunSpiderStartDate:int = getTimer();
+  var _sunSpiderStartDate:int = (new Date).getTime();
   for (var i:int = 6; i <= 48; i *= 2) {
     spectralnorm(i);
   }
-  var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
+    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
   return _sunSpiderInterval;
 }
 
-print("metric time " + runMathSpectralNorm());
+function verifyTest():Boolean {
+  var result:Number = spectralnorm(10);
+  var expectedResult:Number = 1.2718440192507248;
+  if (result !== expectedResult) {
+    print('Test verification failed. spectralnorm(10):  Expected: '+expectedResult+' Got: '+result);
+    return false;
+  }
+  return true;
+}
+
+if (verifyTest()) {
+  print("metric time " + runMathSpectralNorm());
+}
 

@@ -101,25 +101,37 @@ function cordicsincos() {
             CurrAngle -= Angles[Step];
         }
     }
+    return CurrAngle;
 }
-
 ///// End CORDIC
 
 function cordic( runs ) {
-  var start = getTimer();
+  var start = (new Date).getTime();
 
   for ( var i = 0 ; i < runs ; i++ ) {
       cordicsincos();
   }
 
-  var end = getTimer();
+  var end = (new Date).getTime();
 
   return end - start;
 }
-function runMathCordic() {
-var _sunSpiderStartDate:int = getTimer();
-cordic(25000);
-var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-return(_sunSpiderInterval);
+
+function verifyTest() {
+  if (cordicsincos() === 1834995.3515519998) {
+    return true;
+  } else {
+    return false;
+  }
 }
-print("metric time "+runMathCordic());
+
+function runMathCordic() {
+  var _sunSpiderStartDate = (new Date).getTime();
+  cordic(25000);
+  var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  return(_sunSpiderInterval);
+}
+
+if (verifyTest()) {
+  print("metric time "+runMathCordic());
+}

@@ -81,7 +81,7 @@ Angles.push(FIXED(0.111906));
 Angles.push(FIXED(0.055953));
 Angles.push(FIXED(0.027977));
 
-function cordicsincos():void {
+function cordicsincos():Number {
     var X:Number;
     var Y:Number;
     var TargetAngle:Number;
@@ -107,27 +107,33 @@ function cordicsincos():void {
             CurrAngle -= Angles[Step];
         }
     }
+      return CurrAngle;
 }
 
 ///// End CORDIC
 
 function cordic( runs:int ):int {
-  var start:int = getTimer();
+    var start:int = (new Date).getTime();
 
   for ( var i:int = 0 ; i < runs ; i++ ) {
       cordicsincos();
   }
 
-  var end:int = getTimer();
+    var end:int = (new Date).getTime();
 
   return end - start;
 }
+
+  
 function runMathCordic():int {
-var _sunSpiderStartDate:int = getTimer();
-cordic(25000);
-var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-return _sunSpiderInterval;
+    var _sunSpiderStartDate:int = (new Date).getTime();
+    cordic(25000);
+    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    return _sunSpiderInterval;
 }
 
-print("metric time " + runMathCordic());
-
+  if (cordicsincos() === 1834995.3515519998) {
+    print("metric time "+runMathCordic());
+  } else {
+    print("Test validation failed. Expected: 1834995.3515519998 Got: "+cordicsincos());
+  }

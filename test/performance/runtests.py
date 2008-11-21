@@ -584,58 +584,36 @@ for ast in tests:
                             resultList2.append(int(rl[2]))
                     elif globs['perfm']:
                         parsePerfm(line, perfm2Dict)
-            # calculate current best result
-            if len(resultList)==0:
-                result1=9999999
-                result2=9999999
-            else:
-                if globs['largerIsFaster']:
-                    result1 = max(resultList)
-                    if resultList2:
-                        result2 = max(resultList2)
-                else:
-                    result1 = min(resultList)
-                    if resultList2:
-                        result2 = min(resultList2)
-                if globs['memory']:
-                    if memoryhigh<=0:
-                        spdup = 9999
-                    else:
-                        spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
-                elif len(avm2)>0:
-                    if result1==0:
-                        spdup = 9999
-                    else:
-                        spdup = ((result1-result2)/result2)*100.0
-            
-            resultList.append(result1)
-            resultList2.append(result2)
         except:
             print formatExceptionInfo()
             exit(-1)
     # end for i in range(iterations)
     # calculate best result
-    if globs['largerIsFaster']:
-        result1 = max(resultList)
-        if resultList2:
-            result2 = max(resultList2)
+    if len(resultList)==0:
+        result1=9999999
+        result2=9999999
     else:
-        result1 = min(resultList)
-        if resultList2:
-            result2 = min(resultList2)
-    if globs['memory']:
-        if memoryhigh<=0:
-            spdup = 9999
+        if globs['largerIsFaster']:
+            result1 = max(resultList)
+            if resultList2:
+                result2 = max(resultList2)
         else:
-            spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
-    elif len(avm2)>0:
-        if result1==0:
-            spdup = 9999
-        else:
-            if globs['largerIsFaster']:
-                spdup = float(result2-result1)/result2*100.0
+            result1 = min(resultList)
+            if resultList2:
+                result2 = min(resultList2)
+        if globs['memory']:
+            if memoryhigh<=0:
+                spdup = 9999
             else:
-                spdup = float(result1-result2)/result2*100.0
+                spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
+        elif len(avm2)>0:
+            if result1==0:
+                spdup = 9999
+            else:
+                if globs['largerIsFaster']:
+                    spdup = float(result2-result1)/result2*100.0
+                else:
+                    spdup = float(result1-result2)/result2*100.0
     if globs['memory']:
         if len(avm2)>0:
             log_print("%-50s %7s %7s %7.1f %7s" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric))
@@ -717,5 +695,7 @@ for ast in tests:
                     log_print("%-50s %7s %7s" % (ast,result1,metric)) 
             else:
                     log_print("%-50s crash" % (ast)) 
+                    for line in f1:
+                        print(line.strip())
                     res=1
 exit(res)
