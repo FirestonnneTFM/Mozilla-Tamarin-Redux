@@ -197,7 +197,13 @@ class Configuration:
                 'LIBPATH'   : '-LIBPATH:'
                 })
             if self._target[1] == "arm":
-                self._acvars.update({'LDFLAGS' : '-NODEFAULTLIB:"oldnames.lib" -ENTRY:"mainWCRTStartup"'})
+				self._acvars.update({'LDFLAGS' : '-NODEFAULTLIB:"oldnames.lib" -ENTRY:"mainWCRTStartup"'})
+				
+				if sys.platform.startswith('cygwin'):
+					self._acvars.update({'ASM' : '$(topsrcdir)/build/cygwin-wrapper.sh armasm.exe -nologo -arch 5T'})
+				else:
+					self._acvars.update({'ASM' : 'armasm.exe -nologo -arch 5T'})
+				
             if sys.platform.startswith('cygwin'):
                 self._acvars.update({'CXX'          : '$(topsrcdir)/build/cygwin-wrapper.sh cl.exe -nologo'})
 
