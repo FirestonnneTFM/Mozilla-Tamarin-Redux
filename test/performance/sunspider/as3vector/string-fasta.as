@@ -29,14 +29,14 @@
 //  Contributed by Ian Osgood
 
 package {
-	public class frequency {
-		public var c:String;
-		public var p:Number;
-		public function frequency(c:String, p:Number) {
+  public class frequency {
+    public var c:String;
+    public var p:Number;
+    public function frequency(c:String, p:Number) {
             this.c = c;
             this.p = p;
         }
-	}
+  }
 }
 
 var last:Number = 42, A:Number = 3877, C:Number = 29573, M:Number = 139968;
@@ -81,15 +81,16 @@ HomoSap.push(new frequency("t", 0.3015094502008));
 
 
 function makeCumulative(table:Vector.<frequency>):void {
-	var cp:Number = 0.0;
-	for (var i:int = 0; i < table.length; i++) {
-		cp += table[i].p;
-		table[i].p = cp;
-	}
+  var cp:Number = 0.0;
+  for (var i:int = 0; i < table.length; i++) {
+    cp += table[i].p;
+    table[i].p = cp;
+  }
 }
 
-function fastaRepeat(n:int, seq:String):void {
+function fastaRepeat(n:int, seq:String):String {
   var seqi:int = 0, lenOut:int = 60;
+  var ret:String;
   while (n>0) {
     if (n<lenOut) lenOut = n;
     if (seqi + lenOut < seq.length) {
@@ -102,10 +103,12 @@ function fastaRepeat(n:int, seq:String):void {
     }
     n -= lenOut;
   }
+  return ret;
 }
 
-function fastaRandom(n:int, table:Vector.<frequency>):void {
+function fastaRandom(n:int, table:Vector.<frequency>):String {
   var line:Vector.<String> = new Vector.<String>(60,true);
+  var ret:String;
   makeCumulative(table);
   while (n>0) {
     if (n<line.length) line = new Vector.<String>(n, true);
@@ -121,20 +124,27 @@ function fastaRandom(n:int, table:Vector.<frequency>):void {
     ret = line.join('');
     n -= line.length;
   }
+  return ret;
 }
 
 function runStringFasta():int {
-	var _sunSpiderStartDate:int = getTimer();
-	var ret:String;
+  var _sunSpiderStartDate:int = (new Date).getTime();
+  var ret:String;
 
-	var count:Number = 7;
-	ret = fastaRepeat(2*count*100000, ALU);
-	ret = fastaRandom(3*count*1000, IUB);
-	ret = fastaRandom(5*count*1000, HomoSap);
+  var count:Number = 7;
+  ret = fastaRepeat(2*count*100000, ALU);
+  ret += fastaRandom(3*count*1000, IUB);
+  ret += fastaRandom(5*count*1000, HomoSap);
 
-	var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
-	return _sunSpiderInterval;
+  var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+  
+  // verify test results
+  var expected:String = "CAAAAAGGCCGGGCGCGGTGVtttaDtKgcaaWaaaaatSccMcVatgtKgtaKgcgatatgtagtSaaaDttatacaaattggctatatttatgttgga";
+  if (ret != expected) {
+    print("Test validation failed.  Expected: "+expected+" Got: "+ret);
+  } else {
+    print("metric time "+_sunSpiderInterval);
+  }
 }
 
-print("metric time " + runStringFasta());
-
+runStringFasta();

@@ -311,7 +311,7 @@ Camera.prototype.render = function(scene, pixels, width, height) {
 
 function raytraceScene()
 {
-    var startDate = getTimer();
+    var startDate = (new Date).getTime();
     var numTriangles = 2 * 6;
     var triangles = new Array();//numTriangles);
     var tfl = createVector(-10,  10, -10);
@@ -399,6 +399,7 @@ function raytraceScene()
     _camera.render(_scene, pixels, size, size);
 
     return pixels;
+    
 }
 
 function arrayToCanvasCommands(pixels)
@@ -437,10 +438,31 @@ for (var y = 0; y < size; y++) {\n\
     return s;
 }
 
-function run3draytrace() {
-  var _sunSpiderStartDate = getTimer();
-  testOutput = arrayToCanvasCommands(raytraceScene());
-  var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
-  return _sunSpiderInterval;
+function verifyTest(pixelArray) {
+  var total = 0;
+  for (var i=0; i<pixelArray.length; i++) {
+    for (var j=0; j<pixelArray[i].length; j++) {
+        for (var k=0; k<pixelArray[i][j].length; k++) {
+          total += pixelArray[i][j][k];
+        }
+    }
+  }
+  return total;
 }
-print("metric time "+run3draytrace());
+
+function run3draytrace() {
+  var _sunSpiderStartDate = (new Date).getTime();
+  var pixels = raytraceScene();
+  testOutput = arrayToCanvasCommands(pixels);
+  var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  
+  //print('pixels: '+pixels);
+  // verify test result
+  if (verifyTest(pixels) !== 1376.2841399482509) {
+    print("Test validation failed.  Expected 1376.2841399482509 Got: "+verifyTest(pixels));
+  } else {
+    print("metric time "+ _sunSpiderInterval);
+  }
+}
+
+run3draytrace();
