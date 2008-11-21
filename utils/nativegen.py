@@ -36,11 +36,12 @@
 #
 # ***** END LICENSE BLOCK *****
 
-import optparse, struct, os
+import optparse, struct, os, sys
 from optparse import OptionParser
 from struct import *
 from os import path
 from math import floor
+from sys import stderr
 
 parser = OptionParser(usage="usage: %prog [--nativemapname=name] [--uniquethunks] [importfile [, importfile]...] file...")
 parser.add_option("-n", "--nativemapname", help="if using explicit maps for native classes and scripts, the name as argument")
@@ -1353,6 +1354,8 @@ for file in args:
 	abcGenName = os.path.splitext(file)[0]
 
 if abcGenFor:
+	hf = None
+	hc = None
 	try:
 		hf = open(abcGenName+".h2","w")
 		hc = open(abcGenName+".cpp2","w")
@@ -1360,11 +1363,10 @@ if abcGenFor:
 		c = IndentingPrintWriter(hc)
 		ngen.emit(abcGenFor, abcScriptName, h, c);
 	except Exception, e:
-		print "ERROR: ", e
+		sys.stderr.write("ERROR: "+str(e)+"\n")
 		exit(1)
 	finally:
-		hf.close()
-		hc.close()
-
-
-		
+		if hf != None:
+			hf.close()
+		if hc != None:
+			hc.close()
