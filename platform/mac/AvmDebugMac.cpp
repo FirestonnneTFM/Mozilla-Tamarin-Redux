@@ -57,6 +57,7 @@ namespace avmplus
 	#ifdef DARWIN
 	void AvmDebugMsg(bool debuggerBreak, const char* format, ...)
 	{
+#ifdef _DEBUG
 		char buf[4096];
 		va_list args;
 		va_start(args, format);
@@ -64,12 +65,19 @@ namespace avmplus
 		vsprintf(buf, format, args);
 		va_end(args);
 		AvmDebugMsg(buf, debuggerBreak);
+#else
+		(void)debuggerBreak;
+		(void)format;
+#endif
 	}
 
 	void AvmDebugMsg(const char* p, bool debugBreak)
 	{
+#ifdef _DEBUG
         #if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)
             AVMPlusCustomDebugMessageHandler(p);
+		#elif defined(MMGC_MAC_NO_CORE_SERVICES)
+			fprintf(stderr, "%s\n", p);
 		#else
 	  	    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);
 
@@ -87,10 +95,15 @@ namespace avmplus
 		
 			::CFRelease (cfStr);
 		#endif
+#else
+		(void)p;
+		(void)debugBreak;
+#endif
 	}	
 	#else
 	void AvmDebugMsg(bool debuggerBreak, const char* format, ...)
 	{
+#ifdef _DEBUG
 		char buf[4096];
 		va_list args;
 		va_start(args, format);
@@ -101,10 +114,15 @@ namespace avmplus
 		{
 			AvmDebugMsg(buf, debuggerBreak);
 		}
+#else
+		(void)debuggerBreak;
+		(void)format;
+#endif
 	}
 
 	void AvmDebugMsg(const char* p, bool debugBreak)
 	{
+#ifdef _DEBUG
 		char buf[256];
 		strcpy(buf, p);
 		::CopyCStringToPascal(buf, (StringPtr)buf);
@@ -113,6 +131,10 @@ namespace avmplus
 			DebugStr((StringPtr) buf);
 			exit(1);	// ensure we die
 		}
+#else
+		(void)p;
+		(void)debugBreak;
+#endif
 	}
 	#endif
 }
