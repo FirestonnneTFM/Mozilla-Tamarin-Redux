@@ -972,7 +972,7 @@
 					USE_MMAP,
 					_MAC,
 				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
@@ -1001,6 +1001,7 @@
 					USE_MMAP,
 					_MAC,
 				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				INSTALL_PATH = /usr/local/lib;
 				OTHER_CFLAGS = (
 					"-finline-functions",
@@ -1107,6 +1108,7 @@
 					_MAC,
 					DEBUGGER,
 				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
@@ -1136,6 +1138,7 @@
 					_MAC,
 					DEBUGGER,
 				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				INSTALL_PATH = /usr/local/lib;
 				OTHER_CFLAGS = (
 					"-finline-functions",

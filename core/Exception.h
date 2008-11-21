@@ -170,6 +170,10 @@ namespace avmplus
 	class ExceptionFrame
 	{
 	public:
+		// The interpreter sometimes allocates the exception frame inside a larger data structure
+		// and needs the placement new operator.
+		void *operator new(size_t, void* p) { return p; }
+		
 		ExceptionFrame()
 		{
 			core = NULL;
@@ -211,6 +215,15 @@ namespace avmplus
 
 	};
 
+	class ExceptionFrameAutoPtr
+	{
+	private:
+		ExceptionFrame& ef;
+	public:
+		ExceptionFrameAutoPtr(ExceptionFrame& ef) : ef(ef) {}
+		~ExceptionFrameAutoPtr() { ef.~ExceptionFrame(); }
+	};
+	
 	/**
 	 * TRY, CATCH, and friends are macros for setting up exception try/catch
 	 * blocks.  This is similar to the TRY, CATCH, etc. macros in MFC.
@@ -222,6 +235,10 @@ namespace avmplus
 	 * TRY_UNLESS is to support the optimization that if there are no exception handlers
 	 * in this frame, we don't need to create the exception frame at all.  If expr
 	 * is true, the exception frame is not created.
+	 *
+	 * TRY_UNLESS_HEAPMEM is like TRY_UNLESS but the address at which to allocate
+	 * the ExceptionFrame is passed explicitly (it is inside some larger heap-allocated
+	 * block, useful for short-stack systems)
 	 */
 
 #ifdef DEBUGGER
@@ -247,9 +264,21 @@ namespace avmplus
 		Exception* _ee; \
 		int _setjmpVal = 0; \
 		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
+	#define TRY_UNLESS_HEAPMEM(mem, core, expr, CATCH_ACTION) { \
+		ExceptionFrame& _ef = *(new (mem) ExceptionFrame); \
+		ExceptionFrameAutoPtr _ef_ap(_ef); \
+		Exception* _ee; \
+		int _setjmpVal = 0; \
+		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
 #else
 	#define TRY_UNLESS(core,expr,CATCH_ACTION) { \
 		ExceptionFrame _ef; \
+		Exception* _ee; \
+		int _setjmpVal = 0; \
+		if ((expr) || (_ef.beginTry(core), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
+	#define TRY_UNLESS_HEAPMEM(mem, core, expr, CATCH_ACTION) { \
+		ExceptionFrame& _ef = *(new (mem) ExceptionFrame); \
+		ExceptionFrameAutoPtr _ef_ap(_ef); \
 		Exception* _ee; \
 		int _setjmpVal = 0; \
 		if ((expr) || (_ef.beginTry(core), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))

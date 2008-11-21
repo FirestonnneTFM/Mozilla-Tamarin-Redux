@@ -105,7 +105,7 @@ namespace avmplus
 		local_count = AvmCore::readU30(pos);
 		int init_scope_depth = AvmCore::readU30(pos);
 		int max_scope_depth = AvmCore::readU30(pos);
-		max_scope = MethodInfo::maxScopeDepth(info, max_scope_depth - init_scope_depth);
+		max_scope = max_scope_depth - init_scope_depth;
 
 		stackBase = scopeBase + max_scope;
 		frameSize = stackBase + max_stack;
@@ -193,6 +193,22 @@ namespace avmplus
 		secondTry = false;
 		#endif
 
+		info->localCount = local_count;
+		info->maxScopeDepth = max_scope;
+#ifdef AVMPLUS_64BIT
+		info->frameSize = frameSize;
+#else
+		// The interpreter wants this to be padded to a doubleword boundary because
+		// it allocates two objects in a single alloca() request - the frame and
+		// auxiliary storage, in that order - and wants the second object to be
+		// doubleword aligned.
+		info->frameSize = (frameSize + 1) & ~1;
+#endif
+#ifndef AVMPLUS_WORD_CODE
+		// For word code, it is set by the WordcodeTranslator epilogue
+		info->codeStart = code_pos;
+#endif
+		
 #ifdef AVMPLUS_WORD_CODE
 	   // If MIR generation fails due to OOM then we must translate anyhow,
 	   // FIXME - logic for that looks unclear.

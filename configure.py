@@ -107,11 +107,11 @@ if MMGC_THREADSAFE:
 os, cpu = config.getTarget()
 
 if config.getCompiler() == 'GCC':
-    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wuninitialized -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 "
+    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 "
     if config.getDebug():
         APP_CXXFLAGS += "-frtti -fexceptions "
     else:
-        APP_CXXFLAGS += "-fno-rtti -fno-exceptions "
+        APP_CXXFLAGS += "-Wuninitialized -fno-rtti -fno-exceptions "
     DEBUG_CXXFLAGS += "-g "
 elif config.getCompiler() == 'VS':
     if cpu == "arm":

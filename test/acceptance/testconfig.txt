@@ -62,6 +62,10 @@ as3/sampling/Callback: , (x86|ppc)-mac-tvm-debugdebugger , skip,  https://bugzil
 # mmgc seg fault on linux debug-debugger: bug 457903
 ecma3/Exceptions/number_00[12]_rt: , x86-lnx-tvm-debugdebugger  , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=457903
 
+# The non-windows x64 longjmp hackaround is crushed to death by the mops test, bug 464643
+# Note, pass --config=x64-mac-tvm-release etc to runtests.py when running it manually, runtests.py does that only
+# on fully 64-bit OS (like Vista).
+mops/mops: , x64-(lnx|mac)-tvm-.* , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=464643
 
 as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 es4/vector/nonindexproperty:index -6.*          , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852

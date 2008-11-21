@@ -106,6 +106,8 @@ namespace avmplus
 		 * @param info the currently executing method
 		 * @param next the CallStackNode representing the previous
 		 *             call stack
+		 * @param  ap  the arguments pointer.  This is an Atom* if
+		 *             'boxed' is true, and an uint32_t* otherwise.
 		 */
 		inline explicit CallStackNode(MethodEnv*				env
 								#ifdef DEBUGGER
@@ -150,6 +152,9 @@ namespace avmplus
 
 		~CallStackNode();
 
+		// Does exactly what the destructor does, but on an arbitrary object.
+		void reset();
+		
 		void sampleCheck() { if (m_core) m_core->sampler()->sampleCheck(); }
 
 #ifdef DEBUGGER
@@ -176,21 +181,24 @@ namespace avmplus
 		inline const int32_t volatile* scopeDepth() const { return m_scopeDepth; }
 		inline int argc() const { return m_argc; }
 		inline int32_t linenum() const { return m_linenum; }
+		inline bool boxed() const { return m_boxed; }
 
 		inline void set_filename(Stringp s) { m_filename = s; }
 		inline void set_linenum(int32_t i) { m_linenum = i; }
 		inline void set_framep(Atom* fp) { m_framep = fp; }
 #endif
 
-	private:
-		// private, unimplemented: this class can only be stack-allocated
-		void* operator new(size_t size);
-		void* operator new[](size_t size);
-		void operator delete(void* ptr);
-		void operator delete[](void* ptr);
+		// Placement new and delete because the interpreter allocates CallStackNode
+		// instances inside other data structures (think alloca storage that has been
+		// allocated on the heap).
+		//
+		// The delete operator is required by some compilers in builds that compile with
+		// exceptions enabled, but is never actually called.
+		
+		inline void* operator new(size_t, void* storage) { return storage; }
+		inline void operator delete(void*) {}
 
 	// ------------------------ DATA SECTION BEGIN
-	public:
 	private:	AvmCore*			m_core;
 	private:	MethodEnv*			m_env;			// will be NULL if the element is from a fake CallStackNode
 	private:	CallStackNode*		m_next;
