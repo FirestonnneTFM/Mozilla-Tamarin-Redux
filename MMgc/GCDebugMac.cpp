@@ -59,6 +59,7 @@ namespace MMgc
 {
 	void GCDebugMsg(bool debuggerBreak, const char* format, ...)
 	{
+#ifdef _DEBUG
 		char buf[4096];
 		va_list args;
 		va_start(args, format);
@@ -66,13 +67,20 @@ namespace MMgc
 		vsprintf(buf, format, args);
 		va_end(args);
 		GCDebugMsg(buf, debuggerBreak);
+#else
+		(void)debuggerBreak;
+		(void)format;
+#endif
 	}
 
 	void GCDebugMsg(const char* p, bool debugBreak)
 	{
+#ifdef _DEBUG
         #if defined(MMGC_CUSTOM_DEBUG_MESSAGE_HANDLER)
 			MMGCCustomDebugMessageHandler(p);
-        #else
+		#elif defined(MMGC_MAC_NO_CORE_SERVICES)
+			fprintf(stderr, "%s\n", p);
+		#else
 		    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);
 
 			if(debugBreak)
@@ -89,5 +97,9 @@ namespace MMgc
 
 			::CFRelease (cfStr);
 		#endif
+#else
+		(void)p;
+		(void)debugBreak;
+#endif
 	}
 }
