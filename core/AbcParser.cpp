@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 #include "avmplus.h"
 
 #ifdef AVMPLUS_VERBOSE
@@ -1042,21 +1041,8 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
 #endif
-			// double value
-			union {
-				double value;
-				sint64 bits;
-				#ifdef AVMPLUS_ARM_OLDABI
-				uint32 words[2];
-				#endif
-			} u;
-			u.bits = readS64(pos);
-			#ifdef AVMPLUS_ARM_OLDABI
-			uint32 t = u.words[0];
-			u.words[0] = u.words[1];
-			u.words[1] = t;
-			#endif
-			cpool_double.set(i, (double*)(core->allocDouble(u.value)&~7));
+			double value = readDouble(pos);
+			cpool_double.set(i, (double*)(core->allocDouble(value)&~7));
 			if_verbose(
 				core->console << "    " << offset << ":" << "cpool_double["<<i<<"]="
 					<<constantNames[CONSTANT_Double] << " ";
@@ -1746,5 +1732,29 @@ namespace avmplus
 		// top of this function is necessary. (we will read on into our own memory)
 		CHECK_POS(p);
 		return toplevel->readU30(p);
+	}
+
+	double AbcParser::readDouble(const byte* &p) const
+	{
+#ifdef SAFE_PARSE
+		// check to see if we are trying to read past the file end.
+		if (p < abcStart || p+7 >= abcEnd )
+			toplevel->throwVerifyError(kCorruptABCError);
+#endif //SAFE_PARSE
+
+		union {
+			double value;
+			#if defined AVMPLUS_BIG_ENDIAN || defined AVMPLUS_ARM_OLDABI
+				struct { uint32_t hi, lo; } words;
+			#else
+				struct { uint32_t lo, hi; } words;
+			#endif
+		};
+		// the bytes in the abc are little endian but the words
+		// in memory can be little endian or big endian.
+		words.lo = p[0] | p[1]<<8 | p[2]<<16 | p[3]<<24;
+		words.hi = p[4] | p[5]<<8 | p[6]<<16 | p[7]<<24;
+		p += 8;
+		return value;
 	}
 }

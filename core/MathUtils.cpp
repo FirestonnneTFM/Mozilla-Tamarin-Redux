@@ -109,18 +109,19 @@ namespace avmplus
 	 *======================================================
 	 */
 
+	union double_overlay {
+		double value;
+		#if defined AVMPLUS_BIG_ENDIAN || defined AVMPLUS_ARM_OLDABI
+			struct { uint32_t msw, lsw; } parts;
+		#else
+			struct { uint32_t lsw, msw; } parts;
+		#endif
+	};
+		
+
 	int MathUtils::isInfinite(double x)
 	{
-		union {
-			double value;
-			struct {
-#ifdef AVMPLUS_BIG_ENDIAN
-				uint32 msw, lsw;
-#else
-				uint32 lsw, msw;
-#endif
-			} parts;
-		} u;
+		double_overlay u;
 		u.value = x;
 
 		int hx = u.parts.msw;
@@ -139,16 +140,7 @@ namespace avmplus
 			return false;
 		}
 
-		union {
-			double value;
-			struct {
-#ifdef AVMPLUS_BIG_ENDIAN
-				uint32 msw, lsw;
-#else
-				uint32 lsw, msw;
-#endif
-			} parts;
-		} u;
+		double_overlay u;
 		u.value = x;
 
 		int hx = u.parts.msw;
@@ -162,16 +154,7 @@ namespace avmplus
 
 	bool MathUtils::isNegZero(double x)
 	{
-		union {
-			double value;
-			struct {
-#ifdef AVMPLUS_BIG_ENDIAN
-				uint32 msw, lsw;
-#else
-				uint32 lsw, msw;
-#endif
-			} parts;
-		} u;
+		double_overlay u;
 		u.value = x;
 
 		int hx = u.parts.msw;

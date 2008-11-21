@@ -34,42 +34,46 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
-#define I_I   (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<2)
-#define I_D   (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_F<<2)
-#define I_II  (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define D_II  (nanojit::ARGSIZE_F  | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_III (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_IID (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_F<<2)
-#define I_IDI (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_F<<4  | nanojit::ARGSIZE_LO<<2)
-#define D_III (nanojit::ARGSIZE_F  | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I4  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 |\
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define D_I4  (nanojit::ARGSIZE_F  | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 |\
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I5  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<10 |\
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 | \
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I6  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<12 | nanojit::ARGSIZE_LO<<10 | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 | \
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I7  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<14 |\
-    nanojit::ARGSIZE_LO<<12 | nanojit::ARGSIZE_LO<<10 | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 | \
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I8  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<16 | nanojit::ARGSIZE_LO<<14 | \
-    nanojit::ARGSIZE_LO<<12 | nanojit::ARGSIZE_LO<<10 | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 | \
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_ID  (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_F<<2)
-#define D_I   (nanojit::ARGSIZE_F | nanojit::ARGSIZE_LO<<2)
-#define D_DD  (nanojit::ARGSIZE_F | nanojit::ARGSIZE_F<<4 | nanojit::ARGSIZE_F<<2)
+
+
+#define SIG1(r,a1) (nanojit::ARGSIZE_##r | nanojit::ARGSIZE_##a1<<2)
+#define SIG2(r,a2,a1) (SIG1(r,a1) | nanojit::ARGSIZE_##a2<<4)
+#define SIG3(r,a3,a2,a1) (SIG2(r,a2,a1) | nanojit::ARGSIZE_##a3<<6)
+#define SIG4(r,a4,a3,a2,a1) (SIG3(r,a3,a2,a1) | nanojit::ARGSIZE_##a4<<8)
+#define SIG5(r,a5,a4,a3,a2,a1) (SIG4(r,a4,a3,a2,a1) | nanojit::ARGSIZE_##a5<<10)
+#define SIG6(r,a6,a5,a4,a3,a2,a1) (SIG5(r,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a6<<12)
+#define SIG7(r,a7,a6,a5,a4,a3,a2,a1) (SIG6(r,a6,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a7<<14)
+#define SIG8(r,a8,a7,a6,a5,a4,a3,a2,a1) (SIG7(r,a7,a6,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a8<<16)
+
+#define FUNCTIONID(n) &ci_##n
+
+#ifdef NJ_VERBOSE
+    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
+        static const CallInfo ci_##name = { f, sig, cse, fold, abi, #name };
+#else
+    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
+        static const CallInfo ci_##name = { f, sig, cse, fold, abi };
+#endif
+
+#define D_I   SIG1(F,LO)
+#define D_D   SIG1(F,F)
+#define I_I   SIG1(LO,LO)
+#define I_D   SIG1(LO,F)
+#define I_DD  SIG2(LO,F,F)
+#define D_DD  SIG2(F,F,F)
+#define I_II  SIG2(LO,LO,LO)
+#define D_II  SIG2(F,LO,LO)
+#define I_ID  SIG2(LO,LO,F)
+#define I_III SIG3(LO,LO,LO,LO)
+#define I_IID SIG3(LO,LO,LO,F)
+#define I_IDI SIG3(LO,LO,F,LO)
+#define D_III SIG3(F,LO,LO,LO)
+#define I_I4  SIG4(LO,LO,LO,LO,LO)
+#define D_I4  SIG4(F,LO,LO,LO,LO)
+#define I_I5  SIG5(LO,LO,LO,LO,LO,LO)
+#define I_I6  SIG6(LO,LO,LO,LO,LO,LO,LO)
+#define I_I7  SIG7(LO,LO,LO,LO,LO,LO,LO,LO)
+#define I_I8  SIG8(LO,LO,LO,LO,LO,LO,LO,LO,LO)
 
 #if _MSC_VER
 	#define ABI_FUNCTION ABI_CDECL
@@ -243,26 +247,3 @@ SSE2_ONLY(
     METHOD(ENVADDR(MethodEnv::sf32), I_IDI, sf32)
     METHOD(ENVADDR(MethodEnv::sf64), I_IDI, sf64)
 #endif
-
-#undef I_I
-#undef I_II
-#undef I_III
-#undef I_IID
-#undef I_I4
-#undef D_I4
-#undef I_I5
-#undef I_I6
-#undef I_I7
-#undef I_I8
-#undef I_ID
-#undef I_D
-#undef D_I
-#undef D_II
-#undef D_III
-#undef D_DD
-#undef FUNCTION
-#undef CSEFUNCTION
-#undef METHOD
-#undef CSEMETHOD
-#undef ABI_METHOD
-#undef ABI_FUNCTION

@@ -282,19 +282,135 @@ namespace avmplus
     #  define SETJMP ((uintptr)::setjmp)
 	#endif // _MSC_VER
 
-#define FUNCTIONID(n) &ci_##n
-
-#ifdef NJ_VERBOSE
-    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
-        static const CallInfo ci_##name = { f, sig, cse, fold, abi, #name };
-#else
-    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
-        static const CallInfo ci_##name = { f, sig, cse, fold, abi };
-#endif
-
     #include "../core/vm_fops.h"
 
-#undef INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM
+#ifdef NJ_SOFTFLOAT
+
+    static double i2f(int32_t i) { return i; }
+    static double u2f(uint32_t u) { return u; }
+    static double fneg(double a) { return -a; }
+    static double fadd(double a, double b) { return a + b; }
+    static double fsub(double a, double b) { return a - b; }
+    static double fmul(double a, double b) { return a * b; }
+    static double fdiv(double a, double b) { return a / b; }
+    static int feq(double a, double b) { return a == b; }
+    static int flt(double a, double b) { return a <  b; }
+    static int fgt(double a, double b) { return a >  b; }
+    static int fle(double a, double b) { return a <= b; }
+    static int fge(double a, double b) { return a >= b; }
+
+    CSEFUNCTION(FUNCADDR(i2f), D_I, i2f)
+    CSEFUNCTION(FUNCADDR(u2f), D_I, u2f)
+    CSEFUNCTION(FUNCADDR(fneg), D_D, fneg)
+    CSEFUNCTION(FUNCADDR(fadd), D_DD, fadd)
+    CSEFUNCTION(FUNCADDR(fsub), D_DD, fsub)
+    CSEFUNCTION(FUNCADDR(fmul), D_DD, fmul)
+    CSEFUNCTION(FUNCADDR(fdiv), D_DD, fdiv)
+    CSEFUNCTION(FUNCADDR(feq), I_DD, feq)
+    CSEFUNCTION(FUNCADDR(flt), I_DD, flt)
+    CSEFUNCTION(FUNCADDR(fgt), I_DD, fgt)
+    CSEFUNCTION(FUNCADDR(fle), I_DD, fle)
+    CSEFUNCTION(FUNCADDR(fge), I_DD, fge)
+
+    // replace fpu ops with function calls
+    class SoftFloatFilter: public LirWriter
+    {
+    public:
+        SoftFloatFilter(LirWriter *out) : LirWriter(out)
+        {}
+
+        LIns *hi(LIns *q) { 
+            return ins1(LIR_qhi, q); 
+        }
+        LIns *lo(LIns *q) { 
+            return ins1(LIR_qlo, q); 
+        }
+
+        LIns *split(LIns *a) {
+            if (a->isQuad() && !a->isop(LIR_qjoin)) {
+                // all quad-sized args must be qjoin's for soft-float
+                a = ins2(LIR_qjoin, lo(a), hi(a));
+            }
+            return a;
+        }
+
+        LIns *split(const CallInfo *call, LInsp args[]) {
+            LIns *lo = out->insCall(call, args);
+            LIns *hi = out->ins1(LIR_callh, lo);
+            return out->ins2(LIR_qjoin, lo, hi);
+        }
+
+        LIns *fcall1(const CallInfo *call, LIns *a) {
+            LIns *args[] = { split(a) };
+            return split(call, args);
+        }
+
+        LIns *fcall2(const CallInfo *call, LIns *a, LIns *b) {
+            LIns *args[] = { split(b), split(a) };
+            return split(call, args);
+        }
+
+        LIns *fcmp(const CallInfo *call, LIns *a, LIns *b) {
+            LIns *args[] = { split(b), split(a) };
+            return out->ins2(LIR_eq, out->insCall(call, args), out->insImm(1));
+        }
+
+        LIns *ins1(LOpcode op, LIns *a) {
+            switch (op) {
+                case LIR_i2f:
+                    return fcall1(&ci_i2f, a);
+                case LIR_u2f:
+                    return fcall1(&ci_u2f, a);
+                case LIR_fneg:
+                    return fcall1(&ci_fneg, a);
+                case LIR_fret:
+                    return out->ins1(op, split(a));
+                default:
+                    return out->ins1(op, a);
+            }
+        }
+
+        LIns *ins2(LOpcode op, LIns *a, LIns *b) {
+            switch (op) {
+                case LIR_fadd:
+                    return fcall2(&ci_fadd, a, b);
+                case LIR_fsub:
+                    return fcall2(&ci_fsub, a, b);
+                case LIR_fmul:
+                    return fcall2(&ci_fmul, a, b);
+                case LIR_fdiv:
+                    return fcall2(&ci_fdiv, a, b);
+                case LIR_feq:
+                    return fcmp(&ci_feq, a, b);
+                case LIR_flt:
+                    return fcmp(&ci_flt, a, b);
+                case LIR_fgt:
+                    return fcmp(&ci_fgt, a, b);
+                case LIR_fle:
+                    return fcmp(&ci_fle, a, b);
+                case LIR_fge:
+                    return fcmp(&ci_fge, a, b);
+            }
+            return out->ins2(op, a, b);
+        }
+
+        LIns *insCall(const CallInfo *ci, LInsp args[]) {
+            uint32_t argt = ci->_argtypes;
+
+            for (uint32_t i=0, argsizes = argt>>2; argsizes != 0; i++, argsizes >>= 2) {
+                args[i] = split(args[i]);
+            }
+
+            if ((argt & _ARGSIZE_MASK_ANY) == ARGSIZE_F) {
+                // this function returns a double as two 32bit values, so replace
+                // call with qjoin(qhi(call), call)
+                return split(ci, args);
+            } else {
+                return out->insCall(ci, args);
+            }
+        }
+    };
+#endif // NJ_SOFTFLOAT
 
 	/**
  	 * ---------------------------------
@@ -665,6 +781,7 @@ namespace avmplus
                 case LIR_qlo:  AvmAssert(a->isQuad()); break;
                 case LIR_qhi:  AvmAssert(a->isQuad()); break;
                 case LIR_live: break;
+                case LIR_callh: AvmAssert(a->isop(LIR_call)||a->isop(LIR_calli)); break;
                 default:AvmAssert(false);
             }
             return out->ins1(op, a);
@@ -751,14 +868,13 @@ namespace avmplus
         }
 
         LIns *insCall(const CallInfo *call, LInsp args[]) {
-            ArgSize sizes[2*MAXARGS];
-            uint32_t argc = call->get_sizes(sizes);
-            if (call->isIndirect()) {
-                argc--;
-                AvmAssert(!args[argc]->isQuad());
-            }
-            for (uint32_t i=0; i < argc; i++) {
-                switch (sizes[i]) {
+            uint32_t argt = call->_argtypes;
+            for (uint32_t i = 0; i < MAXARGS; i++) {
+                argt >>= 2;
+                ArgSize sz = ArgSize(argt&3);
+                if (sz == ARGSIZE_NONE)
+                    break;
+                switch (sz) {
                     default: AvmAssert(false);
                     case ARGSIZE_LO: NanoAssert(!args[i]->isQuad()); break;
                     case ARGSIZE_Q: NanoAssert(args[i]->isQuad()); break;
@@ -1015,6 +1131,9 @@ namespace avmplus
 				lirout = vbWriter = pushVerboseWriter(gc, lirout, lirbuf);
 			}
 		)
+        #ifdef NJ_SOFTFLOAT
+        lirout = new (gc) SoftFloatFilter(lirout);
+        #endif
         LoadFilter *loadfilter = 0;
         if (core->config.cseopt) {
             loadfilter = new (gc) LoadFilter(lirout, gc);

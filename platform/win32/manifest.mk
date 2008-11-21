@@ -79,7 +79,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/OSDepWin.cpp \
   $(NULL)
 
-ifneq (arm,$(TARGET_CPU))
+ifeq (i686,$(TARGET_CPU))
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/win32cpuid.cpp \
   $(NULL)
