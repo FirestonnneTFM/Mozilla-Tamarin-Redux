@@ -515,6 +515,8 @@ for ast in tests:
     result2=9999999
     resultList=[]
     resultList2=[]
+    out1=[]
+    out2=[]
     if globs['memory'] and vmargs.find("-memstats")==-1:
         vmargs="%s -memstats" % vmargs
     if globs['memory'] and len(vmargs2)>0 and vmargs2.find("-memstats")==-1:
@@ -529,11 +531,13 @@ for ast in tests:
         memoryhigh = 0
         memoryhigh2 = 0
         f1 = run_pipe("%s %s %s" % (avm, vmargs, abc))
+        out1.append(f1)
         if len(avm2)>0:
             if len(vmargs2)>0:
                 f2 = run_pipe("%s %s %s" % (avm2, vmargs2, abc))
             else:
                 f2 = run_pipe("%s %s %s" % (avm2, vmargs, abc))
+            out2.append(f2)
         try:
             for line in f1:
                 if globs['memory'] and "[mem]" in line and "private" in line:
@@ -589,7 +593,11 @@ for ast in tests:
             exit(-1)
     # end for i in range(iterations)
     # calculate best result
-    if len(resultList)==0:
+    if len(resultList)!=iterations:
+        for f in out1:
+            for line in f:
+                print(line.strip())
+        res=1
         result1=9999999
         result2=9999999
     else:
@@ -607,6 +615,11 @@ for ast in tests:
             else:
                 spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
         elif len(avm2)>0:
+            if len(resultList2)!=iterations:
+                for f in out2:
+                    for line in f:
+                        print(line.strip())
+                res=1
             if result1==0:
                 spdup = 9999
             else:
@@ -666,7 +679,7 @@ for ast in tests:
                 calcPerfm('count', 'count')
                 log_print('-------------------------------------------------------------------------------------------------------------')
         else: #only one avm tested
-            if result1 < 9999999 and len(resultList)>0:
+            if result1 < 9999999 and len(resultList)==iterations:
                 meanRes = mean(resultList)
                 if (iterations > 2):
                     if meanRes==0:
@@ -695,7 +708,5 @@ for ast in tests:
                     log_print("%-50s %7s %7s" % (ast,result1,metric)) 
             else:
                     log_print("%-50s crash" % (ast)) 
-                    for line in f1:
-                        print(line.strip())
                     res=1
 exit(res)
