@@ -77,8 +77,8 @@ namespace avmplus
 		ScriptObject *makeSample(Sample sample);
 		bool isGetterSetter(Atom a, QNameObject* name);
 	private:		
-		VTable* const sampleIteratorVTable;
-		VTable* const slotIteratorVTable;
+		DWB(VTable*) const sampleIteratorVTable;
+		DWB(VTable*) const slotIteratorVTable;
 		ClassClosure *getType(Atom typeOrVTable, const void *obj);
 #else
 		// stubs for release

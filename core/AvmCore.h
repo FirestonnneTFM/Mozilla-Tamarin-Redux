@@ -1433,8 +1433,6 @@ const int kBufferPadding = 16;
 		void   invalidateLookupCache() { if (lookup_cache_timestamp != ~0U) ++lookup_cache_timestamp; }
 #endif
 		
-#ifdef AVMPLUS_HEAP_ALLOCA
-		
 		/* A portable replacement for alloca().
 		 *
 		 * Memory is allocated from the heap and not from the stack.  It is freed in 
@@ -1521,14 +1519,6 @@ const int kBufferPadding = 16;
 			}
 			return allocaPushSlow(nbytes);
 		}
-		
-#else // AVMPLUS_HEAP_ALLOCA
-		
-		/* Dummy class so that client code does not have to be cluttered with #ifdefs */
-		class AllocaAutoPtr {
-		};
-		
-#endif // AVMPLUS_HEAP_ALLOCA
 		
 		// avoid multiple inheritance issues
 		class GCInterface : MMgc::GCCallback

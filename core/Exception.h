@@ -203,9 +203,7 @@ namespace avmplus
 		ExceptionFrame*		prevFrame;
 		Namespace* const *	dxnsAddr;
 		CodeContextAtom		codeContextAtom;
-#ifdef AVMPLUS_HEAP_ALLOCA
 		void*				stacktop;
-#endif
 #ifdef DEBUGGER
 		CallStackNode*		callStack;
 		CatchAction			catchAction;

@@ -93,7 +93,3 @@ ecma3/Exceptions/string_002_rt,       .*-lnx-tvm-debugdebugger    ,   skip , htt
 
 # [redux] over(?)zealous debug mode in MMgc
 ecma3/Statements/eregress_74474_002,  x86-win-tvm-debugdebugger   ,   skip , https://bugzilla.mozilla.org/show_bug.cgi?id=463412
-
-
-# bug 458419: hasAtomProperty should not throw an exception but return false, add testcases for regression to acceptance test suite 
-es4/vector/in   ,  .*  ,   expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=458419

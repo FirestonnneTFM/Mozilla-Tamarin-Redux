@@ -327,9 +327,9 @@
 #if defined AVMPLUS_MAC || defined AVMPLUS_UNIX
 #  define AVMPLUS_WORD_CODE
 #  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
-#ifdef __GNUC__
-#  define AVMPLUS_DIRECT_THREADED     // gcc on these platforms
-#endif
+#  ifdef __GNUC__
+#    define AVMPLUS_DIRECT_THREADED     // gcc on these platforms
+#  endif
 #endif
 
 #if defined AVMPLUS_WIN32
@@ -357,16 +357,18 @@
 
 //#define AVMPLUS_SELFTEST
 
-#define AVMPLUS_HEAP_ALLOCA						// Use our own alloca() replacement that allocates in the heap
+// Enable our own alloca() replacement that always allocates in the heap, this is good on
+// systems with limited memory or limited stack
 
-#ifdef AVMPLUS_HEAP_ALLOCA
-#  define AVMPLUS_PARAM_ALLOCA_DEFSIZE	1000	// Default number of bytes in a stack segment
-#endif
+//#define AVMPLUS_HEAP_ALLOCA
+
+#define AVMPLUS_PARAM_ALLOCA_CUTOFF		4000	// Don't make real alloca() blow the stack; this limit is heuristic
+#define AVMPLUS_PARAM_ALLOCA_DEFSIZE	1000	// Default number of bytes in a stack segment for heap-based alloca()
 
 #ifdef AVMPLUS_HEAP_ALLOCA
 #  define VMPI_alloca(core, autoptr, nbytes)  core->allocaPush(nbytes, autoptr)
 #else
-#  define VMPI_alloca(core, autoptr, nbytes)  ((void)autoptr, alloca(nbytes))
+#  define VMPI_alloca(core, autoptr, nbytes)  (nbytes > AVMPLUS_PARAM_ALLOCA_CUTOFF ? core->allocaPush(nbytes, autoptr) : alloca(nbytes))
 #endif
 
 // temporary impedance-matching define for code that needs to build with different versions of tamarin...

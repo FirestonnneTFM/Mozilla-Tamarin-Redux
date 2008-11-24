@@ -169,7 +169,7 @@ if os == "darwin":
 elif os == "windows" or os == "cygwin":
     MMGC_DEFINES.update({'WIN32': None,
                          '_CRT_SECURE_NO_DEPRECATE': None})
-    OS_LDFLAGS +="-MAP "
+    OS_LDFLAGS += "-MAP "
     if cpu == "arm":
         APP_CPPFLAGS += "-DARM -D_ARM_ -DARMV5 -DUNICODE -DUNDER_CE=1 -DMMGC_ARM -QRarch5t "
         OS_LIBS.append('mmtimer corelibc coredll')
