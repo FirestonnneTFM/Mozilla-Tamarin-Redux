@@ -166,9 +166,7 @@ namespace avmplus
 		builtinDomain      = NULL;
 
 		GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
-#ifdef AVMPLUS_HEAP_ALLOCA
 		allocaInit();
-#endif
 
 		minstack           = 0;
 
@@ -314,9 +312,7 @@ namespace avmplus
 #ifdef SUPERWORD_PROFILING
 		WordcodeTranslator::swprofStop();
 #endif
-#ifdef AVMPLUS_HEAP_ALLOCA
 		allocaShutdown();
-#endif
 	}
 
 	void AvmCore::initBuiltinPool()
@@ -3914,7 +3910,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	}		
 #endif // MIR or NANOJIT
 
-#ifdef AVMPLUS_HEAP_ALLOCA
 	void AvmCore::allocaInit()
 	{
 		top_segment = NULL;
@@ -3982,8 +3977,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (top_segment != NULL)
 			stacktop = top_segment->top;
 		delete seg;
-	}	
-#endif // AVMPLUS_HEAP_ALLOCA
+	}
 	
 #ifdef AVMPLUS_VERIFYALL
 	void AvmCore::enq(AbstractFunction* f) {
