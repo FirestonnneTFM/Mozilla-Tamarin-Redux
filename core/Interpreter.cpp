@@ -66,7 +66,7 @@ namespace avmplus
 #define DOUBLE_VALUE(v)		 (*(double*)((v) ^ kDoubleType))
 #define IS_BOTH_INTEGER(a,b) ((((a ^ kIntegerType) | (b ^ kIntegerType)) & 7) == 0) // less control flow but more registers -- which is better?
 //#define IS_BOTH_INTEGER(a,b) ((IS_INTEGER(a) && IS_INTEGER(b))
-#define IS_BOTH_DOUBLE(a,b)  ((((a & kDoubleType) | (b ^ kDoubleType)) & 7) == 0)
+#define IS_BOTH_DOUBLE(a,b)  ((((a ^ kDoubleType) | (b ^ kDoubleType)) & 7) == 0)
 
 #ifdef AVMPLUS_WORD_CODE
 #  define WORD_CODE_ONLY(x)  x
@@ -1266,7 +1266,7 @@ namespace avmplus
 		} \
 	} \
 	else if (IS_BOTH_DOUBLE(a1, a2)) { \
-		dest = core->doubleToAtom(DOUBLE_VALUE(a1) + DOUBLE_VALUE(a2)); \
+		dest = core->doubleToAtom(DOUBLE_VALUE(a1) - DOUBLE_VALUE(a2)); \
 		NEXT; \
 	}
 
