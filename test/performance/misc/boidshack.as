@@ -690,7 +690,7 @@ dynamic class Boids
 //
 
 
-var numFish = 50;
+var numFish = 500;
 var frames = 20;
 var boids = new Boids(numFish);
 
