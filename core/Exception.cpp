@@ -147,7 +147,13 @@ namespace avmplus
 #if defined(AVMPLUS_AMD64) && defined(_WIN64)
 		longjmp64(jmpbuf, (uintptr)exception); 
 #elif defined(AVMPLUS_AMD64)
+		// This is an amazingly gross hack.  I don't know why it's necessary, but it must be fixed.  (lhansen 2008-11-26)
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=464643
+		//
+		// Never allow memory to be corrupted in release builds, exit instead.
 		AvmAssert(lptrcounter<MAX_LONG_JMP_COUNT);
+		if (lptrcounter>=MAX_LONG_JMP_COUNT)
+			exit(1);
 		lptr[lptrcounter++] = exception;
 		longjmp(jmpbuf, (lptrcounter-1)*sizeof(void *)); 
 #else
