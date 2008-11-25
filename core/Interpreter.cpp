@@ -653,8 +653,23 @@ namespace avmplus
 #endif
  		intptr_t volatile expc=0;
  		AvmCore::AllocaAutoPtr _framep;
- 		register Atom* const framep = (Atom*)VMPI_alloca(core, _framep, sizeof(Atom)*(info->frameSize) + sizeof(InterpreterAuxiliaryFrame));
+#ifdef AVMPLUS_AMD64
+		// Allocation is guaranteed on an 8-byte boundary, but we need 16 for _setjmpex.
+		// So allocate 8 bytes extra, then round up to a 16-byte boundary.
+ 		register Atom* const framep = 
+			(Atom*)VMPI_alloca(core, _framep,
+							   sizeof(Atom)*(info->frameSize)
+						     + 8
+							 + sizeof(InterpreterAuxiliaryFrame));
+ 		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(((uintptr_t)(framep + info->frameSize) + 15) & ~15);
+#else
+ 		register Atom* const framep = 
+			(Atom*)VMPI_alloca(core, _framep,
+							   sizeof(Atom)*(info->frameSize)
+							 + sizeof(InterpreterAuxiliaryFrame));
  		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(framep + info->frameSize);
+#endif
+
  		register Atom* const scopeBase = framep + info->localCount;
  		register Atom* volatile withBase = NULL;
  		NONDEBUGGER_ONLY( register ) int volatile scopeDepth = 0;
