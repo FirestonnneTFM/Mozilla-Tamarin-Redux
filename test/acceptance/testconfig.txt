@@ -59,7 +59,7 @@ as3/sampling/Callback.* , arm-winmobile-tvm.* , skip, bug https://bugzilla.mozil
 # windows 64 sampling api crashes bug 455062
 as3/sampling/.*: , x86-win64-tvm-.*debugger , skip       , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=455062
 # mmgc seg fault on linux debug-debugger: bug 457903
-ecma3/Exceptions/number_00[12]_rt: , x86-lnx-tvm-debugdebugger  , expectedfail , https://bugzilla.mozilla.org/show_bug.cgi?id=457903
+ecma3/Exceptions/number_00[12]_rt: , x86-lnx-tvm-debugdebugger  , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=457903
 
 
 as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*Dforcemir , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
@@ -95,4 +95,5 @@ e4x/Regress/b121219:.*      , x86-lnx-tvm-release.*-Dforcemir , expectedfail , b
 # features don't exist in TC yet
 mops/.*             ,   .* ,  skip           ,   mops doesn't exist in TC yet
 as3/DescribeType/.* ,   .* ,  skip           ,   describeType doesn't exist in TC yet
+misc/.*             ,   .* ,  skip           ,   ScriptObject::isGlobalObject() doesn't exist in TC yet
 ######################################################
