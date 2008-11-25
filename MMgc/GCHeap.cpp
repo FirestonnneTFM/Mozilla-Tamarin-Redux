@@ -38,11 +38,20 @@
 
 
 #include <string.h>
+#include <stdlib.h>
 // TODO: remove this hack:
 #ifdef __WINSCW__
 #include <e32std.h>
 #endif
 #include "MMgc.h"
+
+#ifdef FEATURE_SAMPLER
+namespace avmplus
+{
+	void recordAllocationSample(const void* item, size_t size);
+	void recordDeallocationSample(const void* item, size_t size);	
+}
+#endif
 
 #if defined(DARWIN) || defined(MMGC_ARM) || defined (MMGC_SPARC)
 #include <stdlib.h>
@@ -83,9 +92,20 @@ namespace MMgc
 		  kNativePageSize(0),
 		  heapLimit((size_t)-1)
 	{
-#ifdef _DEBUG
+#ifdef MEMORY_PROFILER
 		// dump memory profile after sweeps
-		enableMemoryProfiling = false;
+		profilerEnabled = false;
+		const char *env = getenv("MMGC_PROFILE");
+		if(env && strncmp(env, "1", 1) == 0)
+			profilerEnabled = true;
+		hooksEnabled = profilerEnabled;
+#ifdef _DEBUG
+		// always track allocs in DEBUG builds
+		hooksEnabled = true;
+#endif
+
+		if(hooksEnabled)
+			profiler = new MemoryProfiler();
 #endif
 
 #if defined(MMGC_PORTING_API)
@@ -156,6 +176,11 @@ namespace MMgc
 		FlushMirMemory();
 #endif /*MMGC_AVMPLUS*/
 
+#ifdef MEMORY_PROFILER
+		if(profiler)
+			delete profiler;
+#endif
+
 #ifdef MEMORY_INFO
 		if(numAlloc != 0)
 		{
@@ -170,7 +195,10 @@ namespace MMgc
 				if(block->inUse() && block->baseAddr)
 				{
 					GCDebugMsg(false, "Block 0x%x not freed\n", block->baseAddr);
-					PrintStackTraceByIndex(block->allocTrace);
+#ifdef MEMORY_PROFILER
+					if(block->allocTrace)
+						PrintStackTrace(block->allocTrace);
+#endif
 				}
 			}	
 			GCAssert(false);
@@ -194,47 +222,51 @@ namespace MMgc
 			HeapBlock *block = AllocBlock(size, zero);
 
 			if (!block && expand) {
-				ExpandHeapPrivate(size);
+				ExpandHeapLocked(size);		
 				block = AllocBlock(size, zero);
 			}
 
-			if (!block) {
-				return NULL;
-			}
-
-			GCAssert(block->size == size);
+			if (block) 
+			{			
+				GCAssert(block->size == size);
 			
-			numAlloc += size;
+				numAlloc += size;
 
 #ifdef _DEBUG
-			// Check for debug builds only:
-			// Use the megamap to double-check that we haven't handed
-			// any of these pages out already.
-			uint32 megamapIndex = ((uint32)(uintptr)block->baseAddr)>>12;
-			for (int i=0; i<size; i++) {
-				GCAssert(m_megamap[megamapIndex] == 0);
+				// Check for debug builds only:
+				// Use the megamap to double-check that we haven't handed
+				// any of these pages out already.
+				uint32 megamapIndex = ((uint32)(uintptr)block->baseAddr)>>12;
+				for (int i=0; i<size; i++) {
+					GCAssert(m_megamap[megamapIndex] == 0);
 				
-				// Set the megamap entry
-				m_megamap[megamapIndex++] = 1;
-			}
+					// Set the megamap entry
+					m_megamap[megamapIndex++] = 1;
+				}
 #endif
 
-			// copy baseAddr to a stack variable to fix :
-			// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
-			baseAddr = block->baseAddr;
+				// copy baseAddr to a stack variable to fix :
+				// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
+				baseAddr = block->baseAddr;
+			}
 		}
 
-#ifdef MEMORY_INFO
-		// do this outside of the spinlock to prevent deadlock w/ trace table lock
-		AddrToBlock(baseAddr)->allocTrace = GetStackTraceIndex(2);
+#ifdef FEATURE_OOM
+		if(!baseAddr && expand) {
+			Abort(1);
+		}
 #endif
-		// Zero out the memory, if requested to do so
-		// FIXME: if we know that this memory was just committed we shouldn't do this
-		// maybe zero should pass deeper into the system so that on initial expansions
-		// and re-commit we avoid this, should be a noise optimization over all but
-		// possibly a big win for startup
-		if (zero) {
-			memset(baseAddr, 0, size * kBlockSize);
+		
+		if(baseAddr)
+		{
+			// Zero out the memory, if requested to do so
+			// FIXME: if we know that this memory was just committed we shouldn't do this
+			// maybe zero should pass deeper into the system so that on initial expansions
+			// and re-commit we avoid this, should be a noise optimization over all but
+			// possibly a big win for startup
+			if (zero) {
+				memset(baseAddr, 0, size * kBlockSize);
+			}
 		}
 		
 		return baseAddr;
@@ -807,9 +839,6 @@ namespace MMgc
 #ifdef _DEBUG
 		// trash it. fb == free block
 		memset(block->baseAddr, 0xfb, block->size * kBlockSize);
-#ifdef MEMORY_INFO
-		block->freeTrace = GetStackTraceIndex(2);
-#endif
 #endif
 
 		// Try to coalesce this block with its predecessor
@@ -857,15 +886,27 @@ namespace MMgc
 
 	bool GCHeap::ExpandHeap(int askSize)
 	{
+		bool retval;
+		
+		{ // lock block
 #ifdef GCHEAP_LOCK
-		// Acquire the spinlock, as this is a publicly
-		// accessible API.
-		GCAcquireSpinlock spinlock(m_spinlock);
+			// Acquire the spinlock, as this is a publicly
+			// accessible API.
+			GCAcquireSpinlock spinlock(m_spinlock);
 #endif /* GCHEAP_LOCK */
-		return ExpandHeapPrivate(askSize);
+			retval = ExpandHeapLocked(askSize);
+		}
+
+#ifdef FEATURE_OOM
+		if(!retval) 
+		{
+			Abort(1);
+		}
+#endif
+		return retval;
 	}
 	 
-	bool GCHeap::ExpandHeapPrivate(int askSize)
+	bool GCHeap::ExpandHeapLocked(int askSize)
 	{
 		int size = askSize;
 #ifdef _DEBUG
@@ -1119,7 +1160,7 @@ namespace MMgc
 		block->dirty = true;
 #endif
 
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 		block->allocTrace = 0;
 		block->freeTrace = 0;
 #endif
@@ -1140,7 +1181,7 @@ namespace MMgc
 #else
 			block->dirty = false;
 #endif			
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 			block->allocTrace = 0;
 			block->freeTrace = 0;
 #endif
@@ -1153,7 +1194,7 @@ namespace MMgc
 		block->sizePrevious = size;
 		block->prev         = NULL;
 		block->next         = NULL;
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 		block->allocTrace = 0;
 #endif
 
@@ -1333,5 +1374,57 @@ namespace MMgc
 			region = region->prev;
 		}
 		return SizeToBlocks(size);
+	}
+
+	void GCHeap::AllocHook(const void *item, size_t size)
+	{
+		(void)item;
+		(void)size;
+		{
+#ifdef GCHEAP_LOCK
+			GCAcquireSpinlock spinlock(m_spinlock);
+#endif /* GCHEAP_LOCK */
+#ifdef MEMORY_PROFILER
+			if(hooksEnabled)
+				profiler->Alloc(item, size);
+#endif
+
+#ifdef MEMORY_INFO
+			DebugDecorate(item, size);
+#endif
+		}
+#ifdef FEATURE_SAMPLER
+		// this can't be called with the heap lock locked.
+		avmplus::recordAllocationSample(item, size);
+#endif
+	}
+
+	void GCHeap::FinalizeHook(const void *item, size_t size)
+	{
+		(void)item,(void)size;
+		{
+#ifdef GCHEAP_LOCK
+			GCAcquireSpinlock spinlock(m_spinlock);
+#endif /* GCHEAP_LOCK */
+#ifdef MEMORY_PROFILER
+			if(hooksEnabled)
+				profiler->Free(item, size);
+#endif
+		}
+		
+#ifdef FEATURE_SAMPLER
+		avmplus::recordDeallocationSample(item, size);
+#endif
+	}
+
+	void GCHeap::FreeHook(const void *item, size_t size, int poison)
+	{
+		(void)poison,(void)item,(void)size;
+#ifdef GCHEAP_LOCK
+			GCAcquireSpinlock spinlock(m_spinlock);
+#endif /* GCHEAP_LOCK */
+#ifdef MEMORY_INFO
+		DebugFree(item, poison, size);
+#endif
 	}
 }
