@@ -112,6 +112,7 @@ namespace avmshell
 		double get_totalMemory();
 		double get_freeMemory();
 		double get_privateMemory();
+ 		void dumpMemorySummary();
 
 		// function exists solely to test native-methods with custom namespaces
 		void ns_example_nstest() { }

@@ -88,7 +88,6 @@ namespace MMgc
 				Str255 buf;
 				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
 				DebugStr(buf);
-				exit(1);	// ensure we die
 			}
 			else
 			{

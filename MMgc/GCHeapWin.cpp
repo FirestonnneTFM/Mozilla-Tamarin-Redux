@@ -41,19 +41,269 @@
 
 #include "MMgc.h"
 
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 #include <malloc.h>
 #include <strsafe.h>
-#include <shlwapi.h>
-#ifndef UNDER_CE
 #include <DbgHelp.h>
 #endif
-#endif
-
-#if defined(MEMORY_INFO) && !defined(UNDER_CE)
 
 namespace MMgc
 {
+#ifdef MMGC_AVMPLUS
+	int GCHeap::vmPageSize()
+	{
+		SYSTEM_INFO sysinfo;
+		GetSystemInfo(&sysinfo);
+
+		return sysinfo.dwPageSize;
+	}
+
+	void* GCHeap::ReserveCodeMemory(void* address,
+									size_t size)
+	{
+		return VirtualAlloc(address,
+							size,
+							MEM_RESERVE
+#ifdef _WIN64
+							| MEM_TOP_DOWN
+#endif //#ifdef _WIN64
+							,
+							PAGE_NOACCESS);
+	}
+
+	void GCHeap::ReleaseCodeMemory(void* address,
+								   size_t /*size*/)
+	{
+		VirtualFree(address, 0, MEM_RELEASE);
+	}
+
+	void* GCHeap::CommitCodeMemory(void* address,
+								  size_t size)
+	{
+		if (size == 0)
+			size = GCHeap::kNativePageSize;  // default of one page
+
+#ifdef AVMPLUS_JIT_READONLY
+		void* addr = VirtualAlloc(address,
+								  size,
+								  MEM_COMMIT
+#ifdef _WIN64
+								  | MEM_TOP_DOWN
+#endif //#ifdef _WIN64
+								  ,
+								  PAGE_READWRITE);
+#else
+		void* addr = VirtualAlloc(address,
+								  size,
+								  MEM_COMMIT
+#ifdef _WIN64
+								  | MEM_TOP_DOWN
+#endif //#ifdef _WIN64
+								  ,
+								  PAGE_EXECUTE_READWRITE);
+#endif /* AVMPLUS_JIT_READONLY */
+		if (addr == NULL)
+			address = 0;
+		else {
+			address = (void*)( (sintptr)address + size );
+			committedCodeMemory += size;
+		}
+		return address;
+	}
+
+#ifdef AVMPLUS_JIT_READONLY
+	/**
+	 * SetPageProtection changes the page access protections on a block of pages,
+	 * to make JIT-ted code executable or not.
+	 *
+	 * If executableFlag is true, the memory is made executable and read-only.
+	 *
+	 * If executableFlag is false, the memory is made non-executable and
+	 * read-write.
+	 *
+	 * [rickr] bug #182323  The codegen can bail in the middle of generating 
+	 * code for any number of reasons.  When this occurs we need to ensure 
+	 * that any code that was previously on the page still executes, so we 
+	 * leave the page as PAGE_EXECUTE_READWRITE rather than PAGE_READWRITE.  
+	 * Ideally we'd use PAGE_READWRITE and then on failure revert it back to 
+	 * read/execute but this is a little tricker and doesn't add too much 
+	 * protection since only a single page is 'exposed' with this technique.
+	 */
+	void GCHeap::SetPageProtection(void *address,
+							   size_t size,
+							   bool executableFlag,
+							   bool writeableFlag)
+	{
+		DWORD oldProtectFlags = 0;
+		DWORD newProtectFlags = 0;
+		if ( executableFlag && writeableFlag ) {
+			newProtectFlags = PAGE_EXECUTE_READWRITE;
+		} else if ( executableFlag ) {
+			newProtectFlags = PAGE_EXECUTE_READ;
+		} else if ( writeableFlag ) {
+			newProtectFlags = PAGE_READWRITE;
+		} else {
+			newProtectFlags = PAGE_READONLY;
+		}
+		BOOL retval = VirtualProtect(address,
+									 size,
+									 newProtectFlags,
+									 &oldProtectFlags);
+
+		(void)retval;
+		GCAssert(retval);
+
+		// We should not be clobbering PAGE_GUARD protections
+		GCAssert((oldProtectFlags & PAGE_GUARD) == 0);
+	}
+#endif /* AVMPLUS_JIT_READONLY */
+	
+	bool GCHeap::SetGuardPage(void *address)
+	{
+		if (!useGuardPages)
+		{
+			return false;
+		}
+		void *res = VirtualAlloc(address,
+								 GCHeap::kNativePageSize,
+								 MEM_COMMIT
+#ifdef _WIN64
+								 | MEM_TOP_DOWN
+#endif //#ifdef _WIN64
+								 ,
+								 PAGE_GUARD | PAGE_READWRITE);
+		return res != 0;
+	}
+	
+	void* GCHeap::DecommitCodeMemory(void* address,
+									 size_t size)
+	{
+		if (size == 0)
+			size = GCHeap::kNativePageSize;  // default of one page
+
+		if (VirtualFree(address, size, MEM_DECOMMIT) == false)
+			address = 0;	
+		else
+			committedCodeMemory -= size;
+
+		return address;
+	}
+#endif
+
+	#ifdef USE_MMAP
+	char* GCHeap::ReserveMemory(char *address,
+								size_t size)
+	{
+		return (char*) VirtualAlloc(address,
+									size,
+									MEM_RESERVE
+#ifdef _WIN64
+									| MEM_TOP_DOWN
+#endif //#ifdef _WIN64
+									,
+									PAGE_NOACCESS);
+	}
+
+	bool GCHeap::CommitMemory(char *address,
+							  size_t size)
+	{
+		void *addr = VirtualAlloc(address,
+							size,
+							MEM_COMMIT
+#ifdef _WIN64
+							| MEM_TOP_DOWN
+#endif //#ifdef _WIN64
+							,
+							PAGE_READWRITE);
+#ifdef _DEBUG
+		if(addr == NULL) {
+			MEMORY_BASIC_INFORMATION mbi;
+			VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
+			LPVOID lpMsgBuf;
+			FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+									NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+									(LPTSTR) &lpMsgBuf, 0, NULL );
+			GCAssertMsg(false, (const char*)lpMsgBuf);
+		}
+#endif
+		return addr != NULL;
+	}
+
+	bool GCHeap::DecommitMemory(char *address, size_t size)
+	{
+		return VirtualFree(address, size, MEM_DECOMMIT) != 0;
+	}
+
+	void GCHeap::ReleaseMemory(char *address,
+							   size_t /*size*/)
+	{
+		VirtualFree(address, 0, MEM_RELEASE);
+	}
+
+	bool GCHeap::CommitMemoryThatMaySpanRegions(char *address, size_t size)
+	{
+		bool success = false;
+		MEMORY_BASIC_INFORMATION mbi;	
+		do {
+			VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
+			size_t commitSize = size > mbi.RegionSize ? mbi.RegionSize : size;
+			success = CommitMemory(address, commitSize);
+			address += commitSize;
+			size -= commitSize;
+		} while(size > 0 && success);
+		return success;
+	}
+
+	bool GCHeap::DecommitMemoryThatMaySpanRegions(char *address, size_t size)
+	{
+		bool success = false;
+		MEMORY_BASIC_INFORMATION mbi;	
+		do {
+			VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
+			size_t commitSize = size > mbi.RegionSize ? mbi.RegionSize : size;
+			success = DecommitMemory(address, commitSize);
+			address += commitSize;
+			size -= commitSize;
+		} while(size > 0 && success);
+		return success;
+	}
+
+	#else // !USE_MMAP
+	char* GCHeap::AllocateMemory(size_t size)
+	{
+		return (char*)_aligned_malloc(size, kBlockSize);
+	}
+
+	void GCHeap::ReleaseMemory(char *address)
+	{
+		_aligned_free(address);
+	}	
+	#endif
+
+	/*static*/
+	size_t GCHeap::GetPrivateBytes()
+	{
+		void *addr = 0;
+		size_t ret;
+		size_t bytes=0;
+		MEMORY_BASIC_INFORMATION mib;
+		while(true)
+		{
+			ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
+			if(ret == 0)
+				break;
+
+			if((mib.State & MEM_COMMIT) && (mib.Type & MEM_PRIVATE))
+				bytes += mib.RegionSize;
+
+			addr = (void*) ((sintptr)mib.BaseAddress + mib.RegionSize);
+		}
+	
+		return bytes / GCHeap::kBlockSize;
+	}
+
+#ifdef MEMORY_PROFILER
+
 	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -216,248 +466,17 @@ namespace MMgc
 	// code, you might want to have a way to toss all this... but for _DEBUG
 	// only, it should be fine
 	static DbgHelpDllHelper g_DbgHelpDll;
-
-}
-#endif
-
-namespace MMgc
-{
-#ifdef MMGC_AVMPLUS
-	int GCHeap::vmPageSize()
-	{
-		SYSTEM_INFO sysinfo;
-		GetSystemInfo(&sysinfo);
-
-		return sysinfo.dwPageSize;
-	}
-
-	void* GCHeap::ReserveCodeMemory(void* address,
-									size_t size)
-	{
-		return VirtualAlloc(address,
-							size,
-							MEM_RESERVE,
-							PAGE_NOACCESS);
-	}
-
-	void GCHeap::ReleaseCodeMemory(void* address,
-								   size_t /*size*/)
-	{
-		VirtualFree(address, 0, MEM_RELEASE);
-	}
-
-	void* GCHeap::CommitCodeMemory(void* address,
-								  size_t size)
-	{
-		if (size == 0)
-			size = GCHeap::kNativePageSize;  // default of one page
-
-#ifdef AVMPLUS_JIT_READONLY
-		void* addr = VirtualAlloc(address,
-								  size,
-								  MEM_COMMIT,
-								  PAGE_READWRITE);
-#else
-		void* addr = VirtualAlloc(address,
-								  size,
-								  MEM_COMMIT,
-								  PAGE_EXECUTE_READWRITE);
-#endif /* AVMPLUS_JIT_READONLY */
-		if (addr == NULL)
-			address = 0;
-		else {
-			address = (void*)( (sintptr)address + size );
-			committedCodeMemory += size;
-		}
-		return address;
-	}
-
-#ifdef AVMPLUS_JIT_READONLY
-	/**
-	 * SetPageProtection changes the page access protections on a block of pages,
-	 * to make JIT-ted code executable or not.
-	 *
-	 * If executableFlag is true, the memory is made executable and read-only.
-	 *
-	 * If executableFlag is false, the memory is made non-executable and
-	 * read-write.
-	 *
-	 * [rickr] bug #182323  The codegen can bail in the middle of generating 
-	 * code for any number of reasons.  When this occurs we need to ensure 
-	 * that any code that was previously on the page still executes, so we 
-	 * leave the page as PAGE_EXECUTE_READWRITE rather than PAGE_READWRITE.  
-	 * Ideally we'd use PAGE_READWRITE and then on failure revert it back to 
-	 * read/execute but this is a little tricker and doesn't add too much 
-	 * protection since only a single page is 'exposed' with this technique.
-	 */
-	void GCHeap::SetPageProtection(void *address,
-							   size_t size,
-							   bool executableFlag,
-							   bool writeableFlag)
-	{
-		DWORD oldProtectFlags = 0;
-		DWORD newProtectFlags = 0;
-		if ( executableFlag && writeableFlag ) {
-			newProtectFlags = PAGE_EXECUTE_READWRITE;
-		} else if ( executableFlag ) {
-			newProtectFlags = PAGE_EXECUTE_READ;
-		} else if ( writeableFlag ) {
-			newProtectFlags = PAGE_READWRITE;
-		} else {
-			newProtectFlags = PAGE_READONLY;
-		}
-		BOOL retval = VirtualProtect(address,
-									 size,
-									 newProtectFlags,
-									 &oldProtectFlags);
-
-		(void)retval;
-		GCAssert(retval);
-
-		// We should not be clobbering PAGE_GUARD protections
-		GCAssert((oldProtectFlags & PAGE_GUARD) == 0);
-	}
-#endif /* AVMPLUS_JIT_READONLY */
-	
-	bool GCHeap::SetGuardPage(void *address)
-	{
-		if (!useGuardPages)
-		{
-			return false;
-		}
-		void *res = VirtualAlloc(address,
-								 GCHeap::kNativePageSize,
-								 MEM_COMMIT,
-								 PAGE_GUARD | PAGE_READWRITE);
-		return res != 0;
-	}
-	
-	void* GCHeap::DecommitCodeMemory(void* address,
-									 size_t size)
-	{
-		if (size == 0)
-			size = GCHeap::kNativePageSize;  // default of one page
-
-		if (VirtualFree(address, size, MEM_DECOMMIT) == false)
-			address = 0;	
-		else
-			committedCodeMemory -= size;
-
-		return address;
-	}
-#endif
-
-	#ifdef USE_MMAP
-	char* GCHeap::ReserveMemory(char *address,
-								size_t size)
-	{
-		return (char*) VirtualAlloc(address,
-									size,
-									MEM_RESERVE,
-									PAGE_NOACCESS);
-	}
-
-	bool GCHeap::CommitMemory(char *address,
-							  size_t size)
-	{
-		void *addr = VirtualAlloc(address,
-							size,
-							MEM_COMMIT,
-							PAGE_READWRITE);
-#ifdef _DEBUG
-		if(addr == NULL) {
-			MEMORY_BASIC_INFORMATION mbi;
-			VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
-			LPVOID lpMsgBuf;
-			FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-									NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-									(LPTSTR) &lpMsgBuf, 0, NULL );
-			GCAssertMsg(false, (const char*)lpMsgBuf);
-		}
-#endif
-		return addr != NULL;
-	}
-
-	bool GCHeap::DecommitMemory(char *address, size_t size)
-	{
-		return VirtualFree(address, size, MEM_DECOMMIT) != 0;
-	}
-
-	void GCHeap::ReleaseMemory(char *address,
-							   size_t /*size*/)
-	{
-		VirtualFree(address, 0, MEM_RELEASE);
-	}
-
-	bool GCHeap::CommitMemoryThatMaySpanRegions(char *address, size_t size)
-	{
-		bool success = false;
-		MEMORY_BASIC_INFORMATION mbi;	
-		do {
-			VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
-			size_t commitSize = size > mbi.RegionSize ? mbi.RegionSize : size;
-			success = CommitMemory(address, commitSize);
-			address += commitSize;
-			size -= commitSize;
-		} while(size > 0 && success);
-		return success;
-	}
-
-	bool GCHeap::DecommitMemoryThatMaySpanRegions(char *address, size_t size)
-	{
-		bool success = false;
-		MEMORY_BASIC_INFORMATION mbi;	
-		do {
-			VirtualQuery(address, &mbi, sizeof(MEMORY_BASIC_INFORMATION));
-			size_t commitSize = size > mbi.RegionSize ? mbi.RegionSize : size;
-			success = DecommitMemory(address, commitSize);
-			address += commitSize;
-			size -= commitSize;
-		} while(size > 0 && success);
-		return success;
-	}
-
-	#else
-	char* GCHeap::AllocateMemory(size_t size)
-	{
-		return (char*)_aligned_malloc(size, kBlockSize);
-	}
-
-	void GCHeap::ReleaseMemory(char *address)
-	{
-		_aligned_free(address);
-	}	
-	#endif
-
-#if defined(MEMORY_INFO) && defined (UNDER_CE)
-	void GetStackTrace(int *trace, int len, int skip)
-	{
-		(void) trace;
-		(void) len;
-		(void) skip;
-		// NOT SUPPORTEDD
-		return;
-	}
-
-	void GetInfoFromPC(sintptr pc, char *buff, int buffSize)
-	{
-		(void) pc;
-		(void) buff;
-		(void) buffSize;
-	}
-
-#endif
-
-#if defined(MEMORY_INFO) && !defined(UNDER_CE)
-	static bool inited = false;	
 	static const int MaxNameLength = 256;
+
 #ifdef _WIN64 
 #define MACHINETYPE IMAGE_FILE_MACHINE_AMD64
 #else
 #define MACHINETYPE IMAGE_FILE_MACHINE_I386
 #endif
-	void GetStackTrace(sintptr *trace, int len, int skip)
+
+	bool InitDbgHelp()
 	{
+		static bool inited = false;
 		if(!inited) {
 			if(!g_DbgHelpDll.m_SymInitialize ||
 				!(*g_DbgHelpDll.m_SymInitialize)(GetCurrentProcess(), NULL, true)) {
@@ -469,94 +488,23 @@ namespace MMgc
 					GCDebugMsg("See lpMsgBuf", true);
 					LocalFree(lpMsgBuf);
 				}			
+				return false;
 			}
 			inited = true;
 		}
-
-		HANDLE ht = GetCurrentThread();
-		HANDLE hp = GetCurrentProcess();
-
-		CONTEXT c;		
-		memset( &c, '\0', sizeof c );
-		c.ContextFlags = CONTEXT_FULL;
-
-#ifdef _WIN64
-		 RtlCaptureContext( &c );
-#else		
-      __asm
-      {
-        call x
-        x: pop eax
-        mov c.Eip, eax
-        mov c.Ebp, ebp
-        mov c.Esp, esp
-      }
-#endif
-
-		// skip an extra frame
-		skip++;
-		
-		STACKFRAME64 frame;
-		memset(&frame, 0, sizeof frame);
-		
-#ifdef _WIN64
-		frame.AddrPC.Offset = c.Rip;
-		frame.AddrPC.Mode = AddrModeFlat;
-		frame.AddrStack.Offset = c.Rsp;
-		frame.AddrStack.Mode = AddrModeFlat;
-		frame.AddrFrame.Offset = c.Rbp;
-		frame.AddrFrame.Mode = AddrModeFlat;
-#else
-		frame.AddrPC.Offset = c.Eip;
-		frame.AddrPC.Mode = AddrModeFlat;
-		frame.AddrStack.Offset = c.Esp;
-		frame.AddrStack.Mode = AddrModeFlat;
-		frame.AddrFrame.Offset = c.Ebp;
-		frame.AddrFrame.Mode = AddrModeFlat;
-#endif
-		
-		int i=0;
-		// save space for 0 pc terminator
-		len--;
-		while(i < len && 
-			g_DbgHelpDll.m_StackWalk64 != NULL &&
-			g_DbgHelpDll.m_SymFunctionTableAccess64 != NULL &&
-			g_DbgHelpDll.m_SymGetModuleBase64 != NULL)
-		{
-			BOOL res = (*g_DbgHelpDll.m_StackWalk64)(MACHINETYPE, hp, ht, &frame, 
-						&c, NULL, g_DbgHelpDll.m_SymFunctionTableAccess64, g_DbgHelpDll.m_SymGetModuleBase64, NULL);
-
-			if (!res) 
-				break;
-
-			if(skip-- > 0)
-				continue;
-
-			// Sometimes fires off in 64-bit 
-			// GCAssert(!frame.AddrPC.Offset || frame.AddrPC.Offset > 0x1000);
-
-			trace[i++] = (sintptr) frame.AddrPC.Offset;
-		}
-		trace[i] = 0;
+		return true;
 	}
 
-	void GetInfoFromPC(sintptr pc, char *buff, int buffSize)
+	void CaptureStackTrace(uintptr_t *trace, int len, int skip)
 	{
-		if(!inited) {
-			if(!g_DbgHelpDll.m_SymInitialize ||
-				!(*g_DbgHelpDll.m_SymInitialize)(GetCurrentProcess(), NULL, true)) {
-				LPVOID lpMsgBuf;
-				if(FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-								NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-								(LPTSTR) &lpMsgBuf, 0, NULL )) 
-				{
-					GCDebugMsg("See lpMsgBuf", true);
-					LocalFree(lpMsgBuf);
-				}			
-				goto nosym;
-			}
-			inited = true;
-		}
+		int num =	RtlCaptureStackBackTrace(skip, len - 1, (PVOID*)trace, NULL);
+		trace[num] = 0;
+	}
+
+	void GetInfoFromPC(uintptr_t pc, char *buff, int buffSize)
+	{
+		if(!InitDbgHelp())
+			goto nosym;
 		
 		// gleaned from IMAGEHLP_SYMBOL64 docs
 		IMAGEHLP_SYMBOL64 *pSym = (IMAGEHLP_SYMBOL64 *) alloca(sizeof(IMAGEHLP_SYMBOL64) + MaxNameLength);
@@ -578,7 +526,7 @@ namespace MMgc
 			!(*g_DbgHelpDll.m_SymGetLineFromAddr64)(GetCurrentProcess(), pc, &offsetFromLine, &line)) {
 			goto nosym;
 		}
-		
+
 		/* 
 		 this isn't working, I think i need to call SymLoadModule64 or something
 		IMAGEHLP_MODULE64 module;
@@ -604,33 +552,36 @@ namespace MMgc
 		while(fileName > line.FileName && *fileName != '\\')
 			fileName--;
 		fileName++;
-		wnsprintfA(buff, buffSize, "%s:%d", fileName, line.LineNumber);
+		StringCchPrintfA(buff, buffSize, "%s:%d", fileName, line.LineNumber);
 		return;
 
 nosym:	
-		wnsprintfA(buff, buffSize, "0x%x", pc);
+		StringCchPrintfA(buff, buffSize, "0x%x", pc);
 	}
-#endif // MEMORY_INFO
 
-	/*static*/
-	size_t GCHeap::GetPrivateBytes()
+	void GetFunctionName(uintptr_t pc, char *buff, int buffSize)
 	{
-		void *addr = 0;
-		size_t ret;
-		size_t bytes=0;
-		MEMORY_BASIC_INFORMATION mib;
-		while(true)
-		{
-			ret = VirtualQuery(addr, &mib, sizeof(MEMORY_BASIC_INFORMATION));
-			if(ret == 0)
-				break;
+		if(!InitDbgHelp())
+			goto nosym;
+		
+		// gleaned from IMAGEHLP_SYMBOL64 docs
+		IMAGEHLP_SYMBOL64 *pSym = (IMAGEHLP_SYMBOL64 *) alloca(sizeof(IMAGEHLP_SYMBOL64) + MaxNameLength);
+		pSym->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
+		pSym->MaxNameLength = MaxNameLength;
 
-			if((mib.State & MEM_COMMIT) && (mib.Type & MEM_PRIVATE))
-				bytes += mib.RegionSize;
-
-			addr = (void*) ((sintptr)mib.BaseAddress + mib.RegionSize);
+		DWORD64 offsetFromSymbol;
+		if(!g_DbgHelpDll.m_SymGetSymFromAddr64 ||
+			!(*g_DbgHelpDll.m_SymGetSymFromAddr64)(GetCurrentProcess(), pc, &offsetFromSymbol, pSym)) {
+			goto nosym;
 		}
-	
-		return bytes / GCHeap::kBlockSize;
+
+		StringCchPrintfA(buff, buffSize, "%s", pSym->Name);
+		//printf("%s\n", pSym->Name);
+		return;
+
+nosym:	
+		StringCchPrintfA(buff, buffSize, "0x%x", pc);
 	}
+
+#endif // MEMORY_PROFILER
 }

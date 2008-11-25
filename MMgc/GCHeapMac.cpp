@@ -40,9 +40,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#ifdef MEMORY_PROFILER
+#include <execinfo.h>
+#include <dlfcn.h>
+#include <cxxabi.h>
+#endif
 
 #include "MMgc.h"
-#include "GC.h"
 
 #ifdef USE_MMAP
 #include <sys/mman.h>
@@ -60,7 +64,6 @@
 
 #if (defined(MMGC_IA32) || defined(MMGC_AMD64)) && defined(MEMORY_INFO)
 #include <dlfcn.h>
-#include <cxxabi.h>
 #endif
 
 namespace MMgc
@@ -327,70 +330,56 @@ namespace MMgc
 	}
 #endif
 
-#ifdef MEMORY_INFO  
-
-#ifdef MMGC_PPC
-	// no idea how to do this with codewarrior
-	void GetInfoFromPC(sintptr pc, char *buff, int /*buffSize*/) 
+#ifdef MEMORY_PROFILER
+	
+	void GetFunctionName(uintptr_t pc, char *buff, int buffSize)
 	{
-		sprintf(buff, "0x%x", (uint32)pc);	
-	}
-
-	void GetStackTrace(sintptr *trace, int len, int skip) 
-	{
-	  register int stackp;
-	  sintptr pc;
-	  asm("mr %0,r1" : "=r" (stackp));
-	  while(skip--) {
-	    stackp = *(int*)stackp;
-	  }
-	  int i=0;
-	  // save space for 0 terminator
-	  len--;
-	  while(i<len && stackp) {
-	    pc = *((sintptr*)stackp+2);
-	    trace[i++]=pc;
-	    stackp = *(int*)stackp;
-	  }
-	  trace[i] = 0;
-	}
-#endif
-
-#if (defined(MMGC_IA32) || defined(MMGC_AMD64))
-
-	void GetInfoFromPC(sintptr pc, char *buff, int buffSize) 
-	{
-		int err = 0;
 		Dl_info dlip;
-		dladdr((void * const)pc, &dlip);
-		const char* nm = abi::__cxa_demangle(dlip.dli_sname,0,0,&err);
-		if (!nm || err) nm = dlip.dli_sname;
-		snprintf(buff, buffSize, "0x%08x:%s", (uint32)pc, dlip.dli_sname);
+		int ret = dladdr((void * const)pc, &dlip);
+		const char *sym = dlip.dli_sname;
+		if(ret != 0 && sym) {
+			size_t sz=buffSize;
+			int status=0;
+			char *out = (char*) malloc(buffSize);
+			char *ret = abi::__cxa_demangle(sym, out, &sz, &status);
+			if(ret) {
+				out = ret; // apparently demangle may realloc, so free this instead of out
+				strncpy(buff, ret, buffSize);
+			} else {
+				strncpy(buff, sym, buffSize);
+			}
+			free(out); 
+		} else {
+			snprintf(buff, buffSize, "0x%08x", (uint32)pc);
+		}
 	}
 	
-	void GetStackTrace(sintptr* trace, int len, int skip) 
-	{
-		void **ebp;
-		#ifdef MMGC_IA32
-		asm("mov %%ebp, %0" : "=r" (ebp));
-		#else
-		asm("mov %%rbp, %0" : "=r" (ebp));
-		#endif
-		while(skip-- && *ebp)
-		{
-			ebp = (void**)(*ebp);
-		}
 
-		len--;
-		int i=0;
-		while(i<len && *ebp)
-		{
-			trace[i++] = *((sintptr*)ebp+1);
-			ebp = (void**)(*ebp);			
-		}
-		trace[i] = 0;
+	void GetInfoFromPC(uintptr_t pc, char *buff, int buffSize) 
+	{
+	    buff[0] = 0;
+		(void)pc;
+		(void)buffSize;
+/*		uintptr_t array[2] = {pc, 0};
+		char **strs = backtrace_symbols((void*const*)array, 1);
+		snprintf(buff, buffSize, "%s", strs[0]);
+		free(strs);
+ */
+	  //		GetFunctionName(pc, buff, buffSize);
+	//	snprintf(buff, buffSize, "0x%u:%s", pc, sym);
 	}
-#endif
+	
+	void CaptureStackTrace(uintptr_t* trace, int len, int skip) 
+	{
+		void *array[18];
+		int got = backtrace(array, len);
+		for(int i=0;i < got-skip; i++)
+			trace[i] = (uintptr_t)array[i+skip];
+		trace[got-skip] = 0;
+		Dl_info dlip;
+		if(dladdr((const void*)trace[got-skip-1], &dlip) != 0)
+			trace[got-skip-1] = 0;
+	}
 
 #endif
 

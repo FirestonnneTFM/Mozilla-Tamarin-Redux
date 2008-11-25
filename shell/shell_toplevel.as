@@ -79,6 +79,7 @@ package avmplus
 		public native static function get totalMemory():Number;
 		public native static function get freeMemory():Number;
 		public native static function get privateMemory():Number;
+		public native static function dumpMemorySummary():void;
 
 		// function exists solely to test native-methods with custom namespaces
 		ns_example native static function nstest():void;

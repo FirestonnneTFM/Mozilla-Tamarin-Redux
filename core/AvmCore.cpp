@@ -183,10 +183,6 @@ namespace avmplus
 
 		callStack          = NULL;
 
-#ifdef FEATURE_SAMPLER
-		MMgc::m_sampler = sampler();
-#endif
-
 		interrupted        = false;
 
 		codeContextAtom    = CONTEXT_NONE;
