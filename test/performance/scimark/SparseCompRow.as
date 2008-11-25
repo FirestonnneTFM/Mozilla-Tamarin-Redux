@@ -47,7 +47,7 @@ public class SparseCompRow
 	}
 
 }
-var starttime=getTimer();
+var starttime:Number=new Date();
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:Number=Constants.SPARSE_SIZE_M;
 var nz:Number=Constants.SPARSE_SIZE_nz;
@@ -97,5 +97,5 @@ for (var i:uint=0; i<nr; i++)
 }
 
 SparseCompRow.matmult(y, val, row, col, x, 400);
-print("metric time "+(getTimer()-starttime));
+print("metric time "+(new Date()-starttime));
 }

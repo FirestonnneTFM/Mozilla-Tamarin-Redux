@@ -47,6 +47,7 @@ function prime(n:int) {
 	return true;
 }
 
+var start:Number=new Date();
 var n:int = 100000;
 var numprimes:int=0;
 print("searching for primes 1.."+n)
@@ -56,4 +57,4 @@ for(var j:int = n;j>0;--j) {
 	}
 }
 print("found "+numprimes);
-print("metric time "+getTimer());
+print("metric time "+(new Date()-start));

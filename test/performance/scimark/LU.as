@@ -296,7 +296,7 @@ public static function factor(A:Array,  pivot:Array):uint
     private var LU_:Array;
     private var pivot_:Array;
 }
-var starttime=getTimer();
+var starttime:Number=new Date();
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:Number=Constants.LU_SIZE;
 var A:Array = RandomMatrix(N, N,  R);
@@ -307,5 +307,5 @@ for (var i:int=0;i<cycles;i++) {
   CopyMatrix(lu, A);
   LU.factor(lu, pivot);
 }
-print("metric time "+(getTimer()-starttime));
+print("metric time "+(new Date()-starttime));
 }
