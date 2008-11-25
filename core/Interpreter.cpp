@@ -2134,22 +2134,22 @@ namespace avmplus
 			// rather than using MAKE_INTEGER macro.
 			INSTR(sxi1) {
 				i1 = core->integer(sp[0]);
-				sp[0] = Atom(((i1 << 31) >> (31-3)) | kIntegerType);
+				sp[0] = Atom(((i1 << (8*sizeof(Atom)-1)) >> ((8*sizeof(Atom)-1)-3)) | kIntegerType);
 				NEXT;
 			}
-
+			
 			INSTR(sxi8) {
 				i1 = core->integer(sp[0]);
-				sp[0] = Atom(((i1 << 24) >> (24-3)) | kIntegerType);
+				sp[0] = Atom(((i1 << (8*(sizeof(Atom)-1))) >> ((8*(sizeof(Atom)-1))-3)) | kIntegerType);
 				NEXT;
 			}
-
+			
 			INSTR(sxi16) {
 				i1 = core->integer(sp[0]);
-				sp[0] = Atom(((i1 << 16) >> (16-3)) | kIntegerType);
+				sp[0] = Atom(((i1 << (8*(sizeof(Atom)-2))) >> ((8*(sizeof(Atom)-2))-3)) | kIntegerType);
 				NEXT;
 			}
-
+					
 #define MOPS_RANGE_CHECK(addr, type) \
 		if (addr < 0 || (uint32_t)((addr) + sizeof(type)) > envDomain->globalMemorySize) { env->mopRangeCheckFailed(); }
 
