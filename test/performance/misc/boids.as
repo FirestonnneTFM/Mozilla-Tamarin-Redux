@@ -37,6 +37,7 @@
 
 package {
   
+        var start:Number=new Date();
 	var b:boids=new boids(100);
 	b.width=5000;
 	b.height=5000;
@@ -46,7 +47,7 @@ package {
 	for (var i:int=0;i<frames;i++) {
 		b.move_boids();
 	}
-	print("metric time " + getTimer());
+	print("metric time " + (new Date()-start));
 
 
 	public class boids {
@@ -137,7 +138,7 @@ package {
 		}
 		
 		public function move_boids():void {
-			var time:uint=getTimer();
+			var time:Number=new Date();
 			for (var i:uint=0;i<boids_objs.length;i++) {
 				checkspeed(boids_objs[i].velocity);
 				var v1:vec=rule1(boids_objs[i]);
@@ -147,7 +148,7 @@ package {
 				bound_position(boids_objs[i]);
 				boids_objs[i].position=boids_objs[i].position.add(boids_objs[i].velocity);
 			}
-			time=getTimer()-time;
+			time=new Date()-time;
 			avgtime=(avgtime*generation+time)/(generation+1);
 			generation++;
 		}

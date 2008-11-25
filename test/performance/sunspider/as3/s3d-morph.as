@@ -57,7 +57,7 @@ package {
     var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
     
     // verify test result
-    if (testOutput !== 6.750155989720952e-14) {
+    if (Math.abs(testOutput-6.750155989720952e-14)>0.00001) {
       print("Test validation failed.  Expected 6.750155989720952e-14 Got: "+testOutput);
     } else {
       print("metric time "+ _sunSpiderInterval);

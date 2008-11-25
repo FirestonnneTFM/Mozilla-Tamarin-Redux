@@ -181,7 +181,7 @@ public class FFT {
   }
 }
 // main
-var starttime=getTimer();
+var starttime:Number=new Date();
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:int = Constants.FFT_SIZE;
 var x:Array = RandomVector(2*N, R);
@@ -190,5 +190,5 @@ for (var i:uint=0; i<cycles; i++){
 	FFT.transform(x); // forward transform
 	FFT.inverse(x); // backward transform
 }
-print("metric time "+(getTimer()-starttime));
+print("metric time "+(new Date()-starttime));
 }

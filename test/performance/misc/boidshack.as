@@ -200,7 +200,7 @@ class Food extends Entity
 {
     function Food()
     {
-        lastTime = getTimer();
+        lastTime = new Date();
     }
 
     function initialize( boids:Boids, id:Number, x:Number, y:Number )
@@ -216,7 +216,7 @@ class Food extends Entity
         next = null;
         prev = null;
         
-        startTime = getTimer();
+        startTime = new Date();
         lastTime = startTime;
         position.setMembers( x, y );
         velocity.x = rnd( -5, 5 );
@@ -232,7 +232,7 @@ class Food extends Entity
         if (alive == false)
             return;
         
-        var lifetime:Number = (getTimer() - startTime) / 1000;
+        var lifetime:Number = (new Date() - startTime) / 1000;
 
         velocity.x += rnd( -1, 1 );
 
@@ -279,7 +279,7 @@ class Food extends Entity
     {
         ++frame;
 
-        var thisTime:Number = getTimer();
+        var thisTime:Number = new Date();
         var elapsed:Number = (thisTime - lastTime) / 1000;
         lastTime = thisTime;
 
@@ -694,7 +694,7 @@ var numFish = 500;
 var frames = 20;
 var boids = new Boids(numFish);
 
-var t = getTimer();
+var t:Number = new Date();
 for (var i=0; i < frames; i++)
 {
     for (var j=0; j < numFish; j++)
@@ -703,6 +703,6 @@ for (var i=0; i < frames; i++)
     }
 }
 
-t = getTimer() - t;
+t = new Date() - t;
 print("metric time "+t);
 
