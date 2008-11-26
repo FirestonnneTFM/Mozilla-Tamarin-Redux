@@ -38,6 +38,7 @@
 #ifndef __FixedAlloc__
 #define __FixedAlloc__
 
+
 namespace MMgc
 {
 	/**
@@ -114,10 +115,18 @@ namespace MMgc
 				if(!IsFull(b)) {
 					// There are more items at the end of the block
 					b->nextItem = (void *) ((uintptr)item+m_itemSize);
-				} else {
-					b->nextItem = 0;
+#ifdef MEMORY_INFO
+					// space made in ctor
+					item = DebugDecorate(item, size + DebugSize(), 6);
+					memset(item, 0xfa, size);
+#endif
+
+					SAMPLE_FIXED_ALLOC(item, Size(item));
+					return item;
 				}
+				b->nextItem = 0;
 			}
+
 
 			// If we're out of free items, be sure to remove ourselves from the
 			// list of blocks with free items.  
@@ -132,9 +141,15 @@ namespace MMgc
 					CreateChunk();
 			}
 
-			item = GetUserPointer(item);
-			if(m_heap->HooksEnabled())
-				m_heap->AllocHook(item, b->size - DebugSize());
+#ifdef MEMORY_INFO
+			// space made in ctor
+			item = DebugDecorate(item, size + DebugSize(), 6);
+			memset(item, 0xfa, size);
+#endif
+
+			SAMPLE_FIXED_ALLOC(item, Size(item));
+
+			GCAssertMsg(item != NULL, "Out of memory");
 			return item;
 		}
 
@@ -142,12 +157,16 @@ namespace MMgc
 		{
 			FixedBlock *b = (FixedBlock*) ((uintptr)item & ~0xFFF);
 
-			GCHeap *heap = b->alloc->m_heap;
-			if(heap->HooksEnabled()) {
-				heap->FinalizeHook(item, b->size - DebugSize());
- 				heap->FreeHook(item, b->size - DebugSize(), 0xed);
- 			}
-			item = GetRealPointer(item);
+#ifdef MEMORY_INFO
+			item = DebugFree(item, 0xED, 6);
+#endif
+
+#ifdef _DEBUG
+			// ensure that we are freeing a pointer on a item boundary
+			GCAssert(((uintptr)item - (uintptr)b->items) % b->alloc->m_itemSize == 0);
+#endif
+
+			SAMPLE_DEALLOC(item, Size(item));
 
 			// Add this item to the free list
 			*((void**)item) = b->firstFree;

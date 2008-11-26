@@ -46,8 +46,17 @@
 #include "StaticAssert.h"
 
 #ifdef HAVE_STDARG
-// for va_list
 #include <stdarg.h>
+#endif
+
+#ifdef MEMORY_INFO
+#if !defined(__MWERKS__)
+#if !defined(__ICC)
+#if !defined(UNDER_CE)
+#include <typeinfo>
+#endif
+#endif
+#endif
 #endif
 
 #ifdef _DEBUG
@@ -75,6 +84,10 @@
 	#endif // HAVE_ALLOCA_H
 	#include <sys/time.h>
 #endif // UNIX
+
+#if defined(_MAC) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
+#include <pthread.h>
+#endif
 
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
@@ -760,14 +773,13 @@ namespace MMgc
 			item = largeAlloc->Alloc(size, flags);
 		}
 
-		item = GetUserPointer(item);
-
-		if(heap->HooksEnabled()) {
-			heap->AllocHook(item, Size(item));
-		}
+#ifdef MEMORY_INFO
+		if(item)
+		item = DebugDecorate(item,  GC::Size(GetUserPointer(item)) + DebugSize(), 3);
+#endif
 
 #ifdef _DEBUG
-		bool shouldZero = (flags & kZero) || incrementalValidationPedantic;
+        bool shouldZero = (flags & kZero) || incrementalValidationPedantic;
         
 		// in debug mode memory is poisoned so we have to clear it here
 		// in release builds memory is zero'd to start and on free/sweep
@@ -779,6 +791,8 @@ namespace MMgc
 			memset(item, 0, Size(item));
 		}
 #endif
+
+		SAMPLE_ALLOC(item, GC::Size(item));
 
 		return item;
 	}
@@ -845,6 +859,8 @@ namespace MMgc
 
 		bool isLarge;
 
+		SAMPLE_DEALLOC(GetRealPointer(item), GC::Size(item));
+
 		// we can't allow free'ing something during Sweeping, otherwise alloc counters
 		// get decremented twice and destructors will be called twice.
 		if(collecting) {
@@ -872,10 +888,9 @@ namespace MMgc
 #endif // MMGC_DRC
 #endif
 
-		if(heap->HooksEnabled()) {
-			heap->FinalizeHook(item, GC::Size(item));
-			heap->FreeHook(item, GC::Size(item), 0xca);
-		}
+#ifdef MEMORY_INFO
+		DebugFree(item, 0xca, 4);
+#endif
 	
 		if (isLarge) {
 			largeAlloc->Free(GetRealPointer(item));
@@ -956,9 +971,9 @@ bail:
 
 		size_t heapSize = heap->GetUsedHeapSize();
 
-#ifdef MEMORY_PROFILER
-		if(heap->IsProfilingEnabled()) {
-			fprintf(stdout, "Before sweep memory info:\n");
+#ifdef MEMORY_INFO
+		if(heap->enableMemoryProfiling) {
+			GCDebugMsg(false, "Pre sweep memory info:\n");
 			DumpMemoryInfo();
 		}
 #endif
@@ -1009,8 +1024,10 @@ bail:
 		GCLargeAlloc::LargeBlock *lb = largeEmptyPageList;		
 		while(lb) {
 			GCLargeAlloc::LargeBlock *next = lb->next;
-			if(heap->HooksEnabled())
-				heap->FreeHook(GetUserPointer(lb+1), lb->usableSize - DebugSize(), 0xba);
+#ifdef MEMORY_INFO
+			DebugFreeReverse(lb+1, 0xba, 3);
+#endif
+			// FIXME: this makes for some chatty locking, maybe not a problem?
 			FreeBlock(lb, lb->GetNumBlocks());
 			lb = next;
 		}
@@ -1018,9 +1035,9 @@ bail:
 
 		SAMPLE_CHECK();
 
-#ifdef MEMORY_PROFILER
-		if(heap->IsProfilingEnabled()) {			
-			fprintf(stdout, "After sweep memory info:\n");
+#ifdef MEMORY_INFO
+		if(heap->enableMemoryProfiling) {			
+			GCDebugMsg(false, "Post sweep memory info:\n");
 			DumpMemoryInfo();
 		}
 #endif
@@ -1066,6 +1083,10 @@ bail:
 		}
 #ifdef DEBUGGER
 		StopGCActivity();
+#endif
+
+#ifdef MEMORY_INFO
+		m_gcLastStackTrace = GetStackTraceIndex(5);
 #endif
 	}
 
@@ -1274,9 +1295,7 @@ bail:
 
 		if(shiftAmount || dst != pageMap) {
 			memmove(dst + shiftAmount, pageMap, numBytesToCopy);
-			if ( shiftAmount ) {
-				memset(dst, 0, shiftAmount);
-			}
+			memset(dst, 0, shiftAmount);
 			if(dst != pageMap) {
 				heap->Free(pageMap);
 				pageMap = dst;
@@ -1306,7 +1325,7 @@ bail:
 
 	void GC::CleanStack(bool force)
 	{
-#if defined(_MSC_VER) && defined(_DEBUG)
+#if defined _MSC_VER && defined _DEBUG
 		// debug builds poison the stack already
 		(void)force;
 		return;
@@ -1316,7 +1335,7 @@ bail:
 
 		stackCleaned = true;
 		
-		register void *stackP = 0;
+		register void *stackP;
 
 #if defined MMGC_IA32
 		#ifdef WIN32
@@ -1371,7 +1390,7 @@ bail:
 		}
 #endif // __MSC_VER && _DEBUG
 	}
-
+	
 	#if defined(MMGC_PPC) && defined(__GNUC__)
 	__attribute__((noinline)) 
 	#endif
@@ -1821,7 +1840,8 @@ bail:
 
 				GCAssert(*(int*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
-				((GCFinalizable*)rcobj)->~GCFinalizable();
+//				((GCFinalizable*)rcobj)->~GCFinalizable();
+				((GCFinalizable*)rcobj)->Finalize();
 				numObjects++;
 				objSize += (uint32)GC::Size(rcobj);
 				gc->Free(rcobj);
@@ -2015,20 +2035,36 @@ bail:
 	{
 		int *p = (int*)GetRealPointer ( o ) ;
 		int size = *p++;
-		*p++; // skip old trace index slot
+		int traceIndex = *p++;
 		//if(*(p+1) == 0xcacacaca || *(p+1) == 0xbabababa) {
 			// bail, object was deleted
 		//	return;
 		//}
-		const char *typeName = GetAllocationName(o);
+		const char *typeName = GetTypeName(traceIndex, o);
+// Disabled for 64-bit Windows.  Debugger doesn't allow exception to go uncaught so always breaks
+#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || defined(MMGC_MAC)
+		if (strncmp(typeName, "unknown ", 7))
+		{
+			try {
+				const std::type_info *ti = &typeid(*(MMgc::GCObject*)p);
+				if (ti->name() && (uintptr_t(ti->name()) > 0x10000))
+					typeName = ti->name();
+				// sometimes name will get set to bogus memory with no exceptions catch that
+				char c = *typeName;
+				(void)c;	// silence compiler warning
+			} catch(...) {
+				typeName = "unknown";
+			}
+		}
+#endif
 
 		// strip "class "
 		if (!strncmp(typeName, "class ", 6))
 			typeName += 6;
-		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, o);
+		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, p);
 		if (proc)
 			proc(context, o, typeName);
-		PrintStackTrace(o);
+		PrintStackTraceByIndex(traceIndex);
 		GCDebugMsg(false, "---\n");
 		// skip data + endMarker
 		p += 1 + (size>>2);
@@ -2085,7 +2121,7 @@ bail:
 
 #endif // MMGC_DRC
 	
-#ifdef MEMORY_PROFILER
+#ifdef MEMORY_INFO
 	
 	int DumpAlloc(GCAlloc *a)
 	{
@@ -2100,24 +2136,23 @@ bail:
 
 	void GC::DumpMemoryInfo()
 	{
-		bool gcstatsSave = gcstats;
-		gcstats = true;
-		gclog("Memory Summary");
-		gcstats = gcstatsSave;
-		heap->DumpFatties();
-		if (dumpSizeClassState)
+		if(heap->enableMemoryProfiling)
 		{
-			int waste=0;
-			for(int i=0; i < kNumSizeClasses; i++)
+			DumpFatties();
+			if (dumpSizeClassState)
 			{
-				waste += DumpAlloc(containsPointersAllocs[i]);
+				int waste=0;
+				for(int i=0; i < kNumSizeClasses; i++)
+				{
+					waste += DumpAlloc(containsPointersAllocs[i]);
 #ifdef MMGC_DRC
-				waste += DumpAlloc(containsPointersRCAllocs[i]);
+					waste += DumpAlloc(containsPointersRCAllocs[i]);
 #endif
-				waste += DumpAlloc(noPointersAllocs[i]);
-			}
-			GCDebugMsg(false, "Wasted %d kb\n", waste>>10);
+					waste += DumpAlloc(noPointersAllocs[i]);
+				}
+				GCDebugMsg(false, "Wasted %d kb\n", waste>>10);
 
+			}
 		}
 	}
 
@@ -2301,7 +2336,7 @@ bail:
 				if (buffer) GCDebugMsg(false, buffer);
 				GCDebugMsg(false, "Location: 0x%08x  Object: 0x%08x (size %d)\n", where, real, taggedSize);
 				if (buffer) GCDebugMsg(false, buffer);
-#if 0
+#ifdef MEMORY_INFO
 				PrintStackTraceByIndex(traceIndex);
 #else
 				(void)traceIndex;
@@ -2338,6 +2373,17 @@ bail:
 		GCDebugMsg(false, "[%d] Probing for pointers to : 0x%08x\n", currentDepth, me);
 		while(m < memEnd)
 		{
+#ifdef WIN32
+			// first skip uncommitted memory
+			MEMORY_BASIC_INFORMATION mib;
+			VirtualQuery((void*) m, &mib, sizeof(MEMORY_BASIC_INFORMATION));
+			if((mib.Protect & PAGE_READWRITE) == 0) 
+			{
+				m += mib.RegionSize;
+				continue;
+			}
+#endif
+
 			// divide by 4K to get index
 			int bits = GetPageMapValueAlreadyLocked(m);
 			if(bits == kNonGC) 
@@ -2473,6 +2519,7 @@ bail:
 			}
 #endif
 		}
+
 
 		_asm {
 			// load memStart and End into mm0
@@ -2635,7 +2682,7 @@ bail:
 			// cause things on the work queue to be already marked
 			// in incremental GC
 			if(!validateDefRef) {
-				//GCAssert(!b);
+				GCAssert(!b);
 			}
 #endif			
 		}
@@ -2659,13 +2706,13 @@ bail:
 #endif
 
 			uintptr val = *p++;  
-			
+
 			if(val < _memStart || val >= _memEnd)
 				continue;
 
 			// normalize and divide by 4K to get index
 			int bits = GetPageMapValue(val); 
-						
+			
 			if (bits == kGCAllocPage)
 			{
 				const void *item;
@@ -3379,6 +3426,7 @@ uintptr_t	GC::GetStackTop() const
 	}
 #endif
 #endif /*<<GC_PORTING_API*/
+
 	void *GC::heapAlloc(size_t siz, bool expand, bool zero)
 	{
 		void *ptr = heap->Alloc((int)siz, expand, zero);
@@ -3441,4 +3489,25 @@ uintptr_t	GC::GetStackTop() const
 		log_mem("[mem] \tunmanaged bytes ", fixed_alloced, unmanaged);
 		gclog("[mem] -------- gross stats end -----\n");
 	}
+
+#if defined (FEATURE_SAMPLER)
+	// For sampling support
+	GCThreadLocal<avmplus::Sampler*> m_sampler;
+	bool sampling = false;
+
+	void recordAllocationSample(void* item, size_t size, bool in_lock)
+	{
+		avmplus::Sampler* sampler = m_sampler;
+		if( sampler && sampler->sampling )
+			sampler->recordAllocationSample(item, size, !in_lock);
+	}
+
+	void recordDeallocationSample(const void* item, size_t size)
+	{
+		avmplus::Sampler* sampler = m_sampler;
+		if( sampler /*&& sampler->sampling*/ )
+			sampler->recordDeallocationSample(item, size);
+	}
+#endif
+
 }

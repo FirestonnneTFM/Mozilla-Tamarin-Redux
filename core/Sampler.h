@@ -41,8 +41,6 @@
 namespace avmplus
 {
 #ifdef FEATURE_SAMPLER
- 	void recordAllocationSample(const void* item, size_t size);
- 	void recordDeallocationSample(const void* item, size_t size);
 
 	// This structure is used to read/write data to the sample stream.
 	// The fields are written out to the sample stream as they are defined here.  
@@ -100,7 +98,7 @@ namespace avmplus
 		void sampleCheck() { if(takeSample) sample(); }
 
 		uint64 recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable);
-		uint64 recordAllocationSample(const void* item, uint64 size, bool callback_ok = true);
+		uint64 recordAllocationSample(void* item, uint64 size, bool callback_ok = true);
 		void recordDeallocationSample(const void* item, uint64 size);
 
 		void startSampling();

@@ -1232,7 +1232,7 @@ namespace avmplus
 		m_bufptr(NULL),
 		gc(gc)
 	{
-		MMGC_MEM_TAG("StringNullTerminatedUTF8");
+		MMGC_MEM_TYPE("StringNullTerminatedUTF8");
 		int len = str->length();
 		m_bufptr = (char*)gc->Alloc(len + 1);
        const wchar *data = str->c_str();

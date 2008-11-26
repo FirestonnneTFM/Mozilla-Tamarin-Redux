@@ -202,12 +202,12 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 		VirtualQuery(tmp_ptr, &__mib, sizeof(MEMORY_BASIC_INFORMATION)); \
 	    _size = __mib.RegionSize - ((int)tmp_ptr - (int)__mib.BaseAddress); \
 		_stack = tmp_ptr;
-#else
-#ifdef __ARMCC_VERSION
+#else // UNDER_CE
+#ifdef __ARMCC__
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		_stack =  (void*)__current_sp(); \
 		_size = (unsigned int*)_gc->GetStackTop() - (unsigned int*)_stack;
-#else
+#else // __ARMCC__
 // Store nonvolatile registers r4-r10
 // Find stack pointer
 #ifdef __thumb__
@@ -242,8 +242,6 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 		asm("ta 3");\
 		_stack = (void *) _getsp();\
 		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
-#else
-#error unknown MMGC architecture?!
 #endif
 
 #ifdef MMGC_THREADSAFE
@@ -1171,9 +1169,13 @@ namespace MMgc
 		/** @access Requires(request) */
 		static GCWeakRef *GetWeakRef(const void *obj);
 		
+	public:
 		// a WeakRef that always refers to null. useful if you need one.
 		GCWeakRef* emptyWeakRef;
+	private:
+		GCRoot* emptyWeakRefRoot;
 	
+	public:
 		/** @access Requires((request && m_lock) || exclusiveGC) */
 		void ClearWeakRef(const void *obj);
 
@@ -1242,8 +1244,6 @@ namespace MMgc
 		// for external which does thread safe multi-thread AS execution
 		bool disableThreadCheck;
 #endif
-
-		GCRoot* emptyWeakRefRoot;
 
 		/**
 		 * True if incremental marking is on and some objects have been marked.
@@ -1510,7 +1510,7 @@ private:
 
 		static const void *Pointer(const void *p) { return (const void*)(((uintptr)p)&~7); }
 
-#ifdef MEMORY_PROFILER
+#ifdef MEMORY_INFO
 public:
 		void DumpMemoryInfo();
 private:
