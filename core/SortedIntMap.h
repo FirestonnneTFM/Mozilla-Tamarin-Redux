@@ -338,7 +338,7 @@ namespace avmplus
 		{
 			if (keys.size() == 0 || k > keys.last()) 
 			{
-				MMGC_MEM_TAG("avmplusSortedMap");
+				MMGC_MEM_TYPE("avmplusSortedMap");
 				keys.add(k);
 				values.add(v);
 				return (T)v;

@@ -75,13 +75,11 @@ namespace MMgc
 	void RCObject::DumpHistory()
 	{			
 		GCDebugMsg(false, "Ref count modification history for object 0x%x:\n", this);
-#if 0
 		int *traces = history.GetData();
 		for(int i=0, n=history.Count(); i<n; i++)
 		{
 			PrintStackTraceByIndex(traces[i]);
 		}
-#endif
 	}
 #endif
 }

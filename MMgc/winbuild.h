@@ -57,9 +57,8 @@
 /**
  * Define this to get stack traces.  Helps with memory leaks.
  */
-#ifdef _DEBUG
+#if defined(_DEBUG)
 #define MEMORY_INFO
-#define MEMORY_PROFILER
 #endif
 
 /**
@@ -100,15 +99,6 @@
  * heap overflow attacks.
  */
 #define AVMPLUS_JIT_READONLY
-
-// windows builds need malloc.h for alloca
-#define HAVE_MALLOC_H
-
-/**
- * Turns on ability to setjmp out of allocator back to mutator defined entry point
- * when memory is exhausted
- */
-//#define FEATURE_OOM
 
 /**
  * compiled with the /W4 warning level

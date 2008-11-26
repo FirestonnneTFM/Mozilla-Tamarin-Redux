@@ -91,7 +91,7 @@ namespace MMgc
 		DebugBreak();
 #endif
 		if(logToStdErr) {
- 			fprintf( stdout, "%s", msg );
+ 			fprintf( stderr, "%s\n", msg );
 		}
 
 		if (debugBreak) {
@@ -103,7 +103,7 @@ namespace MMgc
 	{
 		OutputDebugStringW((LPCWSTR)msg);
 		if(logToStdErr) {
- 			fprintf( stdout, "%S", msg );
+ 			fprintf( stderr, "%S\n", msg );
 		}
 
 		if (debugBreak) {

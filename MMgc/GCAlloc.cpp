@@ -444,9 +444,8 @@ start:
 
 					void* item = (char*)b->items + m_itemSize*((i*8)+j);
 
-					if(m_gc->heap->HooksEnabled())
- 						m_gc->heap->FinalizeHook(GetUserPointer(item), m_itemSize - DebugSize());
-  
+					SAMPLE_DEALLOC(item, GC::Size(GetUserPointer(item)));
+
 					if(!(marks & (kFinalize|kHasWeakRef)))
 						continue;
         
@@ -454,7 +453,8 @@ start:
 					{     
 						GCFinalizable *obj = (GCFinalizedObject*)GetUserPointer(item);
 						GCAssert(*(int*)obj != 0);
-						obj->~GCFinalizable();
+//						obj->~GCFinalizable();
+						obj->Finalize();
 						bits[i] &= ~(kFinalize<<(j*4));
 
 #if defined(_DEBUG) && defined(MMGC_DRC)
@@ -463,6 +463,7 @@ start:
 						}
 #endif
 					}
+
 
 					if (marks & kHasWeakRef) {							
 						b->gc->ClearWeakRef(GetUserPointer(item));
@@ -528,9 +529,9 @@ start:
 				// garbage, freelist it
 				void *item = (char*)b->items + m_itemSize*(i*8+j);
 
-				if(m_gc->heap->HooksEnabled())
-					m_gc->heap->FreeHook(GetUserPointer(item), b->size - DebugSize(), 0xba);
-
+#ifdef MEMORY_INFO 
+				DebugFreeReverse(item, 0xba, 4);
+#endif
 				b->FreeItem(item, (i*8+j));
 			}
 		}

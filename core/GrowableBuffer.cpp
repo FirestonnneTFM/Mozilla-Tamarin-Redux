@@ -1008,12 +1008,8 @@ namespace avmplus
 	#else
 		byte *AccessViolationAddress = (byte*) exc_state.faultvaddr;
 	#endif
-#else
-#if __DARWIN_UNIX03 // Mac 10.5 SDK changed definition
-		byte *AccessViolationAddress = (byte*) exc_state.__dar;
-#else
+    #else
 		byte *AccessViolationAddress = (byte*) exc_state.dar;
-#endif
     #endif
 			
 		GrowableBuffer* g = buffer;
@@ -1300,13 +1296,8 @@ namespace avmplus
 		
 		// set the registers to point back to the CATCH block     
 		#ifdef AVMPLUS_PPC
-#if __DARWIN_UNIX03
-		thread_state.__srr0 = (*jmpBuf)[21];
-		thread_state.__r1   = (*jmpBuf)[0];
-#else
 		thread_state.srr0 = (*jmpBuf)[21];
 		thread_state.r1   = (*jmpBuf)[0];
-#endif
 		#endif
 
 		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)

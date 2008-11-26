@@ -44,46 +44,25 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-	// store this in a thread local to capture FixedAlloc alloc traffic
-	GCThreadLocal<avmplus::Sampler*> tls_sampler;
-
-	/* static */
-	void recordAllocationSample(const void* item, size_t size)
-	{
-		avmplus::Sampler* sampler = tls_sampler;
-		if( sampler && sampler->sampling )
-			sampler->recordAllocationSample(item, size);
-	}
-
-	/* static */
-	void recordDeallocationSample(const void* item, size_t size)
-	{
-		avmplus::Sampler* sampler = tls_sampler;
-		if( sampler /*&& sampler->sampling*/ )
-			sampler->recordDeallocationSample(item, size);
-	}
-
 	Sampler::Sampler(GC *gc) : allocId(1), sampling(true),
 			autoStartSampling(false), samplingNow(false), samplingAllAllocs(false), takeSample(0),
 			numSamples(0), currentSample(NULL), timerHandle(0), lastAllocSample(0),
-			uids(1024, GCHashtable::MALLOC), ptrSamples(0), callback(0), runningCallback(false), m_fakeMethodNames(gc)
+			uids(1024), ptrSamples(0), callback(0), runningCallback(false), m_fakeMethodNames(gc)
 	{
 		samples = new (gc) GrowableBuffer(gc->GetGCHeap());
-		gc->GetGCHeap()->EnableHooks();
 	}
 
 	void Sampler::setCore(AvmCore *core)
 	{
 		this->core = core;
- 		tls_sampler = this;
 	}
 
 	Sampler::~Sampler()
 	{
 		stopSampling();
- 		Sampler* tls = tls_sampler;
- 		if(tls == this)
- 			tls_sampler = NULL;
+		Sampler* gc_sampler = MMgc::m_sampler;
+		if(gc_sampler == this)
+			MMgc::m_sampler = NULL;
 		delete samples;
 		samples = 0;
 	}
@@ -230,7 +209,7 @@ namespace avmplus
 		}
 	}
 
-	uint64 Sampler::recordAllocationSample(const void* item, uint64 size, bool callback_ok)
+	uint64 Sampler::recordAllocationSample(void* item, uint64 size, bool callback_ok)
 	{
 		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
 		if(!samplingNow)
@@ -247,7 +226,9 @@ namespace avmplus
 		lastAllocSample = currentSample;
 		writeRawSample(NEW_AUX_SAMPLE);
 		uint64 uid = allocId++;
-		uids.add(item, (void*)uid);
+		samplingNow = false;
+		uids.add(GetRealPointer(item), (void*)uid);
+		samplingNow = true;
 		write(currentSample, uid);
 		write(currentSample, item);
 		write(currentSample, (uintptr)0);
@@ -295,8 +276,10 @@ namespace avmplus
 
 		write(currentSample, s.id);
 
-		AvmAssertMsg( ptrSamples->get(obj)==0, "Missing dealloc sample - same memory alloc'ed twice.\n");
-		ptrSamples->add(obj, currentSample);
+		samplingNow = false;
+		AvmAssertMsg( ptrSamples->get(GetRealPointer(obj))==0, "Missing dealloc sample - same memory alloc'ed twice.\n");
+		ptrSamples->add(GetRealPointer(obj), currentSample);
+		samplingNow = true;
 
 		write(currentSample, s.ptr);
 
@@ -342,7 +325,7 @@ namespace avmplus
 #ifdef _DEBUG
 				void* oldval = 0;
 				read(oldptr, oldval);
-				AvmAssertMsg(oldval==item, "Sample stream corrupt, dealloc doesn't point to correct address");
+				AvmAssertMsg(GetRealPointer(oldval)==item, "Sample stream corrupt, dealloc doesn't point to correct address");
 				rewind(oldptr, sizeof(void*));
 #endif
 			write(oldptr, (void*)0);
@@ -358,7 +341,7 @@ namespace avmplus
 		//samples->free();
 		currentSample = samples->start();
 		GCHashtable* t = ptrSamples;
-		ptrSamples = new MMgc::GCHashtable(4096, GCHashtable::MALLOC);
+		ptrSamples = new MMgc::GCHashtable(4096);
 		delete t;
 		numSamples = 0;
 	}
@@ -388,9 +371,10 @@ namespace avmplus
 		
 		if( !ptrSamples ) 
 		{
-			ptrSamples = new MMgc::GCHashtable(1024, GCHashtable::MALLOC);
+			ptrSamples = new MMgc::GCHashtable(1024);
 		}
 
+		MMgc::sampling = true;
 		samplingNow = true;
 		if(timerHandle == 0)
 			timerHandle = OSDep::startIntWriteTimer(1, &takeSample);
@@ -430,6 +414,7 @@ namespace avmplus
 			ptrSamples = 0;
 		}
 
+		MMgc::sampling = false;
 		samplingNow = false;
 		numSamples = 0;
 		currentSample = NULL;
@@ -510,6 +495,5 @@ namespace avmplus
 	void Sampler::postsweep()
 	{
 	}
-
 }
 #endif

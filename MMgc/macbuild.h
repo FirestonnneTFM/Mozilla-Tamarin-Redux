@@ -67,9 +67,6 @@
  */
 #ifdef DEBUG
 #define MEMORY_INFO
-#if __DARWIN_UNIX03 // 10.5 only
-#define MEMORY_PROFILER
-#endif
 #endif
 
 /**

@@ -89,7 +89,7 @@ namespace MMgc
 					unsigned int fourthInt = *(mem+3);
 					if(fourthInt != 0xedededed) {
 						GCDebugMsg(false, "Leaked %d byte item.  Addr: 0x%x\n", GetItemSize(), mem+2);
-						PrintStackTrace(GetUserPointer(mem));
+						PrintStackTraceByIndex(*(mem+1));
 					}
 					mem += (m_itemSize / sizeof(int));
 				}

@@ -214,7 +214,7 @@ namespace MMgc
 		// assert that I don't fit (makes sure we don't waste space
 		GCAssert(size > m_allocs[index-1]->GetItemSize());
 
-	  return m_allocs[index];
+	    return m_allocs[index];
 	}
 
 	void *FixedMalloc::LargeAlloc(size_t size)
@@ -229,22 +229,22 @@ namespace MMgc
 		else
 		{
 			numLargeChunks += blocksNeeded;
+#ifdef MEMORY_INFO
+			item = DebugDecorate(item, size, 5);
+			memset(item, 0xfb, size - DebugSize());
+#endif
 		}
-		item = GetUserPointer(item);
-		if(m_heap->HooksEnabled())
-			m_heap->AllocHook(item, Size(item));
 		return item;
 	}
 	
 	
 	void FixedMalloc::LargeFree(void *item)
 	{
-		if(m_heap->HooksEnabled()) {
-			m_heap->FinalizeHook(item, Size(item));
-			m_heap->FreeHook(item, Size(item), 0xfa);
-		}
+#ifdef MEMORY_INFO
+		item = DebugFree(item, 0xed, 5);
+#endif
 		numLargeChunks -= GCHeap::SizeToBlocks(LargeSize(item));
-		m_heap->Free(GetRealPointer(item));
+		m_heap->Free(item);
 	}
 	
 	size_t FixedMalloc::LargeSize(const void *item)

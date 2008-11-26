@@ -133,7 +133,8 @@ namespace MMgc
 				if (NeedsFinalize(b)) {
 					GCFinalizable *obj = (GCFinalizable *) item;
 					obj = (GCFinalizable *) GetUserPointer(obj);
-					obj->~GCFinalizable();
+					//obj->~GCFinalizable();
+					obj->Finalize();
 #if defined(_DEBUG) && defined(MMGC_DRC)
 					if((b->flags & kRCObject) != 0) {
 						b->gc->RCObjectZeroCheck((RCObject*)obj);
@@ -143,10 +144,8 @@ namespace MMgc
 				if(b->flags & kHasWeakRef) {
 					b->gc->ClearWeakRef(GetUserPointer(item));
 				}
-				
-				if(m_gc->heap->HooksEnabled())
-					m_gc->heap->FreeHook(GetUserPointer(item), b->usableSize - DebugSize(), 0xba);
-				
+				SAMPLE_DEALLOC(item, GC::Size(item));
+
 				// unlink from list
 				*prev = b->next;
 				b->gc->AddToLargeEmptyBlockList(b);

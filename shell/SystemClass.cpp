@@ -227,11 +227,4 @@ namespace avmshell
 	{
 		return AvmCore::isObject(o) ? AvmCore::atomToScriptObject(o)->isGlobalObject() : false;
 	}
-
-	void SystemClass::dumpMemorySummary()
-	{
-#ifdef MEMORY_PROFILER
-		core()->GetGC()->DumpMemoryInfo();
-#endif
-	}
 }
