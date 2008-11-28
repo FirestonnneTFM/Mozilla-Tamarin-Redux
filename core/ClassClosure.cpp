@@ -43,7 +43,7 @@ namespace avmplus
 	ClassClosure::ClassClosure(VTable *cvtable)
 		: ScriptObject(cvtable, NULL)
 	{
-		AvmAssert(traits()->sizeofInstance >= sizeof(ClassClosure));
+		AvmAssert(traits()->getSizeOfInstance() >= sizeof(ClassClosure));
 
 		// prototype will be set by caller
 		AvmAssert(cvtable->traits->itraits != NULL);

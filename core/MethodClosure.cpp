@@ -37,6 +37,7 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 using namespace MMgc;
 
@@ -51,7 +52,7 @@ namespace avmplus
 								 MethodEnv *env, Atom savedThis)
 		: ScriptObject(ivtable, prototype)
     {
-		AvmAssert(traits()->sizeofInstance == sizeof(MethodClosure));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosure));
 		AvmAssert(env != NULL);
 		AvmAssert(!AvmCore::isNullOrUndefined(savedThis));
         this->env = env;
@@ -94,7 +95,7 @@ namespace avmplus
         return undefinedAtom;
     }
 
-	int MethodClosure::get_length() const
+	int MethodClosure::MethodClosure_get_length() const
 	{
 		return env->method->param_count;
 	}
@@ -116,18 +117,13 @@ namespace avmplus
     }
 #endif
 
-	BEGIN_NATIVE_MAP(MethodClosureClass)
-		NATIVE_METHOD(builtin_as_0_MethodClosure_length_get, MethodClosure::get_length)
-		NATIVE_METHOD(builtin_as_0_MethodClosure_private_savedThis_get, MethodClosure::get_savedThis)
-	END_NATIVE_MAP()
-
 	MethodClosureClass::MethodClosureClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
 		Toplevel* toplevel = this->toplevel();
 
 		toplevel->methodClosureClass = this;
-		AvmAssert(traits()->sizeofInstance == sizeof(MethodClosureClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(MethodClosureClass));
 
 		prototype = toplevel->functionClass->createEmptyFunction();
 	}

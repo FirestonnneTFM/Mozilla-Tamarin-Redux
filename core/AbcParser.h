@@ -50,10 +50,8 @@ namespace avmplus
 		AbcParser(AvmCore* core, ScriptBuffer code, 
 			Toplevel* toplevel,
 			Domain* domain,
-			AbstractFunction *nativeMethods[],
-			NativeClassInfop nativeClasses[],
-			NativeScriptInfop nativeScripts[],
-			List<Stringp>* keepVersions = NULL);
+			const NativeInitializer* natives,
+			const List<Stringp>* keepVersions = NULL);
 
 		~AbcParser();
 
@@ -65,10 +63,8 @@ namespace avmplus
 		static PoolObject* decodeAbc(AvmCore* core, ScriptBuffer code, 
 			Toplevel* toplevel,
 			Domain* domain,
-			AbstractFunction *nativeMethods[],
-			NativeClassInfop nativeClasses[],
-			NativeScriptInfop nativeScripts[],
-			List<Stringp>* keepVersions = NULL);
+			const NativeInitializer* natives,
+			const List<Stringp>* keepVersions = NULL);
 
 	protected:
 		PoolObject* parse();
@@ -78,11 +74,11 @@ namespace avmplus
 		void parseTypeName(const byte* &p, Multiname& m) const;
 		#endif
 
-		Namespace* parseNsRef(const byte* &pc) const;
+		Namespacep parseNsRef(const byte* &pc) const;
 		Stringp resolveUtf8(uint32 index) const;
 		Stringp parseName(const byte* &pc) const;
-		Atom resolveQName(const byte* &pc, Multiname &m) const;
-		int computeInstanceSize(int class_id, Traits* base) const;
+		void resolveQName(const byte* &pc, Multiname &m) const;
+		uint32_t computeInstanceSize(int class_id, Traits* base) const;
 		void parseMethodInfos();
 		void parseMetadataInfos();
 		bool parseInstanceInfos();
@@ -90,12 +86,19 @@ namespace avmplus
 		bool parseScriptInfos();
 		void parseMethodBodies();
 		void parseCpool();
-		Traits* parseTraits(Traits* base, Namespace* ns, Stringp name, AbstractFunction* script, int interfaceDelta, Namespace* protectedNamespace = NULL);
+		Traits* parseTraits(uint32_t sizeofInstance,
+							Traits* base, 
+							Namespacep ns, 
+							Stringp name, 
+							AbstractFunction* script, 
+							TraitsPosPtr traitsPos,
+							TraitsPosType posType, 
+							Namespacep protectedNamespace);
 		
 		/**
 		 * add script to VM-wide table
 		 */
-		void addNamedScript(Namespace* ns, Stringp name, AbstractFunction* script);
+		void addNamedScript(Namespacep ns, Stringp name, AbstractFunction* script);
 
 		/**
 		 * Adds traits to the VM-wide traits table, for types
@@ -104,20 +107,13 @@ namespace avmplus
 		 * @param ns The namespace of the class
 		 * @param itraits The instance traits of the class
 		 */
-		void addNamedTraits(Namespace* ns, Stringp name, Traits* itraits);
+		void addNamedTraits(Namespacep ns, Stringp name, Traits* itraits);
 
-		sint64 readS64(const byte* &p) const
-		{
-#ifdef SAFE_PARSE
-			// check to see if we are trying to read past the file end.
-			if (p < abcStart || p+7 >= abcEnd )
-				toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
-			unsigned first  = p[0] | p[1]<<8 | p[2]<<16 | p[3]<<24;
-			unsigned second = p[4] | p[5]<<8 | p[6]<<16 | p[7]<<24;
-			p += 8;
-			return first | ((sint64)second)<<32;
-		}
+		/**
+		 * reads in 8 bytes in little endian order and stores in
+		 * memory as an ieee double, doing endian swapping as needed
+		 */
+		double readDouble(const byte* &p) const;
 
         /**
          * Reads in 2 bytes and turns them into a 16 bit number.  Always reads in 2 bytes.  Currently
@@ -182,10 +178,7 @@ namespace avmplus
 			return result;
 		}
 
-		unsigned int readU30(const byte *&p) const;
-
-	private:
-		void addTraits(Hashtable *ht, Traits *traits, Traits *baseTraits);
+		uint32_t readU30(const byte*& p) const;
 
 	// ------------------------ DATA SECTION BEGIN
 	private:
@@ -196,14 +189,12 @@ namespace avmplus
 		AvmCore*					core;
 		PoolObject*					pool;
 		const byte*					pos;
-		AbstractFunction**			nativeMethods;
-		const NativeClassInfop*		nativeClasses;
-		const NativeScriptInfop*	nativeScripts;
+		const NativeInitializer*	natives;
 		byte*						abcStart;
 		byte*						abcEnd; // one past the end, actually
 		Stringp*					metaNames;
 		Stringp						kNeedsDxns;
-		List<Stringp>*				keepVersions;
+		const List<Stringp>*		keepVersions;
 #ifdef AVMPLUS_VERBOSE
 		Stringp 					kVerboseVerify;
 #endif
@@ -211,7 +202,7 @@ namespace avmplus
 		BufferGuard*				guard;
 #endif
 		int32_t						version;
-		int32_t						classCount;
+		uint32_t					classCount;
 	// ------------------------ DATA SECTION END
 	};
 

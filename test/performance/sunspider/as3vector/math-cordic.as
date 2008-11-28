@@ -132,7 +132,7 @@ function runMathCordic():int {
     return _sunSpiderInterval;
 }
 
-  if (cordicsincos() === 1834995.3515519998) {
+  if (cordicsincos() - 1834995.3515519998<0.00001) {
     print("metric time "+runMathCordic());
   } else {
     print("Test validation failed. Expected: 1834995.3515519998 Got: "+cordicsincos());

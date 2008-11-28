@@ -37,9 +37,11 @@
 
 
 #include "avmplus.h"
+
 #ifdef AVMPLUS_MIR
 #include "../codegen/CodegenMIR.h"
 #endif
+
 #ifdef FEATURE_NANOJIT
 #include "../codegen/CodegenLIR.h"
 #endif
@@ -65,6 +67,13 @@ namespace avmplus
 		this->impl32 = verifyEnter;
 	}
 
+    void MethodInfo::setInterpImpl() {
+		if (returnTraits() == core()->traits.number_itraits)
+			implN = avmplus::interpN;
+		else
+			impl32 = avmplus::interp32;
+    }
+
 	Atom MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
 	{
 		MethodInfo* f = (MethodInfo*) env->method;
@@ -85,21 +94,23 @@ namespace avmplus
 		
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		if (f->pool->core->config.verifyall && f->pool)
-			f->pool->processVerifyQueue(env->toplevel());
+		f->core()->processVerifyQueue(env->toplevel());
 		#endif
 
+        AvmAssert(f->impl32 != MethodInfo::verifyEnter);
 		env->impl32 = f->impl32;
 		return f->impl32(env, argc, ap);
 	}
 
 	void MethodInfo::verify(Toplevel* toplevel)
 	{
-		AvmAssert(declaringTraits->linked);
+		AvmAssert(declaringTraits->isResolved());
 		resolveSignature(toplevel);
 
 		#ifdef DEBUGGER
-		CallStackNode callStackNode(NULL, this, NULL, NULL, 0, NULL, NULL);
+		// just a fake CallStackNode here , so that if we throw a verify error, 
+		// we get a stack trace with the method being verified as its top entry
+		CallStackNode callStackNode(core(), this->name);
 		#endif /* DEBUGGER */
 
 		if (!body_pos)
@@ -115,9 +126,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
-            #ifdef PERFM
-            _ntprof("verify & IR gen");
-            #endif
+            PERFM_NTPROF("verify & IR gen");
 
 			#if defined AVMPLUS_MIR
 			CodegenMIR jit(this);
@@ -128,9 +137,7 @@ namespace avmplus
 			TRY(core, kCatchAction_Rethrow)
 			{
 				verifier.verify(&jit);	// pass 2 - data flow
-                #ifdef PERFM
-                _tprof_end();
-                #endif
+                PERFM_TPROF_END();
         
 				if (!jit.overflow)
 					jit.emitMD(); // pass 3 - generate code
@@ -141,13 +148,7 @@ namespace avmplus
 
 				// mark it as interpreted and try to limp along
 				if (jit.overflow)
-				{
-					AvmCore* core = this->core();
-					if (returnTraits() == NUMBER_TYPE)
-						implN = avmplus::interpN;
-					else
-						impl32 = avmplus::interp32;
-				}
+                    setInterpImpl();
 			}
 			CATCH (Exception *exception) 
 			{
@@ -164,14 +165,17 @@ namespace avmplus
 		else
 		{
 			verifier.verify(NULL); // pass2 dataflow
+            setInterpImpl();
 		}
 		#else
 		Verifier verifier(this, toplevel);
 		verifier.verify();
+		setInterpImpl();
 		#endif
 		
         #ifdef DEBUGGER
-		callStackNode.exit();
+		// no explicit exit call needed for fake CallStackNodes, they auto-cleanup in dtor
+		//callStackNode.exit();
         #endif /* DEBUGGER */
 	}
 	

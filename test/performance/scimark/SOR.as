@@ -42,11 +42,11 @@ class SOR
 		}
 	}
 }
-var starttime=getTimer();
+var starttime:Number=new Date();
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:Number = Constants.SOR_SIZE;
 var G:Array = RandomMatrix(N, N, R);
 var cycles:int=1000;
 SOR.execute(1.25, G, cycles);
-print("metric time "+(getTimer()-starttime));
+print("metric time "+(new Date()-starttime));
 }

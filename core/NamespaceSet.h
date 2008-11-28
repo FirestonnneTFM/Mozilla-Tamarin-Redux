@@ -49,7 +49,7 @@ namespace avmplus
 	{
 	public:
 		int size;
-		Namespace* namespaces[1/*namespaceCount*/];
+		Namespacep namespaces[1/*namespaceCount*/];
 
 		NamespaceSet(int namespaceCount);
 

@@ -86,8 +86,8 @@ namespace avmplus
 		List<uint32> cpool_uint;
 		List<double*, LIST_GCObjects> cpool_double;	// explicitly specify LIST_GCObject b/c these are GC-allocated ptrs
 		List<Stringp> cpool_string;
-		List<Namespace*> cpool_ns;
-		List<NamespaceSet*> cpool_ns_set;
+		List<Namespacep> cpool_ns;
+		List<NamespaceSetp> cpool_ns_set;
 
 		// explicitly specify LIST_NonGCObjects b/c these aren't really atoms, they are offsets
 		List<Atom,LIST_NonGCObjects> cpool_mn;
@@ -161,37 +161,36 @@ namespace avmplus
 
 		AbstractFunction* getNamedScript(const Multiname* multiname) const;
 
-		const byte* getMetadataInfoPos(uint32 index);
-		Traits* getTraits(Stringp name, Namespace* ns, bool recursive=true) const;
-		Traits* getTraits(const Multiname* n, const Toplevel* toplevel, bool recursive=true) const;
+		inline const byte* getMetadataInfoPos(uint32 index) { return metadata_infos[index]; }
+		Traits* getTraits(Stringp name, Namespacep ns, bool recursive=true) const;
+		Traits* getTraits(const Multiname& n, const Toplevel* toplevel, bool recursive=true) const;
 		Traits* getTraits(Stringp name, bool recursive=true) const;
 
 		Traits* getBuiltinTraits(Stringp name) const;
 
-		void addPrivateNamedScript(Stringp name, Namespace* ns, AbstractFunction *a);
-		void addNamedTraits(Stringp name, Namespace* ns, Traits* traits);
+		void addPrivateNamedScript(Stringp name, Namespacep ns, AbstractFunction *a);
+		void addNamedTraits(Stringp name, Namespacep ns, Traits* traits);
 		
 		//
 		// deferred parsing
 		//
 
 		void parseMultiname(const byte *pos, Multiname& m) const;
-		void resolveTraits(Traits *traits, int firstSlot, const Toplevel* toplevel);
-		Traits* resolveTypeName(const byte* &pc, const Toplevel* toplevel, bool allowVoid=false) const;
+
 		Traits* resolveTypeName(uint32 index, const Toplevel* toplevel, bool allowVoid=false) const;
-		Atom resolveQName(const byte* &p, Multiname &m, const Toplevel* toplevel) const;
+		Traits* resolveTypeName(const byte*& pc, const Toplevel* toplevel, bool allowVoid=false) const
+		{
+			return resolveTypeName(AvmCore::readU30(pc), toplevel, allowVoid);
+		}
+
+		void resolveQName(uint32_t index, Multiname &m, const Toplevel* toplevel) const;
+		void resolveQName(const byte* &p, Multiname &m, const Toplevel* toplevel) const
+		{
+			resolveQName(AvmCore::readU30(p), m, toplevel);
+		}
 
 		Traits* resolveParameterizedType(const Toplevel* toplevel, Traits* base, Traits* type_param) const;
 
-
-
-		/**
-		* we allow early binding to a type if it is defined in 
-		* the same abc file as the reference, or if the type is
-		* specially marked to allow early binding by making it's
-		* Traits->pool pointer be null.  We only do this for Object
-		*/
-		void allowEarlyBinding(Traits* t, bool& slot) const;
 
 		void parseMultiname(Multiname& m, int index) const
 		{
@@ -205,8 +204,8 @@ namespace avmplus
 			parseMultiname(atomToPos(a), m);
 		}
 
-		Namespace* getNamespace(int index) const;
-		NamespaceSet* getNamespaceSet(int index) const;
+		Namespacep getNamespace(int index) const;
+		NamespaceSetp getNamespaceSet(int index) const;
 		Stringp getString(int index) const;
 
 		Atom getDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const;
@@ -223,18 +222,8 @@ namespace avmplus
 		}
 
 		// Index of the metadata info that means skip the associated definition
-		List<uint32> stripMetadataIndexes;
-		void addStripMetadata(uint32 index)
-		{
-			stripMetadataIndexes.add(index);
-		}
+		List<uint32_t> stripMetadataIndexes;
 
-#ifdef AVMPLUS_VERIFYALL
-		List<AbstractFunction*> verifyQueue;
-		void enq(AbstractFunction* f);
-		void enq(Traits* t);
-		void processVerifyQueue(Toplevel* toplevel);
-#endif
 		#ifdef AVMPLUS_VERBOSE
 		bool verbose;
 		#endif
@@ -253,7 +242,7 @@ namespace avmplus
 
 	private:
 		DWB(MultinameHashtable*) namedTraits;
-		MultinameHashtable privateNamedScripts;
+		DWB(MultinameHashtable*) privateNamedScripts;
 		DWB(ScriptBufferImpl*) m_code;
 		const byte * const abcStart;
 	};

@@ -67,22 +67,23 @@
 	#endif
 
 	#ifdef UNIX
-		#include "linuxbuild.h"
+		#include "unixbuild.h"
 	#endif
 
-	#ifdef SOLARIS
-		#include "solarisbuild.h"
+	// don't include armbuild.h when MMGC_CUSTOM_BUILD is used
+	#ifdef MMGC_ARM
+		#include "armbuild.h"
 	#endif
-#endif
-
-#ifdef MMGC_ARM
-#include "armbuild.h"
 #endif
 
 #ifdef SCRIPT_DEBUGGER
 #ifndef DEBUGGER
 #define DEBUGGER
 #endif
+#endif
+
+#ifdef MMGC_AVMPLUS
+#  define MMGC_RCROOT_SUPPORT
 #endif
 
 /**
@@ -143,10 +144,7 @@
 #include "GCSpinLockMac.h"
 #endif
 #ifdef UNIX
-#include "GCSpinLockLinux.h"
-#endif
-#ifdef SOLARIS
-#include "GCSpinLockSolaris.h"
+#include "GCSpinLockUnix.h"
 #endif
 #endif
 

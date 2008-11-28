@@ -52,19 +52,35 @@ void MMGC_PortAPI_Initialize_Imp()
 {
 }
 
+#ifdef __WINSCW__
+// Only use User::FastCounter() in the emulator. The value of TTime isn't updated
+// often enough in the emulator.
+#define USE_SYMBIAN_FASTCOUNTER
+#endif
+
 uint64_t MMGC_PortAPI_Frequency_Imp()
 {
+#ifdef USE_SYMBIAN_FASTCOUNTER
+	TInt frequency;
+	HAL::Get(HAL::EFastCounterFrequency, frequency);
+	return frequency;
+#else
 	// TTime returns microseconds
 	return 1000000;
+#endif
 }
 
+TInt64 g_last_time = 0;
 // We could move to use User::FastCounter, any benefits, disadvantages?
 uint64_t MMGC_PortAPI_Time_Imp()
 {
-// This code is from Flash Lite. Therefore it should work.
+#ifdef USE_SYMBIAN_FASTCOUNTER
+	TInt64 lt = User::FastCounter();
+#else
 	TTime t;
 	t.UniversalTime ( );
 	TInt64 lt = t.Int64 ( );
+#endif
 #ifndef EKA2
 	return (uint64_t) (lt.Low() & 0x7FFFFFFF);
 #else 
@@ -76,12 +92,12 @@ uint64_t MMGC_PortAPI_Time_Imp()
 void* MMGC_PortAPI_Alloc_Imp(size_t aSize)
 {
 	void* mem = User::Alloc(aSize);
-	TInt tSize;
 	User::LeaveIfNull(mem);
 	return mem;
 }
 
 #if 0
+// Not needed -- the call to User::Free is defined in portapi_mmgc.h
 void MMGC_PortAPI_Free_Imp(void* ptr)
 {
 	User::Free(ptr);

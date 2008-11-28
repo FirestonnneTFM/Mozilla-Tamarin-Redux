@@ -65,9 +65,9 @@ public class MonteCarlo
 
 
 }
-var starttime=getTimer();
+var starttime:Number=new Date();
 var cycles:uint=15000000;
 MonteCarlo.integrate(cycles);
-print("metric time "+(getTimer()-starttime));
+print("metric time "+(new Date()-starttime));
 
 }

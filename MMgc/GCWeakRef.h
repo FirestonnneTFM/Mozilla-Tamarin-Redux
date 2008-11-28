@@ -79,7 +79,7 @@ namespace MMgc
 		GCWeakRef(const void *obj) : m_obj(obj) 
 		{
 #ifdef _DEBUG
-			obj_creation = *((int*)GetRealPointer(obj)+1);
+			obj_creation = obj ? *((int*)GetRealPointer(obj)+1) : 0;
 #endif
 		}
 		const void *m_obj;

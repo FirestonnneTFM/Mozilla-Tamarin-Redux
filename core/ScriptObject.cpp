@@ -50,14 +50,14 @@ namespace avmplus
 	{
 		// initialize slots in this object to initial values from traits.
 		Traits* traits = vtable->traits;
-		AvmAssert(traits->linked);
+		AvmAssert(traits->isResolved());
 
 		// Ensure that our object is large enough to hold its extra traits data.
 		AvmAssert(MMgc::GC::Size(this) >= traits->getTotalSize());
 
  		setDelegate(delegate);
 
-		if (traits->needsHashtable)
+		if (traits->needsHashtable())
 		{
 			MMGC_MEM_TYPE(this);
 			getTable()->initialize(this->gc(), capacity);
@@ -84,7 +84,7 @@ namespace avmplus
      */
 	Atom ScriptObject::getAtomProperty(Atom name) const
 	{
-		if (!traits()->needsHashtable)
+		if (!traits()->needsHashtable())
 		{
 			return getAtomPropertyFromProtoChain(name, delegate, traits());
 		}
@@ -143,7 +143,7 @@ namespace avmplus
 
 	bool ScriptObject::hasMultinameProperty(const Multiname* multiname) const
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			if (isValidDynamicName(multiname))
 			{
@@ -163,7 +163,7 @@ namespace avmplus
 
 	bool ScriptObject::hasAtomProperty(Atom name) const
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			Stringp s = core()->atomToString(name);
 			AvmAssert(s->isInterned());
@@ -184,7 +184,7 @@ namespace avmplus
 
     void ScriptObject::setAtomProperty(Atom name, Atom value)
     {
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			Stringp s = core()->atomToString(name);
 			AvmAssert(s->isInterned());
@@ -208,7 +208,7 @@ namespace avmplus
 
 	void ScriptObject::setMultinameProperty(const Multiname* name, Atom value)
 	{
-		if (traits()->needsHashtable && isValidDynamicName(name))
+		if (traits()->needsHashtable() && isValidDynamicName(name))
 		{
 			setStringProperty(name->getName(), value);
 		}
@@ -221,7 +221,7 @@ namespace avmplus
 
 	bool ScriptObject::getAtomPropertyIsEnumerable(Atom name) const
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			Stringp s = core()->atomToString(name);
 			AvmAssert(s->isInterned());
@@ -242,7 +242,7 @@ namespace avmplus
 
 	void ScriptObject::setAtomPropertyIsEnumerable(Atom name, bool enumerable)
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			Stringp s = core()->atomToString(name);
 			AvmAssert(s->isInterned());
@@ -264,7 +264,7 @@ namespace avmplus
 	
 	bool ScriptObject::deleteAtomProperty(Atom name)
 	{
-		if (traits()->needsHashtable)
+		if (traits()->needsHashtable())
 		{
 			Stringp s = core()->atomToString(name);
 			AvmAssert(s->isInterned());
@@ -285,7 +285,7 @@ namespace avmplus
 	
 	bool ScriptObject::deleteMultinameProperty(const Multiname* name)
 	{
-		if (traits()->needsHashtable && isValidDynamicName(name))
+		if (traits()->needsHashtable() && isValidDynamicName(name))
 		{
 			return deleteStringProperty(name->getName());
 		}
@@ -301,7 +301,7 @@ namespace avmplus
 
 		if (!(i&MAX_INTEGER_MASK))
 		{
-			if (!traits()->needsHashtable)
+			if (!traits()->needsHashtable())
 			{
 				Atom name = core->internUint32(i)->atom();
 				return getAtomPropertyFromProtoChain(name, delegate, traits());
@@ -335,7 +335,7 @@ namespace avmplus
 		if (!(i&MAX_INTEGER_MASK)) 
 		{
 			Atom name = core->uintToAtom (i);
-			if (traits()->needsHashtable)
+			if (traits()->needsHashtable())
 			{
 				MMGC_MEM_TYPE(this);
 				getTable()->add(name, value);
@@ -360,7 +360,7 @@ namespace avmplus
 		if (!(i&MAX_INTEGER_MASK)) 
 		{
 			Atom name = core->uintToAtom (i);
-			if (traits()->needsHashtable)
+			if (traits()->needsHashtable())
 			{
 				getTable()->remove(name);
 				return true;
@@ -382,7 +382,7 @@ namespace avmplus
 		if (!(i&MAX_INTEGER_MASK)) 
 		{
 			Atom name = core->uintToAtom (i);
-			if (traits()->needsHashtable)
+			if (traits()->needsHashtable())
 			{
 				return getTable()->contains(name);
 			}
@@ -441,6 +441,17 @@ namespace avmplus
 		toplevel()->throwTypeError(kDescendentsError, core()->toErrorString(traits()));
 		return undefinedAtom;// not reached
 	}
+
+    bool ScriptObject::isGlobalObject() const
+    {
+        AvmAssert(vtable != 0);
+        AvmAssert(vtable->init != 0);
+		MethodEnv* init = vtable->init;
+		if (!init->isScriptEnv())
+			return false;
+        const ScriptEnv* const scriptInitForVTable = static_cast<const ScriptEnv*>(init);
+        return scriptInitForVTable->global == this;
+    }
 
 #ifdef AVMPLUS_VERBOSE
 	Stringp ScriptObject::format(AvmCore* core) const
@@ -531,7 +542,8 @@ namespace avmplus
 	{
 		// argc = # of AS3 arguments
 		AvmAssert(argc >= 0);
-		Atom *newargs = (Atom *) alloca(sizeof(Atom)*(argc+1));
+		AvmCore::AllocaAutoPtr _newargs;
+		Atom *newargs = (Atom *) VMPI_alloca(core(), _newargs, sizeof(Atom)*(argc+1));
 		newargs[0] = thisArg;
 		memcpy(&newargs[1], argv, argc*sizeof(Atom));
 		return call(argc, newargs);
@@ -540,7 +552,8 @@ namespace avmplus
 	Atom ScriptObject::call_this_a(Atom thisArg, ArrayObject *a)
 	{
 		int count = a->getLength();
-		Atom* newargs = (Atom*) alloca(sizeof(Atom)*(1+count));
+		AvmCore::AllocaAutoPtr _newargs;
+		Atom* newargs = (Atom*) VMPI_alloca(core(), _newargs, sizeof(Atom)*(1+count));
 		newargs[0] = thisArg;
 		for (int i=0; i<count; i++) {
 			newargs[i+1] = a->getUintProperty(i);
@@ -574,89 +587,94 @@ namespace avmplus
 		toplevel()->throwTypeError(kTypeAppOfNonParamType);
 		return undefinedAtom;
 	}
-
-	Atom ScriptObject::getSlotAtom(int slot)
+	
+	Atom ScriptObject::getSlotAtom(uint32_t slot)
 	{
 		Traits* traits = this->traits();
-		AvmCore* core = traits->core;
-		Traits* t = traits->getSlotTraits(slot);
-		AvmAssert(t != VOID_TYPE);
-		void* p = ((char*)this) + traits->getOffsets()[slot];
-		if (!t || t == OBJECT_TYPE)
+		const TraitsBindingsp td = traits->getTraitsBindings();
+		// repeated if-else is actually more performant than a switch statement in this case.
+		// SST_atom is most common case, put it first
+		void* p;
+		const SlotStorageType sst = td->calcSlotAddrAndSST(slot, (void*)this, p);
+		if (sst == SST_atom)
 		{
-			return *((Atom*)p);
+			return *((const Atom*)p);
 		}
-		else if (t == NUMBER_TYPE)
+		else if (sst == SST_double)
 		{
-			return core->doubleToAtom(*((double*)p));
+			return traits->core->doubleToAtom(*((const double*)p));				
 		}
-		else if (t == INT_TYPE)
+		else if (sst == SST_int32)
 		{
-			return core->intToAtom(*((int*)p));
+			return traits->core->intToAtom(*((const int32_t*)p));
 		}
-		else if (t == UINT_TYPE)
+		else if (sst == SST_uint32)
 		{
-			return core->uintToAtom(*((uint32*)p));
+			return traits->core->uintToAtom(*((const int32_t*)p));
 		}
-		else if (t == BOOLEAN_TYPE)
+		else if (sst == SST_bool32)
 		{
-			return (*((int*)p)<<3)|kBooleanType;
+			return (*((const int32_t*)p)<<3)|kBooleanType;
 		}
-		else if (t == STRING_TYPE)
+		else if (sst == SST_string)
 		{
-			Stringp s = *((Stringp*)p);
-			return s->atom(); // may be null|kStringType, that's ok
+			return (*((const Stringp*)p))->atom(); // may be null|kStringType, that's ok
 		}
-		else if (t == NAMESPACE_TYPE)
+		else if (sst == SST_namespace)
 		{
-			Namespace* ns = *((Namespace**)p);
-			return ns->atom(); // may be null|kNamespaceType, no problemo
+			return (*((const Namespacep*)p))->atom(); // may be null|kNamespaceType, no problemo
 		}
-		else
+		else // if (sst == SST_scriptobject)
 		{
-			ScriptObject* o = *((ScriptObject**)p);
-			return o->atom(); // may be null|kObjectType, copasthetic
+			AvmAssert(sst == SST_scriptobject);
+			return (*((const ScriptObject**)p))->atom(); // may be null|kObjectType, copacetic
 		}
 	}
 
-	void ScriptObject::setSlotAtom(int slot, Atom value)
+	void ScriptObject::setSlotAtom(uint32_t slot, Atom value)
 	{
 		Traits* traits = this->traits();
-		AvmCore* core = traits->core;
-		Traits* t = traits->getSlotTraits(slot);
-		AvmAssert(t != VOID_TYPE);
-		Atom *p = (Atom*)(((char*)this) + traits->getOffsets()[slot]);
-		if (!t || t == OBJECT_TYPE)
+		const TraitsBindingsp td = traits->getTraitsBindings();
+		void* p;
+		const SlotStorageType sst = td->calcSlotAddrAndSST(slot, (void*)this, p);
+		// repeated if-else is actually more performant than a switch statement in this case.
+		// SST_atom is most common case, put it first
+		if (sst == SST_atom)
 		{
-			//*((Atom*)p) = value;
-			WBATOM(core->GetGC(), this, p, value);
+			AvmAssert(atomKind(value) != 0);
+			WBATOM(traits->core->GetGC(), this, (Atom*)p, value);
 		}
-		else if (t == NUMBER_TYPE)
+		else if (sst == SST_double)
 		{
+			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
 			*((double*)p) = AvmCore::number_d(value);
 		}
-		else if (t == INT_TYPE)
+		else if (sst == SST_int32)
 		{
-			*((int*)p) = AvmCore::integer_i(value);
+			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
+			*((int32_t*)p) = AvmCore::integer_i(value);
 		}
-		else if (t == UINT_TYPE)
+		else if (sst == SST_uint32)
 		{
-			*((uint32*)p) = AvmCore::integer_u(value);
+			AvmAssert(atomKind(value) == kIntegerType || atomKind(value) == kDoubleType);
+			*((uint32_t*)p) = AvmCore::integer_u(value);
 		}
-		else if (t == BOOLEAN_TYPE)
+		else if (sst == SST_bool32)
 		{
-			*((int*)p) = urshift(value,3);
+			AvmAssert(atomKind(value) == kBooleanType);
+			*((int32_t*)p) = urshift(value,3);
 		}
-		else
+		else 
 		{
-			//*((int32*)p) = value & ~7;
-			WBRC(core->GetGC(), this, p, value & ~7);
+			AvmAssert(sst == SST_scriptobject || sst == SST_string || sst == SST_namespace);
+			AvmAssert(atomKind(value) == kStringType || atomKind(value) == kNamespaceType || atomKind(value) == kObjectType);
+			WBRC(traits->core->GetGC(), this, p, value & ~7);
 		}
 	}
 
 	Atom ScriptObject::nextName(int index)
 	{
-		AvmAssert(traits()->needsHashtable);
+		AvmAssert(traits()->needsHashtable());
 		AvmAssert(index > 0);
 
 		Hashtable *ht = getTable();
@@ -670,7 +688,7 @@ namespace avmplus
 
 	Atom ScriptObject::nextValue(int index)
 	{
-		AvmAssert(traits()->needsHashtable);
+		AvmAssert(traits()->needsHashtable());
 		AvmAssert(index > 0);
 
 		Hashtable *ht = getTable();
@@ -686,7 +704,7 @@ namespace avmplus
 	{
 		AvmAssert(index >= 0);
 
-		if (!traits()->needsHashtable)
+		if (!traits()->needsHashtable())
 			return 0;
 
 		// todo clean this up.
@@ -734,46 +752,11 @@ namespace avmplus
 	}
 
 	
-	/**
-     * Function.prototype.call()
-     */
-	Atom ScriptObject::function_call(Atom thisArg,
-							 Atom *argv,
-							 int argc)
-	{
-		if (argc > 0) 
-			return call_this_aa(thisArg, argc, argv);
-		else
-			return call_this(thisArg);
-	}
-
-	/**
-     * Function.prototype.apply()
-     */
-	Atom ScriptObject::function_apply(Atom thisArg, Atom argArray)
-	{
-		// when argArray == undefined or null, same as not being there at all
-		// see Function/e15_3_4_3_1.as 
-	
-		if (!AvmCore::isNullOrUndefined(argArray))
-		{
-			AvmCore* core = this->core();
-
-			if (!core->istype(argArray, ARRAY_TYPE))
-				toplevel()->throwTypeError(kApplyError);
-
-			return call_this_a(thisArg, (ArrayObject*)AvmCore::atomToScriptObject(argArray));
-			
-		}
-		else
-			return call_this(thisArg);
-	}
- 
 #ifdef DEBUGGER
 	uint64 ScriptObject::size() const
 	{
 		uint32 size = traits()->getTotalSize();
-		if(traits()->needsHashtable)
+		if(traits()->needsHashtable())
 		{
 			Hashtable *ht = getTable();
 			size += ht->getSize() * 2 * sizeof(Atom);

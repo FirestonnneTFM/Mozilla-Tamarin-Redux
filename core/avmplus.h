@@ -166,6 +166,7 @@ namespace avmplus
 	class DateClass;
 	class DateObject;
 	class Debugger;
+	class DescribeTypeClass;
 	class Domain;
 	class DomainEnv;
 	class E4XNode;
@@ -175,6 +176,7 @@ namespace avmplus
 	class ExceptionFrame;
 	class ExceptionHandler;
 	class ExceptionHandlerTable;
+	class FrameState;
 	class GrowableBuffer;
 	class Hashtable;
 	class HeapMultiname;
@@ -192,10 +194,7 @@ namespace avmplus
 	class Namespace;
 	class NamespaceSet;
 	class NamespaceClass;
-	class NativeMethod;
-	class NativeClassFactory;
-	class NativeScriptFactory;
-	struct NativeTableEntry;
+	class NativeInitializer;
 	class NumberClass;
 	class IntClass;
 	class UIntClass;
@@ -219,7 +218,10 @@ namespace avmplus
 	class String;
 	class Toplevel;
 	class Traits;
-	class Translator;
+	class TraitsBindings;
+	class TraitsMetadata;
+	class WordcodeTranslator;
+	class WordcodeEmitter;
 	class UnicodeUtils;
 	class Value;
 	class Verifier; 
@@ -234,57 +236,28 @@ namespace avmplus
 	class XMLParser;
 	class XMLTag;
 
-	struct NativeClassInfo;
-	struct NativeScriptInfo;
-	struct NativeTableEntry;
+	struct WordOpcodeAttr;
 
 	typedef Traits* Traitsp;
+	// Stringp and Namespacep should be const, but RCObject doens't allow it yet
 	typedef String* Stringp;
 	typedef Namespace* Namespacep;
-
-	typedef const NativeScriptInfo* NativeScriptInfop;
-	typedef const NativeClassInfo* NativeClassInfop;
-	typedef const NativeTableEntry* NativeTableEntryp;
-	#define AVMTHUNK_NativeClassInfop_DEFINED
-}
-
-namespace avmplus
-{
-//#ifdef AVMTHUNK_VERSION
-// Native-Method helpers (only used when AVMTHUNK_VERSION defined, but must be declared before we know...)
-
-	typedef avmplus::AbcEnv* AvmInstance;
-	typedef avmplus::ScriptObject* AvmObject;
-	typedef avmplus::String* AvmString;
-	typedef avmplus::Namespace* AvmNamespace;
-	typedef avmplus::Atom AvmBox;
-	typedef avmplus::MethodEnv* AvmMethodEnv;
-	typedef uint32_t AvmBoolArg;
-
-	#define AvmThunkRetType_AvmObject		(error ??? illegal) /* all Objects are return as AvmBox */
-	typedef AvmBox AvmThunkRetType_AvmBoolArg;
-	typedef AvmBox AvmThunkRetType_int32_t;
-	typedef AvmBox AvmThunkRetType_uint32_t;
-	typedef AvmBox AvmThunkRetType_AvmNamespace;
-	typedef AvmBox AvmThunkRetType_AvmBox;
-	typedef AvmBox AvmThunkRetType_AvmString;
-	typedef AvmBox AvmThunkRetType_void;
-	typedef double AvmThunkRetType_double;
-
-	#define AVMTHUNK_CALLTYPE	 /* could be used to declare custom call type (eg __fastcall) */
-
-	typedef AvmThunkRetType_AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, const AvmBox* argv);
-
-//#endif
-
-	namespace NativeID
-	{
-        #include "builtin.h"
-	}
+	typedef const NamespaceSet* NamespaceSetp;
+	typedef const TraitsBindings* TraitsBindingsp;
+	typedef const TraitsMetadata* TraitsMetadatap;
 }
 
 #include "MMgc.h"
 
+// disambiguate some common types, without opening all of MMgc namespace
+using MMgc::GC;
+using MMgc::GCObject;
+using MMgc::GCFinalizedObject;
+using MMgc::GCHeap;
+
+#define MMGC_SUBCLASS_DECL : public GCObject
+
+#include "QCache.h"
 #include "GrowableBuffer.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"
@@ -320,7 +293,9 @@ namespace avmplus
 #include "avmplusProfiler.h"
 #include "StringBuffer.h"
 #include "AtomArray.h"
-#include "Translator.h"
+#include "wopcodes.h"
+#include "WordcodeTranslator.h"
+#include "WordcodeEmitter.h"
 #include "Verifier.h"
 #include "NativeFunction.h"
 #include "ClassClosure.h"
@@ -342,6 +317,7 @@ namespace avmplus
 #include "Date.h"
 #include "DateClass.h"
 #include "DateObject.h"
+#include "DescribeTypeClass.h"
 #include "Domain.h"
 #include "DomainEnv.h"
 #include "ObjectClass.h"

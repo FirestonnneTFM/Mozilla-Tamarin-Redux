@@ -191,4 +191,3 @@ else:
 saveResult(out)
 if globs['socketlog']:
     logResult(out)
-

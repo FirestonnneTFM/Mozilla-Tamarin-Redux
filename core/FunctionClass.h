@@ -47,8 +47,6 @@ namespace avmplus
 	class FunctionClass : public ClassClosure
 	{
 	public:
-		DECLARE_NATIVE_MAP(FunctionClass)
-
 		FunctionClass(VTable* cvtable);
 
 		ClassClosure *createEmptyFunction();
@@ -63,6 +61,14 @@ namespace avmplus
 		{
 			return construct(argc,argv);
 		}
+	};
+
+	class FunctionObject : public ClassClosure
+	{
+	public:
+		FunctionObject(VTable *cvtable) : ClassClosure(cvtable) { }
+		Atom AS3_call(Atom thisAtom, Atom *argv, int argc);
+		Atom AS3_apply(Atom thisAtom, Atom argArray);
 	};
 }
 

@@ -37,6 +37,8 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
+
 #ifdef AVMPLUS_MIR
 #include "CodegenMIR.h"
 #endif
@@ -49,58 +51,28 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-	BEGIN_NATIVE_CLASSES(AvmCore)
-		NATIVE_CLASS(abcclass_Object,				ObjectClass,	ScriptObject)
-		NATIVE_CLASS(abcclass_Class,				ClassClass,		ClassClosure)
-		NATIVE_CLASS(abcclass_Namespace,			NamespaceClass,	Namespace)
-		NATIVE_CLASS(abcclass_Function, 			FunctionClass,	ClassClosure)
-		NATIVE_CLASS(abcclass_builtin_as_0_MethodClosure, 			MethodClosureClass,	MethodClosure)
+	void AvmCore::setCacheSizes(const CacheSizes& cs)
+	{
+		#ifdef AVMPLUS_VERBOSE
+		if (verbose())
+		{
+			console << "setCacheSize: bindings " << cs.bindings << " metadata " << cs.metadata << '\n';
+		}
+		#endif // DEBUGGER
 
-		NATIVE_CLASS(abcclass_Error,				ErrorClass,	ErrorObject)
+		//printf("setCacheSize: bindings %d metadata %d\n",cs.bindings,cs.metadata);
 
-		// The Error subclasses are included in the NATIVE_CLASS map
-		// so that their [[Call]] action is mapped to [[Construct]]
-		NATIVE_CLASS(abcclass_DefinitionError,      NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_EvalError,            NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_RangeError,           NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_ReferenceError,       NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_SecurityError,        NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_SyntaxError,          NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_TypeError,            NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_URIError,             NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_VerifyError,          NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_UninitializedError,   NativeErrorClass, ErrorObject)
-		NATIVE_CLASS(abcclass_ArgumentError,        NativeErrorClass, ErrorObject)
+ 		m_tbCache->resize(cs.bindings);	
+ 		m_tmCache->resize(cs.metadata);
+	}
 
-		NATIVE_CLASS(abcclass_String,				StringClass,	String)
-		NATIVE_CLASS(abcclass_Boolean,			BooleanClass,	bool)
-		NATIVE_CLASS(abcclass_Number,				NumberClass,	double)
-		NATIVE_CLASS(abcclass_int,				IntClass,		int)
-		NATIVE_CLASS(abcclass_uint,				UIntClass,		uint32)
-		NATIVE_CLASS(abcclass_Math,				MathClass,		double)
-		NATIVE_CLASS(abcclass_Array,				ArrayClass,		ArrayObject)
-		NATIVE_CLASS(abcclass_RegExp,				RegExpClass,	RegExpObject)
-		NATIVE_CLASS(abcclass_Date,				DateClass,		DateObject)
-
-		// Vector
-		NATIVE_CLASS(abcclass___AS3___vec_Vector_int,     IntVectorClass,      IntVectorObject)		
-		NATIVE_CLASS(abcclass___AS3___vec_Vector_uint,    UIntVectorClass,     UIntVectorObject)		
-		NATIVE_CLASS(abcclass___AS3___vec_Vector_double,  DoubleVectorClass,   DoubleVectorObject)	
-		NATIVE_CLASS(abcclass___AS3___vec_Vector,	      VectorClass,		   ObjectVectorObject)		
-		NATIVE_CLASS(abcclass___AS3___vec_Vector_object,  ObjectVectorClass,  ObjectVectorObject)		
-
-		// E4X
-		NATIVE_CLASS(abcclass_XML,				XMLClass,		XMLObject)
-		NATIVE_CLASS(abcclass_XMLList,			XMLListClass,	XMLListObject)
-		NATIVE_CLASS(abcclass_QName,			QNameClass,		QNameObject)
-	END_NATIVE_CLASSES()
-
-	// don't need toplevel here because we create it manually
-	BEGIN_NATIVE_SCRIPTS(AvmCore)
-		NATIVE_SCRIPT(0, Toplevel)
-	END_NATIVE_SCRIPTS()
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	extern AvmCore* g_tmcore;
+#endif
 
 	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), 
+ 		m_tbCache(new (g) QCache(0, g)),	// bindings: unlimited by default
+ 		m_tmCache(new (g) QCache(1, g)),	// metadata: limited to 1 by default
 #ifdef AVMPLUS_MIR
 		mirBuffers(g, 4), 
 #endif
@@ -108,10 +80,17 @@ namespace avmplus
 #ifdef FEATURE_SAMPLER
 		,_sampler(g)
 #endif
+#ifdef AVMPLUS_VERIFYALL
+		,verifyQueue(g, 0)
+#endif
 #ifdef AVMPLUS_WORD_CODE
 		, lookup_cache_timestamp(1)
 #endif
     {
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+		AvmAssert(g_tmcore == NULL);
+		g_tmcore = this;
+#endif
 		// sanity check for all our types
 		AvmAssert (sizeof(int8) == 1);
 		AvmAssert (sizeof(uint8) == 1);		
@@ -137,12 +116,6 @@ namespace avmplus
 		config.verbose_addrs = false;
 		#endif
 
-		#ifdef AVMPLUS_ARM
-		SetMIREnabled(false);
-		#else
-		SetMIREnabled(true);
-		#endif
-
 		#ifdef AVMPLUS_VERIFYALL
 	    	config.verifyall = false;
 		#endif
@@ -156,20 +129,27 @@ namespace avmplus
 
 		#ifdef AVMPLUS_MIR
 			config.dceopt = true;
-			#ifdef AVMPLUS_VERBOSE
-			config.bbgraph = false;
-			#endif
         #endif
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			// jit flag forces use of MIR/LIR instead of interpreter
-			config.jit = false;
+            #ifdef AVMPLUS_ARM
+                // default is -Dinterp until jit fully debugged
+                config.runmode = RM_interp_all;
+            #else
+    			config.runmode = RM_mixed;
+            #endif
+
 			config.cseopt = true;
 
-    	    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
+			#ifdef AVMPLUS_VERBOSE
+			config.bbgraph = false;
+			#endif
+
+		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     		config.sse2 = true;
-	    	#endif
-        #endif
+			#endif
+		#endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
 	#ifdef VTUNE
 			VTuneStatus = CheckVTuneStatus();
@@ -186,6 +166,7 @@ namespace avmplus
 		builtinDomain      = NULL;
 
 		GetGC()->SetGCContextVariable (MMgc::GC::GCV_AVMCORE, this);
+		allocaInit();
 
 		minstack           = 0;
 
@@ -225,7 +206,7 @@ namespace avmplus
 
 		numNamespaces = 1024;  // power of 2
 		namespaces = new DRC(Namespacep)[numNamespaces];
-		memset(namespaces, 0, numNamespaces*sizeof(Namespace*));
+		memset(namespaces, 0, numNamespaces*sizeof(Namespacep));
 
 		console.setCore(this);
 		
@@ -293,11 +274,11 @@ namespace avmplus
 		codegenMethodNames = CodegenMIR::initMethodNames(this);
 		#endif
 
-		#ifdef FEATURE_JNI
+		#ifdef AVMPLUS_WITH_JNI
 		java = NULL;
 		#endif
 #ifdef SUPERWORD_PROFILING
-		swprofStart();
+		WordcodeTranslator::swprofStart();
 #endif
 	}
 
@@ -324,36 +305,21 @@ namespace avmplus
 		while(mirBuffers.size() > 0)
 			mirBuffers.removeFirst()->free();
 #endif
-#ifdef SUPERWORD_PROFILING
-		swprofStop();
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+		AvmAssert(g_tmcore == this);
+		g_tmcore = NULL;
 #endif
+#ifdef SUPERWORD_PROFILING
+		WordcodeTranslator::swprofStop();
+#endif
+		allocaShutdown();
 	}
 
 	void AvmCore::initBuiltinPool()
 	{
-		using namespace NativeID;
-
-		// stack allocated array of pointers
-		AbstractFunction* nativeMethods[builtin_abc_method_count];
-		NativeClassInfop nativeClasses[builtin_abc_class_count];
-		NativeScriptInfop nativeScripts[builtin_abc_script_count];
-
-		memset(nativeMethods, 0, sizeof(AbstractFunction*)*builtin_abc_method_count);
-		memset(nativeClasses, 0, sizeof(NativeClassInfop)*builtin_abc_class_count);
-		memset(nativeScripts, 0, sizeof(NativeScriptInfop)*builtin_abc_script_count);
-
-		initNativeTables(classEntries, scriptEntries,
-			nativeMethods, nativeClasses, nativeScripts);
-
-		ScriptBuffer code = ScriptBuffer(new (GetGC()) ReadOnlyScriptBufferImpl (builtin_abc_data, builtin_abc_length));
-
 		builtinDomain = new (GetGC()) Domain(this, NULL);
 		
-		builtinPool = parseActionBlock(code, 0, NULL,
-									   builtinDomain,
-									   nativeMethods,
-									   nativeClasses,
-									   nativeScripts);
+		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this, NULL);
 
 		// whack the the non-interruptable bit on all builtin functions
 		for(int i=0, size=builtinPool->methods.size(); i<size; i++)
@@ -411,10 +377,9 @@ namespace avmplus
 			// create a temp object vtable to use, since the real one isn't created yet
 			// later, in OP_newclass, we'll replace with the real Object vtable, so methods
 			// of Object and Class have the right scope.
-
 			object_vtable = newVTable(traits.object_itraits, NULL, emptyScope, abcEnv, NULL);
 			object_vtable->resolveSignatures();
-			mainTraits->sizeofInstance = (uint32_t)getToplevelSize();
+			mainTraits->resetSizeof(uint32_t(getToplevelSize()));
 		}
 		else
 		{
@@ -502,17 +467,18 @@ namespace avmplus
 	
 	void AvmCore::exportDefs(Traits* scriptTraits, ScriptEnv* scriptEnv)
 	{
-		DomainEnv* domainEnv = scriptEnv->domainEnv();
 		AbcEnv* abcEnv = scriptEnv->abcEnv();
+		DomainEnv* domainEnv = abcEnv->domainEnv();
 
 		// iterate thru each of the definitions exported by this script
 		int i=0;
-		while((i=scriptTraits->next(i)) != 0)
+		TraitsBindingsp tb = scriptTraits->getTraitsBindings();
+		while((i=tb->next(i)) != 0)
 		{
 			// don't need to check for DELETED because we never remove trait bindings
-			AvmAssert(scriptTraits->keyAt(i) != NULL);
-			Stringp name = scriptTraits->keyAt(i);
-			Namespace* ns = scriptTraits->nsAt(i);
+			AvmAssert(tb->keyAt(i) != NULL);
+			Stringp name = tb->keyAt(i);
+			Namespacep ns = tb->nsAt(i);
 				
 			// not already in the table then export it 
 			// otherwise we keep the first one that was encountered.
@@ -526,14 +492,14 @@ namespace avmplus
 					if (scriptTraits->pool->verbose)
 						console << "exporting " << ns << "::" << name << "\n";
 					#endif
-					domainEnv->addNamedScript(name, ns, (Binding)scriptEnv);
+					domainEnv->addNamedScript(name, ns, scriptEnv);
 				}
 			}
 			else
 			{
-				if (!abcEnv->privateScriptEnvs.get(name, ns))
+				if (!abcEnv->getPrivateScriptEnv(name, ns))
 				{
-					abcEnv->privateScriptEnvs.add(name, ns, (Binding) scriptEnv);
+					abcEnv->addPrivateScriptEnv(name, ns, scriptEnv);
 				}
 			}
 		}
@@ -547,19 +513,15 @@ namespace avmplus
 										  int /*start*/,
 										  Toplevel* toplevel,
 										  Domain* domain,
-										  AbstractFunction *nativeMethods[],
-										  NativeClassInfop nativeClasses[],
-										  NativeScriptInfop nativeScripts[],
-										  List<Stringp>* include_versions)
+										  const NativeInitializer* ninit,
+										  const List<Stringp>* include_versions)
 	{
 		// parse constants and attributes.
 		PoolObject* pool = AbcParser::decodeAbc(this,
 												code,
 												toplevel,
 												domain,
-												nativeMethods,
-												nativeClasses,
-												nativeScripts,
+												ninit,
 												include_versions);
 
         #ifdef DEBUGGER
@@ -575,9 +537,7 @@ namespace avmplus
 										 int start,
 										 DomainEnv* domainEnv,
 										 Toplevel* &toplevel,
-										 AbstractFunction *nativeMethods[],
-										 NativeClassInfop nativeClasses[],
-										 NativeScriptInfop nativeScripts[],
+										 const NativeInitializer* ninit,
 										 CodeContext *codeContext)
     {
 		resources = new (GetGC()) Hashtable(GetGC());
@@ -591,16 +551,14 @@ namespace avmplus
 		} 
 		else 
 		{
-			Domain* domain = domainEnv ? domainEnv->getDomain() : builtinDomain;
+			Domain* domain = domainEnv ? domainEnv->domain() : builtinDomain;
 			
 			// parse constants and attributes.
 			pool = parseActionBlock(code,
 									start,
 									toplevel,
 									domain,
-									nativeMethods,
-									nativeClasses,
-									nativeScripts);
+									ninit);
 			if (pool != NULL)
 			{
 				resources->put(start+1, pool);
@@ -608,28 +566,6 @@ namespace avmplus
 		}
 
 		return handleActionPool(pool, domainEnv, toplevel, codeContext);
-	}
-
-	Traits* AvmCore::makeParameterizedITraits(Stringp name, Namespace* ns, Traits* t)
-	{
-		Traits* newtraits = newTraits(t, 0, 0, t->sizeofInstance);
-		newtraits->name = name;
-		newtraits->ns = ns;
-		newtraits->slotCount = t->slotCount;
-		newtraits->methodCount = t->methodCount;
-		newtraits->needsHashtable = t->needsHashtable;
-		return newtraits;
-	}
-
-	Traits* AvmCore::makeParameterizedCTraits(Stringp name, Namespace* ns, Traits* t)
-	{
-		Traits* newtraits = newTraits(t->base, 0, 0, t->sizeofInstance);
-		newtraits->name = name;
-		newtraits->ns = ns;
-		newtraits->slotCount = t->base->slotCount;
-		newtraits->methodCount = t->base->methodCount;
-		newtraits->needsHashtable = t->needsHashtable;
-		return newtraits;
 	}
 
 /*
@@ -734,7 +670,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				{
 					QNameObject *qn1 = atomToQName (lhs);
 					QNameObject *qn2 = atomToQName (rhs);
-					return (((qn1->getURI() == qn2->getURI()) && (qn1->getLocalName() == qn2->getLocalName()))? trueAtom : falseAtom);
+					return (((qn1->get_uri() == qn2->get_uri()) && (qn1->get_localName() == qn2->get_localName()))? trueAtom : falseAtom);
 				}
 				else
 				{
@@ -973,19 +909,19 @@ return the result of the comparison ToPrimitive(x) == y.
 
 					// Walk all the way up the stack, one frame at a time, looking for
 					// one which will catch this exception.
-					for (callStackNode = callStack; callStackNode; callStackNode = callStackNode->next)
+					for (callStackNode = callStack; callStackNode; callStackNode = callStackNode->next())
 					{
-						MethodInfo* info = (MethodInfo*) callStackNode->info;
+						MethodInfo* info = (MethodInfo*) callStackNode->info();
 #ifdef AVMPLUS_WORD_CODE
-						ExceptionHandlerTable* exceptions = info->word_code.exceptions;
+						ExceptionHandlerTable* exceptions = info ? info->word_code.exceptions : NULL;
 #else
-						ExceptionHandlerTable* exceptions = info->exceptions;
+						ExceptionHandlerTable* exceptions = info ? info->exceptions : NULL;
 #endif
-						if (exceptions != NULL && callStackNode->eip && *callStackNode->eip)
+						if (exceptions != NULL && callStackNode->eip() && *callStackNode->eip())
 						{
 							// Check if this particular frame of the callstack
 							// is going to catch the exception.
-							if (findExceptionHandlerNoRethrow(info, *callStackNode->eip, exception) != NULL)
+							if (findExceptionHandlerNoRethrow(info, *callStackNode->eip(), exception) != NULL)
 								return true;
 						}
 					}
@@ -1149,6 +1085,18 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s;
 	}
 
+	String* AvmCore::toErrorString(const Multiname& n)
+	{
+		String* s = NULL;
+	#ifdef DEBUGGER
+		s = n.format(this, Multiname::MULTI_FORMAT_NAME_ONLY);
+	#else
+		s = kEmptyString;
+		(void)n;
+	#endif /* DEBUGGER */
+		return s;
+	}
+
 	String* AvmCore::toErrorString(const Multiname* n)
 	{
 		String* s = NULL;
@@ -1164,7 +1112,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s;
 	}
 
-	String* AvmCore::toErrorString(Namespace* ns)
+	String* AvmCore::toErrorString(Namespacep ns)
 	{
 		String* s = NULL;
 	#ifdef DEBUGGER
@@ -1179,7 +1127,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return s;
 	}
 
-	String* AvmCore::toErrorString(Traits* t)
+	String* AvmCore::toErrorString(const Traits* t)
 	{
 		#ifndef DEBUGGER
 		(void)t;
@@ -1436,7 +1384,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
     }
 
-	Namespace* AvmCore::internNamespace(Namespace* ns)
+	Namespacep AvmCore::internNamespace(Namespacep ns)
 	{
 		if (ns->isPrivate())
 		{
@@ -1466,7 +1414,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			Multiname name;
 			pool->parseMultiname(name, index);
-			out << &name;
+			out << name;
 		}
 		else
 		{
@@ -1482,7 +1430,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		case OP_debugfile:
 		case OP_pushstring:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				String *s = format(pool->cpool_string[index]->atom());
 				if (index < pool->cpool_string.size())
@@ -1490,11 +1438,11 @@ return the result of the comparison ToPrimitive(x) == y.
 				break;
 			}
         case OP_pushbyte:
-            buffer << opNames[opcode] << " " << int(int8(*pc));
+            buffer << opcodeInfo[opcode].name << " " << int(int8(*pc));
             break;
 		case OP_pushint:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_int.size())
 					buffer << " " << pool->cpool_int[index];
@@ -1502,7 +1450,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		case OP_pushuint:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_uint.size())
 					buffer << " " << (double)pool->cpool_uint[index];
@@ -1510,7 +1458,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		case OP_pushdouble:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_double.size())
 					buffer << " " << *pool->cpool_double[index];
@@ -1518,7 +1466,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		case OP_pushnamespace:
 			{
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
 				if (index < pool->cpool_ns.size())
                 {
@@ -1539,7 +1487,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		case OP_coerce: 
 		case OP_astype: 
 			{
-				buffer << opNames[opcode] << " ";
+				buffer << opcodeInfo[opcode].name << " ";
 				formatMultiname(buffer, readU30(pc), pool);
 				break;
 			}
@@ -1551,7 +1499,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				uint32 index = readU30(pc);
 				int argc = readU30(pc);
-				buffer << opNames[opcode] << " ";
+				buffer << opcodeInfo[opcode].name << " ";
 				formatMultiname(buffer, index, pool);
 				buffer << " " << argc;
 				break;
@@ -1561,7 +1509,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				int method_id = readU30(pc);
 				AbstractFunction* f = pool->methods[method_id];
-				buffer << opNames[opcode] << " method_id=" << method_id;
+				buffer << opcodeInfo[opcode].name << " method_id=" << method_id;
 				if (opcode == OP_callstatic)
 				{
 					buffer << " argc=" << (int)readU30(pc); // argc
@@ -1577,7 +1525,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
                 uint32_t id = readU30(pc);
 				AbstractFunction* c = pool->cinits[id];
-				buffer << opNames[opcode] << " " << c;
+				buffer << opcodeInfo[opcode].name << " " << c;
 				break;
 			}
 		case OP_lookupswitch:
@@ -1585,12 +1533,12 @@ return the result of the comparison ToPrimitive(x) == y.
 				ptrdiff_t target = off + readS24(pc);
 				pc += 3;
 				int maxindex = readU30(pc);
-				buffer << opNames[opcode] << " default:" << target << " maxcase:"<<maxindex;
+				buffer << opcodeInfo[opcode].name << " default:" << (int)target << " maxcase:"<<maxindex;
 				for (int i=0; i <= maxindex; i++)
 				{
 					target = off + readS24(pc);
 					pc += 3;
-					buffer << " " << target;
+					buffer << " " << (int)target;
 				}
 				break;
 			}
@@ -1619,18 +1567,18 @@ return the result of the comparison ToPrimitive(x) == y.
 				int insWidth = (int)(p2-pc);
 
 				ptrdiff_t target = off + insWidth + imm24 + 1;
-				buffer << opNames[opcode] << " " << (double)target;
+				buffer << opcodeInfo[opcode].name << " " << (double)target;
 				break;
 			}
 		default:
-			switch (opOperandCount[opcode])
+			switch (opcodeInfo[opcode].operandCount)
 			{
 			default:
-				buffer << opNames[opcode];
+				buffer << opcodeInfo[opcode].name;
 				break;
 			case 1:
 				{
-					buffer << opNames[opcode]
+					buffer << opcodeInfo[opcode].name
 						<< ' '
 						<< (int)readU30(pc);
 				}
@@ -1639,7 +1587,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				{
 					int first = readU30(pc);
 					int second = readU30(pc);
-					buffer << opNames[opcode]
+					buffer << opcodeInfo[opcode].name
 						<< ' '
 						<< first
 						<< ' '
@@ -1837,8 +1785,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			AvmAssert(false);
 			return false;
 		}
-
-		return lhs->containsInterface(itraits)!=0;
+		return lhs->containsInterface(itraits);
     }
 
 	Stringp AvmCore::coerce_s(Atom atom)
@@ -1884,44 +1831,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	void AvmCore::setConsoleStream(OutputStream *stream)
 	{
 		console.setOutputStream(stream);
-	}
-
-	void AvmCore::registerNatives(NativeTableEntryp nativeMap, AbstractFunction *nativeMethods[])
-	{
-		while (nativeMap->method_id != -1)
-		{
-#ifdef AVMTHUNK_VERSION
-			AbstractFunction* f = new (GetGC()) NativeMethod(*nativeMap);
-#else
-			AbstractFunction* f = new (GetGC()) NativeMethod(nativeMap->flags, (NativeMethod::Handler)nativeMap->handler, nativeMap->cookie);
-#endif
-            				
-			// if we overwrite a native method mapping, something is hosed
-			AvmAssert(nativeMethods[nativeMap->method_id]==NULL);
-			nativeMethods[nativeMap->method_id] = f;
-			nativeMap++;
-		}
-	}
-
-	void AvmCore::initNativeTables(NativeClassInfop classEntry,
-								  NativeScriptInfop scriptEntry,
-								  AbstractFunction *nativeMethods[],
-								  NativeClassInfop nativeClasses[],
-								  NativeScriptInfop nativeScripts[])
-	{
-		while (classEntry->class_id != -1)
-		{
-			nativeClasses[classEntry->class_id] = classEntry;
-			registerNatives(classEntry->nativeMap, nativeMethods);
-			classEntry++;
-		}
-
-		while (scriptEntry->script_id != -1)
-		{
-			nativeScripts[scriptEntry->script_id] = scriptEntry;
-			registerNatives(scriptEntry->nativeMap, nativeMethods);
-			scriptEntry++;
-		}
 	}
 
 	bool AvmCore::isXML (Atom atm) 
@@ -1972,7 +1881,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	// Tables are from http://www.w3.org/TR/2004/REC-xml-20040204/#NT-NameChar
 	// E4X 13.1.2.1, pg 63
 	/* BaseChar = */
-	wchar letterTable[] = {
+	const wchar letterTable[] = {
 		0x0041, 0x005A,
 		0x0061, 0x007A,
 		0x00C0, 0x00D6,
@@ -2193,7 +2102,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 //[87]   	CombiningChar	   ::=   	
-	wchar combiningCharTable[] = {
+	const wchar combiningCharTable[] = {
 		0x0300, 0x0345,
 		0x0360, 0x0361,
 		0x0483, 0x0486,
@@ -2302,7 +2211,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 
 //[88]   	Digit	   ::=   	
-	wchar digitTable[] = {
+	const wchar digitTable[] = {
 		0x0030, 0x0039,
 		0x0660, 0x0669,
 		0x06F0, 0x06F9,
@@ -2330,7 +2239,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return false;
 	}
 
-	wchar extenderTable[] = {
+	const wchar extenderTable[] = {
 		0x00B7, 0x00B7, // single 
 		0x02D0, 0x02D0, // single 
 		0x02D1, 0x02D1, // single 
@@ -2730,7 +2639,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	 * uri.  We assume uri's are already interned, so interning a namespace
 	 * is quick because uri's can be compared quickly.
 	 */
-	int AvmCore::findNamespace(const Namespace* ns)
+	int AvmCore::findNamespace(Namespacep ns)
 	{
         int m = numNamespaces;
 		// 80% load factor
@@ -2746,7 +2655,7 @@ return the result of the comparison ToPrimitive(x) == y.
         // find the slot to use
         int i = (hashCode&0x7FFFFFFF) & bitMask;
         int n = 7;
-		Namespace* k;
+		Namespacep k;
         while ((k=namespaces[i]) != NULL && k->m_uri != ns->m_uri ) {
             i = (i + (n++)) & bitMask; // quadratic probe
 		}
@@ -2894,7 +2803,8 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
 		// use alloca to avoid heap allocations where possible
-		wchar *buffer = (wchar*) alloca((len16+1)*sizeof(wchar));
+		AvmCore::AllocaAutoPtr _buffer;
+		wchar *buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
 
 		if(!buffer) {
 			AvmAssertMsg(false, "alloca failed!");
@@ -2918,8 +2828,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
 		// use alloca to avoid heap allocations where possible
 		wchar *buffer = 0;
+		AvmCore::AllocaAutoPtr _buffer;
 		if (len16 < 1024)
-			buffer = (wchar*) alloca((len16+1)*sizeof(wchar));
+			buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
 		
 		Stringp s = NULL;
 		if(!buffer) {
@@ -3056,12 +2967,12 @@ return the result of the comparison ToPrimitive(x) == y.
 		int oldCount = numNamespaces;
 
 		namespaces = new DRC(Namespacep)[newlen];
-		memset(namespaces, 0, newlen*sizeof(Namespace*));
+		memset(namespaces, 0, newlen*sizeof(Namespacep));
 		numNamespaces = newlen;
 		
         for (int i=0; i < oldCount; i++)
         {
-			Namespace* o = old[i];
+			Namespacep o = old[i];
             if (o != NULL)
                 namespaces[findNamespace(o)] = o;
         }
@@ -3078,7 +2989,9 @@ return the result of the comparison ToPrimitive(x) == y.
 	VTable* AvmCore::newVTable(Traits* traits, VTable* base, ScopeChain* scope,
 		AbcEnv* abcEnv, Toplevel* toplevel)
 	{
-		size_t extraSize = sizeof(MethodEnv*)*(traits->methodCount > 0 ? traits->methodCount-1 : 0);
+		traits->resolveSignatures(toplevel);
+		const uint32_t count = traits->getTraitsBindings()->methodCount;
+		size_t extraSize = sizeof(MethodEnv*)*(count > 0 ? count-1 : 0);
 		return new (GetGC(), extraSize) VTable(traits, base, scope, abcEnv, toplevel);
 	}
 
@@ -3095,15 +3008,15 @@ return the result of the comparison ToPrimitive(x) == y.
 		return new (GetGC(), vtable->getExtraSize()) ScriptObject(vtable, delegate);
 	}
 
-    Namespace* AvmCore::newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type)
+    Namespacep AvmCore::newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type)
 	{
 		// E4X - this is 13.2.3, step 3 - prefix IS specified
 
 		Atom p;
 		Stringp u;
-		if (isQName (uri) && !isNull(atomToQName (uri)->getURI()))
+		if (isQName(uri) && !isNull(atomToQName(uri)->get_uri()))
 		{
-			u = atomToString(atomToQName (uri)->getURI());
+			u = atomToString(atomToQName(uri)->get_uri());
 		}
 		else
 		{
@@ -3138,19 +3051,19 @@ return the result of the comparison ToPrimitive(x) == y.
         return new (GetGC()) Namespace(p, u, type);
 	}
 
-	Namespace* AvmCore::newNamespace(Atom uri, Namespace::NamespaceType type)
+	Namespacep AvmCore::newNamespace(Atom uri, Namespace::NamespaceType type)
 	{
 		// prefix and uri must be interned!
 		// E4X - this is 13.2.2, step 3 - "prefix not specified"
 
 		if (isNamespace (uri))
 		{
-			Namespace *ns = atomToNamespace (uri);
+			Namespacep ns = atomToNamespace (uri);
 			return new (GetGC()) Namespace (ns->getPrefix(), ns->getURI(), type);
 		}
-		else if (isObject(uri) && isQName (uri) && !isNull(atomToQName (uri)->getURI()))
+		else if (isObject(uri) && isQName(uri) && !isNull(atomToQName(uri)->get_uri()))
 		{
-			return new (GetGC()) Namespace (undefinedAtom, atomToString(atomToQName (uri)->getURI()), type);
+			return new (GetGC()) Namespace(undefinedAtom, atomToString(atomToQName(uri)->get_uri()), type);
 		}
 		else
 		{
@@ -3160,7 +3073,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	Namespace* AvmCore::newNamespace(Stringp uri, Namespace::NamespaceType type)
+	Namespacep AvmCore::newNamespace(Stringp uri, Namespace::NamespaceType type)
 	{
 		uri = internString(uri);
 		Atom prefix = (uri == kEmptyString) ? kEmptyString->atom() : undefinedAtom;
@@ -3191,14 +3104,14 @@ return the result of the comparison ToPrimitive(x) == y.
 	Atom AvmCore::intToAtom(int n)
 	{
 #ifdef AVMPLUS_64BIT
-		// We can always fi t the value in an Atom
+		// We can always fit the value in an Atom
 		return (((Atom)n)<<3) | kIntegerType;
 #else
 		// handle integer values w/out allocation
 		int i29 = n << 3;
 		if ((i29>>3) == n)
 		{
-			return uint32(i29 | kIntegerType);;
+			return uint32(i29 | kIntegerType);
 		}
 		else 
 		{
@@ -3313,7 +3226,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif
 
-#ifndef AVMPLUS_AMD64
+#ifndef AVMPLUS_SSE2_ALWAYS
 	Atom AvmCore::doubleToAtom(double n)
 	{
 		// There is no need for special logic for NaN or +/-Inf since we don't
@@ -3359,7 +3272,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			return allocDouble(n);
 		}
 	}
-#endif // not AVMPLUS_AMD64
+#endif // not AVMPLUS_SSE2_ALWAYS
 
 #ifdef AVMPLUS_VERBOSE
     /**
@@ -3416,29 +3329,6 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif
 
-    /**
-     * traits with base traits.  These should only be used
-	 * for Object instance traits, and activation objects (e.g. global scope)
-	 * that are not normally accessable to users.
-     */
-	Traits* AvmCore::newTraits(Traits *base,
-							int nameCount,
-							int interfaceDelta,
-							uint32 objectSize)
-	{
-		int interfaceCount = interfaceDelta;
-		if (base)
-			interfaceCount += base->interfaceCount+1; // +1 b/c base is added
-		int interfaceCapacity = MathUtils::nextPowerOfTwo((5*interfaceCount >> 2) + 1);
-		size_t extra = interfaceCapacity*sizeof(Traits*);
-		Traits* traits = new (GetGC(), extra) Traits(this, base,
-											  nameCount,
-											  interfaceCount,
-											  interfaceCapacity,
-											  objectSize);
-		return traits;
-	}
-	
 	Stringp AvmCore::newString(const char *s) const
 	{
 		int len = String::Length(s);
@@ -3501,7 +3391,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	#ifdef DEBUGGER
 	StackTrace* AvmCore::newStackTrace()
 	{
-		int depth = callStack ? callStack->depth : 0;
+		int depth = callStack ? callStack->depth() : 0;
 		int extra = depth > 0 ? sizeof(StackTrace::Element) * (depth-1) : 0;
 		StackTrace* stackTrace = new (GetGC(), extra) StackTrace();
 		if (stackTrace)
@@ -3510,11 +3400,9 @@ return the result of the comparison ToPrimitive(x) == y.
 			CallStackNode *curr = callStack;
 			StackTrace::Element *element = stackTrace->elements;
 			while (curr) {
-				element->info     = curr->info;
-				element->filename = curr->filename;
-				element->linenum  = curr->linenum;
+				element->set(*curr);
 				element++;
-				curr = curr->next;
+				curr = curr->next();
 			}
 		}
 		return stackTrace;
@@ -3543,7 +3431,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	// static
 
-#ifndef AVMPLUS_AMD64
+#ifndef AVMPLUS_SSE2_ALWAYS
 	int AvmCore::integer_d(double d)
 	{
 		// Try a simple case first to see if we have a in-range float value
@@ -3561,7 +3449,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		return doubleToInt32(d);
 	}
-#endif // not AVMPLUS_AMD64
+#endif // not AVMPLUS_SSE2_ALWAYS
 
 #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 	int AvmCore::integer_d_sse2(double d)
@@ -3707,7 +3595,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			// |d|<2^31
 			return int32(d);
 		}
-
+	    
 		if(u_tmp > 0x01f00000) {
 			// |d|>=2^32
 			expon = u_tmp >> 20;
@@ -3893,11 +3781,10 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		if (codeContextAtom == CONTEXT_NONE) {
 			return NULL;
-		} else if ((codeContextAtom&7) == CONTEXT_ENV) {
-			MethodEnv *env = (MethodEnv*)(codeContextAtom&~7);
-			return env->vtable->abcEnv->codeContext;
+		} else if (getCodeContextKind(codeContextAtom) == CONTEXTKIND_ENV) {
+			return getCodeContextEnv(codeContextAtom)->vtable->abcEnv->codeContext();
 		} else {
-			return (CodeContext*)(codeContextAtom&~7);
+			return getCodeContextObject(codeContextAtom);
 		}
 	}
 
@@ -3941,7 +3828,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				case kStringType:
 				case kObjectType:
 				case kNamespaceType:
-					((RCObject*)(a&~7))->DecrementRef();
+					obj->DecrementRef();
 					break;
 				}
 			}
@@ -4022,4 +3909,104 @@ return the result of the comparison ToPrimitive(x) == y.
 		name.setName(intern(index));
 	}		
 #endif // MIR or NANOJIT
+
+	void AvmCore::allocaInit()
+	{
+		top_segment = NULL;
+		stacktop = NULL;
+#ifdef _DEBUG
+		stackdepth = 0;
+#endif
+		pushAllocaSegment(AVMPLUS_PARAM_ALLOCA_DEFSIZE);
+	}
+	
+	void AvmCore::allocaShutdown()
+	{
+		while (top_segment != NULL)
+			popAllocaSegment();
+		top_segment = NULL;
+		stacktop = NULL;
+	}
+	
+	void AvmCore::allocaPopToSlow(void* top)
+	{
+		AvmAssert(top_segment != NULL);
+		AvmAssert(!(top >= top_segment->start && top <= top_segment->limit));
+		while (!(top >= top_segment->start && top <= top_segment->limit))
+			popAllocaSegment();
+		AvmAssert(top_segment != NULL);
+	}
+	
+	void* AvmCore::allocaPushSlow(size_t nbytes)
+	{
+		size_t alloc_nbytes = nbytes;
+		if (alloc_nbytes < AVMPLUS_PARAM_ALLOCA_DEFSIZE)
+			alloc_nbytes = AVMPLUS_PARAM_ALLOCA_DEFSIZE;
+		pushAllocaSegment(alloc_nbytes);
+		void *p = stacktop;
+		stacktop = (char*)stacktop + nbytes;
+		return p;
+	}
+	
+	void AvmCore::pushAllocaSegment(size_t nbytes)
+	{
+		AvmAssert(nbytes % 8 == 0);
+#ifdef _DEBUG
+		stackdepth += nbytes;
+#endif
+		void* memory = gc->AllocRCRoot(nbytes);
+		AllocaStackSegment* seg = new AllocaStackSegment;
+		seg->start = memory;
+		seg->limit = (void*)((char*)memory + nbytes);
+		seg->top = NULL;
+		seg->prev = top_segment;
+		if (top_segment != NULL)
+			top_segment->top = stacktop;
+		top_segment = seg;
+		stacktop = memory;
+	}
+	
+	void AvmCore::popAllocaSegment()
+	{
+#ifdef _DEBUG
+		stackdepth -= (char*)top_segment->limit - (char*)top_segment->start;
+#endif
+		gc->FreeRCRoot(top_segment->start);
+		AllocaStackSegment* seg = top_segment;
+		top_segment = top_segment->prev;
+		if (top_segment != NULL)
+			stacktop = top_segment->top;
+		delete seg;
+	}
+	
+#ifdef AVMPLUS_VERIFYALL
+	void AvmCore::enq(AbstractFunction* f) {
+		if (config.verifyall &&
+                f && !f->isVerified() && 
+                !(f->flags & AbstractFunction::VERIFY_PENDING)) {
+			f->flags |= AbstractFunction::VERIFY_PENDING;
+			verifyQueue.add(f);
+		}
+	}
+
+	void AvmCore::enq(Traits* t) {
+        if (config.verifyall && !t->isInterface) {
+            enq(t->init);
+			TraitsBindingsp td = t->getTraitsBindings();
+		    for (int i=0, n=td->methodCount; i < n; i++)
+                enq(td->getMethod(i));
+        }
+	}
+
+    void AvmCore::processVerifyQueue(Toplevel* toplevel) {
+		while (!verifyQueue.isEmpty()) {
+			AbstractFunction* f = verifyQueue.removeLast();
+            if (!f->isVerified()) {
+                //console << "pre verify " << f << "\n";
+			    f->verify(toplevel);
+                f->flags = f->flags | AbstractFunction::VERIFIED & ~AbstractFunction::VERIFY_PENDING;
+            }
+		}
+	}
+#endif
 }

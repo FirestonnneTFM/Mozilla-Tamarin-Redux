@@ -65,7 +65,7 @@ namespace avmplus
 		// Otherwise, generate a new stack trace.
 		if (core->istype(atom, core->traits.error_itraits))
 		{
-			stackTrace = ((ErrorObject*)AvmCore::atomToScriptObject(atom))->getStackTrace();
+			stackTrace = ((ErrorObject*)AvmCore::atomToScriptObject(atom))->getStackTraceObject();
 		}
 		else
 		{
@@ -122,7 +122,8 @@ namespace avmplus
 		// from JIT'd code, that is, kCatchAction_SearchForActionScriptExceptionHandler.
 		catchAction = kCatchAction_SearchForActionScriptExceptionHandler;
 #endif /* DEBUGGER */
-
+		this->stacktop = core->allocaTop();
+		
 		codeContextAtom = core->codeContextAtom;
 		dxnsAddr = core->dxnsAddr;
 	}
@@ -135,6 +136,8 @@ namespace avmplus
 
 			// Restore the code context to what it was before the try
 			core->codeContextAtom = codeContextAtom;
+			
+			core->allocaPopTo(this->stacktop);
 		}
 	}
 	
@@ -144,7 +147,13 @@ namespace avmplus
 #if defined(AVMPLUS_AMD64) && defined(_WIN64)
 		longjmp64(jmpbuf, (uintptr)exception); 
 #elif defined(AVMPLUS_AMD64)
+		// This is an amazingly gross hack.  I don't know why it's necessary, but it must be fixed.  (lhansen 2008-11-26)
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=464643
+		//
+		// Never allow memory to be corrupted in release builds, exit instead.
 		AvmAssert(lptrcounter<MAX_LONG_JMP_COUNT);
+		if (lptrcounter>=MAX_LONG_JMP_COUNT)
+			exit(1);
 		lptr[lptrcounter++] = exception;
 		longjmp(jmpbuf, (lptrcounter-1)*sizeof(void *)); 
 #else
@@ -158,12 +167,12 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		//AvmAssert(callStack && callStack->env);
-		if (core->profiler->profilingDataWanted && callStack && callStack->env)
-			core->profiler->sendCatch(callStack->env->method);
+		if (core->profiler && core->profiler->profilingDataWanted && callStack && callStack->env())
+			core->profiler->sendCatch(callStack->env()->method);
 
 		core->callStack = callStack;
 #endif // DEBUGGER
-
+		core->allocaPopTo(this->stacktop);
 		core->codeContextAtom = codeContextAtom;
 		core->dxnsAddr = dxnsAddr;
 	}

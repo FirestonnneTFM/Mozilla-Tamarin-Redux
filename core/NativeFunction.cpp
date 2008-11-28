@@ -38,6 +38,7 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 #ifdef AVMPLUS_MIR
 #include "../codegen/CodegenMIR.h"
@@ -45,25 +46,15 @@
 
 namespace avmplus
 {
-#ifdef AVMTHUNK_VERSION
-	NativeMethod::NativeMethod(const NativeTableEntry& _nte)
-		: AbstractFunction(), nte(_nte)
-	{
-		this->flags |= nte.flags;
-		this->impl32 = verifyEnter;
-	}
-#else
-	NativeMethod::NativeMethod(int flags, Handler handler, int cookie)
-		: AbstractFunction()
-	{
-		m_handler = handler;
-		m_cookie  = cookie;
-		this->flags |= flags;
-		this->impl32 = verifyEnter;
-	}
-#endif
+	// ---------------
 
-	Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
+	NativeMethod::NativeMethod(AvmThunkNativeThunker _thunker, AvmThunkNativeHandler _handler)
+		: AbstractFunction(), thunker(_thunker), handler(_handler)
+	{
+		this->impl32 = verifyEnter;
+	}
+
+	/*static*/ Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
 	{
 		NativeMethod* f = (NativeMethod*) env->method;
 
@@ -71,8 +62,7 @@ namespace avmplus
 
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		if (f->pool->core->config.verifyall && f->pool)
-			f->pool->processVerifyQueue(env->toplevel());
+		f->core()->processVerifyQueue(env->toplevel());
 		#endif
 
 		env->impl32 = f->impl32;
@@ -81,37 +71,115 @@ namespace avmplus
 
 	void NativeMethod::verify(Toplevel *toplevel)
 	{
-		AvmAssert(declaringTraits->linked);
+		AvmAssert(declaringTraits->isResolved());
 		resolveSignature(toplevel);
-
-#ifdef AVMTHUNK_VERSION
 		union {
 			Atom (*impl32)(MethodEnv*, int, uint32 *);
 			AvmThunkNativeThunker thunker;
 		} u;
-		u.thunker = this->nte.thunker;
+		u.thunker = this->thunker;
 		this->impl32 = u.impl32;
+	}
+
+	// ---------------
+
+	NativeInitializer::NativeInitializer(AvmCore* _core, 
+											const uint8_t* _abcData,
+											uint32_t _abcDataLen,
+											uint32_t _methodCount,
+											uint32_t _classCount,
+											uint32_t _scriptCount) :
+		core(_core),
+		abcData(_abcData),
+		abcDataLen(_abcDataLen),
+		methods((MethodType*)core->GetGC()->Calloc(_methodCount, sizeof(MethodType), GC::kZero)),
+		classes((ClassType*)core->GetGC()->Calloc(_classCount, sizeof(ClassType), GC::kZero)),
+		scripts((ScriptType*)core->GetGC()->Calloc(_scriptCount, sizeof(ScriptType), GC::kZero)),
+		methodCount(_methodCount),
+		classCount(_classCount),
+		scriptCount(_scriptCount)
+	{
+	}
+
+#ifdef AVMPLUS_NO_STATIC_POINTERS
+	void NativeInitializer::fillIn(NativeInitializer::FillInProc p)
+	{
+		(*p)(methods, classes, scripts);
+	}
 #else
-		// generate the native method thunk
-		CodegenMIR cgen(this);
-		AvmCore *c = core();
-		
-		TRY(c, kCatchAction_Rethrow)
+	void NativeInitializer::fillInMethods(const NativeMethodInfo* _methodEntry)
+	{
+		while (_methodEntry->method_id != -1)
 		{
-			cgen.emitNativeThunk(this);
-		} 
-		CATCH (Exception *exception) 
-		{
-			cgen.clearMIRBuffers();
-
-			// re-throw exception
-			c->throwException(exception);
+			// if we overwrite a native method mapping, something is hosed
+			AvmAssert(methods[_methodEntry->method_id] == NULL);
+			methods[_methodEntry->method_id] = _methodEntry;
+			_methodEntry++;
 		}
-		END_CATCH
-		END_TRY
+	}
 
-		if (cgen.overflow)
-			toplevel->throwError(kOutOfMemoryError);
+	void NativeInitializer::fillInClasses(const NativeClassInfo* _classEntry)
+	{
+		while (_classEntry->class_id != -1)
+		{
+			// if we overwrite a native class mapping, something is hosed
+			AvmAssert(classes[_classEntry->class_id]  == NULL);
+			classes[_classEntry->class_id] = _classEntry;
+#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
+			if (_classEntry->nativeMap)
+				fillInMethods(_classEntry->nativeMap);
 #endif
+			_classEntry++;
+		}
+	}
+
+	void NativeInitializer::fillInScripts(const NativeScriptInfo* _scriptEntry)
+	{
+		while (_scriptEntry->script_id != -1)
+		{
+			// if we overwrite a native script mapping, something is hosed
+			AvmAssert(scripts[_scriptEntry->script_id]  == NULL);
+			scripts[_scriptEntry->script_id] = _scriptEntry;
+#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
+			if (_scriptEntry->nativeMap)
+				fillInMethods(_scriptEntry->nativeMap);
+#endif
+			_scriptEntry++;
+		}
+	}
+#endif // AVMPLUS_NO_STATIC_POINTERS
+	
+	PoolObject* NativeInitializer::parseBuiltinABC(const List<Stringp, LIST_RCObjects>* includes)
+	{
+		AvmAssert(core->builtinDomain != NULL);
+		
+		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ReadOnlyScriptBufferImpl(abcData, abcDataLen));
+
+		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, core->builtinDomain, this, includes);
+	}
+	
+	NativeMethod* NativeInitializer::newNativeMethod(uint32_t i) const
+	{
+		const NativeMethodInfo* ni = get_method(i);
+		if (!ni)
+			return NULL;
+
+		NativeMethod* info = new (core->GetGC()) NativeMethod(ni->thunker, ni->handler);
+		info->flags |= AbstractFunction::ABSTRACT_METHOD;
+#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
+		info->flags |= ni->flags;
+		info->cookie = ni->cookie;
+#else
+		info->flags |= AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS;
+#endif
+		return info;
+	}
+
+	NativeInitializer::~NativeInitializer()
+	{
+		// might as well explicitly free now
+		core->GetGC()->Free(methods);
+		core->GetGC()->Free(classes);
+		core->GetGC()->Free(scripts);
 	}
 }

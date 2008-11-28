@@ -76,7 +76,7 @@ package {
   
 
   public function DrawLine(From:Point, To:Point):void {
-    //print("DrawLine "+getTimer());
+    //print("DrawLine "+new Date());
     var x1:Number = From.V[0];
     var x2:Number = To.V[0];
     var y1:Number = From.V[1];
@@ -130,7 +130,7 @@ package {
   }
 
   public function CalcCross(V0:Vector.<Number>, V1:Vector.<Number>):Vector.<Number> {
-    //print("CalcCross "+getTimer());
+    //print("CalcCross "+new Date());
     var Cross = new Vector.<Number>(4);
     Cross[0] = V0[1]*V1[2] - V0[2]*V1[1];
     Cross[1] = V0[2]*V1[0] - V0[0]*V1[2];
@@ -139,7 +139,7 @@ package {
   }
 
   public function CalcNormal(V0:Vector.<Number>, V1:Vector.<Number>, V2:Vector.<Number>):Vector.<Number> {
-    //print("CalcNormal "+getTimer());
+    //print("CalcNormal "+new Date());
     var A:Vector.<Number> = new Vector.<Number>(4);   var B:Vector.<Number> = new Vector.<Number>(4); 
     var i:int;
     for (i = 0; i < 3; i++) {
@@ -155,7 +155,7 @@ package {
 
   // multiplies two matrices
   public function MMulti(M1:Vector.<Vector.<Number>>, M2:Vector.<Vector.<Number>>):Vector.<Vector.<Number>> {
-    //print("MMulti "+getTimer());
+    //print("MMulti "+new Date());
     var M:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>(4);
     M[0]=Vector.<Number>([0,0,0,0]);
     M[1]=Vector.<Number>([0,0,0,0]);
@@ -174,7 +174,7 @@ package {
 
   //multiplies matrix with vector
   public function VMulti(M:Vector.<Vector.<Number>>, V:Vector.<Number>):Vector.<Number> {
-    //print("VMulti "+getTimer());
+    //print("VMulti "+new Date());
     var Vect:Vector.<Number> = new Vector.<Number>(4);
     var i:int = 0;
     for (;i < 4; i++) Vect[i] = M[i][0] * V[0] + M[i][1] * V[1] + M[i][2] * V[2] + M[i][3] * V[3];
@@ -182,7 +182,7 @@ package {
   }
 
   public function VMulti2(M:Vector.<Vector.<Number>>, V:Vector.<Number>):Vector.<Number> {
-    //print("VMulti2 "+getTimer());
+    //print("VMulti2 "+new Date());
     var Vect:Vector.<Number> = new Vector.<Number>(3);
     var i:int = 0;
     for (;i < 3; i++) Vect[i] = M[i][0] * V[0] + M[i][1] * V[1] + M[i][2] * V[2];
@@ -191,7 +191,7 @@ package {
 
   // add to matrices
   public function MAdd(M1:Vector.<Vector.<Number>>, M2:Vector.<Vector.<Number>>):Vector.<Vector.<Number>> {
-    //print("MAdd "+getTimer());
+    //print("MAdd "+new Date());
     var M:Vector.<Vector.<Number>>=new Vector.<Vector.<Number>>(4);
     M[0]=Vector.<Number>;
     M[1]=Vector.<Number>;
@@ -207,7 +207,7 @@ package {
   }
 
   public function Translate(M:Vector.<Vector.<Number>>, Dx:Number, Dy:Number, Dz:Number):Vector.<Vector.<Number>> {
-    //print("Translate "+getTimer());
+    //print("Translate "+new Date());
     var T:Vector.<Vector.<Number>>=new Vector.<Vector.<Number>>(4);
     T[0]=Vector.<Number>([1,0,0,Dx]);
     T[1]=Vector.<Number>([0,1,0,Dy]);
@@ -217,7 +217,7 @@ package {
   }
 
   public function RotateX(M:Vector.<Vector.<Number>>, Phi:Number):Vector.<Vector.<Number>> {
-    //print("RotateX "+getTimer());
+    //print("RotateX "+new Date());
     var a:Number = Phi;
     a *= Math.PI / 180;
     var Cos:Number = Math.cos(a);
@@ -231,7 +231,7 @@ package {
   }
 
   public function RotateY(M:Vector.<Vector.<Number>>, Phi:Number):Vector.<Vector.<Number>> {
-    //print("RotateY "+getTimer());
+    //print("RotateY "+new Date());
     var a:Number = Phi;
     a *= Math.PI / 180;
     var Cos:Number = Math.cos(a);
@@ -245,7 +245,7 @@ package {
   }
 
   public function RotateZ(M:Vector.<Vector.<Number>>, Phi:Number):Vector.<Vector.<Number>> {
-    //print("RotateZ "+getTimer());
+    //print("RotateZ "+new Date());
     var a:Number = Phi;
     a *= Math.PI / 180;
     var Cos:Number = Math.cos(a);
@@ -259,7 +259,7 @@ package {
   }
 
   public function DrawQube():void {
-    //print("DrawCube "+getTimer());
+    //print("DrawCube "+new Date());
     // calc current normals
     var CurN:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>(5);
     var i:int = 5;
@@ -325,7 +325,7 @@ package {
   }
 
   public function Init(CubeSize:Number):void {
-    //print("Init "+getTimer());
+    //print("Init "+new Date());
     // init/reset vars
     Origin.V = Vector.<Number>([150,150,20,1]);
 
@@ -400,7 +400,7 @@ package {
   }
 }
 function run3dCube():int {
-  var _sunSpiderStartDate:int = getTimer();
+  var _sunSpiderStartDate:Number = new Date();
 
   var cube:Cube=new Cube();
   var i:int;
@@ -408,13 +408,13 @@ function run3dCube():int {
     cube.Init(i);
   }
 
-  var _sunSpiderInterval:Number = getTimer() - _sunSpiderStartDate;
+  var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
   
   
   // verify test results
   var expectedResults = [250.49814997925202, 308.02382919560387, -184.27577256519325];
   for (i=0; i<3; i++) {
-    if (cube.Q.elements[5].V[i] !== expectedResults[i]) {
+    if (cube.Q.elements[5].V[i] - expectedResults[i]>0.00001) {
         print("Test validation failed.  Q[5].V["+i+"]: Expected: "+expectedResults[i]+" Got: "+cube.Q.elements[5].V[i]);
     }
   }

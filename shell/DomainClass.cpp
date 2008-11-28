@@ -40,13 +40,6 @@
 
 namespace avmshell
 {
-	BEGIN_NATIVE_MAP(DomainClass)
-		NATIVE_METHOD(avmplus_Domain_Domain, DomainObject::constructFromDomain)
-		NATIVE_METHOD(avmplus_Domain_loadBytes, DomainObject::loadBytes)
-		NATIVE_METHOD(avmplus_Domain_currentDomain_get, DomainClass::get_currentDomain)
-		NATIVE_METHOD(avmplus_Domain_getClass, DomainObject::getClass)
-	END_NATIVE_MAP()
-	
 	DomainObject::DomainObject(VTable *vtable, ScriptObject *delegate)
 		: ScriptObject(vtable, delegate)
 	{
@@ -56,13 +49,13 @@ namespace avmshell
 	{
 	}
 
-	void DomainObject::constructFromDomain(DomainObject *parentDomain)
+	void DomainObject::init(DomainObject *parentDomain)
 	{
 		Shell *core = (Shell*) this->core();
 
 		Domain* baseDomain;
 		if (parentDomain) {
-			baseDomain = parentDomain->domainEnv->getDomain();
+			baseDomain = parentDomain->domainEnv->domain();
 		} else {
 			baseDomain = core->builtinDomain;
 		}
@@ -95,10 +88,10 @@ namespace avmshell
 		return core->handleActionBlock(code, 0,
 								  domainEnv,
 								  toplevel,
-								  NULL, NULL, NULL, codeContext);
+								  NULL, codeContext);
 	}
 
-	ScriptObject* DomainObject::finddef(const Multiname* multiname,
+	ScriptObject* DomainObject::finddef(const Multiname& multiname,
 										DomainEnv* domainEnv)
 	{
 		Toplevel* toplevel = this->toplevel();
@@ -152,7 +145,7 @@ namespace avmshell
 
 		ShellCodeContext* codeContext = (ShellCodeContext*)core->codeContext();
 		
-		ScriptObject *container = finddef(&multiname, codeContext->domainEnv());
+		ScriptObject *container = finddef(multiname, codeContext->domainEnv());
 		if (!container) {
 			toplevel()->throwTypeError(kClassNotFoundError, core->toErrorString(&multiname));
 		}
@@ -188,4 +181,35 @@ namespace avmshell
 		
 		return domainObject;
 	}
+	
+	int DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH()
+ 	{
+#ifdef AVMPLUS_MOPS
+ 		return Domain::GLOBAL_MEMORY_MIN_SIZE;
+#else
+		AvmAssert(0);
+		return 0;
+#endif
+ 	}
+
+ 	ScriptObject *DomainObject::get_domainMemory() const
+ 	{
+#ifdef AVMPLUS_MOPS
+ 		return domainEnv->domain()->globalMemory();
+#else
+		AvmAssert(0);
+		return 0;
+#endif
+ 	}
+ 
+ 	void DomainObject::set_domainMemory(ScriptObject *mem)
+ 	{
+#ifdef AVMPLUS_MOPS
+ 		if(!domainEnv->domain()->setGlobalMemory(mem))
+ 			toplevel()->throwError(kEndOfFileError);
+#else
+		AvmAssert(0);
+#endif
+ 	}
+
 }

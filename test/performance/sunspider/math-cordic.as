@@ -118,7 +118,7 @@ function cordic( runs ) {
 }
 
 function verifyTest() {
-  if (cordicsincos() === 1834995.3515519998) {
+  if (Math.abs(cordicsincos() - 1834995.3515519998)<0.00001) {
     return true;
   } else {
     return false;

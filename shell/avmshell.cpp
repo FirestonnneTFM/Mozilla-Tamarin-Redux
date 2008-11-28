@@ -45,6 +45,7 @@
 
 #if defined(SOLARIS)
 #include <signal.h>
+#include <unistd.h>
 #include <ucontext.h>
 extern "C" greg_t _getsp(void);
 #endif
@@ -65,6 +66,12 @@ bool P4Available();
 #endif
 #elif defined AVMPLUS_UNIX
 bool P4Available();
+#endif
+
+#ifdef UNDER_CE
+	#define STRTOL10(x,y,z) wcstol((x),(y),(z))
+#else
+	#define STRTOL10(x,y,z) strtol((x),(y),(z))
 #endif
 
 #if defined(AVM_SHELL_PLATFORM_HOOKS)
@@ -139,6 +146,7 @@ PRIVATE void operator delete[]( void *p )
 
 namespace avmplus {
 	namespace NativeID {
+		using namespace avmshell;
 		#include "shell_toplevel.cpp"
 	}
 }
@@ -147,32 +155,6 @@ namespace avmshell
 {
 	const int kScriptTimeout = 15;
 	const int kScriptGracePeriod = 5;
-
-	BEGIN_NATIVE_CLASSES(Shell)
-		NATIVE_CLASS(abcclass_avmplus_System,          SystemClass,        ScriptObject)
-		NATIVE_CLASS(abcclass_avmplus_File,            FileClass,          ScriptObject)
-		NATIVE_CLASS(abcclass_avmplus_Domain,          DomainClass,        DomainObject)
-		NATIVE_CLASS(abcclass_avmplus_StringBuilder,   StringBuilderClass, StringBuilderObject)		
-		NATIVE_CLASS(abcclass_avmplus_JObject,          JObjectClass,		JObject)
-		NATIVE_CLASS(abcclass_flash_utils_ByteArray,    ByteArrayClass,     ByteArrayObject)		
-		NATIVE_CLASS(abcclass_flash_utils_Dictionary,   DictionaryClass,    DictionaryObject)
-		NATIVE_CLASS(abcclass_flash_sampler_Sample,     SampleClass,        SampleObject)
-		NATIVE_CLASS(abcclass_flash_sampler_NewObjectSample, NewObjectSampleClass, NewObjectSampleObject)
-		NATIVE_CLASS(abcclass_flash_sampler_DeleteObjectSample, SampleClass, SampleObject)
-		NATIVE_CLASS(abcclass_flash_trace_Trace,		TraceClass,			ScriptObject)
-	END_NATIVE_CLASSES()
-
-	BEGIN_NATIVE_SCRIPTS(Shell)
-		NATIVE_SCRIPT(0/*abcscript_avmplus_debugger*/, AvmplusScript)
-#ifdef AVMTHUNK_VERSION
-		NATIVE_SCRIPT(avmplus::NativeID::abcscript_startSampling, SamplerScript)
-#else
-		NATIVE_SCRIPT(avmplus::NativeID::abcpackage_Sampler_as, SamplerScript)
-#endif
-	END_NATIVE_SCRIPTS()
-
-	BEGIN_NATIVE_MAP(AvmplusScript)
-	END_NATIVE_MAP()
 
 	Shell *shell = NULL;
 	bool show_error = false;
@@ -217,7 +199,7 @@ namespace avmshell
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=456054
 		
 		const int kMaxAvmPlusStack = 4096*1024;  // changed to 4MB for testing purposes, used to be 512KB
-		int sp;
+		uintptr_t sp;
 		#ifdef AVMPLUS_PPC
 		asm("mr %0,r1" : "=r" (sp));
         #elif defined(AVMPLUS_ARM)
@@ -225,7 +207,11 @@ namespace avmshell
 		#elif defined SOLARIS
 		sp = _getsp();
 		#else
+		#ifdef AVMPLUS_64BIT
+		asm("mov %%rsp,%0" : "=r" (sp));
+		#else
 		asm("movl %%esp,%0" : "=r" (sp));
+		#endif
 		#endif
 		minstack = sp-kMaxAvmPlusStack;
 	}
@@ -251,6 +237,10 @@ namespace avmshell
 		#endif
 		printf("          [-memstats]   generate statistics on memory usage\n");
 		printf("          [-memlimit d] limit the heap size to d pages\n");
+
+		printf("          [-cache_bindings N]   size of bindings cache (0 = unlimited)\n");
+		printf("          [-cache_metadata N]   size of metadata cache (0 = unlimited)\n");
+
 		#ifdef _DEBUG
 			printf("          [-Dgreedy]    collect before every allocation\n");
 		#endif /* _DEBUG */
@@ -274,7 +264,7 @@ namespace avmshell
 		printf("          [-Dmem]       show compiler memory usage \n");
 		printf("          [-Dnodce]     disable DCE optimization \n");
 		#ifdef AVMPLUS_VERBOSE
-			printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
+	    printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
 		#endif
     #endif
     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -282,14 +272,16 @@ namespace avmshell
 		printf("          [-Ojit]       use jit always, never interp\n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
         #ifdef AVMPLUS_IA32
-            printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
+        printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         #endif /* AVMPLUS_IA32 */
     #endif
 		
 		#ifdef AVMPLUS_VERIFYALL
-		    printf("          [-Dverifyall] verify greedily instead of lazily\n");
+	    printf("          [-Dverifyall] verify greedily instead of lazily\n");
 		#endif
-
+		#ifdef AVMPLUS_SELFTEST
+		printf("          [-Dselftest[=component,category,test]]  run selftests\n");
+		#endif
 		printf("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
 		printf("          [-error]      crash opens debug dialog, instead of dumping\n");
 		#ifdef AVMPLUS_INTERACTIVE
@@ -390,20 +382,7 @@ namespace avmshell
 	
 	void Shell::initShellPool()
 	{
-		AbstractFunction *nativeMethods[avmplus::NativeID::shell_toplevel_abc_method_count];
-		NativeClassInfop nativeClasses[avmplus::NativeID::shell_toplevel_abc_class_count];
-		NativeScriptInfop nativeScripts[avmplus::NativeID::shell_toplevel_abc_script_count];
-
-		memset(nativeMethods, 0, sizeof(AbstractFunction*)*avmplus::NativeID::shell_toplevel_abc_method_count);
-		memset(nativeClasses, 0, sizeof(NativeClassInfop)*avmplus::NativeID::shell_toplevel_abc_class_count);
-		memset(nativeScripts, 0, sizeof(NativeScriptInfop)*avmplus::NativeID::shell_toplevel_abc_script_count);
-
-		initNativeTables(classEntries, scriptEntries, 
-			nativeMethods, nativeClasses, nativeScripts);
-
-		avmplus::ScriptBuffer code = newScriptBuffer(avmplus::NativeID::shell_toplevel_abc_length);
-		memcpy(code.getBuffer(), avmplus::NativeID::shell_toplevel_abc_data, avmplus::NativeID::shell_toplevel_abc_length);
-		shellPool = parseActionBlock(code, 0, NULL, builtinDomain, nativeMethods, nativeClasses, nativeScripts);
+		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this, NULL);
 	}
 
 	Toplevel* Shell::initShellBuiltins()
@@ -532,7 +511,7 @@ namespace avmshell
 			codeContext->m_domainEnv = domainEnv;
 				
 			// parse new bytecode
-			handleActionBlock(code, 0, domainEnv, toplevel, NULL, NULL, NULL, codeContext);
+			handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
 
 			#ifdef DEBUGGER
 			delete profiler;
@@ -571,11 +550,13 @@ namespace avmshell
 	{
 		bool show_mem = false;
 
+		AvmCore::CacheSizes cacheSizes;	// defaults to unlimited
+
 		TRY(this, kCatchAction_ReportAsError)
 		{
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
-			#ifdef AVMPLUS_MAC
+			#ifdef AVMPLUS_SSE2_ALWAYS
 			config.sse2 = true;
 			#else
 			if (!P4Available()) {
@@ -613,6 +594,13 @@ namespace avmshell
 #ifdef AVMPLUS_VERBOSE
 			bool do_verbose = false;
 #endif
+#ifdef AVMPLUS_SELFTEST
+			bool do_selftest = false;
+			const char* st_component = NULL;
+			const char* st_category = NULL;
+			const char* st_name = NULL;
+			char *st_mem = NULL;
+#endif
 
 			for (int i=1; i<argc && endFilenamePos == -1; i++) {
 #ifdef UNDER_CE
@@ -626,31 +614,34 @@ namespace avmshell
 					if (arg[1] == 'D') {
 						if (!strcmp(arg+2, "timeout")) {
 							config.interrupts = true;
-
+						}
 						#ifdef AVMPLUS_IA32
-						} else if (!strcmp(arg+2, "nosse")) {
+						else if (!strcmp(arg+2, "nosse")) {
                             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 							config.sse2 = false;
-                            #endif
+							#endif
+						}
 						#endif
 
 	                    #ifdef AVMPLUS_VERIFYALL
-						} else if (!strcmp(arg+2, "verifyall")) {
+						else if (!strcmp(arg+2, "verifyall")) {
 							config.verifyall = true;
+						}
 		                #endif /* AVMPLUS_VERIFYALL */
 
 	                    #ifdef _DEBUG
-						} else if (!strcmp(arg+2, "greedy")) {
+						else if (!strcmp(arg+2, "greedy")) {
 							GetGC()->greedy = true;
+						}
 		                #endif /* _DEBUG */
 
 	                    #ifdef DEBUGGER
-						} else if (!strcmp(arg+2, "nogc")) {
+						else if (!strcmp(arg+2, "nogc")) {
 							GetGC()->nogc = true;
 						} else if (!strcmp(arg+2, "noincgc")) {
 							GetGC()->incremental = false;
 						} else if (!strcmp(arg+2, "astrace")) {
-							avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) strtol(argv[++i], 0, 10);
+							avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) STRTOL10(argv[++i], 0, 10);
 						} else if (!strcmp(arg+2, "language")) {
 							langID=-1;
 							for (int j=0;j<kLanguages;j++) {
@@ -663,62 +654,98 @@ namespace avmshell
 								langID = atoi(argv[i+1]);
 							}
 							i++;
+						}
                     	#endif /* DEBUGGER */
-						} else if (!strcmp(arg+2, "interp")) {
-							config.turbo = false;
+							
+						#ifdef AVMPLUS_SELFTEST
+						else if (!strncmp(arg+2, "selftest", 8)) {
+							do_selftest = true;
+							if (arg[10] == '=') {
+								size_t k = strlen(arg+11);
+								st_mem = new char[k+1];
+								strcpy(st_mem, arg+11);
+								char *p = st_mem;
+								st_component = p;
+								while (*p && *p != ',')
+									p++;
+								if (*p == ',')
+									*p++ = 0;
+								st_category = p;
+								while (*p && *p != ',')
+									p++;
+								if (*p == ',')
+									*p++ = 0;
+								st_name = p;
+								if (*st_component == 0)
+									st_component = NULL;
+								if (*st_category == 0)
+									st_category = NULL;
+								if (*st_name == 0)
+									st_name = NULL;
+							}
+						}
+						#endif
 						#ifdef AVMPLUS_VERBOSE
-						} else if (!strcmp(arg+2, "verbose")) {
+						else if (!strcmp(arg+2, "verbose")) {
 							do_verbose = true;
 						} else if (!strcmp(arg+2, "verbose_init")) {
                             do_verbose = this->config.verbose = true;
-                        
+                        }
 						#endif
 
 	                #ifdef AVMPLUS_MIR
-						} else if (!strcmp(arg+2, "nodce")) {
+						else if (!strcmp(arg+2, "nodce")) {
 							config.dceopt = false;
 						} else if (!strcmp(arg+2, "mem")) {
 							show_mem = true;
-                        #ifdef AVMPLUS_VERBOSE
-						} else if (!strcmp(arg+2, "bbgraph")) {
-							config.bbgraph = true;  // generate basic block graph (only valid with MIR)
-                        #endif
+						}
                     #endif
 
                     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-						} else if (!strcmp(arg+2, "forcemir")) {
-							config.jit = true;
-							
-						} else if (!strcmp(arg+2, "nocse")) {
-							config.cseopt = false;
+                        #ifdef AVMPLUS_VERBOSE
+						else if (!strcmp(arg+2, "bbgraph")) {
+							config.bbgraph = true;  // generate basic block graph (only valid with MIR)
+                        }
+						#endif
                     #endif
 
+                    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+						else if (!strcmp(arg+2, "forcemir")) {
+							config.runmode = RM_jit_all;
+						} else if (!strcmp(arg+2, "nocse")) {
+							config.cseopt = false;
+						}
+                        #endif
+
+						else if (!strcmp(arg+2, "interp")) {
+							config.runmode = RM_interp_all;
 						} else {
 							usage();
 						}
+					} 
+					else if (!strcmp(arg, "-cache_bindings")) {
+						cacheSizes.bindings = (uint16_t)STRTOL10(argv[++i], 0, 10);
+					} else if (!strcmp(arg, "-cache_metadata")) {
+						cacheSizes.metadata = (uint16_t)STRTOL10(argv[++i], 0, 10);
+					}
                 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-                    } else if (!strcmp(arg, "-Ojit")) {
-                        config.jit = true;
-                #endif
-					} else if (!strcmp(arg, "-memstats")) {
+					else if (!strcmp(arg, "-Ojit")) 
+					{
+                        config.runmode = RM_jit_all;
+					} 
+				#endif
+					else if (!strcmp(arg, "-memstats")) {
 						GetGC()->gcstats = true;
-					#ifdef AVMPLUS_MIR
-					} else if (!strcmp(arg, "-Ojit")) {
-						config.jit = true;
-					#endif
 					} else if (!strcmp(arg, "-memlimit")) {
-#ifdef UNDER_CE
-						GetGC()->GetGCHeap()->SetHeapLimit(wcstol(argv[++i], 0, 10));
-#else
-						GetGC()->GetGCHeap()->SetHeapLimit(strtol(argv[++i], 0, 10));
-#endif
+						GetGC()->GetGCHeap()->SetHeapLimit(STRTOL10(argv[++i], 0, 10));
 					} else if (!strcmp(arg, "-log")) {
 						do_log = true;
+					} 
 					#ifdef AVMPLUS_INTERACTIVE
-					} else if (!strcmp(arg, "-i")) {
+					else if (!strcmp(arg, "-i")) {
 						do_interactive = true;
-					#endif //AVMPLUS_INTERACTIVE
 					}
+					#endif //AVMPLUS_INTERACTIVE
 					else if (!strcmp(arg, "-error")) {
 						show_error = true;
 						#ifdef WIN32
@@ -771,7 +798,13 @@ namespace avmshell
 				}
 			}
 		
-			if (!filename && !do_interactive) {
+			if (!filename && !do_interactive
+
+#ifdef AVMPLUS_SELFTEST
+				&& !do_selftest
+#endif
+				) 
+			{
 				usage();
 			}
 
@@ -805,6 +838,9 @@ namespace avmshell
 #endif
 				delete [] logname;
 			}
+
+			setCacheSizes(cacheSizes);
+			
 			initBuiltinPool();
 			initShellPool();
 
@@ -813,6 +849,15 @@ namespace avmshell
 				config.verbose = true;
 #endif
 
+#ifdef AVMPLUS_SELFTEST
+			if (do_selftest) {
+				selftests(this, st_component, st_category, st_name);
+				if (st_mem != NULL)
+					delete [] st_mem;
+				return 0;  // FIXME: not ideal
+			}
+#endif
+			
 			#ifdef DEBUGGER
 			// Create the debugger
 			debugCLI = new (GetGC()) DebugCLI(this);
@@ -899,7 +944,7 @@ namespace avmshell
 				{
 					ScriptBuffer code = newScriptBuffer(f.available());
 					f.read(code.getBuffer(), f.available());
-					handleActionBlock(code, 0, domainEnv, toplevel, NULL, NULL, NULL, codeContext);
+					handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
 				}
 
 				lastCodeContext = codeContext;

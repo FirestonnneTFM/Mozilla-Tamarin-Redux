@@ -47,9 +47,8 @@ namespace avmplus
 	Sampler::Sampler(GC *gc) : allocId(1), sampling(true),
 			autoStartSampling(false), samplingNow(false), samplingAllAllocs(false), takeSample(0),
 			numSamples(0), currentSample(NULL), timerHandle(0), lastAllocSample(0),
-			uids(1024), ptrSamples(0), callback(0), runningCallback(false)
+			uids(1024), ptrSamples(0), callback(0), runningCallback(false), m_fakeMethodNames(gc)
 	{
-		fakeMethodInfos = new (gc) Hashtable(gc);
 		samples = new (gc) GrowableBuffer(gc->GetGCHeap());
 	}
 
@@ -66,8 +65,6 @@ namespace avmplus
 			MMgc::m_sampler = NULL;
 		delete samples;
 		samples = 0;
-		delete fakeMethodInfos;
-		fakeMethodInfos = 0;
 	}
 
 	void Sampler::init(bool sampling, bool autoStart)
@@ -98,7 +95,7 @@ namespace avmplus
 			return 0;
 
 		uint32 sampleSize = sizeof(Sample);
-		uint32 callStackDepth = core->callStack ? core->callStack->depth : 0;
+		uint32 callStackDepth = core->callStack ? core->callStack->depth() : 0;
 		sampleSize += callStackDepth * sizeof(StackTrace::Element);
 		sampleSize += sizeof(uint64) * 2;
 		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples->size()/3 > samples->end() 
@@ -110,8 +107,11 @@ namespace avmplus
 			runningCallback = true;
 			pauseSampling();
 			Atom args[1] = { nullObjectAtom };
-			callback->call(0, args);
-			startSampling();
+			Atom ret = callback->call(0, args);
+			if( ret == falseAtom)
+				stopSampling();
+			else
+				startSampling();
 			runningCallback = false;
 		}
 		while(currentSample + sampleSize > samples->uncommitted()) {
@@ -133,7 +133,7 @@ namespace avmplus
 	void Sampler::writeRawSample(SampleType sampleType)
 	{
 		CallStackNode *csn = core->callStack;
-		uint32 depth = csn ? csn->depth : 0;
+		uint32 depth = csn ? csn->depth() : 0;
 		byte *p = currentSample;
 		write(p, GC::ticksToMicros(GC::GetPerformanceCounter()));
 		write(p, sampleType);
@@ -144,20 +144,21 @@ namespace avmplus
 			write(p, depth);
 			while(csn)
 			{
-				write(p, (uintptr_t)csn->info);
+				write(p, csn->info());
+				write(p, csn->envname());
 				// FIXME: can filename can be stored in the AbstractInfo?
 #ifdef DEBUGGER
-				write(p, csn->filename);
-				write(p, csn->linenum);
+				write(p, csn->filename());
+				write(p, csn->linenum());
 #else
 				write(p, 0);
 				write(p, 0);
 #endif
 #ifdef AVMPLUS_64BIT
-				AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int) + sizeof(int));
+				AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
 				write(p, (int) 0); // structure padding
 #endif
-				csn = csn->next;
+				csn = csn->next();
 				depth--;
 			}
 			AvmAssert(depth == 0);
@@ -183,10 +184,10 @@ namespace avmplus
 			read(p, s.stack.depth);
 			s.stack.trace = p;
 #ifndef AVMPLUS_64BIT
-			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int));
+			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t));
 #else
 			// Extra int because of the structure padding
-			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(int) + sizeof(int));
+			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
 #endif
 			p += s.stack.depth * sizeof(StackTrace::Element);
 		}
@@ -230,7 +231,7 @@ namespace avmplus
 		samplingNow = true;
 		write(currentSample, uid);
 		write(currentSample, item);
-		write(currentSample, 0);
+		write(currentSample, (uintptr)0);
 		write(currentSample, size);
 
 		AvmAssertMsg((uintptr)currentSample % 4 == 0, "Alignment should have occurred at end of raw sample.\n");
@@ -450,58 +451,23 @@ namespace avmplus
 		if(!sampling)
 			return;
 
-		AvmAssert(core->builtinPool != NULL);
-		Atom nameAtom = core->constant(name);
-		Atom a = fakeMethodInfos->get(nameAtom);
-		AbstractFunction *af = (AbstractFunction*)AvmCore::atomToGCObject(a);
-		if(!af)
-		{
-			af = new (core->GetGC()) FakeAbstractFunction(AvmCore::atomToString(nameAtom));
-			fakeMethodInfos->add(nameAtom, AvmCore::gcObjectToAtom(af));
-			af->pool = core->builtinPool;
-		}
+		Stringp s = core->constantString(name);
+		// save it in m_fakeMethodNames just to be sure it isn't cleared from the intern-name list.
+		if (m_fakeMethodNames.indexOf(s) < 0)
+			m_fakeMethodNames.add(s);
 	}
 
-	AbstractFunction *Sampler::getFakeFunction(const char *name)
+	Stringp Sampler::getFakeFunctionName(const char* name)
 	{
-		// this can't make any allocations, its called from sensitive areas (like from 
+		// this can't make any allocations, it's called from sensitive areas (like from 
 		// the GC marking routines).  For one we'll recurse but also GC state can get messed
 		// up if for instance the allocation triggers a collection
 		Stringp name_str = core->findInternedString(name, (int)strlen(name));
-		if(name_str == NULL)
-			return NULL;
-		Atom a = fakeMethodInfos->get(name_str->atom());
-		AvmAssertMsg(a != undefinedAtom, "name was interned but need to call createFakeFunction with that name");
-		AbstractFunction *af = (AbstractFunction*)AvmCore::atomToGCObject(a);
-		sampleCheck();
-		return af;
-	}
-
-	FakeCallStackNode::FakeCallStackNode(AvmCore *core, const char *name)
-	{
-		memset(this, 0, sizeof(FakeCallStackNode));
-		this->core = core;
-		if(core)
+		if (name_str != NULL)
 		{
-			AbstractFunction *af = 0;
-			if( core )
-				af = core->sampler()->getFakeFunction(name);
-			if(af)
-				initialize(NULL, af, NULL, NULL, 0, NULL, NULL);
-			else {
-				// this is how the dtor knows what to do
-				this->core = NULL;
-			}
+			sampleCheck();
 		}
-	}
-
-	FakeCallStackNode::~FakeCallStackNode()
-	{
-		if(core)
-		{
-			exit();
-			core->sampleCheck();
-		}
+		return name_str;
 	}
 
 	/* sample data has pointers need to scan */

@@ -39,10 +39,34 @@ package avmplus
 {
     import flash.utils.ByteArray
 
+	// this namespace exists solely so that nativegen.py will encounter them during shell building,
+	// thus giving us a test case for parsing methods with custom namespaces in nativegen.py
+	namespace ns_example = "http://www.example.com"
+
+	// this interface exists solely so that nativegen.py will encounter them during shell building,
+	// thus giving us a test case for interface parsing in nativegen.py
+	interface ITest
+	{
+		function test();
+	}
+	class CTest //implements ITest
+	{
+		public function test() { }
+	}
+
+	[native(cls="SystemClass", methods="auto")]
 	public class System
 	{
+		// this metadata exists solely so that nativegen.py will encounter it during shell building,
+		// thus giving us a test case for metadata parsing in nativegen.py
+		[foo]
 		public native static function exit(status:int):void
+
+		// this metadata exists solely so that nativegen.py will encounter it during shell building,
+		// thus giving us a test case for metadata parsing in nativegen.py
+		[bar(attr="whatever")]
 		public native static function exec(command:String):int
+
 		public native static function getAvmplusVersion():String
 		public native static function trace(a:Array):void
 		public native static function write(s:String):void
@@ -55,8 +79,15 @@ package avmplus
 		public native static function get totalMemory():Number;
 		public native static function get freeMemory():Number;
 		public native static function get privateMemory():Number;
+
+		// function exists solely to test native-methods with custom namespaces
+		ns_example native static function nstest():void;
+
+		// function exists solely to test ScriptObject::isGlobalObject
+		public native static function isGlobal(o:Object):Boolean;
 	}	
 	
+	[native(cls="FileClass", methods="auto")]
 	public class File
 	{
 		public native static function exists(filename:String):Boolean;

@@ -105,3 +105,7 @@
 
 #define HAVE_PTHREADS
 #define HAVE_STDARG
+
+#ifdef MMGC_64BIT
+#define MMGC_MAC_NO_CORE_SERVICES
+#endif

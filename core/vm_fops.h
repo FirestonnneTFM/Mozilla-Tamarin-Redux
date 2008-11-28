@@ -1,38 +1,79 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2008
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
 
-#define I_I   (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<2)
-#define I_D   (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_F<<2)
-#define I_II  (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define D_II  (nanojit::ARGSIZE_F  | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_III (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_IID (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_F<<2)
-#define D_III (nanojit::ARGSIZE_F  | nanojit::ARGSIZE_LO<<6 | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I4  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 |\
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define D_I4  (nanojit::ARGSIZE_F  | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 |\
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I5  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<10 |\
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 | \
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I6  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<12 | nanojit::ARGSIZE_LO<<10 | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 | \
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I7  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<14 |\
-    nanojit::ARGSIZE_LO<<12 | nanojit::ARGSIZE_LO<<10 | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 | \
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_I8  (nanojit::ARGSIZE_LO | \
-    nanojit::ARGSIZE_LO<<16 | nanojit::ARGSIZE_LO<<14 | \
-    nanojit::ARGSIZE_LO<<12 | nanojit::ARGSIZE_LO<<10 | \
-    nanojit::ARGSIZE_LO<<8 | nanojit::ARGSIZE_LO<<6 | \
-    nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_LO<<2)
-#define I_ID  (nanojit::ARGSIZE_LO | nanojit::ARGSIZE_LO<<4 | nanojit::ARGSIZE_F<<2)
-#define D_I   (nanojit::ARGSIZE_F | nanojit::ARGSIZE_LO<<2)
-#define D_DD  (nanojit::ARGSIZE_F | nanojit::ARGSIZE_F<<4 | nanojit::ARGSIZE_F<<2)
+
+#define SIG1(r,a1) (nanojit::ARGSIZE_##r | nanojit::ARGSIZE_##a1<<2)
+#define SIG2(r,a2,a1) (SIG1(r,a1) | nanojit::ARGSIZE_##a2<<4)
+#define SIG3(r,a3,a2,a1) (SIG2(r,a2,a1) | nanojit::ARGSIZE_##a3<<6)
+#define SIG4(r,a4,a3,a2,a1) (SIG3(r,a3,a2,a1) | nanojit::ARGSIZE_##a4<<8)
+#define SIG5(r,a5,a4,a3,a2,a1) (SIG4(r,a4,a3,a2,a1) | nanojit::ARGSIZE_##a5<<10)
+#define SIG6(r,a6,a5,a4,a3,a2,a1) (SIG5(r,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a6<<12)
+#define SIG7(r,a7,a6,a5,a4,a3,a2,a1) (SIG6(r,a6,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a7<<14)
+#define SIG8(r,a8,a7,a6,a5,a4,a3,a2,a1) (SIG7(r,a7,a6,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a8<<16)
+
+#define FUNCTIONID(n) &ci_##n
+
+#ifdef NJ_VERBOSE
+    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
+        static const CallInfo ci_##name = { f, sig, cse, fold, abi, #name };
+#else
+    #define DEFINE_CALLINFO(f,sig,cse,fold,abi,name) \
+        static const CallInfo ci_##name = { f, sig, cse, fold, abi };
+#endif
+
+#define D_I   SIG1(F,LO)
+#define D_D   SIG1(F,F)
+#define I_I   SIG1(LO,LO)
+#define I_D   SIG1(LO,F)
+#define I_DD  SIG2(LO,F,F)
+#define D_DD  SIG2(F,F,F)
+#define I_II  SIG2(LO,LO,LO)
+#define D_II  SIG2(F,LO,LO)
+#define I_ID  SIG2(LO,LO,F)
+#define I_III SIG3(LO,LO,LO,LO)
+#define I_IID SIG3(LO,LO,LO,F)
+#define I_IDI SIG3(LO,LO,F,LO)
+#define D_III SIG3(F,LO,LO,LO)
+#define I_I4  SIG4(LO,LO,LO,LO,LO)
+#define D_I4  SIG4(F,LO,LO,LO,LO)
+#define I_I5  SIG5(LO,LO,LO,LO,LO,LO)
+#define I_I6  SIG6(LO,LO,LO,LO,LO,LO,LO)
+#define I_I7  SIG7(LO,LO,LO,LO,LO,LO,LO,LO)
+#define I_I8  SIG8(LO,LO,LO,LO,LO,LO,LO,LO,LO)
 
 #if _MSC_VER
 	#define ABI_FUNCTION ABI_CDECL
@@ -44,16 +85,14 @@
 #endif
 
 #define FUNCTION(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,0,0,ABI_FUNCTION,/*ret*/,/*args*/,name)
+    DEFINE_CALLINFO(f,sig,0,0,ABI_FUNCTION,name)
 #define CSEFUNCTION(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,1,0,ABI_FUNCTION,/*ret*/,/*args*/,name)
+    DEFINE_CALLINFO(f,sig,1,0,ABI_FUNCTION,name)
 
 #define METHOD(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,0,0,ABI_METHOD,/*ret*/,/*args*/,name)
+    DEFINE_CALLINFO(f,sig,0,0,ABI_METHOD,name)
 #define CSEMETHOD(f, sig, name) \
-    INTERP_FOPCODE_LIST_ENTRY_FUNCPRIM(f,sig,1,0,ABI_METHOD,/*ret*/,/*args*/,name)
-
-INTERP_FOPCODE_LIST_BEGIN
+    DEFINE_CALLINFO(f,sig,1,0,ABI_METHOD,name)
 
     FUNCTION(CALL_INDIRECT, I_III, calli)
     FUNCTION(FCALL_INDIRECT, D_III, fcalli)
@@ -79,17 +118,14 @@ INTERP_FOPCODE_LIST_BEGIN
     CSEMETHOD(COREADDR(AvmCore::uintToString), I_II, uintToString) 
     CSEMETHOD(COREADDR(AvmCore::intToString), I_II, intToString) 
     CSEMETHOD(COREADDR(AvmCore::doubleToAtom), I_ID, doubleToAtom)
-    CSEMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), I_ID, doubleToAtom_sse2)
     CSEMETHOD(COREADDR(AvmCore::boolean), I_II, boolean)
     CSEMETHOD(COREADDR(AvmCore::toUInt32), I_II, toUInt32)
     CSEFUNCTION(FUNCADDR(AVMCORE_integer_d), I_D, integer_d)
     CSEFUNCTION(FUNCADDR(AVMCORE_integer_i), I_I, integer_i)
     CSEFUNCTION(FUNCADDR(AvmCore::number_d), D_I, number_d)
     CSEFUNCTION(FUNCADDR(AvmCore::integer_u), I_I, integer_u)
-    CSEFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), I_D, integer_d_sse2)
     CSEMETHOD(COREADDR(AVMCORE_integer), I_II, integer)
     CSEMETHOD(COREADDR(AvmCore::number), D_II, number)
-    CSEFUNCTION(FUNCADDR(CodegenLIR::coerce_o), I_I, coerce_o)
     METHOD(ENVADDR(MethodEnv::hasnextproto), I_III, hasnextproto)
     METHOD(ENVADDR(MethodEnv::nullcheck), I_II, nullcheck)
     CSEMETHOD(TOPLEVELADDR(Toplevel::toVTable), I_II, toVTable)
@@ -98,14 +134,14 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(COREADDR(AvmCore::newPublicNamespace), I_II, newPublicNamespace)
     METHOD(COREADDR(AvmCore::intern), I_II, intern)
     METHOD(COREADDR(AvmCore::istypeAtom), I_III, istypeAtom)
-    CSEMETHOD(ENVADDR(MethodEnv::toClassITraits), I_II, toClassITraits)
-    METHOD(ENVADDR(MethodEnv::in), I_III, in)
+    CSEMETHOD(TOPLEVELADDR(Toplevel::toClassITraits), I_II, toClassITraits)
+    METHOD(TOPLEVELADDR(Toplevel::in_operator), I_III, in)
     METHOD(TOPLEVELADDR(Toplevel::instanceof), I_III, instanceof)
     CSEMETHOD(COREADDR(AvmCore::stricteq), I_III, stricteq)
     METHOD(COREADDR(AvmCore::equals), I_III, equals)
     CSEMETHOD(COREADDR(AvmCore::concatStrings), I_III, concatStrings)
     METHOD(TOPLEVELADDR(Toplevel::add2), I_III, add2)
-    CSEMETHOD(ENVADDR(MethodEnv::astype), I_III, astype)
+    CSEMETHOD(COREADDR(AvmCore::astype), I_III, astype)
     CSEMETHOD(COREADDR(AvmCore::EscapeAttributeValue), I_II, EscapeAttributeValue)
     CSEMETHOD(COREADDR(AvmCore::ToXMLString), I_II, ToXMLString)
     METHOD(ENVADDR(MethodEnv::delpropertyHelper), I_I4, delpropertyHelper)
@@ -186,6 +222,11 @@ INTERP_FOPCODE_LIST_BEGIN
     FUNCTION(SETJMP, I_II, fsetjmp)
     METHOD(COREADDR(AvmCore::beginCatch), I_I5, beginCatch)
 
+SSE2_ONLY(
+    CSEMETHOD(COREADDR(AvmCore::doubleToAtom_sse2), I_ID, doubleToAtom_sse2)
+    CSEFUNCTION(FUNCADDR(AvmCore::integer_d_sse2), I_D, integer_d_sse2)
+)
+
 #ifdef DEBUGGER
     METHOD(ENVADDR(MethodEnv::debugEnter), I_I8, debugEnter)
     METHOD(ENVADDR(MethodEnv::debugExit), I_II, debugExit)
@@ -194,27 +235,15 @@ INTERP_FOPCODE_LIST_BEGIN
     METHOD(COREADDR(AvmCore::sampleCheck), I_I, sampleCheck)
 #endif
 
-INTERP_FOPCODE_LIST_END
-
-#undef I_I
-#undef I_II
-#undef I_III
-#undef I_IID
-#undef I_I4
-#undef D_I4
-#undef I_I5
-#undef I_I6
-#undef I_I7
-#undef I_I8
-#undef I_ID
-#undef I_D
-#undef D_I
-#undef D_II
-#undef D_III
-#undef D_DD
-#undef FUNCTION
-#undef CSEFUNCTION
-#undef METHOD
-#undef CSEMETHOD
-#undef ABI_METHOD
-#undef ABI_FUNCTION
+#ifdef AVMPLUS_MOPS
+    METHOD(ENVADDR(MethodEnv::li8), I_II, li8)
+    METHOD(ENVADDR(MethodEnv::li16), I_II, li16)
+    METHOD(ENVADDR(MethodEnv::li32), I_II, li32)
+    METHOD(ENVADDR(MethodEnv::lf32), D_II, lf32)
+    METHOD(ENVADDR(MethodEnv::lf64), D_II, lf64)
+    METHOD(ENVADDR(MethodEnv::si8), I_III, si8)
+    METHOD(ENVADDR(MethodEnv::si16), I_III, si16)
+    METHOD(ENVADDR(MethodEnv::si32), I_III, si32)
+    METHOD(ENVADDR(MethodEnv::sf32), I_IDI, sf32)
+    METHOD(ENVADDR(MethodEnv::sf64), I_IDI, sf64)
+#endif

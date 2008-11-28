@@ -57,6 +57,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/ClassClosure.cpp \
   $(curdir)/DateClass.cpp \
   $(curdir)/DateObject.cpp \
+  $(curdir)/DescribeTypeClass.cpp \
   $(curdir)/Domain.cpp \
   $(curdir)/DomainEnv.cpp \
   $(curdir)/E4XNode.cpp \
@@ -81,10 +82,10 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/NativeFunction.cpp \
   $(curdir)/NumberClass.cpp \
   $(curdir)/ObjectClass.cpp \
-  $(curdir)/opcodes.cpp \
   $(curdir)/peephole.cpp \
   $(curdir)/PoolObject.cpp \
   $(curdir)/PrintWriter.cpp \
+  $(curdir)/QCache.cpp \
   $(curdir)/RegExpClass.cpp \
   $(curdir)/RegExpObject.cpp \
   $(curdir)/Sampler.cpp \
@@ -97,11 +98,14 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/StringObject.cpp \
   $(curdir)/Toplevel.cpp \
   $(curdir)/Traits.cpp \
-  $(curdir)/Translator.cpp \
+  $(curdir)/TypeDescriber.cpp \
   $(curdir)/UnicodeUtils.cpp \
   $(curdir)/VectorClass.cpp \
   $(curdir)/Verifier.cpp \
   $(curdir)/VTable.cpp \
+  $(curdir)/WordcodeEmitter.cpp \
+  $(curdir)/WordcodeTranslator.cpp \
+  $(curdir)/wopcodes.cpp \
   $(curdir)/XMLClass.cpp \
   $(curdir)/XMLListClass.cpp \
   $(curdir)/XMLListObject.cpp \

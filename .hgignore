@@ -5,6 +5,7 @@ CVS/**
 *.bat
 *.jar
 test/**.abc
+test/acceptance/test.*
 *.pyc
 *~
 pcre/doc/*.1
@@ -49,6 +50,7 @@ axscript/vc2008/*.ncb
 axscript/vc2008/axtam.vcproj.*.user
 core/*.out
 shell/*.out
+util/lastsizereport.txt
 *.pp
 *.ii
 *.deps

@@ -57,8 +57,44 @@
 #error "unknown nanojit architecture"
 #endif
 
-using namespace MMgc;
-#define MMGC_SUBCLASS_DECL : public GCObject
+/*
+	If we're using MMGC, using operator delete on a GCFinalizedObject is problematic:
+	in particular, calling it from inside a dtor is risky because the dtor for the sub-object
+	might already have been called, wrecking its vtable and ending up in the wrong version
+	of operator delete (the global version rather than the class-specific one). Calling GC::Free
+	directly is fine (since it ignores the vtable), so we macro-ize to make the distinction.
+	
+	macro-ization of operator new isn't strictly necessary, but is done to bottleneck both
+	sides of the new/delete pair to forestall future needs.
+*/
+#ifdef MMGC_API
+	
+	// separate overloads because GCObject and GCFinalizedObjects have different dtors 
+	// (GCFinalizedObject's is virtual, GCObject's is not)
+	inline void mmgc_delete(GCObject* o)
+	{
+		GC* g = GC::GetGC(o); 
+		if (g->Collecting()) 
+			g->Free(o); 
+		else 
+			delete o; 
+	}
+
+	inline void mmgc_delete(GCFinalizedObject* o)
+	{
+		GC* g = GC::GetGC(o); 
+		if (g->Collecting()) 
+			g->Free(o); 
+		else 
+			delete o; 
+	}
+
+	#define NJ_NEW(gc, cls)			new (gc) cls
+	#define NJ_DELETE(obj)			do { mmgc_delete(obj); } while (0)
+#else
+	#define NJ_NEW(gc, cls)			new (gc) cls
+	#define NJ_DELETE(obj)			do { delete obj; } while (0)
+#endif
 
 namespace nanojit
 {
@@ -70,31 +106,42 @@ namespace nanojit
 	class Fragment;
 	class LIns;
 	struct SideExit;
+	struct Page;
 	class RegAlloc;
+	class BBNode;
 	typedef avmplus::AvmCore AvmCore;
 	typedef avmplus::OSDep OSDep;
-	typedef avmplus::GCSortedMap<const void*,Fragment*,avmplus::LIST_GCObjects> FragmentMap;
-	typedef avmplus::SortedMap<SideExit*,RegAlloc*,avmplus::LIST_GCObjects> RegAllocMap;
-	typedef avmplus::List<LIns*,avmplus::LIST_NonGCObjects>	InsList;
+	typedef avmplus::SortedMap<const void*, Fragment*, avmplus::LIST_GCObjects> FragmentMap;
+	typedef avmplus::SortedMap<SideExit*, RegAlloc*, avmplus::LIST_GCObjects> RegAllocMap;
+	typedef avmplus::List<LIns*, avmplus::LIST_NonGCObjects>	InsList;
+	typedef avmplus::SortedMap<LIns*,BBNode*,avmplus::LIST_GCObjects> BBMap;
 	typedef avmplus::List<char*, avmplus::LIST_GCObjects> StringList;
+	typedef avmplus::List<BBNode*,avmplus::LIST_GCObjects>	BBList;
+	typedef avmplus::List<Page*,avmplus::LIST_NonGCObjects>	PageList;
 
     const uint32_t MAXARGS = 8;
 
-	#if defined(_DEBUG)
+	#if defined(_MSC_VER) && _MSC_VER < 1400
+		static void NanoAssertMsgf(bool a,const char *f,...) {}
+		static void NanoAssertMsg(bool a,const char *m) {}
+		static void NanoAssert(bool a) {}
+	#elif defined(_DEBUG)
 		
-		#ifndef WIN32
-			#define DebugBreak() AvmAssert(0)
-		#endif
+		#define __NanoAssertMsgf(a, file_, line_, f, ...)  \
+			if (!(a)) { \
+				fprintf(stderr, "Assertion failed: " f "%s (%s:%d)\n", __VA_ARGS__, #a, file_, line_); \
+				NanoAssertFail(); \
+			}
+			
+		#define _NanoAssertMsgf(a, file_, line_, f, ...)   __NanoAssertMsgf(a, file_, line_, f, __VA_ARGS__)
 
-		#define NanoAssertMsg(x,y)			AvmAssertMsg(x,y)
-        #define NanoAssertMsgf(a,y)				NanoAssert(a)
-		#define NanoAssert(x)					_NanoAssert((x), __LINE__,__FILE__)
-		#define _NanoAssert(x, line_, file_)	__NanoAssert((x), line_, file_)
-		#define __NanoAssert(x, line_, file_)	do { NanoAssertMsg((x), "Assertion failed: \"" #x "\" (" #file_ ":" #line_ ")"); } while (0) /* no semi */
+		#define NanoAssertMsgf(a,f,...)   do { __NanoAssertMsgf(a, __FILE__, __LINE__, f ": ", __VA_ARGS__); } while (0)
+		#define NanoAssertMsg(a,m)        do { __NanoAssertMsgf(a, __FILE__, __LINE__, "\"%s\": ", m); } while (0)
+		#define NanoAssert(a)             do { __NanoAssertMsgf(a, __FILE__, __LINE__, "%s", ""); } while (0)
 	#else
-		#define NanoAssertMsgf(x,y)	do { } while (0) /* no semi */
-		#define NanoAssertMsg(x,y)	do { } while (0) /* no semi */
-		#define NanoAssert(x)		do { } while (0) /* no semi */
+		#define NanoAssertMsgf(a,f,...)   do { } while (0) /* no semi */
+		#define NanoAssertMsg(a,m)        do { } while (0) /* no semi */
+		#define NanoAssert(a)             do { } while (0) /* no semi */
 	#endif
 
 	/**
@@ -156,14 +203,14 @@ namespace nanojit
 #define isU8(i)  ( int32_t(i) == uint8_t(i) )
 #define isS16(i) ( int32_t(i) == int16_t(i) )
 #define isU16(i) ( int32_t(i) == uint16_t(i) )
-#define isS24(i) (((int32_t(i)<<8)>>8) == (i))
-
+#define isS24(i) ( ((int32_t(i)<<8)>>8) == (i) )
 
 #define alignTo(x,s)		((((uintptr_t)(x)))&~(((uintptr_t)s)-1))
 #define alignUp(x,s)		((((uintptr_t)(x))+(((uintptr_t)s)-1))&~(((uintptr_t)s)-1))
 
 #define pageTop(x)			( (int*)alignTo(x,NJ_PAGE_SIZE) )
-#define pageBottom(x)		( (int*)((alignTo(x,NJ_PAGE_SIZE)+NJ_PAGE_SIZE)-1) )
+#define pageDataStart(x)    ( (int*)(alignTo(x,NJ_PAGE_SIZE) + sizeof(PageHeader)) )
+#define pageBottom(x)		( (int*)(alignTo(x,NJ_PAGE_SIZE)+NJ_PAGE_SIZE)-1 )
 #define samepage(x,y)		(pageTop(x) == pageTop(y))
 
 #include "Native.h"
@@ -171,6 +218,7 @@ namespace nanojit
 #include "RegAlloc.h"
 #include "Fragmento.h"
 #include "Assembler.h"
+//#include "TraceTreeDrawer.h"
 
 #endif // FEATURE_NANOJIT
 #endif // __nanojit_h__

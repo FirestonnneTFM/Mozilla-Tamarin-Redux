@@ -37,18 +37,14 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(ErrorClass)
-		NATIVE_METHOD(Error_getStackTrace, ErrorObject::stackTraceToString)
-		NATIVE_METHOD(Error_getErrorMessage, ErrorClass::getErrorMessage)
-	END_NATIVE_MAP()
-
 	ErrorClass::ErrorClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(ErrorClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
 
 		prototype = createInstance(ivtable(), toplevel()->objectClass->prototype);
 	}
@@ -60,7 +56,7 @@ namespace avmplus
 							 ScriptObject *delegate)
 		: ScriptObject(vtable, delegate)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(ErrorObject));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorObject));
 
 		#ifdef DEBUGGER
 		AvmCore *core = this->core();
@@ -74,7 +70,7 @@ namespace avmplus
 		core()->throwErrorV(this, errorID, arg1, arg2, arg3);
 	}
 
-	Stringp ErrorObject::stackTraceToString() const
+	Stringp ErrorObject::getStackTrace() const
 	{
 		#ifdef DEBUGGER
 		AvmCore* core = this->core();
@@ -109,13 +105,10 @@ namespace avmplus
 	 * NativeErrorClass
 	 */
 
-	BEGIN_NATIVE_MAP(NativeErrorClass)
-	END_NATIVE_MAP()	
-
 	NativeErrorClass::NativeErrorClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
-		AvmAssert(traits()->sizeofInstance == sizeof(ErrorClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(ErrorClass));
 		createVanillaPrototype();
 	}
 }

@@ -47,7 +47,6 @@ namespace avmplus
 	class ClassClosure : public ScriptObject
 	{
 	public:
-		DRCWB(ScriptObject*) prototype;
 
 		ClassClosure(VTable *cvtable);
 
@@ -88,6 +87,9 @@ namespace avmplus
 	public:
 		Stringp format(AvmCore* core) const;
 #endif
+	// ------------------------ DATA SECTION BEGIN
+	public: DRCWB(ScriptObject*) prototype;
+	// ------------------------ DATA SECTION END
 	};
 }
 

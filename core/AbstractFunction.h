@@ -53,7 +53,11 @@ namespace avmplus
 	 * can be executed by the VM: Actionscript functions,
 	 * native functions, etc.
 	 */
+#ifdef AVMPLUS_TRAITS_MEMTRACK
+	class AbstractFunction : public MMgc::GCFinalizedObject
+#else
 	class AbstractFunction : public MMgc::GCObject
+#endif
 	{
 	public:
 		/** @name flags from .abc - limited to a BYTE */
@@ -238,11 +242,8 @@ namespace avmplus
 		void boxArgs(int argc, uint32 *ap, Atom* out);
 
 	protected:
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+		virtual ~AbstractFunction();
 
-		/** Dummy destructor to avoid warnings */
-		virtual ~AbstractFunction() {}
-#endif 
 #ifdef AVMPLUS_VERBOSE
 	public:
 		virtual Stringp format(AvmCore* core) const;

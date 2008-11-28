@@ -81,15 +81,16 @@ namespace avmplus
 		double sin(double x);
 		double sqrt(double x);
 		double tan(double x);
-		double min2(double x, double y);
-		double max2(double x, double y);
+		double _min(double x, double y);
+		double _max(double x, double y);
+
+		inline double min2(double x, double y) { return _min(x, y); }
+		inline double max2(double x, double y) { return _max(x, y); }
 
 		// cn:  max/min declared with rest args so we can implement ES3 spec'd length property of 2
 		//      and still allow any number of arguments.
 		double max(double x, double y, const Atom* argv, uint32_t argc);
 		double min(double x, double y, const Atom* argv, uint32_t argc);
-
-		DECLARE_NATIVE_MAP(MathClass)
 
 	private:
 		TRandomFast seed;			

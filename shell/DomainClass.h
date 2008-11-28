@@ -47,15 +47,19 @@ namespace avmshell
 		DomainObject(VTable *vtable, ScriptObject *delegate);
 		~DomainObject();
 
-		void constructFromDomain(DomainObject *base);
+		void init(DomainObject *base);
 		Atom loadBytes(ByteArrayObject *bytes);
 		ClassClosure* getClass(Stringp name);
+//#ifdef AVMPLUS_MOPS
+ 		ScriptObject *get_domainMemory() const;
+ 		void set_domainMemory(ScriptObject *mem);
+//#endif AVMPLUS_MOPS
 		
 		DWB(DomainEnv*) domainEnv;
 		DRCWB(Toplevel*) domainToplevel;
 
 	  private:
-	    ScriptObject* finddef(const Multiname* multiname, DomainEnv* domainEnv);
+	    ScriptObject* finddef(const Multiname& multiname, DomainEnv* domainEnv);
 	};
 
 	class DomainClass : public ClassClosure
@@ -66,8 +70,9 @@ namespace avmshell
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
 		DomainObject* get_currentDomain();
-		
-		DECLARE_NATIVE_MAP(DomainClass)
+//#ifdef AVMPLUS_MOPS
+ 		int get_MIN_DOMAIN_MEMORY_LENGTH();
+//#endif AVMPLUS_MOPS
 	};
 }
 

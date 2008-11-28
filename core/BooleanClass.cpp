@@ -40,9 +40,6 @@
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(BooleanClass)
-	END_NATIVE_MAP()
-
 	BooleanClass::BooleanClass(VTable* cvtable)
 		: ClassClosure(cvtable)
     {

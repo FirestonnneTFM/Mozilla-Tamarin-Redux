@@ -51,195 +51,195 @@
 
 // Get multiple locals
 
-pattern  OP_getlocal ; OP_getlocal
+pattern  getlocal ; getlocal
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_get2locals ; ($1.1 << 16) | $0.1
+action   get2locals ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_getlocal
+pattern  getlocal ; getlocal ; getlocal
 guard    $0.1 < 1024 && $1.1 < 1024 && $2.1 < 1024
-action   OP_ext_get3locals ; ($2.1 << 20) | ($1.1 << 10) | $0.1
+action   get3locals ; ($2.1 << 20) | ($1.1 << 10) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_getlocal ; OP_getlocal
+pattern  getlocal ; getlocal ; getlocal ; getlocal
 guard    $0.1 < 256 && $1.1 < 256 && $2.1 < 256 && $3.1 < 256
-action   OP_ext_get4locals ; ($3.1 << 24) | ($2.1 << 16) | ($1.1 << 8) | $0.1
+action   get4locals ; ($3.1 << 24) | ($2.1 << 16) | ($1.1 << 8) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_getlocal ; OP_getlocal ; OP_getlocal
+pattern  getlocal ; getlocal ; getlocal ; getlocal ; getlocal
 guard    $0.1 < 64 && $1.1 < 64 && $2.1 < 64 && $3.1 < 64 && $4.1 < 64
-action   OP_ext_get5locals ; ($4.1 << 24) | ($3.1 << 18) | ($2.1 << 12) | ($1.1 << 6) | $0.1
+action   get5locals ; ($4.1 << 24) | ($3.1 << 18) | ($2.1 << 12) | ($1.1 << 6) | $0.1
 
 
 // Get two locals and perform arithmetic, possibly with a store (in the case of add only)
 
-pattern  OP_getlocal ; OP_getlocal ; OP_add
+pattern  getlocal ; getlocal ; add
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_add_ll ; ($1.1 << 16) | $0.1
+action   add_ll ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_add; OP_setlocal
+pattern  getlocal ; getlocal ; add; setlocal
 guard    $0.1 < 1024 && $1.1 < 1024 && $3.1 < 1024
-action   OP_ext_add_set_lll ; ($3.1 << 20) | ($1.1 << 10) | $0.1
+action   add_set_lll ; ($3.1 << 20) | ($1.1 << 10) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_subtract
+pattern  getlocal ; getlocal ; subtract
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_subtract_ll ; ($1.1 << 16) | $0.1
+action   subtract_ll ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_multiply
+pattern  getlocal ; getlocal ; multiply
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_multiply_ll ; ($1.1 << 16) | $0.1
+action   multiply_ll ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_divide
+pattern  getlocal ; getlocal ; divide
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_divide_ll ; ($1.1 << 16) | $0.1
+action   divide_ll ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_modulo
+pattern  getlocal ; getlocal ; modulo
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_modulo_ll ; ($1.1 << 16) | $0.1
+action   modulo_ll ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_bitand
+pattern  getlocal ; getlocal ; bitand
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_bitand_ll ; ($1.1 << 16) | $0.1
+action   bitand_ll ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_bitor
+pattern  getlocal ; getlocal ; bitor
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_bitor_ll ; ($1.1 << 16) | $0.1
+action   bitor_ll ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_bitxor
+pattern  getlocal ; getlocal ; bitxor
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_bitxor_ll ; ($1.1 << 16) | $0.1
+action   bitxor_ll ; ($1.1 << 16) | $0.1
 
 
 // Get one local, one immediate, and perform arithmetic
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_add
-action   OP_ext_add_lb ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; add
+action   add_lb ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_subtract
-action   OP_ext_subtract_lb ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; subtract
+action   subtract_lb ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_multiply
-action   OP_ext_multiply_lb ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; multiply
+action   multiply_lb ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_divide
-action   OP_ext_divide_lb ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; divide
+action   divide_lb ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_bitand
-action   OP_ext_bitand_lb ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; bitand
+action   bitand_lb ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_bitor
-action   OP_ext_bitor_lb ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; bitor
+action   bitor_lb ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_bitxor
-action   OP_ext_bitxor_lb ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; bitxor
+action   bitxor_lb ; $0.1 ; $1.1
 
 
 // Compare two locals and branch on condition
 
-pattern  OP_getlocal ; OP_getlocal ; OP_iflt
+pattern  getlocal ; getlocal ; iflt
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_iflt_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   iflt_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifnlt
+pattern  getlocal ; getlocal ; ifnlt
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifnlt_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifnlt_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifle
+pattern  getlocal ; getlocal ; ifle
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifle_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifle_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifnle
+pattern  getlocal ; getlocal ; ifnle
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifnle_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifnle_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifgt
+pattern  getlocal ; getlocal ; ifgt
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifgt_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifgt_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifngt
+pattern  getlocal ; getlocal ; ifngt
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifngt_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifngt_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifge
+pattern  getlocal ; getlocal ; ifge
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifge_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifge_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifnge
+pattern  getlocal ; getlocal ; ifnge
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifnge_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifnge_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifeq
+pattern  getlocal ; getlocal ; ifeq
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifeq_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifeq_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifne
+pattern  getlocal ; getlocal ; ifne
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifne_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifne_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifstricteq
+pattern  getlocal ; getlocal ; ifstricteq
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifstricteq_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifstricteq_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
-pattern  OP_getlocal ; OP_getlocal ; OP_ifstrictne
+pattern  getlocal ; getlocal ; ifstrictne
 guard    $0.1 < 65536 && $1.1 < 65536
-action   OP_ext_ifstrictne_ll ; $2.1 ; ($1.1 << 16) | $0.1
+action   ifstrictne_ll ; $2.1 ; ($1.1 << 16) | $0.1
 
 
 // Compare local with constant and branch on condition
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_iflt
-action   OP_ext_iflt_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; iflt
+action   iflt_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifnlt
-action   OP_ext_ifnlt_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifnlt
+action   ifnlt_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifle
-action   OP_ext_ifle_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifle
+action   ifle_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifnle
-action   OP_ext_ifnle_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifnle
+action   ifnle_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifgt
-action   OP_ext_ifgt_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifgt
+action   ifgt_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifngt
-action   OP_ext_ifngt_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifngt
+action   ifngt_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifge
-action   OP_ext_ifge_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifge
+action   ifge_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifnge
-action   OP_ext_ifnge_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifnge
+action   ifnge_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifeq
-action   OP_ext_ifeq_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifeq
+action   ifeq_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifne
-action   OP_ext_ifne_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifne
+action   ifne_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifstricteq
-action   OP_ext_ifstricteq_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifstricteq
+action   ifstricteq_lb ; $2.1 ; $0.1 ; $1.1
 
-pattern  OP_getlocal ; OP_ext_pushbits ; OP_ifstrictne
-action   OP_ext_ifstrictne_lb ; $2.1 ; $0.1 ; $1.1
+pattern  getlocal ; pushbits ; ifstrictne
+action   ifstrictne_lb ; $2.1 ; $0.1 ; $1.1
 
 
 // Miscellaneous
 
-pattern  OP_setlocal ; OP_getlocal
+pattern  setlocal ; getlocal
 guard    $0.1 == $1.1
-action   OP_ext_storelocal ; $0.1
+action   storelocal ; $0.1
 
-pattern  OP_swap ; OP_pop
-action   OP_ext_swap_pop
+pattern  swap ; pop
+action   swap_pop
 
 
 // Specialize instructions that were despecialized by the verifier.
 
-pattern  OP_getlocal
+pattern  getlocal
 guard    $0.1 < 4
-action   OP_getlocal0 + $0.1
+action   getlocal0 + $0.1
 
-pattern  OP_setlocal
+pattern  setlocal
 guard    $0.1 < 4
-action   OP_setlocal0 + $0.1
+action   setlocal0 + $0.1
 
 
 // This is an example of a sequence that would not appear in a rational instruction
@@ -249,7 +249,7 @@ action   OP_setlocal0 + $0.1
 // Another consideration here is that it may make sense to conflate storelocal and shiftlocal,
 // since it's dispatches we want to reduce as much as possible.
 //
-//pattern  OP_setlocal ; OP_getlocal
+//pattern  setlocal ; getlocal
 //guard    $0.1 < 65536 && $1.1 < 65536
-//action   OP_ext_shiftlocal ; ($1.1 << 16) | $0.1
+//action   shiftlocal ; ($1.1 << 16) | $0.1
 

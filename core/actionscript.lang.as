@@ -38,7 +38,6 @@
 
 package
 {
-
 	public namespace AS3 = "http://adobe.com/AS3/2006/builtin"
 
 	/**
@@ -80,7 +79,11 @@ package
 	public native function escape(s:String="undefined"):String
 
 	// {DontEnum} length=1
+	[native(script="Toplevel", methods="auto")]
 	public native function unescape(s:String="undefined"):String
+
+	// {DontEnum} length=1
+	public native function isXMLName(str=void 0):Boolean	// moved here from XML.as
 
 	// value properties of global object (ECMA 15.1.1)
 

@@ -37,19 +37,15 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(NamespaceClass)
-		NATIVE_METHOD_CAST(Namespace, Namespace_prefix_get, Namespace::getPrefix)
-		NATIVE_METHOD_CAST(Namespace, Namespace_uri_get, Namespace::getURI)
-	END_NATIVE_MAP()
-
 	NamespaceClass::NamespaceClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
 		toplevel()->namespaceClass = this;
-		AvmAssert(traits()->sizeofInstance == sizeof(NamespaceClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(NamespaceClass));
 		createVanillaPrototype();
 	}
 

@@ -38,21 +38,7 @@
 #ifndef __avmplus_types__
 #define __avmplus_types__
 
-
-#ifdef _MSC_VER
-	// MSVC doesn't support inttypes.h or most C99 types directly
-	#include <crtdefs.h>	// defines intrptr_t and uintptr_t, but not the rest of C99 int types
-	typedef __int8				int8_t;
-	typedef __int16				int16_t;
-	typedef __int32				int32_t;
-	typedef __int64				int64_t;
-	typedef unsigned __int8		uint8_t;
-	typedef unsigned __int16	uint16_t;
-	typedef unsigned __int32	uint32_t; 
-	typedef unsigned __int64	uint64_t;
-#else
-	#include <inttypes.h>
-#endif
+#include "avmplus_stdint.h"
 
 namespace avmplus
 {
@@ -103,19 +89,22 @@ namespace avmplus
 	typedef AVMPLUS_TYPE_IS_POINTER_SIZED int32_t Atom;
 	#endif
 	
-	// nothing overloads on Binding, so we can use intptr_t
-	// Ideally, Binding should be a unique pointer type (as it is in TT) but for now, 
-	// avoid the code churn by defining it the "old" way
-	typedef intptr_t	Binding;
-
-	// nothing overloads on CodeContextAtom, so we can use intptr_t
-	// Ideally, CodeContextAtom should be a unique pointer type (as it is in TT) but for now, 
-	// avoid the code churn by defining it the "old" way
-	typedef intptr_t	CodeContextAtom;
+	typedef struct Binding_* Binding;
+	typedef struct CodeContextAtom_* CodeContextAtom;
 
 	inline uint32 urshift(Atom atom, int amount)
 	{
 		return ((uint32)atom >> amount);
+	}
+
+	inline uint32 urshift(Binding b, int amount)
+	{
+		return (uint32_t(uintptr_t(b)) >> amount);
+	}
+
+	inline uint32 urshift(CodeContextAtom c, int amount)
+	{
+		return (uint32_t(uintptr_t(c)) >> amount);
 	}
 }
 

@@ -38,6 +38,7 @@
 package avmplus
 {
 
+[native(cls="StringBuilderClass", instance="StringBuilderObject", methods="auto")]
 public class StringBuilder
 {
 	public function StringBuilder(str:String = null)

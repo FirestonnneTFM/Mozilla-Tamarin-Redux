@@ -363,8 +363,9 @@ function run3dcube() {
   // verify test results
   var expectedResults = [250.49814997925202, 308.02382919560387, -184.27577256519325];
   for (i=0; i<3; i++) {
-    if (Q[5].V[i] !== expectedResults[i]) {
+    if (Math.abs(Q[5].V[i] - expectedResults[i])>0.00001) {
         print("Test validation failed.  Q[5].V["+i+"]: Expected: "+expectedResults[i]+" Got: "+Q[5].V[i]);
+        return;
     }
   }
   
