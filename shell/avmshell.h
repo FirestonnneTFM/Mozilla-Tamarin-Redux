@@ -42,6 +42,7 @@
 #include <stdlib.h>
 
 #include "avmplus.h"
+#include "Selftest.h"
 
 // interactive shell requires functional external compiler, not yet
 // present in Tamarin. commented out for now.
@@ -134,9 +135,6 @@ namespace avmshell
 		PoolObject* shellPool;
 
 	private:
-		DECLARE_NATIVE_CLASSES()
-		DECLARE_NATIVE_SCRIPTS()			
-
 		OutputStream *consoleOutputStream;
 		bool gracePeriod;
 		bool inStackOverflow;
@@ -153,19 +151,6 @@ namespace avmshell
 		#ifdef AVMPLUS_INTERACTIVE
 		int addToImports(char* imports, char* addition);
 		#endif //AVMPLUS_INTERACTIVE
-	};
-
-	class AvmplusScript : public ScriptObject
-	{
-
-	public:
-		AvmplusScript(VTable *vtable, ScriptObject* delegate)
-			: ScriptObject(vtable, delegate)
-		{
-		}
-
-
-		DECLARE_NATIVE_SCRIPT(AvmplusScript)
 	};
 
 	class ShellToplevel : public Toplevel

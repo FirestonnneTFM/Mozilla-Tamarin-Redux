@@ -41,7 +41,7 @@
 namespace avmplus
 {
 
-	Stringp DateObject::dateToString(int index)
+	Stringp DateObject::_toString(int index)
 	{
 		wchar buffer[256];
 		int len;
@@ -49,23 +49,23 @@ namespace avmplus
 		return new (gc()) String(buffer,len);
 	}
 
-	double DateObject::valueOf()
+	double DateObject::AS3_valueOf()
 	{
 		return date.getTime();
 	}
 
-	double DateObject::setTime(double value)
+	double DateObject::_setTime(double value)
 	{
 		date.setTime(value);
 		return date.getTime();
 	}
 
-	double DateObject::get(int index)
+	double DateObject::_get(int index)
 	{
 		return date.getDateProperty(index);
 	}
 
-	double DateObject::set(int index, Atom *argv, int argc)
+	double DateObject::_set(int index, Atom *argv, int argc)
 	{
 		AvmCore* core = this->core();
 

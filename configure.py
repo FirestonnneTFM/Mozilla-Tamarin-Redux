@@ -67,7 +67,7 @@ if (buildShell):
 
 APP_CPPFLAGS = ""
 APP_CXXFLAGS = ""
-OPT_CXXFLAGS = "-Os "
+OPT_CXXFLAGS = "-O3 "
 OPT_CPPFLAGS = ""
 DEBUG_CPPFLAGS = "-DDEBUG -D_DEBUG "
 DEBUG_CXXFLAGS = ""
@@ -80,6 +80,10 @@ AVMSHELL_LDFLAGS = ""
 MMGC_DEFINES = {'SOFT_ASSERTS': None}
 NSPR_INCLUDES = ""
 NSPR_LDOPTS = ""
+
+selfTest = o.getBoolArg("selftests", False)
+if selfTest:
+    APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
 
 MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', True)
 if MMGC_INTERIOR_PTRS:
@@ -103,32 +107,33 @@ if MMGC_THREADSAFE:
 os, cpu = config.getTarget()
 
 if config.getCompiler() == 'GCC':
-    APP_CXXFLAGS = "-fstrict-aliasing -fno-exceptions -Werror -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -finline-functions -finline-limit=65536 "
+    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 "
     if config.getDebug():
         APP_CXXFLAGS += "-frtti -fexceptions "
     else:
-        APP_CXXFLAGS += "-fno-rtti -fno-exceptions -Wuninitialized  "
+        APP_CXXFLAGS += "-Wuninitialized -fno-rtti -fno-exceptions "
     DEBUG_CXXFLAGS += "-g "
 elif config.getCompiler() == 'VS':
     if cpu == "arm":
-        APP_CXXFLAGS = "-W4 -WX -wd4291 -wd4201 -wd4189 -wd4740 -wd4127 "
+        APP_CXXFLAGS = "-W4 -WX -wd4291 -wd4201 -wd4189 -wd4740 -wd4127 -fp:fast -GF -GS- -Zc:wchar_t- "
+        OS_LDFLAGS += "-MAP "
         if config.getDebug():
             DEBUG_CXXFLAGS = "-Od "
             APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- -Zc:forScope "
         else:
-            OPT_CXXFLAGS = "-O2 "
-            APP_CXXFLAGS += "-GR- -fp:fast -GS- -Zc:wchar_t- "
+            OPT_CXXFLAGS = "-O2 -GR- "
     else:
-        APP_CXXFLAGS = "-W4 -WX -wd4291 "
-        OS_LDFLAGS += "-SAFESEH:NO "
+        APP_CXXFLAGS = "-W4 -WX -wd4291 -GF -fp:fast -GS- -Zc:wchar_t- "
+        OS_LDFLAGS += "-SAFESEH:NO -MAP "
         if config.getDebug():
-            OPT_CXXFLAGS = "-Od "
-            APP_CXXFLAGS += "-EHsc "
+            DEBUG_CXXFLAGS = "-Od -EHsc "
         else:
-            OPT_CXXFLAGS = "-O2 -Ob1 "
-            APP_CXXFLAGS += "-GF -GR- -fp:fast -GS- -Zc:wchar_t- "
+            OPT_CXXFLAGS = "-O2 -Ob1 -GR- "
     DEBUG_CXXFLAGS += "-Zi "
     DEBUG_LDFLAGS += "-DEBUG "
+elif config.getCompiler() == 'SunStudio':
+    OPT_CXXFLAGS = "-xO5 "
+    DEBUG_CXXFLAGS += "-g "
 else:
     raise Exception('Unrecognized compiler: ' + config.getCompiler())
 
@@ -147,6 +152,7 @@ if os == "darwin":
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
                          '_MAC': None,
+                         'AVMPLUS_MAC': None,
                          'TARGET_RT_MAC_MACHO': 1,
                          'USE_MMAP': None})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
@@ -170,6 +176,7 @@ elif os == "windows" or os == "cygwin":
     else:
         APP_CPPFLAGS += "-DWIN32_LEAN_AND_MEAN -D_CONSOLE "
         OS_LIBS.append('winmm')
+        OS_LIBS.append('shlwapi')
 elif os == "linux":
     MMGC_DEFINES.update({'UNIX': None,
                          'AVMPLUS_UNIX': None,
@@ -216,6 +223,9 @@ if o.getBoolArg('perfm'):
     
 if o.getBoolArg('disable-nj'):
     APP_CPPFLAGS += '-DAVMPLUS_DISABLE_NJ '
+
+if o.getBoolArg('selftest'):
+    APP_CPPFLAGS += '-DAVMPLUS_SELFTEST '
 
 # We do two things with MMGC_DEFINES: we append it to APP_CPPFLAGS and we also write MMgc-config.h
 APP_CPPFLAGS += ''.join(val is None and ('-D%s ' % var) or ('-D%s=%s ' % (var, val))

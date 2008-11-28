@@ -109,11 +109,15 @@ namespace avmshell
 
 		Stringp readLine();
 
-		double getTotalMemory();
-		double getFreeMemory();
-		double getPrivateMemory();
+		double get_totalMemory();
+		double get_freeMemory();
+		double get_privateMemory();
 
-		DECLARE_NATIVE_MAP(SystemClass)
+		// function exists solely to test native-methods with custom namespaces
+		void ns_example_nstest() { }
+
+		// function exists solely to test ScriptObject::isGlobalObject
+		bool isGlobal(Atom o);
     };
 }
 

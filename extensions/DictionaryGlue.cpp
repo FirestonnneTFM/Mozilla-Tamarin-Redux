@@ -48,10 +48,6 @@ using namespace MMgc;
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(DictionaryClass)
-		NATIVE_METHOD(flash_utils_Dictionary_Dictionary,        DictionaryObject::constructDictionary)
-	END_NATIVE_MAP()
-
 	DictionaryClass::DictionaryClass(VTable *vtable)
 	: ClassClosure(vtable)
 	{		
@@ -76,7 +72,7 @@ namespace avmplus
 		weakKeys = false;
 	}
 
-	void DictionaryObject::constructDictionary(bool weakKeys)
+	void DictionaryObject::init(bool weakKeys)
 	{
 		GCAssert(vtable->traits->isDictionary == true);
 		this->weakKeys = weakKeys;

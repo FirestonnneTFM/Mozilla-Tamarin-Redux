@@ -399,14 +399,14 @@ namespace avmshell
 
 	void DebugCLI::list(const char* line)
 	{
-		int currentLine = (core->callStack) ? core->callStack->linenum : 0;
+		int currentLine = (core->callStack) ? core->callStack->linenum() : 0;
 		int linenum = (line) ? atoi(line) : currentLine;
 		displayLines(linenum, 10);
 	}
 	
 	void DebugCLI::printIP()
 	{
-		int line = (core->callStack) ? core->callStack->linenum : 0;
+		int line = (core->callStack) ? core->callStack->linenum() : 0;
 		displayLines(line, 1);
 	}
 
@@ -669,7 +669,7 @@ namespace avmshell
 	
 	void DebugCLI::enterDebugger()
 	{	
-		setCurrentSource( (core->callStack) ? (core->callStack->filename) : 0 );
+		setCurrentSource( (core->callStack) ? (core->callStack->filename()) : 0 );
 		if (currentSource == NULL)
 		{
 			stepInto();

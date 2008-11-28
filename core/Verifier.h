@@ -57,7 +57,6 @@ namespace avmplus
 	 * incompatible frame states cause verify errors.
 	 */
 
-	class FrameState;
 	#if defined AVMPLUS_MIR
 	class CodegenMIR;
 	#elif defined FEATURE_NANOJIT
@@ -77,10 +76,10 @@ namespace avmplus
 		#endif
 
 		#ifdef AVMPLUS_WORD_CODE
-		Translator *translator;
+		WordcodeTranslator *translator;
 		int num_caches;			// number of entries in 'caches'
 		int next_cache;			// next free entry in 'caches'
-		uint32* caches;			// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
+		uint32_t* caches;			// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
 		#endif
 		
 		AvmCore *core;
@@ -118,9 +117,9 @@ namespace avmplus
 		 * @param info the method to verify
 		 */
 #if defined AVMPLUS_MIR
-		void verify(CodegenMIR*);
+		void verify(CodegenMIR* volatile);
 #elif defined FEATURE_NANOJIT
-		void verify(CodegenLIR*);
+		void verify(CodegenLIR* volatile);
 #else
 		void verify();
 #endif
@@ -136,14 +135,14 @@ namespace avmplus
 
 		FrameState* newFrameState();
 		Value& checkLocal(int local);
-		AbstractFunction*  checkDispId(Traits* traits, uint32 disp_id);
-		AbstractFunction*  checkMethodInfo(uint32 method_id);
-		Traits*            checkClassInfo(uint32 class_id);
-		Traits*            checkTypeName(uint32 name_index);
+		AbstractFunction*  checkDispId(Traits* traits, uint32_t disp_id);
+		AbstractFunction*  checkMethodInfo(uint32_t method_id);
+		Traits*            checkClassInfo(uint32_t class_id);
+		Traits*            checkTypeName(uint32_t name_index);
 		void verifyFailed(int errorID, Stringp a1=0, Stringp a2=0, Stringp a3=0) const;
 		void checkTarget(const byte* target);
-		Atom checkCpoolOperand(uint32 index, int requiredAtomType);
-		void checkConstantMultiname(uint32 index, Multiname &m);
+		Atom checkCpoolOperand(uint32_t index, int requiredAtomType);
+		void checkConstantMultiname(uint32_t index, Multiname &m);
 		bool canAssign(Traits* lhs, Traits* rhs) const;
 		Traits* checkSlot(Traits* traits, int slot_id);
 		Traits* findCommonBase(Traits* t1, Traits* t2);
@@ -151,14 +150,13 @@ namespace avmplus
 		void printValue(Value& v);
 		Traits* readBinding(Traits* traits, Binding b);
 		void checkEarlySlotBinding(Traits* traits);
-		void checkEarlyMethodBinding(Traits* traits);
 		Traits* peekType(Traits* requiredType, int n=1);
 		Traits* emitCoerceSuper(int index);
 		void checkCallMultiname(AbcOpcode opcode, Multiname* multiname) const;
-		void checkPropertyMultiname(uint32 &depth, Multiname& multiname);
+		void checkPropertyMultiname(uint32_t &depth, Multiname& multiname);
 		void parseExceptionHandlers();
-		void checkStack(uint32 pop, uint32 push);
-		void checkStackMulti(uint32 pop, uint32 push, Multiname* m);
+		void checkStack(uint32_t pop, uint32_t push);
+		void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
 
 		void emitCoerce(Traits* target, int i);
 		void emitToString(AbcOpcode opcode, int index);
@@ -166,8 +164,8 @@ namespace avmplus
 		void emitCheckNull(int index);
 		#endif
 		void emitCompare(AbcOpcode opcode);
-		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32 imm30);
-		void emitGetProperty(Multiname &multiname, int n, uint32 imm30);
+		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30);
+		void emitGetProperty(Multiname &multiname, int n, uint32_t imm30);
 		void emitGetGlobalScope();
 		void emitGetOuterScope(int scope_idx);
 		void emitGetSlot(int slot);
@@ -175,19 +173,14 @@ namespace avmplus
 		void emitSwap();
         void emitNip();
 
-		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32 imm30, uint32 imm30b);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		bool emitCallpropertyMethodMIR(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc);
-		bool emitCallpropertySlotMIR(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32 argc);
-#endif
+		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc);
+		bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc);
+		bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc);
 #ifdef AVMPLUS_WORD_CODE
-		bool emitCallpropertyMethodXLAT(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32 argc);
-		bool emitCallpropertySlotXLAT(AbcOpcode opcode, Traits* t, Binding b, uint32 argc);
-		uint32 allocateCacheSlot(uint32 imm30);
+		uint32_t allocateCacheSlot(uint32_t imm30);
 #endif
-		Binding findMathFunction(Traits* math, Multiname* name, Binding b, int argc);
-
-		Binding findStringFunction(Traits* string, Multiname* name, Binding b, int argc);
+		Binding findMathFunction(TraitsBindingsp math, const Multiname& name, Binding b, int argc);
+		Binding findStringFunction(TraitsBindingsp string, const Multiname& name, Binding b, int argc);
 
 		#ifdef AVMPLUS_VERBOSE
 	public:

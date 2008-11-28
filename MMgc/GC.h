@@ -202,22 +202,39 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 		VirtualQuery(tmp_ptr, &__mib, sizeof(MEMORY_BASIC_INFORMATION)); \
 	    _size = __mib.RegionSize - ((int)tmp_ptr - (int)__mib.BaseAddress); \
 		_stack = tmp_ptr;
-#else
+#else // UNDER_CE
 #ifdef __ARMCC__
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		_stack =  (void*)__current_sp(); \
 		_size = (unsigned int*)_gc->GetStackTop() - (unsigned int*)_stack;
-#else
+#else // __ARMCC__
 // Store nonvolatile registers r4-r10
 // Find stack pointer
+#ifdef __thumb__
+#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+        int regs[7];\
+        int temp;\
+        asm("str r4, [%0]"      : : "r" (regs)); \
+        asm("str r5, [%0, #4]"  : : "r" (regs)); \
+        asm("str r6, [%0, #8]"  : : "r" (regs)); \
+        asm("str r7, [%0, #12]" : : "r" (regs)); \
+        asm("mov %0, r8"        : "=r" (temp)); \
+        asm("str %0, [%1, #16]" : : "r" (temp), "r"(regs)); \
+        asm("mov %0, r9"        : "=r" (temp)); \
+        asm("str %0, [%1, #20]" : : "r" (temp), "r"(regs)); \
+        asm("mov %0, r10"       : "=r" (temp)); \
+        asm("str %0, [%1, #24]" : : "r" (temp), "r"(regs)); \
+        asm("mov %0,sp"         : "=r" (_stack));\
+        _size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
+#else // __thumb__
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int regs[7];\
 		asm("stmia %0,{r4-r10}" : : "r" (regs));\
 		asm("mov %0,sp" : "=r" (_stack));\
 		_size = (uintptr)_gc->GetStackTop() - (uintptr)_stack;
+#endif // __thumb__
 #endif //__ARMCC__
-
-#endif
+#endif // UNDER_CE
 
 
 #elif defined MMGC_SPARC
@@ -699,6 +716,36 @@ namespace MMgc
 		 */
 		void *Alloc(size_t size, int flags=0);
 
+#ifdef MMGC_RCROOT_SUPPORT
+		
+	private:
+		class RCRootSegment : public GCRoot
+		{
+		public:
+			RCRootSegment(GC* gc, void* mem, size_t size);
+			void*			mem;
+			size_t			size;
+			RCRootSegment*	prev;
+			RCRootSegment*	next;
+		};
+		
+		RCRootSegment* rcRootSegments;
+		
+	public:
+		
+		/**
+		 * Allocate memory that will be scanned for pointers to GC memory
+		 * and from which pointers to RC objects will pin those objects.
+		 */
+		void* AllocRCRoot(size_t size);
+		
+		/**
+		 * Free memory allocated with AllocRCRoot.
+		 */
+		void FreeRCRoot(void* mem);
+		
+#endif // MMGC_RCROOT_SUPPORT
+
 		/** @access Requires(request && m_lock) */
 		void *AllocAlreadyLocked(size_t size, int flags=0);
 
@@ -872,7 +919,7 @@ namespace MMgc
 		/**
 		 * Are we currently marking
 		 */
-		bool IncrementalMarking() { return marking; }
+		inline bool IncrementalMarking() const { return marking; }
 
 		/**
 		 * A magical write barrier that finds the container's address and the
@@ -1121,7 +1168,14 @@ namespace MMgc
 
 		/** @access Requires(request) */
 		static GCWeakRef *GetWeakRef(const void *obj);
-
+		
+	public:
+		// a WeakRef that always refers to null. useful if you need one.
+		GCWeakRef* emptyWeakRef;
+	private:
+		GCRoot* emptyWeakRefRoot;
+	
+	public:
 		/** @access Requires((request && m_lock) || exclusiveGC) */
 		void ClearWeakRef(const void *obj);
 

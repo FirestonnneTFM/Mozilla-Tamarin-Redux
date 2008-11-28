@@ -38,6 +38,7 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 using namespace MMgc;
 
@@ -265,7 +266,7 @@ namespace avmplus
 		return r->atom();
 	}
 
-	uint32 VectorBaseObject::push(Atom *argv, int argc)
+	uint32 VectorBaseObject::AS3_push(Atom *argv, int argc)
 	{
 		if( m_fixed )
 			toplevel()->throwRangeError(kVectorFixedError);
@@ -279,24 +280,6 @@ namespace avmplus
 	//
 	// IntVectorClass
 	//
-
-	BEGIN_NATIVE_MAP(IntVectorClass)
-		NATIVE_METHOD(__AS3___vec_Vector_int_length_get,        IntVectorObject::get_length)
-		NATIVE_METHOD(__AS3___vec_Vector_int_length_set,        IntVectorObject::set_length)
-		NATIVE_METHOD(__AS3___vec_Vector_int_fixed_get,			IntVectorObject::get_fixed)
-		NATIVE_METHOD(__AS3___vec_Vector_int_fixed_set,			IntVectorObject::set_fixed)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_AS3_pop,		IntVectorObject::pop, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_AS3_push,		IntVectorObject::push, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_private__reverse,		IntVectorObject::_reverse, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_private__spliceHelper,		IntVectorObject::_spliceHelper, 0)
-		NATIVE_METHOD(__AS3___vec_Vector_int_private__forEach,	ArrayClass::forEach)
-		NATIVE_METHOD(__AS3___vec_Vector_int_private__every,	ArrayClass::every)
-		NATIVE_METHOD(__AS3___vec_Vector_int_private__some,		ArrayClass::some)
-		NATIVE_METHOD(__AS3___vec_Vector_int_private__sort,		ArrayClass::sort)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_private__map,		IntVectorObject::map, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_private__filter,		IntVectorObject::filter, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_int_AS3_unshift,		IntVectorObject::unshift, 0)
-	END_NATIVE_MAP()
 
 	IntVectorClass::IntVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
@@ -346,24 +329,6 @@ namespace avmplus
 	// UIntVectorClass
 	//
 
-	BEGIN_NATIVE_MAP(UIntVectorClass)
-		NATIVE_METHOD(__AS3___vec_Vector_uint_length_get,        UIntVectorObject::get_length)
-		NATIVE_METHOD(__AS3___vec_Vector_uint_length_set,        UIntVectorObject::set_length)
-		NATIVE_METHOD(__AS3___vec_Vector_uint_fixed_get,        UIntVectorObject::get_fixed)
-		NATIVE_METHOD(__AS3___vec_Vector_uint_fixed_set,        UIntVectorObject::set_fixed)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_AS3_pop,		UIntVectorObject::pop, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_AS3_push,		UIntVectorObject::push, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_private__reverse,		UIntVectorObject::_reverse, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_private__spliceHelper,		UIntVectorObject::_spliceHelper, 0)
-		NATIVE_METHOD(__AS3___vec_Vector_uint_private__forEach, ArrayClass::forEach)
-		NATIVE_METHOD(__AS3___vec_Vector_uint_private__every,	ArrayClass::every)
-		NATIVE_METHOD(__AS3___vec_Vector_uint_private__some,		ArrayClass::some)
-		NATIVE_METHOD(__AS3___vec_Vector_uint_private__sort,		ArrayClass::sort)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_private__map,		UIntVectorObject::map, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_private__filter,		UIntVectorObject::filter, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_uint_AS3_unshift,		UIntVectorObject::unshift, 0)
-	END_NATIVE_MAP()
-
 	UIntVectorClass::UIntVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
     {
@@ -412,24 +377,6 @@ namespace avmplus
 	// DoubleVectorClass
 	//
 
-	BEGIN_NATIVE_MAP(DoubleVectorClass)
-		NATIVE_METHOD(__AS3___vec_Vector_double_length_get,        DoubleVectorObject::get_length)
-		NATIVE_METHOD(__AS3___vec_Vector_double_length_set,        DoubleVectorObject::set_length)
-		NATIVE_METHOD(__AS3___vec_Vector_double_fixed_get,        DoubleVectorObject::get_fixed)
-		NATIVE_METHOD(__AS3___vec_Vector_double_fixed_set,        DoubleVectorObject::set_fixed)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_AS3_pop,		DoubleVectorObject::pop, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_AS3_push,		DoubleVectorObject::push, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_private__reverse,		DoubleVectorObject::_reverse, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_private__spliceHelper,		DoubleVectorObject::_spliceHelper, 0)
-		NATIVE_METHOD(__AS3___vec_Vector_double_private__forEach, ArrayClass::forEach)
-		NATIVE_METHOD(__AS3___vec_Vector_double_private__every,	ArrayClass::every)
-		NATIVE_METHOD(__AS3___vec_Vector_double_private__some,		ArrayClass::some)
-		NATIVE_METHOD(__AS3___vec_Vector_double_private__sort,		ArrayClass::sort)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_private__map,		DoubleVectorObject::map, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_private__filter,		DoubleVectorObject::filter, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_double_AS3_unshift,		DoubleVectorObject::unshift, 0)
-	END_NATIVE_MAP()
-
 	DoubleVectorClass::DoubleVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
 	{
@@ -477,9 +424,6 @@ namespace avmplus
 	//
 	// VectorClass
 	//
-
-	BEGIN_NATIVE_MAP(VectorClass)
-	END_NATIVE_MAP()
 
 	VectorClass::VectorClass(VTable *vtable)
 	: ClassClosure(vtable)
@@ -532,18 +476,13 @@ namespace avmplus
 
 			Traits* itraits = traits()->pool->resolveParameterizedType(toplevel(), ivtable()->traits, param_traits);
 
-			Traits* ctraits = traits()->pool->getTraits(&class_mname, toplevel());
+			Traits* ctraits = traits()->pool->getTraits(class_mname, toplevel());
 			if( !ctraits ){
-				ctraits = core->makeParameterizedCTraits(classname, this->traits()->ns, vecobj_traits);
+				ctraits = vecobj_traits->newParameterizedCTraits(classname, this->traits()->ns);
 			}
 
 			itraits->resolveSignatures(toplevel());
 			ctraits->resolveSignatures(toplevel());
-
-			itraits->hashTableOffset = vecobj_traits->itraits->hashTableOffset;
-			itraits->setTotalSize(itraits->hashTableOffset+sizeof(Hashtable));
-			ctraits->hashTableOffset = vecobj_traits->hashTableOffset;
-			ctraits->setTotalSize(ctraits->hashTableOffset+sizeof(Hashtable));
 
 			ctraits->itraits = itraits;
 
@@ -558,7 +497,7 @@ namespace avmplus
 			vtab->resolveSignatures();
 			ivtab->resolveSignatures();
 
-			ObjectVectorClass* new_type= (ObjectVectorClass*)toplevel()->objectVectorClass->createClassClosure(vtab);
+			ObjectVectorClass* new_type = new (vtab->gc(), vtab->getExtraSize()) ObjectVectorClass(vtab);
 			new_type->index_type = (ClassClosure*)AvmCore::atomToScriptObject(type);
 			new_type->setDelegate(toplevel()->classClass->prototype);
 
@@ -605,26 +544,6 @@ namespace avmplus
 	//
 	// ObjectVectorClass
 	//
-
-	BEGIN_NATIVE_MAP(ObjectVectorClass)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_length_get,        ObjectVectorObject::get_length, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_length_set,        ObjectVectorObject::set_length, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private_type_set,        ObjectVectorObject::set_type, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private_type_get,        ObjectVectorObject::get_type, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_fixed_set,        ObjectVectorObject::set_fixed, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_fixed_get,        ObjectVectorObject::get_fixed, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_AS3_pop,		ObjectVectorObject::pop, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_AS3_push,		ObjectVectorObject::push, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__reverse,		ObjectVectorObject::_reverse, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__spliceHelper,		ObjectVectorObject::_spliceHelper, 0)
-		NATIVE_METHOD(__AS3___vec_Vector_object_private__forEach, ArrayClass::forEach)
-		NATIVE_METHOD(__AS3___vec_Vector_object_private__every,	ArrayClass::every)
-		NATIVE_METHOD(__AS3___vec_Vector_object_private__some,		ArrayClass::some)
-		NATIVE_METHOD(__AS3___vec_Vector_object_private__sort,		ArrayClass::sort)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__map,		ObjectVectorObject::map, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_private__filter,		ObjectVectorObject::filter, 0)
-		NATIVE_METHOD_FLAGS(__AS3___vec_Vector_object_AS3_unshift,		ObjectVectorObject::unshift, 0)
-	END_NATIVE_MAP()
 
 	ObjectVectorClass::ObjectVectorClass(VTable *vtable)
 		: ClassClosure(vtable)
@@ -825,7 +744,7 @@ namespace avmplus
 		return;
 	}
 
-	Atom ObjectVectorObject::pop()
+	Atom ObjectVectorObject::AS3_pop()
 	{
 		if(m_fixed)
 			toplevel()->throwRangeError(kVectorFixedError);
@@ -839,7 +758,7 @@ namespace avmplus
 		return undefinedAtom;
 	}
 
-	uint32 ObjectVectorObject::unshift(Atom* argv, int argc)
+	uint32 ObjectVectorObject::AS3_unshift(Atom* argv, int argc)
 	{
 		// shift elements up by argc
 		// inserts args into initial spots

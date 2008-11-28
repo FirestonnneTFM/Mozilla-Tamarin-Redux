@@ -21,6 +21,8 @@
  *
  * Contributor(s):
  *   Adobe AS3 Team
+ *   Mozilla TraceMonkey Team
+ *   Asko Tontti <atontti@cc.hut.fi>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -40,6 +42,10 @@
 #ifndef __nanojit_Fragmento__
 #define __nanojit_Fragmento__
 
+/*#ifdef AVMPLUS_VERBOSE
+extern void drawTraceTrees(Fragmento *frago, FragmentMap * _frags, avmplus::AvmCore *core, char *fileName);
+#endif*/
+
 namespace nanojit
 {
 	struct GuardRecord;
@@ -56,7 +62,12 @@ namespace nanojit
             NIns code[(NJ_PAGE_SIZE-sizeof(PageHeader))/sizeof(NIns)];
         };
     };
-	typedef avmplus::List<Page*,avmplus::LIST_NonGCObjects>	AllocList;
+    struct AllocEntry : public GCObject
+    {
+        Page *page;
+        uint32_t allocSize;
+    };
+	typedef avmplus::List<AllocEntry*,avmplus::LIST_GCObjects>	AllocList;
 
 	typedef avmplus::GCSortedMap<const void*, uint32_t, avmplus::LIST_NonGCObjects> BlockSortedMap;
 	class BlockHist: public BlockSortedMap
@@ -88,7 +99,9 @@ namespace nanojit
 			AvmCore*	core();
 			Page*		pageAlloc();
 			void		pageFree(Page* page);
+			void		pagesRelease(PageList& list);
 			
+            Fragment*   getLoop(const void* ip);
             Fragment*   getAnchor(const void* ip);
 			void        clearFrags();	// clear all fragments from the cache
             Fragment*   getMerge(GuardRecord *lr, const void* ip);
@@ -96,7 +109,6 @@ namespace nanojit
             Fragment*   newFrag(const void* ip);
             Fragment*   newBranch(Fragment *from, const void* ip);
 
-            verbose_only ( uint32_t pageCount(); )
 			verbose_only ( void dumpStats(); )
 			verbose_only ( void dumpRatio(const char*, BlockHist*);)
 			verbose_only ( void dumpFragStats(Fragment*, int level, fragstats&); )
@@ -108,8 +120,7 @@ namespace nanojit
 			struct 
 			{
 				uint32_t	pages;					// pages consumed
-				uint32_t	freePages;				// how many pages not in use (<= pages)
-				uint32_t	maxPageUse;				// highwater mark of (poges-freePages)
+				uint32_t	maxPageUse;				// highwater mark of (pages-freePages)
 				uint32_t	flushes, ilsize, abcsize, compiles, totalCompiles;
 			}
 			_stats;
@@ -122,16 +133,16 @@ namespace nanojit
     		void	drawTrees(char *fileName);
             #endif
 			
-			uint32_t cacheUsed() const { return (_stats.pages-_stats.freePages)<<NJ_LOG2_PAGE_SIZE; }
+			uint32_t cacheUsed() const { return (_stats.pages-_freePages.size())<<NJ_LOG2_PAGE_SIZE; }
 			uint32_t cacheUsedMax() const { return (_stats.maxPageUse)<<NJ_LOG2_PAGE_SIZE; }
 		private:
 			void		pagesGrow(int32_t count);
-			void		trackFree(int32_t delta);
+			void		trackPages();
 
-			AvmCore*			_core;
-			DWB(Assembler*)		_assm;
-			DWB(FragmentMap*)	_frags;		/* map from ip -> Fragment ptr  */
-			Page*			_pageList;
+			AvmCore*		_core;
+			DWB(Assembler*)	_assm;
+			FragmentMap 	_frags;		/* map from ip -> Fragment ptr  */
+			PageList		_freePages;
 
 			/* unmanaged mem */
 			AllocList	_allocList;
@@ -180,6 +191,7 @@ namespace nanojit
 			void			releaseTreeMem(Fragmento* frago);
 			bool			isAnchor() { return anchor == this; }
 			bool			isRoot() { return root == this; }
+            void            onDestroy();
 			
 			verbose_only( uint32_t		_called; )
 			verbose_only( uint32_t		_native; )
@@ -192,6 +204,7 @@ namespace nanojit
 			verbose_only( DWB(Fragment*) eot_target; )
 			verbose_only( uint32_t		sid;)
 			verbose_only( uint32_t		compileNbr;)
+			verbose_only( DWB(BlockLocator*) cfg; )
 
             DWB(Fragment*) treeBranches;
             DWB(Fragment*) branches;
@@ -199,6 +212,8 @@ namespace nanojit
             DWB(Fragment*) anchor;
             DWB(Fragment*) root;
             DWB(Fragment*) parent;
+            DWB(Fragment*) first;
+            DWB(Fragment*) peer;
 			DWB(BlockHist*) mergeCounts;
             DWB(LirBuffer*) lirbuf;
 			LIns*			lastIns;

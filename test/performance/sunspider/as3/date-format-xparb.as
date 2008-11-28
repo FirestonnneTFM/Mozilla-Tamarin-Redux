@@ -23,7 +23,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 package {
-	var _sunSpiderStartDate:int = getTimer();
+	var _sunSpiderStartDate:Number = new Date();
 
 	/*
 	 * Copyright (C) 2004 Baron Schwartz <baron at sequent dot org>
@@ -444,7 +444,7 @@ package {
 	}
 
 
-	var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
+	var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
 
 	print("metric time " + _sunSpiderInterval);
 

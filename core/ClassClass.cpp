@@ -37,13 +37,10 @@
 
 
 #include "avmplus.h"
+#include "BuiltinNatives.h"
 
 namespace avmplus
 {
-	BEGIN_NATIVE_MAP(ClassClass)
-		NATIVE_METHOD(Class_prototype_get, ClassClosure::get_prototype)
-	END_NATIVE_MAP()
-
 	ClassClass::ClassClass(VTable* cvtable)
 		: ClassClosure(cvtable)
 	{
@@ -53,7 +50,7 @@ namespace avmplus
 		// bootstrapping
 		ivtable()->scope = cvtable->scope;
 
-		AvmAssert(traits()->sizeofInstance == sizeof(ClassClass));
+		AvmAssert(traits()->getSizeOfInstance() == sizeof(ClassClass));
 
 		createVanillaPrototype();
 	}

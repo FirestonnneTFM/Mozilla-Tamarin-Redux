@@ -67,7 +67,6 @@ namespace avmplus
 		DRCWB(ArrayClass*)     arrayClass;
 		DRCWB(BooleanClass*)   booleanClass;
 		DRCWB(ClassClass*)     classClass;
-		DateClass*           dateClass() { return (DateClass*)getBuiltinClass(avmplus::NativeID::abcclass_Date); }
 		DRCWB(FunctionClass*)  functionClass;		
 		DRCWB(MethodClosureClass*)  methodClosureClass;		
 		DRCWB(NamespaceClass*) namespaceClass;
@@ -80,27 +79,28 @@ namespace avmplus
 		DRCWB(UIntVectorClass*)   uintVectorClass;
 		DRCWB(ObjectVectorClass*)    objectVectorClass;
 		DRCWB(VectorClass*)    vectorClass;
-		RegExpClass*         regexpClass() { return (RegExpClass*)getBuiltinClass(avmplus::NativeID::abcclass_RegExp); }
 		DRCWB(StringClass*)    stringClass;
-		XMLClass*            xmlClass() { return (XMLClass*)getBuiltinClass(avmplus::NativeID::abcclass_XML); }
-		XMLListClass*        xmlListClass() { return (XMLListClass*)getBuiltinClass(avmplus::NativeID::abcclass_XMLList); }
-		QNameClass*          qnameClass() { return (QNameClass*)getBuiltinClass(avmplus::NativeID::abcclass_QName); }
 		/*@}*/
 
+		DateClass* dateClass();
+		RegExpClass* regexpClass();
+		XMLClass* xmlClass();
+		XMLListClass* xmlListClass();
+		QNameClass* qnameClass();
 		/**
 		 * @name Error Subclasses
 		 * These are subclasses of Error used in the VM.
 		 */
 		/*@{*/
-		ErrorClass *errorClass() const { return getErrorClass(avmplus::NativeID::abcclass_Error); }
-		ErrorClass *argumentErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ArgumentError); }
-		ErrorClass *evalErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_EvalError); }
-		ErrorClass *typeErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_TypeError); }
-		ErrorClass *rangeErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_RangeError); }
-		ErrorClass *uriErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_URIError); }
-		ErrorClass *referenceErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ReferenceError); }
-		ErrorClass *securityErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SecurityError); }
-		ErrorClass *verifyErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_VerifyError); }
+		ErrorClass* errorClass() const;
+		ErrorClass* argumentErrorClass() const;
+		ErrorClass* evalErrorClass() const;
+		ErrorClass* typeErrorClass() const;
+		ErrorClass* rangeErrorClass() const;
+		ErrorClass* uriErrorClass() const;
+		ErrorClass* referenceErrorClass() const;
+		ErrorClass* securityErrorClass() const;
+		ErrorClass* verifyErrorClass() const;
 		/*@}*/
 
 		void throwVerifyError(int id) const;
@@ -116,6 +116,7 @@ namespace avmplus
 		void throwTypeError(int id) const;
 		void throwTypeError(int id, Stringp arg1) const;
 		void throwTypeError(int id, Stringp arg1, Stringp arg2) const;
+		void throwTypeErrorWithName(int id, const char* namestr) const;
 
 		void throwError(int id) const;
 		void throwError(int id, Stringp arg1) const;
@@ -133,6 +134,9 @@ namespace avmplus
 
 		void throwReferenceError(int id, const Multiname* multiname, const Traits* traits) const;
 		void throwReferenceError(int id, const Multiname* multiname) const;
+
+		inline void throwReferenceError(int id, const Multiname& multiname, const Traits* traits) const { throwReferenceError(id, &multiname, traits); }
+		inline void throwReferenceError(int id, const Multiname& multiname) const { throwReferenceError(id, &multiname); }
 
 		DWB(VTable*) object_vtable; // instance vtable
 		DWB(VTable*) class_vtable; // instance vtable
@@ -188,7 +192,7 @@ namespace avmplus
 		/**
 		 * Implements the ToAttributeName API as specified in E4X 10.5.1, pg 37
 		 */
-		QNameObject* ToAttributeName (const Atom arg);
+		QNameObject* ToAttributeName (Atom arg);
 		QNameObject* ToAttributeName (const Stringp arg)
 		{
 			return ToAttributeName(arg->atom());
@@ -209,6 +213,14 @@ namespace avmplus
 		 */
 		Atom instanceof(Atom atom, Atom ctor);
 
+		/** returns the instance traits of the factorytype of the passed atom */
+		Traits* toClassITraits(Atom atom);
+
+		/**
+		 * operator in from ES3
+		 */
+		Atom in_operator(Atom name, Atom obj);
+		
 		/**
 		 * This is the implicit coercion operator.  It is kind of like a
 		 * Java downcast, but because of how E4 works, there are some cases
@@ -237,6 +249,27 @@ namespace avmplus
 		 * @param traits The traits of the object
 		 */
 		Atom getproperty(Atom obj, const Multiname* name, VTable* vtable);
+
+		/**
+		 * Determines if a specified object has a specified property
+		 * where the property is specified by a multiname.
+		 * @param obj Object on which to look for the property
+		 * @param multiname The name of the property
+		 * @param vtable The vtable of the object
+		 * @return	true if the object has a readable property with the
+					specified name, false otherwise.
+		 */
+		bool hasproperty(Atom obj, const Multiname* multiname, VTable* vtable);
+
+	    /**
+		 * Delete a specified property on a specified object,where the property is specified
+		 * by a multiname.
+		 * @param obj Object on which to look for the specified property.
+		 * @param multiname The name of the property
+		 * @param vtable The vtable of the object
+		 * @return	true if the property is deleted. false if the property cannot be deleted.
+		 */
+		bool deleteproperty( Atom obj, const Multiname* multiname, VTable* vtable ) const;
 
 	    void setproperty(Atom obj, const Multiname* multiname, Atom value, VTable* vtable) const;
 	    void setproperty_b(Atom obj, const Multiname* multiname, Atom value, VTable* vtable, Binding b) const;
@@ -308,8 +341,6 @@ namespace avmplus
 		// For E4X
 		bool isXMLName(Atom v);
 
-		DECLARE_NATIVE_SCRIPT(Toplevel)
-
         ClassClosure* getBuiltinClass(int class_id) const
         {
             return builtinClasses[class_id] ? builtinClasses[class_id] : const_cast<Toplevel*>(this)->resolveBuiltinClass(class_id);
@@ -320,6 +351,11 @@ namespace avmplus
 
 		// implementations supporting any of our extensions should override this
 		virtual ClassClosure *getBuiltinExtensionClass(int /*clsid*/) { return NULL; }
+
+		// subclasses can override this to check for security violations
+		// and prohibit certain operations. default implementation always
+		// allows but FlashPlayer takes advantage of this.
+		virtual bool sampler_trusted(ScriptObject* /*sampler*/) { return true; }
 
 	private:
 

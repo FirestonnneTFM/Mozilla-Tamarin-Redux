@@ -75,6 +75,8 @@ typedef caddr_t maddr_ptr;
 typedef void *maddr_ptr;
 #endif
 
+#include <fcntl.h>
+
 namespace MMgc
 {
 #ifndef USE_MMAP
@@ -284,6 +286,13 @@ namespace MMgc
 			                MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
 					-1, 0);
 		GCAssert(addr == address);
+		char* temp_addr = addr;
+		while( temp_addr < (addr+size))
+		{
+			// Touch each page
+			*temp_addr = 0;
+			temp_addr += GCHeap::kBlockSize;
+		}
 		return addr == address;
 	}
 
@@ -406,11 +415,109 @@ namespace MMgc
 #endif
 
 #ifdef MMGC_ARM
-	void GetStackTrace(sintptr *trace, int len, int skip) {}
+	void GetStackTrace(sintptr *trace, int len, int skip) {
+		(void) trace;
+		(void) len;
+		(void) skip;
+	}
 #endif
 
 #endif
+
+#define state_newline  1
+#define state_skipline  2
+#define state_P 3
+#define state_Pr 4
+#define state_Private 6
+#define state_size 7
 
 	/*static*/
-	size_t GCHeap::GetPrivateBytes() { return 0; } // TODO
+	size_t GCHeap::GetPrivateBytes() 
+	{
+#ifdef LINUX
+		uint32 pid = getpid();
+		char buff[32];
+		sprintf(buff, "/proc/%d/smaps", pid);
+		int smap_hndl = open(buff, O_RDONLY);
+		size_t priv_bytes = 0;
+		if( smap_hndl != -1 )
+		{
+			uint32 state = state_newline;
+			char size_buff[16];
+			uint32 size_idx = 0;
+			int read_size = 0;
+			while( (read_size = read(smap_hndl, buff, 32)) )
+			{
+				int i = 0;
+				while(i < read_size )
+				{
+					char c = buff[i++];
+					switch( state )
+					{
+					case state_newline:
+						if( c == 'P' )
+							state = state_P;
+						else
+							state = state_skipline;
+						break;
+
+					case state_skipline:
+						if( c == '\n' )
+							state = state_newline;
+						break;
+
+					case state_P:
+						if( c == 'r' )
+							state = state_Pr;
+						else
+							state = state_skipline;
+						break;
+
+					case state_Pr:
+						if( c == 'i' )  // Good enough, nothing else in smaps starts with Pr
+							state = state_Private;
+						else
+							state = state_skipline;
+						break;
+
+					case state_Private:
+						if ( c >= '0' && c <= '9' )
+						{
+							state = state_size;
+							size_buff[size_idx++] = c;
+						}
+						else if ( c == '\n')
+							state = state_newline;
+						break;
+
+					case state_size:
+						if( c >= '0' && c <= '9' )
+							size_buff[size_idx++] = c;
+						else
+						{
+							size_buff[size_idx] = 0;
+							size_idx = 0;
+							uint32 size = atoi(size_buff)*1024;
+							uint32 blocks = size/GCHeap::kBlockSize;
+							if( size % GCHeap::kBlockSize != 0 )
+								++blocks;
+							priv_bytes += blocks;
+							
+							if ( c == '\n' )
+								state = state_newline;
+							else
+								state = state_skipline;
+						}
+						break;
+					}
+				}
+			} 
+			close(smap_hndl);
+		}
+	//	return 0;
+	return priv_bytes; 
+#else
+	return 0;
+#endif
+	}
 }

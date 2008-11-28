@@ -74,7 +74,7 @@ namespace MMgc
 			if ( ( m_iCount + 1 ) > m_iAllocSize ) 
 			{
 				// need to allocate a new block first
-				m_iAllocSize = m_iAllocSize ? m_iAllocSize*2 : kDefSize;
+				m_iAllocSize = m_iAllocSize ? m_iAllocSize*2 : (unsigned int)kDefSize;
 				Alloc();
 			}
 
@@ -85,7 +85,6 @@ namespace MMgc
 		{
 			T t = m_items[--m_iCount];
 #ifdef _DEBUG
-			GCAssert(m_iCount>=0);
 			memset(&m_items[m_iCount], 0, sizeof(T));
 #endif
 			return t;

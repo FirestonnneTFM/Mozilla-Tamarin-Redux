@@ -161,6 +161,7 @@ namespace MMgc
 		 *             a call to Alloc.
 		 */
 		void Free(void *item);
+		void Free(void *item, size_t /*ignore*/) { Free(item); }
 
 		size_t Size(const void *item);
 

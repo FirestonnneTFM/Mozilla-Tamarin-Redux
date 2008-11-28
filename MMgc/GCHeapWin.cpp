@@ -44,6 +44,7 @@
 #ifdef MEMORY_INFO
 #include <malloc.h>
 #include <strsafe.h>
+#include <shlwapi.h>
 #ifndef UNDER_CE
 #include <DbgHelp.h>
 #endif
@@ -603,11 +604,11 @@ namespace MMgc
 		while(fileName > line.FileName && *fileName != '\\')
 			fileName--;
 		fileName++;
-		StringCchPrintfA(buff, buffSize, "%s:%d", fileName, line.LineNumber);
+		wnsprintfA(buff, buffSize, "%s:%d", fileName, line.LineNumber);
 		return;
 
 nosym:	
-		StringCchPrintfA(buff, buffSize, "0x%x", pc);
+		wnsprintfA(buff, buffSize, "0x%x", pc);
 	}
 #endif // MEMORY_INFO
 

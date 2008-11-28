@@ -42,54 +42,15 @@
 
 namespace avmshell
 {
-	BEGIN_NATIVE_MAP(ByteArrayClass)
-		NATIVE_METHOD(flash_utils_ByteArray_toString,          ByteArrayObject::_toString)
-		NATIVE_METHOD(flash_utils_ByteArray_length_get,        ByteArrayObject::get_length)
-		NATIVE_METHOD(flash_utils_ByteArray_length_set,        ByteArrayObject::set_length)
-
-		NATIVE_METHOD(flash_utils_ByteArray_readBytes,         ByteArrayObject::readBytes)
-		NATIVE_METHOD(flash_utils_ByteArray_writeBytes,        ByteArrayObject::writeBytes)
-
-		NATIVE_METHOD(flash_utils_ByteArray_writeBoolean,      ByteArrayObject::writeBoolean)
-		NATIVE_METHOD(flash_utils_ByteArray_writeByte,         ByteArrayObject::writeByte)
-		NATIVE_METHOD(flash_utils_ByteArray_writeShort,        ByteArrayObject::writeShort)
-		NATIVE_METHOD(flash_utils_ByteArray_writeInt,          ByteArrayObject::writeInt)
-		NATIVE_METHOD(flash_utils_ByteArray_writeUnsignedInt,  ByteArrayObject::writeUnsignedInt)		
-		NATIVE_METHOD(flash_utils_ByteArray_writeFloat,        ByteArrayObject::writeFloat)
-		NATIVE_METHOD(flash_utils_ByteArray_writeDouble,       ByteArrayObject::writeDouble)
-		NATIVE_METHOD(flash_utils_ByteArray_writeUTF,          ByteArrayObject::writeUTF)
-		NATIVE_METHOD(flash_utils_ByteArray_writeUTFBytes,     ByteArrayObject::writeUTFBytes)		
-	
-		NATIVE_METHOD(flash_utils_ByteArray_readBoolean,       ByteArrayObject::readBoolean)
-		NATIVE_METHOD(flash_utils_ByteArray_readByte,          ByteArrayObject::readByte)
-		NATIVE_METHOD(flash_utils_ByteArray_readUnsignedByte,  ByteArrayObject::readUnsignedByte)
-		NATIVE_METHOD(flash_utils_ByteArray_readShort,         ByteArrayObject::readShort)
-		NATIVE_METHOD(flash_utils_ByteArray_readUnsignedShort, ByteArrayObject::readUnsignedShort)
-		NATIVE_METHOD(flash_utils_ByteArray_readInt,           ByteArrayObject::readInt)
-		NATIVE_METHOD(flash_utils_ByteArray_readUnsignedInt,   ByteArrayObject::readUnsignedInt)		
-		NATIVE_METHOD(flash_utils_ByteArray_readFloat,         ByteArrayObject::readFloat)
-		NATIVE_METHOD(flash_utils_ByteArray_readDouble,        ByteArrayObject::readDouble)
-		NATIVE_METHOD(flash_utils_ByteArray_readUTF,           ByteArrayObject::readUTF)
-		NATIVE_METHOD(flash_utils_ByteArray_readUTFBytes,      ByteArrayObject::readUTFBytes)		
-		
-		NATIVE_METHOD(flash_utils_ByteArray_bytesAvailable_get,         ByteArrayObject::available)
-		NATIVE_METHOD(flash_utils_ByteArray_position_get,    ByteArrayObject::getFilePointer)
-		NATIVE_METHOD(flash_utils_ByteArray_position_set,              ByteArrayObject::seek)
-		NATIVE_METHOD(flash_utils_ByteArray_compress,          ByteArrayObject::zlib_compress)
-		NATIVE_METHOD(flash_utils_ByteArray_uncompress,        ByteArrayObject::zlib_uncompress)
-		NATIVE_METHOD(flash_utils_ByteArray_endian_get,    ByteArrayObject::get_endian)
-		NATIVE_METHOD(flash_utils_ByteArray_endian_set,              ByteArrayObject::set_endian)
-		NATIVE_METHOD(flash_utils_ByteArray_writeFile,	ByteArrayObject::writeFile)
-
-		NATIVE_METHOD(flash_utils_ByteArray_readFile, ByteArrayClass::readFile)
-	END_NATIVE_MAP()
-		
 	//
 	// ByteArray
 	//
 	
 	ByteArray::ByteArray()
 	{
+#ifdef AVMPLUS_MOPS
+		m_subscriberRoot = NULL;
+#endif
 		m_capacity = 0;
 		m_length   = 0;
 		m_array    = NULL;
@@ -97,6 +58,9 @@ namespace avmshell
 
 	ByteArray::ByteArray(const ByteArray &lhs)
 	{
+#ifdef AVMPLUS_MOPS
+		m_subscriberRoot = NULL;
+#endif
 		m_array    = new U8[lhs.m_length];
 		if (!m_array)
 		{
@@ -112,6 +76,9 @@ namespace avmshell
 
 	ByteArray::~ByteArray()
 	{
+#ifdef AVMPLUS_MOPS
+		m_subscriberRoot = NULL;
+#endif
 		if (m_array)
 		{
 			delete [] m_array;
@@ -153,6 +120,9 @@ namespace avmshell
 			memset(newArray+m_length, 0, newCapacity-m_capacity);
 			m_array = newArray;
 			m_capacity = newCapacity;
+#ifdef AVMPLUS_MOPS
+			NotifySubscribers();
+#endif
 		}
 		return true;
 	}
@@ -172,6 +142,9 @@ namespace avmshell
 		{
 			Grow(index+1);
 			m_length = index+1;
+#ifdef AVMPLUS_MOPS
+			NotifySubscribers();
+#endif
 		}
 		return m_array[index];
 	}
@@ -183,6 +156,9 @@ namespace avmshell
 			Grow(m_length + 1);
 		}
 		m_array[m_length++] = value;
+#ifdef AVMPLUS_MOPS
+		NotifySubscribers();
+#endif
 	}
 		
 	void ByteArray::Push(const U8 *data, uint32 count)
@@ -190,10 +166,17 @@ namespace avmshell
 		Grow(m_length + count);
 		memcpy(m_array + m_length, data, count);
 		m_length += count;
+#ifdef AVMPLUS_MOPS
+		NotifySubscribers();
+#endif
 	}
 	
 	void ByteArray::SetLength(uint32 newLength)
 	{
+#ifdef AVMPLUS_MOPS
+ 		if(m_subscriberRoot && m_length < Domain::GLOBAL_MEMORY_MIN_SIZE)
+ 			ThrowMemoryError();
+#endif
 		if (newLength > m_capacity)
 		{
 			if (!Grow(newLength))
@@ -203,7 +186,70 @@ namespace avmshell
 			}
 		}
 		m_length = newLength;
+#ifdef AVMPLUS_MOPS
+		NotifySubscribers();
+#endif
 	}
+
+#ifdef AVMPLUS_MOPS
+ 	void ByteArray::NotifySubscribers()
+ 	{
+ 		SubscriberLink *curLink = m_subscriberRoot;
+ 		SubscriberLink **prevNext = &m_subscriberRoot;
+ 
+ 		while(curLink != NULL) // notify subscribers
+ 		{
+ 			AvmAssert(m_length >= Domain::GLOBAL_MEMORY_MIN_SIZE);
+ 
+ 			Domain *dom = (Domain *)curLink->weakDomain->get();
+ 
+ 			if(dom)
+ 			{
+ 				(dom->*(curLink->notify))(m_array, m_length);
+ 				prevNext = &curLink->next;
+ 			}
+ 			else
+ 				// Domain went away? remove link
+ 				MMgc::GC::WriteBarrier(prevNext, curLink->next);
+ 			curLink = curLink->next;
+ 		}
+ 	}
+ 
+ 	bool ByteArray::GlobalMemorySubscribe(const Domain *subscriber, GlobalMemoryNotifyFunc notify)
+ 	{
+ 		if(m_length >= Domain::GLOBAL_MEMORY_MIN_SIZE)
+ 		{
+ 			GlobalMemoryUnsubscribe(subscriber);
+			SubscriberLink *newLink = new (MMgc::GC::GetGC(subscriber)) SubscriberLink;
+ 			newLink->weakDomain = subscriber->GetWeakRef();
+ 			newLink->notify = notify;
+ 			MMgc::GC::WriteBarrier(&newLink->next, m_subscriberRoot);
+ 			MMgc::GC::WriteBarrier(&m_subscriberRoot, newLink);
+ 			// notify the new "subscriber" of the current state of the world
+ 			(subscriber->*notify)(m_array, m_length);
+ 			return true;
+ 		}
+ 		return false;
+ 	}
+ 
+ 	bool ByteArray::GlobalMemoryUnsubscribe(const Domain *subscriber)
+ 	{
+ 		SubscriberLink **prevNext = &m_subscriberRoot;
+ 		SubscriberLink *curLink = m_subscriberRoot;
+ 
+ 		while(curLink)
+ 		{
+ 			if(curLink->weakDomain->get() == (MMgc::GCObject *)subscriber)
+ 			{
+ 				MMgc::GC::WriteBarrier(prevNext, curLink->next);
+ 				return true;
+ 			}
+ 			prevNext = &curLink->next;
+ 			curLink = curLink->next;
+ 		}
+ 		return false;
+	}
+ #endif
 
 	//
 	// ByteArrayFile
@@ -327,17 +373,17 @@ namespace avmshell
 		setLength(value);
 	}
 
-	int ByteArrayObject::getFilePointer()
+	int ByteArrayObject::get_position()
 	{
 		return m_byteArray.GetFilePointer();
 	}
 
-	int ByteArrayObject::available()
+	int ByteArrayObject::get_bytesAvailable()
 	{
 		return m_byteArray.Available();
 	}
 	
-	void ByteArrayObject::seek(int offset)
+	void ByteArrayObject::set_position(int offset)
 	{
 		if (offset >= 0) {
 			m_byteArray.Seek(offset);
@@ -600,6 +646,18 @@ namespace avmshell
 		m_byteArray.Write(b, len);
 	}
 	
+#ifdef AVMPLUS_MOPS
+ 	bool ByteArrayObject::globalMemorySubscribe(const Domain *subscriber, ByteArray::GlobalMemoryNotifyFunc notify)
+ 	{
+ 		return m_byteArray.GlobalMemorySubscribe(subscriber, notify);
+ 	}
+ 
+ 	bool ByteArrayObject::globalMemoryUnsubscribe(const Domain *subscriber)
+ 	{
+ 		return m_byteArray.GlobalMemoryUnsubscribe(subscriber);
+ 	}
+#endif
+
 	//
 	// ByteArrayClass
 	//
@@ -703,6 +761,53 @@ namespace avmshell
 		fclose(fp);
 	}
 
+
 }	
+
+#ifdef AVMPLUS_MOPS
+namespace avmplus {
+ 	// memory object glue
+ 	bool Domain::isMemoryObject(Traits *t) const
+ 	{
+		Traits *cur = t;
+
+		// walk the traits to find a builtin pool
+		while(cur && !cur->pool->isBuiltin)
+			cur = cur->base;
+
+		// have a traits with a builtin pool
+		if(cur)
+		{
+			Stringp uri = core->constantString("flash.utils");
+			Namespace* ns = core->internNamespace(core->newNamespace(uri));
+			// try to get traits from flash.utils.ByteArray
+			Traits *baTraits = cur->pool->getTraits(core->constantString("ByteArray"), ns);
+			// and see if the original traits contains it!
+			return t->containsInterface(baTraits) != 0;
+		}
+		return false;
+ 	}
+ 
+ 	bool Domain::globalMemorySubscribe(ScriptObject *mem) const
+ 	{
+		if(isMemoryObject(mem->traits()))
+		{
+			avmshell::ByteArray::GlobalMemoryNotifyFunc notify = &Domain::notifyGlobalMemoryChanged;
+ 			return ((avmshell::ByteArrayObject *)mem)->globalMemorySubscribe(this, notify);
+		}
+		return false;
+ 	}
+ 
+ 	bool Domain::globalMemoryUnsubscribe(ScriptObject *mem) const
+ 	{
+		if(isMemoryObject(mem->traits()))
+		{
+	 		return ((avmshell::ByteArrayObject *)mem)->globalMemoryUnsubscribe(this);
+		}
+		return false;
+ 	}
+#endif
+}	
+
 
 

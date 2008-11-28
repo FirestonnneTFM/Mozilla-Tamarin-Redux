@@ -1,4 +1,4 @@
-/* -*- java-mode -*- */
+/* -*- mode: java -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -16,7 +16,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -39,9 +39,11 @@
 /* Usage: 
 
    Run this from the core/ directory, the program needs to know where
-   to find opcodes.tbl and there's no parameter to specify it.
-   Normally you want the output to be "peephole.icc", which is
-   included into Translator.cpp.
+   to find wopcodes.cpp and there's no parameter to specify it.
+   Normally you want the input to be "peephole.tbl" and the output to 
+   be "peephole.cpp":
+   
+     avmshell peephole.abc -- peephole.tbl peephole.cpp
  */
 
 /* Generate peephole optimization state tables from a description.
@@ -171,103 +173,10 @@ package peephole
 	}
     }
 
-    // FIXME: these should be read with the other opcodes, but their
-    // encodings are currently ad-hoc.  See core/Interpreter.h.
-    //
-    // readOpcodes fleshes out this table.
+    // readOpcodes() fleshes out these tables.
 
-    const opcode = { OP_ext_pushbits:        (1 + 256),
-		     OP_ext_push_doublebits: (2 + 256),
-		     OP_ext_get2locals:      (3 + 256),
-		     OP_ext_get3locals:      (4 + 256),
-		     OP_ext_get4locals:      (5 + 256),
-		     OP_ext_get5locals:      (6 + 256),
-		     OP_ext_storelocal:      (7 + 256),
-		     OP_ext_add_ll:          (8 + 256),
-		     OP_ext_add_set_lll:     (9 + 256),
-		     OP_ext_subtract_ll:     (10 + 256),
-		     OP_ext_multiply_ll:     (11 + 256),
-		     OP_ext_divide_ll:       (12 + 256),
-		     OP_ext_modulo_ll:       (13 + 256),
-		     OP_ext_bitand_ll:       (14 + 256),
-		     OP_ext_bitor_ll:        (15 + 256),
-		     OP_ext_bitxor_ll:       (16 + 256),
-		     OP_ext_add_lb:          (17 + 256),
-		     OP_ext_subtract_lb:     (18 + 256),
-		     OP_ext_multiply_lb:     (19 + 256),
-		     OP_ext_divide_lb:       (20 + 256),
-		     OP_ext_bitand_lb:       (21 + 256),
-		     OP_ext_bitor_lb:        (22 + 256),
-		     OP_ext_bitxor_lb:       (23 + 256),
-		     OP_ext_iflt_ll:         (24 + 256),
-		     OP_ext_ifnlt_ll:        (25 + 256),
-		     OP_ext_ifle_ll:         (26 + 256),
-		     OP_ext_ifnle_ll:        (27 + 256),
-		     OP_ext_ifgt_ll:         (28 + 256),
-		     OP_ext_ifngt_ll:        (29 + 256),
-		     OP_ext_ifge_ll:         (30 + 256),
-		     OP_ext_ifnge_ll:        (31 + 256),
-		     OP_ext_ifeq_ll:         (32 + 256),
-		     OP_ext_ifne_ll:         (33 + 256),
-		     OP_ext_ifstricteq_ll:   (34 + 256),
-		     OP_ext_ifstrictne_ll:   (35 + 256),
-		     OP_ext_iflt_lb:         (36 + 256),
-		     OP_ext_ifnlt_lb:        (37 + 256),
-		     OP_ext_ifle_lb:         (38 + 256),
-		     OP_ext_ifnle_lb:        (39 + 256),
-		     OP_ext_ifgt_lb:         (40 + 256),
-		     OP_ext_ifngt_lb:        (41 + 256),
-		     OP_ext_ifge_lb:         (42 + 256),
-		     OP_ext_ifnge_lb:        (43 + 256),
-		     OP_ext_ifeq_lb:         (44 + 256),
-		     OP_ext_ifne_lb:         (45 + 256),
-		     OP_ext_ifstricteq_lb:   (46 + 256),
-		     OP_ext_ifstrictne_lb:   (47 + 256),
-		     OP_ext_swap_pop:        (48 + 256),
-		     OP_ext_findpropglobal:  (49 + 256),
-		     OP_ext_findpropglobalstrict:  (50 + 256), };
-
-    const jump_opcodes = 
-	{ OP_jump:               true,
-	  OP_iftrue:             true,
-	  OP_iffalse:            true,
-	  OP_iflt:               true,
-	  OP_ifnlt:              true,
-	  OP_ifle:               true,
-	  OP_ifnle:              true,
-	  OP_ifgt:               true,
-	  OP_ifngt:              true,
-	  OP_ifge:               true,
-	  OP_ifnge:              true,
-	  OP_ifeq:               true,
-	  OP_ifne:               true,
-	  OP_ifstricteq:          true,
-	  OP_ifstrictne:          true,
-	  OP_ext_iflt_ll:         true,
-	  OP_ext_ifnlt_ll:        true,
-	  OP_ext_ifle_ll:         true,
-	  OP_ext_ifnle_ll:        true,
-	  OP_ext_ifgt_ll:         true,
-	  OP_ext_ifngt_ll:        true,
-	  OP_ext_ifge_ll:         true,
-	  OP_ext_ifnge_ll:        true,
-	  OP_ext_ifeq_ll:         true,
-	  OP_ext_ifne_ll:         true,
-	  OP_ext_ifstricteq_ll:   true,
-	  OP_ext_ifstrictne_ll:   true,
-	  OP_ext_iflt_lb:         true,
-	  OP_ext_ifnlt_lb:        true,
-	  OP_ext_ifle_lb:         true,
-	  OP_ext_ifnle_lb:        true,
-	  OP_ext_ifgt_lb:         true,
-	  OP_ext_ifngt_lb:        true,
-	  OP_ext_ifge_lb:         true,
-	  OP_ext_ifnge_lb:        true,
-	  OP_ext_ifeq_lb:         true,
-	  OP_ext_ifne_lb:         true,
-	  OP_ext_ifstricteq_lb:   true,
-	  OP_ext_ifstrictne_lb:   true };
-
+    const opcode = {};
+    const jump_opcodes = {};
     const MAXINSTR = 350; // last opcode in table above plus one would be adequate
 
     const opname = new Vector.<String>(MAXINSTR, true);
@@ -282,18 +191,37 @@ package peephole
     var longest = 0;
 
     function readOpcodes() {
-	File.read("opcodes.tbl").
+	var state = 0;
+	var i = 0;
+	File.read("wopcodes.cpp").
 	    split("\n").
-	    filter(function (elt) { return !(/^\s*$/.test(elt) || /^\s*\/\//.test(elt)) }).
-	    forEach(function (elt) { 
-		        var xs=elt.split(/\s+/); 
-			if (!(xs[0].match(/^OP_0x/)))
-			    opcode[xs[0]] = parseInt(xs[2]); 
-		    });
-	for ( var n in opcode ) {
-	    opname[opcode[n]] = n;
-	    longest = Math.max(longest, n.length);
-	}
+	    filter(function (l) { 
+		    var r = state == 1;
+		    if (state == 0 && l.match(/^\s*\/\/\s*BEGIN\s*$/))
+			state = 1;
+		    else if (state == 1 && l.match(/^\s*\/\/\s*END\s*$/))
+			state = 2;
+		    if (r && l.match(/^\s*\/\//))
+			r = false;
+		    if (r && l.match(/^\s*$/))
+			r = false;
+		    return r;
+		}).
+	    forEach(function (l) {
+		     // The format of a line is { num, ... N("name") }
+		     // We only care about the second number (the "jumps" attribute) and the
+		     // name for the time being.
+		     var r = (/^\s*\{\s*([0-9]+)\s*,\s*([0-9]+)[^N]+N\(\"([^\"]+)\"\)/.exec(l));
+		     assert(r != null);
+		     if (!(r[3].match(/^0x/))) {
+			 opcode[r[3]] = i;
+			 opname[i] = r[3];
+			 longest = Math.max(longest, r[3].length);
+			 if (parseInt(r[2]) != 0)
+			     jump_opcodes[r[3]] = true;
+		     }
+		     i++;
+		 });
     }
 
     function preprocess(lines) {
@@ -463,6 +391,8 @@ package peephole
 	var trans = new Vector.<Array>;
 	for ( var i=0 ; i < node.children.length ; i++ ) {
 	    var ci = node.children[i];
+	    if (!(ci.instr in opcode))
+		print(ci.instr);
 	    assert(ci.instr in opcode);
 	    trans.push([opcode[ci.instr], expand(ci, depth+1, state, documentation + " " + ci.instr)]);
 	}
@@ -478,7 +408,7 @@ package peephole
 
     function formatStates() {
 	var s = [];
-	s.push("Translator::peep_state_t Translator::states[] = {");
+	s.push("const WordcodeEmitter::peep_state_t WordcodeEmitter::states[] = {");
 	s.push("//n  s  t  g  f");
 	s.push("{ 0, 0, 0, 0, 0 }, // Invalid");
 	for ( var i=0 ; i < states.length ; i++ ) {
@@ -502,10 +432,10 @@ package peephole
 
     function formatTransitions() {
 	var s = [];
-	s.push("Translator::peep_transition_t Translator::transitions[] = {");
+	s.push("const WordcodeEmitter::peep_transition_t WordcodeEmitter::transitions[] = {");
 	for ( var i=0 ; i < transitions.length ; i++ ) {
 	    assert(transitions[i][1] < 65536);
-	    s.push("{ " + opname[transitions[i][0]] + ", " + transitions[i][1] + " }," + (i > 0 && i % 10 == 0 ? " // " + i : ""));
+	    s.push("{ WOP_" + opname[transitions[i][0]] + ", " + transitions[i][1] + " }," + (i > 0 && i % 10 == 0 ? " // " + i : ""));
 	}
 	s.push("};");
 	return s.join("\n");
@@ -520,7 +450,7 @@ package peephole
 
     function formatToplevel() {
 	var s = [];
-	s.push("uint16 Translator::toplevel[] = {");
+	s.push("const uint16 WordcodeEmitter::toplevel[] = {");
 	var i=0;
 	while (i < MAXINSTR) {
 	    var t = "";
@@ -544,7 +474,7 @@ package peephole
 	    for ( var i=0 ; i < P.length ; i++ ) {
 		if (i > 0)
 		    s += " && ";
-		s += "I[" + i + "][0] == NEW_OPCODE(" + P[i] + ")";
+		s += "I[" + i + "][0] == NEW_OPCODE(WOP_" + P[i] + ")";
 	    }
 	    return "        AvmAssert(" + s + ");";
 	}
@@ -557,8 +487,8 @@ package peephole
 		undo = true;
 		s.push("            undoRelativeOffsetInJump();");
 	    }
-	    s.push("            S[0] = " + A.A[0] + ";");
-	    s.push("            R[0] = NEW_OPCODE(" + A.A[0] + ");");
+	    s.push("            S[0] = WOP_" + A.A[0] + ";");
+	    s.push("            R[0] = NEW_OPCODE(WOP_" + A.A[0] + ");");
 	    for ( var j=1 ; j < A.A.length ; j++ )
 		s.push("            R[" + j + "] = " + A.A[j] + ";");
 	    s.push("            return replace(" + A.P.length + "," + A.A.length + (undo ? ",true" : "") + ");");
@@ -567,7 +497,7 @@ package peephole
 	}
 
 	var s = [];
-	s.push("bool Translator::commit(uint32 action)");
+	s.push("bool WordcodeEmitter::commit(uint32 action)");
 	s.push("{");
 	s.push("    switch (action) {");
 	for ( var i=0 ; i < actions.length ; i++ ) {
@@ -593,13 +523,49 @@ package peephole
     }
 
     if (System.argv.length != 2) {
-        print("Usage: peephole inputfile outputfile");
+        print("Usage: peephole.abc -- inputfile outputfile");
         System.exit(1);
     }
 
     readOpcodes();
     generate(buildTrie(parse(preprocess(File.read(System.argv[0]).split("\n")))));
     File.write(System.argv[1],
+	       "/* ***** BEGIN LICENSE BLOCK *****\n" +
+	       " * Version: MPL 1.1/GPL 2.0/LGPL 2.1\n" +
+	       " *\n" +
+	       " * The contents of this file are subject to the Mozilla Public License Version\n" +
+	       " * 1.1 (the \"License\"); you may not use this file except in compliance with\n" +
+	       " * the License. You may obtain a copy of the License at\n" +
+	       " * http://www.mozilla.org/MPL/\n" +
+	       " *\n" +
+	       " * Software distributed under the License is distributed on an \"AS IS\" basis,\n" +
+	       " * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License\n" +
+	       " * for the specific language governing rights and limitations under the\n" +
+	       " * License.\n" +
+	       " *\n" +
+	       " * The Original Code is [Open Source Virtual Machine.].\n" +
+	       " *\n" +
+	       " * The Initial Developer of the Original Code is\n" +
+	       " * Adobe System Incorporated.\n" +
+	       " * Portions created by the Initial Developer are Copyright (C) 2008\n" +
+	       " * the Initial Developer. All Rights Reserved.\n" +
+	       " *\n" +
+	       " * Contributor(s):\n" +
+	       " *   Adobe AS3 Team\n" +
+	       " *\n" +
+	       " * Alternatively, the contents of this file may be used under the terms of\n" +
+	       " * either the GNU General Public License Version 2 or later (the \"GPL\"), or\n" +
+	       " * the GNU Lesser General Public License Version 2.1 or later (the \"LGPL\"),\n" +
+	       " * in which case the provisions of the GPL or the LGPL are applicable instead\n" +
+	       " * of those above. If you wish to allow use of your version of this file only\n" +
+	       " * under the terms of either the GPL or the LGPL, and not to allow others to\n" +
+	       " * use your version of this file under the terms of the MPL, indicate your\n" +
+	       " * decision by deleting the provisions above and replace them with the notice\n" +
+	       " * and other provisions required by the GPL or the LGPL. If you do not delete\n" +
+	       " * the provisions above, a recipient may use your version of this file under\n" +
+	       " * the terms of any one of the MPL, the GPL or the LGPL.\n" +
+	       " *\n" +
+	       " * ***** END LICENSE BLOCK ***** */\n\n" +
 	       "// Generated by utils/peephole.as\n\n" +
 	       "#include \"avmplus.h\"\n\n" +
 	       "namespace avmplus\n" +

@@ -40,9 +40,7 @@
 #ifndef __GCTypes__
 #define __GCTypes__
 
-#ifdef _MAC
-#include <stdint.h>
-#endif
+#include "mmgc_stdint.h"
 
 #ifdef __SYMBIAN32__
 #include <stddef.h>
@@ -75,43 +73,22 @@
 
 namespace MMgc
 {
-	#ifdef _MSC_VER
-	typedef __int64          int64;
-	typedef __int64          sint64;
-	typedef unsigned __int64 uint64;
-	#elif defined(_MAC)
-	typedef int64_t          int64;
-	typedef int64_t          sint64;
-	typedef uint64_t         uint64;
-	#else
-	typedef long long          int64;
-	typedef long long          sint64;
-	typedef unsigned long long         uint64;
-	#endif
+	// legacy types
+	typedef int64_t		int64;
+	typedef int64_t		sint64;
+	typedef uint64_t	uint64;
 
-	typedef unsigned int  uint32;
-	typedef signed   int  int32;
+	typedef uint32_t	uint32;
+	typedef int32_t		int32;
 	
-	typedef unsigned short uint16;
-	typedef signed   short int16;
+	typedef uint16_t	uint16;
+	typedef int16_t		int16;
 	
-	typedef unsigned char  uint8;
-	typedef signed   char  int8;
+	typedef uint8_t		uint8;
+	typedef int8_t		int8;
 
-	// math friendly pointer (64 bits in LP 64 systems)
-	#if defined (_MSC_VER) && (_MSC_VER >= 1300)
-	    #define MMGC_TYPE_IS_POINTER_SIZED __w64
-	#else
-	    #define MMGC_TYPE_IS_POINTER_SIZED
-	#endif	
-	
-	#ifdef MMGC_64BIT
-	typedef MMGC_TYPE_IS_POINTER_SIZED uint64 uintptr;
-	typedef MMGC_TYPE_IS_POINTER_SIZED int64 sintptr;
-	#else
-	typedef MMGC_TYPE_IS_POINTER_SIZED uint32 uintptr;
-	typedef MMGC_TYPE_IS_POINTER_SIZED int32 sintptr;
-	#endif
+	typedef uintptr_t	uintptr;
+	typedef intptr_t	sintptr;
 
 	/* wchar is our version of wchar_t, since wchar_t is different sizes
 	   on different platforms, but we want to use UTF-16 uniformly. */

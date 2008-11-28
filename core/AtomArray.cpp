@@ -240,7 +240,6 @@ namespace avmplus
 	void AtomArray::removeAt (uint32 index)
 	{
 		AvmAssert (m_length > 0);
-		AvmAssert (index >= 0);
 		AvmAssert (index < uint32(m_length));
 		if (!m_length)
 			return;

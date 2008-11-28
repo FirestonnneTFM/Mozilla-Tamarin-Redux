@@ -41,22 +41,6 @@
 namespace avmplus
 {
 
-#define DECLARE_NATIVE_SCRIPTS() static const NativeScriptInfo scriptEntries[];
-
-#define BEGIN_NATIVE_SCRIPTS(_Class) /*static*/ const  NativeScriptInfo _Class::scriptEntries[] = {
-
-#define NATIVE_SCRIPT(script_id, _Script) { (NativeScriptInfo::Handler)_Script::createGlobalObject, _Script::natives, script_id, sizeof(_Script) },
-
-#define END_NATIVE_SCRIPTS() { NULL, NULL, -1, 0 } };
-
-#define DECLARE_NATIVE_CLASSES() static const NativeClassInfo classEntries[];
-
-#define BEGIN_NATIVE_CLASSES(_Class) /*static*/ const NativeClassInfo _Class::classEntries[] = {
-
-#define NATIVE_CLASS(class_id, _Class, _Instance) { (NativeClassInfo::Handler)_Class::createClassClosure, _Class::natives, avmplus::NativeID::class_id, sizeof(_Class), sizeof(_Instance) },
-
-#define END_NATIVE_CLASSES() { NULL, NULL, -1, 0, 0 } };
-
 #define OBJECT_TYPE		(core->traits.object_itraits)
 #define CLASS_TYPE		(core->traits.class_itraits)
 #define FUNCTION_TYPE	(core->traits.function_itraits)
@@ -76,6 +60,8 @@ namespace avmplus
 
 const int kBufferPadding = 16;
 
+	enum Runmode { RM_mixed, RM_jit_all, RM_interp_all };
+
 	struct Config
 	{
 		#ifdef AVMPLUS_VERBOSE
@@ -89,29 +75,11 @@ const int kBufferPadding = 16;
 		bool verbose_addrs;
 		#endif /* AVMPLUS_VERBOSE */
 
-		/**
-		 * The turbo switch determines how bytecode is executed.
-		 * When turbo is true, bytecode is translated to native code.
-		 * When turbo is false, the gallop() interpreter loop is used.
-		 * turbo defaults to true except on platforms where it is
-		 * not supported, and except when debugging is in progress.
-		 * 
-		 * Turbo is a debugger-only option.  release builds always
-		 * have it turned on.  This means we can only build release
-		 * builds on supported platforms.
-		 */
-		bool turbo;
-
 		#ifdef AVMPLUS_MIR
 		bool dceopt;
-		/**
-		 * Genearate a graph for the basic blocks.  Can be used by
-		 * 'dot' utility to generate a jpg.
-		 */
-		#ifdef AVMPLUS_VERBOSE
-		bool bbgraph;
-		#endif //AVMPLUS_VERBOSE
         #endif
+
+		enum Runmode runmode;
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		/**
@@ -122,12 +90,20 @@ const int kBufferPadding = 16;
 		 * jit switch forces all code to run through MIR/LIR
 		 * instead of interpreter.
 		 */
-		bool jit;
 		bool cseopt;
 
         #if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 		bool sse2;
+		bool use_cmov;
 		#endif
+
+		#ifdef AVMPLUS_VERBOSE
+		/**
+		 * Genearate a graph for the basic blocks.  Can be used by
+		 * 'dot' utility to generate a jpg.
+		 */
+		bool bbgraph;
+		#endif //AVMPLUS_VERBOSE
 
         #endif // AVMPLUS_MIR || FEATURE_NANOJIT
 
@@ -193,6 +169,12 @@ const int kBufferPadding = 16;
 		Debugger *debugger;
 		Profiler *profiler;
 		#endif
+#ifdef AVMPLUS_VERIFYALL
+        List<AbstractFunction*, LIST_GCObjects> verifyQueue;
+		void enq(AbstractFunction* f);
+		void enq(Traits* t);
+		void processVerifyQueue(Toplevel* toplevel);
+#endif
 
 		void branchCheck(MethodEnv *env, bool interruptable, int go)
 		{
@@ -206,6 +188,24 @@ const int kBufferPadding = 16;
 			}
 		}
 
+	private:
+		QCache*			m_tbCache;
+		QCache*			m_tmCache;
+	public:
+		inline QCache* tbCache() { return m_tbCache; }
+		inline QCache* tmCache() { return m_tmCache; }
+		struct CacheSizes
+		{
+			uint16_t bindings;	// default to 0 == unlimited
+			uint16_t metadata;	// default to 1
+			
+			inline CacheSizes() : bindings(0), metadata(1) {}
+		};
+		// safe to call at any time, but calling tosses existing caches, thus has a perf hit --
+		// don't call cavalierly
+		void setCacheSizes(const CacheSizes& cs);
+
+	public:
 		#ifdef AVMPLUS_MIR
 		// MIR intermediate buffer pool
 		List<GrowableBuffer*> mirBuffers; // mir buffer pool
@@ -240,24 +240,30 @@ const int kBufferPadding = 16;
 		Config config;
         
         #ifdef FEATURE_NANOJIT // accessors
-            bool quiet_opt() { return false; } 
-            bool use_sse2() { return config.sse2; }
-		    #ifdef AVMPLUS_VERBOSE
-                bool verbose() { return config.verbose; }
-                bool verbose_exits() { return config.verbose_exits; }
-                bool verbose_live() { return config.verbose_live; }
+            inline bool quiet_opt() const { return false; } 
+            #if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64
+            inline bool use_sse2() const { return config.sse2; }
+			#endif
+			#ifdef AVMPLUS_VERBOSE
+                inline bool verbose_exits() const { return config.verbose_exits; }
+                inline bool verbose_live() const { return config.verbose_live; }
             #endif
         #endif
+		#ifdef AVMPLUS_VERBOSE
+		inline bool verbose() const { return config.verbose; }
+		#endif
 
-	    inline void SetMIREnabled(bool isEnabled)
-		{
-			config.turbo = isEnabled;
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	    inline void SetMIREnabled(bool isEnabled) {
+			config.runmode = (isEnabled) ? RM_mixed : RM_interp_all;
 		}
-
-	    inline bool IsMIREnabled() const
-		{
-			return config.turbo;
+        inline bool IsMIREnabled() const {
+			return (config.runmode == RM_mixed || config.runmode == RM_jit_all) ? true : false;
 		}
+#else
+        inline void SetMIREnabled(bool) {}
+        inline bool IsMirEnabled() { return false; }
+#endif
 
 		/**
 		 * If this is set to a nonzero value, executing code
@@ -272,7 +278,7 @@ const int kBufferPadding = 16;
 		 * minstack.
 		 */
 		virtual void setStackBase() {}
-
+		
 		/** Internal table of strings for boolean type ("true", "false") */
 		DRC(Stringp) booleanStrings[2];
 
@@ -299,10 +305,10 @@ const int kBufferPadding = 16;
 		 * The default namespace, "public", that all identifiers
 		 * belong to
 		 */
-		DRC(Namespace*) publicNamespace;
+		DRC(Namespacep) publicNamespace;
 		VTable* namespaceVTable;
 
-		#ifdef FEATURE_JNI
+		#ifdef AVMPLUS_WITH_JNI
 		Java* java;     /* java vm control */
 		#endif
 
@@ -354,10 +360,8 @@ const int kBufferPadding = 16;
 									 int start,
 									 Toplevel* toplevel,
 									 Domain* domain,
-									 AbstractFunction *nativeMethods[],
-									 NativeClassInfop nativeClasses[],
-									 NativeScriptInfop nativeScripts[],
-									 List<Stringp>* include_versions = NULL);
+									 const NativeInitializer* ninit,
+									 const List<Stringp>* include_versions = NULL);
 		
 		/**
 		 * Execute the ABC block starting at offset start in code.
@@ -379,30 +383,10 @@ const int kBufferPadding = 16;
 									int start,
 									DomainEnv* domainEnv,
 									Toplevel* &toplevel,
-									AbstractFunction *nativeMethods[],
-									NativeClassInfop nativeClasses[],
-									NativeScriptInfop nativeScripts[],
+									const NativeInitializer* ninit,
 									CodeContext *codeContext);
 
 				
-		/**
-		 * Initializes the native table with the specified
-		 * class/script entries.
-		 */
-		void initNativeTables(NativeClassInfop classEntries,
-							 NativeScriptInfop scriptEntries,
-							 AbstractFunction *nativeMethods[],
-							 NativeClassInfop nativeClasses[],
-							 NativeScriptInfop nativeScripts[]);
-
-		/**
-		 * Creates a new traits with the given name & ns, copied from the traits* t
-		 * Used for instantiating new parameterized types on the fly.
-		 */
-		Traits* makeParameterizedITraits(Stringp name, Namespace* ns, Traits* t );
-		Traits* makeParameterizedCTraits(Stringp name, Namespace* ns, Traits* t );
-
-
 		/** Implementation of OP_equals */
 		Atom equals(Atom lhs, Atom rhs);
 		
@@ -442,66 +426,103 @@ const int kBufferPadding = 16;
 			return (atom&7) == kNamespaceType && !isNull(atom);
 		}
 
+		static BindingKind bindingKind(Binding b)
+		{
+			return BindingKind(uintptr_t(b) & 7);
+		}
+
 		static bool isMethodBinding(Binding b)
 		{
-			return (b&7) == BIND_METHOD;
+			return bindingKind(b) == BKIND_METHOD;
 		}
 
 		static bool isAccessorBinding(Binding b)
 		{
-			return (b&7) >= BIND_GET;
+			return bindingKind(b) >= BKIND_GET;
 		}
 
 		static bool hasSetterBinding(Binding b)
 		{
-			return (b&6) == BIND_SET;
+			return (bindingKind(b) & 6) == BKIND_SET;
 		}
 
 		static bool hasGetterBinding(Binding b)
 		{
-			return (b&5) == BIND_GET;
+			return (bindingKind(b) & 5) == BKIND_GET;
 		}
 
 		static int bindingToGetterId(Binding b)
 		{
 			AvmAssert(hasGetterBinding(b));
-			return urshift(b,3);
+			return int(uintptr_t(b)) >> 3;
 		}
 
 		static int bindingToSetterId(Binding b)
 		{
 			AvmAssert(hasSetterBinding(b));
-			return 1+urshift(b,3);
+			return 1 + (int(uintptr_t(b)) >> 3);
 		}
 
 		static int bindingToMethodId(Binding b)
 		{
 			AvmAssert(isMethodBinding(b));
-			return urshift(b,3);
+			return int(uintptr_t(b)) >> 3;
 		}
 
 		static int bindingToSlotId(Binding b)
 		{
 			AvmAssert(isSlotBinding(b));
-			return urshift(b,3);
+			return int(uintptr_t(b)) >> 3;
 		}
 
 		/** true if b is a var or a const */
 		static int isSlotBinding(Binding b)
 		{
-			AvmAssert((BIND_CONST&6)==BIND_VAR);
-			return (b&6)==BIND_VAR;
+			AvmAssert((BKIND_CONST & 6)==BKIND_VAR);
+			return (bindingKind(b) & 6) == BKIND_VAR;
 		}
+
+		static Binding makeSlotBinding(uintptr_t id, BindingKind kind)
+		{
+			AvmAssert(kind == BKIND_VAR || kind == BKIND_CONST);
+			return Binding((id << 3) | kind);
+		}
+
+		static Binding makeMGSBinding(uintptr_t id, BindingKind kind)
+		{
+			AvmAssert(kind == BKIND_METHOD || kind == BKIND_GET || kind == BKIND_SET);
+			return Binding((id << 3) | kind);
+		}
+
+		static Binding makeGetSetBinding(Binding b)
+		{
+			AvmAssert(bindingKind(b) == BKIND_GET || bindingKind(b) == BKIND_SET);
+			return Binding((uintptr_t(b) & ~7) | BKIND_GETSET);
+		}
+
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		static Binding makeITrampBinding(uintptr_t id)
+		{
+			AvmAssert((id&7)==0); // addr must be 8-aligned
+			return Binding(id | BKIND_ITRAMP);
+		}
+
+		static void* getITrampAddr(Binding b)
+		{
+			AvmAssert(bindingKind(b) == BKIND_ITRAMP);
+			return (void*)(uintptr_t(b) & ~7);
+		}
+#endif
 
 		/** true only if b is a var */
 		static int isVarBinding(Binding b)
 		{
-			return (b&7)==BIND_VAR;
+			return bindingKind(b) == BKIND_VAR;
 		}
 		/** true only if b is a const */
 		static int isConstBinding(Binding b)
 		{
-			return (b&7)==BIND_CONST;
+			return bindingKind(b) == BKIND_CONST;
 		}
 		
 		/** Helper method; returns true if atom is an Function */
@@ -698,11 +719,11 @@ const int kBufferPadding = 16;
 			}
 		}
 
-#ifdef AVMPLUS_AMD64
-        static int integer_d(double d) {
+#ifdef AVMPLUS_SSE2_ALWAYS
+        inline static int integer_d(double d) {
             return integer_d_sse2(d);
         }
-        Atom doubleToAtom(double n) {
+        inline Atom doubleToAtom(double n) {
             return doubleToAtom_sse2(n);
         }
 #else
@@ -788,7 +809,7 @@ const int kBufferPadding = 16;
 		 */
 		Stringp intern(Atom atom);
 
-		Namespace* internNamespace(Namespace* ns);
+		Namespacep internNamespace(Namespacep ns);
 
 		/** Helper function; reads a signed 24-bit integer from pc */
 		static int readS24(const byte *pc)
@@ -822,7 +843,7 @@ const int kBufferPadding = 16;
         static void readOperands(const byte* &pc, unsigned int& imm32, int& imm24, unsigned int& imm32b, int& imm8 )
         {
             AbcOpcode opcode = (AbcOpcode)*pc++;
-            int op_count = opOperandCount[opcode];
+            int op_count = opcodeInfo[opcode].operandCount;
 
             imm8 = pc[0];
 			if( opcode == OP_pushbyte || opcode == OP_debug )
@@ -896,6 +917,22 @@ const int kBufferPadding = 16;
 			return result;
 		}
 
+		// when you need to skip over a u30 and don't care about the result,
+		// this is slightly faster.
+		static void skipU30(const uint8_t*& p, int count = 1)
+		{
+			while (count-- > 0)
+			{
+				if (!(p[0] & 0x80)) { p += 1; continue; }
+				if (!(p[1] & 0x80)) { p += 2; continue; }
+				if (!(p[2] & 0x80)) { p += 3; continue; }
+				if (!(p[3] & 0x80)) { p += 4; continue; }
+				//if (!(*p[4] & 0x80)) { p += 5; continue; }	// test should be unnecessary
+				AvmAssert(!(p[4] & 0x80));
+				p += 5;
+			}
+		}
+
 		/** Helper function; reads an unsigned 16-bit integer from pc */
 		static int32_t readU16(const byte *pc)
 		{
@@ -921,6 +958,14 @@ const int kBufferPadding = 16;
 		 */
 		Atom istypeAtom(Atom atom, Traits* itraits) { 
 			return istype(atom, itraits) ? trueAtom : falseAtom; 
+		}
+
+		/**
+		 * implements ECMA as operator.  Returns the same value, or null.
+		 */
+		Atom astype(Atom atom, Traits* expected)
+		{
+			return istype(atom, expected) ? atom : nullObjectAtom;
 		}
 
 		/**
@@ -1009,9 +1054,10 @@ const int kBufferPadding = 16;
 		 */
 		String* toErrorString(int d);
 		String* toErrorString(AbstractFunction* m);
+		String* toErrorString(const Multiname& n);
 		String* toErrorString(const Multiname* n);
-		String* toErrorString(Namespace* ns);
-		String* toErrorString(Traits* t);
+		String* toErrorString(Namespacep ns);
+		String* toErrorString(const Traits* t);
 		String* toErrorString(const char* s);
 		String* toErrorString(const wchar* s);
 		String* atomToErrorString(Atom a);
@@ -1193,11 +1239,6 @@ const int kBufferPadding = 16;
 		Hashtable *xmlEntities;
 		
 	private:
-		DECLARE_NATIVE_CLASSES()
-		DECLARE_NATIVE_SCRIPTS()
-
-		void registerNatives(NativeTableEntryp nativeMap, AbstractFunction *nativeMethods[]);
-
 		//
 		// this used to be Heap
 		//
@@ -1217,18 +1258,16 @@ const int kBufferPadding = 16;
 				
 	public:
 
-		static Namespace *atomToNamespace(Atom atom)
+		static Namespacep atomToNamespace(Atom atom)
 		{
 			AvmAssert((atom&7)==kNamespaceType);
-			return (Namespace*)(atom&~7);
+			return (Namespacep)(atom&~7);
 		}
 		
 		static double atomToDouble(Atom atom)
 		{
 			AvmAssert((atom&7)==kDoubleType);
-
-			double* obj = (double*)(atom&~7);
-			return *obj;
+			return *(const double*)(atom&~7);
 		}
 
 		/**
@@ -1263,7 +1302,7 @@ const int kBufferPadding = 16;
 		int findString(const wchar *s, int len);
 
 		/** search the namespace intern table */
-		int findNamespace(const Namespace *ns);
+		int findNamespace(Namespacep ns);
 
 	public:
 		/**
@@ -1317,24 +1356,20 @@ const int kBufferPadding = 16;
 
 		ScriptObject* newObject(VTable* ivtable, ScriptObject *delegate);
 
-		/**
-		 * traits with base traits (inheritance)
-		 */
-		Traits* newTraits(Traits *base,
-						  int nameCount,
-						  int interfaceCount,
-						  uint32 sizeofInstance);
-		
-        Namespace* newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
-		Namespace* newNamespace(Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
-		Namespace* newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public);
-		Namespace* newPublicNamespace(Stringp uri) { return newNamespace(uri); }
+		FrameState* newFrameState(int frameSize, int scopeBase, int stackBase);
+        Namespacep newNamespace(Atom prefix, Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
+		Namespacep newNamespace(Atom uri, Namespace::NamespaceType type = Namespace::NS_Public);
+		Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public);
+		Namespacep newPublicNamespace(Stringp uri) { return newNamespace(uri); }
 		NamespaceSet* newNamespaceSet(int nsCount);
 
 		// String creation
 		Stringp newString(const char *str) const;
 		Stringp newString(const wchar *str) const;
 		Stringp newString(const char *str, int len) const;		
+		void freeString(Stringp s) {
+			delete s;
+		}
 
 		Stringp uintToString(uint32 i);
 		Stringp intToString(int i);
@@ -1397,6 +1432,93 @@ const int kBufferPadding = 16;
 		bool   lookupCacheIsValid(uint32 t) { return t == lookup_cache_timestamp; }
 		void   invalidateLookupCache() { if (lookup_cache_timestamp != ~0U) ++lookup_cache_timestamp; }
 #endif
+		
+		/* A portable replacement for alloca().
+		 *
+		 * Memory is allocated from the heap and not from the stack.  It is freed in 
+		 * one of two ways: If the function returns normally then an auto_ptr like
+		 * mechanism frees the memory.  If the function leaves by throwing an exception
+		 * (or if one of its callees throws an exception) then the exception
+		 * handling mechanism in Exception.{h,cpp} frees the memory by releasing 
+		 * everything that is still allocated that was allocated since the exception
+		 * handler was erected.
+		 *
+		 * The auto_ptr mechanism, based on the class AvmCore::AllocaAutoPtr, cannot be
+		 * circumvented, as allocaPush() takes a reference to such an object as an argument.
+		 *
+		 * Typical usage:
+		 *
+		 *    AvmCore::AllocaAutoPtr _ptr;                      // by convention prefixed by "_"
+		 *    int* ptr = (int*)core->allocaPush(_ptr, nbytes);  // by convention same name, no "_"
+		 *
+		 * In practice the VMPI_alloca() macro, defined in avmbuild.h, should be used so that
+		 * real alloca() can be used on platforms where that makes sense.
+		 *
+		 * Benchmarks suggest that the performance differences from using this mechanism
+		 * instead of real alloca() are slight to nonexistent, and that the heap allocation
+		 * sometimes provides a performance improvement.
+		 */
+	private:
+		struct AllocaStackSegment
+		{
+			void* start;				// first address; also, the RCRoot pointer
+			void* limit;				// address past data
+			void* top;					// address past live if this segment is not the top
+			AllocaStackSegment* prev;	// segments further from the top
+		};
+		
+		void allocaInit();
+		void allocaShutdown();
+		void allocaPopToSlow(void* top);
+		void* allocaPushSlow(size_t nbytes);
+		void pushAllocaSegment(size_t nbytes);
+		void popAllocaSegment();
+
+		AllocaStackSegment* top_segment;// segment at the stack top
+		void* stacktop;					// current first free word in top_segment
+#ifdef _DEBUG
+		size_t stackdepth;				// useful to have for debugging
+#endif
+		
+	public:
+		/* See documentation above */
+		
+		class AllocaAutoPtr
+		{
+			friend class AvmCore;
+		public:
+			AllocaAutoPtr() : unwindPtr(NULL), core(NULL) {}  // initialization of 'core' to pacify gcc
+			~AllocaAutoPtr() { if (unwindPtr) core->allocaPopTo(unwindPtr); }
+		private:
+			AvmCore* core;
+			void* unwindPtr;
+		};
+				
+		inline void* allocaTop() 
+		{
+			return stacktop;
+		}
+		
+		inline void allocaPopTo(void* top)
+		{ 
+			if (top >= top_segment->start && top <= top_segment->limit)
+				stacktop = top;
+			else
+				allocaPopToSlow(top);
+		}
+		
+		inline void* allocaPush(size_t nbytes, AllocaAutoPtr& x) 
+		{
+			AvmAssert(x.unwindPtr == NULL);
+			x.core = this;
+			x.unwindPtr = stacktop;
+			nbytes = (nbytes + 7) & ~7;
+			if ((char*)stacktop + nbytes <= top_segment->limit) {
+				stacktop = (char*)stacktop + nbytes;
+				return x.unwindPtr;
+			}
+			return allocaPushSlow(nbytes);
+		}
 		
 		// avoid multiple inheritance issues
 		class GCInterface : MMgc::GCCallback

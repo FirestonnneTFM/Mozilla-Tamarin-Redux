@@ -76,8 +76,8 @@ namespace avmplus
 		Stringp name;
 		union
 		{
-			Namespace* ns;
-			NamespaceSet* nsset;
+			Namespacep ns;
+			NamespaceSetp nsset;
 		};
 		uint32 next_index;
 
@@ -109,14 +109,14 @@ namespace avmplus
 			return (nsset && (flags & NSSET)) ? nsset->size : 1;
 		}
 
-		Namespace* getNamespace(int i) const;
+		Namespacep getNamespace(int i) const;
 
-		Namespace* getNamespace() const
+		Namespacep getNamespace() const
 		{
 			return getNamespace(0);
 		}
 
-		void setNamespace(Namespace* _ns)
+		void setNamespace(Namespacep _ns)
 		{
 			flags &= ~(NSSET|RTNS);
 			AvmAssert(_ns != NULL);
@@ -131,13 +131,13 @@ namespace avmplus
 			this->ns = other->ns;
 		}
 
-		NamespaceSet* getNsset() const
+		NamespaceSetp getNsset() const
 		{
 			AvmAssert(!isRtns() && (flags&NSSET));
 			return nsset;
 		}
 
-		void setNsset(NamespaceSet* _nsset)
+		void setNsset(NamespaceSetp _nsset)
 		{
 			flags &= ~RTNS;
 			flags |= NSSET;
@@ -159,7 +159,7 @@ namespace avmplus
 
 		Multiname();
 
-		Multiname(NamespaceSet* nsset);
+		Multiname(NamespaceSetp nsset);
 
 		Multiname(const Multiname &other)
 		{
@@ -167,7 +167,7 @@ namespace avmplus
 		}
 
 
-		Multiname(Namespace* ns, Stringp name, bool qualified=false);
+		Multiname(Namespacep ns, Stringp name, bool qualified=false);
 
 		~Multiname()
 		{
@@ -177,7 +177,7 @@ namespace avmplus
 			next_index = 0;
 		}
 
-		bool contains(Namespace* ns) const;
+		bool contains(Namespacep ns) const;
 
 		/**
 		 * return the flags we want to keep when copying a compile-time
@@ -291,7 +291,7 @@ namespace avmplus
 		MultiFormat;
 
 		Stringp format(AvmCore* core, MultiFormat form=MULTI_FORMAT_FULL) const;
-		static Stringp format(AvmCore* core, Namespace* ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true);
+		static Stringp format(AvmCore* core, Namespacep ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true);
 //#endif
 	};
 
@@ -302,14 +302,14 @@ namespace avmplus
 
 		HeapMultiname() {}
 
-		HeapMultiname(NamespaceSet* nsset) { name.setNsset(nsset); }
+		HeapMultiname(NamespaceSetp nsset) { name.setNsset(nsset); }
 
 		HeapMultiname(const Multiname &other)
 		{
 			setMultiname(other);
 		}
 
-		HeapMultiname(Namespace* ns, Stringp name, bool qualified=false);
+		HeapMultiname(Namespacep ns, Stringp name, bool qualified=false);
 
 
 		operator Multiname* () { return &name; }
@@ -342,7 +342,7 @@ namespace avmplus
 			name.setName(other);
 		}
 		
-		void setNamespace(Namespace* ns) {
+		void setNamespace(Namespacep ns) {
 			WBRC(gc(), this, &name.ns, ns);
 			name.setNamespace(ns);
 		}
@@ -352,7 +352,7 @@ namespace avmplus
 			name.setNamespace(other);
 		}
 
-		void setNsset(NamespaceSet* nsset) {
+		void setNsset(NamespaceSetp nsset) {
 			WB(gc(), this, &name.nsset, nsset);
 			name.setNsset(nsset);
 		}
@@ -377,10 +377,10 @@ namespace avmplus
 
 		Stringp getName() const { return name.getName(); }
 		int namespaceCount() const { return name.namespaceCount(); }
-		Namespace* getNamespace(int i) const { return name.getNamespace(i); }
-		Namespace* getNamespace() const { return name.getNamespace(); }
-		NamespaceSet* getNsset() const { return name.getNsset(); }
-		bool contains(Namespace* ns) const { return name.contains(ns); }
+		Namespacep getNamespace(int i) const { return name.getNamespace(i); }
+		Namespacep getNamespace() const { return name.getNamespace(); }
+		NamespaceSetp getNsset() const { return name.getNsset(); }
+		bool contains(Namespacep ns) const { return name.contains(ns); }
 		int ctFlags() const { return name.ctFlags(); }
 		int isBinding() const { return name.isBinding(); }
 		int isRuntime() const { return name.isRuntime(); }
@@ -400,7 +400,7 @@ namespace avmplus
 //#ifdef AVMPLUS_VERBOSE
 	public:
 		Stringp format(AvmCore* core, Multiname::MultiFormat form=Multiname::MULTI_FORMAT_FULL) const { return name.format(core, form); }
-		static Stringp format(AvmCore* core, Namespace* ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true) { return format(core, ns, name, attr, hideNonPublicNamespaces); }
+		static Stringp format(AvmCore* core, Namespacep ns, Stringp name, bool attr=false, bool hideNonPublicNamespaces=true) { return format(core, ns, name, attr, hideNonPublicNamespaces); }
 //#endif
 	private:
         Multiname name;

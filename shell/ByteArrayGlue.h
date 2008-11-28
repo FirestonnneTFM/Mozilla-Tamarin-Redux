@@ -57,7 +57,38 @@ namespace avmshell
 		bool Grow(uint32 newCapacity);
 		U8 *GetBuffer() const { return m_array; }
 
+#ifdef AVMPLUS_MOPS
+ 		typedef void (Domain::*GlobalMemoryNotifyFunc)(unsigned char *, uint32) const;
+ 
+ 		bool GlobalMemorySubscribe(const Domain *subscriber, GlobalMemoryNotifyFunc notify);
+ 		bool GlobalMemoryUnsubscribe(const Domain *subscriber);
+#endif 
+
 	protected:
+#ifdef AVMPLUS_MOPS
+ 		// singly linked list of all subscribers to this ByteArray...
+ 		// in practice, there isn't much liklihood of too many
+ 		// subscribers at a time and notifications should be rare
+ 		// hence the slower, simpler, smaller structures and algorithms
+ 
+ 		// links are removed explicitly via GlobalMemoryUnsubscribe
+ 		// or implicitly when the backing store changes
+ 		struct SubscriberLink : public MMgc::GCObject
+ 		{
+ 			// weak reference to the subscriber DomainEnv so
+ 			// multiple DomainEnvs subscribing to the same
+ 			// ByteArray don't result in a DomainEnv not being
+ 			// collectable because a ByteArray refers to it and
+ 			// is referenced by another live DomainEnv
+ 			MMgc::GCWeakRef *weakDomain;
+ 			GlobalMemoryNotifyFunc notify;
+ 			// next link
+ 			SubscriberLink *next;
+ 		};
+ 		SubscriberLink *m_subscriberRoot;
+ 
+ 		void NotifySubscribers();
+#endif
 		void ThrowMemoryError();
 
 		uint32 m_capacity;
@@ -136,9 +167,12 @@ namespace avmshell
 		String* readUTF();
 		String* readUTFBytes(uint32 length);		
 		
-		int available();
-		int getFilePointer();
-		void seek(int offset);
+		int get_bytesAvailable();
+		int get_position();
+		void set_position(int offset);
+		inline int available() { return get_bytesAvailable(); }
+		inline int getFilePointer() { return get_position(); }
+		inline void seek(int offset) { set_position(offset); }
 
 		uint32 get_length();
 		void set_length(uint32 value);
@@ -150,7 +184,18 @@ namespace avmshell
 
 		void writeFile(Stringp filename);
 
+#ifdef AVMPLUS_MOPS
+ 	protected:
+		friend class avmplus::Domain;
+#endif
+ 
 	private:
+#ifdef AVMPLUS_MOPS
+ 		bool globalMemorySubscribe(const Domain *subscriber,
+ 			ByteArray::GlobalMemoryNotifyFunc notify);
+ 		bool globalMemoryUnsubscribe(const Domain *subscriber);
+#endif
+
 		MMgc::Cleaner c;
 		ByteArrayFile m_byteArray;
 	};
@@ -167,8 +212,6 @@ namespace avmshell
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
 		ByteArrayObject *readFile(Stringp filename);
-
-		DECLARE_NATIVE_MAP(ByteArrayClass)
     };
 }
 

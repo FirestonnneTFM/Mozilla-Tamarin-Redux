@@ -55,11 +55,9 @@ namespace avmplus
 		cinits(core->GetGC(), 0),
 		scripts(core->GetGC(), 0),
 		abcStart(startPos)
-#ifdef AVMPLUS_VERIFYALL
-		,verifyQueue(core->GetGC(), 0)
-#endif
 	{
 		namedTraits = new(core->GetGC()) MultinameHashtable();
+		privateNamedScripts = new(core->GetGC()) MultinameHashtable();
 		m_code = sb.getImpl();
 #if defined(AVMPLUS_MIR)
 		codeBuffer = new (core->GetGC()) GrowableBuffer(core->GetGC()->GetGCHeap());
@@ -81,12 +79,6 @@ namespace avmplus
     {
 		AvmAssert(index < methodCount);
 		return methods[index];
-    }
-
-    const byte* PoolObject::getMetadataInfoPos(uint32 index)
-    {
-		AvmAssert (index < metadataCount);
-		return metadata_infos[index];
     }
 
 	Traits* PoolObject::getBuiltinTraits(Stringp name) const
@@ -111,17 +103,17 @@ namespace avmplus
 		return getTraits(name, core->publicNamespace, recursive);
 	}
 
-	Traits* PoolObject::getTraits(const Multiname* mname, const Toplevel* toplevel, bool recursive/*=true*/) const
+	Traits* PoolObject::getTraits(const Multiname& mname, const Toplevel* toplevel, bool recursive/*=true*/) const
 	{
 		// do full lookup of multiname, error if more than 1 match
 		// return Traits if 1 match, NULL if 0 match, throw ambiguity error if >1 match
 		Traits* match = NULL;
-		if (mname->isBinding())
+		if (mname.isBinding())
 		{
 			// multiname must not be an attr name, have wildcards, or have runtime parts.
-			for (int i=0, n=mname->namespaceCount(); i < n; i++)
+			for (int i=0, n=mname.namespaceCount(); i < n; i++)
 			{
-				Traits* t = getTraits(mname->getName(), mname->getNamespace(i), recursive);
+				Traits* t = getTraits(mname.getName(), mname.getNamespace(i), recursive);
 				if (t != NULL)
 				{
 					if (match == NULL)
@@ -131,7 +123,9 @@ namespace avmplus
 					else if (match != t)
 					{
 						// ambiguity
-						toplevel->throwReferenceError(kAmbiguousBindingError, mname);
+						if (toplevel)
+							toplevel->throwReferenceError(kAmbiguousBindingError, mname);
+						AvmAssert(!"unhandled ambiguous binding");
 					}
 				}
 			}
@@ -144,43 +138,12 @@ namespace avmplus
 		namedTraits->add(name, ns, (Binding)traits);
 	}
 
-#ifdef AVMPLUS_VERIFYALL
-	void PoolObject::enq(AbstractFunction* f)
-	{
-		if (!f->isVerified() && !(f->flags & AbstractFunction::VERIFY_PENDING))
-		{
-			f->flags |= AbstractFunction::VERIFY_PENDING;
-			verifyQueue.add(f);
-		}
-	}
-
-	void PoolObject::enq(Traits* t)
-	{
-		for (int i=0, n=t->methodCount; i < n; i++)
-		{
-			AbstractFunction* f = t->getMethod(i);
-			if (f)
-				enq(f);
-		}
-	}
-
-	void PoolObject::processVerifyQueue(Toplevel* toplevel)
-	{
-		while (!verifyQueue.isEmpty())
-		{
-			AbstractFunction* f = verifyQueue.removeLast();
-			AvmAssert(!f->isVerified());
-			f->verify(toplevel);
-		}
-	}
-#endif
-
 	Namespace* PoolObject::getNamespace(int index) const
 	{
 		return cpool_ns[index];  
 	}
 
-	NamespaceSet* PoolObject::getNamespaceSet(int index) const
+	NamespaceSetp PoolObject::getNamespaceSet(int index) const
 	{
 		return cpool_ns_set[index];  
 	}
@@ -192,28 +155,33 @@ namespace avmplus
 
 	Atom PoolObject::getDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const
 	{
+		// toplevel actually can be null, when resolving the builtin classes...
+		// but they should never cause verification errors in functioning builds
+		//AvmAssert(toplevel != NULL);
+
 		AvmAssert(index != 0);
+		uint32_t maxcount = 0;
 		// Look in the cpool specified by kind
 		switch(kind)
 		{
 		case CONSTANT_Int:
-			if( index >= constantIntCount )
-				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantIntCount));
+			if (index >= (maxcount = constantIntCount))
+				goto range_error;
 			return core->intToAtom(cpool_int[index]);
 
 		case CONSTANT_UInt:
-			if( index >= constantUIntCount )
-				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantUIntCount));
+			if (index >= (maxcount = constantUIntCount))
+				goto range_error;
 			return core->uintToAtom(cpool_uint[index]);
 
 		case CONSTANT_Double:
-			if( index >= constantDoubleCount )
-				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantDoubleCount));
+			if (index >= (maxcount = constantDoubleCount))
+				goto range_error;
 			return kDoubleType|(uintptr)cpool_double[index];
 
 		case CONSTANT_Utf8:
-			if( index >= constantStringCount )
-				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantStringCount));
+			if (index >= (maxcount = constantStringCount))
+				goto range_error;
 			return cpool_string[index]->atom();
 
 		case CONSTANT_True:
@@ -229,28 +197,31 @@ namespace avmplus
         case CONSTANT_ExplicitNamespace:
         case CONSTANT_StaticProtectedNs:
 		case CONSTANT_PrivateNs:
-			if( index >= constantNsCount )
-				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantNsCount));
+			if (index >= (maxcount = constantNsCount))
+				goto range_error;
 			return cpool_ns[index]->atom();
 
 		case CONSTANT_Null:
 			return nullObjectAtom;
 
 		default:
-			{
 			// Multinames & NamespaceSets are invalid default values.
 			if (t)
 			{
-				Multiname qname(t->ns, t->name);
-				toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
+				toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(Multiname(t->ns, t->name)));
 			}
 			else
 			{
 				toplevel->throwVerifyError(kCorruptABCError);
 			}
 			return undefinedAtom; // not reached
-			}
 		}
+
+range_error:
+		if (toplevel)
+			toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(maxcount));
+		AvmAssert(!"unhandled verify error");
+		return undefinedAtom; // not reached
 	}
 
 	void PoolObject::parseMultiname(const byte *pos, Multiname& m) const
@@ -364,28 +335,22 @@ namespace avmplus
 	}
 
 
-	Atom PoolObject::resolveQName(const byte* &p, Multiname &m, const Toplevel* toplevel) const
+	void PoolObject::resolveQName(uint32_t index, Multiname &m, const Toplevel* toplevel) const
 	{
-		uint32 index = AvmCore::readU30(p);
-
 		if (index == 0 || index >= constantMnCount)
-			toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantMnCount));
+		{
+			if (toplevel)
+				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantMnCount));
+			AvmAssert(!"unhandled verify error");
+		}
 
-		Atom a = cpool_mn[index];
-
-		parseMultiname(a, m);
+		parseMultiname(cpool_mn[index], m);
 		if (!m.isQName())
-			toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
-
-		return a;
-	}
-
-	
-	Traits* PoolObject::resolveTypeName(const byte* &pc, const Toplevel* toplevel, bool allowVoid/*=false*/) const
-	{
-		// only save the type name for now.  verifier will resolve to traits
-		uint32 index = AvmCore::readU30(pc);
-		return resolveTypeName(index, toplevel, allowVoid);
+		{
+			if (toplevel)
+				toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
+			AvmAssert(!"unhandled verify error");
+		}
 	}
 
 	Traits* PoolObject::resolveTypeName(uint32 index, const Toplevel* toplevel, bool allowVoid/*=false*/) const
@@ -398,30 +363,37 @@ namespace avmplus
 
 		// check contents is a multiname.  in the cpool, and type system, kObjectType means multiname.
 		if (index >= constantMnCount)
-			toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantMnCount));
-
-		Atom a = cpool_mn[index];
+		{
+			if (toplevel)
+				toplevel->throwVerifyError(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(constantMnCount));
+			AvmAssert(!"unhandled verify error");
+		}
 
 		Multiname m;
-		parseMultiname(a, m);
+		parseMultiname(cpool_mn[index], m);
 
-		Traits* t = getTraits(&m, toplevel);
+		Traits* t = getTraits(m, toplevel);
 		if(m.isParameterizedType())
 		{
 			Traits* param_traits = resolveTypeName(m.getTypeParameter(), toplevel);
-
 			t = resolveParameterizedType(toplevel, t, param_traits);
 		}
 		if (!t)
 		{
 			#ifdef AVMPLUS_VERBOSE
 			if (!toplevel || !toplevel->verifyErrorClass())
-				core->console << "class not found: " << &m << "\n";
+				core->console << "class not found: " << m << " index=" << index << "\n";
 			#endif
-			toplevel->throwVerifyError(kClassNotFoundError, core->toErrorString(&m));
+			if (toplevel)
+				toplevel->throwVerifyError(kClassNotFoundError, core->toErrorString(&m));
+			AvmAssert(!"unhandled verify error");
 		}
 		if (!allowVoid && t == VOID_TYPE)
-			toplevel->throwVerifyError(kIllegalVoidError);
+		{
+			if (toplevel)
+				toplevel->throwVerifyError(kIllegalVoidError);
+			AvmAssert(!"unhandled verify error");
+		}
 
 		return t;
 	}
@@ -449,509 +421,21 @@ namespace avmplus
 				newname.setName(fullname);
 				newname.setNamespace(base->ns);
 
-				r = getTraits(&newname, toplevel);
+				r = getTraits(newname, toplevel);
 
 				if( !r )
 				{
-					r = core->makeParameterizedITraits(fullname, base->ns, core->traits.vectorobj_itraits);
-					core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, (Binding)r);
+					r = core->traits.vectorobj_itraits->newParameterizedITraits(fullname, base->ns);
+					core->traits.vector_itraits->pool->domain->addNamedTrait(fullname, base->ns, r);
 				}
 			}
 		}
 		return r;
 	}
-	void PoolObject::allowEarlyBinding(Traits* t, bool& slot) const
-	{
-		// the compiler can early bind to a type's slots when it's defined
-		// in the same abc file (ensuring it came from the same compiler)
-		// or when the base class came from another abc file and has zero slots
-		// this ensures you cant use the early opcodes to access an external type's
-		// private members.
-		slot = true;
-		while (t != NULL && t->slotCount > 0 &&	slot)
-		{
-			if (t->pool != this)
-			{
-				if(t->slotCount > 0)
-					slot = false;
-			}
-			t = t->base;
-		}
-	}
-
-    void PoolObject::resolveTraits(Traits *traits, int firstSlot, const Toplevel* toplevel)
-    {
-		int offset = (int)traits->sizeofInstance;
-		int padoffset = -1;
-		if (traits->base && traits->base->base)
-		{
-			AvmAssert(traits->base->getTotalSize() != 0);
-			offset += (uint32)traits->base->getTotalSize() - (uint32)traits->base->sizeofInstance;
-		}
-
-		const byte* pos = traits->getTraitsPos();
-		AvmAssert(pos != NULL);
-
-		int nameCount = AvmCore::readU30(pos);
-
-		int slot_id = firstSlot;
-		
-		AbcGen gen(core->GetGC(), traits->slotCount * 7);
-
-		bool earlySlotBinding;
-		allowEarlyBinding(traits, earlySlotBinding);
-
-        for (int i=0; i < nameCount; i++)
-        {
-			Multiname qn;
-			resolveQName(pos, qn, toplevel);
-			Stringp name = qn.getName();
-			Namespace* ns = qn.getNamespace();
-            int tag = (TraitKind)pos[0];
-			TraitKind kind = (TraitKind) (tag & 0x0f); //Get rid of the flags
-			pos += 1;
-			int skip = 0;
-			int id = 0;
-			int info = 0;
-			int value_index = 0;
-			CPoolKind value_kind = (CPoolKind)0;
-			// Check for version metadata
-			switch (kind)
-			{
-			case TRAIT_Slot:
-			case TRAIT_Const:
-			case TRAIT_Class:
-				id = AvmCore::readU30(pos); // slot id
-				info = AvmCore::readU30(pos); // type or class info
-				if( kind == TRAIT_Slot || kind == TRAIT_Const )
-				{
-					value_index = AvmCore::readU30(pos); // value
-					if( value_index )
-						value_kind = (CPoolKind)*(pos++);
-				}
-				break;
-			case TRAIT_Getter:
-			case TRAIT_Setter:
-			case TRAIT_Method:
-				id = AvmCore::readU30(pos);  // disp id
-				info = AvmCore::readU30(pos);  // method
-				break;
-			default:
-				// unsupported traits type
-				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
-			}
-			const byte* meta_pos = pos;
-			if( tag & ATTR_metadata )
-			{
-				int metadataCount = AvmCore::readU30(pos);
-				for( int metadata = 0; metadata < metadataCount; ++metadata)
-				{
-					int index = AvmCore::readU30(pos);
-					if (stripMetadataIndexes.indexOf(index)!=-1 )
-						skip = 1;  // Stripping this definition, 
-				}
-			}
-			if( skip ) 
-			{ 
-				continue;
-			}
-
-			switch (kind)
-			{
-			case TRAIT_Slot:
-			case TRAIT_Const:
-			{
-				// compute the slot
-				uint32 useSlotId = id;
-                if(!earlySlotBinding ) useSlotId = 0;
-				if (!useSlotId)
-					useSlotId = slot_id++;
-				else
-					useSlotId--;
-
-				// compute the type
-				Traits* slotTraits = resolveTypeName(info, toplevel);
-
-				// default value for this slot.
-				int slotOffset;
-				if ((slotTraits == NUMBER_TYPE)
-					#ifdef AVMPLUS_64BIT
-					|| ((slotTraits != INT_TYPE) && (slotTraits != UINT_TYPE) && (slotTraits != BOOLEAN_TYPE))
-					#endif			
-				)
-				{
-					// 8-aligned, 8-byte field
-					if (offset&7)
-					{
-						padoffset = offset;
-						offset += 4;
-					}
-					slotOffset = offset;
-					offset += 8;
-				}
-				else
-				{
-					// 4-aligned, 4-byte field
-					if (padoffset != -1)
-					{
-						slotOffset = padoffset;
-						padoffset = -1;
-					}
-					else
-					{
-						slotOffset = offset;
-						offset += 4;
-					}
-				}
-
-				traits->setSlotInfo(value_index, useSlotId, toplevel, slotTraits, slotOffset, value_kind, gen);
-				if( tag & ATTR_metadata )
-				{
-					traits->setSlotMetadataPos(useSlotId, meta_pos);
-				}
-				break;
-			}
-
-			case TRAIT_Class: 
-			{
-				// compute the slot
-				uint32 useSlotId = id;
-                if( !earlySlotBinding ) useSlotId = 0;
-				if (!useSlotId)
-					useSlotId = slot_id++;
-				else
-					useSlotId--;
-
-				// get the class type
-				uint32 class_info = info;
-				if (class_info >= classCount)
-					toplevel->throwVerifyError(kClassInfoExceedsCountError, core->toErrorString(class_info), core->toErrorString(classCount));
-
-				AbstractFunction* cinit = cinits[class_info];
-				if (!cinit) 
-					toplevel->throwVerifyError(kClassInfoOrderError, core->toErrorString(class_info));
-
-				int slotOffset;
-				#ifdef AVMPLUS_64BIT
-				// 8-aligned, 8-byte field
-				if (offset&7)
-				{
-					padoffset = offset;
-					offset += 4;
-				}
-				slotOffset = offset;
-				offset += 8;
-				#else
-				// 4-aligned, 4-byte field
-				if (padoffset != -1)
-				{
-					slotOffset = padoffset;
-					padoffset = -1;
-				}
-				else
-				{
-					slotOffset = offset;
-					offset += 4;
-				}
-				#endif
-
-				traits->setSlotInfo(0, useSlotId, toplevel, cinit->declaringTraits, slotOffset, CPoolKind(0), gen);
-				break;
-			}
-
-			case TRAIT_Method:
-			{
-				int earlyDispId = id;
-                (void)earlyDispId;
-
-				uint32 method_info = info;
-
-				// method_info range already checked in AbcParser
-				AvmAssert(method_info < methodCount);
-				AbstractFunction *f = getMethodInfo(method_info);
-				AvmAssert(f != NULL);
-
-				// disp_id assigned by abcParser, this binding must exist already.
-				Binding b = traits->get(name, ns);
-
-				AvmAssert(AvmCore::isMethodBinding(b));
-				int disp_id = AvmCore::bindingToMethodId(b);
-
-				// !!@ Ed says there may be an earlier place in AbcParser to catch this
-				if (traits->getMethod(disp_id) && traits->getOverride(ns,name,tag,toplevel) == BIND_NONE)
-				{
-					toplevel->throwVerifyError(kDuplicateDispIdError, core->toErrorString(traits->getMethod(disp_id)), core->toErrorString(disp_id));
-				}
-				traits->setMethod(disp_id, f);
-				if( tag & ATTR_metadata )
-				{
-					traits->setMethodMetadataPos(disp_id, meta_pos);
-				}
-				break;
-			}
-
-			case TRAIT_Getter:
-			case TRAIT_Setter:
-			{
-				int earlyDispId = id;
-                (void)earlyDispId;
-
-				uint32 method_info = info;
-				
-				// method_info already checked in AbcParser
-				AvmAssert(method_info < methodCount);
-				AbstractFunction* f = getMethodInfo(method_info);
-				AvmAssert(f != NULL);
-
-				Binding b = traits->get(name, ns);
-
-				AvmAssert(b==BIND_NONE || AvmCore::isAccessorBinding(b));
-				uint32 disp_id = kind == TRAIT_Getter ? AvmCore::bindingToGetterId(b) : AvmCore::bindingToSetterId(b);
-				AvmAssert(disp_id < traits->methodCount);
-				// !!@ Ed says there may be an earlier place in AbcParser to catch this
-				if (traits->getMethod(disp_id))
-				{
-					Binding baseBinding = traits->getOverride(ns,name,tag,toplevel);
-					if (kind == TRAIT_Getter && !AvmCore::hasGetterBinding(baseBinding) ||
-						kind == TRAIT_Setter && !AvmCore::hasSetterBinding(baseBinding))
-					{
-						toplevel->throwVerifyError(kDuplicateDispIdError, core->toErrorString(traits->getMethod(disp_id)), core->toErrorString(disp_id));
-					}
-				}
-				traits->setMethod(disp_id, f);
-				if( tag & ATTR_metadata )
-				{
-					traits->setMethodMetadataPos(disp_id, meta_pos);
-				}
-
-				break;
-			}
-
-			default:
-				// unsupported traits type
-				toplevel->throwVerifyError(kUnsupportedTraitsKindError, core->toErrorString(kind));
-			}
-
-		}
-
-		int *offsets = traits->getOffsets();
-		for (uint32 i=0, n=traits->slotCount; i < n; i++)
-		{
-			if (offsets[i] == 0)
-			{
-				// sparse slot table.  make types default to *
-				#ifdef AVMPLUS_VERBOSE
-				if (verbose)
-				{
-					core->console << "WARNING: slot " << i+1 << " on " << traits << " not defined by compiler.  Using *\n";
-				}
-				#endif
-
-				AvmAssert(0);
-				int slotOffset;
-				// 4-aligned, 4-byte field
-				if (padoffset != -1)
-				{
-					slotOffset = padoffset;
-					padoffset = -1;
-				}
-				else
-				{
-					slotOffset = offset;
-					offset += 4;
-				}
-				
-				traits->setSlotInfo(0, i, toplevel, NULL, slotOffset, CPoolKind(0), gen);
-			}
-		}		
-
-		// if initialization code gen is required, create a new method body and write it to traits->init->body_pos
-		if(gen.size() > 0)
-		{
-			AbcGen newMethodBody(core->GetGC(), (uint32)(16+gen.size()));
-
-			// insert body preamble
-			MethodInfo *init;
-			
-			if(traits->init) {
-				init = (MethodInfo*)(AbstractFunction*)traits->init;
-				const byte *pos = init->body_pos;
-				if( !init->body_pos ) toplevel->throwVerifyError(kCorruptABCError);
-
-				int maxStack = AvmCore::readU30(pos);
-				// the code we're generating needs at least 2
-				maxStack = maxStack > 1 ? maxStack : 2;
-				newMethodBody.writeInt(maxStack); // max_stack
-				newMethodBody.writeInt(AvmCore::readU30(pos)); //local_count
-				newMethodBody.writeInt(AvmCore::readU30(pos)); //init_scope_depth
-				newMethodBody.writeInt(AvmCore::readU30(pos)); //max_scope_depth
-
-				// skip real code length
-				int code_length = AvmCore::readU30(pos);
-				
-				// if first instruction is OP_constructsuper keep it as first instruction
-				if(*pos == OP_constructsuper)
-				{
-					gen.getBytes().insert(0, OP_constructsuper);
-					// don't invoke it again later
-					pos++;
-					code_length--;
-				}
-
-				gen.abs_jump(pos, code_length);	
-
-			} else {
-				// make one
-				init = new (core->GetGC()) MethodInfo();
-				init->declaringTraits = traits;
-				init->pool = this;
-				init->param_count = 0;
-				init->restOffset = sizeof(Atom); // sizeof(this)
-				init->initParamTypes(1);
-				init->setParamType(0, traits);	
-				init->setReturnType(VOID_TYPE);
-				traits->init = init;
-				init->flags |= AbstractFunction::LINKED;
-
-				newMethodBody.writeInt(2); // max_stack
-				newMethodBody.writeInt(1); //local_count
-				newMethodBody.writeInt(1); //init_scope_depth
-				newMethodBody.writeInt(1); //max_scope_depth
-
-				gen.returnvoid();
-			}
-
-			newMethodBody.writeInt((int)gen.size()); // code length
-			newMethodBody.writeBytes(gen.getBytes());
-
-			// no exceptions, when we jump to the real code, we'll read the exceptions for that code
-			newMethodBody.writeInt(0);
-
-			// the verifier and interpreter don't read the activation traits so stop here
-			byte *newBytes = (byte*) core->GetGC()->Alloc(newMethodBody.size());
-			memcpy(newBytes, newMethodBody.getBytes().getData(), newMethodBody.size());
-			//init->body_pos = newBytes;
-			WB(core->GetGC(), init, &init->body_pos, newBytes);
-		}
-
-		if (traits->base && traits->base->base && traits->base->hashTableOffset != -1)
-		{
-			traits->hashTableOffset = traits->base->hashTableOffset + (uint32)traits->sizeofInstance - (uint32)traits->base->sizeofInstance;
-		}
-		else if (traits->needsHashtable)
-		{
-			traits->hashTableOffset = offset;
-			offset += sizeof(Hashtable);
-		}
-
-		traits->setTotalSize((size_t) offset);
-    }
-
-	Binding Traits::getOverride(Namespace* ns, Stringp name, int tag, const Toplevel *toplevel) const
-	{
-		int kind = tag & 0x0f;
-		Binding baseBinding = BIND_NONE;
-		if (base)
-		{
-			if (protectedNamespace == ns && base->protectedNamespace)
-			{
-				baseBinding = base->findBinding(name, base->protectedNamespace);
-			}
-			else
-			{
-				baseBinding = base->findBinding(name, ns);
-			}
-		}
-		if (baseBinding == BIND_NONE)
-		{
-			if (tag & ATTR_override)
-			{
-				// error if override attr set, and nothing is actually overridden
-				Multiname qname(ns,name);
-				toplevel->throwVerifyError(kIllegalOverrideError, toplevel->core()->toErrorString(&qname), toplevel->core()->toErrorString((Traits*)this));
-			}
-			return BIND_NONE;
-		}
-
-		switch (kind)
-		{
-		case TRAIT_Method:
-		{
-			if (AvmCore::isMethodBinding(baseBinding))
-			{
-				if (!(tag & ATTR_override))
-				{
-					// error if override flag not set, and something is overridden
-					break;
-				}
-				return baseBinding;
-			}
-			// error, method can only override a virtual method
-			break;
-		}
-		case TRAIT_Getter:
-		{
-			if (AvmCore::hasGetterBinding(baseBinding))
-			{
-				if (!(tag & ATTR_override))
-				{
-					// error if override flag not set, and something is overridden
-					break;
-				}
-				return baseBinding;
-			}
-			if ((baseBinding&7) == BIND_SET)
-			{
-				if (tag & ATTR_override)
-				{
-					// error if override attr set, and nothing is actually overridden
-					break;
-				}
-				return baseBinding;
-			}
-			// error, method can only override a virtual method
-			break;
-		}
-		case TRAIT_Setter:
-		{
-			if (AvmCore::hasSetterBinding(baseBinding))
-			{
-				if (!(tag & ATTR_override))
-				{
-					// error if override flag not set, and something is overridden
-					break;
-				}
-				return baseBinding;
-			}
-			if ((baseBinding&7) == BIND_GET)
-			{
-				if (tag & ATTR_override)
-				{
-					// error if override attr set, and nothing is actually overridden
-					break;
-				}
-				return baseBinding;
-			}
-			// error, method can only override a virtual method
-			break;
-		}
-		default:
-			// internal error to call getOverride on a non-method trait
-			AvmAssert(false);
-			break;
-		}
-		Multiname qname(ns,name);
-#ifdef AVMPLUS_VERBOSE
-		if (pool->verbose)
-			core->console << "illegal override in "<< this << ": " << &qname <<"\n";
-#endif
-		toplevel->throwVerifyError(kIllegalOverrideError, toplevel->core()->toErrorString(&qname), toplevel->core()->toErrorString((Traits*)this));
-		return BIND_NONE;
-	}
 
 	void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, AbstractFunction *script)
 	{
-		privateNamedScripts.add(name, ns, (Atom)script);
+		privateNamedScripts->add(name, ns, (Binding)script);
 	}
 
 	AbstractFunction* PoolObject::getNamedScript(const Multiname* multiname) const
@@ -959,7 +443,7 @@ namespace avmplus
 		AbstractFunction *f = domain->getNamedScript(multiname);
 		if(!f)
 		{
-			f = (AbstractFunction*)privateNamedScripts.getMulti(multiname);
+			f = (AbstractFunction*)privateNamedScripts->getMulti(multiname);
 		}
 		return f;
 	}

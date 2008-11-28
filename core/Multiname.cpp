@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-	Multiname::Multiname(NamespaceSet* nsset)
+	Multiname::Multiname(NamespaceSetp nsset)
 	{
 		this->flags = 0;
 		setNsset(nsset);
@@ -54,7 +54,7 @@ namespace avmplus
 		this->ns = NULL;
 	}
 
-	Multiname::Multiname(Namespace* ns, Stringp name, bool qualified)
+	Multiname::Multiname(Namespacep ns, Stringp name, bool qualified)
 	{
 		this->flags = 0;
 		setNamespace(ns);
@@ -63,7 +63,7 @@ namespace avmplus
 			setQName();
 	}
 
-	Namespace* Multiname::getNamespace(int i) const
+	Namespacep Multiname::getNamespace(int i) const
 	{
 		AvmAssert(!isRtns() && !isAnyNamespace());
 		if (flags&NSSET)
@@ -78,7 +78,7 @@ namespace avmplus
 		}
 	}
 
-	bool Multiname::contains(Namespace* ns) const
+	bool Multiname::contains(Namespacep ns) const
 	{
 		if (flags & NSSET)
 		{
@@ -149,7 +149,7 @@ namespace avmplus
 	}
 
 	/* static */ 
-	Stringp Multiname::format(AvmCore *core, Namespace* ns, Stringp name, bool attr, bool hideNonPublicNamespaces)
+	Stringp Multiname::format(AvmCore *core, Namespacep ns, Stringp name, bool attr, bool hideNonPublicNamespaces)
 	{
 		if (ns == core->publicNamespace ||
 			(hideNonPublicNamespaces && // backwards compatibility

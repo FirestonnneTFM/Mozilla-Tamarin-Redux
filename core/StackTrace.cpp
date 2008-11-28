@@ -41,61 +41,109 @@
 namespace avmplus
 {
 #ifdef FEATURE_SAMPLER
-	void CallStackNode::initialize(MethodEnv *			env,
-								   AbstractFunction *	info,
-								   Atom*				framep,
-								   Traits**				traits,
-								   int					argc,
-								   uint32 *				ap,
-								   sintptr volatile *	eip)
+	void CallStackNode::init(
+					MethodEnv*				env
+			#ifdef DEBUGGER
+					, Atom*					framep
+					, Traits**				frameTraits
+					, int					argc
+					, void*					ap
+					, intptr_t volatile*	eip
+					, int32_t volatile*		scopeDepth
+					, bool                  boxed
+			#endif
+			)
 	{
-		AvmCore *core = info->core();
+		AvmAssert(env != NULL);
+		m_core			= env->core();
+		m_env			= env;
+		m_next			= m_core->callStack; m_core->callStack = this;
+		m_envname		= env->method->name;
+		m_depth			= m_next ? (m_next->m_depth + 1) : 1;
+	#ifdef DEBUGGER
+		m_eip			= eip;     // ptr to where the current instruction pointer is stored
+		m_filename		= NULL;
+		m_framep		= framep;
+		m_traits		= frameTraits;
+		if (boxed)
+			m_ap		= (uint32_t*)ap;
+		else
+			m_atomv		= (Atom*)ap;
+		m_scopeDepth	= scopeDepth;
+		m_argc			= argc;
+		m_linenum		= 0;
+		m_boxed			= boxed;
+	#endif
+	}
 
-		this->info      = info;
-		this->eip		= eip;     // ptr to where the current instruction pointer is stored
-
-#ifdef DEBUGGER
-		this->env       = env;
-		this->ap        = ap;
-		this->argc      = argc;
-		this->framep	= framep;  // pointer to top of AS registers
-		this->traits    = traits;  // pointer to traits of top of AS registers
-		filename        = NULL;
-		linenum         = 0;
-
-		// scopechain stuff
-		this->scopeDepth = NULL;
-#else
-		// Avoid compiler warnings
-		(void)ap;
-		(void)argc;
-		(void)traits;
-		(void)framep;
-		(void)env;
-
-#endif
-		// link into callstack
-		next            = core->callStack;
-		core->callStack = this;
-
-		depth           = next ? (next->depth+1) : 1;
-		AvmAssert(info != NULL);
+	void CallStackNode::init(AvmCore* core, Stringp name)
+	{
+		// careful, core and/or name can be null
+		m_env			= NULL;
+		m_envname		= name;
+		if (name)
+		{
+			AvmAssert(core != NULL);
+			m_core		= core;
+			m_next		= core->callStack; core->callStack = this;
+			m_depth		= m_next ? (m_next->m_depth + 1) : 1;
+		}
+		else
+		{
+			m_core		= NULL;
+			m_next		= NULL;
+			m_depth		= 0;
+		}
+	#ifdef DEBUGGER
+		m_eip			= 0;    
+		m_filename		= 0;
+		m_framep		= 0;
+		m_traits		= 0;
+		m_ap			= 0;
+		m_scopeDepth	= 0;
+		m_argc			= 0;
+		m_linenum		= 0;
+		m_boxed			= false;
+	#endif
 	}
 
 	void CallStackNode::exit()
 	{
-		info->core()->callStack = next;
-		next = NULL;
+		// m_env might be null (for fake CallStackNode), be careful
+		AvmAssert(m_core != NULL);
+		m_core->callStack = m_next;
+		m_next = NULL;
+		m_core = NULL; // so the dtor doesn't call exit() again
 	}
+
+	CallStackNode::~CallStackNode()
+	{
+		// The destructor /must not/ do anything except call reset()
+		reset();
+	}
+	
+	void CallStackNode::reset()
+	{
+		AvmCore* core = m_core; // save it since exit() resets to null
+		if (core)
+		{
+			exit();
+			core->sampleCheck();
+		}
+	}
+
 #ifdef DEBUGGER
 	void** CallStackNode::scopeBase()
 	{
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
-		if (framep && info)
-			return (void**) (framep + ((MethodInfo*)info)->local_count);
-		else
-			return NULL;
+		if (m_framep && m_env)
+		{
+			return (void**) (m_framep + ((MethodInfo*)m_env->method)->local_count);
+		}
+		return NULL;
 	}
+#endif
+
 	// Dump a filename.  The incoming filename is of the form
 	// "C:\path\to\package\root;package/package;filename".  The path format
 	// will depend on the platform on which the movie was originally
@@ -153,23 +201,25 @@ namespace avmplus
 			const Element *e = elements;
 			for (int i=0; i<displayDepth; i++, e++)
 			{
-				// omit fake functions which are only for profiling purposes
-				if(e->info->isFakeFunction())
+				// env will be NULL if the element is from a fake CallStackNode
+				// omit them since they are only for profiling purposes
+				if (!e->info())
 					continue;
+
 				if(i != 0)
 					s = core->concatStrings(s, core->knewline);
 
 				Stringp filename=NULL;
-				if(e->filename)
+				if(e->filename())
 				{
 					StringBuffer sb(core->gc);
-					dumpFilename(e->filename, sb);
+					dumpFilename(e->filename(), sb);
 					filename = core->newString(sb.c_str());
 				}
-				s = core->concatStrings(s, e->info->getStackTraceLine(filename));
-				if(e->filename)
+				s = core->concatStrings(s, e->info()->getStackTraceLine(filename));
+				if(e->filename())
 				{
-					s = core->concatStrings(s, core->intToString(e->linenum));
+					s = core->concatStrings(s, core->intToString(e->linenum()));
 					s = core->concatStrings(s, core->krightbracket);
 				}
 			}
@@ -177,8 +227,6 @@ namespace avmplus
 		}
 		return stringRep;
 	}
-
-#endif /* DEBUGGER */
 
 #endif /* FEATURE_SAMPLER */
 }

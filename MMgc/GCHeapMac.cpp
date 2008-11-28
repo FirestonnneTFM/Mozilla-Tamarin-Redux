@@ -60,6 +60,7 @@
 
 #if (defined(MMGC_IA32) || defined(MMGC_AMD64)) && defined(MEMORY_INFO)
 #include <dlfcn.h>
+#include <cxxabi.h>
 #endif
 
 namespace MMgc
@@ -359,8 +360,11 @@ namespace MMgc
 
 	void GetInfoFromPC(sintptr pc, char *buff, int buffSize) 
 	{
+		int err = 0;
 		Dl_info dlip;
 		dladdr((void * const)pc, &dlip);
+		const char* nm = abi::__cxa_demangle(dlip.dli_sname,0,0,&err);
+		if (!nm || err) nm = dlip.dli_sname;
 		snprintf(buff, buffSize, "0x%08x:%s", (uint32)pc, dlip.dli_sname);
 	}
 	

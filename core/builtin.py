@@ -56,7 +56,6 @@ if classpath == None:
 
 javacmd = "java -ea -DAS3 -DAVMPLUS -classpath "+classpath
 asc = javacmd+" macromedia.asc.embedding.ScriptCompiler "
-thunkgen = javacmd+" adobe.abc.AbcThunkGen "
 
 print("ASC="+classpath)
 print("Building builtins...")
@@ -65,8 +64,9 @@ print("Building builtins...")
 os.system(asc+" -builtin -out builtin builtin.as Math.as Error.as Date.as RegExp.as XML.as")
 
 print("Generating native thunks...")
-os.system(thunkgen+" builtin.abc > builtin.out")
+os.system("python ../utils/nativegen.py builtin.abc")
 
 mv("builtin.cpp2", "builtin.cpp")
 mv("builtin.h2", "builtin.h")
 
+print("Done.")

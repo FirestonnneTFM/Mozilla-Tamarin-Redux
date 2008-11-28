@@ -38,7 +38,7 @@
 package
 {
 
-
+[native(cls="MathClass", instance="double", methods="auto")]
 public final class Math 
 {
 	// the value properties of math are {DontEnum,DontDelete,ReadOnly}
@@ -52,6 +52,8 @@ public final class Math
 	public static const SQRT2   :Number = 1.4142135623730951
 	
 	// min and max with 2 args are so common we overload these
+	// note, these appear to be unused, but are special-cased (by name) in Verifier
+	// in certain cases. Don't remove them.
 	native private static function _min    (x:Number, y:Number):Number
 	native private static function _max    (x:Number, y:Number):Number
 	

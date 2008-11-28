@@ -41,23 +41,23 @@ namespace avmplus
 {
 	ScriptEnv* AbcEnv::getScriptEnv(Stringp name, Namespacep ns)
 	{		
-		if(ns->isPrivate())
+		if (ns->isPrivate())
 		{
-			return (ScriptEnv*)privateScriptEnvs.get(name, ns);
+			return (ScriptEnv*)m_privateScriptEnvs->get(name, ns);
 		}
 		else
 		{
-			return (ScriptEnv*)domainEnv->getScriptInit(ns, name);
+			return (ScriptEnv*)m_domainEnv->getScriptInit(ns, name);
 		}
 	}
 
-	ScriptEnv* AbcEnv::getScriptEnv(const Multiname *multiname)
+	ScriptEnv* AbcEnv::getScriptEnv(const Multiname& multiname)
 	{
-		ScriptEnv *se = (ScriptEnv*)domainEnv->getScriptInit(multiname);
+		ScriptEnv *se = (ScriptEnv*)m_domainEnv->getScriptInit(multiname);
 		if(!se)
 		{	
 			// check privates
-			se = (ScriptEnv*)privateScriptEnvs.getMulti(multiname);
+			se = (ScriptEnv*)m_privateScriptEnvs->getMulti(multiname);
 		}
 		return se;
 	}

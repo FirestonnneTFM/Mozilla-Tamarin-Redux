@@ -60,11 +60,11 @@ package{
 			for (var i=0;i<generations;i++){
 				Iterations++;
 
-				var start2 = getTimer();
+				var start2:Number = new Date();
 
 				step();
 				draw();
-				var end2 = getTimer();
+				var end2:Number = new Date();
 				var t2 = end2-start2;
 //				print("The time taken for generation: "+Iterations+" is:"+t2 +" ms"+"\n");
 			}
@@ -187,8 +187,8 @@ package{
 	}
 	
 	
-	var t = getTimer();
+	var t:Number = new Date();
 	var k = new DrawGrid();
-	t = getTimer() - t;
+	t = new Date() - t;
 	print("metric time "+t);
 }
