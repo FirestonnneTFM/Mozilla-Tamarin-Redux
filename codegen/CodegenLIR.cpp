@@ -1048,10 +1048,11 @@ namespace avmplus
 		else
 		{
 			lirout->ins0(LIR_start);
-
 			// create params for saved regs -- processor specific
 			for (int i=0; i < NumSavedRegs; i++) {
-				lirout->insParam(i, 1);
+				LIns *p = lirout->insParam(i, 1); (void) p;
+				verbose_only(if (lirbuf->names)
+					lirbuf->names->addName(p, regNames[Assembler::savedRegs[i]]);)
 			}
 		}
 	}
@@ -1093,6 +1094,10 @@ namespace avmplus
                     if (isPromote(a->opcode()) && isPromote(b->opcode()))
                         return out->ins2(LOpcode(op & ~LIR64), a->oprnd1(), b->oprnd1());
                 }
+				else if (op == LIR_quad) {
+					// const fold
+					return insImm(AvmCore::integer_d(v->constvalf()));
+				}
             }
 
             SSE2_ONLY(if(config.sse2) {
