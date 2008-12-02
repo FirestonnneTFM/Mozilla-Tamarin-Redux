@@ -72,7 +72,6 @@ package avmplus
 
 	internal function finish(x:XML, e:XML, i:Object):void
 	{
-		e.@name = i.name;
 		if (i.uri !== null) e.@uri = i.uri;
 		if (i.metadata !== null) describeMetadata(e, i.metadata);
 		x.appendChild(e);
@@ -90,30 +89,31 @@ package avmplus
 			var e:XML = <implementsInterface type={i}/>
 			x.appendChild(e);
 		}
-		for each (var i in traits.variables)
-		{
-			var e:XML = (i.access == "readonly") ? <constant/> : <variable/>
-			e.@type= i.type;
-			finish(x, e, i);
-		}
-		for each (var i in traits.accessors)
-		{
-			var e:XML = <accessor access={i.access} type={i.type} declaredBy={i.declaredBy}/>
-			finish(x, e, i);
-		}
-		for each (var i in traits.methods)
-		{
-			var e:XML = <method returnType={i.returnType} declaredBy={i.declaredBy}/>
-			describeParams(e, i.parameters);
-			finish(x, e, i);
-		}
-		describeMetadata(x, traits.metadata);
 		if (traits.constructor !== null)
 		{
 			var e:XML = <constructor/>
 			describeParams(e, traits.constructor);
 			x.appendChild(e);
 		}
+		for each (var i in traits.variables)
+		{
+			var e:XML = (i.access == "readonly") ? <constant/> : <variable/>
+			e.@name = i.name;
+			e.@type = i.type;
+			finish(x, e, i);
+		}
+		for each (var i in traits.accessors)
+		{
+			var e:XML = <accessor name={i.name} access={i.access} type={i.type} declaredBy={i.declaredBy}/>
+			finish(x, e, i);
+		}
+		for each (var i in traits.methods)
+		{
+			var e:XML = <method name={i.name} declaredBy={i.declaredBy} returnType={i.returnType}/>
+			describeParams(e, i.parameters);
+			finish(x, e, i);
+		}
+		describeMetadata(x, traits.metadata);
 	}
 
 	// -------------- public --------------
@@ -151,9 +151,12 @@ package avmplus
 	public function describeType(value:*, flags:uint):XML
 	{
 		var o:Object = DescribeType.describeTypeJSON(value, flags);
-		var x:XML = <type name={o.name} isDynamic={o.isDynamic} isFinal={o.isFinal} isStatic={o.isStatic}/>
+		var x:XML = <type name={o.name}/>
 		if (o.traits.bases.length)
 			x.@base = o.traits.bases[0];
+		x.@isDynamic = o.isDynamic;
+		x.@isFinal = o.isFinal;
+		x.@isStatic = o.isStatic;
 		describeTraits(x, o.traits);
 		
 		var oi:Object = DescribeType.describeTypeJSON(value, flags | USE_ITRAITS);
