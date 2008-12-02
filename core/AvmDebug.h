@@ -80,6 +80,7 @@ namespace avmplus
 			#else
 				AvmDebugMsg(message, true);
 			#endif
+			exit(1); // in case above handler didn't exit, we will
 		}
 
 		inline void _AvmAssertMsg(int32 assertion, const char* message) {
