@@ -64,7 +64,6 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -136,7 +135,6 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 				CompileForArchitecture="3"
 			/>
 			<Tool
@@ -223,7 +221,6 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -298,7 +295,6 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 				CompileForArchitecture="3"
 			/>
 			<Tool
@@ -384,7 +380,6 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -460,7 +455,6 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -546,7 +540,6 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -622,7 +615,6 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -705,7 +697,6 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -777,7 +768,6 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -861,7 +851,6 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -937,7 +926,6 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1012,7 +1000,6 @@
 				WarningLevel="4"
 				WarnAsError="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1088,7 +1075,6 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1161,7 +1147,6 @@
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4189;4740;4189;4310"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
