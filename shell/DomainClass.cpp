@@ -133,9 +133,9 @@ namespace avmshell
 		Namespace* ns;
 		Stringp className;
 		if (dot != -1) {
-			Stringp uri = core->internString(name->substring (0, dot));
+			Stringp uri = core->internString(new (core->GetGC()) String(name, 0, dot));
 			ns = core->internNamespace(core->newNamespace(uri));
-			className = core->internString(name->substring (dot+1, name->length()));
+			className = core->internString(new (core->GetGC()) String(name, dot+1, name->length()-(dot+1)));
 		} else {
 			ns = core->publicNamespace;
 			className = core->internString(name);

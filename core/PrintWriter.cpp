@@ -210,27 +210,10 @@ namespace avmplus
 
 	PrintWriter& PrintWriter::operator<< (Stringp str)
 	{
-		if (!str)
+		if (str)
+		return *this << str->c_str();
+		else
 			return *this << "(null)";
-
-		String::Pointers ptrs;
-		ptrs.pv = (void*) str->getData();
-		int32_t length = str->length();
-		switch (str->getWidth())
-		{
-			case String::k8:
-				while (length--)
-					*this << (wchar) (*ptrs.p8++ & 0xFF);
-					break;
-			case String::k16:
-				while (length--)
-					*this << *ptrs.p16++;
-					break;
-			default:
-				// TODO-32: print 32-bit data
-				AvmAssert(false);
-		}
-		return *this;
 	}
 
 	PrintWriter& PrintWriter::operator<< (ScriptObject *obj)

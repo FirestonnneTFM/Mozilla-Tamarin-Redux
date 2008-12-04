@@ -349,7 +349,7 @@ namespace avmplus
 		if ((*s)[0] == '@')
 		{
 			// __toAttributeName minus the @
-			Stringp news = s->substring(1, s->length());
+			Stringp news = new (core->GetGC()) String(s, 1, s->length() - 1);
 			m.setName(core->internString(news));
 			m.setAttr();
 		}
@@ -463,7 +463,7 @@ namespace avmplus
 					if ((s->length() == 2) && ((*s)[1] == '*'))
 						out.setAnyName();
 					else
-						out.setName(core->internString(s->substring (1, s->length())));
+						out.setName(core->internString (new (core->GetGC()) String(s, 1, s->length()-1)));
 					out.setAttr();
 				}
 				else
@@ -1232,11 +1232,8 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		if (!in) in = core->knull;
-		UTF16String* in16 = in->toUTF16String();
-		const wchar* ptr = (const wchar*) in16->c_str();
-		double n = MathUtils::parseInt(ptr, in16->length(), radix, false);
-		delete in16;
-		return n;
+		const wchar *ptr = in->c_str();
+		return MathUtils::parseInt(ptr, in->length(), radix, false);
     }
 
 	double Toplevel::parseFloat(Stringp in)
@@ -1245,11 +1242,10 @@ namespace avmplus
 		
 		AvmCore* core = this->core();
 		if (!in) in = core->knull;
-		UTF16String* in16 = in->toUTF16String();
-		if (!MathUtils::convertStringToDouble(in16->c_str(), in16->length(), &result, false))
+		if (!MathUtils::convertStringToDouble(in->c_str(), in->length(), &result, false)) {
 			result = MathUtils::nan();
-		delete in16;
-
+		}
+		
 		return result;
     }
 
@@ -1259,11 +1255,11 @@ namespace avmplus
 
 		if (!in) in = core->knull;
 
+		const wchar *str = in->c_str();
 		StringBuffer buffer(core);
 		
-		StringIndexer str_idx(in);
 		for (int i=0, n=in->length(); i<n; i++) {
-			wchar ch = str_idx[i];
+			wchar ch = str[i];
 			if (contains(unescaped, ch)) {
 				buffer << ch;
 			} else if (ch & 0xff00) {
@@ -1296,7 +1292,7 @@ namespace avmplus
 				buffer.writeHexByte((uint8)ch);
 			}
 		}
-		delete inputUTF8;
+
 		return core->newString(buffer.c_str());
     }
 	
@@ -1315,51 +1311,50 @@ namespace avmplus
 		return -1;
 	}
 
+	wchar Toplevel::extractCharacter(const wchar*& src)
+	{
+		if (*src == '%') {
+			const wchar *ptr = src;
+			ptr++;
+			if (*ptr == 0) {
+				return *src++;
+			}
+			wchar value = 0;
+			int len = 2;
+			if (*ptr == 'u') {
+				len = 4;
+				ptr++;
+			}
+			for (int i=0; i<len; i++) {
+				int v = parseHexChar(*ptr++);
+				if (v < 0) {
+					return *src++;
+				}
+				value = (wchar)((value<<4) | v);
+			}
+			src = ptr;
+			return value;
+		}
+		return *src++;
+	}
+	
 	Stringp Toplevel::unescape(Stringp in)
 	{
 		AvmCore* core = this->core();
 
 		if (!in) in = core->knull;
 
-		Stringp out = NULL;
-		int32_t pos = 0;
-		StringIndexer str(in);
-		while (pos < in->length())
-		{
-			utf32_t ch = str[pos++];
-			if (ch == '%') 
-			{
-				int32_t curPos = pos;
-				int len = 2;
-				if (pos < (in->length() - 5) && str[pos] == 'u')
-				{
-					len = 4;
-					pos++;
-				}
-				if ((pos + len) <= in->length())
-				{
-					ch = 0;
-					while (len--) 
-					{
-						int v = parseHexChar((wchar) str[pos++]);
-						if (v < 0) 
-						{
-							pos = curPos;
-							ch = '%';
-							break;
-						}
-						ch = (utf32_t)((ch<<4) | v);
-					}
-				}
-			}
-			wchar ch16 = (wchar) ch;
-			if (NULL == out)
-				out = String::create(core, &ch16, 1);
-			else
-				out = out->append(&ch16, 1);
+		Stringp out = new (core->GetGC()) String(in->length());
+
+		const wchar *src = in->c_str();
+		wchar *outbuf = out->lockBuffer();
+		wchar *dst = outbuf;
+		const wchar *end = src + in->length();
+		while (src < end) {
+			*dst++ = extractCharacter(src);
 		}
-		if (NULL == out)
-			out = core->kEmptyString;
+		*dst = 0;
+		out->unlockBuffer((int)(dst-outbuf));
 		
 		return out;
     }
@@ -1368,8 +1363,7 @@ namespace avmplus
 	{
 		StringBuffer out(core());
 
-		UTF16String* in16 = in->toUTF16String();
-		const wchar *src = in16->c_str();
+		const wchar *src = in->c_str();
 		int len = in->length();
 
 		while (len--) {
@@ -1407,13 +1401,13 @@ namespace avmplus
 				}
 			}
 		}
-		delete in16;
+
 		return core()->newString(out.c_str());
 	}
 	
 	Stringp Toplevel::decode(Stringp in, bool decodeURIComponentFlag)
 	{
-		StringIndexer chars(in);
+		const wchar *chars = in->c_str();
 		int length = in->length();
 		wchar *out = (wchar*) core()->GetGC()->Alloc(length*2+1); // decoded result is at most length wchar chars long
 		int outLen = 0;
@@ -1517,8 +1511,9 @@ namespace avmplus
 				out[outLen++] = C;
 			}
 		}
-
-		return String::create(core(), out, outLen);
+		
+		out[outLen] = 0;
+		return new (gc()) String(out,outLen);
 	}
 
 	/*

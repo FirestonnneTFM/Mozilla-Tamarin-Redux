@@ -806,7 +806,7 @@ namespace avmplus
 		}
 
 		int len = (int)(srcEnd-src-1);
-		return String::create(core, src+1, len);
+		return new (core->GetGC()) String(src+1, len);
 	}
 	
 	void MathUtils::convertDoubleToString(double value,

@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is[Open Source Virtual Machine.].
+ * The Original Code is [Open Source Virtual Machine.].
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
@@ -39,382 +39,433 @@
 
 namespace avmplus
 {
+	wchar *stripPrefix(const wchar *str, const char *pre)
+		// If str begins with pre, return the first char after in str
+	{
+		if ((!str) || (!pre))
+			return 0;
+		for (;;) {
+			// Map to uppercase
+			wchar s = *str;
+			if ( s >= 'a' && s <= 'z' )
+				s -= 'a' - 'A';
+			unsigned char p = *pre;
+			if ( p >= 'a' && p <= 'z' )
+				p -= 'a' - 'A';
+
+			// See if the characters are not equal or we hit the end of the strings
+			if ( s != p || !s || !p ) 
+				break;
+
+			*pre++; *str++;
+		}
+		return *pre == 0 ? const_cast<wchar*>(str) : 0;
+	}
+
 	//
 	// XMLParser
 	//	
-
-	bool XMLParser::skipWhiteSpace()
-	{
-		bool eof = atEnd();
-		while (!eof)
-		{
-			wchar ch = m_str[m_pos];
-			if (!String::isSpace(ch))
-				break;
-			m_pos++;
-			eof = atEnd();
-		}
-		return !eof;
-	}
 
 	// !!@ I'm not sure what this was supposed to do originally but I've rewritten it
 	// to remove the leading and trailing white space for text elements.  
 	// "     5     4     3     " becomes "5     4     3"
 	// This is to simulate the E4X XML parser
-	static Stringp _condenseWhitespace(Stringp text)
+	void XMLParser::condenseWhitespace(Stringp text)
 	{
-		StringIndexer str (text);
-		// leading space
-		int32_t start = 0;
-		while (start < text->length() && String::isSpace(str[start]))
-			start++;
-		// trailing space
-		int32_t end = text->length() - 1;
-		while ((end > start) && String::isSpace(str[end]))
-			end--;
-		return text->substring(start, end + 1);
+		AvmAssert (!text->isInterned());
+		wchar *str = text->lockBuffer();
+		int len = text->length();
+
+		wchar *dst = str;
+		wchar *src = str;
+		bool leadingWhite = true;
+		wchar *lastChar = 0;
+
+		while (len--) {
+			if (String::isSpace(*src)) {
+				if (!leadingWhite) {
+					*dst++ = *src;
+				}
+				src++;
+			} else {
+				leadingWhite = false; // first non-space char, no more 
+				lastChar = dst;
+				*dst++ = *src++;
+			}
+		}
+
+		if (lastChar)
+			lastChar[1] = 0;
+
+		*dst = 0;
+
+        text->unlockBuffer((int)((lastChar ? (lastChar + 1) : dst)-str));
 	}
 
-	int XMLParser::getNext (XMLTag& tag)
+	int XMLParser::getNext(XMLTag& tag)
 	{
-		wchar ch;
-		int32_t start, end;
 		tag.reset();
 
 		// If there's nothing left, exit.
-		if (atEnd()) {
+		if (!m_ptr || !*m_ptr) {
 			return XMLParser::kEndOfDocument;
 		}
 
 		// R41
 		// If the ignore whitespace flag is on, don't produce
 		// all-whitespace text nodes.
-		if (m_ignoreWhite) 
-		{
-			if (!skipWhiteSpace())
+		if (m_ignoreWhite) {
+			const wchar *ptr = m_ptr;
+			while (String::isSpace(*ptr)) {
+				ptr++;
+			}
+			if (*ptr == '<' || !*ptr) {
+				// If we reached the end of the document,
+				// or we reached a tag, skip all the
+				// whitesapce, because it would turn into
+				// an empty text node.
+				m_ptr = ptr;
+			}
+			// If there's nothing left, exit.
+			// But only do it for Flash 6 because we want
+			// to exactly preserve Flash 5 behavior.
+			if (!*m_ptr) {
 				return XMLParser::kEndOfDocument;
+			}
 		}
 		// end R41
 
 		// If it starts with <, it's an XML element.
 		// If it doesn't, it must be a text element.
-		start = m_pos;
-		ch = m_str[m_pos];
-		if (ch != '<') 
-		{
+		if (*m_ptr != '<') {
 			// Treat it as text.  Scan up to the next < or until EOF.
-			m_pos = m_str->indexOf("<", 1, m_pos + 1);
-			if (m_pos < 0)
-				m_pos = m_str->length();
-
-			tag.text = unescape(start, m_pos, false);
+			const wchar *start = m_ptr;
+			while (*m_ptr && *m_ptr != '<') {
+				m_ptr++;
+			}
+			tag.text = unescape(m_source, start, (int)(m_ptr-start), false);
 
 			// Condense whitespace if desired
-			if (m_ignoreWhite && m_condenseWhite)
-				tag.text = _condenseWhitespace(tag.text);
+			if (m_ignoreWhite && m_condenseWhite) {
+				condenseWhitespace(tag.text);
+			}
 
 			tag.nodeType = XMLTag::kTextNodeType;
 			return XMLParser::kNoError;
 		}
 
 		// Is this a <?xml> declaration?
-		start = m_pos;
-		if (m_str->matches("<?xml ", 6, start))
-		{
-			end = m_str->indexOf("?>", 2, start + 6);
-			if (end >= 0)
-			{
-				// We have the end of the XML declaration
-				// !!@ changed to not return <?...?> parts
-				tag.text = m_str->substring(start + 2, end);
-				m_pos = end + 2;
-				tag.nodeType = XMLTag::kXMLDeclaration;
-				return XMLParser::kNoError;
+		wchar *temp;
+		if ((temp = stripPrefix(m_ptr, "<?xml ")) != NULL) {
+			// Scan forward for "?>"
+			const wchar *start = m_ptr;
+			m_ptr = temp;
+			while (*m_ptr) {
+				if (m_ptr[0] == '?' && m_ptr[1] == '>') 
+				{
+					// We have the end of the XML declaration
+					// !!@ changed to not return <?...?> parts
+					tag.text = new (core->GetGC()) String(start + 2, (int)(m_ptr - start - 2));
+					m_ptr += 2;
+					tag.nodeType = XMLTag::kXMLDeclaration;
+					return XMLParser::kNoError;
+				}
+				else
+				{
+					m_ptr++;
+				}
 			}
 			return XMLParser::kUnterminatedXMLDeclaration;
 		}
 
 		// Is this a <!DOCTYPE> declaration?
-		if (m_str->matches("<!DOCTYPE", 8, start))
-		{
-			// Scan forward for '>', but check for embedded <>
-			int32_t depth = 0;
-			start += 8;
-			end = start + 1;
-			while (!atEnd())
-			{
-				ch = m_str[end++];
-				if (ch == '<')
+		if ((temp = stripPrefix(m_ptr, "<!DOCTYPE")) != NULL) {
+			// Scan forward for '>'.
+			const wchar *start = m_ptr;
+			m_ptr = temp;
+			int depth = 0;
+			while (*m_ptr) {
+				if (*m_ptr == '<') {
 					depth++;
-				else if (ch == '>')
-				{
-					if (!depth) 
-					{
+				}
+				if (*m_ptr == '>') {
+					if (!depth) {
 						// We've reached the end of the DOCTYPE.
-						tag.text = m_str->substring(start, end - 1);
+						m_ptr++;
+						tag.text = new (core->GetGC()) String(start, (int)(m_ptr-start));
 						tag.nodeType = XMLTag::kDocTypeDeclaration;
-						m_pos = end;
 						return XMLParser::kNoError;
 					}
 					depth--;
 				}
-				m_pos = end;
+				m_ptr++;
 			}
 			return XMLParser::kUnterminatedDocTypeDeclaration;
 		}
 
 		// Is this a CDATA section?
-		if (m_str->matches("<![CDATA[", 9, start))
-		{
-			start += 9;
-			end = m_str->indexOf("]]>", 3, start);
-			if (end >= 0)
-			{
-				// We have the end of the CDATA section.
-				tag.text = m_str->substring(start, end);
-				tag.nodeType = XMLTag::kCDataSection;
-				m_pos = end + 3;
-				return XMLParser::kNoError;
+		wchar *cdata;
+		if ((cdata = stripPrefix(m_ptr, "<![CDATA[")) != NULL) {
+			// Scan forward for "]]>"
+			m_ptr = cdata;
+			while (*m_ptr) {
+				if (m_ptr[0] == ']' && m_ptr[1] == ']' && m_ptr[2] == '>') {
+					// We have the end of the CDATA section.
+					tag.text = new (core->GetGC()) String(cdata, (int)(m_ptr-cdata));
+					tag.nodeType = XMLTag::kCDataSection;
+					m_ptr += 3;
+					return XMLParser::kNoError;
+				}
+				m_ptr++;
 			}
 			return XMLParser::kUnterminatedCDataSection;
 		}
 
 		// Is this a processing instruction?
-		if (m_str->matches("<?", 2, start))
-		{
+		wchar *pi;
+		if ((pi = stripPrefix(m_ptr, "<?")) != NULL) {
 			// Scan forward for "?>"
-			start += 2;
-			end = m_str->indexOf("?>", 2, start);
-			if (end >= 0)
-			{
-				// We have the end of the processing instruction.
-				tag.text = m_str->substring(start, end);
-				tag.nodeType = XMLTag::kProcessingInstruction;
-				m_pos = end + 2;
-				return XMLParser::kNoError;
+			m_ptr = pi;
+			while (*m_ptr) {
+				if (m_ptr[0] == '?' && m_ptr[1] == '>') {
+					// We have the end of the processing instruction.
+					tag.text = new (core->GetGC()) String(pi, (int)(m_ptr - pi));
+					tag.nodeType = XMLTag::kProcessingInstruction;
+					m_ptr += 2;
+					return XMLParser::kNoError;
+				}
+				m_ptr++;
 			}
 			return XMLParser::kUnterminatedProcessingInstruction;
 		}
 
 		// Advance past the "<"
-		start = ++m_pos;
+		m_ptr++;
 
 		// Is this a comment?  Return a comment tag->
-		if (m_str->matches("!--", 3, start)) 
-		{
+		const wchar *comment;
+		if (m_ptr[0] == '!' && m_ptr[1] == '-' && m_ptr[2] == '-') {
 			// Skip up to '-->'.
-			start += 3;
-			end = m_str->indexOf("-->", 3, start);
-			if (end >= 0)
-			{
-				tag.text = m_str->substring(start, end);
-				tag.nodeType = XMLTag::kComment;
-				m_pos = end  + 3;
-				return XMLParser::kNoError;
+			m_ptr += 3;
+			comment = m_ptr;
+			while (*m_ptr) {
+				if (m_ptr[0] == '-' && m_ptr[1] == '-' && m_ptr[2] == '>') 
+				{
+					tag.text = new (core->GetGC()) String(comment, (int)(m_ptr-comment));
+					tag.nodeType = XMLTag::kComment;
+					m_ptr += 3;
+					return XMLParser::kNoError;
+				}
+				m_ptr++;
 			}
 			// Got to the end of the buffer without finding a new tag->
 			return XMLParser::kUnterminatedComment;
 		}
 
-		// Extract the tag name.  Scan up to "/", ">" or whitespace.
-		start = m_pos;
-		while (!atEnd())
-		{
-			ch = m_str[m_pos];
-			if (ch == '>' || String::isSpace(ch))
-				break;
-			if (ch == '/')
-			{
-				// /tagname?
-				if (start == m_pos)
-					tag.endtag = true, start++;
-				else
-					break;
-			}
-			m_pos++;
-		}
-		if (atEnd() || m_pos == start)
-			// Premature end, or empty tag name
-			return XMLParser::kMalformedElement;
 
-		tag.text = unescape(start, m_pos, true);
+		// Extract the tag name.  Scan up to ">" or whitespace.
+		const wchar *tagStart = m_ptr;
+		while (!String::isSpace(*m_ptr) && *m_ptr != '>') {
+			if (*m_ptr == '/' && *(m_ptr+1) == '>') {
+				// Found close of an empty element.
+				// Exit!
+				break;
+			}
+			if (!*m_ptr) {
+				// Premature end!
+				return XMLParser::kMalformedElement;
+			}
+			m_ptr++;
+		}
+
+		// Give up if tag name is empty
+		if (m_ptr == tagStart) {
+			return XMLParser::kMalformedElement;
+		}
+
+		tag.text = unescape(m_source, tagStart, (int)(m_ptr-tagStart), true);
+
 		tag.nodeType = XMLTag::kElementType;
 
 		// Extract attributes.
-		for (;;) 
-		{
-			if (!skipWhiteSpace())
+		for (;;) {
+			if (!*m_ptr) {
 				// Premature end!
 				return XMLParser::kMalformedElement;
+			}
 
-			ch = m_str[m_pos];
-			if (ch == '>')
+			// Skip any whitespace.
+			while (String::isSpace(*m_ptr)) {
+				m_ptr++;
+			}
+
+			if (*m_ptr == '>') {
 				break;
+			}
 
-			if (ch == '/')
-			{
-				if ((m_pos < m_str->length() - 1) && m_str[++m_pos] == '>') 
-				{
-					// Found close of an empty element.
-					// Exit!
-					tag.empty = true;
-					m_pos++;
-					break;
-				}
-				return XMLParser::kMalformedElement;
+			if (*m_ptr == '/' && *(m_ptr+1) == '>') {
+				// Found close of an empty element.
+				// Exit!
+				tag.empty = true;
+				m_ptr++;
+				break;
 			}
 
 			// Extract the attribute name.
-			start = m_pos;
-
-			m_pos--;
-			while (!String::isSpace(ch) && ch != '=' && ch != '>') 
-			{
-				if (atEnd())
+			const wchar *nameStart = m_ptr;
+			while (!String::isSpace(*m_ptr) && *m_ptr != '=' && *m_ptr != '>') {
+				if (!*m_ptr) {
 					// Premature end!
 					return XMLParser::kMalformedElement;
-				ch = m_str[++m_pos];
+				}
+				m_ptr++;
 			}
-			if (start == m_pos)
+			if (m_ptr == nameStart) {
 				// Empty attribute name?
 				return XMLParser::kMalformedElement;
-
-			Stringp attributeName = unescape(start, m_pos, true);
-
-			if (!skipWhiteSpace())
-				// No attribute value, error!
-				return XMLParser::kMalformedElement;
-
-			ch = m_str[m_pos++];
-			if (ch != '=')
-				// No attribute value, error!
-				return XMLParser::kMalformedElement;
-
-			if (!skipWhiteSpace())
-				// No attribute value, error!
-				return XMLParser::kMalformedElement;
-
-			wchar delimiter = m_str[m_pos++];
-			// Extract the attribute value.
-			if (delimiter != '"' && delimiter != '\'')
-				// Error; no opening quote for attribute value.
-				return XMLParser::kMalformedElement;
-
-			// Extract up to the next quote.
-			start = m_pos;
-			ch = 0;
-			while (ch != delimiter) 
-			{
-				if (atEnd() || ch == '<')
-					// '<' is not permitted in an attribute value
-					// Changed this from kMalformedElement to kUnterminatedAttributeValue for bug 117058(105422)
-					return XMLParser::kUnterminatedAttributeValue;
-				ch = m_str[m_pos++];
 			}
 
-			Stringp attributeValue = unescape(start, m_pos - 1, false);
+			Stringp attributeName = unescape(m_source, nameStart, (int)(m_ptr-nameStart), true);
 
-			AvmAssert(attributeName->isInterned());
-			tag.attributes.add(attributeName);
-			tag.attributes.add(attributeValue);
+			while (String::isSpace(*m_ptr)) {
+				m_ptr++;
+			}
+			if (*m_ptr != '=') {
+				// No '=' sign, no attribute value, error!
+				return XMLParser::kMalformedElement;
+			} else {
+				// Skip over whitespace.
+				while (String::isSpace(*++m_ptr))
+					;
+				const wchar *attrStart = m_ptr;
+				// Extract the attribute value.
+				if (*m_ptr != '"' && *m_ptr != '\'') {
+					// Error; no opening quote for attribute value.
+					return XMLParser::kMalformedElement;
+				}
+				wchar delimiter = *m_ptr;
+				// Extract up to the next quote.
+				attrStart++;
+				while (*++m_ptr != delimiter) {
+					if (*m_ptr == '<') {
+						// '<' is not permitted in an attribute value
+						// Changed this from kMalformedElement to kUnterminatedAttributeValue for bug 117058(105422)
+						return XMLParser::kUnterminatedAttributeValue;
+					}
+					if (!*m_ptr) {
+						// If at end of file, 
+						// we have an unterminated attribute value on our hands.
+						return XMLParser::kUnterminatedAttributeValue;
+					}
+				}
+				const wchar *attrEnd = m_ptr;
+				m_ptr++;
+
+				Stringp attributeValue = unescape(m_source, attrStart, (int)(attrEnd-attrStart), false);
+
+				AvmAssert (attributeName->isInterned());
+				tag.attributes.add(attributeName);
+				tag.attributes.add(attributeValue);
+			}
 		}
 
 		// Advance past the end > of this element.
-		if (ch == '>')
-			m_pos++;
+		if (*m_ptr == '>') {
+			m_ptr++;
+		}
 
 		return XMLParser::kNoError;
 	}
 
-	Stringp XMLParser::unescape(int32_t start, int32_t last, bool bIntern)
+	Stringp XMLParser::unescape(Stringp text, const wchar *startChar, int len, bool bIntern)
 	{
-		if (start == last)
-			return core->kEmptyString;
-
-		int32_t bgn = m_str->indexOf("&", 1, start, last);
-		int32_t end = start;
-		Stringp dest = NULL;
-		while (bgn >= start && bgn < last)
+		bool bUseSubString = true;
+		for (int i = 0; i < len; i++)
 		{
-			int32_t ampEnd = m_str->indexOf(";", 1, ++bgn, last);
-			if (ampEnd < 0)
-				// &xxx without semicolon - we are done
-				break;
-			// add the text between the last sequence and this sequence
-			dest = String::concatStrings(dest, m_str->substring(end, bgn-1));
-			end = ampEnd;
-			int32_t len = end - bgn;
-			// an &xx; sequence is at least two characters
-			bool ok = true;
-			if (len >= 2)
+			if (startChar[i] == '&')
 			{
-				int32_t ch = m_str[bgn];
-				if (ch == '#')
-				{
-					// Parse a &#xx; decimal sequence.  Or a &#xDD hex sequence
-					ch = m_str[++bgn];
-					len--;
-					int base = 10;
-					if (len >= 2 && ch == 'x')
-						base = 16, bgn++, len--;
-					if (len > 0)
-					{
-						int32_t value = 0;
-						while (len-- && ok)
-						{
-							ch = m_str[bgn++];
-							if (ch >= 'A' && ch <= 'F')
-								ch -= 7;
-							ch -= '0';
-							if (ch >= 0 && ch < base)
-								value = (value * base) + ch;
-							else
-								ok = false;
-							if (value > 0xFFFF)
-								ok = false;
-						}
-						if (ok)
-						{
-							wchar c = (wchar) value;
-							if (NULL == dest)
-								dest = String::create(core, &c, 1);
-							else
-								dest = dest->append(&c, 1);
-							bgn = ++end;
-						}
-					}
-				} 
-				else if (len <= 4) // Our xmlEntities are only 4 characters or less
-				{
-					Atom entityAtom = core->internString(m_str->substring(bgn, end))->atom();
-					Atom result = core->xmlEntities->get(entityAtom);
-					if (result != undefinedAtom) 
-					{
-						wchar c = (wchar) (result>>3);
-						if (NULL == dest)
-							dest = String::create(core, &c, 1);
-						else
-							dest = dest->append(&c, 1);
-						bgn = ++end;
-					}
-					else
-						ok = false;
-				}
-				else
-					ok = false;
+				bUseSubString = false;
+				break;
 			}
-			if (!ok)
-				bgn = end + 1;
-			bgn = m_str->indexOf("&", 1, bgn, last);
 		}
-		// add any remaining text
-		if (end < last)
-			dest = String::concatStrings(dest, m_str->substring(end, last));
 
-		return (bIntern) ? core->internString(dest) : dest;
+		if (bUseSubString)
+		{
+			if (bIntern)
+			{
+				return core->internAlloc (startChar, len);
+			}
+			else
+			{
+				MMgc::GC* gc = MMgc::GC::GetGC(text);
+				int start = (int)(startChar - text->c_str());
+				AvmAssert (start < text->length());
+				return new (gc) String (text, start, len);
+			}
+		}
+
+		MMgc::GC* gc = MMgc::GC::GetGC(text);
+		Stringp news = new (gc) String (startChar, len);
+		wchar *buffer = news->lockBuffer();
+	
+		// Remove XML &#xx; escape entities, and &lt; &gt; &amp; &apos;
+		wchar *dst = buffer;
+		wchar *src = buffer;
+
+		while (*src) {
+			if (*src == '&') {
+				bool success = false;
+				// Scan forward to the ';'
+				wchar *endPtr = src;
+				while (*endPtr && *endPtr != ';') {
+					endPtr++;
+				}
+				if (*endPtr) {
+					*endPtr = 0;
+					int len = (int)(endPtr-src-1);
+
+					if (*(src+1) == '#') {
+						// Parse a &#xx; decimal sequence.  Or a &#xDD hex sequence
+						double value = MathUtils::parseInt(src+2, len-1);
+						if (MathUtils::isNaN(value)) {
+							if (len > 2 && src[2] == 'x') {
+								// Handle xFF hex encoded tags, too				
+								value = MathUtils::parseInt(src+3, len-2, 16);
+							}
+						}
+						if (!MathUtils::isNaN(value)) {
+							*dst++ = (wchar) (int) value;
+							success = true;
+						}
+					} else if (len <= 4) // Our xmlEntities are only 4 characters or less
+					{
+						Atom entityAtom = core->internAlloc(src+1, len)->atom();
+						Atom result = core->xmlEntities->get(entityAtom);
+						if (result != undefinedAtom) {
+							*dst++ = (wchar)(result>>3);
+							success = true;
+						}
+					}
+					*endPtr = ';';
+				}
+				if (success) {
+					// If successful, advance past the sequence
+					src = endPtr+1;
+				} else {
+					// Otherwise copy the sequence literally
+					*dst++ = *src++;
+				}
+			} else {
+				*dst++ = *src++;
+			}
+		}
+		*dst = 0;
+
+		news->unlockBuffer((int)(dst-buffer));
+		return (bIntern) ? core->internString (news) : news;
 	}
 
-	XMLParser::XMLParser(AvmCore *core, Stringp str) : m_str (str), m_pos (0)
+	XMLParser::XMLParser(AvmCore *core)
 	{
 		this->core = core;
 
@@ -436,9 +487,11 @@ namespace avmplus
 		}
 	}
 
-	void XMLParser::parse(bool ignoreWhite /*=false*/ )
+	void XMLParser::parse(Stringp source,
+						  bool ignoreWhite /*=false*/ )
 	{
-		m_pos = 0;
+		m_source = source;
+		m_ptr = m_source->c_str();
 		m_ignoreWhite = ignoreWhite;
 	}
 

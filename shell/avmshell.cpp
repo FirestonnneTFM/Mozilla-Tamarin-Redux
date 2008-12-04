@@ -1149,7 +1149,7 @@ namespace avmshell
 							{
 								ScriptBuffer code = newScriptBuffer(fl.available());
 								fl.read(code.getBuffer(), fl.available());
-								handleActionBlock(code, 0, domainEnv, toplevel, NULL, lastCodeContext);
+								handleActionBlock(code, 0, domainEnv, toplevel, NULL, NULL, NULL, lastCodeContext);
 							}
 							CATCH(Exception *exception)
 							{

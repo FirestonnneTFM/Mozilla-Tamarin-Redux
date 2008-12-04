@@ -100,7 +100,7 @@ namespace avmplus
 		wchar buffer[256];
 		int len;
 		date.toString(buffer, Date::kToString, len);
-		return String::create(core(), buffer, len)->atom();
+		return (new (gc()) String(buffer, len))->atom();
     }
 	
 	// static function UTC(year, month, date, hours, minutes, seconds, ms, ... rest)
@@ -150,17 +150,19 @@ namespace avmplus
 			return false;
 
 		// string case must match.  Case insensitivity is not necessary for compliance.
+		wchar  subString16[kKeyWordLength+1];
+		char   subString[kKeyWordLength*2+1];
 
-		char subString[kKeyWordLength+1];
-		StringIndexer str_idx(&s);
-		for (int i = 0; i < count; i++)
-		{
-			utf32_t ch = str_idx[offset + i];
-			// must be alphabetic
-			if (ch < 'A' || ch > 'z' || (ch > 'Z' && ch < 'a'))
-				return false;
-			subString[i] = (char) ch;
-		}
+		memcpy(subString16, s.c_str()+offset, count*sizeof(wchar));
+		subString16[count] = 0;
+		int subStringLength = UnicodeUtils::Utf16ToUtf8( subString16,
+														 count,
+														 (uint8 *)subString,  
+														 kKeyWordLength*2 );
+		if (subStringLength != count)
+			return false; // there are no double byte characters in any of the keywords we accept.
+
+		subString16[count] = 0;
 		if (count == 3)
 		{
 			for(int x=0; x < 7+12+2; x++)
