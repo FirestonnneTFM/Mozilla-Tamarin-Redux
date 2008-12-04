@@ -40,10 +40,9 @@
 
 namespace avmplus
 {
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 	void CallStackNode::init(
 					MethodEnv*				env
-			#ifdef DEBUGGER
 					, Atom*					framep
 					, Traits**				frameTraits
 					, int					argc
@@ -51,7 +50,6 @@ namespace avmplus
 					, intptr_t volatile*	eip
 					, int32_t volatile*		scopeDepth
 					, bool                  boxed
-			#endif
 			)
 	{
 		AvmAssert(env != NULL);
@@ -60,7 +58,6 @@ namespace avmplus
 		m_next			= m_core->callStack; m_core->callStack = this;
 		m_envname		= env->method->name;
 		m_depth			= m_next ? (m_next->m_depth + 1) : 1;
-	#ifdef DEBUGGER
 		m_eip			= eip;     // ptr to where the current instruction pointer is stored
 		m_filename		= NULL;
 		m_framep		= framep;
@@ -73,7 +70,6 @@ namespace avmplus
 		m_argc			= argc;
 		m_linenum		= 0;
 		m_boxed			= boxed;
-	#endif
 	}
 
 	void CallStackNode::init(AvmCore* core, Stringp name)
@@ -94,7 +90,6 @@ namespace avmplus
 			m_next		= NULL;
 			m_depth		= 0;
 		}
-	#ifdef DEBUGGER
 		m_eip			= 0;    
 		m_filename		= 0;
 		m_framep		= 0;
@@ -104,7 +99,6 @@ namespace avmplus
 		m_argc			= 0;
 		m_linenum		= 0;
 		m_boxed			= false;
-	#endif
 	}
 
 	void CallStackNode::exit()
@@ -132,7 +126,6 @@ namespace avmplus
 		}
 	}
 
-#ifdef DEBUGGER
 	void** CallStackNode::scopeBase()
 	{
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
@@ -142,7 +135,6 @@ namespace avmplus
 		}
 		return NULL;
 	}
-#endif
 
 	// Dump a filename.  The incoming filename is of the form
 	// "C:\path\to\package\root;package/package;filename".  The path format
@@ -228,5 +220,5 @@ namespace avmplus
 		return stringRep;
 	}
 
-#endif /* FEATURE_SAMPLER */
+#endif 
 }

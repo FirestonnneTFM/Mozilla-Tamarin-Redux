@@ -273,7 +273,7 @@ namespace avmplus
 
 		ScriptObject* coerceAtom2SO(Atom atom, Traits *expected) const;
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		void debugEnter(int argc, uint32 *ap, 
 			Traits**frameTraits, int localCount,
 			CallStackNode* callstack,
@@ -285,12 +285,6 @@ namespace avmplus
 			Atom* framep, volatile sintptr *eip,
 			bool boxed);
 		void debugExit(CallStackNode* callstack);
-#endif
-
-#ifdef DEBUGGER
-		uint64 invocationCount;
-		void sendEnter(int argc, uint32 *ap);
-		void sendExit();
 #endif
 
 	private:
@@ -327,7 +321,15 @@ namespace avmplus
 	public:
 		inline bool isScriptEnv() const { return (activationOrMCTable & kIsScriptEnv) != 0; }
 
+#ifdef DEBUGGER
+		inline uint64_t invocationCount() const { return _invocationCount; }
+#endif
+
 	// ------------------------ DATA SECTION BEGIN
+#ifdef DEBUGGER
+	private:
+		uint64_t					_invocationCount;
+#endif
 	public:
 		// pointers are write-once so we don't need WB's
 		VTable* const				vtable;		// the vtable for the scope where this env was declared 
@@ -342,7 +344,6 @@ namespace avmplus
 		};
 	private:
 		uintptr_t					activationOrMCTable;
-	// ------------------------ DATA SECTION END
 	public:
 #ifdef AVMPLUS_WORD_CODE
 		class LookupCache : public MMgc::GCObject
@@ -353,6 +354,7 @@ namespace avmplus
 		};
 		DWB(LookupCache*) lookup_cache;
 #endif
+	// ------------------------ DATA SECTION END
 	};
 
 	class ScriptEnv : public MethodEnv

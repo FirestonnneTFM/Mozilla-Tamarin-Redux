@@ -1391,7 +1391,7 @@ namespace avmplus
 		}
 
 		callIns(FUNCTIONID(debugEnter), 8,
-			env_param, argc_param, ap_param, // for sendEnter
+			env_param, argc_param, ap_param, 
 			varTraits, InsConst(state->verifier->local_count), // for clearing traits pointers
 			csn, 
 			varPtrs,

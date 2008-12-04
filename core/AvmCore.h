@@ -627,7 +627,7 @@ const int kBufferPadding = 16;
 		DRC(Stringp) ktabat;
 		DRC(Stringp) kparens;
 #endif
-#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
+#if defined AVMPLUS_VERBOSE || defined DEBUGGER
 		DRC(Stringp) kanonymousFunc;
 #endif
 		Atom kNaN;
@@ -1107,7 +1107,7 @@ const int kBufferPadding = 16;
 		/** The call stack of currently executing code. */
 		CallStackNode *callStack;
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 
 		/**
 		Sampling profiler interface
@@ -1324,7 +1324,7 @@ const int kBufferPadding = 16;
 		Stringp internAlloc(const wchar *s, int len);
 		Stringp internAllocUtf8(const byte *s, int len);
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		/**
 		 * intern without allocating memory, returns NULL if its not already interned
 		 */
@@ -1534,7 +1534,7 @@ const int kBufferPadding = 16;
 		};
 		GCInterface gcInterface;
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 	private:
 		Sampler _sampler;
 #endif

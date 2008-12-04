@@ -126,7 +126,7 @@ namespace avmplus
 
 	using namespace MMgc;
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 
 	class SampleIterator : public ScriptObject
 	{
@@ -540,7 +540,7 @@ namespace avmplus
 				// return constructor count
 				ClassClosure *cc = (ClassClosure*)object;
 				if (cc->vtable->init) // Vector related crash here, Tommy says: I didn't think a type could ever not have a constructor but I guess there's no reason it has to.
-					return (double)cc->vtable->init->invocationCount;
+					return (double)cc->vtable->init->invocationCount();
 			}
 		}
 
@@ -602,7 +602,7 @@ namespace avmplus
 		}
 
 		if(env)
-			return (double)env->invocationCount;
+			return (double)env->invocationCount();
 #else
 		(void)type;
 		(void)qname;
@@ -653,7 +653,7 @@ namespace avmplus
 		return 0;
 	}
 
-#endif // FEATURE_SAMPLER
+#endif // DEBUGGER
 
 	
 	SampleObject::SampleObject(VTable *vtable, ScriptObject *delegate)

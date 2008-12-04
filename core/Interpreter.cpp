@@ -579,7 +579,7 @@ namespace avmplus
  		
  		struct InterpreterAuxiliaryFrame
  		{
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 			InterpreterAuxiliaryFrame() : cs(CallStackNode::kEmpty) {}
 #endif
 
@@ -588,7 +588,7 @@ namespace avmplus
  			Namespace* dxns;
  			Namespace* const * dxnsAddrSave;
  			Multiname multiname2;
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 			CallStackNode  cs;
 #endif
  		};
@@ -693,10 +693,8 @@ namespace avmplus
  		if (pool->domain->base != NULL)
  			core->codeContextAtom = makeCodeContextAtom(env);
  
-#if defined(DEBUGGER)
+#ifdef DEBUGGER
  		CallStackNode& callStackNode = *(new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true));
-#elif defined(FEATURE_SAMPLER)
- 		CallStackNode& callStackNode = *(new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env));
 #endif
  
  		// OPTIMIZEME - opportunities for streamlining the function entry code.
@@ -918,7 +916,7 @@ namespace avmplus
 					core->console << "exit " << info << '\n';
 #endif
 				restore_caller_dxns();
-#if defined DEBUGGER || defined FEATURE_SAMPLER
+#ifdef DEBUGGER 
 				callStackNode.reset();
 #endif
 				return a1;
