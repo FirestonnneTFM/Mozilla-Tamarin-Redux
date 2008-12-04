@@ -102,12 +102,12 @@
 #pragma warning(disable:4291) // no matching operator delete found; memory will not be freed if initialization throws an exception
 #endif
 
-#ifdef FEATURE_SAMPLER
- //sampling support
-#include "avmplus.h"
+#ifdef DEBUGGER
+	 //sampling support
+	#include "avmplus.h"
 #else
-#define SAMPLE_FRAME(_x, _s) 
-#define SAMPLE_CHECK() 
+	#define SAMPLE_FRAME(_x, _s) 
+	#define SAMPLE_CHECK() 
 #endif
 
 #ifdef SOLARIS
@@ -712,7 +712,7 @@ namespace MMgc
 
 	void *GC::AllocAlreadyLocked(size_t size, int flags/*0*/)
 	{
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
 		if(core)
 			core->sampleCheck();
@@ -3490,21 +3490,21 @@ uintptr_t	GC::GetStackTop() const
 		gclog("[mem] -------- gross stats end -----\n");
 	}
 
-#if defined (FEATURE_SAMPLER)
+#if defined (DEBUGGER)
 	// For sampling support
-	GCThreadLocal<avmplus::Sampler*> m_sampler;
-	bool sampling = false;
+	GCThreadLocal<avmplus::Sampler*> g_sampler;
+	bool g_sampling = false;
 
 	void recordAllocationSample(void* item, size_t size, bool in_lock)
 	{
-		avmplus::Sampler* sampler = m_sampler;
+		avmplus::Sampler* sampler = g_sampler;
 		if( sampler && sampler->sampling )
 			sampler->recordAllocationSample(item, size, !in_lock);
 	}
 
 	void recordDeallocationSample(const void* item, size_t size)
 	{
-		avmplus::Sampler* sampler = m_sampler;
+		avmplus::Sampler* sampler = g_sampler;
 		if( sampler /*&& sampler->sampling*/ )
 			sampler->recordDeallocationSample(item, size);
 	}

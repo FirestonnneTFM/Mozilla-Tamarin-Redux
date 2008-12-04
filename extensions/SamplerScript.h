@@ -59,7 +59,7 @@ namespace avmplus
 	public:
 		SamplerScript(VTable *vtable, ScriptObject *delegate);
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		static const uint32 GET=1;
 		static const uint32 SET=2;
 		double getSize(Atom o);

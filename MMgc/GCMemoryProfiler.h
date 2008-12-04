@@ -40,20 +40,16 @@
 #define __GCMemoryProfiler__
 
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 // Sampling support
 namespace avmplus
 {
 	class Sampler;
 }
-#endif
-
-
-#ifdef FEATURE_SAMPLER
 namespace MMgc
 {
-	extern GCThreadLocal<avmplus::Sampler*> m_sampler;
-	extern bool sampling;
+	extern GCThreadLocal<avmplus::Sampler*> g_sampler;
+	extern bool g_sampling;
 	void recordAllocationSample(void* item, size_t size, bool in_lock = false);
 	void recordDeallocationSample(const void* item, size_t size);
 }

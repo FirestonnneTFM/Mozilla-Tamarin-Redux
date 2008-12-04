@@ -77,7 +77,7 @@ namespace avmplus
 		mirBuffers(g, 4), 
 #endif
 		gcInterface(g)
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		,_sampler(g)
 #endif
 #ifdef AVMPLUS_VERIFYALL
@@ -170,7 +170,7 @@ namespace avmplus
 
 		minstack           = 0;
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		_sampler.setCore(this);
 #endif
 
@@ -183,8 +183,8 @@ namespace avmplus
 
 		callStack          = NULL;
 
-#ifdef FEATURE_SAMPLER
-		MMgc::m_sampler = sampler();
+#ifdef DEBUGGER
+		MMgc::g_sampler = sampler();
 #endif
 
 		interrupted        = false;
@@ -246,7 +246,7 @@ namespace avmplus
 		ktabat = newString("\tat ");
 		kparens = newString("()");
 #endif
-#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
+#if defined AVMPLUS_VERBOSE || defined DEBUGGER
 		kanonymousFunc = newString("<anonymous>");
 #endif
 		for (int i = 0; i < 128; i++)
@@ -331,7 +331,7 @@ namespace avmplus
 		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
 			builtinPool->scripts[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		// sampling can begin now, requires builtinPool
 		_sampler.initSampling();
 #endif
@@ -2548,14 +2548,14 @@ return the result of the comparison ToPrimitive(x) == y.
 				rehashNamespaces(numNamespaces);
 		}
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		_sampler.presweep();
 #endif
     }
 
 	void AvmCore::postsweep()
 	{
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		_sampler.postsweep();
 #endif
 	}
@@ -2798,7 +2798,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	    return internAlloc(buffer, len);
     }
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 	Stringp AvmCore::findInternedString(const char *cs, int len8)
 	{
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);

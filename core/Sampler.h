@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 
 	// This structure is used to read/write data to the sample stream.
 	// The fields are written out to the sample stream as they are defined here.  
@@ -183,13 +183,13 @@ namespace avmplus
 		List<Stringp> m_fakeMethodNames; 
 	};
 
-#define SAMPLE_FRAME(_strp, _core) avmplus::CallStackNode __fcsn((avmplus::AvmCore*)_core, _strp)
-#define SAMPLE_CHECK()  __fcsn.sampleCheck();
+	#define SAMPLE_FRAME(_strp, _core)	avmplus::CallStackNode __fcsn((avmplus::AvmCore*)_core, _strp)
+	#define SAMPLE_CHECK()				__fcsn.sampleCheck();
 
 #else
 
-#define SAMPLE_FRAME(_x, _s) 
-#define SAMPLE_CHECK()
+	#define SAMPLE_FRAME(_x, _s) 
+	#define SAMPLE_CHECK()
 
 #endif // DEBUGGER
 }

@@ -636,7 +636,7 @@ namespace avmplus
 			{
 				MethodInfo *methodInfo = new (core->GetGC()) MethodInfo();
 				
-				#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
+				#if defined AVMPLUS_VERBOSE || defined DEBUGGER
 				if (name_index != 0) {
 					methodInfo->name = resolveUtf8(name_index);
 					if(methodInfo->name->length() == 0) 
@@ -1573,7 +1573,7 @@ namespace avmplus
 					<< "\n";
 			)
 
-			#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
+			#if defined AVMPLUS_VERBOSE || defined DEBUGGER
 			iinit->name = Multiname::format(core,ns,name);
 			#endif
 
@@ -1680,7 +1680,7 @@ namespace avmplus
 					<< "\n";
 			)
 
-			#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
+			#if defined AVMPLUS_VERBOSE || defined DEBUGGER
 			Stringp cinitName = core->concatStrings(name, core->newString("$cinit"));
 			cinit->name = Multiname::format(core,ns,cinitName);
 			#endif

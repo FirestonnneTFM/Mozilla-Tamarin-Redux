@@ -39,7 +39,7 @@
 
 // Adobe patent application tracking #P721, entitled Application Profiling, inventors: T. Reilly
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 namespace avmplus
 {
 	using namespace MMgc;
@@ -60,9 +60,9 @@ namespace avmplus
 	Sampler::~Sampler()
 	{
 		stopSampling();
-		Sampler* gc_sampler = MMgc::m_sampler;
+		Sampler* gc_sampler = MMgc::g_sampler;
 		if(gc_sampler == this)
-			MMgc::m_sampler = NULL;
+			MMgc::g_sampler = NULL;
 		delete samples;
 		samples = 0;
 	}
@@ -374,7 +374,7 @@ namespace avmplus
 			ptrSamples = new MMgc::GCHashtable(1024);
 		}
 
-		MMgc::sampling = true;
+		MMgc::g_sampling = true;
 		samplingNow = true;
 		if(timerHandle == 0)
 			timerHandle = OSDep::startIntWriteTimer(1, &takeSample);
@@ -414,7 +414,7 @@ namespace avmplus
 			ptrSamples = 0;
 		}
 
-		MMgc::sampling = false;
+		MMgc::g_sampling = false;
 		samplingNow = false;
 		numSamples = 0;
 		currentSample = NULL;

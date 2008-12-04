@@ -474,7 +474,7 @@ namespace avmplus
 	}
 #endif
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 	void MethodEnv::debugEnter(int argc, uint32 *ap, 
 							   Traits**frameTraits, int localCount,
 							   CallStackNode* callstack,
@@ -494,27 +494,27 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 
-#ifdef DEBUGGER
 		// update profiler
-		// sendEnter ignores the arguments, ergo we pass 0, 0
-		sendEnter(0, 0 /* argc, ap */);
+		Profiler* profiler = core->profiler;
+		if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
+			profiler->sendFunctionEnter(method);
 
 		// dont reset the parameter traits since they are setup in the prologue
 		int firstLocalAt = method->param_count+1;
 		AvmAssert(!frameTraits || localCount >= firstLocalAt);
-		if (frameTraits) memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
-		if (callstack) callstack->init(this, framep, frameTraits, argc, ap, eip, /*scopeDepth*/NULL, boxed);
-		if (core->debugger) core->debugger->_debugMethod(this);
-#else
-		(void)localCount;
-		if (callstack) callstack->init(this);
-#endif
+
+		if (frameTraits) 
+			memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
+
+		if (callstack) 
+			callstack->init(this, framep, frameTraits, argc, ap, eip, /*scopeDepth*/NULL, boxed);
+
+		if (core->debugger) 
+			core->debugger->_debugMethod(this);
 
 		core->sampleCheck();
 
-#ifdef DEBUGGER
-		invocationCount++;
-#endif
+		_invocationCount++;
 	}
 
 	void MethodEnv::debugExit(CallStackNode* callstack)
@@ -522,38 +522,21 @@ namespace avmplus
 		AvmAssert(this != 0);
 		AvmCore* core = this->core();
 
-#ifdef DEBUGGER
 		// update profiler 
-		sendExit();
-#endif
+		Profiler* profiler = core->profiler;
+		if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
+			profiler->sendFunctionExit();
 
 		core->callStack = callstack->next();
 
-#ifdef DEBUGGER
 		// trigger a faked "line number changed" since we exited the function and are now back on the old line (well, almost)
 		if (core->callStack && core->callStack->linenum() > 0)
 		{
 			int line = core->callStack->linenum();
 			core->callStack->set_linenum(-1);
-			if (core->debugger) core->debugger->debugLine(line);
+			if (core->debugger) 
+				core->debugger->debugLine(line);
 		}
-#endif
-	}
-#endif
-
-#ifdef DEBUGGER
-	void MethodEnv::sendEnter(int /*argc*/, uint32 * /*ap*/)
-	{
-		Profiler *profiler = core()->profiler;
-		if (profiler && profiler->profilingDataWanted && !core()->sampler()->sampling)
-			profiler->sendFunctionEnter(method);
-	}
-
-	void MethodEnv::sendExit()
-	{
-		Profiler *profiler = core()->profiler;
-		if (profiler && profiler->profilingDataWanted && !core()->sampler()->sampling)
-			profiler->sendFunctionExit();
 	}
 #endif
 

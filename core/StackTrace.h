@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 	/**
 	 * The CallStackNode class tracks the call stack of executing
 	 * ActionScript code.  It is used for debugger stack dumps
@@ -85,7 +85,6 @@ namespace avmplus
 	public:
 
 		void init(MethodEnv*				env
-			#ifdef DEBUGGER
 					, Atom*					framep
 					, Traits**				frameTraits
 					, int					argc
@@ -93,7 +92,6 @@ namespace avmplus
 					, intptr_t volatile*	eip
 					, int32_t volatile*		scopeDepth
 				    , bool                  boxed
-			#endif
 				);
 
 		void init(AvmCore* core, Stringp name);
@@ -110,7 +108,6 @@ namespace avmplus
 		 *             'boxed' is true, and an uint32_t* otherwise.
 		 */
 		inline explicit CallStackNode(MethodEnv*				env
-								#ifdef DEBUGGER
 										, Atom*					framep
 										, Traits**				frameTraits
 										, int					argc
@@ -118,31 +115,22 @@ namespace avmplus
 										, intptr_t volatile*	eip
 										, int32_t volatile*		scopeDepth
 									    , bool                  boxed = false
-								#endif
 								)
 		{
-		#ifdef DEBUGGER
 			init(env, framep, frameTraits, argc, ap, eip, scopeDepth, boxed);
-		#else
-			init(env);
-		#endif
 		}
 
-	#ifdef FEATURE_SAMPLER
 		// ctor used only for Sampling (no MethodEnv)
 		inline explicit CallStackNode(AvmCore* core, const char* name)
 		{
 			init(core, core ? core->sampler()->getFakeFunctionName(name) : NULL);
 		}
-	#endif
 
-	#ifdef DEBUGGER
 		// ctor used only for verify (no MethodEnv)
 		inline explicit CallStackNode(AvmCore* core, Stringp name)
 		{
 			init(core, name);
 		}
-	#endif
 
 		// dummy ctor we can use to construct an uninitalized version -- useful for the thunks, which
 		// will construct one and immediately call initialize (via debugEnter) so there's no need to
@@ -157,9 +145,7 @@ namespace avmplus
 		
 		void sampleCheck() { if (m_core) m_core->sampler()->sampleCheck(); }
 
-#ifdef DEBUGGER
 		void** scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
-#endif
 
 		void exit();
 
@@ -171,7 +157,6 @@ namespace avmplus
 		inline Stringp envname() const { return m_envname; }
 		inline int32_t depth() const { return m_depth; }
 
-#ifdef DEBUGGER
 		inline intptr_t volatile* eip() const { return m_eip; }
 		inline Stringp filename() const { return m_filename; }
 		inline Atom* framep() const { return m_framep; }
@@ -186,7 +171,6 @@ namespace avmplus
 		inline void set_filename(Stringp s) { m_filename = s; }
 		inline void set_linenum(int32_t i) { m_linenum = i; }
 		inline void set_framep(Atom* fp) { m_framep = fp; }
-#endif
 
 		// Placement new and delete because the interpreter allocates CallStackNode
 		// instances inside other data structures (think alloca storage that has been
@@ -204,7 +188,6 @@ namespace avmplus
 	private:	CallStackNode*		m_next;
 	private:	Stringp				m_envname;		// same as m_env->method->name (except for fake CallStackNode)
 	private:	int32_t				m_depth;
-	#ifdef DEBUGGER
 	private:	intptr_t volatile*	m_eip;			// ptr to where the current pc is stored
 	private:	Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 	private:	Atom*				m_framep;		// pointer to top of AS registers
@@ -217,7 +200,6 @@ namespace avmplus
 	private:	int32_t				m_argc;
 	private:	int32_t				m_linenum;
 	private:	bool				m_boxed;
-	#endif
 	// ------------------------ DATA SECTION END
 	};
 
@@ -252,13 +234,8 @@ namespace avmplus
 			{ 
 				m_info		= csn.info();		// will be NULL if the element is from a fake CallStackNode
 				m_name		= csn.envname();
-			#ifdef DEBUGGER
 				m_filename	= csn.filename();
 				m_linenum	= csn.linenum();
-			#else
-				m_filename	= 0;
-				m_linenum	= 0;
-			#endif
 			#ifdef AVMPLUS_64BIT
 				m_pad		= 0;	// let's keep the stack nice and clean
 			#endif
@@ -277,7 +254,7 @@ namespace avmplus
 		void dumpFilename(Stringp filename, PrintWriter& out) const;
 	};
 		
-#endif /* FEATURE_SAMPLER */
+#endif 
 }
 
 #endif /* __avmplus_CallStackNode__ */

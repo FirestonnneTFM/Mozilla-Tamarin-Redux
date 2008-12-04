@@ -1786,14 +1786,9 @@ namespace avmplus
 		GCHashtable* names = new GCHashtable();
 
 		#ifdef DEBUGGER
-		names->add(ENVADDR(MethodEnv::sendEnter), "MethodEnv::sendEnter");
-		names->add(ENVADDR(MethodEnv::sendExit), "MethodEnv::sendExit");
 		names->add(DEBUGGERADDR(Debugger::debugFile), "Debugger::debugFile");
 		names->add(DEBUGGERADDR(Debugger::debugLine), "Debugger::debugLine");
 		names->add(DEBUGGERADDR(Debugger::_debugMethod), "Debugger::_debugMethod");
-		#endif
-
-		#if (defined DEBUGGER || defined FEATURE_SAMPLER )
 		names->add(ENVADDR(MethodEnv::debugEnter), "MethodEnv::debugEnter");
 		names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
 		names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");
@@ -2246,7 +2241,7 @@ namespace avmplus
 		// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
 		localTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
 		localPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
-		#endif //DEBUGGER | FEATURE_SAMPLER
+		#endif //DEBUGGER
 
 		// whether this sequence is interruptable or not.
 		interruptable = (info->flags & AbstractFunction::NON_INTERRUPTABLE) ? false : true;
@@ -2279,9 +2274,6 @@ namespace avmplus
 		if (verbose())
 			core->console << "    alloc CallStackNode\n";
 		#endif
-		#endif
-
-		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
 		// Allocate space for the call stack
 		_callStackNode = InsAlloc(sizeof(CallStackNode));
 		#endif
@@ -2495,22 +2487,13 @@ namespace avmplus
 		#endif
 
 		callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
-			ldargIns(_env), ldargIns(_argc), ldargIns(_ap), // for sendEnter
+			ldargIns(_env), ldargIns(_argc), ldargIns(_ap), 
 			leaIns(0, localTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
 			leaIns(0, _callStackNode), 
 			leaIns(0, localPtrs),
 			info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
 			);
-		#else
-		#ifdef FEATURE_SAMPLER
-		callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
-			ldargIns(_env), ldargIns(_argc), ldargIns(_ap), // for sendEnter
-			InsConst(0), InsConst(state->verifier->local_count), // for clearing traits pointers
-			leaIns(0, _callStackNode), 
-			InsConst(0),
-			info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
-			);
-		#endif
+
 		#endif // DEBUGGER
 
 
@@ -3427,18 +3410,15 @@ namespace avmplus
 					storeIns(dxnsAddrSave, (uintptr)&core->dxnsAddr, 0);
 				}
 
-				#if (defined DEBUGGER || defined FEATURE_SAMPLER )
+				#ifdef DEBUGGER
 				callIns(MIR_cm, ENVADDR(MethodEnv::debugExit), 2,
 					ldargIns(_env), leaIns(0, _callStackNode));
 				
-				#ifdef DEBUGGER
 				// now we toast the cse and restore contents in order to 
 				// ensure that any variable modifications made by the debugger
 				// will be pulled in.
 				firstCse = ip;
 				#endif // DEBUGGER
-
-				#endif // DEBUGGER || FEATURE_SAMPLER
 
 				if (info->exceptions)
 				{
@@ -5446,7 +5426,7 @@ namespace avmplus
 		InsDealloc(localTraits);
 		#endif
 
-		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
+		#if (defined DEBUGGER)
 		InsDealloc(_callStackNode);
 		#endif
 
