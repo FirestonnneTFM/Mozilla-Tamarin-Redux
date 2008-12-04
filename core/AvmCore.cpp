@@ -255,7 +255,8 @@ namespace avmplus
 			// call newString() with an explicit length of 1; required
 			// when singleChar==0, because in that case we need a string
 			// which is a single character with value 0
-			cachedChars[i] = internString(newString(&singleChar, 1));
+			// Performance: use String::create - this is not UTF-8
+			cachedChars[i] = internString(String::create(this, &singleChar, 1, String::k8));
 		}
 
 		booleanStrings[0] = kfalse;
@@ -1024,20 +1025,20 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	String* AvmCore::toErrorString(int d)
 	{
-		String* s = NULL;
 	#ifdef DEBUGGER
+		String* s = NULL;
 		wchar buffer[256];
 		buffer[255] = '\0';
 		int len;
 		if (MathUtils::convertIntegerToString(d, buffer, len)) 
-			s = this->newString(buffer);
+			s = String::create(this, buffer, len);
 		else
 			s = kEmptyString;
-	#else
-		s = kEmptyString;
-		(void)d;
-	#endif /* DEBUGGER */
 		return s;
+	#else
+		(void)d;
+		return kEmptyString;
+	#endif /* DEBUGGER */
 	}
 
 	String* AvmCore::toErrorString(const char* s)
@@ -2560,27 +2561,57 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
 	}
 
+	int AvmCore::findString(Stringp s)
+    {
+        int m = numStrings;
+		// 80% load factor
+		if (5*(stringCount+deletedCount+1) > 4*m) {
+			if (2*stringCount > m) // 50%
+			    rehashStrings(m = m << 1);
+			else
+				rehashStrings(m);
+		}
 
-	bool wcharEquals(const wchar *s1, const wchar *s2)
-	{
-		while (*s1) {
-			if (*s1 != *s2) {
-				return false;
+        // compute the hash function
+        int hashCode = s->hashCode();
+
+		int bitMask = m - 1;
+
+        // find the slot to use
+        int i = (hashCode&0x7FFFFFFF) & bitMask;
+        int n = 7;
+		Stringp k;
+		if (!deletedCount)
+		{
+			while ((k=strings[i]) != NULL && 0 != k->Compare(*s)) {
+				i = (i + (n++)) & bitMask; // quadratic probe
 			}
-			s1++;
-			s2++;
 		}
-		return true;
-	}
+		else
+		{
+			int iFirstDeletedSlot = -1;
+			while ((k=strings[i]) != NULL)
+			{
+				if (k == AVMPLUS_STRING_DELETED)
+				{
+					if (iFirstDeletedSlot == -1)
+					{
+						iFirstDeletedSlot = i;
+					}
+				}
+				else if (0 == k->Compare (*s))
+				{
+					return i;
+				}
+				i = (i + (n++)) & bitMask; // quadratic probe
+			}
 
-	int hashString(const wchar *ptr, int len)
-	{
-		int hashCode = 0;
-		while (len--) {
-			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptr++;
+			if ((k == NULL) && (iFirstDeletedSlot != -1))
+				return iFirstDeletedSlot;
+
 		}
-		return hashCode;
-	}
+        return i;
+    }
 
     int AvmCore::findString(const wchar *s, int len)
     {
@@ -2594,8 +2625,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 
         // compute the hash function
-        int hashCode = hashString(s, len);
-
+		int hashCode = String::hashCodeUTF16(s, len);
 		int bitMask = m - 1;
 
         // find the slot to use
@@ -2664,7 +2694,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::constantString(const char *s)
 	{
-		return internString(newString(s));
+		return internString(String::create(this, s, String::Length (s), String::k8, true));
 	}
 
     /**
@@ -2677,7 +2707,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (o->isInterned())
 			return o;
 
-		int i = findString(o->c_str(), o->length());
+		int i = findString(o);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
 		{
@@ -2687,8 +2717,11 @@ return the result of the comparison ToPrimitive(x) == y.
 				AvmAssert(deletedCount >= 0);
 			}
 			stringCount++;
+			// do not intern kDependent string - may block large master string
+			// from being freed
+			o = o->getIndependentString();
+			o->setInterned();
 			strings[i] = o;
-			o->setInterned(this);
 			return o;
 		}
 		else
@@ -2823,25 +2856,10 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif
 
-	Stringp AvmCore::internAllocUtf8(const byte *cs, int len8)
+	Stringp AvmCore::internAllocUtf8(const byte *cs, int len8, bool constant)
 	{
-		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
-		// use alloca to avoid heap allocations where possible
-		wchar *buffer = 0;
-		AvmCore::AllocaAutoPtr _buffer;
-		if (len16 < 1024)
-			buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
-		
-		Stringp s = NULL;
-		if(!buffer) {
-			s = new (GetGC()) String((const char *)cs, len8, len16);
-			buffer = (wchar*)s->c_str();
-		} else {
-			UnicodeUtils::Utf8ToUtf16((const uint8 *)cs, len8, buffer, len16);
-			buffer[len16] = 0;
-		}
-
-		int i = findString(buffer, len16);
+		Stringp s = String::createUTF8(this, (const utf8_t*) cs, len8, String::kAuto, constant);
+		int i = findString(s);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
 		{
@@ -2851,19 +2869,13 @@ return the result of the comparison ToPrimitive(x) == y.
 				AvmAssert(deletedCount >= 0);
 			}
 
+			s->setInterned();
 			stringCount++;
-			if(!s)
-				s = new (GetGC()) String(buffer, len16);
 			strings[i] = s;
-			s->setInterned(this);
 			return s;
 		}
 		else
-		{
-			// we know the internal buf has not yet been aliased, so it's safe to explicitly free here.
-			delete s;
 			return other;
-		}
 	}
 
 	Stringp AvmCore::internAlloc(const wchar *s, int len)
@@ -2882,7 +2894,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			DRC(Stringp) *oldStrings = strings;
 #endif
 
-			other = new (GetGC()) String(s,len);
+			other = String::create(this, s,len);
 			
 #ifdef DEBUGGER
 			// re-find if String ctor caused rehash
@@ -2891,7 +2903,7 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
 			strings[i] = other;
 			stringCount++;
-			other->setInterned(this);
+			other->setInterned();
 		}
 		return other;
 	}
@@ -2928,7 +2940,7 @@ return the result of the comparison ToPrimitive(x) == y.
             if (o > AVMPLUS_STRING_DELETED)
             {
 				// compute the hash function
-				int hashCode = hashString(o->c_str(), o->length());
+				int hashCode = (int) o->hashCode();
 
 				// find the slot to use
 				int j = (hashCode&0x7FFFFFFF) & bitMask;
@@ -3020,7 +3032,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			u = internString (string (uri));
+			u = internString(string (uri));
 		}
 		if (u == kEmptyString)
 		{
@@ -3045,7 +3057,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			p = internString (string (prefix))->atom();
+			p = internString(string (prefix))->atom();
 		}
 
         return new (GetGC()) Namespace(p, u, type);
@@ -3067,7 +3079,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			Stringp u = internString (string (uri));
+			Stringp u = internString(string (uri));
 			Atom prefix = (u == kEmptyString) ? kEmptyString->atom() : undefinedAtom;
 			return new (GetGC()) Namespace (prefix, u, type);
 		}
@@ -3325,39 +3337,32 @@ return the result of the comparison ToPrimitive(x) == y.
 		wchar buffer[256];
 		int len;
 		MathUtils::convertIntegerToString((int)atom, buffer, len, 16);
-		return new (GetGC()) String(buffer, len);
+		return String::create(this, buffer, len);
 	}
 #endif
 
 	Stringp AvmCore::newString(const char *s) const
 	{
 		int len = String::Length(s);
-		int utf16len = UnicodeUtils::Utf8ToUtf16((const uint8*)s, len, NULL, 0);
-		return new (GetGC()) String(s, len, utf16len);
+		return String::createUTF8(this, (const utf8_t*) s, len);
 	}
 
 	Stringp AvmCore::newString(const char *s, int len) const
 	{
-		int utf16len = UnicodeUtils::Utf8ToUtf16((const uint8*)s, len, NULL, 0);
-		return new (GetGC()) String(s, len, utf16len);
+		return String::createUTF8(this, (const utf8_t*) s, len);
 	}
 
 	Stringp AvmCore::newString(const wchar *s) const
 	{
 		int len = String::Length(s);
-		return new (GetGC()) String(s, len);
+		return String::create(this, s, len);
 	}
 
 	Stringp AvmCore::concatStrings(Stringp s1, Stringp s2) const
 	{
 		if (!s1) s1 = knull;
 		if (!s2) s2 = knull;
-		if (s1->length() == 0) {
-			return s2;
-		} else if (s2->length() == 0) {
-			return s1;
-		}
-		return new (GetGC()) String(s1, s2);
+		return String::concatStrings(s1, s2);
 	}
 
 	Stringp AvmCore::intToString(int value)
@@ -3365,7 +3370,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		wchar buffer[65];
 		int len;
 		MathUtils::convertIntegerToString(value, buffer, len);
-		return new (GetGC()) String(buffer, len);
+		return String::create(this, buffer, len);
 	}
 
 	Stringp AvmCore::uintToString(uint32 value)
@@ -3376,7 +3381,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			MathUtils::convertIntegerToString(value, buffer, len);
 		else
 			MathUtils::convertDoubleToString(value, buffer, len);
-		return new (GetGC()) String(buffer, len);
+		return String::create(this, buffer, len);
 	}
 
 	Stringp AvmCore::doubleToString(double d)
@@ -3385,7 +3390,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		wchar buffer[312];
 		int len;
 		MathUtils::convertDoubleToString(d, buffer, len, MathUtils::DTOSTR_NORMAL,15);
-		return new (GetGC()) String(buffer, len);
+		return String::create(this, buffer, len);
 	}
 
 	#ifdef DEBUGGER
@@ -3714,67 +3719,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	//  only if ToString(ToUint32(P)) is equal to P and ToUint32(P) is not equal to 2^32-1."
 	bool AvmCore::getIndexFromString (Stringp s, uint32 *result)
 	{
-		int len = s->length();
-		if (!len)
-			return false;
-
-		// Don't support 000000 as 0.
-		// We don't support 0x1234 as 1234 in hex since string(1234) doesn't equal '0x1234')
-		// No leading zeros are supported
-
-		// Single 0 is ok
-		const wchar *c = s->c_str();
-		if (*c == '0')
-		{
-			if (len == 1)
-			{
-				*result = 0;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if ((*c < '0') || (*c > '9'))
-		{
-			return false;
-		}
-
-		// A string that is more than 10 digits (and does not start with 0) 
-		// will always be greater than 2^32-1 (4294967295) or not a numeric string
-		if (len > 10)
-		{
-			return false;
-		}
-
-		uint32 res = 0;
-		int i = 0;
-		while (i < len)
-		{
-			wchar ch = c[i];
-			if (ch < '0' || ch > '9')
-				return false;
-
-			res = res * 10 + (ch - '0');
-			i++;
-		}
-
-		*result = res;
-		// Our input string length is less then 10 digits so we now
-		// our output is in the valid range up to 999,999,999.
-		if (len < 10)
-		{
-			return true;
-		}
-
-		// At this point we know our string is 10 characters long and is all numeric 
-		// characters.  We need to check it to see if it overflows 2^32 and whether it equals
-		// 2^32-1.  This string comparison works as a numeric comparison since we know our input
-		// string is also ten numeric digits.
-
-		int comp = String::Compare (c, "4294967295", 10);
-		return (comp > 0);
+		return s->parseIndex(*result);
 	}
 
 	CodeContext* AvmCore::codeContext() const
