@@ -238,38 +238,12 @@ namespace avmplus
 		}
 		else
 		{
-			matchIndex = Utf8ToUtf16Index(subject, utf8Subject, matchIndex);
+			matchIndex = utf8Subject->toIndex(matchIndex);
 		}
 		return matchIndex;
 	}
 	
-	int RegExpObject::Utf8ToUtf16Index(Stringp utf16String,
-									   UTF8String *utf8String,
-									   int utf8Index)
-	{
-		int utf16Length = utf16String->length();
-		int utf8Length  = utf8String->length();
-
-		// If the UTF-16 and UTF-8 strings contain the same number of
-		// characters, the string is plain ASCII and no conversion is needed.
-		if (utf16Length == utf8Length)
-		{
-			return utf8Index;
-		}
-
-		// If the UTF-8 index is out of range, do nothing.
-		if (utf8Index < 0 || utf8Index > utf8Length)
-		{
-			return utf8Index;
-		}
-		
-		return UnicodeUtils::Utf8ToUtf16((const uint8*)utf8String->c_str(),
-										 utf8Index,
-										 NULL,
-										 0);
-	}
-
-	int RegExpObject::numBytesInUtf8Character(const uint8 *in)
+int RegExpObject::numBytesInUtf8Character(const uint8 *in)
 	{
 		unsigned int c = *in;
 		switch(c>>4)
@@ -356,32 +330,6 @@ namespace avmplus
 		return out;
 	}
 	
-	int RegExpObject::Utf16ToUtf8Index(Stringp utf16String,
-									   UTF8String *utf8String,
-									   int utf16Index)
-	{
-		int utf16Length = utf16String->length();
-		int utf8Length  = utf8String->length();
-
-		// If the UTF-16 and UTF-8 strings contain the same number of
-		// characters, the string is plain ASCII and no conversion is needed.
-		if (utf16Length == utf8Length)
-		{
-			return utf16Index;
-		}
-
-		// If the UTF-16 index is out of range, do nothing.
-		if (utf16Index < 0 || utf16Index > utf16Length)
-		{
-			return utf16Index;
-		}
-		
-		return UnicodeUtils::Utf16ToUtf8(utf16String->c_str(),
-										 utf16Index,
-										 NULL,
-										 0);
-	}
-	
 	Atom RegExpObject::AS3_exec(Stringp subject)
 	{
 		if (!subject)
@@ -399,9 +347,7 @@ namespace avmplus
 		AvmAssert(utf8Subject != NULL);
 
 		int matchIndex = 0, matchLen = 0;
-		int startIndex = (get_global() ? Utf16ToUtf8Index(subject,
-													utf8Subject,
-													m_lastIndex) : 0);
+		int startIndex = (get_global() ? utf8Subject->toUtf8Index(m_lastIndex) : 0);
 
 		ArrayObject* result = _exec(subject,
 								   utf8Subject,
@@ -410,9 +356,7 @@ namespace avmplus
 								   matchLen);
 		if (get_global())
 		{
-			m_lastIndex = Utf8ToUtf16Index(subject,
-										 utf8Subject,
-										 matchIndex+matchLen);
+			m_lastIndex = utf8Subject->toIndex(matchIndex+matchLen);
 		}
 
 		return result;
@@ -451,7 +395,7 @@ namespace avmplus
 		ArrayObject *a = toplevel()->arrayClass->newArray(results);
 
 		a->setAtomProperty(toplevel()->regexpClass()->kindex,
-			   core->intToAtom(Utf8ToUtf16Index(subject, utf8Subject, ovector[0])));
+			   core->intToAtom(utf8Subject->toIndex(ovector[0])));
 		a->setAtomProperty(toplevel()->regexpClass()->kinput,
 			   subject->atom());
 		a->setLength(results);
@@ -527,16 +471,14 @@ namespace avmplus
 			{
 				int last = m_lastIndex;
 				int matchIndex = 0, matchLen = 0;
-				int startIndex = Utf16ToUtf8Index(subject, utf8Subject,	m_lastIndex);
+				int startIndex = utf8Subject->toUtf8Index(m_lastIndex);
 
 				matchArray = _exec(subject,
 								  utf8Subject,
 								  startIndex,
 								  matchIndex,
 								  matchLen);
-				m_lastIndex = Utf8ToUtf16Index(subject,
-											   utf8Subject,
-											   matchIndex+matchLen);
+				m_lastIndex = utf8Subject->toIndex(matchIndex+matchLen);
 				
 				if ((matchArray == NULL) || (last == m_lastIndex))
 					break;
