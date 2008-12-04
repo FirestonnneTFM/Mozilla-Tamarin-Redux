@@ -159,9 +159,6 @@ namespace MMgc
 			if (InZCT())
 				GC::GetGC(this)->RemoveFromZCT(this);
 			composite = 0;
-#ifdef _DEBUG
-			padto32bytes = 0;
-#endif
 		}
 
 		bool IsPinned()

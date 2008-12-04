@@ -229,11 +229,11 @@ namespace avmplus
 		virtual E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);
 		virtual void _addInScopeNamespace (AvmCore *core, Namespace *ns);
 		virtual void _append (E4XNode* /*childNode*/) { AvmAssert(0); };
-		// Extract a namespace from a tag name, and return the new tag name in tagName
-		Namespace *FindNamespace(AvmCore *core, Toplevel *toplevel, Stringp& tagName, bool bAttribute);
-		int FindMatchingNamespace(AvmCore *core, Namespace *ns);
 
-		void BuildInScopeNamespaceList(AvmCore *core, AtomArray *list) const;
+		Namespace *FindNamespace (AvmCore *core, Toplevel *toplevel, const wchar *tagName, const wchar **localName, bool bAttribute);
+		int FindMatchingNamespace (AvmCore *core, Namespace *ns);
+
+		void BuildInScopeNamespaceList (AvmCore *core, AtomArray *list) const;
 
 		MMgc::GC *gc() const { return MMgc::GC::GetGC(this); }
 	};
@@ -356,7 +356,7 @@ namespace avmplus
 		void _insert (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value);
 		E4XNode* _replace (AvmCore *core, Toplevel *toplevel, uint32 entry, Atom value, Atom pastValue = 0);
 
-		void CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag);
+		void CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, const wchar *elementName);
 	};
 }
 #endif /* __avmplus_E4XNode__ */

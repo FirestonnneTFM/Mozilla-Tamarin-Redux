@@ -101,13 +101,15 @@ namespace avmshell
 				//UTF-16 big endian
 				c += 2;
 				len = (len - 2) >> 1;
-				Stringp out = String::create(core, (const wchar*) NULL, len, String::k16);
-				wchar *buffer = (wchar*) out->getData();
+				Stringp out = new (core->GetGC()) String(len);
+				wchar *buffer = out->lockBuffer();
 				for (long i = 0; i < len; i++)
 				{
-					*buffer++ = (c[0] << 8) + c[1];
+					buffer[i] = (c[0] << 8) + c[1];
 					c += 2;
 				}
+				out->unlockBuffer();
+
 				return out;
 			}
 			else if ((c[0] == 0xff) && (c[1] == 0xfe))
@@ -115,13 +117,14 @@ namespace avmshell
 				//UTF-16 little endian
 				c += 2;
 				len = (len - 2) >> 1;
-				Stringp out = String::create(core, (const wchar*) NULL, len, String::k16);
-				wchar *buffer = (wchar*) out->getData();
+				Stringp out = new (core->GetGC()) String(len);
+				wchar *buffer = out->lockBuffer();
 				for (long i = 0; i < len; i++)
 				{
-					*buffer++ = (c[1] << 8) + c[0];
+					buffer[i] = (c[1] << 8) + c[0];
 					c += 2;
 				}
+				out->unlockBuffer();
 				return out;
 			}
 		}

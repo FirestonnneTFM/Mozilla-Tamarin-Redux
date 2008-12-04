@@ -85,7 +85,8 @@ namespace avmplus
 										 len,
 										 mode,
 										 precision);
-		return String::create(core, buffer, len);
+
+		return new (core->GetGC()) String(buffer,len);
 	}
 	
 	Stringp NumberClass::_numberToString(double dVal, int radix)

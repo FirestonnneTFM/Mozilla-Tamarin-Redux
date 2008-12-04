@@ -35,6 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+
 #include "avmplus.h"
 
 namespace avmplus
@@ -240,7 +241,6 @@ namespace avmplus
 
 	void E4XNode::setQName (AvmCore *core, Stringp name, Namespace *ns)
 	{
-		name = core->internString(name);
 		// If we already have an aux, use it.  (It may have notification atom set)
 		uintptr nameOrAux = m_nameOrAux;
 		if (AUXBIT & nameOrAux)
@@ -375,18 +375,34 @@ namespace avmplus
 		return -1;
 	}
 
-	Namespace *E4XNode::FindNamespace(AvmCore *core, Toplevel *toplevel, Stringp& tagName, bool bAttribute)
+	Namespace *E4XNode::FindNamespace (AvmCore *core, Toplevel *toplevel, const wchar *tagName, const wchar **localName, bool bAttribute)
 	{
-		int32_t pos = tagName->indexOf (":", 1, 0);
-		// handle case of ":name"
-		if (0 == pos)
-			toplevel->throwTypeError(kXMLBadQName, tagName);
-
+		const wchar *ptr = tagName;
 		Stringp prefix = core->kEmptyString;
-		if (pos > 0)
+		while (*ptr)
 		{
-			prefix = core->internString(tagName->substring (0, pos));
-			tagName = core->internString(tagName->substring (pos + 1, tagName->length()));
+			// found a separator between namespace prefix and localName
+			if (*ptr == ':')
+			{
+				// handle case of ":name"
+				if (ptr == tagName)
+				{
+					toplevel->throwTypeError(kXMLBadQName, core->toErrorString(tagName));
+				}
+
+				*localName = (ptr + 1);
+				if (!*localName)
+				{
+					// throw error - badly formed prefix:localName pair
+					// where is the localName?
+					toplevel->throwTypeError(kXMLBadQName, core->toErrorString(tagName));
+				}
+
+				prefix = core->internAlloc (tagName, (int)(ptr - tagName));
+				break;
+			}
+
+			ptr++;
 		}
 
 		// An attribute without a prefix is unqualified and does not inherit a namespace
@@ -401,7 +417,7 @@ namespace avmplus
 		{
 			for (uint32 i = 0; i < y->numNamespaces(); i++)
 			{
-				Namespace *ns = AvmCore::atomToNamespace(y->getNamespaces()->getAt(i));
+				Namespace *ns = AvmCore::atomToNamespace (y->getNamespaces()->getAt(i));
 				if (((prefix == core->kEmptyString) && !ns->hasPrefix()) ||
 					(prefix->atom() == ns->getPrefix()))
 				{
@@ -420,7 +436,7 @@ namespace avmplus
 		// throw error because we didn't match this prefix
 		if (prefix != core->kEmptyString)
 		{
-			toplevel->throwTypeError(kXMLPrefixNotBound, prefix, tagName);
+			toplevel->throwTypeError(kXMLPrefixNotBound, prefix, core->toErrorString(tagName));
 		}
 		return 0;
 	}
@@ -476,13 +492,13 @@ namespace avmplus
 		m_attributes->push (AvmCore::gcObjectToAtom(x));
 	}
 
-	void ElementE4XNode::CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag)
+	void ElementE4XNode::CopyAttributesAndNamespaces(AvmCore *core, Toplevel *toplevel, XMLTag& tag, const wchar *elementName)
 	{
 		m_attributes = 0;
 		m_namespaces = 0;
 
 		uint32 numAttr = 0;
-		int32_t len;
+
 		// We first handle namespaces because the a attribute tag can reference a namespace
 		// defined farther on in the same node...
 		// <ns2:table2 ns2:bar=\"last\" xmlns:ns2=\"http://www.macromedia.com/home\">...
@@ -490,34 +506,45 @@ namespace avmplus
 		Stringp attributeName, attributeValue;
 		while (tag.nextAttribute(index, attributeName, attributeValue))
 		{
-			Namespace *ns = NULL;
-			len = attributeName->length();
-			if (len >= 5)
+			wchar *xmlns = stripPrefix (attributeName->c_str(), "xmlns");
+			if (xmlns) // a namespace xnlns:prefix="URI" or xmlns="URI"
 			{
-				// caseless match
-				if (attributeName->matches("xmlns", 5, 0, true))
+				wchar *prefix = 0;
+				if (xmlns[0] == ':')
 				{
-					// a namespace xnlns:prefix="URI" or xmlns="URI"
-					if ((len > 5) && attributeName->charAt(5) == ':')
+					// handle case of ":name"
+					if (xmlns == attributeName->c_str())
 					{
-						if (len == 6)
-							// xmlns:=uri -- throw exception because of badly formed XML???
-							toplevel->throwTypeError(kXMLBadQName, attributeName);
-						Stringp prefix = core->internString(attributeName->substring (6, len));
-						ns = core->newNamespace(prefix->atom(), attributeValue->atom());
+						toplevel->throwTypeError(kXMLBadQName, attributeName);
 					}
-					else if (len == 5)
-						// xmlns=uri
-						ns = core->newNamespace(core->kEmptyString->atom(), attributeValue->atom());
 
-					// !!@ Don't intern these namespaces since the intern table ignores
-					// the prefix value of the namespace.
-					if (ns) // ns can be null if prefix is defined and attributeValue = ""
-						this->_addInScopeNamespace(core, ns);
+					prefix = xmlns + 1;
+					if (!prefix[0])
+					{
+						// throw exception because of badly formed XML???
+						toplevel->throwTypeError(kXMLBadQName, attributeName);
+					}
 				}
+
+				Namespace *ns;
+				if (prefix)
+				{
+					Stringp prefixs = core->internAlloc (prefix, String::Length(prefix));
+					ns = core->newNamespace (prefixs->atom(), attributeValue->atom());
+				}
+				else
+				{
+					ns = core->newNamespace (core->kEmptyString->atom(), attributeValue->atom());
+				}
+				// !!@ Don't intern these namespaces since the intern table ignores
+				// the prefix value of the namespace.
+				if (ns) // ns can be null if prefix is defined and attributeValue = ""
+					this->_addInScopeNamespace (core, ns);
 			}
-			if (!ns)
+			else
+			{
 				numAttr++;
+			}
 		}
 
 		if (!numAttr)
@@ -529,44 +556,37 @@ namespace avmplus
 		index = 0;
 		while (tag.nextAttribute(index, attributeName, attributeValue))
 		{
-			len = attributeName->length();
-			// check for namespace declarations and ignore them
-			if (len >= 5)
+			wchar *xmlns = stripPrefix (attributeName->c_str(), "xmlns");
+			if (!xmlns) // it's an attribute
 			{
-				// caseless match
-				if (attributeName->matches("xmlns", 5, 0, true))
+				// !!@ intern our attributeValue??
+				E4XNode *attrObj = new (core->GetGC()) AttributeE4XNode(this, attributeValue);
+
+				const wchar *localName = attributeName->c_str();
+				Namespace *ns = this->FindNamespace (core, toplevel, attributeName->c_str(), &localName, true);
+				if (!ns)
+					ns = core->publicNamespace;
+				Stringp name = core->internAlloc (localName, String::Length(localName));
+
+				attrObj->setQName(core, name, ns);
+
+				// check for a duplicate attribute here and throw a kXMLDuplicateAttribute if found
+
+				Multiname m2;
+				attrObj->getQName (core, &m2);
+				for (unsigned int i = 0; i < numAttributes(); i++)
 				{
-					// a namespace xnlns:prefix="URI" or xmlns="URI"
-					if ((len == 5) || ((len > 5) && attributeName->charAt(5) == ':'))
-						continue;
+					E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGCObject(m_attributes->getAt(i)));
+					Multiname m;
+					curAttr->getQName (core, &m);
+					if (m.matches (&m2))
+					{
+						toplevel->typeErrorClass()->throwError(kXMLDuplicateAttribute, attributeName, core->toErrorString(elementName), core->toErrorString(String::Length(elementName)));
+					}
 				}
+
+				m_attributes->push (AvmCore::gcObjectToAtom(attrObj));
 			}
-
-			// !!@ intern our attributeValue??
-			E4XNode *attrObj = new(core->GetGC()) AttributeE4XNode(this, attributeValue);
-
-			Namespace *ns = this->FindNamespace(core, toplevel, attributeName, true);
-			if (!ns)
-				ns = core->publicNamespace;
-
-			attrObj->setQName(core, attributeName, ns);
-
-			// check for a duplicate attribute here and throw a kXMLDuplicateAttribute if found
-
-			Multiname m2;
-			attrObj->getQName(core, &m2);
-			for (unsigned int i = 0; i < numAttributes(); i++)
-			{
-				E4XNode *curAttr = (E4XNode *) (AvmCore::atomToGCObject(m_attributes->getAt(i)));
-				Multiname m;
-				curAttr->getQName(core, &m);
-				if (m.matches(&m2))
-				{
-					toplevel->typeErrorClass()->throwError(kXMLDuplicateAttribute, attributeName, tag.text, core->toErrorString(tag.text->length()));
-				}
-			}
-
-			m_attributes->push(AvmCore::gcObjectToAtom(attrObj));
 		}
 	}
 
@@ -703,7 +723,7 @@ namespace avmplus
 				return falseAtom;
 
 			// QName/AttributeName comparision here
-			if (!m.matches(&m2))
+			if (!m.matches (&m2))
 				return falseAtom;
 		}
 		else if (v->getQName(core, &m2) != 0)

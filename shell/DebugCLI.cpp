@@ -772,7 +772,7 @@ namespace avmshell
 					currentSource[i] = ' ';
 			}
 		} else {
-			core->console << "Error opening source file " << currentFile << "\n";
+			core->console << "Error opening source file " << currentFile->c_str() << "\n";
 		}
 	}
 

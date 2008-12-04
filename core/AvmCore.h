@@ -1006,12 +1006,6 @@ const int kBufferPadding = 16;
 			return constantString(s)->atom();
 		}
 
-		/**
-		Intern a string with a character constant. This constant
-		neeeds to persist for the lifetime of this AvmCore. The
-		encoding is assumed to be Latin-1, not UTF-8, for speed
-		reasons.
-		*/
 		Stringp constantString(const char *s);
 
 		/**
@@ -1306,7 +1300,6 @@ const int kBufferPadding = 16;
 	private:
 		/** search the string intern table */
 		int findString(const wchar *s, int len);
-		int findString(Stringp s);
 
 		/** search the namespace intern table */
 		int findNamespace(Namespacep ns);
@@ -1329,7 +1322,7 @@ const int kBufferPadding = 16;
 		 * @return
 		 */
 		Stringp internAlloc(const wchar *s, int len);
-		Stringp internAllocUtf8(const byte *s, int len, bool constant);
+		Stringp internAllocUtf8(const byte *s, int len);
 
 #ifdef FEATURE_SAMPLER
 		/**
@@ -1374,6 +1367,9 @@ const int kBufferPadding = 16;
 		Stringp newString(const char *str) const;
 		Stringp newString(const wchar *str) const;
 		Stringp newString(const char *str, int len) const;		
+		void freeString(Stringp s) {
+			delete s;
+		}
 
 		Stringp uintToString(uint32 i);
 		Stringp intToString(int i);

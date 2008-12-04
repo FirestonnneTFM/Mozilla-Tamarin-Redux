@@ -38,6 +38,7 @@
 #ifndef __avmplus_XMLParser16__
 #define __avmplus_XMLParser16__
 
+
 namespace avmplus
 {
 	/**
@@ -56,7 +57,6 @@ namespace avmplus
 		{
 			text = NULL;
 			nodeType = kNoType;
-			endtag =
 			empty = false;
 			attributes.clear();
 		}
@@ -80,7 +80,6 @@ namespace avmplus
 		Stringp text;
 		enum TagType nodeType;
 		bool empty;
-		bool endtag;
 		List<Stringp> attributes;
 
 		/**
@@ -102,16 +101,18 @@ namespace avmplus
 	class XMLParser
 	{
 	public:
-		XMLParser(AvmCore *core, Stringp str);
+		XMLParser(AvmCore *core);
 		~XMLParser()
 		{
 			core = NULL;
-			m_pos = NULL;
+			m_source = NULL;
+			m_ptr = NULL;
 			m_ignoreWhite = false;
 			m_condenseWhite = false;
 		}
 
-		void parse(bool ignoreWhite = false);
+		void parse(Stringp source,
+				   bool ignoreWhite = false);
 
 		int getNext(XMLTag& tag);
 	
@@ -130,24 +131,21 @@ namespace avmplus
 			kUnterminatedProcessingInstruction = -11
 		};
 
-				AvmCore*		core;
+		AvmCore* core;
 	
-		inline	bool			getCondenseWhite() const { return m_condenseWhite; }
-		inline	void			setCondenseWhite(bool flag) { m_condenseWhite = flag; }
+		bool getCondenseWhite() const { return m_condenseWhite; }
+		void setCondenseWhite(bool flag) { m_condenseWhite = flag; }
 
 	private:
-		inline	bool			atEnd() const { return (m_pos >= m_str->length()); }
-		// get a substring, and remove &xx; entities
-				Stringp			unescape (int32_t start, int32_t end, bool bIntern);
-		// skip a prefix, return true if skipped
-				bool			skipPrefix (int32_t pos, const char* prefix, int32_t len);
-		// skip white space, return false if at end
-				bool			skipWhiteSpace();
+		Stringp unescape(Stringp buffer, const wchar *start, int len, bool bIntern);
 
-				StringIndexer	m_str;
-				int32_t			m_pos;
-				bool			m_ignoreWhite;
-				bool			m_condenseWhite;
+		Stringp m_source;
+		const wchar *m_ptr;
+
+		bool m_ignoreWhite;
+		bool m_condenseWhite;
+
+		void condenseWhitespace(Stringp text);
 	};
 }
 

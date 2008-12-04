@@ -292,8 +292,9 @@ namespace avmplus
 		 * Conversion routine to verify XML related flags of Multiname
 		 * (strips @ from strings and marks multiname as attribute)
 		 */
-		void CoerceE4XMultiname(const Multiname *m, Multiname &out) const;
-		bool NodeNameEquals(Stringp odeName, Stringp parentName, Namespace *ns);
+		void CoerceE4XMultiname (const Multiname *m, Multiname &out) const;
+
+		bool NodeNameEquals (const wchar *NodeName, int len, Stringp parentName, Namespace *ns);
 	};
 
 	/**

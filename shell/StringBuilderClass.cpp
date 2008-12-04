@@ -68,10 +68,7 @@ namespace avmshell
 		if (len > 0)
 		{
 			ensureCapacity(m_length + len);
-			StringIndexer str_idx(str);
-			wchar* buf = m_buffer + m_length;
-			for (int i = 0; i < len; i++)
-				*buf++ = str_idx[i];
+			memcpy(m_buffer+m_length, str->c_str(), len*sizeof(wchar));
 			m_length += len;
 		}
 	}
@@ -87,7 +84,7 @@ namespace avmshell
 		{
 			toplevel()->throwRangeError(kStringIndexOutOfBoundsError, core()->toErrorString(index), core()->toErrorString(0), core()->toErrorString(m_length));
 		}
-		return String::create(core(), m_buffer + index, 1);
+		return new (gc()) String(m_buffer+index, 1);
 	}
 
 	uint32 StringBuilderObject::charCodeAt(uint32 index)
@@ -143,8 +140,7 @@ namespace avmshell
 		const uint32 endIndex = m_length - sublen; 
 		
 		const wchar *ptr = m_buffer + index;
-		Stringp str16 = str->getFixedWidthString(String::k16);
-		const wchar *subchars = (const wchar*) str16->getData();
+		const wchar *subchars = str->c_str();
 		for ( ; index <= endIndex; index++)
 		{
 			if (memcmp(ptr, subchars, sublen*sizeof(wchar)) == 0)
@@ -169,10 +165,7 @@ namespace avmshell
 		
 		ensureCapacity(m_length + len);
 		memmove(m_buffer+index+len, m_buffer+index, (m_length-index)*sizeof(wchar));
-		StringIndexer str_idx(str);
-		wchar *p = m_buffer + index;
-		for (uint32 i = 0; i < len; i++)
-			*p++ = str_idx[i];
+		memcpy(m_buffer+index, str->c_str(), len*sizeof(wchar));
 		m_length += len;
 	}
 
@@ -202,12 +195,11 @@ namespace avmshell
 		}
 		
 		const wchar *ptr = m_buffer + index;
-		Stringp str16 = substr->getFixedWidthString(String::k16);
-		const wchar *subchars = (const wchar*) str16->getData();
-		for ( ; (int32_t) index >= 0 ; index-- )
+		int32_t iindex = (int32_t)index;
+		for ( ; iindex >= 0 ; iindex-- )
 		{
-			if (memcmp(ptr, subchars, sublen*sizeof(wchar)) == 0) {
-				return index;
+			if (memcmp(ptr, substr->c_str(), sublen*sizeof(wchar)) == 0) {
+				return iindex;
 			}
 			ptr--;
 		}
@@ -289,9 +281,8 @@ namespace avmshell
 		memmove(m_buffer + start + replacementLength,
 				m_buffer + end,
 				(m_length - end) * sizeof(wchar));
-		Stringp str16 = replacement->getFixedWidthString(String::k16);
 		memcpy(m_buffer + start,
-			   str16->getData(),
+			   replacement->c_str(),
 			   replacementLength * sizeof(wchar));
 		m_length = newLength;
 	}
@@ -327,7 +318,7 @@ namespace avmshell
 		{
 			set_length(index+1);
 		}
-		m_buffer[index] = (*ch)[0];
+		m_buffer[index] = ch->c_str()[0];
 	}
 
 	Stringp StringBuilderObject::substring(uint32 start, uint32 end)
@@ -348,12 +339,12 @@ namespace avmshell
 		{
 			return core()->kEmptyString;
 		}
-		return String::create(core(), m_buffer+start, end-start);
+		return new (gc()) String(m_buffer+start, end-start);
 	}
 
 	Stringp StringBuilderObject::_toString()
 	{
-		return String::create(core(), m_buffer, m_length);
+		return new (gc()) String(m_buffer, m_length);
 	}
 
 	void StringBuilderObject::trimToSize()
