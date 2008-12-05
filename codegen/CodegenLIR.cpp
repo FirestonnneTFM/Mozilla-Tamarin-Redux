@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -1707,7 +1708,8 @@ namespace avmplus
 			{
 				// load "true" or "false"
 				LIns *index = binaryIns(LIR_lsh, localGet(loc), InsConst(PTR_SCALE));
-				localSet(loc, loadIns(LIR_ldc, (uintptr)&core->booleanStrings, index));
+				LIns *arr = InsConst(&core->booleanStrings);
+				localSet(loc, loadIns(LIR_ldc, 0, binaryIns(LIR_addp, arr, index)));
 			}
 			else if (value.notNull)
 			{
@@ -4316,7 +4318,10 @@ namespace avmplus
         }
     }
 
-    static int jitcount=0;
+#ifdef AVMPLUS_JITMAX
+    int jitcount = 0;
+    int jitmax = 0x7fffffff;
+#endif
 
     void CodegenLIR::emitMD() 
     {
@@ -4375,14 +4380,12 @@ namespace avmplus
         }
         delete lirbuf;
 
-        jitcount++;
-        //_nvprof("assm->error", assm->error());
-        //_nvprof("hasExceptions", info->hasExceptions());
-        //_nvprof("hasLoop", assm->hasLoop);
-
-        bool keep = //jitcount <= 0 &&
-            //!info->hasExceptions() && 
+        bool keep = //!info->hasExceptions() && 
             !assm->error();
+    #ifdef AVMPLUS_JITMAX
+        jitcount++;
+        keep &&= jitcount <= jitmax;
+    #endif
 
         //_nvprof("keep",keep);
         if (keep) {
@@ -4393,17 +4396,19 @@ namespace avmplus
             } u;
             u.vp = frag->code();
             info->impl32 = u.fp;
-            verbose_only(if (verbose()) {
+            #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
+            if (verbose())
                 printf("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
-            })
+            #endif
         } else {
             // assm puked, or we did something untested, so interpret.
             // fixme: need to remove this frag from Fragmento and free everything.
             frag->releaseCode(frago);
             overflow = true;
-            verbose_only(if (verbose()) {
+            #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
+            if (verbose())
                 printf("reverting to interpreter %d assm->error %d \n", jitcount, assm->error());
-            })
+            #endif
             PERFM_NVPROF("lir-error",1);
         }
 
@@ -4530,11 +4535,19 @@ namespace avmplus
 		if (overflow)
 			return false;
 
+	#ifdef AVMPLUS_IA32
 		LIns *iid_param = lirout->insParam(1, 0); // edx
 		//env_param = lirout->insParam(2, 0); // stack
 		argc_param = lirout->insParam(3, 0); // stack
 		ap_param = lirout->insParam(4, 0); // stack
-
+	#else
+		// works for abi's that have at least 4 parameter registers
+		//env_param = lirout->insParam(0, 0);
+		argc_param = lirout->insParam(1, 0);
+		ap_param = lirout->insParam(2, 0);
+		LIns *iid_param = lirout->insParam(3, 0);
+	#endif
+	
 		LIns *obj = lirout->insLoadi(ap_param, 0);
 		LIns *vtable = lirout->insLoadi(obj, offsetof(ScriptObject,vtable));
 
