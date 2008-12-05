@@ -79,9 +79,9 @@ namespace avmplus
 			if( AvmCore::isString(name) )
 			{
 				Stringp s = core->string(name);
-				const wchar *c = s->c_str();
+				const wchar c = (*s)[0];
 				// Does it look like a number?
-				if( s->length() > 0 && *c >= '0' && *c <= '9' )
+				if( s->length() > 0 && c >= '0' && c <= '9' )
 				{
 					double index_d = s->toNumber();
 					if( !MathUtils::isNaN(index_d) )

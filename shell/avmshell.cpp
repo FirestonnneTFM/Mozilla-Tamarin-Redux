@@ -1160,7 +1160,7 @@ namespace avmshell
 							{
 								ScriptBuffer code = newScriptBuffer(fl.available());
 								fl.read(code.getBuffer(), fl.available());
-								handleActionBlock(code, 0, domainEnv, toplevel, NULL, NULL, NULL, lastCodeContext);
+								handleActionBlock(code, 0, domainEnv, toplevel, NULL, lastCodeContext);
 							}
 							CATCH(Exception *exception)
 							{
@@ -1381,7 +1381,7 @@ int StackTop;
 #endif
 
 #ifdef UNDER_CE
-int wmain(int argc, wchar *argv[])
+int wmain(int argc, avmplus::wchar *argv[])
 #else
 int main(int argc, char *argv[])
 #endif
@@ -1417,5 +1417,3 @@ int main(int argc, char *argv[])
 	return code;
 }
 #endif
-
-

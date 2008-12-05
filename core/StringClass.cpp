@@ -136,15 +136,17 @@ namespace avmplus
 	Stringp StringClass::AS3_fromCharCode(Atom *argv, int argc)
 	{
 		AvmCore* core = this->core();
-		Stringp out = new (core->GetGC()) String(argc);
-		wchar *ptr = out->lockBuffer();
-
-		for (int i=0; i<argc; i++) {
-			*ptr++ = wchar(core->integer(argv[i]));
+		Stringp out = NULL;
+		for (int i=0; i<argc; i++) 
+		{
+			wchar ch = wchar(core->integer(argv[i]));
+			if (out == NULL)
+				out = String::create(core, &ch, 1);
+			else
+				out = out->append(&ch, 1);
 		}
-		*ptr = 0;
-
-		out->unlockBuffer();
+		if (out == NULL)
+			out = core->kEmptyString;
 		return out;
 	}
 
@@ -207,19 +209,9 @@ namespace avmplus
 															   3, argv));
 			}
 
-			int newlen = subject->length() - searchString->length() + replacement->length();
-
-			Stringp out = new (core->GetGC()) String(newlen);
-
-			wchar *buffer = out->lockBuffer();
-			memcpy(buffer, subject->c_str(), index*sizeof(wchar));
-			memcpy(buffer+index, replacement->c_str(), replacement->length()*sizeof(wchar));
-			memcpy(buffer+index+replacement->length(),
-				   subject->c_str()+index+searchString->length(),
-				   (subject->length()-searchString->length()-index+1)*sizeof(wchar));
-			buffer[newlen] = 0;
-			out->unlockBuffer();
-
+			Stringp out = subject->substring(0, index);
+			out = String::concatStrings(out, replacement);
+			out = String::concatStrings(out, subject->substring(index + searchString->length(), subject->length()));
 			return out;
 		}
 	}
@@ -273,53 +265,26 @@ namespace avmplus
 			// delim is empty string, split on each char
 			for (int i = 0; i < ilen && (unsigned)i < limit; i++)
 			{
-				Stringp sub = new (core->GetGC()) String(in, i, 1);
+				Stringp sub = in->substr(i, 1);
 				out->setUintProperty(count++, sub->atom());
 			}
 			return out;
 		}
 
-		const wchar *inchar = in->c_str();
-		const wchar *delimch = delim->c_str();
+		int32_t start = 0;
 
-		wchar probe = delimch[0];	// initial char of search string
-		unsigned numSeg = 0;		// index of next slot in the array
-		int start=0;				// start index in input of next substring to extract
-		int i=0;					// index in input of next character to examine
-		int ilimit=ilen-dlen+1;		// limit for i when comparing to probe
-		for (;;) 
+		while (start <= in->length())
 		{
-again:
-			while (i < ilimit && inchar[i] != probe)
-				i++;
-			if (i >= ilimit)
+			if ((limit != 0xFFFFFFFFUL) && (count >= (int) limit))
 				break;
-			for (int j=1; j < dlen ; j++) {
-				if (inchar[i+j] != delimch[j]) {
-					i++;
-					goto again;
-				}
-			}
-
-			// Got one.  "i" has index of first char of delimiter.
-			numSeg++;
-
-			if( numSeg > limit )
-				break;
-
-			Stringp sub = new (core->GetGC()) String(in, start, i-start);
+			int32_t bgn = in->indexOf(delim, start);
+			if (bgn < 0)
+				// not found, use the string remainder
+				bgn = in->length();
+			Stringp sub = in->substring(start, bgn);
 			out->setUintProperty(count++, sub->atom());
-			
-			i = start = i+dlen;
-        }
-
-		// if numSeg is less than limit when we're done, add the rest of
-		// the string to the last element of the array
-		if( numSeg < limit )
-        {
-			Stringp sub = new (core->GetGC()) String(in, start, ilen);
-            out->setUintProperty(count, sub->atom());
-        }
+			start = bgn + delim->length();
+		}
         return out;
     }
 }

@@ -4338,9 +4338,10 @@ namespace avmplus
         )
 
 		verbose_only( if (core->config.bbgraph) { 
-			StringNullTerminatedUTF8 cname(gc, info->format(core));
+			UTF8String* cname = info->format(core)->toUTF8String();
 			frag->cfg->fin();
-			frag->cfg->print((char*)cname.c_str());
+			frag->cfg->print((char*)cname->c_str());
+			delete cname;
 		});
 		
         deadvars();

@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -15,11 +16,11 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004-2006
+ * Portions created by the Initial Developer are Copyright (C) 2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Adobe AS3 Team
+ *   Michael Daumling
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,245 +36,280 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __avmplus_String__
-#define __avmplus_String__
+#ifndef __avmplus_NewString__
+#define __avmplus_NewString__
 
-
-namespace avmplus
+namespace avmplus 
 {
-#ifdef DEBUGGER
-	class GCHashtableScriptObject;
-#endif
-	/**
-	 * A string in UTF-8 encoding.
-	 *
-	 * UTF8String's are immutable and garbage collected, which makes
-	 * it easy to pass them around.
-	 */
-	class UTF8String : public MMgc::GCObject
-	{
-	public:
-		/**
-		 * Constructs a UTF8String.  This should not be called
-		 * directly; use the toUTF8String method of String.
-		 */
-		UTF8String(int _length) { m_length = _length; }
+	using namespace MMgc;
 
-		/**
-		 * Operator overload; returns a pointer to the
-		 * null-terminated string.
-		 */
-		operator const char* () const { return m_buffer; }
+	class UTF8String;
+	class UTF16String;
+	class ByteArray;
 
-		/**
-		 * Returns a pointer to the null-terminated string.
-		 */
-		const char *c_str() const { return m_buffer; }
-
-		/**
-		 * Returns the length of the string in bytes,
-		 * excluding the null terminator.
-		 */
-		int length() const { return m_length; }
-		
-		/**
-		 * This is an advanced method which returns a non-const
-		 * pointer to the UTF8String's internal buffer.  This
-		 * can be used to mutate a string that is known to not
-		 * have any other references.  Use with caution.
-		 */
-		char *lockBuffer() { return m_buffer; }
-
-		/**
-		 * Unlocks the buffer previously returned by lockBuffer.
-		 * Currently a no-op, but may change in the future,
-		 * so call after using lockBuffer.
-		 */
-		void unlockBuffer() {}
-		
-	private:
-		int m_length;
-		char m_buffer[1];
-	};
+	/// The utf8_t data type expressively means UTF-8 data.
+	typedef uint8_t utf8_t;
+	/// The utf32_t data type expressively means UTF-32 data.
+	typedef uint32_t utf32_t;
 
 	/**
-	 * A string in UTF-16 encoding.  This is the basic string
-	 * class used by AVM+ code.
-	 */
+	A String can have many faces, dependent on the way the string data is stored. 
+	The most common is the kDirect type, meaning that the string data follows the
+	instance data. The kStatic type has the string instance point to a static buffer.
+	This buffer must exist as long as the string exists; character constants are
+	ideal candidates for this type. The kDependent type is a string that points
+	into another string; this type is created in a substring or concatenation operation. 
+	Strings cannot be deleted directly, because they may be referenced be dependent strings.
+	<p>
+	String concatenation attempts first to use additional memory that the memory 
+	allocator has left behind when a kDirect string was allocated. If the right-hand
+	string fits into that buffer, the data is appended, and a dependent string is returned,
+	pointing to the new, larger buffer(the original string keeps its initial length
+	and thus does not know about the additional data). If the data does not fit, a new
+	kDirect string is allocated with some extra bytes at the end, assuming that there may
+	be more characters to append. The minimum of extra characters is 32, then it is twice 
+	the new length, up to a platform-dependent maximum(usually 64K). This value can be 
+	tweaked for platforms with memory constraints in favor of more copying operations.
+	<p>
+	Strings exist in 8, 16, and 32-bit flavors. The 8-bit flavor only holds the first
+	256 Unicode characters. All widths ignore Unicode surrogate pairs, treating them
+	as ordinary characters. Use the createUTFxx() methods to deal with surrogate pairs and 
+	UTF-8 encoding. If the kAuto type is used during creation, a quick scan is made to
+	see if a string would fit into a narrower width than the buffer suggests, i.e. if
+	a 16-bit buffer only contains 8-bit characters. UTF-32 support needs to be enabled
+	by defining the value FEATURE_UTF32_SUPPORT in avmbuild.h.
+	<p>
+	Strings cannot be deleted, since the create() methods may choose to return standard
+	string constants, or interned strings, or other strings that other code depends on.
+	*/
 	class String : public AvmPlusScriptableObject
 	{
 	public:
-		String(const wchar *str, int len);					// wchar[] -> string
-		String(const char *str, int utf8len, int utf16len); // utf8->string
-		String(Stringp s1, Stringp s0);		// concat
-		String(Stringp s, int pos, int len);// substr
-		String(int len);					// preallocated empty
 
-		~String()
+		/// String type constants.
+		enum Type
 		{
-#ifdef MMGC_DRC
-			setBuf(NULL);
-			setPrefixOrOffsetOrNumber(0);
-			m_length = 0;
-#endif
-		}
-
-		/**
-		 * Converts this string to a UTF-8 string.  Allocates
-		 * a new UTF8 string object containing the result,
-		 * and returns it.
-		 */
-		UTF8String* toUTF8String();
-
-		/**
-		 * Returns the Atom equivalent of this String.  This is
-		 * done by or'ing the proper type bits into the pointer.
-		 */
-		Atom atom() const { return AtomConstants::kStringType | (Atom)this; }
-
-		/**
-		 * virtual version of atom():
-		 */
-		virtual Atom toAtom() const { return atom(); }
-
-		/**
-		 * Returns the length of the string in characters.
-		 * The null terminator is not included.
-		 */
-		int length() const { 
-			return m_length & 0x7FFFFFFF; 
-		}
-
-		// overload used by AS3 glue code.
-		int get_length() const { return length(); }
-
-		/**
-		 * Operator overload; returns a pointer to the
-		 * null-terminated string.
-		 */
-		inline operator const wchar* () 
+			kDirect				= 0,	// data follows instance (m_direct)
+			kStatic				= 1,	// buffer is static (m_static)
+			kDependent			= 2		// string points into master string (m_dependent)
+		};
+		/// String width constants.
+		enum Width
 		{
-			return c_str(); 
-		}
-		
+#ifdef FEATURE_UTF32_SUPPORT
+			kAuto	= 0,	// only used in APIs
+			k8		= 1,
+			k16		= 2,
+			k32		= 4
+#else
+			kAuto	= 0,	// only used in APIs
+			k8		= 1,
+			k16		= 2
+#endif		
+		};
 		/**
-		 * Returns a pointer to the null-terminated string.
-		 */
-		const wchar* c_str();
-
+		Use this constant to define the default width for this system. If you use anything
+		else but kAuto, this would create strings of that width. This is not recommended.
+		*/
+		static	const Width kDefaultWidth = kAuto;
 		/**
-		 * Returns the index'th character of the string.
-		 * @param index zero-based index into the string
-		 */
-		wchar operator[] (int index);
-
-		/**
-		 * This is an advanced method which returns a non-const
-		 * pointer to the String's internal buffer.  This
-		 * can be used to mutate a string that is known to not
-		 * have any other references.  Use with caution.
-		 */
-		wchar* lockBuffer();
-		
-		/**
-		 * Unlocks the buffer previously returned by lockBuffer.
-		 * Must call after using lockBuffer to mutate the buffer.
-		 */
-		void unlockBuffer(int newLen) 
+		This is a union of three different pointers. To use it, call getData() and assign
+		the result to a Pointers member.
+		*/
+		struct Pointers
 		{
-			AvmAssert(!isInterned());
-			m_length = newLen;
-		}
-		void unlockBuffer() {}
-
-		/**
-		 * Returns a new string object which is a copy of this
-		 * string object, with all characters in the string
-		 * converted to uppercase.
-		 *
-		 * Unicode character classes for uppercase and lowercase
-		 * are used.  The conversion behavior is compliant with
-		 * the String.toUpperCase method.
-		 */
-		Stringp AS3_toUpperCase();
-		inline Stringp toUpperCase() { return AS3_toUpperCase(); }
-
-		/**
-		 * Returns a new string object which is a copy of this
-		 * string object, with all characters in the string
-		 * converted to lowercase.
-		 *
-		 * Unicode character classes for uppercase and lowercase
-		 * are used.  The conversion behavior is compliant with
-		 * the String.toLowerCase method.
-		 */
-		Stringp AS3_toLowerCase();
-		inline Stringp toLowerCase() { return AS3_toLowerCase(); }
-
-		/*@{*/
-		/**
-		 * Compare the String with toCompare.
-		 * @return = 0 if the strings are identical.
-		 *         < 0 if this string is less than toCompare
-		 *         > 0 if this string is greater than toCompare
-		 */
-		int Compare(String& toCompare) 
-		{
-			if (hasPrefix()) normalize();
-			if (toCompare.hasPrefix()) toCompare.normalize();
-
-			return String::Compare(getData() + getOffset(), length(), toCompare.getData() + toCompare.getOffset(), toCompare.length());
-		}
-		
-		/*@{*/
-		/**
-		 * Does String contain wchar?
-		 * @return = 0 if the strings are identical.
-		 *         < 0 if this string is less than toCompare
-		 *         > 0 if this string is greater than toCompare
-		 */
-		bool Contains(wchar c);
-		
-		// compare this string to (other,len)
-		bool Equals(const wchar *toCompare, int len)
-		{
-			AvmAssert(toCompare[len]==0);
-			int sLen = length();
-			if (len != sLen) return false;
-			if (hasPrefix()) normalize();
-			return String::Compare(getData() + getOffset(), sLen, toCompare, len)==0;
-		}
-
-		// toCompare is not necessarily zero-terminated at toCompare[len]
-		bool FastEquals(const wchar *toCompare, int len)
-		{
-			int sLen = length();
-			if (len != sLen) return false;
-			// This is only for intern strings which are never offset or prefix
-			AvmAssert(needsNormalization() == false);
-			const wchar *src = getData();
-
-			// !! could we compare two WORDS at a time?  Our toCompare
-			// string is not necessarily DWORD aligned.  (Offset strings, etc.)
-
-			while (sLen)
+			union
 			{
-				sLen--;
-				if (src[sLen] != toCompare[sLen])
-					return false;
-			}
-				
-			AvmAssert(sLen == 0);
-			return true;
-		}
+				void*			pv;
+				char*			p8;
+				wchar*			p16;
+				utf32_t*		p32;
+			};
+		};
 
-		// compare this string to null-terminated 8bit string
-		bool Equals(const char *other8)
-		{ 
-			if (hasPrefix()) normalize();
-			return !Compare(getData() + getOffset(), other8, length());
-		}
+		/**
+		Create a string using 16-bit data.
+		@param	core				the AvmCore instance to use
+		@param	buffer				the 16-bit buffer; if NULL, the string contains random data
+		@param	len					the size in characters
+		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
+		@param	staticBuf			if true, the buffer is static, and may be used by the string
+		@return						the String instance, or NULL on out-of-memory
+		*/
+		static	Stringp				create(const AvmCore* core, const wchar* buffer, int32_t len, Width desiredWidth = kDefaultWidth, bool staticBuf = false);
+		/**
+		Create a string using Latin-1 data. Characters are just widened and copied.
+		To create an UTF-8 string, use StringUtils::create().
+		@param	core				the AvmCore instance to use
+		@param	buffer				the character buffer; characters are considered unsigned
+									if NULL, the string contains random data
+		@param	len					the size in characters
+		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
+		@param	staticBuf			if true, the buffer is static, and may be used by the string
+		@return						the String instance, or NULL on out-of-memory
+		*/
+		static	Stringp				create(const AvmCore* core, const char* buffer, int32_t len, Width desiredWidth = kDefaultWidth, bool staticBuf = false);
+		/**
+		Create a string using UTF-8 data.
+		@param	avm					the AvmCore instance to use
+		@param	buffer				the UTF-8 buffer
+		@param	len					the size in bytes
+		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
+		@param	staticBuf			if true, the buffer is static, and may be used by the string
+		@return						the String instance, or NULL on out-of-memory, or bad characters
+		*/
+		static	Stringp				createUTF8(const AvmCore* core, const utf8_t* buffer, int32_t len, 
+												String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
+		/**
+		Create a string using UTF-16 data. If the width is k32, and there are surrogate pairs, they
+		will be resolved. If this is not desired, use String::create() instead (only present if
+		FEATURE_UTF32_SUPPORT is defined). If the desired width is too small to fit the source data, 
+		return NULL.
+		@param	avm					the AvmCore instance to use
+		@param	buffer				the UTF-32 buffer
+		@param	len					the size in characters
+		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
+		@param	staticBuf			if true, the buffer is static, and may be used by the string
+		@return						the String instance, or NULL on out-of-memory, or characters too wide
+		*/
+		static	Stringp				createUTF16(const AvmCore* core, const wchar* buffer, int32_t len, 
+												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
+#ifdef FEATURE_UTF32_SUPPORT
+		/**
+		Create a string using UTF-32 data. Characters > 0xFFFF are encoded into UTF-16 surrogate
+		pairs if the desired width is k16. Note that UTF-32 characters > 0x10FFFF are rejected
+		because of a possible integer overrun during comparisons. If the desired width is too 
+		small to fit the source data, return NULL.
+		@param	avm					the AvmCore instance to use
+		@param	buffer				the UTF-32 buffer
+		@param	len					the size in characters
+		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
+		@param	staticBuf			if true, the buffer is static, and may be used by the string
+		@return						the String instance,  or NULL on out-of-memory, or characters too wide
+		*/
+		static	Stringp				createUTF32(const AvmCore* core, const utf32_t* buffer, int32_t len, 
+												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
+#endif
+		virtual						~String();
 
+		/**
+		Create a string out of an ABC string pool stored in the given ByteArray.
+		Returns NULL on out-of-memory, or on bad UTF-8 data.
+		@param	core				the AvmCore instance to use
+		@param	buff				the ByteArray containing the string
+		@param	offset				the offset of the string
+		@param	len					the string length
+		@param	desiredWidth		the desired string width
+		@return						the String instance, or NULL on out-of-memory
+		static Stringp				newPoolString(const AvmCore* core, const ByteArray *buff, uint32_t offset, uint32_t len, Width desiredWidth = kAuto);
+		*/
+		/**
+		Create a string with a given width out of this string. If the width is equal to the current
+		width, return this instance. If the desired width is too narrow to fit, or kAuto is passed
+		in, or there is no memory left, return NULL.
+		@param	w					the width of the new string(kAuto is not supported)
+		@return						the String instance, or NULL on kAuto, string too wide, or out-of-memory
+		*/
+				Stringp	FASTCALL	getFixedWidthString(Width w) const;
+
+		/**
+		Check this string for being a dependent string; if so, create and return
+		a copy. The AvmCore uses this method to ensure that interned strings are
+		never dependent; if dependent strings could be interned, this would keep
+		the master string from being released, which, with a large master string,
+		may be a huge waste of memory.
+		*/
+				Stringp	FASTCALL	getIndependentString() const;
+		/**
+		Returns the Atom equivalent of this String.  This is
+		done by or'ing the proper type bits into the pointer.
+		*/
+		inline	Atom				atom() const { return Atom(AtomConstants::kStringType | uintptr_t(this)); }
+		/**
+		virtual version of atom():
+		*/
+		virtual Atom				toAtom() const { return atom(); }
+		/**
+		If this string is a static string, make it dynamic so the static data can be released.
+		Returns false if the string is not kStatic.
+		*/
+				bool				makeDynamic();
+		/**
+		Produce a has code of this string.
+		*/
+				uint32_t FASTCALL	hashCode() const;
+		/**
+		Use the same algorithm to produce a hash code for UTF-8 data.
+		*/
+		static	uint32_t FASTCALL	hashCodeUTF8(const utf8_t* buf, int32_t len);
+		/**
+		Use the same algorithm to produce a hash code for UTF-16 data.
+		*/
+		static	uint32_t FASTCALL	hashCodeUTF16(const wchar* buf, int32_t len);
+		/// Return the length in characters.
+		inline	int32_t				length() const { return m_length; }
+		// overload used by AS3 glue code.
+				int					get_length() const { return m_length; }
+		/// Is this string empty?
+		inline	bool isEmpty()		const { return m_length == 0; }
+		/// Return the width constant.
+		inline	Width				getWidth() const { return Width(m_bitsAndFlags & TSTR_WIDTH_MASK); }
+		/// Return the string typex.
+		inline	int32_t				getType() const { return ((m_bitsAndFlags & TSTR_TYPE_MASK) >> TSTR_TYPE_SHIFT); }
+		/// Is this an interned string?
+		inline	bool				isInterned() const { return 0 != (m_bitsAndFlags & TSTR_FLAG_INTERNED); }
+		/// Mark this string as interned.
+		inline	void				setInterned() { m_bitsAndFlags |= TSTR_FLAG_INTERNED; }
+		/**	
+		Return the raw pointer to the string data.
+		*/
+		const	void*	FASTCALL	getData() const;
+		/**
+		Return the character at the given position. No index checks!
+		@param	index				the index
+		@return						the character at the index
+		*/
+				uint32_t FASTCALL	charAt(int32_t index) const;
+		/**
+		Use a Pointers instance to quickly access a character given the Pointers
+		instance containing the buffer start, and the string width. No index checks!
+		*/
+				utf32_t FASTCALL	charAt(const Pointers& r, int32_t index) const;
+		/**
+		The index operator throws if the character is too wide for a wchar,
+		or the index is invalid.
+		*/
+#ifdef FEATURE_UTF32_SUPPORT
+		inline	utf32_t				operator[](int index) const { return charAt(index); }
+#else
+		inline	wchar				operator[](int index) const { return (wchar) charAt(index); }
+#endif
+		/*@{*/
+		/**
+		Compare the String with toCompare. If the length is > 0, compare
+		the other string up to the given length.
+		@param	other				the string to compare with
+		@param	start				the starting position
+		@param	length				the length to compare(if > 0)
+		@return = 0 if the strings are identical,
+		        < 0 if this string is less than toCompare,
+		        > 0 if this string is greater than toCompare
+		 */
+				int32_t FASTCALL	Compare(String& other, int32_t start = 0, int32_t length = 0) const;
+		/**
+		Compare this string with a ASCII string.
+		*/
+				bool	FASTCALL	Equals(const char* p) const;
+		/**
+		Compare this string with a UTF-16 string.
+		*/
+				bool	FASTCALL	Equals(const wchar* p, int32_t len) const;
+		///
+		inline	bool				FastEquals(const wchar* p, int32_t len) const { return Equals(p, len); }
+		/**
+		Localized compare - maps to compare().
+		*/
+				int32_t FASTCALL	localeCompare(Stringp other, const Atom* argv, int32_t argc);
 		/*@{*/
 		/**
 		 * Compares s1 and s2.
@@ -281,178 +317,287 @@ namespace avmplus
 		 *         < 0 if s1 is less than s2
 		 *         > 0 if s1 is greater than s2
 		 */		
-		static int Compare(const wchar *s1,
-						   int len1,
-						   const wchar *s2,
-						   int len2);
-		static int Compare(const wchar *s1,
-						   const char  *s2,
-						   int len);
+		static	int32_t	FASTCALL	Compare(const wchar *s1, int32_t len1, const wchar *s2, int32_t len2);
+		///
+		static	int32_t	FASTCALL	Compare(const wchar *s1, const char *s2, int32_t len);
 		/*@}*/
 
 		/*@{*/
 		/**
 		 * Returns the length of str, in # of characters.
 		 */
-		static int Length(const wchar *str);
-		static int Length(const char *str);
+		static int32_t	FASTCALL	Length(const wchar *str);
+		static int32_t	FASTCALL	Length(const char *str);
 		/*@}*/
+		/**
+		Compare the String with an UTF-8 buffer. On a bad UTF-8 character sequence,
+		return false. This method is used for hash table lookups.
+		*/
+				bool FASTCALL		equalsUTF8(const utf8_t* buf, int32_t bytes) const;
+		/**
+		Implements String.indexOf().
+		*/
+				int32_t	FASTCALL	indexOf(Stringp s, int32_t offset = 0) const;
+		/**
+		Convenience method: indexOf() for a Latin-1 string within a given range.
+		@param	p					the character string to compare; NULL returns -1
+		@param	len					the number of characters to compare; if < 0, call Length()
+		@param	start				the starting position
+		@param	end					the ending position
+		@return						the index of the found position, or -1 if no match
+		*/
+				int32_t FASTCALL	indexOf(const char* p, int32_t len, int32_t start, int32_t end = 0x7FFFFFFF) const;
+		/**
+		Convenience method: Does a Latin-1 string match at the current position?
+		@param	p					the character string to compare; NULL returns false
+		@param	len					the number of characters to compare; if < 0, call Length()
+		@param	pos					the position to match
+		@param	caseless			true for a caseless match
+		@return						true if the string matches
+		*/
+				bool	 FASTCALL	matches(const char* p, int32_t len, int32_t pos, bool caseless = false);
+		/**
+		Implements String.lastIndexOf().
+		*/
+				int32_t	FASTCALL	lastIndexOf(Stringp s, int32_t offset = 0) const;
+		/**
+		Concatenate two strings, and return the result. If the right string fits into the buffer
+		end of the left string, append the data and return a new dependent string pointing
+		to that buffer. If it does not fit, create a kDirect string containing the entire
+		buffer, with extra padding at the end to support in-place concatenation.
+		@param	left				the left string; may be NULL
+		@param	right				the right string; may be NULL, although not meaningful
+		@return						the concatenated string
+		*/
+		static	Stringp	FASTCALL	concatStrings(Stringp leftStr, Stringp rightStr);
+		/**
+		Append a String instance.
+		@param	src					the string to append
+		@return						the concatenated string
+		*/
+				Stringp	FASTCALL	append(const String* str);
+		/**
+		Append a character buffer with a given size and width. Of course, the width kAuto is
+		not allowed here - the character width should be supplied correctly!
+		@param	src					the source buffer
+		@param	numChars			the number of characters in that buffer
+		@param	width				the width of the buffer characters
+		@return						the concatenated string
+		*/
+				Stringp	FASTCALL	append(const void* buffer, int32_t numChars, Width charWidth);
+		/*
+		Append a Latin-1 string(8 bits, not UTF-8).
+		*/
+		inline	Stringp				append(const char* p) { return append(p, Length(p), k8); }
+		/*
+		Append a UTF-16 string.
+		*/
+		inline	Stringp				append(const wchar* p) { return append(p, Length(p), k16); }
+		/*
+		Append a Latin-1 string(8 bits, not UTF-8) with a length.
+		*/
+		inline	Stringp				append(const char* p, int32_t len) { return append(p, len, k8); }
+		/*
+		Append a UTF-16 string with a length.
+		*/
+		inline	Stringp				append(const wchar* p, int32_t len) { return append(p, len, k16); }
+		/**
+		Implement String.substr(). The resulting String object points into the original string, 
+		and holds a reference to the original string.
+		*/
+				Stringp	FASTCALL	substr(int32_t start, int32_t len);
+		/**
+		Implement String.substring(). The resulting String object points into the original string, 
+		and holds a reference to the original string.
+		*/
+				Stringp	FASTCALL	substring(int32_t start, int32_t end);
+		/**
+		Implement String.slice(). The resulting String object points into the original string, 
+		and holds a reference to the original string.
+		*/
+				Stringp	FASTCALL	slice(int32_t start, int32_t end);
+		/**
+		This routine is a very specific parser to generate a positive integer from a string.
+		The following are supported:
+		"0" - one single digit for zero - NOT "00" or any other form of zero
+		[1-9]+[0-9]* up to 2^32-2(4294967294)
+		2^32-1(4294967295) is not supported(see ECMA quote below).
+		The ECMA that we're supporting with this routine is...
+		cn:  the ES3 test for a valid array index is 
+		 "A property name P(in the form of a string value) is an array index if and 
+		 only if ToString(ToUint32(P)) is equal to P and ToUint32(P) is not equal to 2^32-1."
+		Don't support 000000 as 0.
+		We don't support 0x1234 as 1234 in hex since string(1234) doesn't equal '0x1234')
+		No leading zeros are supported
+		*/
+				bool	FASTCALL	parseIndex(uint32_t& result) const;
+		/**
+		Returns a new string object which is a copy of this string object, with all 
+		characters in the string converted to uppercase. 
+		Unicode character classes for uppercase and lowercase are used. The conversion 
+		behavior is compliant with the String.toUpperCase method. The method returns
+		this instance if no changes were detected.
+		@return						the resulting string or NULL
+		*/
+				Stringp FASTCALL	toUpperCase();
+		/**
+		Returns a new string object which is a copy of this string object, with all 
+		characters in the string converted to lowercase. 
+		Unicode character classes for uppercase and lowercase are used. The conversion 
+		behavior is compliant with the String.toUpperCase method. The method returns
+		this instance if no changes were detected.
+		@return						the resulting string or NULL
+		*/
+				Stringp FASTCALL	toLowerCase();
+		/**
+		Change the case of a string according to the case mapper supplied.
+		If no changes were detected, return this instance, otherwise, return
+		a new instance. Returns NULL on out-of-memory.
+		@param	unimapper			the mapping function to call
+		@return						the changed string or NULL on out-of-memory
+		*/
+				Stringp	FASTCALL	caseChange(uint32_t(*unimapper)(uint32_t));
+		/**
+		Returns a kIntegerAtom Atom if the string holds an integer that fits into
+		such an atom. For use in our ScriptObject HashTable implementation.  If we 
+		have a valid integer equivalent, it will never be zero since kIntegerType tag != 0.
+		*/
+				Atom	FASTCALL	getIntAtom() const;
+		/**
+		This conversion handles hex, octal, base 10 integer, float, and "Infinity"/"-Infinity".
+		*/
+				double				toNumber();
+		/**
+		Create a 0-terminated UTF-8 string out of this string.
+		*/
+				UTF8String*			toUTF8String() const;
+		/**
+		Create a 0-terminated UTF-16 string out of this string.
+		If this is a 32-bit string, characters > 0xFFFF are
+		converted to surrogate pairs.
+		*/
+				UTF16String*		toUTF16String() const;
+		/**
+		Check if this character is a valid space character.
+		*/
+		static	bool				isSpace(wchar ch);
+		/**
+		Is this string all whitespace?
+		*/
+				bool				isWhitespace() const;
 
-		void setInterned(AvmCore *core)
-		{
-			m_length |= 0x80000000;
-			generateIntegerEquivalent (core);
-		}
+		/// Native functions, used by StringClass.cpp
+				int					_indexOf(Stringp s, int i=0);
+				int					AS3_indexOf(Stringp s, double i=0);
 
-		static bool isSpace(wchar ch);
+				int					_lastIndexOf(Stringp s, int i=0x7fffffff);
+				int					AS3_lastIndexOf(Stringp s, double i=0x7fffffff);
 
-		bool isWhitespace();
+				Stringp				_charAt(int i=0); 
+				Stringp				AS3_charAt(double i=0); 
 
-		int isInterned() const
-		{
-			return m_length & 0x80000000;
-		}
+				double				_charCodeAt(int i); // returns NaN for out-of-bounds
+				double				AS3_charCodeAt(double i); // returns NaN for out-of-bounds
 
-		// handles hex, octal, base 10 integer, float, and "Infinity"/"-Infinity"
-		double toNumber() 
-		{
-			// For offset too since convertStringToNumber expects a null terminated string
-			if (needsNormalization()) normalize();
-			return MathUtils::convertStringToNumber(getData() + getOffset(), length());
-		}
+				int					AS3_localeCompare(Stringp other);
 
-		// native functions
-		int _indexOf(Stringp s, int i=0);
-		int AS3_indexOf(Stringp s, double i=0);
+				Stringp				_substring(int i_start, int i_end);
+				Stringp				AS3_substring(double d_start, double d_end);
 
-		int _lastIndexOf(Stringp s, int i=0x7fffffff);
-		int AS3_lastIndexOf(Stringp s, double i=0x7fffffff);
+				Stringp				_slice(int dStart, int dEnd);
+				Stringp				AS3_slice(double dStart, double dEnd);
 
-		Stringp _charAt(int i=0); 
-		Stringp AS3_charAt(double i=0); 
+				Stringp				_substr(int dStart, int dEnd);
+				Stringp				AS3_substr(double dStart, double dEnd);
 
-		double _charCodeAt(int i); // returns NaN for out-of-bounds
-		double AS3_charCodeAt(double i); // returns NaN for out-of-bounds
-
-		int AS3_localeCompare(Stringp other);
-		inline int localeCompare(Stringp other) { return AS3_localeCompare(other); }
-
-		Stringp _substring(int i_start, int i_end);
-		Stringp AS3_substring(double d_start, double d_end);
-
-		Stringp _slice(int dStart, int dEnd);
-		Stringp AS3_slice(double dStart, double dEnd);
-
-		Stringp _substr(int dStart, int dEnd);
-		Stringp AS3_substr(double dStart, double dEnd);
-
-		inline int indexOf(Stringp s, int i=0) { return _indexOf(s, i); }
-		inline int lastIndexOf(Stringp s, int i=0x7fffffff) { return _lastIndexOf(s, i); }
-		inline Stringp charAt(int i=0) { return _charAt(i); }
-		inline double charCodeAt(int i) { return _charCodeAt(i); }
-		inline Stringp substring(int a, int b) { return _substring(a, b); }
-		inline Stringp slice(int a, int b) { return _slice(a, b); }
-		inline Stringp substr(int a, int b) { return _substr(a, b); }
+				Stringp				AS3_toUpperCase();
+				Stringp				AS3_toLowerCase();
 
 		// Useful utilities used by the core code.
-		static wchar wCharToUpper (wchar ch);
-		static wchar wCharToLower (wchar ch);
-		
+		static	wchar				wCharToUpper(wchar ch) { return (wchar) unicharToUpper((utf32_t) ch); }
+		static	wchar				wCharToLower(wchar ch) { return (wchar) unicharToLower((utf32_t) ch); }
+		static	utf32_t				unicharToUpper(utf32_t ch);
+		static	utf32_t				unicharToLower(utf32_t ch);
 #ifdef DEBUGGER
-		virtual uint64 size() const;
+		virtual uint64				size() const;
 #endif
 
 	private:
-		int			m_length; // { interned: 1, length:31 }
-		class StringBuf : public MMgc::RCObject
-		{
-		public:
-			wchar m_buf[1];
-#ifdef MMGC_DRC
-			~StringBuf()
+		friend class StringUtils;
+		friend class StringRange;
+		friend class StringDataUTF8;
+		friend class StringNullTerminatedUTF8;
+
+								String(int32_t length, uint32_t bits);
+		inline	void			operator delete(void*) {}	// Strings cannot be deleted, therefore private
+
+				int32_t			m_length;					// length in characters
+		mutable	uint32_t		m_bitsAndFlags;				// various bits and flags, see below(must be unsigned)
+				enum {
+					TSTR_WIDTH_MASK			= 0x00000007,	// string width(right-aligned for fast access)
+					TSTR_FLAG_INTERNED		= 0x00000008,	// this string is interned
+					TSTR_TYPE_MASK			= 0x000000F0,	// type index, 4 bits
+					TSTR_TYPE_SHIFT			= 4,
+					TSTR_NOINT_FLAG			= 0x00000100,	// set in getIntAtom() if the string is not an 28-bit integer
+					TSTR_NOUINT_FLAG		= 0x00000200,	// set in parseIndex() if the string is not an unsigned integer
+					TSTR_DYNAMIC_FLAG		= 0x00000400,	// data buffer needs deletion(if kStatic)
+					TSTR_CHARSLEFT_MASK		= 0xFFFFF000,	// characters left in buffer field(for inplace concat)
+					TSTR_CHARSLEFT_SHIFT	= 12
+				};
+		inline	void			setType(char index)			{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_TYPE_MASK) |(index << TSTR_TYPE_SHIFT); }
+		inline	int32_t			getCharsLeft() const		{ return (m_bitsAndFlags & TSTR_CHARSLEFT_MASK) >> TSTR_CHARSLEFT_SHIFT; }
+		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
+
+		union _direct
 			{
-				memset(m_buf, 0, MMgc::GC::Size(this)-sizeof(MMgc::RCObject));
-			}
-#endif
-		};
-		// no WB b/c manual WB is in setBuf, faster that way
-		StringBuf* m_buf;
-
-		// The low two bits control what type of value is stored in m_prefixOrOffsetOrNumber
-		// 0x00 nothing is stored (rest of value is 0)
-		// 0x01 the 29-bit numeric equivalent of this string is stored (same as kIntegerAtom format)
-		// 0x02 a prefix string is stored
-		// 0x03 a 30-bit offset is stored
-		// manual WB when needed
-		uintptr	m_prefixOrOffsetOrNumber;
-		#define		STRINGFLAGS		0x03
-		#define		NUMBERFLAG		0x01
-		#define		PREFIXFLAG		0x02
-		#define		OFFSETFLAG		0x03
-
-		Stringp	getPrefix() const 
-		{ 
-			if ((m_prefixOrOffsetOrNumber & STRINGFLAGS) == PREFIXFLAG) 
-				return Stringp(m_prefixOrOffsetOrNumber & ~STRINGFLAGS); 
-			else 
-				return 0; 
+				char c8[1]; // actual size varies
+				wchar c16[1];
+				utf32_t	c32[1];
 		};
 
-		uint32 getOffset() const 
-		{ 
-			if ((m_prefixOrOffsetOrNumber & STRINGFLAGS) == OFFSETFLAG) 
-				return urshift(m_prefixOrOffsetOrNumber & ~STRINGFLAGS, 2); 
-			else 
-				return 0; 
+		struct _dependent
+		{
+			Stringp			master;
+			Pointers		p;
 		};
 
-		bool hasPrefix() const { return ((m_prefixOrOffsetOrNumber & STRINGFLAGS) == PREFIXFLAG); };
-		bool hasOffset() const { return ((m_prefixOrOffsetOrNumber & STRINGFLAGS) == OFFSETFLAG); };
+		union
+		{
+			// Characters follow the instance; this is the case for
+			// all strings created directly.
+			union _direct			m_direct;
 
-		bool needsNormalization() const { return ((m_prefixOrOffsetOrNumber & STRINGFLAGS) >= 0x2); };
+			// External, static buffer.
+			Pointers				m_static;
 
-		void normalize();
-
-		// If our string is a valid positive integer that fits in a kIntegerAtom, this
-		// will set our m_prefixOrOffsetOrNumber value to the int atom representation or'ed
-		// with NUMBERTYPE.  This is only valid for non-prefix, non-offset interned strings.
-		void generateIntegerEquivalent(AvmCore *core);
-
-		void setPrefixOrOffsetOrNumber(uintptr value);
-
-		static const wchar lowerCaseBase[];
-		static const wchar upperCaseBase[];
-		static const wchar lowerCaseConversion[];
-		static const wchar upperCaseConversion[];
-		static const unsigned char tolower_map[];
-		static const unsigned char toupper_map[];
-public:
-		// This returns a kIntegerAtom Atom
-		// for use in our ScriptObject HashTable implementation.  If we have a valid 
-		// integer equivalent, it will never be zero since kIntegerType tag != 0
-		Atom getIntAtom() const 
-		{ 
-			if ((m_prefixOrOffsetOrNumber & STRINGFLAGS) == NUMBERFLAG) 
-				return m_prefixOrOffsetOrNumber & ~STRINGFLAGS | kIntegerType;
-			else 
-				return 0; 
+			// A dependent string is the result of an in-place concat,
+			// or a substr. Its buffer pointer points into the master's
+			// buffer, and the master member holds a refcounted pointer
+			// to the master string.
+			struct _dependent		m_dependent;
 		};
-
-		StringBuf* allocBuf(int numChars);
-		wchar *getData() const { return m_buf->m_buf; }
-		void setBuf(StringBuf *buf) { WBRC(MMgc::GC::GetGC(this), this, &m_buf, buf); }
-
-
+		// Create a string with no buffer.
+		static	Stringp	FASTCALL	createDependent(GC* gc, Stringp master, int32_t start, int32_t len);
+		// Create a string with a direct buffer.
+		static	Stringp	FASTCALL	createDirect(GC* gc, const void* data, int32_t len, Width w, int32_t extra=0);
+		// Create a string with a static buffer.
+		static	Stringp	FASTCALL	createExternal(GC* gc, const void* data, int32_t len, Width w);
+		// Redefine new for in-place construction.
+		inline	void*				operator new(size_t, Stringp p) { return p; }
+		// Calculate the hash code.
+				uint32_t FASTCALL	_hashCode();
+		// Do a raw buffer compare.
+		static	int32_t	FASTCALL	compare(const Pointers& r1, Width w1, const Pointers& r2, Width w2, int32_t len);
 	};
 
 	// Compare helpers
 	inline bool operator==(String& s1, String& s2)
 	{ 
-		return s1.length() == s2.length() && s1.Compare(s2) == 0;
+		return s1.Compare(s2) == 0;
 	}
 	inline bool operator!=(String& s1, String& s2)
 	{
-		return s1.length() != s2.length() || s1.Compare(s2) != 0;
+		return s1.Compare(s2) != 0;
 	}
 	inline bool operator<(String& s1, String& s2)
 	{ 
@@ -471,32 +616,87 @@ public:
 		return s2.Compare(s1) >= 0; 
 	}
 
-	// if you absolutely MUST have a null-terminated string, use this
-	// class to produce one. keep in mind that the underlying string
-	// probably is NOT null-terminated, so we must allocate temporary space
-	// to copy the string into, so only use this when you have no alternative
-	// (e.g., to pass to a system or library call). also keep in mind that
-	// the pointer is only valid for as long as the class itself.
-	//
-	// And yes, this name is deliberately long and awkward; if that's a problem,
-	// it probably means you are over-using it.
-	//
-	class StringNullTerminatedUTF8
+	/**
+	The StringIndexer class provides quick access to single characters by index.
+	Use an instance of this class on the stack if multiple index access is required.
+	This class does not need to call getData() for each index access, which charAt()
+	without a Pointers argument does internally.
+	*/
+
+	class StringIndexer
 	{
-	private:
-		// no DRC here because these are generally stack-allocated and we
-		// want copy operations to be cheap. if you need one of these as
-		// a member var then change to DRC...
-		Stringp m_str;
-		//DRC(Stringp) m_str;
-		// @todo -- consider putting a small buf here to use for small strings to avoid alloc call
-		char* m_bufptr;
-		MMgc::GC *gc;
 	public:
-		StringNullTerminatedUTF8(MMgc::GC *gc, Stringp src);
-		~StringNullTerminatedUTF8();
-		const char* c_str() const { return m_bufptr; }
+		/// The constructor takes the string to index.
+		inline				StringIndexer(Stringp s) : m_str(s) { m_ptrs.pv = (void*) s->getData(); }
+		inline				~StringIndexer() { m_str = NULL; m_ptrs.pv = NULL; }
+		/// Return the embedded string.
+		inline	Stringp		operator->() const { return m_str; }
+		/// Quick index operator.
+#ifdef FEATURE_UTF32_SUPPORT
+		inline	utf32_t		operator[](int index) const { return m_str->charAt(m_ptrs, index); }
+#else
+		inline	wchar		operator[](int index) const { return (wchar) m_str->charAt(m_ptrs, index); }
+#endif
+	private:
+		// do not create on the heap
+		inline	void*		operator new(size_t) throw() { return NULL; }
+		inline	void		operator delete(void*) {}
+		Stringp				m_str;
+		String::Pointers	m_ptrs;
+	};
+
+	/**
+	The UTF8String class is simply a data buffer containing 0-terminated
+	UTF-8 data. Use String::toUTF8String() to create such a string.
+	*/
+
+	class UTF8String : public MMgc::GCObject
+	{
+	public:
+		/**
+		Convert a string index to an UTF-8 index. 
+		Return the original index if out of range.
+		*/
+				int32_t FASTCALL	toUtf8Index(int32_t pos);
+		/**
+		Convert an UTF-8 index to a string index.
+		Return the original index if < 0.
+		*/
+				int32_t FASTCALL	toIndex(int32_t uf8Pos);
+		///
+		inline	const char*			c_str() const { return m_buffer; }
+		///
+		inline	int32_t				length() const { return m_length; }
+	private:
+				int32_t				m_lastPos;
+				int32_t				m_lastUtf8Pos;
+				int32_t				m_length;
+				char				m_buffer[1];
+				friend class		String;
+									UTF8String(int32_t len);
+		static	UTF8String*			create8 (const String* s);
+		static	UTF8String*			create16(const String* s);
+		static	UTF8String*			create32(const String* s);
+	};
+
+	/**
+	The UTF16String class is simply a data buffer containing 0-terminated
+	UTF-16 data. Use String::toUTF16String() to create such a string.
+	*/
+
+	class UTF16String : public MMgc::GCObject
+	{
+	public:
+		///
+		inline	const wchar*	c_str() const { return m_buffer; }
+		///
+		inline	int32_t			length() const { return m_length; }
+	private:
+				int32_t			m_length;
+				wchar			m_buffer[1];
+				friend class	String;
+		inline					UTF16String(int32_t len) : m_length(len) {}
 	};
 }
 
-#endif /* __avmplus_String__ */
+#endif	// __avmplus_NewString__

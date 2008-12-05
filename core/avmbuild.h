@@ -110,6 +110,14 @@
 	#define AVMPLUS_SSE2_ALWAYS
 #endif
 
+// Uncomment the following line to enable support for 32 bit strings. If disabled,
+// only 8 and 16 bits strings are supported. If enabled, string can be 32 bits 
+// internally, and the String method createUTF32() is defined, which also takes
+// care of surrogate pairs, and createUTF16() converts surrogate pairs to UTF-32 
+// if the desired string width is 32 bits.
+
+//#define FEATURE_UTF32_SUPPORT 1
+
 /// START: CRUFT 
 //
 // guard pages are created for buffers rather than explicit overflow checks
