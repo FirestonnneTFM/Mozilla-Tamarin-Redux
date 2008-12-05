@@ -442,6 +442,13 @@
 		8EDDB9F309AAD2B700FB9EE5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		D940282E0E5F793900818E5B /* QCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QCache.h; sourceTree = "<group>"; };
 		D966B38F0E7EFEA700C19EF5 /* QCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = QCache.cpp; sourceTree = "<group>"; };
+		D97B4FD70EE9B4A100745578 /* NativePPC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativePPC.cpp; path = ../../../nanojit/NativePPC.cpp; sourceTree = SOURCE_ROOT; };
+		D97B4FD80EE9B4A100745578 /* NativePPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativePPC.h; path = ../../../nanojit/NativePPC.h; sourceTree = SOURCE_ROOT; };
+		D97B4FD90EE9B4B600745578 /* NativeThumb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeThumb.cpp; path = ../../../nanojit/NativeThumb.cpp; sourceTree = SOURCE_ROOT; };
+		D97B4FDA0EE9B4B600745578 /* NativeThumb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeThumb.h; path = ../../../nanojit/NativeThumb.h; sourceTree = SOURCE_ROOT; };
+		D97B4FDB0EE9B4B600745578 /* NativeAMD64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeAMD64.h; path = ../../../nanojit/NativeAMD64.h; sourceTree = SOURCE_ROOT; };
+		D97B4FDC0EE9B4B600745578 /* NativeARM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeARM.cpp; path = ../../../nanojit/NativeARM.cpp; sourceTree = SOURCE_ROOT; };
+		D97B4FDD0EE9B4B600745578 /* NativeARM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeARM.h; path = ../../../nanojit/NativeARM.h; sourceTree = SOURCE_ROOT; };
 		D98338330EB11B6900B81872 /* nativegen.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = nativegen.py; path = ../../../utils/nativegen.py; sourceTree = SOURCE_ROOT; };
 		D991708C0EB91DCA00C2B30A /* Trace.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Trace.as; path = ../../../extensions/Trace.as; sourceTree = SOURCE_ROOT; };
 		D991708D0EB91DE000C2B30A /* Java.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Java.as; path = ../../../shell/Java.as; sourceTree = SOURCE_ROOT; };
@@ -512,8 +519,15 @@
 				4E1E424E0E6339A40095C2E7 /* LIR.h */,
 				4E1E424F0E6339A40095C2E7 /* nanojit.h */,
 				4E1E42500E6339A40095C2E7 /* Native.h */,
+				D97B4FDB0EE9B4B600745578 /* NativeAMD64.h */,
+				D97B4FDC0EE9B4B600745578 /* NativeARM.cpp */,
+				D97B4FDD0EE9B4B600745578 /* NativeARM.h */,
 				4E1E42510E6339A40095C2E7 /* Nativei386.cpp */,
 				4E1E42520E6339A40095C2E7 /* Nativei386.h */,
+				D97B4FD70EE9B4A100745578 /* NativePPC.cpp */,
+				D97B4FD80EE9B4A100745578 /* NativePPC.h */,
+				D97B4FD90EE9B4B600745578 /* NativeThumb.cpp */,
+				D97B4FDA0EE9B4B600745578 /* NativeThumb.h */,
 				4E1E42530E6339A40095C2E7 /* RegAlloc.cpp */,
 				4E1E42540E6339A40095C2E7 /* RegAlloc.h */,
 			);

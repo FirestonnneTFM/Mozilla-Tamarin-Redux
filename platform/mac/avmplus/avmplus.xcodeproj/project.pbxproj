@@ -213,6 +213,8 @@
 		942BC4350BB991690088A47F /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 942BC4330BB991690088A47F /* Sampler.cpp */; };
 		942BC4360BB991690088A47F /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 942BC4340BB991690088A47F /* Sampler.h */; };
 		CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */; };
+		D97B4FC60EE9B49100745578 /* NativePPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D97B4FC40EE9B49100745578 /* NativePPC.cpp */; };
+		D97B4FC70EE9B49100745578 /* NativePPC.h in Headers */ = {isa = PBXBuildFile; fileRef = D97B4FC50EE9B49100745578 /* NativePPC.h */; };
 		D981288C0E8D7D9700C48B85 /* peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D981288B0E8D7D9700C48B85 /* peephole.cpp */; };
 		D9C68C9D0EB689490044C84D /* DescribeTypeClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9C68C990EB689480044C84D /* DescribeTypeClass.cpp */; };
 		D9C68C9E0EB689490044C84D /* DescribeTypeClass.h in Headers */ = {isa = PBXBuildFile; fileRef = D9C68C9A0EB689490044C84D /* DescribeTypeClass.h */; };
@@ -430,6 +432,8 @@
 		942BC4340BB991690088A47F /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sampler.h; path = ../../../core/Sampler.h; sourceTree = SOURCE_ROOT; };
 		CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_newline.cpp; path = ../../../pcre/pcre_newline.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libavmplus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libavmplus.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D97B4FC40EE9B49100745578 /* NativePPC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativePPC.cpp; path = ../../../nanojit/NativePPC.cpp; sourceTree = SOURCE_ROOT; };
+		D97B4FC50EE9B49100745578 /* NativePPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativePPC.h; path = ../../../nanojit/NativePPC.h; sourceTree = SOURCE_ROOT; };
 		D981288B0E8D7D9700C48B85 /* peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peephole.cpp; path = ../../../core/peephole.cpp; sourceTree = SOURCE_ROOT; };
 		D9C68C990EB689480044C84D /* DescribeTypeClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DescribeTypeClass.cpp; path = ../../../core/DescribeTypeClass.cpp; sourceTree = SOURCE_ROOT; };
 		D9C68C9A0EB689490044C84D /* DescribeTypeClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DescribeTypeClass.h; path = ../../../core/DescribeTypeClass.h; sourceTree = SOURCE_ROOT; };
@@ -732,6 +736,8 @@
 				4E0F4ECF0E5A34F900DA786F /* Native.h */,
 				4E0F4ED00E5A34F900DA786F /* Nativei386.cpp */,
 				4E0F4ED10E5A34F900DA786F /* Nativei386.h */,
+				D97B4FC40EE9B49100745578 /* NativePPC.cpp */,
+				D97B4FC50EE9B49100745578 /* NativePPC.h */,
 				4E0F4ED20E5A34F900DA786F /* RegAlloc.cpp */,
 				4E0F4ED30E5A34F900DA786F /* RegAlloc.h */,
 			);
@@ -857,6 +863,7 @@
 				D9D251E20EA66AE8006E6BB2 /* QCache.h in Headers */,
 				D9C68C9E0EB689490044C84D /* DescribeTypeClass.h in Headers */,
 				D9C68CA00EB689490044C84D /* TypeDescriber.h in Headers */,
+				D97B4FC70EE9B49100745578 /* NativePPC.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1010,6 +1017,7 @@
 				D9D251E10EA66AE8006E6BB2 /* QCache.cpp in Sources */,
 				D9C68C9D0EB689490044C84D /* DescribeTypeClass.cpp in Sources */,
 				D9C68C9F0EB689490044C84D /* TypeDescriber.cpp in Sources */,
+				D97B4FC60EE9B49100745578 /* NativePPC.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
