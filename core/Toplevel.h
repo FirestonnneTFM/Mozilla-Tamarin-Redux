@@ -360,7 +360,6 @@ namespace avmplus
 	private:
 
 		int parseHexChar(wchar c);
-		wchar extractCharacter(const wchar*& src);
 		Stringp decode(Stringp in, bool decodeURIComponentFlag);
 		Stringp encode(Stringp in, bool encodeURIComponentFlag);
 

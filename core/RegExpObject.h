@@ -101,14 +101,6 @@ namespace avmplus
 						  int& matchIndex,
 						  int& matchLen);
 		
-		int Utf16ToUtf8Index(Stringp utf16String,
-							 UTF8String *utf8String,
-							 int utf16Index);
-
-		int Utf8ToUtf16Index(Stringp utf16String,
-							 UTF8String *utf8String,
-							 int utf8Index);
-
 		void fixReplaceLastIndex(const char *src,
 								 int subjectLength,
 								 int lastIndex,

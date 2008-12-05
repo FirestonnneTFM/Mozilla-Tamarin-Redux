@@ -1079,7 +1079,8 @@ namespace avmplus
 				toplevel->throwVerifyError(kCorruptABCError);
 			// don't need to create an atom for this now, because
 			// each caller will take care of it.
-			Stringp s = core->internAllocUtf8(pos, len);
+			// These strings are assumed to be constant
+			Stringp s = core->internAllocUtf8(pos, len, true);
 #ifdef MMGC_DRC
 			// MIR skips WB on string constants so make them sticky
 			s->Stick();
