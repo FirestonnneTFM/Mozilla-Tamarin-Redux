@@ -51,8 +51,9 @@ namespace MMgc
 	public:
 		const static uint32 kDefaultSize=16;
 		const static void * DELETED;
-		GCHashtable(unsigned int capacity=kDefaultSize);
-		~GCHashtable();
+		enum { MALLOC=1, MT=2, STRINGS=4 };
+		GCHashtable(unsigned int capacity=kDefaultSize, int options=0);
+		virtual ~GCHashtable();
 		const void *get(const void *key);
 		const void *get(sintptr key) { return get((const void*)key); }
 		const void *remove(const void *key);
@@ -79,8 +80,12 @@ namespace MMgc
 		// table elements
 		const void **table;
 
-		static int find(const void *key, const void **table, unsigned int tableSize);
+		int options;
+		int find(const void *key, const void **table, unsigned int tableSize);
 		void grow();
+	protected:
+		virtual unsigned equals(const void *k1, const void *k2);
+		virtual unsigned hash(const void *k);
 	};
 
 	class GCHashtableIterator
