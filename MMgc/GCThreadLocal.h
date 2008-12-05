@@ -61,6 +61,11 @@ namespace MMgc
 			InitializeCriticalSection(&cs);
 		}
 
+		~GCCriticalSection()
+		{
+			DeleteCriticalSection(&cs);
+		}
+
 		inline void Acquire()
 		{
 			EnterCriticalSection(&cs);
@@ -83,13 +88,25 @@ namespace MMgc
 		{
 			GCAssert(sizeof(T) <= sizeof(LPVOID));
 			tlsId = TlsAlloc();
+			TlsSetValue(tlsId, (LPVOID) NULL);
 		}
+
+		~GCThreadLocal()
+		{
+			TlsFree(tlsId);
+			tlsId = 0;
+		}
+
 		T operator=(T tNew)
 		{
 			TlsSetValue(tlsId, (LPVOID) tNew);
 			return tNew;
 		}
 		operator T() const
+		{
+			return (T) TlsGetValue(tlsId);
+		}
+		T operator->() const
 		{
 			return (T) TlsGetValue(tlsId);
 		}
@@ -107,6 +124,7 @@ namespace MMgc
 		{
 			GCAssert(sizeof(T) <= sizeof(void*));
 			pthread_key_create(&tlsId, NULL);
+			pthread_setspecific(tlsId, NULL);
 		}
 		T operator=(T tNew)
 		{
@@ -141,7 +159,7 @@ namespace MMgc
 		T value ;
 	};
 #endif	//HAVE_PTHREADS
-
+	
 	class GCCriticalSection
 	{
 	public:

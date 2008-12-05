@@ -86,19 +86,14 @@
 #  define MMGC_RCROOT_SUPPORT
 #endif
 
-#ifdef DEBUGGER
-	// for historical reasons, define this when DEBUGGER is defined, in case client code depends on it
-	#define FEATURE_SAMPLER
-#endif
+// wait for it...
+//#define FEATURE_OOM
 
+/**
+* Controls whether MMgc reports alloc/dealloc info to a Sampler
+*/
 #ifdef DEBUGGER
-	#define SAMPLE_ALLOC(_item, _size)			if (MMgc::g_sampling) recordAllocationSample(_item, _size)
-	#define SAMPLE_FIXED_ALLOC(_item, _size)	if (MMgc::g_sampling) recordAllocationSample(_item, _size, true)
-	#define SAMPLE_DEALLOC(_item, _size)		if (MMgc::g_sampling) recordDeallocationSample(_item, _size)
-#else
-	#define SAMPLE_ALLOC(_x, _s)
-	#define SAMPLE_FIXED_ALLOC(_x, _s)
-	#define SAMPLE_DEALLOC(_x, _s)
+#define FEATURE_SAMPLER
 #endif
 
 #if defined(_DEBUG) || defined(_MAC)
@@ -160,15 +155,15 @@ namespace MMgc
 #include "GCStack.h"
 #include "GCThreads.h"
 #include "GCAllocObject.h"
+#include "GCHashtable.h"
+#include "GCMemoryProfiler.h"
 #include "GCHeap.h"
 #include "GCAlloc.h"
 #include "GCLargeAlloc.h"
 #include "GCThreadLocal.h"
-#include "GCMemoryProfiler.h"
 #include "FixedAlloc.h"
 #include "FixedMalloc.h"
 #include "GCGlobalNew.h"
-#include "GCHashtable.h"
 #include "GC.h"
 #include "GCObject.h"
 #include "GCWeakRef.h"
