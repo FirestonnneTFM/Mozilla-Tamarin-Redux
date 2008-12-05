@@ -149,6 +149,10 @@ namespace avmplus {
 		using namespace avmshell;
 		#include "shell_toplevel.cpp"
 	}
+
+#ifdef AVMPLUS_JITMAX
+	extern int jitmax;
+#endif
 }
 
 namespace avmshell
@@ -275,6 +279,9 @@ namespace avmshell
         printf("          [-Dnosse]     use FPU stack instead of SSE2 instructions\n");
         #endif /* AVMPLUS_IA32 */
     #endif
+	#ifdef AVMPLUS_JITMAX
+		printf("          [-jitmax N]   only execute the first N jit'd methods, interpret after.");
+	#endif
 		
 		#ifdef AVMPLUS_VERIFYALL
 	    printf("          [-Dverifyall] verify greedily instead of lazily\n");
@@ -729,10 +736,14 @@ namespace avmshell
 						cacheSizes.metadata = (uint16_t)STRTOL10(argv[++i], 0, 10);
 					}
                 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					else if (!strcmp(arg, "-Ojit")) 
-					{
+					else if (!strcmp(arg, "-Ojit")) {
                         config.runmode = RM_jit_all;
 					} 
+				#endif
+				#ifdef AVMPLUS_JITMAX
+					else if (!strcmp(arg, "-jitmax")) {
+						jitmax = atoi(argv[++i]);
+					}
 				#endif
 					else if (!strcmp(arg, "-memstats")) {
 						GetGC()->gcstats = true;
@@ -1211,7 +1222,7 @@ namespace avmshell
 		}
 		END_CATCH
 		END_TRY
-				
+
 		if (show_mem)
 		{
 			MMgc::GCHeap* heap = GetGC()->GetGCHeap();

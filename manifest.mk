@@ -52,6 +52,9 @@ endif
 ifeq (arm,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif
+ifeq (powerpc,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
 ifeq (darwin,$(TARGET_OS))
 $(call RECURSE_DIRS,platform/mac)
 endif
