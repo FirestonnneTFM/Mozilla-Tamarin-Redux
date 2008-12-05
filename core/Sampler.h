@@ -98,7 +98,7 @@ namespace avmplus
 		void sampleCheck() { if(takeSample) sample(); }
 
 		uint64 recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable);
-		uint64 recordAllocationSample(void* item, uint64 size, bool callback_ok = true);
+		uint64 recordAllocationSample(const void* item, uint64 size, bool callback_ok = true);
 		void recordDeallocationSample(const void* item, uint64 size);
 
 		void startSampling();
