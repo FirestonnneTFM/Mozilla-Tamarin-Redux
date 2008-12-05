@@ -549,7 +549,7 @@ if globs['config'] == '':
         if re.search('(ppc)', f[0]):
             cputype='ppc'
         
-        if cpuytpe == '':
+        if cputype == '':
             raise Exception()
             
     except:
