@@ -183,10 +183,6 @@ namespace avmplus
 
 		callStack          = NULL;
 
-#ifdef DEBUGGER
-		MMgc::g_sampler = sampler();
-#endif
-
 		interrupted        = false;
 
 		codeContextAtom    = CONTEXT_NONE;
@@ -3805,6 +3801,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	GrowableBuffer* AvmCore::requestNewMirBuffer()
 	{
+		MMGC_MEM_TAG("JIT");
 		return new (GetGC()) GrowableBuffer(GetGC()->GetGCHeap(),true);
 	}
 
