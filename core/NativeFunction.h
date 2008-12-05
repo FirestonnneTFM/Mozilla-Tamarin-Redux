@@ -156,7 +156,7 @@ namespace avmplus
 #endif
 
 #ifdef DEBUGGER
-	#define AVMTHUNK_DEBUG_ENTER(env)	CallStackNode csn(CallStackNode::kEmpty); (env)->debugEnter(argc, (uint32_t*)argv, 0, 0, &csn, 0, 0); 
+	#define AVMTHUNK_DEBUG_ENTER(env)	CallStackNode csn(CallStackNode::kEmpty); (env)->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
 	#define AVMTHUNK_DEBUG_EXIT(env)	(env)->debugExit(&csn);
 #else
 	#define AVMTHUNK_DEBUG_ENTER(env)	

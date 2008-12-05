@@ -332,6 +332,10 @@ namespace avmplus
 		}
 		#endif
 
+#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+		XLAT_ONLY( if (translator && core->debugger) translator->emitOp0(code_pos, WOP_debugenter); )
+#endif
+
         PERFM_NVPROF("abc-bytes", code_length);
 
 		int size;
@@ -635,7 +639,10 @@ namespace avmplus
 				// straight through to the next block.
 				state->pop();
 				blockEnd = true;
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_returnvalue) );
+#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+				XLAT_ONLY( if (translator && core->debugger) translator->emitOp0(pc, WOP_debugexit); )
+#endif
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_returnvalue); )
 				break;
 			}
 
@@ -644,7 +651,10 @@ namespace avmplus
 				//checkStack(1,0)
 				JIT_ONLY( if (jit) jit->emit(state, opcode); )
 				blockEnd = true;
-				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_returnvoid) );
+#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+				XLAT_ONLY( if (translator && core->debugger) translator->emitOp0(pc, WOP_debugexit); )
+#endif
+				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_returnvoid); )
 				break;
 			}
 

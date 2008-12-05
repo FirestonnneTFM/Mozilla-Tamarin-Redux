@@ -45,7 +45,7 @@
 #endif
 #include "MMgc.h"
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 namespace avmplus
 {
 	void recordAllocationSample(const void* item, size_t size);
@@ -1395,7 +1395,7 @@ namespace MMgc
 			DebugDecorate(item, size);
 #endif
 		}
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		// this can't be called with the heap lock locked.
 		avmplus::recordAllocationSample(item, size);
 #endif
@@ -1414,7 +1414,7 @@ namespace MMgc
 #endif
 		}
 		
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		avmplus::recordDeallocationSample(item, size);
 #endif
 	}

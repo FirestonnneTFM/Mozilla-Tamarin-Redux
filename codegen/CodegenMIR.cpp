@@ -2475,25 +2475,26 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-
-		for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i)
+		if (core->debugger)
 		{
-			localSet(i, undefConst);
+			for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i)
+			{
+				localSet(i, undefConst);
+			}
+
+			#ifdef AVMPLUS_VERBOSE
+			if (verbose())
+				core->console << "    debug_enter\n";
+			#endif
+
+			callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
+				ldargIns(_env), ldargIns(_argc), ldargIns(_ap), 
+				leaIns(0, localTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
+				leaIns(0, _callStackNode), 
+				leaIns(0, localPtrs),
+				info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
+				);
 		}
-
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    debug_enter\n";
-		#endif
-
-		callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
-			ldargIns(_env), ldargIns(_argc), ldargIns(_ap), 
-			leaIns(0, localTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
-			leaIns(0, _callStackNode), 
-			leaIns(0, localPtrs),
-			info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
-			);
-
 		#endif // DEBUGGER
 
 
@@ -3411,13 +3412,16 @@ namespace avmplus
 				}
 
 				#ifdef DEBUGGER
-				callIns(MIR_cm, ENVADDR(MethodEnv::debugExit), 2,
-					ldargIns(_env), leaIns(0, _callStackNode));
-				
-				// now we toast the cse and restore contents in order to 
-				// ensure that any variable modifications made by the debugger
-				// will be pulled in.
-				firstCse = ip;
+				if (core->debugger)
+				{
+					callIns(MIR_cm, ENVADDR(MethodEnv::debugExit), 2,
+						ldargIns(_env), leaIns(0, _callStackNode));
+					
+					// now we toast the cse and restore contents in order to 
+					// ensure that any variable modifications made by the debugger
+					// will be pulled in.
+					firstCse = ip;
+				}
 				#endif // DEBUGGER
 
 				if (info->exceptions)

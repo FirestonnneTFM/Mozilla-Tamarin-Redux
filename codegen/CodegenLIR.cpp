@@ -1385,20 +1385,21 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-
-		for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope && !outOMem(); ++i)
+		if (core->debugger)
 		{
-			localSet(i, undefConst);
+			for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope && !outOMem(); ++i)
+			{
+				localSet(i, undefConst);
+			}
+
+			callIns(FUNCTIONID(debugEnter), 8,
+				env_param, argc_param, ap_param, 
+				varTraits, InsConst(state->verifier->local_count), // for clearing traits pointers
+				csn, 
+				varPtrs,
+				info->hasExceptions() ? _save_eip : InsConst(0)
+				);
 		}
-
-		callIns(FUNCTIONID(debugEnter), 8,
-			env_param, argc_param, ap_param, 
-			varTraits, InsConst(state->verifier->local_count), // for clearing traits pointers
-			csn, 
-			varPtrs,
-			info->hasExceptions() ? _save_eip : InsConst(0)
-			);
-
 		#endif // DEBUGGER
 
 		if (info->hasExceptions()) {
@@ -2209,12 +2210,15 @@ namespace avmplus
 				}
 
 				#ifdef DEBUGGER
-				callIns(FUNCTIONID(debugExit), 2,
-					env_param, csn);
-				// now we toast the cse and restore contents in order to 
-				// ensure that any variable modifications made by the debugger
-				// will be pulled in.
-				//firstCse = ip;
+				if (core->debugger)
+				{
+					callIns(FUNCTIONID(debugExit), 2,
+						env_param, csn);
+					// now we toast the cse and restore contents in order to 
+					// ensure that any variable modifications made by the debugger
+					// will be pulled in.
+					//firstCse = ip;
+				}
 				#endif // DEBUGGER
 
 				if (info->exceptions)

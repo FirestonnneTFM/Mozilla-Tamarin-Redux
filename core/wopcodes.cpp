@@ -398,6 +398,8 @@ namespace avmplus
 		{    1,    0,    0,   0,    0,   1,   2,   0,    0,    0         N("swap_pop") },        // 0x130
 		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobal") },
 		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobalstrict") },
+		{    1,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("debugenter") },
+		{    1,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("debugexit") },
 		// DO NOT ALTER OR MOVE THE NEXT LINE.
 		// END
 	};

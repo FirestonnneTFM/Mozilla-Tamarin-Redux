@@ -170,7 +170,6 @@ namespace avmplus
 
 		inline void set_filename(Stringp s) { m_filename = s; }
 		inline void set_linenum(int32_t i) { m_linenum = i; }
-		inline void set_framep(Atom* fp) { m_framep = fp; }
 
 		// Placement new and delete because the interpreter allocates CallStackNode
 		// instances inside other data structures (think alloca storage that has been

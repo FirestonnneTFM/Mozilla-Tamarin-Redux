@@ -548,6 +548,13 @@ namespace avmplus
 			 IIP(0x130, L_swap_pop)
 			 III(0x131, L_findpropglobal)
 			 III(0x132, L_findpropglobalstrict)
+#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+			 IID(0x133, L_debugenter)
+			 IID(0x134, L_debugexit)
+#else
+			 XXX(0x133)
+			 XXX(0x134)
+#endif
 #  if defined GNUC_THREADING
 			};
 			AvmAssert(opcode_labels[0x18] == &&L_ifge);
@@ -687,11 +694,7 @@ namespace avmplus
  		aux_memory->savedCodeContext = core->codeContextAtom;
  		if (pool->domain->base != NULL)
  			core->codeContextAtom = makeCodeContextAtom(env);
- 
-#ifdef DEBUGGER
- 		CallStackNode& callStackNode = *(new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true));
-#endif
- 
+  
  		// OPTIMIZEME - opportunities for streamlining the function entry code.
  		// 
  		// * With unbox/box optimization introduced and alloca removed so that the parameter
@@ -750,14 +753,16 @@ namespace avmplus
  		}
 
 #ifdef DEBUGGER
- 		if (core->callStack)
- 			core->callStack->set_framep(framep);
-
- 		// Ping the debugger but make sure it does not reinitialize the call frame
- 		// by passing NULL for the callStackNode argument.
- 		env->debugEnterInner(_argc, (void*)_atomv, NULL, info->localCount, NULL, framep, 0, true);
+		CallStackNode* volatile callStackNode = NULL;
+#ifndef AVMPLUS_WORD_CODE
+		if (core->debugger) 
+		{
+			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
+			env->debugEnterInner();
+		}
 #endif
-
+#endif
+ 
  		core->branchCheck(env, interruptable, -1);
 
 // NEXT dispatches the next instruction.
@@ -902,14 +907,17 @@ namespace avmplus
 			INSTR(returnvalue) {
 				a1 = *sp;
 			return_value_from_interpreter:
-				DEBUGGER_ONLY(env->debugExit(&callStackNode) );
+#if defined DEBUGGER && !defined AVMPLUS_WORD_CODE
+				if (callStackNode) 
+				{	
+					env->debugExit(callStackNode); 
+					callStackNode->reset();
+				}
+#endif
 				SAVE_EXPC;
 				core->codeContextAtom = aux_memory->savedCodeContext;
 				a1 = toplevel->coerce(a1, info->returnTraits());
 				core->dxnsAddr = aux_memory->dxnsAddrSave;
-#ifdef DEBUGGER
-				callStackNode.reset();
-#endif
 #ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
 					core->console << "exit " << info << '\n';
@@ -963,6 +971,26 @@ namespace avmplus
 				SAVE_EXPC;
 				u1 = U30ARG;
 				DEBUGGER_ONLY( if (core->debugger) core->debugger->debugFile(pool->getString((int32_t)u1)); )
+				NEXT;
+			}
+#endif
+
+#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+			INSTR(debugenter) {
+				AvmAssert(core->debugger != NULL);
+				AvmAssert(callStackNode == NULL);
+				callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
+				env->debugEnterInner();
+				NEXT;
+			}
+#endif
+
+#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+			INSTR(debugexit) {
+				AvmAssert(core->debugger != NULL);
+				AvmAssert(callStackNode != NULL);
+				env->debugExit(callStackNode); 
+				callStackNode->reset(); 
 				NEXT;
 			}
 #endif
