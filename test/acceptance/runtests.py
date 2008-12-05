@@ -522,16 +522,43 @@ if globs['config'] == '':
     # passed into the script:
     # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
     # ================================================
-    try:
-        ostype={'CYGWIN_NT-5.1':'win','CYGWIN_NT-5.2':'win','CYGWIN_NT-5.2-WOW64':'win64','CYGWIN_NT-6.0-WOW64':'win64','Windows':'win','Darwin':'mac','Linux':'lnx','SunOS':'sol',}[platform.system()]
-    except:
+    
+    os = platform.system()
+    ostype = ''
+    if re.search('(CYGWIN_NT|Windows)', os):
+        ostype='win'
+    if re.search('(Darwin)', os):
+        ostype='mac'
+    if re.search('(Linux)', os):
+        ostype='lnx'
+    if re.search('(SunOS)', os):
+        ostype='sol'
+    
+    if ostype == '':
         print("ERROR: os %s is unknown, expected values are (win,mac,lnx,sol), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.system()))
         exit(1)
+    
     try:
-        cputype={'i386':'x86','i686':'x86','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','':'x86'}[platform.machine()]
+        # Try and determine CPU architecture of the AVM, if it fails drop back to platform.machine()
+        cputype = ''
+        f = run_pipe('file %s' % (avm))
+        if re.search('(32-bit|80386|i386)', f[0]):
+            cputype='x86'
+        if re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f[0]):
+            cputype='x64'
+        if re.search('(ppc)', f[0]):
+            cputype='ppc'
+        
+        if cpuytpe == '':
+            raise Exception()
+            
     except:
-        print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
-        exit(1)
+        try:
+            cputype={'i386':'x86','i686':'x86','x86_64':'x64','i86pc':'x86','Power Macintosh':'ppc','sun4u':'x86','':'x86'}[platform.machine()]
+        except:
+            print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
+            exit(1)
+            
     globs['config'] = cputype+'-'+ostype+'-tvm-'+vmtype+vmargs
     
   
