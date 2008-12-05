@@ -36,14 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 #include "MMgc.h"
-
-#ifdef _DEBUG
-#define __avmplus_types__
-#include "../vprof/vprof.h"
-#endif
 
 #include <stdlib.h>
 
