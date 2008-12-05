@@ -475,23 +475,32 @@ namespace avmplus
 #endif
 
 #ifdef DEBUGGER
-	void MethodEnv::debugEnter(int argc, uint32 *ap, 
-							   Traits**frameTraits, int localCount,
-							   CallStackNode* callstack,
-							   Atom* framep, volatile sintptr *eip)
+	void MethodEnv::debugEnter(int argc, 
+								uint32_t* ap, 
+								Traits** frameTraits, 
+								int localCount,
+								CallStackNode* callstack,
+								Atom* framep, 
+								volatile sintptr *eip)
 	{
-		debugEnterInner(argc, (void*)ap, frameTraits, localCount, callstack, framep, eip, false);
+		AvmAssert(this != 0);
+		AvmAssert(callstack != 0); 
+
+		// dont reset the parameter traits since they are setup in the prologue
+		int firstLocalAt = method->param_count+1;
+		AvmAssert(!frameTraits || localCount >= firstLocalAt);
+		
+		if (frameTraits)
+			memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
+
+		callstack->init(this, framep, frameTraits, argc, ap, eip, /*scopeDepth*/NULL, /*boxed*/false);
+		
+		debugEnterInner();
 	}
 	
-	void MethodEnv::debugEnterInner(int argc, 
-									void *ap, 
-									Traits**frameTraits, 
-									int localCount,
-									CallStackNode* callstack,
-									Atom* framep, 
-									volatile sintptr *eip,
-									bool boxed)
+	void MethodEnv::debugEnterInner()
 	{
+		AvmAssert(this != 0);
 		AvmCore* core = this->core();
 
 		// update profiler
@@ -499,17 +508,10 @@ namespace avmplus
 		if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
 			profiler->sendFunctionEnter(method);
 
-		// dont reset the parameter traits since they are setup in the prologue
-		int firstLocalAt = method->param_count+1;
-		AvmAssert(!frameTraits || localCount >= firstLocalAt);
-
-		if (frameTraits) 
-			memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
-
-		if (callstack) 
-			callstack->init(this, framep, frameTraits, argc, ap, eip, /*scopeDepth*/NULL, boxed);
-
-		if (core->debugger) 
+		// this shouldn't ever be called unless there's a debugger
+		// NOT currently true; native thunks call us unconditionally
+		//AvmAssert(core->debugger != NULL);
+		if (core->debugger)
 			core->debugger->_debugMethod(this);
 
 		core->sampleCheck();
@@ -520,6 +522,7 @@ namespace avmplus
 	void MethodEnv::debugExit(CallStackNode* callstack)
 	{
 		AvmAssert(this != 0);
+		AvmAssert(callstack != 0);
 		AvmCore* core = this->core();
 
 		// update profiler 

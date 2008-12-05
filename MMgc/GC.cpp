@@ -89,7 +89,7 @@
 #pragma warning(disable:4291) // no matching operator delete found; memory will not be freed if initialization throws an exception
 #endif
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
  //sampling support
 #include "avmplus.h"
 #else
@@ -699,7 +699,7 @@ namespace MMgc
 
 	void *GC::AllocAlreadyLocked(size_t size, int flags/*0*/)
 	{
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
 		if(core)
 			core->sampleCheck();
