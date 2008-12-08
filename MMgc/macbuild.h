@@ -68,11 +68,6 @@
  */
 #ifdef DEBUG
 #define MEMORY_INFO
-
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
-#define MEMORY_PROFILER
-#endif
-
 #endif
 
 /**
