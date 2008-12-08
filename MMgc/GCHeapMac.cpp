@@ -35,18 +35,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#include "MMgc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #ifdef MEMORY_PROFILER
 #include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #endif
-
-#include "MMgc.h"
 
 #ifdef USE_MMAP
 #include <sys/mman.h>
@@ -60,10 +60,6 @@
 
 #ifdef _MAC
 #define MAP_ANONYMOUS MAP_ANON
-#endif
-
-#if (defined(MMGC_IA32) || defined(MMGC_AMD64)) && defined(MEMORY_INFO)
-#include <dlfcn.h>
 #endif
 
 namespace MMgc
