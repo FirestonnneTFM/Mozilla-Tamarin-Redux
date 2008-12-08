@@ -841,6 +841,15 @@ namespace avmplus
 
 ///////////////////////////// Concatenation ////////////////////////////////
 
+	// It appears that VC9 des a bad job with this method when attempting
+	// to optimize for speed. The acceptance test ecma3/GlobalObject/e15_1_2_5_1.as
+	// fails in this mathos if Optimize for Speed is turned on (Win64 only).
+	// Therefore, optimize for speed is turned of for this method.
+
+#if defined( AVMPLUS_64BIT ) && defined( _MSC_VER )
+	#pragma optimize("t",off)
+#endif
+
 	Stringp String::concatStrings(Stringp leftStr, Stringp rightStr)
 	{
 		if (leftStr == NULL || leftStr->m_length == 0)
@@ -851,6 +860,10 @@ namespace avmplus
 		String* s = leftStr->append(rightStr->getData(), rightStr->length(), rightStr->getWidth());
 		return s;
 	}
+
+#if defined( AVMPLUS_64BIT ) && defined( _MSC_VER )
+	#pragma optimize("",on)
+#endif
 
 	Stringp String::append(const String* rightStr)
 	{
