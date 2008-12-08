@@ -36,8 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 #include "MMgc.h"
 
 #if defined(MEMORY_INFO) || defined(MEMORY_PROFILER)
