@@ -36,6 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#include <AvailabilityMacros.h>
 
 #ifdef DEBUG
 #ifndef _DEBUG
@@ -67,9 +68,11 @@
  */
 #ifdef DEBUG
 #define MEMORY_INFO
-#if __DARWIN_UNIX03 // 10.5 only
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
 #define MEMORY_PROFILER
 #endif
+
 #endif
 
 /**
