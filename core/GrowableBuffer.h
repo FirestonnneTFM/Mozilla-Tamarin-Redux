@@ -57,11 +57,11 @@
 namespace avmplus
 {
 #if defined(DEBUGGER) || defined(AVMPLUS_MIR) 
-	class GrowableBuffer : public MMgc::GCObject
+	class GrowableBuffer
 	{
 	public:
 		GrowableBuffer(MMgc::GCHeap* heap, bool forMir=false);
-		virtual ~GrowableBuffer();
+		~GrowableBuffer();
 
 		byte* reserve(size_t amt);
 		void  free();

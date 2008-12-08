@@ -300,7 +300,7 @@ namespace avmplus
 #ifdef AVMPLUS_MIR
 		// free all the mir buffers
 		while(mirBuffers.size() > 0)
-			mirBuffers.removeFirst()->free();
+			delete mirBuffers.removeFirst();
 #endif
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 		AvmAssert(g_tmcore == this);
@@ -3748,7 +3748,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	GrowableBuffer* AvmCore::requestNewMirBuffer()
 	{
 		MMGC_MEM_TAG("JIT");
-		return new (GetGC()) GrowableBuffer(GetGC()->GetGCHeap(),true);
+		return new GrowableBuffer(GetGC()->GetGCHeap(),true);
 	}
 
 	void AvmCore::releaseMirBuffer(GrowableBuffer* buffer)
