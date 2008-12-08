@@ -68,7 +68,7 @@ namespace avmplus
 			numSamples(0), currentSample(NULL), timerHandle(0), lastAllocSample(0),
 			uids(1024, GCHashtable::MALLOC), ptrSamples(0), callback(0), runningCallback(false), m_fakeMethodNames(gc)
 	{
-		samples = new (gc) GrowableBuffer(gc->GetGCHeap());
+		samples = new GrowableBuffer(gc->GetGCHeap());
 		gc->GetGCHeap()->EnableHooks();
 	}
 
