@@ -46,8 +46,8 @@
 util/shell_ats, .*, skip, shell file for ats media creation
 
 # Currently failing on linux, bug #402864
-ecma3/GlobalObject/e15_1_2_2_2:parseInt\("123456789012345678"\)   ,   .*lnx-tvm-(release|releasedebugger).*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
-ecma3/TypeConversion/e9_3_1_3_rt:parseInt\("123456789012345678"\) ,   .*lnx-tvm-(release|releasedebugger).*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+ecma3/GlobalObject/e15_1_2_2_2:parseInt\("123456789012345678"\)   ,   x86-lnx-tvm-(release|releasedebugger).*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
+ecma3/TypeConversion/e9_3_1_3_rt:parseInt\("123456789012345678"\) ,   x86-lnx-tvm-(release|releasedebugger).*   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=402864
 
 # bug #459851:  windows mobile System.privateBytes and -memstats privateBytes always returns 0
 as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile-tvm.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
@@ -82,4 +82,12 @@ as3/sampling/PauseSampling      , x64-mac-tvm-(releasedebugger|debugdebugger) , 
 as3/sampling/ProcessSampling    , x64-mac-tvm-(releasedebugger|debugdebugger) , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=467599
 as3/sampling/SimpleSampling     , x64-mac-tvm-(releasedebugger|debugdebugger) , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=467599
 as3/sampling/InvocationSampling , x64-mac-tvm-debugdebugger                   , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=467599
+
+
+# interpreter is failing on testcases when running in linux 64bit
+e4x/XMLList/e13_5_4_2,                                          x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+e4x/Types/e9_1_1_2,                                             x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Classes/Override/DynExtDefaultOverRidePublic,   x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Variable/VarDefPublicStatic,                    x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Variable/VarDefStatic,                          x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
 
