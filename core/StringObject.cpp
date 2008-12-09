@@ -593,7 +593,7 @@ namespace avmplus
 
 	uint32_t String::hashCodeUTF8(const utf8_t* buf, int32_t len)
 	{
-		int hashCode = 0;
+		uint32_t hashCode = 0; // must be uint32!
 		while (len) 
 		{
 			utf32_t ch;
@@ -616,7 +616,7 @@ namespace avmplus
 
 	uint32_t String::hashCodeUTF16(const wchar* buf, int32_t len)
 	{
-		int hashCode = 0;
+		uint32_t hashCode = 0;	// must be uint32!
 		while (len--)
 			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *buf++;
 		return hashCode;
@@ -624,7 +624,7 @@ namespace avmplus
 
 	uint32_t String::hashCode() const
 	{
-		uint32_t hashCode = 0;
+		uint32_t hashCode = 0;	// must be uint32!
 		if (m_length != 0)
 		{
 			Pointers p;
@@ -635,7 +635,7 @@ namespace avmplus
 			{
 				case k8:
 					while (len--)
-						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ (*p.p8++ & 0xFF);
+						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ (uint8_t(*p.p8++) & 0xFF);
 					break;
 				case k16:
 					while (len--)
