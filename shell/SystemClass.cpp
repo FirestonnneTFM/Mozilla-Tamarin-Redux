@@ -78,12 +78,11 @@ namespace avmshell
 		if (!command) {
 			toplevel()->throwArgumentError(kNullArgumentError, "command");
 		}
-		UTF8String *commandUTF8 = command->toUTF8String();
 		#ifdef UNDER_CE
 		AvmAssert(0);
-		(void) commandUTF8;
 		return 0;
 		#else
+		StUTF8String commandUTF8(command);
 		return system(commandUTF8->c_str());
 		#endif
 	}
@@ -110,16 +109,16 @@ namespace avmshell
 		{
 			if (i > 0)
                 console << ' ';
-			Stringp s = core->string(a->getUintProperty(i));
+			StringIndexer s(core->string(a->getUintProperty(i)));
 			for (int j = 0; j < s->length(); j++)
 			{
-				wchar c = (*s)[j];
+				wchar c = s[j];
 				// '\r' gets converted into '\n'
 				// '\n' is left alone
 				// '\r\n' is left alone
 				if (c == '\r')
 				{
-					if (((j+1) < s->length()) && (*s)[j+1] == '\n')
+					if (((j+1) < s->length()) && s[j+1] == '\n')
 					{
 						console << '\r';	
 						j++;

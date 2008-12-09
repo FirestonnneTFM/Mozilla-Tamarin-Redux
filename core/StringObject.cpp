@@ -665,7 +665,7 @@ namespace avmplus
 		return p;
 	}
 
-	utf32_t String::charAt(int32_t index) const
+	String::CharAtType String::charAt(int32_t index) const
 	{
 		AvmAssert(index >= 0 && index < m_length);
 
@@ -679,10 +679,10 @@ namespace avmplus
 			case k16:	ch = uint32_t(ptrs.p16[index]); break;
 			default:	ch = ptrs.p32[index]; break;
 		}
-		return ch;
+		return (String::CharAtType)ch;
 	}
 
-	utf32_t String::charAt(const Pointers& r, int32_t index) const
+	String::CharAtType String::charAt(const Pointers& r, int32_t index) const
 	{
 		AvmAssert(index >= 0 && index < m_length);
 		utf32_t ch;
@@ -692,7 +692,7 @@ namespace avmplus
 			case k16:	ch = uint32_t(r.p16[index]); break;
 			default:	ch = r.p32[index];
 		}
-		return ch;
+		return (String::CharAtType)ch;
 	}
 
 	int32_t String::indexOf(Stringp substr, int32_t start) const

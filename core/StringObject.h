@@ -86,6 +86,12 @@ namespace avmplus
 	{
 	public:
 
+#ifdef FEATURE_UTF32_SUPPORT
+		typedef utf32_t CharAtType;
+#else
+		typedef wchar CharAtType;
+#endif
+
 		/// String type constants.
 		enum Type
 		{
@@ -269,21 +275,17 @@ namespace avmplus
 		@param	index				the index
 		@return						the character at the index
 		*/
-				uint32_t FASTCALL	charAt(int32_t index) const;
+				CharAtType FASTCALL	charAt(int32_t index) const;
 		/**
 		Use a Pointers instance to quickly access a character given the Pointers
 		instance containing the buffer start, and the string width. No index checks!
 		*/
-				utf32_t FASTCALL	charAt(const Pointers& r, int32_t index) const;
+				CharAtType FASTCALL	charAt(const Pointers& r, int32_t index) const;
 		/**
 		The index operator throws if the character is too wide for a wchar,
 		or the index is invalid.
 		*/
-#ifdef FEATURE_UTF32_SUPPORT
-		inline	utf32_t				operator[](int index) const { return charAt(index); }
-#else
-		inline	wchar				operator[](int index) const { return (wchar) charAt(index); }
-#endif
+		inline	CharAtType			operator[](int index) const { return charAt(index); }
 		/*@{*/
 		/**
 		Compare the String with toCompare. If the length is > 0, compare
@@ -346,7 +348,7 @@ namespace avmplus
 		@param	end					the ending position
 		@return						the index of the found position, or -1 if no match
 		*/
-				int32_t FASTCALL	indexOf(const char* p, int32_t len, int32_t start, int32_t end = 0x7FFFFFFF) const;
+				int32_t FASTCALL	indexOf(const char* p, int32_t len = -1, int32_t start = 0, int32_t end = 0x7FFFFFFF) const;
 		/**
 		Convenience method: Does a Latin-1 string match at the current position?
 		@param	p					the character string to compare; NULL returns false
@@ -359,7 +361,7 @@ namespace avmplus
 		/**
 		Implements String.lastIndexOf().
 		*/
-				int32_t	FASTCALL	lastIndexOf(Stringp s, int32_t offset = 0) const;
+				int32_t	FASTCALL	lastIndexOf(Stringp s, int32_t offset = 0x7fffffff) const;
 		/**
 		Concatenate two strings, and return the result. If the right string fits into the buffer
 		end of the left string, append the data and return a new dependent string pointing
@@ -697,6 +699,68 @@ namespace avmplus
 				friend class	String;
 		inline					UTF16String(int32_t len) : m_length(len) {}
 	};
+	
+	// deleting UTF16String and UTF8String immediately hurts performance, but saves memory.
+	// If you need a UTF8String or UTF16String temporarily, use these accessor classes:
+	// they will delete (or not) the temporary in the dtor, allowing the embedder to 
+	// prefer memory vs performance.
+	
+	// if embedder doesn't define this, assume we prefer performance
+	// (note that the test is on value)
+	#ifndef FEATURE_PREFER_STRING_PERFORMANCE
+		#define FEATURE_PREFER_STRING_PERFORMANCE 1
+	#endif
+	
+	class StUTF8String
+	{
+	private:
+		UTF8String* str;
+	public:
+		inline explicit StUTF8String(Stringp s) : str(s ? s->toUTF8String() : NULL) {}
+		inline ~StUTF8String() 
+		{ 
+			#if FEATURE_PREFER_STRING_PERFORMANCE
+			// allow it to be collected
+			str = NULL; 
+			#else
+			// delete right away
+			delete str;
+			#endif
+		}
+		inline UTF8String* operator->() const { return str; }
+		inline operator UTF8String*() { return str; }
+		inline operator UTF8String&() { return *str; }
+	private:
+		// do not create on the heap
+		inline	void*		operator new(size_t) throw() { return NULL; }
+		inline	void		operator delete(void*) {}		
+	};
+
+	class StUTF16String
+	{
+	private:
+		UTF16String* str;
+	public:
+		inline explicit StUTF16String(Stringp s) : str(s ? s->toUTF16String() : NULL) {}
+		inline ~StUTF16String() 
+		{ 
+			#if FEATURE_PREFER_STRING_PERFORMANCE
+			// allow it to be collected
+			str = NULL; 
+			#else
+			// delete right away
+			delete str;
+			#endif
+		}
+		inline UTF16String* operator->() const { return str; }
+		inline operator UTF16String*() { return str; }
+		inline operator UTF16String&() { return *str; }
+	private:
+		// do not create on the heap
+		inline	void*		operator new(size_t) throw() { return NULL; }
+		inline	void		operator delete(void*) {}		
+	};
+	
 }
 
 #endif	// __avmplus_NewString__

@@ -679,7 +679,7 @@ namespace avmshell
 		if (!filename) {
 			toplevel->throwArgumentError(kNullArgumentError, "filename");
 		}
-		UTF8String* filenameUTF8 = filename->toUTF8String();
+		StUTF8String filenameUTF8(filename);
 		FILE *fp = fopen(filenameUTF8->c_str(), "rb");
 		if (fp == NULL) {
 			toplevel->throwError(kFileOpenError, filename);
@@ -747,7 +747,7 @@ namespace avmshell
 			toplevel->throwArgumentError(kNullArgumentError, "filename");
 		}
 
-		UTF8String* filenameUTF8 = filename->toUTF8String();
+		StUTF8String filenameUTF8(filename);
 		FILE *fp = fopen(filenameUTF8->c_str(), "wb");
 		if (fp == NULL) {
 			toplevel->throwError(kFileWriteError, filename);

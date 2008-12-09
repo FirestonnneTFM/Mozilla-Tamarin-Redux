@@ -47,33 +47,6 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-	// UsesUTF8String is a helper class which converts a Stringp to UTF8String,
-	// and frees it afterwards to reduce GC pressure.
-	class UsesUTF8String
-	{
-	public:
-		UsesUTF8String(Stringp subject)
-			: m_utf8String(subject ? subject->toUTF8String() : NULL)
-		{
-		}
-		~UsesUTF8String()
-		{
-			if (m_utf8String)
-			{
-				MMgc::GC* gc = MMgc::GC::GetGC(m_utf8String);
-				gc->Free(m_utf8String);
-			}
-		}
-		operator UTF8String* const () { return m_utf8String; }
-		UTF8String* operator->() const
-		{
-			return m_utf8String;
-		}
-		
-	private:
-		UTF8String* const m_utf8String;
-	};
-	
 #define OVECTOR_SIZE 99 // 32 matches = (32+1)*3
 
 	// This variant is only used for creating the prototype
@@ -92,7 +65,7 @@ namespace avmplus
 		m_hasNamedGroups = false;
 		m_source = core->newString("(?:)");
 
-		UsesUTF8String utf8Pattern(m_source);
+		StUTF8String utf8Pattern(m_source);
 		m_pcreInst = (void*)pcre_compile(utf8Pattern->c_str(), m_optionFlags, &error, &errptr, NULL );
 	}
 
@@ -109,7 +82,7 @@ namespace avmplus
 		m_optionFlags = toCopy->m_optionFlags;
 		m_hasNamedGroups = toCopy->m_hasNamedGroups;
 
-		UsesUTF8String utf8Pattern(m_source);
+		StUTF8String utf8Pattern(m_source);
 		int errptr;
 		const char *error;
 		m_pcreInst = (void*)pcre_compile(utf8Pattern->c_str(), m_optionFlags, &error, &errptr, NULL );
@@ -132,12 +105,12 @@ namespace avmplus
 
 		m_optionFlags = PCRE_UTF8;
 
-		UsesUTF8String utf8Pattern(pattern);
+		StUTF8String utf8Pattern(pattern);
 
 		// Check for named groups and embedded options if optionStr is NULL. ( Needed to handle
 		//  new RegExp( existingRegExpValue.toString() ) )
 		const char *ptr = utf8Pattern->c_str();
-		UsesUTF8String optionUTF8(options);
+		StUTF8String optionUTF8(options);
 		const char* optionStr =   optionUTF8 ? optionUTF8->c_str() : NULL;
 
 		m_hasNamedGroups = false;
@@ -231,7 +204,7 @@ namespace avmplus
 	int RegExpObject::search(Stringp subject)
 	{
 		int matchIndex, matchLen;
-		UsesUTF8String utf8Subject(subject);
+		StUTF8String utf8Subject(subject);
 		if (!_exec(subject, utf8Subject, 0, matchIndex, matchLen))
 		{
 			matchIndex = -1;
@@ -269,7 +242,7 @@ namespace avmplus
 	{
 		AvmCore *core = this->core();
 		ArrayObject *out = toplevel()->arrayClass->newArray();
-		UsesUTF8String utf8Subject(subject);
+		StUTF8String utf8Subject(subject);
 
 		int startIndex=0;
 		int matchIndex;
@@ -336,7 +309,7 @@ namespace avmplus
 		{
 			subject = core()->knull;
 		}
-		UsesUTF8String utf8Subject(subject);
+		StUTF8String utf8Subject(subject);
 		ArrayObject *result = _exec(subject, utf8Subject);
 		return result ? result->atom() : nullStringAtom;
 	}
@@ -452,7 +425,7 @@ namespace avmplus
 
 	ArrayObject* RegExpObject::match(Stringp subject)
 	{
-		UsesUTF8String utf8Subject(subject);
+		StUTF8String utf8Subject(subject);
 		if (!get_global())
 		{
 			return _exec(subject, utf8Subject);
@@ -499,8 +472,8 @@ namespace avmplus
 	Atom RegExpObject::replace(Stringp subject,
 							   Stringp replacement)
 	{
-		UsesUTF8String utf8Subject(subject);
-		UsesUTF8String utf8Replacement(replacement);
+		StUTF8String utf8Subject(subject);
+		StUTF8String utf8Replacement(replacement);
 
 		int ovector[OVECTOR_SIZE];
 		int subjectLength = utf8Subject->length();
@@ -616,7 +589,7 @@ namespace avmplus
 	Atom RegExpObject::replace(Stringp subject,
 							   ScriptObject* replaceFunction)
 	{
-		UsesUTF8String utf8Subject(subject);
+		StUTF8String utf8Subject(subject);
 
 		int ovector[OVECTOR_SIZE];
 		int subjectLength = utf8Subject->length();

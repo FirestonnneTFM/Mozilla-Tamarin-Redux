@@ -281,9 +281,9 @@ namespace avmplus
 	// This returns a Multiname create from a unqualified generic type.
 	// The multiname returned will have one namespace and will be correctly
 	// marked as an attribute if input is an attribute
-	void Toplevel::ToXMLName (const Atom p, Multiname& m) 
+	void Toplevel::ToXMLName(const Atom p, Multiname& m) 
 	{
-		Stringp s = 0;
+		Stringp s = NULL;
 		AvmCore* core = this->core();
 
 		if (!AvmCore::isNullOrUndefined(p))
@@ -346,7 +346,7 @@ namespace avmplus
 		// if s is integer, throw TypeError
 		// if first character of s is "@", return __toAttributeName (string - @)
 		// else, return QName (s)
-		if ((*s)[0] == '@')
+		if (s->charAt(0) == '@')
 		{
 			// __toAttributeName minus the @
 			Stringp news = s->substring(1, s->length());
@@ -366,7 +366,7 @@ namespace avmplus
 		m.setNamespace(core->publicNamespace);
 	}
 
-	void Toplevel::CoerceE4XMultiname (const Multiname *m, Multiname &out) const
+	void Toplevel::CoerceE4XMultiname(const Multiname *m, Multiname &out) const
 	{
 		// This function is used to convert raw string access into correct
 		// Multiname types:
@@ -447,12 +447,12 @@ namespace avmplus
 		else
 		{
 			Stringp s = m->getName();
-			if ((s->length() == 1) && ((*s)[0] == '*'))
+			if ((s->length() == 1) && (s->charAt(0) == '*'))
 			{
 				// Mark is as an "anyName" (name == undefined makes isAnyName true)
 				out.setAnyName();
 			}
-			else if ((s->length() >= 1) && ((*s)[0] == '@'))
+			else if ((s->length() >= 1) && (s->charAt(0) == '@'))
 			{
 				// If we're already marked as an attribute, we don't want to modify 
 				// our string in any way.  Degenerative cases where you call:
@@ -460,10 +460,10 @@ namespace avmplus
 				if (!out.isAttr())
 				{
 					// check for "@*"
-					if ((s->length() == 2) && ((*s)[1] == '*'))
+					if ((s->length() == 2) && (s->charAt(1) == '*'))
 						out.setAnyName();
 					else
-						out.setName(core->internString(s->substring (1, s->length())));
+						out.setName(core->internString(s->substring(1, s->length())));
 					out.setAttr();
 				}
 				else
@@ -1232,9 +1232,9 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		if (!in) in = core->knull;
-		UTF16String* in16 = in->toUTF16String();
-		const wchar* ptr = (const wchar*) in16->c_str();
-		double n = MathUtils::parseInt(ptr, in16->length(), radix, false);
+		StUTF16String in16(in);
+		// @todo this should use StringIndexer
+		double n = MathUtils::parseInt(in16->c_str(), in16->length(), radix, false);
 		return n;
     }
 
@@ -1244,7 +1244,7 @@ namespace avmplus
 		
 		AvmCore* core = this->core();
 		if (!in) in = core->knull;
-		UTF16String* in16 = in->toUTF16String();
+		StUTF16String in16(in);
 		if (!MathUtils::convertStringToDouble(in16->c_str(), in16->length(), &result, false))
 			result = MathUtils::nan();
 
@@ -1280,18 +1280,18 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 
-		UTF8String* inputUTF8 = input->toUTF8String();
-		const uint8* src = (const uint8*) inputUTF8->c_str();
+		StUTF8String inputUTF8(input);
+		const uint8_t* src = (const uint8_t*) inputUTF8->c_str();
 
 		StringBuffer buffer(core);
 		
 		for (int i=0, n=inputUTF8->length(); i<n; i++) {
-			uint8 ch = src[i];
+			uint8_t ch = src[i];
 			if (contains(unescaped, ch)) {
 				buffer << (wchar)ch;
 			} else {
 				buffer << '%';
-				buffer.writeHexByte((uint8)ch);
+				buffer.writeHexByte((uint8_t)ch);
 			}
 		}
 		return core->newString(buffer.c_str());
@@ -1365,7 +1365,7 @@ namespace avmplus
 	{
 		StringBuffer out(core());
 
-		UTF16String* in16 = in->toUTF16String();
+		StUTF16String in16(in);
 		const wchar *src = in16->c_str();
 		int len = in->length();
 

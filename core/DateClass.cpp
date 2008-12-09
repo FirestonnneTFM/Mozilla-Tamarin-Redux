@@ -56,7 +56,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		if (argc == 1) {
 			double dateAsDouble = ( core->isString(argv[1]) ?
-									stringToDateDouble( *(core->string(argv[1])) ) :
+									stringToDateDouble(core->string(argv[1])) :
 									core->number(argv[1]) );
 			
 			Date   date(dateAsDouble);
@@ -124,7 +124,7 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		Stringp s = core->string(input);
-		return stringToDateDouble( *s );
+		return stringToDateDouble(s);
 	}
 
 	
@@ -138,7 +138,7 @@ namespace avmplus
 	//  or timeZoneOffset appropriately.  Return false if keyword is
 	//  invalid.   Assumes that <offset> is the start of a word in <s> and
 	//  <offset> + <count> marks the end of that word.
-	inline bool parseDateKeyword(String &s, int offset, int count, int& hour, 
+	inline bool parseDateKeyword(const StringIndexer& s, int offset, int count, int& hour, 
 								 int& month, double& timeZoneOffset)
 	{
 		static const char kDayAndMonthKeywords[] = "JanFebMarAprMayJunJulAugSepOctNovDecSunMonTueWedThuFriSatGMTUTC";
@@ -152,7 +152,7 @@ namespace avmplus
 		// string case must match.  Case insensitivity is not necessary for compliance.
 
 		char subString[kKeyWordLength+1];
-		StringIndexer str_idx(&s);
+		StringIndexer str_idx(s);
 		for (int i = 0; i < count; i++)
 		{
 			utf32_t ch = str_idx[offset + i];
@@ -202,7 +202,7 @@ namespace avmplus
 	// Parses a number out of the string and updates year/month/day/hour/min/timeZoneOffset as
 	//  appropriate (based on whatever has already been parsed).  Assumes that s[i] is an integer
 	//  character.  (broken out into a seperate function from stringToDateDouble() for readability)
-	static inline bool parseDateNumber(String &s, int sLength, int &i, wchar &c, wchar prevc, 
+	static inline bool parseDateNumber(const StringIndexer& s, int sLength, int &i, wchar &c, wchar prevc, 
 									   double &timeZoneOffset, int &year, int &month, int &day, 
 									   int &hour, int &min, int &sec)
 	{
@@ -301,8 +301,10 @@ namespace avmplus
     }  
 
 	// used by both Date::parse() and the Date(String) constructor
-	double DateClass::stringToDateDouble(String &s) 
+	double DateClass::stringToDateDouble(Stringp _s) 
 	{
+		StringIndexer s(_s);
+		
         int year = -1;
         int month = -1;
         int day = -1;
@@ -316,7 +318,7 @@ namespace avmplus
 		//  suite, however (for instance "1/1/1999 13:30 PM"), but we don't handle timezone keywords
 		//  or instance.
 
-        int sLength = s.length();
+        int sLength = s->length();
 		wchar c, prevc = 0;
         int i = 0;
         while (i < sLength) 

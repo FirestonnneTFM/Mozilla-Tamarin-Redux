@@ -222,7 +222,7 @@ namespace avmshell
 
 	void DataOutput::WriteUTF(String *str)
 	{
-		UTF8String* utf8 = str->toUTF8String();
+		StUTF8String utf8(str);
 		uint32 length = utf8->length();
 		if (length > 65535) {
 			ThrowRangeError();
@@ -233,7 +233,7 @@ namespace avmshell
 
 	void DataOutput::WriteUTFBytes(String *str)
 	{
-		UTF8String* utf8 = str->toUTF8String();
+		StUTF8String utf8(str);
 		int len = utf8->length();
 		Write(utf8->c_str(), len*sizeof(char));
 	}

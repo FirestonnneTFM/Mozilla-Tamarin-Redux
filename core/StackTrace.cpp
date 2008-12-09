@@ -146,8 +146,10 @@ namespace avmplus
 	// platform by looking for any backslashes in the path.  If there are
 	// any, then we'll assume backslash is the path separator.  If not,
 	// we'll use forward slash.
-	void StackTrace::dumpFilename(Stringp filename, PrintWriter& out) const
+	void StackTrace::dumpFilename(Stringp _filename, PrintWriter& out) const
 	{
+		StringIndexer filename(_filename);
+		
 		wchar semicolonReplacement = '/';
 		int length = filename->length();
 		wchar ch;
@@ -156,7 +158,7 @@ namespace avmplus
 		// look for backslashes; if there are any, then semicolons will be
 		// replaced with backslashes, not forward slashes
 		for (i=0; i<length; ++i) {
-			ch = (*filename)[i];
+			ch = filename[i];
 			if (ch == '\\') {
 				semicolonReplacement = '\\';
 				break;
@@ -166,7 +168,7 @@ namespace avmplus
 		// output the entire path
 		bool previousWasSlash = false;
 		for (i=0; i<length; ++i) {
-			ch = (*filename)[i];
+			ch = filename[i];
 			if (ch == ';') {
 				if (previousWasSlash)
 					continue;

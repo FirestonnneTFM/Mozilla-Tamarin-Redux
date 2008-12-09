@@ -121,18 +121,16 @@ namespace avmshell
 			toplevel()->throwArgumentError(kNullArgumentError, core->toErrorString("name"));
 		}
 			
+
 		// Search for a dot from the end.
-		int dot;
-		for (dot=name->length()-1; dot >= 0; dot--)
-			if ((*name)[dot] == (wchar)'.')
-				break;
-		
+		int dot = name->lastIndexOf(core->cachedChars['.']);
+
 		// If there is a '.', this is a fully-qualified
 		// class name in a package.  Must turn it into
 		// a namespace-qualified multiname.
 		Namespace* ns;
 		Stringp className;
-		if (dot != -1) {
+		if (dot >= 0) {
 			Stringp uri = core->internString(name->substring(0, dot));
 			ns = core->internNamespace(core->newNamespace(uri));
 			className = core->internString(name->substring(dot+1, name->length()));

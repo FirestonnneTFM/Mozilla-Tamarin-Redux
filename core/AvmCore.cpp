@@ -1165,7 +1165,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (errorMessage)
 		{
 			#ifdef DEBUGGER
-			UTF8String *errorUTF8 = errorMessage->toUTF8String();		
+			StUTF8String errorUTF8(errorMessage);		
 			const char *format = errorUTF8->c_str();
 			
 			// This block is enclosed in {} to force
@@ -2264,7 +2264,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (isNullOrUndefined(arg))
 			return false;
 
-		Stringp p = string(arg);
+		StringIndexer p(string(arg));
 
 		// http://www.w3.org/TR/2004/REC-xml-20040204/#NT-NameChar
 
@@ -2276,13 +2276,13 @@ return the result of the comparison ToPrimitive(x) == y.
 		// According to the Mozilla testcase...
 		// e4x excludes ':'
 
-		wchar c = (*p)[0];
+		wchar c = p[0];
 		if (!isLetter (c) && c != '_' /*&& c != ':'*/)
 			return false;		
 
 		for (int i = 1; i < p->length(); i++)
 		{
-			wchar c = (*p)[i];
+			wchar c = p[i];
 
 			if (isDigit(c) || isLetter(c) || (c == '.') || (c == '-') || (c == '_') || /*(c != ':') ||*/
 				isCombiningChar (c) || isExtender(c))
@@ -2336,8 +2336,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	Stringp AvmCore::EscapeElementValue (const Stringp s, bool removeLeadingTrailingWhitespace)
+	Stringp AvmCore::EscapeElementValue(const Stringp _s, bool removeLeadingTrailingWhitespace)
 	{
+		StringIndexer s(_s);
 		StringBuffer output(this);
 
 		int i = 0;
@@ -2347,7 +2348,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			// finding trailing whitespace
 			while (last >= 0)
 			{
-				if (!String::isSpace ((*s)[last]))
+				if (!String::isSpace(s[last]))
 					break;
 
 				last--;
@@ -2359,14 +2360,14 @@ return the result of the comparison ToPrimitive(x) == y.
 			// skip leading whitespace
 			for (i = 0; i <= last; i++)
 			{
-				if (!String::isSpace ((*s)[i]))
+				if (!String::isSpace(s[i]))
 					break;
 			}
 		}
 
 		while (i <= last)
 		{
-			switch ((*s)[i])
+			switch (s[i])
 			{
 			case '<':
 				output << "&lt;";
@@ -2378,7 +2379,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				output << "&amp;";
 				break;
 			default:
-				output << ((*s)[i]);
+				output << (s[i]);
 			}
 
 			i++;
@@ -2387,15 +2388,15 @@ return the result of the comparison ToPrimitive(x) == y.
 		return newString (output.c_str());
 	}
 
-	Stringp AvmCore::EscapeAttributeValue (Atom v)
+	Stringp AvmCore::EscapeAttributeValue(Atom v)
 	{
 		StringBuffer output(this);
 
-		Stringp s = string (v);
+		StringIndexer s(string(v));
 
 		for (int i = 0; i < s->length(); i++)
 		{
-			switch ((*s)[i])
+			switch (s[i])
 			{
 			case '"':
 				output << "&quot;";
@@ -2416,7 +2417,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				output << "&#x9;";
 				break;
 			default:
-				output << ((*s)[i]);
+				output << (s[i]);
 			}
 		}
 
@@ -3352,6 +3353,11 @@ return the result of the comparison ToPrimitive(x) == y.
 	Stringp AvmCore::newString(const wchar *s) const
 	{
 		int len = String::Length(s);
+		return String::create(this, s, len);
+	}
+
+	Stringp AvmCore::newString(const wchar *s, int len) const
+	{
 		return String::create(this, s, len);
 	}
 
