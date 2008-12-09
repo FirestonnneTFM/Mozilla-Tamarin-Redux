@@ -1329,7 +1329,7 @@ const int kBufferPadding = 16;
 		 * @return
 		 */
 		Stringp internAlloc(const wchar *s, int len);
- 		Stringp internAllocUtf8(const byte *s, int len, bool constant);
+ 		Stringp internAllocUtf8(const byte *s, int len, bool constant = false);
 
 #ifdef DEBUGGER
 		/**
@@ -1373,6 +1373,7 @@ const int kBufferPadding = 16;
 		// String creation
 		Stringp newString(const char *str) const;
 		Stringp newString(const wchar *str) const;
+        Stringp newString(const wchar *str, int len) const;
 		Stringp newString(const char *str, int len) const;		
 
 		Stringp uintToString(uint32 i);

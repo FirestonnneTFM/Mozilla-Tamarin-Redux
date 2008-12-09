@@ -327,7 +327,7 @@ namespace avmshell
 		{
 			set_length(index+1);
 		}
-		m_buffer[index] = (*ch)[0];
+		m_buffer[index] = ch->charAt(0);
 	}
 
 	Stringp StringBuilderObject::substring(uint32 start, uint32 end)
