@@ -149,6 +149,7 @@ else:
 
 
 if os == "darwin":
+    AVMSHELL_LDFLAGS += " -exported_symbols_list "  + thisdir + "/platform/mac/shell/exports.exp"
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
                          '_MAC': None,
