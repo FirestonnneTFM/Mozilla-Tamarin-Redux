@@ -58,8 +58,10 @@ as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile-tvm.* , expec
 # on fully 64-bit OS (like Vista).
 mops/mops: , x64-(lnx|mac)-tvm-.* , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=464643
 
-as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*Ojit , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
-es4/vector/nonindexproperty:index -6.*          , [^ppc].*Ojit , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/RuntimeErrors/Error1115NotAConstructor:.*   , [^ppc].*Ojit  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+es4/vector/nonindexproperty:index -6.*          , [^ppc].*Ojit  , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+as3/RuntimeErrors/Error1115NotAConstructor:.*   , .*Dforcemir   , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
+es4/vector/nonindexproperty:index -6.*          , .*Dforcemir   , expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=456852
 
 # full run for windows mobile - Dell Axim
 mops/.*                                                          ,   .*winmobile-tvm.*              ,  skip           ,   remote proxy does not have access to additional abc files
