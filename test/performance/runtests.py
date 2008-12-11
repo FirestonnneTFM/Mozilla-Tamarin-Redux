@@ -60,7 +60,8 @@ js_output_f=False
 
 globs = { 'avm':'','avm2':'', 'asc':'', 'globalabc':'', 'exclude':[], 'tmpfile':tmpfile, 'config':'sunspider',
           'ascargs':'','vmargs':'', 'vmargs2':'', 'vmname':'unknown', 'vmversion':'', 'socketlog':'',
-          'perfm':False, 'avmname':'avm', 'avm2name':'avm2', 'memory':False,'optimize':True,'largerIsFaster':False}
+          'perfm':False, 'avmname':'avm', 'avm2name':'avm2', 'memory':False,'optimize':True,
+          'largerIsFaster':False,'shellabc':''}
 
 if 'AVM' in environ:
     globs['avm'] = environ['AVM'].strip()
@@ -70,6 +71,8 @@ if 'ASC' in environ:
     globs['asc'] = environ['ASC'].strip()
 if 'GLOBALABC' in environ:
     globs['globalabc'] = environ['GLOBALABC'].strip()
+if 'SHELLABC' in environ:
+    globs['shellabc'] = environ['SHELLABC'].strip()
 if 'ASCARGS' in environ:
     globs['ascargs'] = environ['ASCARGS'].strip()
 if 'VMARGS' in environ:
@@ -98,6 +101,7 @@ def usage(c):
     print " -a --asc           compiler to use"
     print " -c --config        configuration to use with testconfig.txt"
     print " -g --globalabc     location of global.abc"
+    print " -s --shellabc      location of shell.abc"
     print " -h --help          display help and exit"
     print " -f --forcerebuild  force rebuild all test files"
     print " -i --iterations    number of times to repeat test"
@@ -115,9 +119,10 @@ def usage(c):
     exit(c)
 
 try:
-  opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:m", ["verbose","avm=","asc=","globalabc=","help",
+  opts, args = getopt(argv[1:], "vE:S:a:g:hfi:c:ldr:ms:", ["verbose","avm=","asc=","globalabc=","help",
                 "forcerebuild","ascargs=","vmargs=","log","socketlog","avm2=","vmargs2=","iterations=",
-                "config=","runtime=","vmversion=","perfm", "avmname=","avm2name=","nooptimize","memory","larger"])
+                "config=","runtime=","vmversion=","perfm", "avmname=","avm2name=","nooptimize","memory",
+                "larger","shellabc="])
 except:
     usage(2)
 
@@ -138,6 +143,8 @@ for o, v in opts:
         globs['asc'] = v
     elif o in ("-g", "--globalabc"):
         globs['globalabc'] = v
+    elif o in ("-s", "--shellabc"):
+        globs['shellabc'] = v
     elif o in ("-x", "--exclude"):
         globs['exclude'] += v.split(",")
     elif o in ("-t", "--notime"):
@@ -209,11 +216,13 @@ def run_pipe(cmd):
 
 
 def compile_test(as_file):
-    asc, globalabc, ascargs = globs['asc'], globs['globalabc'], globs['ascargs']
+    asc, globalabc, ascargs, shellabc = globs['asc'], globs['globalabc'], globs['ascargs'], globs['shellabc']
     if not isfile(asc):
         exit("ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar" % as_file)
     if not isfile(globalabc):
         exit("ERROR: global.abc %s does not exist, GLOBALABC environment variable or --globalabc must be set to global.abc" % globalabc)
+    if not isfile(shellabc):
+        exit("ERROR: shell.abc %s does not exist, SHELLLABC environment variable or --shellabc must be set to shell.abc" % shellabc)
     
     if asc.endswith(".jar"):
         cmd = "java -jar " + asc
@@ -227,7 +236,7 @@ def compile_test(as_file):
     
     for arg in arglist:
         cmd += ' %s' % arg
-    cmd += " -import " + globalabc
+    cmd += " -import %s  -import %s " % (shellabc,globalabc)
     if globs['optimize']:
         cmd += " -optimize"
     (dir, file) = split(as_file)
