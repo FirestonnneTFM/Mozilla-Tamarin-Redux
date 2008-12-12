@@ -815,7 +815,7 @@ namespace avmplus
 		traits->final = true;
 	#ifdef AVMPLUS_VERBOSE
 		traits->ns = core->publicNamespace;
-		traits->name = core->internString(core->concatStrings(core->newString("Function-"), core->intToString(method_id)));
+		traits->name = core->internString(core->concatStrings(core->newConstantStringLatin1("Function-"), core->intToString(method_id)));
 	#else
 		traits->ns = NULL;
 		traits->name = NULL;
@@ -1683,7 +1683,7 @@ namespace avmplus
 		if (name != NULL)
 			return Multiname::format(core, ns, name);
 		else
-			return core->concatStrings(core->newString("Traits@"),
+			return core->concatStrings(core->newConstantStringLatin1("Traits@"),
 									   core->formatAtomPtr((uintptr)this));
 	}
 #endif
@@ -2055,11 +2055,9 @@ namespace avmplus
 			StringBuffer buffer(core);
 			buffer << qname;
 			int length = buffer.length();
-			if (length && buffer.c_str()[length-1] == '$') {
-				fullName = core->newString(buffer.c_str(), length-1);
-			} else {
-				fullName = core->newString(buffer.c_str());
-			}
+			if (length && buffer.c_str()[length-1] == '$')
+				length--;
+			fullName = core->newStringUTF8(buffer.c_str(), length);
 		}
 		return fullName;
 	}

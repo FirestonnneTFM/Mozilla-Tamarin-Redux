@@ -3636,7 +3636,7 @@ namespace avmplus
 
 	Binding Verifier::findMathFunction(TraitsBindingsp math, const Multiname& multiname, Binding b, int argc)
 	{
-		Stringp newname = core->internString(core->concatStrings(core->constantString("_"), multiname.getName()));
+		Stringp newname = core->internString(core->concatStrings(core->internConstantStringLatin1("_"), multiname.getName()));
 		Binding newb = math->findBinding(newname);
 		if (AvmCore::isMethodBinding(newb))
 		{
@@ -3658,7 +3658,7 @@ namespace avmplus
 
 	Binding Verifier::findStringFunction(TraitsBindingsp str, const Multiname& multiname, Binding b, int argc)
 	{
-		Stringp newname = core->internString(core->concatStrings(core->constantString("_"), multiname.getName()));
+		Stringp newname = core->internString(core->concatStrings(core->internConstantStringLatin1("_"), multiname.getName()));
 		Binding newb = str->findBinding(newname);
 		if (AvmCore::isMethodBinding(newb))
 		{

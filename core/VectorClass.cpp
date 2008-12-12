@@ -461,7 +461,7 @@ namespace avmplus
 			fullname = so->vtable->ivtable->traits->formatClassName();
 			param_traits = so->vtable->ivtable->traits;
 		}
-		fullname = core->intern(core->concatStrings(core->kVector, core->concatStrings(fullname, core->newString(">")))->atom());
+		fullname = core->intern(core->concatStrings(core->kVector, fullname->appendLatin1(">"))->atom());
 
 		if( !instantiated_types->contains(fullname->atom()) )
 		{
@@ -469,7 +469,7 @@ namespace avmplus
 			Multiname name;
 			name.setName(fullname);
 			name.setNamespace(this->traits()->ns);
-			Stringp classname = core->internString(core->concatStrings(fullname, core->newString("$")));
+			Stringp classname = core->internString(fullname->appendLatin1("$"));
 			Multiname class_mname;
 			class_mname.setName(classname);
 			class_mname.setNamespace(this->traits()->ns);

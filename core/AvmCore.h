@@ -997,24 +997,6 @@ const int kBufferPadding = 16;
 		double number(Atom atom) const;
 
 		/**
-		 * produce an atom from a string.  used only for string constants.
-		 * @param s
-		 * @return
-		 */
-		Atom constant(const char *s)
-		{
-			return constantString(s)->atom();
-		}
-
-		/**
-		Intern a string with a character constant. This constant
-		neeeds to persist for the lifetime of this AvmCore. The
-		encoding is assumed to be Latin-1, not UTF-8, for speed
-		reasons.
-		*/
-		Stringp constantString(const char *s);
-
-		/**
 		 * The interrupt method is called from executing code
 		 * when the interrupted flag is set.
 		 */
@@ -1090,7 +1072,7 @@ const int kBufferPadding = 16;
 		 */
 		String* findErrorMessage(int errorID,
 								 int* mapTable,
-								 const char** errorTable,
+								 const utf8_t** errorTable,
 								 int numErrors);
 
 		/**
@@ -1328,8 +1310,17 @@ const int kBufferPadding = 16;
 		 * @param s
 		 * @return
 		 */
-		Stringp internAlloc(const wchar *s, int len);
- 		Stringp internAllocUtf8(const byte *s, int len, bool constant = false);
+		Stringp internStringUTF16(const wchar* s, int len);
+		Stringp internStringUTF8(const utf8_t* s, int len, bool constant = false);
+
+		/**
+		Intern a string with a character constant. This constant
+		neeeds to persist for the lifetime of this AvmCore. The
+		encoding is assumed to be Latin-1, not UTF-8, for speed
+		reasons.
+		*/
+		Stringp internConstantStringLatin1(const char* s);
+
 
 #ifdef DEBUGGER
 		/**
@@ -1338,7 +1329,7 @@ const int kBufferPadding = 16;
 		Stringp findInternedString(const char *s, int len);
 #endif
 
-		bool getIndexFromAtom (Atom a, uint32 *result) const
+		bool getIndexFromAtom(Atom a, uint32 *result) const
 		{
 			if (AvmCore::isInteger(a))
 			{
@@ -1371,15 +1362,19 @@ const int kBufferPadding = 16;
 		NamespaceSet* newNamespaceSet(int nsCount);
 
 		// String creation
-		Stringp newString(const char *str) const;
-		Stringp newString(const wchar *str) const;
-        Stringp newString(const wchar *str, int len) const;
-		Stringp newString(const char *str, int len) const;		
+		Stringp newStringLatin1(const char* str, int len = -1);
+		Stringp newStringUTF8(const utf8_t* str, int len = -1);
+		Stringp newStringUTF16(const wchar* str, int len = -1);
+		Stringp newStringEndianUTF16(bool littleEndian, const wchar* str, int len = -1);
+		
+		// use this when creating a string with a constant literal string of Latin1 chars, rather than newStringLatin1(),
+		// as we don't have to copy the string data
+		Stringp newConstantStringLatin1(const char* str);
 
 		Stringp uintToString(uint32 i);
 		Stringp intToString(int i);
 		Stringp doubleToString(double d);
-		Stringp concatStrings(Stringp s1, Stringp s2) const;
+		Stringp concatStrings(Stringp s1, Stringp s2);
 		
 		Atom uintToAtom(uint32 n);
 		Atom intToAtom(int n);

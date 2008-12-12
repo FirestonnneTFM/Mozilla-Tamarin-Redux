@@ -208,7 +208,7 @@ namespace avmplus
 				{
 					StringBuffer sb(core->gc);
 					dumpFilename(e->filename(), sb);
-					filename = core->newString(sb.c_str());
+					filename = core->newStringUTF8(sb.c_str());
 				}
 				s = core->concatStrings(s, e->info()->getStackTraceLine(filename));
 				if(e->filename())

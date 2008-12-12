@@ -41,8 +41,6 @@
 
 namespace avmplus 
 {
-	using namespace MMgc;
-
 	class UTF8String;
 	class UTF16String;
 	class ByteArray;
@@ -134,37 +132,27 @@ namespace avmplus
 		};
 
 		/**
-		Create a string using 16-bit data.
-		@param	core				the AvmCore instance to use
-		@param	buffer				the 16-bit buffer; if NULL, the string contains random data
-		@param	len					the size in characters
-		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
-		@param	staticBuf			if true, the buffer is static, and may be used by the string
-		@return						the String instance, or NULL on out-of-memory
-		*/
-		static	Stringp				create(const AvmCore* core, const wchar* buffer, int32_t len, Width desiredWidth = kDefaultWidth, bool staticBuf = false);
-		/**
 		Create a string using Latin-1 data. Characters are just widened and copied.
-		To create an UTF-8 string, use StringUtils::create().
+		To create an UTF-8 string, use createUTF8().
 		@param	core				the AvmCore instance to use
-		@param	buffer				the character buffer; characters are considered unsigned
-									if NULL, the string contains random data
-		@param	len					the size in characters
+		@param	buffer				the character buffer. may not be null.
+		@param	len					the size in characters. If < 0, assume null termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
 		@return						the String instance, or NULL on out-of-memory
 		*/
-		static	Stringp				create(const AvmCore* core, const char* buffer, int32_t len, Width desiredWidth = kDefaultWidth, bool staticBuf = false);
+		static	Stringp				createLatin1(AvmCore* core, const char* buffer, int32_t len = -1, Width desiredWidth = kDefaultWidth, bool staticBuf = false);
+
 		/**
 		Create a string using UTF-8 data.
 		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-8 buffer
-		@param	len					the size in bytes
+		@param	buffer				the UTF-8 buffer. may not be null.
+		@param	len					the size in bytes. If < 0, assume null termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
 		@return						the String instance, or NULL on out-of-memory, or bad characters
 		*/
-		static	Stringp				createUTF8(const AvmCore* core, const utf8_t* buffer, int32_t len, 
+		static	Stringp				createUTF8(AvmCore* core, const utf8_t* buffer, int32_t len = -1, 
 												String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
 		/**
 		Create a string using UTF-16 data. If the width is k32, and there are surrogate pairs, they
@@ -172,14 +160,15 @@ namespace avmplus
 		FEATURE_UTF32_SUPPORT is defined). If the desired width is too small to fit the source data, 
 		return NULL.
 		@param	avm					the AvmCore instance to use
-		@param	buffer				the UTF-32 buffer
-		@param	len					the size in characters
+		@param	buffer				the UTF-16 buffer. may not be null.
+		@param	len					the size in characters. If < 0, assume null termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
 		@return						the String instance, or NULL on out-of-memory, or characters too wide
 		*/
-		static	Stringp				createUTF16(const AvmCore* core, const wchar* buffer, int32_t len, 
+		static	Stringp				createUTF16(AvmCore* core, const wchar* buffer, int32_t len = -1, 
 												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
+
 #ifdef FEATURE_UTF32_SUPPORT
 		/**
 		Create a string using UTF-32 data. Characters > 0xFFFF are encoded into UTF-16 surrogate
@@ -188,12 +177,12 @@ namespace avmplus
 		small to fit the source data, return NULL.
 		@param	avm					the AvmCore instance to use
 		@param	buffer				the UTF-32 buffer
-		@param	len					the size in characters
+		@param	len					the size in characters. If < 0, assume null termination and calculate.
 		@param	desiredWidth		the desired width; use kAuto to get a string as narrow as possible
 		@param	staticBuf			if true, the buffer is static, and may be used by the string
 		@return						the String instance,  or NULL on out-of-memory, or characters too wide
 		*/
-		static	Stringp				createUTF32(const AvmCore* core, const utf32_t* buffer, int32_t len, 
+		static	Stringp				createUTF32(AvmCore* core, const utf32_t* buffer, int32_t len = -1, 
 												 String::Width desiredWidth = String::kDefaultWidth, bool staticBuf = false);
 #endif
 		virtual						~String();
@@ -207,7 +196,7 @@ namespace avmplus
 		@param	len					the string length
 		@param	desiredWidth		the desired string width
 		@return						the String instance, or NULL on out-of-memory
-		static Stringp				newPoolString(const AvmCore* core, const ByteArray *buff, uint32_t offset, uint32_t len, Width desiredWidth = kAuto);
+		static Stringp				newPoolString(AvmCore* core, const ByteArray *buff, uint32_t offset, uint32_t len, Width desiredWidth = kAuto);
 		*/
 		/**
 		Create a string with a given width out of this string. If the width is equal to the current
@@ -266,27 +255,13 @@ namespace avmplus
 		inline	bool				isInterned() const { return 0 != (m_bitsAndFlags & TSTR_FLAG_INTERNED); }
 		/// Mark this string as interned.
 		inline	void				setInterned() { m_bitsAndFlags |= TSTR_FLAG_INTERNED; }
-		/**	
-		Return the raw pointer to the string data.
-		*/
-		const	void*	FASTCALL	getData() const;
 		/**
 		Return the character at the given position. No index checks!
 		@param	index				the index
 		@return						the character at the index
 		*/
 				CharAtType FASTCALL	charAt(int32_t index) const;
-		/**
-		Use a Pointers instance to quickly access a character given the Pointers
-		instance containing the buffer start, and the string width. No index checks!
-		*/
-				CharAtType FASTCALL	charAt(const Pointers& r, int32_t index) const;
-		/**
-		The index operator throws if the character is too wide for a wchar,
-		or the index is invalid.
-		*/
-		inline	CharAtType			operator[](int index) const { return charAt(index); }
-		/*@{*/
+
 		/**
 		Compare the String with toCompare. If the length is > 0, compare
 		the other string up to the given length.
@@ -388,21 +363,18 @@ namespace avmplus
 		*/
 				Stringp	FASTCALL	append(const void* buffer, int32_t numChars, Width charWidth);
 		/*
-		Append a Latin-1 string(8 bits, not UTF-8).
+		Append a 8-bit-wide string. For Unicode, strings should be Latin1, not UTF8.
 		*/
-		inline	Stringp				append(const char* p) { return append(p, Length(p), k8); }
+		inline	Stringp				appendLatin1(const char* p) { return append(p, Length(p), k8); }
+		inline	Stringp				appendLatin1(const char* p, int32_t len) { return append(p, len, k8); }
 		/*
-		Append a UTF-16 string.
+		Append a 16-bit-wide string. For Unicode, strings should be UTF16, but this is not enforced
+		by this method: indeed, several callers expect to be able to create "illegal" UTF16 sequences
+		via this call, for backwards compatibility. Thus, this is a dangerous call and should be used with
+		caution (and is also the reason it is not named "appendUTF16").
 		*/
-		inline	Stringp				append(const wchar* p) { return append(p, Length(p), k16); }
-		/*
-		Append a Latin-1 string(8 bits, not UTF-8) with a length.
-		*/
-		inline	Stringp				append(const char* p, int32_t len) { return append(p, len, k8); }
-		/*
-		Append a UTF-16 string with a length.
-		*/
-		inline	Stringp				append(const wchar* p, int32_t len) { return append(p, len, k16); }
+		inline	Stringp				append16(const wchar* p) { return append(p, Length(p), k16); }
+		inline	Stringp				append16(const wchar* p, int32_t len) { return append(p, len, k16); }
 		/**
 		Implement String.substr(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
@@ -525,10 +497,10 @@ namespace avmplus
 #endif
 
 	private:
-		friend class StringUtils;
-		friend class StringRange;
-		friend class StringDataUTF8;
-		friend class StringNullTerminatedUTF8;
+		friend class StringIndexer;
+		friend class UTF8String;
+		friend class UTF16String;
+		friend class PrintWriter;
 
 								String(int32_t length, uint32_t bits);
 		inline	void			operator delete(void*) {}	// Strings cannot be deleted, therefore private
@@ -590,6 +562,13 @@ namespace avmplus
 				uint32_t FASTCALL	_hashCode();
 		// Do a raw buffer compare.
 		static	int32_t	FASTCALL	compare(const Pointers& r1, Width w1, const Pointers& r2, Width w2, int32_t len);
+		// Return the raw pointer to the string data.
+		const	void*	FASTCALL	getData() const;
+		/**
+		Use a Pointers instance to quickly access a character given the Pointers
+		instance containing the buffer start, and the string width. No index checks!
+		*/
+				CharAtType FASTCALL	charAt(const Pointers& r, int32_t index) const;
 	};
 
 	// Compare helpers
@@ -629,16 +608,13 @@ namespace avmplus
 	{
 	public:
 		/// The constructor takes the string to index.
-		inline				StringIndexer(Stringp s) : m_str(s) { m_ptrs.pv = (void*) s->getData(); }
-		inline				~StringIndexer() { m_str = NULL; m_ptrs.pv = NULL; }
+		inline						StringIndexer(Stringp s) : m_str(s) { m_ptrs.pv = (void*) s->getData(); }
+		inline						~StringIndexer() { m_str = NULL; m_ptrs.pv = NULL; }
 		/// Return the embedded string.
-		inline	Stringp		operator->() const { return m_str; }
+		inline	Stringp				operator->() const { return m_str; }
 		/// Quick index operator.
-#ifdef FEATURE_UTF32_SUPPORT
-		inline	utf32_t		operator[](int index) const { return m_str->charAt(m_ptrs, index); }
-#else
-		inline	wchar		operator[](int index) const { return (wchar) m_str->charAt(m_ptrs, index); }
-#endif
+		inline	String::CharAtType	operator[](int index) const { return m_str->charAt(m_ptrs, index); }
+
 	private:
 		// do not create on the heap
 		inline	void*		operator new(size_t) throw() { return NULL; }

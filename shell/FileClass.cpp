@@ -83,7 +83,9 @@ namespace avmshell
 		rewind(fp);
 		#endif
 
-		unsigned char *c = new unsigned char[len+1];
+		AvmCore::AllocaAutoPtr _c;
+		uint8_t* c = (uint8_t*)VMPI_alloca(core, _c, len+1);
+
 		len = (long)fread(c, 1, len, fp);
 		c[len] = 0;
 		
@@ -94,42 +96,25 @@ namespace avmshell
 			// UTF8 BOM
 			if ((c[0] == 0xef) && (c[1] == 0xbb) && (c[2] == 0xbf))
 			{
-				return core->newString(((char *)c) + 3, len - 3);
+				return core->newStringUTF8(c + 3, len - 3);
 			}
 			else if ((c[0] == 0xfe) && (c[1] == 0xff))
 			{
 				//UTF-16 big endian
 				c += 2;
 				len = (len - 2) >> 1;
-				Stringp out = String::create(core, (const wchar*) NULL, len, String::k16);
-				wchar *buffer = (wchar*) out->getData();
-				for (long i = 0; i < len; i++)
-				{
-					*buffer++ = (c[0] << 8) + c[1];
-					c += 2;
-				}
-				return out;
+				return core->newStringEndianUTF16(/*littleEndian*/false, (const wchar*)c, len);
 			}
 			else if ((c[0] == 0xff) && (c[1] == 0xfe))
 			{
 				//UTF-16 little endian
 				c += 2;
 				len = (len - 2) >> 1;
-				Stringp out = String::create(core, (const wchar*) NULL, len, String::k16);
-				wchar *buffer = (wchar*) out->getData();
-				for (long i = 0; i < len; i++)
-				{
-					*buffer++ = (c[1] << 8) + c[0];
-					c += 2;
-				}
-				return out;
+				return core->newStringEndianUTF16(/*littleEndian*/true, (const wchar*)c, len);
 			}
 		}
 
-		Stringp out = core->newString((char *) c);
-		delete [] c;
-		
-		return out;
+		return core->newStringUTF8(c, len);
 	}
 
 	void FileClass::write(Stringp filename,

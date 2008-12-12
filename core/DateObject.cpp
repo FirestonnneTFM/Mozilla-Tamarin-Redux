@@ -46,7 +46,7 @@ namespace avmplus
 		wchar buffer[256];
 		int len;
 		date.toString(buffer, index, len);
-		return String::create(core(), buffer, len);
+		return core()->newStringUTF16(buffer, len);
 	}
 
 	double DateObject::AS3_valueOf()
@@ -117,9 +117,9 @@ namespace avmplus
 		wchar buffer[256];
 		int len;
 		date.toString(buffer, Date::kToString, len);
-		Stringp result = String::create(core, "<", 1);
-		result = String::concatStrings(result, String::create(core, buffer, len));
-		result = String::concatStrings(result, core->newString(">@"));
+		Stringp result = core->newConstantStringLatin1("<");
+		result = String::concatStrings(result, core->newStringUTF16(buffer, len));
+		result = String::concatStrings(result, core->newConstantStringLatin1(">@"));
 		result = String::concatStrings(result, core->formatAtomPtr(atom()));
 		return result;
 	}

@@ -44,7 +44,7 @@ namespace avmplus
 	StringOutputStream::StringOutputStream(GC *gc)
 	{
 		GCAssert(!gc->IsPointerToGCPage(this));
-		m_buffer = (char*) gc->Alloc(kInitialCapacity);
+		m_buffer = (utf8_t*) gc->Alloc(kInitialCapacity);
 		m_buffer[0] = 0;
 		m_length = 0;
 	}
@@ -64,7 +64,7 @@ namespace avmplus
 		{
 			GC* gc = MMgc::GC::GetGC(m_buffer);
 			int newCapacity = (m_length+count+1)*2;
-			char *newBuffer = (char*) gc->Alloc(newCapacity);
+			utf8_t* newBuffer = (utf8_t*) gc->Alloc(newCapacity);
 			if (!newBuffer) {
 				return 0;
 			}

@@ -1655,10 +1655,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\shell\StringBuilderClass.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\shell\SystemClass.cpp"
 				>
 			</File>
@@ -1806,10 +1802,6 @@
 			</File>
 			<File
 				RelativePath="..\..\shell\ShortArray.as"
-				>
-			</File>
-			<File
-				RelativePath="..\..\shell\StringBuilder.as"
 				>
 			</File>
 			<File

@@ -102,7 +102,7 @@ namespace avmshell
 	{
 		CheckEOF(length);
 		
-		char *buffer = new char[length+1];
+		utf8_t *buffer = new utf8_t[length+1];
 		if (!buffer) {
 			ThrowMemoryError();
 		}
@@ -112,13 +112,13 @@ namespace avmshell
 		
 		// Since this is supposed to read UTF8 into a string, it really should ignore the UTF8 BOM that
 		// might reasonably occur at the head of the data.
-		char *utf8chars = buffer;
+		utf8_t* utf8chars = buffer;
 		if (length >= 3 && (unsigned char)buffer[0] == 0xEF && (unsigned char)buffer[1] == 0xBB && (unsigned char)buffer[2] == 0xBF) 
 		{
 			utf8chars += 3;
 		}
 
-		String *out = m_toplevel->core()->newString(utf8chars);
+		String *out = m_toplevel->core()->newStringUTF8(utf8chars);
 		delete [] buffer;
 		
 		return out;

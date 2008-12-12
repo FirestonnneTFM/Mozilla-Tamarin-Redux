@@ -350,7 +350,7 @@ namespace avmplus
 		Atom* arr;
 		if (frame && frame->arguments(arr, count))
 		{
-			Stringp comma = core->newString(",");
+			Stringp comma = core->newConstantStringLatin1(",");
 			for(int i=0; i<count; i++)
 			{
 				args = core->concatStrings(args, core->format(arr[i]));

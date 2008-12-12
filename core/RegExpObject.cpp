@@ -63,7 +63,7 @@ namespace avmplus
 		AvmCore		*core = this->core();
 		m_optionFlags = PCRE_UTF8;
 		m_hasNamedGroups = false;
-		m_source = core->newString("(?:)");
+		m_source = core->newConstantStringLatin1("(?:)");
 
 		StUTF8String utf8Pattern(m_source);
 		m_pcreInst = (void*)pcre_compile(utf8Pattern->c_str(), m_optionFlags, &error, &errptr, NULL );
@@ -189,16 +189,10 @@ namespace avmplus
      * @param code
      * @return
      */
-    Atom RegExpObject::stringFromUTF8(const char *buffer,
-									  int len)
+    Atom RegExpObject::stringFromUTF8(const char* buffer, int len)
     {
-        // don't need to create an atom for this now, because
-        // each caller will take care of it.
-		if (len == 0) {
-			return core()->kEmptyString->atom(); 
-		} else {
-			return core()->newString(buffer, len)->atom();
-		}
+		AvmAssert(len >= 0);
+		return core()->newStringUTF8((const utf8_t*)buffer, len)->atom();
     }
 
 	int RegExpObject::search(Stringp subject)
@@ -240,7 +234,6 @@ namespace avmplus
 
 	ArrayObject* RegExpObject::split(Stringp subject, uint32 limit)
 	{
-		AvmCore *core = this->core();
 		ArrayObject *out = toplevel()->arrayClass->newArray();
 		StUTF8String utf8Subject(subject);
 
@@ -278,9 +271,7 @@ namespace avmplus
 				startIndex = matchIndex+matchLen;
 				break;
 			} else {
-				out->setUintProperty(n++,
-									 (core->newString(utf8Subject->c_str()+startIndex,
-													  matchIndex-startIndex))->atom());
+				out->setUintProperty(n++, stringFromUTF8(utf8Subject->c_str()+startIndex, matchIndex-startIndex));
 				if (n >= limit)
 					break;
 				for (uint32 j=1; j<matchArray->getLength(); j++) {
@@ -295,9 +286,7 @@ namespace avmplus
 
 		// If we found no match, or we did find a match and are still under limit, and there is a remainder left, add it 
 		if ((unsigned)n < limit && startIndex <= utf8Subject->length()) {
-			out->setUintProperty(n++,
-								 (core->newString(utf8Subject->c_str()+startIndex,
-												  utf8Subject->length()-startIndex))->atom());
+			out->setUintProperty(n++, stringFromUTF8(utf8Subject->c_str()+startIndex, utf8Subject->length()-startIndex));
 		}
 
 		return out;
@@ -406,7 +395,7 @@ namespace avmplus
 				nameIndex = (nameTable[0] << 8) + nameTable[1];
 				length = ovector[nameIndex * 2 + 1] - ovector[ nameIndex * 2 ];
 
-				Atom name = stringFromUTF8((char*)(nameTable+2), (uint32)strlen(nameTable+2));
+				Atom name = stringFromUTF8((nameTable+2), (uint32)strlen(nameTable+2));
 				name = core->internString(name)->atom();
 
 				Atom value = stringFromUTF8(utf8Subject->c_str()+ovector[nameIndex*2], length);
@@ -486,7 +475,7 @@ namespace avmplus
 		// get start/end index of all matches
 		int matchCount;
 		while (lastIndex <= subjectLength &&
-			   (matchCount = pcre_exec((pcre*)m_pcreInst, NULL, src,
+			   (matchCount = pcre_exec((pcre*)m_pcreInst, NULL, (const char*)src,
 			   subjectLength, lastIndex, PCRE_NO_UTF8_CHECK, ovector, OVECTOR_SIZE)) > 0)
 		{
 			int captureCount = matchCount-1;
@@ -582,8 +571,7 @@ namespace avmplus
 			resultBuffer.write(src+lastIndex, subjectLength-lastIndex);
 		}
 
-		return stringFromUTF8(resultBuffer.c_str(),
-							  resultBuffer.length());
+		return stringFromUTF8((const char*)resultBuffer.c_str(), resultBuffer.length());
 	}
 
 	Atom RegExpObject::replace(Stringp subject,
@@ -602,7 +590,7 @@ namespace avmplus
 		// get start/end index of all matches
 		int matchCount;
 		while (lastIndex < subjectLength &&
-			   (matchCount = pcre_exec((pcre*)m_pcreInst, NULL, src,
+			   (matchCount = pcre_exec((pcre*)m_pcreInst, NULL, (const char*)src,
 						 subjectLength, lastIndex, PCRE_NO_UTF8_CHECK, ovector, OVECTOR_SIZE)) > 0)
 		{
 			int captureCount = matchCount-1;
@@ -620,14 +608,13 @@ namespace avmplus
 			argv[0] = undefinedAtom;
 
 			// ECMA 15.5.4.11: Argument 1 is the substring that matched.
-			argv[1] = core()->newString(src+matchIndex, matchLen)->atom();
+			argv[1] = stringFromUTF8(src+matchIndex, matchLen);
 
 			// ECMA 15.5.4.11: The next m arguments are all of the captures in the
 			// MatchResult
 			for (int i=1; i<=captureCount; i++)
 			{
-				argv[i+1] = core()->newString(src+ovector[i*2],
-											  ovector[i*2+1]-ovector[i*2])->atom();
+				argv[i+1] = stringFromUTF8(src+ovector[i*2], ovector[i*2+1]-ovector[i*2]);
 			}
 
 			// ECMA 15.5.4.11: Argument m+2 is the offset within string
@@ -661,8 +648,7 @@ namespace avmplus
 			resultBuffer.write(src+lastIndex, subjectLength-lastIndex);
 		}
 
-		return stringFromUTF8(resultBuffer.c_str(),
-							  resultBuffer.length());
+		return stringFromUTF8((const char*)resultBuffer.c_str(), resultBuffer.length());
 	}
 
 	void RegExpObject::fixReplaceLastIndex(const char *src,

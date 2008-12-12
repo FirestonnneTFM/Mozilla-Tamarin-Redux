@@ -89,7 +89,7 @@ namespace avmshell
 	
 	Stringp SystemClass::getAvmplusVersion()
 	{
-		return core()->newString(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
+		return core()->newConstantStringLatin1(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
 	}
 
 	void SystemClass::write(Stringp s)
@@ -178,7 +178,11 @@ namespace avmshell
 
 		ArrayObject *array = toplevel->arrayClass->newArray();
 		for(int i=0; i<user_argc;i++)
-			array->setUintProperty(i, core->newString(user_argv[i])->atom());
+#ifdef UNDER_CE
+			array->setUintProperty(i, core->newStringUTF16(user_argv[i])->atom());
+#else
+			array->setUintProperty(i, core->newStringLatin1(user_argv[i])->atom());
+#endif
 
 		return array;
 	}
@@ -194,13 +198,13 @@ namespace avmshell
 			wc[i++] = (wchar)c;
 			if (i == 63) {
 				wc[i] = 0;
-				s = core->concatStrings(s, core->newString(wc));
+				s = s->append16(wc);
 				i = 0;
 			}
 		}
 		if (i > 0) {
 			wc[i] = 0;
-			s = core->concatStrings(s, core->newString(wc));
+			s = s->append16(wc);
 		}
 		return s;
 	}

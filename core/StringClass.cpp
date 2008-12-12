@@ -49,9 +49,9 @@ namespace avmplus
 
 		// Some sanity tests for string/wchar* comparison routines
 #if 0 && defined(_DEBUG)
-		Stringp a = core()->newString ("a", 1);
-		Stringp b = core()->newString ("b", 1);
-		Stringp c = core()->newString ("c", 1);
+		Stringp a = core()->newConstantStringLatin1("a");
+		Stringp b = core()->newConstantStringLatin1("b");
+		Stringp c = core()->newConstantStringLatin1("c");
 
 		AvmAssert( (*a == *a));
 		AvmAssert(!(*a != *a));
@@ -136,17 +136,15 @@ namespace avmplus
 	Stringp StringClass::AS3_fromCharCode(Atom *argv, int argc)
 	{
 		AvmCore* core = this->core();
-		Stringp out = NULL;
+		Stringp out = core->kEmptyString;
 		for (int i=0; i<argc; i++) 
 		{
-			wchar ch = wchar(core->integer(argv[i]));
-			if (out == NULL)
-				out = String::create(core, &ch, 1);
-			else
-				out = out->append(&ch, 1);
+			wchar c = wchar(core->integer(argv[i]));
+			// note: this code is allowed to construct a string
+			// containing illegal UTF16 sequences!
+			// (eg, String.fromCharCode(0xD800).charCodeAt(0) -> 0xD800).
+			out = out->append16(&c, 1);
 		}
-		if (out == NULL)
-			out = core->kEmptyString;
 		return out;
 	}
 

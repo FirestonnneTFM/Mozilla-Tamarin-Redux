@@ -458,10 +458,10 @@ namespace avmplus
 	{
 		if (traits()->name != NULL) {
 			return core->concatStrings(traits()->format(core),
-									   core->concatStrings(core->newString("@"),
+									   core->concatStrings(core->newConstantStringLatin1("@"),
 														   core->formatAtomPtr(atom())));
 		} else {
-			return core->concatStrings(core->newString("{}@"),
+			return core->concatStrings(core->newConstantStringLatin1("{}@"),
 									   core->formatAtomPtr(atom()));
 		}
 	}
@@ -567,7 +567,7 @@ namespace avmplus
 	Atom ScriptObject::call(int /*argc*/, Atom* /*argv*/)
 	{
 		// TypeError in ECMA to execute a non-function
-		Multiname name(core()->publicNamespace, core()->constantString("value"));
+		Multiname name(core()->publicNamespace, core()->internConstantStringLatin1("value"));
 		toplevel()->throwTypeError(kCallOfNonFunctionError, core()->toErrorString(&name));
 		return undefinedAtom;
 	}

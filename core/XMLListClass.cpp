@@ -125,7 +125,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		if ((!argc) || AvmCore::isNullOrUndefined(argv[1]))
 		{
-			return ToXMLList (core->newString("")->atom());
+			return ToXMLList (core->kEmptyString->atom());
 		}
 
 		// if args[0] is xmllist, create new list and call append

@@ -115,7 +115,7 @@ namespace avmplus
 			"writeonly"
 		};
 		if (!m_strs[i])
-			m_strs[i] = m_toplevel->core()->constantString(k_strs[i]);
+			m_strs[i] = m_toplevel->core()->internConstantStringLatin1(k_strs[i]);
 		return m_strs[i];
 	}
 

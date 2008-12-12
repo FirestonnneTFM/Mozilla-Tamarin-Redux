@@ -50,18 +50,6 @@
 namespace avmplus
 {
 
-//////////////////////// Helpers: Width counting ///////////////////////////
-
-	static bool _check8(const wchar* src, int32_t len)
-	{
-		while (len-- > 0)
-		{
-			if (*src++ > 0xFF)
-				return false;
-		}
-		return true;
-	}
-
 /////////////////////////// Helpers: Widening //////////////////////////////
 
 	inline void _widen8_16(const char* src, wchar* dst, int32_t len)
@@ -252,59 +240,34 @@ namespace avmplus
 	{
 	}
 
-	// Create a string out of an 16bit buffer.
-	String* String::create(const AvmCore* core, const wchar* buffer, int32_t len, Width desiredWidth, bool staticBuf)
+	// Create a string out of an 8bit buffer. Characters are just widened and copied, not interpreted as UTF8.
+	String* String::createLatin1(AvmCore* core, const char* buffer, int32_t len, Width desiredWidth, bool staticBuf)
 	{
-		String* s = NULL;
-		// for empty strings, return the standard Empty String instance
-		if (len <= 0)
-			s = core->kEmptyString;
-		// for single characters < 128, return the cached strings if the width is k8 or kAuto
-		else if ((desiredWidth == k8 || desiredWidth == kAuto) && len == 1 && *buffer < 128)
-			s = core->cachedChars[*buffer];
+		if (len < 0 && buffer != NULL)
+			len = Length((const char*)buffer);
 
-		if (s == NULL)
-		{
-			int32_t stringLength = len;
-
-			if (desiredWidth == k16 && staticBuf)
-				return createExternal(core->GetGC(), buffer, len, k16);
-
-			if (desiredWidth == kAuto || desiredWidth == k8)
-				desiredWidth = _check8(buffer, len) ? k8 : k16;
-
-
-			// found the width to use, now create that string
-			s = createDirect(core->GetGC(), NULL, stringLength, desiredWidth);
-			if (buffer != NULL)
-				_copyBuffers(buffer, s->m_direct.c16, len, k16, desiredWidth);
-		}
-		return s;
-	}
-
-	// Create a string out of an 8bit buffer.
-	String* String::create(const AvmCore* core, const char* buffer, int32_t len, Width desiredWidth, bool staticBuf)
-	{
 		if (desiredWidth == kAuto)
 			desiredWidth = k8;
 
-		String* s = NULL;
-		// for empty strings, return the standard Empty String instance
-		if (len <= 0)
-			s = core->kEmptyString;
-		// for single characters < 128, return the cached strings if the width is k8
-		else if (desiredWidth == k8 && len == 1 && (*buffer & 0xFF) < 128)
-			s = core->cachedChars[int32_t(*buffer & 0xFF)];
-
-		if (s == NULL)
+		if (core->publicNamespace)	// check this to see if core->kEmptyString and core->cachedChars are inited yet
 		{
-			if (staticBuf && desiredWidth == k8)
-				s = createExternal(core->GetGC(), buffer, len, k8);
-			else
-			{
-				s = createDirect(core->GetGC(), NULL, len, desiredWidth);
-				_copyBuffers(buffer, s->m_direct.c8, len, k8, desiredWidth);
-			}
+			// for empty strings, return the standard Empty String instance
+			if (buffer == NULL || len == 0)
+				return core->kEmptyString;
+
+			if (desiredWidth == k8 && len == 1 && uint8_t(*buffer) < 128)
+				return core->cachedChars[uint8_t(*buffer)];
+		}
+		
+		String* s = NULL;
+		if (staticBuf && desiredWidth == k8)
+		{
+			s = createExternal(core->GetGC(), buffer, len, k8);
+		}
+		else
+		{
+			s = createDirect(core->GetGC(), NULL, len, desiredWidth);
+			_copyBuffers(buffer, s->m_direct.c8, len, k8, desiredWidth);
 		}
 		return s;
 	}
@@ -504,11 +467,11 @@ namespace avmplus
 				ok = !memcmp(ptrs.p8, p, len);
 				break;
 			case k16:
-				while (ok && 0 != len--)
-					ok = (wchar (*p++ & 0xFF) == *ptrs.p16++); 
+				while (ok && len-- != 0)
+					ok = (wchar(*p++ & 0xFF) == *ptrs.p16++); 
 				break;
 			default:
-				while (ok && 0 != len--)
+				while (ok && len-- != 0)
 					ok = (utf32_t(*p++ & 0xFF) == *ptrs.p32++);
 		}
 		return ok;
@@ -525,14 +488,14 @@ namespace avmplus
 		switch (getWidth())
 		{
 			case k8:
-				while (ok && 0 != len--)
-					ok = (*p++ == wchar (*ptrs.p8++ & 0xFF)); 
+				while (ok && len-- != 0)
+					ok = (*p++ == wchar(*ptrs.p8++ & 0xFF)); 
 				break;
 			case k16:
 				ok = !memcmp(ptrs.p16, p, len * sizeof(wchar));
 				break;
 			default:
-				while (ok && 0 != len--)
+				while (ok && len-- != 0)
 					ok = (utf32_t(*p++) == *ptrs.p32++);
 		}
 		return ok;
@@ -841,9 +804,9 @@ namespace avmplus
 
 ///////////////////////////// Concatenation ////////////////////////////////
 
-	// It appears that VC9 des a bad job with this method when attempting
+	// It appears that VC9 does a bad job with this method when attempting
 	// to optimize for speed. The acceptance test ecma3/GlobalObject/e15_1_2_5_1.as
-	// fails in this mathos if Optimize for Speed is turned on (Win64 only).
+	// fails in this methods if Optimize for Speed is turned on (Win64 only).
 	// Therefore, optimize for speed is turned of for this method.
 
 #if defined( AVMPLUS_64BIT ) && defined( _MSC_VER )
@@ -902,7 +865,7 @@ namespace avmplus
 			// in-place append only if rightStr's width fits into leftStr
 			charsLeft = master->getCharsLeft();
 			// charsUsed is the number of chars spent behind m_length
-			charsUsed = int32_t((GC::Size (master) - offsetof(String, m_direct.c8) / leftWidth) - master->m_length - charsLeft);
+			charsUsed = int32_t((GC::Size(master) - offsetof(String, m_direct.c8) / leftWidth) - master->m_length - charsLeft);
 		}
 		int32_t start = 0;	// string start for dependent strings
 		char* data;
@@ -2272,7 +2235,7 @@ namespace avmplus
 		// TODO: 32 bit support
 		AvmAssert(ch <= 0xFFFF);
 		wchar wch = (wchar) ch;
-		return String::create(core, &wch, 1);
+		return core->newStringUTF16(&wch, 1);
 	}
 
 	Stringp String::AS3_charAt(double dPos)
@@ -2379,7 +2342,7 @@ namespace avmplus
 			p += charLen;
 			len -= charLen;
 		}
-		return (0 == len);
+		return (len == 0);
 	}
 
 	// Analyze a UTF-16 string buffer and find out about the character widths.
@@ -2396,7 +2359,7 @@ namespace avmplus
 				r.ascii++;
 			if (ch <= 0xFF)
 				r.w8++;
-			else if (ch < 0xD800 && ch > 0xDBFF)
+			else if (ch < 0xD800 || ch > 0xDBFF)
 				r.w16++;
 			else 
 			{
@@ -2444,7 +2407,7 @@ namespace avmplus
 			dstLen--;
 			dst++;
 		}
-		AvmAssert(0 == srcLen && 0 == dstLen);
+		AvmAssert(srcLen == 0 && dstLen == 0);
 	}
 
 	static int32_t _ucs4ToUtf8(const utf32_t* src, int32_t srcLen, utf8_t* dst, int32_t dstLen)
@@ -2479,109 +2442,116 @@ namespace avmplus
 #endif
 
 	// Create a string out of an UTF-8 buffer.
-	Stringp String::createUTF8(const AvmCore* core, const utf8_t* buffer, int32_t len, String::Width desiredWidth, bool staticBuf)
+	Stringp String::createUTF8(AvmCore* core, const utf8_t* buffer, int32_t len, String::Width desiredWidth, bool staticBuf)
 	{
-		Stringp s = NULL;
+		AvmAssert(core->kEmptyString != NULL);
+
+		if (len < 0 && buffer != NULL)
+			len = Length((const char*)buffer);
+
 		// for empty strings, return the standard Empty String instance
-		if (len <= 0)
-			s = core->kEmptyString;
-		else if (desiredWidth == k16 && len == 1 && uint8_t(*buffer) < 128)
-			s = core->cachedChars[uint8_t(*buffer)];
+		if (buffer == NULL || len == 0)
+			return core->kEmptyString;
+		if (desiredWidth == k8 && len == 1 && uint8_t(*buffer) < 128)
+			return core->cachedChars[uint8_t(*buffer)];
 
-		if (s == NULL)
+		Stringp s = NULL;
+		// determine the string width to use
+		StringWidths widths;
+		if (!_analyzeUtf8(buffer, len, widths))
+			// TODO: bad character sequence error
+			return NULL;
+
+		if (desiredWidth == kAuto)
 		{
-			// determine the string width to use
-			StringWidths widths;
-			if (!_analyzeUtf8(buffer, len, widths))
-				// TODO: bad character sequence error
-				return NULL;
-
-			if (desiredWidth == kAuto)
-			{
 #ifdef FEATURE_UTF32_SUPPORT
-				if (widths.w32 != 0)
-					desiredWidth = String::k32;
-				else
+			if (widths.w32 != 0)
+				desiredWidth = String::k32;
+			else
 #endif
-				if (widths.w16 != 0)
-					desiredWidth = String::k16;
-				else
-					desiredWidth = String::k8;
-			}
+			if (widths.w16 != 0)
+				desiredWidth = String::k16;
+			else
+				desiredWidth = String::k8;
+		}
 
-			GC* gc = core->GetGC();
-			switch (desiredWidth)
-			{
-				case String::k8:
-					if (widths.w16 != 0 || widths.w32 != 0)
-						// cannot do 8-bit string with this data
-						// TODO: string-too-wide error
-						s = NULL;
-					else if (staticBuf && widths.ascii == widths.w8)
-						// works, because we only have 7-bit ASCII
-						return String::createExternal(gc, buffer, widths.w8, String::k8);
-					else
-						s = String::createDirect(gc, buffer, widths.w8, String::k8);
-					goto decodeUtf8;
-				case String::k16:
-					// surrogate pairs need 2 characters
-					s = String::createDirect(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16);
-					goto decodeUtf8;
-				default: ;
+		GC* gc = core->GetGC();
+		switch (desiredWidth)
+		{
+			case String::k8:
+				if (widths.w16 != 0 || widths.w32 != 0)
+					// cannot do 8-bit string with this data
+					// TODO: string-too-wide error
+					s = NULL;
+				else if (staticBuf && widths.ascii == widths.w8)
+					// works, because we only have 7-bit ASCII
+					return String::createExternal(gc, buffer, widths.w8, String::k8);
+				else
+					s = String::createDirect(gc, buffer, widths.w8, String::k8);
+				goto decodeUtf8;
+			case String::k16:
+				// surrogate pairs need 2 characters
+				s = String::createDirect(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16);
+				goto decodeUtf8;
+			default: ;
 #ifdef FEATURE_UTF32_SUPPORT
-					// surrogate pairs need 2 characters
-					s = String::createDirect(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k32);
+				// surrogate pairs need 2 characters
+				s = String::createDirect(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k32);
 #endif
 decodeUtf8:
-					if (s != NULL)
-					{
+				if (s != NULL)
+				{
 
-						utf32_t uch;
-						int32_t bytesRead;
-						String::Pointers dst;
-						dst.p16 = s->m_direct.c16;
-						switch (desiredWidth)
-						{
-							case String::k8:
-								while (len > 0)
+					utf32_t uch;
+					int32_t bytesRead;
+					String::Pointers dst;
+					dst.p16 = s->m_direct.c16;
+					switch (desiredWidth)
+					{
+						case String::k8:
+							while (len > 0)
+							{
+								if (*((int8_t*) buffer) > 0)
 								{
-									if (*((int8_t*) buffer) > 0)
-									{
-										// ASCII
-										*dst.p8++ = char (*buffer++);
-										len--;
-									}
-									else
-									{
-										bytesRead = UnicodeUtils::Utf8ToUcs4 (buffer, len, &uch);
-										buffer += bytesRead;
-										len -= bytesRead;
-										*dst.p8++ = char (uch);
-									}
+									// ASCII
+									*dst.p8++ = char (*buffer++);
+									len--;
 								}
-								break;
-							case String::k16:
-								UnicodeUtils::Utf8ToUtf16((const uint8_t*) buffer, len, dst.p16, s->m_length);
-								break;
+								else
+								{
+									bytesRead = UnicodeUtils::Utf8ToUcs4 (buffer, len, &uch);
+									buffer += bytesRead;
+									len -= bytesRead;
+									*dst.p8++ = char (uch);
+								}
+							}
+							break;
+						case String::k16:
+							UnicodeUtils::Utf8ToUtf16((const uint8_t*) buffer, len, dst.p16, s->m_length);
+							break;
 #ifdef FEATURE_UTF32_SUPPORT
-							default:
-								_utf8ToUcs4 (buffer, len, dst.p32, s->m_length);
+						default:
+							_utf8ToUcs4 (buffer, len, dst.p32, s->m_length);
 #else
-							default: ;
+						default: ;
 #endif
-						}
 					}
-					break;
-			}
+				}
+				break;
 		}
 		return s;
 	}
 
 	// Create a string out of an UTF-16 buffer.
-	Stringp String::createUTF16(const AvmCore* core, const wchar* buffer, int32_t len, Width desiredWidth, bool staticBuf)
+	Stringp String::createUTF16(AvmCore* core, const wchar* buffer, int32_t len, Width desiredWidth, bool staticBuf)
 	{
+		AvmAssert(core->kEmptyString != NULL);
+
+		if (len < 0 && buffer != NULL)
+			len = Length(buffer);
+
 		// for empty strings, return the standard Empty String instance
-		if (buffer == NULL || len <= 0)
+		if (buffer == NULL || len == 0)
 			return core->kEmptyString;
 		if ((desiredWidth == k8 || desiredWidth == kAuto) && len == 1 && *buffer < 128)
 			return core->cachedChars[*buffer];
@@ -2592,8 +2562,10 @@ decodeUtf8:
 			// determine the string width to use
 			StringWidths widths;
 			if (!_analyzeUtf16(buffer, len, widths))
+			{
 				// TODO: bad character sequence error
 				return NULL;
+			}
 
 			if (desiredWidth == kAuto)
 			{
@@ -2603,9 +2575,9 @@ decodeUtf8:
 				else
 #endif
 				if (widths.w16 != 0)
-					desiredWidth = k8;
-				else
 					desiredWidth = k16;
+				else
+					desiredWidth = k8;
 			}
 			else if (desiredWidth == k8 && (widths.w16 != 0 || widths.w32 != 0))
 				// cannot do 8-bit string with this data
@@ -2642,7 +2614,7 @@ decodeUtf8:
 				{
 					wchar ch = *buffer++;
 					// _analyzeUtf16() has already checked the validity of surrogate pairs
-					if (ch <= 0xD800 && ch <= 0xDBFF)
+					if (ch >= 0xD800 && ch <= 0xDBFF)
 						*ptrs.p32++ = utf32_t(((ch & 0x3FF) << 10) | (*buffer++ & 0x3FF)), len--;
 					else
 						*ptrs.p32++ = utf32_t(ch);
@@ -2656,10 +2628,15 @@ decodeUtf8:
 
 #ifdef FEATURE_UTF32_SUPPORT
 	// Create a string out of an UTF-32 buffer.
-	Stringp String::createUTF32(const AvmCore* core, const utf32_t* buffer, int32_t len, String::Width desiredWidth, bool staticBuf)
+	Stringp String::createUTF32(AvmCore* core, const utf32_t* buffer, int32_t len, String::Width desiredWidth, bool staticBuf)
 	{
+		AvmAssert(core->kEmptyString != NULL);
+
+		if (len < 0 && buffer != NULL)
+			len = Length(buffer);
+
 		// for empty strings, return the standard Empty String instance
-		if (buffer == NULL || len <= 0)
+		if (buffer == NULL || len == 0)
 			return core->kEmptyString;
 		if ((desiredWidth == k8 || desiredWidth == kAuto) && len == 1 && *buffer < 128)
 			return core->cachedChars[*buffer];
@@ -2678,9 +2655,9 @@ decodeUtf8:
 				if (widths.w32 != 0)
 					desiredWidth = k32;
 				else if (widths.w16 != 0)
-					desiredWidth = k8;
-				else
 					desiredWidth = k16;
+				else
+					desiredWidth = k8;
 			}
 			if (desiredWidth == k8 && (widths.w16 != 0 || widths.w32 != 0))
 				// string too wide
@@ -2711,8 +2688,8 @@ decodeUtf8:
 					utf32_t ch = *buffer++;
 					if (ch > 0xFFFF)
 					{
-						*ptrs.p16++ = wchar (0xD800 + ((ch >> 10) & 0x3FF));
-						*ptrs.p16++ = wchar (0xDC00 + (ch & 0x3FF));
+						*ptrs.p16++ = wchar(0xD800 + ((ch >> 10) & 0x3FF));
+						*ptrs.p16++ = wchar(0xDC00 + (ch & 0x3FF));
 					}
 					else
 						*ptrs.p16++ = wchar (ch);

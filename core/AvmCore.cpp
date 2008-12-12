@@ -206,53 +206,52 @@ namespace avmplus
 
 		console.setCore(this);
 		
-        kEmptyString = constantString("");
-		kconstructor = constantString("constructor");
-        kundefined = constantString("undefined");
-        knull = constantString("null");
-        ktrue = constantString("true");
-        kfalse = constantString("false");
-		ktoString = constantString("toString");
-		ktoLocaleString = constantString("toLocaleString");
-		kvalueOf = constantString("valueOf");
-		klength = constantString("length");
+        kEmptyString = internConstantStringLatin1("");
+		kconstructor = internConstantStringLatin1("constructor");
+        kundefined = internConstantStringLatin1("undefined");
+        knull = internConstantStringLatin1("null");
+        ktrue = internConstantStringLatin1("true");
+        kfalse = internConstantStringLatin1("false");
+		ktoString = internConstantStringLatin1("toString");
+		ktoLocaleString = internConstantStringLatin1("toLocaleString");
+		kvalueOf = internConstantStringLatin1("valueOf");
+		klength = internConstantStringLatin1("length");
 
-        kobject = constantString("object");
-        kboolean = constantString("boolean");
-        knumber = constantString("number");
-        kstring = constantString("string");
-        kxml = constantString("xml");
-		kfunction = constantString("function");
-		kglobal = constantString("global");
-		kcallee = constantString("callee");
+        kobject = internConstantStringLatin1("object");
+        kboolean = internConstantStringLatin1("boolean");
+        knumber = internConstantStringLatin1("number");
+        kstring = internConstantStringLatin1("string");
+        kxml = internConstantStringLatin1("xml");
+		kfunction = internConstantStringLatin1("function");
+		kglobal = internConstantStringLatin1("global");
+		kcallee = internConstantStringLatin1("callee");
 
-		kuri = constantString("uri");
-		kprefix = constantString("prefix");
+		kuri = internConstantStringLatin1("uri");
+		kprefix = internConstantStringLatin1("prefix");
 		kNaN = doubleToAtom(MathUtils::nan());
-		kNeedsDxns = constantString("NeedsDxns");
-		kAsterisk = constantString("*");
-		kVersion = constantString("Version");
-		kVector = constantString("Vector.<");
+		kNeedsDxns = internConstantStringLatin1("NeedsDxns");
+		kAsterisk = internConstantStringLatin1("*");
+		kVersion = internConstantStringLatin1("Version");
+		kVector = internConstantStringLatin1("Vector.<");
 
 #ifdef AVMPLUS_VERBOSE
-		knewline = newString("\n");
-		krightbracket = newString("]");
-		kleftbracket = newString("[");
-		kcolon = newString(":");
-		ktabat = newString("\tat ");
-		kparens = newString("()");
+		knewline = newConstantStringLatin1("\n");
+		krightbracket = newConstantStringLatin1("]");
+		kleftbracket = newConstantStringLatin1("[");
+		kcolon = newConstantStringLatin1(":");
+		ktabat = newConstantStringLatin1("\tat ");
+		kparens = newConstantStringLatin1("()");
 #endif
 #if defined AVMPLUS_VERBOSE || defined DEBUGGER
-		kanonymousFunc = newString("<anonymous>");
+		kanonymousFunc = newConstantStringLatin1("<anonymous>");
 #endif
 		for (int i = 0; i < 128; i++)
 		{
 			char singleChar = (char)i;
-			// call newString() with an explicit length of 1; required
+			// call String::createLatin1() with an explicit length of 1; required
 			// when singleChar==0, because in that case we need a string
 			// which is a single character with value 0
-			// Performance: use String::create - this is not UTF-8
-			cachedChars[i] = internString(String::create(this, &singleChar, 1, String::k8));
+			cachedChars[i] = internString(String::createLatin1(this, &singleChar, 1));
 		}
 
 		booleanStrings[0] = kfalse;
@@ -952,7 +951,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	String* AvmCore::findErrorMessage(int errorID,
 									  int* mapTable,  /* 2 ints per entry i, i+1 */
-									  const char** errorTable,
+									  const utf8_t** errorTable,
 									  int numErrors)
 	{
 		// Above that, we must binary search.
@@ -976,7 +975,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int id = mapTable[2*lo];
 
 		if (id == errorID) {
-			return newString(errorTable[index]);
+			return newStringUTF8(errorTable[index]);
 		} else {
 			return NULL;
 		}
@@ -985,17 +984,18 @@ return the result of the comparison ToPrimitive(x) == y.
 	
 	String* AvmCore::getErrorMessage(int errorID)
 	{
-		Stringp buffer = newString("Error #");
+		Stringp buffer = newConstantStringLatin1("Error #");
 		buffer = concatStrings(buffer, internInt(errorID));
 
         #ifdef DEBUGGER
+		// errorConstants is declared char* but is encoded as UTF8
 		Stringp out = findErrorMessage(errorID,
 									   errorMappingTable,
-									   errorConstants[determineLanguage()],
+									   (const utf8_t**)errorConstants[determineLanguage()],
 									   kNumErrorConstants);
 		if (out) 
 		{
-			buffer = concatStrings(buffer, newString(": "));
+			buffer = concatStrings(buffer, newConstantStringLatin1(": "));
 			buffer = concatStrings(buffer, out);
 		}
 		else
@@ -1027,7 +1027,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		buffer[255] = '\0';
 		int len;
 		if (MathUtils::convertIntegerToString(d, buffer, len)) 
-			s = String::create(this, buffer, len);
+			s = newStringUTF16(buffer, len);
 		else
 			s = kEmptyString;
 		return s;
@@ -1042,7 +1042,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		String* out = NULL;
 	#ifdef DEBUGGER
 		if (s)
-			out = this->newString(s);
+			out = this->newStringUTF8((const utf8_t*)s);
 		else
 			out = kEmptyString;
 	#else
@@ -1057,7 +1057,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		String* out = NULL;
 	#ifdef DEBUGGER
 		if (s)
-			out = this->newString(s);
+			out = this->newStringUTF16(s);
 		else
 			out = kEmptyString;
 	#else
@@ -1132,14 +1132,14 @@ return the result of the comparison ToPrimitive(x) == y.
 		#else
 		if (!t)
 		{
-			return newString("*");
+			return newConstantStringLatin1("*");
 		}
 
 		String* s = NULL;
 		if (t->base == traits.class_itraits)
 		{
 			t = t->itraits;
-			s = newString("class ");
+			s = newConstantStringLatin1("class ");
 		}
 		else
 		{
@@ -1147,12 +1147,12 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 
 		if (t->ns != NULL && t->ns != publicNamespace)
-			s = concatStrings(s, concatStrings(toErrorString(t->ns), newString("."))); 
+			s = concatStrings(s, concatStrings(toErrorString(t->ns), newConstantStringLatin1("."))); 
 
 		if (t->name)
 			s = concatStrings(s, t->name);
 		else
-			s = concatStrings(s, newString("(null)"));
+			s = concatStrings(s, newConstantStringLatin1("(null)"));
 		return s;
 		#endif /* DEBUGGER */
 	}
@@ -1173,7 +1173,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				StringBuffer buffer(this);
 				buffer.formatP( format, arg1, arg2, arg3);
-				out = newString(buffer.c_str());
+				out = newStringUTF8(buffer.c_str());
 			}
 			#else	
 			/** 
@@ -2385,7 +2385,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			i++;
 		}
 
-		return newString (output.c_str());
+		return newStringUTF8(output.c_str());
 	}
 
 	Stringp AvmCore::EscapeAttributeValue(Atom v)
@@ -2421,7 +2421,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			}
 		}
 
-		return newString (output.c_str());
+		return newStringUTF8(output.c_str());
 	}
 
 	XMLObject *AvmCore::atomToXMLObject (Atom atm) 
@@ -2689,10 +2689,11 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
         return i;
 	}
-
-	Stringp AvmCore::constantString(const char *s)
+	
+	// note, this assumes Latin-1, not UTF8.
+	Stringp AvmCore::internConstantStringLatin1(const char* s)
 	{
-		return internString(String::create(this, s, String::Length (s), String::k8, true));
+		return internString(newConstantStringLatin1(s));
 	}
 
     /**
@@ -2753,7 +2754,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		wchar buffer[65];
 		int len;
 		MathUtils::convertIntegerToString(value, buffer, len);
-		Stringp s = internAlloc(buffer, len);
+		Stringp s = internStringUTF16(buffer, len);
 
 #ifdef AVMPLUS_INTERNINT_CACHE
 		if (value >= 0) {
@@ -2826,7 +2827,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	    wchar buffer[312];
 	    int len;
 	    MathUtils::convertDoubleToString(d, buffer, len);
-	    return internAlloc(buffer, len);
+	    return internStringUTF16(buffer, len);
     }
 
 #ifdef DEBUGGER
@@ -2854,9 +2855,9 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif
 
-	Stringp AvmCore::internAllocUtf8(const byte *cs, int len8, bool constant)
+	Stringp AvmCore::internStringUTF8(const utf8_t* cs, int len8, bool constant)
 	{
-		Stringp s = String::createUTF8(this, (const utf8_t*) cs, len8, String::kAuto, constant);
+		Stringp s = String::createUTF8(this, cs, len8, String::kAuto, constant);
 		int i = findString(s);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
@@ -2876,7 +2877,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			return other;
 	}
 
-	Stringp AvmCore::internAlloc(const wchar *s, int len)
+	Stringp AvmCore::internStringUTF16(const wchar* s, int len)
 	{
         int i = findString(s, len);
 		Stringp other;
@@ -2892,7 +2893,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			DRC(Stringp) *oldStrings = strings;
 #endif
 
-			other = String::create(this, s,len);
+			other = newStringUTF16(s, len);
 			
 #ifdef DEBUGGER
 			// re-find if String ctor caused rehash
@@ -3304,7 +3305,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				return atomToScriptObject(atom)->format(this);
 			case kStringType:
 				{
-					Stringp quotes = newString("\"");
+					Stringp quotes = newConstantStringLatin1("\"");
 					return concatStrings(quotes,
 						concatStrings(atomToString((atom&~7)==0 ? kEmptyString->atom() : atom),
 													quotes));
@@ -3335,33 +3336,73 @@ return the result of the comparison ToPrimitive(x) == y.
 		wchar buffer[256];
 		int len;
 		MathUtils::convertIntegerToString((int)atom, buffer, len, 16);
-		return String::create(this, buffer, len);
+		return newStringUTF16(buffer, len);
 	}
 #endif
 
-	Stringp AvmCore::newString(const char *s) const
+	Stringp AvmCore::newConstantStringLatin1(const char* s)
 	{
-		int len = String::Length(s);
-		return String::createUTF8(this, (const utf8_t*) s, len);
+		return String::createLatin1(this, s, String::Length(s), String::k8, true);
 	}
 
-	Stringp AvmCore::newString(const char *s, int len) const
+	Stringp AvmCore::newStringLatin1(const char* s, int len)
 	{
-		return String::createUTF8(this, (const utf8_t*) s, len);
+		return String::createLatin1(this, s, len);
 	}
 
-	Stringp AvmCore::newString(const wchar *s) const
+	Stringp AvmCore::newStringUTF8(const utf8_t* s, int len)
 	{
-		int len = String::Length(s);
-		return String::create(this, s, len);
+		return String::createUTF8(this, s, len);
 	}
 
-	Stringp AvmCore::newString(const wchar *s, int len) const
+	Stringp AvmCore::newStringUTF16(const wchar* s, int len)
 	{
-		return String::create(this, s, len);
+		return String::createUTF16(this, s, len);
 	}
 
-	Stringp AvmCore::concatStrings(Stringp s1, Stringp s2) const
+	inline uint16_t swap16(const uint16_t c)
+	{
+		const uint16_t hi = (c >> 8);
+		const uint16_t lo = (c & 0xff);
+		return (lo << 8) | hi;
+	}
+
+	Stringp AvmCore::newStringEndianUTF16(bool littleEndian, const wchar* s, int len)
+	{
+	#ifdef AVMPLUS_LITTLE_ENDIAN
+		const bool nativeIsLE = true;
+	#else
+		const bool nativeIsLE = false;
+	#endif
+		if (littleEndian == nativeIsLE)
+		{
+			return newStringUTF16(s, len);
+		}
+		else
+		{
+			if (len < 0 && s != NULL)
+				len = String::Length(s);
+
+			if (s == NULL || len == 0)
+				return this->kEmptyString;
+
+			union {
+				const wchar* src16;
+				const uint8_t* src8;
+			};
+			src16 = s;
+
+			AvmCore::AllocaAutoPtr _swapped;
+			wchar* swapped = (wchar*)VMPI_alloca(this, _swapped, sizeof(wchar)*(len));
+			for (int32 i = 0; i < len; i++)
+			{
+				swapped[i] = swap16(s[i]);
+			}
+			return newStringUTF16(swapped, len);
+		}
+	}
+
+	Stringp AvmCore::concatStrings(Stringp s1, Stringp s2)
 	{
 		if (!s1) s1 = knull;
 		if (!s2) s2 = knull;
@@ -3373,7 +3414,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		wchar buffer[65];
 		int len;
 		MathUtils::convertIntegerToString(value, buffer, len);
-		return String::create(this, buffer, len);
+		return newStringUTF16(buffer, len);
 	}
 
 	Stringp AvmCore::uintToString(uint32 value)
@@ -3384,7 +3425,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			MathUtils::convertIntegerToString(value, buffer, len);
 		else
 			MathUtils::convertDoubleToString(value, buffer, len);
-		return String::create(this, buffer, len);
+		return newStringUTF16(buffer, len);
 	}
 
 	Stringp AvmCore::doubleToString(double d)
@@ -3393,7 +3434,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		wchar buffer[312];
 		int len;
 		MathUtils::convertDoubleToString(d, buffer, len, MathUtils::DTOSTR_NORMAL,15);
-		return String::create(this, buffer, len);
+		return newStringUTF16(buffer, len);
 	}
 
 	#ifdef DEBUGGER
@@ -3421,7 +3462,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		StringBuffer buffer(this);		
 		buffer << "Stack Trace:\n" << newStackTrace()->format(this) << '\n';
-		AvmDebugMsg(false, buffer.c_str());
+		AvmDebugMsg(false, (const char*)buffer.c_str());
 	}
 	#endif
 	#endif /* DEBUGGER */

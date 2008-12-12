@@ -333,7 +333,7 @@ namespace avmplus
 
 		int32_t bgn = m_str->indexOf("&", 1, start, last);
 		int32_t end = start;
-		Stringp dest = NULL;
+		Stringp dest = core->kEmptyString;
 		while (bgn >= start && bgn < last)
 		{
 			int32_t ampEnd = m_str->indexOf(";", 1, ++bgn, last);
@@ -376,10 +376,9 @@ namespace avmplus
 						if (ok)
 						{
 							wchar c = (wchar) value;
-							if (NULL == dest)
-								dest = String::create(core, &c, 1);
-							else
-								dest = dest->append(&c, 1);
+							// note: this code is allowed to construct a string
+							// containing illegal UTF16 sequences!
+							dest = dest->append16(&c, 1);
 							bgn = ++end;
 						}
 					}
@@ -390,11 +389,11 @@ namespace avmplus
 					Atom result = core->xmlEntities->get(entityAtom);
 					if (result != undefinedAtom) 
 					{
+						AvmAssert(atomKind(result) == kIntegerType);
 						wchar c = (wchar) (result>>3);
-						if (NULL == dest)
-							dest = String::create(core, &c, 1);
-						else
-							dest = dest->append(&c, 1);
+						// note: this code is allowed to construct a string
+						// containing illegal UTF16 sequences!
+						dest = dest->append16(&c, 1);
 						bgn = ++end;
 					}
 					else
@@ -427,7 +426,7 @@ namespace avmplus
 		
 			while (*entities)
 			{
-				core->xmlEntities->add(core->constant(entities+1),
+				core->xmlEntities->add(core->internConstantStringLatin1(entities+1)->atom(),
 							   (void*)core->intToAtom(*entities));
 				while (*entities++) {
 					// do nothing
