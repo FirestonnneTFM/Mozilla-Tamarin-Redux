@@ -256,7 +256,7 @@ namespace avmplus
 		}
 		else
 		{
-			Stringp prefix = core->newString("CC{}@");
+			Stringp prefix = core->newConstantStringLatin1("CC{}@");
 			return core->concatStrings(prefix, core->formatAtomPtr(atom()));
 		}
 	}

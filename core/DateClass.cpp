@@ -100,7 +100,7 @@ namespace avmplus
 		wchar buffer[256];
 		int len;
 		date.toString(buffer, Date::kToString, len);
-		return String::create(core(), buffer, len)->atom();
+		return core()->newStringUTF16(buffer, len)->atom();
     }
 	
 	// static function UTC(year, month, date, hours, minutes, seconds, ms, ... rest)

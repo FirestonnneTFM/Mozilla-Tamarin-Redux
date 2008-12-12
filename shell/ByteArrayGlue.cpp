@@ -392,7 +392,7 @@ namespace avmshell
 
 	String* ByteArrayObject::_toString()
 	{
-		unsigned char *c = (unsigned char*)m_byteArray.GetBuffer();
+		uint8_t *c = (uint8_t*)m_byteArray.GetBuffer();
 		uint32 len = m_byteArray.GetLength();
 
 		if (len >= 3)
@@ -400,40 +400,23 @@ namespace avmshell
 			// UTF8 BOM
 			if ((c[0] == 0xef) && (c[1] == 0xbb) && (c[2] == 0xbf))
 			{
-				return core()->newString(((char *)c) + 3, len - 3);
+				return core()->newStringUTF8(c + 3, len - 3);
 			}
 			else if ((c[0] == 0xfe) && (c[1] == 0xff))
 			{
 				//UTF-16 big endian
 				c += 2;
 				len = (len - 2) >> 1;
-				Stringp out = String::create(core(), (const wchar*) NULL, len, String::k16);
-				wchar *buffer = (wchar*) out->getData();
-				for (uint32 i = 0; i < len; i++)
-				{
-					*buffer++ = (c[0] << 8) + c[1];
-					c += 2;
-				}
-
-				return out;
+				return core()->newStringEndianUTF16(/*littleEndian*/false, (const wchar*)c, len);
 			}
 			else if ((c[0] == 0xff) && (c[1] == 0xfe))
 			{
 				//UTF-16 little endian
-				c += 2;
-				len = (len - 2) >> 1;
-				Stringp out = String::create(core(), (const wchar*) NULL, len, String::k16);
-				wchar *buffer = (wchar*) out->getData();
-				for (uint32 i = 0; i < len; i++)
-				{
-					*buffer++ = (c[1] << 8) + c[0];
-					c += 2;
-				}
-				return out;
+				return core()->newStringEndianUTF16(/*littleEndian*/true, (const wchar*)c, len);
 			}
 		}
 
-		return core()->newString(((char *)c), len);
+		return core()->newStringUTF8(c, len);
 	}
 	
 	int ByteArrayObject::readByte()
@@ -719,18 +702,18 @@ namespace avmshell
 
 	Stringp ByteArrayObject::get_endian()
 	{
-		return (m_byteArray.GetEndian() == kBigEndian) ? core()->constantString("bigEndian") : core()->constantString("littleEndian");
+		return (m_byteArray.GetEndian() == kBigEndian) ? core()->internConstantStringLatin1("bigEndian") : core()->internConstantStringLatin1("littleEndian");
 	}
 
 	void ByteArrayObject::set_endian(Stringp type)
 	{
 		AvmCore* core = this->core();
 		type = core->internString(type);
-		if (type == core->constantString("bigEndian"))
+		if (type == core->internConstantStringLatin1("bigEndian"))
 		{
 			m_byteArray.SetEndian(kBigEndian);
 		}
-		else if (type == core->constantString("littleEndian"))
+		else if (type == core->internConstantStringLatin1("littleEndian"))
 		{
 			m_byteArray.SetEndian(kLittleEndian);
 		}
@@ -776,10 +759,10 @@ namespace avmplus {
 		// have a traits with a builtin pool
 		if(cur)
 		{
-			Stringp uri = core->constantString("flash.utils");
+			Stringp uri = core->internConstantStringLatin1("flash.utils");
 			Namespace* ns = core->internNamespace(core->newNamespace(uri));
 			// try to get traits from flash.utils.ByteArray
-			Traits *baTraits = cur->pool->getTraits(core->constantString("ByteArray"), ns);
+			Traits *baTraits = cur->pool->getTraits(core->internConstantStringLatin1("ByteArray"), ns);
 			// and see if the original traits contains it!
 			return t->containsInterface(baTraits) != 0;
 		}

@@ -409,7 +409,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 	Stringp ArrayObject::format(AvmCore* core) const
 	{
-		Stringp prefix = core->newString("[]@");
+		Stringp prefix = core->newConstantStringLatin1("[]@");
 		return core->concatStrings(prefix, core->formatAtomPtr(atom()));
 	}
 #endif

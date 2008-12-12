@@ -53,8 +53,8 @@ namespace avmplus
 		ScriptObject* object_prototype = toplevel()->objectClass->prototype;
 		prototype = new (core->GetGC(), ivtable()->getExtraSize()) RegExpObject(this,object_prototype);
 
-		kindex = core->constant("index");
-		kinput = core->constant("input");		
+		kindex = core->internConstantStringLatin1("index")->atom();
+		kinput = core->internConstantStringLatin1("input")->atom();		
 	}
 	
 	// this = argv[0] (ignored)
@@ -100,7 +100,7 @@ namespace avmplus
 				pattern = core->string(argv[1]);
 			} else {
 				// cn:  disable this, breaking ecma3 tests.   was: todo look into this. it's what SpiderMonkey does.
-				pattern = core->kEmptyString; //core->newString("(?:)");
+				pattern = core->kEmptyString; //core->newConstantStringLatin1("(?:)");
 			}
 		}
 

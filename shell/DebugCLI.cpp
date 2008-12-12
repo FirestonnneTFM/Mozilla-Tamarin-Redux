@@ -417,7 +417,7 @@ namespace avmshell
 
 		if (colon) {
 			*colon = 0;
-			filename = core->constantString(location);
+			filename = core->internConstantStringLatin1(location);
 			location = colon+1;
 		}
 
@@ -531,7 +531,7 @@ namespace avmshell
 	Atom DebugCLI::ease2Atom(const char* to, Atom baseline)
 	{
 		// first make a string out of the value
-		Atom a = core->newString(to)->atom();
+		Atom a = core->newStringLatin1(to)->atom();
 
 		// using the type of baseline try to convert to into an appropriate Atom
 		if (core->isNumber(baseline))
@@ -619,7 +619,7 @@ namespace avmshell
 		// todo deal with exceptions
 		Multiname mname(
 			core->publicNamespace,
-			core->constantString(name)
+			core->internConstantStringLatin1(name)
 		);
 
 		#if 0

@@ -769,10 +769,10 @@ namespace avmplus
 			return NULL;
 		}
 
-		wchar tmp[2048];
-		const int size_buffer = sizeof(tmp)/sizeof(wchar);
-		wchar *src = tmp + size_buffer - 1;
-		wchar *srcEnd = src;
+		char tmp[2048];
+		const int size_buffer = sizeof(tmp)/sizeof(char);
+		char *src = tmp + size_buffer - 1;
+		char *srcEnd = src;
 
 		*src-- = '\0';
 
@@ -796,7 +796,7 @@ namespace avmplus
 				uVal = MathUtils::floor(uVal / radix);
 				j -= (uVal * radix);
 
-				*src-- = (wchar)((j < 10) ? ((int)j + '0') : ((int)j + ('a' - 10)));
+				*src-- = (char)((j < 10) ? ((int)j + '0') : ((int)j + ('a' - 10)));
 
 				AvmAssert(src > tmp);
 			}
@@ -806,7 +806,7 @@ namespace avmplus
 		}
 
 		int len = (int)(srcEnd-src-1);
-		return String::create(core, src+1, len);
+		return core->newStringLatin1(src+1, len);
 	}
 	
 	void MathUtils::convertDoubleToString(double value,

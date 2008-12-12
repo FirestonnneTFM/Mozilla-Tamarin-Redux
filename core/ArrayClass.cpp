@@ -63,7 +63,7 @@ namespace avmplus
 	
 	ArrayClass::ArrayClass(VTable* cvtable)
 	: ClassClosure(cvtable), 
-	  kComma(core()->constantString(","))
+	  kComma(core()->internConstantStringLatin1(","))
 	{
 		AvmCore* core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -87,7 +87,7 @@ namespace avmplus
 		// through actionscript
 
 		// create an atom
-		Stringp s = core->newString("foo");
+		Stringp s = core->newConstantStringLatin1("foo");
 		Atom a = s->atom();
 		AvmAssert(s->RefCount()==0);
 		AtomArray *ar = new (gc()) AtomArray();

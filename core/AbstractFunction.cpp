@@ -89,7 +89,7 @@ namespace avmplus
 	#ifdef AVMPLUS_VERBOSE
 	Stringp AbstractFunction::format(AvmCore* core) const
 	{
-		return core->concatStrings(name ? (Stringp)name : core->newString("?"), core->kparens);
+		return core->concatStrings(name ? (Stringp)name : core->newConstantStringLatin1("?"), core->kparens);
 	}
 
 	Stringp AbstractFunction::getStackTraceLine(Stringp filename) 

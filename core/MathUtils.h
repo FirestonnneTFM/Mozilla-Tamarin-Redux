@@ -136,6 +136,9 @@ namespace avmplus
 			DTOSTR_PRECISION,
 			DTOSTR_EXPONENTIAL
 		};
+		// @todo -- this should probably produce char rather than wchar,
+		// as the string is always Latin1-safe and doing so would enable
+		// more-efficient String constructors with the result
 		static void convertDoubleToString(double value,
 										  wchar *buffer,
 										  int &len,

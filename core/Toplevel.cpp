@@ -1273,7 +1273,7 @@ namespace avmplus
 			}
 		}
 
-		return core->newString(buffer.c_str());
+		return core->newStringUTF8(buffer.c_str());
     }
 
 	Stringp Toplevel::escapeBytes(Stringp input)
@@ -1294,7 +1294,7 @@ namespace avmplus
 				buffer.writeHexByte((uint8_t)ch);
 			}
 		}
-		return core->newString(buffer.c_str());
+		return core->newStringUTF8(buffer.c_str());
     }
 	
 	// Helper function.
@@ -1318,7 +1318,7 @@ namespace avmplus
 
 		if (!in) in = core->knull;
 
-		Stringp out = NULL;
+		Stringp out = core->kEmptyString;
 		int32_t pos = 0;
 		StringIndexer str(in);
 		while (pos < in->length())
@@ -1350,14 +1350,10 @@ namespace avmplus
 				}
 			}
 			wchar ch16 = (wchar) ch;
-			if (NULL == out)
-				out = String::create(core, &ch16, 1);
-			else
-				out = out->append(&ch16, 1);
+			// note: this code is allowed to construct a string
+			// containing illegal UTF16 sequences!
+			out = out->append16(&ch16, 1);
 		}
-		if (NULL == out)
-			out = core->kEmptyString;
-		
 		return out;
     }
 	
@@ -1404,7 +1400,7 @@ namespace avmplus
 				}
 			}
 		}
-		return core()->newString(out.c_str());
+		return core()->newStringUTF8(out.c_str());
 	}
 	
 	Stringp Toplevel::decode(Stringp in, bool decodeURIComponentFlag)
@@ -1514,7 +1510,7 @@ namespace avmplus
 			}
 		}
 
-		return String::create(core(), out, outLen);
+		return core()->newStringUTF16(out, outLen);
 	}
 
 	/*
@@ -1602,7 +1598,7 @@ namespace avmplus
 		// delegated to this function because in-lining it in the caller prevents
 		// taill calling.  See comments in op_call, above.
 		
-		Multiname name(core()->publicNamespace, core()->constantString(namestr));
+		Multiname name(core()->publicNamespace, core()->internString(core()->newStringLatin1(namestr)));
 		throwTypeError(id, core()->toErrorString(&name));
 	}
 	

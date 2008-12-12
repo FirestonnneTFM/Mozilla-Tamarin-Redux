@@ -517,7 +517,7 @@ namespace avmplus
 
 				#ifdef AVMPLUS_VERBOSE
 				Stringp s1 = traits->format(core);
-				Stringp s2 = core->newString(kind == TRAIT_Method ? "/" : (kind == TRAIT_Getter ? "/get " : "/set "));
+				Stringp s2 = core->newConstantStringLatin1(kind == TRAIT_Method ? "/" : (kind == TRAIT_Getter ? "/get " : "/set "));
 				Stringp s3 = Multiname::format(core,ns,name);
 				Stringp s4 = core->concatStrings(s2,s3);
 				f->name = core->concatStrings(s1, s4);
@@ -644,7 +644,7 @@ namespace avmplus
 						methodInfo->name = core->kanonymousFunc;	
 					}
 				} else
-					methodInfo->name = core->concatStrings(core->newString("MethodInfo-"), core->intToString(i));
+					methodInfo->name = core->concatStrings(core->newConstantStringLatin1("MethodInfo-"), core->intToString(i));
 				#endif
 				info = methodInfo;
 			}
@@ -720,7 +720,7 @@ namespace avmplus
 			metaNames = (Stringp*) core->GetGC()->Calloc(metadataCount, sizeof(Stringp), MMgc::GC::kContainsPointers);
 
 #ifdef AVMPLUS_VERBOSE
-			kVerboseVerify = core->constantString("VerboseVerify");
+			kVerboseVerify = core->internConstantStringLatin1("VerboseVerify");
 #endif
 
 			for (uint32_t i=0; i < metadataCount; i++)
@@ -1080,7 +1080,7 @@ namespace avmplus
 			// don't need to create an atom for this now, because
 			// each caller will take care of it.
 			// These strings are assumed to be constant
-			Stringp s = core->internAllocUtf8(pos, len, true);
+			Stringp s = core->internStringUTF8(pos, len, true);
 #ifdef MMGC_DRC
 			// MIR skips WB on string constants so make them sticky
 			s->Stick();
@@ -1443,7 +1443,7 @@ namespace avmplus
 			traits->init = script;
 
 			#ifdef AVMPLUS_VERBOSE
-			script->name = core->concatStrings(traits->format(core), core->newString("$init"));
+			script->name = core->concatStrings(traits->format(core), core->newConstantStringLatin1("$init"));
 			#endif
 
             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -1682,7 +1682,7 @@ namespace avmplus
 			)
 
 			#if defined AVMPLUS_VERBOSE || defined DEBUGGER
-			Stringp cinitName = core->concatStrings(name, core->newString("$cinit"));
+			Stringp cinitName = core->concatStrings(name, core->newConstantStringLatin1("$cinit"));
 			cinit->name = Multiname::format(core,ns,cinitName);
 			#endif
 
@@ -1690,7 +1690,7 @@ namespace avmplus
 			Traits* ctraits = parseTraits(nativeEntry && nativeEntry->sizeofClass ? nativeEntry->sizeofClass : sizeof(ClassClosure),
 											CLASS_TYPE, 
 											ns, 
-											core->internString(core->concatStrings(name, core->newString("$"))), 
+											core->internString(core->concatStrings(name, core->newConstantStringLatin1("$"))), 
 											NULL, 
 											class_pos,
 											TRAITSTYPE_CLASS_FROM_ABC, 

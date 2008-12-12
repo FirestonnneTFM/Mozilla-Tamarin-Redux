@@ -415,8 +415,8 @@ range_error:
 				r = core->traits.vectordouble_itraits;
 			else
 			{
-				Stringp fullname = core->internString( core->concatStrings(core->newString("Vector.<"), 
-					core->concatStrings(param_traits->formatClassName(), core->newString(">")))->atom());
+				Stringp fullname = core->internString( core->concatStrings(core->newConstantStringLatin1("Vector.<"), 
+					core->concatStrings(param_traits->formatClassName(), core->newConstantStringLatin1(">")))->atom());
 
 				Multiname newname;
 				newname.setName(fullname);

@@ -133,7 +133,7 @@ namespace avmplus
 
 			m_node->_addInScopeNamespace (core, ns);
 
-			Stringp name = core->internString(core->newString("parent"));
+			Stringp name = core->internConstantStringLatin1("parent");
 
 			m_node->setQName (core, name, ns);
 
@@ -609,7 +609,7 @@ namespace avmplus
 						output << " " << core->string (xl->_getAt (i)->atom());
 					}
 
-					sc = core->newString (output.c_str());
+					sc = core->newStringUTF8(output.c_str());
 				}
 			}
 			else // step 7c
@@ -1116,7 +1116,7 @@ namespace avmplus
 				{
 					s[2] = x3;
 					bool bMatch = false;
-					Atom pre = core->internAlloc(s, 3)->atom();
+					Atom pre = core->internStringUTF16(s, 3)->atom();
 					for (uint32 i = 0; i < namespaces->getLength(); i++)
 					{
 						Namespace *ns = AvmCore::atomToNamespace (namespaces->getAt(i));
@@ -2188,7 +2188,7 @@ namespace avmplus
 	bool XMLObject::XML_AS3_propertyIsEnumerable(Atom P)	// NOT virtual, not an override
 	{
 		AvmCore *core = this->core();
-		if (core->intern(P) == core->internString(core->newString("0")))
+		if (core->intern(P) == core->internConstantStringLatin1("0"))
 			return true;
 
 		return false;
@@ -2507,7 +2507,7 @@ namespace avmplus
 			AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
 			StringBuffer s(core);
 			__toXMLString(s, AncestorNamespaces, 0);
-			return core->newString(s.c_str())->atom();
+			return core->newStringUTF8(s.c_str())->atom();
 		}
 	}
 
@@ -2521,7 +2521,7 @@ namespace avmplus
 		AtomArray *AncestorNamespaces = new (MMgc::GC::GetGC(this)) AtomArray();
 		StringBuffer s(core());
 		__toXMLString(s, AncestorNamespaces, 0);
-		return core()->newString(s.c_str());
+		return core()->newStringUTF8(s.c_str());
 	}
 
 #ifdef AVMPLUS_VERBOSE
@@ -2536,13 +2536,12 @@ namespace avmplus
 		AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
 		StringBuffer openTag(core);
 		__toXMLString(openTag, AncestorNamespaces, 0, false);
-		Stringp openingTag = core->newString (openTag.c_str());
-		Stringp space = core->newString(" ");
+		Stringp openingTag = core->newStringUTF8(openTag.c_str());
 
 		Stringp result = ScriptObject::format(core);
-		result = core->concatStrings(result, space);
+		result = result->appendLatin1(" ");
 		result = core->concatStrings(result, nodeKind());
-		result = core->concatStrings(result, space);
+		result = result->appendLatin1(" ");
 		result = core->concatStrings(result, openingTag);
 		return result;
 	}

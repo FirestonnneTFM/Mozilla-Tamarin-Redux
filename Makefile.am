@@ -179,7 +179,6 @@ avmplus_CXXFLAGS = \
 
 avmplus_SOURCES = \
 	shell/SystemClass.cpp \
-	shell/StringBuilderClass.cpp \
 	shell/FileClass.cpp \
 	shell/FileInputStream.cpp \
 	shell/DomainClass.cpp \

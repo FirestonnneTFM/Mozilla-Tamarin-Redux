@@ -466,7 +466,7 @@ namespace avmplus
 		if(!sampling)
 			return;
 
-		Stringp s = core->constantString(name);
+		Stringp s = core->internConstantStringLatin1(name);
 		// save it in m_fakeMethodNames just to be sure it isn't cleared from the intern-name list.
 		if (m_fakeMethodNames.indexOf(s) < 0)
 			m_fakeMethodNames.add(s);

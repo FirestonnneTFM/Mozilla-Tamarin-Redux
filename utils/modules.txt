@@ -301,8 +301,6 @@ builtin avmplus::parseDateKeyword
 shell avmshell.obj
 shell DomainClass.obj
 shell DomainObject.obj
-shell StringBuilderClass.obj
-shell StringBuilderObject.obj
 shell ByteArrayGlue.obj
 shell DataIO.obj
 shell FileClass.obj

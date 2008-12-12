@@ -69,7 +69,6 @@ all: ${MMGC_OUTPUT} ${SHELL_OUTPUT} ${AVMPLUS_OUTPUT}
 #****************************************************************************
 
 SHELL_SRCS := ../../shell/SystemClass.cpp \
-	../../shell/StringBuilderClass.cpp \
 	../../shell/FileInputStream.cpp \
 	../../shell/FileClass.cpp \
 	../../shell/DomainClass.cpp \

@@ -78,7 +78,7 @@ namespace avmplus
 		// getStackTrace returns the concatenation of the
 		// error message and the stack trace
 		Stringp buffer = core->string(atom());
-		buffer = core->concatStrings(buffer, core->newString("\n"));
+		buffer = core->concatStrings(buffer, core->newConstantStringLatin1("\n"));
 
 		if (stackTrace) {
 			buffer = core->concatStrings(buffer, stackTrace->format(core));
