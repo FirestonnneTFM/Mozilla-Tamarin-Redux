@@ -523,15 +523,15 @@ if globs['config'] == '':
     # {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
     # ================================================
     
-    os = platform.system()
+    _os = platform.system()
     ostype = ''
-    if re.search('(CYGWIN_NT|Windows)', os):
+    if re.search('(CYGWIN_NT|Windows)', _os):
         ostype='win'
-    if re.search('(Darwin)', os):
+    if re.search('(Darwin)', _os):
         ostype='mac'
-    if re.search('(Linux)', os):
+    if re.search('(Linux)', _os):
         ostype='lnx'
-    if re.search('(SunOS)', os):
+    if re.search('(SunOS)', _os):
         ostype='sol'
     
     if ostype == '':
