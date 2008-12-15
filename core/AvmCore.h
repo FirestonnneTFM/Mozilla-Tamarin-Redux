@@ -1072,7 +1072,7 @@ const int kBufferPadding = 16;
 		 */
 		String* findErrorMessage(int errorID,
 								 int* mapTable,
-								 const utf8_t** errorTable,
+								 const char** errorTable,
 								 int numErrors);
 
 		/**
@@ -1294,6 +1294,31 @@ const int kBufferPadding = 16;
 		int findNamespace(Namespacep ns);
 
 	public:
+
+		// String creation. If len is omitted, zero-termination is assumed.
+		Stringp newStringLatin1(const char* str, int len = -1);
+		Stringp newStringUTF8(const char* str, int len = -1);
+		Stringp newStringUTF16(const wchar* str, int len = -1);
+
+		// decodes UTF16LE or UTF16BE.
+		Stringp newStringEndianUTF16(bool littleEndian, const wchar* str, int len = -1);
+		
+		// like newStringLatin1, but the string constant is assumed to remain valid
+		// for the life of the AvmCore. Generally, should only be used for literal
+		// strings, eg newConstantStringLatin1("foo")
+		Stringp newConstantStringLatin1(const char* str);
+
+
+		// variants on the newStringXXX() calls that also intern the string.
+		Stringp internStringLatin1(const char* s, int len = -1);
+		Stringp internStringUTF8(const char* s, int len = -1, bool constant = false);
+		Stringp internStringUTF16(const wchar* s, int len = -1);
+
+		// like internStringLatin1, but the string constant is assumed to remain valid
+		// for the life of the AvmCore. Generally, should only be used for literal
+		// strings, eg internStringLatin1("foo")
+		Stringp internConstantStringLatin1(const char* s);
+
 		/**
 		 * intern the given string atom which has already been allocated
 		 * @param atom
@@ -1304,22 +1329,6 @@ const int kBufferPadding = 16;
 		Stringp internInt(int n);
 		Stringp internDouble(double d);
 		Stringp internUint32(uint32 ui);
-
-		/**
-		 * intern the given string and allocate it on the heap if necessary
-		 * @param s
-		 * @return
-		 */
-		Stringp internStringUTF16(const wchar* s, int len);
-		Stringp internStringUTF8(const utf8_t* s, int len, bool constant = false);
-
-		/**
-		Intern a string with a character constant. This constant
-		neeeds to persist for the lifetime of this AvmCore. The
-		encoding is assumed to be Latin-1, not UTF-8, for speed
-		reasons.
-		*/
-		Stringp internConstantStringLatin1(const char* s);
 
 
 #ifdef DEBUGGER
@@ -1360,16 +1369,6 @@ const int kBufferPadding = 16;
 		Namespacep newNamespace(Stringp uri, Namespace::NamespaceType type = Namespace::NS_Public);
 		Namespacep newPublicNamespace(Stringp uri) { return newNamespace(uri); }
 		NamespaceSet* newNamespaceSet(int nsCount);
-
-		// String creation
-		Stringp newStringLatin1(const char* str, int len = -1);
-		Stringp newStringUTF8(const utf8_t* str, int len = -1);
-		Stringp newStringUTF16(const wchar* str, int len = -1);
-		Stringp newStringEndianUTF16(bool littleEndian, const wchar* str, int len = -1);
-		
-		// use this when creating a string with a constant literal string of Latin1 chars, rather than newStringLatin1(),
-		// as we don't have to copy the string data
-		Stringp newConstantStringLatin1(const char* str);
 
 		Stringp uintToString(uint32 i);
 		Stringp intToString(int i);

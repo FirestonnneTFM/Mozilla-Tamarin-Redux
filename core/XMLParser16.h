@@ -56,7 +56,6 @@ namespace avmplus
 		{
 			text = NULL;
 			nodeType = kNoType;
-			endtag =
 			empty = false;
 			attributes.clear();
 		}
@@ -80,7 +79,6 @@ namespace avmplus
 		Stringp text;
 		enum TagType nodeType;
 		bool empty;
-		bool endtag;
 		List<Stringp> attributes;
 
 		/**

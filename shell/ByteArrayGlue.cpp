@@ -400,7 +400,7 @@ namespace avmshell
 			// UTF8 BOM
 			if ((c[0] == 0xef) && (c[1] == 0xbb) && (c[2] == 0xbf))
 			{
-				return core()->newStringUTF8(c + 3, len - 3);
+				return core()->newStringUTF8((const char*)c + 3, len - 3);
 			}
 			else if ((c[0] == 0xfe) && (c[1] == 0xff))
 			{
@@ -416,7 +416,7 @@ namespace avmshell
 			}
 		}
 
-		return core()->newStringUTF8(c, len);
+		return core()->newStringUTF8((const char*)c, len);
 	}
 	
 	int ByteArrayObject::readByte()

@@ -951,7 +951,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	String* AvmCore::findErrorMessage(int errorID,
 									  int* mapTable,  /* 2 ints per entry i, i+1 */
-									  const utf8_t** errorTable,
+									  const char** errorTable,
 									  int numErrors)
 	{
 		// Above that, we must binary search.
@@ -991,7 +991,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		// errorConstants is declared char* but is encoded as UTF8
 		Stringp out = findErrorMessage(errorID,
 									   errorMappingTable,
-									   (const utf8_t**)errorConstants[determineLanguage()],
+									   errorConstants[determineLanguage()],
 									   kNumErrorConstants);
 		if (out) 
 		{
@@ -1042,7 +1042,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		String* out = NULL;
 	#ifdef DEBUGGER
 		if (s)
-			out = this->newStringUTF8((const utf8_t*)s);
+			out = this->newStringUTF8(s);
 		else
 			out = kEmptyString;
 	#else
@@ -2691,6 +2691,12 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 	
 	// note, this assumes Latin-1, not UTF8.
+	Stringp AvmCore::internStringLatin1(const char* s, int len)
+	{
+		return internString(newStringLatin1(s, len));
+	}
+
+	// note, this assumes Latin-1, not UTF8.
 	Stringp AvmCore::internConstantStringLatin1(const char* s)
 	{
 		return internString(newConstantStringLatin1(s));
@@ -2855,9 +2861,9 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif
 
-	Stringp AvmCore::internStringUTF8(const utf8_t* cs, int len8, bool constant)
+	Stringp AvmCore::internStringUTF8(const char* cs, int len8, bool constant)
 	{
-		Stringp s = String::createUTF8(this, cs, len8, String::kAuto, constant);
+		Stringp s = String::createUTF8(this, (const utf8_t*)cs, len8, String::kAuto, constant);
 		int i = findString(s);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
@@ -2879,6 +2885,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::internStringUTF16(const wchar* s, int len)
 	{
+		if (len < 0) len = String::Length(s);
         int i = findString(s, len);
 		Stringp other;
         if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
@@ -3350,9 +3357,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		return String::createLatin1(this, s, len);
 	}
 
-	Stringp AvmCore::newStringUTF8(const utf8_t* s, int len)
+	Stringp AvmCore::newStringUTF8(const char* s, int len)
 	{
-		return String::createUTF8(this, s, len);
+		return String::createUTF8(this, (const utf8_t*)s, len);
 	}
 
 	Stringp AvmCore::newStringUTF16(const wchar* s, int len)
