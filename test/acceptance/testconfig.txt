@@ -87,9 +87,66 @@ as3/sampling/InvocationSampling , x64-mac-tvm-debugdebugger                   , 
 
 
 # interpreter is failing on testcases when running in linux 64bit
-e4x/XMLList/e13_5_4_2,                                          x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-e4x/Types/e9_1_1_2,                                             x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Classes/Override/DynExtDefaultOverRidePublic,   x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Variable/VarDefPublicStatic,                    x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Variable/VarDefStatic,                          x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Classes/Ext/DynExtPublicClass,              x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Classes/Ext/PubExtDynamicClassPubStat,      x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Classes/Ext/ExtPublicClassPub,              x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Classes/Ext/ExtPublicClassFin,              x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Classes/Ext/ExtPublicClassPriv,             x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Classes/Ext/PubExtDefaultClassFin,          x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Classes/ExtImpl/PubExtDefaultImplDefPub,    x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/Variable/VarDefPrivateStatic,               x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+as3/Definitions/FunctionAccessors/GetterInNewExpression,    x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+
+###################################################
+# PPC acceptance failures introduced by bug #465506
+# https://bugzilla.mozilla.org/show_bug.cgi?id=469669
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %0N \),  ppc-mac-tvm-release , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u8G \), ppc-mac-tvm-release , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %uEJ \), ppc-mac-tvm-release , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+ecma3/Array/splice2:exhaustive splice w/2 optional args 1, ppc-mac-tvm-release-(Dinterp|Dforcemir) , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %0N \),  ppc-mac-tvm-release-Ojit , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %4V \),  ppc-mac-tvm-release-Ojit , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u7i \), ppc-mac-tvm-release-Ojit , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %uDl \), ppc-mac-tvm-release-Ojit , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+ecma3/Array/splice1,    ppc-mac-tvm-releasedebugger , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+as3/RuntimeErrors/Error1069PropertyNotFound,    ppc-mac-tvm-releasedebugger , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+# 10.5 only
+ecma3/Array/splice1,    ppc-mac-tvm-release-Ojit , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+# 10.5 only in release
+ecma3/Array/e15_4_4_10:exhaustive slice test 3,    ppc-mac-tvm-release , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
+
+
+#####################################################
+# Win64 acceptance failures introduced by bug #465506
+# https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+as3/DescribeType/describeType:test 0, x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(263\)\), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(336\)\), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(409\)\), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(482\)\), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %0N \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %8q \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %B/ \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %FR \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u6N \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+as3/DescribeType/describeType:test 0, x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+e4x/Expressions/e11_1_4, x64-win-tvm-release-Ojit, skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(263\)\), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(336\)\), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(409\)\), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(482\)\), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u8t \), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %uCY \), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+as3/DescribeType/describeType:test 1[^0-9] , x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+as3/sampling/SimpleSampling, x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+as3/ShellClasses/toplevel:System.freeMemory >0, x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_1:unescape\( %u1C \), x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u0Q \), x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u6T \), x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
+
+#########################################################
+# WinMobile acceptance failures introduced by bug #465506
+# https://bugzilla.mozilla.org/show_bug.cgi?id=469671
+es4/vector/nested, arm-winmobile-tvm-release-arm, expectedfail , bug https://bugzilla.mozilla.org/show_bug.cgi?id=469671
+
 
