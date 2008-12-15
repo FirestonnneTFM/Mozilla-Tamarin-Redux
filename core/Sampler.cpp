@@ -65,10 +65,9 @@ namespace avmplus
 
 	Sampler::Sampler(GC *gc) : allocId(1), sampling(true),
 			autoStartSampling(false), samplingNow(false), samplingAllAllocs(false), takeSample(0),
-			numSamples(0), currentSample(NULL), timerHandle(0), lastAllocSample(0),
+			numSamples(0), samples_size(0), samples(0), currentSample(NULL), timerHandle(0), lastAllocSample(0),
 			uids(1024, GCHashtable::MALLOC), ptrSamples(0), callback(0), runningCallback(false), m_fakeMethodNames(gc)
 	{
-		samples = new GrowableBuffer(gc->GetGCHeap());
 		gc->GetGCHeap()->EnableHooks();
 	}
 
@@ -84,8 +83,6 @@ namespace avmplus
  		Sampler* tls = tls_sampler;
  		if(tls == this)
  			tls_sampler = NULL;
-		delete samples;
-		samples = 0;
 	}
 
 	void Sampler::init(bool sampling, bool autoStart)
@@ -97,7 +94,7 @@ namespace avmplus
 	byte *Sampler::getSamples(uint32 &num)
 	{
 		num = numSamples;
-		byte *start = samples->start();
+		byte *start = samples;
 		return start;
 	}
 
@@ -112,14 +109,14 @@ namespace avmplus
 
 	int Sampler::sampleSpaceCheck(bool callback_ok)
 	{
-		if(!samples->start())
+		if(!samples)
 			return 0;
 
 		uint32 sampleSize = sizeof(Sample);
 		uint32 callStackDepth = core->callStack ? core->callStack->depth() : 0;
 		sampleSize += callStackDepth * sizeof(StackTrace::Element);
 		sampleSize += sizeof(uint64) * 2;
-		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples->size()/3 > samples->end() 
+		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples_size/3 > (samples + samples_size)
 			&& !core->GetGC()->Collecting() 
 #ifdef MMGC_DRC
 			&& !core->GetGC()->Reaping()
@@ -135,18 +132,15 @@ namespace avmplus
 				startSampling();
 			runningCallback = false;
 		}
-		while(currentSample + sampleSize > samples->uncommitted()) {
-			samples->grow();
-			if(currentSample + sampleSize > samples->uncommitted()) {
+		if(currentSample + sampleSize > samples+samples_size) {
 /*
 #ifdef AVMPLUS_VERBOSE
-				core->console << "****** Exhausted Sample Buffer *******\n";
+			core->console << "****** Exhausted Sample Buffer *******\n";
 #endif
 */
-				// exhausted buffer
-				stopSampling();
-				return 0;
-			}
+			// exhausted buffer
+			stopSampling();
+			return 0;
 		}
 		return 1;
 	}
@@ -333,7 +327,7 @@ namespace avmplus
 		}
 
 		// Nuke the ptr in the sample stream for the newobject sample
-		if( samples->start() )
+		if( samples )
 		{
 
 		byte* oldptr = 0;
@@ -356,7 +350,7 @@ namespace avmplus
 	void Sampler::clearSamples()
 	{
 		//samples->free();
-		currentSample = samples->start();
+		currentSample = samples;
 		GCHashtable* t = ptrSamples;
 		ptrSamples = new MMgc::GCHashtable(4096, GCHashtable::MALLOC);
 		delete t;
@@ -368,23 +362,21 @@ namespace avmplus
 		if(!sampling || samplingNow)
 			return;
 
-		{
-			init(sampling, autoStartSampling);
-		}
-
 		if (!currentSample)
 		{
 			int megs=16;
 			while(!currentSample && megs > 0) {
-				currentSample = samples->reserve(megs * 1024 * 1024);
+				samples_size = megs*1024*1024;
+				currentSample = samples = new byte[samples_size];
 				megs >>= 1;
 			}
 			if(!currentSample) {
 				sampling = autoStartSampling = false;
-				samples->free();
 				return;
 			}
 		}
+
+		init(sampling, autoStartSampling);
 		
 		if( !ptrSamples ) 
 		{
@@ -418,12 +410,15 @@ namespace avmplus
 		if(!sampling)
 			return;
 
+		if( samples )
+			delete [] samples;
+		samples = 0;
+		samples_size = 0;
+
 		if(timerHandle != 0) {
 			OSDep::stopTimer(timerHandle);
 			timerHandle = 0;
 		}
-
-		samples->free();
 
 		if( ptrSamples ) {
 			delete ptrSamples;
