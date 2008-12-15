@@ -160,8 +160,10 @@ namespace avmplus
 			case XMLTag::kElementType:
 				{
 					// A closing tag
-					if (tag.endtag)
+					if (tag.text->charAt(0) == '/')
 					{
+						Stringp thisNodeNameNoSlash = tag.text->substring(1, 0x7fffffff);
+						
 						Multiname m;
 						p->getQName(core, &m);
 						Namespace *ns = m.getNamespace();
@@ -170,10 +172,10 @@ namespace avmplus
 						Stringp parentName = m.getName();
 
 						Namespace *ns2 = toplevel->getDefaultNamespace();
-						if ((!NodeNameEquals(tag.text, parentName, ns)) &&
+						if ((!NodeNameEquals(thisNodeNameNoSlash, parentName, ns)) &&
 							// We're trying to support paired nodes where the first node gets a namespace
 							// from the default namespace.
-							(*m.getName() != *tag.text) && (ns->getURI() == ns2->getURI()))
+							(*m.getName() != *thisNodeNameNoSlash) && (ns->getURI() == ns2->getURI()))
 						{
 							// If p == m_node, we are at the top of our tree and we're parsing the fake "parent"
 							// wrapper tags around our actual XML text.  Instead of warning about a missing "</parent>"
@@ -203,11 +205,11 @@ namespace avmplus
 						// Our first tag modifies this object itself
 						if (!m_node)
 						{
-							setNode( pNewElement );
+							setNode(pNewElement);
 						}
 						else // all other tags create a new element tag
 						{
-							p->_append (pNewElement);
+							p->_append(pNewElement);
 						}
 
 						if (!tag.empty) // if our tag is not empty, we're now the "parent" tag

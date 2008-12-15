@@ -53,7 +53,7 @@ namespace avmplus
 		StringOutputStream(MMgc::GC *gc);
 		~StringOutputStream();
 
-		const utf8_t* c_str() { return m_buffer; }	// note, always in UTF8 form
+		const char* c_str() { return m_buffer; }	// note, always in UTF8 form
 		int length() const { return m_length; }
 		void reset() { m_length=0; }
 
@@ -62,7 +62,7 @@ namespace avmplus
 	private:
 		enum { kInitialCapacity = 256 };
 		
-		utf8_t* m_buffer;
+		char* m_buffer;
 		int m_length;
 
 		void grow(int newLength);
@@ -88,7 +88,7 @@ namespace avmplus
 			setOutputStream(&m_stream);
 		}
 
-		const utf8_t* c_str() { return m_stream.c_str(); }	// note, always in UTF8 form
+		const char* c_str() { return m_stream.c_str(); }	// note, always in UTF8 form
 		int length() const { return m_stream.length(); }
 		void reset() { m_stream.reset(); }
 		

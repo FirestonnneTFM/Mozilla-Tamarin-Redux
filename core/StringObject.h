@@ -626,6 +626,9 @@ namespace avmplus
 	/**
 	The UTF8String class is simply a data buffer containing 0-terminated
 	UTF-8 data. Use String::toUTF8String() to create such a string.
+	Note that the length() function returns the length not including the 0-terminator.
+	Also note that the string might contain interior NULL characters (if the original
+	String did) and thus String::Length, strlen, etc might return misleading values.
 	*/
 
 	class UTF8String : public MMgc::GCObject
@@ -660,6 +663,9 @@ namespace avmplus
 	/**
 	The UTF16String class is simply a data buffer containing 0-terminated
 	UTF-16 data. Use String::toUTF16String() to create such a string.
+	Note that the length() function returns the length not including the 0-terminator.
+	Also note that the string might contain interior NULL characters (if the original
+	String did) and thus String::Length, strlen, etc might return misleading values.
 	*/
 
 	class UTF16String : public MMgc::GCObject

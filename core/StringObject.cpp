@@ -55,7 +55,7 @@ namespace avmplus
 	inline void _widen8_16(const char* src, wchar* dst, int32_t len)
 	{
 		while (len-- > 0)
-			*dst++ = wchar (*src++ & 0xFF);
+			*dst++ = wchar(*src++ & 0xFF);
 	}
 
 #ifdef FEATURE_UTF32_SUPPORT
@@ -2113,12 +2113,14 @@ namespace avmplus
 		switch (getWidth())
 		{
 			case String::k8:
-				s = new (gc, m_length * sizeof(wchar)) UTF16String(m_length+1);
+				// don't need to add 1 to m_length because m_buffer already includes 1
+				s = new (gc, m_length * sizeof(wchar)) UTF16String(m_length);
 				_copyBuffers(getData(), s->m_buffer, m_length, k8, k16);
 				s->m_buffer[m_length] = 0;
 				break;
 			case String::k16:
-				s = new (gc, m_length * sizeof(wchar)) UTF16String(m_length+1);
+				// don't need to add 1 to m_length because m_buffer already includes 1
+				s = new (gc, m_length * sizeof(wchar)) UTF16String(m_length);
 				_copyBuffers(getData(), s->m_buffer, m_length, k16, k16);
 				s->m_buffer[m_length] = 0;
 				break;
@@ -2129,7 +2131,8 @@ namespace avmplus
 				int32_t count = 0, len = m_length;
 				while (len--)
 					count += (*p++ > 0xFFFF) ? 2 : 1;
-				s = new (gc, count * sizeof(wchar)) UTF16String(count+1);
+				// don't need to add 1 to m_length because m_buffer already includes 1
+				s = new (gc, count * sizeof(wchar)) UTF16String(count);
 				len = m_length;
 				wchar* dst = s->m_buffer;
 				while (len--)
@@ -2733,8 +2736,9 @@ decodeUtf8:
 		int32_t i;
 		for (i = 0; i < len; i++, buf++)
 			count += (*buf < 0) ? 2 : 1;
-
-		UTF8String* s8 = new (GC::GetGC (s), count) UTF8String(count);
+		
+		// don't need to add 1 to count because m_buffer already includes 1
+		UTF8String* s8 = new (GC::GetGC(s), count) UTF8String(count);
 		char* dstBuf = s8->m_buffer;
 
 		dstBuf[count] = 0;
@@ -2761,7 +2765,8 @@ decodeUtf8:
 	{
 		const wchar* data = (const wchar*) s->getData();
 		int32_t count = UnicodeUtils::Utf16ToUtf8(data, s->length(), NULL, 0);
-		UTF8String* s8 = new (GC::GetGC (s), count) UTF8String(count);
+		// don't need to add 1 to count because m_buffer already includes 1
+		UTF8String* s8 = new (GC::GetGC(s), count) UTF8String(count);
 		UnicodeUtils::Utf16ToUtf8(data, s->length(), (uint8_t*) s8->m_buffer, count);
 		return s8;
 	}
@@ -2772,7 +2777,8 @@ decodeUtf8:
 	{
 		const utf32_t* data = (const utf32_t*) s->getData();
 		int32_t count = _ucs4ToUtf8(data, s->length(), NULL, 0);
-		UTF8String* s8 = new (GC::GetGC (s), count) UTF8String(count);
+		// don't need to add 1 to count because m_buffer already includes 1
+		UTF8String* s8 = new (GC::GetGC(s), count) UTF8String(count);
 		_ucs4ToUtf8(data, s->length(), (utf8_t*) s8->m_buffer, count);
 		return s8;
 	}

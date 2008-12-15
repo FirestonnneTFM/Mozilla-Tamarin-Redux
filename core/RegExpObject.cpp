@@ -192,7 +192,7 @@ namespace avmplus
     Atom RegExpObject::stringFromUTF8(const char* buffer, int len)
     {
 		AvmAssert(len >= 0);
-		return core()->newStringUTF8((const utf8_t*)buffer, len)->atom();
+		return core()->newStringUTF8(buffer, len)->atom();
     }
 
 	int RegExpObject::search(Stringp subject)

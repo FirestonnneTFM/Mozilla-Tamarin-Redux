@@ -216,20 +216,18 @@ namespace avmplus
 			return XMLParser::kUnterminatedComment;
 		}
 
-		// Extract the tag name.  Scan up to "/", ">" or whitespace.
+		// Extract the tag name.  Scan up to ">" or whitespace.
 		start = m_pos;
 		while (!atEnd())
 		{
 			ch = m_str[m_pos];
 			if (ch == '>' || String::isSpace(ch))
 				break;
-			if (ch == '/')
+			if (ch == '/' && (m_pos < m_str->length() - 1) && m_str[m_pos+1] == '>')
 			{
-				// /tagname?
-				if (start == m_pos)
-					tag.endtag = true, start++;
-				else
-					break;
+				// Found close of an empty element.
+				// Exit!
+				break;
 			}
 			m_pos++;
 		}
@@ -251,23 +249,17 @@ namespace avmplus
 			if (ch == '>')
 				break;
 
-			if (ch == '/')
+			if (ch == '/' && (m_pos < m_str->length() - 1) && m_str[m_pos+1] == '>')
 			{
-				if ((m_pos < m_str->length() - 1) && m_str[++m_pos] == '>') 
-				{
-					// Found close of an empty element.
-					// Exit!
-					tag.empty = true;
-					m_pos++;
-					break;
-				}
-				return XMLParser::kMalformedElement;
+				// Found close of an empty element.
+				// Exit!
+				tag.empty = true;
+				ch = m_str[++m_pos];
+				break;
 			}
 
 			// Extract the attribute name.
 			start = m_pos;
-
-			m_pos--;
 			while (!String::isSpace(ch) && ch != '=' && ch != '>') 
 			{
 				if (atEnd())
