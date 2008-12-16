@@ -504,15 +504,16 @@ namespace avmplus
 		AvmCore* core = this->core();
 
 		// update profiler
-		Profiler* profiler = core->profiler;
+		Profiler* profiler = core->profiler();
 		if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
 			profiler->sendFunctionEnter(method);
 
 		// this shouldn't ever be called unless there's a debugger
 		// NOT currently true; native thunks call us unconditionally
-		//AvmAssert(core->debugger != NULL);
-		if (core->debugger)
-			core->debugger->_debugMethod(this);
+		//AvmAssert(core->debugger() != NULL);
+		Debugger* debugger = core->debugger();
+		if (debugger)
+			debugger->_debugMethod(this);
 
 		core->sampleCheck();
 
@@ -526,7 +527,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 
 		// update profiler 
-		Profiler* profiler = core->profiler;
+		Profiler* profiler = core->profiler();
 		if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
 			profiler->sendFunctionExit();
 
@@ -537,8 +538,9 @@ namespace avmplus
 		{
 			int line = core->callStack->linenum();
 			core->callStack->set_linenum(-1);
-			if (core->debugger) 
-				core->debugger->debugLine(line);
+			Debugger* debugger = core->debugger();
+			if (debugger) 
+				debugger->debugLine(line);
 		}
 	}
 #endif

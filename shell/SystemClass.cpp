@@ -138,14 +138,15 @@ namespace avmshell
 	void SystemClass::debugger()
 	{
 		#ifdef DEBUGGER
-		core()->debugger->enterDebugger();
+		if (core()->debugger())
+			core()->debugger()->enterDebugger();
 		#endif
 	}
 
 	bool SystemClass::isDebugger()
 	{
 		#ifdef DEBUGGER
-		return true;
+		return core()->debugger() != NULL;
 		#else
 		return false;
 		#endif

@@ -51,11 +51,7 @@ namespace avmplus
 	// Exception
 	//
 
-	Exception::Exception(Atom atom
-#ifdef DEBUGGER
-			, AvmCore* core
-#endif /* DEBUGGER */
-		)
+	Exception::Exception(AvmCore* core, Atom atom)
 	{
 		this->atom = atom;
 		this->flags = 0;
@@ -71,6 +67,8 @@ namespace avmplus
 		{
 			stackTrace = core->newStackTrace();
 		}
+		#else
+		(void)core;
 		#endif
 	}
 	
@@ -114,6 +112,7 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		callStack = core->callStack;
+#endif /* DEBUGGER */
 
 		// beginTry() is called from both the TRY macro and from JIT'd code.  The TRY
 		// macro will immediately change the value of catchAction right after the
@@ -121,7 +120,7 @@ namespace avmplus
 		// we initialize catchAction to the value that it needs when we're called
 		// from JIT'd code, that is, kCatchAction_SearchForActionScriptExceptionHandler.
 		catchAction = kCatchAction_SearchForActionScriptExceptionHandler;
-#endif /* DEBUGGER */
+
 		this->stacktop = core->allocaTop();
 		
 		codeContextAtom = core->codeContextAtom;
@@ -167,8 +166,9 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		//AvmAssert(callStack && callStack->env);
-		if (core->profiler && core->profiler->profilingDataWanted && callStack && callStack->env())
-			core->profiler->sendCatch(callStack->env()->method);
+		Profiler* profiler = core->profiler();
+		if (profiler && profiler->profilingDataWanted && callStack && callStack->env())
+			profiler->sendCatch(callStack->env()->method);
 
 		core->callStack = callStack;
 #endif // DEBUGGER

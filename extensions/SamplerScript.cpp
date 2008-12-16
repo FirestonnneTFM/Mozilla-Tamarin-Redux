@@ -61,7 +61,7 @@ namespace avmplus
 		int lvl = 0 ; /*Debugger::TRACE_OFF;*/
 	#ifdef DEBUGGER
 		AvmCore *core = this->core();
-		if (core->debugger)
+		if (core->debugger())
 		{
 			if (target > 1)
 				lvl = Debugger::astrace_callback;
@@ -77,7 +77,7 @@ namespace avmplus
 	{
 	#ifdef DEBUGGER
 		AvmCore *core = this->core();
-		if (core->debugger)
+		if (core->debugger())
 		{
 			if (target > 1)
 				Debugger::astrace_callback = (Debugger::TraceLevel) lvl;
@@ -93,7 +93,7 @@ namespace avmplus
 	{
 	#ifdef DEBUGGER
 		AvmCore *core = this->core();
-		if (core->debugger)
+		if (core->debugger())
 		{
 			// Listeners MUST be functions or null
 			if ( core->isNullOrUndefined(f->atom()) )
@@ -107,7 +107,7 @@ namespace avmplus
 			}
 			
 			//MethodClosure* mc = f->toplevel()->methodClosureClass->create(f->getCallMethodEnv(), f->atom());
-			core->debugger->trace_callback = f;
+			core->debugger()->trace_callback = f;
 		}
 	#endif /* DEBUGGER */
 		(void)f;
@@ -118,8 +118,8 @@ namespace avmplus
 		ScriptObject* f = 0;
 	#ifdef DEBUGGER
 		AvmCore *core = this->core();
-		if (core->debugger)
-			f = core->debugger->trace_callback;				
+		if (core->debugger())
+			f = core->debugger()->trace_callback;				
 	#endif /* DEBUGGER */
 		return f;
 	}
@@ -158,7 +158,7 @@ namespace avmplus
 			if(!sam) {
 				count = 0;			
 				return undefinedAtom;
-		}
+			}
 			return sam->atom();
 		}
 
@@ -219,41 +219,61 @@ namespace avmplus
 		DWB(TraitsBindingsp) currTraits;
 	};
 
+#endif // DEBUGGER
+
+#ifdef DEBUGGER
+	static VTable* _newVT(VTable* vt, uint32_t sz)
+	{
+		Toplevel* toplevel = vt->toplevel;
+		Traits* t = Traits::newTraits(vt->abcEnv->pool(), NULL, sz, 0, TRAITSTYPE_RT);
+		return toplevel->core()->newVTable(t, NULL, NULL, NULL, toplevel);
+	}
+#endif
 
 	SamplerScript::SamplerScript(VTable *vtable, ScriptObject *delegate)
-	  : ScriptObject(vtable, delegate), 
-	    sampleIteratorVTable(core()->newVTable(Traits::newTraits(vtable->abcEnv->pool(), NULL, sizeof(SampleIterator), 0, TRAITSTYPE_RT),
-						   NULL, NULL, NULL, toplevel())),
-	    slotIteratorVTable(core()->newVTable(Traits::newTraits(vtable->abcEnv->pool(), NULL, sizeof(SlotIterator), 0, TRAITSTYPE_RT),
-						 NULL, NULL, NULL, toplevel()))
+	  : ScriptObject(vtable, delegate)
+#ifdef DEBUGGER
+	    , sampleIteratorVTable(_newVT(vtable, sizeof(SampleIterator)))
+	    , slotIteratorVTable(_newVT(vtable, sizeof(SlotIterator)))
+#endif
 	{
+#ifdef DEBUGGER
 		sampleIteratorVTable->traits->resolveSignatures(NULL);
 		slotIteratorVTable->traits->resolveSignatures(NULL);
+#endif
 		AvmAssert(traits()->getSizeOfInstance() == sizeof(SamplerScript));
 	}
 
 	Atom SamplerScript::getSamples()
 	{	
-		AvmCore *core = this->core();
-		if(!core->sampling() || core->sampler()->sampleCount() == 0)
-			return undefinedAtom;
-		
-		if (!trusted())
+#ifdef DEBUGGER
+		AvmCore* core = this->core();
+		if (!core->debugger() || !core->sampling() || core->sampler()->sampleCount() == 0 || !trusted())
 			return undefinedAtom;
 
 		Sampler *s = core->sampler();
 		ScriptObject *iter = new (gc()) SampleIterator(s, this, sampleIteratorVTable);
 		return iter->atom();
+#else
+		return undefinedAtom;
+#endif
 	}
 
 	double SamplerScript::getSampleCount()
 	{
-		Sampler *s = core()->sampler();
+#ifdef DEBUGGER
+		if (!core()->debugger()) 
+			return -1;
+		Sampler* s = core()->sampler();
 		uint32 num;
 		s->getSamples(num);
 		return (double)num;
+#else
+		return -1;
+#endif
 	}
 
+#ifdef DEBUGGER
 	ClassClosure *SamplerScript::getType(Atom typeOrVTable, const void *ptr)
 	{
 		Toplevel *tl = toplevel();
@@ -290,12 +310,10 @@ namespace avmplus
 		{
 			type = tl->functionClass;
 		}
-#ifdef DEBUGGER
 		else if(obj && obj->traits()->isActivationTraits())
 		{
 			type = tl->objectClass;
 		}
-#endif
 		else
 		{
 			// fallback answer
@@ -318,7 +336,6 @@ namespace avmplus
 				}
 			}
 		}
-#ifdef DEBUGGER
 		// If this fires off, Tommy Reilly says: "It basically means we exhausting all efforts to
 		// associate an object with some "type" and failed.  You can ignore it.
 		AvmAssert(!obj || 
@@ -327,18 +344,13 @@ namespace avmplus
 			(core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
 			(obj->traits()->isActivationTraits() && type == tl->objectClass) ||
 			core->istype(obj->atom(), type->traits()->itraits));
-#else
-		AvmAssert(!obj || 
-			  typeOrVTable < 7 || 
-			  (obj->traits()->name && obj->traits()->name->Equals("global")) ||
-			  (core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
-			  core->istype(obj->atom(), type->traits()->itraits));
-#endif
 		AvmAssert(core->istype(type->atom(), CLASS_TYPE));	
 		return type;	
 	}
+#endif // DEBUGGER
 
-	ScriptObject *SamplerScript::makeSample(Sample sample)
+#ifdef DEBUGGER
+	ScriptObject* SamplerScript::makeSample(const Sample& sample)
 	{
 		AvmCore *core = this->core();
 		int clsId = NativeID::abcclass_flash_sampler_Sample;
@@ -400,10 +412,8 @@ namespace avmplus
 			if (sample.ptr != NULL ) {
 				((NewObjectSampleObject*)sam)->setRef((AvmPlusScriptableObject*)sample.ptr);
 			}
-#ifdef DEBUGGER
 			ClassClosure *type = getType(sample.typeOrVTable, sample.ptr);
 			WBRC(gc(), sam, ((char*)sam + cc->typeOffset), type);
-#endif
 
 			((NewObjectSampleObject*)sam)->setSize(sample.alloc_size);
 		}
@@ -413,12 +423,13 @@ namespace avmplus
 		}
 		return sam;
 	}
-
+#endif // DEBUGGER
 
 	
 	Atom SamplerScript::getMemberNames(Atom o, bool instanceNames)
 	{
-		if (!trusted())
+#ifdef DEBUGGER
+		if (!core()->debugger() || !trusted())
 			return undefinedAtom;
 
 		AvmCore *core = this->core();
@@ -429,6 +440,9 @@ namespace avmplus
 				t = t->itraits;
 			return (new (gc()) SlotIterator(t, slotIteratorVTable))->atom();			   
 		}
+#else
+		(void)o; (void)instanceNames;
+#endif
 		return undefinedAtom;
 	}
 
@@ -455,59 +469,81 @@ namespace avmplus
 
 	double SamplerScript::getSize(Atom a)
 	{
+#ifdef DEBUGGER
+		if (!core()->debugger())
+			return 0;
 		return _get_size(a);
+#else
+		(void)a;
+		return 0;
+#endif
 	}
 
 	void SamplerScript::startSampling() 
 	{ 
-		if (!trusted())
+#ifdef DEBUGGER
+		if (!core()->debugger() || !trusted())
 			return;
-
 		core()->sampler()->startSampling(); 
+#endif
 	}
 	
 	void SamplerScript::stopSampling() 
 	{ 
-		if (!trusted())
+#ifdef DEBUGGER
+		if (!core()->debugger() || !trusted())
 			return;
 		core()->sampler()->stopSampling(); 
+#endif
 	}
 
 	void SamplerScript::clearSamples() 
 	{
-		if (!trusted())
+#ifdef DEBUGGER
+		if (!core()->debugger() || !trusted())
 			return;
 		core()->sampler()->clearSamples();
+#endif
 	}		
 
 	void SamplerScript::pauseSampling() 
 	{
-		if (!trusted())
+#ifdef DEBUGGER
+		if (!core()->debugger() || !trusted())
 			return;
 		core()->sampler()->pauseSampling();
+#endif
 	}	
 
 	void SamplerScript::sampleInternalAllocs(bool b)
 	{
-		if(!trusted())
+#ifdef DEBUGGER
+		if (!core()->debugger() || !trusted())
 			return;
 		core()->sampler()->sampleInternalAllocs(b);
+#else
+		(void)b;
+#endif
 	}
 
 	void SamplerScript::_setSamplerCallback(ScriptObject *callback)
 	{
-		if(!trusted())
+#ifdef DEBUGGER
+		if (!core()->debugger() || !trusted())
 			return;
-
 		core()->sampler()->setCallback(callback);
+#else
+		(void)callback;
+#endif
 	}
 
 	double SamplerScript::_getInvocationCount(Atom a, QNameObject* qname, uint32 type) 
 	{
-		if (!trusted())
-			return -1;
 #ifdef DEBUGGER
-		AvmCore *core = this->core();
+		AvmCore* core = this->core();
+		if (!core->debugger() || !trusted())
+			return -1;
+
 		Multiname multiname;
 		if(qname)
 			qname->getMultiname(multiname);
@@ -614,6 +650,10 @@ namespace avmplus
   
 	bool SamplerScript::isGetterSetter(Atom a, QNameObject *qname)
 	{
+#ifdef DEBUGGER
+		if (!core()->debugger())
+			return false;
+			
 		if(!AvmCore::isObject(a) || !AvmCore::atomToScriptObject(a))
 			toplevel()->throwArgumentError(kInvalidArgumentError, "object");
 
@@ -638,22 +678,11 @@ namespace avmplus
 		}
 
 		return AvmCore::hasSetterBinding(b) || AvmCore::hasGetterBinding(b);
-	}
-
 #else
-
-	SamplerScript::SamplerScript(VTable *vtable, ScriptObject *delegate)
-	: ScriptObject(vtable, delegate)
-	{
+		(void)a; (void)qname;
+		return false;
+#endif
 	}
-
-	static double _get_size(Atom a)
-	{
-		(void)a;
-		return 0;
-	}
-
-#endif // DEBUGGER
 
 	
 	SampleObject::SampleObject(VTable *vtable, ScriptObject *delegate)

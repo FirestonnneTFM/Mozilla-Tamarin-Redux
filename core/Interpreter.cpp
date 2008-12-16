@@ -953,7 +953,7 @@ namespace avmplus
 			INSTR(debugline) {
 				SAVE_EXPC;
 				u1 = U30ARG;
-				DEBUGGER_ONLY( if (core->debugger) core->debugger->debugLine((int32_t)u1); )
+				DEBUGGER_ONLY( if (core->debugger()) core->debugger()->debugLine((int32_t)u1); )
 				NEXT;
 			}
 #endif
@@ -970,14 +970,14 @@ namespace avmplus
 			INSTR(debugfile) {
 				SAVE_EXPC;
 				u1 = U30ARG;
-				DEBUGGER_ONLY( if (core->debugger) core->debugger->debugFile(pool->getString((int32_t)u1)); )
+				DEBUGGER_ONLY( if (core->debugger()) core->debugger()->debugFile(pool->getString((int32_t)u1)); )
 				NEXT;
 			}
 #endif
 
 #if defined DEBUGGER && defined AVMPLUS_WORD_CODE
 			INSTR(debugenter) {
-				AvmAssert(core->debugger != NULL);
+				AvmAssert(core->debugger() != NULL);
 				AvmAssert(callStackNode == NULL);
 				callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
 				env->debugEnterInner();
@@ -987,7 +987,7 @@ namespace avmplus
 
 #if defined DEBUGGER && defined AVMPLUS_WORD_CODE
 			INSTR(debugexit) {
-				AvmAssert(core->debugger != NULL);
+				AvmAssert(core->debugger() != NULL);
 				AvmAssert(callStackNode != NULL);
 				env->debugExit(callStackNode); 
 				callStackNode->reset(); 
@@ -3195,7 +3195,7 @@ namespace avmplus
 		// opcode
 		core->console << "  ";
 #ifdef DEBUGGER
-		if (core->debugger && core->callStack && core->callStack->filename())
+		if (core->debugger() && core->callStack && core->callStack->filename())
 		{
 			core->console << '[' << core->callStack->filename() << ':' << (uint32_t)core->callStack->linenum() << "] ";
 		}

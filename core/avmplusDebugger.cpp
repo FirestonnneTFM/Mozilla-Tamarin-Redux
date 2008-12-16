@@ -130,10 +130,11 @@ namespace avmplus
 		bool exited =  (prev == -1) ? true : false; // are we being called as a result of function exit?
 		if (!changed && !exited) 
 			return;  // still on the same line in the same function?
-
-		if (core->profiler->profilingDataWanted && core->profiler->profileSwitch && !core->sampler()->sampling)
+		
+		Profiler* profiler = core->profiler();
+		if (profiler && profiler->profilingDataWanted && profiler->profileSwitch && !core->sampler()->sampling)
 		{
-			core->profiler->sendLineTimestamp(line);
+			profiler->sendLineTimestamp(line);
 		}
 
 		// tracing information
@@ -214,10 +215,11 @@ namespace avmplus
 		// filename changed
 		if (prev != filename) 
 		{
-			if (core->profiler->profilingDataWanted && !core->sampler()->sampling)
+			Profiler* profiler = core->profiler();
+			if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
 			{
 				StUTF8String sourceFile(filename);
-				core->profiler->sendDebugFileUrl(sourceFile);
+				profiler->sendDebugFileUrl(sourceFile);
 			}
 		}
 	}

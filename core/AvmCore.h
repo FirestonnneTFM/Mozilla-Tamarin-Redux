@@ -162,12 +162,24 @@ const int kBufferPadding = 16;
 		MMgc::GC * const gc;
 
 		#ifdef DEBUGGER
-		/**
-		 * For debugger versions of the VM, this is a pointer to
-		 * the Debugger object.
-		 */
-		Debugger *debugger;
-		Profiler *profiler;
+		friend class CodegenLIR;
+		friend class CodegenMIR;
+		private:
+			/**
+			 * For debugger versions of the VM, this is a pointer to
+			 * the Debugger object.
+			 */
+			Debugger*		_debugger;
+			Profiler*		_profiler;
+		public:
+			inline Debugger* debugger() const { return _debugger; }
+			inline Profiler* profiler() const { return _profiler; }
+		protected:
+			virtual Debugger* createDebugger() { return NULL; }
+			virtual Profiler* createProfiler() { return NULL; }
+		public:
+			int					langID;
+			bool				passAllExceptionsToDebugger;
 		#endif
 #ifdef AVMPLUS_VERIFYALL
         List<AbstractFunction*, LIST_GCObjects> verifyQueue;
@@ -1079,7 +1091,6 @@ const int kBufferPadding = 16;
 		 * Determines the language id of the given platform
 		 */
 		virtual int determineLanguage();
-		int langID;
 		
 
 		/**
@@ -1100,10 +1111,9 @@ const int kBufferPadding = 16;
 		/**
 		Sampling profiler interface
 		*/
-		Sampler *sampler() { return &_sampler; }
-		void sampleCheck() { _sampler.sampleCheck(); }
-		bool sampling() { return _sampler.sampling; }
-		bool passAllExceptionsToDebugger;
+		inline Sampler* sampler() { return &_sampler; }
+		inline void sampleCheck() { _sampler.sampleCheck(); }
+		inline bool sampling() { return _sampler.sampling; }
 
 #endif
 

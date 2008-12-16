@@ -40,6 +40,8 @@
 
 namespace avmplus
 {
+	struct Sample;
+	
 	class TraceClass : public ClassClosure
 	{
     public:
@@ -59,9 +61,8 @@ namespace avmplus
 	public:
 		SamplerScript(VTable *vtable, ScriptObject *delegate);
 
-#ifdef DEBUGGER
-		static const uint32 GET=1;
-		static const uint32 SET=2;
+		enum { GET = 1, SET = 2 };
+
 		double getSize(Atom o);
 		Atom getMemberNames(Atom o, bool instanceNames);
 		Atom getSamples();
@@ -74,26 +75,17 @@ namespace avmplus
 		void _setSamplerCallback(ScriptObject *callback);
 
 		double _getInvocationCount(Atom a, QNameObject* qname, uint32 type);
-		ScriptObject *makeSample(Sample sample);
 		bool isGetterSetter(Atom a, QNameObject* name);
+
+#ifdef DEBUGGER
 	private:		
 		DWB(VTable*) const sampleIteratorVTable;
 		DWB(VTable*) const slotIteratorVTable;
-		ClassClosure *getType(Atom typeOrVTable, const void *obj);
-#else
-		// stubs for release
-		double getSize(Atom ) { return 0; }
-		Atom getMemberNames(Atom, bool) { return undefinedAtom; }
-		Atom getSamples() { return undefinedAtom; }
-		void clearSamples() {}
-		void startSampling() {}
-		void stopSampling() {}
-		void pauseSampling() {}
-		double getSampleCount() { return -1; }
-		double _getInvocationCount(Atom, QNameObject*, uint32) { return -1; }
-		bool isGetterSetter(Atom, QNameObject*) { return false; }
-		void sampleInternalAllocs(bool){};
-		void _setSamplerCallback(ScriptObject *){};
+
+		ClassClosure* getType(Atom typeOrVTable, const void *obj);
+		
+		friend class SampleIterator;
+		ScriptObject* makeSample(const Sample& sample);
 #endif
 	};
 

@@ -139,19 +139,24 @@ namespace avmshell
 		OutputStream *consoleOutputStream;
 		bool gracePeriod;
 		bool inStackOverflow;
+		int allowDebugger;
 
 		bool executeProjector(int argc, char *argv[], int& exitCode);
 		
 		void computeStackBase();
 		
-		#ifdef DEBUGGER
-		DebugCLI *debugCLI;
-		#endif
-
 		// for interactive
 		#ifdef AVMPLUS_INTERACTIVE
 		int addToImports(char* imports, char* addition);
 		#endif //AVMPLUS_INTERACTIVE
+
+	#ifdef DEBUGGER
+	protected:
+		virtual avmplus::Debugger* createDebugger() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) DebugCLI(this) : NULL; }
+		virtual avmplus::Profiler* createProfiler() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) Profiler(this) : NULL; }
+	private:
+		inline DebugCLI* debugCLI() { return (DebugCLI*)debugger(); }
+	#endif
 	};
 
 	class ShellToplevel : public Toplevel
