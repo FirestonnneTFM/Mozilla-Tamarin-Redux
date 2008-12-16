@@ -58,7 +58,7 @@ namespace avmplus
 		{
 			console << "setCacheSize: bindings " << cs.bindings << " metadata " << cs.metadata << '\n';
 		}
-		#endif // DEBUGGER
+		#endif 
 
 		//printf("setCacheSize: bindings %d metadata %d\n",cs.bindings,cs.metadata);
 
@@ -70,7 +70,16 @@ namespace avmplus
 	extern AvmCore* g_tmcore;
 #endif
 
-	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), 
+	AvmCore::AvmCore(GC* g) : 
+		GCRoot(g), 
+		console(NULL), 
+#ifdef DEBUGGER
+		_debugger(NULL),
+		_profiler(NULL),
+		langID(-1),
+		passAllExceptionsToDebugger(false),
+#endif
+		gc(g), 
  		m_tbCache(new (g) QCache(0, g)),	// bindings: unlimited by default
  		m_tmCache(new (g) QCache(1, g)),	// metadata: limited to 1 by default
 #ifdef AVMPLUS_MIR
@@ -92,22 +101,22 @@ namespace avmplus
 		g_tmcore = this;
 #endif
 		// sanity check for all our types
-		AvmAssert (sizeof(int8) == 1);
-		AvmAssert (sizeof(uint8) == 1);		
-		AvmAssert (sizeof(int16) == 2);
-		AvmAssert (sizeof(uint16) == 2);
-		AvmAssert (sizeof(int32) == 4);
-		AvmAssert (sizeof(uint32) == 4);
-		AvmAssert (sizeof(int64) == 8);
-		AvmAssert (sizeof(uint64) == 8);
-		AvmAssert (sizeof(sintptr) == sizeof(void *));
-		AvmAssert (sizeof(uintptr) == sizeof(void *));
+		MMGC_STATIC_ASSERT(sizeof(int8) == 1);
+		MMGC_STATIC_ASSERT(sizeof(uint8) == 1);		
+		MMGC_STATIC_ASSERT(sizeof(int16) == 2);
+		MMGC_STATIC_ASSERT(sizeof(uint16) == 2);
+		MMGC_STATIC_ASSERT(sizeof(int32) == 4);
+		MMGC_STATIC_ASSERT(sizeof(uint32) == 4);
+		MMGC_STATIC_ASSERT(sizeof(int64) == 8);
+		MMGC_STATIC_ASSERT(sizeof(uint64) == 8);
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == sizeof(void *));
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
 		#ifdef AVMPLUS_64BIT
-		AvmAssert (sizeof(sintptr) == 8);
-		AvmAssert (sizeof(uintptr) == 8);		
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == 8);
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == 8);		
 		#else
-		AvmAssert (sizeof(sintptr) == 4);
-		AvmAssert (sizeof(uintptr) == 4);		
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == 4);
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == 4);		
 		#endif	
 			
 		// set default mode flags
@@ -173,13 +182,6 @@ namespace avmplus
 #ifdef DEBUGGER
 		_sampler.setCore(this);
 #endif
-
-		#ifdef DEBUGGER
-		langID			   = -1;
-		debugger           = NULL;
-		profiler		   = NULL;
-		passAllExceptionsToDebugger = false;
-        #endif /* DEBUGGER */
 
 		callStack          = NULL;
 
@@ -309,10 +311,18 @@ namespace avmplus
 		WordcodeTranslator::swprofStop();
 #endif
 		allocaShutdown();
+#ifdef DEBUGGER
+		delete _profiler;
+#endif
 	}
 
 	void AvmCore::initBuiltinPool()
 	{
+		#ifdef DEBUGGER
+		_debugger = createDebugger();
+		_profiler = createProfiler();
+		#endif
+	
 		builtinDomain = new (GetGC()) Domain(this, NULL);
 		
 		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this, NULL);
@@ -521,10 +531,11 @@ namespace avmplus
 												include_versions);
 
         #ifdef DEBUGGER
-		if (debugger) {
-			debugger->processAbc(pool, code);
+		if (_debugger) 
+		{
+			_debugger->processAbc(pool, code);
 		}
-        #endif /* DEBUGGER */
+        #endif 
 
 		return pool;
 	}
@@ -815,7 +826,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	void AvmCore::throwException(Exception *exception)
 	{
 		#ifdef DEBUGGER
-		if (debugger && !(exception->flags & Exception::SEEN_BY_DEBUGGER))
+		if (_debugger && !(exception->flags & Exception::SEEN_BY_DEBUGGER))
 		{
 			// I'm going to set the SEEN_BY_DEBUGGER flag now, before calling
 			// filterException(), just to avoid reentrancy problems (we don't
@@ -829,7 +840,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				// filterException() returns 'true' if it somehow let the user know
 				// about the exception, 'false' if it ignored the exception.
-				if (debugger->filterException(exception, willBeCaught))
+				if (_debugger->filterException(exception, willBeCaught))
 					exception->flags |= Exception::SEEN_BY_DEBUGGER;
 				else
 					exception->flags &= ~Exception::SEEN_BY_DEBUGGER;
@@ -856,11 +867,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	 */
 	void AvmCore::throwAtom(Atom atom)
 	{
-		throwException(new (GetGC()) Exception(atom
-#ifdef DEBUGGER
-			, this
-#endif
-			));
+		throwException(new (GetGC()) Exception(this, atom));
 	}
 	
 #ifdef DEBUGGER

@@ -49,11 +49,7 @@ namespace avmplus
 	class Exception : public MMgc::GCObject
 	{
 	public:
-		Exception(Atom atom
-#ifdef DEBUGGER
-			, AvmCore* core
-#endif /* DEBUGGER */
-		);
+		Exception(AvmCore* core, Atom atom);
 
 		bool isValid();
 		enum
@@ -128,7 +124,6 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
-#ifdef DEBUGGER
 	/**
 	 * CatchAction indicates what the CATCH block for a given ExceptionFrame will
 	 * do if it gets invoked (that is, if an exception is raised from inside the
@@ -161,7 +156,6 @@ namespace avmplus
 		// for an ActionScript try/catch block which will catch it.
 		kCatchAction_SearchForActionScriptExceptionHandler
 	};
-#endif
 
 	/**
 	 * ExceptionFrame class is used to track stack frames that contain
@@ -177,9 +171,7 @@ namespace avmplus
 		ExceptionFrame()
 		{
 			core = NULL;
-#ifdef DEBUGGER
 			this->catchAction = kCatchAction_Unknown;
-#endif
 		}
 		~ExceptionFrame() { endTry(); }
 		void beginTry(AvmCore* core);
@@ -206,8 +198,8 @@ namespace avmplus
 		void*				stacktop;
 #ifdef DEBUGGER
 		CallStackNode*		callStack;
-		CatchAction			catchAction;
 #endif /* DEBUGGER */
+		CatchAction			catchAction;
 
 	// ------------------------ DATA SECTION END
 
@@ -239,7 +231,6 @@ namespace avmplus
 	 * block, useful for short-stack systems)
 	 */
 
-#ifdef DEBUGGER
 	#define TRY(core, CATCH_ACTION) { \
 		ExceptionFrame _ef; \
 		_ef.beginTry(core); \
@@ -247,40 +238,20 @@ namespace avmplus
 		int _setjmpVal = ::setjmp(_ef.jmpbuf); \
 		Exception* _ee = core->exceptionAddr; \
 		if (!_setjmpVal)
-#else
-	#define TRY(core, CATCH_ACTION) { \
-		ExceptionFrame _ef; \
-		_ef.beginTry(core); \
-		int _setjmpVal = ::setjmp(_ef.jmpbuf); \
-		Exception* _ee = core->exceptionAddr; \
-		if (!_setjmpVal)
-#endif
 
-#ifdef DEBUGGER
 	#define TRY_UNLESS(core,expr,CATCH_ACTION) { \
 		ExceptionFrame _ef; \
 		Exception* _ee; \
 		int _setjmpVal = 0; \
 		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
+
 	#define TRY_UNLESS_HEAPMEM(mem, core, expr, CATCH_ACTION) { \
 		ExceptionFrame& _ef = *(new (mem) ExceptionFrame); \
 		ExceptionFrameAutoPtr _ef_ap(_ef); \
 		Exception* _ee; \
 		int _setjmpVal = 0; \
 		if ((expr) || (_ef.beginTry(core), _ef.catchAction=(CATCH_ACTION), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
-#else
-	#define TRY_UNLESS(core,expr,CATCH_ACTION) { \
-		ExceptionFrame _ef; \
-		Exception* _ee; \
-		int _setjmpVal = 0; \
-		if ((expr) || (_ef.beginTry(core), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
-	#define TRY_UNLESS_HEAPMEM(mem, core, expr, CATCH_ACTION) { \
-		ExceptionFrame& _ef = *(new (mem) ExceptionFrame); \
-		ExceptionFrameAutoPtr _ef_ap(_ef); \
-		Exception* _ee; \
-		int _setjmpVal = 0; \
-		if ((expr) || (_ef.beginTry(core), _setjmpVal = ::setjmp(_ef.jmpbuf), _ee=core->exceptionAddr, (_setjmpVal == 0)))
-#endif
+
     #define CATCH(x) else { _ef.beginCatch(); x = _ee;
     #define END_CATCH }
     #define END_TRY }

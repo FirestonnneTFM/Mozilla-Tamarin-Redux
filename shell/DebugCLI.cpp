@@ -271,13 +271,13 @@ namespace avmshell
 		//core->console << '\n';
 
 		// obtain information about each frame 
-		int frameCount = core->debugger->frameCount();
+		int frameCount = core->debugger()->frameCount();
 		for(int k=0; k<frameCount; k++)
 		{
 			Atom* ptr;
 			int count, line; 
 			SourceInfo* src;
-			DebugFrame* frame = core->debugger->frameAt(k);
+			DebugFrame* frame = core->debugger()->frameAt(k);
 
 			// source information
 			frame->sourceLocation(src, line);
@@ -505,7 +505,7 @@ namespace avmshell
 		Atom* ptr;
 		int count, line; 
 		SourceInfo* src;
-		DebugFrame* frame = core->debugger->frameAt(0);
+		DebugFrame* frame = core->debugger()->frameAt(0);
 
 		// source information
 		frame->sourceLocation(src, line);
@@ -557,7 +557,7 @@ namespace avmshell
 			Atom* ptr;
 			int count, line; 
 			SourceInfo* src;
-			DebugFrame* frame = core->debugger->frameAt(0);
+			DebugFrame* frame = core->debugger()->frameAt(0);
 
 			// source information
 			frame->sourceLocation(src, line);

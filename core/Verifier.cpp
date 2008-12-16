@@ -333,7 +333,7 @@ namespace avmplus
 		#endif
 
 #if defined DEBUGGER && defined AVMPLUS_WORD_CODE
-		XLAT_ONLY( if (translator && core->debugger) translator->emitOp0(code_pos, WOP_debugenter); )
+		XLAT_ONLY( if (translator && core->debugger()) translator->emitOp0(code_pos, WOP_debugenter); )
 #endif
 
         PERFM_NVPROF("abc-bytes", code_length);
@@ -640,7 +640,7 @@ namespace avmplus
 				state->pop();
 				blockEnd = true;
 #if defined DEBUGGER && defined AVMPLUS_WORD_CODE
-				XLAT_ONLY( if (translator && core->debugger) translator->emitOp0(pc, WOP_debugexit); )
+				XLAT_ONLY( if (translator && core->debugger()) translator->emitOp0(pc, WOP_debugexit); )
 #endif
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_returnvalue); )
 				break;
@@ -652,7 +652,7 @@ namespace avmplus
 				JIT_ONLY( if (jit) jit->emit(state, opcode); )
 				blockEnd = true;
 #if defined DEBUGGER && defined AVMPLUS_WORD_CODE
-				XLAT_ONLY( if (translator && core->debugger) translator->emitOp0(pc, WOP_debugexit); )
+				XLAT_ONLY( if (translator && core->debugger()) translator->emitOp0(pc, WOP_debugexit); )
 #endif
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_returnvoid); )
 				break;
@@ -710,13 +710,18 @@ namespace avmplus
 			case OP_debugfile:
 			{
 				//checkStack(0,0)
-				#if defined(DEBUGGER) || defined(VTUNE)
-				JIT_ONLY( Atom filename = ) checkCpoolOperand(imm30, kStringType);
-				JIT_ONLY( if (jit) jit->emit(state, opcode, (uintptr)AvmCore::atomToString(filename)); )
+			#if defined(DEBUGGER) || defined(VTUNE)
+				#ifdef VTUNE
+				const bool emit = true;
+				#else
+				const bool emit = core->debugger() != NULL;
 				#endif
-#ifdef DEBUGGER
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_debugfile) );
-#endif
+				JIT_ONLY( Atom filename = ) checkCpoolOperand(imm30, kStringType);
+				JIT_ONLY( if (jit && emit) jit->emit(state, opcode, (uintptr)AvmCore::atomToString(filename)); )
+			#endif
+			#ifdef DEBUGGER
+				XLAT_ONLY( if (translator && core->debugger()) translator->emitOp1(pc, WOP_debugfile) );
+			#endif
 				break;
 			}
 
@@ -1984,7 +1989,7 @@ namespace avmplus
 					verifyFailed(kScopeStackUnderflowError);
 				}
 				#ifdef DEBUGGER
-				JIT_ONLY( if (jit) jit->emitKill(state, scopeBase + state->scopeDepth); )
+				JIT_ONLY( if (jit && core->debugger()) jit->emitKill(state, scopeBase + state->scopeDepth); )
 				#endif
 				if (state->withBase >= state->scopeDepth)
 				{
@@ -2310,7 +2315,7 @@ namespace avmplus
 					
 			case OP_debug:
 #ifdef DEBUGGER
-				XLAT_ONLY( if (translator) translator->emitDebug(pc) );
+				XLAT_ONLY( if (translator && core->debugger()) translator->emitDebug(pc) );
 #endif
 				break;
 					
@@ -2319,15 +2324,21 @@ namespace avmplus
 				break;
 
 			case OP_debugline:
-				#if defined(DEBUGGER) || defined(VTUNE)
-				// we actually do generate code for these, in debugger mode
-				JIT_ONLY( if (jit) jit->emit(state, opcode, imm30); )
+			{
+			#if defined(DEBUGGER) || defined(VTUNE)
+				#ifdef VTUNE
+				const bool emit = true;
+				#else
+				const bool emit = core->debugger() != NULL;
 				#endif
-#ifdef DEBUGGER
-				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_debugline) );
-#endif
+				// we actually do generate code for these, in debugger mode
+				JIT_ONLY( if (jit && emit) jit->emit(state, opcode, imm30); )
+			#endif
+			#ifdef DEBUGGER
+				XLAT_ONLY( if (translator && core->debugger()) translator->emitOp1(pc, WOP_debugline) );
+			#endif
 				break;
-
+			}
 			case OP_nextvalue:
 			case OP_nextname:
 			{

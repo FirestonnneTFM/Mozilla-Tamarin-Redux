@@ -1012,7 +1012,7 @@ namespace avmplus
 	OP* CodegenMIR::callIns(sintptr addr, uint32 argCount, MirOpcode code)
 	{
 		#ifdef DEBUGGER
-		if (!(code & MIR_oper))
+		if (!(code & MIR_oper) && core->debugger())
 			saveState();
 		#endif
 
@@ -1088,7 +1088,7 @@ namespace avmplus
 			lastFunctionCall = where;// + (argCount+3)/4; // look past the last fnc arg
 
 		#ifdef DEBUGGER
-		if (!(code & MIR_oper))
+		if (!(code & MIR_oper) && core->debugger())
 			extendDefLifetime(where);
 		#endif
 
@@ -1104,7 +1104,7 @@ namespace avmplus
 	OP* CodegenMIR::callIndirect(MirOpcode code, OP* target, uint32 argCount, ...)
 	{
 		#ifdef DEBUGGER
-		if (!(code & MIR_oper))
+		if (!(code & MIR_oper) && core->debugger())
 			saveState();
 		#endif
 
@@ -1177,7 +1177,7 @@ namespace avmplus
 		va_end(ap);
 
 		#ifdef DEBUGGER
-		if (!(code & MIR_oper))
+		if (!(code & MIR_oper) && core->debugger())
 			extendDefLifetime(where);
 		#endif
 
@@ -1378,7 +1378,13 @@ namespace avmplus
 		int scopeTop = state->verifier->scopeBase+state->scopeDepth;
 		for (int i=0, n = stackBase+state->stackDepth; i < n; i++)
 		{
-			#ifndef DEBUGGER
+			#ifdef DEBUGGER
+			if (!core->debugger() && (i >= scopeTop && i < stackBase))
+			{
+				// not live
+				continue;
+			}
+			#else
 			if (i >= scopeTop && i < stackBase)
 			{
 				// not live
@@ -1406,40 +1412,43 @@ namespace avmplus
 				v.stored = true;
 
 				#ifdef DEBUGGER
-				// store the traits ptr so the debugger knows what was stored.
-				if (i < state->verifier->local_count)
+				if (core->debugger())
 				{
-					storeIns(InsConst((uintptr)v.traits ), i*sizeof(Traits*), localTraits);
-					storeIns(Ins(MIR_usea, v.ins), i*sizeof(void*), localPtrs);
-				}
-				else if (i >= state->verifier->scopeBase && i < state->verifier->scopeBase + state->verifier->max_scope) 
-				{
-					OP* scope;
-
-					if (i < scopeTop)
+					// store the traits ptr so the debugger knows what was stored.
+					if (i < state->verifier->local_count)
 					{
-						Value& v = state->value(i);
-						Traits* t = v.traits;
+						storeIns(InsConst((uintptr)v.traits ), i*sizeof(Traits*), localTraits);
+						storeIns(Ins(MIR_usea, v.ins), i*sizeof(void*), localPtrs);
+					}
+					else if (i >= state->verifier->scopeBase && i < state->verifier->scopeBase + state->verifier->max_scope) 
+					{
+						OP* scope;
 
-						if (t == VOID_TYPE || t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE ||
-							t == NUMBER_TYPE || t == STRING_TYPE || t == NAMESPACE_TYPE)
+						if (i < scopeTop)
 						{
+							Value& v = state->value(i);
+							Traits* t = v.traits;
+
+							if (t == VOID_TYPE || t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE ||
+								t == NUMBER_TYPE || t == STRING_TYPE || t == NAMESPACE_TYPE)
+							{
+								scope = InsConst(0);
+							}
+							else
+							{
+								scope = Ins(MIR_use, v.ins);
+							}
+						}
+						else // not live
+						{
+							// warning, v.traits are garbage at this point, so don't use them
 							scope = InsConst(0);
 						}
-						else
-						{
-							scope = Ins(MIR_use, v.ins);
-						}
-					}
-					else // not live
-					{
-						// warning, v.traits are garbage at this point, so don't use them
-						scope = InsConst(0);
-					}
 
-					storeIns(scope, i * sizeof(void*), localPtrs);
+						storeIns(scope, i * sizeof(void*), localPtrs);
+					}
 				}
-				#endif //DEBUGGER
+				#endif // DEBUGGER
 			}
 		}
 	}
@@ -1680,7 +1689,7 @@ namespace avmplus
 	#endif
 
 #ifdef AVMPLUS_VERBOSE
-	GCHashtable* CodegenMIR::initMethodNames(AvmCore* /*core*/)
+	GCHashtable* CodegenMIR::initMethodNames(AvmCore* core)
 	{
 		#ifdef AVMPLUS_MAC_CARBON
 		// setjmpInit() is also called in the constructor, but initMethodNames() is
@@ -1786,12 +1795,15 @@ namespace avmplus
 		GCHashtable* names = new GCHashtable();
 
 		#ifdef DEBUGGER
-		names->add(DEBUGGERADDR(Debugger::debugFile), "Debugger::debugFile");
-		names->add(DEBUGGERADDR(Debugger::debugLine), "Debugger::debugLine");
-		names->add(DEBUGGERADDR(Debugger::_debugMethod), "Debugger::_debugMethod");
-		names->add(ENVADDR(MethodEnv::debugEnter), "MethodEnv::debugEnter");
-		names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
-		names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");
+		if (core->debugger())
+		{
+			names->add(DEBUGGERADDR(Debugger::debugFile), "Debugger::debugFile");
+			names->add(DEBUGGERADDR(Debugger::debugLine), "Debugger::debugLine");
+			names->add(DEBUGGERADDR(Debugger::_debugMethod), "Debugger::_debugMethod");
+			names->add(ENVADDR(MethodEnv::debugEnter), "MethodEnv::debugEnter");
+			names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
+			names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");
+		}
 		#endif
 
 		names->add(FUNCADDR(AvmCore::atomWriteBarrier), "AvmCore::atomWriteBarrier");
@@ -2230,18 +2242,18 @@ namespace avmplus
         #endif
 					 
 		#ifdef DEBUGGER
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    alloc local traits\n";
+		if (core->debugger())
+		{
+			#ifdef AVMPLUS_VERBOSE
+			if (verbose())
+				core->console << "    alloc local traits\n";
+			#endif
+			// pointers to traits so that the debugger can decode the locals
+			// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
+			localTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
+			localPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
+		}
 		#endif
-		#endif //DEBUGGER
-		
-		#ifdef DEBUGGER
-		// pointers to traits so that the debugger can decode the locals
-		// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
-		localTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
-		localPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
-		#endif //DEBUGGER
 
 		// whether this sequence is interruptable or not.
 		interruptable = (info->flags & AbstractFunction::NON_INTERRUPTABLE) ? false : true;
@@ -2270,12 +2282,15 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    alloc CallStackNode\n";
-		#endif
-		// Allocate space for the call stack
-		_callStackNode = InsAlloc(sizeof(CallStackNode));
+		if (core->debugger())
+		{
+			#ifdef AVMPLUS_VERBOSE
+			if (verbose())
+				core->console << "    alloc CallStackNode\n";
+			#endif
+			// Allocate space for the call stack
+			_callStackNode = InsAlloc(sizeof(CallStackNode));
+		}
 		#endif
 		
 		if (info->setsDxns())
@@ -2475,7 +2490,7 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		if (core->debugger)
+		if (core->debugger())
 		{
 			for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i)
 			{
@@ -3198,7 +3213,7 @@ namespace avmplus
 				saveState();
 				
 #ifdef DEBUGGER
-				if(core->sampling() && targetpc < state->pc)
+				if (core->debugger() && core->sampling() && targetpc < state->pc)
 				{
 					emitSampleCheck();
 				}
@@ -3412,7 +3427,7 @@ namespace avmplus
 				}
 
 				#ifdef DEBUGGER
-				if (core->debugger)
+				if (core->debugger())
 				{
 					callIns(MIR_cm, ENVADDR(MethodEnv::debugExit), 2,
 						ldargIns(_env), leaIns(0, _callStackNode));
@@ -5071,13 +5086,16 @@ namespace avmplus
 			case OP_debugfile:
 			{
 			#ifdef DEBUGGER
+			if (core->debugger())
+			{
 				// todo refactor api's so we don't have to pass argv/argc
-				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
+				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, _debugger),
 											InsConst((uintptr)core));
 				callIns(MIR_cm, DEBUGGERADDR(Debugger::debugFile), 2,
 						debugger,
 						InsConst(op1));
-			#endif // DEBUGGER
+			}
+			#endif
 			#ifdef VTUNE
 				Ins(MIR_file, op1);
 			#endif /* VTUNE */
@@ -5087,12 +5105,15 @@ namespace avmplus
 			case OP_debugline:
 			{
 			#ifdef DEBUGGER
+			if (core->debugger())
+			{
 				// todo refactor api's so we don't have to pass argv/argc
-				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
+				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, _debugger),
 											InsConst((uintptr)core));
 				callIns(MIR_cm, DEBUGGERADDR(Debugger::debugLine), 2,
 						debugger,
 						InsConst(op1));
+			}
 			#endif // DEBUGGER
 			#ifdef VTUNE
 				Ins(MIR_line, op1);
@@ -5115,7 +5136,7 @@ namespace avmplus
 		this->state = state;
 
 #ifdef DEBUGGER
-		if(core->sampling() && target < state->pc)
+		if (core->debugger() && core->sampling() && target < state->pc)
 		{
 			emitSampleCheck();
 		}
@@ -5426,12 +5447,12 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		InsDealloc(localPtrs);
-		InsDealloc(localTraits);
-		#endif
-
-		#if (defined DEBUGGER)
-		InsDealloc(_callStackNode);
+		if (core->debugger())
+		{
+			InsDealloc(localPtrs);
+			InsDealloc(localTraits);
+			InsDealloc(_callStackNode);
+		}
 		#endif
 
 		if (npe_label.nextPatchIns)
@@ -8782,7 +8803,7 @@ namespace avmplus
 				<< " activation.size " << activation.size << "\n";
 			displayStackTable();
 		}
-		#endif //DEBUGGER
+		#endif 
 	}
 
 	/**

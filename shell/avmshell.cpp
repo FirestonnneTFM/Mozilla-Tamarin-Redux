@@ -329,11 +329,7 @@ namespace avmshell
 		Stringp errorMessage = getErrorMessage(kStackOverflowError);
 		Atom args[2] = { nullObjectAtom, errorMessage->atom() };
 		Atom errorAtom = toplevel->errorClass()->construct(1, args);
-		Exception *exception = new (GetGC()) Exception(errorAtom
-                                                  #ifdef DEBUGGER
-												  ,this
-                                                  #endif
-		);
+		Exception *exception = new (GetGC()) Exception(this, errorAtom);
 
 		// Restore stack overflow checks
 		inStackOverflow = false;
@@ -355,11 +351,7 @@ namespace avmshell
 			Stringp errorMessage = getErrorMessage(kScriptTerminatedError);
 			Atom args[2] = { nullObjectAtom, errorMessage->atom() };
 			Atom errorAtom = toplevel->errorClass()->construct(1, args);
-			Exception *exception = new (GetGC()) Exception(errorAtom
-													  #ifdef DEBUGGER
-													  ,this
-													  #endif
-			                                          );
+			Exception *exception = new (GetGC()) Exception(this, errorAtom);
 			exception->flags |= Exception::EXIT_EXCEPTION;
 			throwException(exception);
 		}
@@ -417,16 +409,14 @@ namespace avmshell
 		return sizeof(ShellToplevel);
 	}
 
-	Shell::Shell(MMgc::GC *gc) : AvmCore(gc)
+	Shell::Shell(MMgc::GC* gc) : AvmCore(gc)
 	{
-		#ifdef DEBUGGER
-		debugCLI = NULL;
-		#endif
-
 		systemClass = NULL;
 		
 		gracePeriod = false;
 		inStackOverflow = false;
+
+		allowDebugger = -1;	// aka "not yet set" 
 
         #if defined(AVM_SHELL_PLATFORM_HOOKS)
 		    consoleOutputStream = AVMShellNewConsoleStream(gc);
@@ -490,15 +480,6 @@ namespace avmshell
 			initBuiltinPool();
 			initShellPool();
 
-			#ifdef DEBUGGER
-			// Create the debugger
-			debugCLI = new (GetGC()) DebugCLI(this);
-			debugger = debugCLI;
-
-			// Create the profiler
-			profiler = new (GetGC()) Profiler(this);
-			#endif
-
 			SystemClass::user_argc = argc-1;
 			SystemClass::user_argv = &argv[1];
 		
@@ -519,10 +500,6 @@ namespace avmshell
 				
 			// parse new bytecode
 			handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
-
-			#ifdef DEBUGGER
-			delete profiler;
-			#endif
 		}
 		CATCH(Exception *exception)
 		{
@@ -534,7 +511,6 @@ namespace avmshell
 			if (exception->getStackTrace()) {
 				console << exception->getStackTrace()->format(this) << '\n';
 			}
-			delete profiler;
 			#else
 			// [ed] always show error, even in release mode,
 			// see bug #121382
@@ -608,7 +584,8 @@ namespace avmshell
 			const char* st_name = NULL;
 			char *st_mem = NULL;
 #endif
-
+			
+			bool nodebugger = false;
 			for (int i=1; i<argc && endFilenamePos == -1; i++) {
 #ifdef UNDER_CE
 				TCHAR *arg = argv[i];
@@ -621,6 +598,10 @@ namespace avmshell
 					if (arg[1] == 'D') {
 						if (!strcmp(arg+2, "timeout")) {
 							config.interrupts = true;
+						}
+						else if (!strcmp(arg+2, "nodebugger")) {
+							// allow this option even in non-DEBUGGER builds to make test scripts simpler
+							nodebugger = true;
 						}
 						#ifdef AVMPLUS_IA32
 						else if (!strcmp(arg+2, "nosse")) {
@@ -808,6 +789,8 @@ namespace avmshell
 					filename = arg;
 				}
 			}
+			
+			this->allowDebugger = nodebugger ? 0 : 1;
 		
 			if (!filename && !do_interactive
 
@@ -870,19 +853,12 @@ namespace avmshell
 #endif
 			
 			#ifdef DEBUGGER
-			// Create the debugger
-			debugCLI = new (GetGC()) DebugCLI(this);
-			debugger = debugCLI;
-
-			// Create the profiler
-			profiler = new (GetGC()) Profiler(this);
-
 			if (do_debugger)
 			{
 				// Activate the debug CLI and stop at
 				// start of program
-				debugCLI->activate();
-				debugCLI->stepInto();
+				debugCLI()->activate();
+				debugCLI()->stepInto();
 			}
 			#endif
 
@@ -940,9 +916,6 @@ namespace avmshell
 				bool isValid = f.valid();
 				if (!isValid) {
                     console << "cannot open file: " << filename << "\n";
-					#ifdef DEBUGGER
-					delete profiler;
-					#endif
 					if (!do_interactive) 
 						return(1);
 				}
@@ -1189,10 +1162,6 @@ namespace avmshell
 				}
 			}
 			#endif //AVMPLUS_INTERACTIVE
-
-			#ifdef DEBUGGER
-			delete profiler;
-			#endif
 		}
 		CATCH(Exception *exception)
 		{
@@ -1204,7 +1173,6 @@ namespace avmshell
 			if (exception->getStackTrace()) {
 				console << exception->getStackTrace()->format(this) << '\n';
 			}
-			delete profiler;
 			#else
 			// [ed] always show error, even in release mode,
 			// see bug #121382

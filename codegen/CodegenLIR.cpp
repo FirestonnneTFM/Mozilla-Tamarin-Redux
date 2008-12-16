@@ -469,7 +469,7 @@ namespace avmplus
         v.ins = o;
         lirout->store(o, vars, i*8);
         DEBUGGER_ONLY(
-            if (int(i) < state->verifier->local_count) {
+            if (core->debugger() && int(i) < state->verifier->local_count) {
                 lirout->store(InsConst(v.traits), varTraits, i*sizeof(Traits*));
 			}
         )
@@ -894,6 +894,7 @@ namespace avmplus
 
     class CopyPropagation: public LirWriter
     {
+		AvmCore* core;
         GC *gc;
         LInsp *tracker; // we use WB() macro, so no DWB() here.
         LIns *vars;
@@ -901,8 +902,8 @@ namespace avmplus
         BitSet dirty;
         bool hasExceptions;
     public:
-        CopyPropagation(GC *gc, LirWriter *out, int nvar, bool ex) 
-            : LirWriter(out), gc(gc), nvar(nvar), dirty(gc,nvar), hasExceptions(ex)
+        CopyPropagation(AvmCore* core, GC *gc, LirWriter *out, int nvar, bool ex) 
+            : LirWriter(out), core(core), gc(gc), nvar(nvar), dirty(gc,nvar), hasExceptions(ex)
         {
             LInsp *a = (LInsp *) gc->Alloc(nvar*sizeof(LInsp), GC::kZero);
             WB(gc, this, &tracker, a);
@@ -999,6 +1000,8 @@ namespace avmplus
 
         LIns *insCall(const CallInfo *call, LInsp args[]) {
             #ifdef DEBUGGER
+			if (core->debugger())
+			{
                 DEFER_STORES(
                     if (!call->_cse)
                         saveState();
@@ -1008,13 +1011,14 @@ namespace avmplus
                 if (!call->_cse)
                     clearState();
                 return i;
-            #else
-                DEFER_STORES(
-                    if (hasExceptions && !call->_cse)
-                        saveState();
-                )
-                return out->insCall(call, args);
+			}
             #endif
+
+			DEFER_STORES(
+				if (hasExceptions && !call->_cse)
+					saveState();
+			)
+			return out->insCall(call, args);
         }
 
         // TODO
@@ -1146,7 +1150,7 @@ namespace avmplus
             lirout = new (gc) CfgCseFilter(loadfilter, gc);
         }
         lirout = new (gc) Specializer(lirout, core->config);
-        CopyPropagation *copier = new (gc) CopyPropagation(gc, lirout,
+        CopyPropagation *copier = new (gc) CopyPropagation(core, gc, lirout,
             framesize, info->hasExceptions() != 0);
         lirout = this->copier = copier;
 		
@@ -1192,19 +1196,22 @@ namespace avmplus
 		coreAddr = InsConst(core);
 
         #ifdef DEBUGGER
-		// pointers to traits so that the debugger can decode the locals
-		// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
-		varTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
-		varPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
-        verbose_only( if (lirbuf->names) {
-            lirbuf->names->addName(varTraits, "varTraits");
-            lirbuf->names->addName(varPtrs, "varPtrs");
-        })
-        // in LIR the variables never move around, so initialize varPtrs once and we're done.
-        for (int i=0; i < state->verifier->max_scope && !outOMem(); i++) {
-            storeIns(leaIns(i*sizeof(double), vars), i*sizeof(void*), varPtrs);
-        }
-		#endif //DEBUGGER
+		if (core->debugger())
+		{
+			// pointers to traits so that the debugger can decode the locals
+			// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
+			varTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
+			varPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
+			verbose_only( if (lirbuf->names) {
+				lirbuf->names->addName(varTraits, "varTraits");
+				lirbuf->names->addName(varPtrs, "varPtrs");
+			})
+			// in LIR the variables never move around, so initialize varPtrs once and we're done.
+			for (int i=0; i < state->verifier->max_scope && !outOMem(); i++) {
+				storeIns(leaIns(i*sizeof(double), vars), i*sizeof(void*), varPtrs);
+			}
+		}
+		#endif
 
 		// whether this sequence is interruptable or not.
 		interruptable = (info->flags & AbstractFunction::NON_INTERRUPTABLE) ? false : true;
@@ -1223,11 +1230,14 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		// Allocate space for the call stack
-		csn = InsAlloc(sizeof(CallStackNode));
-        verbose_only( if (lirbuf->names) {
-            lirbuf->names->addName(csn, "csn");
-        })
+		if (core->debugger())
+		{
+			// Allocate space for the call stack
+			csn = InsAlloc(sizeof(CallStackNode));
+			verbose_only( if (lirbuf->names) {
+				lirbuf->names->addName(csn, "csn");
+			})
+		}
 		#endif
 
 		if (info->setsDxns())
@@ -1385,7 +1395,7 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		if (core->debugger)
+		if (core->debugger())
 		{
 			for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope && !outOMem(); ++i)
 			{
@@ -2158,7 +2168,7 @@ namespace avmplus
 				intptr_t targetpc = op1;
 
 #ifdef DEBUGGER
-				if(core->sampling() && targetpc < state->pc)
+				if (core->debugger() && core->sampling() && targetpc < state->pc)
 				{
 					emitSampleCheck();
 				}
@@ -2210,7 +2220,7 @@ namespace avmplus
 				}
 
 				#ifdef DEBUGGER
-				if (core->debugger)
+				if (core->debugger())
 				{
 					callIns(FUNCTIONID(debugExit), 2,
 						env_param, csn);
@@ -3502,12 +3512,15 @@ namespace avmplus
 			{
                 PERFM_NVPROF("emit(debugfile",1);
 			#ifdef DEBUGGER
+			if (core->debugger())
+			{
 				// todo refactor api's so we don't have to pass argv/argc
-				LIns* debugger = loadIns(LIR_ldc, offsetof(AvmCore, debugger),
+				LIns* debugger = loadIns(LIR_ldc, offsetof(AvmCore, _debugger),
 											coreAddr);
 				callIns(FUNCTIONID(debugFile), 2,
 						debugger,
 						InsConst(op1));
+			}
 			#endif // DEBUGGER
            #ifdef VTUNE
 				Ins(LIR_file, InsConst(op1));
@@ -3519,12 +3532,15 @@ namespace avmplus
 			{
                 PERFM_NVPROF("emit(debugline",1);
 			#ifdef DEBUGGER
+			if (core->debugger())
+			{
 				// todo refactor api's so we don't have to pass argv/argc
-				LIns* debugger = loadIns(LIR_ldc, offsetof(AvmCore, debugger),
+				LIns* debugger = loadIns(LIR_ldc, offsetof(AvmCore, _debugger),
 											coreAddr);
 				callIns(FUNCTIONID(debugLine), 2,
 						debugger,
 						InsConst(op1));
+			}
 			#endif // DEBUGGER
 			#ifdef VTUNE
 				Ins(LIR_line, InsConst(op1));
@@ -3555,7 +3571,7 @@ namespace avmplus
 		this->state = state;
 
 #ifdef DEBUGGER
-		if(core->sampling() && target < state->pc)
+		if (core->debugger() && core->sampling() && target < state->pc)
 		{
 			emitSampleCheck();
 		}
@@ -3850,9 +3866,12 @@ namespace avmplus
         }
 
 		#ifdef DEBUGGER
-		Ins(LIR_live, csn);
-		Ins(LIR_live, varPtrs);
-		Ins(LIR_live, varTraits);
+		if (core->debugger())
+		{
+			Ins(LIR_live, csn);
+			Ins(LIR_live, varPtrs);
+			Ins(LIR_live, varTraits);
+		}
 		#endif
 
         for (int i=0, n=patches.size(); i < n; i++) {
