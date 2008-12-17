@@ -501,7 +501,7 @@ namespace avmplus
 		class StringData
 		{
 		public:
-			String* str;		// needed as a stack reference to ensure String isn't collected, since ptrs might be interior
+			String* volatile str;		// needed as a stack reference to ensure String isn't collected, since ptrs might be interior
 			void* data;
 		public:
 			explicit StringData(String* _str);
