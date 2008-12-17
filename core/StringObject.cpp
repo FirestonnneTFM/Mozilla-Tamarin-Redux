@@ -2038,7 +2038,7 @@ namespace avmplus
 		int32_t count = (dstLen < srcLen) ? dstLen : srcLen;  // choose smaller of two
 		const wchar *dstend = dst + count;
 
-		while(dst < dstend && 0 == (ret = (int32_t)(*src - *dst)))
+		while(dst < dstend && (ret = (int32_t)(*src - *dst)) == 0)
 		{
 			++src, ++dst;
 		}
@@ -2050,8 +2050,7 @@ namespace avmplus
 				ret = -1;
 			else if (srcLen > dstLen)
 				ret = 1;
-			else
-				; // really equal
+			// else really equal
 		}
 		return ret;
 	}
@@ -2062,7 +2061,7 @@ namespace avmplus
 		int32_t ret = 0;
 		const wchar *dstend = dst + len;
 
-		while(dst < dstend && *src && 0 == (ret = (int32_t)(((wchar)*src) - *dst)) )
+		while (dst < dstend && *src && (ret = (int32_t)(((wchar)*src) - *dst)) == 0)
 		{
 			++src, ++dst;
 		}
