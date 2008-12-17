@@ -212,23 +212,11 @@ namespace avmplus
 	{
 		if (!str)
 			return *this << "(null)";
-
-		String::Pointers ptrs;
-		ptrs.pv = (void*) str->getData();
-		int32_t length = str->length();
-		switch (str->getWidth())
+		
+		StringIndexer str_idx(str);
+		for (int i=0, n=str_idx->length(); i<n; i++) 
 		{
-			case String::k8:
-				while (length--)
-					*this << (wchar) (*ptrs.p8++ & 0xFF);
-					break;
-			case String::k16:
-				while (length--)
-					*this << *ptrs.p16++;
-					break;
-			default:
-				// TODO-32: print 32-bit data
-				AvmAssert(false);
+			*this << (wchar)str_idx[i];
 		}
 		return *this;
 	}

@@ -50,6 +50,11 @@
 namespace avmplus
 {
 
+// Pointers is used in a union, so it cannot have a ctor... this is a convenient macro for a common usage.
+#define GET_STRING_POINTERS(STR, PTRS) \
+	String::StringData _strdata##PTRS(const_cast<String*>(STR)); String::Pointers PTRS; PTRS.pv = _strdata##PTRS.data;
+
+
 /////////////////////////// Helpers: Widening //////////////////////////////
 
 	inline void _widen8_16(const char* src, wchar* dst, int32_t len)
@@ -173,7 +178,7 @@ namespace avmplus
 		new (s) String(len, (master->m_bitsAndFlags & TSTR_WIDTH_MASK) | (kDependent << TSTR_TYPE_SHIFT));
 		//newStr->m_dependent.master = master;
 		WBRC( gc, s, &s->m_dependent.master, master );
-		char* data = (kStatic == master->getType()) ? master->m_static.p8 : master->m_direct.c8;
+		char* data = (master->getType() == kStatic) ? master->m_static.p8 : master->m_direct.c8;
 		s->m_dependent.p.p8 = data + start * master->getWidth();
 		return s;
 	}
@@ -281,7 +286,10 @@ namespace avmplus
 			return NULL;
 
 		Stringp newStr = createDirect(_gc(this), NULL, length(), w);
-		if (!_copyBuffers(getData(), (void*) newStr->getData(), length(), getWidth(), w))
+		
+		GET_STRING_POINTERS(this, thisPtrs)
+		GET_STRING_POINTERS(newStr, newStrPtrs)
+		if (!_copyBuffers(thisPtrs.pv, newStrPtrs.pv, length(), getWidth(), w))
 			return NULL;
 
 		return newStr;
@@ -291,7 +299,8 @@ namespace avmplus
 	{
 		if (getType() != kDependent)
 			return (Stringp) this;
-		return createDirect(_gc(this), getData(), m_length, getWidth());
+		GET_STRING_POINTERS(this, thisPtrs)
+		return createDirect(_gc(this), thisPtrs.pv, m_length, getWidth());
 	}
 
 /////////////////////////////// Destructors ////////////////////////////////
@@ -429,9 +438,8 @@ namespace avmplus
 			start = 0;
 
 		int32_t result;
-		Pointers self, test;
-		self.pv = (void*) getData();
-		test.pv = (void*) other.getData();
+		GET_STRING_POINTERS(this, self)
+		GET_STRING_POINTERS(&other, test)
 		if (start) switch (other.getWidth())
 		{
 			case k8:  test.p8  += start; break;
@@ -458,8 +466,7 @@ namespace avmplus
 		if (len != length())
 			return false;
 
-		Pointers ptrs;
-		ptrs.pv = (void*) getData();
+		GET_STRING_POINTERS(this, ptrs)
 		bool ok = true;
 		switch (getWidth())
 		{
@@ -482,8 +489,7 @@ namespace avmplus
 		if (len != length())
 			return false;
 
-		Pointers ptrs;
-		ptrs.pv = (void*) getData();
+		GET_STRING_POINTERS(this, ptrs)
 		bool ok = true;
 		switch (getWidth())
 		{
@@ -517,8 +523,8 @@ namespace avmplus
 			return false;
 
 		Width w = getWidth();
-		Pointers p;
-		p.pv = (void*) getData();
+
+		GET_STRING_POINTERS(this, p)
 
 		for (int32_t i = length(); i > 0; i--)
 		{
@@ -590,8 +596,7 @@ namespace avmplus
 		uint32_t hashCode = 0;	// must be uint32!
 		if (m_length != 0)
 		{
-			Pointers p;
-			p.pv = (void*) getData();
+			GET_STRING_POINTERS(this, p)
 			int32_t len = m_length;
 
 			switch (getWidth())
@@ -614,26 +619,22 @@ namespace avmplus
 
 //////////////////////////////// Accessors /////////////////////////////////
 
-	const void* String::getData() const
+	String::StringData::StringData(String* _str) : str(_str), data(NULL)
 	{
-		const void* p = NULL;
-		switch (getType())
+		if (_str) switch (_str->getType())
 		{
-			case kDirect:		p = &m_direct.c8; break;
-			case kStatic:		p = m_static.p8;  break;
-			case kDependent:	p = m_dependent.p.p8;  break;
-			default:
-				AvmAssert(false);
+			case kDirect:		data = &_str->m_direct.c8; break;
+			case kStatic:		data = _str->m_static.p8;  break;
+			case kDependent:	data = _str->m_dependent.p.p8;  break;
+			default:			AvmAssert(false); break; // init to null to silence compiler 
 		}
-		return p;
 	}
 
 	String::CharAtType String::charAt(int32_t index) const
 	{
 		AvmAssert(index >= 0 && index < m_length);
 
-		Pointers ptrs;
-		ptrs.p8 = (char*) getData();
+		GET_STRING_POINTERS(this, ptrs)
 
 		utf32_t ch;
 		switch (getWidth())
@@ -645,9 +646,11 @@ namespace avmplus
 		return (String::CharAtType)ch;
 	}
 
-	String::CharAtType String::charAt(const Pointers& r, int32_t index) const
+	String::CharAtType String::charAt(const StringData& data, int32_t index) const
 	{
 		AvmAssert(index >= 0 && index < m_length);
+		Pointers r;
+		r.pv = const_cast<void*>(data.data);
 		utf32_t ch;
 		switch (getWidth())
 		{
@@ -687,12 +690,13 @@ namespace avmplus
 		if (start < 0) 
 			start = 0;
 
-		Pointers self, test;
 		Width w1 = getWidth();
 		Width w2 = substr->getWidth();
 
-		self.p8 = (char*) getData() + start * w1;
-		test.p8 = (char*) substr->getData();
+		GET_STRING_POINTERS(this, self)
+		self.p8 += start * w1;
+
+		GET_STRING_POINTERS(substr, test)
 
 		for ( ; start <= right; ++start)
 		{
@@ -729,9 +733,10 @@ namespace avmplus
 		Width w1 = getWidth();
 		Width w2 = substr->getWidth();
 
-		Pointers self, test;
-		self.p8 = (char*) getData() + startPos * w1;
-		test.p8 = (char*) substr->getData();
+		GET_STRING_POINTERS(this, self)
+		self.p8 += startPos * w1;
+
+		GET_STRING_POINTERS(substr, test)
 
 		for ( ; startPos >= 0 ; --startPos )
 		{
@@ -763,8 +768,10 @@ namespace avmplus
 
 		Width w = getWidth();
 
-		Pointers self, test;
-		self.p8 = (char*) getData() + start * w;
+		GET_STRING_POINTERS(this, self)
+		self.p8 += start * w;
+
+		Pointers test;
 		test.p8 = (char*) p;
 
 		for ( ; start <= right; ++start)
@@ -787,12 +794,10 @@ namespace avmplus
 		if (len < 0)
 			len = Length(p);
 
-		Pointers ptrs;
-		ptrs.pv = (void*) getData();
-
+		StringData thisData(this);
 		while (len--)
 		{
-			utf32_t ch1 = charAt(ptrs, pos++);
+			utf32_t ch1 = charAt(thisData, pos++);
 			utf32_t ch2 = utf32_t(*p++ & 0xFF);
 			if (caseless && unicharToUpper(ch1) != unicharToUpper(ch2))
 				return false;
@@ -804,15 +809,6 @@ namespace avmplus
 
 ///////////////////////////// Concatenation ////////////////////////////////
 
-	// It appears that VC9 does a bad job with this method when attempting
-	// to optimize for speed. The acceptance test ecma3/GlobalObject/e15_1_2_5_1.as
-	// fails in this methods if Optimize for Speed is turned on (Win64 only).
-	// Therefore, optimize for speed is turned of for this method.
-
-#if defined( AVMPLUS_64BIT ) && defined( _MSC_VER )
-	#pragma optimize("t",off)
-#endif
-
 	Stringp String::concatStrings(Stringp leftStr, Stringp rightStr)
 	{
 		if (leftStr == NULL || leftStr->m_length == 0)
@@ -820,27 +816,37 @@ namespace avmplus
 		if (rightStr == NULL || rightStr->m_length == 0)
 			return leftStr;
 
-		String* s = leftStr->append(rightStr->getData(), rightStr->length(), rightStr->getWidth());
+		String* s = leftStr->append(rightStr, NULL, 0, kAuto);
 		return s;
 	}
 
-#if defined( AVMPLUS_64BIT ) && defined( _MSC_VER )
-	#pragma optimize("",on)
-#endif
-
-	Stringp String::append(const String* rightStr)
+	Stringp String::append(Stringp rightStr)
 	{
 		if (rightStr == NULL || rightStr->length() == 0)
 			return this;
-		return append(rightStr->getData(), rightStr->length(), rightStr->getWidth());
+		return append(rightStr, NULL, 0, kAuto);
 	}
 
-	Stringp String::append(const void* buffer, int32_t numChars, Width rightWidth)
-	{
-		AvmAssert(rightWidth != kAuto);
+	// Come here either with inStr non-NULL and other values == 0, or vice versa
+	// This weird construct is necessary so MMgc can find inStr on the stack when
+	// garbage-collecting during a call to a creation routine. On 64-bit systems,
+	// there are massive problems with RCObject pointers getting lost, and internal
+	// pointers to that object not being recognized.
 
-		if (buffer == NULL || numChars <= 0)
+	Stringp String::append(Stringp inStr, const void* buffer, int32_t numChars, Width rightWidth)
+	{
+		if (inStr != NULL)
+		{
+			// 64-bit optimizer problem: use getData() as argument to _copyBuffers()
+			// to keep the inStr pointer alive as long as possible
+			// buffer = inStr->getData();
+			numChars = inStr->length();
+			rightWidth = inStr->getWidth();
+		}
+		else if (buffer == NULL || numChars <= 0)
 			return this;
+
+		AvmAssert(rightWidth != kAuto);
 
 		MMgc::GC* gc = _gc(this);
 
@@ -870,6 +876,8 @@ namespace avmplus
 		int32_t start = 0;	// string start for dependent strings
 		char* data;
 
+		GET_STRING_POINTERS(master, masterPtrs)
+
 		// it is possible to append if
 		// 1) leftStr is a kDirect string and charsUsed == 0
 		// 2) leftStr is a kDependent string and the end matches the master's real end
@@ -882,7 +890,7 @@ namespace avmplus
 				break;
 			case kDependent:
 				data = m_dependent.p.p8;
-				start = int32_t(data - (char*) master->getData());
+				start = int32_t(data - masterPtrs.p8);
 				if ((start + m_length) != master->m_length + charsUsed)
 					charsLeft = 0;
 				break;
@@ -890,11 +898,14 @@ namespace avmplus
 				data = m_static.p8;
 		}
 
+		GET_STRING_POINTERS(inStr, inStrPtrs)
+
 		// the big check: are there enough chars left?
 		if (numChars <= charsLeft)
 		{
 			// the right-hand string fits into the buffer end
-			_copyBuffers(buffer, data + m_length * leftWidth, numChars, leftWidth, rightWidth);
+			// use getData() here as late as possible
+			_copyBuffers(buffer ? buffer : inStrPtrs.pv, data + m_length * leftWidth, numChars, leftWidth, rightWidth);
 
 			charsUsed += numChars;
 			charsLeft -= numChars;
@@ -904,13 +915,11 @@ namespace avmplus
 			if (charsLeft)
 			{
 				int32_t end = master->m_length + charsUsed;
-				Pointers ptr;
-				ptr.pv = (void*) master->getData();
 				switch (newWidth)
 				{
-					case k8:  ptr.p8 [end] = 0; break;
-					case k16: ptr.p16[end] = 0; break;
-					default : ptr.p32[end] = 0; break;
+					case k8:  masterPtrs.p8 [end] = 0; break;
+					case k16: masterPtrs.p16[end] = 0; break;
+					default : masterPtrs.p32[end] = 0; break;
 				}
 			}
 #endif
@@ -927,8 +936,8 @@ namespace avmplus
 					  &newStr->m_direct.c8, 
 					  m_length, 
 					  leftWidth, newWidth);
-		// append src
-		_copyBuffers(buffer, 
+		// append src; use getData() here as late as possible
+		_copyBuffers(buffer ? buffer : inStrPtrs.pv, 
 					  ptr,
 					  numChars, 
 					  rightWidth, newWidth);
@@ -985,7 +994,8 @@ namespace avmplus
 		{
 			// get the string offset
 			master = m_dependent.master;
-			int32_t offset = int32_t(m_dependent.p.p8 - (char*) master->getData()) / master->getWidth();
+			GET_STRING_POINTERS(master, masterPtrs)
+			int32_t offset = int32_t(m_dependent.p.p8 - masterPtrs.p8) / master->getWidth();
 			// TODO: possible 32-bit overflow for a very huge dependent string
 			start += offset;
 			end += offset;
@@ -1047,7 +1057,7 @@ namespace avmplus
 
 	bool String::parseIndex(uint32_t& result) const
 	{
-		Pointers ptrs;
+		GET_STRING_POINTERS(this, ptrs)
 		int64_t n = 0;
 		uint32_t uch;
 
@@ -1059,8 +1069,6 @@ namespace avmplus
 
 		if (m_length == 0 || m_length > 10)
 			goto bad;
-
-		ptrs.pv = (void*) getData();
 
 		// collect the value
 		for (int32_t i = 0; i < m_length; i++)
@@ -1095,7 +1103,7 @@ namespace avmplus
 
 	Atom String::getIntAtom() const
 	{
-		Pointers ptrs;
+		GET_STRING_POINTERS(this, ptrs)
 		int32_t n = 0;
 		uint32_t uch;
 
@@ -1106,8 +1114,6 @@ namespace avmplus
 
 		if (m_length == 0 || m_length > 10)
 			goto bad;
-
-		ptrs.pv = (void*) getData();
 
 		// collect the value
 		for (int32_t i = 0; i < m_length; i++)
@@ -1917,8 +1923,8 @@ namespace avmplus
 		// Flag to detect whether any changes were made
 		bool changed = false;
 
-		Pointers src, dst;
-		src.pv = (void*) getData();
+		GET_STRING_POINTERS(this, src)
+		Pointers dst;
 
 		// 0xFF is a special case: ToUpper(0xFF) == 0x178, so we need a wider string
 		// if the string contains 0xFF
@@ -1989,11 +1995,10 @@ namespace avmplus
 
 	bool String::isWhitespace() const
 	{
-		Pointers ptrs;
-		ptrs.pv = (void*) getData();
+		StringData thisData(const_cast<String*>(this));
 		for (int32_t i = 0 ; i < length(); i++)
 		{
-			utf32_t ch = charAt(ptrs, i);
+			utf32_t ch = charAt(thisData, i);
 			if (ch > 0xFFFF || !isSpace((wchar) ch))
 				return false;
 		}
@@ -2108,6 +2113,7 @@ namespace avmplus
 
 	UTF16String* String::toUTF16String() const
 	{
+		GET_STRING_POINTERS(this, ptrs)
 		MMgc::GC* gc = _gc(this);
 		UTF16String* s;
 		switch (getWidth())
@@ -2115,18 +2121,18 @@ namespace avmplus
 			case String::k8:
 				// don't need to add 1 to m_length because m_buffer already includes 1
 				s = new (gc, m_length * sizeof(wchar)) UTF16String(m_length);
-				_copyBuffers(getData(), s->m_buffer, m_length, k8, k16);
+				_copyBuffers(ptrs.pv, s->m_buffer, m_length, k8, k16);
 				s->m_buffer[m_length] = 0;
 				break;
 			case String::k16:
 				// don't need to add 1 to m_length because m_buffer already includes 1
 				s = new (gc, m_length * sizeof(wchar)) UTF16String(m_length);
-				_copyBuffers(getData(), s->m_buffer, m_length, k16, k16);
+				_copyBuffers(ptrs.pv, s->m_buffer, m_length, k16, k16);
 				s->m_buffer[m_length] = 0;
 				break;
 			default:
 			{
-				const utf32_t* src = (const utf32_t*) getData();
+				const utf32_t* src = ptrs.p32;
 				const utf32_t* p = src;
 				int32_t count = 0, len = m_length;
 				while (len--)
@@ -2730,7 +2736,8 @@ decodeUtf8:
 
 	UTF8String* UTF8String::create8(const String* s)
 	{
-		const int8_t* buf = (const int8_t*) s->getData();
+		GET_STRING_POINTERS(s, ptrs)
+		const int8_t* buf = (const int8_t*) ptrs.p8;
 		int32_t count = 0;
 		int32_t len = s->length();
 		int32_t i;
@@ -2742,7 +2749,7 @@ decodeUtf8:
 		char* dstBuf = s8->m_buffer;
 
 		dstBuf[count] = 0;
-		buf = (const int8_t*) s->getData();
+		buf = (const int8_t*) ptrs.p8;
 
 		for (i = 0; i < len; i++, buf++)
 		{
@@ -2763,7 +2770,8 @@ decodeUtf8:
 
 	UTF8String* UTF8String::create16(const String* s)
 	{
-		const wchar* data = (const wchar*) s->getData();
+		GET_STRING_POINTERS(s, ptrs)
+		const wchar* data = ptrs.p16;
 		int32_t count = UnicodeUtils::Utf16ToUtf8(data, s->length(), NULL, 0);
 		// don't need to add 1 to count because m_buffer already includes 1
 		UTF8String* s8 = new (GC::GetGC(s), count) UTF8String(count);
@@ -2775,7 +2783,8 @@ decodeUtf8:
 #ifdef FEATURE_UTF32_SUPPORT
 	UTF8String* UTF8String::create32(const String* s)
 	{
-		const utf32_t* data = (const utf32_t*) s->getData();
+		GET_STRING_POINTERS(s, ptrs)
+		const utf32_t* data = ptrs.p32;
 		int32_t count = _ucs4ToUtf8(data, s->length(), NULL, 0);
 		// don't need to add 1 to count because m_buffer already includes 1
 		UTF8String* s8 = new (GC::GetGC(s), count) UTF8String(count);

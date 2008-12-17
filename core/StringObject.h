@@ -116,20 +116,6 @@ namespace avmplus
 		else but kAuto, this would create strings of that width. This is not recommended.
 		*/
 		static	const Width kDefaultWidth = kAuto;
-		/**
-		This is a union of three different pointers. To use it, call getData() and assign
-		the result to a Pointers member.
-		*/
-		struct Pointers
-		{
-			union
-			{
-				void*			pv;
-				char*			p8;
-				wchar*			p16;
-				utf32_t*		p32;
-			};
-		};
 
 		/**
 		Create a string using Latin-1 data. Characters are just widened and copied.
@@ -352,29 +338,28 @@ namespace avmplus
 		@param	src					the string to append
 		@return						the concatenated string
 		*/
-				Stringp	FASTCALL	append(const String* str);
-		/**
-		Append a character buffer with a given size and width. Of course, the width kAuto is
-		not allowed here - the character width should be supplied correctly!
-		@param	src					the source buffer
-		@param	numChars			the number of characters in that buffer
-		@param	width				the width of the buffer characters
-		@return						the concatenated string
-		*/
-				Stringp	FASTCALL	append(const void* buffer, int32_t numChars, Width charWidth);
+				Stringp	FASTCALL	append(Stringp str);
 		/*
 		Append a 8-bit-wide string. For Unicode, strings should be Latin1, not UTF8.
 		*/
-		inline	Stringp				appendLatin1(const char* p) { return append(p, Length(p), k8); }
-		inline	Stringp				appendLatin1(const char* p, int32_t len) { return append(p, len, k8); }
+		inline	Stringp				appendLatin1(const char* p) { return append(NULL, p, Length(p), k8); }
+		inline	Stringp				appendLatin1(const char* p, int32_t len) { return append(NULL, p, len, k8); }
 		/*
 		Append a 16-bit-wide string. For Unicode, strings should be UTF16, but this is not enforced
 		by this method: indeed, several callers expect to be able to create "illegal" UTF16 sequences
 		via this call, for backwards compatibility. Thus, this is a dangerous call and should be used with
 		caution (and is also the reason it is not named "appendUTF16").
 		*/
-		inline	Stringp				append16(const wchar* p) { return append(p, Length(p), k16); }
-		inline	Stringp				append16(const wchar* p, int32_t len) { return append(p, len, k16); }
+		inline	Stringp				append16(const wchar* p) { return append(NULL, p, Length(p), k16); }
+		inline	Stringp				append16(const wchar* p, int32_t len) { return append(NULL, p, len, k16); }
+#ifdef FEATURE_UTF32_SUPPORT
+		/*
+		Append a 32-bit-wide string. Do not use character values > 0x10FFFF, since these values cannot
+		be expressed as UTF-16 surrogate pairs.
+		*/
+		inline	Stringp				append32(const utf32_t* p) { return append(NULL, p, Length(p), k32); }
+		inline	Stringp				append32(const utf32_t* p, int32_t len) { return append(NULL, p, len, k32); }
+#endif
 		/**
 		Implement String.substr(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
@@ -442,16 +427,6 @@ namespace avmplus
 		*/
 				double				toNumber();
 		/**
-		Create a 0-terminated UTF-8 string out of this string.
-		*/
-				UTF8String*			toUTF8String() const;
-		/**
-		Create a 0-terminated UTF-16 string out of this string.
-		If this is a 32-bit string, characters > 0xFFFF are
-		converted to surrogate pairs.
-		*/
-				UTF16String*		toUTF16String() const;
-		/**
 		Check if this character is a valid space character.
 		*/
 		static	bool				isSpace(wchar ch);
@@ -498,9 +473,10 @@ namespace avmplus
 
 	private:
 		friend class StringIndexer;
+		friend class StUTF8String;
+		friend class StUTF16String;
 		friend class UTF8String;
 		friend class UTF16String;
-		friend class PrintWriter;
 
 								String(int32_t length, uint32_t bits);
 		inline	void			operator delete(void*) {}	// Strings cannot be deleted, therefore private
@@ -522,11 +498,39 @@ namespace avmplus
 		inline	int32_t			getCharsLeft() const		{ return (m_bitsAndFlags & TSTR_CHARSLEFT_MASK) >> TSTR_CHARSLEFT_SHIFT; }
 		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
 
-		union _direct
+		class StringData
+		{
+		public:
+			String* str;		// needed as a stack reference to ensure String isn't collected, since ptrs might be interior
+			void* data;
+		public:
+			explicit StringData(String* _str);
+			inline ~StringData() { str = NULL; data = NULL; }
+		private:
+			// do not create on the heap
+			void*		operator new(size_t) throw(); // unimplemented
+			void		operator delete(void*); // unimplemented
+		};
+
+		/**
+		This is a union of three different pointers. To use it, create a StringData on the stack.
+		*/
+		struct Pointers
+		{
+			union
 			{
-				char c8[1]; // actual size varies
-				wchar c16[1];
-				utf32_t	c32[1];
+				void*			pv;
+				char*			p8;
+				wchar*			p16;
+				utf32_t*		p32;
+			};
+		};
+		
+		union _direct
+		{
+			char c8[1]; // actual size varies
+			wchar c16[1];
+			utf32_t	c32[1];
 		};
 
 		struct _dependent
@@ -562,13 +566,26 @@ namespace avmplus
 				uint32_t FASTCALL	_hashCode();
 		// Do a raw buffer compare.
 		static	int32_t	FASTCALL	compare(const Pointers& r1, Width w1, const Pointers& r2, Width w2, int32_t len);
-		// Return the raw pointer to the string data.
-		const	void*	FASTCALL	getData() const;
+
 		/**
 		Use a Pointers instance to quickly access a character given the Pointers
 		instance containing the buffer start, and the string width. No index checks!
 		*/
-				CharAtType FASTCALL	charAt(const Pointers& r, int32_t index) const;
+				CharAtType FASTCALL	charAt(const StringData& data, int32_t index) const;
+		/**
+		Low-level append worker. Either inStr is non-NULL, or buffer/length is.
+		*/
+				Stringp				append(Stringp inStr, const void* buffer, int32_t numChars, Width width);
+		/**
+		Create a 0-terminated UTF-8 string out of this string. Private, only for use by StUTF8String.
+		*/
+				UTF8String*			toUTF8String() const;
+		/**
+		Create a 0-terminated UTF-16 string out of this string.
+		If this is a 32-bit string, characters > 0xFFFF are
+		converted to surrogate pairs. Private, only for use by StUTF16String.
+		*/
+				UTF16String*		toUTF16String() const;
 	};
 
 	// Compare helpers
@@ -608,24 +625,24 @@ namespace avmplus
 	{
 	public:
 		/// The constructor takes the string to index.
-		inline						StringIndexer(Stringp s) : m_str(s) { m_ptrs.pv = (void*) s->getData(); }
-		inline						~StringIndexer() { m_str = NULL; m_ptrs.pv = NULL; }
+		inline	explicit			StringIndexer(Stringp s) : m_strData(s) { }
 		/// Return the embedded string.
-		inline	Stringp				operator->() const { return m_str; }
+		inline	String*				operator->() const { return m_strData.str; }
 		/// Quick index operator.
-		inline	String::CharAtType	operator[](int index) const { return m_str->charAt(m_ptrs, index); }
+		inline	String::CharAtType	operator[](int index) const { return m_strData.str->charAt(m_strData, index); }
+
+	private:
+		String::StringData	m_strData;
 
 	private:
 		// do not create on the heap
-		inline	void*		operator new(size_t) throw() { return NULL; }
-		inline	void		operator delete(void*) {}
-		Stringp				m_str;
-		String::Pointers	m_ptrs;
+		void*		operator new(size_t) throw(); // unimplemented
+		void		operator delete(void*); // unimplemented
 	};
 
 	/**
-	The UTF8String class is simply a data buffer containing 0-terminated
-	UTF-8 data. Use String::toUTF8String() to create such a string.
+	The UTF8String class is simply a data buffer containing 0-terminated UTF-8 data. 
+	Use StUTF8String() to create such a string.
 	Note that the length() function returns the length not including the 0-terminator.
 	Also note that the string might contain interior NULL characters (if the original
 	String did) and thus String::Length, strlen, etc might return misleading values.
@@ -661,8 +678,8 @@ namespace avmplus
 	};
 
 	/**
-	The UTF16String class is simply a data buffer containing 0-terminated
-	UTF-16 data. Use String::toUTF16String() to create such a string.
+	The UTF16String class is simply a data buffer containing 0-terminated UTF-16 data. 
+	Use StUTF16String() to create such a string.
 	Note that the length() function returns the length not including the 0-terminator.
 	Also note that the string might contain interior NULL characters (if the original
 	String did) and thus String::Length, strlen, etc might return misleading values.
