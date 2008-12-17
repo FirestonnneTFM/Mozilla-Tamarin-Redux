@@ -275,8 +275,7 @@ namespace avmplus
 #ifdef DEBUGGER					
 		if(typeOrVTable < 7 && core->codeContext() && core->codeContext()->domainEnv()) {
 			// and in toplevel
-			// FIXME 64bit
-			typeOrVTable |= (uint32)(uintptr_t)core->codeContext()->domainEnv()->toplevel();
+			typeOrVTable |= (uintptr)core->codeContext()->domainEnv()->toplevel();
 		}
 #endif
 		AvmAssertMsg(s.sampleType == NEW_AUX_SAMPLE, "Sample stream corrupt - can only add info to an AUX sample.\n");
