@@ -1804,6 +1804,8 @@ namespace avmplus
 			names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
 			names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");
 		}
+		#else
+		(void)core;
 		#endif
 
 		names->add(FUNCADDR(AvmCore::atomWriteBarrier), "AvmCore::atomWriteBarrier");
