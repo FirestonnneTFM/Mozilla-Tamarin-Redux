@@ -119,30 +119,7 @@ ecma3/Array/e15_4_4_10:exhaustive slice test 3,    ppc-mac-tvm-release , expecte
 #####################################################
 # Win64 acceptance failures introduced by bug #465506
 # https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-as3/DescribeType/describeType:test 0, x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(263\)\), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(336\)\), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(409\)\), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(482\)\), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %0N \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %8q \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %B/ \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %FR \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u6N \), x64-win-tvm-release, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-as3/DescribeType/describeType:test 0, x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-e4x/Expressions/e11_1_4, x64-win-tvm-release-Ojit, skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(263\)\), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(336\)\), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(409\)\), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_4:escape\(String.fromCharCode\(482\)\), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u8t \), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %uCY \), x64-win-tvm-release-Ojit, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-as3/DescribeType/describeType:test 1[^0-9] , x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-as3/sampling/SimpleSampling, x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
 as3/ShellClasses/toplevel:System.freeMemory >0, x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_1:unescape\( %u1C \), x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u0Q \), x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u6T \), x64-win-tvm-releasedebugger, expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469670
 
 #########################################################
 # WinMobile acceptance failures introduced by bug #465506
