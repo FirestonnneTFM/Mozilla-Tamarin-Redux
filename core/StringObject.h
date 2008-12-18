@@ -174,16 +174,20 @@ namespace avmplus
 		virtual						~String();
 
 		/**
-		Create a string out of an ABC string pool stored in the given ByteArray.
-		Returns NULL on out-of-memory, or on bad UTF-8 data.
-		@param	core				the AvmCore instance to use
-		@param	buff				the ByteArray containing the string
-		@param	offset				the offset of the string
-		@param	len					the string length
-		@param	desiredWidth		the desired string width
-		@return						the String instance, or NULL on out-of-memory
-		static Stringp				newPoolString(AvmCore* core, const ByteArray *buff, uint32_t offset, uint32_t len, Width desiredWidth = kAuto);
+		Create a 0-terminated UTF-8 string out of this string. 
+		Most code should not use this call, but rather, should use the StUTF8String utility class instead.
+		If you call this, be aware that you must keep a reference to the UTF8String* itself (eg by DWB or on the stack)
+		to keep it from being collected; in particular, keeping the c_str() pointer will NOT prevent collection!
 		*/
+				UTF8String*			toUTF8String() const;
+		/**
+		Create a 0-terminated UTF-16 string out of this string.
+		If this is a 32-bit string, characters > 0xFFFF are converted to surrogate pairs. 
+		Most code should not use this call, but rather, should use the StUTF16String utility class instead.
+		If you call this, be aware that you must keep a reference to the UTF16String* itself (eg by DWB or on the stack)
+		to keep it from being collected; in particular, keeping the c_str() pointer will NOT prevent collection!
+		*/
+				UTF16String*		toUTF16String() const;
 		/**
 		Create a string with a given width out of this string. If the width is equal to the current
 		width, return this instance. If the desired width is too narrow to fit, or kAuto is passed
@@ -576,16 +580,6 @@ namespace avmplus
 		Low-level append worker. Either inStr is non-NULL, or buffer/length is.
 		*/
 				Stringp				append(Stringp inStr, const void* buffer, int32_t numChars, Width width);
-		/**
-		Create a 0-terminated UTF-8 string out of this string. Private, only for use by StUTF8String.
-		*/
-				UTF8String*			toUTF8String() const;
-		/**
-		Create a 0-terminated UTF-16 string out of this string.
-		If this is a 32-bit string, characters > 0xFFFF are
-		converted to surrogate pairs. Private, only for use by StUTF16String.
-		*/
-				UTF16String*		toUTF16String() const;
 	};
 
 	// Compare helpers
@@ -651,26 +645,13 @@ namespace avmplus
 	class UTF8String : public MMgc::GCObject
 	{
 	public:
-		/**
-		Convert a string index to an UTF-8 index. 
-		Return the original index if out of range.
-		*/
-				int32_t FASTCALL	toUtf8Index(int32_t pos);
-		/**
-		Convert an UTF-8 index to a string index.
-		Return the original index if < 0.
-		*/
-				int32_t FASTCALL	toIndex(int32_t uf8Pos);
-		///
 		inline	const char*			c_str() const { return m_buffer; }
-		///
 		inline	int32_t				length() const { return m_length; }
 	private:
-				int32_t				m_lastPos;
-				int32_t				m_lastUtf8Pos;
 				int32_t				m_length;
 				char				m_buffer[1];
 				friend class		String;
+				friend class		StIndexableUTF8String;
 									UTF8String(int32_t len);
 		static	UTF8String*			create8 (const String* s);
 		static	UTF8String*			create16(const String* s);
@@ -688,9 +669,7 @@ namespace avmplus
 	class UTF16String : public MMgc::GCObject
 	{
 	public:
-		///
 		inline	const wchar*	c_str() const { return m_buffer; }
-		///
 		inline	int32_t			length() const { return m_length; }
 	private:
 				int32_t			m_length;
@@ -712,7 +691,7 @@ namespace avmplus
 	
 	class StUTF8String
 	{
-	private:
+	protected:
 		UTF8String* str;
 	public:
 		inline explicit StUTF8String(Stringp s) : str(s ? s->toUTF8String() : NULL) {}
@@ -726,13 +705,35 @@ namespace avmplus
 			delete str;
 			#endif
 		}
-		inline UTF8String* operator->() const { return str; }
-		inline operator UTF8String*() { return str; }
-		inline operator UTF8String&() { return *str; }
+		inline	const char*			c_str() const { return str->c_str(); }
+		inline	int32_t				length() const { return str->length(); }
 	private:
 		// do not create on the heap
 		inline	void*		operator new(size_t) throw() { return NULL; }
 		inline	void		operator delete(void*) {}		
+	};
+
+	class StIndexableUTF8String : public StUTF8String
+	{
+	private:
+		int32_t		m_lastPos;
+		int32_t		m_lastUtf8Pos;
+
+	public:
+		
+		inline explicit StIndexableUTF8String(Stringp s) : StUTF8String(s), m_lastPos(0), m_lastUtf8Pos(0) {}
+
+		/**
+		Convert a string index to an UTF-8 index. 
+		Return the original index if out of range.
+		*/
+		int32_t FASTCALL toUtf8Index(int32_t pos);
+		
+		/**
+		Convert an UTF-8 index to a string index.
+		Return the original index if < 0.
+		*/
+		int32_t FASTCALL toIndex(int32_t uf8Pos);
 	};
 
 	class StUTF16String
@@ -751,9 +752,8 @@ namespace avmplus
 			delete str;
 			#endif
 		}
-		inline UTF16String* operator->() const { return str; }
-		inline operator UTF16String*() { return str; }
-		inline operator UTF16String&() { return *str; }
+		inline	const wchar*		c_str() const { return str->c_str(); }
+		inline	int32_t				length() const { return str->length(); }
 	private:
 		// do not create on the heap
 		inline	void*		operator new(size_t) throw() { return NULL; }

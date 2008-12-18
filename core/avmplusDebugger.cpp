@@ -218,8 +218,7 @@ namespace avmplus
 			Profiler* profiler = core->profiler();
 			if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
 			{
-				StUTF8String sourceFile(filename);
-				profiler->sendDebugFileUrl(sourceFile);
+				profiler->sendDebugFileURL(filename);
 			}
 		}
 	}

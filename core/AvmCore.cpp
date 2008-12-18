@@ -1165,7 +1165,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		{
 			#ifdef DEBUGGER
 			StUTF8String errorUTF8(errorMessage);		
-			const char *format = errorUTF8->c_str();
+			const char *format = errorUTF8.c_str();
 			
 			// This block is enclosed in {} to force
 			// StringBuffer destructor to unwind.

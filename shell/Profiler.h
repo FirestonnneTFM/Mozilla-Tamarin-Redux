@@ -50,7 +50,7 @@ namespace avmshell
 	public:
 		Profiler(AvmCore*) {}
 		
-		void sendDebugFileUrl(UTF8String * /*url*/) {}
+		void sendDebugFileURL(String * /*url*/) {}
 		void sendLineTimestamp(int /*linenumber*/) {}
 		void setEnabled(bool /*on*/) {}
 		void sendFunctionEnter(AbstractFunction* /*method*/) {}

@@ -1278,11 +1278,11 @@ namespace avmplus
 		AvmCore* core = this->core();
 
 		StUTF8String inputUTF8(input);
-		const uint8_t* src = (const uint8_t*) inputUTF8->c_str();
+		const uint8_t* src = (const uint8_t*) inputUTF8.c_str();
 
 		StringBuffer buffer(core);
 		
-		for (int i=0, n=inputUTF8->length(); i<n; i++) {
+		for (int i=0, n=inputUTF8.length(); i<n; i++) {
 			uint8_t ch = src[i];
 			if (contains(unescaped, ch)) {
 				buffer << (wchar)ch;
@@ -1359,7 +1359,7 @@ namespace avmplus
 		StringBuffer out(core());
 
 		StUTF16String in16(in);
-		const wchar *src = in16->c_str();
+		const wchar *src = in16.c_str();
 		int len = in->length();
 
 		while (len--) {
