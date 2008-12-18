@@ -144,9 +144,9 @@ namespace avmplus
 	union double_overlay {
 		double value;
 		#if defined AVMPLUS_BIG_ENDIAN || defined AVMPLUS_ARM_OLDABI
-			struct { uint32_t_t msw, lsw; } parts;
+			struct { uint32_t msw, lsw; } parts;
 		#else
-			struct { uint32_t_t lsw, msw; } parts;
+			struct { uint32_t lsw, msw; } parts;
 		#endif
 	};
 		
