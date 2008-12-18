@@ -97,24 +97,6 @@ as3/Definitions/Classes/ExtImpl/PubExtDefaultImplDefPub,    x64-lnx-tvm-release-
 as3/Definitions/Variable/VarDefPrivateStatic,               x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
 as3/Definitions/FunctionAccessors/GetterInNewExpression,    x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
 
-###################################################
-# PPC acceptance failures introduced by bug #465506
-# https://bugzilla.mozilla.org/show_bug.cgi?id=469669
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %0N \),  ppc-mac-tvm-release , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u8G \), ppc-mac-tvm-release , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %uEJ \), ppc-mac-tvm-release , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-ecma3/Array/splice2:exhaustive splice w/2 optional args 1, ppc-mac-tvm-release-(Dinterp|Dforcemir) , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %0N \),  ppc-mac-tvm-release-Ojit , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %4V \),  ppc-mac-tvm-release-Ojit , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %u7i \), ppc-mac-tvm-release-Ojit , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-ecma3/GlobalObject/e15_1_2_5_3:unescape\( %uDl \), ppc-mac-tvm-release-Ojit , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-ecma3/Array/splice1,    ppc-mac-tvm-releasedebugger , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-as3/RuntimeErrors/Error1069PropertyNotFound,    ppc-mac-tvm-releasedebugger , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-# 10.5 only
-ecma3/Array/splice1,    ppc-mac-tvm-release-Ojit , skip, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-# 10.5 only in release
-ecma3/Array/e15_4_4_10:exhaustive slice test 3,    ppc-mac-tvm-release , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=469669 
-
 
 #####################################################
 # Win64 acceptance failures introduced by bug #465506
