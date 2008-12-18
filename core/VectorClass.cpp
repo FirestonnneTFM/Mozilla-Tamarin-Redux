@@ -772,11 +772,10 @@ namespace avmplus
 			memmove (arr + argc, arr, m_length * sizeof(Atom));
 			// clear moved element for RC purposes
 			memset (arr, 0, argc * sizeof(Atom));
+			m_length += argc;
 			for(int i=0; i<argc; i++) {
 				_setUintProperty(i, argv[i]);
 			}
-			// setUintProperty will up the length
-			//m_length += argc;
 		}
 		return m_length;
 	}
