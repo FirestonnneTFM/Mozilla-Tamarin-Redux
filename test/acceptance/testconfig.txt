@@ -79,13 +79,6 @@ ecma3/Math/e15_8_2_5:Infinity/Math.atan2\(-0. 1\)                ,   .*winmobile
 # Recursive PCRE testcases kills the stack on PocketPC builds
 ecma3/RegExp/eregress_119909,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
 
-# Sampling failures running on osx 64-bit
-as3/sampling/PauseSampling      , x64-mac-tvm-(releasedebugger|debugdebugger) , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=467599
-as3/sampling/ProcessSampling    , x64-mac-tvm-(releasedebugger|debugdebugger) , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=467599
-as3/sampling/SimpleSampling     , x64-mac-tvm-(releasedebugger|debugdebugger) , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=467599
-as3/sampling/InvocationSampling , x64-mac-tvm-debugdebugger                   , expectedfail , bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=467599
-
-
 # interpreter is failing on testcases when running in linux 64bit
 as3/Definitions/Classes/Ext/DynExtPublicClass,              x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
 as3/Definitions/Classes/Ext/PubExtDynamicClassPubStat,      x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
