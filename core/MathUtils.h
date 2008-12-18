@@ -46,20 +46,22 @@ namespace avmplus
 #undef min
 #undef max
 
+	class StringIndexer;
+	class String;
 	/**
 	 * Data structure for state of fast random number generator.
 	 */
 	struct TRandomFast
 	{
 		/* Random result and seed for next random result. */
-		uint32  uValue;
+		uint32_t  uValue;
 
 		/* XOR mask for generating the next random value. */
-		uint32  uXorMask;
+		uint32_t  uXorMask;
 
 		/* This is the number of values which will be generated in the
 		   /  sequence given the initial value of n. */
-		uint32  uSequenceLength;
+		uint32_t  uSequenceLength;
 	}; 
 	//
 	// Random number generator
@@ -91,20 +93,20 @@ namespace avmplus
 		static bool equals(double x, double y);
 		static double exp(double value);
 		static double floor(double value);
-		static uint64  frexp(double x, int *eptr);
+		static uint64  frexp(double x, int32_t *eptr);
 		static double infinity();
 		static double neg_infinity();
-		static int isInfinite(double value);
+		/// Return 1 if value is +Infinity, -1 if -Infinity, 0 otherwise.
+		static int32_t isInfinite(double value);
 		static bool isNaN(double value);
 		static bool isNegZero(double x);
-		static bool isHexNumber(const wchar *ptr);
 		static double log(double value);		
 		static double max(double x, double y) { return (x > y) ? x : y; }
 		static double min(double x, double y) { return (x < y) ? x : y; }
 		static double mod(double x, double y);
 		static double nan();
-		static int nextPowerOfTwo(int n);
-		static double parseInt(const wchar *s, int len, int radix=10, bool strict=true);
+		static int32_t nextPowerOfTwo(int32_t n);
+		static double parseInt(Stringp s, int32_t radix=10, bool strict=true);
 		static double pow(double x, double y);
 		static double powInternal(double x, double y);
 		static void initRandom(TRandomFast *seed);
@@ -121,46 +123,116 @@ namespace avmplus
 		#else
 		static int32 real2int(double val) { return (int32) val; }		
 		#endif
-		static bool convertIntegerToString(sintptr value,
-										   wchar *buffer,
-										   int& len,
-										   int radix=10,
-										   bool treatAsUnsigned=false);
+		/**
+		 * Enumeration values for the minimum buffer size required to convert
+		 * a number to a string.
+		 */
+		enum
+		{
+			/**
+			 * The buffer for a 32-bit integer, base 10, needs to be >= 12:
+			 * -2147483647<NUL> or 4294967294
+			 */
+			kMinSizeForInt32_t_base10_toString	= 12,
+			/**
+			 * The buffer for a 64-bit integer needs to be >= 65:
+			 * sign, up to 63 (64 w/o sign) bits if base =-=2, NUL
+			 */
+			kMinSizeForInt64_t_toString			= 65,
+			/**
+			 * The buffer for converting a double to integer must be >= 312:
+			 * sign, up to 310 digits (if conversion to base 2), NUL
+			 * Double ranges from 2.2250738585072014e-308 to 1.7976931348623158e+308
+			 * The original comment says: 
+			 * Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
+			 */
+			 kMinSizeForDouble_toString			= 312
+		};
+		
+		enum UnsignedTreatment
+		{
+			kTreatAsSigned = 0,
+			kTreatAsUnsigned = 1
+		};
+		
+		/**
+		 * Convert an integer to a string. Since the conversion happens from
+		 * right to left, the string is right-aligned in the buffer, and the
+		 * returned pointer points somewhere into the buffer. It is NULL if
+		 * the base is out of range (must be between 2 and 36), or the buffer
+		 * is too small (the debug versions throw an assert if the buffer
+		 * does not fit). The buffer is NUL-terminated.
+		 * @param value            the value to convert
+		 * @param buffer           the buffer to fill
+		 * @param len              the buffer size; takes the number of characters filled in
+		 * @param radix            between 2 and 36
+		 * @param treatAsUnsigned  true for an unsigned conversion
+		 * @return                 a pointer into the buffer or NULL on errors
+		 */
+		static char* convertIntegerToStringBuffer(intptr_t value,
+										    char *buffer,
+										    int32_t& len,
+										    int32_t radix,
+										    UnsignedTreatment treatAs);
+		/**
+		 * Convert a 32/64-bit integer to a String instance. This method uses an internal
+		 * buffer of 65 characters (up to 63 bits+sign, or 64 bits, NUL) on the stack.
+		 * @param core				The AvmCore instance to create strings with
+		 * @param value             the value to convert (32 or 64 bits depending on platform)
+		 * @param radix				the conversion radix (2...36)
+		 * @param treatAsUnsigned	true for an unsigned conversion
+		 * @return					the String instance
+		 */
+		static Stringp convertIntegerToStringRadix(AvmCore* core,
+											  intptr_t value,
+										      int32_t  radix,
+										      UnsignedTreatment treatAs);
+		/**
+		 * Convert a 32-bit integer to a String instance with a radix of 10. This 
+		 * method uses a much smaller internal buffer of 12 characters (up to 
+		 * 9 digits+sign or 10 digits, NUL) on the stack.
+		 * @param core				The AvmCore instance to create strings with
+		 * @param value             the value to convert (32 bits)
+		 * @param treatAsUnsigned	true for an unsigned conversion
+		 * @return					the String instance
+		 */
+		static Stringp convertIntegerToStringBase10(AvmCore* core,
+											  int32_t  value,
+										      UnsignedTreatment treatAs);
 
+		/**
+		 * Convert a double to an integer using the given radix.
+		 * @param core				The AvmCore instance to create strings with
+		 * @param value             the value to convert
+		 * @param treatAsUnsigned	true for an unsigned conversion
+		 * @return					the String instance
+		 */
 		static Stringp convertDoubleToStringRadix(AvmCore *core,
 												  double value,
-										          int radix);
+										          int32_t radix);
 		enum {
 			DTOSTR_NORMAL,
 			DTOSTR_FIXED,
 			DTOSTR_PRECISION,
 			DTOSTR_EXPONENTIAL
 		};
-		// @todo -- this should probably produce char rather than wchar,
-		// as the string is always Latin1-safe and doing so would enable
-		// more-efficient String constructors with the result
-		static void convertDoubleToString(double value,
-										  wchar *buffer,
-										  int &len,
-										  int mode = DTOSTR_NORMAL,
-										  int precision = 15);
-		static bool convertStringToDouble(const wchar *s,
-										  int len,
+		static Stringp convertDoubleToString(AvmCore* core, 
+										     double value,
+										     int32_t mode = DTOSTR_NORMAL,
+										     int32_t precision = 15);
+		static bool convertStringToDouble(Stringp inStr,
 										  double *value,
 										  bool strict=false);
-		static double convertStringToNumber(const wchar* ptr, int strlen);
-		static int nextDigit(double *value);
+		static double convertStringToNumber(Stringp inStr);
+		static int32_t nextDigit(double *value);
 
-        static int doubleToBool(double d) {
+        static int32_t doubleToBool(double d) {
             // ecma3/Boolean/e15_6_1.abc
             return d == d && d != 0;
         }
 	private:
-		static double powerOfTen(int exponent, double value);
-		static wchar *handleSign(const wchar *s, bool& negative);
-		static wchar *skipSpaces(const wchar *s);
-		static int parseIntDigit(wchar ch);
-		static int roundInt(double x);
+		static double powerOfTen(int32_t exponent, double value);
+		static int32_t roundInt(double x);
 
 	public:
 		static void RandomFastInit(pTRandomFast pRandomFast);
@@ -187,22 +259,22 @@ namespace avmplus
 	class D2A {
 
 	public:
-		D2A(double value, int mode, int minPrecision=0);
+		D2A(double value, int32_t mode, int32_t minPrecision=0);
 		~D2A();
 
-		int nextDigit();
-		int expBase10() { return base10Exp; }
+		int32_t nextDigit();
+		int32_t expBase10() { return base10Exp; }
 
 		double value;	   // double value for quick work when e and mantissa are small;
-		int e;			   	   
+		int32_t e;			   	   
 		uint64 mantissa;   // on input, value = mantissa*2^e;  Only last 53 bits are used
-		int mantissaPrec;  // how many bits of precision are actually used in the mantissa;
-		int base10Exp;	   // the (derived) base 10 exponent of value.
+		int32_t mantissaPrec;  // how many bits of precision are actually used in the mantissa;
+		int32_t base10Exp;	   // the (derived) base 10 exponent of value.
 		bool finished;	   // set to true when we've output all relevant digits.
 		bool bFastEstimateOk; // if minPrecision < 16, use double, rather than BigInteger math
 
 	private:
-		int	 minPrecision;    // precision requested
+		int32_t	 minPrecision;    // precision requested
 		
 		bool lowOk;    // for IEEE unbiased rounding, this is true when mantissa is even.  When true, use >= in mMinus test instead of >
 		bool highOk;   //  ditto, but for mPlus test.
@@ -219,9 +291,9 @@ namespace avmplus
 		double      dMPlus;
 		double		dMMinus;
 
-		int scale();   // Estimate base 10 exponent of number, scale r,s,mPlus,mMinus appropriately.
+		int32_t scale();   // Estimate base 10 exponent of number, scale r,s,mPlus,mMinus appropriately.
 					   //  Returns result of fixup_ExponentEstimate(est).
-		int fixup_ExponentEstimate(int expEst); // Used by scale to adjust for possible off-by-one error 
+		int32_t fixup_ExponentEstimate(int32_t expEst); // Used by scale to adjust for possible off-by-one error 
 											    //  in the base 10 exponent estimate.  Returns exact base10 exponent of number.
 	
 	};

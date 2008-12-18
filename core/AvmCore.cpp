@@ -1029,15 +1029,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	String* AvmCore::toErrorString(int d)
 	{
 	#ifdef DEBUGGER
-		String* s = NULL;
-		wchar buffer[256];
-		buffer[255] = '\0';
-		int len;
-		if (MathUtils::convertIntegerToString(d, buffer, len)) 
-			s = newStringUTF16(buffer, len);
-		else
-			s = kEmptyString;
-		return s;
+		return MathUtils::convertIntegerToStringBase10(this, d, MathUtils::kTreatAsSigned);
 	#else
 		(void)d;
 		return kEmptyString;
@@ -2764,10 +2756,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (value >= 0 && index_strings[index] != NULL && index_strings[index]->value == value)
 			return index_strings[index]->string;
 #endif	
-		wchar buffer[65];
-		int len;
-		MathUtils::convertIntegerToString(value, buffer, len);
-		Stringp s = internStringUTF16(buffer, len);
+		Stringp s = internString(MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned));
 
 #ifdef AVMPLUS_INTERNINT_CACHE
 		if (value >= 0) {
@@ -2779,53 +2768,8 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
 
 		return s;
-
-		// This optimized routine below works fine and is faster than calling
-		// convertIntegerToString but with our support of integer keys in our
-		// HashTables, this routine is no longer on a critical path.  Save some
-		// code by leaving it disabled unless we can show a performance gain by
-		// using it.
-#if 0
-		// optimized case of MathUtils;:convertIntegerToString
-
-		if ((uint32)value == 0x80000000) // MathUtils::convertIntegerToString doesn't deal with this number because you can't negate it.
-		{
-			UnicodeUtils::Utf8ToUtf16((uint8*)"-2147483648", 12, buffer, 24);
-			return internAlloc(buffer, 11);
-		}
-
-		wchar *src = &buffer[39];
-		*src-- = '\0';
-
-		if (value == 0)
-		{
-			*src-- = '0';
-		}
-		else
-		{
-			uint32 uVal;
-			bool negative = (value < 0);
-			if (negative)
-				value = -value;
-
-			uVal = (uint32)value;
-
-			while (uVal != 0)
-			{
-				uint32 j = uVal;
-				uVal = uVal / 10;
-				j -= (uVal * 10);
-
-				*src-- = (j + '0');
-			}
-
-			if (negative)
-				*src-- = '-';
-		}
-
-		return internAlloc(src + 1, &buffer[39] - src - 1);
-#endif
     }
+
 	Stringp AvmCore::internUint32 (uint32 ui)
 	{ 
 		if (ui & 0x80000000)
@@ -2836,11 +2780,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::internDouble(double d)
     {
-	    // Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
-	    wchar buffer[312];
-	    int len;
-	    MathUtils::convertDoubleToString(d, buffer, len);
-	    return internStringUTF16(buffer, len);
+		return internString(MathUtils::convertDoubleToString(this, d));
     }
 
 #ifdef DEBUGGER
@@ -3347,10 +3287,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::formatAtomPtr(Atom atom)
 	{
-		wchar buffer[256];
-		int len;
-		MathUtils::convertIntegerToString((int)atom, buffer, len, 16);
-		return newStringUTF16(buffer, len);
+		return MathUtils::convertIntegerToStringRadix(this, atom, 16, MathUtils::kTreatAsUnsigned);
 	}
 #endif
 
@@ -3400,12 +3337,6 @@ return the result of the comparison ToPrimitive(x) == y.
 			if (s == NULL || len == 0)
 				return this->kEmptyString;
 
-			union {
-				const wchar* src16;
-				const uint8_t* src8;
-			};
-			src16 = s;
-
 			AvmCore::AllocaAutoPtr _swapped;
 			wchar* swapped = (wchar*)VMPI_alloca(this, _swapped, sizeof(wchar)*(len));
 			for (int32 i = 0; i < len; i++)
@@ -3425,30 +3356,17 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	Stringp AvmCore::intToString(int value)
 	{
-		wchar buffer[65];
-		int len;
-		MathUtils::convertIntegerToString(value, buffer, len);
-		return newStringUTF16(buffer, len);
+		return MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned);
 	}
 
 	Stringp AvmCore::uintToString(uint32 value)
 	{
-		wchar buffer[65];
-		int len;
-		if (value <= 0x7FFFFFFF)
-			MathUtils::convertIntegerToString(value, buffer, len);
-		else
-			MathUtils::convertDoubleToString(value, buffer, len);
-		return newStringUTF16(buffer, len);
+		return MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsUnsigned);
 	}
 
 	Stringp AvmCore::doubleToString(double d)
 	{
-		// Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
-		wchar buffer[312];
-		int len;
-		MathUtils::convertDoubleToString(d, buffer, len, MathUtils::DTOSTR_NORMAL,15);
-		return newStringUTF16(buffer, len);
+		return MathUtils::convertDoubleToString(this, d, MathUtils::DTOSTR_NORMAL,15);
 	}
 
 	#ifdef DEBUGGER

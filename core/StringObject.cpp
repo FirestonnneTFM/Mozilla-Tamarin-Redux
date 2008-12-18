@@ -1982,9 +1982,7 @@ namespace avmplus
 
 	double String::toNumber()
 	{
-		UTF16String* in16 = toUTF16String();
-		const wchar* ptr = (const wchar*) in16->c_str();
-		double d = MathUtils::convertStringToNumber(ptr, length());
+		double d = MathUtils::convertStringToNumber(this);
 		return d;
 	}
 
