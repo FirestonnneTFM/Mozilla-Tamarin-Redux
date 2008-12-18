@@ -161,7 +161,7 @@ namespace avmplus
 
 		lx |= (hx & 0x7FFFFFFF) ^ 0x7FF00000;
 		lx |= -lx;
-		return ~(lx >> 31) & (hx >> 30));
+		return ~(lx >> 31) & (hx >> 30);
 	}
 
 	bool MathUtils::isNaN(double x)
