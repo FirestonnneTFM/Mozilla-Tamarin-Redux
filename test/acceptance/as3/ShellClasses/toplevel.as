@@ -47,6 +47,10 @@
 
     writeHeaderToLog( SECTION + " "+ TITLE );
 
+    AddTestCase("System.freeMemory >0",
+      true,
+      System.freeMemory>0);
+
     AddTestCase("playerType is AVMPlus",
       "AVMPlus",
       Capabilities.playerType);
@@ -71,10 +75,6 @@
     AddTestCase("System.totalMemory >0",
       true,
       System.totalMemory>0);
-
-    AddTestCase("System.freeMemory >0",
-      true,
-      System.freeMemory>0);
 
     AddTestCase("System.privateMemory >0",
       true,
