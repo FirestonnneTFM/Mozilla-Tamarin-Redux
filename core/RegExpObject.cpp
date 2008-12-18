@@ -47,6 +47,8 @@ namespace avmplus
 {
 	using namespace MMgc;
 
+
+
 #define OVECTOR_SIZE 99 // 32 matches = (32+1)*3
 
 	// This variant is only used for creating the prototype
@@ -66,7 +68,7 @@ namespace avmplus
 		m_source = core->newConstantStringLatin1("(?:)");
 
 		StUTF8String utf8Pattern(m_source);
-		m_pcreInst = (void*)pcre_compile(utf8Pattern->c_str(), m_optionFlags, &error, &errptr, NULL );
+		m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
 	}
 
 	RegExpObject::RegExpObject(RegExpObject *toCopy)
@@ -85,7 +87,7 @@ namespace avmplus
 		StUTF8String utf8Pattern(m_source);
 		int errptr;
 		const char *error;
-		m_pcreInst = (void*)pcre_compile(utf8Pattern->c_str(), m_optionFlags, &error, &errptr, NULL );
+		m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
 	}
 		
 	RegExpObject::RegExpObject(RegExpClass *type,
@@ -109,9 +111,9 @@ namespace avmplus
 
 		// Check for named groups and embedded options if optionStr is NULL. ( Needed to handle
 		//  new RegExp( existingRegExpValue.toString() ) )
-		const char *ptr = utf8Pattern->c_str();
+		const char *ptr = utf8Pattern.c_str();
 		StUTF8String optionUTF8(options);
-		const char* optionStr =   optionUTF8 ? optionUTF8->c_str() : NULL;
+		const char* optionStr = options ? optionUTF8.c_str() : NULL;
 
 		m_hasNamedGroups = false;
 		int numSlashSeen = 0;
@@ -124,7 +126,7 @@ namespace avmplus
 			{
 				m_hasNamedGroups = true;
 			}
-			else if (optionStr == NULL && ptr[0] == '/' && (ptr == utf8Pattern->c_str() || ptr[-1] != '\\') && numSlashSeen++ > 0)
+			else if (optionStr == NULL && ptr[0] == '/' && (ptr == utf8Pattern.c_str() || ptr[-1] != '\\') && numSlashSeen++ > 0)
 			{
 				optionStr = ptr;
 			}
@@ -159,7 +161,7 @@ namespace avmplus
 		}
 
 		
-		m_pcreInst = (void*)pcre_compile(utf8Pattern->c_str(), m_optionFlags, &error, &errptr, NULL );
+		m_pcreInst = (void*)pcre_compile(utf8Pattern.c_str(), m_optionFlags, &error, &errptr, NULL );
 		// FIXME: make errors available to actionscript
 	}
 
@@ -198,14 +200,14 @@ namespace avmplus
 	int RegExpObject::search(Stringp subject)
 	{
 		int matchIndex, matchLen;
-		StUTF8String utf8Subject(subject);
+		StIndexableUTF8String utf8Subject(subject);
 		if (!_exec(subject, utf8Subject, 0, matchIndex, matchLen))
 		{
 			matchIndex = -1;
 		}
 		else
 		{
-			matchIndex = utf8Subject->toIndex(matchIndex);
+			matchIndex = utf8Subject.toIndex(matchIndex);
 		}
 		return matchIndex;
 	}
@@ -235,7 +237,7 @@ namespace avmplus
 	ArrayObject* RegExpObject::split(Stringp subject, uint32 limit)
 	{
 		ArrayObject *out = toplevel()->arrayClass->newArray();
-		StUTF8String utf8Subject(subject);
+		StIndexableUTF8String utf8Subject(subject);
 
 		int startIndex=0;
 		int matchIndex;
@@ -253,7 +255,7 @@ namespace avmplus
 			//  position between characters.  Although we've "matched", its zero length so just break out.
 			if (matchLen == 0 ) {
 				matchLen = 0;
-				matchIndex = startIndex+numBytesInUtf8Character((uint8*)(utf8Subject->c_str())+startIndex); // +1char  will advance startIndex, extract just one char
+				matchIndex = startIndex+numBytesInUtf8Character((uint8*)(utf8Subject.c_str())+startIndex); // +1char  will advance startIndex, extract just one char
 				if( !isEmptyRE )
 				{
 					// don't break if we're processing an empty regex - then we want to split the string into each character
@@ -267,11 +269,11 @@ namespace avmplus
 			//[cn 12/3/04] because a regular expression which matches an empty position (space between characters)
 			//  will match the empty position just past the last character.  This test is correct, though 
 			//  it needs to come before we do any setProperties to avoid a bogus xtra result.
-			if (matchIndex+matchLen > utf8Subject->length()) {
+			if (matchIndex+matchLen > utf8Subject.length()) {
 				startIndex = matchIndex+matchLen;
 				break;
 			} else {
-				out->setUintProperty(n++, stringFromUTF8(utf8Subject->c_str()+startIndex, matchIndex-startIndex));
+				out->setUintProperty(n++, stringFromUTF8(utf8Subject.c_str()+startIndex, matchIndex-startIndex));
 				if (n >= limit)
 					break;
 				for (uint32 j=1; j<matchArray->getLength(); j++) {
@@ -285,8 +287,8 @@ namespace avmplus
 		}
 
 		// If we found no match, or we did find a match and are still under limit, and there is a remainder left, add it 
-		if ((unsigned)n < limit && startIndex <= utf8Subject->length()) {
-			out->setUintProperty(n++, stringFromUTF8(utf8Subject->c_str()+startIndex, utf8Subject->length()-startIndex));
+		if ((unsigned)n < limit && startIndex <= utf8Subject.length()) {
+			out->setUintProperty(n++, stringFromUTF8(utf8Subject.c_str()+startIndex, utf8Subject.length()-startIndex));
 		}
 
 		return out;
@@ -298,18 +300,17 @@ namespace avmplus
 		{
 			subject = core()->knull;
 		}
-		StUTF8String utf8Subject(subject);
+		StIndexableUTF8String utf8Subject(subject);
 		ArrayObject *result = _exec(subject, utf8Subject);
 		return result ? result->atom() : nullStringAtom;
 	}
 
-	ArrayObject* RegExpObject::_exec(Stringp subject, UTF8String *utf8Subject)
+	ArrayObject* RegExpObject::_exec(Stringp subject, StIndexableUTF8String& utf8Subject)
 	{
 		AvmAssert(subject != NULL);
-		AvmAssert(utf8Subject != NULL);
 
 		int matchIndex = 0, matchLen = 0;
-		int startIndex = (get_global() ? utf8Subject->toUtf8Index(m_lastIndex) : 0);
+		int startIndex = (get_global() ? utf8Subject.toUtf8Index(m_lastIndex) : 0);
 
 		ArrayObject* result = _exec(subject,
 								   utf8Subject,
@@ -318,30 +319,29 @@ namespace avmplus
 								   matchLen);
 		if (get_global())
 		{
-			m_lastIndex = utf8Subject->toIndex(matchIndex+matchLen);
+			m_lastIndex = utf8Subject.toIndex(matchIndex+matchLen);
 		}
 
 		return result;
 	}
 
     ArrayObject* RegExpObject::_exec(Stringp subject, 
-									UTF8String *utf8Subject,
+									StIndexableUTF8String& utf8Subject,
 									int startIndex,
 									int& matchIndex,
 									int& matchLen)
 	{
 		AvmAssert(subject != NULL);
-		AvmAssert(utf8Subject != NULL);
 		
 		int ovector[OVECTOR_SIZE];
 		int results;
-		int subjectLength = utf8Subject->length();
+		int subjectLength = utf8Subject.length();
 
 		if( startIndex < 0 ||
 			startIndex > subjectLength ||
 			(results = pcre_exec((pcre*)m_pcreInst,
 								NULL,
-								utf8Subject->c_str(),
+								utf8Subject.c_str(),
 								subjectLength,
 								startIndex,
 								PCRE_NO_UTF8_CHECK,
@@ -357,7 +357,7 @@ namespace avmplus
 		ArrayObject *a = toplevel()->arrayClass->newArray(results);
 
 		a->setAtomProperty(toplevel()->regexpClass()->kindex,
-			   core->intToAtom(utf8Subject->toIndex(ovector[0])));
+			   core->intToAtom(utf8Subject.toIndex(ovector[0])));
 		a->setAtomProperty(toplevel()->regexpClass()->kinput,
 			   subject->atom());
 		a->setLength(results);
@@ -366,7 +366,7 @@ namespace avmplus
 		for (int i=0; i<results; i++) {
 			if (ovector[i*2] > -1) {
 				int length = ovector[i*2 + 1] - ovector[i*2];
-				Atom match = stringFromUTF8(utf8Subject->c_str()+ovector[i*2], length);
+				Atom match = stringFromUTF8(utf8Subject.c_str()+ovector[i*2], length);
 				a->setUintProperty(i, match);
 			} else {
 				a->setUintProperty(i, undefinedAtom);
@@ -398,7 +398,7 @@ namespace avmplus
 				Atom name = stringFromUTF8((nameTable+2), (uint32)strlen(nameTable+2));
 				name = core->internString(name)->atom();
 
-				Atom value = stringFromUTF8(utf8Subject->c_str()+ovector[nameIndex*2], length);
+				Atom value = stringFromUTF8(utf8Subject.c_str()+ovector[nameIndex*2], length);
 
 				a->setAtomProperty(name, value);
 
@@ -414,7 +414,7 @@ namespace avmplus
 
 	ArrayObject* RegExpObject::match(Stringp subject)
 	{
-		StUTF8String utf8Subject(subject);
+		StIndexableUTF8String utf8Subject(subject);
 		if (!get_global())
 		{
 			return _exec(subject, utf8Subject);
@@ -433,14 +433,14 @@ namespace avmplus
 			{
 				int last = m_lastIndex;
 				int matchIndex = 0, matchLen = 0;
-				int startIndex = utf8Subject->toUtf8Index(m_lastIndex);
+				int startIndex = utf8Subject.toUtf8Index(m_lastIndex);
 
 				matchArray = _exec(subject,
 								  utf8Subject,
 								  startIndex,
 								  matchIndex,
 								  matchLen);
-				m_lastIndex = utf8Subject->toIndex(matchIndex+matchLen);
+				m_lastIndex = utf8Subject.toIndex(matchIndex+matchLen);
 				
 				if ((matchArray == NULL) || (last == m_lastIndex))
 					break;
@@ -465,12 +465,12 @@ namespace avmplus
 		StUTF8String utf8Replacement(replacement);
 
 		int ovector[OVECTOR_SIZE];
-		int subjectLength = utf8Subject->length();
+		int subjectLength = utf8Subject.length();
 		int lastIndex=0;
 
 		StringBuffer resultBuffer(core());
 
-		const char *src = utf8Subject->c_str();
+		const char *src = utf8Subject.c_str();
 		
 		// get start/end index of all matches
 		int matchCount;
@@ -486,7 +486,7 @@ namespace avmplus
 			// copy in stuff leading up to match
 			resultBuffer.write(src+lastIndex, matchIndex-lastIndex);
 
-			const char *ptr = utf8Replacement->c_str();
+			const char *ptr = utf8Replacement.c_str();
 			while (*ptr) {
 				if (*ptr == '$') {
 					switch (*(ptr+1)) {
@@ -580,12 +580,12 @@ namespace avmplus
 		StUTF8String utf8Subject(subject);
 
 		int ovector[OVECTOR_SIZE];
-		int subjectLength = utf8Subject->length();
+		int subjectLength = utf8Subject.length();
 		int lastIndex=0;
 
 		StringBuffer resultBuffer(core());
 
-		const char *src = utf8Subject->c_str();
+		const char *src = utf8Subject.c_str();
 		
 		// get start/end index of all matches
 		int matchCount;

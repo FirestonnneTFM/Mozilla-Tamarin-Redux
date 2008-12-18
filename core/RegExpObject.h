@@ -93,10 +93,10 @@ namespace avmplus
 
 		Atom stringFromUTF8(const char *buffer, int len);
 
-		ArrayObject* _exec(Stringp subject, UTF8String *utf8Subject);
+		ArrayObject* _exec(Stringp subject, StIndexableUTF8String& utf8Subject);
 		
 		ArrayObject* _exec(Stringp subject,
-						  UTF8String *utf8Subject,
+						  StIndexableUTF8String& utf8Subject,
 						  int startIndex,
 						  int& matchIndex,
 						  int& matchLen);

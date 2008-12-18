@@ -223,19 +223,19 @@ namespace avmshell
 	void DataOutput::WriteUTF(String *str)
 	{
 		StUTF8String utf8(str);
-		uint32 length = utf8->length();
+		uint32 length = utf8.length();
 		if (length > 65535) {
 			ThrowRangeError();
 		}
 		WriteU16((unsigned short)length);
-		Write(utf8->c_str(), length*sizeof(char));
+		Write(utf8.c_str(), length*sizeof(char));
 	}
 
 	void DataOutput::WriteUTFBytes(String *str)
 	{
 		StUTF8String utf8(str);
-		int len = utf8->length();
-		Write(utf8->c_str(), len*sizeof(char));
+		int len = utf8.length();
+		Write(utf8.c_str(), len*sizeof(char));
 	}
 	
 	void DataOutput::WriteByteArray(ByteArray& buffer,

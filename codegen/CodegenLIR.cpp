@@ -1500,8 +1500,7 @@ namespace avmplus
 				if (f && (f->flags & AbstractFunction::NATIVE))
 				{
 					StringBuffer buffer(core);		
-					const wchar *foo = f->name->c_str();
-					buffer << "function is:" << foo << "\r\n";
+					buffer << "function is:" << f->name << "\r\n";
 
 					AvmDebugMsg (false, buffer.c_str());
 					//core->console << " f->
@@ -4359,7 +4358,7 @@ namespace avmplus
 		verbose_only( if (core->config.bbgraph) { 
 			StUTF8String cname(info->format(core));
 			frag->cfg->fin();
-			frag->cfg->print((char*)cname->c_str());
+			frag->cfg->print((char*)cname.c_str());
 		});
 		
         deadvars();

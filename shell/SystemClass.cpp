@@ -83,7 +83,7 @@ namespace avmshell
 		return 0;
 		#else
 		StUTF8String commandUTF8(command);
-		return system(commandUTF8->c_str());
+		return system(commandUTF8.c_str());
 		#endif
 	}
 	

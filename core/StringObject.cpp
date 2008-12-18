@@ -2724,11 +2724,9 @@ decodeUtf8:
 	UTF8String::UTF8String(int32_t len) : m_length(len)
 	{
 		// operator new has allocated one extra byte already
-		m_buffer[len = 0];
-		m_lastPos =
-		m_lastUtf8Pos = 0;
-
+		m_buffer[len] = 0;
 	}
+
 	// Create a UTF-8 string out of a 8-bit string.
 
 	UTF8String* UTF8String::create8(const String* s)
@@ -2808,9 +2806,9 @@ decodeUtf8:
 		4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,6
 	};
 
-	int32_t UTF8String::toUtf8Index(int32_t pos)
+	int32_t StIndexableUTF8String::toUtf8Index(int32_t pos)
 	{
-		if (pos <= 0 || pos >= m_length)
+		if (pos <= 0 || pos >= str->m_length)
 			return pos;
 
 		// optimization: these two members kick in if this method
@@ -2820,7 +2818,7 @@ decodeUtf8:
 
 		int32_t utf8Pos = m_lastPos;
 
-		const utf8_t* p = (const utf8_t*) &m_buffer[m_lastUtf8Pos];
+		const utf8_t* p = (const utf8_t*) &str->m_buffer[m_lastUtf8Pos];
 		for (int32_t i = m_lastPos; i < pos; i++)
 		{
 			utf8_t ch = *p;
@@ -2838,7 +2836,7 @@ decodeUtf8:
 		return utf8Pos;
 	}
 
-	int32_t UTF8String::toIndex(int32_t utf8Pos)
+	int32_t StIndexableUTF8String::toIndex(int32_t utf8Pos)
 	{
 		if (utf8Pos <= 0)
 			return utf8Pos;
@@ -2851,10 +2849,10 @@ decodeUtf8:
 		int32_t i = m_lastUtf8Pos;
 		int32_t pos = m_lastPos;
 
-		const utf8_t* p = (const utf8_t*) m_buffer + m_lastUtf8Pos;
+		const utf8_t* p = (const utf8_t*) str->m_buffer + m_lastUtf8Pos;
 		while (i < utf8Pos)
 		{
-			if (i >= m_length)
+			if (i >= str->m_length)
 				break;
 			utf8_t ch = *p;
 			if (!(ch & 0x80))

@@ -760,7 +760,7 @@ namespace avmshell
 		
 		// Open this file and suck it into memory
 		StUTF8String currentFileUTF8(currentFile);
-		FileInputStream f(currentFileUTF8->c_str());
+		FileInputStream f(currentFileUTF8.c_str());
 		if (f.valid()) {
 			currentSourceLen = f.available();
 			currentSource = new char[currentSourceLen+1];
