@@ -1232,9 +1232,7 @@ namespace avmplus
 	{
 		AvmCore* core = this->core();
 		if (!in) in = core->knull;
-		StUTF16String in16(in);
-		// @todo this should use StringIndexer
-		double n = MathUtils::parseInt(in16->c_str(), in16->length(), radix, false);
+		double n = MathUtils::parseInt(in, radix, false);
 		return n;
     }
 
@@ -1244,8 +1242,7 @@ namespace avmplus
 		
 		AvmCore* core = this->core();
 		if (!in) in = core->knull;
-		StUTF16String in16(in);
-		if (!MathUtils::convertStringToDouble(in16->c_str(), in16->length(), &result, false))
+		if (!MathUtils::convertStringToDouble(in, &result, false))
 			result = MathUtils::nan();
 
 		return result;
