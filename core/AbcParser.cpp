@@ -1079,8 +1079,16 @@ namespace avmplus
 				toplevel->throwVerifyError(kCorruptABCError);
 			// don't need to create an atom for this now, because
 			// each caller will take care of it.
+
 			// These strings are assumed to be constant
-			Stringp s = core->internStringUTF8((const char*)pos, len, true);
+			//Stringp s = core->internStringUTF8((const char*)pos, len, true);
+
+			// @todo: we *cannot* assume these strings are constant, as some client code
+			// may unload this ABC later. If we ever add a way to "un-constant" interned strings
+			// in an unloaded ABC range, this would be a very worthwhile optimization, but
+			// until then, it's not safe.
+			Stringp s = core->internStringUTF8((const char*)pos, len);
+
 #ifdef MMGC_DRC
 			// MIR skips WB on string constants so make them sticky
 			s->Stick();

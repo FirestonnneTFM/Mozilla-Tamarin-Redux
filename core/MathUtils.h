@@ -140,13 +140,13 @@ namespace avmplus
 			 */
 			kMinSizeForInt64_t_toString			= 65,
 			/**
-			 * The buffer for converting a double to integer must be >= 312:
-			 * sign, up to 310 digits (if conversion to base 2), NUL
-			 * Double ranges from 2.2250738585072014e-308 to 1.7976931348623158e+308
-			 * The original comment says: 
-			 * Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
+			 * For security reason, the buffer must be well over 347 characters:
+			 * Bug 192033: Number.MAX_VALUE is 1.79e+308, so this was 312.
+			 * Bug 230183: That wasn't big enough.  Number.MIN_VALUE.toPrecision(21)
+			 * needs 347.  But why be stingy?  There may be other cases that are 
+			 * even bigger, it's hard to say.
 			 */
-			 kMinSizeForDouble_toString			= 312
+			 kMinSizeForDouble_toString			= 380
 		};
 		
 		enum UnsignedTreatment
