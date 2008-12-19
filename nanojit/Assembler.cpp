@@ -804,6 +804,9 @@ namespace nanojit
 		// When outOMem, nIns is set to startingIns and we overwrite the region until the error is handled
 		underrunProtect(LARGEST_UNDERRUN_PROT);  // the largest value passed to underrunProtect() 
 		_startingIns = _nIns;
+#ifdef AVMPLUS_ARM
+        _startingSlot = _nSlot;
+#endif
 		
 	#ifdef AVMPLUS_PORTING_API
 		_endJit2Addr = _nExitIns;
@@ -876,6 +879,9 @@ namespace nanojit
         }
 		else {
 			_nIns = _startingIns;  // in case of failure reset nIns ready for the next assembly run
+#ifdef AVMPLUS_ARM
+            _nSlot = _startingSlot;  // in case of failure reset nSlot ready for the next assembly run
+#endif
 			IF_PEDANTIC( pedanticTop = _nIns;)
 		}
 	}
@@ -925,6 +931,7 @@ namespace nanojit
 			patchEntry = genPrologue();
 			verbose_only( outputAddr=true; )
 			verbose_only( asm_output("[prologue]"); )
+            NanoAssert((((int)_nIns) & 7) == 0);
 		}
 		
 		// something bad happened?
@@ -950,6 +957,9 @@ namespace nanojit
 		else
 		{
 			_nIns = _startingIns;  // in case of failure reset nIns ready for the next assembly run
+#ifdef AVMPLUS_ARM
+            _nSlot = _startingSlot;  // in case of failure reset nSlot ready for the next assembly run
+#endif
 		}
 		
 		NanoAssertMsgf(error() || _fpuStkDepth == 0,"_fpuStkDepth %d\n",_fpuStkDepth);

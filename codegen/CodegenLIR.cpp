@@ -4543,9 +4543,15 @@ namespace avmplus
         LirBuffer *lirbuf = frag->lirbuf = new (gc) LirBuffer(frago);
         lirbuf->abi = ABI_FASTCALL;
         LirWriter *lirout = new (gc) LirBufWriter(lirbuf);
+        debug_only(
+            lirout = new (gc) ValidateWriter(lirout);
+        )
         verbose_only(if (pool->verbose) {
             lirout = pushVerboseWriter(gc, lirout, lirbuf);
         })
+#ifdef NJ_SOFTFLOAT
+        lirout = new (gc) SoftFloatFilter(lirout);
+#endif
 
 		// x86-specific notes:
 		// the thunk we're generating is really a CDECL function.  We mark
