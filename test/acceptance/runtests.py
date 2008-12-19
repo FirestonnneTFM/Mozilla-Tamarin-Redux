@@ -548,7 +548,8 @@ if globs['config'] == '':
             cputype='x64'
         if re.search('(ppc)', f[0]):
             cputype='ppc'
-        
+        if re.search('(ppc64)', f[0]):
+            cputype='ppc64'
         if cputype == '':
             raise Exception()
             
