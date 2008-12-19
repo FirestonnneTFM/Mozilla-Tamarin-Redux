@@ -2090,7 +2090,7 @@ namespace avmplus
 		return ret;
 	}
 
-	UTF8String* String::toUTF8String() const
+	UTF8String* String::getUTF8String() const
 	{
 		switch (getWidth())
 		{
@@ -2108,7 +2108,7 @@ namespace avmplus
 		}
 	}
 
-	UTF16String* String::toUTF16String() const
+	UTF16String* String::getUTF16String() const
 	{
 		GET_STRING_POINTERS(this, ptrs)
 		MMgc::GC* gc = _gc(this);

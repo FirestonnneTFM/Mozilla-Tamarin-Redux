@@ -179,7 +179,7 @@ namespace avmplus
 		If you call this, be aware that you must keep a reference to the UTF8String* itself (eg by DWB or on the stack)
 		to keep it from being collected; in particular, keeping the c_str() pointer will NOT prevent collection!
 		*/
-				UTF8String*			toUTF8String() const;
+				UTF8String*			getUTF8String() const;
 		/**
 		Create a 0-terminated UTF-16 string out of this string.
 		If this is a 32-bit string, characters > 0xFFFF are converted to surrogate pairs. 
@@ -187,7 +187,7 @@ namespace avmplus
 		If you call this, be aware that you must keep a reference to the UTF16String* itself (eg by DWB or on the stack)
 		to keep it from being collected; in particular, keeping the c_str() pointer will NOT prevent collection!
 		*/
-				UTF16String*		toUTF16String() const;
+				UTF16String*		getUTF16String() const;
 		/**
 		Create a string with a given width out of this string. If the width is equal to the current
 		width, return this instance. If the desired width is too narrow to fit, or kAuto is passed
@@ -694,7 +694,7 @@ namespace avmplus
 	protected:
 		UTF8String* str;
 	public:
-		inline explicit StUTF8String(Stringp s) : str(s ? s->toUTF8String() : NULL) {}
+		inline explicit StUTF8String(Stringp s) : str(s ? s->getUTF8String() : NULL) {}
 		inline ~StUTF8String() 
 		{ 
 			#if FEATURE_PREFER_STRING_PERFORMANCE
@@ -741,7 +741,7 @@ namespace avmplus
 	private:
 		UTF16String* str;
 	public:
-		inline explicit StUTF16String(Stringp s) : str(s ? s->toUTF16String() : NULL) {}
+		inline explicit StUTF16String(Stringp s) : str(s ? s->getUTF16String() : NULL) {}
 		inline ~StUTF16String() 
 		{ 
 			#if FEATURE_PREFER_STRING_PERFORMANCE
