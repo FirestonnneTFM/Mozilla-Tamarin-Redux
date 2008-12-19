@@ -107,6 +107,11 @@ Assembler::genPrologue()
 
     MOV(FP, SP);
     PUSH_mask(savingMask);
+
+    // ARM instructions are four-byte aligned, but we need the start address
+    // of the code to be eight-byte aligned, so add a NOP if necessary.
+    if ((((int)_nIns) & 7) != 0) NOP();
+
     return patchEntry;
 }
 
@@ -294,6 +299,7 @@ Assembler::asm_call(LInsp ins)
 #if NJ_ARM_ARCH >= NJ_ARM_V5
         if (blx_lr_bug) {
             // workaround for msft device emulator bug (blx lr emulated as no-op)
+	    underrunProtect(8);
             BLX(IP);
             MOV(IP,LR);
         } else {
@@ -334,20 +340,41 @@ Assembler::asm_call(LInsp ins)
         NanoAssert(!arg->isQuad() || arg->isop(LIR_qjoin));
         if (arg->isop(LIR_qjoin)) {
             NanoAssert(sz == ARGSIZE_F);
+#if NJ_ARM_EABI
+            // arm eabi puts doubles only in R0:1 or R2:3, and 64bit aligned on the stack.
+            if ((r == R1) || (r == R3)) r = nextreg(r);
             if (r < R3) {
+                // put double in two registers
+                asm_regarg(ARGSIZE_LO, arg->oprnd1(), r);
+                asm_regarg(ARGSIZE_LO, arg->oprnd2(), nextreg(r));
+                r = Register(r+2);
+            } else {
+                // put double on stack, 64bit aligned
+                if ((stkd & 7) != 0) stkd += 4;
+                asm_stkarg(arg->oprnd1(), stkd);
+                asm_stkarg(arg->oprnd2(), stkd+4);
+                stkd += 8;
+            }
+#else // !NJ_ARM_EABI
+            // legacy arm abi's don't align doubles
+            if (r < R3) {
+                // put double in next two registers
                 asm_regarg(ARGSIZE_LO, arg->oprnd1(), r);
                 asm_regarg(ARGSIZE_LO, arg->oprnd2(), nextreg(r));
                 r = Register(r+2);
             } else if (r < R4) {
+                // put LSW in R4, MSW on stack
                 asm_regarg(ARGSIZE_LO, arg->oprnd1(), r);
                 r = nextreg(r);
                 asm_stkarg(arg->oprnd2(), stkd);
                 stkd += 4;
             } else {
+                // put double on stack, 32bit aligned.
                 asm_stkarg(arg->oprnd1(), stkd);
                 asm_stkarg(arg->oprnd2(), stkd+4);
                 stkd += 8;
             }
+#endif // !NJ_ARM_EABI
         }
         else {
             // pre-assign registers R0-R3 for arguments (if they fit)
@@ -370,6 +397,9 @@ Assembler::asm_call(LInsp ins)
 #endif
     
 
+    /* Call this with targ set to 0 if the target is not yet known and the branch
+     * will be patched up later.
+     */
     NIns* Assembler::asm_branch(bool branchOnFalse, LInsp cond, NIns* targ)
     {
         NIns* at = 0;
@@ -475,7 +505,7 @@ Assembler::asm_call(LInsp ins)
                 ALUi(AL, cmn, 1, 0, r, -imm);
             } else {
                 underrunProtect(4 + LD32_size);
-                CMN(r, IP);
+                CMP(r, IP);
                 LD32_nochk(IP, imm);
             }
         } else {
@@ -891,14 +921,24 @@ Assembler::nPatchBranch(NIns* branch, NIns* target)
 
     // We have 2 words to work with here -- if offset is in range of a 24-bit
     // relative jump, emit that; otherwise, we do a pc-relative load into pc.
-    if (isS24(offset)) {
+    if (isS24(offset>>2)) {
         // write a new instruction that preserves the condition of what's there.
         NIns cond = *branch & 0xF0000000;
         *branch = (NIns)( cond | (0xA<<24) | ((offset>>2) & 0xFFFFFF) );
     } else {
         // update const-addr, branch instruction is:
         // LDRcc pc, [pc, #off-to-const-addr]
-        NIns *addr = branch+2 + (*branch & 0xFFF);
+        NanoAssert((*branch & 0x0F7FF000) == 0x051FF000);
+
+        NIns *addr = branch+2;
+        int offset = (*branch & 0xFFF) / sizeof(NIns);
+
+        if (*branch & (1<<23)) {
+            addr += offset;
+        } else {
+            addr -= offset;
+        }
+
         *addr = (NIns) target;
     }
 }
@@ -1087,7 +1127,7 @@ Assembler::asm_store64(LInsp value, int dr, LInsp base)
     if (value->isconstq()) {
         const int32_t* p = (const int32_t*) (value-2);
 
-        underrunProtect(12);
+        underrunProtect(16);
 
         asm_quad_nochk(rv, p);
     }
@@ -1139,7 +1179,7 @@ Assembler::asm_quad(LInsp ins)
     freeRsrcOf(ins, false);
 
     if (rr == UnknownReg) {
-        underrunProtect(12);
+        underrunProtect(28);
 
         // asm_mmq might spill a reg, so don't call it;
         // instead do the equivalent directly.
@@ -1249,8 +1289,8 @@ Assembler::asm_stkarg(LInsp arg, int stkd)
 void
 Assembler::nativePageReset()
 {
-    _nSlot = 0;
     _nExitSlot = 0;
+    _startingSlot = 0;
 }
 
 void
@@ -1435,6 +1475,7 @@ bool Assembler::BL_noload(NIns* addr, Register reg)
         NanoAssert(reg != PC);
         if (blx_lr_bug) {
             // workaround for msft device emulator bug (blx lr emulated as no-op)
+	    underrunProtect(8);
             BLX(IP);
             MOV(IP,LR);
             return true;
@@ -1457,6 +1498,18 @@ Assembler::LD32_nochk(Register r, int32_t imm)
     //fprintf (stderr, "wrote slot(2) %p with %08x, jmp @ %p\n", _nSlot, (intptr_t)imm, _nIns-1);
 
     int offset = PC_OFFSET_FROM(_nSlot,_nIns-1);
+
+    if (offset == 0x1000) {
+        // _nSlot and _nIns are in the same page but pc is 8 bytes ahead of _nIns, so
+        // _nSlot may not be in " pc load range" (4k). This problem can only happen for
+        // the last two intructions in the page, the last instruction is never a load pc
+        // so the only remaining case is when _nSlot is page + 0x0 and _nIns is page + 0xff8,
+        // the offset is then 0xff8 + 8 - 0 == 0x1000
+        // _nSlots is simply incremented to come within range and one constant pool space
+        // is wasted.
+        ++_nSlot;
+        offset -= 4;
+    }
 
     NanoAssert(isS12(offset) && (offset < 0));
 
@@ -1493,7 +1546,11 @@ Assembler::asm_ldr_chk(Register d, Register b, int32_t off, bool chk)
 // Branch to target address _t with condition _c, doing underrun
 // checks (_chk == 1) or skipping them (_chk == 0).
 //
-// If the jump fits in a relative jump (+/-32MB), emit that.
+// Set the target address (_t) to 0 if the target is not yet known and the
+// branch will be patched up later.
+//
+// If the jump is to a known address (i.e. _t != 0), and it fits in a
+// relative jump (+/-32MB), emit that.
 // If the jump is unconditional, emit the dest address inline in
 // the instruction stream and load it into pc.
 // If the jump has a condition, but noone's mucked with _nIns and our _nSlot
@@ -1508,14 +1565,14 @@ Assembler::B_cond_chk(ConditionCode _c, NIns* _t, bool _chk)
 {
     int32_t offs = PC_OFFSET_FROM(_t,_nIns-1);
     //fprintf(stderr, "B_cond_chk target: 0x%08x offset: %d @0x%08x\n", _t, offs, _nIns-1);
-    if (isS24(offs)) {
+    if ((isS24(offs>>2)) && (_t != 0)) {
         if (_chk) {
             underrunProtect(4);
             offs = PC_OFFSET_FROM(_t,_nIns-1);
         }
     }
 
-    if (isS24(offs)) {
+    if ((isS24(offs>>2)) && (_t != 0)) {
         *(--_nIns) = (NIns)( ((_c)<<28) | (0xA<<24) | (((offs)>>2) & 0xFFFFFF) );
         asm_output("b%s %p", _c == AL ? "" : condNames[_c], (void*)(_t));
     } else if (_c == AL) {
@@ -1524,7 +1581,7 @@ Assembler::B_cond_chk(ConditionCode _c, NIns* _t, bool _chk)
         *(--_nIns) = (NIns)( COND_AL | (0x51<<20) | (PC<<16) | (PC<<12) | 0x4 );
         asm_output("b%s %p", _c == AL ? "" : condNames[_c], (void*)(_t));
     } else if (samepage(_nIns-1,_nSlot)) {
-        if(_chk) underrunProtect(4);
+        if(_chk) underrunProtect(8);
         *(++_nSlot) = (NIns)(_t);
         offs = PC_OFFSET_FROM(_nSlot,_nIns-1);
         NanoAssert(offs < 0);
@@ -1533,7 +1590,7 @@ Assembler::B_cond_chk(ConditionCode _c, NIns* _t, bool _chk)
     } else {
         if(_chk) underrunProtect(12);
         *(--_nIns) = (NIns)(_t);
-        *(--_nIns) = (NIns)( COND_AL | (0xA<<24) | ((-4)>>2) & 0xFFFFFF );
+        *(--_nIns) = (NIns)( COND_AL | (0xA<<24) | (0>>2) & 0xFFFFFF );
         *(--_nIns) = (NIns)( ((_c)<<28) | (0x51<<20) | (PC<<16) | (PC<<12) | 0x0 );
         asm_output("b%s %p", _c == AL ? "" : condNames[_c], (void*)(_t));
     }
@@ -1562,7 +1619,7 @@ Assembler::asm_add_imm(Register rd, Register rn, int32_t imm, int stat)
 
     rot &= 0xf;
 
-    underrunProtect(4);
+    underrunProtect(4 + LD32_size);
     if (immval < 256) {
         if (pos) {
             ALUi_rot(AL, add, stat, rd, rn, immval, rot);
