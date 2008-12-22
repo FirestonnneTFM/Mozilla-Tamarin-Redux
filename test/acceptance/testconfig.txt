@@ -75,15 +75,3 @@ ecma3/Math/e15_8_2_5:Infinity/Math.atan2\(-0. 1\)                ,   .*winmobile
 # Recursive PCRE testcases kills the stack on PocketPC builds
 ecma3/RegExp/eregress_119909,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
 
-# interpreter is failing on testcases when running in linux 64bit
-as3/Definitions/Classes/Ext/DynExtPublicClass,              x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Classes/Ext/PubExtDynamicClassPubStat,      x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Classes/Ext/ExtPublicClassPub,              x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Classes/Ext/ExtPublicClassFin,              x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Classes/Ext/ExtPublicClassPriv,             x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Classes/Ext/PubExtDefaultClassFin,          x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Classes/ExtImpl/PubExtDefaultImplDefPub,    x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/Variable/VarDefPrivateStatic,               x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-as3/Definitions/FunctionAccessors/GetterInNewExpression,    x64-lnx-tvm-release-Dinterp , expectedfail, bug https://bugzilla.mozilla.org/show_bug.cgi?id=467776
-
-
