@@ -87,7 +87,7 @@ namespace avmplus
 #endif
 		gcInterface(g)
 #ifdef DEBUGGER
-		,_sampler(g)
+		, _sampler(NULL)
 #endif
 #ifdef AVMPLUS_VERIFYALL
 		,verifyQueue(g, 0)
@@ -172,10 +172,6 @@ namespace avmplus
 		allocaInit();
 
 		minstack           = 0;
-
-#ifdef DEBUGGER
-		_sampler.setCore(this);
-#endif
 
 		callStack          = NULL;
 
@@ -276,6 +272,10 @@ namespace avmplus
 
 	AvmCore::~AvmCore()
 	{		
+#ifdef DEBUGGER
+		delete _sampler;
+		_sampler = NULL;
+#endif
 		// Free the numbers and strings tables
 		delete [] strings;
 		if (gc) 
@@ -307,6 +307,7 @@ namespace avmplus
 		allocaShutdown();
 #ifdef DEBUGGER
 		delete _profiler;
+		_profiler = NULL;
 #endif
 	}
 
@@ -333,7 +334,11 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		// sampling can begin now, requires builtinPool
-		_sampler.initSampling();
+		if (_debugger)
+		{
+			_sampler = new Sampler(this);
+			_sampler->initSampling();
+		}
 #endif
 	}
 	
@@ -2540,14 +2545,16 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 
 #ifdef DEBUGGER
-		_sampler.presweep();
+		if (_sampler)
+			_sampler->presweep();
 #endif
     }
 
 	void AvmCore::postsweep()
 	{
 #ifdef DEBUGGER
-		_sampler.postsweep();
+		if (_sampler)
+			_sampler->postsweep();
 #endif
 	}
 

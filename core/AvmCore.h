@@ -165,15 +165,14 @@ const int kBufferPadding = 16;
 		friend class CodegenLIR;
 		friend class CodegenMIR;
 		private:
-			/**
-			 * For debugger versions of the VM, this is a pointer to
-			 * the Debugger object.
-			 */
 			Debugger*		_debugger;
 			Profiler*		_profiler;
+			Sampler*		_sampler;
 		public:
 			inline Debugger* debugger() const { return _debugger; }
 			inline Profiler* profiler() const { return _profiler; }
+			inline Sampler* get_sampler() const { return _sampler; }
+			inline void sampleCheck() { if (_sampler) _sampler->sampleCheck(); }
 		protected:
 			virtual Debugger* createDebugger() { return NULL; }
 			virtual Profiler* createProfiler() { return NULL; }
@@ -196,7 +195,7 @@ const int kBufferPadding = 16;
 				sampleCheck();
 #endif
 				if (interruptable && interrupted)
-						interrupt(env);
+					interrupt(env);
 			}
 		}
 
@@ -1106,17 +1105,6 @@ const int kBufferPadding = 16;
 		/** The call stack of currently executing code. */
 		CallStackNode *callStack;
 
-#ifdef DEBUGGER
-
-		/**
-		Sampling profiler interface
-		*/
-		inline Sampler* sampler() { return &_sampler; }
-		inline void sampleCheck() { _sampler.sampleCheck(); }
-		inline bool sampling() { return _sampler.sampling; }
-
-#endif
-
 		CodeContextAtom codeContextAtom;
 
 		CodeContext* codeContext() const;
@@ -1542,11 +1530,6 @@ const int kBufferPadding = 16;
 			AvmCore *core;
 		};
 		GCInterface gcInterface;
-
-#ifdef DEBUGGER
-	private:
-		Sampler _sampler;
-#endif
 	};
 }
 

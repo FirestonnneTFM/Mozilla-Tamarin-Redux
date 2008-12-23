@@ -69,10 +69,10 @@ namespace avmplus
 		uint64 alloc_size; // size for new mem sample
 	};
 
-	class Sampler
+	class Sampler : public MMgc::GCRoot
 	{
 	public:
-		Sampler(MMgc::GC *);
+		Sampler(AvmCore*);
 		~Sampler();
 
 		enum SampleType 
@@ -83,23 +83,16 @@ namespace avmplus
 			NEW_AUX_SAMPLE=0xeeeeeeee
 		};
 		
-		// are we sampling at all
-		bool sampling;
-
-		// if true we call startSampling as early as possible during startup
-		bool autoStartSampling;
-
 		// should use opaque Cursor type instead of byte*
 		byte *getSamples(uint32 &num);
 		void readSample(byte *&p, Sample &s);
 		
-		void setCore(AvmCore *core);
 		void init(bool sampling, bool autoStart);
 		void sampleCheck() { if(takeSample) sample(); }
 
 		uint64 recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable);
-		uint64 recordAllocationSample(const void* item, uint64 size, bool callback_ok = true);
-		void recordDeallocationSample(const void* item, uint64 size);
+		uint64 recordAllocationSample(const void* item, uint64_t size, bool callback_ok = true);
+		void recordDeallocationSample(const void* item, uint64_t size);
 
 		void startSampling();
 		void stopSampling();
@@ -120,9 +113,10 @@ namespace avmplus
 		void presweep();
 		void postsweep();
 
-		uint32 sampleCount() const { return numSamples; }
-		bool activelySampling() { return samplingNow; }
-		
+		inline uint32_t sampleCount() const { return numSamples; }
+		inline bool activelySampling() { return samplingNow; }
+		inline bool sampling() const { return _sampling; }
+
 	private:	
 		
 		static void inline align(byte*&b)
@@ -151,26 +145,8 @@ namespace avmplus
 		}
 		
 		
-		AvmCore *core;
-
-		uint64 allocId;
-				
-		bool samplingNow;
-		bool samplingAllAllocs;
-		int takeSample;
-		uint32 numSamples;
-		uint32 samples_size;
-		byte* samples;
-		byte *currentSample;
-		byte *lastAllocSample;
-		bool runningCallback;
-		DRC(ScriptObject*) callback;
 		void sample();
 
-		uintptr timerHandle;
-		MMgc::GCHashtable uids;
-		MMgc::GCHashtable* ptrSamples;
-		
 		void rewind(byte*&b, uint32 amount)
 		{
 			b -= amount;
@@ -180,8 +156,27 @@ namespace avmplus
 		
 		void writeRawSample(SampleType sampleType);
 
+	// ------------------------ DATA SECTION BEGIN
 	private:
-		List<Stringp> m_fakeMethodNames; 
+		AvmCore*			core;
+		List<Stringp>		fakeMethodNames; 
+		uint64_t			allocId;
+		uint8_t*			samples;
+		uint8_t*			currentSample;
+		uint8_t*			lastAllocSample;
+		DRC(ScriptObject*)	callback;
+		uintptr_t			timerHandle;
+		MMgc::GCHashtable	uids;
+		MMgc::GCHashtable*	ptrSamples;
+		int32_t				takeSample;
+		uint32_t			numSamples;
+		uint32_t			samples_size;
+		bool				samplingNow;
+		bool				samplingAllAllocs;
+		bool				runningCallback;
+		bool				autoStartSampling;	// if true we call startSampling as early as possible during startup
+		bool				_sampling;			// are we sampling at all
+	// ------------------------ DATA SECTION END
 	};
 
 	#define SAMPLE_FRAME(_strp, _core)	avmplus::CallStackNode __fcsn((avmplus::AvmCore*)_core, _strp)

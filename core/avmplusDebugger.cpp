@@ -132,7 +132,8 @@ namespace avmplus
 			return;  // still on the same line in the same function?
 		
 		Profiler* profiler = core->profiler();
-		if (profiler && profiler->profilingDataWanted && profiler->profileSwitch && !core->sampler()->sampling)
+		Sampler* s = core->get_sampler();
+		if (profiler && profiler->profilingDataWanted && profiler->profileSwitch && !(s && s->sampling()))
 		{
 			profiler->sendLineTimestamp(line);
 		}
@@ -216,7 +217,8 @@ namespace avmplus
 		if (prev != filename) 
 		{
 			Profiler* profiler = core->profiler();
-			if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
+			Sampler* s = core->get_sampler();
+			if (profiler && profiler->profilingDataWanted && !(s && s->sampling()))
 			{
 				profiler->sendDebugFileURL(filename);
 			}

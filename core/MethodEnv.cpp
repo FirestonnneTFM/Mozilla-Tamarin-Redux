@@ -505,7 +505,8 @@ namespace avmplus
 
 		// update profiler
 		Profiler* profiler = core->profiler();
-		if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
+		Sampler* s = core->get_sampler();
+		if (profiler && profiler->profilingDataWanted && !(s && s->sampling()))
 			profiler->sendFunctionEnter(method);
 
 		// this shouldn't ever be called unless there's a debugger
@@ -514,8 +515,9 @@ namespace avmplus
 		Debugger* debugger = core->debugger();
 		if (debugger)
 			debugger->_debugMethod(this);
-
-		core->sampleCheck();
+		
+		if (s)
+			s->sampleCheck();
 
 		_invocationCount++;
 	}
@@ -528,7 +530,8 @@ namespace avmplus
 
 		// update profiler 
 		Profiler* profiler = core->profiler();
-		if (profiler && profiler->profilingDataWanted && !core->sampler()->sampling)
+		Sampler* s = core->get_sampler();
+		if (profiler && profiler->profilingDataWanted && !(s && s->sampling()))
 			profiler->sendFunctionExit();
 
 		core->callStack = callstack->next();

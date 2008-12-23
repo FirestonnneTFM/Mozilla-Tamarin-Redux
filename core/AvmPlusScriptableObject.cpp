@@ -47,11 +47,11 @@ namespace avmplus
 #ifdef DEBUGGER
 	AvmPlusScriptableObject::AvmPlusScriptableObject(Atom typeOrVTable)
 	{
-		AvmCore *core = this->core();
-			
-		if(core->sampling())
+		AvmCore* core = this->core();
+		Sampler* s = core->get_sampler();
+		if (s && s->sampling())
 		{
-		  core->sampler()->recordAllocationInfo(this, (uintptr)typeOrVTable);
+			s->recordAllocationInfo(this, (uintptr)typeOrVTable);
 		}		
 	}
 

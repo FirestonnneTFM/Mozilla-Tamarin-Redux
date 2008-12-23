@@ -101,7 +101,7 @@ namespace avmplus
 		m_boxed			= false;
 	}
 
-	void CallStackNode::exit()
+	void FASTCALL CallStackNode::exit()
 	{
 		// m_env might be null (for fake CallStackNode), be careful
 		AvmAssert(m_core != NULL);
@@ -116,7 +116,7 @@ namespace avmplus
 		reset();
 	}
 	
-	void CallStackNode::reset()
+	void FASTCALL  CallStackNode::reset()
 	{
 		AvmCore* core = m_core; // save it since exit() resets to null
 		if (core)
@@ -126,7 +126,7 @@ namespace avmplus
 		}
 	}
 
-	void** CallStackNode::scopeBase()
+	void** FASTCALL CallStackNode::scopeBase()
 	{
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
 		if (m_framep && m_env)

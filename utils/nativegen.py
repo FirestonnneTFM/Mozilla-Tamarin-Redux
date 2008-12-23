@@ -1182,13 +1182,17 @@ class AbcThunkGen:
 		argtraits = self.argTraits(receiver, m)
 
 		argszprev = "0"
+		self.out_c.println("enum {");
+		self.out_c.indent += 1;
 		for i in range(0, len(argtraits)):
 			cts = ctype_from_traits(argtraits[i], True);
 			if i == 0:
-				self.out_c.println("const uint32_t argoff0 = 0;");
+				self.out_c.println("argoff0 = 0");
 			else:
-				self.out_c.println("const uint32_t argoff"+str(i)+" = argoff"+str(i-1)+" + "+argszprev+";");
+				self.out_c.println(", argoff"+str(i)+" = argoff"+str(i-1)+" + "+argszprev+"");
 			argszprev = "AvmThunkArgSize_"+cts;
+		self.out_c.indent -= 1;
+		self.out_c.println("};");
 	
 		if m.needRest():
 			self.out_c.println("const uint32_t argoffV = argoff"+str(len(argtraits)-1)+" + "+argszprev+";");
@@ -1220,8 +1224,6 @@ class AbcThunkGen:
 		if not m.hasOptional() and not m.needRest():
 			self.out_c.println("(void)argc;");
 
-		self.out_c.println("AVMTHUNK_DEBUG_ENTER(env)");
-		
 		if directcall:
 			self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
 			self.out_c.println("%s* obj = %s;" % (m.receiver.niname, args[0][0]))
@@ -1250,7 +1252,10 @@ class AbcThunkGen:
 			self.out_c.println(");");
 			self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_HANDLER(env));")
 			if ret != "void":
-				self.out_c.prnt("const %s ret = " % ret)
+				if ret == "double":
+					self.out_c.prnt("return ")
+				else:
+					self.out_c.prnt("return (AvmBox)")
 			self.out_c.println("(*(%s).*(func))(" % (args[0][0]))
 			self.out_c.indent += 1
 			for i in range(1, len(args)):
@@ -1260,14 +1265,8 @@ class AbcThunkGen:
 			self.out_c.indent -= 1
 			self.out_c.println(");")
 
-		self.out_c.println("AVMTHUNK_DEBUG_EXIT(env)")
-
 		if ret == "void":
 			self.out_c.println("return kAvmThunkUndefined;")
-		elif ret == "double":
-			self.out_c.println("return ret;")
-		else:
-			self.out_c.println("return AvmBox(ret);")
 		self.out_c.indent -= 1
 		self.out_c.println("}")
 
