@@ -123,7 +123,8 @@ namespace avmplus
 		// ctor used only for Sampling (no MethodEnv)
 		inline explicit CallStackNode(AvmCore* core, const char* name)
 		{
-			init(core, core ? core->sampler()->getFakeFunctionName(name) : NULL);
+			Sampler* sampler = core ? core->get_sampler() : NULL;
+			init(core, sampler ? sampler->getFakeFunctionName(name) : NULL);
 		}
 
 		// ctor used only for verify (no MethodEnv)
@@ -141,13 +142,13 @@ namespace avmplus
 		~CallStackNode();
 
 		// Does exactly what the destructor does, but on an arbitrary object.
-		void reset();
+		void FASTCALL reset();
 		
-		void sampleCheck() { if (m_core) m_core->sampler()->sampleCheck(); }
+		inline void sampleCheck() { if (m_core) m_core->sampleCheck(); }
 
-		void** scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
+		void** FASTCALL scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
 
-		void exit();
+		void FASTCALL exit();
 
 		inline CallStackNode* next() const { return m_next; }
 		// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.

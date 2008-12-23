@@ -248,10 +248,10 @@ namespace avmplus
 	{	
 #ifdef DEBUGGER
 		AvmCore* core = this->core();
-		if (!core->debugger() || !core->sampling() || core->sampler()->sampleCount() == 0 || !trusted())
+		Sampler *s = core->get_sampler();
+		if (!s || !s->sampling() || s->sampleCount() == 0 || !trusted())
 			return undefinedAtom;
 
-		Sampler *s = core->sampler();
 		ScriptObject *iter = new (gc()) SampleIterator(s, this, sampleIteratorVTable);
 		return iter->atom();
 #else
@@ -262,9 +262,9 @@ namespace avmplus
 	double SamplerScript::getSampleCount()
 	{
 #ifdef DEBUGGER
-		if (!core()->debugger()) 
+		Sampler* s = core()->get_sampler();
+		if (!s) 
 			return -1;
-		Sampler* s = core()->sampler();
 		uint32 num;
 		s->getSamples(num);
 		return (double)num;
@@ -353,6 +353,10 @@ namespace avmplus
 	ScriptObject* SamplerScript::makeSample(const Sample& sample)
 	{
 		AvmCore *core = this->core();
+		Sampler* s = core->get_sampler();
+		if (!s)
+			return NULL;
+			
 		int clsId = NativeID::abcclass_flash_sampler_Sample;
 		
 		if(sample.sampleType == Sampler::NEW_OBJECT_SAMPLE || sample.sampleType == Sampler::NEW_AUX_SAMPLE)
@@ -391,7 +395,7 @@ namespace avmplus
 				// at every allocation the sample buffer could overflow and the samples could be deleted
 				// the StackTrace::Element pointer is a raw pointer into that buffer so we need to check
 				// that its still around before dereferencing e
-				if(core->sampler()->getSamples(num) == NULL)
+				if (s->getSamples(num) == NULL)
 					return NULL;
 		
 				WBRC(gc(), f, ((char*)f + cc->nameOffset), uintptr(e->infoname()));	// NOT e->info()->name() 
@@ -429,10 +433,11 @@ namespace avmplus
 	Atom SamplerScript::getMemberNames(Atom o, bool instanceNames)
 	{
 #ifdef DEBUGGER
-		if (!core()->debugger() || !trusted())
+		AvmCore* core = this->core();
+		Sampler* s = core->get_sampler();
+		if (!s || !trusted())
 			return undefinedAtom;
 
-		AvmCore *core = this->core();
 		if (AvmCore::isObject(o))
 		{
 			Traits *t = AvmCore::atomToScriptObject(o)->traits();
@@ -470,7 +475,9 @@ namespace avmplus
 	double SamplerScript::getSize(Atom a)
 	{
 #ifdef DEBUGGER
-		if (!core()->debugger())
+		AvmCore* core = this->core();
+		Sampler* s = core->get_sampler();
+		if (!s)
 			return 0;
 		return _get_size(a);
 #else
@@ -482,45 +489,50 @@ namespace avmplus
 	void SamplerScript::startSampling() 
 	{ 
 #ifdef DEBUGGER
-		if (!core()->debugger() || !trusted())
+		Sampler* s = core()->get_sampler();
+		if (!s || !trusted())
 			return;
-		core()->sampler()->startSampling(); 
+		s->startSampling(); 
 #endif
 	}
 	
 	void SamplerScript::stopSampling() 
 	{ 
 #ifdef DEBUGGER
-		if (!core()->debugger() || !trusted())
+		Sampler* s = core()->get_sampler();
+		if (!s || !trusted())
 			return;
-		core()->sampler()->stopSampling(); 
+		s->stopSampling(); 
 #endif
 	}
 
 	void SamplerScript::clearSamples() 
 	{
 #ifdef DEBUGGER
-		if (!core()->debugger() || !trusted())
+		Sampler* s = core()->get_sampler();
+		if (!s || !trusted())
 			return;
-		core()->sampler()->clearSamples();
+		s->clearSamples();
 #endif
 	}		
 
 	void SamplerScript::pauseSampling() 
 	{
 #ifdef DEBUGGER
-		if (!core()->debugger() || !trusted())
+		Sampler* s = core()->get_sampler();
+		if (!s || !trusted())
 			return;
-		core()->sampler()->pauseSampling();
+		s->pauseSampling();
 #endif
 	}	
 
 	void SamplerScript::sampleInternalAllocs(bool b)
 	{
 #ifdef DEBUGGER
-		if (!core()->debugger() || !trusted())
+		Sampler* s = core()->get_sampler();
+		if (!s || !trusted())
 			return;
-		core()->sampler()->sampleInternalAllocs(b);
+		s->sampleInternalAllocs(b);
 #else
 		(void)b;
 #endif
@@ -529,9 +541,10 @@ namespace avmplus
 	void SamplerScript::_setSamplerCallback(ScriptObject *callback)
 	{
 #ifdef DEBUGGER
-		if (!core()->debugger() || !trusted())
+		Sampler* s = core()->get_sampler();
+		if (!s || !trusted())
 			return;
-		core()->sampler()->setCallback(callback);
+		s->setCallback(callback);
 #else
 		(void)callback;
 #endif
@@ -541,7 +554,8 @@ namespace avmplus
 	{
 #ifdef DEBUGGER
 		AvmCore* core = this->core();
-		if (!core->debugger() || !trusted())
+		Sampler* s = core->get_sampler();
+		if (!s || !trusted())
 			return -1;
 
 		Multiname multiname;
@@ -651,7 +665,9 @@ namespace avmplus
 	bool SamplerScript::isGetterSetter(Atom a, QNameObject *qname)
 	{
 #ifdef DEBUGGER
-		if (!core()->debugger())
+		AvmCore* core = this->core();
+		Sampler* s = core->get_sampler();
+		if (!s)
 			return false;
 			
 		if(!AvmCore::isObject(a) || !AvmCore::atomToScriptObject(a))

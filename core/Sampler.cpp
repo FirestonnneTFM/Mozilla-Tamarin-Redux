@@ -51,7 +51,7 @@ namespace avmplus
 	void recordAllocationSample(const void* item, size_t size)
 	{
 		avmplus::Sampler* sampler = tls_sampler;
-		if( sampler && sampler->sampling )
+		if (sampler && sampler->sampling())
 			sampler->recordAllocationSample(item, size);
 	}
 
@@ -63,17 +63,28 @@ namespace avmplus
 			sampler->recordDeallocationSample(item, size);
 	}
 
-	Sampler::Sampler(GC *gc) : allocId(1), sampling(true),
-			autoStartSampling(false), samplingNow(false), samplingAllAllocs(false), takeSample(0),
-			numSamples(0), samples_size(0), samples(0), currentSample(NULL), timerHandle(0), lastAllocSample(0),
-			uids(1024, GCHashtable::MALLOC), ptrSamples(0), callback(0), runningCallback(false), m_fakeMethodNames(gc)
+	Sampler::Sampler(AvmCore* _core) : 
+		GCRoot(_core->GetGC()),
+		core(_core),
+		fakeMethodNames(_core->GetGC()),
+		allocId(1), 
+		samples(NULL),
+		currentSample(NULL),
+		lastAllocSample(NULL),
+		callback(NULL),
+		timerHandle(0),
+		uids(1024, GCHashtable::MALLOC),
+		ptrSamples(NULL),
+		takeSample(0),
+		numSamples(0), 
+		samples_size(0),
+		samplingNow(false),
+		samplingAllAllocs(false),
+		runningCallback(false),
+		autoStartSampling(false),
+		_sampling(true)
 	{
-		gc->GetGCHeap()->EnableHooks();
-	}
-
-	void Sampler::setCore(AvmCore *core)
-	{
-		this->core = core;
+		_core->GetGC()->GetGCHeap()->EnableHooks();
  		tls_sampler = this;
 	}
 
@@ -81,13 +92,13 @@ namespace avmplus
 	{
 		stopSampling();
  		Sampler* tls = tls_sampler;
- 		if(tls == this)
+ 		if (tls == this)
  			tls_sampler = NULL;
 	}
 
 	void Sampler::init(bool sampling, bool autoStart)
 	{
-		this->sampling = sampling;
+		this->_sampling = sampling;
 		this->autoStartSampling = autoStart;
 	}
 
@@ -100,7 +111,7 @@ namespace avmplus
 
 	void Sampler::sample()
 	{		
-		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow || !core->callStack || !sampleSpaceCheck())
 			return;	
 		writeRawSample(RAW_SAMPLE);
@@ -226,7 +237,7 @@ namespace avmplus
 
 	uint64 Sampler::recordAllocationSample(const void* item, uint64 size, bool callback_ok)
 	{
-		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow)
 			return 0;
 
@@ -255,7 +266,7 @@ namespace avmplus
 
 	uint64 Sampler::recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable)
 	{
-		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow)
 			return 0;
 
@@ -304,7 +315,7 @@ namespace avmplus
 
 	void Sampler::recordDeallocationSample(const void* item, uint64 size)
 	{
-		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		AvmAssert(item != 0);
 		// recordDeallocationSample doesn't honor the samplingNow flag
 		// this is to avoid dropping deleted object samples when sampling is paused.
@@ -358,7 +369,7 @@ namespace avmplus
 
 	void Sampler::startSampling()
 	{
-		if(!sampling || samplingNow)
+		if (!_sampling || samplingNow)
 			return;
 
 		if (!currentSample)
@@ -370,12 +381,12 @@ namespace avmplus
 				megs >>= 1;
 			}
 			if(!currentSample) {
-				sampling = autoStartSampling = false;
+				_sampling = autoStartSampling = false;
 				return;
 			}
 		}
 
-		init(sampling, autoStartSampling);
+		init(_sampling, autoStartSampling);
 		
 		if( !ptrSamples ) 
 		{
@@ -389,7 +400,7 @@ namespace avmplus
 
 	void Sampler::pauseSampling()
 	{
-		if(!sampling || !samplingNow)
+		if (!_sampling || !samplingNow)
 			return;
 		samplingNow = false;
 	}
@@ -406,7 +417,7 @@ namespace avmplus
 
 	void Sampler::stopSampling()
 	{
-		if(!sampling)
+		if (!_sampling)
 			return;
 
 		if( samples )
@@ -431,7 +442,7 @@ namespace avmplus
 
 	void Sampler::initSampling()
 	{
-		if(!sampling)
+		if (!_sampling)
 			return;
 
 		// prime fake function table
@@ -457,13 +468,13 @@ namespace avmplus
 
 	void Sampler::createFakeFunction(const char *name)
 	{
-		if(!sampling)
+		if (!_sampling)
 			return;
 
 		Stringp s = core->internConstantStringLatin1(name);
-		// save it in m_fakeMethodNames just to be sure it isn't cleared from the intern-name list.
-		if (m_fakeMethodNames.indexOf(s) < 0)
-			m_fakeMethodNames.add(s);
+		// save it in fakeMethodNames just to be sure it isn't cleared from the intern-name list.
+		if (fakeMethodNames.indexOf(s) < 0)
+			fakeMethodNames.add(s);
 	}
 
 	Stringp Sampler::getFakeFunctionName(const char* name)

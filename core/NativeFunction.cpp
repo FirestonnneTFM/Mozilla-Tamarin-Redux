@@ -54,7 +54,29 @@ namespace avmplus
 		this->impl32 = verifyEnter;
 	}
 
-	/*static*/ Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
+	typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+
+#ifdef DEBUGGER
+	/*static*/ AvmBox NativeMethod::debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+	{
+		CallStackNode csn(CallStackNode::kEmpty); 
+		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
+		const AvmBox result = static_cast<NativeMethod*>(env->method)->thunker(env, argc, argv);
+		env->debugExit(&csn);
+		return result;
+	}
+
+	/*static*/ double NativeMethod::debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+	{
+		CallStackNode csn(CallStackNode::kEmpty); 
+		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
+		const double result = reinterpret_cast<AvmThunkNativeThunkerN>(static_cast<NativeMethod*>(env->method)->thunker)(env, argc, argv);
+		env->debugExit(&csn);
+		return result;
+	}
+#endif
+
+	/*static*/ Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32* ap)
 	{
 		NativeMethod* f = (NativeMethod*) env->method;
 
@@ -76,8 +98,21 @@ namespace avmplus
 		union {
 			Atom (*impl32)(MethodEnv*, int, uint32 *);
 			AvmThunkNativeThunker thunker;
+			AvmThunkNativeThunkerN thunkerN;
 		} u;
-		u.thunker = this->thunker;
+#ifdef DEBUGGER
+		if (toplevel->core()->debugger())
+		{
+			if (Traits::getBuiltinType(returnTraits()) == BUILTIN_number)
+				u.thunkerN = NativeMethod::debugEnterExitWrapperN;
+			else
+				u.thunker = NativeMethod::debugEnterExitWrapper32;
+		}
+		else
+#endif
+		{
+			u.thunker = this->thunker;
+		}
 		this->impl32 = u.impl32;
 	}
 

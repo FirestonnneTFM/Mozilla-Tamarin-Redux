@@ -2167,7 +2167,8 @@ namespace avmplus
 				intptr_t targetpc = op1;
 
 #ifdef DEBUGGER
-				if (core->debugger() && core->sampling() && targetpc < state->pc)
+				Sampler* s = core->get_sampler();
+				if (s && s->sampling() && targetpc < state->pc)
 				{
 					emitSampleCheck();
 				}
@@ -3570,7 +3571,8 @@ namespace avmplus
 		this->state = state;
 
 #ifdef DEBUGGER
-		if (core->debugger() && core->sampling() && target < state->pc)
+		Sampler* s = core->get_sampler();
+		if (s && s->sampling() && target < state->pc)
 		{
 			emitSampleCheck();
 		}

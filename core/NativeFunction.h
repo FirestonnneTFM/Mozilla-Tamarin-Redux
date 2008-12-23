@@ -71,6 +71,7 @@ namespace avmplus
 	typedef avmplus::Namespace AvmNamespaceT;
 
 	typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+	typedef double (*AvmThunkNativeThunkerN)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
 	typedef void (ScriptObject::*AvmThunkNativeHandler)();
 
 	#define AvmThunkUnbox_AvmObject(r)		((ScriptObject*)(r))
@@ -155,14 +156,6 @@ namespace avmplus
 	#define AVMTHUNK_GET_COOKIE(env)	(static_cast<NativeMethod*>((env)->method)->cookie)
 #endif
 
-#ifdef DEBUGGER
-	#define AVMTHUNK_DEBUG_ENTER(env)	CallStackNode csn(CallStackNode::kEmpty); (env)->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
-	#define AVMTHUNK_DEBUG_EXIT(env)	(env)->debugExit(&csn);
-#else
-	#define AVMTHUNK_DEBUG_ENTER(env)	
-	#define AVMTHUNK_DEBUG_EXIT(env)	
-#endif
-
 	struct NativeMethodInfo
 	{
 	public:
@@ -210,7 +203,11 @@ namespace avmplus
 	public:
 		NativeMethod(AvmThunkNativeThunker thunker, AvmThunkNativeHandler handler);
 		virtual ~NativeMethod() {}
-		static Atom verifyEnter(MethodEnv* env, int argc, uint32 *ap);
+		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
+#ifdef DEBUGGER
+		static AvmBox debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+		static double debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+#endif
 		virtual void verify(Toplevel* toplevel);
 
 	// ------------------------ DATA SECTION BEGIN
