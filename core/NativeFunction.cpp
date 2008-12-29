@@ -70,7 +70,7 @@ namespace avmplus
 	{
 		CallStackNode csn(CallStackNode::kEmpty); 
 		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
-		const double result = reinterpret_cast<AvmThunkNativeThunkerN>(static_cast<NativeMethod*>(env->method)->thunker)(env, argc, argv);
+		const double result = (reinterpret_cast<AvmThunkNativeThunkerN>(static_cast<NativeMethod*>(env->method)->thunker))(env, argc, argv);
 		env->debugExit(&csn);
 		return result;
 	}
