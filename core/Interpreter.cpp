@@ -586,20 +586,22 @@ namespace avmplus
  		
  		struct InterpreterAuxiliaryFrame
  		{
-#ifdef DEBUGGER
-			InterpreterAuxiliaryFrame() : cs(CallStackNode::kEmpty) {}
-#endif
-
  			ExceptionFrame ef;
  			CodeContextAtom savedCodeContext;
 			Namespace** dxnsAddr;
  			Namespace* dxns;
  			Namespace* const * dxnsAddrSave;
  			Multiname multiname2;
-#ifdef DEBUGGER
-			CallStackNode  cs;
-#endif
  		};
+
+#ifdef DEBUGGER
+ 		struct InterpreterAuxiliaryFrameWithCSN : public InterpreterAuxiliaryFrame
+		{
+			inline InterpreterAuxiliaryFrameWithCSN() : cs(CallStackNode::kEmpty) {}
+
+			CallStackNode  cs;
+		};
+#endif
  		
  		// OPTIMIZEME - opportunity to compute some information only when needed.
  		//
@@ -614,6 +616,12 @@ namespace avmplus
  		register Toplevel* const toplevel = env->toplevel();
  		register MethodInfo* const info = (MethodInfo*)(AbstractFunction*) env->method;
  		register PoolObject* const pool = info->pool;
+
+#ifdef DEBUGGER
+		const size_t kAuxFrameSize = core->debugger() ? sizeof(InterpreterAuxiliaryFrameWithCSN) : sizeof(InterpreterAuxiliaryFrame);
+#else
+		const size_t kAuxFrameSize = sizeof(InterpreterAuxiliaryFrame);
+#endif
  		
 #ifdef AVMPLUS_VERBOSE
  		if (pool->verbose)
@@ -668,13 +676,13 @@ namespace avmplus
 			   (Atom*)VMPI_alloca(core, _framep,
 								  sizeof(Atom)*(info->frameSize)
 								+ 8
-								+ sizeof(InterpreterAuxiliaryFrame));
+								+ kAuxFrameSize);
 		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(((uintptr_t)(framep + info->frameSize) + 15) & ~15);
 #else
 		register Atom* const framep = 
 					   (Atom*)VMPI_alloca(core, _framep,
 										  sizeof(Atom)*(info->frameSize)
-										+ sizeof(InterpreterAuxiliaryFrame));
+										+ kAuxFrameSize);
 		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(framep + info->frameSize);
 #endif
  		register Atom* const scopeBase = framep + info->localCount;
@@ -755,7 +763,7 @@ namespace avmplus
 #ifdef DEBUGGER
 		CallStackNode* volatile callStackNode = NULL;
 #ifndef AVMPLUS_WORD_CODE
-		if (core->debugger) 
+		if (core->debugger()) 
 		{
 			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
 			env->debugEnterInner();
@@ -979,7 +987,7 @@ namespace avmplus
 			INSTR(debugenter) {
 				AvmAssert(core->debugger() != NULL);
 				AvmAssert(callStackNode == NULL);
-				callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
+				callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
 				env->debugEnterInner();
 				NEXT;
 			}
