@@ -1420,7 +1420,6 @@ namespace avmplus
 					<< "\n";
 			)
 			AbstractFunction* script = resolveMethodInfo(init_index);
-			AvmAssert(script->declaringTraits == NULL);
 
 			if (script->declaringTraits != NULL)
 			{
@@ -1705,7 +1704,6 @@ namespace avmplus
 											itraits->protectedNamespace);
 
 			ctraits->setCreateClassClosureProc(nativeEntry ? nativeEntry->createClassClosure : NULL);
-			AvmAssert(cinit->declaringTraits == NULL);
 
 			if (cinit->declaringTraits != NULL)
 			{
