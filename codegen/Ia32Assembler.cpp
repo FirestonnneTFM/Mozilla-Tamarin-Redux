@@ -655,10 +655,12 @@ namespace avmplus
 		#undef _PAGESIZE_ 
 	}
 	
-	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
+	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e, int imtCount)
 	{
 		count_imt();
-		mip = mipStart = getMDBuffer(pool);
+		// Rough guess at bytes required for all our instructions
+		int extraBytes = 4 * (6 + 5 * imtCount);
+		mip = mipStart = getMDBuffer(pool, extraBytes);
 		if (!mip)
 		{
 			overflow = true;

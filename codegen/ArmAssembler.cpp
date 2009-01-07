@@ -651,11 +651,13 @@ namespace avmplus
         #endif
 	}
 	
-	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
+	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e, int imtCount)
 	{
 		SET_CONDITION_CODE(AL);
 		
-		mip = mipStart = (MDInstruction*)getMDBuffer(pool);
+		// Rough guess at bytes required for all our instructions
+		int extraBytes = 4 * (6 + 5 * imtCount);
+		mip = mipStart = (MDInstruction*)getMDBuffer(pool, extraBytes);
 
 #ifdef FEATURE_BUFFER_GUARD
 		GrowthGuard guard(pool->codeBuffer);

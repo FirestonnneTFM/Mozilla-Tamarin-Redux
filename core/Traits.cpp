@@ -1998,7 +1998,25 @@ namespace avmplus
 
 	void ImtBuilder::finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel)
 	{
-		for (uint32_t i = 0; i < Traits::IMT_SIZE; i++)
+	#ifdef AVMPLUS_MIR
+		// Count up all our IMT entries that will generate thunks so we can make sure
+		// we have enough space for them in our CodegenMIR buffers.
+		volatile uint32_t imtCount = 0;
+		for (uint32_t j=0; j < Traits::IMT_SIZE; j++)
+		{
+			ImtEntry *e = entries[j];
+			if ((e != NULL) && (e->next != NULL))
+			{
+				while (e)
+				{
+					imtCount++;
+					e = e->next;
+				}
+			}
+		}
+	#endif // AVMPLUS_MIR
+
+		for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
 		{
 			ImtEntry *e = entries[i];
 			if (e == NULL)
@@ -2022,7 +2040,11 @@ namespace avmplus
 
 				TRY(pool->core, kCatchAction_Rethrow)
 				{
+	#ifdef AVMPLUS_MIR
+					void* thunk = imtgen.emitImtThunk(e, imtCount);
+	#else
 					void* thunk = imtgen.emitImtThunk(e);
+	#endif // AVMPLUS_MIR
 					imt[i] = AvmCore::makeITrampBinding(uintptr_t(thunk));
 					if (imtgen.overflow)
 						toplevel->throwError(kOutOfMemoryError);

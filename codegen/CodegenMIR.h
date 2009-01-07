@@ -402,7 +402,7 @@ namespace avmplus
 		/**
 		 * Generates code for a native method thunk.
 		 */
-		void* emitImtThunk(ImtBuilder::ImtEntry *e);
+		void* emitImtThunk(ImtBuilder::ImtEntry *e, int imtCount);
 
 	private:
 
@@ -1275,7 +1275,7 @@ namespace avmplus
 #endif /* AVMPLUS_JIT_READONLY */
 
 		bool	ensureMDBufferCapacity(PoolObject* pool, size_t s);  // only if buffer guard is not used
-		byte*	getMDBuffer(PoolObject* pool);	// 
+		byte*	getMDBuffer(PoolObject* pool, int extraBytes = 0);	// 
 		size_t	estimateMDBufferReservation(PoolObject* pool, const int expansionFactor); 
 
 		/**

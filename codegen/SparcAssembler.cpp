@@ -147,9 +147,11 @@ namespace avmplus
 #define MAX(x,y) ( (x)>(y)?(x):(y) )
 #endif /* MAX */
 
-	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
+	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e, int imtCount)
 	{
-		mip = mipStart = (MDInstruction*)getMDBuffer(pool);
+		// Rough guess at bytes required for all our instructions
+		int extraBytes = 4*(6+9*imtCount);
+		mip = mipStart = (MDInstruction*)getMDBuffer(pool, extraBytes);
 
 #ifdef FEATURE_BUFFER_GUARD
 		GrowthGuard guard(pool->codeBuffer);
