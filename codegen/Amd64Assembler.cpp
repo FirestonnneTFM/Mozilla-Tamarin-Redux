@@ -997,9 +997,11 @@ namespace avmplus
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
+	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e, int imtCount)
 	{
-		mip = mipStart = getMDBuffer(pool);
+		// Rough guess at bytes required for all our instructions
+		int extraBytes = 8 * (6 + 5 * imtCount);
+		mip = mipStart = getMDBuffer(pool, extraBytes);
 
 #ifdef FEATURE_BUFFER_GUARD
 		GrowthGuard guard(pool->codeBuffer);

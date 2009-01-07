@@ -696,9 +696,15 @@ namespace avmplus
 	}
 #endif // !TARGET_RT_MAC_MACHO
 
-	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e)
+	void* CodegenMIR::emitImtThunk(ImtBuilder::ImtEntry *e, int imtCount)
 	{
-		mip = mipStart = (MDInstruction*)getMDBuffer(pool);
+		// Rough guess at bytes required for all our instructions
+#if !TARGET_RT_MAC_MACHO
+		int extraBytes = 4 * (7 + 9 * imtCount);
+#else
+		int extraBytes = 4 * (6 + 8 * imtCount);
+#endif
+		mip = mipStart = (MDInstruction*)getMDBuffer(pool, extraBytes);
 
 #ifdef FEATURE_BUFFER_GUARD
 		GrowthGuard guard(pool->codeBuffer);

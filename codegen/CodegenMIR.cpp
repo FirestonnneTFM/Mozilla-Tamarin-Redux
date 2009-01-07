@@ -2762,6 +2762,7 @@ namespace avmplus
 			OP* br = Ins(MIR_jne, binaryIns(MIR_ucmp, interrupted, InsConst(0)));
 			mirPatchPtr(&br->target, interrupt_label);
 		}
+
 	}
 
 	void CodegenMIR::emitBlockEnd(FrameState* state)
@@ -8950,7 +8951,7 @@ namespace avmplus
 	}
 #endif /* FEATURE_BUFFER_GUARD */
 
-	byte* CodegenMIR::getMDBuffer(PoolObject* pool)
+	byte* CodegenMIR::getMDBuffer(PoolObject* pool, int extraBytes)
 	{
 		if (pool->codeBuffer->size() == 0)
 		{
@@ -8966,7 +8967,7 @@ namespace avmplus
 			do
 			{
 				size = estimateMDBufferReservation(pool, expansionFactor);
-				pMem = pool->codeBuffer->reserve(size);
+				pMem = pool->codeBuffer->reserve(size + extraBytes);
 				if(pMem)
 					break; // success!
 				else
