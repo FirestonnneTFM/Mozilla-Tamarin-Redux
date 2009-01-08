@@ -126,7 +126,7 @@ extern "C"
 
 namespace avmplus
 {
-#if defined(AVMPLUS_MIR) || defined(DEBUGGER)
+#ifdef AVMPLUS_MIR
 	GrowableBuffer::GrowableBuffer(MMgc::GCHeap *gcheap, bool mir)
 		: heap(gcheap)
 		, forMir(mir)

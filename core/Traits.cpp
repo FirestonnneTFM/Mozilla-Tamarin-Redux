@@ -1876,7 +1876,7 @@ namespace avmplus
 		else 
 		{
 			// make one
-			new_init = new (gc) MethodInfo();
+			new_init = new (gc) MethodInfo(-1);
 			new_init->declaringTraits = this;
 			new_init->pool = this->pool;
 			new_init->param_count = 0;
@@ -1991,7 +1991,7 @@ namespace avmplus
 		const uint32_t i = uint32_t(virt->iid() % Traits::IMT_SIZE);
 #ifdef AVMPLUS_VERBOSE
 		if (entries[i] && virt->pool->verbose)
-			virt->core()->console << "conflict " << (uint64_t)virt->iid() << " " << i << "\n";
+			virt->pool->core->console << "conflict " << (uint64_t)virt->iid() << " " << i << "\n";
 #endif
 		entries[i] = new (gc) ImtEntry(virt, entries[i], disp_id);
 	}

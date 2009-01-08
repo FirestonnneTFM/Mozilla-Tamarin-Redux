@@ -131,7 +131,7 @@ namespace avmplus
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
 		if (m_framep && m_env)
 		{
-			return (void**) (m_framep + ((MethodInfo*)m_env->method)->local_count);
+			return (void**) (m_framep + ((MethodInfo*)m_env->method)->local_count());
 		}
 		return NULL;
 	}
@@ -183,6 +183,20 @@ namespace avmplus
 		}
 	}
 
+	static Stringp getStackTraceLine(AbstractFunction* method, Stringp filename) 
+	{
+		AvmCore *core = method->pool->core;
+		Stringp s = core->newStringLatin1("\tat ");
+		s = core->concatStrings(s, method->format(core));
+		if (filename)
+		{
+			s = s->appendLatin1("[");
+			s = s->append(filename);
+			s = s->appendLatin1(":");
+		}
+		return s;
+	}
+
 	Stringp StackTrace::format(AvmCore* core)
 	{
 		if(!stringRep)
@@ -201,7 +215,7 @@ namespace avmplus
 					continue;
 
 				if(i != 0)
-					s = core->concatStrings(s, core->knewline);
+					s = s->appendLatin1("\n");
 
 				Stringp filename=NULL;
 				if(e->filename())
@@ -210,11 +224,11 @@ namespace avmplus
 					dumpFilename(e->filename(), sb);
 					filename = core->newStringUTF8(sb.c_str());
 				}
-				s = core->concatStrings(s, e->info()->getStackTraceLine(filename));
+				s = core->concatStrings(s, getStackTraceLine(e->info(), filename));
 				if(e->filename())
 				{
 					s = core->concatStrings(s, core->intToString(e->linenum()));
-					s = core->concatStrings(s, core->krightbracket);
+					s = s->appendLatin1("]");
 				}
 			}
 			stringRep = s;

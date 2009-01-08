@@ -48,8 +48,8 @@ namespace avmplus
 {
 	// ---------------
 
-	NativeMethod::NativeMethod(AvmThunkNativeThunker _thunker, AvmThunkNativeHandler _handler)
-		: AbstractFunction(), thunker(_thunker), handler(_handler)
+	NativeMethod::NativeMethod(int _method_id, AvmThunkNativeThunker _thunker, AvmThunkNativeHandler _handler)
+		: AbstractFunction(_method_id), thunker(_thunker), handler(_handler)
 	{
 		this->impl32 = verifyEnter;
 	}
@@ -84,7 +84,7 @@ namespace avmplus
 
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		f->core()->processVerifyQueue(env->toplevel());
+		env->core()->processVerifyQueue(env->toplevel());
 		#endif
 
 		env->impl32 = f->impl32;
@@ -182,7 +182,7 @@ namespace avmplus
 		if (!ni)
 			return NULL;
 
-		NativeMethod* info = new (core->GetGC()) NativeMethod(ni->thunker, ni->handler);
+		NativeMethod* info = new (core->GetGC()) NativeMethod(i, ni->thunker, ni->handler);
 		info->flags |= AbstractFunction::ABSTRACT_METHOD;
 #ifdef AVMPLUS_LEGACY_NATIVE_MAPS
 		info->flags |= ni->flags;

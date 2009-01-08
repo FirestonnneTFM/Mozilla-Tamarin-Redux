@@ -630,14 +630,6 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kAsterisk;
 		DRC(Stringp) kVersion;
 		DRC(Stringp) kVector;
-#ifdef AVMPLUS_VERBOSE
-		DRC(Stringp) knewline;
-		DRC(Stringp) krightbracket;
-		DRC(Stringp) kleftbracket;
-		DRC(Stringp) kcolon;
-		DRC(Stringp) ktabat;
-		DRC(Stringp) kparens;
-#endif
 #if defined AVMPLUS_VERBOSE || defined DEBUGGER
 		DRC(Stringp) kanonymousFunc;
 #endif

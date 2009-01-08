@@ -842,14 +842,14 @@ namespace avmplus
 			else
 			{
 				// negative - we must intern the integer
-				return AvmCore::atomToScriptObject(obj)->getAtomProperty(method->core()->internInt(index)->atom());
+				return AvmCore::atomToScriptObject(obj)->getAtomProperty(this->core()->internInt(index)->atom());
 			}
 		}
 		else
 		{
 			// primitive types are not dynamic, so we can go directly
 			// to their __proto__ object
-			AvmCore* core = method->core();
+			AvmCore* core = this->core();
 			Toplevel *toplevel = this->toplevel();
 			ScriptObject *protoObject = toplevel->toPrototype(obj);
 			return protoObject->ScriptObject::getStringPropertyFromProtoChain(core->internInt(index), protoObject, toplevel->toTraits(obj));			
@@ -870,7 +870,7 @@ namespace avmplus
 		{
 			// primitive types are not dynamic, so we can go directly
 			// to their __proto__ object
-			AvmCore* core = method->core();
+			AvmCore* core = this->core();
 			Toplevel *toplevel = this->toplevel();
 			ScriptObject *protoObject = toplevel->toPrototype(obj);
 			return protoObject->ScriptObject::getStringPropertyFromProtoChain(core->internUint32(index), protoObject, toplevel->toTraits(obj));			
@@ -931,14 +931,14 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 		traits->resolveSignatures(toplevel);
 		ScriptObject* delegate = toplevel->objectClass->prototype;
-		return global = method->core()->newObject(vtable, delegate);
+		return global = this->core()->newObject(vtable, delegate);
 	}
 
     ScriptObject* MethodEnv::op_newobject(Atom* sp, int argc) const
     {
 		// pre-size the hashtable since we know how many vars are coming
 		VTable* object_vtable = toplevel()->object_vtable;
-		AvmCore* core = method->core();
+		AvmCore* core = this->core();
 
 		ScriptObject* o = new (core->GetGC(), object_vtable->getExtraSize()) 
 			ScriptObject(object_vtable, toplevel()->objectClass->prototype,
@@ -968,7 +968,7 @@ namespace avmplus
 		case kObjectType:
 			return AvmCore::atomToScriptObject(objAtom)->nextName(index);
 		case kNamespaceType:
-			return AvmCore::atomToNamespace(objAtom)->nextName(method->core(), index);
+			return AvmCore::atomToNamespace(objAtom)->nextName(this->core(), index);
 		default:
 			ScriptObject* proto = toplevel()->toPrototype(objAtom);  // cn: types like Number are sealed, but their prototype could have dynamic properties
 			return proto ? proto->nextName(index) : undefinedAtom;
@@ -1391,7 +1391,7 @@ namespace avmplus
 			else
 			{
 				// negative index - we must intern the integer
-				o->setAtomProperty(method->core()->internInt(index)->atom(), value);
+				o->setAtomProperty(this->core()->internInt(index)->atom(), value);
 			}
 		}
 		else

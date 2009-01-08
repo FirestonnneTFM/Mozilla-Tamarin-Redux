@@ -42,10 +42,9 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-	AbstractFunction::AbstractFunction()
+	AbstractFunction::AbstractFunction(int _method_id) : method_id(_method_id)
 	{
 		this->flags = 0;
-		this->method_id = -1;
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_abstractfunction, this); )
 	}
 
@@ -60,7 +59,7 @@ namespace avmplus
 	{
 		MMGC_MEM_TYPE(this);
 		AvmAssert(m_types == NULL);
-		m_types = (Traits**)core()->GetGC()->Calloc(count, sizeof(Traits*), GC::kContainsPointers|GC::kZero);
+		m_types = (Traits**)pool->core->GetGC()->Calloc(count, sizeof(Traits*), GC::kContainsPointers|GC::kZero);
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_abstractfunction, GC::Size(m_types) ); )
 	}
 
@@ -68,14 +67,14 @@ namespace avmplus
 	{
 		MMGC_MEM_TYPE(this);
 		AvmAssert(m_values == NULL);
-		m_values = (Atom*)core()->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+		m_values = (Atom*)pool->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_abstractfunction, GC::Size(m_values) ); )
 	}
 	
 	void AbstractFunction::setParamType(int index, Traits* t)
 	{
 		AvmAssert(index >= 0 && index <= param_count);
-		WB(core()->GetGC(), m_types, &m_types[index], t);
+		WB(pool->core->GetGC(), m_types, &m_types[index], t);
 	}
 
 	void AbstractFunction::setDefaultValue(int index, Atom value)
@@ -83,29 +82,17 @@ namespace avmplus
 		AvmAssert(index > (param_count-optional_count) && index <= param_count);
 		int i = index-(param_count-optional_count)-1;
 		AvmAssert(i >= 0 && i < optional_count);
-		WBATOM(core()->GetGC(), m_values, &m_values[i], value);
+		WBATOM(pool->core->GetGC(), m_values, &m_values[i], value);
 	}
 	
-	#ifdef AVMPLUS_VERBOSE
+#ifdef AVMPLUS_VERBOSE
 	Stringp AbstractFunction::format(AvmCore* core) const
 	{
-		return core->concatStrings(name ? (Stringp)name : core->newConstantStringLatin1("?"), core->kparens);
+		return name ?
+				name->appendLatin1("()") :
+				core->newConstantStringLatin1("?()");
 	}
-
-	Stringp AbstractFunction::getStackTraceLine(Stringp filename) 
-	{
-		AvmCore *core = this->core();
-		Stringp s = core->ktabat;
-		s = core->concatStrings(s, format(core));
-		if(filename)
-		{
-			s = core->concatStrings(s, core->kleftbracket);
-			s = core->concatStrings(s, filename);
-			s = core->concatStrings(s, core->kcolon);
-		}
-		return s;
-	}
-	#endif //AVMPLUS_VERBOSE
+#endif // AVMPLUS_VERBOSE
 
 	bool AbstractFunction::makeMethodOf(Traits* traits)
 	{
@@ -127,7 +114,7 @@ namespace avmplus
 		{
 			#ifdef AVMPLUS_VERBOSE
 			if (pool->verbose)
-				core()->console << "WARNING: method " << this << " was already bound to " << declaringTraits << "\n";
+				pool->core->console << "WARNING: method " << this << " was already bound to " << declaringTraits << "\n";
 			#endif
 
 			return false;
@@ -191,7 +178,7 @@ namespace avmplus
 	void AbstractFunction::boxArgs(int argc, uint32 *ap, Atom* out)
 	{
 		// box the typed args, up to param_count
-		AvmCore* core = this->core();
+		AvmCore* core = this->pool->core;
 		for (int i=0; i <= argc; i++)
 		{
 			if (i <= param_count)
@@ -256,7 +243,7 @@ namespace avmplus
 	{
 		if (!(flags & LINKED))
 		{
-			AvmCore* core = this->core();
+			AvmCore* core = this->pool->core;
 			AvmAssert(info_pos != NULL);
 
 			const byte* pos = info_pos;
@@ -433,4 +420,16 @@ namespace avmplus
 		return size;
 	}
 #endif
+
+	bool AbstractFunction::usesCallerContext() const
+	{
+		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));
+	}
+
+	// Builtin + non-native functions always need the dxns code emitted 
+	// Builtin + native functions have flags to specify if they need the dxns code
+	bool AbstractFunction::usesDefaultXmlNamespace() const
+	{
+		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
+	}
 }

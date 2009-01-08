@@ -198,7 +198,7 @@ namespace avmplus
 	class NativeMethod : public AbstractFunction
 	{
 	public:
-		NativeMethod(AvmThunkNativeThunker thunker, AvmThunkNativeHandler handler);
+		NativeMethod(int _method_id, AvmThunkNativeThunker thunker, AvmThunkNativeHandler handler);
 		virtual ~NativeMethod() {}
 		static Atom verifyEnter(MethodEnv* env, int argc, uint32* ap);
 #ifdef DEBUGGER

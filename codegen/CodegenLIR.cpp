@@ -615,7 +615,7 @@ namespace avmplus
     }
 
 	CodegenLIR::CodegenLIR(MethodInfo* i)
-		: gc(i->core()->gc), core(i->core()), pool(i->pool), info(i), patches(gc), 
+		: gc(i->pool->core->gc), core(i->pool->core), pool(i->pool), info(i), patches(gc), 
 			interruptable(true)
 #ifdef VTUNE
            , jitInfoList(i->core()->gc)

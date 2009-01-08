@@ -82,7 +82,7 @@ namespace avmplus
 		this->secondTry = secondTry;
 #endif
 		this->info   = info;
-		this->core   = info->core();
+		this->core   = info->pool->core;
 		this->pool   = info->pool;
 		this->toplevel = toplevel;
 #ifdef AVMPLUS_WORD_CODE
