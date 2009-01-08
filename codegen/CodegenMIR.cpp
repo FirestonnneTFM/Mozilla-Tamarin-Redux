@@ -691,7 +691,7 @@ namespace avmplus
 	 * then we mark it as unsed.  We continue this process all
 	 * until no more instructions are in the list.
 	 */
-	void CodegenMIR::markDead(OP* ins)
+	void CodegenMIR::markDead(OP* ins, OP* dontKill)
 	{
 		if (!core->config.dceopt)
 			return;
@@ -720,6 +720,9 @@ namespace avmplus
 				{
 					// no need to search for it anymore
 					search.removeAt(i);
+
+					if(elm == dontKill)
+						continue;
 
 					// we hit the instruction and didn't see a ref for 
 					// elm, therefore it has no other use. 
@@ -2873,30 +2876,33 @@ namespace avmplus
 					// old: int(fadd(Number(int),Number(int)))
 					// new: iadd(int,int)
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_add, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_add, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ins->code == MIR_fsub &&
 					(ins->oprnd1->code == MIR_u2d || ins->oprnd1->code == MIR_i2d) &&
 					(ins->oprnd2->code == MIR_u2d || ins->oprnd2->code == MIR_i2d))
 				{
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_sub, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_sub, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ins->code == MIR_fmul &&
 					(ins->oprnd1->code == MIR_u2d || ins->oprnd1->code == MIR_i2d) &&
 					(ins->oprnd2->code == MIR_u2d || ins->oprnd2->code == MIR_i2d))
 				{
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_imul, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_imul, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ((ins->code == MIR_i2d) || (ins->code == MIR_u2d)))
 				{
 					OP* orig = value.ins;
 					localSet(loc, ins->oprnd1);
-					markDead(orig);
+					markDead(orig, ins->oprnd1);
 				}
 				else
 				{
@@ -2926,30 +2932,33 @@ namespace avmplus
 					// old: uint(fadd(Number(uint),Number(uint)))
 					// new: iadd(int,int)
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_add, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_add, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ins->code == MIR_fsub &&
 					(ins->oprnd1->code == MIR_u2d || ins->oprnd1->code == MIR_i2d) &&
 					(ins->oprnd2->code == MIR_u2d || ins->oprnd2->code == MIR_i2d))
 				{
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_sub, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_sub, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ins->code == MIR_fmul &&
 					(ins->oprnd1->code == MIR_u2d || ins->oprnd1->code == MIR_i2d) &&
 					(ins->oprnd2->code == MIR_u2d || ins->oprnd2->code == MIR_i2d))
 				{
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_imul, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_imul, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ((ins->code == MIR_i2d) || (ins->code == MIR_u2d)))
 				{
 					OP* orig = value.ins;
 					localSet(loc, ins->oprnd1);
-					markDead(orig);
+					markDead(orig, ins->oprnd1);
 				}
 				else
 				{
@@ -3721,8 +3730,9 @@ namespace avmplus
 						(a->code & ~MIR_oper) == MIR_sld &&
 						(a->disp & (SMOP_MASK ^ SMOP_SX)) == SMOP_I16))
 					{
-						localSet(op1, loadIns(a->code, a->disp | SMOP_SX, a->base));
-						markDead(a);
+						OP* repl = loadIns(a->code, a->disp | SMOP_SX, a->base);
+						localSet(op1, repl);
+						markDead(a, repl);
 					}
 					else
 					{
@@ -3818,7 +3828,7 @@ namespace avmplus
 					localSet(op1, result);
 					// and get rid of the original addr as maddrOpt
 					// optimized for us!
-					markDead(a);
+					markDead(a, result);
 					break;
 				}
 
@@ -3964,8 +3974,8 @@ namespace avmplus
 						break;
 					}
 					storeIns(code, svalue, disp2, maddrO);
-					emitKill(state, sp);
-					markDead(a);
+					emitKill(state, sp); 
+					markDead(a, maddrO);
 					break;
 				}
 
