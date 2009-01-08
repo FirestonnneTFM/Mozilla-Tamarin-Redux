@@ -1162,51 +1162,51 @@ namespace avmplus
 		return b;
 	}
 
-	Stringp Toplevel::decodeURI(Stringp uri)
+	Stringp Toplevel::decodeURI(ScriptObject* self, Stringp uri)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!uri) uri = core->knull;
-		Stringp out = decode(uri, false);
+		Stringp out = decode(core, uri, false);
 		if (!out) {
-			toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("decodeURI"));
+			self->toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("decodeURI"));
 		}
 		return out;
     }
 
-	Stringp Toplevel::decodeURIComponent(Stringp uri)
+	Stringp Toplevel::decodeURIComponent(ScriptObject* self, Stringp uri)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!uri) uri = core->knull;
-		Stringp out = decode(uri, true);
+		Stringp out = decode(core, uri, true);
 		if (!out) {
-			toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("decodeURIComponent"));
+			self->toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("decodeURIComponent"));
 		}
 		return out;
     }
 
-	Stringp Toplevel::encodeURI(Stringp uri)
+	Stringp Toplevel::encodeURI(ScriptObject* self, Stringp uri)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!uri) uri = core->knull;
-		Stringp out = encode(uri, false);
+		Stringp out = encode(core, uri, false);
 		if (!out) {
-			toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("encodeURI"));
+			self->toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("encodeURI"));
 		}
 		return out;
     }
 
-	Stringp Toplevel::encodeURIComponent(Stringp uri)
+	Stringp Toplevel::encodeURIComponent(ScriptObject* self, Stringp uri)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!uri) uri = core->knull;
-		Stringp out = encode(uri, true);
+		Stringp out = encode(core, uri, true);
 		if (!out) {
-			toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("encodeURIComponent"));
+			self->toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("encodeURIComponent"));
 		}
 		return out;
     }
 	
-	bool Toplevel::isNaN(double n)
+	bool Toplevel::isNaN(ScriptObject*, double n)
 	{
         return MathUtils::isNaN(n);
     }
@@ -1223,24 +1223,24 @@ namespace avmplus
 	 * 
 	 * @return true if arg is Finite, false otherwise
 	 */
-	bool Toplevel::isFinite(double d)
+	bool Toplevel::isFinite(ScriptObject*, double d)
 	{
 		return !(MathUtils::isInfinite(d)||MathUtils::isNaN(d));
     }
 
-	double Toplevel::parseInt(Stringp in, int radix)
+	double Toplevel::parseInt(ScriptObject* self, Stringp in, int radix)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!in) in = core->knull;
 		double n = MathUtils::parseInt(in, radix, false);
 		return n;
     }
 
-	double Toplevel::parseFloat(Stringp in)
+	double Toplevel::parseFloat(ScriptObject* self, Stringp in)
 	{
 		double result;
 		
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!in) in = core->knull;
 		if (!MathUtils::convertStringToDouble(in, &result, false))
 			result = MathUtils::nan();
@@ -1248,9 +1248,9 @@ namespace avmplus
 		return result;
     }
 
-	Stringp Toplevel::escape(Stringp in)
+	Stringp Toplevel::escape(ScriptObject* self, Stringp in)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 
 		if (!in) in = core->knull;
 
@@ -1309,9 +1309,9 @@ namespace avmplus
 		return -1;
 	}
 
-	Stringp Toplevel::unescape(Stringp in)
+	Stringp Toplevel::unescape(ScriptObject* self, Stringp in)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 
 		if (!in) in = core->knull;
 
@@ -1354,9 +1354,9 @@ namespace avmplus
 		return out;
     }
 	
-	Stringp Toplevel::encode(Stringp in, bool encodeURIComponentFlag)
+	Stringp Toplevel::encode(AvmCore* core, Stringp in, bool encodeURIComponentFlag)
 	{
-		StringBuffer out(core());
+		StringBuffer out(core);
 
 		StUTF16String in16(in);
 		const wchar *src = in16.c_str();
@@ -1397,14 +1397,14 @@ namespace avmplus
 				}
 			}
 		}
-		return core()->newStringUTF8(out.c_str());
+		return core->newStringUTF8(out.c_str());
 	}
 	
-	Stringp Toplevel::decode(Stringp in, bool decodeURIComponentFlag)
+	Stringp Toplevel::decode(AvmCore* core, Stringp in, bool decodeURIComponentFlag)
 	{
 		StringIndexer chars(in);
 		int length = in->length();
-		wchar *out = (wchar*) core()->GetGC()->Alloc(length*2+1); // decoded result is at most length wchar chars long
+		wchar *out = (wchar*) core->GetGC()->Alloc(length*2+1); // decoded result is at most length wchar chars long
 		int outLen = 0;
 
 		for (int k = 0; k < length; k++) {
@@ -1507,7 +1507,7 @@ namespace avmplus
 			}
 		}
 
-		return core()->newStringUTF16(out, outLen);
+		return core->newStringUTF16(out, outLen);
 	}
 
 	/*
@@ -1544,9 +1544,9 @@ namespace avmplus
 		0x07fffffe
 	};
 
-	bool Toplevel::isXMLName(Atom v)
+	bool Toplevel::isXMLName(ScriptObject* self, Atom v)
 	{
-		return core()->isXMLName(v);
+		return self->core()->isXMLName(v);
 	}
 
 	unsigned int Toplevel::readU30(const byte *&p) const

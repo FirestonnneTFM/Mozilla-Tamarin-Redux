@@ -53,39 +53,34 @@ namespace avmplus
 		ScriptObject* getListener();
     };
 
-	class SamplerScript : public ScriptObject
+	class SamplerScript
 	{
 	private:
-		bool trusted() { return toplevel()->sampler_trusted(this); }
+		static bool trusted(ScriptObject* self) { return self->toplevel()->sampler_trusted(self); }
+		explicit SamplerScript(); // unimplemented, not constructable
 		
 	public:
-		SamplerScript(VTable *vtable, ScriptObject *delegate);
-
 		enum { GET = 1, SET = 2 };
 
-		double getSize(Atom o);
-		Atom getMemberNames(Atom o, bool instanceNames);
-		Atom getSamples();
-		void clearSamples();
-		void startSampling();
-		void stopSampling();
-		void pauseSampling();
-		void sampleInternalAllocs(bool b);
-		double getSampleCount();
-		void _setSamplerCallback(ScriptObject *callback);
-
-		double _getInvocationCount(Atom a, QNameObject* qname, uint32 type);
-		bool isGetterSetter(Atom a, QNameObject* name);
+		static double getSize(ScriptObject* self, Atom o);
+		static Atom getMemberNames(ScriptObject* self, Atom o, bool instanceNames);
+		static Atom getSamples(ScriptObject* self);
+		static void clearSamples(ScriptObject* self);
+		static void startSampling(ScriptObject* self);
+		static void stopSampling(ScriptObject* self);
+		static void pauseSampling(ScriptObject* self);
+		static void sampleInternalAllocs(ScriptObject* self, bool b);
+		static double getSampleCount(ScriptObject* self);
+		static void _setSamplerCallback(ScriptObject* self, ScriptObject* callback);
+		static double _getInvocationCount(ScriptObject* self, Atom a, QNameObject* qname, uint32 type);
+		static bool isGetterSetter(ScriptObject* self, Atom a, QNameObject* name);
 
 #ifdef DEBUGGER
 	private:		
-		DWB(VTable*) const sampleIteratorVTable;
-		DWB(VTable*) const slotIteratorVTable;
-
-		ClassClosure* getType(Atom typeOrVTable, const void *obj);
+		static ClassClosure* getType(ScriptObject* self, Atom typeOrVTable, const void *obj);
 		
 		friend class SampleIterator;
-		ScriptObject* makeSample(const Sample& sample);
+		static ScriptObject* makeSample(ScriptObject* self, const Sample& sample);
 #endif
 	};
 

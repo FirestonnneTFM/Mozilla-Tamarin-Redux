@@ -931,18 +931,7 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 		traits->resolveSignatures(toplevel);
 		ScriptObject* delegate = toplevel->objectClass->prototype;
-
-		CreateGlobalObjectProc createGlobalObject = traits->getCreateGlobalObjectProc();
-		if (createGlobalObject != NULL)
-		{
-			// special script with native impl object
-			return global = (*createGlobalObject)(vtable, delegate);
-		}
-		else
-		{
-			// ordinary user script
-			return global = method->core()->newObject(vtable, delegate);
-		}
+		return global = method->core()->newObject(vtable, delegate);
 	}
 
     ScriptObject* MethodEnv::op_newobject(Atom* sp, int argc) const

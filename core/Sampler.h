@@ -157,6 +157,9 @@ namespace avmplus
 		void writeRawSample(SampleType sampleType);
 
 	// ------------------------ DATA SECTION BEGIN
+	public:
+		VTable*				sampleIteratorVTable;
+		VTable*				slotIteratorVTable;
 	private:
 		AvmCore*			core;
 		List<Stringp>		fakeMethodNames; 

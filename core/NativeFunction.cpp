@@ -122,24 +122,21 @@ namespace avmplus
 											const uint8_t* _abcData,
 											uint32_t _abcDataLen,
 											uint32_t _methodCount,
-											uint32_t _classCount,
-											uint32_t _scriptCount) :
+											uint32_t _classCount) :
 		core(_core),
 		abcData(_abcData),
 		abcDataLen(_abcDataLen),
 		methods((MethodType*)core->GetGC()->Calloc(_methodCount, sizeof(MethodType), GC::kZero)),
 		classes((ClassType*)core->GetGC()->Calloc(_classCount, sizeof(ClassType), GC::kZero)),
-		scripts((ScriptType*)core->GetGC()->Calloc(_scriptCount, sizeof(ScriptType), GC::kZero)),
 		methodCount(_methodCount),
-		classCount(_classCount),
-		scriptCount(_scriptCount)
+		classCount(_classCount)
 	{
 	}
 
 #ifdef AVMPLUS_NO_STATIC_POINTERS
 	void NativeInitializer::fillIn(NativeInitializer::FillInProc p)
 	{
-		(*p)(methods, classes, scripts);
+		(*p)(methods, classes);
 	}
 #else
 	void NativeInitializer::fillInMethods(const NativeMethodInfo* _methodEntry)
@@ -168,20 +165,6 @@ namespace avmplus
 		}
 	}
 
-	void NativeInitializer::fillInScripts(const NativeScriptInfo* _scriptEntry)
-	{
-		while (_scriptEntry->script_id != -1)
-		{
-			// if we overwrite a native script mapping, something is hosed
-			AvmAssert(scripts[_scriptEntry->script_id]  == NULL);
-			scripts[_scriptEntry->script_id] = _scriptEntry;
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-			if (_scriptEntry->nativeMap)
-				fillInMethods(_scriptEntry->nativeMap);
-#endif
-			_scriptEntry++;
-		}
-	}
 #endif // AVMPLUS_NO_STATIC_POINTERS
 	
 	PoolObject* NativeInitializer::parseBuiltinABC(const List<Stringp, LIST_RCObjects>* includes)
@@ -215,6 +198,5 @@ namespace avmplus
 		// might as well explicitly free now
 		core->GetGC()->Free(methods);
 		core->GetGC()->Free(classes);
-		core->GetGC()->Free(scripts);
 	}
 }
