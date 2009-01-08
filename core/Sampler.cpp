@@ -65,6 +65,8 @@ namespace avmplus
 
 	Sampler::Sampler(AvmCore* _core) : 
 		GCRoot(_core->GetGC()),
+	    sampleIteratorVTable(NULL),
+	    slotIteratorVTable(NULL),
 		core(_core),
 		fakeMethodNames(_core->GetGC()),
 		allocId(1), 

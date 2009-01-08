@@ -1428,8 +1428,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString((Traits*)script->declaringTraits));
 			}
 
-			const NativeScriptInfo* nativeEntry = natives ? natives->get_script(i) : NULL;
-			Traits* traits = parseTraits(nativeEntry && nativeEntry->sizeofInstance ? nativeEntry->sizeofInstance : sizeof(ScriptObject), 
+			Traits* traits = parseTraits(sizeof(ScriptObject), 
 											core->traits.object_itraits, 
 											core->publicNamespace, 
 											core->kglobal, 
@@ -1442,7 +1441,6 @@ namespace avmplus
 
 			
 			// global object, make it dynamic
-			traits->setCreateGlobalObjectProc(nativeEntry ? nativeEntry->createGlobalObject : NULL);
 			traits->set_needsHashtable(true);
 			traits->final = true;
 
