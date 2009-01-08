@@ -3077,6 +3077,21 @@ namespace avmplus
 			ExceptionHandler *handler = core->findExceptionHandler(info, expc, exception);
 #endif
 			// handler found in current method
+#ifdef DEBUGGER
+			// This is a little hokey, see https://bugzilla.mozilla.org/show_bug.cgi?id=470954.
+			//
+			// The debugenter instruction sets up core->callStack, we do this lazily to save
+			// time in builds where the debugger is enabled at compile time but not present
+			// at run time.
+			//
+			// The problem is that CATCH restores core->callStack to its old value, saved by TRY.
+			// So we force it to the new value here if there is a new value.  Then TRY will save the
+			// value again (the new value this time) which we restore redundantly the next time
+			// there is an exception, if any.  The debugexit instruction will take care of restoring
+			// the actual old value.
+			if (callStackNode != NULL)
+				core->callStack = callStackNode;
+#endif
 #ifdef AVMPLUS_WORD_CODE
 			pc = info->codeStart + handler->target;
 #else
