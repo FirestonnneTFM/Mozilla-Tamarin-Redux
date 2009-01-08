@@ -711,7 +711,12 @@ namespace avmplus
 	{
 		char buffer[kMinSizeForInt32_t_base10_toString];
 		int32_t len = kMinSizeForInt32_t_base10_toString;
-		char* p = convertIntegerToStringBuffer((intptr_t) value, buffer, len, 10, treatAs);
+	#ifdef AVMPLUS_64BIT
+		intptr_t wideVal = treatAs == kTreatAsUnsigned ? (intptr_t)(uint32_t)value : (intptr_t)value;
+	#else
+		intptr_t wideVal = (intptr_t) value;
+	#endif
+		char* p = convertIntegerToStringBuffer(wideVal, buffer, len, 10, treatAs);
 		return core->newStringLatin1(p, len);
 	}
 

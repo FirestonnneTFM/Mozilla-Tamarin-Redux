@@ -76,8 +76,12 @@ namespace avmplus
 #ifdef _DEBUG
         #if defined(AVMPLUS_CUSTOM_DEBUG_MESSAGE_HANDLER)
             AVMPlusCustomDebugMessageHandler(p);
+			if (debugBreak)
+				abort();
 		#elif defined(MMGC_MAC_NO_CORE_SERVICES)
 			fprintf(stderr, "%s\n", p);
+			if (debugBreak)
+				abort();
 		#else
 	  	    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);
 
@@ -86,7 +90,7 @@ namespace avmplus
 				Str255 buf;
 				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
 				DebugStr(buf);
-				exit(1);	// ensure we die
+				abort();	// ensure we die
 			}
 			else
 			{

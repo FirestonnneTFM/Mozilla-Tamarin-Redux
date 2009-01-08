@@ -1806,12 +1806,17 @@ return the result of the comparison ToPrimitive(x) == y.
 				return kundefined;
 			case kBooleanType:
 				return booleanStrings[atom>>3];
-			case kIntegerType:
+			case kIntegerType: {
 #ifdef AVMPLUS_64BIT
-				return intToString (int(intptr_t(atom)>>3));
+				intptr_t val = (intptr_t)(atom>>3);
+				if (val > 0x7fffffff)
+					return uintToString((uint32_t)val);
+				else
+					return intToString((int32_t)val);
 #else
 				return intToString (int(sint32(atom)>>3));
 #endif
+			}
 			case kDoubleType:
 			default: // number
 				return doubleToString(atomToDouble(atom));
@@ -3269,12 +3274,17 @@ return the result of the comparison ToPrimitive(x) == y.
 				return kundefined;
 			case kBooleanType:
 				return booleanStrings[atom>>3];
-			case kIntegerType:
+			case kIntegerType: {
 #ifdef AVMPLUS_64BIT
-				return intToString((int)(atom>>3));
+				intptr_t val = (intptr_t)(atom>>3);
+				if (val > 0x7fffffff)
+					return uintToString((uint32_t)val);
+				else
+					return intToString((int32_t)val);
 #else
 				return intToString((int)(sint32(atom)>>3));
 #endif
+			}
 			case kDoubleType:
 				AvmAssert(atom != kDoubleType); // this would be a null pointer to double
 				return doubleToString(atomToDouble(atom));
