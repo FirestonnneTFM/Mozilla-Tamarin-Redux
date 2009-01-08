@@ -335,20 +335,25 @@
 	#define FASTCALL
 #endif
 
-// Enable translation from ABC byte code to a wider word code that can
-// also be used by a direct threaded interpreter
-#if defined AVMPLUS_MAC || defined AVMPLUS_UNIX
-#  define AVMPLUS_WORD_CODE
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
-#  ifdef __GNUC__
-#    define AVMPLUS_DIRECT_THREADED     // gcc on these platforms
-#  endif
-#endif
+// By default, enable translation from ABC byte code to a wider word
+// code that can also be used by a direct threaded interpreter.
+//
+// If you define AVMPLUS_ABC_INTERPRETER the ABC code will be interpreted
+// as-is.  This is usually slower but (a) uses less memory and
+// (b) incurs less start-up overhead, and may be particularly appropriate
+// on very small interpreter-only systems or on systems where only
+// initialization code is interpreted.
+//
+// If you define AVMPLUS_WORD_CODE yourself then you must also deal
+// with whether you want peephole optimization and direct threaded
+// execution.
 
-#if defined AVMPLUS_WIN32
+#if !defined AVMPLUS_WORD_CODE && !defined AVMPLUS_ABC_INTERPRETER
 #  define AVMPLUS_WORD_CODE
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
-//#  define AVMPLUS_DIRECT_THREADED   // see comments in Interpreter.cpp before enabling this
+#  define AVMPLUS_PEEPHOLE_OPTIMIZER	// with or without threaded code
+#  ifdef __GNUC__
+#    define AVMPLUS_DIRECT_THREADED     // requires computed goto - some other compilers may have that as well
+#  endif
 #endif
 
 #ifdef AVMPLUS_DIRECT_THREADED
