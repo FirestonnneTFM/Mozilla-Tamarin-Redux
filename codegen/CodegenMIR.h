@@ -1238,7 +1238,7 @@ namespace avmplus
 		OP*   cseMatch(MirOpcode code, OP* a1, OP* a2=0);
 
 		// dead code search
-		void markDead(OP* ins);
+		void markDead(OP* ins, OP* dontKill);
 		bool usedInState(OP* ins);
 
 		void argIns(OP* a);
