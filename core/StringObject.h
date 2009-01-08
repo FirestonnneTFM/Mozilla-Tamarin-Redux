@@ -41,8 +41,6 @@
 
 namespace avmplus 
 {
-	class UTF8String;
-	class UTF16String;
 	class ByteArray;
 
 	/// The utf8_t data type expressively means UTF-8 data.
@@ -93,22 +91,18 @@ namespace avmplus
 		/// String type constants.
 		enum Type
 		{
-			kDirect				= 0,	// data follows instance (m_direct)
-			kStatic				= 1,	// buffer is static (m_static)
-			kDependent			= 2		// string points into master string (m_dependent)
+			kDynamic			= 0,	// buffer is on the heap
+			kStatic				= 1,	// buffer is static
+			kDependent			= 2		// string points into master string
 		};
 		/// String width constants.
 		enum Width
 		{
-#ifdef FEATURE_UTF32_SUPPORT
-			kAuto	= 0,	// only used in APIs
-			k8		= 1,
-			k16		= 2,
-			k32		= 4
-#else
 			kAuto	= 0,	// only used in APIs
 			k8		= 1,
 			k16		= 2
+#ifdef FEATURE_UTF32_SUPPORT
+			,k32	= 4
 #endif		
 		};
 		/**
@@ -174,21 +168,6 @@ namespace avmplus
 		virtual						~String();
 
 		/**
-		Create a 0-terminated UTF-8 string out of this string. 
-		Most code should not use this call, but rather, should use the StUTF8String utility class instead.
-		If you call this, be aware that you must keep a reference to the UTF8String* itself (eg by DWB or on the stack)
-		to keep it from being collected; in particular, keeping the c_str() pointer will NOT prevent collection!
-		*/
-				UTF8String*			getUTF8String() const;
-		/**
-		Create a 0-terminated UTF-16 string out of this string.
-		If this is a 32-bit string, characters > 0xFFFF are converted to surrogate pairs. 
-		Most code should not use this call, but rather, should use the StUTF16String utility class instead.
-		If you call this, be aware that you must keep a reference to the UTF16String* itself (eg by DWB or on the stack)
-		to keep it from being collected; in particular, keeping the c_str() pointer will NOT prevent collection!
-		*/
-				UTF16String*		getUTF16String() const;
-		/**
 		Create a string with a given width out of this string. If the width is equal to the current
 		width, return this instance. If the desired width is too narrow to fit, or kAuto is passed
 		in, or there is no memory left, return NULL.
@@ -215,10 +194,10 @@ namespace avmplus
 		*/
 		virtual Atom				toAtom() const { return atom(); }
 		/**
-		If this string is a static string, make it dynamic so the static data can be released.
-		Returns false if the string is not kStatic.
+		If this string is a static or dependent string, make it dynamic so the static 
+		data can be released.
 		*/
-				bool				makeDynamic();
+				void				makeDynamic();
 		/**
 		Produce a has code of this string.
 		*/
@@ -479,45 +458,10 @@ namespace avmplus
 		friend class StringIndexer;
 		friend class StUTF8String;
 		friend class StUTF16String;
-		friend class UTF8String;
-		friend class UTF16String;
 
-								String(int32_t length, uint32_t bits);
-		inline	void			operator delete(void*) {}	// Strings cannot be deleted, therefore private
-
-				int32_t			m_length;					// length in characters
-		mutable	uint32_t		m_bitsAndFlags;				// various bits and flags, see below(must be unsigned)
-				enum {
-					TSTR_WIDTH_MASK			= 0x00000007,	// string width(right-aligned for fast access)
-					TSTR_FLAG_INTERNED		= 0x00000008,	// this string is interned
-					TSTR_TYPE_MASK			= 0x000000F0,	// type index, 4 bits
-					TSTR_TYPE_SHIFT			= 4,
-					TSTR_NOINT_FLAG			= 0x00000100,	// set in getIntAtom() if the string is not an 28-bit integer
-					TSTR_NOUINT_FLAG		= 0x00000200,	// set in parseIndex() if the string is not an unsigned integer
-					TSTR_DYNAMIC_FLAG		= 0x00000400,	// data buffer needs deletion(if kStatic)
-					TSTR_CHARSLEFT_MASK		= 0xFFFFF000,	// characters left in buffer field(for inplace concat)
-					TSTR_CHARSLEFT_SHIFT	= 12
-				};
-		inline	void			setType(char index)			{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_TYPE_MASK) |(index << TSTR_TYPE_SHIFT); }
-		inline	int32_t			getCharsLeft() const		{ return (m_bitsAndFlags & TSTR_CHARSLEFT_MASK) >> TSTR_CHARSLEFT_SHIFT; }
-		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
-
-		class StringData
-		{
-		public:
-			String* volatile str;		// needed as a stack reference to ensure String isn't collected, since ptrs might be interior
-			void* data;
-		public:
-			explicit StringData(String* _str);
-			inline ~StringData() { str = NULL; data = NULL; }
-		private:
-			// do not create on the heap
-			void*		operator new(size_t) throw(); // unimplemented
-			void		operator delete(void*); // unimplemented
-		};
-
+private:
 		/**
-		This is a union of three different pointers. To use it, create a StringData on the stack.
+		This is a union of three different pointers.
 		*/
 		struct Pointers
 		{
@@ -530,57 +474,56 @@ namespace avmplus
 			};
 		};
 		
-		union _direct
-		{
-			char c8[1]; // actual size varies
-			wchar c16[1];
-			utf32_t	c32[1];
-		};
-
-		struct _dependent
-		{
-			Stringp			master;
-			Pointers		p;
-		};
-
 		union
 		{
-			// Characters follow the instance; this is the case for
-			// all strings created directly.
-			union _direct			m_direct;
-
-			// External, static buffer.
-			Pointers				m_static;
-
-			// A dependent string is the result of an in-place concat,
-			// or a substr. Its buffer pointer points into the master's
-			// buffer, and the master member holds a refcounted pointer
-			// to the master string.
-			struct _dependent		m_dependent;
+			Stringp				m_master;	// used for dependent strings
+			mutable uint32_t	m_index;	// if not dependent, this is the index value for getIntAtom/parseIndex
 		};
+				Pointers		m_buffer;	// buffer pointer (dynamic, static, or into master)
+
+				int32_t			m_length;					// length in characters
+		mutable	uint32_t		m_bitsAndFlags;				// various bits and flags, see below(must be unsigned)
+				enum {
+					TSTR_WIDTH_MASK			= 0x00000007,	// string width(right-aligned for fast access)
+					TSTR_FLAG_INTERNED		= 0x00000008,	// this string is interned
+					TSTR_TYPE_MASK			= 0x000000F0,	// type index, 4 bits
+					TSTR_TYPE_SHIFT			= 4,
+					TSTR_NOINT_FLAG			= 0x00000100,	// set in getIntAtom() if the string is not an 28-bit integer
+					TSTR_NOUINT_FLAG		= 0x00000200,	// set in parseIndex() if the string is not an unsigned integer
+					TSTR_UINT28_FLAG		= 0x00000400,	// set if m_index contains valud for getIntAtom()
+					TSTR_UINT32_FLAG		= 0x00000800,	// set if m_index contains valud for parseIndex()
+					TSTR_CHARSLEFT_MASK		= 0xFFFFF000,	// characters left in buffer field(for inplace concat)
+					TSTR_CHARSLEFT_SHIFT	= 12
+				};
+		inline	void			setType(char index)			{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_TYPE_MASK) |(index << TSTR_TYPE_SHIFT); }
+		inline	int32_t			getCharsLeft() const		{ return (m_bitsAndFlags & TSTR_CHARSLEFT_MASK) >> TSTR_CHARSLEFT_SHIFT; }
+		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
+
 		// Create a string with no buffer.
 		static	Stringp	FASTCALL	createDependent(GC* gc, Stringp master, int32_t start, int32_t len);
-		// Create a string with a direct buffer.
-		static	Stringp	FASTCALL	createDirect(GC* gc, const void* data, int32_t len, Width w, int32_t extra=0);
+		// Create a string with a dynamic buffer.
+		static	Stringp	FASTCALL	createDynamic(GC* gc, const void* data, int32_t len, Width w, int32_t extra=0);
 		// Create a string with a static buffer.
-		static	Stringp	FASTCALL	createExternal(GC* gc, const void* data, int32_t len, Width w);
-		// Redefine new for in-place construction.
-		inline	void*				operator new(size_t, Stringp p) { return p; }
+		static	Stringp	FASTCALL	createStatic(GC* gc, const void* data, int32_t len, Width w);
 		// Calculate the hash code.
 				uint32_t FASTCALL	_hashCode();
 		// Do a raw buffer compare.
 		static	int32_t	FASTCALL	compare(const Pointers& r1, Width w1, const Pointers& r2, Width w2, int32_t len);
 
 		/**
-		Use a Pointers instance to quickly access a character given the Pointers
-		instance containing the buffer start, and the string width. No index checks!
-		*/
-				CharAtType FASTCALL	charAt(const StringData& data, int32_t index) const;
-		/**
 		Low-level append worker. Either inStr is non-NULL, or buffer/length is.
 		*/
 				Stringp				append(Stringp inStr, const void* buffer, int32_t numChars, Width width);
-	};
+		/**
+		Make operator new private - people should use the create functions
+		*/
+		inline	void*				operator new(size_t size, MMgc::GC *gc)
+		{
+			return AvmPlusScriptableObject::operator new(size, gc);
+		}
+		inline	void				operator delete(void*) {}	// Strings cannot be deleted
+									String(int32_t length, uint32_t bits);
+};
 
 	// Compare helpers
 	inline bool operator==(String& s1, String& s2)
@@ -619,98 +562,74 @@ namespace avmplus
 	{
 	public:
 		/// The constructor takes the string to index.
-		inline	explicit			StringIndexer(Stringp s) : m_strData(s) { }
+				explicit			StringIndexer(Stringp s);
 		/// Return the embedded string.
-		inline	String*				operator->() const { return m_strData.str; }
+		inline	String*				operator->() const { return m_str; }
 		/// Quick index operator.
-		inline	String::CharAtType	operator[](int index) const { return m_strData.str->charAt(m_strData, index); }
+		inline	String::CharAtType	operator[](int index) const { return (*m_getter)(m_str, index); }
 
 	private:
-		String::StringData	m_strData;
+		typedef String::CharAtType (*Getter) (Stringp s, int index);
+				Stringp		m_str;
+				Getter		m_getter;
 
-	private:
 		// do not create on the heap
-		void*		operator new(size_t) throw(); // unimplemented
-		void		operator delete(void*); // unimplemented
+				void*		operator new(size_t) throw(); // unimplemented
+				void		operator delete(void*); // unimplemented
+		static	String::CharAtType get8(Stringp s, int index);
+		static	String::CharAtType get16(Stringp s, int index);
+		static	String::CharAtType get32(Stringp s, int index);
 	};
 
 	/**
-	The UTF8String class is simply a data buffer containing 0-terminated UTF-8 data. 
-	Use StUTF8String() to create such a string.
+	The StUTF8String class is simply a data buffer containing 0-terminated UTF-8 data. 
+	The instance can only be created on the stack to preserve the data buffer during GC.
 	Note that the length() function returns the length not including the 0-terminator.
 	Also note that the string might contain interior NULL characters (if the original
 	String did) and thus String::Length, strlen, etc might return misleading values.
 	*/
 
-	class UTF8String : public MMgc::GCObject
+	class StUTF8String
 	{
 	public:
+				explicit			StUTF8String(Stringp str);
+									~StUTF8String();
 		inline	const char*			c_str() const { return m_buffer; }
 		inline	int32_t				length() const { return m_length; }
+	protected:
+				const char*			m_buffer;
 	private:
 				int32_t				m_length;
-				char				m_buffer[1];
-				friend class		String;
-				friend class		StIndexableUTF8String;
-									UTF8String(int32_t len);
-		static	UTF8String*			create8 (const String* s);
-		static	UTF8String*			create16(const String* s);
-		static	UTF8String*			create32(const String* s);
+		static	void				create8 (Stringp s);
+		static	void				create16(Stringp s);
+		static	void				create32(Stringp s);
+		// do not create on the heap
+		inline	void*				operator new(size_t) throw() { return NULL; }
+		inline	void				operator delete(void*) {}		
 	};
 
 	/**
-	The UTF16String class is simply a data buffer containing 0-terminated UTF-16 data. 
-	Use StUTF16String() to create such a string.
+	The StUTF16String class is simply a data buffer containing 0-terminated UTF-16 data. 
+	The instance can only be created on the stack to preserve the data buffer during GC.
 	Note that the length() function returns the length not including the 0-terminator.
 	Also note that the string might contain interior NULL characters (if the original
 	String did) and thus String::Length, strlen, etc might return misleading values.
+	If the string is a 32-bit string, characters > 0xFFFF are converted to surrogate pairs. 
 	*/
 
-	class UTF16String : public MMgc::GCObject
+	class StUTF16String
 	{
 	public:
+				explicit		StUTF16String(Stringp str);
+								~StUTF16String();
 		inline	const wchar*	c_str() const { return m_buffer; }
 		inline	int32_t			length() const { return m_length; }
 	private:
+				const wchar*	m_buffer;
 				int32_t			m_length;
-				wchar			m_buffer[1];
-				friend class	String;
-		inline					UTF16String(int32_t len) : m_length(len) {}
-	};
-	
-	// deleting UTF16String and UTF8String immediately hurts performance, but saves memory.
-	// If you need a UTF8String or UTF16String temporarily, use these accessor classes:
-	// they will delete (or not) the temporary in the dtor, allowing the embedder to 
-	// prefer memory vs performance.
-	
-	// if embedder doesn't define this, assume we prefer performance
-	// (note that the test is on value)
-	#ifndef FEATURE_PREFER_STRING_PERFORMANCE
-		#define FEATURE_PREFER_STRING_PERFORMANCE 1
-	#endif
-	
-	class StUTF8String
-	{
-	protected:
-		UTF8String* str;
-	public:
-		inline explicit StUTF8String(Stringp s) : str(s ? s->getUTF8String() : NULL) {}
-		inline ~StUTF8String() 
-		{ 
-			#if FEATURE_PREFER_STRING_PERFORMANCE
-			// allow it to be collected
-			str = NULL; 
-			#else
-			// delete right away
-			delete str;
-			#endif
-		}
-		inline	const char*			c_str() const { return str->c_str(); }
-		inline	int32_t				length() const { return str->length(); }
-	private:
 		// do not create on the heap
-		inline	void*		operator new(size_t) throw() { return NULL; }
-		inline	void		operator delete(void*) {}		
+		inline	void*			operator new(size_t) throw() { return NULL; }
+		inline	void			operator delete(void*) {}		
 	};
 
 	class StIndexableUTF8String : public StUTF8String
@@ -736,30 +655,6 @@ namespace avmplus
 		int32_t FASTCALL toIndex(int32_t uf8Pos);
 	};
 
-	class StUTF16String
-	{
-	private:
-		UTF16String* str;
-	public:
-		inline explicit StUTF16String(Stringp s) : str(s ? s->getUTF16String() : NULL) {}
-		inline ~StUTF16String() 
-		{ 
-			#if FEATURE_PREFER_STRING_PERFORMANCE
-			// allow it to be collected
-			str = NULL; 
-			#else
-			// delete right away
-			delete str;
-			#endif
-		}
-		inline	const wchar*		c_str() const { return str->c_str(); }
-		inline	int32_t				length() const { return str->length(); }
-	private:
-		// do not create on the heap
-		inline	void*		operator new(size_t) throw() { return NULL; }
-		inline	void		operator delete(void*) {}		
-	};
-	
 }
 
 #endif	// __avmplus_NewString__

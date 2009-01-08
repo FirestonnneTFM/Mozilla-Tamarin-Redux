@@ -50,11 +50,6 @@
 namespace avmplus
 {
 
-// Pointers is used in a union, so it cannot have a ctor... this is a convenient macro for a common usage.
-#define GET_STRING_POINTERS(STR, PTRS) \
-	String::StringData _strdata##PTRS(const_cast<String*>(STR)); String::Pointers PTRS; PTRS.pv = _strdata##PTRS.data;
-
-
 /////////////////////////// Helpers: Widening //////////////////////////////
 
 	inline void _widen8_16(const char* src, wchar* dst, int32_t len)
@@ -110,8 +105,7 @@ namespace avmplus
 
 /////////////////////////// Helpers: Copying ///////////////////////////////
 
-	// Copy the contents of the given buffer to another buffer, given two
-	// widths. Return NULL if the character is too wide to fit in the buffer.
+	// Copy the contents of the given buffer to another buffer, given two widths.
 
 	static void* _copyBuffers(const void* src, void* dst, int32_t srcLen, String::Width srcWidth, String::Width dstWidth)
 	{
@@ -172,48 +166,46 @@ namespace avmplus
 		AvmAssert(len >= 0);
 		// master cannot be a dependent string
 		AvmAssert(kDependent != master->getType());
-		size_t bytes = sizeof(String);
 		MMGC_MEM_TYPE( "String: Dependent" );
-		Stringp s = (Stringp) gc->Alloc(bytes, GC::kContainsPointers|GC::kRCObject|GC::kFinalize|GC::kZero);
-		new (s) String(len, (master->m_bitsAndFlags & TSTR_WIDTH_MASK) | (kDependent << TSTR_TYPE_SHIFT));
-		//newStr->m_dependent.master = master;
-		WBRC( gc, s, &s->m_dependent.master, master );
-		char* data = (master->getType() == kStatic) ? master->m_static.p8 : master->m_direct.c8;
-		s->m_dependent.p.p8 = data + start * master->getWidth();
+		Stringp s = new(gc)
+					String(len, (master->m_bitsAndFlags & TSTR_WIDTH_MASK) | (kDependent << TSTR_TYPE_SHIFT));
+		WBRC( gc, s, &s->m_master, master );
+		s->m_buffer.p8 = master->m_buffer.p8 + start * master->getWidth();
 		return s;
 	}
 
-	// Private static method to create a direct string, given a buffer and its size in characters
+	// Private static method to create a dynamic string, given a buffer and its size in characters
 
-	Stringp String::createDirect(GC* gc, const void* data, int32_t len, Width w, int32_t extra)
+	Stringp String::createDynamic(GC* gc, const void* data, int32_t len, Width w, int32_t extra)
 	{
 		AvmAssert(kAuto != w);
 		AvmAssert(len >= 0);
 
-		// the size of a direct string is the core size plus the string length
-		size_t coreSize = offsetof(String, m_direct);
-		size_t bytes = coreSize + size_t((len + extra) * w);
-		// No kZero here - we do not store pointers, just data
-		MMGC_MEM_TYPE( "String: Direct" );
-		Stringp s = (Stringp) gc->Alloc(bytes, GC::kContainsPointers|GC::kRCObject|GC::kFinalize|GC::kZero);
-		int32_t bufLen = (int32_t) ((GC::Size (s) - coreSize) / w);
+		MMGC_MEM_TYPE( "String: Dynamic" );
+
+		void* buffer = gc->Alloc((len + extra) * w, 0);
+
+		int32_t bufLen = (int32_t) (GC::Size (buffer) / w);
 		int32_t charsLeft = bufLen - len;
 		if (charsLeft > int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT))
 			charsLeft = int32_t((uint32_t) TSTR_CHARSLEFT_MASK >> TSTR_CHARSLEFT_SHIFT);
 
-		new (s) String(len, w 
-						   | (kDirect << TSTR_TYPE_SHIFT)
+		Stringp s = new(gc)
+					String(len, w 
+						   | (kDynamic  << TSTR_TYPE_SHIFT)
 						   | (charsLeft << TSTR_CHARSLEFT_SHIFT));
+		s->m_buffer.pv = buffer;
+
 		if (data != NULL && len != 0)
-			memcpy(s->m_direct.c8, data, size_t(len * w));
+			memcpy(buffer, data, size_t(len * w));
 #ifdef _DEBUG
 		// Terminate string with 0 for better debugging display
 		if (charsLeft)
 		  switch (w)
 		{
-			case k8:  s->m_direct.c8[len] = 0; break;
-			case k16: s->m_direct.c16[len] = 0; break;
-			default : s->m_direct.c32[len] = 0; break;
+			case k8:  s->m_buffer.p8[len] = 0; break;
+			case k16: s->m_buffer.p16[len] = 0; break;
+			default : s->m_buffer.p32[len] = 0; break;
 		}
 #endif
 		return s;
@@ -221,20 +213,17 @@ namespace avmplus
 
 	// Private static method to create a string, given a static buffer and its size in characters
 
-	Stringp String::createExternal(GC* gc, const void* data, int32_t len, Width w)
+	Stringp String::createStatic(GC* gc, const void* data, int32_t len, Width w)
 	{
 		AvmAssert(kAuto != w);
 		AvmAssert(len >= 0);
-		size_t bytes = sizeof(String);
 		MMGC_MEM_TYPE( "String: Static" );
-		Stringp s = (Stringp) gc->Alloc(bytes, GC::kContainsPointers|GC::kRCObject|GC::kFinalize|GC::kZero);
-		new (s) String(len, w | (kStatic << TSTR_TYPE_SHIFT));
+		Stringp s = new(gc)
+					String(len, w | (kStatic << TSTR_TYPE_SHIFT));
 		// this also sets the other pointers
-		s->m_static.p8 = (char*) data;
+		s->m_buffer.p8 = (char*) data;
 		return s;
 	}
-
-	// The "official constructor" does some core initialization
 
 	String::String(int32_t len, uint32_t bits)
 #ifdef DEBUGGER
@@ -267,12 +256,12 @@ namespace avmplus
 		String* s = NULL;
 		if (staticBuf && desiredWidth == k8)
 		{
-			s = createExternal(core->GetGC(), buffer, len, k8);
+			s = createStatic(core->GetGC(), buffer, len, k8);
 		}
 		else
 		{
-			s = createDirect(core->GetGC(), NULL, len, desiredWidth);
-			_copyBuffers(buffer, s->m_direct.c8, len, k8, desiredWidth);
+			s = createDynamic(core->GetGC(), NULL, len, desiredWidth);
+			_copyBuffers(buffer, s->m_buffer.p8, len, k8, desiredWidth);
 		}
 		return s;
 	}
@@ -285,11 +274,9 @@ namespace avmplus
 		if (w == kAuto)
 			return NULL;
 
-		Stringp newStr = createDirect(_gc(this), NULL, length(), w);
+		Stringp newStr = createDynamic(_gc(this), NULL, length(), w);
 		
-		GET_STRING_POINTERS(this, thisPtrs)
-		GET_STRING_POINTERS(newStr, newStrPtrs)
-		if (!_copyBuffers(thisPtrs.pv, newStrPtrs.pv, length(), getWidth(), w))
+		if (!_copyBuffers(m_buffer.pv, m_buffer.pv, length(), getWidth(), w))
 			return NULL;
 
 		return newStr;
@@ -299,52 +286,46 @@ namespace avmplus
 	{
 		if (getType() != kDependent)
 			return (Stringp) this;
-		GET_STRING_POINTERS(this, thisPtrs)
-		return createDirect(_gc(this), thisPtrs.pv, m_length, getWidth());
+		return createDynamic(_gc(this), m_buffer.pv, m_length, getWidth());
 	}
 
 /////////////////////////////// Destructors ////////////////////////////////
 
 	String::~String()
 	{
-		GC* gc = GC::GetGC (this);
+		GC* gc = GC::GetGC(this);
 		switch (getType())
 		{
-			case kStatic:
-				if (m_bitsAndFlags & TSTR_DYNAMIC_FLAG)
-					gc->Free (m_static.pv);
-				m_static.p8 = NULL;
+			case kDynamic:
+				gc->Free(m_buffer.pv);
 				break;
-			case kDirect:
-			{
-				int32_t bytesLeft = (int32_t) GC::Size (this) - offsetof(String, m_direct);
-				memset (&m_direct.c8, 0, bytesLeft);
-				break;
-			}
 			case kDependent:
-				m_dependent.p.pv = NULL;
-				WBRC(gc, this, &m_dependent.master, NULL);
+				WBRC(gc, this, &m_master, NULL);
 				break;
+			default: ; // kStatic
 		}
+		m_buffer.p8 = NULL;
 		m_bitsAndFlags = 0;
 		m_length = 0;
+		m_index = 0;
 	}
 
 /////////////////////////////// Conversions ////////////////////////////////
 
-	bool String::makeDynamic()
+	void String::makeDynamic()
 	{
-		if (getType() == kStatic && !(m_bitsAndFlags & TSTR_DYNAMIC_FLAG))
+		int32_t type = getType();
+		// early to prevent MT race issues (still possible, but less likely)
+		setType(kDynamic);
+		if (type != kDynamic)
 		{
-			// early to prevent MT race issues (still possible, but less likely)
-			m_bitsAndFlags |= TSTR_DYNAMIC_FLAG;
 			int32_t bytes = length() * getWidth();
-			void* buf = GC::GetGC (this)->Alloc(bytes);
-			memcpy(buf, m_static.pv, bytes);
-			m_static.pv = buf;
-			return true;
+			void* buf = GC::GetGC(this)->Alloc(bytes, 0);
+			memcpy(buf, m_buffer.pv, bytes);
+			m_buffer.pv = buf;
+			if (type == kDependent)
+				WBRC( _gc(this), this, &m_master, NULL );
 		}
-		return false;
 	}
 
 /////////////////////////////// Comparison /////////////////////////////////
@@ -438,16 +419,11 @@ namespace avmplus
 			start = 0;
 
 		int32_t result;
-		GET_STRING_POINTERS(this, self)
-		GET_STRING_POINTERS(&other, test)
-		if (start) switch (other.getWidth())
-		{
-			case k8:  test.p8  += start; break;
-			case k16: test.p16 += start; break;
-			default:  test.p32 += start; break;
-		}
+
+		Pointers other_ptrs = other.m_buffer;
+		other_ptrs.p8 += start * other.getWidth();
 		int32_t count = (m_length < other_length) ? m_length : other_length;  // choose smaller of two
-		result = compare(self, getWidth(), test, other.getWidth(), count);
+		result = compare(m_buffer, getWidth(), other_ptrs, other.getWidth(), count);
 		if (result == 0)
 		{
 			// catch substring compares
@@ -466,8 +442,8 @@ namespace avmplus
 		if (len != length())
 			return false;
 
-		GET_STRING_POINTERS(this, ptrs)
 		bool ok = true;
+		Pointers ptrs = m_buffer;
 		switch (getWidth())
 		{
 			case k8:
@@ -489,7 +465,7 @@ namespace avmplus
 		if (len != length())
 			return false;
 
-		GET_STRING_POINTERS(this, ptrs)
+		Pointers ptrs = m_buffer;
 		bool ok = true;
 		switch (getWidth())
 		{
@@ -524,16 +500,16 @@ namespace avmplus
 
 		Width w = getWidth();
 
-		GET_STRING_POINTERS(this, p)
+		Pointers ptrs = m_buffer;
 
 		for (int32_t i = length(); i > 0; i--)
 		{
 			utf32_t ch1, ch2;
 			switch (w)
 			{
-				case k8:  ch1 = utf32_t(*p.p8++ & 0xFF); break;
-				case k16: ch1 = utf32_t(*p.p16++); break;
-				default:  ch1 = *p.p32++;
+				case k8:  ch1 = utf32_t(*ptrs.p8++ & 0xFF); break;
+				case k16: ch1 = utf32_t(*ptrs.p16++); break;
+				default:  ch1 = *ptrs.p32++;
 			}
 			if ((*buf & 0x7FF) < 0x80)
 			{
@@ -551,7 +527,7 @@ namespace avmplus
 				return false;
 			if (bytes == 0)
 				// UTF-8 string exhausted
-				return (1 == i);
+				return (i == 1);
 		}
 		return false;
 	}
@@ -596,22 +572,22 @@ namespace avmplus
 		uint32_t hashCode = 0;	// must be uint32!
 		if (m_length != 0)
 		{
-			GET_STRING_POINTERS(this, p)
+			Pointers ptrs = m_buffer;
 			int32_t len = m_length;
 
 			switch (getWidth())
 			{
 				case k8:
 					while (len--)
-						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ (uint8_t(*p.p8++) & 0xFF);
+						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ (uint8_t(*ptrs.p8++) & 0xFF);
 					break;
 				case k16:
 					while (len--)
-						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *p.p16++;
+						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptrs.p16++;
 					break;
 				default:
 					while (len--)
-						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *p.p32++;
+						hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptrs.p32++;
 			}
 		}
 		return hashCode;
@@ -619,44 +595,16 @@ namespace avmplus
 
 //////////////////////////////// Accessors /////////////////////////////////
 
-	String::StringData::StringData(String* _str) : str(_str), data(NULL)
-	{
-		if (_str) switch (_str->getType())
-		{
-			case kDirect:		data = &_str->m_direct.c8; break;
-			case kStatic:		data = _str->m_static.p8;  break;
-			case kDependent:	data = _str->m_dependent.p.p8;  break;
-			default:			AvmAssert(false); break; // init to null to silence compiler 
-		}
-	}
-
 	String::CharAtType String::charAt(int32_t index) const
 	{
 		AvmAssert(index >= 0 && index < m_length);
 
-		GET_STRING_POINTERS(this, ptrs)
-
 		utf32_t ch;
 		switch (getWidth())
 		{
-			case k8:	ch = uint32_t(ptrs.p8[index] & 0xFF); break;
-			case k16:	ch = uint32_t(ptrs.p16[index]); break;
-			default:	ch = ptrs.p32[index]; break;
-		}
-		return (String::CharAtType)ch;
-	}
-
-	String::CharAtType String::charAt(const StringData& data, int32_t index) const
-	{
-		AvmAssert(index >= 0 && index < m_length);
-		Pointers r;
-		r.pv = const_cast<void*>(data.data);
-		utf32_t ch;
-		switch (getWidth())
-		{
-			case k8:	ch = uint32_t(r.p8[index] & 0xFF); break;
-			case k16:	ch = uint32_t(r.p16[index]); break;
-			default:	ch = r.p32[index];
+			case k8:	ch = uint32_t(m_buffer.p8[index] & 0xFF); break;
+			case k16:	ch = uint32_t(m_buffer.p16[index]); break;
+			default:	ch = m_buffer.p32[index]; break;
 		}
 		return (String::CharAtType)ch;
 	}
@@ -693,17 +641,15 @@ namespace avmplus
 		Width w1 = getWidth();
 		Width w2 = substr->getWidth();
 
-		GET_STRING_POINTERS(this, self)
-		self.p8 += start * w1;
-
-		GET_STRING_POINTERS(substr, test)
+		Pointers buffer = m_buffer;
+		buffer.p8 += start * w1;
 
 		for ( ; start <= right; ++start)
 		{
-			int32_t res = compare(self, w1, test, w2, substr->m_length);
+			int32_t res = compare(buffer, w1, substr->m_buffer, w2, substr->m_length);
 			if (res == 0)
 				return start;
-			self.p8 += w1;
+			buffer.p8 += w1;
 		}
 		return -1;
 	}
@@ -733,17 +679,15 @@ namespace avmplus
 		Width w1 = getWidth();
 		Width w2 = substr->getWidth();
 
-		GET_STRING_POINTERS(this, self)
-		self.p8 += startPos * w1;
-
-		GET_STRING_POINTERS(substr, test)
+		Pointers buffer = m_buffer;
+		buffer.p8 += startPos * w1;
 
 		for ( ; startPos >= 0 ; --startPos )
 		{
-			int32_t res = compare(self, w1, test, w2, substr->m_length);
+			int32_t res = compare(buffer, w1, substr->m_buffer, w2, substr->m_length);
 			if (res == 0)
 				return startPos;
-			self.p8 -= w1;
+			buffer.p8 -= w1;
 		}
 		return -1;
 	}
@@ -768,18 +712,18 @@ namespace avmplus
 
 		Width w = getWidth();
 
-		GET_STRING_POINTERS(this, self)
-		self.p8 += start * w;
+		Pointers buffer = m_buffer;
+		buffer.p8 += start * w;
 
 		Pointers test;
 		test.p8 = (char*) p;
 
 		for ( ; start <= right; ++start)
 		{
-			int32_t res = compare(self, w, test, k8, sublen);
+			int32_t res = compare(buffer, w, test, k8, sublen);
 			if (res == 0)
 				return start;
-			self.p8 += w;
+			buffer.p8 += w;
 		}
 		return -1;
 	}
@@ -794,10 +738,10 @@ namespace avmplus
 		if (len < 0)
 			len = Length(p);
 
-		StringData thisData(this);
+		StringIndexer self(this);
 		while (len--)
 		{
-			utf32_t ch1 = charAt(thisData, pos++);
+			utf32_t ch1 = self[pos++];
 			utf32_t ch2 = utf32_t(*p++ & 0xFF);
 			if (caseless && unicharToUpper(ch1) != unicharToUpper(ch2))
 				return false;
@@ -833,7 +777,7 @@ namespace avmplus
 	// there are massive problems with RCObject pointers getting lost, and internal
 	// pointers to that object not being recognized.
 
-	Stringp String::append(Stringp inStr, const void* buffer, int32_t numChars, Width rightWidth)
+	Stringp String::append(Stringp inStr, const void* buffer, int32_t numChars, Width charWidth)
 	{
 		if (inStr != NULL)
 		{
@@ -841,71 +785,64 @@ namespace avmplus
 			// to keep the inStr pointer alive as long as possible
 			// buffer = inStr->getData();
 			numChars = inStr->length();
-			rightWidth = inStr->getWidth();
+			charWidth = inStr->getWidth();
 		}
 		else if (buffer == NULL || numChars <= 0)
 			return this;
 
-		AvmAssert(rightWidth != kAuto);
+		AvmAssert(charWidth != kAuto);
 
 		MMgc::GC* gc = _gc(this);
 
 		Stringp newStr;
 
-		Width leftWidth = getWidth();
-		Width newWidth = (leftWidth < rightWidth) ? rightWidth : leftWidth;
+		Width thisWidth = getWidth();
+		Width newWidth = (thisWidth < charWidth) ? charWidth : thisWidth;
 
 		int32_t newLen = m_length + numChars;
 
 		// TODO: make thread safe
 
+		Stringp master = (getType() == kDependent) ? m_master : this;
 		// check for characters left in leftStr's buffer, or if leftStr has spent its padding already
-		Stringp master = this;
-		if (getType() == kDependent)
-			master = m_dependent.master;
-		// string types other than kDirect have charsLeft == 0
+		// string types other than kDynamic have charsLeft == 0
 		int32_t charsLeft = 0;
 		int32_t charsUsed = 0;
-		if (leftWidth >= rightWidth)
+		if (thisWidth >= charWidth)
 		{
 			// in-place append only if rightStr's width fits into leftStr
 			charsLeft = master->getCharsLeft();
-			// charsUsed is the number of chars spent behind m_length
-			charsUsed = int32_t((GC::Size(master) - offsetof(String, m_direct.c8) / leftWidth) - master->m_length - charsLeft);
+			if (master->getType() != kStatic)
+				// charsUsed is the number of chars already spent behind m_length
+				charsUsed = int32_t((GC::Size(master->m_buffer.pv) / thisWidth) - master->m_length - charsLeft);
 		}
 		int32_t start = 0;	// string start for dependent strings
-		char* data;
 
-		GET_STRING_POINTERS(master, masterPtrs)
-
-		// it is possible to append if
-		// 1) leftStr is a kDirect string and charsUsed == 0
-		// 2) leftStr is a kDependent string and the end matches the master's real end
+		// it is possible to append in-place if
+		// 1) this is a kDynamic string and charsUsed == 0
+		// 2) this is a kDependent string and the end matches the master's real end
 		switch (getType())
 		{
-			case kDirect:
-				data = m_direct.c8;
+			case kDynamic:
 				if (charsUsed != 0)
+					// someone else has already appended in-place
 					charsLeft = 0;
 				break;
 			case kDependent:
-				data = m_dependent.p.p8;
-				start = int32_t(data - masterPtrs.p8);
+				start = int32_t(m_buffer.p8 - master->m_buffer.p8);
 				if ((start + m_length) != master->m_length + charsUsed)
 					charsLeft = 0;
 				break;
-			default:	// kStatic
-				data = m_static.p8;
+			default:;	// kStatic
 		}
-
-		GET_STRING_POINTERS(inStr, inStrPtrs)
 
 		// the big check: are there enough chars left?
 		if (numChars <= charsLeft)
 		{
 			// the right-hand string fits into the buffer end
-			// use getData() here as late as possible
-			_copyBuffers(buffer ? buffer : inStrPtrs.pv, data + m_length * leftWidth, numChars, leftWidth, rightWidth);
+			_copyBuffers(buffer ? buffer : inStr->m_buffer.pv, 
+						 m_buffer.p8 + m_length * thisWidth, 
+						 numChars, charWidth, newWidth);
 
 			charsUsed += numChars;
 			charsLeft -= numChars;
@@ -917,9 +854,9 @@ namespace avmplus
 				int32_t end = master->m_length + charsUsed;
 				switch (newWidth)
 				{
-					case k8:  masterPtrs.p8 [end] = 0; break;
-					case k16: masterPtrs.p16[end] = 0; break;
-					default : masterPtrs.p32[end] = 0; break;
+					case k8:  master->m_buffer.p8[end] = 0; break;
+					case k16: master->m_buffer.p16[end] = 0; break;
+					default : master->m_buffer.p32[end] = 0; break;
 				}
 			}
 #endif
@@ -927,29 +864,32 @@ namespace avmplus
 		}
 
 		// fall thru - string does not fit
-		// so create a new kDirect string containing the concatenated string
-		// compute the extra padding; start with 32 bytes, but double the length
+		// so create a new kDynamic string containing the concatenated string
+		// assume that concatenation may happen more than once, so request extra
+		// characters at the end; at least 32 bytes, or the current length
 		int32_t extra = (newLen < 32) ? 32 : ((newLen > MAX_EXTRA_CHARS) ? MAX_EXTRA_CHARS : newLen);
-		newStr = createDirect(gc, NULL, newLen, newWidth, extra);
+
+		newStr = createDynamic(gc, NULL, newLen, newWidth, extra);
 		// copy leftStr
-		void* ptr = _copyBuffers(data, 
-					  &newStr->m_direct.c8, 
+		void* ptr = _copyBuffers(m_buffer.pv, 
+					  newStr->m_buffer.p8, 
 					  m_length, 
-					  leftWidth, newWidth);
-		// append src; use getData() here as late as possible
-		_copyBuffers(buffer ? buffer : inStrPtrs.pv, 
+					  thisWidth, newWidth);
+		// append src
+		_copyBuffers(buffer ? buffer : inStr->m_buffer.pv, 
 					  ptr,
 					  numChars, 
-					  rightWidth, newWidth);
+					  charWidth, newWidth);
+
 #ifdef _DEBUG
 		// Terminate string with 0 for better debugging display
 		if (newStr->getCharsLeft())
 		{
 			switch (newWidth)
 			{
-				case k8:  newStr->m_direct.c8 [newStr->m_length] = 0; break;
-				case k16: newStr->m_direct.c16[newStr->m_length] = 0; break;
-				default : newStr->m_direct.c32[newStr->m_length] = 0; break;
+				case k8:  newStr->m_buffer.p8[newStr->m_length] = 0; break;
+				case k16: newStr->m_buffer.p16[newStr->m_length] = 0; break;
+				default : newStr->m_buffer.p32[newStr->m_length] = 0; break;
 			}
 		}
 #endif
@@ -993,9 +933,8 @@ namespace avmplus
 		if (getType() == kDependent)
 		{
 			// get the string offset
-			master = m_dependent.master;
-			GET_STRING_POINTERS(master, masterPtrs)
-			int32_t offset = int32_t(m_dependent.p.p8 - masterPtrs.p8) / master->getWidth();
+			master = m_master;
+			int32_t offset = int32_t(m_buffer.p8 - master->m_buffer.p8) / master->getWidth();
 			// TODO: possible 32-bit overflow for a very huge dependent string
 			start += offset;
 			end += offset;
@@ -1004,7 +943,7 @@ namespace avmplus
 		if (master->getType() == kStatic)
 			// for static strings, create a new static string pointing to the substring
 			// no need to create a dependent string and block the master
-			return createExternal(gc, master->m_static.p8  + start * master->getWidth(), end - start, master->getWidth());
+			return createStatic(gc, master->m_buffer.p8  + start * master->getWidth(), end - start, master->getWidth());
 		else
 			return createDependent(gc, master, start, end - start);
 	}
@@ -1057,15 +996,21 @@ namespace avmplus
 
 	bool String::parseIndex(uint32_t& result) const
 	{
-		GET_STRING_POINTERS(this, ptrs)
-		int64_t n = 0;
-		uint32_t uch;
-
-		// avoid calling getData() if this string is definitely not a candidate
+		// avoid parsing if this string is definitely not a candidate
 		// A string that is more than 10 digits (and does not start with 0) 
 		// will always be greater than 2^32-1 (4294967295) or not a numeric string
 		if (m_bitsAndFlags & TSTR_NOUINT_FLAG)
 			return false;
+
+		if (m_bitsAndFlags & (TSTR_UINT28_FLAG | TSTR_UINT32_FLAG))
+		{
+			result = m_index;
+			return true;
+		}
+
+		int64_t n = 0;
+		uint32_t uch;
+		Pointers ptrs = m_buffer;
 
 		if (m_length == 0 || m_length > 10)
 			goto bad;
@@ -1094,6 +1039,11 @@ namespace avmplus
 			goto bad;
 		if (n & ScriptObject::MAX_INTEGER_MASK)
 			m_bitsAndFlags |= TSTR_NOINT_FLAG;
+		if (getType() != kDependent)
+		{
+			m_bitsAndFlags |= TSTR_UINT32_FLAG;
+			m_index = uint32_t(n);
+		}
 		result = uint32_t(n);
 		return true;
 	bad:
@@ -1103,14 +1053,17 @@ namespace avmplus
 
 	Atom String::getIntAtom() const
 	{
-		GET_STRING_POINTERS(this, ptrs)
-		int32_t n = 0;
-		uint32_t uch;
-
 		// The call uses a simplified version of parseIndex with 32-bit arithmetic, 
 		// since we can only fit 28 bits.
 		if (m_bitsAndFlags & TSTR_NOINT_FLAG)
 			return 0;
+
+		if (m_bitsAndFlags & TSTR_UINT28_FLAG)
+			return Atom((m_index << 3) | AtomConstants::kIntegerType);
+
+		int32_t n = 0;
+		uint32_t uch;
+		Pointers ptrs = m_buffer;
 
 		if (m_length == 0 || m_length > 10)
 			goto bad;
@@ -1136,7 +1089,12 @@ namespace avmplus
 			if (n & ScriptObject::MAX_INTEGER_MASK)
 				goto bad;
 		}
-		return Atom ((n << 3) | AtomConstants::kIntegerType);
+		if (getType() != kDependent)
+		{
+			m_bitsAndFlags |= TSTR_UINT28_FLAG;
+			m_index = n;
+		}
+		return Atom((n << 3) | AtomConstants::kIntegerType);
 	bad:
 		m_bitsAndFlags |= TSTR_NOINT_FLAG;
 		return 0;
@@ -1923,8 +1881,7 @@ namespace avmplus
 		// Flag to detect whether any changes were made
 		bool changed = false;
 
-		GET_STRING_POINTERS(this, src)
-		Pointers dst;
+		Pointers src = m_buffer;
 
 		// 0xFF is a special case: ToUpper(0xFF) == 0x178, so we need a wider string
 		// if the string contains 0xFF
@@ -1932,9 +1889,9 @@ namespace avmplus
 		if (w == k8 && memchr(src.pv, 0xFF, m_length) != 0)
 			w = k16;
 
-		GC* gc = GC::GetGC (this);
-		Stringp newStr = createDirect(gc, NULL, m_length, w);
-		dst.p8 = (char*) newStr->m_direct.c8;
+		GC* gc = GC::GetGC(this);
+		Stringp newStr = createDynamic(gc, NULL, m_length, w);
+		Pointers dst = newStr->m_buffer;
 
 		int32_t i;
 		uint32_t ch1, ch2;
@@ -1993,10 +1950,10 @@ namespace avmplus
 
 	bool String::isWhitespace() const
 	{
-		StringData thisData(const_cast<String*>(this));
+		StringIndexer self((Stringp) this);
 		for (int32_t i = 0 ; i < length(); i++)
 		{
-			utf32_t ch = charAt(thisData, i);
+			utf32_t ch = self[i];
 			if (ch > 0xFFFF || !isSpace((wchar) ch))
 				return false;
 		}
@@ -2088,71 +2045,6 @@ namespace avmplus
 		}
 
 		return ret;
-	}
-
-	UTF8String* String::getUTF8String() const
-	{
-		switch (getWidth())
-		{
-			case String::k8:
-				return UTF8String::create8(this);
-			case String::k16:
-				return UTF8String::create16(this);
-#ifdef FEATURE_UTF32_SUPPORT
-			default:
-				return UTF8String::create32(this);
-#else
-			default: 
-				return NULL;
-#endif
-		}
-	}
-
-	UTF16String* String::getUTF16String() const
-	{
-		GET_STRING_POINTERS(this, ptrs)
-		MMgc::GC* gc = _gc(this);
-		UTF16String* s;
-		switch (getWidth())
-		{
-			case String::k8:
-				// don't need to add 1 to m_length because m_buffer already includes 1
-				s = new (gc, m_length * sizeof(wchar)) UTF16String(m_length);
-				_copyBuffers(ptrs.pv, s->m_buffer, m_length, k8, k16);
-				s->m_buffer[m_length] = 0;
-				break;
-			case String::k16:
-				// don't need to add 1 to m_length because m_buffer already includes 1
-				s = new (gc, m_length * sizeof(wchar)) UTF16String(m_length);
-				_copyBuffers(ptrs.pv, s->m_buffer, m_length, k16, k16);
-				s->m_buffer[m_length] = 0;
-				break;
-			default:
-			{
-				const utf32_t* src = ptrs.p32;
-				const utf32_t* p = src;
-				int32_t count = 0, len = m_length;
-				while (len--)
-					count += (*p++ > 0xFFFF) ? 2 : 1;
-				// don't need to add 1 to m_length because m_buffer already includes 1
-				s = new (gc, count * sizeof(wchar)) UTF16String(count);
-				len = m_length;
-				wchar* dst = s->m_buffer;
-				while (len--)
-				{
-					utf32_t ch = *src++;
-					if (ch > 0xFFFF)
-					{
-						*dst++ = (wchar) (((ch-0x10000)>>10) & 0x3FF) + 0xD800;
-						*dst++ = (wchar) ((ch-0x10000) & 0x3FF) + 0xDC00;
-					}
-					else
-						*dst++ = (wchar) ch;
-				}
-				s->m_buffer[m_length] = 0;				
-			}
-		}
-		return s;
 	}
 
 	int String::_indexOf(Stringp substr, int startPos)
@@ -2289,6 +2181,37 @@ namespace avmplus
 		return GC::Size(this) - sizeof(AvmPlusScriptableObject);
 	}
 #endif
+
+/////////////////////////////////// StringIndexer //////////////////////////////////////
+
+	StringIndexer::StringIndexer(Stringp s) : m_str(s) 
+	{ 
+		AvmAssert(s != NULL);
+		switch (s->getWidth())
+		{
+			case String::k8:	m_getter = &get8; break;
+			case String::k16:	m_getter = &get16; break;
+			default:			m_getter = &get32; break;
+		}
+	}
+
+	String::CharAtType StringIndexer::get8(Stringp s, int index)
+	{
+		AvmAssert(index >= 0 && index < s->length());
+		return (String::CharAtType) (s->m_buffer.p8[index] & 0xFF);
+	}
+
+	String::CharAtType StringIndexer::get16(Stringp s, int index)
+	{
+		AvmAssert(index >= 0 && index < s->length());
+		return (String::CharAtType) s->m_buffer.p16[index];
+	}
+
+	String::CharAtType StringIndexer::get32(Stringp s, int index)
+	{
+		AvmAssert(index >= 0 && index < s->length());
+		return (String::CharAtType) s->m_buffer.p32[index];
+	}
 
 ////////////////////////////// Helpers: Width Analysis /////////////////////////////////
 
@@ -2491,18 +2414,18 @@ namespace avmplus
 					s = NULL;
 				else if (staticBuf && widths.ascii == widths.w8)
 					// works, because we only have 7-bit ASCII
-					return String::createExternal(gc, buffer, widths.w8, String::k8);
+					return String::createStatic(gc, buffer, widths.w8, String::k8);
 				else
-					s = String::createDirect(gc, buffer, widths.w8, String::k8);
+					s = String::createDynamic(gc, buffer, widths.w8, String::k8);
 				goto decodeUtf8;
 			case String::k16:
 				// surrogate pairs need 2 characters
-				s = String::createDirect(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16);
+				s = String::createDynamic(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k16);
 				goto decodeUtf8;
 			default: ;
 #ifdef FEATURE_UTF32_SUPPORT
 				// surrogate pairs need 2 characters
-				s = String::createDirect(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k32);
+				s = String::createDynamic(gc, NULL, widths.w8 + widths.w16 + 2 * widths.w32, String::k32);
 #endif
 decodeUtf8:
 				if (s != NULL)
@@ -2510,8 +2433,7 @@ decodeUtf8:
 
 					utf32_t uch;
 					int32_t bytesRead;
-					String::Pointers dst;
-					dst.p16 = s->m_direct.c16;
+					String::Pointers dst = s->m_buffer;
 					switch (desiredWidth)
 					{
 						case String::k8:
@@ -2597,25 +2519,24 @@ decodeUtf8:
 		}
 
 		if (desiredWidth == k16 && staticBuf)
-			return String::createExternal(core->GetGC(), buffer, len, k16);
+			return String::createStatic(core->GetGC(), buffer, len, k16);
 
 		// found the width to use, now create that string
-		Stringp s = createDirect(core->GetGC(), NULL, stringLength, desiredWidth);
+		Stringp s = createDynamic(core->GetGC(), NULL, stringLength, desiredWidth);
 
-		String::Pointers ptrs;
+		String::Pointers ptrs = s->m_buffer;
 		switch (desiredWidth)
 		{
 			case String::k8:
-				ptrs.p8 = s->m_direct.c8;
 				while (len-- > 0)
 					*ptrs.p8++ = (char) *buffer++;
 				break;
 			case String::k16:
-				memcpy(s->m_direct.c16, buffer, len * sizeof(wchar));
+				memcpy(s->m_buffer.pv, buffer, len * desiredWidth);
 				break;
 #ifdef FEATURE_UTF32_SUPPORT
 			default:
-				ptrs.p32 = s->m_direct.c32;
+				ptrs.p32 = s->m_buffer.p32;
 				while (len-- > 0)
 				{
 					wchar ch = *buffer++;
@@ -2671,19 +2592,19 @@ decodeUtf8:
 		}
 
 		if (desiredWidth == k32 && staticBuf)
-			return createExternal(core->GetGC(), buffer, len, k32);
+			return createStatic(core->GetGC(), buffer, len, k32);
 		int32_t stringLen = len;
 		if (desiredWidth == k16)
 			// make room for surrogate pairs
 			stringLen += widths.w32;
 
 		// found the width to use, now create that string
-		Stringp s = createDirect(core->GetGC(), NULL, stringLen, desiredWidth);
+		Stringp s = createDynamic(core->GetGC(), NULL, stringLen, desiredWidth);
 		Pointers ptrs;
 		switch (desiredWidth)
 		{
 			case k8:
-				ptrs.p8 = s->m_direct.c8;
+				ptrs.p8 = s->m_buffer.p8;
 				while (len-- > 0)
 					*ptrs.p8++ = (char) *buffer++;
 				break;
@@ -2721,72 +2642,135 @@ decodeUtf8:
 	//   0020 0000-03FF FFFF   111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 	//   0400 0000-7FFF FFFF   1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 
-	UTF8String::UTF8String(int32_t len) : m_length(len)
+	static const char* const zero8 = "";
+
+	StUTF8String::StUTF8String(Stringp str)
 	{
-		// operator new has allocated one extra byte already
-		m_buffer[len] = 0;
-	}
-
-	// Create a UTF-8 string out of a 8-bit string.
-
-	UTF8String* UTF8String::create8(const String* s)
-	{
-		GET_STRING_POINTERS(s, ptrs)
-		const int8_t* buf = (const int8_t*) ptrs.p8;
-		int32_t count = 0;
-		int32_t len = s->length();
-		int32_t i;
-		for (i = 0; i < len; i++, buf++)
-			count += (*buf < 0) ? 2 : 1;
-		
-		// don't need to add 1 to count because m_buffer already includes 1
-		UTF8String* s8 = new (GC::GetGC(s), count) UTF8String(count);
-		char* dstBuf = s8->m_buffer;
-
-		dstBuf[count] = 0;
-		buf = (const int8_t*) ptrs.p8;
-
-		for (i = 0; i < len; i++, buf++)
+		if (!str || !str->length())
 		{
-			wchar ch = wchar (*buf & 0xFF);
-			if (ch >= 128)
-			{
-				*dstBuf++ = char(0xC0 + ((ch >> 6) & 0x3));
-				*dstBuf++ = char(0x80 + (ch & 0x3F));
-				ch <<= 32-12;
-			}
-			else
-				*dstBuf++ = char(ch);
+			m_length = 0;
+			m_buffer = zero8;
+			return;
 		}
-		return s8;
-	}
 
-	// Create a UTF-8 string out of a 16-bit string.
+		int32_t i;
+		m_length = 0;
 
-	UTF8String* UTF8String::create16(const String* s)
-	{
-		GET_STRING_POINTERS(s, ptrs)
-		const wchar* data = ptrs.p16;
-		int32_t count = UnicodeUtils::Utf16ToUtf8(data, s->length(), NULL, 0);
-		// don't need to add 1 to count because m_buffer already includes 1
-		UTF8String* s8 = new (GC::GetGC(s), count) UTF8String(count);
-		UnicodeUtils::Utf16ToUtf8(data, s->length(), (uint8_t*) s8->m_buffer, count);
-		return s8;
-	}
+		MMgc::GC* gc = _gc(str);
+		switch (str->getWidth())
+		{
+			case String::k8:
+			{
+				const uint8_t* buf = (const uint8_t*) str->m_buffer.p8;
+				for (i = 0; i < str->m_length; i++, buf++)
+					m_length += (*buf > 127) ? 2 : 1;
+				
+				char* dstBuf = (char*) gc->Alloc(m_length+1, 0);
+				m_buffer = dstBuf;
+				dstBuf[m_length] = 0;
 
-	// Create a UTF-8 string out of a 32-bit string.
+				buf = (const uint8_t*) str->m_buffer.p8;
+
+				for (i = 0; i < str->m_length; i++, buf++)
+				{
+					wchar ch = wchar (*buf);
+					if (ch >= 128)
+					{
+						*dstBuf++ = char(0xC0 + ((ch >> 6) & 0x3));
+						*dstBuf++ = char(0x80 + (ch & 0x3F));
+						ch <<= 32-12;
+					}
+					else
+						*dstBuf++ = char(ch);
+				}
+				break;
+			}
+			case String::k16:
+			{
+				const wchar* data = str->m_buffer.p16;
+				m_length = UnicodeUtils::Utf16ToUtf8(data, str->length(), NULL, 0);
+				char* dstBuf = (char*) gc->Alloc(m_length + 1, 0);
+				m_buffer = dstBuf;
+				dstBuf[m_length] = 0;
+				UnicodeUtils::Utf16ToUtf8(data, str->length(), (uint8_t*) dstBuf, m_length);
+				break;
+			}
+			default: ;
 #ifdef FEATURE_UTF32_SUPPORT
-	UTF8String* UTF8String::create32(const String* s)
-	{
-		GET_STRING_POINTERS(s, ptrs)
-		const utf32_t* data = ptrs.p32;
-		int32_t count = _ucs4ToUtf8(data, s->length(), NULL, 0);
-		// don't need to add 1 to count because m_buffer already includes 1
-		UTF8String* s8 = new (GC::GetGC(s), count) UTF8String(count);
-		_ucs4ToUtf8(data, s->length(), (utf8_t*) s8->m_buffer, count);
-		return s8;
-	}
+			{
+				const utf32_t* data = str->m_buffer.p32;
+				m_length = _ucs4ToUtf8(data, str->length(), NULL, 0);
+				char* dstBuf = (char*) gc->Alloc(m_length + 1, 0);
+				m_buffer = dstBuf;
+				dstBuf[m_length] = 0;
+				_ucs4ToUtf8(data, str->length(), (utf8_t*) dstBuf, m_length);
+			}
 #endif
+		}
+	}
+
+	StUTF8String::~StUTF8String()
+	{
+		if (m_buffer != zero8)
+			GC::GetGC(m_buffer)->Free(m_buffer);
+	}
+
+	static const wchar zero16[1] = { 0 };
+
+	StUTF16String::StUTF16String(Stringp str)
+	{
+		if (!str || !str->length())
+		{
+			m_length = 0;
+			m_buffer = zero16;
+			return;
+		}
+		MMgc::GC* gc = _gc(str);
+		switch (str->getWidth())
+		{
+			case String::k8:
+			case String::k16:
+			{
+				m_length = str->m_length;
+				wchar* dst = (wchar*) gc->Alloc((m_length + 1) * String::k16, 0);
+				m_buffer = dst;
+				dst[m_length] = 0;
+				_copyBuffers(str->m_buffer.pv, dst, m_length, str->getWidth(), String::k16);
+				break;
+			}
+			default: ;
+#ifdef FEATURE_UTF32_SUPPORT
+			{
+				const utf32_t* src = str->m_buffer.p32;
+				const utf32_t* p = src;
+				int32_t count = 0, len = m_length;
+				while (len--)
+					count += (*p++ > 0xFFFF) ? 2 : 1;
+				wchar* dst = gc->Alloc((m_length + 1) * String::k16, 0);
+				m_buffer = dst;
+				dst[m_length] = 0;
+				len = m_length;
+				while (len--)
+				{
+					utf32_t ch = *src++;
+					if (ch > 0xFFFF)
+					{
+						*dst++ = (wchar) (((ch-0x10000)>>10) & 0x3FF) + 0xD800;
+						*dst++ = (wchar) ((ch-0x10000) & 0x3FF) + 0xDC00;
+					}
+					else
+						*dst++ = (wchar) ch;
+				}
+			}
+#endif
+		}
+	}
+
+	StUTF16String::~StUTF16String()
+	{
+		if (m_buffer != zero16)
+			GC::GetGC(m_buffer)->Free(m_buffer);
+	}
 
 	// The following table is the length of an UTF-8 sequence, indexed by the
 	// first character masked with 0x3F. It is assumed that the data is good 
@@ -2808,7 +2792,7 @@ decodeUtf8:
 
 	int32_t StIndexableUTF8String::toUtf8Index(int32_t pos)
 	{
-		if (pos <= 0 || pos >= str->m_length)
+		if (pos <= 0 || pos >= length())
 			return pos;
 
 		// optimization: these two members kick in if this method
@@ -2818,7 +2802,7 @@ decodeUtf8:
 
 		int32_t utf8Pos = m_lastPos;
 
-		const utf8_t* p = (const utf8_t*) &str->m_buffer[m_lastUtf8Pos];
+		const utf8_t* p = (const utf8_t*) &m_buffer[m_lastUtf8Pos];
 		for (int32_t i = m_lastPos; i < pos; i++)
 		{
 			utf8_t ch = *p;
@@ -2849,10 +2833,10 @@ decodeUtf8:
 		int32_t i = m_lastUtf8Pos;
 		int32_t pos = m_lastPos;
 
-		const utf8_t* p = (const utf8_t*) str->m_buffer + m_lastUtf8Pos;
+		const utf8_t* p = (const utf8_t*) m_buffer + m_lastUtf8Pos;
 		while (i < utf8Pos)
 		{
-			if (i >= str->m_length)
+			if (i >= length())
 				break;
 			utf8_t ch = *p;
 			if (!(ch & 0x80))
