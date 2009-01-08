@@ -152,18 +152,17 @@ namespace avmplus
 		/*@}*/
 
 	public:
-		inline AvmCore* core() const;
 
 		uintptr iid() const
 		{
 			return ((uintptr)this)>>3;
 		}
 
-		inline bool usesCallerContext() const;
+		bool usesCallerContext() const;
 
 		// Builtin + non-native functions always need the dxns code emitted 
 		// Builtin + native functions have flags to specify if they need the dxns code
-		inline bool usesDefaultXmlNamespace() const;
+		bool usesDefaultXmlNamespace() const;
 
 		void initParamTypes(int count);
 		void initDefaultValues(int count);
@@ -177,7 +176,7 @@ namespace avmplus
 		}
 
     protected:
-		AbstractFunction();
+		AbstractFunction(int _method_id);
 
 	public:
 		
@@ -244,20 +243,13 @@ namespace avmplus
 	protected:
 		virtual ~AbstractFunction();
 
-#ifdef AVMPLUS_VERBOSE
 	public:
-		virtual Stringp format(AvmCore* core) const;
-#endif
 
-#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-	public:
-	#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-		Stringp getStackTraceLine(Stringp filename);
-	#endif
+#ifdef AVMPLUS_VERBOSE
+		Stringp format(AvmCore* core) const;
 #endif
 #ifdef DEBUGGER
 		virtual uint32 size() const;
-		virtual bool isFakeFunction() { return false; }
 #endif
 	// ------------------------ DATA SECTION BEGIN
 	public:
@@ -286,42 +278,9 @@ namespace avmplus
 		int			optional_count;		// last optional_count params are optional 
 		int			restOffset;			// offset to first rest arg, including the instance parameter. this is sum(sizeof(paramType(0..N)))
 		int			flags;				// see bitmask defs above 
-		int			method_id;		
+		const int	method_id;		
 	// ------------------------ DATA SECTION END
 	};
-
-#ifdef DEBUGGER
-	// for sampling
-	class FakeAbstractFunction : public AbstractFunction
-	{
-	public:
-		FakeAbstractFunction(Stringp name) { this->name = name; }
-		void verify(Toplevel *) {}
-		virtual bool isFakeFunction() { return true; }
-	};
-#endif
-}
-
-#include "PoolObject.h"
-
-namespace avmplus
-{
-	inline AvmCore* AbstractFunction::core() const
-	{
-		return pool->core;
-	}
-
-	inline bool AbstractFunction::usesCallerContext() const
-	{
-		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));
-	}
-
-	// Builtin + non-native functions always need the dxns code emitted 
-	// Builtin + native functions have flags to specify if they need the dxns code
-	inline bool AbstractFunction::usesDefaultXmlNamespace() const
-	{
-		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
-	}
 }
 
 #endif /* __avmplus_AbstractFunction__ */

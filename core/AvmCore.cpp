@@ -226,14 +226,6 @@ namespace avmplus
 		kVersion = internConstantStringLatin1("Version");
 		kVector = internConstantStringLatin1("Vector.<");
 
-#ifdef AVMPLUS_VERBOSE
-		knewline = newConstantStringLatin1("\n");
-		krightbracket = newConstantStringLatin1("]");
-		kleftbracket = newConstantStringLatin1("[");
-		kcolon = newConstantStringLatin1(":");
-		ktabat = newConstantStringLatin1("\tat ");
-		kparens = newConstantStringLatin1("()");
-#endif
 #if defined AVMPLUS_VERBOSE || defined DEBUGGER
 		kanonymousFunc = newConstantStringLatin1("<anonymous>");
 #endif

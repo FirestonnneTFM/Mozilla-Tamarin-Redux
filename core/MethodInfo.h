@@ -45,6 +45,29 @@ namespace avmplus
 	class AbcFile;
 #endif
 
+#ifdef DEBUGGER
+	class DebuggerMethodInfo : public MMgc::GCObject
+	{
+	public:
+		inline explicit DebuggerMethodInfo(int32_t _local_count, uint32_t _codeSize, int32_t _max_scopes) :
+			firstSourceLine(0),
+			lastSourceLine(0),
+			offsetInAbc(0),
+			local_count(_local_count), 
+			codeSize(_codeSize), 
+			max_scopes(_max_scopes) {}
+
+		DWB(AbcFile*)			file;				// the abc file from which this method came
+		int32_t					firstSourceLine;	// source line number where function starts
+		int32_t					lastSourceLine;		// source line number where function ends
+		int32_t					offsetInAbc;		// offset in abc file
+		uint32_t				codeSize;			// abc size pre-jit, native size post jit
+		const int32_t			local_count;		// FIXME: merge with localCount above; this one may be visible to a debugger?
+		const int32_t			max_scopes;			// FIXME: merge with maxScopeDepth above; this one is not used by the VM but may be visible to a debugger?
+		Stringp					localNames[1];		// array of names for args and locals in framep order, written with explicit WBRC (actually local_count)
+	};
+#endif
+
 	/**
 	 * The MethodInfo class represents a method or function written
 	 * in ActionScript code.
@@ -52,32 +75,7 @@ namespace avmplus
 	class MethodInfo : public AbstractFunction
 	{
 	public:
-#ifdef DEBUGGER
-		AbcFile* getFile() { return file; }
-		void setFile(AbcFile* file) { this->file = file; }
-
-		Stringp getLocalName(int index) const;
-		Stringp getArgName(int index) const;
-		Stringp getRegName(int index) const;
-		void setRegName(int index, Stringp name);
-
-		void boxLocals(void* src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length);
-		void unboxLocals(Atom* src, int srcPos, Traits** traitArr, void* dest, int destPos, int length);
-#endif // DEBUGGER
-		
-#ifdef AVMPLUS_WORD_CODE
-		struct 
-		{
-			const uintptr_t *body_pos; // NULL iff not yet translated
-			DWB(GCObject*) code_anchor;  // The object that contains the code pointed to by body_pos
-			int cache_size;              // Number of items in lookup cache
-			// We write this once, in WordcodeTranslator, with an explicit WB.  so no DWB.
-			// The contents are the same as the 'exceptions' structure below, except the 'from', 'to', and 'target' fields.
-			ExceptionHandlerTable* exceptions;
-		} word_code;
-#endif
-
-		MethodInfo();
+		MethodInfo(int _method_id);
 
 		static Atom verifyEnter(MethodEnv* env, int argc, uint32 *ap);
 
@@ -86,8 +84,35 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		virtual uint32 size() const;
-		void initLocalNames();
-#endif // DEBUGGER
+
+		void initDMI(int32_t local_count, uint32_t codeSize, int32_t max_scopes);
+
+		void boxLocals(void* src, int srcPos, Traits** traitArr, Atom* dest, int destPos, int length);
+		void unboxLocals(Atom* src, int srcPos, Traits** traitArr, void* dest, int destPos, int length);
+
+		void setFile(AbcFile* file);
+		void setRegName(int index, Stringp name);
+
+		inline Stringp getLocalName(int index) const { return getRegName(index+param_count); }
+		inline Stringp getArgName(int index) const { return getRegName(index); }
+
+		AbcFile* file() const;
+		int32_t firstSourceLine() const;
+		int32_t lastSourceLine() const;
+		int32_t offsetInAbc() const;
+		uint32_t codeSize() const;
+		int32_t local_count() const;
+		int32_t max_scopes() const;
+
+		void updateSourceLines(int32_t linenum, int32_t offset);
+
+	#ifdef AVMPLUS_MIR
+		void setCodeSize(uint32_t c);
+	#endif
+
+	private:
+		Stringp getRegName(int index) const;
+#endif
 
 	// ------------------------ DATA SECTION BEGIN
 	public:
@@ -101,17 +126,20 @@ namespace avmplus
 #else
 		const uint8_t*			codeStart;			// ditto
 #endif
+#ifdef AVMPLUS_WORD_CODE
+		struct 
+		{
+			const uintptr_t*		body_pos; // NULL iff not yet translated
+			DWB(GCObject*)			code_anchor;  // The object that contains the code pointed to by body_pos
+			// We write this once, in WordcodeTranslator, with an explicit WB.  so no DWB.
+			// The contents are the same as the 'exceptions' structure above, except the 'from', 'to', and 'target' fields.
+			ExceptionHandlerTable*	exceptions;
+			int						cache_size;              // Number of items in lookup cache
+		} word_code;
+#endif
 #ifdef DEBUGGER
-	protected:
-		DWB(AbcFile*)			file;				// the abc file from which this method came
-		DWB(Stringp*)			localNames;			// array of names for args and locals in framep order
-	public:
-		int32_t					firstSourceLine;	// source line number where function starts
-		int32_t					lastSourceLine;		// source line number where function ends
-		int32_t					offsetInAbc;		// offset in abc file
-		uint32_t				codeSize;			// abc size pre-jit, native size post jit
-		int32_t					local_count;		// FIXME: merge with localCount above; this one may be visible to a debugger?
-		int32_t					max_scopes;			// FIXME: merge with maxScopeDepth above; this one is not used by the VM but may be visible to a debugger?
+	private:
+		DebuggerMethodInfo*			m_dmi;			// written with explicit DWB
 #endif
 	// ------------------------ DATA SECTION END
 	};

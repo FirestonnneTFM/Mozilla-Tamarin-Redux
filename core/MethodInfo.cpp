@@ -53,22 +53,19 @@
 namespace avmplus
 {
 	using namespace MMgc;
-	MethodInfo::MethodInfo()
-		: AbstractFunction()
+
+	MethodInfo::MethodInfo(int _method_id) : 
+		AbstractFunction(_method_id)
+#ifdef DEBUGGER
+		, m_dmi(NULL)
+#endif
 	{
-		#ifdef DEBUGGER
-		this->local_count = 0;
-		this->max_scopes = 0;
-		this->localNames = 0;
-		this->firstSourceLine = 0;
-		this->lastSourceLine = 0;
-		this->offsetInAbc = 0;
-		#endif
 		this->impl32 = verifyEnter;
 	}
 
-    void MethodInfo::setInterpImpl() {
-		if (returnTraits() == core()->traits.number_itraits)
+    void MethodInfo::setInterpImpl() 
+	{
+		if (returnTraits() == this->pool->core->traits.number_itraits)
 			implN = avmplus::interpN;
 		else
 			impl32 = avmplus::interp32;
@@ -94,7 +91,7 @@ namespace avmplus
 		
 		#ifdef AVMPLUS_VERIFYALL
 		f->flags |= VERIFIED;
-		f->core()->processVerifyQueue(env->toplevel());
+		env->core()->processVerifyQueue(env->toplevel());
 		#endif
 
         AvmAssert(f->impl32 != MethodInfo::verifyEnter);
@@ -110,20 +107,20 @@ namespace avmplus
 		#ifdef DEBUGGER
 		// just a fake CallStackNode here , so that if we throw a verify error, 
 		// we get a stack trace with the method being verified as its top entry
-		CallStackNode callStackNode(core(), this->name);
+		CallStackNode callStackNode(this->pool->core, this->name);
 		#endif /* DEBUGGER */
 
 		if (!body_pos)
 		{
 			// no body was supplied in abc
-			toplevel->throwVerifyError(kNotImplementedError, toplevel->core()->toErrorString(this));
+			toplevel->throwVerifyError(kNotImplementedError, this->pool->core->toErrorString(this));
 		}
 
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
 		Verifier verifier(this, toplevel);
 
-		AvmCore* core = this->core();
+		AvmCore* core = this->pool->core;
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
             PERFM_NTPROF("verify & IR gen");
@@ -179,52 +176,125 @@ namespace avmplus
         #endif /* DEBUGGER */
 	}
 	
-	#ifdef DEBUGGER
+#ifdef DEBUGGER
 
-	// reg names
-	Stringp MethodInfo::getLocalName(int index) const	{ return getRegName(index+param_count); }
-	Stringp MethodInfo::getArgName(int index) const		{ return getRegName(index); }
+	void MethodInfo::initDMI(int32_t local_count, uint32_t codeSize, int32_t max_scopes)
+	{
+		AvmAssert(m_dmi == NULL);
+		
+		AvmCore* core = this->pool->core;
+		MMgc::GC* gc = core->GetGC();
+		const uint32_t extra = (local_count <= 1) ? 0 : (sizeof(Stringp)*(local_count-1));
+
+		DebuggerMethodInfo* dmi = new (gc, extra) DebuggerMethodInfo(local_count, codeSize, max_scopes);
+		const Stringp undef = core->kundefined;
+		for (int32_t i=0; i<local_count; i++)
+		{
+			WBRC(gc, dmi, &dmi->localNames[i], undef);
+		}
+		WB(gc, this, &this->m_dmi, dmi);
+	}
+
+	AbcFile* MethodInfo::file() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? (AbcFile*)(m_dmi->file) : NULL;
+	}
+	
+	int32_t MethodInfo::firstSourceLine() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->firstSourceLine : 0;
+	}
+
+	int32_t MethodInfo::lastSourceLine() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->lastSourceLine : 0;
+	}
+
+	int32_t MethodInfo::offsetInAbc() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->offsetInAbc : 0;
+	}
+
+	uint32_t MethodInfo::codeSize() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->codeSize : 0;
+	}
+
+	int32_t MethodInfo::local_count() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->local_count : 0;
+	}
+
+	int32_t MethodInfo::max_scopes() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->max_scopes : 0;
+	}
+
+	void MethodInfo::setFile(AbcFile* file) 
+	{
+		AvmAssert(m_dmi != NULL);
+		if (m_dmi)
+			m_dmi->file = file;
+	}
+
+	void MethodInfo::updateSourceLines(int32_t linenum, int32_t offset)
+	{
+		AvmAssert(m_dmi != NULL);
+		if (m_dmi)
+		{
+			if (m_dmi->firstSourceLine == 0 || linenum < m_dmi->firstSourceLine)
+				m_dmi->firstSourceLine = linenum;
+
+			if (m_dmi->offsetInAbc == 0 || offset < m_dmi->offsetInAbc)
+				m_dmi->offsetInAbc = offset;
+
+			if (m_dmi->lastSourceLine == 0 || linenum > m_dmi->lastSourceLine)
+				m_dmi->lastSourceLine = linenum;
+		}
+	}
+
+#ifdef AVMPLUS_MIR
+	void MethodInfo::setCodeSize(uint32_t c)
+	{
+		// MIR can legitimately call this for entries without DMI (eg synthesized init methods)
+		// so check for validity but don't assert
+		if (m_dmi)
+			m_dmi->codeSize = c;
+	}
+#endif
 
 	Stringp MethodInfo::getRegName(int slot) const 
 	{
-		AvmAssert(slot >= 0 && slot < local_count);
-		Stringp name;
-		if (localNames)
-			name = localNames[slot];
-		else
-			name = core()->kundefined;
-		return name;
+		AvmAssert(m_dmi != NULL);
+
+		if (m_dmi && slot >= 0 && slot < m_dmi->local_count)
+			return m_dmi->localNames[slot];
+
+		return this->pool->core->kundefined;
 	}
 
 	void MethodInfo::setRegName(int slot, Stringp name)
 	{
-		//AvmAssert(slot >= 0 && slot < local_count);
-		// @todo fix me.  This is a patch for bug #112405
-		if (slot >= local_count)
-			return;
-		if (!localNames)
-			initLocalNames();
+		AvmAssert(m_dmi != NULL);
 
-		AvmCore* core = this->core();
+		if (!m_dmi || slot < 0 || slot >= m_dmi->local_count)
+			return;
+
+		AvmCore* core = this->pool->core;
 
 		// [mmorearty 5/3/05] temporary workaround for bug 123237: if the register
 		// already has a name, don't assign a new one
-		if (getRegName(slot) != core->kundefined)
+		if (m_dmi->localNames[slot] != core->kundefined)
 			return;
 
-		//localNames[slot] = core->internString(name);
-		WBRC(core->GetGC(), localNames, &localNames[slot], core->internString(name));
-	}
-
-	void MethodInfo::initLocalNames()
-	{
-		AvmCore* core = this->core();
-		localNames = (Stringp*) core->GetGC()->Calloc(local_count, sizeof(Stringp), GC::kZero|GC::kContainsPointers);
-		for(int i=0; i<local_count; i++)
-		{
-			//localNames[i] = core->kundefined;
-			WBRC(core->GetGC(), localNames, &localNames[i], uintptr(Stringp(core->kundefined)));
-		}
+		WBRC(core->GetGC(), m_dmi, &m_dmi->localNames[slot], core->internString(name));
 	}
 
 	/**
@@ -249,7 +319,7 @@ namespace avmplus
 			void **in = (void**)src;			// WARNING this must match with MIR generator
 
 			// now probe each type and do the atom conversion.
-			AvmCore* core = this->core();
+			AvmCore* core = this->pool->core;
 			for (int i=srcPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
@@ -328,7 +398,7 @@ namespace avmplus
 			void** out = (void**)dest;		// WARNING this must match with MIR generator
 
 			// now probe each type and conversion.
-			AvmCore* core = this->core();
+			AvmCore* core = this->pool->core;
 			for (int i=destPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
@@ -373,8 +443,8 @@ namespace avmplus
 	{
 		uint32 size = AbstractFunction::size();
 		size += (sizeof(MethodInfo) - sizeof(AbstractFunction));
-		size += codeSize;
+		size += codeSize();
 		return size;
 	}
-	#endif //DEBUGGER
+#endif //DEBUGGER
 }

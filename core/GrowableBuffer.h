@@ -56,7 +56,7 @@
 
 namespace avmplus
 {
-#if defined(DEBUGGER) || defined(AVMPLUS_MIR) 
+#ifdef AVMPLUS_MIR
 	class GrowableBuffer
 	{
 	public:

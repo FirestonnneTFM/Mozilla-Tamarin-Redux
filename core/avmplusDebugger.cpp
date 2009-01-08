@@ -168,7 +168,7 @@ namespace avmplus
 			if (f && (f->flags & AbstractFunction::ABSTRACT_METHOD) == 0) 
 			{
 				MethodInfo* m = (MethodInfo*)f;
-				AbcFile* abc = m->getFile();
+				AbcFile* abc = m->file();
 				if (abc)
 				{
 					SourceFile* source = abc->sourceNamed( core->callStack->filename() );
@@ -650,16 +650,8 @@ namespace avmplus
 
 		// line numbers for a given function don't always come in sequential
 		// order -- for example, I've seen them come out of order if a function
-		// contains an inner anonymous function -- so, compare the new line
-		// against firstSourceLine every time we get called
-		if (func->firstSourceLine == 0 || linenum < func->firstSourceLine)
-			func->firstSourceLine = linenum;
-
-		if (func->offsetInAbc == 0 || offset < func->offsetInAbc)
-			func->offsetInAbc = offset;
-
-		if (func->lastSourceLine == 0 || linenum > func->lastSourceLine)
-			func->lastSourceLine = linenum;
+		// contains an inner anonymous function -- so, update every time we get called
+		func->updateSourceLines(linenum, offset);
 
         MMgc::GC *gc = core->GetGC();
 		if (sourceLines == NULL)
@@ -881,7 +873,7 @@ namespace avmplus
 		if (trace->framep() && trace->info())
 		{
 			MethodInfo* info = (MethodInfo*) trace->info();
-			*pastLastLocal = info->local_count;
+			*pastLastLocal = info->local_count();
 		}
 		else
 		{

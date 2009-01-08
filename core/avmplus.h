@@ -166,6 +166,9 @@ namespace avmplus
 	class DateClass;
 	class DateObject;
 	class Debugger;
+#ifdef DEBUGGER
+	class DebuggerMethodInfo;
+#endif
 	class DescribeTypeClass;
 	class Domain;
 	class DomainEnv;

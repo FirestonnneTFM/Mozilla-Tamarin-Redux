@@ -228,6 +228,7 @@ namespace avmplus
 		}
 		T get(uint32 index) const
 		{
+			AvmAssert(index < len);
 			return data[index];
 		}
 		T last() const
@@ -323,6 +324,7 @@ namespace avmplus
 		
 		T operator[](uint32 index) const
 		{
+			AvmAssert(index < len);
 			return data[index];
 		}
 

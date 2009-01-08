@@ -55,7 +55,7 @@ namespace avmplus
 #endif
 		: WordcodeTranslator()
 		, info(info)
-		, core(info->core())
+		, core(info->pool->core)
 		, backpatches(NULL)
 		, labels(NULL)
 		, exception_fixes(NULL)

@@ -330,7 +330,7 @@ namespace avmshell
 			for(int i=0; i<size; i++)
 			{
 				MethodInfo* m = src->functionAt(i);
-				if (line >= m->firstSourceLine && line <= m->lastSourceLine)
+				if (line >= m->firstSourceLine() && line <= m->lastSourceLine())
 				{
 					info = m;
 					break;

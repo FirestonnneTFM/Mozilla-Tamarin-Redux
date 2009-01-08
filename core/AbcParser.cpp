@@ -579,7 +579,7 @@ namespace avmplus
 		pool->methods.ensureCapacity(size);
 		pool->methodCount = methodCount;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -634,7 +634,7 @@ namespace avmplus
 			AbstractFunction *info;			
 			if (!(flags & AbstractFunction::NATIVE))
 			{
-				MethodInfo *methodInfo = new (core->GetGC()) MethodInfo();
+				MethodInfo *methodInfo = new (core->GetGC()) MethodInfo(i);
 				
 				#if defined AVMPLUS_VERBOSE || defined DEBUGGER
 				if (name_index != 0) {
@@ -650,7 +650,7 @@ namespace avmplus
 			}
 			else
 			{
-				info = natives->newNativeMethod(i);
+				info = natives ? natives->newNativeMethod(i) : NULL;
 				if (!info)
 				{
 					// If this assert hits, you're missing a native method.  Method "i"
@@ -663,7 +663,6 @@ namespace avmplus
 
 			info->info_pos = info_pos;
 			info->pool = pool;
-			info->method_id = i;
 			info->param_count = param_count;
 			info->initParamTypes(param_count+1);
 			info->flags |= flags;
@@ -697,6 +696,9 @@ namespace avmplus
 
 			// save method info pointer.  we will verify code later.
 			pool->methods.set(i, info);
+#ifdef DEBUGGER
+			// don't create the corresponding DebuggerMethodInfo yet, we'll do that in parseMethodBodies
+#endif
 		}
     }
 	
@@ -778,7 +780,7 @@ namespace avmplus
 			core->console << "bodies_count=" << bodyCount << "\n";
 		)
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -903,9 +905,10 @@ namespace avmplus
 				}
 
 #ifdef DEBUGGER
-				methodInfo->local_count = local_count;
-				methodInfo->codeSize = code_length;
-				methodInfo->max_scopes = max_scope_depth - init_scope_depth;
+				if (core->debugger())
+				{
+					methodInfo->initDMI(local_count, code_length, max_scope_depth - init_scope_depth);
+				}
 #endif
 
 				// if non-zero, we have a duplicate method body - throw a verify error
@@ -978,7 +981,7 @@ namespace avmplus
 		pool->verbose = core->config.verbose;
 #endif
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -1004,7 +1007,7 @@ namespace avmplus
 		cpool_uint.ensureCapacity(uint_count);
 		pool->constantUIntCount = uint_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
@@ -1032,7 +1035,7 @@ namespace avmplus
 		cpool_double.ensureCapacity(double_count);
 		pool->constantDoubleCount = double_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
@@ -1060,7 +1063,7 @@ namespace avmplus
 		cpool_string.ensureCapacity(string_count);
 		pool->constantStringCount = string_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
@@ -1114,7 +1117,7 @@ namespace avmplus
 		cpool_ns.ensureCapacity(ns_count);
 		pool->constantNsCount = ns_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 		for( uint32 i = 1; i < ns_count; ++i )
@@ -1194,7 +1197,7 @@ namespace avmplus
 		cpool_ns_set.ensureCapacity(ns_set_count);
 		pool->constantNsSetCount = ns_set_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
@@ -1238,7 +1241,7 @@ namespace avmplus
 		cpool_mn.ensureCapacity(mn_count);
 		pool->constantMnCount = mn_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 		for(uint32 i = 1; i < mn_count; ++i )
@@ -1391,7 +1394,7 @@ namespace avmplus
 			core->console << "script_count=" << count << "\n";
 		)
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -1476,7 +1479,7 @@ namespace avmplus
 			core->console << "class_count=" << classCount <<"\n";
 		)
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -1660,7 +1663,7 @@ namespace avmplus
 			return;
 		}
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 

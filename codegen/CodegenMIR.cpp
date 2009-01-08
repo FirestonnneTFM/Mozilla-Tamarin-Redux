@@ -1581,7 +1581,7 @@ namespace avmplus
 	}
 
 	CodegenMIR::CodegenMIR(MethodInfo* i)
-		: core(i->core()), pool(i->pool), info(i), activation(i->core()->GetGC())
+		: core(i->pool->core), pool(i->pool), info(i), activation(i->pool->core->GetGC())
 	{
 		state = NULL;
 		framep = SP;
@@ -8895,7 +8895,7 @@ namespace avmplus
 		pool->codeBuffer->decommitUnused();
 
 #ifdef DEBUGGER
-		info->codeSize = int((mip - mipStart) * sizeof(MDInstruction));
+		info->setCodeSize(int((mip - mipStart) * sizeof(MDInstruction)));
 #endif
 
 		#ifdef VTUNE
