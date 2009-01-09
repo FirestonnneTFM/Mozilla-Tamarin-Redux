@@ -729,8 +729,47 @@ namespace avmplus
 					elm->lastUse = 0;
 
 					// clear out the instruction if its in the cse table
-					if (cseTable[elm->code] == elm)
-						cseTable[elm->code] = 0;
+					OP *cse = cseTable[elm->code];
+
+					OP *last = NULL;
+					while (cse)
+					{
+						if (elm == cse)
+						{
+							// start of list
+							if (!last)
+							{
+								if (cseTable[elm->code]->prevcse)
+									cseTable[elm->code] = (cseTable[elm->code] - cseTable[elm->code]->prevcse);
+								else
+									cseTable[elm->code] = 0;
+							}
+							// middle of list
+							else if (cse->prevcse)
+							{
+								OP *next = cse - cse->prevcse;
+								sintptr jmp = last - next;
+								AvmAssert(jmp > 0);
+								AvmAssert(jmp == sintptr(last->prevcse + cse->prevcse));
+								// Does our jump fit into our 16-bit value?  If not, we need to prune the list
+								if (jmp <= 0xFFFF)
+									last->prevcse = (last-next);
+								else
+									last->prevcse = 0;
+							}
+							else // end of list
+							{
+								last->prevcse = 0;
+							}
+							break;
+						}
+
+						if (!cse->prevcse) // end of list
+							break;
+
+						last = cse;
+						cse -= cse->prevcse;
+					}
 
 					#ifdef AVMPLUS_VERBOSE
 					if (verbose())
@@ -2765,7 +2804,6 @@ namespace avmplus
 			OP* br = Ins(MIR_jne, binaryIns(MIR_ucmp, interrupted, InsConst(0)));
 			mirPatchPtr(&br->target, interrupt_label);
 		}
-
 	}
 
 	void CodegenMIR::emitBlockEnd(FrameState* state)
