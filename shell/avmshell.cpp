@@ -723,7 +723,11 @@ namespace avmshell
 				#endif
 				#ifdef AVMPLUS_JITMAX
 					else if (!strcmp(arg, "-jitmax")) {
-						jitmax = atoi(argv[++i]);
+                        #ifdef UNDER_CE
+                            jitmax = _wtoi(argv[++i]);
+                        #else
+						    jitmax = atoi(argv[++i]);
+                        #endif
 					}
 				#endif
 					else if (!strcmp(arg, "-memstats")) {

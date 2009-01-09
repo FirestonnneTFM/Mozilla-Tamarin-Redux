@@ -71,6 +71,7 @@
 #define I_I4  SIG4(LO,LO,LO,LO,LO)
 #define D_I4  SIG4(F,LO,LO,LO,LO)
 #define I_I5  SIG5(LO,LO,LO,LO,LO,LO)
+#define D_I5  SIG5(F,LO,LO,LO,LO,LO)
 #define I_I6  SIG6(LO,LO,LO,LO,LO,LO,LO)
 #define I_I7  SIG7(LO,LO,LO,LO,LO,LO,LO,LO)
 #define I_I8  SIG8(LO,LO,LO,LO,LO,LO,LO,LO,LO)
@@ -94,10 +95,10 @@
 #define CSEMETHOD(f, sig, name) \
     DEFINE_CALLINFO(f,sig,1,0,ABI_METHOD,name)
 
-    FUNCTION(CALL_INDIRECT, I_III, calli)
-    FUNCTION(FCALL_INDIRECT, D_III, fcalli)
-    FUNCTION(CALL_IMT, I_I4, callimt)
-    FUNCTION(FCALL_IMT, D_I4, fcallimt)
+    FUNCTION(CALL_INDIRECT, I_I4, calli)
+    FUNCTION(CALL_INDIRECT, D_I4, fcalli)
+    FUNCTION(CALL_IMT, I_I5, callimt)
+    FUNCTION(CALL_IMT, D_I5, fcallimt)
 
     METHOD(ENVADDR(MethodEnv::newActivation), I_I, newActivation)
     METHOD(ENVADDR(MethodEnv::newcatch), I_II, newcatch)

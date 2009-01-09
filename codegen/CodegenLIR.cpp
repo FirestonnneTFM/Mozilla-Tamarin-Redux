@@ -271,10 +271,6 @@ namespace avmplus
 	using namespace MMgc;
 	using namespace nanojit;
 
-    enum IndirectFunctionId {
-        CALL_INDIRECT, FCALL_INDIRECT, CALL_IMT, FCALL_IMT
-    };
-
 	#if defined _MSC_VER && !defined AVMPLUS_ARM
 	#  define SETJMP ((uintptr)_setjmp3)
     #elif defined AVMPLUS_MAC_CARBON
@@ -782,7 +778,7 @@ namespace avmplus
                 case LIR_qlo:  AvmAssert(a->isQuad()); break;
                 case LIR_qhi:  AvmAssert(a->isQuad()); break;
                 case LIR_live: break;
-                case LIR_callh: AvmAssert(a->isop(LIR_call)||a->isop(LIR_calli)); break;
+                case LIR_callh: AvmAssert(a->isop(LIR_call)); break;
                 default:AvmAssert(false);
             }
             return out->ins1(op, a);
@@ -4200,9 +4196,7 @@ namespace avmplus
                     break;
                 }
                 case LIR_call:
-                case LIR_calli:
                 case LIR_fcall:
-                case LIR_fcalli:
                     if (catcher && !i->isCse()) {
                         // non-cse call is like a conditional forward branch to the catcher label.
                         // this could be made more precise by checking whether this call
@@ -4291,9 +4285,7 @@ namespace avmplus
                     break;
                 }
                 case LIR_call:
-                case LIR_calli:
                 case LIR_fcall:
-                case LIR_fcalli:
                     if (catcher && !i->isCse()) {
                         // non-cse call is like a conditional branch to the catcher label.
                         // this could be made more precise by checking whether this call
@@ -4408,7 +4400,7 @@ namespace avmplus
             !assm->error();
     #ifdef AVMPLUS_JITMAX
         jitcount++;
-        keep &&= jitcount <= jitmax;
+        keep = keep && jitcount <= jitmax;
     #endif
 
         //_nvprof("keep",keep);
