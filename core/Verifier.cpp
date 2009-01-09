@@ -3690,13 +3690,24 @@ namespace avmplus
 		return b;
 	}
 
+#ifndef SIZE_T_MAX
+#  ifdef SIZE_MAX
+#    define SIZE_T_MAX SIZE_MAX 
+#  else
+#    define SIZE_T_MAX UINT_MAX
+#  endif
+#endif
+
 	void Verifier::parseExceptionHandlers()
 	{
 		const byte* pos = exceptions_pos;
-		int exception_count = toplevel->readU30(pos);
+		int exception_count = toplevel->readU30(pos);	// will be nonnegative and less than 0xC0000000
 
 		if (exception_count != 0) 
 		{
+			if (exception_count == 0 || (size_t)(exception_count-1) > SIZE_T_MAX / sizeof(ExceptionHandler))
+				verifyFailed(kIllegalExceptionHandlerError);
+
 			size_t extra = sizeof(ExceptionHandler)*(exception_count-1);
 			ExceptionHandlerTable* table = new (core->GetGC(), extra) ExceptionHandlerTable(exception_count);
 			ExceptionHandler *handler = table->exceptions;
