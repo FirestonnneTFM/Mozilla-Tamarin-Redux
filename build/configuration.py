@@ -228,12 +228,16 @@ class Configuration:
                 self._acvars['CXX'] = os.environ['CXX']
             elif self._target[1] == 'i686':
                 self._acvars['CXX'] = 'g++'
+                self._acvars['CXXFLAGS'] += ' -arch i686 '
+                self._acvars['LDFLAGS'] += ' -arch i686 '
             elif self._target[1] == 'x86_64':
                 self._acvars['CXX'] = 'g++'
                 self._acvars['CXXFLAGS'] += ' -arch x86_64 '
                 self._acvars['LDFLAGS'] += ' -arch x86_64 '
             elif self._target[1] == 'powerpc':
                 self._acvars['CXX'] = 'g++'
+                self._acvars['CXXFLAGS'] += ' -arch ppc '
+                self._acvars['LDFLAGS'] += ' -arch ppc '
             else:
                 raise Exception("Unexpected Darwin processor.")
 
