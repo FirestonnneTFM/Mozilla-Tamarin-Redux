@@ -49,12 +49,14 @@
  * the "Classic AVM" in Flash Player 7.  Our performance target is 10X.
  *
  * AVM+ implements ActionScript 3.0, the new version of the ActionScript
- * language that is compliant with the ECMAScript Edition 4 standard.
+ * language that is based on ECMAScript, 3rd Edition (ES3) and
+ * ECMAScript for XML (E4X), and which also incorporates many
+ * extensions to those languages, including packages, classes, interfaces,
+ * and optional type annotations.
  *
  * AVM+ is also built for modularity.  It will be part of the Flash Player,
  * but is a self-contained module which can be incorporated into other
- * programs with ease.  It may also be submitted to the ECMA standards
- * organization as a reference implementation of ECMAScript Edition 4.
+ * programs with ease.
  *
  * \section usage Using This Document
  *
@@ -72,11 +74,9 @@
  *
  * \section contact Who To Contact
  *
- * For questions about AVM+, please contact:
+ * For questions about AVM+, contact information, and so on please see:
  *
- * Gary Grossman (ggrossman@macromedia.com)<br>
- * Edwin Smith (edsmith@macromedia.com)<br>
- * Jeff Dyer (jdyer@macromedia.com)
+ * https://developer.mozilla.org/En/Tamarin
  */
  
 // Needed for memset, memcpy et al.
