@@ -87,3 +87,6 @@ as3/Definitions/Classes/Ext/FinExtInternalClass:.*               ,   x64-lnx-tvm
 as3/Definitions/Classes/Ext/ExtPublicClass:.*                    ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
 as3/Definitions/Classes/ClassDef/PublicDynamicClass:.*           ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
 as3/Definitions/Classes/ExtImpl/ExtDefaultImplDefPub:.*          ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+
+# sampling failure on winmobile-arm
+as3/sampling/Callback:.*                                         ,   arm-winmobile-tvm.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
