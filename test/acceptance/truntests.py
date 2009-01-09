@@ -324,7 +324,7 @@ def processTest(testandnum):
   alltimeouts += ltimeout
   if lfail or lunpass or ltimeout:
     outputCalls.append((js_print,('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
-  else:
+  elif verbose:
     outputCalls.append((js_print,('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
   return outputCalls
   
