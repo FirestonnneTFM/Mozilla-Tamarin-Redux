@@ -123,7 +123,7 @@ namespace avmshell
 			
 
 		// Search for a dot from the end.
-		int dot = name->lastIndexOf(core->cachedChars['.']);
+		int dot = name->lastIndexOf(core->cachedChars[(int)'.']);
 
 		// If there is a '.', this is a fully-qualified
 		// class name in a package.  Must turn it into
