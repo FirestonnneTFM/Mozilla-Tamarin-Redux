@@ -37,6 +37,7 @@
 
 
 #include "avmplus.h"
+#include <limits.h> // for SIZE_MAX, UINT_MAX
 
 #if defined AVMPLUS_MIR
 	#include "../codegen/CodegenMIR.h"
