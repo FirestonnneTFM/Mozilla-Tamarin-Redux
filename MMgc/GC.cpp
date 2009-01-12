@@ -1196,7 +1196,7 @@ bail:
 	{
 		uintptr index = (addr-memStart) >> 12;
 
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
 #else
 		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
@@ -1212,7 +1212,7 @@ bail:
 	void GC::SetPageMapValue(uintptr addr, int val)
 	{
 		uintptr index = (addr-memStart) >> 12;
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
 #else
 		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
@@ -1223,7 +1223,7 @@ bail:
 	void GC::ClearPageMapValue(uintptr addr)
 	{
 		uintptr index = (addr-memStart) >> 12;
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
 #else
 		GCAssert((index >> 2) < 64 * GCHeap::kBlockSize);
@@ -1819,7 +1819,7 @@ bail:
 					}
 				}
 
-				GCAssert(*(int*)rcobj != 0);
+				GCAssert(*(intptr_t*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
 				((GCFinalizable*)rcobj)->~GCFinalizable();
 				numObjects++;

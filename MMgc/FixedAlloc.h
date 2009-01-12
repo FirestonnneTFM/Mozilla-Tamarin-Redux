@@ -99,10 +99,10 @@ namespace MMgc
 					int data = ((int*)item)[i];
 					if(data != (int)0xedededed)
 					{
-						GCDebugMsg(false, "Object 0x%x was written to after it was deleted, allocation trace:", (int*)item+2);
-						PrintStackTrace((int*)item+2);
+						GCDebugMsg(false, "Object %p was written to after it was deleted, allocation trace:", (int*)item+2);
+						PrintStackTrace((int32_t*)item+2);
 						GCDebugMsg(false, "Deletion trace:");
-						PrintStackTrace((int*)item+3);
+						PrintStackTrace((int32_t*)item+3);
 						GCDebugMsg(true, "Deleted item write violation!");
 					}
 				}
