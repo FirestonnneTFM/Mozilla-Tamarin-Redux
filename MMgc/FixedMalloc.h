@@ -118,7 +118,7 @@ namespace MMgc
 		FixedMalloc(GCHeap* heap);
 		~FixedMalloc();
 		static FixedMalloc *instance;
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 		const static int kLargestAlloc = 2016;	
 #else
 		const static int kLargestAlloc = 2032;	

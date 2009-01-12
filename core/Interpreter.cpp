@@ -669,7 +669,7 @@ namespace avmplus
 #endif
  		intptr_t volatile expc=0;
  		AvmCore::AllocaAutoPtr _framep;
-#ifdef AVMPLUS_AMD64
+#ifdef AVMPLUS_64BIT
 		// Allocation is guaranteed on an 8-byte boundary, but we need 16 for _setjmpex.
 		// So allocate 8 bytes extra, then round up to a 16-byte boundary.
 		register Atom* const framep = 

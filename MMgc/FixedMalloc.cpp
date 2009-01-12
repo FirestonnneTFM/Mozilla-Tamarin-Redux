@@ -48,7 +48,7 @@ namespace MMgc
 
 	// Size classes for our Malloc.  We start with a 4 byte allocator and then from
 	// 8 to 128, size classes are spaced evenly 8 bytes apart, then from 128 to 1968 they
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 	// The upper entries of the table (>128) are sized to 
 	// match the kSizeClassIndex which uses the number-of-entries
 	// per block to pick an allocator.  For example, if you want to 
@@ -188,7 +188,7 @@ namespace MMgc
 
 		// Buckets up to 128 are spaced evenly at 8 bytes.
 		if (size <= 128) {
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 			unsigned index = size8 ? ((size8 >> 3) - 1) : 0;
 #else
 			unsigned index = size > 4 ? size8 >> 3 : 0;
