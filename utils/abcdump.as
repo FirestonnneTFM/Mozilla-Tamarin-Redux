@@ -980,6 +980,8 @@ package abcdump
 			parseClassInfos()
 			parseScriptInfos()
 			parseMethodBodies()
+
+			if (extractAbc==true) { data.writeFile(nextAbcFname()); } 
 		}
 	
 		function readU32():int
@@ -1652,11 +1654,48 @@ package abcdump
 	        }
 	    }
     }
-    	
-	// main
+
+	function help()
+	{
+		print('usage:  abcdump [-x] file...')
+		print('Displays the contents of an abc or swf file(s)')
+		print('  -a  writes out the abc contained within the swf')
+		System.exit(1)
+	}
+
+	function processArg(arg:String)
+	{
+		if (arg == '-a')
+			extractAbc = true;
+		else 
+		{
+			print('Unknown option '+arg)
+			help()
+		}
+	} 
+
+	function nextAbcFname():String
+	{
+		var s = currentFname
+		if (currentFcount>0)
+			s = s.concat(currentFcount);
+		currentFcount++
+		return s+'.abc'
+	}   
 	
+	// main
+	var extractAbc = false
+	var currentFname = ''
+	var currentFcount = 0
 	for each (var file in System.argv)
 	{
+		if (file.indexOf('-')>=0) 
+		{
+			processArg(file)
+			continue
+		}
+		
+		currentFname = file.split('.')[0]   
 		var data:ByteArray = ByteArray.readFile(file)
 		data.endian = "littleEndian"
 		var version:uint = data.readUnsignedInt()
@@ -1667,6 +1706,7 @@ package abcdump
 			var abc:Abc = new Abc(data)
 			abc.dump()
 			break
+		case 67|87<<8|83<<16|10<<24: // SWC10
 		case 67|87<<8|83<<16|9<<24: // SWC9
 		case 67|87<<8|83<<16|8<<24: // SWC8
 		case 67|87<<8|83<<16|7<<24: // SWC7
@@ -1681,6 +1721,7 @@ package abcdump
 			udata.position = 0
 		    /*var swf:Swf =*/ new Swf(udata)
 			break
+		case 70|87<<8|83<<16|10<<24: // SWC10
 		case 70|87<<8|83<<16|9<<24: // SWC9
 		case 70|87<<8|83<<16|8<<24: // SWC8
 		case 70|87<<8|83<<16|7<<24: // SWC7
@@ -1695,5 +1736,8 @@ package abcdump
 			break
 		}
 	}
+
+	if (System.argv<2)
+		help();
 }
 
