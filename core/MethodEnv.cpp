@@ -1313,21 +1313,51 @@ namespace avmplus
 		ScopeChain* iscope = ScopeChain::create(core->GetGC(), itraits->scope, cscope, *core->dxnsAddr);
 
 		AbcEnv *abcEnv = vtable->abcEnv;
-		VTable* cvtable = core->newVTable(ctraits, toplevel->class_vtable, cscope, abcEnv, toplevel);
-		cvtable->resolveSignatures();
-		VTable* ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, iscope, abcEnv, toplevel);
-		ivtable->resolveSignatures();
+		VTable* cvtable = NULL;
+		VTable* ivtable = NULL;
+
+		// We're defining class
+		// This is a little weird, as the cvtable should have the ivtable as its base
+		// i.e. Class$ derives from Class
+		if (itraits == core->traits.class_itraits)
+		{
+			ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, iscope, abcEnv, toplevel);
+			ivtable->resolveSignatures();
+			cvtable = core->newVTable(ctraits, ivtable, cscope, abcEnv, toplevel);
+			cvtable->resolveSignatures();
+		}
+		else
+		{
+			cvtable = core->newVTable(ctraits, toplevel->class_vtable, cscope, abcEnv, toplevel);
+			// Don't resolve signatures for Object$ until after Class has been set up
+			// which should happen very soon after Object is setup.
+			if (itraits != core->traits.object_itraits)
+				cvtable->resolveSignatures();
+			ivtable = core->newVTable(itraits, base ? base->ivtable() : NULL, iscope, abcEnv, toplevel);
+			ivtable->resolveSignatures();
+		}
 		cvtable->ivtable = ivtable;
 
-		if (itraits == core->traits.object_itraits) {
+		if (itraits == core->traits.object_itraits) 
+		{
 			// we just defined Object
 			toplevel->object_vtable = ivtable;
+
+			// We can finish setting up the toplevel object now that
+			// we have the real Object vtable
+			toplevel->vtable->base = ivtable;
+			toplevel->vtable->linked = false;
+			toplevel->vtable->resolveSignatures();
 		}
 		else if (itraits == core->traits.class_itraits) {
 			// we just defined Class
 			toplevel->class_vtable = ivtable;
-			cvtable->base = ivtable;
+			
+			// Can't run the Object$ initializer until after Class is done since
+			// Object$ needs the real Class vtable as its base
 			toplevel->objectClass->vtable->base = ivtable;
+			toplevel->objectClass->vtable->resolveSignatures();
+			toplevel->objectClass->vtable->init->coerceEnter(toplevel->objectClass->atom());
 		}
 
 		CreateClassClosureProc createClassClosure = cvtable->traits->getCreateClassClosureProc();
@@ -1362,7 +1392,10 @@ namespace avmplus
 		}
 
 		// Invoke the class init function.
-		cvtable->init->coerceEnter(cc->atom());
+		// Don't run it for Object - that has to wait until after Class$
+		// is set up
+		if (cvtable != toplevel->objectClass->vtable)
+			cvtable->init->coerceEnter(cc->atom());
 		return cc;
     }
 
