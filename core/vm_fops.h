@@ -35,15 +35,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#define SIG1(r,a1) (nanojit::ARGSIZE_##r | nanojit::ARGSIZE_##a1<<2)
-#define SIG2(r,a2,a1) (SIG1(r,a1) | nanojit::ARGSIZE_##a2<<4)
-#define SIG3(r,a3,a2,a1) (SIG2(r,a2,a1) | nanojit::ARGSIZE_##a3<<6)
-#define SIG4(r,a4,a3,a2,a1) (SIG3(r,a3,a2,a1) | nanojit::ARGSIZE_##a4<<8)
-#define SIG5(r,a5,a4,a3,a2,a1) (SIG4(r,a4,a3,a2,a1) | nanojit::ARGSIZE_##a5<<10)
-#define SIG6(r,a6,a5,a4,a3,a2,a1) (SIG5(r,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a6<<12)
-#define SIG7(r,a7,a6,a5,a4,a3,a2,a1) (SIG6(r,a6,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a7<<14)
-#define SIG8(r,a8,a7,a6,a5,a4,a3,a2,a1) (SIG7(r,a7,a6,a5,a4,a3,a2,a1) | nanojit::ARGSIZE_##a8<<16)
+#define ARGMASK(a,n) (nanojit::ARGSIZE_##a << (ARGSIZE_SHIFT*(n)))
+#define SIG0(r) ARGMASK(r,0)
+#define SIG1(r,a1) (SIG0(r) | ARGMASK(a1,1))
+#define SIG2(r,a2,a1) (SIG1(r,a1) | ARGMASK(a2,2))
+#define SIG3(r,a3,a2,a1) (SIG2(r,a2,a1) | ARGMASK(a3,3))
+#define SIG4(r,a4,a3,a2,a1) (SIG3(r,a3,a2,a1) | ARGMASK(a4,4))
+#define SIG5(r,a5,a4,a3,a2,a1) (SIG4(r,a4,a3,a2,a1) | ARGMASK(a5,5))
+#define SIG6(r,a6,a5,a4,a3,a2,a1) (SIG5(r,a5,a4,a3,a2,a1) | ARGMASK(a6,6))
+#define SIG7(r,a7,a6,a5,a4,a3,a2,a1) (SIG6(r,a6,a5,a4,a3,a2,a1) | ARGMASK(a7,7))
+#define SIG8(r,a8,a7,a6,a5,a4,a3,a2,a1) (SIG7(r,a7,a6,a5,a4,a3,a2,a1) | ARGMASK(a8,8))
 
 #define FUNCTIONID(n) &ci_##n
 
