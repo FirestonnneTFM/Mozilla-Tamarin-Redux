@@ -394,11 +394,11 @@ namespace avmplus
         LIns *insCall(const CallInfo *ci, LInsp args[]) {
             uint32_t argt = ci->_argtypes;
 
-            for (uint32_t i=0, argsizes = argt>>2; argsizes != 0; i++, argsizes >>= 2) {
+            for (uint32_t i=0, argsizes = argt>>ARGSIZE_SHIFT; argsizes != 0; i++, argsizes >>= ARGSIZE_SHIFT) {
                 args[i] = split(args[i]);
             }
 
-            if ((argt & _ARGSIZE_MASK_ANY) == ARGSIZE_F) {
+            if ((argt & ARGSIZE_MASK) == ARGSIZE_F) {
                 // this function returns a double as two 32bit values, so replace
                 // call with qjoin(qhi(call), call)
                 return split(ci, args);
@@ -867,16 +867,12 @@ namespace avmplus
         LIns *insCall(const CallInfo *call, LInsp args[]) {
             uint32_t argt = call->_argtypes;
             for (uint32_t i = 0; i < MAXARGS; i++) {
-                argt >>= 2;
-                ArgSize sz = ArgSize(argt&3);
+                argt >>= ARGSIZE_SHIFT;
+                ArgSize sz = ArgSize(argt & ARGSIZE_MASK);
                 if (sz == ARGSIZE_NONE)
                     break;
-                switch (sz) {
-                    default: AvmAssert(false);
-                    case ARGSIZE_LO: NanoAssert(!args[i]->isQuad()); break;
-                    case ARGSIZE_Q: NanoAssert(args[i]->isQuad()); break;
-                    case ARGSIZE_F: NanoAssert(args[i]->isQuad()); break;
-                }
+				AvmAssert((sz == ARGSIZE_LO || sz == ARGSIZE_Q || sz == ARGSIZE_F) &&
+						  ((sz == ARGSIZE_LO) == !args[i]->isQuad()));
             }
             return out->insCall(call, args);
         }
