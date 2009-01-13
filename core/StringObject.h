@@ -500,11 +500,11 @@ private:
 		inline	void			setCharsLeft(int32_t n)		{ m_bitsAndFlags = (m_bitsAndFlags & ~TSTR_CHARSLEFT_MASK) |(n << TSTR_CHARSLEFT_SHIFT); }
 
 		// Create a string with no buffer.
-		static	Stringp	FASTCALL	createDependent(GC* gc, Stringp master, int32_t start, int32_t len);
+		static	Stringp	FASTCALL	createDependent(MMgc::GC* gc, Stringp master, int32_t start, int32_t len);
 		// Create a string with a dynamic buffer.
-		static	Stringp	FASTCALL	createDynamic(GC* gc, const void* data, int32_t len, Width w, int32_t extra=0);
+		static	Stringp	FASTCALL	createDynamic(MMgc::GC* gc, const void* data, int32_t len, Width w, int32_t extra=0);
 		// Create a string with a static buffer.
-		static	Stringp	FASTCALL	createStatic(GC* gc, const void* data, int32_t len, Width w);
+		static	Stringp	FASTCALL	createStatic(MMgc::GC* gc, const void* data, int32_t len, Width w);
 		// Calculate the hash code.
 				uint32_t FASTCALL	_hashCode();
 		// Do a raw buffer compare.

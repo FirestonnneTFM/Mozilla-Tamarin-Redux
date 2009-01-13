@@ -41,6 +41,8 @@
 #include "BuiltinNatives.h"
 #include "TypeDescriber.h"
 
+using namespace MMgc;
+
 namespace avmplus
 {
 	TypeDescriber::TypeDescriber(Toplevel* toplevel) : 
