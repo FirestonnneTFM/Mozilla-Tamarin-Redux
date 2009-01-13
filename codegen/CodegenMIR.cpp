@@ -2804,6 +2804,20 @@ namespace avmplus
 			OP* br = Ins(MIR_jne, binaryIns(MIR_ucmp, interrupted, InsConst(0)));
 			mirPatchPtr(&br->target, interrupt_label);
 		}
+
+		// load undefined into any killed locals
+		int stackBase = state->verifier->stackBase;
+		for (int i=0, n=stackBase+state->stackDepth; i < n; i++)
+		{
+			#ifndef DEBUGGER
+			int scopeTop = state->verifier->scopeBase+state->scopeDepth;
+			if (i >= scopeTop && i < stackBase)
+				continue; // not live
+			#endif
+			Value &v = state->value(i);
+			if (v.killed)
+				localSet(i, undefConst);
+		}
 	}
 
 	void CodegenMIR::emitBlockEnd(FrameState* state)
@@ -6942,7 +6956,7 @@ namespace avmplus
 				}
 			}
 
-			ADD(RSP, arSize); 
+			ADD64(RSP, arSize); 
 			POP  (RBP);
 			//ALU(0xc9); // leave:  esp = ebp, pop ebp
 		}
