@@ -252,12 +252,6 @@ namespace avmplus
 
 #include "MMgc.h"
 
-// disambiguate some common types, without opening all of MMgc namespace
-using MMgc::GC;
-using MMgc::GCObject;
-using MMgc::GCFinalizedObject;
-using MMgc::GCHeap;
-
 #define MMGC_SUBCLASS_DECL : public GCObject
 
 #include "QCache.h"

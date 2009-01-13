@@ -44,6 +44,8 @@
 #include "../codegen/CodegenMIR.h"
 #endif
 
+using namespace MMgc;
+
 namespace avmplus
 {
 	// ---------------

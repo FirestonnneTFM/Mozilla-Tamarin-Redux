@@ -47,6 +47,8 @@
 
 #define MAX_EXTRA_CHARS 0x8000
 
+using namespace MMgc;
+
 namespace avmplus
 {
 
