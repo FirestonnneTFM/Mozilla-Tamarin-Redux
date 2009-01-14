@@ -65,21 +65,25 @@
     #ifndef AVMPLUS_CDECL
       #define AVMPLUS_CDECL
     #endif
-  #elif (__x86_64__)
+  #elif defined(__x86_64__)
     #ifndef AVMPLUS_AMD64
       #define AVMPLUS_AMD64
     #endif
     #ifndef AVMPLUS_64BIT
 	  #define AVMPLUS_64BIT
     #endif
-  #elif (__ppc__) || (__powerpc__)
+  #elif defined(__ppc__) || defined(__powerpc__)
     #ifndef AVMPLUS_PPC
       #define AVMPLUS_PPC
     #endif	
-    #ifdef __powerpc64__
+  #elif (__ppc64__) || (__powerpc64__)
+    #ifndef AVMPLUS_PPC
+      #define AVMPLUS_PPC
+    #endif	
+    #ifndef AVMPLUS_64BIT
       #define AVMPLUS_64BIT
     #endif
-  #elif (__arm__) || (__ARM__)
+  #elif defined(__arm__) || defined(__ARM__)
     #ifndef AVMPLUS_ARM
       #define AVMPLUS_ARM
     #endif	
@@ -144,14 +148,14 @@
 #endif
 
 #ifndef AVMPLUS_DISABLE_NJ
-#  if defined AVMPLUS_IA32 && !defined AVMPLUS_64BIT || defined AVMPLUS_ARM || defined AVMPLUS_PPC
+#  if defined AVMPLUS_IA32 && !defined AVMPLUS_64BIT || defined AVMPLUS_ARM || defined AVMPLUS_PPC && !defined AVMPLUS_64BIT
 #    define FEATURE_NANOJIT
 #  endif
 #endif
 
 // don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
 #if !defined AVMPLUS_DISABLE_MIR && !defined FEATURE_NANOJIT
-#  if defined AVMPLUS_PPC || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && !defined AVMPLUS_MAC
+#  if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && !defined AVMPLUS_MAC
 #    define AVMPLUS_MIR
 #  endif
 #endif
@@ -204,8 +208,8 @@
 #endif
 
 #ifdef AVMPLUS_MACH_EXCEPTIONS
-  #ifdef AVMPLUS_PPC
-    // Support for running the PowerPC version under Rosetta
+  #if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT
+    // Support for running the 32bit PowerPC version under Rosetta
     #define AVMPLUS_ROSETTA
   #endif
 #endif

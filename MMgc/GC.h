@@ -146,7 +146,8 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 
 #ifdef _MAC
 
-#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+#if !defined MMGC_64BIT
+	#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\
 		_stack = __ppcregs;\
@@ -154,13 +155,49 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 		asm ("mr r3,r1\n"\
 			"1: mr %0,r3\n"\
 			"lwz r3,0(%0)\n"\
-		        "rlwinm r3,r3,0,0,30\n"\
-			"cmpi cr0,r3,0\n"\
+            "rlwinm r3,r3,0,0,30\n"\
+			"cmpwi cr0,r3,0\n"\
 			"bne 1b" : "=b" (__stackBase) : : "r3");\
 		_size = (uintptr) __stackBase - (uintptr) _stack;
+#else // 64bit
+	// there is no 64bit store multiple instruction
+	#define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
+		intptr_t __ppcregs[20]; \
+		asm("std r13,0(%0)\n"\
+			"std r14,8(%0)\n"\
+			"std r15,16(%0)\n"\
+			"std r16,24(%0)\n"\
+			"std r17,32(%0)\n"\
+			"std r18,40(%0)\n"\
+			"std r19,48(%0)\n"\
+			"std r20,56(%0)\n"\
+			"std r21,64(%0)\n"\
+			"std r22,72(%0)\n"\
+			"std r23,80(%0)\n"\
+			"std r24,88(%0)\n"\
+			"std r25,96(%0)\n"\
+			"std r26,104(%0)\n"\
+			"std r27,112(%0)\n"\
+			"std r28,120(%0)\n"\
+			"std r29,128(%0)\n"\
+			"std r30,136(%0)\n"\
+		    "std r31,144(%0)\n" : : "b" (__ppcregs));\
+		_stack = __ppcregs;\
+		void *__stackBase;\
+		asm ("mr r3,r1\n"\
+			"1: mr %0,r3\n"\
+			"ld r3,0(%0)\n"\
+		    "clrrdi r3,r3,0,0,2\n"\
+			"cmpdi cr0,r3,0\n"\
+			"bne 1b" : "=b" (__stackBase) : : "r3");\
+		_size = (uintptr) __stackBase - (uintptr) _stack;
+#endif
 
 #else // _MAC
 
+#ifdef MMGC_64BIT
+#  error("port me to ppc64")
+#endif
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw %%r13,0(%0)" : : "b" (__ppcregs));\
@@ -178,6 +215,12 @@ extern "C" void saveRegs64(void* saves, const void* stack, int* size);
 
 #else // __GNUC__
 
+// fixme -- this is the !__GNUC__ case, but the asm code is the same
+// as __GNUC__... so why bother duplicating?
+
+#ifdef MMGC_64BIT
+#  error("port me to ppc64")
+#endif
 #define MMGC_GET_STACK_EXTENTS(_gc, _stack, _size) \
 		int __ppcregs[20]; \
 		asm("stmw r13,0(%0)" : : "b" (__ppcregs));\

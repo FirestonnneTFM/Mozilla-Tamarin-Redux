@@ -59,6 +59,9 @@
   #define MMGC_64BIT
 #elif defined (__ppc__)
   #define MMGC_PPC
+#elif defined (__ppc64__)
+  #define MMGC_PPC
+  #define MMGC_64BIT
 #endif
 
 #define MMGC_MAC

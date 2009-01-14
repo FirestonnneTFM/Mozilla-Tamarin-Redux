@@ -1290,8 +1290,13 @@ namespace avmplus
 		
 		// set the registers to point back to the CATCH block     
 		#ifdef AVMPLUS_PPC
-		thread_state.srr0 = (*jmpBuf)[21];
-		thread_state.r1   = (*jmpBuf)[0];
+		#  if defined AVMPLUS_64BIT
+			thread_state.__srr0 = (*jmpBuf)[21];
+			thread_state.__r1   = (*jmpBuf)[0];
+		#  else
+			thread_state.srr0 = (*jmpBuf)[21];
+			thread_state.r1   = (*jmpBuf)[0];
+		#  endif
 		#endif
 
 		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)

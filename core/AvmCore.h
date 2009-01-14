@@ -693,8 +693,12 @@ const int kBufferPadding = 16;
 #ifdef AVMPLUS_64BIT
 		int64	integer64(Atom atom)			{ return (int64)integer(atom); }
 		static	int64 integer64_i(Atom atom)	{ return (int64)integer_i(atom); }
+	#ifdef AVMPLUS_AMD64
 		static	int64 integer64_d(double d)		{ return (int64)integer_d_sse2(d); }
 		static	int64 integer64_d_sse2(double d){ return (int64)integer_d_sse2(d); }
+	#else
+		static	int64 integer64_d(double d)		{ return (int64)integer_d(d); }
+	#endif
 #endif
 		int integer(Atom atom) const;
 
