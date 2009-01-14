@@ -34,30 +34,45 @@
 #
 # ***** END LICENSE BLOCK *****
 
-codegen_cpu_cxxsrc = $(error Unrecognized target CPU.)
-
 ifeq (i686,$(TARGET_CPU))
-codegen_cpu_cxxsrc := Ia32Assembler.cpp
-endif
-
-ifeq (x86_64,$(TARGET_CPU))
-codegen_cpu_cxxsrc := Amd64Assembler.cpp
-endif
-
-ifeq (powerpc,$(TARGET_CPU))
-codegen_cpu_cxxsrc := PpcAssembler.cpp
-endif
-
-ifeq (arm,$(TARGET_CPU))
-codegen_cpu_cxxsrc := ArmAssembler.cpp
-endif
-
-ifeq (sparc,$(TARGET_CPU))
-codegen_cpu_cxxsrc := SparcAssembler.cpp
-endif
-
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/CodegenMIR.cpp \
   $(curdir)/CodegenLIR.cpp \
-  $(curdir)/$(codegen_cpu_cxxsrc) \
+  $(curdir)/Ia32Assembler.cpp \
   $(NULL)
+endif
+
+ifeq (x86_64,$(TARGET_CPU))
+avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
+  $(curdir)/CodegenMIR.cpp \
+  $(curdir)/CodegenLIR.cpp \
+  $(curdir)/Amd64Assembler.cpp \
+  $(NULL)
+endif
+
+ifeq (powerpc,$(TARGET_CPU))
+avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
+  $(curdir)/CodegenMIR.cpp \
+  $(curdir)/CodegenLIR.cpp \
+  $(curdir)/PpcAssembler.cpp \
+  $(NULL)
+endif
+
+ifeq (ppc64,$(TARGET_CPU))
+avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
+  $(NULL)
+endif
+
+ifeq (arm,$(TARGET_CPU))
+avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
+  $(curdir)/CodegenLIR.cpp \
+  $(NULL)
+endif
+
+ifeq (sparc,$(TARGET_CPU))
+avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
+  $(curdir)/CodegenMIR.cpp \
+  $(curdir)/CodegenLIR.cpp \
+  $(curdir)/SparcAssembler.cpp \
+  $(NULL)
+endif

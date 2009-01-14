@@ -47,15 +47,15 @@ namespace avmplus
 	{
 	public:
 		Traits* traits;
-		bool notNull;
-		bool isWith;
-		bool killed;
 	#if defined AVMPLUS_MIR
-		bool stored;  // set if codegen has already stored the OP
 		OP* ins;  // spot for codegen to hang data.
+		bool stored;  // set if codegen has already stored the OP
 	#elif defined FEATURE_NANOJIT
 		LIns* ins;
 	#endif //AVMPLUS_MIR
+		bool notNull;
+		bool isWith;
+		bool killed;
 	};
 
 	/**
@@ -67,14 +67,15 @@ namespace avmplus
 	{
 
 	public:
-		sintptr pc;
-		int scopeDepth;
-		int stackDepth;
-		Verifier * const verifier;
-		int withBase;
 		bool initialized;
 		bool targetOfBackwardsBranch;
 		bool insideTryBlock;
+        bool unused1;
+		int scopeDepth;
+		int stackDepth;
+		int withBase;
+		sintptr pc;
+		Verifier * const verifier;
 	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		CodegenLabel label;
 	#endif
