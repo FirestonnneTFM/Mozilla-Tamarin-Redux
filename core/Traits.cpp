@@ -1269,6 +1269,26 @@ namespace avmplus
 					break;
             }
         } // for i
+		
+		// check for sparse slot table -- anything not specified will default to * (but we must allocate space for it)
+		for (uint32_t i = 0; i < tb->slotCount; i++)
+		{
+			if (tb->getSlotOffset(i) > 0)
+				continue;
+
+			#ifdef AVMPLUS_VERBOSE
+			if (pool->verbose)
+			{
+				core->console << "WARNING: slot " << i+1 << " on " << this << " not defined by compiler.  Using *\n";
+			}
+			#endif
+
+			const Traitsp slotType = NULL;
+			const uint32_t slotOffset = is8ByteSlot(slotType) ? 
+									pad8(hole, nextSlotOffset) : 
+									pad4(hole, nextSlotOffset);
+			tb->setSlotInfo(i, slotType, SST_atom, slotOffset);
+		}
 		return nextSlotOffset;
 	}
 
