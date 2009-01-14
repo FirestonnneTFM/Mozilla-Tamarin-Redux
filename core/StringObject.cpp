@@ -184,8 +184,11 @@ namespace avmplus
 		AvmAssert(len >= 0);
 
 		MMGC_MEM_TYPE( "String: Dynamic" );
-
-		void* buffer = gc->Alloc((len + extra) * w, 0);
+		
+		// a zero-length dynamic string is legal, but a zero-length GC allocation is not.
+		int32_t alloc = len + extra;
+		if (alloc < 1) alloc = 1;
+		void* buffer = gc->Alloc(alloc * w, 0);
 
 		int32_t bufLen = (int32_t) (GC::Size (buffer) / w);
 		int32_t charsLeft = bufLen - len;
@@ -1880,6 +1883,9 @@ namespace avmplus
 
 	Stringp String::caseChange(uint32_t(*unimapper)(uint32_t)) 
 	{
+		if (!this->length())
+			return this;
+			
 		// Flag to detect whether any changes were made
 		bool changed = false;
 
