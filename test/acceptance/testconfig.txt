@@ -29,25 +29,25 @@
 # fields are: TESTNAME, CONFIGURATION, COMMANDS, DETAILS
 # each field separate by , and whitespace is removed before/after from each field
 #
-# TESTNAME may contain : testcase (for the vm tests) : is the separator
+# TESTNAME may contain : testcase (for the vm tests) : (colon) is the separator
 # TESTNAME and testcase are regular expressions and can match multiple test files / test cases
 #
 # CONFIGURATION is also a regular expression
 # CONFIGURATION format is {CPU_ARCH}-{OS}-{VM}-{VERSION}-{VMSWITCH}
 #
-# COMMANDS are currently : asc.args, expectedfailure, skip
-#    expectedfailure - expects the test to fail, details should provide bug number and a comment
-#    skip - the test is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
-#    include - includes a specific testcase even if the parent has been skipped
+# COMMANDS are currently : asc.args, expectedfailu, skip
+#    expectedfail - expects the test to fail, details should provide bug number and a comment
+#    skip - the test is not run, for example the configuration does not support a feature or the
+#           file is not a test and is a helper file to another test
+#    include - only run include files for given configuration.
+#              if include is set, only the files specified by the include for the given 
+#              configuration will run, all other files will be skipped
 
 # Example:
 # ecma3/Math/e15_8_2_12:Infinity/Math.min\(0.*   ,   .*-tvm-release-Dinterp   ,  expectedfail   ,   bug tamarin: https://bugzilla.mozilla.org/show_bug.cgi?id=401095
 
-util/shell_ats, .*, skip, shell file for ats media creation
-
 # bug #459851:  windows mobile System.privateBytes and -memstats privateBytes always returns 0
 as3/ShellClasses/toplevel:System.privateMemory >0.*, arm-winmobile-tvm.* , expectedfail ,  bug https://bugzilla.mozilla.org/show_bug.cgi?id=459851
-
 
 # The non-windows x64 longjmp hackaround is crushed to death by the mops test, bug 464643
 # Note, pass --config=x64-mac-tvm-release etc to runtests.py when running it manually, runtests.py does that only
