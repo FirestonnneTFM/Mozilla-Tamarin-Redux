@@ -100,6 +100,7 @@ namespace avmplus
 		ErrorClass* uriErrorClass() const;
 		ErrorClass* referenceErrorClass() const;
 		ErrorClass* securityErrorClass() const;
+		ErrorClass* syntaxErrorClass() const;
 		ErrorClass* verifyErrorClass() const;
 		/*@}*/
 
