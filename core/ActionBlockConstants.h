@@ -284,6 +284,7 @@ namespace avmplus
 		{
 			int8_t operandCount;    // uses -1 for "invalid", we can avoid that if necessary
 			int8_t canThrow;		// always 0 or 1
+			int8_t stack;           // stack movement not taking into account run-time names or function arguments
 #if defined AVMPLUS_WORD_CODE
 			uint16_t wordCode;		// a map used during translation
 #endif
