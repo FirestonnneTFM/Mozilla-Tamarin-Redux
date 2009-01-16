@@ -2032,18 +2032,18 @@ namespace avmplus
         // use localCopy() to sniff the type and use ldq if it's Number
 		LIns* value = localCopy(sp);					
 
-		#ifndef MMGC_DRC
-		storeIns(value, offset, ptr);
+		#if !defined WRITE_BARRIERS || !defined MMGC_DRC
+			#error "untested in years"
 		#endif
 
-		#ifdef WRITE_BARRIERS
+		// the following code assumes WRITE_BARRIERS and MMGC_DRC are enabled
+
 		// if storing to a pointer-typed slot, inline a WB
 		Traits* slotType = tb->getSlotTraits(slot);
 
 		if (core->GetGC()->incremental &&
 			(!slotType || !slotType->isMachineType() || slotType == OBJECT_TYPE))
 		{
-			#ifdef MMGC_DRC
 			const CallInfo *wbAddr = FUNCTIONID(writeBarrierRC);
 			if(slotType == NULL || slotType == OBJECT_TYPE) {
 				// use fast atom wb
@@ -2055,18 +2055,9 @@ namespace avmplus
 					unoffsetPtr, 
 					leaIns(offset, ptr),
 					value);
-			#else // !DRC
-			// use non-substitute WB
-			callIns(FUNCTIONID(WriteBarrierTrap), 3, 
-					InsConst(core->gc), 
-					unoffsetPtr,
-					(slotType && slotType != OBJECT_TYPE) ? value :
-					binaryIns(LIR_and, value, InsConst(~7)));
-			#endif
 		}					
-		#ifdef MMGC_DRC
 		else {
-#ifdef AVMPLUS_AMD64
+#ifdef AVMPLUS_64BIT
 		if (slotType==INT_TYPE || slotType==UINT_TYPE || slotType==BOOLEAN_TYPE)
 		{
 			// Need to force a 32-bit store here, since we
@@ -2077,8 +2068,6 @@ namespace avmplus
 #endif
 			storeIns(value, offset, ptr);
 		}
-		#endif //MMGC_DRC
-		#endif //WRITE_BARRIERS
     }
 
     typedef const CallInfo *CallInfop;
