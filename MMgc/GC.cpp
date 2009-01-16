@@ -414,12 +414,9 @@ namespace MMgc
 		GCAssert(!m_roots);
 		GCAssert(!m_callbacks);
 
-		{
-			GCSpinLock lock(m_rootListLock);
-			// apparently the player can't be made to clean up so keep it from crashing at least
-			while(m_roots) {
-				m_roots->Destroy();
-			}
+		// apparently the player can't be made to clean up so keep it from crashing at least
+		while(m_roots) {
+			m_roots->Destroy();
 		}
 
 		while(m_callbacks) {
