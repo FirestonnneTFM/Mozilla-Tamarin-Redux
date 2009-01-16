@@ -604,7 +604,7 @@ class RuntestBase:
     # TODO: Rename/move to better place
     def preProcessTests(self):
         if (not self.rebuildtests) and (not self.avm): #don't need AVM if rebuilding tests
-            exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % avm)
+            exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % self.avm)
             
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
         
