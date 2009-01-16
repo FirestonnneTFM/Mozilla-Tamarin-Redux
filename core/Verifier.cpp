@@ -2559,6 +2559,7 @@ namespace avmplus
 	void Verifier::emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc)
 	{
 		uint32_t n = argc+1;
+		checkPropertyMultiname(n, multiname);
 		Traits* t = state->peek(n).traits;
 		
 		Binding b = toplevel->getBinding(t, &multiname);
