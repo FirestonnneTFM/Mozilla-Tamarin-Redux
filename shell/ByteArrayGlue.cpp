@@ -790,8 +790,8 @@ namespace avmplus {
 		}
 		return false;
  	}
-#endif
 }	
+#endif
 
 
 
