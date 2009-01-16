@@ -403,7 +403,7 @@ class PerformanceRuntest(RuntestBase):
                     else:
                         spdup = float(result1-result2)/result2*100.0
         if self.memory:
-            if len(avm2)>0:
+            if len(self.avm2)>0:
                 self.js_print("%-50s %7s %7s %7.1f %7s" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric))
             else:
                 confidence=0
