@@ -162,7 +162,7 @@ namespace avmplus
 					// A closing tag
 					if (tag.text->charAt(0) == '/')
 					{
-						Stringp thisNodeNameNoSlash = tag.text->substring(1, 0x7fffffff);
+						Stringp thisNodeNameNoSlash = tag.text->substring(1);
 						
 						Multiname m;
 						p->getQName(core, &m);
@@ -274,7 +274,7 @@ namespace avmplus
 				if (!toplevel->xmlClass()->get_ignoreProcessingInstructions()) 
 				{
 					Stringp name, val;
-					int32_t space = tag.text->indexOf(" ", 1, 0);
+					int32_t space = tag.text->indexOfLatin1(" ", 1, 0);
 					if (space < 0)
 					{
 						// no spaces, no value

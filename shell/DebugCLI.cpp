@@ -417,7 +417,7 @@ namespace avmshell
 
 		if (colon) {
 			*colon = 0;
-			filename = core->internConstantStringLatin1(location);
+			filename = core->internStringLatin1(location);
 			location = colon+1;
 		}
 
@@ -579,7 +579,7 @@ namespace avmshell
 			for(int i=0; i<count; i++)
 			{
 				Stringp arg = info->getArgName(i);
-				if (arg->Equals(what)) 
+				if (arg->equalsLatin1(what)) 
 				{
 					// match!
 					Atom a = ease2Atom(to, ptr[i]);
@@ -595,7 +595,7 @@ namespace avmshell
 			for(int i=0; i<count; i++)
 			{
 				Stringp local = info->getLocalName(i);
-				if ( local->Equals(what)) 
+				if ( local->equalsLatin1(what)) 
 				{
 					// match!
 					Atom a = ease2Atom(to, ptr[i]);
@@ -619,7 +619,7 @@ namespace avmshell
 		// todo deal with exceptions
 		Multiname mname(
 			core->publicNamespace,
-			core->internConstantStringLatin1(name)
+			core->internStringLatin1(name)
 		);
 
 		#if 0

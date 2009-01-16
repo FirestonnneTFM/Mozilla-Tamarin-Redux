@@ -82,7 +82,7 @@ namespace avmplus
 
 			Stringp startTag = s->substr(0, 2);
 			Stringp endTag = s->substr(s->length() - 3, 3);
-			if (startTag->Equals("<>") && endTag->Equals("</>"))
+			if (startTag->equalsLatin1("<>") && endTag->equalsLatin1("</>"))
 				s = s->substr(2, s->length() - 5);
 
 			Namespace *defaultNamespace = toplevel->getDefaultNamespace();

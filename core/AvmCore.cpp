@@ -2629,7 +2629,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		Stringp k;
 		if (!deletedCount)
 		{
-			while ((k=strings[i]) != NULL && !k->FastEquals(s,len)) {
+			while ((k=strings[i]) != NULL && !k->equalsUTF16(s,len)) {
 				i = (i + (n++)) & bitMask; // quadratic probe
 			}
 		}
@@ -2645,7 +2645,7 @@ return the result of the comparison ToPrimitive(x) == y.
 						iFirstDeletedSlot = i;
 					}
 				}
-				else if (k->FastEquals (s, len))
+				else if (k->equalsUTF16(s, len))
 				{
 					return i;
 				}

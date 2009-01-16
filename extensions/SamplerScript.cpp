@@ -330,7 +330,7 @@ namespace avmplus
 		// associate an object with some "type" and failed.  You can ignore it.
 		AvmAssert(!obj || 
 			typeOrVTable < 7 || 
-			  (obj->traits()->name && obj->traits()->name->Equals("global")) ||
+			  (obj->traits()->name && obj->traits()->name->equalsLatin1("global")) ||
 			(core->istype(obj->atom(), CLASS_TYPE) && type == tl->classClass) ||
 			(obj->traits()->isActivationTraits() && type == tl->objectClass) ||
 			core->istype(obj->atom(), type->traits()->itraits));

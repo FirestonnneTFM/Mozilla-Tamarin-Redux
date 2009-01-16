@@ -103,7 +103,7 @@ namespace avmplus
 		if (ch != '<') 
 		{
 			// Treat it as text.  Scan up to the next < or until EOF.
-			m_pos = m_str->indexOf("<", 1, m_pos + 1);
+			m_pos = m_str->indexOfLatin1("<", 1, m_pos + 1);
 			if (m_pos < 0)
 				m_pos = m_str->length();
 
@@ -119,9 +119,9 @@ namespace avmplus
 
 		// Is this a <?xml> declaration?
 		start = m_pos;
-		if (m_str->matches("<?xml ", 6, start))
+		if (m_str->matchesLatin1("<?xml ", 6, start))
 		{
-			end = m_str->indexOf("?>", 2, start + 6);
+			end = m_str->indexOfLatin1("?>", 2, start + 6);
 			if (end >= 0)
 			{
 				// We have the end of the XML declaration
@@ -135,11 +135,10 @@ namespace avmplus
 		}
 
 		// Is this a <!DOCTYPE> declaration?
-		if (m_str->matches("<!DOCTYPE", 8, start))
+		if (m_str->matchesLatin1("<!DOCTYPE", 8, start))
 		{
 			// Scan forward for '>', but check for embedded <>
 			int32_t depth = 0;
-			start += 8;
 			end = start + 1;
 			while (!atEnd())
 			{
@@ -164,10 +163,10 @@ namespace avmplus
 		}
 
 		// Is this a CDATA section?
-		if (m_str->matches("<![CDATA[", 9, start))
+		if (m_str->matchesLatin1("<![CDATA[", 9, start))
 		{
 			start += 9;
-			end = m_str->indexOf("]]>", 3, start);
+			end = m_str->indexOfLatin1("]]>", 3, start);
 			if (end >= 0)
 			{
 				// We have the end of the CDATA section.
@@ -180,11 +179,11 @@ namespace avmplus
 		}
 
 		// Is this a processing instruction?
-		if (m_str->matches("<?", 2, start))
+		if (m_str->matchesLatin1("<?", 2, start))
 		{
 			// Scan forward for "?>"
 			start += 2;
-			end = m_str->indexOf("?>", 2, start);
+			end = m_str->indexOfLatin1("?>", 2, start);
 			if (end >= 0)
 			{
 				// We have the end of the processing instruction.
@@ -200,11 +199,11 @@ namespace avmplus
 		start = ++m_pos;
 
 		// Is this a comment?  Return a comment tag->
-		if (m_str->matches("!--", 3, start)) 
+		if (m_str->matchesLatin1("!--", 3, start)) 
 		{
 			// Skip up to '-->'.
 			start += 3;
-			end = m_str->indexOf("-->", 3, start);
+			end = m_str->indexOfLatin1("-->", 3, start);
 			if (end >= 0)
 			{
 				tag.text = m_str->substring(start, end);
@@ -323,12 +322,12 @@ namespace avmplus
 		if (start == last)
 			return core->kEmptyString;
 
-		int32_t bgn = m_str->indexOf("&", 1, start, last);
+		int32_t bgn = m_str->indexOfLatin1("&", 1, start, last);
 		int32_t end = start;
 		Stringp dest = core->kEmptyString;
 		while (bgn >= start && bgn < last)
 		{
-			int32_t ampEnd = m_str->indexOf(";", 1, ++bgn, last);
+			int32_t ampEnd = m_str->indexOfLatin1(";", 1, ++bgn, last);
 			if (ampEnd < 0)
 				// &xxx without semicolon - we are done
 				break;
@@ -396,7 +395,7 @@ namespace avmplus
 			}
 			if (!ok)
 				bgn = end + 1;
-			bgn = m_str->indexOf("&", 1, bgn, last);
+			bgn = m_str->indexOfLatin1("&", 1, bgn, last);
 		}
 		// add any remaining text
 		if (end < last)

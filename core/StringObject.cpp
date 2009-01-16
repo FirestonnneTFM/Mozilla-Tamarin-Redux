@@ -441,7 +441,7 @@ namespace avmplus
 		return result;
 	}
 
-	bool String::Equals(const char* p) const
+	bool String::equalsLatin1(const char* p) const
 	{
 		int32_t len = Length(p);
 		if (len != length())
@@ -465,7 +465,7 @@ namespace avmplus
 		return ok;
 	}
 
-	bool String::Equals(const wchar* p, int32_t len) const
+	bool String::equalsUTF16(const wchar* p, int32_t len) const
 	{
 		if (len != length())
 			return false;
@@ -697,7 +697,7 @@ namespace avmplus
 		return -1;
 	}
 
-	int32_t String::indexOf(const char* p, int32_t sublen, int32_t start, int32_t end) const
+	int32_t String::indexOfLatin1(const char* p, int32_t sublen, int32_t start, int32_t end) const
 	{
 		if (start < 0)
 			start = 0;
@@ -733,7 +733,7 @@ namespace avmplus
 		return -1;
 	}
 
-	bool String::matches(const char* p, int32_t len, int32_t pos, bool caseless)
+	bool String::matchesLatin1(const char* p, int32_t len, int32_t pos, bool caseless)
 	{
 		if (p == NULL || pos >= m_length)
 			return false;
@@ -2082,12 +2082,38 @@ namespace avmplus
 		return lastIndexOf(substr, iStartPos);
 	}
 
-	Stringp String::_substr(int start, int end)
+	Stringp String::_substr(int start, int count)
     {
-		return substr((int32_t) start, (int32_t) end);
-	}
+		int len = this->length();
+		start = (int)NativeObjectHelpers::ClampIndexInt(start, len); 
+		// ClampIndex takes a double (not int or uint) for first parm...
+		// we must cast these to double before addition, otherwise we
+		// can have numeric overflow with the default arg (end=0x7fffffff)
+		// and wrap to negative, which would be bad...
 
-	Stringp String::AS3_substr(double d_start, double d_end)
+		// Do some sanity checks on our ints to see if they will fall within a valid integer range
+		// !!@what about negative values?
+		int end;
+		if (count == 0x7ffffff)			
+		{
+			end = len; 
+		}
+		else if ((count > 0xffffff) || (start > 0xffffff)) // might overflow - use doubles
+		{
+			end = (int)NativeObjectHelpers::ClampIndex(double(count) + double(start), len); 
+		}
+		else
+		{
+			end = (int)NativeObjectHelpers::ClampIndexInt(count + start, len); 
+		}
+
+		if (end < start)
+			end = start;
+
+		return substr(start, end-start);
+    }
+
+	Stringp String::AS3_substr(double d_start, double d_count)
     {
 		int32_t len = this->length();
 		int32_t start = (int32_t) NativeObjectHelpers::ClampIndex(MathUtils::toInt(d_start), len); 
@@ -2095,7 +2121,7 @@ namespace avmplus
 		// we must cast these to double before addition, otherwise we
 		// can have numeric overflow with the default arg (end=0x7fffffff)
 		// and wrap to negative, which would be bad...
-		int32_t end = (int32_t)NativeObjectHelpers::ClampIndex(MathUtils::toInt(d_end) + (double)start, len); 
+		int32_t end = (int32_t)NativeObjectHelpers::ClampIndex(MathUtils::toInt(d_count) + (double)start, len); 
 		if (end < start)
 			end = start;
 
@@ -2104,6 +2130,7 @@ namespace avmplus
 
 	Stringp String::_substring(int start, int end)
     {
+		NativeObjectHelpers::ClampBInt(start, end, this->length());
 		return substring((int32_t) start, (int32_t) end);
 	}
 
@@ -2115,12 +2142,12 @@ namespace avmplus
 		return substring((int32_t) start, (int32_t) end);
 	}
 
-	Stringp String::_slice (int start, int end)
+	Stringp String::_slice(int start, int end)
     {
 		return slice((int32_t) start, (int32_t) end);
 	}
 
-	Stringp String::AS3_slice (double d_start, double d_end)
+	Stringp String::AS3_slice(double d_start, double d_end)
     {
 		int32_t len = this->length();
 		int32_t start = (int32_t)NativeObjectHelpers::ClampIndex(MathUtils::toInt(d_start), len); 

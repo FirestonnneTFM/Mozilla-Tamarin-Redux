@@ -1255,7 +1255,7 @@ namespace avmplus
 		// If we got no digits, check for Infinity/-Infinity, else fail
 		if (numDigits == 0) {
 			// check for the strings "Infinity" and "-Infinity"
-			if (s->matches ("Infinity", 8, index)) {
+			if (s->matchesLatin1("Infinity", 8, index)) {
 				index += 8;
 				// there may be trailing whitespace
 				if (index < s->length() && skipSpaces(s, index) == index)
