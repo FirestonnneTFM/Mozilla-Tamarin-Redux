@@ -1,6 +1,3 @@
-# File taken from http://www.pixelbeat.org/libs/subProcess.py
-# Released under LGPL (see http://www.pixelbeat.org/libs/)
-
 # Example:
 #
 #     import subProcess
