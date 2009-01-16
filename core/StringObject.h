@@ -243,15 +243,13 @@ namespace avmplus
 		 */
 				int32_t FASTCALL	Compare(String& other, int32_t start = 0, int32_t length = 0) const;
 		/**
-		Compare this string with a ASCII string.
+		Compare this string with a Latin1 string.
 		*/
-				bool	FASTCALL	Equals(const char* p) const;
+				bool	FASTCALL	equalsLatin1(const char* p) const;
 		/**
 		Compare this string with a UTF-16 string.
 		*/
-				bool	FASTCALL	Equals(const wchar* p, int32_t len) const;
-		///
-		inline	bool				FastEquals(const wchar* p, int32_t len) const { return Equals(p, len); }
+				bool	FASTCALL	equalsUTF16(const wchar* p, int32_t len) const;
 		/**
 		Localized compare - maps to compare().
 		*/
@@ -284,6 +282,11 @@ namespace avmplus
 		Implements String.indexOf().
 		*/
 				int32_t	FASTCALL	indexOf(Stringp s, int32_t offset = 0) const;
+
+		/**
+		Convenience method for old code (boolean result)
+		*/
+		inline	bool				contains(Stringp s) const { return indexOf(s) >= 0; }
 		/**
 		Convenience method: indexOf() for a Latin-1 string within a given range.
 		@param	p					the character string to compare; NULL returns -1
@@ -292,7 +295,12 @@ namespace avmplus
 		@param	end					the ending position
 		@return						the index of the found position, or -1 if no match
 		*/
-				int32_t FASTCALL	indexOf(const char* p, int32_t len = -1, int32_t start = 0, int32_t end = 0x7FFFFFFF) const;
+				int32_t FASTCALL	indexOfLatin1(const char* p, int32_t len = -1, int32_t start = 0, int32_t end = 0x7FFFFFFF) const;
+		/**
+		Convenience method for old code (boolean result)
+		*/
+		inline	bool				containsLatin1(const char* p) const { return indexOfLatin1(p) >= 0; }
+
 		/**
 		Convenience method: Does a Latin-1 string match at the current position?
 		@param	p					the character string to compare; NULL returns false
@@ -301,7 +309,7 @@ namespace avmplus
 		@param	caseless			true for a caseless match
 		@return						true if the string matches
 		*/
-				bool	 FASTCALL	matches(const char* p, int32_t len, int32_t pos, bool caseless = false);
+				bool	 FASTCALL	matchesLatin1(const char* p, int32_t len, int32_t pos, bool caseless = false);
 		/**
 		Implements String.lastIndexOf().
 		*/
@@ -347,12 +355,12 @@ namespace avmplus
 		Implement String.substr(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
 		*/
-				Stringp	FASTCALL	substr(int32_t start, int32_t len);
+				Stringp	FASTCALL	substr(int32_t start, int32_t len = 0x7fffffff);
 		/**
 		Implement String.substring(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
 		*/
-				Stringp	FASTCALL	substring(int32_t start, int32_t end);
+				Stringp	FASTCALL	substring(int32_t start, int32_t end = 0x7fffffff);
 		/**
 		Implement String.slice(). The resulting String object points into the original string, 
 		and holds a reference to the original string.
@@ -433,8 +441,8 @@ namespace avmplus
 
 				int					AS3_localeCompare(Stringp other);
 
-				Stringp				_substring(int i_start, int i_end);
-				Stringp				AS3_substring(double d_start, double d_end);
+				Stringp				_substring(int i_start, int i_count);
+				Stringp				AS3_substring(double d_start, double d_count);
 
 				Stringp				_slice(int dStart, int dEnd);
 				Stringp				AS3_slice(double dStart, double dEnd);

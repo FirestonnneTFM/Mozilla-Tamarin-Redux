@@ -377,7 +377,7 @@ namespace avmplus
 
 	Namespace *E4XNode::FindNamespace(AvmCore *core, Toplevel *toplevel, Stringp& tagName, bool bAttribute)
 	{
-		int32_t pos = tagName->indexOf(":", 1, 0);
+		int32_t pos = tagName->indexOfLatin1(":", 1, 0);
 		// handle case of ":name"
 		if (pos == 0)
 			toplevel->throwTypeError(kXMLBadQName, tagName);
@@ -495,7 +495,7 @@ namespace avmplus
 			if (len >= 5)
 			{
 				// caseless match
-				if (attributeName->matches("xmlns", 5, 0, true))
+				if (attributeName->matchesLatin1("xmlns", 5, 0, true))
 				{
 					// a namespace xnlns:prefix="URI" or xmlns="URI"
 					if ((len > 5) && attributeName->charAt(5) == ':')
@@ -534,7 +534,7 @@ namespace avmplus
 			if (len >= 5)
 			{
 				// caseless match
-				if (attributeName->matches("xmlns", 5, 0, true))
+				if (attributeName->matchesLatin1("xmlns", 5, 0, true))
 				{
 					// a namespace xnlns:prefix="URI" or xmlns="URI"
 					if ((len == 5) || ((len > 5) && attributeName->charAt(5) == ':'))
