@@ -416,7 +416,10 @@ namespace avmshell
 			}
 		}
 
-		return core()->newStringUTF8((const char*)c, len);
+		// newStringLatin1, NOT newStringUTF8: the latter might decide the data is invalid
+		// UTF8 format (which is quite likely) and refuse to create the string. Be sure to pass the
+		// explicit len since there might be embedded null characters.
+		return core()->newStringLatin1((const char*)c, len);
 	}
 	
 	int ByteArrayObject::readByte()

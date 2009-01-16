@@ -2423,8 +2423,11 @@ namespace avmplus
 		// determine the string width to use
 		StringWidths widths;
 		if (!_analyzeUtf8(buffer, len, widths))
+		{
 			// TODO: bad character sequence error
+			AvmAssert(!"bad UTF8 character sequence");
 			return NULL;
+		}
 
 		if (desiredWidth == kAuto)
 		{
@@ -2671,7 +2674,7 @@ decodeUtf8:
 		}
 		return s;
 	}
-#endif FEATURE_UTF32_SUPPORT
+#endif // FEATURE_UTF32_SUPPORT
 
 	///////////////////////////////////////////////////////////////////////////////////
 
