@@ -203,7 +203,7 @@ class PerformanceRuntest(RuntestBase):
 
     def preProcessTests(self):
         if not self.avm:
-            exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % avm)
+            exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % self.avm)
         
         # Print run info and headers
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
