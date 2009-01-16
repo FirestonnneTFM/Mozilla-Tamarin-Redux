@@ -2404,12 +2404,16 @@ namespace avmplus
 #ifdef FEATURE_UTF32_SUPPORT
 			if (widths.w32 != 0)
 				desiredWidth = String::k32;
-			else
-#endif
-			if (widths.w16 != 0)
+			else if (widths.w16 != 0)
 				desiredWidth = String::k16;
 			else
 				desiredWidth = String::k8;
+#else
+			if (widths.w32 != 0 || widths.w16 != 0)
+				desiredWidth = String::k16;
+			else
+				desiredWidth = String::k8;
+#endif
 		}
 
 		GC* gc = core->GetGC();
@@ -2508,12 +2512,16 @@ decodeUtf8:
 #ifdef FEATURE_UTF32_SUPPORT
 				if (widths.w32 != 0)
 					desiredWidth = k32;
-				else
-#endif
-				if (widths.w16 != 0)
+				else if (widths.w16 != 0)
 					desiredWidth = k16;
 				else
 					desiredWidth = k8;
+#else
+				if (widths.w32 != 0 || widths.w16 != 0)
+					desiredWidth = k16;
+				else
+					desiredWidth = k8;
+#endif
 			}
 			else if (desiredWidth == k8 && (widths.w16 != 0 || widths.w32 != 0))
 				// cannot do 8-bit string with this data
