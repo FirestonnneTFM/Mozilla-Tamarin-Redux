@@ -305,6 +305,7 @@ class PerformanceRuntest(RuntestBase):
         for i in range(self.iterations):
             memoryhigh = 0
             memoryhigh2 = 0
+            print self.avm, self.vmargs, abc
             f1 = self.run_pipe("%s %s %s" % (self.avm, self.vmargs, abc))
             out1.append(f1)
             if len(self.avm2)>0:
@@ -390,7 +391,7 @@ class PerformanceRuntest(RuntestBase):
                 else:
                     spdup = ((memoryhigh2-memoryhigh)/memoryhigh)*100.0
             elif len(self.avm2)>0:
-                if len(resultList2)!=iterations:
+                if len(resultList2)!=self.iterations:
                     for f in out2:
                         for line in f:
                             print(line.strip())
@@ -408,16 +409,16 @@ class PerformanceRuntest(RuntestBase):
             else:
                 confidence=0
                 meanRes=memoryhigh
-                if iterations>2:
+                if self.iterations>2:
                     meanRes=mean(resultList)
                     if meanRes>0:
                         confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
                     self.js_print("%-50s %7s %10.1f%%     [%s]" % (ast,formatMemory(memoryhigh),confidence,formatMemoryList(resultList)))
                 else:
                     self.js_print("%-50s %7s %7s" % (ast,formatMemory(memoryhigh), metric))
-                config = "%s%s" % (self.vmname, vmargs.replace(" ", ""))
+                config = "%s%s" % (self.vmname, self.vmargs.replace(" ", ""))
                 config = config.replace("-memstats","")
-                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, memoryhigh, confidence, meanRes, iterations, OS_name, config, self.vmversion))
+                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion))
         else:
             if len(self.avm2)>0:
                 if self.iterations == 1:

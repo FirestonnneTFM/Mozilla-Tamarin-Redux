@@ -401,13 +401,18 @@ class RuntestBase:
     def run_pipe(self, cmd):
         if self.debug:
             print('cmd: %s' % cmd)
-        p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.stdout.readlines()
-        starttime=time()
-        exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
-        if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
-            return 'timedOut'
-        return output
+        if self.osName.lower() == 'win':
+            proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, shell=False)
+            (stdo,stde)=proc.communicate()
+            return stdo.split('\n')
+        else:
+            p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            output = p.stdout.readlines()
+            starttime=time()
+            exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
+            if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
+                return 'timedOut'
+            return output
     
     def parseArgStringToList(self, argStr):
         args = argStr.strip().split(' ')
