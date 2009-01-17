@@ -663,14 +663,14 @@ namespace avmplus
 
 			case OP_pushnull:
 				checkStack(0,1);
-				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, 0); )
+				JIT_ONLY( if (jit) jit->emitPtrConst(state, sp+1, 0); )
 				state->push(NULL_TYPE);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushnull) );
 				break;
 
 			case OP_pushundefined:
 				checkStack(0,1);
-				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, undefinedAtom); )
+				JIT_ONLY( if (jit) jit->emitPtrConst(state, sp+1, (void*)undefinedAtom); )
 				state->push(VOID_TYPE);
 				XLAT_ONLY( if (translator) translator->emitOp0(pc, WOP_pushundefined) );
 				break;
@@ -759,7 +759,7 @@ namespace avmplus
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantStringCount));
 
 				Stringp value = pool->cpool_string[index];
-				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, (uintptr)value); )
+				JIT_ONLY( if (jit) jit->emitPtrConst(state, sp+1, value); )
 				state->push(STRING_TYPE, value != NULL);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_pushstring) );
 				break;
@@ -810,7 +810,7 @@ namespace avmplus
 					verifyFailed(kCpoolIndexRangeError, core->toErrorString(index), core->toErrorString(pool->constantNsCount));
 
 				Namespace* value = pool->cpool_ns[index];
-				JIT_ONLY( if (jit) jit->emitIntConst(state, sp+1, (uintptr)value); )
+				JIT_ONLY( if (jit) jit->emitPtrConst(state, sp+1, value); )
 				state->push(NAMESPACE_TYPE, value != NULL);
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_pushnamespace) );
 				break;

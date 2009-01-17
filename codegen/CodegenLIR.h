@@ -168,8 +168,6 @@ namespace avmplus
 		verbose_only(VerboseWriter *vbWriter;)
 
         LIns *InsAlloc(int32_t);
-        void storeIns(LIns *val, int32_t disp, LIns *base, bool force32);
-        LIns *InsConst(const void *p) { return InsConst((int32_t)p); }
         LIns *atomToNativeRep(int loc, LIns *i);
         LIns *atomToNativeRep(Traits *, LIns *i);
         LIns *ptrToNativeRep(Traits*, LIns*);
@@ -177,6 +175,7 @@ namespace avmplus
         LIns *callIns(const CallInfo *, uint32_t argc, ...);
         LIns *leaIns(int32_t d, LIns *base);
         LIns *localGet(int i);
+		LIns *localGetp(int i);
         LIns *localGetq(int i);
         LIns *localCopy(int i); // sniff's type
         LIns *branchIns(LOpcode op, LIns *cond);
@@ -204,6 +203,11 @@ namespace avmplus
         void deadvars();
         void deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
         void deadvars_kill(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
+		void copyParam(int i, int &offset);
+
+		static BuiltinType bt(Traits *t) {
+			return Traits::getBuiltinType(t);
+		}
 
         LIns *loadIns(LOpcode op, int32_t disp, LIns *base) {
             return lirout->insLoad(op, base, disp);
@@ -229,6 +233,34 @@ namespace avmplus
         LIns *InsConst(int32_t c) {
             return lirout->insImm(c);
         }
+        LIns *InsConstPtr(const void *p) {
+			return lirout->insImmPtr(p);
+		}
+		LIns *InsConstAtom(Atom c) {
+			return lirout->insImmPtr((void*)c);
+		}
+	#ifdef NANOJIT_64BIT
+		LIns *i2p(LIns *i) {
+			return lirout->ins1(LIR_i2q, i);
+		}
+		LIns *u2p(LIns *i) {
+			return lirout->ins1(LIR_u2q, i);
+		}
+		LIns *p2i(LIns *i) {
+			return lirout->ins1(LIR_qlo, i);
+		}
+	#else
+		LIns *i2p(LIns *i) {
+			return i;
+		}
+		LIns *u2p(LIns *i) {
+			return i;
+		}
+		LIns *p2i(LIns *i) {
+			return i;
+		}
+	#endif
+
 
 		bool outOMem();
 		
@@ -249,7 +281,8 @@ namespace avmplus
 		void emitKill(FrameState* state, int i);
 		void emitBlockStart(FrameState* state);
 		void emitBlockEnd(FrameState* state);
-		void emitIntConst(FrameState* state, int index, uintptr c);
+		void emitIntConst(FrameState* state, int index, int32_t c);
+		void emitPtrConst(FrameState* state, int index, void* c);
 		void emitDoubleConst(FrameState* state, int index, double* pd);
 		void emitCoerce(FrameState* state, int index, Traits* type);
 		void emitCheckNull(FrameState* state, int index);

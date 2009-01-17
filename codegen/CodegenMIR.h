@@ -382,6 +382,7 @@ namespace avmplus
 		void emitBlockStart(FrameState* state);
 		void emitBlockEnd(FrameState* state);
 		void emitIntConst(FrameState* state, int index, uintptr c);
+		void emitPtrConst(FrameState* state, int index, const void* c) { emitIntConst(state, index, (uintptr) c); }
 		void emitDoubleConst(FrameState* state, int index, double* pd);
 		void emitCoerce(FrameState* state, int index, Traits* type);
 		void emitDoubleToInteger(int index);
