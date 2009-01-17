@@ -60,6 +60,7 @@ endif
 
 ifeq (ppc64,$(TARGET_CPU))
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
+  $(curdir)/CodegenLIR.cpp \
   $(NULL)
 endif
 
