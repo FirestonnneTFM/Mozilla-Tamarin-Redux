@@ -45,10 +45,6 @@
 #include "CodegenLIR.h"
 #include "../core/FrameState.h"
 
-#ifdef DARWIN
-#include <Carbon/Carbon.h>
-#endif
-
 #if defined(WIN32) && defined(AVMPLUS_ARM)
 #include <cmnintrin.h>
 #endif
