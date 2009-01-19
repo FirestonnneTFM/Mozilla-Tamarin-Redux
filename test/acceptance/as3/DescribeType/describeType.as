@@ -117,6 +117,8 @@ package {
 	results.push(getQualifiedSuperclassName(new Object));
 	results.push(getQualifiedSuperclassName(new Foo(1)));
 	results.push(getQualifiedSuperclassName(new Foo2(1)));
+	results.push(describeType(null, FLASH10_FLAGS).toXMLString());
+	results.push(describeType(void 0, FLASH10_FLAGS).toXMLString());
 
 	var expected = []
 	var xc = 
@@ -252,6 +254,8 @@ package {
 	expected.push(null);	// getQualifiedSuperclassName returns null (not "null") for Object
 	expected.push("Object");
 	expected.push("Foo");
+	expected.push('<type name="null" isDynamic="false" isFinal="true" isStatic="false"/>');
+	expected.push('<type name="void" isDynamic="false" isFinal="true" isStatic="false"/>');
 	
 	function sortXMLAttrs(x:XML):XML
 	{

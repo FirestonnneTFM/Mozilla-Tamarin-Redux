@@ -512,7 +512,13 @@ namespace avmplus
 	
 	ScriptObject* TypeDescriber::describeType(Atom value, uint32_t flags)
 	{
-		Traitsp traits = m_toplevel->toTraits(value);
+		Traitsp traits;
+		if (value == undefinedAtom)
+			traits = m_toplevel->core()->traits.void_itraits;
+		else if (ISNULL(value))
+			traits = m_toplevel->core()->traits.null_itraits;
+		else
+			traits = m_toplevel->toTraits(value);
 
 		if (flags & USE_ITRAITS)
 			traits = traits->itraits;
