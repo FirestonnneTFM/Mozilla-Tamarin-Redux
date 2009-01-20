@@ -75,7 +75,9 @@ namespace avmplus
 
 	typedef void (AvmObjectT::*AvmThunkNativeMethodHandler)();
 	typedef void (*AvmThunkNativeFunctionHandler)(AvmObject obj);
-
+	
+	const uintptr_t kUnboxMask = ~uintptr_t(7);
+	#define AvmThunkUnbox_AvmReceiver(t,r)	((t)(uintptr_t(r) & kUnboxMask))
 	#define AvmThunkUnbox_AvmObject(r)		((ScriptObject*)(r))
 	#define AvmThunkUnbox_AvmBool32(r)		((r) != 0)
 	#define AvmThunkUnbox_int32_t(r)		int32_t(r)

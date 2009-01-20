@@ -54,7 +54,7 @@ AvmBox builtin_a2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, AvmObject, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmObject(argv[argoff2])
         , AvmThunkUnbox_AvmBox(argv[argoff3])
@@ -77,7 +77,7 @@ AvmBox builtin_v2a_ouuuai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_void (AvmObjectT::*FuncType)(uint32_t, uint32_t, uint32_t, AvmBox, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_uint32_t(argv[argoff1])
         , AvmThunkUnbox_uint32_t(argv[argoff2])
         , AvmThunkUnbox_uint32_t(argv[argoff3])
@@ -95,7 +95,7 @@ double builtin_d2d_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     };
     typedef AvmRetType_double (AvmStringT::*FuncType)(int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
     );
 }
@@ -128,7 +128,7 @@ double builtin_d2d_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_double (AvmObjectT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
     );
 }
 // native_script_function_parseInt
@@ -141,7 +141,7 @@ double builtin_func_d2d_osi_optsAvmThunkConstant_AvmString_67_____NaN_____opti0_
     };
     typedef AvmRetType_double (*FuncType)(AvmObject, AvmString, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_FUNCTION_HANDLER(env));
-    return (*func)(AvmThunkUnbox_AvmObject(argv[argoff0])
+    return (*func)(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])
         , (argc < 1 ? AvmThunkConstant_AvmString(67)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
         , (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))
     );
@@ -155,7 +155,7 @@ AvmBox builtin_i2a_ss_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t ar
     };
     typedef AvmRetType_int32_t (AvmStringT::*FuncType)(AvmString);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? AvmThunkCoerce_AvmBox_AvmString(kAvmThunkUndefined) : AvmThunkUnbox_AvmString(argv[argoff1]))
     );
 }
@@ -170,7 +170,7 @@ AvmBox builtin_a2a_oau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_uint32_t(argv[argoff2])
     );
@@ -186,7 +186,7 @@ AvmBox builtin_a2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmString, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmString(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
     );
@@ -201,7 +201,7 @@ AvmBox builtin_s2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmString (AvmObjectT::*FuncType)(AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
     );
 }
@@ -219,7 +219,7 @@ AvmBox builtin_a2a_ou_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_uint32_t(argv[argoff1])
     );
 }
@@ -234,7 +234,7 @@ AvmBox builtin_s2a_odi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmString (AvmObjectT::*FuncType)(double, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_double(argv[argoff1])
         , AvmThunkUnbox_int32_t(argv[argoff2])
     );
@@ -250,7 +250,7 @@ AvmBox builtin_a2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_int32_t(argv[argoff1])
     );
 }
@@ -264,7 +264,7 @@ AvmBox builtin_a2a_oo_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmObject);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmObject(argv[argoff1])
     );
 }
@@ -277,7 +277,7 @@ AvmBox builtin_s2a_n_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmString (AvmNamespaceT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmNamespace(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmNamespace, argv[argoff0])).*(func))(
     );
 }
 // XML_AS3_toXMLString
@@ -297,7 +297,7 @@ AvmBox builtin_s2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmString (AvmObjectT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
     );
 }
 // __AS3___vec_Vector_uint_fixed_set
@@ -317,7 +317,7 @@ AvmBox builtin_a2a_ob_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBool32);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBool32(argv[argoff1])
     );
 }
@@ -332,7 +332,7 @@ double builtin_d2d_odd_optdkAvmThunkNegInfinity_optdkAvmThunkNegInfinity_rest_th
     const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;
     typedef AvmRetType_double (AvmObjectT::*FuncType)(double, double, AvmBox*, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc < 1 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff1]))
         , (argc < 2 ? kAvmThunkNegInfinity : AvmThunkUnbox_double(argv[argoff2]))
         , (argc <= 2 ? NULL : argv + argoffV)
@@ -348,7 +348,7 @@ double builtin_func_d2d_os_optsAvmThunkConstant_AvmString_67_____NaN_____thunk(A
     };
     typedef AvmRetType_double (*FuncType)(AvmObject, AvmString);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_FUNCTION_HANDLER(env));
-    return (*func)(AvmThunkUnbox_AvmObject(argv[argoff0])
+    return (*func)(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])
         , (argc < 1 ? AvmThunkConstant_AvmString(67)/* "NaN" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
     );
 }
@@ -379,7 +379,7 @@ AvmBox builtin_a2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
     );
 }
@@ -392,7 +392,7 @@ AvmBox builtin_s2a_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     };
     typedef AvmRetType_AvmString (AvmStringT::*FuncType)(double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
     );
 }
@@ -418,7 +418,7 @@ double builtin_d2d_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
     typedef AvmRetType_double (AvmObjectT::*FuncType)(AvmBox*, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
@@ -433,7 +433,7 @@ AvmBox builtin_func_b2a_od_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32
     };
     typedef AvmRetType_AvmBool32 (*FuncType)(AvmObject, double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_FUNCTION_HANDLER(env));
-    return (AvmBox)(*func)(AvmThunkUnbox_AvmObject(argv[argoff0])
+    return (AvmBox)(*func)(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])
         , (argc < 1 ? AvmThunkCoerce_AvmBox_double(kAvmThunkUndefined) : AvmThunkUnbox_double(argv[argoff1]))
     );
 }
@@ -453,7 +453,7 @@ double builtin_d2d_oaaaaaaa_opti1_opti0_opti0_opti0_opti0_rest_thunk(AvmMethodEn
     const uint32_t argoffV = argoff7 + AvmThunkArgSize_AvmBox;
     typedef AvmRetType_double (AvmObjectT::*FuncType)(AvmBox, AvmBox, AvmBox, AvmBox, AvmBox, AvmBox, AvmBox, AvmBox*, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
         , (argc < 3 ? AvmThunkCoerce_int32_t_AvmBox(1) : AvmThunkUnbox_AvmBox(argv[argoff3]))
@@ -474,7 +474,7 @@ AvmBox builtin_i2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_int32_t (AvmStringT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
     );
 }
 // Object_private__isPrototypeOf
@@ -488,7 +488,7 @@ AvmBox builtin_b2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBool32 (AvmObjectT::*FuncType)(AvmBox, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
     );
@@ -505,7 +505,7 @@ AvmBox builtin_a2a_oaaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, AvmBox, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
         , AvmThunkUnbox_AvmBox(argv[argoff3])
@@ -525,7 +525,7 @@ AvmBox builtin_u2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_uint32_t (AvmObjectT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
     );
 }
 // Function_AS3_call
@@ -538,7 +538,7 @@ AvmBox builtin_a2a_oa_optakAvmThunkUndefined_rest_thunk(AvmMethodEnv env, uint32
     const uint32_t argoffV = argoff1 + AvmThunkArgSize_AvmBox;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, AvmBox*, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
         , (argc <= 1 ? NULL : argv + argoffV)
         , (argc <= 1 ? 0 : argc - 1)
@@ -553,7 +553,7 @@ AvmBox builtin_s2a_si_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     };
     typedef AvmRetType_AvmString (AvmStringT::*FuncType)(int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
     );
 }
@@ -568,7 +568,7 @@ AvmBox builtin_i2a_oaai_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* arg
     };
     typedef AvmRetType_int32_t (AvmObjectT::*FuncType)(AvmBox, AvmBox, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
         , (argc < 3 ? 0 : AvmThunkUnbox_int32_t(argv[argoff3]))
@@ -586,7 +586,7 @@ AvmBox builtin_b2a_oas_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBool32 (AvmObjectT::*FuncType)(AvmBox, AvmString);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmString(argv[argoff2])
     );
@@ -607,7 +607,7 @@ AvmBox builtin_i2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_int32_t (AvmObjectT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
     );
 }
 // __AS3___vec_Vector_object_private__map
@@ -628,7 +628,7 @@ AvmBox builtin_a2a_ooa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmObject, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmObject(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
     );
@@ -642,7 +642,7 @@ double builtin_d2d_sd_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     };
     typedef AvmRetType_double (AvmStringT::*FuncType)(double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
     );
 }
@@ -656,7 +656,7 @@ AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_65_____undefined_____opti2
     };
     typedef AvmRetType_int32_t (AvmStringT::*FuncType)(AvmString, double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? AvmThunkConstant_AvmString(65)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
         , (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
     );
@@ -682,7 +682,7 @@ AvmBox builtin_b2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBool32 (AvmObjectT::*FuncType)(AvmBox, AvmObject, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmObject(argv[argoff2])
         , AvmThunkUnbox_AvmBox(argv[argoff3])
@@ -698,7 +698,7 @@ AvmBox builtin_i2a_ssi_opti2147483647_thunk(AvmMethodEnv env, uint32_t argc, Avm
     };
     typedef AvmRetType_int32_t (AvmStringT::*FuncType)(AvmString, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmString(argv[argoff1])
         , (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
     );
@@ -714,7 +714,7 @@ AvmBox builtin_b2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBool32 (AvmObjectT::*FuncType)(AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
     );
 }
@@ -728,7 +728,7 @@ AvmBox builtin_s2a_s_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmString (AvmStringT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
     );
 }
 // __AS3___vec_Vector_double_private__forEach
@@ -747,7 +747,7 @@ AvmBox builtin_v2a_oaoa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_void (AvmObjectT::*FuncType)(AvmBox, AvmObject, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmObject(argv[argoff2])
         , AvmThunkUnbox_AvmBox(argv[argoff3])
@@ -766,7 +766,7 @@ AvmBox builtin_s2a_sdd_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t arg
     };
     typedef AvmRetType_AvmString (AvmStringT::*FuncType)(double, double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff1]))
         , (argc < 2 ? AvmThunkCoerce_int32_t_double(2147483647) : AvmThunkUnbox_double(argv[argoff2]))
     );
@@ -785,7 +785,7 @@ double builtin_d2d_odd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_double (AvmObjectT::*FuncType)(double, double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_double(argv[argoff1])
         , AvmThunkUnbox_double(argv[argoff2])
     );
@@ -799,7 +799,7 @@ AvmBox builtin_a2a_n_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmNamespaceT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmNamespace(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmNamespace, argv[argoff0])).*(func))(
     );
 }
 // private_MethodClosure_private_savedThis_get
@@ -840,7 +840,7 @@ AvmBox builtin_a2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
     );
 }
 // String_private__split
@@ -855,7 +855,7 @@ AvmBox builtin_a2a_osau_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmString, AvmBox, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmString(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
         , AvmThunkUnbox_uint32_t(argv[argoff3])
@@ -873,7 +873,7 @@ AvmBox builtin_s2a_osaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmString (AvmObjectT::*FuncType)(AvmString, AvmBox, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmString(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
         , AvmThunkUnbox_AvmBox(argv[argoff3])
@@ -891,7 +891,7 @@ AvmBox builtin_v2a_oasb_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_void (AvmObjectT::*FuncType)(AvmBox, AvmString, AvmBool32);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmString(argv[argoff2])
         , AvmThunkUnbox_AvmBool32(argv[argoff3])
@@ -907,7 +907,7 @@ AvmBox builtin_a2a_os_optsAvmThunkConstant_AvmString_0__________thunk(AvmMethodE
     };
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmString);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc < 1 ? AvmThunkConstant_AvmString(0)/* "" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
     );
 }
@@ -929,7 +929,7 @@ AvmBox builtin_u2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
     typedef AvmRetType_uint32_t (AvmObjectT::*FuncType)(AvmBox*, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
@@ -945,7 +945,7 @@ AvmBox builtin_s2a_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmString (AvmObjectT::*FuncType)(int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_int32_t(argv[argoff1])
     );
 }
@@ -963,7 +963,7 @@ AvmBox builtin_func_s2a_os_optsAvmThunkConstant_AvmString_65_____undefined_____t
     };
     typedef AvmRetType_AvmString (*FuncType)(AvmObject, AvmString);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_FUNCTION_HANDLER(env));
-    return (AvmBox)(*func)(AvmThunkUnbox_AvmObject(argv[argoff0])
+    return (AvmBox)(*func)(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])
         , (argc < 1 ? AvmThunkConstant_AvmString(65)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
     );
 }
@@ -977,7 +977,7 @@ AvmBox builtin_i2a_ssi_opti0_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv
     };
     typedef AvmRetType_int32_t (AvmStringT::*FuncType)(AvmString, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmString(argv[argoff1])
         , (argc < 2 ? 0 : AvmThunkUnbox_int32_t(argv[argoff2]))
     );
@@ -991,7 +991,7 @@ AvmBox builtin_func_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32
     };
     typedef AvmRetType_AvmBool32 (*FuncType)(AvmObject, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_FUNCTION_HANDLER(env));
-    return (AvmBox)(*func)(AvmThunkUnbox_AvmObject(argv[argoff0])
+    return (AvmBox)(*func)(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])
         , (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
     );
 }
@@ -1009,7 +1009,7 @@ AvmBox builtin_a2a_oa_optsAvmThunkConstant_AvmString_480___________thunk(AvmMeth
     };
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc < 1 ? AvmThunkCoerce_AvmString_AvmBox(AvmThunkConstant_AvmString(480)/* "*" */) : AvmThunkUnbox_AvmBox(argv[argoff1]))
     );
 }
@@ -1036,7 +1036,7 @@ double builtin_d2d_od_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_double (AvmObjectT::*FuncType)(double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_double(argv[argoff1])
     );
 }
@@ -1050,7 +1050,7 @@ AvmBox builtin_a2a_oaa_optakAvmThunkUndefined_optakAvmThunkUndefined_thunk(AvmMe
     };
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
         , (argc < 2 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff2]))
     );
@@ -1067,7 +1067,7 @@ AvmBox builtin_s2a_sii_opti0_opti2147483647_thunk(AvmMethodEnv env, uint32_t arg
     };
     typedef AvmRetType_AvmString (AvmStringT::*FuncType)(int32_t, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? 0 : AvmThunkUnbox_int32_t(argv[argoff1]))
         , (argc < 2 ? 2147483647 : AvmThunkUnbox_int32_t(argv[argoff2]))
     );
@@ -1081,7 +1081,7 @@ AvmBox builtin_s2a_o_rest_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     const uint32_t argoffV = argoff0 + AvmThunkArgSize_AvmObject;
     typedef AvmRetType_AvmString (AvmObjectT::*FuncType)(AvmBox*, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc <= 0 ? NULL : argv + argoffV)
         , (argc <= 0 ? 0 : argc - 0)
     );
@@ -1102,7 +1102,7 @@ AvmBox builtin_v2a_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_void (AvmObjectT::*FuncType)(AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
     );
     return kAvmThunkUndefined;
@@ -1117,7 +1117,7 @@ double builtin_d2d_oa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_double (AvmObjectT::*FuncType)(AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
     );
 }
@@ -1131,7 +1131,7 @@ AvmBox builtin_i2a_ssd_optsAvmThunkConstant_AvmString_65_____undefined_____opti0
     };
     typedef AvmRetType_int32_t (AvmStringT::*FuncType)(AvmString, double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmString(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmString, argv[argoff0])).*(func))(
         (argc < 1 ? AvmThunkConstant_AvmString(65)/* "undefined" */ : AvmThunkUnbox_AvmString(argv[argoff1]))
         , (argc < 2 ? AvmThunkCoerce_int32_t_double(0) : AvmThunkUnbox_double(argv[argoff2]))
     );
@@ -1148,7 +1148,7 @@ AvmBox builtin_b2a_oa_optakAvmThunkUndefined_thunk(AvmMethodEnv env, uint32_t ar
     };
     typedef AvmRetType_AvmBool32 (AvmObjectT::*FuncType)(AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc < 1 ? kAvmThunkUndefined : AvmThunkUnbox_AvmBox(argv[argoff1]))
     );
 }
@@ -1164,7 +1164,7 @@ AvmBox builtin_v2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_void (AvmObjectT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
     );
     return kAvmThunkUndefined;
 }
@@ -1178,7 +1178,7 @@ double builtin_d2d_oi_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_double (AvmObjectT::*FuncType)(int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_int32_t(argv[argoff1])
     );
 }
@@ -1198,7 +1198,7 @@ AvmBox builtin_a2a_oaa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
     );
@@ -1228,7 +1228,7 @@ AvmBox builtin_b2a_o_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBool32 (AvmObjectT::*FuncType)();
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
     );
 }
 // String_private__search
@@ -1242,7 +1242,7 @@ AvmBox builtin_i2a_osa_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_int32_t (AvmObjectT::*FuncType)(AvmString, AvmBox);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmString(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
     );
@@ -1259,7 +1259,7 @@ AvmBox builtin_a2a_oadd_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, double, double);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_double(argv[argoff2])
         , AvmThunkUnbox_double(argv[argoff3])
@@ -1277,7 +1277,7 @@ AvmBox builtin_a2a_oai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_int32_t(argv[argoff2])
     );
@@ -1294,7 +1294,7 @@ AvmBox builtin_i2a_oaai_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_int32_t (AvmObjectT::*FuncType)(AvmBox, AvmBox, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmBox(argv[argoff2])
         , AvmThunkUnbox_int32_t(argv[argoff3])
@@ -1312,7 +1312,7 @@ AvmBox builtin_s2a_odii_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmString (AvmObjectT::*FuncType)(double, int32_t, int32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_double(argv[argoff1])
         , AvmThunkUnbox_int32_t(argv[argoff2])
         , AvmThunkUnbox_int32_t(argv[argoff3])
@@ -1329,7 +1329,7 @@ double builtin_d2d_odd_optdkAvmThunkInfinity_optdkAvmThunkInfinity_rest_thunk(Av
     const uint32_t argoffV = argoff2 + AvmThunkArgSize_double;
     typedef AvmRetType_double (AvmObjectT::*FuncType)(double, double, AvmBox*, uint32_t);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         (argc < 1 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff1]))
         , (argc < 2 ? kAvmThunkInfinity : AvmThunkUnbox_double(argv[argoff2]))
         , (argc <= 2 ? NULL : argv + argoffV)
@@ -1353,7 +1353,7 @@ AvmBox builtin_a2a_oao_thunk(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
     (void)argc;
     typedef AvmRetType_AvmBox (AvmObjectT::*FuncType)(AvmBox, AvmObject);
     const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));
-    return (AvmBox)(*(AvmThunkUnbox_AvmObject(argv[argoff0])).*(func))(
+    return (AvmBox)(*(AvmThunkUnbox_AvmReceiver(AvmObject, argv[argoff0])).*(func))(
         AvmThunkUnbox_AvmBox(argv[argoff1])
         , AvmThunkUnbox_AvmObject(argv[argoff2])
     );

@@ -1176,8 +1176,19 @@ class AbcThunkGen:
 			self.out_c.println("const uint32_t argoffV = argoff"+str(len(argtraits)-1)+" + "+argszprev+";");
 		
 		args = []
+		
+		cts = ctype_from_traits(argtraits[0], True)
+		assert(cts in ["AvmObject","AvmString","AvmNamespace"])
+		val = "AvmThunkUnbox_AvmReceiver("+cts+", argv[argoff0])";
+		if directcall and argtraits[0].niname != None:
+			val = "(%s*)%s" % (argtraits[0].niname, val)
+		args.append((val, cts))
+		if cookie:
+			assert(opts.nativemapname)
+			assert(not directcall)
+			args.append(("AVMTHUNK_GET_COOKIE(env)", "int32_t"))
 
-		for i in range(0, len(argtraits)):
+		for i in range(1, len(argtraits)):
 			cts = ctype_from_traits(argtraits[i], True)
 			val = "AvmThunkUnbox_"+cts+"(argv[argoff" + str(i) + "])";
 			if directcall and cts == "AvmObject" and argtraits[i].niname != None:
@@ -1190,10 +1201,6 @@ class AbcThunkGen:
 					defval = "AvmThunkCoerce_"+dts+"_"+cts+"("+defval+")";
 				val = "(argc < "+str(i)+" ? "+defval+" : "+val+")";
 			args.append((val, cts))
-			if i == 0 and cookie:
-				assert(opts.nativemapname)
-				assert(not directcall)
-				args.append(("AVMTHUNK_GET_COOKIE(env)", "int32_t"))
 
 		if m.needRest():
 			args.append(("(argc <= "+str(param_count)+" ? NULL : argv + argoffV)", "AvmBox*"))
