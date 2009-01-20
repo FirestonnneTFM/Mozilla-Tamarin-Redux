@@ -3960,6 +3960,12 @@ namespace avmplus
             Ins(LIR_live, _save_eip);
         }
 
+		if (info->setsDxns()) {
+			Ins(LIR_live, dxns);
+			// dxnsAddrSave might not need to be marked as live -- erring on side of conservatism
+			Ins(LIR_live, dxnsAddrSave);
+		}
+
 		#ifdef DEBUGGER
 		if (core->debugger())
 		{
