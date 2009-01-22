@@ -528,6 +528,8 @@ class RuntestBase:
             cmd += ' %s' % arg
         self.verbose_print('   compiling %s' % file)
         for p in self.parents(dir):
+            if p=='':
+                p='.'
             shell = join(p,'shell'+self.sourceExt)
             if isfile(shell):
                 cmd += ' -in ' + shell
@@ -539,6 +541,7 @@ class RuntestBase:
             cmd += ' -in %s' % string.replace(util, '$', '\$')
         #debug
         try:
+            self.verbose_print('%s %s' % (cmd,as_file))
             f = self.run_pipe('%s %s' % (cmd,as_file))
             for line in f:
                 self.verbose_print(line.strip())
