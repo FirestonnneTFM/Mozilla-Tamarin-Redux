@@ -48,6 +48,7 @@ class PerformanceRuntest(RuntestBase):
         self.parseOptions()
         self.setTimestamp()
         self.determineOS()
+        self.getVersion()
         self.tests = self.getTestsList(self.args)
         # Load the root testconfig file
         self.settings, self.includes = self.parseTestConfig('.')
@@ -126,7 +127,7 @@ class PerformanceRuntest(RuntestBase):
         # VM, will be cyclone if not from build machine
         # ================================================
         if not self.vmversion:
-            f = run_pipe("%s" % self.avm)
+            f = self.run_pipe("%s" % self.avm)
             try:
                 for line in f:
                     version = line.split()
