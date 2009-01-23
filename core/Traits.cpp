@@ -1618,7 +1618,7 @@ namespace avmplus
 		}
 		
 		AvmAssert(m_totalSize >= m_sizeofInstance);
-		if (m_needsHashtable || (base && base->m_hashTableOffset && !isXMLType()))
+		if (m_needsHashtable || (base && base->base && base->m_hashTableOffset && !isXMLType()))
 		{
 			// slotSize is already rounded up to pointer-sized boundary, but totalsize might not be
 			// (eg for bool/int/uint, which have weird sizes)
@@ -1956,7 +1956,6 @@ namespace avmplus
 			AvmAssert(m_slotDestroyInfo.cap() >= 1);
 			AvmAssert((uintptr_t(p) & 3) == 0);
 			const uint32_t bitsUsed = slotAreaSize / sizeof(uint32_t);	// not sizeof(Atom)!
-			GC* gc = GC::GetGC(obj);
 			for (uint32_t bit = 1; bit <= bitsUsed; bit++) 
 			{
 				if (m_slotDestroyInfo.test(bit))
@@ -1966,24 +1965,14 @@ namespace avmplus
 					#endif
 					Atom a = *(const Atom*)p;
 					RCObject* rc = NULL;
-					switch (atomKind(a))
+					if (atomKind(a) <= kNamespaceType)
 					{
-						case kStringType:
-						case kObjectType:
-						case kNamespaceType:
-							rc = (RCObject*)atomPtr(a);
-							break;
-						case kSpecialType:
-							rc = (RCObject*)atomPtr(a);
-							// kSpecialType might be GC or RC, gotta check
-							if (rc && !gc->IsRCObject(rc))
-								rc = NULL;
-							break;
-					}
-					if (rc)
-					{
-						AvmAssert(GC::GetGC(obj)->IsRCObject(rc));
-						rc->DecrementRef();
+						rc = (RCObject*)atomPtr(a);
+						if (rc)
+						{
+							AvmAssert(GC::GetGC(obj)->IsRCObject(rc));
+							rc->DecrementRef();
+						}
 					}
 				}
 				*p++ = 0;
