@@ -144,7 +144,7 @@ class PerformanceRuntest(RuntestBase):
         if not isfile(self.shellabc):
             exit("ERROR: shell.abc %s does not exist, SHELLLABC environment variable or --shellabc must be set to shell.abc" % self.shellabc)
         args = []
-        args.append('-in %s' % self.shellabc)
+        args.append('-import %s' % self.shellabc)
         if self.optimize:
             args.append('-optimize')
         RuntestBase.compile_test(self, as_file, args)
