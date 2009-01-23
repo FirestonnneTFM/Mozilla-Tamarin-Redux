@@ -1829,7 +1829,9 @@ namespace avmplus
 				if (!value_index) value = nullObjectAtom;
 				if (!AvmCore::isNull(value))
 					goto illegal_default;
-				break;
+				
+				// return, don't break: we don't want to generate any code, just leave the slot zeroed out.
+				return;
 			}
 		}
 
