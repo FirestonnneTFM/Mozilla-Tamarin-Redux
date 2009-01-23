@@ -43,13 +43,23 @@ package {
 	public namespace ns = "some_ns"
 	public namespace ns2 = "another_ns"
 	
+	public interface IBar
+	{
+		function i0():*;
+	};
+
 	public interface IFoo
 	{
 		function i1():*;
 		function get i2():*;
 	};
 
-	public class Foo extends Object implements IFoo
+	public class FooBase extends Object implements IBar
+	{
+		public function i0():* {}
+	}
+
+	public class Foo extends FooBase implements IFoo
 	{
 		public var z:int;
 		
@@ -133,8 +143,10 @@ package {
             <arg key="c" value="d"/>
         </metadata>
         <extendsClass type="Foo"/>
+        <extendsClass type="FooBase"/>
         <extendsClass type="Object"/>
         <implementsInterface type="IFoo"/>
+        <implementsInterface type="IBar"/>
         <constructor>
             <parameter index="1" type="int" optional="false"/>
         </constructor>
@@ -165,6 +177,7 @@ package {
         <variable name="aa" type="int"/>
         <variable name="z" type="int"/>
         <accessor name="i2" access="readonly" type="*" declaredBy="Foo"/>
+        <method name="i0" declaredBy="FooBase" returnType="*"/>
         <method name="i1" declaredBy="Foo" returnType="*"/>
         <variable name="vecfoo" type="__AS3__.vec::Vector.&lt;IFoo&gt;">
             <metadata name="metahere">
@@ -186,8 +199,10 @@ package {
         <arg key="c" value="d"/>
     </metadata>
     <extendsClass type="Foo"/>
+    <extendsClass type="FooBase"/>
     <extendsClass type="Object"/>
     <implementsInterface type="IFoo"/>
+    <implementsInterface type="IBar"/>
     <constructor>
         <parameter index="1" type="int" optional="false"/>
     </constructor>
@@ -218,6 +233,7 @@ package {
     <variable name="aa" type="int"/>
     <variable name="z" type="int"/>
     <accessor name="i2" access="readonly" type="*" declaredBy="Foo"/>
+    <method name="i0" declaredBy="FooBase" returnType="*"/>
     <method name="i1" declaredBy="Foo" returnType="*"/>
     <variable name="vecfoo" type="__AS3__.vec::Vector.&lt;IFoo&gt;">
         <metadata name="metahere">
@@ -249,10 +265,10 @@ package {
 	expected.push("Foo");
 	expected.push("Foo2");
 	expected.push(null);
-	expected.push("Object");
+	expected.push("FooBase");
 	expected.push("Foo");
 	expected.push(null);	// getQualifiedSuperclassName returns null (not "null") for Object
-	expected.push("Object");
+	expected.push("FooBase");
 	expected.push("Foo");
 	expected.push('<type name="null" isDynamic="false" isFinal="true" isStatic="false"/>');
 	expected.push('<type name="void" isDynamic="false" isFinal="true" isStatic="false"/>');
