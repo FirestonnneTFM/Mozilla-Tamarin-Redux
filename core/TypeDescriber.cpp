@@ -219,9 +219,8 @@ namespace avmplus
 			// so walk the tree. there might be redundant interfaces listed in the inheritance, 
 			// so use a list to remove dupes
 			List<Traitsp> unique(gc);
-			for (Traitsp b = traits; b; b = b->base) 
+			for (TraitsBindingsp tbi = tb; tbi; tbi = tbi->base) 
 			{
-				TraitsBindingsp tbi = b->getTraitsBindings();
 				for (uint32_t i = 0; i < tbi->interfaceCapacity; ++i)
 				{
 					Traitsp ti = tbi->getInterface(i);
@@ -254,18 +253,22 @@ namespace avmplus
 			addBindings(mybind, tb, flags);
 
 			// Don't want interface methods, so post-process and wipe out any
-			// bindings that were added
-			for (uint32_t i = 0; i < tb->interfaceCapacity; ++i)
+			// bindings that were added. Be sure to walk up the inheritance
+			// chain to get interfaces implemented by our ancestors but not us.
+			for (TraitsBindingsp bb = tb; bb; bb = bb->base) 
 			{
-				Traitsp ti = tb->getInterface(i);
-				if (ti && ti->isInterface)
+				for (uint32_t i = 0; i < bb->interfaceCapacity; ++i)
 				{
-					TraitsBindingsp tbi = ti->getTraitsBindings();
-					for (int32_t index = 0; (index = tbi->next(index)) != 0; )
+					Traitsp ti = bb->getInterface(i);
+					if (ti && ti->isInterface)
 					{
-						Stringp name = tbi->keyAt(index);
-						Namespacep ns = tbi->nsAt(index);
-						mybind->add(name, ns, BIND_NONE);
+						TraitsBindingsp tbi = ti->getTraitsBindings();
+						for (int32_t index = 0; (index = tbi->next(index)) != 0; )
+						{
+							Stringp name = tbi->keyAt(index);
+							Namespacep ns = tbi->nsAt(index);
+							mybind->add(name, ns, BIND_NONE);
+						}
 					}
 				}
 			}
@@ -274,18 +277,14 @@ namespace avmplus
 			List<Namespacep> nsremoval(gc);
 			if (flags & HIDE_NSURI_METHODS)
 			{
-				for (uint32_t i = 0; i < tb->interfaceCapacity; ++i)
+				for (TraitsBindingsp tbi = tb->base; tbi; tbi = tbi->base) 
 				{
-					Traitsp ti = tb->getInterface(i);
-					// already did interfaces, don't need to do them again
-					if (ti && !ti->isInterface)
+					for (int32_t index = 0; (index = tbi->next(index)) != 0; )
 					{
-						TraitsBindingsp tbi = ti->getTraitsBindings();
-						for (int32_t index = 0; (index = tbi->next(index)) != 0; )
+						Namespacep ns = tbi->nsAt(index);
+						if (ns->getURI()->length() > 0 && nsremoval.indexOf(ns) < 0)
 						{
-							Namespacep ns = tbi->nsAt(index);
-							if (ns->getURI()->length() > 0 && nsremoval.indexOf(ns) < 0)
-								nsremoval.add(ns);
+							nsremoval.add(ns);
 						}
 					}
 				}
