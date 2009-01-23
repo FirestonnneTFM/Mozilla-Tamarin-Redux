@@ -307,9 +307,9 @@ class PerformanceRuntest(RuntestBase):
             out1.append(f1)
             if len(self.avm2)>0:
                 if len(self.vmargs2)>0:
-                    f2 = run_pipe("%s %s %s" % (self.avm2, self.vmargs2, abc))
+                    f2 = self.run_pipe("%s %s %s" % (self.avm2, self.vmargs2, abc))
                 else:
-                    f2 = run_pipe("%s %s %s" % (self.avm2, self.vmargs, abc))
+                    f2 = self.run_pipe("%s %s %s" % (self.avm2, self.vmargs, abc))
                 out2.append(f2)
             try:
                 for line in f1:
