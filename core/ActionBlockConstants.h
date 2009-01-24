@@ -190,6 +190,8 @@ namespace avmplus
 			OP_newclass = 0x58,
 			OP_getdescendants = 0x59,
 			OP_newcatch = 0x5A,
+			OP_findpropglobalstrict = 0x5B, // NEW internal only
+			OP_findpropglobal = 0x5C, // NEW internal only 
 			OP_findpropstrict = 0x5D,
 			OP_findproperty = 0x5E,
 			OP_finddef = 0x5F,

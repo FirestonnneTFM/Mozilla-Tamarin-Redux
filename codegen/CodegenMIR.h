@@ -169,7 +169,7 @@ namespace avmplus
 	 * suitable for common subexpression elimination, inlining, and register
 	 * allocation.
 	 */
-	class CodegenMIR
+	class CodegenMIR : public CodeWriter
 	#ifdef AVMPLUS_ARM
 		: public ArmAssembler
 	#endif
@@ -404,6 +404,17 @@ namespace avmplus
 		 * Generates code for a native method thunk.
 		 */
 		void* emitImtThunk(ImtBuilder::ImtEntry *e, int imtCount);
+
+		// CodeWriter methods
+		void write(FrameState* state, const byte* pc, AbcOpcode opcode);
+		void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
+		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
+		void writePrologue(FrameState* state);
+		void writeEpilogue(FrameState* state);
+
+		void emitToString(AbcOpcode opcode, int i);
+		Traits* getType(uint32_t index);
+		void emitGetGlobalScope();
 
 	private:
 
