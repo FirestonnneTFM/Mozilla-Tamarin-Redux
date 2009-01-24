@@ -253,6 +253,7 @@ namespace avmplus
 #include "MMgc.h"
 
 #define MMGC_SUBCLASS_DECL : public GCObject
+#define CODER
 
 #include "QCache.h"
 #include "GrowableBuffer.h"
@@ -291,6 +292,7 @@ namespace avmplus
 #include "StringBuffer.h"
 #include "AtomArray.h"
 #include "wopcodes.h"
+#include "Coder.h"
 #include "WordcodeTranslator.h"
 #include "WordcodeEmitter.h"
 #include "Verifier.h"
