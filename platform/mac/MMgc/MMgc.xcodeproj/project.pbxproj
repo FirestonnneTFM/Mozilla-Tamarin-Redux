@@ -278,7 +278,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core ../..";
 				WARNING_CFLAGS = "-Wstrict-aliasing";
 				ZERO_LINK = NO;
 			};
@@ -316,7 +316,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc;
 				SEPARATE_STRIP = NO;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core ../..";
 				WARNING_CFLAGS = "-Wstrict-aliasing";
 			};
 			name = Release;
@@ -431,7 +431,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core ../..";
 				WARNING_CFLAGS = "-Wstrict-aliasing";
 				ZERO_LINK = NO;
 			};
@@ -470,7 +470,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc;
 				SEPARATE_STRIP = NO;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core ../..";
 				WARNING_CFLAGS = "-Wstrict-aliasing";
 			};
 			name = Release_Debugger;

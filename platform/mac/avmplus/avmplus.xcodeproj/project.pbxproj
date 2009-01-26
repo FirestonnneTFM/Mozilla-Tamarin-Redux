@@ -1056,7 +1056,7 @@
 				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -1092,7 +1092,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
 				SEPARATE_STRIP = NO;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 			};
 			name = Release;
 		};
@@ -1213,7 +1213,7 @@
 				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug_Debugger;
@@ -1250,7 +1250,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
 				SEPARATE_STRIP = NO;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 			};
 			name = Release_Debugger;
 		};

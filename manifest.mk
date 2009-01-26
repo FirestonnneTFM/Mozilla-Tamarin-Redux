@@ -40,6 +40,7 @@ INCLUDES += \
   -I$(topsrcdir)/core \
   -I$(topsrcdir)/codegen \
   -I$(topsrcdir)/pcre \
+  -I$(topsrcdir)/platform \
   $(NULL)
 
 $(call RECURSE_DIRS,MMgc)

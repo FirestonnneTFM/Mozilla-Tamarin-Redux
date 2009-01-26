@@ -984,7 +984,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -1017,7 +1017,7 @@
 				);
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 			};
 			name = Release;
 		};
@@ -1124,7 +1124,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug_Debugger;
@@ -1158,7 +1158,7 @@
 				);
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 			};
 			name = Release_Debugger;
 		};

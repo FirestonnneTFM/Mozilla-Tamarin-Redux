@@ -1039,7 +1039,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
 			};
 			name = Debug;
 		};
@@ -1080,7 +1080,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
 			};
 			name = Release;
 		};
@@ -1168,7 +1168,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
 			};
 			name = Debug_Debugger;
 		};
@@ -1211,7 +1211,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
 			};
 			name = Release_Debugger;
 		};
