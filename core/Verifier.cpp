@@ -840,7 +840,7 @@ namespace avmplus
 					f->activationTraits->scope = ftraits->scope;
 				}
 #ifdef AVMPLUS_VERIFYALL
-				core->enq(f);
+				core->enqFunction(f);
 #endif
 				coder->write(state, pc, opcode);
 				state->push(ftraits, true);
@@ -917,8 +917,8 @@ namespace avmplus
 				itraits->resolveSignatures(toplevel);
 
 				#ifdef AVMPLUS_VERIFYALL
-				core->enq(ctraits);
-				core->enq(itraits);
+				core->enqTraits(ctraits);
+				core->enqTraits(itraits);
 				#endif
 
 				emitCoerce(CLASS_TYPE, state->sp()); // make sure base class is really a class
@@ -1226,9 +1226,6 @@ namespace avmplus
 				{
 					verifyFailed(kDanglingFunctionError, core->toErrorString(m), core->toErrorString(info));
 				}
-				#ifdef AVMPLUS_VERIFYALL
-				core->enq(m);
-				#endif
 				emitCoerceArgs(m, argc);
 				int method_id = m->method_id;
 				Traits* resultType = m->returnTraits();
@@ -1698,8 +1695,12 @@ namespace avmplus
 				checkStack(0, 1);
 				if (!(info->flags & AbstractFunction::NEED_ACTIVATION))
 					verifyFailed(kInvalidNewActivationError);
+				info->activationTraits->resolveSignatures(toplevel);
 				coder->write(state, pc, opcode);
 				state->push(info->activationTraits, true);
+			#ifdef AVMPLUS_VERIFYALL
+				core->enqTraits(info->activationTraits);
+			#endif
 				break;
 
 			case OP_newcatch: 
@@ -2398,11 +2399,6 @@ namespace avmplus
 						// OPTIMIZEME - more early binding for interpreter on findproperty!
 						XLAT_ONLY(if (translator) translator->emitOp1(wordCode(opcode), imm30));
 
-                        #ifdef AVMPLUS_VERIFYALL
-                        core->enq(script);
-                        core->enq(script->declaringTraits);
-                        #endif
-
 						return;
 					}
 #if defined AVMPLUS_WORD_CODE
@@ -2928,9 +2924,9 @@ namespace avmplus
         {
 			/*if (verbose)
 			{
-				core->console << "merge current=" << state->pc << "\n";
+				core->console << "merge current=" << (int)state->pc << "\n";
 				showState(state, code_pos+state->pc, false);
-				core->console << "merge target=" << targetState->pc << "\n";
+				core->console << "merge target=" << (int)targetState->pc << "\n";
 				showState(targetState, code_pos+targetState->pc, false);
 			}*/
 
