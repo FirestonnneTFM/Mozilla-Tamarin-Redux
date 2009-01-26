@@ -51,7 +51,6 @@
 	#ifndef AVMPLUS_SYMBIAN
 		#include <pthread.h>
 	#endif
-	#include <stdio.h>
 #endif /* AVMPLUS_UNIX */
 
 namespace avmplus

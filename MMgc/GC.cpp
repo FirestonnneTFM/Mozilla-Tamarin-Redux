@@ -37,18 +37,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// for vsprintf
-#include <stdio.h>
-// For memset
-#include <string.h>
-
 #include "MMgc.h"
 #include "StaticAssert.h"
-
-#ifdef HAVE_STDARG
-// for va_list
-#include <stdarg.h>
-#endif
 
 #ifdef _DEBUG
 #include "GCTests.h"

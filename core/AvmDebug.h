@@ -41,10 +41,6 @@
 
 #include "avmplusTypes.h"
 
-#ifdef WIN32
-    #include <windows.h>
-#endif
-
 #if defined(AVMPLUS_CUSTOM_ASSERTION_HANDLER)
     extern "C"
     {

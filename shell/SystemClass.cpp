@@ -38,8 +38,6 @@
 
 #include "avmshell.h"
 
-#include <stdlib.h>
-
 namespace avmshell
 {
 	SystemClass::SystemClass(VTable *cvtable)

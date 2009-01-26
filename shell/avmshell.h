@@ -38,9 +38,6 @@
 #ifndef __avmshell__
 #define __avmshell__
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "avmplus.h"
 #include "Selftest.h"
 

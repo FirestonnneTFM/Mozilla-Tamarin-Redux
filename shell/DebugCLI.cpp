@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <stdio.h>
-
 #include "avmshell.h"
 
 #ifdef DEBUGGER

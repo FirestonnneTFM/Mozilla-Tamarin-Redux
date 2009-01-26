@@ -37,12 +37,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include <string.h>
-#include <stdlib.h>
-// TODO: remove this hack:
-#ifdef __WINSCW__
-#include <e32std.h>
-#endif
 #include "MMgc.h"
 
 #ifdef DEBUGGER

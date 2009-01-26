@@ -37,9 +37,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-// For memset
-#include <string.h>
-
 #include "MMgc.h"
 
 namespace MMgc

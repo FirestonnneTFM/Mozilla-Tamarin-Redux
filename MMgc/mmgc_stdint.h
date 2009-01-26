@@ -38,10 +38,6 @@
 #ifndef __mmgc_stdint__
 #define __mmgc_stdint__
 
-// pull in stdlib.h everywhere so that downstream includers can predict it.
-// on Win32 and Win64, this defines intptr_t and uintptr_t, but no other C99 types we care about.
-#include <stdlib.h>	
-
 #ifdef _MSC_VER
 	// MSVC doesn't support inttypes.h or most C99 types directly, so declare them ourself.
 

@@ -48,9 +48,6 @@
 #include "MMgc-config.h"
 #endif
 
-// For size_t
-#include <stddef.h>
-
 #if defined(MMGC_CUSTOM_BUILD)
     #include "MMgcCustomBuild.h"
 #else
@@ -76,6 +73,8 @@
 	#endif
 #endif
 
+#include "VMPI.h"
+
 #ifdef SCRIPT_DEBUGGER
 #ifndef DEBUGGER
 #define DEBUGGER
@@ -94,11 +93,6 @@
 */
 #ifdef DEBUGGER
 #define FEATURE_SAMPLER
-#endif
-
-#if defined(_DEBUG) || defined(_MAC)
-// for memset
-#include <string.h>
 #endif
 
 #ifndef _MSC_VER

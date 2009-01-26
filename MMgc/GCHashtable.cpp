@@ -38,8 +38,6 @@
 
 #include "MMgc.h"
 
-#include <stdlib.h>
-
 namespace MMgc
 {
 	const void *GCHashtable::DELETED = (const void*)1;

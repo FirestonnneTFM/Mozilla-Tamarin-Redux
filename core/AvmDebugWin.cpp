@@ -38,10 +38,6 @@
 
 #include "avmplus.h"
 
-#include <windows.h>
-#include <stdio.h>
-#include <stdarg.h>
-
 #ifdef _DEBUG
 #include <malloc.h>
 #ifndef UNDER_CE
