@@ -468,14 +468,14 @@ class PerformanceRuntest(RuntestBase):
                               return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
                             def perfmSocketlog(metric,key):
                               self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % 
-                                       (ast, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), self.config, self.vmversion))
+                                       (ast, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion))
                             perfmSocketlog('vprof-compile-time','compile')
                             perfmSocketlog('vprof-code-size','code')
                             perfmSocketlog('vprof-verify-time','verify')
                             perfmSocketlog('vprof-ir-bytes','irbytes')
                             perfmSocketlog('vprof-ir-time','ir')
                             perfmSocketlog('vprof-count','count')
-                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), self.config, self.vmversion))
+                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion))
                         self.js_print("%-50s %7s %10.1f%% %7s  %s" % (ast,result1,confidence,metric,resultList)) 
                     else: #one iteration
                         self.js_print("%-50s %7s %7s" % (ast,result1,metric)) 
