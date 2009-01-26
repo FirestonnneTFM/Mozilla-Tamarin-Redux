@@ -51,7 +51,12 @@ namespace MMgc
 	public:
 		const static uint32 kDefaultSize=16;
 		const static void * DELETED;
-		enum { MALLOC=1, MT=2, STRINGS=4 };
+		enum 
+		{ 
+			OPTION_MALLOC=1, 
+			OPTION_MT=2, 
+			OPTION_STRINGS=4 
+		};
 		GCHashtable(unsigned int capacity=kDefaultSize, int options=0);
 		virtual ~GCHashtable();
 		const void *get(const void *key);

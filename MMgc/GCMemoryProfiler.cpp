@@ -209,7 +209,7 @@ namespace MMgc
 	class PackageGroup : public GCAllocObject
 	{
 	public:
-		PackageGroup(const char *name) : categories(16, GCHashtable::MALLOC), name(name), size(0), count(0) {}
+		PackageGroup(const char *name) : categories(16, GCHashtable::OPTION_MALLOC), name(name), size(0), count(0) {}
 		const char *name;
 		size_t size;
 		size_t count;
@@ -270,7 +270,7 @@ namespace MMgc
 
 	void MemoryProfiler::DumpFatties()
 	{
-		GCHashtable packageTable(128, GCHashtable::MALLOC);
+		GCHashtable packageTable(128, GCHashtable::OPTION_MALLOC);
 
 		size_t residentSize=0;
 		size_t residentCount=0;
