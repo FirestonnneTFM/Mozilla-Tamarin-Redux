@@ -38,6 +38,4 @@
 #ifndef __avmplus_stdint__
 #define __avmplus_stdint__
 
-#include "mmgc_stdint.h"
-
 #endif /* __avmplus_stdint__ */
