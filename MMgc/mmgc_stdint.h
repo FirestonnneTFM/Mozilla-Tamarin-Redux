@@ -38,25 +38,4 @@
 #ifndef __mmgc_stdint__
 #define __mmgc_stdint__
 
-#ifdef _MSC_VER
-	// MSVC doesn't support inttypes.h or most C99 types directly, so declare them ourself.
-
-	#ifdef _ARM_
-		// Windows Mobile doesn't provide intptr_t or uintptr_t, so we'll do it ourself
-		typedef __int32				intptr_t; 
-		typedef unsigned __int32	uintptr_t; 
-	#endif
-
-	typedef __int8				int8_t;
-	typedef __int16				int16_t;
-	typedef __int32				int32_t;
-	typedef __int64				int64_t;
-	typedef unsigned __int8		uint8_t;
-	typedef unsigned __int16	uint16_t;
-	typedef unsigned __int32	uint32_t; 
-	typedef unsigned __int64	uint64_t;
-#else
-	#include <inttypes.h>
-#endif
-
 #endif /* __mmgc_stdint__ */

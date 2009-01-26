@@ -787,7 +787,7 @@ namespace avmplus
 			{
 				// The above _replace call may be used to insert new nodes at the end.  However, if a null is inserted
 				// the effect is as though nothing was inserted.  Test for this case.
-				if (m_node->_length() > (avmplus::uint32)i)
+				if (m_node->_length() > (uint32)i)
 				{
 					XMLObject* xml = new (core->GetGC()) XMLObject(xmlClass(), m_node->_getAt(i));
 					childChanges( (prior) ? xmlClass()->kNodeChanged : xmlClass()->kNodeAdded, xml->atom(), prior);
