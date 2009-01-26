@@ -73,9 +73,14 @@ namespace avmplus
 			impl32 = avmplus::interp32;
     }
 
-	Atom MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
+	/*static*/ Atom MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
 	{
 		MethodInfo* f = (MethodInfo*) env->method;
+
+		#ifdef AVMPLUS_VERIFYALL
+		// never verify late in verifyall mode
+		AvmAssert(!f->pool->core->config.verifyall);
+		#endif
 
 		f->verify(env->vtable->toplevel);
 
@@ -90,11 +95,6 @@ namespace avmplus
 		}
 #endif
 #endif // 0
-		
-		#ifdef AVMPLUS_VERIFYALL
-		f->flags |= VERIFIED;
-		env->core()->processVerifyQueue(env->toplevel());
-		#endif
 
         AvmAssert(f->impl32 != MethodInfo::verifyEnter);
 		env->impl32 = f->impl32;

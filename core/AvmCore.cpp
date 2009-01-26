@@ -425,6 +425,14 @@ namespace avmplus
 			exportDefs(scriptTraits, scriptEnv);
 		}
 
+#ifdef AVMPLUS_VERIFYALL
+		if (config.verifyall) {
+			for (int i=0, n=pool->scriptCount; i < n; i++)
+				enqTraits(pool->scripts[i]->declaringTraits);
+			verifyEarly(toplevel);
+		}
+#endif
+
 		return main;
 	}
 
@@ -3905,7 +3913,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 	
 #ifdef AVMPLUS_VERIFYALL
-	void AvmCore::enq(AbstractFunction* f) {
+	void AvmCore::enqFunction(AbstractFunction* f) {
 		if (config.verifyall &&
                 f && !f->isVerified() && 
                 !(f->flags & AbstractFunction::VERIFY_PENDING)) {
@@ -3914,16 +3922,16 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	void AvmCore::enq(Traits* t) {
+	void AvmCore::enqTraits(Traits* t) {
         if (config.verifyall && !t->isInterface) {
-            enq(t->init);
 			TraitsBindingsp td = t->getTraitsBindings();
 		    for (int i=0, n=td->methodCount; i < n; i++)
-                enq(td->getMethod(i));
+                enqFunction(td->getMethod(i));
+            enqFunction(t->init);
         }
 	}
 
-    void AvmCore::processVerifyQueue(Toplevel* toplevel) {
+    void AvmCore::verifyEarly(Toplevel* toplevel) {
 		while (!verifyQueue.isEmpty()) {
 			AbstractFunction* f = verifyQueue.removeLast();
             if (!f->isVerified()) {
