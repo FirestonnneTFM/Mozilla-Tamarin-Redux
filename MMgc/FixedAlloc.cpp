@@ -36,11 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "MMgc.h"
 
 #define kBlockHeadSize offsetof(MMgc::FixedAlloc::FixedBlock, items)

@@ -40,13 +40,6 @@
 
 #if defined(MEMORY_INFO) || defined(MEMORY_PROFILER)
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 namespace MMgc
 {
 

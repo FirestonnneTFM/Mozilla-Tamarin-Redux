@@ -36,12 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-
 #include "MMgc.h"
 
 namespace MMgc

@@ -48,12 +48,6 @@
 	#endif
 #endif
 
-#include <stdio.h>
-
-#ifdef AVMPLUS_SYMBIAN
-	#include <e32std.h>
-#endif
-
 namespace avmplus
 {
 #ifdef AVMPLUS_ARM

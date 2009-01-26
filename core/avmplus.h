@@ -79,9 +79,7 @@
  * https://developer.mozilla.org/En/Tamarin
  */
  
-// Needed for memset, memcpy et al.
-#include <string.h>
-
+#include "VMPI.h"
 #include "avmbuild.h"
 
 #if defined(_MAC)
@@ -120,8 +118,6 @@
 		#endif
 	#endif // AVMPLUS_ARM
 #endif // WIN32
-
-#include <stdarg.h>
 
 #include "avmsetjmp.h"
 

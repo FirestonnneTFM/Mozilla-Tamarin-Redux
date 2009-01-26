@@ -38,7 +38,6 @@
 #include "avmplus.h"
 #include "BigInteger.h"
 
-#include <math.h>
 
 #if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
     #include <emmintrin.h>
