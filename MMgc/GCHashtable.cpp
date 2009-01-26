@@ -58,7 +58,7 @@ namespace MMgc
 
 	GCHashtable::~GCHashtable()
 	{
-		if(options & MALLOC) {
+		if(options & OPTION_MALLOC) {
 			if(table)
 				free((char*)table);
 		}	else {
@@ -133,14 +133,14 @@ namespace MMgc
 	{
 		if(k1 == k2) 
 			return true;
-		if(k1 && k2 && (options & STRINGS))
+		if(k1 && k2 && (options & OPTION_STRINGS))
 			return strcmp((const char*)k1, (const char*)k2) == 0;
 		return false;
 	}
 	
 	unsigned GCHashtable::hash(const void *key)
 	{
-		if(options & STRINGS) {
+		if(options & OPTION_STRINGS) {
 			unsigned hashCode = 0;
 			const char *s = (const char*)key;
 			while (*s++) {
@@ -215,7 +215,7 @@ namespace MMgc
 			newTableSize >>= 1;
 
 		const void **newTable;
-		if(options & MALLOC) {
+		if(options & OPTION_MALLOC) {
 			newTable = (const void**)malloc(newTableSize*sizeof(void*));
 		} else {
 			newTable = new const void*[newTableSize];
@@ -244,7 +244,7 @@ namespace MMgc
 		}
 	
 		if(table != EMPTY) {
-			if(options & MALLOC) {
+			if(options & OPTION_MALLOC) {
 				if(table)	
 					free((char*)table);
 			} else {

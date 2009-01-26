@@ -73,9 +73,9 @@ namespace MMgc
 	{
 	public:
 		MemoryProfiler() : 
-				traceTable(128, GCHashtable::MALLOC | GCHashtable::MT),
-				stackTraceMap(128, GCHashtable::MALLOC | GCHashtable::MT),
-				nameTable(128, GCHashtable::MALLOC | GCHashtable::STRINGS) {}
+				traceTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
+				stackTraceMap(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
+				nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS) {}
 		~MemoryProfiler();
 		void Alloc(const void *item, size_t size);
 		void Free(const void *item, size_t size);
