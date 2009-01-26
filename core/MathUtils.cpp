@@ -260,7 +260,7 @@ namespace avmplus
 
 	static bool isHexNumber(const StringIndexer& s, int32_t index)
 	{
-		if (index >= s->length() || s[index] != '0')
+		if (s->length() - index < 2 || s[index] != '0')
 			return false;
 		utf32_t ch = s[index+1];
 		return (ch == 'x' || ch == 'X');
