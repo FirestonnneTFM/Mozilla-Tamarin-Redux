@@ -962,6 +962,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "shell" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 08FB7794FE84155DC02AAC07 /* shell */;
 			projectDirPath = "";
@@ -1112,7 +1113,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
 				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Debug;
@@ -1158,7 +1159,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
 				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Release;
@@ -1232,7 +1233,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
 				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Debug_Debugger;
@@ -1278,7 +1279,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions ..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
 				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Release_Debugger;
