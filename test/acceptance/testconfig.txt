@@ -76,23 +76,24 @@ ecma3/Math/e15_8_2_5:Infinity/Math.atan2\(-0. 1\)                ,   .*winmobile
 ecma3/RegExp/eregress_119909,   .*winmobile-tvm.* ,  expectedfail,   https://bugzilla.mozilla.org/show_bug.cgi?id=458055
 
 # Linux64 failures
-e4x/Expressions/kXMLBadQNameErr:.*                               ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/Ext/FinExtPublicClassFin:.*              ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/Ext/FinExtDefaultClassFin:.*             ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/Ext/FinExtDefaultClassPub:.*             ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/Ext/FinExtPublicClass:.*                 ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/Ext/FinExtDefaultClass:.*                ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/Ext/FinExtPublicClassPub:.*              ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/Ext/FinExtInternalClass:.*               ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/ClassDef/PublicDynamicClass:.*           ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
-as3/Definitions/Classes/ExtImpl/ExtDefaultImplDefPub:.*          ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/DynExtPublicOverRidePublic:.*      ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/PubExtPublicOverRidePublic:.*      ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/ExtDefaultOverRidePublic:.*        ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/FinExtPublicOverRideDefault:.*     ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/PubExtDefaultOverRideDefault:.*    ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/PubExtDefaultOverRidePublic:.*     ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/FinExtPublicOverRidePublic:.*      ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/PubExtPublicOverRideDefault:.*     ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/ExtDefaultOverRideDefault:.*       ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/DynExtDefaultOverRideDefault:.*    ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/ExtPublicOverRidePublic:.*         ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/FinExtDefaultOverRidePublic:.*     ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Classes/Override/FinExtDefaultOverRideDefault:.*    ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Interfaces/QualUnqualAccess:.*                      ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
+as3/Definitions/Interfaces/ImplementMultipleInterfaces:.*           ,   x64-lnx-tvm.*              ,  expectedfail   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=472768
 
 # sampling failure on winmobile-arm
 as3/sampling/Callback:.*                                         ,   arm-winmobile-tvm.*        ,  skip   ,   https://bugzilla.mozilla.org/show_bug.cgi?id=459916
-
-# Bug 473388 release -Dinterp segfaults on e4x/XML/misc_errors.abc
-e4x/XML/misc_errors ,   x64-lnx-tvm-release-Dinterp ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473388
-
 
 # Bug 473392 -  ARM JIT failures
 ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm      ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392

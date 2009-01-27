@@ -409,11 +409,12 @@ class RuntestBase:
         try:
             p = Popen((cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.stdout.readlines()
+            err = p.stderr.readlines()
             starttime=time()
             exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
                 return 'timedOut'
-            return output
+            return output+err
         except KeyboardInterrupt:
             exit('KeyboardInterrupt')
             
