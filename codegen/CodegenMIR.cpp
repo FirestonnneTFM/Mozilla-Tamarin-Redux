@@ -13280,8 +13280,13 @@ namespace avmplus
 		case OP_debugfile:
 		{
 #if defined(DEBUGGER) || defined(VTUNE)
+			#ifdef VTUNE
+			const bool do_emit = true;
+			#else
+			const bool do_emit = core->debugger() != NULL;
+			#endif
 		    Stringp str = pool->cpool_string[imm30];  // assume been checked already
-			emit(state, opcode, (uintptr)str);
+			if(do_emit) emit(state, opcode, (uintptr)str);
 #endif
 			break;
 		}
@@ -13519,7 +13524,7 @@ namespace avmplus
 
 		case OP_popscope:
 			#ifdef DEBUGGER
-		    emitKill(state, info->localCount/*scopeBase*/ + state->scopeDepth);
+		    if (core->debugger()) emitKill(state, info->localCount/*scopeBase*/ + state->scopeDepth);
 			#endif
 			break;
 
@@ -13695,8 +13700,13 @@ namespace avmplus
 
 		case OP_debugline:
             #if defined(DEBUGGER) || defined(VTUNE)
+			#ifdef VTUNE
+			const bool do_emit = true;
+			#else
+			const bool do_emit = core->debugger() != NULL;
+			#endif
 		    // we actually do generate code for these, in debugger mode
-		    emit(state, opcode, imm30);
+		     if (do_emit) emit(state, opcode, imm30);
             #endif
 			break;
 
