@@ -248,7 +248,6 @@ namespace avmplus
 #include "MMgc.h"
 
 #define MMGC_SUBCLASS_DECL : public GCObject
-#define CODER
 
 #include "QCache.h"
 #include "GrowableBuffer.h"
