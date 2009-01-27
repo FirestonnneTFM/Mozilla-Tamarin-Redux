@@ -393,7 +393,7 @@ class PerformanceRuntest(RuntestBase):
                         for line in f:
                             print(line.strip())
                     res=1
-                if result1==0:
+                if result1==0 or result2==0:
                     spdup = 9999
                 else:
                     if self.largerIsFaster:
