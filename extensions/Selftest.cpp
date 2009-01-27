@@ -224,11 +224,7 @@ namespace avmplus
     {
 		if (!expr) {
 			selftestRunner->logFailure(text_expr, file, line);
-			core->throwException(new (core->GetGC()) Exception(selftestRunner->token
-#ifdef DEBUGGER
-															   , core
-#endif
-								 ));
+			core->throwException(new (core->GetGC()) Exception(core, selftestRunner->token));
 		}
     }
 	

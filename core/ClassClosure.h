@@ -79,8 +79,8 @@ namespace avmplus
 		VTable* ivtable() const;
 
 #ifdef DEBUGGER
-		uint64 size() const;
-		MethodEnv *getCallMethodEnv() { return vtable->call; }
+		virtual uint64 size() const;
+		virtual MethodEnv* getCallMethodEnv() { return vtable->call; }
 #endif
 
 #ifdef AVMPLUS_VERBOSE

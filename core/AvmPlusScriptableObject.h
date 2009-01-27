@@ -49,14 +49,12 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		AvmPlusScriptableObject(Atom atom);
-		~AvmPlusScriptableObject();
+
 		virtual uint64 size() const = 0;
 
-		AvmCore *core() const
+		inline AvmCore* core() const
 		{
-			MMgc::GC *gc = MMgc::GC::GetGC(this);
-			AvmCore *core = (AvmCore*)gc->GetGCContextVariable(MMgc::GC::GCV_AVMCORE);
-			return core;
+			return (AvmCore*)MMgc::GC::GetGC(this)->GetGCContextVariable(MMgc::GC::GCV_AVMCORE);
 		}
 
 #endif

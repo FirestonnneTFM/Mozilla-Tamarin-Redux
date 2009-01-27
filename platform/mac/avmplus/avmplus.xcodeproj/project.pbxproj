@@ -38,7 +38,6 @@
 		1E6079A4097335EF007D0E1E /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607904097335EF007D0E1E /* AvmCore.cpp */; };
 		1E6079A5097335EF007D0E1E /* AvmCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607905097335EF007D0E1E /* AvmCore.h */; };
 		1E6079A6097335EF007D0E1E /* AvmDebug.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607906097335EF007D0E1E /* AvmDebug.h */; };
-		1E6079A8097335EF007D0E1E /* AvmError.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607908097335EF007D0E1E /* AvmError.h */; };
 		1E6079A9097335EF007D0E1E /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607909097335EF007D0E1E /* avmplus.cpp */; };
 		1E6079AA097335EF007D0E1E /* avmplus.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60790A097335EF007D0E1E /* avmplus.h */; };
 		1E6079AB097335EF007D0E1E /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */; };
@@ -257,7 +256,6 @@
 		1E607904097335EF007D0E1E /* AvmCore.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AvmCore.cpp; path = ../../../core/AvmCore.cpp; sourceTree = SOURCE_ROOT; };
 		1E607905097335EF007D0E1E /* AvmCore.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmCore.h; path = ../../../core/AvmCore.h; sourceTree = SOURCE_ROOT; };
 		1E607906097335EF007D0E1E /* AvmDebug.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmDebug.h; path = ../../../core/AvmDebug.h; sourceTree = SOURCE_ROOT; };
-		1E607908097335EF007D0E1E /* AvmError.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmError.h; path = ../../../core/AvmError.h; sourceTree = SOURCE_ROOT; };
 		1E607909097335EF007D0E1E /* avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmplus.cpp; path = ../../../core/avmplus.cpp; sourceTree = SOURCE_ROOT; };
 		1E60790A097335EF007D0E1E /* avmplus.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = avmplus.h; path = ../../../core/avmplus.h; sourceTree = SOURCE_ROOT; };
 		1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmplusDebugger.cpp; path = ../../../core/avmplusDebugger.cpp; sourceTree = SOURCE_ROOT; };
@@ -532,7 +530,6 @@
 				1E607904097335EF007D0E1E /* AvmCore.cpp */,
 				1E607905097335EF007D0E1E /* AvmCore.h */,
 				1E607906097335EF007D0E1E /* AvmDebug.h */,
-				1E607908097335EF007D0E1E /* AvmError.h */,
 				1E607909097335EF007D0E1E /* avmplus.cpp */,
 				1E60790A097335EF007D0E1E /* avmplus.h */,
 				1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */,
@@ -772,7 +769,6 @@
 				1E6079A3097335EF007D0E1E /* avmbuild.h in Headers */,
 				1E6079A5097335EF007D0E1E /* AvmCore.h in Headers */,
 				1E6079A6097335EF007D0E1E /* AvmDebug.h in Headers */,
-				1E6079A8097335EF007D0E1E /* AvmError.h in Headers */,
 				1E6079AA097335EF007D0E1E /* avmplus.h in Headers */,
 				1E6079AC097335EF007D0E1E /* avmplusDebugger.h in Headers */,
 				1E6079AE097335EF007D0E1E /* avmplusHashtable.h in Headers */,

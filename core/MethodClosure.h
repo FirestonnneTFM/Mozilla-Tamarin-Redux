@@ -98,15 +98,14 @@ namespace avmplus
 		int MethodClosure_get_length() const;
 		Atom get_savedThis();
 
-		bool isMethodClosure() { return true; }
+		virtual bool isMethodClosure() { return true; }
 
 #ifdef AVMPLUS_VERBOSE
-	public:
 		Stringp format(AvmCore* core) const;
 #endif
 
 #ifdef DEBUGGER
-		MethodEnv *getCallMethodEnv() { return env; }
+		virtual MethodEnv* getCallMethodEnv() { return env; }
 #endif
 	};
 }

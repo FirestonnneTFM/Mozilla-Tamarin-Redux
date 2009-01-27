@@ -127,7 +127,7 @@ namespace avmplus
 		void checkForSparseToDenseConversion();
 
 #ifdef DEBUGGER
-		uint64 size() const;
+		virtual uint64 size() const;
 #endif
 
 #ifdef AVMPLUS_VERBOSE

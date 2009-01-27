@@ -201,8 +201,8 @@ namespace avmplus
 		
 #ifdef DEBUGGER
 	public:
-		uint64 size() const;
-		virtual MethodEnv *getCallMethodEnv() { return NULL; }
+		virtual uint64 size() const;
+		virtual MethodEnv* getCallMethodEnv() { return NULL; }
 #endif
 	// ------------------------ DATA SECTION BEGIN
 	public:		VTable* const		vtable;

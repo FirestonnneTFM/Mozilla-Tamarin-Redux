@@ -167,7 +167,6 @@
 		4EF1E5120D62459F000392CC /* AvmDebug.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AvmDebug.h; sourceTree = "<group>"; };
 		4EF1E5130D62459F000392CC /* AvmDebugUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AvmDebugUnix.cpp; sourceTree = "<group>"; };
 		4EF1E5140D62459F000392CC /* AvmDebugWin.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AvmDebugWin.cpp; sourceTree = "<group>"; };
-		4EF1E5150D62459F000392CC /* AvmError.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AvmError.h; sourceTree = "<group>"; };
 		4EF1E5160D62459F000392CC /* avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = avmplus.cpp; sourceTree = "<group>"; };
 		4EF1E5170D62459F000392CC /* avmplus.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = avmplus.h; sourceTree = "<group>"; };
 		4EF1E5180D62459F000392CC /* avmplusDebugger.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = avmplusDebugger.cpp; sourceTree = "<group>"; };
@@ -538,7 +537,6 @@
 				4EF1E5120D62459F000392CC /* AvmDebug.h */,
 				4EF1E5130D62459F000392CC /* AvmDebugUnix.cpp */,
 				4EF1E5140D62459F000392CC /* AvmDebugWin.cpp */,
-				4EF1E5150D62459F000392CC /* AvmError.h */,
 				4EF1E5160D62459F000392CC /* avmplus.cpp */,
 				4EF1E5170D62459F000392CC /* avmplus.h */,
 				4EF1E5180D62459F000392CC /* avmplusDebugger.cpp */,

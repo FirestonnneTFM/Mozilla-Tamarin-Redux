@@ -54,10 +54,5 @@ namespace avmplus
 			s->recordAllocationInfo(this, (uintptr)typeOrVTable);
 		}		
 	}
-
-	AvmPlusScriptableObject::~AvmPlusScriptableObject()
-	{
-	}
-
 #endif
 }

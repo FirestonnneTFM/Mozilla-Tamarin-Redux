@@ -2078,21 +2078,16 @@ namespace avmplus
 	
 	Stringp Traits::formatClassName()
 	{
-#ifndef DEBUGGER
-		Stringp fullName=NULL;
-#endif
-		if(!fullName)
+		Multiname qname(ns, name);
+		qname.setQName();
+		StringBuffer buffer(core);
+		buffer << qname;
+		int length = buffer.length();
+		if (length && buffer.c_str()[length-1] == '$') 
 		{
-			Multiname qname(ns, name);
-			qname.setQName();
-			StringBuffer buffer(core);
-			buffer << qname;
-			int length = buffer.length();
-			if (length && buffer.c_str()[length-1] == '$')
-				length--;
-			fullName = core->newStringUTF8(buffer.c_str(), length);
-		}
-		return fullName;
+			length--;
+		} 
+		return core->newStringUTF8(buffer.c_str(), length);
 	}
 
 

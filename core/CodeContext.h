@@ -61,9 +61,9 @@ namespace avmplus
 	class CodeContext : public MMgc::GCObject
 	{
 	public:		
-#ifdef DEBUGGER
-		virtual DomainEnv *domainEnv() const = 0;
 		virtual ~CodeContext() {}
+#ifdef DEBUGGER
+		virtual DomainEnv* domainEnv() const = 0;
 #endif
 	};
 
