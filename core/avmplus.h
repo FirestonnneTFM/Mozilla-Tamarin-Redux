@@ -79,8 +79,6 @@
  * https://developer.mozilla.org/En/Tamarin
  */
  
- #include "VMPI.h"
- 
 #include "VMPI.h"
 #include "avmbuild.h"
 

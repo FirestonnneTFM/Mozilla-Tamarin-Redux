@@ -1453,7 +1453,7 @@ namespace avmplus
 				return i;
 		if (next_cache == num_caches) {
 			uint32_t* new_cache = new uint32_t[num_caches*2];
-			memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
+			VMPI_memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
 			delete [] caches;
 			caches = new_cache;
 			num_caches *= 2;
