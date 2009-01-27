@@ -1413,7 +1413,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			out << "invalid multiname index " << index;
+			out << "invalid multiname index " << (uint32_t)index;
 		}
 	}
 
@@ -3706,7 +3706,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	//  only if ToString(ToUint32(P)) is equal to P and ToUint32(P) is not equal to 2^32-1."
 	bool AvmCore::getIndexFromString (Stringp s, uint32 *result)
 	{
-		return s->parseIndex(*result);
+		return s->parseIndex((uint32_t&) *result);
 	}
 
 	CodeContext* AvmCore::codeContext() const

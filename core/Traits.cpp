@@ -782,7 +782,7 @@ namespace avmplus
 
 	/*static*/ Traits* Traits::newTraits(PoolObject* pool,
 							Traits *base,
-							uint32 objectSize,
+							uint32_t objectSize,
 							TraitsPosPtr traitsPos,
 							TraitsPosType posType)
     {
@@ -1708,7 +1708,7 @@ namespace avmplus
 	}
 #endif
 
-	void Traits::genDefaultValue(uint32_t value_index, uint32 slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const
+	void Traits::genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const
 		{
 		// toplevel actually can be null, when resolving the builtin classes...
 		// but they should never cause verification errors in functioning builds

@@ -383,7 +383,7 @@ range_error:
 		{
 			#ifdef AVMPLUS_VERBOSE
 			if (!toplevel || !toplevel->verifyErrorClass())
-				core->console << "class not found: " << m << " index=" << index << "\n";
+				core->console << "class not found: " << m << " index=" << (uint32_t)index << "\n";
 			#endif
 			if (toplevel)
 				toplevel->throwVerifyError(kClassNotFoundError, core->toErrorString(&m));

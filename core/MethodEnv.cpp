@@ -265,7 +265,7 @@ namespace avmplus
 		{
 			size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
 			AvmCore::AllocaAutoPtr _ap;
-			uint32_t *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
+			uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 
 			unboxCoerceArgs(thisArg, a, ap);
 			return endCoerce(argc, ap);
@@ -302,7 +302,7 @@ namespace avmplus
 		{
 			size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
 			AvmCore::AllocaAutoPtr _ap;
-			uint32_t *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
+			uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 				
 			unboxCoerceArgs(thisArg, argc, argv, ap);
 			return endCoerce(argc, ap);
@@ -346,7 +346,7 @@ namespace avmplus
 		int extra = startCoerce(argc);
 		size_t extra_sz = method->restOffset + sizeof(Atom)*extra;
 		AvmCore::AllocaAutoPtr _ap;
-		uint32_t *ap = (uint32_t *)VMPI_alloca(core(), _ap, extra_sz);
+		uint32 *ap = (uint32 *)VMPI_alloca(core(), _ap, extra_sz);
 			
 		unboxCoerceArgs(argc, atomv, ap);
 		return endCoerce(argc, ap);

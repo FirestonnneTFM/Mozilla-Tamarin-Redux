@@ -619,7 +619,7 @@ namespace avmplus
 				#endif
 			}
 
-            uint32 name_index = readU30(pos);
+            uint32_t name_index = readU30(pos);
             (void)name_index;
 			CHECK_POS(pos);
 			int flags = *pos++;
@@ -790,7 +790,7 @@ namespace avmplus
 			int offset = (int)(pos-startpos);
 #endif
 
-			uint32 method_info = readU30(pos);
+			uint32_t method_info = readU30(pos);
 			AbstractFunction* info = resolveMethodInfo(method_info);
 
 			const byte *body_pos = pos;
@@ -985,7 +985,7 @@ namespace avmplus
 		const byte* startpos = pos;
 #endif
 
-		for(uint32 i = 1; i < int_count; ++i)
+		for(uint32_t i = 1; i < int_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -993,7 +993,7 @@ namespace avmplus
 			// S32 value
 			cpool_int.set(i, readS32(pos));
 			if_verbose(
-				core->console << "    " << offset << ":" << "cpool_int["<<i<<"]="
+				core->console << "    " << offset << ":" << "cpool_int["<<(uint32_t)i<<"]="
 					<<constantNames[CONSTANT_Int] << " ";
 				core->console << cpool_int[i] << "\n";
 			)
@@ -1011,7 +1011,7 @@ namespace avmplus
 		startpos = pos;
 #endif
 
-		for(uint32 i = 1; i < uint_count; ++i)
+		for(uint32_t i = 1; i < uint_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1039,7 +1039,7 @@ namespace avmplus
 		startpos = pos;
 #endif
 
-		for(uint32 i = 1; i < double_count; ++i)
+		for(uint32_t i = 1; i < double_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1067,7 +1067,7 @@ namespace avmplus
 		startpos = pos;
 #endif
 
-		for(uint32 i = 1; i < string_count; ++i)
+		for(uint32_t i = 1; i < string_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1120,7 +1120,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
-		for( uint32 i = 1; i < ns_count; ++i )
+		for( uint32_t i = 1; i < ns_count; ++i )
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1201,7 +1201,7 @@ namespace avmplus
 		startpos = pos;
 #endif
 
-		for( uint32 i = 1; i < ns_set_count; ++i)
+		for( uint32_t i = 1; i < ns_set_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1236,7 +1236,8 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 
 		// TODO: why Atom?  its actually a list of positions
-		List<Atom>& cpool_mn = pool->cpool_mn;
+		List<Atom, LIST_NonGCObjects> &cpool_mn = pool->cpool_mn;
+
 		MMGC_MEM_TYPE(pool);
 		cpool_mn.ensureCapacity(mn_count);
 		pool->constantMnCount = mn_count;
@@ -1244,7 +1245,7 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
-		for(uint32 i = 1; i < mn_count; ++i )
+		for(uint32_t i = 1; i < mn_count; ++i )
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1388,7 +1389,7 @@ namespace avmplus
 			}
 		*/
 
-		uint32 count = readU30(pos);
+		uint32_t count = readU30(pos);
 
 		if_verbose(
 			core->console << "script_count=" << count << "\n";
@@ -1411,7 +1412,7 @@ namespace avmplus
 
 		// make global objects subclasses of Object
 
-		for (uint32 i=0; i < count; i++)
+		for (uint32_t i=0; i < count; i++)
 		{
 			const byte* script_pos = pos;
 
@@ -1564,7 +1565,7 @@ namespace avmplus
 			//  - can't override final members
 			//  - overrides agree with base class signature
 			
-            uint32 iinit_index = readU30(pos);
+            uint32_t iinit_index = readU30(pos);
 			AbstractFunction *iinit = resolveMethodInfo(iinit_index);
 
 			if_verbose(
@@ -1676,7 +1677,7 @@ namespace avmplus
 
 			const byte* class_pos = pos;
 
-			uint32 cinit_index = readU30(pos);
+			uint32_t cinit_index = readU30(pos);
             AbstractFunction *cinit = resolveMethodInfo(cinit_index);
 
 			if_verbose(
