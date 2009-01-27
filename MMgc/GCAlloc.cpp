@@ -42,10 +42,10 @@
 namespace MMgc
 {
 	GCAlloc::GCAlloc(GC* _gc, int _itemSize, bool _containsPointers, bool _isRC, int _sizeClassIndex) : 
-		m_gc(_gc),
+		m_sizeClassIndex(_sizeClassIndex),
 		containsPointers(_containsPointers), 
 		containsRCObjects(_isRC),
-		m_sizeClassIndex(_sizeClassIndex)
+		m_gc(_gc)
 	{
 		// Round itemSize to the nearest boundary of 8
 		_itemSize = (_itemSize+7)&~7;

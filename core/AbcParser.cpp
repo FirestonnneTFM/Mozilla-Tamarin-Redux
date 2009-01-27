@@ -88,9 +88,9 @@ namespace avmplus
 		Domain* domain,
 		const NativeInitializer* natives,
 		const List<Stringp>* keepVersions)
-		: toplevel(toplevel),
-		  domain(domain),
-		  instances(core->GetGC(), 0)
+		: instances(core->GetGC(), 0),
+		  toplevel(toplevel),
+		  domain(domain)
 	{
 		this->core = core;
 		this->code = code;

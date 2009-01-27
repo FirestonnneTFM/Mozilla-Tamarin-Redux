@@ -82,8 +82,8 @@ namespace MMgc
 	}
 
 	GCHeap::GCHeap(GCMallocFuncPtr m, GCFreeFuncPtr f, int initialSize)
-		: heapVerbose(false),
-		  kNativePageSize(0),
+		: kNativePageSize(0),
+		  heapVerbose(false),
 		  heapLimit((size_t)-1)
 	{
 #ifdef MEMORY_PROFILER

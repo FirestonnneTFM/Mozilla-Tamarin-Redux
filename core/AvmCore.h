@@ -1480,7 +1480,7 @@ const int kBufferPadding = 16;
 		{
 			friend class AvmCore;
 		public:
-			AllocaAutoPtr() : unwindPtr(NULL), core(NULL) {}  // initialization of 'core' to pacify gcc
+			AllocaAutoPtr() : core(NULL), unwindPtr(NULL) {}  // initialization of 'core' to pacify gcc
 			~AllocaAutoPtr() { if (unwindPtr) core->allocaPopTo(unwindPtr); }
 		private:
 			AvmCore* core;

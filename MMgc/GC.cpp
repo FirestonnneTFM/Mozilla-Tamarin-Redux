@@ -205,70 +205,70 @@ namespace MMgc
 
 	GC::GC(GCHeap *gcheap)
 		:
-#ifdef MMGC_DRC
-		  zct(),
-#endif
-		  nogc(false),
-		  greedy(false),
-		  findUnmarkedPointers(false),
-		  validateDefRef(false),
-		  keepDRCHistory(false),
-		  gcstats(false),
-#ifdef WRITE_BARRIERS
-		  incremental(true),
-#else
-		  incremental(false),
-#endif
-		  incrementalValidation(false),
+	greedy(false),
+		nogc(false),
+		findUnmarkedPointers(false),
+		validateDefRef(false),
+		keepDRCHistory(false),
+		collectThreshold(256),
+		gcstats(false),
+		dontAddToZCTDuringCollection(false),
+		incrementalValidation(false),
 #ifdef _DEBUG
-		  // check for missing write barriers at every Alloc
-		  incrementalValidationPedantic(false),
+		// check for missing write barriers at every Alloc
+		incrementalValidationPedantic(false),
 #endif
-
-		  marking(false),
-		  memStart(MAX_UINTPTR),
-		  memEnd(0),
-		  heap(gcheap),
-		  allocsSinceCollect(0),
-		  collecting(false),
-		  m_roots(0),
-		  m_callbacks(0),
-		  markTicks(0),
-		  bytesMarked(0),
-		  markIncrements(0),
-		  marks(0),
-		  sweeps(0),
-		  totalGCPages(0),
-		  stackCleaned(true),
-		  rememberedStackTop(0),
-		  destroying(false),
-		  lastMarkTicks(0),
-		  lastSweepTicks(0),
-		  lastStartMarkIncrementCount(0),
-#ifdef MMGC_RCROOT_SUPPORT
-		  rcRootSegments(NULL),
-#endif
-		  t0(GetPerformanceCounter()),
-		  dontAddToZCTDuringCollection(false),
-		  numObjects(0),
-		  hitZeroObjects(false),
-		  emptyWeakRef(0),
-		  emptyWeakRefRoot(0),
-		  smallEmptyPageList(NULL),
-		  largeEmptyPageList(NULL),
-		  sweepStart(0),
-		  heapSizeAtLastAlloc(gcheap->GetTotalHeapSize()),
-		  finalizedValue(true),
-		  // Expand, don't collect, until we hit this threshold
-		  collectThreshold(256),
-#if MMGC_THREADSAFE
-		  m_exclusiveGCThread(NULL),
-		  m_gcRunning(false),
-		  m_condDone(m_lock),
-		  m_requestCount(0),
-		  m_condNoRequests(m_lock)
+#ifdef WRITE_BARRIERS
+		incremental(true),
 #else
-		  disableThreadCheck(false)
+		incremental(false),
+#endif
+#ifdef MMGC_RCROOT_SUPPORT
+		rcRootSegments(NULL),
+#endif
+		t0(GetPerformanceCounter()),
+		bytesMarked(0),
+		markTicks(0),
+		lastStartMarkIncrementCount(0),
+		markIncrements(0),
+		marks(0),
+		sweeps(0),
+		numObjects(0),
+		sweepStart(0),
+		hitZeroObjects(false),
+		emptyWeakRef(0),
+		emptyWeakRefRoot(0),
+		destroying(false),
+		heapSizeAtLastAlloc(gcheap->GetTotalHeapSize()),
+		stackCleaned(true),
+		rememberedStackTop(0),
+#ifndef MMGC_THREADSAFE
+		disableThreadCheck(false),
+#endif
+		marking(false),
+		lastMarkTicks(0),
+		lastSweepTicks(0),
+		memStart(MAX_UINTPTR),
+		memEnd(0),
+		totalGCPages(0),
+		heap(gcheap),
+		allocsSinceCollect(0),
+		collecting(false),
+		finalizedValue(true),
+		smallEmptyPageList(NULL),
+		largeEmptyPageList(NULL),
+		m_roots(0),
+		m_callbacks(0)
+#ifdef MMGC_DRC
+		, zct()
+#endif
+		// Expand, don't collect, until we hit this threshold
+#if MMGC_THREADSAFE
+		, m_exclusiveGCThread(NULL)
+		, m_gcRunning(false)
+		, m_condDone(m_lock)
+		, m_requestCount(0)
+		, m_condNoRequests(m_lock)
 #endif
 	{
 		// sanity check for all our types
