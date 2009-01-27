@@ -5546,7 +5546,10 @@ namespace avmplus
             }
         );
         frag->releaseLirBuffer();
-		NanoAssert(assm->error() == None); //@todo we should handle this better... 
+		if (assm->error() != None)
+		{
+			overflow = true;
+		}
 		return frag->code();
 	}
 
