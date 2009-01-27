@@ -48,7 +48,7 @@ namespace avmplus
 	TypeDescriber::TypeDescriber(Toplevel* toplevel) : 
 		m_toplevel(toplevel)
 	{
-		memset(m_strs, 0, sizeof(m_strs));
+		VMPI_memset(m_strs, 0, sizeof(m_strs));
 	}
 
 	Stringp TypeDescriber::describeClassName(Traitsp traits)

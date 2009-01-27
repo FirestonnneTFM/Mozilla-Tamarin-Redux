@@ -68,12 +68,6 @@ bool P4Available();
 bool P4Available();
 #endif
 
-#ifdef UNDER_CE
-	#define STRTOL10(x,y,z) wcstol((x),(y),(z))
-#else
-	#define STRTOL10(x,y,z) strtol((x),(y),(z))
-#endif
-
 #if defined(AVM_SHELL_PLATFORM_HOOKS)
     void AVMShellDidEndTest();
     void AVMShellDidTimeout();
@@ -303,10 +297,35 @@ namespace avmshell
 	}
 
 #ifdef UNDER_CE
-#define strcmp(_str, _conststr)		_tcscmp(_str, _T(_conststr)) 
-#define strrchr(_str, _constchr)	_tcsrchr(_str, _T(_constchr))
-#define strlen(_str)				_tcslen(_str)
-#define strcpy(_str, _conststr)		_tcscpy(_str, _conststr)
+	#ifdef VMPI_strcmp
+		#undef VMPI_strcmp
+	#endif
+	#define VMPI_strcmp(_str, _conststr)		_tcscmp(_str, _T(_conststr)) 
+
+	#ifdef VMPI_strrchr
+		#undef VMPI_strrchr
+	#endif
+	#define VMPI_strrchr(_str, _constchr)		_tcsrchr(_str, _T(_constchr))
+
+	#ifdef VMPI_strlen
+		#undef VMPI_strlen
+	#endif
+	#define VMPI_strlen(_str)					_tcslen(_str)
+
+	#ifdef VMPI_strcpy
+		#undef VMPI_strcpy
+	#endif
+	#define VMPI_strcpy(_str, _conststr)		_tcscpy(_str, _conststr)
+
+	#ifdef VMPI_strtol
+		#undef VMPI_strtol
+	#endif
+	#define VMPI_strtol wcstol
+
+	#ifdef VMPI_atoi
+		#undef VMPI_atoi
+	#endif
+	#define VMPI_atoi _wtoi
 #endif
 
 	void Shell::stackOverflow(MethodEnv *env)
@@ -440,14 +459,14 @@ namespace avmshell
 #ifdef UNDER_CE
 			// !!@windowsmobile untested
 			TCHAR executablePath[256];
-			strncpy(executablePath, argv[0], sizeof(executablePath));
+			VMPI_strncpy(executablePath, argv[0], sizeof(executablePath));
 #else
 			char executablePath[256];
 			GetModuleFileName(NULL, executablePath, sizeof(executablePath));
 #endif
 			#else
 			char executablePath[256];
-			strncpy(executablePath, argv[0], sizeof(executablePath));
+			VMPI_strncpy(executablePath, argv[0], sizeof(executablePath));
 			#endif
 		   
 			FileInputStream file(executablePath);
@@ -596,15 +615,15 @@ namespace avmshell
 				if (arg[0] == '-') 
 				{
 					if (arg[1] == 'D') {
-						if (!strcmp(arg+2, "timeout")) {
+						if (!VMPI_strcmp(arg+2, "timeout")) {
 							config.interrupts = true;
 						}
-						else if (!strcmp(arg+2, "nodebugger")) {
+						else if (!VMPI_strcmp(arg+2, "nodebugger")) {
 							// allow this option even in non-DEBUGGER builds to make test scripts simpler
 							nodebugger = true;
 						}
 						#ifdef AVMPLUS_IA32
-						else if (!strcmp(arg+2, "nosse")) {
+						else if (!VMPI_strcmp(arg+2, "nosse")) {
                             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 							config.sse2 = false;
 							#endif
@@ -612,46 +631,46 @@ namespace avmshell
 						#endif
 
 	                    #ifdef AVMPLUS_VERIFYALL
-						else if (!strcmp(arg+2, "verifyall")) {
+						else if (!VMPI_strcmp(arg+2, "verifyall")) {
 							config.verifyall = true;
 						}
 		                #endif /* AVMPLUS_VERIFYALL */
 
 	                    #ifdef _DEBUG
-						else if (!strcmp(arg+2, "greedy")) {
+						else if (!VMPI_strcmp(arg+2, "greedy")) {
 							GetGC()->greedy = true;
 						}
 		                #endif /* _DEBUG */
 
 	                    #ifdef DEBUGGER
-						else if (!strcmp(arg+2, "nogc")) {
+						else if (!VMPI_strcmp(arg+2, "nogc")) {
 							GetGC()->nogc = true;
-						} else if (!strcmp(arg+2, "noincgc")) {
+						} else if (!VMPI_strcmp(arg+2, "noincgc")) {
 							GetGC()->incremental = false;
-						} else if (!strcmp(arg+2, "astrace")) {
-							avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) STRTOL10(argv[++i], 0, 10);
-						} else if (!strcmp(arg+2, "language")) {
+						} else if (!VMPI_strcmp(arg+2, "astrace")) {
+							avmplus::Debugger::astrace_console = (avmplus::Debugger::TraceLevel) VMPI_strtol(argv[++i], 0, 10);
+						} else if (!VMPI_strcmp(arg+2, "language")) {
 							langID=-1;
 							for (int j=0;j<kLanguages;j++) {
-								if (!strcmp(argv[i+1],languageNames[j].str)) {
+								if (!VMPI_strcmp(argv[i+1],languageNames[j].str)) {
 									langID=j;
 									break;
 								}
 							}
 							if (langID==-1) {
-								langID = atoi(argv[i+1]);
+								langID = VMPI_atoi(argv[i+1]);
 							}
 							i++;
 						}
                     	#endif /* DEBUGGER */
 							
 						#ifdef AVMPLUS_SELFTEST
-						else if (!strncmp(arg+2, "selftest", 8)) {
+						else if (!VMPI_strncmp(arg+2, "selftest", 8)) {
 							do_selftest = true;
 							if (arg[10] == '=') {
-								size_t k = strlen(arg+11);
+								size_t k = VMPI_strlen(arg+11);
 								st_mem = new char[k+1];
-								strcpy(st_mem, arg+11);
+								VMPI_strcpy(st_mem, arg+11);
 								char *p = st_mem;
 								st_component = p;
 								while (*p && *p != ',')
@@ -674,75 +693,71 @@ namespace avmshell
 						}
 						#endif
 						#ifdef AVMPLUS_VERBOSE
-						else if (!strcmp(arg+2, "verbose")) {
+						else if (!VMPI_strcmp(arg+2, "verbose")) {
 							do_verbose = true;
-						} else if (!strcmp(arg+2, "verbose_init")) {
+						} else if (!VMPI_strcmp(arg+2, "verbose_init")) {
                             do_verbose = this->config.verbose = true;
                         }
 						#endif
 
 	                #ifdef AVMPLUS_MIR
-						else if (!strcmp(arg+2, "nodce")) {
+						else if (!VMPI_strcmp(arg+2, "nodce")) {
 							config.dceopt = false;
-						} else if (!strcmp(arg+2, "mem")) {
+						} else if (!VMPI_strcmp(arg+2, "mem")) {
 							show_mem = true;
 						}
                     #endif
 
                     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
                         #ifdef AVMPLUS_VERBOSE
-						else if (!strcmp(arg+2, "bbgraph")) {
+						else if (!VMPI_strcmp(arg+2, "bbgraph")) {
 							config.bbgraph = true;  // generate basic block graph (only valid with MIR)
                         }
 						#endif
                     #endif
 
                     #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-						else if (!strcmp(arg+2, "forcemir")) {
+						else if (!VMPI_strcmp(arg+2, "forcemir")) {
 							config.runmode = RM_jit_all;
-						} else if (!strcmp(arg+2, "nocse")) {
+						} else if (!VMPI_strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
 						}
                         #endif
 
-						else if (!strcmp(arg+2, "interp")) {
+						else if (!VMPI_strcmp(arg+2, "interp")) {
 							config.runmode = RM_interp_all;
 						} else {
 							usage();
 						}
 					} 
-					else if (!strcmp(arg, "-cache_bindings")) {
-						cacheSizes.bindings = (uint16_t)STRTOL10(argv[++i], 0, 10);
-					} else if (!strcmp(arg, "-cache_metadata")) {
-						cacheSizes.metadata = (uint16_t)STRTOL10(argv[++i], 0, 10);
+					else if (!VMPI_strcmp(arg, "-cache_bindings")) {
+						cacheSizes.bindings = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
+					} else if (!VMPI_strcmp(arg, "-cache_metadata")) {
+						cacheSizes.metadata = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 					}
                 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					else if (!strcmp(arg, "-Ojit")) {
+					else if (!VMPI_strcmp(arg, "-Ojit")) {
                         config.runmode = RM_jit_all;
 					} 
 				#endif
 				#ifdef AVMPLUS_JITMAX
-					else if (!strcmp(arg, "-jitmax")) {
-                        #ifdef UNDER_CE
-                            jitmax = _wtoi(argv[++i]);
-                        #else
-						    jitmax = atoi(argv[++i]);
-                        #endif
+					else if (!VMPI_strcmp(arg, "-jitmax")) {
+						jitmax = VMPI_atoi(argv[++i]);
 					}
 				#endif
-					else if (!strcmp(arg, "-memstats")) {
+					else if (!VMPI_strcmp(arg, "-memstats")) {
 						GetGC()->gcstats = true;
-					} else if (!strcmp(arg, "-memlimit")) {
-						GetGC()->GetGCHeap()->SetHeapLimit(STRTOL10(argv[++i], 0, 10));
-					} else if (!strcmp(arg, "-log")) {
+					} else if (!VMPI_strcmp(arg, "-memlimit")) {
+						GetGC()->GetGCHeap()->SetHeapLimit(VMPI_strtol(argv[++i], 0, 10));
+					} else if (!VMPI_strcmp(arg, "-log")) {
 						do_log = true;
 					} 
 					#ifdef AVMPLUS_INTERACTIVE
-					else if (!strcmp(arg, "-i")) {
+					else if (!VMPI_strcmp(arg, "-i")) {
 						do_interactive = true;
 					}
 					#endif //AVMPLUS_INTERACTIVE
-					else if (!strcmp(arg, "-error")) {
+					else if (!VMPI_strcmp(arg, "-error")) {
 						show_error = true;
 						#ifdef WIN32
 						#ifdef UNDER_CE
@@ -753,27 +768,27 @@ namespace avmshell
 						#endif // WIN32
 					}
 #ifdef AVMPLUS_WITH_JNI
-					else if (!strcmp(arg, "-jargs")) {
+					else if (!VMPI_strcmp(arg, "-jargs")) {
 						// all the following args until the semi colon is for java.
 						//@todo fix up this hard limit
 						bool first = true;
 						Java::startup_options = new char[256];
-						memset(Java::startup_options, 0, 256);
+						VMPI_memset(Java::startup_options, 0, 256);
 
 						for(i++; i<argc; i++)
 						{
 							if (*argv[i] == ';')
 								break;
-							if (!first) strcat(Java::startup_options, " ");
-							strcat(Java::startup_options, argv[i]);
+							if (!first) VMPI_strcat(Java::startup_options, " ");
+							VMPI_strcat(Java::startup_options, argv[i]);
 							first = false;
 						}
-						AvmAssert(strlen(Java::startup_options) < 256);
+						AvmAssert(VMPI_strlen(Java::startup_options) < 256);
 					}
 #endif /* AVMPLUS_WITH_JNI */
                                     
 	                #ifdef DEBUGGER
-					else if (!strcmp(arg, "-d")) {
+					else if (!VMPI_strcmp(arg, "-d")) {
 						do_debugger = true;
 					}
 		            #endif /* DEBUGGER */
@@ -820,14 +835,14 @@ namespace avmshell
 				_tcscpy(logname+(dot-filename),_T(".log"));
 				_wfreopen(logname, L"w", stdout);
 #else
-				const char* dot = strrchr(filename, '.');
+				const char* dot = VMPI_strrchr(filename, '.');
 				if (!dot)
-					dot = filename+strlen(filename);
+					dot = filename+VMPI_strlen(filename);
 
 				char* logname = new char[dot-filename+5];  // free upon exit
-				strcpy(logname,filename);
+				VMPI_strcpy(logname,filename);
 
-				strcpy(logname+(dot-filename),".log");
+				VMPI_strcpy(logname+(dot-filename),".log");
 
 				printf("%s\n",filename); // but first print name to default stdout
 				FILE *f = freopen(logname, "w", stdout);
@@ -965,7 +980,7 @@ namespace avmshell
 				enum { kMaxFileName = 1024 };
 				char fileName[kMaxFileName];
 				char imports[kMaxCommandLine];
-				strcpy(imports, " ");
+				VMPI_strcpy(imports, " ");
 
 				// some defaults
 				addToImports(imports, "C:\\src\\farm\\main\\as\\lib\\shell.abc");
@@ -980,28 +995,28 @@ namespace avmshell
 					fflush(stdout);
 					fgets(commandLine, kMaxCommandLine, stdin);
 
-					commandLine[strlen(commandLine)-1] = 0;
+					commandLine[VMPI_strlen(commandLine)-1] = 0;
 
 					// build up the file that we are going to compile
 					bool compile = true;
 					bool exec = true;
 					fileName[0] = '\0';
-					if (strstr(commandLine, ".run ") == commandLine)
+					if (VMPI_strstr(commandLine, ".run ") == commandLine)
 					{
 						// arg 
-						strcpy(fileName, &commandLine[5]);
+						VMPI_strcpy(fileName, &commandLine[5]);
 
 						// search for .as extension
-						const char* dotAt = strrchr(fileName, '.');
+						const char* dotAt = VMPI_strrchr(fileName, '.');
 						bool fail = true;
 						if (dotAt)
 						{
-							if (strcmp(dotAt, ".abc") == 0)
+							if (VMPI_strcmp(dotAt, ".abc") == 0)
 							{
 								compile = false;
 								fail = false;
 							}
-							else if (strcmp(dotAt, ".as") == 0)
+							else if (VMPI_strcmp(dotAt, ".as") == 0)
 							{
 								fail = false;
 							}
@@ -1013,10 +1028,10 @@ namespace avmshell
 							continue;
 						}
 					}
-					else if (strstr(commandLine, ".import ") == commandLine)
+					else if (VMPI_strstr(commandLine, ".import ") == commandLine)
 					{
 						// add to the import list
-						strcpy(fileName, &commandLine[8]);
+						VMPI_strcpy(fileName, &commandLine[8]);
 						compile = false;
 						exec = false;
 
@@ -1026,11 +1041,11 @@ namespace avmshell
 						}
 						console << imports << "\n";
 					}
-					else if (strstr(commandLine, ".quit") == commandLine)
+					else if (VMPI_strstr(commandLine, ".quit") == commandLine)
 					{
 						return 0;
 					}
-					else if (commandLine[0] == '\0' ||  (strstr(commandLine, ".help") == commandLine) )
+					else if (commandLine[0] == '\0' ||  (VMPI_strstr(commandLine, ".help") == commandLine) )
 					{
 						console << "ActionScript source can be directly entered on the command line.\nIt will be compiled and executed once the enter key is pressed.\nThe following directives are also recognized\n" ;
 						console << ".run [f.as|f.abc]   - runs f, compiles f.as first if required\n" ;
@@ -1042,7 +1057,7 @@ namespace avmshell
 					else
 					{
 						// put our command line contents in a file
-						strcpy(fileName, "___file_for_io.as");
+						VMPI_strcpy(fileName, "___file_for_io.as");
 						FILE* f = fopen(fileName , "w");
 						if (!f)
 						{
@@ -1078,9 +1093,9 @@ namespace avmshell
 
 						// now compile and wait
 						commandLine[0] = '\0';
-						strcpy(commandLine, "asc.exe -debug ");
-						strcat(commandLine, imports);
-						strcat(commandLine, fileName);
+						VMPI_strcpy(commandLine, "asc.exe -debug ");
+						VMPI_strcat(commandLine, imports);
+						VMPI_strcat(commandLine, fileName);
 						DWORD err = CreateProcess(0, commandLine, 0,0,TRUE,0,0,0, &si, &pi);
 						if (err)
 						{
@@ -1105,7 +1120,7 @@ namespace avmshell
 						DWORD dwRead = 0; 
 						ReadFile( pRd, commandLine, kMaxCommandLine, &dwRead, NULL);
 						if (dwRead > 0) commandLine[dwRead] = '\0';
-						if ( !strstr(commandLine, "bytes written") )
+						if ( !VMPI_strstr(commandLine, "bytes written") )
 						{
 							// failed compile						
 							console << commandLine;
@@ -1123,8 +1138,8 @@ namespace avmshell
 						}
 
 						// now run the abc
-						int afterDot = strlen(fileName) - 2;
-						strcpy(&fileName[afterDot], "abc");
+						int afterDot = VMPI_strlen(fileName) - 2;
+						VMPI_strcpy(&fileName[afterDot], "abc");
 					}
 
 					if (exec)
@@ -1217,10 +1232,10 @@ namespace avmshell
 			FileInputStream fl(addition);
 			if (fl.valid())
 			{
-				strcat(imports, " ");
-				strcat(imports, " -import \"");
-				strcat(imports, addition);
-				strcat(imports, "\" ");
+				VMPI_strcat(imports, " ");
+				VMPI_strcat(imports, " -import \"");
+				VMPI_strcat(imports, addition);
+				VMPI_strcat(imports, "\" ");
 				worked = 1;
 			}
 		}
@@ -1247,7 +1262,7 @@ int _main(int argc, char *argv[])
 
 	// memory zero'ing check
 /*	int *foo = new int[2];
-	AvmAssert(memcmp(foo, "\0\0\0\0\0\0\0\0\0\0\0\0", 2*sizeof(int)) == 0);
+	AvmAssert(VMPI_memcmp(foo, "\0\0\0\0\0\0\0\0\0\0\0\0", 2*sizeof(int)) == 0);
 	delete foo;*/
 
 	int exitCode = 0;

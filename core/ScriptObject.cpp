@@ -545,7 +545,7 @@ namespace avmplus
 		AvmCore::AllocaAutoPtr _newargs;
 		Atom *newargs = (Atom *) VMPI_alloca(core(), _newargs, sizeof(Atom)*(argc+1));
 		newargs[0] = thisArg;
-		memcpy(&newargs[1], argv, argc*sizeof(Atom));
+		VMPI_memcpy(&newargs[1], argv, argc*sizeof(Atom));
 		return call(argc, newargs);
 	}
 

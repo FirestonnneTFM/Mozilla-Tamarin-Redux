@@ -71,7 +71,7 @@ namespace avmshell
 		m_capacity = lhs.m_length;
 		m_length   = lhs.m_length;
 
-		memcpy(m_array, lhs.m_array, m_length);
+		VMPI_memcpy(m_array, lhs.m_array, m_length);
 	}
 
 	ByteArray::~ByteArray()
@@ -114,10 +114,10 @@ namespace avmshell
 			}
 			if (m_array)
 			{
-				memcpy(newArray, m_array, m_length);
+				VMPI_memcpy(newArray, m_array, m_length);
 				delete [] m_array;
 			}
-			memset(newArray+m_length, 0, newCapacity-m_capacity);
+			VMPI_memset(newArray+m_length, 0, newCapacity-m_capacity);
 			m_array = newArray;
 			m_capacity = newCapacity;
 #ifdef AVMPLUS_MOPS
@@ -164,7 +164,7 @@ namespace avmshell
 	void ByteArray::Push(const U8 *data, uint32 count)
 	{
 		Grow(m_length + count);
-		memcpy(m_array + m_length, data, count);
+		VMPI_memcpy(m_array + m_length, data, count);
 		m_length += count;
 #ifdef AVMPLUS_MOPS
 		NotifySubscribers();
@@ -285,7 +285,7 @@ namespace avmshell
 
 		if (count > 0)
 		{
-			memcpy(buffer, m_array+m_filePointer, count);
+			VMPI_memcpy(buffer, m_array+m_filePointer, count);
 			m_filePointer += count;
 		}
 	}
@@ -296,7 +296,7 @@ namespace avmshell
 			Grow(m_filePointer+count);
 			m_length = m_filePointer+count;
 		}
-		memcpy(m_array+m_filePointer, buffer, count);
+		VMPI_memcpy(m_array+m_filePointer, buffer, count);
 		m_filePointer += count;
 	}
 
@@ -530,7 +530,7 @@ namespace avmshell
 			return; 
 
 		U8 *gzdata = new U8[gzlen];
-        memcpy(gzdata, m_byteArray.GetBuffer(), gzlen);
+        VMPI_memcpy(gzdata, m_byteArray.GetBuffer(), gzlen);
 
         // Clear the buffer
         m_byteArray.Seek(0);

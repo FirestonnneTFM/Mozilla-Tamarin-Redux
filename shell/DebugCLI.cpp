@@ -194,7 +194,7 @@ namespace avmshell
 								   const char *input,
 								   int defCmd)
 	{
-		int inputLen = (int)strlen(input);
+		int inputLen = (int)VMPI_strlen(input);
 		
 		// first check for a comment
 		if (input[0] == '#') {
@@ -205,7 +205,7 @@ namespace avmshell
 		bool ambiguous = false;
 		
 		for (int i=0; cmdList[i].text; i++) {
-			if (!strncmp(input, cmdList[i].text, inputLen)) {
+			if (!VMPI_strncmp(input, cmdList[i].text, inputLen)) {
 				if (match != -1) {
 					ambiguous = true;
 					break;
@@ -229,7 +229,7 @@ namespace avmshell
 			return defCmd;
 		}
 		// only 1 match or our input is 1 character or first match is exact
-		else if (!ambiguous || inputLen == 1 || !strcmp(cmdList[match].text, input)) {
+		else if (!ambiguous || inputLen == 1 || !VMPI_strcmp(cmdList[match].text, input)) {
 			return cmdList[match].id;
 		}
 		else {
@@ -237,7 +237,7 @@ namespace avmshell
 			core->console << "Ambiguous command '" << input << "': ";
 			bool first = true;
 			for (int i=0; cmdList[i].text; i++) {
-				if (!strncmp(cmdList[i].text, input, inputLen)) {
+				if (!VMPI_strncmp(cmdList[i].text, input, inputLen)) {
 					if (!first) {
 						core->console << ", ";
 					} else {
@@ -398,7 +398,7 @@ namespace avmshell
 	void DebugCLI::list(const char* line)
 	{
 		int currentLine = (core->callStack) ? core->callStack->linenum() : 0;
-		int linenum = (line) ? atoi(line) : currentLine;
+		int linenum = (line) ? VMPI_atoi(line) : currentLine;
 		displayLines(linenum, 10);
 	}
 	
@@ -411,7 +411,7 @@ namespace avmshell
 	void DebugCLI::breakpoint(char *location)
 	{
 		Stringp filename = currentFile;
-		char *colon = strchr(location, ':');
+		char *colon = VMPI_strchr(location, ':');
 
 		if (colon) {
 			*colon = 0;
@@ -431,7 +431,7 @@ namespace avmshell
 			return;
 		}
 
-		int targetLine = atoi(location);
+		int targetLine = VMPI_atoi(location);
 
 		int breakpointId = ++breakpointCount;
 		
@@ -467,7 +467,7 @@ namespace avmshell
 	
 	void DebugCLI::deleteBreakpoint(char *idstr)
 	{
-		int id = atoi(idstr);
+		int id = VMPI_atoi(idstr);
 
 		BreakAction *breakAction = firstBreakAction;
 		while (breakAction) {
@@ -681,12 +681,12 @@ namespace avmshell
 			fflush(stdout);
 			fgets(commandLine, kMaxCommandLine, stdin);
 
-			commandLine[strlen(commandLine)-1] = 0;
+			commandLine[VMPI_strlen(commandLine)-1] = 0;
 			
 			if (!commandLine[0]) {
-				strcpy(commandLine, lastCommand);
+				VMPI_strcpy(commandLine, lastCommand);
 			} else {
-				strcpy(lastCommand, commandLine);
+				VMPI_strcpy(lastCommand, commandLine);
 			}
 				
 			currentToken = commandLine;

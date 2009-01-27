@@ -148,7 +148,7 @@ namespace MMgc
 
 #ifdef _DEBUG
 		// deleted and unused memory is 0xed'd, this is important for leak diagnostics
-		memset(b->items, 0xed, m_itemSize * m_itemsPerBlock);
+		VMPI_memset(b->items, 0xed, m_itemSize * m_itemsPerBlock);
 #endif
 
 		// Link the block at the end of the list

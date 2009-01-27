@@ -221,7 +221,7 @@ namespace MMgc
 	{
 		GCAssert(b->numItems == 0);
 		if(!m_bitsInPage) {
-			memset(b->GetBits(), 0, m_numBitmapBytes);
+			VMPI_memset(b->GetBits(), 0, m_numBitmapBytes);
 			m_gc->FreeBits(b->GetBits(), m_sizeClassIndex);
 			b->bits = NULL;
 		}
@@ -709,7 +709,7 @@ start:
 		// we poison the memory (and clear in Alloc)
 		// FIXME: can we do something faster with MMX here?
 		if(!alloc->IsRCObject())
-			memset((char*)item, 0, size);
+			VMPI_memset((char*)item, 0, size);
 #endif
 		// Add this item to the free list
 		*((void**)item) = oldFree;	

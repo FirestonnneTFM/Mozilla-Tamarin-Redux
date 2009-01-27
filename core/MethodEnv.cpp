@@ -295,7 +295,7 @@ namespace avmplus
 			AvmCore::AllocaAutoPtr _atomv;
 			Atom* atomv = (Atom*)VMPI_alloca(core(), _atomv, sizeof(Atom)*(argc+1));
 			atomv[0] = thisArg;
-			memcpy(atomv+1, argv, sizeof(Atom)*argc);
+			VMPI_memcpy(atomv+1, argv, sizeof(Atom)*argc);
 			return coerceEnter(argc, atomv);
 		}
 		else
@@ -491,7 +491,7 @@ namespace avmplus
 		AvmAssert(!frameTraits || localCount >= firstLocalAt);
 		
 		if (frameTraits)
-			memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
+			VMPI_memset(&frameTraits[firstLocalAt], 0, (localCount-firstLocalAt)*sizeof(Traits*));
 
 		callstack->init(this, framep, frameTraits, argc, ap, eip, /*scopeDepth*/NULL, /*boxed*/false);
 		

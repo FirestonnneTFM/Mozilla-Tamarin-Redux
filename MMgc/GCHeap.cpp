@@ -89,8 +89,8 @@ namespace MMgc
 #ifdef MEMORY_PROFILER
 		// dump memory profile after sweeps
 		profilerEnabled = false;
-		const char *env = getenv("MMGC_PROFILE");
-		if(env && strncmp(env, "1", 1) == 0)
+		const char *env = VMPI_getenv("MMGC_PROFILE");
+		if(env && VMPI_strncmp(env, "1", 1) == 0)
 			profilerEnabled = true;
 		hooksEnabled = profilerEnabled;
 #endif
@@ -119,7 +119,7 @@ namespace MMgc
 #endif
 		#ifdef _DEBUG
 		// Initialize the megamap for debugging.
-		memset(m_megamap, 0, sizeof(m_megamap));
+		VMPI_memset(m_megamap, 0, sizeof(m_megamap));
 		#endif
 		
 		lastRegion  = 0;
@@ -261,7 +261,7 @@ namespace MMgc
 			// and re-commit we avoid this, should be a noise optimization over all but
 			// possibly a big win for startup
 			if (zero) {
-				memset(baseAddr, 0, size * kBlockSize);
+				VMPI_memset(baseAddr, 0, size * kBlockSize);
 			}
 		}
 		
@@ -462,11 +462,11 @@ namespace MMgc
 					HeapBlock *newBlocks = new HeapBlock[blocksLen - block->size];
 
 					// copy blocks before this block
-					memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
+					VMPI_memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
 
 					// copy blocks after
 					size_t lastChunkSize = (char*)(blocks + blocksLen) - (char*)(block + block->size);
-					memcpy(newBlocks + (block - blocks), block + block->size, lastChunkSize);
+					VMPI_memcpy(newBlocks + (block - blocks), block + block->size, lastChunkSize);
 
 					// Fix up the prev/next pointers of each freelist.  This is a little more complicated
 					// than the similiar code in ExpandHeap because blocks after the one we are free'ing
@@ -834,7 +834,7 @@ namespace MMgc
 
 #ifdef _DEBUG
 		// trash it. fb == free block
-		memset(block->baseAddr, 0xfb, block->size * kBlockSize);
+		VMPI_memset(block->baseAddr, 0xfb, block->size * kBlockSize);
 #endif
 
 		// Try to coalesce this block with its predecessor
@@ -1105,7 +1105,7 @@ namespace MMgc
 		
 		// Copy all the existing blocks.
 		if (blocksLen) {
-			memcpy(newBlocks, blocks, blocksLen * sizeof(HeapBlock));
+			VMPI_memcpy(newBlocks, blocks, blocksLen * sizeof(HeapBlock));
 
 			// Fix up the prev/next pointers of each freelist.
 			HeapBlock *freelist = freelists;

@@ -134,7 +134,7 @@ namespace MMgc
 		if(k1 == k2) 
 			return true;
 		if(k1 && k2 && (options & OPTION_STRINGS))
-			return strcmp((const char*)k1, (const char*)k2) == 0;
+			return VMPI_strcmp((const char*)k1, (const char*)k2) == 0;
 		return false;
 	}
 	
@@ -220,7 +220,7 @@ namespace MMgc
 		} else {
 			newTable = new const void*[newTableSize];
 		}
-		memset(newTable, 0, newTableSize*sizeof(void*));
+		VMPI_memset(newTable, 0, newTableSize*sizeof(void*));
 
 		numValues = 0;
 		numDeleted = 0;

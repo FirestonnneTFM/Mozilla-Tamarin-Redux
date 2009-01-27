@@ -112,7 +112,7 @@ namespace avmplus
 	static void* _copyBuffers(const void* src, void* dst, int32_t srcLen, String::Width srcWidth, String::Width dstWidth)
 	{
 		if (srcWidth == dstWidth)
-			memcpy(dst, src, srcLen * srcWidth);
+			VMPI_memcpy(dst, src, srcLen * srcWidth);
 		else
 		{
 			switch (srcWidth)
@@ -202,7 +202,7 @@ namespace avmplus
 		s->m_buffer.pv = buffer;
 
 		if (data != NULL && len != 0)
-			memcpy(buffer, data, size_t(len * w));
+			VMPI_memcpy(buffer, data, size_t(len * w));
 #ifdef _DEBUG
 		// Terminate string with 0 for better debugging display
 		if (charsLeft)
@@ -326,7 +326,7 @@ namespace avmplus
 		{
 			int32_t bytes = length() * getWidth();
 			void* buf = GC::GetGC(this)->Alloc(bytes, 0);
-			memcpy(buf, m_buffer.pv, bytes);
+			VMPI_memcpy(buf, m_buffer.pv, bytes);
 			m_buffer.pv = buf;
 			if (type == kDependent)
 				WBRC( _gc(this), this, &m_master, NULL );
@@ -452,7 +452,7 @@ namespace avmplus
 		switch (getWidth())
 		{
 			case k8:
-				ok = !memcmp(ptrs.p8, p, len);
+				ok = !VMPI_memcmp(ptrs.p8, p, len);
 				break;
 			case k16:
 				while (ok && len-- != 0)
@@ -479,7 +479,7 @@ namespace avmplus
 					ok = (*p++ == wchar(*ptrs.p8++ & 0xFF)); 
 				break;
 			case k16:
-				ok = !memcmp(ptrs.p16, p, len * sizeof(wchar));
+				ok = !VMPI_memcmp(ptrs.p16, p, len * sizeof(wchar));
 				break;
 			default:
 				while (ok && len-- != 0)
@@ -1894,7 +1894,7 @@ namespace avmplus
 		// 0xFF is a special case: ToUpper(0xFF) == 0x178, so we need a wider string
 		// if the string contains 0xFF
 		Width w = getWidth();
-		if (w == k8 && memchr(src.pv, 0xFF, m_length) != 0)
+		if (w == k8 && VMPI_memchr(src.pv, 0xFF, m_length) != 0)
 			w = k16;
 
 		GC* gc = GC::GetGC(this);
@@ -2578,7 +2578,7 @@ decodeUtf8:
 					*ptrs.p8++ = (char) *buffer++;
 				break;
 			case String::k16:
-				memcpy(s->m_buffer.pv, buffer, len * desiredWidth);
+				VMPI_memcpy(s->m_buffer.pv, buffer, len * desiredWidth);
 				break;
 #ifdef FEATURE_UTF32_SUPPORT
 			default:
@@ -2669,7 +2669,7 @@ decodeUtf8:
 				}
 				break;
 			case k32:
-				memcpy(s->m_direct.c32, buffer, len * sizeof(utf32_t));
+				VMPI_memcpy(s->m_direct.c32, buffer, len * sizeof(utf32_t));
 				break;
 		}
 		return s;

@@ -205,7 +205,7 @@ namespace avmplus
 		{
 			if( newLength < m_length )
 			{
-				memset(m_array+newLength, 0, (m_length-newLength)*sizeof(T));
+				VMPI_memset(m_array+newLength, 0, (m_length-newLength)*sizeof(T));
 			}
 			VectorBaseObject::set_length(newLength);
 		}
@@ -221,7 +221,7 @@ namespace avmplus
 					toplevel()->throwRangeError(kVectorFixedError);
 				grow (m_length + argc);
 				T *arr = m_array;
-				memmove (arr + argc, arr, m_length * sizeof(T));
+				VMPI_memmove (arr + argc, arr, m_length * sizeof(T));
 				for(int i=0; i<argc; i++) {
 					atomToValue(argv[i], m_array[i]);
 				}
@@ -260,15 +260,15 @@ namespace avmplus
 
 				// shift elements down
 				int toMove = m_length - insertPoint - deleteCount;
-				memmove (arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(T));
+				VMPI_memmove (arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(T));
 
-				//memset (arr + m_length - numberBeingDeleted, 0, numberBeingDeleted * sizeof(T));
+				//VMPI_memset (arr + m_length - numberBeingDeleted, 0, numberBeingDeleted * sizeof(T));
 			}
 			else if (l_shiftAmount > 0)
 			{
-				memmove (arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(T));
+				VMPI_memmove (arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(T));
 				//
-				//memset (arr + insertPoint, 0, l_shiftAmount * sizeof(T));
+				//VMPI_memset (arr + insertPoint, 0, l_shiftAmount * sizeof(T));
 			}
 
 			set_length(m_length + l_shiftAmount);
@@ -278,7 +278,7 @@ namespace avmplus
 			{
 				if( vec_args && (offset+insertCount <= vec_args->m_length) )
 				{
-					memmove(arr+insertPoint, vec_args->m_array+offset, insertCount*sizeof(T));
+					VMPI_memmove(arr+insertPoint, vec_args->m_array+offset, insertCount*sizeof(T));
 				}
 				else if( so_args )
 				{
@@ -417,10 +417,10 @@ namespace avmplus
 				}
 				if (m_array)
 				{
-					memcpy(newArray, m_array, m_length * sizeof(T));
+					VMPI_memcpy(newArray, m_array, m_length * sizeof(T));
 					delete [] m_array;
 				}
-				memset(newArray+m_length, 0, (newCapacity-m_capacity) * sizeof(T));
+				VMPI_memset(newArray+m_length, 0, (newCapacity-m_capacity) * sizeof(T));
 				m_array = newArray;
 				m_capacity = newCapacity;
 			}

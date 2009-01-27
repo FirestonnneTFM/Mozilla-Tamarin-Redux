@@ -977,7 +977,7 @@ namespace avmplus
         }
 
         void clearState() {
-            memset(tracker, 0, nvar*sizeof(LInsp));
+            VMPI_memset(tracker, 0, nvar*sizeof(LInsp));
             dirty.reset();
         }
 
@@ -1346,7 +1346,7 @@ namespace avmplus
                 LIns *label = Ins(LIR_label);
 				verbose_only( if (lirbuf->names) {
 					char str[64];
-					sprintf(str,"param_%d",i);
+					VMPI_sprintf(str,"param_%d",i);
 					lirbuf->names->addName(label,str);
 				})
 				br->target(label);
@@ -1576,7 +1576,7 @@ namespace avmplus
 		LIns* bb = Ins(LIR_label); // mark start of block
         verbose_only( if (frag->lirbuf->names) {
 			char str[64];
-			sprintf(str,"B%d",(int)state->pc);
+			VMPI_sprintf(str,"B%d",(int)state->pc);
             frag->lirbuf->names->addName(bb, str);
         });
 
