@@ -358,7 +358,7 @@ namespace avmplus
 
         void become(List<T, kElementType> &list) {
             clear();
-            for (int i=0, n=list.len; i < n; i++)
+            for (int i=0, n=list.size(); i < n; i++)
                 add(list[i]);
             list.clear();
         }
