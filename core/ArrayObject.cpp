@@ -512,11 +512,12 @@ namespace avmplus
 #ifdef DEBUGGER
 	uint64 ArrayObject::size() const
 	{
-		if(isSimpleDense())
+		uint64 s = ScriptObject::size();
+		if (isSimpleDense())
 		{
-			return ScriptObject::size() + getLength()*sizeof(Atom);
+			s += getLength()*sizeof(Atom);
 		}
-		return ScriptObject::size();
+		return s;
 	}
 #endif
 }

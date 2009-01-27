@@ -126,7 +126,6 @@
 #include "AvmDebug.h"
 #include "AtomConstants.h"
 #include "ActionBlockConstants.h"
-#include "AvmError.h"
 #include "ErrorConstants.h"
 #include "NativeObjectHelpers.h"
 

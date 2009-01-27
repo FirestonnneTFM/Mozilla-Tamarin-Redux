@@ -173,13 +173,11 @@ namespace avmplus
 		Hashtable *ht = getTable();
 
 		// this can happen if you break in debugger in a subclasses constructor before super
-		// has been called
-#ifdef DEBUGGER
-		if(!ht)
+		// has been called -- let's do it in all builds, it's better than crashing.
+		if (!ht)
 		{
 			return 0;
 		}
-#endif // DEBUGGER
 
 		// Advance to first non-empty slot.
 		int numAtoms = ht->getNumAtoms();

@@ -569,9 +569,6 @@ namespace avmplus
 	public:		Traits*					itraits;	// if this type is a factory, itraits is non-null and points to the type created by this factory.
 	public:		DRCWB(Namespacep)		ns;			// The namespace of the class described by this traits object
 	public:		DRCWB(Stringp)			name;		// The name of the class described by this traits object
-#ifdef DEBUGGER
-	public:		DRCWB(Stringp)			fullName;
-#endif
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	public:		DWB(char*)				rawname;
 #endif

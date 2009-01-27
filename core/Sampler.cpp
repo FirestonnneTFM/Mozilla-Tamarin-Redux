@@ -175,13 +175,8 @@ namespace avmplus
 				write(p, csn->info());
 				write(p, csn->envname());
 				// FIXME: can filename can be stored in the AbstractInfo?
-#ifdef DEBUGGER
 				write(p, csn->filename());
 				write(p, csn->linenum());
-#else
-				write(p, 0);
-				write(p, 0);
-#endif
 #ifdef AVMPLUS_64BIT
 				AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
 				write(p, (int) 0); // structure padding
@@ -285,12 +280,11 @@ namespace avmplus
 		readSample(old_sample, s);
 		old_sample = lastAllocSample;
 
-#ifdef DEBUGGER					
 		if(typeOrVTable < 7 && core->codeContext() && core->codeContext()->domainEnv()) {
 			// and in toplevel
 			typeOrVTable |= (uintptr)core->codeContext()->domainEnv()->toplevel();
 		}
-#endif
+
 		AvmAssertMsg(s.sampleType == NEW_AUX_SAMPLE, "Sample stream corrupt - can only add info to an AUX sample.\n");
 		AvmAssertMsg(s.ptr == (void*)obj, "Sample stream corrupt - last sample is not for same object.\n");
 
@@ -519,4 +513,4 @@ namespace avmplus
 	}
 
 }
-#endif
+#endif // DEBUGGER

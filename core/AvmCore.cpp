@@ -994,19 +994,22 @@ return the result of the comparison ToPrimitive(x) == y.
 		buffer = concatStrings(buffer, internInt(errorID));
 
         #ifdef DEBUGGER
-		// errorConstants is declared char* but is encoded as UTF8
-		Stringp out = findErrorMessage(errorID,
-									   errorMappingTable,
-									   errorConstants[determineLanguage()],
-									   kNumErrorConstants);
-		if (out) 
+		if (_debugger)
 		{
-			buffer = concatStrings(buffer, newConstantStringLatin1(": "));
-			buffer = concatStrings(buffer, out);
-		}
-		else
-		{
-			AvmAssertMsg(0, "errorID not found in the message table; check ErrorConstants.cpp you may need to regenerate it");
+			// errorConstants is declared char* but is encoded as UTF8
+			Stringp out = findErrorMessage(errorID,
+										   errorMappingTable,
+										   errorConstants[determineLanguage()],
+										   kNumErrorConstants);
+			if (out) 
+			{
+				buffer = concatStrings(buffer, newConstantStringLatin1(": "));
+				buffer = concatStrings(buffer, out);
+			}
+			else
+			{
+				AvmAssertMsg(0, "errorID not found in the message table; check ErrorConstants.cpp you may need to regenerate it");
+			}
 		}
 		#endif
 
