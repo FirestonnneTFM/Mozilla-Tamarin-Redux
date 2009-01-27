@@ -395,7 +395,7 @@ namespace avmplus
 				nameIndex = (nameTable[0] << 8) + nameTable[1];
 				length = ovector[nameIndex * 2 + 1] - ovector[ nameIndex * 2 ];
 
-				Atom name = stringFromUTF8((nameTable+2), (uint32)strlen(nameTable+2));
+				Atom name = stringFromUTF8((nameTable+2), (uint32)VMPI_strlen(nameTable+2));
 				name = core->internString(name)->atom();
 
 				Atom value = stringFromUTF8(utf8Subject.c_str()+ovector[nameIndex*2], length);

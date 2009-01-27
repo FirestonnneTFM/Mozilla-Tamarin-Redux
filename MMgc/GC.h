@@ -1832,7 +1832,7 @@ public:
 		void set(const void * _v, size_t _size) { this->v = (int*)_v; this->size = _size; }
 		~Cleaner() { 
 			if(v) 
-				memset(v, 0, size);
+				VMPI_memset(v, 0, size);
 			v = 0; 
 			size = 0;
 		}

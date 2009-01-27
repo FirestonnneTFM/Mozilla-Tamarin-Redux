@@ -128,7 +128,7 @@ namespace avmplus
 	{
 #ifdef _DEBUG
 		char buf[256];
-		strcpy(buf, p);
+		VMPI_strcpy(buf, p);
 		::CopyCStringToPascal(buf, (StringPtr)buf);
 		if(debuggerBreak)
 		{

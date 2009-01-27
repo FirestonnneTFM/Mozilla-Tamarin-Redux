@@ -314,7 +314,7 @@ namespace MMgc
 
 		pageMap = (unsigned char*) heapAlloc(1);
 
-		memset(m_bitsFreelists, 0, sizeof(uint32*) * kNumSizeClasses);
+		VMPI_memset(m_bitsFreelists, 0, sizeof(uint32*) * kNumSizeClasses);
 		m_bitsNext = (uint32*)heapAlloc(1);
 
 		// precondition for emptyPageList 
@@ -645,7 +645,7 @@ namespace MMgc
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
 		char* block = new char[size + hdr_size];
 		// FIXME: should allocate with zeroing, probably.
-		memset(block, 0, size + hdr_size);
+		VMPI_memset(block, 0, size + hdr_size);
 		void* mem = (void*)(block + hdr_size);
 		RCRootSegment *segment = new RCRootSegment(this, mem, size);
 		*(uintptr*)block = (uintptr)segment;
@@ -763,7 +763,7 @@ namespace MMgc
 		// mutator to get the poisoned data so it crashes if it relies on 
 		// uninitialized values
 		if((item) && (shouldZero)) {
-			memset(item, 0, Size(item));
+			VMPI_memset(item, 0, Size(item));
 		}
 #endif
 
@@ -1260,9 +1260,9 @@ bail:
 		}
 
 		if(shiftAmount || dst != pageMap) {
-			memmove(dst + shiftAmount, pageMap, numBytesToCopy);
+			VMPI_memmove(dst + shiftAmount, pageMap, numBytesToCopy);
 			if ( shiftAmount ) {
-				memset(dst, 0, shiftAmount);
+				VMPI_memset(dst, 0, shiftAmount);
 			}
 			if(dst != pageMap) {
 				heap->Free(pageMap);
@@ -1353,7 +1353,7 @@ bail:
 			size_t amount = (char*) stackP - (char*)rememberedStackTop;
 			void *stack = alloca(amount);
 			if(stack) {
-				memset(stack, 0, amount);
+				VMPI_memset(stack, 0, amount);
 			}
 		}
 #endif // __MSC_VER && _DEBUG
@@ -1384,7 +1384,7 @@ bail:
 		if(_object == this) {
 			size_t s = FixedMalloc::GetInstance()->Size(this);
 			// being a GCRoot its important we are clean
-			memset(this, 0, s);
+			VMPI_memset(this, 0, s);
 		}
 #endif
 		gc = _gc;
@@ -1554,7 +1554,7 @@ bail:
 		if(zctNext >= zct + zctSize*4096/sizeof(void *)) {
 			// grow 
 			RCObject **newZCT = (RCObject**) gc->heap->Alloc(zctSize*2);
-			memcpy(newZCT, zct, zctSize*GCHeap::kBlockSize);
+			VMPI_memcpy(newZCT, zct, zctSize*GCHeap::kBlockSize);
 			gc->heap->Free(zct);
 			zctNext = newZCT + (zctNext-zct);
 			zct = newZCT;	
@@ -1700,7 +1700,7 @@ bail:
 		{
 			void *stack = alloca(amount);
 			if(stack) {
-				memset(stack, 0, amount);
+				VMPI_memset(stack, 0, amount);
 			}
 		}
 #endif // _MMGC_IA32
@@ -1979,7 +1979,7 @@ bail:
 		vsprintf(buf, format, argptr);
 		va_end(argptr);
 
-		GCAssert(strlen(buf) < 4096);
+		GCAssert(VMPI_strlen(buf) < 4096);
 
 		{
 			USING_CALLBACK_LIST(this);
@@ -2010,7 +2010,7 @@ bail:
 		const char *typeName = GetAllocationName(o);
 
 		// strip "class "
-		if (!strncmp(typeName, "class ", 6))
+		if (!VMPI_strncmp(typeName, "class ", 6))
 			typeName += 6;
 		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, o);
 		if (proc)
@@ -2597,13 +2597,13 @@ bail:
 #endif
 
 				if(wl->prev)
-					sprintf(statusBuffer, "0x%x+%d -> 0x%x size=%d (%s)\n",  (unsigned int)wl->prev->wi.ptr, wl->off, (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
+					VMPI_sprintf(statusBuffer, "0x%x+%d -> 0x%x size=%d (%s)\n",  (unsigned int)wl->prev->wi.ptr, wl->off, (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
 				else
-					sprintf(statusBuffer, "0x%x : %d (%s)\n", (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
+					VMPI_sprintf(statusBuffer, "0x%x : %d (%s)\n", (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
 				wl = wl->prev;
 				OutputDebugString(statusBuffer);
 			}
-			sprintf(statusBuffer, "\n");
+			VMPI_sprintf(statusBuffer, "\n");
 			OutputDebugString(statusBuffer);
 			//shouldGo = NULL;
 		}
@@ -3095,7 +3095,7 @@ bail:
 		if(m_bitsFreelists[sizeClass]) {
 			bits = m_bitsFreelists[sizeClass];
 			m_bitsFreelists[sizeClass] = *(uint32**)bits;
-			memset(bits, 0, sizeof(uint32*));
+			VMPI_memset(bits, 0, sizeof(uint32*));
 			return bits;
 		}
 

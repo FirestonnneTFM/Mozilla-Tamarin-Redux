@@ -519,7 +519,7 @@ namespace MMgc
 
 		// get line
 		IMAGEHLP_LINE64 line;
-		memset(&line, 0, sizeof(IMAGEHLP_LINE64));
+		VMPI_memset(&line, 0, sizeof(IMAGEHLP_LINE64));
 		line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
 		DWORD offsetFromLine;
 		if(!g_DbgHelpDll.m_SymGetLineFromAddr64 ||
@@ -530,7 +530,7 @@ namespace MMgc
 		/* 
 		 this isn't working, I think i need to call SymLoadModule64 or something
 		IMAGEHLP_MODULE64 module;
-		memset(&module, 0, sizeof module);
+		VMPI_memset(&module, 0, sizeof module);
 		module.SizeOfStruct = sizeof module;
 		if(!SymGetModuleInfo64(GetCurrentProcess(), pSym->Address, &module)) 
 		{			
@@ -546,7 +546,7 @@ namespace MMgc
 		*/
 
 		// success!
-		char *fileName = line.FileName + strlen(line.FileName);
+		char *fileName = line.FileName + VMPI_strlen(line.FileName);
 
 		// skip everything up to last slash
 		while(fileName > line.FileName && *fileName != '\\')

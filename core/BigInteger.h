@@ -231,7 +231,7 @@ namespace avmplus
 				numWords = size;
 				AvmAssert(newBuff != wordBuffer);
 				AvmAssert(numWords <= kMaxBigIntegerBufferSize);
-				memcpy(wordBuffer, newBuff, numWords*sizeof(uint32));
+				VMPI_memcpy(wordBuffer, newBuff, numWords*sizeof(uint32));
 			}
 			
 			inline void setNumWords( int32 newNumWords,bool initToZero=false)

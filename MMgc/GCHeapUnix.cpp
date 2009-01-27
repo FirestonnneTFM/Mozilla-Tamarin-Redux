@@ -348,9 +348,9 @@ namespace MMgc
 #ifdef AVMPLUS_UNIX
 		Dl_info dlip;
 		dladdr((void *const)pc, &dlip);
-		sprintf(buff, "0x%p:%s", (void *)pc, dlip.dli_sname);
+		VMPI_sprintf(buff, "0x%p:%s", (void *)pc, dlip.dli_sname);
 #else
-		sprintf(buff, "0x%x", pc);
+		VMPI_sprintf(buff, "0x%x", pc);
 #endif
 	}
 
@@ -439,7 +439,7 @@ namespace MMgc
 #ifdef LINUX
 		uint32 pid = getpid();
 		char buff[32];
-		sprintf(buff, "/proc/%d/smaps", pid);
+		VMPI_sprintf(buff, "/proc/%d/smaps", pid);
 		int smap_hndl = open(buff, O_RDONLY);
 		size_t priv_bytes = 0;
 		if( smap_hndl != -1 )
@@ -499,7 +499,7 @@ namespace MMgc
 						{
 							size_buff[size_idx] = 0;
 							size_idx = 0;
-							uint32 size = atoi(size_buff)*1024;
+							uint32 size = VMPI_atoi(size_buff)*1024;
 							uint32 blocks = size/GCHeap::kBlockSize;
 							if( size % GCHeap::kBlockSize != 0 )
 								++blocks;
@@ -527,7 +527,7 @@ namespace MMgc
 	ssize_t n;
 	size_t priv_bytes = 0;
 
-	(void) snprintf(mapname, sizeof (mapname),
+	(void) VMPI_snprintf(mapname, sizeof (mapname),
 	    "/proc/%d/xmap", pid);
 
 	if ((mapfd = open(mapname, O_RDONLY)) < 0 || fstat(mapfd, &st) != 0) {

@@ -58,8 +58,8 @@ namespace MMgc
 	public:
 		StackTrace(uintptr_t *trace) 
 		{ 
-			memset(this, 0, sizeof(StackTrace));
-			memcpy(ips, trace, kMaxStackTrace * sizeof(void*));
+			VMPI_memset(this, 0, sizeof(StackTrace));
+			VMPI_memcpy(ips, trace, kMaxStackTrace * sizeof(void*));
 		}
 		uintptr_t ips[kMaxStackTrace];
 		size_t skip;
@@ -115,10 +115,10 @@ namespace MMgc
 				nameTable.put((const void*)ip, name);
 			}
 			// keep going until we hit mutator code
-			if(strstr(name, "::Alloc") != NULL ||
-				strstr(name, "::LargeAlloc") != NULL ||
-				strstr(name, "::Calloc") != NULL ||
-				strstr(name, "operator new") != NULL) 
+			if(VMPI_strstr(name, "::Alloc") != NULL ||
+				VMPI_strstr(name, "::LargeAlloc") != NULL ||
+				VMPI_strstr(name, "::Calloc") != NULL ||
+				VMPI_strstr(name, "operator new") != NULL) 
 			{
 				trace->skip++;
 				continue;
@@ -195,7 +195,7 @@ namespace MMgc
 	StackTrace *MemoryProfiler::GetStackTrace()
 	{
 		uintptr_t trace[kMaxStackTrace];
-		memset(trace, 0, sizeof(trace));
+		VMPI_memset(trace, 0, sizeof(trace));
 
 		CaptureStackTrace(trace, kMaxStackTrace, 2);
 		StackTrace *st = (StackTrace*)stackTraceMap.get(trace); 
@@ -222,7 +222,7 @@ namespace MMgc
 	public:
 		CategoryGroup(const char *name) : name(name), size(0), count(0) 
 		{
-			memset(traces, 0, sizeof(traces));
+			VMPI_memset(traces, 0, sizeof(traces));
 		}
 		const char *name;
 		size_t size;
@@ -235,13 +235,13 @@ namespace MMgc
 	{
 		// input doesn't have to be zero terminated
 		char *buff = (char*)alloca(len+1);
-		strncpy(buff, name, len);
+		VMPI_strncpy(buff, name, len);
 		buff[len]='\0';
 		char *iname = (char*)nameTable.get(buff);
 		if(iname)
 			return iname;
 		iname = (char*)malloc(len+1);
-		strncpy(iname, name, len);
+		VMPI_strncpy(iname, name, len);
 		iname[len]='\0';
 		nameTable.put(iname, iname);
 		return iname;
@@ -253,12 +253,12 @@ namespace MMgc
 		if(trace->package)
 			return trace->package;
 		const char *name = GetAllocationNameFromTrace(trace);
-		const char *colons = name ? strstr(name, "::") : NULL;
+		const char *colons = name ? VMPI_strstr(name, "::") : NULL;
 		const char *package="global";
 		if(colons) {
 			colons += 2;
 			// two sets of colons indicates a namespace
-			const char *colons2 = strstr(colons, "::");
+			const char *colons2 = VMPI_strstr(colons, "::");
 			if(colons2)
 				package = Intern(name, colons-name);
 		}
@@ -325,7 +325,7 @@ namespace MMgc
 					break;
 			  if(!tg->traces[j] || tg->traces[j]->size < size) {
 					if(j != kNumTracesPerType-1) {
-						memmove(&tg->traces[j+1], &tg->traces[j], (kNumTracesPerType-j-1)*sizeof(void*));
+						VMPI_memmove(&tg->traces[j+1], &tg->traces[j], (kNumTracesPerType-j-1)*sizeof(void*));
 					}
 					tg->traces[j] = trace;
 					break;
@@ -335,7 +335,7 @@ namespace MMgc
 
 		// reporting time....
 		PackageGroup **packages = (PackageGroup**)alloca(packageCount*sizeof(PackageGroup*));
-		memset(packages, 0, packageCount*sizeof(PackageGroup*));
+		VMPI_memset(packages, 0, packageCount*sizeof(PackageGroup*));
 
 		GCHashtableIterator pack_iter(&packageTable);
 		const char *package;
@@ -345,7 +345,7 @@ namespace MMgc
 			for(unsigned j=0; j<packageCount; j++) {
 				if(packages[j] == NULL || packages[j]->size < pg->size) {
 					if(j != packageCount-1) {
-						memmove(&packages[j+1], &packages[j], (packageCount-j-1)*sizeof(PackageGroup*));
+						VMPI_memmove(&packages[j+1], &packages[j], (packageCount-j-1)*sizeof(PackageGroup*));
 					}
 					packages[j]=pg;
 					break;
@@ -365,7 +365,7 @@ namespace MMgc
 
 			// sort CategoryGroup's into this array
 			CategoryGroup **residentFatties = (CategoryGroup**) alloca(numTypes * sizeof(CategoryGroup *));
-			memset(residentFatties, 0, numTypes * sizeof(CategoryGroup *));
+			VMPI_memset(residentFatties, 0, numTypes * sizeof(CategoryGroup *));
 			GCHashtableIterator iter(&pg->categories);
 			const char *name;
 			while((name = (const char*)iter.nextKey()) != NULL)
@@ -379,7 +379,7 @@ namespace MMgc
 					}
 					if(residentFatties[j]->size < tg->size) {
 						if(j != numTypes-1) {
-							memmove(&residentFatties[j+1], &residentFatties[j], (numTypes-j-1) * sizeof(CategoryGroup *));
+							VMPI_memmove(&residentFatties[j+1], &residentFatties[j], (numTypes-j-1) * sizeof(CategoryGroup *));
 						}
 						residentFatties[j] = tg;
 						break;
@@ -450,14 +450,14 @@ namespace MMgc
 			*tp++ = '\t';		*tp++ = '\t';		*tp++ = '\t';		
 			GetFunctionName(trace[i], buff, 256);
 			strncpy(tp, buff, 256);
-			tp += strlen(buff);
+			tp += VMPI_strlen(buff);
 
 			GetInfoFromPC(trace[i], buff, 256);
 			*tp++ = '(';
-			strncpy(tp, buff, 256);
-			tp += strlen(buff);
+			VMPI_strncpy(tp, buff, 256);
+			tp += VMPI_strlen(buff);
 			*tp++ = ')';
-			tp += sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
+			tp += VMPI_sprintf(tp, " - 0x%x", (unsigned int) trace[i]);
 			*tp++ = '\n';
 			if(tp - out > 1500) {
 				fputs(out, stdout);
@@ -505,7 +505,7 @@ namespace MMgc
 	{
 		if(k == NULL || k2 == NULL)
 			return false;
-		return memcmp(k, k2, kMaxStackTrace * sizeof(void*)) == 0;
+		return VMPI_memcmp(k, k2, kMaxStackTrace * sizeof(void*)) == 0;
 	}
 
 	unsigned GCStackTraceHashtable::hash(const void *k)
@@ -600,7 +600,7 @@ namespace MMgc
 
 		// size is the non-Debug size, so add 4 to get last 4 bytes, don't
 		// touch write back pointer space
-		memset(ip, poison, wholeSize+4);
+		VMPI_memset(ip, poison, wholeSize+4);
 	}
 
 	void *DebugFree(const void *item, int poison, size_t size)

@@ -84,7 +84,7 @@ namespace avmplus
 	ExceptionHandlerTable::ExceptionHandlerTable(int exception_count)
 	{
 		this->exception_count = exception_count;
-		memset(exceptions, 0, sizeof(ExceptionHandler)*exception_count);
+		VMPI_memset(exceptions, 0, sizeof(ExceptionHandler)*exception_count);
 	}
 	
 	//

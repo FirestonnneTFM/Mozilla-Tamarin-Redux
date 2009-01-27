@@ -122,7 +122,7 @@ namespace avmplus
 		if (i >= 0)
 		{
 			if (i < (int32_t)m_count-1)
-				memmove(&m_p[i], &m_p[i+1], sizeof(const void*)*(m_count-1-i));
+				VMPI_memmove(&m_p[i], &m_p[i+1], sizeof(const void*)*(m_count-1-i));
 			m_count -= 1;
 			AvmAssert(find(val) < 0);
 			return true;
@@ -278,7 +278,7 @@ namespace avmplus
 			{
 				const SlotInfo* src = &_base->getSlots()[0];
 				SlotInfo* dst = &tb->getSlots()[0];
-				memcpy(dst, src, _base->slotCount * sizeof(SlotInfo));
+				VMPI_memcpy(dst, src, _base->slotCount * sizeof(SlotInfo));
 				if (!_owner->isMachineType())
 				{
 					AvmAssert(tb->owner->m_sizeofInstance >= _base->owner->m_sizeofInstance);
@@ -294,7 +294,7 @@ namespace avmplus
 				}
 			}
 			if (_base->methodCount)
-				memcpy(&tb->getMethods()[0], &_base->getMethods()[0], _base->methodCount * sizeof(MethodInfo));
+				VMPI_memcpy(&tb->getMethods()[0], &_base->getMethods()[0], _base->methodCount * sizeof(MethodInfo));
 		}
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_tbi, tb); )
 		return tb;
@@ -1681,8 +1681,8 @@ namespace avmplus
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 		const char* xstr = name ? name->toUTF8String()->c_str() : "(null)";
-		rawname = (char*)gc->Alloc(strlen(xstr)+1);
-		strcpy(rawname, xstr);
+		rawname = (char*)gc->Alloc(VMPI_strlen(xstr)+1);
+		VMPI_strcpy(rawname, xstr);
 #endif
 	}
 
@@ -1925,7 +1925,7 @@ namespace avmplus
 
 		// the verifier and interpreter don't read the activation traits so stop here
 		uint8_t* newBytes = (uint8_t*) gc->Alloc(newMethodBody.size());
-		memcpy(newBytes, newMethodBody.getBytes().getData(), newMethodBody.size());
+		VMPI_memcpy(newBytes, newMethodBody.getBytes().getData(), newMethodBody.size());
 		//init->body_pos = newBytes;
 		WB(gc, new_init, &new_init->body_pos, newBytes);
 	}
@@ -1948,11 +1948,11 @@ namespace avmplus
 		{
 			AvmAssert(m_slotDestroyInfo.cap() == 1);
 			// no RCObjects, so just zero it all... my, that was easy
-			memset(p, 0, mysize + slotAreaSize);
+			VMPI_memset(p, 0, mysize + slotAreaSize);
 		}
 		else
 		{
-			memset(p, 0, mysize);
+			VMPI_memset(p, 0, mysize);
 			p += (mysize>>2);
 
 			AvmAssert(m_slotDestroyInfo.cap() >= 1);
@@ -1993,7 +1993,7 @@ namespace avmplus
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	ImtBuilder::ImtBuilder(MMgc::GC* _gc) : gc(_gc)
 	{
-		memset(entries, 0, sizeof(ImtEntry*)*Traits::IMT_SIZE);
+		VMPI_memset(entries, 0, sizeof(ImtEntry*)*Traits::IMT_SIZE);
 	}
 
 	void ImtBuilder::addEntry(AbstractFunction* virt, uint32_t disp_id)

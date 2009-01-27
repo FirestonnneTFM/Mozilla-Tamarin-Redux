@@ -812,7 +812,7 @@ namespace avmplus
 		exception_mask_t mask = EXC_MASK_BAD_ACCESS;
 		
 		// Save exception ports
-		memset(&savedExceptionPorts, 0, sizeof(SavedExceptionPorts));
+		VMPI_memset(&savedExceptionPorts, 0, sizeof(SavedExceptionPorts));
 		
 		kern_return_t r;
 		r = thread_get_exception_ports(thread,
@@ -1234,7 +1234,7 @@ namespace avmplus
 
 		contextRecord->Rip = buf->Rip;
 
-		memcpy(&contextRecord->Xmm6, &buf->Xmm6, sizeof(M128A)*10);
+		VMPI_memcpy(&contextRecord->Xmm6, &buf->Xmm6, sizeof(M128A)*10);
 		//contextRecord->Xmm6 = (M128A)buf->Xmm6;
 		//contextRecord->Xmm7 = buf->Xmm7;
 		//contextRecord->Xmm8 = buf->Xmm8;

@@ -199,7 +199,7 @@ namespace avmplus
 
 	void Sampler::readSample(byte *&p, Sample &s)
 	{
-		memset(&s, 0, sizeof(Sample));
+		VMPI_memset(&s, 0, sizeof(Sample));
 		read(p, s.micros);
 		read(p, s.sampleType);
 		AvmAssertMsg(s.sampleType == RAW_SAMPLE || 
@@ -484,7 +484,7 @@ namespace avmplus
 		// this can't make any allocations, it's called from sensitive areas (like from 
 		// the GC marking routines).  For one we'll recurse but also GC state can get messed
 		// up if for instance the allocation triggers a collection
-		Stringp name_str = core->findInternedString(name, (int)strlen(name));
+		Stringp name_str = core->findInternedString(name, (int)VMPI_strlen(name));
 		if (name_str != NULL)
 		{
 			sampleCheck();

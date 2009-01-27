@@ -735,7 +735,7 @@ namespace avmplus
 			AvmAssert(len >= 12);
 			if (len < 12)
 				return NULL;
-			memcpy (buffer, "-2147483648", 12);
+			VMPI_memcpy (buffer, "-2147483648", 12);
 			len = 11;
 			return buffer;
 		}

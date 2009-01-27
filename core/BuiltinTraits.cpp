@@ -42,7 +42,7 @@ namespace avmplus
 {
 	BuiltinTraits::BuiltinTraits()
 	{
-		memset(this, 0, sizeof(BuiltinTraits));
+		VMPI_memset(this, 0, sizeof(BuiltinTraits));
 	}
 
 	// this is called after core types are defined.  we don't want to do

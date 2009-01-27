@@ -2200,7 +2200,7 @@ namespace avmplus
 		ip = ipStart = (OP*) BIT_ROUND_UP(ipStart, sizeof(OP));
 
 		// reset the cse engine
-		memset(cseTable, 0, sizeof(OP*)*MIR_last);
+		VMPI_memset(cseTable, 0, sizeof(OP*)*MIR_last);
 		firstCse = ip;
 
 		// instruction # of last function call

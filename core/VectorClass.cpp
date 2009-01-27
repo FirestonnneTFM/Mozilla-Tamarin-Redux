@@ -644,7 +644,7 @@ namespace avmplus
 			if( m_fixed )
 				toplevel()->throwRangeError(kVectorFixedError);
 
-			memset(m_array+newLength, 0, (m_length-newLength)*sizeof(Atom));
+			VMPI_memset(m_array+newLength, 0, (m_length-newLength)*sizeof(Atom));
 			//_spliceHelper (newLength, 0, (m_length - newLength), 0, 0);
 		}
 		m_length = newLength;
@@ -676,8 +676,8 @@ namespace avmplus
 			}
 			if (m_array)
 			{
-				memcpy(newArray, m_array, m_length * sizeof(Atom));
-				memset(oldAtoms, 0, m_length*sizeof(Atom));
+				VMPI_memcpy(newArray, m_array, m_length * sizeof(Atom));
+				VMPI_memset(oldAtoms, 0, m_length*sizeof(Atom));
 				gc->Free(oldAtoms);
 			}
 			m_array = newArray;
@@ -707,15 +707,15 @@ namespace avmplus
 
 			// shift elements down
 			int toMove = m_length - insertPoint - deleteCount;
-			memmove (arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(Atom));
+			VMPI_memmove (arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(Atom));
 
-			memset (arr + m_length - numberBeingDeleted, 0, numberBeingDeleted * sizeof(Atom));
+			VMPI_memset (arr + m_length - numberBeingDeleted, 0, numberBeingDeleted * sizeof(Atom));
 		}
 		else if (l_shiftAmount > 0)
 		{
-			memmove (arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(Atom));
+			VMPI_memmove (arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(Atom));
 			//clear for gc purposes
-			memset (arr + insertPoint, 0, l_shiftAmount * sizeof(Atom));
+			VMPI_memset (arr + insertPoint, 0, l_shiftAmount * sizeof(Atom));
 		}
 
 		set_length(m_length + l_shiftAmount);
@@ -769,9 +769,9 @@ namespace avmplus
 				toplevel()->throwRangeError(kVectorFixedError);
 			grow (m_length + argc);
 			Atom *arr = m_array;
-			memmove (arr + argc, arr, m_length * sizeof(Atom));
+			VMPI_memmove (arr + argc, arr, m_length * sizeof(Atom));
 			// clear moved element for RC purposes
-			memset (arr, 0, argc * sizeof(Atom));
+			VMPI_memset (arr, 0, argc * sizeof(Atom));
 			m_length += argc;
 			for(int i=0; i<argc; i++) {
 				_setUintProperty(i, argv[i]);

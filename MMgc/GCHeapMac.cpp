@@ -340,13 +340,13 @@ namespace MMgc
 			char *ret = abi::__cxa_demangle(sym, out, &sz, &status);
 			if(ret) {
 				out = ret; // apparently demangle may realloc, so free this instead of out
-				strncpy(buff, ret, buffSize);
+				VMPI_strncpy(buff, ret, buffSize);
 			} else {
-				strncpy(buff, sym, buffSize);
+				VMPI_strncpy(buff, sym, buffSize);
 			}
 			free(out); 
 		} else {
-			snprintf(buff, buffSize, "0x%08x", (uint32)pc);
+			VMPI_snprintf(buff, buffSize, "0x%08x", (uint32)pc);
 		}
 	}
 	
@@ -358,11 +358,11 @@ namespace MMgc
 		(void)buffSize;
 /*		uintptr_t array[2] = {pc, 0};
 		char **strs = backtrace_symbols((void*const*)array, 1);
-		snprintf(buff, buffSize, "%s", strs[0]);
+		VMPI_snprintf(buff, buffSize, "%s", strs[0]);
 		free(strs);
  */
 	  //		GetFunctionName(pc, buff, buffSize);
-	//	snprintf(buff, buffSize, "0x%u:%s", pc, sym);
+	//	VMPI_snprintf(buff, buffSize, "0x%u:%s", pc, sym);
 	}
 	
 	void CaptureStackTrace(uintptr_t* trace, int len, int skip) 

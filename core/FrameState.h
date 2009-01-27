@@ -99,7 +99,7 @@ namespace avmplus
 			scopeDepth = other->scopeDepth;
 			stackDepth = other->stackDepth;
 			withBase = other->withBase;
-			memcpy(locals, other->locals, verifier->frameSize*sizeof(Value));
+			VMPI_memcpy(locals, other->locals, verifier->frameSize*sizeof(Value));
 			return true;
 		}
 

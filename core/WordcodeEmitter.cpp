@@ -994,7 +994,7 @@ namespace avmplus
 		// move the data
 		uintptr_t* ptr = code;
 		while (first != NULL) {
-			memcpy(ptr, first->data, first->entries_used*sizeof(uintptr_t));
+			VMPI_memcpy(ptr, first->data, first->entries_used*sizeof(uintptr_t));
 			ptr += first->entries_used;
 			first = first->next;
 		}

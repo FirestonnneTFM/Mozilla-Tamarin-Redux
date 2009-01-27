@@ -1353,7 +1353,7 @@ namespace avmplus
 			void clear()
 			{
 				free = 0;
-				memset(active, 0, MAX_REGISTERS * sizeof(OP*));
+				VMPI_memset(active, 0, MAX_REGISTERS * sizeof(OP*));
 			}
 
 			uint32 isFree(Register r) 

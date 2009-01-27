@@ -83,7 +83,7 @@ namespace avmshell
 		// parse new bytecode
 		size_t len = b->get_length();
 		ScriptBuffer code = core->newScriptBuffer(len);
-		memcpy(code.getBuffer(), &b->GetByteArray()[0], len); 
+		VMPI_memcpy(code.getBuffer(), &b->GetByteArray()[0], len); 
 		Toplevel *toplevel = domainToplevel;
 		return core->handleActionBlock(code, 0,
 								  domainEnv,
