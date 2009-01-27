@@ -519,7 +519,13 @@ namespace avmplus
 		if (s)
 			s->sampleCheck();
 
-		_invocationCount++;
+		// method_id can legitimately be -1 for activations, but we don't care about those here,
+		// so just ignore them.
+		int method_id = this->method->method_id;
+		if (method_id >= 0)
+		{
+			vtable->abcEnv->invocationCount(method_id) += 1;	// returns a reference, so this works
+		}
 	}
 
 	void MethodEnv::debugExit(CallStackNode* callstack)
@@ -546,7 +552,14 @@ namespace avmplus
 				debugger->debugLine(line);
 		}
 	}
-#endif
+
+	uint64_t MethodEnv::invocationCount() const 
+	{ 
+		int method_id = this->method->method_id;
+		if (method_id < 0) return 0;
+		return vtable->abcEnv->invocationCount(method_id);
+	}
+#endif // DEBUGGER
 
     void FASTCALL MethodEnv::nullcheckfail(Atom atom)
     {

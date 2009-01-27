@@ -322,14 +322,10 @@ namespace avmplus
 		inline bool isScriptEnv() const { return (activationOrMCTable & kIsScriptEnv) != 0; }
 
 #ifdef DEBUGGER
-		inline uint64_t invocationCount() const { return _invocationCount; }
+		uint64_t invocationCount() const;
 #endif
 
 	// ------------------------ DATA SECTION BEGIN
-#ifdef DEBUGGER
-	private:
-		uint64_t					_invocationCount;
-#endif
 	public:
 		// pointers are write-once so we don't need WB's
 		VTable* const				vtable;		// the vtable for the scope where this env was declared 

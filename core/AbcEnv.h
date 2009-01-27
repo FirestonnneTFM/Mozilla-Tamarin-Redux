@@ -51,15 +51,7 @@ namespace avmplus
 		#endif
 
 	public:
-		AbcEnv(PoolObject* _pool,
-			   DomainEnv* _domainEnv,
-		       CodeContext * _codeContext)
-			: m_pool(_pool),
-			  m_domainEnv(_domainEnv),
-			  m_codeContext(_codeContext),
-              m_privateScriptEnvs(new(_pool->core->GetGC()) MultinameHashtable())
-		{
-		}
+		AbcEnv(PoolObject* _pool, DomainEnv* _domainEnv, CodeContext * _codeContext);
 
 		inline PoolObject* pool() const { return m_pool; }
 		inline DomainEnv* domainEnv() const { return m_domainEnv; }
@@ -67,6 +59,15 @@ namespace avmplus
 
 		inline MethodEnv* getMethod(uint32_t i) const { return m_methods[i]; }
 		inline void setMethod(uint32_t i, MethodEnv* env) { WB(m_pool->core->GetGC(), this, &m_methods[i], env); }
+
+#ifdef DEBUGGER
+		inline uint64_t& invocationCount(uint32_t i) 
+		{ 
+			AvmAssert(m_invocationCounts != NULL); 
+			AvmAssert(i < m_pool->methodCount); 
+			return m_invocationCounts[i]; 
+		}
+#endif
 
 		static size_t calcExtra(PoolObject* pool)
 		{
@@ -94,7 +95,10 @@ namespace avmplus
 		DomainEnv* const			m_domainEnv;
 		CodeContext* const			m_codeContext;
 		DWB(MultinameHashtable*)	m_privateScriptEnvs;
-		MethodEnv*					m_methods[1]; // actual size will hold pool->methodCount methods
+#ifdef DEBUGGER
+		DWB(uint64_t*)				m_invocationCounts;	// actual size will hold pool->methodCount methods, only allocated if debugger exists
+#endif
+		MethodEnv*					m_methods[1];		// actual size will hold pool->methodCount methods
 	// ------------------------ DATA SECTION END
 	};
 
