@@ -451,11 +451,11 @@ namespace avmplus
 		{
 			ScriptObject* so = AvmCore::atomToScriptObject(type);
 
-			if (so == toplevel()->intClass)
+			if (so == (IntClass*)toplevel()->intClass)
 				return toplevel()->intVectorClass->atom();
-			else if( so == toplevel()->numberClass )
+			else if( so == (NumberClass*)toplevel()->numberClass )
 				return toplevel()->doubleVectorClass->atom();
-			else if( so == toplevel()->uintClass )
+			else if( so == (UIntClass*) toplevel()->uintClass )
 				return toplevel()->uintVectorClass->atom();
 
 			fullname = so->vtable->ivtable->traits->formatClassName();

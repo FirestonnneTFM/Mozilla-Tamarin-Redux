@@ -972,7 +972,7 @@ namespace avmplus
 				if (AvmCore::isSlotBinding(b) && /*jit &&*/
 					// it's a var, or a const being set from the init function
 					(!AvmCore::isConstBinding(b) || 
-						obj.traits->init == info && opcode == OP_initproperty))
+						(AbstractFunction*) obj.traits->init == info && opcode == OP_initproperty))
 				{
 					emitCoerce(propTraits, state->sp());
 					coder->writeOp2(state, pc, OP_setslot, (uint32_t)AvmCore::bindingToSlotId(b), sp-(n-1), propTraits);

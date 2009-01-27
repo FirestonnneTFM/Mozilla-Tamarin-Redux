@@ -189,7 +189,7 @@ namespace avmplus
 		// The maximum integer key we can use with our ScriptObject
 		// HashTable must fit within 28 bits.  Any integer larger
 		// than 28 bits will use a string key.
-		static const int MAX_INTEGER_MASK = 0xF0000000;
+		static const uint32 MAX_INTEGER_MASK = 0xF0000000;
 
 		// return true iff the object is a toplevel script init object.
         bool isGlobalObject() const;

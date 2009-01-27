@@ -174,7 +174,7 @@ namespace avmplus
 		
 		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ReadOnlyScriptBufferImpl(abcData, abcDataLen));
 
-		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, core->builtinDomain, this, includes);
+		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, core->builtinDomain, this, (const List<Stringp>*)includes);
 	}
 	
 	NativeMethod* NativeInitializer::newNativeMethod(uint32_t i) const

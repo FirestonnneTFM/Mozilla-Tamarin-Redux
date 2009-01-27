@@ -158,7 +158,7 @@ namespace avmplus
 	{
 		MethodInfo* const info = (MethodInfo*)(AbstractFunction*) env->method;
 		Atom* const atomv = (Atom*)ap;
-		info->boxArgs(argc, ap, atomv);
+		info->boxArgs(argc, (uint32 *)ap, atomv);
 		Atom a = interp(env, argc, atomv);
 		Traits* t = env->method->returnTraits();
 		if (!t)
@@ -180,7 +180,7 @@ namespace avmplus
 	{
 		MethodInfo* const info = (MethodInfo*)(AbstractFunction*) env->method;
 		Atom* const atomv = (Atom*)ap;
-		info->boxArgs(argc, ap, atomv);
+		info->boxArgs(argc, (uint32 *)ap, atomv);
 		Atom a = interp(env, argc, atomv);
 		return AvmCore::number_d(a);
 	}

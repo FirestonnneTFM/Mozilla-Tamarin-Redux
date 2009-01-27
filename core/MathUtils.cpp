@@ -1689,7 +1689,7 @@ namespace avmplus
 			result->setFromDouble(kPowersOfTen[21]);
 			exp -= 21;
 			while (exp-- > 0)
-				result->multBy(10);
+				result->multBy((int32)10);
 		} else { // we won't get here because we only deal in positive exponents
 			result->setFromDouble(MathUtils::pow(10,exp)); // but just in case
 		}
@@ -1758,9 +1758,9 @@ namespace avmplus
 				}
 				else
 				{
-					r.multBy(10); 
-					mPlus.multBy(10);
-					mMinus.multBy(10);
+					r.multBy((int32)10); 
+					mPlus.multBy((int32)10);
+					mMinus.multBy((int32)10);
 				}
 			}
 			else
@@ -1815,9 +1815,9 @@ namespace avmplus
 			}
 			else
 			{
-				r.multBy(10);
-				mPlus.multBy(10);
-				mMinus.multBy(10);
+				r.multBy((int32)10);
+				mPlus.multBy((int32)10);
+				mMinus.multBy((int32)10);
 				correctedEstimate = exponentEstimate;
 			}
 		}
