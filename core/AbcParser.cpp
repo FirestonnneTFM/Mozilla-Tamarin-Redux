@@ -1514,9 +1514,10 @@ namespace avmplus
 			// resolving base class type means class heirarchy must be a Tree
 			Traits* baseTraits = pool->resolveTypeName(pos, toplevel);
 
-			if (baseTraits && baseTraits->final ||
-				CLASS_TYPE != NULL && baseTraits == CLASS_TYPE ||
-				FUNCTION_TYPE != NULL && baseTraits == FUNCTION_TYPE)
+			if ((baseTraits && baseTraits->final) ||
+				(CLASS_TYPE != NULL && baseTraits == CLASS_TYPE) ||
+				// note, builtins are allowed to override Function
+				(FUNCTION_TYPE != NULL && baseTraits == FUNCTION_TYPE && !pool->isBuiltin))
 			{
 				// error - attempt to extend final class
 				if_verbose(
