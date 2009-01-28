@@ -419,13 +419,20 @@ namespace avmshell
 			location = colon+1;
 		}
 
-		AbcFile *abcFile = (AbcFile*) abcAt(0);
-		if (abcFile == NULL) {
+		if (abcCount() == 0) {
 			core->console << "No abc file loaded\n";
 			return;
 		}
 
-		SourceFile *sourceFile = abcFile->sourceNamed(filename);
+		SourceFile* sourceFile = NULL;
+		for (int i = 0, n = abcCount(); i < n; ++i)
+		{
+			AbcFile* abcFile = (AbcFile*)abcAt(i);
+			sourceFile = abcFile->sourceNamed(filename);
+			if (sourceFile)
+				break;
+		}
+
 		if (sourceFile == NULL) {
 			core->console << "No source available; can't set breakpoint.\n";
 			return;
