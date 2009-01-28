@@ -13286,7 +13286,7 @@ namespace avmplus
 			const bool do_emit = core->debugger() != NULL;
 			#endif
 		    Stringp str = pool->cpool_string[imm30];  // assume been checked already
-			if(do_emit) emit(state, opcode, (uintptr)str);
+			if (do_emit) emit(state, opcode, (uintptr)str);
 #endif
 			break;
 		}
@@ -13699,6 +13699,7 @@ namespace avmplus
 			break;
 
 		case OP_debugline:
+		{
             #if defined(DEBUGGER) || defined(VTUNE)
 			#ifdef VTUNE
 			const bool do_emit = true;
@@ -13709,7 +13710,7 @@ namespace avmplus
 		     if (do_emit) emit(state, opcode, imm30);
             #endif
 			break;
-
+		}
 		case OP_nextvalue:
 		case OP_nextname:
 		    emit(state, opcode, 0, 0, NULL);
