@@ -2579,23 +2579,18 @@ namespace avmplus
 			// Exception* _ee = setjmp(_ef.jmpBuf);
 			// ISSUE this needs to be a cdecl call
 			OP* jmpbuf = leaIns(offsetof(ExceptionFrame, jmpbuf), _ef);
-#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
-			OP* ei = callIns(MIR_cs, SETJMP, 2, jmpbuf, InsConst(0));
-			OP* ee = loadIns(MIR_ld, (uintptr)&ExceptionFrame::lptr, ei);
-#else //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
-			OP* ee = callIns(MIR_cs, SETJMP, 2,
-				jmpbuf, InsConst(0));
-#endif // #if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+			OP* setjmpResult = callIns(MIR_cs, SETJMP, 2, jmpbuf, InsConst(0));
 
 #ifdef AVMPLUS_SPARC
-			beginCatch_start = ee;
+			beginCatch_start = setjmpResult;
 #endif
 
 			// if (setjmp() == 0) goto start
-			OP* cond = binaryIns(MIR_ucmp, ee, InsConst(0));
+			OP* cond = binaryIns(MIR_ucmp, setjmpResult, InsConst(0));
 			OP* exBranch = Ins(MIR_jeq, cond);
 
 			// exception case
+			OP* ee = loadIns(MIR_ld, offsetof(AvmCore,exceptionAddr), InsConst((uintptr)core));
 			exAtom = loadIns(MIR_ld, offsetof(Exception, atom), ee);
 			// need to convert exception from atom to native rep, at top of 
 			// catch handler.  can't do it here because it could be any type.
