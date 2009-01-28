@@ -510,8 +510,7 @@ namespace avmplus
 			profiler->sendFunctionEnter(method);
 
 		// this shouldn't ever be called unless there's a debugger
-		// NOT currently true; native thunks call us unconditionally
-		//AvmAssert(core->debugger() != NULL);
+		AvmAssert(core->debugger() != NULL);
 		Debugger* debugger = core->debugger();
 		if (debugger)
 			debugger->_debugMethod(this);
