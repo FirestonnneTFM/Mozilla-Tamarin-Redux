@@ -48,21 +48,6 @@
     }
 #endif
 
-#ifdef _MAC
-    #if !defined(AVMPLUS_MAC_NO_CARBON)
-        typedef const unsigned char* ConstStr255Param;
-
-        extern "C"
-		{
-            #ifdef powerc
-			    extern pascal void DebugStr(ConstStr255Param aStr);
-	        #else
-//			    extern pascal void SysBreakStr(ConstStr255Param aStr) = {0x303C, 0xFE15, 0xA9C9};
-			#endif
-		}
-    #endif
-#endif
-
 namespace avmplus
 {
 	void AvmDebugMsg(bool debuggerBreak, const char* format, ...);
@@ -92,32 +77,6 @@ namespace avmplus
 	#else
 		#define AvmAssertMsg(x,y)	do { } while (0) /* no semi */
 		#define AvmAssert(x)		do { } while (0) /* no semi */
-	#endif
-
-	/*************************************************************************/
-	/******************************* Debugging *******************************/
-	/*************************************************************************/
-
-	/* This mess serves to define the DebugMsg function on each platform.
-	* DebugMsg is only defined when the Debug flag is turned on; it halts
-	* program execution and drops into the debugger with the given message.
-	* We define it as in inline so that when you fall into the debugger,
-	* you're in the function that issued the call and not in a "DebugMsg"
-	* subroutine.
-	*/
-	#if defined(_MAC) && !defined(DARWIN)
-		// WARNING: this function is NOT THREAD SAFE
-	    /*plugin_export*/ ConstStr255Param MakePascalMsg(const char* theString);
-		
-		#ifdef SOFT_ASSERTS
-			inline void DebugMsg_(const char* msg) { }
-		#else
-			#ifdef powerc
-				inline void DebugMsg_(const char* msg) { DebugStr(MakePascalMsg(msg)); }
-			#else
-				inline void DebugMsg_(const char* msg) { SysBreakStr(MakePascalMsg(msg)); }
-			#endif
-		#endif // SOFT_ASSERTS
 	#endif
 }
 

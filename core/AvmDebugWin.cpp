@@ -80,7 +80,11 @@ namespace avmplus
 #endif
 #else
 		// !!@ WINDOWSMOBILE better than nothing?
-		AvmDebugMsg(format, debuggerBreak);
+		va_list argptr;
+		va_start(argptr, format);
+		char *buffer = (char*)alloca(4096);
+		vsprintf(buffer, format, argptr);
+		AvmDebugMsg(buffer, debuggerBreak);
 #endif
 	}
 	

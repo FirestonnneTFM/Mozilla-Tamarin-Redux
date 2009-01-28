@@ -96,7 +96,7 @@ namespace avmplus
 			abort();
 #else
 		(void)msg;
-		(void)debugBreak();
+		(void)debugBreak;
 #endif
 	}
 }
