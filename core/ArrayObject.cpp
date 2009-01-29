@@ -414,7 +414,24 @@ namespace avmplus
 	}
 #endif
 
-	void ArrayObject::set_length(uint32 newLength)
+	// Non-virtual members for ActionScript method implementation.
+	// Always calls thru to the virtual method to allow subclasses to override in C++.
+	uint32 ArrayObject::get_length() const 
+	{ 
+		return getLength(); 
+	}
+	
+	void ArrayObject::set_length(uint32 newLength) 
+	{
+		setLength(newLength); 
+	}
+
+	/*virtual*/ uint32 ArrayObject::getLength() const 
+	{
+		return m_length;
+	}
+	
+	/*virtual*/ void ArrayObject::setLength(uint32 newLength)
 	{
 		if (traits()->needsHashtable())
 		{

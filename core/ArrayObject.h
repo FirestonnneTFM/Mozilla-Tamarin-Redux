@@ -71,11 +71,13 @@ namespace avmplus
 		bool isSimpleDense() const { return (m_denseArr.getLength() == m_length); };
 		uint32 getDenseLength() const { return m_denseArr.getLength(); }
 
-		uint32_t get_length() const { return m_length; }
+		// Non-virtual members for ActionScript method implementation
+		uint32 get_length() const;
 		void set_length(uint32 newLength);
 
-		inline uint32 getLength() const { return get_length(); }
-		inline void setLength(uint32 newLength) { set_length(newLength); }
+		// Virtual members so Array subclasses can treat length differently (in both C++ and AS3)
+		virtual uint32 getLength() const;
+		virtual void setLength(uint32 newLength);
 
 		Atom getAtomProperty(Atom name) const;
 		void setAtomProperty(Atom name, Atom value);
