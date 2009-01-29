@@ -1226,6 +1226,9 @@ namespace avmplus
 				emitCoerceArgs(m, argc);
 				int method_id = m->method_id;
 				Traits* resultType = m->returnTraits();
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				setNotNull(sp-argc);
+#endif
 				coder->writeOp2(state, pc, OP_callstatic, (uint32_t)method_id, argc, resultType);
 				state->pop_push(argc+1, resultType);
 				break;
@@ -1766,6 +1769,9 @@ namespace avmplus
 				checkGetGlobalScope();
 				checkEarlySlotBinding(obj.traits);
 				Traits* slotTraits = checkSlot(obj.traits, index);
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				setNotNull(state->sp());
+#endif
 				coder->writeOp1(state, pc, OP_getglobalslot, index);
 				state->pop_push(1, slotTraits);
 				break;
@@ -1791,6 +1797,9 @@ namespace avmplus
 				Value& obj = state->peek();
 				checkEarlySlotBinding(obj.traits);
 				Traits* slotTraits = checkSlot(obj.traits, imm30-1);
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				setNotNull(state->sp());
+#endif
 				coder->write(state, pc, opcode);
 				state->setType(sp, slotTraits, obj.notNull);
 				break;
@@ -1805,6 +1814,9 @@ namespace avmplus
 				if(pool->isCodePointer(info->body_pos))
 				    checkEarlySlotBinding(obj.traits);
 				checkSlot(obj.traits, imm30-1);
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				setNotNull(state->sp()-1);
+#endif
 				coder->write(state, pc, opcode); 
 				state->pop(2);
 				break;
