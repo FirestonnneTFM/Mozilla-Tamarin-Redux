@@ -159,10 +159,10 @@ if os == "darwin":
                          'USE_MMAP': None})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
     if cpu == 'x86_64' or cpu == 'ppc64' or o.getBoolArg("leopard"):
-		# use --enable-leopard to build for 10.5 or later; this is mainly useful for enabling
-		# us to build with gcc4.2 (which requires the 10.5 sdk), since it has a slightly different
-		# set of error & warning sensitivities. Note that we don't override CC/CXX here, the calling script
-		# is expected to do that if desired (thus we can support 10.5sdk with either 4.0 or 4.2)
+        # use --enable-leopard to build for 10.5 or later; this is mainly useful for enabling
+        # us to build with gcc4.2 (which requires the 10.5 sdk), since it has a slightly different
+        # set of error & warning sensitivities. Note that we don't override CC/CXX here, the calling script
+        # is expected to do that if desired (thus we can support 10.5sdk with either 4.0 or 4.2)
         APP_CXXFLAGS += "-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk "
         config.subst("MACOSX_DEPLOYMENT_TARGET",10.5)
     else:
@@ -208,20 +208,22 @@ else:
     raise Exception("Unsupported OS")
 
 if cpu == "i686":
-    APP_CPPFLAGS += "-DAVMPLUS_IA32 "
     if config.getCompiler() == 'GCC':
         APP_CPPFLAGS += "-msse2 "
 elif cpu == "powerpc":
-    APP_CPPFLAGS += "-DAVMPLUS_PPC "
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
 elif cpu == "ppc64":
-	# we detect this in core/avmbuild.h and MMgc/*build.h
-	None
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
 elif cpu == "sparc":
     APP_CPPFLAGS += "-DAVMPLUS_SPARC "
 elif cpu == "x86_64":
-    APP_CPPFLAGS += "-DAVMPLUS_AMD64 "
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
 elif cpu == "arm":
-    APP_CPPFLAGS += "-DAVMPLUS_ARM "
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
 else:
     raise Exception("Unsupported CPU")
 
