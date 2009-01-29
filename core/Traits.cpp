@@ -2009,6 +2009,8 @@ namespace avmplus
 
 	void ImtBuilder::finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel)
 	{
+		AvmAssert(pool->core->IsMIREnabled());
+
 	#ifdef AVMPLUS_MIR
 		// Count up all our IMT entries that will generate thunks so we can make sure
 		// we have enough space for them in our CodegenMIR buffers.
