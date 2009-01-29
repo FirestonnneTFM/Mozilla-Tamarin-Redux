@@ -283,7 +283,9 @@ namespace avmplus
 					set(i, 0);
 				}
 			} else {
-				VMPI_memset(data, 0, len*sizeof(T));
+				if ( len ) {
+					VMPI_memset(data, 0, len*sizeof(T));
+				}
 			}
 			len = 0;
 		}
