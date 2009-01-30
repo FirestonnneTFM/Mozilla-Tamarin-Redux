@@ -209,8 +209,9 @@ namespace avmplus
 			return Traits::getBuiltinType(t);
 		}
 
-        LIns *loadIns(LOpcode op, int32_t disp, LIns *base) {
-            return lirout->insLoad(op, base, disp);
+        LIns *loadIns(LOpcode op, size_t disp, LIns *base) {
+            AvmAssert(isS32(disp));
+            return lirout->insLoad(op, base, (int32_t)disp);
         }
         LIns *Ins(LOpcode op) {
             return lirout->ins0(op);

@@ -156,13 +156,11 @@ return *((intptr_t*)&_method);
 
 #ifdef AVMPLUS_64BIT
 #define AVMCORE_integer			AvmCore::integer64
-#define AVMCORE_integer_i		AvmCore::integer64_i
 #define AVMCORE_integer_d		AvmCore::integer64_d
 #define AVMCORE_integer_d_sse2	AvmCore::integer64_d_sse2
 #define PTR_SCALE 3
 #else
 #define AVMCORE_integer			AvmCore::integer
-#define AVMCORE_integer_i		AvmCore::integer_i
 #define AVMCORE_integer_d		AvmCore::integer_d
 #define AVMCORE_integer_d_sse2	AvmCore::integer_d_sse2
 #define PTR_SCALE 2
@@ -706,7 +704,7 @@ namespace avmplus
 					return loadIns(LIR_ldqc, 0, InsConstAtom(a&~7));
 				} else {
 					AvmAssert(AvmCore::isInteger(a));
-					return i2dIns(InsConst(a>>3));
+					return i2dIns(InsConst(int32_t(a>>3)));
 				}
 			} else {
 				return callIns(FUNCTIONID(number_d), 1, atom);
@@ -715,7 +713,7 @@ namespace avmplus
 		else if (t == INT_TYPE)
 		{
 			if (atom->isconst())
-				return InsConst(AVMCORE_integer_i(atom->constval()));
+				return InsConst(AvmCore::integer_i(atom->constval()));
 			else
 				return callIns(FUNCTIONID(integer_i), 1, atom);
 		}
@@ -2997,11 +2995,12 @@ namespace avmplus
 			{
 				// straightforward shift based sign extension
 				static const uint8_t kShiftAmt[3] = { 31, 24, 16 };
-				LIns* val = localGet(op1);
+				int32_t index = (int32_t) op1;
+				LIns* val = localGet(index);
 				LIns* sh = InsConst(kShiftAmt[opcode - OP_sxi1]);
 				LIns* shl = binaryIns(LIR_lsh, val, sh);
 				LIns* res = binaryIns(LIR_rsh, shl, sh);
-				localSet(op1, res);
+				localSet(index, res);
 				break;
 			}
 			
@@ -3020,9 +3019,10 @@ namespace avmplus
 					FUNCTIONID(lf64)
 				};
 
-				LIns* addr = localGet(op1);
+				int32_t index = (int32_t) op1;
+				LIns* addr = localGet(index);
 				LIns* i2 = callIns(kFuncID[opcode-OP_li8], 2, env_param, addr);
-				localSet(op1, i2);
+				localSet(index, i2);
 				break;
 			}
 			
@@ -3133,7 +3133,8 @@ namespace avmplus
 				{
 					// already coerced to required native type
                     // use localCopy to sniff type and use appropriate load instruction
-					retvalue = localCopy(op1);
+                    int32_t index = (int32_t) op1;
+					retvalue = localCopy(index);
 				}
 				else
 				{
@@ -3169,35 +3170,39 @@ namespace avmplus
 			{
                 PERFM_NVPROF("emit(unary",1);
 				//sp[0] = typeof(sp[0]);
-				LIns* value = loadAtomRep(op1);
+				int32_t index = (int32_t) op1;
+				LIns* value = loadAtomRep(index);
 				LIns* i3 = callIns(FUNCTIONID(typeof), 2,
 					coreAddr, value);
 				AvmAssert(result == STRING_TYPE);
-				localSet(op1, i3);
+				localSet(index, i3);
 				break;
 			}
 
 			case OP_not:
 			{
                 PERFM_NVPROF("emit(unary",1);
-				AvmAssert(state->value(op1).traits == BOOLEAN_TYPE);
-				LIns* value = localGet(op1);
+				int32_t index = (int32_t) op1;
+				AvmAssert(state->value(index).traits == BOOLEAN_TYPE);
+				LIns* value = localGet(index);
 				LIns* i3 = binaryIns(LIR_xor, value, InsConst(1));
-				localSet(op1, i3);
+				localSet(index, i3);
 				break;
 			}
 
             case OP_negate: {
                 PERFM_NVPROF("emit(unary",1);
-				localSet(op1, Ins(LIR_fneg, localGetq(op1)));
+				int32_t index = (int32_t) op1;
+				localSet(index, Ins(LIR_fneg, localGetq(index)));
 				break;
 			}
 
             case OP_negate_i: {
                 PERFM_NVPROF("emit(unary",1);
 				//framep[op1] = -framep[op1]
-				AvmAssert(state->value(op1).traits == INT_TYPE);
-				localSet(op1, Ins(LIR_neg, localGet(op1)));
+				int32_t index = (int32_t) op1;
+				AvmAssert(state->value(index).traits == INT_TYPE);
+				localSet(index, Ins(LIR_neg, localGet(index)));
 				break;
 			}
 
@@ -3206,7 +3211,9 @@ namespace avmplus
 			case OP_inclocal:
             case OP_declocal: {
                 PERFM_NVPROF("emit(unary",1);
-				localSet(op1, binaryIns(LIR_fadd, localGetq(op1), i2dIns(InsConst(op2))));
+				int32_t index = (int32_t) op1;
+				int32_t incr = (int32_t) op2; // 1 or -1
+				localSet(index, binaryIns(LIR_fadd, localGetq(index), i2dIns(InsConst(incr))));
 				break;
 			}
 
@@ -3215,16 +3222,19 @@ namespace avmplus
 			case OP_increment_i:
             case OP_decrement_i: {
                 PERFM_NVPROF("emit(unary",1);
-				AvmAssert(state->value(op1).traits == INT_TYPE);
-				localSet(op1, binaryIns(LIR_add, localGet(op1), InsConst(op2)));
+				int32_t index = (int32_t) op1;
+				int32_t incr = (int32_t) op2;
+				AvmAssert(state->value(index).traits == INT_TYPE);
+				localSet(index, binaryIns(LIR_add, localGet(index), InsConst(incr)));
 				break;
 			}
 
             case OP_bitnot: {
                 PERFM_NVPROF("emit(unary",1);
 				// *sp = core->intToAtom(~integer(*sp));
-				AvmAssert(state->value(op1).traits == INT_TYPE);
-				localSet(op1, lirout->ins1(LIR_not, localGet(op1)));
+				int32_t index = (int32_t) op1;
+				AvmAssert(state->value(index).traits == INT_TYPE);
+				localSet(index, lirout->ins1(LIR_not, localGet(index)));
 				break;
 			}
 
@@ -3288,8 +3298,8 @@ namespace avmplus
 			{
                 PERFM_NVPROF("emit(throw",1);
 				//throwAtom(*sp--);
-				callIns(FUNCTIONID(throwAtom), 2,
-					coreAddr, loadAtomRep(op1));
+				int32_t index = (int32_t) op1;
+				callIns(FUNCTIONID(throwAtom), 2, coreAddr, loadAtomRep(index));
 				break;
 			}
 
@@ -3365,14 +3375,16 @@ namespace avmplus
                 PERFM_NVPROF("emit(hasnext2",1);
                 // fixme - if obj is already Atom, or index is already int,
                 // easier to directly reference space in vars.
+				int32_t obj_index = (int32_t) op1;
+				int32_t index_index = (int32_t) op2;
 				LIns* obj = InsAlloc(sizeof(Atom));
-				LIns* index = InsAlloc(sizeof(int));
-				storeIns(loadAtomRep(op1), 0, obj);		// Atom obj
-				storeIns(localGet(op2), 0, index);   	// int32 index
+				LIns* index = InsAlloc(sizeof(int32_t));
+				storeIns(loadAtomRep(obj_index), 0, obj);		// Atom obj
+				storeIns(localGet(index_index), 0, index);   	// int32 index
 				LIns* i1 = callIns(FUNCTIONID(hasnextproto), 3,
 									 env_param, obj, index);
-				localSet(op1, loadIns(LIR_ldp, 0, obj));  // Atom obj
-				localSet(op2, loadIns(LIR_ld, 0, index)); // int32 index
+				localSet(obj_index, loadIns(LIR_ldp, 0, obj));  // Atom obj
+				localSet(index_index, loadIns(LIR_ld, 0, index)); // int32 index
 				AvmAssert(result == BOOLEAN_TYPE);
 				localSet(sp+1, i1);
 				break;
@@ -3381,8 +3393,10 @@ namespace avmplus
 			case OP_newfunction:
 			{
                 PERFM_NVPROF("emit(newfunction",1);
+                uint32_t function_id = (uint32_t) op1;
+                int32_t index = (int32_t) op2;
 				//sp[0] = core->newfunction(env, body, _scopeBase, scopeDepth);
- 				AbstractFunction* func = pool->getMethodInfo((uint32_t)op1);
+ 				AbstractFunction* func = pool->getMethodInfo(function_id);
 				int extraScopes = state->scopeDepth;
 
 				// prepare scopechain args for call
@@ -3396,7 +3410,7 @@ namespace avmplus
 					envArg, InsConstPtr(func), outer, ap);
 
 				AvmAssert(!result->isMachineType());
-				localSet(op2, i3);
+				localSet(index, i3);
 				break;
 			}
 
@@ -3665,8 +3679,8 @@ namespace avmplus
 
             case OP_checkfilter: {
                 PERFM_NVPROF("emit(checkfilter",1);
-				callIns(FUNCTIONID(checkfilter), 2,
-					env_param, loadAtomRep(op1));
+				int32_t index = (int32_t) op1;
+				callIns(FUNCTIONID(checkfilter), 2, env_param, loadAtomRep(index));
 				break;
 			}
 
@@ -3717,7 +3731,7 @@ namespace avmplus
 				// stack out: obj
 				// framep[op2] = env->finddef(name)
 				Multiname* multiname = (Multiname*) op1;
-				intptr_t dest = op2;
+				int32_t dest_index = (int32_t) op2;
 				LIns* name = InsConstPtr(multiname->getName());
 				LIns* out;
 
@@ -3736,7 +3750,7 @@ namespace avmplus
 						InsConstPtr(multiname->getNamespace()),
 						name);
 				}
-				localSet(dest, ptrToNativeRep(result, out));
+				localSet(dest_index, ptrToNativeRep(result, out));
 				break;
 			}
 
@@ -4186,8 +4200,9 @@ namespace avmplus
 			case OP_convert_s:
 			{
                 PERFM_NVPROF("emit(unary",1);
-				localSet(op1, callIns(FUNCTIONID(string), 2,
-					coreAddr, loadAtomRep(op1)));
+				int32_t index = (int32_t) op1;
+				localSet(index, callIns(FUNCTIONID(string), 2,
+					coreAddr, loadAtomRep(index)));
 				break;
 			}
 
@@ -4195,11 +4210,12 @@ namespace avmplus
 			{
                 PERFM_NVPROF("emit(unary",1);
 				//sp[0] = core->ToXMLString(sp[0]);
-				LIns* value = loadAtomRep(op1);
+				int32_t index = (int32_t) op1;
+				LIns* value = loadAtomRep(index);
 				LIns* i3 = callIns(FUNCTIONID(ToXMLString), 2,
 					coreAddr, value);
 				AvmAssert(result == STRING_TYPE);
-				localSet(op1, i3);
+				localSet(index, i3);
 				break;
 			}
 
@@ -4207,11 +4223,12 @@ namespace avmplus
 			{
                 PERFM_NVPROF("emit(unary",1);
 				//sp[0] = core->EscapeAttributeValue(sp[0]);
-				LIns* value = loadAtomRep(op1);
+				int32_t index = (int32_t) op1;
+				LIns* value = loadAtomRep(index);
 				LIns* i3 = callIns(FUNCTIONID(EscapeAttributeValue), 2,
 					coreAddr, value);
 				AvmAssert(result == STRING_TYPE);
-				localSet(op1, i3);
+				localSet(index, i3);
 				break;
 			}
 
@@ -4219,14 +4236,16 @@ namespace avmplus
 			{
                 PERFM_NVPROF("emit(astype",1);
 				// sp[0] = core->astype(sp[0], traits)
-				LIns* obj = loadAtomRep(op2);
+				Traits *type = (Traits*) op1;
+				int32_t index = (int32_t) op2;
+				LIns* obj = loadAtomRep(index);
 				LIns* i1 = callIns(FUNCTIONID(astype), 3,
 					coreAddr,
 					obj,
-					InsConstPtr((Traits*)op1)); // traits
+					InsConstPtr(type));
 
 				i1 = atomToNativeRep(result, i1);
-				localSet(op2, i1);
+				localSet(index, i1);
 				break;
 			}
 
@@ -4354,12 +4373,14 @@ namespace avmplus
 				// expects a CONSTANT_Multiname cpool index
 				// used when operator "is" RHS is a compile-time type constant
 				//sp[0] = istype(sp[0], itraits);
-				LIns* obj = loadAtomRep(op2);
-				LIns* itraits = InsConstPtr((Traits*)op1);
+                Traits *type = (Traits*) op1;
+                int32_t index = (int32_t) op2;
+				LIns* obj = loadAtomRep(index);
+				LIns* itraits = InsConstPtr(type);
 				LIns* out = callIns(FUNCTIONID(istypeAtom), 3,
 					coreAddr, obj, itraits);
 				out = atomToNativeRep(result, out);
-				localSet(op2, out);
+				localSet(index, out);
 				break;
 			}
 
@@ -4398,7 +4419,8 @@ namespace avmplus
 			case OP_dxnslate:
 			{
                 PERFM_NVPROF("emit(dxnslate",1);
-				LIns* atom = loadAtomRep(op1);				
+				int32_t index = (int32_t) op1;
+				LIns* atom = loadAtomRep(index);				
 				LIns* uri = callIns(FUNCTIONID(intern), 2,
 					coreAddr, atom);
 				LIns* ns = callIns(FUNCTIONID(newPublicNamespace), 
@@ -4443,11 +4465,11 @@ namespace avmplus
 											coreAddr);
 				callIns(FUNCTIONID(debugLine), 2,
 						debugger,
-						InsConst(op1));
+						InsConst((int32_t)op1));
 			}
 			#endif // DEBUGGER
 			#ifdef VTUNE
-				Ins(LIR_line, InsConst(op1));
+				Ins(LIR_line, InsConst((int32_t)op1));
 				hasDebugInfo = true;
            #endif /* VTUNE */
 				break;

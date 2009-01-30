@@ -106,7 +106,7 @@
     CSEMETHOD(COREADDR(AvmCore::boolean), SIG2(I,P,A), boolean)
     CSEMETHOD(COREADDR(AvmCore::toUInt32), SIG2(U,P,A), toUInt32)
     CSEFUNCTION(FUNCADDR(AVMCORE_integer_d), SIG1(I,F), integer_d)
-    CSEFUNCTION(FUNCADDR(AVMCORE_integer_i), SIG1(I,A), integer_i)
+    CSEFUNCTION(FUNCADDR(AvmCore::integer_i), SIG1(I,A), integer_i)
     CSEFUNCTION(FUNCADDR(AvmCore::number_d), SIG1(F,A), number_d)
     CSEFUNCTION(FUNCADDR(AvmCore::integer_u), SIG1(U,A), integer_u)
     CSEMETHOD(COREADDR(AVMCORE_integer), SIG2(I,P,A), integer)
