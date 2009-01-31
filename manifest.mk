@@ -50,6 +50,9 @@ $(call RECURSE_DIRS,core pcre codegen vprof)
 ifeq (i686,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif
+ifeq (x86_64,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
 ifeq (arm,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif

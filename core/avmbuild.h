@@ -127,6 +127,24 @@
 #  error "AVMPLUS_AMD64 requires AVMPLUS_64BIT"
 #endif
 
+#if !defined AVMPLUS_IA32 && !defined AVMPLUS_AMD64 && !defined AVMPLUS_ARM && \
+    !defined AVMPLUS_PPC && !defined AVMPLUS_SPARC
+// Update the CPU detection code above to define the cpu switch
+#  error "unknown target CPU"
+#endif
+
+#if defined AVMPLUS_IA32 && defined AVMPLUS_AMD64
+#  error "must only define AVMPLUS_IA32 or AVMPLUS_AMD64 but not both"
+#endif
+
+#if defined AVMPLUS_IA32 && defined AVMPLUS_64BIT
+#  error "AVMPLUS_IA32 not supported with AVMPLUS_64BIT"
+#endif
+
+#if defined AVMPLUS_AMD64 && !defined AVMPLUS_64BIT
+#  error "AVMPLUS_AMD64 requires AVMPLUS_64BIT"
+#endif
+
 // all x64, and all MacTel machines, always have sse2
 #if defined(AVMPLUS_AMD64) || (defined(AVMPLUS_MAC) && defined(AVMPLUS_IA32))
 	#define AVMPLUS_SSE2_ALWAYS
@@ -166,14 +184,14 @@
 #endif
 
 #ifndef AVMPLUS_DISABLE_NJ
-#  if defined AVMPLUS_IA32 && !defined AVMPLUS_AMD64 || defined AVMPLUS_ARM || defined AVMPLUS_PPC
+#  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && !defined AVMPLUS_WIN32 || defined AVMPLUS_ARM || defined AVMPLUS_PPC
 #    define FEATURE_NANOJIT
 #  endif
 #endif
 
 // don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
 #if !defined AVMPLUS_DISABLE_MIR && !defined FEATURE_NANOJIT
-#  if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && !defined AVMPLUS_MAC
+#  if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && defined AVMPLUS_WIN32
 #    define AVMPLUS_MIR
 #  endif
 #endif
