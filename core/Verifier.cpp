@@ -1801,7 +1801,7 @@ namespace avmplus
 				setNotNull(state->sp());
 #endif
 				coder->write(state, pc, opcode);
-				state->setType(sp, slotTraits, obj.notNull);
+				state->setType(sp, slotTraits, false);
 				break;
 			}
 
