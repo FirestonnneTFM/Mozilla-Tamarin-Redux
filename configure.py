@@ -227,6 +227,9 @@ elif cpu == "arm":
 else:
     raise Exception("Unsupported CPU")
 
+if o.getBoolArg("selftests"):
+    APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
+
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "
 
