@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Adobe System Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2008
+ * Portions created by the Initial Developer are Copyright (C) 2009
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -34,13 +34,16 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-// Initialization code for generated selftest code
-#include "avmshell.h"
-namespace avmplus {
-#ifdef AVMPLUS_SELFTEST
-extern void create_mmgc_basics(AvmCore* core);
-void SelftestRunner::createGeneratedSelftestClasses() {
-create_mmgc_basics(core);
-}
-#endif // AVMPLUS_SELFTEST
-}
+
+class MyObject {
+public:
+	int i;
+};
+class MyGCObject : public MMgc::GCObject {
+public:
+	int i;
+	MyGCObject *child;
+	MyGCObject() {
+        child=NULL;
+	}
+};

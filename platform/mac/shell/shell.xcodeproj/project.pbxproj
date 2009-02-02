@@ -52,6 +52,7 @@
 		8EDDB9E909AAD1D300FB9EE5 /* DictionaryGlue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8EDDB9E609AAD1D300FB9EE5 /* DictionaryGlue.cpp */; };
 		8EDDB9EA09AAD1D300FB9EE5 /* DictionaryGlue.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8EDDB9E709AAD1D300FB9EE5 /* DictionaryGlue.h */; };
 		8EDDB9F409AAD2B700FB9EE5 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EDDB9F309AAD2B700FB9EE5 /* CoreServices.framework */; };
+		A1A830E30F310E6C000583EA /* ST_mmgc_basics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1A830E20F310E6C000583EA /* ST_mmgc_basics.cpp */; };
 		AA2E0EA50F2A62D800DDEBA2 /* Coder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA2E0EA40F2A62D800DDEBA2 /* Coder.cpp */; };
 /* End PBXBuildFile section */
 
@@ -432,6 +433,8 @@
 		8EDDB9E609AAD1D300FB9EE5 /* DictionaryGlue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DictionaryGlue.cpp; path = ../../../extensions/DictionaryGlue.cpp; sourceTree = SOURCE_ROOT; };
 		8EDDB9E709AAD1D300FB9EE5 /* DictionaryGlue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DictionaryGlue.h; path = ../../../extensions/DictionaryGlue.h; sourceTree = SOURCE_ROOT; };
 		8EDDB9F309AAD2B700FB9EE5 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		A1A830E20F310E6C000583EA /* ST_mmgc_basics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ST_mmgc_basics.cpp; path = ../../../extensions/ST_mmgc_basics.cpp; sourceTree = SOURCE_ROOT; };
+		A1A832B30F324D23000583EA /* SelftestClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SelftestClasses.h; path = ../../../extensions/SelftestClasses.h; sourceTree = SOURCE_ROOT; };
 		AA2E0EA30F2A62D700DDEBA2 /* Coder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Coder.h; path = ../../../core/Coder.h; sourceTree = SOURCE_ROOT; };
 		AA2E0EA40F2A62D800DDEBA2 /* Coder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Coder.cpp; path = ../../../core/Coder.cpp; sourceTree = SOURCE_ROOT; };
 		D940282E0E5F793900818E5B /* QCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QCache.h; sourceTree = "<group>"; };
@@ -900,9 +903,11 @@
 				8E8B529009AABAA30057BEE4 /* Profiler.h */,
 				074E40AC0E8E6FF900146B6F /* ST_avmplus_basics.cpp */,
 				074E40AD0E8E6FF900146B6F /* ST_avmplus_peephole.cpp */,
+				A1A830E20F310E6C000583EA /* ST_mmgc_basics.cpp */,
 				074E40A90E8E6FF900146B6F /* Selftest.cpp */,
 				074E40AA0E8E6FF900146B6F /* Selftest.h */,
 				074E40AB0E8E6FF900146B6F /* SelftestInit.cpp */,
+				A1A832B30F324D23000583EA /* SelftestClasses.h */,
 				8E8B529509AABAA30057BEE4 /* SystemClass.cpp */,
 				8E8B529609AABAA30057BEE4 /* SystemClass.h */,
 				8E8B529709AABAA30057BEE4 /* shell_toplevel.as */,
@@ -1024,6 +1029,7 @@
 				074A00520EA5FBBC0016A8AC /* WordcodeEmitter.cpp in Sources */,
 				07DFE9ED0EB8B3430046B322 /* WordcodeTranslator.cpp in Sources */,
 				AA2E0EA50F2A62D800DDEBA2 /* Coder.cpp in Sources */,
+				A1A830E30F310E6C000583EA /* ST_mmgc_basics.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
