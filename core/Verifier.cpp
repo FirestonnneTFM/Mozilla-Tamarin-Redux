@@ -508,6 +508,7 @@ namespace avmplus
 											v.notNull = false;
 											v.traits = NULL;
 											v.killed = true;
+ 											JIT_ONLY( if (jit) jit->emitKill(catchState, local); )
 										}
 										temp += AvmCore::calculateInstructionWidth(temp);
 									}
