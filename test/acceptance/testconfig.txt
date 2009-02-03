@@ -77,3 +77,7 @@ ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm      ,   
 ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm-Ojit ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
 ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm      ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
 ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm-Ojit ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
+
+
+# Bug 476630 -  MMgc assert in megamap when running on 64bit platform
+ecma3/Date/e15_9_5_34_1 ,   x64-lnx-tvm-debugdebugger  ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=476630
