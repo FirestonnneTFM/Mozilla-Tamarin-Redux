@@ -76,6 +76,11 @@ namespace avmplus
 #  define ABC_CODE_ONLY(x)   x
 #endif
 	
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+#  define PEEPHOLE_ONLY(x)  x
+#else
+#  define PEEPHOLE_ONLY(x)
+#endif
 	
 #ifdef DEBUGGER
 #  define DEBUGGER_ONLY(x)  x
@@ -765,7 +770,7 @@ namespace avmplus
 #ifndef AVMPLUS_WORD_CODE
 		if (core->debugger()) 
 		{
-			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
+			callStackNode = new ((char*)aux_memory + offsetof(InterpreterAuxiliaryFrameWithCSN, cs)) CallStackNode(env, framep, /*frameTraits*/0, _argc, (void*)_atomv, &expc, &scopeDepth, true);
 			env->debugEnterInner();
 		}
 #endif
@@ -1396,7 +1401,7 @@ namespace avmplus
 				a1 = sp[-1];
 				a2 = sp[0];
 				sp--;
-			add_two_values_into_tos_impl:
+			PEEPHOLE_ONLY( add_two_values_into_tos_impl: )
 				ADD_TWO_VALUES_AND_NEXT(a1, a2, sp[0]);
 			}
 
@@ -1704,84 +1709,84 @@ namespace avmplus
 					
 		    INSTR(ifeq) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_eq_and_branch_impl:
+			PEEPHOLE_ONLY( compare_eq_and_branch_impl: )
 				IFCMP_TWO_VALUES(==, core->equals(a1,a2) == trueAtom, a1, a2, i1);
 				NEXT;
 			}
 
 			INSTR(ifne) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_ne_and_branch_impl:
+			PEEPHOLE_ONLY( compare_ne_and_branch_impl: )
 				IFCMP_TWO_VALUES(!=, core->equals(a1,a2) == falseAtom, a1, a2, i1);
                 NEXT;
 			}
 
 		    INSTR(ifstricteq) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_stricteq_and_branch_impl:
+			PEEPHOLE_ONLY( compare_stricteq_and_branch_impl: )
 				IFCMP_TWO_VALUES(==, core->stricteq(a1,a2) == trueAtom, a1, a2, i1);
 				NEXT;
 			}
 					
 			INSTR(ifstrictne) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_strictne_and_branch_impl:
+			PEEPHOLE_ONLY( compare_strictne_and_branch_impl: )
 				IFCMP_TWO_VALUES(!=, core->stricteq(a1,a2) == falseAtom, a1, a2, i1);
 				NEXT;
 			}
 
 			INSTR(iflt) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_lt_and_branch_impl:
+			PEEPHOLE_ONLY( compare_lt_and_branch_impl: )
 				IFCMP_TWO_VALUES(<, core->compare(a1,a2) == trueAtom, a1, a2, i1);
                 NEXT;
 			}
 
 			INSTR(ifnlt) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_nlt_and_branch_impl:
+			PEEPHOLE_ONLY( compare_nlt_and_branch_impl: )
 				IFCMP_TWO_VALUES(>=, core->compare(a1, a2) != trueAtom, a1, a2, i1);
                 NEXT;
 			}
 
 			INSTR(ifle) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_le_and_branch_impl:
+			PEEPHOLE_ONLY( compare_le_and_branch_impl: )
 				IFCMP_TWO_VALUES(<=, core->compare(a2, a1) == falseAtom,a1,a2,i1);
                 NEXT;
 			}
 
 			INSTR(ifnle) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_nle_and_branch_impl:
+			PEEPHOLE_ONLY( compare_nle_and_branch_impl: )
 				IFCMP_TWO_VALUES(>, core->compare(a2, a1) != falseAtom,a1,a2,i1);
                 NEXT;
 			}
 
 			INSTR(ifgt) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_gt_and_branch_impl:
+			PEEPHOLE_ONLY( compare_gt_and_branch_impl: )
 				IFCMP_TWO_VALUES(>, core->compare(a2, a1) == trueAtom,a1,a2,i1);
                 NEXT;
 			}
 
 			INSTR(ifngt) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_ngt_and_branch_impl:
+			PEEPHOLE_ONLY( compare_ngt_and_branch_impl: )
 				IFCMP_TWO_VALUES(<=, core->compare(a2, a1) != trueAtom,a1,a2,i1);
                 NEXT;
 			}
 
 			INSTR(ifge) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_ge_and_branch_impl:
+			PEEPHOLE_ONLY( compare_ge_and_branch_impl: )
 				IFCMP_TWO_VALUES(>=, core->compare(a1, a2) == falseAtom,a1,a2,i1);
                 NEXT;
 			}
 					
 			INSTR(ifnge) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
-			compare_nge_and_branch_impl:
+			PEEPHOLE_ONLY( compare_nge_and_branch_impl: )
 				IFCMP_TWO_VALUES(<, core->compare(a1, a2) != falseAtom,a1,a2,i1);
                 NEXT;
 			}
@@ -2315,7 +2320,7 @@ namespace avmplus
 			}
 
 			INSTR(callproperty) {
-				u1 = WOP_callproperty;
+			    u1 = WORD_CODE_ONLY(WOP_callproperty) ABC_CODE_ONLY(OP_callproperty);
 			callproperty_impl:
 				SAVE_EXPC;
 				GET_MULTINAME_PTR(multiname, U30ARG);
@@ -2329,21 +2334,21 @@ namespace avmplus
 					multiname = &aux_memory->multiname2;
 				}
 				a1 = *sp; /* base */
-				if (u1 == WOP_callproplex)
+				if (u1 == WORD_CODE_ONLY(WOP_callproplex) ABC_CODE_ONLY(OP_callproplex))
 					a2p[0] = nullObjectAtom;
 				*sp = toplevel->callproperty(a1, multiname, (int32_t)i1, a2p, toplevel->toVTable(a1));
-				if (u1 == WOP_callpropvoid)
+				if (u1 == WORD_CODE_ONLY(WOP_callpropvoid) ABC_CODE_ONLY(OP_callpropvoid))
 					sp--;
 				NEXT;
 			}
 
 			INSTR(callproplex) {
-				u1 = WOP_callproplex;
+			    u1 = WORD_CODE_ONLY(WOP_callproplex) ABC_CODE_ONLY(OP_callproplex);
 				goto callproperty_impl;
 			}
 
 			INSTR(callpropvoid) {
-				u1 = WOP_callpropvoid;
+				u1 = WORD_CODE_ONLY(WOP_callpropvoid) ABC_CODE_ONLY(OP_callpropvoid);
 				goto callproperty_impl;
 			}
 
@@ -2375,7 +2380,7 @@ namespace avmplus
 			}
 
 			INSTR(callsuper) {
-				u1 = WOP_callsuper;
+				u1 = WORD_CODE_ONLY(WOP_callsuper) ABC_CODE_ONLY(OP_callsuper);
 			callsuper_impl:
 				SAVE_EXPC;
 				GET_MULTINAME_PTR(multiname, U30ARG);
@@ -2391,13 +2396,13 @@ namespace avmplus
 				}
 				env->nullcheck(a2p[0]);
 				*sp = env->callsuper(multiname, (int32_t)i1, a2p);
-				if (u1 == WOP_callsupervoid)
+				if (u1 == WORD_CODE_ONLY(WOP_callsupervoid) ABC_CODE_ONLY(OP_callsupervoid))
 					sp--;
 				NEXT;
 			}
 
 			INSTR(callsupervoid) {
-				u1 = WOP_callsupervoid;
+				u1 = WORD_CODE_ONLY(WOP_callsupervoid) ABC_CODE_ONLY(OP_callsupervoid);
 				goto callsuper_impl;
 			}
 
