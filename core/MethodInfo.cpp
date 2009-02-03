@@ -146,8 +146,20 @@ namespace avmplus
 				// to just rebuild the MD code.
 
 				// mark it as interpreted and try to limp along
-				if (jit.overflow)
+				if (jit.overflow) {
                     setInterpImpl();
+				}
+#ifdef AVMPLUS_WORD_CODE
+				else {
+					if(word_code.code_anchor) {
+						word_code.code_anchor = NULL;
+						codeStart = NULL;
+					}
+					if (word_code.exceptions) {
+						word_code.exceptions = NULL;
+					}
+				}
+#endif
 			}
 			CATCH (Exception *exception) 
 			{
