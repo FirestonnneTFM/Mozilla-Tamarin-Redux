@@ -2804,11 +2804,9 @@ namespace avmplus
 		int stackBase = state->verifier->stackBase;
 		for (int i=0, n=stackBase+state->stackDepth; i < n; i++)
 		{
-			#ifndef DEBUGGER
 			int scopeTop = state->verifier->scopeBase+state->scopeDepth;
 			if (i >= scopeTop && i < stackBase)
 				continue; // not live
-			#endif
 			Value &v = state->value(i);
 			if (v.killed)
 				localSet(i, undefConst);
