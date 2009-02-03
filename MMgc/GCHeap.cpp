@@ -53,13 +53,6 @@ namespace avmplus
 
 namespace MMgc
 {
-#ifdef _DEBUG
-	// 64bit - Warning, this debug mechanism will fail on 64-bit systems when we 
-	// allocate pages across more than 4 GB of memory space.  We no longer have 20-bits
-	// to track - we have 52-bits.  
-	uint8 GCHeap::m_megamap[1048576];
-#endif
-
 	GCHeap *GCHeap::instance = NULL;
 
 	const bool decommit = true;
@@ -117,10 +110,6 @@ namespace MMgc
 		(void)f;
 #endif
 #endif
-		#ifdef _DEBUG
-		// Initialize the megamap for debugging.
-		VMPI_memset(m_megamap, 0, sizeof(m_megamap));
-		#endif
 		
 		lastRegion  = 0;
 		blocksLen   = 0;
@@ -183,11 +172,6 @@ namespace MMgc
 			for (unsigned int i=0; i<blocksLen; i++) 
 			{
 				HeapBlock *block = &blocks[i];
-				if(block->baseAddr)
-				{
-					uint32 megamapIndex = ((uint32)(uintptr)block->baseAddr) >> 12;
-					GCAssert(m_megamap[megamapIndex] == 0);
-				}
 				if(block->inUse() && block->baseAddr)
 				{
 					GCDebugMsg(false, "Block 0x%x not freed\n", block->baseAddr);
@@ -228,19 +212,6 @@ namespace MMgc
 			
 				numAlloc += size;
 
-#ifdef _DEBUG
-				// Check for debug builds only:
-				// Use the megamap to double-check that we haven't handed
-				// any of these pages out already.
-				uint32 megamapIndex = ((uint32)(uintptr)block->baseAddr)>>12;
-				for (int i=0; i<size; i++) {
-					GCAssert(m_megamap[megamapIndex] == 0);
-				
-					// Set the megamap entry
-					m_megamap[megamapIndex++] = 1;
-				}
-#endif
-
 				// copy baseAddr to a stack variable to fix :
 				// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
 				baseAddr = block->baseAddr;
@@ -276,24 +247,6 @@ namespace MMgc
 
 		HeapBlock *block = AddrToBlock(item);
 		if (block) {
-
-			#ifdef _DEBUG
-			// For debug builds only:
-			// Check the megamap to ensure that all the pages
-			// being freed are in fact allocated.
-			uint32 megamapIndex = ((uint32)(uintptr)block->baseAddr) >> 12;
-			for (int i=0; i<block->size; i++) {
-				if(m_megamap[megamapIndex] != 1) {
-					GCAssertMsg(false, "Megamap is screwed up, are you freeing freed memory?");
-					int *data = (int*)item;
-					(void)data;	// silence compiler warning
-				}
-
-				// Clear the entry
-				m_megamap[megamapIndex++] = 0;
-			}
-			#endif
-
 			// Update metrics
 			GCAssert(numAlloc >= (unsigned int)block->size);
 			numAlloc -= block->size;
@@ -795,8 +748,6 @@ namespace MMgc
 
 	void GCHeap::AddToFreeList(HeapBlock *block)
 	{
-		GCAssert(m_megamap[((uint32)(uintptr)block->baseAddr)>>12] == 0);
-
 		int index = GetFreeListIndex(block->size);
 		HeapBlock *freelist = &freelists[index];
 
@@ -840,7 +791,6 @@ namespace MMgc
 		// Try to coalesce this block with its predecessor
 		HeapBlock *prevBlock = block - block->sizePrevious;
 		if (!prevBlock->inUse() && prevBlock->committed) {
-			GCAssert(m_megamap[((uint32)(uintptr)prevBlock->baseAddr)>>12] == 0);
 			// Remove predecessor block from free list
 			RemoveFromList(prevBlock);
 

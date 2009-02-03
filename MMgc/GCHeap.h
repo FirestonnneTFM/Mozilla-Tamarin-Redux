@@ -438,16 +438,6 @@ public:
 		char *AllocateMemory(size_t size);
 		void ReleaseMemory(char *address);
 #endif
-
-private:
-
-#ifdef _DEBUG
-		/* m_megamap is a debugging aid for finding bugs in this
-		   memory allocator.  It tracks allocated/free pages in
-		   the crudest way possible ... a 1MB byte array with a
-		   0/1 byte for every page in the 32-bit address space. */
-		static uint8 m_megamap[1048576];
-#endif
 	};
 
 #ifdef FEATURE_OOM
