@@ -1425,8 +1425,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		pc++;
 		switch (opcode)
 		{
-		case OP_debugfile:
-		case OP_pushstring:
+			case OP_debugfile:
+			case OP_pushstring:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1435,10 +1435,10 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << s;
 				break;
 			}
-        case OP_pushbyte:
-            buffer << opcodeInfo[opcode].name << " " << int(int8(*pc));
-            break;
-		case OP_pushint:
+			case OP_pushbyte:
+				buffer << opcodeInfo[opcode].name << " " << int(int8(*pc));
+				break;
+			case OP_pushint:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1446,7 +1446,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << pool->cpool_int[index];
 				break;
 			}
-		case OP_pushuint:
+			case OP_pushuint:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1454,7 +1454,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << (double)pool->cpool_uint[index];
 				break;
 			}
-		case OP_pushdouble:
+			case OP_pushdouble:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1462,7 +1462,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << *pool->cpool_double[index];
 				break;
 			}
-		case OP_pushnamespace:
+			case OP_pushnamespace:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1472,28 +1472,28 @@ return the result of the comparison ToPrimitive(x) == y.
                 }
 				break;
 			}
-		case OP_getsuper: 
-		case OP_setsuper: 
-		case OP_getproperty: 
-		case OP_setproperty: 
-		case OP_initproperty: 
-		case OP_findpropstrict: 
-		case OP_findproperty:
-		case OP_finddef:
-		case OP_deleteproperty: 
-		case OP_istype: 
-		case OP_coerce: 
-		case OP_astype: 
+			case OP_getsuper: 
+			case OP_setsuper: 
+			case OP_getproperty: 
+			case OP_setproperty: 
+			case OP_initproperty: 
+			case OP_findpropstrict: 
+			case OP_findproperty:
+			case OP_finddef:
+			case OP_deleteproperty: 
+			case OP_istype: 
+			case OP_coerce: 
+			case OP_astype: 
 			{
 				buffer << opcodeInfo[opcode].name << " ";
 				formatMultiname(buffer, readU30(pc), pool);
 				break;
 			}
-		case OP_callproperty:
-		case OP_callpropvoid:
-		case OP_callproplex:
-		case OP_callsuper:
-		case OP_callsupervoid:
+			case OP_callproperty:
+			case OP_callpropvoid:
+			case OP_callproplex:
+			case OP_callsuper:
+			case OP_callsupervoid:
 			{
 				uint32 index = readU30(pc);
 				int argc = readU30(pc);
@@ -1502,8 +1502,8 @@ return the result of the comparison ToPrimitive(x) == y.
 				buffer << " " << argc;
 				break;
 			}
-		case OP_callstatic:
-		case OP_newfunction:
+			case OP_callstatic:
+			case OP_newfunction:
 			{
 				int method_id = readU30(pc);
 				AbstractFunction* f = pool->methods[method_id];
@@ -1518,15 +1518,15 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " null";
 				break;
 			}
-
-		case OP_newclass: 
+				
+			case OP_newclass: 
 			{
                 uint32_t id = readU30(pc);
 				AbstractFunction* c = pool->cinits[id];
 				buffer << opcodeInfo[opcode].name << " " << c;
 				break;
 			}
-		case OP_lookupswitch:
+			case OP_lookupswitch:
 			{
 				ptrdiff_t target = off + readS24(pc);
 				pc += 3;
@@ -1540,62 +1540,307 @@ return the result of the comparison ToPrimitive(x) == y.
 				}
 				break;
 			}
-			break;
-
-      case OP_ifnlt:
-      case OP_ifnle:
-      case OP_ifngt:
-      case OP_ifnge:         
-		case OP_jump:
-		case OP_iftrue:
-		case OP_iffalse:
-		case OP_ifeq:
-		case OP_ifge:
-		case OP_ifgt:
-		case OP_ifle:
-		case OP_iflt:
-		case OP_ifne:
-		case OP_ifstricteq:
-		case OP_ifstrictne:
+				break;
+				
+			case OP_ifnlt:
+			case OP_ifnle:
+			case OP_ifngt:
+			case OP_ifnge:         
+			case OP_jump:
+			case OP_iftrue:
+			case OP_iffalse:
+			case OP_ifeq:
+			case OP_ifge:
+			case OP_ifgt:
+			case OP_ifle:
+			case OP_iflt:
+			case OP_ifne:
+			case OP_ifstricteq:
+			case OP_ifstrictne:
 			{
 				int imm24 = 0, imm8 = 0;
 				unsigned int imm30 = 0, imm30b = 0;
 				const byte* p2 = pc-1;
 				readOperands(p2, imm30, imm24, imm30b, imm8);
 				int insWidth = (int)(p2-pc);
-
+				
 				ptrdiff_t target = off + insWidth + imm24 + 1;
 				buffer << opcodeInfo[opcode].name << " " << (double)target;
 				break;
 			}
-		default:
-			switch (opcodeInfo[opcode].operandCount)
-			{
 			default:
-				buffer << opcodeInfo[opcode].name;
-				break;
-			case 1:
+				switch (opcodeInfo[opcode].operandCount) {
+				default:
+					buffer << opcodeInfo[opcode].name;
+					break;
+				case 1:
 				{
 					buffer << opcodeInfo[opcode].name
-						<< ' '
-						<< (int)readU30(pc);
+					<< ' '
+					<< (int)readU30(pc);
 				}
-				break;
-			case 2:
+					break;
+				case 2:
 				{
 					int first = readU30(pc);
 					int second = readU30(pc);
 					buffer << opcodeInfo[opcode].name
-						<< ' '
-						<< first
-						<< ' '
-						<< second;
+					<< ' '
+					<< first
+					<< ' '
+					<< second;
 				}
-				break;
+					break;
 			}
 		}
     }
-#endif
+	
+#ifdef AVMPLUS_WORD_CODE
+	void AvmCore::formatBits(PrintWriter& buffer, uint32 bits)
+	{
+		Atom a = (Atom)(intptr_t)(int32)bits;
+		if (isUndefined(a))
+			buffer << "undefined";
+		else if (isBoolean(a))
+			buffer << (boolean(a) ? "true" : "false");
+		else if (isInteger(a))
+			buffer << integer(a);
+		else
+			buffer << "[unknown: " << bits << "]";
+	}
+	
+    void AvmCore::formatOpcode(PrintWriter& buffer, const uintptr_t *pc, WordOpcode opcode, ptrdiff_t off, PoolObject* pool)
+    {
+		pc++;
+		switch (opcode)
+		{
+			case WOP_debugfile:
+			case WOP_pushstring: {
+				buffer << wopAttrs[opcode].name;
+				uint32 index = (uint32)*pc++;
+				if (index < pool->cpool_string.size())
+					buffer << " " << format(pool->cpool_string[index]->atom());
+				else
+					buffer << " OUT OF RANGE: " << index;
+				break;
+			}
+				
+			case WOP_pushbits: {
+				uint32 bits = (uint32)*pc++;
+				buffer << wopAttrs[opcode].name << " ";
+				formatBits(buffer, bits);
+				break;
+			}
+				
+			case WOP_push_doublebits: {
+				union {
+					double d;
+					uint32_t b[2];
+				} u;
+				u.b[0] = *pc++;
+				u.b[1] = *pc++;
+				buffer << wopAttrs[opcode].name << " " << u.d;
+				break;
+			}
+				
+			case WOP_pushdouble: {
+				buffer << wopAttrs[opcode].name;
+				uint32 index = (uint32)*pc++;
+				if (index < pool->cpool_double.size())
+					buffer << " " << *pool->cpool_double[index];
+				else
+					buffer << " OUT OF RANGE: " << index;
+				break;
+			}
+				
+			case WOP_pushnamespace: {
+				buffer << wopAttrs[opcode].name;
+				uint32 index = (uint32)*pc++;
+				if (index < pool->cpool_ns.size())
+					buffer << " " << pool->cpool_ns[index]->getURI();
+				else
+					buffer << " OUT OF RANGE: " << index;
+				break;
+			}
+
+			case WOP_findpropglobal:
+			case WOP_findpropglobalstrict: {
+				buffer << wopAttrs[opcode].name << " ";
+				formatMultiname(buffer, *pc++, pool);
+				buffer << " " << (uint32)*pc++;
+				break;
+			}
+				
+			case WOP_getsuper: 
+			case WOP_setsuper: 
+			case WOP_getproperty: 
+			case WOP_setproperty: 
+			case WOP_initproperty: 
+			case WOP_findpropstrict: 
+			case WOP_findproperty:
+			case WOP_finddef:
+			case WOP_deleteproperty: 
+			case WOP_istype: 
+			case WOP_coerce: 
+			case WOP_astype: {
+				buffer << wopAttrs[opcode].name << " ";
+				formatMultiname(buffer, *pc++, pool);
+				break;
+			}
+
+			case WOP_callproperty:
+			case WOP_callpropvoid:
+			case WOP_callproplex:
+			case WOP_callsuper:
+			case WOP_callsupervoid: {
+				uint32 index = (uint32)*pc++;
+				int argc = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " ";
+				formatMultiname(buffer, index, pool);
+				buffer << " " << argc;
+				break;
+			}
+
+			case WOP_callstatic:
+			case WOP_newfunction: {
+				int method_id = (int)*pc++;
+				AbstractFunction* f = pool->methods[method_id];
+				buffer << wopAttrs[opcode].name << " method_id=" << method_id;
+				if (opcode == WOP_callstatic)
+					buffer << " argc=" << (int)*pc++; // argc
+				if (f->name)
+					buffer << " " << f->name;
+				else
+					buffer << " null";
+				break;
+			}
+				
+			case WOP_newclass: {
+                uint32_t id = (uint32_t)*pc++;
+				AbstractFunction* c = pool->cinits[id];
+				buffer << wopAttrs[opcode].name << " " << c;
+				break;
+			}
+				
+			case WOP_lookupswitch: {
+				ptrdiff_t target = off + *pc++;
+				int maxindex = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " default:" << (int)target << " maxcase:"<<maxindex;
+				for (int i=0; i <= maxindex; i++)
+				{
+					target = off + *pc++;
+					buffer << " " << (int)target;
+				}
+				break;
+			}
+				
+			case WOP_ifnlt:
+			case WOP_ifnle:
+			case WOP_ifngt:
+			case WOP_ifnge:         
+			case WOP_jump:
+			case WOP_iftrue:
+			case WOP_iffalse:
+			case WOP_ifeq:
+			case WOP_ifge:
+			case WOP_ifgt:
+			case WOP_ifle:
+			case WOP_iflt:
+			case WOP_ifne:
+			case WOP_ifstricteq:
+			case WOP_ifstrictne: {
+				int offset = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " " << (uint32)(off + 2 + offset);
+				break;
+			}
+
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			case WOP_subtract_lb:
+			case WOP_multiply_lb:
+			case WOP_divide_lb:
+			case WOP_bitand_lb:
+			case WOP_bitor_lb:
+			case WOP_bitxor_lb: {
+				uint32 r1 = (uint32)*pc++;
+				uint32 b1 = (uint32)*pc++;
+				buffer << wopAttrs[opcode].name << " " << r1 << " ";
+				formatBits(buffer, b1);
+				break;
+			}
+				
+			case WOP_iflt_ll:
+			case WOP_ifnlt_ll:
+			case WOP_ifle_ll:
+			case WOP_ifnle_ll:
+			case WOP_ifgt_ll:
+			case WOP_ifngt_ll:
+			case WOP_ifge_ll:
+			case WOP_ifnge_ll:
+			case WOP_ifeq_ll:
+			case WOP_ifne_ll:
+			case WOP_ifstricteq_ll:
+			case WOP_ifstrictne_ll: {
+				uint32 r1 = (uint32)*pc++;
+				uint32 r2 = (uint32)*pc++;
+				int offset = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " " << r1 << " " << r2 << " " << (uint32)(off + 4 + offset);
+				break;
+			}
+				
+			case WOP_iflt_lb:
+			case WOP_ifnlt_lb:
+			case WOP_ifle_lb:
+			case WOP_ifnle_lb:
+			case WOP_ifgt_lb:
+			case WOP_ifngt_lb:
+			case WOP_ifge_lb:
+			case WOP_ifnge_lb:
+			case WOP_ifeq_lb:
+			case WOP_ifne_lb:
+			case WOP_ifstricteq_lb:
+			case WOP_ifstrictne_lb: {
+				uint32 r1 = (uint32)*pc++;
+				uint32 b1 = (uint32)*pc++;
+				int offset = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " " << r1 << " ";
+				formatBits(buffer, b1);
+				buffer << " " << (uint32)(off + 4 + offset);
+				break;
+			}
+#endif // AVMPLUS_PEEPHOLE_OPTIMIZER
+
+			default:
+				switch (wopAttrs[opcode].width) {
+				case 0: {
+					buffer << "UNKNOWN: " << opcode;
+					break;
+				}
+				default:
+					buffer << wopAttrs[opcode].name;
+					break;
+				case 2:
+				{
+					buffer << wopAttrs[opcode].name
+					<< ' '
+					<< (int)*pc++;
+					break;
+				}
+				case 3:
+				{
+					int first = (int)*pc++;
+					int second = (int)*pc++;
+					buffer << wopAttrs[opcode].name
+					<< ' '
+					<< first
+					<< ' '
+					<< second;
+					break;
+				}
+			}
+		}
+    }
+#endif // AVMPLUS_WORD_CODE
+#endif // AVMPLUS_VERBOSE
 
 	ExceptionHandler* AvmCore::beginCatch(ExceptionFrame *ef,
 		MethodInfo *info, sintptr pc, Exception *exception)

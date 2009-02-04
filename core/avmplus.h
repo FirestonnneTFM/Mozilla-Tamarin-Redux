@@ -126,6 +126,7 @@
 #include "AvmDebug.h"
 #include "AtomConstants.h"
 #include "ActionBlockConstants.h"
+#include "wopcodes.h"
 #include "ErrorConstants.h"
 #include "NativeObjectHelpers.h"
 
@@ -285,7 +286,6 @@ namespace avmplus
 #include "avmplusProfiler.h"
 #include "StringBuffer.h"
 #include "AtomArray.h"
-#include "wopcodes.h"
 #include "Coder.h"
 #include "WordcodeTranslator.h"
 #include "WordcodeEmitter.h"

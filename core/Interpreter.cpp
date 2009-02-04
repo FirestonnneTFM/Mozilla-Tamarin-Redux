@@ -95,6 +95,11 @@ namespace avmplus
 #  define DEBUG_ONLY(x)
 #endif
 
+#ifdef AVMPLUS_WORD_CODE
+	typedef uintptr_t bytecode_t;
+#else
+	typedef uint8_t bytecode_t;
+#endif
 
 #ifndef AVMPLUS_WORD_CODE
 	inline intptr_t readS24(const uint8_t* pc) {
@@ -149,14 +154,10 @@ namespace avmplus
 	static Atom* initMultiname(MethodEnv* env, Multiname &name, Atom* sp);
 	static Atom* initMultinameNoXMLList(MethodEnv* env, Multiname &name, Atom* sp);
 	static Traits* getTraits(const Multiname* name, PoolObject* pool, Toplevel* toplevel, AvmCore* core);
-#if defined(AVMPLUS_VERBOSE) && !defined(AVMPLUS_WORD_CODE)
-	
-	/**
-	 * display contents of current stack frame only.
-	 */
-	static void showState(MethodInfo* info, const uint8_t *code_start, const uint8_t *pc,
-							Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep,
-							int max_scope);
+#ifdef AVMPLUS_VERBOSE
+	// display contents of current stack frame only
+	static void showState(MethodInfo* info, const bytecode_t *code_start, const bytecode_t *pc,
+						  Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep, int max_scope);
 #endif
 
 	Atom interp32(MethodEnv* env, int argc, uint32_t *ap)
@@ -666,12 +667,10 @@ namespace avmplus
  		// I do *not* like making pc 'volatile'; a smart compiler may handle it well
  		// and only spill to memory across a call, but a dumb compiler may not ever
  		// keep the value in a register at all.
-#ifdef AVMPLUS_WORD_CODE
- 		register const uintptr_t* /* NOT VOLATILE */ pc = info->codeStart;
-#else
- 		register const uint8_t* volatile codeStart = info->codeStart;		// updated by the abs_jump opcode
- 		const uint8_t* /* NOT VOLATILE */ pc = codeStart;
+#if !defined AVMPLUS_WORD_CODE || defined AVMPLUS_VERBOSE
+ 		register const bytecode_t* volatile codeStart = info->codeStart;
 #endif
+ 		register const bytecode_t* /* NOT VOLATILE */ pc = info->codeStart;
  		intptr_t volatile expc=0;
  		AvmCore::AllocaAutoPtr _framep;
 #ifdef AVMPLUS_64BIT
@@ -792,17 +791,23 @@ namespace avmplus
 // SAVE_EXPC and variants saves the address of the current opcode in the local 'expc'.
 // Used in the case of exceptions.
 
+#ifdef AVMPLUS_VERBOSE
+#  define VERBOSE  if (pool->verbose) showState(info, codeStart, pc-1, framep, sp, scopeDepth, scopeBase, info->maxScopeDepth)
+#else
+#  define VERBOSE
+#endif
+		
 #ifdef AVMPLUS_WORD_CODE
 
 #  if defined AVMPLUS_DIRECT_THREADED
 #    if defined GNUC_THREADING
-#      define INSTR(op)       L_##op:
+#      define INSTR(op)       L_##op:  VERBOSE;
 #      define NEXT            goto *(*pc++)
 #    elif defined MSVC_X86_REWRITE_THREADING
-#      define INSTR(op)       case WOP_##op: L_ ## op: 
+#      define INSTR(op)       case WOP_##op: L_ ## op: VERBOSE;
 #      define NEXT            continue
 #    elif defined MSVC_X86_ASM_THREADING
-#      define INSTR(op)       L_ ## op: 
+#      define INSTR(op)       L_ ## op: VERBOSE;
 #      define NEXT __asm { \
 				__asm mov ebx, pc \
 				__asm mov eax, [ebx] \
@@ -812,7 +817,7 @@ namespace avmplus
 		   }
 #    endif // threading discipline
 #  else // AVMPLUS_DIRECT_THREADED
-#    define INSTR(op)       case WOP_##op:
+#    define INSTR(op)       case WOP_##op: VERBOSE; 
 #    define NEXT            continue
 #  endif
 		
@@ -835,14 +840,7 @@ namespace avmplus
 
 #else // !AVMPLUS_WORD_CODE
 
-#  if defined AVMPLUS_VERBOSE
-#    define INSTR(op) case OP_##op: \
-                        if (pool->verbose) {\
-							showState(info, codeStart, pc-1,  framep, sp, scopeDepth, scopeBase, info->maxScopeDepth); \
-						}
-#  else
-#    define INSTR(op) case OP_##op:
-#  endif
+#  define INSTR(op) case OP_##op: VERBOSE;
 
 #  define NEXT              continue
 #  define U30ARG            (readU30(pc))
@@ -3186,11 +3184,28 @@ namespace avmplus
 	/**
      * display contents of current stack frame only.
      */
-	void showState(MethodInfo* info, const uint8_t *code_start, const uint8_t *pc,
-							Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep,
-							int max_scope)
+	void showState(MethodInfo* info, const bytecode_t *code_start, const bytecode_t *pc, Atom* framep, Atom *spp, int scopeDepth, Atom *scopebasep, int max_scope)
     {
+#ifdef AVMPLUS_WORD_CODE
+#  ifdef AVMPLUS_DIRECT_THREADED
+		// 'opcode' is really a code pointer.
+		void* address = (void*)*pc;
+		WordOpcode opcode = (WordOpcode)0;
+		void** jumptable = interpGetOpcodeLabels();
+		for ( int i=0 ; i <= WOP_LAST ; i++ ) {
+			if (jumptable[i] == address) {
+				opcode = (WordOpcode)i;
+				break;
+			}
+		}
+		if (opcode < 0 || opcode > WOP_LAST)
+			opcode = (WordOpcode)0;
+# else
+		WordOpcode opcode = (WordOpcode) *pc;
+#  endif
+#else
 		AbcOpcode opcode = (AbcOpcode) *pc;
+#endif
 		PoolObject* pool = info->pool;
 		AvmCore* core = pool->core;
 		ptrdiff_t off = pc - code_start;
