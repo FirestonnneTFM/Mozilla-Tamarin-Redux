@@ -1368,7 +1368,7 @@ int StackTop;
 #endif
 
 #ifdef UNDER_CE
-int wmain(int argc, avmplus::wchar *argv[])
+int wmain(int argc, wchar *argv[])
 #else
 int main(int argc, char *argv[])
 #endif

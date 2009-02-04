@@ -161,6 +161,6 @@ typedef uint8_t		byte;
 
 /* wchar is our version of wchar_t, since wchar_t is different sizes
  on different platforms, but we want to use UTF-16 uniformly. */
-typedef unsigned short wchar;
+typedef uint16_t wchar;
 
 #endif /* __avmplus_VMPI__ */
