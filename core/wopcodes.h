@@ -196,14 +196,12 @@ namespace avmplus
 		WOP_setlocal1 = 0xD5,
 		WOP_setlocal2 = 0xD6,
 		WOP_setlocal3 = 0xD7,
-#if defined DEBUGGER
 		WOP_debug = 0xEF,
 		WOP_debugline = 0xF0,
 		WOP_debugfile = 0xF1,
-#endif
 		WOP_pushbits = 0x101,
 		WOP_push_doublebits = 0x102,
-#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+		// begin AVMPLUS_PEEPHOLE_OPTIMIZER
 		WOP_get2locals = 0x103,
 		WOP_get3locals = 0x104,
 		WOP_get4locals = 0x105,
@@ -250,13 +248,11 @@ namespace avmplus
 		WOP_ifstricteq_lb = 0x12E,
 		WOP_ifstrictne_lb = 0x12F,
 		WOP_swap_pop = 0x130,
-#endif
+		// end AVMPLUS_PEEPHOLE_OPTIMIZER
 		WOP_findpropglobal = 0x131,
 		WOP_findpropglobalstrict = 0x132,
-#ifdef DEBUGGER
 		WOP_debugenter = 0x133,
 		WOP_debugexit = 0x134,
-#endif
 		
 		WOP_LAST = 0x134
 	};
