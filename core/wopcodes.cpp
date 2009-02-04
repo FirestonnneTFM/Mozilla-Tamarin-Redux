@@ -43,7 +43,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_WORD_CODE
 
-#if defined _DEBUG || defined DEBUGGER
+#if defined _DEBUG || defined DEBUGGER || defined AVMPLUS_VERBOSE
 #  define N(x)  , x
 #else
 #  define N(x)

@@ -196,7 +196,7 @@ namespace avmplus
 		WOP_setlocal1 = 0xD5,
 		WOP_setlocal2 = 0xD6,
 		WOP_setlocal3 = 0xD7,
-#if defined DEBUGGER || !defined AVMPLUS_WORD_CODE
+#if defined DEBUGGER
 		WOP_debug = 0xEF,
 		WOP_debugline = 0xF0,
 		WOP_debugfile = 0xF1,
@@ -275,7 +275,7 @@ namespace avmplus
 		unsigned uses_local:1;	 // Use local slot
 		unsigned defs_local:1;	 // Defines local slot
 
-#if defined _DEBUG || defined DEBUGGER
+#if defined _DEBUG || defined DEBUGGER || defined AVMPLUS_VERBOSE
 		// Keep this field last
 		const char * name;       // Printable name for the instruction
 #endif
