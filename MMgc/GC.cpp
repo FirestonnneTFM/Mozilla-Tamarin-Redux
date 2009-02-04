@@ -126,9 +126,11 @@ namespace MMgc
 	const uintptr MAX_UINTPTR = 0xFFFFFFFF;
 #endif	
 
+#ifdef MEMORY_PROFILER
 	// get detailed info on each size class allocators
 	const bool dumpSizeClassState = false;
-	
+#endif
+
 	/**
 	 * Free Space Divisor.  This value may be tuned for optimum
  	 * performance.  The FSD is based on the Boehm collector.

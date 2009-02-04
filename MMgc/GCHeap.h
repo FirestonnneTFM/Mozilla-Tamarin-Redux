@@ -381,7 +381,9 @@ namespace MMgc
 		#endif
 		
 		// mir buffer management, share a common pool across threads
+#ifdef GCHEAP_LOCK
 		GCSpinLock m_mirBufferLock;
+#endif
 		typedef struct _MirMemInfo
 		{
 			void* addr;
