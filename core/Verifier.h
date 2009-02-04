@@ -76,8 +76,11 @@ namespace avmplus
 		CodegenLIR *jit;
 		#endif
 
+#if defined AVMPLUS_WORD_CODE
 		CodeWriter *teeWriter;
-		CodeWriter *cfgWriter;
+#else
+		CodeWriter *nullWriter;
+#endif
 
 		#ifdef AVMPLUS_WORD_CODE
 		WordcodeTranslator *translator;

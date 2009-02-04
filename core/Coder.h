@@ -39,8 +39,11 @@
 #ifndef __avmplus_Coder__
 #define __avmplus_Coder__
 
-#define FEATURE_TEEWRITER
-//#define FEATURE_NULLWRITER
+#if defined AVMPLUS_WORD_CODE
+  #define FEATURE_TEEWRITER
+#else
+  #define FEATURE_NULLWRITER
+#endif
 
 namespace avmplus
 {

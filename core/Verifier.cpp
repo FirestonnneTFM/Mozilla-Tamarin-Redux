@@ -147,10 +147,10 @@ namespace avmplus
             delete blockStates;
         }
 
-		// FIXME need mm policy
+#if defined AVMPLUS_WORD_CODE
         if (teeWriter) delete teeWriter;
-#if 0
-		if (cfgWriter) delete cfgWriter;
+#else
+        if (nullWriter) delete nullWriter;
 #endif
     }
 
@@ -209,6 +209,9 @@ namespace avmplus
         info->codeStart = code_pos;
 #endif
 
+		// FIXME move the following dozen or so lines of pipline configuration 
+		// code to the caller of verify
+
 #ifdef AVMPLUS_WORD_CODE
        // If MIR generation fails due to OOM then we must translate anyhow,
        // FIXME - logic for that looks unclear.
@@ -221,18 +224,23 @@ namespace avmplus
 #    else
         // the jit can fail, and we dont want to have to re-run the verifier
         // until we know it's safe to do so, so run jit & translator concurrently.
-        //this->translator = jit ? 0 : new WordcodeEmitter(info);
         this->translator = new WordcodeEmitter(info);
 #    endif
         WordcodeTranslator *translator = this->translator;
 #endif
 		// keep reference here for memory management
+
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		this->teeWriter = new TeeWriter (NULL, translator, jit);
-		this->coder = this->teeWriter;
+    #if defined AVMPLUS_WORD_CODE
+	this->coder = this->teeWriter = new TeeWriter (NULL, translator, jit);
+    #else
+	this->coder = this->nullWriter = new NullWriter (NULL, jit);
+    #endif
+#elif defined AVMPLUS_WORD_CODE
+	this->coder = translator;
+	this->teeWriter = NULL;
 #else
-		this->teeWriter = NULL;
-		this->coder = this->translator;
+	this->coder = this->nullWriter = new NullWriter(NULL, NULL);
 #endif
 
         JIT_ONLY( this->jit = jit; )
@@ -337,7 +345,6 @@ namespace avmplus
 				// we're out of code memory so try to carry on with interpreter
 				jit = 0;
 				this->jit = 0;
-				// FIXME need to zero out reference in TeeWriter too!
 			}
 		}
 		#endif
@@ -358,7 +365,6 @@ namespace avmplus
 		    JIT_ONLY(if (jit && jit->overflow) {
 				jit = 0;
 				this->jit = 0;
-				// FIXME need to zero out reference in TeeWriter too!
 			})
 			
 			XLAT_ONLY( if (translator) translator->fixExceptionsAndLabels(pc); )
