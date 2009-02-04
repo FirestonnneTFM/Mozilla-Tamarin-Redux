@@ -1637,8 +1637,8 @@ return the result of the comparison ToPrimitive(x) == y.
 					double d;
 					uint32_t b[2];
 				} u;
-				u.b[0] = *pc++;
-				u.b[1] = *pc++;
+				u.b[0] = (uint32)*pc++;
+				u.b[1] = (uint32)*pc++;
 				buffer << wopAttrs[opcode].name << " " << u.d;
 				break;
 			}
@@ -1666,7 +1666,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case WOP_findpropglobal:
 			case WOP_findpropglobalstrict: {
 				buffer << wopAttrs[opcode].name << " ";
-				formatMultiname(buffer, *pc++, pool);
+				formatMultiname(buffer, (uint32)*pc++, pool);
 				buffer << " " << (uint32)*pc++;
 				break;
 			}
@@ -1684,7 +1684,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			case WOP_coerce: 
 			case WOP_astype: {
 				buffer << wopAttrs[opcode].name << " ";
-				formatMultiname(buffer, *pc++, pool);
+				formatMultiname(buffer, (uint32)*pc++, pool);
 				break;
 			}
 
