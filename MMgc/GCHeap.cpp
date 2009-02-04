@@ -503,7 +503,9 @@ namespace MMgc
 		int startList = GetFreeListIndex(size);
 		HeapBlock *freelist = &freelists[startList];
 
+	#if defined(USE_MMAP) && defined(DECOMMIT_MEMORY)
 		HeapBlock *decommittedSuitableBlock = NULL;
+	#endif
 
 		for (int i = startList; i < kNumFreeLists; i++)
 		{
@@ -862,9 +864,13 @@ namespace MMgc
 		// Turn this switch on to test bridging of contiguous
 		// regions.
 		bool test_bridging = false;
+	#ifdef USE_MMAP
 		int defaultReserve = test_bridging ? (size+kMinHeapIncrement) : kDefaultReserve;
+	#endif
 #else
+	#ifdef USE_MMAP
 		const int defaultReserve = kDefaultReserve;
+	#endif
 #endif
 		
 		if(GetTotalHeapSize() > heapLimit)
