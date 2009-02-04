@@ -1034,7 +1034,10 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CPLUSPLUSFLAGS = "-Wextra";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-Wextra",
+					"-Wno-long-long",
+				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
@@ -1075,7 +1078,10 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CPLUSPLUSFLAGS = "-Wextra";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-Wextra",
+					"-Wno-long-long",
+				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
@@ -1163,7 +1169,10 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CPLUSPLUSFLAGS = "-Wextra";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-Wextra",
+					"-Wno-long-long",
+				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
@@ -1206,7 +1215,10 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CPLUSPLUSFLAGS = "-Wextra";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-Wextra",
+					"-Wno-long-long",
+				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
