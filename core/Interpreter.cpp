@@ -1684,14 +1684,26 @@ namespace avmplus
 // the operands from the instruction stream because it is used in various
 // contexts where the instruction sizes and layouts aren't the same.
 
-#define IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, a1, a2, i1) \
+#define GENERATE_FLAG(numeric_cmp, generic_cmp, a1, a2) \
 	if (IS_BOTH_INTEGER(a1, a2)) \
 		b1 = a1 numeric_cmp a2; \
 	else if (IS_BOTH_DOUBLE(a1, a2)) \
 		b1 = DOUBLE_VALUE(a1) numeric_cmp DOUBLE_VALUE(a2); \
 	else \
-		b1 = generic_cmp; \
+		b1 = generic_cmp
+
+#define IFCMP_TWO_VALUES(numeric_cmp, generic_cmp, a1, a2, i1) \
+	GENERATE_FLAG(numeric_cmp, generic_cmp, a1, a2); \
 	if (b1) \
+	{ \
+		if (i1 < 0) \
+			core->branchCheck(env, interruptable, (int32_t)i1); \
+		pc += i1; \
+	}
+
+#define IFNCMP_TWO_VALUES(numeric_cmp, generic_cmp, a1, a2, i1) \
+	GENERATE_FLAG(numeric_cmp, generic_cmp, a1, a2); \
+	if (!b1) \
 	{ \
 		if (i1 < 0) \
 			core->branchCheck(env, interruptable, (int32_t)i1); \
@@ -1715,7 +1727,7 @@ namespace avmplus
 			INSTR(ifne) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
 			PEEPHOLE_ONLY( compare_ne_and_branch_impl: )
-				IFCMP_TWO_VALUES(!=, core->equals(a1,a2) == falseAtom, a1, a2, i1);
+				IFNCMP_TWO_VALUES(==, core->equals(a1,a2) == trueAtom, a1, a2, i1);
                 NEXT;
 			}
 
@@ -1729,7 +1741,7 @@ namespace avmplus
 			INSTR(ifstrictne) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
 			PEEPHOLE_ONLY( compare_strictne_and_branch_impl: )
-				IFCMP_TWO_VALUES(!=, core->stricteq(a1,a2) == falseAtom, a1, a2, i1);
+				IFNCMP_TWO_VALUES(==, core->stricteq(a1,a2) == trueAtom, a1, a2, i1);
 				NEXT;
 			}
 
@@ -1743,7 +1755,7 @@ namespace avmplus
 			INSTR(ifnlt) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
 			PEEPHOLE_ONLY( compare_nlt_and_branch_impl: )
-				IFCMP_TWO_VALUES(>=, core->compare(a1, a2) != trueAtom, a1, a2, i1);
+				IFNCMP_TWO_VALUES(<, core->compare(a1, a2) == trueAtom, a1, a2, i1);
                 NEXT;
 			}
 
@@ -1757,7 +1769,7 @@ namespace avmplus
 			INSTR(ifnle) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
 			PEEPHOLE_ONLY( compare_nle_and_branch_impl: )
-				IFCMP_TWO_VALUES(>, core->compare(a2, a1) != falseAtom,a1,a2,i1);
+				IFNCMP_TWO_VALUES(<=, core->compare(a2, a1) == falseAtom,a1,a2,i1);
                 NEXT;
 			}
 
@@ -1771,7 +1783,7 @@ namespace avmplus
 			INSTR(ifngt) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
 			PEEPHOLE_ONLY( compare_ngt_and_branch_impl: )
-				IFCMP_TWO_VALUES(<=, core->compare(a2, a1) != trueAtom,a1,a2,i1);
+				IFNCMP_TWO_VALUES(>, core->compare(a2, a1) == trueAtom,a1,a2,i1);
                 NEXT;
 			}
 
@@ -1785,7 +1797,7 @@ namespace avmplus
 			INSTR(ifnge) {
 				LOAD_OFFSET_AND_FETCH_SS(a1,a2,i1);
 			PEEPHOLE_ONLY( compare_nge_and_branch_impl: )
-				IFCMP_TWO_VALUES(<, core->compare(a1, a2) != falseAtom,a1,a2,i1);
+				IFNCMP_TWO_VALUES(>=, core->compare(a1, a2) == falseAtom,a1,a2,i1);
                 NEXT;
 			}
 
