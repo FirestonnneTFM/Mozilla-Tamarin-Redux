@@ -84,4 +84,5 @@ as3/sampling/ProcessSampling        , .* , skip , https://bugzilla.mozilla.org/s
 as3/sampling/SimpleSampling         , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
 as3/sampling/StartSamplingErrors    , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
 
-
+# Bug 476691, Intermittent failure
+ecma3/Types/e8_5 , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476691
