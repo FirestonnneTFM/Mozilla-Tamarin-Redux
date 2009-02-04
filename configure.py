@@ -208,7 +208,8 @@ else:
     raise Exception("Unsupported OS")
 
 if cpu == "i686":
-    if config.getCompiler() == 'GCC':
+    if config.getCompiler() == 'GCC' and os == 'darwin':
+        #only mactel always has sse2
         APP_CPPFLAGS += "-msse2 "
 elif cpu == "powerpc":
     # we detect this in core/avmbuild.h and MMgc/*build.h
