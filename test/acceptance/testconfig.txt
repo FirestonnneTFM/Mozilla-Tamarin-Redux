@@ -78,4 +78,10 @@ ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm-Ojit ,   
 ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm      ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
 ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm-Ojit ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
 
+# Bug 476864 - Intermittent sampling test failures
+as3/sampling/Callback               , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+as3/sampling/ProcessSampling        , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+as3/sampling/SimpleSampling         , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+as3/sampling/StartSamplingErrors    , .* , skip , https://bugzilla.mozilla.org/show_bug.cgi?id=476864
+
 
