@@ -39,7 +39,8 @@
 #include "BigInteger.h"
 
 
-#if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
+//GCC only allows intrinsics if sse2 is enabled
+#if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
     #include <emmintrin.h>
 #endif
 
