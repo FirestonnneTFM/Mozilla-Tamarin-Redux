@@ -109,7 +109,7 @@ namespace avmplus
 #  endif
 
 		: WordcodeTranslator()
-		, info(info)
+		, info(NULL)
 		, core(core)
 		, backpatches(NULL)
 		, labels(NULL)
@@ -967,7 +967,8 @@ namespace avmplus
 		AvmAssert(backpatches == NULL);
 		AvmAssert(exception_fixes == NULL);
 		
-		info->word_code.cache_size = next_cache;
+		if (info != NULL)
+			info->word_code.cache_size = next_cache;
 
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peepFlush();
