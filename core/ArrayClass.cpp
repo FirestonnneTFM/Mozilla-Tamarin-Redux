@@ -1589,4 +1589,16 @@ namespace avmplus
 		Atom lenAtm = core->uintToAtom(newLen);
 		toplevel->setproperty(d->atom(), &mname, lenAtm, d->vtable);
 	}
+
+	/* static */ uint32 ArrayClass::generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args) 
+	{
+		ArrayObject *a = isArray(toplevel, thisAtom);
+		
+		AvmAssert(a != NULL);
+		for (uint32 i = args->getLength() ; i > 0; i--) {
+			Atom atom = args->getUintProperty(i - 1);
+			a->unshift(&atom, 1);
+		}
+		return a->getLength();
+	}
 }
