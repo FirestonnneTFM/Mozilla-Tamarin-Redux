@@ -286,9 +286,12 @@ package
 		be transferred to other kinds of objects for use as a method. Whether the unshift function can be applied successfully to a
 		host object is implementation-dependent.
 		*/
+		private static native function _unshift(o, args:Array):uint
 		native AS3 function unshift(...args):uint
 		prototype.unshift = function(...args):uint
 		{
+			if (this is Array)
+				return _unshift(this, args);
 			var len:uint = uint(this.length)
 			var argc:uint = args.length
 			var k:uint
