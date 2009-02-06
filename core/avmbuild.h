@@ -91,7 +91,7 @@
 #endif
 
 #ifdef AVMPLUS_WIN32
-  #ifdef _WIN64
+  #ifdef _M_X64
 	#ifndef AVMPLUS_64BIT
 	  #define AVMPLUS_64BIT
 	#endif
@@ -184,7 +184,7 @@
 #endif
 
 #ifndef AVMPLUS_DISABLE_NJ
-#  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && !defined AVMPLUS_WIN32 || defined AVMPLUS_ARM || defined AVMPLUS_PPC
+#  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 || defined AVMPLUS_ARM || defined AVMPLUS_PPC
 #    define FEATURE_NANOJIT
 #  endif
 #endif
