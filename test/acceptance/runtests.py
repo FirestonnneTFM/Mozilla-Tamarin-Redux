@@ -52,7 +52,11 @@ from time import time
 # add parent dir to python module search path
 sys.path.append('..')
 
-from util.runtestBase import RuntestBase
+try:
+    from util.runtestBase import RuntestBase
+except ImportError:
+    print "Import error.  Please make sure that the test/acceptance/util directory has been deleted."
+    print "   (directory has been moved to test/util)."
 
 class AcceptanceRuntest(RuntestBase):
     runESC = False

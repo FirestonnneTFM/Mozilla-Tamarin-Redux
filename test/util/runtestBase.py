@@ -343,7 +343,6 @@ class RuntestBase:
                 exit(1)
                 
         self.config = cputype+'-'+self.osName+'-tvm-'+vmtype+self.vmargs
-        self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
     
     ### File and Directory functions ###
     def istest(self,f):
@@ -661,6 +660,7 @@ class RuntestBase:
         if (not self.rebuildtests) and (not self.avm): #don't need AVM if rebuilding tests
             exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % self.avm)
             
+        self.js_print('current configuration: %s' % self.config, overrideQuiet=True)
         self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
         
         

@@ -54,9 +54,13 @@ from socket import *
 # add parent dir to python module search path
 sys.path.append('..')
 
-from util.runtestBase import RuntestBase
-from util.runtestUtils import *
-
+try:
+    from util.runtestBase import RuntestBase
+    from util.runtestUtils import *
+except ImportError:
+    print "Import error.  Please make sure that the test/acceptance/util directory has been deleted."
+    print "   (directory has been moved to test/util)."
+    
 class PerformanceRuntest(RuntestBase):
     avm2 = ''
     avmname = 'avm'
@@ -467,28 +471,29 @@ class PerformanceRuntest(RuntestBase):
                         self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, '', '', result1, '', '', result2, spdup, metric))
                 #TODO: clean up / reformat
                 if self.perfm:
-                    def calcPerfm(desc, key):
-                    # calculate min, max, average and %diff of averages
-                        try:
-                            if self.iterations == 1:
-                                self.js_print( '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
-                                            ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0)))
-                            else:
-                                avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
-                                avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
-                                self.js_print('     %-45s [%6s :%6s] %6s   [%6s :%6s] %6s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
-                                                                             min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
-                                                                             ((avg1-avg2)/float(avg2))*100.0))
-                        except:
-                            pass
-            
-                    calcPerfm('verify & IR gen (time)','verify')
-                    calcPerfm('compile (time)','compile')
-                    calcPerfm('code size (bytes)','code')
-                    calcPerfm('mir/lir bytes', 'irbytes')
-                    calcPerfm('mir/lir (# of inst)', 'ir')
-                    calcPerfm('count', 'count')
-                    self.js_print('-------------------------------------------------------------------------------------------------------------')
+                    if perfm1Dict['verify']:    # only calc if data present
+                        def calcPerfm(desc, key):
+                        # calculate min, max, average and %diff of averages
+                            try:
+                                if self.iterations == 1:
+                                    self.js_print( '     %-45s %7s %7s %7.1f' % (desc, perfm1Dict[key][0], perfm2Dict[key][0],
+                                                ((perfm1Dict[key][0]-perfm2Dict[key][0])/float(perfm2Dict[key][0])*100.0)))
+                                else:
+                                    avg1 = sum(perfm1Dict[key])/len(perfm1Dict[key])
+                                    avg2 = sum(perfm2Dict[key])/len(perfm2Dict[key])
+                                    self.js_print('     %-45s [%6s :%6s] %6s   [%6s :%6s] %6s %7.1f' % (desc, min(perfm1Dict[key]), max(perfm1Dict[key]), avg1,
+                                                                                 min(perfm2Dict[key]), max(perfm2Dict[key]), avg2,
+                                                                                 ((avg1-avg2)/float(avg2))*100.0))
+                            except:
+                                pass
+                
+                        calcPerfm('verify & IR gen (time)','verify')
+                        calcPerfm('compile (time)','compile')
+                        calcPerfm('code size (bytes)','code')
+                        calcPerfm('mir/lir bytes', 'irbytes')
+                        calcPerfm('mir/lir (# of inst)', 'ir')
+                        calcPerfm('count', 'count')
+                        self.js_print('-------------------------------------------------------------------------------------------------------------')
             else: #only one avm tested
                 if result1 < 9999999 and len(resultList)==self.iterations:
                     meanRes = mean(resultList)
@@ -501,18 +506,19 @@ class PerformanceRuntest(RuntestBase):
                         if config.find("-memlimit")>-1:
                             config=config[0:config.find("-memlimit")]
                         if self.perfm:  #send vprof results to db
-                            #calc confidence and mean for each stat
-                            def calcConf(list):
-                              return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
-                            def perfmSocketlog(metric,key):
-                              self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % 
-                                       (ast, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion))
-                            perfmSocketlog('vprof-compile-time','compile')
-                            perfmSocketlog('vprof-code-size','code')
-                            perfmSocketlog('vprof-verify-time','verify')
-                            perfmSocketlog('vprof-ir-bytes','irbytes')
-                            perfmSocketlog('vprof-ir-time','ir')
-                            perfmSocketlog('vprof-count','count')
+                            if perfm1Dict['verify']:    # only calc if data present
+                                #calc confidence and mean for each stat
+                                def calcConf(list):
+                                  return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
+                                def perfmSocketlog(metric,key):
+                                  self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % 
+                                           (ast, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion))
+                                perfmSocketlog('vprof-compile-time','compile')
+                                perfmSocketlog('vprof-code-size','code')
+                                perfmSocketlog('vprof-verify-time','verify')
+                                perfmSocketlog('vprof-ir-bytes','irbytes')
+                                perfmSocketlog('vprof-ir-time','ir')
+                                perfmSocketlog('vprof-count','count')
                         self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion))
                         self.js_print("%-50s %7s %10.1f%% %7s  %s" % (ast,result1,confidence,metric,resultList)) 
                     else: #one iteration
