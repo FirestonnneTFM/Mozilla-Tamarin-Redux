@@ -131,7 +131,7 @@ class RuntestBase:
         self.unpassmsgs=[]
         self.timeoutmsgs=[]
         self.assertmsgs=[]
-        
+        self.altsearchpath=None
         
         self.run()
         
@@ -350,6 +350,11 @@ class RuntestBase:
                and not f.endswith('Util'+self.sourceExt)
                
     def getTestsList(self, startDir):
+        if self.altsearchpath!=None:
+            newstartDir=[]
+            for a in startDir:
+                newstartDir.append(self.altsearchpath+a)
+            startDir=startDir+newstartDir
         for i in range(len(startDir)):
             if startDir[i][-1] == '/':
                 startDir[i] = startDir[i][:-1]
