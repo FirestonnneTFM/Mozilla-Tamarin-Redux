@@ -151,6 +151,7 @@ return *((intptr_t*)&_method);
 #endif
 
 #ifdef PERFM
+#define DOPROF
 #include "../vprof/vprof.h"
 #endif /* PERFM */
 

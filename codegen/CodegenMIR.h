@@ -40,6 +40,7 @@
 #define __avmplus_CodegenMIR__
 
 #ifdef PERFM
+#define DOPROF
 #include "../vprof/vprof.h" 
 #define count_instr() _nvprof("x86",1)
 #define count_ret() _nvprof("x86-ret",1) count_instr()
