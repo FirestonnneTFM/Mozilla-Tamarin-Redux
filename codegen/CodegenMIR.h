@@ -367,7 +367,7 @@ namespace avmplus
 
 		/**
 		 * Generates code for the method info.  The bytecode is translated
-		 * into native machine code and the TURBO flag is set
+		 * into native machine code and the JIT_IMPL flag is set
 		 * on the MethodInfo.  The original bytecode is retained for debugging.
 		 * @param info method to compile
 		 */
