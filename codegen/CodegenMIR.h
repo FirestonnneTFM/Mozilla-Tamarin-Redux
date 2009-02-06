@@ -2239,7 +2239,7 @@ namespace avmplus
 			#endif
 
 			#ifdef AVMPLUS_PPC
-			int disp = addr - (int)mip;
+			int disp = int(addr - (intptr_t)mip);
 			if (IsBranchDisplacement(disp)) {
 				// Use relative branch if possible
 				BL(disp);
