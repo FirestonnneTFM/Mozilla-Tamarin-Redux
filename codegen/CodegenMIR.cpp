@@ -7082,7 +7082,7 @@ namespace avmplus
 		}
 
 		// mark method as been JIT'd
-		info->flags |= AbstractFunction::TURBO;
+		info->flags |= AbstractFunction::JIT_IMPL;
 			
 		uintptr mipEnd = (uintptr) mip;
 		(void)mipEnd;

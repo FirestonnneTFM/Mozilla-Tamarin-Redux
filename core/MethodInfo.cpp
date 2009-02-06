@@ -323,7 +323,7 @@ namespace avmplus
 
 		// if we are running jit then the types are native and we
 		// need to box em.
-		if (isFlagSet(TURBO))
+		if (isFlagSet(JIT_IMPL))
 		{
 			// each entry is a pointer into the function's stack frame
 			void **in = (void**)src;			// WARNING this must match with MIR generator
@@ -402,7 +402,7 @@ namespace avmplus
 
 		// If the method has been jit'd then we need to box em, otherwise just
 		// copy them 
-		if (isFlagSet(TURBO))
+		if (isFlagSet(JIT_IMPL))
 		{
 			// we allocated double sized entry for each local src CodegenMIR
 			void** out = (void**)dest;		// WARNING this must match with MIR generator

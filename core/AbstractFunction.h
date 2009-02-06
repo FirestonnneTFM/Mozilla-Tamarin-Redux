@@ -123,10 +123,9 @@ namespace avmplus
 
 		/**
 		 * set to indicate that a function has been compiled
-		 * to native code.  In release mode we always compile
-		 * so we don't need the flag.
+		 * to native code by the jit compiler.
 		 */
-		static const int TURBO				= 0x80000000;
+		static const int JIT_IMPL			= 0x80000000;
 
 		/**
 		 * set to indictate that a function has been 

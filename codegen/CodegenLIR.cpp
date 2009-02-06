@@ -5371,6 +5371,8 @@ namespace avmplus
             } u;
             u.vp = frag->code();
             info->impl32 = u.fp;
+            // mark method as been JIT'd
+            info->flags |= AbstractFunction::JIT_IMPL;
             #if defined AVMPLUS_JITMAX && defined AVMPLUS_VERBOSE
             if (verbose())
                 printf("keeping %d, loop=%d\n", jitcount, assm->hasLoop);
