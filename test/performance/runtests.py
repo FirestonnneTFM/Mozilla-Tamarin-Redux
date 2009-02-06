@@ -88,6 +88,7 @@ class PerformanceRuntest(RuntestBase):
         self.loadPropertiesFile()
         self.setOptions()
         self.parseOptions()
+        self.altsearchpath='../../other-licenses/test/performance/'
         self.setTimestamp()
         self.determineOS()
         self.getVersion()
@@ -278,6 +279,9 @@ class PerformanceRuntest(RuntestBase):
     
     def runTest(self, testAndNum):
         ast = testAndNum[0]
+        testName = ast
+        if self.altsearchpath!=None and ast.startswith(self.altsearchpath):
+            testName = ast[len(self.altsearchpath):]
         testnum = testAndNum[1]
         
         if ast.startswith("./"):
@@ -313,12 +317,12 @@ class PerformanceRuntest(RuntestBase):
             return
             
         if settings.has_key('.*') and settings['.*'].has_key('skip'):
-            self.verbose_print('  skipping')
+            self.verbose_print('  skipping %s' % testName)
             self.allskips += 1
             return
         
         
-        self.verbose_print("%d running %s" % (testnum, ast));
+        self.verbose_print("%d running %s" % (testnum, testName));
         if self.forcerebuild and isfile(abc):
             os.unlink(abc)
         if not isfile(abc):
@@ -444,7 +448,7 @@ class PerformanceRuntest(RuntestBase):
                         spdup = float(result1-result2)/result2*100.0
         if self.memory:
             if len(self.avm2)>0:
-                self.js_print("%-50s %7s %7s %7.1f %7s" % (ast,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric))
+                self.js_print("%-50s %7s %7s %7.1f %7s" % (testName,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric))
             else:
                 confidence=0
                 meanRes=memoryhigh
@@ -452,25 +456,25 @@ class PerformanceRuntest(RuntestBase):
                     meanRes=mean(resultList)
                     if meanRes>0:
                         confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
-                    self.js_print("%-50s %7s %10.1f%%     [%s]" % (ast,formatMemory(memoryhigh),confidence,formatMemoryList(resultList)))
+                    self.js_print("%-50s %7s %10.1f%%     [%s]" % (testName,formatMemory(memoryhigh),confidence,formatMemoryList(resultList)))
                 else:
-                    self.js_print("%-50s %7s %7s" % (ast,formatMemory(memoryhigh), metric))
+                    self.js_print("%-50s %7s %7s" % (testName,formatMemory(memoryhigh), metric))
                 config = "%s%s" % (self.vmname, self.vmargs.replace(" ", ""))
                 config = config.replace("-memstats","")
-                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion))
+                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion))
         else:
             if len(self.avm2)>0:
                 if self.iterations == 1:
-                    self.js_print('%-50s %7s %7s %7.1f %7s' % (ast,result1,result2,spdup, metric))
+                    self.js_print('%-50s %7s %7s %7.1f %7s' % (testName,result1,result2,spdup, metric))
                 else:
                     try:
                         rl1_avg=sum(resultList)/float(len(resultList))
                         rl2_avg=sum(resultList2)/float(len(resultList2))
                         min1 = min(resultList)
                         min2 = min(resultList2)
-                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, min1, max(resultList), rl1_avg, min2, max(resultList2), rl2_avg,(min1-min2)/min2*100.0, metric))
+                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (testName, min1, max(resultList), rl1_avg, min2, max(resultList2), rl2_avg,(min1-min2)/min2*100.0, metric))
                     except:
-                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, '', '', result1, '', '', result2, spdup, metric))
+                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (testName, '', '', result1, '', '', result2, spdup, metric))
                 #TODO: clean up / reformat
                 if self.perfm:
                     if perfm1Dict['verify']:    # only calc if data present
@@ -514,7 +518,7 @@ class PerformanceRuntest(RuntestBase):
                                   return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
                                 def perfmSocketlog(metric,key):
                                   self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % 
-                                           (ast, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion))
+                                           (testName, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion))
                                 perfmSocketlog('vprof-compile-time','compile')
                                 perfmSocketlog('vprof-code-size','code')
                                 perfmSocketlog('vprof-verify-time','verify')
@@ -524,9 +528,9 @@ class PerformanceRuntest(RuntestBase):
                         self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion))
                         self.js_print("%-50s %7s %10.1f%% %7s  %s" % (ast,result1,confidence,metric,resultList)) 
                     else: #one iteration
-                        self.js_print("%-50s %7s %7s" % (ast,result1,metric)) 
+                        self.js_print("%-50s %7s %7s" % (testName,result1,metric)) 
                 else:
-                        self.js_print("%-50s crash" % (ast)) 
+                        self.js_print("%-50s crash" % (testName)) 
                         res=1
 
 runtest = PerformanceRuntest()
