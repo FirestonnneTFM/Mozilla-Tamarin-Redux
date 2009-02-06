@@ -466,7 +466,9 @@ class PerformanceRuntest(RuntestBase):
                     try:
                         rl1_avg=sum(resultList)/float(len(resultList))
                         rl2_avg=sum(resultList2)/float(len(resultList2))
-                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, min(resultList), max(resultList), rl1_avg, min(resultList2), max(resultList2), rl2_avg,(rl1_avg-rl2_avg)/rl2_avg*100.0, metric))
+                        min1 = min(resultList)
+                        min2 = min(resultList2)
+                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, min1, max(resultList), rl1_avg, min2, max(resultList2), rl2_avg,(min1-min2)/min2*100.0, metric))
                     except:
                         self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (ast, '', '', result1, '', '', result2, spdup, metric))
                 #TODO: clean up / reformat
