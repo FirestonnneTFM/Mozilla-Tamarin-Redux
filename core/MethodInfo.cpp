@@ -48,10 +48,6 @@
 #include "../codegen/CodegenLIR.h"
 #endif
 
-#ifdef PERFM
-#include "../vprof/vprof.h"
-#endif /* PERFM */
-
 namespace avmplus
 {
 	using namespace MMgc;

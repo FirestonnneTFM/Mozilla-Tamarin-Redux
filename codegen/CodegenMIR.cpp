@@ -160,10 +160,6 @@ extern  "C"
 }
 #endif
 
-#ifdef PERFM
-#include "../vprof/vprof.h"
-#endif /* PERFM */
-
 #ifdef AVMPLUS_64BIT
 #define AVMCORE_integer			AvmCore::integer64
 #define AVMCORE_integer_i		AvmCore::integer64_i
