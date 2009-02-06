@@ -1123,7 +1123,7 @@ namespace avmplus
 		}
 
 		if (exp10) {
-			char *firstNonZero = buffer;
+			char *firstNonZero = buffer + int(negative);
 			while (firstNonZero < s && *firstNonZero == '0') {
 				firstNonZero++;
 			}
