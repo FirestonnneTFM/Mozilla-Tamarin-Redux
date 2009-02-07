@@ -459,9 +459,9 @@ class PerformanceRuntest(RuntestBase):
                     self.js_print("%-50s %7s %10.1f%%     [%s]" % (testName,formatMemory(memoryhigh),confidence,formatMemoryList(resultList)))
                 else:
                     self.js_print("%-50s %7s %7s" % (testName,formatMemory(memoryhigh), metric))
-                config = "%s%s" % (self.vmname, self.vmargs.replace(" ", ""))
+                config = "%s" % self.vmargs.replace(" ", "")
                 config = config.replace("-memstats","")
-                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion))
+                self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (testName, metric, memoryhigh, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
         else:
             if len(self.avm2)>0:
                 if self.iterations == 1:
@@ -470,8 +470,8 @@ class PerformanceRuntest(RuntestBase):
                     try:
                         rl1_avg=sum(resultList)/float(len(resultList))
                         rl2_avg=sum(resultList2)/float(len(resultList2))
-                        min1 = min(resultList)
-                        min2 = min(resultList2)
+                        min1 = float(min(resultList))
+                        min2 = float(min(resultList2))
                         self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (testName, min1, max(resultList), rl1_avg, min2, max(resultList2), rl2_avg,(min1-min2)/min2*100.0, metric))
                     except:
                         self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (testName, '', '', result1, '', '', result2, spdup, metric))
@@ -508,7 +508,7 @@ class PerformanceRuntest(RuntestBase):
                             confidence = 0
                         else:
                             confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
-                        config = "%s%s" % (self.vmname, self.vmargs.replace(" ", ""))
+                        config = "%s" % self.vmargs.replace(" ", "")
                         if config.find("-memlimit")>-1:
                             config=config[0:config.find("-memlimit")]
                         if self.perfm:  #send vprof results to db
@@ -517,15 +517,15 @@ class PerformanceRuntest(RuntestBase):
                                 def calcConf(list):
                                   return ((tDist(len(list)) * standard_error(list) / mean(list)) * 100)
                                 def perfmSocketlog(metric,key):
-                                  self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % 
-                                           (testName, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion))
+                                  self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % 
+                                           (testName, metric,min(perfm1Dict[key]), calcConf(perfm1Dict[key]), mean(perfm1Dict[key]), self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
                                 perfmSocketlog('vprof-compile-time','compile')
                                 perfmSocketlog('vprof-code-size','code')
                                 perfmSocketlog('vprof-verify-time','verify')
                                 perfmSocketlog('vprof-ir-bytes','irbytes')
                                 perfmSocketlog('vprof-ir-time','ir')
                                 perfmSocketlog('vprof-count','count')
-                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion))
+                        self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
                         self.js_print("%-50s %7s %10.1f%% %7s  %s" % (ast,result1,confidence,metric,resultList)) 
                     else: #one iteration
                         self.js_print("%-50s %7s %7s" % (testName,result1,metric)) 
