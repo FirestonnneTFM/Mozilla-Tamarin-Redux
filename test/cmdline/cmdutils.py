@@ -50,7 +50,7 @@ class RunTestLib:
             self.firstinit()
 
     def firstinit(self):
-        self.verbose=False
+        self.verbose=True
         self.avm=self.checkenv('AVM','path to vm shell')
         self.avmrd=self.checkenv('AVMRD','path to debugger vm shell',False)
         self.asc=self.checkenv('ASC','path to actionscript compiler asc.jar')
@@ -176,7 +176,7 @@ class RunTestLib:
             print "%-30s PASSED" % name
         elif result and type=='expectfail':
             msg=msg + " UNEXPECTED PASS : %s" % notes
-            print "%-30s UNEXPECTED PASSED : %s" % name
+            print "%-30s UNEXPECTED PASS : %s" % name
         elif result==False  and type=='expectfail':
             msg=msg + " EXPECTED FAIL " + notes
             print "%-30s EXPECTED FAIL, see %s.output" % (name,name)
