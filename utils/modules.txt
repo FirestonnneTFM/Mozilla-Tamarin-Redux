@@ -69,6 +69,8 @@ nanojit avmplus:TypeDescriber.obj
 nanojit avmplus:peephole.obj
 nanojit nanojit:Nativei386.obj
 nanojit avmplus:Nativei386.obj
+nanojit avmplus:NativeARM.obj
+nanojit avmplus:Coder.obj
 nanojit nanojit:LIR.obj
 nanojit avmplus:LIR.obj
 nanojit nanojit:Assembler.obj
