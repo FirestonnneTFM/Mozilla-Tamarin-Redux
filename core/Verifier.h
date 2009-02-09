@@ -181,8 +181,8 @@ namespace avmplus
 		void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
 		void setNotNull(int index);
 
+		void checkCoerce(Traits* target, int i);
 		void emitCoerce(Traits* target, int i);
-		void emitExplicitCoerce(Traits* target, int i, const byte* pc);
 		void emitToString(AbcOpcode opcode, int index);
 		void emitCheckNull(int index);
 		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc);

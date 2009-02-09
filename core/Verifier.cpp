@@ -170,11 +170,14 @@ namespace avmplus
      * (done) cpool refs are correct type
      * (done) make sure we don't fall off end of function
      * (done) slot based ops are ok (slot must be legal)
-      * (done) propref ops are ok: usage on actual type compatible with ref type.
+     * (done) propref ops are ok: usage on actual type compatible with ref type.
      * dynamic lookup ops are ok (type must not have that binding & must be dynamic)
      * dont access superclass state in ctor until super ctor called.
+	 * move all emitCoerce calls to the code generators
+	 *
      * @param pool
      * @param info
+	 *
      */
 #if defined AVMPLUS_MIR
     void Verifier::verify(CodegenMIR * volatile jit)
@@ -331,7 +334,7 @@ namespace avmplus
 
 		TRY(core, kCatchAction_Rethrow) {
 
-#if 0
+#if 0   // FIXME use pipeline
 		coder->writePrologue(state);
 #else   // FIXME lars says we should just fail if we start but can't finish jitting
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
@@ -586,6 +589,7 @@ namespace avmplus
 			case OP_iftrue:
 			case OP_iffalse:
 			    checkStack(1,0);
+				checkCoerce(BOOLEAN_TYPE, sp);
 				coder->writeOp1(state, pc, opcode, imm24);
 				state->pop();
 				checkTarget(nextpc+imm24);
@@ -765,20 +769,24 @@ namespace avmplus
 				break;
 			}
 			case OP_getlocal:
+			{
 				checkStack(0,1);
+				Value& v = checkLocal(imm30);
 				coder->write(state, pc, opcode);
-				state->push(checkLocal(imm30));
+				state->push(v);
 				break;
-
+			}
 			case OP_getlocal0:
 			case OP_getlocal1:
 			case OP_getlocal2:
 			case OP_getlocal3:
+			{
 				checkStack(0,1);
+				Value& v = checkLocal(opcode-OP_getlocal0);
 				coder->write(state, pc, opcode);
-				state->push(checkLocal(opcode-OP_getlocal0));
+				state->push(v);
 				break;
-			
+			}
 			case OP_kill:
 			{
 				//checkStack(0,0)
@@ -791,20 +799,22 @@ namespace avmplus
 
 			case OP_inclocal:
 			case OP_declocal:
+			{
 			    //checkStack(0,0);
-				checkLocal(imm30);
-				emitCoerce(NUMBER_TYPE, imm30);
+			    Value &v = checkLocal(imm30);
 				coder->write(state, pc, opcode);
+				state->setType(imm30, NUMBER_TYPE, v.notNull);
 				break;
-
+			}
 			case OP_inclocal_i:
 			case OP_declocal_i:
+			{
 				//checkStack(0,0);
-				checkLocal(imm30);
-				emitCoerce(INT_TYPE, imm30);
+			    Value &v = checkLocal(imm30);
 				coder->write(state, pc, opcode);
+				state->setType(imm30, INT_TYPE, v.notNull);
 				break;
-
+			}
 			case OP_newfunction: 
 			{
 				checkStack(0,1);
@@ -924,7 +934,6 @@ namespace avmplus
 				core->enqTraits(itraits);
 				#endif
 
-				emitCoerce(CLASS_TYPE, state->sp()); // make sure base class is really a class
 				coder->write(state, pc, opcode);
 				state->pop_push(1, ctraits, true);
 				break;
@@ -936,13 +945,16 @@ namespace avmplus
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(0, 1, &multiname);
+
 				if (!multiname.isBinding())
 				{
 					// error, def name must be CT constant, regular name
 					verifyFailed(kIllegalOpMultinameError, core->toErrorString(opcode), core->toErrorString(&multiname));
 				}
-				coder->write(state, pc, opcode);
+
 				AbstractFunction* script = (AbstractFunction*)pool->getNamedScript(&multiname);
+				coder->write(state, pc, opcode);
+
 				if (script != (AbstractFunction*)BIND_NONE && script != (AbstractFunction*)BIND_AMBIGUOUS)
 				{
 					// found a single matching traits
@@ -957,6 +969,17 @@ namespace avmplus
 				break;
 			}
 
+
+			// NOTE ideally the null check is done in the code generator if it
+			// is needed and setNotNull is called after code generation and before
+			// the state is otherwise manipulated. There are to cracks in this
+			// view of the world: 1/when a mname is on the stack it is no always
+			// clear to the code generator what stack offset needs to be checked
+			// (for now, in this case we call emitCheckNull from the verifier),
+			// and 2/there is no guarantee that the code generator hasn't messed
+			// with the state so what was the correct location before the call
+			// to code writer is no longer (just something to look for). 
+
 			case OP_setproperty:
 			case OP_initproperty:
 			{
@@ -969,7 +992,8 @@ namespace avmplus
 				uint32_t n=2;
 				checkPropertyMultiname(n, multiname);
 				Value& obj = state->peek(n);
-				emitCheckNull(sp-(n-1));
+
+			    emitCheckNull(sp-(n-1));
 
 				Binding b = toplevel->getBinding(obj.traits, &multiname);
 				bool needsSetContext = true;
@@ -980,9 +1004,8 @@ namespace avmplus
 					(!AvmCore::isConstBinding(b) || 
 						(AbstractFunction*) obj.traits->init == info && opcode == OP_initproperty))
 				{
-					emitCoerce(propTraits, state->sp());
 					coder->writeOp2(state, pc, OP_setslot, (uint32_t)AvmCore::bindingToSlotId(b), sp-(n-1), propTraits);
-					//MIR_ONLY( if (jit) jit->emit(state, OP_setslot, AvmCore::bindingToSlotId(b), sp-(n-1), propTraits); );
+					setNotNull(sp-(n-1));
 					state->pop(n);
 					break;
 				}
@@ -1041,6 +1064,7 @@ namespace avmplus
 
 				// not a var binding or early bindable accessor
 				coder->write(state, pc, opcode);
+			    setNotNull(sp-(n-1));
 				state->pop(n);
 				break;
 			}
@@ -1069,14 +1093,15 @@ namespace avmplus
 				checkPropertyMultiname(n, multiname);
 				emitCheckNull(sp-(n-1));
 				coder->write(state, pc, opcode);
+				setNotNull(sp-(n-1));
 				state->pop_push(n, NULL);
 				break;
 			}
 
 			case OP_checkfilter:
 				checkStack(1, 1);
-				emitCheckNull(sp);
 				coder->write(state, pc, opcode);
+				setNotNull(state->sp());
 				break;
 
 			case OP_deleteproperty:
@@ -1088,6 +1113,7 @@ namespace avmplus
 				checkPropertyMultiname(n, multiname);
 				emitCheckNull(sp-(n-1));
 				coder->write(state, pc, opcode);
+				setNotNull(sp-(n-1));
 				state->pop_push(n, BOOLEAN_TYPE);
 				break;
 			}
@@ -1205,9 +1231,7 @@ namespace avmplus
 				// ISSUE should result be Object, laundering the type?
 				// ToObject throws an exception on null and undefined, so after this runs we
 				// know the value is safe to dereference.
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 				setNotNull(sp);
-#endif
 				break;
 
 			case OP_convert_s: 
@@ -1232,10 +1256,8 @@ namespace avmplus
 				emitCoerceArgs(m, argc);
 				int method_id = m->method_id;
 				Traits* resultType = m->returnTraits();
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				setNotNull(sp-argc);
-#endif
 				coder->writeOp2(state, pc, OP_callstatic, (uint32_t)method_id, argc, resultType);
+				setNotNull(sp-argc);
 				state->pop_push(argc+1, resultType);
 				break;
 			}
@@ -1309,9 +1331,12 @@ namespace avmplus
 				Multiname multiname;
 				checkConstantMultiname(imm30, multiname);
 				checkStackMulti(argc+1, 1, &multiname);
+
 				checkCallMultiname(opcode, &multiname);
+
 				uint32_t n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
+
 				emitCallproperty(opcode, sp, multiname, imm30, imm30b, pc);
 				break;
 			}
@@ -1327,8 +1352,11 @@ namespace avmplus
 				checkCallMultiname(opcode, &multiname);
 				uint32_t n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
+
+				// FIXME why don't we care about type state nullability here
+                JIT_ONLY( if (jit) emitCheckNull(sp-(n-1)); )
+
 				Value& obj = state->peek(n); // make sure object is there
-				emitCheckNull(sp-(n-1));
 				#ifdef DEBUG_EARLY_BINDING
 				//core->console << "verify constructprop " << t << " " << multiname->getName() << " from within " << info << "\n";
 				#endif
@@ -1398,7 +1426,7 @@ namespace avmplus
 				uint32_t n = argc+1; // index of receiver
 				checkPropertyMultiname(n, multiname);
 
-				emitCheckNull(sp-(n-1));
+                JIT_ONLY( if (jit) emitCheckNull(sp-(n-1)); )
 				Traits* base = emitCoerceSuper(sp-(n-1));
 				const TraitsBindingsp basetd = base->getTraitsBindings();
 
@@ -1446,6 +1474,7 @@ namespace avmplus
 			case OP_getsuper:
 			{
 			    // FIXME use pipeline
+			    // FIXME state is dependent on whether or not jit is enabled
 				// stack in: obj [ns [name]]
 				// stack out: value
 				Multiname multiname;
@@ -1775,10 +1804,8 @@ namespace avmplus
 				checkGetGlobalScope();
 				checkEarlySlotBinding(obj.traits);
 				Traits* slotTraits = checkSlot(obj.traits, index);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-				setNotNull(state->sp());
-#endif
 				coder->writeOp1(state, pc, OP_getglobalslot, index);
+				setNotNull(state->sp());
 				state->pop_push(1, slotTraits);
 				break;
 			}
@@ -1803,11 +1830,9 @@ namespace avmplus
 				Value& obj = state->peek();
 				checkEarlySlotBinding(obj.traits);
 				Traits* slotTraits = checkSlot(obj.traits, imm30-1);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				coder->writeOp1(state, pc, opcode, imm30-1, slotTraits);
 				setNotNull(state->sp());
-#endif
-				coder->write(state, pc, opcode);
-				state->setType(sp, slotTraits, false);
+				state->pop_push(1, slotTraits);
 				break;
 			}
 
@@ -1815,15 +1840,15 @@ namespace avmplus
 			{
 				checkStack(2,0);
 			    Value& obj = state->peek(2); // object
+				TraitsBindingsp td = obj.traits ? obj.traits->getTraitsBindings() : NULL;
+				Traits* slotTraits = td->getSlotTraits(imm30-1);
 				// if code isn't in pool, its our generated init function which we always
 				// allow early binding on
 				if(pool->isCodePointer(info->body_pos))
 				    checkEarlySlotBinding(obj.traits);
 				checkSlot(obj.traits, imm30-1);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				coder->writeOp2(state, pc, opcode, imm30-1, state->sp()-1, slotTraits); 
 				setNotNull(state->sp()-1);
-#endif
-				coder->write(state, pc, opcode); 
 				state->pop(2);
 				break;
 			}
@@ -2179,7 +2204,7 @@ namespace avmplus
 			t->resolveSignatures(toplevel);
 
 		emitCheckNull(sp-(n-1));
-		
+
 		if (emitCallpropertyMethod(opcode, t, b, multiname, multiname_index, argc, pc))
 			goto callproperty_done;
 		
@@ -2187,7 +2212,7 @@ namespace avmplus
 			goto callproperty_done;
 
 		coder->writeOp2(state, pc, opcode, multiname_index, argc);
-		
+		setNotNull(sp-(n-1));
 		// If early binding then the state will have been updated, so this will be skipped
 		state->pop_push(n, NULL);
 		if (opcode == OP_callpropvoid)
@@ -2259,7 +2284,7 @@ namespace avmplus
 			emitCoerceArgs(m, argc);
 			jit->emitSetContext(state, m);
 			if (!t->isInterface)
-				jit->writeOp2(state, pc, OP_callmethod, disp_id, argc, resultType);
+			    jit->emitCall(state, OP_callmethod, disp_id, argc, resultType);
 			else
                 jit->emitCall(state, OP_callinterface, m->iid(), argc, resultType);
 		}
@@ -2272,6 +2297,7 @@ namespace avmplus
 	
 	bool Verifier::emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const byte *pc) 
 	{
+  	    (void)pc;
 		if (!AvmCore::isSlotBinding(b) || argc != 1)
 			return false;
 		
@@ -2279,34 +2305,39 @@ namespace avmplus
 
 		int slot_id = AvmCore::bindingToSlotId(b);
 		Traits* slotType = tb->getSlotTraits(slot_id);
-		
+
 		if (slotType == core->traits.int_ctraits)
 		{
-		    coder->write(state, pc, OP_convert_i);
+			JIT_ONLY( if (jit) emitCoerce(INT_TYPE, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_i) );
 			state->setType(sp, INT_TYPE, true); 
 			goto fast_path;
 		}
 		if (slotType == core->traits.uint_ctraits)
 		{
-		    coder->write(state, pc, OP_convert_u);
+			JIT_ONLY( if (jit) emitCoerce(UINT_TYPE, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_u) );
 			state->setType(sp, UINT_TYPE, true);
 			goto fast_path;
 		}
 		if (slotType == core->traits.number_ctraits)
 		{
-		    coder->write(state, pc, OP_convert_d);
+			JIT_ONLY( if (jit) emitCoerce(NUMBER_TYPE, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_d) );
 			state->setType(sp, NUMBER_TYPE, true);
 			goto fast_path;
 		}
 		if (slotType == core->traits.boolean_ctraits)
 		{
-		    coder->write(state, pc, OP_convert_b);
+			JIT_ONLY( if (jit) emitCoerce(BOOLEAN_TYPE, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_b) );
 			state->setType(sp, BOOLEAN_TYPE, true); 
 			goto fast_path;
 		}
 		if (slotType == core->traits.string_ctraits)
 		{
-		    coder->write(state, pc, OP_convert_s);
+			JIT_ONLY( if (jit) emitToString(OP_convert_s, sp) );
+			XLAT_ONLY( if (translator) translator->emitOp0(WOP_convert_s) );
 			state->setType(sp, STRING_TYPE, true); 
 			goto fast_path;
 		}
@@ -2316,24 +2347,32 @@ namespace avmplus
 			// is this a user defined class?  A(1+ args) means coerce to A
 			AvmAssert(slotType->itraits != NULL);
 			emitCoerce(slotType->itraits, state->sp());
-			goto fast_path; // goto fast_path2:
+			goto fast_path2;
 		}
 #endif
 		return false;
-
+	
 	fast_path:
-
-		if (opcode == OP_callpropvoid)
+#if defined AVMPLUS_WORD_CODE
+		if (translator)
 		{
-		    coder->write(state, pc, OP_pop);
-			coder->write(state, pc, OP_pop);
+			if (opcode == OP_callpropvoid)
+			{
+				translator->emitOp0(WOP_pop);  // result
+				translator->emitOp0(WOP_pop);  // function
+			}
+			else
+			{
+				translator->emitOp0(WOP_swap); // function on top
+				translator->emitOp0(WOP_pop);  //   and discard it
+			}
 		}
-		else
-		{
-		    coder->write(state, pc, OP_swap);
-			coder->write(state, pc, OP_pop);
-		}
-
+#endif
+#if	defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	fast_path2:
+#endif
+		//emitNip();
+        JIT_ONLY( if (jit) jit->emitCopy(state, state->sp(), state->sp()-1); )
         Value v = state->stackTop();
         state->pop(2);
         state->push(v);
@@ -2448,7 +2487,9 @@ namespace avmplus
 	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc)
 	{
 		Value& obj = state->peek(n); // object
+#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		emitCheckNull(state->sp()-(n-1));
+#endif
 		Binding b = toplevel->getBinding(obj.traits, &multiname);
 		Traits* propType = readBinding(obj.traits, b);
 
@@ -2605,6 +2646,7 @@ namespace avmplus
     // FIXME does this belong in FrameState like setType?
 	void Verifier::setNotNull(int i)
 	{
+	    if (!jit) return;
 		Value& value = state->value(i);
 		if (!value.notNull)
 		{
@@ -2635,7 +2677,8 @@ namespace avmplus
 		}
 	}
 #else
-    inline void Verifier::emitCheckNull(int i) { (void) i; }
+	inline void Verifier::setNotNull(int i) { (void)i; }
+    inline void Verifier::emitCheckNull(int i) { (void)i; }
 #endif
 
 	void Verifier::checkCallMultiname(AbcOpcode /*opcode*/, Multiname* name) const
@@ -2661,6 +2704,12 @@ namespace avmplus
 		return base;
 	}
 
+	void Verifier::checkCoerce(Traits* target, int index)
+	{
+		Value &v = state->value(index);
+		state->setType(index, target, v.notNull);
+	}
+
 	void Verifier::emitCoerce(Traits* target, int index)
 	{
 		Value &v = state->value(index);
@@ -2671,16 +2720,6 @@ namespace avmplus
     			jit->emitCoerce(state, index, target);
         }
 		#endif
-
-		state->setType(index, target, v.notNull);
-	}
-
-	void Verifier::emitExplicitCoerce(Traits* target, int index, const byte* pc)
-	{
-		Value &v = state->value(index);
-		Traits* rhs = v.traits;
-		if ((!canAssign(target, rhs) || !Traits::isMachineCompatible(target, rhs)))
-		    coder->write(state, pc, OP_coerce);
 		state->setType(index, target, v.notNull);
 	}
 
