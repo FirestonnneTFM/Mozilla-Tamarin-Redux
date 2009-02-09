@@ -70,7 +70,6 @@ nanojit avmplus:peephole.obj
 nanojit nanojit:Nativei386.obj
 nanojit avmplus:Nativei386.obj
 nanojit avmplus:NativeARM.obj
-nanojit avmplus:Coder.obj
 nanojit nanojit:LIR.obj
 nanojit avmplus:LIR.obj
 nanojit nanojit:Assembler.obj
@@ -91,6 +90,7 @@ vm avmplus::Verifier
 vm avmplus::AbcParser
 vm avmplus::SortedIntMap
 vm avmplus::FrameState
+vm avmplus:Coder.obj
 
 builtin avmplus:MathUtils.obj
 builtin avmplus:MathClass.obj
