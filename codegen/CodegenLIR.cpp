@@ -749,6 +749,9 @@ namespace avmplus
 #ifdef _DEBUG
     class ValidateWriter: public LirWriter
     {
+		bool isCondOrConst(LIns *i) {
+			return i->isCond() || i->isconst();
+		}
     public:
         ValidateWriter(LirWriter *out) : LirWriter(out)
         {}
@@ -850,10 +853,10 @@ namespace avmplus
 					AvmAssert(a->isQuad() == b->isQuad());
 					break;
                 case LIR_cmov:
-					AvmAssert(a->isCond() && b->isop(LIR_2) && !b->oprnd1()->isQuad() && !b->oprnd2()->isQuad()); 
+					AvmAssert(isCondOrConst(a) && b->isop(LIR_2) && !b->oprnd1()->isQuad() && !b->oprnd2()->isQuad()); 
 					break;
                 case LIR_qcmov:
-					AvmAssert(a->isCond() && b->isop(LIR_2) && b->oprnd1()->isQuad() && b->oprnd2()->isQuad()); 
+					AvmAssert(isCondOrConst(a) && b->isop(LIR_2) && b->oprnd1()->isQuad() && b->oprnd2()->isQuad()); 
 					break;
 				case LIR_qilsh:
                 case LIR_qirsh:
