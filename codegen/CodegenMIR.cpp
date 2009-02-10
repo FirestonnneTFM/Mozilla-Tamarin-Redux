@@ -2877,6 +2877,7 @@ namespace avmplus
 	void CodegenMIR::emitCoerce(FrameState* state, int loc, Traits* result)
 	{
 		this->state = state;
+		emitPrep(OP_coerce);
 
 		Value& value = state->value(loc);
 		Traits* in = value.traits;
@@ -2885,8 +2886,6 @@ namespace avmplus
 		    state->setType(loc, result, value.notNull);
 		    return;
 		}
-
-		emitPrep(OP_coerce);
 
 		if (result == NULL)
 		{
@@ -13295,12 +13294,10 @@ namespace avmplus
 		    break;
 		case OP_inclocal:
 		case OP_declocal:
-            emitCoerce(state, imm30, NUMBER_TYPE);
 		    emit(state, opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE);
 		    break;
 		case OP_inclocal_i:
 		case OP_declocal_i:
-            emitCoerce(state, imm30, INT_TYPE);
 		    emit(state, opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE);
 			break;
 		case OP_newfunction:
@@ -13310,7 +13307,6 @@ namespace avmplus
 
 		case OP_newclass:
 		{
-            emitCoerce(state, state->sp(), CLASS_TYPE);
 		    emitSetDxns(state);
 		    AbstractFunction* cinit = pool->cinits[imm30];
 			emit(state, opcode, (uintptr)(void*)cinit, sp, cinit->declaringTraits);
@@ -13354,7 +13350,6 @@ namespace avmplus
 		}
 
 		case OP_checkfilter:
-		    emitCheckNull(state, sp);
 		    emit(state, opcode, sp, 0, NULL);
 			break;
 
@@ -13521,6 +13516,30 @@ namespace avmplus
 		    if (core->debugger()) emitKill(state, info->localCount/*scopeBase*/ + state->scopeDepth);
 			#endif
 			break;
+
+		case OP_getslot:
+		{
+		    Value& obj = state->peek();
+			int index = imm30-1;
+			TraitsBindingsp td = obj.traits ? obj.traits->getTraitsBindings() : NULL;
+			Traits* slotTraits = td->getSlotTraits(index);
+		    emitCheckNull(state, sp);
+			emit(state, OP_getslot, index, sp, slotTraits);
+			break;
+        }
+
+		case OP_setslot:
+		{
+		    Value& obj = state->peek(2);
+			int index = imm30-1;
+			TraitsBindingsp td = obj.traits ? obj.traits->getTraitsBindings() : NULL;
+			Traits* slotTraits = td->getSlotTraits(index);
+			emitCoerce(state, sp, slotTraits);
+		    emitCheckNull(state, sp-1);
+            //emitSetslot(state, OP_setslot, index, sp-1);
+			emit(state, OP_setslot, index, sp-1);
+			break;
+		}
 
 		case OP_dup:
 		    emitCopy(state, sp, sp+1);
@@ -13811,17 +13830,14 @@ namespace avmplus
 			break;
 		}
 		case OP_getslot:
-		{
-			int sp = state->sp();
-		    emitCheckNull(state, sp);
-			emit(state, OP_getslot, opd1, sp, type);
+			emit(state, OP_getslot, opd1, state->sp(), type);
 			break;
-		}
 		case OP_getglobalslot:
 		{
 			int sp = state->sp();
 		    emitGetGlobalScope();
 			emitCheckNull(state, sp);
+		    //emitGetslot(state, opd1, state->sp(), type);
 			emit(state, OP_getslot, opd1, sp, type);
 			break;
 		}
@@ -13872,9 +13888,7 @@ namespace avmplus
 	    (void)pc;
 		switch (opcode) {
 		case OP_setslot:
-            // opd1=imm30-1, opd2=sp-1
-			emitCoerce(state, opd2+1, type);
-		    emitCheckNull(state, opd2);
+		  //emitSetslot(state, OP_setslot, opd1, opd2);
 			emit(state, OP_setslot, opd1, opd2);
 			break;
 
@@ -13898,7 +13912,6 @@ namespace avmplus
 
 		case OP_callmethod:
 		case OP_callinterface:
-		    emitCheckNull(state, state->sp()-opd2);
 		    emitCall(state, opcode, opd1, opd2, type);
 		    break;
 
@@ -13906,7 +13919,6 @@ namespace avmplus
 		case OP_callproplex: 
 		case OP_callpropvoid:
 		{
-		    emitCheckNull (state, state->sp()-opd2);
 		    Multiname name;
 			pool->parseMultiname(name, opd1);
 		    emitSetContext(state, NULL);
