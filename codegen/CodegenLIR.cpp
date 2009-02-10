@@ -5019,8 +5019,7 @@ namespace avmplus
                 }
                 else {
                     // not taken - no code to emit.
-                    // fixme - but what to return? caller wants to patch something.
-                    AvmAssert(false);
+                    return 0;
                 }
             }
         }
@@ -5039,6 +5038,7 @@ namespace avmplus
 	}
 
     void CodegenLIR::patchLater(LIns *br, CodegenLabel &l) {
+        if (!br) return; // occurs if branch was unconditional and thus never emitted.
         l.preds++;
         if (l.bb != 0) {
             br->target(l.bb);
