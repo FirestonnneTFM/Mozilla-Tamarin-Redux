@@ -844,6 +844,7 @@ namespace avmplus
 				}
 #ifdef AVMPLUS_VERIFYALL
 				core->enqFunction(f);
+				core->enqTraits(f->declaringTraits);
 #endif
 				coder->write(state, pc, opcode);
 				state->push(ftraits, true);

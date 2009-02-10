@@ -4174,21 +4174,33 @@ return the result of the comparison ToPrimitive(x) == y.
 	void AvmCore::enqTraits(Traits* t) {
         if (config.verifyall && !t->isInterface) {
 			TraitsBindingsp td = t->getTraitsBindings();
+            enqFunction(t->init);
 		    for (int i=0, n=td->methodCount; i < n; i++)
                 enqFunction(td->getMethod(i));
-            enqFunction(t->init);
         }
 	}
 
     void AvmCore::verifyEarly(Toplevel* toplevel) {
-		while (!verifyQueue.isEmpty()) {
-			AbstractFunction* f = verifyQueue.removeLast();
-            if (!f->isVerified()) {
-                //console << "pre verify " << f << "\n";
-			    f->verify(toplevel);
-                f->flags = f->flags | AbstractFunction::VERIFIED & ~AbstractFunction::VERIFY_PENDING;
-            }
-		}
+        List<AbstractFunction*, LIST_GCObjects> verifyQueue2(GetGC());
+		int verified = 0;
+		do {
+			verified = 0;
+			while (!verifyQueue.isEmpty()) {
+				AbstractFunction* f = verifyQueue.removeLast();
+				if (!f->isVerified()) {
+					if (f->declaringTraits->scope == NULL && f != f->declaringTraits->init) {
+						verifyQueue2.add(f);
+						continue;
+					}
+					verified++;
+					//console << "pre verify " << f << "\n";
+					f->verify(toplevel);
+					f->flags = f->flags | AbstractFunction::VERIFIED & ~AbstractFunction::VERIFY_PENDING;
+				}
+			}
+			while (!verifyQueue2.isEmpty())
+				verifyQueue.add(verifyQueue2.removeLast());
+		} while (verified > 0);
 	}
 #endif
 }
