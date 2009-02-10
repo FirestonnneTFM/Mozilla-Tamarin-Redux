@@ -49,7 +49,8 @@ file="../objdir-release/shell/avmshell.map"
 if 'MAPFILE' in environ:
     file=environ['MAPFILE'].strip()
 
-globs = {'sizereport':'./sizereport', 'file': file, 'prefix':'', 'socketlog':False,'config':'unknown','verbose':False,'version':'unknown','serverHost':'10.60.48.47','serverPort':1188 }
+globs = {'sizereport':'./sizereport', 'file': file, 'prefix':'', 'socketlog':False,'config':'',
+    'product':'unknown', 'verbose':False,'version':'unknown','serverHost':'10.60.48.47','serverPort':1188 }
 
 def usage(c):
     print "usage: %s [options]" % basename(sys.argv[0])
@@ -58,6 +59,7 @@ def usage(c):
     print " -p --prefix     prefix for output line"
     print " --vmversion     version of vm for socket log"
     print " --config        configuration string for socket log"
+    print " --product       product (branch) for socket log"
     print " --verbose       enable verbose messages"
     exit(c)
 
@@ -67,7 +69,7 @@ def runSizeReport():
     exitcode=p.returncode
     if globs['verbose']:
         print 'finished running sizereport exit code=%d' % exitcode
-	print 'output=%s' % out
+    print 'output=%s' % out
     return (exitcode,out)
 
 def printResult(out):
@@ -144,7 +146,7 @@ def logResult(out):
     for line in out.split('\n'):
         fields=line.split()
         if len(fields)>1:
-            msg+='addresult2::sizereport/%s::memory::%s::0::%s::1::%s::%s::%s::%s::%s;' % (fields[1],fields[0],fields[0],os,globs['config'],globs['version'],date,ip)
+            msg+='addresult2::sizereport/%s::memory::%s::0::%s::1::%s::%s::%s::%s::%s::%s;' % (fields[1],fields[0],fields[0],os,globs['config'],globs['version'],globs['product'],date,ip)
     msg+='exit;'
     if globs['verbose']:
         print('sending result to socket server: %s' % msg)
@@ -156,7 +158,7 @@ def logResult(out):
     print('finished sending results to socket server')
 
 try:
-    opts, args = getopt(sys.argv[1:], "m:dp:h",["map=","prefix=","config=","vmversion=","help","verbose","socketlog"])
+    opts, args = getopt(sys.argv[1:], "m:dp:h",["map=","prefix=","config=","product=","vmversion=","help","verbose","socketlog"])
 except:
     usage(2)
 
@@ -171,6 +173,8 @@ for o,v in opts:
         globs['version']=v
     elif o in ("--config"):
         globs['config']=v
+    elif o in ("--product"):
+        globs['product']=v
     elif o in ("-d","--socketlog"):
         globs['socketlog']=True
     elif o in ("--verbose"):

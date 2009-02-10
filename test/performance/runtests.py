@@ -280,6 +280,10 @@ class PerformanceRuntest(RuntestBase):
     def runTest(self, testAndNum):
         ast = testAndNum[0]
         testName = ast
+        
+        # strip off ./ as test is then treated differently in perf db
+        if testName[:2] == './':
+            testName = testName[2:]
         if self.altsearchpath!=None and ast.startswith(self.altsearchpath):
             testName = ast[len(self.altsearchpath):]
         testnum = testAndNum[1]
