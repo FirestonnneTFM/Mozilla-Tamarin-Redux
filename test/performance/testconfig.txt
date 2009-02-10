@@ -44,12 +44,12 @@ jsbench/.*            ,	sunspider	,	skip	,	skip jsbench
 misc/.*               ,	sunspider	,	skip	,	skip misc
 scimark/.*            ,	sunspider	,	skip	,	skip scimark
 v8/.*                 ,	sunspider	,	skip	,	skip v8
-canaries/.*	      , sunspider	,	skip	,       skip canaries
+.*/canaries/.*	      , sunspider	,	skip	,       skip canaries
 
 sunspider/.*                    ,	jsbench		,	skip	,	skip sunspider
 misc/.*                   	,	jsbench		,	skip	,	skip misc
 scimark/.*			,	jsbench		,	skip	,	skip scimark
-canaries/.*			,	jsbench		, 	skip	,       skip canaries
+.*/canaries/.*			,	jsbench		, 	skip	,       skip canaries
 v8/.*                 ,	jsbench	,	skip	,	skip v8
 
 sunspider/.*                    ,	misc		,	skip	, 	skip sunspider
@@ -59,7 +59,7 @@ v8/.*                 ,	misc	,	skip	,	skip v8
 sunspider/.*                    ,	scimark		,	skip	, 	skip sunspider
 jsbench/.*                      ,	scimark		,	skip	, 	skip jsbench
 misc/.*                    	,	scimark		,	skip	, 	skip jsbench
-canaries/.*			,	scimark		,	skip	,	skip canaries
+.*/canaries/.*			,	scimark		,	skip	,	skip canaries
 v8/.*                 ,	scimark	,	skip	,	skip v8
 
 sunspider/.*	      , canaries	,	skip	,    skip sunspider
@@ -71,7 +71,7 @@ v8/.*		      , canaries	, 	skip	,    skip v8
 jsbench/.*            ,	v8	,	skip	,	skip jsbench
 misc/.*               ,	v8	,	skip	,	skip misc
 scimark/.*            ,	v8	,	skip	,	skip scimark
-canaries/.*	      , v8	,	skip	,	skip canaries
+.*/canaries/.*	      , v8	,	skip	,	skip canaries
 sunspider/.*          ,	v8		,	skip	, 	skip sunspider
 
 jsbench/Search.as               ,       .*              ,       skip    ,       skip test runs too long and times out buildbot
