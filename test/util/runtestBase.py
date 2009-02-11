@@ -385,6 +385,7 @@ class RuntestBase:
             sys.stdout.write('.')
         else:
             print m
+            sys.stdout.flush()
         if self.js_output:
             if self.logFileType == 'html':
                 self.js_output_f.write('%s %s %s\n' % (start_tag, m, end_tag))
