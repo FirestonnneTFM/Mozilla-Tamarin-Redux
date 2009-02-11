@@ -1623,46 +1623,6 @@ namespace avmplus
 		// from the Verifier.
 	}
 
-	bool canAssign(Traits* lhs, Traits* rhs)
-	{
-		if (!Traits::isMachineCompatible(lhs,rhs))
-		{
-			// no machine type is compatible with any other 
-			return false;
-		}
-
-		if (!lhs)
-			return true;
-
-		// type on right must be same class or subclass of type on left.
-		Traits* t = rhs;
-		while (t != lhs && t != NULL)
-			t = t->base;
-		return t != NULL;
-	}
-
-	void CodegenLIR::emitToString(AbcOpcode opcode, int i)
-	{
-		Traits *st = STRING_TYPE;
-		Value& value = state->value(i);
-		Traits *in = value.traits;
-		if (in != st || !value.notNull || opcode != OP_convert_s)
-		{
-		    if (opcode == OP_convert_s && in && 
-				(value.notNull || in->isNumeric() || in == BOOLEAN_TYPE))
-			{
-			    emitCoerce(state, i, st);
-			}
-			else
-			{
-			    emit(state, opcode, i, 0, st);
-			}
-			// FIXME side-effect!!!
-			value.traits = st;
-			value.notNull = true;
-		}
-	}
-
 	void CodegenLIR::writePrologue(FrameState* state)
 	{
 	  prologue(state);
@@ -1786,7 +1746,6 @@ namespace avmplus
 		    emit(state, opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE);
 			break;
 		case OP_newfunction:
-		    emitSetDxns(state);
 			emit(state, opcode, imm30, sp+1, pool->methods[imm30]->declaringTraits);
 			break;
 
@@ -1876,62 +1835,19 @@ namespace avmplus
             break;
 		}
 		case OP_coerce:
-		{
-		    Traits *target = getType(imm30);
-   			emitCoerce(state, sp, target);
-		    break;
-		}
-
 		case OP_coerce_b:
 		case OP_convert_b:
-			emitCoerce(state, sp, BOOLEAN_TYPE);
-		    break;
-
 		case OP_coerce_o:
-			emitCoerce(state, sp, OBJECT_TYPE);
-		    break;
-
 		case OP_coerce_a:
-			emitCoerce(state, sp, NULL);
-		    break;
-
 		case OP_convert_i:
 		case OP_coerce_i:
-			emitCoerce(state, sp, INT_TYPE);
-			break;
-
 		case OP_convert_u:
 		case OP_coerce_u:
-			emitCoerce(state, sp, UINT_TYPE);
-			break;
-
 		case OP_convert_d:
 		case OP_coerce_d:
-			emitCoerce(state, sp, NUMBER_TYPE);
-			break;
-
 		case OP_coerce_s:
-			emitCoerce(state, sp, STRING_TYPE);
-			break;
-
-		case OP_convert_s:
-		case OP_esc_xelem: 
-		case OP_esc_xattr:
-		{
-		    // the following was stolen from Verifier::emitToString
-			Value& value = state->value(sp);
-			Traits *in = value.traits;
-		    if (opcode == OP_convert_s && in 
-				&& (value.notNull || in->isNumeric() || in == BOOLEAN_TYPE))
-			{
-			    emitCoerce(state, sp, STRING_TYPE);
-			}
-			else
-			{
-			    emit(state, opcode, sp, 0, STRING_TYPE);
-			}
-			break;
-		}
+            // NOTE coercions has already been done
+            break;
 
 		case OP_istype:
 		{
@@ -1946,14 +1862,13 @@ namespace avmplus
 			break;
 
 		case OP_convert_o:
-		    emitCheckNull(state, sp);
+            // NOTE check null has already been done
 			break;
 
 		case OP_callstatic:
 		{
 			AbstractFunction* m = pool->methods[imm30];
 			const uint32_t argc = imm30b;
-		    emitCheckNull(state, sp-argc);
 			emitSetContext(state, m);
 			emitCall(state, OP_callstatic, m->method_id, argc, m->returnTraits());
 			break;
@@ -2008,22 +1923,13 @@ namespace avmplus
 			int index = imm30-1;
 			TraitsBindingsp td = obj.traits ? obj.traits->getTraitsBindings() : NULL;
 			Traits* slotTraits = td->getSlotTraits(index);
-		    emitCheckNull(state, sp);
             emitGetslot(state, index, sp, slotTraits);
 			break;
         }
 
 		case OP_setslot:
-		{
-		    Value& obj = state->peek(2);
-			int index = imm30-1;
-			TraitsBindingsp td = obj.traits ? obj.traits->getTraitsBindings() : NULL;
-			Traits* slotTraits = td->getSlotTraits(index);
-			emitCoerce(state, sp, slotTraits);
-		    emitCheckNull(state, sp-1);
-            emitSetslot(state, OP_setslot, index, sp-1);
+            emitSetslot(state, OP_setslot, imm30-1, sp-1);
 			break;
-		}
 
 		case OP_dup:
 		    emitCopy(state, sp, sp+1);
@@ -2033,31 +1939,6 @@ namespace avmplus
 		    emitSwap(state, sp, sp-1);
 			break;
 
-		case OP_lessthan:
-		case OP_greaterthan:
-		case OP_lessequals:
-		case OP_greaterequals:
-		{
-		    Value& rhs = state->peek(1);
-			Value& lhs = state->peek(2);
-			Traits *lhst = lhs.traits;
-			Traits *rhst = rhs.traits;
-			if (rhst && rhst->isNumeric() && lhst && !lhst->isNumeric())
-			{
-				// convert lhs to Number
-				//if ((!canAssign(NUMBER_TYPE, rhst) || !Traits::isMachineCompatible(NUMBER_TYPE, rhst)))
-				    emitCoerce(state, sp-1, NUMBER_TYPE);
-			}
-			else if (lhst && lhst->isNumeric() && rhst && !rhst->isNumeric())
-			{
-				// promote rhs to Number
-				//if ((!canAssign(NUMBER_TYPE, lhst) || !Traits::isMachineCompatible(NUMBER_TYPE, lhst)))
-				    emitCoerce(state, sp, NUMBER_TYPE);
-			}
-			emit(state, opcode, 0, 0, BOOLEAN_TYPE);
-		    break;
-		}
-
 		case OP_equals:
 		case OP_strictequals:
 		case OP_instanceof:
@@ -2066,104 +1947,56 @@ namespace avmplus
 		    break;
 
 		case OP_not:
-		{
-		    emitCoerce(state, sp, BOOLEAN_TYPE);
 		    emit(state, opcode, sp);
 		    break;
-		}
-
-		case OP_add:
-		{
-		    Value& rhs = state->peek(1);
-			Value& lhs = state->peek(2);
-			Traits* lhst = lhs.traits;
-			Traits* rhst = rhs.traits;
-			// Note that for correctness the inference of the result type must
-			// remain even in the non-JIT case
-			if (lhst == STRING_TYPE && lhs.notNull || rhst == STRING_TYPE && rhs.notNull)
-			{
-			    emitToString(OP_convert_s, sp-1);
-				emitToString(OP_convert_s, sp);
-				emit(state, OP_concat, 0, 0, STRING_TYPE);
-			}
-			else if (lhst && lhst->isNumeric() && rhst && rhst->isNumeric())
-			{
-			    emitCoerce(state, sp-1, NUMBER_TYPE);
-			    emitCoerce(state, sp, NUMBER_TYPE);
-				emit(state, OP_add_d, 0, 0, NUMBER_TYPE);
-			}
-			else
-		    {
-			    emit(state, OP_add, 0, 0, OBJECT_TYPE);
-				// dont know if it will return number or string, but neither will be null.
-			}
-			break;
-		}
 
 		case OP_modulo:
 		case OP_subtract:
 		case OP_divide:
 		case OP_multiply:
-		{
-			emitCoerce(state, sp-1, NUMBER_TYPE); // convert LHS to number
-			emitCoerce(state, sp, NUMBER_TYPE); // convert RHS to number
 			emit(state, opcode, 0, 0, NUMBER_TYPE);
 			break;
-		}
 
 		case OP_increment:
 		case OP_decrement:
-		    emitCoerce(state, sp, NUMBER_TYPE);
 			emit(state, opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE);
 			break;
 
 		case OP_increment_i:
 		case OP_decrement_i:
-		    emitCoerce(state, sp, INT_TYPE);
 			emit(state, opcode, sp, opcode == OP_increment_i ? 1 : -1, INT_TYPE);
 			break;
 
 		case OP_add_i:
 		case OP_subtract_i:
 		case OP_multiply_i:
-		    emitCoerce(state, sp-1, INT_TYPE);
-			emitCoerce(state, sp, INT_TYPE);
 			emit(state, opcode, 0, 0, INT_TYPE);
 			break;
 
 		case OP_negate:
-			emitCoerce(state, sp, NUMBER_TYPE);
 			emit(state, opcode, sp, 0, NUMBER_TYPE);
 			break;
 
 		case OP_negate_i:
-			emitCoerce(state, sp, INT_TYPE);
 			emit(state, opcode, sp, 0, INT_TYPE);
 			break;
 
 		case OP_bitand:
 		case OP_bitor:
 		case OP_bitxor:
-		    emitCoerce(state, sp-1, INT_TYPE);
-			emitCoerce(state, sp, INT_TYPE);
 			emit(state, opcode, 0, 0, INT_TYPE);
 			break;
 
 		case OP_lshift:
 		case OP_rshift:
-		    emitCoerce(state, sp-1, INT_TYPE); // lhs
-			emitCoerce(state, sp, UINT_TYPE); // rhs
 			emit(state, opcode, 0, 0, INT_TYPE);
 			break;
 
 		case OP_urshift:
-		    emitCoerce(state, sp-1, UINT_TYPE); // lhs
-			emitCoerce(state, sp, UINT_TYPE); // rhs
 			emit(state, opcode, 0, 0, INT_TYPE);
 			break;
 
 		case OP_bitnot:
-			emitCoerce(state, sp, INT_TYPE); // lhs
 			emit(state, opcode, sp, 0, INT_TYPE);
 			break;
 
@@ -2202,7 +2035,6 @@ namespace avmplus
 		case OP_sxi1:
 		case OP_sxi8:
 		case OP_sxi16:
-		    emitCoerce(state, sp, INT_TYPE);
 			emit(state, opcode, sp, 0, INT_TYPE);
 			break;
 
@@ -2214,7 +2046,6 @@ namespace avmplus
 		case OP_lf64:
 		{
 			Traits* result = (opcode == OP_lf32 || opcode == OP_lf64) ? NUMBER_TYPE : INT_TYPE;
-			emitCoerce(state, sp, INT_TYPE);
 			emit(state, opcode, sp, 0, result);
 			break;
 		}
@@ -2226,8 +2057,6 @@ namespace avmplus
 		case OP_sf32:
 		case OP_sf64:
 		{
-			emitCoerce(state, sp-1, (opcode == OP_sf32 || opcode == OP_sf64) ? NUMBER_TYPE : INT_TYPE);
-			emitCoerce(state, sp, INT_TYPE);
 			emit(state, opcode, 0, 0, VOID_TYPE);
 			break;
 		}
@@ -2243,7 +2072,14 @@ namespace avmplus
 		    emitGetGlobalScope();
 			break;
 
+		case OP_convert_s: 
+		case OP_esc_xelem: 
+		case OP_esc_xattr:
+            // NOTE already been called
+            break;
+
 		default:
+            AvmAssert(false);
 			// FIXME need error handler here
 		    break;
 		}
@@ -2303,7 +2139,6 @@ namespace avmplus
 		{
 			int32_t offset = (int32_t) opd1;
 			int sp = state->sp();
-			emitCoerce(state, sp, BOOLEAN_TYPE);
 			emitIf(state, opcode, state->pc+4/*size*/+offset, sp, 0);
 			break;
 		}
@@ -2318,17 +2153,11 @@ namespace avmplus
 			break;
 		case OP_getglobalslot:
 		    emitGetGlobalScope();
-			emitCheckNull(state, state->sp());
 		    emitGetslot(state, opd1, state->sp(), type);
 			break;
 		case OP_setglobalslot:
-		{
-		    // FIXME untested
-			int sp = state->sp();    
-			emitCoerce(state, sp, type);
-			emit(state, opcode, opd1, sp, type);
+			emit(state, opcode, opd1, state->sp(), type);
 			break;
-		}
 		case OP_getproperty:
 		{
 		    Multiname name;
@@ -2358,6 +2187,7 @@ namespace avmplus
 		    emitCopy(state, opd1+state->verifier->scopeBase, state->sp()+1);
 			break;
 		default:
+            AvmAssert(false);
 			// FIXME need error handler here
 		    break;
 		}
@@ -2413,23 +2243,10 @@ namespace avmplus
 		}
 
 		default:
+            AvmAssert(false);
 			// FIXME need error handler here
 		    break;
 		}
-	}
-
-	Traits* CodegenLIR::getType(uint32_t index)
-	{
-	    Toplevel* toplevel = state->verifier->getToplevel(this);
-		Multiname name;
-		pool->parseMultiname(name, index);
-		Traits *t = pool->getTraits(name, toplevel);
-		if( name.isParameterizedType() )
-		{
-			Traits* param_traits = name.getTypeParameter() ? getType(name.getTypeParameter()) : NULL ;
-			t = pool->resolveParameterizedType(toplevel, t, param_traits);
-		}
-		return t;
 	}
 
 	void CodegenLIR::emitIntConst(FrameState* state, int index, int32_t c)
@@ -2462,11 +2279,6 @@ namespace avmplus
 
 		Value& value = state->value(loc);
 		Traits* in = value.traits;
-
-	    if (canAssign(result, in) && Traits::isMachineCompatible(result, in)) {
-		    state->setType(loc, result, value.notNull);
-		    return;
-		}
 
 		if (result == NULL)
 		{
@@ -3112,10 +2924,8 @@ namespace avmplus
 				break;
 			}
 
-			case OP_returnvalue:
-				emitCoerce(state, sp, info->returnTraits());
-				// fall through
 			case OP_returnvoid:
+			case OP_returnvalue:
 			{
                 PERFM_NVPROF("emit(return",1);
 				// ISSUE if a method has multiple returns this causes some bloat

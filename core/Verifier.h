@@ -179,19 +179,17 @@ namespace avmplus
 		void parseExceptionHandlers();
 		void checkStack(uint32_t pop, uint32_t push);
 		void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
-		void setNotNull(int index);
-
 		void emitCoerce(Traits* target, int i);
-		void emitExplicitCoerce(Traits* target, int i, const byte* pc);
 		void emitToString(AbcOpcode opcode, int index);
 		void emitCheckNull(int index);
 		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc);
 		void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc);
 		void checkGetGlobalScope();
+		void emitNip();
 
 		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
-		bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
-		bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc, const byte* pc);
+		bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc);
+		bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc);
 #ifdef AVMPLUS_WORD_CODE
 		uint32_t allocateCacheSlot(uint32_t imm30);
 #endif
