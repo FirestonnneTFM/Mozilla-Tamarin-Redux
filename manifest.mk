@@ -47,6 +47,9 @@ $(call RECURSE_DIRS,MMgc)
 
 ifdef ENABLE_TAMARIN
 $(call RECURSE_DIRS,core pcre codegen vprof)
+ifeq (sparc,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
 ifeq (i686,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif
