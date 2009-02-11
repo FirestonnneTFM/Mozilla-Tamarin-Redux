@@ -58,7 +58,7 @@
 
 #if defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX)
   // Are we PowerPC or i386 (Macintel) or x86_64 (64-bit)?
-  #if defined(__i386__)
+  #if defined(__i386__) || defined(__i386)
     #ifndef AVMPLUS_IA32
       #define AVMPLUS_IA32
     #endif
@@ -86,6 +86,10 @@
   #elif defined(__arm__) || defined(__ARM__)
     #ifndef AVMPLUS_ARM
       #define AVMPLUS_ARM
+    #endif	
+  #elif defined(__sparc__) || defined(__sparc)
+    #ifndef AVMPLUS_SPARC
+      #define AVMPLUS_SPARC
     #endif	
   #endif
 #endif
@@ -184,7 +188,7 @@
 #endif
 
 #ifndef AVMPLUS_DISABLE_NJ
-#  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 || defined AVMPLUS_ARM || defined AVMPLUS_PPC
+#  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 || defined AVMPLUS_ARM || defined AVMPLUS_PPC || defined AVMPLUS_SPARC
 #    define FEATURE_NANOJIT
 #  endif
 #endif
