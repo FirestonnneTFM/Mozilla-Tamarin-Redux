@@ -697,6 +697,9 @@ namespace avmplus
 	 * implements ECMA implicit coersion.  returns the coerced value,
 	 * or throws a TypeError if coersion is not possible.
 	 */
+	 
+	 // NOTE: parts of this function have been explicitly inlined into MethodEnv::unbox1 for
+	 // efficiency. If you change/fix this method, you may need to change/fix MethodEnv::unbox1 as well.
     Atom Toplevel::coerce(Atom atom, Traits* expected) const
     {
 		Traits* actual;
