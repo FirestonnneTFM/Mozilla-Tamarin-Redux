@@ -104,7 +104,6 @@ namespace avmplus
 		Atom endCoerce(int argc, uint32 *ap);
 		int  startCoerce(int argc);
 		Atom coerceUnboxEnter(int argc, Atom* atomv);
-		static Atom *unbox1(AvmCore* core, Toplevel* toplevel, Atom in, Traits *t, Atom *argv);
 		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv);
 		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap);
 		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv);
