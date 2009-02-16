@@ -51,6 +51,9 @@ namespace avmplus
 		cpool_mn(0),
 		bugFlags(0),
 		methods(core->GetGC(), 0),
+#if VMCFG_METHOD_NAMES
+		method_name_indices(0),
+#endif
 		metadata_infos(0),
 		cinits(core->GetGC(), 0),
 		scripts(core->GetGC(), 0),
@@ -450,6 +453,12 @@ range_error:
 	}
 	
 #ifdef AVMPLUS_WORD_CODE
+	void PoolObject::initPrecomputedMultinames()
+	{
+		if (this->word_code.cpool_mn == NULL)
+			this->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (this->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), this);
+	}
+
 	PrecomputedMultinames::PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool)
 		: MMgc::GCRoot(gc)
 		, nNames (0)

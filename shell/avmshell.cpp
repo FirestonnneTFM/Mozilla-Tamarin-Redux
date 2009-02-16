@@ -590,7 +590,7 @@ namespace avmshell
 #endif
 			bool do_log = false;
 #ifdef DEBUGGER
-			bool do_debugger = false;
+			bool enter_debugger_on_launch = false;
 #endif
 			bool do_interactive = false;
 #ifdef AVMPLUS_VERBOSE
@@ -789,7 +789,7 @@ namespace avmshell
                                     
 	                #ifdef DEBUGGER
 					else if (!VMPI_strcmp(arg, "-d")) {
-						do_debugger = true;
+						enter_debugger_on_launch = true;
 					}
 		            #endif /* DEBUGGER */
 
@@ -853,6 +853,22 @@ namespace avmshell
 			}
 
 			setCacheSizes(cacheSizes);
+
+#ifdef AVMPLUS_VERBOSE
+#if VMCFG_METHOD_NAMES
+			// verbose requires methodnames (in avmshell, anyway), before calling initBuiltinPool.
+			if (do_verbose)
+				this->config.methodNames = true;
+#endif
+#endif
+
+#ifdef DEBUGGER
+#if VMCFG_METHOD_NAMES
+			// debugger in avmshell always enables methodnames. 
+			if (this->allowDebugger)
+				this->config.methodNames = true;
+#endif
+#endif
 			
 			initBuiltinPool();
 			initShellPool();
@@ -872,7 +888,7 @@ namespace avmshell
 #endif
 			
 			#ifdef DEBUGGER
-			if (do_debugger)
+			if (enter_debugger_on_launch)
 			{
 				// Activate the debug CLI and stop at
 				// start of program

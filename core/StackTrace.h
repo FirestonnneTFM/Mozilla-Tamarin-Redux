@@ -127,17 +127,17 @@ namespace avmplus
 			init(core, sampler ? sampler->getFakeFunctionName(name) : NULL);
 		}
 
-		// ctor used only for verify (no MethodEnv)
-		inline explicit CallStackNode(AvmCore* core, Stringp name)
-		{
-			init(core, name);
-		}
-
 		// dummy ctor we can use to construct an uninitalized version -- useful for the thunks, which
 		// will construct one and immediately call initialize (via debugEnter) so there's no need to
-		// redundantly fill in fields.
+		// redundantly fill in fields. (note that the fields are uninitialized so you *must* call init 
+		// afterwards when using this!)
 		enum Empty { kEmpty = 0 };
 		inline explicit CallStackNode(Empty) { }
+
+		// dummy ctor used by verify to skip initialization in non-debugger runmode.
+		// you don't need to follow this with init (but can if you like)
+		enum NoOp { kNoOp = 0 };
+		inline explicit CallStackNode(NoOp) { VMPI_memset(this, 0, sizeof(*this)); }
 
 		~CallStackNode();
 

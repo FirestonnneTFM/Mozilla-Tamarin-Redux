@@ -515,7 +515,7 @@ namespace avmplus
 		if (method->declaringTraits != vtable->traits)
 		{
 		#ifdef AVMPLUS_VERBOSE
-			core->console << "ERROR " << method->name << " " << method->declaringTraits << " " << vtable->traits << "\n";
+			core->console << "ERROR " << method->getMethodName() << " " << method->declaringTraits << " " << vtable->traits << "\n";
 		#endif
 			AvmAssertMsg(0, "(method->declaringTraits != vtable->traits)");
 			toplevel()->throwVerifyError(kCorruptABCError);

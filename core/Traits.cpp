@@ -1697,7 +1697,7 @@ namespace avmplus
 			(a && b && !a->isMachineType() && !b->isMachineType());
 	}
 
-#ifdef AVMPLUS_VERBOSE
+#if VMCFG_METHOD_NAMES
 	Stringp Traits::format(AvmCore* core) const
 	{
 		if (name != NULL)

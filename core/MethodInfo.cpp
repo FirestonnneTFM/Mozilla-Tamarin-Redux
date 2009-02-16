@@ -102,10 +102,15 @@ namespace avmplus
 		AvmAssert(declaringTraits->isResolved());
 		resolveSignature(toplevel);
 
+		AvmCore* core = this->pool->core;
 		#ifdef DEBUGGER
 		// just a fake CallStackNode here , so that if we throw a verify error, 
-		// we get a stack trace with the method being verified as its top entry
-		CallStackNode callStackNode(this->pool->core, this->name);
+		// we get a stack trace with the method being verified as its top entry.
+		// init with an empty setup when debugger() isn't present, so we can
+		// skip the call to getMethodName(), which is nonzero
+		CallStackNode callStackNode(CallStackNode::kNoOp);
+		if (core->debugger())
+			callStackNode.init(this->pool->core, this->getMethodName());
 		#endif /* DEBUGGER */
 
 		if (!body_pos)
@@ -118,7 +123,6 @@ namespace avmplus
 
 		Verifier verifier(this, toplevel);
 
-		AvmCore* core = this->pool->core;
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
             PERFM_NTPROF("verify & IR gen");
@@ -182,6 +186,7 @@ namespace avmplus
 		
         #ifdef DEBUGGER
 		// no explicit exit call needed for fake CallStackNodes, they auto-cleanup in dtor
+		// (note that this is true even if we didn't call CallStackNode::init; the dtor is a no-op in that case)
 		//callStackNode.exit();
         #endif /* DEBUGGER */
 	}

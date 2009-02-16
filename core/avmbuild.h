@@ -228,6 +228,14 @@
 #define AVMPLUS_VERBOSE
 #endif
 
+#ifndef VMCFG_METHOD_NAMES
+	#if defined AVMPLUS_VERBOSE || defined DEBUGGER
+		#define VMCFG_METHOD_NAMES 1
+	#else
+		#define VMCFG_METHOD_NAMES 0
+	#endif
+#endif
+
 // #undef verify, a Mac thing
 #undef verify
 

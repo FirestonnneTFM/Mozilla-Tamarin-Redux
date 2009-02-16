@@ -88,8 +88,9 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 	Stringp AbstractFunction::format(AvmCore* core) const
 	{
-		return name ?
-				name->appendLatin1("()") :
+		Stringp n = getMethodName();
+		return n ?
+				n->appendLatin1("()") :
 				core->newConstantStringLatin1("?()");
 	}
 #endif // AVMPLUS_VERBOSE
@@ -432,4 +433,105 @@ namespace avmplus
 	{
 		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
 	}
+
+#if VMCFG_METHOD_NAMES
+	Stringp AbstractFunction::getMethodName() const 
+	{
+		AvmAssert(pool != NULL);
+
+		Stringp name = NULL;
+		
+		AvmCore* core = pool->core;
+		if (core->config.methodNames)
+		{
+			if (uint32_t(method_id) < uint32_t(pool->method_name_indices.size()))
+			{
+				const int32_t index = pool->method_name_indices[method_id];
+				if (index >= 0)
+				{
+					name = pool->getString(index);
+				}
+				else
+				{
+#ifdef AVMPLUS_WORD_CODE
+					// PrecomputedMultinames may not be inited yet, but we'll need them eventually,
+					// so go ahead and init them now
+					pool->initPrecomputedMultinames();
+					const Multiname& mn = pool->word_code.cpool_mn->multinames[-index];
+#else
+					Multiname mn;
+					pool->parseMultiname(pool->cpool_mn[-index], mn);
+#endif
+					name = Multiname::format(core, mn.getNamespace(), mn.getName());
+				}
+			}
+
+			if (name && name->length() == 0) 
+			{
+				name = core->kanonymousFunc;	
+			}
+			
+			Traitsp t = this->declaringTraits;
+			if (t)
+			{
+				Stringp tname = t->format(core);
+				if (core->config.oldVectorMethodNames)
+				{
+					// Tamarin used to incorrectly return the internal name of these
+					// Vector types rather than the "official" name due to initialization
+					// order. Names on the left are "more correct" but old builds might
+					// require the "classic" name for compatibility purposes, so check.
+					struct NameMapRec { const char* n; const char* o; };
+					static const NameMapRec kNameMap[4] = 
+					{
+						{ "Vector.<Number>", "Vector$double" }, 
+						{ "Vector.<int>", "Vector$int" }, 
+						{ "Vector.<uint>", "Vector$uint" }, 
+						{ "Vector.<*>", "Vector$object" },
+					};
+					for (int i = 0; i < 4; ++i)
+					{
+						if (tname->equalsLatin1(kNameMap[i].n))
+							tname = core->newConstantStringLatin1(kNameMap[i].o);
+					}
+				};
+				
+				if (this == t->init)
+				{
+					// careful, name could be null, that's ok for init methods
+					if (t->posType() == TRAITSTYPE_SCRIPT_FROM_ABC)
+					{
+						name = tname->appendLatin1("$init");
+					}
+					else if (t->posType() == TRAITSTYPE_CLASS_FROM_ABC)
+					{
+						name = tname->appendLatin1("cinit");
+					}
+					else
+					{
+						AvmAssert(t->posType() == TRAITSTYPE_INSTANCE_FROM_ABC || t->posType() == TRAITSTYPE_ACTIVATION);
+						name = tname;
+					}
+				}
+				else if (name)
+				{
+					const char* sep;
+					if (flags & IS_GETTER)
+						sep = "/get ";
+					else if (flags & IS_SETTER)
+						sep = "/set ";
+					else 
+						sep = "/";
+					name = tname->appendLatin1(sep)->append(name);
+				}
+			}
+		}
+		
+		// if config.methodNames isn't set, might as well still return a non-null result
+		if (name == NULL)
+			name = core->concatStrings(core->newConstantStringLatin1("MethodInfo-"), core->intToString(method_id));
+		
+		return name;
+	}
+#endif		
 }

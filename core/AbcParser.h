@@ -77,7 +77,7 @@ namespace avmplus
 		Namespacep parseNsRef(const byte* &pc) const;
 		Stringp resolveUtf8(uint32 index) const;
 		Stringp parseName(const byte* &pc) const;
-		void resolveQName(const byte* &pc, Multiname &m) const;
+		uint32_t resolveQName(const byte*& pc, Multiname& m) const;
 		uint32_t computeInstanceSize(int class_id, Traits* base) const;
 		void parseMethodInfos();
 		void parseMetadataInfos();
