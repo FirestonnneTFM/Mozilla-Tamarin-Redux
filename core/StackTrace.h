@@ -155,7 +155,7 @@ namespace avmplus
 		inline MethodEnv* env() const { return m_env; }
 		// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
 		inline AbstractFunction* info() const { return m_env ? m_env->method : NULL; }
-		inline Stringp envname() const { return m_envname; }
+		inline Stringp fakename() const { return m_fakename; }
 		inline int32_t depth() const { return m_depth; }
 
 		inline intptr_t volatile* eip() const { return m_eip; }
@@ -186,7 +186,7 @@ namespace avmplus
 	private:	AvmCore*			m_core;
 	private:	MethodEnv*			m_env;			// will be NULL if the element is from a fake CallStackNode
 	private:	CallStackNode*		m_next;
-	private:	Stringp				m_envname;		// same as m_env->method->name (except for fake CallStackNode)
+	private:	Stringp				m_fakename;		// NULL unless we are a fake CallStackNode
 	private:	int32_t				m_depth;
 	private:	intptr_t volatile*	m_eip;			// ptr to where the current pc is stored
 	private:	Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
@@ -233,14 +233,16 @@ namespace avmplus
 			inline void set(const CallStackNode& csn) 
 			{ 
 				m_info		= csn.info();		// will be NULL if the element is from a fake CallStackNode
-				m_name		= csn.envname();
+				m_name		= csn.fakename();
+				if (!m_name && csn.info())
+					m_name = csn.info()->getMethodName();
 				m_filename	= csn.filename();
 				m_linenum	= csn.linenum();
 			#ifdef AVMPLUS_64BIT
 				m_pad		= 0;	// let's keep the stack nice and clean
 			#endif
 			}
-			// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.
+			// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
 			inline AbstractFunction* info() const { return m_info; }
 			inline Stringp infoname() const { return m_name; }
 			inline Stringp filename() const { return m_filename; }

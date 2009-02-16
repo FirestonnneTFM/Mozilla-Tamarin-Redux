@@ -173,7 +173,7 @@ namespace avmplus
 			while(csn)
 			{
 				write(p, csn->info());
-				write(p, csn->envname());
+				write(p, csn->fakename());
 				// FIXME: can filename can be stored in the AbstractInfo?
 				write(p, csn->filename());
 				write(p, csn->linenum());

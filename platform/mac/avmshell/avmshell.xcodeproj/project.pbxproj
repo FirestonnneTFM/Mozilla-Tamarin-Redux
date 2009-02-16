@@ -16,7 +16,6 @@
 		079DF83B0F3A882D0031D1B4 /* AtomArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */; };
 		079DF83C0F3A882D0031D1B4 /* AtomConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C20F3A882D0031D1B4 /* AtomConstants.cpp */; };
 		079DF83D0F3A882D0031D1B4 /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */; };
-		079DF83E0F3A882D0031D1B4 /* AvmDebugGeneric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C90F3A882D0031D1B4 /* AvmDebugGeneric.cpp */; };
 		079DF83F0F3A882D0031D1B4 /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */; };
 		079DF8400F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */; };
 		079DF8410F3A882D0031D1B4 /* avmplusHashtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CF0F3A882D0031D1B4 /* avmplusHashtable.cpp */; };
@@ -72,7 +71,6 @@
 		079DF8730F3A882D0031D1B4 /* AtomArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C00F3A882D0031D1B4 /* AtomArray.cpp */; };
 		079DF8740F3A882D0031D1B4 /* AtomConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C20F3A882D0031D1B4 /* AtomConstants.cpp */; };
 		079DF8750F3A882D0031D1B4 /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */; };
-		079DF8760F3A882D0031D1B4 /* AvmDebugGeneric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7C90F3A882D0031D1B4 /* AvmDebugGeneric.cpp */; };
 		079DF8770F3A882D0031D1B4 /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */; };
 		079DF8780F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CD0F3A882D0031D1B4 /* avmplusDebugger.cpp */; };
 		079DF8790F3A882D0031D1B4 /* avmplusHashtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF7CF0F3A882D0031D1B4 /* avmplusHashtable.cpp */; };
@@ -311,6 +309,8 @@
 		079DFCB80F3ABC6F0031D1B4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 079DFB670F3A9C350031D1B4 /* libz.dylib */; };
 		07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
 		07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07DC69640F4032F200E3CC37 /* vprof.cpp */; };
+		D9B8153C0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */; };
+		D9B8153D0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -362,7 +362,6 @@
 		079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmCore.cpp; path = ../../../core/AvmCore.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7C70F3A882D0031D1B4 /* AvmCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmCore.h; path = ../../../core/AvmCore.h; sourceTree = SOURCE_ROOT; };
 		079DF7C80F3A882D0031D1B4 /* AvmDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvmDebug.h; path = ../../../core/AvmDebug.h; sourceTree = SOURCE_ROOT; };
-		079DF7C90F3A882D0031D1B4 /* AvmDebugGeneric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmDebugGeneric.cpp; path = ../../../core/AvmDebugGeneric.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = avmplus.cpp; path = ../../../core/avmplus.cpp; sourceTree = SOURCE_ROOT; };
 		079DF7CB0F3A882D0031D1B4 /* avmplus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplus.h; path = ../../../core/avmplus.h; sourceTree = SOURCE_ROOT; };
 		079DF7CC0F3A882D0031D1B4 /* avmplus_stdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avmplus_stdint.h; path = ../../../core/avmplus_stdint.h; sourceTree = SOURCE_ROOT; };
@@ -683,6 +682,7 @@
 		07DA81A00F40335500288C8F /* vprof.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vprof.h; path = ../../../vprof/vprof.h; sourceTree = SOURCE_ROOT; };
 		07DC69640F4032F200E3CC37 /* vprof.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vprof.cpp; path = ../../../vprof/vprof.cpp; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* shell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = shell; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AvmDebugMac.cpp; path = ../AvmDebugMac.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -748,7 +748,6 @@
 				079DF7C60F3A882D0031D1B4 /* AvmCore.cpp */,
 				079DF7C70F3A882D0031D1B4 /* AvmCore.h */,
 				079DF7C80F3A882D0031D1B4 /* AvmDebug.h */,
-				079DF7C90F3A882D0031D1B4 /* AvmDebugGeneric.cpp */,
 				079DF7CA0F3A882D0031D1B4 /* avmplus.cpp */,
 				079DF7CB0F3A882D0031D1B4 /* avmplus.h */,
 				079DF7CC0F3A882D0031D1B4 /* avmplus_stdint.h */,
@@ -1069,6 +1068,7 @@
 		079DF9C20F3A8BC10031D1B4 /* platform */ = {
 			isa = PBXGroup;
 			children = (
+				D9B8153B0F49F8F6002FE70D /* AvmDebugMac.cpp */,
 				079DFB290F3A98E60031D1B4 /* DateUnix.cpp */,
 				079DFB2A0F3A98E60031D1B4 /* MathUtilsUnix.cpp */,
 				079DFB2B0F3A98E60031D1B4 /* OSDepUnix.cpp */,
@@ -1292,7 +1292,6 @@
 				079DF8730F3A882D0031D1B4 /* AtomArray.cpp in Sources */,
 				079DF8740F3A882D0031D1B4 /* AtomConstants.cpp in Sources */,
 				079DF8750F3A882D0031D1B4 /* AvmCore.cpp in Sources */,
-				079DF8760F3A882D0031D1B4 /* AvmDebugGeneric.cpp in Sources */,
 				079DF8770F3A882D0031D1B4 /* avmplus.cpp in Sources */,
 				079DF8780F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */,
 				079DF8790F3A882D0031D1B4 /* avmplusHashtable.cpp in Sources */,
@@ -1433,6 +1432,7 @@
 				079DFB300F3A98E60031D1B4 /* MathUtilsUnix.cpp in Sources */,
 				079DFB310F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */,
 				07DC69660F4032F200E3CC37 /* vprof.cpp in Sources */,
+				D9B8153D0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1449,7 +1449,6 @@
 				079DF83B0F3A882D0031D1B4 /* AtomArray.cpp in Sources */,
 				079DF83C0F3A882D0031D1B4 /* AtomConstants.cpp in Sources */,
 				079DF83D0F3A882D0031D1B4 /* AvmCore.cpp in Sources */,
-				079DF83E0F3A882D0031D1B4 /* AvmDebugGeneric.cpp in Sources */,
 				079DF83F0F3A882D0031D1B4 /* avmplus.cpp in Sources */,
 				079DF8400F3A882D0031D1B4 /* avmplusDebugger.cpp in Sources */,
 				079DF8410F3A882D0031D1B4 /* avmplusHashtable.cpp in Sources */,
@@ -1590,6 +1589,7 @@
 				079DFB2D0F3A98E60031D1B4 /* MathUtilsUnix.cpp in Sources */,
 				079DFB2E0F3A98E60031D1B4 /* OSDepUnix.cpp in Sources */,
 				07DC69650F4032F200E3CC37 /* vprof.cpp in Sources */,
+				D9B8153C0F49F8F6002FE70D /* AvmDebugMac.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

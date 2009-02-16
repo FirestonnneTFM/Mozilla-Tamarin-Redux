@@ -86,7 +86,7 @@ selfTest = o.getBoolArg("selftests", False)
 if selfTest:
     APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
 
-MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', True)
+MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', False)
 if MMGC_INTERIOR_PTRS:
     MMGC_DEFINES['MMGC_INTERIOR_PTRS'] = None
 
