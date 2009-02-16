@@ -290,7 +290,7 @@ namespace avmshell
 			// method
 			MethodInfo* info = functionFor(src, line);
 			if (info)
-				core->console << info->name;
+				core->console << info->getMethodName();
 			else
 				core->console << "<unknown>";
 

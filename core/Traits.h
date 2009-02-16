@@ -557,7 +557,7 @@ namespace avmplus
 		Traitsp* findInterface(Traits* t) const;
 
 	public:
-#ifdef AVMPLUS_VERBOSE
+#if VMCFG_METHOD_NAMES
 		Stringp format(AvmCore* core) const;
 #endif
 

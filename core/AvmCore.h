@@ -75,6 +75,15 @@ const int kBufferPadding = 16;
 		bool verbose_addrs;
 		#endif /* AVMPLUS_VERBOSE */
 
+		#if VMCFG_METHOD_NAMES
+		// if true, record original names of methods at runtime.
+		// if false, don't (Function.toString will return things like "Function-21")
+		bool methodNames;
+		
+		// give "Vector.<*>" instead of "Vector$object", etc
+		bool oldVectorMethodNames;	
+		#endif
+
 		#ifdef AVMPLUS_MIR
 		bool dceopt;
         #endif
@@ -634,7 +643,7 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kAsterisk;
 		DRC(Stringp) kVersion;
 		DRC(Stringp) kVector;
-#if defined AVMPLUS_VERBOSE || defined DEBUGGER
+#if VMCFG_METHOD_NAMES
 		DRC(Stringp) kanonymousFunc;
 #endif
 		Atom kNaN;
@@ -1396,9 +1405,11 @@ const int kBufferPadding = 16;
 		static void decrementAtomRegion(Atom *ar, int length);
 #endif
 
-#ifdef AVMPLUS_VERBOSE
 	public:
+#ifdef AVMPLUS_VERBOSE
 		Stringp format(Atom atom);
+#endif
+#if VMCFG_METHOD_NAMES
 		Stringp formatAtomPtr(Atom atom);
 #endif
 

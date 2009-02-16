@@ -264,8 +264,9 @@ namespace avmplus
 				// WARNING: don't change the format of output since outside utils depend on it
 				uint64 delta = OSDep::currentTimeMillis() - astraceStartTime;
 				core->console << (uint32)(delta) << " AVMINF: MTHD ";
-				if (fnc->name && (fnc->name->length() > 0) )
-					core->console << fnc->name;
+				Stringp fname = fnc->getMethodName();
+				if (fname && (fname->length() > 0) )
+					core->console << fname;
 				else
 					core->console << "<unknown>";
 				
@@ -324,7 +325,9 @@ namespace avmplus
 		MethodEnv* env = core->callStack->env();
 		if (env->method)
 		{
-			name = ( env->method->name != 0 ) ? Stringp(env->method->name) : Stringp(core->kEmptyString);
+			name = env->method->getMethodName();
+			if (!name)
+				name = core->kEmptyString;
 			if ((line == 0) && (astrace_callback == TRACE_METHODS_WITH_ARGS || astrace_callback == TRACE_METHODS_AND_LINES_WITH_ARGS))
 				args = traceArgumentsString();
 		}

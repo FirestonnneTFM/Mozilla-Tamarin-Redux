@@ -171,7 +171,7 @@ namespace avmplus
 	}
 	#endif
 
-	void AbcParser::resolveQName(const byte* &p, Multiname &m) const
+	uint32_t AbcParser::resolveQName(const byte* &p, Multiname &m) const
 	{
 		uint32 index = readU30(p);
 		if (index == 0 || index >= pool->constantMnCount)
@@ -182,6 +182,8 @@ namespace avmplus
 		pool->parseMultiname(a, m);
 		if (!m.isQName())
 			toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
+			
+		return index;
 	}
 
 	AbstractFunction *AbcParser::resolveMethodInfo(uint32 index) const
@@ -198,7 +200,7 @@ namespace avmplus
 
 	Stringp AbcParser::resolveUtf8(uint32 index) const
 	{
-		if (index > 0 && index < pool->constantStringCount )
+		if (index > 0 && index < pool->constantStringCount)
 		{
 			return pool->cpool_string[index];
 		}
@@ -275,6 +277,7 @@ namespace avmplus
 
 			// method bodies: code, exception info, and activation traits
 			parseMethodBodies();
+
 #ifdef FEATURE_BUFFER_GUARD // no buffer guard in Carbon builds
 		}
 		CATCH(Exception *exception)
@@ -337,7 +340,7 @@ namespace avmplus
 		for (uint32_t i=0; i < nameCount; i++)
         {
 			Multiname qn;
-			resolveQName(pos, qn);
+			const uint32_t qn_index = resolveQName(pos, qn);
 			Namespacep ns = qn.getNamespace();
 			// TODO name can come out null and fire all kinds of asserts from a broken compiler
 			// and crash a release build, not sure if null is valid in any cases but there's definitely
@@ -498,6 +501,11 @@ namespace avmplus
 			case TRAIT_Setter:
             case TRAIT_Method:
 			{
+				if (kind == TRAIT_Getter)
+					flags |= AbstractFunction::IS_GETTER;
+				else if (kind == TRAIT_Setter)
+					flags |= AbstractFunction::IS_SETTER;
+					
 				#ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
 				{
@@ -515,12 +523,13 @@ namespace avmplus
 				// id is unused here
 				AbstractFunction* f = resolveMethodInfo(method_info);
 
-				#ifdef AVMPLUS_VERBOSE
-				Stringp s1 = traits->format(core);
-				Stringp s2 = core->newConstantStringLatin1(kind == TRAIT_Method ? "/" : (kind == TRAIT_Getter ? "/get " : "/set "));
-				Stringp s3 = Multiname::format(core,ns,name);
-				Stringp s4 = core->concatStrings(s2,s3);
-				f->name = core->concatStrings(s1, s4);
+				#if VMCFG_METHOD_NAMES
+				if (core->config.methodNames)
+				{
+					pool->method_name_indices.set(method_info, -int32_t(qn_index));
+				}
+				#else
+				(void)qn_index;
 				#endif
 
 				// since this function is ref'ed here, we know the receiver type.
@@ -577,6 +586,12 @@ namespace avmplus
 
 		MMGC_MEM_TYPE(pool);
 		pool->methods.ensureCapacity(size);
+#if VMCFG_METHOD_NAMES
+		if (core->config.methodNames)
+		{
+			pool->method_name_indices.ensureCapacity(size);
+		}
+#endif
 		pool->methodCount = methodCount;
 
 #ifdef AVMPLUS_VERBOSE
@@ -592,7 +607,11 @@ namespace avmplus
 			int param_count = readU30(pos);
 
 			const byte* info_pos = pos;
-
+		
+		// @todo -- we should add an AbcParser equivalent of skipU30;
+		// then the next two clauses would be 			
+		//		skipU30(pos, param_count+1);
+		// in non-verbose builds
 			#ifdef AVMPLUS_VERBOSE
 			Multiname returnTypeName;
 			parseTypeName(pos, returnTypeName);
@@ -634,19 +653,7 @@ namespace avmplus
 			AbstractFunction *info;			
 			if (!(flags & AbstractFunction::NATIVE))
 			{
-				MethodInfo *methodInfo = new (core->GetGC()) MethodInfo(i);
-				
-				#if defined AVMPLUS_VERBOSE || defined DEBUGGER
-				if (name_index != 0) {
-					methodInfo->name = resolveUtf8(name_index);
-					if(methodInfo->name->length() == 0) 
-					{
-						methodInfo->name = core->kanonymousFunc;	
-					}
-				} else
-					methodInfo->name = core->concatStrings(core->newConstantStringLatin1("MethodInfo-"), core->intToString(i));
-				#endif
-				info = methodInfo;
+				info = new (core->GetGC()) MethodInfo(i);
 			}
 			else
 			{
@@ -666,6 +673,12 @@ namespace avmplus
 			info->param_count = param_count;
 			info->initParamTypes(param_count+1);
 			info->flags |= flags;
+			#if VMCFG_METHOD_NAMES
+			if (core->config.methodNames)
+			{
+				info->pool->method_name_indices.set(i, int32_t(name_index));
+			}
+			#endif
 
 			if (flags & AbstractFunction::HAS_OPTIONAL)
 			{
@@ -928,12 +941,14 @@ namespace avmplus
 				if ((methodInfo->flags & AbstractFunction::NEED_ACTIVATION) || nameCount > 0)
 				{
 					pos = traits_pos;
+					Namespacep ns = NULL;
+					Stringp name = NULL;
 					#ifdef AVMPLUS_VERBOSE
-					const Namespacep ns = core->publicNamespace;
-					const Stringp name = core->internString(methodInfo->name);
-					#else
-					const Namespacep ns = NULL;
-					const Stringp name = NULL;
+					if (core->config.methodNames)
+					{
+						ns = core->publicNamespace;
+						name = core->internString(methodInfo->getMethodName());
+					}
 					#endif
 					// activation traits are raw types, not subclasses of object.  this is
 					// okay because they aren't accessable to the programming model.
@@ -1451,10 +1466,6 @@ namespace avmplus
 			script->makeMethodOf(traits);
 			traits->init = script;
 
-			#ifdef AVMPLUS_VERBOSE
-			script->name = core->concatStrings(traits->format(core), core->newConstantStringLatin1("$init"));
-			#endif
-
             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
@@ -1584,10 +1595,6 @@ namespace avmplus
 					<< "\n";
 			)
 
-			#if defined AVMPLUS_VERBOSE || defined DEBUGGER
-			iinit->name = Multiname::format(core,ns,name);
-			#endif
-
 			Traits* itraits = parseTraits(computeInstanceSize(i, baseTraits), 
 											baseTraits, 
 											ns, 
@@ -1690,11 +1697,6 @@ namespace avmplus
 					<< " cinit_index=" << cinit_index
 					<< "\n";
 			)
-
-			#if defined AVMPLUS_VERBOSE || defined DEBUGGER
-			Stringp cinitName = core->concatStrings(name, core->newConstantStringLatin1("$cinit"));
-			cinit->name = Multiname::format(core,ns,cinitName);
-			#endif
 
 			const NativeClassInfo* nativeEntry = natives ? natives->get_class(i) : NULL;
 			Traits* ctraits = parseTraits(nativeEntry && nativeEntry->sizeofClass ? nativeEntry->sizeofClass : sizeof(ClassClosure),

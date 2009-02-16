@@ -227,9 +227,10 @@ namespace avmplus
 		kVersion = internConstantStringLatin1("Version");
 		kVector = internConstantStringLatin1("Vector.<");
 
-#if defined AVMPLUS_VERBOSE || defined DEBUGGER
+#if VMCFG_METHOD_NAMES
 		kanonymousFunc = newConstantStringLatin1("<anonymous>");
 #endif
+
 		for (int i = 0; i < 128; i++)
 		{
 			char singleChar = (char)i;
@@ -1513,8 +1514,9 @@ return the result of the comparison ToPrimitive(x) == y.
 				{
 					buffer << " argc=" << (int)readU30(pc); // argc
 				}
-				if (f->name)
-					buffer << " " << f->name;
+				Stringp fname = f->getMethodName();
+				if (fname)
+					buffer << " " << fname;
 				else
 					buffer << " null";
 				break;
@@ -1709,8 +1711,9 @@ return the result of the comparison ToPrimitive(x) == y.
 				buffer << wopAttrs[opcode].name << " method_id=" << method_id;
 				if (opcode == WOP_callstatic)
 					buffer << " argc=" << (int)*pc++; // argc
-				if (f->name)
-					buffer << " " << f->name;
+				Stringp fname = f->getMethodName();
+				if (fname)
+					buffer << " " << fname;
 				else
 					buffer << " null";
 				break;
@@ -3544,7 +3547,9 @@ return the result of the comparison ToPrimitive(x) == y.
 			return knull;
 		}
     }
+#endif
 
+#if VMCFG_METHOD_NAMES
 	Stringp AvmCore::formatAtomPtr(Atom atom)
 	{
 		return MathUtils::convertIntegerToStringRadix(this, atom, 16, MathUtils::kTreatAsUnsigned);
