@@ -56,7 +56,7 @@ namespace avmplus
 		m_core			= env->core();
 		m_env			= env;
 		m_next			= m_core->callStack; m_core->callStack = this;
-		m_envname		= env->method->getMethodName();
+		m_fakename		= NULL;
 		m_depth			= m_next ? (m_next->m_depth + 1) : 1;
 		m_eip			= eip;     // ptr to where the current instruction pointer is stored
 		m_filename		= NULL;
@@ -76,7 +76,7 @@ namespace avmplus
 	{
 		// careful, core and/or name can be null
 		m_env			= NULL;
-		m_envname		= name;
+		m_fakename		= name;
 		if (name)
 		{
 			AvmAssert(core != NULL);
