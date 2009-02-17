@@ -51,7 +51,7 @@
 	-->
 	<property name="lib.dir" location="Set in build.properties"/>
 	<property name="lib2.dir" location="Set in build.properties"/>
-	<property name="antlr.runtime" value="Set in build.properties"/>
+	<property name="antlr.runtime" value="../../other-licenses/ANTLR/antlr-runtime-3.0.1.jar"/>
 
 	<!-- Pull in current environment -->
 	<property environment="env"/>
@@ -78,9 +78,10 @@
 		<pathelement path="${ASC_JAR}"/>
     </path>
 
-	<path id="main.classpath">
+	<path id="runtime.classpath">
 		<pathelement path="${ASC_JAR}"/>
 		<pathelement path="${target.jar}"/>
+		<pathelement path="${antlr.runtime}"/>
     </path>
 
 	<target name="generate">
@@ -153,7 +154,7 @@
 
 	<target name="test" depends="jar">
 		<java classname="adobe.abcasm.Main" fork="yes" failonerror="yes">
-            <classpath refid="main.classpath" />
+            <classpath refid="runtime.classpath" />
 			<arg value="test/parseInt.abs"/>
 			<arg value="-dump"/>
 			<arg value="-verbose"/>
