@@ -41,6 +41,7 @@
 # operation:
 #    skip - the test/dir is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
 #    include - includes a specific testcase/dir even if the parent has been skipped
+#    largerValuesFaster - test metric larger values indicate faster execution
 
 
 sunspider/.*          , sunspider , include , sunspider testsuite
@@ -71,3 +72,6 @@ v8/earley-boyer.as, .*, skip, VerifyError - https://bugzilla.mozilla.org/show_bu
 v8/typed/base.as,   .*, skip, included by test files
 v8/typed/run.as ,   .*, skip, file used to run entire suite at once
 v8/typed/earley-boyer.as, .*, skip, VerifyError - https://bugzilla.mozilla.org/show_bug.cgi?id=464134
+
+# v8 tests: larger values are faster
+v8/.*           ,  .*  , largerValuesFaster, reports v8 metric: http://v8.googlecode.com/svn/data/benchmarks/v3/run.html

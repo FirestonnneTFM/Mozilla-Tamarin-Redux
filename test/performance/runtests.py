@@ -68,7 +68,6 @@ class PerformanceRuntest(RuntestBase):
     iterations = 1
     vmname = 'unknown'
     memory = False
-    largerIsFaster = False
     vmversion = ''
     vmargs2 = ''
     optimize = True
@@ -117,7 +116,6 @@ class PerformanceRuntest(RuntestBase):
         print " -k --socketlog     logs results to a socket server"
         print " -r --runtime       name of the runtime VM used, including switch info eg. TTVMi (tamarin-tracing interp)"
         print " -m --memory        logs the high water memory mark"
-        print "    --larger        larger values are better than smaller values"
         print "    --vmversion     specify vmversion e.g. 502, use this if cannot be calculated from executable"
         print "    --vmargs2       args to pass to avm2, if not specified --vmargs will be used"
         print "    --nooptimize    do not optimize files when compiling"
@@ -151,8 +149,6 @@ class PerformanceRuntest(RuntestBase):
                 self.vmname = v
             elif o in ("-m", "--memory"):
                 self.memory = True
-            elif o in ('--larger'):
-                self.largerIsFaster = True
             elif o in ("--vmversion"):
                 self.vmversion = v
             elif o in ("--vmargs2"):
@@ -247,17 +243,15 @@ class PerformanceRuntest(RuntestBase):
             exit('ERROR: cannot run %s, AVM environment variable or --avm must be set to avmplus' % self.avm)
         
         # Print run info and headers
-        self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True);
+        self.js_print('Executing %d tests against vm: %s' % (len(self.tests), self.avm), overrideQuiet=True)
         self.js_print("Executing tests at %s" % datetime.now())
-        self.js_print("avm: %s %s" % (self.avm,self.vmargs));
+        self.js_print("avm: %s %s" % (self.avm,self.vmargs))
         if len(self.avm2)>0:
             if len(self.vmargs2)>0:
-                self.js_print("avm2: %s %s" % (self.avm2,self.vmargs2));
+                self.js_print("avm2: %s %s" % (self.avm2,self.vmargs2))
             else:
-                self.js_print("avm2: %s" % self.avm2);
+                self.js_print("avm2: %s" % self.avm2)
         self.js_print('iterations: %s' % self.iterations)
-        if self.largerIsFaster:
-            self.js_print("Larger values are faster");
         if len(self.avm2)>0:
             if self.iterations == 1:
                 self.js_print("\n%-50s %7s %7s %7s %7s\n" % ("test",self.avmname,self.avm2name, "%sp", "metric"))
@@ -298,7 +292,7 @@ class PerformanceRuntest(RuntestBase):
         includes = self.includes #list
         settings = {}
         
-        # get settings for this test
+        # get settings for this test (from main testconfig file loaded into self.settings)
         for k in self.settings.keys():
             if re.search('^'+k+'$', root):
                 for k2 in self.settings[k].keys():
@@ -325,6 +319,12 @@ class PerformanceRuntest(RuntestBase):
             self.allskips += 1
             return
         
+        
+        if settings.has_key('.*') and settings['.*'].has_key('largerValuesFaster'):
+            largerIsFaster = 'largerValuesFaster'
+        else:
+            largerIsFaster = ''
+
         
         self.verbose_print("%d running %s" % (testnum, testName));
         if self.forcerebuild and isfile(abc):
@@ -424,7 +424,7 @@ class PerformanceRuntest(RuntestBase):
             result1=9999999
             result2=9999999
         else:
-            if self.largerIsFaster:
+            if largerIsFaster:
                 result1 = max(resultList)
                 if resultList2:
                     result2 = max(resultList2)
@@ -446,13 +446,13 @@ class PerformanceRuntest(RuntestBase):
                 if result1==0 or result2==0:
                     spdup = 9999
                 else:
-                    if self.largerIsFaster:
+                    if largerIsFaster:
                         spdup = float(result2-result1)/result2*100.0
                     else:
                         spdup = float(result1-result2)/result2*100.0
         if self.memory:
             if len(self.avm2)>0:
-                self.js_print("%-50s %7s %7s %7.1f %7s" % (testName,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric))
+                self.js_print("%-50s %7s %7s %7.1f %7s %s" % (testName,formatMemory(memoryhigh),formatMemory(memoryhigh2),spdup, metric, largerIsFaster))
             else:
                 confidence=0
                 meanRes=memoryhigh
@@ -469,16 +469,16 @@ class PerformanceRuntest(RuntestBase):
         else:
             if len(self.avm2)>0:
                 if self.iterations == 1:
-                    self.js_print('%-50s %7s %7s %7.1f %7s' % (testName,result1,result2,spdup, metric))
+                    self.js_print('%-50s %7s %7s %7.1f %7s %s' % (testName,result1,result2,spdup, metric, largerIsFaster))
                 else:
                     try:
                         rl1_avg=sum(resultList)/float(len(resultList))
                         rl2_avg=sum(resultList2)/float(len(resultList2))
                         min1 = float(min(resultList))
                         min2 = float(min(resultList2))
-                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (testName, min1, max(resultList), rl1_avg, min2, max(resultList2), rl2_avg,(min1-min2)/min2*100.0, metric))
+                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s %s' % (testName, min1, max(resultList), rl1_avg, min2, max(resultList2), rl2_avg,((min1-min2)/min2*100.0) if not largerIsFaster else ((min2-min1)/min1*100.0), metric, largerIsFaster))
                     except:
-                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s' % (testName, '', '', result1, '', '', result2, spdup, metric))
+                        self.js_print('%-50s [%6s :%6s] %6.1f   [%6s :%6s] %6.1f %7.1f %7s %s' % (testName, '', '', result1, '', '', result2, spdup, metric, largerIsFaster))
                 #TODO: clean up / reformat
                 if self.perfm:
                     if perfm1Dict['verify']:    # only calc if data present
@@ -530,9 +530,9 @@ class PerformanceRuntest(RuntestBase):
                                 perfmSocketlog('vprof-ir-time','ir')
                                 perfmSocketlog('vprof-count','count')
                         self.socketlog("addresult2::%s::%s::%s::%0.1f::%s::%s::%s::%s::%s::%s;" % (ast, metric, result1, confidence, meanRes, self.iterations, self.osName.upper(), config, self.vmversion, self.vmname))
-                        self.js_print("%-50s %7s %10.1f%% %7s  %s" % (ast,result1,confidence,metric,resultList)) 
+                        self.js_print("%-50s %7s %10.1f%% %7s  %s %s" % (ast,result1,confidence,metric,resultList, largerIsFaster)) 
                     else: #one iteration
-                        self.js_print("%-50s %7s %7s" % (testName,result1,metric)) 
+                        self.js_print("%-50s %7s %7s %s" % (testName,result1,metric,largerIsFaster)) 
                 else:
                         self.js_print("%-50s crash" % (testName)) 
                         res=1
