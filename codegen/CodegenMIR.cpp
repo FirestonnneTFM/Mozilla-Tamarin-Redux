@@ -2688,7 +2688,7 @@ namespace avmplus
 				if (f && (f->flags & AbstractFunction::NATIVE))
 				{
 					StringBuffer buffer(core);		
-					const wchar *foo = f->name->c_str();
+					const wchar *foo = f->getMethodName()->c_str();
 					buffer << "function is:" << foo << "\r\n";
 
 					AvmDebugMsg (false, buffer.c_str());
@@ -5563,7 +5563,7 @@ namespace avmplus
 		OP* begin = ipStart;
 		OP* end = ipEnd;
 
-		core->console << "digraph \"" << info->name << "\" {\n";
+		core->console << "digraph \"" << info->getMethodName() << "\" {\n";
         core->console << "ratio=fill\n";
         core->console << "ranksep=.1\n";
         core->console << "nodesep=.2\n";
