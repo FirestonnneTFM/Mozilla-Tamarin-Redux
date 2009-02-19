@@ -157,15 +157,6 @@ namespace avmplus
 
 		/*@}*/
 
-		/**
-		 * @name NativeMethod flags
-		 * These are used in the NativeMethod subclass
-		 */
-		/*@{*/
-		/** cookie int passed into C++ code */
-		static const int NATIVE_COOKIE      = 0x10000000;
-		/*@}*/
-
 	public:
 
 		uintptr iid() const

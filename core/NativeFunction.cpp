@@ -158,10 +158,6 @@ namespace avmplus
 			// if we overwrite a native class mapping, something is hosed
 			AvmAssert(classes[_classEntry->class_id]  == NULL);
 			classes[_classEntry->class_id] = _classEntry;
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-			if (_classEntry->nativeMap)
-				fillInMethods(_classEntry->nativeMap);
-#endif
 			_classEntry++;
 		}
 	}
@@ -184,13 +180,7 @@ namespace avmplus
 			return NULL;
 
 		NativeMethod* info = new (core->GetGC()) NativeMethod(i, ni->thunker, ni->handler);
-		info->flags |= AbstractFunction::ABSTRACT_METHOD;
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-		info->flags |= ni->flags;
-		info->cookie = ni->cookie;
-#else
-		info->flags |= AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS;
-#endif
+		info->flags |= AbstractFunction::ABSTRACT_METHOD | AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS;
 		return info;
 	}
 
