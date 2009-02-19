@@ -143,6 +143,16 @@ const OP_pushdouble:int = 0x2F
 const OP_pushscope:int = 0x30
 const OP_pushnamespace:int = 0x31
 const OP_hasnext2:int = 0x32
+const OP_li8:int = 0x35
+const OP_li16:int = 0x36
+const OP_li32:int = 0x37
+const OP_lf32:int = 0x38
+const OP_lf64:int = 0x39
+const OP_si8:int = 0x3A
+const OP_si16:int = 0x3B
+const OP_si32:int = 0x3C
+const OP_sf32:int = 0x3D
+const OP_sf64:int = 0x3E
 const OP_newfunction:int = 0x40
 const OP_call:int = 0x41
 const OP_construct:int = 0x42
@@ -159,6 +169,9 @@ const OP_callproplex:int = 0x4C
 const OP_callinterface:int = 0x4D
 const OP_callsupervoid:int = 0x4E
 const OP_callpropvoid:int = 0x4F
+const OP_sxi1:int = 0x50
+const OP_sxi8:int = 0x51
+const OP_sxi16:int = 0x52
 const OP_applytype:int = 0x53
 const OP_newobject:int = 0x55
 const OP_newarray:int = 0x56
@@ -309,16 +322,16 @@ const opNames = [
 "hasnext2      ",
 "OP_0x33       ",
 "OP_0x34       ",
-"OP_0x35       ",
-"OP_0x36       ",
-"OP_0x37       ",
-"OP_0x38       ",
-"OP_0x39       ",
-"OP_0x3A       ",
-"OP_0x3B       ",
-"OP_0x3C       ",
-"OP_0x3D       ",
-"OP_0x3E       ",
+"li8           ",
+"li16          ",
+"li32          ",
+"lf32          ",
+"lf64          ",
+"si8           ",
+"si16          ",
+"si32          ",
+"sf32          ",
+"sf64          ",
 "OP_0x3F       ",
 "newfunction   ",
 "call          ",
@@ -336,10 +349,10 @@ const opNames = [
 "callinterface ",
 "callsupervoid ",
 "callpropvoid  ",
+"sxi1          ",
+"sxi8          ",
+"sxi16         ",
 "applytype     ",
-"OP_0x51       ",
-"OP_0x52       ",
-"OP_0x53       ",
 "OP_0x54       ",
 "newobject     ",
 "newarray      ",
@@ -347,8 +360,8 @@ const opNames = [
 "newclass      ",
 "getdescendants",
 "newcatch      ",
-"OP_0x5B       ",
-"OP_0x5C       ",
+"OP_0x5B       ", // findpropglobalstrict (internal)
+"OP_0x5C       ", // findpropglobal (internal)
 "findpropstrict",
 "findproperty  ",
 "finddef       ",
@@ -363,7 +376,7 @@ const opNames = [
 "initproperty  ",
 "OP_0x69       ",
 "deleteproperty",
-"OP_0x6A       ",
+"OP_0x6B       ",
 "getslot       ",
 "setslot       ",
 "getglobalslot ",
@@ -501,17 +514,17 @@ const opNames = [
 "bkptline      ",
 "timestamp     ",
 "OP_0xF4       ",
-"verifypass    ",
-"alloc         ",
-"mark          ",
-"wb            ",
-"prologue      ",
-"sendenter     ",
-"doubletoatom  ",
-"sweep         ",
-"codegenop     ",
-"verifyop      ",
-"decode        "
+"OP_0xF5       ",
+"OP_0xF6       ",
+"OP_0xF7       ",
+"OP_0xF8       ",
+"OP_0xF9       ",
+"OP_0xFA       ",
+"OP_0xFB       ",
+"OP_0xFC       ",
+"OP_0xFD       ",
+"OP_0xFE       ",
+"OP_0xFF       "
 ];
 
 const ATTR_final			:int = 0x01; // 1=final, 0=virtual
