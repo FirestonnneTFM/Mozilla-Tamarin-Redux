@@ -609,7 +609,8 @@ namespace avmplus
             AvmCore *core = pool->core;
             GC *gc = core->gc;
 			PageMgr *mgr = pool->codePages = new (gc) PageMgr();
-            mgr->frago = new (gc) Fragmento(core, 24/*16mb*/);
+			// @todo, we really need to limit growth system-wide, rather than per-Fragmento
+            mgr->frago = new (gc) Fragmento(core, Fragmento::MAX_CACHE_SIZE_LOG2);	
 			verbose_only(
                 mgr->frago->assm()->_verbose = pool->verbose;
                 if (pool->verbose) {
@@ -2075,6 +2076,7 @@ namespace avmplus
 		case OP_convert_s: 
 		case OP_esc_xelem: 
 		case OP_esc_xattr:
+		case OP_debug:
             // NOTE already been called
             break;
 
