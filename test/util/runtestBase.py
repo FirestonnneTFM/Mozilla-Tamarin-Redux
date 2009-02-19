@@ -74,6 +74,7 @@ try:
     import pexpect
 except ImportError:
     pexpect = False
+    
 
 class RuntestBase:
     sourceExt = '.as'
@@ -434,9 +435,20 @@ class RuntestBase:
                 return 'timedOut'
             return output+err
         except KeyboardInterrupt:
-            exit('KeyboardInterrupt')
+            print '\n\nKeyboardInterrupt detected ... killing process'
+            p.kill()
+            self.killmyself()
             
-            
+    def killmyself(self):
+        # destroy this python process and children
+        if self.osName == 'win':
+            import ctypes
+            ctypes.windll.kernel32.TerminateProcess(
+                ctypes.windll.kernel32.OpenProcess(1, False, os.getpid()),
+                -1)
+        else:
+            os.killpg(os.getpgrp(),9)
+                    
     def parseArgStringToList(self, argStr):
         args = argStr.strip().split(' ')
         # recombine any args that have spaces in them
@@ -586,9 +598,13 @@ class RuntestBase:
             try:
               main.wait()
             except KeyboardInterrupt, SystemExit:
-              raise
+                print '\n\nKeyboardInterrupt detected ... killing worker threads'
+                main.dismissWorkers(self.threads)
+                self.killmyself()
             except Exception, e:
-              print 'EXCEPTION: %s' % e
+                main.dismissWorkers(self.threads)
+                print 'EXCEPTION: %s' % e
+                self.killmyself()
         
     
     def compileWithAsh(self, tests):
@@ -717,9 +733,13 @@ class RuntestBase:
             try:
               main.wait()
             except KeyboardInterrupt, SystemExit:
-              raise
+                print '\n\nKeyboardInterrupt detected ... killing worker threads'
+                main.dismissWorkers(self.threads)
+                self.killmyself()
             except Exception, e:
-              print 'EXCEPTION: %s' % e
+                main.dismissWorkers(self.threads)
+                print 'EXCEPTION: %s' % e
+                self.killmyself()
         
     def parseTestConfig(self, dir):
         settings={}
