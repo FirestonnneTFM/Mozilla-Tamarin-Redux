@@ -40,7 +40,7 @@
 #ifndef __GCTypes__
 #define __GCTypes__
 
-#include "mmgc_stdint.h"
+#include "VMPI.h"
 
 #ifdef __SYMBIAN32__
 #include <stddef.h>
@@ -73,26 +73,6 @@
 
 namespace MMgc
 {
-	// legacy types
-	typedef int64_t		int64;
-	typedef int64_t		sint64;
-	typedef uint64_t	uint64;
-
-	typedef uint32_t	uint32;
-	typedef int32_t		int32;
-	
-	typedef uint16_t	uint16;
-	typedef int16_t		int16;
-	
-	typedef uint8_t		uint8;
-	typedef int8_t		int8;
-
-	typedef uintptr_t	uintptr;
-	typedef intptr_t	sintptr;
-
-	/* wchar is our version of wchar_t, since wchar_t is different sizes
-	   on different platforms, but we want to use UTF-16 uniformly. */
-	typedef unsigned short wchar;
 
     typedef void* (*GCMallocFuncPtr)(size_t size);
     typedef void (*GCFreeFuncPtr)(void* mem);

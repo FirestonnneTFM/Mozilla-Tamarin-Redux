@@ -78,15 +78,7 @@ namespace avmplus
 			}
 		}
 
-		wchar buffer[312];
-		int len;
-		MathUtils::convertDoubleToString(n,
-										 buffer,
-										 len,
-										 mode,
-										 precision);
-
-		return new (core->GetGC()) String(buffer,len);
+		return MathUtils::convertDoubleToString(core, n, mode, precision);
 	}
 	
 	Stringp NumberClass::_numberToString(double dVal, int radix)

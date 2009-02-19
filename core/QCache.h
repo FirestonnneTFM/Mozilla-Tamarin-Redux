@@ -43,10 +43,6 @@
 	#define QCACHE_DEBUG
 #endif
 
-#ifdef QCACHE_DEBUG
-	#include <stdio.h>
-#endif
-
 #include "MathUtils.h"
 
 /*

@@ -42,7 +42,7 @@ namespace avmplus
 {
 	BuiltinTraits::BuiltinTraits()
 	{
-		memset(this, 0, sizeof(BuiltinTraits));
+		VMPI_memset(this, 0, sizeof(BuiltinTraits));
 	}
 
 	// this is called after core types are defined.  we don't want to do
@@ -53,19 +53,19 @@ namespace avmplus
 
 		null_itraits = Traits::newTraits(pool, NULL, 0, 0, TRAITSTYPE_NVA);
 		null_itraits->ns = core->publicNamespace;
-		null_itraits->name = core->constantString("null");
+		null_itraits->name = core->internConstantStringLatin1("null");
 		null_itraits->final = true;
 		null_itraits->builtinType = BUILTIN_null;
 		null_itraits->resolveSignatures(NULL);
 
 		void_itraits = Traits::newTraits(pool, NULL, 0, 0, TRAITSTYPE_NVA);
 		void_itraits->ns = core->publicNamespace;
-		void_itraits->name = core->constantString("void");
+		void_itraits->name = core->internConstantStringLatin1("void");
 		void_itraits->final = true;
 		void_itraits->builtinType = BUILTIN_void;
 		void_itraits->resolveSignatures(NULL);
 
-#define DO_BUILTIN(nm, clsnm)	do { nm##_itraits = pool->getBuiltinTraits(core->constantString(clsnm)); nm##_itraits->builtinType = BUILTIN_##nm; } while (0)
+#define DO_BUILTIN(nm, clsnm)	do { nm##_itraits = pool->getBuiltinTraits(core->internConstantStringLatin1(clsnm)); nm##_itraits->builtinType = BUILTIN_##nm; } while (0)
 		DO_BUILTIN(array, "Array");
 		DO_BUILTIN(boolean, "Boolean");
 		DO_BUILTIN(class, "Class");
@@ -125,10 +125,10 @@ namespace avmplus
 		qName_itraits->hasCustomConstruct		= true;
 		math_itraits->hasCustomConstruct		= true;
 
-		vectordouble_itraits->name = core->constantString("Vector.<Number>");
-		vectorint_itraits->name = core->constantString("Vector.<int>");
-		vectoruint_itraits->name = core->constantString("Vector.<uint>");
-		vectorobj_itraits->name = core->constantString("Vector.<*>");
+		vectordouble_itraits->name = core->internConstantStringLatin1("Vector.<Number>");
+		vectorint_itraits->name = core->internConstantStringLatin1("Vector.<int>");
+		vectoruint_itraits->name = core->internConstantStringLatin1("Vector.<uint>");
+		vectorobj_itraits->name = core->internConstantStringLatin1("Vector.<*>");
 
 	}
 
@@ -145,7 +145,7 @@ namespace avmplus
 
 	Traits* BuiltinTraits::findCTraits(const char* cname, PoolObject* pool)
 	{
-		Stringp name = pool->core->constantString(cname);
+		Stringp name = pool->core->internConstantStringLatin1(cname);
 		for (int i=0, n=pool->cinits.capacity(); i < n; i++) 
 		{
 			AbstractFunction* cinit = pool->cinits[i];

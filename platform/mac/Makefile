@@ -108,7 +108,6 @@ SHELL_SRCS := ../../shell/avmshell.cpp \
               ../../shell/FileClass.cpp \
               ../../shell/FileInputStream.cpp \
 			  ../../shell/DebugCLI.cpp \
-              ../../shell/StringBuilderClass.cpp \
               ../../shell/SystemClass.cpp \
 		../../extensions/DictionaryGlue.cpp
 		../../extensions/SamplerScript.cpp

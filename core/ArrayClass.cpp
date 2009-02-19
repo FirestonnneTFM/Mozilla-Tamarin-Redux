@@ -63,7 +63,7 @@ namespace avmplus
 	
 	ArrayClass::ArrayClass(VTable* cvtable)
 	: ClassClosure(cvtable), 
-	  kComma(core()->constantString(","))
+	  kComma(core()->internConstantStringLatin1(","))
 	{
 		AvmCore* core = this->core();
 		Toplevel* toplevel = this->toplevel();
@@ -87,7 +87,7 @@ namespace avmplus
 		// through actionscript
 
 		// create an atom
-		Stringp s = core->newString("foo");
+		Stringp s = core->newConstantStringLatin1("foo");
 		Atom a = s->atom();
 		AvmAssert(s->RefCount()==0);
 		AtomArray *ar = new (gc()) AtomArray();
@@ -1588,5 +1588,17 @@ namespace avmplus
 		Multiname mname(core->publicNamespace, core->klength);
 		Atom lenAtm = core->uintToAtom(newLen);
 		toplevel->setproperty(d->atom(), &mname, lenAtm, d->vtable);
+	}
+
+	/* static */ uint32 ArrayClass::generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args) 
+	{
+		ArrayObject *a = isArray(toplevel, thisAtom);
+		
+		AvmAssert(a != NULL);
+		for (uint32 i = args->getLength() ; i > 0; i--) {
+			Atom atom = args->getUintProperty(i - 1);
+			a->unshift(&atom, 1);
+		}
+		return a->getLength();
 	}
 }

@@ -42,10 +42,6 @@
 
 #include "GCTypes.h"
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #ifdef _MAC
     #if defined(AVMPLUS_MAC_CARBON)
         typedef const unsigned char* ConstStr255Param;

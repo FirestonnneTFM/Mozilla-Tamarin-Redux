@@ -69,6 +69,8 @@
 #ifdef SOLARIS
 #include <ucontext.h>
 #include <dlfcn.h>
+#include <procfs.h>
+#include <sys/stat.h>
 extern "C" caddr_t _getfp(void);
 typedef caddr_t maddr_ptr;
 #else
@@ -346,9 +348,9 @@ namespace MMgc
 #ifdef AVMPLUS_UNIX
 		Dl_info dlip;
 		dladdr((void *const)pc, &dlip);
-		sprintf(buff, "0x%p:%s", (void *)pc, dlip.dli_sname);
+		VMPI_sprintf(buff, "0x%p:%s", (void *)pc, dlip.dli_sname);
 #else
-		sprintf(buff, "0x%x", pc);
+		VMPI_sprintf(buff, "0x%x", pc);
 #endif
 	}
 
@@ -437,7 +439,7 @@ namespace MMgc
 #ifdef LINUX
 		uint32 pid = getpid();
 		char buff[32];
-		sprintf(buff, "/proc/%d/smaps", pid);
+		VMPI_sprintf(buff, "/proc/%d/smaps", pid);
 		int smap_hndl = open(buff, O_RDONLY);
 		size_t priv_bytes = 0;
 		if( smap_hndl != -1 )
@@ -497,7 +499,7 @@ namespace MMgc
 						{
 							size_buff[size_idx] = 0;
 							size_idx = 0;
-							uint32 size = atoi(size_buff)*1024;
+							uint32 size = VMPI_atoi(size_buff)*1024;
 							uint32 blocks = size/GCHeap::kBlockSize;
 							if( size % GCHeap::kBlockSize != 0 )
 								++blocks;
@@ -516,6 +518,50 @@ namespace MMgc
 		}
 	//	return 0;
 	return priv_bytes; 
+#elif defined SOLARIS
+	uint32 pid = getpid();
+	char mapname[32];
+	int mapfd, nmap, i;
+	prxmap_t *prmapp, *pmp;
+	struct stat st;
+	ssize_t n;
+	size_t priv_bytes = 0;
+
+	(void) VMPI_snprintf(mapname, sizeof (mapname),
+	    "/proc/%d/xmap", pid);
+
+	if ((mapfd = open(mapname, O_RDONLY)) < 0 || fstat(mapfd, &st) != 0) {
+		if (mapfd >= 0)
+			(void) close(mapfd);
+		return 0;
+	}
+
+	nmap = st.st_size / sizeof (prxmap_t);
+	nmap *= 2;
+again:
+	prmapp = (prxmap_t *)malloc((nmap + 1) * sizeof (prxmap_t));
+
+	if ((n = pread(mapfd, prmapp, (nmap + 1) * sizeof (prxmap_t), 0)) < 0) {
+		(void) close(mapfd);
+		free(prmapp);
+		return 0;
+	}
+
+	if (nmap < n / sizeof (prxmap_t)) {
+		free(prmapp);
+		nmap *= 2;
+		goto again;
+	}
+
+	(void) close(mapfd);
+	nmap = n / sizeof (prxmap_t);
+
+	for (i = 0, pmp = prmapp; i < nmap; i++, pmp++) {
+		priv_bytes += pmp->pr_anon;
+	}
+	free(prmapp);
+	priv_bytes = priv_bytes * sysconf(_SC_PAGESIZE) / GCHeap::kBlockSize;
+	return priv_bytes;
 #else
 	return 0;
 #endif

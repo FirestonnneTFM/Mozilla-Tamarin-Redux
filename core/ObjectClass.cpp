@@ -216,14 +216,14 @@ namespace avmplus
 		{
 			ClassClosure *cc = (ClassClosure *)AvmCore::atomToScriptObject(thisAtom);
 			Traits*		t = cc->ivtable()->traits;
-			Stringp s = core->concatStrings(core->newString("[class "), t->name);
-			return core->concatStrings(s, core->newString("]"));
+			Stringp s = core->concatStrings(core->newConstantStringLatin1("[class "), t->name);
+			return core->concatStrings(s, core->newConstantStringLatin1("]"));
 		}
 		else
 		{
 			Traits*		t = toplevel()->toTraits(thisAtom);
-			Stringp s = core->concatStrings(core->newString("[object "), t->name);
-			return core->concatStrings(s, core->newString("]"));
+			Stringp s = core->concatStrings(core->newConstantStringLatin1("[object "), t->name);
+			return core->concatStrings(s, core->newConstantStringLatin1("]"));
 		}
 	}
 }

@@ -514,7 +514,7 @@ namespace avmplus
 		jvalue* jargs = (jvalue*) VMPI_alloca( core, _jargs, count*sizeof(jvalue) );
 		boxArgs(core, jobj->toplevel(), constrDesc, argc, &argv[0], jargs);
 		for(int i=argc; i<count; i++)
-			memset(&jargs[i], 0, sizeof(jvalue));
+			VMPI_memset(&jargs[i], 0, sizeof(jvalue));
 
 		jmethodID mid = jni->FromReflectedMethod(constr);
 		jobject obj = jni->NewObjectA(cref, mid, jargs);
@@ -547,7 +547,7 @@ namespace avmplus
 		jvalue* jargs = (jvalue*) VMPI_alloca( core, _jargs, count*sizeof(jvalue) );
 		const char* rt = boxArgs(core, jobj->toplevel(), methodDesc, argc, &argv[1], jargs);
 		for(int i=argc; i<count; i++)
-			memset(&jargs[i], 0, sizeof(jvalue));
+			VMPI_memset(&jargs[i], 0, sizeof(jvalue));
 
 		// extract return type from methodDesc
 		while(*rt++ != ')')
@@ -1000,7 +1000,7 @@ namespace avmplus
 				if (which == constrDesc)
 					continue;
 			}
-			strcpy(constrDesc, desc);
+			VMPI_strcpy(constrDesc, desc);
 			match = m;
 		}
 		return match;
@@ -1039,7 +1039,7 @@ namespace avmplus
 				if (which == methodDesc)
 					continue;
 			}
-			strcpy(methodDesc, desc);
+			VMPI_strcpy(methodDesc, desc);
 			match = m;
 		}
 		return match;

@@ -372,7 +372,7 @@ namespace avmplus
 				}
 				
 				outch =				  (c<<18     & 0x1C0000 |
-									   in[1]<<12 & 0x3F000 &
+									   in[1]<<12 & 0x3F000 |
 									   in[2]<<6  & 0xFC0 |
 									   in[3]     & 0x3F);
 				if (outch < 0x10000) {

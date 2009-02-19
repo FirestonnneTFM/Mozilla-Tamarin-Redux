@@ -39,6 +39,25 @@
 
 namespace avmplus
 {
+	AbcEnv::AbcEnv(PoolObject* _pool,
+		   DomainEnv* _domainEnv,
+		   CodeContext * _codeContext)
+		: m_pool(_pool),
+		  m_domainEnv(_domainEnv),
+		  m_codeContext(_codeContext),
+		  m_privateScriptEnvs(new(_pool->core->GetGC()) MultinameHashtable())
+#ifdef DEBUGGER
+		  , m_invocationCounts(NULL)
+#endif
+	{
+#ifdef DEBUGGER
+		if (_pool->core->debugger())
+		{
+			m_invocationCounts = (uint64_t*)_pool->core->GetGC()->Alloc(_pool->methodCount * sizeof(uint64_t), MMgc::GC::kZero);
+		}
+#endif		
+	}
+
 	ScriptEnv* AbcEnv::getScriptEnv(Stringp name, Namespacep ns)
 	{		
 		if (ns->isPrivate())

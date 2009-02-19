@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 /////////////////////////////////////////////////////////
 // Internal properties of the E4XNode classes 
 //		Multiname *m_name;
@@ -117,8 +115,8 @@ namespace avmplus
 
 		// str, ignoreWhite
 		bool bIgnoreWhite = toplevel->xmlClass()->get_ignoreWhitespace() != 0;
-		XMLParser parser(core);
-		parser.parse(str, bIgnoreWhite);
+		XMLParser parser(core, str);
+		parser.parse(bIgnoreWhite);
 		parser.setCondenseWhite(true);
 
 		XMLTag tag(gc);
@@ -135,7 +133,7 @@ namespace avmplus
 
 			m_node->_addInScopeNamespace (core, ns);
 
-			Stringp name = core->internString (core->newString("parent"));
+			Stringp name = core->internConstantStringLatin1("parent");
 
 			m_node->setQName (core, name, ns);
 
@@ -162,12 +160,10 @@ namespace avmplus
 			case XMLTag::kElementType:
 				{
 					// A closing tag
-					if (tag.text->c_str()[0] == '/')
+					if (tag.text->charAt(0) == '/')
 					{
-						//Stringp thisNodeNameNoSlash = new (gc) String(tag.text, 1, tag.text->length()-1);
-						const wchar *thisNodeNameNoSlash = tag.text->c_str() + 1;
-						uint32 noSlashLen = tag.text->length() - 1;
-
+						Stringp thisNodeNameNoSlash = tag.text->substring(1);
+						
 						Multiname m;
 						p->getQName(core, &m);
 						Namespace *ns = m.getNamespace();
@@ -176,65 +172,25 @@ namespace avmplus
 						Stringp parentName = m.getName();
 
 						Namespace *ns2 = toplevel->getDefaultNamespace();
-						if ((!NodeNameEquals (thisNodeNameNoSlash, noSlashLen, parentName, ns)) &&
+						if ((!NodeNameEquals(thisNodeNameNoSlash, parentName, ns)) &&
 							// We're trying to support paired nodes where the first node gets a namespace
 							// from the default namespace.
-							(!(m.getName()->Equals (thisNodeNameNoSlash, noSlashLen) && (ns->getURI() == ns2->getURI()))))
+							(*m.getName() != *thisNodeNameNoSlash) && (ns->getURI() == ns2->getURI()))
 						{
 							// If p == m_node, we are at the top of our tree and we're parsing the fake "parent"
 							// wrapper tags around our actual XML text.  Instead of warning about a missing "</parent>"
 							// tag, we instead complain about the XML markup not being well-formed.
 							// (Emulating Rhino behavior)
 							if (p == m_node)
-							{
 								toplevel->throwTypeError(kXMLMarkupMustBeWellFormed);
-							}
 							else
-							{
-								#if 0 // After team and 8ball_adv discussion, this will not be enabled
-								// Try to see if we have a bit of misformed XML tags where a trailing 
-								// tag is missing.  We'll walk up a parent node to see if that node
-								// matches this ending tag.  If so, we'll automagically end tag this 
-								// node.  Bug 110808 - "<item><p>blah blah blah</item>".  Some RSS XML
-								// feeds have badly formed HTML tags
-								if (p->m_parent)
-								{
-									Multiname *m = p->m_parent->getQName();
-									Namespace *ns = core->atomToNamespace(m->getNamespace());
-									StringBuffer out2 (core);
-									if (ns && ns->hasPrefix())
-									{
-										out2 << core->string(ns->getPrefix()) << ":";
-									}
-									out2 << m->getName();
-
-									Stringp parentParentName = core->newString (out2.c_str());
-									if (*thisNodeNameNoSlash == *parentParentName)
-									{
-										p = p->m_parent->m_parent;
-									}
-									else
-									{
-										toplevel->throwTypeError(kXMLUnterminatedElementTag, parentName, parentName);
-									}
-								}
-								else
-								#endif
-								{
-									toplevel->throwTypeError(kXMLUnterminatedElementTag, parentName, parentName);
-								}
-							}
+								toplevel->throwTypeError(kXMLUnterminatedElementTag, parentName, parentName);
 						}
 						else
 						{
 							// Catch the case where our input string ends with a bogus <parent> tag
-							if (defaultNamespace)
-							{
-								if (p == m_node)
-								{
-									toplevel->throwTypeError(kXMLMarkupMustBeWellFormed);
-								}
-							}
+							if (defaultNamespace && (p == m_node))
+								toplevel->throwTypeError(kXMLMarkupMustBeWellFormed);
 
 							// found matching closing tag so we can pop back up a level now
 							if (p != m_node)
@@ -249,11 +205,11 @@ namespace avmplus
 						// Our first tag modifies this object itself
 						if (!m_node)
 						{
-							setNode( pNewElement );
+							setNode(pNewElement);
 						}
 						else // all other tags create a new element tag
 						{
-							p->_append (pNewElement);
+							p->_append(pNewElement);
 						}
 
 						if (!tag.empty) // if our tag is not empty, we're now the "parent" tag
@@ -261,34 +217,19 @@ namespace avmplus
 							p = pNewElement;
 						}
 
-						const wchar *localName = tag.text->c_str();
-
 						// Needs to happen after setting m_name->name so throw error can use name in routine
-						e->CopyAttributesAndNamespaces (core, toplevel, tag, localName);
+						e->CopyAttributesAndNamespaces(core, toplevel, tag);
 
 						// Find a namespace that matches this tag in our parent chain.  If this name
 						// is a qualified name (ns:name), we search for a namespace with a matching
 						// prefix.  If is an unqualified name, we find the first empty prefix name.
-						Namespace *ns = pNewElement->FindNamespace (core, toplevel, tag.text->c_str(), &localName, false);
+						Namespace *ns = pNewElement->FindNamespace(core, toplevel, tag.text, false);
 
 						// pg 35, map [[name]].uri to "namespace name" of node
 
 						if (!ns) 
 							ns = core->publicNamespace;
-
-						Stringp name;
-						// If our string ptr did not change, just use our tag.text string instead of creating a new one.
-						if (localName == tag.text->c_str())
-						{
-							AvmAssert(tag.text->isInterned());
-							name = tag.text;
-						}
-						else 
-						{
-							name = core->internAlloc (localName, String::Length(localName));
-						}
-									
-						pNewElement->setQName (core, name, ns);
+						pNewElement->setQName(core, tag.text, ns);
 					}
 				}
 				break;
@@ -317,8 +258,7 @@ namespace avmplus
 					if (text != tag.text)
 					{
 						AvmAssert(!tag.text->isInterned());
-						delete tag.text;
-						tag.text = 0;
+						tag.text = NULL;
 					}
 					pNewElement = new (gc) TextE4XNode(0, text);
 				}
@@ -333,19 +273,20 @@ namespace avmplus
 			case XMLTag::kProcessingInstruction:
 				if (!toplevel->xmlClass()->get_ignoreProcessingInstructions()) 
 				{
-
-					const wchar *nameStart = tag.text->c_str();
-					const wchar *nameEnd = nameStart;
-					while (!String::isSpace(nameEnd[0]) && (nameEnd[0]))
-						nameEnd++;
-
-					Stringp name = core->internString (new (core->GetGC()) String(nameStart, (int)(nameEnd - nameStart)));
-
-					// Skip over any white space between name and rest of PI
-					while (String::isSpace(nameEnd[0]) && nameEnd[0])
-						nameEnd++;
-
-					String *val = new (gc) String(nameEnd, tag.text->length()-(int)(nameEnd-nameStart));
+					Stringp name, val;
+					int32_t space = tag.text->indexOfLatin1(" ", 1, 0);
+					if (space < 0)
+					{
+						// no spaces, no value
+						name = tag.text;
+						val = core->kEmptyString;
+					}
+					else
+					{
+						name = tag.text->substring(0, space);
+						while (String::isSpace((wchar) tag.text->charAt (++space))) {}
+						val  = tag.text->substring(space, tag.text->length());
+					}
 					pNewElement = new (gc) PIE4XNode(0, val); 
 					pNewElement->setQName (core, name, core->publicNamespace);
 					if (!m_node)
@@ -427,7 +368,7 @@ namespace avmplus
 		setNode(NULL);
 	}
 
-	bool XMLObject::NodeNameEquals (const wchar *nodeName, int len, Stringp parentName, Namespace * parentNs)
+	bool XMLObject::NodeNameEquals(Stringp nodeName, Stringp parentName, Namespace * parentNs)
 	{
 		if (parentNs && parentNs->hasPrefix())
 		{
@@ -437,20 +378,22 @@ namespace avmplus
 
 			// Does nodeName == parentNS:parentName
 			int totalLen = prefixLen + 1 + parentName->length(); // + 1 for ':' separator
-			if (totalLen != len)
+			if (totalLen != nodeName->length())
 				return false;
 
-			if (String::Compare (nodeName, prefixLen, parentNSName->c_str(), prefixLen))
+			if (parentNSName->Compare(*nodeName, 0, prefixLen) != 0)
 				return false;
 
-			if (nodeName[prefixLen] != ':')
+			if (nodeName->charAt(prefixLen) != ':')
 				return false;
 
-			return (parentName->Equals (nodeName + prefixLen + 1, parentName->length())); // +1 for ':'
+			// -1 for ':'
+			prefixLen++;
+			return (parentName->Compare(*nodeName, prefixLen, nodeName->length() - prefixLen) == 0); 
 		}
 		else
 		{
-			return parentName->Equals (nodeName, len);
+			return *parentName == *nodeName;
 		}
 	}
 
@@ -546,7 +489,7 @@ namespace avmplus
 				//	l.append (a);
 
 				xml->getQName (core, &m);
-				if (name.matches (&m))
+				if (name.matches(&m))
 				{
 					xl->_append (xml);
 				}
@@ -575,7 +518,7 @@ namespace avmplus
 			//	if (n.localName = "*" OR this[k].class == "element" and (this[k].name.localName == n.localName)
 			//	and (!n.uri) or (this[k].class == "element) and (n.uri == this[k].name.uri)))
 			//		xl->_append (x[k]);
-			if (name.matches (m2))
+			if (name.matches(m2))
 			{
 				xl->_append (child);
 			}
@@ -668,7 +611,7 @@ namespace avmplus
 						output << " " << core->string (xl->_getAt (i)->atom());
 					}
 
-					sc = core->newString (output.c_str());
+					sc = core->newStringUTF8(output.c_str());
 				}
 			}
 			else // step 7c
@@ -684,7 +627,7 @@ namespace avmplus
 				E4XNode *x = m_node->getAttribute(j);
 				Multiname m2;
 				x->getQName(core, &m2);
-				if (m.matches (&m2))
+				if (m.matches(&m2))
 				{
 					if (a == -1)
 					{
@@ -753,7 +696,7 @@ namespace avmplus
 				m2 = &mx;
 			}
 
-			if (m.matches (m2))
+			if (m.matches(m2))
 			{
 				// remove n-1 nodes of n matching
 				if (i != -1)
@@ -844,7 +787,7 @@ namespace avmplus
 			{
 				// The above _replace call may be used to insert new nodes at the end.  However, if a null is inserted
 				// the effect is as though nothing was inserted.  Test for this case.
-				if (m_node->_length() > (avmplus::uint32)i)
+				if (m_node->_length() > (uint32)i)
 				{
 					XMLObject* xml = new (core->GetGC()) XMLObject(xmlClass(), m_node->_getAt(i));
 					childChanges( (prior) ? xmlClass()->kNodeChanged : xmlClass()->kNodeAdded, xml->atom(), prior);
@@ -882,7 +825,7 @@ namespace avmplus
 				E4XNode *x = m_node->getAttribute(j);
 				Multiname m2;
 				x->getQName(core, &m2);
-				if (m.matches (&m2))
+				if (m.matches(&m2))
 				{
 					x->setParent(NULL);
 
@@ -918,7 +861,7 @@ namespace avmplus
 				m2 = &mx;
 			}
 
-			if (m.matches (m2))
+			if (m.matches(m2))
 			{
 				x->setParent (NULL);
 				m_node->_deleteByIndex (q);
@@ -962,7 +905,7 @@ namespace avmplus
 				AvmAssert(ax->getQName(core, &m2));
 				ax->getQName(core, &m2);
 
-				if (m.matches (&m2))
+				if (m.matches(&m2))
 				{
 					// for each atribute, if it's name equals m,
 					l->_append (ax);
@@ -983,7 +926,7 @@ namespace avmplus
 					child->getQName (core, &mx);
 					m2 = &mx;
 				}
-				if (m.matches (m2))
+				if (m.matches(m2))
 				{
 					l->_append (child);
 				}
@@ -1073,7 +1016,7 @@ namespace avmplus
 			{
 				E4XNode *ax = m_node->getAttribute(i);
 				Multiname m2;
-				if (ax->getQName(core, &m2) && (m.matches (&m2)))
+				if (ax->getQName(core, &m2) && (m.matches(&m2)))
 				{
 					return true;
 				}
@@ -1094,7 +1037,7 @@ namespace avmplus
 				m2 = &mx;
 			}
 
-			if (m.matches (m2))
+			if (m.matches(m2))
 			{
 				return true;
 			}
@@ -1175,7 +1118,7 @@ namespace avmplus
 				{
 					s[2] = x3;
 					bool bMatch = false;
-					Atom pre = core->internAlloc(s, 3)->atom();
+					Atom pre = core->internStringUTF16(s, 3)->atom();
 					for (uint32 i = 0; i < namespaces->getLength(); i++)
 					{
 						Namespace *ns = AvmCore::atomToNamespace (namespaces->getAt(i));
@@ -1741,7 +1684,7 @@ namespace avmplus
 
 				// if name.localName = "*" or name.localName =child->name.localName)
 				// and (name.uri == null) or (name.uri == child.name.uri))
-				if (m.matches (&m2))
+				if (m.matches(&m2))
 				{
 					// if name.localName = "*" or name.localName =child->name.localName)
 					// and (name.uri == null) or (name.uri == child.name.uri))
@@ -2008,7 +1951,7 @@ namespace avmplus
 		}
 		else
 		{
-			Atom prefix = core->internString (core->string (p_prefix))->atom();
+			Atom prefix = core->internString(core->string (p_prefix))->atom();
 
 			for (uint32 i = 0; i < inScopeNS->getLength(); i++)
 			{
@@ -2207,7 +2150,7 @@ namespace avmplus
 
 				// if name.localName = "*" or name.localName =child->name.localName)
 				// and (name.uri == null) or (name.uri == child.name.uri))
-				if (m.matches (bFound ? &m2 : 0))
+				if (m.matches(bFound ? &m2 : 0))
 				{
 					xl->_append (child);
 				}
@@ -2247,7 +2190,7 @@ namespace avmplus
 	bool XMLObject::XML_AS3_propertyIsEnumerable(Atom P)	// NOT virtual, not an override
 	{
 		AvmCore *core = this->core();
-		if (core->intern(P) == core->internString (core->newString("0")))
+		if (core->intern(P) == core->internConstantStringLatin1("0"))
 			return true;
 
 		return false;
@@ -2566,7 +2509,7 @@ namespace avmplus
 			AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
 			StringBuffer s(core);
 			__toXMLString(s, AncestorNamespaces, 0);
-			return core->newString(s.c_str())->atom();
+			return core->newStringUTF8(s.c_str())->atom();
 		}
 	}
 
@@ -2580,7 +2523,7 @@ namespace avmplus
 		AtomArray *AncestorNamespaces = new (MMgc::GC::GetGC(this)) AtomArray();
 		StringBuffer s(core());
 		__toXMLString(s, AncestorNamespaces, 0);
-		return core()->newString(s.c_str());
+		return core()->newStringUTF8(s.c_str());
 	}
 
 #ifdef AVMPLUS_VERBOSE
@@ -2595,13 +2538,12 @@ namespace avmplus
 		AtomArray *AncestorNamespaces = new (core->GetGC()) AtomArray();
 		StringBuffer openTag(core);
 		__toXMLString(openTag, AncestorNamespaces, 0, false);
-		Stringp openingTag = core->newString (openTag.c_str());
-		Stringp space = core->newString(" ");
+		Stringp openingTag = core->newStringUTF8(openTag.c_str());
 
 		Stringp result = ScriptObject::format(core);
-		result = core->concatStrings(result, space);
+		result = result->appendLatin1(" ");
 		result = core->concatStrings(result, nodeKind());
-		result = core->concatStrings(result, space);
+		result = result->appendLatin1(" ");
 		result = core->concatStrings(result, openingTag);
 		return result;
 	}
@@ -2815,7 +2757,7 @@ namespace avmplus
 				AvmAssert(xml->getQName(core, &m) != 0);
 
 				xml->getQName (core, &m);
-				if (name.matches (&m))
+				if (name.matches(&m))
 				{
 					if (core->equals(xml->getValue()->atom(), value) == trueAtom)
 						l->_append (xml);
@@ -2836,7 +2778,7 @@ namespace avmplus
 				m2 = &m;
 			}
 
-			if (name.matches (m2))
+			if (name.matches(m2))
 			{
 				// If we're an element node, we do something more complicated than a string compare
 				if (child->getClass() == E4XNode::kElement)

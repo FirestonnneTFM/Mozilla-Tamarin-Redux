@@ -228,6 +228,7 @@ namespace avmplus
 		}
 		T get(uint32 index) const
 		{
+			AvmAssert(index < len);
 			return data[index];
 		}
 		T last() const
@@ -282,7 +283,9 @@ namespace avmplus
 					set(i, 0);
 				}
 			} else {
-				memset(data, 0, len*sizeof(T));
+				if ( len ) {
+					VMPI_memset(data, 0, len*sizeof(T));
+				}
 			}
 			len = 0;
 		}
@@ -323,6 +326,7 @@ namespace avmplus
 		
 		T operator[](uint32 index) const
 		{
+			AvmAssert(index < len);
 			return data[index];
 		}
 
@@ -356,7 +360,7 @@ namespace avmplus
 
         void become(List<T, kElementType> &list) {
             clear();
-            for (int i=0, n=list.len; i < n; i++)
+            for (int i=0, n=list.size(); i < n; i++)
                 add(list[i]);
             list.clear();
         }

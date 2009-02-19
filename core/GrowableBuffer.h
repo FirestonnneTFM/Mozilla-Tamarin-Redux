@@ -51,17 +51,16 @@
 	#ifndef AVMPLUS_SYMBIAN
 		#include <pthread.h>
 	#endif
-	#include <stdio.h>
 #endif /* AVMPLUS_UNIX */
 
 namespace avmplus
 {
-#if defined(DEBUGGER) || defined(AVMPLUS_MIR) 
-	class GrowableBuffer : public MMgc::GCObject
+#ifdef AVMPLUS_MIR
+	class GrowableBuffer
 	{
 	public:
 		GrowableBuffer(MMgc::GCHeap* heap, bool forMir=false);
-		virtual ~GrowableBuffer();
+		~GrowableBuffer();
 
 		byte* reserve(size_t amt);
 		void  free();

@@ -45,24 +45,30 @@
 
 namespace MMgc
 {
-	void GCDebugMsg(bool /*debuggerBreak*/, const char* format, ...)
+	void GCDebugMsg(bool debuggerBreak, const char* format, ...)
 	{
 #ifdef _DEBUG
 		va_list args;
 		va_start(args, format);
 		vfprintf(stderr, format, args);
 		va_end(args);
+		if (debuggerBreak)
+			abort();
 #else
 		(void)format;
+		(void)debuggerBreak;
 #endif
 	}
 
-	void GCDebugMsg(const char* p, bool /*debugBreak*/)
+	void GCDebugMsg(const char* p, bool debugBreak)
 	{
 #ifdef _DEBUG
 		fprintf(stderr, "%s\n", p);
+		if (debugBreak)
+			abort();
 #else
 		(void)p;
+		(void)debugBreak;
 #endif
 	}
 }

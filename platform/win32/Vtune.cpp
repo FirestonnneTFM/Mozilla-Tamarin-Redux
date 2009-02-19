@@ -140,9 +140,9 @@ namespace avmplus
        if (!str->length()) return 0;
        StringNullTerminatedUTF8 s(core->gc, str);
        const char* cstr = s.c_str();
-       size_t max = strlen(cstr);
+       size_t max = VMPI_strlen(cstr);
        char* to = (char*)malloc((max+1)*sizeof(char));
-       strncpy(to,cstr,max);
+       VMPI_strncpy(to,cstr,max);
        to[max]='\0';
        return to;
    }
@@ -158,7 +158,7 @@ namespace avmplus
    bool locateNames(AvmCore* core, Stringp name, int* idx)
    {
        bool hasClass = true;
-       memset(idx,0,sizeof(*idx));
+       VMPI_memset(idx,0,sizeof(*idx));
        if (!name) return false;
 
        // class
@@ -198,7 +198,7 @@ namespace avmplus
 		// register the method
 		iJIT_Method_Load ML;
        Stringp mname = name->substring(idx[2],idx[3]);
-		memset(&ML, 0, sizeof(iJIT_Method_Load));
+		VMPI_memset(&ML, 0, sizeof(iJIT_Method_Load));
        ML.method_id = (inf->vtune) ? inf->vtune->method_id : iJIT_GetNewMethodID();
        ML.method_name = string2char(core, mname);
 		ML.method_load_address = (void *)startAt;	// virtual address of that method  - This determines the method range for the iJVM_EVENT_TYPE_ENTER/LEAVE_METHOD_ADDR events
@@ -212,7 +212,7 @@ namespace avmplus
 		{
 			int bsz = size*sizeof(LineNumberInfo);
 			lines = (LineNumberInfo*) malloc(bsz);
-			memset(lines, 0, bsz);
+			VMPI_memset(lines, 0, bsz);
 		}
 
        String* fileName = 0;

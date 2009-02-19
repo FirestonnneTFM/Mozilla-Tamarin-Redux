@@ -51,11 +51,7 @@ namespace avmplus
 	// Exception
 	//
 
-	Exception::Exception(Atom atom
-#ifdef DEBUGGER
-			, AvmCore* core
-#endif /* DEBUGGER */
-		)
+	Exception::Exception(AvmCore* core, Atom atom)
 	{
 		this->atom = atom;
 		this->flags = 0;
@@ -71,6 +67,8 @@ namespace avmplus
 		{
 			stackTrace = core->newStackTrace();
 		}
+		#else
+		(void)core;
 		#endif
 	}
 	
@@ -86,18 +84,12 @@ namespace avmplus
 	ExceptionHandlerTable::ExceptionHandlerTable(int exception_count)
 	{
 		this->exception_count = exception_count;
-		memset(exceptions, 0, sizeof(ExceptionHandler)*exception_count);
+		VMPI_memset(exceptions, 0, sizeof(ExceptionHandler)*exception_count);
 	}
 	
 	//
 	// ExceptionFrame
 	//
-
-#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
-	// FIXME: This is a temporary approach.
-	void *ExceptionFrame::lptr[MAX_LONG_JMP_COUNT] = {0};
-	int   ExceptionFrame::lptrcounter = 1;
-#endif //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
 
 	void ExceptionFrame::beginTry(AvmCore* core)
 	{
@@ -114,6 +106,7 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		callStack = core->callStack;
+#endif /* DEBUGGER */
 
 		// beginTry() is called from both the TRY macro and from JIT'd code.  The TRY
 		// macro will immediately change the value of catchAction right after the
@@ -121,7 +114,7 @@ namespace avmplus
 		// we initialize catchAction to the value that it needs when we're called
 		// from JIT'd code, that is, kCatchAction_SearchForActionScriptExceptionHandler.
 		catchAction = kCatchAction_SearchForActionScriptExceptionHandler;
-#endif /* DEBUGGER */
+
 		this->stacktop = core->allocaTop();
 		
 		codeContextAtom = core->codeContextAtom;
@@ -144,20 +137,10 @@ namespace avmplus
 	void ExceptionFrame::throwException(Exception *exception)
 	{
 		core->exceptionAddr = exception;
-#if defined(AVMPLUS_AMD64) && defined(_WIN64)
+#if defined(_WIN64)
 		longjmp64(jmpbuf, (uintptr)exception); 
-#elif defined(AVMPLUS_AMD64)
-		// This is an amazingly gross hack.  I don't know why it's necessary, but it must be fixed.  (lhansen 2008-11-26)
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=464643
-		//
-		// Never allow memory to be corrupted in release builds, exit instead.
-		AvmAssert(lptrcounter<MAX_LONG_JMP_COUNT);
-		if (lptrcounter>=MAX_LONG_JMP_COUNT)
-			exit(1);
-		lptr[lptrcounter++] = exception;
-		longjmp(jmpbuf, (lptrcounter-1)*sizeof(void *)); 
 #else
-		longjmp(jmpbuf, (int)(uintptr)exception); 
+		longjmp(jmpbuf, 1); 
 #endif
 	}
 
@@ -167,8 +150,9 @@ namespace avmplus
 
 #ifdef DEBUGGER
 		//AvmAssert(callStack && callStack->env);
-		if (core->profiler && core->profiler->profilingDataWanted && callStack && callStack->env())
-			core->profiler->sendCatch(callStack->env()->method);
+		Profiler* profiler = core->profiler();
+		if (profiler && profiler->profilingDataWanted && callStack && callStack->env())
+			profiler->sendCatch(callStack->env()->method);
 
 		core->callStack = callStack;
 #endif // DEBUGGER

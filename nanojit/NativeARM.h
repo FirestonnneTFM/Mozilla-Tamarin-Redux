@@ -43,6 +43,7 @@
 
 
 #ifdef PERFM
+#define DOPROF
 #include "../vprof/vprof.h"
 #define count_instr() _nvprof("arm",1)
 #define count_prolog() _nvprof("arm-prolog",1); count_instr();
@@ -62,6 +63,12 @@ const int NJ_LOG2_PAGE_SIZE = 12;       // 4K
 // be present.  If it's not defined, then softfloat
 // is used, and NJ_SOFTFLOAT is defined.
 //#define NJ_ARM_VFP
+
+#if defined AVMPLUS_ARM_OLDABI || defined _MSC_VER
+#  define NJ_ARM_EABI  0
+#else
+#  define NJ_ARM_EABI  1
+#endif
 
 // Which ARM architecture version should the JIT output code for?
 #define NJ_ARM_V4    1         // v4, no Thumb interworking
@@ -214,9 +221,10 @@ verbose_only( extern const char *regNames[], *condNames[], *shiftNames[]; )
     void asm_stkarg(LInsp p, int stkd);                                 \
     void asm_cmpi(Register, int32_t imm);                               \
     void asm_ldr_chk(Register d, Register b, int32_t off, bool chk);    \
+    void asm_cmp(LIns *cond);                                           \
     int  max_out_args; /* bytes */                                      \
-    int* _nSlot;                                                        \
-    int* _nExitSlot;                                                    \
+    int *_nSlot, *_startingSlot;                                        \
+    int *_nExitSlot;                                                    \
     bool blx_lr_bug;
 
 //printf("jmp_l_n count=%d, nins=%X, %X = %X\n", (_c), nins, _nIns, ((intptr_t)(nins+(_c))-(intptr_t)_nIns - 4) );
@@ -467,7 +475,7 @@ enum {
 // (LDRB actually allows 12-bit offset in ARM mode but constraining to 5-bit gives us advantage for Thumb)
 // @todo, untested!
 #define LDRB(_d,_off,_b) do {                                           \
-        NanoAssert((d)>=0&&(d)<=31);                                    \
+        NanoAssert((_off)>=0&&(_off)<=31);                                    \
         underrunProtect(4);                                             \
         *(--_nIns) = (NIns)( COND_AL | (0x5D<<20) | ((_b)<<16) | ((_d)<<12) |  ((_off)&0xfff)  ); \
         asm_output("ldrb %s, [%s, #0x%X]", gpn(_d),gpn(_b),(_off));          \
@@ -513,12 +521,22 @@ enum {
 
 
 //#define RET()   underrunProtect(1); *(--_nIns) = 0xc3;    asm_output("ret")
-//#define NOP()     underrunProtect(1); *(--_nIns) = 0x90;  asm_output("nop")
 //#define INT3()  underrunProtect(1); *(--_nIns) = 0xcc;  asm_output("int3")
 //#define RET() INT3()
 
+// NOP
+#if NJ_ARM_ARCH >= NJ_ARM_V7
+#define NOP() do { \
+        underrunProtect(4); \
+        *(--_nIns) = (NIns)0xE320F000; \
+        asm_output("nop"); \
+    } while (0)
+#else
+#define NOP() MOV(R0,R0)
+#endif
+
 #define BKPT_nochk() do { \
-        *(--_nIns) = (NIns)( (0xE<<24) | (0x12<<20) | (0x7<<4) ); \
+        *(--_nIns) = (NIns)( COND_AL | (0x12<<20) | (0x7<<4) ); \
         asm_output("bkpt");\
     } while (0)
 
@@ -555,15 +573,6 @@ enum {
 #define B_nochk(_t)                           \
     B_cond_chk(AL,_t,0)
 
-// emit a placeholder that will be filled in later by nPatchBranch;
-// emit two breakpoint instructions in case something goes wrong with
-// the patching.
-#define B_long_placeholder()  do {            \
-        underrunProtect(8);                     \
-        BKPT_nochk();                           \
-        BKPT_nochk();                           \
-    } while(0)
-
 #define B(t)    B_cond(AL,t)
 #define BHI(t)  B_cond(HI,t)
 #define BLS(t)  B_cond(LS,t)
@@ -579,6 +588,9 @@ enum {
 #define BVC(t)  B_cond(VC,t)
 
 #define JMP(t) B(t)
+
+// emit a placeholder that will be filled in later by nPatchBranch
+#define B_long_placeholder() B(0)
 
 // MOV(EQ) _r, #1 
 // MOV(NE) _r, #0

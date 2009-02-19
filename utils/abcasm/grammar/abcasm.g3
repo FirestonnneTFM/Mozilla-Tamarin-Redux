@@ -1,0 +1,626 @@
+/* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+grammar abcasm;
+
+options
+{
+	// output  = via the AssemblerCore;
+	language = Java;
+}
+
+@header {
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+package adobe.abcasm;
+import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+}
+
+@lexer::header {
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is [Open Source Virtual Machine.].
+ *
+ * The Initial Developer of the Original Code is
+ * Adobe System Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Adobe AS3 Team
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+package adobe.abcasm;
+}
+
+
+@members
+{
+    AssemblerCore asmCore;
+
+	/**
+	 *  Override default error handling; 
+	 *  send errors to the assembler.
+	 */
+	public void emitErrorMessage(String msg)
+	{
+        asmCore.syntaxError(msg);
+    }
+
+	/*
+	*/
+	public void reportError(RecognitionException x)
+	{
+	    if ( asmCore.options.expandedDiagnostics )
+			x.printStackTrace();
+		super.reportError(x);
+	}
+
+	void seekToEOL(Token bad_token)
+	{
+	    int start_line = bad_token.getLine();
+
+		while ( input.LT(1).getLine() == start_line )
+		{
+		    input.consume();
+		}
+	}
+}
+
+translation_unit:
+    decl*
+	;
+
+decl:
+	function_decl
+	;
+
+function_decl:
+    function_header block
+	;
+
+function_header:
+	'function' IDENTIFIER plist (COLON SPLAT)?
+	{
+	    asmCore.newFunction($IDENTIFIER.getText() );
+	}
+	;
+
+block:
+	LBRACE insn+ RBRACE
+	;
+
+plist: LPAREN RPAREN
+	;
+
+insn:
+	label = control_flow_target COLON
+	{
+		//  Put a label on the current block,
+		//  or start a new one.
+	    asmCore.startBlock(label);
+	}
+	|
+	(
+		// Accept but ignore labels from dumpabc
+		// TODO: Use these as "weak" labels?
+		DECIMAL_LITERAL?  
+
+		//  Rules for the various instructions.  
+		//  Note: Instructions are grouped by 
+		//  syntactic characteristics, not by purpose.
+		(
+			  single_cfg_target_insn
+			| no_operand_insn
+			| integer_operands_insn
+			| pool_insn
+			| call_insn
+			| multiname_insn
+			| ad_hoc_insn
+			| unknown_opcode
+		)
+		
+	)
+	;
+
+
+
+/*
+ *  Instructions with a single control-flow target.
+ */
+single_cfg_target_insn
+	: opcode =
+	  ( 'ifnlt'  | 'ifnle'  | 'ifngt'  | 'ifnge'  | 'iftrue'   | 'iffalse'  | 
+		'ifeq'  | 'ifne'  | 'iflt'  | 'ifle'  | 'ifgt'  | 'ifge'  | 'ifstricteq'  | 'ifstrictne' |
+		'jump'
+	  )
+	  DECIMAL_LITERAL? ( LPAREN DECIMAL_LITERAL RPAREN )?  //  abcdump stuff for human consumption
+	  label = control_flow_target
+	  {
+	      asmCore.insn(opcode, label);
+		  asmCore.startBlock();
+	  }
+	  ;
+
+control_flow_target 
+    returns [Label result]
+	: label_text = IDENTIFIER
+	{
+	    return asmCore.getLabel(label_text.getText());
+	}
+	;
+
+
+/*
+ *  Instructions with integer operands.
+ *  @warn Instructions that need to operate on a numeric pool,
+ *     i.e., pushdouble, pushint, pushuint, can't use this rule.
+ */
+integer_operands_insn
+	: int_opcode = (
+	      'debug' | 'debugline' | 'declocal' | 'declocal_i' |	 
+		  'dxns' | 'dxnslate' |
+		  'esc_xattr' | 'esc_xelem' |
+		  'getlocal' | 'getslot' | 'getglobalslot' | 'getscopeobject' |
+		  'hasnext2' | 
+		  'inclocal' | 'inclocal_i' | 
+		  'kill' |
+		  'newarray' | 'newfunction' | 'newobject' |
+		  'pushbyte' | 'pushshort' | 
+		  'setlocal' | 'setslot' | 'setglobalslot'
+	  )
+	  operands = integer_operands_list
+	  {
+	      asmCore.insn(int_opcode, operands);
+	  }
+	  ;
+
+/*
+ *  Instructions that operate on a pool.
+ */
+pool_insn
+	: 'pushint' int_operand = integer_literal
+	{
+	    asmCore.poolInsn(OP_pushint, new Integer(int_operand));
+	}
+	| 'pushuint' uint_operand = long_literal
+	{
+	    asmCore.poolInsn(OP_pushuint, new Long(uint_operand));
+	}
+	| 'pushdouble' double_operand = double_literal
+	{
+	    asmCore.poolInsn(OP_pushdouble, new Double(double_operand));
+	}
+	| opcode = ( 'debugfile' | 'pushstring' )
+	string_op = string_literal
+	{
+		asmCore.poolInsn(asmCore.decodeOpcodeName(opcode.getText()), string_op); 
+	}
+	;
+
+/*
+ *  Call-type instructions.
+ */
+call_insn
+	:   call_opcode = (
+	        'callmethod' | 'callproplex' | 'callproperty' | 'callpropvoid' |
+			'callstatic' | 'callsuper' | 'callsupervoid' |
+			'construct' | 'constructprop' | 'constructsuper'
+	    )
+		callee = identifier 
+		LPAREN arg_count = integer_literal RPAREN 
+	{
+		asmCore.insn(call_opcode, callee, arg_count);
+	}
+	|  'call' 	LPAREN arg_count = integer_literal RPAREN 
+	{
+	    asmCore.insn(OP_call, new int[] { arg_count } );
+	}
+	;
+
+/*
+ *  Instructions with no operands.
+ */
+no_operand_insn
+	: opcode = ( 
+		'add' | 'add_i' | 'astypelate' |
+		'bitand' | 'bitnot' | 'bitor' | 'bitxor' |
+		'checkfilter' | 'coerce_a' | 'coerce_b' | 'coerce_d' | 'coerce_i' | 'coerce_s' |
+		'convert_b' | 'convert_i' | 'convert_d' | 'convert_o' | 'convert_u' | 'convert_s' |
+		'decrement' | 'decrement_i' | 'divide' | 'dup' | 
+		'equals' |
+		'getglobalscope' | 
+		'getlocal0' | 'getlocal1' | 'getlocal2' | 'getlocal3' |
+		'greaterequals' | 'greaterthan' |
+		'hasnext' | 
+		'in' | 'increment' | 'increment_i' | 'instanceof' | 'istypelate' |
+		'lessequals' | 'lessthan' | 'lshift' |
+		'modulo' | 'multiply' | 'multiply_i' |
+		'negate' | 'negate_i' | 'newactivation' | 'nextname' | 'nextvalue' | 'nop' | 'not' |
+		'pop' | 'pushfalse' | 'pushtrue' | 'pushnan' | 'pushnull' | 'pushscope' | 
+		'pushundefined' | 'pushwith' |
+		'returnvalue' | 'returnvoid' | 'rshift' |
+		'setlocal0' | 'setlocal1' | 'setlocal2' | 'setlocal3' |
+		'subtract' | 'subtract_i' | 'swap' |
+		'throw' | 'typeof' |
+		'urshift'
+
+		)
+	{
+	    asmCore.insn(opcode);
+	}
+	;
+
+/*
+ *  Instructions that operate on a multiname.
+ */
+multiname_insn :
+	opcode = (
+		'astype' |
+	    'coerce' | 
+		'deleteproperty' | 
+		'finddef' | 'findproperty' | 'findpropstrict' |
+		'getdescendants' | 'getlex' | 'getproperty' | 'getsuper' |
+		'istype'
+	)
+	name_key = multipart_identifier
+	{
+		asmCore.insn(opcode, name_key);
+	}
+	| 'pushnamespace' ns = namespace_specification
+	{
+	    asmCore.insn(OP_pushnamespace, ns);
+	}
+	;
+
+/*
+ *  An instruction defined by the assembly program.
+ */
+ad_hoc_insn
+	: opcode = hex_literal imm_array = integer_operands_list
+	{
+	    asmCore.insn(opcode, imm_array);
+	}
+	;
+
+/*
+ *  Emit a more informative diagnostic.
+ */
+unknown_opcode
+	: bad_opcode = IDENTIFIER
+	{
+	    String diagnostic = "line ";
+		diagnostic += Integer.toString(bad_opcode.getLine());
+		diagnostic += ":";
+		diagnostic += Integer.toString(bad_opcode.getCharPositionInLine());
+		diagnostic += " Unimplemented opcode \"";
+		diagnostic += bad_opcode.getText();
+		diagnostic += "\"";
+	    asmCore.syntaxError(diagnostic);
+
+		seekToEOL(bad_opcode);
+	}
+	;
+
+/*
+ *  **************************
+ *  ** Section: identifiers **
+ *  **************************
+ */
+
+/*
+ *  A potentially qualified identifier.
+ *  Returns a QName if the name's not qualified,
+ *  as opposed to multipart_identifier which
+ *  always returns a multiname.
+ */
+identifier
+	returns [Name result]
+	: 
+	mpid = qualified_multipart_id
+	{
+	    result = mpid;
+	}
+	| IDENTIFIER
+	{
+		//  Simple QName.
+	    result = asmCore.getName($IDENTIFIER.getText());
+	}
+	;
+
+multipart_identifier
+	returns [Name result]
+	: 
+	mpid = qualified_multipart_id
+	{
+	    result = mpid;
+	}
+	| IDENTIFIER
+	{
+	    result = asmCore.getName( asmCore.getUsualSuspectNamespaces(), $IDENTIFIER.getText());
+	}
+	;
+
+qualified_multipart_id
+	returns [Name result]
+	:
+		nsset = multiname_qualifier COLON COLON  id = IDENTIFIER
+	{
+	    result = asmCore.getName(nsset, id.getText());
+	}
+	;
+
+multiname_qualifier
+    returns [Nsset result]
+	@init { java.util.Vector<Namespace> namespaces = new java.util.Vector(); }
+	:
+	LBRACE 
+	    ns1 = namespace_specification { namespaces.add(ns1); }
+		( COMMA nsx = namespace_specification { namespaces.add(nsx); } )*
+	RBRACE
+	{
+	    return asmCore.getNsset(namespaces);
+	}
+	;
+
+namespace_specification 
+    returns [Namespace result]
+	@init { StringBuffer nameBuffer = new StringBuffer(); }
+	: 
+		ns_id1 = IDENTIFIER { nameBuffer.append(ns_id1.getText()); }
+		( '.' ns_idx = IDENTIFIER { nameBuffer.append("."); nameBuffer.append(ns_idx.getText()); })*
+	{
+	    result = asmCore.getNamespace(nameBuffer.toString());
+	}
+	;
+
+/*
+ *  ***********************
+ *  ** Section: literals **
+ *  ***********************
+ */
+
+
+/*
+ *  A list of integer operands.
+ */
+integer_operands_list 
+	returns [java.util.ArrayList<Integer> result]
+	@init { result = new ArrayList<Integer>(); }
+	: 
+	first_value = integer_literal { result.add(first_value); }
+	(COMMA next_value = integer_literal { result.add(next_value); } )*
+	;
+
+integer_literal returns [int result]
+	: DECIMAL_LITERAL
+	{
+		result = Integer.parseInt($DECIMAL_LITERAL.getText());
+	}
+	| OCTAL_LITERAL
+	{
+	    result = Integer.parseInt($OCTAL_LITERAL.getText(), 8);
+	}
+	| hex_value = hex_literal
+	{
+	    result = hex_value;
+	}
+	;
+
+long_literal returns [long result]
+	: DECIMAL_LITERAL
+	{
+		result = Long.parseLong($DECIMAL_LITERAL.getText());
+	}
+	| OCTAL_LITERAL
+	{
+	    result = Long.parseLong($OCTAL_LITERAL.getText(), 8);
+	}
+	| HEX_LITERAL
+	{
+	    result = Long.parseLong($HEX_LITERAL.getText().substring(2), 16);
+	}
+	;
+
+double_literal returns [double result]
+	: FLOATING_POINT_LITERAL
+	{
+	    return Double.parseDouble($FLOATING_POINT_LITERAL.getText());
+	}
+	;
+
+hex_literal returns [int result]
+	: HEX_LITERAL
+	{
+	    result = Integer.parseInt($HEX_LITERAL.getText().substring(2), 16);
+	}
+	;
+
+string_literal returns [String result]
+	: STRING_LITERAL
+	{
+	    String raw_result = $STRING_LITERAL.getText();
+		result = raw_result.substring(1, raw_result.length() - 1);
+	}
+	;
+
+/*
+ *  *********************
+ *  ** Section: tokens **
+ *  *********************
+ */
+
+	COLON	: ':' ;
+	LBRACE	: '{' ;
+	RBRACE	: '}' ;
+	LPAREN	: '(' ;
+	RPAREN	: ')' ;
+	LBRACK	: '[' ;
+	RBRACK	: ']' ;
+	DOT		: '.' ;
+	COMMA	: ',' ;
+	QUOTE	: '"' ;
+	SPLAT	: '*' ; 
+
+IDENTIFIER
+	:	LETTER (LETTER|'0'..'9')*
+	;
+
+fragment
+LETTER
+	:	'$'
+	|	'A'..'Z'
+	|	'a'..'z'
+	|	'_'
+	;
+
+CHARACTER_LITERAL
+    :   '\'' ( EscapeSequence | ~('\''|'\\') ) '\''
+    ;
+
+STRING_LITERAL
+    :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+    ;
+
+HEX_LITERAL : '0' ('x'|'X') HexDigit+  ;
+
+DECIMAL_LITERAL : ('0' | '1'..'9' '0'..'9'*)  ;
+
+OCTAL_LITERAL : '0' ('0'..'7')+ ;
+
+fragment
+HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;
+
+FLOATING_POINT_LITERAL
+    :   ('0'..'9')+ '.' ('0'..'9')* Exponent? 
+    |   '.' ('0'..'9')+ Exponent? 
+    |   ('0'..'9')+ Exponent? 
+	;
+
+fragment
+Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
+
+fragment
+FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
+
+fragment
+EscapeSequence
+    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+    |   OctalEscape
+    ;
+
+fragment
+OctalEscape
+    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7')
+    ;
+
+fragment
+UnicodeEscape
+    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
+    ;
+
+WS  :  (' '|'\r'|'\t'|'\u000C'|'\n') {$channel=HIDDEN;}
+    ;
+
+COMMENT
+    :   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
+    ;
+
+LINE_COMMENT
+    : '//' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;}
+    ;
+

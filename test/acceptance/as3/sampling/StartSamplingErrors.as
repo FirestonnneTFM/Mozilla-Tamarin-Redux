@@ -117,7 +117,7 @@ if (isdebugger) {
 test();
 
 function simpleLoop() {
-    for (var i:int=0;i<10;i++) {
+    for (var i:int=0;i<100;i++) {
        objs.push(new simpleobject(""+i));
     }
 }

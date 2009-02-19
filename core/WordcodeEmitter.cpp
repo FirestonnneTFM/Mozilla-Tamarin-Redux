@@ -37,9 +37,30 @@
 
 #include "avmplus.h"
 
+#ifdef AVMPLUS_WORD_CODE
+
+// FIXME the following is required because FrameState has dependencies on the jitters
+#if defined AVMPLUS_MIR
+    #include "../codegen/CodegenMIR.h"
+    #define JIT_ONLY(x) x
+    #define MIR_ONLY(x) x
+    #define LIR_ONLY(x)
+#elif defined FEATURE_NANOJIT
+    #include "../codegen/CodegenLIR.h"
+    #define JIT_ONLY(x) x
+    #define MIR_ONLY(x) 
+    #define LIR_ONLY(x) x
+#else
+    #define JIT_ONLY(x) 
+    #define MIR_ONLY(x) 
+    #define LIR_ONLY(x) 
+#endif
+
+#include "FrameState.h"
+
+
 namespace avmplus
 {
-#ifdef AVMPLUS_WORD_CODE
 	using namespace MMgc;
 	
 	class TranslatedCode : public GCObject
@@ -55,7 +76,7 @@ namespace avmplus
 #endif
 		: WordcodeTranslator()
 		, info(info)
-		, core(info->core())
+		, core(info->pool->core)
 		, backpatches(NULL)
 		, labels(NULL)
 		, exception_fixes(NULL)
@@ -76,8 +97,7 @@ namespace avmplus
 		const byte* pos = info->body_pos;
 		AvmCore::skipU30(pos, 5);  // max_stack, local_count, init_scope_depth, max_scope_depth, code_length
 		code_start = pos;
-		pool = info->pool;
-		
+		pool = info->pool;		
 		boot();
 	}
 
@@ -89,7 +109,7 @@ namespace avmplus
 #  endif
 
 		: WordcodeTranslator()
-		, info(info)
+		, info(NULL)
 		, core(core)
 		, backpatches(NULL)
 		, labels(NULL)
@@ -112,17 +132,22 @@ namespace avmplus
 #endif // AVMPLUS_SELFTEST
 	
 	void WordcodeEmitter::boot() {
-		if (pool != NULL && pool->word_code.cpool_mn == NULL)
-			pool->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (pool->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), pool);
+		if (pool != NULL)
+			pool->initPrecomputedMultinames();
 		computeExceptionFixups();
 		refill();
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peepInit();
 #endif
+		this->next_cache = 0;
+		this->caches = new uint32_t[5];
+		this->num_caches = 5;
 	}
 	
 	WordcodeEmitter::~WordcodeEmitter()
 	{
+		delete [] caches;
+		caches = NULL;
 		cleanup();
 	}
 
@@ -351,7 +376,332 @@ namespace avmplus
 #endif
 	}
 
-	// These take one U30 argument
+	inline WordOpcode wordCode(AbcOpcode opcode) {
+		return (WordOpcode)opcodeInfo[opcode].wordCode;
+	}
+
+	void WordcodeEmitter::writePrologue(FrameState* state)
+	{
+		(void)state;
+	  // do nothing
+	}
+
+	void WordcodeEmitter::writeEpilogue(FrameState* state)
+	{
+		(void)state;
+		epilogue();
+	}
+
+	void WordcodeEmitter::writeOp1(FrameState *state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
+	{
+		(void)type;
+		switch (opcode) {
+		case OP_iflt:
+		case OP_ifle:
+		case OP_ifnlt:
+		case OP_ifnle:
+		case OP_ifgt:
+		case OP_ifge:
+		case OP_ifngt:
+		case OP_ifnge:
+		case OP_ifeq:
+		case OP_ifstricteq:
+		case OP_ifne:
+		case OP_ifstrictne:
+		case OP_iftrue:
+		case OP_iffalse:
+		case OP_jump:
+			emitRelativeJump(pc, wordCode(opcode));
+			break;
+		case OP_getslot:
+		{
+    		const byte* nextpc = pc;
+		    unsigned int imm30=0, imm30b=0;
+		    int imm8=0, imm24=0;
+		    AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
+			Traits* t = state->value(state->sp()).traits;
+			AvmAssert(t->isResolved());
+			if (t->pool->isBuiltin && !t->final)  // de-optimize
+			    emitOp1(WOP_getproperty, imm30);
+			else
+			    emitOp1(WOP_getslot, opd1+1);
+			break;
+		}
+		case OP_getglobalslot:
+		case OP_setglobalslot:
+		    emitOp1(pc, WOP_getglobalslot);
+			break;
+		case OP_getproperty:
+		case OP_call:
+		case OP_construct:
+		case OP_getouterscope:
+		    emitOp1(wordCode(opcode), opd1);
+			break;
+		case OP_getscopeobject:
+		    emitOp1(WOP_getscopeobject, opd1);
+			break;
+		case OP_findpropglobal: 
+		case OP_findpropglobalstrict:
+			emitOp2(wordCode(opcode), opd1, allocateCacheSlot(opd1));
+		    break;
+		default:
+			// FIXME need error handler here
+		    break;
+		}
+	}
+
+	void WordcodeEmitter::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits *type)
+	{
+		(void)type;
+		(void)pc;
+		(void)state;
+		switch (opcode) {
+		case OP_setslot:
+		    emitOp1(WOP_setslot, opd1+1);
+			break;
+
+		case OP_callmethod:
+		case OP_callproperty: 
+		case OP_callproplex: 
+		case OP_callpropvoid:
+		case OP_callstatic:
+		    emitOp2(wordCode(opcode), opd1, opd2);
+			break;
+
+		case OP_abs_jump:
+		{
+            #ifdef AVMPLUS_64BIT
+		    const byte* new_pc = (const byte *) (uintptr(opd1) | (((uintptr) opd2) << 32));
+            #else
+			const byte* new_pc = (const byte*) opd1;
+			#endif
+		    emitAbsJump(new_pc);
+			break;
+		}
+
+		default:
+			// FIXME need error handler here
+		    break;
+		}
+	}
+
+	void WordcodeEmitter::write(FrameState* state, const byte* pc, AbcOpcode opcode)
+	{
+		(void)state;
+	  //printf("WordcodeEmitter::write %x\n", opcode);
+
+		switch (opcode) {
+		case OP_coerce_a:
+		case OP_nop:
+		    // do nothing, all values on stack are atoms
+		    break;
+		case OP_label:
+		    emitLabel(pc);
+			break;
+		case OP_pushfalse:
+		case OP_pushtrue:
+		case OP_pushundefined:
+		case OP_pushnull:
+		case OP_pushnan:
+		case OP_checkfilter:
+		case OP_astypelate:
+		case OP_coerce_b:
+		case OP_convert_b:
+		case OP_coerce_i:
+		case OP_convert_i:
+		case OP_coerce_u:
+		case OP_convert_u:
+		case OP_coerce_d:
+		case OP_convert_d:
+		case OP_coerce_s:
+		case OP_convert_s:
+		case OP_esc_xelem: 
+		case OP_esc_xattr:
+		case OP_coerce_o:
+		case OP_convert_o:
+		case OP_istypelate:
+		case OP_newactivation:
+		case OP_popscope:
+		case OP_pop:
+		case OP_dup:
+		case OP_swap:
+		case OP_lessthan:
+		case OP_greaterthan:
+		case OP_lessequals:
+		case OP_greaterequals:
+		case OP_equals:
+		case OP_strictequals:
+		case OP_instanceof:
+		case OP_in:
+		case OP_not:
+		case OP_add:
+		case OP_modulo:
+		case OP_subtract:
+		case OP_divide:
+		case OP_multiply:
+		case OP_increment_i:
+		case OP_decrement_i:
+		case OP_increment:
+		case OP_decrement:
+		case OP_add_i:
+		case OP_subtract_i:
+		case OP_multiply_i:
+		case OP_negate:
+		case OP_negate_i:
+		case OP_bitand:
+		case OP_bitor:
+		case OP_bitxor:
+		case OP_bitnot:
+		case OP_lshift:
+		case OP_rshift:
+		case OP_urshift:
+		case OP_typeof:
+		case OP_nextvalue:
+		case OP_nextname:
+		case OP_hasnext:
+#ifdef AVMPLUS_MOPS
+		case OP_sxi1:
+		case OP_sxi8:
+		case OP_sxi16:
+		case OP_li8:
+		case OP_li16:
+		case OP_li32:
+		case OP_lf32:
+		case OP_lf64:
+		case OP_si8:
+		case OP_si16:
+		case OP_si32:
+		case OP_sf32:
+		case OP_sf64:
+		case OP_getglobalscope:
+  		    emitOp0(pc, wordCode(opcode));
+			break;
+		case OP_throw:
+		case OP_returnvalue:		  
+		case OP_returnvoid:
+#if defined DEBUGGER && defined AVMPLUS_WORD_CODE
+			if (core->debugger()) emitOp0(pc, WOP_debugexit);
+#endif
+  		    emitOp0(pc, wordCode(opcode));
+			break;
+
+#endif // AVMPLUS_MOPS
+		case OP_pushstring:
+		case OP_pushdouble:
+		case OP_pushnamespace: 
+		case OP_getlocal:
+		case OP_setlocal:
+		case OP_inclocal:
+		case OP_declocal:
+		case OP_inclocal_i:
+		case OP_declocal_i:
+		case OP_dxns:
+		case OP_newfunction: 
+		case OP_newclass:
+		case OP_finddef: 
+		case OP_getdescendants:
+		case OP_deleteproperty:
+		case OP_astype:
+		case OP_coerce:
+		case OP_istype: 
+		case OP_applytype:
+		case OP_newobject:
+		case OP_newarray:
+		case OP_newcatch:
+		case OP_getslot:
+		case OP_setslot:
+		case OP_findpropstrict:
+		case OP_findproperty:
+		case OP_setproperty:
+		case OP_initproperty:
+		case OP_getouterscope:
+		    emitOp1(pc, wordCode(opcode));
+			break;
+		case OP_constructprop:
+		case OP_hasnext2:
+		    emitOp2(pc, wordCode(opcode));
+			break;
+		case OP_pushshort:
+		    emitPushshort(pc);
+			break;
+		case OP_pushbyte:
+		    emitPushbyte(pc);
+			break;
+		case OP_getlocal0:
+		case OP_getlocal1:
+		case OP_getlocal2:
+		case OP_getlocal3:
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			emitOp1(WOP_getlocal, opcode-OP_getlocal0);
+#else
+			emitOp0(pc, wordCode(opcode));
+#endif
+			break;
+		case OP_setlocal0:
+		case OP_setlocal1:
+		case OP_setlocal2:
+		case OP_setlocal3:
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			emitOp1(WOP_setlocal, opcode-OP_setlocal0);
+#else
+			emitOp0(pc, wordCode(opcode));
+#endif
+			break;
+		case OP_pushint:
+		    emitPushint(pc);
+			break;
+		case OP_pushuint:
+		    emitPushuint(pc);
+			break;
+		case OP_iflt:
+		case OP_ifle:
+		case OP_ifnlt:
+		case OP_ifnle:
+		case OP_ifgt:
+		case OP_ifge:
+		case OP_ifngt:
+		case OP_ifnge:
+		case OP_ifeq:
+		case OP_ifstricteq:
+		case OP_ifne:
+		case OP_ifstrictne:
+		case OP_iftrue:
+		case OP_iffalse:
+		case OP_jump:
+			emitRelativeJump(pc, wordCode(opcode));
+			break;
+		case OP_lookupswitch: 
+			emitLookupswitch(pc);
+			break;
+		case OP_debugfile:
+            #ifdef DEBUGGER
+		    if (core->debugger()) emitOp1(pc, WOP_debugfile);
+            #endif
+			break;
+		case OP_debug:
+            #ifdef DEBUGGER
+		    if (core->debugger()) emitDebug(pc);
+            #endif
+			break;
+		case OP_debugline:
+            #ifdef DEBUGGER
+		    if (core->debugger()) emitOp1(pc, WOP_debugline);
+			#endif
+			break;
+		case OP_dxnslate:
+		    emitOp0(pc, WOP_dxnslate);
+			break;
+		case OP_kill:
+			// No sense in emitting this for the interpreter, as all
+			// stacked values are atoms and fully type checked
+			break;
+		default:
+			// FIXME need error handler here
+		    break;
+		}
+
+	}
+
 	void WordcodeEmitter::emitOp1(const uint8_t *pc, WordOpcode opcode)
 	{
 #ifdef _DEBUG
@@ -487,7 +837,7 @@ namespace avmplus
 		peep(WOP_pushbits, dest-2);
 #endif
 	}
-	
+
 	void WordcodeEmitter::emitGetscopeobject(const uint8_t *pc) 
 	{
 		CHECK(2);
@@ -617,6 +967,9 @@ namespace avmplus
 		AvmAssert(backpatches == NULL);
 		AvmAssert(exception_fixes == NULL);
 		
+		if (info != NULL)
+			info->word_code.cache_size = next_cache;
+
 #ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
 		peepFlush();
 #endif
@@ -642,7 +995,7 @@ namespace avmplus
 		// move the data
 		uintptr_t* ptr = code;
 		while (first != NULL) {
-			memcpy(ptr, first->data, first->entries_used*sizeof(uintptr_t));
+			VMPI_memcpy(ptr, first->data, first->entries_used*sizeof(uintptr_t));
 			ptr += first->entries_used;
 			first = first->next;
 		}
@@ -1089,8 +1442,27 @@ namespace avmplus
 		peep(0, NULL);		// commits, but may start another match
 		state = 0;			// ignore any partial match
 	}
-
 #endif  // AVMPLUS_PEEPHOLE_OPTIMIZER
 
-#endif // AVMPLUS_WORD_CODE
+	// The cache structure is expected to be small in the normal case, so use a
+	// linear list.  For some programs, notably classical JS programs, it may however
+	// be larger, and we may need a more sophisticated structure.
+	uint32_t WordcodeEmitter::allocateCacheSlot(uint32_t imm30)
+	{
+		for ( int i=0 ; i < next_cache ; i++ )
+			if (caches[i] == imm30)
+				return i;
+		if (next_cache == num_caches) {
+			uint32_t* new_cache = new uint32_t[num_caches*2];
+			VMPI_memcpy(new_cache, caches, sizeof(uint32_t)*num_caches);
+			delete [] caches;
+			caches = new_cache;
+			num_caches *= 2;
+		}
+		caches[next_cache] = imm30;
+		return next_cache++;
+	}
+
+
 }
+#endif // AVMPLUS_WORD_CODE

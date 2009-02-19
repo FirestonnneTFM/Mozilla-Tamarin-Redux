@@ -42,11 +42,13 @@ extern void create_avmplus_basics(AvmCore* core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 extern void create_avmplus_peephole(AvmCore* core);
 #endif
+extern void create_mmgc_basics(AvmCore* core);
 void SelftestRunner::createGeneratedSelftestClasses() {
 create_avmplus_basics(core);
 #if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 create_avmplus_peephole(core);
 #endif
+create_mmgc_basics(core);
 }
 #endif // AVMPLUS_SELFTEST
 }

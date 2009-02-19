@@ -100,6 +100,7 @@ namespace avmplus
 		ErrorClass* uriErrorClass() const;
 		ErrorClass* referenceErrorClass() const;
 		ErrorClass* securityErrorClass() const;
+		ErrorClass* syntaxErrorClass() const;
 		ErrorClass* verifyErrorClass() const;
 		/*@}*/
 
@@ -313,8 +314,8 @@ namespace avmplus
 		 * Extensions to ECMAScript, in ECMA-262 Appendix B.2
 		 */
 		/*@{*/
-		Stringp escape(Stringp in);
-		Stringp unescape(Stringp in);
+		static Stringp escape(ScriptObject*, Stringp in);
+		static Stringp unescape(ScriptObject*, Stringp in);
 		/*@}*/
 
 		/**
@@ -328,18 +329,18 @@ namespace avmplus
 		 * Function properties of the global object (ECMA 15.1.2)
 		 */
 		/*@{*/
-		Stringp decodeURI(Stringp uri);
-		Stringp decodeURIComponent(Stringp uri);
-		Stringp encodeURI(Stringp uri);
-		Stringp encodeURIComponent(Stringp uri);
-		bool isNaN(double d);
-		bool isFinite(double d);
-		double parseInt(Stringp in, int radix);
-		double parseFloat(Stringp in);
+		static Stringp decodeURI(ScriptObject*, Stringp uri);
+		static Stringp decodeURIComponent(ScriptObject*, Stringp uri);
+		static Stringp encodeURI(ScriptObject*, Stringp uri);
+		static Stringp encodeURIComponent(ScriptObject*, Stringp uri);
+		static bool isNaN(ScriptObject*, double d);
+		static bool isFinite(ScriptObject*, double d);
+		static double parseInt(ScriptObject*, Stringp in, int radix);
+		static double parseFloat(ScriptObject*, Stringp in);
 		/*@}*/
 
 		// For E4X
-		bool isXMLName(Atom v);
+		static bool isXMLName(ScriptObject*, Atom v);
 
         ClassClosure* getBuiltinClass(int class_id) const
         {
@@ -359,10 +360,9 @@ namespace avmplus
 
 	private:
 
-		int parseHexChar(wchar c);
-		wchar extractCharacter(const wchar*& src);
-		Stringp decode(Stringp in, bool decodeURIComponentFlag);
-		Stringp encode(Stringp in, bool encodeURIComponentFlag);
+		static int parseHexChar(wchar c);
+		static Stringp decode(AvmCore* core, Stringp in, bool decodeURIComponentFlag);
+		static Stringp encode(AvmCore* core, Stringp in, bool encodeURIComponentFlag);
 
 		static const uint32 unescaped[];
 		static const uint32 uriUnescaped[];

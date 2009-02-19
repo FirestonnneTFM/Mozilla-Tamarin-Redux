@@ -270,9 +270,6 @@ function stopTest()	{
 
 function getTimeZoneDiff()
 {
-  // re-hard coding to -8 because Date object is not implemented yet
-  // mtilburg 3/15/2004
-  //return -8;
   return -((new Date(2000, 1, 1)).getTimezoneOffset())/60;
 }
 
@@ -485,7 +482,6 @@ function DayWithinYear(	t )	{
 function DateFromTime( t ) {
 	var	day	= DayWithinYear(t);
 	var	month =	MonthFromTime(t);
-
 	if ( month == 0	) {
 		return ( day + 1 );
 	}
@@ -556,11 +552,23 @@ function UTC( t	) {
 }
 
 function DaylightSavingTA( t ) {
-	t =	t -	LocalTZA();
-
-	var	dst_start =	GetSecondSundayInMarch(t) + 2*msPerHour;
-        var k = new Date(dst_start);
-	var	dst_end	  =	GetFirstSundayInNovember(t)+ 2*msPerHour;
+	var dst_start;
+	var dst_end;
+    // Windows fix for 2007 DST change made all previous years follow new DST rules
+    // check to see if 3/13/2006 12pm getHours is 12 or 13
+    var dstPrev:Boolean=(new Date(1142269200000).getHours()==13);
+	if (TZ_DIFF<=-4 && TZ_DIFF>=-8) {
+        if (dstPrev || YearFromTime(t)>=2007) {
+   	        dst_start = GetSecondSundayInMarch(t) + 2*msPerHour;
+            dst_end = GetFirstSundayInNovember(t) + 2*msPerHour;
+        } else {
+            dst_start = GetFirstSundayInApril(t) + 2*msPerHour;
+            dst_end = GetLastSundayInOctober(t) + 2*msPerHour;
+        }        
+	} else {
+	    dst_start = GetLastSundayInMarch(t) + 2*msPerHour;
+	    dst_end = GetLastSundayInOctober(t) + 2*msPerHour;
+    }
 	if ( t >= dst_start	&& t < dst_end ) {
 		return msPerHour;
 	} else {
@@ -573,17 +581,33 @@ function DaylightSavingTA( t ) {
 	_print( new Date( UTC(dst_start + LocalTZA())) );
 
 	return UTC(dst_start  +	LocalTZA());
-}function GetSecondSundayInMarch(t )	{
+}
+function GetLastSundayInMarch(t) {
 	var	year = YearFromTime(t);
 	var	leap = InLeapYear(t);
-	var	march =	TimeFromYear(year) + TimeInMonth(0,leap) +	TimeInMonth(1,leap);
+	var	march =	TimeFromYear(year) + TimeInMonth(0,leap) +	TimeInMonth(1,leap)-LocalTZA()+2*msPerHour;
+    var sunday;
+	for( sunday=march;WeekDay(sunday)>0;sunday +=msPerDay ){;}
+	var last_sunday;
+	while (true) {
+	   sunday=sunday+7*msPerDay;
+	   if (MonthFromTime(sunday)>2)
+	       break;
+	   last_sunday=sunday;
+	}
+	return last_sunday;
+}
+function GetSecondSundayInMarch(t )	{
+	var	year = YearFromTime(t);
+	var	leap = InLeapYear(t);
+	var	march =	TimeFromYear(year) + TimeInMonth(0,leap) +	TimeInMonth(1,leap)-LocalTZA()+2*msPerHour;
         
 	for	( var first_sunday = march;	WeekDay(first_sunday) >0;
 		first_sunday +=msPerDay )
 	{
 		;
 	}
-        second_sunday=first_sunday+7*msPerDay;
+    second_sunday=first_sunday+7*msPerDay;
 	return second_sunday;
 }
 
@@ -592,16 +616,52 @@ function DaylightSavingTA( t ) {
 function GetFirstSundayInNovember( t ) {
 	var	year = YearFromTime(t);
 	var	leap = InLeapYear(t);
-
-	for	( var nov =	TimeFromYear(year),	m =	0; m < 10; m++ )	{
+        var     nov,m;
+	for	( nov =	TimeFromYear(year),	m =	0; m < 10; m++ )	{
 		nov	+= TimeInMonth(m, leap);
 	}
+	nov=nov-LocalTZA()+2*msPerHour;
 	for	( var first_sunday =	nov; WeekDay(first_sunday)	> 0;
 		first_sunday	+= msPerDay	)
 	{
 		;
 	}
 	return first_sunday;
+}
+function GetFirstSundayInApril( t ) {
+	var	year = YearFromTime(t);
+	var	leap = InLeapYear(t);
+    var     apr,m;
+	for	( apr =	TimeFromYear(year),	m =	0; m < 3; m++ )	{
+		apr	+= TimeInMonth(m, leap);
+	}
+	apr=apr-LocalTZA()+2*msPerHour;
+
+	for	( var first_sunday =	apr; WeekDay(first_sunday)	> 0;
+		first_sunday	+= msPerDay	)
+	{
+		;
+	}
+	return first_sunday;
+}
+function GetLastSundayInOctober(t) {
+	var	year = YearFromTime(t);
+	var	leap = InLeapYear(t);
+	var oct,m;
+	for	(oct =	TimeFromYear(year),	m =	0; m < 9; m++ )	{
+		oct	+= TimeInMonth(m, leap);
+	}
+	oct=oct-LocalTZA()+2*msPerHour;
+    var sunday;
+	for( sunday=oct;WeekDay(sunday)>0;sunday +=msPerDay ){;}
+	var last_sunday;
+	while (true) {
+	   last_sunday=sunday;
+	   sunday=sunday+7*msPerDay;
+	   if (MonthFromTime(sunday)>9)
+	       break;
+	}
+	return last_sunday;
 }
 function LocalTime(	t )	{
 	return ( t + LocalTZA()	+ DaylightSavingTA(t) );

@@ -38,6 +38,8 @@
 
 #include "nanojit.h"
 
+#ifdef NANOJIT_ARM	// probably not right
+
 #ifdef AVMPLUS_PORTING_API
 #include "portapi_nanojit.h"
 #endif
@@ -181,19 +183,19 @@ namespace nanojit
 		// loaded in r2/r3, at least according to the ARM EABI and gcc 4.2's
 		// generated code.
 		bool arg0IsInt32FollowedByFloat = false;
-		while ((atypes & 3) != ARGSIZE_NONE) {
-			if (((atypes >> 4) & 3) == ARGSIZE_LO &&
-				((atypes >> 2) & 3) == ARGSIZE_F &&
-				((atypes >> 6) & 3) == ARGSIZE_NONE)
+		while ((atypes & ARGSIZE_MASK) != ARGSIZE_NONE) {
+			if (((atypes >> (2*ARGSIZE_SHIFT)) & ARGSIZE_MASK) == ARGSIZE_LO &&
+				((atypes >> ARGSIZE_SHIFT) & ARGSIZE_MASK) == ARGSIZE_F &&
+				((atypes >> (3*ARGSIZE_SHIFT)) & ARGSIZE_MASK) == ARGSIZE_NONE)
 			{
 				arg0IsInt32FollowedByFloat = true;
 				break;
 			}
-			atypes >>= 2;
+			atypes >>= ARGSIZE_SHIFT;
 		}
 
 		CALL(call);
-        ArgSize sizes[10];
+        ArgSize sizes[MAXARGS];
         uint32_t argc = call->get_sizes(sizes);
 		for(uint32_t i=0; i < argc; i++)
 		{
@@ -277,7 +279,7 @@ namespace nanojit
 		uint32_t op = i->opcode();
 		int prefer = ~0;
 
-		if (op==LIR_call || op==LIR_fcall)
+		if (op==LIR_icall)
 			prefer = rmask(R0);
 		else if (op == LIR_callh)
 			prefer = rmask(R1);
@@ -1321,3 +1323,6 @@ namespace nanojit
 	}
     #endif /* FEATURE_NANOJIT */
 }
+
+#endif // NANOJIT_ARM
+

@@ -93,22 +93,14 @@ namespace avmplus
 
 		Atom stringFromUTF8(const char *buffer, int len);
 
-		ArrayObject* _exec(Stringp subject, UTF8String *utf8Subject);
+		ArrayObject* _exec(Stringp subject, StIndexableUTF8String& utf8Subject);
 		
 		ArrayObject* _exec(Stringp subject,
-						  UTF8String *utf8Subject,
+						  StIndexableUTF8String& utf8Subject,
 						  int startIndex,
 						  int& matchIndex,
 						  int& matchLen);
 		
-		int Utf16ToUtf8Index(Stringp utf16String,
-							 UTF8String *utf8String,
-							 int utf16Index);
-
-		int Utf8ToUtf16Index(Stringp utf16String,
-							 UTF8String *utf8String,
-							 int utf8Index);
-
 		void fixReplaceLastIndex(const char *src,
 								 int subjectLength,
 								 int lastIndex,

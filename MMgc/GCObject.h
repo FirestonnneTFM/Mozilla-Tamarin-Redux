@@ -107,7 +107,6 @@ namespace MMgc
 	{
 	public:
 		virtual ~GCFinalizable() { }
-		virtual void Finalize() { this->~GCFinalizable(); }
 	};
 
 	/**
@@ -159,6 +158,9 @@ namespace MMgc
 			if (InZCT())
 				GC::GetGC(this)->RemoveFromZCT(this);
 			composite = 0;
+#ifdef _DEBUG
+			padto32bytes = 0;
+#endif
 		}
 
 		bool IsPinned()
@@ -224,7 +226,7 @@ namespace MMgc
 				GC::GetGC(this)->RemoveFromZCT(this);
 			}
 			
-#ifdef MEMORY_INFO
+#if 0
 			if(gc->keepDRCHistory)
 				history.Push(GetStackTraceIndex(2));
 #endif
@@ -270,7 +272,7 @@ namespace MMgc
 			
 			composite--; 
 
-#ifdef MEMORY_INFO
+#if 0
 			// the delete flag works around the fact that DecrementRef
 			// may be called after ~RCObject since all dtors are called
 			// in one pass.  For example a FunctionScriptObject may be

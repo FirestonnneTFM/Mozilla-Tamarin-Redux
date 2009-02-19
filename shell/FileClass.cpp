@@ -38,8 +38,6 @@
 
 #include "avmshell.h"
 
-#include <stdlib.h>
-
 namespace avmshell
 {
 	FileClass::FileClass(VTable *cvtable)
@@ -53,8 +51,8 @@ namespace avmshell
 		if (!filename) {
 			toplevel()->throwArgumentError(kNullArgumentError, "filename");
 		}
-		UTF8String* filenameUTF8 = filename->toUTF8String();
-		FILE *fp = fopen(filenameUTF8->c_str(), "r");
+		StUTF8String filenameUTF8(filename);
+		FILE *fp = fopen(filenameUTF8.c_str(), "r");
 		if (fp != NULL) {
 			fclose(fp);
 			return true;
@@ -70,8 +68,8 @@ namespace avmshell
 		if (!filename) {
 			toplevel->throwArgumentError(kNullArgumentError, "filename");
 		}
-		UTF8String* filenameUTF8 = filename->toUTF8String();
-		FILE *fp = fopen(filenameUTF8->c_str(), "r");
+		StUTF8String filenameUTF8(filename);
+		FILE *fp = fopen(filenameUTF8.c_str(), "r");
 		if (fp == NULL) {
 			toplevel->throwError(kFileOpenError, filename);
 		}
@@ -83,7 +81,9 @@ namespace avmshell
 		rewind(fp);
 		#endif
 
-		unsigned char *c = new unsigned char[len+1];
+		AvmCore::AllocaAutoPtr _c;
+		uint8_t* c = (uint8_t*)VMPI_alloca(core, _c, len+1);
+
 		len = (long)fread(c, 1, len, fp);
 		c[len] = 0;
 		
@@ -94,45 +94,28 @@ namespace avmshell
 			// UTF8 BOM
 			if ((c[0] == 0xef) && (c[1] == 0xbb) && (c[2] == 0xbf))
 			{
-				return core->newString(((char *)c) + 3, len - 3);
+				return core->newStringUTF8((const char*)c + 3, len - 3);
 			}
 			else if ((c[0] == 0xfe) && (c[1] == 0xff))
 			{
 				//UTF-16 big endian
 				c += 2;
 				len = (len - 2) >> 1;
-				Stringp out = new (core->GetGC()) String(len);
-				wchar *buffer = out->lockBuffer();
-				for (long i = 0; i < len; i++)
-				{
-					buffer[i] = (c[0] << 8) + c[1];
-					c += 2;
-				}
-				out->unlockBuffer();
-
-				return out;
+				return core->newStringEndianUTF16(/*littleEndian*/false, (const wchar*)c, len);
 			}
 			else if ((c[0] == 0xff) && (c[1] == 0xfe))
 			{
 				//UTF-16 little endian
 				c += 2;
 				len = (len - 2) >> 1;
-				Stringp out = new (core->GetGC()) String(len);
-				wchar *buffer = out->lockBuffer();
-				for (long i = 0; i < len; i++)
-				{
-					buffer[i] = (c[1] << 8) + c[0];
-					c += 2;
-				}
-				out->unlockBuffer();
-				return out;
+				return core->newStringEndianUTF16(/*littleEndian*/true, (const wchar*)c, len);
 			}
 		}
 
-		Stringp out = core->newString((char *) c);
-		delete [] c;
-		
-		return out;
+		// newStringLatin1, NOT newStringUTF8: the latter might decide the data is invalid
+		// UTF8 format (which is quite likely) and refuse to create the string. Be sure to pass the
+		// explicit len since there might be embedded null characters.
+		return core->newStringLatin1((const char*)c, len);
 	}
 
 	void FileClass::write(Stringp filename,
@@ -146,13 +129,13 @@ namespace avmshell
 		if (!data) {
 			toplevel->throwArgumentError(kNullArgumentError, "data");
 		}
-		UTF8String* filenameUTF8 = filename->toUTF8String();
-		FILE *fp = fopen(filenameUTF8->c_str(), "w");
+		StUTF8String filenameUTF8(filename);
+		FILE *fp = fopen(filenameUTF8.c_str(), "w");
 		if (fp == NULL) {
 			toplevel->throwError(kFileWriteError, filename);
 		}
-		UTF8String* dataUTF8 = data->toUTF8String();
-		if (fwrite(dataUTF8->c_str(), dataUTF8->length(), 1, fp) != 1) {
+		StUTF8String dataUTF8(data);
+		if (fwrite(dataUTF8.c_str(), dataUTF8.length(), 1, fp) != 1) {
 			toplevel->throwError(kFileWriteError, filename);
 		}
 		fclose(fp);

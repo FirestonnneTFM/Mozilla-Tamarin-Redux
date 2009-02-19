@@ -38,35 +38,11 @@
 #ifndef __avmplus_types__
 #define __avmplus_types__
 
-#include "avmplus_stdint.h"
+#include "GCTypes.h"
 
 namespace avmplus
 {
-	// legacy types
-	typedef int8_t		sint8;
-	typedef int8_t		int8;
-	typedef uint8_t		byte;
-	typedef uint8_t		uint8;
 
-	typedef int16_t		sint16;
-	typedef int16_t		int16;
-	typedef uint16_t	uint16;
-
-	typedef int32_t		sint32;
-	typedef int32_t		int32;
-	typedef uint32_t	uint32; 
-
-	typedef int64_t		int64;
-	typedef int64_t		sint64;
-	typedef uint64_t	uint64;
-
-	typedef intptr_t	sintptr;
-	typedef uintptr_t	uintptr;
-
-	/* wchar is our version of wchar_t, since wchar_t is different sizes
-	   on different platforms, but we want to use UTF-16 uniformly. */
-	typedef uint16_t wchar;
-	
     #ifndef NULL
     #define NULL 0
     #endif

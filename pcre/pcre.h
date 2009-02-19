@@ -90,11 +90,6 @@ don't change existing definitions of PCRE_EXP_DECL and PCRECPP_EXP_DECL. */
 
 #define EXPORT
     
-/* Have to include stdlib.h in order to ensure that size_t is defined;
-it is needed here for malloc. */
-
-#include <stdlib.h>
-
 /* Allow for C++ users */
 
 #ifdef __cplusplus

@@ -202,7 +202,7 @@ namespace nanojit
 			void		setError(AssmError e) { _err = e; }
 			void		setCallTable(const CallInfo *functions);
 			void		pageReset();
-			int32_t		codeBytes();
+			size_t		codeBytes();
 			Page*		handoverPages(bool exitPages=false);
 
 			debug_only ( void		pageValidate(); )
@@ -276,6 +276,9 @@ namespace nanojit
 			Page*		_nativePages;	// list of NJ_PAGE_SIZE pages that have been alloc'd
 			Page*		_nativeExitPages; // list of pages that have been allocated for exit code
 			AssmError	_err;			// 0 = means assemble() appears ok, otherwise it failed
+		#if PEDANTIC
+			NIns*		pedanticTop;
+		#endif
 
 			AR			_activation;
 			RegAlloc	_allocator;
@@ -287,7 +290,6 @@ namespace nanojit
 			bool		_inExit, vpad2[3];
             InsList     pending_lives;
 
-			void		asm_cmp(LIns *cond);
 #ifndef NJ_SOFTFLOAT
 			void		asm_fcmp(LIns *cond);
             void        asm_setcc(Register res, LIns *cond);
@@ -323,6 +325,7 @@ namespace nanojit
 			void		asm_fop(LInsp ins);
 			void		asm_i2f(LInsp ins);
 			void		asm_u2f(LInsp ins);
+			void		asm_promote(LIns *ins);
 			Register	asm_prep_fcall(Reservation *rR, LInsp ins);
 			void		asm_nongp_copy(Register r, Register s);
 			void		asm_bailout(LInsp guard, Register state);
@@ -332,6 +335,7 @@ namespace nanojit
             void        assignSavedParams();
             void        reserveSavedParams();
             void        handleLoopCarriedExprs();
+            void        flush_icache(Page*);
 			
 			// flag values for nMarkExecute
 			enum 
@@ -343,7 +347,7 @@ namespace nanojit
 			
 			// platform specific implementation (see NativeXXX.cpp file)
 			void		nInit(AvmCore *);
-			Register	nRegisterAllocFromSet(int32_t set);
+			Register	nRegisterAllocFromSet(RegisterMask set);
 			void		nRegisterResetAll(RegAlloc& a);
 			void		nMarkExecute(Page* page, int flags);
 			void		nFrameRestore(RegisterMask rmask);
@@ -377,7 +381,8 @@ namespace nanojit
 
 	inline int32_t disp(Reservation* r) 
 	{
-		return stack_direction((int32_t)STACK_GRANULARITY) * int32_t(r->arIndex);
+		// even on 64bit cpu's, we allocate stack area in 4byte chunks
+		return stack_direction(4 * int32_t(r->arIndex));
 	}
 }
 #endif // __nanojit_Assembler__

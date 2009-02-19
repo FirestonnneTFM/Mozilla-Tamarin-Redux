@@ -75,6 +75,15 @@ const int kBufferPadding = 16;
 		bool verbose_addrs;
 		#endif /* AVMPLUS_VERBOSE */
 
+		#if VMCFG_METHOD_NAMES
+		// if true, record original names of methods at runtime.
+		// if false, don't (Function.toString will return things like "Function-21")
+		bool methodNames;
+		
+		// give "Vector.<*>" instead of "Vector$object", etc
+		bool oldVectorMethodNames;	
+		#endif
+
 		#ifdef AVMPLUS_MIR
 		bool dceopt;
         #endif
@@ -162,18 +171,29 @@ const int kBufferPadding = 16;
 		MMgc::GC * const gc;
 
 		#ifdef DEBUGGER
-		/**
-		 * For debugger versions of the VM, this is a pointer to
-		 * the Debugger object.
-		 */
-		Debugger *debugger;
-		Profiler *profiler;
+		friend class CodegenLIR;
+		friend class CodegenMIR;
+		private:
+			Debugger*		_debugger;
+			Profiler*		_profiler;
+			Sampler*		_sampler;
+		public:
+			inline Debugger* debugger() const { return _debugger; }
+			inline Profiler* profiler() const { return _profiler; }
+			inline Sampler* get_sampler() const { return _sampler; }
+			inline void sampleCheck() { if (_sampler) _sampler->sampleCheck(); }
+		protected:
+			virtual Debugger* createDebugger() { return NULL; }
+			virtual Profiler* createProfiler() { return NULL; }
+		public:
+			int					langID;
+			bool				passAllExceptionsToDebugger;
 		#endif
 #ifdef AVMPLUS_VERIFYALL
         List<AbstractFunction*, LIST_GCObjects> verifyQueue;
-		void enq(AbstractFunction* f);
-		void enq(Traits* t);
-		void processVerifyQueue(Toplevel* toplevel);
+		void enqFunction(AbstractFunction* f);
+		void enqTraits(Traits* t);
+		void verifyEarly(Toplevel* toplevel);
 #endif
 
 		void branchCheck(MethodEnv *env, bool interruptable, int go)
@@ -184,7 +204,7 @@ const int kBufferPadding = 16;
 				sampleCheck();
 #endif
 				if (interruptable && interrupted)
-						interrupt(env);
+					interrupt(env);
 			}
 		}
 
@@ -576,6 +596,10 @@ const int kBufferPadding = 16;
 #ifdef AVMPLUS_VERBOSE
 		/** Disassembles an opcode and places the text in str. */
 		void formatOpcode(PrintWriter& out, const byte *pc, AbcOpcode opcode, ptrdiff_t off, PoolObject* pool);
+# ifdef AVMPLUS_WORD_CODE
+		void formatOpcode(PrintWriter& out, const uintptr_t *pc, WordOpcode opcode, ptrdiff_t off, PoolObject* pool);
+		void formatBits(PrintWriter& buffer, uint32 bits);
+# endif
 		static void formatMultiname(PrintWriter& out, uint32 index, PoolObject* pool);
 #endif
 
@@ -619,15 +643,7 @@ const int kBufferPadding = 16;
 		DRC(Stringp) kAsterisk;
 		DRC(Stringp) kVersion;
 		DRC(Stringp) kVector;
-#ifdef AVMPLUS_VERBOSE
-		DRC(Stringp) knewline;
-		DRC(Stringp) krightbracket;
-		DRC(Stringp) kleftbracket;
-		DRC(Stringp) kcolon;
-		DRC(Stringp) ktabat;
-		DRC(Stringp) kparens;
-#endif
-#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
+#if VMCFG_METHOD_NAMES
 		DRC(Stringp) kanonymousFunc;
 #endif
 		Atom kNaN;
@@ -690,8 +706,12 @@ const int kBufferPadding = 16;
 #ifdef AVMPLUS_64BIT
 		int64	integer64(Atom atom)			{ return (int64)integer(atom); }
 		static	int64 integer64_i(Atom atom)	{ return (int64)integer_i(atom); }
+	#ifdef AVMPLUS_AMD64
 		static	int64 integer64_d(double d)		{ return (int64)integer_d_sse2(d); }
 		static	int64 integer64_d_sse2(double d){ return (int64)integer_d_sse2(d); }
+	#else
+		static	int64 integer64_d(double d)		{ return (int64)integer_d(d); }
+	#endif
 #endif
 		int integer(Atom atom) const;
 
@@ -997,18 +1017,6 @@ const int kBufferPadding = 16;
 		double number(Atom atom) const;
 
 		/**
-		 * produce an atom from a string.  used only for string constants.
-		 * @param s
-		 * @return
-		 */
-		Atom constant(const char *s)
-		{
-			return constantString(s)->atom();
-		}
-
-		Stringp constantString(const char *s);
-
-		/**
 		 * The interrupt method is called from executing code
 		 * when the interrupted flag is set.
 		 */
@@ -1091,7 +1099,6 @@ const int kBufferPadding = 16;
 		 * Determines the language id of the given platform
 		 */
 		virtual int determineLanguage();
-		int langID;
 		
 
 		/**
@@ -1106,18 +1113,6 @@ const int kBufferPadding = 16;
 
 		/** The call stack of currently executing code. */
 		CallStackNode *callStack;
-
-#ifdef FEATURE_SAMPLER
-
-		/**
-		Sampling profiler interface
-		*/
-		Sampler *sampler() { return &_sampler; }
-		void sampleCheck() { _sampler.sampleCheck(); }
-		bool sampling() { return _sampler.sampling; }
-		bool passAllExceptionsToDebugger;
-
-#endif
 
 		CodeContextAtom codeContextAtom;
 
@@ -1300,11 +1295,37 @@ const int kBufferPadding = 16;
 	private:
 		/** search the string intern table */
 		int findString(const wchar *s, int len);
+		int findString(Stringp s);
 
 		/** search the namespace intern table */
 		int findNamespace(Namespacep ns);
 
 	public:
+
+		// String creation. If len is omitted, zero-termination is assumed.
+		Stringp newStringLatin1(const char* str, int len = -1);
+		Stringp newStringUTF8(const char* str, int len = -1);
+		Stringp newStringUTF16(const wchar* str, int len = -1);
+
+		// decodes UTF16LE or UTF16BE.
+		Stringp newStringEndianUTF16(bool littleEndian, const wchar* str, int len = -1);
+		
+		// like newStringLatin1, but the string constant is assumed to remain valid
+		// for the life of the AvmCore. Generally, should only be used for literal
+		// strings, eg newConstantStringLatin1("foo")
+		Stringp newConstantStringLatin1(const char* str);
+
+
+		// variants on the newStringXXX() calls that also intern the string.
+		Stringp internStringLatin1(const char* s, int len = -1);
+		Stringp internStringUTF8(const char* s, int len = -1, bool constant = false);
+		Stringp internStringUTF16(const wchar* s, int len = -1);
+
+		// like internStringLatin1, but the string constant is assumed to remain valid
+		// for the life of the AvmCore. Generally, should only be used for literal
+		// strings, eg internStringLatin1("foo")
+		Stringp internConstantStringLatin1(const char* s);
+
 		/**
 		 * intern the given string atom which has already been allocated
 		 * @param atom
@@ -1316,22 +1337,15 @@ const int kBufferPadding = 16;
 		Stringp internDouble(double d);
 		Stringp internUint32(uint32 ui);
 
-		/**
-		 * intern the given string and allocate it on the heap if necessary
-		 * @param s
-		 * @return
-		 */
-		Stringp internAlloc(const wchar *s, int len);
-		Stringp internAllocUtf8(const byte *s, int len);
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		/**
 		 * intern without allocating memory, returns NULL if its not already interned
 		 */
 		Stringp findInternedString(const char *s, int len);
 #endif
 
-		bool getIndexFromAtom (Atom a, uint32 *result) const
+		bool getIndexFromAtom(Atom a, uint32 *result) const
 		{
 			if (AvmCore::isInteger(a))
 			{
@@ -1363,18 +1377,10 @@ const int kBufferPadding = 16;
 		Namespacep newPublicNamespace(Stringp uri) { return newNamespace(uri); }
 		NamespaceSet* newNamespaceSet(int nsCount);
 
-		// String creation
-		Stringp newString(const char *str) const;
-		Stringp newString(const wchar *str) const;
-		Stringp newString(const char *str, int len) const;		
-		void freeString(Stringp s) {
-			delete s;
-		}
-
 		Stringp uintToString(uint32 i);
 		Stringp intToString(int i);
 		Stringp doubleToString(double d);
-		Stringp concatStrings(Stringp s1, Stringp s2) const;
+		Stringp concatStrings(Stringp s1, Stringp s2);
 		
 		Atom uintToAtom(uint32 n);
 		Atom intToAtom(int n);
@@ -1399,9 +1405,11 @@ const int kBufferPadding = 16;
 		static void decrementAtomRegion(Atom *ar, int length);
 #endif
 
-#ifdef AVMPLUS_VERBOSE
 	public:
+#ifdef AVMPLUS_VERBOSE
 		Stringp format(Atom atom);
+#endif
+#if VMCFG_METHOD_NAMES
 		Stringp formatAtomPtr(Atom atom);
 #endif
 
@@ -1487,7 +1495,7 @@ const int kBufferPadding = 16;
 		{
 			friend class AvmCore;
 		public:
-			AllocaAutoPtr() : unwindPtr(NULL), core(NULL) {}  // initialization of 'core' to pacify gcc
+			AllocaAutoPtr() : core(NULL), unwindPtr(NULL) {}  // initialization of 'core' to pacify gcc
 			~AllocaAutoPtr() { if (unwindPtr) core->allocaPopTo(unwindPtr); }
 		private:
 			AvmCore* core;
@@ -1533,11 +1541,6 @@ const int kBufferPadding = 16;
 			AvmCore *core;
 		};
 		GCInterface gcInterface;
-
-#ifdef FEATURE_SAMPLER
-	private:
-		Sampler _sampler;
-#endif
 	};
 }
 

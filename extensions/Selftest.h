@@ -41,6 +41,7 @@
 
 namespace avmplus
 {
+    #include "SelftestClasses.h"
 	class Selftest;
 	
 	// Call 'selftests()' to create a selftest runner, instantiate all the

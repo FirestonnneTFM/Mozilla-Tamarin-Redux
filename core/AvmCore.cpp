@@ -43,7 +43,8 @@
 #include "CodegenMIR.h"
 #endif
 
-#if (defined(_MSC_VER) || defined(__GNUC__)) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
+//GCC only allows intrinsics if sse2 is enabled
+#if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
     #include <emmintrin.h>
 #endif
 
@@ -58,7 +59,7 @@ namespace avmplus
 		{
 			console << "setCacheSize: bindings " << cs.bindings << " metadata " << cs.metadata << '\n';
 		}
-		#endif // DEBUGGER
+		#endif 
 
 		//printf("setCacheSize: bindings %d metadata %d\n",cs.bindings,cs.metadata);
 
@@ -70,15 +71,24 @@ namespace avmplus
 	extern AvmCore* g_tmcore;
 #endif
 
-	AvmCore::AvmCore(GC *g) : GCRoot(g), console(NULL), gc(g), 
+	AvmCore::AvmCore(GC* g) : 
+		GCRoot(g), 
+		console(NULL), 
+#ifdef DEBUGGER
+		_debugger(NULL),
+		_profiler(NULL),
+		langID(-1),
+		passAllExceptionsToDebugger(false),
+#endif
+		gc(g), 
  		m_tbCache(new (g) QCache(0, g)),	// bindings: unlimited by default
  		m_tmCache(new (g) QCache(1, g)),	// metadata: limited to 1 by default
 #ifdef AVMPLUS_MIR
 		mirBuffers(g, 4), 
 #endif
 		gcInterface(g)
-#ifdef FEATURE_SAMPLER
-		,_sampler(g)
+#ifdef DEBUGGER
+		, _sampler(NULL)
 #endif
 #ifdef AVMPLUS_VERIFYALL
 		,verifyQueue(g, 0)
@@ -92,22 +102,22 @@ namespace avmplus
 		g_tmcore = this;
 #endif
 		// sanity check for all our types
-		AvmAssert (sizeof(int8) == 1);
-		AvmAssert (sizeof(uint8) == 1);		
-		AvmAssert (sizeof(int16) == 2);
-		AvmAssert (sizeof(uint16) == 2);
-		AvmAssert (sizeof(int32) == 4);
-		AvmAssert (sizeof(uint32) == 4);
-		AvmAssert (sizeof(int64) == 8);
-		AvmAssert (sizeof(uint64) == 8);
-		AvmAssert (sizeof(sintptr) == sizeof(void *));
-		AvmAssert (sizeof(uintptr) == sizeof(void *));
+		MMGC_STATIC_ASSERT(sizeof(int8) == 1);
+		MMGC_STATIC_ASSERT(sizeof(uint8) == 1);		
+		MMGC_STATIC_ASSERT(sizeof(int16) == 2);
+		MMGC_STATIC_ASSERT(sizeof(uint16) == 2);
+		MMGC_STATIC_ASSERT(sizeof(int32) == 4);
+		MMGC_STATIC_ASSERT(sizeof(uint32) == 4);
+		MMGC_STATIC_ASSERT(sizeof(int64) == 8);
+		MMGC_STATIC_ASSERT(sizeof(uint64) == 8);
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == sizeof(void *));
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == sizeof(void *));
 		#ifdef AVMPLUS_64BIT
-		AvmAssert (sizeof(sintptr) == 8);
-		AvmAssert (sizeof(uintptr) == 8);		
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == 8);
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == 8);		
 		#else
-		AvmAssert (sizeof(sintptr) == 4);
-		AvmAssert (sizeof(uintptr) == 4);		
+		MMGC_STATIC_ASSERT(sizeof(sintptr) == 4);
+		MMGC_STATIC_ASSERT(sizeof(uintptr) == 4);		
 		#endif	
 			
 		// set default mode flags
@@ -133,13 +143,7 @@ namespace avmplus
 
         #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			// jit flag forces use of MIR/LIR instead of interpreter
-            #ifdef AVMPLUS_ARM
-                // default is -Dinterp until jit fully debugged
-                config.runmode = RM_interp_all;
-            #else
-    			config.runmode = RM_mixed;
-            #endif
-
+    	    config.runmode = RM_mixed;
 			config.cseopt = true;
 
 			#ifdef AVMPLUS_VERBOSE
@@ -170,22 +174,7 @@ namespace avmplus
 
 		minstack           = 0;
 
-#ifdef FEATURE_SAMPLER
-		_sampler.setCore(this);
-#endif
-
-		#ifdef DEBUGGER
-		langID			   = -1;
-		debugger           = NULL;
-		profiler		   = NULL;
-		passAllExceptionsToDebugger = false;
-        #endif /* DEBUGGER */
-
 		callStack          = NULL;
-
-#ifdef FEATURE_SAMPLER
-		MMgc::m_sampler = sampler();
-#endif
 
 		interrupted        = false;
 
@@ -202,60 +191,53 @@ namespace avmplus
 
 		numStrings = 1024; // power of 2
 		strings = new DRC(Stringp)[numStrings];
-		memset(strings, 0, numStrings*sizeof(Stringp));
+		VMPI_memset(strings, 0, numStrings*sizeof(Stringp));
 
 		numNamespaces = 1024;  // power of 2
 		namespaces = new DRC(Namespacep)[numNamespaces];
-		memset(namespaces, 0, numNamespaces*sizeof(Namespacep));
+		VMPI_memset(namespaces, 0, numNamespaces*sizeof(Namespacep));
 
 		console.setCore(this);
 		
-        kEmptyString = constantString("");
-		kconstructor = constantString("constructor");
-        kundefined = constantString("undefined");
-        knull = constantString("null");
-        ktrue = constantString("true");
-        kfalse = constantString("false");
-		ktoString = constantString("toString");
-		ktoLocaleString = constantString("toLocaleString");
-		kvalueOf = constantString("valueOf");
-		klength = constantString("length");
+        kEmptyString = internConstantStringLatin1("");
+		kconstructor = internConstantStringLatin1("constructor");
+        kundefined = internConstantStringLatin1("undefined");
+        knull = internConstantStringLatin1("null");
+        ktrue = internConstantStringLatin1("true");
+        kfalse = internConstantStringLatin1("false");
+		ktoString = internConstantStringLatin1("toString");
+		ktoLocaleString = internConstantStringLatin1("toLocaleString");
+		kvalueOf = internConstantStringLatin1("valueOf");
+		klength = internConstantStringLatin1("length");
 
-        kobject = constantString("object");
-        kboolean = constantString("boolean");
-        knumber = constantString("number");
-        kstring = constantString("string");
-        kxml = constantString("xml");
-		kfunction = constantString("function");
-		kglobal = constantString("global");
-		kcallee = constantString("callee");
+        kobject = internConstantStringLatin1("object");
+        kboolean = internConstantStringLatin1("boolean");
+        knumber = internConstantStringLatin1("number");
+        kstring = internConstantStringLatin1("string");
+        kxml = internConstantStringLatin1("xml");
+		kfunction = internConstantStringLatin1("function");
+		kglobal = internConstantStringLatin1("global");
+		kcallee = internConstantStringLatin1("callee");
 
-		kuri = constantString("uri");
-		kprefix = constantString("prefix");
+		kuri = internConstantStringLatin1("uri");
+		kprefix = internConstantStringLatin1("prefix");
 		kNaN = doubleToAtom(MathUtils::nan());
-		kNeedsDxns = constantString("NeedsDxns");
-		kAsterisk = constantString("*");
-		kVersion = constantString("Version");
-		kVector = constantString("Vector.<");
+		kNeedsDxns = internConstantStringLatin1("NeedsDxns");
+		kAsterisk = internConstantStringLatin1("*");
+		kVersion = internConstantStringLatin1("Version");
+		kVector = internConstantStringLatin1("Vector.<");
 
-#ifdef AVMPLUS_VERBOSE
-		knewline = newString("\n");
-		krightbracket = newString("]");
-		kleftbracket = newString("[");
-		kcolon = newString(":");
-		ktabat = newString("\tat ");
-		kparens = newString("()");
+#if VMCFG_METHOD_NAMES
+		kanonymousFunc = newConstantStringLatin1("<anonymous>");
 #endif
-#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
-		kanonymousFunc = newString("<anonymous>");
-#endif
+
 		for (int i = 0; i < 128; i++)
 		{
 			char singleChar = (char)i;
-			// call newString() with an explicit length of 1; required
+			// call String::createLatin1() with an explicit length of 1; required
 			// when singleChar==0, because in that case we need a string
 			// which is a single character with value 0
-			cachedChars[i] = internString(newString(&singleChar, 1));
+			cachedChars[i] = internString(String::createLatin1(this, &singleChar, 1));
 		}
 
 		booleanStrings[0] = kfalse;
@@ -284,6 +266,10 @@ namespace avmplus
 
 	AvmCore::~AvmCore()
 	{		
+#ifdef DEBUGGER
+		delete _sampler;
+		_sampler = NULL;
+#endif
 		// Free the numbers and strings tables
 		delete [] strings;
 		if (gc) 
@@ -303,7 +289,7 @@ namespace avmplus
 #ifdef AVMPLUS_MIR
 		// free all the mir buffers
 		while(mirBuffers.size() > 0)
-			mirBuffers.removeFirst()->free();
+			delete mirBuffers.removeFirst();
 #endif
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 		AvmAssert(g_tmcore == this);
@@ -313,10 +299,19 @@ namespace avmplus
 		WordcodeTranslator::swprofStop();
 #endif
 		allocaShutdown();
+#ifdef DEBUGGER
+		delete _profiler;
+		_profiler = NULL;
+#endif
 	}
 
 	void AvmCore::initBuiltinPool()
 	{
+		#ifdef DEBUGGER
+		_debugger = createDebugger();
+		_profiler = createProfiler();
+		#endif
+	
 		builtinDomain = new (GetGC()) Domain(this, NULL);
 		
 		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this, NULL);
@@ -331,9 +326,13 @@ namespace avmplus
 		for(int i=0, size=builtinPool->scripts.size(); i<size; i++)
 			builtinPool->scripts[i]->flags |= AbstractFunction::NON_INTERRUPTABLE;
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		// sampling can begin now, requires builtinPool
-		_sampler.initSampling();
+		if (_debugger)
+		{
+			_sampler = new Sampler(this);
+			_sampler->initSampling();
+		}
 #endif
 	}
 	
@@ -427,6 +426,14 @@ namespace avmplus
 			scriptVTable->init = scriptEnv;
 			exportDefs(scriptTraits, scriptEnv);
 		}
+
+#ifdef AVMPLUS_VERIFYALL
+		if (config.verifyall) {
+			for (int i=0, n=pool->scriptCount; i < n; i++)
+				enqTraits(pool->scripts[i]->declaringTraits);
+			verifyEarly(toplevel);
+		}
+#endif
 
 		return main;
 	}
@@ -525,10 +532,11 @@ namespace avmplus
 												include_versions);
 
         #ifdef DEBUGGER
-		if (debugger) {
-			debugger->processAbc(pool, code);
+		if (_debugger) 
+		{
+			_debugger->processAbc(pool, code);
 		}
-        #endif /* DEBUGGER */
+        #endif 
 
 		return pool;
 	}
@@ -819,7 +827,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	void AvmCore::throwException(Exception *exception)
 	{
 		#ifdef DEBUGGER
-		if (debugger && !(exception->flags & Exception::SEEN_BY_DEBUGGER))
+		if (_debugger && !(exception->flags & Exception::SEEN_BY_DEBUGGER))
 		{
 			// I'm going to set the SEEN_BY_DEBUGGER flag now, before calling
 			// filterException(), just to avoid reentrancy problems (we don't
@@ -833,7 +841,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			{
 				// filterException() returns 'true' if it somehow let the user know
 				// about the exception, 'false' if it ignored the exception.
-				if (debugger->filterException(exception, willBeCaught))
+				if (_debugger->filterException(exception, willBeCaught))
 					exception->flags |= Exception::SEEN_BY_DEBUGGER;
 				else
 					exception->flags &= ~Exception::SEEN_BY_DEBUGGER;
@@ -860,11 +868,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	 */
 	void AvmCore::throwAtom(Atom atom)
 	{
-		throwException(new (GetGC()) Exception(atom
-#ifdef DEBUGGER
-			, this
-#endif
-			));
+		throwException(new (GetGC()) Exception(this, atom));
 	}
 	
 #ifdef DEBUGGER
@@ -979,7 +983,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int id = mapTable[2*lo];
 
 		if (id == errorID) {
-			return newString(errorTable[index]);
+			return newStringUTF8(errorTable[index]);
 		} else {
 			return NULL;
 		}
@@ -988,22 +992,26 @@ return the result of the comparison ToPrimitive(x) == y.
 	
 	String* AvmCore::getErrorMessage(int errorID)
 	{
-		Stringp buffer = newString("Error #");
+		Stringp buffer = newConstantStringLatin1("Error #");
 		buffer = concatStrings(buffer, internInt(errorID));
 
         #ifdef DEBUGGER
-		Stringp out = findErrorMessage(errorID,
-									   errorMappingTable,
-									   errorConstants[determineLanguage()],
-									   kNumErrorConstants);
-		if (out) 
+		if (_debugger)
 		{
-			buffer = concatStrings(buffer, newString(": "));
-			buffer = concatStrings(buffer, out);
-		}
-		else
-		{
-			AvmAssertMsg(0, "errorID not found in the message table; check ErrorConstants.cpp you may need to regenerate it");
+			// errorConstants is declared char* but is encoded as UTF8
+			Stringp out = findErrorMessage(errorID,
+										   errorMappingTable,
+										   errorConstants[determineLanguage()],
+										   kNumErrorConstants);
+			if (out) 
+			{
+				buffer = concatStrings(buffer, newConstantStringLatin1(": "));
+				buffer = concatStrings(buffer, out);
+			}
+			else
+			{
+				AvmAssertMsg(0, "errorID not found in the message table; check ErrorConstants.cpp you may need to regenerate it");
+			}
 		}
 		#endif
 
@@ -1024,20 +1032,12 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	String* AvmCore::toErrorString(int d)
 	{
-		String* s = NULL;
 	#ifdef DEBUGGER
-		wchar buffer[256];
-		buffer[255] = '\0';
-		int len;
-		if (MathUtils::convertIntegerToString(d, buffer, len)) 
-			s = this->newString(buffer);
-		else
-			s = kEmptyString;
+		return MathUtils::convertIntegerToStringBase10(this, d, MathUtils::kTreatAsSigned);
 	#else
-		s = kEmptyString;
 		(void)d;
+		return kEmptyString;
 	#endif /* DEBUGGER */
-		return s;
 	}
 
 	String* AvmCore::toErrorString(const char* s)
@@ -1045,7 +1045,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		String* out = NULL;
 	#ifdef DEBUGGER
 		if (s)
-			out = this->newString(s);
+			out = this->newStringUTF8(s);
 		else
 			out = kEmptyString;
 	#else
@@ -1060,7 +1060,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		String* out = NULL;
 	#ifdef DEBUGGER
 		if (s)
-			out = this->newString(s);
+			out = this->newStringUTF16(s);
 		else
 			out = kEmptyString;
 	#else
@@ -1135,14 +1135,14 @@ return the result of the comparison ToPrimitive(x) == y.
 		#else
 		if (!t)
 		{
-			return newString("*");
+			return newConstantStringLatin1("*");
 		}
 
 		String* s = NULL;
 		if (t->base == traits.class_itraits)
 		{
 			t = t->itraits;
-			s = newString("class ");
+			s = newConstantStringLatin1("class ");
 		}
 		else
 		{
@@ -1150,12 +1150,12 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 
 		if (t->ns != NULL && t->ns != publicNamespace)
-			s = concatStrings(s, concatStrings(toErrorString(t->ns), newString("."))); 
+			s = concatStrings(s, concatStrings(toErrorString(t->ns), newConstantStringLatin1("."))); 
 
 		if (t->name)
 			s = concatStrings(s, t->name);
 		else
-			s = concatStrings(s, newString("(null)"));
+			s = concatStrings(s, newConstantStringLatin1("(null)"));
 		return s;
 		#endif /* DEBUGGER */
 	}
@@ -1168,15 +1168,15 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (errorMessage)
 		{
 			#ifdef DEBUGGER
-			UTF8String *errorUTF8 = errorMessage->toUTF8String();		
-			const char *format = errorUTF8->c_str();
+			StUTF8String errorUTF8(errorMessage);		
+			const char *format = errorUTF8.c_str();
 			
 			// This block is enclosed in {} to force
 			// StringBuffer destructor to unwind.
 			{
 				StringBuffer buffer(this);
 				buffer.formatP( format, arg1, arg2, arg3);
-				out = newString(buffer.c_str());
+				out = newStringUTF8(buffer.c_str());
 			}
 			#else	
 			/** 
@@ -1418,7 +1418,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			out << "invalid multiname index " << index;
+			out << "invalid multiname index " << (uint32_t)index;
 		}
 	}
 
@@ -1427,8 +1427,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		pc++;
 		switch (opcode)
 		{
-		case OP_debugfile:
-		case OP_pushstring:
+			case OP_debugfile:
+			case OP_pushstring:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1437,10 +1437,10 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << s;
 				break;
 			}
-        case OP_pushbyte:
-            buffer << opcodeInfo[opcode].name << " " << int(int8(*pc));
-            break;
-		case OP_pushint:
+			case OP_pushbyte:
+				buffer << opcodeInfo[opcode].name << " " << int(int8(*pc));
+				break;
+			case OP_pushint:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1448,7 +1448,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << pool->cpool_int[index];
 				break;
 			}
-		case OP_pushuint:
+			case OP_pushuint:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1456,7 +1456,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << (double)pool->cpool_uint[index];
 				break;
 			}
-		case OP_pushdouble:
+			case OP_pushdouble:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1464,7 +1464,7 @@ return the result of the comparison ToPrimitive(x) == y.
 					buffer << " " << *pool->cpool_double[index];
 				break;
 			}
-		case OP_pushnamespace:
+			case OP_pushnamespace:
 			{
 				buffer << opcodeInfo[opcode].name;
 				uint32 index = readU30(pc);
@@ -1474,28 +1474,28 @@ return the result of the comparison ToPrimitive(x) == y.
                 }
 				break;
 			}
-		case OP_getsuper: 
-		case OP_setsuper: 
-		case OP_getproperty: 
-		case OP_setproperty: 
-		case OP_initproperty: 
-		case OP_findpropstrict: 
-		case OP_findproperty:
-		case OP_finddef:
-		case OP_deleteproperty: 
-		case OP_istype: 
-		case OP_coerce: 
-		case OP_astype: 
+			case OP_getsuper: 
+			case OP_setsuper: 
+			case OP_getproperty: 
+			case OP_setproperty: 
+			case OP_initproperty: 
+			case OP_findpropstrict: 
+			case OP_findproperty:
+			case OP_finddef:
+			case OP_deleteproperty: 
+			case OP_istype: 
+			case OP_coerce: 
+			case OP_astype: 
 			{
 				buffer << opcodeInfo[opcode].name << " ";
 				formatMultiname(buffer, readU30(pc), pool);
 				break;
 			}
-		case OP_callproperty:
-		case OP_callpropvoid:
-		case OP_callproplex:
-		case OP_callsuper:
-		case OP_callsupervoid:
+			case OP_callproperty:
+			case OP_callpropvoid:
+			case OP_callproplex:
+			case OP_callsuper:
+			case OP_callsupervoid:
 			{
 				uint32 index = readU30(pc);
 				int argc = readU30(pc);
@@ -1504,8 +1504,8 @@ return the result of the comparison ToPrimitive(x) == y.
 				buffer << " " << argc;
 				break;
 			}
-		case OP_callstatic:
-		case OP_newfunction:
+			case OP_callstatic:
+			case OP_newfunction:
 			{
 				int method_id = readU30(pc);
 				AbstractFunction* f = pool->methods[method_id];
@@ -1514,21 +1514,22 @@ return the result of the comparison ToPrimitive(x) == y.
 				{
 					buffer << " argc=" << (int)readU30(pc); // argc
 				}
-				if (f->name)
-					buffer << " " << f->name;
+				Stringp fname = f->getMethodName();
+				if (fname)
+					buffer << " " << fname;
 				else
 					buffer << " null";
 				break;
 			}
-
-		case OP_newclass: 
+				
+			case OP_newclass: 
 			{
                 uint32_t id = readU30(pc);
 				AbstractFunction* c = pool->cinits[id];
 				buffer << opcodeInfo[opcode].name << " " << c;
 				break;
 			}
-		case OP_lookupswitch:
+			case OP_lookupswitch:
 			{
 				ptrdiff_t target = off + readS24(pc);
 				pc += 3;
@@ -1542,62 +1543,308 @@ return the result of the comparison ToPrimitive(x) == y.
 				}
 				break;
 			}
-			break;
-
-      case OP_ifnlt:
-      case OP_ifnle:
-      case OP_ifngt:
-      case OP_ifnge:         
-		case OP_jump:
-		case OP_iftrue:
-		case OP_iffalse:
-		case OP_ifeq:
-		case OP_ifge:
-		case OP_ifgt:
-		case OP_ifle:
-		case OP_iflt:
-		case OP_ifne:
-		case OP_ifstricteq:
-		case OP_ifstrictne:
+				break;
+				
+			case OP_ifnlt:
+			case OP_ifnle:
+			case OP_ifngt:
+			case OP_ifnge:         
+			case OP_jump:
+			case OP_iftrue:
+			case OP_iffalse:
+			case OP_ifeq:
+			case OP_ifge:
+			case OP_ifgt:
+			case OP_ifle:
+			case OP_iflt:
+			case OP_ifne:
+			case OP_ifstricteq:
+			case OP_ifstrictne:
 			{
 				int imm24 = 0, imm8 = 0;
 				unsigned int imm30 = 0, imm30b = 0;
 				const byte* p2 = pc-1;
 				readOperands(p2, imm30, imm24, imm30b, imm8);
 				int insWidth = (int)(p2-pc);
-
+				
 				ptrdiff_t target = off + insWidth + imm24 + 1;
 				buffer << opcodeInfo[opcode].name << " " << (double)target;
 				break;
 			}
-		default:
-			switch (opcodeInfo[opcode].operandCount)
-			{
 			default:
-				buffer << opcodeInfo[opcode].name;
-				break;
-			case 1:
+				switch (opcodeInfo[opcode].operandCount) {
+				default:
+					buffer << opcodeInfo[opcode].name;
+					break;
+				case 1:
 				{
 					buffer << opcodeInfo[opcode].name
-						<< ' '
-						<< (int)readU30(pc);
+					<< ' '
+					<< (int)readU30(pc);
 				}
-				break;
-			case 2:
+					break;
+				case 2:
 				{
 					int first = readU30(pc);
 					int second = readU30(pc);
 					buffer << opcodeInfo[opcode].name
-						<< ' '
-						<< first
-						<< ' '
-						<< second;
+					<< ' '
+					<< first
+					<< ' '
+					<< second;
 				}
-				break;
+					break;
 			}
 		}
     }
-#endif
+	
+#ifdef AVMPLUS_WORD_CODE
+	void AvmCore::formatBits(PrintWriter& buffer, uint32 bits)
+	{
+		Atom a = (Atom)(intptr_t)(int32)bits;
+		if (isUndefined(a))
+			buffer << "undefined";
+		else if (isBoolean(a))
+			buffer << (boolean(a) ? "true" : "false");
+		else if (isInteger(a))
+			buffer << integer(a);
+		else
+			buffer << "[unknown: " << bits << "]";
+	}
+	
+    void AvmCore::formatOpcode(PrintWriter& buffer, const uintptr_t *pc, WordOpcode opcode, ptrdiff_t off, PoolObject* pool)
+    {
+		pc++;
+		switch (opcode)
+		{
+			case WOP_debugfile:
+			case WOP_pushstring: {
+				buffer << wopAttrs[opcode].name;
+				uint32 index = (uint32)*pc++;
+				if (index < pool->cpool_string.size())
+					buffer << " " << format(pool->cpool_string[index]->atom());
+				else
+					buffer << " OUT OF RANGE: " << index;
+				break;
+			}
+				
+			case WOP_pushbits: {
+				uint32 bits = (uint32)*pc++;
+				buffer << wopAttrs[opcode].name << " ";
+				formatBits(buffer, bits);
+				break;
+			}
+				
+			case WOP_push_doublebits: {
+				union {
+					double d;
+					uint32_t b[2];
+				} u;
+				u.b[0] = (uint32)*pc++;
+				u.b[1] = (uint32)*pc++;
+				buffer << wopAttrs[opcode].name << " " << u.d;
+				break;
+			}
+				
+			case WOP_pushdouble: {
+				buffer << wopAttrs[opcode].name;
+				uint32 index = (uint32)*pc++;
+				if (index < pool->cpool_double.size())
+					buffer << " " << *pool->cpool_double[index];
+				else
+					buffer << " OUT OF RANGE: " << index;
+				break;
+			}
+				
+			case WOP_pushnamespace: {
+				buffer << wopAttrs[opcode].name;
+				uint32 index = (uint32)*pc++;
+				if (index < pool->cpool_ns.size())
+					buffer << " " << pool->cpool_ns[index]->getURI();
+				else
+					buffer << " OUT OF RANGE: " << index;
+				break;
+			}
+
+			case WOP_findpropglobal:
+			case WOP_findpropglobalstrict: {
+				buffer << wopAttrs[opcode].name << " ";
+				formatMultiname(buffer, (uint32)*pc++, pool);
+				buffer << " " << (uint32)*pc++;
+				break;
+			}
+				
+			case WOP_getsuper: 
+			case WOP_setsuper: 
+			case WOP_getproperty: 
+			case WOP_setproperty: 
+			case WOP_initproperty: 
+			case WOP_findpropstrict: 
+			case WOP_findproperty:
+			case WOP_finddef:
+			case WOP_deleteproperty: 
+			case WOP_istype: 
+			case WOP_coerce: 
+			case WOP_astype: {
+				buffer << wopAttrs[opcode].name << " ";
+				formatMultiname(buffer, (uint32)*pc++, pool);
+				break;
+			}
+
+			case WOP_callproperty:
+			case WOP_callpropvoid:
+			case WOP_callproplex:
+			case WOP_callsuper:
+			case WOP_callsupervoid: {
+				uint32 index = (uint32)*pc++;
+				int argc = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " ";
+				formatMultiname(buffer, index, pool);
+				buffer << " " << argc;
+				break;
+			}
+
+			case WOP_callstatic:
+			case WOP_newfunction: {
+				int method_id = (int)*pc++;
+				AbstractFunction* f = pool->methods[method_id];
+				buffer << wopAttrs[opcode].name << " method_id=" << method_id;
+				if (opcode == WOP_callstatic)
+					buffer << " argc=" << (int)*pc++; // argc
+				Stringp fname = f->getMethodName();
+				if (fname)
+					buffer << " " << fname;
+				else
+					buffer << " null";
+				break;
+			}
+				
+			case WOP_newclass: {
+                uint32_t id = (uint32_t)*pc++;
+				AbstractFunction* c = pool->cinits[id];
+				buffer << wopAttrs[opcode].name << " " << c;
+				break;
+			}
+				
+			case WOP_lookupswitch: {
+				ptrdiff_t target = off + *pc++;
+				int maxindex = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " default:" << (int)target << " maxcase:"<<maxindex;
+				for (int i=0; i <= maxindex; i++)
+				{
+					target = off + *pc++;
+					buffer << " " << (int)target;
+				}
+				break;
+			}
+				
+			case WOP_ifnlt:
+			case WOP_ifnle:
+			case WOP_ifngt:
+			case WOP_ifnge:         
+			case WOP_jump:
+			case WOP_iftrue:
+			case WOP_iffalse:
+			case WOP_ifeq:
+			case WOP_ifge:
+			case WOP_ifgt:
+			case WOP_ifle:
+			case WOP_iflt:
+			case WOP_ifne:
+			case WOP_ifstricteq:
+			case WOP_ifstrictne: {
+				int offset = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " " << (uint32)(off + 2 + offset);
+				break;
+			}
+
+#ifdef AVMPLUS_PEEPHOLE_OPTIMIZER
+			case WOP_subtract_lb:
+			case WOP_multiply_lb:
+			case WOP_divide_lb:
+			case WOP_bitand_lb:
+			case WOP_bitor_lb:
+			case WOP_bitxor_lb: {
+				uint32 r1 = (uint32)*pc++;
+				uint32 b1 = (uint32)*pc++;
+				buffer << wopAttrs[opcode].name << " " << r1 << " ";
+				formatBits(buffer, b1);
+				break;
+			}
+				
+			case WOP_iflt_ll:
+			case WOP_ifnlt_ll:
+			case WOP_ifle_ll:
+			case WOP_ifnle_ll:
+			case WOP_ifgt_ll:
+			case WOP_ifngt_ll:
+			case WOP_ifge_ll:
+			case WOP_ifnge_ll:
+			case WOP_ifeq_ll:
+			case WOP_ifne_ll:
+			case WOP_ifstricteq_ll:
+			case WOP_ifstrictne_ll: {
+				uint32 r1 = (uint32)*pc++;
+				uint32 r2 = (uint32)*pc++;
+				int offset = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " " << r1 << " " << r2 << " " << (uint32)(off + 4 + offset);
+				break;
+			}
+				
+			case WOP_iflt_lb:
+			case WOP_ifnlt_lb:
+			case WOP_ifle_lb:
+			case WOP_ifnle_lb:
+			case WOP_ifgt_lb:
+			case WOP_ifngt_lb:
+			case WOP_ifge_lb:
+			case WOP_ifnge_lb:
+			case WOP_ifeq_lb:
+			case WOP_ifne_lb:
+			case WOP_ifstricteq_lb:
+			case WOP_ifstrictne_lb: {
+				uint32 r1 = (uint32)*pc++;
+				uint32 b1 = (uint32)*pc++;
+				int offset = (int)*pc++;
+				buffer << wopAttrs[opcode].name << " " << r1 << " ";
+				formatBits(buffer, b1);
+				buffer << " " << (uint32)(off + 4 + offset);
+				break;
+			}
+#endif // AVMPLUS_PEEPHOLE_OPTIMIZER
+
+			default:
+				switch (wopAttrs[opcode].width) {
+				case 0: {
+					buffer << "UNKNOWN: " << opcode;
+					break;
+				}
+				default:
+					buffer << wopAttrs[opcode].name;
+					break;
+				case 2:
+				{
+					buffer << wopAttrs[opcode].name
+					<< ' '
+					<< (int)*pc++;
+					break;
+				}
+				case 3:
+				{
+					int first = (int)*pc++;
+					int second = (int)*pc++;
+					buffer << wopAttrs[opcode].name
+					<< ' '
+					<< first
+					<< ' '
+					<< second;
+					break;
+				}
+			}
+		}
+    }
+#endif // AVMPLUS_WORD_CODE
+#endif // AVMPLUS_VERBOSE
 
 	ExceptionHandler* AvmCore::beginCatch(ExceptionFrame *ef,
 		MethodInfo *info, sintptr pc, Exception *exception)
@@ -1811,12 +2058,17 @@ return the result of the comparison ToPrimitive(x) == y.
 				return kundefined;
 			case kBooleanType:
 				return booleanStrings[atom>>3];
-			case kIntegerType:
+			case kIntegerType: {
 #ifdef AVMPLUS_64BIT
-				return intToString (int(intptr_t(atom)>>3));
+				intptr_t val = (intptr_t)(atom>>3);
+				if (val > 0x7fffffff)
+					return uintToString((uint32_t)val);
+				else
+					return intToString((int32_t)val);
 #else
 				return intToString (int(sint32(atom)>>3));
 #endif
+			}
 			case kDoubleType:
 			default: // number
 				return doubleToString(atomToDouble(atom));
@@ -2267,7 +2519,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (isNullOrUndefined(arg))
 			return false;
 
-		Stringp p = string(arg);
+		StringIndexer p(string(arg));
 
 		// http://www.w3.org/TR/2004/REC-xml-20040204/#NT-NameChar
 
@@ -2279,13 +2531,13 @@ return the result of the comparison ToPrimitive(x) == y.
 		// According to the Mozilla testcase...
 		// e4x excludes ':'
 
-		wchar c = (*p)[0];
+		wchar c = p[0];
 		if (!isLetter (c) && c != '_' /*&& c != ':'*/)
 			return false;		
 
 		for (int i = 1; i < p->length(); i++)
 		{
-			wchar c = (*p)[i];
+			wchar c = p[i];
 
 			if (isDigit(c) || isLetter(c) || (c == '.') || (c == '-') || (c == '_') || /*(c != ':') ||*/
 				isCombiningChar (c) || isExtender(c))
@@ -2339,8 +2591,9 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	Stringp AvmCore::EscapeElementValue (const Stringp s, bool removeLeadingTrailingWhitespace)
+	Stringp AvmCore::EscapeElementValue(const Stringp _s, bool removeLeadingTrailingWhitespace)
 	{
+		StringIndexer s(_s);
 		StringBuffer output(this);
 
 		int i = 0;
@@ -2350,7 +2603,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			// finding trailing whitespace
 			while (last >= 0)
 			{
-				if (!String::isSpace ((*s)[last]))
+				if (!String::isSpace(s[last]))
 					break;
 
 				last--;
@@ -2362,14 +2615,14 @@ return the result of the comparison ToPrimitive(x) == y.
 			// skip leading whitespace
 			for (i = 0; i <= last; i++)
 			{
-				if (!String::isSpace ((*s)[i]))
+				if (!String::isSpace(s[i]))
 					break;
 			}
 		}
 
 		while (i <= last)
 		{
-			switch ((*s)[i])
+			switch (s[i])
 			{
 			case '<':
 				output << "&lt;";
@@ -2381,24 +2634,24 @@ return the result of the comparison ToPrimitive(x) == y.
 				output << "&amp;";
 				break;
 			default:
-				output << ((*s)[i]);
+				output << (s[i]);
 			}
 
 			i++;
 		}
 
-		return newString (output.c_str());
+		return newStringUTF8(output.c_str());
 	}
 
-	Stringp AvmCore::EscapeAttributeValue (Atom v)
+	Stringp AvmCore::EscapeAttributeValue(Atom v)
 	{
 		StringBuffer output(this);
 
-		Stringp s = string (v);
+		StringIndexer s(string(v));
 
 		for (int i = 0; i < s->length(); i++)
 		{
-			switch ((*s)[i])
+			switch (s[i])
 			{
 			case '"':
 				output << "&quot;";
@@ -2419,11 +2672,11 @@ return the result of the comparison ToPrimitive(x) == y.
 				output << "&#x9;";
 				break;
 			default:
-				output << ((*s)[i]);
+				output << (s[i]);
 			}
 		}
 
-		return newString (output.c_str());
+		return newStringUTF8(output.c_str());
 	}
 
 	XMLObject *AvmCore::atomToXMLObject (Atom atm) 
@@ -2548,41 +2801,21 @@ return the result of the comparison ToPrimitive(x) == y.
 				rehashNamespaces(numNamespaces);
 		}
 
-#ifdef FEATURE_SAMPLER
-		_sampler.presweep();
+#ifdef DEBUGGER
+		if (_sampler)
+			_sampler->presweep();
 #endif
     }
 
 	void AvmCore::postsweep()
 	{
-#ifdef FEATURE_SAMPLER
-		_sampler.postsweep();
+#ifdef DEBUGGER
+		if (_sampler)
+			_sampler->postsweep();
 #endif
 	}
 
-
-	bool wcharEquals(const wchar *s1, const wchar *s2)
-	{
-		while (*s1) {
-			if (*s1 != *s2) {
-				return false;
-			}
-			s1++;
-			s2++;
-		}
-		return true;
-	}
-
-	int hashString(const wchar *ptr, int len)
-	{
-		int hashCode = 0;
-		while (len--) {
-			hashCode = (hashCode >> 28) ^ (hashCode << 4) ^ *ptr++;
-		}
-		return hashCode;
-	}
-
-    int AvmCore::findString(const wchar *s, int len)
+	int AvmCore::findString(Stringp s)
     {
         int m = numStrings;
 		// 80% load factor
@@ -2594,7 +2827,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 
         // compute the hash function
-        int hashCode = hashString(s, len);
+        int hashCode = s->hashCode();
 
 		int bitMask = m - 1;
 
@@ -2604,7 +2837,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		Stringp k;
 		if (!deletedCount)
 		{
-			while ((k=strings[i]) != NULL && !k->FastEquals(s,len)) {
+			while ((k=strings[i]) != NULL && k->Compare(*s) != 0) {
 				i = (i + (n++)) & bitMask; // quadratic probe
 			}
 		}
@@ -2620,7 +2853,59 @@ return the result of the comparison ToPrimitive(x) == y.
 						iFirstDeletedSlot = i;
 					}
 				}
-				else if (k->FastEquals (s, len))
+				else if (k->Compare(*s) == 0)
+				{
+					return i;
+				}
+				i = (i + (n++)) & bitMask; // quadratic probe
+			}
+
+			if ((k == NULL) && (iFirstDeletedSlot != -1))
+				return iFirstDeletedSlot;
+
+		}
+        return i;
+    }
+
+    int AvmCore::findString(const wchar *s, int len)
+    {
+        int m = numStrings;
+		// 80% load factor
+		if (5*(stringCount+deletedCount+1) > 4*m) {
+			if (2*stringCount > m) // 50%
+			    rehashStrings(m = m << 1);
+			else
+				rehashStrings(m);
+		}
+
+        // compute the hash function
+		int hashCode = String::hashCodeUTF16(s, len);
+
+		int bitMask = m - 1;
+
+        // find the slot to use
+        int i = (hashCode&0x7FFFFFFF) & bitMask;
+        int n = 7;
+		Stringp k;
+		if (!deletedCount)
+		{
+			while ((k=strings[i]) != NULL && !k->equalsUTF16(s,len)) {
+				i = (i + (n++)) & bitMask; // quadratic probe
+			}
+		}
+		else
+		{
+			int iFirstDeletedSlot = -1;
+			while ((k=strings[i]) != NULL)
+			{
+				if (k == AVMPLUS_STRING_DELETED)
+				{
+					if (iFirstDeletedSlot == -1)
+					{
+						iFirstDeletedSlot = i;
+					}
+				}
+				else if (k->equalsUTF16(s, len))
 				{
 					return i;
 				}
@@ -2661,10 +2946,17 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
         return i;
 	}
-
-	Stringp AvmCore::constantString(const char *s)
+	
+	// note, this assumes Latin-1, not UTF8.
+	Stringp AvmCore::internStringLatin1(const char* s, int len)
 	{
-		return internString(newString(s));
+		return internString(newStringLatin1(s, len));
+	}
+
+	// note, this assumes Latin-1, not UTF8.
+	Stringp AvmCore::internConstantStringLatin1(const char* s)
+	{
+		return internString(newConstantStringLatin1(s));
 	}
 
     /**
@@ -2677,7 +2969,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (o->isInterned())
 			return o;
 
-		int i = findString(o->c_str(), o->length());
+		int i = findString(o);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
 		{
@@ -2687,8 +2979,11 @@ return the result of the comparison ToPrimitive(x) == y.
 				AvmAssert(deletedCount >= 0);
 			}
 			stringCount++;
+			// do not intern kDependent string - may block large master string
+			// from being freed
+			o = o->getIndependentString();
+			o->setInterned();
 			strings[i] = o;
-			o->setInterned(this);
 			return o;
 		}
 		else
@@ -2719,10 +3014,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		if (value >= 0 && index_strings[index] != NULL && index_strings[index]->value == value)
 			return index_strings[index]->string;
 #endif	
-		wchar buffer[65];
-		int len;
-		MathUtils::convertIntegerToString(value, buffer, len);
-		Stringp s = internAlloc(buffer, len);
+		Stringp s = internString(MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned));
 
 #ifdef AVMPLUS_INTERNINT_CACHE
 		if (value >= 0) {
@@ -2734,53 +3026,8 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
 
 		return s;
-
-		// This optimized routine below works fine and is faster than calling
-		// convertIntegerToString but with our support of integer keys in our
-		// HashTables, this routine is no longer on a critical path.  Save some
-		// code by leaving it disabled unless we can show a performance gain by
-		// using it.
-#if 0
-		// optimized case of MathUtils;:convertIntegerToString
-
-		if ((uint32)value == 0x80000000) // MathUtils::convertIntegerToString doesn't deal with this number because you can't negate it.
-		{
-			UnicodeUtils::Utf8ToUtf16((uint8*)"-2147483648", 12, buffer, 24);
-			return internAlloc(buffer, 11);
-		}
-
-		wchar *src = &buffer[39];
-		*src-- = '\0';
-
-		if (value == 0)
-		{
-			*src-- = '0';
-		}
-		else
-		{
-			uint32 uVal;
-			bool negative = (value < 0);
-			if (negative)
-				value = -value;
-
-			uVal = (uint32)value;
-
-			while (uVal != 0)
-			{
-				uint32 j = uVal;
-				uVal = uVal / 10;
-				j -= (uVal * 10);
-
-				*src-- = (j + '0');
-			}
-
-			if (negative)
-				*src-- = '-';
-		}
-
-		return internAlloc(src + 1, &buffer[39] - src - 1);
-#endif
     }
+
 	Stringp AvmCore::internUint32 (uint32 ui)
 	{ 
 		if (ui & 0x80000000)
@@ -2791,14 +3038,10 @@ return the result of the comparison ToPrimitive(x) == y.
 
     Stringp AvmCore::internDouble(double d)
     {
-	    // Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
-	    wchar buffer[312];
-	    int len;
-	    MathUtils::convertDoubleToString(d, buffer, len);
-	    return internAlloc(buffer, len);
+		return internString(MathUtils::convertDoubleToString(this, d));
     }
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 	Stringp AvmCore::findInternedString(const char *cs, int len8)
 	{
 		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
@@ -2823,25 +3066,10 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 #endif
 
-	Stringp AvmCore::internAllocUtf8(const byte *cs, int len8)
+	Stringp AvmCore::internStringUTF8(const char* cs, int len8, bool constant)
 	{
-		int len16 = UnicodeUtils::Utf8Count((const uint8*)cs, len8);
-		// use alloca to avoid heap allocations where possible
-		wchar *buffer = 0;
-		AvmCore::AllocaAutoPtr _buffer;
-		if (len16 < 1024)
-			buffer = (wchar*) VMPI_alloca(this, _buffer, (len16+1)*sizeof(wchar));
-		
-		Stringp s = NULL;
-		if(!buffer) {
-			s = new (GetGC()) String((const char *)cs, len8, len16);
-			buffer = (wchar*)s->c_str();
-		} else {
-			UnicodeUtils::Utf8ToUtf16((const uint8 *)cs, len8, buffer, len16);
-			buffer[len16] = 0;
-		}
-
-		int i = findString(buffer, len16);
+		Stringp s = String::createUTF8(this, (const utf8_t*)cs, len8, String::kAuto, constant);
+		int i = findString(s);
 		Stringp other;
 		if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
 		{
@@ -2851,23 +3079,18 @@ return the result of the comparison ToPrimitive(x) == y.
 				AvmAssert(deletedCount >= 0);
 			}
 
+			s->setInterned();
 			stringCount++;
-			if(!s)
-				s = new (GetGC()) String(buffer, len16);
 			strings[i] = s;
-			s->setInterned(this);
 			return s;
 		}
 		else
-		{
-			// we know the internal buf has not yet been aliased, so it's safe to explicitly free here.
-			delete s;
 			return other;
-		}
 	}
 
-	Stringp AvmCore::internAlloc(const wchar *s, int len)
+	Stringp AvmCore::internStringUTF16(const wchar* s, int len)
 	{
+		if (len < 0) len = String::Length(s);
         int i = findString(s, len);
 		Stringp other;
         if ((other=strings[i]) <= AVMPLUS_STRING_DELETED)
@@ -2882,7 +3105,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			DRC(Stringp) *oldStrings = strings;
 #endif
 
-			other = new (GetGC()) String(s,len);
+			other = newStringUTF16(s, len);
 			
 #ifdef DEBUGGER
 			// re-find if String ctor caused rehash
@@ -2891,7 +3114,7 @@ return the result of the comparison ToPrimitive(x) == y.
 #endif
 			strings[i] = other;
 			stringCount++;
-			other->setInterned(this);
+			other->setInterned();
 		}
 		return other;
 	}
@@ -2904,7 +3127,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int oldStringCount = numStrings;
 
 		strings = new DRC(Stringp)[newlen];
-		memset(strings, 0, newlen*sizeof(Stringp));
+		VMPI_memset(strings, 0, newlen*sizeof(Stringp));
 		numStrings = newlen;
 
 #ifdef _DEBUG // debug sanity checks
@@ -2928,7 +3151,7 @@ return the result of the comparison ToPrimitive(x) == y.
             if (o > AVMPLUS_STRING_DELETED)
             {
 				// compute the hash function
-				int hashCode = hashString(o->c_str(), o->length());
+				int hashCode = (int) o->hashCode();
 
 				// find the slot to use
 				int j = (hashCode&0x7FFFFFFF) & bitMask;
@@ -2967,7 +3190,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		int oldCount = numNamespaces;
 
 		namespaces = new DRC(Namespacep)[newlen];
-		memset(namespaces, 0, newlen*sizeof(Namespacep));
+		VMPI_memset(namespaces, 0, newlen*sizeof(Namespacep));
 		numNamespaces = newlen;
 		
         for (int i=0; i < oldCount; i++)
@@ -3020,7 +3243,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			u = internString (string (uri));
+			u = internString(string (uri));
 		}
 		if (u == kEmptyString)
 		{
@@ -3045,7 +3268,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			p = internString (string (prefix))->atom();
+			p = internString(string (prefix))->atom();
 		}
 
         return new (GetGC()) Namespace(p, u, type);
@@ -3067,7 +3290,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 		else
 		{
-			Stringp u = internString (string (uri));
+			Stringp u = internString(string (uri));
 			Atom prefix = (u == kEmptyString) ? kEmptyString->atom() : undefinedAtom;
 			return new (GetGC()) Namespace (prefix, u, type);
 		}
@@ -3294,7 +3517,7 @@ return the result of the comparison ToPrimitive(x) == y.
 				return atomToScriptObject(atom)->format(this);
 			case kStringType:
 				{
-					Stringp quotes = newString("\"");
+					Stringp quotes = newConstantStringLatin1("\"");
 					return concatStrings(quotes,
 						concatStrings(atomToString((atom&~7)==0 ? kEmptyString->atom() : atom),
 													quotes));
@@ -3303,12 +3526,17 @@ return the result of the comparison ToPrimitive(x) == y.
 				return kundefined;
 			case kBooleanType:
 				return booleanStrings[atom>>3];
-			case kIntegerType:
+			case kIntegerType: {
 #ifdef AVMPLUS_64BIT
-				return intToString((int)(atom>>3));
+				intptr_t val = (intptr_t)(atom>>3);
+				if (val > 0x7fffffff)
+					return uintToString((uint32_t)val);
+				else
+					return intToString((int32_t)val);
 #else
 				return intToString((int)(sint32(atom)>>3));
 #endif
+			}
 			case kDoubleType:
 				AvmAssert(atom != kDoubleType); // this would be a null pointer to double
 				return doubleToString(atomToDouble(atom));
@@ -3319,73 +3547,91 @@ return the result of the comparison ToPrimitive(x) == y.
 			return knull;
 		}
     }
+#endif
 
+#if VMCFG_METHOD_NAMES
 	Stringp AvmCore::formatAtomPtr(Atom atom)
 	{
-		wchar buffer[256];
-		int len;
-		MathUtils::convertIntegerToString((int)atom, buffer, len, 16);
-		return new (GetGC()) String(buffer, len);
+		return MathUtils::convertIntegerToStringRadix(this, atom, 16, MathUtils::kTreatAsUnsigned);
 	}
 #endif
 
-	Stringp AvmCore::newString(const char *s) const
+	Stringp AvmCore::newConstantStringLatin1(const char* s)
 	{
-		int len = String::Length(s);
-		int utf16len = UnicodeUtils::Utf8ToUtf16((const uint8*)s, len, NULL, 0);
-		return new (GetGC()) String(s, len, utf16len);
+		return String::createLatin1(this, s, String::Length(s), String::k8, true);
 	}
 
-	Stringp AvmCore::newString(const char *s, int len) const
+	Stringp AvmCore::newStringLatin1(const char* s, int len)
 	{
-		int utf16len = UnicodeUtils::Utf8ToUtf16((const uint8*)s, len, NULL, 0);
-		return new (GetGC()) String(s, len, utf16len);
+		return String::createLatin1(this, s, len);
 	}
 
-	Stringp AvmCore::newString(const wchar *s) const
+	Stringp AvmCore::newStringUTF8(const char* s, int len)
 	{
-		int len = String::Length(s);
-		return new (GetGC()) String(s, len);
+		return String::createUTF8(this, (const utf8_t*)s, len);
 	}
 
-	Stringp AvmCore::concatStrings(Stringp s1, Stringp s2) const
+	Stringp AvmCore::newStringUTF16(const wchar* s, int len)
+	{
+		return String::createUTF16(this, s, len);
+	}
+
+	inline uint16_t swap16(const uint16_t c)
+	{
+		const uint16_t hi = (c >> 8);
+		const uint16_t lo = (c & 0xff);
+		return (lo << 8) | hi;
+	}
+
+	Stringp AvmCore::newStringEndianUTF16(bool littleEndian, const wchar* s, int len)
+	{
+	#ifdef AVMPLUS_LITTLE_ENDIAN
+		const bool nativeIsLE = true;
+	#else
+		const bool nativeIsLE = false;
+	#endif
+		if (littleEndian == nativeIsLE)
+		{
+			return newStringUTF16(s, len);
+		}
+		else
+		{
+			if (len < 0 && s != NULL)
+				len = String::Length(s);
+
+			if (s == NULL || len == 0)
+				return this->kEmptyString;
+
+			AvmCore::AllocaAutoPtr _swapped;
+			wchar* swapped = (wchar*)VMPI_alloca(this, _swapped, sizeof(wchar)*(len));
+			for (int32 i = 0; i < len; i++)
+			{
+				swapped[i] = swap16(s[i]);
+			}
+			return newStringUTF16(swapped, len);
+		}
+	}
+
+	Stringp AvmCore::concatStrings(Stringp s1, Stringp s2)
 	{
 		if (!s1) s1 = knull;
 		if (!s2) s2 = knull;
-		if (s1->length() == 0) {
-			return s2;
-		} else if (s2->length() == 0) {
-			return s1;
-		}
-		return new (GetGC()) String(s1, s2);
+		return String::concatStrings(s1, s2);
 	}
 
 	Stringp AvmCore::intToString(int value)
 	{
-		wchar buffer[65];
-		int len;
-		MathUtils::convertIntegerToString(value, buffer, len);
-		return new (GetGC()) String(buffer, len);
+		return MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsSigned);
 	}
 
 	Stringp AvmCore::uintToString(uint32 value)
 	{
-		wchar buffer[65];
-		int len;
-		if (value <= 0x7FFFFFFF)
-			MathUtils::convertIntegerToString(value, buffer, len);
-		else
-			MathUtils::convertDoubleToString(value, buffer, len);
-		return new (GetGC()) String(buffer, len);
+		return MathUtils::convertIntegerToStringBase10(this, value, MathUtils::kTreatAsUnsigned);
 	}
 
 	Stringp AvmCore::doubleToString(double d)
 	{
-		// Bug 192033: Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
-		wchar buffer[312];
-		int len;
-		MathUtils::convertDoubleToString(d, buffer, len, MathUtils::DTOSTR_NORMAL,15);
-		return new (GetGC()) String(buffer, len);
+		return MathUtils::convertDoubleToString(this, d, MathUtils::DTOSTR_NORMAL,15);
 	}
 
 	#ifdef DEBUGGER
@@ -3413,7 +3659,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	{
 		StringBuffer buffer(this);		
 		buffer << "Stack Trace:\n" << newStackTrace()->format(this) << '\n';
-		AvmDebugMsg(false, buffer.c_str());
+		AvmDebugMsg(false, (const char*)buffer.c_str());
 	}
 	#endif
 	#endif /* DEBUGGER */
@@ -3714,67 +3960,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	//  only if ToString(ToUint32(P)) is equal to P and ToUint32(P) is not equal to 2^32-1."
 	bool AvmCore::getIndexFromString (Stringp s, uint32 *result)
 	{
-		int len = s->length();
-		if (!len)
-			return false;
-
-		// Don't support 000000 as 0.
-		// We don't support 0x1234 as 1234 in hex since string(1234) doesn't equal '0x1234')
-		// No leading zeros are supported
-
-		// Single 0 is ok
-		const wchar *c = s->c_str();
-		if (*c == '0')
-		{
-			if (len == 1)
-			{
-				*result = 0;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else if ((*c < '0') || (*c > '9'))
-		{
-			return false;
-		}
-
-		// A string that is more than 10 digits (and does not start with 0) 
-		// will always be greater than 2^32-1 (4294967295) or not a numeric string
-		if (len > 10)
-		{
-			return false;
-		}
-
-		uint32 res = 0;
-		int i = 0;
-		while (i < len)
-		{
-			wchar ch = c[i];
-			if (ch < '0' || ch > '9')
-				return false;
-
-			res = res * 10 + (ch - '0');
-			i++;
-		}
-
-		*result = res;
-		// Our input string length is less then 10 digits so we now
-		// our output is in the valid range up to 999,999,999.
-		if (len < 10)
-		{
-			return true;
-		}
-
-		// At this point we know our string is 10 characters long and is all numeric 
-		// characters.  We need to check it to see if it overflows 2^32 and whether it equals
-		// 2^32-1.  This string comparison works as a numeric comparison since we know our input
-		// string is also ten numeric digits.
-
-		int comp = String::Compare (c, "4294967295", 10);
-		return (comp > 0);
+		return s->parseIndex((uint32_t&) *result);
 	}
 
 	CodeContext* AvmCore::codeContext() const
@@ -3805,7 +3991,8 @@ return the result of the comparison ToPrimitive(x) == y.
 
 	GrowableBuffer* AvmCore::requestNewMirBuffer()
 	{
-		return new (GetGC()) GrowableBuffer(GetGC()->GetGCHeap(),true);
+		MMGC_MEM_TAG("JIT");
+		return new GrowableBuffer(GetGC()->GetGCHeap(),true);
 	}
 
 	void AvmCore::releaseMirBuffer(GrowableBuffer* buffer)
@@ -3980,7 +4167,7 @@ return the result of the comparison ToPrimitive(x) == y.
 	}
 	
 #ifdef AVMPLUS_VERIFYALL
-	void AvmCore::enq(AbstractFunction* f) {
+	void AvmCore::enqFunction(AbstractFunction* f) {
 		if (config.verifyall &&
                 f && !f->isVerified() && 
                 !(f->flags & AbstractFunction::VERIFY_PENDING)) {
@@ -3989,24 +4176,36 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-	void AvmCore::enq(Traits* t) {
+	void AvmCore::enqTraits(Traits* t) {
         if (config.verifyall && !t->isInterface) {
-            enq(t->init);
 			TraitsBindingsp td = t->getTraitsBindings();
+            enqFunction(t->init);
 		    for (int i=0, n=td->methodCount; i < n; i++)
-                enq(td->getMethod(i));
+                enqFunction(td->getMethod(i));
         }
 	}
 
-    void AvmCore::processVerifyQueue(Toplevel* toplevel) {
-		while (!verifyQueue.isEmpty()) {
-			AbstractFunction* f = verifyQueue.removeLast();
-            if (!f->isVerified()) {
-                //console << "pre verify " << f << "\n";
-			    f->verify(toplevel);
-                f->flags = f->flags | AbstractFunction::VERIFIED & ~AbstractFunction::VERIFY_PENDING;
-            }
-		}
+    void AvmCore::verifyEarly(Toplevel* toplevel) {
+        List<AbstractFunction*, LIST_GCObjects> verifyQueue2(GetGC());
+		int verified = 0;
+		do {
+			verified = 0;
+			while (!verifyQueue.isEmpty()) {
+				AbstractFunction* f = verifyQueue.removeLast();
+				if (!f->isVerified()) {
+					if (f->declaringTraits->scope == NULL && f != f->declaringTraits->init) {
+						verifyQueue2.add(f);
+						continue;
+					}
+					verified++;
+					//console << "pre verify " << f << "\n";
+					f->verify(toplevel);
+					f->flags = f->flags | AbstractFunction::VERIFIED & ~AbstractFunction::VERIFY_PENDING;
+				}
+			}
+			while (!verifyQueue2.isEmpty())
+				verifyQueue.add(verifyQueue2.removeLast());
+		} while (verified > 0);
 	}
 #endif
 }

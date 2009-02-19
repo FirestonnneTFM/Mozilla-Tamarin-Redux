@@ -88,9 +88,9 @@ namespace avmplus
 		Domain* domain,
 		const NativeInitializer* natives,
 		const List<Stringp>* keepVersions)
-		: toplevel(toplevel),
-		  domain(domain),
-		  instances(core->GetGC(), 0)
+		: instances(core->GetGC(), 0),
+		  toplevel(toplevel),
+		  domain(domain)
 	{
 		this->core = core;
 		this->code = code;
@@ -171,7 +171,7 @@ namespace avmplus
 	}
 	#endif
 
-	void AbcParser::resolveQName(const byte* &p, Multiname &m) const
+	uint32_t AbcParser::resolveQName(const byte* &p, Multiname &m) const
 	{
 		uint32 index = readU30(p);
 		if (index == 0 || index >= pool->constantMnCount)
@@ -182,6 +182,8 @@ namespace avmplus
 		pool->parseMultiname(a, m);
 		if (!m.isQName())
 			toplevel->throwVerifyError(kCpoolEntryWrongTypeError, core->toErrorString(index));
+			
+		return index;
 	}
 
 	AbstractFunction *AbcParser::resolveMethodInfo(uint32 index) const
@@ -198,7 +200,7 @@ namespace avmplus
 
 	Stringp AbcParser::resolveUtf8(uint32 index) const
 	{
-		if (index > 0 && index < pool->constantStringCount )
+		if (index > 0 && index < pool->constantStringCount)
 		{
 			return pool->cpool_string[index];
 		}
@@ -275,6 +277,7 @@ namespace avmplus
 
 			// method bodies: code, exception info, and activation traits
 			parseMethodBodies();
+
 #ifdef FEATURE_BUFFER_GUARD // no buffer guard in Carbon builds
 		}
 		CATCH(Exception *exception)
@@ -337,7 +340,7 @@ namespace avmplus
 		for (uint32_t i=0; i < nameCount; i++)
         {
 			Multiname qn;
-			resolveQName(pos, qn);
+			const uint32_t qn_index = resolveQName(pos, qn);
 			Namespacep ns = qn.getNamespace();
 			// TODO name can come out null and fire all kinds of asserts from a broken compiler
 			// and crash a release build, not sure if null is valid in any cases but there's definitely
@@ -498,6 +501,11 @@ namespace avmplus
 			case TRAIT_Setter:
             case TRAIT_Method:
 			{
+				if (kind == TRAIT_Getter)
+					flags |= AbstractFunction::IS_GETTER;
+				else if (kind == TRAIT_Setter)
+					flags |= AbstractFunction::IS_SETTER;
+					
 				#ifdef AVMPLUS_VERBOSE
 				if (pool->verbose)
 				{
@@ -515,12 +523,13 @@ namespace avmplus
 				// id is unused here
 				AbstractFunction* f = resolveMethodInfo(method_info);
 
-				#ifdef AVMPLUS_VERBOSE
-				Stringp s1 = traits->format(core);
-				Stringp s2 = core->newString(kind == TRAIT_Method ? "/" : (kind == TRAIT_Getter ? "/get " : "/set "));
-				Stringp s3 = Multiname::format(core,ns,name);
-				Stringp s4 = core->concatStrings(s2,s3);
-				f->name = core->concatStrings(s1, s4);
+				#if VMCFG_METHOD_NAMES
+				if (core->config.methodNames)
+				{
+					pool->method_name_indices.set(method_info, -int32_t(qn_index));
+				}
+				#else
+				(void)qn_index;
 				#endif
 
 				// since this function is ref'ed here, we know the receiver type.
@@ -577,9 +586,15 @@ namespace avmplus
 
 		MMGC_MEM_TYPE(pool);
 		pool->methods.ensureCapacity(size);
+#if VMCFG_METHOD_NAMES
+		if (core->config.methodNames)
+		{
+			pool->method_name_indices.ensureCapacity(size);
+		}
+#endif
 		pool->methodCount = methodCount;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -592,7 +607,11 @@ namespace avmplus
 			int param_count = readU30(pos);
 
 			const byte* info_pos = pos;
-
+		
+		// @todo -- we should add an AbcParser equivalent of skipU30;
+		// then the next two clauses would be 			
+		//		skipU30(pos, param_count+1);
+		// in non-verbose builds
 			#ifdef AVMPLUS_VERBOSE
 			Multiname returnTypeName;
 			parseTypeName(pos, returnTypeName);
@@ -619,7 +638,7 @@ namespace avmplus
 				#endif
 			}
 
-            uint32 name_index = readU30(pos);
+            uint32_t name_index = readU30(pos);
             (void)name_index;
 			CHECK_POS(pos);
 			int flags = *pos++;
@@ -634,23 +653,11 @@ namespace avmplus
 			AbstractFunction *info;			
 			if (!(flags & AbstractFunction::NATIVE))
 			{
-				MethodInfo *methodInfo = new (core->GetGC()) MethodInfo();
-				
-				#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
-				if (name_index != 0) {
-					methodInfo->name = resolveUtf8(name_index);
-					if(methodInfo->name->length() == 0) 
-					{
-						methodInfo->name = core->kanonymousFunc;	
-					}
-				} else
-					methodInfo->name = core->concatStrings(core->newString("MethodInfo-"), core->intToString(i));
-				#endif
-				info = methodInfo;
+				info = new (core->GetGC()) MethodInfo(i);
 			}
 			else
 			{
-				info = natives->newNativeMethod(i);
+				info = natives ? natives->newNativeMethod(i) : NULL;
 				if (!info)
 				{
 					// If this assert hits, you're missing a native method.  Method "i"
@@ -663,10 +670,15 @@ namespace avmplus
 
 			info->info_pos = info_pos;
 			info->pool = pool;
-			info->method_id = i;
 			info->param_count = param_count;
 			info->initParamTypes(param_count+1);
 			info->flags |= flags;
+			#if VMCFG_METHOD_NAMES
+			if (core->config.methodNames)
+			{
+				info->pool->method_name_indices.set(i, int32_t(name_index));
+			}
+			#endif
 
 			if (flags & AbstractFunction::HAS_OPTIONAL)
 			{
@@ -697,6 +709,9 @@ namespace avmplus
 
 			// save method info pointer.  we will verify code later.
 			pool->methods.set(i, info);
+#ifdef DEBUGGER
+			// don't create the corresponding DebuggerMethodInfo yet, we'll do that in parseMethodBodies
+#endif
 		}
     }
 	
@@ -720,7 +735,7 @@ namespace avmplus
 			metaNames = (Stringp*) core->GetGC()->Calloc(metadataCount, sizeof(Stringp), MMgc::GC::kContainsPointers);
 
 #ifdef AVMPLUS_VERBOSE
-			kVerboseVerify = core->constantString("VerboseVerify");
+			kVerboseVerify = core->internConstantStringLatin1("VerboseVerify");
 #endif
 
 			for (uint32_t i=0; i < metadataCount; i++)
@@ -778,7 +793,7 @@ namespace avmplus
 			core->console << "bodies_count=" << bodyCount << "\n";
 		)
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -788,7 +803,7 @@ namespace avmplus
 			int offset = (int)(pos-startpos);
 #endif
 
-			uint32 method_info = readU30(pos);
+			uint32_t method_info = readU30(pos);
 			AbstractFunction* info = resolveMethodInfo(method_info);
 
 			const byte *body_pos = pos;
@@ -903,9 +918,10 @@ namespace avmplus
 				}
 
 #ifdef DEBUGGER
-				methodInfo->local_count = local_count;
-				methodInfo->codeSize = code_length;
-				methodInfo->max_scopes = max_scope_depth - init_scope_depth;
+				if (core->debugger())
+				{
+					methodInfo->initDMI(local_count, code_length, max_scope_depth - init_scope_depth);
+				}
 #endif
 
 				// if non-zero, we have a duplicate method body - throw a verify error
@@ -925,12 +941,14 @@ namespace avmplus
 				if ((methodInfo->flags & AbstractFunction::NEED_ACTIVATION) || nameCount > 0)
 				{
 					pos = traits_pos;
+					Namespacep ns = NULL;
+					Stringp name = NULL;
 					#ifdef AVMPLUS_VERBOSE
-					const Namespacep ns = core->publicNamespace;
-					const Stringp name = core->internString(methodInfo->name);
-					#else
-					const Namespacep ns = NULL;
-					const Stringp name = NULL;
+					if (core->config.methodNames)
+					{
+						ns = core->publicNamespace;
+						name = core->internString(methodInfo->getMethodName());
+					}
 					#endif
 					// activation traits are raw types, not subclasses of object.  this is
 					// okay because they aren't accessable to the programming model.
@@ -978,11 +996,11 @@ namespace avmplus
 		pool->verbose = core->config.verbose;
 #endif
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
-		for(uint32 i = 1; i < int_count; ++i)
+		for(uint32_t i = 1; i < int_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -990,7 +1008,7 @@ namespace avmplus
 			// S32 value
 			cpool_int.set(i, readS32(pos));
 			if_verbose(
-				core->console << "    " << offset << ":" << "cpool_int["<<i<<"]="
+				core->console << "    " << offset << ":" << "cpool_int["<<(uint32_t)i<<"]="
 					<<constantNames[CONSTANT_Int] << " ";
 				core->console << cpool_int[i] << "\n";
 			)
@@ -1004,11 +1022,11 @@ namespace avmplus
 		cpool_uint.ensureCapacity(uint_count);
 		pool->constantUIntCount = uint_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
-		for(uint32 i = 1; i < uint_count; ++i)
+		for(uint32_t i = 1; i < uint_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1032,11 +1050,11 @@ namespace avmplus
 		cpool_double.ensureCapacity(double_count);
 		pool->constantDoubleCount = double_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
-		for(uint32 i = 1; i < double_count; ++i)
+		for(uint32_t i = 1; i < double_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1060,11 +1078,11 @@ namespace avmplus
 		cpool_string.ensureCapacity(string_count);
 		pool->constantStringCount = string_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
-		for(uint32 i = 1; i < string_count; ++i)
+		for(uint32_t i = 1; i < string_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1079,7 +1097,16 @@ namespace avmplus
 				toplevel->throwVerifyError(kCorruptABCError);
 			// don't need to create an atom for this now, because
 			// each caller will take care of it.
-			Stringp s = core->internAllocUtf8(pos, len);
+
+			// These strings are assumed to be constant
+			//Stringp s = core->internStringUTF8((const char*)pos, len, true);
+
+			// @todo: we *cannot* assume these strings are constant, as some client code
+			// may unload this ABC later. If we ever add a way to "un-constant" interned strings
+			// in an unloaded ABC range, this would be a very worthwhile optimization, but
+			// until then, it's not safe.
+			Stringp s = core->internStringUTF8((const char*)pos, len);
+
 #ifdef MMGC_DRC
 			// MIR skips WB on string constants so make them sticky
 			s->Stick();
@@ -1105,10 +1132,10 @@ namespace avmplus
 		cpool_ns.ensureCapacity(ns_count);
 		pool->constantNsCount = ns_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
-		for( uint32 i = 1; i < ns_count; ++i )
+		for( uint32_t i = 1; i < ns_count; ++i )
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1185,11 +1212,11 @@ namespace avmplus
 		cpool_ns_set.ensureCapacity(ns_set_count);
 		pool->constantNsSetCount = ns_set_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
 
-		for( uint32 i = 1; i < ns_set_count; ++i)
+		for( uint32_t i = 1; i < ns_set_count; ++i)
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1224,15 +1251,16 @@ namespace avmplus
 			toplevel->throwVerifyError(kCorruptABCError);
 
 		// TODO: why Atom?  its actually a list of positions
-		List<Atom>& cpool_mn = pool->cpool_mn;
+		List<Atom, LIST_NonGCObjects> &cpool_mn = pool->cpool_mn;
+
 		MMGC_MEM_TYPE(pool);
 		cpool_mn.ensureCapacity(mn_count);
 		pool->constantMnCount = mn_count;
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		startpos = pos;
 #endif
-		for(uint32 i = 1; i < mn_count; ++i )
+		for(uint32_t i = 1; i < mn_count; ++i )
 		{
 #ifdef AVMPLUS_VERBOSE
 			int offset = (int)(pos-startpos);
@@ -1376,13 +1404,13 @@ namespace avmplus
 			}
 		*/
 
-		uint32 count = readU30(pos);
+		uint32_t count = readU30(pos);
 
 		if_verbose(
 			core->console << "script_count=" << count << "\n";
 		)
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -1399,7 +1427,7 @@ namespace avmplus
 
 		// make global objects subclasses of Object
 
-		for (uint32 i=0; i < count; i++)
+		for (uint32_t i=0; i < count; i++)
 		{
 			const byte* script_pos = pos;
 
@@ -1411,7 +1439,6 @@ namespace avmplus
 					<< "\n";
 			)
 			AbstractFunction* script = resolveMethodInfo(init_index);
-			AvmAssert(script->declaringTraits == NULL);
 
 			if (script->declaringTraits != NULL)
 			{
@@ -1420,8 +1447,7 @@ namespace avmplus
 				toplevel->throwVerifyError(kAlreadyBoundError, core->toErrorString(script), core->toErrorString((Traits*)script->declaringTraits));
 			}
 
-			const NativeScriptInfo* nativeEntry = natives ? natives->get_script(i) : NULL;
-			Traits* traits = parseTraits(nativeEntry && nativeEntry->sizeofInstance ? nativeEntry->sizeofInstance : sizeof(ScriptObject), 
+			Traits* traits = parseTraits(sizeof(ScriptObject), 
 											core->traits.object_itraits, 
 											core->publicNamespace, 
 											core->kglobal, 
@@ -1434,16 +1460,11 @@ namespace avmplus
 
 			
 			// global object, make it dynamic
-			traits->setCreateGlobalObjectProc(nativeEntry ? nativeEntry->createGlobalObject : NULL);
 			traits->set_needsHashtable(true);
 			traits->final = true;
 
 			script->makeMethodOf(traits);
 			traits->init = script;
-
-			#ifdef AVMPLUS_VERBOSE
-			script->name = core->concatStrings(traits->format(core), core->newString("$init"));
-			#endif
 
             #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
@@ -1470,7 +1491,7 @@ namespace avmplus
 			core->console << "class_count=" << classCount <<"\n";
 		)
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -1504,9 +1525,10 @@ namespace avmplus
 			// resolving base class type means class heirarchy must be a Tree
 			Traits* baseTraits = pool->resolveTypeName(pos, toplevel);
 
-			if (baseTraits && baseTraits->final ||
-				CLASS_TYPE != NULL && baseTraits == CLASS_TYPE ||
-				FUNCTION_TYPE != NULL && baseTraits == FUNCTION_TYPE)
+			if ((baseTraits && baseTraits->final) ||
+				(CLASS_TYPE != NULL && baseTraits == CLASS_TYPE) ||
+				// note, builtins are allowed to override Function
+				(FUNCTION_TYPE != NULL && baseTraits == FUNCTION_TYPE && !pool->isBuiltin))
 			{
 				// error - attempt to extend final class
 				if_verbose(
@@ -1555,7 +1577,7 @@ namespace avmplus
 			//  - can't override final members
 			//  - overrides agree with base class signature
 			
-            uint32 iinit_index = readU30(pos);
+            uint32_t iinit_index = readU30(pos);
 			AbstractFunction *iinit = resolveMethodInfo(iinit_index);
 
 			if_verbose(
@@ -1572,10 +1594,6 @@ namespace avmplus
 					<< " iinit_index=" << iinit_index
 					<< "\n";
 			)
-
-			#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
-			iinit->name = Multiname::format(core,ns,name);
-			#endif
 
 			Traits* itraits = parseTraits(computeInstanceSize(i, baseTraits), 
 											baseTraits, 
@@ -1654,7 +1672,7 @@ namespace avmplus
 			return;
 		}
 
-#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
+#ifdef AVMPLUS_VERBOSE
 		const byte* startpos = pos;
 #endif
 
@@ -1667,7 +1685,7 @@ namespace avmplus
 
 			const byte* class_pos = pos;
 
-			uint32 cinit_index = readU30(pos);
+			uint32_t cinit_index = readU30(pos);
             AbstractFunction *cinit = resolveMethodInfo(cinit_index);
 
 			if_verbose(
@@ -1680,23 +1698,17 @@ namespace avmplus
 					<< "\n";
 			)
 
-			#if defined AVMPLUS_VERBOSE || defined FEATURE_SAMPLER
-			Stringp cinitName = core->concatStrings(name, core->newString("$cinit"));
-			cinit->name = Multiname::format(core,ns,cinitName);
-			#endif
-
 			const NativeClassInfo* nativeEntry = natives ? natives->get_class(i) : NULL;
 			Traits* ctraits = parseTraits(nativeEntry && nativeEntry->sizeofClass ? nativeEntry->sizeofClass : sizeof(ClassClosure),
 											CLASS_TYPE, 
 											ns, 
-											core->internString(core->concatStrings(name, core->newString("$"))), 
+											core->internString(core->concatStrings(name, core->newConstantStringLatin1("$"))), 
 											NULL, 
 											class_pos,
 											TRAITSTYPE_CLASS_FROM_ABC, 
 											itraits->protectedNamespace);
 
 			ctraits->setCreateClassClosureProc(nativeEntry ? nativeEntry->createClassClosure : NULL);
-			AvmAssert(cinit->declaringTraits == NULL);
 
 			if (cinit->declaringTraits != NULL)
 			{

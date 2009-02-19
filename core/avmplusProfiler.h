@@ -68,7 +68,7 @@ namespace avmplus
 		 * @param url the URL of the new source file, as encoded
 		 *            in the OP_debugfile bytecode
 		 */
-		virtual void sendDebugFileUrl(UTF8String *url) = 0;
+		virtual void sendDebugFileURL(String* url) = 0;
 
 		/**
 		 * This will be called to notify the profiler that the

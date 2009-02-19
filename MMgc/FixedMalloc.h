@@ -39,7 +39,6 @@
 #ifndef __Malloc__
 #define __Malloc__
 
-
 namespace MMgc
 {
 	/**
@@ -67,10 +66,8 @@ namespace MMgc
 			size = (size+3)&~3;
 			if (size <= (size_t)kLargestAlloc) {
 				item = FindSizeClass(size)->Alloc(size);
-				//No sample here, called from FixedAlloc::Alloc
 			} else {
 				item = LargeAlloc(size);
-				SAMPLE_ALLOC(item, Size(item));
 			}
 			return item;
 		}
@@ -83,10 +80,8 @@ namespace MMgc
 			// small things are never allocated on the 4K boundary b/c the block
 			// header structure is stored there, large things always are		
 			if(IsLargeAlloc(item)) {
-				SAMPLE_DEALLOC(item, Size(item));
 				LargeFree(item);
 			} else {		
-				//No sample here, called from FixedAlloc::Free
 				FixedAllocSafe::GetFixedAllocSafe(item)->Free(item);
 			}
 		}
@@ -123,7 +118,7 @@ namespace MMgc
 		FixedMalloc(GCHeap* heap);
 		~FixedMalloc();
 		static FixedMalloc *instance;
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 		const static int kLargestAlloc = 2016;	
 #else
 		const static int kLargestAlloc = 2032;	

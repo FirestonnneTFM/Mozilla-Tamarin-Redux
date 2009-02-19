@@ -39,50 +39,81 @@
 
 // Adobe patent application tracking #P721, entitled Application Profiling, inventors: T. Reilly
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 namespace avmplus
 {
 	using namespace MMgc;
 
-	Sampler::Sampler(GC *gc) : allocId(1), sampling(true),
-			autoStartSampling(false), samplingNow(false), samplingAllAllocs(false), takeSample(0),
-			numSamples(0), currentSample(NULL), timerHandle(0), lastAllocSample(0),
-			uids(1024), ptrSamples(0), callback(0), runningCallback(false), m_fakeMethodNames(gc)
+	// store this in a thread local to capture FixedAlloc alloc traffic
+	GCThreadLocal<avmplus::Sampler*> tls_sampler;
+
+	/* static */
+	void recordAllocationSample(const void* item, size_t size)
 	{
-		samples = new (gc) GrowableBuffer(gc->GetGCHeap());
+		avmplus::Sampler* sampler = tls_sampler;
+		if (sampler && sampler->sampling())
+			sampler->recordAllocationSample(item, size);
 	}
 
-	void Sampler::setCore(AvmCore *core)
+	/* static */
+	void recordDeallocationSample(const void* item, size_t size)
 	{
-		this->core = core;
+		avmplus::Sampler* sampler = tls_sampler;
+		if( sampler /*&& sampler->sampling*/ )
+			sampler->recordDeallocationSample(item, size);
+	}
+
+	Sampler::Sampler(AvmCore* _core) : 
+		GCRoot(_core->GetGC()),
+	    sampleIteratorVTable(NULL),
+	    slotIteratorVTable(NULL),
+		core(_core),
+		fakeMethodNames(_core->GetGC()),
+		allocId(1), 
+		samples(NULL),
+		currentSample(NULL),
+		lastAllocSample(NULL),
+		callback(NULL),
+		timerHandle(0),
+		uids(1024, GCHashtable::OPTION_MALLOC),
+		ptrSamples(NULL),
+		takeSample(0),
+		numSamples(0), 
+		samples_size(0),
+		samplingNow(false),
+		samplingAllAllocs(false),
+		runningCallback(false),
+		autoStartSampling(false),
+		_sampling(true)
+	{
+		_core->GetGC()->GetGCHeap()->EnableHooks();
+ 		tls_sampler = this;
 	}
 
 	Sampler::~Sampler()
 	{
 		stopSampling();
-		Sampler* gc_sampler = MMgc::m_sampler;
-		if(gc_sampler == this)
-			MMgc::m_sampler = NULL;
-		delete samples;
-		samples = 0;
+ 		Sampler* tls = tls_sampler;
+ 		if (tls == this)
+ 			tls_sampler = NULL;
 	}
 
 	void Sampler::init(bool sampling, bool autoStart)
 	{
-		this->sampling = sampling;
+		this->_sampling = sampling;
 		this->autoStartSampling = autoStart;
 	}
 
 	byte *Sampler::getSamples(uint32 &num)
 	{
 		num = numSamples;
-		byte *start = samples->start();
+		byte *start = samples;
 		return start;
 	}
 
 	void Sampler::sample()
 	{		
-		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow || !core->callStack || !sampleSpaceCheck())
 			return;	
 		writeRawSample(RAW_SAMPLE);
@@ -91,14 +122,14 @@ namespace avmplus
 
 	int Sampler::sampleSpaceCheck(bool callback_ok)
 	{
-		if(!samples->start())
+		if(!samples)
 			return 0;
 
 		uint32 sampleSize = sizeof(Sample);
 		uint32 callStackDepth = core->callStack ? core->callStack->depth() : 0;
 		sampleSize += callStackDepth * sizeof(StackTrace::Element);
 		sampleSize += sizeof(uint64) * 2;
-		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples->size()/3 > samples->end() 
+		if( callback && callback_ok && !runningCallback && currentSample+sampleSize+samples_size/3 > (samples + samples_size)
 			&& !core->GetGC()->Collecting() 
 #ifdef MMGC_DRC
 			&& !core->GetGC()->Reaping()
@@ -114,18 +145,15 @@ namespace avmplus
 				startSampling();
 			runningCallback = false;
 		}
-		while(currentSample + sampleSize > samples->uncommitted()) {
-			samples->grow();
-			if(currentSample + sampleSize > samples->uncommitted()) {
+		if(currentSample + sampleSize > samples+samples_size) {
 /*
 #ifdef AVMPLUS_VERBOSE
-				core->console << "****** Exhausted Sample Buffer *******\n";
+			core->console << "****** Exhausted Sample Buffer *******\n";
 #endif
 */
-				// exhausted buffer
-				stopSampling();
-				return 0;
-			}
+			// exhausted buffer
+			stopSampling();
+			return 0;
 		}
 		return 1;
 	}
@@ -145,15 +173,10 @@ namespace avmplus
 			while(csn)
 			{
 				write(p, csn->info());
-				write(p, csn->envname());
+				write(p, csn->fakename());
 				// FIXME: can filename can be stored in the AbstractInfo?
-#ifdef DEBUGGER
 				write(p, csn->filename());
 				write(p, csn->linenum());
-#else
-				write(p, 0);
-				write(p, 0);
-#endif
 #ifdef AVMPLUS_64BIT
 				AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
 				write(p, (int) 0); // structure padding
@@ -171,7 +194,7 @@ namespace avmplus
 
 	void Sampler::readSample(byte *&p, Sample &s)
 	{
-		memset(&s, 0, sizeof(Sample));
+		VMPI_memset(&s, 0, sizeof(Sample));
 		read(p, s.micros);
 		read(p, s.sampleType);
 		AvmAssertMsg(s.sampleType == RAW_SAMPLE || 
@@ -209,9 +232,9 @@ namespace avmplus
 		}
 	}
 
-	uint64 Sampler::recordAllocationSample(void* item, uint64 size, bool callback_ok)
+	uint64 Sampler::recordAllocationSample(const void* item, uint64 size, bool callback_ok)
 	{
-		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow)
 			return 0;
 
@@ -226,9 +249,7 @@ namespace avmplus
 		lastAllocSample = currentSample;
 		writeRawSample(NEW_AUX_SAMPLE);
 		uint64 uid = allocId++;
-		samplingNow = false;
-		uids.add(GetRealPointer(item), (void*)uid);
-		samplingNow = true;
+		uids.add(item, (void*)uid);
 		write(currentSample, uid);
 		write(currentSample, item);
 		write(currentSample, (uintptr)0);
@@ -242,7 +263,7 @@ namespace avmplus
 
 	uint64 Sampler::recordAllocationInfo(AvmPlusScriptableObject *obj, uintptr typeOrVTable)
 	{
-		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		if(!samplingNow)
 			return 0;
 
@@ -259,13 +280,11 @@ namespace avmplus
 		readSample(old_sample, s);
 		old_sample = lastAllocSample;
 
-#ifdef DEBUGGER					
 		if(typeOrVTable < 7 && core->codeContext() && core->codeContext()->domainEnv()) {
 			// and in toplevel
-			// FIXME 64bit
-			typeOrVTable |= (uint32)(uintptr_t)core->codeContext()->domainEnv()->toplevel();
+			typeOrVTable |= (uintptr)core->codeContext()->domainEnv()->toplevel();
 		}
-#endif
+
 		AvmAssertMsg(s.sampleType == NEW_AUX_SAMPLE, "Sample stream corrupt - can only add info to an AUX sample.\n");
 		AvmAssertMsg(s.ptr == (void*)obj, "Sample stream corrupt - last sample is not for same object.\n");
 
@@ -276,10 +295,8 @@ namespace avmplus
 
 		write(currentSample, s.id);
 
-		samplingNow = false;
-		AvmAssertMsg( ptrSamples->get(GetRealPointer(obj))==0, "Missing dealloc sample - same memory alloc'ed twice.\n");
-		ptrSamples->add(GetRealPointer(obj), currentSample);
-		samplingNow = true;
+		AvmAssertMsg( ptrSamples->get(obj)==0, "Missing dealloc sample - same memory alloc'ed twice.\n");
+		ptrSamples->add(obj, currentSample);
 
 		write(currentSample, s.ptr);
 
@@ -294,7 +311,7 @@ namespace avmplus
 
 	void Sampler::recordDeallocationSample(const void* item, uint64 size)
 	{
-		AvmAssertMsg(sampling, "How did we get here if sampling is disabled?");
+		AvmAssertMsg(sampling(), "How did we get here if sampling is disabled?");
 		AvmAssert(item != 0);
 		// recordDeallocationSample doesn't honor the samplingNow flag
 		// this is to avoid dropping deleted object samples when sampling is paused.
@@ -316,7 +333,7 @@ namespace avmplus
 		}
 
 		// Nuke the ptr in the sample stream for the newobject sample
-		if( samples->start() )
+		if( samples )
 		{
 
 		byte* oldptr = 0;
@@ -325,7 +342,7 @@ namespace avmplus
 #ifdef _DEBUG
 				void* oldval = 0;
 				read(oldptr, oldval);
-				AvmAssertMsg(GetRealPointer(oldval)==item, "Sample stream corrupt, dealloc doesn't point to correct address");
+				AvmAssertMsg(oldval==item, "Sample stream corrupt, dealloc doesn't point to correct address");
 				rewind(oldptr, sizeof(void*));
 #endif
 			write(oldptr, (void*)0);
@@ -339,42 +356,39 @@ namespace avmplus
 	void Sampler::clearSamples()
 	{
 		//samples->free();
-		currentSample = samples->start();
+		currentSample = samples;
 		GCHashtable* t = ptrSamples;
-		ptrSamples = new MMgc::GCHashtable(4096);
+		ptrSamples = new MMgc::GCHashtable(4096, GCHashtable::OPTION_MALLOC);
 		delete t;
 		numSamples = 0;
 	}
 
 	void Sampler::startSampling()
 	{
-		if(!sampling || samplingNow)
+		if (!_sampling || samplingNow)
 			return;
-
-		{
-			init(sampling, autoStartSampling);
-		}
 
 		if (!currentSample)
 		{
 			int megs=16;
 			while(!currentSample && megs > 0) {
-				currentSample = samples->reserve(megs * 1024 * 1024);
+				samples_size = megs*1024*1024;
+				currentSample = samples = new byte[samples_size];
 				megs >>= 1;
 			}
 			if(!currentSample) {
-				sampling = autoStartSampling = false;
-				samples->free();
+				_sampling = autoStartSampling = false;
 				return;
 			}
 		}
+
+		init(_sampling, autoStartSampling);
 		
 		if( !ptrSamples ) 
 		{
-			ptrSamples = new MMgc::GCHashtable(1024);
+			ptrSamples = new MMgc::GCHashtable(1024, GCHashtable::OPTION_MALLOC);
 		}
 
-		MMgc::sampling = true;
 		samplingNow = true;
 		if(timerHandle == 0)
 			timerHandle = OSDep::startIntWriteTimer(1, &takeSample);
@@ -382,7 +396,7 @@ namespace avmplus
 
 	void Sampler::pauseSampling()
 	{
-		if(!sampling || !samplingNow)
+		if (!_sampling || !samplingNow)
 			return;
 		samplingNow = false;
 	}
@@ -399,22 +413,24 @@ namespace avmplus
 
 	void Sampler::stopSampling()
 	{
-		if(!sampling)
+		if (!_sampling)
 			return;
+
+		if( samples )
+			delete [] samples;
+		samples = 0;
+		samples_size = 0;
 
 		if(timerHandle != 0) {
 			OSDep::stopTimer(timerHandle);
 			timerHandle = 0;
 		}
 
-		samples->free();
-
 		if( ptrSamples ) {
 			delete ptrSamples;
 			ptrSamples = 0;
 		}
 
-		MMgc::sampling = false;
 		samplingNow = false;
 		numSamples = 0;
 		currentSample = NULL;
@@ -422,7 +438,7 @@ namespace avmplus
 
 	void Sampler::initSampling()
 	{
-		if(!sampling)
+		if (!_sampling)
 			return;
 
 		// prime fake function table
@@ -448,13 +464,13 @@ namespace avmplus
 
 	void Sampler::createFakeFunction(const char *name)
 	{
-		if(!sampling)
+		if (!_sampling)
 			return;
 
-		Stringp s = core->constantString(name);
-		// save it in m_fakeMethodNames just to be sure it isn't cleared from the intern-name list.
-		if (m_fakeMethodNames.indexOf(s) < 0)
-			m_fakeMethodNames.add(s);
+		Stringp s = core->internConstantStringLatin1(name);
+		// save it in fakeMethodNames just to be sure it isn't cleared from the intern-name list.
+		if (fakeMethodNames.indexOf(s) < 0)
+			fakeMethodNames.add(s);
 	}
 
 	Stringp Sampler::getFakeFunctionName(const char* name)
@@ -462,7 +478,7 @@ namespace avmplus
 		// this can't make any allocations, it's called from sensitive areas (like from 
 		// the GC marking routines).  For one we'll recurse but also GC state can get messed
 		// up if for instance the allocation triggers a collection
-		Stringp name_str = core->findInternedString(name, (int)strlen(name));
+		Stringp name_str = core->findInternedString(name, (int)VMPI_strlen(name));
 		if (name_str != NULL)
 		{
 			sampleCheck();
@@ -495,5 +511,6 @@ namespace avmplus
 	void Sampler::postsweep()
 	{
 	}
+
 }
-#endif
+#endif // DEBUGGER

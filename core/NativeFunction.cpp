@@ -44,27 +44,50 @@
 #include "../codegen/CodegenMIR.h"
 #endif
 
+using namespace MMgc;
+
 namespace avmplus
 {
 	// ---------------
 
-	NativeMethod::NativeMethod(AvmThunkNativeThunker _thunker, AvmThunkNativeHandler _handler)
-		: AbstractFunction(), thunker(_thunker), handler(_handler)
+	NativeMethod::NativeMethod(int _method_id, AvmThunkNativeThunker _thunker, AvmThunkNativeHandler _handler)
+		: AbstractFunction(_method_id), thunker(_thunker), handler(_handler)
 	{
 		this->impl32 = verifyEnter;
 	}
 
-	/*static*/ Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
+	typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
+
+#ifdef DEBUGGER
+	/*static*/ AvmBox NativeMethod::debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+	{
+		CallStackNode csn(CallStackNode::kEmpty); 
+		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
+		const AvmBox result = static_cast<NativeMethod*>(env->method)->thunker(env, argc, argv);
+		env->debugExit(&csn);
+		return result;
+	}
+
+	/*static*/ double NativeMethod::debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
+	{
+		CallStackNode csn(CallStackNode::kEmpty); 
+		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
+		const double result = (reinterpret_cast<AvmThunkNativeThunkerN>(static_cast<NativeMethod*>(env->method)->thunker))(env, argc, argv);
+		env->debugExit(&csn);
+		return result;
+	}
+#endif
+
+	/*static*/ Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32* ap)
 	{
 		NativeMethod* f = (NativeMethod*) env->method;
 
-		f->verify(env->vtable->toplevel);
-
 		#ifdef AVMPLUS_VERIFYALL
-		f->flags |= VERIFIED;
-		f->core()->processVerifyQueue(env->toplevel());
+		// never verify late in verifyall mode
+		AvmAssert(!f->pool->core->config.verifyall);
 		#endif
 
+		f->verify(env->vtable->toplevel);
 		env->impl32 = f->impl32;
 		return f->impl32(env, argc, ap);
 	}
@@ -76,8 +99,21 @@ namespace avmplus
 		union {
 			Atom (*impl32)(MethodEnv*, int, uint32 *);
 			AvmThunkNativeThunker thunker;
+			AvmThunkNativeThunkerN thunkerN;
 		} u;
-		u.thunker = this->thunker;
+#ifdef DEBUGGER
+		if (toplevel->core()->debugger())
+		{
+			if (Traits::getBuiltinType(returnTraits()) == BUILTIN_number)
+				u.thunkerN = NativeMethod::debugEnterExitWrapperN;
+			else
+				u.thunker = NativeMethod::debugEnterExitWrapper32;
+		}
+		else
+#endif
+		{
+			u.thunker = this->thunker;
+		}
 		this->impl32 = u.impl32;
 	}
 
@@ -87,24 +123,21 @@ namespace avmplus
 											const uint8_t* _abcData,
 											uint32_t _abcDataLen,
 											uint32_t _methodCount,
-											uint32_t _classCount,
-											uint32_t _scriptCount) :
+											uint32_t _classCount) :
 		core(_core),
 		abcData(_abcData),
 		abcDataLen(_abcDataLen),
 		methods((MethodType*)core->GetGC()->Calloc(_methodCount, sizeof(MethodType), GC::kZero)),
 		classes((ClassType*)core->GetGC()->Calloc(_classCount, sizeof(ClassType), GC::kZero)),
-		scripts((ScriptType*)core->GetGC()->Calloc(_scriptCount, sizeof(ScriptType), GC::kZero)),
 		methodCount(_methodCount),
-		classCount(_classCount),
-		scriptCount(_scriptCount)
+		classCount(_classCount)
 	{
 	}
 
 #ifdef AVMPLUS_NO_STATIC_POINTERS
 	void NativeInitializer::fillIn(NativeInitializer::FillInProc p)
 	{
-		(*p)(methods, classes, scripts);
+		(*p)(methods, classes);
 	}
 #else
 	void NativeInitializer::fillInMethods(const NativeMethodInfo* _methodEntry)
@@ -133,20 +166,6 @@ namespace avmplus
 		}
 	}
 
-	void NativeInitializer::fillInScripts(const NativeScriptInfo* _scriptEntry)
-	{
-		while (_scriptEntry->script_id != -1)
-		{
-			// if we overwrite a native script mapping, something is hosed
-			AvmAssert(scripts[_scriptEntry->script_id]  == NULL);
-			scripts[_scriptEntry->script_id] = _scriptEntry;
-#ifdef AVMPLUS_LEGACY_NATIVE_MAPS
-			if (_scriptEntry->nativeMap)
-				fillInMethods(_scriptEntry->nativeMap);
-#endif
-			_scriptEntry++;
-		}
-	}
 #endif // AVMPLUS_NO_STATIC_POINTERS
 	
 	PoolObject* NativeInitializer::parseBuiltinABC(const List<Stringp, LIST_RCObjects>* includes)
@@ -155,7 +174,7 @@ namespace avmplus
 		
 		ScriptBuffer code = ScriptBuffer(new (core->GetGC()) ReadOnlyScriptBufferImpl(abcData, abcDataLen));
 
-		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, core->builtinDomain, this, includes);
+		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, core->builtinDomain, this, (const List<Stringp>*)includes);
 	}
 	
 	NativeMethod* NativeInitializer::newNativeMethod(uint32_t i) const
@@ -164,7 +183,7 @@ namespace avmplus
 		if (!ni)
 			return NULL;
 
-		NativeMethod* info = new (core->GetGC()) NativeMethod(ni->thunker, ni->handler);
+		NativeMethod* info = new (core->GetGC()) NativeMethod(i, ni->thunker, ni->handler);
 		info->flags |= AbstractFunction::ABSTRACT_METHOD;
 #ifdef AVMPLUS_LEGACY_NATIVE_MAPS
 		info->flags |= ni->flags;
@@ -180,6 +199,5 @@ namespace avmplus
 		// might as well explicitly free now
 		core->GetGC()->Free(methods);
 		core->GetGC()->Free(classes);
-		core->GetGC()->Free(scripts);
 	}
 }

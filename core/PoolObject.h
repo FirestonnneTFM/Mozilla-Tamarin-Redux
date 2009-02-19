@@ -94,6 +94,12 @@ namespace avmplus
 
 		/** all methods */
 		List<AbstractFunction*> methods;
+#if VMCFG_METHOD_NAMES
+		// only allocated & populated if core->config.methodName is true...
+		// if positive, an index into cpool_string; if negative, an index into cpool_mn
+		// (always safe because those indices are limited to 30 bits)
+		List<int32_t> method_name_indices;	
+#endif
 
 		/** metadata -- ptrs into ABC, not gc-allocated */
 		List<const byte*> metadata_infos;
@@ -133,15 +139,13 @@ namespace avmplus
 		enum {
 			kbug444630 = 0x00000001
 		};
-		// true if this pool is baked into the player.  used to control
-		// whether callees will set their context.
-		bool isBuiltin;
 
 #ifdef AVMPLUS_WORD_CODE
 		struct 
 		{
 			PrecomputedMultinames* cpool_mn;	// a GCRoot
 		} word_code;
+		void initPrecomputedMultinames();
 #endif
 		
 		#ifdef AVMPLUS_MIR
@@ -224,10 +228,6 @@ namespace avmplus
 		// Index of the metadata info that means skip the associated definition
 		List<uint32_t> stripMetadataIndexes;
 
-		#ifdef AVMPLUS_VERBOSE
-		bool verbose;
-		#endif
-
 		int version;
 		
 		ScriptBuffer code() 
@@ -240,11 +240,19 @@ namespace avmplus
 			return pos > &code()[0] && pos < m_code->getBuffer() + code().getSize();
 		}
 
+		
 	private:
 		DWB(MultinameHashtable*) namedTraits;
 		DWB(MultinameHashtable*) privateNamedScripts;
 		DWB(ScriptBufferImpl*) m_code;
 		const byte * const abcStart;
+
+	public:
+		// @todo, privatize & make into bitfield (requires API churn)
+		bool	isBuiltin;	// true if this pool is baked into the player.  used to control whether callees will set their context.
+	#ifdef AVMPLUS_VERBOSE
+		bool	verbose;
+	#endif
 	};
 }
 

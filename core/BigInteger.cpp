@@ -36,7 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "avmplus.h"
-#include <math.h>
 #include "BigInteger.h"
 
 #define X86_MATH
@@ -65,7 +64,7 @@ void BigInteger::setFromBigInteger(const BigInteger* from, int32 offset, int32 a
 {
 	numWords = amount;
 	AvmAssert(numWords <= kMaxBigIntegerBufferSize);
-	memcpy( (byte*)wordBuffer, 
+	VMPI_memcpy( (byte*)wordBuffer, 
 			(byte*)&(from->wordBuffer[offset]), 
 			amount*sizeof(uint32));
 }

@@ -43,7 +43,7 @@ namespace avmplus
 
 #ifdef AVMPLUS_WORD_CODE
 
-#if defined _DEBUG || defined DEBUGGER
+#if defined _DEBUG || defined DEBUGGER || defined AVMPLUS_VERBOSE
 #  define N(x)  , x
 #else
 #  define N(x)
@@ -199,8 +199,8 @@ namespace avmplus
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x69") },
 		{    2,    0,    0,   1,    0,   1,   1,   1,    0,    0         N("deleteproperty") },
 		{    0,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("0x6B") },
-		{    2,    0,    0,   0,    0,   1,   1,   0,    0,    0         N("getslot") },
-		{    2,    0,    0,   0,    0,   0,   2,   0,    0,    0         N("setslot") },
+		{    2,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("getslot") },
+		{    2,    0,    0,   1,    0,   0,   2,   0,    0,    0         N("setslot") },
 		{    2,    0,    0,   0,    0,   1,   0,   0,    0,    0         N("getglobalslot") },
 		{    2,    0,    0,   0,    0,   0,   1,   0,    0,    0         N("setglobalslot") },
 		{    1,    0,    0,   1,    0,   1,   1,   0,    0,    0         N("convert_s") },       // 0x70
@@ -398,6 +398,8 @@ namespace avmplus
 		{    1,    0,    0,   0,    0,   1,   2,   0,    0,    0         N("swap_pop") },        // 0x130
 		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobal") },
 		{    3,    0,    0,   1,    0,   1,   0,   0,    0,    0         N("findpropglobalstrict") },
+		{    1,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("debugenter") },
+		{    1,    0,    0,   0,    0,   0,   0,   0,    0,    0         N("debugexit") },
 		// DO NOT ALTER OR MOVE THE NEXT LINE.
 		// END
 	};

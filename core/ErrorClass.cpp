@@ -60,6 +60,8 @@ namespace avmplus
 
 		#ifdef DEBUGGER
 		AvmCore *core = this->core();
+		if (!core->debugger())
+			return;
 		// Copy the stack trace
 		stackTrace = core->newStackTrace();
 		#endif
@@ -74,11 +76,13 @@ namespace avmplus
 	{
 		#ifdef DEBUGGER
 		AvmCore* core = this->core();
+		if (!core->debugger())
+			return NULL;
 
 		// getStackTrace returns the concatenation of the
 		// error message and the stack trace
 		Stringp buffer = core->string(atom());
-		buffer = core->concatStrings(buffer, core->newString("\n"));
+		buffer = core->concatStrings(buffer, core->newConstantStringLatin1("\n"));
 
 		if (stackTrace) {
 			buffer = core->concatStrings(buffer, stackTrace->format(core));

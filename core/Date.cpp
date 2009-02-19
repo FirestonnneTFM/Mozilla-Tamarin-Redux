@@ -36,8 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include <stdarg.h>
-
 #include "avmplus.h"
 
 namespace avmplus
@@ -373,12 +371,11 @@ namespace avmplus
 				case 'd':
 					{
 						int value = va_arg(ap, int);
-						wchar intbuf[256];
-						int len;
-						MathUtils::convertIntegerToString(value, intbuf, len);
-						wchar *uintptr = intbuf;
-						while (*uintptr) {
-							*buffer++ = *uintptr++;
+						char intbuf[MathUtils::kMinSizeForInt32_t_base10_toString];
+						int32_t len = MathUtils::kMinSizeForInt32_t_base10_toString;
+						char* intptr = MathUtils::convertIntegerToStringBuffer(value, intbuf, len, 10, MathUtils::kTreatAsSigned);
+						while (*intptr) {
+							*buffer++ = *intptr++;
 						}
 					}
 					break;

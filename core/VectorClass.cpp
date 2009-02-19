@@ -79,9 +79,9 @@ namespace avmplus
 			if( AvmCore::isString(name) )
 			{
 				Stringp s = core->string(name);
-				const wchar *c = s->c_str();
+				const wchar c = s->charAt(0);
 				// Does it look like a number?
-				if( s->length() > 0 && *c >= '0' && *c <= '9' )
+				if( s->length() > 0 && c >= '0' && c <= '9' )
 				{
 					double index_d = s->toNumber();
 					if( !MathUtils::isNaN(index_d) )
@@ -451,17 +451,17 @@ namespace avmplus
 		{
 			ScriptObject* so = AvmCore::atomToScriptObject(type);
 
-			if (so == toplevel()->intClass)
+			if (so == (IntClass*)toplevel()->intClass)
 				return toplevel()->intVectorClass->atom();
-			else if( so == toplevel()->numberClass )
+			else if( so == (NumberClass*)toplevel()->numberClass )
 				return toplevel()->doubleVectorClass->atom();
-			else if( so == toplevel()->uintClass )
+			else if( so == (UIntClass*) toplevel()->uintClass )
 				return toplevel()->uintVectorClass->atom();
 
 			fullname = so->vtable->ivtable->traits->formatClassName();
 			param_traits = so->vtable->ivtable->traits;
 		}
-		fullname = core->intern(core->concatStrings(core->kVector, core->concatStrings(fullname, core->newString(">")))->atom());
+		fullname = core->intern(core->concatStrings(core->kVector, fullname->appendLatin1(">"))->atom());
 
 		if( !instantiated_types->contains(fullname->atom()) )
 		{
@@ -469,7 +469,7 @@ namespace avmplus
 			Multiname name;
 			name.setName(fullname);
 			name.setNamespace(this->traits()->ns);
-			Stringp classname = core->internString(core->concatStrings(fullname, core->newString("$")));
+			Stringp classname = core->internString(fullname->appendLatin1("$"));
 			Multiname class_mname;
 			class_mname.setName(classname);
 			class_mname.setNamespace(this->traits()->ns);
@@ -644,7 +644,7 @@ namespace avmplus
 			if( m_fixed )
 				toplevel()->throwRangeError(kVectorFixedError);
 
-			memset(m_array+newLength, 0, (m_length-newLength)*sizeof(Atom));
+			VMPI_memset(m_array+newLength, 0, (m_length-newLength)*sizeof(Atom));
 			//_spliceHelper (newLength, 0, (m_length - newLength), 0, 0);
 		}
 		m_length = newLength;
@@ -676,8 +676,8 @@ namespace avmplus
 			}
 			if (m_array)
 			{
-				memcpy(newArray, m_array, m_length * sizeof(Atom));
-				memset(oldAtoms, 0, m_length*sizeof(Atom));
+				VMPI_memcpy(newArray, m_array, m_length * sizeof(Atom));
+				VMPI_memset(oldAtoms, 0, m_length*sizeof(Atom));
 				gc->Free(oldAtoms);
 			}
 			m_array = newArray;
@@ -707,15 +707,15 @@ namespace avmplus
 
 			// shift elements down
 			int toMove = m_length - insertPoint - deleteCount;
-			memmove (arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(Atom));
+			VMPI_memmove (arr + insertPoint + insertCount, arr + insertPoint + deleteCount, toMove * sizeof(Atom));
 
-			memset (arr + m_length - numberBeingDeleted, 0, numberBeingDeleted * sizeof(Atom));
+			VMPI_memset (arr + m_length - numberBeingDeleted, 0, numberBeingDeleted * sizeof(Atom));
 		}
 		else if (l_shiftAmount > 0)
 		{
-			memmove (arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(Atom));
+			VMPI_memmove (arr + insertPoint + l_shiftAmount, arr + insertPoint, (m_length - insertPoint) * sizeof(Atom));
 			//clear for gc purposes
-			memset (arr + insertPoint, 0, l_shiftAmount * sizeof(Atom));
+			VMPI_memset (arr + insertPoint, 0, l_shiftAmount * sizeof(Atom));
 		}
 
 		set_length(m_length + l_shiftAmount);
@@ -769,14 +769,13 @@ namespace avmplus
 				toplevel()->throwRangeError(kVectorFixedError);
 			grow (m_length + argc);
 			Atom *arr = m_array;
-			memmove (arr + argc, arr, m_length * sizeof(Atom));
+			VMPI_memmove (arr + argc, arr, m_length * sizeof(Atom));
 			// clear moved element for RC purposes
-			memset (arr, 0, argc * sizeof(Atom));
+			VMPI_memset (arr, 0, argc * sizeof(Atom));
+			m_length += argc;
 			for(int i=0; i<argc; i++) {
 				_setUintProperty(i, argv[i]);
 			}
-			// setUintProperty will up the length
-			//m_length += argc;
 		}
 		return m_length;
 	}

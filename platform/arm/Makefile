@@ -137,7 +137,6 @@ SHELL_SRCS := ../../../../../zlib/zutil.cpp \
 	../../../../../zlib/compress.cpp \
 	../../../../../zlib/adler32.cpp \
 	../../shell/SystemClass.cpp \
-	../../shell/StringBuilderClass.cpp \
 	../../shell/FileInputStream.cpp \
 	../../shell/FileClass.cpp \
 	../../shell/DomainClass.cpp \

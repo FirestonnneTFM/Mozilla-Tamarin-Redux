@@ -85,7 +85,7 @@ namespace MMgc
 		{
 			T t = m_items[--m_iCount];
 #ifdef _DEBUG
-			memset(&m_items[m_iCount], 0, sizeof(T));
+			VMPI_memset(&m_items[m_iCount], 0, sizeof(T));
 #endif
 			return t;
 		}
@@ -122,7 +122,7 @@ namespace MMgc
 				T* items = new T[ m_iAllocSize ];
 				if ( items )
 				{
-					::memcpy(items, m_items, m_iCount * sizeof(T));
+					VMPI_memcpy(items, m_items, m_iCount * sizeof(T));
 				}
 				delete [] m_items;
 				m_items = items;

@@ -122,7 +122,7 @@ namespace avmplus
 		if (i >= 0)
 		{
 			if (i < (int32_t)m_count-1)
-				memmove(&m_p[i], &m_p[i+1], sizeof(const void*)*(m_count-1-i));
+				VMPI_memmove(&m_p[i], &m_p[i+1], sizeof(const void*)*(m_count-1-i));
 			m_count -= 1;
 			AvmAssert(find(val) < 0);
 			return true;
@@ -278,7 +278,7 @@ namespace avmplus
 			{
 				const SlotInfo* src = &_base->getSlots()[0];
 				SlotInfo* dst = &tb->getSlots()[0];
-				memcpy(dst, src, _base->slotCount * sizeof(SlotInfo));
+				VMPI_memcpy(dst, src, _base->slotCount * sizeof(SlotInfo));
 				if (!_owner->isMachineType())
 				{
 					AvmAssert(tb->owner->m_sizeofInstance >= _base->owner->m_sizeofInstance);
@@ -294,7 +294,7 @@ namespace avmplus
 				}
 			}
 			if (_base->methodCount)
-				memcpy(&tb->getMethods()[0], &_base->getMethods()[0], _base->methodCount * sizeof(MethodInfo));
+				VMPI_memcpy(&tb->getMethods()[0], &_base->getMethods()[0], _base->methodCount * sizeof(MethodInfo));
 		}
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_tbi, tb); )
 		return tb;
@@ -782,7 +782,7 @@ namespace avmplus
 
 	/*static*/ Traits* Traits::newTraits(PoolObject* pool,
 							Traits *base,
-							uint32 objectSize,
+							uint32_t objectSize,
 							TraitsPosPtr traitsPos,
 							TraitsPosType posType)
     {
@@ -815,7 +815,7 @@ namespace avmplus
 		traits->final = true;
 	#ifdef AVMPLUS_VERBOSE
 		traits->ns = core->publicNamespace;
-		traits->name = core->internString(core->concatStrings(core->newString("Function-"), core->intToString(method_id)));
+		traits->name = core->internString(core->concatStrings(core->newConstantStringLatin1("Function-"), core->intToString(method_id)));
 	#else
 		traits->ns = NULL;
 		traits->name = NULL;
@@ -1269,6 +1269,26 @@ namespace avmplus
 					break;
             }
         } // for i
+		
+		// check for sparse slot table -- anything not specified will default to * (but we must allocate space for it)
+		for (uint32_t i = 0; i < tb->slotCount; i++)
+		{
+			if (tb->getSlotOffset(i) > 0)
+				continue;
+
+			#ifdef AVMPLUS_VERBOSE
+			if (pool->verbose)
+			{
+				core->console << "WARNING: slot " << i+1 << " on " << this << " not defined by compiler.  Using *\n";
+			}
+			#endif
+
+			const Traitsp slotType = NULL;
+			const uint32_t slotOffset = is8ByteSlot(slotType) ? 
+									pad8(hole, nextSlotOffset) : 
+									pad4(hole, nextSlotOffset);
+			tb->setSlotInfo(i, slotType, SST_atom, slotOffset);
+		}
 		return nextSlotOffset;
 	}
 
@@ -1598,7 +1618,7 @@ namespace avmplus
 		}
 		
 		AvmAssert(m_totalSize >= m_sizeofInstance);
-		if (m_needsHashtable || (base && base->m_hashTableOffset && !isXMLType()))
+		if (m_needsHashtable || (base && base->base && base->m_hashTableOffset && !isXMLType()))
 		{
 			// slotSize is already rounded up to pointer-sized boundary, but totalsize might not be
 			// (eg for bool/int/uint, which have weird sizes)
@@ -1661,8 +1681,8 @@ namespace avmplus
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 		const char* xstr = name ? name->toUTF8String()->c_str() : "(null)";
-		rawname = (char*)gc->Alloc(strlen(xstr)+1);
-		strcpy(rawname, xstr);
+		rawname = (char*)gc->Alloc(VMPI_strlen(xstr)+1);
+		VMPI_strcpy(rawname, xstr);
 #endif
 	}
 
@@ -1677,18 +1697,18 @@ namespace avmplus
 			(a && b && !a->isMachineType() && !b->isMachineType());
 	}
 
-#ifdef AVMPLUS_VERBOSE
+#if VMCFG_METHOD_NAMES
 	Stringp Traits::format(AvmCore* core) const
 	{
 		if (name != NULL)
 			return Multiname::format(core, ns, name);
 		else
-			return core->concatStrings(core->newString("Traits@"),
+			return core->concatStrings(core->newConstantStringLatin1("Traits@"),
 									   core->formatAtomPtr((uintptr)this));
 	}
 #endif
 
-	void Traits::genDefaultValue(uint32_t value_index, uint32 slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const
+	void Traits::genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const
 		{
 		// toplevel actually can be null, when resolving the builtin classes...
 		// but they should never cause verification errors in functioning builds
@@ -1809,7 +1829,9 @@ namespace avmplus
 				if (!value_index) value = nullObjectAtom;
 				if (!AvmCore::isNull(value))
 					goto illegal_default;
-				break;
+				
+				// return, don't break: we don't want to generate any code, just leave the slot zeroed out.
+				return;
 			}
 		}
 
@@ -1876,7 +1898,7 @@ namespace avmplus
 		else 
 		{
 			// make one
-			new_init = new (gc) MethodInfo();
+			new_init = new (gc) MethodInfo(-1);
 			new_init->declaringTraits = this;
 			new_init->pool = this->pool;
 			new_init->param_count = 0;
@@ -1903,7 +1925,7 @@ namespace avmplus
 
 		// the verifier and interpreter don't read the activation traits so stop here
 		uint8_t* newBytes = (uint8_t*) gc->Alloc(newMethodBody.size());
-		memcpy(newBytes, newMethodBody.getBytes().getData(), newMethodBody.size());
+		VMPI_memcpy(newBytes, newMethodBody.getBytes().getData(), newMethodBody.size());
 		//init->body_pos = newBytes;
 		WB(gc, new_init, &new_init->body_pos, newBytes);
 	}
@@ -1926,17 +1948,16 @@ namespace avmplus
 		{
 			AvmAssert(m_slotDestroyInfo.cap() == 1);
 			// no RCObjects, so just zero it all... my, that was easy
-			memset(p, 0, mysize + slotAreaSize);
+			VMPI_memset(p, 0, mysize + slotAreaSize);
 		}
 		else
 		{
-			memset(p, 0, mysize);
+			VMPI_memset(p, 0, mysize);
 			p += (mysize>>2);
 
 			AvmAssert(m_slotDestroyInfo.cap() >= 1);
 			AvmAssert((uintptr_t(p) & 3) == 0);
 			const uint32_t bitsUsed = slotAreaSize / sizeof(uint32_t);	// not sizeof(Atom)!
-			GC* gc = GC::GetGC(obj);
 			for (uint32_t bit = 1; bit <= bitsUsed; bit++) 
 			{
 				if (m_slotDestroyInfo.test(bit))
@@ -1946,24 +1967,14 @@ namespace avmplus
 					#endif
 					Atom a = *(const Atom*)p;
 					RCObject* rc = NULL;
-					switch (atomKind(a))
+					if (atomKind(a) <= kNamespaceType)
 					{
-						case kStringType:
-						case kObjectType:
-						case kNamespaceType:
-							rc = (RCObject*)atomPtr(a);
-							break;
-						case kSpecialType:
-							rc = (RCObject*)atomPtr(a);
-							// kSpecialType might be GC or RC, gotta check
-							if (rc && !gc->IsRCObject(rc))
-								rc = NULL;
-							break;
-					}
-					if (rc)
-					{
-						AvmAssert(GC::GetGC(obj)->IsRCObject(rc));
-						rc->DecrementRef();
+						rc = (RCObject*)atomPtr(a);
+						if (rc)
+						{
+							AvmAssert(GC::GetGC(obj)->IsRCObject(rc));
+							rc->DecrementRef();
+						}
 					}
 				}
 				*p++ = 0;
@@ -1982,7 +1993,7 @@ namespace avmplus
 #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 	ImtBuilder::ImtBuilder(MMgc::GC* _gc) : gc(_gc)
 	{
-		memset(entries, 0, sizeof(ImtEntry*)*Traits::IMT_SIZE);
+		VMPI_memset(entries, 0, sizeof(ImtEntry*)*Traits::IMT_SIZE);
 	}
 
 	void ImtBuilder::addEntry(AbstractFunction* virt, uint32_t disp_id)
@@ -1991,14 +2002,34 @@ namespace avmplus
 		const uint32_t i = uint32_t(virt->iid() % Traits::IMT_SIZE);
 #ifdef AVMPLUS_VERBOSE
 		if (entries[i] && virt->pool->verbose)
-			virt->core()->console << "conflict " << (uint64_t)virt->iid() << " " << i << "\n";
+			virt->pool->core->console << "conflict " << (uint64_t)virt->iid() << " " << i << "\n";
 #endif
 		entries[i] = new (gc) ImtEntry(virt, entries[i], disp_id);
 	}
 
 	void ImtBuilder::finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel)
 	{
-		for (uint32_t i = 0; i < Traits::IMT_SIZE; i++)
+		AvmAssert(pool->core->IsMIREnabled());
+
+	#ifdef AVMPLUS_MIR
+		// Count up all our IMT entries that will generate thunks so we can make sure
+		// we have enough space for them in our CodegenMIR buffers.
+		volatile uint32_t imtCount = 0;
+		for (uint32_t j=0; j < Traits::IMT_SIZE; j++)
+		{
+			ImtEntry *e = entries[j];
+			if ((e != NULL) && (e->next != NULL))
+			{
+				while (e)
+				{
+					imtCount++;
+					e = e->next;
+				}
+			}
+		}
+	#endif // AVMPLUS_MIR
+
+		for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
 		{
 			ImtEntry *e = entries[i];
 			if (e == NULL)
@@ -2022,7 +2053,11 @@ namespace avmplus
 
 				TRY(pool->core, kCatchAction_Rethrow)
 				{
+	#ifdef AVMPLUS_MIR
+					void* thunk = imtgen.emitImtThunk(e, imtCount);
+	#else
 					void* thunk = imtgen.emitImtThunk(e);
+	#endif // AVMPLUS_MIR
 					imt[i] = AvmCore::makeITrampBinding(uintptr_t(thunk));
 					if (imtgen.overflow)
 						toplevel->throwError(kOutOfMemoryError);
@@ -2045,23 +2080,16 @@ namespace avmplus
 	
 	Stringp Traits::formatClassName()
 	{
-#ifndef DEBUGGER
-		Stringp fullName=NULL;
-#endif
-		if(!fullName)
+		Multiname qname(ns, name);
+		qname.setQName();
+		StringBuffer buffer(core);
+		buffer << qname;
+		int length = buffer.length();
+		if (length && buffer.c_str()[length-1] == '$') 
 		{
-			Multiname qname(ns, name);
-			qname.setQName();
-			StringBuffer buffer(core);
-			buffer << qname;
-			int length = buffer.length();
-			if (length && buffer.c_str()[length-1] == '$') {
-				fullName = core->newString(buffer.c_str(), length-1);
-			} else {
-				fullName = core->newString(buffer.c_str());
-			}
-		}
-		return fullName;
+			length--;
+		} 
+		return core->newStringUTF8(buffer.c_str(), length);
 	}
 
 

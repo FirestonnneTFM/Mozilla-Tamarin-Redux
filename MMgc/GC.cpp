@@ -37,27 +37,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// for vsprintf
-#include <stdio.h>
-// For memset
-#include <string.h>
-
 #include "MMgc.h"
 #include "StaticAssert.h"
-
-#ifdef HAVE_STDARG
-#include <stdarg.h>
-#endif
-
-#ifdef MEMORY_INFO
-#if !defined(__MWERKS__)
-#if !defined(__ICC)
-#if !defined(UNDER_CE)
-#include <typeinfo>
-#endif
-#endif
-#endif
-#endif
 
 #ifdef _DEBUG
 #include "GCTests.h"
@@ -85,10 +66,6 @@
 	#include <sys/time.h>
 #endif // UNIX
 
-#if defined(_MAC) && (defined(MMGC_IA32) || defined(MMGC_AMD64))
-#include <pthread.h>
-#endif
-
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
 #endif // HAVE_PTHREAD_H
@@ -102,7 +79,7 @@
 #pragma warning(disable:4291) // no matching operator delete found; memory will not be freed if initialization throws an exception
 #endif
 
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
  //sampling support
 #include "avmplus.h"
 #else
@@ -118,6 +95,39 @@
 #include <sys/stack.h>
 extern "C" greg_t _getsp(void);
 #endif
+
+#ifdef MMGC_SPARC
+extern "C" {
+void sparc_clean_windows()
+{
+	asm(
+		"  cmp %i7, %o7 \n"
+		"  be 2f\n"
+		"  clr %o0\n"
+		"  cmp %o7, 0\n"
+		"  be 1f\n"
+		"  clr %o1\n"
+		"  call sparc_clean_windows\n"
+		"  nop\n"
+		"1:clr %o2\n"
+		"  clr %o3\n"
+		"  clr %o4\n"
+		"  clr %o5\n"
+		"  clr %o7\n"
+		"  clr %l0\n"
+		"  clr %l1\n"
+		"  clr %l2\n"
+		"  clr %l3\n"
+		"  clr %l4\n"
+		"  clr %l5\n"
+		"  clr %l6\n"
+		"  clr %l7\n"
+		"2:nop\n"
+		);
+}
+}
+#endif
+
 
 // Werner mode is a back pointer chain facility for Relase mode
 //#define WERNER_MODE
@@ -149,9 +159,11 @@ namespace MMgc
 	const uintptr MAX_UINTPTR = 0xFFFFFFFF;
 #endif	
 
+#ifdef MEMORY_PROFILER
 	// get detailed info on each size class allocators
 	const bool dumpSizeClassState = false;
-	
+#endif
+
 	/**
 	 * Free Space Divisor.  This value may be tuned for optimum
  	 * performance.  The FSD is based on the Boehm collector.
@@ -228,70 +240,70 @@ namespace MMgc
 
 	GC::GC(GCHeap *gcheap)
 		:
-#ifdef MMGC_DRC
-		  zct(),
-#endif
-		  nogc(false),
-		  greedy(false),
-		  findUnmarkedPointers(false),
-		  validateDefRef(false),
-		  keepDRCHistory(false),
-		  gcstats(false),
-#ifdef WRITE_BARRIERS
-		  incremental(true),
-#else
-		  incremental(false),
-#endif
-		  incrementalValidation(false),
+	greedy(false),
+		nogc(false),
+		findUnmarkedPointers(false),
+		validateDefRef(false),
+		keepDRCHistory(false),
+		collectThreshold(256),
+		gcstats(false),
+		dontAddToZCTDuringCollection(false),
+		incrementalValidation(false),
 #ifdef _DEBUG
-		  // check for missing write barriers at every Alloc
-		  incrementalValidationPedantic(false),
+		// check for missing write barriers at every Alloc
+		incrementalValidationPedantic(false),
 #endif
-
-		  marking(false),
-		  memStart(MAX_UINTPTR),
-		  memEnd(0),
-		  heap(gcheap),
-		  allocsSinceCollect(0),
-		  collecting(false),
-		  m_roots(0),
-		  m_callbacks(0),
-		  markTicks(0),
-		  bytesMarked(0),
-		  markIncrements(0),
-		  marks(0),
-		  sweeps(0),
-		  totalGCPages(0),
-		  stackCleaned(true),
-		  rememberedStackTop(0),
-		  destroying(false),
-		  lastMarkTicks(0),
-		  lastSweepTicks(0),
-		  lastStartMarkIncrementCount(0),
-#ifdef MMGC_RCROOT_SUPPORT
-		  rcRootSegments(NULL),
-#endif
-		  t0(GetPerformanceCounter()),
-		  dontAddToZCTDuringCollection(false),
-		  numObjects(0),
-		  hitZeroObjects(false),
-		  emptyWeakRef(0),
-		  emptyWeakRefRoot(0),
-		  smallEmptyPageList(NULL),
-		  largeEmptyPageList(NULL),
-		  sweepStart(0),
-		  heapSizeAtLastAlloc(gcheap->GetTotalHeapSize()),
-		  finalizedValue(true),
-		  // Expand, don't collect, until we hit this threshold
-		  collectThreshold(256),
-#if MMGC_THREADSAFE
-		  m_exclusiveGCThread(NULL),
-		  m_gcRunning(false),
-		  m_condDone(m_lock),
-		  m_requestCount(0),
-		  m_condNoRequests(m_lock)
+#ifdef WRITE_BARRIERS
+		incremental(true),
 #else
-		  disableThreadCheck(false)
+		incremental(false),
+#endif
+#ifdef MMGC_RCROOT_SUPPORT
+		rcRootSegments(NULL),
+#endif
+		t0(GetPerformanceCounter()),
+		bytesMarked(0),
+		markTicks(0),
+		lastStartMarkIncrementCount(0),
+		markIncrements(0),
+		marks(0),
+		sweeps(0),
+		numObjects(0),
+		sweepStart(0),
+		hitZeroObjects(false),
+		emptyWeakRef(0),
+		emptyWeakRefRoot(0),
+		destroying(false),
+		heapSizeAtLastAlloc(gcheap->GetTotalHeapSize()),
+		stackCleaned(true),
+		rememberedStackTop(0),
+#ifndef MMGC_THREADSAFE
+		disableThreadCheck(false),
+#endif
+		marking(false),
+		lastMarkTicks(0),
+		lastSweepTicks(0),
+		memStart(MAX_UINTPTR),
+		memEnd(0),
+		totalGCPages(0),
+		heap(gcheap),
+		allocsSinceCollect(0),
+		collecting(false),
+		finalizedValue(true),
+		smallEmptyPageList(NULL),
+		largeEmptyPageList(NULL),
+		m_roots(0),
+		m_callbacks(0)
+#ifdef MMGC_DRC
+		, zct()
+#endif
+		// Expand, don't collect, until we hit this threshold
+#if MMGC_THREADSAFE
+		, m_exclusiveGCThread(NULL)
+		, m_gcRunning(false)
+		, m_condDone(m_lock)
+		, m_requestCount(0)
+		, m_condNoRequests(m_lock)
 #endif
 	{
 		// sanity check for all our types
@@ -337,7 +349,7 @@ namespace MMgc
 
 		pageMap = (unsigned char*) heapAlloc(1);
 
-		memset(m_bitsFreelists, 0, sizeof(uint32*) * kNumSizeClasses);
+		VMPI_memset(m_bitsFreelists, 0, sizeof(uint32*) * kNumSizeClasses);
 		m_bitsNext = (uint32*)heapAlloc(1);
 
 		// precondition for emptyPageList 
@@ -427,12 +439,9 @@ namespace MMgc
 		GCAssert(!m_roots);
 		GCAssert(!m_callbacks);
 
-		{
-			GCSpinLock lock(m_rootListLock);
-			// apparently the player can't be made to clean up so keep it from crashing at least
-			while(m_roots) {
-				m_roots->Destroy();
-			}
+		// apparently the player can't be made to clean up so keep it from crashing at least
+		while(m_roots) {
+			m_roots->Destroy();
 		}
 
 		while(m_callbacks) {
@@ -671,7 +680,7 @@ namespace MMgc
 		const int hdr_size = (sizeof(void*) + 7) & ~7;
 		char* block = new char[size + hdr_size];
 		// FIXME: should allocate with zeroing, probably.
-		memset(block, 0, size + hdr_size);
+		VMPI_memset(block, 0, size + hdr_size);
 		void* mem = (void*)(block + hdr_size);
 		RCRootSegment *segment = new RCRootSegment(this, mem, size);
 		*(uintptr*)block = (uintptr)segment;
@@ -712,7 +721,7 @@ namespace MMgc
 
 	void *GC::AllocAlreadyLocked(size_t size, int flags/*0*/)
 	{
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 		avmplus::AvmCore *core = (avmplus::AvmCore*)GetGCContextVariable(GCV_AVMCORE);
 		if(core)
 			core->sampleCheck();
@@ -773,13 +782,14 @@ namespace MMgc
 			item = largeAlloc->Alloc(size, flags);
 		}
 
-#ifdef MEMORY_INFO
-		if(item)
-		item = DebugDecorate(item,  GC::Size(GetUserPointer(item)) + DebugSize(), 3);
-#endif
+		item = GetUserPointer(item);
+
+		if(heap->HooksEnabled()) {
+			heap->AllocHook(item, Size(item));
+		}
 
 #ifdef _DEBUG
-        bool shouldZero = (flags & kZero) || incrementalValidationPedantic;
+		bool shouldZero = (flags & kZero) || incrementalValidationPedantic;
         
 		// in debug mode memory is poisoned so we have to clear it here
 		// in release builds memory is zero'd to start and on free/sweep
@@ -788,11 +798,9 @@ namespace MMgc
 		// mutator to get the poisoned data so it crashes if it relies on 
 		// uninitialized values
 		if((item) && (shouldZero)) {
-			memset(item, 0, Size(item));
+			VMPI_memset(item, 0, Size(item));
 		}
 #endif
-
-		SAMPLE_ALLOC(item, GC::Size(item));
 
 		return item;
 	}
@@ -859,8 +867,6 @@ namespace MMgc
 
 		bool isLarge;
 
-		SAMPLE_DEALLOC(GetRealPointer(item), GC::Size(item));
-
 		// we can't allow free'ing something during Sweeping, otherwise alloc counters
 		// get decremented twice and destructors will be called twice.
 		if(collecting) {
@@ -888,9 +894,10 @@ namespace MMgc
 #endif // MMGC_DRC
 #endif
 
-#ifdef MEMORY_INFO
-		DebugFree(item, 0xca, 4);
-#endif
+		if(heap->HooksEnabled()) {
+			heap->FinalizeHook(item, GC::Size(item));
+			heap->FreeHook(item, GC::Size(item), 0xca);
+		}
 	
 		if (isLarge) {
 			largeAlloc->Free(GetRealPointer(item));
@@ -971,9 +978,9 @@ bail:
 
 		size_t heapSize = heap->GetUsedHeapSize();
 
-#ifdef MEMORY_INFO
-		if(heap->enableMemoryProfiling) {
-			GCDebugMsg(false, "Pre sweep memory info:\n");
+#ifdef MEMORY_PROFILER
+		if(heap->IsProfilingEnabled()) {
+			fprintf(stdout, "Before sweep memory info:\n");
 			DumpMemoryInfo();
 		}
 #endif
@@ -1024,10 +1031,8 @@ bail:
 		GCLargeAlloc::LargeBlock *lb = largeEmptyPageList;		
 		while(lb) {
 			GCLargeAlloc::LargeBlock *next = lb->next;
-#ifdef MEMORY_INFO
-			DebugFreeReverse(lb+1, 0xba, 3);
-#endif
-			// FIXME: this makes for some chatty locking, maybe not a problem?
+			if(heap->HooksEnabled())
+				heap->FreeHook(GetUserPointer(lb+1), lb->usableSize - DebugSize(), 0xba);
 			FreeBlock(lb, lb->GetNumBlocks());
 			lb = next;
 		}
@@ -1035,9 +1040,9 @@ bail:
 
 		SAMPLE_CHECK();
 
-#ifdef MEMORY_INFO
-		if(heap->enableMemoryProfiling) {			
-			GCDebugMsg(false, "Post sweep memory info:\n");
+#ifdef MEMORY_PROFILER
+		if(heap->IsProfilingEnabled()) {			
+			fprintf(stdout, "After sweep memory info:\n");
 			DumpMemoryInfo();
 		}
 #endif
@@ -1083,10 +1088,6 @@ bail:
 		}
 #ifdef DEBUGGER
 		StopGCActivity();
-#endif
-
-#ifdef MEMORY_INFO
-		m_gcLastStackTrace = GetStackTraceIndex(5);
 #endif
 	}
 
@@ -1217,7 +1218,7 @@ bail:
 	{
 		uintptr index = (addr-memStart) >> 12;
 
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
 #else
 		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
@@ -1233,7 +1234,7 @@ bail:
 	void GC::SetPageMapValue(uintptr addr, int val)
 	{
 		uintptr index = (addr-memStart) >> 12;
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
 #else
 		GCAssert(index >> 2 < 64 * GCHeap::kBlockSize);
@@ -1244,7 +1245,7 @@ bail:
 	void GC::ClearPageMapValue(uintptr addr)
 	{
 		uintptr index = (addr-memStart) >> 12;
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 		GCAssert((index >> 2) < uintptr(64*65536) * uintptr(GCHeap::kBlockSize));
 #else
 		GCAssert((index >> 2) < 64 * GCHeap::kBlockSize);
@@ -1294,8 +1295,10 @@ bail:
 		}
 
 		if(shiftAmount || dst != pageMap) {
-			memmove(dst + shiftAmount, pageMap, numBytesToCopy);
-			memset(dst, 0, shiftAmount);
+			VMPI_memmove(dst + shiftAmount, pageMap, numBytesToCopy);
+			if ( shiftAmount ) {
+				VMPI_memset(dst, 0, shiftAmount);
+			}
 			if(dst != pageMap) {
 				heap->Free(pageMap);
 				pageMap = dst;
@@ -1325,7 +1328,7 @@ bail:
 
 	void GC::CleanStack(bool force)
 	{
-#if defined _MSC_VER && defined _DEBUG
+#if defined(_MSC_VER) && defined(_DEBUG)
 		// debug builds poison the stack already
 		(void)force;
 		return;
@@ -1335,7 +1338,7 @@ bail:
 
 		stackCleaned = true;
 		
-		register void *stackP;
+		register void *stackP = 0;
 
 #if defined MMGC_IA32
 		#ifdef WIN32
@@ -1385,12 +1388,15 @@ bail:
 			size_t amount = (char*) stackP - (char*)rememberedStackTop;
 			void *stack = alloca(amount);
 			if(stack) {
-				memset(stack, 0, amount);
+				VMPI_memset(stack, 0, amount);
+#ifdef MMGC_SPARC
+				sparc_clean_windows();
+#endif
 			}
 		}
 #endif // __MSC_VER && _DEBUG
 	}
-	
+
 	#if defined(MMGC_PPC) && defined(__GNUC__)
 	__attribute__((noinline)) 
 	#endif
@@ -1416,7 +1422,7 @@ bail:
 		if(_object == this) {
 			size_t s = FixedMalloc::GetInstance()->Size(this);
 			// being a GCRoot its important we are clean
-			memset(this, 0, s);
+			VMPI_memset(this, 0, s);
 		}
 #endif
 		gc = _gc;
@@ -1586,7 +1592,7 @@ bail:
 		if(zctNext >= zct + zctSize*4096/sizeof(void *)) {
 			// grow 
 			RCObject **newZCT = (RCObject**) gc->heap->Alloc(zctSize*2);
-			memcpy(newZCT, zct, zctSize*GCHeap::kBlockSize);
+			VMPI_memcpy(newZCT, zct, zctSize*GCHeap::kBlockSize);
 			gc->heap->Free(zct);
 			zctNext = newZCT + (zctNext-zct);
 			zct = newZCT;	
@@ -1732,7 +1738,7 @@ bail:
 		{
 			void *stack = alloca(amount);
 			if(stack) {
-				memset(stack, 0, amount);
+				VMPI_memset(stack, 0, amount);
 			}
 		}
 #endif // _MMGC_IA32
@@ -1838,10 +1844,9 @@ bail:
 					}
 				}
 
-				GCAssert(*(int*)rcobj != 0);
+				GCAssert(*(intptr_t*)rcobj != 0);
 				GCAssert(gc->IsFinalized(rcobj));
-//				((GCFinalizable*)rcobj)->~GCFinalizable();
-				((GCFinalizable*)rcobj)->Finalize();
+				((GCFinalizable*)rcobj)->~GCFinalizable();
 				numObjects++;
 				objSize += (uint32)GC::Size(rcobj);
 				gc->Free(rcobj);
@@ -2012,7 +2017,7 @@ bail:
 		vsprintf(buf, format, argptr);
 		va_end(argptr);
 
-		GCAssert(strlen(buf) < 4096);
+		GCAssert(VMPI_strlen(buf) < 4096);
 
 		{
 			USING_CALLBACK_LIST(this);
@@ -2035,36 +2040,20 @@ bail:
 	{
 		int *p = (int*)GetRealPointer ( o ) ;
 		int size = *p++;
-		int traceIndex = *p++;
+		*p++; // skip old trace index slot
 		//if(*(p+1) == 0xcacacaca || *(p+1) == 0xbabababa) {
 			// bail, object was deleted
 		//	return;
 		//}
-		const char *typeName = GetTypeName(traceIndex, o);
-// Disabled for 64-bit Windows.  Debugger doesn't allow exception to go uncaught so always breaks
-#if (defined(WIN32) && !defined(UNDER_CE) && !defined(MMGC_64BIT)) || defined(MMGC_MAC)
-		if (strncmp(typeName, "unknown ", 7))
-		{
-			try {
-				const std::type_info *ti = &typeid(*(MMgc::GCObject*)p);
-				if (ti->name() && (uintptr_t(ti->name()) > 0x10000))
-					typeName = ti->name();
-				// sometimes name will get set to bogus memory with no exceptions catch that
-				char c = *typeName;
-				(void)c;	// silence compiler warning
-			} catch(...) {
-				typeName = "unknown";
-			}
-		}
-#endif
+		const char *typeName = GetAllocationName(o);
 
 		// strip "class "
-		if (!strncmp(typeName, "class ", 6))
+		if (!VMPI_strncmp(typeName, "class ", 6))
 			typeName += 6;
-		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, p);
+		GCDebugMsg(false, "Object: (%s *)0x%x\n", typeName, o);
 		if (proc)
 			proc(context, o, typeName);
-		PrintStackTraceByIndex(traceIndex);
+		PrintStackTrace(o);
 		GCDebugMsg(false, "---\n");
 		// skip data + endMarker
 		p += 1 + (size>>2);
@@ -2121,7 +2110,7 @@ bail:
 
 #endif // MMGC_DRC
 	
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 	
 	int DumpAlloc(GCAlloc *a)
 	{
@@ -2136,23 +2125,26 @@ bail:
 
 	void GC::DumpMemoryInfo()
 	{
-		if(heap->enableMemoryProfiling)
+		// for consistency
+		Collect();
+		bool gcstatsSave = gcstats;
+		gcstats = true;
+		gclog("Memory Summary");
+		gcstats = gcstatsSave;
+		heap->DumpFatties();
+		if (dumpSizeClassState)
 		{
-			DumpFatties();
-			if (dumpSizeClassState)
+			int waste=0;
+			for(int i=0; i < kNumSizeClasses; i++)
 			{
-				int waste=0;
-				for(int i=0; i < kNumSizeClasses; i++)
-				{
-					waste += DumpAlloc(containsPointersAllocs[i]);
+				waste += DumpAlloc(containsPointersAllocs[i]);
 #ifdef MMGC_DRC
-					waste += DumpAlloc(containsPointersRCAllocs[i]);
+				waste += DumpAlloc(containsPointersRCAllocs[i]);
 #endif
-					waste += DumpAlloc(noPointersAllocs[i]);
-				}
-				GCDebugMsg(false, "Wasted %d kb\n", waste>>10);
-
+				waste += DumpAlloc(noPointersAllocs[i]);
 			}
+			GCDebugMsg(false, "Wasted %d kb\n", waste>>10);
+
 		}
 	}
 
@@ -2336,7 +2328,7 @@ bail:
 				if (buffer) GCDebugMsg(false, buffer);
 				GCDebugMsg(false, "Location: 0x%08x  Object: 0x%08x (size %d)\n", where, real, taggedSize);
 				if (buffer) GCDebugMsg(false, buffer);
-#ifdef MEMORY_INFO
+#if 0
 				PrintStackTraceByIndex(traceIndex);
 #else
 				(void)traceIndex;
@@ -2373,17 +2365,6 @@ bail:
 		GCDebugMsg(false, "[%d] Probing for pointers to : 0x%08x\n", currentDepth, me);
 		while(m < memEnd)
 		{
-#ifdef WIN32
-			// first skip uncommitted memory
-			MEMORY_BASIC_INFORMATION mib;
-			VirtualQuery((void*) m, &mib, sizeof(MEMORY_BASIC_INFORMATION));
-			if((mib.Protect & PAGE_READWRITE) == 0) 
-			{
-				m += mib.RegionSize;
-				continue;
-			}
-#endif
-
 			// divide by 4K to get index
 			int bits = GetPageMapValueAlreadyLocked(m);
 			if(bits == kNonGC) 
@@ -2520,7 +2501,6 @@ bail:
 #endif
 		}
 
-
 		_asm {
 			// load memStart and End into mm0
 			movq mm0,memStart			
@@ -2655,13 +2635,13 @@ bail:
 #endif
 
 				if(wl->prev)
-					sprintf(statusBuffer, "0x%x+%d -> 0x%x size=%d (%s)\n",  (unsigned int)wl->prev->wi.ptr, wl->off, (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
+					VMPI_sprintf(statusBuffer, "0x%x+%d -> 0x%x size=%d (%s)\n",  (unsigned int)wl->prev->wi.ptr, wl->off, (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
 				else
-					sprintf(statusBuffer, "0x%x : %d (%s)\n", (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
+					VMPI_sprintf(statusBuffer, "0x%x : %d (%s)\n", (unsigned int)wl->wi.ptr, wl->wi.GetSize(), name);
 				wl = wl->prev;
 				OutputDebugString(statusBuffer);
 			}
-			sprintf(statusBuffer, "\n");
+			VMPI_sprintf(statusBuffer, "\n");
 			OutputDebugString(statusBuffer);
 			//shouldGo = NULL;
 		}
@@ -2682,7 +2662,7 @@ bail:
 			// cause things on the work queue to be already marked
 			// in incremental GC
 			if(!validateDefRef) {
-				GCAssert(!b);
+				//GCAssert(!b);
 			}
 #endif			
 		}
@@ -2706,13 +2686,13 @@ bail:
 #endif
 
 			uintptr val = *p++;  
-
+			
 			if(val < _memStart || val >= _memEnd)
 				continue;
 
 			// normalize and divide by 4K to get index
 			int bits = GetPageMapValue(val); 
-			
+						
 			if (bits == kGCAllocPage)
 			{
 				const void *item;
@@ -3153,7 +3133,7 @@ bail:
 		if(m_bitsFreelists[sizeClass]) {
 			bits = m_bitsFreelists[sizeClass];
 			m_bitsFreelists[sizeClass] = *(uint32**)bits;
-			memset(bits, 0, sizeof(uint32*));
+			VMPI_memset(bits, 0, sizeof(uint32*));
 			return bits;
 		}
 
@@ -3426,7 +3406,6 @@ uintptr_t	GC::GetStackTop() const
 	}
 #endif
 #endif /*<<GC_PORTING_API*/
-
 	void *GC::heapAlloc(size_t siz, bool expand, bool zero)
 	{
 		void *ptr = heap->Alloc((int)siz, expand, zero);
@@ -3489,25 +3468,4 @@ uintptr_t	GC::GetStackTop() const
 		log_mem("[mem] \tunmanaged bytes ", fixed_alloced, unmanaged);
 		gclog("[mem] -------- gross stats end -----\n");
 	}
-
-#if defined (FEATURE_SAMPLER)
-	// For sampling support
-	GCThreadLocal<avmplus::Sampler*> m_sampler;
-	bool sampling = false;
-
-	void recordAllocationSample(void* item, size_t size, bool in_lock)
-	{
-		avmplus::Sampler* sampler = m_sampler;
-		if( sampler && sampler->sampling )
-			sampler->recordAllocationSample(item, size, !in_lock);
-	}
-
-	void recordDeallocationSample(const void* item, size_t size)
-	{
-		avmplus::Sampler* sampler = m_sampler;
-		if( sampler /*&& sampler->sampling*/ )
-			sampler->recordDeallocationSample(item, size);
-	}
-#endif
-
 }

@@ -40,10 +40,9 @@
 
 namespace avmplus
 {
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 	void CallStackNode::init(
 					MethodEnv*				env
-			#ifdef DEBUGGER
 					, Atom*					framep
 					, Traits**				frameTraits
 					, int					argc
@@ -51,16 +50,14 @@ namespace avmplus
 					, intptr_t volatile*	eip
 					, int32_t volatile*		scopeDepth
 					, bool                  boxed
-			#endif
 			)
 	{
 		AvmAssert(env != NULL);
 		m_core			= env->core();
 		m_env			= env;
 		m_next			= m_core->callStack; m_core->callStack = this;
-		m_envname		= env->method->name;
+		m_fakename		= NULL;
 		m_depth			= m_next ? (m_next->m_depth + 1) : 1;
-	#ifdef DEBUGGER
 		m_eip			= eip;     // ptr to where the current instruction pointer is stored
 		m_filename		= NULL;
 		m_framep		= framep;
@@ -73,14 +70,13 @@ namespace avmplus
 		m_argc			= argc;
 		m_linenum		= 0;
 		m_boxed			= boxed;
-	#endif
 	}
 
 	void CallStackNode::init(AvmCore* core, Stringp name)
 	{
 		// careful, core and/or name can be null
 		m_env			= NULL;
-		m_envname		= name;
+		m_fakename		= name;
 		if (name)
 		{
 			AvmAssert(core != NULL);
@@ -94,7 +90,6 @@ namespace avmplus
 			m_next		= NULL;
 			m_depth		= 0;
 		}
-	#ifdef DEBUGGER
 		m_eip			= 0;    
 		m_filename		= 0;
 		m_framep		= 0;
@@ -104,10 +99,9 @@ namespace avmplus
 		m_argc			= 0;
 		m_linenum		= 0;
 		m_boxed			= false;
-	#endif
 	}
 
-	void CallStackNode::exit()
+	void FASTCALL CallStackNode::exit()
 	{
 		// m_env might be null (for fake CallStackNode), be careful
 		AvmAssert(m_core != NULL);
@@ -122,7 +116,7 @@ namespace avmplus
 		reset();
 	}
 	
-	void CallStackNode::reset()
+	void FASTCALL  CallStackNode::reset()
 	{
 		AvmCore* core = m_core; // save it since exit() resets to null
 		if (core)
@@ -132,17 +126,15 @@ namespace avmplus
 		}
 	}
 
-#ifdef DEBUGGER
-	void** CallStackNode::scopeBase()
+	void** FASTCALL CallStackNode::scopeBase()
 	{
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
 		if (m_framep && m_env)
 		{
-			return (void**) (m_framep + ((MethodInfo*)m_env->method)->local_count);
+			return (void**) (m_framep + ((MethodInfo*)m_env->method)->local_count());
 		}
 		return NULL;
 	}
-#endif
 
 	// Dump a filename.  The incoming filename is of the form
 	// "C:\path\to\package\root;package/package;filename".  The path format
@@ -154,8 +146,10 @@ namespace avmplus
 	// platform by looking for any backslashes in the path.  If there are
 	// any, then we'll assume backslash is the path separator.  If not,
 	// we'll use forward slash.
-	void StackTrace::dumpFilename(Stringp filename, PrintWriter& out) const
+	void StackTrace::dumpFilename(Stringp _filename, PrintWriter& out) const
 	{
+		StringIndexer filename(_filename);
+		
 		wchar semicolonReplacement = '/';
 		int length = filename->length();
 		wchar ch;
@@ -164,7 +158,7 @@ namespace avmplus
 		// look for backslashes; if there are any, then semicolons will be
 		// replaced with backslashes, not forward slashes
 		for (i=0; i<length; ++i) {
-			ch = (*filename)[i];
+			ch = filename[i];
 			if (ch == '\\') {
 				semicolonReplacement = '\\';
 				break;
@@ -174,7 +168,7 @@ namespace avmplus
 		// output the entire path
 		bool previousWasSlash = false;
 		for (i=0; i<length; ++i) {
-			ch = (*filename)[i];
+			ch = filename[i];
 			if (ch == ';') {
 				if (previousWasSlash)
 					continue;
@@ -187,6 +181,20 @@ namespace avmplus
 			}
 			out << ch;
 		}
+	}
+
+	static Stringp getStackTraceLine(AbstractFunction* method, Stringp filename) 
+	{
+		AvmCore *core = method->pool->core;
+		Stringp s = core->newStringLatin1("\tat ");
+		s = core->concatStrings(s, method->format(core));
+		if (filename)
+		{
+			s = s->appendLatin1("[");
+			s = s->append(filename);
+			s = s->appendLatin1(":");
+		}
+		return s;
 	}
 
 	Stringp StackTrace::format(AvmCore* core)
@@ -207,20 +215,20 @@ namespace avmplus
 					continue;
 
 				if(i != 0)
-					s = core->concatStrings(s, core->knewline);
+					s = s->appendLatin1("\n");
 
 				Stringp filename=NULL;
 				if(e->filename())
 				{
 					StringBuffer sb(core->gc);
 					dumpFilename(e->filename(), sb);
-					filename = core->newString(sb.c_str());
+					filename = core->newStringUTF8(sb.c_str());
 				}
-				s = core->concatStrings(s, e->info()->getStackTraceLine(filename));
+				s = core->concatStrings(s, getStackTraceLine(e->info(), filename));
 				if(e->filename())
 				{
 					s = core->concatStrings(s, core->intToString(e->linenum()));
-					s = core->concatStrings(s, core->krightbracket);
+					s = s->appendLatin1("]");
 				}
 			}
 			stringRep = s;
@@ -228,5 +236,5 @@ namespace avmplus
 		return stringRep;
 	}
 
-#endif /* FEATURE_SAMPLER */
+#endif 
 }

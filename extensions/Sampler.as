@@ -205,6 +205,7 @@ package flash.sampler
      * @keyword clearSamples      
      * @see package.html#getSamples() getSamples()
      */
+    [native("SamplerScript::clearSamples")]
 	public native function clearSamples():void;
 
     /**
@@ -216,6 +217,7 @@ package flash.sampler
      * @keyword startSampling      
      * @see flash.sampler.Sample Sample class
      */
+    [native("SamplerScript::startSampling")]
 	public native function startSampling():void;
 
 	/**
@@ -227,6 +229,7 @@ package flash.sampler
      * @keyword stopSampling      
      * @see flash.sampler.Sample Sample class
 	 */
+    [native("SamplerScript::stopSampling")]
 	public native function stopSampling():void;
 
 	/**
@@ -237,6 +240,7 @@ package flash.sampler
      * @keyword pauseSampling      
      * @see package.html#startSampling() startSampling()
 	 */
+    [native("SamplerScript::pauseSampling")]
 	public native function pauseSampling():void;
 	
 	/**
@@ -247,6 +251,7 @@ package flash.sampler
      * @langversion 3.0
      * @keyword sampleInternalAllocs
      */
+    [native("SamplerScript::sampleInternalAllocs")]
 	public native function sampleInternalAllocs(b:Boolean):void;
 
 	/**
@@ -281,6 +286,7 @@ package flash.sampler
             _setSamplerCallback(null);
         }
     }
+    [native("SamplerScript::_setSamplerCallback")]
     native function _setSamplerCallback(f:Function):void;
     
 	/**
@@ -293,6 +299,7 @@ package flash.sampler
     * @langversion 3.0     
     * @keyword getSize      
 	*/
+    [native("SamplerScript::getSize")]
 	public native function getSize(o:*):Number;
 
     /**
@@ -313,6 +320,7 @@ package flash.sampler
      * @see ../../statements.html#for_each..in for each..in    
      * 
      */
+    [native("SamplerScript::getMemberNames")]
     public native function getMemberNames(o:Object, instanceNames:Boolean=false):Object;
 
  
@@ -325,6 +333,7 @@ package flash.sampler
      * @keyword getSamples     
      * @see flash.sampler.Sample
      */
+    [native("SamplerScript::getSamples")]
     public native function getSamples():Object;
 
     /** 
@@ -336,6 +345,7 @@ package flash.sampler
      * @keyword getSampleCount     
      * @see flash.sampler.Sample    
      */
+    [native("SamplerScript::getSampleCount")]
     public native function getSampleCount():Number;
  
    /**
@@ -387,6 +397,7 @@ package flash.sampler
     /** 
     * @private
     */
+    [native("SamplerScript::_getInvocationCount")]
     native function _getInvocationCount(obj:Object, qname:QName, type:uint):Number;
 
    /**
@@ -407,6 +418,6 @@ package flash.sampler
      * @see package.html#getSetterInvocationCount() getSetterInvocationCount() 
      * @see package.html#getGetterInvocationCount() getGetterInvocationCount() 
      */
-    [native(script="SamplerScript", methods="auto")]
+    [native("SamplerScript::isGetterSetter")]
     public native function isGetterSetter(obj:Object, qname:QName):Boolean;
 };

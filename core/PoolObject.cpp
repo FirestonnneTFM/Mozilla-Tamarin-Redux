@@ -51,6 +51,9 @@ namespace avmplus
 		cpool_mn(0),
 		bugFlags(0),
 		methods(core->GetGC(), 0),
+#if VMCFG_METHOD_NAMES
+		method_name_indices(0),
+#endif
 		metadata_infos(0),
 		cinits(core->GetGC(), 0),
 		scripts(core->GetGC(), 0),
@@ -60,7 +63,8 @@ namespace avmplus
 		privateNamedScripts = new(core->GetGC()) MultinameHashtable();
 		m_code = sb.getImpl();
 #if defined(AVMPLUS_MIR)
-		codeBuffer = new (core->GetGC()) GrowableBuffer(core->GetGC()->GetGCHeap());
+		MMGC_MEM_TAG("JIT");
+		codeBuffer = new GrowableBuffer(core->GetGC()->GetGCHeap());
 #endif
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
 	}
@@ -382,7 +386,7 @@ range_error:
 		{
 			#ifdef AVMPLUS_VERBOSE
 			if (!toplevel || !toplevel->verifyErrorClass())
-				core->console << "class not found: " << m << " index=" << index << "\n";
+				core->console << "class not found: " << m << " index=" << (uint32_t)index << "\n";
 			#endif
 			if (toplevel)
 				toplevel->throwVerifyError(kClassNotFoundError, core->toErrorString(&m));
@@ -414,8 +418,8 @@ range_error:
 				r = core->traits.vectordouble_itraits;
 			else
 			{
-				Stringp fullname = core->internString( core->concatStrings(core->newString("Vector.<"), 
-					core->concatStrings(param_traits->formatClassName(), core->newString(">")))->atom());
+				Stringp fullname = core->internString( core->concatStrings(core->newConstantStringLatin1("Vector.<"), 
+					core->concatStrings(param_traits->formatClassName(), core->newConstantStringLatin1(">")))->atom());
 
 				Multiname newname;
 				newname.setName(fullname);
@@ -449,6 +453,12 @@ range_error:
 	}
 	
 #ifdef AVMPLUS_WORD_CODE
+	void PoolObject::initPrecomputedMultinames()
+	{
+		if (this->word_code.cpool_mn == NULL)
+			this->word_code.cpool_mn = new (sizeof(PrecomputedMultinames) + (this->constantMnCount - 1)*sizeof(Multiname)) PrecomputedMultinames(core->GetGC(), this);
+	}
+
 	PrecomputedMultinames::PrecomputedMultinames(MMgc::GC* gc, PoolObject* pool)
 		: MMgc::GCRoot(gc)
 		, nNames (0)

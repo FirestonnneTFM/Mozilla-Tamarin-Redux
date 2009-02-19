@@ -1209,7 +1209,7 @@ namespace avmplus
 		{
 			StringBuffer output(core);
 			this->__toXMLString(output, nullStringAtom, 0);
-			return core->newString(output.c_str())->atom();
+			return core->newStringUTF8(output.c_str())->atom();
 		}
 	}
 
@@ -1222,7 +1222,7 @@ namespace avmplus
 	{
 		StringBuffer output(core());
 		this->__toXMLString(output, nullStringAtom, 0);
-		return core()->newString(output.c_str());
+		return core()->newStringUTF8(output.c_str());
 	}
 
 	/////////////////////////////////////////////////////////////////////////

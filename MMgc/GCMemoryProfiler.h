@@ -39,55 +39,85 @@
 #ifndef __GCMemoryProfiler__
 #define __GCMemoryProfiler__
 
-
-#ifdef FEATURE_SAMPLER
-// Sampling support
-namespace avmplus
-{
-	class Sampler;
-}
-#endif
-
-
-#ifdef FEATURE_SAMPLER
 namespace MMgc
 {
-	extern GCThreadLocal<avmplus::Sampler*> m_sampler;
-	extern bool sampling;
-	void recordAllocationSample(void* item, size_t size, bool in_lock = false);
-	void recordDeallocationSample(const void* item, size_t size);
-}
-#endif
-#ifndef MEMORY_INFO
+	MMGC_API void PrintStackTrace(const void *item);
+	MMGC_API const char* GetAllocationName(const void *obj);
 
-#define MMGC_MEM_TAG(_x)
-#define MMGC_MEM_TYPE(_x)
-#define GetRealPointer(_x) _x
-#define GetUserPointer(_x) _x
-#define DebugSize() 0
-#else
+#ifdef MEMORY_PROFILER
 
 #define MMGC_MEM_TAG(_x) MMgc::SetMemTag(_x)
 #define MMGC_MEM_TYPE(_x) MMgc::SetMemType(_x)
+	
+	class StackTrace;
 
-namespace MMgc
-{
 	MMGC_API void SetMemTag(const char *memtag);
 	MMGC_API void SetMemType(const void *memtype);
+	MMGC_API void PrintStackTraceByTrace(StackTrace *trace);
 
-	/**
-	 * calculate a stack trace skipping skip frames and return index into
-	 * trace table of stored trace
-	 */
-	unsigned int GetStackTraceIndex(int skip);
-	unsigned int LookupTrace(int *trace);
-	void ChangeSize(int traceIndex, int delta);
-	void DumpFatties();
+	// platform specific helpers
+	void GetInfoFromPC(uintptr_t pc, char *buff, int buffSize);
+	void GetFunctionName(uintptr_t pc, char *buff, int buffSize);
+	void CaptureStackTrace(uintptr_t *trace, int len, int skip);
+
+	class GCStackTraceHashtable : public GCHashtable
+	{
+	public:
+		GCStackTraceHashtable(unsigned int capacity=kDefaultSize, int options=0) : GCHashtable(capacity, options) {}
+	protected:
+		virtual unsigned equals(const void *k, const void *k2);
+		virtual unsigned hash(const void *k);
+	};
+
+	class MemoryProfiler : public GCAllocObject
+	{
+	public:
+		MemoryProfiler() : 
+				traceTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
+				stackTraceMap(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_MT),
+				nameTable(128, GCHashtable::OPTION_MALLOC | GCHashtable::OPTION_STRINGS) {}
+		~MemoryProfiler();
+		void Alloc(const void *item, size_t size);
+		void Free(const void *item, size_t size);
+		void DumpFatties();
+		const char *GetAllocationName(const void *obj);
+		StackTrace *GetAllocationTrace(const void *obj);
+	private:
+		StackTrace *GetStackTrace();
+		const char *Intern(const char *name, size_t len);
+		const char *GetPackage(StackTrace *trace);
+		const char *GetAllocationNameFromTrace(StackTrace *trace);
+		const char *GetAllocationCategory(StackTrace *trace);
+
+		// map memory addresses of allocated objects to StackTrace*
+		GCHashtable traceTable;
+
+		// intern table of StackTrace*
+		GCStackTraceHashtable stackTraceMap;
+
+		// intern table of names
+		GCHashtable nameTable;
+	};
+
+#else // MEMORY_PROFILER
+
+#define MMGC_MEM_TAG(_x)
+#define MMGC_MEM_TYPE(_x)
+
+#endif // !MEMORY_PROFILER
+
+#ifndef MEMORY_INFO
+
+#define GetRealPointer(_x) _x
+#define GetUserPointer(_x) _x
+#define DebugSize() 0
+
+#else 
 
 	/**
 	* Manually set me, for special memory not new/deleted, like the code memory region
 	*/
-	MMGC_API void ChangeSizeForObject(void *object, int size);
+	MMGC_API void ChangeSizeForObject(const void *object, int size);
 
 	/**
 	* How much extra size does DebugDecorate need?
@@ -97,17 +127,11 @@ namespace MMgc
 	/**
 	* decorate memory with debug information, return pointer to memory to return to caller
 	*/
-	MMGC_API void *DebugDecorate(void *item, size_t size, int skip);
-
+	MMGC_API void DebugDecorate(const void *item, size_t size);
 	/** 
 	* Given a pointer to user memory do debug checks and return pointer to real memory
 	*/
-	void *DebugFree(const void *item, int poison, int skip);		
-
-	/**
-	* Given a pointer to real memory do debug checks and return pointer to user memory
-	*/
-	void *DebugFreeReverse(void *item, int poison, int skip);
+	void *DebugFree(const void *item, int poison, size_t size);		
 
 	/**
 	* Given a user pointer back up to real beginning
@@ -119,18 +143,10 @@ namespace MMgc
 	*/
 	inline void *GetUserPointer(const void *item) { return (void*)((uintptr) item +  2 * sizeof(int)); }
 
-	const char* GetTypeName(int index, void *obj);
-
-	void GetInfoFromPC(sintptr pc, char *buff, int buffSize);
-	void GetStackTrace(sintptr *trace, int len, int skip);
-	// print stack trace of index into trace table
-	void PrintStackTraceByIndex(int index);
-	MMGC_API void PrintStackTrace(const void *item);
-	// print stack trace of caller
-	void DumpStackTrace(int skip=1);
-
-}
 
 #endif //MEMORY_INFO
+
+} // namespace MMgc
+
 #endif //!__GCMemoryProfiler__
 

@@ -130,10 +130,12 @@ namespace avmplus
 		bool exited =  (prev == -1) ? true : false; // are we being called as a result of function exit?
 		if (!changed && !exited) 
 			return;  // still on the same line in the same function?
-
-		if (core->profiler->profilingDataWanted && core->profiler->profileSwitch && !core->sampler()->sampling)
+		
+		Profiler* profiler = core->profiler();
+		Sampler* s = core->get_sampler();
+		if (profiler && profiler->profilingDataWanted && profiler->profileSwitch && !(s && s->sampling()))
 		{
-			core->profiler->sendLineTimestamp(line);
+			profiler->sendLineTimestamp(line);
 		}
 
 		// tracing information
@@ -166,7 +168,7 @@ namespace avmplus
 			if (f && (f->flags & AbstractFunction::ABSTRACT_METHOD) == 0) 
 			{
 				MethodInfo* m = (MethodInfo*)f;
-				AbcFile* abc = m->getFile();
+				AbcFile* abc = m->file();
 				if (abc)
 				{
 					SourceFile* source = abc->sourceNamed( core->callStack->filename() );
@@ -214,10 +216,11 @@ namespace avmplus
 		// filename changed
 		if (prev != filename) 
 		{
-			if (core->profiler->profilingDataWanted && !core->sampler()->sampling)
+			Profiler* profiler = core->profiler();
+			Sampler* s = core->get_sampler();
+			if (profiler && profiler->profilingDataWanted && !(s && s->sampling()))
 			{
-				UTF8String* sourceFile = filename->toUTF8String();
-				core->profiler->sendDebugFileUrl(sourceFile);
+				profiler->sendDebugFileURL(filename);
 			}
 		}
 	}
@@ -261,8 +264,9 @@ namespace avmplus
 				// WARNING: don't change the format of output since outside utils depend on it
 				uint64 delta = OSDep::currentTimeMillis() - astraceStartTime;
 				core->console << (uint32)(delta) << " AVMINF: MTHD ";
-				if (fnc->name && (fnc->name->length() > 0) )
-					core->console << fnc->name;
+				Stringp fname = fnc->getMethodName();
+				if (fname && (fname->length() > 0) )
+					core->console << fname;
 				else
 					core->console << "<unknown>";
 				
@@ -321,7 +325,9 @@ namespace avmplus
 		MethodEnv* env = core->callStack->env();
 		if (env->method)
 		{
-			name = ( env->method->name != 0 ) ? Stringp(env->method->name) : Stringp(core->kEmptyString);
+			name = env->method->getMethodName();
+			if (!name)
+				name = core->kEmptyString;
 			if ((line == 0) && (astrace_callback == TRACE_METHODS_WITH_ARGS || astrace_callback == TRACE_METHODS_AND_LINES_WITH_ARGS))
 				args = traceArgumentsString();
 		}
@@ -350,7 +356,7 @@ namespace avmplus
 		Atom* arr;
 		if (frame && frame->arguments(arr, count))
 		{
-			Stringp comma = core->newString(",");
+			Stringp comma = core->newConstantStringLatin1(",");
 			for(int i=0; i<count; i++)
 			{
 				args = core->concatStrings(args, core->format(arr[i]));
@@ -647,16 +653,8 @@ namespace avmplus
 
 		// line numbers for a given function don't always come in sequential
 		// order -- for example, I've seen them come out of order if a function
-		// contains an inner anonymous function -- so, compare the new line
-		// against firstSourceLine every time we get called
-		if (func->firstSourceLine == 0 || linenum < func->firstSourceLine)
-			func->firstSourceLine = linenum;
-
-		if (func->offsetInAbc == 0 || offset < func->offsetInAbc)
-			func->offsetInAbc = offset;
-
-		if (func->lastSourceLine == 0 || linenum > func->lastSourceLine)
-			func->lastSourceLine = linenum;
+		// contains an inner anonymous function -- so, update every time we get called
+		func->updateSourceLines(linenum, offset);
 
         MMgc::GC *gc = core->GetGC();
 		if (sourceLines == NULL)
@@ -878,7 +876,7 @@ namespace avmplus
 		if (trace->framep() && trace->info())
 		{
 			MethodInfo* info = (MethodInfo*) trace->info();
-			*pastLastLocal = info->local_count;
+			*pastLastLocal = info->local_count();
 		}
 		else
 		{
