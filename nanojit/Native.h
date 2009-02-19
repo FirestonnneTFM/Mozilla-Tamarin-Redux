@@ -40,6 +40,18 @@
 #ifndef __nanojit_Native__
 #define __nanojit_Native__
 
+// define PEDANTIC=1 to ignore specialized forms, force general forms
+// for everything, far branches, extra page-linking, etc.  This will
+// flush out many corner cases.
+
+#define PEDANTIC 0
+#if PEDANTIC
+#  define UNLESS_PEDANTIC(...)
+#  define IF_PEDANTIC(...) __VA_ARGS__
+#else
+#  define UNLESS_PEDANTIC(...) __VA_ARGS__
+#  define IF_PEDANTIC(...)
+#endif
 
 #ifdef NANOJIT_IA32
 #include "Nativei386.h"
@@ -50,9 +62,11 @@
 #include "NativeARM.h"
 #endif
 #elif defined(NANOJIT_PPC)
-#include "NativePpc.h"
-#elif defined(NANOJIT_AMD64)
-#include "NativeAMD64.h"
+#include "NativePPC.h"
+#elif defined(NANOJIT_SPARC)
+#include "NativeSparc.h"
+#elif defined(NANOJIT_X64)
+#include "NativeX64.h"
 #else
 #error "unknown nanojit architecture"
 #endif
@@ -74,9 +88,9 @@ namespace nanojit {
 			counter_increment(native);\
 			if (verbose_enabled()) {\
 				outline[0]='\0';\
-				if (outputAddr) sprintf(outline, "  %10p  ",_nIns);\
-				else sprintf(outline, "              ");\
-				sprintf(&outline[14], ##__VA_ARGS__);\
+				if (outputAddr) VMPI_sprintf(outline, "  %10p  ",_nIns);\
+				else VMPI_sprintf(outline, "              ");\
+				VMPI_sprintf(&outline[14], ##__VA_ARGS__);\
 				Assembler::outputAlign(outline, 45);\
 				RegAlloc::formatRegisters(_allocator, outline, _thisfrag);\
 				Assembler::output_asm(outline);\
@@ -86,7 +100,7 @@ namespace nanojit {
 		#define gpn(r)					regNames[(r)] 
 		#define fpn(r)					regNames[(r)] 
 	#else
-		#define asm_output(f, ...)
+		#define asm_output(...)
 		#define gpn(r)		
 		#define fpn(r)		
 	#endif /* NJ_VERBOSE */

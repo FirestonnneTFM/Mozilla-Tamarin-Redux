@@ -83,7 +83,7 @@ namespace avmshell
 		// parse new bytecode
 		size_t len = b->get_length();
 		ScriptBuffer code = core->newScriptBuffer(len);
-		memcpy(code.getBuffer(), &b->GetByteArray()[0], len); 
+		VMPI_memcpy(code.getBuffer(), &b->GetByteArray()[0], len); 
 		Toplevel *toplevel = domainToplevel;
 		return core->handleActionBlock(code, 0,
 								  domainEnv,
@@ -121,21 +121,19 @@ namespace avmshell
 			toplevel()->throwArgumentError(kNullArgumentError, core->toErrorString("name"));
 		}
 			
+
 		// Search for a dot from the end.
-		int dot;
-		for (dot=name->length()-1; dot >= 0; dot--)
-			if ((*name)[dot] == (wchar)'.')
-				break;
-		
+		int dot = name->lastIndexOf(core->cachedChars[(int)'.']);
+
 		// If there is a '.', this is a fully-qualified
 		// class name in a package.  Must turn it into
 		// a namespace-qualified multiname.
 		Namespace* ns;
 		Stringp className;
-		if (dot != -1) {
-			Stringp uri = core->internString(new (core->GetGC()) String(name, 0, dot));
+		if (dot >= 0) {
+			Stringp uri = core->internString(name->substring(0, dot));
 			ns = core->internNamespace(core->newNamespace(uri));
-			className = core->internString(new (core->GetGC()) String(name, dot+1, name->length()-(dot+1)));
+			className = core->internString(name->substring(dot+1, name->length()));
 		} else {
 			ns = core->publicNamespace;
 			className = core->internString(name);

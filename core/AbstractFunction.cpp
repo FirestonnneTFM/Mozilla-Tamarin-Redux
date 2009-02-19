@@ -42,10 +42,9 @@ namespace avmplus
 {
 	using namespace MMgc;
 
-	AbstractFunction::AbstractFunction()
+	AbstractFunction::AbstractFunction(int _method_id) : method_id(_method_id)
 	{
 		this->flags = 0;
-		this->method_id = -1;
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst(TMT_abstractfunction, this); )
 	}
 
@@ -60,7 +59,7 @@ namespace avmplus
 	{
 		MMGC_MEM_TYPE(this);
 		AvmAssert(m_types == NULL);
-		m_types = (Traits**)core()->GetGC()->Calloc(count, sizeof(Traits*), GC::kContainsPointers|GC::kZero);
+		m_types = (Traits**)pool->core->GetGC()->Calloc(count, sizeof(Traits*), GC::kContainsPointers|GC::kZero);
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_abstractfunction, GC::Size(m_types) ); )
 	}
 
@@ -68,14 +67,14 @@ namespace avmplus
 	{
 		MMGC_MEM_TYPE(this);
 		AvmAssert(m_values == NULL);
-		m_values = (Atom*)core()->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
+		m_values = (Atom*)pool->core->GetGC()->Calloc(count, sizeof(Atom), GC::kContainsPointers|GC::kZero);
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_mem(TMT_abstractfunction, GC::Size(m_values) ); )
 	}
 	
 	void AbstractFunction::setParamType(int index, Traits* t)
 	{
 		AvmAssert(index >= 0 && index <= param_count);
-		WB(core()->GetGC(), m_types, &m_types[index], t);
+		WB(pool->core->GetGC(), m_types, &m_types[index], t);
 	}
 
 	void AbstractFunction::setDefaultValue(int index, Atom value)
@@ -83,29 +82,18 @@ namespace avmplus
 		AvmAssert(index > (param_count-optional_count) && index <= param_count);
 		int i = index-(param_count-optional_count)-1;
 		AvmAssert(i >= 0 && i < optional_count);
-		WBATOM(core()->GetGC(), m_values, &m_values[i], value);
+		WBATOM(pool->core->GetGC(), m_values, &m_values[i], value);
 	}
 	
-	#ifdef AVMPLUS_VERBOSE
+#ifdef AVMPLUS_VERBOSE
 	Stringp AbstractFunction::format(AvmCore* core) const
 	{
-		return core->concatStrings(name ? (Stringp)name : core->newString("?"), core->kparens);
+		Stringp n = getMethodName();
+		return n ?
+				n->appendLatin1("()") :
+				core->newConstantStringLatin1("?()");
 	}
-
-	Stringp AbstractFunction::getStackTraceLine(Stringp filename) 
-	{
-		AvmCore *core = this->core();
-		Stringp s = core->ktabat;
-		s = core->concatStrings(s, format(core));
-		if(filename)
-		{
-			s = core->concatStrings(s, core->kleftbracket);
-			s = core->concatStrings(s, filename);
-			s = core->concatStrings(s, core->kcolon);
-		}
-		return s;
-	}
-	#endif //AVMPLUS_VERBOSE
+#endif // AVMPLUS_VERBOSE
 
 	bool AbstractFunction::makeMethodOf(Traits* traits)
 	{
@@ -127,7 +115,7 @@ namespace avmplus
 		{
 			#ifdef AVMPLUS_VERBOSE
 			if (pool->verbose)
-				core()->console << "WARNING: method " << this << " was already bound to " << declaringTraits << "\n";
+				pool->core->console << "WARNING: method " << this << " was already bound to " << declaringTraits << "\n";
 			#endif
 
 			return false;
@@ -191,7 +179,7 @@ namespace avmplus
 	void AbstractFunction::boxArgs(int argc, uint32 *ap, Atom* out)
 	{
 		// box the typed args, up to param_count
-		AvmCore* core = this->core();
+		AvmCore* core = this->pool->core;
 		for (int i=0; i <= argc; i++)
 		{
 			if (i <= param_count)
@@ -256,7 +244,7 @@ namespace avmplus
 	{
 		if (!(flags & LINKED))
 		{
-			AvmCore* core = this->core();
+			AvmCore* core = this->pool->core;
 			AvmAssert(info_pos != NULL);
 
 			const byte* pos = info_pos;
@@ -433,4 +421,117 @@ namespace avmplus
 		return size;
 	}
 #endif
+
+	bool AbstractFunction::usesCallerContext() const
+	{
+		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));
+	}
+
+	// Builtin + non-native functions always need the dxns code emitted 
+	// Builtin + native functions have flags to specify if they need the dxns code
+	bool AbstractFunction::usesDefaultXmlNamespace() const
+	{
+		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
+	}
+
+#if VMCFG_METHOD_NAMES
+	Stringp AbstractFunction::getMethodName() const 
+	{
+		AvmAssert(pool != NULL);
+
+		Stringp name = NULL;
+		
+		AvmCore* core = pool->core;
+		if (core->config.methodNames)
+		{
+			if (uint32_t(method_id) < uint32_t(pool->method_name_indices.size()))
+			{
+				const int32_t index = pool->method_name_indices[method_id];
+				if (index >= 0)
+				{
+					name = pool->getString(index);
+				}
+				else
+				{
+#ifdef AVMPLUS_WORD_CODE
+					// PrecomputedMultinames may not be inited yet, but we'll need them eventually,
+					// so go ahead and init them now
+					pool->initPrecomputedMultinames();
+					const Multiname& mn = pool->word_code.cpool_mn->multinames[-index];
+#else
+					Multiname mn;
+					pool->parseMultiname(pool->cpool_mn[-index], mn);
+#endif
+					name = Multiname::format(core, mn.getNamespace(), mn.getName());
+				}
+			}
+
+			if (name && name->length() == 0) 
+			{
+				name = core->kanonymousFunc;	
+			}
+			
+			Traitsp t = this->declaringTraits;
+			if (t)
+			{
+				Stringp tname = t->format(core);
+				if (core->config.oldVectorMethodNames)
+				{
+					// Tamarin used to incorrectly return the internal name of these
+					// Vector types rather than the "official" name due to initialization
+					// order. Names on the left are "more correct" but old builds might
+					// require the "classic" name for compatibility purposes, so check.
+					struct NameMapRec { const char* n; const char* o; };
+					static const NameMapRec kNameMap[4] = 
+					{
+						{ "Vector.<Number>", "Vector$double" }, 
+						{ "Vector.<int>", "Vector$int" }, 
+						{ "Vector.<uint>", "Vector$uint" }, 
+						{ "Vector.<*>", "Vector$object" },
+					};
+					for (int i = 0; i < 4; ++i)
+					{
+						if (tname->equalsLatin1(kNameMap[i].n))
+							tname = core->newConstantStringLatin1(kNameMap[i].o);
+					}
+				};
+				
+				if (this == t->init)
+				{
+					// careful, name could be null, that's ok for init methods
+					if (t->posType() == TRAITSTYPE_SCRIPT_FROM_ABC)
+					{
+						name = tname->appendLatin1("$init");
+					}
+					else if (t->posType() == TRAITSTYPE_CLASS_FROM_ABC)
+					{
+						name = tname->appendLatin1("cinit");
+					}
+					else
+					{
+						AvmAssert(t->posType() == TRAITSTYPE_INSTANCE_FROM_ABC || t->posType() == TRAITSTYPE_ACTIVATION);
+						name = tname;
+					}
+				}
+				else if (name)
+				{
+					const char* sep;
+					if (flags & IS_GETTER)
+						sep = "/get ";
+					else if (flags & IS_SETTER)
+						sep = "/set ";
+					else 
+						sep = "/";
+					name = tname->appendLatin1(sep)->append(name);
+				}
+			}
+		}
+		
+		// if config.methodNames isn't set, might as well still return a non-null result
+		if (name == NULL)
+			name = core->concatStrings(core->newConstantStringLatin1("MethodInfo-"), core->intToString(method_id));
+		
+		return name;
+	}
+#endif		
 }

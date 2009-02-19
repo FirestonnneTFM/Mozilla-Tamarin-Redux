@@ -71,7 +71,7 @@ namespace avmshell
 		m_capacity = lhs.m_length;
 		m_length   = lhs.m_length;
 
-		memcpy(m_array, lhs.m_array, m_length);
+		VMPI_memcpy(m_array, lhs.m_array, m_length);
 	}
 
 	ByteArray::~ByteArray()
@@ -114,10 +114,10 @@ namespace avmshell
 			}
 			if (m_array)
 			{
-				memcpy(newArray, m_array, m_length);
+				VMPI_memcpy(newArray, m_array, m_length);
 				delete [] m_array;
 			}
-			memset(newArray+m_length, 0, newCapacity-m_capacity);
+			VMPI_memset(newArray+m_length, 0, newCapacity-m_capacity);
 			m_array = newArray;
 			m_capacity = newCapacity;
 #ifdef AVMPLUS_MOPS
@@ -164,7 +164,7 @@ namespace avmshell
 	void ByteArray::Push(const U8 *data, uint32 count)
 	{
 		Grow(m_length + count);
-		memcpy(m_array + m_length, data, count);
+		VMPI_memcpy(m_array + m_length, data, count);
 		m_length += count;
 #ifdef AVMPLUS_MOPS
 		NotifySubscribers();
@@ -285,7 +285,7 @@ namespace avmshell
 
 		if (count > 0)
 		{
-			memcpy(buffer, m_array+m_filePointer, count);
+			VMPI_memcpy(buffer, m_array+m_filePointer, count);
 			m_filePointer += count;
 		}
 	}
@@ -296,7 +296,7 @@ namespace avmshell
 			Grow(m_filePointer+count);
 			m_length = m_filePointer+count;
 		}
-		memcpy(m_array+m_filePointer, buffer, count);
+		VMPI_memcpy(m_array+m_filePointer, buffer, count);
 		m_filePointer += count;
 	}
 
@@ -392,7 +392,7 @@ namespace avmshell
 
 	String* ByteArrayObject::_toString()
 	{
-		unsigned char *c = (unsigned char*)m_byteArray.GetBuffer();
+		uint8_t *c = (uint8_t*)m_byteArray.GetBuffer();
 		uint32 len = m_byteArray.GetLength();
 
 		if (len >= 3)
@@ -400,42 +400,26 @@ namespace avmshell
 			// UTF8 BOM
 			if ((c[0] == 0xef) && (c[1] == 0xbb) && (c[2] == 0xbf))
 			{
-				return core()->newString(((char *)c) + 3, len - 3);
+				return core()->newStringUTF8((const char*)c + 3, len - 3);
 			}
 			else if ((c[0] == 0xfe) && (c[1] == 0xff))
 			{
 				//UTF-16 big endian
 				c += 2;
 				len = (len - 2) >> 1;
-				Stringp out = new (core()->GetGC()) String(len);
-				wchar *buffer = out->lockBuffer();
-				for (uint32 i = 0; i < len; i++)
-				{
-					buffer[i] = (c[0] << 8) + c[1];
-					c += 2;
-				}
-				out->unlockBuffer();
-
-				return out;
+				return core()->newStringEndianUTF16(/*littleEndian*/false, (const wchar*)c, len);
 			}
 			else if ((c[0] == 0xff) && (c[1] == 0xfe))
 			{
 				//UTF-16 little endian
-				c += 2;
-				len = (len - 2) >> 1;
-				Stringp out = new (core()->GetGC()) String(len);
-				wchar *buffer = out->lockBuffer();
-				for (uint32 i = 0; i < len; i++)
-				{
-					buffer[i] = (c[1] << 8) + c[0];
-					c += 2;
-				}
-				out->unlockBuffer();
-				return out;
+				return core()->newStringEndianUTF16(/*littleEndian*/true, (const wchar*)c, len);
 			}
 		}
 
-		return core()->newString(((char *)c), len);
+		// newStringLatin1, NOT newStringUTF8: the latter might decide the data is invalid
+		// UTF8 format (which is quite likely) and refuse to create the string. Be sure to pass the
+		// explicit len since there might be embedded null characters.
+		return core()->newStringLatin1((const char*)c, len);
 	}
 	
 	int ByteArrayObject::readByte()
@@ -546,7 +530,7 @@ namespace avmshell
 			return; 
 
 		U8 *gzdata = new U8[gzlen];
-        memcpy(gzdata, m_byteArray.GetBuffer(), gzlen);
+        VMPI_memcpy(gzdata, m_byteArray.GetBuffer(), gzlen);
 
         // Clear the buffer
         m_byteArray.Seek(0);
@@ -681,8 +665,8 @@ namespace avmshell
 		if (!filename) {
 			toplevel->throwArgumentError(kNullArgumentError, "filename");
 		}
-		UTF8String* filenameUTF8 = filename->toUTF8String();
-		FILE *fp = fopen(filenameUTF8->c_str(), "rb");
+		StUTF8String filenameUTF8(filename);
+		FILE *fp = fopen(filenameUTF8.c_str(), "rb");
 		if (fp == NULL) {
 			toplevel->throwError(kFileOpenError, filename);
 		}
@@ -721,18 +705,18 @@ namespace avmshell
 
 	Stringp ByteArrayObject::get_endian()
 	{
-		return (m_byteArray.GetEndian() == kBigEndian) ? core()->constantString("bigEndian") : core()->constantString("littleEndian");
+		return (m_byteArray.GetEndian() == kBigEndian) ? core()->internConstantStringLatin1("bigEndian") : core()->internConstantStringLatin1("littleEndian");
 	}
 
 	void ByteArrayObject::set_endian(Stringp type)
 	{
 		AvmCore* core = this->core();
 		type = core->internString(type);
-		if (type == core->constantString("bigEndian"))
+		if (type == core->internConstantStringLatin1("bigEndian"))
 		{
 			m_byteArray.SetEndian(kBigEndian);
 		}
-		else if (type == core->constantString("littleEndian"))
+		else if (type == core->internConstantStringLatin1("littleEndian"))
 		{
 			m_byteArray.SetEndian(kLittleEndian);
 		}
@@ -749,8 +733,8 @@ namespace avmshell
 			toplevel->throwArgumentError(kNullArgumentError, "filename");
 		}
 
-		UTF8String* filenameUTF8 = filename->toUTF8String();
-		FILE *fp = fopen(filenameUTF8->c_str(), "wb");
+		StUTF8String filenameUTF8(filename);
+		FILE *fp = fopen(filenameUTF8.c_str(), "wb");
 		if (fp == NULL) {
 			toplevel->throwError(kFileWriteError, filename);
 		}
@@ -778,10 +762,10 @@ namespace avmplus {
 		// have a traits with a builtin pool
 		if(cur)
 		{
-			Stringp uri = core->constantString("flash.utils");
+			Stringp uri = core->internConstantStringLatin1("flash.utils");
 			Namespace* ns = core->internNamespace(core->newNamespace(uri));
 			// try to get traits from flash.utils.ByteArray
-			Traits *baTraits = cur->pool->getTraits(core->constantString("ByteArray"), ns);
+			Traits *baTraits = cur->pool->getTraits(core->internConstantStringLatin1("ByteArray"), ns);
 			// and see if the original traits contains it!
 			return t->containsInterface(baTraits) != 0;
 		}
@@ -806,8 +790,8 @@ namespace avmplus {
 		}
 		return false;
  	}
-#endif
 }	
+#endif
 
 
 

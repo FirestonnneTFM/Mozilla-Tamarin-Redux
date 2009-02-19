@@ -39,22 +39,34 @@
 #ifndef __nanojit_h__
 #define __nanojit_h__
 
-#include <stddef.h>
 #include "avmplus.h"
 
 #ifdef FEATURE_NANOJIT
 
-#ifdef AVMPLUS_IA32
-#define NANOJIT_IA32
-#elif AVMPLUS_ARM
-#define NANOJIT_ARM
-#elif AVMPLUS_PPC
-#define NANOJIT_PPC
-#elif AVMPLUS_AMD64
-#define NANOJIT_AMD64
-#define NANOJIT_64BIT
+#if defined AVMPLUS_IA32
+	#define NANOJIT_IA32
+#elif defined AVMPLUS_ARM
+	#define NANOJIT_ARM
+#elif defined AVMPLUS_PPC
+	#define NANOJIT_PPC
+#elif defined AVMPLUS_SPARC
+	#define NANOJIT_SPARC
+#elif defined AVMPLUS_AMD64
+	#define NANOJIT_X64
 #else
-#error "unknown nanojit architecture"
+	#error "unknown nanojit architecture"
+#endif
+
+#ifdef AVMPLUS_64BIT
+#define NANOJIT_64BIT
+#endif
+
+#if defined NANOJIT_64BIT
+	#define IF_64BIT(...) __VA_ARGS__
+	#define UNLESS_64BIT(...)
+#else
+	#define IF_64BIT(...)
+	#define UNLESS_64BIT(...) __VA_ARGS__
 #endif
 
 /*
@@ -68,6 +80,8 @@
 	sides of the new/delete pair to forestall future needs.
 */
 #ifdef MMGC_API
+
+    using namespace MMgc;
 	
 	// separate overloads because GCObject and GCFinalizedObjects have different dtors 
 	// (GCFinalizedObject's is virtual, GCObject's is not)
@@ -122,9 +136,9 @@ namespace nanojit
     const uint32_t MAXARGS = 8;
 
 	#if defined(_MSC_VER) && _MSC_VER < 1400
-		static void NanoAssertMsgf(bool a,const char *f,...) {}
-		static void NanoAssertMsg(bool a,const char *m) {}
-		static void NanoAssert(bool a) {}
+		inline void NanoAssertMsgf(bool a,const char *f,...) {}
+		inline void NanoAssertMsg(bool a,const char *m) {}
+		inline void NanoAssert(bool a) {}
 	#elif defined(_DEBUG)
 		
 		#define __NanoAssertMsgf(a, file_, line_, f, ...)  \
@@ -157,7 +171,6 @@ namespace nanojit
 #endif
 
 #ifdef NJ_VERBOSE
-	#include <stdio.h>
 	#define verbose_output						if (verbose_enabled()) Assembler::output
 	#define verbose_outputf						if (verbose_enabled()) Assembler::outputf
 	#define verbose_enabled()					(_verbose)
@@ -203,7 +216,15 @@ namespace nanojit
 #define isU8(i)  ( int32_t(i) == uint8_t(i) )
 #define isS16(i) ( int32_t(i) == int16_t(i) )
 #define isU16(i) ( int32_t(i) == uint16_t(i) )
-#define isS24(i) ( ((int32_t(i)<<8)>>8) == (i) )
+#define isS24(i) ( (int32_t((i)<<8)>>8) == (i) )
+
+static inline bool isS32(intptr_t i) {
+	return int32_t(i) == i;
+}
+
+static inline bool isU32(uintptr_t i) {
+	return uint32_t(i) == i;
+}
 
 #define alignTo(x,s)		((((uintptr_t)(x)))&~(((uintptr_t)s)-1))
 #define alignUp(x,s)		((((uintptr_t)(x))+(((uintptr_t)s)-1))&~(((uintptr_t)s)-1))

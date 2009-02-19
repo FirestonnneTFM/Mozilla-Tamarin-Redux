@@ -37,9 +37,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-// For memset
-#include <string.h>
-
 #include "MMgc.h"
 
 namespace MMgc
@@ -48,7 +45,7 @@ namespace MMgc
 
 	// Size classes for our Malloc.  We start with a 4 byte allocator and then from
 	// 8 to 128, size classes are spaced evenly 8 bytes apart, then from 128 to 1968 they
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 	// The upper entries of the table (>128) are sized to 
 	// match the kSizeClassIndex which uses the number-of-entries
 	// per block to pick an allocator.  For example, if you want to 
@@ -188,7 +185,7 @@ namespace MMgc
 
 		// Buckets up to 128 are spaced evenly at 8 bytes.
 		if (size <= 128) {
-#ifdef MMGC_AMD64
+#ifdef MMGC_64BIT
 			unsigned index = size8 ? ((size8 >> 3) - 1) : 0;
 #else
 			unsigned index = size > 4 ? size8 >> 3 : 0;
@@ -214,7 +211,7 @@ namespace MMgc
 		// assert that I don't fit (makes sure we don't waste space
 		GCAssert(size > m_allocs[index-1]->GetItemSize());
 
-	    return m_allocs[index];
+	  return m_allocs[index];
 	}
 
 	void *FixedMalloc::LargeAlloc(size_t size)
@@ -229,22 +226,22 @@ namespace MMgc
 		else
 		{
 			numLargeChunks += blocksNeeded;
-#ifdef MEMORY_INFO
-			item = DebugDecorate(item, size, 5);
-			memset(item, 0xfb, size - DebugSize());
-#endif
 		}
+		item = GetUserPointer(item);
+		if(m_heap->HooksEnabled())
+			m_heap->AllocHook(item, Size(item));
 		return item;
 	}
 	
 	
 	void FixedMalloc::LargeFree(void *item)
 	{
-#ifdef MEMORY_INFO
-		item = DebugFree(item, 0xed, 5);
-#endif
+		if(m_heap->HooksEnabled()) {
+			m_heap->FinalizeHook(item, Size(item));
+			m_heap->FreeHook(item, Size(item), 0xfa);
+		}
 		numLargeChunks -= GCHeap::SizeToBlocks(LargeSize(item));
-		m_heap->Free(item);
+		m_heap->Free(GetRealPointer(item));
 	}
 	
 	size_t FixedMalloc::LargeSize(const void *item)

@@ -57,6 +57,9 @@
 #define MMGC_64BIT
 #elif defined(__powerpc__)
 #define MMGC_PPC
+#elif defined(__ppc64__)
+#define MMGC_PPC
+#define MMGC_64BIT
 #elif defined(__sparc__) || defined(__sparc)
 #define MMGC_SPARC
 #elif defined(__arm__)

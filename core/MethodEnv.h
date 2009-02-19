@@ -104,7 +104,6 @@ namespace avmplus
 		Atom endCoerce(int argc, uint32 *ap);
 		int  startCoerce(int argc);
 		Atom coerceUnboxEnter(int argc, Atom* atomv);
-		static Atom *unbox1(AvmCore* core, Toplevel* toplevel, Atom in, Traits *t, Atom *argv);
 		void unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv);
 		void unboxCoerceArgs(int argc, Atom* in, uint32 *ap);
 		void unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv);
@@ -273,24 +272,18 @@ namespace avmplus
 
 		ScriptObject* coerceAtom2SO(Atom atom, Traits *expected) const;
 
-#ifdef FEATURE_SAMPLER
-		void debugEnter(int argc, uint32 *ap, 
-			Traits**frameTraits, int localCount,
-			CallStackNode* callstack,
-			Atom* framep, volatile sintptr *eip);
-		void debugEnterInner(int argc, 
-			void *ap, /* Atom* or uint32_t*, depending on whether 'boxed' is true or false */ 
-			Traits**frameTraits, int localCount,
-			CallStackNode* callstack,
-			Atom* framep, volatile sintptr *eip,
-			bool boxed);
-		void debugExit(CallStackNode* callstack);
-#endif
-
 #ifdef DEBUGGER
-		uint64 invocationCount;
-		void sendEnter(int argc, uint32 *ap);
-		void sendExit();
+		void debugEnter(int argc, 
+						uint32_t* ap, 
+						Traits** frameTraits, 
+						int localCount,
+						CallStackNode* callstack,
+						Atom* framep, 
+						volatile sintptr *eip);
+
+		void debugEnterInner();
+
+		void debugExit(CallStackNode* callstack);
 #endif
 
 	private:
@@ -327,6 +320,10 @@ namespace avmplus
 	public:
 		inline bool isScriptEnv() const { return (activationOrMCTable & kIsScriptEnv) != 0; }
 
+#ifdef DEBUGGER
+		uint64_t invocationCount() const;
+#endif
+
 	// ------------------------ DATA SECTION BEGIN
 	public:
 		// pointers are write-once so we don't need WB's
@@ -342,7 +339,6 @@ namespace avmplus
 		};
 	private:
 		uintptr_t					activationOrMCTable;
-	// ------------------------ DATA SECTION END
 	public:
 #ifdef AVMPLUS_WORD_CODE
 		class LookupCache : public MMgc::GCObject
@@ -353,6 +349,7 @@ namespace avmplus
 		};
 		DWB(LookupCache*) lookup_cache;
 #endif
+	// ------------------------ DATA SECTION END
 	};
 
 	class ScriptEnv : public MethodEnv
@@ -437,16 +434,17 @@ namespace avmplus
 			_swap8(c[2], c[5]);
 			_swap8(c[3], c[4]);
 		}
-	#elif AVMPLUS_ARM_OLDABI
+	#elif defined AVMPLUS_ARM_OLDABI
 		inline void MOPS_SWAP_BYTES(uint16_t*) {}
-		inline void MOPS_SWAP_BYTES(uint32_t*) {}
+		inline void MOPS_SWAP_BYTES(int32_t*) {}
 		inline void MOPS_SWAP_BYTES(float*) {}
-		inline void MOPS_SWAP_BYTES(double*)
+		inline void MOPS_SWAP_BYTES(double *p)
 		{
 			union {
 				double* pv;
 				uint32_t* w;
 			};
+			pv = p;
 			uint32_t t = w[0];
 			w[0] = w[1];
 			w[1] = t;

@@ -7,6 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		070869020F39452A00A5F31C /* Coder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070868FF0F39452A00A5F31C /* Coder.cpp */; };
+		070869030F39452A00A5F31C /* Coder.h in Headers */ = {isa = PBXBuildFile; fileRef = 070869000F39452A00A5F31C /* Coder.h */; };
+		070869040F39452A00A5F31C /* peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869010F39452A00A5F31C /* peephole.cpp */; };
+		070869220F39460400A5F31C /* ArmAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708691C0F39460400A5F31C /* ArmAssembler.cpp */; };
+		070869230F39460400A5F31C /* ArmAssembler.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708691D0F39460400A5F31C /* ArmAssembler.h */; };
+		070869240F39460400A5F31C /* CodegenLIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708691E0F39460400A5F31C /* CodegenLIR.cpp */; };
+		070869250F39460400A5F31C /* CodegenLIR.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708691F0F39460400A5F31C /* CodegenLIR.h */; };
+		070869260F39460400A5F31C /* Ia32Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869200F39460400A5F31C /* Ia32Assembler.cpp */; };
+		070869270F39460400A5F31C /* SparcAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869210F39460400A5F31C /* SparcAssembler.cpp */; };
+		0708693F0F39463400A5F31C /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708692A0F39463400A5F31C /* Assembler.cpp */; };
+		070869400F39463400A5F31C /* Assembler.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708692B0F39463400A5F31C /* Assembler.h */; };
+		070869410F39463400A5F31C /* Fragmento.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708692C0F39463400A5F31C /* Fragmento.cpp */; };
+		070869420F39463400A5F31C /* Fragmento.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708692D0F39463400A5F31C /* Fragmento.h */; };
+		070869430F39463400A5F31C /* LIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708692E0F39463400A5F31C /* LIR.cpp */; };
+		070869440F39463400A5F31C /* LIR.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708692F0F39463400A5F31C /* LIR.h */; };
+		070869450F39463400A5F31C /* nanojit.h in Headers */ = {isa = PBXBuildFile; fileRef = 070869300F39463400A5F31C /* nanojit.h */; };
+		070869460F39463400A5F31C /* Native.h in Headers */ = {isa = PBXBuildFile; fileRef = 070869310F39463400A5F31C /* Native.h */; };
+		070869470F39463400A5F31C /* NativeAMD64.h in Headers */ = {isa = PBXBuildFile; fileRef = 070869320F39463400A5F31C /* NativeAMD64.h */; };
+		070869480F39463400A5F31C /* NativeARM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869330F39463400A5F31C /* NativeARM.cpp */; };
+		070869490F39463400A5F31C /* NativeARM.h in Headers */ = {isa = PBXBuildFile; fileRef = 070869340F39463400A5F31C /* NativeARM.h */; };
+		0708694A0F39463400A5F31C /* Nativei386.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869350F39463400A5F31C /* Nativei386.cpp */; };
+		0708694B0F39463400A5F31C /* Nativei386.h in Headers */ = {isa = PBXBuildFile; fileRef = 070869360F39463400A5F31C /* Nativei386.h */; };
+		0708694C0F39463400A5F31C /* NativePPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869370F39463400A5F31C /* NativePPC.cpp */; };
+		0708694D0F39463400A5F31C /* NativePPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 070869380F39463400A5F31C /* NativePPC.h */; };
+		0708694E0F39463400A5F31C /* NativeThumb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869390F39463400A5F31C /* NativeThumb.cpp */; };
+		0708694F0F39463400A5F31C /* NativeThumb.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708693A0F39463400A5F31C /* NativeThumb.h */; };
+		070869500F39463400A5F31C /* NativeX64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708693B0F39463400A5F31C /* NativeX64.cpp */; };
+		070869510F39463400A5F31C /* NativeX64.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708693C0F39463400A5F31C /* NativeX64.h */; };
+		070869520F39463400A5F31C /* RegAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708693D0F39463400A5F31C /* RegAlloc.cpp */; };
+		070869530F39463400A5F31C /* RegAlloc.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708693E0F39463400A5F31C /* RegAlloc.h */; };
 		07F7744E0EC82A7100570C8C /* wopcodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F774480EC82A7100570C8C /* wopcodes.cpp */; };
 		07F7744F0EC82A7100570C8C /* wopcodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 07F774490EC82A7100570C8C /* wopcodes.h */; };
 		07F774500EC82A7100570C8C /* WordcodeEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F7744A0EC82A7100570C8C /* WordcodeEmitter.cpp */; };
@@ -43,7 +73,6 @@
 		1E6079A4097335EF007D0E1E /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607904097335EF007D0E1E /* AvmCore.cpp */; };
 		1E6079A5097335EF007D0E1E /* AvmCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607905097335EF007D0E1E /* AvmCore.h */; };
 		1E6079A6097335EF007D0E1E /* AvmDebug.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607906097335EF007D0E1E /* AvmDebug.h */; };
-		1E6079A8097335EF007D0E1E /* AvmError.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607908097335EF007D0E1E /* AvmError.h */; };
 		1E6079A9097335EF007D0E1E /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607909097335EF007D0E1E /* avmplus.cpp */; };
 		1E6079AA097335EF007D0E1E /* avmplus.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60790A097335EF007D0E1E /* avmplus.h */; };
 		1E6079AB097335EF007D0E1E /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */; };
@@ -208,6 +237,36 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		070868FF0F39452A00A5F31C /* Coder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Coder.cpp; path = ../../../core/Coder.cpp; sourceTree = SOURCE_ROOT; };
+		070869000F39452A00A5F31C /* Coder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Coder.h; path = ../../../core/Coder.h; sourceTree = SOURCE_ROOT; };
+		070869010F39452A00A5F31C /* peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peephole.cpp; path = ../../../core/peephole.cpp; sourceTree = SOURCE_ROOT; };
+		0708691C0F39460400A5F31C /* ArmAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ArmAssembler.cpp; path = ../../../codegen/ArmAssembler.cpp; sourceTree = SOURCE_ROOT; };
+		0708691D0F39460400A5F31C /* ArmAssembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArmAssembler.h; path = ../../../codegen/ArmAssembler.h; sourceTree = SOURCE_ROOT; };
+		0708691E0F39460400A5F31C /* CodegenLIR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenLIR.cpp; path = ../../../codegen/CodegenLIR.cpp; sourceTree = SOURCE_ROOT; };
+		0708691F0F39460400A5F31C /* CodegenLIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodegenLIR.h; path = ../../../codegen/CodegenLIR.h; sourceTree = SOURCE_ROOT; };
+		070869200F39460400A5F31C /* Ia32Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ia32Assembler.cpp; path = ../../../codegen/Ia32Assembler.cpp; sourceTree = SOURCE_ROOT; };
+		070869210F39460400A5F31C /* SparcAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparcAssembler.cpp; path = ../../../codegen/SparcAssembler.cpp; sourceTree = SOURCE_ROOT; };
+		0708692A0F39463400A5F31C /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cpp; path = ../../../nanojit/Assembler.cpp; sourceTree = SOURCE_ROOT; };
+		0708692B0F39463400A5F31C /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Assembler.h; path = ../../../nanojit/Assembler.h; sourceTree = SOURCE_ROOT; };
+		0708692C0F39463400A5F31C /* Fragmento.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Fragmento.cpp; path = ../../../nanojit/Fragmento.cpp; sourceTree = SOURCE_ROOT; };
+		0708692D0F39463400A5F31C /* Fragmento.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Fragmento.h; path = ../../../nanojit/Fragmento.h; sourceTree = SOURCE_ROOT; };
+		0708692E0F39463400A5F31C /* LIR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LIR.cpp; path = ../../../nanojit/LIR.cpp; sourceTree = SOURCE_ROOT; };
+		0708692F0F39463400A5F31C /* LIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LIR.h; path = ../../../nanojit/LIR.h; sourceTree = SOURCE_ROOT; };
+		070869300F39463400A5F31C /* nanojit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nanojit.h; path = ../../../nanojit/nanojit.h; sourceTree = SOURCE_ROOT; };
+		070869310F39463400A5F31C /* Native.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Native.h; path = ../../../nanojit/Native.h; sourceTree = SOURCE_ROOT; };
+		070869320F39463400A5F31C /* NativeAMD64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeAMD64.h; path = ../../../nanojit/NativeAMD64.h; sourceTree = SOURCE_ROOT; };
+		070869330F39463400A5F31C /* NativeARM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeARM.cpp; path = ../../../nanojit/NativeARM.cpp; sourceTree = SOURCE_ROOT; };
+		070869340F39463400A5F31C /* NativeARM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeARM.h; path = ../../../nanojit/NativeARM.h; sourceTree = SOURCE_ROOT; };
+		070869350F39463400A5F31C /* Nativei386.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Nativei386.cpp; path = ../../../nanojit/Nativei386.cpp; sourceTree = SOURCE_ROOT; };
+		070869360F39463400A5F31C /* Nativei386.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Nativei386.h; path = ../../../nanojit/Nativei386.h; sourceTree = SOURCE_ROOT; };
+		070869370F39463400A5F31C /* NativePPC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativePPC.cpp; path = ../../../nanojit/NativePPC.cpp; sourceTree = SOURCE_ROOT; };
+		070869380F39463400A5F31C /* NativePPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativePPC.h; path = ../../../nanojit/NativePPC.h; sourceTree = SOURCE_ROOT; };
+		070869390F39463400A5F31C /* NativeThumb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeThumb.cpp; path = ../../../nanojit/NativeThumb.cpp; sourceTree = SOURCE_ROOT; };
+		0708693A0F39463400A5F31C /* NativeThumb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeThumb.h; path = ../../../nanojit/NativeThumb.h; sourceTree = SOURCE_ROOT; };
+		0708693B0F39463400A5F31C /* NativeX64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativeX64.cpp; path = ../../../nanojit/NativeX64.cpp; sourceTree = SOURCE_ROOT; };
+		0708693C0F39463400A5F31C /* NativeX64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeX64.h; path = ../../../nanojit/NativeX64.h; sourceTree = SOURCE_ROOT; };
+		0708693D0F39463400A5F31C /* RegAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RegAlloc.cpp; path = ../../../nanojit/RegAlloc.cpp; sourceTree = SOURCE_ROOT; };
+		0708693E0F39463400A5F31C /* RegAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RegAlloc.h; path = ../../../nanojit/RegAlloc.h; sourceTree = SOURCE_ROOT; };
 		07F774480EC82A7100570C8C /* wopcodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wopcodes.cpp; path = ../../../core/wopcodes.cpp; sourceTree = SOURCE_ROOT; };
 		07F774490EC82A7100570C8C /* wopcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wopcodes.h; path = ../../../core/wopcodes.h; sourceTree = SOURCE_ROOT; };
 		07F7744A0EC82A7100570C8C /* WordcodeEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordcodeEmitter.cpp; path = ../../../core/WordcodeEmitter.cpp; sourceTree = SOURCE_ROOT; };
@@ -244,7 +303,6 @@
 		1E607904097335EF007D0E1E /* AvmCore.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AvmCore.cpp; path = ../../../core/AvmCore.cpp; sourceTree = SOURCE_ROOT; };
 		1E607905097335EF007D0E1E /* AvmCore.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmCore.h; path = ../../../core/AvmCore.h; sourceTree = SOURCE_ROOT; };
 		1E607906097335EF007D0E1E /* AvmDebug.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmDebug.h; path = ../../../core/AvmDebug.h; sourceTree = SOURCE_ROOT; };
-		1E607908097335EF007D0E1E /* AvmError.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmError.h; path = ../../../core/AvmError.h; sourceTree = SOURCE_ROOT; };
 		1E607909097335EF007D0E1E /* avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmplus.cpp; path = ../../../core/avmplus.cpp; sourceTree = SOURCE_ROOT; };
 		1E60790A097335EF007D0E1E /* avmplus.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = avmplus.h; path = ../../../core/avmplus.h; sourceTree = SOURCE_ROOT; };
 		1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmplusDebugger.cpp; path = ../../../core/avmplusDebugger.cpp; sourceTree = SOURCE_ROOT; };
@@ -420,9 +478,38 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		070869290F39461300A5F31C /* NanoJIT */ = {
+			isa = PBXGroup;
+			children = (
+				0708692A0F39463400A5F31C /* Assembler.cpp */,
+				0708692B0F39463400A5F31C /* Assembler.h */,
+				0708692C0F39463400A5F31C /* Fragmento.cpp */,
+				0708692D0F39463400A5F31C /* Fragmento.h */,
+				0708692E0F39463400A5F31C /* LIR.cpp */,
+				0708692F0F39463400A5F31C /* LIR.h */,
+				070869300F39463400A5F31C /* nanojit.h */,
+				070869310F39463400A5F31C /* Native.h */,
+				070869320F39463400A5F31C /* NativeAMD64.h */,
+				070869330F39463400A5F31C /* NativeARM.cpp */,
+				070869340F39463400A5F31C /* NativeARM.h */,
+				070869350F39463400A5F31C /* Nativei386.cpp */,
+				070869360F39463400A5F31C /* Nativei386.h */,
+				070869370F39463400A5F31C /* NativePPC.cpp */,
+				070869380F39463400A5F31C /* NativePPC.h */,
+				070869390F39463400A5F31C /* NativeThumb.cpp */,
+				0708693A0F39463400A5F31C /* NativeThumb.h */,
+				0708693B0F39463400A5F31C /* NativeX64.cpp */,
+				0708693C0F39463400A5F31C /* NativeX64.h */,
+				0708693D0F39463400A5F31C /* RegAlloc.cpp */,
+				0708693E0F39463400A5F31C /* RegAlloc.h */,
+			);
+			name = NanoJIT;
+			sourceTree = "<group>";
+		};
 		08FB7794FE84155DC02AAC07 /* avmplus */ = {
 			isa = PBXGroup;
 			children = (
+				070869290F39461300A5F31C /* NanoJIT */,
 				1E607AB4097337F4007D0E1E /* pcre */,
 				1E607AA009733790007D0E1E /* Platform */,
 				1E607A9F09733787007D0E1E /* Core */,
@@ -444,6 +531,12 @@
 		1E607A9E0973377F007D0E1E /* CodenGen */ = {
 			isa = PBXGroup;
 			children = (
+				0708691C0F39460400A5F31C /* ArmAssembler.cpp */,
+				0708691D0F39460400A5F31C /* ArmAssembler.h */,
+				0708691E0F39460400A5F31C /* CodegenLIR.cpp */,
+				0708691F0F39460400A5F31C /* CodegenLIR.h */,
+				070869200F39460400A5F31C /* Ia32Assembler.cpp */,
+				070869210F39460400A5F31C /* SparcAssembler.cpp */,
 				47BB6CC90B08D9F800036360 /* Amd64Assembler.cpp */,
 				1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */,
 				1E6078E5097335B3007D0E1E /* CodegenMIR.h */,
@@ -484,7 +577,6 @@
 				1E607904097335EF007D0E1E /* AvmCore.cpp */,
 				1E607905097335EF007D0E1E /* AvmCore.h */,
 				1E607906097335EF007D0E1E /* AvmDebug.h */,
-				1E607908097335EF007D0E1E /* AvmError.h */,
 				1E607909097335EF007D0E1E /* avmplus.cpp */,
 				1E60790A097335EF007D0E1E /* avmplus.h */,
 				1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */,
@@ -510,6 +602,8 @@
 				1E607920097335EF007D0E1E /* ClassClass.h */,
 				1E607921097335EF007D0E1E /* ClassClosure.cpp */,
 				1E607922097335EF007D0E1E /* ClassClosure.h */,
+				070868FF0F39452A00A5F31C /* Coder.cpp */,
+				070869000F39452A00A5F31C /* Coder.h */,
 				1E607923097335EF007D0E1E /* CodeContext.h */,
 				1E607924097335EF007D0E1E /* Date.h */,
 				1E607925097335EF007D0E1E /* DateClass.cpp */,
@@ -569,6 +663,7 @@
 				1E60795B097335EF007D0E1E /* ObjectClass.h */,
 				1E60795E097335EF007D0E1E /* OSDep.h */,
 				1E60795F097335EF007D0E1E /* OutputStream.h */,
+				070869010F39452A00A5F31C /* peephole.cpp */,
 				1E607960097335EF007D0E1E /* PoolObject.cpp */,
 				1E607961097335EF007D0E1E /* PoolObject.h */,
 				1E607962097335EF007D0E1E /* PrintWriter.cpp */,
@@ -711,7 +806,6 @@
 				1E6079A3097335EF007D0E1E /* avmbuild.h in Headers */,
 				1E6079A5097335EF007D0E1E /* AvmCore.h in Headers */,
 				1E6079A6097335EF007D0E1E /* AvmDebug.h in Headers */,
-				1E6079A8097335EF007D0E1E /* AvmError.h in Headers */,
 				1E6079AA097335EF007D0E1E /* avmplus.h in Headers */,
 				1E6079AC097335EF007D0E1E /* avmplusDebugger.h in Headers */,
 				1E6079AE097335EF007D0E1E /* avmplusHashtable.h in Headers */,
@@ -793,6 +887,21 @@
 				07F774530EC82A7100570C8C /* WordcodeTranslator.h in Headers */,
 				07F774780EC82CFD00570C8C /* DescribeTypeClass.h in Headers */,
 				07F774820EC82D9000570C8C /* TypeDescriber.h in Headers */,
+				070869030F39452A00A5F31C /* Coder.h in Headers */,
+				070869230F39460400A5F31C /* ArmAssembler.h in Headers */,
+				070869250F39460400A5F31C /* CodegenLIR.h in Headers */,
+				070869400F39463400A5F31C /* Assembler.h in Headers */,
+				070869420F39463400A5F31C /* Fragmento.h in Headers */,
+				070869440F39463400A5F31C /* LIR.h in Headers */,
+				070869450F39463400A5F31C /* nanojit.h in Headers */,
+				070869460F39463400A5F31C /* Native.h in Headers */,
+				070869470F39463400A5F31C /* NativeAMD64.h in Headers */,
+				070869490F39463400A5F31C /* NativeARM.h in Headers */,
+				0708694B0F39463400A5F31C /* Nativei386.h in Headers */,
+				0708694D0F39463400A5F31C /* NativePPC.h in Headers */,
+				0708694F0F39463400A5F31C /* NativeThumb.h in Headers */,
+				070869510F39463400A5F31C /* NativeX64.h in Headers */,
+				070869530F39463400A5F31C /* RegAlloc.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -940,6 +1049,21 @@
 				07F774520EC82A7100570C8C /* WordcodeTranslator.cpp in Sources */,
 				07F774770EC82CFD00570C8C /* DescribeTypeClass.cpp in Sources */,
 				07F774810EC82D9000570C8C /* TypeDescriber.cpp in Sources */,
+				070869020F39452A00A5F31C /* Coder.cpp in Sources */,
+				070869040F39452A00A5F31C /* peephole.cpp in Sources */,
+				070869220F39460400A5F31C /* ArmAssembler.cpp in Sources */,
+				070869240F39460400A5F31C /* CodegenLIR.cpp in Sources */,
+				070869260F39460400A5F31C /* Ia32Assembler.cpp in Sources */,
+				070869270F39460400A5F31C /* SparcAssembler.cpp in Sources */,
+				0708693F0F39463400A5F31C /* Assembler.cpp in Sources */,
+				070869410F39463400A5F31C /* Fragmento.cpp in Sources */,
+				070869430F39463400A5F31C /* LIR.cpp in Sources */,
+				070869480F39463400A5F31C /* NativeARM.cpp in Sources */,
+				0708694A0F39463400A5F31C /* Nativei386.cpp in Sources */,
+				0708694C0F39463400A5F31C /* NativePPC.cpp in Sources */,
+				0708694E0F39463400A5F31C /* NativeThumb.cpp in Sources */,
+				070869500F39463400A5F31C /* NativeX64.cpp in Sources */,
+				070869520F39463400A5F31C /* RegAlloc.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -976,7 +1100,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -1009,7 +1133,7 @@
 				);
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 			};
 			name = Release;
 		};
@@ -1017,6 +1141,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_STRICT_ALIASING = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
@@ -1050,6 +1176,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_STRICT_ALIASING = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
@@ -1112,7 +1240,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug_Debugger;
@@ -1146,7 +1274,7 @@
 				);
 				PRODUCT_NAME = avmplus64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 			};
 			name = Release_Debugger;
 		};
@@ -1154,6 +1282,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_STRICT_ALIASING = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
@@ -1187,6 +1317,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_STRICT_ALIASING = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;

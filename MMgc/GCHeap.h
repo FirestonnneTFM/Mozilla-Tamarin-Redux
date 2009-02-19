@@ -39,7 +39,6 @@
 #ifndef __GCHeap__
 #define __GCHeap__
 
-
 namespace MMgc
 {
 	/**
@@ -124,13 +123,6 @@ namespace MMgc
 
 		bool heapVerbose;
 
-#ifdef _DEBUG
-		/**
-		 * turn on memory profiling
-		 */
-		bool enableMemoryProfiling;
-#endif
-
 		/**
 		 * Init must be called to set up the GCHeap singleton
 		 */
@@ -162,6 +154,7 @@ namespace MMgc
 		 */
 		void Free(void *item);
 		void Free(void *item, size_t /*ignore*/) { Free(item); }
+
 
 		size_t Size(const void *item);
 
@@ -257,6 +250,13 @@ namespace MMgc
 		static size_t GetPrivateBytes();
 		
 		void SetHeapLimit(size_t numpages) { heapLimit = numpages; }
+
+#ifdef MEMORY_PROFILER
+		MemoryProfiler *GetProfiler() { return profiler; }
+		bool IsProfilingEnabled() { return profilerEnabled; }
+		void DumpFatties() { profiler->DumpFatties(); }
+#endif
+
 	private:
 
 		// -- Implementation
@@ -287,14 +287,15 @@ namespace MMgc
 			HeapBlock *next;      // next entry on free list
 			bool committed;   // is block fully committed?
 			bool dirty;		  // needs zero'ing, only valid if committed
-#ifdef MEMORY_INFO
-			int allocTrace;
-			int freeTrace;
+#ifdef MEMORY_PROFILER
+			StackTrace *allocTrace;
+			StackTrace *freeTrace;
 #endif
 			bool inUse() { return prev == NULL; }
 		};
 
-		bool ExpandHeapPrivate(int size);
+		bool ExpandHeapLocked(int size);
+		bool ExpandHeapLockedUnchecked(int size);
 
 		// Core data structures
 		HeapBlock *blocks;
@@ -303,6 +304,8 @@ namespace MMgc
 		HeapBlock freelists[kNumFreeLists];
 		unsigned int numAlloc;
 		size_t heapLimit;
+		bool hooksEnabled;
+		bool profilerEnabled;
 		
 		// Core methods
 		void AddToFreeList(HeapBlock *block);
@@ -364,6 +367,10 @@ namespace MMgc
 		GCSpinLock m_spinlock;
 #endif /* GCHEAP_LOCK */
 
+#ifdef MEMORY_PROFILER
+		MemoryProfiler *profiler;
+#endif
+
 #ifdef MMGC_AVMPLUS
 		// OS abstraction to determine native page size
 		int vmPageSize();
@@ -374,7 +381,9 @@ namespace MMgc
 		#endif
 		
 		// mir buffer management, share a common pool across threads
+#ifdef GCHEAP_LOCK
 		GCSpinLock m_mirBufferLock;
+#endif
 		typedef struct _MirMemInfo
 		{
 			void* addr;
@@ -390,6 +399,15 @@ namespace MMgc
 		void FlushMirMemory();
 		
 public:
+
+		/* controls whether AllocHook and FreeHook are called */
+		void EnableHooks() { hooksEnabled = true; }
+		bool HooksEnabled() const { return hooksEnabled; }
+		void AllocHook(const void *item, size_t size);
+		// called when object is determined to be garbage but we can't write to it yet
+		void FinalizeHook(const void *item, size_t size);
+		// called when object is really dead and can be poisoned
+		void FreeHook(const void *item, size_t size, int poison);
 
 		// support for Mir buffers
 		void* ReserveMirMemory(size_t size);		
@@ -414,26 +432,21 @@ public:
 		char *ReserveMemory(char *address, size_t size);
 		bool CommitMemory(char *address, size_t size);
 		bool DecommitMemory(char *address, size_t size);
-		void ReleaseMemory(char *address, size_t size);
-
-
+		static void ReleaseMemory(char *address, size_t size);
+		
 		bool CommitMemoryThatMaySpanRegions(char *address, size_t size);
 		bool DecommitMemoryThatMaySpanRegions(char *address, size_t size);		
 #else
 		char *AllocateMemory(size_t size);
 		void ReleaseMemory(char *address);
 #endif
-
-private:
-
-#ifdef _DEBUG
-		/* m_megamap is a debugging aid for finding bugs in this
-		   memory allocator.  It tracks allocated/free pages in
-		   the crudest way possible ... a 1MB byte array with a
-		   0/1 byte for every page in the 32-bit address space. */
-		static uint8 m_megamap[1048576];
-#endif
 	};
+
+#ifdef FEATURE_OOM
+		GCThreadLocal<EnterFrame*> enterFrame;
+	public:
+		void Abort(int reason);
+#endif
 }
 
 #endif /* __GCHeap__ */

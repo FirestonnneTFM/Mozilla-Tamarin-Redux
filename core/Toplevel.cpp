@@ -281,9 +281,9 @@ namespace avmplus
 	// This returns a Multiname create from a unqualified generic type.
 	// The multiname returned will have one namespace and will be correctly
 	// marked as an attribute if input is an attribute
-	void Toplevel::ToXMLName (const Atom p, Multiname& m) 
+	void Toplevel::ToXMLName(const Atom p, Multiname& m) 
 	{
-		Stringp s = 0;
+		Stringp s = NULL;
 		AvmCore* core = this->core();
 
 		if (!AvmCore::isNullOrUndefined(p))
@@ -346,10 +346,10 @@ namespace avmplus
 		// if s is integer, throw TypeError
 		// if first character of s is "@", return __toAttributeName (string - @)
 		// else, return QName (s)
-		if ((*s)[0] == '@')
+		if (s->charAt(0) == '@')
 		{
 			// __toAttributeName minus the @
-			Stringp news = new (core->GetGC()) String(s, 1, s->length() - 1);
+			Stringp news = s->substring(1, s->length());
 			m.setName(core->internString(news));
 			m.setAttr();
 		}
@@ -366,7 +366,7 @@ namespace avmplus
 		m.setNamespace(core->publicNamespace);
 	}
 
-	void Toplevel::CoerceE4XMultiname (const Multiname *m, Multiname &out) const
+	void Toplevel::CoerceE4XMultiname(const Multiname *m, Multiname &out) const
 	{
 		// This function is used to convert raw string access into correct
 		// Multiname types:
@@ -447,12 +447,12 @@ namespace avmplus
 		else
 		{
 			Stringp s = m->getName();
-			if ((s->length() == 1) && ((*s)[0] == '*'))
+			if ((s->length() == 1) && (s->charAt(0) == '*'))
 			{
 				// Mark is as an "anyName" (name == undefined makes isAnyName true)
 				out.setAnyName();
 			}
-			else if ((s->length() >= 1) && ((*s)[0] == '@'))
+			else if ((s->length() >= 1) && (s->charAt(0) == '@'))
 			{
 				// If we're already marked as an attribute, we don't want to modify 
 				// our string in any way.  Degenerative cases where you call:
@@ -460,10 +460,10 @@ namespace avmplus
 				if (!out.isAttr())
 				{
 					// check for "@*"
-					if ((s->length() == 2) && ((*s)[1] == '*'))
+					if ((s->length() == 2) && (s->charAt(1) == '*'))
 						out.setAnyName();
 					else
-						out.setName(core->internString (new (core->GetGC()) String(s, 1, s->length()-1)));
+						out.setName(core->internString(s->substring(1, s->length())));
 					out.setAttr();
 				}
 				else
@@ -697,6 +697,9 @@ namespace avmplus
 	 * implements ECMA implicit coersion.  returns the coerced value,
 	 * or throws a TypeError if coersion is not possible.
 	 */
+	 
+	 // NOTE: parts of this function have been explicitly inlined into MethodEnv::unbox1 for
+	 // efficiency. If you change/fix this method, you may need to change/fix MethodEnv::unbox1 as well.
     Atom Toplevel::coerce(Atom atom, Traits* expected) const
     {
 		Traits* actual;
@@ -1162,51 +1165,51 @@ namespace avmplus
 		return b;
 	}
 
-	Stringp Toplevel::decodeURI(Stringp uri)
+	Stringp Toplevel::decodeURI(ScriptObject* self, Stringp uri)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!uri) uri = core->knull;
-		Stringp out = decode(uri, false);
+		Stringp out = decode(core, uri, false);
 		if (!out) {
-			toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("decodeURI"));
+			self->toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("decodeURI"));
 		}
 		return out;
     }
 
-	Stringp Toplevel::decodeURIComponent(Stringp uri)
+	Stringp Toplevel::decodeURIComponent(ScriptObject* self, Stringp uri)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!uri) uri = core->knull;
-		Stringp out = decode(uri, true);
+		Stringp out = decode(core, uri, true);
 		if (!out) {
-			toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("decodeURIComponent"));
+			self->toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("decodeURIComponent"));
 		}
 		return out;
     }
 
-	Stringp Toplevel::encodeURI(Stringp uri)
+	Stringp Toplevel::encodeURI(ScriptObject* self, Stringp uri)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!uri) uri = core->knull;
-		Stringp out = encode(uri, false);
+		Stringp out = encode(core, uri, false);
 		if (!out) {
-			toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("encodeURI"));
+			self->toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("encodeURI"));
 		}
 		return out;
     }
 
-	Stringp Toplevel::encodeURIComponent(Stringp uri)
+	Stringp Toplevel::encodeURIComponent(ScriptObject* self, Stringp uri)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!uri) uri = core->knull;
-		Stringp out = encode(uri, true);
+		Stringp out = encode(core, uri, true);
 		if (!out) {
-			toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("encodeURIComponent"));
+			self->toplevel()->uriErrorClass()->throwError(kInvalidURIError, core->toErrorString("encodeURIComponent"));
 		}
 		return out;
     }
 	
-	bool Toplevel::isNaN(double n)
+	bool Toplevel::isNaN(ScriptObject*, double n)
 	{
         return MathUtils::isNaN(n);
     }
@@ -1223,43 +1226,42 @@ namespace avmplus
 	 * 
 	 * @return true if arg is Finite, false otherwise
 	 */
-	bool Toplevel::isFinite(double d)
+	bool Toplevel::isFinite(ScriptObject*, double d)
 	{
 		return !(MathUtils::isInfinite(d)||MathUtils::isNaN(d));
     }
 
-	double Toplevel::parseInt(Stringp in, int radix)
+	double Toplevel::parseInt(ScriptObject* self, Stringp in, int radix)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!in) in = core->knull;
-		const wchar *ptr = in->c_str();
-		return MathUtils::parseInt(ptr, in->length(), radix, false);
+		double n = MathUtils::parseInt(in, radix, false);
+		return n;
     }
 
-	double Toplevel::parseFloat(Stringp in)
+	double Toplevel::parseFloat(ScriptObject* self, Stringp in)
 	{
 		double result;
 		
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 		if (!in) in = core->knull;
-		if (!MathUtils::convertStringToDouble(in->c_str(), in->length(), &result, false)) {
+		if (!MathUtils::convertStringToDouble(in, &result, false))
 			result = MathUtils::nan();
-		}
-		
+
 		return result;
     }
 
-	Stringp Toplevel::escape(Stringp in)
+	Stringp Toplevel::escape(ScriptObject* self, Stringp in)
 	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 
 		if (!in) in = core->knull;
 
-		const wchar *str = in->c_str();
 		StringBuffer buffer(core);
 		
+		StringIndexer str_idx(in);
 		for (int i=0, n=in->length(); i<n; i++) {
-			wchar ch = str[i];
+			wchar ch = str_idx[i];
 			if (contains(unescaped, ch)) {
 				buffer << ch;
 			} else if (ch & 0xff00) {
@@ -1271,29 +1273,28 @@ namespace avmplus
 			}
 		}
 
-		return core->newString(buffer.c_str());
+		return core->newStringUTF8(buffer.c_str());
     }
 
 	Stringp Toplevel::escapeBytes(Stringp input)
 	{
 		AvmCore* core = this->core();
 
-		UTF8String* inputUTF8 = input->toUTF8String();
-		const uint8* src = (const uint8*) inputUTF8->c_str();
+		StUTF8String inputUTF8(input);
+		const uint8_t* src = (const uint8_t*) inputUTF8.c_str();
 
 		StringBuffer buffer(core);
 		
-		for (int i=0, n=inputUTF8->length(); i<n; i++) {
-			uint8 ch = src[i];
+		for (int i=0, n=inputUTF8.length(); i<n; i++) {
+			uint8_t ch = src[i];
 			if (contains(unescaped, ch)) {
 				buffer << (wchar)ch;
 			} else {
 				buffer << '%';
-				buffer.writeHexByte((uint8)ch);
+				buffer.writeHexByte((uint8_t)ch);
 			}
 		}
-
-		return core->newString(buffer.c_str());
+		return core->newStringUTF8(buffer.c_str());
     }
 	
 	// Helper function.
@@ -1311,59 +1312,57 @@ namespace avmplus
 		return -1;
 	}
 
-	wchar Toplevel::extractCharacter(const wchar*& src)
+	Stringp Toplevel::unescape(ScriptObject* self, Stringp in)
 	{
-		if (*src == '%') {
-			const wchar *ptr = src;
-			ptr++;
-			if (*ptr == 0) {
-				return *src++;
-			}
-			wchar value = 0;
-			int len = 2;
-			if (*ptr == 'u') {
-				len = 4;
-				ptr++;
-			}
-			for (int i=0; i<len; i++) {
-				int v = parseHexChar(*ptr++);
-				if (v < 0) {
-					return *src++;
-				}
-				value = (wchar)((value<<4) | v);
-			}
-			src = ptr;
-			return value;
-		}
-		return *src++;
-	}
-	
-	Stringp Toplevel::unescape(Stringp in)
-	{
-		AvmCore* core = this->core();
+		AvmCore* core = self->core();
 
 		if (!in) in = core->knull;
 
-		Stringp out = new (core->GetGC()) String(in->length());
-
-		const wchar *src = in->c_str();
-		wchar *outbuf = out->lockBuffer();
-		wchar *dst = outbuf;
-		const wchar *end = src + in->length();
-		while (src < end) {
-			*dst++ = extractCharacter(src);
+		Stringp out = core->kEmptyString;
+		int32_t pos = 0;
+		StringIndexer str(in);
+		while (pos < in->length())
+		{
+			utf32_t ch = str[pos++];
+			if (ch == '%') 
+			{
+				int32_t curPos = pos;
+				int len = 2;
+				if (pos < (in->length() - 5) && str[pos] == 'u')
+				{
+					len = 4;
+					pos++;
+				}
+				if ((pos + len) <= in->length())
+				{
+					ch = 0;
+					while (len--) 
+					{
+						int v = parseHexChar((wchar) str[pos++]);
+						if (v < 0) 
+						{
+							pos = curPos;
+							ch = '%';
+							break;
+						}
+						ch = (utf32_t)((ch<<4) | v);
+					}
+				}
+			}
+			wchar ch16 = (wchar) ch;
+			// note: this code is allowed to construct a string
+			// containing illegal UTF16 sequences!
+			out = out->append16(&ch16, 1);
 		}
-		*dst = 0;
-		out->unlockBuffer((int)(dst-outbuf));
-		
 		return out;
     }
 	
-	Stringp Toplevel::encode(Stringp in, bool encodeURIComponentFlag)
+	Stringp Toplevel::encode(AvmCore* core, Stringp in, bool encodeURIComponentFlag)
 	{
-		StringBuffer out(core());
+		StringBuffer out(core);
 
-		const wchar *src = in->c_str();
+		StUTF16String in16(in);
+		const wchar *src = in16.c_str();
 		int len = in->length();
 
 		while (len--) {
@@ -1401,15 +1400,14 @@ namespace avmplus
 				}
 			}
 		}
-
-		return core()->newString(out.c_str());
+		return core->newStringUTF8(out.c_str());
 	}
 	
-	Stringp Toplevel::decode(Stringp in, bool decodeURIComponentFlag)
+	Stringp Toplevel::decode(AvmCore* core, Stringp in, bool decodeURIComponentFlag)
 	{
-		const wchar *chars = in->c_str();
+		StringIndexer chars(in);
 		int length = in->length();
-		wchar *out = (wchar*) core()->GetGC()->Alloc(length*2+1); // decoded result is at most length wchar chars long
+		wchar *out = (wchar*) core->GetGC()->Alloc(length*2+1); // decoded result is at most length wchar chars long
 		int outLen = 0;
 
 		for (int k = 0; k < length; k++) {
@@ -1511,9 +1509,8 @@ namespace avmplus
 				out[outLen++] = C;
 			}
 		}
-		
-		out[outLen] = 0;
-		return new (gc()) String(out,outLen);
+
+		return core->newStringUTF16(out, outLen);
 	}
 
 	/*
@@ -1550,9 +1547,9 @@ namespace avmplus
 		0x07fffffe
 	};
 
-	bool Toplevel::isXMLName(Atom v)
+	bool Toplevel::isXMLName(ScriptObject* self, Atom v)
 	{
-		return core()->isXMLName(v);
+		return self->core()->isXMLName(v);
 	}
 
 	unsigned int Toplevel::readU30(const byte *&p) const
@@ -1601,7 +1598,7 @@ namespace avmplus
 		// delegated to this function because in-lining it in the caller prevents
 		// taill calling.  See comments in op_call, above.
 		
-		Multiname name(core()->publicNamespace, core()->constantString(namestr));
+		Multiname name(core()->publicNamespace, core()->internString(core()->newStringLatin1(namestr)));
 		throwTypeError(id, core()->toErrorString(&name));
 	}
 	
@@ -1683,5 +1680,6 @@ namespace avmplus
 	ErrorClass* Toplevel::uriErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_URIError); }
 	ErrorClass* Toplevel::referenceErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_ReferenceError); }
 	ErrorClass* Toplevel::securityErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SecurityError); }
+	ErrorClass* Toplevel::syntaxErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_SyntaxError); }
 	ErrorClass* Toplevel::verifyErrorClass() const { return getErrorClass(avmplus::NativeID::abcclass_VerifyError); }
 }

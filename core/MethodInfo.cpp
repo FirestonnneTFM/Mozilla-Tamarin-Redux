@@ -1,3 +1,5 @@
+/* -*- Mode: C++; c-basic-offset: 4; indent-tabs-mode: t; tab-width: 4 -*- */
+/* vi: set ts=4 sw=4: */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -46,37 +48,35 @@
 #include "../codegen/CodegenLIR.h"
 #endif
 
-#ifdef PERFM
-#include "../vprof/vprof.h"
-#endif /* PERFM */
-
 namespace avmplus
 {
 	using namespace MMgc;
-	MethodInfo::MethodInfo()
-		: AbstractFunction()
+
+	MethodInfo::MethodInfo(int _method_id) : 
+		AbstractFunction(_method_id)
+#ifdef DEBUGGER
+		, m_dmi(NULL)
+#endif
 	{
-		#ifdef DEBUGGER
-		this->local_count = 0;
-		this->max_scopes = 0;
-		this->localNames = 0;
-		this->firstSourceLine = 0;
-		this->lastSourceLine = 0;
-		this->offsetInAbc = 0;
-		#endif
 		this->impl32 = verifyEnter;
 	}
 
-    void MethodInfo::setInterpImpl() {
-		if (returnTraits() == core()->traits.number_itraits)
+    void MethodInfo::setInterpImpl() 
+	{
+		if (returnTraits() == this->pool->core->traits.number_itraits)
 			implN = avmplus::interpN;
 		else
 			impl32 = avmplus::interp32;
     }
 
-	Atom MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
+	/*static*/ Atom MethodInfo::verifyEnter(MethodEnv* env, int argc, uint32 *ap)
 	{
 		MethodInfo* f = (MethodInfo*) env->method;
+
+		#ifdef AVMPLUS_VERIFYALL
+		// never verify late in verifyall mode
+		AvmAssert(!f->pool->core->config.verifyall);
+		#endif
 
 		f->verify(env->vtable->toplevel);
 
@@ -91,11 +91,6 @@ namespace avmplus
 		}
 #endif
 #endif // 0
-		
-		#ifdef AVMPLUS_VERIFYALL
-		f->flags |= VERIFIED;
-		f->core()->processVerifyQueue(env->toplevel());
-		#endif
 
         AvmAssert(f->impl32 != MethodInfo::verifyEnter);
 		env->impl32 = f->impl32;
@@ -107,23 +102,27 @@ namespace avmplus
 		AvmAssert(declaringTraits->isResolved());
 		resolveSignature(toplevel);
 
+		AvmCore* core = this->pool->core;
 		#ifdef DEBUGGER
 		// just a fake CallStackNode here , so that if we throw a verify error, 
-		// we get a stack trace with the method being verified as its top entry
-		CallStackNode callStackNode(core(), this->name);
+		// we get a stack trace with the method being verified as its top entry.
+		// init with an empty setup when debugger() isn't present, so we can
+		// skip the call to getMethodName(), which is nonzero
+		CallStackNode callStackNode(CallStackNode::kNoOp);
+		if (core->debugger())
+			callStackNode.init(this->pool->core, this->getMethodName());
 		#endif /* DEBUGGER */
 
 		if (!body_pos)
 		{
 			// no body was supplied in abc
-			toplevel->throwVerifyError(kNotImplementedError, toplevel->core()->toErrorString(this));
+			toplevel->throwVerifyError(kNotImplementedError, this->pool->core->toErrorString(this));
 		}
 
 		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 
 		Verifier verifier(this, toplevel);
 
-		AvmCore* core = this->core();
 		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
             PERFM_NTPROF("verify & IR gen");
@@ -147,8 +146,20 @@ namespace avmplus
 				// to just rebuild the MD code.
 
 				// mark it as interpreted and try to limp along
-				if (jit.overflow)
+				if (jit.overflow) {
                     setInterpImpl();
+				}
+#ifdef AVMPLUS_WORD_CODE
+				else {
+					if(word_code.code_anchor) {
+						word_code.code_anchor = NULL;
+						codeStart = NULL;
+					}
+					if (word_code.exceptions) {
+						word_code.exceptions = NULL;
+					}
+				}
+#endif
 			}
 			CATCH (Exception *exception) 
 			{
@@ -175,56 +186,130 @@ namespace avmplus
 		
         #ifdef DEBUGGER
 		// no explicit exit call needed for fake CallStackNodes, they auto-cleanup in dtor
+		// (note that this is true even if we didn't call CallStackNode::init; the dtor is a no-op in that case)
 		//callStackNode.exit();
         #endif /* DEBUGGER */
 	}
 	
-	#ifdef DEBUGGER
+#ifdef DEBUGGER
 
-	// reg names
-	Stringp MethodInfo::getLocalName(int index) const	{ return getRegName(index+param_count); }
-	Stringp MethodInfo::getArgName(int index) const		{ return getRegName(index); }
+	void MethodInfo::initDMI(int32_t local_count, uint32_t codeSize, int32_t max_scopes)
+	{
+		AvmAssert(m_dmi == NULL);
+		
+		AvmCore* core = this->pool->core;
+		MMgc::GC* gc = core->GetGC();
+		const uint32_t extra = (local_count <= 1) ? 0 : (sizeof(Stringp)*(local_count-1));
+
+		DebuggerMethodInfo* dmi = new (gc, extra) DebuggerMethodInfo(local_count, codeSize, max_scopes);
+		const Stringp undef = core->kundefined;
+		for (int32_t i=0; i<local_count; i++)
+		{
+			WBRC(gc, dmi, &dmi->localNames[i], undef);
+		}
+		WB(gc, this, &this->m_dmi, dmi);
+	}
+
+	AbcFile* MethodInfo::file() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? (AbcFile*)(m_dmi->file) : NULL;
+	}
+	
+	int32_t MethodInfo::firstSourceLine() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->firstSourceLine : 0;
+	}
+
+	int32_t MethodInfo::lastSourceLine() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->lastSourceLine : 0;
+	}
+
+	int32_t MethodInfo::offsetInAbc() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->offsetInAbc : 0;
+	}
+
+	uint32_t MethodInfo::codeSize() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->codeSize : 0;
+	}
+
+	int32_t MethodInfo::local_count() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->local_count : 0;
+	}
+
+	int32_t MethodInfo::max_scopes() const
+	{
+		AvmAssert(m_dmi != NULL);
+		return m_dmi ? m_dmi->max_scopes : 0;
+	}
+
+	void MethodInfo::setFile(AbcFile* file) 
+	{
+		AvmAssert(m_dmi != NULL);
+		if (m_dmi)
+			m_dmi->file = file;
+	}
+
+	void MethodInfo::updateSourceLines(int32_t linenum, int32_t offset)
+	{
+		AvmAssert(m_dmi != NULL);
+		if (m_dmi)
+		{
+			if (m_dmi->firstSourceLine == 0 || linenum < m_dmi->firstSourceLine)
+				m_dmi->firstSourceLine = linenum;
+
+			if (m_dmi->offsetInAbc == 0 || offset < m_dmi->offsetInAbc)
+				m_dmi->offsetInAbc = offset;
+
+			if (m_dmi->lastSourceLine == 0 || linenum > m_dmi->lastSourceLine)
+				m_dmi->lastSourceLine = linenum;
+		}
+	}
+
+#ifdef AVMPLUS_MIR
+	void MethodInfo::setCodeSize(uint32_t c)
+	{
+		// MIR can legitimately call this for entries without DMI (eg synthesized init methods)
+		// so check for validity but don't assert
+		if (m_dmi)
+			m_dmi->codeSize = c;
+	}
+#endif
 
 	Stringp MethodInfo::getRegName(int slot) const 
 	{
-		AvmAssert(slot >= 0 && slot < local_count);
-		Stringp name;
-		if (localNames)
-			name = localNames[slot];
-		else
-			name = core()->kundefined;
-		return name;
+		AvmAssert(m_dmi != NULL);
+
+		if (m_dmi && slot >= 0 && slot < m_dmi->local_count)
+			return m_dmi->localNames[slot];
+
+		return this->pool->core->kundefined;
 	}
 
 	void MethodInfo::setRegName(int slot, Stringp name)
 	{
-		//AvmAssert(slot >= 0 && slot < local_count);
-		// @todo fix me.  This is a patch for bug #112405
-		if (slot >= local_count)
-			return;
-		if (!localNames)
-			initLocalNames();
+		AvmAssert(m_dmi != NULL);
 
-		AvmCore* core = this->core();
+		if (!m_dmi || slot < 0 || slot >= m_dmi->local_count)
+			return;
+
+		AvmCore* core = this->pool->core;
 
 		// [mmorearty 5/3/05] temporary workaround for bug 123237: if the register
 		// already has a name, don't assign a new one
-		if (getRegName(slot) != core->kundefined)
+		if (m_dmi->localNames[slot] != core->kundefined)
 			return;
 
-		//localNames[slot] = core->internString(name);
-		WBRC(core->GetGC(), localNames, &localNames[slot], core->internString(name));
-	}
-
-	void MethodInfo::initLocalNames()
-	{
-		AvmCore* core = this->core();
-		localNames = (Stringp*) core->GetGC()->Calloc(local_count, sizeof(Stringp), GC::kZero|GC::kContainsPointers);
-		for(int i=0; i<local_count; i++)
-		{
-			//localNames[i] = core->kundefined;
-			WBRC(core->GetGC(), localNames, &localNames[i], uintptr(Stringp(core->kundefined)));
-		}
+		WBRC(core->GetGC(), m_dmi, &m_dmi->localNames[slot], core->internString(name));
 	}
 
 	/**
@@ -243,13 +328,13 @@ namespace avmplus
 
 		// if we are running jit then the types are native and we
 		// need to box em.
-		if (isFlagSet(TURBO))
+		if (isFlagSet(JIT_IMPL))
 		{
 			// each entry is a pointer into the function's stack frame
 			void **in = (void**)src;			// WARNING this must match with MIR generator
 
 			// now probe each type and do the atom conversion.
-			AvmCore* core = this->core();
+			AvmCore* core = this->pool->core;
 			for (int i=srcPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
@@ -315,20 +400,20 @@ namespace avmplus
 	void MethodInfo::unboxLocals(Atom* src, int srcPos, Traits** traitArr, void* dest, int destPos, int length)
 	{
 		#ifdef AVMPLUS_64BIT
-		AvmDebugMsg (true, "are these ops right for 64-bit?  alignment of int/uint/bool?\n");
+		AvmAssertMsg(false, "are these ops right for 64-bit?  alignment of int/uint/bool?\n");
 		#endif
 		int size = destPos+length;
 		int at = srcPos;
 
 		// If the method has been jit'd then we need to box em, otherwise just
 		// copy them 
-		if (isFlagSet(TURBO))
+		if (isFlagSet(JIT_IMPL))
 		{
 			// we allocated double sized entry for each local src CodegenMIR
 			void** out = (void**)dest;		// WARNING this must match with MIR generator
 
 			// now probe each type and conversion.
-			AvmCore* core = this->core();
+			AvmCore* core = this->pool->core;
 			for (int i=destPos; i<size; i++)
 			{
 				Traits* t = traitArr[i];
@@ -373,8 +458,8 @@ namespace avmplus
 	{
 		uint32 size = AbstractFunction::size();
 		size += (sizeof(MethodInfo) - sizeof(AbstractFunction));
-		size += codeSize;
+		size += codeSize();
 		return size;
 	}
-	#endif //DEBUGGER
+#endif //DEBUGGER
 }

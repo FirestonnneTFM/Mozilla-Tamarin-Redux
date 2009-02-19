@@ -108,11 +108,11 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
     Stringp MethodClosure::format(AvmCore* core) const
     {
-		Stringp prefix = core->newString("MC{");
+		Stringp prefix = core->newConstantStringLatin1("MC{");
 		prefix = core->concatStrings(prefix, core->format(savedThis));
-		prefix = core->concatStrings(prefix, core->newString(" "));
+		prefix = core->concatStrings(prefix, core->newConstantStringLatin1(" "));
 		prefix = core->concatStrings(prefix, env->method->format(core));
-		prefix = core->concatStrings(prefix, core->newString("}@"));
+		prefix = core->concatStrings(prefix, core->newConstantStringLatin1("}@"));
 		return core->concatStrings(prefix, core->formatAtomPtr(atom()));
     }
 #endif

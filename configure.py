@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- Mode: Python; indent-tabs-mode: nil -*-
+# vi: set ts=4 sw=4 expandtab:
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -85,7 +86,7 @@ selfTest = o.getBoolArg("selftests", False)
 if selfTest:
     APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
 
-MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', True)
+MMGC_INTERIOR_PTRS = o.getBoolArg('mmgc-interior-pointers', False)
 if MMGC_INTERIOR_PTRS:
     MMGC_DEFINES['MMGC_INTERIOR_PTRS'] = None
 
@@ -107,11 +108,11 @@ if MMGC_THREADSAFE:
 os, cpu = config.getTarget()
 
 if config.getCompiler() == 'GCC':
-    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 "
+    APP_CXXFLAGS = "-fstrict-aliasing -Wextra -Wall -Wno-reorder -Wno-switch -Wno-invalid-offsetof -Wsign-compare -Wunused-parameter -fmessage-length=0 -fno-rtti -fno-exceptions "
     if config.getDebug():
-        APP_CXXFLAGS += "-frtti -fexceptions "
+        APP_CXXFLAGS += ""
     else:
-        APP_CXXFLAGS += "-Wuninitialized -fno-rtti -fno-exceptions "
+        APP_CXXFLAGS += "-Wuninitialized "
     DEBUG_CXXFLAGS += "-g "
 elif config.getCompiler() == 'VS':
     if cpu == "arm":
@@ -149,6 +150,7 @@ else:
 
 
 if os == "darwin":
+    AVMSHELL_LDFLAGS += " -exported_symbols_list "  + thisdir + "/platform/mac/shell/exports.exp"
     MMGC_DEFINES.update({'TARGET_API_MAC_CARBON': 1,
                          'DARWIN': 1,
                          '_MAC': None,
@@ -156,11 +158,11 @@ if os == "darwin":
                          'TARGET_RT_MAC_MACHO': 1,
                          'USE_MMAP': None})
     APP_CXXFLAGS += "-fpascal-strings -faltivec -fasm-blocks "
-    if o.getBoolArg("leopard"):
-		# use --enable-leopard to build for 10.5 or later; this is mainly useful for enabling
-		# us to build with gcc4.2 (which requires the 10.5 sdk), since it has a slightly different
-		# set of error & warning sensitivities. Note that we don't override CC/CXX here, the calling script
-		# is expected to do that if desired (thus we can support 10.5sdk with either 4.0 or 4.2)
+    if cpu == 'x86_64' or cpu == 'ppc64' or o.getBoolArg("leopard"):
+        # use --enable-leopard to build for 10.5 or later; this is mainly useful for enabling
+        # us to build with gcc4.2 (which requires the 10.5 sdk), since it has a slightly different
+        # set of error & warning sensitivities. Note that we don't override CC/CXX here, the calling script
+        # is expected to do that if desired (thus we can support 10.5sdk with either 4.0 or 4.2)
         APP_CXXFLAGS += "-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk "
         config.subst("MACOSX_DEPLOYMENT_TARGET",10.5)
     else:
@@ -183,6 +185,11 @@ elif os == "linux":
                          'LINUX': None})
     OS_LIBS.append('pthread')
     APP_CPPFLAGS += '-DAVMPLUS_CDECL '
+    if cpu == "x86_64":
+        # workaround https://bugzilla.mozilla.org/show_bug.cgi?id=467776
+        OPT_CXXFLAGS += '-fno-schedule-insns2 '
+        # these warnings are too noisy
+        APP_CXXFLAGS += ' -Wno-parentheses -Wno-c++0x-compat -Wno-empty-body '
     if config.getDebug():
         OS_LIBS.append("dl")
 elif os == "sunos":
@@ -201,19 +208,28 @@ else:
     raise Exception("Unsupported OS")
 
 if cpu == "i686":
-    APP_CPPFLAGS += "-DAVMPLUS_IA32 "
-    if config.getCompiler() == 'GCC':
+    if config.getCompiler() == 'GCC' and os == 'darwin':
+        #only mactel always has sse2
         APP_CPPFLAGS += "-msse2 "
 elif cpu == "powerpc":
-    APP_CPPFLAGS += "-DAVMPLUS_PPC "
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
+elif cpu == "ppc64":
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
 elif cpu == "sparc":
     APP_CPPFLAGS += "-DAVMPLUS_SPARC "
 elif cpu == "x86_64":
-    APP_CPPFLAGS += "-DAVMPLUS_AMD64 "
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
 elif cpu == "arm":
-    APP_CPPFLAGS += "-DAVMPLUS_ARM "
+    # we detect this in core/avmbuild.h and MMgc/*build.h
+    None
 else:
     raise Exception("Unsupported CPU")
+
+if o.getBoolArg("selftests"):
+    APP_CPPFLAGS += "-DAVMPLUS_SELFTEST "
 
 if o.getBoolArg("debugger"):
     APP_CPPFLAGS += "-DDEBUGGER "

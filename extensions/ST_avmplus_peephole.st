@@ -76,8 +76,8 @@ private:
      t->emitOp1(WOP_getlocal, 65536);
      t->emitOp1(WOP_getlocal, 7);
      t->emitOp1(WOP_getlocal, 6);
-     uint32_t* code;
-     uint32_t len = t->epilogue(&code);
+     uintptr_t* code;
+uint32_t len = (uint32_t)t->epilogue(&code);
 
 %%verify len == 6
 %%verify code[0] == NEW_OPCODE(WOP_get2locals)

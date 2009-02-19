@@ -74,7 +74,7 @@ namespace avmplus
 		/*@}*/
 
 	private:
-		double		stringToDateDouble(String &s);
+		double		stringToDateDouble(Stringp s);
 	};
 }
 

@@ -38,8 +38,6 @@
 
 #include "avmshell.h"
 
-#include <stdlib.h>
-
 namespace avmshell
 {
 	SystemClass::SystemClass(VTable *cvtable)
@@ -78,19 +76,18 @@ namespace avmshell
 		if (!command) {
 			toplevel()->throwArgumentError(kNullArgumentError, "command");
 		}
-		UTF8String *commandUTF8 = command->toUTF8String();
 		#ifdef UNDER_CE
 		AvmAssert(0);
-		(void) commandUTF8;
 		return 0;
 		#else
-		return system(commandUTF8->c_str());
+		StUTF8String commandUTF8(command);
+		return system(commandUTF8.c_str());
 		#endif
 	}
 	
 	Stringp SystemClass::getAvmplusVersion()
 	{
-		return core()->newString(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
+		return core()->newConstantStringLatin1(AVMPLUS_VERSION_USER " " AVMPLUS_BUILD_CODE);
 	}
 
 	void SystemClass::write(Stringp s)
@@ -110,16 +107,16 @@ namespace avmshell
 		{
 			if (i > 0)
                 console << ' ';
-			Stringp s = core->string(a->getUintProperty(i));
+			StringIndexer s(core->string(a->getUintProperty(i)));
 			for (int j = 0; j < s->length(); j++)
 			{
-				wchar c = (*s)[j];
+				wchar c = s[j];
 				// '\r' gets converted into '\n'
 				// '\n' is left alone
 				// '\r\n' is left alone
 				if (c == '\r')
 				{
-					if (((j+1) < s->length()) && (*s)[j+1] == '\n')
+					if (((j+1) < s->length()) && s[j+1] == '\n')
 					{
 						console << '\r';	
 						j++;
@@ -139,14 +136,15 @@ namespace avmshell
 	void SystemClass::debugger()
 	{
 		#ifdef DEBUGGER
-		core()->debugger->enterDebugger();
+		if (core()->debugger())
+			core()->debugger()->enterDebugger();
 		#endif
 	}
 
 	bool SystemClass::isDebugger()
 	{
 		#ifdef DEBUGGER
-		return true;
+		return core()->debugger() != NULL;
 		#else
 		return false;
 		#endif
@@ -179,7 +177,11 @@ namespace avmshell
 
 		ArrayObject *array = toplevel->arrayClass->newArray();
 		for(int i=0; i<user_argc;i++)
-			array->setUintProperty(i, core->newString(user_argv[i])->atom());
+#ifdef UNDER_CE
+			array->setUintProperty(i, core->newStringUTF16(user_argv[i])->atom());
+#else
+			array->setUintProperty(i, core->newStringLatin1(user_argv[i])->atom());
+#endif
 
 		return array;
 	}
@@ -195,13 +197,13 @@ namespace avmshell
 			wc[i++] = (wchar)c;
 			if (i == 63) {
 				wc[i] = 0;
-				s = core->concatStrings(s, core->newString(wc));
+				s = s->append16(wc);
 				i = 0;
 			}
 		}
 		if (i > 0) {
 			wc[i] = 0;
-			s = core->concatStrings(s, core->newString(wc));
+			s = s->append16(wc);
 		}
 		return s;
 	}

@@ -58,36 +58,44 @@
 
 #if defined(AVMPLUS_MAC) || defined(AVMPLUS_UNIX)
   // Are we PowerPC or i386 (Macintel) or x86_64 (64-bit)?
-  #if defined(__i386__)
+  #if defined(__i386__) || defined(__i386)
     #ifndef AVMPLUS_IA32
       #define AVMPLUS_IA32
     #endif
     #ifndef AVMPLUS_CDECL
       #define AVMPLUS_CDECL
     #endif
-  #elif (__x86_64__)
+  #elif defined(__x86_64__)
     #ifndef AVMPLUS_AMD64
       #define AVMPLUS_AMD64
     #endif
     #ifndef AVMPLUS_64BIT
 	  #define AVMPLUS_64BIT
     #endif
-  #elif (__ppc__) || (__powerpc__)
+  #elif defined(__ppc__) || defined(__powerpc__)
     #ifndef AVMPLUS_PPC
       #define AVMPLUS_PPC
     #endif	
-    #ifdef __powerpc64__
+  #elif (__ppc64__) || (__powerpc64__)
+    #ifndef AVMPLUS_PPC
+      #define AVMPLUS_PPC
+    #endif	
+    #ifndef AVMPLUS_64BIT
       #define AVMPLUS_64BIT
     #endif
-  #elif (__arm__) || (__ARM__)
+  #elif defined(__arm__) || defined(__ARM__)
     #ifndef AVMPLUS_ARM
       #define AVMPLUS_ARM
+    #endif	
+  #elif defined(__sparc__) || defined(__sparc)
+    #ifndef AVMPLUS_SPARC
+      #define AVMPLUS_SPARC
     #endif	
   #endif
 #endif
 
 #ifdef AVMPLUS_WIN32
-  #ifdef _WIN64
+  #ifdef _M_X64
 	#ifndef AVMPLUS_64BIT
 	  #define AVMPLUS_64BIT
 	#endif
@@ -105,10 +113,54 @@
 #endif
 #endif
 
+#if !defined AVMPLUS_IA32 && !defined AVMPLUS_AMD64 && !defined AVMPLUS_ARM && \
+    !defined AVMPLUS_PPC && !defined AVMPLUS_SPARC
+// Update the CPU detection code above to define the cpu switch
+#  error "unknown target CPU"
+#endif
+
+#if defined AVMPLUS_IA32 && defined AVMPLUS_AMD64
+#  error "must only define AVMPLUS_IA32 or AVMPLUS_AMD64 but not both"
+#endif
+
+#if defined AVMPLUS_IA32 && defined AVMPLUS_64BIT
+#  error "AVMPLUS_IA32 not supported with AVMPLUS_64BIT"
+#endif
+
+#if defined AVMPLUS_AMD64 && !defined AVMPLUS_64BIT
+#  error "AVMPLUS_AMD64 requires AVMPLUS_64BIT"
+#endif
+
+#if !defined AVMPLUS_IA32 && !defined AVMPLUS_AMD64 && !defined AVMPLUS_ARM && \
+    !defined AVMPLUS_PPC && !defined AVMPLUS_SPARC
+// Update the CPU detection code above to define the cpu switch
+#  error "unknown target CPU"
+#endif
+
+#if defined AVMPLUS_IA32 && defined AVMPLUS_AMD64
+#  error "must only define AVMPLUS_IA32 or AVMPLUS_AMD64 but not both"
+#endif
+
+#if defined AVMPLUS_IA32 && defined AVMPLUS_64BIT
+#  error "AVMPLUS_IA32 not supported with AVMPLUS_64BIT"
+#endif
+
+#if defined AVMPLUS_AMD64 && !defined AVMPLUS_64BIT
+#  error "AVMPLUS_AMD64 requires AVMPLUS_64BIT"
+#endif
+
 // all x64, and all MacTel machines, always have sse2
 #if defined(AVMPLUS_AMD64) || (defined(AVMPLUS_MAC) && defined(AVMPLUS_IA32))
 	#define AVMPLUS_SSE2_ALWAYS
 #endif
+
+// Uncomment the following line to enable support for 32 bit strings. If disabled,
+// only 8 and 16 bits strings are supported. If enabled, string can be 32 bits 
+// internally, and the String method createUTF32() is defined, which also takes
+// care of surrogate pairs, and createUTF16() converts surrogate pairs to UTF-32 
+// if the desired string width is 32 bits.
+
+//#define FEATURE_UTF32_SUPPORT 1
 
 /// START: CRUFT 
 //
@@ -136,20 +188,25 @@
 #endif
 
 #ifndef AVMPLUS_DISABLE_NJ
-#  if defined AVMPLUS_IA32 && !defined AVMPLUS_64BIT || defined AVMPLUS_ARM
+#  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 || defined AVMPLUS_ARM || defined AVMPLUS_PPC || defined AVMPLUS_SPARC
 #    define FEATURE_NANOJIT
 #  endif
 #endif
 
 // don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
 #if !defined AVMPLUS_DISABLE_MIR && !defined FEATURE_NANOJIT
-#  if defined AVMPLUS_PPC || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && !defined AVMPLUS_MAC
+#  if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && defined AVMPLUS_WIN32
 #    define AVMPLUS_MIR
 #  endif
 #endif
 
 #if defined AVMPLUS_MIR && defined FEATURE_NANOJIT
 #  error "must not define AVMPLUS_MIR and FEATURE_NANOJIT at the same time"
+#endif
+
+#ifdef FEATURE_NANOJIT
+// enable the jitmax global variables and -jitmax switch, for bisecting nanojit bugs
+//#define AVMPLUS_JITMAX
 #endif
 
 // if a function meets the E4 criteria for being unchecked, then make
@@ -169,6 +226,14 @@
 
 #if defined(VTUNE) || defined(DEBUG) || defined(DEBUGGER)
 #define AVMPLUS_VERBOSE
+#endif
+
+#ifndef VMCFG_METHOD_NAMES
+	#if defined AVMPLUS_VERBOSE || defined DEBUGGER
+		#define VMCFG_METHOD_NAMES 1
+	#else
+		#define VMCFG_METHOD_NAMES 0
+	#endif
 #endif
 
 // #undef verify, a Mac thing
@@ -191,8 +256,8 @@
 #endif
 
 #ifdef AVMPLUS_MACH_EXCEPTIONS
-  #ifdef AVMPLUS_PPC
-    // Support for running the PowerPC version under Rosetta
+  #if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT
+    // Support for running the 32bit PowerPC version under Rosetta
     #define AVMPLUS_ROSETTA
   #endif
 #endif
@@ -322,20 +387,25 @@
 	#define FASTCALL
 #endif
 
-// Enable translation from ABC byte code to a wider word code that can
-// also be used by a direct threaded interpreter
-#if defined AVMPLUS_MAC || defined AVMPLUS_UNIX
-#  define AVMPLUS_WORD_CODE
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
-#  ifdef __GNUC__
-#    define AVMPLUS_DIRECT_THREADED     // gcc on these platforms
-#  endif
-#endif
+// By default, enable translation from ABC byte code to a wider word
+// code that can also be used by a direct threaded interpreter.
+//
+// If you define AVMPLUS_ABC_INTERPRETER the ABC code will be interpreted
+// as-is.  This is usually slower but (a) uses less memory and
+// (b) incurs less start-up overhead, and may be particularly appropriate
+// on very small interpreter-only systems or on systems where only
+// initialization code is interpreted.
+//
+// If you define AVMPLUS_WORD_CODE yourself then you must also deal
+// with whether you want peephole optimization and direct threaded
+// execution.
 
-#if defined AVMPLUS_WIN32
+#if !defined AVMPLUS_WORD_CODE && !defined AVMPLUS_ABC_INTERPRETER
 #  define AVMPLUS_WORD_CODE
-#  define AVMPLUS_PEEPHOLE_OPTIMIZER  // with or without threaded code
-//#  define AVMPLUS_DIRECT_THREADED   // see comments in Interpreter.cpp before enabling this
+#  define AVMPLUS_PEEPHOLE_OPTIMIZER	// with or without threaded code
+#  ifdef __GNUC__
+#    define AVMPLUS_DIRECT_THREADED     // requires computed goto - some other compilers may have that as well
+#  endif
 #endif
 
 #ifdef AVMPLUS_DIRECT_THREADED

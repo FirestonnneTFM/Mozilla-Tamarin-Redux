@@ -90,6 +90,19 @@ namespace avmplus
 
 		/** @name internal flags - upper 3 BYTES available */
 		/*@{*/
+		static const int UNUSED_0x00000100	= 0x00000100;
+		static const int UNUSED_0x00000200	= 0x00000200;
+		static const int UNUSED_0x00000400	= 0x00000400;
+		static const int UNUSED_0x00000800	= 0x00000800;
+		static const int UNUSED_0x00001000	= 0x00001000;
+		static const int UNUSED_0x00002000	= 0x00002000;
+
+		// set iff this is a getter
+		static const int IS_GETTER			= 0x00004000;
+
+		// set iff this is a setter
+		static const int IS_SETTER			= 0x00008000;
+
 		static const int OVERRIDE           = 0x00010000;
 
 		static const int NON_INTERRUPTABLE	= 0x00020000;
@@ -107,6 +120,7 @@ namespace avmplus
 		static const int NEEDS_DXNS			= 0x00400000;
 
 		static const int VERIFIED			= 0x00800000;
+
 #ifdef AVMPLUS_VERIFYALL
 		static const int VERIFY_PENDING		= 0x01000000;
 #endif
@@ -121,12 +135,13 @@ namespace avmplus
 		/** set to indicate that a function has no bytecode body. */
 		static const int ABSTRACT_METHOD	= 0x08000000;
 
+		static const int UNUSED_0x10000000	= 0x10000000;
+
 		/**
-		 * set to indicate that a function has been compiled
-		 * to native code.  In release mode we always compile
-		 * so we don't need the flag.
+		 * set once the signature types have been resolved and
+		 * override signatures have been checked.
 		 */
-		static const int TURBO				= 0x80000000;
+		static const int LINKED             = 0x20000000;
 
 		/**
 		 * set to indictate that a function has been 
@@ -135,10 +150,10 @@ namespace avmplus
 		static const int SUGGEST_INTERP		= 0x40000000;
 
 		/**
-		 * set once the signature types have been resolved and
-		 * override signatures have been checked.
+		 * set to indicate that a function has been compiled
+		 * to native code by the jit compiler.
 		 */
-		static const int LINKED             = 0x20000000;
+		static const int JIT_IMPL			= 0x80000000;
 
 		/*@}*/
 
@@ -152,18 +167,17 @@ namespace avmplus
 		/*@}*/
 
 	public:
-		inline AvmCore* core() const;
 
 		uintptr iid() const
 		{
 			return ((uintptr)this)>>3;
 		}
 
-		inline bool usesCallerContext() const;
+		bool usesCallerContext() const;
 
 		// Builtin + non-native functions always need the dxns code emitted 
 		// Builtin + native functions have flags to specify if they need the dxns code
-		inline bool usesDefaultXmlNamespace() const;
+		bool usesDefaultXmlNamespace() const;
 
 		void initParamTypes(int count);
 		void initDefaultValues(int count);
@@ -177,7 +191,7 @@ namespace avmplus
 		}
 
     protected:
-		AbstractFunction();
+		AbstractFunction(int _method_id);
 
 	public:
 		
@@ -244,29 +258,23 @@ namespace avmplus
 	protected:
 		virtual ~AbstractFunction();
 
-#ifdef AVMPLUS_VERBOSE
 	public:
-		virtual Stringp format(AvmCore* core) const;
-#endif
 
-#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER) || defined FEATURE_SAMPLER
-	public:
-	#if defined(AVMPLUS_VERBOSE) || defined(DEBUGGER)
-		Stringp getStackTraceLine(Stringp filename);
-	#endif
+#if VMCFG_METHOD_NAMES
+		Stringp FASTCALL getMethodName() const;
+#endif		
+
+#ifdef AVMPLUS_VERBOSE
+		Stringp format(AvmCore* core) const;
 #endif
 #ifdef DEBUGGER
 		virtual uint32 size() const;
-		virtual bool isFakeFunction() { return false; }
 #endif
 	// ------------------------ DATA SECTION BEGIN
 	public:
 		DWB(Traits*)		declaringTraits;
 		DWB(Traits*)		activationTraits;
 		DWB(PoolObject*)	pool;
-#if defined(VTUNE) || defined(AVMPLUS_VERBOSE) || defined(DEBUGGER) || defined FEATURE_SAMPLER
-		DRCWB(Stringp)		name;
-#endif
 	private:
 		DWB(Traits*)		m_returnType;
 		DWB(Traits**)		m_types;		// actual length will be 1+param_count
@@ -286,44 +294,9 @@ namespace avmplus
 		int			optional_count;		// last optional_count params are optional 
 		int			restOffset;			// offset to first rest arg, including the instance parameter. this is sum(sizeof(paramType(0..N)))
 		int			flags;				// see bitmask defs above 
-		int			method_id;		
+		const int	method_id;		
 	// ------------------------ DATA SECTION END
 	};
-
-#ifdef FEATURE_SAMPLER
-	// for sampling
-	class FakeAbstractFunction : public AbstractFunction
-	{
-	public:
-		FakeAbstractFunction(Stringp name) { this->name = name; }
-		void verify(Toplevel *) {}
-#ifdef DEBUGGER
-		virtual bool isFakeFunction() { return true; }
-#endif
-	};
-#endif
-}
-
-#include "PoolObject.h"
-
-namespace avmplus
-{
-	inline AvmCore* AbstractFunction::core() const
-	{
-		return pool->core;
-	}
-
-	inline bool AbstractFunction::usesCallerContext() const
-	{
-		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_CODECONTEXT));
-	}
-
-	// Builtin + non-native functions always need the dxns code emitted 
-	// Builtin + native functions have flags to specify if they need the dxns code
-	inline bool AbstractFunction::usesDefaultXmlNamespace() const
-	{
-		return pool->isBuiltin && (!(flags & NATIVE) || (flags & NEEDS_DXNS));
-	}
 }
 
 #endif /* __avmplus_AbstractFunction__ */

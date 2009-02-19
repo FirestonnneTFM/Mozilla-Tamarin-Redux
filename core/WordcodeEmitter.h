@@ -89,6 +89,13 @@ namespace avmplus
 		// In this case, new_pc is the pc being jumped to
 		virtual void emitAbsJump(const uint8_t *new_pc);
 
+		// CodeWriter
+		void write (FrameState* state, const byte *pc, AbcOpcode opcode);
+		void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL);
+		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
+		void writePrologue(FrameState* state);
+		void writeEpilogue(FrameState* state);
+
 	private:
 		// 'backpatches' represent target addresses of forward jumps in the original code,
 		// along with locations in the translated code that must be patched when the target
@@ -218,6 +225,11 @@ namespace avmplus
 			return wopAttrs[opcode].width;
 		}
 #endif	// AVMPLUS_PEEPHOLE_OPTIMIZER
+
+		uint32_t allocateCacheSlot(uint32_t imm30);
+		int num_caches;			// number of entries in 'caches'
+		int next_cache;			// next free entry in 'caches'
+		uint32_t* caches;			// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
 
 	};
 #endif // AVMPUS_WORD_CODE

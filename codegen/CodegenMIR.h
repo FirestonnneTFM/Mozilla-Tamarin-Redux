@@ -40,6 +40,7 @@
 #define __avmplus_CodegenMIR__
 
 #ifdef PERFM
+#define DOPROF
 #include "../vprof/vprof.h" 
 #define count_instr() _nvprof("x86",1)
 #define count_ret() _nvprof("x86-ret",1) count_instr()
@@ -169,7 +170,7 @@ namespace avmplus
 	 * suitable for common subexpression elimination, inlining, and register
 	 * allocation.
 	 */
-	class CodegenMIR
+	class CodegenMIR : public CodeWriter
 	#ifdef AVMPLUS_ARM
 		: public ArmAssembler
 	#endif
@@ -366,7 +367,7 @@ namespace avmplus
 
 		/**
 		 * Generates code for the method info.  The bytecode is translated
-		 * into native machine code and the TURBO flag is set
+		 * into native machine code and the JIT_IMPL flag is set
 		 * on the MethodInfo.  The original bytecode is retained for debugging.
 		 * @param info method to compile
 		 */
@@ -382,6 +383,7 @@ namespace avmplus
 		void emitBlockStart(FrameState* state);
 		void emitBlockEnd(FrameState* state);
 		void emitIntConst(FrameState* state, int index, uintptr c);
+		void emitPtrConst(FrameState* state, int index, const void* c) { emitIntConst(state, index, (uintptr) c); }
 		void emitDoubleConst(FrameState* state, int index, double* pd);
 		void emitCoerce(FrameState* state, int index, Traits* type);
 		void emitDoubleToInteger(int index);
@@ -402,7 +404,15 @@ namespace avmplus
 		/**
 		 * Generates code for a native method thunk.
 		 */
-		void* emitImtThunk(ImtBuilder::ImtEntry *e);
+		void* emitImtThunk(ImtBuilder::ImtEntry *e, int imtCount);
+
+		// CodeWriter methods
+		void write(FrameState* state, const byte* pc, AbcOpcode opcode);
+		void writeOp1 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits* type = NULL);
+		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
+		void writePrologue(FrameState* state);
+		void writeEpilogue(FrameState* state);
+		void emitGetGlobalScope();
 
 	private:
 
@@ -1125,10 +1135,8 @@ namespace avmplus
 		OP*  dxns;
 		OP*  dxnsAddrSave; // methods that set dxns need to save/restore
 
-		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
-		OP*  _callStackNode;
-		#endif
 		#ifdef DEBUGGER
+		OP*  _callStackNode;
 		OP*  localPtrs;		// array of local_count + max_scope (holds locals and scopes)
 		OP*  localTraits;	// array of local_count (holds snapshot of Traits* per local)
 		#endif
@@ -1240,7 +1248,7 @@ namespace avmplus
 		OP*   cseMatch(MirOpcode code, OP* a1, OP* a2=0);
 
 		// dead code search
-		void markDead(OP* ins);
+		void markDead(OP* ins, OP* dontKill);
 		bool usedInState(OP* ins);
 
 		void argIns(OP* a);
@@ -1277,7 +1285,7 @@ namespace avmplus
 #endif /* AVMPLUS_JIT_READONLY */
 
 		bool	ensureMDBufferCapacity(PoolObject* pool, size_t s);  // only if buffer guard is not used
-		byte*	getMDBuffer(PoolObject* pool);	// 
+		byte*	getMDBuffer(PoolObject* pool, int extraBytes = 0);	// 
 		size_t	estimateMDBufferReservation(PoolObject* pool, const int expansionFactor); 
 
 		/**
@@ -1343,7 +1351,7 @@ namespace avmplus
 			void clear()
 			{
 				free = 0;
-				memset(active, 0, MAX_REGISTERS * sizeof(OP*));
+				VMPI_memset(active, 0, MAX_REGISTERS * sizeof(OP*));
 			}
 
 			uint32 isFree(Register r) 
@@ -2228,7 +2236,7 @@ namespace avmplus
 			#endif
 
 			#ifdef AVMPLUS_PPC
-			int disp = addr - (int)mip;
+			int disp = int(addr - (intptr_t)mip);
 			if (IsBranchDisplacement(disp)) {
 				// Use relative branch if possible
 				BL(disp);

@@ -41,9 +41,17 @@ ifeq (i686,$(TARGET_CPU))
 nanojit_cpu_cxxsrc := Nativei386.cpp
 endif
 
-#ifeq (powerpc,$(TARGET_CPU))
-#nanojit_cpu_cxxsrc := PpcAssembler.cpp
-#endif
+ifeq (x86_64,$(TARGET_CPU))
+nanojit_cpu_cxxsrc := NativeX64.cpp
+endif
+
+ifeq (powerpc,$(TARGET_CPU))
+nanojit_cpu_cxxsrc := NativePPC.cpp
+endif
+
+ifeq (ppc64,$(TARGET_CPU))
+nanojit_cpu_cxxsrc := NativePPC.cpp
+endif
 
 ifeq (arm,$(TARGET_CPU))
 nanojit_cpu_cxxsrc := NativeARM.cpp
@@ -53,9 +61,9 @@ ifeq (thumb,$(TARGET_CPU))
 nanojit_cpu_cxxsrc := NativeThumb.cpp
 endif
 
-#ifeq (sparc,$(TARGET_CPU))
-#nanojit_cpu_cxxsrc := SparcAssembler.cpp
-#endif
+ifeq (sparc,$(TARGET_CPU))
+nanojit_cpu_cxxsrc := NativeSparc.cpp
+endif
 
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/Assembler.cpp \

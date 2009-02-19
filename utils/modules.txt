@@ -69,6 +69,7 @@ nanojit avmplus:TypeDescriber.obj
 nanojit avmplus:peephole.obj
 nanojit nanojit:Nativei386.obj
 nanojit avmplus:Nativei386.obj
+nanojit avmplus:NativeARM.obj
 nanojit nanojit:LIR.obj
 nanojit avmplus:LIR.obj
 nanojit nanojit:Assembler.obj
@@ -89,6 +90,7 @@ vm avmplus::Verifier
 vm avmplus::AbcParser
 vm avmplus::SortedIntMap
 vm avmplus::FrameState
+vm avmplus:Coder.obj
 
 builtin avmplus:MathUtils.obj
 builtin avmplus:MathClass.obj
@@ -301,8 +303,6 @@ builtin avmplus::parseDateKeyword
 shell avmshell.obj
 shell DomainClass.obj
 shell DomainObject.obj
-shell StringBuilderClass.obj
-shell StringBuilderObject.obj
 shell ByteArrayGlue.obj
 shell DataIO.obj
 shell FileClass.obj

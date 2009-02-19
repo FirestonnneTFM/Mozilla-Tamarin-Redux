@@ -37,19 +37,15 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "MMgc.h"
 
 namespace MMgc
 {
 	GCAlloc::GCAlloc(GC* _gc, int _itemSize, bool _containsPointers, bool _isRC, int _sizeClassIndex) : 
-		m_gc(_gc),
+		m_sizeClassIndex(_sizeClassIndex),
 		containsPointers(_containsPointers), 
 		containsRCObjects(_isRC),
-		m_sizeClassIndex(_sizeClassIndex)
+		m_gc(_gc)
 	{
 		// Round itemSize to the nearest boundary of 8
 		_itemSize = (_itemSize+7)&~7;
@@ -225,7 +221,7 @@ namespace MMgc
 	{
 		GCAssert(b->numItems == 0);
 		if(!m_bitsInPage) {
-			memset(b->GetBits(), 0, m_numBitmapBytes);
+			VMPI_memset(b->GetBits(), 0, m_numBitmapBytes);
 			m_gc->FreeBits(b->GetBits(), m_sizeClassIndex);
 			b->bits = NULL;
 		}
@@ -444,17 +440,17 @@ start:
 
 					void* item = (char*)b->items + m_itemSize*((i*8)+j);
 
-					SAMPLE_DEALLOC(item, GC::Size(GetUserPointer(item)));
-
+					if(m_gc->heap->HooksEnabled())
+ 						m_gc->heap->FinalizeHook(GetUserPointer(item), m_itemSize - DebugSize());
+  
 					if(!(marks & (kFinalize|kHasWeakRef)))
 						continue;
         
 					if (marks & kFinalize)
 					{     
 						GCFinalizable *obj = (GCFinalizedObject*)GetUserPointer(item);
-						GCAssert(*(int*)obj != 0);
-//						obj->~GCFinalizable();
-						obj->Finalize();
+						GCAssert(*(intptr_t*)obj != 0);
+						obj->~GCFinalizable();
 						bits[i] &= ~(kFinalize<<(j*4));
 
 #if defined(_DEBUG) && defined(MMGC_DRC)
@@ -463,7 +459,6 @@ start:
 						}
 #endif
 					}
-
 
 					if (marks & kHasWeakRef) {							
 						b->gc->ClearWeakRef(GetUserPointer(item));
@@ -529,9 +524,9 @@ start:
 				// garbage, freelist it
 				void *item = (char*)b->items + m_itemSize*(i*8+j);
 
-#ifdef MEMORY_INFO 
-				DebugFreeReverse(item, 0xba, 4);
-#endif
+				if(m_gc->heap->HooksEnabled())
+					m_gc->heap->FreeHook(GetUserPointer(item), b->size - DebugSize(), 0xba);
+
 				b->FreeItem(item, (i*8+j));
 			}
 		}
@@ -714,7 +709,7 @@ start:
 		// we poison the memory (and clear in Alloc)
 		// FIXME: can we do something faster with MMX here?
 		if(!alloc->IsRCObject())
-			memset((char*)item, 0, size);
+			VMPI_memset((char*)item, 0, size);
 #endif
 		// Add this item to the free list
 		*((void**)item) = oldFree;	

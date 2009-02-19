@@ -36,6 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#include "avmplus.h"
+
 #ifdef AVMPLUS_ARM
 
 bool P4Available() {

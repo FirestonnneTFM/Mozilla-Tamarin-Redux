@@ -190,6 +190,8 @@ namespace avmplus
 			OP_newclass = 0x58,
 			OP_getdescendants = 0x59,
 			OP_newcatch = 0x5A,
+			OP_findpropglobalstrict = 0x5B, // NEW internal only
+			OP_findpropglobal = 0x5C, // NEW internal only 
 			OP_findpropstrict = 0x5D,
 			OP_findproperty = 0x5E,
 			OP_finddef = 0x5F,
@@ -284,6 +286,7 @@ namespace avmplus
 		{
 			int8_t operandCount;    // uses -1 for "invalid", we can avoid that if necessary
 			int8_t canThrow;		// always 0 or 1
+			int8_t stack;           // stack movement not taking into account run-time names or function arguments
 #if defined AVMPLUS_WORD_CODE
 			uint16_t wordCode;		// a map used during translation
 #endif

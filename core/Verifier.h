@@ -38,7 +38,6 @@
 #ifndef __avmplus_Verifier__
 #define __avmplus_Verifier__
 
-
 namespace avmplus
 {
 	/**
@@ -67,6 +66,8 @@ namespace avmplus
 	{
 	public:
 
+	    CodeWriter* coder;
+
 		#if defined AVMPLUS_MIR
 		CodegenMIR *jit;
 		#endif // AVMPLUS_MIR
@@ -75,11 +76,20 @@ namespace avmplus
 		CodegenLIR *jit;
 		#endif
 
+#if defined AVMPLUS_WORD_CODE
+		CodeWriter *teeWriter;
+#else
+		CodeWriter *nullWriter;
+#endif
+
 		#ifdef AVMPLUS_WORD_CODE
 		WordcodeTranslator *translator;
+#if 1
+#else
 		int num_caches;			// number of entries in 'caches'
 		int next_cache;			// next free entry in 'caches'
 		uint32_t* caches;			// entry i has an imm30 value that represents the multiname whose entry in the MethodEnv's lookup cache is 'i'
+#endif
 		#endif
 		
 		AvmCore *core;
@@ -125,6 +135,18 @@ namespace avmplus
 #endif
 		FrameState* getFrameState(sintptr targetpc);
 
+		// provide access to known jitters
+		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		#if defined AVMPLUS_MIR
+		Toplevel* getToplevel (CodegenMIR* jit) {
+		#elif defined FEATURE_NANOJIT
+		Toplevel* getToplevel (CodegenLIR* jit) {
+		#endif
+		    if(jit == this->jit) return toplevel;
+			return NULL;
+		}
+        #endif
+
 	private:
 		Toplevel* toplevel;
 		#ifdef FEATURE_BUFFER_GUARD
@@ -157,23 +179,15 @@ namespace avmplus
 		void parseExceptionHandlers();
 		void checkStack(uint32_t pop, uint32_t push);
 		void checkStackMulti(uint32_t pop, uint32_t push, Multiname* m);
-
 		void emitCoerce(Traits* target, int i);
 		void emitToString(AbcOpcode opcode, int index);
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
 		void emitCheckNull(int index);
-		#endif
-		void emitCompare(AbcOpcode opcode);
-		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30);
-		void emitGetProperty(Multiname &multiname, int n, uint32_t imm30);
-		void emitGetGlobalScope();
-		void emitGetOuterScope(int scope_idx);
-		void emitGetSlot(int slot);
-		void emitSetSlot(int slot);
-		void emitSwap();
-        void emitNip();
+		void emitFindProperty(AbcOpcode opcode, Multiname& multiname, uint32_t imm30, const byte *pc);
+		void emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc);
+		void checkGetGlobalScope();
+		void emitNip();
 
-		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc);
+		void emitCallproperty(AbcOpcode opcode, int& sp, Multiname& multiname, uint32_t multiname_index, uint32_t argc, const byte* pc);
 		bool emitCallpropertyMethod(AbcOpcode opcode, Traits* t, Binding b, Multiname& multiname, uint32_t multiname_index, uint32_t argc);
 		bool emitCallpropertySlot(AbcOpcode opcode, int& sp, Traits* t, Binding b, uint32_t argc);
 #ifdef AVMPLUS_WORD_CODE
@@ -189,7 +203,55 @@ namespace avmplus
 		void showState(FrameState* state, const byte* pc, bool unreachable);
 		void verifyWarn(int errorId, ...);
 		#endif
+
+	private:
+		bool blockEnd;  // share between methods
     };
+
+#if defined FEATURE_CFGWRITER
+	class Block {
+	public:
+	  uint32_t label;
+	  sintptr begin;
+	  sintptr end;
+	  Block* succ;
+	  List<uint32_t>* succs;
+	  List<uint32_t>* preds;
+	  int pred_count;
+	  Block (CoderContext *ctx, uint32_t label, sintptr begin) 
+		: label(label), begin(begin), pred_count(0)
+		, succs(new (ctx->core->GetGC()) List<uint32_t>())
+		, preds(new (ctx->core->GetGC()) List<uint32_t>()) {}
+	  ~Block() {}
+	};
+
+	class Edge {
+	public:
+	  uint32_t src;
+	  uint32_t snk;
+	  Edge(uint32_t src, uint32_t snk)
+		: src(src), snk(snk) {}
+	};
+
+	class CFGWriter : public CodeWriter {
+	    SortedIntMap<Block*>* blocks;
+	    SortedIntMap<Edge*>* edges;
+		uint32_t label;
+		uint32_t edge;
+		CodeWriter* coder;       // the next leg of the pipeline
+		Block* current;
+	public:
+
+		CFGWriter (CoderContext *ctx, CodeWriter* coder);
+		~CFGWriter ();
+
+		void write (FrameState* state, const byte* pc, AbcOpcode opcode);
+		void writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type = NULL);
+		void writeOp2 (FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits* type = NULL);
+		void writePrologue(FrameState* state);
+		void writeEpilogue(FrameState* state);
+	};
+#endif // FEATURE_CFGWRITER
 }
 
 namespace nanojit {

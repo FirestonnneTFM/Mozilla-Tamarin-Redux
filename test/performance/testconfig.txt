@@ -38,40 +38,31 @@
 # format for testconfig:
 # name,operation,description
 # name=regular expression matching testname 
-# operation=skip is only supported operation
+# operation:
+#    skip - the test/dir is not run, for example the configuration does not support a feature or the file is not a test and is a helper file to another test
+#    include - includes a specific testcase/dir even if the parent has been skipped
 
-jsbench/.*            ,	sunspider	,	skip	,	skip jsbench
-misc/.*               ,	sunspider	,	skip	,	skip misc
-scimark/.*            ,	sunspider	,	skip	,	skip scimark
-v8/.*                 ,	sunspider	,	skip	,	skip v8
 
-sunspider/.*                    ,	jsbench		,	skip	,	skip sunspider
-misc/.*                   	,	jsbench		,	skip	,	skip misc
-scimark/.*			,	jsbench		,	skip	,	skip scimark
-v8/.*                 ,	jsbench	,	skip	,	skip v8
+sunspider/.*          , sunspider , include , sunspider testsuite
+jsbench/.*            , jsbench   , include , jsbench testsuite
+v8/.*                 , v8        , include , v8 testsuite 
+scimark/.*            , scimark   , include , scimark testsuite
 
-sunspider/.*                    ,	misc		,	skip	, 	skip sunspider
-jsbench/.*                      ,	misc		,	skip	, 	skip jsbench
-v8/.*                 ,	misc	,	skip	,	skip v8
+canaries/.*           , canaries  , include , canaries testsuite
+.*/canaries/.*        , canaries  , include , canaries testsuite
 
-sunspider/.*                    ,	scimark		,	skip	, 	skip sunspider
-jsbench/.*                      ,	scimark		,	skip	, 	skip jsbench
-misc/.*                    	,	scimark		,	skip	, 	skip jsbench
-v8/.*                 ,	scimark	,	skip	,	skip v8
-
-jsbench/.*            ,	v8	,	skip	,	skip jsbench
-misc/.*               ,	v8	,	skip	,	skip misc
-scimark/.*            ,	v8	,	skip	,	skip scimark
-sunspider/.*          ,	v8		,	skip	, 	skip sunspider
+sunspider/.*          , misc    , skip  , skip sunspider
+jsbench/.*            , misc    , skip  , skip jsbench
+v8/.*                 , misc    , skip  , skip v8
 
 jsbench/Search.as               ,       .*              ,       skip    ,       skip test runs too long and times out buildbot
 .*util.*                        ,       .*              ,       skip    ,       ship internal files
-sunspider/(as3/|)regexp-dna.as	,.*       ,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
-#sunspider/(as3/|)date-format-tofte.as	,.*       ,skip, contains eval
-sunspider/(as3/|)date-format-xparb.as	,.*       ,skip, contains eval
+sunspider/(as3/|)regexp-dna.as  ,.*       ,skip, large string.match(regexp) verifier error:1068 https://bugzilla.mozilla.org/show_bug.cgi?id=409206
+#sunspider/(as3/|)date-format-tofte.as  ,.*       ,skip, contains eval
+sunspider/(as3/|)date-format-xparb.as ,.*       ,skip, contains eval
 #sunspider/(as3/|)string-unpack-code.as,.*       ,skip, too slow: javascript compressor code runs slowly https://bugzilla.mozilla.org/show_bug.cgi?id=409225
-sunspider/(as3/|)string-base64.as	,.*       ,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
-sunspider/(as3/|)string-tagcloud.as	,.*       ,skip, contains eval
+sunspider/(as3/|)string-base64.as ,.*       ,skip, string indexing throws ReferenceError "z"[0] https://bugzilla.mozilla.org/show_bug.cgi?id=409210
+sunspider/(as3/|)string-tagcloud.as ,.*       ,skip, contains eval
 
 # util files for v8 tests
 v8/base.as,         .*, skip, included by test files

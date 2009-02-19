@@ -80,13 +80,10 @@ namespace avmplus
 	
 			Stringp s = core->string(arg);
 
-			Stringp startTag = new (core->GetGC()) String(s, 0, 2);
-			Stringp endTag = new (core->GetGC()) String(s, s->length() - 3, 3);
-
-			if (startTag->Equals("<>") && endTag->Equals("</>"))
-			{
-				s = new (core->GetGC()) String(s, 2, s->length() - 5);
-			}
+			Stringp startTag = s->substr(0, 2);
+			Stringp endTag = s->substr(s->length() - 3, 3);
+			if (startTag->equalsLatin1("<>") && endTag->equalsLatin1("</>"))
+				s = s->substr(2, s->length() - 5);
 
 			Namespace *defaultNamespace = toplevel->getDefaultNamespace();
 			// We handle this step in the XMLObject constructor to avoid concatenation huge strings together
@@ -128,7 +125,7 @@ namespace avmplus
 		AvmCore* core = this->core();
 		if ((!argc) || AvmCore::isNullOrUndefined(argv[1]))
 		{
-			return ToXMLList (core->newString("")->atom());
+			return ToXMLList (core->kEmptyString->atom());
 		}
 
 		// if args[0] is xmllist, create new list and call append

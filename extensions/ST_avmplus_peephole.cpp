@@ -97,8 +97,8 @@ void ST_avmplus_peephole::test0() {
      t->emitOp1(WOP_getlocal, 65536);
      t->emitOp1(WOP_getlocal, 7);
      t->emitOp1(WOP_getlocal, 6);
-     uint32_t* code;
-     uint32_t len = t->epilogue(&code);
+     uintptr_t* code;
+uint32_t len = (uint32_t)t->epilogue(&code);
 
 verifyPass(len == 6, "len == 6", __FILE__, __LINE__);
 verifyPass(code[0] == NEW_OPCODE(WOP_get2locals), "code[0] == NEW_OPCODE(WOP_get2locals)", __FILE__, __LINE__);

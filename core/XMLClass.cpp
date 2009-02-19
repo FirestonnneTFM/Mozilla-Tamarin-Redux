@@ -60,28 +60,28 @@ namespace avmplus
 		m_flags = kFlagIgnoreComments | kFlagIgnoreProcessingInstructions | kFlagIgnoreWhitespace | kFlagPrettyPrinting;
 		m_prettyIndent = 2;
 
-		kAttribute = core->constantString("attribute");
-		kComment = core->constantString("comment");
-		kProcessingInstruction = core->constantString("processing-instruction");
-		kElement = core->constantString("element");
-		kText = core->constantString("text");
+		kAttribute = core->internConstantStringLatin1("attribute");
+		kComment = core->internConstantStringLatin1("comment");
+		kProcessingInstruction = core->internConstantStringLatin1("processing-instruction");
+		kElement = core->internConstantStringLatin1("element");
+		kText = core->internConstantStringLatin1("text");
 
-		kColon = core->constantString(":");
-		kXml = core->constantString("xml");
-		nsXML = core->newNamespace (core->kEmptyString->atom(), core->internString (core->newString ("http://www.w3.org/XML/1998/namespace"))->atom()); 
+		kColon = core->internConstantStringLatin1(":");
+		kXml = core->internConstantStringLatin1("xml");
+		nsXML = core->newNamespace(core->kEmptyString->atom(), core->internConstantStringLatin1("http://www.w3.org/XML/1998/namespace")->atom()); 
 
 		// for notifications
-		kAttrAdded = core->constant("attributeAdded");
-		kAttrRemoved = core->constant("attributeRemoved");
-		kAttrChanged = core->constant("attributeChanged");
-		kNodeAdded = core->constant("nodeAdded");
-		kNodeRemoved = core->constant("nodeRemoved");
-		kNodeChanged = core->constant("nodeChanged");
-		kNamespaceAdded = core->constant("namespaceAdded");
-		kNamespaceRemoved = core->constant("namespaceRemoved");
-		kNamespaceSet = core->constant("namespaceSet");
-		kNameSet = core->constant("nameSet");
-		kTextSet = core->constant("textSet");
+		kAttrAdded = core->internConstantStringLatin1("attributeAdded")->atom();
+		kAttrRemoved = core->internConstantStringLatin1("attributeRemoved")->atom();
+		kAttrChanged = core->internConstantStringLatin1("attributeChanged")->atom();
+		kNodeAdded = core->internConstantStringLatin1("nodeAdded")->atom();
+		kNodeRemoved = core->internConstantStringLatin1("nodeRemoved")->atom();
+		kNodeChanged = core->internConstantStringLatin1("nodeChanged")->atom();
+		kNamespaceAdded = core->internConstantStringLatin1("namespaceAdded")->atom();
+		kNamespaceRemoved = core->internConstantStringLatin1("namespaceRemoved")->atom();
+		kNamespaceSet = core->internConstantStringLatin1("namespaceSet")->atom();
+		kNameSet = core->internConstantStringLatin1("nameSet")->atom();
+		kTextSet = core->internConstantStringLatin1("textSet")->atom();
 
 		// XML.settings
 		// XML.setSettings ([settings])
@@ -182,11 +182,7 @@ namespace avmplus
 		else
 		{
 			Namespace *defaultNamespace = toplevel->getDefaultNamespace();
-			// parentString = <parent xnlns=defaultNamespace> s </parent>
-			//Stringp parentString = core->concatStrings(core->newString("<parent xmlns=\""),defaultNamespace->getURI());
-			//parentString = core->concatStrings(parentString, core->newString("\">"));
-			//parentString = core->concatStrings(parentString, core->string(arg));
-			//parentString = core->concatStrings(parentString, core->newString("</parent>"));
+
 			// 2. Parse parentString as a W3C element information info e
 			// 3. If the parse fails, throw a SyntaxError exception
 			XMLObject *x = new (core->GetGC()) XMLObject(toplevel->xmlClass(), core->string(arg), defaultNamespace);
@@ -322,8 +318,8 @@ namespace avmplus
 		createVanillaPrototype();
 
 		AvmCore* core = this->core();
-		kUri = core->constant("uri");
-		kLocalName = core->constant("localName");
+		kUri = core->internConstantStringLatin1("uri")->atom();
+		kLocalName = core->internConstantStringLatin1("localName")->atom();
 	}
 
 	// E4X 13.3.1, page 66

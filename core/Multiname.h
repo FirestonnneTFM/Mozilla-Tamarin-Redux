@@ -256,7 +256,7 @@ namespace avmplus
 			ns = NULL;
 		}
 
-		bool matches (const Multiname *mn) const;
+		bool matches(const Multiname *mn) const;
 
 #ifdef AVMPLUS_WORD_CODE
 		// As an optimization a Multiname may be part of a GCRoot.  The following
@@ -395,7 +395,7 @@ namespace avmplus
 		void setAttr(bool b=true) { name.setAttr(b); }
 		void setQName() { name.setQName(); }
 
-		bool matches (const Multiname *mn) const { return name.matches(mn); }
+		bool matches(const Multiname *mn) const { return name.matches(mn); }
 
 //#ifdef AVMPLUS_VERBOSE
 	public:

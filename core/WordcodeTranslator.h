@@ -52,7 +52,7 @@ namespace avmplus
 #  endif
 	
 	// Abstract Base class
-	class WordcodeTranslator 
+    class WordcodeTranslator : public CodeWriter
 	{
 	public:
 		WordcodeTranslator() { };
@@ -90,7 +90,7 @@ namespace avmplus
 
 		// In this case, new_pc is the pc being jumped to
 		virtual void emitAbsJump(const uint8_t *new_pc) = 0;
-		
+
 #ifdef SUPERWORD_PROFILING
 		static void swprofStart();
 		static void swprofStop();

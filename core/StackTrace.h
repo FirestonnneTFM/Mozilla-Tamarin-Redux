@@ -40,7 +40,7 @@
 
 namespace avmplus
 {
-#ifdef FEATURE_SAMPLER
+#ifdef DEBUGGER
 	/**
 	 * The CallStackNode class tracks the call stack of executing
 	 * ActionScript code.  It is used for debugger stack dumps
@@ -85,7 +85,6 @@ namespace avmplus
 	public:
 
 		void init(MethodEnv*				env
-			#ifdef DEBUGGER
 					, Atom*					framep
 					, Traits**				frameTraits
 					, int					argc
@@ -93,7 +92,6 @@ namespace avmplus
 					, intptr_t volatile*	eip
 					, int32_t volatile*		scopeDepth
 				    , bool                  boxed
-			#endif
 				);
 
 		void init(AvmCore* core, Stringp name);
@@ -110,7 +108,6 @@ namespace avmplus
 		 *             'boxed' is true, and an uint32_t* otherwise.
 		 */
 		inline explicit CallStackNode(MethodEnv*				env
-								#ifdef DEBUGGER
 										, Atom*					framep
 										, Traits**				frameTraits
 										, int					argc
@@ -118,60 +115,49 @@ namespace avmplus
 										, intptr_t volatile*	eip
 										, int32_t volatile*		scopeDepth
 									    , bool                  boxed = false
-								#endif
 								)
 		{
-		#ifdef DEBUGGER
 			init(env, framep, frameTraits, argc, ap, eip, scopeDepth, boxed);
-		#else
-			init(env);
-		#endif
 		}
 
-	#ifdef FEATURE_SAMPLER
 		// ctor used only for Sampling (no MethodEnv)
 		inline explicit CallStackNode(AvmCore* core, const char* name)
 		{
-			init(core, core ? core->sampler()->getFakeFunctionName(name) : NULL);
+			Sampler* sampler = core ? core->get_sampler() : NULL;
+			init(core, sampler ? sampler->getFakeFunctionName(name) : NULL);
 		}
-	#endif
-
-	#ifdef DEBUGGER
-		// ctor used only for verify (no MethodEnv)
-		inline explicit CallStackNode(AvmCore* core, Stringp name)
-		{
-			init(core, name);
-		}
-	#endif
 
 		// dummy ctor we can use to construct an uninitalized version -- useful for the thunks, which
 		// will construct one and immediately call initialize (via debugEnter) so there's no need to
-		// redundantly fill in fields.
+		// redundantly fill in fields. (note that the fields are uninitialized so you *must* call init 
+		// afterwards when using this!)
 		enum Empty { kEmpty = 0 };
 		inline explicit CallStackNode(Empty) { }
+
+		// dummy ctor used by verify to skip initialization in non-debugger runmode.
+		// you don't need to follow this with init (but can if you like)
+		enum NoOp { kNoOp = 0 };
+		inline explicit CallStackNode(NoOp) { VMPI_memset(this, 0, sizeof(*this)); }
 
 		~CallStackNode();
 
 		// Does exactly what the destructor does, but on an arbitrary object.
-		void reset();
+		void FASTCALL reset();
 		
-		void sampleCheck() { if (m_core) m_core->sampler()->sampleCheck(); }
+		inline void sampleCheck() { if (m_core) m_core->sampleCheck(); }
 
-#ifdef DEBUGGER
-		void** scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
-#endif
+		void** FASTCALL scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
 
-		void exit();
+		void FASTCALL exit();
 
 		inline CallStackNode* next() const { return m_next; }
 		// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.
 		inline MethodEnv* env() const { return m_env; }
 		// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
 		inline AbstractFunction* info() const { return m_env ? m_env->method : NULL; }
-		inline Stringp envname() const { return m_envname; }
+		inline Stringp fakename() const { return m_fakename; }
 		inline int32_t depth() const { return m_depth; }
 
-#ifdef DEBUGGER
 		inline intptr_t volatile* eip() const { return m_eip; }
 		inline Stringp filename() const { return m_filename; }
 		inline Atom* framep() const { return m_framep; }
@@ -185,8 +171,6 @@ namespace avmplus
 
 		inline void set_filename(Stringp s) { m_filename = s; }
 		inline void set_linenum(int32_t i) { m_linenum = i; }
-		inline void set_framep(Atom* fp) { m_framep = fp; }
-#endif
 
 		// Placement new and delete because the interpreter allocates CallStackNode
 		// instances inside other data structures (think alloca storage that has been
@@ -202,9 +186,8 @@ namespace avmplus
 	private:	AvmCore*			m_core;
 	private:	MethodEnv*			m_env;			// will be NULL if the element is from a fake CallStackNode
 	private:	CallStackNode*		m_next;
-	private:	Stringp				m_envname;		// same as m_env->method->name (except for fake CallStackNode)
+	private:	Stringp				m_fakename;		// NULL unless we are a fake CallStackNode
 	private:	int32_t				m_depth;
-	#ifdef DEBUGGER
 	private:	intptr_t volatile*	m_eip;			// ptr to where the current pc is stored
 	private:	Stringp				m_filename;		// in the form "C:\path\to\package\root;package/package;filename"
 	private:	Atom*				m_framep;		// pointer to top of AS registers
@@ -217,7 +200,6 @@ namespace avmplus
 	private:	int32_t				m_argc;
 	private:	int32_t				m_linenum;
 	private:	bool				m_boxed;
-	#endif
 	// ------------------------ DATA SECTION END
 	};
 
@@ -251,19 +233,16 @@ namespace avmplus
 			inline void set(const CallStackNode& csn) 
 			{ 
 				m_info		= csn.info();		// will be NULL if the element is from a fake CallStackNode
-				m_name		= csn.envname();
-			#ifdef DEBUGGER
+				m_name		= csn.fakename();
+				if (!m_name && csn.info())
+					m_name = csn.info()->getMethodName();
 				m_filename	= csn.filename();
 				m_linenum	= csn.linenum();
-			#else
-				m_filename	= 0;
-				m_linenum	= 0;
-			#endif
 			#ifdef AVMPLUS_64BIT
 				m_pad		= 0;	// let's keep the stack nice and clean
 			#endif
 			}
-			// WARNING, env() can return null if there are fake Sampler-only frames. You must always check for null.
+			// WARNING, info() can return null if there are fake Sampler-only frames. You must always check for null.
 			inline AbstractFunction* info() const { return m_info; }
 			inline Stringp infoname() const { return m_name; }
 			inline Stringp filename() const { return m_filename; }
@@ -277,7 +256,7 @@ namespace avmplus
 		void dumpFilename(Stringp filename, PrintWriter& out) const;
 	};
 		
-#endif /* FEATURE_SAMPLER */
+#endif 
 }
 
 #endif /* __avmplus_CallStackNode__ */

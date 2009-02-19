@@ -458,10 +458,10 @@ namespace avmplus
 	{
 		if (traits()->name != NULL) {
 			return core->concatStrings(traits()->format(core),
-									   core->concatStrings(core->newString("@"),
+									   core->concatStrings(core->newConstantStringLatin1("@"),
 														   core->formatAtomPtr(atom())));
 		} else {
-			return core->concatStrings(core->newString("{}@"),
+			return core->concatStrings(core->newConstantStringLatin1("{}@"),
 									   core->formatAtomPtr(atom()));
 		}
 	}
@@ -545,7 +545,7 @@ namespace avmplus
 		AvmCore::AllocaAutoPtr _newargs;
 		Atom *newargs = (Atom *) VMPI_alloca(core(), _newargs, sizeof(Atom)*(argc+1));
 		newargs[0] = thisArg;
-		memcpy(&newargs[1], argv, argc*sizeof(Atom));
+		VMPI_memcpy(&newargs[1], argv, argc*sizeof(Atom));
 		return call(argc, newargs);
 	}
 
@@ -567,7 +567,7 @@ namespace avmplus
 	Atom ScriptObject::call(int /*argc*/, Atom* /*argv*/)
 	{
 		// TypeError in ECMA to execute a non-function
-		Multiname name(core()->publicNamespace, core()->constantString("value"));
+		Multiname name(core()->publicNamespace, core()->internConstantStringLatin1("value"));
 		toplevel()->throwTypeError(kCallOfNonFunctionError, core()->toErrorString(&name));
 		return undefinedAtom;
 	}

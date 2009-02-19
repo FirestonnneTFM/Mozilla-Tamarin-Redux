@@ -41,6 +41,7 @@
 #define __nanojit_Nativei386__
 
 #ifdef PERFM
+#define DOPROF
 #include "../vprof/vprof.h"
 #define count_instr() _nvprof("x86",1)
 #define count_ret() _nvprof("x86-ret",1); count_instr();
@@ -183,6 +184,7 @@ namespace nanojit
         void asm_farg(LInsp);\
         void asm_arg(ArgSize, LIns*, Register);\
 		void asm_pusharg(LInsp);\
+		void asm_cmp(LIns *cond);\
         void asm_align_code();
 		
 	#define swapptrs()  { NIns* _tins = _nIns; _nIns=_nExitIns; _nExitIns=_tins; }

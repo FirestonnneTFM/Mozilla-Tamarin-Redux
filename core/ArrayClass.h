@@ -81,7 +81,8 @@ namespace avmplus
 		void _forEach(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_forEach(toplevel(), thisAtom, callback, thisObject); }
 		bool _some(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_some(toplevel(), thisAtom, callback, thisObject); }
 		ArrayObject* _map(Atom thisAtom, ScriptObject* callback, Atom thisObject) { return ArrayClass::generic_map(toplevel(), thisAtom, callback, thisObject); }
-		
+		uint32 _unshift(Atom thisAtom, ArrayObject* args) { return ArrayClass::generic_unshift(toplevel(), thisAtom, args); }
+
 		// inline wrappers for legacy code.
 		inline ArrayObject* concat(Atom thisAtom, ArrayObject* args) { return ArrayClass::generic_concat(toplevel(), thisAtom, args); }
 		inline Atom pop(Atom thisAtom) { return ArrayClass::generic_pop(toplevel(), thisAtom); }
@@ -114,7 +115,8 @@ namespace avmplus
 		static void generic_forEach(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject); 
 		static bool generic_some(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject); 
 		static ArrayObject* generic_map(Toplevel* toplevel, Atom thisAtom, ScriptObject* callback, Atom thisObject); 
-
+		static uint32 generic_unshift(Toplevel* toplevel, Atom thisAtom, ArrayObject* args);
+		
 		static uint32_t getLengthHelper(Toplevel* toplevel, ScriptObject* d);
 
 	private:

@@ -80,6 +80,8 @@ namespace MMgc
 			MMGCCustomDebugMessageHandler(p);
 		#elif defined(MMGC_MAC_NO_CORE_SERVICES)
 			fprintf(stderr, "%s\n", p);
+			if (debugBreak)
+				abort();
 		#else
 		    CFStringRef cfStr = ::CFStringCreateWithCString(NULL, p, kCFStringEncodingUTF8);
 
@@ -88,7 +90,7 @@ namespace MMgc
 				Str255 buf;
 				CFStringGetPascalString (cfStr, buf, 255, kCFStringEncodingUTF8);
 				DebugStr(buf);
-				exit(1);	// ensure we die
+				abort();	// ensure we die
 			}
 			else
 			{

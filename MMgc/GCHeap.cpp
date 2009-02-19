@@ -37,12 +37,15 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include <string.h>
-// TODO: remove this hack:
-#ifdef __WINSCW__
-#include <e32std.h>
-#endif
 #include "MMgc.h"
+
+#ifdef DEBUGGER
+namespace avmplus
+{
+	void recordAllocationSample(const void* item, size_t size);
+	void recordDeallocationSample(const void* item, size_t size);	
+}
+#endif
 
 #if defined(DARWIN) || defined(MMGC_ARM) || defined (MMGC_SPARC)
 #include <stdlib.h>
@@ -50,13 +53,6 @@
 
 namespace MMgc
 {
-#ifdef _DEBUG
-	// 64bit - Warning, this debug mechanism will fail on 64-bit systems when we 
-	// allocate pages across more than 4 GB of memory space.  We no longer have 20-bits
-	// to track - we have 52-bits.  
-	uint8 GCHeap::m_megamap[1048576];
-#endif
-
 	GCHeap *GCHeap::instance = NULL;
 
 	const bool decommit = true;
@@ -79,13 +75,26 @@ namespace MMgc
 	}
 
 	GCHeap::GCHeap(GCMallocFuncPtr m, GCFreeFuncPtr f, int initialSize)
-		: heapVerbose(false),
-		  kNativePageSize(0),
+		: kNativePageSize(0),
+		  heapVerbose(false),
 		  heapLimit((size_t)-1)
 	{
-#ifdef _DEBUG
+#ifdef MEMORY_PROFILER
 		// dump memory profile after sweeps
-		enableMemoryProfiling = false;
+		profilerEnabled = false;
+		const char *env = VMPI_getenv("MMGC_PROFILE");
+		if(env && VMPI_strncmp(env, "1", 1) == 0)
+			profilerEnabled = true;
+		hooksEnabled = profilerEnabled;
+#endif
+		
+#ifdef MEMORY_INFO
+		// always track allocs in DEBUG builds
+		hooksEnabled = true;
+#ifdef MEMORY_PROFILER
+		if(hooksEnabled)
+			profiler = new MemoryProfiler();
+#endif
 #endif
 
 #if defined(MMGC_PORTING_API)
@@ -101,10 +110,6 @@ namespace MMgc
 		(void)f;
 #endif
 #endif
-		#ifdef _DEBUG
-		// Initialize the megamap for debugging.
-		memset(m_megamap, 0, sizeof(m_megamap));
-		#endif
 		
 		lastRegion  = 0;
 		blocksLen   = 0;
@@ -156,21 +161,24 @@ namespace MMgc
 		FlushMirMemory();
 #endif /*MMGC_AVMPLUS*/
 
+#ifdef MEMORY_PROFILER
+		if(profiler)
+			delete profiler;
+#endif
+
 #ifdef MEMORY_INFO
 		if(numAlloc != 0)
 		{
 			for (unsigned int i=0; i<blocksLen; i++) 
 			{
 				HeapBlock *block = &blocks[i];
-				if(block->baseAddr)
-				{
-					uint32 megamapIndex = ((uint32)(uintptr)block->baseAddr) >> 12;
-					GCAssert(m_megamap[megamapIndex] == 0);
-				}
 				if(block->inUse() && block->baseAddr)
 				{
 					GCDebugMsg(false, "Block 0x%x not freed\n", block->baseAddr);
-					PrintStackTraceByIndex(block->allocTrace);
+#ifdef MEMORY_PROFILER
+					if(block->allocTrace)
+						PrintStackTrace(block->allocTrace);
+#endif
 				}
 			}	
 			GCAssert(false);
@@ -194,47 +202,38 @@ namespace MMgc
 			HeapBlock *block = AllocBlock(size, zero);
 
 			if (!block && expand) {
-				ExpandHeapPrivate(size);
+				ExpandHeapLocked(size);		
 				block = AllocBlock(size, zero);
 			}
 
-			if (!block) {
-				return NULL;
-			}
-
-			GCAssert(block->size == size);
+			if (block) 
+			{			
+				GCAssert(block->size == size);
 			
-			numAlloc += size;
+				numAlloc += size;
 
-#ifdef _DEBUG
-			// Check for debug builds only:
-			// Use the megamap to double-check that we haven't handed
-			// any of these pages out already.
-			uint32 megamapIndex = ((uint32)(uintptr)block->baseAddr)>>12;
-			for (int i=0; i<size; i++) {
-				GCAssert(m_megamap[megamapIndex] == 0);
-				
-				// Set the megamap entry
-				m_megamap[megamapIndex++] = 1;
+				// copy baseAddr to a stack variable to fix :
+				// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
+				baseAddr = block->baseAddr;
 			}
-#endif
-
-			// copy baseAddr to a stack variable to fix :
-			// http://flashqa.macromedia.com/bugapp/detail.asp?ID=125938
-			baseAddr = block->baseAddr;
 		}
 
-#ifdef MEMORY_INFO
-		// do this outside of the spinlock to prevent deadlock w/ trace table lock
-		AddrToBlock(baseAddr)->allocTrace = GetStackTraceIndex(2);
+#ifdef FEATURE_OOM
+		if(!baseAddr && expand) {
+			Abort(1);
+		}
 #endif
-		// Zero out the memory, if requested to do so
-		// FIXME: if we know that this memory was just committed we shouldn't do this
-		// maybe zero should pass deeper into the system so that on initial expansions
-		// and re-commit we avoid this, should be a noise optimization over all but
-		// possibly a big win for startup
-		if (zero) {
-			memset(baseAddr, 0, size * kBlockSize);
+		
+		if(baseAddr)
+		{
+			// Zero out the memory, if requested to do so
+			// FIXME: if we know that this memory was just committed we shouldn't do this
+			// maybe zero should pass deeper into the system so that on initial expansions
+			// and re-commit we avoid this, should be a noise optimization over all but
+			// possibly a big win for startup
+			if (zero) {
+				VMPI_memset(baseAddr, 0, size * kBlockSize);
+			}
 		}
 		
 		return baseAddr;
@@ -248,24 +247,6 @@ namespace MMgc
 
 		HeapBlock *block = AddrToBlock(item);
 		if (block) {
-
-			#ifdef _DEBUG
-			// For debug builds only:
-			// Check the megamap to ensure that all the pages
-			// being freed are in fact allocated.
-			uint32 megamapIndex = ((uint32)(uintptr)block->baseAddr) >> 12;
-			for (int i=0; i<block->size; i++) {
-				if(m_megamap[megamapIndex] != 1) {
-					GCAssertMsg(false, "Megamap is screwed up, are you freeing freed memory?");
-					int *data = (int*)item;
-					(void)data;	// silence compiler warning
-				}
-
-				// Clear the entry
-				m_megamap[megamapIndex++] = 0;
-			}
-			#endif
-
 			// Update metrics
 			GCAssert(numAlloc >= (unsigned int)block->size);
 			numAlloc -= block->size;
@@ -434,11 +415,11 @@ namespace MMgc
 					HeapBlock *newBlocks = new HeapBlock[blocksLen - block->size];
 
 					// copy blocks before this block
-					memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
+					VMPI_memcpy(newBlocks, blocks, (block - blocks) * sizeof(HeapBlock));
 
 					// copy blocks after
 					size_t lastChunkSize = (char*)(blocks + blocksLen) - (char*)(block + block->size);
-					memcpy(newBlocks + (block - blocks), block + block->size, lastChunkSize);
+					VMPI_memcpy(newBlocks + (block - blocks), block + block->size, lastChunkSize);
 
 					// Fix up the prev/next pointers of each freelist.  This is a little more complicated
 					// than the similiar code in ExpandHeap because blocks after the one we are free'ing
@@ -522,7 +503,9 @@ namespace MMgc
 		int startList = GetFreeListIndex(size);
 		HeapBlock *freelist = &freelists[startList];
 
+	#if defined(USE_MMAP) && defined(DECOMMIT_MEMORY)
 		HeapBlock *decommittedSuitableBlock = NULL;
+	#endif
 
 		for (int i = startList; i < kNumFreeLists; i++)
 		{
@@ -767,8 +750,6 @@ namespace MMgc
 
 	void GCHeap::AddToFreeList(HeapBlock *block)
 	{
-		GCAssert(m_megamap[((uint32)(uintptr)block->baseAddr)>>12] == 0);
-
 		int index = GetFreeListIndex(block->size);
 		HeapBlock *freelist = &freelists[index];
 
@@ -806,16 +787,12 @@ namespace MMgc
 
 #ifdef _DEBUG
 		// trash it. fb == free block
-		memset(block->baseAddr, 0xfb, block->size * kBlockSize);
-#ifdef MEMORY_INFO
-		block->freeTrace = GetStackTraceIndex(2);
-#endif
+		VMPI_memset(block->baseAddr, 0xfb, block->size * kBlockSize);
 #endif
 
 		// Try to coalesce this block with its predecessor
 		HeapBlock *prevBlock = block - block->sizePrevious;
 		if (!prevBlock->inUse() && prevBlock->committed) {
-			GCAssert(m_megamap[((uint32)(uintptr)prevBlock->baseAddr)>>12] == 0);
 			// Remove predecessor block from free list
 			RemoveFromList(prevBlock);
 
@@ -857,15 +834,27 @@ namespace MMgc
 
 	bool GCHeap::ExpandHeap(int askSize)
 	{
+		bool retval;
+		
+		{ // lock block
 #ifdef GCHEAP_LOCK
-		// Acquire the spinlock, as this is a publicly
-		// accessible API.
-		GCAcquireSpinlock spinlock(m_spinlock);
+			// Acquire the spinlock, as this is a publicly
+			// accessible API.
+			GCAcquireSpinlock spinlock(m_spinlock);
 #endif /* GCHEAP_LOCK */
-		return ExpandHeapPrivate(askSize);
+			retval = ExpandHeapLocked(askSize);
+		}
+
+#ifdef FEATURE_OOM
+		if(!retval) 
+		{
+			Abort(1);
+		}
+#endif
+		return retval;
 	}
 	 
-	bool GCHeap::ExpandHeapPrivate(int askSize)
+	bool GCHeap::ExpandHeapLocked(int askSize)
 	{
 		int size = askSize;
 #ifdef _DEBUG
@@ -875,9 +864,13 @@ namespace MMgc
 		// Turn this switch on to test bridging of contiguous
 		// regions.
 		bool test_bridging = false;
+	#ifdef USE_MMAP
 		int defaultReserve = test_bridging ? (size+kMinHeapIncrement) : kDefaultReserve;
+	#endif
 #else
+	#ifdef USE_MMAP
 		const int defaultReserve = kDefaultReserve;
+	#endif
 #endif
 		
 		if(GetTotalHeapSize() > heapLimit)
@@ -1068,7 +1061,7 @@ namespace MMgc
 		
 		// Copy all the existing blocks.
 		if (blocksLen) {
-			memcpy(newBlocks, blocks, blocksLen * sizeof(HeapBlock));
+			VMPI_memcpy(newBlocks, blocks, blocksLen * sizeof(HeapBlock));
 
 			// Fix up the prev/next pointers of each freelist.
 			HeapBlock *freelist = freelists;
@@ -1119,7 +1112,7 @@ namespace MMgc
 		block->dirty = true;
 #endif
 
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 		block->allocTrace = 0;
 		block->freeTrace = 0;
 #endif
@@ -1140,7 +1133,7 @@ namespace MMgc
 #else
 			block->dirty = false;
 #endif			
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 			block->allocTrace = 0;
 			block->freeTrace = 0;
 #endif
@@ -1153,7 +1146,7 @@ namespace MMgc
 		block->sizePrevious = size;
 		block->prev         = NULL;
 		block->next         = NULL;
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 		block->allocTrace = 0;
 #endif
 
@@ -1333,5 +1326,54 @@ namespace MMgc
 			region = region->prev;
 		}
 		return SizeToBlocks(size);
+	}
+
+	void GCHeap::AllocHook(const void *item, size_t size)
+	{
+		(void)item;
+		(void)size;
+		{
+#ifdef GCHEAP_LOCK
+			GCAcquireSpinlock spinlock(m_spinlock);
+#endif /* GCHEAP_LOCK */
+#ifdef MEMORY_PROFILER
+			if(hooksEnabled)
+				profiler->Alloc(item, size);
+#endif
+
+#ifdef MEMORY_INFO
+			DebugDecorate(item, size);
+#endif
+		}
+#ifdef DEBUGGER
+		// this can't be called with the heap lock locked.
+		avmplus::recordAllocationSample(item, size);
+#endif
+	}
+
+	void GCHeap::FinalizeHook(const void *item, size_t size)
+	{
+		(void)item,(void)size;
+		{
+#ifdef GCHEAP_LOCK
+			GCAcquireSpinlock spinlock(m_spinlock);
+#endif /* GCHEAP_LOCK */
+#ifdef MEMORY_PROFILER
+			if(hooksEnabled)
+				profiler->Free(item, size);
+#endif
+		}
+		
+#ifdef DEBUGGER
+		avmplus::recordDeallocationSample(item, size);
+#endif
+	}
+
+	void GCHeap::FreeHook(const void *item, size_t size, int poison)
+	{
+		(void)poison,(void)item,(void)size;
+#ifdef MEMORY_INFO
+		DebugFree(item, poison, size);
+#endif
 	}
 }

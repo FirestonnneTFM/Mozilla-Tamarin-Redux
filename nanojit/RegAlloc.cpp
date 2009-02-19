@@ -49,8 +49,8 @@ namespace nanojit
 	{
 		free = 0;
 		used = 0;
-		memset(active, 0, sizeof(active));
-		memset(usepri, 0, sizeof(usepri));
+		VMPI_memset(active, 0, sizeof(active));
+		VMPI_memset(usepri, 0, sizeof(usepri));
 	}
 
 	bool RegAlloc::isFree(Register r) 
@@ -142,9 +142,14 @@ namespace nanojit
 			if (!ins)
 				continue;				
 
-			s += strlen(s);
+			if (ins->isop(LIR_param) && ins->imm8b()==1 && r == Assembler::savedRegs[ins->imm8()]) {
+				// dont print callee-saved regs that arent used
+				continue;
+			}
+
+			s += VMPI_strlen(s);
 			const char* rname = ins->isQuad() ? fpn(r) : gpn(r);
-			sprintf(s, " %s(%s)", rname, names->formatRef(ins));
+			VMPI_sprintf(s, " %s(%s)", rname, names->formatRef(ins));
 		}
 	}
 	#endif /* NJ_VERBOSE */

@@ -409,12 +409,29 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 	Stringp ArrayObject::format(AvmCore* core) const
 	{
-		Stringp prefix = core->newString("[]@");
+		Stringp prefix = core->newConstantStringLatin1("[]@");
 		return core->concatStrings(prefix, core->formatAtomPtr(atom()));
 	}
 #endif
 
-	void ArrayObject::set_length(uint32 newLength)
+	// Non-virtual members for ActionScript method implementation.
+	// Always calls thru to the virtual method to allow subclasses to override in C++.
+	uint32 ArrayObject::get_length() const 
+	{ 
+		return getLength(); 
+	}
+	
+	void ArrayObject::set_length(uint32 newLength) 
+	{
+		setLength(newLength); 
+	}
+
+	/*virtual*/ uint32 ArrayObject::getLength() const 
+	{
+		return m_length;
+	}
+	
+	/*virtual*/ void ArrayObject::setLength(uint32 newLength)
 	{
 		if (traits()->needsHashtable())
 		{
@@ -512,11 +529,12 @@ namespace avmplus
 #ifdef DEBUGGER
 	uint64 ArrayObject::size() const
 	{
-		if(isSimpleDense())
+		uint64 s = ScriptObject::size();
+		if (isSimpleDense())
 		{
-			return ScriptObject::size() + getLength()*sizeof(Atom);
+			s += getLength()*sizeof(Atom);
 		}
-		return ScriptObject::size();
+		return s;
 	}
 #endif
 }

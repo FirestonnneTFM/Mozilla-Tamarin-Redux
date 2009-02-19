@@ -126,7 +126,7 @@ extern "C"
 
 namespace avmplus
 {
-#if defined(AVMPLUS_MIR) || defined(DEBUGGER)
+#ifdef AVMPLUS_MIR
 	GrowableBuffer::GrowableBuffer(MMgc::GCHeap *gcheap, bool mir)
 		: heap(gcheap)
 		, forMir(mir)
@@ -171,7 +171,7 @@ namespace avmplus
 		{
 			// get rid of pages
 			byte* after = pageAfter(current);
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 			MMgc::ChangeSizeForObject(this, (int)(-1 * (uncommit-after)));
 #endif
 			heap->DecommitCodeMemory((void*)after, uncommit-after);
@@ -191,12 +191,10 @@ namespace avmplus
 	{
 		AvmAssertMsg(amt % pageSize() == 0, "amt must be multiple of pageSize");
 		size_t grow = ( (uncommit + amt) < last) ? amt : last - uncommit;
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 		MMgc::ChangeSizeForObject(this, (int)grow);
 #endif
 		void* res = heap->CommitCodeMemory((void*)uncommit, grow);
-		// This breaks when GrowableBuffer used by sampler, and is going away soon anyways
-		//GC::GetGC(this)->UpdateStat("jit", (int) GCHeap::SizeToBlocks(grow));
 		AvmAssert(res != 0);
 		if(res == 0)
 		  return uncommit;
@@ -216,12 +214,10 @@ namespace avmplus
 		size_t size = (shrinkTo < uncommit) ? uncommit - shrinkTo : 0;
 		if (size > 0)
 		{	
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 			MMgc::ChangeSizeForObject(this, (int)(-1 * size));
 #endif
 			void* res = heap->DecommitCodeMemory((void*)shrinkTo, size);
-			// This breaks when GrowableBuffer used by sampler, and is going away soon anyways
-			//GC::GetGC(this)->UpdateStat("jit", -1 * (int)GCHeap::SizeToBlocks(size));
 			AvmAssert(res != 0);
 			(void)res;
 			uncommit = shrinkTo;
@@ -237,12 +233,10 @@ namespace avmplus
 		// get rid of the whole shebang
 		if (first != 0)
 		{
-#ifdef MEMORY_INFO
+#ifdef MEMORY_PROFILER
 			MMgc::ChangeSizeForObject(this, (int)(-1 * (uncommit-first)));
-			heap->DecommitCodeMemory(first, uncommit-first);
 #endif
-			// This breaks when GrowableBuffer used by sampler, and is going away soon anyways
-			//GC::GetGC(this)->UpdateStat("jit", -1 * (int)GCHeap::SizeToBlocks(uncommit-first));
+			heap->DecommitCodeMemory(first, uncommit-first);
 			if (forMir)
 				heap->ReleaseMirMemory(first, size());
 			else
@@ -818,7 +812,7 @@ namespace avmplus
 		exception_mask_t mask = EXC_MASK_BAD_ACCESS;
 		
 		// Save exception ports
-		memset(&savedExceptionPorts, 0, sizeof(SavedExceptionPorts));
+		VMPI_memset(&savedExceptionPorts, 0, sizeof(SavedExceptionPorts));
 		
 		kern_return_t r;
 		r = thread_get_exception_ports(thread,
@@ -1240,7 +1234,7 @@ namespace avmplus
 
 		contextRecord->Rip = buf->Rip;
 
-		memcpy(&contextRecord->Xmm6, &buf->Xmm6, sizeof(M128A)*10);
+		VMPI_memcpy(&contextRecord->Xmm6, &buf->Xmm6, sizeof(M128A)*10);
 		//contextRecord->Xmm6 = (M128A)buf->Xmm6;
 		//contextRecord->Xmm7 = buf->Xmm7;
 		//contextRecord->Xmm8 = buf->Xmm8;
@@ -1296,8 +1290,13 @@ namespace avmplus
 		
 		// set the registers to point back to the CATCH block     
 		#ifdef AVMPLUS_PPC
-		thread_state.srr0 = (*jmpBuf)[21];
-		thread_state.r1   = (*jmpBuf)[0];
+		#  if defined AVMPLUS_64BIT
+			thread_state.__srr0 = (*jmpBuf)[21];
+			thread_state.__r1   = (*jmpBuf)[0];
+		#  else
+			thread_state.srr0 = (*jmpBuf)[21];
+			thread_state.r1   = (*jmpBuf)[0];
+		#  endif
 		#endif
 
 		#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)

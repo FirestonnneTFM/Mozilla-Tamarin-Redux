@@ -36,11 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "MMgc.h"
 
 #define kBlockHeadSize offsetof(MMgc::FixedAlloc::FixedBlock, items)
@@ -89,7 +84,7 @@ namespace MMgc
 					unsigned int fourthInt = *(mem+3);
 					if(fourthInt != 0xedededed) {
 						GCDebugMsg(false, "Leaked %d byte item.  Addr: 0x%x\n", GetItemSize(), mem+2);
-						PrintStackTraceByIndex(*(mem+1));
+						PrintStackTrace(GetUserPointer(mem));
 					}
 					mem += (m_itemSize / sizeof(int));
 				}
@@ -153,7 +148,7 @@ namespace MMgc
 
 #ifdef _DEBUG
 		// deleted and unused memory is 0xed'd, this is important for leak diagnostics
-		memset(b->items, 0xed, m_itemSize * m_itemsPerBlock);
+		VMPI_memset(b->items, 0xed, m_itemSize * m_itemsPerBlock);
 #endif
 
 		// Link the block at the end of the list

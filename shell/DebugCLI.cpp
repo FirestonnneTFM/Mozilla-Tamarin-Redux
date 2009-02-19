@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include <stdio.h>
-
 #include "avmshell.h"
 
 #ifdef DEBUGGER
@@ -196,7 +194,7 @@ namespace avmshell
 								   const char *input,
 								   int defCmd)
 	{
-		int inputLen = (int)strlen(input);
+		int inputLen = (int)VMPI_strlen(input);
 		
 		// first check for a comment
 		if (input[0] == '#') {
@@ -207,7 +205,7 @@ namespace avmshell
 		bool ambiguous = false;
 		
 		for (int i=0; cmdList[i].text; i++) {
-			if (!strncmp(input, cmdList[i].text, inputLen)) {
+			if (!VMPI_strncmp(input, cmdList[i].text, inputLen)) {
 				if (match != -1) {
 					ambiguous = true;
 					break;
@@ -231,7 +229,7 @@ namespace avmshell
 			return defCmd;
 		}
 		// only 1 match or our input is 1 character or first match is exact
-		else if (!ambiguous || inputLen == 1 || !strcmp(cmdList[match].text, input)) {
+		else if (!ambiguous || inputLen == 1 || !VMPI_strcmp(cmdList[match].text, input)) {
 			return cmdList[match].id;
 		}
 		else {
@@ -239,7 +237,7 @@ namespace avmshell
 			core->console << "Ambiguous command '" << input << "': ";
 			bool first = true;
 			for (int i=0; cmdList[i].text; i++) {
-				if (!strncmp(cmdList[i].text, input, inputLen)) {
+				if (!VMPI_strncmp(cmdList[i].text, input, inputLen)) {
 					if (!first) {
 						core->console << ", ";
 					} else {
@@ -271,13 +269,13 @@ namespace avmshell
 		//core->console << '\n';
 
 		// obtain information about each frame 
-		int frameCount = core->debugger->frameCount();
+		int frameCount = core->debugger()->frameCount();
 		for(int k=0; k<frameCount; k++)
 		{
 			Atom* ptr;
 			int count, line; 
 			SourceInfo* src;
-			DebugFrame* frame = core->debugger->frameAt(k);
+			DebugFrame* frame = core->debugger()->frameAt(k);
 
 			// source information
 			frame->sourceLocation(src, line);
@@ -292,7 +290,7 @@ namespace avmshell
 			// method
 			MethodInfo* info = functionFor(src, line);
 			if (info)
-				core->console << info->name;
+				core->console << info->getMethodName();
 			else
 				core->console << "<unknown>";
 
@@ -330,7 +328,7 @@ namespace avmshell
 			for(int i=0; i<size; i++)
 			{
 				MethodInfo* m = src->functionAt(i);
-				if (line >= m->firstSourceLine && line <= m->lastSourceLine)
+				if (line >= m->firstSourceLine() && line <= m->lastSourceLine())
 				{
 					info = m;
 					break;
@@ -400,7 +398,7 @@ namespace avmshell
 	void DebugCLI::list(const char* line)
 	{
 		int currentLine = (core->callStack) ? core->callStack->linenum() : 0;
-		int linenum = (line) ? atoi(line) : currentLine;
+		int linenum = (line) ? VMPI_atoi(line) : currentLine;
 		displayLines(linenum, 10);
 	}
 	
@@ -413,27 +411,34 @@ namespace avmshell
 	void DebugCLI::breakpoint(char *location)
 	{
 		Stringp filename = currentFile;
-		char *colon = strchr(location, ':');
+		char *colon = VMPI_strchr(location, ':');
 
 		if (colon) {
 			*colon = 0;
-			filename = core->constantString(location);
+			filename = core->internStringLatin1(location);
 			location = colon+1;
 		}
 
-		AbcFile *abcFile = (AbcFile*) abcAt(0);
-		if (abcFile == NULL) {
+		if (abcCount() == 0) {
 			core->console << "No abc file loaded\n";
 			return;
 		}
 
-		SourceFile *sourceFile = abcFile->sourceNamed(filename);
+		SourceFile* sourceFile = NULL;
+		for (int i = 0, n = abcCount(); i < n; ++i)
+		{
+			AbcFile* abcFile = (AbcFile*)abcAt(i);
+			sourceFile = abcFile->sourceNamed(filename);
+			if (sourceFile)
+				break;
+		}
+
 		if (sourceFile == NULL) {
 			core->console << "No source available; can't set breakpoint.\n";
 			return;
 		}
 
-		int targetLine = atoi(location);
+		int targetLine = VMPI_atoi(location);
 
 		int breakpointId = ++breakpointCount;
 		
@@ -469,7 +474,7 @@ namespace avmshell
 	
 	void DebugCLI::deleteBreakpoint(char *idstr)
 	{
-		int id = atoi(idstr);
+		int id = VMPI_atoi(idstr);
 
 		BreakAction *breakAction = firstBreakAction;
 		while (breakAction) {
@@ -505,7 +510,7 @@ namespace avmshell
 		Atom* ptr;
 		int count, line; 
 		SourceInfo* src;
-		DebugFrame* frame = core->debugger->frameAt(0);
+		DebugFrame* frame = core->debugger()->frameAt(0);
 
 		// source information
 		frame->sourceLocation(src, line);
@@ -531,7 +536,7 @@ namespace avmshell
 	Atom DebugCLI::ease2Atom(const char* to, Atom baseline)
 	{
 		// first make a string out of the value
-		Atom a = core->newString(to)->atom();
+		Atom a = core->newStringLatin1(to)->atom();
 
 		// using the type of baseline try to convert to into an appropriate Atom
 		if (core->isNumber(baseline))
@@ -557,7 +562,7 @@ namespace avmshell
 			Atom* ptr;
 			int count, line; 
 			SourceInfo* src;
-			DebugFrame* frame = core->debugger->frameAt(0);
+			DebugFrame* frame = core->debugger()->frameAt(0);
 
 			// source information
 			frame->sourceLocation(src, line);
@@ -579,7 +584,7 @@ namespace avmshell
 			for(int i=0; i<count; i++)
 			{
 				Stringp arg = info->getArgName(i);
-				if (arg->Equals(what)) 
+				if (arg->equalsLatin1(what)) 
 				{
 					// match!
 					Atom a = ease2Atom(to, ptr[i]);
@@ -595,7 +600,7 @@ namespace avmshell
 			for(int i=0; i<count; i++)
 			{
 				Stringp local = info->getLocalName(i);
-				if ( local->Equals(what)) 
+				if ( local->equalsLatin1(what)) 
 				{
 					// match!
 					Atom a = ease2Atom(to, ptr[i]);
@@ -619,7 +624,7 @@ namespace avmshell
 		// todo deal with exceptions
 		Multiname mname(
 			core->publicNamespace,
-			core->constantString(name)
+			core->internStringLatin1(name)
 		);
 
 		#if 0
@@ -683,12 +688,12 @@ namespace avmshell
 			fflush(stdout);
 			fgets(commandLine, kMaxCommandLine, stdin);
 
-			commandLine[strlen(commandLine)-1] = 0;
+			commandLine[VMPI_strlen(commandLine)-1] = 0;
 			
 			if (!commandLine[0]) {
-				strcpy(commandLine, lastCommand);
+				VMPI_strcpy(commandLine, lastCommand);
 			} else {
-				strcpy(lastCommand, commandLine);
+				VMPI_strcpy(lastCommand, commandLine);
 			}
 				
 			currentToken = commandLine;
@@ -759,7 +764,8 @@ namespace avmshell
 		}
 		
 		// Open this file and suck it into memory
-		FileInputStream f(currentFile->toUTF8String()->c_str());
+		StUTF8String currentFileUTF8(currentFile);
+		FileInputStream f(currentFileUTF8.c_str());
 		if (f.valid()) {
 			currentSourceLen = f.available();
 			currentSource = new char[currentSourceLen+1];
@@ -772,7 +778,7 @@ namespace avmshell
 					currentSource[i] = ' ';
 			}
 		} else {
-			core->console << "Error opening source file " << currentFile->c_str() << "\n";
+			core->console << "Error opening source file " << currentFile << "\n";
 		}
 	}
 

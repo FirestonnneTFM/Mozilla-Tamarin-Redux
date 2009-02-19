@@ -38,7 +38,6 @@
 		1E6079A4097335EF007D0E1E /* AvmCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607904097335EF007D0E1E /* AvmCore.cpp */; };
 		1E6079A5097335EF007D0E1E /* AvmCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607905097335EF007D0E1E /* AvmCore.h */; };
 		1E6079A6097335EF007D0E1E /* AvmDebug.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607906097335EF007D0E1E /* AvmDebug.h */; };
-		1E6079A8097335EF007D0E1E /* AvmError.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E607908097335EF007D0E1E /* AvmError.h */; };
 		1E6079A9097335EF007D0E1E /* avmplus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607909097335EF007D0E1E /* avmplus.cpp */; };
 		1E6079AA097335EF007D0E1E /* avmplus.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E60790A097335EF007D0E1E /* avmplus.h */; };
 		1E6079AB097335EF007D0E1E /* avmplusDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */; };
@@ -213,6 +212,8 @@
 		942BC4350BB991690088A47F /* Sampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 942BC4330BB991690088A47F /* Sampler.cpp */; };
 		942BC4360BB991690088A47F /* Sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 942BC4340BB991690088A47F /* Sampler.h */; };
 		CB79DBD50CA861EC00F6FD1D /* pcre_newline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */; };
+		D97B4FC60EE9B49100745578 /* NativePPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D97B4FC40EE9B49100745578 /* NativePPC.cpp */; };
+		D97B4FC70EE9B49100745578 /* NativePPC.h in Headers */ = {isa = PBXBuildFile; fileRef = D97B4FC50EE9B49100745578 /* NativePPC.h */; };
 		D981288C0E8D7D9700C48B85 /* peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D981288B0E8D7D9700C48B85 /* peephole.cpp */; };
 		D9C68C9D0EB689490044C84D /* DescribeTypeClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9C68C990EB689480044C84D /* DescribeTypeClass.cpp */; };
 		D9C68C9E0EB689490044C84D /* DescribeTypeClass.h in Headers */ = {isa = PBXBuildFile; fileRef = D9C68C9A0EB689490044C84D /* DescribeTypeClass.h */; };
@@ -255,7 +256,6 @@
 		1E607904097335EF007D0E1E /* AvmCore.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AvmCore.cpp; path = ../../../core/AvmCore.cpp; sourceTree = SOURCE_ROOT; };
 		1E607905097335EF007D0E1E /* AvmCore.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmCore.h; path = ../../../core/AvmCore.h; sourceTree = SOURCE_ROOT; };
 		1E607906097335EF007D0E1E /* AvmDebug.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmDebug.h; path = ../../../core/AvmDebug.h; sourceTree = SOURCE_ROOT; };
-		1E607908097335EF007D0E1E /* AvmError.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmError.h; path = ../../../core/AvmError.h; sourceTree = SOURCE_ROOT; };
 		1E607909097335EF007D0E1E /* avmplus.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmplus.cpp; path = ../../../core/avmplus.cpp; sourceTree = SOURCE_ROOT; };
 		1E60790A097335EF007D0E1E /* avmplus.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = avmplus.h; path = ../../../core/avmplus.h; sourceTree = SOURCE_ROOT; };
 		1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = avmplusDebugger.cpp; path = ../../../core/avmplusDebugger.cpp; sourceTree = SOURCE_ROOT; };
@@ -430,6 +430,8 @@
 		942BC4340BB991690088A47F /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Sampler.h; path = ../../../core/Sampler.h; sourceTree = SOURCE_ROOT; };
 		CB79DBD40CA861EC00F6FD1D /* pcre_newline.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = pcre_newline.cpp; path = ../../../pcre/pcre_newline.cpp; sourceTree = SOURCE_ROOT; };
 		D2AAC046055464E500DB518D /* libavmplus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libavmplus.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D97B4FC40EE9B49100745578 /* NativePPC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NativePPC.cpp; path = ../../../nanojit/NativePPC.cpp; sourceTree = SOURCE_ROOT; };
+		D97B4FC50EE9B49100745578 /* NativePPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativePPC.h; path = ../../../nanojit/NativePPC.h; sourceTree = SOURCE_ROOT; };
 		D981288B0E8D7D9700C48B85 /* peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peephole.cpp; path = ../../../core/peephole.cpp; sourceTree = SOURCE_ROOT; };
 		D9C68C990EB689480044C84D /* DescribeTypeClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DescribeTypeClass.cpp; path = ../../../core/DescribeTypeClass.cpp; sourceTree = SOURCE_ROOT; };
 		D9C68C9A0EB689490044C84D /* DescribeTypeClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DescribeTypeClass.h; path = ../../../core/DescribeTypeClass.h; sourceTree = SOURCE_ROOT; };
@@ -528,7 +530,6 @@
 				1E607904097335EF007D0E1E /* AvmCore.cpp */,
 				1E607905097335EF007D0E1E /* AvmCore.h */,
 				1E607906097335EF007D0E1E /* AvmDebug.h */,
-				1E607908097335EF007D0E1E /* AvmError.h */,
 				1E607909097335EF007D0E1E /* avmplus.cpp */,
 				1E60790A097335EF007D0E1E /* avmplus.h */,
 				1E60790B097335EF007D0E1E /* avmplusDebugger.cpp */,
@@ -732,6 +733,8 @@
 				4E0F4ECF0E5A34F900DA786F /* Native.h */,
 				4E0F4ED00E5A34F900DA786F /* Nativei386.cpp */,
 				4E0F4ED10E5A34F900DA786F /* Nativei386.h */,
+				D97B4FC40EE9B49100745578 /* NativePPC.cpp */,
+				D97B4FC50EE9B49100745578 /* NativePPC.h */,
 				4E0F4ED20E5A34F900DA786F /* RegAlloc.cpp */,
 				4E0F4ED30E5A34F900DA786F /* RegAlloc.h */,
 			);
@@ -766,7 +769,6 @@
 				1E6079A3097335EF007D0E1E /* avmbuild.h in Headers */,
 				1E6079A5097335EF007D0E1E /* AvmCore.h in Headers */,
 				1E6079A6097335EF007D0E1E /* AvmDebug.h in Headers */,
-				1E6079A8097335EF007D0E1E /* AvmError.h in Headers */,
 				1E6079AA097335EF007D0E1E /* avmplus.h in Headers */,
 				1E6079AC097335EF007D0E1E /* avmplusDebugger.h in Headers */,
 				1E6079AE097335EF007D0E1E /* avmplusHashtable.h in Headers */,
@@ -857,6 +859,7 @@
 				D9D251E20EA66AE8006E6BB2 /* QCache.h in Headers */,
 				D9C68C9E0EB689490044C84D /* DescribeTypeClass.h in Headers */,
 				D9C68CA00EB689490044C84D /* TypeDescriber.h in Headers */,
+				D97B4FC70EE9B49100745578 /* NativePPC.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1010,6 +1013,7 @@
 				D9D251E10EA66AE8006E6BB2 /* QCache.cpp in Sources */,
 				D9C68C9D0EB689490044C84D /* DescribeTypeClass.cpp in Sources */,
 				D9C68C9F0EB689490044C84D /* TypeDescriber.cpp in Sources */,
+				D97B4FC60EE9B49100745578 /* NativePPC.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1025,7 +1029,7 @@
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1048,7 +1052,7 @@
 				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -1084,7 +1088,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
 				SEPARATE_STRIP = NO;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 			};
 			name = Release;
 		};
@@ -1096,6 +1100,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1180,7 +1185,7 @@
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1204,7 +1209,7 @@
 				GCC_STRICT_ALIASING = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug_Debugger;
@@ -1241,7 +1246,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = avmplus;
 				SEPARATE_STRIP = NO;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../MMgc ../..";
 			};
 			name = Release_Debugger;
 		};

@@ -160,10 +160,6 @@ extern  "C"
 }
 #endif
 
-#ifdef PERFM
-#include "../vprof/vprof.h"
-#endif /* PERFM */
-
 #ifdef AVMPLUS_64BIT
 #define AVMCORE_integer			AvmCore::integer64
 #define AVMCORE_integer_i		AvmCore::integer64_i
@@ -691,7 +687,7 @@ namespace avmplus
 	 * then we mark it as unsed.  We continue this process all
 	 * until no more instructions are in the list.
 	 */
-	void CodegenMIR::markDead(OP* ins)
+	void CodegenMIR::markDead(OP* ins, OP* dontKill)
 	{
 		if (!core->config.dceopt)
 			return;
@@ -721,13 +717,55 @@ namespace avmplus
 					// no need to search for it anymore
 					search.removeAt(i);
 
+					if(elm == dontKill)
+						continue;
+
 					// we hit the instruction and didn't see a ref for 
 					// elm, therefore it has no other use. 
 					elm->lastUse = 0;
 
 					// clear out the instruction if its in the cse table
-					if (cseTable[elm->code] == elm)
-						cseTable[elm->code] = 0;
+					OP *cse = cseTable[elm->code];
+
+					OP *last = NULL;
+					while (cse)
+					{
+						if (elm == cse)
+						{
+							// start of list
+							if (!last)
+							{
+								if (cseTable[elm->code]->prevcse)
+									cseTable[elm->code] = (cseTable[elm->code] - cseTable[elm->code]->prevcse);
+								else
+									cseTable[elm->code] = 0;
+							}
+							// middle of list
+							else if (cse->prevcse)
+							{
+								OP *next = cse - cse->prevcse;
+								sintptr jmp = last - next;
+								AvmAssert(jmp > 0);
+								AvmAssert(jmp == sintptr(last->prevcse + cse->prevcse));
+								// Does our jump fit into our 16-bit value?  If not, we need to prune the list
+								if (jmp <= 0xFFFF)
+									last->prevcse = (last-next);
+								else
+									last->prevcse = 0;
+							}
+							else // end of list
+							{
+								last->prevcse = 0;
+							}
+							break;
+						}
+
+						if (!cse->prevcse) // end of list
+							break;
+
+						last = cse;
+						cse -= cse->prevcse;
+					}
 
 					#ifdef AVMPLUS_VERBOSE
 					if (verbose())
@@ -1012,7 +1050,7 @@ namespace avmplus
 	OP* CodegenMIR::callIns(sintptr addr, uint32 argCount, MirOpcode code)
 	{
 		#ifdef DEBUGGER
-		if (!(code & MIR_oper))
+		if (!(code & MIR_oper) && core->debugger())
 			saveState();
 		#endif
 
@@ -1088,7 +1126,7 @@ namespace avmplus
 			lastFunctionCall = where;// + (argCount+3)/4; // look past the last fnc arg
 
 		#ifdef DEBUGGER
-		if (!(code & MIR_oper))
+		if (!(code & MIR_oper) && core->debugger())
 			extendDefLifetime(where);
 		#endif
 
@@ -1104,7 +1142,7 @@ namespace avmplus
 	OP* CodegenMIR::callIndirect(MirOpcode code, OP* target, uint32 argCount, ...)
 	{
 		#ifdef DEBUGGER
-		if (!(code & MIR_oper))
+		if (!(code & MIR_oper) && core->debugger())
 			saveState();
 		#endif
 
@@ -1177,7 +1215,7 @@ namespace avmplus
 		va_end(ap);
 
 		#ifdef DEBUGGER
-		if (!(code & MIR_oper))
+		if (!(code & MIR_oper) && core->debugger())
 			extendDefLifetime(where);
 		#endif
 
@@ -1378,7 +1416,13 @@ namespace avmplus
 		int scopeTop = state->verifier->scopeBase+state->scopeDepth;
 		for (int i=0, n = stackBase+state->stackDepth; i < n; i++)
 		{
-			#ifndef DEBUGGER
+			#ifdef DEBUGGER
+			if (!core->debugger() && (i >= scopeTop && i < stackBase))
+			{
+				// not live
+				continue;
+			}
+			#else
 			if (i >= scopeTop && i < stackBase)
 			{
 				// not live
@@ -1406,40 +1450,43 @@ namespace avmplus
 				v.stored = true;
 
 				#ifdef DEBUGGER
-				// store the traits ptr so the debugger knows what was stored.
-				if (i < state->verifier->local_count)
+				if (core->debugger())
 				{
-					storeIns(InsConst((uintptr)v.traits ), i*sizeof(Traits*), localTraits);
-					storeIns(Ins(MIR_usea, v.ins), i*sizeof(void*), localPtrs);
-				}
-				else if (i >= state->verifier->scopeBase && i < state->verifier->scopeBase + state->verifier->max_scope) 
-				{
-					OP* scope;
-
-					if (i < scopeTop)
+					// store the traits ptr so the debugger knows what was stored.
+					if (i < state->verifier->local_count)
 					{
-						Value& v = state->value(i);
-						Traits* t = v.traits;
+						storeIns(InsConst((uintptr)v.traits ), i*sizeof(Traits*), localTraits);
+						storeIns(Ins(MIR_usea, v.ins), i*sizeof(void*), localPtrs);
+					}
+					else if (i >= state->verifier->scopeBase && i < state->verifier->scopeBase + state->verifier->max_scope) 
+					{
+						OP* scope;
 
-						if (t == VOID_TYPE || t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE ||
-							t == NUMBER_TYPE || t == STRING_TYPE || t == NAMESPACE_TYPE)
+						if (i < scopeTop)
 						{
+							Value& v = state->value(i);
+							Traits* t = v.traits;
+
+							if (t == VOID_TYPE || t == INT_TYPE || t == UINT_TYPE || t == BOOLEAN_TYPE ||
+								t == NUMBER_TYPE || t == STRING_TYPE || t == NAMESPACE_TYPE)
+							{
+								scope = InsConst(0);
+							}
+							else
+							{
+								scope = Ins(MIR_use, v.ins);
+							}
+						}
+						else // not live
+						{
+							// warning, v.traits are garbage at this point, so don't use them
 							scope = InsConst(0);
 						}
-						else
-						{
-							scope = Ins(MIR_use, v.ins);
-						}
-					}
-					else // not live
-					{
-						// warning, v.traits are garbage at this point, so don't use them
-						scope = InsConst(0);
-					}
 
-					storeIns(scope, i * sizeof(void*), localPtrs);
+						storeIns(scope, i * sizeof(void*), localPtrs);
+					}
 				}
-				#endif //DEBUGGER
+				#endif // DEBUGGER
 			}
 		}
 	}
@@ -1569,7 +1616,7 @@ namespace avmplus
 	}
 
 	CodegenMIR::CodegenMIR(MethodInfo* i)
-		: core(i->core()), pool(i->pool), info(i), activation(i->core()->GetGC())
+		: core(i->pool->core), pool(i->pool), info(i), activation(i->pool->core->GetGC())
 	{
 		state = NULL;
 		framep = SP;
@@ -1680,7 +1727,7 @@ namespace avmplus
 	#endif
 
 #ifdef AVMPLUS_VERBOSE
-	GCHashtable* CodegenMIR::initMethodNames(AvmCore* /*core*/)
+	GCHashtable* CodegenMIR::initMethodNames(AvmCore* core)
 	{
 		#ifdef AVMPLUS_MAC_CARBON
 		// setjmpInit() is also called in the constructor, but initMethodNames() is
@@ -1786,17 +1833,17 @@ namespace avmplus
 		GCHashtable* names = new GCHashtable();
 
 		#ifdef DEBUGGER
-		names->add(ENVADDR(MethodEnv::sendEnter), "MethodEnv::sendEnter");
-		names->add(ENVADDR(MethodEnv::sendExit), "MethodEnv::sendExit");
-		names->add(DEBUGGERADDR(Debugger::debugFile), "Debugger::debugFile");
-		names->add(DEBUGGERADDR(Debugger::debugLine), "Debugger::debugLine");
-		names->add(DEBUGGERADDR(Debugger::_debugMethod), "Debugger::_debugMethod");
-		#endif
-
-		#if (defined DEBUGGER || defined FEATURE_SAMPLER )
-		names->add(ENVADDR(MethodEnv::debugEnter), "MethodEnv::debugEnter");
-		names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
-		names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");
+		if (core->debugger())
+		{
+			names->add(DEBUGGERADDR(Debugger::debugFile), "Debugger::debugFile");
+			names->add(DEBUGGERADDR(Debugger::debugLine), "Debugger::debugLine");
+			names->add(DEBUGGERADDR(Debugger::_debugMethod), "Debugger::_debugMethod");
+			names->add(ENVADDR(MethodEnv::debugEnter), "MethodEnv::debugEnter");
+			names->add(ENVADDR(MethodEnv::debugExit), "MethodEnv::debugExit");
+			names->add(COREADDR(AvmCore::sampleCheck), "AvmCore::sampleCheck");
+		}
+		#else
+		(void)core;
 		#endif
 
 		names->add(FUNCADDR(AvmCore::atomWriteBarrier), "AvmCore::atomWriteBarrier");
@@ -2149,7 +2196,7 @@ namespace avmplus
 		ip = ipStart = (OP*) BIT_ROUND_UP(ipStart, sizeof(OP));
 
 		// reset the cse engine
-		memset(cseTable, 0, sizeof(OP*)*MIR_last);
+		VMPI_memset(cseTable, 0, sizeof(OP*)*MIR_last);
 		firstCse = ip;
 
 		// instruction # of last function call
@@ -2235,18 +2282,18 @@ namespace avmplus
         #endif
 					 
 		#ifdef DEBUGGER
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    alloc local traits\n";
+		if (core->debugger())
+		{
+			#ifdef AVMPLUS_VERBOSE
+			if (verbose())
+				core->console << "    alloc local traits\n";
+			#endif
+			// pointers to traits so that the debugger can decode the locals
+			// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
+			localTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
+			localPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
+		}
 		#endif
-		#endif //DEBUGGER
-		
-		#ifdef DEBUGGER
-		// pointers to traits so that the debugger can decode the locals
-		// IMPORTANT don't move this around unless you change MethodInfo::boxLocals()
-		localTraits = InsAlloc(state->verifier->local_count * sizeof(Traits*));
-		localPtrs = InsAlloc((state->verifier->local_count + state->verifier->max_scope) * sizeof(void*));
-		#endif //DEBUGGER | FEATURE_SAMPLER
 
 		// whether this sequence is interruptable or not.
 		interruptable = (info->flags & AbstractFunction::NON_INTERRUPTABLE) ? false : true;
@@ -2275,15 +2322,15 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    alloc CallStackNode\n";
-		#endif
-		#endif
-
-		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
-		// Allocate space for the call stack
-		_callStackNode = InsAlloc(sizeof(CallStackNode));
+		if (core->debugger())
+		{
+			#ifdef AVMPLUS_VERBOSE
+			if (verbose())
+				core->console << "    alloc CallStackNode\n";
+			#endif
+			// Allocate space for the call stack
+			_callStackNode = InsAlloc(sizeof(CallStackNode));
+		}
 		#endif
 		
 		if (info->setsDxns())
@@ -2483,34 +2530,26 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-
-		for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i)
+		if (core->debugger())
 		{
-			localSet(i, undefConst);
+			for (int i=state->verifier->scopeBase; i<state->verifier->scopeBase+state->verifier->max_scope; ++i)
+			{
+				localSet(i, undefConst);
+			}
+
+			#ifdef AVMPLUS_VERBOSE
+			if (verbose())
+				core->console << "    debug_enter\n";
+			#endif
+
+			callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
+				ldargIns(_env), ldargIns(_argc), ldargIns(_ap), 
+				leaIns(0, localTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
+				leaIns(0, _callStackNode), 
+				leaIns(0, localPtrs),
+				info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
+				);
 		}
-
-		#ifdef AVMPLUS_VERBOSE
-		if (verbose())
-			core->console << "    debug_enter\n";
-		#endif
-
-		callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
-			ldargIns(_env), ldargIns(_argc), ldargIns(_ap), // for sendEnter
-			leaIns(0, localTraits), InsConst(state->verifier->local_count), // for clearing traits pointers
-			leaIns(0, _callStackNode), 
-			leaIns(0, localPtrs),
-			info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
-			);
-		#else
-		#ifdef FEATURE_SAMPLER
-		callIns(MIR_cm, ENVADDR(MethodEnv::debugEnter), 8,
-			ldargIns(_env), ldargIns(_argc), ldargIns(_ap), // for sendEnter
-			InsConst(0), InsConst(state->verifier->local_count), // for clearing traits pointers
-			leaIns(0, _callStackNode), 
-			InsConst(0),
-			info->hasExceptions() ? leaIns(0, _save_eip) : InsConst(0)
-			);
-		#endif
 		#endif // DEBUGGER
 
 
@@ -2536,23 +2575,18 @@ namespace avmplus
 			// Exception* _ee = setjmp(_ef.jmpBuf);
 			// ISSUE this needs to be a cdecl call
 			OP* jmpbuf = leaIns(offsetof(ExceptionFrame, jmpbuf), _ef);
-#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
-			OP* ei = callIns(MIR_cs, SETJMP, 2, jmpbuf, InsConst(0));
-			OP* ee = loadIns(MIR_ld, (uintptr)&ExceptionFrame::lptr, ei);
-#else //#if defined(AVMPLUS_AMD64) && !defined(_WIN64)
-			OP* ee = callIns(MIR_cs, SETJMP, 2,
-				jmpbuf, InsConst(0));
-#endif // #if defined(AVMPLUS_AMD64) && !defined(_WIN64)
+			OP* setjmpResult = callIns(MIR_cs, SETJMP, 2, jmpbuf, InsConst(0));
 
 #ifdef AVMPLUS_SPARC
-			beginCatch_start = ee;
+			beginCatch_start = setjmpResult;
 #endif
 
 			// if (setjmp() == 0) goto start
-			OP* cond = binaryIns(MIR_ucmp, ee, InsConst(0));
+			OP* cond = binaryIns(MIR_ucmp, setjmpResult, InsConst(0));
 			OP* exBranch = Ins(MIR_jeq, cond);
 
 			// exception case
+			OP* ee = loadIns(MIR_ld, offsetof(AvmCore,exceptionAddr), InsConst((uintptr)core));
 			exAtom = loadIns(MIR_ld, offsetof(Exception, atom), ee);
 			// need to convert exception from atom to native rep, at top of 
 			// catch handler.  can't do it here because it could be any type.
@@ -2654,7 +2688,7 @@ namespace avmplus
 				if (f && (f->flags & AbstractFunction::NATIVE))
 				{
 					StringBuffer buffer(core);		
-					const wchar *foo = f->name->c_str();
+					const wchar *foo = f->getMethodName()->c_str();
 					buffer << "function is:" << foo << "\r\n";
 
 					AvmDebugMsg (false, buffer.c_str());
@@ -2760,6 +2794,18 @@ namespace avmplus
 			OP* interrupted = loadIns(MIR_ld, (uintptr)&core->interrupted, NULL);
 			OP* br = Ins(MIR_jne, binaryIns(MIR_ucmp, interrupted, InsConst(0)));
 			mirPatchPtr(&br->target, interrupt_label);
+		}
+
+		// load undefined into any killed locals
+		int stackBase = state->verifier->stackBase;
+		for (int i=0, n=stackBase+state->stackDepth; i < n; i++)
+		{
+			int scopeTop = state->verifier->scopeBase+state->scopeDepth;
+			if (i >= scopeTop && i < stackBase)
+				continue; // not live
+			Value &v = state->value(i);
+			if (v.killed)
+				localSet(i, undefConst);
 		}
 	}
 
@@ -2871,30 +2917,33 @@ namespace avmplus
 					// old: int(fadd(Number(int),Number(int)))
 					// new: iadd(int,int)
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_add, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_add, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ins->code == MIR_fsub &&
 					(ins->oprnd1->code == MIR_u2d || ins->oprnd1->code == MIR_i2d) &&
 					(ins->oprnd2->code == MIR_u2d || ins->oprnd2->code == MIR_i2d))
 				{
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_sub, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_sub, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ins->code == MIR_fmul &&
 					(ins->oprnd1->code == MIR_u2d || ins->oprnd1->code == MIR_i2d) &&
 					(ins->oprnd2->code == MIR_u2d || ins->oprnd2->code == MIR_i2d))
 				{
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_imul, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_imul, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ((ins->code == MIR_i2d) || (ins->code == MIR_u2d)))
 				{
 					OP* orig = value.ins;
 					localSet(loc, ins->oprnd1);
-					markDead(orig);
+					markDead(orig, ins->oprnd1);
 				}
 				else
 				{
@@ -2924,30 +2973,33 @@ namespace avmplus
 					// old: uint(fadd(Number(uint),Number(uint)))
 					// new: iadd(int,int)
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_add, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_add, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ins->code == MIR_fsub &&
 					(ins->oprnd1->code == MIR_u2d || ins->oprnd1->code == MIR_i2d) &&
 					(ins->oprnd2->code == MIR_u2d || ins->oprnd2->code == MIR_i2d))
 				{
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_sub, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_sub, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ins->code == MIR_fmul &&
 					(ins->oprnd1->code == MIR_u2d || ins->oprnd1->code == MIR_i2d) &&
 					(ins->oprnd2->code == MIR_u2d || ins->oprnd2->code == MIR_i2d))
 				{
 					OP* orig = value.ins;
-					localSet(loc, binaryIns(MIR_imul, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1));
-					markDead(orig);
+					OP* repl = binaryIns(MIR_imul, ins->oprnd1->oprnd1, ins->oprnd2->oprnd1);
+					localSet(loc, repl);
+					markDead(orig, repl);
 				}
 				else if (ins != NULL && ((ins->code == MIR_i2d) || (ins->code == MIR_u2d)))
 				{
 					OP* orig = value.ins;
 					localSet(loc, ins->oprnd1);
-					markDead(orig);
+					markDead(orig, ins->oprnd1);
 				}
 				else
 				{
@@ -3050,6 +3102,8 @@ namespace avmplus
 			// store the result
 			localSet(loc, atomToNativeRep(result, out));
 		}
+
+	    state->setType(loc, result, value.notNull);
 	}
 
 	void CodegenMIR::emitCheckNull(FrameState* state, int index)
@@ -3214,7 +3268,8 @@ namespace avmplus
 				saveState();
 				
 #ifdef DEBUGGER
-				if(core->sampling() && targetpc < state->pc)
+				Sampler* s = core->get_sampler();
+				if (s && s->sampling() && targetpc < state->pc)
 				{
 					emitSampleCheck();
 				}
@@ -3427,18 +3482,18 @@ namespace avmplus
 					storeIns(dxnsAddrSave, (uintptr)&core->dxnsAddr, 0);
 				}
 
-				#if (defined DEBUGGER || defined FEATURE_SAMPLER )
-				callIns(MIR_cm, ENVADDR(MethodEnv::debugExit), 2,
-					ldargIns(_env), leaIns(0, _callStackNode));
-				
 				#ifdef DEBUGGER
-				// now we toast the cse and restore contents in order to 
-				// ensure that any variable modifications made by the debugger
-				// will be pulled in.
-				firstCse = ip;
+				if (core->debugger())
+				{
+					callIns(MIR_cm, ENVADDR(MethodEnv::debugExit), 2,
+						ldargIns(_env), leaIns(0, _callStackNode));
+					
+					// now we toast the cse and restore contents in order to 
+					// ensure that any variable modifications made by the debugger
+					// will be pulled in.
+					firstCse = ip;
+				}
 				#endif // DEBUGGER
-
-				#endif // DEBUGGER || FEATURE_SAMPLER
 
 				if (info->exceptions)
 				{
@@ -3718,8 +3773,9 @@ namespace avmplus
 						(a->code & ~MIR_oper) == MIR_sld &&
 						(a->disp & (SMOP_MASK ^ SMOP_SX)) == SMOP_I16))
 					{
-						localSet(op1, loadIns(a->code, a->disp | SMOP_SX, a->base));
-						markDead(a);
+						OP* repl = loadIns(a->code, a->disp | SMOP_SX, a->base);
+						localSet(op1, repl);
+						markDead(a, repl);
 					}
 					else
 					{
@@ -3815,7 +3871,7 @@ namespace avmplus
 					localSet(op1, result);
 					// and get rid of the original addr as maddrOpt
 					// optimized for us!
-					markDead(a);
+					markDead(a, result);
 					break;
 				}
 
@@ -3961,8 +4017,8 @@ namespace avmplus
 						break;
 					}
 					storeIns(code, svalue, disp2, maddrO);
-					emitKill(state, sp);
-					markDead(a);
+					emitKill(state, sp); 
+					markDead(a, maddrO);
 					break;
 				}
 
@@ -5087,13 +5143,16 @@ namespace avmplus
 			case OP_debugfile:
 			{
 			#ifdef DEBUGGER
+			if (core->debugger())
+			{
 				// todo refactor api's so we don't have to pass argv/argc
-				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
+				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, _debugger),
 											InsConst((uintptr)core));
 				callIns(MIR_cm, DEBUGGERADDR(Debugger::debugFile), 2,
 						debugger,
 						InsConst(op1));
-			#endif // DEBUGGER
+			}
+			#endif
 			#ifdef VTUNE
 				Ins(MIR_file, op1);
 			#endif /* VTUNE */
@@ -5103,12 +5162,15 @@ namespace avmplus
 			case OP_debugline:
 			{
 			#ifdef DEBUGGER
+			if (core->debugger())
+			{
 				// todo refactor api's so we don't have to pass argv/argc
-				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, debugger),
+				OP* debugger = loadIns(MIR_ldop, offsetof(AvmCore, _debugger),
 											InsConst((uintptr)core));
 				callIns(MIR_cm, DEBUGGERADDR(Debugger::debugLine), 2,
 						debugger,
 						InsConst(op1));
+			}
 			#endif // DEBUGGER
 			#ifdef VTUNE
 				Ins(MIR_line, op1);
@@ -5131,7 +5193,8 @@ namespace avmplus
 		this->state = state;
 
 #ifdef DEBUGGER
-		if(core->sampling() && target < state->pc)
+		Sampler* s = core->get_sampler();
+		if (s && s->sampling() && target < state->pc)
 		{
 			emitSampleCheck();
 		}
@@ -5442,12 +5505,12 @@ namespace avmplus
 		}
 
 		#ifdef DEBUGGER
-		InsDealloc(localPtrs);
-		InsDealloc(localTraits);
-		#endif
-
-		#if (defined DEBUGGER || defined FEATURE_SAMPLER)
-		InsDealloc(_callStackNode);
+		if (core->debugger())
+		{
+			InsDealloc(localPtrs);
+			InsDealloc(localTraits);
+			InsDealloc(_callStackNode);
+		}
 		#endif
 
 		if (npe_label.nextPatchIns)
@@ -5500,7 +5563,7 @@ namespace avmplus
 		OP* begin = ipStart;
 		OP* end = ipEnd;
 
-		core->console << "digraph \"" << info->name << "\" {\n";
+		core->console << "digraph \"" << info->getMethodName() << "\" {\n";
         core->console << "ratio=fill\n";
         core->console << "ranksep=.1\n";
         core->console << "nodesep=.2\n";
@@ -6884,7 +6947,7 @@ namespace avmplus
 				}
 			}
 
-			ADD(RSP, arSize); 
+			ADD64(RSP, arSize); 
 			POP  (RBP);
 			//ALU(0xc9); // leave:  esp = ebp, pop ebp
 		}
@@ -6994,7 +7057,7 @@ namespace avmplus
 		}
 
 		// mark method as been JIT'd
-		info->flags |= AbstractFunction::TURBO;
+		info->flags |= AbstractFunction::JIT_IMPL;
 			
 		uintptr mipEnd = (uintptr) mip;
 		(void)mipEnd;
@@ -8798,7 +8861,7 @@ namespace avmplus
 				<< " activation.size " << activation.size << "\n";
 			displayStackTable();
 		}
-		#endif //DEBUGGER
+		#endif 
 	}
 
 	/**
@@ -8875,7 +8938,7 @@ namespace avmplus
 		pool->codeBuffer->decommitUnused();
 
 #ifdef DEBUGGER
-		info->codeSize = int((mip - mipStart) * sizeof(MDInstruction));
+		info->setCodeSize(int((mip - mipStart) * sizeof(MDInstruction)));
 #endif
 
 		#ifdef VTUNE
@@ -8941,7 +9004,7 @@ namespace avmplus
 	}
 #endif /* FEATURE_BUFFER_GUARD */
 
-	byte* CodegenMIR::getMDBuffer(PoolObject* pool)
+	byte* CodegenMIR::getMDBuffer(PoolObject* pool, int extraBytes)
 	{
 		if (pool->codeBuffer->size() == 0)
 		{
@@ -8957,7 +9020,7 @@ namespace avmplus
 			do
 			{
 				size = estimateMDBufferReservation(pool, expansionFactor);
-				pMem = pool->codeBuffer->reserve(size);
+				pMem = pool->codeBuffer->reserve(size + extraBytes);
 				if(pMem)
 					break; // success!
 				else
@@ -13044,7 +13107,7 @@ namespace avmplus
 		if((mx - mn) <= Domain::GLOBAL_MEMORY_MIN_SIZE)
 			return -mn;
 		return 0;
-}
+    }
 
 	OP *CodegenMIR::maddrOpt(OP *a, int32 size, int32 *disp)
 	{
@@ -13082,7 +13145,7 @@ namespace avmplus
 			}
 		}
 		return NULL;
-}
+    }
 
 #endif
 #if (defined(_DEBUG)) && HAVE_MIR_SMOPS
@@ -13092,5 +13155,626 @@ namespace avmplus
 	int CodegenMIR::singleCmpRangeChecks = 0;
 	int CodegenMIR::doubleCmpRangeChecks = 0;
 #endif
+
+	void CodegenMIR::writePrologue(FrameState* state)
+	{
+	  prologue(state);
+	}
+
+	void CodegenMIR::writeEpilogue(FrameState* state)
+	{
+	  epilogue(state);
+	}
+
+
+	void CodegenMIR::write(FrameState* state, const byte* pc, AbcOpcode opcode)
+	{
+		const byte* nextpc = pc;
+		unsigned int imm30=0, imm30b=0;
+		int imm8=0, imm24=0;
+        AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
+		int sp = state->sp();
+
+		switch (opcode) {
+		case OP_nop:
+		case OP_pop:
+		case OP_label:
+		    // do nothing
+		    break;
+		case OP_getlocal0:
+		case OP_getlocal1:
+		case OP_getlocal2:
+		case OP_getlocal3:
+		    imm30 = opcode-OP_getlocal0;
+			// hack imm30 and fall through
+		case OP_getlocal:
+			emitCopy(state, imm30, sp+1);
+			break;
+		case OP_setlocal0:
+		case OP_setlocal1:
+		case OP_setlocal2:
+		case OP_setlocal3:
+			imm30 = opcode-OP_setlocal0;
+			// hack imm30 and fall through
+		case OP_setlocal:
+			emitCopy(state, sp, imm30);
+			break;
+		case OP_pushtrue:
+		    emitIntConst(state, sp+1, 1);
+			break;
+		case OP_pushfalse:
+		case OP_pushnull:
+		    emitIntConst(state, sp+1, 0);
+			break;
+		case OP_pushundefined:
+			emitIntConst(state, sp+1, undefinedAtom);
+			break;
+		case OP_pushshort:
+			emitIntConst(state, sp+1, (signed short)imm30);
+			break;
+		case OP_pushbyte:
+			emitIntConst(state, sp+1, (signed char)imm8);
+			break;
+	    case OP_pushstring:
+			emitIntConst(state, sp+1, (uintptr)pool->cpool_string[imm30]);
+			break;
+	    case OP_pushnamespace:
+			emitIntConst(state, sp+1, (uintptr)pool->cpool_ns[imm30]);
+			break;
+	    case OP_pushint:
+			emitIntConst(state, sp+1, pool->cpool_int[imm30]);
+			break;
+	    case OP_pushuint:
+			emitIntConst(state, sp+1, pool->cpool_uint[imm30]);
+			break;
+	    case OP_pushdouble:
+			emitDoubleConst(state, sp+1, pool->cpool_double[imm30]);
+			break;
+		case OP_pushnan:
+			emitDoubleConst(state, sp+1, (double*)(core->kNaN & ~7));
+			break;
+		case OP_lookupswitch: 
+			emit(state, opcode, state->pc+imm24, imm30b /*count*/);
+			break;
+		case OP_throw:
+		case OP_returnvalue:
+		case OP_returnvoid:
+			emit(state, opcode, sp);
+			break;
+		case OP_debugfile:
+		{
+#if defined(DEBUGGER) || defined(VTUNE)
+			#ifdef VTUNE
+			const bool do_emit = true;
+			#else
+			const bool do_emit = core->debugger() != NULL;
+			#endif
+		    Stringp str = pool->cpool_string[imm30];  // assume been checked already
+			if (do_emit) emit(state, opcode, (uintptr)str);
+#endif
+			break;
+		}
+		case OP_dxns:
+		{
+		    Stringp str = pool->cpool_string[imm30];  // assume been checked already
+			emit(state, opcode, (uintptr)str);
+		    break;
+		}
+		case OP_dxnslate:
+		    // codgen will call intern on the input atom.
+		    emit(state, opcode, sp);
+		    break;
+		case OP_kill:
+		    emitKill(state, imm30);
+		    break;
+		case OP_inclocal:
+		case OP_declocal:
+		    emit(state, opcode, imm30, opcode==OP_inclocal ? 1 : -1, NUMBER_TYPE);
+		    break;
+		case OP_inclocal_i:
+		case OP_declocal_i:
+		    emit(state, opcode, imm30, opcode==OP_inclocal_i ? 1 : -1, INT_TYPE);
+			break;
+		case OP_newfunction:
+			emit(state, opcode, imm30, sp+1, pool->methods[imm30]->declaringTraits);
+			break;
+
+		case OP_newclass:
+		{
+		    emitSetDxns(state);
+		    AbstractFunction* cinit = pool->cinits[imm30];
+			emit(state, opcode, (uintptr)(void*)cinit, sp, cinit->declaringTraits);
+			break;
+		}
+
+		case OP_finddef: 
+		{
+  		    Multiname multiname;
+		    pool->parseMultiname(multiname, imm30);
+		    AbstractFunction* script = (AbstractFunction*)pool->getNamedScript(&multiname);
+			if (script != (AbstractFunction*)BIND_NONE && script != (AbstractFunction*)BIND_AMBIGUOUS)
+			{
+			    // found a single matching traits
+				emit(state, opcode, (uintptr)&multiname, sp+1, script->declaringTraits);
+			}
+			else
+			{
+			    // no traits, or ambiguous reference.  use Object, anticipating
+			    // a runtime exception
+			    emit(state, opcode, (uintptr)&multiname, sp+1, OBJECT_TYPE);
+			}
+			break;
+		}
+
+		case OP_findpropstrict: 
+		case OP_findproperty: 
+		{
+  		    Multiname multiname;
+		    pool->parseMultiname(multiname, imm30);
+			emit(state, opcode, (uintptr)&multiname, 0, OBJECT_TYPE);
+			break;
+		}
+
+		case OP_getdescendants:
+		{
+  		    Multiname multiname;
+		    pool->parseMultiname(multiname, imm30);
+			emit(state, opcode, (uintptr)&multiname, 0, NULL);
+			break;
+		}
+
+		case OP_checkfilter:
+		    emit(state, opcode, sp, 0, NULL);
+			break;
+
+		case OP_deleteproperty:
+		{
+  		    Multiname multiname;
+		    pool->parseMultiname(multiname, imm30);
+			emit(state, opcode, (uintptr)&multiname, 0, BOOLEAN_TYPE);
+			break;
+		}
+
+		case OP_setproperty:
+		case OP_initproperty:
+		{
+  		    Multiname multiname;
+		    pool->parseMultiname(multiname, imm30);
+		    emitSetContext(state, NULL);  // FIXME not be necessary in all code paths
+			emit(state, opcode, (uintptr)&multiname);
+			break;
+		}
+
+		case OP_astype:
+		{
+  		    Multiname name;
+		    pool->parseMultiname(name, imm30);
+		    Traits *t = pool->getTraits(name, state->verifier->getToplevel(this));
+		    emit(state, OP_astype, (uintptr)t, sp, t && t->isMachineType() ? OBJECT_TYPE : t);
+		    break;
+		}
+		case OP_astypelate:
+		{
+		    Value& classValue = state->peek(1); // rhs - class
+			Traits* ct = classValue.traits;
+			Traits* t = NULL;
+			if (ct && (t=ct->itraits) != 0)
+			    if (t->isMachineType())
+				    t = OBJECT_TYPE;
+			emit(state, opcode, 0, 0, t);
+			break;
+		}
+		case OP_coerce:
+		case OP_coerce_b:
+		case OP_convert_b:
+		case OP_coerce_o:
+		case OP_coerce_a:
+		case OP_convert_i:
+		case OP_coerce_i:
+		case OP_convert_u:
+		case OP_coerce_u:
+		case OP_convert_d:
+		case OP_coerce_d:
+		case OP_coerce_s:
+			break;
+
+		case OP_istype:
+		{
+  		    Multiname name;
+		    pool->parseMultiname(name, imm30);
+		    Traits* itraits = pool->getTraits(name, state->verifier->getToplevel(this));
+			emit(state, opcode, (uintptr)itraits, sp, BOOLEAN_TYPE);
+		}
+
+		case OP_istypelate: 
+		    emit(state, opcode, 0, 0, BOOLEAN_TYPE);
+			break;
+
+		case OP_convert_o:
+            // NOTE check null has already been done
+			break;
+
+		case OP_callstatic:
+		{
+			AbstractFunction* m = pool->methods[imm30];
+			const uint32_t argc = imm30b;
+			emitSetContext(state, m);
+			emitCall(state, OP_callstatic, m->method_id, argc, m->returnTraits());
+			break;
+		}
+
+		case OP_constructprop:
+		{
+			const uint32_t argc = imm30b;
+  		    Multiname name;
+		    pool->parseMultiname(name, imm30);
+			emitSetContext(state, NULL);
+			emit(state, opcode, (uintptr)&name, argc, NULL);
+			break;
+		}
+		case OP_applytype:
+		{
+		    emitSetContext(state, NULL);
+			// * is ok for the type, as Vector classes have no statics
+			// when we implement type parameters fully, we should do something here.
+			emit(state, opcode, imm30/*argc*/, 0, NULL);
+		    break;
+		}
+
+		case OP_newobject: 
+		    emit(state, opcode, imm30, 0, OBJECT_TYPE);
+			break;
+
+		case OP_newarray:
+			emit(state, opcode, imm30, 0, ARRAY_TYPE);
+			break;
+
+		case OP_newactivation:
+		    emit(state, opcode, 0, 0, info->activationTraits);
+			break;
+
+		case OP_newcatch:
+		{
+		    ExceptionHandler* handler = &info->exceptions->exceptions[imm30];
+			emit(state, opcode, 0, 0, handler->scopeTraits);
+			break;
+		}
+
+		case OP_popscope:
+			#ifdef DEBUGGER
+		    if (core->debugger()) emitKill(state, info->localCount/*scopeBase*/ + state->scopeDepth);
+			#endif
+			break;
+
+		case OP_getslot:
+		{
+		    Value& obj = state->peek();
+			int index = imm30-1;
+			TraitsBindingsp td = obj.traits ? obj.traits->getTraitsBindings() : NULL;
+			Traits* slotTraits = td->getSlotTraits(index);
+		    emitCheckNull(state, sp);
+			emit(state, OP_getslot, index, sp, slotTraits);
+			break;
+        }
+
+		case OP_setslot:
+			emit(state, OP_setslot, imm30-1, sp-1);
+			break;
+
+		case OP_dup:
+		    emitCopy(state, sp, sp+1);
+			break;
+
+		case OP_swap:
+		    emitSwap(state, sp, sp-1);
+			break;
+
+		case OP_equals:
+		case OP_strictequals:
+		case OP_instanceof:
+		case OP_in:
+		    emit(state, opcode, 0, 0, BOOLEAN_TYPE);
+		    break;
+
+		case OP_not:
+		    emit(state, opcode, sp);
+		    break;
+
+		case OP_modulo:
+		case OP_subtract:
+		case OP_divide:
+		case OP_multiply:
+			emit(state, opcode, 0, 0, NUMBER_TYPE);
+			break;
+
+		case OP_increment:
+		case OP_decrement:
+			emit(state, opcode, sp, opcode == OP_increment ? 1 : -1, NUMBER_TYPE);
+			break;
+
+		case OP_increment_i:
+		case OP_decrement_i:
+			emit(state, opcode, sp, opcode == OP_increment_i ? 1 : -1, INT_TYPE);
+			break;
+
+		case OP_add_i:
+		case OP_subtract_i:
+		case OP_multiply_i:
+			emit(state, opcode, 0, 0, INT_TYPE);
+			break;
+
+		case OP_negate:
+			emit(state, opcode, sp, 0, NUMBER_TYPE);
+			break;
+
+		case OP_negate_i:
+			emit(state, opcode, sp, 0, INT_TYPE);
+			break;
+
+		case OP_bitand:
+		case OP_bitor:
+		case OP_bitxor:
+			emit(state, opcode, 0, 0, INT_TYPE);
+			break;
+
+		case OP_lshift:
+		case OP_rshift:
+			emit(state, opcode, 0, 0, INT_TYPE);
+			break;
+
+		case OP_urshift:
+			emit(state, opcode, 0, 0, INT_TYPE);
+			break;
+
+		case OP_bitnot:
+			emit(state, opcode, sp, 0, INT_TYPE);
+			break;
+
+		case OP_typeof:
+			emit(state, opcode, sp, 0, STRING_TYPE);
+			break;
+
+		case OP_debugline:
+		{
+            #if defined(DEBUGGER) || defined(VTUNE)
+			#ifdef VTUNE
+			const bool do_emit = true;
+			#else
+			const bool do_emit = core->debugger() != NULL;
+			#endif
+		    // we actually do generate code for these, in debugger mode
+		     if (do_emit) emit(state, opcode, imm30);
+            #endif
+			break;
+		}
+		case OP_nextvalue:
+		case OP_nextname:
+		    emit(state, opcode, 0, 0, NULL);
+			break;
+
+		case OP_hasnext:
+		    emit(state, opcode, 0, 0, INT_TYPE);
+			break;
+
+		case OP_hasnext2:
+		    emit(state, opcode, imm30, imm30b, BOOLEAN_TYPE);
+			break;
+
+#ifdef AVMPLUS_MOPS
+		// sign extends
+		case OP_sxi1:
+		case OP_sxi8:
+		case OP_sxi16:
+			emit(state, opcode, sp, 0, INT_TYPE);
+			break;
+
+		// loads
+		case OP_li8:
+		case OP_li16:
+		case OP_li32:
+		case OP_lf32:
+		case OP_lf64:
+		{
+			Traits* result = (opcode == OP_lf32 || opcode == OP_lf64) ? NUMBER_TYPE : INT_TYPE;
+			emit(state, opcode, sp, 0, result);
+			break;
+		}
+
+		// stores
+		case OP_si8:
+		case OP_si16:
+		case OP_si32:
+		case OP_sf32:
+		case OP_sf64:
+		{
+			emit(state, opcode, 0, 0, VOID_TYPE);
+			break;
+		}
+
+#endif // AVMPLUS_MOPS
+
+		case OP_getouterscope:
+			AvmAssert (info->declaringTraits->scope->size > 0);
+		    emitGetscope(state, imm30, sp+1);
+			break;
+
+		case OP_getglobalscope:
+		    emitGetGlobalScope();
+			break;
+
+		case OP_convert_s: 
+		case OP_esc_xelem: 
+		case OP_esc_xattr:
+            // NOTE handled directly
+            break;
+
+		default:
+		    AvmAssert (false);
+		    break;
+		}
+	}
+
+	void CodegenMIR::emitGetGlobalScope()
+	{
+		ScopeTypeChain* scope = info->declaringTraits->scope;
+		int captured_depth = scope->size;
+		if (captured_depth > 0)
+		{
+			// enclosing scope
+			emitGetscope(state, 0, state->sp()+1);
+		}
+		else
+		{
+			// local scope
+			if (state->scopeDepth > 0)
+			{
+				emitCopy(state, state->verifier->scopeBase, state->sp()+1);
+				// this will copy type and all attributes too
+			}
+			else
+			{
+				#ifdef _DEBUG
+				if (pool->isBuiltin)
+					core->console << "getglobalscope >= depth (0) "<< state->scopeDepth << "\n";
+				#endif
+			}
+		}
+	}
+
+	void CodegenMIR::writeOp1(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, Traits *type)
+	{
+	    (void)pc;
+		switch (opcode) {
+		case OP_iflt:
+		case OP_ifle:
+		case OP_ifnlt:
+		case OP_ifnle:
+		case OP_ifgt:
+		case OP_ifge:
+		case OP_ifngt:
+		case OP_ifnge:
+		case OP_ifeq:
+		case OP_ifstricteq:
+		case OP_ifne:
+		case OP_ifstrictne:
+		{
+			int32_t offset = (int32_t) opd1;
+			int lhs = state->sp()-1;
+			emitIf(state, opcode, state->pc+4/*size*/+offset, lhs, lhs+1);
+			break;
+		}
+		case OP_iftrue:
+		case OP_iffalse:
+		{
+			int32_t offset = (int32_t) opd1;
+			int sp = state->sp();
+			emitIf(state, opcode, state->pc+4/*size*/+offset, sp, 0);
+			break;
+		}
+		case OP_jump:
+		{
+			int32_t offset = (int32_t) opd1;
+		    emit(state, opcode, state->pc+4/*size*/+offset);
+			break;
+		}
+		case OP_getslot:
+			emit(state, OP_getslot, opd1, state->sp(), type);
+			break;
+		case OP_getglobalslot:
+		    emitGetGlobalScope();
+			emit(state, OP_getslot, opd1, state->sp(), type);
+			break;
+		case OP_setglobalslot:
+  		    emit(state, opcode, opd1, state->sp(), type);
+			break;
+		case OP_getproperty:
+		{
+		    Multiname name;
+			pool->parseMultiname(name, opd1);
+		    emit(state, OP_getproperty, (uintptr)&name, 0, type);
+			break;
+		}
+		case OP_call:
+		    emitSetContext(state, NULL);
+			emit(state, opcode, opd1 /*argc*/, 0, NULL);
+			break;
+
+		case OP_construct:
+		{
+			const uint32_t argc = opd1;
+  		    Traits* ctraits = state->peek(argc+1).traits;
+			// don't need null check, AvmCore::construct() uses toFunction() for null check.
+			Traits* itraits = ctraits ? ctraits->itraits : NULL;
+			emitSetContext(state, NULL);
+			emit(state, opcode, argc, 0, itraits);
+			break;
+		}
+		case OP_getouterscope:
+		    emitGetscope(state, opd1, state->sp()+1);
+			break;
+		case OP_getscopeobject:
+		    emitCopy(state, opd1+state->verifier->scopeBase, state->sp()+1);
+			break;
+		default:
+		    AvmAssert (false);
+		    break;
+		}
+	}
+
+	void CodegenMIR::writeOp2(FrameState* state, const byte *pc, AbcOpcode opcode, uint32_t opd1, uint32_t opd2, Traits *type)
+	{
+	    (void)pc;
+		switch (opcode) {
+		case OP_setslot:
+			emit(state, OP_setslot, opd1, opd2);
+			break;
+
+		case OP_abs_jump:
+		{
+            #ifdef AVMPLUS_64BIT
+            const byte* nextpc = pc;
+            unsigned int imm30=0, imm30b=0;
+            int imm8=0, imm24=0;
+            AvmCore::readOperands(nextpc, imm30, imm24, imm30b, imm8);
+            const byte* new_pc = (const byte *) (uintptr(opd1) | (((uintptr) opd2) << 32));
+            const byte* new_code_end = new_pc + AvmCore::readU30 (nextpc);
+            #else
+			const byte* new_pc = (const byte*) opd1;
+			const byte* new_code_end = new_pc + opd2;
+			#endif
+            this->abcStart = new_pc;
+            this->abcEnd = new_code_end;
+		    break;
+		}
+
+		case OP_callmethod:
+		case OP_callinterface:
+		    emitCall(state, opcode, opd1, opd2, type);
+		    break;
+
+		case OP_callproperty: 
+		case OP_callproplex: 
+		case OP_callpropvoid:
+		{
+		    Multiname name;
+			pool->parseMultiname(name, opd1);
+		    emitSetContext(state, NULL);
+			emit(state, opcode, (uintptr)&name, opd2, NULL);
+			break;
+		}
+
+		case OP_callstatic:
+		{
+		    emitCheckNull(state, state->sp()-opd2);
+			emitSetContext(state, pool->methods[opd1]);
+			emitCall(state, OP_callstatic, opd1, opd2, type);
+			break;
+		}
+
+		default:
+		    AvmAssert (false);
+		    break;
+		}
+	}
 }
 #endif // AVMPLUS_MIR

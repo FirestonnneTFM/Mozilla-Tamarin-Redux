@@ -87,23 +87,21 @@ namespace avmplus
 	}
 	
 	PrintWriter& PrintWriter::operator<< (percent value)
-	{		
-		// Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
-		wchar buffer[312];
-		int len;
-		MathUtils::convertDoubleToString(value.getPercent(), buffer, len);
-		wchar *ptr = buffer;
-		while (*ptr) {
-			if (*ptr == '.' && *(ptr+1)) {
-				*(ptr+2) = 0;
-				break;
-			}
-			ptr++;
-		}
+	{
 		if (value.getPercent() < 10) {
 			*this << ' ';
 		}
-		*this << buffer;
+		Stringp s = MathUtils::convertDoubleToString(m_core, value.getPercent());
+		StringIndexer str(s);
+		for (int32_t i = 0; i < s->length(); i++)
+		{
+			wchar ch = str[i];
+			*this << ch;
+			if (ch == '.' && i < s->length() - 1) {
+				*this << str[++i];
+				break;
+			}
+		}
 		return *this;
 	}
 	
@@ -148,72 +146,55 @@ namespace avmplus
 	
 	PrintWriter& PrintWriter::operator<< (int32_t value)
 	{
-		wchar buffer[256];
-		int len;
-		if (MathUtils::convertIntegerToString(value, buffer, len)) {
-			*this << buffer;
-		}
-		return *this;
+		Stringp s = MathUtils::convertIntegerToStringBase10(m_core, value, MathUtils::kTreatAsSigned);
+		return *this << s;
 	}
 
 	PrintWriter& PrintWriter::operator<< (uint64_t value)
 	{
-		wchar buffer[256];
-		int len;
-		if (MathUtils::convertIntegerToString((sintptr) value, buffer, len)) {
-			*this << buffer;
-		}
-		return *this;
+		// use the intptr_t version - it is 64, not 32 bits
+		Stringp s = MathUtils::convertIntegerToStringRadix(m_core, (intptr_t) value, 10, MathUtils::kTreatAsUnsigned);
+		return *this << s;
 	}
 
 	PrintWriter& PrintWriter::operator<< (int64_t value)
 	{
-		wchar buffer[256];
-		int len;
-		if (MathUtils::convertIntegerToString((sintptr) value, buffer, len)) {
-			*this << buffer;
-		}
-		return *this;
+		// use the intptr_t version - it is 64, not 32 bits
+		Stringp s = MathUtils::convertIntegerToStringRadix(m_core, (intptr_t) value, 10, MathUtils::kTreatAsSigned);
+		return *this << s;
 	}
 
 #if defined AVMPLUS_MAC && defined AVMPLUS_64BIT
 	PrintWriter& PrintWriter::operator<< (ptrdiff_t value)
 	{
-		wchar buffer[256];
-		int len;
-		if (MathUtils::convertIntegerToString((sintptr) value, buffer, len)) {
-			*this << buffer;
-		}
-		return *this;
+		// use the sintptr version - it is 64, not 32 bits
+		Stringp s = MathUtils::convertIntegerToStringRadix(m_core, (intptr_t) value, 10, MathUtils::kTreatAsSigned);
+		return *this << s;
 	}
 #endif
 
 	PrintWriter& PrintWriter::operator<< (uint32_t value)
 	{
-		wchar buffer[256];
-		int len;
-		if (MathUtils::convertIntegerToString(value, buffer, len, 10, true)) {
-			*this << buffer;
-		}
-		return *this;
+		Stringp s = MathUtils::convertIntegerToStringBase10(m_core, value, MathUtils::kTreatAsUnsigned);
+		return *this << s;
 	}
 
 	PrintWriter& PrintWriter::operator<< (double value)
 	{
-		// Number.MAX_VALUE is 1.79e+308; size temp buffer accordingly
-		wchar buffer[312];
-		int len;
-		MathUtils::convertDoubleToString(value, buffer, len);
-		*this << buffer;
-		return *this;
+		return *this << MathUtils::convertDoubleToString(m_core, value);
 	}
 
 	PrintWriter& PrintWriter::operator<< (Stringp str)
 	{
-		if (str)
-		return *this << str->c_str();
-		else
+		if (!str)
 			return *this << "(null)";
+		
+		StringIndexer str_idx(str);
+		for (int i=0, n=str_idx->length(); i<n; i++) 
+		{
+			*this << (wchar)str_idx[i];
+		}
+		return *this;
 	}
 
 	PrintWriter& PrintWriter::operator<< (ScriptObject *obj)

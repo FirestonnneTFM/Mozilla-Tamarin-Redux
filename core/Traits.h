@@ -42,7 +42,6 @@
 namespace avmplus
 {
 	typedef ClassClosure* (*CreateClassClosureProc)(VTable*);
-	typedef ScriptObject* (*CreateGlobalObjectProc)(VTable*, ScriptObject*);
 
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	// doesn't really belong here, but needs to go somewhere... good enough for now.
@@ -544,11 +543,8 @@ namespace avmplus
 
 		static bool isMachineCompatible(const Traits* a, const Traits* b);
 
-		void setCreateClassClosureProc(CreateClassClosureProc p) { this->m_nativeInfo.createClassClosure = p; }
-		void setCreateGlobalObjectProc(CreateGlobalObjectProc p) { this->m_nativeInfo.createGlobalObject = p; }
-
-		CreateClassClosureProc getCreateClassClosureProc() const { return m_nativeInfo.createClassClosure; }
-		CreateGlobalObjectProc getCreateGlobalObjectProc() const { return m_nativeInfo.createGlobalObject; }
+		void setCreateClassClosureProc(CreateClassClosureProc p) { this->m_createClassClosure = p; }
+		CreateClassClosureProc getCreateClassClosureProc() const { return m_createClassClosure; }
 
 
 		Stringp formatClassName();
@@ -561,16 +557,10 @@ namespace avmplus
 		Traitsp* findInterface(Traits* t) const;
 
 	public:
-#ifdef AVMPLUS_VERBOSE
+#if VMCFG_METHOD_NAMES
 		Stringp format(AvmCore* core) const;
 #endif
 
-
-	private:
-		union NativeInfo {
-			CreateClassClosureProc	createClassClosure;
-			CreateGlobalObjectProc	createGlobalObject;
-		};
 
 	// ------------------------ DATA SECTION BEGIN
 	public:		AvmCore* const			core;		// @todo remove, can get from pool->core
@@ -579,16 +569,13 @@ namespace avmplus
 	public:		Traits*					itraits;	// if this type is a factory, itraits is non-null and points to the type created by this factory.
 	public:		DRCWB(Namespacep)		ns;			// The namespace of the class described by this traits object
 	public:		DRCWB(Stringp)			name;		// The name of the class described by this traits object
-#ifdef DEBUGGER
-	public:		DRCWB(Stringp)			fullName;
-#endif
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	public:		DWB(char*)				rawname;
 #endif
 	public:		DRCWB(Namespacep)		protectedNamespace;	// protected namespace, if any
 	public:		DWB(ScopeTypeChain*)	scope;				// scope chain types
 	public:		DWB(AbstractFunction*)	init;				// not a call/init union b/c smart pointers and union's don't mix
-	private:	NativeInfo				m_nativeInfo;
+	private:	CreateClassClosureProc	m_createClassClosure;
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType
 	private:	const byte*				metadata_pos;
 	private:	FixedBitSet				m_skips;	

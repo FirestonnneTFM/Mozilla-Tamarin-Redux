@@ -40,16 +40,29 @@ INCLUDES += \
   -I$(topsrcdir)/core \
   -I$(topsrcdir)/codegen \
   -I$(topsrcdir)/pcre \
+  -I$(topsrcdir)/platform \
   $(NULL)
 
 $(call RECURSE_DIRS,MMgc)
 
 ifdef ENABLE_TAMARIN
 $(call RECURSE_DIRS,core pcre codegen vprof)
+ifeq (sparc,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
 ifeq (i686,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif
+ifeq (x86_64,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
 ifeq (arm,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (powerpc,$(TARGET_CPU))
+$(call RECURSE_DIRS,nanojit)
+endif
+ifeq (ppc64,$(TARGET_CPU))
 $(call RECURSE_DIRS,nanojit)
 endif
 ifeq (darwin,$(TARGET_OS))

@@ -44,7 +44,7 @@ from math import floor
 from sys import stderr
 
 parser = OptionParser(usage="usage: %prog [--nativemapname=name] [--uniquethunks] [importfile [, importfile]...] file...")
-parser.add_option("-n", "--nativemapname", help="if using explicit maps for native classes and scripts, the name as argument")
+parser.add_option("-n", "--nativemapname", help="if using explicit maps for native classes, the name as argument")
 parser.add_option("-u", "--uniquethunks", help="generate a unique thunk for every native method (don't recycle thunks with similar signatures)")
 opts, args = parser.parse_args()
 
@@ -348,34 +348,31 @@ class MethodInfo(MemberInfo):
 			return
 		
 		if self == traits.init:
-			self.native_id_name = prefix + to_cname(traits.name.name) 
-			if traits.niname != None:
-				self.native_method_name = "#error illegal name, ctors cannot be native"
+			raise Error("ctors cannot be native")
 
-		else:
-			assert(isinstance(self.name, QName))
-			self.native_id_name = prefix + ns_prefix(self.name.ns, False) + self.name.name
-			self.native_method_name = self.name.name
+		assert(isinstance(self.name, QName))
+		self.native_id_name = prefix + ns_prefix(self.name.ns, False) + self.name.name
+		self.native_method_name = self.name.name
 
-			if self.kind == TRAIT_Getter:
-				self.native_id_name += "_get"
-				self.native_method_name = "get_" + self.native_method_name
-			elif self.kind == TRAIT_Setter:
-				self.native_id_name += "_set"		
-				self.native_method_name = "set_" + self.native_method_name
+		if self.kind == TRAIT_Getter:
+			self.native_id_name += "_get"
+			self.native_method_name = "get_" + self.native_method_name
+		elif self.kind == TRAIT_Setter:
+			self.native_id_name += "_set"		
+			self.native_method_name = "set_" + self.native_method_name
 
-			if self.name.ns.srcname != None:
-				self.native_method_name = str(self.name.ns.srcname) + "_" + self.native_method_name
+		if self.name.ns.srcname != None:
+			self.native_method_name = str(self.name.ns.srcname) + "_" + self.native_method_name
 
-			# if we are an override, prepend the classname to the C method name.
-			# (native method implementations must not be virtual, and some compilers
-			# will be unhappy if a subclass overrides a method with the same name and signature
-			# without it being virtual.) Note that we really only need to do this if the ancestor
-			# implementation is native, rather than pure AS3, but we currently do it regardless.
-			if self.override:
-				self.native_method_name = traits.name.name + "_" + self.native_method_name
+		# if we are an override, prepend the classname to the C method name.
+		# (native method implementations must not be virtual, and some compilers
+		# will be unhappy if a subclass overrides a method with the same name and signature
+		# without it being virtual.) Note that we really only need to do this if the ancestor
+		# implementation is native, rather than pure AS3, but we currently do it regardless.
+		if self.override:
+			self.native_method_name = traits.name.name + "_" + self.native_method_name
 
-			self.native_method_name = to_cname(self.native_method_name)
+		self.native_method_name = to_cname(self.native_method_name)
 					
 class SlotInfo(MemberInfo):
 	type = ""
@@ -384,14 +381,8 @@ class SlotInfo(MemberInfo):
 class NativeInfo:
 	class_name = None
 	instance_name = None
-	script_name = None
 	gen_method_map = False
 	
-	def set_script(self, name):
-		if self.script_name != None:
-			raise Error("native(script) may not be specified multiple times for the same script: %s %s" % (self.script_name, name) )
-		self.script_name = name
-
 	def set_class(self, name):
 		if self.class_name != None:
 			raise Error("native(cls) may not be specified multiple times for the same class: %s %s" % (self.class_name, name))
@@ -403,10 +394,8 @@ class NativeInfo:
 		self.instance_name = name
 		
 	def validate(self):
-		if (self.script_name != None) and (self.class_name != None or self.instance_name != None):
-			raise Error("cannot mix script and class/instance attributes")
-		if self.gen_method_map and self.script_name == None and self.class_name == None and self.instance_name == None:
-			raise Error("cannot specify native(methods) without native(script) or native(cls)")
+		if self.gen_method_map and self.class_name == None and self.instance_name == None:
+			raise Error("cannot specify native(methods) without native(cls)")
 		if self.class_name != None or self.instance_name != None:
 			# if nothing specified, use ClassClosure/ScriptObject.
 			if self.class_name == None:
@@ -576,14 +565,27 @@ class Abc:
 				c.itraits.ni = c.ni
 				c.itraits.niname = c.ni.instance_name
 				self.assign_names(c.itraits, prefix)
-
+		
 		for i in range(0, len(self.scripts)):
 			script = self.scripts[i]
 			if script != None:
-				prefix = ""
-				script.ni = self.find_script_nativeinfo(script)
-				script.niname = script.ni.script_name
-				self.assign_names(script, prefix)
+				for j in range(0, len(script.tmethods)):
+					m = script.tmethods[j]
+					if m.metadata != None:
+						for md in m.metadata:
+							if md.name == "native":
+								if md.attrs.has_key("script"):
+									raise Error("native(script) is no longer supported; please use a native(\"function-name\") instead: " + str(m.name))
+								if len(md.attrs) != 1 or not md.attrs.has_key(""):
+									raise Error("native(\"function-name\") is the only form supported here" + str(m.name))
+								if not m.isNative():
+									raise Error("native(\"function-name\") can only be used on native functions" + str(m.name))
+								m.receiver = None
+								m.native_method_name = md.attrs[""]	# override 
+								m.native_id_name = "native_script_function_" + ns_prefix(m.name.ns, False) + m.name.name
+								#m.native_id_name = "native_script_function_" + to_cname(m.native_method_name)
+								m.gen_method_map = True
+
 
 	def assign_names(self, traits, prefix):
 		if traits.init != None:
@@ -835,7 +837,7 @@ class Abc:
 			for md in m:
 				if md.name == "native":
 					if md.attrs.has_key("script"):
-						ni.set_script(md.attrs["script"])
+						raise Error("native scripts are no longer supported; please use a native class instead and wrap with AS3 code as necessary.")
 					if md.attrs.has_key("cls"):
 						ni.set_class(md.attrs["cls"])
 					if md.attrs.has_key("instance"):
@@ -845,16 +847,8 @@ class Abc:
 						if v != "auto":
 							raise Error("the only legal value for native(methods) is auto")
 						ni.gen_method_map = True
-					if (ni.script_name == None) and (ni.class_name == None) and (ni.instance_name == None):
-						raise Error("native metadata must specify (script) or (cls,instance)")
-
-	def find_script_nativeinfo(self, t):
-		ni = NativeInfo()
-		# since asc doesn't allow us to put metadata on scripts, look for it on methods of the script. 
-		for j in range(0, len(t.tmethods)):
-			self.find_nativeinfo(t.tmethods[j].metadata, ni)
-		ni.validate()
-		return ni
+					if (ni.class_name == None) and (ni.instance_name == None):
+						raise Error("native metadata must specify (cls,instance)")
 
 	def find_class_nativeinfo(self, t):
 		ni = NativeInfo()
@@ -975,7 +969,7 @@ class AbcThunkGen:
 		out_h.println("/* machine generated file -- do not edit */");
 		out_c.println("/* machine generated file -- do not edit */");
 
-		out_h.println("#define AVMTHUNK_VERSION 4");
+		out_h.println("#define AVMTHUNK_VERSION 5");
 		
 		out_h.println("extern const uint32_t "+name+"_abc_class_count;")
 		out_h.println("extern const uint32_t "+name+"_abc_script_count;")
@@ -1069,12 +1063,6 @@ class AbcThunkGen:
 				out_c.println("AVMTHUNK_NATIVE_CLASS_GLUE(%s)" % c.ni.class_name)
 
 		out_c.println("");
-		for i in range(0, len(abc.scripts)):
-			script = abc.scripts[i]
-			if script.ni.gen_method_map:
-				out_c.println("AVMTHUNK_NATIVE_SCRIPT_GLUE(%s)" % script.ni.script_name)
-
-		out_c.println("");
 		out_c.println("AVMTHUNK_BEGIN_NATIVE_TABLES(%s)" % self.abc.scriptName)
 		out_c.indent += 1
 
@@ -1086,30 +1074,20 @@ class AbcThunkGen:
 			if m.isNative() and m.gen_method_map:
 				assert(m.native_method_name != None)
 				assert(m.native_id_name != None)
-				# special-case the two oddballs of the group: String and Namespace
-				# don't descend from ScriptObject and so need a little extra love.
-				if str(m.receiver.name) == "String":
-					nmout = "AVMTHUNK_NATIVE_METHOD_STRING"
-				elif str(m.receiver.name) == "Namespace":
-					nmout = "AVMTHUNK_NATIVE_METHOD_NAMESPACE"
+				if m.receiver == None:
+					self.out_c.println("AVMTHUNK_NATIVE_FUNCTION(%s, %s)" % (m.native_id_name, m.native_method_name))
 				else:
-					nmout = "AVMTHUNK_NATIVE_METHOD"
-				self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, m.receiver.niname, m.native_method_name))
+					# special-case the two oddballs of the group: String and Namespace
+					# don't descend from ScriptObject and so need a little extra love.
+					if str(m.receiver.name) == "String":
+						nmout = "AVMTHUNK_NATIVE_METHOD_STRING"
+					elif str(m.receiver.name) == "Namespace":
+						nmout = "AVMTHUNK_NATIVE_METHOD_NAMESPACE"
+					else:
+						nmout = "AVMTHUNK_NATIVE_METHOD"
+					self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, m.receiver.niname, m.native_method_name))
 		out_c.indent -= 1
 		out_c.println("AVMTHUNK_END_NATIVE_METHODS()")
-
-		out_c.println("");
-		out_c.println("AVMTHUNK_BEGIN_NATIVE_SCRIPTS(%s)" % self.abc.scriptName)
-		out_c.indent += 1
-		for i in range(0, len(abc.scripts)):
-			script = abc.scripts[i]
-			if script.ni.script_name != None:
-				if script.ni.gen_method_map:
-					out_c.println("AVMTHUNK_NATIVE_SCRIPT(%d, %s)" % (i, script.ni.script_name))
-				else:
-					out_c.println("NATIVE_SCRIPT(%d, %s)" % (i, script.ni.script_name))
-		out_c.indent -= 1
-		out_c.println("AVMTHUNK_END_NATIVE_SCRIPTS()")
 
 		out_c.println("");
 		out_c.println("AVMTHUNK_BEGIN_NATIVE_CLASSES(%s)" % self.abc.scriptName)
@@ -1182,20 +1160,35 @@ class AbcThunkGen:
 		argtraits = self.argTraits(receiver, m)
 
 		argszprev = "0"
+		self.out_c.println("enum {");
+		self.out_c.indent += 1;
 		for i in range(0, len(argtraits)):
 			cts = ctype_from_traits(argtraits[i], True);
 			if i == 0:
-				self.out_c.println("const uint32_t argoff0 = 0;");
+				self.out_c.println("argoff0 = 0");
 			else:
-				self.out_c.println("const uint32_t argoff"+str(i)+" = argoff"+str(i-1)+" + "+argszprev+";");
+				self.out_c.println(", argoff"+str(i)+" = argoff"+str(i-1)+" + "+argszprev+"");
 			argszprev = "AvmThunkArgSize_"+cts;
+		self.out_c.indent -= 1;
+		self.out_c.println("};");
 	
 		if m.needRest():
 			self.out_c.println("const uint32_t argoffV = argoff"+str(len(argtraits)-1)+" + "+argszprev+";");
 		
 		args = []
+		
+		cts = ctype_from_traits(argtraits[0], True)
+		assert(cts in ["AvmObject","AvmString","AvmNamespace"])
+		val = "AvmThunkUnbox_AvmReceiver("+cts+", argv[argoff0])";
+		if directcall and argtraits[0].niname != None:
+			val = "(%s*)%s" % (argtraits[0].niname, val)
+		args.append((val, cts))
+		if cookie:
+			assert(opts.nativemapname)
+			assert(not directcall)
+			args.append(("AVMTHUNK_GET_COOKIE(env)", "int32_t"))
 
-		for i in range(0, len(argtraits)):
+		for i in range(1, len(argtraits)):
 			cts = ctype_from_traits(argtraits[i], True)
 			val = "AvmThunkUnbox_"+cts+"(argv[argoff" + str(i) + "])";
 			if directcall and cts == "AvmObject" and argtraits[i].niname != None:
@@ -1208,10 +1201,6 @@ class AbcThunkGen:
 					defval = "AvmThunkCoerce_"+dts+"_"+cts+"("+defval+")";
 				val = "(argc < "+str(i)+" ? "+defval+" : "+val+")";
 			args.append((val, cts))
-			if i == 0 and cookie:
-				assert(opts.nativemapname)
-				assert(not directcall)
-				args.append(("AVMTHUNK_GET_COOKIE(env)", "int32_t"))
 
 		if m.needRest():
 			args.append(("(argc <= "+str(param_count)+" ? NULL : argv + argoffV)", "AvmBox*"))
@@ -1220,8 +1209,6 @@ class AbcThunkGen:
 		if not m.hasOptional() and not m.needRest():
 			self.out_c.println("(void)argc;");
 
-		self.out_c.println("AVMTHUNK_DEBUG_ENTER(env)");
-		
 		if directcall:
 			self.out_c.println("(void)env;") # avoid "unreferenced formal parameter" in non-debugger builds
 			self.out_c.println("%s* obj = %s;" % (m.receiver.niname, args[0][0]))
@@ -1242,32 +1229,47 @@ class AbcThunkGen:
 			self.out_c.indent -= 1
 			self.out_c.println(");")
 		else:
-			self.out_c.prnt("typedef AvmRetType_%s (%sT::*FuncType)(" % (ret, args[0][1]))
-			for i in range(1, len(args)):
-				if i > 1:
-					self.out_c.prnt(", ")
-				self.out_c.prnt(args[i][1]);
-			self.out_c.println(");");
-			self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_HANDLER(env));")
-			if ret != "void":
-				self.out_c.prnt("const %s ret = " % ret)
-			self.out_c.println("(*(%s).*(func))(" % (args[0][0]))
-			self.out_c.indent += 1
-			for i in range(1, len(args)):
-				if i > 1:
-					self.out_c.prnt(", ")
-				self.out_c.println(args[i][0]);
-			self.out_c.indent -= 1
-			self.out_c.println(");")
-
-		self.out_c.println("AVMTHUNK_DEBUG_EXIT(env)")
+			if m.receiver == None:
+				self.out_c.prnt("typedef AvmRetType_%s (*FuncType)(AvmObject" % (ret))
+				for i in range(1, len(args)):
+					self.out_c.prnt(", " + args[i][1]);
+				self.out_c.println(");");
+				self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_FUNCTION_HANDLER(env));")
+				if ret != "void":
+					if ret == "double":
+						self.out_c.prnt("return ")
+					else:
+						self.out_c.prnt("return (AvmBox)")
+				self.out_c.println("(*func)(%s" % (args[0][0]))
+				self.out_c.indent += 1
+				for i in range(1, len(args)):
+					self.out_c.println(", " + args[i][0]);
+				self.out_c.indent -= 1
+				self.out_c.println(");")
+			else:
+				self.out_c.prnt("typedef AvmRetType_%s (%sT::*FuncType)(" % (ret, args[0][1]))
+				for i in range(1, len(args)):
+					if i > 1:
+						self.out_c.prnt(", ")
+					self.out_c.prnt(args[i][1]);
+				self.out_c.println(");");
+				self.out_c.println("const FuncType func = reinterpret_cast<FuncType>(AVMTHUNK_GET_METHOD_HANDLER(env));")
+				if ret != "void":
+					if ret == "double":
+						self.out_c.prnt("return ")
+					else:
+						self.out_c.prnt("return (AvmBox)")
+				self.out_c.println("(*(%s).*(func))(" % (args[0][0]))
+				self.out_c.indent += 1
+				for i in range(1, len(args)):
+					if i > 1:
+						self.out_c.prnt(", ")
+					self.out_c.println(args[i][0]);
+				self.out_c.indent -= 1
+				self.out_c.println(");")
 
 		if ret == "void":
 			self.out_c.println("return kAvmThunkUndefined;")
-		elif ret == "double":
-			self.out_c.println("return ret;")
-		else:
-			self.out_c.println("return AvmBox(ret);")
 		self.out_c.indent -= 1
 		self.out_c.println("}")
 
@@ -1311,10 +1313,14 @@ class AbcThunkGen:
 				sig += "_opt" + sigchar_from_enum(dct, True) + to_cname(defval)
 		if m.needRest():
 			sig += "_rest"
+		# native script functions can't share thunk with native class methods, add a prefix to force uniqueness
+		if m.receiver == None:
+			sig = "func_" + sig
 		return sig;
 
 	def gatherThunk(self, receiver, m):
-		assert(m.native_id_name != None)
+		if m.native_id_name == None:
+			raise Error("name not specified for native method " + str(m.name))
 		self.all_thunks.append((receiver, m))	
 
 	def processClass(self, b):
