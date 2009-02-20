@@ -47,17 +47,13 @@ typedef void *maddr_ptr;
 namespace avmplus
 {
 	Domain::Domain(AvmCore *_core, Domain* base) : base(base)
-#ifdef AVMPLUS_MOPS
 		  , core(_core)
 		  , globalMemoryBase(m_gmInfo.globalMemoryScratch)
 		  , globalMemorySize(sizeof(m_gmInfo.globalMemoryScratch))
-#endif
 	{
-#ifdef AVMPLUS_MOPS
 		m_gmInfo.globalMemory = NULL;
 		// should be able to contain largest read or write (currently double)
 		AvmAssert(sizeof(m_gmInfo.globalMemoryScratch) >= sizeof(double));
-#endif
 		namedTraits  = new (_core->GetGC()) MultinameHashtable();
 		namedScripts = new (_core->GetGC()) MultinameHashtable();
 	}
@@ -110,7 +106,6 @@ namespace avmplus
 		return f;
 	}
 
-#ifdef AVMPLUS_MOPS
 	bool Domain::setGlobalMemory(ScriptObject *mem) const
 	{
 		if(!mem)
@@ -398,7 +393,6 @@ namespace avmplus
 			protHelper.FlushCache();
 		}
 	}
-#endif
 }
 
 

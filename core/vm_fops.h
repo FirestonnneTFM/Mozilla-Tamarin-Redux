@@ -220,7 +220,7 @@ SSE2_ONLY(
     METHOD(COREADDR(AvmCore::sampleCheck), SIG1(V,P), sampleCheck)
 #endif
 
-#ifdef AVMPLUS_MOPS
+	// MOPS helper functions
     METHOD(ENVADDR(MethodEnv::li8),  SIG2(I,P,I), li8)
     METHOD(ENVADDR(MethodEnv::li16), SIG2(I,P,I), li16)
     METHOD(ENVADDR(MethodEnv::li32), SIG2(I,P,I), li32)
@@ -231,4 +231,3 @@ SSE2_ONLY(
     METHOD(ENVADDR(MethodEnv::si32), SIG3(V,P,I,I), si32)
     METHOD(ENVADDR(MethodEnv::sf32), SIG3(V,P,F,I), sf32)
     METHOD(ENVADDR(MethodEnv::sf64), SIG3(V,P,F,I), sf64)
-#endif

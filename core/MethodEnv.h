@@ -163,7 +163,6 @@ namespace avmplus
 		/** Implementation of OP_hasnext2 */		
 		int hasnextproto(Atom& objAtom, int& index) const;
 		
-#ifdef AVMPLUS_MOPS
 		/** Implementation of memory op helpers */
 		void mopRangeCheckFailed() const;
 
@@ -186,7 +185,6 @@ namespace avmplus
 		//inline static int sxi1(int value) { return (value << 31) >> 31; }
 		//inline static int sxi8(int value) { return (value << 24) >> 24; }
 		//inline static int sxi16(int value) { return (value << 16) >> 16; }
-#endif
 
 		/**
 		 * OP_newfunction
@@ -374,8 +372,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
-// probably should go elsewhere, but this is adequate for now.
-#if defined(AVMPLUS_MOPS)
+	// probably should go elsewhere, but this is adequate for now.
 	#if defined(AVMPLUS_BIG_ENDIAN)
 		inline void _swap8(uint8_t& a, uint8_t& b)
 		{
@@ -446,8 +443,6 @@ namespace avmplus
 	#else
 		#define MOPS_SWAP_BYTES(p) do {} while (0)
 	#endif
-#endif
-
 }
 
 #endif // __avmplus_MethodEnv__

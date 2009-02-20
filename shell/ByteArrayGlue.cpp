@@ -48,9 +48,7 @@ namespace avmshell
 	
 	ByteArray::ByteArray()
 	{
-#ifdef AVMPLUS_MOPS
 		m_subscriberRoot = NULL;
-#endif
 		m_capacity = 0;
 		m_length   = 0;
 		m_array    = NULL;
@@ -58,9 +56,7 @@ namespace avmshell
 
 	ByteArray::ByteArray(const ByteArray &lhs)
 	{
-#ifdef AVMPLUS_MOPS
 		m_subscriberRoot = NULL;
-#endif
 		m_array    = new U8[lhs.m_length];
 		if (!m_array)
 		{
@@ -76,9 +72,7 @@ namespace avmshell
 
 	ByteArray::~ByteArray()
 	{
-#ifdef AVMPLUS_MOPS
 		m_subscriberRoot = NULL;
-#endif
 		if (m_array)
 		{
 			delete [] m_array;
@@ -120,9 +114,7 @@ namespace avmshell
 			VMPI_memset(newArray+m_length, 0, newCapacity-m_capacity);
 			m_array = newArray;
 			m_capacity = newCapacity;
-#ifdef AVMPLUS_MOPS
 			NotifySubscribers();
-#endif
 		}
 		return true;
 	}
@@ -142,9 +134,7 @@ namespace avmshell
 		{
 			Grow(index+1);
 			m_length = index+1;
-#ifdef AVMPLUS_MOPS
 			NotifySubscribers();
-#endif
 		}
 		return m_array[index];
 	}
@@ -156,9 +146,7 @@ namespace avmshell
 			Grow(m_length + 1);
 		}
 		m_array[m_length++] = value;
-#ifdef AVMPLUS_MOPS
 		NotifySubscribers();
-#endif
 	}
 		
 	void ByteArray::Push(const U8 *data, uint32 count)
@@ -166,17 +154,13 @@ namespace avmshell
 		Grow(m_length + count);
 		VMPI_memcpy(m_array + m_length, data, count);
 		m_length += count;
-#ifdef AVMPLUS_MOPS
 		NotifySubscribers();
-#endif
 	}
 	
 	void ByteArray::SetLength(uint32 newLength)
 	{
-#ifdef AVMPLUS_MOPS
  		if(m_subscriberRoot && m_length < Domain::GLOBAL_MEMORY_MIN_SIZE)
  			ThrowMemoryError();
-#endif
 		if (newLength > m_capacity)
 		{
 			if (!Grow(newLength))
@@ -186,12 +170,9 @@ namespace avmshell
 			}
 		}
 		m_length = newLength;
-#ifdef AVMPLUS_MOPS
 		NotifySubscribers();
-#endif
 	}
 
-#ifdef AVMPLUS_MOPS
  	void ByteArray::NotifySubscribers()
  	{
  		SubscriberLink *curLink = m_subscriberRoot;
@@ -249,7 +230,6 @@ namespace avmshell
  		}
  		return false;
 	}
- #endif
 
 	//
 	// ByteArrayFile
@@ -630,7 +610,6 @@ namespace avmshell
 		m_byteArray.Write(b, len);
 	}
 	
-#ifdef AVMPLUS_MOPS
  	bool ByteArrayObject::globalMemorySubscribe(const Domain *subscriber, ByteArray::GlobalMemoryNotifyFunc notify)
  	{
  		return m_byteArray.GlobalMemorySubscribe(subscriber, notify);
@@ -640,7 +619,6 @@ namespace avmshell
  	{
  		return m_byteArray.GlobalMemoryUnsubscribe(subscriber);
  	}
-#endif
 
 	//
 	// ByteArrayClass
@@ -748,7 +726,6 @@ namespace avmshell
 
 }	
 
-#ifdef AVMPLUS_MOPS
 namespace avmplus {
  	// memory object glue
  	bool Domain::isMemoryObject(Traits *t) const
@@ -791,7 +768,3 @@ namespace avmplus {
 		return false;
  	}
 }	
-#endif
-
-
-

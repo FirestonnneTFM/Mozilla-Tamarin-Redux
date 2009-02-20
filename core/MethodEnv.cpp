@@ -1154,8 +1154,6 @@ namespace avmplus
 	}
 	
 	
-#ifdef AVMPLUS_MOPS
-
 	void MethodEnv::mopRangeCheckFailed() const
 	{
 		toplevel()->throwRangeError(kInvalidRangeError);
@@ -1289,8 +1287,6 @@ namespace avmplus
 
 		*(double *)(dom->globalMemoryBase + addr) = value;
 	}
-
-#endif // AVMPLUS_MOPS
 
 	// see 13.2 creating function objects
     ClassClosure* MethodEnv::newfunction(AbstractFunction *function,

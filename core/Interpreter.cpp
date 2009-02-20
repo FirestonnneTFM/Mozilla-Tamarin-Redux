@@ -232,11 +232,7 @@ namespace avmplus
 #         define III(a,b) extern void LLLLABEL ## _ ## a ## _ ## b(); LLLLABEL ## _ ## a ## _ ## b();
 #    endif
 #  endif // threading discipline
-#  if defined AVMPLUS_MOPS
-#      define IIM(a,b) III(a,b)
-#  else
-#      define IIM(a,b) XXX(a)
-#  endif
+#  define IIM(a,b) III(a,b)
 #  if defined AVMPLUS_PEEPHOLE_OPTIMIZER
 #      define IIP(a,b) III(a,b)
 #  else
@@ -661,9 +657,7 @@ namespace avmplus
  		
  		register List<double*, LIST_GCObjects> const & cpool_double = pool->cpool_double;
  		register const bool interruptable = !(info->flags & AbstractFunction::NON_INTERRUPTABLE);
-#ifdef AVMPLUS_MOPS
  		register const Domain* envDomain = env->domainEnv()->domain();
-#endif
  		// I do *not* like making pc 'volatile'; a smart compiler may handle it well
  		// and only spill to memory across a call, but a dumb compiler may not ever
  		// keep the value in a register at all.
@@ -2059,7 +2053,6 @@ namespace avmplus
 				NEXT;
 			}
 
-#ifdef AVMPLUS_MOPS
 			// sign extends -- results always fit into an atom, no need to call intToAtom
 			// since we are downshifting anyway, integrate final upshift-by-3 into downshift
 			// rather than using MAKE_INTEGER macro.
@@ -2176,7 +2169,6 @@ namespace avmplus
 				sp -= 2;
 				NEXT;
 			}
-#endif
 
 			// delete property using multiname
 			INSTR(deleteproperty) {

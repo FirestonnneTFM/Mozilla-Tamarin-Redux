@@ -54,10 +54,7 @@ namespace avmplus
 	public:
 		/** Parent domain */
 		Domain* const base;
-		
-#ifdef AVMPLUS_MOPS
 		AvmCore* const core;
-#endif	
 	
 		Domain(AvmCore *core, Domain* base);
 		
@@ -70,7 +67,6 @@ namespace avmplus
 		void addNamedTrait(Stringp name, Namespace* ns, Traits* v) { namedTraits->add(name, ns, (Binding)v); }
 		void addNamedScript(Stringp name, Namespace* ns, AbstractFunction* v) { namedScripts->add(name, ns, (Binding)v); }
 
-	#ifdef AVMPLUS_MOPS
 		/**
 		 * global memory access glue
 		 */
@@ -151,7 +147,6 @@ namespace avmplus
 		bool globalMemorySubscribe(ScriptObject *mem) const;
 		// stops "mem" from notifying us if it moves
 		bool globalMemoryUnsubscribe(ScriptObject *mem) const;
-#endif
 	};
 }
 

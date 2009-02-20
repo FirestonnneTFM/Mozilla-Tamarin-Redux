@@ -182,32 +182,18 @@ namespace avmshell
 	
 	int DomainClass::get_MIN_DOMAIN_MEMORY_LENGTH()
  	{
-#ifdef AVMPLUS_MOPS
  		return Domain::GLOBAL_MEMORY_MIN_SIZE;
-#else
-		AvmAssert(0);
-		return 0;
-#endif
  	}
 
  	ScriptObject *DomainObject::get_domainMemory() const
  	{
-#ifdef AVMPLUS_MOPS
  		return domainEnv->domain()->globalMemory();
-#else
-		AvmAssert(0);
-		return 0;
-#endif
  	}
  
  	void DomainObject::set_domainMemory(ScriptObject *mem)
  	{
-#ifdef AVMPLUS_MOPS
  		if(!domainEnv->domain()->setGlobalMemory(mem))
  			toplevel()->throwError(kEndOfFileError);
-#else
-		AvmAssert(0);
-#endif
  	}
 
 }
