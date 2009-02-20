@@ -400,7 +400,7 @@ namespace avmshell
 	
 	void Shell::initShellPool()
 	{
-		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this, NULL);
+		shellPool = AVM_INIT_BUILTIN_ABC(shell_toplevel, this);
 	}
 
 	Toplevel* Shell::initShellBuiltins()

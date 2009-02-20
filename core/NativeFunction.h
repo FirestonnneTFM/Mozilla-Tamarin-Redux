@@ -218,7 +218,7 @@ namespace avmplus
 
 		~NativeInitializer();
 
-		PoolObject* parseBuiltinABC(const List<Stringp, LIST_RCObjects>* includes = NULL);
+		PoolObject* parseBuiltinABC(Domain* domain, const List<Stringp, LIST_RCObjects>* includes = NULL);
 
 		NativeMethod* newNativeMethod(uint32_t i) const;
 	
@@ -261,7 +261,7 @@ namespace avmplus
 		{ return new (cvtable->gc(), cvtable->getExtraSize()) CLS(cvtable); } 
 
 	#define AVMTHUNK_DECLARE_NATIVE_INITIALIZER(NAME) \
-		extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, const List<Stringp, LIST_RCObjects>* includes);
+		extern PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain, const List<Stringp, LIST_RCObjects>* includes);
 
 #ifdef AVMPLUS_NO_STATIC_POINTERS
 
@@ -306,14 +306,14 @@ namespace avmplus
 	#define AVMTHUNK_END_NATIVE_CLASSES() 
 
 	#define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
-		PoolObject* initBuiltinABC_##NAME(AvmCore* core, const List<Stringp, LIST_RCObjects>* includes) { \
+		PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain, const List<Stringp, LIST_RCObjects>* includes) { \
 			NativeInitializer ninit(core, \
 				avmplus::NativeID::NAME##_abc_data, \
 				avmplus::NativeID::NAME##_abc_length, \
 				avmplus::NativeID::NAME##_abc_method_count, \
 				avmplus::NativeID::NAME##_abc_class_count); \
 			ninit.fillIn(fillIn_##NAME); \
-			return ninit.parseBuiltinABC(includes); \
+			return ninit.parseBuiltinABC(domain, includes); \
 		}
 
 #else
@@ -366,7 +366,7 @@ namespace avmplus
 		{ NULL, -1, 0, 0 } };
 
 	#define AVMTHUNK_DEFINE_NATIVE_INITIALIZER(NAME) \
-		PoolObject* initBuiltinABC_##NAME(AvmCore* core, const List<Stringp, LIST_RCObjects>* includes) { \
+		PoolObject* initBuiltinABC_##NAME(AvmCore* core, Domain* domain, const List<Stringp, LIST_RCObjects>* includes) { \
 			NativeInitializer ninit(core, \
 				avmplus::NativeID::NAME##_abc_data, \
 				avmplus::NativeID::NAME##_abc_length, \
@@ -374,13 +374,16 @@ namespace avmplus
 				avmplus::NativeID::NAME##_abc_class_count); \
 			ninit.fillInClasses(NAME##_classEntries); \
 			ninit.fillInMethods(NAME##_methodEntries); \
-			return ninit.parseBuiltinABC(includes); \
+			return ninit.parseBuiltinABC(domain, includes); \
 		}
 
 #endif // AVMPLUS_NO_STATIC_POINTERS
 
-	#define AVM_INIT_BUILTIN_ABC(MAPNAME, CORE, INCLUDES) \
-		avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (INCLUDES))
+	#define AVM_INIT_BUILTIN_ABC_IN_DOMAIN(MAPNAME, CORE, DOMAIN) \
+		avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (DOMAIN), NULL)
+
+	#define AVM_INIT_BUILTIN_ABC(MAPNAME, CORE) \
+		avmplus::NativeID::initBuiltinABC_##MAPNAME((CORE), (CORE)->builtinDomain, NULL)
 
 }	
 

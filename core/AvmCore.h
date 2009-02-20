@@ -314,10 +314,18 @@ const int kBufferPadding = 16;
 		/** The location of the currently active defaultNamespace */
 		Namespace *const*dxnsAddr;
 
+		enum InterruptReason {
+			ScriptTimeout = 1,
+			ExternalInterrupt = 2
+		};
+
 		/**
 		 * If this flag is set, an interrupt is in progress.
 		 * This must be type int, not bool, since it will
 		 * be checked by generated code.
+		 * 
+		 * Set to 1 for a timeout interrupt, 2 for
+		 * an external (i.e., signal handler) interrupt.
 		 */
 		int interrupted;
 		
