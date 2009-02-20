@@ -52,7 +52,6 @@
     #define XLAT_ONLY(x)
 #endif
 
-
 namespace avmplus
 {
 #undef DEBUG_EARLY_BINDING
@@ -2077,7 +2076,6 @@ namespace avmplus
 				break;
 			}
 
-#ifdef AVMPLUS_MOPS
 			// sign extends
 			case OP_sxi1:
 			case OP_sxi8:
@@ -2115,7 +2113,6 @@ namespace avmplus
 				coder->write(state, pc, opcode);
 				state->pop(2);
 				break;
-#endif // AVMPLUS_MOPS
 
 			case OP_abs_jump:
 			{

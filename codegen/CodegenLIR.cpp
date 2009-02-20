@@ -2031,7 +2031,6 @@ namespace avmplus
 		    emit(state, opcode, imm30, imm30b, BOOLEAN_TYPE);
 			break;
 
-#ifdef AVMPLUS_MOPS
 		// sign extends
 		case OP_sxi1:
 		case OP_sxi8:
@@ -2061,8 +2060,6 @@ namespace avmplus
 			emit(state, opcode, 0, 0, VOID_TYPE);
 			break;
 		}
-
-#endif // AVMPLUS_MOPS
 
 		case OP_getouterscope:
 			//assert (info->declaringTraits->scope->size > 0);
@@ -2817,7 +2814,6 @@ namespace avmplus
 
 		switch (opcode)
 		{
-#ifdef AVMPLUS_MOPS
 			// sign extends
 			case OP_sxi1:
 			case OP_sxi8:
@@ -2876,7 +2872,6 @@ namespace avmplus
 				callIns(kFuncID[opcode-OP_si8], 3, env_param, svalue, addr);
 				break;
 			}
-#endif
 
 			case OP_jump:
 			{

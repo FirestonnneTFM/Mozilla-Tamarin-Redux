@@ -552,7 +552,6 @@ namespace avmplus
 		case OP_nextvalue:
 		case OP_nextname:
 		case OP_hasnext:
-#ifdef AVMPLUS_MOPS
 		case OP_sxi1:
 		case OP_sxi8:
 		case OP_sxi16:
@@ -578,7 +577,6 @@ namespace avmplus
   		    emitOp0(pc, wordCode(opcode));
 			break;
 
-#endif // AVMPLUS_MOPS
 		case OP_pushstring:
 		case OP_pushdouble:
 		case OP_pushnamespace: 

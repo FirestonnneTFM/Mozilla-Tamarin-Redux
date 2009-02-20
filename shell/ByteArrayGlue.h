@@ -57,15 +57,12 @@ namespace avmshell
 		bool Grow(uint32 newCapacity);
 		U8 *GetBuffer() const { return m_array; }
 
-#ifdef AVMPLUS_MOPS
  		typedef void (Domain::*GlobalMemoryNotifyFunc)(unsigned char *, uint32) const;
  
  		bool GlobalMemorySubscribe(const Domain *subscriber, GlobalMemoryNotifyFunc notify);
  		bool GlobalMemoryUnsubscribe(const Domain *subscriber);
-#endif 
 
 	protected:
-#ifdef AVMPLUS_MOPS
  		// singly linked list of all subscribers to this ByteArray...
  		// in practice, there isn't much liklihood of too many
  		// subscribers at a time and notifications should be rare
@@ -88,7 +85,6 @@ namespace avmshell
  		SubscriberLink *m_subscriberRoot;
  
  		void NotifySubscribers();
-#endif
 		void ThrowMemoryError();
 
 		uint32 m_capacity;
@@ -184,17 +180,15 @@ namespace avmshell
 
 		void writeFile(Stringp filename);
 
-#ifdef AVMPLUS_MOPS
  	protected:
+		// If this ByteArray is attached as MOPS memory to the
+		// domain, must notify of changes.
 		friend class avmplus::Domain;
-#endif
  
 	private:
-#ifdef AVMPLUS_MOPS
  		bool globalMemorySubscribe(const Domain *subscriber,
  			ByteArray::GlobalMemoryNotifyFunc notify);
  		bool globalMemoryUnsubscribe(const Domain *subscriber);
-#endif
 
 		MMgc::Cleaner c;
 		ByteArrayFile m_byteArray;

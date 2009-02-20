@@ -358,11 +358,6 @@
 	#define AVM10_BIG_ENDIAN
 #endif
 
-// handle the MOPS opcodes
-#ifndef AVMPLUS_DISABLE_MOPS
-	#define AVMPLUS_MOPS
-#endif
-
 // FASTCALL 
 #ifdef AVMPLUS_IA32
 	#if _MSC_VER

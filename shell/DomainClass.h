@@ -50,10 +50,8 @@ namespace avmshell
 		void init(DomainObject *base);
 		Atom loadBytes(ByteArrayObject *bytes);
 		ClassClosure* getClass(Stringp name);
-//#ifdef AVMPLUS_MOPS
  		ScriptObject *get_domainMemory() const;
  		void set_domainMemory(ScriptObject *mem);
-//#endif AVMPLUS_MOPS
 		
 		DWB(DomainEnv*) domainEnv;
 		DRCWB(Toplevel*) domainToplevel;
@@ -70,9 +68,7 @@ namespace avmshell
 		ScriptObject *createInstance(VTable *ivtable, ScriptObject *delegate);
 
 		DomainObject* get_currentDomain();
-//#ifdef AVMPLUS_MOPS
  		int get_MIN_DOMAIN_MEMORY_LENGTH();
-//#endif AVMPLUS_MOPS
 	};
 }
 
