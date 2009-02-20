@@ -37,58 +37,69 @@
  * ***** END LICENSE BLOCK ***** */
 package adobe.abcasm;
 
+import java.util.HashMap;
 
-class Instruction
+class Trait 
 {
-	int opcode;
-	int [] imm;
-	Name n;
-	Label target;
-	public Object value;
+	int kind_byte;
 	
-	Instruction(int opcode, int[] imm)
+	HashMap<String,Object> attrs = new HashMap<String,Object>();
+	
+	Trait(int kind)
 	{
-		this.opcode = opcode;
-		this.imm = imm;
+		this.kind_byte = kind;
+	}
+
+	void addAttr(String key, Object value)
+	{
+		if ( attrs.containsKey(key) )
+		{
+			throw new IllegalArgumentException("Trait attribute " + key + " cannot be specified twice." );
+		}
+
+		attrs.put(key, value);
+	}
+
+	void validate()
+	{
+		verifyContains("name", null);
+	}
+
+	public int getKind()
+	{
+		return kind_byte & 0x0F;
+	}
+
+	public boolean hasAttr(String attr_name)
+	{
+		return attrs.containsKey(attr_name);
+	}
+
+	public Object getAttr(String attr_name)
+	{
+		verifyContains(attr_name, null);
+		return attrs.get(attr_name);
+	}
+
+	public int getIntAttr(String attr_name)
+	{
+		verifyContains(attr_name, Integer.class);
+		return (Integer)attrs.get(attr_name);
 	}
 	
-	Instruction(int opcode, Object v)
+	public Name getNameAttr(String attr_name)
 	{
-		this(opcode, new int[0]);
-		value = v;
+		verifyContains(attr_name, Name.class);
+		return (Name)attrs.get(attr_name);
 	}
 	
-	public String toString()
+	void verifyContains(String attr_name, Class clazz)
 	{
-		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
-		
-		
-		if ( n != null )
+		if ( !attrs.containsKey(attr_name) )
+			throw new IllegalArgumentException("Required attribute " + attr_name + " not found.");
+		if ( ! ( null == clazz ||  attrs.get(attr_name).getClass().equals(clazz) ) )
 		{
-			result.append(" ");
-			result.append(n);
+			throw new IllegalArgumentException("Attribute " + attr_name + " must be type " + clazz.getSimpleName() );
 		}
-		
-		if ( value != null )
-		{
-			result.append(" \"");
-			result.append(value.toString());
-			result.append("\"");
-		}
-		
-		if ( target != null )
-		{
-			result.append(" ");
-			result.append(target);
-		}
-		
-		for ( int x: imm)
-		{
-			result.append(" ");
-			result.append(x);
-		}
-		
-		return result.toString();
 	}
 }
-

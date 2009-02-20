@@ -38,6 +38,8 @@
 package adobe.abcasm;
 
 import org.antlr.runtime.*;
+
+
 import java.io.FileInputStream;
 
 public class Main
@@ -69,16 +71,14 @@ public class Main
 		AssemblerCore core = new AssemblerCore(options);
 		parser.asmCore = core;
 
-		//  FIXME: This should be in the assembler core or 
-		//  somewhere it gets better reset.
-		Function.method_table_count = 0;
-
 		try
 		{
 			parser.translation_unit();
 		}
 		catch ( Throwable parser_fatal )
 		{
+			if ( options.expandedDiagnostics )
+				parser_fatal.printStackTrace();
 			core.syntaxErrors.add(parser_fatal.getMessage());
 		}
 
@@ -96,6 +96,23 @@ public class Main
 		if ( options.dumpIl )
 			core.dump(System.out);
 		
+		
+		//  Parsing successful, do the results make sense?
+		core.semanticAnalysis();
+		
+		if ( core.semanticErrors.size() > 0 )
+		{
+			System.err.println("Unable to assemble " + asmFile + " due to:");
+
+			for ( String s: core.semanticErrors )
+			{
+				System.err.println(s);
+			}
+
+			return;
+		}
+		
+		//  Emit the bytecode.
 		try
 		{
 			String binary_file_name;
@@ -105,7 +122,7 @@ public class Main
 				binary_file_name = asmFile.substring(0, last_dot) + ".abc";
 			else
 				binary_file_name = asmFile + ".abc";
-					
+			
 			byte[] abc_binary = new AbcEmitter(core).emit();
 			java.io.OutputStream output = new java.io.FileOutputStream(binary_file_name);
 			output.write(abc_binary);
