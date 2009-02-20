@@ -314,7 +314,7 @@ namespace avmplus
 	
 		builtinDomain = new (GetGC()) Domain(this, NULL);
 		
-		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this, NULL);
+		builtinPool = AVM_INIT_BUILTIN_ABC(builtin, this);
 
 		// whack the the non-interruptable bit on all builtin functions
 		for(int i=0, size=builtinPool->methods.size(); i<size; i++)
@@ -1543,7 +1543,6 @@ return the result of the comparison ToPrimitive(x) == y.
 				}
 				break;
 			}
-				break;
 				
 			case OP_ifnlt:
 			case OP_ifnle:
