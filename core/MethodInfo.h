@@ -106,10 +106,6 @@ namespace avmplus
 
 		void updateSourceLines(int32_t linenum, int32_t offset);
 
-	#ifdef AVMPLUS_MIR
-		void setCodeSize(uint32_t c);
-	#endif
-
 	private:
 		Stringp getRegName(int index) const;
 #endif

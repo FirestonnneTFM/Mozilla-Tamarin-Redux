@@ -193,17 +193,6 @@
 #  endif
 #endif
 
-// don't want MIR enabled for a particular build? define AVMPLUS_DISABLE_MIR
-#if !defined AVMPLUS_DISABLE_MIR && !defined FEATURE_NANOJIT
-#  if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT || defined AVMPLUS_SPARC || defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 && defined AVMPLUS_WIN32
-#    define AVMPLUS_MIR
-#  endif
-#endif
-
-#if defined AVMPLUS_MIR && defined FEATURE_NANOJIT
-#  error "must not define AVMPLUS_MIR and FEATURE_NANOJIT at the same time"
-#endif
-
 #ifdef FEATURE_NANOJIT
 // enable the jitmax global variables and -jitmax switch, for bisecting nanojit bugs
 //#define AVMPLUS_JITMAX

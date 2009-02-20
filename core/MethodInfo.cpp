@@ -40,10 +40,6 @@
 
 #include "avmplus.h"
 
-#ifdef AVMPLUS_MIR
-#include "../codegen/CodegenMIR.h"
-#endif
-
 #ifdef FEATURE_NANOJIT
 #include "../codegen/CodegenLIR.h"
 #endif
@@ -119,7 +115,7 @@ namespace avmplus
 			toplevel->throwVerifyError(kNotImplementedError, this->pool->core->toErrorString(this));
 		}
 
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 
 		Verifier verifier(this, toplevel);
 
@@ -127,9 +123,7 @@ namespace avmplus
 		{
             PERFM_NTPROF("verify & IR gen");
 
-			#if defined AVMPLUS_MIR
-			CodegenMIR jit(this);
-			#elif defined FEATURE_NANOJIT
+			#if defined FEATURE_NANOJIT
 			CodegenLIR jit(this);
 			#endif
 
@@ -163,10 +157,6 @@ namespace avmplus
 			}
 			CATCH (Exception *exception) 
 			{
-                #ifdef AVMPLUS_MIR
-				jit.clearMIRBuffers();
-                #endif
-
 				// re-throw exception
 				core->throwException(exception);
 			}
@@ -275,16 +265,6 @@ namespace avmplus
 		}
 	}
 
-#ifdef AVMPLUS_MIR
-	void MethodInfo::setCodeSize(uint32_t c)
-	{
-		// MIR can legitimately call this for entries without DMI (eg synthesized init methods)
-		// so check for validity but don't assert
-		if (m_dmi)
-			m_dmi->codeSize = c;
-	}
-#endif
-
 	Stringp MethodInfo::getRegName(int slot) const 
 	{
 		AvmAssert(m_dmi != NULL);
@@ -331,7 +311,7 @@ namespace avmplus
 		if (isFlagSet(JIT_IMPL))
 		{
 			// each entry is a pointer into the function's stack frame
-			void **in = (void**)src;			// WARNING this must match with MIR generator
+			void **in = (void**)src;			// WARNING this must match with JIT generator
 
 			// now probe each type and do the atom conversion.
 			AvmCore* core = this->pool->core;
@@ -381,7 +361,7 @@ namespace avmplus
 		}
 		else
 		{
-			// no MIR then we know they are Atoms and we just copy them
+			// no JIT then we know they are Atoms and we just copy them
 			Atom* in = (Atom*)src;
 			for(int i=srcPos; i<size; i++)
 				dest[at++] = in[i];
@@ -409,8 +389,8 @@ namespace avmplus
 		// copy them 
 		if (isFlagSet(JIT_IMPL))
 		{
-			// we allocated double sized entry for each local src CodegenMIR
-			void** out = (void**)dest;		// WARNING this must match with MIR generator
+			// we allocated double sized entry for each local src 
+			void** out = (void**)dest;		// WARNING this must match with JIT generator
 
 			// now probe each type and conversion.
 			AvmCore* core = this->pool->core;
@@ -447,7 +427,7 @@ namespace avmplus
 		}
 		else
 		{
-			// no MIR then we know they are Atoms and we just copy them
+			// no JIT then we know they are Atoms and we just copy them
 			Atom* out = (Atom*)dest;
 			for(int i=destPos; i<size; i++)
 				out[i] = src[at++];

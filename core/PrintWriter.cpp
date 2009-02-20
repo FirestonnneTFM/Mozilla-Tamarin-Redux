@@ -37,9 +37,7 @@
 
 
 #include "avmplus.h"
-#if defined AVMPLUS_MIR
-#include "../codegen/CodegenMIR.h"
-#elif defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 #include "../codegen/CodegenLIR.h"
 #endif 
 
@@ -399,52 +397,6 @@ namespace avmplus
 				case 'N':
 					*this << va_arg(ap, Multiname*)->format(m_core, Multiname::MULTI_FORMAT_NS_ONLY);
 					break;
-	#if defined(AVMPLUS_MIR)
-				case 'A': // addr
-	#ifdef AVMPLUS_64BIT
-					*this << hexAddr(va_arg(ap,int64));
-	#else
-					*this << hexAddr(va_arg(ap,int));
-	#endif				
-					break;
-
-				#ifdef AVMPLUS_ARM
-				case 'R': // gp reg
-					*this << CodegenMIR::regNames[va_arg(ap, int)];
-					break;
-				#endif
-
-				#ifdef AVMPLUS_PPC
-				case 'R': {// gp reg 
-					int r = va_arg(ap,int);
-					if (r == CodegenMIR::Unknown)
-						*this << "0";
-					else
-						*this << CodegenMIR::gpregNames[r];
-					break;
-				}
-				case 'F': // fp reg
-					*this << CodegenMIR::fpregNames[va_arg(ap, int)];
-					break;
-                #endif
-					
-		#if defined (AVMPLUS_IA32) || defined (AVMPLUS_AMD64)
-				case 'R': {// gp reg 
-					int r = va_arg(ap,int);
-					if (r == CodegenMIR::Unknown)
-						*this << "0";
-					else
-						*this << CodegenMIR::gpregNames[r];
-					break;
-				}
-				case 'F': // fp reg
-					*this << CodegenMIR::xmmregNames[va_arg(ap, int)];
-					break;
-				case 'X': // x87 reg
-					*this << CodegenMIR::x87regNames[va_arg(ap, int)];
-					break;
-		#endif
-	#endif
 				case 'S':
 					*this << va_arg(ap, Stringp);
 					break;

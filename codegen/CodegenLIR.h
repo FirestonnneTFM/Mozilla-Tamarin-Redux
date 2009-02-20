@@ -268,7 +268,7 @@ namespace avmplus
 	public:
 		CodegenLIR(MethodInfo* info);
         ~CodegenLIR();
-		void clearMIRBuffers();
+		void clearBuffers();
 		void emitMD();
 	    void formatOperand(PrintWriter& buffer, LIns* oprnd);
 		void epilogue(FrameState* state);
@@ -314,7 +314,7 @@ namespace avmplus
 		bool overflow;
 		CodegenIMT(PoolObject *pool);
 		~CodegenIMT();
-		void clearMIRBuffers();
+		void clearBuffers();
 		void* emitImtThunk(ImtBuilder::ImtEntry *e);
 	};
 }

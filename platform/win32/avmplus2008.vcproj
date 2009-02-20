@@ -1484,14 +1484,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\codegen\Amd64Assembler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\ArmAssembler.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\ArrayClass.cpp"
 				>
 			</File>
@@ -1788,14 +1780,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\codegen\CodegenMIR.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\CodegenMIR.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\Coder.cpp"
 				>
 			</File>
@@ -1917,10 +1901,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\GrowableBuffer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\Ia32Assembler.cpp"
 				>
 			</File>
 			<File
@@ -2077,10 +2057,6 @@
 			</File>
 			<File
 				RelativePath="..\..\core\PoolObject.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\codegen\PpcAssembler.cpp"
 				>
 			</File>
 			<File

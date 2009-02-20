@@ -1108,7 +1108,8 @@ namespace avmplus
 			Stringp s = core->internStringUTF8((const char*)pos, len);
 
 #ifdef MMGC_DRC
-			// MIR skips WB on string constants so make them sticky
+			// Jit skips WB on string constants so make them sticky
+			// fixme -- it's incorrect to skip WB's on const's, bug was fixed; is this still required?
 			s->Stick();
 #endif
 			cpool_string.set(i, s);
@@ -1466,7 +1467,7 @@ namespace avmplus
 			script->makeMethodOf(traits);
 			traits->init = script;
 
-            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+            #if defined FEATURE_NANOJIT
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the $init methods
@@ -1723,7 +1724,7 @@ namespace avmplus
 			ctraits->final = true;
 			ctraits->set_needsHashtable(true);
 
-            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+            #if defined FEATURE_NANOJIT
 			if (core->config.runmode == RM_mixed || core->config.runmode == RM_interp_all)
 			{
 				// suggest that we don't jit the class initializer

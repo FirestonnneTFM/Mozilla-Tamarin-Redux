@@ -652,7 +652,7 @@ namespace avmplus
 	{
 	}
 
-	void CodegenLIR::clearMIRBuffers()
+	void CodegenLIR::clearBuffers()
 	{
 		// free scratch buffers explicitly.  None of these have any pointers
 		// in them, and none of them will have escaped into other objects.
@@ -4798,12 +4798,7 @@ namespace avmplus
 #ifdef DEBUGGER
 	void CodegenLIR::emitSampleCheck()
 	{
-		/* @todo in MIR, inlined sample check doesn't work, help! 
-			LIns* takeSample = loadIns(LIR_ld, 0, InsConstPtr(&core->takeSample));
-			LIns* br = Ins(MIR_jt, binaryIns(LIR_eq, takeSample, InsConst(0)));
-			callIns(FUNCTIONID(sample), 1, coreAddr);
-			br->target(lirout->ins0(LIR_label));
-		*/
+		/* @todo inline the sample check code, help!  */
 		callIns(FUNCTIONID(sampleCheck), 1, coreAddr);
 	}
 #endif
@@ -5294,7 +5289,7 @@ namespace avmplus
 	CodegenIMT::~CodegenIMT()
 	{}
 
-	void CodegenIMT::clearMIRBuffers()
+	void CodegenIMT::clearBuffers()
 	{}
 
 

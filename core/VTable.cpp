@@ -123,7 +123,7 @@ namespace avmplus
 		if (base)
 			traits->isDictionary = base->traits->isDictionary;
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		{
 			for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
 			{

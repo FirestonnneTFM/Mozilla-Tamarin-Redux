@@ -84,19 +84,15 @@ const int kBufferPadding = 16;
 		bool oldVectorMethodNames;	
 		#endif
 
-		#ifdef AVMPLUS_MIR
-		bool dceopt;
-        #endif
-
 		enum Runmode runmode;
 
-        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+        #if defined FEATURE_NANOJIT
 		/**
-		 * To speed up initialization, we don't use MIR on
+		 * To speed up initialization, we don't use jit on
 		 * $init methods; we use interp instead.  For testing
-		 * purposes, one may want to force the MIR to be used
+		 * purposes, one may want to force the jit to be used
 		 * for all code including $init methods.  The
-		 * jit switch forces all code to run through MIR/LIR
+		 * jit switch forces all code to run through the jit
 		 * instead of interpreter.
 		 */
 		bool cseopt;
@@ -114,7 +110,7 @@ const int kBufferPadding = 16;
 		bool bbgraph;
 		#endif //AVMPLUS_VERBOSE
 
-        #endif // AVMPLUS_MIR || FEATURE_NANOJIT
+        #endif // FEATURE_NANOJIT
 
         /**
 		 * If this switch is set, executing code will check the
@@ -172,7 +168,6 @@ const int kBufferPadding = 16;
 
 		#ifdef DEBUGGER
 		friend class CodegenLIR;
-		friend class CodegenMIR;
 		private:
 			Debugger*		_debugger;
 			Profiler*		_profiler;
@@ -226,20 +221,7 @@ const int kBufferPadding = 16;
 		void setCacheSizes(const CacheSizes& cs);
 
 	public:
-		#ifdef AVMPLUS_MIR
-		// MIR intermediate buffer pool
-		List<GrowableBuffer*> mirBuffers; // mir buffer pool
-		GrowableBuffer* requestNewMirBuffer();	 // create a new buffer
-		GrowableBuffer* requestMirBuffer();	     // get next buffer in list or a create a new one
-		void releaseMirBuffer(GrowableBuffer* buffer);
-		//GCSpinLock mirBufferLock;
-
-		#ifdef AVMPLUS_VERBOSE
-		MMgc::GCHashtable* codegenMethodNames;
-		#endif /* AVMPLUS_VERBOSE */
-		#endif /* MIR */
-
-        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+        #if defined FEATURE_NANOJIT
 		void initMultinameLate(Multiname& name, Atom index);
         #endif
 
@@ -273,7 +255,7 @@ const int kBufferPadding = 16;
 		inline bool verbose() const { return config.verbose; }
 		#endif
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	    inline void SetMIREnabled(bool isEnabled) {
 			config.runmode = (isEnabled) ? RM_mixed : RM_interp_all;
 		}
@@ -528,7 +510,7 @@ const int kBufferPadding = 16;
 			return Binding((uintptr_t(b) & ~7) | BKIND_GETSET);
 		}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		static Binding makeITrampBinding(uintptr_t id)
 		{
 			AvmAssert((id&7)==0); // addr must be 8-aligned

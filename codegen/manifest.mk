@@ -34,46 +34,5 @@
 #
 # ***** END LICENSE BLOCK *****
 
-ifeq (i686,$(TARGET_CPU))
 avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/CodegenMIR.cpp \
-  $(curdir)/CodegenLIR.cpp \
-  $(curdir)/Ia32Assembler.cpp \
-  $(NULL)
-endif
-
-ifeq (x86_64,$(TARGET_CPU))
-avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/CodegenMIR.cpp \
-  $(curdir)/CodegenLIR.cpp \
-  $(curdir)/Amd64Assembler.cpp \
-  $(NULL)
-endif
-
-ifeq (powerpc,$(TARGET_CPU))
-avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/CodegenMIR.cpp \
-  $(curdir)/CodegenLIR.cpp \
-  $(curdir)/PpcAssembler.cpp \
-  $(NULL)
-endif
-
-ifeq (ppc64,$(TARGET_CPU))
-avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/CodegenLIR.cpp \
-  $(NULL)
-endif
-
-ifeq (arm,$(TARGET_CPU))
-avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/CodegenLIR.cpp \
-  $(NULL)
-endif
-
-ifeq (sparc,$(TARGET_CPU))
-avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
-  $(curdir)/CodegenMIR.cpp \
-  $(curdir)/CodegenLIR.cpp \
-  $(curdir)/SparcAssembler.cpp \
-  $(NULL)
-endif
+  $(curdir)/CodegenLIR.cpp

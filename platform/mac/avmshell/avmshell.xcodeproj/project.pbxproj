@@ -165,20 +165,8 @@
 		079DF9060F3A88950031D1B4 /* XMLListClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF8D10F3A88950031D1B4 /* XMLListClass.cpp */; };
 		079DF9070F3A88950031D1B4 /* XMLListObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF8D30F3A88950031D1B4 /* XMLListObject.cpp */; };
 		079DF9080F3A88950031D1B4 /* XMLObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF8D50F3A88950031D1B4 /* XMLObject.cpp */; };
-		079DF9270F3A891C0031D1B4 /* Amd64Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF91D0F3A891C0031D1B4 /* Amd64Assembler.cpp */; };
-		079DF9280F3A891C0031D1B4 /* ArmAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF91E0F3A891C0031D1B4 /* ArmAssembler.cpp */; };
 		079DF9290F3A891C0031D1B4 /* CodegenLIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9200F3A891C0031D1B4 /* CodegenLIR.cpp */; };
-		079DF92A0F3A891C0031D1B4 /* CodegenMIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9220F3A891C0031D1B4 /* CodegenMIR.cpp */; };
-		079DF92B0F3A891C0031D1B4 /* Ia32Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9240F3A891C0031D1B4 /* Ia32Assembler.cpp */; };
-		079DF92C0F3A891C0031D1B4 /* PpcAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9250F3A891C0031D1B4 /* PpcAssembler.cpp */; };
-		079DF92D0F3A891C0031D1B4 /* SparcAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9260F3A891C0031D1B4 /* SparcAssembler.cpp */; };
-		079DF92E0F3A891C0031D1B4 /* Amd64Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF91D0F3A891C0031D1B4 /* Amd64Assembler.cpp */; };
-		079DF92F0F3A891C0031D1B4 /* ArmAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF91E0F3A891C0031D1B4 /* ArmAssembler.cpp */; };
 		079DF9300F3A891C0031D1B4 /* CodegenLIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9200F3A891C0031D1B4 /* CodegenLIR.cpp */; };
-		079DF9310F3A891C0031D1B4 /* CodegenMIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9220F3A891C0031D1B4 /* CodegenMIR.cpp */; };
-		079DF9320F3A891C0031D1B4 /* Ia32Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9240F3A891C0031D1B4 /* Ia32Assembler.cpp */; };
-		079DF9330F3A891C0031D1B4 /* PpcAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9250F3A891C0031D1B4 /* PpcAssembler.cpp */; };
-		079DF9340F3A891C0031D1B4 /* SparcAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9260F3A891C0031D1B4 /* SparcAssembler.cpp */; };
 		079DF94A0F3A893C0031D1B4 /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9350F3A893C0031D1B4 /* Assembler.cpp */; };
 		079DF94B0F3A893C0031D1B4 /* Fragmento.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9370F3A893C0031D1B4 /* Fragmento.cpp */; };
 		079DF94C0F3A893C0031D1B4 /* LIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 079DF9390F3A893C0031D1B4 /* LIR.cpp */; };
@@ -538,16 +526,8 @@
 		079DF91A0F3A88EA0031D1B4 /* Vector.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Vector.as; path = ../../../core/Vector.as; sourceTree = SOURCE_ROOT; };
 		079DF91B0F3A88EA0031D1B4 /* VectorImpl.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = VectorImpl.as; path = ../../../core/VectorImpl.as; sourceTree = SOURCE_ROOT; };
 		079DF91C0F3A88EA0031D1B4 /* XML.as */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = XML.as; path = ../../../core/XML.as; sourceTree = SOURCE_ROOT; };
-		079DF91D0F3A891C0031D1B4 /* Amd64Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Amd64Assembler.cpp; path = ../../../codegen/Amd64Assembler.cpp; sourceTree = SOURCE_ROOT; };
-		079DF91E0F3A891C0031D1B4 /* ArmAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ArmAssembler.cpp; path = ../../../codegen/ArmAssembler.cpp; sourceTree = SOURCE_ROOT; };
-		079DF91F0F3A891C0031D1B4 /* ArmAssembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArmAssembler.h; path = ../../../codegen/ArmAssembler.h; sourceTree = SOURCE_ROOT; };
 		079DF9200F3A891C0031D1B4 /* CodegenLIR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenLIR.cpp; path = ../../../codegen/CodegenLIR.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9210F3A891C0031D1B4 /* CodegenLIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodegenLIR.h; path = ../../../codegen/CodegenLIR.h; sourceTree = SOURCE_ROOT; };
-		079DF9220F3A891C0031D1B4 /* CodegenMIR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenMIR.cpp; path = ../../../codegen/CodegenMIR.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9230F3A891C0031D1B4 /* CodegenMIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodegenMIR.h; path = ../../../codegen/CodegenMIR.h; sourceTree = SOURCE_ROOT; };
-		079DF9240F3A891C0031D1B4 /* Ia32Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ia32Assembler.cpp; path = ../../../codegen/Ia32Assembler.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9250F3A891C0031D1B4 /* PpcAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PpcAssembler.cpp; path = ../../../codegen/PpcAssembler.cpp; sourceTree = SOURCE_ROOT; };
-		079DF9260F3A891C0031D1B4 /* SparcAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparcAssembler.cpp; path = ../../../codegen/SparcAssembler.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9350F3A893C0031D1B4 /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cpp; path = ../../../nanojit/Assembler.cpp; sourceTree = SOURCE_ROOT; };
 		079DF9360F3A893C0031D1B4 /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Assembler.h; path = ../../../nanojit/Assembler.h; sourceTree = SOURCE_ROOT; };
 		079DF9370F3A893C0031D1B4 /* Fragmento.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Fragmento.cpp; path = ../../../nanojit/Fragmento.cpp; sourceTree = SOURCE_ROOT; };
@@ -921,16 +901,8 @@
 		079DF7B20F3A86EB0031D1B4 /* codegen */ = {
 			isa = PBXGroup;
 			children = (
-				079DF91D0F3A891C0031D1B4 /* Amd64Assembler.cpp */,
-				079DF91E0F3A891C0031D1B4 /* ArmAssembler.cpp */,
-				079DF91F0F3A891C0031D1B4 /* ArmAssembler.h */,
 				079DF9200F3A891C0031D1B4 /* CodegenLIR.cpp */,
 				079DF9210F3A891C0031D1B4 /* CodegenLIR.h */,
-				079DF9220F3A891C0031D1B4 /* CodegenMIR.cpp */,
-				079DF9230F3A891C0031D1B4 /* CodegenMIR.h */,
-				079DF9240F3A891C0031D1B4 /* Ia32Assembler.cpp */,
-				079DF9250F3A891C0031D1B4 /* PpcAssembler.cpp */,
-				079DF9260F3A891C0031D1B4 /* SparcAssembler.cpp */,
 			);
 			name = codegen;
 			sourceTree = "<group>";
@@ -1362,13 +1334,7 @@
 				079DF9060F3A88950031D1B4 /* XMLListClass.cpp in Sources */,
 				079DF9070F3A88950031D1B4 /* XMLListObject.cpp in Sources */,
 				079DF9080F3A88950031D1B4 /* XMLObject.cpp in Sources */,
-				079DF92E0F3A891C0031D1B4 /* Amd64Assembler.cpp in Sources */,
-				079DF92F0F3A891C0031D1B4 /* ArmAssembler.cpp in Sources */,
 				079DF9300F3A891C0031D1B4 /* CodegenLIR.cpp in Sources */,
-				079DF9310F3A891C0031D1B4 /* CodegenMIR.cpp in Sources */,
-				079DF9320F3A891C0031D1B4 /* Ia32Assembler.cpp in Sources */,
-				079DF9330F3A891C0031D1B4 /* PpcAssembler.cpp in Sources */,
-				079DF9340F3A891C0031D1B4 /* SparcAssembler.cpp in Sources */,
 				079DF9530F3A893C0031D1B4 /* Assembler.cpp in Sources */,
 				079DF9540F3A893C0031D1B4 /* Fragmento.cpp in Sources */,
 				079DF9550F3A893C0031D1B4 /* LIR.cpp in Sources */,
@@ -1519,13 +1485,7 @@
 				079DF8ED0F3A88950031D1B4 /* XMLListClass.cpp in Sources */,
 				079DF8EE0F3A88950031D1B4 /* XMLListObject.cpp in Sources */,
 				079DF8EF0F3A88950031D1B4 /* XMLObject.cpp in Sources */,
-				079DF9270F3A891C0031D1B4 /* Amd64Assembler.cpp in Sources */,
-				079DF9280F3A891C0031D1B4 /* ArmAssembler.cpp in Sources */,
 				079DF9290F3A891C0031D1B4 /* CodegenLIR.cpp in Sources */,
-				079DF92A0F3A891C0031D1B4 /* CodegenMIR.cpp in Sources */,
-				079DF92B0F3A891C0031D1B4 /* Ia32Assembler.cpp in Sources */,
-				079DF92C0F3A891C0031D1B4 /* PpcAssembler.cpp in Sources */,
-				079DF92D0F3A891C0031D1B4 /* SparcAssembler.cpp in Sources */,
 				079DF94A0F3A893C0031D1B4 /* Assembler.cpp in Sources */,
 				079DF94B0F3A893C0031D1B4 /* Fragmento.cpp in Sources */,
 				079DF94C0F3A893C0031D1B4 /* LIR.cpp in Sources */,

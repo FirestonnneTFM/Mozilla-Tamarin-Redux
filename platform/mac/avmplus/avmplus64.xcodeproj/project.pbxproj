@@ -10,12 +10,8 @@
 		070869020F39452A00A5F31C /* Coder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070868FF0F39452A00A5F31C /* Coder.cpp */; };
 		070869030F39452A00A5F31C /* Coder.h in Headers */ = {isa = PBXBuildFile; fileRef = 070869000F39452A00A5F31C /* Coder.h */; };
 		070869040F39452A00A5F31C /* peephole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869010F39452A00A5F31C /* peephole.cpp */; };
-		070869220F39460400A5F31C /* ArmAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708691C0F39460400A5F31C /* ArmAssembler.cpp */; };
-		070869230F39460400A5F31C /* ArmAssembler.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708691D0F39460400A5F31C /* ArmAssembler.h */; };
 		070869240F39460400A5F31C /* CodegenLIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708691E0F39460400A5F31C /* CodegenLIR.cpp */; };
 		070869250F39460400A5F31C /* CodegenLIR.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708691F0F39460400A5F31C /* CodegenLIR.h */; };
-		070869260F39460400A5F31C /* Ia32Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869200F39460400A5F31C /* Ia32Assembler.cpp */; };
-		070869270F39460400A5F31C /* SparcAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 070869210F39460400A5F31C /* SparcAssembler.cpp */; };
 		0708693F0F39463400A5F31C /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708692A0F39463400A5F31C /* Assembler.cpp */; };
 		070869400F39463400A5F31C /* Assembler.h in Headers */ = {isa = PBXBuildFile; fileRef = 0708692B0F39463400A5F31C /* Assembler.h */; };
 		070869410F39463400A5F31C /* Fragmento.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0708692C0F39463400A5F31C /* Fragmento.cpp */; };
@@ -47,9 +43,6 @@
 		07F774780EC82CFD00570C8C /* DescribeTypeClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 07F774760EC82CFD00570C8C /* DescribeTypeClass.h */; };
 		07F774810EC82D9000570C8C /* TypeDescriber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07F7747F0EC82D9000570C8C /* TypeDescriber.cpp */; };
 		07F774820EC82D9000570C8C /* TypeDescriber.h in Headers */ = {isa = PBXBuildFile; fileRef = 07F774800EC82D9000570C8C /* TypeDescriber.h */; };
-		1E6078E8097335B3007D0E1E /* CodegenMIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */; };
-		1E6078E9097335B3007D0E1E /* CodegenMIR.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6078E5097335B3007D0E1E /* CodegenMIR.h */; };
-		1E6078EB097335B3007D0E1E /* PpcAssembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6078E7097335B3007D0E1E /* PpcAssembler.cpp */; };
 		1E60798E097335EF007D0E1E /* AbcEnv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6078EE097335EF007D0E1E /* AbcEnv.cpp */; };
 		1E60798F097335EF007D0E1E /* AbcEnv.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6078EF097335EF007D0E1E /* AbcEnv.h */; };
 		1E607990097335EF007D0E1E /* AbcGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6078F0097335EF007D0E1E /* AbcGen.cpp */; };
@@ -205,7 +198,6 @@
 		1E607F9709733ED1007D0E1E /* MathUtilsUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607F9409733ED1007D0E1E /* MathUtilsUnix.cpp */; };
 		1E607F9809733ED1007D0E1E /* OSDepUnix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E607F9509733ED1007D0E1E /* OSDepUnix.cpp */; };
 		1EC50991097391B400040CAB /* Date.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC50990097391B400040CAB /* Date.cpp */; };
-		47BB6CCA0B08D9F800036360 /* Amd64Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47BB6CC90B08D9F800036360 /* Amd64Assembler.cpp */; };
 		7CD864E60AC47805004C73CB /* AbcData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CD864E50AC47805004C73CB /* AbcData.cpp */; };
 		85125ADF0A5C648300502345 /* AvmPlusScriptableObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 85125ADD0A5C648300502345 /* AvmPlusScriptableObject.cpp */; };
 		85125AE00A5C648300502345 /* AvmPlusScriptableObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 85125ADE0A5C648300502345 /* AvmPlusScriptableObject.h */; };
@@ -240,12 +232,8 @@
 		070868FF0F39452A00A5F31C /* Coder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Coder.cpp; path = ../../../core/Coder.cpp; sourceTree = SOURCE_ROOT; };
 		070869000F39452A00A5F31C /* Coder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Coder.h; path = ../../../core/Coder.h; sourceTree = SOURCE_ROOT; };
 		070869010F39452A00A5F31C /* peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peephole.cpp; path = ../../../core/peephole.cpp; sourceTree = SOURCE_ROOT; };
-		0708691C0F39460400A5F31C /* ArmAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ArmAssembler.cpp; path = ../../../codegen/ArmAssembler.cpp; sourceTree = SOURCE_ROOT; };
-		0708691D0F39460400A5F31C /* ArmAssembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArmAssembler.h; path = ../../../codegen/ArmAssembler.h; sourceTree = SOURCE_ROOT; };
 		0708691E0F39460400A5F31C /* CodegenLIR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenLIR.cpp; path = ../../../codegen/CodegenLIR.cpp; sourceTree = SOURCE_ROOT; };
 		0708691F0F39460400A5F31C /* CodegenLIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodegenLIR.h; path = ../../../codegen/CodegenLIR.h; sourceTree = SOURCE_ROOT; };
-		070869200F39460400A5F31C /* Ia32Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ia32Assembler.cpp; path = ../../../codegen/Ia32Assembler.cpp; sourceTree = SOURCE_ROOT; };
-		070869210F39460400A5F31C /* SparcAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparcAssembler.cpp; path = ../../../codegen/SparcAssembler.cpp; sourceTree = SOURCE_ROOT; };
 		0708692A0F39463400A5F31C /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cpp; path = ../../../nanojit/Assembler.cpp; sourceTree = SOURCE_ROOT; };
 		0708692B0F39463400A5F31C /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Assembler.h; path = ../../../nanojit/Assembler.h; sourceTree = SOURCE_ROOT; };
 		0708692C0F39463400A5F31C /* Fragmento.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Fragmento.cpp; path = ../../../nanojit/Fragmento.cpp; sourceTree = SOURCE_ROOT; };
@@ -277,9 +265,6 @@
 		07F774760EC82CFD00570C8C /* DescribeTypeClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DescribeTypeClass.h; path = ../../../core/DescribeTypeClass.h; sourceTree = SOURCE_ROOT; };
 		07F7747F0EC82D9000570C8C /* TypeDescriber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeDescriber.cpp; path = ../../../core/TypeDescriber.cpp; sourceTree = SOURCE_ROOT; };
 		07F774800EC82D9000570C8C /* TypeDescriber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TypeDescriber.h; path = ../../../core/TypeDescriber.h; sourceTree = SOURCE_ROOT; };
-		1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenMIR.cpp; path = ../../../codegen/CodegenMIR.cpp; sourceTree = SOURCE_ROOT; };
-		1E6078E5097335B3007D0E1E /* CodegenMIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = CodegenMIR.h; path = ../../../codegen/CodegenMIR.h; sourceTree = SOURCE_ROOT; };
-		1E6078E7097335B3007D0E1E /* PpcAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = PpcAssembler.cpp; path = ../../../codegen/PpcAssembler.cpp; sourceTree = SOURCE_ROOT; };
 		1E6078EE097335EF007D0E1E /* AbcEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AbcEnv.cpp; path = ../../../core/AbcEnv.cpp; sourceTree = SOURCE_ROOT; };
 		1E6078EF097335EF007D0E1E /* AbcEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AbcEnv.h; path = ../../../core/AbcEnv.h; sourceTree = SOURCE_ROOT; };
 		1E6078F0097335EF007D0E1E /* AbcGen.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AbcGen.cpp; path = ../../../core/AbcGen.cpp; sourceTree = SOURCE_ROOT; };
@@ -435,7 +420,6 @@
 		1E607F9409733ED1007D0E1E /* MathUtilsUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MathUtilsUnix.cpp; path = ../../unix/MathUtilsUnix.cpp; sourceTree = SOURCE_ROOT; };
 		1E607F9509733ED1007D0E1E /* OSDepUnix.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = OSDepUnix.cpp; path = ../../unix/OSDepUnix.cpp; sourceTree = SOURCE_ROOT; };
 		1EC50990097391B400040CAB /* Date.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Date.cpp; path = ../../../core/Date.cpp; sourceTree = SOURCE_ROOT; };
-		47BB6CC90B08D9F800036360 /* Amd64Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Amd64Assembler.cpp; path = ../../../codegen/Amd64Assembler.cpp; sourceTree = SOURCE_ROOT; };
 		7CD864E50AC47805004C73CB /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AbcData.cpp; path = ../../../core/AbcData.cpp; sourceTree = SOURCE_ROOT; };
 		85125ADD0A5C648300502345 /* AvmPlusScriptableObject.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = AvmPlusScriptableObject.cpp; path = ../../../core/AvmPlusScriptableObject.cpp; sourceTree = SOURCE_ROOT; };
 		85125ADE0A5C648300502345 /* AvmPlusScriptableObject.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = AvmPlusScriptableObject.h; path = ../../../core/AvmPlusScriptableObject.h; sourceTree = SOURCE_ROOT; };
@@ -531,16 +515,8 @@
 		1E607A9E0973377F007D0E1E /* CodenGen */ = {
 			isa = PBXGroup;
 			children = (
-				0708691C0F39460400A5F31C /* ArmAssembler.cpp */,
-				0708691D0F39460400A5F31C /* ArmAssembler.h */,
 				0708691E0F39460400A5F31C /* CodegenLIR.cpp */,
 				0708691F0F39460400A5F31C /* CodegenLIR.h */,
-				070869200F39460400A5F31C /* Ia32Assembler.cpp */,
-				070869210F39460400A5F31C /* SparcAssembler.cpp */,
-				47BB6CC90B08D9F800036360 /* Amd64Assembler.cpp */,
-				1E6078E4097335B3007D0E1E /* CodegenMIR.cpp */,
-				1E6078E5097335B3007D0E1E /* CodegenMIR.h */,
-				1E6078E7097335B3007D0E1E /* PpcAssembler.cpp */,
 			);
 			name = CodenGen;
 			sourceTree = "<group>";
@@ -792,7 +768,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E6078E9097335B3007D0E1E /* CodegenMIR.h in Headers */,
 				1E60798F097335EF007D0E1E /* AbcEnv.h in Headers */,
 				1E607991097335EF007D0E1E /* AbcGen.h in Headers */,
 				1E607993097335EF007D0E1E /* AbcParser.h in Headers */,
@@ -888,7 +863,6 @@
 				07F774780EC82CFD00570C8C /* DescribeTypeClass.h in Headers */,
 				07F774820EC82D9000570C8C /* TypeDescriber.h in Headers */,
 				070869030F39452A00A5F31C /* Coder.h in Headers */,
-				070869230F39460400A5F31C /* ArmAssembler.h in Headers */,
 				070869250F39460400A5F31C /* CodegenLIR.h in Headers */,
 				070869400F39463400A5F31C /* Assembler.h in Headers */,
 				070869420F39463400A5F31C /* Fragmento.h in Headers */,
@@ -947,8 +921,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E6078E8097335B3007D0E1E /* CodegenMIR.cpp in Sources */,
-				1E6078EB097335B3007D0E1E /* PpcAssembler.cpp in Sources */,
 				1E60798E097335EF007D0E1E /* AbcEnv.cpp in Sources */,
 				1E607990097335EF007D0E1E /* AbcGen.cpp in Sources */,
 				1E607992097335EF007D0E1E /* AbcParser.cpp in Sources */,
@@ -1039,7 +1011,6 @@
 				8EE6F44F09AA541600DE11A0 /* pcre_xclass.cpp in Sources */,
 				85125ADF0A5C648300502345 /* AvmPlusScriptableObject.cpp in Sources */,
 				7CD864E60AC47805004C73CB /* AbcData.cpp in Sources */,
-				47BB6CCA0B08D9F800036360 /* Amd64Assembler.cpp in Sources */,
 				94A154610BB9966700DD0F47 /* Sampler.cpp in Sources */,
 				D9A92C2D0E512ACE001AA197 /* pcre_newline.cpp in Sources */,
 				D9A92C300E512B00001AA197 /* VectorClass.cpp in Sources */,
@@ -1051,10 +1022,7 @@
 				07F774810EC82D9000570C8C /* TypeDescriber.cpp in Sources */,
 				070869020F39452A00A5F31C /* Coder.cpp in Sources */,
 				070869040F39452A00A5F31C /* peephole.cpp in Sources */,
-				070869220F39460400A5F31C /* ArmAssembler.cpp in Sources */,
 				070869240F39460400A5F31C /* CodegenLIR.cpp in Sources */,
-				070869260F39460400A5F31C /* Ia32Assembler.cpp in Sources */,
-				070869270F39460400A5F31C /* SparcAssembler.cpp in Sources */,
 				0708693F0F39463400A5F31C /* Assembler.cpp in Sources */,
 				070869410F39463400A5F31C /* Fragmento.cpp in Sources */,
 				070869430F39463400A5F31C /* LIR.cpp in Sources */,

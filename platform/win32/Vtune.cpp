@@ -38,11 +38,7 @@
 #include "avmplus.h"
 
 #ifdef VTUNE
-#ifdef AVMPLUS_MIR
-#include "CodegenMIR.h"
-#else
 #include "CodegenLIR.h"
-#endif
 
 namespace avmplus
 {

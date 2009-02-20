@@ -62,18 +62,11 @@ namespace avmplus
 		namedTraits = new(core->GetGC()) MultinameHashtable();
 		privateNamedScripts = new(core->GetGC()) MultinameHashtable();
 		m_code = sb.getImpl();
-#if defined(AVMPLUS_MIR)
-		MMGC_MEM_TAG("JIT");
-		codeBuffer = new GrowableBuffer(core->GetGC()->GetGCHeap());
-#endif
 		version = AvmCore::readU16(&code()[0]) | AvmCore::readU16(&code()[2])<<16;
 	}
 
 	PoolObject::~PoolObject()
 	{
-		#ifdef AVMPLUS_MIR
-		delete codeBuffer;
-		#endif
 		#ifdef AVMPLUS_WORD_CODE
 		delete word_code.cpool_mn;
 		#endif

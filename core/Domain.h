@@ -76,14 +76,14 @@ namespace avmplus
 		 */
 		enum {
 			GLOBAL_MEMORY_MIN_SIZE =
-// on IA32, we have HAVE_MIR_SMOPS and can optimize range checks
+// if we have JIT support for MOPS we can optimize range checks
 // against ranges that can fit within the minimum memory size
 // so it's worth burning a little space
-#ifdef AVMPLUS_IA32
-				1024
-#else
+//#ifdef AVMPLUS_IA32
+//				1024
+//#else
 				8
-#endif
+//#endif
 		};
 		// backing store for global memory
 		mutable unsigned char *globalMemoryBase;

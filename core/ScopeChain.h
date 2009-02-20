@@ -90,9 +90,7 @@ namespace avmplus
 	*/
 	class ScopeChain : public MMgc::GCObject
 	{
-		#if defined AVMPLUS_MIR
-		friend class CodegenMIR;
-		#elif defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif
 	public:

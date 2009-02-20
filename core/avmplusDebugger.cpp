@@ -811,9 +811,9 @@ namespace avmplus
 				MethodInfo* info = (MethodInfo*)trace->info();
 				info->boxLocals(trace->framep(), firstLocal, trace->traits(), ar, 0, count);
 
-				// If NEED_REST or NEED_ARGUMENTS is set, and the MIR is being used, then the first
+				// If NEED_REST or NEED_ARGUMENTS is set, and the jit is being used, then the first
 				// local is actually not an atom at all -- it is an ArrayObject*.  So, we need to
-				// convert it to an atom.  (If the interpreter is being used instead of the MIR, then
+				// convert it to an atom.  (If the interpreter is being used instead of the jit, then
 				// it is stored as an atom.)
 				if (info->flags & (AbstractFunction::NEED_REST | AbstractFunction::NEED_ARGUMENTS))
 				{

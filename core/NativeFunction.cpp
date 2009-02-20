@@ -40,10 +40,6 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
-#ifdef AVMPLUS_MIR
-#include "../codegen/CodegenMIR.h"
-#endif
-
 using namespace MMgc;
 
 namespace avmplus

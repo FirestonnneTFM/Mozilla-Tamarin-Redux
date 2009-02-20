@@ -56,9 +56,7 @@ namespace avmplus
 	 * incompatible frame states cause verify errors.
 	 */
 
-	#if defined AVMPLUS_MIR
-	class CodegenMIR;
-	#elif defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 	class CodegenLIR;
 	#endif
 
@@ -67,10 +65,6 @@ namespace avmplus
 	public:
 
 	    CodeWriter* coder;
-
-		#if defined AVMPLUS_MIR
-		CodegenMIR *jit;
-		#endif // AVMPLUS_MIR
 
 		#ifdef FEATURE_NANOJIT
 		CodegenLIR *jit;
@@ -126,9 +120,7 @@ namespace avmplus
 		 * an exception will be thrown, of type VerifyError.
 		 * @param info the method to verify
 		 */
-#if defined AVMPLUS_MIR
-		void verify(CodegenMIR* volatile);
-#elif defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		void verify(CodegenLIR* volatile);
 #else
 		void verify();
@@ -136,12 +128,8 @@ namespace avmplus
 		FrameState* getFrameState(sintptr targetpc);
 
 		// provide access to known jitters
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-		#if defined AVMPLUS_MIR
-		Toplevel* getToplevel (CodegenMIR* jit) {
-		#elif defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 		Toplevel* getToplevel (CodegenLIR* jit) {
-		#endif
 		    if(jit == this->jit) return toplevel;
 			return NULL;
 		}
@@ -149,12 +137,6 @@ namespace avmplus
 
 	private:
 		Toplevel* toplevel;
-		#ifdef FEATURE_BUFFER_GUARD
-		#ifdef AVMPLUS_MIR
-		GrowthGuard *growthGuard;
-		#endif
-		#endif
-
 		FrameState* newFrameState();
 		Value& checkLocal(int local);
 		AbstractFunction*  checkDispId(Traits* traits, uint32_t disp_id);

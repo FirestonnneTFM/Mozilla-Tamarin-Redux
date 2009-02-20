@@ -129,14 +129,7 @@
 		1A91570E0B012A3F00744986 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		470266390B053A6F007B70DD /* MMgc64.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MMgc64.xcodeproj; path = ../MMgc/MMgc64.xcodeproj; sourceTree = SOURCE_ROOT; };
 		47BA8F1F0B053AB10092107F /* avmplus64.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = avmplus64.xcodeproj; path = ../avmplus/avmplus64.xcodeproj; sourceTree = SOURCE_ROOT; };
-		4EF1E4EE0D62458A000392CC /* Amd64Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Amd64Assembler.cpp; sourceTree = "<group>"; };
-		4EF1E4EF0D62458A000392CC /* ArmAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ArmAssembler.cpp; sourceTree = "<group>"; };
-		4EF1E4F00D62458A000392CC /* ArmAssembler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ArmAssembler.h; sourceTree = "<group>"; };
-		4EF1E4F10D62458A000392CC /* CodegenMIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CodegenMIR.cpp; sourceTree = "<group>"; };
-		4EF1E4F20D62458A000392CC /* CodegenMIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CodegenMIR.h; sourceTree = "<group>"; };
-		4EF1E4F30D62458A000392CC /* Ia32Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Ia32Assembler.cpp; sourceTree = "<group>"; };
 		4EF1E4F40D62458A000392CC /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = manifest.mk; sourceTree = "<group>"; };
-		4EF1E4F50D62458A000392CC /* PpcAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = PpcAssembler.cpp; sourceTree = "<group>"; };
 		4EF1E4F70D62459F000392CC /* AbcData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AbcData.cpp; sourceTree = "<group>"; };
 		4EF1E4F80D62459F000392CC /* AbcEnv.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AbcEnv.cpp; sourceTree = "<group>"; };
 		4EF1E4F90D62459F000392CC /* AbcEnv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AbcEnv.h; sourceTree = "<group>"; };
@@ -491,14 +484,7 @@
 		4EF1E4ED0D62458A000392CC /* codegen */ = {
 			isa = PBXGroup;
 			children = (
-				4EF1E4EE0D62458A000392CC /* Amd64Assembler.cpp */,
-				4EF1E4EF0D62458A000392CC /* ArmAssembler.cpp */,
-				4EF1E4F00D62458A000392CC /* ArmAssembler.h */,
-				4EF1E4F10D62458A000392CC /* CodegenMIR.cpp */,
-				4EF1E4F20D62458A000392CC /* CodegenMIR.h */,
-				4EF1E4F30D62458A000392CC /* Ia32Assembler.cpp */,
 				4EF1E4F40D62458A000392CC /* manifest.mk */,
-				4EF1E4F50D62458A000392CC /* PpcAssembler.cpp */,
 			);
 			name = codegen;
 			path = ../../../codegen;

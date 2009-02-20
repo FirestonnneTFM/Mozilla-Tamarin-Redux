@@ -331,14 +331,7 @@
 		4E62BEF70D6244D300A24F2D /* XMLObject.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = XMLObject.h; sourceTree = "<group>"; };
 		4E62BEF80D6244D300A24F2D /* XMLParser16.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = XMLParser16.cpp; sourceTree = "<group>"; };
 		4E62BEF90D6244D300A24F2D /* XMLParser16.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = XMLParser16.h; sourceTree = "<group>"; };
-		4E62BEFB0D62450800A24F2D /* Amd64Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Amd64Assembler.cpp; sourceTree = "<group>"; };
-		4E62BEFC0D62450800A24F2D /* ArmAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ArmAssembler.cpp; sourceTree = "<group>"; };
-		4E62BEFD0D62450800A24F2D /* ArmAssembler.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ArmAssembler.h; sourceTree = "<group>"; };
-		4E62BEFE0D62450800A24F2D /* CodegenMIR.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CodegenMIR.cpp; sourceTree = "<group>"; };
-		4E62BEFF0D62450800A24F2D /* CodegenMIR.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CodegenMIR.h; sourceTree = "<group>"; };
-		4E62BF000D62450800A24F2D /* Ia32Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Ia32Assembler.cpp; sourceTree = "<group>"; };
 		4E62BF010D62450800A24F2D /* manifest.mk */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = manifest.mk; sourceTree = "<group>"; };
-		4E62BF020D62450800A24F2D /* PpcAssembler.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = PpcAssembler.cpp; sourceTree = "<group>"; };
 		4E62BF040D62451F00A24F2D /* armbuild.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = armbuild.h; sourceTree = "<group>"; };
 		4E62BF050D62451F00A24F2D /* FixedAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FixedAlloc.cpp; sourceTree = "<group>"; };
 		4E62BF060D62451F00A24F2D /* FixedAlloc.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FixedAlloc.h; sourceTree = "<group>"; };
@@ -758,14 +751,7 @@
 			children = (
 				4E1E42550E6339CD0095C2E7 /* CodegenLIR.cpp */,
 				4E1E42560E6339CD0095C2E7 /* CodegenLIR.h */,
-				4E62BEFB0D62450800A24F2D /* Amd64Assembler.cpp */,
-				4E62BEFC0D62450800A24F2D /* ArmAssembler.cpp */,
-				4E62BEFD0D62450800A24F2D /* ArmAssembler.h */,
-				4E62BEFE0D62450800A24F2D /* CodegenMIR.cpp */,
-				4E62BEFF0D62450800A24F2D /* CodegenMIR.h */,
-				4E62BF000D62450800A24F2D /* Ia32Assembler.cpp */,
 				4E62BF010D62450800A24F2D /* manifest.mk */,
-				4E62BF020D62450800A24F2D /* PpcAssembler.cpp */,
 			);
 			name = codegen;
 			path = ../../../codegen;

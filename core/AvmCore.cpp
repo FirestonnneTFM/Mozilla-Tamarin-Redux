@@ -39,10 +39,6 @@
 #include "avmplus.h"
 #include "BuiltinNatives.h"
 
-#ifdef AVMPLUS_MIR
-#include "CodegenMIR.h"
-#endif
-
 //GCC only allows intrinsics if sse2 is enabled
 #if (defined(_MSC_VER) || (defined(__GNUC__) && defined(__SSE2__))) && (defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64))
     #include <emmintrin.h>
@@ -83,9 +79,6 @@ namespace avmplus
 		gc(g), 
  		m_tbCache(new (g) QCache(0, g)),	// bindings: unlimited by default
  		m_tmCache(new (g) QCache(1, g)),	// metadata: limited to 1 by default
-#ifdef AVMPLUS_MIR
-		mirBuffers(g, 4), 
-#endif
 		gcInterface(g)
 #ifdef DEBUGGER
 		, _sampler(NULL)
@@ -137,12 +130,8 @@ namespace avmplus
 			config.verbose_exits = false;
 		#endif
 
-		#ifdef AVMPLUS_MIR
-			config.dceopt = true;
-        #endif
-
-        #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-			// jit flag forces use of MIR/LIR instead of interpreter
+        #if defined FEATURE_NANOJIT
+			// jit flag forces use of jit-compiler instead of interpreter
     	    config.runmode = RM_mixed;
 			config.cseopt = true;
 
@@ -153,7 +142,7 @@ namespace avmplus
 		    #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
     		config.sse2 = true;
 			#endif
-		#endif // AVMPLUS_MIR || FEATURE_NANOJIT
+		#endif // FEATURE_NANOJIT
 
 	#ifdef VTUNE
 			VTuneStatus = CheckVTuneStatus();
@@ -252,10 +241,6 @@ namespace avmplus
 		// create public namespace 
 		publicNamespace = internNamespace(newNamespace(kEmptyString));
 
-		#if defined AVMPLUS_MIR && defined(AVMPLUS_VERBOSE)
-		codegenMethodNames = CodegenMIR::initMethodNames(this);
-		#endif
-
 		#ifdef AVMPLUS_WITH_JNI
 		java = NULL;
 		#endif
@@ -277,20 +262,11 @@ namespace avmplus
 			gc->SetGCContextVariable(GC::GCV_AVMCORE, NULL);
 		}
 
-		#if defined AVMPLUS_MIR && defined(AVMPLUS_VERBOSE)
-		delete codegenMethodNames;
-		#endif
-
 		strings = NULL;
 
 		delete [] namespaces;
 		namespaces = NULL;
 
-#ifdef AVMPLUS_MIR
-		// free all the mir buffers
-		while(mirBuffers.size() > 0)
-			delete mirBuffers.removeFirst();
-#endif
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 		AvmAssert(g_tmcore == this);
 		g_tmcore = NULL;
@@ -3973,34 +3949,6 @@ return the result of the comparison ToPrimitive(x) == y.
 		}
 	}
 
-#ifdef AVMPLUS_MIR
-	/**
-	 * MIR needs a large intermediate buffer for codegen.
-	 * These routines allow reuse of this buffer(s)
-	 */				  
-	GrowableBuffer* AvmCore::requestMirBuffer()
-	{
-		GrowableBuffer* buffer = 0;
-		if (mirBuffers.size() > 0)
-			buffer = mirBuffers.removeFirst();
-		else
-			buffer = requestNewMirBuffer();
-		return buffer;
-	}
-
-	GrowableBuffer* AvmCore::requestNewMirBuffer()
-	{
-		MMGC_MEM_TAG("JIT");
-		return new GrowableBuffer(GetGC()->GetGCHeap(),true);
-	}
-
-	void AvmCore::releaseMirBuffer(GrowableBuffer* buffer)
-	{
-		 buffer->free();  // free the underlying space
-		mirBuffers.add(buffer);
-	}
-#endif
-
 #ifdef MMGC_DRC
 	/*static*/ 
 	void AvmCore::decrementAtomRegion(Atom *arr, int length)
@@ -4075,7 +4023,7 @@ return the result of the comparison ToPrimitive(x) == y.
 		return (Atom)obj|kDoubleType;
 	}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 
 	void AvmCore::initMultinameLate(Multiname& name, Atom index)
 	{
@@ -4094,7 +4042,7 @@ return the result of the comparison ToPrimitive(x) == y.
 
 		name.setName(intern(index));
 	}		
-#endif // MIR or NANOJIT
+#endif // NANOJIT
 
 	void AvmCore::allocaInit()
 	{
