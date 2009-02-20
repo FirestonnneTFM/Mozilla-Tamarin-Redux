@@ -37,18 +37,22 @@
  * ***** END LICENSE BLOCK ***** */
 package adobe.abcasm;
 
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
-
 import java.util.Vector;
 
-class Traits
+class Traits extends Vector<Trait>
 {
-    Vector<Trait> entries = new Vector();
-}
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3691060424629191999L;
+	private Integer explicitCount;
 
-class Trait
-{
-	String name;
-	int kind;
+	public int getTraitCount()
+	{
+		if ( explicitCount != null )
+			return explicitCount;
+		else
+			return size();
+	}
 	
 }

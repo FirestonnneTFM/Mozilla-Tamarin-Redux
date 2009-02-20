@@ -163,26 +163,267 @@ translation_unit:
     decl*
 	;
 
-decl:
-	function_decl
+decl
+	scope { MethodBodyInfo method_body_info; }
+	:
+	script_info
+	| method_info
+	| method_body_info
+	| sugared_function_decl
 	;
 
-function_decl:
-    function_header block
+method_info
+	@init { MethodInfo mi; }
+	:
+		'.method_info' 
+		{
+			mi = new MethodInfo();
+		}
+		LBRACE
+		(
+			'name' ':' function_name = IDENTIFIER
+			{
+			    mi.methodName = function_name.getText();
+			}
+			| 'return_type' ':' rettype = type_name
+			{
+			    mi.returnType = rettype;
+			}
+			| 'flags' ':' flags = method_info_flags
+			{
+				mi.flags = flags;
+			}
+			| 'param_type' ':' LBRACE method_parameters[mi.paramTypes]? RBRACE
+		)*
+		RBRACE
+		{
+			asmCore.addMethodInfo(mi);
+		}
 	;
 
-function_header:
-	'function' IDENTIFIER plist (COLON SPLAT)?
+method_parameters[java.util.Vector<Name> param_types]
+	:
+	(
+		first_type = identifier
+		{
+			param_types.add(first_type);
+		}
+
+		(
+			',' next_type = identifier
+			{
+			    param_types.add(next_type);
+			}
+		)*
+	)
+	;
+
+method_info_flags
+	returns [byte flags]
+	@init { flags = 0; }
+	:
+	( 
+		('|' | '+' )?
+		'NEED_ARGUMENTS' { flags |= METHOD_Arguments; }
+		| 'NEED_ACTIVATION' { flags |= METHOD_Activation; }
+		| 'NEED_REST' { flags |= METHOD_Needrest;}
+		| 'HAS_OPTIONAL' { flags |= METHOD_HasOptional; }
+		| 'SET_DXNS' { flags |= METHOD_Setsdxns; }
+		| 'SETS_DXNS' { flags |= METHOD_Setsdxns; }
+		| 'HAS_PARAM_NAMES' { flags |= METHOD_HasParamNames; }
+	)*
 	{
-	    asmCore.newFunction($IDENTIFIER.getText() );
+		return flags;
 	}
 	;
 
-block:
+
+attribute[String attr_name]
+	: id = IDENTIFIER { $id.getText().equals(attr_name) }? '=' attribute_value
+	;
+
+script_info
+	returns [ScriptInfo result]
+	@init { result = new ScriptInfo(); }
+	: '.script_info' LBRACE
+	(
+		'init' ':' initial_function = function_id
+		{
+		    result.setInit(initial_function);
+		}
+		| 'traits' ':' LBRACE traits[result.traits] RBRACE
+	)+
+	RBRACE
+	{
+		asmCore.addScript(result);
+	}
+	;
+	
+method_body_info
+	@init { Traits traits; }
+	: '.method_body_info'
+	{
+		$decl::method_body_info = new MethodBodyInfo();
+		traits = $decl::method_body_info.traits;
+	}
+	LBRACE
+	(
+		'method' ':' method_id = function_id
+		{
+			$decl::method_body_info.methodId = method_id;
+		}
+		| 'local_count' ':' max_local = integer_literal
+		{
+			$decl::method_body_info.explicit_max_local = new Integer(max_local);
+		}
+		| 'max_stack' ':' max_stack = integer_literal
+		{
+			$decl::method_body_info.explicit_max_stack = new Integer(max_stack);
+		}
+		| 'max_scope_depth' ':' max_scope = integer_literal
+		{
+			$decl::method_body_info.explicit_max_scope = new Integer(max_scope);
+		}
+		| 'init_scope_depth' ':' init_scope = integer_literal
+		{
+			$decl::method_body_info.explicit_init_scope = new Integer(init_scope);
+		}
+		| 'code' ':' block
+		| 'traits' ':' LBRACE traits[traits] RBRACE
+	)*
+	RBRACE
+	{
+		asmCore.addMethodBodyInfo($decl::method_body_info);
+	}
+	;
+
+function_id returns [Object result]
+	: literal_id = integer_literal
+	{
+		result = new Integer(literal_id);
+	}
+	| '.function_id' LPAREN referenced_func = IDENTIFIER RPAREN
+	{
+	    result = referenced_func.getText();
+	}
+	;
+
+
+attribute_value
+	: IDENTIFIER
+	| integer_literal
+	;
+
+traits[Traits traits]
+	:
+	(
+		'.trait' LBRACE
+		te = trait_entry { traits.add(te); }
+		RBRACE
+	)*
+	;
+
+trait_entry
+	returns [Trait result]
+	:
+	   st = slot_trait { result = st; }
+	;
+
+slot_trait
+	returns [Trait result]
+	: 'kind' ':' 'Trait_Slot' kind = trait_kind_modifiers[TRAIT_Var]
+	{
+		result = new Trait(kind);
+	}
+	(
+	  trait_name[result]
+	  |
+	  'slot_id' ':' slot_id = integer_literal
+	  {
+	  	result.addAttr("slot_id", slot_id);
+	  }
+	  |
+	  'type_name' ':' trait_type_name = type_name
+	  {
+	  	result.addAttr("type_name", trait_type_name);
+	  }
+	)*
+	;
+
+trait_name[Trait t]
+	:
+		'name' ':' name = identifier
+		{
+			t.addAttr("name", name);
+		}
+	;
+
+trait_kind_modifiers[int initial_kind]
+	returns [int result]
+	@init { result = initial_kind; }
+	:
+	(
+		('+' | '|') modifier = trait_kind_modifier { result |= modifier; }
+	)*
+	;
+
+trait_kind_modifier
+	returns [int result]
+	:
+		'ATTR_Final' { result = TRAIT_FLAG_final; }
+	|	'ATTR_Override' { result = TRAIT_FLAG_override; }
+	|	'ATTR_Metadata' { result = TRAIT_FLAG_metadata; }
+	;
+
+type_name
+	returns [Name result]
+	:
+	| type_any = '*' 
+	{
+		result = asmCore.getName(type_any.getText());
+	}
+	| mpid = multipart_identifier { result = mpid; }
+	;
+
+
+
+sugared_function_decl
+	:
+    sugared_function_header
+    block
+    {
+    	asmCore.addMethodBodyInfo($decl::method_body_info);
+    }
+	;
+
+sugared_function_header
+	scope { MethodInfo signature; }
+	@init { MethodInfo signature; }
+	:
+	'function' func_name = IDENTIFIER
+	{
+		$sugared_function_header::signature = signature = new MethodInfo();
+		signature.methodName = func_name.getText();
+		
+	} 
+	plist[signature.paramTypes]
+	((COLON rettype = type_name) {signature.returnType = rettype; })?
+	{
+	    asmCore.addMethodInfo(signature);
+	    
+	    //  Tie this header to the corresponding block.
+	    $decl::method_body_info = new MethodBodyInfo();
+	    $decl::method_body_info.methodId = new Integer(signature.methodId);
+	}
+	;
+
+block
+	:
 	LBRACE insn+ RBRACE
 	;
 
-plist: LPAREN RPAREN
+plist[java.util.Vector<Name>param_types]
+	: LPAREN method_parameters[param_types]? RPAREN
 	;
 
 insn:
@@ -190,7 +431,7 @@ insn:
 	{
 		//  Put a label on the current block,
 		//  or start a new one.
-	    asmCore.startBlock(label);
+	    $decl::method_body_info.startBlock(label);
 	}
 	|
 	(
@@ -208,6 +449,7 @@ insn:
 			| pool_insn
 			| call_insn
 			| multiname_insn
+			| function_insn
 			| ad_hoc_insn
 			| unknown_opcode
 		)
@@ -229,8 +471,8 @@ single_cfg_target_insn
 	  DECIMAL_LITERAL? ( LPAREN DECIMAL_LITERAL RPAREN )?  //  abcdump stuff for human consumption
 	  label = control_flow_target
 	  {
-	      asmCore.insn(opcode, label);
-		  asmCore.startBlock();
+	      $decl::method_body_info.insn(opcode, label);
+		  $decl::method_body_info.startBlock();
 	  }
 	  ;
 
@@ -257,13 +499,13 @@ integer_operands_insn
 		  'hasnext2' | 
 		  'inclocal' | 'inclocal_i' | 
 		  'kill' |
-		  'newarray' | 'newfunction' | 'newobject' |
+		  'newarray' | 'newobject' |
 		  'pushbyte' | 'pushshort' | 
 		  'setlocal' | 'setslot' | 'setglobalslot'
 	  )
 	  operands = integer_operands_list
 	  {
-	      asmCore.insn(int_opcode, operands);
+	      $decl::method_body_info.insn(int_opcode, operands);
 	  }
 	  ;
 
@@ -273,20 +515,20 @@ integer_operands_insn
 pool_insn
 	: 'pushint' int_operand = integer_literal
 	{
-	    asmCore.poolInsn(OP_pushint, new Integer(int_operand));
+	    $decl::method_body_info.insn(OP_pushint, new int[] { asmCore.createPoolId(new Integer(int_operand)) } );
 	}
 	| 'pushuint' uint_operand = long_literal
 	{
-	    asmCore.poolInsn(OP_pushuint, new Long(uint_operand));
+	    $decl::method_body_info.insn(OP_pushuint, new int[] { asmCore.createPoolId(new Long(uint_operand)) } );
 	}
 	| 'pushdouble' double_operand = double_literal
 	{
-	    asmCore.poolInsn(OP_pushdouble, new Double(double_operand));
+	    $decl::method_body_info.insn(OP_pushdouble, new int[] { asmCore.createPoolId(new Double(double_operand)) } );
 	}
 	| opcode = ( 'debugfile' | 'pushstring' )
-	string_op = string_literal
+	string_operand = string_literal
 	{
-		asmCore.poolInsn(asmCore.decodeOpcodeName(opcode.getText()), string_op); 
+		$decl::method_body_info.insn(opcode, new int[] {asmCore.createPoolId(string_operand)}); 
 	}
 	;
 
@@ -300,13 +542,23 @@ call_insn
 			'construct' | 'constructprop' | 'constructsuper'
 	    )
 		callee = identifier 
-		LPAREN arg_count = integer_literal RPAREN 
+		LPAREN? arg_count = integer_literal RPAREN?
 	{
-		asmCore.insn(call_opcode, callee, arg_count);
+		$decl::method_body_info.insn(call_opcode, callee, arg_count);
 	}
-	|  'call' 	LPAREN arg_count = integer_literal RPAREN 
+	|  'call' 	LPAREN? arg_count = integer_literal RPAREN? 
 	{
-	    asmCore.insn(OP_call, new int[] { arg_count } );
+	    $decl::method_body_info.insn(OP_call, new int[] { arg_count } );
+	}
+	;
+	
+/*
+ *  TODO: All integer operands should accept .function_id()  .slot_id() etc.
+ */
+function_insn
+	:	'newfunction' fid = function_id
+	{
+		$decl::method_body_info.insn(OP_newfunction, fid);
 	}
 	;
 
@@ -339,7 +591,7 @@ no_operand_insn
 
 		)
 	{
-	    asmCore.insn(opcode);
+	    $decl::method_body_info.insn(opcode);
 	}
 	;
 
@@ -357,11 +609,11 @@ multiname_insn :
 	)
 	name_key = multipart_identifier
 	{
-		asmCore.insn(opcode, name_key);
+		$decl::method_body_info.insn(opcode, name_key);
 	}
 	| 'pushnamespace' ns = namespace_specification
 	{
-	    asmCore.insn(OP_pushnamespace, ns);
+	    $decl::method_body_info.insn(OP_pushnamespace, ns);
 	}
 	;
 
@@ -371,7 +623,7 @@ multiname_insn :
 ad_hoc_insn
 	: opcode = hex_literal imm_array = integer_operands_list
 	{
-	    asmCore.insn(opcode, imm_array);
+	    $decl::method_body_info.insn(opcode, imm_array);
 	}
 	;
 
@@ -595,10 +847,14 @@ Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 fragment
 FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
 
+/*
+ *  FIXME: Turn escape sequences into the correct chars
+ */
 fragment
 EscapeSequence
     :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
     |   OctalEscape
+	|   UnicodeEscape
     ;
 
 fragment

@@ -1,4 +1,3 @@
-/* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,60 +34,39 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
 
-
-class Instruction
-{
-	int opcode;
-	int [] imm;
-	Name n;
-	Label target;
-	public Object value;
-	
-	Instruction(int opcode, int[] imm)
-	{
-		this.opcode = opcode;
-		this.imm = imm;
-	}
-	
-	Instruction(int opcode, Object v)
-	{
-		this(opcode, new int[0]);
-		value = v;
-	}
-	
-	public String toString()
-	{
-		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
-		
-		
-		if ( n != null )
-		{
-			result.append(" ");
-			result.append(n);
-		}
-		
-		if ( value != null )
-		{
-			result.append(" \"");
-			result.append(value.toString());
-			result.append("\"");
-		}
-		
-		if ( target != null )
-		{
-			result.append(" ");
-			result.append(target);
-		}
-		
-		for ( int x: imm)
-		{
-			result.append(" ");
-			result.append(x);
-		}
-		
-		return result.toString();
+ /*
+  *  Bind a function to a global slot; refer to it by .function_id 
+  *  in the newfunction instruction.
+  */
+.script_info {
+	init: .function_id(main)
+	traits : {
+		.trait { kind: Trait_Slot name: zarquon slot_id:1 type_name:* }
 	}
 }
+function main()
+{
+	getlocal0
+	pushscope
+	newfunction .function_id(zarquon)
+ 
+	getglobalscope
+	swap
+	setslot             1
+	getglobalscope
+	getslot 1
 
+	getlocal0
+	call  0
+	returnvoid
+    
+}
+
+function zarquon()
+{
+	findpropstrict      print
+	pushstring          "hello, world."
+	callpropvoid        print (1)
+	returnvoid
+}

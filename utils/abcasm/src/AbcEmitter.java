@@ -65,25 +65,25 @@ class AbcEmitter
 
 		int pos = w.size();
 		w.writeU30(core.intPool.size());
-		for (int x: core.intPool.sort())
+		for (int x: core.intPool.getValues())
 			w.writeU30(x);
 		
 		pos = w.size();
 		
 		w.writeU30(core.uintPool.size());
-		for (long x: core.uintPool.sort())
+		for (long x: core.uintPool.getValues())
 			w.writeU30((int)x);
 
 		pos = w.size();
 		
 		w.writeU30(core.doublePool.size());
-		for (double x: core.doublePool.sort())
+		for (double x: core.doublePool.getValues())
 			w.write64(Double.doubleToLongBits(x));
 
 		pos = w.size();
 
 		w.writeU30(core.stringPool.size());
-		for (String s: core.stringPool.sort())
+		for (String s: core.stringPool.getValues())
 		{
 			w.writeU30(s.length());
 			w.write(s.getBytes("UTF-8"));
@@ -92,12 +92,12 @@ class AbcEmitter
 		pos = w.size();
 		
 		w.writeU30(core.nsPool.size());
-		for (Namespace ns: core.nsPool.sort())
+		for (Namespace ns: core.nsPool.getValues())
 			emitNamespace(ns);
 		pos = w.size();
 		
 		w.writeU30(core.nssetPool.size());
-		for (Nsset nsset: core.nssetPool.sort())
+		for (Nsset nsset: core.nssetPool.getValues())
 		{
 			w.writeU30(nsset.length());
 			for (Namespace ns: nsset)
@@ -106,7 +106,7 @@ class AbcEmitter
 		pos = w.size();
 		
 		w.writeU30(core.namePool.size());
-		for (Name n: core.namePool.sort())
+		for (Name n: core.namePool.getValues())
 		{
 			w.write(n.kind);
 			switch (n.kind)
@@ -146,11 +146,11 @@ class AbcEmitter
 
 		pos = w.size();
 			
-		w.writeU30(core.functionsByName.size());
+		w.writeU30(core.methodSignatures.size());
 
 		int method_id=0;
-		for (Function f: core.functionsByName.values())
-			emitMethodInfo(method_id++, f);
+		for (MethodInfo mi: core.methodSignatures)
+			emitMethodInfo(mi);
 		/*
 		for (Method m: core.nativeFunctions.values)
 			emitMethod(abc, w, method_id++, m);
@@ -195,95 +195,89 @@ class AbcEmitter
 		}
 		*/
 
-		/*
-		 *  FIXME: More than one script?
 		w.writeU30(core.scripts.size());
-		for (Type s: core.scripts)
+		for (ScriptInfo s: core.scripts)
 		{
-			w.writeU30(core.methodId(s.init));
-			emitTraits(w, abc, s);
+			emitScriptInfo(s);
 		}
-		*/
-		w.writeU30(1);
-		emitScriptInfo(0);
 		
-		
-		w.writeU30(core.functionsByName.size());
-		int emit_id = 0;
-		for ( Function f: core.functionsByNumber)
+		w.writeU30(core.methodBodies.size());
+		for ( MethodBodyInfo f: core.methodBodies)
 		{
-			assert(emit_id++ == f.method_id);
-		
-			emitFunctionBody(f);
+			emitMethodBody(f);
 		}
-		//emitBodies(core.nativeFunctions);
 	
 		return w.toByteArray();
 	}
 	
-	private void emitScriptInfo(int script)
+	private void emitTraits(AbcWriter w, Traits traits)
 	{
-		/*
-		 * FIXME: Better semantics than "first one wins"
-		 */
-		w.writeU30(0);
+		w.writeU30(traits.getTraitCount());
+		
+		for ( Trait t: traits)
+		{
+			w.writeU30(core.namePool.id(t.getNameAttr("name")));
+			w.write(t.kind_byte);
 
-		// TODO Record the script's traits, not canned stuff
-		w.writeU30(0);
+			switch (t.getKind())
+			{
+			case TRAIT_Var:
+					w.writeU30(t.getIntAttr("slot_id"));
+					w.writeU30(core.getNameId(t.getNameAttr("type_name")));
+					//  TODO: vindex and vkind
+					w.writeU30(0);
+					// w.write(0); //  TODO: write vkind when vindex !0
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown trait kind " + t.getKind());
+			}
+		}
 	}
 
-	private void emitMethodInfo(int i, Function f)
+	private void emitScriptInfo(ScriptInfo info)
 	{
-		// TODO Write the function's proper info, not canned stuff
-		
-		w.writeU30(/*f.getParams().length-1*/0);
-		w.writeU30(/*abc.typeRef(m.returns)*/0);
-		/*
-		for (int i=1, n=m.getParams().length; i < n; i++)
-			w.writeU30(abc.typeRef(m.getParams()[i]));
-		
-		if (PRESERVE_METHOD_NAMES)
-			w.writeU30(abc.stringPool.id(m.debugName));
-		else
-		*/
-			w.writeU30(0);
-		
-		int flags = /*f.flags*/ 0;
-		w.write(flags);		
+		w.writeU30(info.getInitId());
+		emitTraits(w, info.getTraits());
 	}
 
-	private void emitFunctionBody(Function f)
+	private void emitMethodInfo(MethodInfo info)
+	{
+		w.writeU30(info.paramTypes.size());
+		w.writeU30(core.getNameId(info.returnType));
+
+		for (int i=1, n=info.paramTypes.size(); i < n; i++)
+			w.writeU30(core.getNameId(info.paramTypes.elementAt(i)));
+
+		w.writeU30(core.getPoolId(info.methodName));
+		w.write(info.flags);		
+	}
+
+	private void emitMethodBody(MethodBodyInfo f)
 	throws Exception
 	{	
-		w.writeU30(f.method_id);
+		int method_id = core.translateFunctionId(f.methodId);
+		
+		MethodInfo signature = core.methodSignatures.elementAt(method_id);
+		
+		w.writeU30(method_id);
 		f.computeFrameCounts();
 
 		w.writeU30(f.getMaxStack());
-		w.writeU30(f.getLocalCount());
-		/*
-		if (m.cx != null && m.cx.scopes != null)
-		{
-			w.writeU30(m.cx.scopes.length); // init_scope_depth
-			w.writeU30(m.cx.scopes.length+m.max_scope); // max_scope_depth
-		}
-		else
-		{
-		*/
-			w.writeU30(0); // init_scope_depth
-			w.writeU30(f.getScopeDepth());
-		//}
+		
+		int max_local = f.getLocalCount();
+		if ( signature.getParamCount() > max_local )
+			max_local = signature.getParamCount();
+		
+		w.writeU30(max_local);
+		
+		w.writeU30(f.getInitScopeDepth());
+		w.writeU30(f.getMaxScopeDepth());
 		
 		emitCode(f);
-		emitActivationTraits(f);
+		emitTraits(w, f.traits);
 	}
 
-	void emitActivationTraits(Function f)
-	{
-		// TODO Record the function's activation traits, not canned stuff
-		w.writeU30(/*f.bindings.size()*/0);
-	}
-
-	private void emitCode(Function f) 
+	private void emitCode(MethodBodyInfo f) 
 	throws Exception
 	{		
 			Map<Block,Integer> padding = new HashMap<Block,Integer>();
@@ -498,7 +492,7 @@ class AbcEmitter
 				throw new IllegalStateException("Not implemented.");
 				//break;
 			case OP_newfunction:
-				blockWriter.writeU30(insn.imm[0]);
+				blockWriter.writeU30(core.translateFunctionId(insn.value));
 				break;
 			case OP_applytype:
 				//blockWriter.writeU30(argc(e));
@@ -523,22 +517,20 @@ class AbcEmitter
 				break;
 			case OP_pushstring:
 			case OP_dxns:
-				blockWriter.writeU30(core.stringPool.id((String)insn.value));
-				break;
 			case OP_debugfile:
-				blockWriter.writeU30(core.stringPool.id((String)insn.value));
+				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_pushnamespace:
 				blockWriter.writeU30(core.nsPool.id((Namespace)insn.value));
 				break;
 			case OP_pushint:
-				blockWriter.writeU30(core.intPool.id((Integer)insn.value));
+				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_pushuint:
-				blockWriter.writeU30(core.uintPool.id((Long)insn.value));
+				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_pushdouble:
-				blockWriter.writeU30(core.doublePool.id((Double)insn.value));
+				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_debugline:
 			case OP_bkptline:
@@ -581,7 +573,7 @@ class AbcEmitter
 	private void emitNamespace(Namespace ns)
 	{
 		w.write(ns.kind);
-		w.writeU30(core.stringPool.id(ns.name));
+		w.writeU30(core.getPoolId(ns.name));
 	}
 
 	class AbcWriter extends ByteArrayOutputStream

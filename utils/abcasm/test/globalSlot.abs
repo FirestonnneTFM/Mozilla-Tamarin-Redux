@@ -1,4 +1,3 @@
-/* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,60 +34,44 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
 
-
-class Instruction
+ /*
+  *  Testcase uses desuguared script and function declarations, 
+  *  finds, sets, and reads a slot on the global object.
+  */
+.script_info 
 {
-	int opcode;
-	int [] imm;
-	Name n;
-	Label target;
-	public Object value;
-	
-	Instruction(int opcode, int[] imm)
-	{
-		this.opcode = opcode;
-		this.imm = imm;
-	}
-	
-	Instruction(int opcode, Object v)
-	{
-		this(opcode, new int[0]);
-		value = v;
-	}
-	
-	public String toString()
-	{
-		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
-		
-		
-		if ( n != null )
-		{
-			result.append(" ");
-			result.append(n);
-		}
-		
-		if ( value != null )
-		{
-			result.append(" \"");
-			result.append(value.toString());
-			result.append("\"");
-		}
-		
-		if ( target != null )
-		{
-			result.append(" ");
-			result.append(target);
-		}
-		
-		for ( int x: imm)
-		{
-			result.append(" ");
-			result.append(x);
-		}
-		
-		return result.toString();
+	init : .function_id(init_method) 
+	traits : {
+		.trait { kind : Trait_Slot name:zuul slot_id:1 type_name:String }
 	}
 }
 
+.method_info {
+	name:init_method
+	return_type:int
+	param_type:{}
+}
+
+.method_body_info {
+	method: .function_id(init_method)
+    local_count:0
+	max_stack:2
+	init_scope_depth:0
+	max_scope_depth:1
+	code:
+	{
+		getlocal0
+		pushscope
+		findpropstrict zuul
+		pushstring "moo"
+		setslot 1
+		getglobalscope
+		getslot 1
+		findpropstrict print
+		swap
+		callpropvoid print 1
+		pushint 17
+		returnvalue
+	}
+}

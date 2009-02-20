@@ -37,6 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 package adobe.abcasm;
 
+
 import java.util.*;
 
 import java.lang.reflect.Field;
@@ -48,14 +49,25 @@ class AssemblerCore
 	AssemblerOptions options;
 
 	/**
-	 * Functions defined by this translation unit in entry order.
+	 *  Scripts defined by this translation unit.
 	 */
-	List<Function> functionsByNumber = new ArrayList<Function>();
+	Vector<ScriptInfo> scripts = new Vector<ScriptInfo>();
 	
-	Map<String,Function> functionsByName = new HashMap<String, Function>();
-	Function currentFunction = null;
+	/**
+	 * Functions defined by this translation unit in method ID order.
+	 */
+	Vector<MethodInfo> methodSignatures = new Vector<MethodInfo>();
+	int methodMasterId = 0;
+
+	Map<String,Integer> methodsByName = new HashMap<String,Integer>();
+
+	/**
+	 *  Method bodies, in entry order.
+	 */
+	List<MethodBodyInfo> methodBodies = new ArrayList<MethodBodyInfo>();
 	
 	List<String> syntaxErrors = new LinkedList<String>();
+	List<String> semanticErrors = new LinkedList<String>();
 
 	/*
 	 *  ABC pools.
@@ -67,173 +79,95 @@ class AssemblerCore
 	Pool<Double> doublePool = new Pool<Double>(1);
 	Pool<Namespace> nsPool = new Pool<Namespace>(1);
 	Pool<Nsset> nssetPool = new Pool<Nsset>(1);
-	
-	/*
-	 * Opcode mappings extracted from ActionBlockConstants
-	 */
-	static Map<String, Integer> opcodeNameToOpcode = new HashMap<String, Integer>();
-	static Map<Integer, String> opcodeToOpcodeName = new HashMap<Integer, String>();
 
 	AssemblerCore(AssemblerOptions options)
 	{
 		this.options = options;
 	}
 
-	//  FIXME: Should be a Name
-	void newFunction(String name)
+	void addMethodInfo(MethodInfo new_function)
 	{
-		semanticAssertion(
-			null == functionsByName.get(name),
-			"Duplicate function : " + name
-			);
-
-		currentFunction = new Function(name);
-		functionsByName.put(name, currentFunction);
-		functionsByNumber.add(currentFunction);
-	}
-
-	void startBlock(Label blockLabel)
-	{
-		currentFunction.startBlock(blockLabel);
-	}
-	
-	void startBlock()
-	{
-		currentFunction.startBlock();
-	}
-	
-	void insn(org.antlr.runtime.Token opcode_token)
-	{
-		insn( decodeOpcodeName(opcode_token.getText()));
-	}
-	
-	void insn(org.antlr.runtime.Token opcode_token, Label label)
-	{
-		insn( decodeOpcodeName(opcode_token.getText()), label);
-	}
-
-	void insn(int opcode, Label label)
-	{
-		currentFunction.insn(opcode, label);
-	}
-
-	void insn(org.antlr.runtime.Token opcode_token, java.util.ArrayList<Integer> imm_list)
-	{
-		insn(decodeOpcodeName(opcode_token.getText()), imm_list);
-	}
-
-	void insn(int opcode, java.util.ArrayList<Integer> imm_list)
-	{
-		int[] imm_array = new int[imm_list.size()];
-		
-		int idx = 0;
-		for ( Integer imm: imm_list )
+		if ( methodsByName.containsKey(new_function.methodName) )
 		{
-			imm_array[idx++] = imm;
+			throw new IllegalArgumentException (
+				"Duplicate method name: " + new_function.methodName
+			);
 		}
-		
-		currentFunction.insn(opcode, imm_array);
+		methodSignatures.add(new_function);
+		new_function.methodId = methodMasterId++;
+
+		if ( new_function.methodName != null )
+		{
+			createPoolId(new_function.methodName);
+			methodsByName.put(new_function.methodName, new_function.methodId);
+		}
 	}
 
-	void insn(int opcode)
+	void addMethodBodyInfo(MethodBodyInfo new_body)
 	{
-		insn(opcode, new int[]{});
-	}
-	
-	void insn(int opcode, int[] imm)
-	{
-		currentFunction.insn(opcode, imm);
-	}
-	
-	void insn(org.antlr.runtime.Token opcode_token, Name name, int imm)
-	{
-		currentFunction.insn(decodeOpcodeName(opcode_token.getText()), name, new int[]{imm});
+		methodBodies.add(new_body);
 	}
 
-	void insn(org.antlr.runtime.Token opcode_token, Name name)
+	int createPoolId(Object value)
 	{
-		currentFunction.insn(decodeOpcodeName(opcode_token.getText()), name, new int[0]);
-	}
-
-	void insn(int opcode, Object value)
-	{
-		currentFunction.insn(opcode, value);
-	}
-
-	void poolInsn(int opcode, Object value)
-	{
-		if ( OP_pushint == opcode )
+		if ( null == value )
+			return 0;
+		else if ( value instanceof Integer )
 		{
 			Integer iKey = (Integer)value;
-			intPool.add(iKey);
-			currentFunction.insn(opcode, iKey);
+			return intPool.add(iKey);
 		}
-		else if ( OP_pushuint == opcode )
+		else if ( value instanceof Long )
 		{
 			Long lKey = (Long)value;
-			uintPool.add(lKey);
-			currentFunction.insn(opcode, lKey);
+			return uintPool.add(lKey);
 		}
-		else if ( OP_pushdouble == opcode )
+		else if ( value instanceof Double )
 		{
 			Double dKey = (Double)value;
-			doublePool.add(dKey);
-			currentFunction.insn(opcode, dKey);
+			return doublePool.add(dKey);
 		}
-		else if ( OP_pushstring == opcode || OP_debugfile == opcode )
+		else if ( value instanceof String )
 		{
 			String sKey = (String)value;
-			stringPool.add(sKey);
-			currentFunction.insn(opcode, sKey);
+			return stringPool.add(sKey);
 		}
 		else
-			throw new IllegalArgumentException("Don't have a pool for " + opcode);
+			throw new IllegalArgumentException("Don't have a pool for " + value.getClass().getSimpleName());
 	}
 	
-	int decodeOpcodeName(String opcodeName)
+	int getPoolId(Object value )
 	{
-		String opcodeKey = opcodeName.toLowerCase();
-		
-		if ( opcodeNameToOpcode.size() == 0)
+		if ( null == value )
+			return 0;
+		else if ( value instanceof Integer )
 		{
-			loadOpcodes();
+			Integer iKey = (Integer)value;
+			return intPool.id(iKey);
 		}
-		
-		semanticAssertion(opcodeNameToOpcode.containsKey(opcodeKey), "Unknown opcode: " + opcodeName);
-		
-		return opcodeNameToOpcode.get(opcodeKey);
-	}
-
-	static private void loadOpcodes()
-	{
-		//  Traverse the names of the OP_foo constants
-		//  in ActionBlockConstants and load their values.
-		for ( Field f: macromedia.asc.embedding.avmplus.ActionBlockConstants.class.getFields())
+		else if ( value instanceof Long )
 		{
-			String field_name = f.getName();
-			
-			if ( field_name.startsWith("OP_"))
-			{
-				String opcode = field_name.substring(3);
-				try
-				{
-					int field_value = f.getInt(null);
-					opcodeNameToOpcode.put(opcode, field_value);
-					opcodeToOpcodeName.put(field_value, opcode);
-				}
-				catch ( Exception noFieldValue)
-				{
-					//  Ignore, continue...
-				}
-					
-			}
+			Long lKey = (Long)value;
+			return uintPool.id(lKey);
 		}
+		else if ( value instanceof Double )
+		{
+			Double dKey = (Double)value;
+			return doublePool.id(dKey);
+		}
+		else if ( value instanceof String )
+		{
+			String sKey = (String)value;
+			return stringPool.id(sKey);
+		}
+		else
+			throw new IllegalArgumentException("Don't have a pool for " + value.getClass().getSimpleName());
 	}
 
 	void semanticAssertion(boolean cond, String diagnostic )
 	{
 		if (!cond)
-			throw new IllegalArgumentException(diagnostic);
+			semanticErrors.add(diagnostic);
 	}
 
 	void syntaxError(String diagnostic)
@@ -243,27 +177,22 @@ class AssemblerCore
 	
 	void dump(java.io.PrintStream out)
 	{
-		for ( String fname: functionsByName.keySet() )
-			functionsByName.get(fname).dump(out);
+		for ( String fname: methodsByName.keySet() )
+			/* FIXME: not working right now... functionsByName.get(fname).dump(out) */;
 	}
-
-
-	static String decodeOp(int opcode)
-	{
-		if ( opcodeToOpcodeName.containsKey(opcode))
-			return opcodeToOpcodeName.get(opcode);
-		else
-			return "OP_" + Integer.toHexString(opcode);
-	}
-
 
 	Name getName(String unqualifiedName)
 	{
-		nsPool.add(new Namespace(CONSTANT_PackageNamespace));
+		//  Ensure the package namespace is present.
+		getNamespace("package");
 		Name result = new Name(unqualifiedName);
 		
-		namePool.add(result);
-		stringPool.add(unqualifiedName);
+		if ( !"*".equals(unqualifiedName))
+		{
+			namePool.add(result);
+			stringPool.add(unqualifiedName);
+		}
+
 		return result;
 	}
 	
@@ -327,5 +256,54 @@ class AssemblerCore
 	Label getLabel(String labelName)
 	{
 		return new Label(labelName);
+	}
+	
+	void addScript(ScriptInfo s)
+	{
+		scripts.add(s);
+	}
+	
+	void semanticAnalysis()
+	{
+		//  Add a default script if none was specified.
+		if ( scripts.isEmpty() )
+		{
+			scripts.add(new ScriptInfo());
+		}
+		else
+		{
+			for ( ScriptInfo s: scripts )
+			{
+				s.init_id  = translateFunctionId(s.init_id);
+			}
+		}
+	}
+	
+	Integer translateFunctionId(Object func_name)
+	{
+		if ( func_name instanceof Integer )
+		{
+			//  ID was specified.
+			return (Integer) func_name;
+		}
+		//  FIXME: Should be functionID special form
+		//  to also support .slot_id(foo)
+		else if ( func_name instanceof String )
+		{
+			//  ID should be in the table.
+			if ( methodsByName.containsKey(func_name.toString()))
+				return methodsByName.get(func_name.toString());
+		}
+
+		//  No match.
+		throw new IllegalArgumentException("Unknown function_id " + func_name.toString());
+	}
+	
+	int getNameId(Name n)
+	{
+		if ( null == n  || n.baseName.equals("*"))
+			return 0;
+		else
+			return namePool.id(n);
 	}
 }

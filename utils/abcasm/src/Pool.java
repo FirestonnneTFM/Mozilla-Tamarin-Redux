@@ -53,6 +53,7 @@ import java.util.TreeMap;
 public class Pool<T extends Comparable>
 {
 	Map<T,Integer> refs = new TreeMap<T,Integer>();
+	ArrayList<T> values = new ArrayList<T>();
 	int countFrom;
 	
 	public Pool(int countFrom)
@@ -62,35 +63,24 @@ public class Pool<T extends Comparable>
 	
 	public int add(T e)
 	{
-		int n = !refs.containsKey(e) ? 1 : refs.get(e) + 1;
-		refs.put(e, n);
-		return n;
+		if ( !refs.containsKey(e) )
+		{
+			values.add(e);
+			refs.put(e, size());
+		}
+
+		return refs.get(e);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public ArrayList<T> sort()
+	public ArrayList<T> getValues()
 	{
-		Ranker<T>[] arr = new Ranker[refs.size()];
-		int i=0;
-		for (T e: refs.keySet())
-			arr[i++] = new Ranker<T>(e,refs.get(e));
-		assert(i==refs.size());
-		Arrays.sort(arr);
-		ArrayList<T> values = new ArrayList<T>();
-		i=countFrom;
-		for (Ranker<T> r: arr)
-		{
-			values.add(r.value);
-			refs.put(r.value, i++);
-		}
-		
 		return values;
 	}
 	
 	public int id(T e)
 	{
-		assert(refs.containsKey(e));
-		assert(refs.get(e) < size());
+		if ( !refs.containsKey(e))
+			throw new IllegalArgumentException("Unknown pool item \"" + e.toString() + "\"");
 		return refs.get(e);
 	}
 	
@@ -102,21 +92,6 @@ public class Pool<T extends Comparable>
 	public int size()
 	{
 		return countFrom + refs.size();
-	}
-	
-	static class Ranker<T> implements Comparable
-	{
-		T value;
-		int rank;
-		Ranker(T value, int rank)
-		{
-			this.value = value;
-			this.rank = rank;
-		}
-		public int compareTo(Object o)
-		{
-			return ((Ranker)o).rank - rank;
-		}
 	}
 }
 

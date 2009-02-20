@@ -37,58 +37,24 @@
  * ***** END LICENSE BLOCK ***** */
 package adobe.abcasm;
 
+import java.util.Vector;
 
-class Instruction
+class MethodInfo
 {
-	int opcode;
-	int [] imm;
-	Name n;
-	Label target;
-	public Object value;
-	
-	Instruction(int opcode, int[] imm)
+	byte flags;
+
+	/**
+	 * Denormalized method id, carried here
+	 * so the syntax-directed translator can access it.
+	 */
+	int methodId;
+
+	String methodName;
+
+	Name returnType;
+	Vector<Name> paramTypes = new Vector<Name>();
+	public int getParamCount()
 	{
-		this.opcode = opcode;
-		this.imm = imm;
-	}
-	
-	Instruction(int opcode, Object v)
-	{
-		this(opcode, new int[0]);
-		value = v;
-	}
-	
-	public String toString()
-	{
-		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
-		
-		
-		if ( n != null )
-		{
-			result.append(" ");
-			result.append(n);
-		}
-		
-		if ( value != null )
-		{
-			result.append(" \"");
-			result.append(value.toString());
-			result.append("\"");
-		}
-		
-		if ( target != null )
-		{
-			result.append(" ");
-			result.append(target);
-		}
-		
-		for ( int x: imm)
-		{
-			result.append(" ");
-			result.append(x);
-		}
-		
-		return result.toString();
+		return paramTypes.size() + 1;
 	}
 }
-

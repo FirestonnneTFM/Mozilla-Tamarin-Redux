@@ -74,7 +74,7 @@
 
 	 <path id="compile.classpath">
         <path refid="antlr.classpath" />
-		<pathelement path="."/>
+		<pathelement path="classes"/>
 		<pathelement path="${ASC_JAR}"/>
     </path>
 
@@ -85,7 +85,7 @@
     </path>
 
 	<target name="generate">
-		<java classname="org.antlr.Tool">
+		<java classname="org.antlr.Tool" fork="yes" failonerror="yes">
 			<arg value="-o" />
 			<arg value="gensrc" />
 			<arg value="grammar/abcasm.g3"/>

@@ -37,58 +37,36 @@
  * ***** END LICENSE BLOCK ***** */
 package adobe.abcasm;
 
+import java.util.Vector;
 
-class Instruction
+class ScriptInfo
 {
-	int opcode;
-	int [] imm;
-	Name n;
-	Label target;
-	public Object value;
+	Object init_id = new Integer(0);
+
+	Traits traits = new Traits();
 	
-	Instruction(int opcode, int[] imm)
+	void setInit(Object i)
 	{
-		this.opcode = opcode;
-		this.imm = imm;
+		init_id = i;
 	}
 	
-	Instruction(int opcode, Object v)
+	int getInitId()
 	{
-		this(opcode, new int[0]);
-		value = v;
+		if ( this.init_id instanceof Integer )
+		{
+			return (Integer)this.init_id;
+		}
+		else
+			throw new IllegalArgumentException("Unknown function " + init_id.toString());
 	}
 	
-	public String toString()
+	void addTrait(Trait t)
 	{
-		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
-		
-		
-		if ( n != null )
-		{
-			result.append(" ");
-			result.append(n);
-		}
-		
-		if ( value != null )
-		{
-			result.append(" \"");
-			result.append(value.toString());
-			result.append("\"");
-		}
-		
-		if ( target != null )
-		{
-			result.append(" ");
-			result.append(target);
-		}
-		
-		for ( int x: imm)
-		{
-			result.append(" ");
-			result.append(x);
-		}
-		
-		return result.toString();
+		traits.add(t);
+	}
+	
+	Traits getTraits()
+	{
+		return traits;
 	}
 }
-
