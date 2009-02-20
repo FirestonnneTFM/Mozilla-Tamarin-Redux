@@ -57,7 +57,7 @@ namespace avmplus
 		/** getter lazily creates table which maps SO->MC */
 		WeakKeyHashtable *getMethodClosureTable();
 
-#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
+#if defined(FEATURE_NANOJIT)
 		MethodEnv(void* addr, VTable *vtable);
 #endif
 		MethodEnv(AbstractFunction* method, VTable *vtable);
@@ -127,7 +127,7 @@ namespace avmplus
 		Atom getpropertylate_i(Atom obj, int index) const;
 		Atom getpropertylate_u(Atom obj, uint32 index) const;
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		void setpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
 		void initpropertyHelper(Atom obj, /* not const */ Multiname *multi, Atom value, VTable *vtable, Atom index);
 		Atom getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index);
@@ -171,12 +171,6 @@ namespace avmplus
 		int li8(int addr) const;
 		int li16(int addr) const;
 		int li32(int addr) const;
-#if defined(AVMPLUS_64BIT) && defined(AVMPLUS_MIR)
-		// MIR needs helpers, LIR does not
-		int64 li8_64(int addr) const { return (int64)li8(addr); }
-		int64 li16_64(int addr) const { return (int64)li16(addr); }
-		int64 li32_64(int addr) const { return (int64)li32(addr); }
-#endif
 		double lf32(int addr) const;
 		double lf64(int addr) const;
 
@@ -333,7 +327,7 @@ namespace avmplus
 		union {
 			AtomMethodProc			impl32;	// pointer to invoke trampoline 
 			DoubleMethodProc		implN;
-#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
+#if defined(FEATURE_NANOJIT)
 			void*					implV;
 #endif
 		};

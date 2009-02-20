@@ -37,20 +37,11 @@
 
 #include "avmplus.h"
 
-#if defined AVMPLUS_MIR
-    #include "../codegen/CodegenMIR.h"
-    #define JIT_ONLY(x) x
-    #define MIR_ONLY(x) x
-    #define LIR_ONLY(x)
-#elif defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
     #include "../codegen/CodegenLIR.h"
     #define JIT_ONLY(x) x
-    #define MIR_ONLY(x) 
-    #define LIR_ONLY(x) x
 #else
     #define JIT_ONLY(x) 
-    #define MIR_ONLY(x) 
-    #define LIR_ONLY(x) 
 #endif
 
 #include "FrameState.h"
@@ -88,10 +79,6 @@ namespace avmplus
 #ifdef AVMPLUS_WORD_CODE
         this->translator = NULL;
 #endif
-
-        #if defined FEATURE_BUFFER_GUARD && defined AVMPLUS_MIR
-        this->growthGuard = 0;
-        #endif /* FEATURE_BUFFER_GUARD && AVMPLUS_MIR */
 
         #ifdef AVMPLUS_VERBOSE
         this->verbose = pool->verbose || (info->flags & AbstractFunction::VERBOSE_VERIFY);
@@ -181,9 +168,7 @@ namespace avmplus
      * @param pool
      * @param info
      */
-#if defined AVMPLUS_MIR
-    void Verifier::verify(CodegenMIR * volatile jit)
-#elif defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
     void Verifier::verify(CodegenLIR * volatile jit)
 #else
     void Verifier::verify()
@@ -218,11 +203,11 @@ namespace avmplus
 		// code to the caller of verify
 
 #ifdef AVMPLUS_WORD_CODE
-       // If MIR generation fails due to OOM then we must translate anyhow,
+       // If native code generation fails due to OOM then we must translate anyhow,
        // FIXME - logic for that looks unclear.
        // Also unclear if any of the existing logic is working, since none
        // of it can really handle running out of memory anyhow.
-       // FIXME - if MIR generation doesn't fail, then we've translated for
+       // FIXME - if native code generation doesn't fail, then we've translated for
        // no good reason.
 #    ifdef AVMPLUS_DIRECT_THREADED
         this->translator = new WordcodeEmitter(info, interpGetOpcodeLabels());
@@ -235,7 +220,7 @@ namespace avmplus
 #endif
 		// keep reference here for memory management
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
     #if defined AVMPLUS_WORD_CODE
 	this->coder = this->teeWriter = new TeeWriter (NULL, translator, jit);
     #else
@@ -326,20 +311,12 @@ namespace avmplus
         // always load the entry state, no merge on second pass
     	state->init(initialState);
 
-#ifdef FEATURE_BUFFER_GUARD
-		#ifdef AVMPLUS_MIR
-		// allow the jit buffer to grow dynamically
-		GrowthGuard guard(jit ? jit->mirBuffer : NULL);
-		this->growthGuard = &guard;
-		#endif //AVMPLUS_MIR
-#endif /* FEATURE_BUFFER_GUARD */
-
 		TRY(core, kCatchAction_Rethrow) {
 
 #if 0
 		coder->writePrologue(state);
 #else   // FIXME lars says we should just fail if we start but can't finish jitting
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 		if (jit)
 		{
 			if( !jit->prologue(state) ) 
@@ -479,8 +456,6 @@ namespace avmplus
 							const byte* target = code_pos + handler->target;
 							// atom received as *, will coerce to correct type in catch handler.
 							state->push(NULL);
-
-                            MIR_ONLY(if (jit) jit->localSet(stackBase, jit->exAtom);)
 
 							checkTarget(target);
  							state->pop();
@@ -989,7 +964,7 @@ namespace avmplus
 				Binding b = toplevel->getBinding(obj.traits, &multiname);
 				bool needsSetContext = true;
 				Traits* propTraits = readBinding(obj.traits, b);
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT || defined AVMPLUS_WORD_CODE
+				#if defined FEATURE_NANOJIT || defined AVMPLUS_WORD_CODE
 				if (AvmCore::isSlotBinding(b) && /*jit &&*/
 					// it's a var, or a const being set from the init function
 					(!AvmCore::isConstBinding(b) || 
@@ -1005,7 +980,7 @@ namespace avmplus
 				(void)propTraits;
 				#endif
 				
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				// If it's an accessor that we can early bind, do so.
 				// Note that this cannot be done on String or Namespace,
 				// since those are represented by non-ScriptObjects
@@ -1361,12 +1336,11 @@ namespace avmplus
 				{
 					JIT_ONLY( int slot_id = AvmCore::bindingToSlotId(b); )
 					Traits* ctraits = readBinding(obj.traits, b);
-					MIR_ONLY( if (jit) jit->emit(state, OP_getslot, slot_id, sp-(n-1), ctraits); )
-					LIR_ONLY( if (jit) jit->emitGetslot(state, slot_id, sp-(n-1), ctraits); )
+					JIT_ONLY( if (jit) jit->emitGetslot(state, slot_id, sp-(n-1), ctraits); )
 					obj.notNull = false;
 					obj.traits = ctraits;
 					Traits* itraits = ctraits ? ctraits->itraits : NULL;
-					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+					#if defined FEATURE_NANOJIT
 					if (jit)
 					{
 						jit->emitSetContext(state, NULL);
@@ -1433,7 +1407,7 @@ namespace avmplus
 					if( !m ) verifyFailed(kCorruptABCError);
 					emitCoerceArgs(m, argc);
 					Traits* resultType = m->returnTraits();
-					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+					#if defined FEATURE_NANOJIT
 					if (jit) 
 					{
 						jit->emitSetContext(state, m);
@@ -1451,7 +1425,7 @@ namespace avmplus
 				#endif
 
 				// TODO optimize other cases
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				if (jit)
 				{
 					jit->emitSetContext(state, NULL);
@@ -1485,7 +1459,7 @@ namespace avmplus
 				Binding b = toplevel->getBinding(base, &multiname);
 				Traits* propType = readBinding(base, b);
 				
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				if (jit)
 				{
 					emitCheckNull(sp-(n-1));
@@ -1493,8 +1467,7 @@ namespace avmplus
 					if (AvmCore::isSlotBinding(b))
 					{
 						int slot_id = AvmCore::bindingToSlotId(b);
-						MIR_ONLY(if (jit) jit->emit(state, OP_getslot, slot_id, sp-(n-1), propType);)
-						LIR_ONLY(if (jit) jit->emitGetslot(state, slot_id, sp-(n-1), propType);)
+						JIT_ONLY(if (jit) jit->emitGetslot(state, slot_id, sp-(n-1), propType);)
 						state->pop_push(n, propType);
 						goto getsuper_end;
 					}
@@ -1517,13 +1490,13 @@ namespace avmplus
 						goto getsuper_end;
 					}
 				}
-				#endif // AVMPLUS_MIR || FEATURE_NANOJIT
+				#endif // FEATURE_NANOJIT
 
 				#ifdef DEBUG_EARLY_BINDING
 				core->console << "verify getsuper " << base << " " << multiname.getName() << " from within " << info << "\n";
 				#endif
 				
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				if (jit) 
 				{
 					jit->emitSetContext(state, NULL);
@@ -1531,7 +1504,7 @@ namespace avmplus
 				}
 				#endif
 				state->pop_push(n, propType);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 			getsuper_end:
 #endif
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_getsuper) );
@@ -1554,7 +1527,7 @@ namespace avmplus
 				int32_t ptrIndex = sp-(n-1);
 				JIT_ONLY( Traits* base = ) emitCoerceSuper(ptrIndex);
 				
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				if (jit)
 				{
 					emitCheckNull(ptrIndex);
@@ -1569,8 +1542,7 @@ namespace avmplus
 						{
 							int slot_id = AvmCore::bindingToSlotId(b);
 							emitCoerce(propType, sp);
-							MIR_ONLY(jit->emit(state, OP_setslot, slot_id, ptrIndex);)
-							LIR_ONLY(jit->emitSetslot(state, OP_setslot, slot_id, ptrIndex);)
+							JIT_ONLY(jit->emitSetslot(state, OP_setslot, slot_id, ptrIndex);)
 						}
 						// else, it's a readonly slot so ignore
 						state->pop(n);
@@ -1601,10 +1573,10 @@ namespace avmplus
 					jit->emitSetContext(state, NULL);
 					jit->emit(state, opcode, (uintptr)&multiname);
 				}
-				#endif // AVMPLUS_MIR || FEATURE_NANOJIT
+				#endif // FEATURE_NANOJIT
 
 				state->pop(n);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 			setsuper_end:
 #endif
 				XLAT_ONLY( if (translator) translator->emitOp1(pc, WOP_setsuper) );
@@ -1626,7 +1598,7 @@ namespace avmplus
 
 				emitCoerceArgs(f, argc);
 				
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				if (jit)
 				{
 					jit->emitSetContext(state, f);
@@ -1678,7 +1650,7 @@ namespace avmplus
 						verifyFailed(kIllegalOperandTypeError, core->toErrorString(scopeTraits), core->toErrorString(requiredType));
 					}
 				}
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				if (jit)
 				{
 					emitCheckNull(sp);
@@ -1701,7 +1673,7 @@ namespace avmplus
 				if (state->scopeDepth+1 > max_scope) 
 					verifyFailed(kScopeStackOverflowError);
 
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				if (jit)
 				{
 					emitCheckNull(sp);
@@ -1814,7 +1786,7 @@ namespace avmplus
 				Traits *globalTraits = scope->size > 0 ? scope->getScopeTraitsAt(0) : state->scopeValue(0).traits;
 				checkStack(1,0);
 				checkEarlySlotBinding(globalTraits);
-				JIT_ONLY( Traits* slotTraits = ) checkSlot(globalTraits, imm30-1);
+				Traits* slotTraits = checkSlot(globalTraits, imm30-1);
 				emitCoerce(slotTraits, state->sp());
 				coder->writeOp1(state, pc, opcode, imm30-1, slotTraits);
 				state->pop();
@@ -1841,7 +1813,7 @@ namespace avmplus
 				// allow early binding on
 				if(pool->isCodePointer(info->body_pos))
 				    checkEarlySlotBinding(obj.traits);
-				JIT_ONLY( Traits* slotTraits = ) checkSlot(obj.traits, imm30-1);
+				Traits* slotTraits = checkSlot(obj.traits, imm30-1);
 				emitCoerce(slotTraits, state->sp());
 				emitCheckNull(state->sp()-1);
 				coder->write(state, pc, opcode); 
@@ -2206,25 +2178,8 @@ namespace avmplus
 		}
 #endif
 			
-		#ifdef FEATURE_BUFFER_GUARD
-		#ifdef AVMPLUS_MIR
-		growthGuard = NULL;
-		#endif
-		#endif
-
 		} CATCH (Exception *exception) {
 
-			// clean up growthGuard
-#ifdef FEATURE_BUFFER_GUARD
-#ifdef AVMPLUS_MIR
-		    // Make sure the GrowthGuard is unregistered
-			if (growthGuard)
-			{
-					growthGuard->~GrowthGuard();
-//					growthGuard = NULL;
-			}
-#endif
-#endif
 		XLAT_ONLY( if (translator) delete translator; )
 			// re-throw exception
 			core->throwException(exception);
@@ -2339,7 +2294,7 @@ namespace avmplus
 			}
 		}
 #endif
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		if (jit)
 		{
 			emitCoerceArgs(m, argc);
@@ -2401,7 +2356,7 @@ namespace avmplus
 			state->setType(sp, STRING_TYPE, true); 
 			goto fast_path;
 		}
-#if	defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if	defined FEATURE_NANOJIT
 		if (jit && slotType && slotType->base == CLASS_TYPE && slotType->getCreateClassClosureProc() == NULL)
 		{
 			// is this a user defined class?  A(1+ args) means coerce to A
@@ -2428,7 +2383,7 @@ namespace avmplus
 			}
 		}
 #endif
-#if	defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if	defined FEATURE_NANOJIT
 	fast_path2:
 #endif
 		emitNip();
@@ -2495,7 +2450,7 @@ namespace avmplus
 					AbstractFunction* script = (AbstractFunction*)pool->getNamedScript(&multiname);
 					if (script != (AbstractFunction*)BIND_NONE && script != (AbstractFunction*)BIND_AMBIGUOUS)
 					{
-						#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+						#if defined FEATURE_NANOJIT
 						if (jit)
 						{
 							if (script == info)
@@ -2552,7 +2507,6 @@ namespace avmplus
 	void Verifier::emitGetProperty(Multiname &multiname, int n, uint32_t imm30, const byte *pc)
 	{
 		Value& obj = state->peek(n); // object
-
 		emitCheckNull(state->sp()-(n-1));
 
 		Binding b = toplevel->getBinding(obj.traits, &multiname);
@@ -2575,7 +2529,7 @@ namespace avmplus
 			AbstractFunction *f = objtd->getMethod(disp_id);
 			AvmAssert(f != NULL);
 
-			#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			#if defined FEATURE_NANOJIT
 			emitCoerceArgs(f, 0);
 			if (jit)
 			{
@@ -2622,7 +2576,7 @@ namespace avmplus
 			}
 		}
 		// default - do getproperty at runtime
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 		if (jit)
 		{
 			if (needsSetContext)
@@ -2688,7 +2642,7 @@ namespace avmplus
 		Traits *in = value.traits;
 		if (in != st || !value.notNull || opcode != OP_convert_s)
 		{
-			#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			#if defined FEATURE_NANOJIT
 			if (jit)
 			{
 				if (opcode == OP_convert_s && in && 
@@ -2707,7 +2661,7 @@ namespace avmplus
 		}
 	}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	void Verifier::emitCheckNull(int i)
 	{
 	    if (!jit) return;
@@ -2754,7 +2708,7 @@ namespace avmplus
 	void Verifier::emitCoerce(Traits* target, int index)
 	{
 		Value &v = state->value(index);
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
         if (jit) {
     		Traits* rhs = v.traits;
 		    if ((!canAssign(target, rhs) || !Traits::isMachineCompatible(target, rhs)))
@@ -2789,7 +2743,7 @@ namespace avmplus
 
 		m->resolveSignature(toplevel);
 	
-		#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 		// coerce parameter types
 		int n=1;
 		while (argc > 0) 
@@ -2953,23 +2907,13 @@ namespace avmplus
 
     void Verifier::verifyFailed(int errorID, Stringp arg1, Stringp arg2, Stringp arg3) const
     {
-#ifdef FEATURE_BUFFER_GUARD
-#ifdef AVMPLUS_MIR
-		// Make sure the GrowthGuard is unregistered
-		if (growthGuard)
-		{
-			growthGuard->~GrowthGuard();
-		}
-#endif
-#endif
-
 #ifdef AVMPLUS_VERBOSE
 		if (!secondTry && !verbose)
 		{
 			// capture the verify trace even if verbose is false.
 			Verifier v2(info, toplevel, true);
 			v2.verbose = true;
-			#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+			#if defined FEATURE_NANOJIT
 			v2.verify(NULL);
 			#else
 			v2.verify();
@@ -3077,10 +3021,10 @@ namespace avmplus
 
 				Traits* t3 = (t1 == t2) ? t1 : findCommonBase(t1, t2);
 				
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				if (jit)
 					jit->merge(i, curValue, targetValue);
-				#endif // AVMPLUS_MIR || FEATURE_NANOJIT
+				#endif // FEATURE_NANOJIT
 
 				bool notNull = targetValue.notNull && curValue.notNull;
 				if (targetState->pc < state->pc && 
@@ -3365,7 +3309,7 @@ namespace avmplus
 				v.isWith = info->declaringTraits->scope->getScopeIsWithAt(i);
 				v.killed = false;
 				v.notNull = true;
-				#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				v.ins = 0;
 				#endif
 				printValue(v);
@@ -3415,7 +3359,7 @@ namespace avmplus
 			if (!t->isNumeric() && !v.notNull && t != BOOLEAN_TYPE && t != NULL_TYPE)
 				core->console << "?";
 		}
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		if (jit && v.ins)
 			jit->formatOperand(core->console, v.ins);
 #endif

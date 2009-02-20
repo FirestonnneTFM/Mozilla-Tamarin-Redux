@@ -40,19 +40,12 @@
 #ifdef AVMPLUS_WORD_CODE
 
 // FIXME the following is required because FrameState has dependencies on the jitters
-#if defined AVMPLUS_MIR
-    #include "../codegen/CodegenMIR.h"
-    #define JIT_ONLY(x) x
-    #define MIR_ONLY(x) x
-    #define LIR_ONLY(x)
-#elif defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
     #include "../codegen/CodegenLIR.h"
     #define JIT_ONLY(x) x
-    #define MIR_ONLY(x) 
     #define LIR_ONLY(x) x
 #else
     #define JIT_ONLY(x) 
-    #define MIR_ONLY(x) 
     #define LIR_ONLY(x) 
 #endif
 
@@ -937,7 +930,7 @@ namespace avmplus
 	}
 	
 	// 'OP_abs_jump' is an ABC-only construct, it boils away in the translation,
-	// both here and to MIR/LIR.  It says: My first operand (one word in 32-bit
+	// both here and to LIR.  It says: My first operand (one word in 32-bit
 	// mode, two words in 64-bit mode) is a raw pointer into a buffer of ABC code.
 	// My second operand is the number of bytes of code starting at that address.
 	// Continue translating from that address as if it were a linear part

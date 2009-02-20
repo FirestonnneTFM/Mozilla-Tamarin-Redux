@@ -37,9 +37,6 @@
 
 
 #include "avmplus.h"
-#ifdef AVMPLUS_MIR
-#include "../codegen/CodegenMIR.h"
-#endif
 #ifdef FEATURE_NANOJIT
 #include "../codegen/CodegenLIR.h"
 #endif
@@ -601,7 +598,7 @@ namespace avmplus
 		return true;
 	}
 	
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	void TraitsBindings::fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel, ImtBuilder* imtBuilder)
 #else
 	void TraitsBindings::fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel)
@@ -610,10 +607,10 @@ namespace avmplus
 		if (owner->isInterface)
 			return;
 		
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 		for (TraitsBindingsp self = this; self; self = self->base)
 	#else
-		// only need this to be a loop if we are building IMT, which never happens in non-MIR mode
+		// only need this to be a loop if we are building IMT, which never happens in non-jit mode
 		TraitsBindingsp self = this;
 	#endif
 		{
@@ -655,7 +652,7 @@ namespace avmplus
 						}
 					}
 					AvmAssert(isCompatibleOverrideKind(iBindingKind, AvmCore::bindingKind(cBinding)));
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 					// don't need to add bindings for ancestors, but we do need to add ancestor interfaces
 					// to the IMT if we are building that.
 					if (imtBuilder)
@@ -677,7 +674,7 @@ namespace avmplus
 				} // for j
 			} // for tbi
 			//
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 			// if not building IMT, we're done after one iteration.
 			if (!imtBuilder) 
 				break;
@@ -1361,7 +1358,7 @@ namespace avmplus
 		return capLog;
 	}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	TraitsBindings* Traits::_buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen, ImtBuilder* imtBuilder)
 #else
 	TraitsBindings* Traits::_buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen)
@@ -1432,7 +1429,7 @@ namespace avmplus
 			
 			thisData->m_slotSize = finishSlotsAndMethods(basetb, thisData, toplevel, abcGen) - m_sizeofInstance;
 			addInterfaces(thisData);
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 			thisData->fixInterfaceBindings(core, toplevel, imtBuilder);
 #else
 			thisData->fixInterfaceBindings(core, toplevel);
@@ -1567,7 +1564,7 @@ namespace avmplus
 
 		AbcGen gen(gc);	
 		TraitsBindings* tb;
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		if (core->IsMIREnabled())
 		{
 			ImtBuilder imtBuilder(gc);
@@ -1990,7 +1987,7 @@ namespace avmplus
 	}
 #endif
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	ImtBuilder::ImtBuilder(MMgc::GC* _gc) : gc(_gc)
 	{
 		VMPI_memset(entries, 0, sizeof(ImtEntry*)*Traits::IMT_SIZE);
@@ -2011,24 +2008,6 @@ namespace avmplus
 	{
 		AvmAssert(pool->core->IsMIREnabled());
 
-	#ifdef AVMPLUS_MIR
-		// Count up all our IMT entries that will generate thunks so we can make sure
-		// we have enough space for them in our CodegenMIR buffers.
-		volatile uint32_t imtCount = 0;
-		for (uint32_t j=0; j < Traits::IMT_SIZE; j++)
-		{
-			ImtEntry *e = entries[j];
-			if ((e != NULL) && (e->next != NULL))
-			{
-				while (e)
-				{
-					imtCount++;
-					e = e->next;
-				}
-			}
-		}
-	#endif // AVMPLUS_MIR
-
 		for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
 		{
 			ImtEntry *e = entries[i];
@@ -2045,27 +2024,21 @@ namespace avmplus
 			else
 			{
 				// build conflict stub
-				#if defined AVMPLUS_MIR
-				CodegenMIR imtgen(pool);
-				#elif defined FEATURE_NANOJIT
+				#if defined FEATURE_NANOJIT
 				CodegenIMT imtgen(pool);
 				#endif
 
 				TRY(pool->core, kCatchAction_Rethrow)
 				{
-	#ifdef AVMPLUS_MIR
-					void* thunk = imtgen.emitImtThunk(e, imtCount);
-	#else
 					void* thunk = imtgen.emitImtThunk(e);
-	#endif // AVMPLUS_MIR
 					imt[i] = AvmCore::makeITrampBinding(uintptr_t(thunk));
 					if (imtgen.overflow)
 						toplevel->throwError(kOutOfMemoryError);
 				}
 				CATCH (Exception* exception) 
 				{
-					#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
-					imtgen.clearMIRBuffers();
+					#if defined FEATURE_NANOJIT
+					imtgen.clearBuffers();
                     #endif
 
 					// re-throw exception
@@ -2174,7 +2147,7 @@ failure:
 		// executed for subsequent re-buildings. Thus we pass NULL for toplevel (it's only used
 		// for verification errors, but those will have been caught prior to this) and for
 		// abcGen and imtBuilder (since those only need to be done once).
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*abcGen*/NULL, /*imtBuilder*/NULL);
 #else
 		TraitsBindings* tb = _buildTraitsBindings(/*toplevel*/NULL, /*abcGen*/NULL);

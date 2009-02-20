@@ -43,7 +43,7 @@ namespace avmplus
 	/**
 	 * interp32/N() is the main loop of the AVM+ interpreter.
 	 *
-	 * The native code compiler CodegenMIR is used by default
+	 * The native code compiler is used by default
 	 * for executing AVM+ bytecode, since it is faster by
 	 * nature, but the AVM+ interpreter is used in some cases:
 	 *

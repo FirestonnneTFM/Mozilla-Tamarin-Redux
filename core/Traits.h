@@ -149,7 +149,7 @@ namespace avmplus
 
 	typedef const uint8_t* TraitsPosPtr;
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	class ImtBuilder;
 #endif
 
@@ -286,7 +286,7 @@ namespace avmplus
 		inline const InterfaceInfo* findInterfaceAddr(Traitsp intf) const { return const_cast<TraitsBindings*>(this)->findInterfaceAddr(intf); }
 		bool checkOverride(AvmCore* core, AbstractFunction* virt, AbstractFunction* over) const;
 		bool checkLegalInterfaces(AvmCore* core) const;
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		void fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel, ImtBuilder* imtBuilder);
 #else
 		void fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel);
@@ -360,14 +360,12 @@ namespace avmplus
 	class Traits : public TRAITSBASE 
 	{
 		friend class TraitsBindings;	// for m_sizeofInstance
-		#if defined AVMPLUS_MIR
-		friend class CodegenMIR;
-		#elif defined FEATURE_NANOJIT
+		#if defined FEATURE_NANOJIT
 		friend class CodegenLIR;
 		#endif
 
 	public:
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
 		// since we use the AbstractFunction pointer as the interface method id
 		// smaller = dense table, few large conflict stubs
@@ -378,7 +376,7 @@ namespace avmplus
 #else
 		static const uint32_t IMT_SIZE = 7;  // good for performance
 #endif
-#endif // AVMPLUS_MIR | FEATURE_NANOJIT
+#endif // FEATURE_NANOJIT
 
 		inline void resetSizeof(uint32_t size)
 		{
@@ -428,7 +426,7 @@ namespace avmplus
 									TraitsBindings* tb, 
 									const Toplevel* toplevel,
 									AbcGen* abcGen) const;
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 		TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen, ImtBuilder* imtBuilder);
 	#else
 		TraitsBindings* _buildTraitsBindings(const Toplevel* toplevel, AbcGen* abcGen);
@@ -513,7 +511,7 @@ namespace avmplus
 		// BIND_METHOD+disp_id = no conflict, dispatches to concrete method
 		// BIND_ITRAMP+addr    = conflict, dispatch to conflict resolution stub
 		// IMT table (if we have one, comes after the interfaces)
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 		const Binding* getIMT() const 
 		{
 			// @todo we only need this at vtable-resolution time, could move into TD or gen on demand?
@@ -582,12 +580,13 @@ namespace avmplus
 	#ifdef MMGC_DRC
 	private:	FixedBitSet				m_slotDestroyInfo;	
 	#endif
-	#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+	#if defined FEATURE_NANOJIT
 	private:	Binding					m_imt[Traits::IMT_SIZE];
 	#endif
 	private:	DWB(MMgc::GCWeakRef*)	m_tbref;				// our TraitsBindings 
 	private:	DWB(MMgc::GCWeakRef*)	m_tmref;				// our TraitsMetadata
-// @todo -- we should be able to store m_sizeofInstance in 16 bits but MIR doesn't have a convenient way to do a 16-bit load. Leaving at 32 for now.
+// @todo -- we should be able to store m_sizeofInstance in 16 bits but JIT doesn't have a convenient way to do a 16-bit load. Leaving at 32 for now.
+// @todo -- what prevents an instance being >64K?
 	private:	uint32_t				m_sizeofInstance;	// sizeof implementation class, e.g. ScriptObject, etc. < 64k. Not counting extra room for slots.
 	private:	uint32_t				m_hashTableOffset;	// offset to our hashtable (or 0 if none)
 	private:	uint32_t				m_totalSize;		// total size, including sizeofInstance + slots + hashtable
@@ -608,7 +607,7 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	class ImtBuilder
 	{
 	public:

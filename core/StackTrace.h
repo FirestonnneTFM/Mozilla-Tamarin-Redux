@@ -146,7 +146,7 @@ namespace avmplus
 		
 		inline void sampleCheck() { if (m_core) m_core->sampleCheck(); }
 
-		void** FASTCALL scopeBase(); // with MIR, array members are (ScriptObject*); with interpreter, they are (Atom).
+		void** FASTCALL scopeBase(); // with JIT, array members are (ScriptObject*); with interpreter, they are (Atom).
 
 		void FASTCALL exit();
 
@@ -196,7 +196,7 @@ namespace avmplus
 					uint32_t*		m_ap;			// unboxed args, iff boxed == false
 					Atom*			m_atomv;		// boxed args, iff boxed == true
 				};
-	private:	int32_t volatile*	m_scopeDepth;	// Only used by the interpreter! With MIR, look for NULL entires in the scopeBase array.
+	private:	int32_t volatile*	m_scopeDepth;	// Only used by the interpreter! With JIT, look for NULL entires in the scopeBase array.
 	private:	int32_t				m_argc;
 	private:	int32_t				m_linenum;
 	private:	bool				m_boxed;

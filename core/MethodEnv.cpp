@@ -493,7 +493,7 @@ namespace avmplus
 		return env->impl32(env, argc, ap);
 	}
 
-#if defined(AVMPLUS_MIR) || defined(FEATURE_NANOJIT)
+#if defined(FEATURE_NANOJIT)
 	MethodEnv::MethodEnv(void *addr, VTable *vtable)
 		: vtable(vtable), method(NULL), declTraits(NULL), activationOrMCTable(0)
 	{
@@ -667,7 +667,7 @@ namespace avmplus
 		return toplevel()->arrayClass->newarray(extra, extra_count);
 	}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 
 	Atom MethodEnv::getpropertyHelper(Atom obj, /* not const */ Multiname *multi, VTable *vtable, Atom index)
 	{
@@ -886,7 +886,7 @@ namespace avmplus
 		}
 	}
 
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 	ArrayObject* MethodEnv::createArgumentsHelper(int argc, uint32 *ap)
 	{
 		// create arguments using argv[1..argc].
@@ -906,7 +906,7 @@ namespace avmplus
 		return toplevel()->arrayClass->newarray(extra, extra_count);
 	}
 
-#endif // AVMPLUS_MIR || FEATURE_NANOJIT
+#endif // FEATURE_NANOJIT
 
 	Atom MethodEnv::getpropertylate_i(Atom obj, int index) const
 	{

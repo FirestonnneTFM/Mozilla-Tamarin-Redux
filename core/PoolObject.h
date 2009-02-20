@@ -148,12 +148,6 @@ namespace avmplus
 		void initPrecomputedMultinames();
 #endif
 		
-		#ifdef AVMPLUS_MIR
-		/** buffer containing generated machine code for all methods */
-		GrowableBuffer *codeBuffer;
-		sintptr stackOverflowHandler; // address of stack overflow handler
-		#endif /*AVMPLUS_MIR */
-
         #ifdef FEATURE_NANOJIT
         DWB(PageMgr*) codePages;
         #endif

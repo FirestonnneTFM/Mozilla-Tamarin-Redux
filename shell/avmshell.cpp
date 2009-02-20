@@ -255,17 +255,10 @@ namespace avmshell
 		#ifdef AVMPLUS_VERBOSE
 			printf("          [-Dverbose]   trace every instruction (verbose!)\n");
 			printf("          [-Dverbose_init] trace the builtins too\n");
-			printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
+			printf("          [-Dbbgraph]   output JIT basic block graphs for use with Graphviz\n");
 		#endif
 
-    #ifdef AVMPLUS_MIR
-		printf("          [-Dmem]       show compiler memory usage \n");
-		printf("          [-Dnodce]     disable DCE optimization \n");
-		#ifdef AVMPLUS_VERBOSE
-	    printf("          [-Dbbgraph]   output MIR basic block graphs for use with Graphviz\n");
-		#endif
-    #endif
-    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+    #if defined FEATURE_NANOJIT
 		printf("          [-Dforcemir]  deprecated, use -Ojit\n");
 		printf("          [-Ojit]       use jit always, never interp\n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
@@ -556,7 +549,7 @@ namespace avmshell
 
 		TRY(this, kCatchAction_ReportAsError)
 		{
-#if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+#if defined FEATURE_NANOJIT
 			#if defined (AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
 			#ifdef AVMPLUS_SSE2_ALWAYS
 			config.sse2 = true;
@@ -624,7 +617,7 @@ namespace avmshell
 						}
 						#ifdef AVMPLUS_IA32
 						else if (!VMPI_strcmp(arg+2, "nosse")) {
-                            #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                            #if defined FEATURE_NANOJIT
 							config.sse2 = false;
 							#endif
 						}
@@ -700,23 +693,15 @@ namespace avmshell
                         }
 						#endif
 
-	                #ifdef AVMPLUS_MIR
-						else if (!VMPI_strcmp(arg+2, "nodce")) {
-							config.dceopt = false;
-						} else if (!VMPI_strcmp(arg+2, "mem")) {
-							show_mem = true;
-						}
-                    #endif
-
-                    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                    #if defined FEATURE_NANOJIT
                         #ifdef AVMPLUS_VERBOSE
 						else if (!VMPI_strcmp(arg+2, "bbgraph")) {
-							config.bbgraph = true;  // generate basic block graph (only valid with MIR)
+							config.bbgraph = true;  // generate basic block graph (only valid with JIT)
                         }
 						#endif
                     #endif
 
-                    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                    #if defined FEATURE_NANOJIT
 						else if (!VMPI_strcmp(arg+2, "forcemir")) {
 							config.runmode = RM_jit_all;
 						} else if (!VMPI_strcmp(arg+2, "nocse")) {
@@ -735,7 +720,7 @@ namespace avmshell
 					} else if (!VMPI_strcmp(arg, "-cache_metadata")) {
 						cacheSizes.metadata = (uint16_t)VMPI_strtol(argv[++i], 0, 10);
 					}
-                #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                #if defined FEATURE_NANOJIT
 					else if (!VMPI_strcmp(arg, "-Ojit")) {
                         config.runmode = RM_jit_all;
 					} 
