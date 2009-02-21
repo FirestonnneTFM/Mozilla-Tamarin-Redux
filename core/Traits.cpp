@@ -1565,7 +1565,7 @@ namespace avmplus
 		AbcGen gen(gc);	
 		TraitsBindings* tb;
 #if defined FEATURE_NANOJIT
-		if (core->IsMIREnabled())
+		if (core->IsJITEnabled())
 		{
 			ImtBuilder imtBuilder(gc);
 			tb = _buildTraitsBindings(toplevel, &gen, &imtBuilder);
@@ -2006,7 +2006,7 @@ namespace avmplus
 
 	void ImtBuilder::finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel)
 	{
-		AvmAssert(pool->core->IsMIREnabled());
+		AvmAssert(pool->core->IsJITEnabled());
 
 		for (uint32_t i=0; i < Traits::IMT_SIZE; i++)
 		{

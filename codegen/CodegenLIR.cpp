@@ -1584,7 +1584,7 @@ namespace avmplus
         });
 
 		// get a label for our block start and tie it to this location
-		mirLabel(state->verifier->getFrameState(state->pc)->label, bb);
+		setLabelPos(state->verifier->getFrameState(state->pc)->label, bb);
 
 		// If this is a backwards branch, generate an interrupt check.
 		// current verifier state, includes tack pointer.
@@ -3074,15 +3074,15 @@ namespace avmplus
             case OP_subtract:
             case OP_add_d: {
                 PERFM_NVPROF("emit(binary",1);
-				LOpcode mircode;
+				LOpcode op;
 				switch (opcode) {
 					default:
-					case OP_divide:     mircode = LIR_fdiv; break;
-					case OP_multiply:   mircode = LIR_fmul; break;
-					case OP_subtract:   mircode = LIR_fsub; break;
-					case OP_add_d:      mircode = LIR_fadd; break;
+					case OP_divide:     op = LIR_fdiv; break;
+					case OP_multiply:   op = LIR_fmul; break;
+					case OP_subtract:   op = LIR_fsub; break;
+					case OP_add_d:      op = LIR_fadd; break;
 				}
-                localSet(sp-1, binaryIns(mircode, localGetq(sp-1), localGetq(sp)));
+                localSet(sp-1, binaryIns(op, localGetq(sp-1), localGetq(sp)));
                 break;
             }
 
@@ -3097,22 +3097,22 @@ namespace avmplus
 			case OP_bitxor:
 			{
                 PERFM_NVPROF("emit(binary",1);
-				LOpcode mircode;
+				LOpcode op;
 				switch (opcode) {
                     default:
-					case OP_bitxor:     mircode = LIR_xor;  break;
-					case OP_bitor:      mircode = LIR_or;   break;
-					case OP_bitand:     mircode = LIR_and;  break;
-					case OP_urshift:    mircode = LIR_ush;  break;
-					case OP_rshift:     mircode = LIR_rsh;  break;
-					case OP_lshift:     mircode = LIR_lsh;  break;
-					case OP_multiply_i: mircode = LIR_mul; break;
-					case OP_add_i:      mircode = LIR_add;  break;
-					case OP_subtract_i: mircode = LIR_sub;  break;
+					case OP_bitxor:     op = LIR_xor;  break;
+					case OP_bitor:      op = LIR_or;   break;
+					case OP_bitand:     op = LIR_and;  break;
+					case OP_urshift:    op = LIR_ush;  break;
+					case OP_rshift:     op = LIR_rsh;  break;
+					case OP_lshift:     op = LIR_lsh;  break;
+					case OP_multiply_i: op = LIR_mul; break;
+					case OP_add_i:      op = LIR_add;  break;
+					case OP_subtract_i: op = LIR_sub;  break;
 				}
 				LIns* lhs = localGet(sp-1);
 				LIns* rhs = localGet(sp);
-				LIns* out = binaryIns(mircode, lhs, rhs);
+				LIns* out = binaryIns(op, lhs, rhs);
 				localSet(sp-1, out);
 				break;
 			}
@@ -4568,14 +4568,14 @@ namespace avmplus
         if (npe_label.preds) {
             LIns *label = Ins(LIR_label);
 			verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "npe"); })
-			mirLabel(npe_label, label);
+			setLabelPos(npe_label, label);
 			callIns(FUNCTIONID(npe), 1, env_param);
 		}
 
         if (interrupt_label.preds) {
             LIns *label = Ins(LIR_label);
 			verbose_only( if (frag->lirbuf->names) { frag->lirbuf->names->addName(label, "interrupt"); })
-			mirLabel(interrupt_label, label);
+			setLabelPos(interrupt_label, label);
 			callIns(FUNCTIONID(interrupt), 1, env_param);
 		}
 
@@ -4784,7 +4784,7 @@ namespace avmplus
 	}
 
 	/* set position of label */
-	void CodegenLIR::mirLabel(CodegenLabel& l, LIns* bb) {
+	void CodegenLIR::setLabelPos(CodegenLabel& l, LIns* bb) {
         AvmAssert(bb->isop(LIR_label));
         AvmAssert(l.bb == 0);
         l.bb = bb;

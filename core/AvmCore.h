@@ -256,15 +256,15 @@ const int kBufferPadding = 16;
 		#endif
 
 #if defined FEATURE_NANOJIT
-	    inline void SetMIREnabled(bool isEnabled) {
+	    inline void SetJITEnabled(bool isEnabled) {
 			config.runmode = (isEnabled) ? RM_mixed : RM_interp_all;
 		}
-        inline bool IsMIREnabled() const {
+        inline bool IsJITEnabled() const {
 			return (config.runmode == RM_mixed || config.runmode == RM_jit_all) ? true : false;
 		}
 #else
-        inline void SetMIREnabled(bool) {}
-        inline bool IsMirEnabled() { return false; }
+        inline void SetJITEnabled(bool) {}
+        inline bool IsJITEnabled() { return false; }
 #endif
 
 		/**
