@@ -99,6 +99,7 @@ namespace avmplus
 		resolveSignature(toplevel);
 
 		AvmCore* core = this->pool->core;
+
 		#ifdef DEBUGGER
 		// just a fake CallStackNode here , so that if we throw a verify error, 
 		// we get a stack trace with the method being verified as its top entry.
@@ -106,13 +107,13 @@ namespace avmplus
 		// skip the call to getMethodName(), which is nonzero
 		CallStackNode callStackNode(CallStackNode::kNoOp);
 		if (core->debugger())
-			callStackNode.init(this->pool->core, this->getMethodName());
+			callStackNode.init(core, this->getMethodName());
 		#endif /* DEBUGGER */
 
 		if (!body_pos)
 		{
 			// no body was supplied in abc
-			toplevel->throwVerifyError(kNotImplementedError, this->pool->core->toErrorString(this));
+			toplevel->throwVerifyError(kNotImplementedError, core->toErrorString(this));
 		}
 
 		#if defined FEATURE_NANOJIT

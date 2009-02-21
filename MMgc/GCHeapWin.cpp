@@ -58,59 +58,6 @@ namespace MMgc
 		return sysinfo.dwPageSize;
 	}
 
-	void* GCHeap::ReserveCodeMemory(void* address,
-									size_t size)
-	{
-		return VirtualAlloc(address,
-							size,
-							MEM_RESERVE
-#ifdef _WIN64
-							| MEM_TOP_DOWN
-#endif //#ifdef _WIN64
-							,
-							PAGE_NOACCESS);
-	}
-
-	void GCHeap::ReleaseCodeMemory(void* address,
-								   size_t /*size*/)
-	{
-		VirtualFree(address, 0, MEM_RELEASE);
-	}
-
-	void* GCHeap::CommitCodeMemory(void* address,
-								  size_t size)
-	{
-		if (size == 0)
-			size = GCHeap::kNativePageSize;  // default of one page
-
-#ifdef AVMPLUS_JIT_READONLY
-		void* addr = VirtualAlloc(address,
-								  size,
-								  MEM_COMMIT
-#ifdef _WIN64
-								  | MEM_TOP_DOWN
-#endif //#ifdef _WIN64
-								  ,
-								  PAGE_READWRITE);
-#else
-		void* addr = VirtualAlloc(address,
-								  size,
-								  MEM_COMMIT
-#ifdef _WIN64
-								  | MEM_TOP_DOWN
-#endif //#ifdef _WIN64
-								  ,
-								  PAGE_EXECUTE_READWRITE);
-#endif /* AVMPLUS_JIT_READONLY */
-		if (addr == NULL)
-			address = 0;
-		else {
-			address = (void*)( (sintptr)address + size );
-			committedCodeMemory += size;
-		}
-		return address;
-	}
-
 #ifdef AVMPLUS_JIT_READONLY
 	/**
 	 * SetPageProtection changes the page access protections on a block of pages,
@@ -157,37 +104,6 @@ namespace MMgc
 		GCAssert((oldProtectFlags & PAGE_GUARD) == 0);
 	}
 #endif /* AVMPLUS_JIT_READONLY */
-	
-	bool GCHeap::SetGuardPage(void *address)
-	{
-		if (!useGuardPages)
-		{
-			return false;
-		}
-		void *res = VirtualAlloc(address,
-								 GCHeap::kNativePageSize,
-								 MEM_COMMIT
-#ifdef _WIN64
-								 | MEM_TOP_DOWN
-#endif //#ifdef _WIN64
-								 ,
-								 PAGE_GUARD | PAGE_READWRITE);
-		return res != 0;
-	}
-	
-	void* GCHeap::DecommitCodeMemory(void* address,
-									 size_t size)
-	{
-		if (size == 0)
-			size = GCHeap::kNativePageSize;  // default of one page
-
-		if (VirtualFree(address, size, MEM_DECOMMIT) == false)
-			address = 0;	
-		else
-			committedCodeMemory -= size;
-
-		return address;
-	}
 #endif
 
 	#ifdef USE_MMAP

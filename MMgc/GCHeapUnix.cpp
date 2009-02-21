@@ -115,28 +115,6 @@ namespace MMgc
 		long v = sysconf(_SC_PAGESIZE);
 		return v;
 	}
-
-	void* GCHeap::ReserveCodeMemory(void* address,
-									size_t size)
-	{
-		return (char*) mmap((maddr_ptr)address,
-							size,
-							PROT_READ | PROT_WRITE,
-							MAP_PRIVATE | MAP_ANONYMOUS,
-							-1, 0);
-	}
-
-	void GCHeap::ReleaseCodeMemory(void* address,
-								   size_t size)
-	{
-		if (munmap((maddr_ptr)address, size) != 0)
-			GCAssert(false);
-	}
-
-	bool GCHeap::SetGuardPage(void */*address*/)
-	{
-		return false;
-	}
 #endif /* USE_MMAP */
 
 #ifdef AVMPLUS_JIT_READONLY
@@ -181,84 +159,11 @@ namespace MMgc
 #endif /* AVMPLUS_JIT_READONLY */
 	
 #ifdef USE_MMAP
-	void* GCHeap::CommitCodeMemory(void* address,
-								  size_t size)
-	{
-		void* res;
-		if (size == 0)
-			size = GCHeap::kNativePageSize;  // default of one page
-
-#ifdef AVMPLUS_JIT_READONLY
-		mmap((maddr_ptr)address,
-			 size,
-			 PROT_READ | PROT_WRITE,
-			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
-			 -1, 0);
-#else
-		mmap((maddr_ptr)address,
-			 size,
-			 PROT_READ | PROT_WRITE | PROT_EXEC,
-			 MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
-			 -1, 0);
-#endif /* AVMPLUS_JIT_READONLY */
-		res = address;
-		
-		if (res == address)
-			address = (void*)( (uintptr)address + size );
-		else
-			address = 0;
-			
-		committedCodeMemory += size;
-		return address;
-	}
-
-	void* GCHeap::DecommitCodeMemory(void* address,
-									 size_t size)
-	{
-		if (size == 0)
-			size = GCHeap::kNativePageSize;  // default of one page
-
-		// release and re-reserve it
-		ReleaseCodeMemory(address, size);
-		address = ReserveCodeMemory(address, size);
-		committedCodeMemory -= size;
-		return address;
-	}
 #else
 	int GCHeap::vmPageSize()
 	{
 		return 4096;
 	}
-
-	void* GCHeap::ReserveCodeMemory(void* address,
-									size_t size)
-	{
-		return aligned_malloc(size, 4096, m_malloc);
-	}
-
-	void GCHeap::ReleaseCodeMemory(void* address,
-								   size_t size)
-	{
-		aligned_free(address, m_free);
-	}
-
-	bool GCHeap::SetGuardPage(void *address)
-	{
-		return false;
-	}
-	
-	void* GCHeap::CommitCodeMemory(void* address,
-								   size_t size)
-	{
-		committedCodeMemory += size;
-		return address;
-	}	
-	void* GCHeap::DecommitCodeMemory(void* address,
-									 size_t size)
-	{
-		committedCodeMemory -= size;
-		return address;
-	}	
 #endif /* USE_MMAP */	
 
 #ifdef USE_MMAP

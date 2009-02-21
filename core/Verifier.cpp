@@ -1855,7 +1855,7 @@ namespace avmplus
 			    // if either the LHS or RHS is a number type, then we know                                        
 			    // it will be a numeric comparison.                                                               
 
-                #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                #if defined FEATURE_NANOJIT
 			    Value& rhs = state->peek(1);
 				Value& lhs = state->peek(2);
 				Traits *lhst = lhs.traits;
@@ -1909,7 +1909,7 @@ namespace avmplus
 				// remain even in the non-JIT case                                                        
 				if (lhst == STRING_TYPE && lhs.notNull || rhst == STRING_TYPE && rhs.notNull)
 				{
-                #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                #if defined FEATURE_NANOJIT
                 if (jit)
 				{
 				    emitToString(OP_convert_s, sp-1);
@@ -1921,7 +1921,7 @@ namespace avmplus
 				}
 				else if (lhst && lhst->isNumeric() && rhst && rhst->isNumeric())
 				{
-                    #if defined AVMPLUS_MIR || defined FEATURE_NANOJIT
+                    #if defined FEATURE_NANOJIT
 				    if (jit)
 					{
 					    emitCoerce(NUMBER_TYPE, sp-1);

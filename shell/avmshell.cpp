@@ -542,8 +542,6 @@ namespace avmshell
 	int Shell::main(int argc, char *argv[])
 #endif
 	{
-		bool show_mem = false;
-
 		AvmCore::CacheSizes cacheSizes;	// defaults to unlimited
 
 		TRY(this, kCatchAction_ReportAsError)
@@ -1207,13 +1205,6 @@ namespace avmshell
 		}
 		END_CATCH
 		END_TRY
-
-		if (show_mem)
-		{
-			MMgc::GCHeap* heap = GetGC()->GetGCHeap();
-			size_t codeSize = heap->GetCodeMemorySize();
-			console << (int)codeSize << " bytes used by the compiler\n";
-		}
 
 #ifdef AVMPLUS_WITH_JNI
 		if (Java::startup_options) delete Java::startup_options;
