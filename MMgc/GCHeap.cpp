@@ -133,15 +133,6 @@ namespace MMgc
 #ifdef MMGC_AVMPLUS
 		// get native page size from OS
 		kNativePageSize = vmPageSize();
-		committedCodeMemory = 0;
-
-		#ifdef WIN32
-		// Check OS version to see if PAGE_GUARD is supported
-		// (It is not supported on Win9x)
-		OSVERSIONINFO osvi;
-		::GetVersionEx(&osvi);
-		useGuardPages = (osvi.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS);
-		#endif
 #endif
 
 		// Create the initial heap
@@ -149,18 +140,10 @@ namespace MMgc
 
 		decommitTicks = 0;
 		decommitThresholdTicks = kDecommitThresholdMillis * GC::GetPerformanceFrequency() / 1000;
-
-#ifdef MMGC_AVMPLUS
-		InitMirMemory();
-#endif /*MMGC_AVMPLUS*/
 	}
 
 	GCHeap::~GCHeap()
 	{
-#ifdef MMGC_AVMPLUS
-		FlushMirMemory();
-#endif /*MMGC_AVMPLUS*/
-
 #ifdef MEMORY_PROFILER
 		if(profiler)
 			delete profiler;
@@ -1221,99 +1204,6 @@ namespace MMgc
 		}
 		delete [] blocks;
 
-	}
-
-	void GCHeap::FlushMirMemory()
-	{
-		for(int i=0;i<MirBufferCount;i++)
-		{
-			MirMemInfo* b = &m_mirBuffers[i];
-			GCAssertMsg(b->free, "WARNING: ReleaseMirMemory was not called on this block\n");
-			if (b->size)
-				ReleaseCodeMemory(b->addr, b->size);
-		}
-	}
-
-	void GCHeap::InitMirMemory()
-	{
-		for(int i=0;i<MirBufferCount;i++)
-		{
-			MirMemInfo* b = &m_mirBuffers[i];
-			b->addr = 0;
-			b->size = 0;
-			b->free = true;
-		}
-	}
-		
-	void* GCHeap::ReserveMirMemory(size_t size)
-	{
-		MirMemInfo* buf = 0;
-		{
-#ifdef GCHEAP_LOCK
-			GCAcquireSpinlock lock(m_mirBufferLock);
-#endif
-			for(int i=0;i<MirBufferCount;i++)
-			{
-				MirMemInfo* b = &m_mirBuffers[i];
-				if (b->free)
-				{
-					if (b->size >= size)
-					{
-						b->free = false;
-						buf = b;
-						break;
-					}
-
-					// pick best between empty or least largest
-					if (!buf || b->size < buf->size)
-						buf = b;
-				}
-			}
-
-			// lock in our selection
-			if (buf) 
-				buf->free = false; 
-		}
-		// WATCH OUT; lock on buffers relased
-
-		// no match, no room 
-		if (!buf) return 0;
-		
-		// match 
-		if (buf->size >= size) return buf->addr;
-		 
-		// eviction 
-		if (buf->size)
-			ReleaseCodeMemory(buf->addr, buf->size);
-			
-		buf->size = size;
-		buf->addr = ReserveCodeMemory(0,size);
-		if (buf->addr)
-			return buf->addr;
-			
-		// failure
-		buf->size = 0;
-#ifdef GCHEAP_LOCK
-		GCAcquireSpinlock lock(m_mirBufferLock);  // technically needed
-#endif
-		buf->free = true;
-		return 0;	
-	}	
-	
-	void GCHeap::ReleaseMirMemory(void* addr, size_t /*size*/)
-	{
-		MirMemInfo* b = 0;
-		for(int i=0;i<MirBufferCount;i++)
-		{
-			b = &m_mirBuffers[i];
-			if (b->addr == addr)
-				break;
-		}
-		GCAssertMsg(b && !b->free, "Ohh very bad we have a memory leak");
-#ifdef GCHEAP_LOCK
-		GCAcquireSpinlock lock(m_mirBufferLock);  // technically needed 
-#endif
-		if (b) b->free = true;
 	}
 	
 	size_t GCHeap::GetTotalHeapSize() const

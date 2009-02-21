@@ -194,7 +194,6 @@ void ST_mmgc_basics::test8() {
     MMgc::GCHeap *gh=MMgc::GCHeap::GetGCHeap();
     int startfreeheap=(int)gh->GetFreeHeapSize();
 verifyPass((int)gh->GetTotalHeapSize()==128, "(int)gh->GetTotalHeapSize()==128", __FILE__, __LINE__);
-verifyPass((int)gh->GetCodeMemorySize()==0, "(int)gh->GetCodeMemorySize()==0", __FILE__, __LINE__);
 //    printf("gh->GetFreeHeapSize()=%d\n",(int)gh->GetFreeHeapSize());
 verifyPass((int)gh->GetFreeHeapSize()==startfreeheap, "(int)gh->GetFreeHeapSize()==startfreeheap", __FILE__, __LINE__);
     gh->SetHeapLimit(1024);

@@ -374,30 +374,6 @@ namespace MMgc
 #ifdef MMGC_AVMPLUS
 		// OS abstraction to determine native page size
 		int vmPageSize();
-		size_t committedCodeMemory;
-
-		#ifdef WIN32
-		bool useGuardPages;
-		#endif
-		
-		// mir buffer management, share a common pool across threads
-#ifdef GCHEAP_LOCK
-		GCSpinLock m_mirBufferLock;
-#endif
-		typedef struct _MirMemInfo
-		{
-			void* addr;
-			size_t size;
-			bool free;
-		} 
-		MirMemInfo;
-
-		static const int MirBufferCount = 8;
-		MirMemInfo m_mirBuffers[MirBufferCount];
-
-		void InitMirMemory();
-		void FlushMirMemory();
-		
 public:
 
 		/* controls whether AllocHook and FreeHook are called */
@@ -409,22 +385,11 @@ public:
 		// called when object is really dead and can be poisoned
 		void FreeHook(const void *item, size_t size, int poison);
 
-		// support for Mir buffers
-		void* ReserveMirMemory(size_t size);		
-		void  ReleaseMirMemory(void* addr, size_t size);
-
-		// support for jit buffers
-		void* ReserveCodeMemory(void* address, size_t size);
-		void* CommitCodeMemory(void* address, size_t size=0);  // size=0 => 1 page
-		void* DecommitCodeMemory(void* address, size_t size=0);  // size=0 => 1 page
-		void ReleaseCodeMemory(void* address, size_t size);
-		bool SetGuardPage(void *address);
 #ifdef AVMPLUS_JIT_READONLY
 		// SECURITY: setting executeFlag and writeableFlag at the same time is DANGEROUS! 
 		//           Make sure that you know what you are doing!
 		void SetPageProtection(void *address, size_t size, bool executeFlag, bool writeableFlag);
 #endif /* AVMPLUS_JIT_READONLY */
-		size_t GetCodeMemorySize() const { return committedCodeMemory; }
 #endif
 
 #ifdef USE_MMAP

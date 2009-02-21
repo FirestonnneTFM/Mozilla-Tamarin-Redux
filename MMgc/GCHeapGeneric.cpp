@@ -151,16 +151,6 @@ unsigned int ChunkTracker::s_maxblocks = 0;
 		}
 	}
 
-	void* GCHeap::ReserveCodeMemory(void* address, size_t /* size */)
-	{
-		return address;
-	}
-
-	void GCHeap::ReleaseCodeMemory(void* address, size_t /*size*/)
-	{
-		ReleaseMemory((char*)address);
-	}
-
 	/*static*/
 	size_t GCHeap::GetPrivateBytes() { return 0; } // TODO	
 }
