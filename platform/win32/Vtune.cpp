@@ -182,7 +182,7 @@ namespace avmplus
 	
    void VTune_RegisterMethod(AvmCore* core, JITCodeInfo* inf) 
    {       
-		// assume no method inlining so start/end of mir gen = method start/end
+		// assume no method inlining so start/end of JIT code gen = method start/end
        uintptr startAt = inf->startAddr;
        uintptr endAt = inf->endAddr;
 		uint32 methodSize = endAt - startAt;

@@ -199,7 +199,7 @@ namespace avmplus
         void patchLater(LIns *br, CodegenLabel &);
         void patchLater(LIns *br, intptr_t pc);
         bool isCodeContextChanged() const;
-        void mirLabel(CodegenLabel &l, LIns *target);
+        void setLabelPos(CodegenLabel &l, LIns *target);
         void deadvars();
         void deadvars_analyze(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);
         void deadvars_kill(SortedMap<LIns*, BitSet*, LIST_GCObjects> &labels);

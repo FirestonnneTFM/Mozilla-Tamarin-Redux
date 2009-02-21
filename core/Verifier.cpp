@@ -425,7 +425,7 @@ namespace avmplus
 
 			if (info->exceptions)
 			{
-				JIT_ONLY( bool mirSavedState = false; )
+				JIT_ONLY( bool jitSavedState = false; )
 				for (int i=0, n=info->exceptions->exception_count; i < n; i++)
 				{
 					ExceptionHandler* handler = &info->exceptions->exceptions[i];
@@ -446,9 +446,9 @@ namespace avmplus
 							state->scopeDepth = outer_depth;
 							Value stackEntryZero = state->stackValue(0);
 
-							JIT_ONLY(if (jit && !mirSavedState) {
+							JIT_ONLY(if (jit && !jitSavedState) {
 								jit->emitBlockEnd(state);
-								mirSavedState = true;
+								jitSavedState = true;
 							})
 
 							// add edge from try statement to catch block

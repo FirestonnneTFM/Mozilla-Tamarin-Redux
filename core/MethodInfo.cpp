@@ -119,7 +119,7 @@ namespace avmplus
 
 		Verifier verifier(this, toplevel);
 
-		if ((core->IsMIREnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
+		if ((core->IsJITEnabled()) && !isFlagSet(AbstractFunction::SUGGEST_INTERP))
 		{
             PERFM_NTPROF("verify & IR gen");
 

@@ -259,7 +259,6 @@ namespace avmshell
 		#endif
 
     #if defined FEATURE_NANOJIT
-		printf("          [-Dforcemir]  deprecated, use -Ojit\n");
 		printf("          [-Ojit]       use jit always, never interp\n");
 		printf("          [-Dnocse]     disable CSE optimization \n");
         #ifdef AVMPLUS_IA32
@@ -702,12 +701,10 @@ namespace avmshell
                     #endif
 
                     #if defined FEATURE_NANOJIT
-						else if (!VMPI_strcmp(arg+2, "forcemir")) {
-							config.runmode = RM_jit_all;
-						} else if (!VMPI_strcmp(arg+2, "nocse")) {
+						else if (!VMPI_strcmp(arg+2, "nocse")) {
 							config.cseopt = false;
 						}
-                        #endif
+					#endif
 
 						else if (!VMPI_strcmp(arg+2, "interp")) {
 							config.runmode = RM_interp_all;
