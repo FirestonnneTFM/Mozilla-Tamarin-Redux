@@ -450,6 +450,7 @@ insn:
 			| call_insn
 			| multiname_insn
 			| function_insn
+			| mops_insn
 			| ad_hoc_insn
 			| unknown_opcode
 		)
@@ -624,6 +625,22 @@ ad_hoc_insn
 	: opcode = hex_literal imm_array = integer_operands_list
 	{
 	    $decl::method_body_info.insn(opcode, imm_array);
+	}
+	;
+
+/*
+ *  Indirect (MOPS) instructions.
+ */
+mops_insn
+	: mops_opcode = 
+	( 
+		'li8' | 'li16' | 'li32'
+		| 'lf32' | 'lf64'
+		| 'si8' | 'si16' | 'si32'
+		| 'sf32' | 'sf64'
+	)
+	{
+		$decl::method_body_info.insn(mops_opcode);
 	}
 	;
 
