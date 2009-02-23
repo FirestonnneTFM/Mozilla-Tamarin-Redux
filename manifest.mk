@@ -39,6 +39,7 @@ INCLUDES += \
   -I$(topsrcdir)/MMgc \
   -I$(topsrcdir)/core \
   -I$(topsrcdir)/pcre \
+  -I$(topsrcdir)/eval \
   -I$(topsrcdir)/platform \
   $(NULL)
 
@@ -78,6 +79,7 @@ $(call RECURSE_DIRS,platform/unix)
 endif
 endif
 
+$(call RECURSE_DIRS,eval)
 $(call RECURSE_DIRS,shell)
 
 echo:
