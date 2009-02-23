@@ -1,3 +1,4 @@
+/* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -34,16 +35,35 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-function script0$init():*
-{
-  			debugfile "adhoc.abs"
 
-            getlocal0     	
-            pushscope     	
-  			debugline 99
-  			//  Test ad-hoc insn generation.
-  199		0xfa // no operands
-			0x12 19
-			0xea 077 /*octal*/, 0xf
-  23        returnvalue   	
+package adobe.abcasm;
+
+class SymbolicReference
+{
+	public static final int function_id = 1;
+	public static final int slot_id = 2;
+
+	int kind;
+	String symbolicReference;
+
+	SymbolicReference(int kind, String reference)
+	{
+		this.kind = kind;
+		this.symbolicReference = reference;
+	}
+	
+	public String toString()
+	{
+		StringBuffer result = new StringBuffer();
+
+		if ( function_id == kind )
+			result.append(".function_id(");
+		else if ( slot_id == kind )
+			result.append(".slot_id(");
+		else
+			result.append("symref(");
+		result.append(symbolicReference);
+		result.append(")");
+		return result.toString();
+	}
 }

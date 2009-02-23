@@ -173,6 +173,8 @@
 
 		<delete verbose="true" dir="gensrc"/>
 		<delete verbose="true" dir="classes"/>
+		<delete verbose="true" dir="bin"/>
+		<delete verbose="true" dir="grammar/output"/>
 	</target>
 
 	<target name="extraclean" depends="clean">

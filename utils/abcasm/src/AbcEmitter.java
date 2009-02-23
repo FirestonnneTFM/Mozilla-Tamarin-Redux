@@ -254,12 +254,10 @@ class AbcEmitter
 
 	private void emitMethodBody(MethodBodyInfo f)
 	throws Exception
-	{	
-		int method_id = core.translateFunctionId(f.methodId);
+	{
+		MethodInfo signature = core.getMethod(f.methodId);
 		
-		MethodInfo signature = core.methodSignatures.elementAt(method_id);
-		
-		w.writeU30(method_id);
+		w.writeU30(signature.methodId);
 		f.computeFrameCounts();
 
 		w.writeU30(f.getMaxStack());
@@ -492,7 +490,7 @@ class AbcEmitter
 				throw new IllegalStateException("Not implemented.");
 				//break;
 			case OP_newfunction:
-				blockWriter.writeU30(core.translateFunctionId(insn.value));
+				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_applytype:
 				//blockWriter.writeU30(argc(e));
@@ -521,7 +519,7 @@ class AbcEmitter
 				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_pushnamespace:
-				blockWriter.writeU30(core.nsPool.id((Namespace)insn.value));
+				blockWriter.writeU30(insn.imm[0]);
 				break;
 			case OP_pushint:
 				blockWriter.writeU30(insn.imm[0]);

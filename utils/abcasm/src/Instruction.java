@@ -40,40 +40,51 @@ package adobe.abcasm;
 
 class Instruction
 {
+	/**
+	 * @see ActionBlockConstants
+	 */
 	int opcode;
-	int [] imm;
-	Name n;
-	Label target;
-	public Object value;
 	
-	Instruction(int opcode, int[] imm)
+	/**
+	 *  Immediate operands as specified by the program,
+	 *  symbolic references may still be present.
+	 */
+	Object[] operands;
+
+	/**
+	 *  Cooked immediate operands, symbolic references resolved.
+	 */
+	int [] imm;
+	
+	/**
+	 *  Name reference for instructions that operate on a named entity.
+	 */
+	Name n;
+	
+	/**
+	 *  Control-flow target for branch/jump instructions.
+	 */
+	Label target;
+	
+	Instruction(int opcode, Object[] operands)
 	{
 		this.opcode = opcode;
-		this.imm = imm;
+		this.operands = operands;
 	}
 	
 	Instruction(int opcode, Object v)
 	{
-		this(opcode, new int[0]);
-		value = v;
+		this(opcode, new Object[]{v});
 	}
 	
 	public String toString()
 	{
 		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
 		
-		
 		if ( n != null )
 		{
 			result.append(" ");
 			result.append(n);
-		}
-		
-		if ( value != null )
-		{
-			result.append(" \"");
-			result.append(value.toString());
-			result.append("\"");
 		}
 		
 		if ( target != null )
@@ -82,7 +93,7 @@ class Instruction
 			result.append(target);
 		}
 		
-		for ( int x: imm)
+		for ( Object x: operands)
 		{
 			result.append(" ");
 			result.append(x);
