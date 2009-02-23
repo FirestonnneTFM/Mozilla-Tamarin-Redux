@@ -41,11 +41,18 @@ Usage: see abcasm.sh
 
 Syntax: the assembler language is based on abcdump's output format.
 
-Hacking: rebuilding the parser requires antlr-3.0.1 and antlr-2.7.7 
-(ANTLR to be upgraded to version 3.1).
-Put the paths to the ANTLR jarfiles in a build.properties file, e.g.
+Hacking:
+
+1. Rebuilding the parser requires antlr-3.0.1 and antlr-2.7.7, 
+(ANTLR to be upgraded to version 3.1). 
+
+2. $ASC must point to asc.jar.
+
+3. Put the paths to the ANTLR jarfiles in a build.properties file, e.g.
 
 # ANTLR grammar regeneration support
 # Note both ANTLR3 and ANTLR 2.7.7 are required.
 lib.dir=C:/work/antlr-3.0.1
 lib2.dir=C:/work/antlr-2.7.7
+
+4. ant
