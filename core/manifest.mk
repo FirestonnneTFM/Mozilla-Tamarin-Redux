@@ -55,6 +55,7 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/BuiltinTraits.cpp \
   $(curdir)/ClassClass.cpp \
   $(curdir)/ClassClosure.cpp \
+  $(curdir)/CodegenLIR.cpp \
   $(curdir)/Coder.cpp \
   $(curdir)/DateClass.cpp \
   $(curdir)/DateObject.cpp \

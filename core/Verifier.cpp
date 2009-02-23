@@ -38,7 +38,7 @@
 #include "avmplus.h"
 
 #if defined FEATURE_NANOJIT
-    #include "../codegen/CodegenLIR.h"
+    #include "CodegenLIR.h"
     #define JIT_ONLY(x) x
 #else
     #define JIT_ONLY(x) 
@@ -431,7 +431,7 @@ namespace avmplus
 					ExceptionHandler* handler = &info->exceptions->exceptions[i];
 					if (pc >= code_pos + handler->from && pc <= code_pos + handler->to)
 					{
-						// Set the insideTryBlock flag, so the codegen can
+						// Set the insideTryBlock flag, so the jit can
 						// react appropriately.
 						state->insideTryBlock = true;
 
@@ -1760,7 +1760,7 @@ namespace avmplus
 			case OP_getglobalscope:
 				checkStack(0,1);
 				coder->write(state, pc, OP_getglobalscope);
-				checkGetGlobalScope(); // after codegen because mutates stack that codgen depends on
+				checkGetGlobalScope(); // after coder->write because mutates stack that coder depends on
 				break;
 			
 			case OP_getglobalslot: 

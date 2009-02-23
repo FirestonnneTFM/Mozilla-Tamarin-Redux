@@ -476,19 +476,9 @@
 			children = (
 				4EF1E5C50D6245B3000392CC /* MMgc */,
 				4EF1E4F60D62459F000392CC /* core */,
-				4EF1E4ED0D62458A000392CC /* codegen */,
 			);
 			name = no_compile_for_debugging_only;
 			sourceTree = "<group>";
-		};
-		4EF1E4ED0D62458A000392CC /* codegen */ = {
-			isa = PBXGroup;
-			children = (
-				4EF1E4F40D62458A000392CC /* manifest.mk */,
-			);
-			name = codegen;
-			path = ../../../codegen;
-			sourceTree = SOURCE_ROOT;
 		};
 		4EF1E4F60D62459F000392CC /* core */ = {
 			isa = PBXGroup;
@@ -1026,7 +1016,7 @@
 				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..";
 			};
 			name = Debug;
 		};
@@ -1070,7 +1060,7 @@
 				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..";
 			};
 			name = Release;
 		};
@@ -1161,7 +1151,7 @@
 				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..";
 			};
 			name = Debug_Debugger;
 		};
@@ -1207,7 +1197,7 @@
 				);
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..";
 			};
 			name = Release_Debugger;
 		};

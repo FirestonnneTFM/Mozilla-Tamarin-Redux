@@ -38,7 +38,7 @@
 
 #include "avmplus.h"
 #ifdef FEATURE_NANOJIT
-#include "../codegen/CodegenLIR.h"
+#include "CodegenLIR.h"
 #endif
 
 namespace avmplus
