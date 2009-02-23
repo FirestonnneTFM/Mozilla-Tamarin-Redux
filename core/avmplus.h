@@ -315,6 +315,7 @@ namespace avmplus
 #include "ObjectClass.h"
 #include "ErrorClass.h"
 #include "MathClass.h"
+#include "eval-avmplus.h"
 #include "Toplevel.h"
 #include "AbcParser.h"
 #include "RegExpObject.h"

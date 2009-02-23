@@ -319,6 +319,11 @@ namespace avmplus
 		/*@}*/
 
 		/**
+		 * E262-3 eval, but for the top level only (no lexical capture)
+		 */
+		static Atom eval(ScriptObject*, Atom in);
+		
+		/**
 		 * This is a variant of escape() which doesn't encode
 		 * Unicode characters using the %u sequence
 		 */

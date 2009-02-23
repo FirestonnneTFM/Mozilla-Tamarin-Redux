@@ -1297,6 +1297,27 @@ namespace avmplus
 		return core->newStringUTF8(buffer.c_str());
     }
 	
+	Atom Toplevel::eval(ScriptObject* self, Atom input)
+	{
+#ifdef VMCFG_EVAL
+		if (AvmCore::isString(input)) {
+			AvmCore* core = self->core();
+			CodeContext* codeContext = core->codeContext();
+# ifdef DEBUGGER
+			DomainEnv* domainEnv = codeContext->domainEnv();
+#else
+			DomainEnv* domainEnv = NULL;
+#endif
+			String* filename = NULL;						// should be NULL to denote eval code, for now
+			NativeInitializer* nativeInitializer = NULL;	// "native" not supported for eval code
+			Toplevel* toplevel = (Toplevel*)self;
+			String *newsrc = AvmCore::atomToString(input)->appendLatin1("\0", 1);
+			return core->handleActionSource(newsrc, filename, domainEnv, toplevel, nativeInitializer, codeContext);
+		}
+#endif // VMCFG_EVAL
+		return undefinedAtom;
+	}
+	
 	// Helper function.
 	int Toplevel::parseHexChar(wchar c)
 	{

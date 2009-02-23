@@ -396,7 +396,63 @@ const int kBufferPadding = 16;
 									const NativeInitializer* ninit,
 									CodeContext *codeContext);
 
-				
+#ifdef VMCFG_EVAL
+		/**
+		 * Compile the source code held in 'code' and then execute it
+		 * as for handleActionBlock() above.
+		 *
+		 * @param code The code to be compiled and executed.  The string must be
+		 *             NUL-terminated and the NUL is not considered part of the
+		 *             input.  If 'code' is not in UTF-16 format it will be converted
+		 *             to UTF-16 format, so it is highly advisable that the caller
+		 *             has created an UTF-16 string.
+		 * @param filename The name of the file originating the code, or
+		 *                 NULL if the source code does not originate from a file.
+		 *                 If not NULL then ActionScript's 'include' directive will
+		 *                 be allowed in the program and files will be loaded
+		 *                 relative to 'filename'.
+		 * @param domainEnv  FIXME
+		 * @param toplevel the Toplevel object to execute against,
+		 *                 or NULL if a Toplevel should be
+		 *                 created.
+		 * @param ninit  FIXME
+		 * @param codeContext  FIXME
+		 * @throws Exception If an error occurs, an Exception object will
+		 *         be thrown using the AVM+ exceptions mechanism.
+		 *         Calls to handleActionBlock should be bracketed
+		 *         in TRY/CATCH.
+		 */
+		Atom handleActionSource(String* code,
+								String* filename,
+								DomainEnv* domainEnv,
+								Toplevel* &toplevel,
+								const NativeInitializer* ninit,
+								CodeContext *codeContext);
+		
+		/**
+		 * Obtain input from a file to handle ActionScript's 'include' directive.
+		 *
+		 * This method invoked by the run-time compiler if the script uses 'include'
+		 * and the use of 'include' is allowed because the script originated from
+		 * a file; see 'handleActionSource()' above.
+		 *
+		 * 'referencingFilename' should be taken into
+		 * account by this method if 'filename' is not an absolute file name.
+		 *
+		 * @param referencingFilename The name of the file from which the script 
+		 *                            containing the 'include' directive was loaded
+		 * @param filename  The filename in the 'include' directive.
+		 * @return  A string representing the contents of the file named by 'filename'.
+		 *          The string must NUL-terminated and the NUL is not considered part
+		 *          of the input.  If the returned string is not in UTF-16 format then
+		 *          it will be converted to UTF-16 format, so it is highly advisable
+		 *          that the method has created an UTF-16 string.  If the file cannot
+		 *          be opened or read then the return value should be NULL, an
+		 *          exception should not be thrown.
+		 */
+		virtual String* readFileForEval(String* referencingFilename, String* filename) = 0;
+#endif // VMCFG_EVAL
+
 		/** Implementation of OP_equals */
 		Atom equals(Atom lhs, Atom rhs);
 		

@@ -66,6 +66,11 @@ namespace avmplus
 			const NativeInitializer* natives,
 			const List<Stringp>* keepVersions = NULL);
 
+#ifdef VMCFG_EVAL
+		/** return true iff the code starts with a known magic number */
+		static bool canParse(ScriptBuffer code);
+#endif // VMCFG_EVAL
+
 	protected:
 		PoolObject* parse();
 		AbstractFunction* resolveMethodInfo(uint32 index) const;
