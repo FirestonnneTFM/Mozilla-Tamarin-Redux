@@ -120,19 +120,19 @@ class MethodBodyInfo
 		blocks.add(currentBlock);
 	}
 	
-	void insn(org.antlr.runtime.Token opcode_token, Name name, int imm)
+	void insn(org.antlr.runtime.Token opcode_token, Name name, Object imm)
 	{
-		insn(decodeOpcodeName(opcode_token.getText()), name, new int[]{imm});
+		insn(decodeOpcodeName(opcode_token.getText()), name, new Object[]{imm});
 	}
 
 	void insn(org.antlr.runtime.Token opcode_token, Name name)
 	{
-		insn(decodeOpcodeName(opcode_token.getText()), name, new int[0]);
+		insn(decodeOpcodeName(opcode_token.getText()), name, new Object[0]);
 	}
 	
 	void insn(org.antlr.runtime.Token opcode_token)
 	{
-		insn( decodeOpcodeName(opcode_token.getText()), new int[0]);
+		insn( decodeOpcodeName(opcode_token.getText()), new Object[0]);
 	}
 	
 	void insn(org.antlr.runtime.Token opcode_token, Label label)
@@ -142,33 +142,29 @@ class MethodBodyInfo
 
 	void insn(org.antlr.runtime.Token opcode_token, java.util.ArrayList<Integer> imm_list)
 	{
-		insn(decodeOpcodeName(opcode_token.getText()), imm_list);
+		insn(decodeOpcodeName(opcode_token.getText()), imm_list.toArray());
 	}
 
-	void insn(org.antlr.runtime.Token opcode_token, int[] imm)
+	void insn(org.antlr.runtime.Token opcode_token, Object[] imm)
 	{
 		insn(decodeOpcodeName(opcode_token.getText()), imm);
 	}
 
-	void insn(int opcode, java.util.ArrayList<Integer> imm_list)
-	{
-		int[] imm_array = new int[imm_list.size()];
-		
-		int idx = 0;
-		for ( Integer imm: imm_list )
-		{
-			imm_array[idx++] = imm;
-		}
-		
-		insn(opcode, imm_array);
+	void insn(int opcode, java.util.ArrayList<Object> imm_list)
+	{	
+		insn(opcode, imm_list.toArray());
 	}
 	
-	public void insn(int opcode, int[] imm)
+	void insn(Integer opcode, java.util.ArrayList<Integer> imm_list)
+	{	
+		insn(opcode.intValue(), imm_list.toArray());
+	}
+	public void insn(int opcode, Object[] imm)
 	{
 		this.currentBlock.insns.add(new Instruction(opcode, imm));	
 	}
 	
-	void insn(int opcode, Name name, int[] imm)
+	void insn(int opcode, Name name, Object[] imm)
 	{
 		Instruction i = new Instruction(opcode, imm);
 		this.currentBlock.insns.add(i);
@@ -177,9 +173,15 @@ class MethodBodyInfo
 	
 	void insn(int opcode, Label target)
 	{
-		Instruction i = new Instruction(opcode, new int[0]);
+		Instruction i = new Instruction(opcode, null);
 		this.currentBlock.insns.add(i);
 		i.target = target;
+	}
+	
+	public void insn(org.antlr.runtime.Token opcode_token, Object pooledValue)
+	{
+		Instruction i = new Instruction(decodeOpcodeName(opcode_token.getText()), pooledValue);
+		this.currentBlock.insns.add(i);
 	}
 	
 	public void insn(int opcode, Object pooledValue)

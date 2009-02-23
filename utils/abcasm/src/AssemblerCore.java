@@ -108,11 +108,9 @@ class AssemblerCore
 		methodBodies.add(new_body);
 	}
 
-	int createPoolId(Object value)
+	Integer createPoolId(Object value)
 	{
-		if ( null == value )
-			return 0;
-		else if ( value instanceof Integer )
+		if ( value instanceof Integer )
 		{
 			Integer iKey = (Integer)value;
 			return intPool.add(iKey);
@@ -125,12 +123,26 @@ class AssemblerCore
 		else if ( value instanceof Double )
 		{
 			Double dKey = (Double)value;
-			return doublePool.add(dKey);
+			if (dKey.isNaN() )
+				return 0;
+			else
+				return doublePool.add(dKey);
 		}
 		else if ( value instanceof String )
 		{
 			String sKey = (String)value;
-			return stringPool.add(sKey);
+			if ( sKey.length() == 0 )
+				return 0;
+			else
+				return stringPool.add(sKey);
+		}
+		else if ( value instanceof Namespace )
+		{
+			Namespace nsKey = (Namespace)value;
+			if ( nsKey.name.equals("*") )
+				return 0;
+			else
+				return nsPool.add(nsKey);
 		}
 		else
 			throw new IllegalArgumentException("Don't have a pool for " + value.getClass().getSimpleName());
@@ -274,29 +286,115 @@ class AssemblerCore
 		{
 			for ( ScriptInfo s: scripts )
 			{
-				s.init_id  = translateFunctionId(s.init_id);
+				s.init_id  = translateImmediate(s.init_id);
+				finishTraits(s.traits);
+			}
+		}
+		
+		//  TODO: Classes change these semantics.
+		if ( scripts.size() == 1 )
+			pushTraits(scripts.elementAt(0).traits);
+		
+		for ( MethodBodyInfo info: methodBodies)
+		{
+			info.methodId = translateImmediate(info.methodId);
+			finishTraits(info.traits);
+			
+			pushTraits(info.traits);
+			for ( Block b: info.blocks )
+			{
+				for ( Instruction insn: b.insns)
+				{
+					if ( insn.operands != null )
+					{
+						insn.imm = new int[insn.operands.length];
+						for ( int i = 0; i < insn.operands.length; i++)
+						{
+							try
+							{
+								insn.imm[i] = translateImmediate(insn.operands[i]);
+							}
+							catch ( IllegalArgumentException ex )
+							{
+								System.err.println("Method " + this.methodSignatures.elementAt(info.getMethodId()).methodName 
+										+ " insn " + insn.toString() + " untranslatable: " + ex.getMessage() );
+								throw ex;
+							}
+						}
+					}
+				}
+			}
+			popTraits();
+		}
+		
+		if ( scripts.size() == 1 )
+			popTraits();
+	}
+	
+	/**
+	 * Ensure that all required traits entries are present.
+	 * @param traits - the traits to finish.
+	 */
+	private void finishTraits(Traits traits)
+	{	
+		int slot_count = 0;
+		
+		for ( Trait t: traits )
+		{
+			if ( TRAIT_Var == t.getKind())
+			{
+				if ( t.hasAttr("slot_id") )
+				{
+					slot_count = Math.max(t.getIntAttr("slot_id") + 1, slot_count);
+				}
+				else
+				{
+					t.setAttr("slot_id", new Integer(slot_count++));
+				}
+				
+				if ( !t.hasAttr("type_name"))
+				{
+					//  Unspecified type is type ANY.
+					t.setAttr("type_name", new Name("*"));
+				}
 			}
 		}
 	}
-	
-	Integer translateFunctionId(Object func_name)
+
+	Integer translateImmediate(Object immediate_operand)
 	{
-		if ( func_name instanceof Integer )
+		Integer result = null;
+		if ( immediate_operand instanceof Integer )
 		{
 			//  ID was specified.
-			return (Integer) func_name;
+			result = (Integer) immediate_operand;
 		}
-		//  FIXME: Should be functionID special form
-		//  to also support .slot_id(foo)
-		else if ( func_name instanceof String )
+		else if ( immediate_operand instanceof SymbolicReference )
 		{
-			//  ID should be in the table.
-			if ( methodsByName.containsKey(func_name.toString()))
-				return methodsByName.get(func_name.toString());
+			SymbolicReference symconst = (SymbolicReference) immediate_operand;
+			
+			if ( SymbolicReference.function_id == symconst.kind )
+			{
+				//  ID should be in the table.
+				if ( methodsByName.containsKey(symconst.symbolicReference))
+					result = methodsByName.get(symconst.symbolicReference);
+			}
+			else if ( SymbolicReference.slot_id == symconst.kind )
+			{
+				
+				for ( int i = staticScopes.size() -1; i >= 0 && null == result; i-- )
+				{
+					result = staticScopes.elementAt(i).getSlotId(symconst.symbolicReference);
+				}
+			}
 		}
 
-		//  No match.
-		throw new IllegalArgumentException("Unknown function_id " + func_name.toString());
+		if ( null == result )
+		{
+			throw new IllegalArgumentException("Unknown operand " + immediate_operand.toString() + ", type " + immediate_operand.getClass().getCanonicalName());
+		}
+		
+		return result;
 	}
 	
 	int getNameId(Name n)
@@ -305,5 +403,23 @@ class AssemblerCore
 			return 0;
 		else
 			return namePool.id(n);
+	}
+
+	MethodInfo getMethod(Object method_key)
+	{
+		int method_index = translateImmediate(method_key);
+		return methodSignatures.elementAt(method_index);
+	}
+	java.util.Vector<Traits> staticScopes = new java.util.Vector<Traits>();
+	
+	void pushTraits(Traits traits) 
+	{	
+		staticScopes.add(traits);
+	}
+	
+	
+	void popTraits()
+	{
+		staticScopes.remove(staticScopes.size()-1);
 	}
 }

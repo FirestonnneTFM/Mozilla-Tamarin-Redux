@@ -304,7 +304,7 @@ function_id returns [Object result]
 	}
 	| '.function_id' LPAREN referenced_func = IDENTIFIER RPAREN
 	{
-	    result = referenced_func.getText();
+	    result = new SymbolicReference(SymbolicReference.function_id, referenced_func.getText());
 	}
 	;
 
@@ -338,9 +338,9 @@ slot_trait
 	(
 	  trait_name[result]
 	  |
-	  'slot_id' ':' slot_id = integer_literal
+	  'slot_id' ':' slot_literal = integer_literal
 	  {
-	  	result.addAttr("slot_id", slot_id);
+	  	result.addAttr("slot_id", slot_literal);
 	  }
 	  |
 	  'type_name' ':' trait_type_name = type_name
@@ -450,12 +450,49 @@ insn:
 			| call_insn
 			| multiname_insn
 			| function_insn
+			| slot_insn
 			| mops_insn
 			| ad_hoc_insn
 			| unknown_opcode
 		)
 		
 	)
+	;
+
+slot_insn
+	: opcode = ('getslot' | 'getglobalslot' | 'setslot' | 'setglobalslot' ) operand = slot_id
+	{
+		$decl::method_body_info.insn(opcode, new Object[] { operand } );
+	}
+	;
+
+slot_id
+	returns [Object result]
+	: 
+		literal_id = integer_literal
+		{
+			result = new Integer(literal_id);
+		}
+		| '.slot_id' LPAREN slot_symbol = IDENTIFIER RPAREN
+		{
+			result = new SymbolicReference(SymbolicReference.slot_id, slot_symbol.getText());
+		}
+	;
+
+/*
+ *  Indirect (MOPS) instructions.
+ */
+mops_insn
+	: mops_opcode = 
+	( 
+		'li8' | 'li16' | 'li32'
+		| 'lf32' | 'lf64'
+		| 'si8' | 'si16' | 'si32'
+		| 'sf32' | 'sf64'
+	)
+	{
+		$decl::method_body_info.insn(mops_opcode);
+	}
 	;
 
 
@@ -496,13 +533,13 @@ integer_operands_insn
 	      'debug' | 'debugline' | 'declocal' | 'declocal_i' |	 
 		  'dxns' | 'dxnslate' |
 		  'esc_xattr' | 'esc_xelem' |
-		  'getlocal' | 'getslot' | 'getglobalslot' | 'getscopeobject' |
+		  'getlocal' | /* 'getslot' | 'getglobalslot' | */'getscopeobject' |
 		  'hasnext2' | 
 		  'inclocal' | 'inclocal_i' | 
 		  'kill' |
 		  'newarray' | 'newobject' |
 		  'pushbyte' | 'pushshort' | 
-		  'setlocal' | 'setslot' | 'setglobalslot'
+		  'setlocal' /* | 'setslot' | 'setglobalslot' */
 	  )
 	  operands = integer_operands_list
 	  {
@@ -516,20 +553,24 @@ integer_operands_insn
 pool_insn
 	: 'pushint' int_operand = integer_literal
 	{
-	    $decl::method_body_info.insn(OP_pushint, new int[] { asmCore.createPoolId(new Integer(int_operand)) } );
+	    $decl::method_body_info.insn(OP_pushint, asmCore.createPoolId(new Integer(int_operand)));
 	}
 	| 'pushuint' uint_operand = long_literal
 	{
-	    $decl::method_body_info.insn(OP_pushuint, new int[] { asmCore.createPoolId(new Long(uint_operand)) } );
+	    $decl::method_body_info.insn(OP_pushuint, asmCore.createPoolId(new Long(uint_operand)));
 	}
 	| 'pushdouble' double_operand = double_literal
 	{
-	    $decl::method_body_info.insn(OP_pushdouble, new int[] { asmCore.createPoolId(new Double(double_operand)) } );
+	    $decl::method_body_info.insn(OP_pushdouble, asmCore.createPoolId(new Double(double_operand)));
+	}
+	| 'pushnamespace' ns = namespace_specification
+	{
+	    $decl::method_body_info.insn(OP_pushnamespace, asmCore.createPoolId(ns));
 	}
 	| opcode = ( 'debugfile' | 'pushstring' )
 	string_operand = string_literal
 	{
-		$decl::method_body_info.insn(opcode, new int[] {asmCore.createPoolId(string_operand)}); 
+		$decl::method_body_info.insn(opcode, asmCore.createPoolId(string_operand)); 
 	}
 	;
 
@@ -549,7 +590,7 @@ call_insn
 	}
 	|  'call' 	LPAREN? arg_count = integer_literal RPAREN? 
 	{
-	    $decl::method_body_info.insn(OP_call, new int[] { arg_count } );
+	    $decl::method_body_info.insn(OP_call, new Object[] { new Integer(arg_count) } );
 	}
 	;
 	
@@ -612,10 +653,6 @@ multiname_insn :
 	{
 		$decl::method_body_info.insn(opcode, name_key);
 	}
-	| 'pushnamespace' ns = namespace_specification
-	{
-	    $decl::method_body_info.insn(OP_pushnamespace, ns);
-	}
 	;
 
 /*
@@ -624,23 +661,12 @@ multiname_insn :
 ad_hoc_insn
 	: opcode = hex_literal imm_array = integer_operands_list
 	{
-	    $decl::method_body_info.insn(opcode, imm_array);
-	}
-	;
-
-/*
- *  Indirect (MOPS) instructions.
- */
-mops_insn
-	: mops_opcode = 
-	( 
-		'li8' | 'li16' | 'li32'
-		| 'lf32' | 'lf64'
-		| 'si8' | 'si16' | 'si32'
-		| 'sf32' | 'sf64'
-	)
-	{
-		$decl::method_body_info.insn(mops_opcode);
+		//  HACK: This insn signature dodges around the lack
+		//  of a token, and the fact that the signature list
+		//  is an ArrayList of Integers (which would match
+		//  the signature (int, Object) better than the correct
+		//  signature (int, ArrayList<Object>
+	    $decl::method_body_info.insn(new Integer(opcode), imm_array);
 	}
 	;
 

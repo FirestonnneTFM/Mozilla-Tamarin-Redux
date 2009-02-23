@@ -69,6 +69,11 @@ class Trait
 	{
 		return kind_byte & 0x0F;
 	}
+	
+	public void setAttr(String attr_name, Object attr_value)
+	{
+		attrs.put(attr_name, attr_value);
+	}
 
 	public boolean hasAttr(String attr_name)
 	{
