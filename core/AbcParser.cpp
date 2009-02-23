@@ -56,47 +56,54 @@ namespace avmplus
 		const NativeInitializer* natives,
 		const List<Stringp>* keepVersions)
     {
-		if (code.getSize() < 4)
-			toplevel->throwVerifyError(kCorruptABCError);
-
-		int version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
-
-        #ifdef AVMPLUS_VERBOSE
+		int version;
+		int result = canParse(code, &version);
+		
+#ifdef AVMPLUS_VERBOSE
 		if (core->config.verbose)
 			core->console << "major=" << (version&0xFFFF) << " minor=" << (version>>16) << "\n";
-        #endif
-
-		switch (version)
-		{
-		case (46<<16|16):
-		{
-			AbcParser parser(core, code, toplevel, domain, natives, keepVersions);
-			PoolObject *pObject = parser.parse();
- 			if ( !pObject )
- 				toplevel->throwVerifyError( kCorruptABCError );
- 			else
- 				return pObject;
+#endif
+		
+		if (result != 0) {
+			switch (result) {
+				case kInvalidMagicError:
+					toplevel->throwVerifyError(kInvalidMagicError, core->toErrorString(version>>16), core->toErrorString(version&0xFFFF));
+				case kCorruptABCError:
+				default:
+					toplevel->throwVerifyError(kCorruptABCError);
+			}
 		}
-		default:
-			toplevel->throwVerifyError(kInvalidMagicError, core->toErrorString(version>>16), core->toErrorString(version&0xFFFF));
+
+		AbcParser parser(core, code, toplevel, domain, natives, keepVersions);
+		PoolObject *pObject = parser.parse();
+ 		if ( !pObject ) {
+ 			toplevel->throwVerifyError( kCorruptABCError );
+			/*NOTREACHED*/
 			return NULL;
 		}
+ 		else
+ 			return pObject;
     }
 
-#ifdef VMCFG_EVAL
-	bool AbcParser::canParse(ScriptBuffer code)
+	int AbcParser::canParse(ScriptBuffer code, int* version)
 	{
+		if (version != NULL)
+			*version = 0;
+		
 		if (code.getSize() < 4)
-			return false;
-		int version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
-		switch (version) {
+			return kCorruptABCError;
+		
+		int v = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
+		if (version != NULL)
+			*version = v;
+		
+		switch (v) {
 			case (46<<16|16):
-				return true;
+				return 0;
 			default:
-				return false;
+				return kInvalidMagicError;
 		}
 	}
-#endif // VMCFG_EVAL
 	
 	AbcParser::AbcParser(AvmCore* core, ScriptBuffer code, 
 		Toplevel* toplevel,
