@@ -130,6 +130,12 @@ namespace avmshell
 
 		virtual size_t getToplevelSize() const;
 
+#ifdef VMCFG_EVAL
+		void repl(Toplevel* toplevel, DomainEnv* domainEnv);
+		String* decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate=false);
+		virtual String* readFileForEval(String* referencing_filename, String* filename);
+#endif // VMCFG_EVAL
+
 		PoolObject* shellPool;
 
 	private:
