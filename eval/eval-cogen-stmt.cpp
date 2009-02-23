@@ -270,6 +270,7 @@ namespace avmplus
 
 		void Program::cogenBody(Cogen* cogen, uint32_t activation_reg)
 		{
+			(void)activation_reg;
 			AvmAssert(activation_reg == 0);
 			uint32_t capture_reg = cogen->getTemp();
 			cogen->I_pushundefined();

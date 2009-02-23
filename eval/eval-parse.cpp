@@ -365,7 +365,7 @@ namespace avmplus
 		}
 		
 		// Qualifiers are known to be appropriate for 'class'
-		void Parser::classDefinition(int flags, Qualifier* qual)
+		void Parser::classDefinition(int /*flags*/, Qualifier* qual)
 		{
 			// FIXME: pick up the methods plus all other flags somehow, these are available from the binding ribs
 			// Maybe time to package them up conveniently (FunctionDefinition needs it too).
@@ -392,7 +392,7 @@ namespace avmplus
 			addClass(ALLOC(ClassDefn, (qual, name, extends, implements.get(), class_init, instance_init)));
 		}
 		
-		void Parser::interfaceDefinition(int flags, Qualifier* qual)
+		void Parser::interfaceDefinition(int /*flags*/, Qualifier* qual)
 		{
 			// FIXME: pick up the methods somehow, these are available from the binding ribs
 			eat(T_Interface);
@@ -574,11 +574,13 @@ namespace avmplus
 		
 		void Parser::addClass(ClassDefn* cls)
 		{
+			(void)cls;
 			compiler->internalError(0, "Class definitions cannot be processed");
 		}
 		
 		void Parser::addInterface(InterfaceDefn* iface)
 		{
+			(void)iface;
 			compiler->internalError(0, "Interface definitions cannot be processed");
 		}
 		
@@ -648,6 +650,7 @@ namespace avmplus
 		
 		Stmt* Parser::variableDefinition(Qualifier* qual)
 		{
+			(void)qual;
 			// FIXME: discards qualifiers on variable definitions!
 			return statement();
 		}
