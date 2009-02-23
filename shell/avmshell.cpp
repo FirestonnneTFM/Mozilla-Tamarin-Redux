@@ -1103,7 +1103,7 @@ namespace avmshell
 					ScriptBuffer code = newScriptBuffer(f.available());
 					f.read(code.getBuffer(), f.available());
 #ifdef VMCFG_EVAL
-					if (AbcParser::canParse(code))
+					if (AbcParser::canParse(code) == 0)
 						handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
 					else {
 						// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
