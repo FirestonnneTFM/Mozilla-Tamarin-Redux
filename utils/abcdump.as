@@ -61,8 +61,9 @@ package abcdump
     "      of the input file minus the .swf/.swc extension;",
     "      and <n> is omitted if it is 0.",
     "",
-    " -i   Print information about the ABC, but do not dump the",
-    "      byte code.",
+    " -i   Print information about the ABC, but do not dump the byte code.",
+    "",
+    " -abs Print the bytecode, but no information about the ABC",
     ].join("\n");
 
     const TAB = "  "
@@ -71,13 +72,13 @@ package abcdump
     var opSizes:Array = new Array(256)
 
     function dumpPrint(s) {
-        if (!(doExtractAbc || doExtractInfo))
+        if (doExtractAbs)
             print(s);
     }
 
     function infoPrint(s) {
-        if (doExtractInfo || !doExtractAbc)
-            print(s);
+        if (doExtractInfo)
+            print((doExtractAbs ? "// " : "") + s)
     }
 
     class Multiname
@@ -152,6 +153,8 @@ package abcdump
     
     class MethodInfo extends MemberInfo
     {
+        var method_id:int
+        var dumped:Boolean
         var flags:int
         var debugName
         var paramTypes
@@ -163,7 +166,6 @@ package abcdump
         var code_length:uint
         var code:ByteArray
         var activation:Traits
-        var anon:Boolean
 
         public function toString():String
         {
@@ -172,15 +174,14 @@ package abcdump
         
         public function format():String
         {
-            var s:String = ""
-            if (flags & NATIVE)
-                s = "native "
+            var name = this.name ? this.name : "function"
 
-            return s + traitKinds[kind] + " " + name + "(" + paramTypes + "):" + returnType + "\t/* disp_id " + id + "*/"
+            return name + "(" + paramTypes + "):" + returnType + "\t/* disp_id=" + id + " method_id=" + method_id + " */"
         }
 
         function dump(abc:Abc, indent:String, attr:String="")
         {
+            dumped = true
             dumpPrint("")
 
             if (metadata) {
@@ -188,7 +189,12 @@ package abcdump
                     dumpPrint(indent+md)
             }
 
-            dumpPrint(indent+attr+format())
+            var s:String = ""
+            if (flags & NATIVE)
+                s = "native "
+            s += traitKinds[kind] + " " 
+
+            dumpPrint(indent+attr+s+format())
             if (code)
             {
                 dumpPrint(indent+"{")
@@ -268,7 +274,6 @@ package abcdump
                         case OP_newfunction: {
                             var method_id = readU32()
                             s += abc.methods[method_id]
-                            abc.methods[method_id].anon = true
                             break;
                         }
                         case OP_callstatic:
@@ -461,8 +466,8 @@ package abcdump
         
         public function dump(abc:Abc, indent:String, attr:String="")
         {
-            for each (var m in members) 
-                m.dump(abc,indent,attr)
+            for each (var m in members)
+                m.dump(abc, indent, attr)
         }
     }
 
@@ -696,6 +701,7 @@ package abcdump
             for (var i:int=0; i < method_count; i++)
             {
                 var m = methods[i] = new MethodInfo()
+                m.method_id = i
                 var param_count:int = readU32()
                 m.returnType = names[readU32()]
                 m.paramTypes = []
@@ -778,7 +784,7 @@ package abcdump
                 m.id = -1
                 parseTraits(t)
             }
-            infoPrint("InstanceInfo size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
+            infoPrint("InstanceInfo count " + count + " size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
         }
         
         function parseTraits(t:Traits)
@@ -849,7 +855,7 @@ package abcdump
                 t.init.kind = TRAIT_Method
                 parseTraits(t)
             }           
-            infoPrint("ClassInfo size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+"%")
+            infoPrint("ClassInfo count " + count + " size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+"%")
         }
 
         function parseScriptInfos()
@@ -901,23 +907,22 @@ package abcdump
                 }
                 parseTraits(m.activation = new Traits)
             }
-            infoPrint("MethodBodies size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
+            infoPrint("MethodBodies count " + count + " size "+(data.position-start)+" "+int(100*(data.position-start)/data.length)+" %")
         }
         
         function dump(indent:String="")
         {
             for each (var t in scripts)
             {
-                dumpPrint(indent+t.name)
+                dumpPrint("// " + indent+t.name)
                 t.dump(this,indent)
                 t.init.dump(this,indent)
             }
 
             for each (var m in methods)
             {
-                if (m.anon) {
+                if (!m.dumped)
                     m.dump(this,indent)
-                }
             }
 
             infoPrint("OPCODE\tSIZE\t% OF "+totalSize)
@@ -1212,12 +1217,17 @@ package abcdump
 
     function processArg(arg:String)
     {
-        if (arg == '-a')
+        if (arg == '-a') {
             doExtractAbc = true;
-        else if (arg == '-i')
-            doExtractInfo = true;
-        else 
-        {
+            doExtractInfo = false
+            doExtractAbs = false
+        } else if (arg == '-i') {
+            // suppress abs output
+            doExtractAbs = false;
+        } else if (arg == '-abs') {
+            // suppress info output   
+            doExtractInfo = false
+        } else {
             print('Unknown option '+arg)
             help()
         }
@@ -1234,7 +1244,8 @@ package abcdump
     
     // main
     var doExtractAbc = false
-    var doExtractInfo = false
+    var doExtractInfo = true
+    var doExtractAbs = true
     var currentFname = ''
     var currentFcount = 0
     for each (var file in System.argv)
