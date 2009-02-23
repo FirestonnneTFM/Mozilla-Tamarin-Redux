@@ -109,8 +109,9 @@ class RuntestBase:
     htmlOutput = True
     timestamps = True
     forcerebuild = False
+    eval = False      # Run the source file (.as, .js) but, do not magically prepend included files
     
-    runSource = False # Run the source file (.as, .js) instead of .abc
+    runSource = False # Run the source file (.as, .js) instead of .abc, magically prepend included files
     testTimeOut = -1 #by default tests will NOT timeout
     debug = False
     threads = 1
@@ -207,6 +208,7 @@ class RuntestBase:
         print ' -b --builtinabc    location of builtin.abc'
         print ' -s --shellabc      location of shell_toplevel.abc'
         print ' -x --exclude       comma separated list of directories to skip'
+        print ' -e --eval          use run-time compiler'
         print ' -h --help          display help and exit'
         print ' -t --notime        do not generate timestamps (cleaner diffs)'
         print ' -f --forcerebuild  force rebuild all test files'
@@ -222,10 +224,10 @@ class RuntestBase:
     def setOptions(self):
         '''set the valid command line options.
             When subclassing, call this method first, then append options to each list'''
-        self.options = 'vE:a:g:b:s:x:htfc:dq'
+        self.options = 'vE:a:g:b:s:x:htfc:dqe'
         self.longOptions = ['verbose','avm=','asc=','globalabc=','builtinabc=','shellabc=',
                    'exclude=','help','notime','forcerebuild','config=','ascargs=','vmargs=',
-                   'timeout=', 'rebuildtests','quiet','nohtml']
+                   'timeout=', 'rebuildtests','quiet','nohtml','eval']
 
     def parseOptions(self):
         try:
@@ -259,6 +261,8 @@ class RuntestBase:
                 self.forcerebuild = True
             elif o in ('-c', '--config'):
                 self.config = v
+            elif o in ('-e', '--eval'):
+                self.eval = True
             elif o in ('--ascargs'):
                 self.ascargs = v
             elif o in ('--vmargs'):
@@ -673,8 +677,9 @@ class RuntestBase:
             if isfile(shell):
                 files.append(shell)
         (testdir, ext) = splitext(as_file)
-        for util in glob(join(testdir,'*'+self.sourceExt)) + glob(join(dir,'*Util'+self.sourceExt)):
-            files.append(string.replace(util, "$", "\$"))
+        if not self.eval:
+            for util in glob(join(testdir,'*'+self.sourceExt)) + glob(join(dir,'*Util'+self.sourceExt)):
+                files.append(string.replace(util, "$", "\$"))
         return files
 
     # TODO: Rename/move to better place
@@ -797,7 +802,7 @@ class RuntestBase:
         
         dir = ast[0:ast.rfind('/')]
         root,ext = splitext(ast)
-        if self.runSource:
+        if self.runSource or self.eval:
             testName = ast
         else:
             testName = root + '.abc'
@@ -848,8 +853,9 @@ class RuntestBase:
             if not isfile(testName):
                 lfail += 1
                 outputCalls.append((self.fail,(testName, 'FAILED! file not found ' + testName, self.failmsgs)))
-        if self.runSource:
-            incfiles=build_incfiles(testName)
+        if self.runSource or self.eval:
+            incfiles=self.build_incfiles(testName)
+            incfiles.append("shell" + self.sourceExt)
             for incfile in incfiles:
                 testName=incfile+" "+testName
         
