@@ -39,7 +39,7 @@ GCC_ENABLE_CPP_EXCEPTIONS=NO
 GCC_ENABLE_CPP_RTTI=NO
 GCC_PREFIX_HEADER = ../../../core/avmplus.h
 GCC_PRECOMPILE_PREFIX_HEADER = YES
-HEADER_SEARCH_PATHS=../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..
+HEADER_SEARCH_PATHS=../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..
 
 // This should define everything except DEBUG, _DEBUG, DEBUGGER
 COMMON_PREPROCESSOR_DEFINITIONS=AVMPLUS_SHELL SOFT_ASSERTS TARGET_API_MAC_CARBON=1 DARWIN=1 _MAC TARGET_RT_MAC_MACHO=1 USE_MMAP

@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;..\..\core;..\..\codegen"
+				AdditionalIncludeDirectories="..;..\..\core"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
@@ -67,7 +67,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..;..\..\core;..\..\codegen"
+				AdditionalIncludeDirectories="..;..\..\core"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;_CONSOLE"
 				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"

@@ -532,7 +532,6 @@
 				D98338330EB11B6900B81872 /* nativegen.py */,
 				4E1E42480E63396E0095C2E7 /* nanojit */,
 				4E62BF030D62451F00A24F2D /* MMgc */,
-				4E62BEFA0D62450800A24F2D /* codegen */,
 				4E62BE2B0D6244D300A24F2D /* core */,
 			);
 			name = no_compile_for_debugging_only;
@@ -607,6 +606,8 @@
 				4E62BE6A0D6244D300A24F2D /* ClassClosure.cpp */,
 				4E62BE6B0D6244D300A24F2D /* ClassClosure.h */,
 				4E62BE6C0D6244D300A24F2D /* CodeContext.h */,
+				4E1E42550E6339CD0095C2E7 /* CodegenLIR.cpp */,
+				4E1E42560E6339CD0095C2E7 /* CodegenLIR.h */,
 				4E62BE6D0D6244D300A24F2D /* Date.as */,
 				4E62BE6E0D6244D300A24F2D /* Date.cpp */,
 				4E62BE6F0D6244D300A24F2D /* Date.h */,
@@ -744,17 +745,6 @@
 			);
 			name = core;
 			path = ../../../core;
-			sourceTree = SOURCE_ROOT;
-		};
-		4E62BEFA0D62450800A24F2D /* codegen */ = {
-			isa = PBXGroup;
-			children = (
-				4E1E42550E6339CD0095C2E7 /* CodegenLIR.cpp */,
-				4E1E42560E6339CD0095C2E7 /* CodegenLIR.h */,
-				4E62BF010D62450800A24F2D /* manifest.mk */,
-			);
-			name = codegen;
-			path = ../../../codegen;
 			sourceTree = SOURCE_ROOT;
 		};
 		4E62BF030D62451F00A24F2D /* MMgc */ = {
@@ -1103,7 +1093,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..";
 				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Debug;
@@ -1149,7 +1139,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..";
 				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Release;
@@ -1223,7 +1213,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..";
 				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Debug_Debugger;
@@ -1269,7 +1259,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-Wextra";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../codegen ../../../extensions .. ../..";
+				USER_HEADER_SEARCH_PATHS = "../../../core ../../../MMgc ../../../pcre ../../../extensions .. ../..";
 				WARNING_CFLAGS = "-Dno_variadic_macros";
 			};
 			name = Release_Debugger;

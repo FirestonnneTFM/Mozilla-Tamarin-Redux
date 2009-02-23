@@ -271,7 +271,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core ../..";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../core ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -304,7 +304,7 @@
 				);
 				PRODUCT_NAME = MMgc64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core ../..";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../core ../..";
 			};
 			name = Release;
 		};
@@ -405,7 +405,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = MMgc64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core ../..";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../core ../..";
 				ZERO_LINK = NO;
 			};
 			name = Debug_Debugger;
@@ -439,7 +439,7 @@
 				);
 				PRODUCT_NAME = MMgc64;
 				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../codegen ../../../core ../..";
+				USER_HEADER_SEARCH_PATHS = "$(USER_HEADER_SEARCH_PATHS) ../../../core ../..";
 			};
 			name = Release_Debugger;
 		};

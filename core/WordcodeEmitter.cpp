@@ -41,12 +41,10 @@
 
 // FIXME the following is required because FrameState has dependencies on the jitters
 #if defined FEATURE_NANOJIT
-    #include "../codegen/CodegenLIR.h"
+    #include "CodegenLIR.h"
     #define JIT_ONLY(x) x
-    #define LIR_ONLY(x) x
 #else
     #define JIT_ONLY(x) 
-    #define LIR_ONLY(x) 
 #endif
 
 #include "FrameState.h"

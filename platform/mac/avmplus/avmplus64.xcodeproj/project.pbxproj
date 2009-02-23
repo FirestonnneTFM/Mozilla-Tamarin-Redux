@@ -232,8 +232,8 @@
 		070868FF0F39452A00A5F31C /* Coder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Coder.cpp; path = ../../../core/Coder.cpp; sourceTree = SOURCE_ROOT; };
 		070869000F39452A00A5F31C /* Coder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Coder.h; path = ../../../core/Coder.h; sourceTree = SOURCE_ROOT; };
 		070869010F39452A00A5F31C /* peephole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = peephole.cpp; path = ../../../core/peephole.cpp; sourceTree = SOURCE_ROOT; };
-		0708691E0F39460400A5F31C /* CodegenLIR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenLIR.cpp; path = ../../../codegen/CodegenLIR.cpp; sourceTree = SOURCE_ROOT; };
-		0708691F0F39460400A5F31C /* CodegenLIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodegenLIR.h; path = ../../../codegen/CodegenLIR.h; sourceTree = SOURCE_ROOT; };
+		0708691E0F39460400A5F31C /* CodegenLIR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodegenLIR.cpp; path = ../../../core/CodegenLIR.cpp; sourceTree = SOURCE_ROOT; };
+		0708691F0F39460400A5F31C /* CodegenLIR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodegenLIR.h; path = ../../../core/CodegenLIR.h; sourceTree = SOURCE_ROOT; };
 		0708692A0F39463400A5F31C /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Assembler.cpp; path = ../../../nanojit/Assembler.cpp; sourceTree = SOURCE_ROOT; };
 		0708692B0F39463400A5F31C /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Assembler.h; path = ../../../nanojit/Assembler.h; sourceTree = SOURCE_ROOT; };
 		0708692C0F39463400A5F31C /* Fragmento.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Fragmento.cpp; path = ../../../nanojit/Fragmento.cpp; sourceTree = SOURCE_ROOT; };

@@ -68,7 +68,7 @@ namespace MMgc
 	 * If executableFlag is false, the memory is made non-executable and
 	 * read-write.
 	 *
-	 * [rickr] bug #182323  The codegen can bail in the middle of generating 
+	 * [rickr] bug #182323  The jit can bail in the middle of generating 
 	 * code for any number of reasons.  When this occurs we need to ensure 
 	 * that any code that was previously on the page still executes, so we 
 	 * leave the page as PAGE_EXECUTE_READWRITE rather than PAGE_READWRITE.  
