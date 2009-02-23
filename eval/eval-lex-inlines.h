@@ -131,6 +131,7 @@ inline bool Lexer::notPartOfIdent(int c)
 
 inline void Lexer::xmlPushback(wchar c)
 {
+	(void)c;
 	AvmAssert(idx > src && idx[-1] == c);
 	idx--;
 }

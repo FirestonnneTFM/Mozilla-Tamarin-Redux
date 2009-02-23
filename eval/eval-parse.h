@@ -173,6 +173,12 @@ public:
 	ClassDefn(Qualifier* qual, Str* name, Str* extends, Seq<Str*>* implements, Seq<Stmt*>* class_init, Seq<Stmt*>* instance_init)
 	{
 		// FIXME: elaborate
+		(void)qual;
+		(void)name;
+		(void)extends;
+		(void)implements;
+		(void)class_init;
+		(void)instance_init;
 	}
 };
 
@@ -181,6 +187,9 @@ public:
 	InterfaceDefn(Qualifier* qual, Str* name, Seq<Str*>* extends)
 	{
 		// FIXME: elaborate
+		(void)qual;
+		(void)name;
+		(void)extends;
 	}
 };
 
@@ -201,7 +210,7 @@ public:
 				 Seq<FunctionDefn*>* functions, Seq<NamespaceDefn*>* namespaces, Seq<Stmt*>* stmts, 
 				 bool uses_arguments,
 				 bool uses_dxns,
-				 bool optional_args)
+				 bool optional_arguments)
 		: CodeBlock(CODE_Function, bindings, functions, namespaces, stmts)
 		, name(name)
 		, params(params)
