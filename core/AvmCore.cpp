@@ -551,6 +551,19 @@ namespace avmplus
 
 		return handleActionPool(pool, domainEnv, toplevel, codeContext);
 	}
+	
+#ifdef VMCFG_EVAL
+	Atom AvmCore::handleActionSource(String* code,
+									 String* filename,
+									 DomainEnv* domainEnv,
+									 Toplevel* &toplevel,
+									 const NativeInitializer* ninit,
+									 CodeContext *codeContext)
+	{
+		ScriptBuffer buffer = avmplus::compileProgram(this, toplevel, code, filename);
+		return handleActionBlock(buffer, 0, domainEnv, toplevel, ninit, codeContext);
+	}
+#endif // VMCFG_EVAL
 
 /*
 11.9.3 The Abstract Equality Comparison Algorithm

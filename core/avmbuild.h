@@ -404,6 +404,12 @@
 #  endif
 #endif
 
+#define AVMPLUS_FEATURE_EVAL   // supposed to be enabled in some config file...
+
+#ifdef AVMPLUS_FEATURE_EVAL
+#  define VMCFG_EVAL
+#endif
+
 // Enable selftests.  These can be run by -Dselftest at the shell or by calling the
 // global function avmplus::selftests(), see extensions/Selftest.h.
 //

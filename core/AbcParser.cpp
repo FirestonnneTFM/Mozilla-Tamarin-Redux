@@ -83,6 +83,21 @@ namespace avmplus
 		}
     }
 
+#ifdef VMCFG_EVAL
+	bool AbcParser::canParse(ScriptBuffer code)
+	{
+		if (code.getSize() < 4)
+			return false;
+		int version = AvmCore::readU16(&code[0]) | AvmCore::readU16(&code[2])<<16;
+		switch (version) {
+			case (46<<16|16):
+				return true;
+			default:
+				return false;
+		}
+	}
+#endif // VMCFG_EVAL
+	
 	AbcParser::AbcParser(AvmCore* core, ScriptBuffer code, 
 		Toplevel* toplevel,
 		Domain* domain,
