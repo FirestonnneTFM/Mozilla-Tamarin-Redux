@@ -280,6 +280,9 @@ namespace avmshell
 		#ifdef AVMPLUS_INTERACTIVE
 		printf("          [-i]          interactive mode\n");
 		#endif //AVMPLUS_INTERACTIVE
+		#ifdef VMCFG_EVAL
+		printf("          [-repl]       read-eval-print mode\n");
+		#endif // VMCFG_EVAL
 		printf("          [-log]\n");
 		printf("          [-- args]     args passed to AS3 program\n");
 		printf("          [-jargs ... ;] args passed to Java runtime\n");
@@ -420,6 +423,157 @@ namespace avmshell
 		return sizeof(ShellToplevel);
 	}
 
+#ifdef VMCFG_EVAL
+
+	// FIXME, this is currently hokey for several reasons:
+	//
+	//  - Does not try to determine whether input is Latin1, UTF8, or indeed, already UTF16,
+	//    but assumes UTF8, which can be dangerous.  Falls back to latin1 if the utf8 conversion
+	//    fails, this seems ill-defined in the string layer though so it's just one more hack.
+	//
+	//  - Does not create an UTF16 string.  The string layer is actually broken on this count,
+	//    because requesting an empty UTF16 string returns a constant that is a Latin1 string,
+	//    and appending to it won't force the representation to UTF16 unless the data require
+	//    that to happen.  See <URL:https://bugzilla.mozilla.org/show_bug.cgi?id=473995>.
+	//
+	//  - May incur copying because the terminating NUL is not accounted for in the original
+	//    creation
+
+	String* Shell::decodeBytesAsUTF16String(uint8_t* bytes, uint32_t nbytes, bool terminate)
+	{
+		String* s = newStringUTF8((const char*)bytes, nbytes);
+		if (s == NULL)
+			s = newStringLatin1((const char*)bytes, nbytes);
+		if (terminate)
+			s = s->appendLatin1("\0", 1);
+		return s;
+	}
+
+	String* Shell::readFileForEval(String* referencingFile, String* filename)
+	{
+		// FIXME, filename sanitazion is more complicated than this
+		if (referencingFile != NULL && filename->charAt(0) != '/' && filename->charAt(0) != '\\') {
+			// find the last slash if any, truncate the string there, append the
+			// new filename
+			int32_t x = referencingFile->lastIndexOf(newStringLatin1("/"));
+			if (x != -1)
+				filename = referencingFile->substring(0,x+1)->append(filename);
+		}
+		filename = filename->appendLatin1("\0", 1);
+		
+		// FIXME, not obvious that UTF8 is correct for all operating systems (far from it!)
+		StUTF8String fn(filename);
+		FileInputStream f(fn.c_str());
+		if (!f.valid())
+			return NULL;
+
+		uint32_t nbytes = f.available();
+		uint8_t* bytes = new uint8_t[nbytes];
+		f.read(bytes, nbytes);
+		String* str = decodeBytesAsUTF16String(bytes, nbytes, true);
+		delete [] bytes;
+		return str;
+	}
+	
+	void Shell::repl(Toplevel* toplevel, DomainEnv* domainEnv)
+	{
+		const int kMaxCommandLine = 1024;
+		char commandLine[kMaxCommandLine];
+
+		ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
+		codeContext->m_domainEnv = domainEnv;
+
+		console << "avmplus interactive shell\n"
+				<< "Type '?' for help\n\n";
+		for (;;)
+		{
+			TRY(this, kCatchAction_ReportAsError) 
+			{
+				String* code_string = NULL;
+				bool record_time = false;
+				fprintf(stdout, "> ");
+				fflush(stdout);
+				if (fgets(commandLine, kMaxCommandLine, stdin) == NULL)
+					return;
+				commandLine[kMaxCommandLine-1] = 0;
+				if (strncmp(commandLine, "?", 1) == 0) {
+					console << "Text entered at the prompt is compiled and evaluated unless\n"
+							<< "it is one of these commands:\n\n"
+							<< "  ?             print help\n"
+							<< "  .input        collect lines until a line that reads '.end',\n"
+							<< "                then eval the collected lines\n"
+							<< "  .load file    load the file (source or compiled)\n"
+							<< "  .quit         leave the repl\n"
+							<< "  .time expr    evaluate expr and report the time it took.\n\n";
+				}
+				else if (strncmp(commandLine, ".load", 5) == 0) {
+					const char* s = commandLine+5;
+					while (*s == ' ' || *s == '\t')
+						s++;
+					// wrong, handles only source code
+					//readFileForEval(NULL, newStringLatin1(s));
+					// FIXME: implement .load
+					// Small amount of generalization of the code currently in the main loop should
+					// take care of it.
+					console << "The .load command is not implemented\n";
+				}
+				else if (strncmp(commandLine, ".input", 6) == 0) {
+					code_string = newStringLatin1("");
+					for (;;) {
+						if (fgets(commandLine, kMaxCommandLine, stdin) == NULL)
+							return;
+						commandLine[kMaxCommandLine-1] = 0;
+						if (strncmp(commandLine, ".end", 4) == 0)
+							break;
+						code_string = code_string->appendLatin1(commandLine);
+					}
+					goto evaluate;
+				}
+				else if (strncmp(commandLine, ".quit", 5) == 0) {
+					return;
+				}
+				else if (strncmp(commandLine, ".time", 5) == 0) {
+					record_time = true;
+					code_string = newStringLatin1(commandLine+5);
+					goto evaluate;
+				}
+				else {
+					// Always Latin-1 here so don't use the normal decoder
+					code_string = newStringLatin1(commandLine);
+				evaluate:
+					double then = 0, now = 0;
+					code_string = code_string->appendLatin1("\0", 1);
+					if (record_time) 
+						then = OSDep::getDate();
+					Atom result = handleActionSource(code_string, NULL, domainEnv, toplevel, NULL, codeContext);
+					if (record_time) 
+						now = OSDep::getDate();
+					if (result != undefinedAtom)
+						console << string(result) << "\n";
+					if (record_time)
+						console << "Elapsed time: " << (now - then)/1000 << "s\n";
+				}
+			}
+			CATCH(Exception *exception)
+			{
+#ifdef DEBUGGER
+				if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
+				{
+					console << string(exception->atom) << "\n";
+				}
+				if (exception->getStackTrace()) {
+					console << exception->getStackTrace()->format(this) << '\n';
+				}
+#else
+				console << string(exception->atom) << "\n";
+#endif
+			}
+			END_CATCH
+			END_TRY
+		}
+	}
+#endif // VMCFG_EVAL
+	
 	Shell::Shell(MMgc::GC* gc) : AvmCore(gc)
 	{
 		systemClass = NULL;
@@ -582,6 +736,7 @@ namespace avmshell
 #ifdef DEBUGGER
 			bool enter_debugger_on_launch = false;
 #endif
+			bool do_repl = false;
 			bool do_interactive = false;
 #ifdef AVMPLUS_VERBOSE
 			bool do_verbose = false;
@@ -737,6 +892,11 @@ namespace avmshell
 						do_interactive = true;
 					}
 					#endif //AVMPLUS_INTERACTIVE
+					#ifdef VMCFG_EVAL
+					else if (!VMPI_strcmp(arg, "-repl")) {
+						do_repl = true;
+					}
+					#endif // VMCFG_EVAL
 					else if (!VMPI_strcmp(arg, "-error")) {
 						show_error = true;
 						#ifdef WIN32
@@ -791,8 +951,7 @@ namespace avmshell
 			
 			this->allowDebugger = nodebugger ? 0 : 1;
 		
-			if (!filename && !do_interactive
-
+			if (!filename && !do_interactive && !do_repl
 #ifdef AVMPLUS_SELFTEST
 				&& !do_selftest
 #endif
@@ -943,7 +1102,20 @@ namespace avmshell
 				{
 					ScriptBuffer code = newScriptBuffer(f.available());
 					f.read(code.getBuffer(), f.available());
+#ifdef VMCFG_EVAL
+					if (AbcParser::canParse(code))
+						handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
+					else {
+						// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
+						String* code_string = decodeBytesAsUTF16String(code.getBuffer(), code.getSize(), true);
+						String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, strlen(filename));
+						ScriptBuffer empty;		// With luck: allow the
+						code = empty;			//    buffer to be garbage collected
+						handleActionSource(code_string, filename_string, domainEnv, toplevel, NULL, codeContext);
+					}
+#else
 					handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
+#endif // VMCFG_EVAL
 				}
 
 				lastCodeContext = codeContext;
@@ -968,6 +1140,11 @@ namespace avmshell
 			console << "FreeItemCount     " << MMgc::GCAlloc::FreeItemCount << "\n";
 			#endif
 
+			#ifdef VMCFG_EVAL
+			if (do_repl)
+				repl(toplevel, domainEnv);
+			#endif // VMCFG_EVAL
+			
 			#ifdef AVMPLUS_INTERACTIVE
 			if (do_interactive)
 			{
