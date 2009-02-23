@@ -176,7 +176,6 @@ namespace avmplus
 	class ExceptionHandler;
 	class ExceptionHandlerTable;
 	class FrameState;
-	class GrowableBuffer;
 	class Hashtable;
 	class HeapMultiname;
 	class IntVectorObject;
