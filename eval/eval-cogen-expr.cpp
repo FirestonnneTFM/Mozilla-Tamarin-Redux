@@ -528,8 +528,8 @@ namespace avmplus
 			// FIXME: semantics: findpropstrict(""::RegExp) is not quite right here.
 			// Doing so creates a spoofing hole / surprising trap.  We want an OP_newregexp instruction.
 			cogen->I_findpropstrict(compiler->ID_RegExp);
-			cogen->I_pushstring(cogen->emitString(compiler->intern(s+1, t-s-1)));
-			cogen->I_pushstring(cogen->emitString(compiler->intern(t+1, value->length-(t-s+1))));
+			cogen->I_pushstring(cogen->emitString(compiler->intern(s+1, uint32_t(t-s-1))));
+			cogen->I_pushstring(cogen->emitString(compiler->intern(t+1, uint32_t(value->length-(t-s+1)))));
 			cogen->I_constructprop(compiler->ID_RegExp, 2);
 		}
 

@@ -74,7 +74,7 @@ template<class T> inline Seq<T>* SeqBuilder<T>::get() const
 
 inline uint32_t ByteBuffer::size() const
 {
-	return last == NULL ? 0 : size_rest + (out - last->start);
+	return last == NULL ? 0 : (uint32_t)(size_rest + (out - last->start));
 }
 
 inline void ByteBuffer::makeRoom(uint32_t nbytes)

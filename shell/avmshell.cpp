@@ -1107,8 +1107,8 @@ namespace avmshell
 						handleActionBlock(code, 0, domainEnv, toplevel, NULL, codeContext);
 					else {
 						// FIXME: I'm assuming code is UTF8 - OK for now, but easy to go wrong; it could be 8-bit ASCII
-						String* code_string = decodeBytesAsUTF16String(code.getBuffer(), code.getSize(), true);
-						String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, strlen(filename));
+						String* code_string = decodeBytesAsUTF16String(code.getBuffer(), (uint32_t)code.getSize(), true);
+						String* filename_string = decodeBytesAsUTF16String((uint8_t*)filename, (uint32_t)strlen(filename));
 						ScriptBuffer empty;		// With luck: allow the
 						code = empty;			//    buffer to be garbage collected
 						handleActionSource(code_string, filename_string, domainEnv, toplevel, NULL, codeContext);

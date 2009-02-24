@@ -1345,7 +1345,7 @@ namespace avmplus
 			if (notPartOfIdent(c) && c != '\\') {
 				if (idx == start)
 					compiler->syntaxError(lineno, "Invalid character in input: %c", *idx);
-				val.s = compiler->intern(start, idx-start);
+				val.s = compiler->intern(start, uint32_t(idx-start));
 				DEBUG_ONLY(last_token = T_Identifier);
 				return T_Identifier;
 			}

@@ -144,7 +144,7 @@ namespace avmplus
 			if (idx == limit)
 				compiler->syntaxError(l, "Unterminated XML token");
 			idx += strlen(terminator);
-			val.s = compiler->intern(mark, idx-mark);
+			val.s = compiler->intern(mark, uint32_t(idx-mark));
 			return token;
 		}
 
@@ -170,7 +170,7 @@ namespace avmplus
 				idx++;
 			}
 		end_loop:
-			val.s = compiler->intern(mark, idx-mark);
+			val.s = compiler->intern(mark, uint32_t(idx-mark));
 			return T_XmlWhitespaces;
 		}
 
@@ -180,7 +180,7 @@ namespace avmplus
 			mark = idx;
 			while (isXmlNameSubsequent(*idx))
 				idx++;
-			val.s = compiler->intern(mark, idx-mark);
+			val.s = compiler->intern(mark, uint32_t(idx-mark));
 			return T_XmlName;
 		}
 		
@@ -198,7 +198,7 @@ namespace avmplus
 			if (idx == limit)
 				compiler->syntaxError(l, "Unterminated XML token");
 			idx++;
-			val.s = compiler->intern(mark, idx-mark);
+			val.s = compiler->intern(mark, uint32_t(idx-mark));
 			return T_XmlString;
 		}
 		
@@ -225,7 +225,7 @@ namespace avmplus
 				idx++;
 			}
 		end_loop:
-			val.s = compiler->intern(mark, idx-mark);
+			val.s = compiler->intern(mark, uint32_t(idx-mark));
 			return T_XmlText;
 		}
 
