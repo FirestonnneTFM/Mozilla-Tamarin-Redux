@@ -404,7 +404,7 @@
 #  endif
 #endif
 
-#define AVMPLUS_FEATURE_EVAL   // supposed to be enabled in some config file...
+//#define AVMPLUS_FEATURE_EVAL   // supposed to be enabled in some config file...
 
 #ifdef AVMPLUS_FEATURE_EVAL
 #  define VMCFG_EVAL
