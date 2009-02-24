@@ -64,7 +64,7 @@ namespace avmplus
 			uint32_t sym;
 
 		private:
-			void Name::computeName(QualifiedName* qname);
+			void computeName(QualifiedName* qname);
 		};
 
 		// Compute the base object (on the stack) and the name information.
