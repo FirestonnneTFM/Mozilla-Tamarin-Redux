@@ -40,6 +40,9 @@
 #ifdef VMCFG_EVAL
 
 #include "eval.h"
+#ifdef _MSC_VER
+#  define snprintf _snprintf
+#endif
 
 namespace avmplus
 {

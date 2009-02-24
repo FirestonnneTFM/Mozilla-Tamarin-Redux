@@ -469,7 +469,7 @@ namespace avmplus
 						if (buf+4 >= limit)
 							break;
 						wchar u = ((c >> 6) & 15) + 1;
-						*buf++ = 0xF0 | (u >> 2);
+						*buf++ = (char)(0xF0 | (u >> 2));
 						*buf++ = 0x80 | ((u & 3) << 4) | ((c >> 2) & 15);
 						*buf++ = 0x80 | ((c & 3) << 4) | ((d >> 6) & 15);
 						*buf++ = 0x80 | (d & 63);
