@@ -803,7 +803,7 @@ class RuntestBase:
         # return diff
         try:
             f = open(file[:-4]+'.out', 'r')
-            if self.vmtype == 'releasedebugger':
+            if self.config.find('debugger') != -1:
                 if isfile(file[:-4]+'.out.debug'):
                     f.close()
                     f = open(file[:-4]+'.out.debug', 'r')
