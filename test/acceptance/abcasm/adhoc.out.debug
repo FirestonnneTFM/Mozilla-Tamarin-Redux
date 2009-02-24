@@ -1,0 +1,19 @@
+Warning: stack underflow.
+verify global$init()
+                        stack:
+                        scope: ~ 
+                         locals: global 
+  0:OP_0xF1 "adhoc.abs"
+                        stack:
+                        scope: ~ 
+                         locals: global 
+  2:getlocal0
+                        stack: global
+                        scope: ~ 
+                         locals: global 
+  3:pushscope
+                        stack:
+                        scope: global 
+                         locals: global 
+  4:OP_0xF0 99
+VerifyError: Error #1011

@@ -108,7 +108,7 @@ class PerformanceRuntest(RuntestBase):
 
     def usage(self, c):
         RuntestBase.usage(self, c)
-        print ' -S --avm2          second avmplus command to use'
+        print " -S --avm2          second avmplus command to use"
         print "    --avmname       nickname for avm to use as column header"
         print "    --avm2name      nickname for avm2 to use as column header"
         print " -i --iterations    number of times to repeat test"
@@ -132,30 +132,30 @@ class PerformanceRuntest(RuntestBase):
     def parseOptions(self):
         opts = RuntestBase.parseOptions(self)
         for o, v in opts:
-            if o in ("-S", "--avm2"):
+            if o in ('-S', '--avm2'):
                 self.avm2 = v
-            elif o in ("--avmname"):
+            elif o in ('--avmname',):
                 self.avmname = v
-            elif o in ("--avm2name"):
+            elif o in ('--avm2name',):
                 self.avm2name = v
-            elif o in ("-i", "--iterations"):
+            elif o in ('-i', '--iterations'):
                 self.iterations = int(v)
-            elif o in ("-l","--log"):
+            elif o in ('-l','--log'):
                 self.logFileType='log'
                 self.createOutputFile()
-            elif o in ("-k", "--socketlog"):
+            elif o in ('-k', '--socketlog'):
                 self.logresults = True
-            elif o in ("-r", "--runtime"):
+            elif o in ('-r', '--runtime'):
                 self.vmname = v
-            elif o in ("-m", "--memory"):
+            elif o in ('-m', '--memory'):
                 self.memory = True
-            elif o in ("--vmversion"):
+            elif o in ('--vmversion',):
                 self.vmversion = v
-            elif o in ("--vmargs2"):
+            elif o in ('--vmargs2',):
                 self.vmargs2 = v
-            elif o in ('--nooptimize'):
+            elif o in ('--nooptimize',):
                 self.optimize = False
-            elif o in ("--perfm"):
+            elif o in ('--perfm',):
                 self.perfm = True
                 
     
@@ -329,6 +329,9 @@ class PerformanceRuntest(RuntestBase):
         self.verbose_print("%d running %s" % (testnum, testName));
         if self.forcerebuild and isfile(abc):
             os.unlink(abc)
+        if isfile(testName) and getmtime(ast)>getmtime(testName):
+        	self.verbose_print("%s has been modified, recompiling" % ast)
+        	os.unlink(testName)
         if not isfile(abc):
             self.compile_test(ast)
             if not isfile(abc):

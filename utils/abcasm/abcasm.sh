@@ -41,6 +41,24 @@ ABCASM_HOME=`dirname $0`
 ANTLR_HOME=$ABCASM_HOME/../../other-licenses/ANTLR
 ANTLR_RUNTIME=$ANTLR_HOME/antlr-runtime-3.0.1.jar
 
+# enable setting asc.jar using -a switch
+while getopts "a:" OPTION
+    do
+        case $OPTION in
+            a)
+                ASC=$OPTARG
+                shift 2
+                ;;
+        esac
+    done
+    
+if [[ -z $ASC ]]
+then
+    echo "-a [asc.jar] flag must be set or ASC environment variable must be set."
+    exit 1
+fi
+
+echo "$*"
 case `uname -s` in
 	CYGWIN*)
 		# Classpath set for Cygwin systems
