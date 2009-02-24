@@ -165,7 +165,7 @@ namespace avmplus
 				snprintf(buf, sizeof(buf), "%s:%s: Internal error: ", fbuf, lbuf);
 				buf[sizeof(buf)-1] = 0;
 			}
-			int k = strlen(buf);
+			int k = int(strlen(buf));
 			va_list args;
 			va_start(args,fmt);
 			vsnprintf(buf+k, sizeof(buf)-k, fmt, args);
@@ -188,7 +188,7 @@ namespace avmplus
 				snprintf(buf, sizeof(buf), "%s:%s: Syntax error: ", fbuf, lbuf);
 				buf[sizeof(buf)-1] = 0;
 			}
-			int k = strlen(buf);
+			int k = int(strlen(buf));
 			va_list args;
 			va_start(args,fmt);
 			vsnprintf(buf+k, sizeof(buf)-k, fmt, args);

@@ -179,7 +179,7 @@ namespace avmplus
 			}
 			while (ptr < lim) {
 				uint32_t avail = SBChunk::chunksize - nextchar;
-				uint32_t need = lim - ptr;
+				uint32_t need = uint32_t(lim - ptr);
 				uint32_t k = min(need, avail);
 				memcpy(chunk->data + nextchar, ptr, k*sizeof(wchar));
 				ptr += k;
