@@ -49,7 +49,6 @@
 
 import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform
 import subprocess
-import difflib
 from os.path import *
 from os import getcwd,environ
 from datetime import datetime
@@ -76,7 +75,7 @@ except ImportError:
 class RuntestBase:
     sourceExt = '.as'
     abcasmExt = '.abs'
-    abcasmRunner = '../../utils/abcasm/abcasm.sh'
+    abcasmRunner = 'bash ../../utils/abcasm/abcasm.sh'
     testconfig = 'testconfig.txt'
     logFileType = 'html'
     
@@ -808,6 +807,10 @@ class RuntestBase:
                 if isfile(file[:-4]+'.out.debug'):
                     f.close()
                     f = open(file[:-4]+'.out.debug', 'r')
+            if self.config.find('interp') != -1:
+                if isfile(file[:-4]+'.out.interp'):
+                    f.close()
+                    f = open(file[:-4]+'.out.interp', 'r')
             flines = []
             for line in f.readlines():
                 line = ''.join(line.split('\r'))
