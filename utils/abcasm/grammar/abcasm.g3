@@ -451,6 +451,7 @@ insn:
 			| multiname_insn
 			| function_insn
 			| slot_insn
+			| pseudo_insn
 			| mops_insn
 			| ad_hoc_insn
 			| unknown_opcode
@@ -593,6 +594,15 @@ call_insn
 	    $decl::method_body_info.insn(OP_call, new Object[] { new Integer(arg_count) } );
 	}
 	;
+
+pseudo_insn
+		:  '.print'
+        {
+			$decl::method_body_info.insn(OP_findproperty, asmCore.getName( asmCore.getUsualSuspectNamespaces(), "print"), new Object[0]);
+            $decl::method_body_info.insn(OP_swap, new Object[0]);
+            $decl::method_body_info.insn(OP_callpropvoid, asmCore.getName( asmCore.getUsualSuspectNamespaces(), "print"), new Object[] { new Integer(1) } );
+		}
+		;
 	
 /*
  *  TODO: All integer operands should accept .function_id()  .slot_id() etc.

@@ -36,8 +36,10 @@
  * ***** END LICENSE BLOCK ***** */
 function hello()
 {
-    finddef print
+	getlocal0
+	pushscope
+
 	pushstring "Hello, world"
-	callproperty print(1)
+	.print
 	returnvoid
 }
