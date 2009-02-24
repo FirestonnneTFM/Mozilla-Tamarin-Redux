@@ -1,0 +1,2 @@
+RangeError: Error #1506: The specified range is invalid.
+	at global$init()

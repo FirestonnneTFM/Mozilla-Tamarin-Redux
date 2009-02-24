@@ -43,16 +43,13 @@
 # stand-alone, avmplus executable.  
 # see http://developer.mozilla.org/en/docs/Tamarin_Build_Documentation 
 #
-# this is just a quick-n-dirty script.  for full reporting, you need to run
-# the test driver, which requires java and is currently not available on
-# mozilla.org.
-#
 # this test looks for an executable avmplus shell in
 # %MOZ_SRC/mozilla/js/tamarin/platform/,
 #
 
 import os, sys, getopt, datetime, pipes, glob, itertools, tempfile, string, re, platform
 import subprocess
+import difflib
 from os.path import *
 from os import getcwd,environ
 from datetime import datetime
@@ -78,6 +75,8 @@ except ImportError:
 
 class RuntestBase:
     sourceExt = '.as'
+    abcasmExt = '.abs'
+    abcasmRunner = '../../utils/abcasm/abcasm.sh'
     testconfig = 'testconfig.txt'
     logFileType = 'html'
     
@@ -97,6 +96,7 @@ class RuntestBase:
     options = ''
     longOptions = []
     osName = ''
+    vmtype = ''
 
     js_output = ''
     js_output_f = None
@@ -239,7 +239,7 @@ class RuntestBase:
             self.args = ['.']
         
         for o, v in opts:
-            if o in ('-v', '--self.verbose'):
+            if o in ('-v', '--verbose'):
                 self.verbose = True
             elif o in ('-h', '--help'):
                 self.usage(0)
@@ -263,21 +263,21 @@ class RuntestBase:
                 self.config = v
             elif o in ('-e', '--eval'):
                 self.eval = True
-            elif o in ('--ascargs'):
+            elif o in ('--ascargs',):
                 self.ascargs = v
-            elif o in ('--vmargs'):
+            elif o in ('--vmargs',):
                 self.vmargs = v
-            elif o in ('--ext'):
+            elif o in ('--ext',):
                 self.sourceExt = v
-            elif o in ('--timeout'):
+            elif o in ('--timeout',):
                 self.self.testTimeOut=int(v)
-            elif o in ('-d'):
+            elif o in ('-d',):
                 self.debug = True
-            elif o in ('--rebuildtests'):
+            elif o in ('--rebuildtests',):
                 self.rebuildtests = True
             elif o in ('-q', '--quiet'):
                 self.quiet = True
-            elif o in ('--nohtml'):
+            elif o in ('--nohtml',):
                 self.htmlOutput = False
         return opts
                 
@@ -307,12 +307,12 @@ class RuntestBase:
     
     def determineConfig(self):
         if not self.runSource:
-            vmtype = 'release'
+            self.vmtype = 'release'
             f = self.run_pipe('%s' % self.avm)
             try:
                 for line in f:
                     if line.find('[-d]') != -1:
-                        vmtype = 'releasedebugger'
+                        self.vmtype = 'releasedebugger'
                         break
             except:
                 nop = True
@@ -347,11 +347,11 @@ class RuntestBase:
                 print("ERROR: cpu_arch '%s' is unknown, expected values are (x86,ppc), use runtests.py --config x86-win-tvm-release to manually set the configuration" % (platform.machine()))
                 exit(1)
                 
-        self.config = cputype+'-'+self.osName+'-tvm-'+vmtype+self.vmargs
+        self.config = cputype+'-'+self.osName+'-tvm-'+self.vmtype+self.vmargs
     
     ### File and Directory functions ###
     def istest(self,f):
-        return f.endswith(self.sourceExt) and basename(f) != ('shell'+self.sourceExt) \
+        return f.endswith((self.sourceExt,self.abcasmExt)) and basename(f) != ('shell'+self.sourceExt) \
                and not f.endswith('Util'+self.sourceExt)
                
     def getTestsList(self, startDir):
@@ -542,44 +542,54 @@ class RuntestBase:
 
         if not isfile(asc):
             exit('ERROR: cannot build %s, ASC environment variable or --asc must be set to asc.jar' % as_file)
-        if not isfile(builtinabc):
-            exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
-        
-        if asc.endswith('.jar'):
-            cmd = 'java -jar ' + asc
-        else:
-            cmd = asc
-        
-        arglist = self.parseArgStringToList(ascargs)
-    
+           
         (dir, file) = split(as_file)
-        # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
-        arglist = self.loadAscArgs(arglist, dir, as_file)
-        for arg in extraArgs:
-            cmd += ' %s' % arg
-                
-        cmd += ' -import %s' % builtinabc
-        for arg in arglist:
-            cmd += ' %s' % arg
         self.verbose_print('   compiling %s' % file)
-        for p in self.parents(dir):
-            if p=='':
-                p='.'
-            shell = join(p,'shell'+self.sourceExt)
-            if isfile(shell):
-                cmd += ' -in ' + shell
-                break
-        (testdir, ext) = splitext(as_file)
-        deps = glob(join(testdir,'*'+self.sourceExt))
-        deps.sort()
-        for util in deps + glob(join(dir,'*Util'+self.sourceExt)):
-            cmd += ' -in %s' % string.replace(util, '$', '\$')
-        #debug
+        
+        # additional .as file compiler args
+        if as_file.endswith(self.sourceExt):
+            if not isfile(builtinabc):
+                exit('ERROR: builtin.abc (formerly global.abc) %s does not exist, BUILTINABC environment variable or --builtinabc must be set to builtin.abc' % builtinabc)
+        
+            if asc.endswith('.jar'):
+                cmd = 'java -jar ' + asc
+            else:
+                cmd = asc
+                
+            arglist = self.parseArgStringToList(ascargs)
+        
+            # look for .asc_args files to specify dir / file level compile args, arglist is passed by ref
+            arglist = self.loadAscArgs(arglist, dir, as_file)
+            for arg in extraArgs:
+                cmd += ' %s' % arg
+        
+                                  
+            cmd += ' -import %s' % builtinabc
+            for arg in arglist:
+                cmd += ' %s' % arg
+            
+            for p in self.parents(dir):
+                if p=='':
+                    p='.'
+                shell = join(p,'shell'+self.sourceExt)
+                if isfile(shell):
+                    cmd += ' -in ' + shell
+                    break
+            (testdir, ext) = splitext(as_file)
+            deps = glob(join(testdir,'*'+self.sourceExt))
+            deps.sort()
+            for util in deps + glob(join(dir,'*Util'+self.sourceExt)):
+                cmd += ' -in %s' % string.replace(util, '$', '\$')
+                
+        elif as_file.endswith(self.abcasmExt):
+            cmd = self.abcasmRunner+' -a '+asc
+            
         try:
             self.verbose_print('%s %s' % (cmd,as_file))
             f = self.run_pipe('%s %s' % (cmd,as_file))
             for line in f:
                 self.verbose_print(line.strip())
+            return f
         except:
             raise
     
@@ -631,41 +641,44 @@ class RuntestBase:
             child.expect("\(ash\)")
     
             for test in tests:
-                arglist = self.parseArgStringToList(self.ascargs)
-            
-                (dir, file) = split(test)
-                # look for .asc_args files to specify dir / file level compile args
-                self.loadAscArgs(arglist, dir, file)
-                
-                cmd = "asc -import %s " % (self.builtinabc)
-                for arg in arglist:
-                    cmd += ' %s' % arg
-                
-                for p in self.parents(dir):
-                    shell = join(p,"shell.as")
-                    if isfile(shell):
-                        cmd += " -in " + shell
-                        break
-                (testdir, ext) = splitext(test)
-                deps = glob(join(testdir,"*.as"))
-                deps.sort()
-                for util in deps + glob(join(dir,"*Util.as")):
-                    cmd += " -in %s" % util #no need to prepend \ to $ when using ash
-                cmd += " %s" % test
-            
-                if exists(testdir+".abc"):
-                    os.unlink(testdir+".abc")
-                if self.debug:
-                    print cmd
+                if test.endswith(self.abcasmExt):
+                    self.compile_test(test)
                 else:
-                    print "Compiling ", test
-                child.sendline(cmd)
-                child.expect("\(ash\)")
-                if not exists(testdir+".abc"):
-                    print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
-                    self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
-                total -= 1;
-                #print("%d remaining, %s" % (total,cmd))
+                    arglist = self.parseArgStringToList(self.ascargs)
+                
+                    (dir, file) = split(test)
+                    # look for .asc_args files to specify dir / file level compile args
+                    self.loadAscArgs(arglist, dir, file)
+                    
+                    cmd = "asc -import %s " % (self.builtinabc)
+                    for arg in arglist:
+                        cmd += ' %s' % arg
+                    
+                    for p in self.parents(dir):
+                        shell = join(p,"shell.as")
+                        if isfile(shell):
+                            cmd += " -in " + shell
+                            break
+                    (testdir, ext) = splitext(test)
+                    deps = glob(join(testdir,"*.as"))
+                    deps.sort()
+                    for util in deps + glob(join(dir,"*Util.as")):
+                        cmd += " -in %s" % util #no need to prepend \ to $ when using ash
+                    cmd += " %s" % test
+                
+                    if exists(testdir+".abc"):
+                        os.unlink(testdir+".abc")
+                    if self.debug:
+                        print cmd
+                    else:
+                        print "Compiling ", test
+                    child.sendline(cmd)
+                    child.expect("\(ash\)")
+                    if not exists(testdir+".abc"):
+                        print("ERROR: abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
+                        self.ashErrors.append("abc file %s.abc not created, cmd used to compile: %s" % (testdir,cmd))
+                    total -= 1;
+                    #print("%d remaining, %s" % (total,cmd))
         end_time = datetime.today()
         #print("finished compile of %d tests at %s elapsed time is %s" % (len(tests),start_time,end_time-start_time))
 
@@ -772,6 +785,7 @@ class RuntestBase:
                 if len(names)==1:
                     names.append('.*')
                 # remove any trailing extension if specified
+                # TODO: add abs to here
                 if names[0][-3:] == self.sourceExt:
                     names[0]=names[0][:-3]
                 rs='^%s$' % names[0]
@@ -785,7 +799,33 @@ class RuntestBase:
                         settings[names[0]][names[1]] = {}
                     settings[names[0]][names[1]][fields[2]]=fields[3]
         return settings, includes
-                
+    
+    def compareAbcAsmOutput(self, file, output):
+        # return diff
+        try:
+            f = open(file[:-4]+'.out', 'r')
+            if self.vmtype == 'releasedebugger':
+                if isfile(file[:-4]+'.out.debug'):
+                    f.close()
+                    f = open(file[:-4]+'.out.debug', 'r')
+            flines = []
+            for line in f.readlines():
+                line = ''.join(line.split('\r'))
+                if line != '\n':
+                    flines.append(line)
+            f.close()
+        except IOError:
+            flines = []
+        #print 'output: %s' % output
+        #print 'flines: %s' % flines
+        if len(output) != len(flines):
+            return flines
+        # compare lines
+        for i in range(0,len(output)):
+            if output[i].strip() != flines[i].strip():
+                return flines
+        return
+                                                
     def runTest(self, testAndNum):
         ast = testAndNum[0]
         testnum = testAndNum[1]
@@ -849,10 +889,26 @@ class RuntestBase:
         	self.verbose_print("%s has been modified, recompiling" % ast)
         	os.unlink(testName)
         if not isfile(testName):
-            self.compile_test(ast)
+            compileOutput = self.compile_test(ast)
             if not isfile(testName):
                 lfail += 1
                 outputCalls.append((self.fail,(testName, 'FAILED! file not found ' + testName, self.failmsgs)))
+                if ast.endswith(self.abcasmExt):
+                    # file didn't compile, compare compile output
+                    flines = self.compareAbcAsmOutput(ast, compileOutput)
+                    if flines:
+                        lfail += 1
+                        outputCalls.append((self.fail,(testName, 'FAILED! :\nExpected:\n'+''.join(flines)+'\nGOT:\n'+''.join(compileOutput), self.failmsgs)))
+                        outputCalls.append((self.js_print, ('   FAILED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
+                    else:
+                        lpass += 1
+                        outputCalls.append((self.verbose_print, ('   PASSED passes:%d fails:%d unexpected passes: %d expected failures: %d' % (lpass,lfail,lunpass,lexpfail), '', '<br/>')))
+                    self.allfails += lfail
+                    self.allpasses += lpass
+                    return outputCalls
+                else:
+                    lfail += 1
+                    outputCalls.append((self.fail,(testName, 'FAILED! file not found ' + testName, self.failmsgs)))
         if self.runSource or self.eval:
             incfiles=self.build_incfiles(testName)
             incfiles.append("shell" + self.sourceExt)
@@ -866,6 +922,13 @@ class RuntestBase:
         if f == "timedOut":
             outputCalls.append((self.fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % self.testTimeOut, self.timeoutmsgs)))
             ltimeout += 1
+        elif ast.endswith(self.abcasmExt):
+            flines = self.compareAbcAsmOutput(ast, f)
+            if flines:
+                lfail += 1
+                outputCalls.append((self.fail,(testName, 'FAILED! :\nExpected:\n'+''.join(flines)+'\nGOT:\n'+''.join(f), self.failmsgs)))
+            else:
+                lpass += 1
         else:
             try:
                 outputLines = []
