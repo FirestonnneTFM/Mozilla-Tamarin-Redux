@@ -12,6 +12,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "avmplus", "avmplus2008.vcpr
 	ProjectSection(ProjectDependencies) = postProject
 		{7E408248-3BAA-45AE-B65A-5355113A1FF8} = {7E408248-3BAA-45AE-B65A-5355113A1FF8}
 		{B004A8CC-B3A9-4600-A1A9-EF1BBCF2434B} = {B004A8CC-B3A9-4600-A1A9-EF1BBCF2434B}
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A} = {AAEFC4E3-287B-4DD5-B668-DE084BC8041A}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MMgc", "..\..\MMgc\MMgc2008.vcproj", "{B004A8CC-B3A9-4600-A1A9-EF1BBCF2434B}"
@@ -22,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nanojit", "nanojit2008.vcpr
 	ProjectSection(ProjectDependencies) = postProject
 		{B004A8CC-B3A9-4600-A1A9-EF1BBCF2434B} = {B004A8CC-B3A9-4600-A1A9-EF1BBCF2434B}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "eval", "eval2008.vcproj", "{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -221,6 +224,42 @@ Global
 		{7E408248-3BAA-45AE-B65A-5355113A1FF8}.VTune|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = VTune|Windows Mobile 6 Professional SDK (ARMV4I)
 		{7E408248-3BAA-45AE-B65A-5355113A1FF8}.VTune|x64.ActiveCfg = VTune|x64
 		{7E408248-3BAA-45AE-B65A-5355113A1FF8}.VTune|x64.Build.0 = VTune|x64
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug_Debugger|Win32.ActiveCfg = Debug_Debugger|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug_Debugger|Win32.Build.0 = Debug_Debugger|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I).Build.0 = Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug_Debugger|x64.ActiveCfg = Debug_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug|Win32.Build.0 = Debug|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug|Windows Mobile 6 Professional SDK (ARMV4I).Build.0 = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Debug|x64.ActiveCfg = Debug|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.MemoryProfiler|Win32.ActiveCfg = MemoryProfiler|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.MemoryProfiler|Win32.Build.0 = MemoryProfiler|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I).Build.0 = MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.MemoryProfiler|x64.ActiveCfg = MemoryProfiler|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release_Debugger|Win32.ActiveCfg = Release_Debugger|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release_Debugger|Win32.Build.0 = Release_Debugger|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I).Build.0 = Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release_Debugger|x64.ActiveCfg = Release_Debugger|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release|Win32.ActiveCfg = Release|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release|Win32.Build.0 = Release|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release|Windows Mobile 6 Professional SDK (ARMV4I).Build.0 = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.Release|x64.ActiveCfg = Release|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|Win32.ActiveCfg = VTune|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|Win32.Build.0 = VTune|Win32
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|Windows Mobile 6 Professional SDK (ARMV4I).ActiveCfg = VTune|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|Windows Mobile 6 Professional SDK (ARMV4I).Build.0 = VTune|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|Windows Mobile 6 Professional SDK (ARMV4I).Deploy.0 = VTune|Windows Mobile 6 Professional SDK (ARMV4I)
+		{AAEFC4E3-287B-4DD5-B668-DE084BC8041A}.VTune|x64.ActiveCfg = VTune|Windows Mobile 6 Professional SDK (ARMV4I)
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
