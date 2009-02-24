@@ -82,3 +82,6 @@ as3/sampling/StartSamplingErrors    , .* , skip , https://bugzilla.mozilla.org/s
 # Bug 477228: Try to write readonly Number.NEGATIVE_INFINITY crashes with ARM JIT
 ecma3/Number/e15_7_3_5_3_rt ,   arm-winmobile-tvm-release-arm       ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=477228
 ecma3/Number/e15_7_3_5_3_rt ,   arm-winmobile-tvm-release-arm-Ojit  ,   expectedfail    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=477228
+
+# inconsistencies in different debug output, need to implement regex matching of diffs
+abcasm/adhoc , .* , skip, 
