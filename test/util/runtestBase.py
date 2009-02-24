@@ -894,8 +894,6 @@ class RuntestBase:
         if not isfile(testName):
             compileOutput = self.compile_test(ast)
             if not isfile(testName):
-                lfail += 1
-                outputCalls.append((self.fail,(testName, 'FAILED! file not found ' + testName, self.failmsgs)))
                 if ast.endswith(self.abcasmExt):
                     # file didn't compile, compare compile output
                     flines = self.compareAbcAsmOutput(ast, compileOutput)
