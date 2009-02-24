@@ -1,0 +1,5 @@
+stored, not yet incremented=2147483650
+floating-point 0x7f000001 + 0x01000001=2147483650
+converted to fixed_point=-2147483646
+stored and incremented=-2147483645
+temp result was later incremented=2147483650
