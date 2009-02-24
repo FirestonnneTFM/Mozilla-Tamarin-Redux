@@ -337,7 +337,7 @@ class AssemblerCore
 	 */
 	private void finishTraits(Traits traits)
 	{	
-		int slot_count = 0;
+		int slot_id = 1;
 		
 		for ( Trait t: traits )
 		{
@@ -345,11 +345,11 @@ class AssemblerCore
 			{
 				if ( t.hasAttr("slot_id") )
 				{
-					slot_count = Math.max(t.getIntAttr("slot_id") + 1, slot_count);
+					slot_id = Math.max(t.getIntAttr("slot_id") + 1, slot_id);
 				}
 				else
 				{
-					t.setAttr("slot_id", new Integer(slot_count++));
+					t.setAttr("slot_id", new Integer(slot_id++));
 				}
 				
 				if ( !t.hasAttr("type_name"))

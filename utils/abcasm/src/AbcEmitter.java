@@ -245,7 +245,7 @@ class AbcEmitter
 		w.writeU30(info.paramTypes.size());
 		w.writeU30(core.getNameId(info.returnType));
 
-		for (int i=1, n=info.paramTypes.size(); i < n; i++)
+		for (int i=0, n=info.paramTypes.size(); i < n; i++)
 			w.writeU30(core.getNameId(info.paramTypes.elementAt(i)));
 
 		w.writeU30(core.getPoolId(info.methodName));
