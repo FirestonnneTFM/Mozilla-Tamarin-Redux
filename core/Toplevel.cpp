@@ -1299,6 +1299,8 @@ namespace avmplus
 	
 	Atom Toplevel::eval(ScriptObject* self, Atom input)
 	{
+		(void)self;
+		(void)input;
 #ifdef VMCFG_EVAL
 		if (AvmCore::isString(input)) {
 			AvmCore* core = self->core();
