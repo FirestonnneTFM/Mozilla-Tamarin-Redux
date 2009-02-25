@@ -206,7 +206,8 @@ namespace avmplus
 		NamespaceSetp getNamespaceSet(int index) const;
 		Stringp getString(int index) const;
 
-		Atom getDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const;
+		Atom getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const;
+		static bool isLegalDefaultValue(BuiltinType bt, Atom value);
 
 		Atom posToAtom(const byte* pos) const
 		{
