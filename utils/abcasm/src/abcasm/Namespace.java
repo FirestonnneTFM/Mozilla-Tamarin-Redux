@@ -35,76 +35,41 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-import java.util.HashMap;
-
-class Trait 
+public class Namespace implements Comparable
 {
-	int kind_byte;
+	int kind;
+	String name;
 	
-	HashMap<String,Object> attrs = new HashMap<String,Object>();
-	
-	Trait(int kind)
+	Namespace(int kind)
 	{
-		this.kind_byte = kind;
-	}
-
-	void addAttr(String key, Object value)
-	{
-		if ( attrs.containsKey(key) )
-		{
-			throw new IllegalArgumentException("Trait attribute " + key + " cannot be specified twice." );
-		}
-
-		attrs.put(key, value);
-	}
-
-	void validate()
-	{
-		verifyContains("name", null);
-	}
-
-	public int getKind()
-	{
-		return kind_byte & 0x0F;
+		this(kind, new String());
 	}
 	
-	public void setAttr(String attr_name, Object attr_value)
+	Namespace(int kind, String name)
 	{
-		attrs.put(attr_name, attr_value);
-	}
-
-	public boolean hasAttr(String attr_name)
-	{
-		return attrs.containsKey(attr_name);
-	}
-
-	public Object getAttr(String attr_name)
-	{
-		verifyContains(attr_name, null);
-		return attrs.get(attr_name);
-	}
-
-	public int getIntAttr(String attr_name)
-	{
-		verifyContains(attr_name, Integer.class);
-		return (Integer)attrs.get(attr_name);
+		this.kind = kind;
+		this.name = name;
 	}
 	
-	public Name getNameAttr(String attr_name)
+	public int compareTo(Object o)
 	{
-		verifyContains(attr_name, Name.class);
-		return (Name)attrs.get(attr_name);
+		Namespace other = (Namespace)o;
+		
+		int result = kind - other.kind;
+		
+		if ( 0 == result )
+			result = name.compareTo(other.name);
+		
+		return result;
 	}
 	
-	void verifyContains(String attr_name, Class clazz)
+	public String toString()
 	{
-		if ( !attrs.containsKey(attr_name) )
-			throw new IllegalArgumentException("Required attribute " + attr_name + " not found.");
-		if ( ! ( null == clazz ||  attrs.get(attr_name).getClass().equals(clazz) ) )
-		{
-			throw new IllegalArgumentException("Attribute " + attr_name + " must be type " + clazz.getSimpleName() );
-		}
+		if ( name.length() > 0 )
+			return name;
+		else
+			return "0x" + Integer.toHexString(kind);
 	}
 }

@@ -35,11 +35,30 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
 import java.util.Vector;
 
-class Block
+class AssemblerOptions
 {
-	Vector<Instruction> insns = new Vector<Instruction>();
+	boolean dumpIl = false;
+	boolean verbose = false;
+	boolean expandedDiagnostics = false;
+
+	java.util.Vector<String> asmFile = new java.util.Vector<String>();
+	
+	AssemblerOptions(String[] args)
+	{
+		for ( String option: args)
+		{
+			if ( option.equalsIgnoreCase("-dump"))
+				dumpIl = true;
+			else if ( option.equalsIgnoreCase("-verbose"))
+				verbose = true;
+			else if ( option.equalsIgnoreCase("-debug_assembler"))
+				expandedDiagnostics = true;
+			else
+				asmFile.add(option);
+		}
+	}
 }

@@ -35,26 +35,38 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
 import java.util.Vector;
 
-class MethodInfo
+class ScriptInfo
 {
-	byte flags;
+	Object init_id = new Integer(0);
 
-	/**
-	 * Denormalized method id, carried here
-	 * so the syntax-directed translator can access it.
-	 */
-	int methodId;
-
-	String methodName;
-
-	Name returnType;
-	Vector<Name> paramTypes = new Vector<Name>();
-	public int getParamCount()
+	Traits traits = new Traits();
+	
+	void setInit(Object i)
 	{
-		return paramTypes.size() + 1;
+		init_id = i;
+	}
+	
+	int getInitId()
+	{
+		if ( this.init_id instanceof Integer )
+		{
+			return (Integer)this.init_id;
+		}
+		else
+			throw new IllegalArgumentException("Unknown function " + init_id.toString());
+	}
+	
+	void addTrait(Trait t)
+	{
+		traits.add(t);
+	}
+	
+	Traits getTraits()
+	{
+		return traits;
 	}
 }
