@@ -288,12 +288,8 @@ namespace avmplus
         return pool;
 	}
 
-#ifdef SAFE_PARSE
 	// check to see if we are trying to read past the file end or the beginning.
 	#define CHECK_POS(pos) do { if ((pos) < abcStart || (pos) >= abcEnd ) toplevel->throwVerifyError(kCorruptABCError); } while (0)
-#else
-	#define CHECK_POS(pos) do {  } while (0)
-#endif //SAFE_PARSE
 
 	/**
 	 * setting up a traits that extends another one.  Two parser passes are required,
@@ -1738,11 +1734,9 @@ namespace avmplus
 
 	double AbcParser::readDouble(const byte* &p) const
 	{
-#ifdef SAFE_PARSE
 		// check to see if we are trying to read past the file end.
 		if (p < abcStart || p+7 >= abcEnd )
 			toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
 
 		union {
 			double value;

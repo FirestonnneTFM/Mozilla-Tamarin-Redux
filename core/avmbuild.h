@@ -260,12 +260,6 @@
 
 #endif
 
-// extra safety checks during parsing
-// this will be turned off for desktop players once we get the gaurd pages in
-// Mobile players that may not be able to use guard pages(exceptions) so will 
-//want to turn this on
-#define SAFE_PARSE
-
 // Enable interfacing Java ; so you can access java methods/properties like native AS; e.g.
 // var hello = JObject.create("java.lang.String", " hello world ");  print(hello.indexOf('o')); 
 //#define AVMPLUS_WITH_JNI
