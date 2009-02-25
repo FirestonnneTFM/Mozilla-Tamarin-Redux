@@ -35,39 +35,71 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-import java.util.Vector;
 
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
-
-class Traits extends Vector<Trait>
+class Instruction
 {
 	/**
-	 *  @see Serializable
+	 * @see ActionBlockConstants
 	 */
-	private static final long serialVersionUID = -3691060424629191999L;
-	private Integer explicitCount;
+	int opcode;
+	
+	/**
+	 *  Immediate operands as specified by the program,
+	 *  symbolic references may still be present.
+	 */
+	Object[] operands;
 
-	public int getTraitCount()
+	/**
+	 *  Cooked immediate operands, symbolic references resolved.
+	 */
+	int [] imm;
+	
+	/**
+	 *  Name reference for instructions that operate on a named entity.
+	 */
+	Name n;
+	
+	/**
+	 *  Control-flow target for branch/jump instructions.
+	 */
+	Label target;
+	
+	Instruction(int opcode, Object[] operands)
 	{
-		if ( explicitCount != null )
-			return explicitCount;
-		else
-			return size();
+		this.opcode = opcode;
+		this.operands = operands;
 	}
 	
-	public Integer getSlotId(String slot_name)
+	Instruction(int opcode, Object v)
 	{
-		for ( Trait t: this)
+		this(opcode, new Object[]{v});
+	}
+	
+	public String toString()
+	{
+		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
+		
+		if ( n != null )
 		{
-			if ( TRAIT_Var == t.getKind() && ((Name)t.getAttr("name")).baseName.equals(slot_name) )
-			{
-				return (Integer)t.getAttr("slot_id");
-			}
+			result.append(" ");
+			result.append(n);
 		}
 		
-		return null;
+		if ( target != null )
+		{
+			result.append(" ");
+			result.append(target);
+		}
+		
+		for ( Object x: operands)
+		{
+			result.append(" ");
+			result.append(x);
+		}
+		
+		return result.toString();
 	}
-	
 }
+

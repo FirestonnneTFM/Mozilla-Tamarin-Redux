@@ -35,38 +35,63 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
-class ScriptInfo
+/**
+ * Abstract representation of an ABC pool,
+ * which can be sorted according to some
+ * criterion (e.g., most used elements to
+ * lowest positions).
+ *
+ * @param <T>
+ */
+public class Pool<T extends Comparable>
 {
-	Object init_id = new Integer(0);
-
-	Traits traits = new Traits();
+	Map<T,Integer> refs = new TreeMap<T,Integer>();
+	ArrayList<T> values = new ArrayList<T>();
+	int countFrom;
 	
-	void setInit(Object i)
+	public Pool(int countFrom)
 	{
-		init_id = i;
+		this.countFrom = countFrom;
 	}
 	
-	int getInitId()
+	public int add(T e)
 	{
-		if ( this.init_id instanceof Integer )
+		if ( !refs.containsKey(e) )
 		{
-			return (Integer)this.init_id;
+			values.add(e);
+			refs.put(e, size());
 		}
-		else
-			throw new IllegalArgumentException("Unknown function " + init_id.toString());
+
+		return refs.get(e);
 	}
 	
-	void addTrait(Trait t)
+	public ArrayList<T> getValues()
 	{
-		traits.add(t);
+		return values;
 	}
 	
-	Traits getTraits()
+	public int id(T e)
 	{
-		return traits;
+		if ( !refs.containsKey(e))
+			throw new IllegalArgumentException("Unknown pool item \"" + e.toString() + "\"");
+		return refs.get(e);
+	}
+	
+	public String toString()
+	{
+		return String.valueOf(refs);
+	}
+	
+	public int size()
+	{
+		return countFrom + refs.size();
 	}
 }
+

@@ -50,7 +50,6 @@
 		lib.dir=/usr/local/lib/antlr-3.0.1
 	-->
 	<property name="lib.dir" location="Set in build.properties"/>
-	<property name="lib2.dir" location="Set in build.properties"/>
 	<property name="antlr.runtime" value="../../other-licenses/ANTLR/antlr-runtime-3.0.1.jar"/>
 
 	<!-- Pull in current environment -->
@@ -69,7 +68,6 @@
 
 	<path id="antlr.classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar" />
-        <fileset dir="${lib2.dir}" includes="**/*.jar" />
 	</path>
 
 	 <path id="compile.classpath">
@@ -116,7 +114,7 @@
 		-->
 		<javac 
 			srcdir="src" 
-			excludes="Main.java"
+			excludes="abcasm/Main.java"
 			destdir="classes" 
 			classpathref="compile.classpath"
 			debug="${compile.debug}">
@@ -131,7 +129,7 @@
 
 		<javac 
 			srcdir="src" 
-			includes="Main.java"
+			includes="abcasm/Main.java"
 			destdir="classes" 
 			classpathref="compile.classpath"
 			debug="${compile.debug}">
@@ -141,11 +139,11 @@
 
 	<target name="jar" depends="generate,compile">
 		<mkdir dir="lib"/>
-		<jar jarfile="${target.jar}" basedir="classes" includes="adobe/abcasm/*.class">
+		<jar jarfile="${target.jar}" basedir="classes" includes="abcasm/*.class">
 			<!--
 			TODO: Not workable b/c ASC isn't at a known relative location.
 			<manifest>
-				<attribute name="Main-Class" value="adobe.abcasm.Main"/>
+				<attribute name="Main-Class" value="abcasm.Main"/>
 				<attribute name="Class-Path" value="${antlr.runtime} ${ASC_JAR}"/>
 			</manifest>
 			-->
@@ -153,7 +151,7 @@
 	</target>
 
 	<target name="test" depends="jar">
-		<java classname="adobe.abcasm.Main" fork="yes" failonerror="yes">
+		<java classname="abcasm.Main" fork="yes" failonerror="yes">
             <classpath refid="runtime.classpath" />
 			<arg value="test/parseInt.abs"/>
 			<arg value="-dump"/>

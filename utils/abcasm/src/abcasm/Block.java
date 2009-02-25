@@ -35,28 +35,11 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-/**
- *  This simple Label class wraps
- *  string literal labels in a typed class.
- */
-public class Label implements Comparable
+import java.util.Vector;
+
+class Block
 {
-	private String labelText;
-
-	Label(String label_text)
-	{
-		this.labelText = label_text;
-	}
-
-	public int compareTo(Object o)
-	{
-		return ((Label)o).labelText.compareTo(this.labelText);
-	}
-	
-	public String toString()
-	{
-		return labelText;
-	}
+	Vector<Instruction> insns = new Vector<Instruction>();
 }

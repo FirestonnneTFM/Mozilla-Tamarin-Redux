@@ -81,7 +81,7 @@ options
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
 }
 
@@ -122,7 +122,7 @@ import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 }
 
 

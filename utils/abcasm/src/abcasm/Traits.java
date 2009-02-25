@@ -35,59 +35,39 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-import java.util.Iterator;
 import java.util.Vector;
 
-public class Nsset implements Comparable, Iterable<Namespace>
+import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+
+class Traits extends Vector<Trait>
 {
-	java.util.Vector<Namespace> namespaces = new java.util.Vector<Namespace>();
-	
-	public Nsset(Namespace single_ns)
-	{
-		namespaces.add(single_ns);
-	}
-	
-	public Nsset(Vector<Namespace> nss) 
-	{
-		namespaces.addAll(nss);
-	}
+	/**
+	 *  @see Serializable
+	 */
+	private static final long serialVersionUID = -3691060424629191999L;
+	private Integer explicitCount;
 
-	public int length()
+	public int getTraitCount()
 	{
-		return namespaces.size();
-	}
-	public int compareTo(Object o)
-	{
-		Nsset other = (Nsset)o;
-		
-		int result = this.namespaces.size() - other.namespaces.size();
-		
-		for ( int i = 0; i < this.namespaces.size() && 0 == result; i++ )
-			result = this.namespaces.elementAt(i).compareTo(other.namespaces.elementAt(i));
-		
-		return result;
-	}
-
-	public Iterator<Namespace> iterator()
-	{
-		return namespaces.iterator();
+		if ( explicitCount != null )
+			return explicitCount;
+		else
+			return size();
 	}
 	
-	public String toString()
+	public Integer getSlotId(String slot_name)
 	{
-		StringBuffer result = new StringBuffer();
-		
-		result.append('{');
-		for ( int i = 0; i < namespaces.size(); i++ )
+		for ( Trait t: this)
 		{
-			if ( i > 0 )
-				result.append(',');
-			result.append(namespaces.elementAt(i));
+			if ( TRAIT_Var == t.getKind() && ((Name)t.getAttr("name")).baseName.equals(slot_name) )
+			{
+				return (Integer)t.getAttr("slot_id");
+			}
 		}
-		result.append('}');
-		return result.toString();
+		
+		return null;
 	}
+	
 }
-
