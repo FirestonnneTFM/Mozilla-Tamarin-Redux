@@ -57,11 +57,9 @@ mmgc operator *
 
 nanojit avmplus:CodegenMIR.obj
 nanojit avmplus:Ia32Assembler.obj
-nanojit avmplus:GrowableBuffer.obj
 nanojit win32cpuid.obj
 nanojit avmplus::CodegenMIR
 nanojit avmplus::ArmAssembler
-nanojit avmplus::GrowableBuffer
 nanojit avmplus::ImtBuilder
 nanojit avmplus:CodegenLIR.obj
 nanojit avmplus:WordcodeEmitter.obj

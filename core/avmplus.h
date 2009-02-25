@@ -150,7 +150,6 @@ namespace avmplus
 	class AtomArray;
 	class AvmCore;
 	class BooleanClass;
-	class BufferGuard;
 	class BuiltinTraits;
 	class CallStackNode;
 	class ClassClass;
@@ -250,7 +249,6 @@ namespace avmplus
 #define MMGC_SUBCLASS_DECL : public GCObject
 
 #include "QCache.h"
-#include "GrowableBuffer.h"
 #include "MathUtils.h"
 #include "UnicodeUtils.h"
 #include "OSDep.h"

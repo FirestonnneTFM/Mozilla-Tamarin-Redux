@@ -205,9 +205,6 @@ namespace avmplus
 #ifdef AVMPLUS_VERBOSE
 		Stringp 					kVerboseVerify;
 #endif
-#ifdef FEATURE_BUFFER_GUARD // no Carbon
-		BufferGuard*				guard;
-#endif
 		int32_t						version;
 		uint32_t					classCount;
 	// ------------------------ DATA SECTION END
