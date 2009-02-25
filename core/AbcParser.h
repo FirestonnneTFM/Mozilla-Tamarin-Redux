@@ -128,10 +128,8 @@ namespace avmplus
          */
 		int readU16(const byte* p) const
 		{
-#ifdef SAFE_PARSE
 			if (p < abcStart || p+1 >= abcEnd)
 				toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
 			return p[0] | p[1]<<8;
 		}
 
@@ -146,7 +144,6 @@ namespace avmplus
          */
 		int readS32(const byte *&p) const
 		{
-#ifdef SAFE_PARSE
 			// We have added kBufferPadding bytes to the end of the main swf buffer.
 			// Why?  Here we can read from 1 to 5 bytes.  If we were to
 			// put the required safety checks at each byte read, we would slow
@@ -154,7 +151,6 @@ namespace avmplus
 			// top of this function is necessary. (we will read on into our own memory)
 		    if ( p < abcStart || p >= abcEnd )
 				toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
 
 			int result = p[0];
 			if (!(result & 0x00000080))
