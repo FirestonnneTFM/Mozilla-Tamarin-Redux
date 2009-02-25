@@ -85,3 +85,10 @@ ecma3/Number/e15_7_3_5_3_rt ,   arm-winmobile-tvm-release-arm-Ojit  ,   expected
 
 # inconsistencies in different debug output, need to implement regex matching of diffs
 abcasm/adhoc , .* , skip, 
+
+# Bug 473392 -  ARM JIT failures
+ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm      ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
+ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm-Ojit ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
+ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm      ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
+ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm-Ojit ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
+
