@@ -1550,9 +1550,6 @@ int main(int argc, char *argv[])
 	#endif
 	#endif
 
-#ifdef AVMPLUS_MACH_EXCEPTIONS
-	GenericGuard::staticInit();
-#endif
 	int code;
 	
     #if defined(AVM_SHELL_PLATFORM_HOOKS)
@@ -1562,10 +1559,6 @@ int main(int argc, char *argv[])
 	#endif
 	
 	if (avmshell::show_error) printf("error %d", code);
-	
-#ifdef AVMPLUS_MACH_EXCEPTIONS
-	GenericGuard::staticDestroy();
-#endif	
 
 	return code;
 }

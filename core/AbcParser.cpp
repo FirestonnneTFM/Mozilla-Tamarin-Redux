@@ -248,21 +248,6 @@ namespace avmplus
 		core->tbCache()->flush();
 		core->tmCache()->flush();
 
-#ifdef FEATURE_BUFFER_GUARD // no Carbon
-		TRY(this->core, kCatchAction_Rethrow)
-		{
-			// catches any access violation exceptions and sends control to
-			// the CATCH block below.
-			BufferGuard guard(&_ef.jmpbuf);			
-			this->guard = &guard;
-
-			if(toplevel == NULL) {
-				this->guard = NULL;
-				guard.disable();
-			}
-			
-#endif // FEATURE_BUFFER_GUARD
-
 		// constant pool
 		parseCpool();
 
@@ -299,24 +284,6 @@ namespace avmplus
 
 		// method bodies: code, exception info, and activation traits
 		parseMethodBodies();
-
-#ifdef FEATURE_BUFFER_GUARD // no buffer guard in Carbon builds
-		}
-		CATCH(Exception *exception)
-		{
-		 	guard->disable();
-			guard = NULL;
-			if( exception && exception->isValid()) {
-				// Re-throw if exception exists
-				core->throwException(exception);
-			} else if(toplevel) {
-				// create new exception
-				toplevel->throwVerifyError(kCorruptABCError);
-			} 
-		}
-		END_CATCH
-		END_TRY
-#endif // FEATURE_BUFFER_GUARD
 
         return pool;
 	}
