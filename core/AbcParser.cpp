@@ -263,42 +263,42 @@ namespace avmplus
 			
 #endif // FEATURE_BUFFER_GUARD
 
-			// constant pool
-			parseCpool();
+		// constant pool
+		parseCpool();
 
-			// parse all methodInfos in one pass.  Nested functions must come before outer functions
-			parseMethodInfos();
+		// parse all methodInfos in one pass.  Nested functions must come before outer functions
+		parseMethodInfos();
 
-			// parse all metadataInfos - AVM+ doesn't care about this, so we are really just skipping them
-			parseMetadataInfos();
+		// parse all metadataInfos - AVM+ doesn't care about this, so we are really just skipping them
+		parseMetadataInfos();
 
-			// parse classes.  base classes must come first.
-			if (!parseInstanceInfos()) return NULL;
+		// parse classes.  base classes must come first.
+		if (!parseInstanceInfos()) return NULL;
 
-			bool first = false;
-			if (CLASS_TYPE == NULL)
-			{
-				// if we haven't got types from the builtin file yet, do it now.
-				first = true;
-				core->traits.initInstanceTypes(pool);
+		bool first = false;
+		if (CLASS_TYPE == NULL)
+		{
+			// if we haven't got types from the builtin file yet, do it now.
+			first = true;
+			core->traits.initInstanceTypes(pool);
 
-				// register "void"
-				addNamedTraits(core->publicNamespace, VOID_TYPE->name, VOID_TYPE);
-			}
+			// register "void"
+			addNamedTraits(core->publicNamespace, VOID_TYPE->name, VOID_TYPE);
+		}
 
-			// type information about class objects
-			parseClassInfos();
+		// type information about class objects
+		parseClassInfos();
 
-			if (first)
-			{
-				core->traits.initClassTypes(pool);
-			}
+		if (first)
+		{
+			core->traits.initClassTypes(pool);
+		}
 
-			// scripts
-			if( !parseScriptInfos() ) return NULL;
+		// scripts
+		if( !parseScriptInfos() ) return NULL;
 
-			// method bodies: code, exception info, and activation traits
-			parseMethodBodies();
+		// method bodies: code, exception info, and activation traits
+		parseMethodBodies();
 
 #ifdef FEATURE_BUFFER_GUARD // no buffer guard in Carbon builds
 		}
