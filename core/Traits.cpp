@@ -1706,32 +1706,17 @@ namespace avmplus
 #endif
 
 	void Traits::genDefaultValue(uint32_t value_index, uint32_t slot_id, const Toplevel* toplevel, Traitsp slotType, CPoolKind kind, AbcGen& gen) const
-		{
+	{
 		// toplevel actually can be null, when resolving the builtin classes...
 		// but they should never cause verification errors in functioning builds
 		//AvmAssert(toplevel != NULL);
 
-		Atom value = value_index ? pool->getDefaultValue(toplevel, value_index, kind, slotType) : 0;
+		Atom value = pool->getLegalDefaultValue(toplevel, value_index, kind, slotType);
 		switch (Traits::getBuiltinType(slotType))
 		{
 			case BUILTIN_any:
-			{
-				AvmAssert(slotType == NULL);
-				
-				if (!value_index) value = undefinedAtom;
-
-				if (value == 0)
-					return;
-
-				break;
-			}
 			case BUILTIN_object:
 			{
-				if (!value_index) value = nullObjectAtom;
-
-				if (value == undefinedAtom)
-					goto illegal_default;
-
 				if (value == 0)
 					return;
 
@@ -1739,23 +1724,12 @@ namespace avmplus
 			}
 			case BUILTIN_number:
 			{
-				if (!value_index) value = core->kNaN;
-
-				if (!(AvmCore::isInteger(value)||AvmCore::isDouble(value)))
-					goto illegal_default;
-
 				if (AvmCore::number_d(value) == 0)
 					return;
-
 				break;
 			}
 			case BUILTIN_boolean:
 			{
-				if (!value_index) value = falseAtom;
-				
-				if (!AvmCore::isBoolean(value))
-					goto illegal_default;
-
 				AvmAssert(urshift(falseAtom,3) == 0);
 				if (value == falseAtom)
 					return;
@@ -1764,71 +1738,21 @@ namespace avmplus
 				break;
 			}
 			case BUILTIN_uint:
-			{
-				if (!value_index) value = (0|kIntegerType);
-				
-				if (!AvmCore::isInteger(value) && !AvmCore::isDouble(value)) 
-					goto illegal_default;
-
-				const double d = AvmCore::number_d(value);
-				if (d != (uint32_t)d) 
-					goto illegal_default;
-
-				if (value == (0|kIntegerType))
-					return;
-
-				break;
-			}
 			case BUILTIN_int:
 			{
-				if (!value_index) value = (0|kIntegerType);
-
-				if (!AvmCore::isInteger(value) && !AvmCore::isDouble(value)) 
-					goto illegal_default;
-
-				const double d = AvmCore::number_d(value);
-				if (d != (int32_t)d)
-					goto illegal_default;
-			
 				if (value == (0|kIntegerType))
-					return;
-
-				break;
-			}
-			case BUILTIN_string:
-			{
-				if (!value_index) value = nullStringAtom;
-
-				if (!(AvmCore::isNull(value) || AvmCore::isString(value)))
-					goto illegal_default;
-
-				if (AvmCore::isNull(value))
 					return;
 
 				break;
 			}
 			case BUILTIN_namespace:
+			case BUILTIN_string:
+			default:
 			{
-				if (!value_index) value = nullNsAtom;
-
-				if (!(AvmCore::isNull(value) || AvmCore::isNamespace(value)))
-					goto illegal_default;
-
 				if (AvmCore::isNull(value))
 					return;
 
 				break;
-			}
-			default:
-			{								
-				AvmAssert(slotType->builtinType != BUILTIN_void);
-				// any other type: only allow null default value
-				if (!value_index) value = nullObjectAtom;
-				if (!AvmCore::isNull(value))
-					goto illegal_default;
-				
-				// return, don't break: we don't want to generate any code, just leave the slot zeroed out.
-				return;
 			}
 		}
 
@@ -1843,13 +1767,7 @@ namespace avmplus
 			gen.pushtrue();
 		else
 			gen.pushconstant(kind, value_index);
-				gen.setslot(slot_id);				
-		return;
-
-	illegal_default:
-		if (toplevel)
-			toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(Multiname(slotType->ns, slotType->name)));
-		AvmAssert(!"unhandled verify error");
+		gen.setslot(slot_id);				
 	}
 
 	void Traits::genInitBody(const Toplevel* toplevel, AbcGen& gen)
