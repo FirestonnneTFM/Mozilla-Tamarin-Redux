@@ -628,7 +628,7 @@ class B extends A {
   <!-- The following errors are specific to the AVM2 command-line shell.-->  
   <error id="1500" hidden="true" label="kFileOpenError">Fel vid öppning av filen %1.</error>
   <error id="1501" hidden="true" label="kFileWriteError">Fel vid skrivning till filen %1.
-.        <description><![CDATA[
+        <description><![CDATA[
 		The file you are writing to cannot be opened. Possibly the filename contains an error, the file is read-only, or 
 		you do not have access privileges.
 	  	]]></description>
