@@ -41,7 +41,7 @@ package abcasm;
 class Instruction
 {
 	/**
-	 * @see ActionBlockConstants
+	 * @see AbcConstants
 	 */
 	int opcode;
 	

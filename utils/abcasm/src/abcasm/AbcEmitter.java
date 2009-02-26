@@ -37,8 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 package abcasm;
 
-import static adobe.abc.OptimizerConstants.opNames;
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+import static abcasm.AbcConstants.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -46,9 +46,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
-import static adobe.abc.OptimizerConstants.opNames;
-
+import static abcasm.AbcConstants.*;
 
 class MethodBodyInfo
 {
@@ -563,7 +561,7 @@ class MethodBodyInfo
 	}
 	
 	/*
-	 * Opcode mappings extracted from ActionBlockConstants
+	 * Opcode mappings extracted from AbcConstants
 	 */
 	static Map<String, Integer> opcodeNameToOpcode = new HashMap<String, Integer>();
 	static Map<Integer, String> opcodeToOpcodeName = new HashMap<Integer, String>();
@@ -586,8 +584,8 @@ class MethodBodyInfo
 	static private void loadOpcodes()
 	{
 		//  Traverse the names of the OP_foo constants
-		//  in ActionBlockConstants and load their values.
-		for ( Field f: macromedia.asc.embedding.avmplus.ActionBlockConstants.class.getFields())
+		//  in AbcConstants and load their values.
+		for ( Field f: AbcConstants.class.getFields())
 		{
 			String field_name = f.getName();
 			

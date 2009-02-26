@@ -1,5 +1,6 @@
 #!/bin/sh
-# -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
+# -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- 
+# vi: set ts=4 sw=4 expandtab: (add to ~/.vimrc: set modeline modelines=5) 
 # ***** BEGIN LICENSE BLOCK *****
 # Version: MPL 1.1/GPL 2.0/LGPL 2.1
 #
@@ -46,30 +47,23 @@ while getopts "a:" OPTION
     do
         case $OPTION in
             a)
-                ASC=$OPTARG
+                # $ASC deprecated and ignored
                 shift 2
                 ;;
         esac
     done
     
-if [[ -z $ASC ]]
-then
-    echo "-a [asc.jar] flag must be set or ASC environment variable must be set."
-    exit 1
-fi
-
 echo "$*"
 case `uname -s` in
 	CYGWIN*)
 		# Classpath set for Cygwin systems
-		java -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/abcasm.jar\;$ASC\;$ANTLR_RUNTIME abcasm.Main $*
+		java -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/abcasm.jar\;$ANTLR_RUNTIME abcasm.Main $*
 		;;
 	*)
 		# 'NIX systems use this classpath
-		java -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/abcasm.jar:$ASC:$ANTLR_RUNTIME abcasm.Main $*
+		java -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/abcasm.jar:$ANTLR_RUNTIME abcasm.Main $*
 		;;
 esac
 
-# -jar option doesn't work, since
-# the ASC jar isn't on a relative path
-#java -ea  -jar lib/abcasm.jar $*
+# the other way to invoke abcasm is with the jar
+#java -ea  -jar $ABCASM_HOME/lib/abcasm.jar $*

@@ -38,8 +38,7 @@
 package abcasm;
 
 import java.util.Vector;
-
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+import static abcasm.AbcConstants.*;
 
 class Traits extends Vector<Trait>
 {

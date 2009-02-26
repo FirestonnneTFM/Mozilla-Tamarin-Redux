@@ -55,4 +55,4 @@ util/lastsizereport.txt
 *.pp
 *.ii
 *.deps
-
+*.class

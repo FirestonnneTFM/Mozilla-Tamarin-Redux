@@ -37,7 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 package abcasm;
 
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+import static abcasm.AbcConstants.*;
 
 
 class Name implements java.lang.Comparable
@@ -50,7 +50,7 @@ class Name implements java.lang.Comparable
 	{
 		baseName = unqualifiedName;
 		kind = CONSTANT_Qname;
-		qualifiers = new Nsset( new Namespace(CONSTANT_PackageNamespace));
+		qualifiers = new Nsset( new Namespace(CONSTANT_PackageNs));
 	}
 	
 	Name(Nsset multiname_qualifiers, String baseName)

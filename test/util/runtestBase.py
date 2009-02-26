@@ -615,7 +615,7 @@ class RuntestBase:
                 cmd += ' -in %s' % string.replace(util, '$', '\$')
                 
         elif as_file.endswith(self.abcasmExt):
-            cmd = self.abcasmRunner+' -a '+asc
+            cmd = self.abcasmRunner
             
         try:
             self.verbose_print('%s %s' % (cmd,as_file))

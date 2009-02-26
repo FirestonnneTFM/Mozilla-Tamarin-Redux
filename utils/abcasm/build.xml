@@ -55,8 +55,6 @@
 	<!-- Pull in current environment -->
 	<property environment="env"/>
 
-	<property name="ASC_JAR" value="${env.ASC}" />
-
 	<property name="target.jar" value="lib/abcasm.jar" />
 	
 	<property name="compile.debug" value="true" />
@@ -73,11 +71,9 @@
 	 <path id="compile.classpath">
         <path refid="antlr.classpath" />
 		<pathelement path="classes"/>
-		<pathelement path="${ASC_JAR}"/>
     </path>
 
 	<path id="runtime.classpath">
-		<pathelement path="${ASC_JAR}"/>
 		<pathelement path="${target.jar}"/>
 		<pathelement path="${antlr.runtime}"/>
     </path>
@@ -140,13 +136,10 @@
 	<target name="jar" depends="generate,compile">
 		<mkdir dir="lib"/>
 		<jar jarfile="${target.jar}" basedir="classes" includes="abcasm/*.class">
-			<!--
-			TODO: Not workable b/c ASC isn't at a known relative location.
 			<manifest>
 				<attribute name="Main-Class" value="abcasm.Main"/>
-				<attribute name="Class-Path" value="${antlr.runtime} ${ASC_JAR}"/>
+				<attribute name="Class-Path" value="${antlr.runtime}"/>
 			</manifest>
-			-->
 		</jar>
 	</target>
 

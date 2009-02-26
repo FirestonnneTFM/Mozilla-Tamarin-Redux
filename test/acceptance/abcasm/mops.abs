@@ -64,5 +64,8 @@ function main()
 	pushint 0
 	pushint 8
 	sf64
+	sxi1
+	sxi8
+	sxi16
 	returnvoid	
 }
