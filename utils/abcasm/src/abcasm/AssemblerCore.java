@@ -39,10 +39,8 @@ package abcasm;
 
 
 import java.util.*;
-
 import java.lang.reflect.Field;
-
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+import static abcasm.AbcConstants.*;
 
 class AssemblerCore
 {
@@ -225,12 +223,12 @@ class AssemblerCore
 		if ( "Package".equalsIgnoreCase(nsName))
 		{
 			nsPoolName = "";
-			result = new Namespace(CONSTANT_PackageNamespace, "");
+			result = new Namespace(CONSTANT_PackageNs, "");
 		}
 		else if ( "Private".equalsIgnoreCase(nsName))
 		{
 			nsPoolName = "";
-			result = new Namespace(CONSTANT_PrivateNamespace, "");
+			result = new Namespace(CONSTANT_PrivateNs, "");
 		}
 		else
 		{

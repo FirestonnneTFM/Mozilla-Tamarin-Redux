@@ -82,7 +82,7 @@ options
  *
  * ***** END LICENSE BLOCK ***** */
 package abcasm;
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+import static abcasm.AbcConstants.*;
 }
 
 @lexer::header {
@@ -489,6 +489,7 @@ mops_insn
 		| 'lf32' | 'lf64'
 		| 'si8' | 'si16' | 'si32'
 		| 'sf32' | 'sf64'
+		| 'sxi1' | 'sxi8' | 'sxi16'
 	)
 	{
 		$decl::method_body_info.insn(mops_opcode);
