@@ -126,9 +126,16 @@ function verifyTest() {
 }
 
 function runMathCordic() {
-  var _sunSpiderStartDate = (new Date).getTime();
-  cordic(25000);
-  var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  if (CONFIG::desktop) {
+      var _sunSpiderStartDate = (new Date).getTime();
+      cordic(25000);
+      var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  }
+  else { // mobile
+      var _sunSpiderStartDate = getTimer();
+      cordic(25000);
+      var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
+  }
   return(_sunSpiderInterval);
 }
 

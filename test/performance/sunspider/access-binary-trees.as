@@ -72,9 +72,16 @@ function runAccessBinaryTrees() {
     }
     return check;
 }
-var start=new Date();
-var res=runAccessBinaryTrees();
-var totaltime=new Date()-start;
+if (CONFIG::desktop) {
+    var start=new Date();
+    var res=runAccessBinaryTrees();
+    var totaltime=new Date()-start;
+}
+else { // mobile
+    var start=getTimer();
+    var res=runAccessBinaryTrees();
+    var totaltime=getTimer()-start;
+}
 if (res==-64) {
    print("metric time "+totaltime);
 } else {

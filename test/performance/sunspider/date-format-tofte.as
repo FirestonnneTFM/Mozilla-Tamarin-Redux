@@ -344,7 +344,10 @@ Date.prototype.formatDate = function (input,time) {
     return ia.join("");
 }
 
-var start=new Date();
+if (CONFIG::desktop)
+    var start=new Date();
+else  // mobile
+    var start=getTimer();
 var date = new Date("1/1/2007 1:11:11");
 
 var shortFormat;
@@ -354,7 +357,10 @@ for (i = 0; i < 500; ++i) {
     longFormat = date.formatDate("l, F d, Y g:i:s A");
     date.setTime(date.getTime() + 84266956);
 }
-var totaltime=new Date()-start;
+if (CONFIG::desktop)
+    var totaltime=new Date()-start;
+else  // mobile
+    var totaltime=getTimer()-start;
 if (shortFormat!="2008-05-01") {
     print("error shortFormat expecting 2008-05-01 got "+shortFormat);
 } else {

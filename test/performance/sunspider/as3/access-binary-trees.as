@@ -79,10 +79,17 @@ package {
 		}
 		return check;
 	}
+    if (CONFIG::desktop) {
+        var start:Number = new Date();
+        var res:int = runAccessBinaryTrees();
+        var totaltime:Number = new Date() - start;
+    }
+    else { // mobile
+        var start:int = getTimer();
+        var res:int = runAccessBinaryTrees();
+        var totaltime:int = getTimer() - start;
+    }
 	
-	var start:Number=new Date();
-	var res:int=runAccessBinaryTrees();
-	var totaltime:Number=new Date()-start;
 
 	if (res==-64) {
 	   print("metric time "+totaltime);

@@ -2,12 +2,19 @@
 var array_rows:int;
 var TestArray:Vector.<int>;
 var size:int;
-var datasizes:Vector.<int> = new Vector.<int>(3);
+var datasizes:Vector.<int> = new Vector.<int>(4);
 	
 
-var start=new Date();
-JGFrun(0);
-var elapsed=new Date()-start;
+if (CONFIG::desktop) {
+    var start = new Date();
+    JGFrun(0);
+    var elapsed = new Date() - start;
+}
+else { // mobile
+    var start = getTimer();
+    JGFrun(3);
+    var elapsed = getTimer() - start;
+}
 print("metric time "+elapsed);
 
 /**
@@ -18,6 +25,7 @@ function JGFrun(sizelocal:int):void
 		datasizes[0]= 1000000;
 		datasizes[1]= 5000000;
 		datasizes[2]=25000000;
+        datasizes[3]= 250000;
 		
 		JGFsetsize(sizelocal);
 		JGFinitialise();

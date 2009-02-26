@@ -195,10 +195,16 @@ function runAccessNBody() {
   }
   return res;
 }
-var _sunSpiderStartDate = new Date();
-var res=runAccessNBody();
-var totaltime=new Date()-_sunSpiderStartDate;
-
+if (CONFIG::desktop) {
+    var _sunSpiderStartDate = new Date();
+    var res=runAccessNBody();
+    var totaltime=new Date()-_sunSpiderStartDate;
+}
+else { // mobile
+    var _sunSpiderStartDate = getTimer();
+    var res=runAccessNBody();
+    var totaltime=getTimer()-_sunSpiderStartDate;
+}
 if (res-(-0.1690693)<0.00001)
    print("metric time "+totaltime);
 else

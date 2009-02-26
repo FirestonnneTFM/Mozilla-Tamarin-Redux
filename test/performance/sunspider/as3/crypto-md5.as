@@ -279,7 +279,10 @@ function binl2b64(binarray:Array):String
   return str;
 }
 
-var start:Number=new Date();
+if (CONFIG::desktop) 
+    var start:Number = new Date();
+else // mobile
+    var start:int = getTimer();
 
 var plainText:String = "Rebellious subjects, enemies to peace,\n\
 Profaners of this neighbour-stained steel,--\n\
@@ -310,7 +313,10 @@ for (var i:int = 0; i <4; i++) {
 }
 
 var md5Output:String = hex_md5(plainText);
-var totaltime:Number=new Date()-start;
+if (CONFIG::desktop) 
+    var totaltime:Number = new Date() - start;
+else // mobile
+    var totaltime:int = getTimer() - start;
 if (md5Output=="a831e91e0f70eddcb70dc61c6f82f6cd")
    print("metric time "+totaltime);
 else

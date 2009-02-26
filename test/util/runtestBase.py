@@ -472,7 +472,7 @@ class RuntestBase:
             ascargs = f.readline()
             if (ascargs[0] != '#'):
                 break
-        ascargs = ascargs.split(':')
+        ascargs = ascargs.split('|')
         ascargs[0] = ascargs[0].strip()
         if (len(ascargs) == 1): #treat no keyword as a merge
             ascargs.insert(0,'merge')
@@ -503,25 +503,57 @@ class RuntestBase:
         newArgList = []
         removeArgList = []
         # Loads an asc_args file and modifies arglist accordingly
+        if isfile('./dir.asc_args'):
+            mode = ''
+            mode, newList, removeList = self.parseAscArgs('./dir.asc_args', './')
+            newArgList.extend(newList)
+            removeArgList.extend(removeList)
+            if mode == 'merge':
+                arglist.extend(newArgList)
+            elif mode == 'override':
+                arglist = newArgList
+            # remove any duplicate args
+            arglist = list(set(arglist))
+            if removeArgList:
+                for removeArg in removeArgList:
+                    try:
+                        arglist.remove(removeArg)
+                    except:
+                        pass
+        if isfile(dir+'/dir.asc_args'):
+            mode = ''
+            mode, newList, removeList = self.parseAscArgs(dir+'/dir.asc_args', dir)
+            newArgList.extend(newList)
+            removeArgList.extend(removeList)
+            if mode == 'merge':
+                arglist.extend(newArgList)
+            elif mode == 'override':
+                arglist = newArgList
+            # remove any duplicate args
+            arglist = list(set(arglist))
+            if removeArgList:
+                for removeArg in removeArgList:
+                    try:
+                        arglist.remove(removeArg)
+                    except:
+                        pass
         if file and isfile('%s/%s.asc_args' % (dir, file)):  #file takes precendence over directory
-            mode, newArgList, removeArgList = self.parseAscArgs('%s/%s.asc_args' % (dir, file), dir)
-        elif isfile(dir+'/dir.asc_args'):
-            mode, newArgList, removeArgList = self.parseAscArgs(dir+'/dir.asc_args', dir)
-        elif isfile('./dir.asc_args'):
-            mode, newArgList, removeArgList = self.parseAscArgs('./dir.asc_args', './')
-        
-        if mode == 'merge':
-            arglist.extend(newArgList)
-        elif mode == 'override':
-            arglist = newArgList
-        # remove any duplicate args
-        arglist = list(set(arglist))
-        if removeArgList:
-            for removeArg in removeArgList:
-                try:
-                    arglist.remove(removeArg)
-                except:
-                    pass
+            mode = ''
+            mode, newList, removeList = self.parseAscArgs('%s/%s.asc_args' % (dir, file), dir)
+            newArgList.extend(newList)
+            removeArgList.extend(removeList)
+            if mode == 'merge':
+                arglist.extend(newArgList)
+            elif mode == 'override':
+                arglist = newArgList
+            # remove any duplicate args
+            arglist = list(set(arglist))
+            if removeArgList:
+                for removeArg in removeArgList:
+                    try:
+                        arglist.remove(removeArg)
+                    except:
+                        pass
         return arglist
     
         
@@ -651,7 +683,7 @@ class RuntestBase:
                 
                     (dir, file) = split(test)
                     # look for .asc_args files to specify dir / file level compile args
-                    self.loadAscArgs(arglist, dir, file)
+                    arglist = self.loadAscArgs(arglist, dir, test)
                     
                     cmd = "asc -import %s " % (self.builtinabc)
                     for arg in arglist:

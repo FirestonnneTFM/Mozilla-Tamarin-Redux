@@ -352,13 +352,19 @@ function Init(CubeSize) {
 
 }
 function run3dcube() {
-  var _sunSpiderStartDate = (new Date).getTime();
+  if (CONFIG::desktop)
+      var _sunSpiderStartDate = (new Date).getTime();
+  else  // mobile
+      var _sunSpiderStartDate = getTimer();
 
   for ( var i = 20; i <= 160; i *= 2 ) {
     Init(i);
   }
   
-  var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  if (CONFIG::desktop)
+      var _sunSpiderInterval = (new Date).getTime() - _sunSpiderStartDate;
+  else  // mobile
+      var _sunSpiderInterval = getTimer() - _sunSpiderStartDate;
   
   // verify test results
   var expectedResults = [250.49814997925202, 308.02382919560387, -184.27577256519325];

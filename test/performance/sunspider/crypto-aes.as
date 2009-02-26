@@ -439,7 +439,10 @@ function byteArrayToHexStr(b) {  // convert byte array to hex string for display
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-var start=new Date();
+if (CONFIG::desktop)
+    var start=new Date();
+else  // mobile
+    var start=getTimer();
 
 var plainText = "ROMEO: But, soft! what light through yonder window breaks?\n\
 It is the east, and Juliet is the sun.\n\
@@ -480,7 +483,10 @@ var password = "O Romeo, Romeo! wherefore art thou Romeo?";
 var cipherText = AESEncryptCtr(plainText, password, 256);
 var decryptedText = AESDecryptCtr(cipherText, password, 256);
 
-var totaltime=new Date()-start;
+if (CONFIG::desktop)
+    var totaltime=new Date()-start;
+else  // mobile
+    var totaltime=getTimer()-start;
 if (decryptedText==plainText) {
     print("metric time "+totaltime);
 } else {
