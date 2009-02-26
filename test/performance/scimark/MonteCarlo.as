@@ -65,9 +65,19 @@ public class MonteCarlo
 
 
 }
-var starttime:Number=new Date();
-var cycles:uint=15000000;
+if (CONFIG::desktop) {
+    var starttime:Number=new Date();
+    var cycles:uint=15000000;
+}
+else { // mobile
+    var starttime:int=getTimer();
+    var cycles:uint=15000;
+}
+
 MonteCarlo.integrate(cycles);
-print("metric time "+(new Date()-starttime));
+if (CONFIG::desktop)
+    print("metric time "+(new Date()-starttime));
+else // mobile
+    print("metric time "+(getTimer()-starttime));
 
 }

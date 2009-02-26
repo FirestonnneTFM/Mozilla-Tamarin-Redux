@@ -54,9 +54,16 @@ for(var x=0; x<500; x++)
 return res;
 }
 
-var start=new Date();
-var res=TimeFunc(fast3bitlookup);
-var totaltime=new Date()-start;
+if (CONFIG::desktop) {
+    var start=new Date();
+    var res=TimeFunc(fast3bitlookup);
+    var totaltime=new Date()-start;
+}
+else { // mobile
+    var start=getTimer();
+    var res=TimeFunc(fast3bitlookup);
+    var totaltime=getTimer()-start;
+}
 print("fast3bitlookup="+res);
 if (res==8)
    print("metric time "+totaltime);

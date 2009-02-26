@@ -145,7 +145,10 @@ package {
   }
 
   function runStringBase64():Number {
-      var _sunSpiderStartDate:Number = (new Date).getTime();
+    if (CONFIG::desktop)
+        var _sunSpiderStartDate:Number = (new Date).getTime();
+    else // mobile
+        var _sunSpiderStartDate:int = getTimer();
     
       var str:String = "";
     
@@ -166,7 +169,11 @@ package {
       toBinaryTable = null;
     
     
-      var _sunSpiderInterval:Number = (new Date).getTime() - _sunSpiderStartDate;
+    if (CONFIG::desktop)
+        var _sunSpiderInterval:Number = (new Date).getTime() - _sunSpiderStartDate;
+    else // mobile
+        var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
+        
       return _sunSpiderInterval;
   }
 

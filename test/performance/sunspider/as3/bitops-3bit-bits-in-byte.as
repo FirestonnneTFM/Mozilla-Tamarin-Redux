@@ -35,9 +35,16 @@ package {
 	}
 
 
-	var start:Number=new Date();
-	var res:int=TimeFunc(fast3bitlookup);
-	var totaltime=new Date()-start;
+    if (CONFIG::desktop) {
+        var start:Number = new Date();
+        var res:int = TimeFunc(fast3bitlookup);
+        var totaltime:Number = new Date() - start;
+    }
+    else { // mobile
+        var start:int = getTimer();
+        var res:int = TimeFunc(fast3bitlookup);
+        var totaltime:int = getTimer() - start;
+    }
 	if (res==8) {
 	   print("metric time "+totaltime);
         } else {

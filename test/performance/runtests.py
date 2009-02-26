@@ -523,6 +523,7 @@ class PerformanceRuntest(RuntestBase):
                         else:
                             confidence = ((tDist(len(resultList)) * standard_error(resultList) / meanRes) * 100)
                         config = "%s" % self.vmargs.replace(" ", "")
+                        config = "%s" % config.replace("\"", "")
                         if config.find("-memlimit")>-1:
                             config=config[0:config.find("-memlimit")]
                         if self.perfm:  #send vprof results to db

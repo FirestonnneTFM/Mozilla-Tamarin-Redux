@@ -227,7 +227,11 @@ function binb2b64(binarray:Array):String
 }
 
 
-var start:Number=new Date();
+if (CONFIG::desktop) 
+    var start:Number = new Date();
+else // mobile
+    var start:int = getTimer();
+
 var plainText:String = "Two households, both alike in dignity,\n\
 In fair Verona, where we lay our scene,\n\
 From ancient grudge break to new mutiny,\n\
@@ -248,7 +252,10 @@ for (var i:int = 0; i <4; i++) {
 }
 
 var sha1Output:String = hex_sha1(plainText);
-var totaltime:Number=new Date()-start;
+if (CONFIG::desktop) 
+    var totaltime:Number = new Date() - start;
+else // mobile
+    var totaltime:int = getTimer() - start;
 if (sha1Output=="2524d264def74cce2498bf112bedf00e6c0b796d")
     print("metric time "+totaltime);
 else

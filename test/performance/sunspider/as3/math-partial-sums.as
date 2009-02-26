@@ -91,11 +91,18 @@ package {
   }
 
   function runMathPartialSums():int {
-    var _sunSpiderStartDate:int = (new Date).getTime();
+    if (CONFIG::desktop)
+        var _sunSpiderStartDate:int = (new Date).getTime();
+    else // mobile
+        var _sunSpiderStartDate:int = getTimer();
+    
     for (var i:int = 1024; i <= 16384; i *= 2) {
         partial(i);
     }
-    var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    if (CONFIG::desktop)
+        var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+    else // mobile
+        var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
     return _sunSpiderInterval;
   }
 

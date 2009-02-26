@@ -40,7 +40,10 @@ function morph(a:Vector.<Number>, f:Number):void {
 }
 
 function run3dMorph():int {    
-  var _sunSpiderStartDate:Number = new Date();
+  if (CONFIG::desktop)
+      var _sunSpiderStartDate:Number = new Date();
+  else // mobile
+      var _sunSpiderStartDate:int = getTimer();
 
   var a:Vector.<Number> = new Vector.<Number>(nx*nz*3,true);
   for (var i:int=0; i < nx*nz*3; ++i) 
@@ -54,7 +57,10 @@ function run3dMorph():int {
   for (var i:int = 0; i < nx; i++)
       testOutput += a[3*(i*nx+i)+1];
   a = null;
-  var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+  if (CONFIG::desktop)
+      var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+  else // mobile
+      var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
   
   // verify test result
   if (Math.abs(testOutput - 6.750155989720952e-14)>0.00001) {

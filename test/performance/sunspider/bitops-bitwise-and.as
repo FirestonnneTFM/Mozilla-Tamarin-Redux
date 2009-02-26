@@ -32,9 +32,16 @@ function runBitopsBitwiseAnd() {
   return bitwiseAndValue;
 }
 
-var start=new Date();
-var res=runBitopsBitwiseAnd();
-var totaltime=new Date()-start;
+if (CONFIG::desktop) {
+    var start=new Date();
+    var res=runBitopsBitwiseAnd();
+    var totaltime=new Date()-start;
+}
+else {  // mobile
+    var start=getTimer();
+    var res=runBitopsBitwiseAnd();
+    var totaltime=getTimer()-start;
+}
 print("bitwiseAnd()="+res);
 if (res==0) 
   print("metric time "+totaltime);

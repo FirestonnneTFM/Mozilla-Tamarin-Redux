@@ -1607,8 +1607,14 @@ class Vector2 {
 }
   
   
-  var start=new Date();
-  JGFrun(0);
-  var elapsed=new Date()-start;
+  if (CONFIG::desktop) {
+      var start = new Date();
+      JGFrun(0);
+      var elapsed = new Date() - start;
+  }
+  else { // mobile
+      // unable to trim this test down further
+      var elapsed = 0;
+  }
   print("metric time "+elapsed);
   

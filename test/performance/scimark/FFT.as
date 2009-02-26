@@ -181,14 +181,25 @@ public class FFT {
   }
 }
 // main
-var starttime:Number=new Date();
+if (CONFIG::desktop) {
+    var starttime:Number=new Date();
+    var cycles:int = 600;
+}
+else { // mobile
+    var starttime:int=getTimer();
+    var cycles:int = 50;
+}
+
 var R:Random = new Random(Constants.RANDOM_SEED, 0, 1);
 var N:int = Constants.FFT_SIZE;
 var x:Array = RandomVector(2*N, R);
-var cycles:int = 600;
 for (var i:uint=0; i<cycles; i++){
 	FFT.transform(x); // forward transform
 	FFT.inverse(x); // backward transform
 }
-print("metric time "+(new Date()-starttime));
+if (CONFIG::desktop)
+    print("metric time "+(new Date()-starttime));
+else // mobile
+    print("metric time "+(getTimer()-starttime));
+
 }

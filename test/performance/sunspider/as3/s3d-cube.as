@@ -399,7 +399,11 @@ package {
   }
 }
   function run3dCube():Number {
-    var _sunSpiderStartDate:Number =new Date();
+    if (CONFIG::desktop)
+        var _sunSpiderStartDate:Number = new Date();
+    else // mobile
+        var _sunSpiderStartDate:int = getTimer();
+    
   
     var cube:Cube=new Cube();
     var i:int;
@@ -407,7 +411,10 @@ package {
       cube.Init(i);
     }
     
-    var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+    if (CONFIG::desktop)
+        var _sunSpiderInterval:Number = new Date() - _sunSpiderStartDate;
+    else // mobile
+        var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
     
     
     // verify test results

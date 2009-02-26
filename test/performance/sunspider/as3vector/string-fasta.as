@@ -128,7 +128,10 @@ function fastaRandom(n:int, table:Vector.<frequency>):String {
 }
 
 function runStringFasta():int {
-  var _sunSpiderStartDate:int = (new Date).getTime();
+  if (CONFIG::desktop)
+      var _sunSpiderStartDate:int = (new Date).getTime();
+  else // mobile
+      var _sunSpiderStartDate:int = getTimer();
   var ret:String;
 
   var count:Number = 7;
@@ -136,7 +139,10 @@ function runStringFasta():int {
   ret += fastaRandom(3*count*1000, IUB);
   ret += fastaRandom(5*count*1000, HomoSap);
 
-  var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+  if (CONFIG::desktop)
+      var _sunSpiderInterval:int = (new Date).getTime() - _sunSpiderStartDate;
+  else // mobile
+      var _sunSpiderInterval:int = getTimer() - _sunSpiderStartDate;
   
   // verify test results
   var expected:String = "CAAAAAGGCCGGGCGCGGTGVtttaDtKgcaaWaaaaatSccMcVatgtKgtaKgcgatatgtagtSaaaDttatacaaattggctatatttatgttgga";
