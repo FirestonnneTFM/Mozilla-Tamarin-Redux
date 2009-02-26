@@ -3202,8 +3202,10 @@ namespace avmplus
 				break;
 			}
 		}
-		if (opcode < 0 || opcode > WOP_LAST)
-			opcode = (WordOpcode)0;
+		// this cannot happen due to the structure of the loop above
+		// (and triggers a warning in some exceptionally-picky compilers)
+		//if (opcode < 0 || opcode > WOP_LAST)
+		//	opcode = (WordOpcode)0;
 # else
 		WordOpcode opcode = (WordOpcode) *pc;
 #  endif
