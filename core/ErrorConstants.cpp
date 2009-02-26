@@ -44,30 +44,64 @@
 
 namespace avmplus
 {
+    // Error message strings only in DEBUGGER builds.
+    #ifdef DEBUGGER
     namespace ErrorConstants
     {
-        // Error message strings only in DEBUGGER builds.
-        #ifdef DEBUGGER
-		LangName languageNames[kLanguages] =
+		LangName languageNames[] =
 		{
+        #ifdef AVMPLUS_ERROR_LANG_en
             { "en",     LANG_en },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_cs
             { "cs",     LANG_cs },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_de
             { "de",     LANG_de },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_es
             { "es",     LANG_es },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_fr
             { "fr",     LANG_fr },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_it
             { "it",     LANG_it },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_ja
             { "ja",     LANG_ja },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_ko
             { "ko",     LANG_ko },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_nl
             { "nl",     LANG_nl },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_pl
             { "pl",     LANG_pl },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_pt
             { "pt",     LANG_pt },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_ru
             { "ru",     LANG_ru },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_sv
             { "sv",     LANG_sv },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_tr
             { "tr",     LANG_tr },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_zh_CN
             { "zh-CN",  LANG_zh_CN },
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_zh_TW
             { "zh-TW",  LANG_zh_TW },
+        #endif
 
 		};
+    
+        MMGC_STATIC_ASSERT((sizeof languageNames/sizeof languageNames[0]) == kLanguages);
 
         int errorMappingTable[2*kNumErrorConstants] =
         {
@@ -206,9 +240,10 @@ namespace avmplus
             1510, 132
         };
 
-        const char* errorConstants[kLanguages][kNumErrorConstants] =
+        const char* errorConstants[][kNumErrorConstants] =
         {
-                // en
+        #ifdef AVMPLUS_ERROR_LANG_en
+            // en
             {
                 /*1000,0*/ "The system is out of memory.",
                 /*1001,1*/ "The method %1 is not implemented.",
@@ -344,7 +379,9 @@ namespace avmplus
                 /*1509,131*/ "There was an error decompressing the data.",
                 /*1510,132*/ "When the callback argument is a method of a class, the optional this argument must be null."
             },
-                // cs
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_cs
+            // cs
             {
                 /*1000,0*/ "Systém nemá dostatek paměti.",
                 /*1001,1*/ "Metoda %1 není implementovaná.",
@@ -480,7 +517,9 @@ namespace avmplus
                 /*1509,131*/ "Při dekomprimování dat došlo k chybě.",
                 /*1510,132*/ "Pokud je argument zpětného volání metodou třídy, volitelný argument musí být null."
             },
-                // de
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_de
+            // de
             {
                 /*1000,0*/ "Nicht genügend Speicher vorhanden.",
                 /*1001,1*/ "Die Methode %1 wird nicht implementiert.",
@@ -616,7 +655,9 @@ namespace avmplus
                 /*1509,131*/ "Fehler beim Dekomprimieren der Daten.",
                 /*1510,132*/ "Wenn das callback-Argument eine Methode einer Klasse ist, muss das optionale this-Argument null sein."
             },
-                // es
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_es
+            // es
             {
                 /*1000,0*/ "El sistema no tiene memoria disponible.",
                 /*1001,1*/ "El método %1 no se ha implementado.",
@@ -752,7 +793,9 @@ namespace avmplus
                 /*1509,131*/ "Se produjo un error al descomprimir los datos.",
                 /*1510,132*/ "Si el argumento de la función de repetición de llamada es un método de la clase, el argumento opcional debe ser null."
             },
-                // fr
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_fr
+            // fr
             {
                 /*1000,0*/ "La mémoire du système est saturée.",
                 /*1001,1*/ "La méthode %1 n'est pas mise en oeuvre.",
@@ -888,7 +931,9 @@ namespace avmplus
                 /*1509,131*/ "Une erreur s'est produite lors de la décompression des données.",
                 /*1510,132*/ "Lorsque l’argument du rappel correspond à une méthode de classe, l’argument facultatif 'this' doit être null."
             },
-                // it
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_it
+            // it
             {
                 /*1000,0*/ "Memoria del sistema esaurita.",
                 /*1001,1*/ "Il metodo %1 non è implementato.",
@@ -1024,7 +1069,9 @@ namespace avmplus
                 /*1509,131*/ "Si è verificato un errore durante la decompressione dei dati.",
                 /*1510,132*/ "Quando l'argomento callback è il metodo di una classe, l'argomento opzionale this deve essere null."
             },
-                // ja
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_ja
+            // ja
             {
                 /*1000,0*/ "システムのメモリ不足です。",
                 /*1001,1*/ "メソッド %1 は実装されていません。",
@@ -1160,7 +1207,9 @@ namespace avmplus
                 /*1509,131*/ "圧縮データの解凍時にエラーが発生しました。",
                 /*1510,132*/ "コールバック引数がクラスのメソッドのとき、任意指定の引数 'this' は null でなければなりません。"
             },
-                // ko
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_ko
+            // ko
             {
                 /*1000,0*/ "시스템의 메모리가 부족합니다.",
                 /*1001,1*/ "메서드 %1이(가) 구현되지 않습니다.",
@@ -1296,7 +1345,9 @@ namespace avmplus
                 /*1509,131*/ "데이터의 압축을 푸는 동안 오류가 발생했습니다.",
                 /*1510,132*/ "콜백 인수가 클래스의 메서드인 경우 선택적 인수 'this'는 null이어야 합니다."
             },
-                // nl
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_nl
+            // nl
             {
                 /*1000,0*/ "Het systeem heeft onvoldoende geheugen beschikbaar.",
                 /*1001,1*/ "De methode %1 is niet geïmplementeerd.",
@@ -1432,7 +1483,9 @@ namespace avmplus
                 /*1509,131*/ "Er is een fout opgetreden bij het decomprimeren van gegevens.",
                 /*1510,132*/ "Wanneer het callback-argument een methode of een klasse is, moet het optionele argument this null zijn."
             },
-                // pl
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_pl
+            // pl
             {
                 /*1000,0*/ "Brak pamięci w systemie.",
                 /*1001,1*/ "Metoda %1 nie jest implementowana.",
@@ -1568,7 +1621,9 @@ namespace avmplus
                 /*1509,131*/ "Podczas dekompresji danych wystąpił błąd.",
                 /*1510,132*/ "Jeśli argument wywołania zwrotnego jest metodą klasy, argument opcjonalny musi mieć wartość null."
             },
-                // pt
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_cs
+            // pt
             {
                 /*1000,0*/ "O sistema está sem memória.",
                 /*1001,1*/ "O método %1 não foi implementado.",
@@ -1704,7 +1759,9 @@ namespace avmplus
                 /*1509,131*/ "Ocorreu um erro ao descompactar os dados.",
                 /*1510,132*/ "Quando o argumento de retorno de chamada for um método de uma classe, o opcional deste argumento deverá ser nulo."
             },
-                // ru
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_ru
+            // ru
             {
                 /*1000,0*/ "Недостаточно памяти в системе.",
                 /*1001,1*/ "Метод %1 не реализован.",
@@ -1831,7 +1888,7 @@ namespace avmplus
                 /*1500,122*/ "Ошибка при открытии файла %1.",
                 /*1501,123*/ "Ошибка при записи в файл %1.",
                 /*1502,124*/ "Сценарий выполнялся дольше периода ожидания, установленного по умолчанию на 15 секунд.",
-                /*1503,125*/ "Сценарий не завершился через 30 секунд и был остановлен.",
+                /*1503,125*/ "Сценарий не завершился после 30 секунд и был остановлен.",
                 /*1504,126*/ "Окончание файла.",
                 /*1505,127*/ "Индекс строки %1 вне пределов; должен быть в диапазоне от %2 до %3.",
                 /*1506,128*/ "Указан недопустимый диапазон.",
@@ -1840,7 +1897,9 @@ namespace avmplus
                 /*1509,131*/ "При распаковке данных произошла ошибка.",
                 /*1510,132*/ "Если аргумент \"callback\" является методом класса, дополнительный аргумент \"this\" должен быть \"null\"."
             },
-                // sv
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_sv
+            // sv
             {
                 /*1000,0*/ "Systemets minne är slut.",
                 /*1001,1*/ "Metoden %1 har inte implementerats.",
@@ -1976,7 +2035,9 @@ namespace avmplus
                 /*1509,131*/ "Ett fel uppstod vid dekomprimering av data.",
                 /*1510,132*/ "När ett callback-argument är en metod i en klass måste det valfria this-argumentet vara null."
             },
-                // tr
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_tr
+            // tr
             {
                 /*1000,0*/ "Sistem belleği yetersiz.",
                 /*1001,1*/ "%1 yöntemi uygulanamıyor.",
@@ -2112,7 +2173,9 @@ namespace avmplus
                 /*1509,131*/ "Veri açılırken hata oluştu.",
                 /*1510,132*/ "Geri çağırma değişkeni bir sınıfın yöntemi ise, isteğe bağlı olan bu değişken boş olmalıdır."
             },
-                // zh_CN
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_zh_CN
+            // zh_CN
             {
                 /*1000,0*/ "系统内存不足。",
                 /*1001,1*/ "未实现 %1 方法。",
@@ -2248,7 +2311,9 @@ namespace avmplus
                 /*1509,131*/ "解压缩数据时出错。",
                 /*1510,132*/ "如果回调参数是某个类的方法，则可选参数“this”必须为空。"
             },
-                // zh_TW
+        #endif
+        #ifdef AVMPLUS_ERROR_LANG_zh_TW
+            // zh_TW
             {
                 /*1000,0*/ "系統記憶體不足。",
                 /*1001,1*/ "未實作方法 %1。",
@@ -2384,7 +2449,11 @@ namespace avmplus
                 /*1509,131*/ "解壓縮資料時發生錯誤。",
                 /*1510,132*/ "若回呼引數是 Class 的方法，選擇性的引數 'this' 必須是 null。"
             }
+        #endif
         };
-        #endif /* DEBUGGER */
+        
+        MMGC_STATIC_ASSERT((sizeof errorConstants/sizeof errorConstants[0]) == kLanguages);
+        
     }
+    #endif /* DEBUGGER */
 }
