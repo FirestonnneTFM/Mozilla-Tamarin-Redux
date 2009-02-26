@@ -35,30 +35,26 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
 import java.util.Vector;
 
-class AssemblerOptions
+class MethodInfo
 {
-	boolean dumpIl = false;
-	boolean verbose = false;
-	boolean expandedDiagnostics = false;
+	byte flags;
 
-	java.util.Vector<String> asmFile = new java.util.Vector<String>();
-	
-	AssemblerOptions(String[] args)
+	/**
+	 * Denormalized method id, carried here
+	 * so the syntax-directed translator can access it.
+	 */
+	int methodId;
+
+	String methodName;
+
+	Name returnType;
+	Vector<Name> paramTypes = new Vector<Name>();
+	public int getParamCount()
 	{
-		for ( String option: args)
-		{
-			if ( option.equalsIgnoreCase("-dump"))
-				dumpIl = true;
-			else if ( option.equalsIgnoreCase("-verbose"))
-				verbose = true;
-			else if ( option.equalsIgnoreCase("-debug_assembler"))
-				expandedDiagnostics = true;
-			else
-				asmFile.add(option);
-		}
+		return paramTypes.size() + 1;
 	}
 }

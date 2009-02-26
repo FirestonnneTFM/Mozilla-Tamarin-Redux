@@ -107,8 +107,7 @@
 
     test();
 
-    System.trace("trace message ln cr \n\r");
-    System.trace("trace message ln \n");
-    System.trace("trace message cr \r");
+    System.trace(["trace message ln cr \n\r"]);
+    System.trace(["trace message ln \n","trace message cr \r"]);
     System.write("write message to stdout");
     System.exit(0);

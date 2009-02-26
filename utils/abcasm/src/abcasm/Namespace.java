@@ -35,28 +35,41 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-/**
- *  This simple Label class wraps
- *  string literal labels in a typed class.
- */
-public class Label implements Comparable
+public class Namespace implements Comparable
 {
-	private String labelText;
-
-	Label(String label_text)
+	int kind;
+	String name;
+	
+	Namespace(int kind)
 	{
-		this.labelText = label_text;
+		this(kind, new String());
 	}
-
+	
+	Namespace(int kind, String name)
+	{
+		this.kind = kind;
+		this.name = name;
+	}
+	
 	public int compareTo(Object o)
 	{
-		return ((Label)o).labelText.compareTo(this.labelText);
+		Namespace other = (Namespace)o;
+		
+		int result = kind - other.kind;
+		
+		if ( 0 == result )
+			result = name.compareTo(other.name);
+		
+		return result;
 	}
 	
 	public String toString()
 	{
-		return labelText;
+		if ( name.length() > 0 )
+			return name;
+		else
+			return "0x" + Integer.toHexString(kind);
 	}
 }

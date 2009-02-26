@@ -307,7 +307,7 @@ class RuntestBase:
     def determineConfig(self):
         if not self.runSource:
             self.vmtype = 'release'
-            f = self.run_pipe('%s' % self.avm)
+            (f,err,exitcode) = self.run_pipe('%s' % self.avm)
             try:
                 for line in f:
                     if line.find('[-d]') != -1:
@@ -327,7 +327,7 @@ class RuntestBase:
         try:
             # Try and determine CPU architecture of the AVM, if it fails drop back to platform.machine()
             cputype = ''
-            f = self.run_pipe('file %s' % (self.avm))
+            (f,err,exitcode) = self.run_pipe('file %s' % (self.avm))
             if re.search('(32-bit|80386|i386)', f[0]):
                 cputype='x86'
             if re.search('(64-bit|x86-64|x86_64|Mono/\.Net)', f[0]):
@@ -436,7 +436,7 @@ class RuntestBase:
             exitCode = p.wait(self.testTimeOut) #abort if it takes longer than 60 seconds
             if exitCode < 0 and self.testTimeOut>-1 and time()-starttime>self.testTimeOut:  # process timed out
                 return 'timedOut'
-            return output+err
+            return (output,err,exitCode)
         except KeyboardInterrupt:
             print '\n\nKeyboardInterrupt detected ... killing process'
             p.kill()
@@ -534,8 +534,10 @@ class RuntestBase:
         if isfile(as_base+'.build'):
             (dir,file)=split(as_base)
             self.verbose_print('    compiling %s running %s%s' % (file, as_base, '.build'))
-            f = self.run_pipe('%s%s' % (as_base, '.build'))
+            (f,err,exitcode) = self.run_pipe('%s%s' % (as_base, '.build'))
             for line in f:
+                self.verbose_print(line.strip())
+            for line in err:
                 self.verbose_print(line.strip())
             return
 
@@ -585,10 +587,12 @@ class RuntestBase:
             
         try:
             self.verbose_print('%s %s' % (cmd,as_file))
-            f = self.run_pipe('%s %s' % (cmd,as_file))
+            (f,err,exitcode) = self.run_pipe('%s %s' % (cmd,as_file))
             for line in f:
                 self.verbose_print(line.strip())
-            return f
+            for line in err:
+                self.verbose_print(line.strip())
+            return f+err
         except:
             raise
     
@@ -887,7 +891,6 @@ class RuntestBase:
         # delete abc if forcerebuild
         if self.forcerebuild and isfile(testName):
             os.unlink(testName)
-        
         if isfile(testName) and getmtime(ast)>getmtime(testName):
         	self.verbose_print("%s has been modified, recompiling" % ast)
         	os.unlink(testName)
@@ -919,7 +922,7 @@ class RuntestBase:
         if isfile("%s.avm_args" % ast):
             testName = " %s %s" % (string.replace(open("%s.avm_args" % ast).readline(), "$DIR", dir), testName)
         
-        f = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
+        (f,err,exitcode) = self.run_pipe('%s %s %s' % (self.avm, self.vmargs, testName))
         if f == "timedOut":
             outputCalls.append((self.fail(testName, 'FAILED! Test Timed Out! Time out is set to %s s' % self.testTimeOut, self.timeoutmsgs)))
             ltimeout += 1
@@ -964,7 +967,18 @@ class RuntestBase:
             except:
                 print 'exception running avm'
                 exit(1)
-            if lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
+            exitcodeExp=0
+            if isfile(root+".exitcode"):
+                try:
+                    exitcodeExp=int(open(root+".exitcode").read())
+                except:
+                    print("ERROR: reading exit code file '%s' should contain an integer")
+            if exitcode!=exitcodeExp:
+                outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d' % (exitcodeExp,exitcode), self.failmsgs)))
+                lfail+= 1
+            elif err!=[]:
+                outputCalls.append((self.fail,(testName, "unexpected stderr expected:'%s' actual:'%s'" % ('',err), self.failmsgs)))
+            elif lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
                 res=dict_match(settings,'*','expectedfail')
                 if res:
                     outputCalls.append((self.fail,(testName, 'expected failure: FAILED contained no testcase messages reason: %s' % res,self.expfailmsgs)))

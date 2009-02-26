@@ -51,8 +51,15 @@ Hacking:
 3. Put the paths to the ANTLR jarfiles in a build.properties file, e.g.
 
 # ANTLR grammar regeneration support
-# Note both ANTLR3 and ANTLR 2.7.7 are required.
+# Note both ANTLR3 and ANTLR 2.7.7 are required, and both are provided
+# by the 3.0.1 distribution.
 lib.dir=C:/work/antlr-3.0.1
-lib2.dir=C:/work/antlr-2.7.7
 
 4. ant
+
+Hacking with Eclipse:
+
+1. make abcasm be the root of your eclipse project
+2. add asc.jar, antlr-3.0.1.jar, and antlr-2.7.7.jar as external libraries
+3. build with ant, first, to get gensrc/*.java
+4. now you should be able to edit/save/test in eclipse

@@ -35,35 +35,28 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+package abcasm;
 
-package adobe.abcasm;
-
-class SymbolicReference
+/**
+ *  This simple Label class wraps
+ *  string literal labels in a typed class.
+ */
+public class Label implements Comparable
 {
-	public static final int function_id = 1;
-	public static final int slot_id = 2;
+	private String labelText;
 
-	int kind;
-	String symbolicReference;
-
-	SymbolicReference(int kind, String reference)
+	Label(String label_text)
 	{
-		this.kind = kind;
-		this.symbolicReference = reference;
+		this.labelText = label_text;
+	}
+
+	public int compareTo(Object o)
+	{
+		return ((Label)o).labelText.compareTo(this.labelText);
 	}
 	
 	public String toString()
 	{
-		StringBuffer result = new StringBuffer();
-
-		if ( function_id == kind )
-			result.append(".function_id(");
-		else if ( slot_id == kind )
-			result.append(".slot_id(");
-		else
-			result.append("symref(");
-		result.append(symbolicReference);
-		result.append(")");
-		return result.toString();
+		return labelText;
 	}
 }

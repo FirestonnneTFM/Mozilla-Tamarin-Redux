@@ -35,82 +35,76 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+import java.util.HashMap;
 
-
-class Name implements java.lang.Comparable
+class Trait 
 {
-	int kind;
-	String baseName;
-	Nsset qualifiers;
-
-	Name(String unqualifiedName)
+	int kind_byte;
+	
+	HashMap<String,Object> attrs = new HashMap<String,Object>();
+	
+	Trait(int kind)
 	{
-		baseName = unqualifiedName;
-		kind = CONSTANT_Qname;
-		qualifiers = new Nsset( new Namespace(CONSTANT_PackageNamespace));
+		this.kind_byte = kind;
+	}
+
+	void addAttr(String key, Object value)
+	{
+		if ( attrs.containsKey(key) )
+		{
+			throw new IllegalArgumentException("Trait attribute " + key + " cannot be specified twice." );
+		}
+
+		attrs.put(key, value);
+	}
+
+	void validate()
+	{
+		verifyContains("name", null);
+	}
+
+	public int getKind()
+	{
+		return kind_byte & 0x0F;
 	}
 	
-	Name(Nsset multiname_qualifiers, String baseName)
+	public void setAttr(String attr_name, Object attr_value)
 	{
-		this.baseName = baseName;
-		kind = CONSTANT_Multiname;
-		qualifiers = multiname_qualifiers;
+		attrs.put(attr_name, attr_value);
 	}
 
-	public String toString()
+	public boolean hasAttr(String attr_name)
 	{
-		StringBuffer result = new StringBuffer();
-
-		if ( qualifiers != null )
-		{
-			result.append(qualifiers.toString());
-		}
-		result.append("::");
-		result.append(baseName);
-
-		return result.toString();
+		return attrs.containsKey(attr_name);
 	}
 
-	public int compareTo(Object o)
+	public Object getAttr(String attr_name)
 	{
-
-		if ( !(o instanceof Name ))
-		{
-			return -1;
-		}
-
-		int result = 0;
-
-		Name other = (Name)o;
-
-		if ( this.qualifiers != null )
-		{
-			if ( other.qualifiers != null )
-			{
-				result =  this.qualifiers.compareTo(other.qualifiers);
-			}
-			else
-			{
-				result = 1;
-			}
-		}
-		else if ( other.qualifiers != null )
-		{
-			result = -1;
-		}
-
-		if ( 0 == result )
-			result = baseName.compareTo(other.baseName);
-
-		return result;
+		verifyContains(attr_name, null);
+		return attrs.get(attr_name);
 	}
 
-	Namespace getSingleQualifier()
+	public int getIntAttr(String attr_name)
 	{
-		assert(this.qualifiers.namespaces.size() == 1);
-		return this.qualifiers.namespaces.elementAt(0);
+		verifyContains(attr_name, Integer.class);
+		return (Integer)attrs.get(attr_name);
+	}
+	
+	public Name getNameAttr(String attr_name)
+	{
+		verifyContains(attr_name, Name.class);
+		return (Name)attrs.get(attr_name);
+	}
+	
+	void verifyContains(String attr_name, Class clazz)
+	{
+		if ( !attrs.containsKey(attr_name) )
+			throw new IllegalArgumentException("Required attribute " + attr_name + " not found.");
+		if ( ! ( null == clazz ||  attrs.get(attr_name).getClass().equals(clazz) ) )
+		{
+			throw new IllegalArgumentException("Attribute " + attr_name + " must be type " + clazz.getSimpleName() );
+		}
 	}
 }

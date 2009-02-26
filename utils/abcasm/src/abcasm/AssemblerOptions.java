@@ -1,3 +1,4 @@
+/* -*- Mode: Java; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 4 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -34,74 +35,30 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-function main()
+package abcasm;
+
+import java.util.Vector;
+
+class AssemblerOptions
 {
-	getlocal0
-	pushscope
-    newfunction 1
-	getlocal0
-	call(0)
-	returnvoid
+	boolean dumpIl = false;
+	boolean verbose = false;
+	boolean expandedDiagnostics = false;
 
-}
-
-function jitover()
-{
-    pushint 0x7f000001
-	pushint 0x01000001
-	add
-	dup
-	dup
-	setlocal1
-	coerce_i
-	setlocal2
-	setlocal3
-
-	pushstring "stored, not yet incremented="
-	findpropstrict print
-	swap
-	getlocal3
-	add
-	callproperty {package}::print (1)
-
-	inclocal_i 3
-
-	pushstring "floating-point 0x7f000001 + 0x01000001="
-	findpropstrict print
-	swap
-	getlocal1
-	add
-	callproperty {package,private}::print (1)
-
-	pushstring "converted to fixed_point="
-	findpropstrict print
-	swap
-	getlocal2
-	add
-	callproperty {package,private}::print (1)
-
-	pushstring "stored and incremented="
-	findpropstrict print
-	swap
-	getlocal3
-	add
-	callproperty {package}::print (1)
-
-	pushint 0x7f000001
-	pushint 0x01000001
-	add
-	dup
-	setlocal1
-	increment_i 1
-	setlocal2
-
-	pushstring "temp result was later incremented="
-	findpropstrict print
-	swap
-	getlocal1
-	add
-	callproperty {package}::print (1)
-
-
-	returnvoid
+	java.util.Vector<String> asmFile = new java.util.Vector<String>();
+	
+	AssemblerOptions(String[] args)
+	{
+		for ( String option: args)
+		{
+			if ( option.equalsIgnoreCase("-dump"))
+				dumpIl = true;
+			else if ( option.equalsIgnoreCase("-verbose"))
+				verbose = true;
+			else if ( option.equalsIgnoreCase("-debug_assembler"))
+				expandedDiagnostics = true;
+			else
+				asmFile.add(option);
+		}
+	}
 }

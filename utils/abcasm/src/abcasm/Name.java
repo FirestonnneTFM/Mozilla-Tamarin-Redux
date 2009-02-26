@@ -35,41 +35,82 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-public class Namespace implements Comparable
+import static macromedia.asc.embedding.avmplus.ActionBlockConstants.*;
+
+
+class Name implements java.lang.Comparable
 {
 	int kind;
-	String name;
-	
-	Namespace(int kind)
+	String baseName;
+	Nsset qualifiers;
+
+	Name(String unqualifiedName)
 	{
-		this(kind, new String());
+		baseName = unqualifiedName;
+		kind = CONSTANT_Qname;
+		qualifiers = new Nsset( new Namespace(CONSTANT_PackageNamespace));
 	}
 	
-	Namespace(int kind, String name)
+	Name(Nsset multiname_qualifiers, String baseName)
 	{
-		this.kind = kind;
-		this.name = name;
+		this.baseName = baseName;
+		kind = CONSTANT_Multiname;
+		qualifiers = multiname_qualifiers;
 	}
-	
-	public int compareTo(Object o)
-	{
-		Namespace other = (Namespace)o;
-		
-		int result = kind - other.kind;
-		
-		if ( 0 == result )
-			result = name.compareTo(other.name);
-		
-		return result;
-	}
-	
+
 	public String toString()
 	{
-		if ( name.length() > 0 )
-			return name;
-		else
-			return "0x" + Integer.toHexString(kind);
+		StringBuffer result = new StringBuffer();
+
+		if ( qualifiers != null )
+		{
+			result.append(qualifiers.toString());
+		}
+		result.append("::");
+		result.append(baseName);
+
+		return result.toString();
+	}
+
+	public int compareTo(Object o)
+	{
+
+		if ( !(o instanceof Name ))
+		{
+			return -1;
+		}
+
+		int result = 0;
+
+		Name other = (Name)o;
+
+		if ( this.qualifiers != null )
+		{
+			if ( other.qualifiers != null )
+			{
+				result =  this.qualifiers.compareTo(other.qualifiers);
+			}
+			else
+			{
+				result = 1;
+			}
+		}
+		else if ( other.qualifiers != null )
+		{
+			result = -1;
+		}
+
+		if ( 0 == result )
+			result = baseName.compareTo(other.baseName);
+
+		return result;
+	}
+
+	Namespace getSingleQualifier()
+	{
+		assert(this.qualifiers.namespaces.size() == 1);
+		return this.qualifiers.namespaces.elementAt(0);
 	}
 }
