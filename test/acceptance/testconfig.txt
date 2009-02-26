@@ -92,3 +92,11 @@ ecma3/Statements/eregress_74474_002 ,    arm-winmobile-tvm-release-arm-Ojit ,   
 ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm      ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
 ecma3/Statements/eregress_74474_003 ,    arm-winmobile-tvm-release-arm-Ojit ,   skip    ,   https://bugzilla.mozilla.org/show_bug.cgi?id=473392
 
+
+# Bug 480315: executing the shell by ceremoteshell.exe always returns 0 instead of returning the exit code of the shell on the device
+as3/Statements/Exceptions/NestedTryBlockWithMultipleCatchBlocksTypeWithNoInnerCatchType   , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideFourthCatchWithoutMatchingCatch , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+as3/Statements/Exceptions/NestedTryWithMultipleCatchInsideSecondCatchWithoutMatchingCatch , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_010_rt , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+ecma3/Exceptions/exception_011_rt , arm-winmobile-tvm.* , expectfail, https://bugzilla.mozilla.org/show_bug.cgi?id=480315
+
