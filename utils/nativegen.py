@@ -327,7 +327,6 @@ class MethodInfo(MemberInfo):
 	native_method_name = None
 	final = False
 	override = False
-	gen_method_map = False
 	receiver = None
 
 	def isNative(self):
@@ -342,7 +341,6 @@ class MethodInfo(MemberInfo):
 	def assign_names(self, traits, prefix):
 		
 		self.receiver = traits
-		self.gen_method_map = traits.ni.gen_method_map
 		
 		if not self.isNative():
 			return
@@ -382,6 +380,7 @@ class NativeInfo:
 	class_name = None
 	instance_name = None
 	gen_method_map = False
+	method_map_name = None
 	
 	def set_class(self, name):
 		if self.class_name != None:
@@ -844,9 +843,9 @@ class Abc:
 						ni.set_instance(md.attrs["instance"])
 					if md.attrs.has_key("methods"):
 						v = md.attrs["methods"]
-						if v != "auto":
-							raise Error("the only legal value for native(methods) is auto")
 						ni.gen_method_map = True
+						if v != "auto":
+							ni.method_map_name = v
 					if (ni.class_name == None) and (ni.instance_name == None):
 						raise Error("native metadata must specify (cls,instance)")
 
@@ -1046,7 +1045,7 @@ class AbcThunkGen:
 		out_c.indent += 1
 		for i in range(0, len(abc.methods)):
 			m = abc.methods[i]
-			if m.isNative() and m.gen_method_map:
+			if m.isNative() and (m.receiver == None or m.receiver.ni.gen_method_map):
 				assert(m.native_method_name != None)
 				assert(m.native_id_name != None)
 				if m.receiver == None:
@@ -1060,7 +1059,10 @@ class AbcThunkGen:
 						nmout = "AVMTHUNK_NATIVE_METHOD_NAMESPACE"
 					else:
 						nmout = "AVMTHUNK_NATIVE_METHOD"
-					self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, m.receiver.niname, m.native_method_name))
+					method_map_name = m.receiver.niname
+					if m.receiver.ni.method_map_name != None and m.receiver.itraits == None:
+						method_map_name = m.receiver.ni.method_map_name
+					self.out_c.println("%s(%s, %s::%s)" % (nmout, m.native_id_name, method_map_name, m.native_method_name))
 		out_c.indent -= 1
 		out_c.println("AVMTHUNK_END_NATIVE_METHODS()")
 
