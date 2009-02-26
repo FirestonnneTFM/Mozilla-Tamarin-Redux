@@ -69,6 +69,12 @@ namespace avmplus
 				break;
 
 			case BUILTIN_namespace:
+				// coerce undefined -> Namespace should yield null
+				if (AvmCore::isNullOrUndefined(atom))
+				{
+					atom = NULL;
+					break;
+				}
 				if (atomKind(atom) != kNamespaceType)
 					goto failure;
 				atom = (Atom)atomPtr(atom);
