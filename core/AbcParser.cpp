@@ -248,85 +248,48 @@ namespace avmplus
 		core->tbCache()->flush();
 		core->tmCache()->flush();
 
-#ifdef FEATURE_BUFFER_GUARD // no Carbon
-		TRY(this->core, kCatchAction_Rethrow)
+		// constant pool
+		parseCpool();
+
+		// parse all methodInfos in one pass.  Nested functions must come before outer functions
+		parseMethodInfos();
+
+		// parse all metadataInfos - AVM+ doesn't care about this, so we are really just skipping them
+		parseMetadataInfos();
+
+		// parse classes.  base classes must come first.
+		if (!parseInstanceInfos()) return NULL;
+
+		bool first = false;
+		if (CLASS_TYPE == NULL)
 		{
-			// catches any access violation exceptions and sends control to
-			// the CATCH block below.
-			BufferGuard guard(&_ef.jmpbuf);			
-			this->guard = &guard;
+			// if we haven't got types from the builtin file yet, do it now.
+			first = true;
+			core->traits.initInstanceTypes(pool);
 
-			if(toplevel == NULL) {
-				this->guard = NULL;
-				guard.disable();
-			}
-			
-#endif // FEATURE_BUFFER_GUARD
-
-			// constant pool
-			parseCpool();
-
-			// parse all methodInfos in one pass.  Nested functions must come before outer functions
-			parseMethodInfos();
-
-			// parse all metadataInfos - AVM+ doesn't care about this, so we are really just skipping them
-			parseMetadataInfos();
-
-			// parse classes.  base classes must come first.
-			if (!parseInstanceInfos()) return NULL;
-
-			bool first = false;
-			if (CLASS_TYPE == NULL)
-			{
-				// if we haven't got types from the builtin file yet, do it now.
-				first = true;
-				core->traits.initInstanceTypes(pool);
-
-				// register "void"
-				addNamedTraits(core->publicNamespace, VOID_TYPE->name, VOID_TYPE);
-			}
-
-			// type information about class objects
-			parseClassInfos();
-
-			if (first)
-			{
-				core->traits.initClassTypes(pool);
-			}
-
-			// scripts
-			if( !parseScriptInfos() ) return NULL;
-
-			// method bodies: code, exception info, and activation traits
-			parseMethodBodies();
-
-#ifdef FEATURE_BUFFER_GUARD // no buffer guard in Carbon builds
+			// register "void"
+			addNamedTraits(core->publicNamespace, VOID_TYPE->name, VOID_TYPE);
 		}
-		CATCH(Exception *exception)
+
+		// type information about class objects
+		parseClassInfos();
+
+		if (first)
 		{
-		 	guard->disable();
-			guard = NULL;
-			if( exception && exception->isValid()) {
-				// Re-throw if exception exists
-				core->throwException(exception);
-			} else if(toplevel) {
-				// create new exception
-				toplevel->throwVerifyError(kCorruptABCError);
-			} 
+			core->traits.initClassTypes(pool);
 		}
-		END_CATCH
-		END_TRY
-#endif // FEATURE_BUFFER_GUARD
+
+		// scripts
+		if( !parseScriptInfos() ) return NULL;
+
+		// method bodies: code, exception info, and activation traits
+		parseMethodBodies();
 
         return pool;
 	}
 
-#ifdef SAFE_PARSE
 	// check to see if we are trying to read past the file end or the beginning.
 	#define CHECK_POS(pos) do { if ((pos) < abcStart || (pos) >= abcEnd ) toplevel->throwVerifyError(kCorruptABCError); } while (0)
-#else
-	#define CHECK_POS(pos) do {  } while (0)
-#endif //SAFE_PARSE
 
 	/**
 	 * setting up a traits that extends another one.  Two parser passes are required,
@@ -1771,11 +1734,9 @@ namespace avmplus
 
 	double AbcParser::readDouble(const byte* &p) const
 	{
-#ifdef SAFE_PARSE
 		// check to see if we are trying to read past the file end.
 		if (p < abcStart || p+7 >= abcEnd )
 			toplevel->throwVerifyError(kCorruptABCError);
-#endif //SAFE_PARSE
 
 		union {
 			double value;

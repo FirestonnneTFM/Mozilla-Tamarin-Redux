@@ -35,71 +35,11 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
+import java.util.Vector;
 
-class Instruction
+class Block
 {
-	/**
-	 * @see ActionBlockConstants
-	 */
-	int opcode;
-	
-	/**
-	 *  Immediate operands as specified by the program,
-	 *  symbolic references may still be present.
-	 */
-	Object[] operands;
-
-	/**
-	 *  Cooked immediate operands, symbolic references resolved.
-	 */
-	int [] imm;
-	
-	/**
-	 *  Name reference for instructions that operate on a named entity.
-	 */
-	Name n;
-	
-	/**
-	 *  Control-flow target for branch/jump instructions.
-	 */
-	Label target;
-	
-	Instruction(int opcode, Object[] operands)
-	{
-		this.opcode = opcode;
-		this.operands = operands;
-	}
-	
-	Instruction(int opcode, Object v)
-	{
-		this(opcode, new Object[]{v});
-	}
-	
-	public String toString()
-	{
-		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
-		
-		if ( n != null )
-		{
-			result.append(" ");
-			result.append(n);
-		}
-		
-		if ( target != null )
-		{
-			result.append(" ");
-			result.append(target);
-		}
-		
-		for ( Object x: operands)
-		{
-			result.append(" ");
-			result.append(x);
-		}
-		
-		return result.toString();
-	}
+	Vector<Instruction> insns = new Vector<Instruction>();
 }
-

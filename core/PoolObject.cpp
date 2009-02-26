@@ -150,59 +150,160 @@ namespace avmplus
 		return cpool_string[index];  
 	}
 
-	Atom PoolObject::getDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const
+	/*static*/ bool PoolObject::isLegalDefaultValue(BuiltinType bt, Atom value)
+	{
+		switch (bt)
+		{
+			case BUILTIN_any:
+				return true;
+
+			case BUILTIN_object:
+				return (value != undefinedAtom);
+
+			case BUILTIN_number:
+				return AvmCore::isNumber(value);
+
+			case BUILTIN_boolean:
+				return AvmCore::isBoolean(value);
+
+			case BUILTIN_uint:
+				if (AvmCore::isDouble(value))
+				{
+					const double d = AvmCore::number_d(value);
+					if (d == (uint32_t)d) 
+						return true;
+				}
+
+				return AvmCore::isInteger(value);
+
+			case BUILTIN_int:
+				if (AvmCore::isDouble(value))
+				{
+					const double d = AvmCore::number_d(value);
+					if (d == (int32_t)d) 
+						return true;
+				}
+
+				return AvmCore::isInteger(value);
+
+			case BUILTIN_string:
+				return AvmCore::isNull(value) || AvmCore::isString(value);
+
+			case BUILTIN_namespace:
+				return AvmCore::isNull(value) || AvmCore::isNamespace(value);
+
+			default:
+				return AvmCore::isNull(value);
+		}
+
+		//return false; // unreachable
+	}
+
+	Atom PoolObject::getLegalDefaultValue(const Toplevel* toplevel, uint32 index, CPoolKind kind, Traits* t) const
 	{
 		// toplevel actually can be null, when resolving the builtin classes...
 		// but they should never cause verification errors in functioning builds
 		//AvmAssert(toplevel != NULL);
-
-		AvmAssert(index != 0);
+		
+		const BuiltinType bt = Traits::getBuiltinType(t);
 		uint32_t maxcount = 0;
-		// Look in the cpool specified by kind
-		switch(kind)
+		Atom value;
+		if (index)
 		{
-		case CONSTANT_Int:
-			if (index >= (maxcount = constantIntCount))
-				goto range_error;
-			return core->intToAtom(cpool_int[index]);
+			// Look in the cpool specified by kind
+			switch (kind)
+			{
+			case CONSTANT_Int:
+				if (index >= (maxcount = constantIntCount))
+					goto range_error;
+				value = core->intToAtom(cpool_int[index]);
+				break;
 
-		case CONSTANT_UInt:
-			if (index >= (maxcount = constantUIntCount))
-				goto range_error;
-			return core->uintToAtom(cpool_uint[index]);
+			case CONSTANT_UInt:
+				if (index >= (maxcount = constantUIntCount))
+					goto range_error;
+				value = core->uintToAtom(cpool_uint[index]);
+				break;
 
-		case CONSTANT_Double:
-			if (index >= (maxcount = constantDoubleCount))
-				goto range_error;
-			return kDoubleType|(uintptr)cpool_double[index];
+			case CONSTANT_Double:
+				if (index >= (maxcount = constantDoubleCount))
+					goto range_error;
+				value = kDoubleType|(uintptr)cpool_double[index];
+				break;
 
-		case CONSTANT_Utf8:
-			if (index >= (maxcount = constantStringCount))
-				goto range_error;
-			return cpool_string[index]->atom();
+			case CONSTANT_Utf8:
+				if (index >= (maxcount = constantStringCount))
+					goto range_error;
+				value = cpool_string[index]->atom();
+				break;
 
-		case CONSTANT_True:
-			return trueAtom;
+			case CONSTANT_True:
+				value = trueAtom;
+				break;
 
-		case CONSTANT_False:
-			return falseAtom;
+			case CONSTANT_False:
+				value = falseAtom;
+				break;
 
-		case CONSTANT_Namespace:
-        case CONSTANT_PackageNamespace:
-        case CONSTANT_PackageInternalNs:
-        case CONSTANT_ProtectedNamespace:
-        case CONSTANT_ExplicitNamespace:
-        case CONSTANT_StaticProtectedNs:
-		case CONSTANT_PrivateNs:
-			if (index >= (maxcount = constantNsCount))
-				goto range_error;
-			return cpool_ns[index]->atom();
+			case CONSTANT_Namespace:
+			case CONSTANT_PackageNamespace:
+			case CONSTANT_PackageInternalNs:
+			case CONSTANT_ProtectedNamespace:
+			case CONSTANT_ExplicitNamespace:
+			case CONSTANT_StaticProtectedNs:
+			case CONSTANT_PrivateNs:
+				if (index >= (maxcount = constantNsCount))
+					goto range_error;
+				value = cpool_ns[index]->atom();
+				break;
 
-		case CONSTANT_Null:
-			return nullObjectAtom;
+			case CONSTANT_Null:
+				value = nullObjectAtom;
+				break;
 
-		default:
-			// Multinames & NamespaceSets are invalid default values.
+			default:
+				// Multinames & NamespaceSets are invalid default values.
+				goto illegal_default_error;
+			}
+		}
+		else
+		{
+			switch (bt)
+			{
+				case BUILTIN_any:
+					value = undefinedAtom;
+					break;
+				case BUILTIN_number:
+					value = core->kNaN;
+					break;
+				case BUILTIN_boolean:
+					value = falseAtom;
+					break;
+				case BUILTIN_int:
+				case BUILTIN_uint:
+					value = (0|kIntegerType);
+					break;
+				case BUILTIN_string:
+					value = nullStringAtom;
+					break;
+				case BUILTIN_namespace:
+					value = nullNsAtom;
+					break;
+				case BUILTIN_object:
+				default:
+					value = nullObjectAtom;
+					break;
+			}
+		}
+
+		if (!isLegalDefaultValue(bt, value))
+			goto illegal_default_error;
+		
+		return value;
+
+illegal_default_error:
+		if (toplevel)
+		{
 			if (t)
 			{
 				toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(Multiname(t->ns, t->name)));
@@ -211,8 +312,9 @@ namespace avmplus
 			{
 				toplevel->throwVerifyError(kCorruptABCError);
 			}
-			return undefinedAtom; // not reached
 		}
+		AvmAssert(!"unhandled verify error");
+		return undefinedAtom; // not reached
 
 range_error:
 		if (toplevel)

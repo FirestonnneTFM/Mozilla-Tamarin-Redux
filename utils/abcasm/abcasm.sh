@@ -62,11 +62,11 @@ echo "$*"
 case `uname -s` in
 	CYGWIN*)
 		# Classpath set for Cygwin systems
-		java -ea -classpath $ABCASM_HOME/lib/abcasm.jar\;$ASC\;$ANTLR_RUNTIME adobe.abcasm.Main $*
+		java -ea -classpath $ABCASM_HOME/classes\;$ABCASM_HOME/lib/abcasm.jar\;$ASC\;$ANTLR_RUNTIME abcasm.Main $*
 		;;
 	*)
 		# 'NIX systems use this classpath
-		java -ea -classpath $ABCASM_HOME/lib/abcasm.jar:$ASC:$ANTLR_RUNTIME adobe.abcasm.Main $*
+		java -ea -classpath $ABCASM_HOME/classes:$ABCASM_HOME/lib/abcasm.jar:$ASC:$ANTLR_RUNTIME abcasm.Main $*
 		;;
 esac
 

@@ -68,7 +68,6 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/Exception.cpp \
   $(curdir)/FrameState.cpp \
   $(curdir)/FunctionClass.cpp \
-  $(curdir)/GrowableBuffer.cpp \
   $(curdir)/IntClass.cpp \
   $(curdir)/Interpreter.cpp \
   $(curdir)/MathClass.cpp \

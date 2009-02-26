@@ -288,7 +288,7 @@ namespace avmplus
 
 			if (flags & HAS_OPTIONAL)
 			{
-				AvmCore::readU30(pos); // optional_count
+				AvmCore::skipU30(pos); // optional_count
 
 				initDefaultValues(optional_count);
 
@@ -296,103 +296,13 @@ namespace avmplus
 				{
 					int param = param_count-optional_count+1+j;
 					int index = AvmCore::readU30(pos);
-					CPoolKind kind = (CPoolKind)*(pos++);
+					CPoolKind kind = (CPoolKind)*pos++;
 
 					// check that the default value is legal for the param type
 					Traits* t = this->paramTraits(param);
-					AvmAssert(t != VOID_TYPE);
+					AvmAssert(Traits::getBuiltinType(t) != BUILTIN_void);
 
-					Atom value;
-					if (t == NULL)
-					{
-						value = !index ? undefinedAtom : pool->getDefaultValue(toplevel, index, kind, t);
-					}
-					else if (t == OBJECT_TYPE)
-					{
-						value = !index ? nullObjectAtom : pool->getDefaultValue(toplevel, index, kind, t);
-						if (value == undefinedAtom)
-						{
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-					}
-					else if (t == NUMBER_TYPE)
-					{
-						value = !index ? core->kNaN : pool->getDefaultValue(toplevel, index, kind, t);
-						if (!(AvmCore::isInteger(value)||AvmCore::isDouble(value)))
-						{
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-					}
-					else if (t == BOOLEAN_TYPE)
-					{
-						value = !index ? falseAtom : pool->getDefaultValue(toplevel, index, kind, t);
-						if (!AvmCore::isBoolean(value))
-						{
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-					}
-					else if (t == UINT_TYPE)
-					{
-						value = !index ? 0|kIntegerType : pool->getDefaultValue(toplevel, index, kind, t);
-						if (!AvmCore::isInteger(value) && !AvmCore::isDouble(value)) 
-						{
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-						double d = AvmCore::number_d(value);
-						if (d != (uint32)d) 
-						{								
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-					}
-					else if (t == INT_TYPE)
-					{
-						value = !index ? 0|kIntegerType : pool->getDefaultValue(toplevel, index, kind, t);
-						if (!AvmCore::isInteger(value) && !AvmCore::isDouble(value)) 
-						{
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-						double d = AvmCore::number_d(value);
-						if (d != (int)d)
-						{								
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-					}
-					else if (t == STRING_TYPE)
-					{
-						value = !index ? nullStringAtom : pool->getDefaultValue(toplevel, index, kind, t);
-						if (!(AvmCore::isNull(value) || AvmCore::isString(value)))
-						{
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-					}
-					else if (t == NAMESPACE_TYPE)
-					{
-						value = !index ? nullNsAtom : pool->getDefaultValue(toplevel, index, kind, t);
-						if (!(AvmCore::isNull(value) || AvmCore::isNamespace(value)))
-						{
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-					}
-					else
-					{
-						// any other type: only allow null default value
-						value = !index ? nullObjectAtom : pool->getDefaultValue(toplevel, index, kind, t);
-						if (!AvmCore::isNull(value))
-						{
-							Multiname qname(t->ns, t->name);
-							toplevel->throwVerifyError(kIllegalDefaultValue, core->toErrorString(&qname));
-						}
-					}
-					
+					Atom value = pool->getLegalDefaultValue(toplevel, index, kind, t);
 					setDefaultValue(param, value);
 				}
 			}

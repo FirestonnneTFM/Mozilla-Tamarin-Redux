@@ -1896,14 +1896,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\GrowableBuffer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\GrowableBuffer.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\IntClass.cpp"
 				>
 			</File>

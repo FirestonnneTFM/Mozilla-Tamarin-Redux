@@ -162,31 +162,6 @@
 
 //#define FEATURE_UTF32_SUPPORT 1
 
-/// START: CRUFT 
-//
-// guard pages are created for buffers rather than explicit overflow checks
-// this define exists only for the interm In a few days I'll toast the rest
-// of the non-guard logic and we'll see the end of the days of estimatation!
-// [rickr-Jun16,05]
-
-#define FEATURE_BUFFER_GUARD
-
-// FEATURE_BUFFER_GUARD not yet supported on ARM
-#ifdef AVMPLUS_ARM
-  #undef FEATURE_BUFFER_GUARD
-#endif
-
-// FEATURE_BUFFER_GUARD not supported on Mac CFM
-#ifdef AVMPLUS_MAC
-  #if !TARGET_RT_MAC_MACHO
-    #undef FEATURE_BUFFER_GUARD
-  #endif
-  // not supported yet in 64-bit mode
-  #ifdef AVMPLUS_AMD64
-    #undef FEATURE_BUFFER_GUARD
-  #endif
-#endif
-
 #ifndef AVMPLUS_DISABLE_NJ
 #  if defined AVMPLUS_IA32 || defined AVMPLUS_AMD64 || defined AVMPLUS_ARM || defined AVMPLUS_PPC || defined AVMPLUS_SPARC
 #    define FEATURE_NANOJIT
@@ -238,19 +213,6 @@
     #endif
 #endif
 
-#ifdef AVMPLUS_MAC
-  #ifdef FEATURE_BUFFER_GUARD
-    #define AVMPLUS_MACH_EXCEPTIONS
-  #endif
-#endif
-
-#ifdef AVMPLUS_MACH_EXCEPTIONS
-  #if defined AVMPLUS_PPC && !defined AVMPLUS_64BIT
-    // Support for running the 32bit PowerPC version under Rosetta
-    #define AVMPLUS_ROSETTA
-  #endif
-#endif
-
 #ifndef AVMPLUS_UNALIGNED_ACCESS
     #if defined(AVMPLUS_IA32) || defined(AVMPLUS_AMD64)
         #define AVMPLUS_UNALIGNED_ACCESS
@@ -297,12 +259,6 @@
 	#endif // DEBUG
 
 #endif
-
-// extra safety checks during parsing
-// this will be turned off for desktop players once we get the gaurd pages in
-// Mobile players that may not be able to use guard pages(exceptions) so will 
-//want to turn this on
-#define SAFE_PARSE
 
 // Enable interfacing Java ; so you can access java methods/properties like native AS; e.g.
 // var hello = JObject.create("java.lang.String", " hello world ");  print(hello.indexOf('o')); 

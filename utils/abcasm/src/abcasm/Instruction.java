@@ -35,58 +35,70 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
+package abcasm;
 
-import java.util.Iterator;
-import java.util.Vector;
 
-public class Nsset implements Comparable, Iterable<Namespace>
+class Instruction
 {
-	java.util.Vector<Namespace> namespaces = new java.util.Vector<Namespace>();
+	/**
+	 * @see ActionBlockConstants
+	 */
+	int opcode;
 	
-	public Nsset(Namespace single_ns)
+	/**
+	 *  Immediate operands as specified by the program,
+	 *  symbolic references may still be present.
+	 */
+	Object[] operands;
+
+	/**
+	 *  Cooked immediate operands, symbolic references resolved.
+	 */
+	int [] imm;
+	
+	/**
+	 *  Name reference for instructions that operate on a named entity.
+	 */
+	Name n;
+	
+	/**
+	 *  Control-flow target for branch/jump instructions.
+	 */
+	Label target;
+	
+	Instruction(int opcode, Object[] operands)
 	{
-		namespaces.add(single_ns);
+		this.opcode = opcode;
+		this.operands = operands;
 	}
 	
-	public Nsset(Vector<Namespace> nss) 
+	Instruction(int opcode, Object v)
 	{
-		namespaces.addAll(nss);
-	}
-
-	public int length()
-	{
-		return namespaces.size();
-	}
-	public int compareTo(Object o)
-	{
-		Nsset other = (Nsset)o;
-		
-		int result = this.namespaces.size() - other.namespaces.size();
-		
-		for ( int i = 0; i < this.namespaces.size() && 0 == result; i++ )
-			result = this.namespaces.elementAt(i).compareTo(other.namespaces.elementAt(i));
-		
-		return result;
-	}
-
-	public Iterator<Namespace> iterator()
-	{
-		return namespaces.iterator();
+		this(opcode, new Object[]{v});
 	}
 	
 	public String toString()
 	{
-		StringBuffer result = new StringBuffer();
+		StringBuffer result = new StringBuffer(MethodBodyInfo.decodeOp(opcode));
 		
-		result.append('{');
-		for ( int i = 0; i < namespaces.size(); i++ )
+		if ( n != null )
 		{
-			if ( i > 0 )
-				result.append(',');
-			result.append(namespaces.elementAt(i));
+			result.append(" ");
+			result.append(n);
 		}
-		result.append('}');
+		
+		if ( target != null )
+		{
+			result.append(" ");
+			result.append(target);
+		}
+		
+		for ( Object x: operands)
+		{
+			result.append(" ");
+			result.append(x);
+		}
+		
 		return result.toString();
 	}
 }

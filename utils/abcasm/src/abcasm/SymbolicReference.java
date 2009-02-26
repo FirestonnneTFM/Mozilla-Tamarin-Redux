@@ -35,63 +35,35 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package adobe.abcasm;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.TreeMap;
+package abcasm;
 
-/**
- * Abstract representation of an ABC pool,
- * which can be sorted according to some
- * criterion (e.g., most used elements to
- * lowest positions).
- *
- * @param <T>
- */
-public class Pool<T extends Comparable>
+class SymbolicReference
 {
-	Map<T,Integer> refs = new TreeMap<T,Integer>();
-	ArrayList<T> values = new ArrayList<T>();
-	int countFrom;
-	
-	public Pool(int countFrom)
-	{
-		this.countFrom = countFrom;
-	}
-	
-	public int add(T e)
-	{
-		if ( !refs.containsKey(e) )
-		{
-			values.add(e);
-			refs.put(e, size());
-		}
+	public static final int function_id = 1;
+	public static final int slot_id = 2;
 
-		return refs.get(e);
-	}
-	
-	public ArrayList<T> getValues()
+	int kind;
+	String symbolicReference;
+
+	SymbolicReference(int kind, String reference)
 	{
-		return values;
-	}
-	
-	public int id(T e)
-	{
-		if ( !refs.containsKey(e))
-			throw new IllegalArgumentException("Unknown pool item \"" + e.toString() + "\"");
-		return refs.get(e);
+		this.kind = kind;
+		this.symbolicReference = reference;
 	}
 	
 	public String toString()
 	{
-		return String.valueOf(refs);
-	}
-	
-	public int size()
-	{
-		return countFrom + refs.size();
+		StringBuffer result = new StringBuffer();
+
+		if ( function_id == kind )
+			result.append(".function_id(");
+		else if ( slot_id == kind )
+			result.append(".slot_id(");
+		else
+			result.append("symref(");
+		result.append(symbolicReference);
+		result.append(")");
+		return result.toString();
 	}
 }
-
