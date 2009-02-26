@@ -1804,7 +1804,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			default:
 				switch (wopAttrs[opcode].width) {
 				case 0: {
-					buffer << "UNKNOWN: " << opcode;
+					buffer << "UNKNOWN: " << (uint32_t)opcode;
 					break;
 				}
 				default:
@@ -3564,7 +3564,8 @@ return the result of the comparison ToPrimitive(x) == y.
 		return String::createUTF16(this, s, len);
 	}
 
-	inline uint16_t swap16(const uint16_t c)
+	// "swap16" is apparently reserved/defined in some build environments...
+	inline uint16_t avmSwap16(const uint16_t c)
 	{
 		const uint16_t hi = (c >> 8);
 		const uint16_t lo = (c & 0xff);
@@ -3594,7 +3595,7 @@ return the result of the comparison ToPrimitive(x) == y.
 			wchar* swapped = (wchar*)VMPI_alloca(this, _swapped, sizeof(wchar)*(len));
 			for (int32 i = 0; i < len; i++)
 			{
-				swapped[i] = swap16(s[i]);
+				swapped[i] = avmSwap16(s[i]);
 			}
 			return newStringUTF16(swapped, len);
 		}

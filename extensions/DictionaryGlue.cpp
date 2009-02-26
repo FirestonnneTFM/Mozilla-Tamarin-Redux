@@ -42,6 +42,7 @@
 // player
 #include "platformbuild.h"
 #include "avmplayer.h"
+#include "DictionaryGlue.h"
 #endif
 
 using namespace MMgc;

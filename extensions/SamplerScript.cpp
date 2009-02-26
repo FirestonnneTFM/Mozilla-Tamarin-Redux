@@ -44,6 +44,7 @@
 // player
 #include "platformbuild.h"
 #include "avmplayer.h"
+#include "SamplerScript.h"
 #endif
 
 using namespace MMgc;

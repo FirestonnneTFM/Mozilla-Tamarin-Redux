@@ -2078,7 +2078,10 @@ namespace avmplus
 		const BindingKind baseBindingKind = AvmCore::bindingKind(baseBinding);
 
 		const TraitKind kind = TraitKind(tag & 0x0f);
-		AvmAssert(kind >= 0 && kind < TRAIT_COUNT); 
+		// some extra-picky compilers will complain about the values being out of
+		// range for the comparison (if we use "kind") even with explicit int casting.
+		// so recycle the expression for the assert.
+		AvmAssert((tag & 0x0f) >= 0 && (tag & 0x0f) < TRAIT_COUNT); 
 
 		static const uint8_t kDesiredKind[TRAIT_COUNT] = 
 		{

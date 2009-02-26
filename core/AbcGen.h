@@ -58,7 +58,8 @@ namespace avmplus
 		void pushconstant(CPoolKind kind, int index) 
 		{ 
 			// AbcParser should already ensure kind is legal value.
-			AvmAssert(kind >=0 && kind <= CONSTANT_StaticProtectedNs && kindToPushOp[kind] != 0);
+			// commented out due to over-aggressive compiler warnings
+			//AvmAssert((int)kind >=0 && (int)kind <= CONSTANT_StaticProtectedNs && kindToPushOp[kind] != 0);
 			int op = kindToPushOp[kind];
 			bytes.add((byte)op);
 			if(opcodeInfo[op].operandCount > 0)
