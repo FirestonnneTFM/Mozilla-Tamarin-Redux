@@ -139,8 +139,8 @@ namespace avmplus
 		Toplevel* toplevel;
 		FrameState* newFrameState();
 		Value& checkLocal(int local);
-		AbstractFunction*  checkDispId(Traits* traits, uint32_t disp_id);
-		AbstractFunction*  checkMethodInfo(uint32_t method_id);
+		MethodInfo*  checkDispId(Traits* traits, uint32_t disp_id);
+		MethodInfo*  checkMethodInfo(uint32_t method_id);
 		Traits*            checkClassInfo(uint32_t class_id);
 		Traits*            checkTypeName(uint32_t name_index);
 		void verifyFailed(int errorID, Stringp a1=0, Stringp a2=0, Stringp a3=0) const;
@@ -150,7 +150,7 @@ namespace avmplus
 		bool canAssign(Traits* lhs, Traits* rhs) const;
 		Traits* checkSlot(Traits* traits, int slot_id);
 		Traits* findCommonBase(Traits* t1, Traits* t2);
-		void emitCoerceArgs(AbstractFunction* m, int argc, bool isctor=false);
+		void emitCoerceArgs(MethodInfo* m, int argc, bool isctor=false);
 		void printValue(Value& v);
 		Traits* readBinding(Traits* traits, Binding b);
 		void checkEarlySlotBinding(Traits* traits);

@@ -157,7 +157,7 @@ namespace avmplus
 	public:
 		PrintWriter& operator<< (ScriptObject* obj);
 		PrintWriter& operator<< (const Traits* obj);
-		PrintWriter& operator<< (AbstractFunction* obj);
+		PrintWriter& operator<< (MethodInfo* obj);
 		PrintWriter& operator<< (const Multiname& obj);
 		PrintWriter& operator<< (Namespacep str);
 	private:

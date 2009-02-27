@@ -46,75 +46,6 @@ namespace avmplus
 {
 	// ---------------
 
-	NativeMethod::NativeMethod(int _method_id, AvmThunkNativeThunker _thunker, AvmThunkNativeHandler _handler)
-		: AbstractFunction(_method_id), thunker(_thunker), handler(_handler)
-	{
-		this->impl32 = verifyEnter;
-	}
-
-	typedef AvmBox (*AvmThunkNativeThunker)(AvmMethodEnv env, uint32_t argc, AvmBox* argv);
-
-#ifdef DEBUGGER
-	/*static*/ AvmBox NativeMethod::debugEnterExitWrapper32(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
-	{
-		CallStackNode csn(CallStackNode::kEmpty); 
-		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
-		const AvmBox result = static_cast<NativeMethod*>(env->method)->thunker(env, argc, argv);
-		env->debugExit(&csn);
-		return result;
-	}
-
-	/*static*/ double NativeMethod::debugEnterExitWrapperN(AvmMethodEnv env, uint32_t argc, AvmBox* argv)
-	{
-		CallStackNode csn(CallStackNode::kEmpty); 
-		env->debugEnter(argc, (uint32_t*)argv, /*frametraits*/0, /*localCount*/0, &csn, /*framep*/0, /*eip*/0); 
-		const double result = (reinterpret_cast<AvmThunkNativeThunkerN>(static_cast<NativeMethod*>(env->method)->thunker))(env, argc, argv);
-		env->debugExit(&csn);
-		return result;
-	}
-#endif
-
-	/*static*/ Atom NativeMethod::verifyEnter(MethodEnv* env, int argc, uint32* ap)
-	{
-		NativeMethod* f = (NativeMethod*) env->method;
-
-		#ifdef AVMPLUS_VERIFYALL
-		// never verify late in verifyall mode
-		AvmAssert(!f->pool->core->config.verifyall);
-		#endif
-
-		f->verify(env->vtable->toplevel);
-		env->impl32 = f->impl32;
-		return f->impl32(env, argc, ap);
-	}
-
-	void NativeMethod::verify(Toplevel *toplevel)
-	{
-		AvmAssert(declaringTraits->isResolved());
-		resolveSignature(toplevel);
-		union {
-			Atom (*impl32)(MethodEnv*, int, uint32 *);
-			AvmThunkNativeThunker thunker;
-			AvmThunkNativeThunkerN thunkerN;
-		} u;
-#ifdef DEBUGGER
-		if (toplevel->core()->debugger())
-		{
-			if (Traits::getBuiltinType(returnTraits()) == BUILTIN_number)
-				u.thunkerN = NativeMethod::debugEnterExitWrapperN;
-			else
-				u.thunker = NativeMethod::debugEnterExitWrapper32;
-		}
-		else
-#endif
-		{
-			u.thunker = this->thunker;
-		}
-		this->impl32 = u.impl32;
-	}
-
-	// ---------------
-
 	NativeInitializer::NativeInitializer(AvmCore* _core, 
 											const uint8_t* _abcData,
 											uint32_t _abcDataLen,
@@ -169,17 +100,6 @@ namespace avmplus
 		return core->parseActionBlock(code, /*start*/0, /*toplevel*/NULL, domain, this, (const List<Stringp>*)includes);
 	}
 	
-	NativeMethod* NativeInitializer::newNativeMethod(uint32_t i) const
-	{
-		const NativeMethodInfo* ni = get_method(i);
-		if (!ni)
-			return NULL;
-
-		NativeMethod* info = new (core->GetGC()) NativeMethod(i, ni->thunker, ni->handler);
-		info->flags |= AbstractFunction::ABSTRACT_METHOD | AbstractFunction::NEEDS_CODECONTEXT | AbstractFunction::NEEDS_DXNS;
-		return info;
-	}
-
 	NativeInitializer::~NativeInitializer()
 	{
 		// might as well explicitly free now

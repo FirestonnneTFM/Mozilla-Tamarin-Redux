@@ -53,7 +53,7 @@ package
 		// E262 {DontEnum, DontDelete, ReadOnly}
 		public native function get length():int
 		
-		// indexOf and other _ functions get early bound by MIR
+		// indexOf and other _ functions get early bound by JIT
 		private native function _indexOf(s:String, i:int=0):int	// special-cased in Verifier, don't remove
 		AS3 native function indexOf(s:String="undefined", i:Number=0):int
 		prototype.indexOf = function(s:String="undefined", i:Number=0):int 

@@ -1464,14 +1464,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\core\AbstractFunction.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\core\AbstractFunction.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\core\Accessor.h"
 				>
 			</File>

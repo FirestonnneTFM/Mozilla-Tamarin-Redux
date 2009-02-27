@@ -767,4 +767,10 @@ namespace avmplus
 
 	
 #endif
+
+	DomainEnv* ScriptObject::domainEnv() const 
+	{
+		return vtable->abcEnv->domainEnv();
+	}
+
 }

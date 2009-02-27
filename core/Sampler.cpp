@@ -178,7 +178,7 @@ namespace avmplus
 				write(p, csn->filename());
 				write(p, csn->linenum());
 #ifdef AVMPLUS_64BIT
-				AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
+				AvmAssert(sizeof(StackTrace::Element) == sizeof(MethodInfo *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
 				write(p, (int) 0); // structure padding
 #endif
 				csn = csn->next();
@@ -207,10 +207,10 @@ namespace avmplus
 			read(p, s.stack.depth);
 			s.stack.trace = p;
 #ifndef AVMPLUS_64BIT
-			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t));
+			AvmAssert(sizeof(StackTrace::Element) == sizeof(MethodInfo *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t));
 #else
 			// Extra int because of the structure padding
-			AvmAssert(sizeof(StackTrace::Element) == sizeof(AbstractFunction *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
+			AvmAssert(sizeof(StackTrace::Element) == sizeof(MethodInfo *) + sizeof(Stringp) + sizeof(Stringp) + sizeof(int32_t) + sizeof(int32_t));
 #endif
 			p += s.stack.depth * sizeof(StackTrace::Element);
 		}

@@ -131,7 +131,7 @@ namespace avmplus
 		// If we were given a real frame, calculate the scope base; otherwise return NULL
 		if (m_framep && m_env)
 		{
-			return (void**) (m_framep + ((MethodInfo*)m_env->method)->local_count());
+			return (void**) (m_framep + m_env->method->local_count());
 		}
 		return NULL;
 	}
@@ -183,7 +183,7 @@ namespace avmplus
 		}
 	}
 
-	static Stringp getStackTraceLine(AbstractFunction* method, Stringp filename) 
+	static Stringp getStackTraceLine(MethodInfo* method, Stringp filename) 
 	{
 		AvmCore *core = method->pool->core;
 		Stringp s = core->newStringLatin1("\tat ");

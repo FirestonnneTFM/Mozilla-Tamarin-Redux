@@ -192,7 +192,6 @@ vm avmplus:Toplevel.obj
 vm avmplus:PoolObject.obj
 vm avmplus:Traits.obj
 vm avmplus:Translator.obj
-vm avmplus:AbstractFunction.obj
 vm avmplus:PrintWriter.obj
 vm avmplus:Multiname.obj
 vm avmplus:NamespaceSet.obj
@@ -225,7 +224,6 @@ vm avmplus::Multiname *
 vm avmplus::PrintWriter
 vm avmplus::BuiltinTraits
 vm avmplus::letterTable
-vm avmplus::AbstractFunction
 vm avmplus::ActionBlockConstants
 vm avmplus::VTable
 vm avmplus::combiningCharTable

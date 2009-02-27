@@ -72,7 +72,7 @@ namespace avmplus
 		#endif
 	}
 	
-    AbstractFunction* PoolObject::getMethodInfo(uint32 index)
+    MethodInfo* PoolObject::getMethodInfo(uint32 index)
     {
 		AvmAssert(index < methodCount);
 		return methods[index];
@@ -532,17 +532,17 @@ range_error:
 		return r;
 	}
 
-	void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, AbstractFunction *script)
+	void PoolObject::addPrivateNamedScript(Stringp name, Namespace* ns, MethodInfo *script)
 	{
 		privateNamedScripts->add(name, ns, (Binding)script);
 	}
 
-	AbstractFunction* PoolObject::getNamedScript(const Multiname* multiname) const
+	MethodInfo* PoolObject::getNamedScript(const Multiname* multiname) const
 	{
-		AbstractFunction *f = domain->getNamedScript(multiname);
-		if(!f)
+		MethodInfo* f = domain->getNamedScript(multiname);
+		if (!f)
 		{
-			f = (AbstractFunction*)privateNamedScripts->getMulti(multiname);
+			f = (MethodInfo*)privateNamedScripts->getMulti(multiname);
 		}
 		return f;
 	}

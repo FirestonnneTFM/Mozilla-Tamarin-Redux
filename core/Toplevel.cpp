@@ -559,7 +559,7 @@ namespace avmplus
 		{
 			// can't invoke method as constructor
 			MethodEnv* env = vtable->methods[AvmCore::bindingToMethodId(b)];
-			throwTypeError(kCannotCallMethodAsConstructor, core->toErrorString((AbstractFunction*)env->method));
+			throwTypeError(kCannotCallMethodAsConstructor, core->toErrorString(env->method));
 		}
 		case BKIND_VAR:
 		case BKIND_CONST:

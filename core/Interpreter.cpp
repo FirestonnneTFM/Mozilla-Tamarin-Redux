@@ -162,7 +162,7 @@ namespace avmplus
 
 	Atom interp32(MethodEnv* env, int argc, uint32_t *ap)
 	{
-		MethodInfo* const info = (MethodInfo*)(AbstractFunction*) env->method;
+		MethodInfo* const info = env->method;
 		Atom* const atomv = (Atom*)ap;
 		info->boxArgs(argc, (uint32 *)ap, atomv);
 		Atom a = interp(env, argc, atomv);
@@ -184,7 +184,7 @@ namespace avmplus
 
 	double interpN(MethodEnv* env, int argc, uint32_t * ap)
 	{
-		MethodInfo* const info = (MethodInfo*)(AbstractFunction*) env->method;
+		MethodInfo* const info = env->method;
 		Atom* const atomv = (Atom*)ap;
 		info->boxArgs(argc, (uint32 *)ap, atomv);
 		Atom a = interp(env, argc, atomv);
@@ -616,7 +616,7 @@ namespace avmplus
  		
  		register AvmCore* const core = env->core();
  		register Toplevel* const toplevel = env->toplevel();
- 		register MethodInfo* const info = (MethodInfo*)(AbstractFunction*) env->method;
+ 		register MethodInfo* const info = env->method;
  		register PoolObject* const pool = info->pool;
 
 #ifdef DEBUGGER
@@ -637,9 +637,9 @@ namespace avmplus
   		// it elsewhere is not currently working - at least the verifier installs an impl32 that
   		// bypasses delegateInvoke, so the structure is not created on all paths.
   		
-  		if (info->word_code.cache_size > 0 && env->lookup_cache == NULL) {
+  		if (info->word_code_cache_size() > 0 && env->lookup_cache == NULL) {
   			using namespace MMgc;
- 			env->lookup_cache = (MethodEnv::LookupCache*)core->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code.cache_size, GC::kContainsPointers|GC::kZero);
+ 			env->lookup_cache = (MethodEnv::LookupCache*)core->GetGC()->Alloc(sizeof(MethodEnv::LookupCache)*info->word_code_cache_size(), GC::kContainsPointers|GC::kZero);
   		}
 #endif
  		
@@ -656,15 +656,23 @@ namespace avmplus
  		}
  		
  		register List<double*, LIST_GCObjects> const & cpool_double = pool->cpool_double;
- 		register const bool interruptable = !(info->flags & AbstractFunction::NON_INTERRUPTABLE);
+ 		register const bool interruptable = !(info->flags & MethodInfo::NON_INTERRUPTABLE);
  		register const Domain* envDomain = env->domainEnv()->domain();
  		// I do *not* like making pc 'volatile'; a smart compiler may handle it well
  		// and only spill to memory across a call, but a dumb compiler may not ever
  		// keep the value in a register at all.
 #if !defined AVMPLUS_WORD_CODE || defined AVMPLUS_VERBOSE
- 		register const bytecode_t* volatile codeStart = info->codeStart;
+	#ifdef AVMPLUS_WORD_CODE
+ 		register const bytecode_t* volatile codeStart = info->word_code_start();
+	#else
+ 		register const bytecode_t* volatile codeStart = info->abc_code_start();
+	#endif
 #endif
- 		register const bytecode_t* /* NOT VOLATILE */ pc = info->codeStart;
+#ifdef AVMPLUS_WORD_CODE
+ 		register const bytecode_t* /* NOT VOLATILE */ pc = info->word_code_start();
+#else
+ 		register const bytecode_t* /* NOT VOLATILE */ pc = info->abc_code_start();
+#endif
  		intptr_t volatile expc=0;
  		AvmCore::AllocaAutoPtr _framep;
 #ifdef AVMPLUS_64BIT
@@ -672,22 +680,22 @@ namespace avmplus
 		// So allocate 8 bytes extra, then round up to a 16-byte boundary.
 		register Atom* const framep = 
 			   (Atom*)VMPI_alloca(core, _framep,
-								  sizeof(Atom)*(info->frameSize)
+								  sizeof(Atom)*(info->abc_frame_size())
 								+ 8
 								+ kAuxFrameSize);
-		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(((uintptr_t)(framep + info->frameSize) + 15) & ~15);
+		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(((uintptr_t)(framep + info->abc_frame_size()) + 15) & ~15);
 #else
 		register Atom* const framep = 
 					   (Atom*)VMPI_alloca(core, _framep,
-										  sizeof(Atom)*(info->frameSize)
+										  sizeof(Atom)*(info->abc_frame_size())
 										+ kAuxFrameSize);
-		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(framep + info->frameSize);
+		register InterpreterAuxiliaryFrame* const aux_memory = (InterpreterAuxiliaryFrame*)(framep + info->abc_frame_size());
 #endif
- 		register Atom* const scopeBase = framep + info->localCount;
+ 		register Atom* const scopeBase = framep + info->abc_local_count();
  		register Atom* volatile withBase = NULL;
  		NONDEBUGGER_ONLY( register ) int volatile scopeDepth = 0;
  		register ScopeChain* const scope = env->vtable->scope;
- 		register Atom* /* NOT VOLATILE */ sp = scopeBase + info->maxScopeDepth - 1;
+ 		register Atom* /* NOT VOLATILE */ sp = scopeBase + info->abc_max_scope_depth() - 1;
  		
  		aux_memory->dxns = scope->defaultXmlNamespace;
 		aux_memory->dxnsAddrSave = core->dxnsAddr;
@@ -729,7 +737,7 @@ namespace avmplus
  
  			// Set optional param values.  these not aliased to arguments[] since arguments[]
  			// only present with traditional prototype functions (no optional args)
- 			if (info->flags & AbstractFunction::HAS_OPTIONAL)
+ 			if (info->flags & MethodInfo::HAS_OPTIONAL)
  			{
  				if (_argc < info->param_count)
  				{
@@ -746,11 +754,11 @@ namespace avmplus
  				*p = undefinedAtom;
  
  			// Capture arguments or rest array.
- 			if (info->flags & AbstractFunction::NEED_REST)
+ 			if (info->flags & MethodInfo::NEED_REST)
  			{
  				framep[info->param_count+1] = env->createRest(_atomv, arguments_argc)->atom();
  			}
- 			else if (info->flags & AbstractFunction::NEED_ARGUMENTS)
+ 			else if (info->flags & MethodInfo::NEED_ARGUMENTS)
  			{
  				// create arguments using atomv[1..argc].
  				// Even tho E3 says create an Object, E4 says create an Array so thats what we will do.
@@ -786,7 +794,7 @@ namespace avmplus
 // Used in the case of exceptions.
 
 #ifdef AVMPLUS_VERBOSE
-#  define VERBOSE  if (pool->verbose) showState(info, codeStart, pc-1, framep, sp, scopeDepth, scopeBase, info->maxScopeDepth)
+#  define VERBOSE  if (pool->verbose) showState(info, codeStart, pc-1, framep, sp, scopeDepth, scopeBase, info->abc_max_scope_depth())
 #else
 #  define VERBOSE
 #endif
@@ -823,8 +831,8 @@ namespace avmplus
 	 // It's probably possible to adjust it on demand outside the function too,
 	 // because code that accesses it will have access to "info" and can
 	 // perform the adjustment.
-#    define SAVE_EXPC         expc = pc-1-info->codeStart
-#    define SAVE_EXPC_S24     expc = pc-2-info->codeStart
+#    define SAVE_EXPC         expc = pc-1-info->word_code_start()
+#    define SAVE_EXPC_S24     expc = pc-2-info->word_code_start()
 #  else
 	 // Adjusted on demand in the CATCH clause.  Reduces size of interpreter function
 	 // by 2.5KB of object code (x86 / gcc4.0 / -O3).
@@ -882,9 +890,9 @@ namespace avmplus
 		
 	MainLoop:
 #ifdef AVMPLUS_WORD_CODE
-		TRY_UNLESS_HEAPMEM((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, ef), core, !info->word_code.exceptions, kCatchAction_SearchForActionScriptExceptionHandler) {
+		TRY_UNLESS_HEAPMEM((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, ef), core, !info->word_code_exceptions(), kCatchAction_SearchForActionScriptExceptionHandler) {
 #else
-		TRY_UNLESS_HEAPMEM((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, ef), core, !info->exceptions, kCatchAction_SearchForActionScriptExceptionHandler) {
+		TRY_UNLESS_HEAPMEM((char*)aux_memory + offsetof(InterpreterAuxiliaryFrame, ef), core, !info->abc_exceptions(), kCatchAction_SearchForActionScriptExceptionHandler) {
 #endif
 		
 #ifdef DIRECT_DISPATCH
@@ -2274,7 +2282,7 @@ namespace avmplus
             INSTR(newfunction) {
 				SAVE_EXPC;
 				sp++;
-				AbstractFunction *body = pool->getMethodInfo((uint32_t)U30ARG);
+				MethodInfo *body = pool->getMethodInfo((uint32_t)U30ARG);
 				sp[0] = env->newfunction(body, scope, scopeBase)->atom();
                 NEXT;
             }
@@ -2282,7 +2290,7 @@ namespace avmplus
             INSTR(newclass) {
 				SAVE_EXPC;
 				u1 = U30ARG;
-				AbstractFunction *cinit = pool->cinits[(uint32_t)u1];
+				MethodInfo *cinit = pool->cinits[(uint32_t)u1];
 				o1 = (ScriptObject*)(~7 & toplevel->coerce(sp[0], CLASS_TYPE));
 				sp[0] = env->newclass(cinit, (ClassClosure*)o1, scope, scopeBase)->atom();
 				NEXT;
@@ -2579,9 +2587,9 @@ namespace avmplus
 				SAVE_EXPC;
 				u1 = U30ARG;  // catch_index
 #ifdef AVMPLUS_WORD_CODE
-				t1 = info->word_code.exceptions->exceptions[u1].scopeTraits;
+				t1 = info->word_code_exceptions()->exceptions[u1].scopeTraits;
 #else
-				t1 = info->exceptions->exceptions[u1].scopeTraits;
+				t1 = info->abc_exceptions()->exceptions[u1].scopeTraits;
 #endif
 				*(++sp) = env->newcatch(t1)->atom();
 				NEXT;
@@ -3079,7 +3087,7 @@ namespace avmplus
 		{
 			// find handler; rethrow if no handler.
 #if defined AVMPLUS_WORD_CODE && !defined DEBUGGER
-			ExceptionHandler *handler = core->findExceptionHandler(info, (uintptr_t*)expc-1-info->codeStart, exception);
+			ExceptionHandler *handler = core->findExceptionHandler(info, (uintptr_t*)expc-1-info->word_code_start(), exception);
 #else
 			ExceptionHandler *handler = core->findExceptionHandler(info, expc, exception);
 #endif
@@ -3100,12 +3108,12 @@ namespace avmplus
 				core->callStack = callStackNode;
 #endif
 #ifdef AVMPLUS_WORD_CODE
-			pc = info->codeStart + handler->target;
+			pc = info->word_code_start() + handler->target;
 #else
 			pc = codeStart + handler->target;
 #endif
 			scopeDepth = 0;
-			sp = scopeBase + info->maxScopeDepth - 1;
+			sp = scopeBase + info->abc_max_scope_depth() - 1;
 			*(++sp) = exception->atom;
 			goto MainLoop;
 		}

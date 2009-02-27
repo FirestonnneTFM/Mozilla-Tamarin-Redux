@@ -142,7 +142,6 @@ namespace avmplus
 	class AbcGen;
 	class AbcEnv;
 	class AbcParser;
-	class AbstractFunction;
 	class Accessor;
 	class ArrayClass;
 	class ArrayObject;
@@ -192,6 +191,7 @@ namespace avmplus
 	class NamespaceSet;
 	class NamespaceClass;
 	class NativeInitializer;
+	struct NativeMethodInfo;
 	class NumberClass;
 	class IntClass;
 	class UIntClass;
@@ -271,15 +271,16 @@ namespace avmplus
 #include "AtomWriteBarrier.h"
 #include "avmplusHashtable.h"
 #include "CodeContext.h"
-#include "AbstractFunction.h"
+#include "Traits.h"
+#include "VTable.h"
+#include "ScriptObject.h"
+#include "NativeFunction.h"
+#include "MethodInfo.h"
 #include "PoolObject.h"
 #include "AbcEnv.h"
-#include "Traits.h"
 #include "TraitsIterator.h"
-#include "VTable.h"
 #include "MethodEnv.h"
 #include "ScopeChain.h"
-#include "ScriptObject.h"
 #include "avmplusProfiler.h"
 #include "StringBuffer.h"
 #include "AtomArray.h"
@@ -287,7 +288,6 @@ namespace avmplus
 #include "WordcodeTranslator.h"
 #include "WordcodeEmitter.h"
 #include "Verifier.h"
-#include "NativeFunction.h"
 #include "ClassClosure.h"
 #include "ClassClass.h"
 #include "FunctionClass.h"

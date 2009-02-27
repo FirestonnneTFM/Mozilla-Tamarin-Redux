@@ -148,7 +148,7 @@ namespace avmplus
 		return b ? trueAtom : falseAtom;
 	}
 
-	ArrayObject* TypeDescriber::describeParams(const AbstractFunction* af)
+	ArrayObject* TypeDescriber::describeParams(const MethodInfo* af)
 	{
 		ArrayObject* a = new_array();
 		const int requiredParamCount = af->requiredParamCount();
@@ -236,7 +236,7 @@ namespace avmplus
 		// constructor
 		if (flags & INCLUDE_CONSTRUCTOR)
 		{
-			AbstractFunction* initMethod = traits->init;
+			MethodInfo* initMethod = traits->init;
 			if (initMethod && initMethod->param_count)
 			{
 				constructor = describeParams(initMethod);
@@ -337,7 +337,7 @@ namespace avmplus
 							continue;
 
 						const uint32_t methodID = AvmCore::bindingToMethodId(binding);
-						const AbstractFunction* af = tb->getMethod(methodID);
+						const MethodInfo* af = tb->getMethod(methodID);
 
 						Traitsp declaringTraits = af->declaringTraits;
 
@@ -364,7 +364,7 @@ namespace avmplus
 													AvmCore::bindingToGetterId(binding) :
 													AvmCore::bindingToSetterId(binding);
 
-						const AbstractFunction* af = tb->getMethod(methodID);
+						const MethodInfo* af = tb->getMethod(methodID);
 
 						Traitsp declaringTraits = af->declaringTraits;
 

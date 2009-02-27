@@ -142,7 +142,7 @@ namespace avmplus
 			ABCMethodInfo* global_info = ALLOC(ABCMethodInfo, (this, abc.addString("script$init"), 0, NULL, 0));
 			ABCMethodBodyInfo* global_body = ALLOC(ABCMethodBodyInfo, (this, global_info, global_traits, 1));
 			program->cogen(&global_body->cogen);
-			global_info->setFlags(global_body->getFlags() | AbstractFunction::SETS_DXNS);
+			global_info->setFlags(global_body->getFlags() | MethodInfo::SETS_DXNS);
 
 			ALLOC(ABCScriptInfo, (this, global_info, global_traits));
 

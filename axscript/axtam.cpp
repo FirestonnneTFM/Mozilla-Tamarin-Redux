@@ -155,11 +155,11 @@ namespace axtam
 	
 	void AXTam::initAXPool()
 	{
-		AbstractFunction *nativeMethods[axtoplevel_abc_method_count];
+		MethodInfo *nativeMethods[axtoplevel_abc_method_count];
 		NativeClassInfo *nativeClasses[axtoplevel_abc_class_count];
 		NativeScriptInfo *nativeScripts[axtoplevel_abc_script_count];
 
-		memset(nativeMethods, 0, sizeof(AbstractFunction*)*axtoplevel_abc_method_count);
+		memset(nativeMethods, 0, sizeof(MethodInfo*)*axtoplevel_abc_method_count);
 		memset(nativeClasses, 0, sizeof(NativeClassInfo*)*axtoplevel_abc_class_count);
 		memset(nativeScripts, 0, sizeof(NativeScriptInfo*)*axtoplevel_abc_script_count);
 

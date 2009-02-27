@@ -215,7 +215,7 @@ namespace avmplus
 		if (!method->argcOk(argc))
 		{
 			toplevel->argumentErrorClass()->throwError(kWrongArgumentCountError, 
-													   core()->toErrorString((AbstractFunction*)method), 
+													   core()->toErrorString(method), 
 													   core()->toErrorString(method->requiredParamCount()), 
 													   core()->toErrorString(argc));
 		}
@@ -279,7 +279,7 @@ namespace avmplus
 	
 	inline bool MethodEnv::isInterpreted()
 	{
-		return impl32 == interp32 || implN == interpN;
+		return impl32() == interp32 || implN() == interpN;
 	}
 	
 	// Optimization opportunities: since we call interp() directly, it is
@@ -434,7 +434,7 @@ namespace avmplus
 	 */
 	void MethodEnv::unboxCoerceArgs(int argc, Atom* in, uint32 *argv)
 	{
-		AbstractFunction* f = this->method;
+		MethodInfo* f = this->method;
 		Toplevel* toplevel = this->toplevel();
 		AvmCore* core = this->core();
 		
@@ -449,7 +449,7 @@ namespace avmplus
 
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, ArrayObject *a, uint32 *argv)
 	{
-		AbstractFunction* f = this->method;
+		MethodInfo* f = this->method;
 		Toplevel* toplevel = this->toplevel();
 		AvmCore* core = this->core();
 		int argc = a->getLength();
@@ -465,7 +465,7 @@ namespace avmplus
 
 	void MethodEnv::unboxCoerceArgs(Atom thisArg, int argc, Atom* in, uint32 *argv)
 	{
-		AbstractFunction* f = this->method;
+		MethodInfo* f = this->method;
 		Toplevel* toplevel = this->toplevel();
 		AvmCore* core = this->core();
 
@@ -478,44 +478,55 @@ namespace avmplus
 			*args++ = in[end++];
 	}
 
+#if VMCFG_METHODENV_IMPL32
 	Atom MethodEnv::delegateInvoke(MethodEnv* env, int argc, uint32 *ap)
 	{
-		env->impl32 = env->method->impl32;
-#if 0 // This is handled near the top of interp() for the moment, see comments there
-#ifdef AVMPLUS_WORD_CODE
-		{
-			// Install the lookup cache here, if the information is available to create it.
-			// Otherwise it's done in verifyEnter, inside env->impl32() below.
-			using namespace MMgc;
-			MethodInfo* info = (MethodInfo*)(AbstractFunction*) env->method;
-			int n;
-			if ((n = info->word_code.cache_size) > 0) {
-				AvmAssert(env->lookup_cache == NULL);
-				env->lookup_cache = (LookupCache*)env->core()->GetGC()->Alloc(sizeof(LookupCache)*n, GC::kContainsPointers|GC::kZero);
-			}
-		}
-#endif
-#endif // 0
-		return env->impl32(env, argc, ap);
+		env->_impl32 = env->method->impl32;
+//#if 0 // This is handled near the top of interp() for the moment, see comments there
+//#ifdef AVMPLUS_WORD_CODE
+//		{
+//			// Install the lookup cache here, if the information is available to create it.
+//			// Otherwise it's done in verifyEnter, inside env->impl32() below.
+//			using namespace MMgc;
+//			MethodInfo* info = env->method;
+//			int n;
+//			if ((n = info->word_code.cache_size) > 0) {
+//				AvmAssert(env->lookup_cache == NULL);
+//				env->lookup_cache = (LookupCache*)env->core()->GetGC()->Alloc(sizeof(LookupCache)*n, GC::kContainsPointers|GC::kZero);
+//			}
+//		}
+//#endif
+//#endif // 0
+		return env->_impl32(env, argc, ap);
 	}
+#endif // VMCFG_METHODENV_IMPL32
 
-#if defined(FEATURE_NANOJIT)
-	MethodEnv::MethodEnv(void *addr, VTable *vtable)
+#if defined(FEATURE_NANOJIT) && VMCFG_METHODENV_IMPL32
+	MethodEnv::MethodEnv(TrampStub, void* tramp, VTable *vtable)
 		: vtable(vtable), method(NULL), declTraits(NULL), activationOrMCTable(0)
 	{
-		implV = addr;
+		union { void* v; AtomMethodProc p; };
+		v = tramp;
+		_impl32 = p;
 		AVMPLUS_TRAITS_MEMTRACK_ONLY( tmt_add_inst( TMT_methodenv, this); )
 	}
 #endif
 
-	MethodEnv::MethodEnv(AbstractFunction* method, VTable *vtable)
+	MethodEnv::MethodEnv(MethodInfo* method, VTable *vtable)
 		: vtable(vtable)
 		, method(method)
 		, declTraits(method->declaringTraits)
 		, activationOrMCTable(0)
 	{
+		AvmAssert(method != NULL);
+		
+#if VMCFG_METHODENV_IMPL32
+	#if !defined(AVMPLUS_TRAITS_MEMTRACK) && !defined(MEMORY_INFO)
+		MMGC_STATIC_ASSERT(offsetof(MethodEnv, _impl32) == 0);
+	#endif
 		// make the first call go to the method impl
-		impl32 = delegateInvoke;
+		_impl32 = delegateInvoke;
+#endif
 
 		AvmCore* core = vtable->traits->core;
 		if (method->declaringTraits != vtable->traits)
@@ -527,7 +538,7 @@ namespace avmplus
 			toplevel()->throwVerifyError(kCorruptABCError);
 		}
 
-		if (method->flags & AbstractFunction::NEED_ACTIVATION)
+		if (method->flags & MethodInfo::NEED_ACTIVATION)
 		{
 			// This can happen when the ABC has MethodInfo data but not MethodBody data
 			if (!method->activationTraits)
@@ -1295,7 +1306,7 @@ namespace avmplus
 	}
 
 	// see 13.2 creating function objects
-    ClassClosure* MethodEnv::newfunction(AbstractFunction *function,
+    ClassClosure* MethodEnv::newfunction(MethodInfo *function,
 									 ScopeChain* outer,
 									 Atom* scopes) const
     {
@@ -1342,7 +1353,7 @@ namespace avmplus
      * given a classInfo, create a new ClassClosure object and return it on the stack.
      */
 
-	ClassClosure* MethodEnv::newclass(AbstractFunction* cinit,
+	ClassClosure* MethodEnv::newclass(MethodInfo* cinit,
 							ClassClosure *base,
 							ScopeChain* outer,
 							Atom* scopes) const
@@ -1941,7 +1952,7 @@ namespace avmplus
 		Toplevel* toplevel = this->toplevel();
 		ArrayObject *arguments = toplevel->arrayClass->newarray(atomv+1,argc);
 		ScriptObject *closure;
-		if (method->flags & AbstractFunction::NEED_CLOSURE)
+		if (method->flags & MethodInfo::NEED_CLOSURE)
 		{
 			closure = toplevel->methodClosureClass->create(this, atomv[0]);
 		}

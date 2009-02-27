@@ -41,8 +41,6 @@
 
 namespace avmplus
 {
-	typedef ClassClosure* (*CreateClassClosureProc)(VTable*);
-
 #ifdef AVMPLUS_TRAITS_MEMTRACK
 	// doesn't really belong here, but needs to go somewhere... good enough for now.
 	enum TMTTYPE 
@@ -150,9 +148,9 @@ namespace avmplus
 			inline uint32_t offset() const { return (offsetAndSST >> 3) << 2; }
 		};
 
-		struct MethodInfo
+		struct BindingMethodInfo
 		{
-			AbstractFunction* f;
+			MethodInfo* f;
 		};
 		
 		struct InterfaceInfo
@@ -206,7 +204,7 @@ namespace avmplus
 			return SlotStorageType(offsetAndSST & 7);
 		}
 		inline Traitsp getInterface(uint32 i) const { AvmAssert(i < interfaceCapacity); return getInterfaces()[i].t; }
-		inline AbstractFunction* getMethod(uint32_t i) const { AvmAssert(i < methodCount); return getMethods()[i].f; }
+		inline MethodInfo* getMethod(uint32_t i) const { AvmAssert(i < methodCount); return getMethods()[i].f; }
 		bool containsInterface(Traitsp t) const;
 		Binding findBinding(Stringp key) const;
 		Binding findBinding(Stringp name, Namespacep ns) const;
@@ -224,8 +222,8 @@ namespace avmplus
 		InterfaceInfo* getInterfaces() { return (InterfaceInfo*)(getSlots() + slotCount); }
 		const InterfaceInfo* getInterfaces() const { return (const InterfaceInfo*)(getSlots() + slotCount); }
 
-		MethodInfo* getMethods() { return (MethodInfo*)(getInterfaces() + interfaceCapacity); }
-		const MethodInfo* getMethods() const { return (const MethodInfo*)(getInterfaces() + interfaceCapacity); }
+		BindingMethodInfo* getMethods() { return (BindingMethodInfo*)(getInterfaces() + interfaceCapacity); }
+		const BindingMethodInfo* getMethods() const { return (const BindingMethodInfo*)(getInterfaces() + interfaceCapacity); }
 
 		inline void setSlotInfo(uint32_t i, Traits* t, SlotStorageType sst, uint32_t offset) 
 		{ 
@@ -238,7 +236,7 @@ namespace avmplus
 			getSlots()[i].offsetAndSST = (offset<<1) | uint32_t(sst);
 		}
 
-		inline void setMethodInfo(uint32_t i, AbstractFunction* f) 
+		inline void setMethodInfo(uint32_t i, MethodInfo* f) 
 		{ 
 			AvmAssert(i < methodCount); 
 			// don't need WB here
@@ -248,7 +246,7 @@ namespace avmplus
 		void addOneInterface(Traitsp intf);
 		InterfaceInfo* findInterfaceAddr(Traitsp intf);
 		inline const InterfaceInfo* findInterfaceAddr(Traitsp intf) const { return const_cast<TraitsBindings*>(this)->findInterfaceAddr(intf); }
-		bool checkOverride(AvmCore* core, AbstractFunction* virt, AbstractFunction* over) const;
+		bool checkOverride(AvmCore* core, MethodInfo* virt, MethodInfo* over) const;
 		bool checkLegalInterfaces(AvmCore* core) const;
 #if defined FEATURE_NANOJIT
 		void fixInterfaceBindings(AvmCore* core, const Toplevel* toplevel, ImtBuilder* imtBuilder);
@@ -309,6 +307,8 @@ namespace avmplus
 	// ------------------------ DATA SECTION END
 	};
 
+	typedef ClassClosure* (*CreateClassClosureProc)(VTable*);
+	
 	/**
 	 * Traits objects describe the layout of objects.  Traits are
 	 * used to describe a variety of things in the VM, such as
@@ -330,8 +330,8 @@ namespace avmplus
 
 	public:
 #if defined FEATURE_NANOJIT
-		// choose a number that is relatively prime to sizeof(AbstractFunction)/8
-		// since we use the AbstractFunction pointer as the interface method id
+		// choose a number that is relatively prime to sizeof(MethodInfo)/8
+		// since we use the MethodInfo pointer as the interface method id
 		// smaller = dense table, few large conflict stubs
 		// larger  = sparse table, many small conflict stubs 
 
@@ -536,7 +536,7 @@ namespace avmplus
 #endif
 	public:		DRCWB(Namespacep)		protectedNamespace;	// protected namespace, if any
 	public:		DWB(ScopeTypeChain*)	scope;				// scope chain types
-	public:		DWB(AbstractFunction*)	init;				// not a call/init union b/c smart pointers and union's don't mix
+	public:		DWB(MethodInfo*)		init;				// not a call/init union b/c smart pointers and union's don't mix
 	private:	CreateClassClosureProc	m_createClassClosure;
 	private:	const TraitsPosPtr		m_traitsPos;		// ptr into our ABC definition, depending on m_posType
 	private:	const byte*				metadata_pos;
@@ -578,19 +578,19 @@ namespace avmplus
 		class ImtEntry: public MMgc::GCObject
 		{
 		public:
-			ImtEntry(AbstractFunction* v, ImtEntry* n, uint32_t d) : 
+			ImtEntry(MethodInfo* v, ImtEntry* n, uint32_t d) : 
 				virt(v), 
 				next(n), 
 				disp_id(d) 
 			{
 			}
-			AbstractFunction * const virt;
+			MethodInfo * const virt;
 			ImtEntry * const next;
 			const uint32_t disp_id;
 		};
 
 		ImtBuilder(MMgc::GC *gc);
-		void addEntry(AbstractFunction* virt, uint32_t disp_id);
+		void addEntry(MethodInfo* virt, uint32_t disp_id);
 		void finish(Binding imt[], PoolObject* pool, const Toplevel *toplevel);
 
 	private:

@@ -41,7 +41,6 @@ avmplus_CXXSRCS := $(avmplus_CXXSRCS) \
   $(curdir)/AbcEnv.cpp \
   $(curdir)/AbcGen.cpp \
   $(curdir)/AbcParser.cpp \
-  $(curdir)/AbstractFunction.cpp \
   $(curdir)/ActionBlockConstants.cpp \
   $(curdir)/ArrayClass.cpp \
   $(curdir)/ArrayObject.cpp \

@@ -148,7 +148,7 @@ namespace avmplus
 		Stringp name = pool->core->internConstantStringLatin1(cname);
 		for (int i=0, n=pool->cinits.capacity(); i < n; i++) 
 		{
-			AbstractFunction* cinit = pool->cinits[i];
+			MethodInfo* cinit = pool->cinits[i];
 			if (cinit && cinit->declaringTraits->name == name) 
 			{
 				return cinit->declaringTraits;
