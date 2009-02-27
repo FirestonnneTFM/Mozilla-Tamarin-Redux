@@ -1005,9 +1005,15 @@ class RuntestBase:
                     exitcodeExp=int(open(root+".exitcode").read())
                 except:
                     print("ERROR: reading exit code file '%s' should contain an integer")
+            res=dict_match(settings,'exitcode','expectedfail')
             if exitcode!=exitcodeExp:
-                outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d' % (exitcodeExp,exitcode), self.failmsgs)))
-                lfail+= 1
+                res2=dict_match(settings,'exitcode','skip')
+                if res2==None and res:
+                    outputCalls.append((self.js_print,(testName, 'expected failure: exitcode reason: %s'%res,self.expfailmsgs)))
+                    lexpfail += 1
+                elif res2==None:
+                    outputCalls.append((self.fail,(testName, 'unexpected exit code expected:%d actual:%d FAILED!' % (exitcodeExp,exitcode), self.failmsgs)))
+                    lfail+= 1
             elif err!=[]:
                 outputCalls.append((self.fail,(testName, "unexpected stderr expected:'%s' actual:'%s'" % ('',err), self.failmsgs)))
             elif lpass == 0 and lfail == 0 and lunpass==0 and lexpfail==0:
