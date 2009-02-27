@@ -41,10 +41,6 @@
 #include "avmplus.h"
 #include "Selftest.h"
 
-// interactive shell requires functional external compiler, not yet
-// present in Tamarin. commented out for now.
-// #define AVMPLUS_INTERACTIVE
-
 using namespace avmplus;
 
 
@@ -148,11 +144,6 @@ namespace avmshell
 		
 		void computeStackBase();
 		
-		// for interactive
-		#ifdef AVMPLUS_INTERACTIVE
-		int addToImports(char* imports, char* addition);
-		#endif //AVMPLUS_INTERACTIVE
-
 	#ifdef DEBUGGER
 	protected:
 		virtual avmplus::Debugger* createDebugger() { AvmAssert(allowDebugger >= 0); return allowDebugger ? new (GetGC()) DebugCLI(this) : NULL; }

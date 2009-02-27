@@ -277,9 +277,6 @@ namespace avmshell
 		#endif
 		printf("          [-Dtimeout]   enforce maximum 15 seconds execution\n");
 		printf("          [-error]      crash opens debug dialog, instead of dumping\n");
-		#ifdef AVMPLUS_INTERACTIVE
-		printf("          [-i]          interactive mode\n");
-		#endif //AVMPLUS_INTERACTIVE
 		#ifdef VMCFG_EVAL
 		printf("          [-repl]       read-eval-print mode\n");
 		#endif // VMCFG_EVAL
@@ -737,7 +734,6 @@ namespace avmshell
 			bool enter_debugger_on_launch = false;
 #endif
 			bool do_repl = false;
-			bool do_interactive = false;
 #ifdef AVMPLUS_VERBOSE
 			bool do_verbose = false;
 #endif
@@ -887,11 +883,6 @@ namespace avmshell
 					} else if (!VMPI_strcmp(arg, "-log")) {
 						do_log = true;
 					} 
-					#ifdef AVMPLUS_INTERACTIVE
-					else if (!VMPI_strcmp(arg, "-i")) {
-						do_interactive = true;
-					}
-					#endif //AVMPLUS_INTERACTIVE
 					#ifdef VMCFG_EVAL
 					else if (!VMPI_strcmp(arg, "-repl")) {
 						do_repl = true;
@@ -951,7 +942,7 @@ namespace avmshell
 			
 			this->allowDebugger = nodebugger ? 0 : 1;
 		
-			if (!filename && !do_interactive && !do_repl
+			if (!filename && !do_repl
 #ifdef AVMPLUS_SELFTEST
 				&& !do_selftest
 #endif
@@ -1090,8 +1081,7 @@ namespace avmshell
 				bool isValid = f.valid();
 				if (!isValid) {
                     console << "cannot open file: " << filename << "\n";
-					if (!do_interactive) 
-						return(1);
+					return(1);
 				}
 
 				ShellCodeContext* codeContext = new (GetGC()) ShellCodeContext();
@@ -1144,216 +1134,6 @@ namespace avmshell
 			if (do_repl)
 				repl(toplevel, domainEnv);
 			#endif // VMCFG_EVAL
-			
-			#ifdef AVMPLUS_INTERACTIVE
-			if (do_interactive)
-			{
-				enum { kMaxCommandLine = 1024 };
-				char commandLine[kMaxCommandLine];
-				enum { kMaxFileName = 1024 };
-				char fileName[kMaxFileName];
-				char imports[kMaxCommandLine];
-				VMPI_strcpy(imports, " ");
-
-				// some defaults
-				addToImports(imports, "C:\\src\\farm\\main\\as\\lib\\shell.abc");
-				addToImports(imports, "C:\\src\\farm\\main\\as\\lib\\global.abc");
-
-				STARTUPINFO si;
-				PROCESS_INFORMATION pi;
-
-				while(do_interactive)
-				{
-					console << "(avmplus) ";
-					fflush(stdout);
-					fgets(commandLine, kMaxCommandLine, stdin);
-
-					commandLine[VMPI_strlen(commandLine)-1] = 0;
-
-					// build up the file that we are going to compile
-					bool compile = true;
-					bool exec = true;
-					fileName[0] = '\0';
-					if (VMPI_strstr(commandLine, ".run ") == commandLine)
-					{
-						// arg 
-						VMPI_strcpy(fileName, &commandLine[5]);
-
-						// search for .as extension
-						const char* dotAt = VMPI_strrchr(fileName, '.');
-						bool fail = true;
-						if (dotAt)
-						{
-							if (VMPI_strcmp(dotAt, ".abc") == 0)
-							{
-								compile = false;
-								fail = false;
-							}
-							else if (VMPI_strcmp(dotAt, ".as") == 0)
-							{
-								fail = false;
-							}
-						}
-
-						if (fail)
-						{
-							console << "only .as and .abc files are supported \n";
-							continue;
-						}
-					}
-					else if (VMPI_strstr(commandLine, ".import ") == commandLine)
-					{
-						// add to the import list
-						VMPI_strcpy(fileName, &commandLine[8]);
-						compile = false;
-						exec = false;
-
-						if (!addToImports(imports, fileName))
-						{
-							console << "file does not exist; not added to import list \n";
-						}
-						console << imports << "\n";
-					}
-					else if (VMPI_strstr(commandLine, ".quit") == commandLine)
-					{
-						return 0;
-					}
-					else if (commandLine[0] == '\0' ||  (VMPI_strstr(commandLine, ".help") == commandLine) )
-					{
-						console << "ActionScript source can be directly entered on the command line.\nIt will be compiled and executed once the enter key is pressed.\nThe following directives are also recognized\n" ;
-						console << ".run [f.as|f.abc]   - runs f, compiles f.as first if required\n" ;
-						console << ".import f           - add f to the -import list for compiling \n" ;
-						console << ".quit               - exits this shell \n" ;
-						console << ".help               - displays help information \n" ;
-						continue;
-					}
-					else
-					{
-						// put our command line contents in a file
-						VMPI_strcpy(fileName, "___file_for_io.as");
-						FILE* f = fopen(fileName , "w");
-						if (!f)
-						{
-							console << "i/o error \n";
-							return 1;
-						}			
-
-						fputs(commandLine, f);
-						fclose(f);
-					}
-
-					// set up for the compile if needed
-					if (compile)
-					{
-						// Set the bInheritHandle flag so pipe handles are inherited. 
-						SECURITY_ATTRIBUTES saAttr; 
-						saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
-						saAttr.bInheritHandle = TRUE; 
-						saAttr.lpSecurityDescriptor = NULL; 
-
-						HANDLE pRd, pWr;
-						CreatePipe(&pRd, &pWr, &saAttr, 64*kMaxCommandLine);
-						SetHandleInformation( pRd, HANDLE_FLAG_INHERIT, 0);  // don't inherit read portion; only allow writes from child proc
-						SetHandleInformation( GetStdHandle(STD_INPUT_HANDLE), HANDLE_FLAG_INHERIT, 0);  // don't inherit stdin 
-
-						ZeroMemory( &si, sizeof(si) );
-						si.cb = sizeof(si);
-						ZeroMemory( &pi, sizeof(pi) );
-						si.hStdError = pWr;
-						si.hStdOutput = pWr;
-						si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-						si.dwFlags = STARTF_USESTDHANDLES;
-
-						// now compile and wait
-						commandLine[0] = '\0';
-						VMPI_strcpy(commandLine, "asc.exe -debug ");
-						VMPI_strcat(commandLine, imports);
-						VMPI_strcat(commandLine, fileName);
-						DWORD err = CreateProcess(0, commandLine, 0,0,TRUE,0,0,0, &si, &pi);
-						if (err)
-						{
-							// Wait until child process exits.
-							WaitForSingleObject( pi.hProcess, 20000 );
-						}
-						else
-						{
-							console << "failed to compile err=0x";
-							console.writeHexAddr(GetLastError());
-							console << "\n";
-							exec = false;
-						}
-
-						// Close process and thread handles. 
-						CloseHandle( pi.hProcess );
-						CloseHandle( pi.hThread );
-
-						// now check the compile 
-						CloseHandle(pWr);  // Close the write end of the pipe before reading from the read end of the pipe.
-						commandLine[0] = '\0';
-						DWORD dwRead = 0; 
-						ReadFile( pRd, commandLine, kMaxCommandLine, &dwRead, NULL);
-						if (dwRead > 0) commandLine[dwRead] = '\0';
-						if ( !VMPI_strstr(commandLine, "bytes written") )
-						{
-							// failed compile						
-							console << commandLine;
-
-							// dump the rest of the message
-							for(;;)
-							{
-								if (!ReadFile( pRd, commandLine, kMaxCommandLine, &dwRead, NULL) || dwRead == 0)
-									break;
-
-								console << commandLine;
-							}
-							exec = false;
-							console << "\n";
-						}
-
-						// now run the abc
-						int afterDot = VMPI_strlen(fileName) - 2;
-						VMPI_strcpy(&fileName[afterDot], "abc");
-					}
-
-					if (exec)
-					{
-						FileInputStream fl(fileName);
-						bool isValid = fl.valid();
-						if (isValid)
-						{
-							TRY(this, kCatchAction_ReportAsError)
-							{
-								ScriptBuffer code = newScriptBuffer(fl.available());
-								fl.read(code.getBuffer(), fl.available());
-								handleActionBlock(code, 0, domainEnv, toplevel, NULL, lastCodeContext);
-							}
-							CATCH(Exception *exception)
-							{
-								#ifdef DEBUGGER
-								if (!(exception->flags & Exception::SEEN_BY_DEBUGGER))
-								{
-									console << string(exception->atom) << "\n";
-								}
-								if (exception->getStackTrace()) {
-									console << exception->getStackTrace()->format(this) << '\n';
-								}
-								#else
-								// [ed] always show error, even in release mode,
-								// see bug #121382
-								console << string(exception->atom) << "\n";
-								#endif
-							}
-							END_CATCH
-							END_TRY
-						}
-						else
-						{
-							console << "can't find " << fileName << "\n";
-						}
-					}
-				}
-			}
-			#endif //AVMPLUS_INTERACTIVE
 		}
 		CATCH(Exception *exception)
 		{
@@ -1388,26 +1168,6 @@ namespace avmshell
 #endif /* AVMPLUS_WITH_JNI */
 		return 0;
 	}
-
-	#ifdef AVMPLUS_INTERACTIVE
-	int Shell::addToImports(char* imports, char* addition)
-	{
-		int worked = 0;
-		if (addition && addition[0] != '\0')
-		{
-			FileInputStream fl(addition);
-			if (fl.valid())
-			{
-				VMPI_strcat(imports, " ");
-				VMPI_strcat(imports, " -import \"");
-				VMPI_strcat(imports, addition);
-				VMPI_strcat(imports, "\" ");
-				worked = 1;
-			}
-		}
-		return worked;
-	}
-	#endif //AVMPLUS_INTERACTIVE
 }
 
 #ifdef UNDER_CE
